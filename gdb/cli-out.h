@@ -73,10 +73,10 @@ protected:
   virtual void do_redirect (struct ui_file *outstream) override;
 
   virtual void do_progress_start (const std::string &, bool) override;
-  virtual void do_progress_notify (double) override;
+  virtual void do_progress_notify (double, progress_update::state) override;
   virtual void do_progress_end () override;
   virtual void update_progress_name (const std::string &) override;
-  virtual progress_report::state get_progress_state () override;
+  virtual progress_update::state get_progress_state () override;
 
   bool suppress_output ()
   { return m_suppress_output; }
@@ -88,11 +88,11 @@ private:
   std::vector<ui_file *> m_streams;
   bool m_suppress_output;
 
-  /* The state of a recent progress report.  */
+  /* The state of a recent progress update.  */
   struct cli_progress_info
   {
     /* The current state.  */
-    progress_report::state state;
+    progress_update::state state;
     /* The name to print.  */
     std::string name;
     /* Time of last spinner update.  */

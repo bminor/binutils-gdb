@@ -280,11 +280,11 @@ class ui_out
      escapes.  */
   virtual bool can_emit_style_escape () const = 0;
 
-  /* An object that starts and finishes progress reporting.  */
-  class progress_report
+  /* An object that starts and finishes displaying progress updates.  */
+  class progress_update
   {
   public:
-    /* Represents the printing state of a progress report.  */
+    /* Represents the printing state of a progress update.  */
     enum state
     {
       /* Printing will start with the next output.  */
@@ -295,19 +295,21 @@ class ui_out
       BAR,
       /* Spinner printing has already started.  */
       SPIN,
+      /* Percent printing has already started.  */
+      PERCENT,
       /* Printing should not be done.  */
       NO_PRINT
     };
 
     /* SHOULD_PRINT indicates whether something should be printed for a tty.  */
-    progress_report (struct ui_out *uiout, const std::string &name,
+    progress_update (struct ui_out *uiout, const std::string &name,
 		     bool should_print)
       : m_uiout (uiout)
     {
       m_uiout->do_progress_start (name, should_print);
     }
 
-    ~progress_report ()
+    ~progress_update ()
     {
       m_uiout->do_progress_end ();
     }
@@ -322,8 +324,8 @@ class ui_out
       return m_uiout->get_progress_state ();
     }
 
-    progress_report (const progress_report &) = delete;
-    progress_report &operator= (const progress_report &) = delete;
+    progress_update (const progress_update &) = delete;
+    progress_update &operator= (const progress_update &) = delete;
 
   private:
 
@@ -331,10 +333,20 @@ class ui_out
   };
 
   /* Emit some progress corresponding to the most recently created
-     progress_report object.  */
-  void update_progress (double howmuch)
+     progress_update object.  */
+  void update_progress_bar (double howmuch)
   {
-    do_progress_notify (howmuch);
+    do_progress_notify (howmuch, progress_update::BAR);
+  }
+
+  void update_progress_percent (double howmuch)
+  {
+    do_progress_notify (howmuch, progress_update::PERCENT);
+  }
+
+  void update_progress_spin ()
+  {
+    do_progress_notify (0, progress_update::SPIN);
   }
 
  protected:
@@ -372,10 +384,10 @@ class ui_out
   virtual void do_redirect (struct ui_file *outstream) = 0;
 
   virtual void do_progress_start (const std::string &, bool) = 0;
-  virtual void do_progress_notify (double) = 0;
+  virtual void do_progress_notify (double, progress_update::state) = 0;
   virtual void do_progress_end () = 0;
   virtual void update_progress_name (const std::string &) = 0;
-  virtual progress_report::state get_progress_state () = 0;
+  virtual progress_update::state get_progress_state () = 0;
 
   /* Set as not MI-like by default.  It is overridden in subclasses if
      necessary.  */

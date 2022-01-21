@@ -287,7 +287,7 @@ cli_ui_out::do_progress_start (const std::string &name, bool should_print)
     {
       fprintf_unfiltered (stream, "%s...", info.name.c_str ());
       gdb_flush (stream);
-      info.state = progress_report::WORKING;
+      info.state = progress_update::WORKING;
     }
   else
     {
@@ -295,57 +295,66 @@ cli_ui_out::do_progress_start (const std::string &name, bool should_print)
 	 of progress.  This makes it so a second progress message can
 	 be started before the first one has been notified, without
 	 messy output.  */
-      info.state = should_print ? progress_report::START
-				: progress_report::NO_PRINT;
+      info.state = should_print ? progress_update::START
+				: progress_update::NO_PRINT;
     }
 
   m_progress_info.push_back (std::move (info));
 }
 
 void
-cli_ui_out::do_progress_notify (double howmuch)
+cli_ui_out::do_progress_notify (double howmuch,
+			        progress_update::state next_state)
 {
   struct ui_file *stream = m_streams.back ();
   cli_progress_info &info (m_progress_info.back ());
 
-  if (info.state == progress_report::NO_PRINT)
+  if (info.state == progress_update::NO_PRINT)
     return;
 
-  int chars_per_line = get_chars_per_line ();
-  if (info.state == progress_report::START && chars_per_line <= 0)
+  if (info.state == progress_update::START)
     {
-      fprintf_unfiltered (stream, "%s\n", info.name.c_str ());
+      fprintf_unfiltered (stream, "%s", info.name.c_str ());
       gdb_flush (stream);
-      info.state = progress_report::WORKING;
+      info.state = progress_update::WORKING;
     }
 
-  if (info.state == progress_report::WORKING && howmuch >= 1.0)
+  if (info.state == progress_update::WORKING && howmuch >= 1.0)
     return;
 
   if (!stream->isatty ())
     return;
 
+  int chars_per_line = get_chars_per_line ();
   if (chars_per_line <= 0)
     return;
 
-  if (howmuch <= 0.0)
+  if (next_state == progress_update::PERCENT)
+    {
+      fprintf_unfiltered (stream, "\r(%2.0f%%) %s",
+			  howmuch * 100, info.name.c_str ());
+      gdb_flush (stream);
+      info.state = progress_update::PERCENT;
+    }
+  else if (next_state == progress_update::SPIN)
     {
       using namespace std::chrono;
       seconds diff = duration_cast<seconds>
 	(steady_clock::now () - info.last_update);
 
+      /* Advance the spinner no faster than 1 tick per second.  */
       if (diff.count () >= 1.0)
 	{
 	  static int spin = 0;
 
-	  fprintf_unfiltered (stream, "\r%s %c\b", info.name.c_str (),
-			      "-\\|/"[spin++ % 4]);
+	  fprintf_unfiltered (stream, "\r%c %s", "-\\|/"[spin++ % 4],
+			      info.name.c_str ());
 	  gdb_flush (stream);
 	  info.last_update = steady_clock::now ();
 	}
-      info.state = progress_report::SPIN;
+      info.state = progress_update::SPIN;
     }
-  else
+  else if (next_state == progress_update::BAR)
     {
       /* Pick a reasonable limit for the progress bar length.  */
       if (chars_per_line > 3840)
@@ -355,10 +364,11 @@ cli_ui_out::do_progress_notify (double howmuch)
       int width = chars_per_line - 3;
       max = width * howmuch;
 
-      if (info.state == progress_report::SPIN)
+      if (info.state == progress_update::SPIN
+	  || info.state == progress_update::PERCENT)
 	{
 	  /* Ensure the progress bar prints on its own line so that
-	     progress updates don't erase name.  */
+	     progress updates don't overwrite name.  */
 	  fprintf_unfiltered (stream, "\r%s\n", info.name.c_str ());
 	  gdb_flush (stream);
 	}
@@ -369,8 +379,10 @@ cli_ui_out::do_progress_notify (double howmuch)
 	fprintf_unfiltered (stream, i < max ? "#" : " ");
       fprintf_unfiltered (stream, "]");
       gdb_flush (stream);
-      info.state = progress_report::BAR;
+      info.state = progress_update::BAR;
     }
+
+  return;
 }
 
 void
@@ -380,7 +392,7 @@ cli_ui_out::update_progress_name (const std::string &name)
   info.name = name;
 }
 
-cli_ui_out::progress_report::state
+cli_ui_out::progress_update::state
 cli_ui_out::get_progress_state ()
 {
   cli_progress_info &info = m_progress_info.back ();
@@ -391,24 +403,21 @@ void
 cli_ui_out::do_progress_end ()
 {
   struct ui_file *stream = m_streams.back ();
-  cli_progress_info &info = m_progress_info.back ();
+  m_progress_info.pop_back ();
 
-  if (!stream->isatty () || info.state == progress_report::SPIN)
-    fprintf_unfiltered (stream, " \n");
-  else if (info.state == progress_report::BAR)
-    {
-      int i;
-      int width = get_chars_per_line () - 3;
+  if (!stream->isatty ())
+    return;
 
-      this->do_progress_notify (1.0);
-      fprintf_unfiltered (stream, "\r");
-      for (i = 0; i < width + 2; ++i)
-	fprintf_unfiltered (stream, " ");
-      fprintf_unfiltered (stream, "\r");
-    }
+  int i;
+  int width = get_chars_per_line () - 3;
+
+  /* Erase everything printed on the current line.  */
+  fprintf_unfiltered (stream, "\r");
+  for (i = 0; i < width + 2; ++i)
+    fprintf_unfiltered (stream, " ");
+  fprintf_unfiltered (stream, "\r");
 
   gdb_flush (stream);
-  m_progress_info.pop_back ();
 }
 
 /* local functions */
