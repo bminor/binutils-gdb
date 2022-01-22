@@ -1,5 +1,9 @@
 2022-01-22  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
 	* 2.38 release branch created.
 
 2022-01-17  Nick Clifton  <nickc@redhat.com>

@@ -1,5 +1,12 @@
 2022-01-22  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* po/gold.pot: Regenerate.
+	* testsuite/Makegfile.in: Regenerate.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
 	* 2.38 release branch created.
 
 2021-08-10  Nick Clifton  <nickc@redhat.com>

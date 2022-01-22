@@ -1,5 +1,10 @@
 2022-01-22  Nick Clifton  <nickc@redhat.com>
 
+	* configure: Regenerate.
+	* po/ld.pot: Regenerate.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
 	* 2.38 release branch created.
 
 2022-01-21  Nick Clifton  <nickc@redhat.com>
