@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2022-01-17 13:56+0000\n"
+"POT-Creation-Date: 2022-01-22 12:21+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2963,7 +2963,7 @@ msgstr ""
 #: config/tc-hppa.c:6838 config/tc-hppa.c:8225 config/tc-lm32.c:197
 #: config/tc-mips.c:3690 config/tc-mips.c:4187 config/tc-mn10300.c:935
 #: config/tc-mn10300.c:940 config/tc-mn10300.c:2440 config/tc-riscv.c:1263
-#: config/tc-riscv.c:4424 config/tc-xc16x.c:79 config/tc-xc16x.c:86
+#: config/tc-riscv.c:4430 config/tc-xc16x.c:79 config/tc-xc16x.c:86
 #: config/tc-xc16x.c:93
 msgid "could not set architecture and machine"
 msgstr ""
@@ -10291,7 +10291,7 @@ msgstr ""
 msgid "Relocation against a constant"
 msgstr ""
 
-#: config/tc-loongarch.c:1301 config/tc-riscv.c:4023
+#: config/tc-loongarch.c:1301 config/tc-riscv.c:4029
 #, c-format
 msgid "cannot represent %s relocation in object file"
 msgstr ""
@@ -15921,7 +15921,7 @@ msgstr ""
 msgid "unrecognized .option directive: %s\n"
 msgstr ""
 
-#: config/tc-riscv.c:4164
+#: config/tc-riscv.c:4170
 #, c-format
 msgid ""
 "RISC-V options:\n"
@@ -15946,30 +15946,30 @@ msgid ""
 "  -mlittle-endian             assemble for little-endian\n"
 msgstr ""
 
-#: config/tc-riscv.c:4206
+#: config/tc-riscv.c:4212
 #, c-format
 msgid "unknown register `%s'"
 msgstr ""
 
-#: config/tc-riscv.c:4228
+#: config/tc-riscv.c:4234
 #, c-format
 msgid "non-constant .%cleb128 is not supported"
 msgstr ""
 
-#: config/tc-riscv.c:4322
+#: config/tc-riscv.c:4328
 #, c-format
 msgid "internal: bad RISC-V privileged spec (%s)"
 msgstr ""
 
-#: config/tc-riscv.c:4414
+#: config/tc-riscv.c:4420
 msgid "architecture elf attributes must set before any instructions"
 msgstr ""
 
-#: config/tc-riscv.c:4432
+#: config/tc-riscv.c:4438
 msgid "privileged elf attributes must set before any instructions"
 msgstr ""
 
-#: config/tc-riscv.c:4454
+#: config/tc-riscv.c:4460
 msgid "missing symbol name for .variant_cc directive"
 msgstr ""
 
