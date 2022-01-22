@@ -392,7 +392,8 @@ void
 type_print (struct type *type, const char *varstring, struct ui_file *stream,
 	    int show)
 {
-  LA_PRINT_TYPE (type, varstring, stream, show, 0, &default_ptype_flags);
+  current_language->print_type (type, varstring, stream, show, 0,
+				&default_ptype_flags);
 }
 
 /* Print TYPE to a string, returning it.  The caller is responsible for
@@ -578,7 +579,7 @@ whatis_exp (const char *exp, int show)
       printf_filtered (" */\n");    
     }
 
-  LA_PRINT_TYPE (type, "", gdb_stdout, show, 0, &flags);
+  current_language->print_type (type, "", gdb_stdout, show, 0, &flags);
   printf_filtered ("\n");
 }
 

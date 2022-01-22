@@ -1025,8 +1025,9 @@ typy_str (PyObject *self)
 
   try
     {
-      LA_PRINT_TYPE (type_object_to_type (self), "", &thetype, -1, 0,
-		     &type_print_raw_options);
+      current_language->print_type (type_object_to_type (self), "",
+				    &thetype, -1, 0,
+				    &type_print_raw_options);
     }
   catch (const gdb_exception &except)
     {

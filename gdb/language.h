@@ -755,9 +755,6 @@ extern enum language set_language (enum language);
    the current setting of working_lang, which the user sets
    with the "set language" command.  */
 
-#define LA_PRINT_TYPE(type,varstring,stream,show,level,flags)		\
-  (current_language->print_type(type,varstring,stream,show,level,flags))
-
 #define LA_PRINT_CHAR(ch, type, stream) \
   (current_language->printchar (ch, type, stream))
 #define LA_PRINT_STRING(stream, elttype, string, length, encoding, force_ellipses, options) \

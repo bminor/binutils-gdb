@@ -525,8 +525,8 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
     {
       if (symbol->type ()->name ())
 	{
-	  LA_PRINT_TYPE (symbol->type (), "", outfile, 1, depth,
-			 &type_print_raw_options);
+	  current_language->print_type (symbol->type (), "", outfile, 1, depth,
+					&type_print_raw_options);
 	}
       else
 	{
@@ -536,8 +536,8 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 		     : (symbol->type ()->code () == TYPE_CODE_STRUCT
 			? "struct" : "union")),
 			    symbol->linkage_name ());
-	  LA_PRINT_TYPE (symbol->type (), "", outfile, 1, depth,
-			 &type_print_raw_options);
+	  current_language->print_type (symbol->type (), "", outfile, 1, depth,
+					&type_print_raw_options);
 	}
       fprintf_filtered (outfile, ";\n");
     }
@@ -548,11 +548,11 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
       if (symbol->type ())
 	{
 	  /* Print details of types, except for enums where it's clutter.  */
-	  LA_PRINT_TYPE (symbol->type (), symbol->print_name (),
-			 outfile,
-			 symbol->type ()->code () != TYPE_CODE_ENUM,
-			 depth,
-			 &type_print_raw_options);
+	  current_language->print_type (symbol->type (), symbol->print_name (),
+					outfile,
+					symbol->type ()->code () != TYPE_CODE_ENUM,
+					depth,
+					&type_print_raw_options);
 	  fprintf_filtered (outfile, "; ");
 	}
       else
