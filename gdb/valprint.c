@@ -2767,10 +2767,9 @@ val_print_string (struct type *elttype, const char *encoding,
      But if we fetch something and then get an error, print the string
      and then the error message.  */
   if (err == 0 || bytes_read > 0)
-    {
-      LA_PRINT_STRING (stream, elttype, buffer.get (), bytes_read / width,
-		       encoding, force_ellipsis, options);
-    }
+    current_language->printstr (stream, elttype, buffer.get (),
+				bytes_read / width,
+				encoding, force_ellipsis, options);
 
   if (err != 0)
     {

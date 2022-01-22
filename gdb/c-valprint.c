@@ -277,7 +277,7 @@ c_value_print_array (struct value *val,
 		   ++temp_len)
 		;
 
-	      /* Force LA_PRINT_STRING to print ellipses if
+	      /* Force printstr to print ellipses if
 		 we've printed the maximum characters and
 		 the next character is not \000.  */
 	      if (temp_len == options->print_max && temp_len < len)
@@ -292,8 +292,8 @@ c_value_print_array (struct value *val,
 	      len = temp_len;
 	    }
 
-	  LA_PRINT_STRING (stream, unresolved_elttype, valaddr, len,
-			   NULL, force_ellipses, options);
+	  current_language->printstr (stream, unresolved_elttype, valaddr, len,
+				      NULL, force_ellipses, options);
 	}
       else
 	{
