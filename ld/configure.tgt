@@ -202,7 +202,7 @@ arm*-*-conix*)		targ_emul=armelf
 arm*-*-fuchsia*)	targ_emul=armelf_fuchsia
 			targ_extra_emuls="armelfb_fuchsia armelf armelfb"
 			;;
-arm*-*-haiku*)		arg_emul=armelf_haiku
+arm*-*-haiku*)		targ_emul=armelf_haiku
 			targ_extra_emuls=armelf
 			;;
 avr-*-*)		targ_emul=avr2

@@ -1,3 +1,9 @@
+2022-01-22  Alexander von Gluck IV  <kallisti5@unixzen.com>
+
+	* configure.tgt (arm-haiku): Fix typo.
+	* emulparams/armelf_haiku.su (MAXPAGESIZE): Use the default value.
+	(COMMONPAGESIZE): Likewise.
+
 2022-01-22  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
