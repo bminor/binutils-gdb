@@ -791,7 +791,7 @@ generic_value_print_char (struct value *value, struct ui_file *stream,
       else
 	fprintf_filtered (stream, "%d", (int) val);
       fputs_filtered (" ", stream);
-      LA_PRINT_CHAR (val, unresolved_type, stream);
+      current_language->printchar (val, unresolved_type, stream);
     }
 }
 

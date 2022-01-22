@@ -409,7 +409,8 @@ c_value_print_int (struct value *val, struct ui_file *stream,
       if (c_textual_element_type (type, options->format))
 	{
 	  fputs_filtered (" ", stream);
-	  LA_PRINT_CHAR (unpack_long (type, valaddr), type, stream);
+	  current_language->printchar (unpack_long (type, valaddr), type,
+				       stream);
 	}
     }
 }
