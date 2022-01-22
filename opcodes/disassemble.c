@@ -858,3 +858,16 @@ opcodes_assert (const char *file, int line)
   opcodes_error_handler (_("Please report this bug"));
   abort ();
 }
+
+/* Set the stream, and the styled and unstyled printf functions within
+   INFO.  */
+
+void
+disassemble_set_printf (struct disassemble_info *info, void *stream,
+			fprintf_ftype unstyled_printf,
+			fprintf_styled_ftype styled_printf)
+{
+  info->stream = stream;
+  info->fprintf_func = unstyled_printf;
+  info->fprintf_styled_func = styled_printf;
+}

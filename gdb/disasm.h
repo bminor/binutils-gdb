@@ -110,6 +110,13 @@ private:
   static int dis_asm_fprintf (void *stream, const char *format, ...)
     ATTRIBUTE_PRINTF(2,3);
 
+  /* Print formatted message to STREAM, the content can be styled based on
+     STYLE if desired.  */
+  static int dis_asm_styled_fprintf (void *stream,
+				     enum disassembler_style style,
+				     const char *format, ...)
+    ATTRIBUTE_PRINTF(3,4);
+
   static int dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr,
 				  unsigned int len,
 				  struct disassemble_info *info);

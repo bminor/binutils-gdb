@@ -2270,6 +2270,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{--prefix-strip=}@var{level}]
         [@option{--insn-width=}@var{width}]
         [@option{--visualize-jumps[=color|=extended-color|=off]}
+        [@option{--disassembler-color=[color|extended-color|off]}
         [@option{-U} @var{method}] [@option{--unicode=}@var{method}]
         [@option{-V}|@option{--version}]
         [@option{-H}|@option{--help}]
@@ -2806,6 +2807,16 @@ colors, but these might not work on all terminals.
 If it is necessary to disable the @option{visualize-jumps} option
 after it has previously been enabled then use
 @option{visualize-jumps=off}.
+
+@item --disassembler-color=[color|extended-color|off]
+Apply syntax highlighting to the disassembler output.  The
+@option{color} argument adds color using simple terminal colors.
+Alternatively the @option{extended-color} argument will use 8bit
+colors, but these might not work on all terminals.
+
+If it is necessary to disable the @option{--disassembler-color} option
+after it has previously been enabled then use
+@option{--disassembler-color=off}.
 
 @item -W[lLiaprmfFsoORtUuTgAckK]
 @itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]

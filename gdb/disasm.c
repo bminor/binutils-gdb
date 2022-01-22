@@ -177,6 +177,22 @@ gdb_disassembler::dis_asm_fprintf (void *stream, const char *format, ...)
   return 0;
 }
 
+/* See disasm.h.  */
+
+int
+gdb_disassembler::dis_asm_styled_fprintf (void *stream,
+					  enum disassembler_style style,
+					  const char *format, ...)
+{
+  va_list args;
+
+  va_start (args, format);
+  vfprintf_filtered ((struct ui_file *) stream, format, args);
+  va_end (args);
+  /* Something non -ve.  */
+  return 0;
+}
+
 static bool
 line_is_less_than (const deprecated_dis_line_entry &mle1,
 		   const deprecated_dis_line_entry &mle2)
@@ -787,7 +803,8 @@ gdb_disassembler::gdb_disassembler (struct gdbarch *gdbarch,
 	      && file->can_emit_style_escape ()),
     m_dest (file)
 {
-  init_disassemble_info (&m_di, &m_buffer, dis_asm_fprintf);
+  init_disassemble_info (&m_di, &m_buffer, dis_asm_fprintf,
+			 dis_asm_styled_fprintf);
   m_di.flavour = bfd_target_unknown_flavour;
   m_di.memory_error_func = dis_asm_memory_error;
   m_di.print_address_func = dis_asm_print_address;
@@ -954,12 +971,25 @@ gdb_disasm_null_printf (void *stream, const char *format, ...)
   return 0;
 }
 
+/* An fprintf-function for use by the disassembler when we know we don't
+   want to print anything, and the disassembler is using style.  Always
+   returns success.  */
+
+static int ATTRIBUTE_PRINTF (3, 4)
+gdb_disasm_null_styled_printf (void *stream,
+			       enum disassembler_style style,
+			       const char *format, ...)
+{
+  return 0;
+}
+
 /* See disasm.h.  */
 
 void
 init_disassemble_info_for_no_printing (struct disassemble_info *dinfo)
 {
-  init_disassemble_info (dinfo, nullptr, gdb_disasm_null_printf);
+  init_disassemble_info (dinfo, nullptr, gdb_disasm_null_printf,
+			 gdb_disasm_null_styled_printf);
 }
 
 /* Initialize a struct disassemble_info for gdb_buffered_insn_length.

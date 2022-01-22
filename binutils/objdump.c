@@ -130,9 +130,18 @@ static bool visualize_jumps = false;	/* --visualize-jumps.  */
 static bool color_output = false;	/* --visualize-jumps=color.  */
 static bool extended_color_output = false; /* --visualize-jumps=extended-color.  */
 static int process_links = false;       /* --process-links.  */
+static bool disassembler_color = false; /* --disassembler-color=color.  */
+static bool disassembler_extended_color = false; /* --disassembler-color=extended-color.  */
 
 static int dump_any_debugging;
 static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
+
+/* This is reset to false each time we enter the disassembler, and set true
+   when the disassembler emits something in the dis_style_comment_start
+   style.  Once this is true, all further output on that line is done in
+   the comment style.  This only has an effect when disassembler coloring
+   is turned on.  */
+static bool disassembler_in_comment = false;
 
 /* A structure to record the sections mentioned in -j switches.  */
 struct only
@@ -396,6 +405,10 @@ usage (FILE *stream, int status)
                                  Use extended 8-bit color codes\n"));
       fprintf (stream, _("\
       --visualize-jumps=off      Disable jump visualization\n\n"));
+      fprintf (stream, _("\
+      --disassembler-color=off   Disable disassembler color output.\n\n"));
+      fprintf (stream, _("\
+      --disassembler-color=color Use basic colors in disassembler output.\n\n"));
 
       list_supported_targets (program_name, stream);
       list_supported_architectures (program_name, stream);
@@ -437,7 +450,8 @@ enum option_values
     OPTION_CTF,
     OPTION_CTF_PARENT,
 #endif
-    OPTION_VISUALIZE_JUMPS
+    OPTION_VISUALIZE_JUMPS,
+    OPTION_DISASSEMBLER_COLOR
   };
 
 static struct option long_options[]=
@@ -503,6 +517,7 @@ static struct option long_options[]=
   {"version", no_argument, NULL, 'V'},
   {"visualize-jumps", optional_argument, 0, OPTION_VISUALIZE_JUMPS},
   {"wide", no_argument, NULL, 'w'},
+  {"disassembler-color", required_argument, NULL, OPTION_DISASSEMBLER_COLOR},
   {NULL, no_argument, NULL, 0}
 };
 
@@ -1246,7 +1261,7 @@ objdump_print_value (bfd_vma vma, struct disassemble_info *inf,
       if (*p == '\0')
 	--p;
     }
-  (*inf->fprintf_func) (inf->stream, "%s", p);
+  (*inf->fprintf_styled_func) (inf->stream, dis_style_address, "%s", p);
 }
 
 /* Print the name of a symbol.  */
@@ -1280,10 +1295,11 @@ objdump_print_symname (bfd *abfd, struct disassemble_info *inf,
 
   if (inf != NULL)
     {
-      (*inf->fprintf_func) (inf->stream, "%s", name);
+      (*inf->fprintf_styled_func) (inf->stream, dis_style_symbol, "%s", name);
       if (version_string && *version_string != '\0')
-	(*inf->fprintf_func) (inf->stream, hidden ? "@%s" : "@@%s",
-			      version_string);
+	(*inf->fprintf_styled_func) (inf->stream, dis_style_symbol,
+				     hidden ? "@%s" : "@@%s",
+				     version_string);
     }
   else
     {
@@ -1545,31 +1561,33 @@ objdump_print_addr_with_sym (bfd *abfd, asection *sec, asymbol *sym,
   if (!no_addresses)
     {
       objdump_print_value (vma, inf, skip_zeroes);
-      (*inf->fprintf_func) (inf->stream, " ");
+      (*inf->fprintf_styled_func) (inf->stream, dis_style_text, " ");
     }
 
   if (sym == NULL)
     {
       bfd_vma secaddr;
 
-      (*inf->fprintf_func) (inf->stream, "<%s",
-			    sanitize_string (bfd_section_name (sec)));
+      (*inf->fprintf_styled_func) (inf->stream, dis_style_text,"<");
+      (*inf->fprintf_styled_func) (inf->stream, dis_style_symbol, "%s",
+				   sanitize_string (bfd_section_name (sec)));
       secaddr = bfd_section_vma (sec);
       if (vma < secaddr)
 	{
-	  (*inf->fprintf_func) (inf->stream, "-0x");
+	  (*inf->fprintf_styled_func) (inf->stream, dis_style_immediate,
+				       "-0x");
 	  objdump_print_value (secaddr - vma, inf, true);
 	}
       else if (vma > secaddr)
 	{
-	  (*inf->fprintf_func) (inf->stream, "+0x");
+	  (*inf->fprintf_styled_func) (inf->stream, dis_style_immediate, "+0x");
 	  objdump_print_value (vma - secaddr, inf, true);
 	}
-      (*inf->fprintf_func) (inf->stream, ">");
+      (*inf->fprintf_styled_func) (inf->stream, dis_style_text, ">");
     }
   else
     {
-      (*inf->fprintf_func) (inf->stream, "<");
+      (*inf->fprintf_styled_func) (inf->stream, dis_style_text, "<");
 
       objdump_print_symname (abfd, inf, sym);
 
@@ -1586,21 +1604,22 @@ objdump_print_addr_with_sym (bfd *abfd, asection *sec, asymbol *sym,
 	;
       else if (bfd_asymbol_value (sym) > vma)
 	{
-	  (*inf->fprintf_func) (inf->stream, "-0x");
+	  (*inf->fprintf_styled_func) (inf->stream, dis_style_immediate,"-0x");
 	  objdump_print_value (bfd_asymbol_value (sym) - vma, inf, true);
 	}
       else if (vma > bfd_asymbol_value (sym))
 	{
-	  (*inf->fprintf_func) (inf->stream, "+0x");
+	  (*inf->fprintf_styled_func) (inf->stream, dis_style_immediate, "+0x");
 	  objdump_print_value (vma - bfd_asymbol_value (sym), inf, true);
 	}
 
-      (*inf->fprintf_func) (inf->stream, ">");
+      (*inf->fprintf_styled_func) (inf->stream, dis_style_text, ">");
     }
 
   if (display_file_offsets)
-    inf->fprintf_func (inf->stream, _(" (File Offset: 0x%lx)"),
-			(long int)(sec->filepos + (vma - sec->vma)));
+    inf->fprintf_styled_func (inf->stream, dis_style_text,
+			      _(" (File Offset: 0x%lx)"),
+			      (long int)(sec->filepos + (vma - sec->vma)));
 }
 
 /* Print an address (VMA), symbolically if possible.
@@ -2127,6 +2146,143 @@ objdump_sprintf (SFILE *f, const char *format, ...)
   return n;
 }
 
+/* Return an integer greater than, or equal to zero, representing the color
+   for STYLE, or -1 if no color should be used.  */
+
+static int
+objdump_color_for_disassembler_style (enum disassembler_style style)
+{
+  int color = -1;
+
+  if (style == dis_style_comment_start)
+    disassembler_in_comment = true;
+
+  if (disassembler_color)
+    {
+      if (disassembler_in_comment)
+	return color;
+
+      switch (style)
+	{
+	case dis_style_symbol: color = 32; break;
+        case dis_style_assembler_directive:
+	case dis_style_mnemonic: color = 33; break;
+	case dis_style_register: color = 34; break;
+	case dis_style_address:
+        case dis_style_address_offset:
+	case dis_style_immediate: color = 35; break;
+	default:
+	case dis_style_text: color = -1; break;
+	}
+    }
+  else if (disassembler_extended_color)
+    {
+      if (disassembler_in_comment)
+	return 250;
+
+      switch (style)
+	{
+	case dis_style_symbol: color = 40; break;
+        case dis_style_assembler_directive:
+	case dis_style_mnemonic: color = 142; break;
+	case dis_style_register: color = 27; break;
+	case dis_style_address:
+        case dis_style_address_offset:
+	case dis_style_immediate: color = 134; break;
+	default:
+	case dis_style_text: color = -1; break;
+	}
+    }
+
+  return color;
+}
+
+/* Like objdump_sprintf, but add in escape sequences to highlight the
+   content according to STYLE.  */
+
+static int ATTRIBUTE_PRINTF_3
+objdump_styled_sprintf (SFILE *f, enum disassembler_style style,
+			const char *format, ...)
+{
+  size_t n;
+  va_list args;
+  int color = objdump_color_for_disassembler_style (style);
+
+  if (color >= 0)
+    {
+      while (1)
+	{
+	  size_t space = f->alloc - f->pos;
+
+	  if (disassembler_color)
+	    n = snprintf (f->buffer + f->pos, space, "\033[%dm", color);
+	  else
+	    n = snprintf (f->buffer + f->pos, space, "\033[38;5;%dm", color);
+	  if (space > n)
+	    break;
+
+	  f->alloc = (f->alloc + n) * 2;
+	  f->buffer = (char *) xrealloc (f->buffer, f->alloc);
+	}
+      f->pos += n;
+    }
+
+  while (1)
+    {
+      size_t space = f->alloc - f->pos;
+
+      va_start (args, format);
+      n = vsnprintf (f->buffer + f->pos, space, format, args);
+      va_end (args);
+
+      if (space > n)
+	break;
+
+      f->alloc = (f->alloc + n) * 2;
+      f->buffer = (char *) xrealloc (f->buffer, f->alloc);
+    }
+  f->pos += n;
+
+  if (color >= 0)
+    {
+      while (1)
+	{
+	  size_t space = f->alloc - f->pos;
+
+	  n = snprintf (f->buffer + f->pos, space, "\033[0m");
+
+	  if (space > n)
+	    break;
+
+	  f->alloc = (f->alloc + n) * 2;
+	  f->buffer = (char *) xrealloc (f->buffer, f->alloc);
+	}
+      f->pos += n;
+    }
+
+  return n;
+}
+
+/* We discard the styling information here.  This function is only used
+   when objdump is printing auxiliary information, the symbol headers, and
+   disassembly address, or the bytes of the disassembled instruction.  We
+   don't (currently) apply styling to any of this stuff, so, for now, just
+   print the content with no additional style added.  */
+
+static int ATTRIBUTE_PRINTF_3
+fprintf_styled (FILE *f, enum disassembler_style style ATTRIBUTE_UNUSED,
+		const char *fmt, ...)
+{
+  int res;
+  va_list ap;
+
+  va_start (ap, fmt);
+  res = vfprintf (f, fmt, ap);
+  va_end (ap);
+
+  return res;
+}
+
 /* Code for generating (colored) diagrams of control flow start and end
    points.  */
 
@@ -2558,8 +2714,8 @@ disassemble_jumps (struct disassemble_info * inf,
   sfile.pos = 0;
 
   inf->insn_info_valid = 0;
-  inf->fprintf_func = (fprintf_ftype) objdump_sprintf;
-  inf->stream = &sfile;
+  disassemble_set_printf (inf, &sfile, (fprintf_ftype) objdump_sprintf,
+			  (fprintf_styled_ftype) objdump_styled_sprintf);
 
   addr_offset = start_offset;
   while (addr_offset < stop_offset)
@@ -2621,6 +2777,7 @@ disassemble_jumps (struct disassemble_info * inf,
 
       /* Extract jump information.  */
       inf->insn_info_valid = 0;
+      disassembler_in_comment = false;
       octets = (*disassemble_fn) (section->vma + addr_offset, inf);
       /* Test if a jump was detected.  */
       if (inf->insn_info_valid
@@ -2641,9 +2798,8 @@ disassemble_jumps (struct disassemble_info * inf,
       addr_offset += octets / opb;
     }
 
-  inf->fprintf_func = (fprintf_ftype) fprintf;
-  inf->stream = stdout;
-
+  disassemble_set_printf (inf, (void *) stdout, (fprintf_ftype) fprintf,
+			  (fprintf_styled_ftype) fprintf_styled);
   free (sfile.buffer);
 
   /* Merge jumps.  */
@@ -2732,6 +2888,17 @@ disassemble_jumps (struct disassemble_info * inf,
 
 static int
 null_print (const void * stream ATTRIBUTE_UNUSED, const char * format ATTRIBUTE_UNUSED, ...)
+{
+  return 1;
+}
+
+/* Like null_print, but takes the extra STYLE argument.  As this is not
+   going to print anything, the extra argument is just ignored.  */
+
+static int
+null_styled_print (const void * stream ATTRIBUTE_UNUSED,
+		   enum disassembler_style style ATTRIBUTE_UNUSED,
+		   const char * format ATTRIBUTE_UNUSED, ...)
 {
   return 1;
 }
@@ -2946,8 +3113,9 @@ disassemble_bytes (struct disassemble_info *inf,
 	      int insn_size;
 
 	      sfile.pos = 0;
-	      inf->fprintf_func = (fprintf_ftype) objdump_sprintf;
-	      inf->stream = &sfile;
+	      disassemble_set_printf
+		(inf, &sfile, (fprintf_ftype) objdump_sprintf,
+		 (fprintf_styled_ftype) objdump_styled_sprintf);
 	      inf->bytes_per_line = 0;
 	      inf->bytes_per_chunk = 0;
 	      inf->flags = ((disassemble_all ? DISASSEMBLE_DATA : 0)
@@ -2989,10 +3157,15 @@ disassemble_bytes (struct disassemble_info *inf,
 			     twice, but we only do this when there is a high
 			     probability that there is a reloc that will
 			     affect the instruction.  */
-			  inf->fprintf_func = (fprintf_ftype) null_print;
+			  disassemble_set_printf
+			    (inf, inf->stream, (fprintf_ftype) null_print,
+			     (fprintf_styled_ftype) null_styled_print);
 			  insn_size = disassemble_fn (section->vma
 						      + addr_offset, inf);
-			  inf->fprintf_func = (fprintf_ftype) objdump_sprintf;
+			  disassemble_set_printf
+			    (inf, inf->stream,
+			     (fprintf_ftype) objdump_sprintf,
+			     (fprintf_styled_ftype) objdump_styled_sprintf);
 			}
 		    }
 
@@ -3017,12 +3190,13 @@ disassemble_bytes (struct disassemble_info *inf,
 		inf->stop_vma = section->vma + stop_offset;
 
 	      inf->stop_offset = stop_offset;
+	      disassembler_in_comment = false;
 	      insn_size = (*disassemble_fn) (section->vma + addr_offset, inf);
 	      octets = insn_size;
 
 	      inf->stop_vma = 0;
-	      inf->fprintf_func = (fprintf_ftype) fprintf;
-	      inf->stream = stdout;
+	      disassemble_set_printf (inf, stdout, (fprintf_ftype) fprintf,
+				      (fprintf_styled_ftype) fprintf_styled);
 	      if (insn_width == 0 && inf->bytes_per_line != 0)
 		octets_per_line = inf->bytes_per_line;
 	      if (insn_size < (int) opb)
@@ -3583,8 +3757,9 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
 	      sf.alloc = strlen (sym->name) + 40;
 	      sf.buffer = (char*) xmalloc (sf.alloc);
 	      sf.pos = 0;
-	      di.fprintf_func = (fprintf_ftype) objdump_sprintf;
-	      di.stream = &sf;
+	      disassemble_set_printf
+		(&di, &sf, (fprintf_ftype) objdump_sprintf,
+		 (fprintf_styled_ftype) objdump_styled_sprintf);
 
 	      objdump_print_symname (abfd, &di, sym);
 
@@ -3653,8 +3828,8 @@ disassemble_data (bfd *abfd)
       ++sorted_symcount;
     }
 
-  init_disassemble_info (&disasm_info, stdout, (fprintf_ftype) fprintf);
-
+  init_disassemble_info (&disasm_info, stdout, (fprintf_ftype) fprintf,
+			 (fprintf_styled_ftype) fprintf_styled);
   disasm_info.application_data = (void *) &aux;
   aux.abfd = abfd;
   aux.require_sec = false;
@@ -5494,6 +5669,16 @@ main (int argc, char **argv)
 	      else
 		nonfatal (_("unrecognized argument to --visualize-option"));
 	    }
+	  break;
+	case OPTION_DISASSEMBLER_COLOR:
+	  if (streq (optarg, "off"))
+	    disassembler_color = false;
+	  else if (streq (optarg, "color"))
+	    disassembler_color = true;
+	  else if (streq (optarg, "extended-color"))
+	    disassembler_extended_color = true;
+	  else
+	    nonfatal (_("unrecognized argument to --disassembler-color"));
 	  break;
 	case 'E':
 	  if (strcmp (optarg, "B") == 0)
