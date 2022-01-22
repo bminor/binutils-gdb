@@ -44,8 +44,8 @@ Approx time to complete from here: 2 hours ....
 
   4. Create the release branch using:
 
-	git branch binutils-2_38-branch
-        git push origin binutils-2_38-branch
+	git branch binutils-2_39-branch
+        git push origin binutils-2_39-branch
 
      If you get a message like:
      
@@ -55,7 +55,7 @@ Approx time to complete from here: 2 hours ....
 
   5. Make sure that the branch is there.  IE check out the branch sources:
   
-        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_38-branch 2.38
+        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_39-branch 2.39
 
      If you get a message about being in a "detached head" state, something
      has gone wrong...
@@ -83,15 +83,18 @@ Approx time to complete from here: 2 hours ....
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
   8. Update bfd/version.m4 on HEAD to indicate that is now a snapshot
-     of the next release:
-     
-       m4_define([BFD_VERSION], [2.38.50])
-       
-     Update the release number in bfd/version.m4 for the BRANCH.
-     The branch only needs the point value set to 90 as the release
-     has not actually happened yet.
+     of the next release.  Note if the release is going to be 2.39 then
+     the version number on the branch is set to 2.38.90 - ie almost, but
+     not quite at 2.39, and the version number on the mainline is set to
+     2.39.50 - ie half way to the next release after 2.39.
 
-       m4_define([BFD_VERSION], [2.37.90])
+     So the branch bfd/version.m4 has:
+     
+       m4_define([BFD_VERSION], [2.38.90])
+       
+     and the mainline has:
+
+       m4_define([BFD_VERSION], [2.39.50])
 
      Regenerate various files on both branch and HEAD by configuring
      with "--enable-maintainer-mode --enable-gold" and then building
@@ -115,12 +118,12 @@ Approx time to complete from here: 2 hours ....
 
      c. Build a test target using this tarball.
 
-           cp binutils-2.37.90.tar.xz /dev/shm
+           cp binutils-2.38.90.tar.xz /dev/shm
 	   pushd /dev/shm
-	   tar xvf binutils-2.36.90.tar.xz
+	   tar xvf binutils-2.38.90.tar.xz
 	   mkdir build
 	   cd build
-	   ../binutils-2.37.90/configure --quiet --enable-gold
+	   ../binutils-2.38.90/configure --quiet --enable-gold
 	   make
 	   popd
 
@@ -128,8 +131,8 @@ Approx time to complete from here: 2 hours ....
 
      d. Upload the pre-release snapshot to the sourceware FTP site:
 
-          scp binutils-2.37.90.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
-          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.37.90.tar.xz
+          scp binutils-2.38.90.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
+          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.38.90.tar.xz
 
      e. Clean up the source directory again.
 
@@ -142,11 +145,11 @@ Approx time to complete from here: 2 hours ....
 ------------------------------------------------------------------------
 Dear Translation Project
 
-  The 2.38 release branch has been created for the GNU Binutils project.
+  The 2.39 release branch has been created for the GNU Binutils project.
 
   A snapshot of the branch sources can be found here:
 
-    https://sourceware.org/pub/binutils/snapshots/binutils-2.37.90.tar.xz
+    https://sourceware.org/pub/binutils/snapshots/binutils-2.38.90.tar.xz
 
   We hope to make the official release of the sources on the <DATE>
   although that could change if there are important bugs that need to
