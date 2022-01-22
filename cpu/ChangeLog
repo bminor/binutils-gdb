@@ -1,3 +1,7 @@
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* 2.38 release branch created.
+
 2021-07-05  Alan Modra  <amodra@gmail.com>
 
 	* mep.opc (macros): Make static and const.

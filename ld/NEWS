@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.38:
+
 * Add -z pack-relative-relocs/-z no pack-relative-relocs to x86 ELF
   linker to pack relative relocations in the DT_RELR section.
 

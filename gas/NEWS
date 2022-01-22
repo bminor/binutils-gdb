@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.38:
+
 * Add support for AArch64 system registers that were missing in previous
   releases.
 

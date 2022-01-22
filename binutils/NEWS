@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.38:
+
 * elfedit: Add --output-abiversion option to update ABIVERSION.
 
 * Add support for the LoongArch instruction set.
