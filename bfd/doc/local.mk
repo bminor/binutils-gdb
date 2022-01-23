@@ -144,10 +144,6 @@ DISTCLEANFILES += %D%/bfd.?? %D%/bfd.??? texput.log
 
 MAINTAINERCLEANFILES += $(DOCFILES)
 
-# We want install to imply install-info as per GNU standards, despite the
-# cygnus option.
-install: install-info
-
 html-local: %D%/bfd/index.html
 %D%/bfd/index.html: %D%/bfd.texi $(bfd_TEXINFOS) %D%/$(am__dirstamp)
 	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \

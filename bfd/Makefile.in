@@ -134,7 +134,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
-	$(am__configure_deps) $(am__bfdinclude_HEADERS_DIST)
+	$(am__configure_deps) $(am__include_HEADERS_DIST)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
@@ -178,9 +178,9 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(bfdlibdir)" "$(DESTDIR)$(infodir)" \
-	"$(DESTDIR)$(bfdincludedir)"
-LTLIBRARIES = $(bfdlib_LTLIBRARIES) $(noinst_LTLIBRARIES)
+am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(infodir)" \
+	"$(DESTDIR)$(includedir)"
+LTLIBRARIES = $(lib_LTLIBRARIES) $(noinst_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 am__objects_1 = archive.lo archures.lo bfd.lo bfdio.lo bfdwin.lo \
 	cache.lo coff-bfd.lo compress.lo corefile.lo elf-properties.lo \
@@ -198,7 +198,7 @@ libbfd_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(libbfd_la_LDFLAGS) $(LDFLAGS) -o $@
 @INSTALL_LIBBFD_FALSE@am_libbfd_la_rpath =
-@INSTALL_LIBBFD_TRUE@am_libbfd_la_rpath = -rpath $(bfdlibdir)
+@INSTALL_LIBBFD_TRUE@am_libbfd_la_rpath = -rpath $(libdir)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -289,10 +289,10 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__bfdinclude_HEADERS_DIST = $(INCDIR)/plugin-api.h bfd.h \
+am__include_HEADERS_DIST = $(INCDIR)/plugin-api.h bfd.h \
 	$(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
 	$(INCDIR)/diagnostics.h $(INCDIR)/bfdlink.h
-HEADERS = $(bfdinclude_HEADERS)
+HEADERS = $(include_HEADERS)
 RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
   distclean-recursive maintainer-clean-recursive
 am__recursive_targets = \
@@ -513,10 +513,10 @@ SUBDIRS = po
 bfddocdir = doc
 libbfd_la_LDFLAGS = $(am__append_1) -release `cat libtool-soversion` \
 	@SHARED_LDFLAGS@ $(am__empty)
-@INSTALL_LIBBFD_TRUE@bfdlib_LTLIBRARIES = libbfd.la
-@INSTALL_LIBBFD_FALSE@bfdinclude_HEADERS = $(am__append_2)
-@INSTALL_LIBBFD_TRUE@bfdinclude_HEADERS = $(BFD_H) \
-@INSTALL_LIBBFD_TRUE@	$(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
+@INSTALL_LIBBFD_TRUE@lib_LTLIBRARIES = libbfd.la
+@INSTALL_LIBBFD_FALSE@include_HEADERS = $(am__append_2)
+@INSTALL_LIBBFD_TRUE@include_HEADERS = $(BFD_H) $(INCDIR)/ansidecl.h \
+@INSTALL_LIBBFD_TRUE@	$(INCDIR)/symcat.h \
 @INSTALL_LIBBFD_TRUE@	$(INCDIR)/diagnostics.h \
 @INSTALL_LIBBFD_TRUE@	$(INCDIR)/bfdlink.h $(am__append_2)
 @INSTALL_LIBBFD_FALSE@rpath_bfdlibdir = @bfdlibdir@
@@ -1388,33 +1388,33 @@ po/Makefile.in: $(top_builddir)/config.status $(top_srcdir)/po/Make-in
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
 
-install-bfdlibLTLIBRARIES: $(bfdlib_LTLIBRARIES)
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
-	@list='$(bfdlib_LTLIBRARIES)'; test -n "$(bfdlibdir)" || list=; \
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
 	list2=; for p in $$list; do \
 	  if test -f $$p; then \
 	    list2="$$list2 $$p"; \
 	  else :; fi; \
 	done; \
 	test -z "$$list2" || { \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(bfdlibdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(bfdlibdir)" || exit 1; \
-	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(bfdlibdir)'"; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(bfdlibdir)"; \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(libdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(libdir)" || exit 1; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(libdir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(libdir)"; \
 	}
 
-uninstall-bfdlibLTLIBRARIES:
+uninstall-libLTLIBRARIES:
 	@$(NORMAL_UNINSTALL)
-	@list='$(bfdlib_LTLIBRARIES)'; test -n "$(bfdlibdir)" || list=; \
+	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
 	for p in $$list; do \
 	  $(am__strip_dir) \
-	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(bfdlibdir)/$$f'"; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(bfdlibdir)/$$f"; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$f"; \
 	done
 
-clean-bfdlibLTLIBRARIES:
-	-test -z "$(bfdlib_LTLIBRARIES)" || rm -f $(bfdlib_LTLIBRARIES)
-	@list='$(bfdlib_LTLIBRARIES)'; \
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
+	@list='$(lib_LTLIBRARIES)'; \
 	locs=`for p in $$list; do echo $$p; done | \
 	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
 	      sort -u`; \
@@ -1911,27 +1911,27 @@ maintainer-clean-aminfo:
 	  echo " rm -f $$i $$i-[0-9] $$i-[0-9][0-9] $$i_i[0-9] $$i_i[0-9][0-9]"; \
 	  rm -f $$i $$i-[0-9] $$i-[0-9][0-9] $$i_i[0-9] $$i_i[0-9][0-9]; \
 	done
-install-bfdincludeHEADERS: $(bfdinclude_HEADERS)
+install-includeHEADERS: $(include_HEADERS)
 	@$(NORMAL_INSTALL)
-	@list='$(bfdinclude_HEADERS)'; test -n "$(bfdincludedir)" || list=; \
+	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
 	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(bfdincludedir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(bfdincludedir)" || exit 1; \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(includedir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(includedir)" || exit 1; \
 	fi; \
 	for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$$d$$p"; \
 	done | $(am__base_list) | \
 	while read files; do \
-	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(bfdincludedir)'"; \
-	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(bfdincludedir)" || exit $$?; \
+	  echo " $(INSTALL_HEADER) $$files '$(DESTDIR)$(includedir)'"; \
+	  $(INSTALL_HEADER) $$files "$(DESTDIR)$(includedir)" || exit $$?; \
 	done
 
-uninstall-bfdincludeHEADERS:
+uninstall-includeHEADERS:
 	@$(NORMAL_UNINSTALL)
-	@list='$(bfdinclude_HEADERS)'; test -n "$(bfdincludedir)" || list=; \
+	@list='$(include_HEADERS)'; test -n "$(includedir)" || list=; \
 	files=`for p in $$list; do echo $$p; done | sed -e 's|^.*/||'`; \
-	dir='$(DESTDIR)$(bfdincludedir)'; $(am__uninstall_files_from_dir)
+	dir='$(DESTDIR)$(includedir)'; $(am__uninstall_files_from_dir)
 
 # This directory's subdirectories are mostly independent; you can cd
 # into them and run 'make' without going through this Makefile.
@@ -2045,9 +2045,11 @@ all-am: Makefile $(INFO_DEPS) $(LIBRARIES) $(LTLIBRARIES) $(HEADERS) \
 		config.h
 installdirs: installdirs-recursive
 installdirs-am:
-	for dir in "$(DESTDIR)$(bfdlibdir)" "$(DESTDIR)$(infodir)" "$(DESTDIR)$(bfdincludedir)"; do \
+	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(infodir)" "$(DESTDIR)$(includedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-recursive
 install-exec: install-exec-recursive
 install-data: install-data-recursive
 uninstall: uninstall-recursive
@@ -2085,7 +2087,7 @@ maintainer-clean-generic:
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-recursive
 
-clean-am: clean-aminfo clean-bfdlibLTLIBRARIES clean-generic \
+clean-am: clean-aminfo clean-generic clean-libLTLIBRARIES \
 	clean-libtool clean-noinstLIBRARIES clean-noinstLTLIBRARIES \
 	mostlyclean-am
 
@@ -2108,8 +2110,7 @@ info: info-recursive
 
 info-am: $(INFO_DEPS)
 
-install-data-am: install-bfdincludeHEADERS install-bfdlibLTLIBRARIES \
-	install-info-am
+install-data-am: install-includeHEADERS install-info-am
 
 install-dvi: install-dvi-recursive
 
@@ -2128,7 +2129,7 @@ install-dvi-am: $(DVIS)
 	  echo " $(INSTALL_DATA) $$files '$(DESTDIR)$(dvidir)'"; \
 	  $(INSTALL_DATA) $$files "$(DESTDIR)$(dvidir)" || exit $$?; \
 	done
-install-exec-am:
+install-exec-am: install-libLTLIBRARIES
 
 install-html: install-html-recursive
 
@@ -2249,34 +2250,33 @@ ps: ps-recursive
 
 ps-am: $(PSS)
 
-uninstall-am: uninstall-bfdincludeHEADERS uninstall-bfdlibLTLIBRARIES \
-	uninstall-dvi-am uninstall-html-am uninstall-info-am \
-	uninstall-pdf-am uninstall-ps-am
+uninstall-am: uninstall-dvi-am uninstall-html-am \
+	uninstall-includeHEADERS uninstall-info-am \
+	uninstall-libLTLIBRARIES uninstall-pdf-am uninstall-ps-am
 
 .MAKE: $(am__recursive_targets) all check install install-am \
 	install-strip
 
 .PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
-	am--refresh check check-am clean clean-aminfo \
-	clean-bfdlibLTLIBRARIES clean-cscope clean-generic \
-	clean-libtool clean-noinstLIBRARIES clean-noinstLTLIBRARIES \
-	cscope cscopelist-am ctags ctags-am dist-info distclean \
+	am--refresh check check-am clean clean-aminfo clean-cscope \
+	clean-generic clean-libLTLIBRARIES clean-libtool \
+	clean-noinstLIBRARIES clean-noinstLTLIBRARIES cscope \
+	cscopelist-am ctags ctags-am dist-info distclean \
 	distclean-compile distclean-generic distclean-hdr \
 	distclean-libtool distclean-tags dvi dvi-am html html-am \
-	html-local info info-am install install-am \
-	install-bfdincludeHEADERS install-bfdlibLTLIBRARIES \
-	install-data install-data-am install-dvi install-dvi-am \
-	install-exec install-exec-am install-html install-html-am \
-	install-info install-info-am install-man install-pdf \
-	install-pdf-am install-ps install-ps-am install-strip \
-	installcheck installcheck-am installdirs installdirs-am \
-	maintainer-clean maintainer-clean-aminfo \
-	maintainer-clean-generic mostlyclean mostlyclean-aminfo \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
-	uninstall-bfdincludeHEADERS uninstall-bfdlibLTLIBRARIES \
-	uninstall-dvi-am uninstall-html-am uninstall-info-am \
-	uninstall-pdf-am uninstall-ps-am
+	html-local info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am \
+	install-includeHEADERS install-info install-info-am \
+	install-libLTLIBRARIES install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs installdirs-am maintainer-clean \
+	maintainer-clean-aminfo maintainer-clean-generic mostlyclean \
+	mostlyclean-aminfo mostlyclean-compile mostlyclean-generic \
+	mostlyclean-libtool pdf pdf-am ps ps-am tags tags-am uninstall \
+	uninstall-am uninstall-dvi-am uninstall-html-am \
+	uninstall-includeHEADERS uninstall-info-am \
+	uninstall-libLTLIBRARIES uninstall-pdf-am uninstall-ps-am
 
 .PRECIOUS: Makefile
 
@@ -2520,10 +2520,6 @@ doc/bfdver.texi: $(srcdir)/Makefile.in
 	if test -n "$(REPORT_BUGS_TEXI)"; then \
 	  echo "@set BUGURL $(REPORT_BUGS_TEXI)" >> $@; \
 	fi
-
-# We want install to imply install-info as per GNU standards, despite the
-# cygnus option.
-install: install-info
 
 html-local: doc/bfd/index.html
 doc/bfd/index.html: doc/bfd.texi $(bfd_TEXINFOS) doc/$(am__dirstamp)
