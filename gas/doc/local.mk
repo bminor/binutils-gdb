@@ -101,10 +101,6 @@ CPU_DOCS = \
 	%D%/c-z80.texi \
 	%D%/c-z8k.texi
 
-# We want install to imply install-info as per GNU standards, despite the
-# cygnus option.
-install-data-local: install-info
-
 # This one isn't ready for prime time yet.  Not even a little bit.
 
 noinst_TEXINFOS = %D%/internals.texi
