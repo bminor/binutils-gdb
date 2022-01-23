@@ -1244,21 +1244,27 @@ rust_subscript (struct type *expect_type, struct expression *exp,
   return result;
 }
 
-/* A helper function for UNOP_IND.  */
+namespace expr
+{
 
 struct value *
-eval_op_rust_ind (struct type *expect_type, struct expression *exp,
-		  enum noside noside,
-		  enum exp_opcode opcode,
-		  struct value *value)
+rust_unop_ind_operation::evaluate (struct type *expect_type,
+				   struct expression *exp,
+				   enum noside noside)
 {
-  gdb_assert (noside == EVAL_NORMAL);
+  if (noside != EVAL_NORMAL)
+    return unop_ind_operation::evaluate (expect_type, exp, noside);
+
+  struct value *value = std::get<0> (m_storage)->evaluate (nullptr, exp,
+							   noside);
   struct value *trait_ptr = rust_get_trait_object_pointer (value);
   if (trait_ptr != NULL)
     value = trait_ptr;
 
   return value_ind (value);
 }
+
+} /* namespace expr */
 
 /* A helper function for UNOP_COMPLEMENT.  */
 
@@ -1302,13 +1308,17 @@ eval_op_rust_array (struct type *expect_type, struct expression *exp,
     }
 }
 
-/* A helper function for STRUCTOP_ANONYMOUS.  */
+namespace expr
+{
 
 struct value *
-eval_op_rust_struct_anon (struct type *expect_type, struct expression *exp,
-			  enum noside noside,
-			  int field_number, struct value *lhs)
+rust_struct_anon::evaluate (struct type *expect_type,
+			    struct expression *exp,
+			    enum noside noside)
 {
+  value *lhs = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  int field_number = std::get<0> (m_storage);
+
   struct type *type = value_type (lhs);
 
   if (type->code () == TYPE_CODE_STRUCT)
@@ -1368,13 +1378,14 @@ eval_op_rust_struct_anon (struct type *expect_type, struct expression *exp,
 tuple structs, and tuple-like enum variants"));
 }
 
-/* A helper function for STRUCTOP_STRUCT.  */
-
 struct value *
-eval_op_rust_structop (struct type *expect_type, struct expression *exp,
-		       enum noside noside,
-		       struct value *lhs, const char *field_name)
+rust_structop::evaluate (struct type *expect_type,
+			 struct expression *exp,
+			 enum noside noside)
 {
+  value *lhs = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  const char *field_name = std::get<1> (m_storage).c_str ();
+
   struct value *result;
   struct type *type = value_type (lhs);
   if (type->code () == TYPE_CODE_STRUCT && rust_enum_p (type))
@@ -1415,9 +1426,6 @@ eval_op_rust_structop (struct type *expect_type, struct expression *exp,
     result = value_zero (value_type (result), VALUE_LVAL (result));
   return result;
 }
-
-namespace expr
-{
 
 value *
 rust_aggregate_operation::evaluate (struct type *expect_type,
