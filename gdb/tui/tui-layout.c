@@ -118,7 +118,7 @@ tui_apply_current_layout ()
 void
 tui_adjust_window_height (struct tui_win_info *win, int new_height)
 {
-  applied_layout->adjust_size (win->name (), new_height);
+  applied_layout->set_height (win->name (), new_height);
 }
 
 /* Set the current layout to LAYOUT.  */
@@ -570,7 +570,7 @@ tui_layout_split::set_weights_from_heights ()
 /* See tui-layout.h.  */
 
 tui_adjust_result
-tui_layout_split::adjust_size (const char *name, int new_height)
+tui_layout_split::set_height (const char *name, int new_height)
 {
   /* Look through the children.  If one is a layout holding the named
      window, we're done; or if one actually is the named window,
@@ -579,7 +579,7 @@ tui_layout_split::adjust_size (const char *name, int new_height)
   for (int i = 0; i < m_splits.size (); ++i)
     {
       tui_adjust_result adjusted
-	= m_splits[i].layout->adjust_size (name, new_height);
+	= m_splits[i].layout->set_height (name, new_height);
       if (adjusted == HANDLED)
 	return HANDLED;
       if (adjusted == FOUND)

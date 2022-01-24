@@ -75,9 +75,9 @@ public:
     return nullptr;
   }
 
-  /* Adjust the size of the window named NAME to NEW_HEIGHT, updating
+  /* Set the height of the window named NAME to NEW_HEIGHT, updating
      the sizes of the other windows around it.  */
-  virtual tui_adjust_result adjust_size (const char *name, int new_height) = 0;
+  virtual tui_adjust_result set_height (const char *name, int new_height) = 0;
 
   /* Remove some windows from the layout, leaving the command window
      and the window being passed in here.  */
@@ -127,7 +127,7 @@ public:
     return m_contents.c_str ();
   }
 
-  tui_adjust_result adjust_size (const char *name, int new_height) override
+  tui_adjust_result set_height (const char *name, int new_height) override
   {
     return m_contents == name ? FOUND : NOT_FOUND;
   }
@@ -192,7 +192,7 @@ public:
 
   void apply (int x, int y, int width, int height) override;
 
-  tui_adjust_result adjust_size (const char *name, int new_height) override;
+  tui_adjust_result set_height (const char *name, int new_height) override;
 
   bool top_boxed_p () const override;
 
