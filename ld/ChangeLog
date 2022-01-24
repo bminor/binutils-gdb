@@ -1,3 +1,8 @@
+2022-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated Bulgarian translation.
+	* po/uk.po: Updated Ukranian translation.
+
 2022-01-22  Alexander von Gluck IV  <kallisti5@unixzen.com>
 
 	* configure.tgt (arm-haiku): Fix typo.
