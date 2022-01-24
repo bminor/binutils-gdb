@@ -1,3 +1,8 @@
+2022-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/ro.po: Updated Romanian translation.
+	* po/uk.po: Updated Ukranian translation.
+
 2022-01-22  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.
