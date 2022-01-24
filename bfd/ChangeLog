@@ -1,3 +1,7 @@
+2022-01-24  Roland McGrath  <mcgrathr@google.com>
+
+	* doc/local.mk (%D%/bfdver.texi): Add mkdir command.
+
 2022-01-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

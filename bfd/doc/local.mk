@@ -127,6 +127,7 @@ REGEN_TEXI = \
 
 %D%/bfdver.texi: $(srcdir)/Makefile.in
 	$(AM_V_GEN)\
+	$(MKDIR_P) $(@D); \
 	echo "@set VERSION $(VERSION)" > $@; \
 	if test -n "$(PKGVERSION)"; then \
 	  echo "@set VERSION_PACKAGE $(PKGVERSION)" >> $@; \
