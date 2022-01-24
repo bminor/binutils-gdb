@@ -29114,6 +29114,28 @@ Positive counts increase the height, while negative counts decrease
 it.  The @var{name} parameter can be the name of any currently visible
 window.  The names of the currently visible windows can be discovered
 using @kbd{info win} (@pxref{info_win_command,,info win}).
+
+The set of currently visible windows must always fill the terminal,
+and so, it is only possible to resize on window if there are other
+visible windows that can either give or receive the extra terminal
+space.
+
+@kindex tui window width
+@kindex winwidth
+@item tui window width @var{name} +@var{count}
+@itemx tui window width @var{name} -@var{count}
+@itemx winwidth @var{name} +@var{count}
+@itemx winwidth @var{name} -@var{count}
+Change the width of the window @var{name} by @var{count} columns.
+Positive counts increase the width, while negative counts decrease it.
+The @var{name} parameter can be the name of any currently visible
+window.  The names of the currently visible windows can be discovered
+using @code{info win} (@pxref{info_win_command,,info win}).
+
+The set of currently visible windows must always fill the terminal,
+and so, it is only possible to resize on window if there are other
+visible windows that can either give or receive the extra terminal
+space.
 @end table
 
 @node TUI Configuration

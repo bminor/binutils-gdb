@@ -148,6 +148,12 @@ tui window height
   and 'winheight' tui commands respectively.  The old names still
   exist as aliases to these new commands.
 
+tui window width
+winwidth
+  The new command 'tui window width', and the alias 'winwidth' allow
+  the width of a tui window to be adjusted when windows are laid out
+  in horizontal mode.
+
 * Changed commands
 
 print

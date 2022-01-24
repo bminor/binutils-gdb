@@ -79,6 +79,10 @@ public:
      the sizes of the other windows around it.  */
   virtual tui_adjust_result set_height (const char *name, int new_height) = 0;
 
+  /* Set the width of the window named NAME to NEW_WIDTH, updating
+     the sizes of the other windows around it.  */
+  virtual tui_adjust_result set_width (const char *name, int new_width) = 0;
+
   /* Remove some windows from the layout, leaving the command window
      and the window being passed in here.  */
   virtual void remove_windows (const char *name) = 0;
@@ -128,6 +132,11 @@ public:
   }
 
   tui_adjust_result set_height (const char *name, int new_height) override
+  {
+    return m_contents == name ? FOUND : NOT_FOUND;
+  }
+
+  tui_adjust_result set_width (const char *name, int new_width) override
   {
     return m_contents == name ? FOUND : NOT_FOUND;
   }
@@ -192,7 +201,17 @@ public:
 
   void apply (int x, int y, int width, int height) override;
 
-  tui_adjust_result set_height (const char *name, int new_height) override;
+  tui_adjust_result set_height (const char *name, int new_height) override
+  {
+    /* Pass false as the final argument to indicate change of height.  */
+    return set_size (name, new_height, false);
+  }
+
+  tui_adjust_result set_width (const char *name, int new_width) override
+  {
+    /* Pass true as the final argument to indicate change of width.  */
+    return set_size (name, new_width, true);
+  }
 
   bool top_boxed_p () const override;
 
@@ -216,6 +235,15 @@ protected:
   void get_sizes (bool height, int *min_value, int *max_value) override;
 
 private:
+
+  /* Used to implement set_height and set_width member functions.  When
+     SET_WIDTH_P is true, set the width, otherwise, set the height of the
+     window named NAME to NEW_SIZE, updating the sizes of the other windows
+     around it as needed.  The result indicates if the window NAME was
+     found and had its size adjusted, was found but was not adjusted, or
+     was not found at all.  */
+  tui_adjust_result set_size (const char *name, int new_size,
+			      bool set_width_p);
 
   /* Set the weights from the current heights (when m_vertical is true) or
      widths (when m_vertical is false).  */
@@ -265,6 +293,10 @@ extern void tui_apply_current_layout ();
 /* Adjust the window height of WIN to NEW_HEIGHT.  */
 extern void tui_adjust_window_height (struct tui_win_info *win,
 				      int new_height);
+
+/* Adjust the window width of WIN to NEW_WIDTH.  */
+extern void tui_adjust_window_width (struct tui_win_info *win,
+				     int new_width);
 
 /* The type of a function that is used to create a TUI window.  */
 

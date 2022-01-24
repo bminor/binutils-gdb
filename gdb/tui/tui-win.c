@@ -842,10 +842,21 @@ tui_set_tab_width_command (const char *arg, int from_tty)
     }
 }
 
+/* Helper function for the user commands to adjust a window's width or
+   height.  The ARG string contains the command line arguments from the
+   user, which should give the name of a window, and how to adjust the
+   size.
 
-/* Set the height of the specified window.  */
+   When SET_WIDTH_P is true the width of the window is adjusted based on
+   ARG, and when SET_WIDTH_P is false, the height of the window is adjusted
+   based on ARG.
+
+   On invalid input, or if the size can't be adjusted as requested, then an
+   error is thrown, otherwise, the window sizes are adjusted, and the
+   windows redrawn.  */
+
 static void
-tui_set_win_height_command (const char *arg, int from_tty)
+tui_set_win_size (const char *arg, bool set_width_p)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -854,7 +865,7 @@ tui_set_win_height_command (const char *arg, int from_tty)
 
   const char *buf = arg;
   const char *buf_ptr = buf;
-  int new_height;
+  int new_size;
   struct tui_win_info *win_info;
 
   buf_ptr = skip_to_space (buf_ptr);
@@ -890,18 +901,51 @@ tui_set_win_height_command (const char *arg, int from_tty)
 	  if (negate)
 	    input_no *= (-1);
 	  if (fixed_size)
-	    new_height = input_no;
+	    new_size = input_no;
 	  else
-	    new_height = win_info->height + input_no;
+	    {
+	      int curr_size;
+	      if (set_width_p)
+		curr_size = win_info->width;
+	      else
+		curr_size = win_info->height;
+	      new_size = curr_size + input_no;
+	    }
 
 	  /* Now change the window's height, and adjust
 	     all other windows around it.  */
-	  tui_adjust_window_height (win_info, new_height);
+	  if (set_width_p)
+	    tui_adjust_window_width (win_info, new_size);
+	  else
+	    tui_adjust_window_height (win_info, new_size);
 	  tui_update_gdb_sizes ();
 	}
       else
-	error (_("Invalid window height specified"));
+	{
+	  if (set_width_p)
+	    error (_("Invalid window width specified"));
+	  else
+	    error (_("Invalid window height specified"));
+	}
     }
+}
+
+/* Implement the 'tui window height' command (alias 'winheight').  */
+
+static void
+tui_set_win_height_command (const char *arg, int from_tty)
+{
+  /* Pass false as the final argument to set the height.  */
+  tui_set_win_size (arg, false);
+}
+
+/* Implement the 'tui window width' command (alias 'winwidth').  */
+
+static void
+tui_set_win_width_command (const char *arg, int from_tty)
+{
+  /* Pass true as the final argument to set the width.  */
+  tui_set_win_size (arg, true);
 }
 
 /* See tui-data.h.  */
@@ -1033,6 +1077,16 @@ Use \"info win\" to see the names of the windows currently being displayed."),
   add_com_alias ("winheight", winheight_cmd, class_tui, 0);
   add_com_alias ("wh", winheight_cmd, class_tui, 0);
   set_cmd_completer (winheight_cmd, winheight_completer);
+
+  cmd_list_element *winwidth_cmd
+    = add_cmd ("width", class_tui, tui_set_win_width_command, _("\
+Set or modify the width of a specified window.\n\
+Usage: tui window width WINDOW-NAME [+ | -] NUM-LINES\n\
+Use \"info win\" to see the names of the windows currently being displayed."),
+	       &tui_window_cmds);
+  add_com_alias ("winwidth", winwidth_cmd, class_tui, 0);
+  set_cmd_completer (winwidth_cmd, winheight_completer);
+
   add_info ("win", tui_all_windows_info,
 	    _("List of all displayed windows.\n\
 Usage: info win"));

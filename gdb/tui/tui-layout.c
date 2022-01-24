@@ -121,6 +121,14 @@ tui_adjust_window_height (struct tui_win_info *win, int new_height)
   applied_layout->set_height (win->name (), new_height);
 }
 
+/* See tui-layout.  */
+
+void
+tui_adjust_window_width (struct tui_win_info *win, int new_width)
+{
+  applied_layout->set_width (win->name (), new_width);
+}
+
 /* Set the current layout to LAYOUT.  */
 
 static void
@@ -571,7 +579,7 @@ tui_layout_split::set_weights_from_sizes ()
 /* See tui-layout.h.  */
 
 tui_adjust_result
-tui_layout_split::set_height (const char *name, int new_height)
+tui_layout_split::set_size (const char *name, int new_size, bool set_width_p)
 {
   /* Look through the children.  If one is a layout holding the named
      window, we're done; or if one actually is the named window,
@@ -579,13 +587,16 @@ tui_layout_split::set_height (const char *name, int new_height)
   int found_index = -1;
   for (int i = 0; i < m_splits.size (); ++i)
     {
-      tui_adjust_result adjusted
-	= m_splits[i].layout->set_height (name, new_height);
+      tui_adjust_result adjusted;
+      if (set_width_p)
+	adjusted = m_splits[i].layout->set_width (name, new_size);
+      else
+	adjusted = m_splits[i].layout->set_height (name, new_size);
       if (adjusted == HANDLED)
 	return HANDLED;
       if (adjusted == FOUND)
 	{
-	  if (!m_vertical)
+	  if (set_width_p ? m_vertical : !m_vertical)
 	    return FOUND;
 	  found_index = i;
 	  break;
@@ -594,12 +605,15 @@ tui_layout_split::set_height (const char *name, int new_height)
 
   if (found_index == -1)
     return NOT_FOUND;
-  if (m_splits[found_index].layout->height == new_height)
+  int curr_size = (set_width_p
+		   ? m_splits[found_index].layout->width
+		   : m_splits[found_index].layout->height);
+  if (curr_size == new_size)
     return HANDLED;
 
   set_weights_from_sizes ();
-  int delta = m_splits[found_index].weight - new_height;
-  m_splits[found_index].weight = new_height;
+  int delta = m_splits[found_index].weight - new_size;
+  m_splits[found_index].weight = new_size;
 
   /* Distribute the "delta" over the next window; but if the next
      window cannot hold it all, keep going until we either find a
@@ -633,7 +647,10 @@ tui_layout_split::set_height (const char *name, int new_height)
 
   if (delta != 0)
     {
-      warning (_("Invalid window height specified"));
+      if (set_width_p)
+	warning (_("Invalid window width specified"));
+      else
+	warning (_("Invalid window height specified"));
       /* Effectively undo any modifications made here.  */
       set_weights_from_sizes ();
     }
