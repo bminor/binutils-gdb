@@ -168,6 +168,13 @@ info win
      manager that temporarily sets the gdb parameter NAME to VALUE,
      then resets it when the context is exited.
 
+  ** The gdb.Value.format_string method now takes a 'styling'
+     argument, which is a boolean.  When true, the returned string can
+     include escape sequences to apply styling.  The styling will only
+     be present if styling is otherwise turned on in GDB (see 'help
+     set styling').  When false, which is the default if the argument
+     is not given, then no styling is applied to the returned string.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on OpenRISC GNU/Linux.

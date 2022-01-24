@@ -639,6 +639,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
       "symbols",		/* See set print symbol on|off.  */
       "unions",			/* See set print union on|off.  */
       "address",		/* See set print address on|off.  */
+      "styling",		/* Should we apply styling.  */
       /* C++ options.  */
       "deref_refs",		/* No corresponding setting.  */
       "actual_objects",		/* See set print object on|off.  */
@@ -683,13 +684,14 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
   PyObject *symbols_obj = NULL;
   PyObject *unions_obj = NULL;
   PyObject *address_obj = NULL;
+  PyObject *styling_obj = Py_False;
   PyObject *deref_refs_obj = NULL;
   PyObject *actual_objects_obj = NULL;
   PyObject *static_members_obj = NULL;
   char *format = NULL;
   if (!gdb_PyArg_ParseTupleAndKeywords (args,
 					kw,
-					"|O!O!O!O!O!O!O!O!O!O!IIIs",
+					"|O!O!O!O!O!O!O!O!O!O!O!IIIs",
 					keywords,
 					&PyBool_Type, &raw_obj,
 					&PyBool_Type, &pretty_arrays_obj,
@@ -698,6 +700,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 					&PyBool_Type, &symbols_obj,
 					&PyBool_Type, &unions_obj,
 					&PyBool_Type, &address_obj,
+					&PyBool_Type, &styling_obj,
 					&PyBool_Type, &deref_refs_obj,
 					&PyBool_Type, &actual_objects_obj,
 					&PyBool_Type, &static_members_obj,
@@ -752,7 +755,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 	}
     }
 
-  string_file stb;
+  string_file stb (PyObject_IsTrue (styling_obj));
 
   try
     {
