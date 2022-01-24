@@ -102,6 +102,10 @@ show debug lin-lwp
   debug linux-nat' and 'show debug linux-nat' should be used
   instead.
 
+info win
+  This command now includes information about the width of the tui
+  windows in its output.
+
 * Python API
 
   ** New function gdb.add_history(), which takes a gdb.Value object
