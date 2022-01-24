@@ -948,6 +948,10 @@ extern void binop_promote (const struct language_defn *language,
 
 extern struct value *access_value_history (int num);
 
+/* Return the number of items in the value history.  */
+
+extern ULONGEST value_history_count ();
+
 extern struct value *value_of_internalvar (struct gdbarch *gdbarch,
 					   struct internalvar *var);
 

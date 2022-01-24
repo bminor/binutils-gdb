@@ -2012,6 +2012,14 @@ gdbpy_add_history (PyObject *self, PyObject *args)
   return nullptr;
 }
 
+/* Return an integer, the number of items in GDB's history.  */
+
+PyObject *
+gdbpy_history_count (PyObject *self, PyObject *args)
+{
+  return gdb_py_object_from_ulongest (value_history_count ()).release ();
+}
+
 /* Return the value of a convenience variable.  */
 PyObject *
 gdbpy_convenience_variable (PyObject *self, PyObject *args)

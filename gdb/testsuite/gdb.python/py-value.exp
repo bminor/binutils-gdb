@@ -647,6 +647,17 @@ proc test_value_sub_classes {} {
 	"check printing of MyValue when initiaized with a type"
 }
 
+# Test the history count.  This must be the first thing called after
+# starting GDB as it depends on there being nothing in the value
+# history.
+proc test_history_count {} {
+    for { set i 0 } { $i < 5 } { incr i } {
+	gdb_test "python print('history count is %d' % gdb.history_count())" \
+	    "history count is $i" "history count is $i"
+	gdb_test "print $i" " = $i"
+    }
+}
+
 # Build C version of executable.  C++ is built later.
 if { [build_inferior "${binfile}" "c"] < 0 } {
     return -1
@@ -658,6 +669,7 @@ clean_restart ${binfile}
 # Skip all tests if Python scripting is not enabled.
 if { [skip_python_tests] } { continue }
 
+test_history_count
 test_value_creation
 test_value_reinit
 test_value_numeric_ops

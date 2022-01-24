@@ -387,6 +387,11 @@ as its result, then placing the value into the history will allow the
 user convenient access to those values via CLI history facilities.
 @end defun
 
+@defun gdb.history_count ()
+Return an integer indicating the number of values in @value{GDBN}'s
+value history (@pxref{Value History}).
+@end defun
+
 @findex gdb.convenience_variable
 @defun gdb.convenience_variable (name)
 Return the value of the convenience variable (@pxref{Convenience

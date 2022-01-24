@@ -1909,6 +1909,14 @@ access_value_history (int num)
   return value_copy (value_history[absnum].get ());
 }
 
+/* See value.h.  */
+
+ULONGEST
+value_history_count ()
+{
+  return value_history.size ();
+}
+
 static void
 show_values (const char *num_exp, int from_tty)
 {

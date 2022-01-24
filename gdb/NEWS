@@ -109,6 +109,9 @@ show debug lin-lwp
      integer, the index of the new item in the history list, is
      returned.
 
+  ** New function gdb.history_count(), which returns the number of
+     values in GDB's value history.
+
   ** New gdb.events.gdb_exiting event.  This event is called with a
      gdb.GdbExitingEvent object which has the read-only attribute
      'exit_code', which contains the value of the GDB exit code.  This

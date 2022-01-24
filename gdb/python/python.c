@@ -2212,6 +2212,8 @@ PyMethodDef python_GdbMethods[] =
     "Get a value from history" },
   { "add_history", gdbpy_add_history, METH_VARARGS,
     "Add a value to the value history list" },
+  { "history_count", gdbpy_history_count, METH_NOARGS,
+    "Return an integer, the number of values in GDB's value history" },
   { "execute", (PyCFunction) execute_gdb_command, METH_VARARGS | METH_KEYWORDS,
     "execute (command [, from_tty] [, to_string]) -> [String]\n\
 Evaluate command, a string, as a gdb CLI command.  Optionally returns\n\
