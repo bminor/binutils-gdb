@@ -6252,9 +6252,9 @@ and so the content should appear to move up.
 
 @defun Window.click (@var{x}, @var{y}, @var{button})
 This is called on a mouse click in this window.  @var{x} and @var{y} are
-the mouse coordinates inside the window (0-based), and @var{button}
-specifies which mouse button was used, whose values can be 1 (left),
-2 (middle), or 3 (right).
+the mouse coordinates inside the window (0-based, from the top left
+corner), and @var{button} specifies which mouse button was used, whose
+values can be 1 (left), 2 (middle), or 3 (right).
 @end defun
 
 @node Python Auto-loading
