@@ -271,7 +271,6 @@ PDFS = doc/bfd.pdf
 PSS = doc/bfd.ps
 HTMLS = doc/bfd.html
 TEXINFOS = doc/bfd.texi
-TEXI2DVI = texi2dvi
 TEXI2PDF = $(TEXI2DVI) --pdf --batch
 MAKEINFOHTML = $(MAKEINFO) --html
 AM_MAKEINFOHTMLFLAGS = $(AM_MAKEINFOFLAGS)
@@ -1304,7 +1303,8 @@ SRCIPROT = $(srcdir)/cache.c $(srcdir)/libbfd.c \
 TEXIDIR = $(srcdir)/../texinfo/fsf
 info_TEXINFOS = doc/bfd.texi
 doc_bfd_TEXINFOS = $(DOCFILES) doc/bfdsumm.texi
-AM_MAKEINFOFLAGS = --no-split
+AM_MAKEINFOFLAGS = --no-split -I "$(srcdir)/doc" -I doc
+TEXI2DVI = texi2dvi -I "$(srcdir)/doc" -I doc
 MKDOC = doc/chew$(EXEEXT_FOR_BUILD)
 
 # We can't replace these rules with an implicit rule, because
@@ -2505,7 +2505,7 @@ doc/%.stamp: $(srcdir)/%.c $(srcdir)/doc/doc.str $(MKDOC) doc/$(am__dirstamp)
 	$(AM_V_GEN)$(REGEN_TEXI)
 
 # Avoid the %.stamp generating a builddir/bfd.texi that overrides the srcdir/.
-doc/bfd.texi doc/bfd.stamp: doc/$(am__dirstamp) ; $(AM_V_at)touch $@
+doc/bfd.stamp: doc/$(am__dirstamp) ; $(AM_V_at)touch $@
 
 # We use bfdt.texi, rather than bfd.texi, to avoid conflicting with
 # bfd.texi on an 8.3 filesystem.
@@ -2526,7 +2526,7 @@ doc/bfdver.texi: $(srcdir)/Makefile.in
 html-local: doc/bfd/index.html
 doc/bfd/index.html: doc/bfd.texi $(bfd_TEXINFOS) doc/$(am__dirstamp)
 	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
-	  --split=node -I$(srcdir) -o doc/bfd $(srcdir)/bfd.texi
+	  --split=node -o doc/bfd $(srcdir)/doc/bfd.texi
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

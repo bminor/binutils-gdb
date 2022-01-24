@@ -77,7 +77,8 @@ TEXIDIR = $(srcdir)/../texinfo/fsf
 info_TEXINFOS = %D%/bfd.texi
 %C%_bfd_TEXINFOS = $(DOCFILES) %D%/bfdsumm.texi
 
-AM_MAKEINFOFLAGS = --no-split
+AM_MAKEINFOFLAGS = --no-split -I "$(srcdir)/%D%" -I %D%
+TEXI2DVI = texi2dvi -I "$(srcdir)/%D%" -I %D%
 
 MKDOC = %D%/chew$(EXEEXT_FOR_BUILD)
 
@@ -118,7 +119,7 @@ REGEN_TEXI = \
 	$(AM_V_GEN)$(REGEN_TEXI)
 
 # Avoid the %.stamp generating a builddir/bfd.texi that overrides the srcdir/.
-%D%/bfd.texi %D%/bfd.stamp: %D%/$(am__dirstamp) ; $(AM_V_at)touch $@
+%D%/bfd.stamp: %D%/$(am__dirstamp) ; $(AM_V_at)touch $@
 
 # We use bfdt.texi, rather than bfd.texi, to avoid conflicting with
 # bfd.texi on an 8.3 filesystem.
@@ -148,6 +149,6 @@ MAINTAINERCLEANFILES += $(DOCFILES)
 html-local: %D%/bfd/index.html
 %D%/bfd/index.html: %D%/bfd.texi $(bfd_TEXINFOS) %D%/$(am__dirstamp)
 	$(AM_V_at)$(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) \
-	  --split=node -I$(srcdir) -o %D%/bfd $(srcdir)/bfd.texi
+	  --split=node -o %D%/bfd $(srcdir)/%D%/bfd.texi
 
 MAINTAINERCLEANFILES += %D%/bfd.info
