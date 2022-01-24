@@ -140,6 +140,14 @@ show ada source-charset
   values for this follow the values that can be passed to the GNAT
   compiler via the '-gnati' option.  The default is ISO-8859-1.
 
+tui layout
+tui focus
+tui refresh
+tui window height
+  These are the new names for the old 'layout', 'focus', 'refresh',
+  and 'winheight' tui commands respectively.  The old names still
+  exist as aliases to these new commands.
+
 * Changed commands
 
 print
@@ -170,6 +178,13 @@ show debug lin-lwp
 info win
   This command now includes information about the width of the tui
   windows in its output.
+
+layout
+focus
+refresh
+winheight
+  These commands are now aliases for the 'tui layout', 'tui focus',
+  'tui refresh', and 'tui window height' commands respectively.
 
 * GDB's Ada parser now supports an extension for specifying the exact
   byte contents of a floating-point literal.  This can be useful for

@@ -29005,8 +29005,10 @@ status and command window being beneath these, filling the entire
 width of the terminal.  Because they have weight 2, the source and
 assembly windows will be twice the height of the command window.
 
-@item layout @var{name}
+@kindex tui layout
 @kindex layout
+@item tui layout @var{name}
+@itemx layout @var{name}
 Changes which TUI windows are displayed.  The @var{name} parameter
 controls which layout is shown.  It can be either one of the built-in
 layout names, or the name of a layout defined by the user using
@@ -29036,8 +29038,9 @@ windows.  When in @code{asm} or @code{split} layout display the
 register, assembler, and command windows.
 @end table
 
-@item focus @var{name}
 @kindex focus
+@item tui focus @var{name}
+@itemx focus @var{name}
 Changes which TUI window is currently active for scrolling.  The
 @var{name} parameter can be any of the following:
 
@@ -29061,8 +29064,10 @@ Make the register window active for scrolling.
 Make the command window active for scrolling.
 @end table
 
-@item refresh
+@kindex tui refresh
 @kindex refresh
+@item tui refresh
+@itemx refresh
 Refresh the screen.  This is similar to typing @kbd{C-L}.
 
 @item tui reg @var{group}
@@ -29098,9 +29103,12 @@ Display all registers.
 @kindex update
 Update the source window and the current execution point.
 
-@item winheight @var{name} +@var{count}
-@itemx winheight @var{name} -@var{count}
+@kindex tui window height
 @kindex winheight
+@item tui window height @var{name} +@var{count}
+@itemx tui window height @var{name} -@var{count}
+@itemx winheight @var{name} +@var{count}
+@itemx winheight @var{name} -@var{count}
 Change the height of the window @var{name} by @var{count} lines.
 Positive counts increase the height, while negative counts decrease
 it.  The @var{name} parameter can be the name of any currently visible

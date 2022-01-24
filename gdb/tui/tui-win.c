@@ -977,6 +977,18 @@ parse_scrolling_args (const char *arg,
     }
 }
 
+/* The list of 'tui window' sub-commands.  */
+
+static cmd_list_element *tui_window_cmds = nullptr;
+
+/* Called to implement 'tui window'.  */
+
+static void
+tui_window_command (const char *args, int from_tty)
+{
+  help_list (tui_window_cmds, "tui window ", all_commands, gdb_stdout);
+}
+
 /* Function to initialize gdb commands, for tui window
    manipulation.  */
 
@@ -995,8 +1007,11 @@ _initialize_tui_win ()
 			  &tui_setlist, &tui_showlist,
 			  &setlist, &showlist);
 
-  add_com ("refresh", class_tui, tui_refresh_all_command,
-	   _("Refresh the terminal display."));
+  cmd_list_element *refresh_cmd
+    = add_cmd ("refresh", class_tui, tui_refresh_all_command,
+	       _("Refresh the terminal display."),
+	       tui_get_cmd_list ());
+  add_com_alias ("refresh", refresh_cmd, class_tui, 0);
 
   cmd_list_element *tabset_cmd
     = add_com ("tabset", class_tui, tui_set_tab_width_command, _("\
@@ -1004,21 +1019,30 @@ Set the width (in characters) of tab stops.\n\
 Usage: tabset N"));
   deprecate_cmd (tabset_cmd, "set tui tab-width");
 
+  /* Setup the 'tui window' list of command.  */
+  add_prefix_cmd ("window", class_tui, tui_window_command,
+		  _("Text User Interface window commands."),
+		  &tui_window_cmds, 1, tui_get_cmd_list ());
+
   cmd_list_element *winheight_cmd
-    = add_com ("winheight", class_tui, tui_set_win_height_command, _("\
+    = add_cmd ("height", class_tui, tui_set_win_height_command, _("\
 Set or modify the height of a specified window.\n\
-Usage: winheight WINDOW-NAME [+ | -] NUM-LINES\n\
-Use \"info win\" to see the names of the windows currently being displayed."));
+Usage: tui window height WINDOW-NAME [+ | -] NUM-LINES\n\
+Use \"info win\" to see the names of the windows currently being displayed."),
+	       &tui_window_cmds);
+  add_com_alias ("winheight", winheight_cmd, class_tui, 0);
   add_com_alias ("wh", winheight_cmd, class_tui, 0);
   set_cmd_completer (winheight_cmd, winheight_completer);
   add_info ("win", tui_all_windows_info,
 	    _("List of all displayed windows.\n\
 Usage: info win"));
   cmd_list_element *focus_cmd
-    = add_com ("focus", class_tui, tui_set_focus_command, _("\
+    = add_cmd ("focus", class_tui, tui_set_focus_command, _("\
 Set focus to named window or next/prev window.\n\
-Usage: focus [WINDOW-NAME | next | prev]\n\
-Use \"info win\" to see the names of the windows currently being displayed."));
+Usage: tui focus [WINDOW-NAME | next | prev]\n\
+Use \"info win\" to see the names of the windows currently being displayed."),
+	       tui_get_cmd_list ());
+  add_com_alias ("focus", focus_cmd, class_tui, 0);
   add_com_alias ("fs", focus_cmd, class_tui, 0);
   set_cmd_completer (focus_cmd, focus_completer);
   add_com ("+", class_tui, tui_scroll_forward_command, _("\
