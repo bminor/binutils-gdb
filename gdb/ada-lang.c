@@ -8786,7 +8786,13 @@ ada_enum_name (const char *name)
 
       if (name[1] == 'U' || name[1] == 'W')
 	{
-	  if (sscanf (name + 2, "%x", &v) != 1)
+	  int offset = 2;
+	  if (name[1] == 'W' && name[2] == 'W')
+	    {
+	      /* Also handle the QWW case.  */
+	      ++offset;
+	    }
+	  if (sscanf (name + offset, "%x", &v) != 1)
 	    return name;
 	}
       else if (((name[1] >= '0' && name[1] <= '9')
@@ -8802,9 +8808,11 @@ ada_enum_name (const char *name)
       if (isascii (v) && isprint (v))
 	storage = string_printf ("'%c'", v);
       else if (name[1] == 'U')
-	storage = string_printf ("[\"%02x\"]", v);
+	storage = string_printf ("'[\"%02x\"]'", v);
+      else if (name[2] != 'W')
+	storage = string_printf ("'[\"%04x\"]'", v);
       else
-	storage = string_printf ("[\"%04x\"]", v);
+	storage = string_printf ("'[\"%06x\"]'", v);
 
       return storage.c_str ();
     }
