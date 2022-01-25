@@ -1406,7 +1406,9 @@
 #define AT_SUN_PLATFORM 2008    /* Platform name string.  */
 #define AT_SUN_CAP_HW1	2009	/* Machine dependent hints about
 				   processor capabilities.  */
+#ifndef AT_SUN_HWCAP
 #define AT_SUN_HWCAP	AT_SUN_CAP_HW1 /* For backward compat only.  */
+#endif
 #define AT_SUN_IFLUSH   2010    /* Should flush icache? */
 #define AT_SUN_CPU      2011    /* CPU name string.  */
 #define AT_SUN_EMUL_ENTRY 2012	/* COFF entry point address.  */
