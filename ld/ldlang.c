@@ -7022,6 +7022,7 @@ lang_symbol_tweaks (void)
 	    h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
 	  h->def_regular = 1;
 	  h->root.linker_def = 1;
+	  h->root.rel_from_abs = 1;
 	}
     }
 }

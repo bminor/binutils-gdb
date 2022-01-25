@@ -1619,7 +1619,6 @@ ldelf_before_allocation (char *audit, char *depaudit,
 		      sizeof ehdr_start_save_u);
 	      ehdr_start->type = bfd_link_hash_defined;
 	      /* It will be converted to section-relative later.  */
-	      ehdr_start->rel_from_abs = 1;
 	      ehdr_start->u.def.section = bfd_abs_section_ptr;
 	      ehdr_start->u.def.value = 0;
 	    }
