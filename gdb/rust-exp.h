@@ -197,6 +197,33 @@ public:
   { return OP_AGGREGATE; }
 };
 
+/* Rust parenthesized operation.  This is needed to distinguish
+   between 'obj.f()', which is a method call, and '(obj.f)()', which
+   is a call of a function-valued field 'f'.  */
+class rust_parenthesized_operation
+  : public tuple_holding_operation<operation_up>
+{
+public:
+
+  explicit rust_parenthesized_operation (operation_up op)
+    : tuple_holding_operation (std::move (op))
+  {
+  }
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    return std::get<0> (m_storage)->evaluate (expect_type, exp, noside);
+  }
+
+  enum exp_opcode opcode () const override
+  {
+    /* A lie but this isn't worth introducing a new opcode for.  */
+    return UNOP_PLUS;
+  }
+};
+
 } /* namespace expr */
 
 #endif /* RUST_EXP_H */

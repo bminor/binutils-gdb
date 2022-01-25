@@ -1105,7 +1105,7 @@ rust_parser::parse_tuple ()
     {
       /* Parenthesized expression.  */
       lex ();
-      return expr;
+      return make_operation<rust_parenthesized_operation> (std::move (expr));
     }
 
   std::vector<operation_up> ops;
