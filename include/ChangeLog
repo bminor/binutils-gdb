@@ -1,3 +1,8 @@
+2022-01-25  Klaus Ziegler  <klausz@haus-gisela.de>
+
+	PR 28816
+	* elf/common.h (AT_SUN_HWCAP): Make definition conditional.
+
 2022-01-22  Nick Clifton  <nickc@redhat.com>
 
 	* 2.38 release branch created.
