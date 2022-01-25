@@ -2242,7 +2242,7 @@ varobj_value_get_print_value (struct value *value,
     /* All other cases.  */
     common_val_print (value, &stb, 0, &opts, current_language);
 
-  return std::move (stb.string ());
+  return stb.release ();
 }
 
 bool

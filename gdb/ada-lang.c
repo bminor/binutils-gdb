@@ -6915,7 +6915,7 @@ type_as_string (struct type *type)
 
   type_print (type, "", &tmp_stream, -1);
 
-  return std::move (tmp_stream.string ());
+  return tmp_stream.release ();
 }
 
 /* Given a type TYPE, look up the type of the component of type named NAME.

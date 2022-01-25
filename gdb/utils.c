@@ -1986,7 +1986,7 @@ vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
       /* Print the message.  */
       string_file sfile;
       cli_ui_out (&sfile, 0).vmessage (ui_file_style (), format, args);
-      std::string linebuffer = std::move (sfile.string ());
+      const std::string &linebuffer = sfile.string ();
       fputs_unfiltered (linebuffer.c_str (), stream);
 
       size_t len = linebuffer.length ();

@@ -295,8 +295,7 @@ save_completion_result (const test_options_opts &opts, bool res,
 
       stream.puts ("1 ");
       opts.dump (&stream, text);
-      maintenance_test_options_command_completion_text
-	= std::move (stream.string ());
+      maintenance_test_options_command_completion_text = stream.release ();
     }
   else
     {

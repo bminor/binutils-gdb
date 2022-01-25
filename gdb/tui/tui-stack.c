@@ -181,12 +181,14 @@ tui_locator_window::make_status_line () const
       string.puts (pc_buf);
     }
 
-  if (string.size () < status_size)
-    string.puts (n_spaces (status_size - string.size ()));
-  else if (string.size () > status_size)
-    string.string ().erase (status_size, string.size ());
+  std::string string_val = string.release ();
 
-  return std::move (string.string ());
+  if (string.size () < status_size)
+    string_val.append (status_size - string.size (), ' ');
+  else if (string.size () > status_size)
+    string_val.erase (status_size, string.size ());
+
+  return string_val;
 }
 
 /* Get a printable name for the function at the address.  The symbol

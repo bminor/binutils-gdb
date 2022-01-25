@@ -160,17 +160,19 @@ public:
   /* string_file-specific public API.  */
 
   /* Accesses the std::string containing the entire output collected
-     so far.
+     so far.  */
+  const std::string &string () { return m_string; }
 
-     Returns a non-const reference so that it's easy to move the
-     string contents out of the string_file.  E.g.:
+  /* Return an std::string containing the entire output collected so far.
 
-      string_file buf;
-      buf.printf (....);
-      buf.printf (....);
-      return std::move (buf.string ());
-  */
-  std::string &string () { return m_string; }
+     The internal buffer is cleared, such that it's ready to build a new
+     string.  */
+  std::string release ()
+  {
+    std::string ret = std::move (m_string);
+    m_string.clear ();
+    return ret;
+  }
 
   /* Provide a few convenience methods with the same API as the
      underlying std::string.  */

@@ -100,7 +100,7 @@ tui_register_format (struct frame_info *frame, int regnum)
   gdbarch_print_registers_info (gdbarch, &stream, frame, regnum, 1);
 
   /* Remove the possible \n.  */
-  std::string &str = stream.string ();
+  std::string str = stream.release ();
   if (!str.empty () && str.back () == '\n')
     str.resize (str.size () - 1);
 

@@ -406,7 +406,7 @@ type_to_string (struct type *type)
       string_file stb;
 
       type_print (type, "", &stb, -1);
-      return std::move (stb.string ());
+      return stb.release ();
     }
   catch (const gdb_exception &except)
     {

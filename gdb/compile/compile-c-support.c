@@ -635,7 +635,7 @@ public:
       PopUserExpressionPolicy::pop_user_expression (&buf);
 
     AddCodeFooterPolicy::add_code_footer (m_instance->scope (), &buf);
-    return buf.string ();
+    return buf.release ();
   }
 
 private:

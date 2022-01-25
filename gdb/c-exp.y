@@ -1780,11 +1780,11 @@ oper:	OPERATOR NEW
 	|	OPERATOR OBJC_LBRAC ']'
 			{ $$ = operator_stoken ("[]"); }
 	|	OPERATOR conversion_type_id
-			{ string_file buf;
-
+			{
+			  string_file buf;
 			  c_print_type ($2, NULL, &buf, -1, 0,
 					&type_print_raw_options);
-			  std::string name = std::move (buf.string ());
+			  std::string name = buf.release ();
 
 			  /* This also needs canonicalization.  */
 			  gdb::unique_xmalloc_ptr<char> canon

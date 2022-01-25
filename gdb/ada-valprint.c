@@ -307,7 +307,7 @@ ada_print_floating (const gdb_byte *valaddr, struct type *type,
 
   print_floating (valaddr, type, &tmp_stream);
 
-  std::string &s = tmp_stream.string ();
+  std::string s = tmp_stream.release ();
   size_t skip_count = 0;
 
   /* Modify for Ada rules.  */

@@ -447,7 +447,7 @@ explicit_to_string_internal (bool as_linespec,
 		  explicit_loc->line_offset.offset);
     }
 
-  return std::move (buf.string ());
+  return buf.release ();
 }
 
 /* See description in location.h.  */
