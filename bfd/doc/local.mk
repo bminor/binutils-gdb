@@ -118,8 +118,9 @@ REGEN_TEXI = \
 %D%/%.stamp: $(srcdir)/%.c $(srcdir)/%D%/doc.str $(MKDOC) %D%/$(am__dirstamp)
 	$(AM_V_GEN)$(REGEN_TEXI)
 
-# Avoid the %.stamp generating a builddir/bfd.texi that overrides the srcdir/.
-%D%/bfd.stamp: %D%/$(am__dirstamp) ; $(AM_V_at)touch $@
+# Avoid the %.stamp generating a builddir/bfd.texi that overrides the
+# srcdir/ as well as regenerating doc/bfd.info for each make run.
+%D%/bfd.stamp: $(srcdir)/%D%/bfd.texi ; $(AM_V_at)touch $@
 
 # We use bfdt.texi, rather than bfd.texi, to avoid conflicting with
 # bfd.texi on an 8.3 filesystem.
