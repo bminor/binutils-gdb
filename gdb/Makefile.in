@@ -2456,20 +2456,19 @@ po/$(PACKAGE).pot: force
 	  rm -f $@.tmp && \
 	  mv $@.new $@
 %.c: %.l
-	$(ECHO_LEX) $(FLEX) -t $<  \
-	    | sed -e '/extern.*malloc/d' \
-	        -e '/extern.*realloc/d' \
-	        -e '/extern.*free/d' \
-	        -e '/include.*malloc.h/d' \
-	        -e 's/\([^x]\)malloc/\1xmalloc/g' \
-	        -e 's/\([^x]\)realloc/\1xrealloc/g' \
-	        -e 's/\([ \t;,(]\)free\([ \t]*[&(),]\)/\1xfree\2/g' \
-	        -e 's/\([ \t;,(]\)free$$/\1xfree/g' \
-		-e 's/yy_flex_xrealloc/yyxrealloc/g' \
-	      > $@.new && \
-	    mv $@.new $@
-
-.PRECIOUS: ada-lex.c
+	$(ECHO_LEX) $(FLEX) -t $< > $@.tmp || (rm -f $@.tmp; false)
+	@sed -e '/extern.*malloc/d' \
+	     -e '/extern.*realloc/d' \
+	     -e '/extern.*free/d' \
+	     -e '/include.*malloc.h/d' \
+	     -e 's/\([^x]\)malloc/\1xmalloc/g' \
+	     -e 's/\([^x]\)realloc/\1xrealloc/g' \
+	     -e 's/\([ \t;,(]\)free\([ \t]*[&(),]\)/\1xfree\2/g' \
+	     -e 's/\([ \t;,(]\)free$$/\1xfree/g' \
+	     -e 's/yy_flex_xrealloc/yyxrealloc/g' \
+	     < $@.tmp > $@.new && \
+	     rm -f $@.tmp && \
+	     mv $@.new $@
 
 # XML rules
 
