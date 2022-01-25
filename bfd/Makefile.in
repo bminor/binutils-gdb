@@ -2514,6 +2514,7 @@ doc/bfdt.stamp: $(srcdir)/bfd.c $(srcdir)/doc/doc.str $(MKDOC) doc/$(am__dirstam
 
 doc/bfdver.texi: $(srcdir)/Makefile.in
 	$(AM_V_GEN)\
+	$(MKDIR_P) $(@D); \
 	echo "@set VERSION $(VERSION)" > $@; \
 	if test -n "$(PKGVERSION)"; then \
 	  echo "@set VERSION_PACKAGE $(PKGVERSION)" >> $@; \
