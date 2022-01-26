@@ -179,6 +179,60 @@ proc test_insert_characters { } {
     } 0 1
 }
 
+proc test_pan_down { } {
+    Term::_move_cursor 1 2
+    Term::_csi_S
+    check "pan down, default arg" {
+	"ijklmnop"
+	"qrstuvwx"
+	"yz01234 "
+	"        "
+    } 1 2
+
+    Term::_csi_S 2
+    check "pan down, explicit arg" {
+	"yz01234 "
+	"        "
+	"        "
+	"        "
+    } 1 2
+
+    Term::_csi_S 100
+    check "pan down, excessive arg" {
+	"        "
+	"        "
+	"        "
+	"        "
+    } 1 2
+}
+
+proc test_pan_up { } {
+    Term::_move_cursor 1 2
+    Term::_csi_T
+    check "pan down, default arg" {
+	"        "
+	"abcdefgh"
+	"ijklmnop"
+	"qrstuvwx"
+    } 1 2
+
+    Term::_csi_T 2
+    check "pan down, explicit arg" {
+	"        "
+	"        "
+	"        "
+	"abcdefgh"
+    } 1 2
+
+    Term::_csi_T 100
+    check "pan down, excessive arg" {
+	"        "
+	"        "
+	"        "
+	"        "
+    } 1 2
+}
+
 proc test_cursor_up { } {
     Term::_move_cursor 2 3
 
@@ -594,6 +648,34 @@ proc test_vertical_line_position_absolute { } {
     } 2 3
 }
 
+proc test_insert_line { } {
+    Term::_move_cursor 2 1
+    Term::_csi_L
+    check "insert line, default param" {
+	"abcdefgh"
+	"        "
+	"ijklmnop"
+	"qrstuvwx"
+    } 2 1
+
+    Term::_move_cursor 2 0
+    Term::_csi_L 2
+    check "insert line, explicit param" {
+	"        "
+	"        "
+	"abcdefgh"
+	"        "
+    } 2 0
+
+    Term::_csi_L 12
+    check "insert line, insert more lines than display has" {
+	"        "
+	"        "
+	"        "
+	"        "
+    } 2 0
+}
+
 # Run proc TEST_PROC_NAME with a "small" terminal.
 
 proc run_one_test_small { test_proc_name } {
@@ -632,6 +714,9 @@ foreach_with_prefix test {
     test_erase_character
     test_repeat
     test_vertical_line_position_absolute
+    test_insert_line
+    test_pan_up
+    test_pan_down
 } {
     run_one_test_small $test
 }

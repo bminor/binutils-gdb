@@ -324,6 +324,33 @@ namespace eval Term {
 	}
     }
 
+    # Insert Line
+    #
+    # https://vt100.net/docs/vt510-rm/IL.html
+    proc _csi_L {args} {
+	set arg [_default [lindex $args 0] 1]
+
+	_log_cur "Insert Line ($arg)" {
+	    variable _cur_col
+	    variable _cur_row
+	    variable _rows
+	    variable _cols
+	    variable _chars
+
+	    set y [expr $_rows - 2]
+	    set next_y [expr $y + $arg]
+	    while {$y >= $_cur_row} {
+		for {set x 0} {$x < $_cols} {incr x} {
+		    set _chars($x,$next_y) $_chars($x,$y)
+		}
+		incr y -1
+		incr next_y -1
+	    }
+
+	    _clear_lines $_cur_row [expr $_cur_row + $arg]
+	}
+    }
+
     # Delete line.
     #
     # https://vt100.net/docs/vt510-rm/DL.html
@@ -373,6 +400,74 @@ namespace eval Term {
 
 	    # Clear the rest of the line.
 	    _clear_in_line $out_col $_cols $_cur_row
+	}
+    }
+
+    # Pan Down
+    #
+    # https://vt100.net/docs/vt510-rm/SU.html
+    proc _csi_S {args} {
+	set count [_default [lindex $args 0] 1]
+
+	_log_cur "Pan Down ($count)" {
+	    variable _cur_col
+	    variable _cur_row
+	    variable _cols
+	    variable _rows
+	    variable _chars
+
+	    # The following code is written without consideration for
+	    # the scroll margins.  At this time this comment was
+	    # written the tuiterm library doesn't support the scroll
+	    # margins.  If/when that changes, then the following will
+	    # need to be updated.
+
+	    set dy 0
+	    set y $count
+
+	    while {$y < $_rows} {
+		for {set x 0} {$x < $_cols} {incr x} {
+		    set _chars($x,$dy) $_chars($x,$y)
+		}
+		incr y 1
+		incr dy 1
+	    }
+
+	    _clear_lines $dy $_rows
+	}
+    }
+
+    # Pan Up
+    #
+    # https://vt100.net/docs/vt510-rm/SD.html
+    proc _csi_T {args} {
+	set count [_default [lindex $args 0] 1]
+
+	_log_cur "Pan Up ($count)" {
+	    variable _cur_col
+	    variable _cur_row
+	    variable _cols
+	    variable _rows
+	    variable _chars
+
+	    # The following code is written without consideration for
+	    # the scroll margins.  At this time this comment was
+	    # written the tuiterm library doesn't support the scroll
+	    # margins.  If/when that changes, then the following will
+	    # need to be updated.
+
+	    set y [expr $_rows - $count]
+	    set dy $_rows
+
+	    while {$dy >= $count} {
+		for {set x 0} {$x < $_cols} {incr x} {
+		    set _chars($x,$dy) $_chars($x,$y)
+		}
+		incr y -1
+		incr dy -1
+	    }
+
+	    _clear_lines 0 $count
 	}
     }
 
