@@ -134,10 +134,12 @@ progressfn (debuginfod_client *c, long cur, long total)
       return 1;
     }
 
-  if (debuginfod_verbose == 0)
+  if (debuginfod_verbose == 0
+      || (data->progress.has_value ()
+	  && data->progress->get_state () == ui_out::progress_update::WORKING))
     return 0;
 
-  /* Print progress update.  Try to include the transfer if possible.  */
+  /* Print progress update.  Include the transfer size if available.  */
   if (total > 0)
     {
       /* Transfer size is known.  */
@@ -229,6 +231,8 @@ debuginfod_is_enabled ()
 
   return true;
 }
+
+/* Print the result of the most recent attempted download.  */
 
 static void
 print_outcome (user_data &data, int fd)

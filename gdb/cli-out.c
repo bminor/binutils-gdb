@@ -265,10 +265,17 @@ cli_ui_out::do_redirect (ui_file *outstream)
     m_streams.pop_back ();
 }
 
-/* The cli_ui_out::do_progress_* functions result in the following:
-   - printed for tty, SHOULD_PRINT == true:
-     <NAME
-      [#####                      ]\r>
+/* The cli_ui_out::do_progress_{start, notify} functions result in
+   the following:
+
+   - printed for tty, SHOULD_PRINT == true
+      - next state == PERCENT:
+         <(XX%) NAME\r>
+      - next state == SPIN:
+         <-\|/ NAME\r>
+      - next state == BAR:
+         <NAME
+         [#####                      ]\r>
    - printed for tty, SHOULD_PRINT == false:
      <>
    - printed for not-a-tty:
@@ -285,7 +292,7 @@ cli_ui_out::do_progress_start (const std::string &name, bool should_print)
   info.name = name;
   if (!stream->isatty ())
     {
-      fprintf_unfiltered (stream, "%s...", info.name.c_str ());
+      fprintf_unfiltered (stream, "%s...\n", info.name.c_str ());
       gdb_flush (stream);
       info.state = progress_update::WORKING;
     }
@@ -302,6 +309,9 @@ cli_ui_out::do_progress_start (const std::string &name, bool should_print)
   m_progress_info.push_back (std::move (info));
 }
 
+/* Pick a reasonable limit for the progress update length.  */
+#define MAX_CHARS_PER_LINE 4096
+
 void
 cli_ui_out::do_progress_notify (double howmuch,
 			        progress_update::state next_state)
@@ -312,21 +322,26 @@ cli_ui_out::do_progress_notify (double howmuch,
   if (info.state == progress_update::NO_PRINT)
     return;
 
+  int chars_per_line = get_chars_per_line ();
+  if (chars_per_line > MAX_CHARS_PER_LINE)
+    chars_per_line = MAX_CHARS_PER_LINE;
+
   if (info.state == progress_update::START)
     {
       fprintf_unfiltered (stream, "%s", info.name.c_str ());
+      if (chars_per_line <= 0)
+	fprintf_unfiltered (stream, "...\n");
       gdb_flush (stream);
       info.state = progress_update::WORKING;
     }
+
+  if (chars_per_line <= 0)
+    return;
 
   if (info.state == progress_update::WORKING && howmuch >= 1.0)
     return;
 
   if (!stream->isatty ())
-    return;
-
-  int chars_per_line = get_chars_per_line ();
-  if (chars_per_line <= 0)
     return;
 
   if (next_state == progress_update::PERCENT)
@@ -356,10 +371,6 @@ cli_ui_out::do_progress_notify (double howmuch,
     }
   else if (next_state == progress_update::BAR)
     {
-      /* Pick a reasonable limit for the progress bar length.  */
-      if (chars_per_line > 3840)
-	chars_per_line = 3840;
-
       int i, max;
       int width = chars_per_line - 3;
       max = width * howmuch;
@@ -385,6 +396,8 @@ cli_ui_out::do_progress_notify (double howmuch,
   return;
 }
 
+/* Set NAME as the new description of the most recent progress update.  */
+
 void
 cli_ui_out::update_progress_name (const std::string &name)
 {
@@ -392,12 +405,16 @@ cli_ui_out::update_progress_name (const std::string &name)
   info.name = name;
 }
 
+/* Get the current state of the most recent progress update.  */
+
 cli_ui_out::progress_update::state
 cli_ui_out::get_progress_state ()
 {
   cli_progress_info &info = m_progress_info.back ();
   return info.state;
 }
+
+/* Clear the current line of the most recent progress update.  */
 
 void
 cli_ui_out::do_progress_end ()
@@ -408,10 +425,14 @@ cli_ui_out::do_progress_end ()
   if (!stream->isatty ())
     return;
 
+  int chars_per_line = get_chars_per_line ();
+  if (chars_per_line <= 0
+      || chars_per_line > MAX_CHARS_PER_LINE)
+    chars_per_line = MAX_CHARS_PER_LINE;
+
   int i;
   int width = get_chars_per_line () - 3;
 
-  /* Erase everything printed on the current line.  */
   fprintf_unfiltered (stream, "\r");
   for (i = 0; i < width + 2; ++i)
     fprintf_unfiltered (stream, " ");

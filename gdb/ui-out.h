@@ -287,7 +287,7 @@ class ui_out
     /* Represents the printing state of a progress update.  */
     enum state
     {
-      /* Printing will start with the next output.  */
+      /* Printing will start with the next update.  */
       START,
       /* Printing has already started.  */
       WORKING,
