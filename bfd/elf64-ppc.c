@@ -4779,6 +4779,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
     {
       unsigned long r_symndx;
       struct elf_link_hash_entry *h;
+      Elf_Internal_Sym *isym;
       enum elf_ppc64_reloc_type r_type;
       int tls_type;
       struct _ppc64_elf_section_data *ppc64_sec;
@@ -4786,9 +4787,15 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
       r_symndx = ELF64_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
-	h = NULL;
+	{
+	  h = NULL;
+	  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache, abfd, r_symndx);
+	  if (isym == NULL)
+	    return false;
+	}
       else
 	{
+	  isym = NULL;
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  h = elf_follow_link (h);
 
@@ -4859,11 +4866,6 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	}
       else
 	{
-	  Elf_Internal_Sym *isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
-							  abfd, r_symndx);
-	  if (isym == NULL)
-	    return false;
-
 	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
 	    {
 	      ifunc = update_local_sym_info (abfd, symtab_hdr, r_symndx,
@@ -5127,16 +5129,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  dest = h->root.u.def.section;
 	      }
 	    else
-	      {
-		Elf_Internal_Sym *isym;
-
-		isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
-					      abfd, r_symndx);
-		if (isym == NULL)
-		  return false;
-
-		dest = bfd_section_from_elf_index (abfd, isym->st_shndx);
-	      }
+	      dest = bfd_section_from_elf_index (abfd, isym->st_shndx);
 
 	    if (dest != sec)
 	      ppc64_elf_section_data (sec)->has_14bit_branch = 1;
@@ -5352,11 +5345,13 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	dodyn:
 	  if ((h != NULL
 	       && (h->root.type == bfd_link_hash_defweak
-		   || !h->def_regular))
+		   || (!h->def_regular && !h->root.ldscript_def)))
 	      || (h != NULL
-		  && !bfd_link_executable (info)
-		  && !SYMBOLIC_BIND (info, h))
+		  && !SYMBOL_REFERENCES_LOCAL (info, h))
 	      || (bfd_link_pic (info)
+		  && (h != NULL
+		      ? !bfd_is_abs_symbol (&h->root)
+		      : isym->st_shndx != SHN_ABS)
 		  && must_be_dyn_reloc (info, r_type))
 	      || (!bfd_link_pic (info)
 		  && ifunc != NULL))
@@ -5404,20 +5399,12 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		}
 	      else
 		{
-		  /* Track dynamic relocs needed for local syms too.
-		     We really need local syms available to do this
-		     easily.  Oh well.  */
+		  /* Track dynamic relocs needed for local syms too.  */
 		  struct ppc_local_dyn_relocs *p;
 		  struct ppc_local_dyn_relocs **head;
 		  bool is_ifunc;
 		  asection *s;
 		  void *vpp;
-		  Elf_Internal_Sym *isym;
-
-		  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
-						abfd, r_symndx);
-		  if (isym == NULL)
-		    return false;
 
 		  s = bfd_section_from_elf_index (abfd, isym->st_shndx);
 		  if (s == NULL)
@@ -7256,11 +7243,13 @@ dec_dynrel_count (const Elf_Internal_Rela *rel,
 
   if ((h != NULL
        && (h->root.type == bfd_link_hash_defweak
-	   || !h->def_regular))
+	   || (!h->def_regular && !h->root.ldscript_def)))
       || (h != NULL
-	  && !bfd_link_executable (info)
-	  && !SYMBOLIC_BIND (info, h))
+	  && !SYMBOL_REFERENCES_LOCAL (info, h))
       || (bfd_link_pic (info)
+	  && (h != NULL
+	      ? !bfd_is_abs_symbol (&h->root)
+	      : sym_sec != bfd_abs_section_ptr)
 	  && must_be_dyn_reloc (info, r_type))
       || (!bfd_link_pic (info)
 	  && (h != NULL
@@ -9065,7 +9054,9 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		  || discarded_section (sym_sec))
 		continue;
 
-	      if (!SYMBOL_REFERENCES_LOCAL (info, h))
+	      if (!SYMBOL_REFERENCES_LOCAL (info, h)
+		  || (bfd_link_pic (info)
+		      && sym_sec == bfd_abs_section_ptr))
 		continue;
 
 	      if (h != NULL)
@@ -9647,7 +9638,9 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 	      if ((h ? h->type : ELF_ST_TYPE (sym->st_info)) == STT_GNU_IFUNC)
 		continue;
 
-	      if (!SYMBOL_REFERENCES_LOCAL (info, h))
+	      if (!SYMBOL_REFERENCES_LOCAL (info, h)
+		  || (bfd_link_pic (info)
+		      && sym_sec == bfd_abs_section_ptr))
 		continue;
 
 	      if (h != NULL)
@@ -9781,7 +9774,8 @@ allocate_got (struct elf_link_hash_entry *h,
 	     && (gent->tls_type == 0
 		 ? !info->enable_dt_relr
 		 : !(bfd_link_executable (info)
-		     && SYMBOL_REFERENCES_LOCAL (info, h))))
+		     && SYMBOL_REFERENCES_LOCAL (info, h)))
+	     && !bfd_is_abs_symbol (&h->root))
 	    || (htab->elf.dynamic_sections_created
 		&& h->dynindx != -1
 		&& !SYMBOL_REFERENCES_LOCAL (info, h)))
@@ -10246,6 +10240,8 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
       unsigned char *lgot_masks;
       bfd_size_type locsymcount;
       Elf_Internal_Shdr *symtab_hdr;
+      Elf_Internal_Sym *local_syms;
+      Elf_Internal_Sym *isym;
 
       if (!is_ppc64_elf (ibfd))
 	continue;
@@ -10296,8 +10292,22 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
       local_plt = (struct plt_entry **) end_lgot_ents;
       end_local_plt = local_plt + locsymcount;
       lgot_masks = (unsigned char *) end_local_plt;
+      local_syms = NULL;
+      if (bfd_link_pic (info))
+	{
+	  local_syms = (Elf_Internal_Sym *) symtab_hdr->contents;
+	  if (local_syms == NULL && locsymcount != 0)
+	    {
+	      local_syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, locsymcount,
+						 0, NULL, NULL, NULL);
+	      if (local_syms == NULL)
+		return false;
+	    }
+	}
       s = ppc64_elf_tdata (ibfd)->got;
-      for (; lgot_ents < end_lgot_ents; ++lgot_ents, ++lgot_masks)
+      for (isym = local_syms;
+	   lgot_ents < end_lgot_ents;
+	   ++lgot_ents, ++lgot_masks, isym != NULL && isym++)
 	{
 	  struct got_entry **pent, *ent;
 
@@ -10330,7 +10340,8 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 		    else if (bfd_link_pic (info)
 			     && (ent->tls_type == 0
 				 ? !info->enable_dt_relr
-				 : !bfd_link_executable (info)))
+				 : !bfd_link_executable (info))
+			     && isym->st_shndx != SHN_ABS)
 		      {
 			asection *srel = ppc64_elf_tdata (ibfd)->relgot;
 			srel->size += rel_size;
@@ -10340,6 +10351,14 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	      }
 	    else
 	      *pent = ent->next;
+	}
+      if (local_syms != NULL
+	  && symtab_hdr->contents != (unsigned char *) local_syms)
+	{
+	  if (!info->keep_memory)
+	    free (local_syms);
+	  else
+	    symtab_hdr->contents = (unsigned char *) local_syms;
 	}
 
       /* Allocate space for plt calls to local syms.  */
@@ -12793,6 +12812,8 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
       bfd_size_type locsymcount;
       Elf_Internal_Shdr *symtab_hdr;
       asection *s;
+      Elf_Internal_Sym *local_syms;
+      Elf_Internal_Sym *isym;
 
       if (!is_ppc64_elf (ibfd))
 	continue;
@@ -12807,8 +12828,22 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
       local_plt = (struct plt_entry **) end_lgot_ents;
       end_local_plt = local_plt + locsymcount;
       lgot_masks = (unsigned char *) end_local_plt;
+      local_syms = NULL;
+      if (bfd_link_pic (info))
+	{
+	  local_syms = (Elf_Internal_Sym *) symtab_hdr->contents;
+	  if (local_syms == NULL && locsymcount != 0)
+	    {
+	      local_syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, locsymcount,
+						 0, NULL, NULL, NULL);
+	      if (local_syms == NULL)
+		return false;
+	    }
+	}
       s = ppc64_elf_tdata (ibfd)->got;
-      for (; lgot_ents < end_lgot_ents; ++lgot_ents, ++lgot_masks)
+      for (isym = local_syms;
+	   lgot_ents < end_lgot_ents;
+	   ++lgot_ents, ++lgot_masks, isym != NULL && isym++)
 	{
 	  struct got_entry *ent;
 
@@ -12832,7 +12867,8 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
 	      else if (bfd_link_pic (info)
 		       && (ent->tls_type == 0
 			   ? !info->enable_dt_relr
-			   : !bfd_link_executable (info)))
+			   : !bfd_link_executable (info))
+		       && isym->st_shndx != SHN_ABS)
 		{
 		  asection *srel = ppc64_elf_tdata (ibfd)->relgot;
 		  srel->size += rel_size;
@@ -13422,7 +13458,8 @@ got_and_plt_relr_for_local_syms (struct bfd_link_info *info)
       struct plt_entry **local_plt, **lplt, **end_local_plt;
       Elf_Internal_Shdr *symtab_hdr;
       bfd_size_type locsymcount;
-      Elf_Internal_Sym *local_syms = NULL;
+      Elf_Internal_Sym *local_syms;
+      Elf_Internal_Sym *isym;
       struct plt_entry *pent;
       struct got_entry *gent;
 
@@ -13435,14 +13472,25 @@ got_and_plt_relr_for_local_syms (struct bfd_link_info *info)
 
       symtab_hdr = &elf_symtab_hdr (ibfd);
       locsymcount = symtab_hdr->sh_info;
+      local_syms = (Elf_Internal_Sym *) symtab_hdr->contents;
+      if (local_syms == NULL && locsymcount != 0)
+	{
+	  local_syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, locsymcount,
+					     0, NULL, NULL, NULL);
+	  if (local_syms == NULL)
+	    return false;
+	}
       end_lgot_ents = lgot_ents + locsymcount;
       local_plt = (struct plt_entry **) end_lgot_ents;
       end_local_plt = local_plt + locsymcount;
-      for (lgot = lgot_ents; lgot < end_lgot_ents; ++lgot)
+      for (lgot = lgot_ents, isym = local_syms;
+	   lgot < end_lgot_ents;
+	   ++lgot, ++isym)
 	for (gent = *lgot; gent != NULL; gent = gent->next)
 	  if (!gent->is_indirect
 	      && gent->tls_type == 0
-	      && gent->got.offset != (bfd_vma) -1)
+	      && gent->got.offset != (bfd_vma) -1
+	      && isym->st_shndx != SHN_ABS)
 	    {
 	      asection *got = ppc64_elf_tdata (gent->owner)->got;
 	      bfd_vma r_offset = (got->output_section->vma
@@ -13456,28 +13504,21 @@ got_and_plt_relr_for_local_syms (struct bfd_link_info *info)
 	    }
 
       if (!htab->opd_abi)
-	for (lplt = local_plt; lplt < end_local_plt; ++lplt)
+	for (lplt = local_plt, isym = local_syms;
+	     lplt < end_local_plt;
+	     ++lplt, ++isym)
 	  for (pent = *lplt; pent != NULL; pent = pent->next)
-	    if (pent->plt.offset != (bfd_vma) -1)
+	    if (pent->plt.offset != (bfd_vma) -1
+		&& ELF_ST_TYPE (isym->st_info) != STT_GNU_IFUNC)
 	      {
-		Elf_Internal_Sym *sym;
-
-		if (!get_sym_h (NULL, &sym, NULL, NULL, &local_syms,
-				lplt - local_plt, ibfd))
+		bfd_vma r_offset = (pent->plt.offset
+				    + htab->pltlocal->output_offset
+				    + htab->pltlocal->output_section->vma);
+		if (!append_relr_off (htab, r_offset))
 		  {
-		  err_exit:
 		    if (symtab_hdr->contents != (unsigned char *) local_syms)
 		      free (local_syms);
 		    return false;
-		  }
-
-		if (ELF_ST_TYPE (sym->st_info) != STT_GNU_IFUNC)
-		  {
-		    bfd_vma r_offset = (pent->plt.offset
-					+ htab->pltlocal->output_offset
-					+ htab->pltlocal->output_section->vma);
-		    if (!append_relr_off (htab, r_offset))
-		      goto err_exit;
 		  }
 	      }
 
@@ -13514,9 +13555,10 @@ got_and_plt_relr (struct elf_link_hash_entry *h, void *inf)
       && (h->root.type == bfd_link_hash_defined
 	  || h->root.type == bfd_link_hash_defweak))
     {
-      if (!htab->elf.dynamic_sections_created
-	  || h->dynindx == -1
-	  || SYMBOL_REFERENCES_LOCAL (info, h))
+      if ((!htab->elf.dynamic_sections_created
+	   || h->dynindx == -1
+	   || SYMBOL_REFERENCES_LOCAL (info, h))
+	  && !bfd_is_abs_symbol (&h->root))
 	for (gent = h->got.glist; gent != NULL; gent = gent->next)
 	  if (!gent->is_indirect
 	      && gent->tls_type == 0
@@ -13804,6 +13846,10 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 			  if (h != NULL
 			      ? h->type == STT_GNU_IFUNC
 			      : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
+			    continue;
+			  if (h != NULL
+			      ? bfd_is_abs_symbol (&h->root)
+			      : sym->st_shndx == SHN_ABS)
 			    continue;
 			  if (h != NULL
 			      && !SYMBOL_REFERENCES_LOCAL (info, h))
@@ -16553,6 +16599,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	case R_PPC64_GOT16_DS:
 	  if ((h ? h->elf.type : ELF_ST_TYPE (sym->st_info)) == STT_GNU_IFUNC
+	      || (bfd_link_pic (info)
+		  && sec == bfd_abs_section_ptr)
 	      || !htab->do_toc_opt)
 	    break;
 	  from = TOCstart + htab->sec_info[input_section->id].toc_off;
@@ -16577,6 +16625,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_GOT16_LO_DS:
 	case R_PPC64_GOT16_HA:
 	  if ((h ? h->elf.type : ELF_ST_TYPE (sym->st_info)) == STT_GNU_IFUNC
+	      || (bfd_link_pic (info)
+		  && sec == bfd_abs_section_ptr)
 	      || !htab->do_toc_opt)
 	    break;
 	  from = TOCstart + htab->sec_info[input_section->id].toc_off;
@@ -16607,6 +16657,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	case R_PPC64_GOT_PCREL34:
 	  if ((h ? h->elf.type : ELF_ST_TYPE (sym->st_info)) == STT_GNU_IFUNC
+	      || (bfd_link_pic (info)
+		  && sec == bfd_abs_section_ptr)
 	      || !htab->do_toc_opt)
 	    break;
 	  from = (rel->r_offset
@@ -16846,7 +16898,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 				  && bfd_link_executable (info)
 				  && (h == NULL
 				      || SYMBOL_REFERENCES_LOCAL (info,
-								  &h->elf)))))
+								  &h->elf)))
+			     && (h != NULL
+				 ? !bfd_is_abs_symbol (&h->elf.root)
+				 : sym->st_shndx != SHN_ABS)))
+
 		  relgot = ppc64_elf_tdata (ent->owner)->relgot;
 		if (relgot != NULL)
 		  {
@@ -17555,7 +17611,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_GOT16_HA:
 	case R_PPC64_TOC16_HA:
 	  if (htab->do_toc_opt && relocation + addend + 0x8000 < 0x10000
-	      && !ppc64_elf_tdata (input_bfd)->unexpected_toc_insn)
+	      && !ppc64_elf_tdata (input_bfd)->unexpected_toc_insn
+	      && !(bfd_link_pic (info)
+		   && (h != NULL
+		       ? bfd_is_abs_symbol (&h->elf.root)
+		       : sec == bfd_abs_section_ptr)))
 	    {
 	      bfd_byte *p;
 	    nop_it:
@@ -17586,6 +17646,10 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_TOC16_LO_DS:
 	  if (htab->do_toc_opt && relocation + addend + 0x8000 < 0x10000
 	      && !ppc64_elf_tdata (input_bfd)->unexpected_toc_insn
+	      && !(bfd_link_pic (info)
+		   && (h != NULL
+		       ? bfd_is_abs_symbol (&h->elf.root)
+		       : sec == bfd_abs_section_ptr))
 	      && offset_in_range (input_section, rel->r_offset & ~3, 4))
 	    {
 	      bfd_byte *p = contents + (rel->r_offset & ~3);
