@@ -426,8 +426,14 @@ tui_layout_window::apply (int x_, int y_, int width_, int height_)
 void
 tui_layout_window::get_sizes (bool height, int *min_value, int *max_value)
 {
+  TUI_SCOPED_DEBUG_ENTER_EXIT;
+
   if (m_window == nullptr)
     m_window = tui_get_window_by_name (m_contents);
+
+  tui_debug_printf ("window = %s, getting %s",
+		    m_window->name (), (height ? "height" : "width"));
+
   if (height)
     {
       *min_value = m_window->min_height ();
@@ -438,6 +444,8 @@ tui_layout_window::get_sizes (bool height, int *min_value, int *max_value)
       *min_value = m_window->min_width ();
       *max_value = m_window->max_width ();
     }
+
+  tui_debug_printf ("min = %d, max = %d", *min_value, *max_value);
 }
 
 /* See tui-layout.h.  */
@@ -522,6 +530,8 @@ tui_layout_split::clone () const
 void
 tui_layout_split::get_sizes (bool height, int *min_value, int *max_value)
 {
+  TUI_SCOPED_DEBUG_ENTER_EXIT;
+
   *min_value = 0;
   *max_value = 0;
   bool first_time = true;
@@ -544,6 +554,8 @@ tui_layout_split::get_sizes (bool height, int *min_value, int *max_value)
 	}
       first_time = false;
     }
+
+  tui_debug_printf ("min_value = %d, max_value = %d", *min_value, *max_value);
 }
 
 /* See tui-layout.h.  */
@@ -578,9 +590,46 @@ tui_layout_split::set_weights_from_sizes ()
 
 /* See tui-layout.h.  */
 
+std::string
+tui_layout_split::tui_debug_weights_to_string () const
+{
+  std::string str;
+
+  for (int i = 0; i < m_splits.size (); ++i)
+    {
+      if (i > 0)
+       str += ", ";
+      str += string_printf ("[%d] %d", i, m_splits[i].weight);
+    }
+
+  return str;
+}
+
+/* See tui-layout.h.  */
+
+void
+tui_layout_split::tui_debug_print_size_info
+  (const std::vector<tui_layout_split::size_info> &info)
+{
+  gdb_assert (debug_tui);
+
+  tui_debug_printf ("current size info data:");
+  for (int i = 0; i < info.size (); ++i)
+    tui_debug_printf ("  [%d] { size = %d, min = %d, max = %d, share_box = %d }",
+		      i, info[i].size, info[i].min_size,
+		      info[i].max_size, info[i].share_box);
+}
+
+/* See tui-layout.h.  */
+
 tui_adjust_result
 tui_layout_split::set_size (const char *name, int new_size, bool set_width_p)
 {
+  TUI_SCOPED_DEBUG_ENTER_EXIT;
+
+  tui_debug_printf ("this = %p, name = %s, new_size = %d",
+		    this, name, new_size);
+
   /* Look through the children.  If one is a layout holding the named
      window, we're done; or if one actually is the named window,
      update it.  */
@@ -611,9 +660,14 @@ tui_layout_split::set_size (const char *name, int new_size, bool set_width_p)
   if (curr_size == new_size)
     return HANDLED;
 
+  tui_debug_printf ("found window %s at index %d", name, found_index);
+
   set_weights_from_sizes ();
   int delta = m_splits[found_index].weight - new_size;
   m_splits[found_index].weight = new_size;
+
+  tui_debug_printf ("before delta (%d) distribution, weights: %s",
+		    delta, tui_debug_weights_to_string ().c_str ());
 
   /* Distribute the "delta" over the next window; but if the next
      window cannot hold it all, keep going until we either find a
@@ -643,7 +697,13 @@ tui_layout_split::set_size (const char *name, int new_size, bool set_width_p)
 	  m_splits[index].weight += grow_by;
 	  delta -= grow_by;
 	}
+
+      tui_debug_printf ("index = %d, weight now: %d",
+			index, m_splits[index].weight);
     }
+
+  tui_debug_printf ("after delta (%d) distribution, weights: %s",
+		    delta, tui_debug_weights_to_string ().c_str ());
 
   if (delta != 0)
     {
@@ -668,22 +728,17 @@ tui_layout_split::set_size (const char *name, int new_size, bool set_width_p)
 void
 tui_layout_split::apply (int x_, int y_, int width_, int height_)
 {
+  TUI_SCOPED_DEBUG_ENTER_EXIT;
+
   x = x_;
   y = y_;
   width = width_;
   height = height_;
 
-  struct size_info
-  {
-    int size;
-    int min_size;
-    int max_size;
-    /* True if this window will share a box border with the previous
-       window in the list.  */
-    bool share_box;
-  };
-
   std::vector<size_info> info (m_splits.size ());
+
+  tui_debug_printf ("weights are: %s",
+		    tui_debug_weights_to_string ().c_str ());
 
   /* Step 1: Find the min and max size of each sub-layout.
      Fixed-sized layouts are given their desired size, and then the
@@ -760,9 +815,31 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
 	}
     }
 
+  if (debug_tui)
+    {
+      tui_debug_printf ("after initial size calculation");
+      tui_debug_printf ("available_size = %d, used_size = %d",
+			available_size, used_size);
+      tui_debug_printf ("total_weight = %d, last_index = %d",
+			total_weight, last_index);
+      tui_debug_print_size_info (info);
+    }
+
   /* Allocate any leftover size.  */
   if (available_size >= used_size && last_index != -1)
-    info[last_index].size += available_size - used_size;
+    {
+      info[last_index].size += available_size - used_size;
+
+      if (debug_tui)
+	{
+	  tui_debug_printf ("after final size calculation");
+	  tui_debug_printf ("available_size = %d, used_size = %d",
+			    available_size, used_size);
+	  tui_debug_printf ("total_weight = %d, last_index = %d",
+			    total_weight, last_index);
+	  tui_debug_print_size_info (info);
+	}
+    }
 
   /* Step 3: Resize.  */
   int size_accum = 0;

@@ -22,6 +22,20 @@
 #ifndef TUI_TUI_H
 #define TUI_TUI_H
 
+/* Flag to control tui debugging.  */
+
+extern bool debug_tui;
+
+/* Print a "tui" debug statement.  */
+
+#define tui_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (debug_tui, "tui", fmt, ##__VA_ARGS__)
+
+/* Print "tui" enter/exit debug statements.  */
+
+#define TUI_SCOPED_DEBUG_ENTER_EXIT \
+  scoped_debug_enter_exit (debug_tui, "tui")
+
 struct ui_file;
 
 /* Types of error returns.  */

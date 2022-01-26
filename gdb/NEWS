@@ -154,6 +154,10 @@ winwidth
   the width of a tui window to be adjusted when windows are laid out
   in horizontal mode.
 
+set debug tui on|off
+show debug tui
+  Control the display of debug output about GDB's tui.
+
 * Changed commands
 
 print

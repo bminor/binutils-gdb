@@ -29204,6 +29204,17 @@ The default display uses more space for line numbers and starts the
 source text at the next tab stop; the compact display uses only as
 much space as is needed for the line numbers in the current file, and
 only a single space to separate the line numbers from the source.
+
+@kindex set debug tui
+@item set debug tui @r{[}on|off@r{]}
+Turn on or off display of @value{GDBN} internal debug messages relating
+to the TUI.
+
+@kindex show debug tui
+@item show debug tui
+Show the current status of displaying @value{GDBN} internal debug
+messages relating to the TUI.
+
 @end table
 
 Note that the colors of the TUI borders can be controlled using the

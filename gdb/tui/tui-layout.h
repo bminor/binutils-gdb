@@ -249,6 +249,31 @@ private:
      widths (when m_vertical is false).  */
   void set_weights_from_sizes ();
 
+  /* Structure used when resizing, or applying a layout.  An instance of
+     this structure is created for each sub-layout.  */
+  struct size_info
+  {
+    /* The calculated size for this sub-layout.  */
+    int size;
+
+    /* The minimum and maximum sizes for this sub-layout, obtained by
+       calling the get_sizes member function.  */
+    int min_size;
+    int max_size;
+
+    /* True if this window will share a box border with the previous
+       window in the list.  */
+    bool share_box;
+  };
+
+  /* Used for debug, prints the contents of INFO using tui_debug_printf.
+     Only call this when the global debug_tui is true.  */
+  static void tui_debug_print_size_info (const std::vector<size_info> &info);
+
+  /* Used for debug, returns a string describing the current weight of each
+     sub-layout.  */
+  std::string tui_debug_weights_to_string () const;
+
   struct split
   {
     /* The requested weight.  */
