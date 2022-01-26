@@ -1346,6 +1346,45 @@ until_next_command (int from_tty)
 
       tp->control.step_range_start = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (func));
       tp->control.step_range_end = sal.end;
+
+      /* By setting the step_range_end based on the current pc, we are
+	 assuming that the last line table entry for any given source line
+	 will have is_stmt set to true.  This is not necessarily the case,
+	 there may be additional entries for the same source line with
+	 is_stmt set false.  Consider the following code:
+
+	 for (int i = 0; i < 10; i++)
+	   loop_body ();
+
+	 Clang-13, will generate multiple line table entries at the end of
+	 the loop all associated with the 'for' line.  The first of these
+	 entries is marked is_stmt true, but the other entries are is_stmt
+	 false.
+
+	 If we only use the values in SAL, then our stepping range may not
+	 extend to the end of the loop. The until command will reach the
+	 end of the range, find a non is_stmt instruction, and step to the
+	 next is_stmt instruction. This stopping point, however, will be
+	 inside the loop, which is not what we wanted.
+
+	 Instead, we now check any subsequent line table entries to see if
+	 they are for the same line.  If they are, and they are marked
+	 is_stmt false, then we extend the end of our stepping range.
+
+	 When we finish this process the end of the stepping range will
+	 point either to a line with a different line number, or, will
+	 point at an address for the same line number that is marked as a
+	 statement.  */
+
+      struct symtab_and_line final_sal
+	= find_pc_line (tp->control.step_range_end, 0);
+
+      while (final_sal.line == sal.line && final_sal.symtab == sal.symtab
+	     && !final_sal.is_stmt)
+	{
+	  tp->control.step_range_end = final_sal.end;
+	  final_sal = find_pc_line (final_sal.end, 0);
+	}
     }
   tp->control.may_range_step = 1;
 
