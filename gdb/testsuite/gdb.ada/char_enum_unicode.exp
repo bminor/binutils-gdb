@@ -40,4 +40,13 @@ gdb_test "print Char_Y" " = 2 $y"
 gdb_test "print Char_King" " = 3 $king"
 gdb_test "print Char_Thorn" " = 4 $thorn"
 gdb_test "print Char_Enum_Type'('x')" " = 1 'x'"
+gdb_test "print Char_Enum_Type'('\[\"0178\"\]')" " = 2 $y"
+gdb_test "print Char_Enum_Type'('\[\"1fa00\"\]')" " = 3 $king"
 gdb_test "print Char_Enum_Type'('\[\"de\"\]')" " = 4 $thorn"
+
+gdb_test "print '\[\"0178\"\]'" " = 376 $y"
+gdb_test "print '\[\"01fa00\"\]'" " = 129536 $king"
+gdb_test "print '\[\"de\"\]'" " = 222 $thorn"
+
+gdb_test "print \"\[\"0178\"\]\"" "wide strings are not yet supported"
+gdb_test "print \"\[\"de\"\]\"" " = \"\\\[\"de\"\\\]\""

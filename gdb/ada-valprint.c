@@ -277,7 +277,11 @@ ada_emit_char (int c, struct type *type, struct ui_file *stream,
 	fprintf_filtered (stream, "%c", c);
     }
   else
-    fprintf_filtered (stream, "[\"%0*x\"]", type_len * 2, c);
+    {
+      /* Follow GNAT's lead here and only use 6 digits for
+	 wide_wide_character.  */
+      fprintf_filtered (stream, "[\"%0*x\"]", std::min (6, type_len * 2), c);
+    }
 }
 
 /* Character #I of STRING, given that TYPE_LEN is the size in bytes

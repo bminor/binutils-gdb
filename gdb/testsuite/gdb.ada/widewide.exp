@@ -33,9 +33,9 @@ if ![runto "foo.adb:$bp_location" ] then {
 
 gdb_test "print some_easy" "= 74 'J'"
 
-gdb_test "print some_larger" "= 48879 '\\\[\"0000beef\"\\\]'"
+gdb_test "print some_larger" "= 48879 '\\\[\"00beef\"\\\]'"
 
-gdb_test "print some_big" "= 14335727 '\\\[\"00dabeef\"\\\]'"
+gdb_test "print some_big" "= 14335727 '\\\[\"dabeef\"\\\]'"
 
 gdb_test "print my_wws" "= \" helo\""
 

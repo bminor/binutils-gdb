@@ -98,7 +98,7 @@ static struct type *type_long_long (struct parser_state *);
 
 static struct type *type_long_double (struct parser_state *);
 
-static struct type *type_char (struct parser_state *);
+static struct type *type_for_char (struct parser_state *, ULONGEST);
 
 static struct type *type_boolean (struct parser_state *);
 
@@ -1727,10 +1727,18 @@ type_long_double (struct parser_state *par_state)
 }
 
 static struct type *
-type_char (struct parser_state *par_state)
+type_for_char (struct parser_state *par_state, ULONGEST value)
 {
-  return language_string_char_type (par_state->language (),
-				    par_state->gdbarch ());
+  if (value <= 0xff)
+    return language_string_char_type (par_state->language (),
+				      par_state->gdbarch ());
+  else if (value <= 0xffff)
+    return language_lookup_primitive_type (par_state->language (),
+					   par_state->gdbarch (),
+					   "wide_character");
+  return language_lookup_primitive_type (par_state->language (),
+					 par_state->gdbarch (),
+					 "wide_wide_character");
 }
 
 static struct type *

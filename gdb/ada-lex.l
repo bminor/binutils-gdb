@@ -1,4 +1,4 @@
-/* FLEX lexer for Ada expressions, for GDB.
+/* FLEX lexer for Ada expressions, for GDB. -*- c++ -*-
    Copyright (C) 1994-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -150,20 +150,22 @@ static int paren_depth;
 		}
 
 <INITIAL>"'"({GRAPHIC}|\")"'" {
-		   yylval.typed_val.type = type_char (pstate);
 		   yylval.typed_val.val = yytext[1];
+		   yylval.typed_val.type = type_for_char (pstate, yytext[1]);
 		   return CHARLIT;
 		}
 
-<INITIAL>"'[\""{HEXDIG}{2}"\"]'"   {
-                   int v;
-                   yylval.typed_val.type = type_char (pstate);
-		   sscanf (yytext+3, "%2x", &v);
+<INITIAL>"'[\""{HEXDIG}{2,}"\"]'"   {
+                   ULONGEST v = strtoulst (yytext+3, nullptr, 16);
 		   yylval.typed_val.val = v;
+                   yylval.typed_val.type = type_for_char (pstate, v);
 		   return CHARLIT;
 		}
 
-\"({GRAPHIC}|"[\""({HEXDIG}{2}|\")"\"]")*\"   {
+	/* Note that we don't handle bracket sequences of more than 2
+	   digits here.  Currently there's no support for wide or
+	   wide-wide strings.  */
+\"({GRAPHIC}|"[\""({HEXDIG}{2,}|\")"\"]")*\"   {
 	           yylval.sval = processString (yytext+1, yyleng-2);
 		   return STRING;
 		}
@@ -513,10 +515,12 @@ processString (const char *text, int len)
 	     }
            else
 	     {
-               int chr;
-	       sscanf (p+2, "%2x", &chr);
+	       const char *end;
+	       ULONGEST chr = strtoulst (p + 2, &end, 16);
+	       if (chr > 0xff)
+		 error (_("wide strings are not yet supported"));
 	       *q = (char) chr;
-	       p += 5;
+	       p = end + 1;
 	     }
          }
        else
