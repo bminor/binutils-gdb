@@ -3296,6 +3296,9 @@ struct ppc_link_hash_table
   /* Set if inline plt calls should be converted to direct calls.  */
   unsigned int can_convert_all_inline_plt:1;
 
+  /* Set if a stub_offset changed.  */
+  unsigned int stub_changed:1;
+
   /* Set on error.  */
   unsigned int stub_error:1;
 
@@ -3313,6 +3316,13 @@ struct ppc_link_hash_table
 
   /* Incremented every time we size stubs.  */
   unsigned int stub_iteration;
+
+/* After 20 iterations of stub sizing we no longer allow stubs to
+   shrink.  This is to break out of a pathological case where adding
+   stubs or increasing their size on one iteration decreases section
+   gaps (perhaps due to alignment), which then results in smaller
+   stubs on the next iteration.  */
+#define STUB_SHRINK_ITER 20
 };
 
 /* Rename some of the generic section flags to better document how they
@@ -12164,6 +12174,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   asection *plt;
   bfd_vma targ, off, r2off;
   unsigned int size, extra, lr_used, delta, odd;
+  bfd_vma stub_offset;
 
   /* Massage our args to the form they really have.  */
   stub_entry = (struct ppc_stub_hash_entry *) gen_entry;
@@ -12193,7 +12204,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 			    stub_entry->target_section);
 
   /* Make a note of the offset within the stubs for this entry.  */
-  stub_entry->stub_offset = stub_entry->group->stub_sec->size;
+  stub_offset = stub_entry->group->stub_sec->size;
 
   if (stub_entry->h != NULL
       && stub_entry->h->save_res
@@ -12223,7 +12234,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      + stub_entry->target_section->output_offset
 	      + stub_entry->target_section->output_section->vma);
       targ += PPC64_LOCAL_ENTRY_OFFSET (stub_entry->other);
-      off = (stub_entry->stub_offset
+      off = (stub_offset
 	     + stub_entry->group->stub_sec->output_offset
 	     + stub_entry->group->stub_sec->output_section->vma);
 
@@ -12322,7 +12333,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
     }
   else if (stub_entry->type.main == ppc_stub_long_branch)
     {
-      off = (stub_entry->stub_offset
+      off = (stub_offset
 	     + stub_entry->group->stub_sec->output_offset
 	     + stub_entry->group->stub_sec->output_section->vma);
       size = 0;
@@ -12361,7 +12372,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	{
 	  /* After the bcl, lr has been modified so we need to emit
 	     .eh_frame info saying the return address is in r12.  */
-	  lr_used = stub_entry->stub_offset + 8;
+	  lr_used = stub_offset + 8;
 	  if (stub_entry->type.r2save)
 	    lr_used += 4;
 	  /* The eh_frame info will consist of a DW_CFA_advance_loc or
@@ -12410,7 +12421,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    plt = htab->pltlocal;
 	}
       targ += plt->output_offset + plt->output_section->vma;
-      off = (stub_entry->stub_offset
+      off = (stub_offset
 	     + stub_entry->group->stub_sec->output_offset
 	     + stub_entry->group->stub_sec->output_section->vma
 	     + lr_used);
@@ -12422,7 +12433,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  unsigned pad = plt_stub_pad (htab, stub_entry, off, odd);
 
 	  stub_entry->group->stub_sec->size += pad;
-	  stub_entry->stub_offset = stub_entry->group->stub_sec->size;
+	  stub_offset = stub_entry->group->stub_sec->size;
 	  off -= pad;
 	  odd ^= pad & 4;
 	}
@@ -12444,7 +12455,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	{
 	  /* After the bcl, lr has been modified so we need to emit
 	     .eh_frame info saying the return address is in r12.  */
-	  lr_used += stub_entry->stub_offset + 8;
+	  lr_used += stub_offset + 8;
 	  /* The eh_frame info will consist of a DW_CFA_advance_loc or
 	     variant, DW_CFA_register, 65, 12, DW_CFA_advance_loc+2,
 	     DW_CFA_restore_extended 65.  */
@@ -12458,20 +12469,18 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	{
 	  if (!htab->params->no_tls_get_addr_regsave)
 	    {
-	      unsigned int cfa_updt = stub_entry->stub_offset + 18 * 4;
+	      unsigned int cfa_updt = stub_offset + 18 * 4;
 	      delta = cfa_updt - stub_entry->group->lr_restore;
 	      stub_entry->group->eh_size += eh_advance_size (delta);
 	      stub_entry->group->eh_size += htab->opd_abi ? 36 : 35;
-	      stub_entry->group->lr_restore
-		= stub_entry->stub_offset + size - 4;
+	      stub_entry->group->lr_restore = stub_offset + size - 4;
 	    }
 	  else if (stub_entry->type.r2save)
 	    {
-	      lr_used = stub_entry->stub_offset + size - 20;
+	      lr_used = stub_offset + size - 20;
 	      delta = lr_used - stub_entry->group->lr_restore;
 	      stub_entry->group->eh_size += eh_advance_size (delta) + 6;
-	      stub_entry->group->lr_restore
-		= stub_entry->stub_offset + size - 4;
+	      stub_entry->group->lr_restore = stub_offset + size - 4;
 	    }
 	}
     }
@@ -12499,7 +12508,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  unsigned pad = plt_stub_pad (htab, stub_entry, off, 0);
 
 	  stub_entry->group->stub_sec->size += pad;
-	  stub_entry->stub_offset = stub_entry->group->stub_sec->size;
+	  stub_offset = stub_entry->group->stub_sec->size;
 	}
 
       if (info->emitrelocations)
@@ -12523,21 +12532,21 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  if (!htab->params->no_tls_get_addr_regsave)
 	    {
 	      /* Adjustments to r1 need to be described.  */
-	      unsigned int cfa_updt = stub_entry->stub_offset + 18 * 4;
+	      unsigned int cfa_updt = stub_offset + 18 * 4;
 	      delta = cfa_updt - stub_entry->group->lr_restore;
 	      stub_entry->group->eh_size += eh_advance_size (delta);
 	      stub_entry->group->eh_size += htab->opd_abi ? 36 : 35;
 	    }
 	  else
 	    {
-	      lr_used = stub_entry->stub_offset + size - 20;
+	      lr_used = stub_offset + size - 20;
 	      /* The eh_frame info will consist of a DW_CFA_advance_loc
 		 or variant, DW_CFA_offset_externed_sf, 65, -stackoff,
 		 DW_CFA_advance_loc+4, DW_CFA_restore_extended, 65.  */
 	      delta = lr_used - stub_entry->group->lr_restore;
 	      stub_entry->group->eh_size += eh_advance_size (delta) + 6;
 	    }
-	  stub_entry->group->lr_restore = stub_entry->stub_offset + size - 4;
+	  stub_entry->group->lr_restore = stub_offset + size - 4;
 	}
     }
   else
@@ -12546,7 +12555,12 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       return false;
     }
 
-  stub_entry->group->stub_sec->size += size;
+  if (stub_entry->stub_offset != stub_offset)
+    htab->stub_changed = true;
+  if (htab->stub_iteration <= STUB_SHRINK_ITER
+      || stub_entry->stub_offset < stub_offset)
+    stub_entry->stub_offset = stub_offset;
+  stub_entry->group->stub_sec->size = stub_entry->stub_offset + size;
   return true;
 }
 
@@ -13644,12 +13658,8 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
       _bfd_elf_link_hash_hide_symbol (info, &htab->tga_desc_fd->elf, true);
     }
 
-#define STUB_SHRINK_ITER 20
   /* Loop until no stubs added.  After iteration 20 of this loop we may
-     exit on a stub section shrinking.  This is to break out of a
-     pathological case where adding stubs on one iteration decreases
-     section gaps (perhaps due to alignment), which then requires
-     fewer or smaller stubs on the next iteration.  */
+     exit on a stub section shrinking.  */
 
   while (1)
     {
@@ -14119,6 +14129,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	  htab->elf.srelrdyn->size = 0;
 	}
 
+      htab->stub_changed = false;
       bfd_hash_traverse (&htab->stub_hash_table, ppc_size_one_stub, info);
 
       for (group = htab->group; group != NULL; group = group->next)
@@ -14215,6 +14226,8 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	  break;
 
       if (group == NULL
+	  && (!htab->stub_changed
+	      || htab->stub_iteration > STUB_SHRINK_ITER)
 	  && (htab->brlt->rawsize == htab->brlt->size
 	      || (htab->stub_iteration > STUB_SHRINK_ITER
 		  && htab->brlt->rawsize > htab->brlt->size))
