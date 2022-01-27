@@ -14320,6 +14320,7 @@ check_producer (struct dwarf2_cu *cu)
     {
       cu->producer_is_gxx_lt_4_6 = major < 4 || (major == 4 && minor < 6);
       cu->producer_is_gcc_lt_4_3 = major < 4 || (major == 4 && minor < 3);
+      cu->producer_is_gcc_11 = major == 11;
     }
   else if (producer_is_icc (cu->producer, &major, &minor))
     {
@@ -14464,6 +14465,19 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
       if (attr->form_is_constant ())
 	{
 	  LONGEST offset = attr->constant_value (0);
+
+	  /* Work around this GCC 11 bug, where it would erroneously use -1
+	     data member locations, instead of 0:
+
+	       Negative DW_AT_data_member_location
+	       https://gcc.gnu.org/bugzilla/show_bug.cgi?id=101378
+	     */
+	  if (offset == -1 && cu->producer_is_gcc_11)
+	    {
+	      complaint (_("DW_AT_data_member_location value of -1, assuming 0"));
+	      offset = 0;
+	    }
+
 	  field->set_loc_bitpos (offset * bits_per_byte);
 	}
       else if (attr->form_is_section_offset ())
