@@ -6352,12 +6352,12 @@ lang_size_segment (seg_align_type *seg)
      a page could be saved in the data segment.  */
   bfd_vma first, last;
 
-  first = -seg->base & (seg->pagesize - 1);
-  last = seg->end & (seg->pagesize - 1);
+  first = -seg->base & (seg->commonpagesize - 1);
+  last = seg->end & (seg->commonpagesize - 1);
   if (first && last
-      && ((seg->base & ~(seg->pagesize - 1))
-	  != (seg->end & ~(seg->pagesize - 1)))
-      && first + last <= seg->pagesize)
+      && ((seg->base & ~(seg->commonpagesize - 1))
+	  != (seg->end & ~(seg->commonpagesize - 1)))
+      && first + last <= seg->commonpagesize)
     {
       seg->phase = exp_seg_adjust;
       return true;
@@ -6374,8 +6374,7 @@ lang_size_relro_segment_1 (seg_align_type *seg)
   asection *sec;
 
   /* Compute the expected PT_GNU_RELRO/PT_LOAD segment end.  */
-  relro_end = ((seg->relro_end + seg->pagesize - 1)
-	       & ~(seg->pagesize - 1));
+  relro_end = (seg->relro_end + seg->relropagesize - 1) & -seg->relropagesize;
 
   /* Adjust by the offset arg of XXX_SEGMENT_RELRO_END.  */
   desired_end = relro_end - seg->relro_offset;

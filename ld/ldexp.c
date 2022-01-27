@@ -469,7 +469,8 @@ fold_segment_align (seg_align_type *seg, etree_value_type *lhs)
 	}
       else
 	{
-	  expld.result.value += expld.dot & (maxpage - 1);
+	  if (!link_info.relro)
+	    expld.result.value += expld.dot & (maxpage - 1);
 	  if (seg->phase == exp_seg_done)
 	    {
 	      /* OK.  */
@@ -478,8 +479,9 @@ fold_segment_align (seg_align_type *seg, etree_value_type *lhs)
 	    {
 	      seg->phase = exp_seg_align_seen;
 	      seg->base = expld.result.value;
-	      seg->pagesize = commonpage;
+	      seg->commonpagesize = commonpage;
 	      seg->maxpagesize = maxpage;
+	      seg->relropagesize = maxpage;
 	      seg->relro_end = 0;
 	    }
 	  else
@@ -508,10 +510,10 @@ fold_segment_relro_end (seg_align_type *seg, etree_value_type *lhs)
 	seg->relro_end = lhs->value + expld.result.value;
 
       if (seg->phase == exp_seg_relro_adjust
-	  && (seg->relro_end & (seg->pagesize - 1)))
+	  && (seg->relro_end & (seg->relropagesize - 1)))
 	{
-	  seg->relro_end += seg->pagesize - 1;
-	  seg->relro_end &= ~(seg->pagesize - 1);
+	  seg->relro_end += seg->relropagesize - 1;
+	  seg->relro_end &= ~(seg->relropagesize - 1);
 	  expld.result.value = seg->relro_end - expld.result.value;
 	}
       else
