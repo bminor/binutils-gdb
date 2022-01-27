@@ -445,6 +445,7 @@ if [ supports_ppc64 ] then {
     run_dump_test "tlsie"
     run_dump_test "non-contiguous-powerpc64"
     run_dump_test "tprel"
+    run_dump_test "pr28827-2"
 }
 
 run_dump_test "localgot"
