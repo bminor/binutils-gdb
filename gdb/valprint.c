@@ -2516,7 +2516,7 @@ generic_printstr (struct ui_file *stream, struct type *type,
 
   if (length == 0)
     {
-      gdb_puts ("\"\"", stream);
+      gdb_printf (stream, "%c%c", quote_char, quote_char);
       return;
     }
 
