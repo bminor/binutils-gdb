@@ -520,6 +520,11 @@ gdb_test "break" \
     "Note: breakpoints \[0-9\]*, \[0-9\]* and \[0-9\]* also set at .*Breakpoint \[0-9\]*.*" \
     "break on default location, 4th time"
 
+# Check setting a breakpoint at the default location with a condition attached.
+gdb_test "break if (1)" \
+    "Note: breakpoints \[0-9\]*, \[0-9\]*, \[0-9\]* and \[0-9\]* also set at .*Breakpoint \[0-9\]*.*" \
+    "break on the default location, 5th time, but with a condition"
+
 # Verify that a "silent" breakpoint can be set, and that GDB is indeed
 # "silent" about its triggering.
 #

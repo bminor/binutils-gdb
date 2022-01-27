@@ -134,6 +134,11 @@ struct event_location_linespec : public event_location
 
 	linespec_lex_to_end (linespec);
 	p = remove_trailing_whitespace (orig, *linespec);
+
+	/* If there is no valid linespec then this will leave the
+	   spec_string as nullptr.  This behaviour is relied on in the
+	   breakpoint setting code, where spec_string being nullptr means
+	   to use the default breakpoint location.  */
 	if ((p - orig) > 0)
 	  linespec_location.spec_string = savestring (orig, p - orig);
       }
