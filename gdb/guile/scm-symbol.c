@@ -510,7 +510,7 @@ gdbscm_symbol_line (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  return scm_from_int (SYMBOL_LINE (symbol));
+  return scm_from_int (symbol->line ());
 }
 
 /* (symbol-value <gdb:symbol> [#:frame <gdb:frame>]) -> <gdb:value>

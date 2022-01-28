@@ -74,8 +74,8 @@ output_debug_symbol (ui_out *uiout, enum search_domain kind,
 {
   ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
-  if (SYMBOL_LINE (sym) != 0)
-    uiout->field_unsigned ("line", SYMBOL_LINE (sym));
+  if (sym->line () != 0)
+    uiout->field_unsigned ("line", sym->line ());
   uiout->field_string ("name", sym->print_name ());
 
   if (kind == FUNCTIONS_DOMAIN || kind == VARIABLES_DOMAIN)

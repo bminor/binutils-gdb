@@ -58,7 +58,7 @@ convert_one_symbol (compile_c_instance *context,
 {
   gcc_type sym_type;
   const char *filename = symbol_symtab (sym.symbol)->filename;
-  unsigned short line = SYMBOL_LINE (sym.symbol);
+  unsigned short line = sym.symbol->line ();
 
   context->error_symbol_once (sym.symbol);
 

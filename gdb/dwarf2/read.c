@@ -21727,7 +21727,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 			  inlined_func ? DW_AT_call_line : DW_AT_decl_line,
 			  cu);
       if (attr != nullptr)
-	SYMBOL_LINE (sym) = attr->constant_value (0);
+	sym->set_line (attr->constant_value (0));
 
       attr = dwarf2_attr (die,
 			  inlined_func ? DW_AT_call_file : DW_AT_decl_file,

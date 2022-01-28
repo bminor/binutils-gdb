@@ -4451,7 +4451,7 @@ symbol_to_sal (struct symtab_and_line *result,
 	  *result = {};
 	  result->symtab = symbol_symtab (sym);
 	  result->symbol = sym;
-	  result->line = SYMBOL_LINE (sym);
+	  result->line = sym->line ();
 	  result->pc = SYMBOL_VALUE_ADDRESS (sym);
 	  result->pspace = result->symtab->pspace ();
 	  result->explicit_pc = 1;
@@ -4461,13 +4461,13 @@ symbol_to_sal (struct symtab_and_line *result,
 	{
 	  /* Nothing.  */
 	}
-      else if (SYMBOL_LINE (sym) != 0)
+      else if (sym->line () != 0)
 	{
 	  /* We know its line number.  */
 	  *result = {};
 	  result->symtab = symbol_symtab (sym);
 	  result->symbol = sym;
-	  result->line = SYMBOL_LINE (sym);
+	  result->line = sym->line ();
 	  result->pc = SYMBOL_VALUE_ADDRESS (sym);
 	  result->pspace = result->symtab->pspace ();
 	  return 1;

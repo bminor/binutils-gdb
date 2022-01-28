@@ -626,7 +626,7 @@ compile_cplus_convert_struct_or_union_members
 		    continue;
 		  }
 		const char *filename = symbol_symtab (sym.symbol)->filename;
-		unsigned int line = SYMBOL_LINE (sym.symbol);
+		unsigned int line = sym.symbol->line ();
 
 		physaddr = SYMBOL_VALUE_ADDRESS (sym.symbol);
 		instance->plugin ().build_decl
@@ -765,7 +765,7 @@ compile_cplus_convert_struct_or_union_methods (compile_cplus_instance *instance,
 	    }
 
 	  const char *filename = symbol_symtab (sym.symbol)->filename;
-	  unsigned int line = SYMBOL_LINE (sym.symbol);
+	  unsigned int line = sym.symbol->line ();
 	  CORE_ADDR address = BLOCK_START (SYMBOL_BLOCK_VALUE (sym.symbol));
 	  const char *kind;
 

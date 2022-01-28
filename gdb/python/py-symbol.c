@@ -221,7 +221,7 @@ sympy_line (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return gdb_py_object_from_longest (SYMBOL_LINE (symbol)).release ();
+  return gdb_py_object_from_longest (symbol->line ()).release ();
 }
 
 /* Implementation of gdb.Symbol.is_valid (self) -> Boolean.
