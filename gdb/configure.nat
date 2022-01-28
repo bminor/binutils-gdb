@@ -165,7 +165,7 @@ case ${gdb_host} in
 	    i386)
 		# Host: FreeBSD/i386
 		NATDEPFILES="${NATDEPFILES} x86-nat.o nat/x86-dregs.o \
-		x86-bsd-nat.o i386-bsd-nat.o i386-fbsd-nat.o bsd-kvm.o"
+		x86-bsd-nat.o i386-fbsd-nat.o bsd-kvm.o"
 		;;
 	    mips)
 		# Host: FreeBSD/mips
@@ -192,7 +192,7 @@ case ${gdb_host} in
 	case ${gdb_host_cpu} in
 	    i386)
 		# Host: FreeBSD/amd64
-		NATDEPFILES="${NATDEPFILES} amd64-nat.o amd64-bsd-nat.o \
+		NATDEPFILES="${NATDEPFILES} amd64-nat.o \
 		amd64-fbsd-nat.o bsd-kvm.o x86-nat.o nat/x86-dregs.o \
 		x86-bsd-nat.o"
 		;;

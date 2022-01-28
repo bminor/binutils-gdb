@@ -33,10 +33,6 @@
 #include "inf-ptrace.h"
 
 
-#ifdef PT_GETXSTATE_INFO
-size_t x86bsd_xsave_len;
-#endif
-
 /* Support for debug registers.  */
 
 #ifdef HAVE_PT_GETDBREGS

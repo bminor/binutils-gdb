@@ -159,56 +159,12 @@ i386bsd_fetch_inferior_registers (struct regcache *regcache, int regnum)
 	return;
     }
 
-#ifdef PT_GETFSBASE
-  if (regnum == -1 || regnum == I386_FSBASE_REGNUM)
-    {
-      register_t base;
-
-      if (gdb_ptrace (PT_GETFSBASE, ptid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
-	perror_with_name (_("Couldn't get segment register fs_base"));
-
-      regcache->raw_supply (I386_FSBASE_REGNUM, &base);
-      if (regnum != -1)
-	return;
-    }
-#endif
-#ifdef PT_GETGSBASE
-  if (regnum == -1 || regnum == I386_GSBASE_REGNUM)
-    {
-      register_t base;
-
-      if (gdb_ptrace (PT_GETGSBASE, ptid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
-	perror_with_name (_("Couldn't get segment register gs_base"));
-
-      regcache->raw_supply (I386_GSBASE_REGNUM, &base);
-      if (regnum != -1)
-	return;
-    }
-#endif
-
   if (regnum == -1 || regnum >= I386_ST0_REGNUM)
     {
       struct fpreg fpregs;
 #ifdef HAVE_PT_GETXMMREGS
       char xmmregs[512];
-#endif
 
-#ifdef PT_GETXSTATE_INFO
-      if (x86bsd_xsave_len != 0)
-	{
-	  void *xstateregs;
-
-	  xstateregs = alloca (x86bsd_xsave_len);
-	  if (gdb_ptrace (PT_GETXSTATE, ptid,
-			  (PTRACE_TYPE_ARG3) xstateregs, 0) == -1)
-	    perror_with_name (_("Couldn't get extended state status"));
-
-	  i387_supply_xsave (regcache, -1, xstateregs);
-	  return;
-	}
-#endif
-      
-#ifdef HAVE_PT_GETXMMREGS
       if (have_ptrace_xmmregs != 0
 	  && gdb_ptrace(PT_GETXMMREGS, ptid,
 			(PTRACE_TYPE_ARG3) xmmregs, 0) == 0)
@@ -255,60 +211,12 @@ i386bsd_store_inferior_registers (struct regcache *regcache, int regnum)
 	return;
     }
 
-#ifdef PT_SETFSBASE
-  if (regnum == -1 || regnum == I386_FSBASE_REGNUM)
-    {
-      register_t base;
-
-      regcache->raw_collect (I386_FSBASE_REGNUM, &base);
-
-      if (gdb_ptrace (PT_SETFSBASE, ptid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
-	perror_with_name (_("Couldn't write segment register fs_base"));
-      if (regnum != -1)
-	return;
-    }
-#endif
-#ifdef PT_SETGSBASE
-  if (regnum == -1 || regnum == I386_GSBASE_REGNUM)
-    {
-      register_t base;
-
-      regcache->raw_collect (I386_GSBASE_REGNUM, &base);
-
-      if (gdb_ptrace (PT_SETGSBASE, ptid, (PTRACE_TYPE_ARG3) &base, 0) == -1)
-	perror_with_name (_("Couldn't write segment register gs_base"));
-      if (regnum != -1)
-	return;
-    }
-#endif
-
   if (regnum == -1 || regnum >= I386_ST0_REGNUM)
     {
       struct fpreg fpregs;
 #ifdef HAVE_PT_GETXMMREGS
       char xmmregs[512];
-#endif
 
-#ifdef PT_GETXSTATE_INFO
-      if (x86bsd_xsave_len != 0)
-	{
-	  void *xstateregs;
-
-	  xstateregs = alloca (x86bsd_xsave_len);
-	  if (gdb_ptrace (PT_GETXSTATE, ptid,
-			  (PTRACE_TYPE_ARG3) xstateregs, 0) == -1)
-	    perror_with_name (_("Couldn't get extended state status"));
-
-	  i387_collect_xsave (regcache, -1, xstateregs, 0);
-
-	  if (gdb_ptrace (PT_SETXSTATE, ptid, (PTRACE_TYPE_ARG3) xstateregs,
-			  x86bsd_xsave_len) == -1)
-	    perror_with_name (_("Couldn't write extended state status"));
-	  return;
-	}
-#endif
-
-#ifdef HAVE_PT_GETXMMREGS
       if (have_ptrace_xmmregs != 0
 	  && gdb_ptrace(PT_GETXMMREGS, ptid,
 			(PTRACE_TYPE_ARG3) xmmregs, 0) == 0)

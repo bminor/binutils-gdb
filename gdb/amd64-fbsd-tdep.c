@@ -27,6 +27,7 @@
 #include "gdbsupport/x86-xstate.h"
 
 #include "amd64-tdep.h"
+#include "amd64-fbsd-tdep.h"
 #include "fbsd-tdep.h"
 #include "solib-svr4.h"
 #include "inferior.h"

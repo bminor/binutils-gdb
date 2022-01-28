@@ -1,6 +1,6 @@
-/* Target-dependent code for FreeBSD x86.
+/* FreeBSD/amd64 target support, prototypes.
 
-   Copyright (C) 2015-2022 Free Software Foundation, Inc.
+   Copyright (C) 2021 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,19 +17,11 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef I386_FBSD_TDEP_H
-#define I386_FBSD_TDEP_H
+#ifndef AMD64_FBSD_TDEP_H
+#define AMD64_FBSD_TDEP_H
 
 #include "regset.h"
 
-/* Get XSAVE extended state xcr0 from core dump.  */
-extern uint64_t i386fbsd_core_read_xcr0 (bfd *abfd);
+extern const struct regset amd64_fbsd_gregset;
 
-/* The format of the XSAVE extended area is determined by hardware.
-   Cores store the XSAVE extended area in a NT_X86_XSTATE note that
-   matches the layout on Linux.  */
-#define I386_FBSD_XSAVE_XCR0_OFFSET 464
-
-extern const struct regset i386_fbsd_gregset;
-
-#endif /* i386-fbsd-tdep.h */
+#endif /* AMD64_FBSD_TDEP_H */
