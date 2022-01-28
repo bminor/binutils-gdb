@@ -217,20 +217,21 @@ buildsym_compunit::finish_block_internal
 
   if (symbol)
     {
-      BLOCK_MULTIDICT (block)
-	= mdict_create_linear (&m_objfile->objfile_obstack, *listhead);
+      block->set_multidict
+	(mdict_create_linear (&m_objfile->objfile_obstack, *listhead));
     }
   else
     {
       if (expandable)
 	{
-	  BLOCK_MULTIDICT (block) = mdict_create_hashed_expandable (m_language);
-	  mdict_add_pending (BLOCK_MULTIDICT (block), *listhead);
+	  block->set_multidict
+	    (mdict_create_hashed_expandable (m_language));
+	  mdict_add_pending (block->multidict (), *listhead);
 	}
       else
 	{
-	  BLOCK_MULTIDICT (block) =
-	    mdict_create_hashed (&m_objfile->objfile_obstack, *listhead);
+	  block->set_multidict
+	    (mdict_create_hashed (&m_objfile->objfile_obstack, *listhead));
 	}
     }
 
@@ -256,7 +257,7 @@ buildsym_compunit::finish_block_internal
 
 	  /* Here we want to directly access the dictionary, because
 	     we haven't fully initialized the block yet.  */
-	  ALL_DICT_SYMBOLS (BLOCK_MULTIDICT (block), miter, sym)
+	  ALL_DICT_SYMBOLS (block->multidict (), miter, sym)
 	    {
 	      if (sym->is_argument ())
 		nparams++;
@@ -271,7 +272,7 @@ buildsym_compunit::finish_block_internal
 	      iparams = 0;
 	      /* Here we want to directly access the dictionary, because
 		 we haven't fully initialized the block yet.  */
-	      ALL_DICT_SYMBOLS (BLOCK_MULTIDICT (block), miter, sym)
+	      ALL_DICT_SYMBOLS (block->multidict (), miter, sym)
 		{
 		  if (iparams == nparams)
 		    break;
@@ -1013,7 +1014,7 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 	/* Note that we only want to fix up symbols from the local
 	   blocks, not blocks coming from included symtabs.  That is why
 	   we use ALL_DICT_SYMBOLS here and not ALL_BLOCK_SYMBOLS.  */
-	ALL_DICT_SYMBOLS (BLOCK_MULTIDICT (block), miter, sym)
+	ALL_DICT_SYMBOLS (block->multidict (), miter, sym)
 	  if (sym->symtab () == NULL)
 	    sym->set_symtab (symtab);
       }
@@ -1148,7 +1149,7 @@ buildsym_compunit::augment_type_symtab ()
 	 to the primary symtab.  */
       set_missing_symtab (m_file_symbols, cust);
 
-      mdict_add_pending (BLOCK_MULTIDICT (block), m_file_symbols);
+      mdict_add_pending (block->multidict (), m_file_symbols);
     }
 
   if (m_global_symbols != NULL)
@@ -1159,8 +1160,7 @@ buildsym_compunit::augment_type_symtab ()
 	 to the primary symtab.  */
       set_missing_symtab (m_global_symbols, cust);
 
-      mdict_add_pending (BLOCK_MULTIDICT (block),
-			m_global_symbols);
+      mdict_add_pending (block->multidict (), m_global_symbols);
     }
 }
 

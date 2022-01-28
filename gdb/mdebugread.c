@@ -4489,7 +4489,7 @@ static void
 add_symbol (struct symbol *s, struct symtab *symtab, struct block *b)
 {
   s->set_symtab (symtab);
-  mdict_add_symbol (BLOCK_MULTIDICT (b), s);
+  mdict_add_symbol (b->multidict (), s);
 }
 
 /* Add a new block B to a symtab S.  */
@@ -4733,9 +4733,9 @@ new_block (enum block_type type, enum language language)
   struct block *retval = XCNEW (struct block);
 
   if (type == FUNCTION_BLOCK)
-    BLOCK_MULTIDICT (retval) = mdict_create_linear_expandable (language);
+    retval->set_multidict (mdict_create_linear_expandable (language));
   else
-    BLOCK_MULTIDICT (retval) = mdict_create_hashed_expandable (language);
+    retval->set_multidict (mdict_create_hashed_expandable (language));
 
   return retval;
 }

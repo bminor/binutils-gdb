@@ -689,7 +689,7 @@ objfile_relocate1 (struct objfile *objfile,
 
 	    /* We only want to iterate over the local symbols, not any
 	       symbols in included symtabs.  */
-	    ALL_DICT_SYMBOLS (BLOCK_MULTIDICT (b), miter, sym)
+	    ALL_DICT_SYMBOLS (b->multidict (), miter, sym)
 	      {
 		relocate_one_symbol (sym, objfile, delta);
 	      }

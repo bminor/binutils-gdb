@@ -545,7 +545,7 @@ block_iterator_step (struct block_iterator *iterator, int first)
 
 	  block = BLOCKVECTOR_BLOCK (cust->blockvector (),
 				     iterator->which);
-	  sym = mdict_iterator_first (BLOCK_MULTIDICT (block),
+	  sym = mdict_iterator_first (block->multidict (),
 				      &iterator->mdict_iter);
 	}
       else
@@ -571,7 +571,7 @@ block_iterator_first (const struct block *block,
   initialize_block_iterator (block, iterator);
 
   if (iterator->which == FIRST_LOCAL_BLOCK)
-    return mdict_iterator_first (block->multidict, &iterator->mdict_iter);
+    return mdict_iterator_first (block->multidict (), &iterator->mdict_iter);
 
   return block_iterator_step (iterator, 1);
 }
@@ -614,7 +614,7 @@ block_iter_match_step (struct block_iterator *iterator,
 
 	  block = BLOCKVECTOR_BLOCK (cust->blockvector (),
 				     iterator->which);
-	  sym = mdict_iter_match_first (BLOCK_MULTIDICT (block), name,
+	  sym = mdict_iter_match_first (block->multidict (), name,
 					&iterator->mdict_iter);
 	}
       else
@@ -641,7 +641,7 @@ block_iter_match_first (const struct block *block,
   initialize_block_iterator (block, iterator);
 
   if (iterator->which == FIRST_LOCAL_BLOCK)
-    return mdict_iter_match_first (block->multidict, name,
+    return mdict_iter_match_first (block->multidict (), name,
 				   &iterator->mdict_iter);
 
   return block_iter_match_step (iterator, name, 1);
@@ -779,8 +779,8 @@ block_lookup_symbol_primary (const struct block *block, const char *name,
 	      || block->superblock ()->superblock () == NULL);
 
   other = NULL;
-  for (sym
-	 = mdict_iter_match_first (block->multidict, lookup_name, &mdict_iter);
+  for (sym = mdict_iter_match_first (block->multidict (), lookup_name,
+				     &mdict_iter);
        sym != NULL;
        sym = mdict_iter_match_next (lookup_name, &mdict_iter))
     {

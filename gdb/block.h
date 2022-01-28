@@ -122,6 +122,14 @@ struct block
   void set_superblock (const block *superblock)
   { m_superblock = superblock; }
 
+  /* Return this block's multidict.  */
+  multidictionary *multidict () const
+  { return m_multidict; }
+
+  /* Set this block's multidict.  */
+  void set_multidict (multidictionary *multidict)
+  { m_multidict = multidict; }
+
   /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR m_start;
@@ -142,7 +150,7 @@ struct block
 
   /* This is used to store the symbols in the block.  */
 
-  struct multidictionary *multidict;
+  struct multidictionary *m_multidict;
 
   /* Contains information about namespace-related info relevant to this block:
      using directives and the current namespace scope.  */
@@ -170,7 +178,6 @@ struct global_block
   struct compunit_symtab *compunit_symtab;
 };
 
-#define BLOCK_MULTIDICT(bl)	(bl)->multidict
 #define BLOCK_NAMESPACE(bl)	(bl)->namespace_info
 
 /* Accessor for ranges field within block BL.  */

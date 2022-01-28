@@ -294,7 +294,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	     even if we're using a hashtable, but nothing else but this message
 	     wants it.  */
 	  gdb_printf (outfile, ", %d syms/buckets in ",
-		      mdict_size (BLOCK_MULTIDICT (b)));
+		      mdict_size (b->multidict ()));
 	  gdb_puts (paddress (gdbarch, b->start ()), outfile);
 	  gdb_printf (outfile, "..");
 	  gdb_puts (paddress (gdbarch, b->end ()), outfile);
@@ -312,7 +312,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	  /* Now print each symbol in this block (in no particular order, if
 	     we're using a hashtable).  Note that we only want this
 	     block, not any blocks from included symtabs.  */
-	  ALL_DICT_SYMBOLS (BLOCK_MULTIDICT (b), miter, sym)
+	  ALL_DICT_SYMBOLS (b->multidict (), miter, sym)
 	    {
 	      try
 		{

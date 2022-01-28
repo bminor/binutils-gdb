@@ -580,8 +580,8 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 					   TARGET_CHAR_BIT,
 					   "void");
 
-      BLOCK_MULTIDICT (new_block)
-	= mdict_create_linear (&objfile->objfile_obstack, NULL);
+      new_block->set_multidict
+	(mdict_create_linear (&objfile->objfile_obstack, NULL));
       /* The address range.  */
       new_block->set_start (gdb_block_iter.begin);
       new_block->set_end (gdb_block_iter.end);
@@ -618,8 +618,8 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       new_block = (i == GLOBAL_BLOCK
 		   ? allocate_global_block (&objfile->objfile_obstack)
 		   : allocate_block (&objfile->objfile_obstack));
-      BLOCK_MULTIDICT (new_block)
-	= mdict_create_linear (&objfile->objfile_obstack, NULL);
+      new_block->set_multidict
+	(mdict_create_linear (&objfile->objfile_obstack, NULL));
       new_block->set_superblock (block_iter);
       block_iter = new_block;
 
