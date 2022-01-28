@@ -32,6 +32,42 @@
 #include "solib-svr4.h"
 #include "inferior.h"
 
+/* The general-purpose regset consists of 19 32-bit slots.  */
+#define I386_FBSD_SIZEOF_GREGSET	(19 * 4)
+
+/* Register maps.  */
+
+static const struct regcache_map_entry i386_fbsd_gregmap[] =
+{
+  { 1, I386_FS_REGNUM, 4 },
+  { 1, I386_ES_REGNUM, 4 },
+  { 1, I386_DS_REGNUM, 4 },
+  { 1, I386_EDI_REGNUM, 0 },
+  { 1, I386_ESI_REGNUM, 0 },
+  { 1, I386_EBP_REGNUM, 0 },
+  { 1, REGCACHE_MAP_SKIP, 4 },	/* isp */
+  { 1, I386_EBX_REGNUM, 0 },
+  { 1, I386_EDX_REGNUM, 0 },
+  { 1, I386_ECX_REGNUM, 0 },
+  { 1, I386_EAX_REGNUM, 0 },
+  { 1, REGCACHE_MAP_SKIP, 4 },	/* trapno */
+  { 1, REGCACHE_MAP_SKIP, 4 },	/* err */
+  { 1, I386_EIP_REGNUM, 0 },
+  { 1, I386_CS_REGNUM, 4 },
+  { 1, I386_EFLAGS_REGNUM, 0 },
+  { 1, I386_ESP_REGNUM, 0 },
+  { 1, I386_SS_REGNUM, 4 },
+  { 1, I386_GS_REGNUM, 4 },
+  { 0 }
+};
+
+/* Register set definitions.  */
+
+const struct regset i386_fbsd_gregset =
+{
+  i386_fbsd_gregmap, regcache_supply_regset, regcache_collect_regset
+};
+
 /* Support for signal handlers.  */
 
 /* Return whether THIS_FRAME corresponds to a FreeBSD sigtramp
@@ -110,17 +146,6 @@ i386fbsd_sigtramp_p (struct frame_info *this_frame)
 
   return 1;
 }
-
-/* From <machine/reg.h>.  */
-static int i386fbsd_r_reg_offset[] =
-{
-  10 * 4, 9 * 4, 8 * 4, 7 * 4,	/* %eax, %ecx, %edx, %ebx */
-  16 * 4, 5 * 4,		/* %esp, %ebp */
-  4 * 4, 3 * 4,			/* %esi, %edi */
-  13 * 4, 15 * 4,		/* %eip, %eflags */
-  14 * 4, 17 * 4,		/* %cs, %ss */
-  2 * 4, 1 * 4, 0 * 4, 18 * 4	/* %ds, %es, %fs, %gs */
-};
 
 /* From <machine/signal.h>.  */
 int i386fbsd_sc_reg_offset[] =
@@ -229,8 +254,8 @@ i386fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 {
   i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
-  cb (".reg", tdep->sizeof_gregset, tdep->sizeof_gregset, &i386_gregset, NULL,
-      cb_data);
+  cb (".reg", I386_FBSD_SIZEOF_GREGSET, I386_FBSD_SIZEOF_GREGSET,
+      &i386_fbsd_gregset, NULL, cb_data);
   cb (".reg2", tdep->sizeof_fpregset, tdep->sizeof_fpregset, &i386_fpregset,
       NULL, cb_data);
 
@@ -276,11 +301,8 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Obviously FreeBSD is BSD-based.  */
   i386bsd_init_abi (info, gdbarch);
 
-  /* FreeBSD has a different `struct reg', and reserves some space for
-     its FPU emulator in `struct fpreg'.  */
-  tdep->gregset_reg_offset = i386fbsd_r_reg_offset;
-  tdep->gregset_num_regs = ARRAY_SIZE (i386fbsd_r_reg_offset);
-  tdep->sizeof_gregset = 19 * 4;
+  /* FreeBSD reserves some space for its FPU emulator in
+     `struct fpreg'.  */
   tdep->sizeof_fpregset = 176;
 
   /* FreeBSD uses -freg-struct-return by default.  */

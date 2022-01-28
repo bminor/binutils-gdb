@@ -32,6 +32,51 @@
 #include "solib-svr4.h"
 #include "inferior.h"
 
+/* The general-purpose regset consists of 22 64-bit slots, most of
+   which contain individual registers, but a few contain multiple
+   16-bit segment registers.  */
+#define AMD64_FBSD_SIZEOF_GREGSET	(22 * 8)
+
+/* Register maps.  */
+
+static const struct regcache_map_entry amd64_fbsd_gregmap[] =
+{
+  { 1, AMD64_R15_REGNUM, 0 },
+  { 1, AMD64_R14_REGNUM, 0 },
+  { 1, AMD64_R13_REGNUM, 0 },
+  { 1, AMD64_R12_REGNUM, 0 },
+  { 1, AMD64_R11_REGNUM, 0 },
+  { 1, AMD64_R10_REGNUM, 0 },
+  { 1, AMD64_R9_REGNUM, 0 },
+  { 1, AMD64_R8_REGNUM, 0 },
+  { 1, AMD64_RDI_REGNUM, 0 },
+  { 1, AMD64_RSI_REGNUM, 0 },
+  { 1, AMD64_RBP_REGNUM, 0 },
+  { 1, AMD64_RBX_REGNUM, 0 },
+  { 1, AMD64_RDX_REGNUM, 0 },
+  { 1, AMD64_RCX_REGNUM, 0 },
+  { 1, AMD64_RAX_REGNUM, 0 },
+  { 1, REGCACHE_MAP_SKIP, 4 },	/* trapno */
+  { 1, AMD64_FS_REGNUM, 2 },
+  { 1, AMD64_GS_REGNUM, 2 },
+  { 1, REGCACHE_MAP_SKIP, 4 },	/* err */
+  { 1, AMD64_ES_REGNUM, 2 },
+  { 1, AMD64_DS_REGNUM, 2 },
+  { 1, AMD64_RIP_REGNUM, 0 },
+  { 1, AMD64_CS_REGNUM, 8 },
+  { 1, AMD64_EFLAGS_REGNUM, 8 },
+  { 1, AMD64_RSP_REGNUM, 0 },
+  { 1, AMD64_SS_REGNUM, 8 },
+  { 0 }
+};
+
+/* Register set definitions.  */
+
+const struct regset amd64_fbsd_gregset =
+{
+  amd64_fbsd_gregmap, regcache_supply_regset, regcache_collect_regset
+};
+
 /* Support for signal handlers.  */
 
 /* Return whether THIS_FRAME corresponds to a FreeBSD sigtramp
@@ -80,42 +125,6 @@ amd64fbsd_sigcontext_addr (struct frame_info *this_frame)
   return sp + 16;
 }
 
-/* FreeBSD 5.1-RELEASE or later.  */
-
-/* Mapping between the general-purpose registers in `struct reg'
-   format and GDB's register cache layout.
-
-   Note that some registers are 32-bit, but since we're little-endian
-   we get away with that.  */
-
-/* From <machine/reg.h>.  */
-static int amd64fbsd_r_reg_offset[] =
-{
-  14 * 8,			/* %rax */
-  11 * 8,			/* %rbx */
-  13 * 8,			/* %rcx */
-  12 * 8,			/* %rdx */
-  9 * 8,			/* %rsi */
-  8 * 8,			/* %rdi */
-  10 * 8,			/* %rbp */
-  20 * 8,			/* %rsp */
-  7 * 8,			/* %r8 ...  */
-  6 * 8,
-  5 * 8,
-  4 * 8,
-  3 * 8,
-  2 * 8,
-  1 * 8,
-  0 * 8,			/* ... %r15 */
-  17 * 8,			/* %rip */
-  19 * 8,			/* %eflags */
-  18 * 8,			/* %cs */
-  21 * 8,			/* %ss */
-  -1,				/* %ds */
-  -1,				/* %es */
-  -1,				/* %fs */
-  -1				/* %gs */
-};
 
 /* From <machine/signal.h>.  */
 int amd64fbsd_sc_reg_offset[] =
@@ -193,8 +202,8 @@ amd64fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 {
   i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
-  cb (".reg", tdep->sizeof_gregset, tdep->sizeof_gregset, &i386_gregset, NULL,
-      cb_data);
+  cb (".reg", AMD64_FBSD_SIZEOF_GREGSET, AMD64_FBSD_SIZEOF_GREGSET,
+      &amd64_fbsd_gregset, NULL, cb_data);
   cb (".reg2", tdep->sizeof_fpregset, tdep->sizeof_fpregset, &amd64_fpregset,
       NULL, cb_data);
   cb (".reg-xstate", X86_XSTATE_SIZE (tdep->xcr0), X86_XSTATE_SIZE (tdep->xcr0),
@@ -232,10 +241,6 @@ amd64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Obviously FreeBSD is BSD-based.  */
   i386bsd_init_abi (info, gdbarch);
-
-  tdep->gregset_reg_offset = amd64fbsd_r_reg_offset;
-  tdep->gregset_num_regs = ARRAY_SIZE (amd64fbsd_r_reg_offset);
-  tdep->sizeof_gregset = 22 * 8;
 
   amd64_init_abi (info, gdbarch,
 		  amd64_target_description (X86_XSTATE_SSE_MASK, true));
