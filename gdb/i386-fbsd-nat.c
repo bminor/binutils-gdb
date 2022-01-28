@@ -182,30 +182,4 @@ _initialize_i386fbsd_nat ()
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (i386fbsd_supply_pcb);
-
-#ifdef KERN_PROC_SIGTRAMP
-  /* Normally signal frames are detected via i386fbsd_sigtramp_p.
-     However, FreeBSD 9.2 through 10.1 do not include the page holding
-     the signal code in core dumps.  These releases do provide a
-     kern.proc.sigtramp.<pid> sysctl that returns the location of the
-     signal trampoline for a running process.  We fetch the location
-     of the current (gdb) process and use this to identify signal
-     frames in core dumps from these releases.  */
-  {
-    int mib[4];
-    struct kinfo_sigtramp kst;
-    size_t len;
-
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_SIGTRAMP;
-    mib[3] = getpid ();
-    len = sizeof (kst);
-    if (sysctl (mib, 4, &kst, &len, NULL, 0) == 0)
-      {
-	i386fbsd_sigtramp_start_addr = (uintptr_t) kst.ksigtramp_start;
-	i386fbsd_sigtramp_end_addr = (uintptr_t) kst.ksigtramp_end;
-      }
-  }
-#endif
 }

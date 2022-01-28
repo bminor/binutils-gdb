@@ -122,10 +122,6 @@ static int i386fbsd_r_reg_offset[] =
   2 * 4, 1 * 4, 0 * 4, 18 * 4	/* %ds, %es, %fs, %gs */
 };
 
-/* Sigtramp routine location.  */
-CORE_ADDR i386fbsd_sigtramp_start_addr;
-CORE_ADDR i386fbsd_sigtramp_end_addr;
-
 /* From <machine/signal.h>.  */
 int i386fbsd_sc_reg_offset[] =
 {
@@ -291,10 +287,6 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->struct_return = reg_struct_return;
 
   tdep->sigtramp_p = i386fbsd_sigtramp_p;
-
-  /* FreeBSD uses a different memory layout.  */
-  tdep->sigtramp_start = i386fbsd_sigtramp_start_addr;
-  tdep->sigtramp_end = i386fbsd_sigtramp_end_addr;
 
   /* FreeBSD has a more complete `struct sigcontext'.  */
   tdep->sc_reg_offset = i386fbsd_sc_reg_offset;
