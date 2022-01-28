@@ -160,7 +160,7 @@ bkscm_print_block_smob (SCM self, SCM port, scm_print_state *pstate)
     gdbscm_printf (port, " %s", BLOCK_FUNCTION (b)->print_name ());
 
   gdbscm_printf (port, " %s-%s",
-		 hex_string (BLOCK_START (b)), hex_string (BLOCK_END (b)));
+		 hex_string (b->start ()), hex_string (b->end ()));
 
   scm_puts (">", port);
 
@@ -379,7 +379,7 @@ gdbscm_block_start (SCM self)
     = bkscm_get_valid_block_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct block *block = b_smob->block;
 
-  return gdbscm_scm_from_ulongest (BLOCK_START (block));
+  return gdbscm_scm_from_ulongest (block->start ());
 }
 
 /* (block-end <gdb:block>) -> address */
@@ -391,7 +391,7 @@ gdbscm_block_end (SCM self)
     = bkscm_get_valid_block_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct block *block = b_smob->block;
 
-  return gdbscm_scm_from_ulongest (BLOCK_END (block));
+  return gdbscm_scm_from_ulongest (block->end ());
 }
 
 /* (block-function <gdb:block>) -> <gdb:symbol> */

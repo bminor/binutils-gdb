@@ -2982,8 +2982,8 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 	  const struct blockvector *bv = cust->blockvector ();
 	  const struct block *global_block
 	    = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	  CORE_ADDR start = BLOCK_START (global_block);
-	  CORE_ADDR end = BLOCK_END (global_block);
+	  CORE_ADDR start = global_block->start ();
+	  CORE_ADDR end = global_block->end ();
 	  bool in_range_p = start <= pc && pc < end;
 	  if (!in_range_p)
 	    continue;
@@ -3406,7 +3406,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
       else if (alt)
 	val.end = alt->pc;
       else
-	val.end = BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK));
+	val.end = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK)->end ();
     }
   val.section = section;
   return val;
@@ -3985,7 +3985,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
 	 line is still part of the same function.  */
       if (skip && start_sal.pc != pc
 	  && (sym ? (BLOCK_ENTRY_PC (sym->value_block ()) <= start_sal.end
-		     && start_sal.end < BLOCK_END (sym->value_block ()))
+		     && start_sal.end < sym->value_block()->end ())
 	      : (lookup_minimal_symbol_by_pc_section (start_sal.end, section).minsym
 		 == lookup_minimal_symbol_by_pc_section (pc, section).minsym)))
 	{

@@ -102,7 +102,7 @@ find_proc_desc (CORE_ADDR pc)
       CORE_ADDR startaddr;
       find_pc_partial_function (pc, &sh_name, &startaddr, NULL);
 
-      if (startaddr > BLOCK_START (b))
+      if (startaddr > b->start ())
 	/* This is the "pathological" case referred to in a comment in
 	   print_frame_info.  It might be better to move this check into
 	   symbol reading.  */

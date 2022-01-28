@@ -583,8 +583,8 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       BLOCK_MULTIDICT (new_block)
 	= mdict_create_linear (&objfile->objfile_obstack, NULL);
       /* The address range.  */
-      BLOCK_START (new_block) = (CORE_ADDR) gdb_block_iter.begin;
-      BLOCK_END (new_block) = (CORE_ADDR) gdb_block_iter.end;
+      new_block->set_start (gdb_block_iter.begin);
+      new_block->set_end (gdb_block_iter.end);
 
       /* The name.  */
       block_name->set_domain (VAR_DOMAIN);
@@ -599,10 +599,10 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       BLOCK_FUNCTION (new_block) = block_name;
 
       BLOCKVECTOR_BLOCK (bv, block_idx) = new_block;
-      if (begin > BLOCK_START (new_block))
-	begin = BLOCK_START (new_block);
-      if (end < BLOCK_END (new_block))
-	end = BLOCK_END (new_block);
+      if (begin > new_block->start ())
+	begin = new_block->start ();
+      if (end < new_block->end ())
+	end = new_block->end ();
 
       gdb_block_iter.real_block = new_block;
 
@@ -623,8 +623,8 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       BLOCK_SUPERBLOCK (new_block) = block_iter;
       block_iter = new_block;
 
-      BLOCK_START (new_block) = (CORE_ADDR) begin;
-      BLOCK_END (new_block) = (CORE_ADDR) end;
+      new_block->set_start (begin);
+      new_block->set_end (end);
 
       BLOCKVECTOR_BLOCK (bv, i) = new_block;
 

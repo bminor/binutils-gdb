@@ -1939,8 +1939,8 @@ check_scope (const struct varobj *var)
     {
       CORE_ADDR pc = get_frame_pc (fi);
 
-      if (pc <  BLOCK_START (var->root->valid_block) ||
-	  pc >= BLOCK_END (var->root->valid_block))
+      if (pc <  var->root->valid_block->start () ||
+	  pc >= var->root->valid_block->end ())
 	scope = false;
       else
 	select_frame (fi);

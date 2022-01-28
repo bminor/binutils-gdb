@@ -1839,7 +1839,7 @@ csky_frame_unwind_cache (struct frame_info *this_frame)
   /* Get the (function) symbol matching prologue_start.  */
   bl = block_for_pc (prologue_start);
   if (bl != NULL)
-    func_size = bl->endaddr - bl->startaddr;
+    func_size = bl->end () - bl->start ();
   else
     {
       struct bound_minimal_symbol msymbol

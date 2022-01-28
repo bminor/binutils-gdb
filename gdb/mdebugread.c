@@ -798,7 +798,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       b = new_block (FUNCTION_BLOCK, s->language ());
       s->set_value_block (b);
       BLOCK_FUNCTION (b) = s;
-      BLOCK_START (b) = BLOCK_END (b) = sh->value;
+      b->set_start (sh->value);
+      b->set_end (sh->value);
       BLOCK_SUPERBLOCK (b) = top_stack->cur_block;
       add_block (b, top_stack->cur_st);
 
@@ -1126,7 +1127,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
       top_stack->blocktype = stBlock;
       b = new_block (NON_FUNCTION_BLOCK, psymtab_language);
-      BLOCK_START (b) = sh->value + top_stack->procadr;
+      b->set_start (sh->value + top_stack->procadr);
       BLOCK_SUPERBLOCK (b) = top_stack->cur_block;
       top_stack->cur_block = b;
       add_block (b, top_stack->cur_st);
@@ -1150,7 +1151,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  struct type *ftype = top_stack->cur_type;
 	  int i;
 
-	  BLOCK_END (top_stack->cur_block) += sh->value;	/* size */
+	  top_stack->cur_block->set_end
+	    (top_stack->cur_block->end () + sh->value); /* size */
 
 	  /* Make up special symbol to contain procedure specific info.  */
 	  s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
@@ -1171,11 +1173,11 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	      struct block *b_bad = BLOCKVECTOR_BLOCK (bv, i);
 
 	      if (BLOCK_SUPERBLOCK (b_bad) == cblock
-		  && BLOCK_START (b_bad) == top_stack->procadr
-		  && BLOCK_END (b_bad) == top_stack->procadr)
+		  && b_bad->start () == top_stack->procadr
+		  && b_bad->end () == top_stack->procadr)
 		{
-		  BLOCK_START (b_bad) = BLOCK_START (cblock);
-		  BLOCK_END (b_bad) = BLOCK_END (cblock);
+		  b_bad->set_start (cblock->start ());
+		  b_bad->set_end (cblock->end ());
 		}
 	    }
 
@@ -1217,7 +1219,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  /* End of (code) block.  The value of the symbol is the
 	     displacement from the procedure`s start address of the
 	     end of this block.  */
-	  BLOCK_END (top_stack->cur_block) = sh->value + top_stack->procadr;
+	  top_stack->cur_block->set_end (sh->value + top_stack->procadr);
 	}
       else if (sh->sc == scText && top_stack->blocktype == stNil)
 	{
@@ -2024,7 +2026,7 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
 	 e->pdr.adr is sometimes offset by a bogus value.
 	 To work around these problems, we replace e->pdr.adr with
 	 the start address of the function.  */
-      e->pdr.adr = BLOCK_START (b);
+      e->pdr.adr = b->start ();
     }
 
   /* It would be reasonable that functions that have been compiled
@@ -4099,8 +4101,8 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
       top_stack->cur_st = cust->primary_filetab ();
       top_stack->cur_block
 	= BLOCKVECTOR_BLOCK (cust->blockvector (), STATIC_BLOCK);
-      BLOCK_START (top_stack->cur_block) = pst->text_low (objfile);
-      BLOCK_END (top_stack->cur_block) = 0;
+      top_stack->cur_block->set_start (pst->text_low (objfile));
+      top_stack->cur_block->set_end (0);
       top_stack->blocktype = stFile;
       top_stack->cur_type = 0;
       top_stack->procadr = 0;
@@ -4550,13 +4552,13 @@ add_line (struct linetable *lt, int lineno, CORE_ADDR adr, int last)
 static bool
 block_is_less_than (const struct block *b1, const struct block *b2)
 {
-  CORE_ADDR start1 = BLOCK_START (b1);
-  CORE_ADDR start2 = BLOCK_START (b2);
+  CORE_ADDR start1 = b1->start ();
+  CORE_ADDR start2 = b2->start ();
 
   if (start1 != start2)
     return start1 < start2;
 
-  return (BLOCK_END (b2)) < (BLOCK_END (b1));
+  return (b2->end ()) < (b1->end ());
 }
 
 /* Sort the blocks of a symtab S.
@@ -4574,10 +4576,10 @@ sort_blocks (struct symtab *s)
   if (BLOCKVECTOR_NBLOCKS (bv) <= FIRST_LOCAL_BLOCK)
     {
       /* Cosmetic */
-      if (BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK)) == 0)
-	BLOCK_START (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK)) = 0;
-      if (BLOCK_END (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)) == 0)
-	BLOCK_START (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)) = 0;
+      if (BLOCKVECTOR_BLOCK(bv, GLOBAL_BLOCK)->end () == 0)
+	BLOCKVECTOR_BLOCK(bv, GLOBAL_BLOCK)->set_start (0);
+      if (BLOCKVECTOR_BLOCK(bv, STATIC_BLOCK)->end () == 0)
+	BLOCKVECTOR_BLOCK(bv, STATIC_BLOCK)->set_start (0);
       return;
     }
   /*
@@ -4596,18 +4598,19 @@ sort_blocks (struct symtab *s)
     int i, j = BLOCKVECTOR_NBLOCKS (bv);
 
     for (i = FIRST_LOCAL_BLOCK; i < j; i++)
-      if (high < BLOCK_END (BLOCKVECTOR_BLOCK (bv, i)))
-	high = BLOCK_END (BLOCKVECTOR_BLOCK (bv, i));
-    BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK)) = high;
+      if (high < BLOCKVECTOR_BLOCK(bv, i)->end ())
+	high = BLOCKVECTOR_BLOCK(bv, i)->end ();
+    BLOCKVECTOR_BLOCK(bv, GLOBAL_BLOCK)->set_end (high);
   }
 
-  BLOCK_START (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK)) =
-    BLOCK_START (BLOCKVECTOR_BLOCK (bv, FIRST_LOCAL_BLOCK));
+  BLOCKVECTOR_BLOCK(bv, GLOBAL_BLOCK)->set_start
+    (BLOCKVECTOR_BLOCK(bv, FIRST_LOCAL_BLOCK)->start ());
 
-  BLOCK_START (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)) =
-    BLOCK_START (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK));
-  BLOCK_END (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)) =
-    BLOCK_END (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK));
+  BLOCKVECTOR_BLOCK(bv, STATIC_BLOCK)->set_start
+    (BLOCKVECTOR_BLOCK(bv, GLOBAL_BLOCK)->start ());
+
+  BLOCKVECTOR_BLOCK(bv, STATIC_BLOCK)->set_end
+    (BLOCKVECTOR_BLOCK(bv, GLOBAL_BLOCK)->end ());
 }
 
 

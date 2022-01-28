@@ -1835,8 +1835,8 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		    }
 		}
 	      if (ps->raw_text_high () != 0
-		  && (ps->text_low (objfile) < BLOCK_START (b)
-		      || ps->text_high (objfile) > BLOCK_END (b)))
+		  && (ps->text_low (objfile) < b->start ()
+		      || ps->text_high (objfile) > b->end ()))
 		{
 		  gdb_printf ("Psymtab ");
 		  gdb_puts (ps->filename);
@@ -1845,9 +1845,9 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		  gdb_printf (" - ");
 		  gdb_puts (paddress (gdbarch, ps->text_high (objfile)));
 		  gdb_printf (" but symtab covers only ");
-		  gdb_puts (paddress (gdbarch, BLOCK_START (b)));
+		  gdb_puts (paddress (gdbarch, b->start ()));
 		  gdb_printf (" - ");
-		  gdb_puts (paddress (gdbarch, BLOCK_END (b)));
+		  gdb_puts (paddress (gdbarch, b->end ()));
 		  gdb_printf ("\n");
 		}
 	    }

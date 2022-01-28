@@ -2432,7 +2432,7 @@ inside_main_func (frame_info *this_frame)
 
       const struct block *block = bs.symbol->value_block ();
       gdb_assert (block != nullptr);
-      sym_addr = BLOCK_START (block);
+      sym_addr = block->start ();
     }
   else
     sym_addr = msymbol.value_address ();

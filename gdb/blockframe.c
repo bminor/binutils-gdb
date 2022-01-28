@@ -278,8 +278,8 @@ find_pc_partial_function_sym (CORE_ADDR pc,
 
 	  if (BLOCK_CONTIGUOUS_P (b))
 	    {
-	      cache_pc_function_low = BLOCK_START (b);
-	      cache_pc_function_high = BLOCK_END (b);
+	      cache_pc_function_low = b->start ();
+	      cache_pc_function_high = b->end ();
 	    }
 	  else
 	    {

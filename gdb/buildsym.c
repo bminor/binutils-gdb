@@ -234,8 +234,8 @@ buildsym_compunit::finish_block_internal
 	}
     }
 
-  BLOCK_START (block) = start;
-  BLOCK_END (block) = end;
+  block->set_start (start);
+  block->set_end (end);
 
   /* Put the block in as the value of the symbol that names it.  */
 
@@ -306,7 +306,7 @@ buildsym_compunit::finish_block_internal
   /* Check to be sure that the blocks have an end address that is
      greater than starting address.  */
 
-  if (BLOCK_END (block) < BLOCK_START (block))
+  if (block->end () < block->start ())
     {
       if (symbol)
 	{
@@ -318,11 +318,11 @@ buildsym_compunit::finish_block_internal
 	{
 	  complaint (_("block end address %s less than block "
 		       "start address %s (patched it)"),
-		     paddress (gdbarch, BLOCK_END (block)),
-		     paddress (gdbarch, BLOCK_START (block)));
+		     paddress (gdbarch, block->end ()),
+		     paddress (gdbarch, block->start ()));
 	}
       /* Better than nothing.  */
-      BLOCK_END (block) = BLOCK_START (block);
+      block->set_end (block->start ());
     }
 
   /* Install this block as the superblock of all blocks made since the
@@ -343,8 +343,8 @@ buildsym_compunit::finish_block_internal
 	     physically nested inside this other blocks, only
 	     lexically nested.  */
 	  if (BLOCK_FUNCTION (pblock->block) == NULL
-	      && (BLOCK_START (pblock->block) < BLOCK_START (block)
-		  || BLOCK_END (pblock->block) > BLOCK_END (block)))
+	      && (pblock->block->start () < block->start ()
+		  || pblock->block->end () > block->end ()))
 	    {
 	      if (symbol)
 		{
@@ -355,15 +355,17 @@ buildsym_compunit::finish_block_internal
 		{
 		  complaint (_("inner block (%s-%s) not "
 			       "inside outer block (%s-%s)"),
-			     paddress (gdbarch, BLOCK_START (pblock->block)),
-			     paddress (gdbarch, BLOCK_END (pblock->block)),
-			     paddress (gdbarch, BLOCK_START (block)),
-			     paddress (gdbarch, BLOCK_END (block)));
+			     paddress (gdbarch, pblock->block->start ()),
+			     paddress (gdbarch, pblock->block->end ()),
+			     paddress (gdbarch, block->start ()),
+			     paddress (gdbarch, block->end ()));
 		}
-	      if (BLOCK_START (pblock->block) < BLOCK_START (block))
-		BLOCK_START (pblock->block) = BLOCK_START (block);
-	      if (BLOCK_END (pblock->block) > BLOCK_END (block))
-		BLOCK_END (pblock->block) = BLOCK_END (block);
+
+	      if (pblock->block->start () < block->start ())
+		pblock->block->set_start (block->start ());
+
+	      if (pblock->block->end () > block->end ())
+		pblock->block->set_end (block->end ());
 	    }
 	  BLOCK_SUPERBLOCK (pblock->block) = block;
 	}
@@ -413,8 +415,8 @@ buildsym_compunit::record_block_range (struct block *block,
      become interesting.  Note that even if this block doesn't have
      any "interesting" ranges, some later block might, so we still
      need to record this block in the addrmap.  */
-  if (start != BLOCK_START (block)
-      || end_inclusive + 1 != BLOCK_END (block))
+  if (start != block->start ()
+      || end_inclusive + 1 != block->end ())
     m_pending_addrmap_interesting = true;
 
   if (m_pending_addrmap == nullptr)
@@ -473,11 +475,11 @@ buildsym_compunit::make_blockvector ()
     {
       for (i = 1; i < BLOCKVECTOR_NBLOCKS (blockvector); i++)
 	{
-	  if (BLOCK_START (BLOCKVECTOR_BLOCK (blockvector, i - 1))
-	      > BLOCK_START (BLOCKVECTOR_BLOCK (blockvector, i)))
+	  if (BLOCKVECTOR_BLOCK(blockvector, i - 1)->start ()
+	      > BLOCKVECTOR_BLOCK(blockvector, i)->start ())
 	    {
 	      CORE_ADDR start
-		= BLOCK_START (BLOCKVECTOR_BLOCK (blockvector, i));
+		= BLOCKVECTOR_BLOCK(blockvector, i)->start ();
 
 	      complaint (_("block at %s out of order"),
 			 hex_string ((LONGEST) start));
@@ -820,7 +822,7 @@ buildsym_compunit::end_compunit_symtab_get_static_block (CORE_ADDR end_addr,
       std::stable_sort (barray.begin (), barray.end (),
 			[] (const block *a, const block *b)
 			{
-			  return BLOCK_START (a) > BLOCK_START (b);
+			  return a->start () > b->start ();
 			});
 
       int i = 0;
@@ -878,7 +880,7 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
   gdb_assert (static_block != NULL);
   gdb_assert (m_subfiles != NULL);
 
-  end_addr = BLOCK_END (static_block);
+  end_addr = static_block->end ();
 
   /* Create the GLOBAL_BLOCK and build the blockvector.  */
   finish_block_internal (NULL, get_global_symbols (), NULL, NULL,

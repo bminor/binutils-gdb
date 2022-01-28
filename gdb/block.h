@@ -90,11 +90,26 @@ struct blockranges
 
 struct block
 {
+  /* Return this block's start address.  */
+  CORE_ADDR start () const
+  { return m_start; }
+
+  /* Set this block's start address.  */
+  void set_start (CORE_ADDR start)
+  { m_start = start; }
+
+  /* Return this block's end address.  */
+  CORE_ADDR end () const
+  { return m_end; }
+
+  /* Set this block's end address.  */
+  void set_end (CORE_ADDR end)
+  { m_end = end; }
 
   /* Addresses in the executable code that are in this block.  */
 
-  CORE_ADDR startaddr;
-  CORE_ADDR endaddr;
+  CORE_ADDR m_start;
+  CORE_ADDR m_end;
 
   /* The symbol that names this block, if the block is the body of a
      function (real or inlined); otherwise, zero.  */
@@ -139,8 +154,6 @@ struct global_block
   struct compunit_symtab *compunit_symtab;
 };
 
-#define BLOCK_START(bl)		(bl)->startaddr
-#define BLOCK_END(bl)		(bl)->endaddr
 #define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
 #define BLOCK_MULTIDICT(bl)	(bl)->multidict
@@ -186,7 +199,7 @@ struct global_block
    too).  BLOCK_ENTRY_PC can then be redefined to be less DWARF-centric.  */
 
 #define BLOCK_ENTRY_PC(bl)	(BLOCK_CONTIGUOUS_P (bl) \
-				 ? BLOCK_START (bl) \
+				 ? bl->start () \
 				 : BLOCK_RANGE_START (bl,0))
 
 struct blockvector

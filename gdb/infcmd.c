@@ -980,8 +980,8 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 	      if (sym->aclass () == LOC_BLOCK)
 		{
 		  const block *block = sym->value_block ();
-		  if (BLOCK_END (block) < tp->control.step_range_end)
-		    tp->control.step_range_end = BLOCK_END (block);
+		  if (block->end () < tp->control.step_range_end)
+		    tp->control.step_range_end = block->end ();
 		}
 	    }
 

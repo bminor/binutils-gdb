@@ -87,7 +87,7 @@ convert_one_symbol (compile_cplus_instance *instance,
 	case LOC_BLOCK:
 	  {
 	    kind = GCC_CP_SYMBOL_FUNCTION;
-	    addr = BLOCK_START (sym.symbol->value_block ());
+	    addr = sym.symbol->value_block()->start ();
 	    if (is_global && sym.symbol->type ()->is_gnu_ifunc ())
 	      addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
 	  }
@@ -441,7 +441,7 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 	    gdb_printf (gdb_stdlog,
 			"gcc_symbol_address \"%s\": full symbol\n",
 			identifier);
-	  result = BLOCK_START (sym->value_block ());
+	  result = sym->value_block ()->start ();
 	  if (sym->type ()->is_gnu_ifunc ())
 	    result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
 	  found = 1;
