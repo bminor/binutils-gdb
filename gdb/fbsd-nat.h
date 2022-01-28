@@ -120,12 +120,15 @@ private:
      of registers to a native thread.
 
      The caller must provide storage for the set of registers in REGS,
-     and SIZE is the size of the storage.  */
+     and SIZE is the size of the storage.
 
-  void fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
+     Returns true if the register set was transferred due to a
+     matching REGNUM.*/
+
+  bool fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   const struct regset *regset, void *regs, size_t size);
 
-  void store_register_set (struct regcache *regcache, int regnum, int fetch_op,
+  bool store_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   int store_op, const struct regset *regset,
 			   void *regs, size_t size);
 protected:
@@ -133,21 +136,21 @@ protected:
      type such as 'struct reg' or 'struct fpreg'.  */
 
   template <class Regset>
-  void fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
+  bool fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   const struct regset *regset)
   {
     Regset regs;
-    fetch_register_set (regcache, regnum, fetch_op, regset, &regs,
-			sizeof (regs));
+    return fetch_register_set (regcache, regnum, fetch_op, regset, &regs,
+			       sizeof (regs));
   }
 
   template <class Regset>
-  void store_register_set (struct regcache *regcache, int regnum, int fetch_op,
+  bool store_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   int store_op, const struct regset *regset)
   {
     Regset regs;
-    store_register_set (regcache, regnum, fetch_op, store_op, regset, &regs,
-			sizeof (regs));
+    return store_register_set (regcache, regnum, fetch_op, store_op, regset,
+			       &regs, sizeof (regs));
   }
 };
 

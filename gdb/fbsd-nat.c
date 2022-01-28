@@ -1611,7 +1611,7 @@ fbsd_nat_target::supports_disable_randomization ()
 
 /* See fbsd-nat.h.  */
 
-void
+bool
 fbsd_nat_target::fetch_register_set (struct regcache *regcache, int regnum,
 				     int fetch_op, const struct regset *regset,
 				     void *regs, size_t size)
@@ -1627,12 +1627,14 @@ fbsd_nat_target::fetch_register_set (struct regcache *regcache, int regnum,
 	perror_with_name (_("Couldn't get registers"));
 
       regcache->supply_regset (regset, regnum, regs, size);
+      return true;
     }
+  return false;
 }
 
 /* See fbsd-nat.h.  */
 
-void
+bool
 fbsd_nat_target::store_register_set (struct regcache *regcache, int regnum,
 				     int fetch_op, int store_op,
 				     const struct regset *regset, void *regs,
@@ -1652,7 +1654,9 @@ fbsd_nat_target::store_register_set (struct regcache *regcache, int regnum,
 
       if (ptrace (store_op, pid, (PTRACE_TYPE_ARG3) regs, 0) == -1)
 	perror_with_name (_("Couldn't write registers"));
+      return true;
     }
+  return false;
 }
 
 void _initialize_fbsd_nat ();
