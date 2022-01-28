@@ -135,7 +135,7 @@ tui_disassemble (struct gdbarch *gdbarch,
       /* And capture the address the instruction is at.  */
       tal.addr = orig_pc;
       print_address (gdbarch, orig_pc, &gdb_dis_out);
-      tal.addr_string = std::move (gdb_dis_out.release ());
+      tal.addr_string = gdb_dis_out.release ();
 
       if (addr_size != nullptr)
 	{
