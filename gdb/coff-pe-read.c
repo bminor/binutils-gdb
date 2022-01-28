@@ -245,7 +245,7 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
 		sym_name, dll_name, forward_qualified_name);
 
   vma = msymbol.value_address ();
-  msymtype = MSYMBOL_TYPE (msymbol.minsym);
+  msymtype = msymbol.minsym->type ();
   section = msymbol.minsym->section_index ();
 
   /* Generate a (hopefully unique) qualified name using the first part

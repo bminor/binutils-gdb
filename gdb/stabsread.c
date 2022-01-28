@@ -4538,7 +4538,7 @@ scan_file_globals (struct objfile *objfile)
 	  QUIT;
 
 	  /* Skip static symbols.  */
-	  switch (MSYMBOL_TYPE (msymbol))
+	  switch (msymbol->type ())
 	    {
 	    case mst_file_text:
 	    case mst_file_data:

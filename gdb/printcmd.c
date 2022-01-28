@@ -655,9 +655,9 @@ build_address_symbolic (struct gdbarch *gdbarch,
   if (msymbol.minsym != NULL
       && MSYMBOL_HAS_SIZE (msymbol.minsym)
       && MSYMBOL_SIZE (msymbol.minsym) == 0
-      && MSYMBOL_TYPE (msymbol.minsym) != mst_text
-      && MSYMBOL_TYPE (msymbol.minsym) != mst_text_gnu_ifunc
-      && MSYMBOL_TYPE (msymbol.minsym) != mst_file_text)
+      && msymbol.minsym->type () != mst_text
+      && msymbol.minsym->type () != mst_text_gnu_ifunc
+      && msymbol.minsym->type () != mst_file_text)
     msymbol.minsym = NULL;
 
   if (msymbol.minsym != NULL)
@@ -681,10 +681,10 @@ build_address_symbolic (struct gdbarch *gdbarch,
 	     first instruction of a Thumb function as <function>; the
 	     second instruction will be <function+2>, even though the
 	     pointer is <function+3>.  This matches the ISA behavior.  */
-	  if (MSYMBOL_TYPE (msymbol.minsym) == mst_text
-	      || MSYMBOL_TYPE (msymbol.minsym) == mst_text_gnu_ifunc
-	      || MSYMBOL_TYPE (msymbol.minsym) == mst_file_text
-	      || MSYMBOL_TYPE (msymbol.minsym) == mst_solib_trampoline)
+	  if (msymbol.minsym->type () == mst_text
+	      || msymbol.minsym->type () == mst_text_gnu_ifunc
+	      || msymbol.minsym->type () == mst_file_text
+	      || msymbol.minsym->type () == mst_solib_trampoline)
 	    addr = gdbarch_addr_bits_remove (gdbarch, addr);
 
 	  symbol = 0;

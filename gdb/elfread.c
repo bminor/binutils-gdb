@@ -828,7 +828,7 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
       msym = lookup_minimal_symbol (name_got_plt, NULL, objfile);
       if (msym.minsym == NULL)
 	continue;
-      if (MSYMBOL_TYPE (msym.minsym) != mst_slot_got_plt)
+      if (msym.minsym->type () != mst_slot_got_plt)
 	continue;
       pointer_address = msym.value_address ();
 

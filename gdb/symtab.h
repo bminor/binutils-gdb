@@ -699,6 +699,20 @@ struct minimal_symbol : public general_symbol_info
     return m_value.address;
   }
 
+  /* Return this minimal symbol's type.  */
+
+  minimal_symbol_type type () const
+  {
+    return m_type;
+  }
+
+  /* Set this minimal symbol's type.  */
+
+  void set_type (minimal_symbol_type type)
+  {
+    m_type = type;
+  }
+
   /* Size of this symbol.  dbx_end_psymtab in dbxread.c uses this
      information to calculate the end of the partial symtab based on the
      address of the last symbol plus the size of the last symbol.  */
@@ -710,7 +724,7 @@ struct minimal_symbol : public general_symbol_info
 
   /* Classification type for this minimal symbol.  */
 
-  ENUM_BITFIELD(minimal_symbol_type) type : MINSYM_TYPE_BITS;
+  ENUM_BITFIELD(minimal_symbol_type) m_type : MINSYM_TYPE_BITS;
 
   /* Non-zero if this symbol was created by gdb.
      Such symbols do not appear in the output of "info var|fun".  */
@@ -766,7 +780,6 @@ struct minimal_symbol : public general_symbol_info
       (msymbol)->has_size = 1;			\
     } while (0)
 #define MSYMBOL_HAS_SIZE(msymbol)	((msymbol)->has_size + 0)
-#define MSYMBOL_TYPE(msymbol)		(msymbol)->type
 
 #include "minsyms.h"
 

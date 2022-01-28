@@ -115,7 +115,7 @@ msymbol_is_function (struct objfile *objfile, minimal_symbol *minsym,
 {
   CORE_ADDR msym_addr = minsym->value_address (objfile);
 
-  switch (minsym->type)
+  switch (minsym->type ())
     {
     case mst_slot_got_plt:
     case mst_data:
@@ -253,7 +253,7 @@ found_minimal_symbols::maybe_collect (const char *sfile,
 				      struct objfile *objfile,
 				      minimal_symbol *msymbol)
 {
-  switch (MSYMBOL_TYPE (msymbol))
+  switch (msymbol->type ())
     {
     case mst_file_text:
     case mst_file_data:
@@ -586,8 +586,8 @@ lookup_minimal_symbol_linkage (const char *name, struct objfile *objf)
 	   msymbol = msymbol->hash_next)
 	{
 	  if (strcmp (msymbol->linkage_name (), name) == 0
-	      && (MSYMBOL_TYPE (msymbol) == mst_data
-		  || MSYMBOL_TYPE (msymbol) == mst_bss))
+	      && (msymbol->type () == mst_data
+		  || msymbol->type () == mst_bss))
 	    return {msymbol, objfile};
 	}
     }
@@ -619,11 +619,11 @@ lookup_minimal_symbol_text (const char *name, struct objfile *objf)
 	       msymbol = msymbol->hash_next)
 	    {
 	      if (strcmp (msymbol->linkage_name (), name) == 0 &&
-		  (MSYMBOL_TYPE (msymbol) == mst_text
-		   || MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc
-		   || MSYMBOL_TYPE (msymbol) == mst_file_text))
+		  (msymbol->type () == mst_text
+		   || msymbol->type () == mst_text_gnu_ifunc
+		   || msymbol->type () == mst_file_text))
 		{
-		  switch (MSYMBOL_TYPE (msymbol))
+		  switch (msymbol->type ())
 		    {
 		    case mst_file_text:
 		      found_file_symbol.minsym = msymbol;
@@ -840,7 +840,7 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		     triggered by a special mst_abs_or_lib or some
 		     such.  */
 
-		  if (MSYMBOL_TYPE (&msymbol[hi]) == mst_abs)
+		  if (msymbol[hi].type () == mst_abs)
 		    {
 		      hi--;
 		      continue;
@@ -866,8 +866,8 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		     preceding symbol too.  If they are otherwise
 		     identical prefer that one.  */
 		  if (hi > 0
-		      && MSYMBOL_TYPE (&msymbol[hi]) != want_type
-		      && MSYMBOL_TYPE (&msymbol[hi - 1]) == want_type
+		      && msymbol[hi].type () != want_type
+		      && msymbol[hi - 1].type () == want_type
 		      && (MSYMBOL_SIZE (&msymbol[hi])
 			  == MSYMBOL_SIZE (&msymbol[hi - 1]))
 		      && (msymbol[hi].value_raw_address ()
@@ -993,7 +993,7 @@ in_gnu_ifunc_stub (CORE_ADDR pc)
   bound_minimal_symbol msymbol
     = lookup_minimal_symbol_by_pc_section (pc, NULL,
 					   lookup_msym_prefer::GNU_IFUNC);
-  return msymbol.minsym && MSYMBOL_TYPE (msymbol.minsym) == mst_text_gnu_ifunc;
+  return msymbol.minsym && msymbol.minsym->type () == mst_text_gnu_ifunc;
 }
 
 /* See elf_gnu_ifunc_resolve_addr for its real implementation.  */
@@ -1211,7 +1211,7 @@ minimal_symbol_reader::record_full (gdb::string_view name,
   msymbol->set_value_address (address);
   msymbol->set_section_index (section);
 
-  MSYMBOL_TYPE (msymbol) = ms_type;
+  msymbol->set_type (ms_type);
 
   /* If we already read minimal symbols for this objfile, then don't
      ever allocate a new one.  */
@@ -1303,10 +1303,9 @@ compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
 	      && strcmp (copyfrom->linkage_name (),
 			 (copyfrom + 1)->linkage_name ()) == 0)
 	    {
-	      if (MSYMBOL_TYPE ((copyfrom + 1)) == mst_unknown)
-		{
-		  MSYMBOL_TYPE ((copyfrom + 1)) = MSYMBOL_TYPE (copyfrom);
-		}
+	      if ((copyfrom + 1)->type () == mst_unknown)
+		(copyfrom + 1)->set_type (copyfrom->type ());
+
 	      copyfrom++;
 	    }
 	  else
@@ -1530,7 +1529,7 @@ lookup_solib_trampoline_symbol_by_pc (CORE_ADDR pc)
 					   lookup_msym_prefer::TRAMPOLINE);
 
   if (msymbol.minsym != NULL
-      && MSYMBOL_TYPE (msymbol.minsym) == mst_solib_trampoline)
+      && msymbol.minsym->type () == mst_solib_trampoline)
     return msymbol.minsym;
   return NULL;
 }
@@ -1558,10 +1557,10 @@ find_solib_trampoline_target (struct frame_info *frame, CORE_ADDR pc)
 	    {
 	      /* Also handle minimal symbols pointing to function
 		 descriptors.  */
-	      if ((MSYMBOL_TYPE (msymbol) == mst_text
-		   || MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc
-		   || MSYMBOL_TYPE (msymbol) == mst_data
-		   || MSYMBOL_TYPE (msymbol) == mst_data_gnu_ifunc)
+	      if ((msymbol->type () == mst_text
+		   || msymbol->type () == mst_text_gnu_ifunc
+		   || msymbol->type () == mst_data
+		   || msymbol->type () == mst_data_gnu_ifunc)
 		  && strcmp (msymbol->linkage_name (),
 			     tsymbol->linkage_name ()) == 0)
 		{

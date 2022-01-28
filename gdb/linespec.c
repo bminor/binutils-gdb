@@ -2228,11 +2228,11 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
 
 		  for (const auto &elem : ls->minimal_symbols)
 		    {
-		      if (MSYMBOL_TYPE (elem.minsym) == mst_text_gnu_ifunc
-			  || MSYMBOL_TYPE (elem.minsym) == mst_data_gnu_ifunc)
+		      if (elem.minsym->type () == mst_text_gnu_ifunc
+			  || elem.minsym->type () == mst_data_gnu_ifunc)
 			{
 			  CORE_ADDR msym_addr = elem.value_address ();
-			  if (MSYMBOL_TYPE (elem.minsym) == mst_data_gnu_ifunc)
+			  if (elem.minsym->type () == mst_data_gnu_ifunc)
 			    {
 			      struct gdbarch *gdbarch
 				= elem.objfile->arch ();
@@ -4146,8 +4146,8 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
     {
       const char *msym_name = msymbol->linkage_name ();
 
-      if (MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc
-	  || MSYMBOL_TYPE (msymbol) == mst_data_gnu_ifunc)
+      if (msymbol->type () == mst_text_gnu_ifunc
+	  || msymbol->type () == mst_data_gnu_ifunc)
 	want_start_sal = gnu_ifunc_resolve_name (msym_name, &func_addr);
       else
 	want_start_sal = true;
@@ -4284,7 +4284,7 @@ search_minsyms_for_name (struct collect_info *info,
   for (const bound_minimal_symbol &item : minsyms)
     {
       bool skip = false;
-      if (MSYMBOL_TYPE (item.minsym) == mst_solib_trampoline)
+      if (item.minsym->type () == mst_solib_trampoline)
 	{
 	  for (const bound_minimal_symbol &item2 : minsyms)
 	    {
@@ -4293,7 +4293,7 @@ search_minsyms_for_name (struct collect_info *info,
 
 	      /* Trampoline symbols can only jump to exported
 		 symbols.  */
-	      if (msymbol_type_is_static (MSYMBOL_TYPE (item2.minsym)))
+	      if (msymbol_type_is_static (item2.minsym->type ()))
 		continue;
 
 	      if (strcmp (item.minsym->linkage_name (),

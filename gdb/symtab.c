@@ -432,11 +432,11 @@ minimal_symbol::value_address (objfile *objfile) const
 bool
 minimal_symbol::data_p () const
 {
-  return type == mst_data
-    || type == mst_bss
-    || type == mst_abs
-    || type == mst_file_data
-    || type == mst_file_bss;
+  return m_type == mst_data
+    || m_type == mst_bss
+    || m_type == mst_abs
+    || m_type == mst_file_data
+    || m_type == mst_file_bss;
 }
 
 /* See symtab.h.  */
@@ -444,12 +444,12 @@ minimal_symbol::data_p () const
 bool
 minimal_symbol::text_p () const
 {
-  return type == mst_text
-    || type == mst_text_gnu_ifunc
-    || type == mst_data_gnu_ifunc
-    || type == mst_slot_got_plt
-    || type == mst_solib_trampoline
-    || type == mst_file_text;
+  return m_type == mst_text
+    || m_type == mst_text_gnu_ifunc
+    || m_type == mst_data_gnu_ifunc
+    || m_type == mst_slot_got_plt
+    || m_type == mst_solib_trampoline
+    || m_type == mst_file_text;
 }
 
 /* See whether FILENAME matches SEARCH_NAME using the rule that we
@@ -3238,7 +3238,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
    */
   msymbol = lookup_minimal_symbol_by_pc (pc);
   if (msymbol.minsym != NULL)
-    if (MSYMBOL_TYPE (msymbol.minsym) == mst_solib_trampoline)
+    if (msymbol.minsym->type () == mst_solib_trampoline)
       {
 	struct bound_minimal_symbol mfunsym
 	  = lookup_minimal_symbol_text (msymbol.minsym->linkage_name (),
@@ -4751,7 +4751,7 @@ bool
 global_symbol_searcher::is_suitable_msymbol
 	(const enum search_domain kind, const minimal_symbol *msymbol)
 {
-  switch (MSYMBOL_TYPE (msymbol))
+  switch (msymbol->type ())
     {
     case mst_data:
     case mst_bss:
@@ -5767,7 +5767,7 @@ symbol_is_function_or_method (symbol *sym)
 bool
 symbol_is_function_or_method (minimal_symbol *msymbol)
 {
-  switch (MSYMBOL_TYPE (msymbol))
+  switch (msymbol->type ())
     {
     case mst_text:
     case mst_text_gnu_ifunc:
@@ -5797,11 +5797,11 @@ find_gnu_ifunc (const symbol *sym)
   iterate_over_minimal_symbols (objfile, lookup_name,
 				[&] (minimal_symbol *minsym)
     {
-      if (MSYMBOL_TYPE (minsym) == mst_text_gnu_ifunc
-	  || MSYMBOL_TYPE (minsym) == mst_data_gnu_ifunc)
+      if (minsym->type () == mst_text_gnu_ifunc
+	  || minsym->type () == mst_data_gnu_ifunc)
 	{
 	  CORE_ADDR msym_addr = minsym->value_address (objfile);
-	  if (MSYMBOL_TYPE (minsym) == mst_data_gnu_ifunc)
+	  if (minsym->type () == mst_data_gnu_ifunc)
 	    {
 	      struct gdbarch *gdbarch = objfile->arch ();
 	      msym_addr = gdbarch_convert_from_func_ptr_addr

@@ -1232,8 +1232,8 @@ variable:	name_not_typename
 				 is important for example for "p
 				 *__errno_location()".  */
 			      symbol *alias_target
-				= ((msymbol.minsym->type != mst_text_gnu_ifunc
-				    && msymbol.minsym->type != mst_data_gnu_ifunc)
+				= ((msymbol.minsym->type () != mst_text_gnu_ifunc
+				    && msymbol.minsym->type () != mst_data_gnu_ifunc)
 				   ? find_function_alias_target (msymbol)
 				   : NULL);
 			      if (alias_target != NULL)

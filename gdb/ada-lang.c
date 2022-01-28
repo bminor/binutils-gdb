@@ -4898,7 +4898,7 @@ ada_lookup_simple_minsym (const char *name)
       for (minimal_symbol *msymbol : objfile->msymbols ())
 	{
 	  if (match_name (msymbol->linkage_name (), lookup_name, NULL)
-	      && MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
+	      && msymbol->type () != mst_solib_trampoline)
 	    {
 	      result.minsym = msymbol;
 	      result.objfile = objfile;
@@ -11717,7 +11717,7 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
       struct bound_minimal_symbol msym
 	= lookup_minimal_symbol (einfo->catch_exception_sym, NULL, NULL);
 
-      if (msym.minsym && MSYMBOL_TYPE (msym.minsym) != mst_solib_trampoline)
+      if (msym.minsym && msym.minsym->type () != mst_solib_trampoline)
 	error (_("Your Ada runtime appears to be missing some debugging "
 		 "information.\nCannot insert Ada exception catchpoint "
 		 "in this configuration."));
@@ -11740,7 +11740,7 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
       struct bound_minimal_symbol msym
 	= lookup_minimal_symbol (einfo->catch_handlers_sym, NULL, NULL);
 
-      if (msym.minsym && MSYMBOL_TYPE (msym.minsym) != mst_solib_trampoline)
+      if (msym.minsym && msym.minsym->type () != mst_solib_trampoline)
 	error (_("Your Ada runtime appears to be missing some debugging "
 		 "information.\nCannot insert Ada exception catchpoint "
 		 "in this configuration."));

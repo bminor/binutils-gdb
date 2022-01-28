@@ -766,7 +766,7 @@ compile_object_load (const compile_file_names &file_names,
 
       bmsym = lookup_minimal_symbol (sym->name, NULL, NULL);
       switch (bmsym.minsym == NULL
-	      ? mst_unknown : MSYMBOL_TYPE (bmsym.minsym))
+	      ? mst_unknown : bmsym.minsym->type ())
 	{
 	case mst_text:
 	case mst_bss:

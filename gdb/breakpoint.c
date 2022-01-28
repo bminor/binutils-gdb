@@ -3439,8 +3439,8 @@ create_std_terminate_master_breakpoint (void)
 	      struct bound_minimal_symbol m;
 
 	      m = lookup_minimal_symbol (func_name, NULL, objfile);
-	      if (m.minsym == NULL || (MSYMBOL_TYPE (m.minsym) != mst_text
-				       && MSYMBOL_TYPE (m.minsym) != mst_file_text))
+	      if (m.minsym == NULL || (m.minsym->type () != mst_text
+				       && m.minsym->type () != mst_file_text))
 		{
 		  /* Prevent future lookups in this objfile.  */
 		  bp_objfile_data->terminate_msym.minsym = &msym_not_found;
@@ -7175,8 +7175,8 @@ set_breakpoint_location_function (struct bp_location *loc)
       const char *function_name;
 
       if (loc->msymbol != NULL
-	  && (MSYMBOL_TYPE (loc->msymbol) == mst_text_gnu_ifunc
-	      || MSYMBOL_TYPE (loc->msymbol) == mst_data_gnu_ifunc))
+	  && (loc->msymbol->type () == mst_text_gnu_ifunc
+	      || loc->msymbol->type () == mst_data_gnu_ifunc))
 	{
 	  struct breakpoint *b = loc->owner;
 

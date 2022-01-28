@@ -160,7 +160,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
     {
       struct obj_section *section = msymbol->obj_section (objfile);
 
-      switch (MSYMBOL_TYPE (msymbol))
+      switch (msymbol->type ())
 	{
 	case mst_unknown:
 	  ms_type = 'u';

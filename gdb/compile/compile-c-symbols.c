@@ -273,7 +273,7 @@ convert_symbol_bmsym (compile_c_instance *context,
   addr = msym->value_address (objfile);
 
   /* Conversion copied from write_exp_msymbol.  */
-  switch (MSYMBOL_TYPE (msym))
+  switch (msym->type ())
     {
     case mst_text:
     case mst_file_text:
@@ -422,7 +422,7 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 			    "symbol\n",
 			    identifier);
 	      result = msym.value_address ();
-	      if (MSYMBOL_TYPE (msym.minsym) == mst_text_gnu_ifunc)
+	      if (msym.minsym->type () == mst_text_gnu_ifunc)
 		result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
 	      found = 1;
 	    }
