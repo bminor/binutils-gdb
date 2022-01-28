@@ -28812,9 +28812,10 @@ otherwise a default layout is used.
 @kindex tui disable
 Disable TUI mode, returning to the console interpreter.
 
+@anchor{info_win_command}
 @item info win
 @kindex info win
-List and give the size of all displayed windows.
+List the names and sizes of all currently displayed windows.
 
 @item tui new-layout @var{name} @var{window} @var{weight} @r{[}@var{window} @var{weight}@dots{}@r{]}
 @kindex tui new-layout
@@ -28961,11 +28962,11 @@ Update the source window and the current execution point.
 @item winheight @var{name} +@var{count}
 @itemx winheight @var{name} -@var{count}
 @kindex winheight
-Change the height of the window @var{name} by @var{count}
-lines.  Positive counts increase the height, while negative counts
-decrease it.  The @var{name} parameter can be one of @code{src} (the
-source window), @code{cmd} (the command window), @code{asm} (the
-disassembly window), or @code{regs} (the register display window).
+Change the height of the window @var{name} by @var{count} lines.
+Positive counts increase the height, while negative counts decrease
+it.  The @var{name} parameter can be the name of any currently visible
+window.  The names of the currently visible windows can be discovered
+using @kbd{info win} (@pxref{info_win_command,,info win}).
 @end table
 
 @node TUI Configuration
