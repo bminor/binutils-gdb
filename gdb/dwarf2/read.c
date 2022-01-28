@@ -21794,7 +21794,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  /* SYMBOL_BLOCK_VALUE (sym) will be filled in later by
 	     finish_block.  */
 	  sym->set_aclass_index (LOC_BLOCK);
-	  SYMBOL_INLINED (sym) = 1;
+	  sym->set_is_inlined (1);
 	  list_to_add = cu->list_in_scope;
 	  break;
 	case DW_TAG_template_value_param:

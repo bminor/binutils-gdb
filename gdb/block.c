@@ -124,7 +124,7 @@ block_containing_function (const struct block *bl)
 int
 block_inlined_p (const struct block *bl)
 {
-  return BLOCK_FUNCTION (bl) != NULL && SYMBOL_INLINED (BLOCK_FUNCTION (bl));
+  return BLOCK_FUNCTION (bl) != NULL && BLOCK_FUNCTION (bl)->is_inlined ();
 }
 
 /* A helper function that checks whether PC is in the blockvector BL.
