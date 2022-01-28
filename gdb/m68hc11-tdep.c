@@ -58,16 +58,16 @@
    MSYMBOL_IS_RTI       Tests the "RTC" bit in a minimal symbol.  */
 
 #define MSYMBOL_SET_RTC(msym)                           \
-	MSYMBOL_TARGET_FLAG_1 (msym) = 1
+	(msym)->set_target_flag_1 (true)
 
 #define MSYMBOL_SET_RTI(msym)                           \
-	MSYMBOL_TARGET_FLAG_2 (msym) = 1
+	(msym)->set_target_flag_2 (true)
 
 #define MSYMBOL_IS_RTC(msym)				\
-	MSYMBOL_TARGET_FLAG_1 (msym)
+	(msym)->target_flag_1 ()
 
 #define MSYMBOL_IS_RTI(msym)				\
-	MSYMBOL_TARGET_FLAG_2 (msym)
+	(msym)->target_flag_2 ()
 
 enum insn_return_kind {
   RETURN_RTS,

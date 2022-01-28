@@ -1639,7 +1639,7 @@ ppc_elfv2_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
     default:
       break;
     case 8:
-      MSYMBOL_TARGET_FLAG_1 (msym) = 1;
+      msym->set_target_flag_1 (true);
       break;
     }
 }
@@ -1659,7 +1659,7 @@ ppc_elfv2_skip_entrypoint (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   /* See ppc_elfv2_elf_make_msymbol_special for how local entry point
      offset values are encoded.  */
-  if (MSYMBOL_TARGET_FLAG_1 (fun.minsym))
+  if (fun.minsym->target_flag_1 ())
     local_entry_offset = 8;
 
   if (fun.value_address () <= pc

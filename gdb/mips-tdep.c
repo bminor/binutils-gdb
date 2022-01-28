@@ -435,12 +435,12 @@ mips_elf_make_msymbol_special (asymbol * sym, struct minimal_symbol *msym)
 
   if (ELF_ST_IS_MICROMIPS (st_other))
     {
-      MSYMBOL_TARGET_FLAG_MICROMIPS (msym) = 1;
+      SET_MSYMBOL_TARGET_FLAG_MICROMIPS (msym);
       msym->set_value_address (msym->value_raw_address () | 1);
     }
   else if (ELF_ST_IS_MIPS16 (st_other))
     {
-      MSYMBOL_TARGET_FLAG_MIPS16 (msym) = 1;
+      SET_MSYMBOL_TARGET_FLAG_MIPS16 (msym);
       msym->set_value_address (msym->value_raw_address () | 1);
     }
 }

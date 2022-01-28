@@ -82,10 +82,10 @@ static bool arm_debug;
    MSYMBOL_IS_SPECIAL   Tests the "special" bit in a minimal symbol.  */
 
 #define MSYMBOL_SET_SPECIAL(msym)				\
-	MSYMBOL_TARGET_FLAG_1 (msym) = 1
+	(msym)->set_target_flag_1 (true)
 
 #define MSYMBOL_IS_SPECIAL(msym)				\
-	MSYMBOL_TARGET_FLAG_1 (msym)
+	(msym)->target_flag_1 ()
 
 struct arm_mapping_symbol
 {

@@ -735,6 +735,34 @@ struct minimal_symbol : public general_symbol_info
     return m_has_size;
   }
 
+  /* Return this minimal symbol's first target-specific flag.  */
+
+  bool target_flag_1 () const
+  {
+    return m_target_flag_1;
+  }
+
+  /* Set this minimal symbol's first target-specific flag.  */
+
+  void set_target_flag_1 (bool target_flag_1)
+  {
+    m_target_flag_1 = target_flag_1;
+  }
+
+  /* Return this minimal symbol's second target-specific flag.  */
+
+  bool target_flag_2 () const
+  {
+    return m_target_flag_2;
+  }
+
+  /* Set this minimal symbol's second target-specific flag.  */
+
+  void set_target_flag_2 (bool target_flag_2)
+  {
+    m_target_flag_2 = target_flag_2;
+  }
+
   /* Size of this symbol.  dbx_end_psymtab in dbxread.c uses this
      information to calculate the end of the partial symtab based on the
      address of the last symbol plus the size of the last symbol.  */
@@ -753,8 +781,8 @@ struct minimal_symbol : public general_symbol_info
   unsigned int created_by_gdb : 1;
 
   /* Two flag bits provided for the use of the target.  */
-  unsigned int target_flag_1 : 1;
-  unsigned int target_flag_2 : 1;
+  unsigned int m_target_flag_1 : 1;
+  unsigned int m_target_flag_2 : 1;
 
   /* Nonzero iff the size of the minimal symbol has been set.
      Symbol size information can sometimes not be determined, because
@@ -791,9 +819,6 @@ struct minimal_symbol : public general_symbol_info
 
   bool text_p () const;
 };
-
-#define MSYMBOL_TARGET_FLAG_1(msymbol)  (msymbol)->target_flag_1
-#define MSYMBOL_TARGET_FLAG_2(msymbol)  (msymbol)->target_flag_2
 
 #include "minsyms.h"
 
