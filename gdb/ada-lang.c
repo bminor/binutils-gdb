@@ -3352,7 +3352,7 @@ See set/show multiple-symbol."));
 	     && SYMBOL_TYPE (syms[i].symbol)->code () == TYPE_CODE_ENUM);
 	  struct symtab *symtab = NULL;
 
-	  if (SYMBOL_OBJFILE_OWNED (syms[i].symbol))
+	  if (syms[i].symbol->is_objfile_owned ())
 	    symtab = symbol_symtab (syms[i].symbol);
 
 	  if (SYMBOL_LINE (syms[i].symbol) != 0 && symtab != NULL)
@@ -4376,7 +4376,7 @@ cache_symbol (const char *name, domain_enum domain, struct symbol *sym,
 
   /* Symbols for builtin types don't have a block.
      For now don't cache such symbols.  */
-  if (sym != NULL && !SYMBOL_OBJFILE_OWNED (sym))
+  if (sym != NULL && !sym->is_objfile_owned ())
     return;
 
   /* If the symbol is a local symbol, then do not cache it, as a search

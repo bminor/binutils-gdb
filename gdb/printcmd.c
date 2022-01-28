@@ -1686,7 +1686,7 @@ info_address_command (const char *exp, int from_tty)
   puts_filtered (sym->print_name ());
   printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
-  if (SYMBOL_OBJFILE_OWNED (sym))
+  if (sym->is_objfile_owned ())
     section = sym->obj_section (symbol_objfile (sym));
   else
     section = NULL;

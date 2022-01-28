@@ -1789,7 +1789,7 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
   if (!sym)
     return NULL;
 
-  if (!SYMBOL_OBJFILE_OWNED (sym))
+  if (!sym->is_objfile_owned ())
     return sym;
 
   /* We either have an OBJFILE, or we can get at it from the sym's
@@ -6534,7 +6534,7 @@ initialize_ordinary_address_classes (void)
 struct objfile *
 symbol_objfile (const struct symbol *symbol)
 {
-  gdb_assert (SYMBOL_OBJFILE_OWNED (symbol));
+  gdb_assert (symbol->is_objfile_owned ());
   return symbol->owner.symtab->objfile ();
 }
 
@@ -6543,7 +6543,7 @@ symbol_objfile (const struct symbol *symbol)
 struct gdbarch *
 symbol_arch (const struct symbol *symbol)
 {
-  if (!SYMBOL_OBJFILE_OWNED (symbol))
+  if (!symbol->is_objfile_owned ())
     return symbol->owner.arch;
   return symbol->owner.symtab->objfile ()->arch ();
 }
@@ -6553,7 +6553,7 @@ symbol_arch (const struct symbol *symbol)
 struct symtab *
 symbol_symtab (const struct symbol *symbol)
 {
-  gdb_assert (SYMBOL_OBJFILE_OWNED (symbol));
+  gdb_assert (symbol->is_objfile_owned ());
   return symbol->owner.symtab;
 }
 
@@ -6562,7 +6562,7 @@ symbol_symtab (const struct symbol *symbol)
 void
 symbol_set_symtab (struct symbol *symbol, struct symtab *symtab)
 {
-  gdb_assert (SYMBOL_OBJFILE_OWNED (symbol));
+  gdb_assert (symbol->is_objfile_owned ());
   symbol->owner.symtab = symtab;
 }
 

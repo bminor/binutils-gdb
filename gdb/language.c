@@ -998,7 +998,7 @@ language_arch_info::type_and_symbol::alloc_type_symbol
   symbol->m_name = type->name ();
   symbol->set_language (lang, nullptr);
   symbol->owner.arch = gdbarch;
-  SYMBOL_OBJFILE_OWNED (symbol) = 0;
+  symbol->set_is_objfile_owned (0);
   symbol->set_section_index (0);
   SYMBOL_TYPE (symbol) = type;
   symbol->set_domain (VAR_DOMAIN);

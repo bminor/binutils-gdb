@@ -101,7 +101,7 @@ syscm_get_symbol_map (struct symbol *symbol)
 {
   htab_t htab;
 
-  if (SYMBOL_OBJFILE_OWNED (symbol))
+  if (symbol->is_objfile_owned ())
     {
       struct objfile *objfile = symbol_objfile (symbol);
 
@@ -362,7 +362,7 @@ gdbscm_symbol_symtab (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  if (!SYMBOL_OBJFILE_OWNED (symbol))
+  if (!symbol->is_objfile_owned ())
     return SCM_BOOL_F;
   return stscm_scm_from_symtab (symbol_symtab (symbol));
 }

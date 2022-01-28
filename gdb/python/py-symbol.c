@@ -88,7 +88,7 @@ sympy_get_symtab (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  if (!SYMBOL_OBJFILE_OWNED (symbol))
+  if (!symbol->is_objfile_owned ())
     Py_RETURN_NONE;
 
   return symtab_to_symtab_object (symbol_symtab (symbol));
@@ -302,7 +302,7 @@ set_symbol (symbol_object *obj, struct symbol *symbol)
 {
   obj->symbol = symbol;
   obj->prev = NULL;
-  if (SYMBOL_OBJFILE_OWNED (symbol)
+  if (symbol->is_objfile_owned ()
       && symbol_symtab (symbol) != NULL)
     {
       struct objfile *objfile = symbol_objfile (symbol);
@@ -348,7 +348,7 @@ sympy_dealloc (PyObject *obj)
   if (sym_obj->prev)
     sym_obj->prev->next = sym_obj->next;
   else if (sym_obj->symbol != NULL
-	   && SYMBOL_OBJFILE_OWNED (sym_obj->symbol)
+	   && sym_obj->symbol->is_objfile_owned ()
 	   && symbol_symtab (sym_obj->symbol) != NULL)
     {
       set_objfile_data (symbol_objfile (sym_obj->symbol),
