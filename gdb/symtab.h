@@ -1198,6 +1198,11 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     m_is_inlined = is_inlined;
   }
 
+  bool is_cplus_template_function () const
+  {
+    return this->subclass == SYMBOL_TEMPLATE;
+  }
+
   /* Data type of value */
 
   struct type *type = nullptr;
@@ -1300,8 +1305,6 @@ struct block_symbol
 /* Note: There is no accessor macro for symbol.owner because it is
    "private".  */
 
-#define SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION(symbol) \
-  (((symbol)->subclass) == SYMBOL_TEMPLATE)
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_COMPUTED_OPS(symbol)	((symbol)->impl ().ops_computed)
@@ -1342,7 +1345,7 @@ extern void symbol_set_symtab (struct symbol *symbol, struct symtab *symtab);
 
 /* An instance of this type is used to represent a C++ template
    function.  A symbol is really of this type iff
-   SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION is true.  */
+   symbol::is_cplus_template_function is true.  */
 
 struct template_symbol : public symbol
 {

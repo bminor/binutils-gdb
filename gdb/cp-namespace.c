@@ -519,7 +519,7 @@ cp_lookup_symbol_imports_or_template (const char *scope,
   if (function != NULL && function->language () == language_cplus)
     {
       /* Search the function's template parameters.  */
-      if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (function))
+      if (function->is_cplus_template_function ())
 	{
 	  struct template_symbol *templ
 	    = (struct template_symbol *) function;
