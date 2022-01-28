@@ -297,9 +297,9 @@ block_scope (const struct block *block)
 {
   for (; block != NULL; block = block->superblock ())
     {
-      if (BLOCK_NAMESPACE (block) != NULL
-	  && BLOCK_NAMESPACE (block)->scope != NULL)
-	return BLOCK_NAMESPACE (block)->scope;
+      if (block->namespace_info () != NULL
+	  && block->namespace_info ()->scope != NULL)
+	return block->namespace_info ()->scope;
     }
 
   return "";
@@ -315,7 +315,7 @@ block_set_scope (struct block *block, const char *scope,
 {
   block_initialize_namespace (block, obstack);
 
-  BLOCK_NAMESPACE (block)->scope = scope;
+  block->namespace_info ()->scope = scope;
 }
 
 /* This returns the using directives list associated with BLOCK, if
@@ -324,10 +324,10 @@ block_set_scope (struct block *block, const char *scope,
 struct using_direct *
 block_using (const struct block *block)
 {
-  if (block == NULL || BLOCK_NAMESPACE (block) == NULL)
+  if (block == NULL || block->namespace_info () == NULL)
     return NULL;
   else
-    return BLOCK_NAMESPACE (block)->using_decl;
+    return block->namespace_info ()->using_decl;
 }
 
 /* Set BLOCK's using member to USING; if needed, allocate memory via
@@ -341,17 +341,17 @@ block_set_using (struct block *block,
 {
   block_initialize_namespace (block, obstack);
 
-  BLOCK_NAMESPACE (block)->using_decl = using_decl;
+  block->namespace_info ()->using_decl = using_decl;
 }
 
-/* If BLOCK_NAMESPACE (block) is NULL, allocate it via OBSTACK and
+/* If block->namespace_info () is NULL, allocate it via OBSTACK and
    initialize its members to zero.  */
 
 static void
 block_initialize_namespace (struct block *block, struct obstack *obstack)
 {
-  if (BLOCK_NAMESPACE (block) == NULL)
-    BLOCK_NAMESPACE (block) = new (obstack) struct block_namespace_info ();
+  if (block->namespace_info () == NULL)
+    block->set_namespace_info (new (obstack) struct block_namespace_info ());
 }
 
 /* Return the static block associated to BLOCK.  Return NULL if block

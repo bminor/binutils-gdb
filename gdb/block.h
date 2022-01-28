@@ -130,6 +130,14 @@ struct block
   void set_multidict (multidictionary *multidict)
   { m_multidict = multidict; }
 
+  /* Return this block's namespace info.  */
+  block_namespace_info *namespace_info () const
+  { return m_namespace_info; }
+
+  /* Set this block's namespace info.  */
+  void set_namespace_info (block_namespace_info *namespace_info)
+  { m_namespace_info = namespace_info; }
+
   /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR m_start;
@@ -155,7 +163,7 @@ struct block
   /* Contains information about namespace-related info relevant to this block:
      using directives and the current namespace scope.  */
 
-  struct block_namespace_info *namespace_info;
+  struct block_namespace_info *m_namespace_info;
 
   /* Address ranges for blocks with non-contiguous ranges.  If this
      is NULL, then there is only one range which is specified by
@@ -177,8 +185,6 @@ struct global_block
 
   struct compunit_symtab *compunit_symtab;
 };
-
-#define BLOCK_NAMESPACE(bl)	(bl)->namespace_info
 
 /* Accessor for ranges field within block BL.  */
 
