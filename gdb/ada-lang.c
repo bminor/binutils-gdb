@@ -3163,7 +3163,7 @@ static void
 ada_print_symbol_signature (struct ui_file *stream, struct symbol *sym,
 			    const struct type_print_options *flags)
 {
-  struct type *type = SYMBOL_TYPE (sym);
+  struct type *type = sym->type ();
 
   fprintf_filtered (stream, "%s", sym->print_name ());
   if (!print_signatures
@@ -3348,8 +3348,8 @@ See set/show multiple-symbol."));
 	{
 	  int is_enumeral =
 	    (syms[i].symbol->aclass () == LOC_CONST
-	     && SYMBOL_TYPE (syms[i].symbol) != NULL
-	     && SYMBOL_TYPE (syms[i].symbol)->code () == TYPE_CODE_ENUM);
+	     && syms[i].symbol->type () != NULL
+	     && syms[i].symbol->type ()->code () == TYPE_CODE_ENUM);
 	  struct symtab *symtab = NULL;
 
 	  if (syms[i].symbol->is_objfile_owned ())
@@ -3365,10 +3365,10 @@ See set/show multiple-symbol."));
 			       SYMBOL_LINE (syms[i].symbol));
 	    }
 	  else if (is_enumeral
-		   && SYMBOL_TYPE (syms[i].symbol)->name () != NULL)
+		   && syms[i].symbol->type ()->name () != NULL)
 	    {
 	      printf_filtered (("[%d] "), i + first_choice);
-	      ada_print_type (SYMBOL_TYPE (syms[i].symbol), NULL,
+	      ada_print_type (syms[i].symbol->type (), NULL,
 			      gdb_stdout, -1, 0, &type_print_raw_options);
 	      printf_filtered (_("'(%s) (enumeral)\n"),
 			       syms[i].symbol->print_name ());
@@ -3467,7 +3467,7 @@ ada_resolve_enum (std::vector<struct block_symbol> &syms,
     {
       /* We already know the name matches, so we're just looking for
 	 an element of the correct enum type.  */
-      if (ada_check_typedef (SYMBOL_TYPE (syms[i].symbol)) == context_type)
+      if (ada_check_typedef (syms[i].symbol->type ()) == context_type)
 	return i;
     }
 
@@ -3626,7 +3626,7 @@ static int
 ada_args_match (struct symbol *func, struct value **actuals, int n_actuals)
 {
   int i;
-  struct type *func_type = SYMBOL_TYPE (func);
+  struct type *func_type = func->type ();
 
   if (func->aclass () == LOC_CONST
       && func_type->code () == TYPE_CODE_ENUM)
@@ -3714,7 +3714,7 @@ ada_resolve_function (std::vector<struct block_symbol> &syms,
     {
       for (k = 0; k < syms.size (); k += 1)
 	{
-	  struct type *type = ada_check_typedef (SYMBOL_TYPE (syms[k].symbol));
+	  struct type *type = ada_check_typedef (syms[k].symbol->type ());
 
 	  if (ada_args_match (syms[k].symbol, args, nargs)
 	      && (fallback || return_match (type, context_type)))
@@ -4441,8 +4441,8 @@ static int
 is_nonfunction (const std::vector<struct block_symbol> &syms)
 {
   for (const block_symbol &sym : syms)
-    if (SYMBOL_TYPE (sym.symbol)->code () != TYPE_CODE_FUNC
-	&& (SYMBOL_TYPE (sym.symbol)->code () != TYPE_CODE_ENUM
+    if (sym.symbol->type ()->code () != TYPE_CODE_FUNC
+	&& (sym.symbol->type ()->code () != TYPE_CODE_ENUM
 	    || sym.symbol->aclass () != LOC_CONST))
       return 1;
 
@@ -4487,8 +4487,8 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
       return 1;
     case LOC_TYPEDEF:
       {
-	struct type *type0 = SYMBOL_TYPE (sym0);
-	struct type *type1 = SYMBOL_TYPE (sym1);
+	struct type *type0 = sym0->type ();
+	struct type *type1 = sym1->type ();
 	const char *name0 = sym0->linkage_name ();
 	const char *name1 = sym1->linkage_name ();
 	int len0 = strlen (name0);
@@ -4501,7 +4501,7 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
       }
     case LOC_CONST:
       return SYMBOL_VALUE (sym0) == SYMBOL_VALUE (sym1)
-	&& equiv_types (SYMBOL_TYPE (sym0), SYMBOL_TYPE (sym1));
+	&& equiv_types (sym0->type (), sym1->type ());
 
     case LOC_STATIC:
       {
@@ -4675,7 +4675,7 @@ symbols_are_identical_enums (const std::vector<struct block_symbol> &syms)
 
   /* Quick check: All symbols should have an enum type.  */
   for (i = 0; i < syms.size (); i++)
-    if (SYMBOL_TYPE (syms[i].symbol)->code () != TYPE_CODE_ENUM)
+    if (syms[i].symbol->type ()->code () != TYPE_CODE_ENUM)
       return 0;
 
   /* Quick check: They should all have the same value.  */
@@ -4685,16 +4685,16 @@ symbols_are_identical_enums (const std::vector<struct block_symbol> &syms)
 
   /* Quick check: They should all have the same number of enumerals.  */
   for (i = 1; i < syms.size (); i++)
-    if (SYMBOL_TYPE (syms[i].symbol)->num_fields ()
-	!= SYMBOL_TYPE (syms[0].symbol)->num_fields ())
+    if (syms[i].symbol->type ()->num_fields ()
+	!= syms[0].symbol->type ()->num_fields ())
       return 0;
 
   /* All the sanity checks passed, so we might have a set of
      identical enumeration types.  Perform a more complete
      comparison of the type of each symbol.  */
   for (i = 1; i < syms.size (); i++)
-    if (!ada_identical_enum_types_p (SYMBOL_TYPE (syms[i].symbol),
-				     SYMBOL_TYPE (syms[0].symbol)))
+    if (!ada_identical_enum_types_p (syms[i].symbol->type (),
+				     syms[0].symbol->type ()))
       return 0;
 
   return 1;
@@ -4725,13 +4725,13 @@ remove_extra_symbols (std::vector<struct block_symbol> *syms)
       /* If two symbols have the same name and one of them is a stub type,
 	 the get rid of the stub.  */
 
-      if (SYMBOL_TYPE ((*syms)[i].symbol)->is_stub ()
+      if ((*syms)[i].symbol->type ()->is_stub ()
 	  && (*syms)[i].symbol->linkage_name () != NULL)
 	{
 	  for (j = 0; j < syms->size (); j++)
 	    {
 	      if (j != i
-		  && !SYMBOL_TYPE ((*syms)[j].symbol)->is_stub ()
+		  && !(*syms)[j].symbol->type ()->is_stub ()
 		  && (*syms)[j].symbol->linkage_name () != NULL
 		  && strcmp ((*syms)[i].symbol->linkage_name (),
 			     (*syms)[j].symbol->linkage_name ()) == 0)
@@ -4744,7 +4744,7 @@ remove_extra_symbols (std::vector<struct block_symbol> *syms)
 
       else if ((*syms)[i].symbol->linkage_name () != NULL
 	  && (*syms)[i].symbol->aclass () == LOC_STATIC
-	  && is_nondebugging_type (SYMBOL_TYPE ((*syms)[i].symbol)))
+	  && is_nondebugging_type ((*syms)[i].symbol->type ()))
 	{
 	  for (j = 0; j < syms->size (); j += 1)
 	    {
@@ -4848,7 +4848,7 @@ old_renaming_is_invisible (const struct symbol *sym, const char *function_name)
   if (sym->aclass () != LOC_TYPEDEF)
     return 0;
 
-  std::string scope = xget_renaming_scope (SYMBOL_TYPE (sym));
+  std::string scope = xget_renaming_scope (sym->type ());
 
   /* If the rename has been defined in a package, then it is visible.  */
   if (is_package_name (scope.c_str ()))
@@ -7231,7 +7231,7 @@ ada_find_any_type (const char *name)
   struct symbol *sym = ada_find_any_type_symbol (name);
 
   if (sym != NULL)
-    return SYMBOL_TYPE (sym);
+    return sym->type ();
 
   return NULL;
 }
@@ -10420,7 +10420,7 @@ ada_var_value_operation::evaluate (struct type *expect_type,
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
-      struct type *type = static_unwrap_type (SYMBOL_TYPE (sym));
+      struct type *type = static_unwrap_type (sym->type ());
       /* Check to see if this is a tagged type.  We also need to handle
 	 the case where the type is a reference to a tagged type, but
 	 we have to be careful to exclude pointers to tagged types.
@@ -10511,7 +10511,7 @@ ada_var_value_operation::resolve (struct expression *exp,
     }
 
   if (deprocedure_p
-      && (SYMBOL_TYPE (std::get<0> (m_storage).symbol)->code ()
+      && (std::get<0> (m_storage).symbol->type ()->code ()
 	  == TYPE_CODE_FUNC))
     return true;
 
@@ -12418,7 +12418,7 @@ catch_assert_command (const char *arg_entry, int from_tty,
 static int
 ada_is_exception_sym (struct symbol *sym)
 {
-  const char *type_name = SYMBOL_TYPE (sym)->name ();
+  const char *type_name = sym->type ()->name ();
 
   return (sym->aclass () != LOC_TYPEDEF
 	  && sym->aclass () != LOC_BLOCK

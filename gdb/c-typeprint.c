@@ -207,10 +207,10 @@ c_print_typedef (struct type *type,
   type = check_typedef (type);
   fprintf_filtered (stream, "typedef ");
   type_print (type, "", stream, -1);
-  if ((SYMBOL_TYPE (new_symbol))->name () == 0
-      || strcmp ((SYMBOL_TYPE (new_symbol))->name (),
+  if ((new_symbol->type ())->name () == 0
+      || strcmp ((new_symbol->type ())->name (),
 		 new_symbol->linkage_name ()) != 0
-      || SYMBOL_TYPE (new_symbol)->code () == TYPE_CODE_TYPEDEF)
+      || new_symbol->type ()->code () == TYPE_CODE_TYPEDEF)
     fprintf_filtered (stream, " %s", new_symbol->print_name ());
   fprintf_filtered (stream, ";");
 }
@@ -899,7 +899,7 @@ c_type_print_template_args (const struct type_print_options *flags,
 	  fprintf_filtered (stream, "%s = ", sym->linkage_name ());
 	}
 
-      c_print_type (SYMBOL_TYPE (sym), "", stream, -1, 0, flags);
+      c_print_type (sym->type (), "", stream, -1, 0, flags);
     }
 
   if (!first)

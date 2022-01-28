@@ -452,7 +452,7 @@ ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
       sym->compute_and_set_names (name, false, ccp->of->per_bfd);
       sym->set_aclass_index (LOC_CONST);
       sym->set_domain (VAR_DOMAIN);
-      SYMBOL_TYPE (sym) = fip->ptype;
+      sym->set_type (fip->ptype);
       add_symbol_to_list (sym, ccp->builder->get_global_symbols ());
     }
 
@@ -483,7 +483,7 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
       sym->set_aclass_index (LOC_OPTIMIZED_OUT);
 
       if (type != nullptr)
-	SYMBOL_TYPE (sym) = type;
+	sym->set_type (type);
 
       uint32_t kind = ctf_type_kind (fp, tid);
       switch (kind)
@@ -499,8 +499,8 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
 	    set_symbol_address (objfile, sym, sym->linkage_name ());
 	    break;
 	  case CTF_K_CONST:
-	    if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_VOID)
-	      SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_int;
+	    if (sym->type ()->code () == TYPE_CODE_VOID)
+	      sym->set_type (objfile_type (objfile)->builtin_int);
 	    break;
 	  case CTF_K_TYPEDEF:
 	  case CTF_K_INTEGER:
@@ -1169,7 +1169,7 @@ ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
 	  }
 	sym = new (&ccp->of->objfile_obstack) symbol;
 	OBJSTAT (ccp->of, n_syms++);
-	SYMBOL_TYPE (sym) = type;
+	sym->set_type (type);
 	sym->set_domain (VAR_DOMAIN);
 	sym->set_aclass_index (LOC_OPTIMIZED_OUT);
 	sym->compute_and_set_names (name, false, ccp->of->per_bfd);
@@ -1205,7 +1205,7 @@ add_stt_entries (struct ctf_context *ccp, int functions)
 	continue;
       sym = new (&ccp->of->objfile_obstack) symbol;
       OBJSTAT (ccp->of, n_syms++);
-      SYMBOL_TYPE (sym) = type;
+      sym->set_type (type);
       sym->set_domain (VAR_DOMAIN);
       sym->set_aclass_index (LOC_STATIC);
       sym->compute_and_set_names (tname, false, ccp->of->per_bfd);

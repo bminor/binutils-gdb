@@ -564,7 +564,7 @@ evaluate_var_value (enum noside noside, const block *blk, symbol *var)
       if (noside != EVAL_AVOID_SIDE_EFFECTS)
 	throw;
 
-      ret = value_zero (SYMBOL_TYPE (var), not_lval);
+      ret = value_zero (var->type (), not_lval);
     }
 
   return ret;
@@ -580,7 +580,7 @@ var_value_operation::evaluate (struct type *expect_type,
 			       enum noside noside)
 {
   symbol *var = std::get<0> (m_storage).symbol;
-  if (SYMBOL_TYPE (var)->code () == TYPE_CODE_ERROR)
+  if (var->type ()->code () == TYPE_CODE_ERROR)
     error_unknown_type (var->print_name ());
   return evaluate_var_value (noside, std::get<0> (m_storage).block, var);
 }
@@ -722,7 +722,7 @@ var_value_operation::evaluate_funcall (struct type *expect_type,
 		       NULL, std::get<0> (m_storage).symbol,
 		       NULL, &symp, NULL, 0, noside);
 
-  if (SYMBOL_TYPE (symp)->code () == TYPE_CODE_ERROR)
+  if (symp->type ()->code () == TYPE_CODE_ERROR)
     error_unknown_type (symp->print_name ());
   value *callee = evaluate_var_value (noside, std::get<0> (m_storage).block,
 				      symp);
@@ -1005,7 +1005,7 @@ eval_op_var_entry_value (struct type *expect_type, struct expression *exp,
 			 enum noside noside, symbol *sym)
 {
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (SYMBOL_TYPE (sym), not_lval);
+    return value_zero (sym->type (), not_lval);
 
   if (SYMBOL_COMPUTED_OPS (sym) == NULL
       || SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry == NULL)
@@ -2261,7 +2261,7 @@ adl_func_operation::evaluate (struct type *expect_type,
 		       NON_METHOD,
 		       nullptr, nullptr,
 		       nullptr, &symp, nullptr, 0, noside);
-  if (SYMBOL_TYPE (symp)->code () == TYPE_CODE_ERROR)
+  if (symp->type ()->code () == TYPE_CODE_ERROR)
     error_unknown_type (symp->print_name ());
   value *callee = evaluate_var_value (noside, std::get<1> (m_storage), symp);
   return evaluate_subexp_do_call (exp, noside, callee, args,
@@ -2582,12 +2582,12 @@ var_value_operation::evaluate_for_address (struct expression *exp,
 
   /* C++: The "address" of a reference should yield the address
    * of the object pointed to.  Let value_addr() deal with it.  */
-  if (TYPE_IS_REFERENCE (SYMBOL_TYPE (var)))
+  if (TYPE_IS_REFERENCE (var->type ()))
     return operation::evaluate_for_address (exp, noside);
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
-      struct type *type = lookup_pointer_type (SYMBOL_TYPE (var));
+      struct type *type = lookup_pointer_type (var->type ());
       enum address_class sym_class = var->aclass ();
 
       if (sym_class == LOC_CONST
@@ -2606,7 +2606,7 @@ var_value_operation::evaluate_with_coercion (struct expression *exp,
 					     enum noside noside)
 {
   struct symbol *var = std::get<0> (m_storage).symbol;
-  struct type *type = check_typedef (SYMBOL_TYPE (var));
+  struct type *type = check_typedef (var->type ());
   if (type->code () == TYPE_CODE_ARRAY
       && !type->is_vector ()
       && CAST_IS_CONVERSION (exp->language_defn))
@@ -2735,7 +2735,7 @@ value *
 var_value_operation::evaluate_for_sizeof (struct expression *exp,
 					  enum noside noside)
 {
-  struct type *type = SYMBOL_TYPE (std::get<0> (m_storage).symbol);
+  struct type *type = std::get<0> (m_storage).symbol->type ();
   if (is_dynamic_type (type))
     {
       value *val = evaluate (nullptr, exp, EVAL_NORMAL);

@@ -1203,9 +1203,19 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     return this->subclass == SYMBOL_TEMPLATE;
   }
 
+  struct type *type () const
+  {
+    return m_type;
+  }
+
+  void set_type (struct type *type)
+  {
+    m_type = type;
+  }
+
   /* Data type of value */
 
-  struct type *type = nullptr;
+  struct type *m_type = nullptr;
 
   /* The owner of this symbol.
      Which one to use is defined by symbol.is_objfile_owned.  */
@@ -1305,7 +1315,6 @@ struct block_symbol
 /* Note: There is no accessor macro for symbol.owner because it is
    "private".  */
 
-#define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_COMPUTED_OPS(symbol)	((symbol)->impl ().ops_computed)
 #define SYMBOL_BLOCK_OPS(symbol)	((symbol)->impl ().ops_block)

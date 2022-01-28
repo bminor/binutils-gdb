@@ -523,20 +523,20 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 
   if (symbol->domain () == STRUCT_DOMAIN)
     {
-      if (SYMBOL_TYPE (symbol)->name ())
+      if (symbol->type ()->name ())
 	{
-	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), "", outfile, 1, depth,
+	  LA_PRINT_TYPE (symbol->type (), "", outfile, 1, depth,
 			 &type_print_raw_options);
 	}
       else
 	{
 	  fprintf_filtered (outfile, "%s %s = ",
-			 (SYMBOL_TYPE (symbol)->code () == TYPE_CODE_ENUM
+			 (symbol->type ()->code () == TYPE_CODE_ENUM
 			  ? "enum"
-		     : (SYMBOL_TYPE (symbol)->code () == TYPE_CODE_STRUCT
+		     : (symbol->type ()->code () == TYPE_CODE_STRUCT
 			? "struct" : "union")),
 			    symbol->linkage_name ());
-	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), "", outfile, 1, depth,
+	  LA_PRINT_TYPE (symbol->type (), "", outfile, 1, depth,
 			 &type_print_raw_options);
 	}
       fprintf_filtered (outfile, ";\n");
@@ -545,12 +545,12 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
     {
       if (symbol->aclass () == LOC_TYPEDEF)
 	fprintf_filtered (outfile, "typedef ");
-      if (SYMBOL_TYPE (symbol))
+      if (symbol->type ())
 	{
 	  /* Print details of types, except for enums where it's clutter.  */
-	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), symbol->print_name (),
+	  LA_PRINT_TYPE (symbol->type (), symbol->print_name (),
 			 outfile,
-			 SYMBOL_TYPE (symbol)->code () != TYPE_CODE_ENUM,
+			 symbol->type ()->code () != TYPE_CODE_ENUM,
 			 depth,
 			 &type_print_raw_options);
 	  fprintf_filtered (outfile, "; ");
@@ -569,7 +569,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	case LOC_CONST_BYTES:
 	  {
 	    unsigned i;
-	    struct type *type = check_typedef (SYMBOL_TYPE (symbol));
+	    struct type *type = check_typedef (symbol->type ());
 
 	    fprintf_filtered (outfile, "const %s hex bytes:",
 			      pulongest (TYPE_LENGTH (type)));

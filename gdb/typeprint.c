@@ -260,7 +260,7 @@ typedef_hash_table::add_template_parameters (struct type *t)
 
       tf = XOBNEW (&m_storage, struct decl_field);
       tf->name = TYPE_TEMPLATE_ARGUMENT (t, i)->linkage_name ();
-      tf->type = SYMBOL_TYPE (TYPE_TEMPLATE_ARGUMENT (t, i));
+      tf->type = TYPE_TEMPLATE_ARGUMENT (t, i)->type ();
 
       slot = htab_find_slot (m_table.get (), tf, INSERT);
       if (*slot == NULL)

@@ -56,7 +56,7 @@ convert_one_symbol (compile_cplus_instance *instance,
   if (sym.symbol->aclass () == LOC_LABEL)
     sym_type = 0;
   else
-    sym_type = instance->convert_type (SYMBOL_TYPE (sym.symbol));
+    sym_type = instance->convert_type (sym.symbol->type ());
 
   if (sym.symbol->domain () == STRUCT_DOMAIN)
     {
@@ -73,9 +73,9 @@ convert_one_symbol (compile_cplus_instance *instance,
       switch (sym.symbol->aclass ())
 	{
 	case LOC_TYPEDEF:
-	  if (SYMBOL_TYPE (sym.symbol)->code () == TYPE_CODE_TYPEDEF)
+	  if (sym.symbol->type ()->code () == TYPE_CODE_TYPEDEF)
 	    kind = GCC_CP_SYMBOL_TYPEDEF;
-	  else  if (SYMBOL_TYPE (sym.symbol)->code () == TYPE_CODE_NAMESPACE)
+	  else  if (sym.symbol->type ()->code () == TYPE_CODE_NAMESPACE)
 	    return;
 	  break;
 
@@ -88,13 +88,13 @@ convert_one_symbol (compile_cplus_instance *instance,
 	  {
 	    kind = GCC_CP_SYMBOL_FUNCTION;
 	    addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym.symbol));
-	    if (is_global && SYMBOL_TYPE (sym.symbol)->is_gnu_ifunc ())
+	    if (is_global && sym.symbol->type ()->is_gnu_ifunc ())
 	      addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
 	  }
 	  break;
 
 	case LOC_CONST:
-	  if (SYMBOL_TYPE (sym.symbol)->code () == TYPE_CODE_ENUM)
+	  if (sym.symbol->type ()->code () == TYPE_CODE_ENUM)
 	    {
 	      /* Already handled by convert_enum.  */
 	      return;
@@ -190,7 +190,7 @@ convert_one_symbol (compile_cplus_instance *instance,
 	    {
 	      compile_scope scope
 		= instance->new_scope (sym.symbol->natural_name (),
-				       SYMBOL_TYPE (sym.symbol));
+				       sym.symbol->type ());
 	      if (scope.nested_type () != GCC_TYPE_NONE)
 		{
 		  /* We found a symbol for this type that was defined inside
@@ -442,7 +442,7 @@ gcc_cplus_symbol_address (void *datum, struct gcc_cp_context *gcc_context,
 				"gcc_symbol_address \"%s\": full symbol\n",
 				identifier);
 	  result = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-	  if (SYMBOL_TYPE (sym)->is_gnu_ifunc ())
+	  if (sym->type ()->is_gnu_ifunc ())
 	    result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
 	  found = 1;
 	}

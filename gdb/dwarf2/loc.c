@@ -744,7 +744,7 @@ func_addr_to_tail_call_list (struct gdbarch *gdbarch, CORE_ADDR addr)
 		   "name for address %s"),
 		 paddress (gdbarch, addr));
 
-  type = SYMBOL_TYPE (sym);
+  type = sym->type ();
   gdb_assert (type->code () == TYPE_CODE_FUNC);
   gdb_assert (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_FUNC);
 
@@ -783,7 +783,7 @@ func_verify_no_selftailcall (struct gdbarch *gdbarch, CORE_ADDR verify_addr)
 
       func_sym = func_addr_to_tail_call_list (gdbarch, addr);
 
-      for (call_site = TYPE_TAIL_CALL_LIST (SYMBOL_TYPE (func_sym));
+      for (call_site = TYPE_TAIL_CALL_LIST (func_sym->type ());
 	   call_site; call_site = call_site->tail_call_next)
 	{
 	  CORE_ADDR target_addr;
@@ -985,7 +985,7 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 	  struct symbol *target_func;
 
 	  target_func = func_addr_to_tail_call_list (gdbarch, target_func_addr);
-	  target_call_site = TYPE_TAIL_CALL_LIST (SYMBOL_TYPE (target_func));
+	  target_call_site = TYPE_TAIL_CALL_LIST (target_func->type ());
 	}
 
       do
@@ -3019,7 +3019,7 @@ locexpr_read_variable (struct symbol *symbol, struct frame_info *frame)
     = (struct dwarf2_locexpr_baton *) SYMBOL_LOCATION_BATON (symbol);
   struct value *val;
 
-  val = dwarf2_evaluate_loc_desc (SYMBOL_TYPE (symbol), frame, dlbaton->data,
+  val = dwarf2_evaluate_loc_desc (symbol->type (), frame, dlbaton->data,
 				  dlbaton->size, dlbaton->per_cu,
 				  dlbaton->per_objfile);
 
@@ -3036,7 +3036,7 @@ locexpr_read_variable_at_entry (struct symbol *symbol, struct frame_info *frame)
   struct dwarf2_locexpr_baton *dlbaton
     = (struct dwarf2_locexpr_baton *) SYMBOL_LOCATION_BATON (symbol);
 
-  return value_of_dwarf_block_entry (SYMBOL_TYPE (symbol), frame, dlbaton->data,
+  return value_of_dwarf_block_entry (symbol->type (), frame, dlbaton->data,
 				     dlbaton->size);
 }
 
@@ -3856,7 +3856,7 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
   CORE_ADDR pc = frame ? get_frame_address_in_block (frame) : 0;
 
   data = dwarf2_find_location_expression (dlbaton, &size, pc);
-  val = dwarf2_evaluate_loc_desc (SYMBOL_TYPE (symbol), frame, data, size,
+  val = dwarf2_evaluate_loc_desc (symbol->type (), frame, data, size,
 				  dlbaton->per_cu, dlbaton->per_objfile);
 
   return val;
@@ -3880,13 +3880,13 @@ loclist_read_variable_at_entry (struct symbol *symbol, struct frame_info *frame)
   CORE_ADDR pc;
 
   if (frame == NULL || !get_frame_func_if_available (frame, &pc))
-    return allocate_optimized_out_value (SYMBOL_TYPE (symbol));
+    return allocate_optimized_out_value (symbol->type ());
 
   data = dwarf2_find_location_expression (dlbaton, &size, pc);
   if (data == NULL)
-    return allocate_optimized_out_value (SYMBOL_TYPE (symbol));
+    return allocate_optimized_out_value (symbol->type ());
 
-  return value_of_dwarf_block_entry (SYMBOL_TYPE (symbol), frame, data, size);
+  return value_of_dwarf_block_entry (symbol->type (), frame, data, size);
 }
 
 /* Implementation of get_symbol_read_needs from

@@ -166,7 +166,7 @@ inspect_type (struct demangle_parse_info *info,
 
   if (sym != NULL)
     {
-      struct type *otype = SYMBOL_TYPE (sym);
+      struct type *otype = sym->type ();
 
       if (finder != NULL)
 	{
@@ -512,7 +512,7 @@ replace_typedefs (struct demangle_parse_info *info,
 
 	      if (sym != NULL)
 		{
-		  struct type *otype = SYMBOL_TYPE (sym);
+		  struct type *otype = sym->type ();
 		  const char *new_name = (*finder) (otype, data);
 
 		  if (new_name != NULL)
@@ -1215,7 +1215,7 @@ overload_list_add_symbol (struct symbol *sym,
 {
   /* If there is no type information, we can't do anything, so
      skip.  */
-  if (SYMBOL_TYPE (sym) == NULL)
+  if (sym->type () == NULL)
     return;
 
   /* skip any symbols that we've already considered.  */
@@ -1507,7 +1507,7 @@ cp_lookup_rtti_type (const char *name, const struct block *block)
       return NULL;
     }
 
-  rtti_type = check_typedef (SYMBOL_TYPE (rtti_sym));
+  rtti_type = check_typedef (rtti_sym->type ());
 
   switch (rtti_type->code ())
     {

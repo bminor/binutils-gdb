@@ -593,7 +593,7 @@ language_defn::read_var_value (struct symbol *var,
 			       struct frame_info *frame) const
 {
   struct value *v;
-  struct type *type = SYMBOL_TYPE (var);
+  struct type *type = var->type ();
   CORE_ADDR addr;
   enum symbol_needs_kind sym_need;
 

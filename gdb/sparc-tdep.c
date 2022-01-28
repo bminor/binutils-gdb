@@ -1234,7 +1234,7 @@ sparc_frame_cache (struct frame_info *this_frame, void **this_cache)
 static int
 sparc32_struct_return_from_sym (struct symbol *sym)
 {
-  struct type *type = check_typedef (SYMBOL_TYPE (sym));
+  struct type *type = check_typedef (sym->type ());
   enum type_code code = type->code ();
 
   if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)

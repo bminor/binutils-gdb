@@ -345,10 +345,10 @@ gdbscm_symbol_type (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  if (SYMBOL_TYPE (symbol) == NULL)
+  if (symbol->type () == NULL)
     return SCM_BOOL_F;
 
-  return tyscm_scm_from_type (SYMBOL_TYPE (symbol));
+  return tyscm_scm_from_type (symbol->type ());
 }
 
 /* (symbol-symtab <gdb:symbol>) -> <gdb:symtab> | #f

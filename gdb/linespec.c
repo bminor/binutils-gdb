@@ -3494,7 +3494,7 @@ decode_compound_collector::operator () (block_symbol *bsym)
   if (sym->aclass () != LOC_TYPEDEF)
     return true; /* Continue iterating.  */
 
-  t = SYMBOL_TYPE (sym);
+  t = sym->type ();
   t = check_typedef (t);
   if (t->code () != TYPE_CODE_STRUCT
       && t->code () != TYPE_CODE_UNION
@@ -3686,7 +3686,7 @@ find_method (struct linespec_state *self,
       pspace = symbol_symtab (sym)->pspace ();
       gdb_assert (!pspace->executing_startup);
       set_current_program_space (pspace);
-      t = check_typedef (SYMBOL_TYPE (sym));
+      t = check_typedef (sym->type ());
       find_methods (t, sym->language (),
 		    method_name, &result_names, &superclass_vec);
 

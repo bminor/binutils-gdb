@@ -96,7 +96,7 @@ lookup_struct_typedef (const char *name, const struct block *block, int noerr)
       else 
 	error (_("No struct type named %s."), name);
     }
-  if (SYMBOL_TYPE (sym)->code () != TYPE_CODE_STRUCT)
+  if (sym->type ()->code () != TYPE_CODE_STRUCT)
     {
       if (noerr)
 	return 0;
@@ -210,7 +210,7 @@ value_nsstring (struct gdbarch *gdbarch, const char *ptr, int len)
   if (sym == NULL)
     type = builtin_type (gdbarch)->builtin_data_ptr;
   else
-    type = lookup_pointer_type(SYMBOL_TYPE (sym));
+    type = lookup_pointer_type(sym->type ());
 
   deprecated_set_value_type (nsstringValue, type);
   return nsstringValue;

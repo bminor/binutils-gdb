@@ -525,8 +525,8 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 
   if (values == PRINT_SIMPLE_VALUES)
     {
-      check_typedef (arg->sym->type);
-      type_print (arg->sym->type, "", &stb, -1);
+      check_typedef (arg->sym->type ());
+      type_print (arg->sym->type (), "", &stb, -1);
       uiout->field_stream ("type", stb);
     }
 
@@ -648,7 +648,7 @@ list_args_or_locals (const frame_print_options &fp_opts,
 	      switch (values)
 		{
 		case PRINT_SIMPLE_VALUES:
-		  type = check_typedef (sym2->type);
+		  type = check_typedef (sym2->type ());
 		  if (type->code () != TYPE_CODE_ARRAY
 		      && type->code () != TYPE_CODE_STRUCT
 		      && type->code () != TYPE_CODE_UNION)

@@ -690,7 +690,7 @@ variable:	name_not_typename
 				pstate->block_tracker->update (sym);
 
 			      pstate->push_new<var_value_operation> (sym);
-			      current_type = sym.symbol->type; }
+			      current_type = sym.symbol->type (); }
 			  else if ($1.is_a_field_of_this)
 			    {
 			      struct value * this_val;
@@ -1640,9 +1640,9 @@ yylex (void)
 		break;
 	    }
 
-	  yylval.tsym.type = SYMBOL_TYPE (best_sym);
+	  yylval.tsym.type = best_sym->type ();
 #else /* not 0 */
-	  yylval.tsym.type = SYMBOL_TYPE (sym);
+	  yylval.tsym.type = sym->type ();
 #endif /* not 0 */
 	  free (uptokstart);
 	  return TYPENAME;

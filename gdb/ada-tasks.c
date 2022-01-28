@@ -503,7 +503,7 @@ ada_get_tcb_types_info (void)
     lookup_symbol_in_language (entry_call_record_name, NULL, STRUCT_DOMAIN,
 			       language_c, NULL).symbol;
 
-  if (atcb_sym == NULL || atcb_sym->type == NULL)
+  if (atcb_sym == NULL || atcb_sym->type () == NULL)
     {
       /* In Ravenscar run-time libs, the  ATCB does not have a dynamic
 	 size, so the symbol name differs.  */
@@ -511,34 +511,34 @@ ada_get_tcb_types_info (void)
 					    STRUCT_DOMAIN, language_c,
 					    NULL).symbol;
 
-      if (atcb_sym == NULL || atcb_sym->type == NULL)
+      if (atcb_sym == NULL || atcb_sym->type () == NULL)
 	return _("Cannot find Ada_Task_Control_Block type");
 
-      type = atcb_sym->type;
+      type = atcb_sym->type ();
     }
   else
     {
       /* Get a static representation of the type record
 	 Ada_Task_Control_Block.  */
-      type = atcb_sym->type;
+      type = atcb_sym->type ();
       type = ada_template_to_fixed_record_type_1 (type, NULL, 0, NULL, 0);
     }
 
-  if (common_atcb_sym == NULL || common_atcb_sym->type == NULL)
+  if (common_atcb_sym == NULL || common_atcb_sym->type () == NULL)
     return _("Cannot find Common_ATCB type");
-  if (private_data_sym == NULL || private_data_sym->type == NULL)
+  if (private_data_sym == NULL || private_data_sym->type ()== NULL)
     return _("Cannot find Private_Data type");
-  if (entry_call_record_sym == NULL || entry_call_record_sym->type == NULL)
+  if (entry_call_record_sym == NULL || entry_call_record_sym->type () == NULL)
     return _("Cannot find Entry_Call_Record type");
 
   /* Get the type for Ada_Task_Control_Block.Common.  */
-  common_type = common_atcb_sym->type;
+  common_type = common_atcb_sym->type ();
 
   /* Get the type for Ada_Task_Control_Bloc.Common.Call.LL.  */
-  ll_type = private_data_sym->type;
+  ll_type = private_data_sym->type ();
 
   /* Get the type for Common_ATCB.Call.all.  */
-  call_type = entry_call_record_sym->type;
+  call_type = entry_call_record_sym->type ();
 
   /* Get the field indices.  */
   fieldnos.common = ada_get_field_index (type, "common", 0);
@@ -904,7 +904,7 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
       if (sym != NULL)
 	{
 	  /* Validate.  */
-	  struct type *type = check_typedef (SYMBOL_TYPE (sym));
+	  struct type *type = check_typedef (sym->type ());
 	  struct type *eltype = NULL;
 	  struct type *idxtype = NULL;
 
@@ -950,7 +950,7 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
       if (sym != NULL && SYMBOL_VALUE_ADDRESS (sym) != 0)
 	{
 	  /* Validate.  */
-	  struct type *type = check_typedef (SYMBOL_TYPE (sym));
+	  struct type *type = check_typedef (sym->type ());
 
 	  if (type->code () == TYPE_CODE_PTR)
 	    {

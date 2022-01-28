@@ -1332,10 +1332,10 @@ select_possible_type_sym (const std::vector<struct block_symbol> &syms)
     switch (syms[i].symbol->aclass ())
       {
       case LOC_TYPEDEF:
-	if (ada_prefer_type (SYMBOL_TYPE (syms[i].symbol), preferred_type))
+	if (ada_prefer_type (syms[i].symbol->type (), preferred_type))
 	  {
 	    preferred_index = i;
-	    preferred_type = SYMBOL_TYPE (syms[i].symbol);
+	    preferred_type = syms[i].symbol->type ();
 	  }
 	break;
       case LOC_REGISTER:
@@ -1374,7 +1374,7 @@ find_primitive_type (struct parser_state *par_state, const char *name)
       strcat (expanded_name, name);
       sym = ada_lookup_symbol (expanded_name, NULL, VAR_DOMAIN).symbol;
       if (sym != NULL && sym->aclass () == LOC_TYPEDEF)
-	type = SYMBOL_TYPE (sym);
+	type = sym->type ();
     }
 
   return type;
@@ -1474,7 +1474,7 @@ get_symbol_field_type (struct symbol *sym, const char *encoded_field_name)
 {
   const char *field_name = encoded_field_name;
   const char *subfield_name;
-  struct type *type = SYMBOL_TYPE (sym);
+  struct type *type = sym->type ();
   int fieldno;
 
   if (type == NULL || field_name == NULL)
@@ -1595,7 +1595,7 @@ write_var_or_type (struct parser_state *par_state,
 	      struct type *field_type;
 	      
 	      if (tail_index == name_len)
-		return SYMBOL_TYPE (type_sym);
+		return type_sym->type ();
 
 	      /* We have some extraneous characters after the type name.
 		 If this is an expression "TYPE_NAME.FIELD0.[...].FIELDN",

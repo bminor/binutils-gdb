@@ -927,7 +927,7 @@ collection_list::collect_symbol (struct symbol *sym,
   bfd_signed_vma offset;
   int treat_as_expr = 0;
 
-  len = TYPE_LENGTH (check_typedef (SYMBOL_TYPE (sym)));
+  len = TYPE_LENGTH (check_typedef (sym->type ()));
   switch (sym->aclass ())
     {
     default:
@@ -948,7 +948,7 @@ collection_list::collect_symbol (struct symbol *sym,
 	}
       /* A struct may be a C++ class with static fields, go to general
 	 expression handling.  */
-      if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_STRUCT)
+      if (sym->type ()->code () == TYPE_CODE_STRUCT)
 	treat_as_expr = 1;
       else
 	add_memrange (gdbarch, memrange_absolute, offset, len, scope);
@@ -960,7 +960,7 @@ collection_list::collect_symbol (struct symbol *sym,
       add_local_register (gdbarch, reg, scope);
       /* Check for doubles stored in two registers.  */
       /* FIXME: how about larger types stored in 3 or more regs?  */
-      if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_FLT &&
+      if (sym->type ()->code () == TYPE_CODE_FLT &&
 	  len > register_size (gdbarch, reg))
 	add_local_register (gdbarch, reg + 1, scope);
       break;
@@ -2565,8 +2565,8 @@ info_scope_command (const char *args_in, int from_tty)
 		  break;
 		case LOC_CONST_BYTES:
 		  printf_filtered ("constant bytes: ");
-		  if (SYMBOL_TYPE (sym))
-		    for (j = 0; j < TYPE_LENGTH (SYMBOL_TYPE (sym)); j++)
+		  if (sym->type ())
+		    for (j = 0; j < TYPE_LENGTH (sym->type ()); j++)
 		      printf_filtered (" %02x",
 				       (unsigned) SYMBOL_VALUE_BYTES (sym)[j]);
 		  break;
@@ -2645,9 +2645,9 @@ info_scope_command (const char *args_in, int from_tty)
 		  gdb_assert_not_reached ("LOC_COMPUTED variable missing a method");
 		}
 	    }
-	  if (SYMBOL_TYPE (sym))
+	  if (sym->type ())
 	    {
-	      struct type *t = check_typedef (SYMBOL_TYPE (sym));
+	      struct type *t = check_typedef (sym->type ());
 
 	      printf_filtered (", length %s.\n", pulongest (TYPE_LENGTH (t)));
 	    }

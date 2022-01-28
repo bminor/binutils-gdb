@@ -569,9 +569,9 @@ add_data_symbol (SYMR *sh, union aux_ext *ax, int bigend,
   /* Type could be missing if file is compiled without debugging info.  */
   if (SC_IS_UNDEF (sh->sc)
       || sh->sc == scNil || sh->index == indexNil)
-    SYMBOL_TYPE (s) = objfile_type (objfile)->nodebug_data_symbol;
+    s->set_type (objfile_type (objfile)->nodebug_data_symbol);
   else
-    SYMBOL_TYPE (s) = parse_type (cur_fd, ax, sh->index, 0, bigend, name);
+    s->set_type (parse_type (cur_fd, ax, sh->index, 0, bigend, name));
   /* Value of a data symbol is its memory address.  */
 }
 
@@ -697,7 +697,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  break;
 	}
       SYMBOL_VALUE (s) = svalue;
-      SYMBOL_TYPE (s) = parse_type (cur_fd, ax, sh->index, 0, bigend, name);
+      s->set_type (parse_type (cur_fd, ax, sh->index, 0, bigend, name));
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
       break;
 
@@ -706,7 +706,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       s->set_domain (VAR_DOMAIN);	/* So that it can be used */
       s->set_aclass_index (LOC_LABEL);	/* but not misused.  */
       SET_SYMBOL_VALUE_ADDRESS (s, (CORE_ADDR) sh->value);
-      SYMBOL_TYPE (s) = objfile_type (objfile)->builtin_int;
+      s->set_type (objfile_type (objfile)->builtin_int);
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
       break;
 
@@ -787,12 +787,12 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       add_symbol (s, top_stack->cur_st, b);
 
       /* Make a type for the procedure itself.  */
-      SYMBOL_TYPE (s) = lookup_function_type (t);
+      s->set_type (lookup_function_type (t));
 
       /* All functions in C++ have prototypes.  For C we don't have enough
 	 information in the debug info.  */
       if (s->language () == language_cplus)
-	SYMBOL_TYPE (s)->set_is_prototyped (true);
+	s->type ()->set_is_prototyped (true);
 
       /* Create and enter a new lexical context.  */
       b = new_block (FUNCTION_BLOCK, s->language ());
@@ -809,7 +809,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       push_parse_stack ();
       top_stack->cur_block = b;
       top_stack->blocktype = sh->st;
-      top_stack->cur_type = SYMBOL_TYPE (s);
+      top_stack->cur_type = s->type ();
       top_stack->cur_field = -1;
       top_stack->procadr = sh->value;
       top_stack->numargs = 0;
@@ -1066,7 +1066,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		  (obstack_strdup (&mdebugread_objfile->objfile_obstack,
 				   f->name ()));
 		enum_sym->set_aclass_index (LOC_CONST);
-		SYMBOL_TYPE (enum_sym) = t;
+		enum_sym->set_type (t);
 		enum_sym->set_domain (VAR_DOMAIN);
 		SYMBOL_VALUE (enum_sym) = tsym.value;
 		if (SYMBOL_VALUE (enum_sym) < 0)
@@ -1100,7 +1100,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	s->set_domain (STRUCT_DOMAIN);
 	s->set_aclass_index (LOC_TYPEDEF);
 	SYMBOL_VALUE (s) = 0;
-	SYMBOL_TYPE (s) = t;
+	s->set_type (t);
 	add_symbol (s, top_stack->cur_st, top_stack->cur_block);
 	break;
 
@@ -1156,7 +1156,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 	  s->set_domain (LABEL_DOMAIN);
 	  s->set_aclass_index (LOC_CONST);
-	  SYMBOL_TYPE (s) = objfile_type (mdebugread_objfile)->builtin_void;
+	  s->set_type (objfile_type (mdebugread_objfile)->builtin_void);
 	  e = OBSTACK_ZALLOC (&mdebugread_objfile->objfile_obstack,
 			      mdebug_extra_func_info);
 	  SYMBOL_VALUE_BYTES (s) = (gdb_byte *) e;
@@ -1204,7 +1204,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 		      if (sym->is_argument ())
 			{
-			  ftype->field (iparams).set_type (SYMBOL_TYPE (sym));
+			  ftype->field (iparams).set_type (sym->type ());
 			  TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
 			  iparams++;
 			}
@@ -1298,17 +1298,17 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       s->set_domain (VAR_DOMAIN);
       s->set_aclass_index (LOC_TYPEDEF);
       SYMBOL_BLOCK_VALUE (s) = top_stack->cur_block;
-      SYMBOL_TYPE (s) = t;
+      s->set_type (t);
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
 
       /* Incomplete definitions of structs should not get a name.  */
-      if (SYMBOL_TYPE (s)->name () == NULL
-	  && (SYMBOL_TYPE (s)->num_fields () != 0
-	      || (SYMBOL_TYPE (s)->code () != TYPE_CODE_STRUCT
-		  && SYMBOL_TYPE (s)->code () != TYPE_CODE_UNION)))
+      if (s->type ()->name () == NULL
+	  && (s->type ()->num_fields () != 0
+	      || (s->type ()->code () != TYPE_CODE_STRUCT
+		  && s->type ()->code () != TYPE_CODE_UNION)))
 	{
-	  if (SYMBOL_TYPE (s)->code () == TYPE_CODE_PTR
-	      || SYMBOL_TYPE (s)->code () == TYPE_CODE_FUNC)
+	  if (s->type ()->code () == TYPE_CODE_PTR
+	      || s->type ()->code () == TYPE_CODE_FUNC)
 	    {
 	      /* If we are giving a name to a type such as "pointer to
 		 foo" or "function returning foo", we better not set
@@ -1330,7 +1330,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		 for anything except pointers or functions.  */
 	    }
 	  else
-	    SYMBOL_TYPE (s)->set_name (s->linkage_name ());
+	    s->type ()->set_name (s->linkage_name ());
 	}
       break;
 
@@ -1990,7 +1990,7 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
       s->set_domain (VAR_DOMAIN);
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Don't know its type, hope int is ok.  */
-      SYMBOL_TYPE (s)
+      s->type ()
 	= lookup_function_type (objfile_type (pst->objfile)->builtin_int);
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
       /* Won't have symbols for this one.  */
@@ -2044,8 +2044,8 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
 
   if (processing_gcc_compilation == 0
       && found_ecoff_debugging_info == 0
-      && TYPE_TARGET_TYPE (SYMBOL_TYPE (s))->code () == TYPE_CODE_VOID)
-    SYMBOL_TYPE (s) = objfile_type (mdebugread_objfile)->nodebug_text_symbol;
+      && TYPE_TARGET_TYPE (s->type ())->code () == TYPE_CODE_VOID)
+    s->set_type (objfile_type (mdebugread_objfile)->nodebug_text_symbol);
 }
 
 /* Parse the external symbol ES.  Just call parse_symbol() after
@@ -3989,7 +3989,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 
 		  s->set_domain (LABEL_DOMAIN);
 		  s->set_aclass_index (LOC_CONST);
-		  SYMBOL_TYPE (s) = objfile_type (objfile)->builtin_void;
+		  s->set_type (objfile_type (objfile)->builtin_void);
 		  SYMBOL_VALUE_BYTES (s) = (gdb_byte *) e;
 		  e->pdr.framereg = -1;
 		  add_symbol_to_list (s, get_local_symbols ());

@@ -3090,7 +3090,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
 				&inner_is_a_field_of_this);
 	  if (bsym.symbol != NULL)
 	    {
-	      yylval.tsym.type = SYMBOL_TYPE (bsym.symbol);
+	      yylval.tsym.type = bsym.symbol->type ();
 	      return TYPENAME;
 	    }
 	}
@@ -3118,7 +3118,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
 
   if (bsym.symbol && bsym.symbol->aclass () == LOC_TYPEDEF)
     {
-      yylval.tsym.type = SYMBOL_TYPE (bsym.symbol);
+      yylval.tsym.type = bsym.symbol->type ();
       return TYPENAME;
     }
 
@@ -3135,7 +3135,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	  sym = lookup_struct_typedef (copy.c_str (),
 				       par_state->expression_context_block, 1);
 	  if (sym)
-	    yylval.theclass.type = SYMBOL_TYPE (sym);
+	    yylval.theclass.type = sym->type ();
 	  return CLASSNAME;
 	}
     }
@@ -3231,7 +3231,7 @@ classify_inner_name (struct parser_state *par_state,
       return ERROR;
 
     case LOC_TYPEDEF:
-      yylval.tsym.type = SYMBOL_TYPE (yylval.ssym.sym.symbol);
+      yylval.tsym.type = yylval.ssym.sym.symbol->type ();
       return TYPENAME;
 
     default:

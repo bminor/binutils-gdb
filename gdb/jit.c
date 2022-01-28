@@ -562,7 +562,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       block_name->set_domain (VAR_DOMAIN);
       block_name->set_aclass_index (LOC_BLOCK);
       symbol_set_symtab (block_name, filetab);
-      SYMBOL_TYPE (block_name) = lookup_function_type (block_type);
+      block_name->set_type (lookup_function_type (block_type));
       SYMBOL_BLOCK_VALUE (block_name) = new_block;
 
       block_name->m_name = obstack_strdup (&objfile->objfile_obstack,
