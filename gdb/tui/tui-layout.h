@@ -217,8 +217,9 @@ protected:
 
 private:
 
-  /* Set the weights from the current heights.  */
-  void set_weights_from_heights ();
+  /* Set the weights from the current heights (when m_vertical is true) or
+     widths (when m_vertical is false).  */
+  void set_weights_from_sizes ();
 
   struct split
   {

@@ -561,10 +561,11 @@ tui_layout_split::bottom_boxed_p () const
 /* See tui-layout.h.  */
 
 void
-tui_layout_split::set_weights_from_heights ()
+tui_layout_split::set_weights_from_sizes ()
 {
   for (int i = 0; i < m_splits.size (); ++i)
-    m_splits[i].weight = m_splits[i].layout->height;
+    m_splits[i].weight
+      = m_vertical ? m_splits[i].layout->height : m_splits[i].layout->width;
 }
 
 /* See tui-layout.h.  */
@@ -596,7 +597,7 @@ tui_layout_split::set_height (const char *name, int new_height)
   if (m_splits[found_index].layout->height == new_height)
     return HANDLED;
 
-  set_weights_from_heights ();
+  set_weights_from_sizes ();
   int delta = m_splits[found_index].weight - new_height;
   m_splits[found_index].weight = new_height;
 
@@ -634,7 +635,7 @@ tui_layout_split::set_height (const char *name, int new_height)
     {
       warning (_("Invalid window height specified"));
       /* Effectively undo any modifications made here.  */
-      set_weights_from_heights ();
+      set_weights_from_sizes ();
     }
   else
     {
