@@ -58,7 +58,7 @@ convert_one_symbol (compile_cplus_instance *instance,
   else
     sym_type = instance->convert_type (SYMBOL_TYPE (sym.symbol));
 
-  if (SYMBOL_DOMAIN (sym.symbol) == STRUCT_DOMAIN)
+  if (sym.symbol->domain () == STRUCT_DOMAIN)
     {
       /* Nothing to do.  */
     }
@@ -374,7 +374,7 @@ gcc_cplus_convert_symbol (void *datum,
 	    {
 	      found = true;
 	      convert_symbol_sym (instance, identifier, it,
-				  SYMBOL_DOMAIN (it.symbol));
+				  it.symbol->domain ());
 	    }
 	}
 

@@ -562,7 +562,7 @@ add_data_symbol (SYMR *sh, union aux_ext *ax, int bigend,
 		 struct symbol *s, int aclass_index, struct block *b,
 		 struct objfile *objfile, const char *name)
 {
-  SYMBOL_DOMAIN (s) = VAR_DOMAIN;
+  s->set_domain (VAR_DOMAIN);
   s->set_aclass_index (aclass_index);
   add_symbol (s, top_stack->cur_st, b);
 
@@ -675,7 +675,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	name = "this";		/* FIXME, not alloc'd in obstack.  */
       s = new_symbol (name);
 
-      SYMBOL_DOMAIN (s) = VAR_DOMAIN;
+      s->set_domain (VAR_DOMAIN);
       SYMBOL_IS_ARGUMENT (s) = 1;
       switch (sh->sc)
 	{
@@ -703,7 +703,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
     case stLabel:		/* label, goes into current block.  */
       s = new_symbol (name);
-      SYMBOL_DOMAIN (s) = VAR_DOMAIN;	/* So that it can be used */
+      s->set_domain (VAR_DOMAIN);	/* So that it can be used */
       s->set_aclass_index (LOC_LABEL);	/* but not misused.  */
       SET_SYMBOL_VALUE_ADDRESS (s, (CORE_ADDR) sh->value);
       SYMBOL_TYPE (s) = objfile_type (objfile)->builtin_int;
@@ -744,7 +744,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  break;
 	}
       s = new_symbol (name);
-      SYMBOL_DOMAIN (s) = VAR_DOMAIN;
+      s->set_domain (VAR_DOMAIN);
       s->set_aclass_index (LOC_BLOCK);
       /* Type of the return value.  */
       if (SC_IS_UNDEF (sh->sc) || sh->sc == scNil)
@@ -1067,7 +1067,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 				   f->name ()));
 		enum_sym->set_aclass_index (LOC_CONST);
 		SYMBOL_TYPE (enum_sym) = t;
-		SYMBOL_DOMAIN (enum_sym) = VAR_DOMAIN;
+		enum_sym->set_domain (VAR_DOMAIN);
 		SYMBOL_VALUE (enum_sym) = tsym.value;
 		if (SYMBOL_VALUE (enum_sym) < 0)
 		  unsigned_enum = 0;
@@ -1097,7 +1097,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  }
 
 	s = new_symbol (name);
-	SYMBOL_DOMAIN (s) = STRUCT_DOMAIN;
+	s->set_domain (STRUCT_DOMAIN);
 	s->set_aclass_index (LOC_TYPEDEF);
 	SYMBOL_VALUE (s) = 0;
 	SYMBOL_TYPE (s) = t;
@@ -1154,7 +1154,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 	  /* Make up special symbol to contain procedure specific info.  */
 	  s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
-	  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
+	  s->set_domain (LABEL_DOMAIN);
 	  s->set_aclass_index (LOC_CONST);
 	  SYMBOL_TYPE (s) = objfile_type (mdebugread_objfile)->builtin_void;
 	  e = OBSTACK_ZALLOC (&mdebugread_objfile->objfile_obstack,
@@ -1295,7 +1295,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       if (has_opaque_xref (cur_fdr, sh))
 	break;
       s = new_symbol (name);
-      SYMBOL_DOMAIN (s) = VAR_DOMAIN;
+      s->set_domain (VAR_DOMAIN);
       s->set_aclass_index (LOC_TYPEDEF);
       SYMBOL_BLOCK_VALUE (s) = top_stack->cur_block;
       SYMBOL_TYPE (s) = t;
@@ -1987,7 +1987,7 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
 #else
 /* FIXME -- delete.  We can't do symbol allocation now; it's all done.  */
       s = new_symbol (sh_name);
-      SYMBOL_DOMAIN (s) = VAR_DOMAIN;
+      s->set_domain (VAR_DOMAIN);
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Don't know its type, hope int is ok.  */
       SYMBOL_TYPE (s)
@@ -3987,7 +3987,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 				      mdebug_extra_func_info);
 		  struct symbol *s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 
-		  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
+		  s->set_domain (LABEL_DOMAIN);
 		  s->set_aclass_index (LOC_CONST);
 		  SYMBOL_TYPE (s) = objfile_type (objfile)->builtin_void;
 		  SYMBOL_VALUE_BYTES (s) = (gdb_byte *) e;
@@ -4467,7 +4467,7 @@ mylookup_symbol (const char *name, const struct block *block,
   ALL_BLOCK_SYMBOLS (block, iter, sym)
     {
       if (sym->linkage_name ()[0] == inc
-	  && SYMBOL_DOMAIN (sym) == domain
+	  && sym->domain () == domain
 	  && sym->aclass () == theclass
 	  && strcmp (sym->linkage_name (), name) == 0)
 	return sym;

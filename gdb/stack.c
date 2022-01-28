@@ -2258,7 +2258,7 @@ iterate_over_block_locals (const struct block *b,
 	case LOC_OPTIMIZED_OUT:
 	  if (SYMBOL_IS_ARGUMENT (sym))
 	    break;
-	  if (SYMBOL_DOMAIN (sym) == COMMON_BLOCK_DOMAIN)
+	  if (sym->domain () == COMMON_BLOCK_DOMAIN)
 	    break;
 	  (*cb) (sym->print_name (), sym, cb_data);
 	  break;

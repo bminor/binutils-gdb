@@ -290,7 +290,7 @@ ada_funcall (int nargs)
   int array_arity = 0;
   struct type *callee_t = nullptr;
   if (vvo == nullptr
-      || SYMBOL_DOMAIN (vvo->get_symbol ()) != UNDEF_DOMAIN)
+      || vvo->get_symbol ()->domain () != UNDEF_DOMAIN)
     {
       struct value *callee_v = callee->evaluate (nullptr,
 						 pstate->expout.get (),
@@ -1435,7 +1435,7 @@ write_ambiguous_var (struct parser_state *par_state,
 {
   struct symbol *sym = new (&temp_parse_space) symbol ();
 
-  SYMBOL_DOMAIN (sym) = UNDEF_DOMAIN;
+  sym->set_domain (UNDEF_DOMAIN);
   sym->set_linkage_name (obstack_strndup (&temp_parse_space, name, len));
   sym->set_language (language_ada, nullptr);
 

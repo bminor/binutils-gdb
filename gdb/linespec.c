@@ -3995,7 +3995,7 @@ find_label_symbols_in_block (const struct block *block,
       ALL_BLOCK_SYMBOLS (block, iter, sym)
 	{
 	  if (symbol_matches_domain (sym->language (),
-				     SYMBOL_DOMAIN (sym), LABEL_DOMAIN)
+				     sym->domain (), LABEL_DOMAIN)
 	      && cmp (sym->search_name (), name, name_len) == 0)
 	    {
 	      result->push_back ({sym, block});

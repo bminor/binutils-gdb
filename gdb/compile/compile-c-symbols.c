@@ -67,7 +67,7 @@ convert_one_symbol (compile_c_instance *context,
   else
     sym_type = context->convert_type (SYMBOL_TYPE (sym.symbol));
 
-  if (SYMBOL_DOMAIN (sym.symbol) == STRUCT_DOMAIN)
+  if (sym.symbol->domain () == STRUCT_DOMAIN)
     {
       /* Binding a tag, so we don't need to build a decl.  */
       context->plugin ().tagbind (sym.symbol->natural_name (),

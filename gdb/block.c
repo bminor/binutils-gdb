@@ -664,7 +664,7 @@ block_iter_match_next (const lookup_name_info &name,
 bool
 best_symbol (struct symbol *a, const domain_enum domain)
 {
-  return (SYMBOL_DOMAIN (a) == domain
+  return (a->domain () == domain
 	  && a->aclass () != LOC_UNRESOLVED);
 }
 
@@ -678,11 +678,10 @@ better_symbol (struct symbol *a, struct symbol *b, const domain_enum domain)
   if (b == NULL)
     return a;
 
-  if (SYMBOL_DOMAIN (a) == domain
-      && SYMBOL_DOMAIN (b) != domain)
+  if (a->domain () == domain && b->domain () != domain)
     return a;
-  if (SYMBOL_DOMAIN (b) == domain
-      && SYMBOL_DOMAIN (a) != domain)
+
+  if (b->domain () == domain && a->domain () != domain)
     return b;
 
   if (a->aclass () != LOC_UNRESOLVED && b->aclass () == LOC_UNRESOLVED)
@@ -730,7 +729,7 @@ block_lookup_symbol (const struct block *block, const char *name,
 	     make sure there is no "better" matching symbol, i.e., one with
 	     exactly the same domain.  PR 16253.  */
 	  if (symbol_matches_domain (sym->language (),
-				     SYMBOL_DOMAIN (sym), domain))
+				     sym->domain (), domain))
 	    other = better_symbol (other, sym, domain);
 	}
       return other;
@@ -751,7 +750,7 @@ block_lookup_symbol (const struct block *block, const char *name,
       ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
 	{
 	  if (symbol_matches_domain (sym->language (),
-				     SYMBOL_DOMAIN (sym), domain))
+				     sym->domain (), domain))
 	    {
 	      sym_found = sym;
 	      if (!SYMBOL_IS_ARGUMENT (sym))
@@ -819,7 +818,7 @@ block_lookup_symbol_primary (const struct block *block, const char *name,
 	 STRUCT vs VAR domain symbols.  So if a matching symbol is found,
 	 make sure there is no "better" matching symbol, i.e., one with
 	 exactly the same domain.  PR 16253.  */
-      if (symbol_matches_domain (sym->language (), SYMBOL_DOMAIN (sym), domain))
+      if (symbol_matches_domain (sym->language (), sym->domain (), domain))
 	other = better_symbol (other, sym, domain);
     }
 
@@ -846,7 +845,7 @@ block_find_symbol (const struct block *block, const char *name,
     {
       /* MATCHER is deliberately called second here so that it never sees
 	 a non-domain-matching symbol.  */
-      if (symbol_matches_domain (sym->language (), SYMBOL_DOMAIN (sym), domain)
+      if (symbol_matches_domain (sym->language (), sym->domain (), domain)
 	  && matcher (sym, data))
 	return sym;
     }

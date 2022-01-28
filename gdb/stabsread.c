@@ -424,7 +424,7 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 		 ld will remove it from the executable.  There is then
 		 a N_GSYM stab for it, but no regular (C_EXT) symbol.  */
 	      sym = new (&objfile->objfile_obstack) symbol;
-	      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+	      sym->set_domain (VAR_DOMAIN);
 	      sym->set_aclass_index (LOC_OPTIMIZED_OUT);
 	      sym->set_linkage_name
 		(obstack_strndup (&objfile->objfile_obstack, name, pp - name));
@@ -785,7 +785,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	{
 	  sym->set_aclass_index (LOC_CONST);
 	  SYMBOL_TYPE (sym) = error_type (&p, objfile);
-	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+	  sym->set_domain (VAR_DOMAIN);
 	  add_symbol_to_list (sym, get_file_symbols ());
 	  return sym;
 	}
@@ -844,7 +844,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      {
 		sym->set_aclass_index (LOC_CONST);
 		SYMBOL_TYPE (sym) = error_type (&p, objfile);
-		SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+		sym->set_domain (VAR_DOMAIN);
 		add_symbol_to_list (sym, get_file_symbols ());
 		return sym;
 	      }
@@ -869,7 +869,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      {
 		sym->set_aclass_index (LOC_CONST);
 		SYMBOL_TYPE (sym) = error_type (&p, objfile);
-		SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+		sym->set_domain (VAR_DOMAIN);
 		add_symbol_to_list (sym, get_file_symbols ());
 		return sym;
 	      }
@@ -924,7 +924,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    SYMBOL_TYPE (sym) = error_type (&p, objfile);
 	  }
 	}
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_file_symbols ());
       return sym;
 
@@ -932,7 +932,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* The name of a caught exception.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       sym->set_aclass_index (LOC_LABEL);
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       SET_SYMBOL_VALUE_ADDRESS (sym, valu);
       add_symbol_to_list (sym, get_local_symbols ());
       break;
@@ -941,7 +941,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* A static function definition.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       sym->set_aclass_index (LOC_BLOCK);
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_file_symbols ());
       /* fall into process_function_types.  */
 
@@ -1013,7 +1013,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* A global function definition.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       sym->set_aclass_index (LOC_BLOCK);
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_global_symbols ());
       goto process_function_types;
 
@@ -1024,7 +1024,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	 These definitions appear at the end of the namelist.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       sym->set_aclass_index (LOC_STATIC);
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       /* Don't add symbol references to global_sym_chain.
 	 Symbol references don't have valid names and wont't match up with
 	 minimal symbols when the global_sym_chain is relocated.
@@ -1046,7 +1046,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       sym->set_aclass_index (LOC_LOCAL);
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
       break;
 
@@ -1066,7 +1066,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
       sym->set_aclass_index (LOC_ARG);
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       SYMBOL_IS_ARGUMENT (sym) = 1;
       add_symbol_to_list (sym, get_local_symbols ());
 
@@ -1116,7 +1116,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       sym->set_aclass_index (stab_register_index);
       SYMBOL_IS_ARGUMENT (sym) = 1;
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
       break;
 
@@ -1125,7 +1125,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       sym->set_aclass_index (stab_register_index);
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       if (within_function)
 	{
 	  /* Sun cc uses a pair of symbols, one 'p' and one 'r', with
@@ -1180,7 +1180,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       sym->set_aclass_index (LOC_STATIC);
       SET_SYMBOL_VALUE_ADDRESS (sym, valu);
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_file_symbols ());
       break;
 
@@ -1211,7 +1211,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
       sym->set_aclass_index (LOC_TYPEDEF);
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       /* C++ vagaries: we may have a type which is derived from
 	 a base type which did not have its name defined when the
 	 derived class was output.  We fill in the derived class's
@@ -1288,7 +1288,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  *struct_sym = *sym;
 	  struct_sym->set_aclass_index (LOC_TYPEDEF);
 	  SYMBOL_VALUE (struct_sym) = valu;
-	  SYMBOL_DOMAIN (struct_sym) = STRUCT_DOMAIN;
+	  struct_sym->set_domain (STRUCT_DOMAIN);
 	  if (SYMBOL_TYPE (sym)->name () == 0)
 	    SYMBOL_TYPE (sym)->set_name
 	      (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
@@ -1315,7 +1315,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
       sym->set_aclass_index (LOC_TYPEDEF);
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
+      sym->set_domain (STRUCT_DOMAIN);
       if (SYMBOL_TYPE (sym)->name () == 0)
 	SYMBOL_TYPE (sym)->set_name
 	  (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
@@ -1330,7 +1330,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  *typedef_sym = *sym;
 	  typedef_sym->set_aclass_index (LOC_TYPEDEF);
 	  SYMBOL_VALUE (typedef_sym) = valu;
-	  SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
+	  typedef_sym->set_domain (VAR_DOMAIN);
 	  if (SYMBOL_TYPE (sym)->name () == 0)
 	    SYMBOL_TYPE (sym)->set_name
 	      (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
@@ -1344,7 +1344,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       sym->set_aclass_index (LOC_STATIC);
       SET_SYMBOL_VALUE_ADDRESS (sym, valu);
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
       break;
 
@@ -1354,7 +1354,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       sym->set_aclass_index (LOC_REF_ARG);
       SYMBOL_IS_ARGUMENT (sym) = 1;
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
       break;
 
@@ -1364,7 +1364,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       sym->set_aclass_index (stab_regparm_index);
       SYMBOL_IS_ARGUMENT (sym) = 1;
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
       break;
 
@@ -1376,7 +1376,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       sym->set_aclass_index (LOC_LOCAL);
       SYMBOL_VALUE (sym) = valu;
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
       break;
 
@@ -1384,7 +1384,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       SYMBOL_TYPE (sym) = error_type (&p, objfile);
       sym->set_aclass_index (LOC_CONST);
       SYMBOL_VALUE (sym) = 0;
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_file_symbols ());
       break;
     }
@@ -1629,7 +1629,7 @@ again:
 	      struct symbol *sym = ppt->symbol[i];
 
 	      if (sym->aclass () == LOC_TYPEDEF
-		  && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
+		  && sym->domain () == STRUCT_DOMAIN
 		  && (SYMBOL_TYPE (sym)->code () == code)
 		  && strcmp (sym->linkage_name (), type_name) == 0)
 		{
@@ -3593,7 +3593,7 @@ read_enum_type (const char **pp, struct type *type,
       sym->set_language (get_current_subfile ()->language,
 			 &objfile->objfile_obstack);
       sym->set_aclass_index (LOC_CONST);
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       SYMBOL_VALUE (sym) = n;
       if (n < 0)
 	unsigned_enum = 0;
@@ -4467,7 +4467,7 @@ cleanup_undefined_types_1 (void)
 			struct symbol *sym = ppt->symbol[i];
 
 			if (sym->aclass () == LOC_TYPEDEF
-			    && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
+			    && sym->domain () == STRUCT_DOMAIN
 			    && (SYMBOL_TYPE (sym)->code () == (*type)->code ())
 			    && ((*type)->instance_flags ()
 				== SYMBOL_TYPE (sym)->instance_flags ())

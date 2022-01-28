@@ -4477,7 +4477,7 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
 {
   if (sym0 == sym1)
     return 1;
-  if (SYMBOL_DOMAIN (sym0) != SYMBOL_DOMAIN (sym1)
+  if (sym0->domain () != sym1->domain ()
       || sym0->aclass () != sym1->aclass ())
     return 0;
 
@@ -5740,7 +5740,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
        sym != NULL;
        sym = block_iter_match_next (lookup_name, &iter))
     {
-      if (symbol_matches_domain (sym->language (), SYMBOL_DOMAIN (sym), domain))
+      if (symbol_matches_domain (sym->language (), sym->domain (), domain))
 	{
 	  if (sym->aclass () != LOC_UNRESOLVED)
 	    {
@@ -5780,7 +5780,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
       ALL_BLOCK_SYMBOLS (block, iter, sym)
       {
 	if (symbol_matches_domain (sym->language (),
-				   SYMBOL_DOMAIN (sym), domain))
+				   sym->domain (), domain))
 	  {
 	    int cmp;
 
@@ -10411,7 +10411,7 @@ ada_var_value_operation::evaluate (struct type *expect_type,
 {
   symbol *sym = std::get<0> (m_storage).symbol;
 
-  if (SYMBOL_DOMAIN (sym) == UNDEF_DOMAIN)
+  if (sym->domain () == UNDEF_DOMAIN)
     /* Only encountered when an unresolved symbol occurs in a
        context other than a function call, in which case, it is
        invalid.  */
@@ -10501,7 +10501,7 @@ ada_var_value_operation::resolve (struct expression *exp,
 				  struct type *context_type)
 {
   symbol *sym = std::get<0> (m_storage).symbol;
-  if (SYMBOL_DOMAIN (sym) == UNDEF_DOMAIN)
+  if (sym->domain () == UNDEF_DOMAIN)
     {
       block_symbol resolved
 	= ada_resolve_variable (sym, std::get<0> (m_storage).block,
@@ -10666,7 +10666,7 @@ ada_funcall_operation::evaluate (struct type *expect_type,
   ada_var_value_operation *avv
     = dynamic_cast<ada_var_value_operation *> (callee_op.get ());
   if (avv != nullptr
-      && SYMBOL_DOMAIN (avv->get_symbol ()) == UNDEF_DOMAIN)
+      && avv->get_symbol ()->domain () == UNDEF_DOMAIN)
     error (_("Unexpected unresolved symbol, %s, during evaluation"),
 	   avv->get_symbol ()->print_name ());
 
@@ -10810,7 +10810,7 @@ ada_funcall_operation::resolve (struct expression *exp,
     return false;
 
   symbol *sym = avv->get_symbol ();
-  if (SYMBOL_DOMAIN (sym) != UNDEF_DOMAIN)
+  if (sym->domain () != UNDEF_DOMAIN)
     return false;
 
   const std::vector<operation_up> &args_up = std::get<1> (m_storage);

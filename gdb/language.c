@@ -1001,7 +1001,7 @@ language_arch_info::type_and_symbol::alloc_type_symbol
   SYMBOL_OBJFILE_OWNED (symbol) = 0;
   symbol->set_section_index (0);
   SYMBOL_TYPE (symbol) = type;
-  SYMBOL_DOMAIN (symbol) = VAR_DOMAIN;
+  symbol->set_domain (VAR_DOMAIN);
   symbol->set_aclass_index (LOC_TYPEDEF);
   return symbol;
 }

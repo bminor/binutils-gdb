@@ -8916,7 +8916,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
       sym->compute_and_set_names (saved_package_name, false, objfile->per_bfd);
       /* This is not VAR_DOMAIN because we want a way to ensure a lookup of,
 	 e.g., "main" finds the "main" module and not C's main().  */
-      SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
+      sym->set_domain (STRUCT_DOMAIN);
       sym->set_aclass_index (LOC_TYPEDEF);
       SYMBOL_TYPE (sym) = type;
 
@@ -21717,7 +21717,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 
       /* Default assumptions.
 	 Use the passed type or decode it from the die.  */
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      sym->set_domain (VAR_DOMAIN);
       sym->set_aclass_index (LOC_OPTIMIZED_OUT);
       if (type != NULL)
 	SYMBOL_TYPE (sym) = type;
@@ -21765,7 +21765,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  else
 	    sym->set_aclass_index (LOC_OPTIMIZED_OUT);
 	  SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_core_addr;
-	  SYMBOL_DOMAIN (sym) = LABEL_DOMAIN;
+	  sym->set_domain (LABEL_DOMAIN);
 	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
 	case DW_TAG_subprogram:
@@ -21964,7 +21964,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_set_type:
 	case DW_TAG_enumeration_type:
 	  sym->set_aclass_index (LOC_TYPEDEF);
-	  SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
+	  sym->set_domain (STRUCT_DOMAIN);
 
 	  {
 	    /* NOTE: carlton/2003-11-10: C++ class symbols shouldn't
@@ -22002,14 +22002,14 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  break;
 	case DW_TAG_typedef:
 	  sym->set_aclass_index (LOC_TYPEDEF);
-	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+	  sym->set_domain (VAR_DOMAIN);
 	  list_to_add = cu->list_in_scope;
 	  break;
 	case DW_TAG_array_type:
 	case DW_TAG_base_type:
 	case DW_TAG_subrange_type:
 	  sym->set_aclass_index (LOC_TYPEDEF);
-	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+	  sym->set_domain (VAR_DOMAIN);
 	  list_to_add = cu->list_in_scope;
 	  break;
 	case DW_TAG_enumerator:
@@ -22036,12 +22036,12 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  break;
 	case DW_TAG_module:
 	  sym->set_aclass_index (LOC_TYPEDEF);
-	  SYMBOL_DOMAIN (sym) = MODULE_DOMAIN;
+	  sym->set_domain (MODULE_DOMAIN);
 	  list_to_add = cu->get_builder ()->get_global_symbols ();
 	  break;
 	case DW_TAG_common_block:
 	  sym->set_aclass_index (LOC_COMMON_BLOCK);
-	  SYMBOL_DOMAIN (sym) = COMMON_BLOCK_DOMAIN;
+	  sym->set_domain (COMMON_BLOCK_DOMAIN);
 	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
 	default:

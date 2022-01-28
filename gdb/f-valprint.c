@@ -595,7 +595,7 @@ info_common_command_for_block (const struct block *block, const char *comname,
   get_user_print_options (&opts);
 
   ALL_BLOCK_SYMBOLS (block, iter, sym)
-    if (SYMBOL_DOMAIN (sym) == COMMON_BLOCK_DOMAIN)
+    if (sym->domain () == COMMON_BLOCK_DOMAIN)
       {
 	const struct common_block *common = SYMBOL_VALUE_COMMON_BLOCK (sym);
 	size_t index;

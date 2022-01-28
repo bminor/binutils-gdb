@@ -508,7 +508,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
     section = NULL;
 
   print_spaces_filtered (depth, outfile);
-  if (SYMBOL_DOMAIN (symbol) == LABEL_DOMAIN)
+  if (symbol->domain () == LABEL_DOMAIN)
     {
       fprintf_filtered (outfile, "label %s at ", symbol->print_name ());
       fputs_filtered (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (symbol)),
@@ -521,7 +521,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
       return;
     }
 
-  if (SYMBOL_DOMAIN (symbol) == STRUCT_DOMAIN)
+  if (symbol->domain () == STRUCT_DOMAIN)
     {
       if (SYMBOL_TYPE (symbol)->name ())
 	{

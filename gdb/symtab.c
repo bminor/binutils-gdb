@@ -1229,7 +1229,7 @@ eq_symbol_entry (const struct symbol_cache_slot *slot,
   else
     {
       slot_name = slot->value.found.symbol->search_name ();
-      slot_domain = SYMBOL_DOMAIN (slot->value.found.symbol);
+      slot_domain = slot->value.found.symbol->domain ();
     }
 
   /* NULL names match.  */
@@ -1582,7 +1582,7 @@ symbol_cache_dump (const struct symbol_cache *cache)
 		printf_filtered ("  [%4u] = %s, %s %s\n", i,
 				 host_address_to_string (context),
 				 found->print_name (),
-				 domain_name (SYMBOL_DOMAIN (found)));
+				 domain_name (found->domain ()));
 		break;
 	      }
 	    }
@@ -2329,7 +2329,7 @@ lookup_symbol_in_objfile_symtabs (struct objfile *objfile,
 	  break;
 	}
       if (symbol_matches_domain (result.symbol->language (),
-				 SYMBOL_DOMAIN (result.symbol), domain))
+				 result.symbol->domain (), domain))
 	{
 	  struct symbol *better
 	    = better_symbol (other.symbol, result.symbol, domain);
@@ -2906,7 +2906,7 @@ iterate_over_symbols (const struct block *block,
 
   ALL_BLOCK_SYMBOLS_WITH_NAME (block, name, iter, sym)
     {
-      if (symbol_matches_domain (sym->language (), SYMBOL_DOMAIN (sym), domain))
+      if (symbol_matches_domain (sym->language (), sym->domain (), domain))
 	{
 	  struct block_symbol block_sym = {sym, block};
 
@@ -4847,9 +4847,9 @@ global_symbol_searcher::add_matching_symbols
 								 sym)))
 			  || (kind == TYPES_DOMAIN
 			      && sym->aclass () == LOC_TYPEDEF
-			      && SYMBOL_DOMAIN (sym) != MODULE_DOMAIN)
+			      && sym->domain () != MODULE_DOMAIN)
 			  || (kind == MODULES_DOMAIN
-			      && SYMBOL_DOMAIN (sym) == MODULE_DOMAIN
+			      && sym->domain () == MODULE_DOMAIN
 			      && SYMBOL_LINE (sym) != 0))))
 		{
 		  if (result_set->size () < m_max_search_results)
@@ -5030,7 +5030,7 @@ symbol_to_info_string (struct symbol *sym, int block,
 
   /* Typedef that is not a C++ class.  */
   if (kind == TYPES_DOMAIN
-      && SYMBOL_DOMAIN (sym) != STRUCT_DOMAIN)
+      && sym->domain () != STRUCT_DOMAIN)
     {
       string_file tmp_stream;
 
@@ -5051,7 +5051,7 @@ symbol_to_info_string (struct symbol *sym, int block,
   /* variable, func, or typedef-that-is-c++-class.  */
   else if (kind < TYPES_DOMAIN
 	   || (kind == TYPES_DOMAIN
-	       && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN))
+	       && sym->domain () == STRUCT_DOMAIN))
     {
       string_file tmp_stream;
 
@@ -5525,7 +5525,7 @@ completion_list_add_symbol (completion_tracker &tracker,
      the msymbol name and removes the msymbol name from the completion
      tracker.  */
   if (sym->language () == language_cplus
-      && SYMBOL_DOMAIN (sym) == VAR_DOMAIN
+      && sym->domain () == VAR_DOMAIN
       && sym->aclass () == LOC_BLOCK)
     {
       /* The call to canonicalize returns the empty string if the input
@@ -5788,7 +5788,7 @@ add_symtab_completions (struct compunit_symtab *cust,
 	    continue;
 
 	  if (code == TYPE_CODE_UNDEF
-	      || (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
+	      || (sym->domain () == STRUCT_DOMAIN
 		  && SYMBOL_TYPE (sym)->code () == code))
 	    completion_list_add_symbol (tracker, sym,
 					lookup_name,
@@ -5941,7 +5941,7 @@ default_collect_symbol_completion_matches_break_on
 		completion_list_add_fields (tracker, sym, lookup_name,
 					    sym_text, word);
 	      }
-	    else if (SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
+	    else if (sym->domain () == STRUCT_DOMAIN
 		     && SYMBOL_TYPE (sym)->code () == code)
 	      completion_list_add_symbol (tracker, sym, lookup_name,
 					  sym_text, word);
