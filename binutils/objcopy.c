@@ -4085,9 +4085,6 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       goto loser;
     }
 
-  if (make_nobits)
-    elf_section_type (osection) = SHT_NOBITS;
-
   size = bfd_section_size (isection);
   size = bfd_convert_section_size (ibfd, isection, obfd, size);
   if (copy_byte >= 0)
@@ -4180,6 +4177,9 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       err = _("failed to copy private data");
       goto loser;
     }
+
+  if (make_nobits)
+    elf_section_type (osection) = SHT_NOBITS;
 
   /* All went well.  */
   return;
