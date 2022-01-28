@@ -2025,7 +2025,7 @@ dbx_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
 
       if (minsym.minsym)
 	pst->set_text_high (minsym.minsym->value_raw_address ()
-			    + MSYMBOL_SIZE (minsym.minsym));
+			    + minsym.minsym->size ());
 
       last_function_name = NULL;
     }

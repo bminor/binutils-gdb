@@ -1845,7 +1845,7 @@ csky_frame_unwind_cache (struct frame_info *this_frame)
       struct bound_minimal_symbol msymbol
 	= lookup_minimal_symbol_by_pc (prologue_start);
       if (msymbol.minsym != NULL)
-	func_size = MSYMBOL_SIZE (msymbol.minsym);
+	func_size = msymbol.minsym->size ();
     }
 
   /* If FUNC_SIZE is 0 we may have a special-case use of lr

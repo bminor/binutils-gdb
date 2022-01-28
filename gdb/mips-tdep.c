@@ -7836,11 +7836,11 @@ mips_skip_pic_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
     return 0;
 
   /* A two-instruction header.  */
-  if (MSYMBOL_SIZE (msym.minsym) == 8)
+  if (msym.minsym->size () == 8)
     return pc + 8;
 
   /* A three-instruction (plus delay slot) trampoline.  */
-  if (MSYMBOL_SIZE (msym.minsym) == 16)
+  if (msym.minsym->size () == 16)
     {
       if (target_read_memory (pc, stub_code, 16) != 0)
 	return 0;

@@ -94,7 +94,7 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
   if (msym.minsym == NULL)
     return TARGET_XFER_E_IO;
 
-  if (MSYMBOL_SIZE (msym.minsym) != ptr_size)
+  if (msym.minsym->size () != ptr_size)
     return TARGET_XFER_E_IO;
 
   /* POINTER_ADDRESS is a location where the `_dl_auxv' variable

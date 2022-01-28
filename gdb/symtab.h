@@ -713,11 +713,33 @@ struct minimal_symbol : public general_symbol_info
     m_type = type;
   }
 
+  /* Return this minimal symbol's size.  */
+
+  unsigned long size () const
+  {
+    return m_size;
+  }
+
+  /* Set this minimal symbol's size.  */
+
+  void set_size (unsigned long size)
+  {
+    m_size = size;
+    m_has_size = 1;
+  }
+
+  /* Return true if this minimal symbol's size is known.  */
+
+  bool has_size () const
+  {
+    return m_has_size;
+  }
+
   /* Size of this symbol.  dbx_end_psymtab in dbxread.c uses this
      information to calculate the end of the partial symtab based on the
      address of the last symbol plus the size of the last symbol.  */
 
-  unsigned long size;
+  unsigned long m_size;
 
   /* Which source file is this symbol in?  Only relevant for mst_file_*.  */
   const char *filename;
@@ -737,7 +759,7 @@ struct minimal_symbol : public general_symbol_info
   /* Nonzero iff the size of the minimal symbol has been set.
      Symbol size information can sometimes not be determined, because
      the object file format may not carry that piece of information.  */
-  unsigned int has_size : 1;
+  unsigned int m_has_size : 1;
 
   /* For data symbols only, if this is set, then the symbol might be
      subject to copy relocation.  In this case, a minimal symbol
@@ -772,14 +794,6 @@ struct minimal_symbol : public general_symbol_info
 
 #define MSYMBOL_TARGET_FLAG_1(msymbol)  (msymbol)->target_flag_1
 #define MSYMBOL_TARGET_FLAG_2(msymbol)  (msymbol)->target_flag_2
-#define MSYMBOL_SIZE(msymbol)		((msymbol)->size + 0)
-#define SET_MSYMBOL_SIZE(msymbol, sz)		\
-  do						\
-    {						\
-      (msymbol)->size = sz;			\
-      (msymbol)->has_size = 1;			\
-    } while (0)
-#define MSYMBOL_HAS_SIZE(msymbol)	((msymbol)->has_size + 0)
 
 #include "minsyms.h"
 

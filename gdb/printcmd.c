@@ -653,8 +653,8 @@ build_address_symbolic (struct gdbarch *gdbarch,
     }
 
   if (msymbol.minsym != NULL
-      && MSYMBOL_HAS_SIZE (msymbol.minsym)
-      && MSYMBOL_SIZE (msymbol.minsym) == 0
+      && msymbol.minsym->has_size ()
+      && msymbol.minsym->size () == 0
       && msymbol.minsym->type () != mst_text
       && msymbol.minsym->type () != mst_text_gnu_ifunc
       && msymbol.minsym->type () != mst_file_text)

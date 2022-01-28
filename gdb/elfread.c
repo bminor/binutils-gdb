@@ -483,7 +483,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
 	      if (type != ST_SYNTHETIC)
 		{
 		  /* Pass symbol size field in via BFD.  FIXME!!!  */
-		  SET_MSYMBOL_SIZE (msym, elf_sym->internal_elf_sym.st_size);
+		  msym->set_size (elf_sym->internal_elf_sym.st_size);
 		}
 
 	      msym->filename = filesymname;
@@ -522,7 +522,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
 			 symaddr, mst_solib_trampoline, sym->section, objfile);
 		      if (mtramp)
 			{
-			  SET_MSYMBOL_SIZE (mtramp, MSYMBOL_SIZE (msym));
+			  mtramp->set_size (msym->size());
 			  mtramp->created_by_gdb = 1;
 			  mtramp->filename = filesymname;
 			  if (elf_make_msymbol_special_p)
@@ -640,7 +640,7 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
 				    true, address, mst_slot_got_plt,
 				    msym_section, objfile);
       if (msym)
-	SET_MSYMBOL_SIZE (msym, ptr_size);
+	msym->set_size (ptr_size);
     }
 }
 
@@ -836,7 +836,7 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
       if (plt == NULL)
 	continue;
 
-      if (MSYMBOL_SIZE (msym.minsym) != ptr_size)
+      if (msym.minsym->size () != ptr_size)
 	continue;
       if (target_read_memory (pointer_address, buf, ptr_size) != 0)
 	continue;

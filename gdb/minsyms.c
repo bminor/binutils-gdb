@@ -868,8 +868,7 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		  if (hi > 0
 		      && msymbol[hi].type () != want_type
 		      && msymbol[hi - 1].type () == want_type
-		      && (MSYMBOL_SIZE (&msymbol[hi])
-			  == MSYMBOL_SIZE (&msymbol[hi - 1]))
+		      && (msymbol[hi].size () == msymbol[hi - 1].size ())
 		      && (msymbol[hi].value_raw_address ()
 			  == msymbol[hi - 1].value_raw_address ())
 		      && (msymbol[hi].obj_section (objfile)
@@ -885,7 +884,7 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		     symbol isn't an object or function (e.g. a
 		     label), or it may just mean that the size was not
 		     specified.  */
-		  if (MSYMBOL_SIZE (&msymbol[hi]) == 0)
+		  if (msymbol[hi].size () == 0)
 		    {
 		      if (best_zero_sized == -1)
 			best_zero_sized = hi;
@@ -899,11 +898,11 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		     the nocancel variants of system calls are inside
 		     the cancellable variants, but both have sizes.  */
 		  if (hi > 0
-		      && MSYMBOL_SIZE (&msymbol[hi]) != 0
+		      && msymbol[hi].size () != 0
 		      && pc >= (msymbol[hi].value_raw_address ()
-				+ MSYMBOL_SIZE (&msymbol[hi]))
+				+ msymbol[hi].size ())
 		      && pc < (msymbol[hi - 1].value_raw_address ()
-			       + MSYMBOL_SIZE (&msymbol[hi - 1])))
+			       + msymbol[hi - 1].size ()))
 		    {
 		      hi--;
 		      continue;
@@ -920,7 +919,7 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		 address).  Also, if we ran off the end, be sure
 		 to back up.  */
 	      if (best_zero_sized != -1
-		  && (hi < 0 || MSYMBOL_SIZE (&msymbol[hi]) == 0))
+		  && (hi < 0 || msymbol[hi].size () == 0))
 		hi = best_zero_sized;
 
 	      /* If the minimal symbol has a non-zero size, and this
@@ -931,9 +930,9 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc_in, struct obj_section *sectio
 		 specified sizes, they do not overlap.  */
 
 	      if (hi >= 0
-		  && MSYMBOL_SIZE (&msymbol[hi]) != 0
+		  && msymbol[hi].size () != 0
 		  && pc >= (msymbol[hi].value_raw_address ()
-			    + MSYMBOL_SIZE (&msymbol[hi])))
+			    + msymbol[hi].size ()))
 		{
 		  if (best_zero_sized != -1)
 		    hi = best_zero_sized;
@@ -1593,8 +1592,8 @@ minimal_symbol_upper_bound (struct bound_minimal_symbol minsym)
      lesser of the next minimal symbol in the same section, or the end
      of the section, as the end of the function.  */
 
-  if (MSYMBOL_SIZE (minsym.minsym) != 0)
-    return minsym.value_address () + MSYMBOL_SIZE (minsym.minsym);
+  if (minsym.minsym->size () != 0)
+    return minsym.value_address () + minsym.minsym->size ();
 
   /* Step over other symbols at this same address, and symbols in
      other sections, to find the next symbol in this section with a
