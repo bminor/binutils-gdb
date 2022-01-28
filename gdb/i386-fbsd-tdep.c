@@ -186,17 +186,15 @@ i386fbsd_sigtramp_p (struct frame_info *this_frame)
   return 1;
 }
 
-/* FreeBSD 3.0-RELEASE or later.  */
-
 /* From <machine/reg.h>.  */
 static int i386fbsd_r_reg_offset[] =
 {
-  9 * 4, 8 * 4, 7 * 4, 6 * 4,	/* %eax, %ecx, %edx, %ebx */
-  15 * 4, 4 * 4,		/* %esp, %ebp */
-  3 * 4, 2 * 4,			/* %esi, %edi */
-  12 * 4, 14 * 4,		/* %eip, %eflags */
-  13 * 4, 16 * 4,		/* %cs, %ss */
-  1 * 4, 0 * 4, -1, -1		/* %ds, %es, %fs, %gs */
+  10 * 4, 9 * 4, 8 * 4, 7 * 4,	/* %eax, %ecx, %edx, %ebx */
+  16 * 4, 5 * 4,		/* %esp, %ebp */
+  4 * 4, 3 * 4,			/* %esi, %edi */
+  13 * 4, 15 * 4,		/* %eip, %eflags */
+  14 * 4, 17 * 4,		/* %cs, %ss */
+  2 * 4, 1 * 4, 0 * 4, 18 * 4	/* %ds, %es, %fs, %gs */
 };
 
 /* Sigtramp routine location.  */
@@ -206,22 +204,22 @@ CORE_ADDR i386fbsd_sigtramp_end_addr;
 /* From <machine/signal.h>.  */
 int i386fbsd_sc_reg_offset[] =
 {
-  8 + 14 * 4,			/* %eax */
-  8 + 13 * 4,			/* %ecx */
-  8 + 12 * 4,			/* %edx */
-  8 + 11 * 4,			/* %ebx */
-  8 + 0 * 4,                    /* %esp */
-  8 + 1 * 4,                    /* %ebp */
-  8 + 10 * 4,                   /* %esi */
-  8 + 9 * 4,                    /* %edi */
-  8 + 3 * 4,                    /* %eip */
-  8 + 4 * 4,                    /* %eflags */
-  8 + 7 * 4,                    /* %cs */
-  8 + 8 * 4,                    /* %ss */
-  8 + 6 * 4,                    /* %ds */
-  8 + 5 * 4,                    /* %es */
-  8 + 15 * 4,			/* %fs */
-  8 + 16 * 4			/* %gs */
+  20 + 11 * 4,			/* %eax */
+  20 + 10 * 4,			/* %ecx */
+  20 + 9 * 4,			/* %edx */
+  20 + 8 * 4,			/* %ebx */
+  20 + 17 * 4,			/* %esp */
+  20 + 6 * 4,			/* %ebp */
+  20 + 5 * 4,			/* %esi */
+  20 + 4 * 4,			/* %edi */
+  20 + 14 * 4,			/* %eip */
+  20 + 16 * 4,			/* %eflags */
+  20 + 15 * 4,			/* %cs */
+  20 + 18 * 4,			/* %ss */
+  20 + 3 * 4,			/* %ds */
+  20 + 2 * 4,			/* %es */
+  20 + 1 * 4,			/* %fs */
+  20 + 0 * 4			/* %gs */
 };
 
 /* Get XSAVE extended state xcr0 from core dump.  */
@@ -351,6 +349,9 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
+  /* Generic FreeBSD support. */
+  fbsd_init_abi (info, gdbarch);
+
   /* Obviously FreeBSD is BSD-based.  */
   i386bsd_init_abi (info, gdbarch);
 
@@ -358,7 +359,7 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      its FPU emulator in `struct fpreg'.  */
   tdep->gregset_reg_offset = i386fbsd_r_reg_offset;
   tdep->gregset_num_regs = ARRAY_SIZE (i386fbsd_r_reg_offset);
-  tdep->sizeof_gregset = 18 * 4;
+  tdep->sizeof_gregset = 19 * 4;
   tdep->sizeof_fpregset = 176;
 
   /* FreeBSD uses -freg-struct-return by default.  */
@@ -376,66 +377,6 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   i386_elf_init_abi (info, gdbarch);
 
-  /* FreeBSD uses SVR4-style shared libraries.  */
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
-}
-
-/* FreeBSD 4.0-RELEASE or later.  */
-
-/* From <machine/reg.h>.  */
-static int i386fbsd4_r_reg_offset[] =
-{
-  10 * 4, 9 * 4, 8 * 4, 7 * 4,	/* %eax, %ecx, %edx, %ebx */
-  16 * 4, 5 * 4,		/* %esp, %ebp */
-  4 * 4, 3 * 4,			/* %esi, %edi */
-  13 * 4, 15 * 4,		/* %eip, %eflags */
-  14 * 4, 17 * 4,		/* %cs, %ss */
-  2 * 4, 1 * 4, 0 * 4, 18 * 4	/* %ds, %es, %fs, %gs */
-};
-
-/* From <machine/signal.h>.  */
-int i386fbsd4_sc_reg_offset[] =
-{
-  20 + 11 * 4,			/* %eax */
-  20 + 10 * 4,			/* %ecx */
-  20 + 9 * 4,			/* %edx */
-  20 + 8 * 4,			/* %ebx */
-  20 + 17 * 4,			/* %esp */
-  20 + 6 * 4,			/* %ebp */
-  20 + 5 * 4,			/* %esi */
-  20 + 4 * 4,			/* %edi */
-  20 + 14 * 4,			/* %eip */
-  20 + 16 * 4,			/* %eflags */
-  20 + 15 * 4,			/* %cs */
-  20 + 18 * 4,			/* %ss */
-  20 + 3 * 4,			/* %ds */
-  20 + 2 * 4,			/* %es */
-  20 + 1 * 4,			/* %fs */
-  20 + 0 * 4			/* %gs */
-};
-
-static void
-i386fbsd4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
-{
-  i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-
-  /* Generic FreeBSD support. */
-  fbsd_init_abi (info, gdbarch);
-
-  /* Inherit stuff from older releases.  We assume that FreeBSD
-     4.0-RELEASE always uses ELF.  */
-  i386fbsd_init_abi (info, gdbarch);
-
-  /* FreeBSD 4.0 introduced a new `struct reg'.  */
-  tdep->gregset_reg_offset = i386fbsd4_r_reg_offset;
-  tdep->gregset_num_regs = ARRAY_SIZE (i386fbsd4_r_reg_offset);
-  tdep->sizeof_gregset = 19 * 4;
-
-  /* FreeBSD 4.0 introduced a new `struct sigcontext'.  */
-  tdep->sc_reg_offset = i386fbsd4_sc_reg_offset;
-  tdep->sc_num_regs = ARRAY_SIZE (i386fbsd4_sc_reg_offset);
-
   tdep->xsave_xcr0_offset = I386_FBSD_XSAVE_XCR0_OFFSET;
 
   /* Iterate over core file register note sections.  */
@@ -444,6 +385,10 @@ i386fbsd4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_core_read_description (gdbarch,
 				     i386fbsd_core_read_description);
+
+  /* FreeBSD uses SVR4-style shared libraries.  */
+  set_solib_svr4_fetch_link_map_offsets
+    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
 					     svr4_fetch_objfile_link_map);
@@ -456,5 +401,5 @@ void
 _initialize_i386fbsd_tdep ()
 {
   gdbarch_register_osabi (bfd_arch_i386, 0, GDB_OSABI_FREEBSD,
-			  i386fbsd4_init_abi);
+			  i386fbsd_init_abi);
 }
