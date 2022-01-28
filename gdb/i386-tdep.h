@@ -474,7 +474,6 @@ extern int i386_mpx_enabled (void);
 extern void i386bsd_init_abi (struct gdbarch_info, struct gdbarch *);
 extern CORE_ADDR i386obsd_sigtramp_start_addr;
 extern CORE_ADDR i386obsd_sigtramp_end_addr;
-extern int i386fbsd_sc_reg_offset[];
 extern int i386obsd_sc_reg_offset[];
 extern int i386bsd_sc_reg_offset[];
 

@@ -213,8 +213,6 @@ void _initialize_amd64fbsd_nat ();
 void
 _initialize_amd64fbsd_nat ()
 {
-  int offset;
-
   amd64_native_gregset32_reg_offset = amd64fbsd32_r_reg_offset;
   amd64_native_gregset64_reg_offset = amd64fbsd64_r_reg_offset;
 
@@ -222,60 +220,4 @@ _initialize_amd64fbsd_nat ()
 
   /* Support debugging kernel virtual memory images.  */
   bsd_kvm_add_target (amd64fbsd_supply_pcb);
-
-  /* To support the recognition of signal handlers, i386-bsd-tdep.c
-     hardcodes some constants.  Inclusion of this file means that we
-     are compiling a native debugger, which means that we can use the
-     system header files and sysctl(3) to get at the relevant
-     information.  */
-
-#define SC_REG_OFFSET amd64fbsd_sc_reg_offset
-
-  /* We only check the program counter, stack pointer and frame
-     pointer since these members of `struct sigcontext' are essential
-     for providing backtraces.  */
-
-#define SC_RIP_OFFSET SC_REG_OFFSET[AMD64_RIP_REGNUM]
-#define SC_RSP_OFFSET SC_REG_OFFSET[AMD64_RSP_REGNUM]
-#define SC_RBP_OFFSET SC_REG_OFFSET[AMD64_RBP_REGNUM]
-
-  /* Override the default value for the offset of the program counter
-     in the sigcontext structure.  */
-  offset = offsetof (struct sigcontext, sc_rip);
-
-  if (SC_RIP_OFFSET != offset)
-    {
-      warning (_("\
-offsetof (struct sigcontext, sc_rip) yields %d instead of %d.\n\
-Please report this to <bug-gdb@gnu.org>."),
-	       offset, SC_RIP_OFFSET);
-    }
-
-  SC_RIP_OFFSET = offset;
-
-  /* Likewise for the stack pointer.  */
-  offset = offsetof (struct sigcontext, sc_rsp);
-
-  if (SC_RSP_OFFSET != offset)
-    {
-      warning (_("\
-offsetof (struct sigcontext, sc_rsp) yields %d instead of %d.\n\
-Please report this to <bug-gdb@gnu.org>."),
-	       offset, SC_RSP_OFFSET);
-    }
-
-  SC_RSP_OFFSET = offset;
-
-  /* And the frame pointer.  */
-  offset = offsetof (struct sigcontext, sc_rbp);
-
-  if (SC_RBP_OFFSET != offset)
-    {
-      warning (_("\
-offsetof (struct sigcontext, sc_rbp) yields %d instead of %d.\n\
-Please report this to <bug-gdb@gnu.org>."),
-	       offset, SC_RBP_OFFSET);
-    }
-
-  SC_RBP_OFFSET = offset;
 }

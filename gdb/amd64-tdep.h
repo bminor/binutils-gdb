@@ -144,7 +144,4 @@ extern int amd64nbsd_r_reg_offset[];
 /* Variables exported from amd64-obsd-tdep.c.  */
 extern int amd64obsd_r_reg_offset[];
 
-/* Variables exported from amd64-fbsd-tdep.c.  */
-extern int amd64fbsd_sc_reg_offset[];
-
 #endif /* amd64-tdep.h */

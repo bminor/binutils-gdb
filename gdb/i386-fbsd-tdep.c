@@ -18,11 +18,11 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "arch-utils.h"
-#include "gdbcore.h"
 #include "osabi.h"
 #include "regcache.h"
 #include "regset.h"
+#include "trad-frame.h"
+#include "tramp-frame.h"
 #include "i386-fbsd-tdep.h"
 #include "gdbsupport/x86-xstate.h"
 
@@ -61,6 +61,41 @@ static const struct regcache_map_entry i386_fbsd_gregmap[] =
   { 0 }
 };
 
+/* This layout including fsbase and gsbase was adopted in FreeBSD
+   8.0.  */
+
+static const struct regcache_map_entry i386_fbsd_mcregmap[] =
+{
+  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_onstack */
+  { 1, I386_GS_REGNUM, 4 },
+  { 1, I386_FS_REGNUM, 4 },
+  { 1, I386_ES_REGNUM, 4 },
+  { 1, I386_DS_REGNUM, 4 },
+  { 1, I386_EDI_REGNUM, 0 },
+  { 1, I386_ESI_REGNUM, 0 },
+  { 1, I386_EBP_REGNUM, 0 },
+  { 1, REGCACHE_MAP_SKIP, 4 },	/* isp */
+  { 1, I386_EBX_REGNUM, 0 },
+  { 1, I386_EDX_REGNUM, 0 },
+  { 1, I386_ECX_REGNUM, 0 },
+  { 1, I386_EAX_REGNUM, 0 },
+  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_trapno */
+  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_err */
+  { 1, I386_EIP_REGNUM, 0 },
+  { 1, I386_CS_REGNUM, 4 },
+  { 1, I386_EFLAGS_REGNUM, 0 },
+  { 1, I386_ESP_REGNUM, 0 },
+  { 1, I386_SS_REGNUM, 4 },
+  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_len */
+  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_fpformat */
+  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_ownedfp */
+  { 1, REGCACHE_MAP_SKIP, 4 },	/* mc_flags */
+  { 128, REGCACHE_MAP_SKIP, 4 },/* mc_fpstate */
+  { 1, I386_FSBASE_REGNUM, 0 },
+  { 1, I386_GSBASE_REGNUM, 0 },
+  { 0 }
+};
+
 /* Register set definitions.  */
 
 const struct regset i386_fbsd_gregset =
@@ -70,102 +105,127 @@ const struct regset i386_fbsd_gregset =
 
 /* Support for signal handlers.  */
 
-/* Return whether THIS_FRAME corresponds to a FreeBSD sigtramp
-   routine.  */
+/* In a signal frame, esp points to a 'struct sigframe' which is
+   defined as:
+
+   struct sigframe {
+	register_t	sf_signum;
+	register_t	sf_siginfo;
+	register_t	sf_ucontext;
+	register_t	sf_addr;
+	union {
+		__siginfohandler_t	*sf_action;
+		__sighandler_t		*sf_handler;
+	} sf_ahu;
+	ucontext_t	sf_uc;
+        ...
+   }
+
+   ucontext_t is defined as:
+
+   struct __ucontext {
+	   sigset_t	uc_sigmask;
+	   mcontext_t	uc_mcontext;
+	   ...
+   };
+
+   The mcontext_t contains the general purpose register set as well
+   as the floating point or XSAVE state.  */
+
+/* NB: There is a 12 byte padding hole between sf_ahu and sf_uc. */
+#define I386_SIGFRAME_UCONTEXT_OFFSET 		32
+#define I386_UCONTEXT_MCONTEXT_OFFSET		16
+#define I386_SIZEOF_MCONTEXT_T			640
+
+/* Implement the "init" method of struct tramp_frame.  */
+
+static void
+i386_fbsd_sigframe_init (const struct tramp_frame *self,
+			 struct frame_info *this_frame,
+			 struct trad_frame_cache *this_cache,
+			 CORE_ADDR func)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, I386_ESP_REGNUM);
+  CORE_ADDR mcontext_addr
+    = (sp
+       + I386_SIGFRAME_UCONTEXT_OFFSET
+       + I386_UCONTEXT_MCONTEXT_OFFSET);
+
+  trad_frame_set_reg_regmap (this_cache, i386_fbsd_mcregmap, mcontext_addr,
+			     I386_SIZEOF_MCONTEXT_T);
+
+  /* Don't bother with floating point or XSAVE state for now.  The
+     current helper routines for parsing FXSAVE and XSAVE state only
+     work with regcaches.  This could perhaps create a temporary
+     regcache, collect the register values from mc_fpstate and
+     mc_xfpustate, and then set register values in the trad_frame.  */
+
+  trad_frame_set_id (this_cache, frame_id_build (sp, func));
+}
+
+static const struct tramp_frame i386_fbsd_sigframe =
+{
+  SIGTRAMP_FRAME,
+  1,
+  {
+    {0x8d, ULONGEST_MAX},		/* lea     SIGF_UC(%esp),%eax */
+    {0x44, ULONGEST_MAX},
+    {0x24, ULONGEST_MAX},
+    {0x20, ULONGEST_MAX},
+    {0x50, ULONGEST_MAX},		/* pushl   %eax */
+    {0xf7, ULONGEST_MAX},		/* testl   $PSL_VM,UC_EFLAGS(%eax) */
+    {0x40, ULONGEST_MAX},
+    {0x54, ULONGEST_MAX},
+    {0x00, ULONGEST_MAX},
+    {0x00, ULONGEST_MAX},
+    {0x02, ULONGEST_MAX},
+    {0x00, ULONGEST_MAX},
+    {0x75, ULONGEST_MAX},		/* jne	   +3 */
+    {0x03, ULONGEST_MAX},
+    {0x8e, ULONGEST_MAX},		/* mov	   UC_GS(%eax),%gs */
+    {0x68, ULONGEST_MAX},
+    {0x14, ULONGEST_MAX},
+    {0xb8, ULONGEST_MAX},		/* movl   $SYS_sigreturn,%eax */
+    {0xa1, ULONGEST_MAX},
+    {0x01, ULONGEST_MAX},
+    {0x00, ULONGEST_MAX},
+    {0x00, ULONGEST_MAX},
+    {0x50, ULONGEST_MAX},		/* pushl   %eax */
+    {0xcd, ULONGEST_MAX},		/* int	   $0x80 */
+    {0x80, ULONGEST_MAX},
+    {TRAMP_SENTINEL_INSN, ULONGEST_MAX}
+  },
+  i386_fbsd_sigframe_init
+};
 
 /* FreeBSD/i386 binaries running under an amd64 kernel use a different
-   trampoline This trampoline differs from the i386 kernel trampoline
+   trampoline.  This trampoline differs from the i386 kernel trampoline
    in that it omits a middle section that conditionally restores
    %gs.  */
 
-static const gdb_byte i386fbsd_sigtramp_start[] =
+static const struct tramp_frame i386_fbsd64_sigframe =
 {
-  0x8d, 0x44, 0x24, 0x20,       /* lea     SIGF_UC(%esp),%eax */
-  0x50				/* pushl   %eax */
-};
-
-static const gdb_byte i386fbsd_sigtramp_middle[] =
-{
-  0xf7, 0x40, 0x54, 0x00, 0x00, 0x02, 0x00,
-				/* testl   $PSL_VM,UC_EFLAGS(%eax) */
-  0x75, 0x03,			/* jne	   +3 */
-  0x8e, 0x68, 0x14		/* mov	   UC_GS(%eax),%gs */
-};
-
-static const gdb_byte i386fbsd_sigtramp_end[] =
-{
-  0xb8, 0xa1, 0x01, 0x00, 0x00, /* movl   $SYS_sigreturn,%eax */
-  0x50,			/* pushl   %eax */
-  0xcd, 0x80			/* int	   $0x80 */
-};
-
-/* We assume that the middle is the largest chunk below.  */
-gdb_static_assert (sizeof i386fbsd_sigtramp_middle
-		   > sizeof i386fbsd_sigtramp_start);
-gdb_static_assert (sizeof i386fbsd_sigtramp_middle
-		   > sizeof i386fbsd_sigtramp_end);
-
-static int
-i386fbsd_sigtramp_p (struct frame_info *this_frame)
-{
-  CORE_ADDR pc = get_frame_pc (this_frame);
-  gdb_byte buf[sizeof i386fbsd_sigtramp_middle];
-
-  /* Look for a matching start.  */
-  if (!safe_frame_unwind_memory (this_frame, pc,
-				 {buf, sizeof i386fbsd_sigtramp_start}))
-    return 0;
-  if (memcmp (buf, i386fbsd_sigtramp_start, sizeof i386fbsd_sigtramp_start)
-      != 0)
-    return 0;
-
-  /* Since the end is shorter than the middle, check for a matching end
-     next.  */
-  pc += sizeof i386fbsd_sigtramp_start;
-  if (!safe_frame_unwind_memory (this_frame, pc,
-				 {buf, sizeof i386fbsd_sigtramp_end}))
-    return 0;
-  if (memcmp (buf, i386fbsd_sigtramp_end, sizeof i386fbsd_sigtramp_end) == 0)
-    return 1;
-
-  /* If the end didn't match, check for a matching middle.  */
-  if (!safe_frame_unwind_memory (this_frame, pc,
-				 {buf, sizeof i386fbsd_sigtramp_middle}))
-    return 0;
-  if (memcmp (buf, i386fbsd_sigtramp_middle, sizeof i386fbsd_sigtramp_middle)
-      != 0)
-    return 0;
-
-  /* The middle matched, check for a matching end.  */
-  pc += sizeof i386fbsd_sigtramp_middle;
-  if (!safe_frame_unwind_memory (this_frame, pc,
-				 {buf, sizeof i386fbsd_sigtramp_end}))
-    return 0;
-  if (memcmp (buf, i386fbsd_sigtramp_end, sizeof i386fbsd_sigtramp_end) != 0)
-    return 0;
-
-  return 1;
-}
-
-/* From <machine/signal.h>.  */
-int i386fbsd_sc_reg_offset[] =
-{
-  20 + 11 * 4,			/* %eax */
-  20 + 10 * 4,			/* %ecx */
-  20 + 9 * 4,			/* %edx */
-  20 + 8 * 4,			/* %ebx */
-  20 + 17 * 4,			/* %esp */
-  20 + 6 * 4,			/* %ebp */
-  20 + 5 * 4,			/* %esi */
-  20 + 4 * 4,			/* %edi */
-  20 + 14 * 4,			/* %eip */
-  20 + 16 * 4,			/* %eflags */
-  20 + 15 * 4,			/* %cs */
-  20 + 18 * 4,			/* %ss */
-  20 + 3 * 4,			/* %ds */
-  20 + 2 * 4,			/* %es */
-  20 + 1 * 4,			/* %fs */
-  20 + 0 * 4			/* %gs */
+  SIGTRAMP_FRAME,
+  1,
+  {
+    {0x8d, ULONGEST_MAX},		/* lea     SIGF_UC(%esp),%eax */
+    {0x44, ULONGEST_MAX},
+    {0x24, ULONGEST_MAX},
+    {0x20, ULONGEST_MAX},
+    {0x50, ULONGEST_MAX},		/* pushl   %eax */
+    {0xb8, ULONGEST_MAX},		/* movl   $SYS_sigreturn,%eax */
+    {0xa1, ULONGEST_MAX},
+    {0x01, ULONGEST_MAX},
+    {0x00, ULONGEST_MAX},
+    {0x00, ULONGEST_MAX},
+    {0x50, ULONGEST_MAX},		/* pushl   %eax */
+    {0xcd, ULONGEST_MAX},		/* int	   $0x80 */
+    {0x80, ULONGEST_MAX},
+    {TRAMP_SENTINEL_INSN, ULONGEST_MAX}
+  },
+  i386_fbsd_sigframe_init
 };
 
 /* Get XSAVE extended state xcr0 from core dump.  */
@@ -308,11 +368,8 @@ i386fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* FreeBSD uses -freg-struct-return by default.  */
   tdep->struct_return = reg_struct_return;
 
-  tdep->sigtramp_p = i386fbsd_sigtramp_p;
-
-  /* FreeBSD has a more complete `struct sigcontext'.  */
-  tdep->sc_reg_offset = i386fbsd_sc_reg_offset;
-  tdep->sc_num_regs = ARRAY_SIZE (i386fbsd_sc_reg_offset);
+  tramp_frame_prepend_unwinder (gdbarch, &i386_fbsd_sigframe);
+  tramp_frame_prepend_unwinder (gdbarch, &i386_fbsd64_sigframe);
 
   i386_elf_init_abi (info, gdbarch);
 

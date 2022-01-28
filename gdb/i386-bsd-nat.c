@@ -350,9 +350,7 @@ _initialize_i386bsd_nat ()
      system header files and sysctl(3) to get at the relevant
      information.  */
 
-#if defined (__FreeBSD_version)
-#define SC_REG_OFFSET i386fbsd_sc_reg_offset
-#elif defined (OpenBSD)
+#if defined (OpenBSD)
 #define SC_REG_OFFSET i386obsd_sc_reg_offset
 #endif
 
