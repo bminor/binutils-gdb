@@ -1400,7 +1400,7 @@ add_symbol_overload_list_using (const char *func_name,
 
   for (block = get_selected_block (0);
        block != NULL;
-       block = BLOCK_SUPERBLOCK (block))
+       block = block->superblock ())
     for (current = block_using (block);
 	current != NULL;
 	current = current->next)
@@ -1451,7 +1451,7 @@ add_symbol_overload_list_qualified (const char *func_name,
   /* Search upwards from currently selected frame (so that we can
      complete on local vars.  */
 
-  for (b = get_selected_block (0); b != NULL; b = BLOCK_SUPERBLOCK (b))
+  for (b = get_selected_block (0); b != NULL; b = b->superblock ())
     add_symbol_overload_list_block (func_name, b, overload_list);
 
   surrounding_static_block = block_static_block (get_selected_block (0));

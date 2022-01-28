@@ -559,7 +559,7 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
       else
 	/* We must be in some function nested lexical block.  Just get the
 	   outer block: both must share the same frame.  */
-	frame_block = BLOCK_SUPERBLOCK (frame_block);
+	frame_block = frame_block->superblock ();
     }
 
   /* Old compilers may not provide a static link, or they may provide an

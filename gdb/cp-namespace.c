@@ -547,7 +547,7 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 	  struct type *context;
 	  std::string name_copy (function->natural_name ());
 	  const struct language_defn *lang = language_def (language_cplus);
-	  const struct block *parent = BLOCK_SUPERBLOCK (block);
+	  const struct block *parent = block->superblock ();
 	  struct symbol *sym;
 
 	  while (1)
@@ -615,7 +615,7 @@ cp_lookup_symbol_via_all_imports (const char *scope, const char *name,
       if (sym.symbol)
 	return sym;
 
-      block = BLOCK_SUPERBLOCK (block);
+      block = block->superblock ();
     }
 
   return {};

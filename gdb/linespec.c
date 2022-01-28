@@ -1234,7 +1234,7 @@ iterate_over_file_blocks
   for (block = BLOCKVECTOR_BLOCK (symtab->compunit ()->blockvector (),
 				  STATIC_BLOCK);
        block != NULL;
-       block = BLOCK_SUPERBLOCK (block))
+       block = block->superblock ())
     current_language->iterate_over_symbols (block, name, domain, callback);
 }
 
@@ -3968,7 +3968,7 @@ find_label_symbols (struct linespec_state *self,
 
       for (;
 	   block && !block->function ();
-	   block = BLOCK_SUPERBLOCK (block))
+	   block = block->superblock ())
 	;
 
       if (!block)

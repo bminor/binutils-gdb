@@ -287,9 +287,9 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	  gdb_printf (outfile, "%*sblock #%03d, object at %s",
 		      depth, "", i,
 		      host_address_to_string (b));
-	  if (BLOCK_SUPERBLOCK (b))
+	  if (b->superblock ())
 	    gdb_printf (outfile, " under %s",
-			host_address_to_string (BLOCK_SUPERBLOCK (b)));
+			host_address_to_string (b->superblock ()));
 	  /* drow/2002-07-10: We could save the total symbols count
 	     even if we're using a hashtable, but nothing else but this message
 	     wants it.  */
@@ -939,7 +939,7 @@ block_depth (const struct block *block)
 {
   int i = 0;
 
-  while ((block = BLOCK_SUPERBLOCK (block)) != NULL)
+  while ((block = block->superblock ()) != NULL)
     {
       i++;
     }

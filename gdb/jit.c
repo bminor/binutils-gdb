@@ -620,7 +620,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 		   : allocate_block (&objfile->objfile_obstack));
       BLOCK_MULTIDICT (new_block)
 	= mdict_create_linear (&objfile->objfile_obstack, NULL);
-      BLOCK_SUPERBLOCK (new_block) = block_iter;
+      new_block->set_superblock (block_iter);
       block_iter = new_block;
 
       new_block->set_start (begin);
@@ -640,14 +640,15 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 	{
 	  /* If the plugin specifically mentioned a parent block, we
 	     use that.  */
-	  BLOCK_SUPERBLOCK (gdb_block_iter.real_block) =
-	    gdb_block_iter.parent->real_block;
+	  gdb_block_iter.real_block->set_superblock
+	    (gdb_block_iter.parent->real_block);
+
 	}
       else
 	{
 	  /* And if not, we set a default parent block.  */
-	  BLOCK_SUPERBLOCK (gdb_block_iter.real_block) =
-	    BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	  gdb_block_iter.real_block->set_superblock
+	    (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK));
 	}
     }
 }

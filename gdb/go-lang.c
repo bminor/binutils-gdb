@@ -433,7 +433,7 @@ go_block_package_name (const struct block *block)
 	  return NULL;
 	}
 
-      block = BLOCK_SUPERBLOCK (block);
+      block = block->superblock ();
     }
 
   return NULL;

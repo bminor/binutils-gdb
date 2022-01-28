@@ -5334,7 +5334,7 @@ ada_add_local_symbols (std::vector<struct block_symbol> &result,
       if (block->function () != nullptr && is_nonfunction (result))
 	return;
 
-      block = BLOCK_SUPERBLOCK (block);
+      block = block->superblock ();
     }
 }
 
@@ -13040,7 +13040,7 @@ ada_add_exceptions_from_frame (compiled_regex *preg,
 	}
       if (block->function () != NULL)
 	break;
-      block = BLOCK_SUPERBLOCK (block);
+      block = block->superblock ();
     }
 }
 
@@ -13662,9 +13662,9 @@ public:
     /* Search upwards from currently selected frame (so that we can
        complete on local vars.  */
 
-    for (b = get_selected_block (0); b != NULL; b = BLOCK_SUPERBLOCK (b))
+    for (b = get_selected_block (0); b != NULL; b = b->superblock ())
       {
-	if (!BLOCK_SUPERBLOCK (b))
+	if (!b->superblock ())
 	  surrounding_static_block = b;   /* For elmin of dups */
 
 	ALL_BLOCK_SYMBOLS (b, iter, sym)

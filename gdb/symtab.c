@@ -2026,7 +2026,7 @@ lookup_language_this (const struct language_defn *lang,
 	}
       if (block->function ())
 	break;
-      block = BLOCK_SUPERBLOCK (block);
+      block = block->superblock ();
     }
 
   if (symbol_lookup_debug > 1)
@@ -2229,7 +2229,7 @@ lookup_local_symbol (const char *name,
 
       if (block->function () != NULL && block_inlined_p (block))
 	break;
-      block = BLOCK_SUPERBLOCK (block);
+      block = block->superblock ();
     }
 
   /* We've reached the end of the function without finding a result.  */
@@ -4046,7 +4046,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
 	function_block = b;
       else if (b->function () != NULL)
 	break;
-      b = BLOCK_SUPERBLOCK (b);
+      b = b->superblock ();
     }
   if (function_block != NULL
       && function_block->function ()->line () != 0)
@@ -4145,7 +4145,7 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 		  bl = NULL;
 		  break;
 		}
-	      bl = BLOCK_SUPERBLOCK (bl);
+	      bl = bl->superblock ();
 	    }
 	  if (bl != NULL)
 	    break;
@@ -6013,7 +6013,7 @@ default_collect_symbol_completion_matches_break_on
 	   are in scope for a nested function.  */
 	if (b->function () != NULL && block_inlined_p (b))
 	  break;
-	b = BLOCK_SUPERBLOCK (b);
+	b = b->superblock ();
       }
 
   /* Add fields from the file's types; symbols will be added below.  */

@@ -82,7 +82,7 @@ contained_in (const struct block *a, const struct block *b,
 	 except if A was inlined.  */
       if (!allow_nested && a->function () != NULL && !block_inlined_p (a))
 	return false;
-      a = BLOCK_SUPERBLOCK (a);
+      a = a->superblock ();
     }
   while (a != NULL);
 
@@ -99,8 +99,8 @@ struct symbol *
 block_linkage_function (const struct block *bl)
 {
   while ((bl->function () == NULL || block_inlined_p (bl))
-	 && BLOCK_SUPERBLOCK (bl) != NULL)
-    bl = BLOCK_SUPERBLOCK (bl);
+	 && bl->superblock () != NULL)
+    bl = bl->superblock ();
 
   return bl->function ();
 }
@@ -113,8 +113,8 @@ block_linkage_function (const struct block *bl)
 struct symbol *
 block_containing_function (const struct block *bl)
 {
-  while (bl->function () == NULL && BLOCK_SUPERBLOCK (bl) != NULL)
-    bl = BLOCK_SUPERBLOCK (bl);
+  while (bl->function () == NULL && bl->superblock () != NULL)
+    bl = bl->superblock ();
 
   return bl->function ();
 }
@@ -295,7 +295,7 @@ block_for_pc (CORE_ADDR pc)
 const char *
 block_scope (const struct block *block)
 {
-  for (; block != NULL; block = BLOCK_SUPERBLOCK (block))
+  for (; block != NULL; block = block->superblock ())
     {
       if (BLOCK_NAMESPACE (block) != NULL
 	  && BLOCK_NAMESPACE (block)->scope != NULL)
@@ -360,11 +360,11 @@ block_initialize_namespace (struct block *block, struct obstack *obstack)
 const struct block *
 block_static_block (const struct block *block)
 {
-  if (block == NULL || BLOCK_SUPERBLOCK (block) == NULL)
+  if (block == NULL || block->superblock () == NULL)
     return NULL;
 
-  while (BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) != NULL)
-    block = BLOCK_SUPERBLOCK (block);
+  while (block->superblock ()->superblock () != NULL)
+    block = block->superblock ();
 
   return block;
 }
@@ -378,8 +378,8 @@ block_global_block (const struct block *block)
   if (block == NULL)
     return NULL;
 
-  while (BLOCK_SUPERBLOCK (block) != NULL)
-    block = BLOCK_SUPERBLOCK (block);
+  while (block->superblock () != NULL)
+    block = block->superblock ();
 
   return block;
 }
@@ -418,7 +418,7 @@ set_block_compunit_symtab (struct block *block, struct compunit_symtab *cu)
 {
   struct global_block *gb;
 
-  gdb_assert (BLOCK_SUPERBLOCK (block) == NULL);
+  gdb_assert (block->superblock () == NULL);
   gb = (struct global_block *) block;
   gdb_assert (gb->compunit_symtab == NULL);
   gb->compunit_symtab = cu;
@@ -446,7 +446,7 @@ get_block_compunit_symtab (const struct block *block)
 {
   struct global_block *gb;
 
-  gdb_assert (BLOCK_SUPERBLOCK (block) == NULL);
+  gdb_assert (block->superblock () == NULL);
   gb = (struct global_block *) block;
   gdb_assert (gb->compunit_symtab != NULL);
   return gb->compunit_symtab;
@@ -467,15 +467,15 @@ initialize_block_iterator (const struct block *block,
 
   iter->idx = -1;
 
-  if (BLOCK_SUPERBLOCK (block) == NULL)
+  if (block->superblock () == NULL)
     {
       which = GLOBAL_BLOCK;
       cu = get_block_compunit_symtab (block);
     }
-  else if (BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) == NULL)
+  else if (block->superblock ()->superblock () == NULL)
     {
       which = STATIC_BLOCK;
-      cu = get_block_compunit_symtab (BLOCK_SUPERBLOCK (block));
+      cu = get_block_compunit_symtab (block->superblock ());
     }
   else
     {
@@ -775,8 +775,8 @@ block_lookup_symbol_primary (const struct block *block, const char *name,
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
   /* Verify BLOCK is STATIC_BLOCK or GLOBAL_BLOCK.  */
-  gdb_assert (BLOCK_SUPERBLOCK (block) == NULL
-	      || BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) == NULL);
+  gdb_assert (block->superblock () == NULL
+	      || block->superblock ()->superblock () == NULL);
 
   other = NULL;
   for (sym
@@ -838,8 +838,8 @@ block_find_symbol (const struct block *block, const char *name,
   lookup_name_info lookup_name (name, symbol_name_match_type::FULL);
 
   /* Verify BLOCK is STATIC_BLOCK or GLOBAL_BLOCK.  */
-  gdb_assert (BLOCK_SUPERBLOCK (block) == NULL
-	      || BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) == NULL);
+  gdb_assert (block->superblock () == NULL
+	      || block->superblock ()->superblock () == NULL);
 
   ALL_BLOCK_SYMBOLS_WITH_NAME (block, lookup_name, iter, sym)
     {

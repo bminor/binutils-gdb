@@ -674,7 +674,7 @@ list_args_or_locals (const frame_print_options &fp_opts,
       if (block->function ())
 	break;
       else
-	block = BLOCK_SUPERBLOCK (block);
+	block = block->superblock ();
     }
 }
 

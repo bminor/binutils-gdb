@@ -2618,7 +2618,7 @@ info_scope_command (const char *args_in, int from_tty)
       if (block->function ())
 	break;
       else
-	block = BLOCK_SUPERBLOCK (block);
+	block = block->superblock ();
     }
   if (count <= 0)
     gdb_printf ("Scope for %s contains no locals or arguments.\n",

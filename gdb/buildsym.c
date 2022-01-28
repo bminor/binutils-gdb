@@ -331,7 +331,7 @@ buildsym_compunit::finish_block_internal
        pblock && pblock != old_blocks; 
        pblock = pblock->next)
     {
-      if (BLOCK_SUPERBLOCK (pblock->block) == NULL)
+      if (pblock->block->superblock () == NULL)
 	{
 	  /* Check to be sure the blocks are nested as we receive
 	     them.  If the compiler/assembler/linker work, this just
@@ -365,7 +365,7 @@ buildsym_compunit::finish_block_internal
 	      if (pblock->block->end () > block->end ())
 		pblock->block->set_end (block->end ());
 	    }
-	  BLOCK_SUPERBLOCK (pblock->block) = block;
+	  pblock->block->set_superblock (block);
 	}
       opblock = pblock;
     }

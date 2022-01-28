@@ -800,7 +800,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       b->set_function (s);
       b->set_start (sh->value);
       b->set_end (sh->value);
-      BLOCK_SUPERBLOCK (b) = top_stack->cur_block;
+      b->set_superblock (top_stack->cur_block);
       add_block (b, top_stack->cur_st);
 
       /* Not if we only have partial info.  */
@@ -1128,7 +1128,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       top_stack->blocktype = stBlock;
       b = new_block (NON_FUNCTION_BLOCK, psymtab_language);
       b->set_start (sh->value + top_stack->procadr);
-      BLOCK_SUPERBLOCK (b) = top_stack->cur_block;
+      b->set_superblock (top_stack->cur_block);
       top_stack->cur_block = b;
       add_block (b, top_stack->cur_st);
       break;
@@ -1172,7 +1172,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	    {
 	      struct block *b_bad = BLOCKVECTOR_BLOCK (bv, i);
 
-	      if (BLOCK_SUPERBLOCK (b_bad) == cblock
+	      if (b_bad->superblock () == cblock
 		  && b_bad->start () == top_stack->procadr
 		  && b_bad->end () == top_stack->procadr)
 		{
@@ -4476,7 +4476,7 @@ mylookup_symbol (const char *name, const struct block *block,
 	return sym;
     }
 
-  block = BLOCK_SUPERBLOCK (block);
+  block = block->superblock ();
   if (block)
     return mylookup_symbol (name, block, domain, theclass);
   return 0;
@@ -4637,8 +4637,8 @@ new_symtab (const char *name, int maxlines, struct objfile *objfile)
   bv = new_bvect (2);
   BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK) = new_block (NON_FUNCTION_BLOCK, lang);
   BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK) = new_block (NON_FUNCTION_BLOCK, lang);
-  BLOCK_SUPERBLOCK (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)) =
-    BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+  BLOCKVECTOR_BLOCK(bv, STATIC_BLOCK)->set_superblock
+    (BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK));
   cust->set_blockvector (bv);
 
   cust->set_debugformat ("ECOFF");

@@ -647,7 +647,7 @@ generate_c_for_variable_locations (compile_instance *compiler,
 	 done.  */
       if (block->function () != NULL)
 	break;
-      block = BLOCK_SUPERBLOCK (block);
+      block = block->superblock ();
     }
 
   return registers_used;

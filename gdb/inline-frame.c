@@ -226,14 +226,14 @@ inline_frame_sniffer (const struct frame_unwind *self,
      location.  */
   depth = 0;
   cur_block = frame_block;
-  while (BLOCK_SUPERBLOCK (cur_block))
+  while (cur_block->superblock ())
     {
       if (block_inlined_p (cur_block))
 	depth++;
       else if (cur_block->function () != NULL)
 	break;
 
-      cur_block = BLOCK_SUPERBLOCK (cur_block);
+      cur_block = cur_block->superblock ();
     }
 
   /* Check how many inlined functions already have frames.  */
@@ -356,7 +356,7 @@ skip_inline_frames (thread_info *thread, bpstat *stop_chain)
   if (frame_block != NULL)
     {
       cur_block = frame_block;
-      while (BLOCK_SUPERBLOCK (cur_block))
+      while (cur_block->superblock ())
 	{
 	  if (block_inlined_p (cur_block))
 	    {
@@ -380,7 +380,7 @@ skip_inline_frames (thread_info *thread, bpstat *stop_chain)
 	  else if (cur_block->function () != NULL)
 	    break;
 
-	  cur_block = BLOCK_SUPERBLOCK (cur_block);
+	  cur_block = cur_block->superblock ();
 	}
     }
 

@@ -612,7 +612,7 @@ gdbscm_frame_block (SCM self)
 
   for (fn_block = block;
        fn_block != NULL && fn_block->function () == NULL;
-       fn_block = BLOCK_SUPERBLOCK (fn_block))
+       fn_block = fn_block->superblock ())
     continue;
 
   if (block == NULL || fn_block == NULL || fn_block->function () == NULL)

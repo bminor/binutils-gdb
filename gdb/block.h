@@ -114,6 +114,14 @@ struct block
   void set_function (symbol *function)
   { m_function = function; }
 
+  /* Return this block's superblock.  */
+  const block *superblock () const
+  { return m_superblock; }
+
+  /* Set this block's superblock.  */
+  void set_superblock (const block *superblock)
+  { m_superblock = superblock; }
+
   /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR m_start;
@@ -130,7 +138,7 @@ struct block
      case of C) is the STATIC_BLOCK.  The superblock of the
      STATIC_BLOCK is the GLOBAL_BLOCK.  */
 
-  const struct block *superblock;
+  const struct block *m_superblock;
 
   /* This is used to store the symbols in the block.  */
 
@@ -162,7 +170,6 @@ struct global_block
   struct compunit_symtab *compunit_symtab;
 };
 
-#define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
 #define BLOCK_MULTIDICT(bl)	(bl)->multidict
 #define BLOCK_NAMESPACE(bl)	(bl)->namespace_info
 

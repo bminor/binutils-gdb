@@ -293,7 +293,7 @@ frapy_block (PyObject *self, PyObject *args)
 
   for (fn_block = block;
        fn_block != NULL && fn_block->function () == NULL;
-       fn_block = BLOCK_SUPERBLOCK (fn_block))
+       fn_block = fn_block->superblock ())
     ;
 
   if (block == NULL || fn_block == NULL || fn_block->function () == NULL)

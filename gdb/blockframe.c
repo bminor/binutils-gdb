@@ -75,7 +75,7 @@ get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
       if (block_inlined_p (bl))
 	inline_count--;
 
-      bl = BLOCK_SUPERBLOCK (bl);
+      bl = bl->superblock ();
       gdb_assert (bl != NULL);
     }
 
@@ -122,8 +122,8 @@ get_frame_function (struct frame_info *frame)
   if (bl == NULL)
     return NULL;
 
-  while (bl->function () == NULL && BLOCK_SUPERBLOCK (bl) != NULL)
-    bl = BLOCK_SUPERBLOCK (bl);
+  while (bl->function () == NULL && bl->superblock () != NULL)
+    bl = bl->superblock ();
 
   return bl->function ();
 }

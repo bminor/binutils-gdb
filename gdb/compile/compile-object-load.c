@@ -444,13 +444,13 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
       while (function_block != BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)
 	     && function_block != BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK))
 	{
-	  function_block = BLOCK_SUPERBLOCK (function_block);
+	  function_block = function_block->superblock ();
 	  function = function_block->function ();
 	  if (function != NULL)
 	    break;
 	}
       if (function != NULL
-	  && (BLOCK_SUPERBLOCK (function_block)
+	  && (function_block->superblock ()
 	      == BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK))
 	  && symbol_matches_search_name (function, func_matcher))
 	break;

@@ -2275,7 +2275,7 @@ iterate_over_block_local_vars (const struct block *block,
 	 symbols.  */
       if (block->function ())
 	break;
-      block = BLOCK_SUPERBLOCK (block);
+      block = block->superblock ();
     }
 }
 
