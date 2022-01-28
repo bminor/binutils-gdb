@@ -1164,7 +1164,12 @@ regcache::transfer_regset_register (struct regcache *out_regcache, int regnum,
 	memset (out_buf + offs + reg_size, 0, slot_size - reg_size);
     }
   else if (in_buf != nullptr)
-    out_regcache->raw_supply_part (regnum, 0, reg_size, in_buf + offs);
+    {
+      /* Zero-extend the register value if the slot is smaller than the register.  */
+      if (slot_size < register_size (gdbarch, regnum))
+	out_regcache->raw_supply_zeroed (regnum);
+      out_regcache->raw_supply_part (regnum, 0, reg_size, in_buf + offs);
+    }
   else
     {
       /* Invalidate the register.  */
