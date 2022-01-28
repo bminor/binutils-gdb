@@ -111,7 +111,7 @@ ps_pglobal_lookup (struct ps_prochandle *ph, const char *obj,
   if (ms.minsym == NULL)
     return PS_NOSYM;
 
-  *sym_addr = core_addr_to_ps_addr (BMSYMBOL_VALUE_ADDRESS (ms));
+  *sym_addr = core_addr_to_ps_addr (ms.value_address ());
   return PS_OK;
 }
 

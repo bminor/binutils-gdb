@@ -7951,7 +7951,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
       psymbol.domain = VAR_DOMAIN;
       psymbol.aclass = LOC_BLOCK;
       psymbol.ginfo.set_section_index (SECT_OFF_TEXT (objfile));
-      psymbol.ginfo.value.address = addr;
+      psymbol.ginfo.set_value_address (addr);
 
       if (pdi->main_subprogram && actual_name != NULL)
 	set_objfile_main_name (objfile, actual_name, cu->per_cu->lang);
@@ -7996,7 +7996,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	      psymbol.domain = VAR_DOMAIN;
 	      psymbol.aclass = LOC_STATIC;
 	      psymbol.ginfo.set_section_index (SECT_OFF_TEXT (objfile));
-	      psymbol.ginfo.value.address = addr;
+	      psymbol.ginfo.set_value_address (addr);
 	      where = psymbol_placement::GLOBAL;
 	    }
 	}
@@ -8013,7 +8013,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 	  psymbol.aclass = LOC_STATIC;
 	  psymbol.ginfo.set_section_index (SECT_OFF_TEXT (objfile));
 	  if (has_loc)
-	    psymbol.ginfo.value.address = addr;
+	    psymbol.ginfo.set_value_address (addr);
 	  where = psymbol_placement::STATIC;
 	}
       break;
@@ -17025,7 +17025,7 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
 	}
 
       sym = new_symbol (die, objfile_type (objfile)->builtin_void, cu);
-      SYMBOL_VALUE_COMMON_BLOCK (sym) = common_block;
+      sym->set_value_common_block (common_block);
     }
 }
 
@@ -21706,19 +21706,16 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
 	  unsigned int dummy;
 
 	  if (block->data[0] == DW_OP_addr)
-	    SET_SYMBOL_VALUE_ADDRESS
-	      (sym, cu->header.read_address (objfile->obfd,
-					     block->data + 1,
-					     &dummy));
+	    sym->set_value_address
+	      (cu->header.read_address (objfile->obfd, block->data + 1,
+					&dummy));
 	  else
-	    SET_SYMBOL_VALUE_ADDRESS
-	      (sym, read_addr_index_from_leb128 (cu, block->data + 1,
-						 &dummy));
+	    sym->set_value_address
+	      (read_addr_index_from_leb128 (cu, block->data + 1, &dummy));
 	  sym->set_aclass_index (LOC_STATIC);
 	  fixup_symbol_section (sym, objfile);
-	  SET_SYMBOL_VALUE_ADDRESS
-	    (sym,
-	     SYMBOL_VALUE_ADDRESS (sym)
+	  sym->set_value_address
+	    (sym->value_address ()
 	     + objfile->section_offsets[sym->section_index ()]);
 	  return;
 	}
@@ -21841,7 +21838,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 
 	      addr = attr->as_address ();
 	      addr = gdbarch_adjust_dwarf2_addr (gdbarch, addr + baseaddr);
-	      SET_SYMBOL_VALUE_ADDRESS (sym, addr);
+	      sym->set_value_address (addr);
 	      sym->set_aclass_index (LOC_LABEL);
 	    }
 	  else
@@ -21927,7 +21924,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		attr2 = NULL;
 
 	      if (sym->aclass () == LOC_STATIC
-		  && SYMBOL_VALUE_ADDRESS (sym) == 0
+		  && sym->value_address () == 0
 		  && !per_objfile->per_bfd->has_section_at_zero)
 		{
 		  /* When a static variable is eliminated by the linker,
@@ -22332,13 +22329,13 @@ dwarf2_const_value (const struct attribute *attr, struct symbol *sym,
       sym->set_aclass_index (dwarf2_locexpr_index);
     }
   else if (bytes != NULL)
-     {
-      SYMBOL_VALUE_BYTES (sym) = bytes;
+    {
+      sym->set_value_bytes (bytes);
       sym->set_aclass_index (LOC_CONST_BYTES);
     }
   else
     {
-      SYMBOL_VALUE (sym) = value;
+      sym->set_value_longest (value);
       sym->set_aclass_index (LOC_CONST);
     }
 }

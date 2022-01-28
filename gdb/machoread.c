@@ -404,7 +404,7 @@ macho_resolve_oso_sym_with_minsym (struct objfile *main_objfile, asymbol *sym)
       return 0;
     }
   else
-    return BMSYMBOL_VALUE_ADDRESS (msym);
+    return msym.value_address ();
 }
 
 /* Add oso file OSO/ABFD as a symbol file.  */

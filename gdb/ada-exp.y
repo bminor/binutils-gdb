@@ -1382,7 +1382,7 @@ block_lookup (const struct block *context, const char *raw_name)
     {
       if (syms.size () > 1)
 	warning (_("Function name \"%s\" ambiguous here"), raw_name);
-      result = SYMBOL_BLOCK_VALUE (syms[0].symbol);
+      result = syms[0].symbol->value_block ();
     }
 
   return result;

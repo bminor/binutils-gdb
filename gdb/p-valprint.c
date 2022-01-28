@@ -228,7 +228,7 @@ pascal_language::value_print_inner (struct value *val,
 	  /* If 'symbol_print' is set, we did the work above.  */
 	  if (!options->symbol_print
 	      && (msymbol.minsym != NULL)
-	      && (vt_address == BMSYMBOL_VALUE_ADDRESS (msymbol)))
+	      && (vt_address == msymbol.value_address ()))
 	    {
 	      if (want_space)
 		gdb_puts (" ", stream);

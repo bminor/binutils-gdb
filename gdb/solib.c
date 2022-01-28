@@ -1551,9 +1551,9 @@ gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
 		{
 		  struct minimal_symbol msym {};
 
-		  SET_MSYMBOL_VALUE_ADDRESS (&msym, symaddr);
+		  msym.set_value_address (symaddr);
 		  gdbarch_elf_make_msymbol_special (gdbarch, sym, &msym);
-		  symaddr = MSYMBOL_VALUE_RAW_ADDRESS (&msym);
+		  symaddr = msym.value_raw_address ();
 		}
 
 	      /* BFD symbols are section relative.  */

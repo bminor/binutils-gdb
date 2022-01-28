@@ -979,7 +979,7 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 	      symbol *sym = inline_skipped_symbol (tp);
 	      if (sym->aclass () == LOC_BLOCK)
 		{
-		  const block *block = SYMBOL_BLOCK_VALUE (sym);
+		  const block *block = sym->value_block ();
 		  if (BLOCK_END (block) < tp->control.step_range_end)
 		    tp->control.step_range_end = BLOCK_END (block);
 		}
@@ -1336,7 +1336,7 @@ until_next_command (int from_tty)
       if (msymbol.minsym == NULL)
 	error (_("Execution is not within a known function."));
 
-      tp->control.step_range_start = BMSYMBOL_VALUE_ADDRESS (msymbol);
+      tp->control.step_range_start = msymbol.value_address ();
       /* The upper-bound of step_range is exclusive.  In order to make PC
 	 within the range, set the step_range_end with PC + 1.  */
       tp->control.step_range_end = pc + 1;
@@ -1345,7 +1345,7 @@ until_next_command (int from_tty)
     {
       sal = find_pc_line (pc, 0);
 
-      tp->control.step_range_start = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (func));
+      tp->control.step_range_start = BLOCK_ENTRY_PC (func->value_block ());
       tp->control.step_range_end = sal.end;
 
       /* By setting the step_range_end based on the current pc, we are

@@ -470,7 +470,7 @@ mips_fbsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct bound_minimal_symbol msym
     = lookup_bound_minimal_symbol ("_mips_rtld_bind");
-  if (msym.minsym != nullptr && BMSYMBOL_VALUE_ADDRESS (msym) == pc)
+  if (msym.minsym != nullptr && msym.value_address () == pc)
     return frame_unwind_caller_pc (get_current_frame ());
 
   return fbsd_skip_solib_resolver (gdbarch, pc);

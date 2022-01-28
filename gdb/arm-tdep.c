@@ -600,7 +600,7 @@ skip_prologue_function (struct gdbarch *gdbarch, CORE_ADDR pc, int is_thumb)
 
   msym = lookup_minimal_symbol_by_pc (pc);
   if (msym.minsym != NULL
-      && BMSYMBOL_VALUE_ADDRESS (msym) == pc
+      && msym.value_address () == pc
       && msym.minsym->linkage_name () != NULL)
     {
       const char *name = msym.minsym->linkage_name ();
@@ -8521,7 +8521,7 @@ arm_skip_cmse_entry (CORE_ADDR pc, const char *name, struct objfile *objfile)
    = lookup_minimal_symbol (target_name, NULL, objfile);
 
   if (minsym.minsym != nullptr)
-    return BMSYMBOL_VALUE_ADDRESS (minsym);
+    return minsym.value_address ();
 
   return 0;
 }
@@ -8610,7 +8610,7 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
       objfile = (sec == NULL) ? NULL : sec->objfile;
       minsym = lookup_minimal_symbol (target_name, NULL, objfile);
       if (minsym.minsym != NULL)
-	return BMSYMBOL_VALUE_ADDRESS (minsym);
+	return minsym.value_address ();
       else
 	return 0;
     }

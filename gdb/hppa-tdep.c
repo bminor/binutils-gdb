@@ -197,7 +197,7 @@ hppa_symbol_address(const char *sym)
 
   minsym = lookup_minimal_symbol (sym, NULL, NULL);
   if (minsym.minsym)
-    return BMSYMBOL_VALUE_ADDRESS (minsym);
+    return minsym.value_address ();
   else
     return (CORE_ADDR)-1;
 }
@@ -2528,7 +2528,7 @@ hppa_lookup_stub_minimal_symbol (const char *name,
 	    {
 	      struct unwind_table_entry *u;
 
-	      u = find_unwind_entry (MSYMBOL_VALUE (msym));
+	      u = find_unwind_entry (msym->value_longest ());
 	      if (u != NULL && u->stub_unwind.stub_type == stub_type)
 		{
 		  result.objfile = objfile;

@@ -201,7 +201,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 
       /* Use the relocated address as shown in the symbol here -- do
 	 not try to respect copy relocations.  */
-      CORE_ADDR addr = (msymbol->value.address
+      CORE_ADDR addr = (msymbol->value_raw_address ()
 			+ objfile->section_offsets[msymbol->section_index ()]);
       gdb_puts (paddress (gdbarch, addr), outfile);
       gdb_printf (outfile, " %s", msymbol->linkage_name ());
@@ -511,7 +511,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
   if (symbol->domain () == LABEL_DOMAIN)
     {
       gdb_printf (outfile, "label %s at ", symbol->print_name ());
-      gdb_puts (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (symbol)),
+      gdb_puts (paddress (gdbarch, symbol->value_address ()),
 		outfile);
       if (section)
 	gdb_printf (outfile, " section %s\n",
@@ -562,8 +562,8 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	{
 	case LOC_CONST:
 	  gdb_printf (outfile, "const %s (%s)",
-		      plongest (SYMBOL_VALUE (symbol)),
-		      hex_string (SYMBOL_VALUE (symbol)));
+		      plongest (symbol->value_longest ()),
+		      hex_string (symbol->value_longest ()));
 	  break;
 
 	case LOC_CONST_BYTES:
@@ -575,14 +575,13 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 			pulongest (TYPE_LENGTH (type)));
 	    for (i = 0; i < TYPE_LENGTH (type); i++)
 	      gdb_printf (outfile, " %02x",
-			  (unsigned) SYMBOL_VALUE_BYTES (symbol)[i]);
+			  (unsigned) symbol->value_bytes ()[i]);
 	  }
 	  break;
 
 	case LOC_STATIC:
 	  gdb_printf (outfile, "static at ");
-	  gdb_puts (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (symbol)),
-		    outfile);
+	  gdb_puts (paddress (gdbarch, symbol->value_address ()), outfile);
 	  if (section)
 	    gdb_printf (outfile, " section %s",
 			bfd_section_name (section->the_bfd_section));
@@ -591,30 +590,30 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	case LOC_REGISTER:
 	  if (symbol->is_argument ())
 	    gdb_printf (outfile, "parameter register %s",
-			plongest (SYMBOL_VALUE (symbol)));
+			plongest (symbol->value_longest ()));
 	  else
 	    gdb_printf (outfile, "register %s",
-			plongest (SYMBOL_VALUE (symbol)));
+			plongest (symbol->value_longest ()));
 	  break;
 
 	case LOC_ARG:
 	  gdb_printf (outfile, "arg at offset %s",
-		      hex_string (SYMBOL_VALUE (symbol)));
+		      hex_string (symbol->value_longest ()));
 	  break;
 
 	case LOC_REF_ARG:
 	  gdb_printf (outfile, "reference arg at %s",
-		      hex_string (SYMBOL_VALUE (symbol)));
+		      hex_string (symbol->value_longest ()));
 	  break;
 
 	case LOC_REGPARM_ADDR:
 	  gdb_printf (outfile, "address parameter register %s",
-		      plongest (SYMBOL_VALUE (symbol)));
+		      plongest (symbol->value_longest ()));
 	  break;
 
 	case LOC_LOCAL:
 	  gdb_printf (outfile, "local at offset %s",
-		      hex_string (SYMBOL_VALUE (symbol)));
+		      hex_string (symbol->value_longest ()));
 	  break;
 
 	case LOC_TYPEDEF:
@@ -622,8 +621,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 
 	case LOC_LABEL:
 	  gdb_printf (outfile, "label at ");
-	  gdb_puts (paddress (gdbarch, SYMBOL_VALUE_ADDRESS (symbol)),
-		    outfile);
+	  gdb_puts (paddress (gdbarch, symbol->value_address ()), outfile);
 	  if (section)
 	    gdb_printf (outfile, " section %s",
 			bfd_section_name (section->the_bfd_section));
@@ -632,9 +630,9 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	case LOC_BLOCK:
 	  gdb_printf
 	    (outfile, "block object %s, %s..%s",
-	     host_address_to_string (SYMBOL_BLOCK_VALUE (symbol)),
-	     paddress (gdbarch, BLOCK_START (SYMBOL_BLOCK_VALUE (symbol))),
-	     paddress (gdbarch, BLOCK_END (SYMBOL_BLOCK_VALUE (symbol))));
+	     host_address_to_string (symbol->value_block ()),
+	     paddress (gdbarch, BLOCK_START (symbol->value_block ())),
+	     paddress (gdbarch, BLOCK_END (symbol->value_block ())));
 	  if (section)
 	    gdb_printf (outfile, " section %s",
 			bfd_section_name (section->the_bfd_section));

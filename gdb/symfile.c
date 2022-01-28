@@ -3450,11 +3450,11 @@ simple_read_overlay_table (void)
   word_size = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
   byte_order = gdbarch_byte_order (gdbarch);
 
-  cache_novlys = read_memory_integer (BMSYMBOL_VALUE_ADDRESS (novlys_msym),
+  cache_novlys = read_memory_integer (novlys_msym.value_address (),
 				      4, byte_order);
   cache_ovly_table
     = (unsigned int (*)[4]) xmalloc (cache_novlys * sizeof (*cache_ovly_table));
-  cache_ovly_table_base = BMSYMBOL_VALUE_ADDRESS (ovly_table_msym);
+  cache_ovly_table_base = ovly_table_msym.value_address ();
   read_target_long_array (cache_ovly_table_base,
 			  (unsigned int *) cache_ovly_table,
 			  cache_novlys * 4, word_size, byte_order);
@@ -3524,7 +3524,7 @@ simple_overlay_update (struct obj_section *osect)
 		   "find `_ovly_table' array\n"
 		   "in inferior.  Use `overlay manual' mode."));
 	
-	if (cache_ovly_table_base == BMSYMBOL_VALUE_ADDRESS (minsym))
+	if (cache_ovly_table_base == minsym.value_address ())
 	  /* Then go ahead and try to look up this single section in
 	     the cache.  */
 	  if (simple_overlay_update_1 (osect))

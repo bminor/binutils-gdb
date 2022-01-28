@@ -8090,7 +8090,7 @@ check_exception_resume (struct execution_control_state *ecs,
 	 cases such as throwing an exception from inside a signal
 	 handler.  */
 
-      b = SYMBOL_BLOCK_VALUE (func);
+      b = func->value_block ();
       ALL_BLOCK_SYMBOLS (b, iter, sym)
 	{
 	  if (!sym->is_argument ())

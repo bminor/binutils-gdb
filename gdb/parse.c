@@ -115,11 +115,11 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
     {
       /* Addresses of TLS symbols are really offsets into a
 	 per-objfile/per-thread storage block.  */
-      addr = MSYMBOL_VALUE_RAW_ADDRESS (bound_msym.minsym);
+      addr = bound_msym.minsym->value_raw_address ();
     }
   else if (msymbol_is_function (objfile, msymbol, &addr))
     {
-      if (addr != BMSYMBOL_VALUE_ADDRESS (bound_msym))
+      if (addr != bound_msym.value_address ())
 	{
 	  /* This means we resolved a function descriptor, and we now
 	     have an address for a code/text symbol instead of a data
@@ -132,7 +132,7 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
 	}
     }
   else
-    addr = BMSYMBOL_VALUE_ADDRESS (bound_msym);
+    addr = bound_msym.value_address ();
 
   if (overlay_debugging)
     addr = symbol_overlayed_address (addr, section);

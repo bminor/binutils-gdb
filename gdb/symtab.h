@@ -475,6 +475,16 @@ struct general_symbol_info
 			      gdb::optional<hashval_t> hash
 				= gdb::optional<hashval_t> ());
 
+  CORE_ADDR value_address () const
+  {
+    return m_value.address;
+  }
+
+  void set_value_address (CORE_ADDR address)
+  {
+    m_value.address = address;
+  }
+
   /* Name of the symbol.  This is a required field.  Storage for the
      name is allocated on the objfile_obstack for the associated
      objfile.  For languages like C++ that make a distinction between
@@ -507,7 +517,7 @@ struct general_symbol_info
 
     struct symbol *chain;
   }
-  value;
+  m_value;
 
   /* Since one and only one language can apply, wrap the language specific
      information inside a union.  */
@@ -572,19 +582,6 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
    SYMBOL_VALUE_ADDRESS macro.  */
 
 extern CORE_ADDR get_symbol_address (const struct symbol *sym);
-
-/* Note that these macros only work with symbol, not partial_symbol.  */
-
-#define SYMBOL_VALUE(symbol)		(symbol)->value.ivalue
-#define SYMBOL_VALUE_ADDRESS(symbol)			      \
-  (((symbol)->maybe_copied) ? get_symbol_address (symbol)     \
-   : ((symbol)->value.address))
-#define SET_SYMBOL_VALUE_ADDRESS(symbol, new_value)	\
-  ((symbol)->value.address = (new_value))
-#define SYMBOL_VALUE_BYTES(symbol)	(symbol)->value.bytes
-#define SYMBOL_VALUE_COMMON_BLOCK(symbol) (symbol)->value.common_block
-#define SYMBOL_BLOCK_VALUE(symbol)	(symbol)->value.block
-#define SYMBOL_VALUE_CHAIN(symbol)	(symbol)->value.chain
 
 /* Try to determine the demangled name for a symbol, based on the
    language of that symbol.  If the language is set to language_auto,
@@ -664,6 +661,15 @@ enum minimal_symbol_type
 #define MINSYM_TYPE_BITS 4
 gdb_static_assert (nr_minsym_types <= (1 << MINSYM_TYPE_BITS));
 
+/* Return the address of MINSYM, which comes from OBJF.  The
+   MAYBE_COPIED flag must be set on MINSYM.  If MINSYM appears in the
+   main program's minimal symbols, then that minsym's address is
+   returned; otherwise, MINSYM's address is returned.  This should
+   generally only be used via the MSYMBOL_VALUE_ADDRESS macro.  */
+
+extern CORE_ADDR get_msymbol_address (struct objfile *objf,
+				      const struct minimal_symbol *minsym);
+
 /* Define a simple structure used to hold some very basic information about
    all defined global symbols (text, data, bss, abs, etc).  The only required
    information is the general_symbol_info.
@@ -678,6 +684,21 @@ gdb_static_assert (nr_minsym_types <= (1 << MINSYM_TYPE_BITS));
 
 struct minimal_symbol : public general_symbol_info
 {
+  LONGEST value_longest () const
+  {
+    return m_value.ivalue;
+  }
+
+  /* The relocated address of the minimal symbol, using the section
+     offsets from OBJFILE.  */
+  CORE_ADDR value_address (objfile *objfile) const;
+
+  /* The unrelocated address of the minimal symbol.  */
+  CORE_ADDR value_raw_address () const
+  {
+    return m_value.address;
+  }
+
   /* Size of this symbol.  dbx_end_psymtab in dbxread.c uses this
      information to calculate the end of the partial symtab based on the
      address of the last symbol plus the size of the last symbol.  */
@@ -735,15 +756,6 @@ struct minimal_symbol : public general_symbol_info
   bool text_p () const;
 };
 
-/* Return the address of MINSYM, which comes from OBJF.  The
-   MAYBE_COPIED flag must be set on MINSYM.  If MINSYM appears in the
-   main program's minimal symbols, then that minsym's address is
-   returned; otherwise, MINSYM's address is returned.  This should
-   generally only be used via the MSYMBOL_VALUE_ADDRESS macro.  */
-
-extern CORE_ADDR get_msymbol_address (struct objfile *objf,
-				      const struct minimal_symbol *minsym);
-
 #define MSYMBOL_TARGET_FLAG_1(msymbol)  (msymbol)->target_flag_1
 #define MSYMBOL_TARGET_FLAG_2(msymbol)  (msymbol)->target_flag_2
 #define MSYMBOL_SIZE(msymbol)		((msymbol)->size + 0)
@@ -755,23 +767,6 @@ extern CORE_ADDR get_msymbol_address (struct objfile *objf,
     } while (0)
 #define MSYMBOL_HAS_SIZE(msymbol)	((msymbol)->has_size + 0)
 #define MSYMBOL_TYPE(msymbol)		(msymbol)->type
-
-#define MSYMBOL_VALUE(symbol)		(symbol)->value.ivalue
-/* The unrelocated address of the minimal symbol.  */
-#define MSYMBOL_VALUE_RAW_ADDRESS(symbol) ((symbol)->value.address + 0)
-/* The relocated address of the minimal symbol, using the section
-   offsets from OBJFILE.  */
-#define MSYMBOL_VALUE_ADDRESS(objfile, symbol)				\
-  (((symbol)->maybe_copied) ? get_msymbol_address (objfile, symbol)	\
-   : ((symbol)->value.address						\
-      + (objfile)->section_offsets[(symbol)->section_index ()]))
-/* For a bound minsym, we can easily compute the address directly.  */
-#define BMSYMBOL_VALUE_ADDRESS(symbol) \
-  MSYMBOL_VALUE_ADDRESS ((symbol).objfile, (symbol).minsym)
-#define SET_MSYMBOL_VALUE_ADDRESS(symbol, new_value)	\
-  ((symbol)->value.address = (new_value))
-#define MSYMBOL_VALUE_BYTES(symbol)	(symbol)->value.bytes
-#define MSYMBOL_BLOCK_VALUE(symbol)	(symbol)->value.block
 
 #include "minsyms.h"
 
@@ -1124,7 +1119,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
       /* We can't use an initializer list for members of a base class, and
 	 general_symbol_info needs to stay a POD type.  */
       m_name = nullptr;
-      value.ivalue = 0;
+      m_value.ivalue = 0;
       language_specific.obstack = nullptr;
       m_language = language_unknown;
       ada_mangled = 0;
@@ -1220,6 +1215,69 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
   void set_line (unsigned short line)
   {
     m_line = line;
+  }
+
+  LONGEST value_longest () const
+  {
+    return m_value.ivalue;
+  }
+
+  void set_value_longest (LONGEST value)
+  {
+    m_value.ivalue = value;
+  }
+
+  CORE_ADDR value_address () const
+  {
+    if (this->maybe_copied)
+      return get_symbol_address (this);
+    else
+      return m_value.address;
+  }
+
+  void set_value_address (CORE_ADDR address)
+  {
+    m_value.address = address;
+  }
+
+  const gdb_byte *value_bytes () const
+  {
+    return m_value.bytes;
+  }
+
+  void set_value_bytes (const gdb_byte *bytes)
+  {
+    m_value.bytes = bytes;
+  }
+
+  const common_block *value_common_block () const
+  {
+    return m_value.common_block;
+  }
+
+  void set_value_common_block (const common_block *common_block)
+  {
+    m_value.common_block = common_block;
+  }
+
+  const block *value_block () const
+  {
+    return m_value.block;
+  }
+
+  void set_value_block (const block *block)
+  {
+    m_value.block = block;
+  }
+
+  symbol *value_chain () const
+  {
+    return m_value.chain;
+  }
+
+  void set_value_chain (symbol *sym)
+  {
+    m_value.chain = sym;
   }
 
   /* Data type of value */

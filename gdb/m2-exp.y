@@ -490,7 +490,7 @@ exp	:	STRING
 
 /* This will be used for extensions later.  Like adding modules.  */
 block	:	fblock	
-			{ $$ = SYMBOL_BLOCK_VALUE($1); }
+			{ $$ = $1->value_block (); }
 	;
 
 fblock	:	BLOCKNAME

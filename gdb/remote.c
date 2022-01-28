@@ -5155,7 +5155,7 @@ remote_target::remote_check_symbols ()
       else
 	{
 	  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
-	  CORE_ADDR sym_addr = BMSYMBOL_VALUE_ADDRESS (sym);
+	  CORE_ADDR sym_addr = sym.value_address ();
 
 	  /* If this is a function address, return the start of code
 	     instead of any data function descriptor.  */

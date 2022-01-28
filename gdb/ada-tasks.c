@@ -574,7 +574,7 @@ ada_get_tcb_types_info (void)
   unsigned int first_id = 0;
   if (first_id_sym.minsym != nullptr)
     {
-      CORE_ADDR addr = BMSYMBOL_VALUE_ADDRESS (first_id_sym);
+      CORE_ADDR addr = first_id_sym.value_address ();
       /* This symbol always has type uint32_t.  */
       struct type *u32type = builtin_type (target_gdbarch ())->builtin_uint32;
       first_id = value_as_long (value_at (u32type, addr));
@@ -896,7 +896,7 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
   if (msym.minsym != NULL)
     {
       data->known_tasks_kind = ADA_TASKS_ARRAY;
-      data->known_tasks_addr = BMSYMBOL_VALUE_ADDRESS (msym);
+      data->known_tasks_addr = msym.value_address ();
 
       /* Try to get pointer type and array length from the symtab.  */
       sym = lookup_symbol_in_language (KNOWN_TASKS_NAME, NULL, VAR_DOMAIN,
@@ -942,12 +942,12 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
   if (msym.minsym != NULL)
     {
       data->known_tasks_kind = ADA_TASKS_LIST;
-      data->known_tasks_addr = BMSYMBOL_VALUE_ADDRESS (msym);
+      data->known_tasks_addr = msym.value_address ();
       data->known_tasks_length = 1;
 
       sym = lookup_symbol_in_language (KNOWN_TASKS_LIST, NULL, VAR_DOMAIN,
 				       language_c, NULL).symbol;
-      if (sym != NULL && SYMBOL_VALUE_ADDRESS (sym) != 0)
+      if (sym != NULL && sym->value_address () != 0)
 	{
 	  /* Validate.  */
 	  struct type *type = check_typedef (sym->type ());

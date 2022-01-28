@@ -750,7 +750,7 @@ print_frame_args (const frame_print_options &fp_opts,
 
   if (func)
     {
-      const struct block *b = SYMBOL_BLOCK_VALUE (func);
+      const struct block *b = func->value_block ();
       struct block_iterator iter;
       struct symbol *sym;
 
@@ -778,7 +778,7 @@ print_frame_args (const frame_print_options &fp_opts,
 	    case LOC_ARG:
 	    case LOC_REF_ARG:
 	      {
-		long current_offset = SYMBOL_VALUE (sym);
+		long current_offset = sym->value_longest ();
 		int arg_size = TYPE_LENGTH (sym->type ());
 
 		/* Compute address of next argument by adding the size of
@@ -2554,7 +2554,7 @@ print_frame_arg_vars (struct frame_info *frame,
   cb_data.stream = stream;
   cb_data.values_printed = 0;
 
-  iterate_over_block_arg_vars (SYMBOL_BLOCK_VALUE (func), cb_data);
+  iterate_over_block_arg_vars (func->value_block (), cb_data);
 
   /* do_print_variable_and_value invalidates FRAME.  */
   frame = NULL;

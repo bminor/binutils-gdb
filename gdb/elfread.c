@@ -703,7 +703,7 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
   msym = lookup_minimal_symbol_by_pc (addr);
   if (msym.minsym == NULL)
     return 0;
-  if (BMSYMBOL_VALUE_ADDRESS (msym) != addr)
+  if (msym.value_address () != addr)
     return 0;
   objfile = msym.objfile;
 
@@ -830,7 +830,7 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
 	continue;
       if (MSYMBOL_TYPE (msym.minsym) != mst_slot_got_plt)
 	continue;
-      pointer_address = BMSYMBOL_VALUE_ADDRESS (msym);
+      pointer_address = msym.value_address ();
 
       plt = bfd_get_section_by_name (obfd, ".plt");
       if (plt == NULL)

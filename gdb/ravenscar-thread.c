@@ -361,7 +361,7 @@ get_running_thread_id (int cpu)
     return 0;
 
   object_size = TYPE_LENGTH (builtin_type_void_data_ptr);
-  object_addr = (BMSYMBOL_VALUE_ADDRESS (object_msym)
+  object_addr = (object_msym.value_address ()
 		 + (cpu - 1) * object_size);
   buf_size = object_size;
   buf = (gdb_byte *) alloca (buf_size);

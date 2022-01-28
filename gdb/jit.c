@@ -265,7 +265,7 @@ jit_read_descriptor (gdbarch *gdbarch,
   jiter_objfile_data *objf_data = jiter->jiter_data.get ();
   gdb_assert (objf_data != nullptr);
 
-  CORE_ADDR addr = MSYMBOL_VALUE_ADDRESS (jiter, objf_data->descriptor);
+  CORE_ADDR addr = objf_data->descriptor->value_address (jiter);
 
   jit_debug_printf ("descriptor_addr = %s", paddress (gdbarch, addr));
 
@@ -591,7 +591,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       block_name->set_aclass_index (LOC_BLOCK);
       symbol_set_symtab (block_name, filetab);
       block_name->set_type (lookup_function_type (block_type));
-      SYMBOL_BLOCK_VALUE (block_name) = new_block;
+      block_name->set_value_block (new_block);
 
       block_name->m_name = obstack_strdup (&objfile->objfile_obstack,
 					   gdb_block_iter.name.get ());
@@ -887,7 +887,7 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch, program_space *pspace)
       bound_minimal_symbol reg_symbol
 	= lookup_minimal_symbol (jit_break_name, nullptr, the_objfile);
       if (reg_symbol.minsym == NULL
-	  || BMSYMBOL_VALUE_ADDRESS (reg_symbol) == 0)
+	  || reg_symbol.value_address () == 0)
 	{
 	  /* No need to repeat the lookup the next time.  */
 	  the_objfile->skip_jit_symbol_lookup = true;
@@ -897,7 +897,7 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch, program_space *pspace)
       bound_minimal_symbol desc_symbol
 	= lookup_minimal_symbol (jit_descriptor_name, NULL, the_objfile);
       if (desc_symbol.minsym == NULL
-	  || BMSYMBOL_VALUE_ADDRESS (desc_symbol) == 0)
+	  || desc_symbol.value_address () == 0)
 	{
 	  /* No need to repeat the lookup the next time.  */
 	  the_objfile->skip_jit_symbol_lookup = true;
@@ -909,9 +909,7 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch, program_space *pspace)
       objf_data->register_code = reg_symbol.minsym;
       objf_data->descriptor = desc_symbol.minsym;
 
-      CORE_ADDR addr = MSYMBOL_VALUE_ADDRESS (the_objfile,
-					      objf_data->register_code);
-
+      CORE_ADDR addr = objf_data->register_code->value_address (the_objfile);
       jit_debug_printf ("breakpoint_addr = %s", paddress (gdbarch, addr));
 
       /* Check if we need to re-create the breakpoint.  */

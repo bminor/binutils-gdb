@@ -619,11 +619,8 @@ relocate_one_symbol (struct symbol *sym, struct objfile *objfile,
   if ((sym->aclass () == LOC_LABEL
        || sym->aclass () == LOC_STATIC)
       && sym->section_index () >= 0)
-    {
-      SET_SYMBOL_VALUE_ADDRESS (sym,
-				SYMBOL_VALUE_ADDRESS (sym)
-				+ delta[sym->section_index ()]);
-    }
+    sym->set_value_address (sym->value_address ()
+			    + delta[sym->section_index ()]);
 }
 
 /* Relocate OBJFILE to NEW_OFFSETS.  There should be OBJFILE->NUM_SECTIONS

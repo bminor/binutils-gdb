@@ -533,7 +533,7 @@ reg_value_complaint (int regnum, int num_regs, const char *sym)
 static int
 mdebug_reg_to_regnum (struct symbol *sym, struct gdbarch *gdbarch)
 {
-  int regno = gdbarch_ecoff_reg_to_regnum (gdbarch, SYMBOL_VALUE (sym));
+  int regno = gdbarch_ecoff_reg_to_regnum (gdbarch, sym->value_longest ());
 
   if (regno < 0 || regno >= gdbarch_num_cooked_regs (gdbarch))
     {
@@ -631,7 +631,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       b = BLOCKVECTOR_BLOCK (top_stack->cur_st->compunit ()->blockvector (),
 			     GLOBAL_BLOCK);
       s = new_symbol (name);
-      SET_SYMBOL_VALUE_ADDRESS (s, (CORE_ADDR) sh->value);
+      s->set_value_address (sh->value);
       add_data_symbol (sh, ax, bigend, s, LOC_STATIC, b, objfile, name);
       break;
 
@@ -644,18 +644,18 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	     address is not in the symbol; we need to fix it later in
 	     scan_file_globals.  */
 	  int bucket = hashname (s->linkage_name ());
-	  SYMBOL_VALUE_CHAIN (s) = global_sym_chain[bucket];
+	  s->set_value_chain (global_sym_chain[bucket]);
 	  global_sym_chain[bucket] = s;
 	}
       else
-	SET_SYMBOL_VALUE_ADDRESS (s, (CORE_ADDR) sh->value);
+	s->set_value_address (sh->value);
       add_data_symbol (sh, ax, bigend, s, LOC_STATIC, b, objfile, name);
       break;
 
     case stLocal:		/* Local variable, goes into current block.  */
       b = top_stack->cur_block;
       s = new_symbol (name);
-      SYMBOL_VALUE (s) = svalue;
+      s->set_value_longest (svalue);
       if (sh->sc == scRegister)
 	add_data_symbol (sh, ax, bigend, s, mdebug_register_index,
 			 b, objfile, name);
@@ -696,7 +696,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  s->set_aclass_index (LOC_ARG);
 	  break;
 	}
-      SYMBOL_VALUE (s) = svalue;
+      s->set_value_longest (svalue);
       s->set_type (parse_type (cur_fd, ax, sh->index, 0, bigend, name));
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
       break;
@@ -705,7 +705,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       s = new_symbol (name);
       s->set_domain (VAR_DOMAIN);	/* So that it can be used */
       s->set_aclass_index (LOC_LABEL);	/* but not misused.  */
-      SET_SYMBOL_VALUE_ADDRESS (s, (CORE_ADDR) sh->value);
+      s->set_value_address (sh->value);
       s->set_type (objfile_type (objfile)->builtin_int);
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
       break;
@@ -796,7 +796,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
       /* Create and enter a new lexical context.  */
       b = new_block (FUNCTION_BLOCK, s->language ());
-      SYMBOL_BLOCK_VALUE (s) = b;
+      s->set_value_block (b);
       BLOCK_FUNCTION (b) = s;
       BLOCK_START (b) = BLOCK_END (b) = sh->value;
       BLOCK_SUPERBLOCK (b) = top_stack->cur_block;
@@ -1068,8 +1068,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		enum_sym->set_aclass_index (LOC_CONST);
 		enum_sym->set_type (t);
 		enum_sym->set_domain (VAR_DOMAIN);
-		SYMBOL_VALUE (enum_sym) = tsym.value;
-		if (SYMBOL_VALUE (enum_sym) < 0)
+		enum_sym->set_value_longest (tsym.value);
+		if (enum_sym->value_longest () < 0)
 		  unsigned_enum = 0;
 		add_symbol (enum_sym, top_stack->cur_st, top_stack->cur_block);
 
@@ -1099,7 +1099,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	s = new_symbol (name);
 	s->set_domain (STRUCT_DOMAIN);
 	s->set_aclass_index (LOC_TYPEDEF);
-	SYMBOL_VALUE (s) = 0;
+	s->set_value_longest (0);
 	s->set_type (t);
 	add_symbol (s, top_stack->cur_st, top_stack->cur_block);
 	break;
@@ -1159,7 +1159,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  s->set_type (objfile_type (mdebugread_objfile)->builtin_void);
 	  e = OBSTACK_ZALLOC (&mdebugread_objfile->objfile_obstack,
 			      mdebug_extra_func_info);
-	  SYMBOL_VALUE_BYTES (s) = (gdb_byte *) e;
+	  s->set_value_bytes ((gdb_byte *) e);
 	  e->numargs = top_stack->numargs;
 	  e->pdr.framereg = -1;
 	  add_symbol (s, top_stack->cur_st, top_stack->cur_block);
@@ -1297,7 +1297,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       s = new_symbol (name);
       s->set_domain (VAR_DOMAIN);
       s->set_aclass_index (LOC_TYPEDEF);
-      SYMBOL_BLOCK_VALUE (s) = top_stack->cur_block;
+      s->set_value_block (top_stack->cur_block);
       s->set_type (t);
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
 
@@ -1977,7 +1977,7 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
 
   if (s != 0)
     {
-      b = SYMBOL_BLOCK_VALUE (s);
+      b = s->value_block ();
     }
   else
     {
@@ -2012,7 +2012,7 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
     {
       struct mdebug_extra_func_info *e;
       
-      e = (struct mdebug_extra_func_info *) SYMBOL_VALUE_BYTES (i);
+      e = (struct mdebug_extra_func_info *) i->value_bytes ();
       e->pdr = *pr;
 
       /* GDB expects the absolute function start address for the
@@ -3990,7 +3990,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 		  s->set_domain (LABEL_DOMAIN);
 		  s->set_aclass_index (LOC_CONST);
 		  s->set_type (objfile_type (objfile)->builtin_void);
-		  SYMBOL_VALUE_BYTES (s) = (gdb_byte *) e;
+		  s->set_value_bytes ((gdb_byte *) e);
 		  e->pdr.framereg = -1;
 		  add_symbol_to_list (s, get_local_symbols ());
 		}

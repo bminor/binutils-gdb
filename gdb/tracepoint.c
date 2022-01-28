@@ -696,7 +696,7 @@ validate_actionline (const char *line, struct breakpoint *b)
 		      error (_("constant `%s' (value %s) "
 			       "will not be collected."),
 			     sym->print_name (),
-			     plongest (SYMBOL_VALUE (sym)));
+			     plongest (sym->value_longest ()));
 		    }
 		  else if (sym->aclass () == LOC_OPTIMIZED_OUT)
 		    {
@@ -931,10 +931,10 @@ collection_list::collect_symbol (struct symbol *sym,
       break;
     case LOC_CONST:
       gdb_printf ("constant %s (value %s) will not be collected.\n",
-		  sym->print_name (), plongest (SYMBOL_VALUE (sym)));
+		  sym->print_name (), plongest (sym->value_longest ()));
       break;
     case LOC_STATIC:
-      offset = SYMBOL_VALUE_ADDRESS (sym);
+      offset = sym->value_address ();
       if (info_verbose)
 	{
 	  gdb_printf ("LOC_STATIC %s: collect %ld bytes at %s.\n",
@@ -965,7 +965,7 @@ collection_list::collect_symbol (struct symbol *sym,
       break;
     case LOC_ARG:
       reg = frame_regno;
-      offset = frame_offset + SYMBOL_VALUE (sym);
+      offset = frame_offset + sym->value_longest ();
       if (info_verbose)
 	{
 	  gdb_printf ("LOC_LOCAL %s: Collect %ld bytes at offset %s"
@@ -975,7 +975,7 @@ collection_list::collect_symbol (struct symbol *sym,
       add_memrange (gdbarch, reg, offset, len, scope);
       break;
     case LOC_REGPARM_ADDR:
-      reg = SYMBOL_VALUE (sym);
+      reg = sym->value_longest ();
       offset = 0;
       if (info_verbose)
 	{
@@ -987,7 +987,7 @@ collection_list::collect_symbol (struct symbol *sym,
       break;
     case LOC_LOCAL:
       reg = frame_regno;
-      offset = frame_offset + SYMBOL_VALUE (sym);
+      offset = frame_offset + sym->value_longest ();
       if (info_verbose)
 	{
 	  gdb_printf ("LOC_LOCAL %s: Collect %ld bytes at offset %s"
@@ -2526,20 +2526,18 @@ info_scope_command (const char *args_in, int from_tty)
 		  continue;
 		case LOC_CONST:
 		  gdb_printf ("a constant with value %s (%s)",
-			      plongest (SYMBOL_VALUE (sym)),
-			      hex_string (SYMBOL_VALUE (sym)));
+			      plongest (sym->value_longest ()),
+			      hex_string (sym->value_longest ()));
 		  break;
 		case LOC_CONST_BYTES:
 		  gdb_printf ("constant bytes: ");
 		  if (sym->type ())
 		    for (j = 0; j < TYPE_LENGTH (sym->type ()); j++)
-		      gdb_printf (" %02x",
-				  (unsigned) SYMBOL_VALUE_BYTES (sym)[j]);
+		      gdb_printf (" %02x", (unsigned) sym->value_bytes ()[j]);
 		  break;
 		case LOC_STATIC:
 		  gdb_printf ("in static storage at address ");
-		  gdb_printf ("%s", paddress (gdbarch,
-					      SYMBOL_VALUE_ADDRESS (sym)));
+		  gdb_printf ("%s", paddress (gdbarch, sym->value_address ()));
 		  break;
 		case LOC_REGISTER:
 		  /* GDBARCH is the architecture associated with the objfile
@@ -2561,15 +2559,15 @@ info_scope_command (const char *args_in, int from_tty)
 		  break;
 		case LOC_ARG:
 		  gdb_printf ("an argument at stack/frame offset %s",
-			      plongest (SYMBOL_VALUE (sym)));
+			      plongest (sym->value_longest ()));
 		  break;
 		case LOC_LOCAL:
 		  gdb_printf ("a local variable at frame offset %s",
-			      plongest (SYMBOL_VALUE (sym)));
+			      plongest (sym->value_longest ()));
 		  break;
 		case LOC_REF_ARG:
 		  gdb_printf ("a reference argument at offset %s",
-			      plongest (SYMBOL_VALUE (sym)));
+			      plongest (sym->value_longest ()));
 		  break;
 		case LOC_REGPARM_ADDR:
 		  /* Note comment at LOC_REGISTER.  */
@@ -2583,13 +2581,13 @@ info_scope_command (const char *args_in, int from_tty)
 		  continue;
 		case LOC_LABEL:
 		  gdb_printf ("a label at address ");
-		  gdb_printf ("%s", paddress (gdbarch,
-					      SYMBOL_VALUE_ADDRESS (sym)));
+		  gdb_printf ("%s", paddress (gdbarch, sym->value_address ()));
 		  break;
 		case LOC_BLOCK:
 		  gdb_printf ("a function at address ");
 		  gdb_printf ("%s",
-			      paddress (gdbarch, BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym))));
+			      paddress (gdbarch,
+					BLOCK_ENTRY_PC (sym->value_block ())));
 		  break;
 		case LOC_UNRESOLVED:
 		  msym = lookup_minimal_symbol (sym->linkage_name (),
@@ -2600,8 +2598,7 @@ info_scope_command (const char *args_in, int from_tty)
 		    {
 		      gdb_printf ("static storage at address ");
 		      gdb_printf ("%s",
-				  paddress (gdbarch,
-					    BMSYMBOL_VALUE_ADDRESS (msym)));
+				  paddress (gdbarch, msym.value_address ()));
 		    }
 		  break;
 		case LOC_OPTIMIZED_OUT:

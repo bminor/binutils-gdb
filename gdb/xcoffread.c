@@ -1563,7 +1563,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
     ++name;
 
   /* default assumptions */
-  SET_SYMBOL_VALUE_ADDRESS (sym, cs->c_value + off);
+  sym->set_value_address (cs->c_value + off);
   sym->set_domain (VAR_DOMAIN);
   sym->set_section_index (secnum_to_section (cs->c_secnum, objfile));
 
@@ -1660,9 +1660,8 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
 			       cs->c_name, 0, 0, objfile);
 	  if (sym != NULL)
 	    {
-	      SET_SYMBOL_VALUE_ADDRESS (sym,
-					SYMBOL_VALUE_ADDRESS (sym)
-					+ static_block_base);
+	      sym->set_value_address
+		(sym->value_address () + static_block_base);
 	      sym->set_section_index (static_block_section);
 	    }
 	  return sym;

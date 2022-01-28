@@ -2430,12 +2430,12 @@ inside_main_func (frame_info *this_frame)
       if (bs.symbol == nullptr)
 	return false;
 
-      const struct block *block = SYMBOL_BLOCK_VALUE (bs.symbol);
+      const struct block *block = bs.symbol->value_block ();
       gdb_assert (block != nullptr);
       sym_addr = BLOCK_START (block);
     }
   else
-    sym_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
+    sym_addr = msymbol.value_address ();
 
   /* Convert any function descriptor addresses into the actual function
      code address.  */

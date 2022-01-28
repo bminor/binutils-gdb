@@ -612,7 +612,7 @@ exp	:	THIS
 block	:	BLOCKNAME
 			{
 			  if ($1.sym.symbol != 0)
-			      $$ = SYMBOL_BLOCK_VALUE ($1.sym.symbol);
+			      $$ = $1.sym.symbol->value_block ();
 			  else
 			    {
 			      std::string copy = copy_name ($1.stoken);
@@ -639,7 +639,7 @@ block	:	block COLONCOLON name
 			  if (!tem || tem->aclass () != LOC_BLOCK)
 			    error (_("No function \"%s\" in specified context."),
 				   copy.c_str ());
-			  $$ = SYMBOL_BLOCK_VALUE (tem); }
+			  $$ = tem->value_block (); }
 	;
 
 variable:	block COLONCOLON name

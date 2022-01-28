@@ -281,7 +281,7 @@ cp_search_static_and_baseclasses (const char *name,
   if ((scope_type->code () == TYPE_CODE_FUNC
        || scope_type->code () == TYPE_CODE_METHOD)
       && domain == VAR_DOMAIN)
-    return lookup_symbol (nested, SYMBOL_BLOCK_VALUE (scope_sym.symbol),
+    return lookup_symbol (nested, scope_sym.symbol->value_block (),
 			  VAR_DOMAIN, NULL);
 
   /* Look for a symbol named NESTED in this class/namespace.

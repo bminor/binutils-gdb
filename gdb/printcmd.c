@@ -645,7 +645,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
 	 pointer is <function+3>.  This matches the ISA behavior.  */
       addr = gdbarch_addr_bits_remove (gdbarch, addr);
 
-      name_location = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (symbol));
+      name_location = BLOCK_ENTRY_PC (symbol->value_block ());
       if (do_demangle || asm_demangle)
 	name_temp = symbol->print_name ();
       else
@@ -673,7 +673,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
 	      under consideration.  */
       if (symbol == NULL ||
 	   (!prefer_sym_over_minsym
-	    && BMSYMBOL_VALUE_ADDRESS (msymbol) == addr
+	    && msymbol.value_address () == addr
 	    && name_location != addr))
 	{
 	  /* If this is a function (i.e. a code address), strip out any
@@ -688,7 +688,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
 	    addr = gdbarch_addr_bits_remove (gdbarch, addr);
 
 	  symbol = 0;
-	  name_location = BMSYMBOL_VALUE_ADDRESS (msymbol);
+	  name_location = msymbol.value_address ();
 	  if (do_demangle || asm_demangle)
 	    name_temp = msymbol.minsym->print_name ();
 	  else
@@ -1551,7 +1551,7 @@ info_symbol_command (const char *arg, int from_tty)
 	    const char *loc_string;
 
 	    matches = 1;
-	    offset = sect_addr - MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
+	    offset = sect_addr - msymbol->value_address (objfile);
 	    mapped = section_is_mapped (osect) ? _("mapped") : _("unmapped");
 	    sec_name = osect->the_bfd_section->name;
 	    msym_name = msymbol->print_name ();
@@ -1649,7 +1649,7 @@ info_address_command (const char *exp, int from_tty)
 	  struct objfile *objfile = msymbol.objfile;
 
 	  gdbarch = objfile->arch ();
-	  load_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
+	  load_addr = msymbol.value_address ();
 
 	  gdb_printf ("Symbol \"");
 	  fprintf_symbol (gdb_stdout, exp,
@@ -1679,7 +1679,7 @@ info_address_command (const char *exp, int from_tty)
   gdb_printf ("Symbol \"");
   gdb_puts (sym->print_name ());
   gdb_printf ("\" is ");
-  val = SYMBOL_VALUE (sym);
+  val = sym->value_longest ();
   if (sym->is_objfile_owned ())
     section = sym->obj_section (symbol_objfile (sym));
   else
@@ -1703,7 +1703,7 @@ info_address_command (const char *exp, int from_tty)
 
     case LOC_LABEL:
       gdb_printf ("a label at address ");
-      load_addr = SYMBOL_VALUE_ADDRESS (sym);
+      load_addr = sym->value_address ();
       fputs_styled (paddress (gdbarch, load_addr), address_style.style (),
 		    gdb_stdout);
       if (section_is_overlay (section))
@@ -1739,7 +1739,7 @@ info_address_command (const char *exp, int from_tty)
 
     case LOC_STATIC:
       gdb_printf (_("static storage at address "));
-      load_addr = SYMBOL_VALUE_ADDRESS (sym);
+      load_addr = sym->value_address ();
       fputs_styled (paddress (gdbarch, load_addr), address_style.style (),
 		    gdb_stdout);
       if (section_is_overlay (section))
@@ -1778,7 +1778,7 @@ info_address_command (const char *exp, int from_tty)
 
     case LOC_BLOCK:
       gdb_printf (_("a function at address "));
-      load_addr = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym));
+      load_addr = BLOCK_ENTRY_PC (sym->value_block ());
       fputs_styled (paddress (gdbarch, load_addr), address_style.style (),
 		    gdb_stdout);
       if (section_is_overlay (section))
@@ -1806,7 +1806,7 @@ info_address_command (const char *exp, int from_tty)
 	    if (section
 		&& (section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
 	      {
-		load_addr = MSYMBOL_VALUE_RAW_ADDRESS (msym.minsym);
+		load_addr = msym.minsym->value_raw_address ();
 		gdb_printf (_("a thread-local variable at offset %s "
 			      "in the thread-local storage for `%s'"),
 			    paddress (gdbarch, load_addr),
@@ -1814,7 +1814,7 @@ info_address_command (const char *exp, int from_tty)
 	      }
 	    else
 	      {
-		load_addr = BMSYMBOL_VALUE_ADDRESS (msym);
+		load_addr = msym.value_address ();
 		gdb_printf (_("static storage at address "));
 		fputs_styled (paddress (gdbarch, load_addr),
 			      address_style.style (), gdb_stdout);

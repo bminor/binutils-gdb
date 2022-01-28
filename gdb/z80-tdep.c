@@ -360,7 +360,7 @@ z80_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
       msymbol = lookup_minimal_symbol ("__sdcc_enter_ix", NULL, NULL);
       if (msymbol.minsym)
 	{
-	  value = BMSYMBOL_VALUE_ADDRESS (msymbol);
+	  value = msymbol.value_address ();
 	  if (value == extract_unsigned_integer (&prologue[pos+1], addr_len, byte_order))
 	    {
 	      pos += 1 + addr_len;
@@ -625,7 +625,7 @@ z80_frame_unwind_cache (struct frame_info *this_frame,
 		  msymbol = lookup_minimal_symbol (names[i], NULL, NULL);
 		  if (!msymbol.minsym)
 		    continue;
-		  if (addr == BMSYMBOL_VALUE_ADDRESS (msymbol))
+		  if (addr == msymbol.value_address ())
 		    break;
 		}
 	      if (i >= 0)
@@ -722,7 +722,7 @@ z80_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
       struct bound_minimal_symbol bh;
       bh = lookup_minimal_symbol ("_break_handler", NULL, NULL);
       if (bh.minsym)
-	addr = BMSYMBOL_VALUE_ADDRESS (bh);
+	addr = bh.value_address ();
       else
 	{
 	  warning(_("Unable to determine inferior's software breakpoint type: "
@@ -927,14 +927,13 @@ z80_read_overlay_region_table ()
   word_size = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
   byte_order = gdbarch_byte_order (gdbarch);
 
-  cache_novly_regions = read_memory_integer (
-				BMSYMBOL_VALUE_ADDRESS (novly_regions_msym),
-				4, byte_order);
+  cache_novly_regions = read_memory_integer (novly_regions_msym.value_address (),
+                                             4, byte_order);
   cache_ovly_region_table
     = (unsigned int (*)[3]) xmalloc (cache_novly_regions *
 					sizeof (*cache_ovly_region_table));
   cache_ovly_region_table_base
-    = BMSYMBOL_VALUE_ADDRESS (ovly_region_table_msym);
+    = ovly_region_table_msym.value_address ();
   read_target_long_array (cache_ovly_region_table_base,
 			  (unsigned int *) cache_ovly_region_table,
 			  cache_novly_regions * 3, word_size, byte_order);

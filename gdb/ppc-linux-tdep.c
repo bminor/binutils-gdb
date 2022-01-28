@@ -1662,9 +1662,9 @@ ppc_elfv2_skip_entrypoint (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (MSYMBOL_TARGET_FLAG_1 (fun.minsym))
     local_entry_offset = 8;
 
-  if (BMSYMBOL_VALUE_ADDRESS (fun) <= pc
-      && pc < BMSYMBOL_VALUE_ADDRESS (fun) + local_entry_offset)
-    return BMSYMBOL_VALUE_ADDRESS (fun) + local_entry_offset;
+  if (fun.value_address () <= pc
+      && pc < fun.value_address () + local_entry_offset)
+    return fun.value_address () + local_entry_offset;
 
   return pc;
 }

@@ -100,7 +100,7 @@ output_nondebug_symbol (ui_out *uiout,
   ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
   uiout->field_core_addr ("address", gdbarch,
-			  BMSYMBOL_VALUE_ADDRESS (msymbol));
+			  msymbol.value_address ());
   uiout->field_string ("name", msymbol.minsym->print_name ());
 }
 

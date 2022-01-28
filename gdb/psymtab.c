@@ -134,7 +134,7 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
 	     object's symbol table.  */
 	  p = find_pc_sect_psymbol (objfile, tpst, pc, section);
 	  if (p != NULL
-	      && (p->address (objfile) == BMSYMBOL_VALUE_ADDRESS (msymbol)))
+	      && (p->address (objfile) == msymbol.value_address ()))
 	    return tpst;
 
 	  /* Also accept the textlow value of a psymtab as a
@@ -211,7 +211,7 @@ psymbol_functions::find_pc_sect_psymtab (struct objfile *objfile,
 	      p = find_pc_sect_psymbol (objfile, pst, pc, section);
 	      if (p == NULL
 		  || (p->address (objfile)
-		      != BMSYMBOL_VALUE_ADDRESS (msymbol)))
+		      != msymbol.value_address ()))
 		goto next;
 	    }
 
@@ -1287,7 +1287,7 @@ psymbol_bcache::hash (const void *addr, int length)
   unsigned int domain = psymbol->domain;
   unsigned int theclass = psymbol->aclass;
 
-  h = fast_hash (&psymbol->ginfo.value, sizeof (psymbol->ginfo.value), h);
+  h = fast_hash (&psymbol->ginfo.m_value, sizeof (psymbol->ginfo.m_value), h);
   h = fast_hash (&lang, sizeof (unsigned int), h);
   h = fast_hash (&domain, sizeof (unsigned int), h);
   h = fast_hash (&theclass, sizeof (unsigned int), h);
@@ -1306,8 +1306,8 @@ psymbol_bcache::compare (const void *addr1, const void *addr2, int length)
   struct partial_symbol *sym1 = (struct partial_symbol *) addr1;
   struct partial_symbol *sym2 = (struct partial_symbol *) addr2;
 
-  return (memcmp (&sym1->ginfo.value, &sym2->ginfo.value,
-		  sizeof (sym1->ginfo.value)) == 0
+  return (memcmp (&sym1->ginfo.m_value, &sym2->ginfo.m_value,
+		  sizeof (sym1->ginfo.m_value)) == 0
 	  && sym1->ginfo.language () == sym2->ginfo.language ()
 	  && sym1->domain == sym2->domain
 	  && sym1->aclass == sym2->aclass
@@ -1804,7 +1804,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		  /* Skip symbols for inlined functions without address.  These may
 		     or may not have a match in the full symtab.  */
 		  if (psym->aclass == LOC_BLOCK
-		      && psym->ginfo.value.address == 0)
+		      && psym->ginfo.value_address () == 0)
 		    continue;
 
 		  sym = block_lookup_symbol (b, psym->ginfo.search_name (),

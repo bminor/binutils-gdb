@@ -627,8 +627,7 @@ language_defn::read_var_value (struct symbol *var,
       /* Put the constant back in target format. */
       v = allocate_value (type);
       store_signed_integer (value_contents_raw (v).data (), TYPE_LENGTH (type),
-			    type_byte_order (type),
-			    (LONGEST) SYMBOL_VALUE (var));
+			    type_byte_order (type), var->value_longest ());
       VALUE_LVAL (v) = not_lval;
       return v;
 
@@ -638,13 +637,13 @@ language_defn::read_var_value (struct symbol *var,
       if (overlay_debugging)
 	{
 	  struct objfile *var_objfile = symbol_objfile (var);
-	  addr = symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (var),
+	  addr = symbol_overlayed_address (var->value_address (),
 					   var->obj_section (var_objfile));
 	  store_typed_address (value_contents_raw (v).data (), type, addr);
 	}
       else
 	store_typed_address (value_contents_raw (v).data (), type,
-			      SYMBOL_VALUE_ADDRESS (var));
+			      var->value_address ());
       VALUE_LVAL (v) = not_lval;
       return v;
 
@@ -655,7 +654,7 @@ language_defn::read_var_value (struct symbol *var,
 	  type = resolve_dynamic_type (type, {}, /* Unused address.  */ 0);
 	}
       v = allocate_value (type);
-      memcpy (value_contents_raw (v).data (), SYMBOL_VALUE_BYTES (var),
+      memcpy (value_contents_raw (v).data (), var->value_bytes (),
 	      TYPE_LENGTH (type));
       VALUE_LVAL (v) = not_lval;
       return v;
@@ -663,10 +662,10 @@ language_defn::read_var_value (struct symbol *var,
     case LOC_STATIC:
       if (overlay_debugging)
 	addr
-	  = symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (var),
+	  = symbol_overlayed_address (var->value_address (),
 				      var->obj_section (symbol_objfile (var)));
       else
-	addr = SYMBOL_VALUE_ADDRESS (var);
+	addr = var->value_address ();
       break;
 
     case LOC_ARG:
@@ -674,7 +673,7 @@ language_defn::read_var_value (struct symbol *var,
       if (!addr)
 	error (_("Unknown argument list address for `%s'."),
 	       var->print_name ());
-      addr += SYMBOL_VALUE (var);
+      addr += var->value_longest ();
       break;
 
     case LOC_REF_ARG:
@@ -686,7 +685,7 @@ language_defn::read_var_value (struct symbol *var,
 	if (!argref)
 	  error (_("Unknown argument list address for `%s'."),
 		 var->print_name ());
-	argref += SYMBOL_VALUE (var);
+	argref += var->value_longest ();
 	ref = value_at (lookup_pointer_type (type), argref);
 	addr = value_as_address (ref);
 	break;
@@ -694,7 +693,7 @@ language_defn::read_var_value (struct symbol *var,
 
     case LOC_LOCAL:
       addr = get_frame_locals_address (frame);
-      addr += SYMBOL_VALUE (var);
+      addr += var->value_longest ();
       break;
 
     case LOC_TYPEDEF:
@@ -705,10 +704,10 @@ language_defn::read_var_value (struct symbol *var,
     case LOC_BLOCK:
       if (overlay_debugging)
 	addr = symbol_overlayed_address
-	  (BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (var)),
+	  (BLOCK_ENTRY_PC (var->value_block ()),
 	   var->obj_section (symbol_objfile (var)));
       else
-	addr = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (var));
+	addr = BLOCK_ENTRY_PC (var->value_block ());
       break;
 
     case LOC_REGISTER:
@@ -778,9 +777,9 @@ language_defn::read_var_value (struct symbol *var,
 	   a TLS variable. */
 	if (obj_section == NULL
 	    || (obj_section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
-	   addr = MSYMBOL_VALUE_RAW_ADDRESS (msym);
+	   addr = msym->value_raw_address ();
 	else
-	   addr = BMSYMBOL_VALUE_ADDRESS (lookup_data.result);
+	   addr = lookup_data.result.value_address ();
 	if (overlay_debugging)
 	  addr = symbol_overlayed_address (addr, obj_section);
 	/* Determine address of TLS variable. */

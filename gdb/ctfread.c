@@ -329,7 +329,7 @@ set_symbol_address (struct objfile *of, struct symbol *sym, const char *name)
   msym = lookup_minimal_symbol (name, nullptr, of);
   if (msym.minsym != NULL)
     {
-      SET_SYMBOL_VALUE_ADDRESS (sym, BMSYMBOL_VALUE_ADDRESS (msym));
+      sym->set_value_address (msym.value_address ());
       sym->set_aclass_index (LOC_STATIC);
       sym->set_section_index (msym.minsym->section_index ());
     }

@@ -1939,7 +1939,7 @@ fbsd_read_integer_by_name (struct gdbarch *gdbarch, const char *name)
     error (_("Unable to resolve symbol '%s'"), name);
 
   gdb_byte buf[4];
-  if (target_read_memory (BMSYMBOL_VALUE_ADDRESS (ms), buf, sizeof buf) != 0)
+  if (target_read_memory (ms.value_address (), buf, sizeof buf) != 0)
     error (_("Unable to read value of '%s'"), name);
 
   return extract_signed_integer (buf, gdbarch_byte_order (gdbarch));
@@ -2048,7 +2048,7 @@ CORE_ADDR
 fbsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   struct bound_minimal_symbol msym = lookup_bound_minimal_symbol ("_rtld_bind");
-  if (msym.minsym != nullptr && BMSYMBOL_VALUE_ADDRESS (msym) == pc)
+  if (msym.minsym != nullptr && msym.value_address () == pc)
     return frame_unwind_caller_pc (get_current_frame ());
 
   return 0;

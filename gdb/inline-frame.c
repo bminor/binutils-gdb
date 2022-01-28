@@ -181,7 +181,7 @@ inline_frame_this_id (struct frame_info *this_frame,
      in the frame ID (and eventually, to set breakpoints).  */
   func = get_frame_function (this_frame);
   gdb_assert (func != NULL);
-  (*this_id).code_addr = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (func));
+  (*this_id).code_addr = BLOCK_ENTRY_PC (func->value_block ());
   (*this_id).artificial_depth++;
 }
 
@@ -329,7 +329,7 @@ stopped_by_user_bp_inline_frame (const block *frame_block, bpstat *stop_chain)
 		 to presenting the stop at the innermost inline
 		 function.  */
 	      if (loc->symbol == nullptr
-		  || frame_block == SYMBOL_BLOCK_VALUE (loc->symbol))
+		  || frame_block == loc->symbol->value_block ())
 		return true;
 	    }
 	}

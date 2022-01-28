@@ -474,7 +474,7 @@ inferior_has_bug (const char *ver_symbol, int ver_major_min, int ver_minor_min)
   if (version_msym.minsym == NULL)
     return 0;
 
-  version_addr = BMSYMBOL_VALUE_ADDRESS (version_msym);
+  version_addr = version_msym.value_address ();
   gdb::unique_xmalloc_ptr<char> version
     = target_read_string (version_addr, 32, &got);
   if (version != nullptr

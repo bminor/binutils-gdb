@@ -588,7 +588,7 @@ maintenance_translate_address (const char *arg, int from_tty)
     {
       const char *symbol_name = sym.minsym->print_name ();
       const char *symbol_offset
-	= pulongest (address - BMSYMBOL_VALUE_ADDRESS (sym));
+	= pulongest (address - sym.value_address ());
 
       sect = sym.obj_section ();
       if (sect != NULL)

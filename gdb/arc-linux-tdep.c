@@ -509,7 +509,7 @@ arc_linux_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       if (resolver.minsym != nullptr)
 	{
-	  CORE_ADDR res_addr = BMSYMBOL_VALUE_ADDRESS (resolver);
+	  CORE_ADDR res_addr = resolver.value_address ();
 	  arc_linux_debug_printf ("pc = %s, resolver at %s",
 				  print_core_address (gdbarch, pc),
 				  print_core_address (gdbarch, res_addr));
@@ -519,7 +519,7 @@ arc_linux_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 				print_core_address (gdbarch, pc));
     }
 
-  if (resolver.minsym != nullptr && BMSYMBOL_VALUE_ADDRESS (resolver) == pc)
+  if (resolver.minsym != nullptr && resolver.value_address () == pc)
     {
       /* Find the return address.  */
       return frame_unwind_caller_pc (get_current_frame ());

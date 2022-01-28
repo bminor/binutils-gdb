@@ -67,7 +67,7 @@ sol2_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
   struct bound_minimal_symbol msym;
 
   msym = lookup_minimal_symbol("elf_bndr", NULL, NULL);
-  if (msym.minsym && BMSYMBOL_VALUE_ADDRESS (msym) == pc)
+  if (msym.minsym && msym.value_address () == pc)
     return frame_unwind_caller_pc (get_current_frame ());
 
   return 0;

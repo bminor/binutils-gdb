@@ -713,7 +713,7 @@ elf_locate_base (void)
   msymbol = lookup_minimal_symbol ("_r_debug", NULL,
 				   current_program_space->symfile_object_file);
   if (msymbol.minsym != NULL)
-    return BMSYMBOL_VALUE_ADDRESS (msymbol);
+    return msymbol.value_address ();
 
   /* DT_DEBUG entry not found.  */
   return 0;
@@ -2369,9 +2369,9 @@ enable_break (struct svr4_info *info, int from_tty)
     {
       msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, objf);
       if ((msymbol.minsym != NULL)
-	  && (BMSYMBOL_VALUE_ADDRESS (msymbol) != 0))
+	  && (msymbol.value_address () != 0))
 	{
-	  sym_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
+	  sym_addr = msymbol.value_address ();
 	  sym_addr = gdbarch_convert_from_func_ptr_addr
 	    (target_gdbarch (), sym_addr, current_inferior ()->top_target ());
 	  svr4_create_solib_event_breakpoints (info, target_gdbarch (),
@@ -2386,9 +2386,9 @@ enable_break (struct svr4_info *info, int from_tty)
 	{
 	  msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, objf);
 	  if ((msymbol.minsym != NULL)
-	      && (BMSYMBOL_VALUE_ADDRESS (msymbol) != 0))
+	      && (msymbol.value_address () != 0))
 	    {
-	      sym_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
+	      sym_addr = msymbol.value_address ();
 	      sym_addr = gdbarch_convert_from_func_ptr_addr
 		(target_gdbarch (), sym_addr,
 		 current_inferior ()->top_target ());

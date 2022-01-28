@@ -1655,7 +1655,7 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 					  pst ? pst->filename : NULL,
 					  objfile);
 		  if (minsym.minsym != NULL)
-		    nlist.n_value = MSYMBOL_VALUE_RAW_ADDRESS (minsym.minsym);
+		    nlist.n_value = minsym.minsym->value_raw_address ();
 		}
 	      if (pst && textlow_not_set
 		  && gdbarch_sofun_address_maybe_missing (gdbarch))
@@ -1711,7 +1711,7 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 					  pst ? pst->filename : NULL,
 					  objfile);
 		  if (minsym.minsym != NULL)
-		    nlist.n_value = MSYMBOL_VALUE_RAW_ADDRESS (minsym.minsym);
+		    nlist.n_value = minsym.minsym->value_raw_address ();
 		}
 	      if (pst && textlow_not_set
 		  && gdbarch_sofun_address_maybe_missing (gdbarch))
@@ -2024,7 +2024,7 @@ dbx_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
 	}
 
       if (minsym.minsym)
-	pst->set_text_high (MSYMBOL_VALUE_RAW_ADDRESS (minsym.minsym)
+	pst->set_text_high (minsym.minsym->value_raw_address ()
 			    + MSYMBOL_SIZE (minsym.minsym));
 
       last_function_name = NULL;
@@ -2791,7 +2791,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 		    = find_stab_function (name, get_last_source_file (),
 					  objfile);
 		  if (minsym.minsym != NULL)
-		    valu = BMSYMBOL_VALUE_ADDRESS (minsym);
+		    valu = minsym.value_address ();
 		}
 
 	      /* These addresses are absolute.  */

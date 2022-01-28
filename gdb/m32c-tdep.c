@@ -2216,7 +2216,7 @@ m32c_return_value (struct gdbarch *gdbarch,
 	    error (_("The return value is stored in memory at 'mem0', "
 		     "but GDB cannot find\n"
 		     "its address."));
-	  read_memory (BMSYMBOL_VALUE_ADDRESS (mem0), readbuf, valtype_len);
+	  read_memory (mem0.value_address (), readbuf, valtype_len);
 	}
     }
 
@@ -2248,7 +2248,7 @@ m32c_return_value (struct gdbarch *gdbarch,
 	    error (_("The return value is stored in memory at 'mem0', "
 		     "but GDB cannot find\n"
 		     " its address."));
-	  write_memory (BMSYMBOL_VALUE_ADDRESS (mem0), writebuf, valtype_len);
+	  write_memory (mem0.value_address (), writebuf, valtype_len);
 	}
     }
 
@@ -2473,7 +2473,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
       else
 	{
 	  /* The trampoline's address is our pointer.  */
-	  addr = BMSYMBOL_VALUE_ADDRESS (tramp_msym);
+	  addr = tramp_msym.value_address ();
 	}
     }
 
@@ -2525,7 +2525,7 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
 	      /* If we do have such a symbol, return its value as the
 		 function's true address.  */
 	      if (func_msym.minsym)
-		ptr = BMSYMBOL_VALUE_ADDRESS (func_msym);
+		ptr = func_msym.value_address ();
 	    }
 	}
       else

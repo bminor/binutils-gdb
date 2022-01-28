@@ -1249,7 +1249,7 @@ find_objc_msgsend (void)
 	  continue; 
 	}
 
-      methcalls[i].begin = BMSYMBOL_VALUE_ADDRESS (func);
+      methcalls[i].begin = func.value_address ();
       methcalls[i].end = minimal_symbol_upper_bound (func);
     }
 }

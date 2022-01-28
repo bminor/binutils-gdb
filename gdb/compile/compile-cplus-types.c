@@ -628,7 +628,7 @@ compile_cplus_convert_struct_or_union_members
 		const char *filename = symbol_symtab (sym.symbol)->filename;
 		unsigned int line = sym.symbol->line ();
 
-		physaddr = SYMBOL_VALUE_ADDRESS (sym.symbol);
+		physaddr = sym.symbol->value_address ();
 		instance->plugin ().build_decl
 		  ("field physname", field_name,
 		   (GCC_CP_SYMBOL_VARIABLE| get_field_access_flag (type, i)),
@@ -766,7 +766,7 @@ compile_cplus_convert_struct_or_union_methods (compile_cplus_instance *instance,
 
 	  const char *filename = symbol_symtab (sym.symbol)->filename;
 	  unsigned int line = sym.symbol->line ();
-	  CORE_ADDR address = BLOCK_START (SYMBOL_BLOCK_VALUE (sym.symbol));
+	  CORE_ADDR address = BLOCK_START (sym.symbol->value_block ());
 	  const char *kind;
 
 	  if (TYPE_FN_FIELD_STATIC_P (methods, j))

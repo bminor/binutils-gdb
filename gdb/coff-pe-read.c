@@ -244,7 +244,7 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
 			      " \"%s\" in dll \"%s\", pointing to \"%s\"\n"),
 		sym_name, dll_name, forward_qualified_name);
 
-  vma = BMSYMBOL_VALUE_ADDRESS (msymbol);
+  vma = msymbol.value_address ();
   msymtype = MSYMBOL_TYPE (msymbol.minsym);
   section = msymbol.minsym->section_index ();
 

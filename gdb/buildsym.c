@@ -251,7 +251,7 @@ buildsym_compunit::finish_block_internal
     {
       struct type *ftype = symbol->type ();
       struct mdict_iterator miter;
-      SYMBOL_BLOCK_VALUE (symbol) = block;
+      symbol->set_value_block (block);
       BLOCK_FUNCTION (block) = symbol;
 
       if (ftype->num_fields () <= 0)

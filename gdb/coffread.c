@@ -1026,7 +1026,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
 
 		sym = process_coff_symbol
 		  (cs, &main_aux, objfile);
-		SYMBOL_VALUE (sym) = tmpaddr + offset;
+		sym->set_value_longest (tmpaddr + offset);
 		sym->set_section_index (sec);
 	      }
 	  }
@@ -1506,29 +1506,21 @@ patch_opaque_types (struct symtab *s)
 		  && strcmp (name + 1, sym->linkage_name () + 1) == 0)
 		{
 		  if (prev)
-		    {
-		      SYMBOL_VALUE_CHAIN (prev) = SYMBOL_VALUE_CHAIN (sym);
-		    }
+		    prev->set_value_chain (sym->value_chain ());
 		  else
-		    {
-		      opaque_type_chain[hash] = SYMBOL_VALUE_CHAIN (sym);
-		    }
+		    opaque_type_chain[hash] = sym->value_chain ();
 
 		  patch_type (sym->type (), real_sym->type ());
 
 		  if (prev)
-		    {
-		      sym = SYMBOL_VALUE_CHAIN (prev);
-		    }
+		    sym = prev->value_chain ();
 		  else
-		    {
-		      sym = opaque_type_chain[hash];
-		    }
+		    sym = opaque_type_chain[hash];
 		}
 	      else
 		{
 		  prev = sym;
-		  sym = SYMBOL_VALUE_CHAIN (sym);
+		  sym->set_value_chain (sym);
 		}
 	    }
 	}
@@ -1538,7 +1530,7 @@ patch_opaque_types (struct symtab *s)
 static int
 coff_reg_to_regnum (struct symbol *sym, struct gdbarch *gdbarch)
 {
-  return gdbarch_sdb_reg_to_regnum (gdbarch, SYMBOL_VALUE (sym));
+  return gdbarch_sdb_reg_to_regnum (gdbarch, sym->value_longest ());
 }
 
 static const struct symbol_register_ops coff_register_funcs = {
@@ -1564,13 +1556,14 @@ process_coff_symbol (struct coff_symbol *cs,
   sym->compute_and_set_names (name, true, objfile->per_bfd);
 
   /* default assumptions */
-  SYMBOL_VALUE (sym) = cs->c_value;
+  sym->set_value_longest (cs->c_value);
   sym->set_domain (VAR_DOMAIN);
   sym->set_section_index (cs_to_section (cs, objfile));
 
   if (ISFCN (cs->c_type))
     {
-      SYMBOL_VALUE (sym) += objfile->text_section_offset ();
+      sym->set_value_longest
+	(sym->value_longest () + objfile->text_section_offset ());
       sym->set_type
 	(lookup_function_type (decode_function_type (cs, cs->c_type,
 						     aux, objfile)));
@@ -1600,9 +1593,8 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_THUMBEXTFUNC:
 	case C_EXT:
 	  sym->set_aclass_index (LOC_STATIC);
-	  SET_SYMBOL_VALUE_ADDRESS (sym,
-				    (CORE_ADDR) cs->c_value
-				    + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
+	  sym->set_value_address ((CORE_ADDR) cs->c_value
+				  + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
 	  add_symbol_to_list (sym, get_global_symbols ());
 	  break;
 
@@ -1610,9 +1602,8 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_THUMBSTATFUNC:
 	case C_STAT:
 	  sym->set_aclass_index (LOC_STATIC);
-	  SET_SYMBOL_VALUE_ADDRESS (sym,
-				    (CORE_ADDR) cs->c_value
-				    + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
+	  sym->set_value_address ((CORE_ADDR) cs->c_value
+				  + objfile->section_offsets[SECT_OFF_TEXT (objfile)]);
 	  if (within_function)
 	    {
 	      /* Static symbol of local scope.  */
@@ -1630,7 +1621,7 @@ process_coff_symbol (struct coff_symbol *cs,
 #endif
 	case C_REG:
 	  sym->set_aclass_index (coff_register_index);
-	  SYMBOL_VALUE (sym) = cs->c_value;
+	  sym->set_value_longest (cs->c_value);
 	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
@@ -1647,7 +1638,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_REGPARM:
 	  sym->set_aclass_index (coff_register_index);
 	  sym->set_is_argument (1);
-	  SYMBOL_VALUE (sym) = cs->c_value;
+	  sym->set_value_longest (cs->c_value);
 	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
@@ -1698,7 +1689,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	    {
 	      int i = hashname (sym->linkage_name ());
 
-	      SYMBOL_VALUE_CHAIN (sym) = opaque_type_chain[i];
+	      sym->set_value_chain (opaque_type_chain[i]);
 	      opaque_type_chain[i] = sym;
 	    }
 	  add_symbol_to_list (sym, get_file_symbols ());
@@ -2100,7 +2091,7 @@ coff_read_enum_type (int index, int length, int lastsym,
 	  sym->set_linkage_name (name);
 	  sym->set_aclass_index (LOC_CONST);
 	  sym->set_domain (VAR_DOMAIN);
-	  SYMBOL_VALUE (sym) = ms->c_value;
+	  sym->set_value_longest (ms->c_value);
 	  add_symbol_to_list (sym, symlist);
 	  nsyms++;
 	  break;
@@ -2145,8 +2136,8 @@ coff_read_enum_type (int index, int length, int lastsym,
 
 	  xsym->set_type (type);
 	  type->field (n).set_name (xsym->linkage_name ());
-	  type->field (n).set_loc_enumval (SYMBOL_VALUE (xsym));
-	  if (SYMBOL_VALUE (xsym) < 0)
+	  type->field (n).set_loc_enumval (xsym->value_longest ());
+	  if (xsym->value_longest () < 0)
 	    unsigned_enum = 0;
 	  TYPE_FIELD_BITSIZE (type, n) = 0;
 	}

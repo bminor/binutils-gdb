@@ -767,7 +767,7 @@ ps_pglobal_lookup (struct ps_prochandle *ph, const char *ld_object_name,
   if (!ms.minsym)
     return PS_NOSYM;
 
-  *ld_symbol_addr = BMSYMBOL_VALUE_ADDRESS (ms);
+  *ld_symbol_addr = ms.value_address ();
   return PS_OK;
 }
 

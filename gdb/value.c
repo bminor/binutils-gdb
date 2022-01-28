@@ -2986,7 +2986,7 @@ value_static_field (struct type *type, int fieldno)
 	  if (!msym.minsym)
 	    retval = allocate_optimized_out_value (field_type);
 	  else
-	    retval = value_at_lazy (field_type, BMSYMBOL_VALUE_ADDRESS (msym));
+	    retval = value_at_lazy (field_type, msym.value_address ());
 	}
       else
 	retval = value_of_variable (sym.symbol, sym.block);
@@ -3184,7 +3184,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
   VALUE_LVAL (v) = lval_memory;
   if (sym)
     {
-      set_value_address (v, BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym)));
+      set_value_address (v, BLOCK_ENTRY_PC (sym->value_block ()));
     }
   else
     {
@@ -3195,7 +3195,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 
       set_value_address (v,
 	gdbarch_convert_from_func_ptr_addr
-	   (gdbarch, BMSYMBOL_VALUE_ADDRESS (msym),
+	   (gdbarch, msym.value_address (),
 	    current_inferior ()->top_target ()));
     }
 

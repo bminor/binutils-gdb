@@ -611,7 +611,7 @@ info_common_command_for_block (const struct block *block, const char *comname,
   ALL_BLOCK_SYMBOLS (block, iter, sym)
     if (sym->domain () == COMMON_BLOCK_DOMAIN)
       {
-	const struct common_block *common = SYMBOL_VALUE_COMMON_BLOCK (sym);
+	const struct common_block *common = sym->value_common_block ();
 	size_t index;
 
 	gdb_assert (sym->aclass () == LOC_COMMON_BLOCK);
