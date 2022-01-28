@@ -1092,6 +1092,7 @@ coff_write_alien_symbol (bfd *abfd,
 	memset (isym, 0, sizeof (*isym));
       return true;
     }
+  memset (dummy, 0, sizeof dummy);
   native = dummy;
   native->is_sym = true;
   native[1].is_sym = false;
