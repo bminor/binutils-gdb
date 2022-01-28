@@ -645,7 +645,7 @@ generate_c_for_variable_locations (compile_instance *compiler,
 
       /* If we just finished the outermost block of a function, we're
 	 done.  */
-      if (BLOCK_FUNCTION (block) != NULL)
+      if (block->function () != NULL)
 	break;
       block = BLOCK_SUPERBLOCK (block);
     }

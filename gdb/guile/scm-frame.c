@@ -611,11 +611,11 @@ gdbscm_frame_block (SCM self)
     }
 
   for (fn_block = block;
-       fn_block != NULL && BLOCK_FUNCTION (fn_block) == NULL;
+       fn_block != NULL && fn_block->function () == NULL;
        fn_block = BLOCK_SUPERBLOCK (fn_block))
     continue;
 
-  if (block == NULL || fn_block == NULL || BLOCK_FUNCTION (fn_block) == NULL)
+  if (block == NULL || fn_block == NULL || fn_block->function () == NULL)
     {
       scm_misc_error (FUNC_NAME, _("cannot find block for frame"),
 		      scm_list_1 (self));
@@ -624,7 +624,7 @@ gdbscm_frame_block (SCM self)
   if (block != NULL)
     {
       return bkscm_scm_from_block
-	(block, BLOCK_FUNCTION (fn_block)->objfile ());
+	(block, fn_block->function ()->objfile ());
     }
 
   return SCM_BOOL_F;

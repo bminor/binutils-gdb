@@ -2024,7 +2024,7 @@ lookup_language_this (const struct language_defn *lang,
 	    }
 	  return (struct block_symbol) {sym, block};
 	}
-      if (BLOCK_FUNCTION (block))
+      if (block->function ())
 	break;
       block = BLOCK_SUPERBLOCK (block);
     }
@@ -2227,7 +2227,7 @@ lookup_local_symbol (const char *name,
 	    return blocksym;
 	}
 
-      if (BLOCK_FUNCTION (block) != NULL && block_inlined_p (block))
+      if (block->function () != NULL && block_inlined_p (block))
 	break;
       block = BLOCK_SUPERBLOCK (block);
     }
@@ -4042,17 +4042,17 @@ skip_prologue_sal (struct symtab_and_line *sal)
   function_block = NULL;
   while (b != NULL)
     {
-      if (BLOCK_FUNCTION (b) != NULL && block_inlined_p (b))
+      if (b->function () != NULL && block_inlined_p (b))
 	function_block = b;
-      else if (BLOCK_FUNCTION (b) != NULL)
+      else if (b->function () != NULL)
 	break;
       b = BLOCK_SUPERBLOCK (b);
     }
   if (function_block != NULL
-      && BLOCK_FUNCTION (function_block)->line () != 0)
+      && function_block->function ()->line () != 0)
     {
-      sal->line = BLOCK_FUNCTION (function_block)->line ();
-      sal->symtab = BLOCK_FUNCTION (function_block)->symtab ();
+      sal->line = function_block->function ()->line ();
+      sal->symtab = function_block->function ()->symtab ();
     }
 }
 
@@ -4140,7 +4140,7 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
 	    {
 	      if (block_inlined_p (bl))
 		break;
-	      if (BLOCK_FUNCTION (bl))
+	      if (bl->function ())
 		{
 		  bl = NULL;
 		  break;
@@ -6011,7 +6011,7 @@ default_collect_symbol_completion_matches_break_on
 	/* Stop when we encounter an enclosing function.  Do not stop for
 	   non-inlined functions - the locals of the enclosing function
 	   are in scope for a nested function.  */
-	if (BLOCK_FUNCTION (b) != NULL && block_inlined_p (b))
+	if (b->function () != NULL && block_inlined_p (b))
 	  break;
 	b = BLOCK_SUPERBLOCK (b);
       }

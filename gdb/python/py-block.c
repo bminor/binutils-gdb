@@ -130,7 +130,7 @@ blpy_get_function (PyObject *self, void *closure)
 
   BLPY_REQUIRE_VALID (self, block);
 
-  sym = BLOCK_FUNCTION (block);
+  sym = block->function ();
   if (sym)
     return symbol_to_symbol_object (sym);
 

@@ -298,14 +298,14 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	  gdb_puts (paddress (gdbarch, b->start ()), outfile);
 	  gdb_printf (outfile, "..");
 	  gdb_puts (paddress (gdbarch, b->end ()), outfile);
-	  if (BLOCK_FUNCTION (b))
+	  if (b->function ())
 	    {
 	      gdb_printf (outfile, ", function %s",
-			  BLOCK_FUNCTION (b)->linkage_name ());
-	      if (BLOCK_FUNCTION (b)->demangled_name () != NULL)
+			  b->function ()->linkage_name ());
+	      if (b->function ()->demangled_name () != NULL)
 		{
 		  gdb_printf (outfile, ", %s",
-			      BLOCK_FUNCTION (b)->demangled_name ());
+			      b->function ()->demangled_name ());
 		}
 	    }
 	  gdb_printf (outfile, "\n");

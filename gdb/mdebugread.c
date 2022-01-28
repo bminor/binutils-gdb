@@ -797,7 +797,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       /* Create and enter a new lexical context.  */
       b = new_block (FUNCTION_BLOCK, s->language ());
       s->set_value_block (b);
-      BLOCK_FUNCTION (b) = s;
+      b->set_function (s);
       b->set_start (sh->value);
       b->set_end (sh->value);
       BLOCK_SUPERBLOCK (b) = top_stack->cur_block;

@@ -230,7 +230,7 @@ inline_frame_sniffer (const struct frame_unwind *self,
     {
       if (block_inlined_p (cur_block))
 	depth++;
-      else if (BLOCK_FUNCTION (cur_block) != NULL)
+      else if (cur_block->function () != NULL)
 	break;
 
       cur_block = BLOCK_SUPERBLOCK (cur_block);
@@ -372,12 +372,12 @@ skip_inline_frames (thread_info *thread, bpstat *stop_chain)
 		    break;
 
 		  skip_count++;
-		  skipped_syms.push_back (BLOCK_FUNCTION (cur_block));
+		  skipped_syms.push_back (cur_block->function ());
 		}
 	      else
 		break;
 	    }
-	  else if (BLOCK_FUNCTION (cur_block) != NULL)
+	  else if (cur_block->function () != NULL)
 	    break;
 
 	  cur_block = BLOCK_SUPERBLOCK (cur_block);

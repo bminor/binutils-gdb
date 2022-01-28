@@ -5331,7 +5331,7 @@ ada_add_local_symbols (std::vector<struct block_symbol> &result,
       /* If we found a non-function match, assume that's the one.  We
 	 only check this when finding a function boundary, so that we
 	 can accumulate all results from intervening blocks first.  */
-      if (BLOCK_FUNCTION (block) != nullptr && is_nonfunction (result))
+      if (block->function () != nullptr && is_nonfunction (result))
 	return;
 
       block = BLOCK_SUPERBLOCK (block);
@@ -13038,7 +13038,7 @@ ada_add_exceptions_from_frame (compiled_regex *preg,
 		}
 	    }
 	}
-      if (BLOCK_FUNCTION (block) != NULL)
+      if (block->function () != NULL)
 	break;
       block = BLOCK_SUPERBLOCK (block);
     }

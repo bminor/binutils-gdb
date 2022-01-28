@@ -156,8 +156,8 @@ bkscm_print_block_smob (SCM self, SCM port, scm_print_state *pstate)
   else if (BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (b)) == NULL)
     gdbscm_printf (port, " static");
 
-  if (BLOCK_FUNCTION (b) != NULL)
-    gdbscm_printf (port, " %s", BLOCK_FUNCTION (b)->print_name ());
+  if (b->function () != NULL)
+    gdbscm_printf (port, " %s", b->function ()->print_name ());
 
   gdbscm_printf (port, " %s-%s",
 		 hex_string (b->start ()), hex_string (b->end ()));
@@ -404,7 +404,7 @@ gdbscm_block_function (SCM self)
   const struct block *block = b_smob->block;
   struct symbol *sym;
 
-  sym = BLOCK_FUNCTION (block);
+  sym = block->function ();
 
   if (sym != NULL)
     return syscm_scm_from_symbol (sym);

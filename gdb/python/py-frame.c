@@ -292,11 +292,11 @@ frapy_block (PyObject *self, PyObject *args)
     }
 
   for (fn_block = block;
-       fn_block != NULL && BLOCK_FUNCTION (fn_block) == NULL;
+       fn_block != NULL && fn_block->function () == NULL;
        fn_block = BLOCK_SUPERBLOCK (fn_block))
     ;
 
-  if (block == NULL || fn_block == NULL || BLOCK_FUNCTION (fn_block) == NULL)
+  if (block == NULL || fn_block == NULL || fn_block->function () == NULL)
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("Cannot locate block for frame."));
@@ -306,7 +306,7 @@ frapy_block (PyObject *self, PyObject *args)
   if (block)
     {
       return block_to_block_object
-	(block, BLOCK_FUNCTION (fn_block)->objfile ());
+	(block, fn_block->function ()->objfile ());
     }
 
   Py_RETURN_NONE;

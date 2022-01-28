@@ -596,7 +596,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       block_name->m_name = obstack_strdup (&objfile->objfile_obstack,
 					   gdb_block_iter.name.get ());
 
-      BLOCK_FUNCTION (new_block) = block_name;
+      new_block->set_function (block_name);
 
       BLOCKVECTOR_BLOCK (bv, block_idx) = new_block;
       if (begin > new_block->start ())

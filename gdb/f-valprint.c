@@ -688,7 +688,7 @@ info_common_command (const char *comname, int from_tty)
       info_common_command_for_block (block, comname, &values_printed);
       /* After handling the function's top-level block, stop.  Don't
 	 continue to its superblock, the block of per-file symbols.  */
-      if (BLOCK_FUNCTION (block))
+      if (block->function ())
 	break;
       block = BLOCK_SUPERBLOCK (block);
     }

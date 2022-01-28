@@ -122,10 +122,10 @@ get_frame_function (struct frame_info *frame)
   if (bl == NULL)
     return NULL;
 
-  while (BLOCK_FUNCTION (bl) == NULL && BLOCK_SUPERBLOCK (bl) != NULL)
+  while (bl->function () == NULL && BLOCK_SUPERBLOCK (bl) != NULL)
     bl = BLOCK_SUPERBLOCK (bl);
 
-  return BLOCK_FUNCTION (bl);
+  return bl->function ();
 }
 
 

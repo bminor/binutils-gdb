@@ -3967,14 +3967,14 @@ find_label_symbols (struct linespec_state *self,
       block = get_current_search_block ();
 
       for (;
-	   block && !BLOCK_FUNCTION (block);
+	   block && !block->function ();
 	   block = BLOCK_SUPERBLOCK (block))
 	;
 
       if (!block)
 	return {};
 
-      fn_sym = BLOCK_FUNCTION (block);
+      fn_sym = block->function ();
 
       find_label_symbols_in_block (block, name, fn_sym, completion_mode,
 				   &result, label_funcs_ret);

@@ -431,7 +431,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
       const struct block *function_block;
 
       block = BLOCKVECTOR_BLOCK (bv, block_loop);
-      if (BLOCK_FUNCTION (block) != NULL)
+      if (block->function () != NULL)
 	continue;
       gdb_val_sym = block_lookup_symbol (block,
 					 COMPILE_I_EXPR_VAL,
@@ -445,7 +445,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 	     && function_block != BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK))
 	{
 	  function_block = BLOCK_SUPERBLOCK (function_block);
-	  function = BLOCK_FUNCTION (function_block);
+	  function = function_block->function ();
 	  if (function != NULL)
 	    break;
 	}

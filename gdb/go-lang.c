@@ -418,7 +418,7 @@ go_block_package_name (const struct block *block)
 {
   while (block != NULL)
     {
-      struct symbol *function = BLOCK_FUNCTION (block);
+      struct symbol *function = block->function ();
 
       if (function != NULL)
 	{

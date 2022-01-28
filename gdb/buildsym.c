@@ -244,7 +244,7 @@ buildsym_compunit::finish_block_internal
       struct type *ftype = symbol->type ();
       struct mdict_iterator miter;
       symbol->set_value_block (block);
-      BLOCK_FUNCTION (block) = symbol;
+      block->set_function (symbol);
 
       if (ftype->num_fields () <= 0)
 	{
@@ -287,9 +287,7 @@ buildsym_compunit::finish_block_internal
 	}
     }
   else
-    {
-      BLOCK_FUNCTION (block) = NULL;
-    }
+    block->set_function (nullptr);
 
   if (static_link != NULL)
     objfile_register_static_link (m_objfile, block, static_link);
@@ -342,7 +340,7 @@ buildsym_compunit::finish_block_internal
 	     Skip blocks which correspond to a function; they're not
 	     physically nested inside this other blocks, only
 	     lexically nested.  */
-	  if (BLOCK_FUNCTION (pblock->block) == NULL
+	  if (pblock->block->function () == NULL
 	      && (pblock->block->start () < block->start ()
 		  || pblock->block->end () > block->end ()))
 	    {
@@ -1008,9 +1006,9 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 
 	/* Inlined functions may have symbols not in the global or
 	   static symbol lists.  */
-	if (BLOCK_FUNCTION (block) != NULL)
-	  if (BLOCK_FUNCTION (block)->symtab () == NULL)
-	    BLOCK_FUNCTION (block)->set_symtab (symtab);
+	if (block->function () != nullptr
+	    && block->function ()->symtab () == nullptr)
+	    block->function ()->set_symtab (symtab);
 
 	/* Note that we only want to fix up symbols from the local
 	   blocks, not blocks coming from included symtabs.  That is why

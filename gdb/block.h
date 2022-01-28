@@ -106,6 +106,14 @@ struct block
   void set_end (CORE_ADDR end)
   { m_end = end; }
 
+  /* Return this block's function symbol.  */
+  symbol *function () const
+  { return m_function; }
+
+  /* Set this block's function symbol.  */
+  void set_function (symbol *function)
+  { m_function = function; }
+
   /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR m_start;
@@ -114,7 +122,7 @@ struct block
   /* The symbol that names this block, if the block is the body of a
      function (real or inlined); otherwise, zero.  */
 
-  struct symbol *function;
+  struct symbol *m_function;
 
   /* The `struct block' for the containing block, or 0 if none.
 
@@ -154,7 +162,6 @@ struct global_block
   struct compunit_symtab *compunit_symtab;
 };
 
-#define BLOCK_FUNCTION(bl)	(bl)->function
 #define BLOCK_SUPERBLOCK(bl)	(bl)->superblock
 #define BLOCK_MULTIDICT(bl)	(bl)->multidict
 #define BLOCK_NAMESPACE(bl)	(bl)->namespace_info

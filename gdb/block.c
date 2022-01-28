@@ -47,8 +47,8 @@ block_objfile (const struct block *block)
 {
   const struct global_block *global_block;
 
-  if (BLOCK_FUNCTION (block) != NULL)
-    return BLOCK_FUNCTION (block)->objfile ();
+  if (block->function () != nullptr)
+    return block->function ()->objfile ();
 
   global_block = (struct global_block *) block_global_block (block);
   return global_block->compunit_symtab->objfile ();
@@ -59,8 +59,8 @@ block_objfile (const struct block *block)
 struct gdbarch *
 block_gdbarch (const struct block *block)
 {
-  if (BLOCK_FUNCTION (block) != NULL)
-    return BLOCK_FUNCTION (block)->arch ();
+  if (block->function () != nullptr)
+    return block->function ()->arch ();
 
   return block_objfile (block)->arch ();
 }
@@ -80,7 +80,7 @@ contained_in (const struct block *a, const struct block *b,
 	return true;
       /* If A is a function block, then A cannot be contained in B,
 	 except if A was inlined.  */
-      if (!allow_nested && BLOCK_FUNCTION (a) != NULL && !block_inlined_p (a))
+      if (!allow_nested && a->function () != NULL && !block_inlined_p (a))
 	return false;
       a = BLOCK_SUPERBLOCK (a);
     }
@@ -98,11 +98,11 @@ contained_in (const struct block *a, const struct block *b,
 struct symbol *
 block_linkage_function (const struct block *bl)
 {
-  while ((BLOCK_FUNCTION (bl) == NULL || block_inlined_p (bl))
+  while ((bl->function () == NULL || block_inlined_p (bl))
 	 && BLOCK_SUPERBLOCK (bl) != NULL)
     bl = BLOCK_SUPERBLOCK (bl);
 
-  return BLOCK_FUNCTION (bl);
+  return bl->function ();
 }
 
 /* Return the symbol for the function which contains a specified
@@ -113,10 +113,10 @@ block_linkage_function (const struct block *bl)
 struct symbol *
 block_containing_function (const struct block *bl)
 {
-  while (BLOCK_FUNCTION (bl) == NULL && BLOCK_SUPERBLOCK (bl) != NULL)
+  while (bl->function () == NULL && BLOCK_SUPERBLOCK (bl) != NULL)
     bl = BLOCK_SUPERBLOCK (bl);
 
-  return BLOCK_FUNCTION (bl);
+  return bl->function ();
 }
 
 /* Return one if BL represents an inlined function.  */
@@ -124,7 +124,7 @@ block_containing_function (const struct block *bl)
 int
 block_inlined_p (const struct block *bl)
 {
-  return BLOCK_FUNCTION (bl) != NULL && BLOCK_FUNCTION (bl)->is_inlined ();
+  return bl->function () != NULL && bl->function ()->is_inlined ();
 }
 
 /* A helper function that checks whether PC is in the blockvector BL.
@@ -433,7 +433,7 @@ block_static_link (const struct block *block)
 
   /* Only objfile-owned blocks that materialize top function scopes can have
      static links.  */
-  if (objfile == NULL || BLOCK_FUNCTION (block) == NULL)
+  if (objfile == NULL || block->function () == NULL)
     return NULL;
 
   return (struct dynamic_prop *) objfile_lookup_static_link (objfile, block);
@@ -714,7 +714,7 @@ block_lookup_symbol (const struct block *block, const char *name,
 
   lookup_name_info lookup_name (name, match_type);
 
-  if (!BLOCK_FUNCTION (block))
+  if (!block->function ())
     {
       struct symbol *other = NULL;
 

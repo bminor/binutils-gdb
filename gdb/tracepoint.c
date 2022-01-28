@@ -2615,7 +2615,7 @@ info_scope_command (const char *args_in, int from_tty)
 	      gdb_printf (", length %s.\n", pulongest (TYPE_LENGTH (t)));
 	    }
 	}
-      if (BLOCK_FUNCTION (block))
+      if (block->function ())
 	break;
       else
 	block = BLOCK_SUPERBLOCK (block);
