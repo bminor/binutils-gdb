@@ -753,7 +753,7 @@ block_lookup_symbol (const struct block *block, const char *name,
 				     sym->domain (), domain))
 	    {
 	      sym_found = sym;
-	      if (!SYMBOL_IS_ARGUMENT (sym))
+	      if (!sym->is_argument ())
 		{
 		  break;
 		}

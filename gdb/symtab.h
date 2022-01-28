@@ -1116,7 +1116,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     : m_domain (UNDEF_DOMAIN),
       m_aclass_index (0),
       m_is_objfile_owned (1),
-      is_argument (0),
+      m_is_argument (0),
       is_inlined (0),
       maybe_copied (0),
       subclass (SYMBOL_NONE),
@@ -1178,6 +1178,16 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     m_is_objfile_owned = is_objfile_owned;
   }
 
+  bool is_argument () const
+  {
+    return m_is_argument;
+  }
+
+  void set_is_argument (bool is_argument)
+  {
+    m_is_argument = is_argument;
+  }
+
   /* Data type of value */
 
   struct type *type = nullptr;
@@ -1213,7 +1223,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
 
   /* Whether this is an argument.  */
 
-  unsigned is_argument : 1;
+  unsigned m_is_argument : 1;
 
   /* Whether this is an inlined function (class LOC_BLOCK only).  */
   unsigned is_inlined : 1;
@@ -1280,7 +1290,6 @@ struct block_symbol
 /* Note: There is no accessor macro for symbol.owner because it is
    "private".  */
 
-#define SYMBOL_IS_ARGUMENT(symbol)	(symbol)->is_argument
 #define SYMBOL_INLINED(symbol)		(symbol)->is_inlined
 #define SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION(symbol) \
   (((symbol)->subclass) == SYMBOL_TEMPLATE)

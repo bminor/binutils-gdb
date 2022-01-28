@@ -1640,13 +1640,13 @@ process_coff_symbol (struct coff_symbol *cs,
 
 	case C_ARG:
 	  sym->set_aclass_index (LOC_ARG);
-	  SYMBOL_IS_ARGUMENT (sym) = 1;
+	  sym->set_is_argument (1);
 	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;
 
 	case C_REGPARM:
 	  sym->set_aclass_index (coff_register_index);
-	  SYMBOL_IS_ARGUMENT (sym) = 1;
+	  sym->set_is_argument (1);
 	  SYMBOL_VALUE (sym) = cs->c_value;
 	  add_symbol_to_list (sym, get_local_symbols ());
 	  break;

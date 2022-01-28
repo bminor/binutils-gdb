@@ -520,7 +520,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
     stb.puts ("@entry");
   uiout->field_stream ("name", stb);
 
-  if (what == all && SYMBOL_IS_ARGUMENT (arg->sym))
+  if (what == all && arg->sym->is_argument ())
     uiout->field_signed ("arg", 1);
 
   if (values == PRINT_SIMPLE_VALUES)
@@ -623,9 +623,9 @@ list_args_or_locals (const frame_print_options &fp_opts,
 	      if (what == all)
 		print_me = 1;
 	      else if (what == locals)
-		print_me = !SYMBOL_IS_ARGUMENT (sym);
+		print_me = !sym->is_argument ();
 	      else
-		print_me = SYMBOL_IS_ARGUMENT (sym);
+		print_me = sym->is_argument ();
 	      break;
 	    }
 	  if (print_me)
@@ -633,7 +633,7 @@ list_args_or_locals (const frame_print_options &fp_opts,
 	      struct symbol *sym2;
 	      struct frame_arg arg, entryarg;
 
-	      if (SYMBOL_IS_ARGUMENT (sym))
+	      if (sym->is_argument ())
 		sym2 = lookup_symbol_search_name (sym->search_name (),
 						  block, VAR_DOMAIN).symbol;
 	      else
@@ -654,7 +654,7 @@ list_args_or_locals (const frame_print_options &fp_opts,
 		      && type->code () != TYPE_CODE_UNION)
 		    {
 		case PRINT_ALL_VALUES:
-		  if (SYMBOL_IS_ARGUMENT (sym))
+		  if (sym->is_argument ())
 		    read_frame_arg (fp_opts, sym2, fi, &arg, &entryarg);
 		  else
 		    read_frame_local (sym2, fi, &arg);

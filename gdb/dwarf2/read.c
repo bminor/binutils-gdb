@@ -21934,7 +21934,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    struct context_stack *curr
 	      = cu->get_builder ()->get_current_context_stack ();
 	    if (curr != nullptr && curr->name != nullptr)
-	      SYMBOL_IS_ARGUMENT (sym) = 1;
+	      sym->set_is_argument (1);
 	    attr = dwarf2_attr (die, DW_AT_location, cu);
 	    if (attr != nullptr)
 	      {

@@ -589,7 +589,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
 	  break;
 
 	case LOC_REGISTER:
-	  if (SYMBOL_IS_ARGUMENT (symbol))
+	  if (symbol->is_argument ())
 	    fprintf_filtered (outfile, "parameter register %s",
 			      plongest (SYMBOL_VALUE (symbol)));
 	  else

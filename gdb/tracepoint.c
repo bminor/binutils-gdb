@@ -2586,7 +2586,7 @@ info_scope_command (const char *args_in, int from_tty)
 		  regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym,
 								      gdbarch);
 
-		  if (SYMBOL_IS_ARGUMENT (sym))
+		  if (sym->is_argument ())
 		    printf_filtered ("an argument in register $%s",
 				     gdbarch_register_name (gdbarch, regno));
 		  else

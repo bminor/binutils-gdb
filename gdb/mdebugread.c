@@ -676,7 +676,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       s = new_symbol (name);
 
       s->set_domain (VAR_DOMAIN);
-      SYMBOL_IS_ARGUMENT (s) = 1;
+      s->set_is_argument (1);
       switch (sh->sc)
 	{
 	case scRegister:
@@ -1202,7 +1202,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		      if (iparams == nparams)
 			break;
 
-		      if (SYMBOL_IS_ARGUMENT (sym))
+		      if (sym->is_argument ())
 			{
 			  ftype->field (iparams).set_type (SYMBOL_TYPE (sym));
 			  TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;

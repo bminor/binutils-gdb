@@ -424,7 +424,7 @@ gdbscm_symbol_argument_p (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  return scm_from_bool (SYMBOL_IS_ARGUMENT (symbol));
+  return scm_from_bool (symbol->is_argument ());
 }
 
 /* (symbol-constant? <gdb:symbol>) -> boolean */
@@ -469,7 +469,7 @@ gdbscm_symbol_variable_p (SCM self)
 
   theclass = symbol->aclass ();
 
-  return scm_from_bool (!SYMBOL_IS_ARGUMENT (symbol)
+  return scm_from_bool (!symbol->is_argument ()
 			&& (theclass == LOC_LOCAL || theclass == LOC_REGISTER
 			    || theclass == LOC_STATIC || theclass == LOC_COMPUTED
 			    || theclass == LOC_OPTIMIZED_OUT));

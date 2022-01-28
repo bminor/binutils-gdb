@@ -1067,7 +1067,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       sym->set_aclass_index (LOC_ARG);
       SYMBOL_VALUE (sym) = valu;
       sym->set_domain (VAR_DOMAIN);
-      SYMBOL_IS_ARGUMENT (sym) = 1;
+      sym->set_is_argument (1);
       add_symbol_to_list (sym, get_local_symbols ());
 
       if (gdbarch_byte_order (gdbarch) != BFD_ENDIAN_BIG)
@@ -1114,7 +1114,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* Parameter which is in a register.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       sym->set_aclass_index (stab_register_index);
-      SYMBOL_IS_ARGUMENT (sym) = 1;
+      sym->set_is_argument (1);
       SYMBOL_VALUE (sym) = valu;
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
@@ -1352,7 +1352,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* Reference parameter */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       sym->set_aclass_index (LOC_REF_ARG);
-      SYMBOL_IS_ARGUMENT (sym) = 1;
+      sym->set_is_argument (1);
       SYMBOL_VALUE (sym) = valu;
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
@@ -1362,7 +1362,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       /* Reference parameter which is in a register.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       sym->set_aclass_index (stab_regparm_index);
-      SYMBOL_IS_ARGUMENT (sym) = 1;
+      sym->set_is_argument (1);
       SYMBOL_VALUE (sym) = valu;
       sym->set_domain (VAR_DOMAIN);
       add_symbol_to_list (sym, get_local_symbols ());
@@ -1394,7 +1394,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
      register or on the stack) instead of the structure itself.  */
 
   if (gdbarch_stabs_argument_has_addr (gdbarch, SYMBOL_TYPE (sym))
-      && SYMBOL_IS_ARGUMENT (sym))
+      && sym->is_argument ())
     {
       /* We have to convert LOC_REGISTER to LOC_REGPARM_ADDR (for
 	 variables passed in a register).  */

@@ -266,7 +266,7 @@ buildsym_compunit::finish_block_internal
 	     we haven't fully initialized the block yet.  */
 	  ALL_DICT_SYMBOLS (BLOCK_MULTIDICT (block), miter, sym)
 	    {
-	      if (SYMBOL_IS_ARGUMENT (sym))
+	      if (sym->is_argument ())
 		nparams++;
 	    }
 	  if (nparams > 0)
@@ -284,7 +284,7 @@ buildsym_compunit::finish_block_internal
 		  if (iparams == nparams)
 		    break;
 
-		  if (SYMBOL_IS_ARGUMENT (sym))
+		  if (sym->is_argument ())
 		    {
 		      ftype->field (iparams).set_type (SYMBOL_TYPE (sym));
 		      TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;

@@ -141,7 +141,7 @@ sympy_is_argument (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return PyBool_FromLong (SYMBOL_IS_ARGUMENT (symbol));
+  return PyBool_FromLong (symbol->is_argument ());
 }
 
 static PyObject *
@@ -180,7 +180,7 @@ sympy_is_variable (PyObject *self, void *closure)
 
   theclass = symbol->aclass ();
 
-  return PyBool_FromLong (!SYMBOL_IS_ARGUMENT (symbol)
+  return PyBool_FromLong (!symbol->is_argument ()
 			  && (theclass == LOC_LOCAL || theclass == LOC_REGISTER
 			      || theclass == LOC_STATIC || theclass == LOC_COMPUTED
 			      || theclass == LOC_OPTIMIZED_OUT));

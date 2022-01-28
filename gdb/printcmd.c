@@ -1735,7 +1735,7 @@ info_address_command (const char *exp, int from_tty)
 	 in that objfile.  */
       regno = SYMBOL_REGISTER_OPS (sym)->register_number (sym, gdbarch);
 
-      if (SYMBOL_IS_ARGUMENT (sym))
+      if (sym->is_argument ())
 	printf_filtered (_("an argument in register %s"),
 			 gdbarch_register_name (gdbarch, regno));
       else

@@ -5053,7 +5053,7 @@ match_data::operator() (struct block_symbol *bsym)
     {
       if (sym->aclass () == LOC_UNRESOLVED)
 	return true;
-      else if (SYMBOL_IS_ARGUMENT (sym))
+      else if (sym->is_argument ())
 	arg_sym = sym;
       else
 	{
@@ -5744,7 +5744,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
 	{
 	  if (sym->aclass () != LOC_UNRESOLVED)
 	    {
-	      if (SYMBOL_IS_ARGUMENT (sym))
+	      if (sym->is_argument ())
 		arg_sym = sym;
 	      else
 		{
@@ -5798,7 +5798,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
 	      {
 		if (sym->aclass () != LOC_UNRESOLVED)
 		  {
-		    if (SYMBOL_IS_ARGUMENT (sym))
+		    if (sym->is_argument ())
 		      arg_sym = sym;
 		    else
 		      {

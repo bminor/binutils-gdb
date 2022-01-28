@@ -191,9 +191,9 @@ mi_should_print (struct symbol *sym, enum mi_print_types type)
     case LOC_REGISTER:	/* register              */
     case LOC_COMPUTED:	/* computed location     */
       if (type == MI_PRINT_LOCALS)
-	print_me = ! SYMBOL_IS_ARGUMENT (sym);
+	print_me = ! sym->is_argument ();
       else
-	print_me = SYMBOL_IS_ARGUMENT (sym);
+	print_me = sym->is_argument ();
     }
   return print_me;
 }
