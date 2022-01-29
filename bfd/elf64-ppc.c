@@ -11174,12 +11174,12 @@ plt_stub_size (struct ppc_link_hash_table *htab,
 static inline unsigned int
 plt_stub_pad (struct ppc_link_hash_table *htab,
 	      struct ppc_stub_hash_entry *stub_entry,
+	      bfd_vma stub_off,
 	      bfd_vma plt_off,
 	      unsigned int odd)
 {
   int stub_align;
   unsigned stub_size;
-  bfd_vma stub_off = stub_entry->group->stub_sec->size;
 
   if (htab->params->plt_stub_align >= 0)
     {
@@ -12205,6 +12205,9 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
   /* Make a note of the offset within the stubs for this entry.  */
   stub_offset = stub_entry->group->stub_sec->size;
+  if (htab->stub_iteration > STUB_SHRINK_ITER
+      && stub_entry->stub_offset > stub_offset)
+    stub_offset = stub_entry->stub_offset;
 
   if (stub_entry->h != NULL
       && stub_entry->h->save_res
@@ -12430,10 +12433,9 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       if (htab->params->plt_stub_align != 0)
 	{
-	  unsigned pad = plt_stub_pad (htab, stub_entry, off, odd);
+	  unsigned pad = plt_stub_pad (htab, stub_entry, stub_offset, off, odd);
 
-	  stub_entry->group->stub_sec->size += pad;
-	  stub_offset = stub_entry->group->stub_sec->size;
+	  stub_offset += pad;
 	  off -= pad;
 	  odd ^= pad & 4;
 	}
@@ -12505,10 +12507,9 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
       if (htab->params->plt_stub_align != 0)
 	{
-	  unsigned pad = plt_stub_pad (htab, stub_entry, off, 0);
+	  unsigned pad = plt_stub_pad (htab, stub_entry, stub_offset, off, 0);
 
-	  stub_entry->group->stub_sec->size += pad;
-	  stub_offset = stub_entry->group->stub_sec->size;
+	  stub_offset += pad;
 	}
 
       if (info->emitrelocations)
@@ -12557,10 +12558,8 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
   if (stub_entry->stub_offset != stub_offset)
     htab->stub_changed = true;
-  if (htab->stub_iteration <= STUB_SHRINK_ITER
-      || stub_entry->stub_offset < stub_offset)
-    stub_entry->stub_offset = stub_offset;
-  stub_entry->group->stub_sec->size = stub_entry->stub_offset + size;
+  stub_entry->stub_offset = stub_offset;
+  stub_entry->group->stub_sec->size = stub_offset + size;
   return true;
 }
 
