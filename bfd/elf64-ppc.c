@@ -14093,10 +14093,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	    {
 	      asection *stub_sec = group->stub_sec;
 
-	      if (htab->stub_iteration <= STUB_SHRINK_ITER
-		  || stub_sec->rawsize < stub_sec->size)
-		/* Past STUB_SHRINK_ITER, rawsize is the max size seen.  */
-		stub_sec->rawsize = stub_sec->size;
+	      stub_sec->rawsize = stub_sec->size;
 	      stub_sec->size = 0;
 	      stub_sec->reloc_count = 0;
 	      stub_sec->flags &= ~SEC_RELOC;
@@ -14111,9 +14108,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	  htab->tga_group->stub_sec->size = 24 * 4;
 	}
 
-      if (htab->stub_iteration <= STUB_SHRINK_ITER
-	  || htab->brlt->rawsize < htab->brlt->size)
-	htab->brlt->rawsize = htab->brlt->size;
+      htab->brlt->rawsize = htab->brlt->size;
       htab->brlt->size = 0;
       htab->brlt->reloc_count = 0;
       htab->brlt->flags &= ~SEC_RELOC;
@@ -14122,9 +14117,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 
       if (htab->elf.srelrdyn != NULL)
 	{
-	  if (htab->stub_iteration <= STUB_SHRINK_ITER
-	      || htab->elf.srelrdyn->rawsize < htab->elf.srelrdyn->size)
-	    htab->elf.srelrdyn->rawsize = htab->elf.srelrdyn->size;
+	  htab->elf.srelrdyn->rawsize = htab->elf.srelrdyn->size;
 	  htab->elf.srelrdyn->size = 0;
 	}
 
@@ -14239,6 +14232,21 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	  && (htab->tga_group == NULL
 	      || htab->stub_iteration > 1))
 	break;
+
+      if (htab->stub_iteration > STUB_SHRINK_ITER)
+	{
+	  for (group = htab->group; group != NULL; group = group->next)
+	    if (group->stub_sec != NULL
+		&& group->stub_sec->size < group->stub_sec->rawsize)
+	      group->stub_sec->size = group->stub_sec->rawsize;
+
+	  if (htab->brlt->size < htab->brlt->rawsize)
+	    htab->brlt->size = htab->brlt->rawsize;
+
+	  if (htab->elf.srelrdyn != NULL
+	      && htab->elf.srelrdyn->size < htab->elf.srelrdyn->rawsize)
+	    htab->elf.srelrdyn->size = htab->elf.srelrdyn->rawsize;
+	}
 
       /* Ask the linker to do its stuff.  */
       (*htab->params->layout_sections_again) ();
