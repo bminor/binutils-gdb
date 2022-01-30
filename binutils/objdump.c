@@ -131,6 +131,7 @@ static bool color_output = false;	/* --visualize-jumps=color.  */
 static bool extended_color_output = false; /* --visualize-jumps=extended-color.  */
 static int process_links = false;       /* --process-links.  */
 
+static int dump_any_debugging;
 static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
 
 /* A structure to record the sections mentioned in -j switches.  */
@@ -3851,6 +3852,9 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
   asection *sec;
   const char *name;
 
+  if (!dump_any_debugging)
+    return false;
+
   /* If it is already loaded, do nothing.  */
   if (section->start != NULL)
     {
@@ -5687,6 +5691,10 @@ main (int argc, char **argv)
 
   if (!seenflag)
     usage (stderr, 2);
+
+  dump_any_debugging = (dump_debugging
+			|| dump_dwarf_section_info
+			|| process_links);
 
   if (formats_info)
     exit_status = display_info ();
