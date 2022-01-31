@@ -982,7 +982,6 @@ static const struct internalvar_funcs inferior_funcs =
 {
   inferior_id_make_value,
   NULL,
-  NULL
 };
 
 

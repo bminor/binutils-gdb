@@ -510,7 +510,6 @@ static const struct internalvar_funcs exception_funcs =
 {
   compute_exception,
   NULL,
-  NULL
 };
 
 

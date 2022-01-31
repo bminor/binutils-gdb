@@ -9368,7 +9368,6 @@ static const struct internalvar_funcs siginfo_funcs =
 {
   siginfo_make_value,
   NULL,
-  NULL
 };
 
 /* Callback for infrun's target events source.  This is marked when a

@@ -2449,11 +2449,6 @@ clear_internalvar (struct internalvar *var)
       xfree (var->u.string);
       break;
 
-    case INTERNALVAR_MAKE_VALUE:
-      if (var->u.make_value.functions->destroy != NULL)
-	var->u.make_value.functions->destroy (var->u.make_value.data);
-      break;
-
     default:
       break;
     }

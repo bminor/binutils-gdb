@@ -3985,7 +3985,6 @@ traceframe_available_memory (std::vector<mem_range> *result,
 static const struct internalvar_funcs sdata_funcs =
 {
   sdata_make_value,
-  NULL,
   NULL
 };
 

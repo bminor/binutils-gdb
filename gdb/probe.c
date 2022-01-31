@@ -866,7 +866,6 @@ static const struct internalvar_funcs probe_funcs =
 {
   compute_probe_arg,
   compile_probe_arg,
-  NULL
 };
 
 

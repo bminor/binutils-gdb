@@ -2123,7 +2123,6 @@ static const struct internalvar_funcs thread_funcs =
 {
   thread_id_per_inf_num_make_value,
   NULL,
-  NULL
 };
 
 /* Implementation of `gthread' variable.  */
@@ -2132,7 +2131,6 @@ static const struct internalvar_funcs gthread_funcs =
 {
   global_thread_id_make_value,
   NULL,
-  NULL
 };
 
 void _initialize_thread ();

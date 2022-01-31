@@ -970,7 +970,6 @@ static const struct internalvar_funcs tlb_funcs =
 {
   tlb_make_value,
   NULL,
-  NULL
 };
 
 /* Layout of an element of a PE's Import Directory Table.  Based on:
