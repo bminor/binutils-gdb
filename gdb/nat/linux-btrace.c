@@ -427,9 +427,11 @@ diagnose_perf_event_open_fail ()
     case EACCES:
       {
 	static const char filename[] = "/proc/sys/kernel/perf_event_paranoid";
+	errno = 0;
 	gdb_file_up file = gdb_fopen_cloexec (filename, "r");
 	if (file.get () == nullptr)
-	  break;
+	  error (_("Failed to open %s (%s).  Your system does not support "
+		   "process recording."), filename, safe_strerror (errno));
 
 	int level, found = fscanf (file.get (), "%d", &level);
 	if (found == 1 && level > 2)
@@ -571,7 +573,22 @@ perf_event_pt_event_type ()
   errno = 0;
   gdb_file_up file = gdb_fopen_cloexec (filename, "r");
   if (file.get () == nullptr)
-    error (_("Failed to open %s: %s."), filename, safe_strerror (errno));
+    switch (errno)
+      {
+      case EACCES:
+      case EFAULT:
+      case EPERM:
+	error (_("Failed to open %s (%s).  You do not have permission "
+		 "to use Intel PT."), filename, safe_strerror (errno));
+
+      case ENOTDIR:
+      case ENOENT:
+	error (_("Failed to open %s (%s).  Your system does not support "
+		 "Intel PT."), filename, safe_strerror (errno));
+
+      default:
+	error (_("Failed to open %s: %s."), filename, safe_strerror (errno));
+      }
 
   int type, found = fscanf (file.get (), "%d", &type);
   if (found != 1)
