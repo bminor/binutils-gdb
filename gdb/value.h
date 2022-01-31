@@ -1127,7 +1127,7 @@ extern void preserve_values (struct objfile *);
 
 /* From values.c */
 
-extern struct value *value_copy (struct value *);
+extern struct value *value_copy (const value *);
 
 extern struct value *value_non_lval (struct value *);
 
