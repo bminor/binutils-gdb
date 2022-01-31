@@ -189,7 +189,7 @@ line_is_less_than (const deprecated_dis_line_entry &mle1,
     {
       if (mle1.start_pc != mle2.start_pc)
 	val = mle1.start_pc < mle2.start_pc;
-    else
+      else
 	val = mle1.line < mle2.line;
     }
   else

@@ -2063,7 +2063,7 @@ micromips_next_pc (struct regcache *regcache, CORE_ADDR pc)
 	  if (regcache_raw_get_signed (regcache, b0s5_reg (insn >> 16))
 		!= regcache_raw_get_signed (regcache, b5s5_reg (insn >> 16)))
 	      pc += micromips_relative_offset16 (insn);
-	    else
+	  else
 	      pc += micromips_pc_insn_size (gdbarch, pc);
 	  break;
 

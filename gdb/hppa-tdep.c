@@ -2171,7 +2171,7 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	      fprintf_unfiltered (gdb_stdlog, " (base=%s) [saved]",
 				  paddress (gdbarch, cache->base));
       }
-    else
+     else
       {
 	/* The prologue has been slowly allocating stack space.  Adjust
 	   the SP back.  */

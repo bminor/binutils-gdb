@@ -2410,14 +2410,14 @@ tfind_line_command (const char *args, int from_tty)
 	    error (_("Cannot find a good line."));
 	}
       }
-    else
-      {
-	/* Is there any case in which we get here, and have an address
-	   which the user would want to see?  If we have debugging
-	   symbols and no line numbers?  */
-	error (_("Line number %d is out of range for \"%s\"."),
-	       sal.line, symtab_to_filename_for_display (sal.symtab));
-      }
+  else
+    {
+      /* Is there any case in which we get here, and have an address
+	 which the user would want to see?  If we have debugging
+	 symbols and no line numbers?  */
+      error (_("Line number %d is out of range for \"%s\"."),
+	     sal.line, symtab_to_filename_for_display (sal.symtab));
+    }
 
   /* Find within range of stated line.  */
   if (args && *args)

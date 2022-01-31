@@ -327,8 +327,8 @@ adi_is_addr_mapped (CORE_ADDR vaddr, size_t cnt)
 	    }
 	}
       }
-    else
-      warning (_("unable to open /proc file '%s'"), filename);
+  else
+    warning (_("unable to open /proc file '%s'"), filename);
 
   return false;
 }

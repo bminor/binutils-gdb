@@ -851,7 +851,7 @@ dtrace_static_probe_ops::get_probes
 	  if (bfd_malloc_and_get_section (abfd, sect, &dof) && dof != NULL)
 	    dtrace_process_dof (sect, objfile, probesp,
 				(struct dtrace_dof_hdr *) dof);
-	 else
+	  else
 	    complaint (_("could not obtain the contents of"
 			 "section '%s' in objfile `%s'."),
 		       bfd_section_name (sect), bfd_get_filename (abfd));
