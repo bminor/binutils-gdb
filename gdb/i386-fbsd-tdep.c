@@ -145,8 +145,6 @@ i386_fbsd_sigframe_init (const struct tramp_frame *self,
 			 struct trad_frame_cache *this_cache,
 			 CORE_ADDR func)
 {
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, I386_ESP_REGNUM);
   CORE_ADDR mcontext_addr
     = (sp
