@@ -62,11 +62,13 @@ public:
      HEIGHT is true to fetch height, false to fetch width.  */
   virtual void get_sizes (bool height, int *min_value, int *max_value) = 0;
 
-  /* True if the topmost item in this layout is boxed.  */
-  virtual bool top_boxed_p () const = 0;
+  /* True if the topmost (for vertical layouts), or the leftmost (for
+     horizontal layouts) item in this layout is boxed.  */
+  virtual bool first_edge_has_border_p () const = 0;
 
-  /* True if the bottommost item in this layout is boxed.  */
-  virtual bool bottom_boxed_p () const = 0;
+  /* True if the bottommost (for vertical layouts), or the rightmost (for
+     horizontal layouts) item in this layout is boxed.  */
+  virtual bool last_edge_has_border_p () const = 0;
 
   /* Return the name of this layout's window, or nullptr if this
      layout does not represent a single window.  */
@@ -141,9 +143,9 @@ public:
     return m_contents == name ? FOUND : NOT_FOUND;
   }
 
-  bool top_boxed_p () const override;
+  bool first_edge_has_border_p () const override;
 
-  bool bottom_boxed_p () const override;
+  bool last_edge_has_border_p () const override;
 
   void remove_windows (const char *name) override
   {
@@ -213,9 +215,9 @@ public:
     return set_size (name, new_width, true);
   }
 
-  bool top_boxed_p () const override;
+  bool first_edge_has_border_p () const override;
 
-  bool bottom_boxed_p () const override;
+  bool last_edge_has_border_p () const override;
 
   void remove_windows (const char *name) override;
 

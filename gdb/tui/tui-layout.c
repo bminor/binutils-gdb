@@ -451,7 +451,7 @@ tui_layout_window::get_sizes (bool height, int *min_value, int *max_value)
 /* See tui-layout.h.  */
 
 bool
-tui_layout_window::top_boxed_p () const
+tui_layout_window::first_edge_has_border_p () const
 {
   gdb_assert (m_window != nullptr);
   return m_window->can_box ();
@@ -460,7 +460,7 @@ tui_layout_window::top_boxed_p () const
 /* See tui-layout.h.  */
 
 bool
-tui_layout_window::bottom_boxed_p () const
+tui_layout_window::last_edge_has_border_p () const
 {
   gdb_assert (m_window != nullptr);
   return m_window->can_box ();
@@ -561,21 +561,21 @@ tui_layout_split::get_sizes (bool height, int *min_value, int *max_value)
 /* See tui-layout.h.  */
 
 bool
-tui_layout_split::top_boxed_p () const
+tui_layout_split::first_edge_has_border_p () const
 {
   if (m_splits.empty ())
     return false;
-  return m_splits[0].layout->top_boxed_p ();
+  return m_splits[0].layout->first_edge_has_border_p ();
 }
 
 /* See tui-layout.h.  */
 
 bool
-tui_layout_split::bottom_boxed_p () const
+tui_layout_split::last_edge_has_border_p () const
 {
   if (m_splits.empty ())
     return false;
-  return m_splits.back ().layout->top_boxed_p ();
+  return m_splits.back ().layout->last_edge_has_border_p ();
 }
 
 /* See tui-layout.h.  */
@@ -785,8 +785,8 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
       /* Two adjacent boxed windows will share a border, making a bit
 	 more size available.  */
       if (i > 0
-	  && m_splits[i - 1].layout->bottom_boxed_p ()
-	  && m_splits[i].layout->top_boxed_p ())
+	  && m_splits[i - 1].layout->last_edge_has_border_p ()
+	  && m_splits[i].layout->first_edge_has_border_p ())
 	info[i].share_box = true;
     }
 
