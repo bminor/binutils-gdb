@@ -48,6 +48,7 @@ target:
 	fle.q		a0, a2, a4
 	fgt.q		a0, a2, a4
 	fge.q		a0, a2, a4
+	fmv.q		a0, a2
 	fneg.q		a0, a2
 	fabs.q		a0, a2
 	fclass.q	a0, a2

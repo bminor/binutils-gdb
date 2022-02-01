@@ -45,6 +45,7 @@ target:
 	fle.s		a0, a1, a2
 	fgt.s		a0, a1, a2
 	fge.s		a0, a1, a2
+	fmv.s		a0, a1
 	fneg.s		a0, a1
 	fabs.s		a0, a1
 	fclass.s	a0, a1
