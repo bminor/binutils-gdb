@@ -30,10 +30,14 @@ proc multi_line_string {str} {
 }
 
 set inner_string {    case ? is
-        when ? =>
+        when 0 =>
             small: range 0 .. 255;
+            second: range 0 .. 255;
         when ? =>
+            bval: range 0 .. 255;
+        when others =>
             large: range 255 .. 510;
+            more: range 255 .. 510;
     end case;
 }
 set inner_full "type = record (?) is\n${inner_string}end record"
