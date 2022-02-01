@@ -513,7 +513,7 @@ objfpy_repr (PyObject *self_)
     return PyString_FromString ("<gdb.Objfile (invalid)>");
 
   return PyString_FromFormat ("<gdb.Objfile filename=%s>",
-			      objfile_filename (obj));
+			      objfile_name (obj));
 }
 
 /* Subroutine of gdbpy_lookup_objfile_by_build_id to simplify it.
