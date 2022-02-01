@@ -1859,29 +1859,29 @@ ILL_RPC (S_proc_pid2proc_reply,
 	 mach_port_t proc, mach_msg_type_name_t procPoly)
 ILL_RPC (S_proc_getprocinfo_reply,
 	 mach_port_t reply_port, kern_return_t return_code,
-	 int flags, procinfo_t procinfo, mach_msg_type_number_t procinfoCnt,
-	 data_t threadwaits, mach_msg_type_number_t threadwaitsCnt)
+	 int flags, const_procinfo_t procinfo, mach_msg_type_number_t procinfoCnt,
+	 const_data_t threadwaits, mach_msg_type_number_t threadwaitsCnt)
 ILL_RPC (S_proc_getprocargs_reply,
 	 mach_port_t reply_port, kern_return_t return_code,
-	 data_t procargs, mach_msg_type_number_t procargsCnt)
+	 const_data_t procargs, mach_msg_type_number_t procargsCnt)
 ILL_RPC (S_proc_getprocenv_reply,
 	 mach_port_t reply_port, kern_return_t return_code,
-	 data_t procenv, mach_msg_type_number_t procenvCnt)
+	 const_data_t procenv, mach_msg_type_number_t procenvCnt)
 ILL_RPC (S_proc_getloginid_reply,
 	 mach_port_t reply_port, kern_return_t return_code, pid_t login_id)
 ILL_RPC (S_proc_getloginpids_reply,
 	 mach_port_t reply_port, kern_return_t return_code,
-	 pidarray_t pids, mach_msg_type_number_t pidsCnt)
+	 const_pidarray_t pids, mach_msg_type_number_t pidsCnt)
 ILL_RPC (S_proc_getlogin_reply,
-	 mach_port_t reply_port, kern_return_t return_code, string_t logname)
+	 mach_port_t reply_port, kern_return_t return_code, const_string_t logname)
 ILL_RPC (S_proc_getsid_reply,
 	 mach_port_t reply_port, kern_return_t return_code, pid_t sid)
 ILL_RPC (S_proc_getsessionpgids_reply,
 	 mach_port_t reply_port, kern_return_t return_code,
-	 pidarray_t pgidset, mach_msg_type_number_t pgidsetCnt)
+	 const_pidarray_t pgidset, mach_msg_type_number_t pgidsetCnt)
 ILL_RPC (S_proc_getsessionpids_reply,
 	 mach_port_t reply_port, kern_return_t return_code,
-	 pidarray_t pidset, mach_msg_type_number_t pidsetCnt)
+	 const_pidarray_t pidset, mach_msg_type_number_t pidsetCnt)
 ILL_RPC (S_proc_getsidport_reply,
 	 mach_port_t reply_port, kern_return_t return_code,
 	 mach_port_t sessport)
@@ -1889,7 +1889,7 @@ ILL_RPC (S_proc_getpgrp_reply,
 	 mach_port_t reply_port, kern_return_t return_code, pid_t pgrp)
 ILL_RPC (S_proc_getpgrppids_reply,
 	 mach_port_t reply_port, kern_return_t return_code,
-	 pidarray_t pidset, mach_msg_type_number_t pidsetCnt)
+	 const_pidarray_t pidset, mach_msg_type_number_t pidsetCnt)
 ILL_RPC (S_proc_get_tty_reply,
 	 mach_port_t reply_port, kern_return_t return_code, mach_port_t tty)
 ILL_RPC (S_proc_getnports_reply,
