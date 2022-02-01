@@ -1766,7 +1766,7 @@ do_mach_notify_dead_name (mach_port_t notify, mach_port_t dead_port)
 
 
 #define ILL_RPC(fun, ...) \
-  extern kern_return_t fun (__VA_ARGS__); \
+  extern "C" kern_return_t fun (__VA_ARGS__); \
   kern_return_t fun (__VA_ARGS__) \
   { \
     warning (_("illegal rpc: %s"), #fun); \
