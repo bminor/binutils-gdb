@@ -955,7 +955,7 @@ tui_set_win_width_command (const char *arg, int from_tty)
 int
 tui_win_info::max_height () const
 {
-  return tui_term_height () - 2;
+  return tui_term_height ();
 }
 
 /* See tui-data.h.  */
@@ -963,7 +963,7 @@ tui_win_info::max_height () const
 int
 tui_win_info::max_width () const
 {
-  return tui_term_width () - 2;
+  return tui_term_width ();
 }
 
 static void
