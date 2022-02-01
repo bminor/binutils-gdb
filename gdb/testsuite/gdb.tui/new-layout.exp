@@ -124,5 +124,14 @@ foreach_with_prefix layout $layouts {
 	Term::command "winheight src + 5"
 	Term::check_box "left window box after grow" 0 0 40 15
 	Term::check_box "right window box after grow" 39 0 41 15
+    } elseif {$name == "cmd_only"} {
+	Term::check_region_contents "bottom of cmd window is blank" \
+	    0 14 80 10 "^\\s+$"
+	Term::command "info win"
+	Term::check_region_contents "info win output" \
+	    0 0 80 24 [multi_line "info win\\s+" \
+			   "Name\\s+Lines\\s+Columns\\s+Focus\\s+" \
+			   "cmd\\s+20\\s+80\\s+\\(has focus\\)\\s+" \
+			   "$gdb_prompt\\s+"]
     }
 }

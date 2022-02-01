@@ -735,6 +735,30 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
   width = width_;
   height = height_;
 
+  /* In some situations we fix the size of the cmd window.  However,
+     occasionally this turns out to be a mistake.  This struct is used to
+     hold the original information about the cmd window, so we can restore
+     it if needed.  */
+  struct old_size_info
+  {
+    /* Constructor.  */
+    old_size_info (int index_, int min_size_, int max_size_)
+      : index (index_),
+	min_size (min_size_),
+	max_size (max_size_)
+    { /* Nothing.  */ }
+
+    /* The index in m_splits where the cmd window was found.  */
+    int index;
+
+    /* The previous min/max size.  */
+    int min_size;
+    int max_size;
+  };
+
+  /* This is given a value only if we fix the size of the cmd window.  */
+  gdb::optional<old_size_info> old_cmd_info;
+
   std::vector<size_info> info (m_splits.size ());
 
   tui_debug_printf ("weights are: %s",
@@ -762,6 +786,10 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
 	  && m_splits[i].layout->get_name () != nullptr
 	  && strcmp (m_splits[i].layout->get_name (), "cmd") == 0)
 	{
+	  /* Save the old cmd window information, in case we need to
+	     restore it later.  */
+          old_cmd_info.emplace (i, info[i].min_size, info[i].max_size);
+
 	  /* If this layout has never been applied, then it means the
 	     user just changed the layout.  In this situation, it's
 	     desirable to keep the size of the command window the
@@ -833,22 +861,66 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
       tui_debug_print_size_info (info);
     }
 
+  /* If we didn't find any sub-layouts that were of a non-fixed size, but
+     we did find the cmd window, then we can consider that a sort-of
+     non-fixed size sub-layout.
+
+     The cmd window might, initially, be of a fixed size (see above), but,
+     we are willing to relax this constraint if required to correctly apply
+     this layout (see below).  */
+  if (last_index == -1 && old_cmd_info.has_value ())
+    last_index = old_cmd_info->index;
+
   /* Allocate any leftover size.  */
-  if (available_size > used_size && last_index != -1)
+  if (available_size != used_size && last_index != -1)
     {
-      /* Loop over all windows until all available space is used up.  */
+      /* Loop over all windows until the amount of used space is equal to
+	 the amount of available space.  There's an escape hatch within
+	 the loop in case we can't find any sub-layouts to resize.  */
       bool found_window_that_can_grow_p = true;
       for (int idx = last_index;
-	   available_size > used_size;
+	   available_size != used_size;
 	   idx = (idx + 1) % m_splits.size ())
 	{
-	  /* Once we have visited all of the windows, check that we did
-	     manage to allocate some more space.  This prevents us getting
-	     stuck in the loop forever if we can't allocate anything
-	     more.  */
+	  /* Every time we get back to last_index, which is where the loop
+	     started, we check to make sure that we did assign some space
+	     to a window, bringing used_size closer to available_size.
+
+	     If we didn't, but the cmd window is of a fixed size, then we
+	     can make the console window non-fixed-size, and continue
+	     around the loop, hopefully, this will allow the layout to be
+	     applied correctly.
+
+	     If we still make it around the loop without moving used_size
+	     closer to available_size, then there's nothing more we can do,
+	     and we break out of the loop.  */
 	  if (idx == last_index)
 	    {
-	      if (!found_window_that_can_grow_p)
+	      /* If the used_size is greater than the available_size then
+		 this indicates that the fixed-sized sub-layouts claimed
+		 more space than is available.  This layout is not going to
+		 work.  Our only hope at this point is to make the cmd
+		 window non-fixed-size (if possible), and hope we can
+		 shrink this enough to fit the rest of the sub-layouts in.
+
+	         Alternatively, we've made it around the loop without
+	         adjusting any window's size.  This likely means all
+	         windows have hit their min or max size.  Again, our only
+	         hope is to make the cmd window non-fixed-size, and hope
+	         this fixes all our problems.  */
+	      if (old_cmd_info.has_value ()
+		  && ((available_size < used_size)
+		      || !found_window_that_can_grow_p))
+		{
+		  info[old_cmd_info->index].min_size = old_cmd_info->min_size;
+		  info[old_cmd_info->index].max_size = old_cmd_info->max_size;
+		  tui_debug_printf
+		    ("restoring index %d (cmd) size limits, min = %d, max = %d",
+		     old_cmd_info->index, old_cmd_info->min_size,
+		     old_cmd_info->max_size);
+		  old_cmd_info.reset ();
+		}
+	      else if (!found_window_that_can_grow_p)
 		break;
 	      found_window_that_can_grow_p = false;
 	    }
@@ -859,6 +931,13 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
 	      found_window_that_can_grow_p = true;
 	      info[idx].size += 1;
 	      used_size += 1;
+	    }
+	  else if (available_size < used_size
+		   && info[idx].size > info[idx].min_size)
+	    {
+	      found_window_that_can_grow_p = true;
+	      info[idx].size -= 1;
+	      used_size -= 1;
 	    }
 	}
 

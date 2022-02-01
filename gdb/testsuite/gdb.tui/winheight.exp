@@ -50,3 +50,49 @@ Term::check_box "larger source box again" 0 0 80 15
 Term::command "layout asm"
 Term::check_box "check for asm window" 0 0 80 15
 
+
+# Check what happens when we switch from src layout to split layout.
+# The interesting thing here is that the src layout has one flexible
+# window (the src), the status window, which is of fixed size, and the
+# cmd window, which tries to retain its size when a layout changes.
+#
+# In contrast, the split layout has both a src and asm window, plus
+# the same status and cmd windows.
+#
+# Of particular interest here is the first test, where we maximise the
+# cmd window before switching to split.  This requires gdb to realise
+# that it has to shrink the cmd window, even though this is something
+# gdb usually avoids doing.
+#
+# Each test here is a size for the src window in the 'src' layout.
+# The test then switches to the 'split' layout, and calculates the
+# expected window sizes.
+foreach_with_prefix cmd_size {20 12 5} {
+    set src_size_before [expr 24 - ${cmd_size} - 1]
+    set split_size [expr (24 - ${cmd_size}) / 2]
+
+    if { $split_size < 3 } {
+	# The minimum window size is 3, so force that.
+	set src_size_after 3
+	set asm_size_after 3
+    } elseif { [expr $split_size % 2] == 0 } {
+	# The remaining space can be divided evenly between the two
+	# windows.
+	set src_size_after ${split_size}
+	set asm_size_after ${split_size}
+    } else {
+	# The space can't be divided evenly, the asm window will get
+	# the extra line.
+	set src_size_after ${split_size}
+	set asm_size_after [expr ${split_size} + 1]
+    }
+
+    Term::command "layout src"
+    Term::command "winheight cmd ${cmd_size}"
+    Term::check_box "check for src window" 0 0 80 ${src_size_before}
+
+    # Both windows should be of equal size, which will be their minimum.
+    Term::command "layout split"
+    Term::check_box "check for src window in split" 0 0 80 ${src_size_after}
+    Term::check_box "check for asm window in split" 0 [expr ${src_size_after} - 1] 80 ${asm_size_after}
+}
