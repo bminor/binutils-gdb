@@ -70,7 +70,8 @@ set layouts \
 	      {{0 0 80 15}} ""] \
 	 [list h "{-horizontal asm 1 src 1} 1 status 0 cmd 1" \
 	      {{0 0 40 15} {39 0 41 15}} \
-	      "$hex <main>.*21.*return 0"]]
+	      "$hex <main>.*21.*return 0"] \
+	 [list cmd_only "cmd 1" {} ""]]
 
 # Helper function to verify a list of boxes.
 proc check_boxes {boxes} {

@@ -790,29 +790,37 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
 	info[i].share_box = true;
     }
 
+  /* If last_index is set then we have a window that is not of a fixed
+     size.  This window will have its size calculated below, which requires
+     that the total_weight not be zero (we divide by total_weight, so don't
+     want a floating-point exception).  */
+  gdb_assert (last_index == -1 || total_weight > 0);
+
   /* Step 2: Compute the size of each sub-layout.  Fixed-sized items
      are given their fixed size, while others are resized according to
      their weight.  */
   int used_size = 0;
   for (int i = 0; i < m_splits.size (); ++i)
     {
-      /* Compute the height and clamp to the allowable range.  */
-      info[i].size = available_size * m_splits[i].weight / total_weight;
-      if (info[i].size > info[i].max_size)
-	info[i].size = info[i].max_size;
-      if (info[i].size < info[i].min_size)
-	info[i].size = info[i].min_size;
-      /* If there is any leftover size, just redistribute it to the
-	 last resizeable window, by dropping it from the allocated
-	 size.  We could try to be fancier here perhaps, by
-	 redistributing this size among all windows, not just the
-	 last window.  */
       if (info[i].min_size != info[i].max_size)
 	{
+	  /* Compute the height and clamp to the allowable range.  */
+	  info[i].size = available_size * m_splits[i].weight / total_weight;
+	  if (info[i].size > info[i].max_size)
+	    info[i].size = info[i].max_size;
+	  if (info[i].size < info[i].min_size)
+	    info[i].size = info[i].min_size;
+	  /* If there is any leftover size, just redistribute it to the
+	     last resizeable window, by dropping it from the allocated
+	     size.  We could try to be fancier here perhaps, by
+	     redistributing this size among all windows, not just the
+	     last window.  */
 	  used_size += info[i].size;
 	  if (info[i].share_box)
 	    --used_size;
 	}
+      else
+	info[i].size = info[i].min_size;
     }
 
   if (debug_tui)
