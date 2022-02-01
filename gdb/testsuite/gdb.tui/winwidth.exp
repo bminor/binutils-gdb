@@ -39,24 +39,25 @@ with_test_prefix "original window sizes" {
 }
 
 with_test_prefix "after src +5" {
-    Term::check_box "source box" 0 0 44 15
-    Term::check_box "asm box" 43 0 37 15
+    Term::check_box "source box" 0 0 45 15
+    Term::check_box "asm box" 44 0 36 15
     Term::command "winwidth asm -5"
 }
 
 with_test_prefix "after asm -5" {
-    Term::check_box "source box" 0 0 48 15
-    Term::check_box "asm box" 47 0 33 15
+    Term::dump_screen
+    Term::check_box "source box" 0 0 50 15
+    Term::check_box "asm box" 49 0 31 15
     Term::command "winwidth asm +8"
 }
 
 with_test_prefix "after asm +8" {
-    Term::check_box "source box" 0 0 39 15
-    Term::check_box "asm box" 38 0 42 15
+    Term::check_box "source box" 0 0 42 15
+    Term::check_box "asm box" 41 0 39 15
     Term::command "winwidth src -2"
 }
 
 with_test_prefix "after src -2" {
-    Term::check_box "source box" 0 0 36 15
-    Term::check_box "asm box" 35 0 45 15
+    Term::check_box "source box" 0 0 40 15
+    Term::check_box "asm box" 39 0 41 15
 }

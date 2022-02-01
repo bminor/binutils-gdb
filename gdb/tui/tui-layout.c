@@ -810,11 +810,11 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
 	    info[i].size = info[i].max_size;
 	  if (info[i].size < info[i].min_size)
 	    info[i].size = info[i].min_size;
-	  /* If there is any leftover size, just redistribute it to the
-	     last resizeable window, by dropping it from the allocated
-	     size.  We could try to be fancier here perhaps, by
-	     redistributing this size among all windows, not just the
-	     last window.  */
+	  /* Keep a total of all the size we've used so far (we gain some
+	     size back if this window can share a border with a preceding
+	     window).  Any unused space will be distributed between all of
+	     the other windows (while respecting min/max sizes) later in
+	     this function.  */
 	  used_size += info[i].size;
 	  if (info[i].share_box)
 	    --used_size;
@@ -834,9 +834,33 @@ tui_layout_split::apply (int x_, int y_, int width_, int height_)
     }
 
   /* Allocate any leftover size.  */
-  if (available_size >= used_size && last_index != -1)
+  if (available_size > used_size && last_index != -1)
     {
-      info[last_index].size += available_size - used_size;
+      /* Loop over all windows until all available space is used up.  */
+      bool found_window_that_can_grow_p = true;
+      for (int idx = last_index;
+	   available_size > used_size;
+	   idx = (idx + 1) % m_splits.size ())
+	{
+	  /* Once we have visited all of the windows, check that we did
+	     manage to allocate some more space.  This prevents us getting
+	     stuck in the loop forever if we can't allocate anything
+	     more.  */
+	  if (idx == last_index)
+	    {
+	      if (!found_window_that_can_grow_p)
+		break;
+	      found_window_that_can_grow_p = false;
+	    }
+
+	  if (available_size > used_size
+	      && info[idx].size < info[idx].max_size)
+	    {
+	      found_window_that_can_grow_p = true;
+	      info[idx].size += 1;
+	      used_size += 1;
+	    }
+	}
 
       if (debug_tui)
 	{
