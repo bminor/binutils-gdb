@@ -43,11 +43,42 @@ Term::check_box "smaller source box again" 0 0 80 10
 Term::command "winheight src +5"
 Term::check_box "larger source box again" 0 0 80 15
 
+# Check that attempting a window to be too large gives an error.
+Term::command "winheight src 100"
+Term::check_box "source box has not changed" 0 0 80 15
+Term::check_region_contents "check error message about src size 100" 0 16 80 8 \
+    [multi_line "$gdb_prompt winheight src 100\\s+" \
+     "warning: Invalid window height specified\\s+" \
+     "$gdb_prompt"]
+
+# Check that incrementing to a size that is "too big" will trigger an
+# error, and that the window doesn't resize.
+Term::command "winheight src 20"
+Term::check_box "source box is at its max size" 0 0 80 20
+Term::command "winheight src +1"
+Term::check_box "source box is still at its max size" 0 0 80 20
+Term::check_region_contents "check error message about src +1" 0 21 80 3 \
+    [multi_line "$gdb_prompt winheight src \\+1\\s+" \
+     "warning: Invalid window height specified\\s+" \
+     "$gdb_prompt"]
+
+# Reset the cmd window to a sane size.
+Term::command "winheight cmd 8"
+
+Term::command "layout regs"
+Term::check_box "register window" 0 0 80 8
+Term::check_box "source window" 0 7 80 8
+
+Term::command "winheight cmd 10"
+Term::check_box "register window after resize" 0 0 80 7
+Term::check_box "source window after resize" 0 6 80 7
+
 # At one point we had a bug where adjusting the winheight would result
 # in GDB keeping hold of duplicate window pointers, which it might
 # then try to delete when the layout was changed.  Running this test
 # under valgrind would expose that bug.
 Term::command "layout asm"
+Term::command "winheight cmd 8"
 Term::check_box "check for asm window" 0 0 80 15
 
 

@@ -691,12 +691,21 @@ tui_layout_split::set_size (const char *name, int new_size, bool set_width_p)
   tui_debug_printf ("before delta (%d) distribution, weights: %s",
 		    delta, tui_debug_weights_to_string ().c_str ());
 
-  /* Distribute the "delta" over the next window; but if the next
-     window cannot hold it all, keep going until we either find a
-     window that does, or until we loop all the way around.  */
-  for (int i = 0; delta != 0 && i < m_splits.size () - 1; ++i)
+  /* Distribute the "delta" over all other windows, while respecting their
+     min/max sizes.  We grow each window by 1 line at a time continually
+     looping over all the windows.  However, skip the window that the user
+     just resized, obviously we don't want to readjust that window.  */
+  bool found_window_that_can_grow_p = true;
+  for (int i = 0; delta != 0; i = (i + 1) % m_splits.size ())
     {
       int index = (found_index + 1 + i) % m_splits.size ();
+      if (index == found_index)
+	{
+	  if (!found_window_that_can_grow_p)
+	    break;
+	  found_window_that_can_grow_p = false;
+	  continue;
+	}
 
       int new_min, new_max;
       m_splits[index].layout->get_sizes (m_vertical, &new_min, &new_max);
@@ -705,19 +714,23 @@ tui_layout_split::set_size (const char *name, int new_size, bool set_width_p)
 	{
 	  /* The primary window grew, so we are trying to shrink other
 	     windows.  */
-	  int available = m_splits[index].weight - new_min;
-	  int shrink_by = std::min (available, -delta);
-	  m_splits[index].weight -= shrink_by;
-	  delta += shrink_by;
+	  if (m_splits[index].weight > new_min)
+	    {
+	      m_splits[index].weight -= 1;
+	      delta += 1;
+	      found_window_that_can_grow_p = true;
+	    }
 	}
       else
 	{
 	  /* The primary window shrank, so we are trying to grow other
 	     windows.  */
-	  int available = new_max - m_splits[index].weight;
-	  int grow_by = std::min (available, delta);
-	  m_splits[index].weight += grow_by;
-	  delta -= grow_by;
+	  if (m_splits[index].weight < new_max)
+	    {
+	      m_splits[index].weight += 1;
+	      delta -= 1;
+	      found_window_that_can_grow_p = true;
+	    }
 	}
 
       tui_debug_printf ("index = %d, weight now: %d",
