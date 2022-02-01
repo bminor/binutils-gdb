@@ -511,8 +511,10 @@ tui_resize_all (void)
 	 AIX 5.3 does not define clear.  */
       erase ();
       clearok (curscr, TRUE);
-      tui_apply_current_layout ();
-      /* Turn keypad back on.  */
+      /* Apply the current layout.  The 'false' here allows the command
+	 window to resize proportionately with containing terminal, rather
+	 than maintaining a fixed size.  */
+      tui_apply_current_layout (false); /* Turn keypad back on.  */
       keypad (TUI_CMD_WIN->handle.get (), TRUE);
     }
 }

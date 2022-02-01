@@ -71,6 +71,11 @@ set layouts \
 	 [list h "{-horizontal asm 1 src 1} 1 status 0 cmd 1" \
 	      {{0 0 40 15} {39 0 41 15}} \
 	      "$hex <main>.*21.*return 0"] \
+	 [list example3 "{-horizontal src 1 cmd 1} 1 status 0 asm 1" \
+	      {{0 0 40 11} {0 12 80 12}} \
+	      "21.*return 0.*$hex <main>"] \
+	 [list example4 "src 1 status 0 {-horizontal cmd 1 regs 1} 1" \
+	      {{0 0 80 11} {40 12 40 12}} ""] \
 	 [list cmd_only "cmd 1" {} ""]]
 
 # Helper function to verify a list of boxes.

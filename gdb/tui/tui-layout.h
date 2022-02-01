@@ -55,8 +55,12 @@ public:
      "skeleton" layout.  */
   virtual std::unique_ptr<tui_layout_base> clone () const = 0;
 
-  /* Change the size and location of this layout.  */
-  virtual void apply (int x, int y, int width, int height) = 0;
+  /* Change the size and location of this layout.  When
+     PRESERVE_CMD_WIN_SIZE_P is true the current size of the TUI_CMD_WIN
+     is preserved, otherwise, the TUI_CMD_WIN will resize just like any
+     other window.  */
+  virtual void apply (int x, int y, int width, int height,
+		      bool preserve_cmd_win_size_p) = 0;
 
   /* Return the minimum and maximum height or width of this layout.
      HEIGHT is true to fetch height, false to fetch width.  */
@@ -97,6 +101,26 @@ public:
      depth of this layout in the hierarchy (zero-based).  */
   virtual void specification (ui_file *output, int depth) = 0;
 
+  /* Return a FINGERPRINT string containing an abstract representation of
+     the location of the cmd window in this layout.
+
+     When called on a complete, top-level layout, the fingerprint will be a
+     non-empty string made of 'V' and 'H' characters, followed by a single
+     'C' character.  Each 'V' and 'H' represents a vertical or horizontal
+     layout that must be passed through in order to find the cmd
+     window.
+
+     Of course, layouts are built recursively, so, when called on a partial
+     layout, if this object represents a single window, then either the
+     empty string is returned (for non-cmd windows), or a string
+     containing a single 'C' is returned.
+
+     For object representing layouts, if the layout contains the cmd
+     window then we will get back a valid fingerprint string (contains 'V'
+     and 'H', ends with 'C'), or, if this layout doesn't contain the cmd
+     window, an empty string is returned.  */
+  virtual std::string layout_fingerprint () const = 0;
+
   /* Add all windows to the WINDOWS vector.  */
   virtual void get_windows (std::vector<tui_win_info *> *windows) = 0;
 
@@ -126,7 +150,8 @@ public:
 
   std::unique_ptr<tui_layout_base> clone () const override;
 
-  void apply (int x, int y, int width, int height) override;
+  void apply (int x, int y, int width, int height,
+	      bool preserve_cmd_win_size_p) override;
 
   const char *get_name () const override
   {
@@ -154,6 +179,8 @@ public:
   void replace_window (const char *name, const char *new_window) override;
 
   void specification (ui_file *output, int depth) override;
+
+  std::string layout_fingerprint () const override;
 
   /* See tui_layout_base::get_windows.  */
   void get_windows (std::vector<tui_win_info *> *windows) override
@@ -201,7 +228,8 @@ public:
 
   std::unique_ptr<tui_layout_base> clone () const override;
 
-  void apply (int x, int y, int width, int height) override;
+  void apply (int x, int y, int width, int height,
+	      bool preserve_cmd_win_size_p) override;
 
   tui_adjust_result set_height (const char *name, int new_height) override
   {
@@ -224,6 +252,8 @@ public:
   void replace_window (const char *name, const char *new_window) override;
 
   void specification (ui_file *output, int depth) override;
+
+  std::string layout_fingerprint () const override;
 
   /* See tui_layout_base::get_windows.  */
   void get_windows (std::vector<tui_win_info *> *windows) override
@@ -289,9 +319,6 @@ private:
 
   /* True if the windows in this split are arranged vertically.  */
   bool m_vertical;
-
-  /* True if this layout has already been applied at least once.  */
-  bool m_applied = false;
 };
 
 /* Add the specified window to the layout in a logical way.  This
@@ -314,8 +341,10 @@ extern void tui_regs_layout ();
    some other window is chosen to remain.  */
 extern void tui_remove_some_windows ();
 
-/* Apply the current layout.  */
-extern void tui_apply_current_layout ();
+/* Apply the current layout.  When PRESERVE_CMD_WIN_SIZE_P is true the
+   current size of the TUI_CMD_WIN is preserved, otherwise, the TUI_CMD_WIN
+   will resize just like any other window.  */
+extern void tui_apply_current_layout (bool);
 
 /* Adjust the window height of WIN to NEW_HEIGHT.  */
 extern void tui_adjust_window_height (struct tui_win_info *win,
