@@ -219,8 +219,14 @@ extern void detach_command (const char *, int);
 
 extern void notice_new_inferior (struct thread_info *, bool, int);
 
-extern struct value *get_return_value (struct value *function,
-				       struct type *value_type);
+/* Return the value of the result of a function at the end of a 'finish'
+   command/BP.  If the result's value cannot be retrieved, return NULL.
+
+   FUNC_SYMBOL is the symbol of the function being returned from.  FUNCTION is
+   a value containing the address of the function.  */
+
+extern struct value *get_return_value (struct symbol *func_symbol,
+				       struct value *function);
 
 /* Prepare for execution command.  TARGET is the target that will run
    the command.  BACKGROUND determines whether this is a foreground
