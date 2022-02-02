@@ -1,3 +1,10 @@
+2022-02-02  Stafford Horne  <shorne@gmail.com>
+
+	PR 28735
+	* elf32-or1k.c (or1k_elf_got16_no_overflow_howto): Define.
+	(or1k_elf_relocate_section): Use new howto instead of trying to
+	mask out relocation bits.
+
 2022-01-24  Roland McGrath  <mcgrathr@google.com>
 
 	* doc/local.mk (%D%/bfdver.texi): Add mkdir command.
