@@ -557,10 +557,14 @@ read_section (bfd *	      abfd,
 
       amt = bfd_get_section_limit_octets (abfd, msec);
       filesize = bfd_get_file_size (abfd);
-      if (amt >= filesize)
+      /* PR 28834: A compressed debug section could well decompress to a size
+	 larger than the file, so we choose an arbitrary modifier of 10x in
+	 the test below.  If this ever turns out to be insufficient, it can
+	 be changed by a future update.  */
+      if (amt >= filesize * 10)
 	{
 	  /* PR 26946 */
-	  _bfd_error_handler (_("DWARF error: section %s is larger than its filesize! (0x%lx vs 0x%lx)"),
+	  _bfd_error_handler (_("DWARF error: section %s is larger than 10x its filesize! (0x%lx vs 0x%lx)"),
 			      section_name, (long) amt, (long) filesize);
 	  bfd_set_error (bfd_error_bad_value);
 	  return false;

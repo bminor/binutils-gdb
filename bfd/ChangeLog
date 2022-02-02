@@ -1,3 +1,9 @@
+2022-02-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 28834
+	* dwarf2.c (read_section): Change the heuristic that checks for
+	overlarge dwarf debug info sections.
+
 2022-02-02  Stafford Horne  <shorne@gmail.com>
 
 	PR 28735
