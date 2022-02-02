@@ -986,7 +986,24 @@ sim_fpu_round_64 (sim_fpu *f,
   return do_round (f, 1, round, denorm);
 }
 
+/* NaN handling for binary operations.  */
 
+INLINE_SIM_FPU (int)
+sim_fpu_op_nan (sim_fpu *f, const sim_fpu *l, const sim_fpu *r)
+{
+  if (sim_fpu_is_snan (l) || sim_fpu_is_snan (r))
+    {
+      *f = sim_fpu_is_snan (l) ? *l : *r;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+   ASSERT (sim_fpu_is_nan (l) || sim_fpu_is_nan (r));
+   if (sim_fpu_is_qnan (l))
+     *f = *l;
+   else /* if (sim_fpu_is_qnan (r)) */
+     *f = *r;
+  return 0;
+}
 
 /* Arithmetic ops */
 
@@ -995,28 +1012,8 @@ sim_fpu_add (sim_fpu *f,
 	     const sim_fpu *l,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (l))
-    {
-      *f = *l;
-      return 0;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      return 0;
-    }
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+    return sim_fpu_op_nan (f, l, r);
   if (sim_fpu_is_infinity (l))
     {
       if (sim_fpu_is_infinity (r)
@@ -1144,28 +1141,8 @@ sim_fpu_sub (sim_fpu *f,
 	     const sim_fpu *l,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (l))
-    {
-      *f = *l;
-      return 0;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      return 0;
-    }
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+    return sim_fpu_op_nan (f, l, r);
   if (sim_fpu_is_infinity (l))
     {
       if (sim_fpu_is_infinity (r)
@@ -1298,28 +1275,8 @@ sim_fpu_mul (sim_fpu *f,
 	     const sim_fpu *l,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (l))
-    {
-      *f = *l;
-      return 0;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      return 0;
-    }
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+    return sim_fpu_op_nan (f, l, r);
   if (sim_fpu_is_infinity (l))
     {
       if (sim_fpu_is_zero (r))
@@ -1423,30 +1380,8 @@ sim_fpu_div (sim_fpu *f,
 	     const sim_fpu *l,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return 0;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return 0;
-    }
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+    return sim_fpu_op_nan (f, l, r);
   if (sim_fpu_is_infinity (l))
     {
       if (sim_fpu_is_infinity (r))
@@ -1556,30 +1491,8 @@ sim_fpu_rem (sim_fpu *f,
 	     const sim_fpu *l,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return 0;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return 0;
-    }
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+    return sim_fpu_op_nan (f, l, r);
   if (sim_fpu_is_infinity (l))
     {
       *f = sim_fpu_qnan;
@@ -1639,28 +1552,8 @@ sim_fpu_max (sim_fpu *f,
 	     const sim_fpu *l,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (l))
-    {
-      *f = *l;
-      return 0;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      return 0;
-    }
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+    return sim_fpu_op_nan (f, l, r);
   if (sim_fpu_is_infinity (l))
     {
       if (sim_fpu_is_infinity (r)
@@ -1722,28 +1615,8 @@ sim_fpu_min (sim_fpu *f,
 	     const sim_fpu *l,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (l))
-    {
-      *f = *l;
-      return 0;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      return 0;
-    }
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+    return sim_fpu_op_nan (f, l, r);
   if (sim_fpu_is_infinity (l))
     {
       if (sim_fpu_is_infinity (r)

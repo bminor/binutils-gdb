@@ -261,6 +261,16 @@ INLINE_SIM_FPU (int) sim_fpu_sqrt (sim_fpu *f,
 
 
 
+/* NaN handling.
+
+   Assuming that at least one of the inputs is NAN choose the correct
+   NAN result for the binary operation.  */
+
+INLINE_SIM_FPU (int) sim_fpu_op_nan (sim_fpu *f,
+				     const sim_fpu *l, const sim_fpu *r);
+
+
+
 /* Conversion of integer <-> floating point. */
 
 INLINE_SIM_FPU (int) sim_fpu_i32to (sim_fpu *f, int32_t i,
