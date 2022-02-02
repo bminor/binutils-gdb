@@ -43,6 +43,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* FCSR bits for IEEE754-2008 compliance.  */
 #define fcsr_NAN2008_mask       (0x00040000)
 #define fcsr_NAN2008_shift      (18)
+#define fcsr_ABS2008_mask       (0x00080000)
+#define fcsr_ABS2008_shift      (19)
 
 #define fenr_FS            (0x00000004)
 

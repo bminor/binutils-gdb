@@ -98,6 +98,7 @@ IGEN_INCLUDE=\
 	$(srcdir)/dsp.igen \
 	$(srcdir)/dsp2.igen \
 	$(srcdir)/mips3264r2.igen \
+	$(srcdir)/mips3264r6.igen \
 
 # NB:	Since these can be built by a number of generators, care
 #	must be taken to ensure that they are only dependant on

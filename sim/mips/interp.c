@@ -1549,6 +1549,10 @@ store_word (SIM_DESC sd,
     }
 }
 
+#define MIPSR6_P(abfd) \
+  ((elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_32R6 \
+    || (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH) == E_MIPS_ARCH_64R6)
+
 /* Load a word from memory.  */
 
 static signed_word
@@ -1557,7 +1561,7 @@ load_word (SIM_DESC sd,
 	   address_word cia,
 	   uword64 vaddr)
 {
-  if ((vaddr & 3) != 0)
+  if ((vaddr & 3) != 0 && !MIPSR6_P (STATE_PROG_BFD (sd)))
     {
       SIM_CORE_SIGNAL (SD, cpu, cia, read_map, AccessLength_WORD+1, vaddr, read_transfer, sim_core_unaligned_signal);
     }
