@@ -1039,6 +1039,7 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"e", "i",		check_implicit_always},
   {"i", "zicsr",	check_implicit_for_i},
   {"i", "zifencei",	check_implicit_for_i},
+  {"m", "zmmul",	check_implicit_always},
   {"g", "i",		check_implicit_always},
   {"g", "m",		check_implicit_always},
   {"g", "a",		check_implicit_always},
@@ -1160,6 +1161,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zifencei",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zifencei",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
   {"zihintpause",	ISA_SPEC_CLASS_DRAFT,		2, 0,  0 },
+  {"zmmul",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfh",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfhmin",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zfinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -2287,6 +2289,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zihintpause");
     case INSN_CLASS_M:
       return riscv_subset_supports (rps, "m");
+    case INSN_CLASS_ZMMUL:
+      return riscv_subset_supports (rps, "zmmul");
     case INSN_CLASS_A:
       return riscv_subset_supports (rps, "a");
     case INSN_CLASS_F:
@@ -2402,6 +2406,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "zihintpause";
     case INSN_CLASS_M:
       return "m";
+    case INSN_CLASS_ZMMUL:
+      return _ ("m' or `zmmul");
     case INSN_CLASS_A:
       return "a";
     case INSN_CLASS_F:
