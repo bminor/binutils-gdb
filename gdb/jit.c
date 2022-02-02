@@ -380,7 +380,16 @@ struct gdb_object
 /* The type of the `private' data passed around by the callback
    functions.  */
 
-typedef CORE_ADDR jit_dbg_reader_data;
+struct jit_dbg_reader_data
+{
+  /* Address of the jit_code_entry in the inferior's address space.  */
+  CORE_ADDR entry_addr;
+
+  /* The code entry, copied in our address space.  */
+  const jit_code_entry &entry;
+
+  struct gdbarch *gdbarch;
+};
 
 /* The reader calls into this function to read data off the targets
    address space.  */
@@ -623,19 +632,20 @@ static void
 jit_object_close_impl (struct gdb_symbol_callbacks *cb,
 		       struct gdb_object *obj)
 {
-  struct objfile *objfile;
-  jit_dbg_reader_data *priv_data;
+  jit_dbg_reader_data *priv_data = (jit_dbg_reader_data *) cb->priv_data;
+  std::string objfile_name
+    = string_printf ("<< JIT compiled code at %s >>",
+		     paddress (priv_data->gdbarch,
+			       priv_data->entry.symfile_addr));
 
-  priv_data = (jit_dbg_reader_data *) cb->priv_data;
-
-  objfile = objfile::make (nullptr, "<< JIT compiled code >>",
-			   OBJF_NOT_FILENAME);
-  objfile->per_bfd->gdbarch = target_gdbarch ();
+  objfile *objfile = objfile::make (nullptr, objfile_name.c_str (),
+				    OBJF_NOT_FILENAME);
+  objfile->per_bfd->gdbarch = priv_data->gdbarch;
 
   for (gdb_symtab &symtab : obj->symtabs)
     finalize_symtab (&symtab, objfile);
 
-  add_objfile_entry (objfile, *priv_data);
+  add_objfile_entry (objfile, priv_data->entry_addr);
 
   delete obj;
 }
@@ -645,11 +655,16 @@ jit_object_close_impl (struct gdb_symbol_callbacks *cb,
    inferior address space.  */
 
 static int
-jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
+jit_reader_try_read_symtab (gdbarch *gdbarch, jit_code_entry *code_entry,
 			    CORE_ADDR entry_addr)
 {
   int status;
-  jit_dbg_reader_data priv_data;
+  jit_dbg_reader_data priv_data
+    {
+      entry_addr,
+      *code_entry,
+      gdbarch
+    };
   struct gdb_reader_funcs *funcs;
   struct gdb_symbol_callbacks callbacks =
     {
@@ -664,8 +679,6 @@ jit_reader_try_read_symtab (struct jit_code_entry *code_entry,
 
       &priv_data
     };
-
-  priv_data = entry_addr;
 
   if (!loaded_jit_reader)
     return 0;
@@ -779,7 +792,7 @@ jit_register_code (struct gdbarch *gdbarch,
 		    paddress (gdbarch, code_entry->symfile_addr),
 		    pulongest (code_entry->symfile_size));
 
-  success = jit_reader_try_read_symtab (code_entry, entry_addr);
+  success = jit_reader_try_read_symtab (gdbarch, code_entry, entry_addr);
 
   if (!success)
     jit_bfd_try_read_symtab (code_entry, entry_addr, gdbarch);
