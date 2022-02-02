@@ -8080,6 +8080,8 @@ lang_process (void)
       lang_statement_list_type added;
       lang_statement_list_type files, inputfiles;
 
+      ldemul_before_plugin_all_symbols_read ();
+
       /* Now all files are read, let the plugin(s) decide if there
 	 are any more to be added to the link before we call the
 	 emulation's after_open hook.  We create a private list of

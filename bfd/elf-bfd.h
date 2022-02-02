@@ -599,6 +599,9 @@ struct elf_link_hash_table
   /* TRUE if DT_JMPREL is a required dynamic tag.  */
   bool dt_jmprel_required;
 
+  /* TRUE when we are handling DT_NEEDED entries.  */
+  bool handling_dt_needed;
+
   /* The BFD used to hold special sections created by the linker.
      This will be the first BFD found which requires these sections to
      be created.  */

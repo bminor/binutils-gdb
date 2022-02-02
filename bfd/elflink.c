@@ -1090,6 +1090,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   const struct elf_backend_data *bed;
   char *new_version;
   bool default_sym = *matched;
+  struct elf_link_hash_table *htab;
 
   *skip = false;
   *override = NULL;
@@ -1220,6 +1221,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
      symbols.  */
   bfd_elf_link_mark_dynamic_symbol (info, h, sym);
 
+  htab = elf_hash_table (info);
+
   /* NEWDYN and OLDDYN indicate whether the new or old symbol,
      respectively, is from a dynamic object.  */
 
@@ -1283,7 +1286,9 @@ _bfd_elf_merge_symbol (bfd *abfd,
       olddyn = (oldsec->symbol->flags & BSF_DYNAMIC) != 0;
     }
 
-  if (oldbfd != NULL
+  /* Set non_ir_ref_dynamic only when not handling DT_NEEDED entries.  */
+  if (!htab->handling_dt_needed
+      && oldbfd != NULL
       && (oldbfd->flags & BFD_PLUGIN) != (abfd->flags & BFD_PLUGIN))
     {
       if (newdyn != olddyn)

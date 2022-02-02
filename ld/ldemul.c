@@ -60,6 +60,13 @@ ldemul_before_parse (void)
 }
 
 void
+ldemul_before_plugin_all_symbols_read (void)
+{
+  if (ld_emulation->before_plugin_all_symbols_read)
+    ld_emulation->before_plugin_all_symbols_read ();
+}
+
+void
 ldemul_after_open (void)
 {
   ld_emulation->after_open ();

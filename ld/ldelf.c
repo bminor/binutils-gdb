@@ -1005,17 +1005,229 @@ ldelf_check_needed (lang_input_statement_type *s)
     }
 }
 
-/* This is called after all the input files have been opened.  */
+static void
+ldelf_handle_dt_needed (struct elf_link_hash_table *htab,
+			int use_libpath, int native, int is_linux,
+			int is_freebsd, int elfsize, const char *prefix)
+{
+  struct bfd_link_needed_list *needed, *l;
+  bfd *abfd;
+  bfd **save_input_bfd_tail;
+
+  /* Get the list of files which appear in DT_NEEDED entries in
+     dynamic objects included in the link (often there will be none).
+     For each such file, we want to track down the corresponding
+     library, and include the symbol table in the link.  This is what
+     the runtime dynamic linker will do.  Tracking the files down here
+     permits one dynamic object to include another without requiring
+     special action by the person doing the link.  Note that the
+     needed list can actually grow while we are stepping through this
+     loop.  */
+  save_input_bfd_tail = link_info.input_bfds_tail;
+  needed = bfd_elf_get_needed_list (link_info.output_bfd, &link_info);
+  for (l = needed; l != NULL; l = l->next)
+    {
+      struct bfd_link_needed_list *ll;
+      struct dt_needed n, nn;
+      int force;
+
+      /* If the lib that needs this one was --as-needed and wasn't
+	 found to be needed, then this lib isn't needed either.  */
+      if (l->by != NULL
+	  && (bfd_elf_get_dyn_lib_class (l->by) & DYN_AS_NEEDED) != 0)
+	continue;
+
+      /* Skip the lib if --no-copy-dt-needed-entries and when we are
+	 handling DT_NEEDED entries or --allow-shlib-undefined is in
+	 effect.  */
+      if (l->by != NULL
+	  && (htab->handling_dt_needed
+	      || link_info.unresolved_syms_in_shared_libs == RM_IGNORE)
+	  && (bfd_elf_get_dyn_lib_class (l->by) & DYN_NO_ADD_NEEDED) != 0)
+	continue;
+
+      /* If we've already seen this file, skip it.  */
+      for (ll = needed; ll != l; ll = ll->next)
+	if ((ll->by == NULL
+	     || (bfd_elf_get_dyn_lib_class (ll->by) & DYN_AS_NEEDED) == 0)
+	    && strcmp (ll->name, l->name) == 0)
+	  break;
+      if (ll != l)
+	continue;
+
+      /* See if this file was included in the link explicitly.  */
+      global_needed = l;
+      global_found = NULL;
+      lang_for_each_input_file (ldelf_check_needed);
+      if (global_found != NULL
+	  && (bfd_elf_get_dyn_lib_class (global_found->the_bfd)
+	      & DYN_AS_NEEDED) == 0)
+	continue;
+
+      n.by = l->by;
+      n.name = l->name;
+      nn.by = l->by;
+      if (verbose)
+	info_msg (_("%s needed by %pB\n"), l->name, l->by);
+
+      /* As-needed libs specified on the command line (or linker script)
+	 take priority over libs found in search dirs.  */
+      if (global_found != NULL)
+	{
+	  nn.name = global_found->filename;
+	  if (ldelf_try_needed (&nn, true, is_linux))
+	    continue;
+	}
+
+      /* We need to find this file and include the symbol table.  We
+	 want to search for the file in the same way that the dynamic
+	 linker will search.  That means that we want to use
+	 rpath_link, rpath, then the environment variable
+	 LD_LIBRARY_PATH (native only), then the DT_RPATH/DT_RUNPATH
+	 entries (native only), then the linker script LIB_SEARCH_DIRS.
+	 We do not search using the -L arguments.
+
+	 We search twice.  The first time, we skip objects which may
+	 introduce version mismatches.  The second time, we force
+	 their use.  See ldelf_vercheck comment.  */
+      for (force = 0; force < 2; force++)
+	{
+	  size_t len;
+	  search_dirs_type *search;
+	  const char *path;
+	  struct bfd_link_needed_list *rp;
+	  int found;
+
+	  if (ldelf_search_needed (command_line.rpath_link, &n, force,
+				   is_linux, elfsize))
+	    break;
+
+	  if (use_libpath)
+	    {
+	      path = command_line.rpath;
+	      if (path)
+		{
+		  path = ldelf_add_sysroot (path);
+		  found = ldelf_search_needed (path, &n, force,
+					       is_linux, elfsize);
+		  free ((char *) path);
+		  if (found)
+		    break;
+		}
+	    }
+	  if (native)
+	    {
+	      if (command_line.rpath_link == NULL
+		  && command_line.rpath == NULL)
+		{
+		  path = (const char *) getenv ("LD_RUN_PATH");
+		  if (path
+		      && ldelf_search_needed (path, &n, force,
+					      is_linux, elfsize))
+		    break;
+		}
+	      path = (const char *) getenv ("LD_LIBRARY_PATH");
+	      if (path
+		  && ldelf_search_needed (path, &n, force,
+					  is_linux, elfsize))
+		break;
+	    }
+	  if (use_libpath)
+	    {
+	      found = 0;
+	      rp = bfd_elf_get_runpath_list (link_info.output_bfd, &link_info);
+	      for (; !found && rp != NULL; rp = rp->next)
+		{
+		  path = ldelf_add_sysroot (rp->name);
+		  found = (rp->by == l->by
+			   && ldelf_search_needed (path, &n, force,
+						   is_linux, elfsize));
+		  free ((char *) path);
+		}
+	      if (found)
+		break;
+
+	      if (is_freebsd
+		  && ldelf_check_ld_elf_hints (l, force, elfsize))
+		break;
+
+	      if (is_linux
+		  && ldelf_check_ld_so_conf (l, force, elfsize, prefix))
+		break;
+	    }
+
+	  len = strlen (l->name);
+	  for (search = search_head; search != NULL; search = search->next)
+	    {
+	      char *filename;
+
+	      if (search->cmdline)
+		continue;
+	      filename = (char *) xmalloc (strlen (search->name) + len + 2);
+	      sprintf (filename, "%s/%s", search->name, l->name);
+	      nn.name = filename;
+	      if (ldelf_try_needed (&nn, force, is_linux))
+		break;
+	      free (filename);
+	    }
+	  if (search != NULL)
+	    break;
+	}
+
+      if (force < 2)
+	continue;
+
+      einfo (_("%P: warning: %s, needed by %pB, not found "
+	       "(try using -rpath or -rpath-link)\n"),
+	     l->name, l->by);
+    }
+
+  /* Don't add DT_NEEDED when loading shared objects from DT_NEEDED for
+     plugin symbol resolution while handling DT_NEEDED entries.  */
+  if (!htab->handling_dt_needed)
+    for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
+      if (bfd_get_format (abfd) == bfd_object
+	  && ((abfd->flags) & DYNAMIC) != 0
+	  && bfd_get_flavour (abfd) == bfd_target_elf_flavour
+	  && (elf_dyn_lib_class (abfd) & (DYN_AS_NEEDED | DYN_NO_NEEDED)) == 0
+	  && elf_dt_name (abfd) != NULL)
+	{
+	  if (bfd_elf_add_dt_needed_tag (abfd, &link_info) < 0)
+	    einfo (_("%F%P: failed to add DT_NEEDED dynamic tag\n"));
+	}
+
+  link_info.input_bfds_tail = save_input_bfd_tail;
+  *save_input_bfd_tail = NULL;
+}
+
+/* This is called before calling plugin 'all symbols read' hook.  */
+
+void
+ldelf_before_plugin_all_symbols_read (int use_libpath, int native,
+				      int is_linux, int is_freebsd,
+				      int elfsize, const char *prefix)
+{
+  struct elf_link_hash_table *htab = elf_hash_table (&link_info);
+
+  if (!is_elf_hash_table (&htab->root))
+    return;
+
+  htab->handling_dt_needed = true;
+  ldelf_handle_dt_needed (htab, use_libpath, native, is_linux,
+			  is_freebsd, elfsize, prefix);
+  htab->handling_dt_needed = false;
+}
+
+/* This is called after all the input files have been opened and all
+   symbols have been loaded.  */
 
 void
 ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 		  int elfsize, const char *prefix)
 {
-  struct bfd_link_needed_list *needed, *l;
   struct elf_link_hash_table *htab;
   asection *s;
   bfd *abfd;
-  bfd **save_input_bfd_tail;
 
   after_open_default ();
 
@@ -1172,189 +1384,12 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 		 " --eh-frame-hdr ignored\n"));
     }
 
-  /* Get the list of files which appear in DT_NEEDED entries in
-     dynamic objects included in the link (often there will be none).
-     For each such file, we want to track down the corresponding
-     library, and include the symbol table in the link.  This is what
-     the runtime dynamic linker will do.  Tracking the files down here
-     permits one dynamic object to include another without requiring
-     special action by the person doing the link.  Note that the
-     needed list can actually grow while we are stepping through this
-     loop.  */
-  save_input_bfd_tail = link_info.input_bfds_tail;
-  needed = bfd_elf_get_needed_list (link_info.output_bfd, &link_info);
-  for (l = needed; l != NULL; l = l->next)
-    {
-      struct bfd_link_needed_list *ll;
-      struct dt_needed n, nn;
-      int force;
-
-      /* If the lib that needs this one was --as-needed and wasn't
-	 found to be needed, then this lib isn't needed either.  */
-      if (l->by != NULL
-	  && (bfd_elf_get_dyn_lib_class (l->by) & DYN_AS_NEEDED) != 0)
-	continue;
-
-      /* Skip the lib if --no-copy-dt-needed-entries and
-	 --allow-shlib-undefined is in effect.  */
-      if (l->by != NULL
-	  && link_info.unresolved_syms_in_shared_libs == RM_IGNORE
-	  && (bfd_elf_get_dyn_lib_class (l->by) & DYN_NO_ADD_NEEDED) != 0)
-	continue;
-
-      /* If we've already seen this file, skip it.  */
-      for (ll = needed; ll != l; ll = ll->next)
-	if ((ll->by == NULL
-	     || (bfd_elf_get_dyn_lib_class (ll->by) & DYN_AS_NEEDED) == 0)
-	    && strcmp (ll->name, l->name) == 0)
-	  break;
-      if (ll != l)
-	continue;
-
-      /* See if this file was included in the link explicitly.  */
-      global_needed = l;
-      global_found = NULL;
-      lang_for_each_input_file (ldelf_check_needed);
-      if (global_found != NULL
-	  && (bfd_elf_get_dyn_lib_class (global_found->the_bfd)
-	      & DYN_AS_NEEDED) == 0)
-	continue;
-
-      n.by = l->by;
-      n.name = l->name;
-      nn.by = l->by;
-      if (verbose)
-	info_msg (_("%s needed by %pB\n"), l->name, l->by);
-
-      /* As-needed libs specified on the command line (or linker script)
-	 take priority over libs found in search dirs.  */
-      if (global_found != NULL)
-	{
-	  nn.name = global_found->filename;
-	  if (ldelf_try_needed (&nn, true, is_linux))
-	    continue;
-	}
-
-      /* We need to find this file and include the symbol table.  We
-	 want to search for the file in the same way that the dynamic
-	 linker will search.  That means that we want to use
-	 rpath_link, rpath, then the environment variable
-	 LD_LIBRARY_PATH (native only), then the DT_RPATH/DT_RUNPATH
-	 entries (native only), then the linker script LIB_SEARCH_DIRS.
-	 We do not search using the -L arguments.
-
-	 We search twice.  The first time, we skip objects which may
-	 introduce version mismatches.  The second time, we force
-	 their use.  See ldelf_vercheck comment.  */
-      for (force = 0; force < 2; force++)
-	{
-	  size_t len;
-	  search_dirs_type *search;
-	  const char *path;
-	  struct bfd_link_needed_list *rp;
-	  int found;
-
-	  if (ldelf_search_needed (command_line.rpath_link, &n, force,
-				   is_linux, elfsize))
-	    break;
-
-	  if (use_libpath)
-	    {
-	      path = command_line.rpath;
-	      if (path)
-		{
-		  path = ldelf_add_sysroot (path);
-		  found = ldelf_search_needed (path, &n, force,
-					       is_linux, elfsize);
-		  free ((char *) path);
-		  if (found)
-		    break;
-		}
-	    }
-	  if (native)
-	    {
-	      if (command_line.rpath_link == NULL
-		  && command_line.rpath == NULL)
-		{
-		  path = (const char *) getenv ("LD_RUN_PATH");
-		  if (path
-		      && ldelf_search_needed (path, &n, force,
-					      is_linux, elfsize))
-		    break;
-		}
-	      path = (const char *) getenv ("LD_LIBRARY_PATH");
-	      if (path
-		  && ldelf_search_needed (path, &n, force,
-					  is_linux, elfsize))
-		break;
-	    }
-	  if (use_libpath)
-	    {
-	      found = 0;
-	      rp = bfd_elf_get_runpath_list (link_info.output_bfd, &link_info);
-	      for (; !found && rp != NULL; rp = rp->next)
-		{
-		  path = ldelf_add_sysroot (rp->name);
-		  found = (rp->by == l->by
-			   && ldelf_search_needed (path, &n, force,
-						   is_linux, elfsize));
-		  free ((char *) path);
-		}
-	      if (found)
-		break;
-
-	      if (is_freebsd
-		  && ldelf_check_ld_elf_hints (l, force, elfsize))
-		break;
-
-	      if (is_linux
-		  && ldelf_check_ld_so_conf (l, force, elfsize, prefix))
-		break;
-	    }
-
-	  len = strlen (l->name);
-	  for (search = search_head; search != NULL; search = search->next)
-	    {
-	      char *filename;
-
-	      if (search->cmdline)
-		continue;
-	      filename = (char *) xmalloc (strlen (search->name) + len + 2);
-	      sprintf (filename, "%s/%s", search->name, l->name);
-	      nn.name = filename;
-	      if (ldelf_try_needed (&nn, force, is_linux))
-		break;
-	      free (filename);
-	    }
-	  if (search != NULL)
-	    break;
-	}
-
-      if (force < 2)
-	continue;
-
-      einfo (_("%P: warning: %s, needed by %pB, not found "
-	       "(try using -rpath or -rpath-link)\n"),
-	     l->name, l->by);
-    }
-
-  for (abfd = link_info.input_bfds; abfd; abfd = abfd->link.next)
-    if (bfd_get_format (abfd) == bfd_object
-	&& ((abfd->flags) & DYNAMIC) != 0
-	&& bfd_get_flavour (abfd) == bfd_target_elf_flavour
-	&& (elf_dyn_lib_class (abfd) & (DYN_AS_NEEDED | DYN_NO_NEEDED)) == 0
-	&& elf_dt_name (abfd) != NULL)
-      {
-	if (bfd_elf_add_dt_needed_tag (abfd, &link_info) < 0)
-	  einfo (_("%F%P: failed to add DT_NEEDED dynamic tag\n"));
-      }
-
-  link_info.input_bfds_tail = save_input_bfd_tail;
-  *save_input_bfd_tail = NULL;
-
   if (link_info.eh_frame_hdr_type == COMPACT_EH_HDR)
     if (!bfd_elf_parse_eh_frame_entries (NULL, &link_info))
       einfo (_("%F%P: failed to parse EH frame entries\n"));
+
+  ldelf_handle_dt_needed (htab, use_libpath, native, is_linux,
+			  is_freebsd, elfsize, prefix);
 }
 
 static bfd_size_type

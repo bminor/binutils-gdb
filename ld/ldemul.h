@@ -32,6 +32,8 @@ extern void ldemul_after_parse
   (void);
 extern void ldemul_before_parse
   (void);
+extern void ldemul_before_plugin_all_symbols_read
+  (void);
 extern void ldemul_after_open
   (void);
 extern void ldemul_after_check_relocs
@@ -130,6 +132,9 @@ typedef struct ld_emulation_xfer_struct {
 
   /* Run after parsing the command line and script file.  */
   void   (*after_parse) (void);
+
+  /* Run before calling plugin 'all symbols read' hook.  */
+  void   (*before_plugin_all_symbols_read)  (void);
 
   /* Run after opening all input files, and loading the symbols.  */
   void   (*after_open) (void);

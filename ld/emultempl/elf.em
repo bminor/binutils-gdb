@@ -53,6 +53,8 @@ fragment <<EOF
 
 /* Declare functions used by various EXTRA_EM_FILEs.  */
 static void gld${EMULATION_NAME}_before_parse (void);
+static void gld${EMULATION_NAME}_before_plugin_all_symbols_read
+  (void);
 static void gld${EMULATION_NAME}_after_open (void);
 static void gld${EMULATION_NAME}_before_allocation (void);
 static void gld${EMULATION_NAME}_after_allocation (void);
@@ -124,6 +126,17 @@ if test x"$LDEMUL_AFTER_OPEN" != xgld"$EMULATION_NAME"_after_open; then
   fi
 
 fragment <<EOF
+
+/* This is called before calling plugin 'all symbols read' hook.  */
+
+static void
+gld${EMULATION_NAME}_before_plugin_all_symbols_read (void)
+{
+  ldelf_before_plugin_all_symbols_read ($IS_LIBPATH, $IS_NATIVE,
+				        $IS_LINUX_TARGET,
+					$IS_FREEBSD_TARGET,
+					$ELFSIZE, "$prefix");
+}
 
 /* This is called after all the input files have been opened.  */
 
@@ -910,6 +923,7 @@ fi
 fi
 
 LDEMUL_AFTER_PARSE=${LDEMUL_AFTER_PARSE-ldelf_after_parse}
+LDEMUL_BEFORE_PLUGIN_ALL_SYMBOLS_READ=${LDEMUL_BEFORE_PLUGIN_ALL_SYMBOLS_READ-gld${EMULATION_NAME}_before_plugin_all_symbols_read}
 LDEMUL_AFTER_OPEN=${LDEMUL_AFTER_OPEN-gld${EMULATION_NAME}_after_open}
 LDEMUL_BEFORE_PLACE_ORPHANS=${LDEMUL_BEFORE_PLACE_ORPHANS-ldelf_before_place_orphans}
 LDEMUL_AFTER_ALLOCATION=${LDEMUL_AFTER_ALLOCATION-gld${EMULATION_NAME}_after_allocation}

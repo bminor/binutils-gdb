@@ -497,6 +497,31 @@ set lto_link_elf_tests [list \
    "pr28879" \
    "c++" \
   ] \
+  [list \
+   "Build libpr28849a.so" \
+   "-shared" \
+   "-fPIC" \
+   {pr28849a.c} \
+   "" \
+   "libpr28849a.so" \
+  ] \
+  [list \
+   "Build libpr28849b.so" \
+   "-shared -Wl,--no-as-needed,tmpdir/libpr28849a.so" \
+   "" \
+   {dummy.c} \
+   "" \
+   "libpr28849b.so" \
+  ] \
+  [list \
+   "Build pr28849" \
+   "-Wl,--no-as-needed,--copy-dt-needed-entries,-rpath-link,. \
+    tmpdir/libpr28849b.so" \
+   "-O2 -flto" \
+   {pr28849b.c} \
+   {{"nm" {-D} "pr28849.d"}} \
+   "pr28849" \
+  ] \
 ]
 
 # PR 14918 checks that libgcc is not spuriously included in a shared link of
