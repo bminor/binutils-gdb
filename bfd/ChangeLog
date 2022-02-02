@@ -1,3 +1,9 @@
+2022-02-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 28834
+	* dwarf2.c (read_section): Change the heuristic that checks for
+	overlarge dwarf debug info sections.
+
 2022-01-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
