@@ -198,11 +198,10 @@ pack_fpu (const sim_fpu *src,
       /* Force fraction to correct class.  */
       fraction = src->fraction;
       fraction >>= NR_GUARDS;
-#ifdef SIM_QUIET_NAN_NEGATED
-      fraction |= QUIET_NAN - 1;
-#else
-      fraction |= QUIET_NAN;
-#endif
+      if (sim_fpu_quiet_nan_inverted)
+	fraction |= QUIET_NAN - 1;
+      else
+	fraction |= QUIET_NAN;
       break;
     case sim_fpu_class_snan:
       sign = src->sign;
@@ -210,11 +209,10 @@ pack_fpu (const sim_fpu *src,
       /* Force fraction to correct class.  */
       fraction = src->fraction;
       fraction >>= NR_GUARDS;
-#ifdef SIM_QUIET_NAN_NEGATED
-      fraction |= QUIET_NAN;
-#else
-      fraction &= ~QUIET_NAN;
-#endif
+      if (sim_fpu_quiet_nan_inverted)
+        fraction |= QUIET_NAN;
+      else
+	fraction &= ~QUIET_NAN;
       break;
     case sim_fpu_class_infinity:
       sign = src->sign;
@@ -372,11 +370,10 @@ unpack_fpu (sim_fpu *dst, uint64_t packed, int is_double)
 	  /* Non zero fraction, means NaN.  */
 	  dst->sign = sign;
 	  dst->fraction = (fraction << NR_GUARDS);
-#ifdef SIM_QUIET_NAN_NEGATED
-	  qnan = (fraction & QUIET_NAN) == 0;
-#else
-	  qnan = fraction >= QUIET_NAN;
-#endif
+	  if (sim_fpu_quiet_nan_inverted)
+	    qnan = (fraction & QUIET_NAN) == 0;
+	  else
+	    qnan = fraction >= QUIET_NAN;
 	  if (qnan)
 	    dst->class = sim_fpu_class_qnan;
 	  else
@@ -2512,6 +2509,10 @@ sim_fpu_gt (int *is,
 /* A number of useful constants */
 
 #if EXTERN_SIM_FPU_P
+sim_fpu_state _sim_fpu = {
+  .quiet_nan_inverted = false,
+};
+
 const sim_fpu sim_fpu_zero = {
   sim_fpu_class_zero, 0, 0, 0
 };

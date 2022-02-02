@@ -5050,6 +5050,9 @@
 {
   if (! COP_Usable (1))
     SignalExceptionCoProcessorUnusable (1);
+
+  FCSR &= ~fcsr_NAN2008_mask;
+  sim_fpu_quiet_nan_inverted = true;
 }
 
 

@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SIM_FPU_H
 
 
+#include <stdbool.h>
+
 
 /* The FPU intermediate type - this object, passed by reference,
    should be treated as opaque.
@@ -153,6 +155,17 @@ typedef enum
   sim_fpu_status_underflow = 16384,
   sim_fpu_status_denorm = 32768,
 } sim_fpu_status;
+
+
+
+
+/* State used by the FPU.
+
+   FIXME: This state is global, but should be moved to SIM_CPU.  */
+
+typedef struct _sim_fpu_state {
+  bool quiet_nan_inverted; /* Toggle quiet NaN semantics.  */
+} sim_fpu_state;
 
 
 
@@ -375,7 +388,19 @@ enum {
 INLINE_SIM_FPU (int) sim_fpu_is (const sim_fpu *l);
 INLINE_SIM_FPU (int) sim_fpu_cmp (const sim_fpu *l, const sim_fpu *r);
 
+/* Global FPU state.  */
 
+extern sim_fpu_state _sim_fpu;
+
+
+/* IEEE 754-1985 specifies the top bit of the mantissa as an indicator
+   of signalling vs. quiet NaN, but does not specify the semantics.
+   Most architectures treat this bit as quiet NaN, but legacy (pre-R6)
+   MIPS goes the other way and treats it as signalling.  This variable
+   tracks the current semantics of the NaN bit and allows differentiation
+   between pre-R6 and R6 MIPS cores.  */
+
+#define sim_fpu_quiet_nan_inverted _sim_fpu.quiet_nan_inverted
 
 /* A number of useful constants.  */
 
