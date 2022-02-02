@@ -121,6 +121,7 @@ f_language::f_type_print_varspec_prefix (struct type *type,
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
+    case TYPE_CODE_NAMELIST:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_INT:
     case TYPE_CODE_FLT:
@@ -261,6 +262,7 @@ f_language::f_type_print_varspec_suffix (struct type *type,
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
+    case TYPE_CODE_NAMELIST:
     case TYPE_CODE_ENUM:
     case TYPE_CODE_INT:
     case TYPE_CODE_FLT:
@@ -305,7 +307,8 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
       const char *prefix = "";
       if (type->code () == TYPE_CODE_UNION)
 	prefix = "Type, C_Union :: ";
-      else if (type->code () == TYPE_CODE_STRUCT)
+      else if (type->code () == TYPE_CODE_STRUCT
+               || type->code () == TYPE_CODE_NAMELIST)
 	prefix = "Type ";
       fprintf_filtered (stream, "%*s%s%s", level, "", prefix, type->name ());
       return;
@@ -391,6 +394,7 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
 
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
+    case TYPE_CODE_NAMELIST:
       if (type->code () == TYPE_CODE_UNION)
 	fprintf_filtered (stream, "%*sType, C_Union :: ", level, "");
       else

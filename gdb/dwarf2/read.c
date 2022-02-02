@@ -9694,6 +9694,7 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_interface_type:
     case DW_TAG_structure_type:
     case DW_TAG_union_type:
+    case DW_TAG_namelist:
       process_structure_scope (die, cu);
       break;
     case DW_TAG_enumeration_type:
@@ -14556,8 +14557,21 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 
   fp = &new_field->field;
 
-  if (die->tag == DW_TAG_member && ! die_is_declaration (die, cu))
+  if ((die->tag == DW_TAG_member || die->tag == DW_TAG_namelist_item)
+      && !die_is_declaration (die, cu))
     {
+      if (die->tag == DW_TAG_namelist_item)
+        {
+	  /* Typically, DW_TAG_namelist_item are references to namelist items.
+	     If so, follow that reference.  */
+	  struct attribute *attr1 = dwarf2_attr (die, DW_AT_namelist_item, cu);
+	  struct die_info *item_die = nullptr;
+	  struct dwarf2_cu *item_cu = cu;
+          if (attr1->form_is_ref ())
+	    item_die = follow_die_ref (die, attr1, &item_cu);
+	  if (item_die != nullptr)
+	    die = item_die;
+        }
       /* Data member other than a C++ static data member.  */
 
       /* Get type of field.  */
@@ -15615,6 +15629,10 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       type->set_code (TYPE_CODE_UNION);
     }
+  else if (die->tag == DW_TAG_namelist)
+    {
+      type->set_code (TYPE_CODE_NAMELIST);
+    }
   else
     {
       type->set_code (TYPE_CODE_STRUCT);
@@ -15817,7 +15835,8 @@ handle_struct_member_die (struct die_info *child_die, struct type *type,
 			  struct dwarf2_cu *cu)
 {
   if (child_die->tag == DW_TAG_member
-      || child_die->tag == DW_TAG_variable)
+      || child_die->tag == DW_TAG_variable
+      || child_die->tag == DW_TAG_namelist_item)
     {
       /* NOTE: carlton/2002-11-05: A C++ static data member
 	 should be a DW_TAG_member that is a declaration, but
@@ -15860,8 +15879,10 @@ handle_struct_member_die (struct die_info *child_die, struct type *type,
     handle_variant (child_die, type, fi, template_args, cu);
 }
 
-/* Finish creating a structure or union type, including filling in
-   its members and creating a symbol for it.  */
+/* Finish creating a structure or union type, including filling in its
+   members and creating a symbol for it. This function also handles Fortran
+   namelist variables, their items or members and creating a symbol for
+   them.  */
 
 static void
 process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
@@ -21963,9 +21984,17 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_union_type:
 	case DW_TAG_set_type:
 	case DW_TAG_enumeration_type:
-	  sym->set_aclass_index (LOC_TYPEDEF);
-	  sym->set_domain (STRUCT_DOMAIN);
-
+	case DW_TAG_namelist:
+	  if (die->tag == DW_TAG_namelist)
+	    {
+	      sym->set_aclass_index (LOC_STATIC);
+	      sym->set_domain (VAR_DOMAIN);
+	    }
+	  else
+	    {
+	      sym->set_aclass_index (LOC_TYPEDEF);
+	      sym->set_domain (STRUCT_DOMAIN);
+	    }
 	  {
 	    /* NOTE: carlton/2003-11-10: C++ class symbols shouldn't
 	       really ever be static objects: otherwise, if you try
@@ -22902,6 +22931,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
       && die->tag != DW_TAG_class_type
       && die->tag != DW_TAG_interface_type
       && die->tag != DW_TAG_structure_type
+      && die->tag != DW_TAG_namelist
       && die->tag != DW_TAG_union_type)
     return NULL;
 
@@ -22926,6 +22956,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_interface_type:
     case DW_TAG_structure_type:
     case DW_TAG_union_type:
+    case DW_TAG_namelist:
       /* Some GCC versions emit spurious DW_AT_name attributes for unnamed
 	 structures or unions.  These were of the form "._%d" in GCC 4.1,
 	 or simply "<anonymous struct>" or "<anonymous union>" in GCC 4.3

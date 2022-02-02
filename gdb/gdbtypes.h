@@ -196,6 +196,19 @@ enum type_code
 
     /* * Fixed Point type.  */
     TYPE_CODE_FIXED_POINT,
+
+    /* * Fortran namelist is a group of variables or arrays that can be
+       read or written.
+
+       Namelist syntax: NAMELIST / groupname / namelist_items ...
+       NAMELIST statement assign a group name to a collection of variables
+       called as namelist items. The namelist items can be of any data type
+       and can be variables or arrays.
+
+       Compiler emit DW_TAG_namelist for group name and DW_TAG_namelist_item
+       for each of the namelist items. GDB process these namelist dies
+       and print namelist variables during print and ptype commands.  */
+    TYPE_CODE_NAMELIST,
   };
 
 /* * Some bits for the type's instance_flags word.  See the macros
