@@ -481,7 +481,10 @@ fold_segment_align (seg_align_type *seg, etree_value_type *lhs)
 	      seg->base = expld.result.value;
 	      seg->commonpagesize = commonpage;
 	      seg->maxpagesize = maxpage;
-	      seg->relropagesize = maxpage;
+	      if (config.relro_use_commonpagesize)
+		seg->relropagesize = commonpage;
+	      else
+		seg->relropagesize = maxpage;
 	      seg->relro_end = 0;
 	    }
 	  else
