@@ -43,9 +43,9 @@ set no_longer_exists_msg "The program no longer exists\."
 set not_being_run_msg "The program is not being run\."
 
 gdb_test_multiple "continue" "prompt after first continue" {
-    -re "Continuing\.\r\n$no_such_process_msg\r\n$no_such_process_msg\r\n$gdb_prompt " {
+    -re "Continuing\.\r\n$no_such_process_msg\r\n$gdb_prompt " {
 	pass $gdb_test_name
-	# Two times $no_such_process_msg.  The bug condition was triggered, go
+	# Saw $no_such_process_msg.  The bug condition was triggered, go
 	# check for it.
 	gdb_test_multiple "" "messages" {
 	    -re ".*$killed_msg.*$no_longer_exists_msg\r\n" {
