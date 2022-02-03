@@ -550,7 +550,7 @@ objfpy_build_id_matches (const struct bfd_build_id *build_id,
   for (i = 0; i < build_id->size; ++i)
     {
       char c1 = string[i * 2], c2 = string[i * 2 + 1];
-      int byte = (host_hex_value (c1) << 4) | host_hex_value (c2);
+      int byte = (fromhex (c1) << 4) | fromhex (c2);
 
       if (byte != build_id->data[i])
 	return 0;

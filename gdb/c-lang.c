@@ -410,7 +410,7 @@ convert_ucn (const char *p, const char *limit, const char *dest_charset,
   int i;
 
   for (i = 0; i < length && p < limit && ISXDIGIT (*p); ++i, ++p)
-    result = (result << 4) + host_hex_value (*p);
+    result = (result << 4) + fromhex (*p);
 
   for (i = 3; i >= 0; --i)
     {
@@ -454,7 +454,7 @@ convert_octal (struct type *type, const char *p,
        i < 3 && p < limit && ISDIGIT (*p) && *p != '8' && *p != '9';
        ++i)
     {
-      value = 8 * value + host_hex_value (*p);
+      value = 8 * value + fromhex (*p);
       ++p;
     }
 
@@ -476,7 +476,7 @@ convert_hex (struct type *type, const char *p,
 
   while (p < limit && ISXDIGIT (*p))
     {
-      value = 16 * value + host_hex_value (*p);
+      value = 16 * value + fromhex (*p);
       ++p;
     }
 

@@ -159,9 +159,4 @@ class wchar_iterator
    character.  */
 char host_letter_to_control_character (char c);
 
-/* Convert a hex digit character to its numeric value.  E.g., 'f' is
-   converted to 15.  This function assumes that C is a valid hex
-   digit.  Both upper- and lower-case letters are recognized.  */
-int host_hex_value (char c);
-
 #endif /* CHARSET_H */

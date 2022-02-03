@@ -463,20 +463,6 @@ host_letter_to_control_character (char c)
   return c & 0237;
 }
 
-/* Convert a host character, C, to its hex value.  C must already have
-   been validated using isxdigit.  */
-
-int
-host_hex_value (char c)
-{
-  if (isdigit (c))
-    return c - '0';
-  if (c >= 'a' && c <= 'f')
-    return 10 + c - 'a';
-  gdb_assert (c >= 'A' && c <= 'F');
-  return 10 + c - 'A';
-}
-
 
 /* Public character management functions.  */
 
