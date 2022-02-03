@@ -101,6 +101,7 @@ private:
 
   /* Stack of progress info.  */
   std::vector<cli_progress_info> m_progress_info;
+  void clear_current_line ();
 };
 
 extern cli_ui_out *cli_out_new (struct ui_file *stream);

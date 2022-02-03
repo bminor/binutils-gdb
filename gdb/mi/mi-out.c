@@ -261,7 +261,7 @@ mi_ui_out::main_stream ()
 /* Indicate that a task described by NAME is in progress:
 
    - SHOULD_PRINT == true:
-       <NAME...
+       <NAME
        >
    - SHOULD_PRINT == false:
        <>
@@ -275,7 +275,7 @@ mi_ui_out::do_progress_start (const std::string &name, bool should_print)
 
   if (should_print)
     {
-      fprintf_unfiltered (stream, "%s...\n", name.c_str ());
+      fprintf_unfiltered (stream, "%s\n", name.c_str ());
       gdb_flush (stream);
     }
 

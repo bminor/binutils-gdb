@@ -330,7 +330,7 @@ cli_ui_out::do_progress_notify (double howmuch,
     {
       fprintf_unfiltered (stream, "%s", info.name.c_str ());
       if (chars_per_line <= 0)
-	fprintf_unfiltered (stream, "...\n");
+	fprintf_unfiltered (stream, "\n");
       gdb_flush (stream);
       info.state = progress_update::WORKING;
     }
@@ -379,7 +379,7 @@ cli_ui_out::do_progress_notify (double howmuch,
 	  || info.state == progress_update::PERCENT)
 	{
 	  /* Ensure the progress bar prints on its own line so that
-	     progress updates don't overwrite name.  */
+	     progress updates don't overwrite NAME.  */
 	  fprintf_unfiltered (stream, "\r%s\n", info.name.c_str ());
 	  gdb_flush (stream);
 	}
@@ -396,13 +396,41 @@ cli_ui_out::do_progress_notify (double howmuch,
   return;
 }
 
+/* Clear the current line of the most recent progress update.  Overwrites
+   the current line with whitespace.  */
+
+void
+cli_ui_out::clear_current_line ()
+{
+  struct ui_file *stream = m_streams.back ();
+  int chars_per_line = get_chars_per_line ();
+
+  if (chars_per_line <= 0
+      || chars_per_line > MAX_CHARS_PER_LINE)
+    chars_per_line = MAX_CHARS_PER_LINE;
+
+  int i;
+  int width = chars_per_line - 3;
+
+  fprintf_unfiltered (stream, "\r");
+  for (i = 0; i < width + 2; ++i)
+    fprintf_unfiltered (stream, " ");
+  fprintf_unfiltered (stream, "\r");
+
+  gdb_flush (stream);
+}
+
 /* Set NAME as the new description of the most recent progress update.  */
 
 void
 cli_ui_out::update_progress_name (const std::string &name)
 {
+  struct ui_file *stream = m_streams.back ();
   cli_progress_info &info = m_progress_info.back ();
   info.name = name;
+
+  if (stream->isatty ())
+    clear_current_line ();
 }
 
 /* Get the current state of the most recent progress update.  */
@@ -414,7 +442,9 @@ cli_ui_out::get_progress_state ()
   return info.state;
 }
 
-/* Clear the current line of the most recent progress update.  */
+
+/* Remove the most recent progress update from the stack and
+   overwrite the current line with whitespace.  */
 
 void
 cli_ui_out::do_progress_end ()
@@ -422,23 +452,8 @@ cli_ui_out::do_progress_end ()
   struct ui_file *stream = m_streams.back ();
   m_progress_info.pop_back ();
 
-  if (!stream->isatty ())
-    return;
-
-  int chars_per_line = get_chars_per_line ();
-  if (chars_per_line <= 0
-      || chars_per_line > MAX_CHARS_PER_LINE)
-    chars_per_line = MAX_CHARS_PER_LINE;
-
-  int i;
-  int width = get_chars_per_line () - 3;
-
-  fprintf_unfiltered (stream, "\r");
-  for (i = 0; i < width + 2; ++i)
-    fprintf_unfiltered (stream, " ");
-  fprintf_unfiltered (stream, "\r");
-
-  gdb_flush (stream);
+  if (stream->isatty ())
+    clear_current_line ();
 }
 
 /* local functions */
