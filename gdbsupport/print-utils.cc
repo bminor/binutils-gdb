@@ -168,6 +168,10 @@ phex (ULONGEST l, int sizeof_l)
       str = get_print_cell ();
       xsnprintf (str, PRINT_CELL_SIZE, "%04x", (unsigned short) (l & 0xffff));
       break;
+    case 1:
+      str = get_print_cell ();
+      xsnprintf (str, PRINT_CELL_SIZE, "%02x", (unsigned short) (l & 0xff));
+      break;
     default:
       str = phex (l, sizeof (l));
       break;
@@ -205,6 +209,10 @@ phex_nz (ULONGEST l, int sizeof_l)
     case 2:
       str = get_print_cell ();
       xsnprintf (str, PRINT_CELL_SIZE, "%x", (unsigned short) (l & 0xffff));
+      break;
+    case 1:
+      str = get_print_cell ();
+      xsnprintf (str, PRINT_CELL_SIZE, "%x", (unsigned short) (l & 0xff));
       break;
     default:
       str = phex_nz (l, sizeof (l));
