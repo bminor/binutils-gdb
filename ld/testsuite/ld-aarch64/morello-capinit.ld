@@ -15,5 +15,16 @@ SECTIONS {
 	.plt : { *(.plt) }
 	.got : { *(.got) }
 	.got : { *(.got) }
-	.data : { *(.data) }
+	__outer_data_start = .;
+	.data_total :
+	{
+		data_start = .;
+		*(.data)
+		data1_start = .;
+		*(.data.1)
+		data1_end = .;
+		*(.data.2)
+		__data_end = .;
+	}
+	.inspectionsection : { *(.inspectionsection) }
 }

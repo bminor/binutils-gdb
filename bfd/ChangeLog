@@ -1,3 +1,17 @@
+2022-02-03  Alex Coplan  <alex.coplan@arm.com>
+	    Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* elfnn-aarch64.c (pcc_low): New.
+	(pcc_high): New.
+	(elfNN_c64_resize_sections): Update new global variables
+	pcc_{low,high} instead of local variables to track PCC span.
+	(enum c64_section_perm_type): New.
+	(c64_symbol_section_adjustment): New.
+	(c64_fixup_frag): Rework to calculate size appropriately for
+	symbols that need adjustment.
+	(c64_symbol_adjust): New. Use it ...
+	(elfNN_aarch64_final_link_relocate): ... here.
+
 2022-01-17  Alex Coplan  <alex.coplan@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_relocate_section): Skip over TLS

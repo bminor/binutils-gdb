@@ -1,3 +1,23 @@
+2022-02-03  Alex Coplan  <alex.coplan@arm.com>
+	    Matthew Malcomson  <matthew.malcomson@arm.com>
+
+	* testsuite/ld-aarch64/aarch64-elf.exp: Add new tests.
+	* testsuite/ld-aarch64/emit-relocs-morello-6.d: New test.
+	* testsuite/ld-aarch64/emit-relocs-morello-6.s: Assembly.
+	* testsuite/ld-aarch64/emit-relocs-morello-6b.d: New test.
+	* testsuite/ld-aarch64/emit-relocs-morello-7.d: New test.
+	* testsuite/ld-aarch64/emit-relocs-morello-7.ld: Linker script thereof.
+	* testsuite/ld-aarch64/emit-relocs-morello-7.s: Assembly.
+	* testsuite/ld-aarch64/morello-capinit.d: New test.
+	* testsuite/ld-aarch64/morello-capinit.ld: Linker script.
+	* testsuite/ld-aarch64/morello-capinit.s: Assembly.
+	* testsuite/ld-aarch64/morello-sizeless-global-syms.d: New test.
+	* testsuite/ld-aarch64/morello-sizeless-global-syms.s: Assembly.
+	* testsuite/ld-aarch64/morello-sizeless-got-syms.d: New test.
+	* testsuite/ld-aarch64/morello-sizeless-got-syms.s: Assembly.
+	* testsuite/ld-aarch64/morello-sizeless-local-syms.d: New test.
+	* testsuite/ld-aarch64/morello-sizeless-local-syms.s: Assembly.
+
 2022-01-17  Alex Coplan  <alex.coplan@arm.com>
 
 	* testsuite/ld-aarch64/aarch64-elf.exp: Add morello-weak-tls test.

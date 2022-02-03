@@ -4884,6 +4884,8 @@ record_section_change (asection *sec, struct sec_change_queue **queue)
    of the section and if necessary, adding a pad at the end of the section so
    that the section following it starts only after the pad.  */
 
+static bfd_vma pcc_low;
+static bfd_vma pcc_high;
 void
 elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 			   void (*c64_pad_section) (asection *, bfd_vma),
@@ -5052,8 +5054,8 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 	  /* Layout sections since it affects the final range of PCC.  */
 	  (*htab->layout_sections_again) ();
 
-	  bfd_vma pcc_low = pcc_low_sec->vma;
-	  bfd_vma pcc_high = pcc_high_sec->vma + pcc_high_sec->size + padding;
+	  pcc_low = pcc_low_sec->vma;
+	  pcc_high = pcc_high_sec->vma + pcc_high_sec->size + padding;
 
 	  if (!c64_valid_cap_range (&pcc_low, &pcc_high))
 	    {
@@ -5072,6 +5074,14 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 
       queue = queue->next;
       free (queue_free);
+    }
+
+  if (pcc_low_sec)
+    {
+      if (!pcc_high_sec)
+	abort ();
+      pcc_low = pcc_low_sec->vma;
+      pcc_high = pcc_high_sec->vma + pcc_high_sec->size;
     }
 }
 
@@ -6374,70 +6384,94 @@ cap_meta (size_t size, const asection *sec)
   abort ();
 }
 
+enum c64_section_perm_type {
+    C64_SYM_UNKNOWN = 0,
+    C64_SYM_STANDARD,
+    C64_SYM_LINKER_DEF,
+    C64_SYM_LDSCRIPT_DEF,
+    C64_SYM_LDSCRIPT_START,
+};
+
+static enum c64_section_perm_type
+c64_symbol_section_adjustment (struct elf_link_hash_entry *h, bfd_vma value,
+			       asection *sym_sec, asection **ret_sec,
+			       struct bfd_link_info *info)
+{
+  if (!sym_sec)
+    return C64_SYM_UNKNOWN;
+
+  *ret_sec = sym_sec;
+  if (!h)
+    return C64_SYM_STANDARD;
+
+  /* Linker defined symbols are always at the start of the section they
+     track.  */
+  if (h->root.linker_def)
+    return C64_SYM_LINKER_DEF;
+  else if (h->root.ldscript_def)
+    {
+      const char *name = h->root.root.string;
+      size_t len = strlen (name);
+
+      bfd_vma size = sym_sec->size - (value - sym_sec->vma);
+      /* The special case: the symbol is at the end of the section.
+	 This could either mean that it is an end symbol or it is the
+	 start of the output section following the symbol.  We try to
+	 guess if it is a start of the next section by reading its
+	 name.  This is a compatibility hack, ideally linker scripts
+	 should be written such that start symbols are defined within
+	 the output section it intends to track.  */
+      if (size == 0
+	  && (len > 8 && name[0] == '_' && name[1] == '_'
+	      && (!strncmp (name + 2, "start_", 6)
+		  || !strcmp (name + len - 6, "_start"))))
+	{
+	  asection *s = bfd_sections_find_if (info->output_bfd,
+					      section_start_symbol,
+					      &value);
+	  if (s != NULL)
+	    {
+	      *ret_sec = s;
+	      return C64_SYM_LDSCRIPT_START;
+	    }
+	}
+      return C64_SYM_LDSCRIPT_DEF;
+    }
+  return C64_SYM_STANDARD;
+}
+
 static bfd_reloc_status_type
 c64_fixup_frag (bfd *input_bfd, struct bfd_link_info *info,
-		bfd_reloc_code_real_type bfd_r_type, Elf_Internal_Sym *sym,
-		struct elf_link_hash_entry *h, asection *sym_sec,
-		bfd_byte *frag_loc, bfd_vma value, bfd_signed_vma addend)
+		Elf_Internal_Sym *sym, struct elf_link_hash_entry *h,
+		asection *sym_sec, bfd_byte *frag_loc, bfd_vma value,
+		bfd_signed_vma addend)
 {
-  bfd_vma size = 0;
+  BFD_ASSERT (h || sym);
+  bfd_vma size = sym ? sym->st_size : h->size;
   asection *perm_sec = sym_sec;
   bfd_boolean bounds_ok = FALSE;
 
-  if (sym != NULL)
+  if (size == 0 && sym_sec)
     {
-      size = sym->st_size;
-      if (size == 0)
-	goto need_size;
-    }
-  else if (h != NULL)
-    {
-      size = h->size;
+      bounds_ok = TRUE;
+      enum c64_section_perm_type type
+	= c64_symbol_section_adjustment (h, value, sym_sec, &perm_sec, info);
 
-      if (size == 0 && sym_sec != NULL)
+      switch (type)
 	{
-	  /* Linker defined symbols are always at the start of the section they
-	     track.  */
-	  if (h->root.linker_def)
-	    {
-	      size = sym_sec->output_section->size;
-	      bounds_ok = TRUE;
-	    }
-	  else if (h->root.ldscript_def)
-	    {
-	      const char *name = h->root.root.string;
-	      size_t len = strlen (name);
-
-	      /* In the general case, the symbol should be able to access the
-	         entire output section following it.  */
-	      size = sym_sec->size - (value - sym_sec->vma);
-
-	      /* The special case: the symbol is at the end of the section.
-		 This could either mean that it is an end symbol or it is the
-		 start of the output section following the symbol.  We try to
-		 guess if it is a start of the next section by reading its
-		 name.  This is a compatibility hack, ideally linker scripts
-		 should be written such that start symbols are defined within
-		 the output section it intends to track.  */
-	      if (size == 0
-		  && (len > 8 && name[0] == '_' && name[1] == '_'
-		      && (!strncmp (name + 2, "start_", 6)
-			  || !strcmp (name + len - 6, "_start"))))
-		{
-		  asection *s = bfd_sections_find_if (info->output_bfd,
-						      section_start_symbol,
-						      &value);
-		  if (s != NULL)
-		    {
-		      perm_sec = s;
-		      size = s->size;
-		    }
-		}
-	      bounds_ok = TRUE;
-	    }
-	  else if (size == 0 && bfd_link_pic (info)
-		   && SYMBOL_REFERENCES_LOCAL (info, h))
-	    goto need_size;
+	case C64_SYM_STANDARD:
+	  break;
+	case C64_SYM_LINKER_DEF:
+	  size = perm_sec->output_section->size;
+	  break;
+	case C64_SYM_LDSCRIPT_DEF:
+	  size = perm_sec->size - (value - perm_sec->vma);
+	  break;
+	case C64_SYM_LDSCRIPT_START:
+	  size = perm_sec->size;
+	  break;
+	default:
+	  abort ();
 	}
     }
 
@@ -6445,7 +6479,7 @@ c64_fixup_frag (bfd *input_bfd, struct bfd_link_info *info,
   if (addend < 0 || (bfd_vma) addend > size)
     return bfd_reloc_outofrange;
 
-  bfd_vma base = value + addend, limit = value + addend + size;
+  bfd_vma base = value, limit = value + size;
 
   if (!bounds_ok && !c64_valid_cap_range (&base, &limit))
     {
@@ -6454,6 +6488,25 @@ c64_fixup_frag (bfd *input_bfd, struct bfd_link_info *info,
 			  input_bfd);
       bfd_set_error (bfd_error_bad_value);
       return bfd_reloc_notsupported;
+    }
+
+  if (perm_sec && perm_sec->flags & SEC_CODE)
+    {
+      /* Any symbol pointing into an executable section gets bounds according
+	 to PCC.  In this case the relocation is set up so that the value is
+	 the base of the PCC, the addend is the offset from the PCC base to the
+	 VA that we want, and the size is the length of the PCC range.
+	 In this function we only use `value` to check the bounds make sense,
+	 which is somewhat superfluous when we're using pcc_high and pcc_low
+	 since we already enforced that in elfNN_c64_resize_sections.  No harm
+	 in instead checking that the bounds on the object that were requested
+	 made sense even if they were overridden because this symbol points
+	 into an executable section.
+
+	 `size` on the other hand is part of the fragment that we output to and
+	 we need to change it in order to have functions that can access global
+	 data or jump to other functions.  */
+      size = pcc_high - pcc_low;
     }
 
   if (perm_sec != NULL)
@@ -6467,17 +6520,30 @@ c64_fixup_frag (bfd *input_bfd, struct bfd_link_info *info,
     }
 
   return bfd_reloc_continue;
+}
 
-need_size:
+/* Given either a local symbol SYM or global symbol H, do we need to adjust
+   capability relocations against the symbol due to the fact that it points to
+   a code section?  */
+static bfd_boolean
+c64_symbol_adjust (struct elf_link_hash_entry *h,
+		   bfd_vma value, asection *sym_sec, struct bfd_link_info *info,
+		   bfd_vma *adjust_addr)
+{
+  asection *tmp_sec;
+  enum c64_section_perm_type type
+    = c64_symbol_section_adjustment (h, value, sym_sec, &tmp_sec, info);
+
+  if (type == C64_SYM_UNKNOWN)
+    return FALSE;
+
+  if (tmp_sec->flags & SEC_CODE)
     {
-      int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
-      _bfd_error_handler
-	/* xgettext:c-format */
-	(_("%pB: relocation %s against local symbol without size info"),
-	 input_bfd, elfNN_aarch64_howto_table[howto_index].name);
-      bfd_set_error (bfd_error_bad_value);
-      return bfd_reloc_notsupported;
+      *adjust_addr = pcc_low;
+      return TRUE;
     }
+
+  return FALSE;
 }
 
 /* Perform a relocation as part of a final link.  The input relocation type
@@ -7077,9 +7143,21 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
       off = symbol_got_offset (input_bfd, h, r_symndx);
       base_got = globals->root.sgot;
+
       bfd_boolean c64_reloc =
 	(bfd_r_type == BFD_RELOC_MORELLO_LD128_GOT_LO12_NC
 	 || bfd_r_type == BFD_RELOC_MORELLO_ADR_GOT_PAGE);
+
+      if (signed_addend != 0)
+	{
+	  int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
+	  _bfd_error_handler
+	  /* xgettext:c-format */
+	  (_("%pB: symbol plus addend can not be placed into the GOT "
+	     "for relocation %s"),
+	     input_bfd, elfNN_aarch64_howto_table[howto_index].name);
+	  abort ();
+	}
 
       if (base_got == NULL)
 	BFD_ASSERT (h != NULL);
@@ -7088,6 +7166,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       if (h != NULL)
 	{
 	  bfd_vma addend = 0;
+	  bfd_vma frag_value;
 
 	  /* If a symbol is not dynamic and is not undefined weak, bind it
 	     locally and generate a RELATIVE relocation under PIC mode.
@@ -7108,8 +7187,14 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	      && !symbol_got_offset_mark_p (input_bfd, h, r_symndx))
 	    relative_reloc = TRUE;
 
+	  if (c64_reloc
+	      && c64_symbol_adjust (h, value, sym_sec, info, &frag_value))
+	    signed_addend = (value | h->target_internal) - frag_value;
+	  else
+	    frag_value = value | h->target_internal;
+
 	  value = aarch64_calculate_got_entry_vma (h, globals, info,
-						   value | h->target_internal,
+						   frag_value,
 						   output_bfd,
 						   unresolved_reloc_p);
 	  /* Record the GOT entry address which will be used when generating
@@ -7146,8 +7231,15 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	if (!symbol_got_offset_mark_p (input_bfd, h, r_symndx))
 	  {
-	    bfd_put_64 (output_bfd, value | sym->st_target_internal,
-			base_got->contents + off);
+	    bfd_vma frag_value;
+
+	    if (c64_reloc
+		&& c64_symbol_adjust (h, value, sym_sec, info, &frag_value))
+	      signed_addend = (value | sym->st_target_internal) - frag_value;
+	    else
+	      frag_value = value | sym->st_target_internal;
+
+	    bfd_put_64 (output_bfd, frag_value, base_got->contents + off);
 
 	    /* For local symbol, we have done absolute relocation in static
 	       linking stage.  While for shared library, we need to update the
@@ -7189,7 +7281,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    {
 	      bfd_reloc_status_type ret;
 
-	      ret = c64_fixup_frag (input_bfd, info, bfd_r_type, sym, h,
+	      ret = c64_fixup_frag (input_bfd, info, sym, h,
 				    sym_sec, base_got->contents + off + 8,
 				    orig_value, 0);
 
@@ -7201,7 +7293,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	      if (bfd_link_executable (info) && !bfd_link_pic (info))
 		s = globals->srelcaps;
 
-	      outrel.r_addend = 0;
+	      outrel.r_addend = signed_addend;
 	    }
 	  else
 	    outrel.r_addend = orig_value;
@@ -7394,13 +7486,14 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	  bfd_reloc_status_type ret;
 
-	  ret = c64_fixup_frag (input_bfd, info, bfd_r_type, sym, h, sym_sec,
+	  ret = c64_fixup_frag (input_bfd, info, sym, h, sym_sec,
 				hit_data + 8, value, signed_addend);
 
 	  if (ret != bfd_reloc_continue)
 	    return ret;
 
 	  outrel.r_addend = signed_addend;
+	  value |= (h != NULL ? h->target_internal : sym->st_target_internal);
 
 	  /* Emit a dynamic relocation if we are building PIC.  */
 	  if (h != NULL
@@ -7411,7 +7504,16 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  else
 	    outrel.r_info = ELFNN_R_INFO (0, MORELLO_R (RELATIVE));
 
-	  value |= (h != NULL ? h->target_internal : sym->st_target_internal);
+	  /* Symbols without size information get bounds to the
+	     whole section: adjust the base of the capability to the
+	     start of the section and set the addend to obtain the
+	     correct address for the symbol.  */
+	  bfd_vma new_value;
+	  if (c64_symbol_adjust (h, value, sym_sec, info, &new_value))
+	    {
+	      outrel.r_addend += (value - new_value);
+	      value = new_value;
+	    }
 
 	  asection *s = globals->srelcaps;
 
