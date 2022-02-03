@@ -1549,9 +1549,13 @@ write_var_or_type (struct parser_state *par_state,
 	  int terminator = encoded_name[tail_index];
 
 	  encoded_name[tail_index] = '\0';
-	  std::vector<struct block_symbol> syms
-	    = ada_lookup_symbol_list (encoded_name, block, VAR_DOMAIN);
+	  /* In order to avoid double-encoding, we want to only pass
+	     the decoded form to lookup functions.  */
+	  std::string decoded_name = ada_decode (encoded_name);
 	  encoded_name[tail_index] = terminator;
+
+	  std::vector<struct block_symbol> syms
+	    = ada_lookup_symbol_list (decoded_name.c_str (), block, VAR_DOMAIN);
 
 	  type_sym = select_possible_type_sym (syms);
 
@@ -1626,7 +1630,7 @@ write_var_or_type (struct parser_state *par_state,
 	  else if (syms.empty ())
 	    {
 	      struct bound_minimal_symbol msym
-		= ada_lookup_simple_minsym (encoded_name);
+		= ada_lookup_simple_minsym (decoded_name.c_str ());
 	      if (msym.minsym != NULL)
 		{
 		  par_state->push_new<ada_var_msym_value_operation> (msym);

@@ -111,6 +111,12 @@ show style disassembler enabled
   package is available, then, when this setting is on, disassembler
   output will have styling applied.
 
+set ada source-charset
+show ada source-charset
+  Set the character set encoding that is assumed for Ada symbols.  Valid
+  values for this follow the values that can be passed to the GNAT
+  compiler via the '-gnati' option.  The default is ISO-8859-1.
+
 * Changed commands
 
 maint packet

@@ -59,6 +59,7 @@
 #include "gdbsupport/byte-vector.h"
 #include <algorithm>
 #include "ada-exp.h"
+#include "charset.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).
@@ -206,6 +207,38 @@ static struct type *ada_find_any_type (const char *name);
 
 static symbol_name_matcher_ftype *ada_get_symbol_name_matcher
   (const lookup_name_info &lookup_name);
+
+
+
+/* The character set used for source files.  */
+static const char *ada_source_charset;
+
+/* The string "UTF-8".  This is here so we can check for the UTF-8
+   charset using == rather than strcmp.  */
+static const char ada_utf8[] = "UTF-8";
+
+/* Each entry in the UTF-32 case-folding table is of this form.  */
+struct utf8_entry
+{
+  /* The start and end, inclusive, of this range of codepoints.  */
+  uint32_t start, end;
+  /* The delta to apply to get the upper-case form.  0 if this is
+     already upper-case.  */
+  int upper_delta;
+  /* The delta to apply to get the lower-case form.  0 if this is
+     already lower-case.  */
+  int lower_delta;
+
+  bool operator< (uint32_t val) const
+  {
+    return end < val;
+  }
+};
+
+static const utf8_entry ada_case_fold[] =
+{
+#include "ada-casefold.h"
+};
 
 
 
@@ -843,6 +876,52 @@ is_compiler_suffix (const char *str)
   return *str == '\0' || (str[0] == ']' && str[1] == '\0');
 }
 
+/* Append a non-ASCII character to RESULT.  */
+static void
+append_hex_encoded (std::string &result, uint32_t one_char)
+{
+  if (one_char <= 0xff)
+    {
+      result.append ("U");
+      result.append (phex (one_char, 1));
+    }
+  else if (one_char <= 0xffff)
+    {
+      result.append ("W");
+      result.append (phex (one_char, 2));
+    }
+  else
+    {
+      result.append ("WW");
+      result.append (phex (one_char, 4));
+    }
+}
+
+/* Return a string that is a copy of the data in STORAGE, with
+   non-ASCII characters replaced by the appropriate hex encoding.  A
+   template is used because, for UTF-8, we actually want to work with
+   UTF-32 codepoints.  */
+template<typename T>
+std::string
+copy_and_hex_encode (struct obstack *storage)
+{
+  const T *chars = (T *) obstack_base (storage);
+  int num_chars = obstack_object_size (storage) / sizeof (T);
+  std::string result;
+  for (int i = 0; i < num_chars; ++i)
+    {
+      if (chars[i] <= 0x7f)
+	{
+	  /* The host character set has to be a superset of ASCII, as
+	     are all the other character sets we can use.  */
+	  result.push_back (chars[i]);
+	}
+      else
+	append_hex_encoded (result, chars[i]);
+    }
+  return result;
+}
+
 /* The "encoded" form of DECODED, according to GNAT conventions.  If
    THROW_ERRORS, throw an error if invalid operator name is found.
    Otherwise, return the empty string in that case.  */
@@ -854,8 +933,12 @@ ada_encode_1 (const char *decoded, bool throw_errors)
     return {};
 
   std::string encoding_buffer;
+  bool saw_non_ascii = false;
   for (const char *p = decoded; *p != '\0'; p += 1)
     {
+      if ((*p & 0x80) != 0)
+	saw_non_ascii = true;
+
       if (*p == '.')
 	encoding_buffer.append ("__");
       else if (*p == '[' && is_compiler_suffix (p))
@@ -887,23 +970,70 @@ ada_encode_1 (const char *decoded, bool throw_errors)
 	encoding_buffer.push_back (*p);
     }
 
+  /* If a non-ASCII character is seen, we must convert it to the
+     appropriate hex form.  As this is more expensive, we keep track
+     of whether it is even necessary.  */
+  if (saw_non_ascii)
+    {
+      auto_obstack storage;
+      bool is_utf8 = ada_source_charset == ada_utf8;
+      try
+	{
+	  convert_between_encodings
+	    (host_charset (),
+	     is_utf8 ? HOST_UTF32 : ada_source_charset,
+	     (const gdb_byte *) encoding_buffer.c_str (),
+	     encoding_buffer.length (), 1,
+	     &storage, translit_none);
+	}
+      catch (const gdb_exception &)
+	{
+	  static bool warned = false;
+
+	  /* Converting to UTF-32 shouldn't fail, so if it doesn't, we
+	     might like to know why.  */
+	  if (!warned)
+	    {
+	      warned = true;
+	      warning (_("charset conversion failure for '%s'.\n"
+			 "You may have the wrong value for 'set ada source-charset'."),
+		       encoding_buffer.c_str ());
+	    }
+
+	  /* We don't try to recover from errors.  */
+	  return encoding_buffer;
+	}
+
+      if (is_utf8)
+	return copy_and_hex_encode<uint32_t> (&storage);
+      return copy_and_hex_encode<gdb_byte> (&storage);
+    }
+
   return encoding_buffer;
 }
 
-/* The "encoded" form of DECODED, according to GNAT conventions.  */
-
-std::string
-ada_encode (const char *decoded)
+/* Find the entry for C in the case-folding table.  Return nullptr if
+   the entry does not cover C.  */
+static const utf8_entry *
+find_case_fold_entry (uint32_t c)
 {
-  return ada_encode_1 (decoded, true);
+  auto iter = std::lower_bound (std::begin (ada_case_fold),
+				std::end (ada_case_fold),
+				c);
+  if (iter == std::end (ada_case_fold)
+      || c < iter->start
+      || c > iter->end)
+    return nullptr;
+  return &*iter;
 }
 
 /* Return NAME folded to lower case, or, if surrounded by single
-   quotes, unfolded, but with the quotes stripped away.  Result good
-   to next call.  */
+   quotes, unfolded, but with the quotes stripped away.  If
+   THROW_ON_ERROR is true, encoding failures will throw an exception
+   rather than emitting a warning.  Result good to next call.  */
 
 static const char *
-ada_fold_name (gdb::string_view name)
+ada_fold_name (gdb::string_view name, bool throw_on_error = false)
 {
   static std::string fold_storage;
 
@@ -911,12 +1041,118 @@ ada_fold_name (gdb::string_view name)
     fold_storage = gdb::to_string (name.substr (1, name.size () - 2));
   else
     {
-      fold_storage = gdb::to_string (name);
-      for (int i = 0; i < name.size (); i += 1)
-	fold_storage[i] = tolower (fold_storage[i]);
+      /* Why convert to UTF-32 and implement our own case-folding,
+	 rather than convert to wchar_t and use the platform's
+	 functions?  I'm glad you asked.
+
+	 The main problem is that GNAT implements an unusual rule for
+	 case folding.  For ASCII letters, letters in single-byte
+	 encodings (such as ISO-8859-*), and Unicode letters that fit
+	 in a single byte (i.e., code point is <= 0xff), the letter is
+	 folded to lower case.  Other Unicode letters are folded to
+	 upper case.
+
+	 This rule means that the code must be able to examine the
+	 value of the character.  And, some hosts do not use Unicode
+	 for wchar_t, so examining the value of such characters is
+	 forbidden.  */
+      auto_obstack storage;
+      try
+	{
+	  convert_between_encodings
+	    (host_charset (), HOST_UTF32,
+	     (const gdb_byte *) name.data (),
+	     name.length (), 1,
+	     &storage, translit_none);
+	}
+      catch (const gdb_exception &)
+	{
+	  if (throw_on_error)
+	    throw;
+
+	  static bool warned = false;
+
+	  /* Converting to UTF-32 shouldn't fail, so if it doesn't, we
+	     might like to know why.  */
+	  if (!warned)
+	    {
+	      warned = true;
+	      warning (_("could not convert '%s' from the host encoding (%s) to UTF-32.\n"
+			 "This normally should not happen, please file a bug report."),
+		       gdb::to_string (name).c_str (), host_charset ());
+	    }
+
+	  /* We don't try to recover from errors; just return the
+	     original string.  */
+	  fold_storage = gdb::to_string (name);
+	  return fold_storage.c_str ();
+	}
+
+      bool is_utf8 = ada_source_charset == ada_utf8;
+      uint32_t *chars = (uint32_t *) obstack_base (&storage);
+      int num_chars = obstack_object_size (&storage) / sizeof (uint32_t);
+      for (int i = 0; i < num_chars; ++i)
+	{
+	  const struct utf8_entry *entry = find_case_fold_entry (chars[i]);
+	  if (entry != nullptr)
+	    {
+	      uint32_t low = chars[i] + entry->lower_delta;
+	      if (!is_utf8 || low <= 0xff)
+		chars[i] = low;
+	      else
+		chars[i] = chars[i] + entry->upper_delta;
+	    }
+	}
+
+      /* Now convert back to ordinary characters.  */
+      auto_obstack reconverted;
+      try
+	{
+	  convert_between_encodings (HOST_UTF32,
+				     host_charset (),
+				     (const gdb_byte *) chars,
+				     num_chars * sizeof (uint32_t),
+				     sizeof (uint32_t),
+				     &reconverted,
+				     translit_none);
+	  obstack_1grow (&reconverted, '\0');
+	  fold_storage = std::string ((const char *) obstack_base (&reconverted));
+	}
+      catch (const gdb_exception &)
+	{
+	  if (throw_on_error)
+	    throw;
+
+	  static bool warned = false;
+
+	  /* Converting back from UTF-32 shouldn't normally fail, but
+	     there are some host encodings without upper/lower
+	     equivalence.  */
+	  if (!warned)
+	    {
+	      warned = true;
+	      warning (_("could not convert the lower-cased variant of '%s'\n"
+			 "from UTF-32 to the host encoding (%s)."),
+		       gdb::to_string (name).c_str (), host_charset ());
+	    }
+
+	  /* We don't try to recover from errors; just return the
+	     original string.  */
+	  fold_storage = gdb::to_string (name);
+	}
     }
 
   return fold_storage.c_str ();
+}
+
+/* The "encoded" form of DECODED, according to GNAT conventions.  */
+
+std::string
+ada_encode (const char *decoded)
+{
+  if (decoded[0] != '<')
+    decoded = ada_fold_name (decoded);
+  return ada_encode_1 (decoded, true);
 }
 
 /* Return nonzero if C is either a digit or a lowercase alphabet character.  */
@@ -997,6 +1233,72 @@ remove_compiler_suffix (const char *encoded, int *len)
       return offset + 1;
     }
   return -1;
+}
+
+/* Convert an ASCII hex string to a number.  Reads exactly N
+   characters from STR.  Returns true on success, false if one of the
+   digits was not a hex digit.  */
+static bool
+convert_hex (const char *str, int n, uint32_t *out)
+{
+  uint32_t result = 0;
+
+  for (int i = 0; i < n; ++i)
+    {
+      if (!isxdigit (str[i]))
+	return false;
+      result <<= 4;
+      result |= fromhex (str[i]);
+    }
+
+  *out = result;
+  return true;
+}
+
+/* Convert a wide character from its ASCII hex representation in STR
+   (consisting of exactly N characters) to the host encoding,
+   appending the resulting bytes to OUT.  If N==2 and the Ada source
+   charset is not UTF-8, then hex refers to an encoding in the
+   ADA_SOURCE_CHARSET; otherwise, use UTF-32.  Return true on success.
+   Return false and do not modify OUT on conversion failure.  */
+static bool
+convert_from_hex_encoded (std::string &out, const char *str, int n)
+{
+  uint32_t value;
+
+  if (!convert_hex (str, n, &value))
+    return false;
+  try
+    {
+      auto_obstack bytes;
+      /* In the 'U' case, the hex digits encode the character in the
+	 Ada source charset.  However, if the source charset is UTF-8,
+	 this really means it is a single-byte UTF-32 character.  */
+      if (n == 2 && ada_source_charset != ada_utf8)
+	{
+	  gdb_byte one_char = (gdb_byte) value;
+
+	  convert_between_encodings (ada_source_charset, host_charset (),
+				     &one_char,
+				     sizeof (one_char), sizeof (one_char),
+				     &bytes, translit_none);
+	}
+      else
+	convert_between_encodings (HOST_UTF32, host_charset (),
+				   (const gdb_byte *) &value,
+				   sizeof (value), sizeof (value),
+				   &bytes, translit_none);
+      obstack_1grow (&bytes, '\0');
+      out.append ((const char *) obstack_base (&bytes));
+    }
+  catch (const gdb_exception &)
+    {
+      /* On failure, the caller will just let the encoded form
+	 through, which seems basically reasonable.  */
+      return false;
+    }
+
+  return true;
 }
 
 /* See ada-lang.h.  */
@@ -1189,6 +1491,32 @@ ada_decode (const char *encoded, bool wrap)
 	  if (ptr < encoded
 	      || (ptr > encoded && ptr[0] == '_' && ptr[-1] == '_'))
 	    i++;
+	}
+
+      if (i < len0 + 3 && encoded[i] == 'U' && isxdigit (encoded[i + 1]))
+	{
+	  if (convert_from_hex_encoded (decoded, &encoded[i + 1], 2))
+	    {
+	      i += 3;
+	      continue;
+	    }
+	}
+      else if (i < len0 + 5 && encoded[i] == 'W' && isxdigit (encoded[i + 1]))
+	{
+	  if (convert_from_hex_encoded (decoded, &encoded[i + 1], 4))
+	    {
+	      i += 5;
+	      continue;
+	    }
+	}
+      else if (i < len0 + 10 && encoded[i] == 'W' && encoded[i + 1] == 'W'
+	       && isxdigit (encoded[i + 2]))
+	{
+	  if (convert_from_hex_encoded (decoded, &encoded[i + 2], 8))
+	    {
+	      i += 10;
+	      continue;
+	    }
 	}
 
       if (encoded[i] == 'X' && i != 0 && isalnum (encoded[i - 1]))
@@ -6212,7 +6540,6 @@ ada_get_tsd_from_tag (struct value *tag)
 static gdb::unique_xmalloc_ptr<char>
 ada_tag_name_from_tsd (struct value *tsd)
 {
-  char *p;
   struct value *val;
 
   val = ada_value_struct_elt (tsd, "expanded_name", 1);
@@ -6223,13 +6550,18 @@ ada_tag_name_from_tsd (struct value *tsd)
   if (buffer == nullptr)
     return nullptr;
 
-  for (p = buffer.get (); *p != '\0'; ++p)
+  try
     {
-      if (isalpha (*p))
-	*p = tolower (*p);
+      /* Let this throw an exception on error.  If the data is
+	 uninitialized, we'd rather not have the user see a
+	 warning.  */
+      const char *folded = ada_fold_name (buffer.get (), true);
+      return make_unique_xstrdup (folded);
     }
-
-  return buffer;
+  catch (const gdb_exception &)
+    {
+      return nullptr;
+    }
 }
 
 /* The type name of the dynamic type denoted by the 'tag value TAG, as
@@ -13435,6 +13767,26 @@ ada_free_objfile_observer (struct objfile *objfile)
   ada_clear_symbol_cache ();
 }
 
+/* Charsets known to GNAT.  */
+static const char * const gnat_source_charsets[] =
+{
+  /* Note that code below assumes that the default comes first.
+     Latin-1 is the default here, because that is also GNAT's
+     default.  */
+  "ISO-8859-1",
+  "ISO-8859-2",
+  "ISO-8859-3",
+  "ISO-8859-4",
+  "ISO-8859-5",
+  "ISO-8859-15",
+  "CP437",
+  "CP850",
+  /* Note that this value is special-cased in the encoder and
+     decoder.  */
+  ada_utf8,
+  nullptr
+};
+
 void _initialize_ada_language ();
 void
 _initialize_ada_language ()
@@ -13469,6 +13821,17 @@ overloads selection menu."), _("\
 Show whether the output of formal and return types for functions in the \
 overloads selection menu is activated."),
 			   NULL, NULL, NULL, &set_ada_list, &show_ada_list);
+
+  ada_source_charset = gnat_source_charsets[0];
+  add_setshow_enum_cmd ("source-charset", class_files,
+			gnat_source_charsets,
+			&ada_source_charset,  _("\
+Set the Ada source character set."), _("\
+Show the Ada source character set."), _("\
+The character set used for Ada source files.\n\
+This must correspond to the '-gnati' or '-gnatW' option passed to GNAT."),
+			nullptr, nullptr,
+			&set_ada_list, &show_ada_list);
 
   add_catch_command ("exception", _("\
 Catch Ada exceptions, when raised.\n\

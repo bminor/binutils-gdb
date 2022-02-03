@@ -30,7 +30,7 @@ HEXDIG	[0-9a-f]
 NUM16	({HEXDIG}({HEXDIG}|_)*)
 OCTDIG	[0-7]
 LETTER	[a-z_]
-ID	({LETTER}({LETTER}|{DIG})*|"<"{LETTER}({LETTER}|{DIG})*">")
+ID	({LETTER}({LETTER}|{DIG}|[\x80-\xff])*|"<"{LETTER}({LETTER}|{DIG})*">")
 WHITE	[ \t\n]
 TICK	("'"{WHITE}*)
 GRAPHIC [a-z0-9 #&'()*+,-./:;<>=_|!$%?@\[\]\\^`{}~]

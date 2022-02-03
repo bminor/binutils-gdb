@@ -18012,6 +18012,7 @@ to be difficult.
 * Ravenscar Profile::           Tasking Support when using the Ravenscar
                                    Profile
 * Ada Settings::                New settable GDB parameters for Ada.
+* Ada Source Character Set::    Character set of Ada source files.
 * Ada Glitches::                Known peculiarities of Ada mode.
 @end menu
 
@@ -18760,6 +18761,28 @@ size is less than @var{size}.
 @kindex show varsize-limit
 @item show varsize-limit
 Show the limit on types whose size is determined by run-time quantities.
+@end table
+
+@node Ada Source Character Set
+@subsubsection Ada Source Character Set
+@cindex Ada, source character set
+
+The GNAT compiler supports a number of character sets for source
+files.  @xref{Character Set Control, , Character Set Control,
+gnat_ugn}.  @value{GDBN} includes support for this as well.
+
+@table @code
+@item set ada source-charset @var{charset}
+@kindex set ada source-charset
+Set the source character set for Ada.  The character set must be
+supported by GNAT.  Because this setting affects the decoding of
+symbols coming from the debug information in your program, the setting
+should be set as early as possible.  The default is @code{ISO-8859-1},
+because that is also GNAT's default.
+
+@item show ada source-charset
+@kindex show ada source-charset
+Show the current source character set for Ada.
 @end table
 
 @node Ada Glitches
