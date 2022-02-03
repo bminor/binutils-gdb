@@ -50,7 +50,11 @@
 #define X86_64_GOT_TYPE_P(TYPE) \
   ((TYPE) == R_X86_64_GOTPCREL \
    || (TYPE) == R_X86_64_GOTPCRELX \
-   || (TYPE) == R_X86_64_REX_GOTPCRELX)
+   || (TYPE) == R_X86_64_REX_GOTPCRELX \
+   || (TYPE) == R_X86_64_GOT32 \
+   || (TYPE) == R_X86_64_GOT64 \
+   || (TYPE) == R_X86_64_GOTPCREL64 \
+   || (TYPE) == R_X86_64_GOTPLT64)
 #define I386_GOT_TYPE_P(TYPE) \
   ((TYPE) == R_386_GOT32 || (TYPE) == R_386_GOT32X)
 #define X86_GOT_TYPE_P(IS_X86_64, TYPE) \
