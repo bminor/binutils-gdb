@@ -5,17 +5,13 @@
 # created, the one that is referenced by the first instruction in _start is
 # the one which has the LSB set in its value.
 #
-# It's difficult to check this in the DejaGNU testsuite without checking for
-# specific values that we know are good.  However this is susceptible to
-# defaults changing where the .text and .got sections end up.
-#
-# If this testcase prooves to be too flaky while the linker gets updated then
-# we should look harder for some solution, but for now we'll take this
-# tradeoff.
+# Have tried to mitigate the flakyness of the test with a linker script that
+# aligns .text and the GOT to 12 bits so that the ldr addends are just offsets
+# into the GOT and we are likely to get .text at 0x1000.
 #source: emit-relocs-morello-6.s
 #as: -march=morello+c64
-#ld: -Ttext-segment 0x0 -pie -static
-#objdump: -DR -j .got -j .text
+#ld: -Ttext-segment 0x100000 -T emit-relocs-morello-7.ld -pie -static
+#objdump: -DR -j .got -j .text -j .data
 
 
 .*:     file format .*
@@ -23,22 +19,42 @@
 
 Disassembly of section \.text:
 
-00000000000001e8 <_start>:
- 1e8:	c240c400 	ldr	c0, \[c0, #784\]
- 1ec:	c240c000 	ldr	c0, \[c0, #768\]
+0000000000100100 <_start>:
+  100100:	c2400c00 	ldr	c0, \[c0, #48\]
+  100104:	c2400800 	ldr	c0, \[c0, #32\]
+  100108:	c2401000 	ldr	c0, \[c0, #64\]
+  10010c:	c2400400 	ldr	c0, \[c0, #16\]
+
+Disassembly of section \.data:
+
+00000000001001e8 <data_obj>:
+  1001e8:	0000000a 	.*
+
+00000000001001ec <data_func>:
+  1001ec:	0000000a 	.*
 
 Disassembly of section \.got:
 
-00000000000102f0 <\.got>:
-   102f0:	000101f0 	\.inst	0x000101f0 ; undefined
+0000000000101000 <\.got>:
+  101000:	00100000 	.*
 	\.\.\.
-   10300:	000001e8 	udf	#488
-			10300: R_MORELLO_RELATIVE	\*ABS\*
-   10304:	00000000 	udf	#0
-   10308:	.*
-   1030c:	.*
-   10310:	000001e9 	udf	#489
-			10310: R_MORELLO_RELATIVE	\*ABS\*
-   10314:	.*
-   10318:	.*
-   1031c:	.*
+  101010:	001001ed 	.*
+			101010: R_MORELLO_RELATIVE	\*ABS\*
+  101014:	00000000 	.*
+  101018:	00000402 	.*
+  10101c:	00000000 	.*
+  101020:	00100100 	.*
+			101020: R_MORELLO_RELATIVE	\*ABS\*
+  101024:	00000000 	.*
+  101028:	000f5001 	.*
+  10102c:	00000000 	.*
+  101030:	00100100 	.*
+			101030: R_MORELLO_RELATIVE	\*ABS\*\+0x1
+  101034:	00000000 	.*
+  101038:	000f5001 	.*
+  10103c:	00000000 	.*
+  101040:	001001e8 	.*
+			101040: R_MORELLO_RELATIVE	\*ABS\*
+  101044:	00000000 	.*
+  101048:	00000402 	.*
+  10104c:	00000000 	.*

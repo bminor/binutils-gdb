@@ -1,4 +1,13 @@
 .data
+obj1:
+	.4byte 0
+.section .data.1
+obj2:
+	.4byte 0
+.section .data.2
+obj3:
+	.4byte 0
+.section .inspectionsection,"aw"
 .align 4
 ct_outer_start:
 	.capinit __outer_text_start
@@ -18,6 +27,26 @@ ct1_end:
 	.8byte 0
 ct_end:
 	.capinit __text_end
+	.8byte 0
+	.8byte 0
+cd_outer_start:
+	.capinit __outer_data_start
+	.8byte 0
+	.8byte 0
+cd_start:
+	.capinit data_start
+	.8byte 0
+	.8byte 0
+cd1_start:
+	.capinit data1_start
+	.8byte 0
+	.8byte 0
+cd1_end:
+	.capinit data1_end
+	.8byte 0
+	.8byte 0
+cd_end:
+	.capinit __data_end
 	.8byte 0
 	.8byte 0
 cdynamic:
