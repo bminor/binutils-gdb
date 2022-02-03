@@ -159,4 +159,10 @@ class wchar_iterator
    character.  */
 char host_letter_to_control_character (char c);
 
+#if WORDS_BIGENDIAN
+#define HOST_UTF32 "UTF-32BE"
+#else
+#define HOST_UTF32 "UTF-32LE"
+#endif
+
 #endif /* CHARSET_H */

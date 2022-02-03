@@ -33,12 +33,6 @@
 
 using namespace expr;
 
-#if WORDS_BIGENDIAN
-#define UTF32 "UTF-32BE"
-#else
-#define UTF32 "UTF-32LE"
-#endif
-
 /* A regular expression for matching Rust numbers.  This is split up
    since it is very long and this gives us a way to comment the
    sections.  */
@@ -601,7 +595,8 @@ lex_multibyte_char (const char *text, int *len)
     return 0;
 
   auto_obstack result;
-  convert_between_encodings (host_charset (), UTF32, (const gdb_byte *) text,
+  convert_between_encodings (host_charset (), HOST_UTF32,
+			     (const gdb_byte *) text,
 			     quote, 1, &result, translit_none);
 
   int size = obstack_object_size (&result);
@@ -732,7 +727,8 @@ rust_parser::lex_string ()
 	  if (is_byte)
 	    obstack_1grow (&obstack, value);
 	  else
-	    convert_between_encodings (UTF32, "UTF-8", (gdb_byte *) &value,
+	    convert_between_encodings (HOST_UTF32, "UTF-8",
+				       (gdb_byte *) &value,
 				       sizeof (value), sizeof (value),
 				       &obstack, translit_none);
 	}
