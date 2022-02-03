@@ -1004,7 +1004,7 @@ remove_compiler_suffix (const char *encoded, int *len)
 std::string
 ada_decode (const char *encoded, bool wrap)
 {
-  int i, j;
+  int i;
   int len0;
   const char *p;
   int at_start_name;
@@ -1068,10 +1068,6 @@ ada_decode (const char *encoded, bool wrap)
   if (len0 > 1 && startswith (encoded + len0 - 1, "B"))
     len0 -= 1;
 
-  /* Make decoded big enough for possible expansion by operator name.  */
-
-  decoded.resize (2 * len0 + 1, 'X');
-
   /* Remove trailing __{digit}+ or trailing ${digit}+.  */
 
   if (len0 > 1 && isdigit (encoded[len0 - 1]))
@@ -1089,8 +1085,8 @@ ada_decode (const char *encoded, bool wrap)
   /* The first few characters that are not alphabetic are not part
      of any encoding we use, so we can copy them over verbatim.  */
 
-  for (i = 0, j = 0; i < len0 && !isalpha (encoded[i]); i += 1, j += 1)
-    decoded[j] = encoded[i];
+  for (i = 0; i < len0 && !isalpha (encoded[i]); i += 1)
+    decoded.push_back (encoded[i]);
 
   at_start_name = 1;
   while (i < len0)
@@ -1107,10 +1103,9 @@ ada_decode (const char *encoded, bool wrap)
 			    op_len - 1) == 0)
 		  && !isalnum (encoded[i + op_len]))
 		{
-		  strcpy (&decoded.front() + j, ada_opname_table[k].decoded);
+		  decoded.append (ada_opname_table[k].decoded);
 		  at_start_name = 0;
 		  i += op_len;
-		  j += strlen (ada_opname_table[k].decoded);
 		  break;
 		}
 	    }
@@ -1214,21 +1209,18 @@ ada_decode (const char *encoded, bool wrap)
       else if (i < len0 - 2 && encoded[i] == '_' && encoded[i + 1] == '_')
 	{
 	 /* Replace '__' by '.'.  */
-	  decoded[j] = '.';
+	  decoded.push_back ('.');
 	  at_start_name = 1;
 	  i += 2;
-	  j += 1;
 	}
       else
 	{
 	  /* It's a character part of the decoded name, so just copy it
 	     over.  */
-	  decoded[j] = encoded[i];
+	  decoded.push_back (encoded[i]);
 	  i += 1;
-	  j += 1;
 	}
     }
-  decoded.resize (j);
 
   /* Decoded names should never contain any uppercase character.
      Double-check this, and abort the decoding if we find one.  */
