@@ -354,6 +354,9 @@
 #define EM_65816	257	/* WDC 65816/65C816 */
 #define EM_LOONGARCH	258	/* LoongArch */
 #define EM_KF32		259	/* ChipON KungFu32 */
+#define EM_U16_U8CORE	260	/* LAPIS nX-U16/U8 */
+#define EM_TACHYUM	261	/* Tachyum */
+#define EM_56800V4	262	/* NXP 56800V4 Digital Signal Controller (DSC) */
 
 /* If it is necessary to assign new unofficial EM_* values, please pick large
    random numbers (0x8523, 0xa7f2, etc.) to minimize the chances of collision
