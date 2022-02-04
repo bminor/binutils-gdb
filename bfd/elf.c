@@ -4343,6 +4343,20 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
   return true;
 }
 
+/* Retrieve .eh_frame_hdr.  Prior to size_dynamic_sections the
+   function effectively returns whether --eh-frame-hdr is given on the
+   command line.  After size_dynamic_sections the result reflects
+   whether .eh_frame_hdr will actually be output (sizing isn't done
+   until ldemul_after_allocation).  */
+
+static asection *
+elf_eh_frame_hdr (const struct bfd_link_info *info)
+{
+  if (info != NULL && is_elf_hash_table (info->hash))
+    return elf_hash_table (info)->eh_info.hdr_sec;
+  return NULL;
+}
+
 /* Make an initial estimate of the size of the program header.  If we
    get the number wrong here, we'll redo section placement.  */
 
@@ -4379,7 +4393,7 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
       ++segs;
     }
 
-  if (elf_eh_frame_hdr (abfd))
+  if (elf_eh_frame_hdr (info))
     {
       /* We need a PT_GNU_EH_FRAME segment.  */
       ++segs;
@@ -5134,7 +5148,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd,
 
       /* If there is a .eh_frame_hdr section, throw in a PT_GNU_EH_FRAME
 	 segment.  */
-      eh_frame_hdr = elf_eh_frame_hdr (abfd);
+      eh_frame_hdr = elf_eh_frame_hdr (info);
       if (eh_frame_hdr != NULL
 	  && (eh_frame_hdr->output_section->flags & SEC_LOAD) != 0)
 	{
