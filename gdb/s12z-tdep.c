@@ -140,19 +140,15 @@ s12z_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int num)
 
 /* Support functions for frame handling.  */
 
-/* Copy of gdb_buffered_insn_length_fprintf from disasm.c.  */
 
-static int ATTRIBUTE_PRINTF (2, 3)
-s12z_fprintf_disasm (void *stream, const char *format, ...)
-{
-  return 0;
-}
+/* Return a disassemble_info initialized for s12z disassembly, however,
+   the disassembler will not actually print anything.  */
 
 static struct disassemble_info
 s12z_disassemble_info (struct gdbarch *gdbarch)
 {
   struct disassemble_info di;
-  init_disassemble_info (&di, &null_stream, s12z_fprintf_disasm);
+  init_disassemble_info_for_no_printing (&di);
   di.arch = gdbarch_bfd_arch_info (gdbarch)->arch;
   di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
   di.endian = gdbarch_byte_order (gdbarch);

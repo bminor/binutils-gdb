@@ -174,4 +174,10 @@ extern char *get_disassembler_options (struct gdbarch *gdbarch);
 
 extern void set_disassembler_options (const char *options);
 
+/* Setup DINFO with its output function and output stream setup so that
+   nothing is printed while disassembling.  */
+
+extern void init_disassemble_info_for_no_printing
+  (struct disassemble_info *dinfo);
+
 #endif
