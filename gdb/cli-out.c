@@ -410,10 +410,10 @@ cli_ui_out::clear_current_line ()
     chars_per_line = MAX_CHARS_PER_LINE;
 
   int i;
-  int width = chars_per_line - 3;
+  int width = chars_per_line;
 
   fprintf_unfiltered (stream, "\r");
-  for (i = 0; i < width + 2; ++i)
+  for (i = 0; i < width; ++i)
     fprintf_unfiltered (stream, " ");
   fprintf_unfiltered (stream, "\r");
 
