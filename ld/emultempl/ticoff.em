@@ -64,7 +64,7 @@ gld${EMULATION_NAME}_add_options
 }
 
 static void
-gld_${EMULATION_NAME}_list_options (FILE * file)
+gld${EMULATION_NAME}_list_options (FILE * file)
 {
   fprintf (file, _("  --format 0|1|2              Specify which COFF version to use\n"));
 }
@@ -96,7 +96,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
 }
 
 static void
-gld_${EMULATION_NAME}_before_parse(void)
+gld${EMULATION_NAME}_before_parse(void)
 {
 #ifndef TARGET_			/* I.e., if not generic.  */
   ldfile_set_output_arch ("`echo ${ARCH}`", bfd_arch_unknown);
@@ -104,7 +104,7 @@ gld_${EMULATION_NAME}_before_parse(void)
 }
 
 static char *
-gld_${EMULATION_NAME}_get_script (int *isfile)
+gld${EMULATION_NAME}_get_script (int *isfile)
 EOF
 if test x"$COMPILE_IN" = xyes
 then
@@ -154,40 +154,8 @@ EOF
 
 fi
 
-fragment <<EOF
-struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
-{
-  gld_${EMULATION_NAME}_before_parse,
-  syslib_default,
-  hll_default,
-  after_parse_default,
-  after_open_default,
-  after_check_relocs_default,
-  before_place_orphans_default,
-  after_allocation_default,
-  set_output_arch_default,
-  ldemul_default_target,
-  before_allocation_default,
-  gld_${EMULATION_NAME}_get_script,
-  "${EMULATION_NAME}",
-  "${OUTPUT_FORMAT}",
-  finish_default,
-  NULL, /* create output section statements */
-  NULL, /* open dynamic archive */
-  NULL, /* place orphan */
-  NULL, /* set_symbols */
-  NULL, /* parse_args */
-  gld${EMULATION_NAME}_add_options,
-  gld${EMULATION_NAME}_handle_option,
-  NULL, /* unrecognized_file */
-  gld_${EMULATION_NAME}_list_options,
-  NULL, /* recognized file */
-  NULL,	/* find_potential_libraries */
-  NULL,	/* new_vers_pattern */
-  NULL,  /* extra_map_file_text */
-  ${LDEMUL_EMIT_CTF_EARLY-NULL},
-  ${LDEMUL_ACQUIRE_STRINGS_FOR_CTF-NULL},
-  ${LDEMUL_NEW_DYNSYM_FOR_CTF-NULL},
-  ${LDEMUL_PRINT_SYMBOL-NULL}
-};
-EOF
+LDEMUL_ADD_OPTIONS=gld${EMULATION_NAME}_add_options
+LDEMUL_HANDLE_OPTION=gld${EMULATION_NAME}_handle_option
+LDEMUL_LIST_OPTIONS=gld${EMULATION_NAME}_list_options
+
+source_em ${srcdir}/emultempl/emulation.em

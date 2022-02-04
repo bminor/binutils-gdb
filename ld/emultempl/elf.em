@@ -909,41 +909,17 @@ EOF
 fi
 fi
 
-fragment <<EOF
+LDEMUL_AFTER_PARSE=${LDEMUL_AFTER_PARSE-ldelf_after_parse}
+LDEMUL_AFTER_OPEN=${LDEMUL_AFTER_OPEN-gld${EMULATION_NAME}_after_open}
+LDEMUL_BEFORE_PLACE_ORPHANS=${LDEMUL_BEFORE_PLACE_ORPHANS-ldelf_before_place_orphans}
+LDEMUL_AFTER_ALLOCATION=${LDEMUL_AFTER_ALLOCATION-gld${EMULATION_NAME}_after_allocation}
+LDEMUL_SET_OUTPUT_ARCH=${LDEMUL_SET_OUTPUT_ARCH-ldelf_set_output_arch}
+LDEMUL_BEFORE_ALLOCATION=${LDEMUL_BEFORE_ALLOCATION-gld${EMULATION_NAME}_before_allocation}
+LDEMUL_OPEN_DYNAMIC_ARCHIVE=${LDEMUL_OPEN_DYNAMIC_ARCHIVE-ldelf_open_dynamic_archive}
+LDEMUL_PLACE_ORPHAN=${LDEMUL_PLACE_ORPHAN-ldelf_place_orphan}
+LDEMUL_ADD_OPTIONS=gld${EMULATION_NAME}_add_options
+LDEMUL_HANDLE_OPTION=gld${EMULATION_NAME}_handle_option
+LDEMUL_LIST_OPTIONS=${LDEMUL_LIST_OPTIONS-${gld_list_options}}
+LDEMUL_RECOGNIZED_FILE=${LDEMUL_RECOGNIZED_FILE-ldelf_load_symbols}
 
-struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
-{
-  ${LDEMUL_BEFORE_PARSE-gld${EMULATION_NAME}_before_parse},
-  ${LDEMUL_SYSLIB-syslib_default},
-  ${LDEMUL_HLL-hll_default},
-  ${LDEMUL_AFTER_PARSE-ldelf_after_parse},
-  ${LDEMUL_AFTER_OPEN-gld${EMULATION_NAME}_after_open},
-  ${LDEMUL_AFTER_CHECK_RELOCS-after_check_relocs_default},
-  ${LDEMUL_BEFORE_PLACE_ORPHANS-ldelf_before_place_orphans},
-  ${LDEMUL_AFTER_ALLOCATION-gld${EMULATION_NAME}_after_allocation},
-  ${LDEMUL_SET_OUTPUT_ARCH-ldelf_set_output_arch},
-  ${LDEMUL_CHOOSE_TARGET-ldemul_default_target},
-  ${LDEMUL_BEFORE_ALLOCATION-gld${EMULATION_NAME}_before_allocation},
-  ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},
-  "${EMULATION_NAME}",
-  "${OUTPUT_FORMAT}",
-  ${LDEMUL_FINISH-finish_default},
-  ${LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS-NULL},
-  ${LDEMUL_OPEN_DYNAMIC_ARCHIVE-ldelf_open_dynamic_archive},
-  ${LDEMUL_PLACE_ORPHAN-ldelf_place_orphan},
-  ${LDEMUL_SET_SYMBOLS-NULL},
-  ${LDEMUL_PARSE_ARGS-NULL},
-  gld${EMULATION_NAME}_add_options,
-  gld${EMULATION_NAME}_handle_option,
-  ${LDEMUL_UNRECOGNIZED_FILE-NULL},
-  ${LDEMUL_LIST_OPTIONS-${gld_list_options}},
-  ${LDEMUL_RECOGNIZED_FILE-ldelf_load_symbols},
-  ${LDEMUL_FIND_POTENTIAL_LIBRARIES-NULL},
-  ${LDEMUL_NEW_VERS_PATTERN-NULL},
-  ${LDEMUL_EXTRA_MAP_FILE_TEXT-NULL},
-  ${LDEMUL_EMIT_CTF_EARLY-NULL},
-  ${LDEMUL_ACQUIRE_STRINGS_FOR_CTF-NULL},
-  ${LDEMUL_NEW_DYNSYM_FOR_CTF-NULL},
-  ${LDEMUL_PRINT_SYMBOL-NULL}
-};
-EOF
+source_em ${srcdir}/emultempl/emulation.em

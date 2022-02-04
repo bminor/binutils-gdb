@@ -905,43 +905,17 @@ gld${EMULATION_NAME}_finish (void)
   finish_default ();
   check_array_section_alignment ();
 }
-
-struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
-{
-  ${LDEMUL_BEFORE_PARSE-gld${EMULATION_NAME}_before_parse},
-  ${LDEMUL_SYSLIB-syslib_default},
-  ${LDEMUL_HLL-hll_default},
-  ${LDEMUL_AFTER_PARSE-after_parse_default},
-  msp430_elf_after_open,
-  after_check_relocs_default,
-  before_place_orphans_default,
-  msp430_elf_after_allocation,
-  ${LDEMUL_SET_OUTPUT_ARCH-set_output_arch_default},
-  ${LDEMUL_CHOOSE_TARGET-ldemul_default_target},
-  ${LDEMUL_BEFORE_ALLOCATION-before_allocation_default},
-  ${LDEMUL_GET_SCRIPT-gld${EMULATION_NAME}_get_script},
-  "${EMULATION_NAME}",
-  "${OUTPUT_FORMAT}",
-  gld${EMULATION_NAME}_finish,
-  ${LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS-NULL},
-  ${LDEMUL_OPEN_DYNAMIC_ARCHIVE-NULL},
-  ${LDEMUL_PLACE_ORPHAN-gld${EMULATION_NAME}_place_orphan},
-  ${LDEMUL_SET_SYMBOLS-NULL},
-  ${LDEMUL_PARSE_ARGS-NULL},
-  gld${EMULATION_NAME}_add_options,
-  gld${EMULATION_NAME}_handle_option,
-  ${LDEMUL_UNRECOGNIZED_FILE-NULL},
-  gld${EMULATION_NAME}_list_options,
-  ${LDEMUL_RECOGNIZED_FILE-NULL},
-  ${LDEMUL_FIND_POTENTIAL_LIBRARIES-NULL},
-  ${LDEMUL_NEW_VERS_PATTERN-NULL},
-  ${LDEMUL_EXTRA_MAP_FILE_TEXT-NULL},
-  ${LDEMUL_EMIT_CTF_EARLY-NULL},
-  ${LDEMUL_ACQUIRE_STRINGS_FOR_CTF-NULL},
-  ${LDEMUL_NEW_DYNSYM_FOR_CTF-NULL},
-  ${LDEMUL_PRINT_SYMBOL-NULL}
-};
 EOF
+
+LDEMUL_AFTER_OPEN=msp430_elf_after_open
+LDEMUL_AFTER_ALLOCATION=msp430_elf_after_allocation
+LDEMUL_PLACE_ORPHAN=${LDEMUL_PLACE_ORPHAN-gld${EMULATION_NAME}_place_orphan}
+LDEMUL_FINISH=gld${EMULATION_NAME}_finish
+LDEMUL_ADD_OPTIONS=gld${EMULATION_NAME}_add_options
+LDEMUL_HANDLE_OPTION=gld${EMULATION_NAME}_handle_option
+LDEMUL_LIST_OPTIONS=gld${EMULATION_NAME}_list_options
+
+source_em ${srcdir}/emultempl/emulation.em
 # 
 # Local Variables:
 # mode: c
