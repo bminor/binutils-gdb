@@ -14888,7 +14888,7 @@ bfd_elf_discard_info (bfd *output_bfd, struct bfd_link_info *info)
 
   if (info->eh_frame_hdr_type
       && !bfd_link_relocatable (info)
-      && _bfd_elf_discard_section_eh_frame_hdr (output_bfd, info))
+      && _bfd_elf_discard_section_eh_frame_hdr (info))
     changed = 1;
 
   return changed;

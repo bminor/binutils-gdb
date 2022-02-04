@@ -1909,10 +1909,6 @@ struct output_elf_obj_tdata
   /* STT_SECTION symbols for each section */
   asymbol **section_syms;
 
-  /* Used to determine if PT_GNU_EH_FRAME segment header should be
-     created.  */
-  asection *eh_frame_hdr;
-
   /* NT_GNU_BUILD_ID note type info.  */
   struct
   {
@@ -2116,7 +2112,6 @@ struct elf_obj_tdata
 #define elf_seg_map(bfd)	(elf_tdata(bfd) -> o->seg_map)
 #define elf_link_info(bfd)	(elf_tdata(bfd) -> o->link_info)
 #define elf_next_file_pos(bfd)	(elf_tdata(bfd) -> o->next_file_pos)
-#define elf_eh_frame_hdr(bfd)	(elf_tdata(bfd) -> o->eh_frame_hdr)
 #define elf_stack_flags(bfd)	(elf_tdata(bfd) -> o->stack_flags)
 #define elf_shstrtab(bfd)	(elf_tdata(bfd) -> o->strtab_ptr)
 #define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
@@ -2412,7 +2407,7 @@ extern bool _bfd_elf_discard_section_eh_frame
 extern bool _bfd_elf_adjust_eh_frame_global_symbol
   (struct elf_link_hash_entry *, void *);
 extern bool _bfd_elf_discard_section_eh_frame_hdr
-  (bfd *, struct bfd_link_info *);
+  (struct bfd_link_info *);
 extern bfd_vma _bfd_elf_eh_frame_section_offset
   (bfd *, struct bfd_link_info *, asection *, bfd_vma);
 extern bool _bfd_elf_write_section_eh_frame

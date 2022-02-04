@@ -1612,7 +1612,7 @@ _bfd_elf_discard_section_eh_frame
    input sections.  It finalizes the size of .eh_frame_hdr section.  */
 
 bool
-_bfd_elf_discard_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
+_bfd_elf_discard_section_eh_frame_hdr (struct bfd_link_info *info)
 {
   struct elf_link_hash_table *htab;
   struct eh_frame_hdr_info *hdr_info;
@@ -1644,7 +1644,6 @@ _bfd_elf_discard_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
 	sec->size += 4 + hdr_info->u.dwarf.fde_count * 8;
     }
 
-  elf_eh_frame_hdr (abfd) = sec;
   return true;
 }
 
