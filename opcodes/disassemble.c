@@ -706,6 +706,7 @@ disassemble_init_for_target (struct disassemble_info * info)
 #ifdef ARCH_riscv
     case bfd_arch_riscv:
       info->symbol_is_valid = riscv_symbol_is_valid;
+      info->created_styled_output = true;
       break;
 #endif
 #ifdef ARCH_wasm32
