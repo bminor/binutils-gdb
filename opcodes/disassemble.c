@@ -630,7 +630,12 @@ disassemble_init_for_target (struct disassemble_info * info)
       info->disassembler_needs_relocs = true;
       break;
 #endif
-
+#ifdef ARCH_i386
+    case bfd_arch_i386:
+    case bfd_arch_iamcu:
+      info->created_styled_output = true;
+      break;
+#endif
 #ifdef ARCH_ia64
     case bfd_arch_ia64:
       info->skip_zeroes = 16;

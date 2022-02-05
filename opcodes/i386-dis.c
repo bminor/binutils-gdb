@@ -9402,8 +9402,8 @@ print_insn (bfd_vma pc, instr_info *ins)
 
   if (ins->address_mode == mode_64bit && sizeof (bfd_vma) < 8)
     {
-      (*ins->info->fprintf_func) (ins->info->stream,
-			     _("64-bit address is disabled"));
+      (*ins->info->fprintf_styled_func) (ins->info->stream, dis_style_text,
+					 _("64-bit address is disabled"));
       return -1;
     }
 
@@ -9452,12 +9452,16 @@ print_insn (bfd_vma pc, instr_info *ins)
 	{
 	  name = prefix_name (ins, priv.the_buffer[0], priv.orig_sizeflag);
 	  if (name != NULL)
-	    (*ins->info->fprintf_func) (ins->info->stream, "%s", name);
+	    (*ins->info->fprintf_styled_func)
+	      (ins->info->stream, dis_style_mnemonic, "%s", name);
 	  else
 	    {
 	      /* Just print the first byte as a .byte instruction.  */
-	      (*ins->info->fprintf_func) (ins->info->stream, ".byte 0x%x",
-				     (unsigned int) priv.the_buffer[0]);
+	      (*ins->info->fprintf_styled_func)
+		(ins->info->stream, dis_style_assembler_directive, ".byte ");
+	      (*ins->info->fprintf_styled_func)
+		(ins->info->stream, dis_style_immediate, "0x%x",
+		 (unsigned int) priv.the_buffer[0]);
 	    }
 
 	  return 1;
@@ -9475,10 +9479,10 @@ print_insn (bfd_vma pc, instr_info *ins)
       for (i = 0;
 	   i < (int) ARRAY_SIZE (ins->all_prefixes) && ins->all_prefixes[i];
 	   i++)
-	(*ins->info->fprintf_func) (ins->info->stream, "%s%s",
-			       i == 0 ? "" : " ",
-			       prefix_name (ins, ins->all_prefixes[i],
-					    sizeflag));
+	(*ins->info->fprintf_styled_func)
+	  (ins->info->stream, dis_style_mnemonic, "%s%s",
+	   (i == 0 ? "" : " "), prefix_name (ins, ins->all_prefixes[i],
+					     sizeflag));
       return i;
     }
 
@@ -9493,10 +9497,11 @@ print_insn (bfd_vma pc, instr_info *ins)
       /* Handle ins->prefixes before fwait.  */
       for (i = 0; i < ins->fwait_prefix && ins->all_prefixes[i];
 	   i++)
-	(*ins->info->fprintf_func) (ins->info->stream, "%s ",
-				    prefix_name (ins, ins->all_prefixes[i],
-						 sizeflag));
-      (*ins->info->fprintf_func) (ins->info->stream, "fwait");
+	(*ins->info->fprintf_styled_func)
+	  (ins->info->stream, dis_style_mnemonic, "%s ",
+	   prefix_name (ins, ins->all_prefixes[i], sizeflag));
+      (*ins->info->fprintf_styled_func)
+	(ins->info->stream, dis_style_mnemonic, "fwait");
       return i + 1;
     }
 
@@ -9645,14 +9650,16 @@ print_insn (bfd_vma pc, instr_info *ins)
      are all 0s in inverted form.  */
   if (ins->need_vex && ins->vex.register_specifier != 0)
     {
-      (*ins->info->fprintf_func) (ins->info->stream, "(bad)");
+      (*ins->info->fprintf_styled_func) (ins->info->stream, dis_style_text,
+					 "(bad)");
       return ins->end_codep - priv.the_buffer;
     }
 
   /* If EVEX.z is set, there must be an actual mask register in use.  */
   if (ins->vex.zeroing && ins->vex.mask_register_specifier == 0)
     {
-      (*ins->info->fprintf_func) (ins->info->stream, "(bad)");
+      (*ins->info->fprintf_styled_func) (ins->info->stream, dis_style_text,
+					 "(bad)");
       return ins->end_codep - priv.the_buffer;
     }
 
@@ -9663,7 +9670,8 @@ print_insn (bfd_vma pc, instr_info *ins)
 	 the encoding invalid.  Most other PREFIX_OPCODE rules still apply.  */
       if (ins->need_vex ? !ins->vex.prefix : !(ins->prefixes & PREFIX_DATA))
 	{
-	  (*ins->info->fprintf_func) (ins->info->stream, "(bad)");
+	  (*ins->info->fprintf_styled_func) (ins->info->stream,
+					     dis_style_text, "(bad)");
 	  return ins->end_codep - priv.the_buffer;
 	}
       ins->used_prefixes |= PREFIX_DATA;
@@ -9690,7 +9698,8 @@ print_insn (bfd_vma pc, instr_info *ins)
 	  || (ins->vex.evex && dp->prefix_requirement != PREFIX_DATA
 	      && !ins->vex.w != !(ins->used_prefixes & PREFIX_DATA)))
 	{
-	  (*ins->info->fprintf_func) (ins->info->stream, "(bad)");
+	  (*ins->info->fprintf_styled_func) (ins->info->stream,
+					     dis_style_text, "(bad)");
 	  return ins->end_codep - priv.the_buffer;
 	}
       break;
@@ -9740,13 +9749,15 @@ print_insn (bfd_vma pc, instr_info *ins)
 	if (name == NULL)
 	  abort ();
 	prefix_length += strlen (name) + 1;
-	(*ins->info->fprintf_func) (ins->info->stream, "%s ", name);
+	(*ins->info->fprintf_styled_func)
+	  (ins->info->stream, dis_style_mnemonic, "%s ", name);
       }
 
   /* Check maximum code length.  */
   if ((ins->codep - ins->start_codep) > MAX_CODE_LENGTH)
     {
-      (*ins->info->fprintf_func) (ins->info->stream, "(bad)");
+      (*ins->info->fprintf_styled_func)
+	(ins->info->stream, dis_style_text, "(bad)");
       return MAX_CODE_LENGTH;
     }
 
@@ -9754,7 +9765,8 @@ print_insn (bfd_vma pc, instr_info *ins)
   for (i = strlen (ins->obuf) + prefix_length; i < 6; i++)
     oappend (ins, " ");
   oappend (ins, " ");
-  (*ins->info->fprintf_func) (ins->info->stream, "%s", ins->obuf);
+  (*ins->info->fprintf_styled_func)
+    (ins->info->stream, dis_style_mnemonic, "%s", ins->obuf);
 
   /* The enter and bound instructions are printed with operands in the same
      order as the intel book; everything else is printed in reverse order.  */
@@ -9793,7 +9805,8 @@ print_insn (bfd_vma pc, instr_info *ins)
     if (*op_txt[i])
       {
 	if (needcomma)
-	  (*ins->info->fprintf_func) (ins->info->stream, ",");
+	  (*ins->info->fprintf_styled_func) (ins->info->stream,
+					     dis_style_text, ",");
 	if (ins->op_index[i] != -1 && !ins->op_riprel[i])
 	  {
 	    bfd_vma target = (bfd_vma) ins->op_address[ins->op_index[i]];
@@ -9809,14 +9822,18 @@ print_insn (bfd_vma pc, instr_info *ins)
 	    (*ins->info->print_address_func) (target, ins->info);
 	  }
 	else
-	  (*ins->info->fprintf_func) (ins->info->stream, "%s", op_txt[i]);
+	  (*ins->info->fprintf_styled_func) (ins->info->stream,
+					     dis_style_text, "%s",
+					     op_txt[i]);
 	needcomma = 1;
       }
 
   for (i = 0; i < MAX_OPERANDS; i++)
     if (ins->op_index[i] != -1 && ins->op_riprel[i])
       {
-	(*ins->info->fprintf_func) (ins->info->stream, "        # ");
+	(*ins->info->fprintf_styled_func) (ins->info->stream,
+					   dis_style_comment_start,
+					   "        # ");
 	(*ins->info->print_address_func) ((bfd_vma)
 			(ins->start_pc + (ins->codep - ins->start_codep)
 			 + ins->op_address[ins->op_index[i]]), ins->info);
