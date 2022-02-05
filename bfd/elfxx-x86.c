@@ -1484,11 +1484,13 @@ elf_x86_size_or_finish_relative_reloc
 		}
 	      else
 		{
-		  /* Allow undefined symbol only at the sizing phase.  */
+		  /* Allow undefined symbol only at the sizing phase.
+		     Otherwise skip undefined symbol here.  Undefined
+		     symbol will be reported by relocate_section.  */
 		  if (outrel == NULL)
 		    relocation = 0;
 		  else
-		    abort ();
+		    continue;
 		}
 	    }
 	  else
