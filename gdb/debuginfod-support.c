@@ -272,31 +272,33 @@ progressfn (debuginfod_client *c, long cur, long total)
   if (total > 0)
     {
       /* Transfer size is known.  */
-      if (!data->progress.has_value ()
-	  || data->progress->get_state () != ui_out::progress_update::PERCENT)
+      double percent = (double)cur / (double)total;
+
+      if (percent >= 0.0 && percent <= 1.0)
 	{
-	  double size = (double)total;
-	  const char *unit = "";
+          if (!data->progress.has_value ()
+	      || data->progress->get_state ()
+		 != ui_out::progress_update::PERCENT)
+	    {
+	      double size = (double)total;
+	      const char *unit = "";
 
-	  get_size_and_unit (&size, &unit);
-          std::string fsize = string_printf ("%.2f", size);
-	  std::string message = build_message (fsize, unit, data->desc,
-					       data->fname);
-	  if (!data->progress.has_value ())
-	    data->progress.emplace (current_uiout, message, 1);
-	  else
-	    data->progress->update_name (message);
-	}
+	      get_size_and_unit (&size, &unit);
+              std::string fsize = string_printf ("%.2f", size);
+	      std::string message = build_message (fsize, unit, data->desc,
+						   data->fname);
+	      if (!data->progress.has_value ())
+		data->progress.emplace (current_uiout, message, 1);
+	      else
+		data->progress->update_name (message);
+	    }
 
-	double percent = (double)cur / (double)total;
-	if (percent >= 0.0 && percent <= 1.0)
-	  {
 	    /* Ensure PERCENT doesn't require three digits to display.  */
 	    if (percent > 0.99 && percent <= 1.0)
 	      percent = .99;
 	    current_uiout->update_progress_percent (percent);
 	    return 0;
-	  }
+	}
     }
 
   if (!data->progress.has_value ()
@@ -312,7 +314,6 @@ progressfn (debuginfod_client *c, long cur, long total)
 
   current_uiout->update_progress_spin ();
   return 0;
-
 }
 
 static debuginfod_client *
