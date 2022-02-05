@@ -301,6 +301,14 @@ if ![info exists READELFFLAGS] then {
     set READELFFLAGS {}
 }
 
+if ![info exists SIZE] then {
+    set SIZE [findfile $base_dir/../binutils/size]
+}
+
+if ![info exists SIZEFLAGS] then {
+    set SIZEFLAGS ""
+}
+
 if ![info exists ELFEDIT] then {
     set ELFEDIT [findfile $base_dir/../binutils/elfedit]
 }
