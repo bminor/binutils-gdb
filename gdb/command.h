@@ -379,6 +379,9 @@ struct cli_suppress_notification
 {
   /* Inferior, thread, frame selected notification suppressed?  */
   bool user_selected_context = false;
+
+  /* Normal stop event suppressed? */
+  bool normal_stop = false;
 };
 
 extern struct cli_suppress_notification cli_suppress_notification;
