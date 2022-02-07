@@ -6364,7 +6364,7 @@ aarch64_relocation_aginst_gp_p (bfd_reloc_code_real_type reloc)
 /* Build capability meta data, i.e. size and permissions for a capability.  */
 
 static bfd_vma
-cap_meta (size_t size, const asection *sec)
+cap_meta (size_t size, const asection *sec, bfd_boolean *guessed)
 {
 
   if (size >= (1ULL << 56))
@@ -6386,10 +6386,20 @@ cap_meta (size_t size, const asection *sec)
   else if (sec->flags & SEC_ALLOC)
     flags = 2;
 
-  /* We should always be able to derive a valid set of permissions
-     from the section flags.  */
+  /* We should usually be able to derive a valid set of permissions
+     from the section flags.  We know that when a relocation is against an
+     SHN_ABS symbol the section has no associated flags and we must guess.
+
+     As it stands we don't know of any other instances where we do not have
+     permission flags on a section.  We choose to allow instances that we do
+     not know of rather than abort on them so that if the guess is correct we
+     don't hamper anyone progressing.  */
   if (flags == 0)
-    abort ();
+    {
+      flags = 2;
+      *guessed = TRUE;
+    }
+
   return size | (flags << 56);
 }
 
@@ -6451,15 +6461,18 @@ c64_symbol_section_adjustment (struct elf_link_hash_entry *h, bfd_vma value,
 
 static bfd_reloc_status_type
 c64_fixup_frag (bfd *input_bfd, struct bfd_link_info *info,
-		Elf_Internal_Sym *sym, struct elf_link_hash_entry *h,
-		asection *sym_sec, bfd_byte *frag_loc, bfd_vma value,
-		bfd_signed_vma addend)
+		bfd_reloc_code_real_type bfd_r_type, Elf_Internal_Sym *sym,
+		struct elf_link_hash_entry *h, asection *sym_sec,
+		asection *reloc_sec, bfd_byte *frag_loc, bfd_vma value,
+		bfd_signed_vma addend, bfd_vma r_offset)
 {
   BFD_ASSERT (h || sym);
   bfd_vma size = sym ? sym->st_size : h->size;
   asection *perm_sec = sym_sec;
   bfd_boolean bounds_ok = FALSE;
 
+  const int aarch64_reloc_idx = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
+  const char *reloc_name = elfNN_aarch64_howto_table[aarch64_reloc_idx].name;
   const char *sym_name;
 
   if (sym)
@@ -6534,10 +6547,21 @@ c64_fixup_frag (bfd *input_bfd, struct bfd_link_info *info,
 
   if (perm_sec != NULL)
     {
-      bfd_vma frag = cap_meta (size, perm_sec);
+      bfd_boolean permissions_guessed = FALSE;
+      bfd_vma frag = cap_meta (size, perm_sec, &permissions_guessed);
 
       if (frag == (bfd_vma) -1)
 	return bfd_reloc_outofrange;
+
+      if (permissions_guessed)
+	{
+	  _bfd_error_handler (_("%pB(%pA+%#" PRIx64 "): "
+				"warning: relocation %s against symbol '%s' in "
+				"section without permission flags '%s'.  "
+				"Assuming Read-Write."),
+			      input_bfd, reloc_sec, r_offset, reloc_name,
+			      sym_name, perm_sec->name);
+	}
 
       bfd_put_64 (input_bfd, frag, frag_loc);
     }
@@ -7304,9 +7328,9 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    {
 	      bfd_reloc_status_type ret;
 
-	      ret = c64_fixup_frag (input_bfd, info, sym, h,
-				    sym_sec, base_got->contents + off + 8,
-				    orig_value, 0);
+	      ret = c64_fixup_frag (input_bfd, info, bfd_r_type, sym, h,
+				    sym_sec, s, base_got->contents + off + 8,
+				    orig_value, 0, off);
 
 	      if (ret != bfd_reloc_continue)
 		return ret;
@@ -7509,8 +7533,9 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	  bfd_reloc_status_type ret;
 
-	  ret = c64_fixup_frag (input_bfd, info, sym, h, sym_sec,
-				hit_data + 8, value, signed_addend);
+	  ret = c64_fixup_frag (input_bfd, info, bfd_r_type, sym, h, sym_sec,
+				input_section, hit_data + 8, value,
+				signed_addend, rel->r_offset);
 
 	  if (ret != bfd_reloc_continue)
 	    return ret;
