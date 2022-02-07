@@ -63,7 +63,7 @@ index_cache::set_directory (std::string dir)
 
   m_dir = std::move (dir);
 
-  index_cache_debug ("now using directory %s\n", m_dir.c_str ());
+  index_cache_debug ("now using directory %s", m_dir.c_str ());
 }
 
 /* See dwarf-index-cache.h.  */
@@ -71,7 +71,7 @@ index_cache::set_directory (std::string dir)
 void
 index_cache::enable ()
 {
-  index_cache_debug ("enabling (%s)\n", m_dir.c_str ());
+  index_cache_debug ("enabling (%s)", m_dir.c_str ());
 
   m_enabled = true;
 }
@@ -81,7 +81,7 @@ index_cache::enable ()
 void
 index_cache::disable ()
 {
-  index_cache_debug ("disabling\n");
+  index_cache_debug ("disabling");
 
   m_enabled = false;
 }
@@ -100,7 +100,7 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
   const bfd_build_id *build_id = build_id_bfd_get (obj->obfd);
   if (build_id == nullptr)
     {
-      index_cache_debug ("objfile %s has no build id\n",
+      index_cache_debug ("objfile %s has no build id",
 			 objfile_name (obj));
       return;
     }
@@ -118,7 +118,7 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
 
       if (dwz_build_id == nullptr)
 	{
-	  index_cache_debug ("dwz objfile %s has no build id\n",
+	  index_cache_debug ("dwz objfile %s has no build id",
 			     dwz->filename ());
 	  return;
 	}
@@ -143,7 +143,7 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
 	  return;
 	}
 
-      index_cache_debug ("writing index cache for objfile %s\n",
+      index_cache_debug ("writing index cache for objfile %s",
 			 objfile_name (obj));
 
       /* Write the index itself to the directory, using the build id as the
@@ -154,8 +154,8 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
     }
   catch (const gdb_exception_error &except)
     {
-      index_cache_debug ("couldn't store index cache for objfile "
-			 "%s: %s", objfile_name (obj), except.what ());
+      index_cache_debug ("couldn't store index cache for objfile %s: %s",
+			 objfile_name (obj), except.what ());
     }
 }
 
@@ -195,7 +195,7 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
 
   try
     {
-      index_cache_debug ("trying to read %s\n",
+      index_cache_debug ("trying to read %s",
 			 filename.c_str ());
 
       /* Try to map that file.  */
@@ -211,7 +211,7 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
     }
   catch (const gdb_exception_error &except)
     {
-      index_cache_debug ("couldn't read %s: %s\n",
+      index_cache_debug ("couldn't read %s: %s",
 			 filename.c_str (), except.what ());
     }
 
