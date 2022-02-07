@@ -82,6 +82,8 @@ maint_info_jit_cmd (const char *args, int from_tty)
   inferior *inf = current_inferior ();
   bool printed_header = false;
 
+  gdb::optional<ui_out_emit_table> table_emitter;
+
   /* Print a line for each JIT-ed objfile.  */
   for (objfile *obj : inf->pspace->objfiles ())
     {
@@ -90,11 +92,35 @@ maint_info_jit_cmd (const char *args, int from_tty)
 
       if (!printed_header)
 	{
-	  printf_filtered ("Base address of known JIT-ed objfiles:\n");
+	  table_emitter.emplace (current_uiout, 3, -1, "jit-created-objfiles");
+
+	  /* The +2 allows for the leading '0x', then one character for
+	     every 4-bits.  */
+	  int addr_width = 2 + (gdbarch_ptr_bit (obj->arch ()) / 4);
+
+	  /* The std::max here selects between the width of an address (as
+	     a string) and the width of the column header string.  */
+	  current_uiout->table_header (std::max (addr_width, 22), ui_left,
+				       "jit_code_entry-address",
+				       "jit_code_entry address");
+	  current_uiout->table_header (std::max (addr_width, 15), ui_left,
+				       "symfile-address", "symfile address");
+	  current_uiout->table_header (20, ui_left,
+				       "symfile-size", "symfile size");
+	  current_uiout->table_body ();
+
 	  printed_header = true;
 	}
 
-      printf_filtered ("  %s\n", paddress (obj->arch (), obj->jited_data->addr));
+      ui_out_emit_tuple tuple_emitter (current_uiout, "jit-objfile");
+
+      current_uiout->field_core_addr ("jit_code_entry-address", obj->arch (),
+				      obj->jited_data->addr);
+      current_uiout->field_core_addr ("symfile-address", obj->arch (),
+				      obj->jited_data->symfile_addr);
+      current_uiout->field_unsigned ("symfile-size",
+				      obj->jited_data->symfile_size);
+      current_uiout->text ("\n");
     }
 }
 
@@ -211,11 +237,13 @@ get_jiter_objfile_data (objfile *objf)
    at inferior address ENTRY.  */
 
 static void
-add_objfile_entry (struct objfile *objfile, CORE_ADDR entry)
+add_objfile_entry (struct objfile *objfile, CORE_ADDR entry,
+		   CORE_ADDR symfile_addr, ULONGEST symfile_size)
 {
   gdb_assert (objfile->jited_data == nullptr);
 
-  objfile->jited_data.reset (new jited_objfile_data (entry));
+  objfile->jited_data.reset (new jited_objfile_data (entry, symfile_addr,
+						     symfile_size));
 }
 
 /* Helper function for reading the global JIT descriptor from remote
@@ -644,7 +672,9 @@ jit_object_close_impl (struct gdb_symbol_callbacks *cb,
   for (gdb_symtab &symtab : obj->symtabs)
     finalize_symtab (&symtab, objfile);
 
-  add_objfile_entry (objfile, priv_data->entry_addr);
+  add_objfile_entry (objfile, priv_data->entry_addr,
+		     priv_data->entry.symfile_addr,
+		     priv_data->entry.symfile_size);
 
   delete obj;
 }
@@ -773,7 +803,8 @@ JITed symbol file is not an object file, ignoring it.\n"));
 				      &sai,
 				      OBJF_SHARED | OBJF_NOT_FILENAME, NULL);
 
-  add_objfile_entry (objfile, entry_addr);
+  add_objfile_entry (objfile, entry_addr, code_entry->symfile_addr,
+		     code_entry->symfile_size);
 }
 
 /* This function registers code associated with a JIT code entry.  It uses the
