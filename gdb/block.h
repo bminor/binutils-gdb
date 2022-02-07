@@ -167,6 +167,10 @@ struct block
   void set_ranges (blockranges *ranges)
   { m_ranges = ranges; }
 
+  /* Return true if all addresses within this block are contiguous.  */
+  bool is_contiguous () const
+  { return this->ranges ().size () <= 1; }
+
   /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR m_start;
@@ -215,11 +219,6 @@ struct global_block
   struct compunit_symtab *compunit_symtab;
 };
 
-/* Are all addresses within a block contiguous?  */
-
-#define BLOCK_CONTIGUOUS_P(bl)	((bl)->ranges ().size () == 0 \
-				 || (bl)->ranges ().size () == 1)
-
 /* Define the "entry pc" for a block BL to be the lowest (start) address
    for the block when all addresses within the block are contiguous.  If
    non-contiguous, then use the start address for the first range in the
@@ -234,7 +233,7 @@ struct global_block
    the entry_pc field can be set from the dwarf reader (and other readers
    too).  BLOCK_ENTRY_PC can then be redefined to be less DWARF-centric.  */
 
-#define BLOCK_ENTRY_PC(bl)	(BLOCK_CONTIGUOUS_P (bl) \
+#define BLOCK_ENTRY_PC(bl)	(bl->is_contiguous () \
 				 ? bl->start () \
 				 : bl->ranges ()[0].start ())
 

@@ -1428,7 +1428,7 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
       if (name != NULL)
 	gdb_printf (_("for function %ps:\n"),
 		    styled_string (function_name_style.style (), name));
-      if (block == nullptr || BLOCK_CONTIGUOUS_P (block))
+      if (block == nullptr || block->is_contiguous ())
 	{
 	  if (name == NULL)
 	    gdb_printf (_("from %ps to %ps:\n"),

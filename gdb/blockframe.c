@@ -276,7 +276,7 @@ find_pc_partial_function_sym (CORE_ADDR pc,
 	     comment preceding declaration of find_pc_partial_function
 	     in symtab.h for more information.  */
 
-	  if (BLOCK_CONTIGUOUS_P (b))
+	  if (b->is_contiguous ())
 	    {
 	      cache_pc_function_low = b->start ();
 	      cache_pc_function_high = b->end ();
@@ -390,7 +390,7 @@ find_function_entry_range_from_pc (CORE_ADDR pc, const char **name,
   const struct block *block;
   bool status = find_pc_partial_function (pc, name, address, endaddr, &block);
 
-  if (status && block != nullptr && !BLOCK_CONTIGUOUS_P (block))
+  if (status && block != nullptr && !block->is_contiguous ())
     {
       CORE_ADDR entry_pc = BLOCK_ENTRY_PC (block);
 
