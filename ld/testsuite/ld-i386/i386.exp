@@ -493,6 +493,7 @@ run_dump_test "property-x86-isa3"
 run_dump_test "property-x86-isa4"
 run_dump_test "pr26869"
 run_dump_test "code16"
+run_dump_test "pr28870"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
