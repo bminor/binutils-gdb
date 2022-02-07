@@ -54,7 +54,7 @@ proc run_test { args } {
 	set cmd ""
 
 	# Create a command that is at least `i` characters long.
-	set first_cmd "print \$a"
+	set first_cmd "-data-evaluate-expression \$a"
 	while { [string length $first_cmd] < $i } {
 	    set first_cmd " $first_cmd"
 	}
@@ -69,7 +69,7 @@ proc run_test { args } {
 	set i [string length $first_cmd]
 	verbose -log "length of first command is $i"
 
-	set cmd "${first_cmd}\nprint \$b\n"
+	set cmd "${first_cmd}\n-data-evaluate-expression \$b\n"
 
 	# We need to call send_gdb ourselves here as gdb_test_multiple
 	# will try to send each line of the command separately (breaking
@@ -100,14 +100,14 @@ proc run_test { args } {
 	set seen_second_message false
 
 	gdb_test_multiple "" "look for first command output, command length $i" -prompt "$mi_gdb_prompt" {
-	    -re "(&\"print \\\$\[ab\]\\\\n\")\r\n(~\"\\\$$decimal = \\\\\"FIRST COMMAND\\\\\"\[^\r\n\]+\r\n\\^done\r\n$mi_gdb_prompt)" {
+	    -re "\\^done,value=\"\\\\\"FIRST COMMAND\\\\\"\"\r\n" {
 		pass $gdb_test_name
 		set seen_first_message true
 	    }
 	}
 
 	gdb_test_multiple "" "look for second command output, command length $i" -prompt "$mi_gdb_prompt" {
-	    -re "(&\"print \\\$\[ab\]\\\\n\")\r\n(~\"\\\$$decimal = \\\\\"TEST COMPLETE\\\\\"\[^\r\n\]+\r\n\\^done\r\n$mi_gdb_prompt)" {
+	    -re "\\^done,value=\"\\\\\"TEST COMPLETE\\\\\"\"\r\n$mi_gdb_prompt" {
 		pass $gdb_test_name
 		set seen_second_message true
 	    }
