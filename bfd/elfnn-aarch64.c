@@ -8689,7 +8689,7 @@ elfNN_aarch64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   bfd *obfd = info->output_bfd;
   flagword out_flags;
   flagword in_flags;
-  bool flags_compatible = true;
+  bool flags_compatible = false;
   asection *sec;
 
   /* Check if we have the same endianess.  */
@@ -8710,6 +8710,8 @@ elfNN_aarch64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 
   if (!elf_flags_init (obfd))
     {
+      elf_flags_init (obfd) = true;
+
       /* If the input is the default architecture and had the default
 	 flags then do not bother setting the flags for the output
 	 architecture, instead allow future merges to do this.  If no
@@ -8720,7 +8722,6 @@ elfNN_aarch64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	  && elf_elfheader (ibfd)->e_flags == 0)
 	return true;
 
-      elf_flags_init (obfd) = true;
       elf_elfheader (obfd)->e_flags = in_flags;
 
       if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
@@ -8744,11 +8745,17 @@ elfNN_aarch64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
      Also check to see if there are no code sections in the input.
      In this case there is no need to check for code specific flags.
      XXX - do we need to worry about floating-point format compatability
-     in data sections ?  */
+     in data sections ?
+
+     We definitely need to check for data sections if one set of flags is
+     targetting the PURECAP abi and another is not.  Pointers being
+     capabilities in data sections can not be glossed over.  */
   if (!(ibfd->flags & DYNAMIC))
     {
       bool null_input_bfd = true;
-      bool only_data_sections = true;
+      bool only_data_sections
+	= !(in_flags & EF_AARCH64_CHERI_PURECAP
+	    || out_flags & EF_AARCH64_CHERI_PURECAP);
 
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	{
