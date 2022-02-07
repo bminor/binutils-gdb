@@ -1,6 +1,4 @@
 #source: emit-relocs-morello-5.s
 #as: -march=morello+c64
 #ld: -static
-#error: .*: capability range may exceed object bounds
-#error: .*: in function `_start':.*
-#error: .*: dangerous relocation: unsupported relocation
+#warning: .*: capability range for 'bigarray' may exceed object bounds
