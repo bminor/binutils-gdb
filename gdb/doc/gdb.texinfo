@@ -27211,6 +27211,75 @@ inside a cygwin window.
 Displays whether the debugger is operating in interactive mode or not.
 @end table
 
+@table @code
+@kindex set suppress-cli-notifications
+@item set suppress-cli-notifications
+If @code{on}, command-line-interface (CLI) notifications that are
+printed by @value{GDBN} are suppressed.  If @code{off}, the
+notifications are printed as usual.  The default value is @code{off}.
+CLI notifications occur when you change the selected context or when
+the program being debugged stops, as detailed below.
+
+@table @emph
+@item User-selected context changes:
+When you change the selected context (i.e.@: the current inferior,
+thread and/or the frame), @value{GDBN} prints information about the
+new context.  For example, the default behavior is below:
+
+@smallexample
+(gdb) inferior 1
+[Switching to inferior 1 [process 634] (/tmp/test)]
+[Switching to thread 1 (process 634)]
+#0  main () at test.c:3
+3         return 0;
+(gdb)
+@end smallexample
+
+When the notifications are suppressed, the new context is not printed:
+
+@smallexample
+(gdb) set suppress-cli-notifications on
+(gdb) inferior 1
+(gdb)
+@end smallexample
+
+@item The program being debugged stops:
+When the program you are debugging stops (e.g.@: because of hitting a
+breakpoint, completing source-stepping, an interrupt, etc.),
+@value{GDBN} prints information about the stop event.  For example,
+below is a breakpoint hit:
+
+@smallexample
+(gdb) break test.c:3
+Breakpoint 2 at 0x555555555155: file test.c, line 3.
+(gdb) continue
+Continuing.
+
+Breakpoint 2, main () at test.c:3
+3         return 0;
+(gdb)
+@end smallexample
+
+When the notifications are suppressed, the output becomes:
+
+@smallexample
+(gdb) break test.c:3
+Breakpoint 2 at 0x555555555155: file test.c, line 3.
+(gdb) set suppress-cli-notifications on
+(gdb) continue
+Continuing.
+(gdb)
+@end smallexample
+
+Suppressing CLI notifications may be useful in scripts to obtain a
+reduced output from a list of commands.
+@end table
+
+@kindex show suppress-cli-notifications
+@item show suppress-cli-notifications
+Displays whether printing CLI notifications is suppressed or not.
+@end table
+
 @node Extending GDB
 @chapter Extending @value{GDBN}
 @cindex extending GDB

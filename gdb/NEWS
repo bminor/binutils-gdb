@@ -81,6 +81,14 @@ maint show gnu-source-highlight enabled
   styling to a particular source file, then the Python Pygments
   library will be used instead.
 
+set suppress-cli-notifications (on|off)
+show suppress-cli-notifications
+  This controls whether printing the notifications is suppressed for CLI.
+  CLI notifications occur when you change the selected context
+  (i.e., the current inferior, thread and/or the frame), or when
+  the program being debugged stops (e.g., because of hitting a
+  breakpoint, completing source-stepping, an interrupt, etc.).
+
 * Changed commands
 
 maint packet
