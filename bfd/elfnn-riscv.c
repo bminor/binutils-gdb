@@ -3371,52 +3371,27 @@ riscv_std_ext_p (const char *name)
   return (strlen (name) == 1) && (name[0] != 'x') && (name[0] != 's');
 }
 
-/* Check if the versions are compatible.  */
+/* Update the output subset's version to match the input when the input
+   subset's version is newer.  */
 
-static bool
-riscv_version_mismatch (bfd *ibfd,
-			struct riscv_subset_t *in,
-			struct riscv_subset_t *out)
+static void
+riscv_update_subset_version (struct riscv_subset_t *in,
+			     struct riscv_subset_t *out)
 {
   if (in == NULL || out == NULL)
-    return true;
+    return;
 
-  /* Since there are no version conflicts for now, we just report
-     warning when the versions are mis-matched.  */
-  if (in->major_version != out->major_version
-      || in->minor_version != out->minor_version)
+  /* Update the output ISA versions to the newest ones, but otherwise don't
+     provide any errors or warnings about mis-matched ISA versions as it's
+     generally too tricky to check for these at link time. */
+  if ((in->major_version > out->major_version)
+      || (in->major_version == out->major_version
+	  && in->minor_version > out->minor_version)
+      || (out->major_version == RISCV_UNKNOWN_VERSION))
     {
-      if ((in->major_version == RISCV_UNKNOWN_VERSION
-	   && in->minor_version == RISCV_UNKNOWN_VERSION)
-	  || (out->major_version == RISCV_UNKNOWN_VERSION
-	      && out->minor_version == RISCV_UNKNOWN_VERSION))
-	{
-	  /* Do not report the warning when the version of input
-	     or output is RISCV_UNKNOWN_VERSION, since the extension
-	     is added implicitly.  */
-	}
-      else
-	_bfd_error_handler
-	  (_("warning: %pB: mis-matched ISA version %d.%d for '%s' "
-	     "extension, the output version is %d.%d"),
-	   ibfd,
-	   in->major_version,
-	   in->minor_version,
-	   in->name,
-	   out->major_version,
-	   out->minor_version);
-
-      /* Update the output ISA versions to the newest ones.  */
-      if ((in->major_version > out->major_version)
-	  || (in->major_version == out->major_version
-	      && in->minor_version > out->minor_version))
-	{
-	  out->major_version = in->major_version;
-	  out->minor_version = in->minor_version;
-	}
+      out->major_version = in->major_version;
+      out->minor_version = in->minor_version;
     }
-
-  return true;
 }
 
 /* Return true if subset is 'i' or 'e'.  */
@@ -3477,11 +3452,10 @@ riscv_merge_std_ext (bfd *ibfd,
 	 ibfd, in->name, out->name);
       return false;
     }
-  else if (!riscv_version_mismatch (ibfd, in, out))
-    return false;
-  else
-    riscv_add_subset (&merged_subsets,
-		      out->name, out->major_version, out->minor_version);
+
+  riscv_update_subset_version(in, out);
+  riscv_add_subset (&merged_subsets,
+		    out->name, out->major_version, out->minor_version);
 
   in = in->next;
   out = out->next;
@@ -3499,10 +3473,8 @@ riscv_merge_std_ext (bfd *ibfd,
       if (!find_in && !find_out)
 	continue;
 
-      if (find_in
-	  && find_out
-	  && !riscv_version_mismatch (ibfd, ext_in, ext_out))
-	return false;
+      if (find_in && find_out)
+	riscv_update_subset_version(ext_in, ext_out);
 
       ext_merged = find_out ? ext_out : ext_in;
       riscv_add_subset (&merged_subsets, ext_merged->name,
@@ -3524,8 +3496,7 @@ riscv_merge_std_ext (bfd *ibfd,
    on success and FALSE when a conflict is found.  */
 
 static bool
-riscv_merge_multi_letter_ext (bfd *ibfd,
-			      riscv_subset_t **pin,
+riscv_merge_multi_letter_ext (riscv_subset_t **pin,
 			      riscv_subset_t **pout)
 {
   riscv_subset_t *in = *pin;
@@ -3555,8 +3526,7 @@ riscv_merge_multi_letter_ext (bfd *ibfd,
       else
 	{
 	  /* Both present, check version and increment both.  */
-	  if (!riscv_version_mismatch (ibfd, in, out))
-	    return false;
+	  riscv_update_subset_version (in, out);
 
 	  riscv_add_subset (&merged_subsets, out->name, out->major_version,
 			    out->minor_version);
@@ -3629,7 +3599,7 @@ riscv_merge_arch_attr_info (bfd *ibfd, char *in_arch, char *out_arch)
     return NULL;
 
   /* Merge all non-single letter extensions with single call.  */
-  if (!riscv_merge_multi_letter_ext (ibfd, &in, &out))
+  if (!riscv_merge_multi_letter_ext (&in, &out))
     return NULL;
 
   if (xlen_in != xlen_out)
