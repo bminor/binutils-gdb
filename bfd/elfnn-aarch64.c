@@ -6460,6 +6460,18 @@ c64_fixup_frag (bfd *input_bfd, struct bfd_link_info *info,
   asection *perm_sec = sym_sec;
   bfd_boolean bounds_ok = FALSE;
 
+  const char *sym_name;
+
+  if (sym)
+    {
+      Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (input_bfd);
+      sym_name = (bfd_elf_string_from_elf_section (input_bfd,
+						   symtab_hdr->sh_link,
+						   sym->st_name));
+    }
+  else
+    sym_name = h->root.root.string;
+
   if (size == 0 && sym_sec)
     {
       bounds_ok = TRUE;
@@ -6492,11 +6504,13 @@ c64_fixup_frag (bfd *input_bfd, struct bfd_link_info *info,
 
   if (!bounds_ok && !c64_valid_cap_range (&base, &limit))
     {
+      /* Just warn about this.  It's not a requirement that bounds on
+	 objects should be precise, so there's no reason to error out on
+	 such an object.  */
       /* xgettext:c-format */
-      _bfd_error_handler (_("%pB: capability range may exceed object bounds"),
-			  input_bfd);
-      bfd_set_error (bfd_error_bad_value);
-      return bfd_reloc_notsupported;
+      _bfd_error_handler
+	(_("%pB: capability range for '%s' may exceed object bounds"),
+	 input_bfd, sym_name);
     }
 
   if (perm_sec && perm_sec->flags & SEC_CODE)
