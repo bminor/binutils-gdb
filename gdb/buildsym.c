@@ -448,11 +448,9 @@ buildsym_compunit::make_blockvector ()
      each block into the list after its subblocks in order to make
      sure this is true.  */
 
-  BLOCKVECTOR_NBLOCKS (blockvector) = i;
+  blockvector->set_num_blocks (i);
   for (next = m_pending_blocks; next; next = next->next)
-    {
-      BLOCKVECTOR_BLOCK (blockvector, --i) = next->block;
-    }
+    blockvector->set_block (--i, next->block);
 
   free_pending_blocks ();
 
@@ -470,15 +468,15 @@ buildsym_compunit::make_blockvector ()
      Note: Remember that the first two blocks are the global and static
      blocks.  We could special case that fact and begin checking at block 2.
      To avoid making that assumption we do not.  */
-  if (BLOCKVECTOR_NBLOCKS (blockvector) > 1)
+  if (blockvector->num_blocks () > 1)
     {
-      for (i = 1; i < BLOCKVECTOR_NBLOCKS (blockvector); i++)
+      for (i = 1; i < blockvector->num_blocks (); i++)
 	{
-	  if (BLOCKVECTOR_BLOCK(blockvector, i - 1)->start ()
-	      > BLOCKVECTOR_BLOCK(blockvector, i)->start ())
+	  if (blockvector->block (i - 1)->start ()
+	      > blockvector->block (i)->start ())
 	    {
 	      CORE_ADDR start
-		= BLOCKVECTOR_BLOCK(blockvector, i)->start ();
+		= blockvector->block (i)->start ();
 
 	      complaint (_("block at %s out of order"),
 			 hex_string ((LONGEST) start));
@@ -983,7 +981,7 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 
   cu->set_blockvector (blockvector);
   {
-    struct block *b = BLOCKVECTOR_BLOCK (blockvector, GLOBAL_BLOCK);
+    struct block *b = blockvector->global_block ();
 
     set_block_compunit_symtab (b, cu);
   }
@@ -999,9 +997,9 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
     /* The main source file's symtab.  */
     struct symtab *symtab = cu->primary_filetab ();
 
-    for (block_i = 0; block_i < BLOCKVECTOR_NBLOCKS (blockvector); block_i++)
+    for (block_i = 0; block_i < blockvector->num_blocks (); block_i++)
       {
-	struct block *block = BLOCKVECTOR_BLOCK (blockvector, block_i);
+	struct block *block = blockvector->block (block_i);
 	struct symbol *sym;
 	struct mdict_iterator miter;
 
@@ -1130,7 +1128,7 @@ void
 buildsym_compunit::augment_type_symtab ()
 {
   struct compunit_symtab *cust = m_compunit_symtab;
-  const struct blockvector *blockvector = cust->blockvector ();
+  struct blockvector *blockvector = cust->blockvector ();
 
   if (!m_context_stack.empty ())
     complaint (_("Context stack not empty in augment_type_symtab"));
@@ -1143,7 +1141,7 @@ buildsym_compunit::augment_type_symtab ()
 
   if (m_file_symbols != NULL)
     {
-      struct block *block = BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK);
+      struct block *block = blockvector->static_block ();
 
       /* First mark any symbols without a specified symtab as belonging
 	 to the primary symtab.  */
@@ -1154,7 +1152,7 @@ buildsym_compunit::augment_type_symtab ()
 
   if (m_global_symbols != NULL)
     {
-      struct block *block = BLOCKVECTOR_BLOCK (blockvector, GLOBAL_BLOCK);
+      struct block *block = blockvector->global_block ();
 
       /* First mark any symbols without a specified symtab as belonging
 	 to the primary symtab.  */

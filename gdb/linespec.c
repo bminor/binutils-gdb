@@ -1190,9 +1190,9 @@ iterate_over_all_matching_symtabs
 		  int i;
 		  const blockvector *bv = symtab->compunit ()->blockvector ();
 
-		  for (i = FIRST_LOCAL_BLOCK; i < BLOCKVECTOR_NBLOCKS (bv); i++)
+		  for (i = FIRST_LOCAL_BLOCK; i < bv->num_blocks (); i++)
 		    {
-		      block = BLOCKVECTOR_BLOCK (bv, i);
+		      block = bv->block (i);
 		      state->language->iterate_over_symbols
 			(block, lookup_name, name_domain,
 			 [&] (block_symbol *bsym)
@@ -1231,8 +1231,7 @@ iterate_over_file_blocks
 {
   const struct block *block;
 
-  for (block = BLOCKVECTOR_BLOCK (symtab->compunit ()->blockvector (),
-				  STATIC_BLOCK);
+  for (block = symtab->compunit ()->blockvector ()->static_block ();
        block != NULL;
        block = block->superblock ())
     current_language->iterate_over_symbols (block, name, domain, callback);

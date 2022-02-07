@@ -1757,12 +1757,17 @@ struct compunit_symtab
     m_dirname = dirname;
   }
 
+  struct blockvector *blockvector ()
+  {
+    return m_blockvector;
+  }
+
   const struct blockvector *blockvector () const
   {
     return m_blockvector;
   }
 
-  void set_blockvector (const struct blockvector *blockvector)
+  void set_blockvector (struct blockvector *blockvector)
   {
     m_blockvector = blockvector;
   }
@@ -1860,7 +1865,7 @@ struct compunit_symtab
 
   /* List of all symbol scope blocks for this symtab.  It is shared among
      all symtabs in a given compilation unit.  */
-  const struct blockvector *m_blockvector;
+  struct blockvector *m_blockvector;
 
   /* Section in objfile->section_offsets for the blockvector and
      the linetable.  Probably always SECT_OFF_TEXT.  */

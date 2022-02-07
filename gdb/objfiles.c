@@ -664,19 +664,17 @@ objfile_relocate1 (struct objfile *objfile,
 
     for (compunit_symtab *cust : objfile->compunits ())
       {
-	const struct blockvector *bv = cust->blockvector ();
+	struct blockvector *bv = cust->blockvector ();
 	int block_line_section = cust->block_line_section ();
 
 	if (BLOCKVECTOR_MAP (bv))
 	  addrmap_relocate (BLOCKVECTOR_MAP (bv), delta[block_line_section]);
 
-	for (int i = 0; i < BLOCKVECTOR_NBLOCKS (bv); ++i)
+	for (block *b : bv->blocks ())
 	  {
-	    struct block *b;
 	    struct symbol *sym;
 	    struct mdict_iterator miter;
 
-	    b = BLOCKVECTOR_BLOCK (bv, i);
 	    b->set_start (b->start () + delta[block_line_section]);
 	    b->set_end (b->end () + delta[block_line_section]);
 

@@ -1798,7 +1798,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 	      if (cust == NULL)
 		continue;
 	      bv = cust->blockvector ();
-	      b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	      b = bv->static_block ();
 	      for (partial_symbol *psym : ps->static_psymbols)
 		{
 		  /* Skip symbols for inlined functions without address.  These may
@@ -1819,7 +1819,7 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 		      gdb_printf (" psymtab\n");
 		    }
 		}
-	      b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+	      b = bv->global_block ();
 	      for (partial_symbol *psym : ps->global_psymbols)
 		{
 		  sym = block_lookup_symbol (b, psym->ginfo.search_name (),

@@ -569,10 +569,9 @@ gdbpy_lookup_static_symbols (PyObject *self, PyObject *args, PyObject *kw)
 	  for (compunit_symtab *cust : objfile->compunits ())
 	    {
 	      const struct blockvector *bv;
-	      const struct block *block;
 
 	      bv = cust->blockvector ();
-	      block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	      const struct block *block = bv->static_block ();
 
 	      if (block != nullptr)
 		{

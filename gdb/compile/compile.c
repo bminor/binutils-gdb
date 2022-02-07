@@ -484,8 +484,8 @@ get_expr_block_and_pc (CORE_ADDR *pc)
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
 
       if (cursal.symtab)
-	block = BLOCKVECTOR_BLOCK (cursal.symtab->compunit ()->blockvector (),
-				   STATIC_BLOCK);
+	block = cursal.symtab->compunit ()->blockvector ()->static_block ();
+
       if (block != NULL)
 	*pc = block->entry_pc ();
     }

@@ -236,13 +236,9 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 {
   struct objfile *objfile = symtab->compunit ()->objfile ();
   struct gdbarch *gdbarch = objfile->arch ();
-  int i;
   struct mdict_iterator miter;
-  int len;
   struct linetable *l;
-  const struct blockvector *bv;
   struct symbol *sym;
-  const struct block *b;
   int depth;
 
   gdb_printf (outfile, "\nSymtab for file %s at %s\n",
@@ -263,8 +259,8 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
   if (l)
     {
       gdb_printf (outfile, "\nLine table:\n\n");
-      len = l->nitems;
-      for (i = 0; i < len; i++)
+      int len = l->nitems;
+      for (int i = 0; i < len; i++)
 	{
 	  gdb_printf (outfile, " line %d at ", l->item[i].line);
 	  gdb_puts (paddress (gdbarch, l->item[i].pc), outfile);
@@ -278,11 +274,10 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
   if (is_main_symtab_of_compunit_symtab (symtab))
     {
       gdb_printf (outfile, "\nBlockvector:\n\n");
-      bv = symtab->compunit ()->blockvector ();
-      len = BLOCKVECTOR_NBLOCKS (bv);
-      for (i = 0; i < len; i++)
+      const blockvector *bv = symtab->compunit ()->blockvector ();
+      for (int i = 0; i < bv->num_blocks (); i++)
 	{
-	  b = BLOCKVECTOR_BLOCK (bv, i);
+	  const block *b = bv->block (i);
 	  depth = block_depth (b) * 2;
 	  gdb_printf (outfile, "%*sblock #%03d, object at %s",
 		      depth, "", i,
@@ -351,7 +346,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
 	  gdb_printf (outfile, "Compunit user: %s\n", addr);
 	}
       if (cust->includes != nullptr)
-	for (i = 0; ; ++i)
+	for (int i = 0; ; ++i)
 	  {
 	    struct compunit_symtab *include = cust->includes[i];
 	    if (include == nullptr)

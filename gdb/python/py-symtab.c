@@ -176,13 +176,13 @@ static PyObject *
 stpy_global_block (PyObject *self, PyObject *args)
 {
   struct symtab *symtab = NULL;
-  const struct block *block = NULL;
   const struct blockvector *blockvector;
 
   STPY_REQUIRE_VALID (self, symtab);
 
   blockvector = symtab->compunit ()->blockvector ();
-  block = BLOCKVECTOR_BLOCK (blockvector, GLOBAL_BLOCK);
+  const struct block *block = blockvector->global_block ();
+
   return block_to_block_object (block, symtab->compunit ()->objfile ());
 }
 
@@ -192,13 +192,13 @@ static PyObject *
 stpy_static_block (PyObject *self, PyObject *args)
 {
   struct symtab *symtab = NULL;
-  const struct block *block = NULL;
   const struct blockvector *blockvector;
 
   STPY_REQUIRE_VALID (self, symtab);
 
   blockvector = symtab->compunit ()->blockvector ();
-  block = BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK);
+  const struct block *block = blockvector->static_block ();
+
   return block_to_block_object (block, symtab->compunit ()->objfile ());
 }
 

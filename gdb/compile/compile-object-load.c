@@ -422,7 +422,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 				 symbol_name_match_type::SEARCH_NAME);
 
   bv = func_sym->symtab ()->compunit ()->blockvector ();
-  nblocks = BLOCKVECTOR_NBLOCKS (bv);
+  nblocks = bv->num_blocks ();
 
   gdb_ptr_type_sym = NULL;
   for (block_loop = 0; block_loop < nblocks; block_loop++)
@@ -430,7 +430,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
       struct symbol *function = NULL;
       const struct block *function_block;
 
-      block = BLOCKVECTOR_BLOCK (bv, block_loop);
+      block = bv->block (block_loop);
       if (block->function () != NULL)
 	continue;
       gdb_val_sym = block_lookup_symbol (block,
@@ -441,8 +441,8 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 	continue;
 
       function_block = block;
-      while (function_block != BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)
-	     && function_block != BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK))
+      while (function_block != bv->static_block ()
+	     && function_block != bv->global_block ())
 	{
 	  function_block = function_block->superblock ();
 	  function = function_block->function ();
@@ -450,8 +450,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 	    break;
 	}
       if (function != NULL
-	  && (function_block->superblock ()
-	      == BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK))
+	  && function_block->superblock () == bv->static_block ()
 	  && symbol_matches_search_name (function, func_matcher))
 	break;
     }

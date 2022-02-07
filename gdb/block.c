@@ -147,14 +147,14 @@ find_block_in_blockvector (const struct blockvector *bl, CORE_ADDR pc)
      They both have the same START,END values.
      Historically this code would choose STATIC_BLOCK over GLOBAL_BLOCK but the
      fact that this choice was made was subtle, now we make it explicit.  */
-  gdb_assert (BLOCKVECTOR_NBLOCKS (bl) >= 2);
+  gdb_assert (bl->blocks ().size () >= 2);
   bot = STATIC_BLOCK;
-  top = BLOCKVECTOR_NBLOCKS (bl);
+  top = bl->blocks ().size ();
 
   while (top - bot > 1)
     {
       half = (top - bot + 1) >> 1;
-      b = BLOCKVECTOR_BLOCK (bl, bot + half);
+      b = bl->block (bot + half);
       if (b->start () <= pc)
 	bot += half;
       else
@@ -165,7 +165,7 @@ find_block_in_blockvector (const struct blockvector *bl, CORE_ADDR pc)
 
   while (bot >= STATIC_BLOCK)
     {
-      b = BLOCKVECTOR_BLOCK (bl, bot);
+      b = bl->block (bot);
       if (!(b->start () <= pc))
 	return NULL;
       if (b->end () > pc)
@@ -543,8 +543,7 @@ block_iterator_step (struct block_iterator *iterator, int first)
 	  if (cust == NULL)
 	    return  NULL;
 
-	  block = BLOCKVECTOR_BLOCK (cust->blockvector (),
-				     iterator->which);
+	  block = cust->blockvector ()->block (iterator->which);
 	  sym = mdict_iterator_first (block->multidict (),
 				      &iterator->mdict_iter);
 	}
@@ -612,8 +611,7 @@ block_iter_match_step (struct block_iterator *iterator,
 	  if (cust == NULL)
 	    return  NULL;
 
-	  block = BLOCKVECTOR_BLOCK (cust->blockvector (),
-				     iterator->which);
+	  block = cust->blockvector ()->block (iterator->which);
 	  sym = mdict_iter_match_first (block->multidict (), name,
 					&iterator->mdict_iter);
 	}

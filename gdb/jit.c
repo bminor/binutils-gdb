@@ -565,7 +565,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
   BLOCKVECTOR_MAP (bv) = NULL;
   begin = stab->blocks.front ().begin;
   end = stab->blocks.front ().end;
-  BLOCKVECTOR_NBLOCKS (bv) = actual_nblocks;
+  bv->set_num_blocks (actual_nblocks);
 
   /* First run over all the gdb_block objects, creating a real block
      object for each.  Simultaneously, keep setting the real_block
@@ -598,7 +598,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 
       new_block->set_function (block_name);
 
-      BLOCKVECTOR_BLOCK (bv, block_idx) = new_block;
+      bv->set_block (block_idx, new_block);
       if (begin > new_block->start ())
 	begin = new_block->start ();
       if (end < new_block->end ())
@@ -626,7 +626,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       new_block->set_start (begin);
       new_block->set_end (end);
 
-      BLOCKVECTOR_BLOCK (bv, i) = new_block;
+      bv->set_block (i, new_block);
 
       if (i == GLOBAL_BLOCK)
 	set_block_compunit_symtab (new_block, cust);
@@ -647,8 +647,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       else
 	{
 	  /* And if not, we set a default parent block.  */
-	  gdb_block_iter.real_block->set_superblock
-	    (BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK));
+	  gdb_block_iter.real_block->set_superblock (bv->static_block ());
 	}
     }
 }

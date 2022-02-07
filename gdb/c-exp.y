@@ -3110,8 +3110,8 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	  if (symtab)
 	    {
 	      yylval.bval
-		= BLOCKVECTOR_BLOCK (symtab->compunit ()->blockvector (),
-				     STATIC_BLOCK);
+		= symtab->compunit ()->blockvector ()->static_block ();
+
 	      return FILENAME;
 	    }
 	}

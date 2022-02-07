@@ -244,18 +244,71 @@ struct global_block
 
 struct blockvector
 {
-  /* Number of blocks in the list.  */
-  int nblocks;
+  /* Return a view on the blocks of this blockvector.  */
+  gdb::array_view<struct block *> blocks ()
+  {
+    return gdb::array_view<struct block *> (m_blocks, m_num_blocks);
+  }
+
+  /* Const version of the above.  */
+  gdb::array_view<const struct block *const> blocks () const
+  {
+    const struct block **blocks = (const struct block **) m_blocks;
+    return gdb::array_view<const struct block *const> (blocks, m_num_blocks);
+  }
+
+  /* Return the block at index I.  */
+  struct block *block (size_t i)
+  { return this->blocks ()[i]; }
+
+  /* Const version of the above.  */
+  const struct block *block (size_t i) const
+  { return this->blocks ()[i]; }
+
+  /* Set the block at index I.  */
+  void set_block (int i, struct block *block)
+  { m_blocks[i] = block; }
+
+  /* Set the number of blocks of this blockvector.
+
+     The storage of blocks is done using a flexible array member, so the number
+     of blocks set here must agree with what was effectively allocated.  */
+  void set_num_blocks (int num_blocks)
+  { m_num_blocks = num_blocks; }
+
+  /* Return the number of blocks in this blockvector.  */
+  int num_blocks () const
+  { return m_num_blocks; }
+
+  /* Return the global block of this blockvector.  */
+  struct block *global_block ()
+  { return this->block (GLOBAL_BLOCK); }
+
+  /* Const version of the above.  */
+  const struct block *global_block () const
+  { return this->block (GLOBAL_BLOCK); }
+
+  /* Return the static block of this blockvector.  */
+  struct block *static_block ()
+  { return this->block (STATIC_BLOCK); }
+
+  /* Const version of the above.  */
+  const struct block *static_block () const
+  { return this->block (STATIC_BLOCK); }
+
   /* An address map mapping addresses to blocks in this blockvector.
      This pointer is zero if the blocks' start and end addresses are
      enough.  */
   struct addrmap *map;
+
+private:
+  /* Number of blocks in the list.  */
+  int m_num_blocks;
+
   /* The blocks themselves.  */
-  struct block *block[1];
+  struct block *m_blocks[1];
 };
 
-#define BLOCKVECTOR_NBLOCKS(blocklist) (blocklist)->nblocks
-#define BLOCKVECTOR_BLOCK(blocklist,n) (blocklist)->block[n]
 #define BLOCKVECTOR_MAP(blocklist) ((blocklist)->map)
 
 /* Return the objfile of BLOCK, which must be non-NULL.  */

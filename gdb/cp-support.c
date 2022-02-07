@@ -1440,7 +1440,7 @@ static void
 add_symbol_overload_list_qualified (const char *func_name,
 				    std::vector<symbol *> *overload_list)
 {
-  const struct block *b, *surrounding_static_block = 0;
+  const struct block *surrounding_static_block = 0;
 
   /* Look through the partial symtabs for all symbols which begin by
      matching FUNC_NAME.  Make sure we read that symbol table in.  */
@@ -1451,7 +1451,9 @@ add_symbol_overload_list_qualified (const char *func_name,
   /* Search upwards from currently selected frame (so that we can
      complete on local vars.  */
 
-  for (b = get_selected_block (0); b != NULL; b = b->superblock ())
+  for (const block *b = get_selected_block (0);
+       b != nullptr;
+       b = b->superblock ())
     add_symbol_overload_list_block (func_name, b, overload_list);
 
   surrounding_static_block = block_static_block (get_selected_block (0));
@@ -1464,7 +1466,7 @@ add_symbol_overload_list_qualified (const char *func_name,
       for (compunit_symtab *cust : objfile->compunits ())
 	{
 	  QUIT;
-	  b = BLOCKVECTOR_BLOCK (cust->blockvector (), GLOBAL_BLOCK);
+	  const block *b = cust->blockvector ()->global_block ();
 	  add_symbol_overload_list_block (func_name, b, overload_list);
 	}
     }
@@ -1474,10 +1476,12 @@ add_symbol_overload_list_qualified (const char *func_name,
       for (compunit_symtab *cust : objfile->compunits ())
 	{
 	  QUIT;
-	  b = BLOCKVECTOR_BLOCK (cust->blockvector (), STATIC_BLOCK);
+	  const block *b = cust->blockvector ()->static_block ();
+
 	  /* Don't do this block twice.  */
 	  if (b == surrounding_static_block)
 	    continue;
+
 	  add_symbol_overload_list_block (func_name, b, overload_list);
 	}
     }
