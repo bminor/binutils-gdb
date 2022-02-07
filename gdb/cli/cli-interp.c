@@ -68,10 +68,7 @@ cli_interp::~cli_interp ()
 }
 
 /* Suppress notification struct.  */
-struct cli_suppress_notification cli_suppress_notification =
-  {
-    0   /* user_selected_context_changed */
-  };
+struct cli_suppress_notification cli_suppress_notification;
 
 /* Returns the INTERP's data cast as cli_interp if INTERP is a CLI,
    and returns NULL otherwise.  */
