@@ -215,10 +215,6 @@ struct global_block
   struct compunit_symtab *compunit_symtab;
 };
 
-/* Access range array for block BL.  */
-
-#define BLOCK_RANGE(bl)		(bl)->ranges ().data ()
-
 /* Are all addresses within a block contiguous?  */
 
 #define BLOCK_CONTIGUOUS_P(bl)	((bl)->ranges ().size () == 0 \
@@ -240,7 +236,7 @@ struct global_block
 
 #define BLOCK_ENTRY_PC(bl)	(BLOCK_CONTIGUOUS_P (bl) \
 				 ? bl->start () \
-				 : BLOCK_RANGE (bl)[0].start ())
+				 : bl->ranges ()[0].start ())
 
 struct blockvector
 {
