@@ -286,11 +286,11 @@ find_pc_partial_function_sym (CORE_ADDR pc,
 	      int i;
 	      for (i = 0; i < BLOCK_NRANGES (b); i++)
 		{
-		  if (BLOCK_RANGE_START (b, i) <= mapped_pc
-		      && mapped_pc < BLOCK_RANGE_END (b, i))
+		  if (BLOCK_RANGE (b)[i].start () <= mapped_pc
+		      && mapped_pc < BLOCK_RANGE (b)[i].end ())
 		    {
-		      cache_pc_function_low = BLOCK_RANGE_START (b, i);
-		      cache_pc_function_high = BLOCK_RANGE_END (b, i);
+		      cache_pc_function_low = BLOCK_RANGE (b)[i].start ();
+		      cache_pc_function_high = BLOCK_RANGE (b)[i].end ();
 		      break;
 		    }
 		}
@@ -396,14 +396,14 @@ find_function_entry_range_from_pc (CORE_ADDR pc, const char **name,
 
       for (int i = 0; i < BLOCK_NRANGES (block); i++)
 	{
-	  if (BLOCK_RANGE_START (block, i) <= entry_pc
-	      && entry_pc < BLOCK_RANGE_END (block, i))
+	  if (BLOCK_RANGE (block)[i].start () <= entry_pc
+	      && entry_pc < BLOCK_RANGE (block)[i].end ())
 	    {
 	      if (address != nullptr)
-		*address = BLOCK_RANGE_START (block, i);
+		*address = BLOCK_RANGE (block)[i].start ();
 
 	      if (endaddr != nullptr)
-		*endaddr = BLOCK_RANGE_END (block, i);
+		*endaddr = BLOCK_RANGE (block)[i].end ();
 
 	      return status;
 	    }

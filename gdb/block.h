@@ -38,19 +38,35 @@ struct addrmap;
 
 struct blockrange
 {
-  blockrange (CORE_ADDR startaddr_, CORE_ADDR endaddr_)
-    : startaddr (startaddr_),
-      endaddr (endaddr_)
+  blockrange (CORE_ADDR start, CORE_ADDR end)
+    : m_start (start),
+      m_end (end)
   {
   }
 
+  /* Return this blockrange's start address.  */
+  CORE_ADDR start () const
+  { return m_start; }
+
+  /* Set this blockrange's start address.  */
+  void set_start (CORE_ADDR start)
+  { m_start = start; }
+
+  /* Return this blockrange's end address.  */
+  CORE_ADDR end () const
+  { return m_end; }
+
+  /* Set this blockrange's end address.  */
+  void set_end (CORE_ADDR end)
+  { m_end = end; }
+
   /* Lowest address in this range.  */
 
-  CORE_ADDR startaddr;
+  CORE_ADDR m_start;
 
   /* One past the highest address in the range.  */
 
-  CORE_ADDR endaddr;
+  CORE_ADDR m_end;
 };
 
 /* Two or more non-contiguous ranges in the same order as that provided
@@ -203,14 +219,6 @@ struct global_block
 #define BLOCK_CONTIGUOUS_P(bl)	(BLOCK_RANGES (bl) == nullptr \
 				 || BLOCK_NRANGES (bl) <= 1)
 
-/* Obtain the start address of the Nth range for block BL.  */
-
-#define BLOCK_RANGE_START(bl,n) (BLOCK_RANGE (bl)[n].startaddr)
-
-/* Obtain the end address of the Nth range for block BL.  */
-
-#define BLOCK_RANGE_END(bl,n)	(BLOCK_RANGE (bl)[n].endaddr)
-
 /* Define the "entry pc" for a block BL to be the lowest (start) address
    for the block when all addresses within the block are contiguous.  If
    non-contiguous, then use the start address for the first range in the
@@ -227,7 +235,7 @@ struct global_block
 
 #define BLOCK_ENTRY_PC(bl)	(BLOCK_CONTIGUOUS_P (bl) \
 				 ? bl->start () \
-				 : BLOCK_RANGE_START (bl,0))
+				 : BLOCK_RANGE (bl)[0].start ())
 
 struct blockvector
 {

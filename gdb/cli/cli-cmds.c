@@ -1444,8 +1444,8 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
 	{
 	  for (int i = 0; i < BLOCK_NRANGES (block); i++)
 	    {
-	      CORE_ADDR range_low = BLOCK_RANGE_START (block, i);
-	      CORE_ADDR range_high = BLOCK_RANGE_END (block, i);
+	      CORE_ADDR range_low = BLOCK_RANGE (block)[i].start ();
+	      CORE_ADDR range_high = BLOCK_RANGE (block)[i].end ();
 	      gdb_printf (_("Address range %ps to %ps:\n"),
 			  styled_string (address_style.style (),
 					 paddress (gdbarch, range_low)),
