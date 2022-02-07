@@ -283,19 +283,19 @@ find_pc_partial_function_sym (CORE_ADDR pc,
 	    }
 	  else
 	    {
-	      int i;
-	      for (i = 0; i < BLOCK_NRANGES (b); i++)
+	      bool found = false;
+	      for (const blockrange &range : b->ranges ())
 		{
-		  if (BLOCK_RANGE (b)[i].start () <= mapped_pc
-		      && mapped_pc < BLOCK_RANGE (b)[i].end ())
+		  if (range.start () <= mapped_pc && mapped_pc < range.end ())
 		    {
-		      cache_pc_function_low = BLOCK_RANGE (b)[i].start ();
-		      cache_pc_function_high = BLOCK_RANGE (b)[i].end ();
+		      cache_pc_function_low = range.start ();
+		      cache_pc_function_high = range.end ();
+		      found = true;
 		      break;
 		    }
 		}
 	      /* Above loop should exit via the break.  */
-	      gdb_assert (i < BLOCK_NRANGES (b));
+	      gdb_assert (found);
 	    }
 
 
@@ -394,16 +394,15 @@ find_function_entry_range_from_pc (CORE_ADDR pc, const char **name,
     {
       CORE_ADDR entry_pc = BLOCK_ENTRY_PC (block);
 
-      for (int i = 0; i < BLOCK_NRANGES (block); i++)
+      for (const blockrange &range : block->ranges ())
 	{
-	  if (BLOCK_RANGE (block)[i].start () <= entry_pc
-	      && entry_pc < BLOCK_RANGE (block)[i].end ())
+	  if (range.start () <= entry_pc && entry_pc < range.end ())
 	    {
 	      if (address != nullptr)
-		*address = BLOCK_RANGE (block)[i].start ();
+		*address = range.start ();
 
 	      if (endaddr != nullptr)
-		*endaddr = BLOCK_RANGE (block)[i].end ();
+		*endaddr = range.end ();
 
 	      return status;
 	    }

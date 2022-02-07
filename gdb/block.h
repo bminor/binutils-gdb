@@ -215,10 +215,6 @@ struct global_block
   struct compunit_symtab *compunit_symtab;
 };
 
-/* Number of ranges within a block.  */
-
-#define BLOCK_NRANGES(bl)	(bl)->ranges ().size ()
-
 /* Access range array for block BL.  */
 
 #define BLOCK_RANGE(bl)		(bl)->ranges ().data ()
