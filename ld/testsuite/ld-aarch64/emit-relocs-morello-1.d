@@ -19,8 +19,8 @@ Disassembly of section .got:
    .*:	[0-9a-f]+ 	.*
 			.*: R_MORELLO_RELATIVE	\*ABS\*
    .*:	00000000 	.*
-   .*:	00000302 	.*
-   .*:	00000000 	.*
+   .*:	00000003 	.*
+   .*:	02000000 	.*
 
 Disassembly of section .data:
 
@@ -32,5 +32,5 @@ Disassembly of section .data:
    .*:	[0-9a-f]+ 	.*
 			.*: R_MORELLO_RELATIVE	\*ABS\*
    .*:	00000000 	.*
-   .*:	00000302 	.*
-   .*:	00000000 	.*
+   .*:	00000003 	.*
+   .*:	02000000 	.*

@@ -37,8 +37,8 @@ Disassembly of section .data:
 .*:	[0-9a-f]+ 	.*
 			.*: R_MORELLO_RELATIVE	\*ABS\*
 .*:	00000000 	.*
-.*:	00000402 	.*
-.*:	00000000 	.*
+.*:	00000004 	.*
+.*:	02000000 	.*
 
 .* <globcap>:
 	...

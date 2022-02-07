@@ -41,5 +41,5 @@ Disassembly of section .data:
 .*:	[0-9a-f]+ 	.*
 			.*: R_MORELLO_RELATIVE	\*ABS\*
 .*:	00000000 	.*
-.*:	00001b02 	.*
-.*:	00000000 	.*
+.*:	0000001b 	.*
+.*:	02000000 	.*

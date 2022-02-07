@@ -6370,18 +6370,27 @@ cap_meta (size_t size, const asection *sec)
   if (size >= (1ULL << 56))
     return (bfd_vma) -1;
 
-  size <<= 8;
-  if (sec->flags & SEC_READONLY
-      || sec->flags & SEC_ROM)
-    return size | 1;
+  /* N.b. We are only ever using this function for Morello.
+     Morello is little-endian.
+     We are returning a 64bit sized integer.
+     The format this metadata is supposed to fit is
+      | 56 bit length | 8 bit permissions |
+     This means that (in little endian layout) we need to put the 56 bit size
+     in the *lower* bits of the uint64_t.  */
+  uint64_t flags = 0;
   if (sec->flags & SEC_CODE)
-    return size | 4;
-  if (sec->flags & SEC_ALLOC)
-    return size | 2;
+    flags = 4;
+  else if (sec->flags & SEC_READONLY
+      || sec->flags & SEC_ROM)
+    flags = 1;
+  else if (sec->flags & SEC_ALLOC)
+    flags = 2;
 
   /* We should always be able to derive a valid set of permissions
      from the section flags.  */
-  abort ();
+  if (flags == 0)
+    abort ();
+  return size | (flags << 56);
 }
 
 enum c64_section_perm_type {
