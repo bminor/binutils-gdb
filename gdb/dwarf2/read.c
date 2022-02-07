@@ -13192,7 +13192,7 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
 	  blockvec.emplace_back (start, end);
 	});
 
-      BLOCK_RANGES(block) = make_blockranges (objfile, blockvec);
+      block->set_ranges (make_blockranges (objfile, blockvec));
     }
 }
 

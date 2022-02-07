@@ -680,13 +680,11 @@ objfile_relocate1 (struct objfile *objfile,
 	    b->set_start (b->start () + delta[block_line_section]);
 	    b->set_end (b->end () + delta[block_line_section]);
 
-	    if (BLOCK_RANGES (b) != nullptr)
-	      for (int j = 0; j < BLOCK_NRANGES (b); j++)
-		{
-		  blockrange &r = BLOCK_RANGE (b)[j];
-		  r.set_start (r.start () + delta[block_line_section]);
-		  r.set_end (r.end () + delta[block_line_section]);
-		}
+	    for (blockrange &r : b->ranges ())
+	      {
+		r.set_start (r.start () + delta[block_line_section]);
+		r.set_end (r.end () + delta[block_line_section]);
+	      }
 
 	    /* We only want to iterate over the local symbols, not any
 	       symbols in included symtabs.  */

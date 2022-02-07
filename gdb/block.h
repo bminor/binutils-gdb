@@ -21,6 +21,7 @@
 #define BLOCK_H
 
 #include "dictionary.h"
+#include "gdbsupport/array-view.h"
 
 /* Opaque declarations.  */
 
@@ -154,6 +155,18 @@ struct block
   void set_namespace_info (block_namespace_info *namespace_info)
   { m_namespace_info = namespace_info; }
 
+  /* Return a view on this block's ranges.  */
+  gdb::array_view<blockrange> ranges ()
+  { return gdb::make_array_view (m_ranges->range, m_ranges->nranges); }
+
+  /* Const version of the above.  */
+  gdb::array_view<const blockrange> ranges () const
+  { return gdb::make_array_view (m_ranges->range, m_ranges->nranges); }
+
+  /* Set this block's ranges array.  */
+  void set_ranges (blockranges *ranges)
+  { m_ranges = ranges; }
+
   /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR m_start;
@@ -185,7 +198,7 @@ struct block
      is NULL, then there is only one range which is specified by
      startaddr and endaddr above.  */
 
-  struct blockranges *ranges;
+  struct blockranges *m_ranges;
 };
 
 /* The global block is singled out so that we can provide a back-link
@@ -202,22 +215,18 @@ struct global_block
   struct compunit_symtab *compunit_symtab;
 };
 
-/* Accessor for ranges field within block BL.  */
-
-#define BLOCK_RANGES(bl)	(bl)->ranges
-
 /* Number of ranges within a block.  */
 
-#define BLOCK_NRANGES(bl)	(bl)->ranges->nranges
+#define BLOCK_NRANGES(bl)	(bl)->ranges ().size ()
 
 /* Access range array for block BL.  */
 
-#define BLOCK_RANGE(bl)		(bl)->ranges->range
+#define BLOCK_RANGE(bl)		(bl)->ranges ().data ()
 
 /* Are all addresses within a block contiguous?  */
 
-#define BLOCK_CONTIGUOUS_P(bl)	(BLOCK_RANGES (bl) == nullptr \
-				 || BLOCK_NRANGES (bl) <= 1)
+#define BLOCK_CONTIGUOUS_P(bl)	((bl)->ranges ().size () == 0 \
+				 || (bl)->ranges ().size () == 1)
 
 /* Define the "entry pc" for a block BL to be the lowest (start) address
    for the block when all addresses within the block are contiguous.  If
