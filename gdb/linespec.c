@@ -2224,7 +2224,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
 		   && sym.symbol->aclass () == LOC_BLOCK)
 		{
 		  const CORE_ADDR addr
-		    = BLOCK_ENTRY_PC (sym.symbol->value_block ());
+		    = sym.symbol->value_block ()->entry_pc ();
 
 		  for (const auto &elem : ls->minimal_symbols)
 		    {

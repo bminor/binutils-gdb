@@ -645,7 +645,7 @@ build_address_symbolic (struct gdbarch *gdbarch,
 	 pointer is <function+3>.  This matches the ISA behavior.  */
       addr = gdbarch_addr_bits_remove (gdbarch, addr);
 
-      name_location = BLOCK_ENTRY_PC (symbol->value_block ());
+      name_location = symbol->value_block ()->entry_pc ();
       if (do_demangle || asm_demangle)
 	name_temp = symbol->print_name ();
       else
@@ -1778,7 +1778,7 @@ info_address_command (const char *exp, int from_tty)
 
     case LOC_BLOCK:
       gdb_printf (_("a function at address "));
-      load_addr = BLOCK_ENTRY_PC (sym->value_block ());
+      load_addr = sym->value_block ()->entry_pc ();
       fputs_styled (paddress (gdbarch, load_addr), address_style.style (),
 		    gdb_stdout);
       if (section_is_overlay (section))

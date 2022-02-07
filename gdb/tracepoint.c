@@ -2512,7 +2512,7 @@ info_scope_command (const char *args_in, int from_tty)
 
 	  if (SYMBOL_COMPUTED_OPS (sym) != NULL)
 	    SYMBOL_COMPUTED_OPS (sym)->describe_location (sym,
-							  BLOCK_ENTRY_PC (block),
+							  block->entry_pc (),
 							  gdb_stdout);
 	  else
 	    {
@@ -2587,7 +2587,7 @@ info_scope_command (const char *args_in, int from_tty)
 		  gdb_printf ("a function at address ");
 		  gdb_printf ("%s",
 			      paddress (gdbarch,
-					BLOCK_ENTRY_PC (sym->value_block ())));
+					sym->value_block ()->entry_pc ()));
 		  break;
 		case LOC_UNRESOLVED:
 		  msym = lookup_minimal_symbol (sym->linkage_name (),

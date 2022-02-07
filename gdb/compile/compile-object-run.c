@@ -145,7 +145,7 @@ compile_object_run (compile_module_up &&module)
 
       gdb_assert (func_type->code () == TYPE_CODE_FUNC);
       func_val = value_from_pointer (lookup_pointer_type (func_type),
-				   BLOCK_ENTRY_PC (func_sym->value_block ()));
+				   func_sym->value_block ()->entry_pc ());
 
       vargs = XALLOCAVEC (struct value *, func_type->num_fields ());
       if (func_type->num_fields () >= 1)

@@ -704,10 +704,10 @@ language_defn::read_var_value (struct symbol *var,
     case LOC_BLOCK:
       if (overlay_debugging)
 	addr = symbol_overlayed_address
-	  (BLOCK_ENTRY_PC (var->value_block ()),
+	  (var->value_block ()->entry_pc (),
 	   var->obj_section (var->objfile ()));
       else
-	addr = BLOCK_ENTRY_PC (var->value_block ());
+	addr = var->value_block ()->entry_pc ();
       break;
 
     case LOC_REGISTER:

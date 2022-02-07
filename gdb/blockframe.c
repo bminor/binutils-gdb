@@ -96,7 +96,7 @@ get_pc_function_start (CORE_ADDR pc)
       if (symbol)
 	{
 	  bl = symbol->value_block ();
-	  return BLOCK_ENTRY_PC (bl);
+	  return bl->entry_pc ();
 	}
     }
 
@@ -254,7 +254,7 @@ find_pc_partial_function_sym (CORE_ADDR pc,
       f = find_pc_sect_function (mapped_pc, section);
       if (f != NULL
 	  && (msymbol.minsym == NULL
-	      || (BLOCK_ENTRY_PC (f->value_block ())
+	      || (f->value_block ()->entry_pc ()
 		  >= msymbol.value_address ())))
 	{
 	  const struct block *b = f->value_block ();
@@ -392,7 +392,7 @@ find_function_entry_range_from_pc (CORE_ADDR pc, const char **name,
 
   if (status && block != nullptr && !block->is_contiguous ())
     {
-      CORE_ADDR entry_pc = BLOCK_ENTRY_PC (block);
+      CORE_ADDR entry_pc = block->entry_pc ();
 
       for (const blockrange &range : block->ranges ())
 	{
@@ -424,7 +424,7 @@ find_function_type (CORE_ADDR pc)
 {
   struct symbol *sym = find_pc_function (pc);
 
-  if (sym != NULL && BLOCK_ENTRY_PC (sym->value_block ()) == pc)
+  if (sym != NULL && sym->value_block ()->entry_pc () == pc)
     return sym->type ();
 
   return NULL;

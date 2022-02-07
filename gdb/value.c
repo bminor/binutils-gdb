@@ -3184,7 +3184,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
   VALUE_LVAL (v) = lval_memory;
   if (sym)
     {
-      set_value_address (v, BLOCK_ENTRY_PC (sym->value_block ()));
+      set_value_address (v, sym->value_block ()->entry_pc ());
     }
   else
     {

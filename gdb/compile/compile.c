@@ -487,10 +487,10 @@ get_expr_block_and_pc (CORE_ADDR *pc)
 	block = BLOCKVECTOR_BLOCK (cursal.symtab->compunit ()->blockvector (),
 				   STATIC_BLOCK);
       if (block != NULL)
-	*pc = BLOCK_ENTRY_PC (block);
+	*pc = block->entry_pc ();
     }
   else
-    *pc = BLOCK_ENTRY_PC (block);
+    *pc = block->entry_pc ();
 
   return block;
 }

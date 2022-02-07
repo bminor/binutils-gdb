@@ -453,7 +453,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
 	  if (pc_block)
 	    pc_func = block_linkage_function (pc_block);
 
-	  if (pc_func && pc == BLOCK_ENTRY_PC (pc_func->value_block ()))
+	  if (pc_func && pc == pc_func->value_block ()->entry_pc ())
 	    {
 	      *locexpr_length = length;
 	      return loc_ptr;
@@ -753,7 +753,7 @@ func_addr_to_tail_call_list (struct gdbarch *gdbarch, CORE_ADDR addr)
   struct symbol *sym = find_pc_function (addr);
   struct type *type;
 
-  if (sym == NULL || BLOCK_ENTRY_PC (sym->value_block ()) != addr)
+  if (sym == NULL || sym->value_block ()->entry_pc () != addr)
     throw_error (NO_ENTRY_VALUE_ERROR,
 		 _("DW_TAG_call_site resolving failed to find function "
 		   "name for address %s"),

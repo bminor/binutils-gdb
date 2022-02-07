@@ -1345,7 +1345,7 @@ until_next_command (int from_tty)
     {
       sal = find_pc_line (pc, 0);
 
-      tp->control.step_range_start = BLOCK_ENTRY_PC (func->value_block ());
+      tp->control.step_range_start = func->value_block ()->entry_pc ();
       tp->control.step_range_end = sal.end;
 
       /* By setting the step_range_end based on the current pc, we are

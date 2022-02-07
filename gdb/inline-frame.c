@@ -181,7 +181,7 @@ inline_frame_this_id (struct frame_info *this_frame,
      in the frame ID (and eventually, to set breakpoints).  */
   func = get_frame_function (this_frame);
   gdb_assert (func != NULL);
-  (*this_id).code_addr = BLOCK_ENTRY_PC (func->value_block ());
+  (*this_id).code_addr = func->value_block ()->entry_pc ();
   (*this_id).artificial_depth++;
 }
 
@@ -362,7 +362,7 @@ skip_inline_frames (thread_info *thread, bpstat *stop_chain)
 	    {
 	      /* See comments in inline_frame_this_id about this use
 		 of BLOCK_ENTRY_PC.  */
-	      if (BLOCK_ENTRY_PC (cur_block) == this_pc
+	      if (cur_block->entry_pc () == this_pc
 		  || block_starting_point_at (this_pc, cur_block))
 		{
 		  /* Do not skip the inlined frame if execution

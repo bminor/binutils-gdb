@@ -571,7 +571,7 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       break;
 
     case LOC_BLOCK:
-      ax_const_l (ax, BLOCK_ENTRY_PC (var->value_block ()));
+      ax_const_l (ax, var->value_block ()->entry_pc ());
       value->kind = axs_rvalue;
       break;
 

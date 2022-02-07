@@ -4687,8 +4687,8 @@ fill_in_stop_func (struct gdbarch *gdbarch,
 	 stop_func_start is NOT advanced when in a range of a
 	 non-contiguous block that does not contain the entry pc.  */
       if (block != nullptr
-	  && ecs->stop_func_start <= BLOCK_ENTRY_PC (block)
-	  && BLOCK_ENTRY_PC (block) < ecs->stop_func_end)
+	  && ecs->stop_func_start <= block->entry_pc ()
+	  && block->entry_pc () < ecs->stop_func_end)
 	{
 	  ecs->stop_func_start
 	    += gdbarch_deprecated_function_start_offset (gdbarch);

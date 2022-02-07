@@ -171,6 +171,29 @@ struct block
   bool is_contiguous () const
   { return this->ranges ().size () <= 1; }
 
+  /* Return the "entry PC" of this block.
+
+     The entry PC is the lowest (start) address for the block when all addresses
+     within the block are contiguous.  If non-contiguous, then use the start
+     address for the first range in the block.
+
+     At the moment, this almost matches what DWARF specifies as the entry
+     pc.  (The missing bit is support for DW_AT_entry_pc which should be
+     preferred over range data and the low_pc.)
+
+     Once support for DW_AT_entry_pc is added, I expect that an entry_pc
+     field will be added to one of these data structures.  Once that's done,
+     the entry_pc field can be set from the dwarf reader (and other readers
+     too).  ENTRY_PC can then be redefined to be less DWARF-centric.  */
+
+  CORE_ADDR entry_pc () const
+  {
+    if (this->is_contiguous ())
+      return this->start ();
+    else
+      return this->ranges ()[0].start ();
+  }
+
   /* Addresses in the executable code that are in this block.  */
 
   CORE_ADDR m_start;
@@ -218,24 +241,6 @@ struct global_block
 
   struct compunit_symtab *compunit_symtab;
 };
-
-/* Define the "entry pc" for a block BL to be the lowest (start) address
-   for the block when all addresses within the block are contiguous.  If
-   non-contiguous, then use the start address for the first range in the
-   block.
-
-   At the moment, this almost matches what DWARF specifies as the entry
-   pc.  (The missing bit is support for DW_AT_entry_pc which should be
-   preferred over range data and the low_pc.)
-
-   Once support for DW_AT_entry_pc is added, I expect that an entry_pc
-   field will be added to one of these data structures.  Once that's done,
-   the entry_pc field can be set from the dwarf reader (and other readers
-   too).  BLOCK_ENTRY_PC can then be redefined to be less DWARF-centric.  */
-
-#define BLOCK_ENTRY_PC(bl)	(bl->is_contiguous () \
-				 ? bl->start () \
-				 : bl->ranges ()[0].start ())
 
 struct blockvector
 {
