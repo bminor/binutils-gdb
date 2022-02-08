@@ -546,9 +546,11 @@ proc gdb_starti_cmd { {inferior_args {}} } {
     return -1
 }
 
-# Set a breakpoint at FUNCTION.  If there is an additional argument it is
-# a list of options; the supported options are allow-pending, temporary,
-# message, no-message and qualified.
+# Set a breakpoint using LINESPEC.
+#
+# If there is an additional argument it is a list of options; the supported
+# options are allow-pending, temporary, message, no-message and qualified.
+#
 # The result is 1 for success, 0 for failure.
 #
 # Note: The handling of message vs no-message is messed up, but it's based
@@ -557,7 +559,7 @@ proc gdb_starti_cmd { {inferior_args {}} } {
 # no-message: turns off printing of fails (and passes, but they're already off)
 # message: turns on printing of passes (and fails, but they're already on)
 
-proc gdb_breakpoint { function args } {
+proc gdb_breakpoint { linespec args } {
     global gdb_prompt
     global decimal
 
@@ -588,9 +590,9 @@ proc gdb_breakpoint { function args } {
 	set print_pass 1
     }
 
-    set test_name "setting breakpoint at $function"
+    set test_name "gdb_breakpoint: set breakpoint at $linespec"
 
-    send_gdb "$break_command $function\n"
+    send_gdb "$break_command $linespec\n"
     # The first two regexps are what we get with -g, the third is without -g.
     gdb_expect 30 {
 	-re "$break_message \[0-9\]* at .*: file .*, line $decimal.\r\n$gdb_prompt $" {}
@@ -658,7 +660,7 @@ proc gdb_breakpoint { function args } {
 # no-message: turns off printing of fails (and passes, but they're already off)
 # message: turns on printing of passes (and fails, but they're already on)
 
-proc runto { function args } {
+proc runto { linespec args } {
     global gdb_prompt
     global decimal
 
@@ -675,14 +677,14 @@ proc runto { function args } {
 	set print_pass 1
     }
 
-    set test_name "running to $function in runto"
+    set test_name "runto: run to $linespec"
 
     # We need to use eval here to pass our varargs args to gdb_breakpoint
     # which is also a varargs function.
-    # But we also have to be careful because $function may have multiple
+    # But we also have to be careful because $linespec may have multiple
     # elements, and we don't want Tcl to move the remaining elements after
-    # the first to $args.  That is why $function is wrapped in {}.
-    if ![eval gdb_breakpoint {$function} $args] {
+    # the first to $args.  That is why $linespec is wrapped in {}.
+    if ![eval gdb_breakpoint {$linespec} $args] {
 	return 0
     }
 
