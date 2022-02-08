@@ -340,8 +340,10 @@ update_definedness (const char *name, struct bfd_link_hash_entry *h)
 }
 
 static void
-fold_segment_end (seg_align_type *seg)
+fold_segment_end (void)
 {
+  seg_align_type *seg = &expld.dataseg;
+
   if (expld.phase == lang_first_phase_enum
       || expld.section != bfd_abs_section_ptr)
     {
@@ -410,7 +412,7 @@ fold_unary (etree_type *tree)
 	  break;
 
 	case DATA_SEGMENT_END:
-	  fold_segment_end (&expld.dataseg);
+	  fold_segment_end ();
 	  break;
 
 	default:
@@ -447,8 +449,10 @@ arith_result_section (const etree_value_type *lhs)
 }
 
 static void
-fold_segment_align (seg_align_type *seg, etree_value_type *lhs)
+fold_segment_align (etree_value_type *lhs)
 {
+  seg_align_type *seg = &expld.dataseg;
+
   seg->relro = exp_seg_relro_start;
   if (expld.phase == lang_first_phase_enum
       || expld.section != bfd_abs_section_ptr)
@@ -494,8 +498,10 @@ fold_segment_align (seg_align_type *seg, etree_value_type *lhs)
 }
 
 static void
-fold_segment_relro_end (seg_align_type *seg, etree_value_type *lhs)
+fold_segment_relro_end (etree_value_type *lhs)
 {
+  seg_align_type *seg = &expld.dataseg;
+
   /* Operands swapped!  XXX_SEGMENT_RELRO_END(offset,exp) has offset
      in expld.result and exp in lhs.  */
   seg->relro = exp_seg_relro_end;
@@ -662,11 +668,11 @@ fold_binary (etree_type *tree)
 	  break;
 
 	case DATA_SEGMENT_ALIGN:
-	  fold_segment_align (&expld.dataseg, &lhs);
+	  fold_segment_align (&lhs);
 	  break;
 
 	case DATA_SEGMENT_RELRO_END:
-	  fold_segment_relro_end (&expld.dataseg, &lhs);
+	  fold_segment_relro_end (&lhs);
 	  break;
 
 	default:
