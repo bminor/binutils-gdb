@@ -235,8 +235,7 @@ after_parse_default (void)
   if (link_info.maxpagesize == 0)
     link_info.maxpagesize = bfd_emul_get_maxpagesize (default_target);
   if (link_info.commonpagesize == 0)
-    link_info.commonpagesize = bfd_emul_get_commonpagesize (default_target,
-							    link_info.relro);
+    link_info.commonpagesize = bfd_emul_get_commonpagesize (default_target);
 }
 
 void

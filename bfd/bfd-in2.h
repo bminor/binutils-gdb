@@ -7273,7 +7273,7 @@ bool bfd_alt_mach_code (bfd *abfd, int alternative);
 
 bfd_vma bfd_emul_get_maxpagesize (const char *);
 
-bfd_vma bfd_emul_get_commonpagesize (const char *, bool);
+bfd_vma bfd_emul_get_commonpagesize (const char *);
 
 char *bfd_demangle (bfd *, const char *, int);
 

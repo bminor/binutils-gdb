@@ -10373,7 +10373,6 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define ELF_MACHINE_CODE	EM_PPC
 #define ELF_MAXPAGESIZE		0x10000
 #define ELF_COMMONPAGESIZE	0x1000
-#define ELF_RELROPAGESIZE	ELF_MAXPAGESIZE
 #define elf_info_to_howto	ppc_elf_info_to_howto
 
 #ifdef  EM_CYGNUS_POWERPC
