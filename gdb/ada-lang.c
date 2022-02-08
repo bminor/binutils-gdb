@@ -4562,8 +4562,6 @@ ada_lookup_simple_minsym (const char *name)
 {
   struct bound_minimal_symbol result;
 
-  memset (&result, 0, sizeof (result));
-
   symbol_name_match_type match_type = name_match_type_from_name (name);
   lookup_name_info lookup_name (name, match_type);
 

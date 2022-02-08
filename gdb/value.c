@@ -3171,13 +3171,8 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
   struct bound_minimal_symbol msym;
 
   sym = lookup_symbol (physname, 0, VAR_DOMAIN, 0).symbol;
-  if (sym != NULL)
+  if (sym == nullptr)
     {
-      memset (&msym, 0, sizeof (msym));
-    }
-  else
-    {
-      gdb_assert (sym == NULL);
       msym = lookup_bound_minimal_symbol (physname);
       if (msym.minsym == NULL)
 	return NULL;

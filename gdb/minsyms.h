@@ -31,12 +31,12 @@ struct bound_minimal_symbol
   /* The minimal symbol that was found, or NULL if no minimal symbol
      was found.  */
 
-  struct minimal_symbol *minsym;
+  struct minimal_symbol *minsym = nullptr;
 
   /* If MINSYM is not NULL, then this is the objfile in which the
      symbol is defined.  */
 
-  struct objfile *objfile;
+  struct objfile *objfile = nullptr;
 
   /* Return the obj_section from OBJFILE for MINSYM.  */
 
