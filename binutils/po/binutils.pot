@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2022-01-22 12:22+0000\n"
+"POT-Creation-Date: 2022-02-09 11:48+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1545,7 +1545,7 @@ msgstr ""
 msgid "Unable to open base-file: %s"
 msgstr ""
 
-#: dlltool.c:3956
+#: dlltool.c:3939
 #, c-format
 msgid "Machine '%s' not supported"
 msgstr ""
@@ -5630,19 +5630,19 @@ msgstr ""
 msgid "failed to create output section"
 msgstr ""
 
-#: objcopy.c:4099
+#: objcopy.c:4096
 msgid "failed to set size"
 msgstr ""
 
-#: objcopy.c:4118
+#: objcopy.c:4115
 msgid "failed to set vma"
 msgstr ""
 
-#: objcopy.c:4148
+#: objcopy.c:4145
 msgid "failed to set alignment"
 msgstr ""
 
-#: objcopy.c:4180
+#: objcopy.c:4177
 msgid "failed to copy private data"
 msgstr ""
 

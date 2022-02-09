@@ -1,3 +1,8 @@
+2022-02-09  Nick Clifton  <nickc@redhat.com>
+
+	2.38 release.
+	* ChangeLog.git.2.37-2.38: New file.
+
 2022-01-22  Nick Clifton  <nickc@redhat.com>
 
 	* configure: Regenerate.

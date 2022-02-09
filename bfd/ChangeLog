@@ -1,3 +1,14 @@
+2022-02-09  Nick Clifton  <nickc@redhat.com>
+
+	2.38 release.
+	* development.sh (development): Set to false.
+	(experimental): Set to false.
+	* version.m4 (BFD_VERSION): Set to 2.38.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* bfd/po/bfd.pot: Tegenerate.
+
 2022-02-02  Nick Clifton  <nickc@redhat.com>
 
 	PR 28834

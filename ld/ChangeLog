@@ -1,3 +1,10 @@
+2022-02-09  Nick Clifton  <nickc@redhat.com>
+
+	2.38 release.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* po/ld.pot: Regenerate.
+
 2022-02-02  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2022-01-22 12:24+0000\n"
+"POT-Creation-Date: 2022-02-09 11:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -345,7 +345,7 @@ msgstr ""
 msgid "%F%P:%pS: nonconstant expression for %s\n"
 msgstr ""
 
-#: ldexp.c:1670 ldlang.c:1279 ldlang.c:3493 ldlang.c:8066
+#: ldexp.c:1670 ldlang.c:1279 ldlang.c:3493 ldlang.c:8013
 msgid "%F%P: can not create hash table: %E\n"
 msgstr ""
 
@@ -700,147 +700,147 @@ msgstr ""
 msgid "%F%P: can't relax section: %E\n"
 msgstr ""
 
-#: ldlang.c:6603
+#: ldlang.c:6550
 msgid "%F%P: invalid data statement\n"
 msgstr ""
 
-#: ldlang.c:6636
+#: ldlang.c:6583
 msgid "%F%P: invalid reloc statement\n"
 msgstr ""
 
-#: ldlang.c:7053
+#: ldlang.c:7000
 msgid ""
 "%F%P: --gc-sections requires a defined symbol root specified by -e or -u\n"
 msgstr ""
 
-#: ldlang.c:7078
+#: ldlang.c:7025
 msgid "%F%P: %s: can't set start address\n"
 msgstr ""
 
-#: ldlang.c:7091 ldlang.c:7110
+#: ldlang.c:7038 ldlang.c:7057
 msgid "%F%P: can't set start address\n"
 msgstr ""
 
-#: ldlang.c:7104
+#: ldlang.c:7051
 msgid "%P: warning: cannot find entry symbol %s; defaulting to %V\n"
 msgstr ""
 
-#: ldlang.c:7115 ldlang.c:7123
+#: ldlang.c:7062 ldlang.c:7070
 msgid "%P: warning: cannot find entry symbol %s; not setting start address\n"
 msgstr ""
 
-#: ldlang.c:7179
+#: ldlang.c:7126
 msgid ""
 "%F%P: relocatable linking with relocations from format %s (%pB) to format %s "
 "(%pB) is not supported\n"
 msgstr ""
 
-#: ldlang.c:7189
+#: ldlang.c:7136
 msgid ""
 "%X%P: %s architecture of input file `%pB' is incompatible with %s output\n"
 msgstr ""
 
-#: ldlang.c:7213
+#: ldlang.c:7160
 msgid "%X%P: failed to merge target specific data of file %pB\n"
 msgstr ""
 
-#: ldlang.c:7284
+#: ldlang.c:7231
 msgid "%F%P: could not define common symbol `%pT': %E\n"
 msgstr ""
 
-#: ldlang.c:7296
+#: ldlang.c:7243
 msgid ""
 "\n"
 "Allocating common symbols\n"
 msgstr ""
 
-#: ldlang.c:7297
+#: ldlang.c:7244
 msgid ""
 "Common symbol       size              file\n"
 "\n"
 msgstr ""
 
-#: ldlang.c:7370
+#: ldlang.c:7317
 msgid "%X%P: error: unplaced orphan section `%pA' from `%pB'\n"
 msgstr ""
 
-#: ldlang.c:7388
+#: ldlang.c:7335
 msgid ""
 "%P: warning: orphan section `%pA' from `%pB' being placed in section `%s'\n"
 msgstr ""
 
-#: ldlang.c:7478
+#: ldlang.c:7425
 msgid "%F%P: invalid character %c (%d) in flags\n"
 msgstr ""
 
-#: ldlang.c:7587
+#: ldlang.c:7534
 msgid "%F%P:%pS: error: align with input and explicit align specified\n"
 msgstr ""
 
-#: ldlang.c:8102
+#: ldlang.c:8049
 msgid "%F%P: %s: plugin reported error after all symbols read\n"
 msgstr ""
 
-#: ldlang.c:8538
+#: ldlang.c:8485
 msgid "%F%P: multiple STARTUP files\n"
 msgstr ""
 
-#: ldlang.c:8584
+#: ldlang.c:8531
 msgid "%X%P:%pS: section has both a load address and a load region\n"
 msgstr ""
 
-#: ldlang.c:8690
+#: ldlang.c:8637
 msgid ""
 "%X%P:%pS: PHDRS and FILEHDR are not supported when prior PT_LOAD headers "
 "lack them\n"
 msgstr ""
 
-#: ldlang.c:8763
+#: ldlang.c:8710
 msgid "%F%P: no sections assigned to phdrs\n"
 msgstr ""
 
-#: ldlang.c:8801
+#: ldlang.c:8748
 msgid "%F%P: bfd_record_phdr failed: %E\n"
 msgstr ""
 
-#: ldlang.c:8821
+#: ldlang.c:8768
 msgid "%X%P: section `%s' assigned to non-existent phdr `%s'\n"
 msgstr ""
 
-#: ldlang.c:9244
+#: ldlang.c:9191
 msgid "%X%P: unknown language `%s' in version information\n"
 msgstr ""
 
-#: ldlang.c:9389
+#: ldlang.c:9336
 msgid ""
 "%X%P: anonymous version tag cannot be combined with other version tags\n"
 msgstr ""
 
-#: ldlang.c:9398
+#: ldlang.c:9345
 msgid "%X%P: duplicate version tag `%s'\n"
 msgstr ""
 
-#: ldlang.c:9419 ldlang.c:9428 ldlang.c:9446 ldlang.c:9456
+#: ldlang.c:9366 ldlang.c:9375 ldlang.c:9393 ldlang.c:9403
 msgid "%X%P: duplicate expression `%s' in version information\n"
 msgstr ""
 
-#: ldlang.c:9496
+#: ldlang.c:9443
 msgid "%X%P: unable to find version dependency `%s'\n"
 msgstr ""
 
-#: ldlang.c:9519
+#: ldlang.c:9466
 msgid "%X%P: unable to read .exports section contents\n"
 msgstr ""
 
-#: ldlang.c:9565
+#: ldlang.c:9512
 msgid "%P: invalid origin for memory region %s\n"
 msgstr ""
 
-#: ldlang.c:9577
+#: ldlang.c:9524
 msgid "%P: invalid length for memory region %s\n"
 msgstr ""
 
-#: ldlang.c:9689
+#: ldlang.c:9636
 msgid "%X%P: unknown feature `%s'\n"
 msgstr ""
 

@@ -1,3 +1,9 @@
+2022-02-09  Nick Clifton  <nickc@redhat.com>
+
+	2.38 release.
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2022-01-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/ro.po: Updated Romanian translation.
