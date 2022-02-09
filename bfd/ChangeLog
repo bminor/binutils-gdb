@@ -1,5 +1,10 @@
 2022-02-09  Nick Clifton  <nickc@redhat.com>
 
+	* development.sh (development): Set to true.
+	* version.m4 (BFD_VERSION): Set to 2.38.0.
+
+2022-02-09  Nick Clifton  <nickc@redhat.com>
+
 	2.38 release.
 	* development.sh (development): Set to false.
 	(experimental): Set to false.
