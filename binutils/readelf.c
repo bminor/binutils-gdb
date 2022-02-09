@@ -5631,10 +5631,7 @@ process_file_header (Filedata * filedata)
       if (filedata->section_headers != NULL
 	  && header->e_phnum == PN_XNUM
 	  && filedata->section_headers[0].sh_info != 0)
-	{
-	  header->e_phnum = filedata->section_headers[0].sh_info;
-	  printf (" (%u)", header->e_phnum);
-	}
+	printf (" (%u)", filedata->section_headers[0].sh_info);
       putc ('\n', stdout);
       printf (_("  Size of section headers:           %u (bytes)\n"),
 	      header->e_shentsize);
@@ -5667,7 +5664,12 @@ process_file_header (Filedata * filedata)
     {
       if (header->e_phnum == PN_XNUM
 	  && filedata->section_headers[0].sh_info != 0)
-	header->e_phnum = filedata->section_headers[0].sh_info;
+	{
+	  /* Throw away any cached read of PN_XNUM headers.  */
+	  free (filedata->program_headers);
+	  filedata->program_headers = NULL;
+	  header->e_phnum = filedata->section_headers[0].sh_info;
+	}
       if (header->e_shnum == SHN_UNDEF)
 	header->e_shnum = filedata->section_headers[0].sh_size;
       if (header->e_shstrndx == (SHN_XINDEX & 0xffff))
