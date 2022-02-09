@@ -1382,6 +1382,14 @@ if { [isnative] && [check_compiler_available] } {
 	    "libprotected-func-2b.so" \
 	] \
 	[list \
+	    "Build protected-func-2 without PIE" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-func-2b.so" \
+	    "$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
+	    { protected-func-1b.c } \
+	    {{error_output "pr28875-func.err"}} \
+	    "protected-func-2" \
+	] \
+	[list \
 	    "Build libprotected-data-1a.so" \
 	    "-shared -z noindirect-extern-access" \
 	    "-fPIC -Wa,-mx86-used-note=yes" \
@@ -1402,7 +1410,7 @@ if { [isnative] && [check_compiler_available] } {
 	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-data-1b.so" \
 	    "$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
 	    { protected-data-1b.c } \
-	    {} \
+	    {{error_output "pr28875-data.err"}} \
 	    "protected-data-1" \
 	] \
 	[list \
@@ -1468,6 +1476,14 @@ if { [isnative] && [check_compiler_available] } {
 		"-Wa,-mx86-used-note=yes" \
 		{ pr25416-5d.s } \
 	    ] \
+	    [list \
+		"Build pr21997-1b" \
+		"$NOPIE_LDFLAGS -Wl,--no-as-needed,-z,notext tmpdir/pr21997-1.so" \
+		"$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
+		{ pr21997-1c.c } \
+		{{error_output "pr21997-1b.err"}} \
+		"pr21997-1b" \
+	    ] \
 	]
 
 	run_ld_link_exec_tests [list \
@@ -1477,15 +1493,6 @@ if { [isnative] && [check_compiler_available] } {
 		"-Wa,-mx86-used-note=yes" \
 		{ pr22001-1c.c } \
 		"pr22001-1b" \
-		"pass.out" \
-		"$NOPIE_CFLAGS" \
-	    ] \
-	    [list \
-		"Run pr21997-1b" \
-		"$NOPIE_LDFLAGS -Wl,--no-as-needed,-z,notext tmpdir/pr21997-1.so" \
-		"-Wa,-mx86-used-note=yes" \
-		{ pr21997-1c.c } \
-		"pr21997-1b" \
 		"pass.out" \
 		"$NOPIE_CFLAGS" \
 	    ] \

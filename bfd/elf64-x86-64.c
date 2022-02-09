@@ -2223,6 +2223,23 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 		    func_pointer_ref = true;
 		}
 
+	      if (h->pointer_equality_needed
+		  && h->type == STT_FUNC
+		  && eh->def_protected
+		  && elf_has_indirect_extern_access (h->root.u.def.section->owner))
+		{
+		  /* Disallow non-canonical reference to canonical
+		     protected function.  */
+		  _bfd_error_handler
+		    /* xgettext:c-format */
+		    (_("%pB: non-canonical reference to canonical "
+		       "protected function `%s' in %pB"),
+		     abfd, h->root.root.string,
+		     h->root.u.def.section->owner);
+		  bfd_set_error (bfd_error_bad_value);
+		  goto error_return;
+		}
+
 	      if (!func_pointer_ref)
 		{
 		  /* If this reloc is in a read-only section, we might
