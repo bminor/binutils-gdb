@@ -270,12 +270,12 @@ cli_ui_out::do_redirect (ui_file *outstream)
 
    - printed for tty, SHOULD_PRINT == true
       - next state == PERCENT:
-         <(XX%) NAME\r>
+	<(XX%) NAME\r>
       - next state == SPIN:
-         <-\|/ NAME\r>
+	<-\|/ NAME\r>
       - next state == BAR:
-         <NAME
-         [#####                      ]\r>
+	<NAME
+	[#####                      ]\r>
    - printed for tty, SHOULD_PRINT == false:
      <>
    - printed for not-a-tty:
@@ -292,7 +292,7 @@ cli_ui_out::do_progress_start (const std::string &name, bool should_print)
   info.name = name;
   if (!stream->isatty ())
     {
-      fprintf_unfiltered (stream, "%s...\n", info.name.c_str ());
+      fprintf_unfiltered (stream, "%s\n", info.name.c_str ());
       gdb_flush (stream);
       info.state = progress_update::WORKING;
     }

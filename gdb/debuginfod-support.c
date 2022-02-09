@@ -276,7 +276,7 @@ progressfn (debuginfod_client *c, long cur, long total)
 
       if (percent >= 0.0 && percent <= 1.0)
 	{
-          if (!data->progress.has_value ()
+	  if (!data->progress.has_value ()
 	      || data->progress->get_state ()
 		 != ui_out::progress_update::PERCENT)
 	    {
@@ -284,7 +284,7 @@ progressfn (debuginfod_client *c, long cur, long total)
 	      const char *unit = "";
 
 	      get_size_and_unit (&size, &unit);
-              std::string fsize = string_printf ("%.2f", size);
+	      std::string fsize = string_printf ("%.2f", size);
 	      std::string message = build_message (fsize, unit, data->desc,
 						   data->fname);
 	      if (!data->progress.has_value ())

@@ -261,10 +261,10 @@ mi_ui_out::main_stream ()
 /* Indicate that a task described by NAME is in progress:
 
    - SHOULD_PRINT == true:
-       <NAME
-       >
+     <NAME
+     >
    - SHOULD_PRINT == false:
-       <>
+     <>
 */
 
 void
