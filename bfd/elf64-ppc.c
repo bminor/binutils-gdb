@@ -10292,22 +10292,18 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
       local_plt = (struct plt_entry **) end_lgot_ents;
       end_local_plt = local_plt + locsymcount;
       lgot_masks = (unsigned char *) end_local_plt;
-      local_syms = NULL;
-      if (bfd_link_pic (info))
+      local_syms = (Elf_Internal_Sym *) symtab_hdr->contents;
+      if (local_syms == NULL && locsymcount != 0)
 	{
-	  local_syms = (Elf_Internal_Sym *) symtab_hdr->contents;
-	  if (local_syms == NULL && locsymcount != 0)
-	    {
-	      local_syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, locsymcount,
-						 0, NULL, NULL, NULL);
-	      if (local_syms == NULL)
-		return false;
-	    }
+	  local_syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, locsymcount,
+					     0, NULL, NULL, NULL);
+	  if (local_syms == NULL)
+	    return false;
 	}
       s = ppc64_elf_tdata (ibfd)->got;
       for (isym = local_syms;
 	   lgot_ents < end_lgot_ents;
-	   ++lgot_ents, ++lgot_masks, isym != NULL && isym++)
+	   ++lgot_ents, ++lgot_masks, isym++)
 	{
 	  struct got_entry **pent, *ent;
 
@@ -12828,22 +12824,18 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
       local_plt = (struct plt_entry **) end_lgot_ents;
       end_local_plt = local_plt + locsymcount;
       lgot_masks = (unsigned char *) end_local_plt;
-      local_syms = NULL;
-      if (bfd_link_pic (info))
+      local_syms = (Elf_Internal_Sym *) symtab_hdr->contents;
+      if (local_syms == NULL && locsymcount != 0)
 	{
-	  local_syms = (Elf_Internal_Sym *) symtab_hdr->contents;
-	  if (local_syms == NULL && locsymcount != 0)
-	    {
-	      local_syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, locsymcount,
-						 0, NULL, NULL, NULL);
-	      if (local_syms == NULL)
-		return false;
-	    }
+	  local_syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, locsymcount,
+					     0, NULL, NULL, NULL);
+	  if (local_syms == NULL)
+	    return false;
 	}
       s = ppc64_elf_tdata (ibfd)->got;
       for (isym = local_syms;
 	   lgot_ents < end_lgot_ents;
-	   ++lgot_ents, ++lgot_masks, isym != NULL && isym++)
+	   ++lgot_ents, ++lgot_masks, isym++)
 	{
 	  struct got_entry *ent;
 
