@@ -1288,6 +1288,30 @@ if { [isnative]
 	    {} \
 	    "pr22842.so" \
 	] \
+	[list \
+	    "Build pr28875.so" \
+	    "-shared -Wl,-z,indirect-extern-access" \
+	    "-fPIC" \
+	    { pr28875a.c } \
+	    {} \
+	    "pr28875.so" \
+	] \
+	[list \
+	    "Build pr28875" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr28875.so" \
+	    "$NOPIE_CFLAGS" \
+	    { pr28875b.c } \
+	    {{error_output "pr28875.err"}} \
+	    "pr28875" \
+	] \
+	[list \
+	    "Build pr21997-1" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed,-z,notext tmpdir/pr21997-1.so" \
+	    "$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
+	    { pr21997-1b.c } \
+	    {{error_output "pr21997-1.err"}} \
+	    "pr21997-1" \
+	] \
     ]
 
     run_ld_link_exec_tests [list \
@@ -1342,15 +1366,6 @@ if { [isnative]
 	    "pr22001-1-pic-2" \
 	    "pass.out" \
 	    "-fPIC" \
-	] \
-	[list \
-	    "Run pr21997-1" \
-	    "$NOPIE_LDFLAGS -Wl,--no-as-needed,-z,notext tmpdir/pr21997-1.so" \
-	    "-Wa,-mx86-used-note=yes" \
-	    { pr21997-1b.c } \
-	    "pr21997-1" \
-	    "pass.out" \
-	    "$NOPIE_CFLAGS" \
 	] \
 	[list \
 	    "Run pr21997-1 (PIC 1)" \
