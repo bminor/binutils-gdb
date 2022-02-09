@@ -1,3 +1,7 @@
+2022-02-09  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Update after the 2.38 release.
+
 2022-01-27  Nick Clifton  <nickc@redhat.com>
 
 	* po/sv.po: Updated Swedish translation.

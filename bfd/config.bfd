@@ -48,8 +48,6 @@ targ_underscore=no
 
 # Catch obsolete configurations.
 case $targ in
- m32c-*-rtems* | \
- ns32k-*-netbsd* | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
@@ -66,7 +64,7 @@ case $targ in
     # Explicit, no defaulting
     ;;
  ns32k-*-netbsd*)
-    # The obsolete warning is enough, and ns32k does not have ELF support
+    # The obsolete warning below is enough, and ns32k does not have ELF support
     ;;
  *-*-netbsd* )
     targ_migrated=`echo "$targ" | sed 's/netbsd/netbsdaout/'`
@@ -154,6 +152,8 @@ case $targ in
  mips*-dec-* | \
  mips*-sgi-* | \
  mips*el-*-rtems* | \
+ m32c-*-rtems* | \
+ ns32k-*-netbsd* | \
  openrisc-*-* | \
  or32-*-* | \
  powerpc-*-lynxos* | powerpc-*-windiss* | \
