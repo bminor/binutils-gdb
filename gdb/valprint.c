@@ -2075,11 +2075,11 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig,
 	     int orig_len, int width,
 	     enum bfd_endian byte_order,
 	     struct obstack *output,
-	     int quoter, int *need_escapep)
+	     int quoter, bool *need_escapep)
 {
-  int need_escape = *need_escapep;
+  bool need_escape = *need_escapep;
 
-  *need_escapep = 0;
+  *need_escapep = false;
 
   /* iswprint implementation on Windows returns 1 for tab character.
      In order to avoid different printout on this host, we explicitly
@@ -2149,7 +2149,7 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig,
 		  ++i;
 		}
 
-	      *need_escapep = 1;
+	      *need_escapep = true;
 	    }
 	  break;
 	}
@@ -2167,7 +2167,7 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
   enum bfd_endian byte_order
     = type_byte_order (type);
   gdb_byte *c_buf;
-  int need_escape = 0;
+  bool need_escape = false;
 
   c_buf = (gdb_byte *) alloca (type->length ());
   pack_long (c_buf, type, c);
@@ -2332,7 +2332,7 @@ print_converted_chars_to_obstack (struct obstack *obstack,
   const converted_character *elem;
   enum {START, SINGLE, REPEAT, INCOMPLETE, FINISH} state, last;
   gdb_wchar_t wide_quote_char = gdb_btowc (quote_char);
-  int need_escape = 0;
+  bool need_escape = false;
 
   /* Set the start state.  */
   idx = 0;
