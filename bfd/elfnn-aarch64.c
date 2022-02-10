@@ -4801,11 +4801,12 @@ exponent (uint64_t len)
 #define ALIGN_UP(x, a)  (((x) + ONES (a)) & (~ONES (a)))
 
 static bfd_boolean
-c64_valid_cap_range (bfd_vma *basep, bfd_vma *limitp)
+c64_valid_cap_range (bfd_vma *basep, bfd_vma *limitp, unsigned *alignmentp)
 {
   bfd_vma base = *basep, size = *limitp - *basep;
 
   unsigned e, old_e;
+  *alignmentp = 1;
 
   if ((e = exponent (size)) == (unsigned) -1)
     return TRUE;
@@ -4818,6 +4819,7 @@ c64_valid_cap_range (bfd_vma *basep, bfd_vma *limitp)
 
   base = ALIGN_UP (base, e + 3);
 
+  *alignmentp = e+3;
   if (base == *basep && *limitp == base + size)
     return TRUE;
 
@@ -4868,17 +4870,18 @@ record_section_change (asection *sec, struct sec_change_queue **queue)
 {
   bfd_vma low = sec->vma;
   bfd_vma high = sec->vma + sec->size;
+  unsigned alignment;
 
-  if (!c64_valid_cap_range (&low, &high))
+  if (!c64_valid_cap_range (&low, &high, &alignment))
     queue_section_padding (queue, sec);
 }
 
 /* Make sure that all capabilities that refer to sections have bounds that
    won't overlap with neighbouring sections.  This is needed in two specific
    cases.  The first case is that of PCC, which needs to span across all
-   executable sections as well as the GOT and PLT sections in the output
-   binary.  The second case is that of linker and ldscript defined symbols that
-   indicate start and/or end of sections.
+   readonly sections as well as the GOT and PLT sections in the output binary.
+   The second case is that of linker and ldscript defined symbols that indicate
+   start and/or end of sections and/or zero-sized symbols.
 
    In both cases, overlap of capability bounds are avoided by aligning the base
    of the section and if necessary, adding a pad at the end of the section so
@@ -4963,7 +4966,6 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 		  if (len > 8 && name[0] == '_' && name[1] == '_'
 		      && (!strncmp (name + 2, "start_", 6)
 			  || !strcmp (name + len - 6, "_start")))
-
 		    {
 		      bfd_vma value = os->vma + os->size;
 
@@ -5029,10 +5031,8 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
       low = queue->sec->vma;
       high = queue->sec->vma + queue->sec->size;
 
-      if (!c64_valid_cap_range (&low, &high))
+      if (!c64_valid_cap_range (&low, &high, &align))
 	{
-	  align = __builtin_ctzl (low);
-
 	  if (queue->sec->alignment_power < align)
 	    queue->sec->alignment_power = align;
 
@@ -5057,9 +5057,8 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 	  pcc_low = pcc_low_sec->vma;
 	  pcc_high = pcc_high_sec->vma + pcc_high_sec->size + padding;
 
-	  if (!c64_valid_cap_range (&pcc_low, &pcc_high))
+	  if (!c64_valid_cap_range (&pcc_low, &pcc_high, &align))
 	    {
-	      align = __builtin_ctzl (pcc_low);
 	      if (pcc_low_sec->alignment_power < align)
 		pcc_low_sec->alignment_power = align;
 
@@ -6514,8 +6513,9 @@ c64_fixup_frag (bfd *input_bfd, struct bfd_link_info *info,
     return bfd_reloc_outofrange;
 
   bfd_vma base = value, limit = value + size;
+  unsigned align = 0;
 
-  if (!bounds_ok && !c64_valid_cap_range (&base, &limit))
+  if (!bounds_ok && !c64_valid_cap_range (&base, &limit, &align))
     {
       /* Just warn about this.  It's not a requirement that bounds on
 	 objects should be precise, so there's no reason to error out on
