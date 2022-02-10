@@ -4997,12 +4997,16 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 
 #define NOT_OP_SECTION(s) ((s) == NULL || (s)->output_section != sec)
 
-      if ((sec->flags & SEC_CODE) == 0
+      if ((sec->flags & SEC_READONLY) == 0
 	  && NOT_OP_SECTION (htab->root.sgotplt)
 	  && NOT_OP_SECTION (htab->root.igotplt)
 	  && NOT_OP_SECTION (htab->root.sgot)
 	  && NOT_OP_SECTION (htab->root.splt)
-	  && NOT_OP_SECTION (htab->root.iplt))
+	  && NOT_OP_SECTION (htab->root.iplt)
+	  && (sec->vma < info->relro_start
+	      || sec->vma >= info->relro_end))
+	continue;
+      if ((sec->flags & SEC_ALLOC) == 0)
 	continue;
 
       if (sec->vma < low)
