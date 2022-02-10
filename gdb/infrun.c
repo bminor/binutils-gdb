@@ -4186,6 +4186,12 @@ set_step_info (thread_info *tp, struct frame_info *frame,
 
   tp->current_symtab = sal.symtab;
   tp->current_line = sal.line;
+
+  infrun_debug_printf
+    ("symtab = %s, line = %d, step_frame_id = %s, step_stack_frame_id = %s",
+     tp->current_symtab->filename, tp->current_line,
+     tp->control.step_frame_id.to_string ().c_str (),
+     tp->control.step_stack_frame_id.to_string ().c_str ());
 }
 
 /* Clear context switchable stepping state.  */
@@ -7260,6 +7266,11 @@ process_event_stop_test (struct execution_control_state *ecs)
   ecs->event_thread->control.step_range_start = stop_pc_sal.pc;
   ecs->event_thread->control.step_range_end = stop_pc_sal.end;
   ecs->event_thread->control.may_range_step = 1;
+  infrun_debug_printf
+    ("updated step range, start = %s, end = %s, may_range_step = %d",
+     paddress (gdbarch, ecs->event_thread->control.step_range_start),
+     paddress (gdbarch, ecs->event_thread->control.step_range_end),
+     ecs->event_thread->control.may_range_step);
   if (refresh_step_info)
     set_step_info (ecs->event_thread, frame, stop_pc_sal);
 
