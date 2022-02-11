@@ -46293,6 +46293,7 @@ registers using the capitalization used in the description.
 * ARC Features::
 * ARM Features::
 * i386 Features::
+* LoongArch Features::
 * MicroBlaze Features::
 * MIPS Features::
 * M68K Features::
@@ -46520,6 +46521,15 @@ describe the additional @sc{zmm} registers:
 The @samp{org.gnu.gdb.i386.pkeys} feature is optional.  It should
 describe a single register, @samp{pkru}.  It is a 32-bit register
 valid for i386 and amd64.
+
+@node LoongArch Features
+@subsection LoongArch Features
+@cindex target descriptions, LoongArch Features
+
+The @samp{org.gnu.gdb.loongarch.base} feature is required for LoongArch
+targets.  It should contain the registers @samp{r0} through @samp{r31},
+@samp{pc}, and @samp{badv}.  Either the architectural names (@samp{r0},
+@samp{r1}, etc) can be used, or the ABI names (@samp{zero}, @samp{ra}, etc).
 
 @node MicroBlaze Features
 @subsection MicroBlaze Features
