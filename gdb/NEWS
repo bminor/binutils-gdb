@@ -114,6 +114,10 @@ info win
   This command now includes information about the width of the tui
   windows in its output.
 
+* New targets
+
+GNU/Linux/LoongArch    loongarch*-*-linux*
+
 * Python API
 
   ** New function gdb.add_history(), which takes a gdb.Value object

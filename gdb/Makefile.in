@@ -745,6 +745,7 @@ ALL_TARGET_OBS = \
 	arch/arm-get-next-pcs.o \
 	arch/arm-linux.o \
 	arch/i386.o \
+	arch/loongarch.o \
 	arch/ppc-linux-common.o \
 	arm-bsd-tdep.o \
 	arm-fbsd-tdep.o \
@@ -794,6 +795,8 @@ ALL_TARGET_OBS = \
 	linux-record.o \
 	linux-tdep.o \
 	lm32-tdep.o \
+	loongarch-linux-tdep.o \
+	loongarch-tdep.o \
 	m32c-tdep.o \
 	m32r-linux-tdep.o \
 	m32r-tdep.o \
@@ -1357,6 +1360,7 @@ HFILES_NO_SRCDIR = \
 	linux-record.h \
 	linux-tdep.h \
 	location.h \
+	loongarch-tdep.h \
 	m2-lang.h \
 	m32r-tdep.h \
 	m68k-tdep.h \
@@ -1491,6 +1495,7 @@ HFILES_NO_SRCDIR = \
 	arch/arc.h \
 	arch/arm.h \
 	arch/i386.h \
+	arch/loongarch.h \
 	arch/ppc-linux-common.h \
 	arch/ppc-linux-tdesc.h \
 	arch/riscv.h \
@@ -2232,6 +2237,9 @@ ALLDEPFILES = \
 	linux-record.c \
 	linux-tdep.c \
 	lm32-tdep.c \
+	loongarch-linux-nat.c \
+	loongarch-linux-tdep.c \
+	loongarch-tdep.c \
 	m32r-linux-nat.c \
 	m32r-linux-tdep.c \
 	m32r-tdep.c \
