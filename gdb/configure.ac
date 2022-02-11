@@ -1242,10 +1242,10 @@ either use --disable-source-highlight or dnl
       # This situation can occur for instance when using a source highlight
       # library compiled with g++ 7.5.0 while building gdb with g++ 4.8.5.
       AC_LANG_PUSH(C++)
-      save_CFLAGS="$CFLAGS"
-      save_LDFLAGS="$LDFLAGS"
-      CFLAGS="$CFLAGS $srchigh_pkg_cflags"
-      LDFLAGS="$LDFLAGS $srchigh_pkg_libs"
+      save_CXXFLAGS="$CXXFLAGS"
+      save_LIBS="$LIBS"
+      CXXFLAGS="$CXXFLAGS $srchigh_pkg_cflags"
+      LIBS="$LIBS $srchigh_pkg_libs"
       AC_LINK_IFELSE(
         [AC_LANG_PROGRAM(
           [#include <srchilite/sourcehighlight.h>],
@@ -1255,8 +1255,8 @@ either use --disable-source-highlight or dnl
         [have_usable_source_highlight=yes],
         [have_usable_source_highlight=no]
       )
-      CFLAGS="$save_CFLAGS"
-      LDFLAGS="$save_LDFLAGS"
+      CXXFLAGS="$save_CXXFLAGS"
+      LIBS="$save_LIBS"
       AC_LANG_POP(C++)
 
       if test "${have_usable_source_highlight}" = "yes"; then
