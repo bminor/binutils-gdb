@@ -1876,7 +1876,7 @@ DESCRIPTION
 void
 bfd_set_gp_value (bfd *abfd, bfd_vma v)
 {
-  return _bfd_set_gp_value (abfd, v);
+  _bfd_set_gp_value (abfd, v);
 }
 
 /*
