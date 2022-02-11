@@ -1294,9 +1294,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	  h->root.non_ir_ref_dynamic = true;
 	  hi->root.non_ir_ref_dynamic = true;
 	}
-
-      if ((oldbfd->flags & BFD_PLUGIN) != 0
-	  && hi->root.type == bfd_link_hash_indirect)
+      else if ((oldbfd->flags & BFD_PLUGIN) != 0
+	       && hi->root.type == bfd_link_hash_indirect)
 	{
 	  /* Change indirect symbol from IR to undefined.  */
 	  hi->root.type = bfd_link_hash_undefined;
