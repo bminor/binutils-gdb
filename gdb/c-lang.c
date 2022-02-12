@@ -144,8 +144,8 @@ classify_type (struct type *elttype, struct gdbarch *gdbarch,
    for printing characters and strings is language specific.  */
 
 void
-c_emit_char (int c, struct type *type,
-	     struct ui_file *stream, int quoter)
+language_defn::emitchar (int c, struct type *type,
+			 struct ui_file *stream, int quoter) const
 {
   const char *encoding;
 

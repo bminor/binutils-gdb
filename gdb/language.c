@@ -636,15 +636,6 @@ language_defn::value_print_inner
 /* See language.h.  */
 
 void
-language_defn::emitchar (int ch, struct type *chtype,
-			 struct ui_file * stream, int quoter) const
-{
-  c_emit_char (ch, chtype, stream, quoter);
-}
-
-/* See language.h.  */
-
-void
 language_defn::printstr (struct ui_file *stream, struct type *elttype,
 			 const gdb_byte *string, unsigned int length,
 			 const char *encoding, int force_ellipses,
