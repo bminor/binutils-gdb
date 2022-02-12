@@ -112,6 +112,7 @@ rm -f $tmp_files
 trap "rm -f $tmp_files" 0
 
 $GDB --batch -nx -iex 'set auto-load no' \
+    -iex 'set debuginfod enabled off' \
     -ex "file $file" -ex "save gdb-index $dwarf5 $dir" || {
     # Just in case.
     status=$?
