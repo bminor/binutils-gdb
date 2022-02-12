@@ -636,18 +636,6 @@ language_defn::value_print_inner
 /* See language.h.  */
 
 void
-language_defn::printstr (struct ui_file *stream, struct type *elttype,
-			 const gdb_byte *string, unsigned int length,
-			 const char *encoding, int force_ellipses,
-			 const struct value_print_options *options) const
-{
-  c_printstr (stream, elttype, string, length, encoding, force_ellipses,
-	      options);
-}
-
-/* See language.h.  */
-
-void
 language_defn::print_typedef (struct type *type, struct symbol *new_symbol,
 			      struct ui_file *stream) const
 {

@@ -292,8 +292,9 @@ rust_language::printstr (struct ui_file *stream, struct type *type,
 	{
 	  /* This is probably some C string, so let's let C deal with
 	     it.  */
-	  c_printstr (stream, type, string, length, user_encoding,
-		      force_ellipses, options);
+	  language_defn::printstr (stream, type, string, length,
+				   user_encoding, force_ellipses,
+				   options);
 	  return;
 	}
     }

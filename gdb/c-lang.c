@@ -190,10 +190,10 @@ language_defn::printchar (int c, struct type *type,
    characters, or if FORCE_ELLIPSES.  */
 
 void
-c_printstr (struct ui_file *stream, struct type *type, 
-	    const gdb_byte *string, unsigned int length, 
-	    const char *user_encoding, int force_ellipses,
-	    const struct value_print_options *options)
+language_defn::printstr (struct ui_file *stream, struct type *type,
+			 const gdb_byte *string, unsigned int length,
+			 const char *user_encoding, int force_ellipses,
+			 const struct value_print_options *options) const
 {
   c_string_type str_type;
   const char *type_encoding;
