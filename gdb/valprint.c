@@ -2081,9 +2081,8 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig,
 
   *need_escapep = false;
 
-  /* iswprint implementation on Windows returns 1 for tab character.
-     In order to avoid different printout on this host, we explicitly
-     use wchar_printable function.  */
+  /* If any additional cases are added to this switch block, then the
+     function wchar_printable will likely need updating too.  */
   switch (w)
     {
       case LCST ('\a'):
@@ -2109,9 +2108,9 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig,
 	break;
       default:
 	{
-	  if (wchar_printable (w) && (!need_escape || (!gdb_iswdigit (w)
-						       && w != LCST ('8')
-						       && w != LCST ('9'))))
+	  if (gdb_iswprint (w) && (!need_escape || (!gdb_iswdigit (w)
+						    && w != LCST ('8')
+						    && w != LCST ('9'))))
 	    {
 	      gdb_wchar_t wchar = w;
 
