@@ -66,7 +66,7 @@ typedef wint_t gdb_wint_t;
 
 #define gdb_wcslen wcslen
 #define gdb_iswprint iswprint
-#define gdb_iswdigit iswdigit
+#define gdb_iswxdigit iswxdigit
 #define gdb_btowc btowc
 #define gdb_WEOF WEOF
 
@@ -103,7 +103,7 @@ typedef int gdb_wint_t;
 
 #define gdb_wcslen strlen
 #define gdb_iswprint isprint
-#define gdb_iswdigit isdigit
+#define gdb_iswxdigit isxdigit
 #define gdb_btowc /* empty */
 #define gdb_WEOF EOF
 
