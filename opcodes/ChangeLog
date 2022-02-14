@@ -1,3 +1,8 @@
+2022-02-14  Sergei Trofimovich  <siarheit@google.com>
+
+	* microblaze-opcm.h: Renamed 'fsqrt' to 'microblaze_fsqrt'.
+	* microblaze-opc.h: Follow 'fsqrt' rename.
+
 2022-01-24  Nick Clifton  <nickc@redhat.com>
 
 	* po/ro.po: Updated Romanian translation.
