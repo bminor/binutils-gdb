@@ -184,7 +184,7 @@ foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.c]] {
     verbose -log "Compiling $src with $opts(cc)"
 
     if { [target_compile $src "$objdir/$testname.x" "executable" "$opts(cc)" ] != "" } {
-	unresolved $testname
+	fail "$mach $testname (compilation)"
 	continue
     }
 
