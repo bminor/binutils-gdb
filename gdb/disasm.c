@@ -41,6 +41,63 @@
    which is set by the "set disassembler_options" command.  */
 static std::string prospective_options;
 
+/* When this is true we will try to use libopcodes to provide styling to
+   the disassembler output.  */
+
+static bool use_libopcodes_styling = true;
+
+/* To support the set_use_libopcodes_styling function we have a second
+   variable which is connected to the actual set/show option.  */
+
+static bool use_libopcodes_styling_option = use_libopcodes_styling;
+
+/* The "maint show libopcodes-styling enabled" command.  */
+
+static void
+show_use_libopcodes_styling  (struct ui_file *file, int from_tty,
+			      struct cmd_list_element *c,
+			      const char *value)
+{
+  gdb_non_printing_memory_disassembler dis (target_gdbarch ());
+  bool supported = dis.disasm_info ()->created_styled_output;
+
+  if (supported || !use_libopcodes_styling)
+    gdb_printf (file, _("Use of libopcodes styling support is \"%s\".\n"),
+		value);
+  else
+    {
+      /* Use of libopcodes styling is not supported, and the user has this
+	 turned on!  */
+      gdb_printf (file, _("Use of libopcodes styling support is \"off\""
+			  " (not supported on architecture \"%s\")\n"),
+		  gdbarch_bfd_arch_info (target_gdbarch ())->printable_name);
+    }
+}
+
+/* The "maint set libopcodes-styling enabled" command.  */
+
+static void
+set_use_libopcodes_styling (const char *args, int from_tty,
+			    struct cmd_list_element *c)
+{
+  gdb_non_printing_memory_disassembler dis (target_gdbarch ());
+  bool supported = dis.disasm_info ()->created_styled_output;
+
+  /* If the current architecture doesn't support libopcodes styling then we
+     give an error here, but leave the underlying setting enabled.  This
+     means that if the user switches to an architecture that does support
+     libopcodes styling the setting will be enabled.  */
+
+  if (use_libopcodes_styling_option && !supported)
+    {
+      use_libopcodes_styling_option = use_libopcodes_styling;
+      error (_("Use of libopcodes styling not supported on architecture \"%s\"."),
+	     gdbarch_bfd_arch_info (target_gdbarch ())->printable_name);
+    }
+  else
+    use_libopcodes_styling = use_libopcodes_styling_option;
+}
+
 /* This structure is used to store line number information for the
    deprecated /m option.
    We need a different sort of line table from the normal one cuz we can't
@@ -160,7 +217,26 @@ gdb_disassembler::dis_asm_print_address (bfd_vma addr,
   gdb_disassembler *self
     = static_cast<gdb_disassembler *>(info->application_data);
 
-  print_address (self->arch (), addr, self->stream ());
+  if (self->in_comment_p ())
+    {
+      /* Calling 'print_address' might add styling to the output (based on
+	 the properties of the stream we're writing too).  This is usually
+	 fine, but if we are in an assembler comment then we'd prefer to
+	 have the comment style, rather than the default address style.
+
+	 Print the address into a temporary buffer which doesn't support
+	 styling, then reprint this unstyled address with the default text
+	 style.
+
+	 As we are inside a comment right now, the standard print routine
+	 will ensure that the comment is printed to the user with a
+	 suitable comment style.  */
+      string_file tmp;
+      print_address (self->arch (), addr, &tmp);
+      self->fprintf_styled_func (self, dis_style_text, "%s", tmp.c_str ());
+    }
+  else
+    print_address (self->arch (), addr, self->stream ());
 }
 
 /* See disasm.h.  */
@@ -202,11 +278,54 @@ gdb_printing_disassembler::fprintf_styled_func (void *dis_info,
 						const char *format, ...)
 {
   ui_file *stream = stream_from_gdb_disassemble_info (dis_info);
+  gdb_printing_disassembler *dis = (gdb_printing_disassembler *) dis_info;
 
   va_list args;
   va_start (args, format);
-  gdb_vprintf (stream, format, args);
+  std::string content = string_vprintf (format, args);
   va_end (args);
+
+  /* Once in a comment then everything should be styled as a comment.  */
+  if (style == dis_style_comment_start)
+    dis->set_in_comment (true);
+  if (dis->in_comment_p ())
+    style = dis_style_comment_start;
+
+  /* Now print the content with the correct style.  */
+  const char *txt = content.c_str ();
+  switch (style)
+    {
+    case dis_style_mnemonic:
+    case dis_style_assembler_directive:
+      fputs_styled (txt, disasm_mnemonic_style.style (), stream);
+      break;
+
+    case dis_style_register:
+      fputs_styled (txt, disasm_register_style.style (), stream);
+      break;
+
+    case dis_style_immediate:
+    case dis_style_address_offset:
+      fputs_styled (txt, disasm_immediate_style.style (), stream);
+      break;
+
+    case dis_style_address:
+      fputs_styled (txt, address_style.style (), stream);
+      break;
+
+    case dis_style_symbol:
+      fputs_styled (txt, function_name_style.style (), stream);
+      break;
+
+    case dis_style_comment_start:
+      fputs_styled (txt, disasm_comment_style.style (), stream);
+      break;
+
+    case dis_style_text:
+      gdb_puts (txt, stream);
+      break;
+    }
+
   /* Something non -ve.  */
   return 0;
 }
@@ -818,7 +937,20 @@ gdb_disassembler::gdb_disassembler (struct gdbarch *gdbarch,
 				    read_memory_ftype func)
   : gdb_printing_disassembler (gdbarch, &m_buffer, func,
 			       dis_asm_memory_error, dis_asm_print_address),
-    m_buffer (!use_ext_lang_colorization_p && disassembler_styling
+    /* The use of m_di.created_styled_output here is a bit of a cheat, but
+       it works fine for now.  Currently, for all targets that support
+       libopcodes styling, this field is set during the call to
+       disassemble_init_for_target, which was called as part of the
+       initialization of gdb_printing_disassembler.  And so, we are able to
+       spot if a target supports libopcodes styling, and create m_buffer in
+       the correct styling mode.
+
+       If there's ever a target that only sets created_styled_output during
+       the actual disassemble phase, then the logic here will have to
+       change.  */
+    m_buffer ((!use_ext_lang_colorization_p
+	       || (use_libopcodes_styling && m_di.created_styled_output))
+	      && disassembler_styling
 	      && file->can_emit_style_escape ()),
     m_dest (file)
 { /* Nothing.  */ }
@@ -903,14 +1035,17 @@ gdb_disassembler::print_insn (CORE_ADDR memaddr,
 {
   m_err_memaddr.reset ();
   m_buffer.clear ();
+  this->set_in_comment (false);
 
   int length = gdb_print_insn_1 (arch (), memaddr, &m_di);
 
-  /* If we have successfully disassembled an instruction, styling is on, we
-     think that the extension language might be able to perform styling for
-     us, and the destination can support styling, then lets call into the
-     extension languages in order to style this output.  */
+  /* If we have successfully disassembled an instruction, disassembler
+     styling using the extension language is on, and libopcodes hasn't
+     already styled the output for us, and, if the destination can support
+     styling, then lets call into the extension languages in order to style
+     this output.  */
   if (length > 0 && disassembler_styling
+      && (!m_di.created_styled_output || !use_libopcodes_styling)
       && use_ext_lang_colorization_p
       && m_dest->can_emit_style_escape ())
     {
@@ -1311,4 +1446,39 @@ Show the disassembler options."), NULL,
 					 show_disassembler_options_sfunc,
 					 &setlist, &showlist);
   set_cmd_completer (set_show_disas_opts.set, disassembler_options_completer);
+
+
+  /* All the 'maint set|show libopcodes-styling' sub-commands.  */
+  static struct cmd_list_element *maint_set_libopcodes_styling_cmdlist;
+  static struct cmd_list_element *maint_show_libopcodes_styling_cmdlist;
+
+  /* Adds 'maint set|show libopcodes-styling'.  */
+  add_setshow_prefix_cmd ("libopcodes-styling", class_maintenance,
+			  _("Set libopcodes-styling specific variables."),
+			  _("Show libopcodes-styling specific variables."),
+			  &maint_set_libopcodes_styling_cmdlist,
+			  &maint_show_libopcodes_styling_cmdlist,
+			  &maintenance_set_cmdlist,
+			  &maintenance_show_cmdlist);
+
+  /* Adds 'maint set|show gnu-source-highlight enabled'.  */
+  add_setshow_boolean_cmd ("enabled", class_maintenance,
+			   &use_libopcodes_styling_option, _("\
+Set whether the libopcodes styling support should be used."), _("\
+Show whether the libopcodes styling support should be used."),_("\
+When enabled, GDB will try to make use of the builtin libopcodes styling\n\
+support, to style the disassembler output.  Not every architecture has\n\
+styling support within libopcodes, so enabling this is not a guarantee\n\
+that libopcodes styling will be available.\n\
+\n\
+When this option is disabled, GDB will make use of the Python Pygments\n\
+package (if available) to style the disassembler output.\n\
+\n\
+All disassembler styling can be disabled with:\n\
+\n\
+  set style disassembler enabled off"),
+			   set_use_libopcodes_styling,
+			   show_use_libopcodes_styling,
+			   &maint_set_libopcodes_styling_cmdlist,
+			   &maint_show_libopcodes_styling_cmdlist);
 }

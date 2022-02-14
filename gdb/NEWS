@@ -39,6 +39,12 @@
    set width NUMBER
    set width unlimited
 
+* Disassembler styling using libopcodes.  GDB now supports
+  disassembler styling using libopcodes.  This is only available for
+  some targets (currently x86 and RISC-V).  For unsupported targets
+  Python Pygments is still used.  For supported targets, libopcodes
+  styling is used by default.
+
 * New commands
 
 maintenance set ignore-prologue-end-flag on|off
@@ -52,6 +58,28 @@ set print nibbles [on|off]
 show print nibbles
   This controls whether the 'print/t' command will display binary values
   in groups of four bits, known as "nibbles".  The default is 'off'.
+
+maintenance set libopcodes-styling on|off
+maintenance show libopcodes-styling
+  These can be used to force off libopcodes based styling, the Python
+  Pygments styling will then be used instead.
+
+set style disassembler comment
+show style disassembler comment
+set style disassembler immediate
+show style disassembler immediate
+set style disassembler mnemonic
+show style disassembler mnemonic
+set style disassembler register
+show style disassembler register
+set style disassembler address
+show style disassembler address
+set style disassembler symbol
+show style disassembler symbol
+  For targets that support libopcodes based styling, these settings
+  control how various aspects of the disassembler output are styled.
+  The 'disassembler address' and 'disassembler symbol' styles are
+  aliases for the 'address' and 'function' styles respectively.
 
 * Changed commands
 

@@ -138,6 +138,16 @@ protected:
 				  const char *format, ...)
     ATTRIBUTE_PRINTF(3,4);
 
+  /* Return true if the disassembler is considered inside a comment, false
+     otherwise.  */
+  bool in_comment_p () const
+  { return m_in_comment; }
+
+  /* Set whether the disassembler should be considered as within comment
+     text or not.  */
+  void set_in_comment (bool c)
+  { m_in_comment = c; }
+
 private:
 
   /* When libopcodes calls the fprintf_func and fprintf_styled_func
@@ -151,6 +161,12 @@ private:
 
   /* The stream to which output should be sent.  */
   struct ui_file *m_stream;
+
+  /* Are we inside a comment?  This will be set true if the disassembler
+     uses styled output and emits a start of comment character.  It is up
+     to the code that uses this disassembler class to reset this flag back
+     to false at a suitable time (e.g. at the end of every line).  */
+  bool m_in_comment;
 };
 
 /* A basic disassembler that doesn't actually print anything.  */

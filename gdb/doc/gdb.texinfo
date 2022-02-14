@@ -26526,6 +26526,7 @@ then it will be used.
 @item show style sources
 Show the current state of source code styling.
 
+@anchor{style_disassembler_enabled}
 @item set style disassembler enabled @samp{on|off}
 Enable or disable disassembler styling.  This affects whether
 disassembler output, such as the output of the @code{disassemble}
@@ -26533,13 +26534,32 @@ command, is styled.  Disassembler styling only works if styling in
 general is enabled (with @code{set style enabled on}), and if a source
 highlighting library is available to @value{GDBN}.
 
-To highlight disassembler output, @value{GDBN} must be compiled with
-Python support, and the Python Pygments package must be available.  If
-these requirements are not met then @value{GDBN} will not highlight
-disassembler output, even when this option is @samp{on}.
+The two source highlighting libraries that @value{GDBN} could use to
+style disassembler output are; @value{GDBN}'s builtin disassembler, or
+the Python Pygments package.
+
+@value{GDBN}'s first choice will be to use the builtin disassembler
+for styling, this usually provides better results, being able to style
+different types of instruction operands differently.  However, the
+builtin disassembler is not able to style all architectures.
+
+For architectures that the builtin disassembler is unable to style,
+@value{GDBN} will fall back to use the Python Pygments package where
+possible.  In order to use the Python Pygments package, @value{GDBN}
+must be built with Python support, and the Pygments package must be
+installed.
+
+If neither of these options are available then @value{GDBN} will
+produce unstyled disassembler output, even when this setting is
+@samp{on}.
+
+To discover if the current architecture supports styling using the
+builtin disassembler library see @ref{maint_libopcodes_styling,,@kbd{maint
+show libopcodes-styling enabled}}.
 
 @item show style disassembler enabled
 Show the current state of disassembler styling.
+
 @end table
 
 Subcommands of @code{set style} control specific forms of styling.
@@ -26584,6 +26604,11 @@ Control the styling of function names.  These are managed with the
 @code{set style function} family of commands.  By default, this
 style's foreground color is yellow.
 
+This style is also used for symbol names in styled disassembler output
+if @value{GDBN} is using its builtin disassembler library for styling
+(@pxref{style_disassembler_enabled,,@kbd{set style disassembler
+enabled}}).
+
 @item variable
 Control the styling of variable names.  These are managed with the
 @code{set style variable} family of commands.  By default, this style's
@@ -26593,6 +26618,11 @@ foreground color is cyan.
 Control the styling of addresses.  These are managed with the
 @code{set style address} family of commands.  By default, this style's
 foreground color is blue.
+
+This style is also used for addresses in styled disassembler output
+if @value{GDBN} is using its builtin disassembler library for styling
+(@pxref{style_disassembler_enabled,,@kbd{set style disassembler
+enabled}}).
 
 @item version
 Control the styling of @value{GDBN}'s version number text.  By
@@ -26641,6 +26671,47 @@ general styling to @value{GDBN}.  @xref{TUI Configuration}.
 @item tui-active-border
 Control the styling of the active TUI border; that is, the TUI window
 that has the focus.
+
+@item disassembler comment
+Control the styling of comments in the disassembler output.  These are
+managed with the @code{set style disassembler comment} family of
+commands.  This style is only used when @value{GDBN} is styling using
+its builtin disassembler library
+(@pxref{style_disassembler_enabled,,@kbd{set style disassembler
+enabled}}).  By default, this style's intensity is dim, and its
+foreground color is white.
+
+@item disassembler immediate
+Control the styling of numeric operands in the disassembler output.
+These are managed with the @code{set style disassembler immediate}
+family of commands.  This style is not used for instruction operands
+that represent addresses, in that case the @samp{disassembler address}
+style is used.  This style is only used when @value{GDBN} is styling
+using its builtin disassembler library.  By default, this style's
+foreground color is blue.
+
+@item disassembler address
+Control the styling of address operands in the disassembler output.
+This is an alias for the @samp{address} style.
+
+@item disassembler symbol
+Control the styling of symbol names in the disassembler output.  This
+is an alias for the @samp{function} style.
+
+@item disassembler mnemonic
+Control the styling of instruction mnemonics in the disassembler
+output.  These are managed with the @code{set style disassembler
+mnemonic} family of commands.  This style is also used for assembler
+directives, e.g.@: @code{.byte}, @code{.word}, etc.  This style is
+only used when @value{GDBN} is styling using its builtin disassembler
+library.  By default, this style's foreground color is green.
+
+@item disassembler register
+Control the styling of register operands in the disassembler output.
+These are managed with the @code{set style disassembler register}
+family of commands.  This style is only used when @value{GDBN} is
+styling using its builtin disassembler library.  By default, this style's
+foreground color is red.
 
 @end table
 
@@ -40415,6 +40486,29 @@ This option is useful for debugging @value{GDBN}'s use of the Pygments
 library when @value{GDBN} is linked against the GNU Source Highlight
 library.
 
+@anchor{maint_libopcodes_styling}
+@kindex maint set libopcodes-styling enabled
+@kindex maint show libopcodes-styling enabled
+@item maint set libopcodes-styling enabled @r{[}on|off@r{]}
+@itemx maint show libopcodes-styling enabled
+Control whether @value{GDBN} should use its builtin disassembler
+(@file{libopcodes}) to style disassembler output (@pxref{Output
+Styling}).  The builtin disassembler does not support styling for all
+architectures.
+
+When this option is @samp{off} the builtin disassembler will not be
+used for styling, @value{GDBN} will fall back to using the Python
+Pygments package if possible.
+
+Trying to set this option @samp{on} for an architecture that the
+builtin disassembler is unable to style will give an error, otherwise,
+the builtin disassembler will be used to style disassembler output.
+
+This option is @samp{on} by default for supported architectures.
+
+This option is useful for debugging @value{GDBN}'s use of the Pygments
+library when @value{GDBN} is built for an architecture that supports
+styling with the builtin disassembler
 @kindex maint space
 @cindex memory used by commands
 @item maint space @var{value}
