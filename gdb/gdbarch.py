@@ -20,10 +20,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import textwrap
+import gdbcopyright
 
 # All the components created in gdbarch-components.py.
 components = []
-
 
 def join_type_and_name(t, n):
     "Combine the type T and the name N into a C declaration."
@@ -161,30 +161,9 @@ class Method(Function):
 with open("gdbarch-components.py") as fd:
     exec(fd.read())
 
-copyright = """/* *INDENT-OFF* */ /* THIS FILE IS GENERATED -*- buffer-read-only: t -*- */
-/* vi:set ro: */
-
-/* Dynamic architecture support for GDB, the GNU debugger.
-
-   Copyright (C) 1998-2022 Free Software Foundation, Inc.
-
-   This file is part of GDB.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
-
-/* This file was created with the aid of ``gdbarch.py''.  */
-"""
+copyright = gdbcopyright.copyright(
+    "gdbarch.py", "Dynamic architecture support for GDB, the GNU debugger."
+)
 
 
 def info(c):

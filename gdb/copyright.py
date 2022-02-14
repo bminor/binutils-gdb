@@ -245,7 +245,6 @@ BY_HAND = (
 MULTIPLE_COPYRIGHT_HEADERS = (
     "gdb/doc/gdb.texinfo",
     "gdb/doc/refcard.tex",
-    "gdb/gdbarch.sh",
     "gdb/syscalls/update-netbsd.sh",
 )
 

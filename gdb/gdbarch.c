@@ -20,7 +20,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* This file was created with the aid of ``gdbarch.py''.  */
+/* To regenerate this file, run:
+   ./gdbarch.py
+*/
 
 
 /* Maintain the struct gdbarch object.  */
