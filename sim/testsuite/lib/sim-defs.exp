@@ -142,6 +142,7 @@ proc sim_init_toolchain {} {
     } {
 	verbose -log "Can't execute C compiler"
 	set global_cc_works 0
+	set global_cc_os ""
     }
 
     file delete $objdir/compilercheck.x
