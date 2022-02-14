@@ -3629,6 +3629,7 @@ Thread 1 "main" received signal SIGINT, Interrupt.
 @end smallexample
 
 @table @code
+@anchor{info_threads}
 @kindex info threads
 @item info threads @r{[}@var{thread-id-list}@r{]}
 
@@ -42719,6 +42720,7 @@ encoded).  @value{GDBN} will continue to supply the values of symbols
 
 @xref{Tracepoint Packets}.
 
+@anchor{qThreadExtraInfo}
 @item qThreadExtraInfo,@var{thread-id}
 @cindex thread attributes info, remote request
 @cindex @samp{qThreadExtraInfo} packet

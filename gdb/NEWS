@@ -201,6 +201,11 @@ GNU/Linux/LoongArch    loongarch*-*-linux*
      set styling').  When false, which is the default if the argument
      is not given, then no styling is applied to the returned string.
 
+  ** New read-only attribute gdb.InferiorThread.details, which is
+     either a string, containing additional, target specific thread
+     state information, or None, if there is no such additional
+     information.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on OpenRISC GNU/Linux.

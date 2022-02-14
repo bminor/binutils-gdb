@@ -3574,6 +3574,23 @@ The inferior this thread belongs to.  This attribute is represented as
 a @code{gdb.Inferior} object.  This attribute is not writable.
 @end defvar
 
+@defvar InferiorThread.details
+A string containing target specific thread state information.  The
+format of this string varies by target.  If there is no additional
+state information for this thread, then this attribute contains
+@code{None}.
+
+For example, on a @sc{gnu}/Linux system, a thread that is in the
+process of exiting will return the string @samp{Exiting}.  For remote
+targets the @code{details} string will be obtained with the
+@samp{qThreadExtraInfo} remote packet, if the target supports it
+(@pxref{qThreadExtraInfo,,@samp{qThreadExtraInfo}}).
+
+@value{GDBN} displays the @code{details} string as part of the
+@samp{Target Id} column, in the @code{info threads} output
+(@pxref{info_threads,,@samp{info threads}}).
+@end defvar
+
 A @code{gdb.InferiorThread} object has the following methods:
 
 @defun InferiorThread.is_valid ()

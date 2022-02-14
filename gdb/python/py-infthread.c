@@ -76,6 +76,32 @@ thpy_get_name (PyObject *self, void *ignore)
   return PyString_FromString (name);
 }
 
+/* Return a string containing target specific additional information about
+   the state of the thread, or None, if there is no such additional
+   information.  */
+
+static PyObject *
+thpy_get_details (PyObject *self, void *ignore)
+{
+  thread_object *thread_obj = (thread_object *) self;
+
+  THPY_REQUIRE_VALID (thread_obj);
+
+  const char *extra_info;
+  try
+    {
+      extra_info = target_extra_thread_info (thread_obj->thread);
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+  if (extra_info == nullptr)
+    Py_RETURN_NONE;
+
+  return PyString_FromString (extra_info);
+}
+
 static int
 thpy_set_name (PyObject *self, PyObject *newvalue, void *ignore)
 {
@@ -347,6 +373,9 @@ static gdb_PyGetSetDef thread_object_getset[] =
 {
   { "name", thpy_get_name, thpy_set_name,
     "The name of the thread, as set by the user or the OS.", NULL },
+  { "details", thpy_get_details, NULL,
+    "A target specific string containing extra thread state details.",
+    NULL },
   { "num", thpy_get_num, NULL,
     "Per-inferior number of the thread, as assigned by GDB.", NULL },
   { "global_num", thpy_get_global_num, NULL,
