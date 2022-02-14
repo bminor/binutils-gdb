@@ -813,6 +813,9 @@ SIM_ENABLE_ARCH_aarch64_TRUE
 CC_FOR_TARGET_AARCH64
 LD_FOR_TARGET_AARCH64
 AS_FOR_TARGET_AARCH64
+LD_FOR_TARGET
+AS_FOR_TARGET
+CC_FOR_TARGET
 SIM_COMMON_BUILD_FALSE
 SIM_COMMON_BUILD_TRUE
 SIM_SUBDIRS
@@ -12632,7 +12635,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12635 "configure"
+#line 12638 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12738,7 +12741,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12741 "configure"
+#line 12744 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14395,13 +14398,141 @@ if test "${enable_sim}" != no; then
 
       ;;
   esac
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking where to find the target cc" >&5
+$as_echo_n "checking where to find the target cc... " >&6; }
+if test "x${build}" != "x${host}" ; then
+  if expr "x$CC_FOR_TARGET" : "x/" > /dev/null; then
+    # We already found the complete path
+    ac_dir=`dirname $CC_FOR_TARGET`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed in $ac_dir" >&5
+$as_echo "pre-installed in $ac_dir" >&6; }
+  else
+    # Canadian cross, just use what we found
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed" >&5
+$as_echo "pre-installed" >&6; }
+  fi
+else
+  ok=yes
+  case " ${configdirs} " in
+    *" ${target_alias}-gcc "*) ;;
+    *) ok=no ;;
+  esac
+
+  if test $ok = yes; then
+    # An in-tree tool is available and we can use it
+    CC_FOR_TARGET='$$r/$(HOST_SUBDIR)/${target_alias}-gcc'
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: just compiled" >&5
+$as_echo "just compiled" >&6; }
+  elif expr "x$CC_FOR_TARGET" : "x/" > /dev/null; then
+    # We already found the complete path
+    ac_dir=`dirname $CC_FOR_TARGET`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed in $ac_dir" >&5
+$as_echo "pre-installed in $ac_dir" >&6; }
+  elif test "x$target" = "x$host"; then
+    # We can use an host tool
+    CC_FOR_TARGET='$(CC)'
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: host tool" >&5
+$as_echo "host tool" >&6; }
+  else
+    # We need a cross tool
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed" >&5
+$as_echo "pre-installed" >&6; }
+  fi
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking where to find the target as" >&5
+$as_echo_n "checking where to find the target as... " >&6; }
+if test "x${build}" != "x${host}" ; then
+  if expr "x$AS_FOR_TARGET" : "x/" > /dev/null; then
+    # We already found the complete path
+    ac_dir=`dirname $AS_FOR_TARGET`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed in $ac_dir" >&5
+$as_echo "pre-installed in $ac_dir" >&6; }
+  else
+    # Canadian cross, just use what we found
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed" >&5
+$as_echo "pre-installed" >&6; }
+  fi
+else
+  ok=yes
+  case " ${configdirs} " in
+    *" \$(abs_builddir) "*) ;;
+    *) ok=no ;;
+  esac
+
+  if test $ok = yes; then
+    # An in-tree tool is available and we can use it
+    AS_FOR_TARGET='$$r/$(HOST_SUBDIR)/\$(abs_builddir)/../gas/as-new'
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: just compiled" >&5
+$as_echo "just compiled" >&6; }
+  elif expr "x$AS_FOR_TARGET" : "x/" > /dev/null; then
+    # We already found the complete path
+    ac_dir=`dirname $AS_FOR_TARGET`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed in $ac_dir" >&5
+$as_echo "pre-installed in $ac_dir" >&6; }
+  elif test "x$target" = "x$host"; then
+    # We can use an host tool
+    AS_FOR_TARGET='$(AS)'
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: host tool" >&5
+$as_echo "host tool" >&6; }
+  else
+    # We need a cross tool
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed" >&5
+$as_echo "pre-installed" >&6; }
+  fi
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking where to find the target ld" >&5
+$as_echo_n "checking where to find the target ld... " >&6; }
+if test "x${build}" != "x${host}" ; then
+  if expr "x$LD_FOR_TARGET" : "x/" > /dev/null; then
+    # We already found the complete path
+    ac_dir=`dirname $LD_FOR_TARGET`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed in $ac_dir" >&5
+$as_echo "pre-installed in $ac_dir" >&6; }
+  else
+    # Canadian cross, just use what we found
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed" >&5
+$as_echo "pre-installed" >&6; }
+  fi
+else
+  ok=yes
+  case " ${configdirs} " in
+    *" \$(abs_builddir) "*) ;;
+    *) ok=no ;;
+  esac
+
+  if test $ok = yes; then
+    # An in-tree tool is available and we can use it
+    LD_FOR_TARGET='$$r/$(HOST_SUBDIR)/\$(abs_builddir)/../ld/ld-new'
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: just compiled" >&5
+$as_echo "just compiled" >&6; }
+  elif expr "x$LD_FOR_TARGET" : "x/" > /dev/null; then
+    # We already found the complete path
+    ac_dir=`dirname $LD_FOR_TARGET`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed in $ac_dir" >&5
+$as_echo "pre-installed in $ac_dir" >&6; }
+  elif test "x$target" = "x$host"; then
+    # We can use an host tool
+    LD_FOR_TARGET='$(LD)'
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: host tool" >&5
+$as_echo "host tool" >&6; }
+  else
+    # We need a cross tool
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed" >&5
+$as_echo "pre-installed" >&6; }
+  fi
+fi
+
+
+
 
 
 
   if test "$SIM_PRIMARY_TARGET" = "aarch64"; then :
-      : "${AS_FOR_TARGET_AARCH64:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_AARCH64:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_AARCH64:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_AARCH64:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_AARCH64:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_AARCH64:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14438,10 +14569,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "arm"; then :
-      : "${AS_FOR_TARGET_ARM:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_ARM:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_ARM:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_ARM:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_ARM:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_ARM:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14478,10 +14610,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "avr"; then :
-      : "${AS_FOR_TARGET_AVR:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_AVR:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_AVR:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_AVR:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_AVR:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_AVR:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14518,10 +14651,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "bfin"; then :
-      : "${AS_FOR_TARGET_BFIN:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_BFIN:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_BFIN:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_BFIN:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_BFIN:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_BFIN:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14557,10 +14691,11 @@ subdirs="$subdirs bpf"
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "bpf"; then :
-      : "${AS_FOR_TARGET_BPF:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_BPF:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_BPF:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_BPF:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_BPF:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_BPF:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14597,10 +14732,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "cr16"; then :
-      : "${AS_FOR_TARGET_CR16:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_CR16:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_CR16:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_CR16:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_CR16:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_CR16:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14637,10 +14773,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "cris"; then :
-      : "${AS_FOR_TARGET_CRIS:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_CRIS:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_CRIS:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_CRIS:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_CRIS:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_CRIS:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14677,10 +14814,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "d10v"; then :
-      : "${AS_FOR_TARGET_D10V:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_D10V:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_D10V:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_D10V:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_D10V:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_D10V:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14717,10 +14855,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "frv"; then :
-      : "${AS_FOR_TARGET_FRV:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_FRV:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_FRV:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_FRV:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_FRV:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_FRV:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14757,10 +14896,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "ft32"; then :
-      : "${AS_FOR_TARGET_FT32:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_FT32:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_FT32:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_FT32:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_FT32:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_FT32:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14797,10 +14937,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "h8300"; then :
-      : "${AS_FOR_TARGET_H8300:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_H8300:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_H8300:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_H8300:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_H8300:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_H8300:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14837,10 +14978,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "iq2000"; then :
-      : "${AS_FOR_TARGET_IQ2000:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_IQ2000:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_IQ2000:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_IQ2000:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_IQ2000:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_IQ2000:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14877,10 +15019,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "lm32"; then :
-      : "${AS_FOR_TARGET_LM32:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_LM32:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_LM32:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_LM32:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_LM32:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_LM32:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14917,10 +15060,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "m32c"; then :
-      : "${AS_FOR_TARGET_M32C:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_M32C:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_M32C:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_M32C:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_M32C:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_M32C:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14957,10 +15101,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "m32r"; then :
-      : "${AS_FOR_TARGET_M32R:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_M32R:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_M32R:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_M32R:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_M32R:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_M32R:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14997,10 +15142,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "m68hc11"; then :
-      : "${AS_FOR_TARGET_M68HC11:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_M68HC11:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_M68HC11:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_M68HC11:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_M68HC11:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_M68HC11:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15037,10 +15183,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "mcore"; then :
-      : "${AS_FOR_TARGET_MCORE:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_MCORE:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_MCORE:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_MCORE:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_MCORE:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_MCORE:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15077,10 +15224,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "microblaze"; then :
-      : "${AS_FOR_TARGET_MICROBLAZE:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_MICROBLAZE:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_MICROBLAZE:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_MICROBLAZE:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_MICROBLAZE:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_MICROBLAZE:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15114,10 +15262,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "mips"; then :
-      : "${AS_FOR_TARGET_MIPS:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_MIPS:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_MIPS:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_MIPS:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_MIPS:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_MIPS:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15151,10 +15300,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "mn10300"; then :
-      : "${AS_FOR_TARGET_MN10300:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_MN10300:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_MN10300:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_MN10300:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_MN10300:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_MN10300:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15191,10 +15341,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "moxie"; then :
-      : "${AS_FOR_TARGET_MOXIE:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_MOXIE:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_MOXIE:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_MOXIE:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_MOXIE:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_MOXIE:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15231,10 +15382,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "msp430"; then :
-      : "${AS_FOR_TARGET_MSP430:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_MSP430:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_MSP430:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_MSP430:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_MSP430:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_MSP430:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15268,10 +15420,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "or1k"; then :
-      : "${AS_FOR_TARGET_OR1K:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_OR1K:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_OR1K:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_OR1K:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_OR1K:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_OR1K:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15305,10 +15458,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "ppc"; then :
-      : "${AS_FOR_TARGET_PPC:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_PPC:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_PPC:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_PPC:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_PPC:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_PPC:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15345,10 +15499,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "pru"; then :
-      : "${AS_FOR_TARGET_PRU:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_PRU:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_PRU:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_PRU:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_PRU:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_PRU:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15382,10 +15537,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "riscv"; then :
-      : "${AS_FOR_TARGET_RISCV:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_RISCV:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_RISCV:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_RISCV:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_RISCV:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_RISCV:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15422,10 +15578,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "rl78"; then :
-      : "${AS_FOR_TARGET_RL78:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_RL78:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_RL78:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_RL78:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_RL78:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_RL78:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15462,10 +15619,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "rx"; then :
-      : "${AS_FOR_TARGET_RX:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_RX:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_RX:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_RX:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_RX:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_RX:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15502,10 +15660,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "sh"; then :
-      : "${AS_FOR_TARGET_SH:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_SH:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_SH:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_SH:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_SH:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_SH:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15542,10 +15701,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "erc32"; then :
-      : "${AS_FOR_TARGET_ERC32:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_ERC32:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_ERC32:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_ERC32:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_ERC32:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_ERC32:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15579,10 +15739,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "v850"; then :
-      : "${AS_FOR_TARGET_V850:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_V850:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_V850:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_V850:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_V850:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_V850:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15603,8 +15764,9 @@ fi
 
 
 
-  : "${AS_FOR_TARGET_EXAMPLE_SYNACOR:=\$(abs_builddir)/../gas/as-new}"
-  : "${LD_FOR_TARGET_EXAMPLE_SYNACOR:=\$(abs_builddir)/../ld/ld-new}"
+
+  : "${AS_FOR_TARGET_EXAMPLE_SYNACOR:=\$(AS_FOR_TARGET)}"
+  : "${LD_FOR_TARGET_EXAMPLE_SYNACOR:=\$(LD_FOR_TARGET)}"
   : "${CC_FOR_TARGET_EXAMPLE_SYNACOR:=\$(CC)}"
 
 as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_EXAMPLE_SYNACOR LD_FOR_TARGET_EXAMPLE_SYNACOR CC_FOR_TARGET_EXAMPLE_SYNACOR"
