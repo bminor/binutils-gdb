@@ -100,9 +100,11 @@ static const OPTION cris_options[] =
   { {"cris-naked", no_argument, NULL, OPTION_CRIS_NAKED},
      '\0', NULL, "Don't set up stack and environment",
      cris_option_handler, NULL },
+#if WITH_HW
   { {"cris-900000xx", no_argument, NULL, OPTION_CRIS_900000XXIF},
      '\0', NULL, "Define addresses at 0x900000xx with simulator semantics",
      cris_option_handler, NULL },
+#endif
   { {"cris-unknown-syscall", required_argument, NULL,
      OPTION_CRIS_UNKNOWN_SYSCALL},
      '\0', "stop|enosys|enosys-quiet", "Action at an unknown system call",
@@ -891,8 +893,14 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 		     startmem, endmem - startmem);
 
   /* Allocate simulator I/O managed memory if none specified by user.  */
+#if WITH_HW
   if (cris_have_900000xxif)
     sim_hw_parse (sd, "/core/%s/reg %#x %i", "cris_900000xx", 0x90000000, 0x100);
+#else
+  /* With the option disabled, nothing should be able to set this variable.
+     We should "use" it, though, and why not assert that it isn't set.  */
+  ASSERT (! cris_have_900000xxif);
+#endif
 
   /* Establish any remaining configuration options.  */
   if (sim_config (sd) != SIM_RC_OK)
