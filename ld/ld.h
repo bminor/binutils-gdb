@@ -276,10 +276,6 @@ typedef struct
   /* If set, code and non-code sections should never be in one segment.  */
   bool separate_code;
 
-  /* TRUE if the end of the relro segment should be aligned to
-     COMMONPAGESIZE rather than MAXPAGESIZE.  */
-  bool relro_use_commonpagesize;
-
   /* The rpath separation character.  Usually ':'.  */
   char rpath_separator;
 

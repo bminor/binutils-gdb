@@ -33,7 +33,6 @@ static struct elf_linker_x86_params params;
 static void
 elf_x86_create_output_section_statements (void)
 {
-  config.relro_use_commonpagesize = true;
   _bfd_elf_linker_x86_set_options (&link_info, &params);
 }
 
