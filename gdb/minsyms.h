@@ -28,6 +28,14 @@ struct type;
 
 struct bound_minimal_symbol
 {
+  bound_minimal_symbol (struct minimal_symbol *msym, struct objfile *objf)
+    : minsym (msym),
+      objfile (objf)
+  {
+  }
+
+  bound_minimal_symbol () = default;
+
   /* The minimal symbol that was found, or NULL if no minimal symbol
      was found.  */
 

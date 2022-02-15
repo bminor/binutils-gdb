@@ -1577,7 +1577,7 @@ maintenance_print_psymbols (const char *args, int from_tty)
 
 	  if (address_arg != NULL)
 	    {
-	      struct bound_minimal_symbol msymbol = { NULL, NULL };
+	      struct bound_minimal_symbol msymbol;
 
 	      /* We don't assume each pc has a unique objfile (this is for
 		 debugging).  */

@@ -3171,10 +3171,10 @@ static const char *const longjmp_names[] =
 struct breakpoint_objfile_data
 {
   /* Minimal symbol for "_ovly_debug_event" (if any).  */
-  struct bound_minimal_symbol overlay_msym {};
+  struct bound_minimal_symbol overlay_msym;
 
   /* Minimal symbol(s) for "longjmp", "siglongjmp", etc. (if any).  */
-  struct bound_minimal_symbol longjmp_msym[NUM_LONGJMP_NAMES] {};
+  struct bound_minimal_symbol longjmp_msym[NUM_LONGJMP_NAMES];
 
   /* True if we have looked for longjmp probes.  */
   int longjmp_searched = 0;
@@ -3184,10 +3184,10 @@ struct breakpoint_objfile_data
   std::vector<probe *> longjmp_probes;
 
   /* Minimal symbol for "std::terminate()" (if any).  */
-  struct bound_minimal_symbol terminate_msym {};
+  struct bound_minimal_symbol terminate_msym;
 
   /* Minimal symbol for "_Unwind_DebugHook" (if any).  */
-  struct bound_minimal_symbol exception_msym {};
+  struct bound_minimal_symbol exception_msym;
 
   /* True if we have looked for exception probes.  */
   int exception_searched = 0;

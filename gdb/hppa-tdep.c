@@ -2531,7 +2531,7 @@ struct bound_minimal_symbol
 hppa_lookup_stub_minimal_symbol (const char *name,
 				 enum unwind_stub_types stub_type)
 {
-  struct bound_minimal_symbol result = { NULL, NULL };
+  struct bound_minimal_symbol result;
 
   for (objfile *objfile : current_program_space->objfiles ())
     {

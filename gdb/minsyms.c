@@ -230,13 +230,13 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
 struct found_minimal_symbols
 {
   /* External symbols are best.  */
-  bound_minimal_symbol external_symbol {};
+  bound_minimal_symbol external_symbol;
 
   /* File-local symbols are next best.  */
-  bound_minimal_symbol file_symbol {};
+  bound_minimal_symbol file_symbol;
 
   /* Symbols for shared library trampolines are next best.  */
-  bound_minimal_symbol trampoline_symbol {};
+  bound_minimal_symbol trampoline_symbol;
 
   /* Called when a symbol name matches.  Check if the minsym is a
      better type than what we had already found, and record it in one
@@ -601,8 +601,8 @@ struct bound_minimal_symbol
 lookup_minimal_symbol_text (const char *name, struct objfile *objf)
 {
   struct minimal_symbol *msymbol;
-  struct bound_minimal_symbol found_symbol = { NULL, NULL };
-  struct bound_minimal_symbol found_file_symbol = { NULL, NULL };
+  struct bound_minimal_symbol found_symbol;
+  struct bound_minimal_symbol found_file_symbol;
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 

@@ -4273,8 +4273,7 @@ add_minsym (struct minimal_symbol *minsym, struct objfile *objfile,
   if (!list_mode && !msymbol_is_function (objfile, minsym))
     return;
 
-  struct bound_minimal_symbol mo = {minsym, objfile};
-  msyms->push_back (mo);
+  msyms->emplace_back (minsym, objfile);
   return;
 }
 
