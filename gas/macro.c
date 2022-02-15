@@ -184,14 +184,24 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 	{
 	  if (! flag_m68k_mri && ptr->ptr[i] == '.')
 	    i++;
-	  if (from == NULL
-	     && strncasecmp (ptr->ptr + i, "IRPC", from_len = 4) != 0
-	     && strncasecmp (ptr->ptr + i, "IRP", from_len = 3) != 0
-	     && strncasecmp (ptr->ptr + i, "IREPC", from_len = 5) != 0
-	     && strncasecmp (ptr->ptr + i, "IREP", from_len = 4) != 0
-	     && strncasecmp (ptr->ptr + i, "REPT", from_len = 4) != 0
-	     && strncasecmp (ptr->ptr + i, "REP", from_len = 3) != 0)
-	    from_len = 0;
+	  if (from == NULL)
+	    {
+	      size_t len = ptr->len - i;
+	      if (len >= 5 && strncasecmp (ptr->ptr + i, "IREPC", 5) == 0)
+		from_len = 5;
+	      else if (len >= 4 && strncasecmp (ptr->ptr + i, "IREP", 4) == 0)
+		from_len = 4;
+	      else if (len >= 4 && strncasecmp (ptr->ptr + i, "IRPC", 4) == 0)
+		from_len = 4;
+	      else if (len >= 4 && strncasecmp (ptr->ptr + i, "REPT", 4) == 0)
+		from_len = 4;
+	      else if (len >= 3 && strncasecmp (ptr->ptr + i, "IRP", 3) == 0)
+		from_len = 3;
+	      else if (len >= 3 && strncasecmp (ptr->ptr + i, "REP", 3) == 0)
+		from_len = 3;
+	      else
+		from_len = 0;
+	    }
 	  if ((from != NULL
 	       ? strncasecmp (ptr->ptr + i, from, from_len) == 0
 	       : from_len > 0)
@@ -199,7 +209,8 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 		  || ! (is_part_of_name (ptr->ptr[i + from_len])
 			|| is_name_ender (ptr->ptr[i + from_len]))))
 	    depth++;
-	  if (strncasecmp (ptr->ptr + i, to, to_len) == 0
+	  if (ptr->len - i >= to_len
+	      && strncasecmp (ptr->ptr + i, to, to_len) == 0
 	      && (ptr->len == (i + to_len)
 		  || ! (is_part_of_name (ptr->ptr[i + to_len])
 			|| is_name_ender (ptr->ptr[i + to_len]))))
