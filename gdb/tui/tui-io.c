@@ -1034,7 +1034,7 @@ tui_inject_newline_into_command_window ()
 {
   gdb_assert (tui_active);
 
-  WINDOW *w= TUI_CMD_WIN->handle.get ();
+  WINDOW *w = TUI_CMD_WIN->handle.get ();
 
   /* When hitting return with an empty input, gdb executes the last
      command.  If we emit a newline, this fills up the command window
