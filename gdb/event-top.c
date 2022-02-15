@@ -301,7 +301,7 @@ change_line_handler (int editing)
    is typing would lose input.  */
 
 /* Whether we've registered a callback handler with readline.  */
-static int callback_handler_installed;
+static bool callback_handler_installed;
 
 /* See event-top.h, and above.  */
 
@@ -311,7 +311,7 @@ gdb_rl_callback_handler_remove (void)
   gdb_assert (current_ui == main_ui);
 
   rl_callback_handler_remove ();
-  callback_handler_installed = 0;
+  callback_handler_installed = false;
 }
 
 /* See event-top.h, and above.  Note this wrapper doesn't have an
@@ -329,7 +329,7 @@ gdb_rl_callback_handler_install (const char *prompt)
   gdb_assert (!callback_handler_installed);
 
   rl_callback_handler_install (prompt, gdb_rl_callback_handler);
-  callback_handler_installed = 1;
+  callback_handler_installed = true;
 }
 
 /* See event-top.h, and above.  */
