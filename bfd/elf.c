@@ -1104,7 +1104,8 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 
   if (!bfd_set_section_vma (newsect, hdr->sh_addr / opb)
       || !bfd_set_section_size (newsect, hdr->sh_size)
-      || !bfd_set_section_alignment (newsect, bfd_log2 (hdr->sh_addralign)))
+      || !bfd_set_section_alignment (newsect, bfd_log2 (hdr->sh_addralign
+							& -hdr->sh_addralign)))
     return false;
 
   /* As a GNU extension, if the name begins with .gnu.linkonce, we
@@ -4227,7 +4228,7 @@ _bfd_elf_assign_file_position_for_section (Elf_Internal_Shdr *i_shdrp,
 					   bool align)
 {
   if (align && i_shdrp->sh_addralign > 1)
-    offset = BFD_ALIGN (offset, i_shdrp->sh_addralign);
+    offset = BFD_ALIGN (offset, i_shdrp->sh_addralign & -i_shdrp->sh_addralign);
   i_shdrp->sh_offset = offset;
   if (i_shdrp->bfd_section != NULL)
     i_shdrp->bfd_section->filepos = offset;
@@ -6149,6 +6150,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
   for (hdrpp = i_shdrpp + 1; hdrpp < end_hdrpp; hdrpp++)
     {
       Elf_Internal_Shdr *hdr;
+      bfd_vma align;
 
       hdr = *hdrpp;
       if (hdr->bfd_section != NULL
@@ -6174,11 +6176,10 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		: hdr->bfd_section->name));
 	  /* We don't need to page align empty sections.  */
 	  if ((abfd->flags & D_PAGED) != 0 && hdr->sh_size != 0)
-	    off += vma_page_aligned_bias (hdr->sh_addr, off,
-					  maxpagesize);
+	    align = maxpagesize;
 	  else
-	    off += vma_page_aligned_bias (hdr->sh_addr, off,
-					  hdr->sh_addralign);
+	    align = hdr->sh_addralign & -hdr->sh_addralign;
+	  off += vma_page_aligned_bias (hdr->sh_addr, off, align);
 	  off = _bfd_elf_assign_file_position_for_section (hdr, off,
 							   false);
 	}
