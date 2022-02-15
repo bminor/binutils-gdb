@@ -2225,6 +2225,7 @@ init_main (void)
   rl_completion_display_matches_hook = cli_display_match_list;
   rl_readline_name = "gdb";
   rl_terminal_name = getenv ("TERM");
+  rl_deprep_term_function = gdb_rl_deprep_term_function;
 
   /* The name for this defun comes from Bash, where it originated.
      15 is Control-o, the same binding this function has in Bash.  */

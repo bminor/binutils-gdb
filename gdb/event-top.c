@@ -742,6 +742,25 @@ handle_line_of_input (struct buffer *cmd_line_buffer,
     return cmd;
 }
 
+/* See event-top.h.  */
+
+void
+gdb_rl_deprep_term_function (void)
+{
+#ifdef RL_STATE_EOF
+  gdb::optional<scoped_restore_tmpl<int>> restore_eof_found;
+
+  if (RL_ISSTATE (RL_STATE_EOF))
+    {
+      printf_unfiltered ("quit\n");
+      restore_eof_found.emplace (&rl_eof_found, 0);
+    }
+
+#endif /* RL_STATE_EOF */
+
+  rl_deprep_terminal ();
+}
+
 /* Handle a complete line of input.  This is called by the callback
    mechanism within the readline library.  Deal with incomplete
    commands as well, by saving the partial input in a global
@@ -764,26 +783,51 @@ command_line_handler (gdb::unique_xmalloc_ptr<char> &&rl)
 	 This happens at the end of a testsuite run, after Expect has
 	 hung up but GDB is still alive.  In such a case, we just quit
 	 gdb killing the inferior program too.  This also happens if the
-	 user sends EOF, which is usually bound to ctrl+d.
+	 user sends EOF, which is usually bound to ctrl+d.  */
 
-	 What we want to do in this case is print "quit" after the GDB
-	 prompt, as if the user had just typed "quit" and pressed return.
+#ifndef RL_STATE_EOF
+      /* When readline is using bracketed paste mode, then, when eof is
+	 received, readline will emit the control sequence to leave
+	 bracketed paste mode.
 
-	 This used to work just fine, but unfortunately, doesn't play well
-	 with readline's bracketed paste mode.  By the time we get here,
-	 readline has already sent the control sequence to leave bracketed
-	 paste mode, and this sequence ends with a '\r' character.  As a
-	 result, if bracketed paste mode is on, and we print quit here,
-	 then this will overwrite the prompt.
+	 This control sequence ends with \r, which means that the "quit" we
+	 are about to print will overwrite the prompt on this line.
 
-	 To work around this issue, when bracketed paste mode is enabled,
-	 we first print '\n' to move to the next line, and then print the
-	 quit.  This isn't ideal, but avoids corrupting the prompt.  */
+	 The solution to this problem is to actually print the "quit"
+	 message from gdb_rl_deprep_term_function (see above), however, we
+	 can only do that if we can know, in that function, when eof was
+	 received.
+
+	 Unfortunately, with older versions of readline, it is not possible
+	 in the gdb_rl_deprep_term_function to know if eof was received or
+	 not, and, as GDB can be built against the system readline, which
+	 could be older than the readline in GDB's repository, then we
+	 can't be sure that we can work around this prompt corruption in
+	 the gdb_rl_deprep_term_function function.
+
+	 If we get here, RL_STATE_EOF is not defined.  This indicates that
+	 we are using an older readline, and couldn't print the quit
+	 message in gdb_rl_deprep_term_function.  So, what we do here is
+	 check to see if bracketed paste mode is on or not.  If it's on
+	 then we print a \n and then the quit, this means the user will
+	 see:
+
+	 (gdb)
+	 quit
+
+	 Rather than the usual:
+
+	 (gdb) quit
+
+	 Which we will get with a newer readline, but this really is the
+	 best we can do with older versions of readline.  */
       const char *value = rl_variable_value ("enable-bracketed-paste");
       if (value != nullptr && strcmp (value, "on") == 0
 	  && ((rl_readline_version >> 8) & 0xff) > 0x07)
 	printf_unfiltered ("\n");
       printf_unfiltered ("quit\n");
+#endif
+
       execute_command ("quit", 1);
     }
   else if (cmd == NULL)
