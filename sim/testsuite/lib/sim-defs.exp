@@ -121,9 +121,10 @@ proc sim_init_toolchain {} {
     set global_cpp_works [string equal "" "$result"]
 
     # See if we have a compiler available, and which environment it's targeting.
+    set global_cc_os ""
+    set global_cc_works 0
     if { $arch != $SIM_PRIMARY_TARGET && $CC_FOR_TARGET == "false" } {
 	verbose -log "Can't find a compatible C compiler"
-	set global_cc_works 0
     } elseif { [target_compile $srcdir/lib/newlibcheck.c \
 		$objdir/compilercheck.x "executable" $cc_options] == "" } {
 	verbose -log "Found newlib C compiler"
@@ -138,11 +139,8 @@ proc sim_init_toolchain {} {
 		$objdir/compilercheck.x "executable" $cc_options] == "" } {
 	verbose -log "Found C compiler, but unknown OS"
 	set global_cc_works 1
-	set global_cc_os ""
     } {
 	verbose -log "Can't execute C compiler"
-	set global_cc_works 0
-	set global_cc_os ""
     }
 
     file delete $objdir/compilercheck.x
