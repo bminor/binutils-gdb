@@ -153,6 +153,7 @@ struct instr_info
 
   bool need_modrm;
   bool need_vex;
+  bool has_sib;
 
   /* Flags for ins->prefixes which we somehow handled when printing the
      current instruction.  */
@@ -9291,7 +9292,10 @@ get_sib (instr_info *ins, int sizeflag)
       ins->sib.index = (ins->codep[1] >> 3) & 7;
       ins->sib.scale = (ins->codep[1] >> 6) & 3;
       ins->sib.base = ins->codep[1] & 7;
+      ins->has_sib = true;
     }
+  else
+    ins->has_sib = false;
 }
 
 /* Like oappend (below), but S is a string starting with '%'.
@@ -11396,7 +11400,6 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
     {
       /* 32/64 bit address mode */
       int havedisp;
-      int havesib;
       int havebase;
       int needindex;
       int needaddr32;
@@ -11411,13 +11414,11 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
       bool check_gather = false;
       const char *const *indexes = NULL;
 
-      havesib = 0;
       havebase = 1;
       base = ins->modrm.rm;
 
       if (base == 4)
 	{
-	  havesib = 1;
 	  vindex = ins->sib.index;
 	  USED_REX (REX_X);
 	  if (ins->rex & REX_X)
@@ -11487,7 +11488,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	  if (base == 5)
 	    {
 	      havebase = 0;
-	      if (ins->address_mode == mode_64bit && !havesib)
+	      if (ins->address_mode == mode_64bit && !ins->has_sib)
 		riprel = 1;
 	      disp = get32s (ins);
 	      if (riprel && bytemode == v_bndmk_mode)
@@ -11512,7 +11513,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 
       needindex = 0;
       needaddr32 = 0;
-      if (havesib
+      if (ins->has_sib
 	  && !havebase
 	  && !indexes
 	  && ins->address_mode != mode_16bit)
@@ -11538,7 +11539,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 
       havedisp = (havebase
 		  || needindex
-		  || (havesib && (indexes || scale != 0)));
+		  || (ins->has_sib && (indexes || scale != 0)));
 
       if (!ins->intel_syntax)
 	if (ins->modrm.mod != 0 || base == 5)
@@ -11576,7 +11577,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	    oappend_maybe_intel (ins,
 				 (ins->address_mode == mode_64bit && !addr32flag
 				  ? att_names64 : att_names32)[rbase]);
-	  if (havesib)
+	  if (ins->has_sib)
 	    {
 	      /* ESP/RSP won't allow index.  If base isn't ESP/RSP,
 		 print index to tell base + index from base.  */
@@ -13190,7 +13191,7 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
       if (ins->rex & REX_R)
 	modrm_reg += 8;
 
-      if (ins->modrm.rm == 4)
+      if (ins->has_sib && ins->modrm.rm == 4)
 	{
 	  sib_index = ins->sib.index;
 	  if (ins->rex & REX_X)
