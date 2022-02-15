@@ -489,7 +489,7 @@ pe_ILF_make_a_symbol_reloc (pe_ILF_vars *		vars,
 
   internal->r_vaddr  = address;
   internal->r_symndx = sym_index;
-  internal->r_type   = entry->howto->type;
+  internal->r_type   = entry->howto ? entry->howto->type : 0;
 
   vars->relcount ++;
 
