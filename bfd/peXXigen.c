@@ -2937,6 +2937,7 @@ bool
 _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 {
   pe_data_type *ipe, *ope;
+  bfd_size_type size;
 
   /* One day we may try to grok other private data.  */
   if (ibfd->xvec->flavour != bfd_target_coff_flavour
@@ -2971,7 +2972,8 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
   memcpy (ope->dos_message, ipe->dos_message, sizeof (ope->dos_message));
 
   /* The file offsets contained in the debug directory need rewriting.  */
-  if (ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size != 0)
+  size = ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size;
+  if (size != 0)
     {
       bfd_vma addr = ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].VirtualAddress
 	+ ope->pe_opthdr.ImageBase;
@@ -2980,12 +2982,16 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	 representing s_size, not virt_size).  Therefore don't look for the
 	 section containing the first byte, but for that covering the last
 	 one.  */
-      bfd_vma last = addr + ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size - 1;
+      bfd_vma last = addr + size - 1;
       asection *section = find_section_by_vma (obfd, last);
       bfd_byte *data;
+      bfd_vma dataoff = addr - section->vma;
 
       /* PR 17512: file: 0f15796a.  */
-      if (section && addr < section->vma)
+      if (section
+	  && (addr < section->vma
+	      || section->size < dataoff
+	      || section->size - dataoff < size))
 	{
 	  /* xgettext:c-format */
 	  _bfd_error_handler
@@ -3000,7 +3006,7 @@ _bfd_XX_bfd_copy_private_bfd_data_common (bfd * ibfd, bfd * obfd)
 	{
 	  unsigned int i;
 	  struct external_IMAGE_DEBUG_DIRECTORY *dd =
-	    (struct external_IMAGE_DEBUG_DIRECTORY *)(data + (addr - section->vma));
+	    (struct external_IMAGE_DEBUG_DIRECTORY *)(data + dataoff);
 
 	  for (i = 0; i < ope->pe_opthdr.DataDirectory[PE_DEBUG_DATA].Size
 		 / sizeof (struct external_IMAGE_DEBUG_DIRECTORY); i++)
