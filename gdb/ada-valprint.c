@@ -314,6 +314,13 @@ ada_print_floating (const gdb_byte *valaddr, struct type *type,
   std::string s = tmp_stream.release ();
   size_t skip_count = 0;
 
+  /* Don't try to modify a result representing an error.  */
+  if (s[0] == '<')
+    {
+      fputs_filtered (s.c_str (), stream);
+      return;
+    }
+
   /* Modify for Ada rules.  */
 
   size_t pos = s.find ("inf");
