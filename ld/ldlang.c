@@ -1891,8 +1891,8 @@ lang_insert_orphan (asection *s,
     address = exp_intop (0);
 
   os_tail = (lang_output_section_statement_type **) lang_os_list.tail;
-  os = lang_enter_output_section_statement (secname, address, normal_section,
-					    NULL, NULL, NULL, constraint, 0);
+  os = lang_enter_output_section_statement (
+      secname, address, normal_section, 0, NULL, NULL, NULL, constraint, 0);
 
   if (add_child == NULL)
     add_child = &os->children;
@@ -2635,10 +2635,12 @@ lang_add_section (lang_statement_list_type *ptr,
     case normal_section:
     case overlay_section:
     case first_overlay_section:
+    case type_section:
       break;
     case noalloc_section:
       flags &= ~SEC_ALLOC;
       break;
+    case typed_readonly_section:
     case readonly_section:
       flags |= SEC_READONLY;
       break;
@@ -4209,6 +4211,7 @@ map_input_to_output_sections
     {
       lang_output_section_statement_type *tos;
       flagword flags;
+      unsigned int type = 0;
 
       switch (s->header.type)
 	{
@@ -4264,6 +4267,42 @@ map_input_to_output_sections
 	    case readonly_section:
 	      flags |= SEC_READONLY;
 	      break;
+	    case typed_readonly_section:
+	      flags |= SEC_READONLY;
+	      /* Fall through.  */
+	    case type_section:
+	      if (os->sectype_value->type.node_class == etree_name
+		  && os->sectype_value->type.node_code == NAME)
+		{
+		  const char *name = os->sectype_value->name.name;
+		  if (strcmp (name, "SHT_PROGBITS") == 0)
+		    type = SHT_PROGBITS;
+		  else if (strcmp (name, "SHT_STRTAB") == 0)
+		    type = SHT_STRTAB;
+		  else if (strcmp (name, "SHT_NOTE") == 0)
+		    type = SHT_NOTE;
+		  else if (strcmp (name, "SHT_NOBITS") == 0)
+		    type = SHT_NOBITS;
+		  else if (strcmp (name, "SHT_INIT_ARRAY") == 0)
+		    type = SHT_INIT_ARRAY;
+		  else if (strcmp (name, "SHT_FINI_ARRAY") == 0)
+		    type = SHT_FINI_ARRAY;
+		  else if (strcmp (name, "SHT_PREINIT_ARRAY") == 0)
+		    type = SHT_PREINIT_ARRAY;
+		  else
+		    einfo (_ ("%F%P: invalid type for output section `%s'\n"),
+			   os->name);
+		}
+	     else
+	       {
+		 exp_fold_tree_no_dot (os->sectype_value);
+		 if (expld.result.valid_p)
+		   type = expld.result.value;
+		 else
+		   einfo (_ ("%F%P: invalid type for output section `%s'\n"),
+			  os->name);
+	       }
+	      break;
 	    case noload_section:
 	      if (bfd_get_flavour (link_info.output_bfd)
 		  == bfd_target_elf_flavour)
@@ -4276,6 +4315,7 @@ map_input_to_output_sections
 	    init_os (os, flags | SEC_READONLY);
 	  else
 	    os->bfd_section->flags |= flags;
+	  os->bfd_section->type = type;
 	  break;
 	case lang_input_section_enum:
 	  break;
@@ -7506,6 +7546,7 @@ lang_output_section_statement_type *
 lang_enter_output_section_statement (const char *output_section_statement_name,
 				     etree_type *address_exp,
 				     enum section_type sectype,
+				     etree_type *sectype_value,
 				     etree_type *align,
 				     etree_type *subalign,
 				     etree_type *ebase,
@@ -7523,10 +7564,12 @@ lang_enter_output_section_statement (const char *output_section_statement_name,
       os->addr_tree = address_exp;
     }
   os->sectype = sectype;
-  if (sectype != noload_section)
-    os->flags = SEC_NO_FLAGS;
-  else
+  if (sectype == type_section || sectype == typed_readonly_section)
+    os->sectype_value = sectype_value;
+  else if (sectype == noload_section)
     os->flags = SEC_NEVER_LOAD;
+  else
+    os->flags = SEC_NO_FLAGS;
   os->block_value = 1;
 
   /* Make next things chain into subchain of this.  */
@@ -8842,7 +8885,7 @@ lang_enter_overlay_section (const char *name)
   etree_type *size;
 
   lang_enter_output_section_statement (name, overlay_vma, overlay_section,
-				       0, overlay_subalign, 0, 0, 0);
+				       0, 0, overlay_subalign, 0, 0, 0);
 
   /* If this is the first section, then base the VMA of future
      sections on this one.  This will work correctly even if `.' is

@@ -737,8 +737,8 @@ CODE_FRAGMENT
 .  {* symbol,                    symbol_ptr_ptr,                     *}	\
 .     (struct bfd_symbol *) SYM, &SEC.symbol,				\
 .									\
-.  {* map_head, map_tail, already_assigned                           *}	\
-.     { NULL }, { NULL }, NULL						\
+.  {* map_head, map_tail, already_assigned, type                     *}	\
+.     { NULL }, { NULL }, NULL, 0						\
 .									\
 .    }
 .

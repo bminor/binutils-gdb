@@ -5483,13 +5483,23 @@ loaded into memory when the program is run.
 @item READONLY
 The section should be marked as read-only.
 @item DSECT
-@itemx COPY
-@itemx INFO
-@itemx OVERLAY
+@item COPY
+@item INFO
+@item OVERLAY
 These type names are supported for backward compatibility, and are
 rarely used.  They all have the same effect: the section should be
 marked as not allocatable, so that no memory is allocated for the
 section when the program is run.
+@item TYPE = @var{type}
+Set the section type to the integer @var{type}. When generating an ELF
+output file, type names @code{SHT_PROGBITS}, @code{SHT_STRTAB},
+@code{SHT_NOTE}, @code {SHT_NOBITS}, @code{SHT_INIT_ARRAY},
+@code{SHT_FINI_ARRAY}, and @code{SHT_PREINIT_ARRAY} are also allowed
+for @var{type}.  It is the user's responsibility to ensure that any
+special requirements of the section type are met.
+@item READONLY ( TYPE = @var{type} )
+This form of the syntax combines the @var{READONLY} type with the
+type specified by @var{type}.
 @end table
 
 @kindex NOLOAD

@@ -1,5 +1,8 @@
 -*- text -*-
 
+* TYPE=<type> is now supported in an output section description to set the
+  section type value.
+
 Changes in 2.38:
 
 * Add -z pack-relative-relocs/-z no pack-relative-relocs to x86 ELF

@@ -1,3 +1,16 @@
+2022-02-16  Fangrui Song  <maskray@google.com>
+	Nick Clifton  <nickc@redhat.com>
+
+	PR ld/28841
+	* ld.texi: Document new output section type.
+	* ldlex.l: Add new token TYPE.
+	* ldgram.y: Handle TYPE=exp and READONLY (TYPE=exp).
+	* ldlang.h: Add type_section to list of section types.
+	* ldlang.c (lang_add_section): Handle type_section.
+	(map_input_to_output_sections): Handle type_section.
+	* testsuite/ld-scripts/output-section-types.t: Add tests.
+	* testsuite/ld-scripts/output-section-types.d: Update.
+
 2022-02-02  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.

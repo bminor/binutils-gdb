@@ -3280,7 +3280,9 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 
   /* If the section type is unspecified, we set it based on
      asect->flags.  */
-  if ((asect->flags & SEC_GROUP) != 0)
+  if (asect->type != 0)
+    sh_type = asect->type;
+  else if ((asect->flags & SEC_GROUP) != 0)
     sh_type = SHT_GROUP;
   else
     sh_type = bfd_elf_get_default_section_type (asect->flags);

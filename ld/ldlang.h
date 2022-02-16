@@ -122,7 +122,9 @@ enum section_type
   overlay_section,
   noload_section,
   noalloc_section,
-  readonly_section
+  type_section,
+  readonly_section,
+  typed_readonly_section
 };
 
 /* This structure holds a list of program headers describing
@@ -166,6 +168,7 @@ typedef struct lang_output_section_statement_struct
   int constraint;
   flagword flags;
   enum section_type sectype;
+  etree_type *sectype_value;
   unsigned int processed_vma : 1;
   unsigned int processed_lma : 1;
   unsigned int all_input_readonly : 1;
@@ -545,7 +548,7 @@ extern void lang_add_output
   (const char *, int from_script);
 extern lang_output_section_statement_type *lang_enter_output_section_statement
   (const char *, etree_type *, enum section_type, etree_type *, etree_type *,
-   etree_type *, int, int);
+   etree_type *, etree_type *, int, int);
 extern void lang_final
   (void);
 extern void lang_relax_sections
