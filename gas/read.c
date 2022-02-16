@@ -2068,20 +2068,18 @@ void
 s_app_line (int appline)
 {
   char *file = NULL;
-  int l;
+  int linenum;
 
   /* The given number is that of the next line.  */
   if (appline)
-    l = get_absolute_expression ();
-  else if (!get_linefile_number (&l))
+    linenum = get_absolute_expression ();
+  else if (!get_linefile_number (&linenum))
     {
       ignore_rest_of_line ();
       return;
     }
 
-  l--;
-
-  if (l < -1)
+  if (linenum < 0)
     /* Some of the back ends can't deal with non-positive line numbers.
        Besides, it's silly.  GCC however will generate a line number of
        zero when it is pre-processing builtins for assembler-with-cpp files:
@@ -2092,7 +2090,7 @@ s_app_line (int appline)
        in the GCC and GDB testsuites.  So we check for negative line numbers
        rather than non-positive line numbers.  */
     as_warn (_("line numbers must be positive; line number %d rejected"),
-	     l + 1);
+	     linenum);
   else
     {
       int flags = 0;
@@ -2152,10 +2150,11 @@ s_app_line (int appline)
 
       if (appline || file)
 	{
-	  new_logical_line_flags (file, l, flags);
+	  linenum--;
+	  new_logical_line_flags (file, linenum, flags);
 #ifdef LISTING
 	  if (listing)
-	    listing_source_line (l);
+	    listing_source_line (linenum);
 #endif
 	}
     }
