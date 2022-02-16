@@ -641,7 +641,8 @@ sim_memory_uninstall (SIM_DESC sd)
 
 void sim_dump_memory (SIM_DESC sd);
 
-/* Convenience function for use when debugging the simulator.  */
+/* Convenience function for use when debugging the simulator, to be
+   called from within e.g. gdb.  */
 
 void
 sim_dump_memory (SIM_DESC sd)
