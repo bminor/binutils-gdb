@@ -122,7 +122,11 @@ static int paren_depth;
 				      e_ptr + 1);
 		 }
 
-{NUM10}"#"{HEXDIG}({HEXDIG}|_)*"#" {
+	/* The "llf" is a gdb extension to allow a floating-point
+	   constant to be written in some other base.  The
+	   floating-point number is formed by reinterpreting the
+	   bytes, allowing direct control over the bits.  */
+{NUM10}(l{0,2}f)?"#"{HEXDIG}({HEXDIG}|_)*"#" {
 		   canonicalizeNumeral (numbuf, yytext);
 		   return processInt (pstate, numbuf, strchr (numbuf, '#') + 1,
 				      NULL);
@@ -347,18 +351,36 @@ static int
 processInt (struct parser_state *par_state, const char *base0,
 	    const char *num0, const char *exp0)
 {
-  ULONGEST result;
   long exp;
   int base;
-  const char *trailer;
+  /* For the based literal with an "f" prefix, we'll return a
+     floating-point number.  This counts the the number of "l"s seen,
+     to decide the width of the floating-point number to return.  -1
+     means no "f".  */
+  int floating_point_l_count = -1;
 
   if (base0 == NULL)
     base = 10;
   else
     {
-      base = strtol (base0, (char **) NULL, 10);
+      char *end_of_base;
+      base = strtol (base0, &end_of_base, 10);
       if (base < 2 || base > 16)
 	error (_("Invalid base: %d."), base);
+      while (*end_of_base == 'l')
+	{
+	  ++floating_point_l_count;
+	  ++end_of_base;
+	}
+      /* This assertion is ensured by the pattern.  */
+      gdb_assert (floating_point_l_count == -1 || *end_of_base == 'f');
+      if (*end_of_base == 'f')
+	{
+	  ++end_of_base;
+	  ++floating_point_l_count;
+	}
+      /* This assertion is ensured by the pattern.  */
+      gdb_assert (*end_of_base == '#');
     }
 
   if (exp0 == NULL)
@@ -366,26 +388,62 @@ processInt (struct parser_state *par_state, const char *base0,
   else
     exp = strtol(exp0, (char **) NULL, 10);
 
-  errno = 0;
-  result = strtoulst (num0, &trailer, base);
-  if (errno == ERANGE)
-    error (_("Integer literal out of range"));
-  if (isxdigit(*trailer))
-    error (_("Invalid digit `%c' in based literal"), *trailer);
+  gdb_mpz result;
+  while (isxdigit (*num0))
+    {
+      int dig = fromhex (*num0);
+      if (dig >= base)
+	error (_("Invalid digit `%c' in based literal"), *num0);
+      mpz_mul_ui (result.val, result.val, base);
+      mpz_add_ui (result.val, result.val, dig);
+      ++num0;
+    }
 
   while (exp > 0)
     {
-      if (result > (ULONG_MAX / base))
-	error (_("Integer literal out of range"));
-      result *= base;
+      mpz_mul_ui (result.val, result.val, base);
       exp -= 1;
     }
 
-  if ((result >> (gdbarch_int_bit (par_state->gdbarch ())-1)) == 0)
+  if (floating_point_l_count > -1)
+    {
+      struct type *fp_type;
+      if (floating_point_l_count == 0)
+	fp_type = language_lookup_primitive_type (par_state->language (),
+						  par_state->gdbarch (),
+						  "float");
+      else if (floating_point_l_count == 1)
+	fp_type = language_lookup_primitive_type (par_state->language (),
+						  par_state->gdbarch (),
+						  "long_float");
+      else
+	{
+	  /* This assertion is ensured by the pattern.  */
+	  gdb_assert (floating_point_l_count == 2);
+	  fp_type = language_lookup_primitive_type (par_state->language (),
+						    par_state->gdbarch (),
+						    "long_long_float");
+	}
+
+      yylval.typed_val_float.type = fp_type;
+      result.write (gdb::make_array_view (yylval.typed_val_float.val,
+					  TYPE_LENGTH (fp_type)),
+		    type_byte_order (fp_type),
+		    true);
+
+      return FLOAT;
+    }
+
+  gdb_mpz maxval (ULONGEST_MAX / base);
+  if (mpz_cmp (result.val, maxval.val) > 0)
+    error (_("Integer literal out of range"));
+
+  LONGEST value = result.as_integer<LONGEST> ();
+  if ((value >> (gdbarch_int_bit (par_state->gdbarch ())-1)) == 0)
     yylval.typed_val.type = type_int (par_state);
-  else if ((result >> (gdbarch_long_bit (par_state->gdbarch ())-1)) == 0)
+  else if ((value >> (gdbarch_long_bit (par_state->gdbarch ())-1)) == 0)
     yylval.typed_val.type = type_long (par_state);
-  else if (((result >> (gdbarch_long_bit (par_state->gdbarch ())-1)) >> 1) == 0)
+  else if (((value >> (gdbarch_long_bit (par_state->gdbarch ())-1)) >> 1) == 0)
     {
       /* We have a number representable as an unsigned integer quantity.
          For consistency with the C treatment, we will treat it as an
@@ -396,18 +454,18 @@ processInt (struct parser_state *par_state, const char *base0,
        */
       yylval.typed_val.type
 	= builtin_type (par_state->gdbarch ())->builtin_unsigned_long;
-      if (result & LONGEST_SIGN)
+      if (value & LONGEST_SIGN)
 	yylval.typed_val.val =
-	  (LONGEST) (result & ~LONGEST_SIGN)
+	  (LONGEST) (value & ~LONGEST_SIGN)
 	  - (LONGEST_SIGN>>1) - (LONGEST_SIGN>>1);
       else
-	yylval.typed_val.val = (LONGEST) result;
+	yylval.typed_val.val = (LONGEST) value;
       return INT;
     }
   else
     yylval.typed_val.type = type_long_long (par_state);
 
-  yylval.typed_val.val = (LONGEST) result;
+  yylval.typed_val.val = value;
   return INT;
 }
 

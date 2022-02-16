@@ -142,6 +142,14 @@ info win
   This command now includes information about the width of the tui
   windows in its output.
 
+* GDB's Ada parser now supports an extension for specifying the exact
+  byte contents of a floating-point literal.  This can be useful for
+  setting floating-point registers to a precise value without loss of
+  precision.  The syntax is an extension of the based literal syntax.
+  Use, e.g., "16lf#0123abcd#" -- the number of "l"s controls the width
+  of the floating-point type, and the "f" is the marker for floating
+  point.
+
 * New targets
 
 GNU/Linux/LoongArch    loongarch*-*-linux*

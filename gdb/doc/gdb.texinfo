@@ -18190,6 +18190,9 @@ context.
 Should your program
 redefine these names in a package or procedure (at best a dubious practice),
 you will have to use fully qualified names to access their new definitions.
+
+@item
+Based real literals are not implemented.
 @end itemize
 
 @node Additions to Ada
@@ -18246,6 +18249,19 @@ complex conditional breaks:
 @smallexample
 (@value{GDBP}) break f
 (@value{GDBP}) condition 1 (report(i); k += 1; A(k) > 100)
+@end smallexample
+
+@item
+An extension to based literals can be used to specify the exact byte
+contents of a floating-point literal.  After the base, you can use
+from zero to two @samp{l} characters, followed by an @samp{f}.  The
+number of @samp{l} characters controls the width of the resulting real
+constant: zero means @code{Float} is used, one means
+@code{Long_Float}, and two means @code{Long_Long_Float}.
+
+@smallexample
+(@value{GDBP}) print 16f#41b80000#
+$1 = 23.0
 @end smallexample
 
 @item 
