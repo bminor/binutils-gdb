@@ -311,7 +311,7 @@ int yylex (void);
     char *ref = strdup (yytext);
     if (ref[1] == 'b' || ref[1] == 'B')
       {
-        name = fb_label_name ((int) (ref[0] - '0'), 0);
+        name = fb_label_name (ref[0] - '0', 0);
 	yylval.symbol = symbol_find (name);
 
 	if ((yylval.symbol != NULL)
@@ -329,7 +329,7 @@ int yylex (void);
            Construct a local label name, then an undefined symbol.
            Just return it as never seen before.  */
 
-        name = fb_label_name ((int) (ref[0] - '0'), 1);
+        name = fb_label_name (ref[0] - '0', 1);
 	yylval.symbol = symbol_find_or_make (name);
 	/* We have no need to check symbol properties.  */
 	return SYMBOL;

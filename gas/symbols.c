@@ -246,13 +246,6 @@ struct obstack notes;
 const char * an_external_name;
 #endif
 
-static const char *save_symbol_name (const char *);
-static void fb_label_init (void);
-static long dollar_label_instance (long);
-static long fb_label_instance (long);
-
-static void print_binary (FILE *, const char *, expressionS *);
-
 /* Return a pointer to a new symbol.  Die if we can't make a new
    symbol.  Fill in the symbol's values.  Add symbol to end of symbol
    chain.
@@ -1804,16 +1797,17 @@ snapshot_symbol (symbolS **symbolPP, valueT *valueP, segT *segP, fragS **fragPP)
    the instance number, keep a list of defined symbols separate from the real
    symbol table, and we treat these buggers as a sparse array.  */
 
-static long *dollar_labels;
-static long *dollar_label_instances;
+typedef unsigned int dollar_ent;
+static dollar_ent *dollar_labels;
+static dollar_ent *dollar_label_instances;
 static char *dollar_label_defines;
 static size_t dollar_label_count;
 static size_t dollar_label_max;
 
 int
-dollar_label_defined (long label)
+dollar_label_defined (unsigned int label)
 {
-  long *i;
+  dollar_ent *i;
 
   know ((dollar_labels != NULL) || (dollar_label_count == 0));
 
@@ -1825,10 +1819,10 @@ dollar_label_defined (long label)
   return 0;
 }
 
-static long
-dollar_label_instance (long label)
+static unsigned int
+dollar_label_instance (unsigned int label)
 {
-  long *i;
+  dollar_ent *i;
 
   know ((dollar_labels != NULL) || (dollar_label_count == 0));
 
@@ -1851,9 +1845,9 @@ dollar_label_clear (void)
 #define DOLLAR_LABEL_BUMP_BY 10
 
 void
-define_dollar_label (long label)
+define_dollar_label (unsigned int label)
 {
-  long *i;
+  dollar_ent *i;
 
   for (i = dollar_labels; i < dollar_labels + dollar_label_count; ++i)
     if (*i == label)
@@ -1867,8 +1861,8 @@ define_dollar_label (long label)
 
   if (dollar_labels == NULL)
     {
-      dollar_labels = XNEWVEC (long, DOLLAR_LABEL_BUMP_BY);
-      dollar_label_instances = XNEWVEC (long, DOLLAR_LABEL_BUMP_BY);
+      dollar_labels = XNEWVEC (dollar_ent, DOLLAR_LABEL_BUMP_BY);
+      dollar_label_instances = XNEWVEC (dollar_ent, DOLLAR_LABEL_BUMP_BY);
       dollar_label_defines = XNEWVEC (char, DOLLAR_LABEL_BUMP_BY);
       dollar_label_max = DOLLAR_LABEL_BUMP_BY;
       dollar_label_count = 0;
@@ -1876,9 +1870,11 @@ define_dollar_label (long label)
   else if (dollar_label_count == dollar_label_max)
     {
       dollar_label_max += DOLLAR_LABEL_BUMP_BY;
-      dollar_labels = XRESIZEVEC (long, dollar_labels, dollar_label_max);
-      dollar_label_instances = XRESIZEVEC (long, dollar_label_instances,
-					  dollar_label_max);
+      dollar_labels = XRESIZEVEC (dollar_ent, dollar_labels,
+				  dollar_label_max);
+      dollar_label_instances = XRESIZEVEC (dollar_ent,
+					   dollar_label_instances,
+					   dollar_label_max);
       dollar_label_defines = XRESIZEVEC (char, dollar_label_defines,
 					 dollar_label_max);
     }				/* if we needed to grow  */
@@ -1898,50 +1894,22 @@ define_dollar_label (long label)
    symbol. The first "4:" is "L4^A1" - the m numbers begin at 1.
 
    fb labels get the same treatment, except that ^B is used in place
-   of ^A.  */
+   of ^A.
 
-char *				/* Return local label name.  */
-dollar_label_name (long n,	/* we just saw "n$:" : n a number.  */
-		   int augend	/* 0 for current instance, 1 for new instance.  */)
+   AUGEND is 0 for current instance, 1 for new instance.  */
+
+char *
+dollar_label_name (unsigned int n, unsigned int augend)
 {
-  long i;
   /* Returned to caller, then copied.  Used for created names ("4f").  */
   static char symbol_name_build[24];
-  char *p;
-  char *q;
-  char symbol_name_temporary[20];	/* Build up a number, BACKWARDS.  */
+  char *p = symbol_name_build;
 
-  know (n >= 0);
-  know (augend == 0 || augend == 1);
-  p = symbol_name_build;
 #ifdef LOCAL_LABEL_PREFIX
   *p++ = LOCAL_LABEL_PREFIX;
 #endif
-  *p++ = 'L';
-
-  /* Next code just does sprintf( {}, "%d", n);  */
-  /* Label number.  */
-  q = symbol_name_temporary;
-  for (*q++ = 0, i = n; i; ++q)
-    {
-      *q = i % 10 + '0';
-      i /= 10;
-    }
-  while ((*p = *--q) != '\0')
-    ++p;
-
-  *p++ = DOLLAR_LABEL_CHAR;		/* ^A  */
-
-  /* Instance number.  */
-  q = symbol_name_temporary;
-  for (*q++ = 0, i = dollar_label_instance (n) + augend; i; ++q)
-    {
-      *q = i % 10 + '0';
-      i /= 10;
-    }
-  while ((*p++ = *--q) != '\0');
-
-  /* The label, as a '\0' ended string, starts at symbol_name_build.  */
+  sprintf (p, "L%u%c%u",
+	   n, DOLLAR_LABEL_CHAR, dollar_label_instance (n) + augend);
   return symbol_name_build;
 }
 
@@ -1964,11 +1932,12 @@ dollar_label_name (long n,	/* we just saw "n$:" : n a number.  */
 
 #define FB_LABEL_SPECIAL (10)
 
-static long fb_low_counter[FB_LABEL_SPECIAL];
-static long *fb_labels;
-static long *fb_label_instances;
-static long fb_label_count;
-static long fb_label_max;
+typedef unsigned int fb_ent;
+static fb_ent fb_low_counter[FB_LABEL_SPECIAL];
+static fb_ent *fb_labels;
+static fb_ent *fb_label_instances;
+static size_t fb_label_count;
+static size_t fb_label_max;
 
 /* This must be more than FB_LABEL_SPECIAL.  */
 #define FB_LABEL_BUMP_BY (FB_LABEL_SPECIAL + 6)
@@ -1982,11 +1951,11 @@ fb_label_init (void)
 /* Add one to the instance number of this fb label.  */
 
 void
-fb_label_instance_inc (long label)
+fb_label_instance_inc (unsigned int label)
 {
-  long *i;
+  fb_ent *i;
 
-  if ((unsigned long) label < FB_LABEL_SPECIAL)
+  if (label < FB_LABEL_SPECIAL)
     {
       ++fb_low_counter[label];
       return;
@@ -2009,8 +1978,8 @@ fb_label_instance_inc (long label)
 
   if (fb_labels == NULL)
     {
-      fb_labels = XNEWVEC (long, FB_LABEL_BUMP_BY);
-      fb_label_instances = XNEWVEC (long, FB_LABEL_BUMP_BY);
+      fb_labels = XNEWVEC (fb_ent, FB_LABEL_BUMP_BY);
+      fb_label_instances = XNEWVEC (fb_ent, FB_LABEL_BUMP_BY);
       fb_label_max = FB_LABEL_BUMP_BY;
       fb_label_count = FB_LABEL_SPECIAL;
 
@@ -2018,8 +1987,9 @@ fb_label_instance_inc (long label)
   else if (fb_label_count == fb_label_max)
     {
       fb_label_max += FB_LABEL_BUMP_BY;
-      fb_labels = XRESIZEVEC (long, fb_labels, fb_label_max);
-      fb_label_instances = XRESIZEVEC (long, fb_label_instances, fb_label_max);
+      fb_labels = XRESIZEVEC (fb_ent, fb_labels, fb_label_max);
+      fb_label_instances = XRESIZEVEC (fb_ent, fb_label_instances,
+				       fb_label_max);
     }				/* if we needed to grow  */
 
   fb_labels[fb_label_count] = label;
@@ -2027,15 +1997,13 @@ fb_label_instance_inc (long label)
   ++fb_label_count;
 }
 
-static long
-fb_label_instance (long label)
+static unsigned int
+fb_label_instance (unsigned int label)
 {
-  long *i;
+  fb_ent *i;
 
-  if ((unsigned long) label < FB_LABEL_SPECIAL)
-    {
-      return (fb_low_counter[label]);
-    }
+  if (label < FB_LABEL_SPECIAL)
+    return (fb_low_counter[label]);
 
   if (fb_labels != NULL)
     {
@@ -2043,10 +2011,8 @@ fb_label_instance (long label)
 	   i < fb_labels + fb_label_count; ++i)
 	{
 	  if (*i == label)
-	    {
-	      return (fb_label_instances[i - fb_labels]);
-	    }			/* if we find it  */
-	}			/* for each existing label  */
+	    return (fb_label_instances[i - fb_labels]);
+	}
     }
 
   /* We didn't find the label, so this must be a reference to the
@@ -2063,55 +2029,29 @@ fb_label_instance (long label)
    symbol. The first "4:" is "L4^B1" - the m numbers begin at 1.
 
    dollar labels get the same treatment, except that ^A is used in
-   place of ^B.  */
+   place of ^B.
 
-char *				/* Return local label name.  */
-fb_label_name (long n,	/* We just saw "n:", "nf" or "nb" : n a number.  */
-	       long augend	/* 0 for nb, 1 for n:, nf.  */)
+   AUGEND is 0 for nb, 1 for n:, nf.  */
+
+char *
+fb_label_name (unsigned int n, unsigned int augend)
 {
-  long i;
   /* Returned to caller, then copied.  Used for created names ("4f").  */
   static char symbol_name_build[24];
-  char *p;
-  char *q;
-  char symbol_name_temporary[20];	/* Build up a number, BACKWARDS.  */
+  char *p = symbol_name_build;
 
-  know (n >= 0);
 #ifdef TC_MMIX
-  know ((unsigned long) augend <= 2 /* See mmix_fb_label.  */);
+  know (augend <= 2 /* See mmix_fb_label.  */);
 #else
-  know ((unsigned long) augend <= 1);
+  know (augend <= 1);
 #endif
-  p = symbol_name_build;
+
 #ifdef LOCAL_LABEL_PREFIX
   *p++ = LOCAL_LABEL_PREFIX;
 #endif
-  *p++ = 'L';
-
-  /* Next code just does sprintf( {}, "%d", n);  */
-  /* Label number.  */
-  q = symbol_name_temporary;
-  for (*q++ = 0, i = n; i; ++q)
-    {
-      *q = i % 10 + '0';
-      i /= 10;
-    }
-  while ((*p = *--q) != '\0')
-    ++p;
-
-  *p++ = LOCAL_LABEL_CHAR;		/* ^B  */
-
-  /* Instance number.  */
-  q = symbol_name_temporary;
-  for (*q++ = 0, i = fb_label_instance (n) + augend; i; ++q)
-    {
-      *q = i % 10 + '0';
-      i /= 10;
-    }
-  while ((*p++ = *--q) != '\0');
-
-  /* The label, as a '\0' ended string, starts at symbol_name_build.  */
-  return (symbol_name_build);
+  sprintf (p, "L%u%c%u",
+	   n, LOCAL_LABEL_CHAR, fb_label_instance (n) + augend);
+  return symbol_name_build;
 }
 
 /* Decode name that may have been generated by foo_label_name() above.

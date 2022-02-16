@@ -1266,7 +1266,7 @@ read_a_source_file (const char *name)
 	      while (ISDIGIT (*input_line_pointer))
 		{
 		  const long digit = *input_line_pointer - '0';
-		  if (temp > (LONG_MAX - digit) / 10)
+		  if (temp > (INT_MAX - digit) / 10)
 		    {
 		      as_bad (_("local label too large near %s"), backup);
 		      temp = -1;

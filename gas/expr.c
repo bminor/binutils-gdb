@@ -567,7 +567,7 @@ integer_constant (int radix, expressionS *expressionP)
 	  /* Backward ref to local label.
 	     Because it is backward, expect it to be defined.  */
 	  /* Construct a local label.  */
-	  name = fb_label_name ((int) number, 0);
+	  name = fb_label_name (number, 0);
 
 	  /* Seen before, or symbol is defined: OK.  */
 	  symbolP = symbol_find (name);
@@ -601,7 +601,7 @@ integer_constant (int radix, expressionS *expressionP)
 	     Construct a local label name, then an undefined symbol.
 	     Don't create a xseg frag for it: caller may do that.
 	     Just return it as never seen before.  */
-	  name = fb_label_name ((int) number, 1);
+	  name = fb_label_name (number, 1);
 	  symbolP = symbol_find_or_make (name);
 	  /* We have no need to check symbol properties.  */
 #ifndef many_segments
@@ -620,15 +620,15 @@ integer_constant (int radix, expressionS *expressionP)
 	     then this is a fresh instantiation of that number, so create
 	     it.  */
 
-	  if (dollar_label_defined ((long) number))
+	  if (dollar_label_defined (number))
 	    {
-	      name = dollar_label_name ((long) number, 0);
+	      name = dollar_label_name (number, 0);
 	      symbolP = symbol_find (name);
 	      know (symbolP != NULL);
 	    }
 	  else
 	    {
-	      name = dollar_label_name ((long) number, 1);
+	      name = dollar_label_name (number, 1);
 	      symbolP = symbol_find_or_make (name);
 	    }
 
