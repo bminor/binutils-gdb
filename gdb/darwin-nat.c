@@ -1113,9 +1113,6 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 	      inferior_debug (4, _("darwin_wait: pid=%d exit, status=0x%x\n"),
 			      res_pid, wstatus);
 
-	      /* Looks necessary on Leopard and harmless...  */
-	      wait4 (inf->pid, &wstatus, 0, NULL);
-
 	      return ptid_t (inf->pid);
 	    }
 	  else
