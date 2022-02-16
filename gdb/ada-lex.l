@@ -103,8 +103,9 @@ static int paren_depth;
 
 {NUM10}{POSEXP}  {
 		   canonicalizeNumeral (numbuf, yytext);
-		   return processInt (pstate, NULL, numbuf,
-				      strrchr (numbuf, 'e') + 1);
+		   char *e_ptr = strrchr (numbuf, 'e');
+		   *e_ptr = '\0';
+		   return processInt (pstate, nullptr, numbuf, e_ptr + 1);
 		 }
 
 {NUM10}          {
@@ -114,9 +115,11 @@ static int paren_depth;
 
 {NUM10}"#"{HEXDIG}({HEXDIG}|_)*"#"{POSEXP} {
 		   canonicalizeNumeral (numbuf, yytext);
+		   char *e_ptr = strrchr (numbuf, 'e');
+		   *e_ptr = '\0';
 		   return processInt (pstate, numbuf,
 				      strchr (numbuf, '#') + 1,
-				      strrchr(numbuf, '#') + 1);
+				      e_ptr + 1);
 		 }
 
 {NUM10}"#"{HEXDIG}({HEXDIG}|_)*"#" {
