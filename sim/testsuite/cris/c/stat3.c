@@ -14,7 +14,7 @@ int main (int argc, char *argv[])
   char path[1024] = "/";
   struct stat buf;
 
-  strcat (path, mybasename(argv[0]));
+  strcat (path, mybasename (argv[0]));
   if (stat (".", &buf) != 0
       || !S_ISDIR (buf.st_mode))
     abort ();
