@@ -1744,7 +1744,8 @@ fputs_maybe_filtered (const char *linebuffer, struct ui_file *stream,
 	      /* Possible new page.  Note that
 		 PAGINATION_DISABLED_FOR_COMMAND might be set during
 		 this loop, so we must continue to check it here.  */
-	      if (lines_printed >= lines_per_page - 1
+	      if (filter
+		  && lines_printed >= lines_per_page - 1
 		  && !pagination_disabled_for_command)
 		{
 		  prompt_for_continue ();
