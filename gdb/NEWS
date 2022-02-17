@@ -125,6 +125,12 @@ show ada source-charset
 
 * Changed commands
 
+print
+  Printing of floating-point values with base-modifying formats like
+  /x has been changed to display the underlying bytes of the value in
+  the desired base.  This was GDB's documented behavior, but was never
+  implemented correctly.
+
 maint packet
   This command can now print a reply, if the reply includes
   non-printable characters.  Any non-printable characters are printed

@@ -10756,23 +10756,24 @@ letters supported are:
 
 @table @code
 @item x
-Regard the bits of the value as an integer, and print the integer in
-hexadecimal.
+Print the binary representation of the value in hexadecimal.
 
 @item d
-Print as integer in signed decimal.
+Print the binary representation of the value in decimal.
 
 @item u
-Print as integer in unsigned decimal.
+Print the binary representation of the value as an decimal, as if it
+were unsigned.
 
 @item o
-Print as integer in octal.
+Print the binary representation of the value in octal.
 
 @item t
-Print as integer in binary.  The letter @samp{t} stands for ``two''.
-@footnote{@samp{b} cannot be used because these format letters are also
-used with the @code{x} command, where @samp{b} stands for ``byte'';
-see @ref{Memory,,Examining Memory}.}
+Print the binary representation of the value in binary.  The letter
+@samp{t} stands for ``two''.  @footnote{@samp{b} cannot be used
+because these format letters are also used with the @code{x} command,
+where @samp{b} stands for ``byte''; see @ref{Memory,,Examining
+Memory}.}
 
 @item a
 @cindex unknown address, locating
@@ -10791,10 +10792,11 @@ The command @code{info symbol 0x54320} yields similar results.
 @xref{Symbols, info symbol}.
 
 @item c
-Regard as an integer and print it as a character constant.  This
-prints both the numerical value and its character representation.  The
-character representation is replaced with the octal escape @samp{\nnn}
-for characters outside the 7-bit @sc{ascii} range.
+Cast the value to an integer (unlike other formats, this does not just
+reinterpret the underlying bits) and print it as a character constant.
+This prints both the numerical value and its character representation.
+The character representation is replaced with the octal escape
+@samp{\nnn} for characters outside the 7-bit @sc{ascii} range.
 
 Without this format, @value{GDBN} displays @code{char},
 @w{@code{unsigned char}}, and @w{@code{signed char}} data as character

@@ -426,19 +426,14 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
       len = newlen;
     }
 
-  /* Historically gdb has printed floats by first casting them to a
-     long, and then printing the long.  PR cli/16242 suggests changing
-     this to using C-style hex float format.
-
-     Biased range types and sub-word scalar types must also be handled
+  /* Biased range types and sub-word scalar types must be handled
      here; the value is correctly computed by unpack_long.  */
   gdb::byte_vector converted_bytes;
   /* Some cases below will unpack the value again.  In the biased
      range case, we want to avoid this, so we store the unpacked value
      here for possible use later.  */
   gdb::optional<LONGEST> val_long;
-  if (((type->code () == TYPE_CODE_FLT
-	|| is_fixed_point_type (type))
+  if ((is_fixed_point_type (type)
        && (options->format == 'o'
 	   || options->format == 'x'
 	   || options->format == 't'
