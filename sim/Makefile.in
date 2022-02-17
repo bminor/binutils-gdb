@@ -208,7 +208,7 @@ CONFIG_CLEAN_FILES = Make-common.sim aarch64/Makefile.sim \
 	microblaze/Makefile.sim moxie/Makefile.sim msp430/Makefile.sim \
 	pru/Makefile.sim rl78/Makefile.sim rx/Makefile.sim \
 	sh/Makefile.sim erc32/Makefile.sim \
-	example-synacor/Makefile.sim arch-subdir.mk
+	example-synacor/Makefile.sim arch-subdir.mk .gdbinit
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
@@ -1277,6 +1277,8 @@ erc32/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/erc32/Makefile.i
 example-synacor/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/example-synacor/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 arch-subdir.mk: $(top_builddir)/config.status $(srcdir)/arch-subdir.mk.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+.gdbinit: $(top_builddir)/config.status $(srcdir)/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 clean-noinstLIBRARIES:
