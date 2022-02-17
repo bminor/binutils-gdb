@@ -1,3 +1,7 @@
+2022-02-17  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
 2022-02-14  Sergei Trofimovich  <siarheit@google.com>
 
 	* microblaze-opcm.h: Renamed 'fsqrt' to 'microblaze_fsqrt'.
