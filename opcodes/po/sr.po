@@ -1,13 +1,13 @@
 # Serbian translation of opcodes.
 # Copyright © 2020 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
-# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2016–2021.
+# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2016–2022.
 msgid ""
 msgstr ""
-"Project-Id-Version: opcodes-2.36.90\n"
-"Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
-"POT-Creation-Date: 2021-07-03 15:02+0100\n"
-"PO-Revision-Date: 2021-07-24 07:53+0200\n"
+"Project-Id-Version: opcodes-2.37.90\n"
+"Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
+"POT-Creation-Date: 2022-01-22 12:21+0000\n"
+"PO-Revision-Date: 2022-02-15 21:04+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: Serbian <(nothing)>\n"
 "Language: sr\n"
@@ -26,12 +26,22 @@ msgid "specified register cannot be written to"
 msgstr "не могу да пишем у наведени регистар"
 
 #. Invalid option.
-#: aarch64-dis.c:94 arc-dis.c:802 arm-dis.c:11652
+#: aarch64-dis.c:94 arc-dis.c:802 arm-dis.c:11670
 #, c-format
 msgid "unrecognised disassembler option: %s"
 msgstr "непозната опција разложитеља: %s"
 
-#: aarch64-dis.c:3589
+#: aarch64-dis.c:3395
+#, c-format
+msgid "this `%s' should have an immediately preceding `%s'"
+msgstr "ово „%s“ треба да има одмах претходеће „%s“"
+
+#: aarch64-dis.c:3402
+#, c-format
+msgid "expected `%s' after previous `%s'"
+msgstr "очекивах „%s“ након претходног „%s“"
+
+#: aarch64-dis.c:3806
 #, c-format
 msgid ""
 "\n"
@@ -42,7 +52,7 @@ msgstr ""
 "Следеће опције разложитеља специфичне за „AARCH64“ су подржане за коришћење\n"
 "са прекидачем „-M“ (више опција треба да се раздвајају зарезима):\n"
 
-#: aarch64-dis.c:3593
+#: aarch64-dis.c:3810
 #, c-format
 msgid ""
 "\n"
@@ -51,7 +61,7 @@ msgstr ""
 "\n"
 "  no-aliases         Не исписује алијасе инструкције.\n"
 
-#: aarch64-dis.c:3596
+#: aarch64-dis.c:3813
 #, c-format
 msgid ""
 "\n"
@@ -60,7 +70,7 @@ msgstr ""
 "\n"
 "  aliases            Исписује алијасе инструкције.\n"
 
-#: aarch64-dis.c:3599
+#: aarch64-dis.c:3816
 #, c-format
 msgid ""
 "\n"
@@ -69,7 +79,7 @@ msgstr ""
 "\n"
 "  no-notes           Не исписује напомене инструкције.\n"
 
-#: aarch64-dis.c:3602
+#: aarch64-dis.c:3819
 #, c-format
 msgid ""
 "\n"
@@ -78,7 +88,7 @@ msgstr ""
 "\n"
 "  notes              Исписује напомене инструкције.\n"
 
-#: aarch64-dis.c:3606
+#: aarch64-dis.c:3823
 #, c-format
 msgid ""
 "\n"
@@ -87,265 +97,281 @@ msgstr ""
 "\n"
 "  debug_dump         Временски прекидач за праћење прочишћавања.\n"
 
-#: aarch64-dis.c:3610 arc-dis.c:1551 arc-dis.c:1572 arc-dis.c:1575
-#: mips-dis.c:2807 mips-dis.c:2817 mips-dis.c:2820 nfp-dis.c:2981
-#: riscv-dis.c:655
+#: aarch64-dis.c:3827 arc-dis.c:1551 arc-dis.c:1572 arc-dis.c:1575
+#: loongarch-dis.c:306 mips-dis.c:2807 mips-dis.c:2817 mips-dis.c:2820
+#: nfp-dis.c:2993 riscv-dis.c:1140 riscv-dis.c:1143
 #, c-format
 msgid "\n"
 msgstr "\n"
 
-#: aarch64-opc.c:1350
+#: aarch64-opc.c:1365
 msgid "immediate value"
 msgstr "вредност непосредног"
 
-#: aarch64-opc.c:1360
+#: aarch64-opc.c:1375
 msgid "immediate offset"
 msgstr "померај непосредног"
 
-#: aarch64-opc.c:1370
+#: aarch64-opc.c:1385
 msgid "register number"
 msgstr "број регистра"
 
-#: aarch64-opc.c:1380
+#: aarch64-opc.c:1395
 msgid "register element index"
 msgstr "индекс елемента регистра"
 
-#: aarch64-opc.c:1390
+#: aarch64-opc.c:1405
 msgid "shift amount"
 msgstr "износ помака"
 
-#: aarch64-opc.c:1402
+#: aarch64-opc.c:1417
 msgid "multiplier"
 msgstr "множилац"
 
-#: aarch64-opc.c:1475
+#: aarch64-opc.c:1491
 msgid "reg pair must start from even reg"
 msgstr "пар израза мора почети на парном изразу"
 
-#: aarch64-opc.c:1481
+#: aarch64-opc.c:1497
 msgid "reg pair must be contiguous"
 msgstr "пар израза мора бити непрекидан"
 
-#: aarch64-opc.c:1495
+#: aarch64-opc.c:1511
 msgid "extraneous register"
 msgstr "страни регистар"
 
-#: aarch64-opc.c:1501
+#: aarch64-opc.c:1517
 msgid "missing register"
 msgstr "недостаје регистар"
 
-#: aarch64-opc.c:1512
+#: aarch64-opc.c:1528
 msgid "stack pointer register expected"
 msgstr "очекиван је регистар показивача спремника"
 
-#: aarch64-opc.c:1537
+#: aarch64-opc.c:1553
 msgid "z0-z15 expected"
 msgstr "очекивано је „z0-z15“"
 
-#: aarch64-opc.c:1538
+#: aarch64-opc.c:1554
 msgid "z0-z7 expected"
 msgstr "очекивано је „z0-z7“"
 
-#: aarch64-opc.c:1564
+#: aarch64-opc.c:1580
 msgid "invalid register list"
 msgstr "неисправан списак регистра"
 
-#: aarch64-opc.c:1578
+#: aarch64-opc.c:1594
 msgid "p0-p7 expected"
 msgstr "очекивано је „p0-p7“"
 
-#: aarch64-opc.c:1604 aarch64-opc.c:1612
+#: aarch64-opc.c:1620 aarch64-opc.c:1628
 msgid "unexpected address writeback"
 msgstr "неочекивано повратно писање адресе"
 
-#: aarch64-opc.c:1623
+#: aarch64-opc.c:1639
 msgid "address writeback expected"
 msgstr "очекивано је повратно писање адресе"
 
-#: aarch64-opc.c:1670
+#: aarch64-opc.c:1686
 msgid "negative or unaligned offset expected"
 msgstr "очекиван је негативан или непоравнат померај"
 
-#: aarch64-opc.c:1727
+#: aarch64-opc.c:1743
 msgid "invalid register offset"
 msgstr "неисправан померај регистра"
 
-#: aarch64-opc.c:1749
+#: aarch64-opc.c:1765
 msgid "invalid post-increment amount"
 msgstr "неисправан износ пост-увећања"
 
-#: aarch64-opc.c:1765 aarch64-opc.c:2274
+#: aarch64-opc.c:1781 aarch64-opc.c:2299
 msgid "invalid shift amount"
 msgstr "неисправан износ помака"
 
-#: aarch64-opc.c:1778
+#: aarch64-opc.c:1794
 msgid "invalid extend/shift operator"
 msgstr "неисправан оператор проширења/помака"
 
-#: aarch64-opc.c:1824 aarch64-opc.c:2076 aarch64-opc.c:2111 aarch64-opc.c:2130
-#: aarch64-opc.c:2138 aarch64-opc.c:2227 aarch64-opc.c:2404 aarch64-opc.c:2504
-#: aarch64-opc.c:2517
+#: aarch64-opc.c:1840 aarch64-opc.c:2101 aarch64-opc.c:2136 aarch64-opc.c:2155
+#: aarch64-opc.c:2163 aarch64-opc.c:2252 aarch64-opc.c:2429 aarch64-opc.c:2529
+#: aarch64-opc.c:2542
 msgid "immediate out of range"
 msgstr "непосредни је ван опсега"
 
-#: aarch64-opc.c:1846 aarch64-opc.c:1888 aarch64-opc.c:1950 aarch64-opc.c:1984
+#: aarch64-opc.c:1870 aarch64-opc.c:1912 aarch64-opc.c:1975 aarch64-opc.c:2009
 msgid "invalid addressing mode"
 msgstr "непознат режим адресирања"
 
-#: aarch64-opc.c:1942
+#: aarch64-opc.c:1967
 msgid "index register xzr is not allowed"
 msgstr "регистар индекса „xzr“ није допуштен"
 
-#: aarch64-opc.c:2064 aarch64-opc.c:2086 aarch64-opc.c:2307 aarch64-opc.c:2315
-#: aarch64-opc.c:2381 aarch64-opc.c:2410
+#: aarch64-opc.c:2089 aarch64-opc.c:2111 aarch64-opc.c:2332 aarch64-opc.c:2340
+#: aarch64-opc.c:2406 aarch64-opc.c:2435
 msgid "invalid shift operator"
 msgstr "неисправан оператор помака"
 
-#: aarch64-opc.c:2070
+#: aarch64-opc.c:2095
 msgid "shift amount must be 0 or 12"
 msgstr "износ помака мора бити 0 или 12"
 
-#: aarch64-opc.c:2093
+#: aarch64-opc.c:2118
 msgid "shift amount must be a multiple of 16"
 msgstr "износ помака мора бити множилац од 16"
 
-#: aarch64-opc.c:2105
+#: aarch64-opc.c:2130
 msgid "negative immediate value not allowed"
 msgstr "негативна вредност непосредног није дозвољена"
 
-#: aarch64-opc.c:2238
+#: aarch64-opc.c:2263
 msgid "immediate zero expected"
 msgstr "очекиван је непосредни нула"
 
-#: aarch64-opc.c:2252
+#: aarch64-opc.c:2277
 msgid "rotate expected to be 0, 90, 180 or 270"
 msgstr "очекивано је да заокрет буде 0, 90, 180 или 270"
 
-#: aarch64-opc.c:2263
+#: aarch64-opc.c:2288
 msgid "rotate expected to be 90 or 270"
 msgstr "очекивано је да заокрет буде 90 или 270"
 
-#: aarch64-opc.c:2323
+#: aarch64-opc.c:2348
 msgid "shift is not permitted"
 msgstr "помак није допуштен"
 
-#: aarch64-opc.c:2348
+#: aarch64-opc.c:2373
 msgid "invalid value for immediate"
 msgstr "неисправна вредност за непосредног"
 
-#: aarch64-opc.c:2373
+#: aarch64-opc.c:2398
 msgid "shift amount must be 0 or 16"
 msgstr "износ помака мора бити 0 или 16"
 
-#: aarch64-opc.c:2394
+#: aarch64-opc.c:2419
 msgid "floating-point immediate expected"
 msgstr "очекиван је непосредни са покретним зарезом"
 
-#: aarch64-opc.c:2428
+#: aarch64-opc.c:2453
 msgid "no shift amount allowed for 8-bit constants"
 msgstr "износ помака није допуштен за 8-битне константе"
 
-#: aarch64-opc.c:2438
+#: aarch64-opc.c:2463
 msgid "shift amount must be 0 or 8"
 msgstr "износ помака мора бити 0 или 8"
 
-#: aarch64-opc.c:2451
+#: aarch64-opc.c:2476
 msgid "immediate too big for element size"
 msgstr "непосредни је превелик за величину елеммента"
 
-#: aarch64-opc.c:2458
+#: aarch64-opc.c:2483
 msgid "invalid arithmetic immediate"
 msgstr "неисправан непосредни аритметике"
 
-#: aarch64-opc.c:2472
+#: aarch64-opc.c:2497
 msgid "floating-point value must be 0.5 or 1.0"
 msgstr "вредност покретног зареза мора бити 0.5 или 1.0"
 
-#: aarch64-opc.c:2482
+#: aarch64-opc.c:2507
 msgid "floating-point value must be 0.5 or 2.0"
 msgstr "вредност покретног зареза мора бити 0.5 или 2.0"
 
-#: aarch64-opc.c:2492
+#: aarch64-opc.c:2517
 msgid "floating-point value must be 0.0 or 1.0"
 msgstr "вредност покретног зареза мора бити 0.0 или 1.0"
 
-#: aarch64-opc.c:2523
+#: aarch64-opc.c:2548
 msgid "invalid replicated MOV immediate"
 msgstr "неисправан реплицирани „MOV“ непосредни"
 
-#: aarch64-opc.c:2644
+#: aarch64-opc.c:2656
 msgid "extend operator expected"
 msgstr "очекиван је проширени оператор"
 
-#: aarch64-opc.c:2657
+#: aarch64-opc.c:2669
 msgid "missing extend operator"
 msgstr "недостаје проширени оператор"
 
-#: aarch64-opc.c:2663
+#: aarch64-opc.c:2675
 msgid "'LSL' operator not allowed"
 msgstr "„LSL“ оператор није допуштен"
 
-#: aarch64-opc.c:2684
+#: aarch64-opc.c:2696
 msgid "W register expected"
 msgstr "„W“ регистар је очекиван"
 
-#: aarch64-opc.c:2695
+#: aarch64-opc.c:2707
 msgid "shift operator expected"
 msgstr "очекиван је оператор помака"
 
-#: aarch64-opc.c:2702
+#: aarch64-opc.c:2714
 msgid "'ROR' operator not allowed"
 msgstr "„ROR“ оператор није допуштен"
 
-#: aarch64-opc.c:3722
+#: aarch64-opc.c:3852
 msgid "reading from a write-only register"
 msgstr "читам из регистра само за писање"
 
-#: aarch64-opc.c:3724
+#: aarch64-opc.c:3854
 msgid "writing to a read-only register"
 msgstr "пишем у регистар само за читање"
 
-#: aarch64-opc.c:5165
+#: aarch64-opc.c:5445
+msgid "the three register operands must be distinct from one another"
+msgstr "операнди три регистра морају бити различити"
+
+#: aarch64-opc.c:5556
+msgid "destination register differs from preceding instruction"
+msgstr "регистар одредишта се разликује од претходеће инструкције"
+
+#: aarch64-opc.c:5559
+msgid "source register differs from preceding instruction"
+msgstr "регистар изворишта се разликује од претходеће инструкције"
+
+#: aarch64-opc.c:5562
+msgid "size register differs from preceding instruction"
+msgstr "регистар величине се разликује од претходеће инструкције"
+
+#: aarch64-opc.c:5610
 msgid "instruction opens new dependency sequence without ending previous one"
 msgstr "инструкција је отворила нови низ зависности а да није завршила претходни"
 
-#: aarch64-opc.c:5185
+#: aarch64-opc.c:5639
 msgid "previous `movprfx' sequence not closed"
 msgstr "претходни „movprfx“ низ није затворен"
 
-#: aarch64-opc.c:5204
+#: aarch64-opc.c:5658
 msgid "SVE instruction expected after `movprfx'"
 msgstr "инструкција „SVE“ је очекивана након „movprfx“"
 
-#: aarch64-opc.c:5217
+#: aarch64-opc.c:5671
 msgid "SVE `movprfx' compatible instruction expected"
 msgstr "очекивана је „SVE movprfx“ сагласна инструкција"
 
-#: aarch64-opc.c:5304
+#: aarch64-opc.c:5759
 msgid "predicated instruction expected after `movprfx'"
 msgstr "предвиђена инструкција је очекивана након „movprfx“"
 
-#: aarch64-opc.c:5316
+#: aarch64-opc.c:5771
 msgid "merging predicate expected due to preceding `movprfx'"
 msgstr "стапање предиката је очекивано услед претходећег „movprfx“"
 
-#: aarch64-opc.c:5328
+#: aarch64-opc.c:5783
 msgid "predicate register differs from that in preceding `movprfx'"
 msgstr "регистрар предиката се разликује од оног у претходећем „movprfx“"
 
-#: aarch64-opc.c:5347
+#: aarch64-opc.c:5802
 msgid "output register of preceding `movprfx' not used in current instruction"
 msgstr "регистар излаза претходеће „movprfx“ није коришћен у текућој инструкцији"
 
-#: aarch64-opc.c:5360
+#: aarch64-opc.c:5815
 msgid "output register of preceding `movprfx' expected as output"
 msgstr "регистар излаза претходеће „movprfx“ је очекиван као излаз"
 
-#: aarch64-opc.c:5372
+#: aarch64-opc.c:5827
 msgid "output register of preceding `movprfx' used as input"
 msgstr "регистар излаза претходеће „movprfx“ је коришћен као улаз"
 
-#: aarch64-opc.c:5388
+#: aarch64-opc.c:5843
 msgid "register size not compatible with previous `movprfx'"
 msgstr "величина регистра није сагласна са претходним „movprfx“"
 
@@ -437,7 +463,7 @@ msgstr ""
 "Следеће опције разложитеља специфичне за „ARC“ су подржане за коришћење\n"
 "са прекидачем „-M“ (више опција треба да се раздвајају зарезима):\n"
 
-#: arc-dis.c:1558 mips-dis.c:2812
+#: arc-dis.c:1558 mips-dis.c:2812 riscv-dis.c:1135
 #, c-format
 msgid ""
 "\n"
@@ -618,67 +644,67 @@ msgstr "вредност мор бити у опсегу од 0 до 31"
 msgid "invalid position, should be one of: 0,4,8,...124."
 msgstr "неисправан положај, треба да буде: 0,4,8,...или 124."
 
-#: arm-dis.c:5187
+#: arm-dis.c:5204
 msgid "Select raw register names"
 msgstr "Бира сирове називе регистра"
 
-#: arm-dis.c:5189
+#: arm-dis.c:5206
 msgid "Select register names used by GCC"
 msgstr "Бира називе регистра које користи „GCC“"
 
-#: arm-dis.c:5191
+#: arm-dis.c:5208
 msgid "Select register names used in ARM's ISA documentation"
 msgstr "Бира називе регистра коришћене у „ISA“ документацији „ARM“-а"
 
-#: arm-dis.c:5193
+#: arm-dis.c:5210
 msgid "Assume all insns are Thumb insns"
 msgstr "Претпоставља да су сви инснси „Thumb“ инснси"
 
-#: arm-dis.c:5194
+#: arm-dis.c:5211
 msgid "Examine preceding label to determine an insn's type"
 msgstr "Происпитује претходећи натпис да одреди врсту „insn“-а"
 
-#: arm-dis.c:5195
+#: arm-dis.c:5212
 msgid "Select register names used in the APCS"
 msgstr "Бира називе регистра који се користе у „APCS“-у"
 
-#: arm-dis.c:5197
+#: arm-dis.c:5214
 msgid "Select register names used in the ATPCS"
 msgstr "Бира називе регистра који се користе у „ATPCS“-у"
 
-#: arm-dis.c:5199
+#: arm-dis.c:5216
 msgid "Select special register names used in the ATPCS"
 msgstr "Бира посебне називе регистра који се користе у „ATPCS“-у"
 
-#: arm-dis.c:5201
+#: arm-dis.c:5218
 msgid "Enable CDE extensions for coprocessor N space"
 msgstr "Укључује „CDE“ проширења за N простор копроцесора"
 
-#: arm-dis.c:8373
+#: arm-dis.c:8390
 msgid "<illegal precision>"
 msgstr "<неисправна тачност>"
 
-#: arm-dis.c:11613
+#: arm-dis.c:11631
 #, c-format
 msgid "unrecognised register name set: %s"
 msgstr "непознат назив регистра је подешен: %s"
 
-#: arm-dis.c:11627
+#: arm-dis.c:11645
 #, c-format
 msgid "cde coprocessor not between 0-7: %s"
 msgstr "„cde“ копроцесор није између 0-7: %s"
 
-#: arm-dis.c:11633
+#: arm-dis.c:11651
 #, c-format
 msgid "coproc must have an argument: %s"
 msgstr "копроцесор мора имати аргумент: %s"
 
-#: arm-dis.c:11646
+#: arm-dis.c:11664
 #, c-format
 msgid "coprocN argument takes options \"generic\", \"cde\", or \"CDE\": %s"
 msgstr "аргумент копроцN може да има опције „generic“, „cde“, или „CDE“: %s"
 
-#: arm-dis.c:12357
+#: arm-dis.c:12374
 #, c-format
 msgid ""
 "\n"
@@ -689,17 +715,17 @@ msgstr ""
 "Следеће опције разложитеља специфичне за „ARM“ су подржане за коришћење са\n"
 "прекидачем „-M“:\n"
 
-#: avr-dis.c:115 avr-dis.c:136
+#: avr-dis.c:124 avr-dis.c:145
 #, c-format
 msgid "undefined"
 msgstr "неодређено"
 
-#: avr-dis.c:218
+#: avr-dis.c:236
 #, c-format
 msgid "internal disassembler error"
 msgstr "унутрашња грешка разложитеља"
 
-#: avr-dis.c:272
+#: avr-dis.c:290
 #, c-format
 msgid "unknown constraint `%c'"
 msgstr "непознато ограничење „%c“"
@@ -786,17 +812,17 @@ msgstr "лоша инструкција „%.50s...“"
 msgid "bad instruction `%.50s'"
 msgstr "лоша инструкција „%.50s“"
 
-#: bpf-desc.c:1767
+#: bpf-desc.c:1768
 #, c-format
 msgid "internal error: bpf_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: bpf_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: bpf-desc.c:1855
+#: bpf-desc.c:1856
 #, c-format
 msgid "internal error: bpf_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: bpf_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: bpf-desc.c:1874
+#: bpf-desc.c:1875
 #, c-format
 msgid "internal error: bpf_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: bpf_cgen_cpu_open: нису наведене крајњости"
@@ -894,17 +920,17 @@ msgstr "унутрашња грешка: непознато поље %d прил
 msgid "operand out of range (%lu not between %lu and %lu)"
 msgstr "операнд је ван опсега (%lu није између %lu и %lu)"
 
-#: cris-desc.c:2621
+#: cris-desc.c:2622
 #, c-format
 msgid "internal error: cris_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: cris_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: cris-desc.c:2709
+#: cris-desc.c:2710
 #, c-format
 msgid "internal error: cris_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: cris_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: cris-desc.c:2728
+#: cris-desc.c:2729
 #, c-format
 msgid "internal error: cris_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: cris_cgen_cpu_open: нису наведене крајњости"
@@ -930,12 +956,12 @@ msgstr "Непозната грешка %d\n"
 msgid "Address 0x%s is out of bounds.\n"
 msgstr "Адреса 0х%s је изван граница.\n"
 
-#: disassemble.c:848
+#: disassemble.c:859
 #, c-format
 msgid "assertion fail %s:%d"
 msgstr "неуспех тврдње „%s:%d“"
 
-#: disassemble.c:849
+#: disassemble.c:860
 msgid "Please report this bug"
 msgstr "Известите о овој грешци"
 
@@ -974,17 +1000,17 @@ msgstr "ПРЕКИДАМ: непознат операнд"
 msgid "Not a pc-relative address."
 msgstr "Није адреса која се односи на пц."
 
-#: epiphany-desc.c:2109
+#: epiphany-desc.c:2110
 #, c-format
 msgid "internal error: epiphany_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: epiphany_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: epiphany-desc.c:2197
+#: epiphany-desc.c:2198
 #, c-format
 msgid "internal error: epiphany_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: epiphany_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: epiphany-desc.c:2216
+#: epiphany-desc.c:2217
 #, c-format
 msgid "internal error: epiphany_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: epiphany_cgen_cpu_open: нису наведене крајњости"
@@ -1005,17 +1031,17 @@ msgstr "Регистар мора бити између r8 и r15"
 msgid "Register list is not valid"
 msgstr "Списак регистра није исправан"
 
-#: fr30-desc.c:1586
+#: fr30-desc.c:1587
 #, c-format
 msgid "internal error: fr30_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: fr30_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: fr30-desc.c:1674
+#: fr30-desc.c:1675
 #, c-format
 msgid "internal error: fr30_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: fr30_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: fr30-desc.c:1693
+#: fr30-desc.c:1694
 #, c-format
 msgid "internal error: fr30_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: fr30_cgen_cpu_open: нису наведене крајњости"
@@ -1036,17 +1062,17 @@ msgstr "Вредност операнда A мора бити 0 или 1"
 msgid "register number must be even"
 msgstr "број регистра мора бити паран"
 
-#: frv-desc.c:6326
+#: frv-desc.c:6327
 #, c-format
 msgid "internal error: frv_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: frv_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: frv-desc.c:6414
+#: frv-desc.c:6415
 #, c-format
 msgid "internal error: frv_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: frv_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: frv-desc.c:6433
+#: frv-desc.c:6434
 #, c-format
 msgid "internal error: frv_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: frv_cgen_cpu_open: нису наведене крајњости"
@@ -1076,11 +1102,11 @@ msgstr "Hmmmm 0x%x"
 msgid "Don't understand 0x%x \n"
 msgstr "Не разумем 0x%x \n"
 
-#: i386-dis.c:8591
+#: i386-dis.c:8528
 msgid "<internal disassembler error>"
 msgstr "<унутрашња грешка разложитеља>"
 
-#: i386-dis.c:8900
+#: i386-dis.c:8802
 #, c-format
 msgid ""
 "\n"
@@ -1091,32 +1117,32 @@ msgstr ""
 "Следеће опције разложитеља специфичне за „i386/x86-64“ су подржане за коришћење\n"
 "са прекидачем „-M“ (више опција треба да се раздвајају зарезима):\n"
 
-#: i386-dis.c:8904
+#: i386-dis.c:8806
 #, c-format
 msgid "  x86-64      Disassemble in 64bit mode\n"
 msgstr "  x86-64      Разлаже у режиму 64-бита\n"
 
-#: i386-dis.c:8905
+#: i386-dis.c:8807
 #, c-format
 msgid "  i386        Disassemble in 32bit mode\n"
 msgstr "  i386        Разлаже у режиму 32-бита\n"
 
-#: i386-dis.c:8906
+#: i386-dis.c:8808
 #, c-format
 msgid "  i8086       Disassemble in 16bit mode\n"
 msgstr "  i8086       Разлаже у режиму 16-бита\n"
 
-#: i386-dis.c:8907
+#: i386-dis.c:8809
 #, c-format
 msgid "  att         Display instruction in AT&T syntax\n"
 msgstr "  att         Приказује инструкцију у синтакси „AT&T“-ја\n"
 
-#: i386-dis.c:8908
+#: i386-dis.c:8810
 #, c-format
 msgid "  intel       Display instruction in Intel syntax\n"
 msgstr "  intel       Приказује инструкцију у синтакси Интела\n"
 
-#: i386-dis.c:8909
+#: i386-dis.c:8811
 #, c-format
 msgid ""
 "  att-mnemonic\n"
@@ -1125,7 +1151,7 @@ msgstr ""
 "  att-mnemonic\n"
 "              Приказује инструкцију у мнемонику „AT&T“-а\n"
 
-#: i386-dis.c:8911
+#: i386-dis.c:8813
 #, c-format
 msgid ""
 "  intel-mnemonic\n"
@@ -1134,136 +1160,136 @@ msgstr ""
 "  intel-mnemonic\n"
 "              Приказује инструкцију у мнемонику Интела\n"
 
-#: i386-dis.c:8913
+#: i386-dis.c:8815
 #, c-format
 msgid "  addr64      Assume 64bit address size\n"
 msgstr "  addr64      Претпоставља величину адресе од 64 бита\n"
 
-#: i386-dis.c:8914
+#: i386-dis.c:8816
 #, c-format
 msgid "  addr32      Assume 32bit address size\n"
 msgstr "  addr32      Претпоставља величину адресе од 32 бита\n"
 
-#: i386-dis.c:8915
+#: i386-dis.c:8817
 #, c-format
 msgid "  addr16      Assume 16bit address size\n"
 msgstr "  addr16      Претпоставља величину адресе од 16 бита\n"
 
-#: i386-dis.c:8916
+#: i386-dis.c:8818
 #, c-format
 msgid "  data32      Assume 32bit data size\n"
 msgstr "  data32      Претпоставља величину података од 32 бита\n"
 
-#: i386-dis.c:8917
+#: i386-dis.c:8819
 #, c-format
 msgid "  data16      Assume 16bit data size\n"
 msgstr "  data16      Претпоставља величину података од 16 бита\n"
 
-#: i386-dis.c:8918
+#: i386-dis.c:8820
 #, c-format
 msgid "  suffix      Always display instruction suffix in AT&T syntax\n"
 msgstr "  suffix      Увек приказује суфикс инструкције у синтакси „AT&T“-ја\n"
 
-#: i386-dis.c:8919
+#: i386-dis.c:8821
 #, c-format
 msgid "  amd64       Display instruction in AMD64 ISA\n"
 msgstr "  amd64       Приказује инструкцију у „AMD64 ISA“\n"
 
-#: i386-dis.c:8920
+#: i386-dis.c:8822
 #, c-format
 msgid "  intel64     Display instruction in Intel64 ISA\n"
 msgstr "  intel64     Приказује инструкције у „Intel64 ISA“\n"
 
-#: i386-dis.c:9484
+#: i386-dis.c:9402
 msgid "64-bit address is disabled"
 msgstr "64-битна адреса је искључена"
 
-#: i386-gen.c:851
+#: i386-gen.c:856
 #, c-format
 msgid "%s: error: "
 msgstr "%s: грешка: "
 
-#: i386-gen.c:1007
+#: i386-gen.c:1012
 #, c-format
 msgid "%s: %d: unknown bitfield: %s\n"
 msgstr "%s: %d: непознато поље бита: %s\n"
 
-#: i386-gen.c:1009
+#: i386-gen.c:1014
 #, c-format
 msgid "unknown bitfield: %s\n"
 msgstr "непознато поље бита: %s\n"
 
-#: i386-gen.c:1072
+#: i386-gen.c:1077
 #, c-format
 msgid "%s: %d: missing `)' in bitfield: %s\n"
 msgstr "%s: %d: недостаје ) у пољу бита: %s\n"
 
-#: i386-gen.c:1173
+#: i386-gen.c:1178
 #, c-format
 msgid "unknown broadcast operand: %s\n"
 msgstr "непознат операнд емитовања: %s\n"
 
-#: i386-gen.c:1228
+#: i386-gen.c:1233
 #, c-format
 msgid "%s:%d: Conflicting opcode space specifications\n"
 msgstr "%s:%d: Сукобљавајуће одредбе опкод размака\n"
 
-#: i386-gen.c:1232
+#: i386-gen.c:1237
 #, c-format
 msgid "%s:%d: Warning: redundant opcode space specification\n"
 msgstr "%s:%d: Упозорење: понављајућа одредба опкод размака\n"
 
-#: i386-gen.c:1241
+#: i386-gen.c:1246
 #, c-format
 msgid "%s:%d: Conflicting prefix specifications\n"
 msgstr "%s:%d: Сукобљавајуће одредбе префикса\n"
 
-#: i386-gen.c:1245
+#: i386-gen.c:1250
 #, c-format
 msgid "%s:%d: Warning: redundant prefix specification\n"
 msgstr "%s:%d: Упозорење: понављајућа одредба префикса\n"
 
-#: i386-gen.c:1455
+#: i386-gen.c:1460
 #, c-format
 msgid "%s:%d: %s: unrecognized opcode encoding space\n"
 msgstr "%s:%d: %s: непознат размак опкод кодирања\n"
 
-#: i386-gen.c:1461
+#: i386-gen.c:1466
 #, c-format
 msgid "%s:%d: %s: residual opcode (0x%0*llx) too large\n"
 msgstr "%s:%d: %s: заостали опкод (0x%0*llx) је превелик\n"
 
-#: i386-gen.c:1883
+#: i386-gen.c:1888
 #, c-format
 msgid "can't find i386-reg.tbl for reading, errno = %s\n"
 msgstr "не могу да нађем „i386-reg.tbl“ за читање, грешка = %s\n"
 
-#: i386-gen.c:1961
+#: i386-gen.c:1966
 #, c-format
 msgid "can't create i386-init.h, errno = %s\n"
 msgstr "не могу да направим „i386-init.h“, грешка = %s\n"
 
-#: i386-gen.c:2051 ia64-gen.c:2829
+#: i386-gen.c:2056 ia64-gen.c:2829
 #, c-format
 msgid "unable to change directory to \"%s\", errno = %s\n"
 msgstr "не могу да пређем у директоријум „%s“, гршка = %s\n"
 
-#: i386-gen.c:2065 i386-gen.c:2070
+#: i386-gen.c:2070 i386-gen.c:2075
 #, c-format
 msgid "CpuMax != %d!\n"
 msgstr "CpuMax != %d!\n"
 
-#: i386-gen.c:2074
+#: i386-gen.c:2079
 #, c-format
 msgid "%d unused bits in i386_cpu_flags.\n"
 msgstr "%d некоришћена бита у „i386_cpu_flags“.\n"
 
-#: i386-gen.c:2089
+#: i386-gen.c:2094
 #, c-format
 msgid "%d unused bits in i386_operand_type.\n"
 msgstr "%d некоришћена бита у „i386_operand_type“.\n"
 
-#: i386-gen.c:2103
+#: i386-gen.c:2108
 #, c-format
 msgid "can't create i386-tbl.h, errno = %s\n"
 msgstr "не могу да направим „i386-tbl.h“, грешка = %s\n"
@@ -1428,17 +1454,17 @@ msgstr "„percent-operator“ операнд није симбол"
 msgid "Attempt to find bit index of 0"
 msgstr "Покушавам да нађем индекс бита 0"
 
-#: ip2k-desc.c:1015
+#: ip2k-desc.c:1016
 #, c-format
 msgid "internal error: ip2k_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: ip2k_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: ip2k-desc.c:1103
+#: ip2k-desc.c:1104
 #, c-format
 msgid "internal error: ip2k_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: ip2k_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: ip2k-desc.c:1122
+#: ip2k-desc.c:1123
 #, c-format
 msgid "internal error: ip2k_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: ip2k_cgen_cpu_open: нису наведене крајњости"
@@ -1455,17 +1481,17 @@ msgstr "вредност непосредног је ван опсега"
 msgid "21-bit offset out of range"
 msgstr "Померај 21 бита је ван опсега"
 
-#: iq2000-desc.c:2020
+#: iq2000-desc.c:2021
 #, c-format
 msgid "internal error: iq2000_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: iq2000_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: iq2000-desc.c:2108
+#: iq2000-desc.c:2109
 #, c-format
 msgid "internal error: iq2000_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: iq2000_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: iq2000-desc.c:2127
+#: iq2000-desc.c:2128
 #, c-format
 msgid "internal error: iq2000_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: iq2000_cgen_cpu_open: нису наведене крајњости"
@@ -1486,20 +1512,40 @@ msgstr "очекујем „got“ односну адресу: gotoffhi16(symbo
 msgid "expecting got relative address: gotofflo16(symbol)"
 msgstr "очекујем „got“ односну адресу: gotofflo16(symbol)"
 
-#: lm32-desc.c:1002
+#: lm32-desc.c:1003
 #, c-format
 msgid "internal error: lm32_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: lm32_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: lm32-desc.c:1090
+#: lm32-desc.c:1091
 #, c-format
 msgid "internal error: lm32_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: lm32_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: lm32-desc.c:1109
+#: lm32-desc.c:1110
 #, c-format
 msgid "internal error: lm32_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: lm32_cgen_cpu_open: нису наведене крајњости"
+
+#: loongarch-dis.c:300
+#, c-format
+msgid ""
+"\n"
+"The following LoongArch disassembler options are supported for use\n"
+"with the -M switch (multiple options should be separated by commas):\n"
+msgstr ""
+"\n"
+"Следеће опције разложитеља „LoongArch“ су подржане за коришћење\n"
+"са прекидачем „-M“ (више опција треба раздвојити зарезима):\n"
+
+#: loongarch-dis.c:304
+#, c-format
+msgid ""
+"\n"
+"    numeric       Print numeric register names, rather than ABI names.\n"
+msgstr ""
+"\n"
+"  numeric         Исписује бројчане називе регистра, радије него „ABI“ називе.\n"
 
 #: m10200-dis.c:151 m10300-dis.c:574
 #, c-format
@@ -1585,32 +1631,32 @@ msgstr "није исправан пар „r0l/r0h“"
 msgid "Invalid size specifier"
 msgstr "Неисправан одредник величине"
 
-#: m32c-desc.c:63033
+#: m32c-desc.c:63034
 #, c-format
 msgid "internal error: m32c_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: m32_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: m32c-desc.c:63121
+#: m32c-desc.c:63122
 #, c-format
 msgid "internal error: m32c_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: m32_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: m32c-desc.c:63140
+#: m32c-desc.c:63141
 #, c-format
 msgid "internal error: m32c_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: m32_cgen_cpu_open: нису наведене крајњости"
 
-#: m32r-desc.c:1365
+#: m32r-desc.c:1366
 #, c-format
 msgid "internal error: m32r_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: m32r_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: m32r-desc.c:1453
+#: m32r-desc.c:1454
 #, c-format
 msgid "internal error: m32r_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: m32r_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: m32r-desc.c:1472
+#: m32r-desc.c:1473
 #, c-format
 msgid "internal error: m32r_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: m32r_cgen_cpu_open: нису наведене крајњости"
@@ -1658,17 +1704,17 @@ msgstr "Непосредни је ван опсега од -128 до 127"
 msgid "Value is not aligned enough"
 msgstr "Вредност није довољно поравната"
 
-#: mep-desc.c:6226
+#: mep-desc.c:6227
 #, c-format
 msgid "internal error: mep_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: mep_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: mep-desc.c:6314
+#: mep-desc.c:6315
 #, c-format
 msgid "internal error: mep_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: mep_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: mep-desc.c:6333
+#: mep-desc.c:6334
 #, c-format
 msgid "internal error: mep_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: mep_cgen_cpu_open: нису наведене крајњости"
@@ -1847,17 +1893,17 @@ msgstr "„percent-operator“-ов операнд није симбол"
 msgid "invalid operand.  type may have values 0,1,2 only."
 msgstr "неисправан операнд.  врста може имати само вредности 0,1,2."
 
-#: mt-desc.c:1146
+#: mt-desc.c:1147
 #, c-format
 msgid "internal error: mt_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: mt_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: mt-desc.c:1234
+#: mt-desc.c:1235
 #, c-format
 msgid "internal error: mt_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: mt_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: mt-desc.c:1253
+#: mt-desc.c:1254
 #, c-format
 msgid "internal error: mt_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: mt_cgen_cpu_open: нису наведене крајњости"
@@ -1881,47 +1927,47 @@ msgstr "унутрашња грешка: непознати хардверски
 msgid "insufficient data to decode instruction"
 msgstr "недовољно података за декодирање инструкције"
 
-#: nfp-dis.c:927
+#: nfp-dis.c:930
 msgid "<invalid_instruction>:"
 msgstr "<неисправна_инструкција>:"
 
-#: nfp-dis.c:1331
+#: nfp-dis.c:1334
 msgid ", <invalid CRC operator>, "
 msgstr ", <неисправан „CRC“ оператор>, "
 
-#: nfp-dis.c:1683
+#: nfp-dis.c:1686
 msgid "<invalid branch>["
 msgstr "<неисправна грана>["
 
-#: nfp-dis.c:2052 nfp-dis.c:2323
+#: nfp-dis.c:2055 nfp-dis.c:2326
 #, c-format
 msgid "<invalid cmd target %d:%d:%d>[]"
 msgstr "<неисправна мета наредбе %d:%d:%d>[]"
 
-#: nfp-dis.c:2063 nfp-dis.c:2334
+#: nfp-dis.c:2066 nfp-dis.c:2337
 #, c-format
 msgid "<invalid cmd action %d:%d:%d>[]"
 msgstr "<неисправна радња наредбе %d:%d:%d>[]"
 
-#: nfp-dis.c:2555
+#: nfp-dis.c:2558
 msgid "File has no ME-Config section."
 msgstr "Датотека нема одељак „ME“-Подешавања."
 
-#: nfp-dis.c:2569
+#: nfp-dis.c:2572
 msgid "File has invalid ME-Config section."
 msgstr "Датотека има неисправан одељак „ME“-Подешавања."
 
-#: nfp-dis.c:2711
+#: nfp-dis.c:2717
 #, c-format
 msgid "Error processing section %u "
 msgstr "Грешка обраде одељка %u "
 
-#: nfp-dis.c:2740
+#: nfp-dis.c:2746
 #, c-format
 msgid "Invalid NFP option: %s"
 msgstr "Неисправна „NFP“ опција: %s"
 
-#: nfp-dis.c:2972
+#: nfp-dis.c:2984
 #, c-format
 msgid ""
 "\n"
@@ -1932,7 +1978,7 @@ msgstr ""
 "Следеће опције разложитеља специфичне за „NFP“ су подржане за коришћење\n"
 "са прекидачем „-M“ (више опција треба да се раздвајају зарезима):\n"
 
-#: nfp-dis.c:2976
+#: nfp-dis.c:2988
 #, c-format
 msgid ""
 "\n"
@@ -1973,17 +2019,17 @@ msgstr "премештај је неисправан за спремиште"
 msgid "internal relocation type invalid"
 msgstr "унутрашња врста премештаја је неисправна"
 
-#: or1k-desc.c:2040
+#: or1k-desc.c:2041
 #, c-format
 msgid "internal error: or1k_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: or1k_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: or1k-desc.c:2128
+#: or1k-desc.c:2129
 #, c-format
 msgid "internal error: or1k_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: or1k_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: or1k-desc.c:2147
+#: or1k-desc.c:2148
 #, c-format
 msgid "internal error: or1k_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: or1k_cgen_cpu_open: нису наведене крајњости"
@@ -2133,74 +2179,55 @@ msgid "invalid TH value"
 msgstr "неисправна „TH“ вредност"
 
 #. The option without '=' should be defined above.
-#: riscv-dis.c:85 riscv-dis.c:122
+#: riscv-dis.c:103 riscv-dis.c:140
 #, c-format
 msgid "unrecognized disassembler option: %s"
 msgstr "непозната опција разложитеља: %s"
 
 #. Invalid options with '=', no option name before '=',
 #. and no value after '='.
-#: riscv-dis.c:93
+#: riscv-dis.c:111
 #, c-format
 msgid "unrecognized disassembler option with '=': %s"
 msgstr "непозната опција разложитеља са знаком =: %s"
 
-#: riscv-dis.c:107
+#: riscv-dis.c:125
 #, c-format
 msgid "unknown privileged spec set by %s=%s"
 msgstr "непозната одредба привилегије постављена са „%s=%s“"
 
-#: riscv-dis.c:114
+#: riscv-dis.c:132
 #, c-format
 msgid "mis-matched privilege spec set by %s=%s, the elf privilege attribute is %s"
 msgstr "неодговарајућу одредбу привилегије је поставио „%s=%s“, атрибут елф привилегије је „%s“"
 
-#: riscv-dis.c:416
+#: riscv-dis.c:526
 #, c-format
 msgid "# internal error, undefined modifier (%c)"
 msgstr "# унутрашња грешка, неодређени измењивач (%c)"
 
-#: riscv-dis.c:640
+#: riscv-dis.c:1018
+msgid "Print numeric register names, rather than ABI names."
+msgstr "Исписује бројчане називе регистра, уместо „ABI“ називе."
+
+#: riscv-dis.c:1021
+msgid "Disassemble only into canonical instructions."
+msgstr "Рашчлањује само у канонске инструкције."
+
+#: riscv-dis.c:1024
+msgid "Print the CSR according to the chosen privilege spec."
+msgstr "Исписује „CSR“ у складу са изабраном одредбом привилегије."
+
+#: riscv-dis.c:1100
 #, c-format
 msgid ""
 "\n"
-"The following RISC-V-specific disassembler options are supported for use\n"
+"The following RISC-V specific disassembler options are supported for use\n"
 "with the -M switch (multiple options should be separated by commas):\n"
 msgstr ""
 "\n"
-"Следеће опције разложитеља специфичне за „RISC-V-“ су подржане за коришћење\n"
+"Следеће опције разложитеља специфичне за „RISC-V“ су подржане за коришћење\n"
 "са прекидачем „-M“ (више опција треба да се раздвајају зарезима):\n"
-
-#: riscv-dis.c:644
-#, c-format
-msgid ""
-"\n"
-"  numeric         Print numeric register names, rather than ABI names.\n"
-msgstr ""
-"\n"
-"  numeric         Исписује бројчане називе регистра, радије него „ABI“ називе.\n"
-
-#: riscv-dis.c:647
-#, c-format
-msgid ""
-"\n"
-"  no-aliases      Disassemble only into canonical instructions, rather\n"
-"                  than into pseudoinstructions.\n"
-msgstr ""
-"\n"
-"  no-aliases      Разлаже само у прописне инструкције, радије него\n"
-"                  у псеудоинструкције.\n"
-
-#: riscv-dis.c:651
-#, c-format
-msgid ""
-"\n"
-"  priv-spec=PRIV  Print the CSR according to the chosen privilege spec\n"
-"                  (1.9, 1.9.1, 1.10, 1.11).\n"
-msgstr ""
-"\n"
-"  priv-spec=ПРИВ  Исписује „CSR“ у складу са изабраном одредбом привилегије\n"
-"                  (1.9, 1.9.1, 1.10, 1.11).\n"
 
 #: rx-dis.c:139 rx-dis.c:163 rx-dis.c:171 rx-dis.c:179 rx-dis.c:187
 msgid "<invalid register number>"
@@ -2222,15 +2249,15 @@ msgstr "<неисправна оп_величина>"
 msgid "<invalid size>"
 msgstr "<неисправна величина>"
 
-#: s12z-dis.c:236 s12z-dis.c:293 s12z-dis.c:304
+#: s12z-dis.c:239 s12z-dis.c:296 s12z-dis.c:307
 msgid "<illegal reg num>"
 msgstr "<неисправан број регистра>"
 
-#: s12z-dis.c:367
+#: s12z-dis.c:370
 msgid "<bad>"
 msgstr "<лоше>"
 
-#: s12z-dis.c:377
+#: s12z-dis.c:380
 msgid ".<bad>"
 msgstr ".<лоше>"
 
@@ -2430,17 +2457,17 @@ msgstr "Недостаје префикс „sof:“"
 msgid "Missing 'seg:' prefix"
 msgstr "Недостаје префикс „seg:“"
 
-#: xc16x-desc.c:3349
+#: xc16x-desc.c:3350
 #, c-format
 msgid "internal error: xc16x_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: xc16x_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: xc16x-desc.c:3437
+#: xc16x-desc.c:3438
 #, c-format
 msgid "internal error: xc16x_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: xc16x_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: xc16x-desc.c:3456
+#: xc16x-desc.c:3457
 #, c-format
 msgid "internal error: xc16x_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: xc16x_cgen_cpu_open: нису наведене крајњости"
@@ -2485,20 +2512,29 @@ msgstr "Операнд није симбол"
 msgid "Syntax error: No trailing ')'"
 msgstr "Грешка синтаксе: Нема пратеће )"
 
-#: xstormy16-desc.c:1317
+#: xstormy16-desc.c:1318
 #, c-format
 msgid "internal error: xstormy16_cgen_rebuild_tables: conflicting insn-chunk-bitsize values: `%d' vs. `%d'"
 msgstr "унутрашња грешка: xstormy16_cgen_rebuild_tables: сукобљене „insn-chunk-bitsize“ вредности: %d наспрам %d"
 
-#: xstormy16-desc.c:1405
+#: xstormy16-desc.c:1406
 #, c-format
 msgid "internal error: xstormy16_cgen_cpu_open: unsupported argument `%d'"
 msgstr "унутрашња грешка: xstormy16_cgen_cpu_open: неподржан аргумент „%d“"
 
-#: xstormy16-desc.c:1424
+#: xstormy16-desc.c:1425
 #, c-format
 msgid "internal error: xstormy16_cgen_cpu_open: no endianness specified"
 msgstr "унутрашња грешка: xstormy16_cgen_cpu_open: нису наведене крајњости"
+
+#~ msgid ""
+#~ "\n"
+#~ "  no-aliases      Disassemble only into canonical instructions, rather\n"
+#~ "                  than into pseudoinstructions.\n"
+#~ msgstr ""
+#~ "\n"
+#~ "  no-aliases      Разлаже само у прописне инструкције, радије него\n"
+#~ "                  у псеудоинструкције.\n"
 
 #~ msgid "  dsp             Recognize DSP instructions.\n"
 #~ msgstr "  dsp             Препознаје „DSP“ инструкције.\n"
