@@ -1,9 +1,13 @@
+2022-02-17  Roland McGrath  <mcgrathr@google.com>
+
+	* ld.texi (Output Section Type): Fix typo in @code syntax.
+
 2022-02-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/sr.po: Updated Serbian translation.
 
 2022-02-16  Fangrui Song  <maskray@google.com>
-	Nick Clifton  <nickc@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
 
 	PR ld/28841
 	* ld.texi: Document new output section type.

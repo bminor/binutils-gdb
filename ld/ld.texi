@@ -2076,7 +2076,7 @@ If this option is provided then the linker will invoke
 @var{scriptname} whenever an error is encountered.  Currently however
 only two kinds of error are supported: missing symbols and missing
 libraries.  Two arguments will be passed to script: the keyword
-``undefined-symbol'' or `missing-lib'' and the @var{name} of the 
+``undefined-symbol'' or `missing-lib'' and the @var{name} of the
 undefined symbol or missing library.  The intention is that the script
 will provide suggestions to the user as to where the symbol or library
 might be found.  After the script has finished then the normal linker
@@ -2230,7 +2230,7 @@ On platforms where the feature is supported, the option
 
 On platforms where the feature is not supported, both @option{--relax}
 and @option{--no-relax} are accepted, but ignored.
- 
+
 @cindex retaining specified symbols
 @cindex stripping all but some symbols
 @cindex symbols, retaining selectively
@@ -3923,7 +3923,7 @@ check a list of possible entry symbols, matching the first one found.
 @item
 the address of the first byte of the code section, if present and an
 executable is being created - the code section is usually
-@samp{.text}, but can be something else; 
+@samp{.text}, but can be something else;
 @item
 The address @code{0}.
 @end itemize
@@ -5493,7 +5493,7 @@ section when the program is run.
 @item TYPE = @var{type}
 Set the section type to the integer @var{type}. When generating an ELF
 output file, type names @code{SHT_PROGBITS}, @code{SHT_STRTAB},
-@code{SHT_NOTE}, @code {SHT_NOBITS}, @code{SHT_INIT_ARRAY},
+@code{SHT_NOTE}, @code{SHT_NOBITS}, @code{SHT_INIT_ARRAY},
 @code{SHT_FINI_ARRAY}, and @code{SHT_PREINIT_ARRAY} are also allowed
 for @var{type}.  It is the user's responsibility to ensure that any
 special requirements of the section type are met.
