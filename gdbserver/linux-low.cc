@@ -3493,9 +3493,9 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 
   gdb_assert (step_over_bkpt == null_ptid);
 
-  threads_debug_printf ("ret = %s, %d, %d",
+  threads_debug_printf ("ret = %s, %s",
 			target_pid_to_str (ptid_of (current_thread)).c_str (),
-			ourstatus->kind (), ourstatus->sig ());
+			ourstatus->to_string ().c_str ());
 
   if (ourstatus->kind () == TARGET_WAITKIND_EXITED)
     return filter_exit_event (event_child, ourstatus);
