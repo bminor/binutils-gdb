@@ -422,7 +422,8 @@ cpu_supports_bts (void)
 static void
 diagnose_perf_event_open_fail ()
 {
-  switch (errno)
+  int orig_errno = errno;
+  switch (orig_errno)
     {
     case EPERM:
     case EACCES:
@@ -443,7 +444,7 @@ diagnose_perf_event_open_fail ()
       break;
     }
 
-  error (_("Failed to start recording: %s"), safe_strerror (errno));
+  error (_("Failed to start recording: %s"), safe_strerror (orig_errno));
 }
 
 /* Get the linux version of a btrace_target_info.  */
