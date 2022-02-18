@@ -1188,6 +1188,14 @@ proc gdb_test_multiple { command message args } {
 	    }
 	    set result -1
 	}
+	-re "Corrupted shared library list.*$prompt_regexp" {
+	    fail "$message (shared library list corrupted)"
+	    set result -1
+	}
+	-re "Invalid cast\.\r\nwarning: Probes-based dynamic linker interface failed.*$prompt_regexp" {
+	    fail "$message (probes interface failure)"
+	    set result -1
+	}
     }
     append code $processed_code
 
