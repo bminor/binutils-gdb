@@ -44,12 +44,15 @@
 #include <algorithm>
 #include "gmp-utils.h"
 
+/* The value of an invalid conversion badness.  */
+#define INVALID_CONVERSION 100
+
 /* Initialize BADNESS constants.  */
 
-const struct rank LENGTH_MISMATCH_BADNESS = {100,0};
+const struct rank LENGTH_MISMATCH_BADNESS = {INVALID_CONVERSION,0};
 
-const struct rank TOO_FEW_PARAMS_BADNESS = {100,0};
-const struct rank INCOMPATIBLE_TYPE_BADNESS = {100,0};
+const struct rank TOO_FEW_PARAMS_BADNESS = {INVALID_CONVERSION,0};
+const struct rank INCOMPATIBLE_TYPE_BADNESS = {INVALID_CONVERSION,0};
 
 const struct rank EXACT_MATCH_BADNESS = {0,0};
 
@@ -3966,8 +3969,14 @@ compare_badness (const badness_vector &a, const badness_vector &b)
 {
   int i;
   int tmp;
-  short found_pos = 0;		/* any positives in c? */
-  short found_neg = 0;		/* any negatives in c? */
+  /* Any positives in comparison? */
+  bool found_pos = false;
+  /* Any negatives in comparison? */
+  bool found_neg = false;
+  /* Did A have any INVALID_CONVERSION entries.  */
+  bool a_invalid = false;
+  /* Did B have any INVALID_CONVERSION entries.  */
+  bool b_invalid = false;
 
   /* differing sizes => incomparable */
   if (a.size () != b.size ())
@@ -3978,12 +3987,27 @@ compare_badness (const badness_vector &a, const badness_vector &b)
     {
       tmp = compare_ranks (b[i], a[i]);
       if (tmp > 0)
-	found_pos = 1;
+	found_pos = true;
       else if (tmp < 0)
-	found_neg = 1;
+	found_neg = true;
+      if (a[i].rank >= INVALID_CONVERSION)
+	a_invalid = true;
+      if (b[i].rank >= INVALID_CONVERSION)
+	b_invalid = true;
     }
 
-  if (found_pos)
+  /* B will only be considered better than or incomparable to A if
+     they both have invalid entries, or if neither does.  That is, if
+     A has only valid entries, and B has an invalid entry, then A will
+     be considered better than B, even if B happens to be better for
+     some parameter.  */
+  if (a_invalid != b_invalid)
+    {
+      if (a_invalid)
+	return 3;		/* A > B */
+      return 2;			/* A < B */
+    }
+  else if (found_pos)
     {
       if (found_neg)
 	return 1;		/* incomparable */
@@ -4742,7 +4766,8 @@ rank_one_type_parm_set (struct type *parm, struct type *arg, struct value *value
  * Return 0 if they are identical types;
  * Otherwise, return an integer which corresponds to how compatible
  * PARM is to ARG.  The higher the return value, the worse the match.
- * Generally the "bad" conversions are all uniformly assigned a 100.  */
+ * Generally the "bad" conversions are all uniformly assigned
+ * INVALID_CONVERSION.  */
 
 struct rank
 rank_one_type (struct type *parm, struct type *arg, struct value *value)
