@@ -3887,7 +3887,7 @@ open_proc_mem_file (ptid_t ptid)
 			     std::forward_as_tuple (ptid.pid ()),
 			     std::forward_as_tuple (ptid, fd));
 
-  linux_nat_debug_printf ("opened fd %d for lwp %d.%ld\n",
+  linux_nat_debug_printf ("opened fd %d for lwp %d.%ld",
 			  fd, ptid.pid (), ptid.lwp ());
 }
 
@@ -3927,7 +3927,7 @@ linux_proc_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 
   if (ret == -1)
     {
-      linux_nat_debug_printf ("accessing fd %d for pid %d failed: %s (%d)\n",
+      linux_nat_debug_printf ("accessing fd %d for pid %d failed: %s (%d)",
 			      fd, inferior_ptid.pid (),
 			      safe_strerror (errno), errno);
       return TARGET_XFER_EOF;
@@ -3936,7 +3936,7 @@ linux_proc_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
     {
       /* EOF means the address space is gone, the whole process exited
 	 or execed.  */
-      linux_nat_debug_printf ("accessing fd %d for pid %d got EOF\n",
+      linux_nat_debug_printf ("accessing fd %d for pid %d got EOF",
 			      fd, inferior_ptid.pid ());
       return TARGET_XFER_EOF;
     }
