@@ -4,7 +4,7 @@
 #ld:
 #readelf: -wf
 #target: [check_as_cfi]
-#xfail: alpha-*-*ecoff hppa64-*-* tile*-*-* visium-*-*
+#xfail: alpha-*-*ecoff hppa64-*-* tile*-*-* visium-*-* loongarch64-*-*
 
 Contents of the .eh_frame section:
 
