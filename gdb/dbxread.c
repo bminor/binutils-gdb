@@ -1461,23 +1461,33 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 	  switch (p[1])
 	    {
 	    case 'S':
-	      pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
-				VAR_DOMAIN, LOC_STATIC,
-				data_sect_index,
-				psymbol_placement::STATIC,
-				nlist.n_value, psymtab_language,
-				partial_symtabs, objfile);
+	      if (pst != nullptr)
+		pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
+				  VAR_DOMAIN, LOC_STATIC,
+				  data_sect_index,
+				  psymbol_placement::STATIC,
+				  nlist.n_value, psymtab_language,
+				  partial_symtabs, objfile);
+	      else
+		complaint (_("static `%*s' appears to be defined "
+			     "outside of all compilation units"),
+			   sym_len, sym_name);
 	      continue;
 
 	    case 'G':
 	      /* The addresses in these entries are reported to be
 		 wrong.  See the code that reads 'G's for symtabs.  */
-	      pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
-				VAR_DOMAIN, LOC_STATIC,
-				data_sect_index,
-				psymbol_placement::GLOBAL,
-				nlist.n_value, psymtab_language,
-				partial_symtabs, objfile);
+	      if (pst != nullptr)
+		pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
+				  VAR_DOMAIN, LOC_STATIC,
+				  data_sect_index,
+				  psymbol_placement::GLOBAL,
+				  nlist.n_value, psymtab_language,
+				  partial_symtabs, objfile);
+	      else
+		complaint (_("global `%*s' appears to be defined "
+			     "outside of all compilation units"),
+			   sym_len, sym_name);
 	      continue;
 
 	    case 'T':
@@ -1491,19 +1501,30 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 		  || (p == namestring + 1
 		      && namestring[0] != ' '))
 		{
-		  pst->add_psymbol (gdb::string_view (sym_name, sym_len),
-				    true, STRUCT_DOMAIN, LOC_TYPEDEF, -1,
-				    psymbol_placement::STATIC,
-				    0, psymtab_language,
-				    partial_symtabs, objfile);
+		  if (pst != nullptr)
+		    pst->add_psymbol (gdb::string_view (sym_name, sym_len),
+				      true, STRUCT_DOMAIN, LOC_TYPEDEF, -1,
+				      psymbol_placement::STATIC,
+				      0, psymtab_language,
+				      partial_symtabs, objfile);
+		  else
+		    complaint (_("enum, struct, or union `%*s' appears "
+				 "to be defined outside of all "
+				 "compilation units"),
+			       sym_len, sym_name);
 		  if (p[2] == 't')
 		    {
 		      /* Also a typedef with the same name.  */
-		      pst->add_psymbol (gdb::string_view (sym_name, sym_len),
-					true, VAR_DOMAIN, LOC_TYPEDEF, -1,
-					psymbol_placement::STATIC,
-					0, psymtab_language,
-					partial_symtabs, objfile);
+		      if (pst != nullptr)
+			pst->add_psymbol (gdb::string_view (sym_name, sym_len),
+					  true, VAR_DOMAIN, LOC_TYPEDEF, -1,
+					  psymbol_placement::STATIC,
+					  0, psymtab_language,
+					  partial_symtabs, objfile);
+		      else
+			complaint (_("typedef `%*s' appears to be defined "
+				     "outside of all compilation units"),
+				   sym_len, sym_name);
 		      p += 1;
 		    }
 		}
@@ -1512,11 +1533,16 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 	    case 't':
 	      if (p != namestring)	/* a name is there, not just :T...  */
 		{
-		  pst->add_psymbol (gdb::string_view (sym_name, sym_len),
-				    true, VAR_DOMAIN, LOC_TYPEDEF, -1,
-				    psymbol_placement::STATIC,
-				    0, psymtab_language,
-				    partial_symtabs, objfile);
+		  if (pst != nullptr)
+		    pst->add_psymbol (gdb::string_view (sym_name, sym_len),
+				      true, VAR_DOMAIN, LOC_TYPEDEF, -1,
+				      psymbol_placement::STATIC,
+				      0, psymtab_language,
+				      partial_symtabs, objfile);
+		  else
+		    complaint (_("typename `%*s' appears to be defined "
+				 "outside of all compilation units"),
+			       sym_len, sym_name);
 		}
 	    check_enum:
 	      /* If this is an enumerated type, we need to
@@ -1574,11 +1600,16 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 			;
 		      /* Note that the value doesn't matter for
 			 enum constants in psymtabs, just in symtabs.  */
-		      pst->add_psymbol (gdb::string_view (p, q - p), true,
-					VAR_DOMAIN, LOC_CONST, -1,
-					psymbol_placement::STATIC, 0,
-					psymtab_language,
-					partial_symtabs, objfile);
+		      if (pst != nullptr)
+			pst->add_psymbol (gdb::string_view (p, q - p), true,
+					  VAR_DOMAIN, LOC_CONST, -1,
+					  psymbol_placement::STATIC, 0,
+					  psymtab_language,
+					  partial_symtabs, objfile);
+		      else
+			complaint (_("enum constant `%*s' appears to be defined "
+				     "outside of all compilation units"),
+				   ((int) (q - p)), p);
 		      /* Point past the name.  */
 		      p = q;
 		      /* Skip over the value.  */
@@ -1593,11 +1624,17 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 
 	    case 'c':
 	      /* Constant, e.g. from "const" in Pascal.  */
-	      pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
-				VAR_DOMAIN, LOC_CONST, -1,
-				psymbol_placement::STATIC, 0,
-				psymtab_language,
-				partial_symtabs, objfile);
+	      if (pst != nullptr)
+		pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
+				  VAR_DOMAIN, LOC_CONST, -1,
+				  psymbol_placement::STATIC, 0,
+				  psymtab_language,
+				  partial_symtabs, objfile);
+	      else
+		complaint (_("constant `%*s' appears to be defined "
+			     "outside of all compilation units"),
+			   sym_len, sym_name);
+
 	      continue;
 
 	    case 'f':
@@ -1644,12 +1681,13 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 		  pst->set_text_low (nlist.n_value);
 		  textlow_not_set = 0;
 		}
-	      pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
-				VAR_DOMAIN, LOC_BLOCK,
-				SECT_OFF_TEXT (objfile),
-				psymbol_placement::STATIC,
-				nlist.n_value, psymtab_language,
-				partial_symtabs, objfile);
+	      if (pst != nullptr)
+		pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
+				  VAR_DOMAIN, LOC_BLOCK,
+				  SECT_OFF_TEXT (objfile),
+				  psymbol_placement::STATIC,
+				  nlist.n_value, psymtab_language,
+				  partial_symtabs, objfile);
 	      continue;
 
 	      /* Global functions were ignored here, but now they
@@ -1699,12 +1737,13 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 		  pst->set_text_low (nlist.n_value);
 		  textlow_not_set = 0;
 		}
-	      pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
-				VAR_DOMAIN, LOC_BLOCK,
-				SECT_OFF_TEXT (objfile),
-				psymbol_placement::GLOBAL,
-				nlist.n_value, psymtab_language,
-				partial_symtabs, objfile);
+	      if (pst != nullptr)
+		pst->add_psymbol (gdb::string_view (sym_name, sym_len), true,
+				  VAR_DOMAIN, LOC_BLOCK,
+				  SECT_OFF_TEXT (objfile),
+				  psymbol_placement::GLOBAL,
+				  nlist.n_value, psymtab_language,
+				  partial_symtabs, objfile);
 	      continue;
 
 	      /* Two things show up here (hopefully); static symbols of
