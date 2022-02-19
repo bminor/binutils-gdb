@@ -4001,8 +4001,10 @@ not documented.'' is used.
 @defun Command.dont_repeat ()
 By default, a @value{GDBN} command is repeated when the user enters a
 blank line at the command prompt.  A command can suppress this
-behavior by invoking the @code{dont_repeat} method.  This is similar
-to the user command @code{dont-repeat}, see @ref{Define, dont-repeat}.
+behavior by invoking the @code{dont_repeat} method at some point in
+its @code{invoke} method (normally this is done early in case of
+exception).  This is similar to the user command @code{dont-repeat},
+see @ref{Define, dont-repeat}.
 @end defun
 
 @defun Command.invoke (argument, from_tty)
