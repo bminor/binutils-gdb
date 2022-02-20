@@ -129,6 +129,10 @@ verbose "using GDBFLAGS = $GDBFLAGS" 2
 set BUILD_DATA_DIRECTORY "[pwd]/../data-directory"
 
 # INTERNAL_GDBFLAGS contains flags that the testsuite requires.
+# `-nw' disables any of the windowed interfaces.
+# `-nx' disables ~/.gdbinit, so that it doesn't interfere with the tests.
+# `-data-directory' points to the data directory in the build directory.
+# `-iex "set {height,width} 0"' disables pagination.
 global INTERNAL_GDBFLAGS
 if ![info exists INTERNAL_GDBFLAGS] {
     set INTERNAL_GDBFLAGS \
