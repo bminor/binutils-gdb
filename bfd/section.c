@@ -551,9 +551,14 @@ CODE_FRAGMENT
 .    struct bfd_section *s;
 .    const char *linked_to_symbol_name;
 .  } map_head, map_tail;
-. {* Points to the output section this section is already assigned to, if any.
-.    This is used when support for non-contiguous memory regions is enabled.  *}
-. struct bfd_section *already_assigned;
+.
+.  {* Points to the output section this section is already assigned to,
+.     if any.  This is used when support for non-contiguous memory
+.     regions is enabled.  *}
+.  struct bfd_section *already_assigned;
+.
+.  {* Explicitly specified section type, if non-zero.  *}
+.  unsigned int type;
 .
 .} asection;
 .
@@ -738,7 +743,7 @@ CODE_FRAGMENT
 .     (struct bfd_symbol *) SYM, &SEC.symbol,				\
 .									\
 .  {* map_head, map_tail, already_assigned, type                     *}	\
-.     { NULL }, { NULL }, NULL, 0						\
+.     { NULL }, { NULL }, NULL,             0				\
 .									\
 .    }
 .
