@@ -12,7 +12,7 @@
 
 Sections:
 Idx Name          Size      VMA               LMA               File off  Algn
-  0 \.rela\.dyn     00000030  0000000000000000  0000000000000000  00010000  2\*\*3
+  0 \.rela\.dyn     00000030  0000000000000000  0000000000000000  00010000  .*
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
   .* \.got .*
 .*

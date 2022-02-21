@@ -23,7 +23,7 @@ Disassembly of section .got:
 
 Disassembly of section .data:
 
-.* <str>:
+0000000000010360 <str>:
 .*:	6c6c6548 	.*
 .*:	6874206f 	.*
 .*:	20657265 	.*
@@ -34,11 +34,11 @@ Disassembly of section .data:
 			.*: R_AARCH64_RELATIVE	\*ABS\*\+.*
 
 .* <ptr>:
-.*:	00010350 	.*
+.*:	00010360 	.*
 	...
 
 .* <cap>:
-.*:	00010350 	.*
+.*:	00010360 	.*
 			.*: R_MORELLO_RELATIVE	\*ABS\*
 .*:	00000000 	.*
 .*:	0000001b 	.*

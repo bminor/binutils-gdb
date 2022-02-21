@@ -20,37 +20,37 @@ Disassembly of section \.inspectionsection:
 
 [0-9a-f]+ <ct_outer_start>:
 .*:	[0-9a-f]+ 	.*
-			.*: R_MORELLO_RELATIVE	\*ABS\*\+0x[0-9a-f]+
+			.*: R_MORELLO_RELATIVE	\*ABS\*
 .*:	00000000 	.*
-.*:	00000270 	.*
+.*:	00000278 	.*
 .*:	04000000 	.*
 
 [0-9a-f]+ <ct_start>:
 .*:	[0-9a-f]+ 	.*
-			.*: R_MORELLO_RELATIVE	\*ABS\*\+0x[0-9a-f]+
+			.*: R_MORELLO_RELATIVE	\*ABS\*
 .*:	00000000 	.*
-.*:	00000270 	.*
+.*:	00000278 	.*
 .*:	04000000 	.*
 
 [0-9a-f]+ <ct1_start>:
 .*:	[0-9a-f]+ 	.*
 			.*: R_MORELLO_RELATIVE	\*ABS\*\+0x[0-9a-f]+
 .*:	00000000 	.*
-.*:	00000270 	.*
+.*:	00000278 	.*
 .*:	04000000 	.*
 
 [0-9a-f]+ <ct1_end>:
 .*:	[0-9a-f]+ 	.*
 			.*: R_MORELLO_RELATIVE	\*ABS\*\+0x[0-9a-f]+
 .*:	00000000 	.*
-.*:	00000270 	.*
+.*:	00000278 	.*
 .*:	04000000 	.*
 
 [0-9a-f]+ <ct_end>:
 .*:	[0-9a-f]+ 	.*
 			.*: R_MORELLO_RELATIVE	\*ABS\*\+0x[0-9a-f]+
 .*:	00000000 	.*
-.*:	00000270 	.*
+.*:	00000278 	.*
 .*:	04000000 	.*
 
 [0-9a-f]+ <cd_outer_start>:

@@ -9,21 +9,21 @@
 Disassembly of section .data:
 
 [0-9a-f]+ <ptr3>:
-   [0-9a-f]+:	00010440.*
+   [0-9a-f]+:	00010450.*
 			[0-9a-f]+: R_MORELLO_RELATIVE	\*ABS\*
    [0-9a-f]+:	00000000.*
    [0-9a-f]+:	00000000.*
    [0-9a-f]+:	02000000.*
 
 [0-9a-f]+ <ptr2>:
-   [0-9a-f]+:	00010444.*
+   [0-9a-f]+:	00010454.*
 			[0-9a-f]+: R_MORELLO_RELATIVE	\*ABS\*
    [0-9a-f]+:	00000000.*
    [0-9a-f]+:	00000000.*
    [0-9a-f]+:	02000000.*
 
 [0-9a-f]+ <ptr1>:
-   [0-9a-f]+:	00010448.*
+   [0-9a-f]+:	00010458.*
 			[0-9a-f]+: R_MORELLO_RELATIVE	\*ABS\*
    [0-9a-f]+:	00000000.*
    [0-9a-f]+:	00000000.*
@@ -31,7 +31,7 @@ Disassembly of section .data:
 
 Disassembly of section .bss:
 
-0000000000010440 <baz>:
+0000000000010450 <baz>:
    [0-9a-f]+:	00000000.*
 
 [0-9a-f]+ <bar>:

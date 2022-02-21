@@ -12,13 +12,13 @@
 #
 # Point here is that the __text_start and __data_other symbols should end up
 # pointing into the text section, which should mean that they have PCC bounds
-# and their value includes an addend.  These are the symbols used in the first
-# and last LDR's in the function.
+# and the value of the __data_other symbol should include an addend.  These are
+# the symbols used in the first and last LDR's in the function.
 #
 # Meanwhile, the __text_other symbol should have bounds of everything remaining
 # in the section *before* it (which is nothing), and the __data_start symbol
-# should have bounds spanning the entire section *after* it (which is the data
-# section).
+# should have bounds spanning the entire section *after* it (which happens to
+# be the .interp section).
 #
 #source: emit-relocs-morello-7.s
 #as: -march=morello+c64
@@ -30,7 +30,7 @@
 
 Disassembly of section \.text:
 
-.* <obj>:
+0000000000000230 <obj>:
 .*:	c2400400 	ldr	c0, \[c0, #16\]
 .*:	c2401000 	ldr	c0, \[c0, #64\]
 .*:	c2400c00 	ldr	c0, \[c0, #48\]
@@ -44,24 +44,24 @@ Disassembly of section \.data:
 Disassembly of section \.got:
 
 0000000000001000 <\.got>:
-    1000:	00000120 	.*
+    1000:	[0-9a-f]+ 	.*
 	\.\.\.
-    1010:	000001e8 	.*
-			1010: R_MORELLO_RELATIVE	\*ABS\*\+0x38
+    1010:	00000230 	.*
+			1010: R_MORELLO_RELATIVE	\*ABS\*
     1014:	00000000 	.*
-    1018:	00000e68 	.*
+    1018:	00000e20 	.*
     101c:	04000000 	.*
-    1020:	000001e8 	.*
-			1020: R_MORELLO_RELATIVE	\*ABS\*\+0x48
+    1020:	00000230 	.*
+			1020: R_MORELLO_RELATIVE	\*ABS\*\+0x10
     1024:	00000000 	.*
-    1028:	00000e68 	.*
+    1028:	00000e20 	.*
     102c:	04000000 	.*
-    1030:	00000230 	.*
+    1030:	00000240 	.*
 			1030: R_MORELLO_RELATIVE	\*ABS\*
     1034:	00000000 	.*
     1038:	0000000d 	.*
     103c:	01000000 	.*
-    1040:	00000220 	.*
+    1040:	00000230 	.*
 			1040: R_MORELLO_RELATIVE	\*ABS\*
 	\.\.\.
     104c:	02000000 	.*
