@@ -401,7 +401,7 @@ elfNN_loongarch_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
     }
 
   /* Disallow linking different ABIs.  */
-  if ((out_flags ^ in_flags) & EF_LOONGARCH_ABI)
+  if (EF_LOONGARCH_ABI(out_flags ^ in_flags) & EF_LOONGARCH_ABI_MASK)
     {
       _bfd_error_handler (_("%pB: can't link different ABI object."), ibfd);
       goto fail;
