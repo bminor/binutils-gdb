@@ -4899,6 +4899,7 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
   struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
   bfd_vma low = (bfd_vma) -1, high = 0;
   bfd *input_bfd;
+  unsigned align = 0;
 
   htab->layout_sections_again = layout_sections_again;
 
@@ -5030,7 +5031,6 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
      and whether they need to be padded or aligned.  */
   while (queue)
     {
-      unsigned align = 0;
       bfd_vma padding = 0;
 
       low = queue->sec->vma;
@@ -5049,30 +5049,6 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
       if (queue->sec->alignment_power < align)
 	queue->sec->alignment_power = align;
 
-      /* If we have crossed all sections within the PCC range, set up alignment
-         and padding for the PCC range.  */
-      if (pcc_high_sec != NULL && pcc_low_sec != NULL
-	  && (queue->next == NULL
-	      || queue->next->sec->vma > pcc_high_sec->vma))
-	{
-	  /* Layout sections since it affects the final range of PCC.  */
-	  (*htab->layout_sections_again) ();
-
-	  pcc_low = pcc_low_sec->vma;
-	  pcc_high = pcc_high_sec->vma + pcc_high_sec->size + padding;
-
-	  if (!c64_valid_cap_range (&pcc_low, &pcc_high, &align))
-	    {
-	      bfd_vma current_length =
-		(pcc_high_sec->vma + pcc_high_sec->size) - pcc_low_sec->vma;
-	      bfd_vma desired_length = (pcc_high - pcc_low);
-	      padding = desired_length - current_length;
-	      c64_pad_section (pcc_high_sec, padding);
-	    }
-	  if (pcc_low_sec->alignment_power < align)
-	    pcc_low_sec->alignment_power = align;
-	}
-
       (*htab->layout_sections_again) ();
 
       struct sec_change_queue *queue_free = queue;
@@ -5081,10 +5057,56 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
       free (queue_free);
     }
 
-  if (pcc_low_sec)
+  /* Always ensure that the PCC range has precise Morello bounds.
+     Whether or not there are any individual sections that need to be adjusted
+     to give precise bounds.  */
+  if (pcc_low_sec != NULL)
     {
-      if (!pcc_high_sec)
-	abort ();
+      BFD_ASSERT (pcc_high_sec);
+
+      bfd_vma pcc_low_tmp;
+      bfd_vma pcc_high_tmp;
+
+      /* We have to be a little careful about the padding we introduce.  The
+	 padding we could calculate here may not be the padding that we would
+	 want after the very first section in the PCC bounds has been aligned
+	 properly.  That change in the start address propagated through a few
+	 different sections with their own alignment requirements can easily
+	 change the length of the region we want the PCC to span.
+	 Even more tricky, that change in length could change the alignment we
+	 want.  We don't proove that the alignment requirement converges,
+	 but believe that it should (there is only so much space that existing
+	 alignment requirements could trigger to be added -- a section with an
+	 alignment requirement of 16 can only really add 15 bytes to the
+	 length).  */
+      bfd_boolean valid_range = FALSE;
+      while (TRUE) {
+	  pcc_low_tmp = pcc_low_sec->vma;
+	  pcc_high_tmp = pcc_high_sec->vma + pcc_high_sec->size;
+	  valid_range =
+	    c64_valid_cap_range (&pcc_low_tmp, &pcc_high_tmp, &align);
+	  if (pcc_low_sec->alignment_power >= align)
+	    break;
+	  pcc_low_sec->alignment_power = align;
+	  (*htab->layout_sections_again) ();
+      }
+
+      /* We have calculated the bottom and top address that we want in the
+	 above call to c64_valid_cap_range.  We have also aligned the lowest
+	 section in the PCC range to where we want it.  Just have to add the
+	 padding remaining if needs be.  */
+      if (!valid_range)
+	{
+	  BFD_ASSERT (pcc_low_tmp == pcc_low_sec->vma);
+	  bfd_vma current_length =
+	    (pcc_high_sec->vma + pcc_high_sec->size) - pcc_low_sec->vma;
+	  bfd_vma desired_length = (pcc_high_tmp - pcc_low_tmp);
+	  bfd_vma padding = desired_length - current_length;
+	  c64_pad_section (pcc_high_sec, padding);
+	}
+      /* Layout sections since it affects the final range of PCC.  */
+      (*htab->layout_sections_again) ();
+
       pcc_low = pcc_low_sec->vma;
       pcc_high = pcc_high_sec->vma + pcc_high_sec->size;
     }

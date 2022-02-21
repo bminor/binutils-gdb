@@ -13,7 +13,7 @@ Idx Name          Size      VMA               LMA               File off  Algn
                   CONTENTS, ALLOC, LOAD, DATA
   3 \.got\.plt      00000030  00000000000081b0  [0-9a-f]+  [0-9a-f]+  2\*\*4
                   CONTENTS, ALLOC, LOAD, DATA
-  4 \.rela\.dyn     000000b8  00000000000081e0  [0-9a-f]+  [0-9a-f]+  2\*\*3
+  4 \.rela\.dyn     00000030  00000000000081e0  [0-9a-f]+  [0-9a-f]+  2\*\*3
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
 #pass
 
