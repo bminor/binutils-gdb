@@ -25,6 +25,7 @@
 #include "elf/loongarch.h"
 #include "opcode/loongarch.h"
 #include "obj-elf.h"
+#include "bfd/elfxx-loongarch.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -1068,13 +1069,29 @@ md_pcrel_from (fixS *fixP ATTRIBUTE_UNUSED)
   return 0;
 }
 
+static void fix_reloc_insn (fixS *fixP, bfd_vma reloc_val, char *buf)
+{
+  reloc_howto_type *howto;
+  insn_t insn;
+  howto = bfd_reloc_type_lookup (stdoutput, fixP->fx_r_type);
+
+  insn = bfd_getl32 (buf);
+
+  if (!loongarch_adjust_reloc_bitsfield(howto, &reloc_val))
+    as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
+
+  insn = (insn & (insn_t)howto->src_mask)
+    | ((insn & (~(insn_t)howto->dst_mask)) | reloc_val);
+
+  bfd_putl32 (insn, buf);
+}
+
 void
 md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   static int64_t stack_top;
   static int last_reloc_is_sop_push_pcrel_1 = 0;
   int last_reloc_is_sop_push_pcrel = last_reloc_is_sop_push_pcrel_1;
-  insn_t insn;
   last_reloc_is_sop_push_pcrel_1 = 0;
 
   char *buf = fixP->fx_frag->fr_literal + fixP->fx_where;
@@ -1083,17 +1100,17 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_LARCH_SOP_PUSH_TLS_TPREL:
     case BFD_RELOC_LARCH_SOP_PUSH_TLS_GD:
     case BFD_RELOC_LARCH_SOP_PUSH_TLS_GOT:
-      if (fixP->fx_addsy)
-	S_SET_THREAD_LOCAL (fixP->fx_addsy);
-      else
-	as_bad_where (fixP->fx_file, fixP->fx_line,
-		      _("Relocation against a constant"));
-      break;
     case BFD_RELOC_LARCH_SOP_PUSH_PCREL:
     case BFD_RELOC_LARCH_SOP_PUSH_PLT_PCREL:
       if (fixP->fx_addsy == NULL)
 	as_bad_where (fixP->fx_file, fixP->fx_line,
 		      _("Relocation against a constant"));
+
+      if (fixP->fx_r_type == BFD_RELOC_LARCH_SOP_PUSH_TLS_TPREL
+	  || fixP->fx_r_type == BFD_RELOC_LARCH_SOP_PUSH_TLS_GD
+	  || fixP->fx_r_type == BFD_RELOC_LARCH_SOP_PUSH_TLS_GOT)
+	S_SET_THREAD_LOCAL (fixP->fx_addsy);
+
       if (fixP->fx_r_type == BFD_RELOC_LARCH_SOP_PUSH_PCREL)
 	{
 	  last_reloc_is_sop_push_pcrel_1 = 1;
@@ -1106,111 +1123,18 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       break;
 
     case BFD_RELOC_LARCH_SOP_POP_32_S_10_5:
-      if (!last_reloc_is_sop_push_pcrel)
-	break;
-      if ((stack_top & ~(uint64_t) 0xf) != 0x0
-	  && (stack_top & ~(uint64_t) 0xf) != ~(uint64_t) 0xf)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
-      insn = bfd_getl32 (buf);
-      insn = (insn & (~(uint32_t) 0x7c00)) | ((stack_top & 0x1f) << 10);
-      bfd_putl32 (insn, buf);
-      break;
-
-    case BFD_RELOC_LARCH_SOP_POP_32_U_10_12:
-      if (!last_reloc_is_sop_push_pcrel)
-	break;
-      if (stack_top & ~(uint64_t) 0xfff)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
-      insn = bfd_getl32 (buf);
-      insn = (insn & (~(uint32_t) 0x3ffc00)) | ((stack_top & 0xfff) << 10);
-      bfd_putl32 (insn, buf);
-      break;
-
     case BFD_RELOC_LARCH_SOP_POP_32_S_10_12:
-      if (!last_reloc_is_sop_push_pcrel)
-	break;
-      if ((stack_top & ~(uint64_t) 0x7ff) != 0x0
-	  && (stack_top & ~(uint64_t) 0x7ff) != ~(uint64_t) 0x7ff)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
-      insn = bfd_getl32 (buf);
-      insn = (insn & (~(uint32_t) 0x3ffc00)) | ((stack_top & 0xfff) << 10);
-      bfd_putl32 (insn, buf);
-      break;
-
+    case BFD_RELOC_LARCH_SOP_POP_32_U_10_12:
     case BFD_RELOC_LARCH_SOP_POP_32_S_10_16:
-      if (!last_reloc_is_sop_push_pcrel)
-	break;
-      if ((stack_top & ~(uint64_t) 0x7fff) != 0x0
-	  && (stack_top & ~(uint64_t) 0x7fff) != ~(uint64_t) 0x7fff)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
-      insn = bfd_getl32 (buf);
-      insn = (insn & 0xfc0003ff) | ((stack_top & 0xffff) << 10);
-      bfd_putl32 (insn, buf);
-      break;
-
     case BFD_RELOC_LARCH_SOP_POP_32_S_10_16_S2:
-      if (!last_reloc_is_sop_push_pcrel)
-	break;
-      if ((stack_top & 0x3) != 0)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
-      stack_top >>= 2;
-      if ((stack_top & ~(uint64_t) 0x7fff) != 0x0
-	  && (stack_top & ~(uint64_t) 0x7fff) != ~(uint64_t) 0x7fff)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
-      insn = bfd_getl32 (buf);
-      insn = (insn & 0xfc0003ff) | ((stack_top & 0xffff) << 10);
-      bfd_putl32 (insn, buf);
-      break;
-
-    case BFD_RELOC_LARCH_SOP_POP_32_S_0_5_10_16_S2:
-      if (!last_reloc_is_sop_push_pcrel)
-	break;
-      if ((stack_top & 0x3) != 0)
-	break;
-      stack_top >>= 2;
-      if ((stack_top & ~(uint64_t) 0xfffff) != 0x0
-	  && (stack_top & ~(uint64_t) 0xfffff) != ~(uint64_t) 0xfffff)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
-      insn = bfd_getl32 (buf);
-      insn = ((insn & 0xfc0003e0)
-	      | ((stack_top & 0xffff) << 10)
-	      | ((stack_top & 0x1f0000) >> 16));
-      bfd_putl32 (insn, buf);
-      break;
-
     case BFD_RELOC_LARCH_SOP_POP_32_S_5_20:
-      if (!last_reloc_is_sop_push_pcrel)
-	break;
-      if ((stack_top & ~(uint64_t) 0x7ffff) != 0x0
-	  && (stack_top & ~(uint64_t) 0x7ffff) != ~(uint64_t) 0x7ffff)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
-      insn = bfd_getl32 (buf);
-      insn = (insn & (~(uint32_t) 0x1ffffe0)) | ((stack_top & 0xfffff) << 5);
-      bfd_putl32 (insn, buf);
-      break;
-
+    case BFD_RELOC_LARCH_SOP_POP_32_U:
+    case BFD_RELOC_LARCH_SOP_POP_32_S_0_5_10_16_S2:
     case BFD_RELOC_LARCH_SOP_POP_32_S_0_10_10_16_S2:
       if (!last_reloc_is_sop_push_pcrel)
 	break;
-      if ((stack_top & 0x3) != 0)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
-      stack_top >>= 2;
-      if ((stack_top & ~(uint64_t) 0x1ffffff) != 0x0
-	  && (stack_top & ~(uint64_t) 0x1ffffff) != ~(uint64_t) 0x1ffffff)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
-      insn = bfd_getl32 (buf);
-      insn = ((insn & 0xfc000000)
-	      | ((stack_top & 0xffff) << 10)
-	      | ((stack_top & 0x3ff0000) >> 16));
-      bfd_putl32 (insn, buf);
-      break;
 
-    case BFD_RELOC_LARCH_SOP_POP_32_U:
-      if (!last_reloc_is_sop_push_pcrel)
-	break;
-      if (stack_top & ~(uint64_t) 0xffffffff)
-	as_warn_where (fixP->fx_file, fixP->fx_line, "Reloc overflow");
-      bfd_putl32 (stack_top, buf);
+      fix_reloc_insn (fixP, (bfd_vma)stack_top, buf);
       break;
 
     case BFD_RELOC_64:
