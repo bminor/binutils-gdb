@@ -4872,7 +4872,8 @@ record_section_change (asection *sec, struct sec_change_queue **queue)
   bfd_vma high = sec->vma + sec->size;
   unsigned alignment;
 
-  if (!c64_valid_cap_range (&low, &high, &alignment))
+  if (!c64_valid_cap_range (&low, &high, &alignment)
+      || sec->alignment_power < alignment)
     queue_section_padding (queue, sec);
 }
 
@@ -5037,9 +5038,6 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 
       if (!c64_valid_cap_range (&low, &high, &align))
 	{
-	  if (queue->sec->alignment_power < align)
-	    queue->sec->alignment_power = align;
-
 	  padding = high - low - queue->sec->size;
 
 	  if (queue->sec != pcc_high_sec)
@@ -5048,6 +5046,8 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 	      padding = 0;
 	    }
 	}
+      if (queue->sec->alignment_power < align)
+	queue->sec->alignment_power = align;
 
       /* If we have crossed all sections within the PCC range, set up alignment
          and padding for the PCC range.  */
@@ -5063,15 +5063,14 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 
 	  if (!c64_valid_cap_range (&pcc_low, &pcc_high, &align))
 	    {
-	      if (pcc_low_sec->alignment_power < align)
-		pcc_low_sec->alignment_power = align;
-
 	      bfd_vma current_length =
 		(pcc_high_sec->vma + pcc_high_sec->size) - pcc_low_sec->vma;
 	      bfd_vma desired_length = (pcc_high - pcc_low);
 	      padding = desired_length - current_length;
 	      c64_pad_section (pcc_high_sec, padding);
 	    }
+	  if (pcc_low_sec->alignment_power < align)
+	    pcc_low_sec->alignment_power = align;
 	}
 
       (*htab->layout_sections_again) ();
