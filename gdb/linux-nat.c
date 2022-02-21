@@ -2776,45 +2776,50 @@ linux_nat_filter_event (int lwpid, int status)
 
   lp = find_lwp_pid (ptid_t (lwpid));
 
-  /* Check for stop events reported by a process we didn't already
-     know about - anything not already in our LWP list.
-
-     If we're expecting to receive stopped processes after
-     fork, vfork, and clone events, then we'll just add the
-     new one to our list and go back to waiting for the event
-     to be reported - the stopped process might be returned
-     from waitpid before or after the event is.
-
-     But note the case of a non-leader thread exec'ing after the
-     leader having exited, and gone from our lists.  The non-leader
-     thread changes its tid to the tgid.  */
-
-  if (WIFSTOPPED (status) && lp == NULL
-      && (WSTOPSIG (status) == SIGTRAP && event == PTRACE_EVENT_EXEC))
+  /* Check for events reported by anything not in our LWP list.  */
+  if (lp == nullptr)
     {
-      /* A multi-thread exec after we had seen the leader exiting.  */
-      linux_nat_debug_printf ("Re-adding thread group leader LWP %d.", lwpid);
+      if (WIFSTOPPED (status))
+	{
+	  if (WSTOPSIG (status) == SIGTRAP && event == PTRACE_EVENT_EXEC)
+	    {
+	      /* A non-leader thread exec'ed after we've seen the
+		 leader zombie, and removed it from our lists (in
+		 check_zombie_leaders).  The non-leader thread changes
+		 its tid to the tgid.  */
+	      linux_nat_debug_printf
+		("Re-adding thread group leader LWP %d after exec.",
+		 lwpid);
 
-      lp = add_lwp (ptid_t (lwpid, lwpid));
-      lp->stopped = 1;
-      lp->resumed = 1;
-      add_thread (linux_target, lp->ptid);
+	      lp = add_lwp (ptid_t (lwpid, lwpid));
+	      lp->stopped = 1;
+	      lp->resumed = 1;
+	      add_thread (linux_target, lp->ptid);
+	    }
+	  else
+	    {
+	      /* A process we are controlling has forked and the new
+		 child's stop was reported to us by the kernel.  Save
+		 its PID and go back to waiting for the fork event to
+		 be reported - the stopped process might be returned
+		 from waitpid before or after the fork event is.  */
+	      linux_nat_debug_printf
+		("Saving LWP %d status %s in stopped_pids list",
+		 lwpid, status_to_str (status).c_str ());
+	      add_to_pid_list (&stopped_pids, lwpid, status);
+	    }
+	}
+      else
+	{
+	  /* Don't report an event for the exit of an LWP not in our
+	     list, i.e. not part of any inferior we're debugging.
+	     This can happen if we detach from a program we originally
+	     forked and then it exits.  */
+	}
+
+      if (lp == nullptr)
+	return;
     }
-
-  if (WIFSTOPPED (status) && !lp)
-    {
-      linux_nat_debug_printf ("saving LWP %ld status %s in stopped_pids list",
-			      (long) lwpid, status_to_str (status).c_str ());
-      add_to_pid_list (&stopped_pids, lwpid, status);
-      return;
-    }
-
-  /* Make sure we don't report an event for the exit of an LWP not in
-     our list, i.e. not part of the current process.  This can happen
-     if we detach from a program we originally forked and then it
-     exits.  */
-  if (!WIFSTOPPED (status) && !lp)
-    return;
 
   /* This LWP is stopped now.  (And if dead, this prevents it from
      ever being continued.)  */
