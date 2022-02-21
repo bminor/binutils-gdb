@@ -8,7 +8,7 @@
 # should get this compatibility hack (and some linker script defined symbols
 # that should not get the compatibility hack).
 .arch morello+c64
-  .section othersection,"aw"
+  .section .othersection,"aw",@progbits
   .asciz "Hello there ;-)"
   .data
   .word 10

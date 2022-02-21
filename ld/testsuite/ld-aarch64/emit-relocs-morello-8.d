@@ -12,7 +12,7 @@ Disassembly of section \.data\.rel\.ro:
 
 0.* <\.LC1>:
    .*:	00001000 	udf	#4096
-			101e0: R_MORELLO_RELATIVE	\*ABS\*
+			[0-9a-f]+: R_MORELLO_RELATIVE	\*ABS\*
    .*:	00000000 	udf	#0
    .*:	00000004 	udf	#4
    .*:	02000000 	add	c0, c0, #0x0
