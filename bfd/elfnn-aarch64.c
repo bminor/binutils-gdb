@@ -4828,53 +4828,33 @@ c64_valid_cap_range (bfd_vma *basep, bfd_vma *limitp, unsigned *alignmentp)
   return FALSE;
 }
 
-struct sec_change_queue
-{
-  asection *sec;
-  struct sec_change_queue *next;
-};
-
-/* Queue up the change, sorted in order of the output section vma.  */
-
-static void
-queue_section_padding (struct sec_change_queue **queue, asection *sec)
-{
-  struct sec_change_queue *q = *queue, *last_q = NULL, *n;
-
-  while (q != NULL)
-    {
-      if (q->sec->vma > sec->vma)
-	break;
-      last_q = q;
-      q = q->next;
-    }
-
-  n = bfd_zmalloc (sizeof (struct sec_change_queue));
-
-  if (last_q == NULL)
-    *queue = n;
-  else
-    {
-      n->next = q;
-      last_q->next = n;
-    }
-
-  n->sec = sec;
-}
-
-/* Check if the bounds covering all sections between LOW_SEC and HIGH_SEC will
-   get rounded off in the Morello capability format and if it does, queue up a
-   change to fix up the section layout.  */
+/* Check if the bounds of section SEC will get rounded off in the Morello
+   capability format and if it would, adjust the section to ensure any
+   capability spanning this section would have its bounds precise.  */
 static inline void
-record_section_change (asection *sec, struct sec_change_queue **queue)
+ensure_precisely_bounded_section (asection *sec,
+				  struct elf_aarch64_link_hash_table *htab,
+				  void (*c64_pad_section) (asection *, bfd_vma))
 {
   bfd_vma low = sec->vma;
   bfd_vma high = sec->vma + sec->size;
   unsigned alignment;
 
-  if (!c64_valid_cap_range (&low, &high, &alignment)
-      || sec->alignment_power < alignment)
-    queue_section_padding (queue, sec);
+  bfd_boolean did_change = FALSE;
+  if (!c64_valid_cap_range (&low, &high, &alignment))
+    {
+      bfd_vma padding = high - low - sec->size;
+      c64_pad_section (sec, padding);
+      did_change = TRUE;
+    }
+  if (sec->alignment_power < alignment)
+    {
+      sec->alignment_power = alignment;
+      did_change = TRUE;
+    }
+
+  if (did_change)
+    (*htab->layout_sections_again) ();
 }
 
 /* Make sure that all capabilities that refer to sections have bounds that
@@ -4910,8 +4890,6 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
   if (!(htab->c64_output
 	|| (elf_elfheader (output_bfd)->e_flags & EF_AARCH64_CHERI_PURECAP)))
     return;
-
-  struct sec_change_queue *queue = NULL;
 
   /* First, walk through all the relocations to find those referring to linker
      defined and ldscript defined symbols since we set their range to their
@@ -4975,7 +4953,7 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 	      os = h->root.u.def.section->output_section;
 
 	      if (h->root.linker_def)
-		record_section_change (os, &queue);
+		ensure_precisely_bounded_section (os, htab, c64_pad_section);
 	      else if (h->root.ldscript_def)
 		{
 		  const char *name = h->root.root.string;
@@ -4991,38 +4969,18 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 						 section_start_symbol, &value);
 
 		      if (os != NULL)
-			record_section_change (os, &queue);
+			ensure_precisely_bounded_section (os, htab,
+							  c64_pad_section);
 		    }
 		  /* XXX We're overfitting here because the offset of H within
 		     the output section is not yet resolved and ldscript
 		     defined symbols do not have input section information.  */
 		  else
-		    record_section_change (os, &queue);
+		    ensure_precisely_bounded_section (os, htab,
+						      c64_pad_section);
 		}
 	    }
 	}
-    }
-
-  /* Sequentially add alignment and padding as required.  */
-  while (queue)
-    {
-      bfd_vma low = queue->sec->vma;
-      bfd_vma high = queue->sec->vma + queue->sec->size;
-
-      if (!c64_valid_cap_range (&low, &high, &align))
-	{
-	  bfd_vma padding = high - low - queue->sec->size;
-	  c64_pad_section (queue->sec, padding);
-	}
-      if (queue->sec->alignment_power < align)
-	queue->sec->alignment_power = align;
-
-      (*htab->layout_sections_again) ();
-
-      struct sec_change_queue *queue_free = queue;
-
-      queue = queue->next;
-      free (queue_free);
     }
 
   /* Next, walk through output sections to find the PCC span and add a padding
