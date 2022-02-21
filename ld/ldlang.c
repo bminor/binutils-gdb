@@ -8371,6 +8371,15 @@ lang_add_assignment (etree_type *exp)
 }
 
 void
+lang_add_assignment_internal (lang_statement_list_type *ptr, etree_type *exp)
+{
+  lang_assignment_statement_type *new_stmt;
+
+  new_stmt = new_stat (lang_assignment_statement, ptr);
+  new_stmt->exp = exp;
+}
+
+void
 lang_add_newdot (lang_statement_list_type *ptr, bfd_vma newdot)
 {
   lang_assignment_statement_type *new_stmt;

@@ -216,7 +216,10 @@ elf64_c64_pad_section (asection *osec, bfd_vma padding)
       lang_output_section_statement_type *os = lang_output_section_get (osec);
 
       lang_list_init (&list);
-      lang_add_newdot (&list, osec->vma + osec->size + padding);
+      lang_add_assignment_internal (&list,
+	    exp_assign (".",
+		exp_binop ('+', exp_nameop (NAME, "."), exp_intop (padding)),
+		FALSE));
 
       if (list.head == NULL)
         {
@@ -224,8 +227,8 @@ elf64_c64_pad_section (asection *osec, bfd_vma padding)
           return;
         }
 
-      *(list.tail) = os->header.next;
-      os->header.next = list.head;
+      *(list.tail) = NULL;
+      *(os->children.tail) = list.head;
     }
 }
 

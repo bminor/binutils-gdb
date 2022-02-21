@@ -561,6 +561,8 @@ extern lang_assignment_statement_type *lang_add_assignment
   (union etree_union *);
 extern void lang_add_attribute
   (enum statement_enum);
+extern void lang_add_assignment_internal
+  (lang_statement_list_type *, etree_type *);
 extern void lang_add_newdot
   (lang_statement_list_type *, bfd_vma);
 extern void lang_startup

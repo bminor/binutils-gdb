@@ -5040,7 +5040,7 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 	  if (queue->sec->alignment_power < align)
 	    queue->sec->alignment_power = align;
 
-	  padding = high - queue->sec->vma - queue->sec->size;
+	  padding = high - low - queue->sec->size;
 
 	  if (queue->sec != pcc_high_sec)
 	    {
@@ -5066,7 +5066,10 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 	      if (pcc_low_sec->alignment_power < align)
 		pcc_low_sec->alignment_power = align;
 
-	      padding = pcc_high - pcc_high_sec->vma - pcc_high_sec->size;
+	      bfd_vma current_length =
+		(pcc_high_sec->vma + pcc_high_sec->size) - pcc_low_sec->vma;
+	      bfd_vma desired_length = (pcc_high - pcc_low);
+	      padding = desired_length - current_length;
 	      c64_pad_section (pcc_high_sec, padding);
 	    }
 	}
