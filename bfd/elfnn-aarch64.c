@@ -4895,15 +4895,20 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 			   void (*c64_pad_section) (asection *, bfd_vma),
 			   void (*layout_sections_again) (void))
 {
-  asection *sec, *pcc_low_sec = NULL, *pcc_high_sec = NULL;
+  asection *sec;
   struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
-  bfd_vma low = (bfd_vma) -1, high = 0;
   bfd *input_bfd;
   unsigned align = 0;
 
   htab->layout_sections_again = layout_sections_again;
 
-  if (!htab->c64_output)
+  /* If this is not a PURECAP binary, and has no C64 code in it, then this is
+     just a stock AArch64 binary and the section padding is not necessary.
+     We can have PURECAP shared libraries that are data-only, so just checking
+     if there is C64 code in this executable is not enough.  We can have HYBRID
+     binaries, so just checking for PURECAP is not enough.  */
+  if (!(htab->c64_output
+	|| (elf_elfheader (output_bfd)->e_flags & EF_AARCH64_CHERI_PURECAP)))
     return;
 
   struct sec_change_queue *queue = NULL;
@@ -4912,7 +4917,18 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
      defined and ldscript defined symbols since we set their range to their
      output sections.  */
   for (input_bfd = info->input_bfds;
-       htab->c64_rel && input_bfd != NULL; input_bfd = input_bfd->link.next)
+       /* No point iterating over all relocations to ensure each section that
+	  needs to give the bounds for a capability is padded accordingly if
+	  there are no capability relocations in the GOT and there are no
+	  CAPINIT relocations.
+	  N.b. It is possible that when creating a dynamic object a
+	  section-spanning symbol could be used by some other executable
+	  linking to it when we don't have a relocation to it in the given
+	  dynamic library.  Rather than pad every section which has a linker
+	  defined symbol pointing into it we choose to allow such use-cases to
+	  have sizes which bleed into another section.  */
+       (htab->c64_rel || htab->srelcaps) && input_bfd != NULL;
+       input_bfd = input_bfd->link.next)
     {
       Elf_Internal_Shdr *symtab_hdr;
 
@@ -4987,10 +5003,48 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 	}
     }
 
+  /* Sequentially add alignment and padding as required.  */
+  while (queue)
+    {
+      bfd_vma low = queue->sec->vma;
+      bfd_vma high = queue->sec->vma + queue->sec->size;
+
+      if (!c64_valid_cap_range (&low, &high, &align))
+	{
+	  bfd_vma padding = high - low - queue->sec->size;
+	  c64_pad_section (queue->sec, padding);
+	}
+      if (queue->sec->alignment_power < align)
+	queue->sec->alignment_power = align;
+
+      (*htab->layout_sections_again) ();
+
+      struct sec_change_queue *queue_free = queue;
+
+      queue = queue->next;
+      free (queue_free);
+    }
+
   /* Next, walk through output sections to find the PCC span and add a padding
      at the end to ensure that PCC bounds don't bleed into neighbouring
      sections.  For now PCC needs to encompass all code sections, .got, .plt
-     and .got.plt.  */
+     and .got.plt.
+     If there is no C64 code in this binary, then we do not need to care about
+     PCC bounds, hence skip this bit.
+     It's tempting to also avoid padding the PCC range when we have no static
+     relocations in this binary, since it would seem that we can never end up
+     trying to access something "outside" the PCC bounds (any PCC bounded
+     capability provided to an outside dynamic object would be sealed by the
+     runtime, and hence can't be offset).  Unfortunately it is still possible,
+     since an `adr c0, 0` gives an unsealed capability to the current code
+     which could then be offset by some other means.
+     While that seems unlikely to happen, having no relocations in a file also
+     seems quite unlikely, so we may as well play it safe.  */
+  if (!htab->c64_output)
+    return;
+
+  bfd_vma low = (bfd_vma) -1, high = 0;
+  asection *pcc_low_sec = NULL, *pcc_high_sec = NULL;
   for (sec = output_bfd->sections; sec != NULL; sec = sec->next)
     {
       /* XXX This is a good place to figure out if there are any readable or
@@ -5025,41 +5079,8 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 #undef NOT_OP_SECTION
     }
 
-  /* Sequentially add alignment and padding as required.  We also need to
-     account for the PCC-related alignment and padding here since its
-     requirements could change based on the range of sections it encompasses
-     and whether they need to be padded or aligned.  */
-  while (queue)
-    {
-      bfd_vma padding = 0;
-
-      low = queue->sec->vma;
-      high = queue->sec->vma + queue->sec->size;
-
-      if (!c64_valid_cap_range (&low, &high, &align))
-	{
-	  padding = high - low - queue->sec->size;
-
-	  if (queue->sec != pcc_high_sec)
-	    {
-	      c64_pad_section (queue->sec, padding);
-	      padding = 0;
-	    }
-	}
-      if (queue->sec->alignment_power < align)
-	queue->sec->alignment_power = align;
-
-      (*htab->layout_sections_again) ();
-
-      struct sec_change_queue *queue_free = queue;
-
-      queue = queue->next;
-      free (queue_free);
-    }
-
-  /* Always ensure that the PCC range has precise Morello bounds.
-     Whether or not there are any individual sections that need to be adjusted
-     to give precise bounds.  */
+  /* Set the PCC range to have precise bounds to ensure that PCC relative loads
+     can not access outside of their given range.  */
   if (pcc_low_sec != NULL)
     {
       BFD_ASSERT (pcc_high_sec);
@@ -5073,12 +5094,11 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 	 properly.  That change in the start address propagated through a few
 	 different sections with their own alignment requirements can easily
 	 change the length of the region we want the PCC to span.
-	 Even more tricky, that change in length could change the alignment we
-	 want.  We don't proove that the alignment requirement converges,
-	 but believe that it should (there is only so much space that existing
-	 alignment requirements could trigger to be added -- a section with an
-	 alignment requirement of 16 can only really add 15 bytes to the
-	 length).  */
+	 Also, that change in length could change the alignment we want.  We
+	 don't proove that the alignment requirement converges, but believe
+	 that it should (there is only so much space that existing alignment
+	 requirements could trigger to be added -- a section with an alignment
+	 requirement of 16 can only really add 15 bytes to the length).  */
       bfd_boolean valid_range = FALSE;
       while (TRUE) {
 	  pcc_low_tmp = pcc_low_sec->vma;
@@ -5103,9 +5123,8 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 	  bfd_vma desired_length = (pcc_high_tmp - pcc_low_tmp);
 	  bfd_vma padding = desired_length - current_length;
 	  c64_pad_section (pcc_high_sec, padding);
+	  (*htab->layout_sections_again) ();
 	}
-      /* Layout sections since it affects the final range of PCC.  */
-      (*htab->layout_sections_again) ();
 
       pcc_low = pcc_low_sec->vma;
       pcc_high = pcc_high_sec->vma + pcc_high_sec->size;
