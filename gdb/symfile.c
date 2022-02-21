@@ -1438,7 +1438,7 @@ find_separate_debug_file (const char *dir,
   for (const gdb::unique_xmalloc_ptr<char> &debugdir : debugdir_vec)
     {
       debugfile = target_prefix ? "target:" : "";
-      debugfile += debugdir.get ();
+      debugfile += debugdir;
       debugfile += "/";
       debugfile += drive;
       debugfile += dir_notarget;
@@ -1460,7 +1460,7 @@ find_separate_debug_file (const char *dir,
 	  /* If the file is in the sysroot, try using its base path in
 	     the global debugfile directory.  */
 	  debugfile = target_prefix ? "target:" : "";
-	  debugfile += debugdir.get ();
+	  debugfile += debugdir;
 	  debugfile += "/";
 	  debugfile += base_path;
 	  debugfile += "/";
@@ -1473,7 +1473,7 @@ find_separate_debug_file (const char *dir,
 	     the sysroot's global debugfile directory.  */
 	  debugfile = target_prefix ? "target:" : "";
 	  debugfile += gdb_sysroot;
-	  debugfile += debugdir.get ();
+	  debugfile += debugdir;
 	  debugfile += "/";
 	  debugfile += base_path;
 	  debugfile += "/";
