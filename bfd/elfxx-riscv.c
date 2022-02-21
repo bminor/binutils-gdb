@@ -1163,17 +1163,10 @@ static struct riscv_supported_ext riscv_supported_std_ext[] =
   {"q",		ISA_SPEC_CLASS_20191213,	2, 2, 0 },
   {"q",		ISA_SPEC_CLASS_20190608,	2, 2, 0 },
   {"q",		ISA_SPEC_CLASS_2P2,		2, 0, 0 },
-  {"l",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
   {"c",		ISA_SPEC_CLASS_20191213,	2, 0, 0 },
   {"c",		ISA_SPEC_CLASS_20190608,	2, 0, 0 },
   {"c",		ISA_SPEC_CLASS_2P2,		2, 0, 0 },
-  {"b",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
-  {"k",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
-  {"j",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
-  {"t",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
-  {"p",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
   {"v",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
-  {"n",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
   {NULL, 0, 0, 0, 0}
 };
 
@@ -1341,6 +1334,9 @@ riscv_recognized_prefixed_ext (const char *ext)
   return false;
 }
 
+/* Canonical order for single letter extensions.  */
+static const char riscv_ext_canonical_order[] = "eigmafdqlcbjktpvn";
+
 /* Array is used to compare the orders of standard extensions quickly.  */
 static int riscv_ext_order[26] = {0};
 
@@ -1356,16 +1352,8 @@ riscv_init_ext_order (void)
   /* The orders of all standard extensions are positive.  */
   int order = 1;
 
-  int i = 0;
-  while (riscv_supported_std_ext[i].name != NULL)
-    {
-      const char *ext = riscv_supported_std_ext[i].name;
-      riscv_ext_order[(*ext - 'a')] = order++;
-      i++;
-      while (riscv_supported_std_ext[i].name
-	     && strcmp (ext, riscv_supported_std_ext[i].name) == 0)
-	i++;
-    }
+  for (const char *ext = &riscv_ext_canonical_order[0]; *ext; ++ext)
+    riscv_ext_order[(*ext - 'a')] = order++;
 
   /* Some of the prefixed keyword are not single letter, so we set
      their prefixed orders in the riscv_compare_subsets directly,
