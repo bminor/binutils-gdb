@@ -4958,26 +4958,21 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 		{
 		  const char *name = h->root.root.string;
 		  size_t len = strlen (name);
+		  asection *altos = NULL;
+		  bfd_vma value = os->vma + os->size;
 
 		  if (len > 8 && name[0] == '_' && name[1] == '_'
 		      && (!strncmp (name + 2, "start_", 6)
-			  || !strcmp (name + len - 6, "_start")))
-		    {
-		      bfd_vma value = os->vma + os->size;
-
-		      os = bfd_sections_find_if (info->output_bfd,
-						 section_start_symbol, &value);
-
-		      if (os != NULL)
-			ensure_precisely_bounded_section (os, htab,
-							  c64_pad_section);
-		    }
+			  || !strcmp (name + len - 6, "_start"))
+		      && ((altos = bfd_sections_find_if
+			   (info->output_bfd, section_start_symbol, &value))
+			  != NULL))
+		    ensure_precisely_bounded_section (altos, htab,
+						      c64_pad_section);
 		  /* XXX We're overfitting here because the offset of H within
 		     the output section is not yet resolved and ldscript
 		     defined symbols do not have input section information.  */
-		  else
-		    ensure_precisely_bounded_section (os, htab,
-						      c64_pad_section);
+		  ensure_precisely_bounded_section (os, htab, c64_pad_section);
 		}
 	    }
 	}
