@@ -3,6 +3,8 @@
 
 *** Changes since GDB 11
 
+* The FreeBSD native target now supports async mode.
+
 * Configure changes
 
 --enable-threading
