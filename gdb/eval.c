@@ -967,6 +967,91 @@ structop_base_operation::evaluate_funcall
 				  nullptr, expect_type);
 }
 
+/* Helper for structop_base_operation::complete which recursively adds
+   field and method names from TYPE, a struct or union type, to the
+   OUTPUT list.  */
+
+static void
+add_struct_fields (struct type *type, completion_list &output,
+		   const char *fieldname, int namelen)
+{
+  int i;
+  int computed_type_name = 0;
+  const char *type_name = NULL;
+
+  type = check_typedef (type);
+  for (i = 0; i < type->num_fields (); ++i)
+    {
+      if (i < TYPE_N_BASECLASSES (type))
+	add_struct_fields (TYPE_BASECLASS (type, i),
+			   output, fieldname, namelen);
+      else if (type->field (i).name ())
+	{
+	  if (type->field (i).name ()[0] != '\0')
+	    {
+	      if (! strncmp (type->field (i).name (),
+			     fieldname, namelen))
+		output.emplace_back (xstrdup (type->field (i).name ()));
+	    }
+	  else if (type->field (i).type ()->code () == TYPE_CODE_UNION)
+	    {
+	      /* Recurse into anonymous unions.  */
+	      add_struct_fields (type->field (i).type (),
+				 output, fieldname, namelen);
+	    }
+	}
+    }
+
+  for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
+    {
+      const char *name = TYPE_FN_FIELDLIST_NAME (type, i);
+
+      if (name && ! strncmp (name, fieldname, namelen))
+	{
+	  if (!computed_type_name)
+	    {
+	      type_name = type->name ();
+	      computed_type_name = 1;
+	    }
+	  /* Omit constructors from the completion list.  */
+	  if (!type_name || strcmp (type_name, name))
+	    output.emplace_back (xstrdup (name));
+	}
+    }
+}
+
+/* See expop.h.  */
+
+bool
+structop_base_operation::complete (struct expression *exp,
+				   completion_tracker &tracker)
+{
+  const std::string &fieldname = std::get<1> (m_storage);
+
+  value *lhs = std::get<0> (m_storage)->evaluate (nullptr, exp,
+						  EVAL_AVOID_SIDE_EFFECTS);
+  struct type *type = value_type (lhs);
+  for (;;)
+    {
+      type = check_typedef (type);
+      if (!type->is_pointer_or_reference ())
+	break;
+      type = TYPE_TARGET_TYPE (type);
+    }
+
+  if (type->code () == TYPE_CODE_UNION
+      || type->code () == TYPE_CODE_STRUCT)
+    {
+      completion_list result;
+
+      add_struct_fields (type, result, fieldname.c_str (),
+			 fieldname.length ());
+      tracker.add_completions (std::move (result));
+      return true;
+    }
+
+  return false;
+}
 
 } /* namespace expr */
 

@@ -1055,107 +1055,31 @@ location_completer_handle_brkchars (struct cmd_list_element *ignore,
   location_completer (ignore, tracker, text, NULL);
 }
 
-/* Helper for expression_completer which recursively adds field and
-   method names from TYPE, a struct or union type, to the OUTPUT
-   list.  */
-
-static void
-add_struct_fields (struct type *type, completion_list &output,
-		   const char *fieldname, int namelen)
-{
-  int i;
-  int computed_type_name = 0;
-  const char *type_name = NULL;
-
-  type = check_typedef (type);
-  for (i = 0; i < type->num_fields (); ++i)
-    {
-      if (i < TYPE_N_BASECLASSES (type))
-	add_struct_fields (TYPE_BASECLASS (type, i),
-			   output, fieldname, namelen);
-      else if (type->field (i).name ())
-	{
-	  if (type->field (i).name ()[0] != '\0')
-	    {
-	      if (! strncmp (type->field (i).name (), 
-			     fieldname, namelen))
-		output.emplace_back (xstrdup (type->field (i).name ()));
-	    }
-	  else if (type->field (i).type ()->code () == TYPE_CODE_UNION)
-	    {
-	      /* Recurse into anonymous unions.  */
-	      add_struct_fields (type->field (i).type (),
-				 output, fieldname, namelen);
-	    }
-	}
-    }
-
-  for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
-    {
-      const char *name = TYPE_FN_FIELDLIST_NAME (type, i);
-
-      if (name && ! strncmp (name, fieldname, namelen))
-	{
-	  if (!computed_type_name)
-	    {
-	      type_name = type->name ();
-	      computed_type_name = 1;
-	    }
-	  /* Omit constructors from the completion list.  */
-	  if (!type_name || strcmp (type_name, name))
-	    output.emplace_back (xstrdup (name));
-	}
-    }
-}
-
 /* See completer.h.  */
 
 void
 complete_expression (completion_tracker &tracker,
 		     const char *text, const char *word)
 {
-  struct type *type = NULL;
-  gdb::unique_xmalloc_ptr<char> fieldname;
-  enum type_code code = TYPE_CODE_UNDEF;
+  expression_up exp;
+  std::unique_ptr<expr_completion_base> expr_completer;
 
   /* Perform a tentative parse of the expression, to see whether a
      field completion is required.  */
   try
     {
-      type = parse_expression_for_completion (text, &fieldname, &code);
+      exp = parse_expression_for_completion (text, &expr_completer);
     }
   catch (const gdb_exception_error &except)
     {
       return;
     }
 
-  if (fieldname != nullptr && type)
-    {
-      for (;;)
-	{
-	  type = check_typedef (type);
-	  if (!type->is_pointer_or_reference ())
-	    break;
-	  type = TYPE_TARGET_TYPE (type);
-	}
-
-      if (type->code () == TYPE_CODE_UNION
-	  || type->code () == TYPE_CODE_STRUCT)
-	{
-	  completion_list result;
-
-	  add_struct_fields (type, result, fieldname.get (),
-			     strlen (fieldname.get ()));
-	  tracker.add_completions (std::move (result));
-	  return;
-	}
-    }
-  else if (fieldname != nullptr && code != TYPE_CODE_UNDEF)
-    {
-      collect_symbol_completion_matches_type (tracker, fieldname.get (),
-					      fieldname.get (), code);
-      return;
-    }
+  /* Part of the parse_expression_for_completion contract.  */
+  gdb_assert ((exp == nullptr) == (expr_completer == nullptr));
+  if (expr_completer != nullptr
+      && expr_completer->complete (exp.get (), tracker))
+    return;
 
   complete_files_symbols (tracker, text, word);
 }

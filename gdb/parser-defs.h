@@ -82,20 +82,55 @@ struct expr_builder
   expression_up expout;
 };
 
-/* This is used for expression completion.  */
+/* Complete an expression that references a field, like "x->y".  */
 
-struct expr_completion_state
+struct expr_complete_structop : public expr_completion_base
 {
+  explicit expr_complete_structop (expr::structop_base_operation *op)
+    : m_op (op)
+  {
+  }
+
+  bool complete (struct expression *exp,
+		 completion_tracker &tracker) override
+  {
+    return m_op->complete (exp, tracker);
+  }
+
+private:
+
   /* The last struct expression directly before a '.' or '->'.  This
      is set when parsing and is only used when completing a field
      name.  It is nullptr if no dereference operation was found.  */
-  expr::structop_base_operation *expout_last_op = nullptr;
+  expr::structop_base_operation *m_op = nullptr;
+};
 
-  /* If we are completing a tagged type name, this will be nonzero.  */
-  enum type_code expout_tag_completion_type = TYPE_CODE_UNDEF;
+/* Complete a tag name in an expression.  This is used for something
+   like "enum abc<TAB>".  */
+
+struct expr_complete_tag : public expr_completion_base
+{
+  expr_complete_tag (enum type_code code,
+		     gdb::unique_xmalloc_ptr<char> name)
+    : m_code (code),
+      m_name (std::move (name))
+  {
+    /* Parsers should enforce this statically.  */
+    gdb_assert (code == TYPE_CODE_ENUM
+		|| code == TYPE_CODE_UNION
+		|| code == TYPE_CODE_STRUCT);
+  }
+
+  bool complete (struct expression *exp,
+		 completion_tracker &tracker) override;
+
+private:
+
+  /* The kind of tag to complete.  */
+  enum type_code m_code;
 
   /* The token for tagged type name completion.  */
-  gdb::unique_xmalloc_ptr<char> expout_completion_name;
+  gdb::unique_xmalloc_ptr<char> m_name;
 };
 
 /* An instance of this type is instantiated during expression parsing,
@@ -254,7 +289,7 @@ struct parser_state : public expr_builder
   bool parse_completion;
 
   /* Completion state is updated here.  */
-  expr_completion_state m_completion_state;
+  std::unique_ptr<expr_completion_base> m_completion_state;
 
   /* The innermost block tracker.  */
   innermost_block_tracker *block_tracker;
