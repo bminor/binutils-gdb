@@ -1081,6 +1081,9 @@ ada_parse (struct parser_state *par_state)
   gdb_assert (par_state != NULL);
   pstate = par_state;
 
+  scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
+							parser_debug);
+
   lexer_init (yyin);		/* (Re-)initialize lexer.  */
   obstack_free (&temp_parse_space, NULL);
   obstack_init (&temp_parse_space);
