@@ -67,12 +67,8 @@ public:
   void update_thread_list () override;
 
   bool can_async_p () override;
-  bool is_async_p () override;
 
-  int async_wait_fd () override;
   void async (int) override;
-
-  void close () override;
 
   thread_control_capabilities get_thread_control_capabilities () override
   { return tc_schedlock; }

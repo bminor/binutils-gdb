@@ -20,6 +20,7 @@
 #ifndef INF_PTRACE_H
 #define INF_PTRACE_H
 
+#include "gdbsupport/event-pipe.h"
 #include "inf-child.h"
 
 /* An abstract prototype ptrace target.  The client can override it
@@ -32,6 +33,8 @@ struct inf_ptrace_target : public inf_child_target
   void attach (const char *, int) override;
 
   void detach (inferior *inf, int) override;
+
+  void close () override;
 
   void resume (ptid_t, int, enum gdb_signal) override;
 
@@ -57,7 +60,31 @@ struct inf_ptrace_target : public inf_child_target
 					ULONGEST offset, ULONGEST len,
 					ULONGEST *xfered_len) override;
 
+  bool is_async_p () override
+  { return m_event_pipe.is_open (); }
+
+  int async_wait_fd () override
+  { return m_event_pipe.event_fd (); }
+
+  /* Helper routine used from SIGCHLD handlers to signal the async
+     event pipe.  */
+  static void async_file_mark_if_open ()
+  {
+    if (m_event_pipe.is_open ())
+      m_event_pipe.mark ();
+  }
+
 protected:
+  /* Helper routines for interacting with the async event pipe.  */
+  bool async_file_open ()
+  { return m_event_pipe.open (); }
+  void async_file_close ()
+  { m_event_pipe.close (); }
+  void async_file_flush ()
+  { m_event_pipe.flush (); }
+  void async_file_mark ()
+  { m_event_pipe.mark (); }
+
   /* Cleanup the inferior after a successful ptrace detach.  */
   void detach_success (inferior *inf);
 
@@ -71,6 +98,9 @@ protected:
      Such targets will supply an appropriate definition for this
      function.  */
   virtual void post_startup_inferior (ptid_t ptid) = 0;
+
+private:
+  static event_pipe m_event_pipe;
 };
 
 #ifndef __NetBSD__

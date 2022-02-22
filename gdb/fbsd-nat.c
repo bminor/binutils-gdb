@@ -21,7 +21,6 @@
 #include "gdbsupport/block-signals.h"
 #include "gdbsupport/byte-vector.h"
 #include "gdbsupport/event-loop.h"
-#include "gdbsupport/event-pipe.h"
 #include "gdbcore.h"
 #include "inferior.h"
 #include "regcache.h"
@@ -932,8 +931,6 @@ fbsd_nat_target::update_thread_list ()
 
 /* Async mode support.  */
 
-static event_pipe fbsd_nat_event_pipe;
-
 /* Implement the "can_async_p" target method.  */
 
 bool
@@ -946,22 +943,6 @@ fbsd_nat_target::can_async_p ()
   return true;
 }
 
-/* Implement the "is_async_p" target method.  */
-
-bool
-fbsd_nat_target::is_async_p ()
-{
-  return fbsd_nat_event_pipe.is_open ();
-}
-
-/* Implement the "async_wait_fd" target method.  */
-
-int
-fbsd_nat_target::async_wait_fd ()
-{
-  return fbsd_nat_event_pipe.event_fd ();
-}
-
 /* SIGCHLD handler notifies the event-loop in async mode.  */
 
 static void
@@ -969,8 +950,7 @@ sigchld_handler (int signo)
 {
   int old_errno = errno;
 
-  if (fbsd_nat_event_pipe.is_open ())
-    fbsd_nat_event_pipe.mark ();
+  fbsd_nat_target::async_file_mark_if_open ();
 
   errno = old_errno;
 }
@@ -997,32 +977,20 @@ fbsd_nat_target::async (int enable)
 
   if (enable)
     {
-      if (!fbsd_nat_event_pipe.open ())
+      if (!async_file_open ())
 	internal_error (__FILE__, __LINE__, "failed to create event pipe.");
 
-      add_file_handler (fbsd_nat_event_pipe.event_fd (),
-			handle_target_event, NULL, "fbsd-nat");
+      add_file_handler (async_wait_fd (), handle_target_event, NULL, "fbsd-nat");
 
       /* Trigger a poll in case there are pending events to
 	 handle.  */
-      fbsd_nat_event_pipe.mark ();
+      async_file_mark ();
     }
   else
     {
-      delete_file_handler (fbsd_nat_event_pipe.event_fd ());
-      fbsd_nat_event_pipe.close ();
+      delete_file_handler (async_wait_fd ());
+      async_file_close ();
     }
-}
-
-/* Implement the "close" target method.  */
-
-void
-fbsd_nat_target::close ()
-{
-  if (is_async_p ())
-    async (0);
-
-  inf_ptrace_target::close ();
 }
 
 #ifdef TDP_RFPPWAIT
@@ -1100,7 +1068,7 @@ fbsd_add_vfork_done (ptid_t pid)
   /* If we're in async mode, need to tell the event loop there's
      something here to process.  */
   if (target_is_async_p ())
-    fbsd_nat_event_pipe.mark ();
+    async_file_mark ();
 }
 
 /* Check for a pending vfork done event for a specific PID.  */
@@ -1499,7 +1467,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
   /* Ensure any subsequent events trigger a new event in the loop.  */
   if (is_async_p ())
-    fbsd_nat_event_pipe.flush ();
+    async_file_flush ();
 
   wptid = wait_1 (ptid, ourstatus, target_options);
 
@@ -1510,7 +1478,7 @@ fbsd_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
       && ((ourstatus->kind () != TARGET_WAITKIND_IGNORE
 	  && ourstatus->kind() != TARGET_WAITKIND_NO_RESUMED)
 	  || ptid != minus_one_ptid))
-    fbsd_nat_event_pipe.mark ();
+    async_file_mark ();
 
   fbsd_nat_debug_printf ("returning [%s], [%s]",
 			 target_pid_to_str (wptid).c_str (),
