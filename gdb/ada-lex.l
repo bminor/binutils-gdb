@@ -655,7 +655,6 @@ attributes[] = {
   { "size", TICK_SIZE },
   { "tag", TICK_TAG },
   { "val", TICK_VAL },
-  { NULL, -1 }
 };
 
 /* Return the syntactic code corresponding to the attribute name or
@@ -664,24 +663,23 @@ attributes[] = {
 static int
 processAttribute (const char *str)
 {
-  int i, k;
+  for (const auto &item : attributes)
+    if (strcasecmp (str, item.name) == 0)
+      return item.code;
 
-  for (i = 0; attributes[i].code != -1; i += 1)
-    if (strcasecmp (str, attributes[i].name) == 0)
-      return attributes[i].code;
-
-  for (i = 0, k = -1; attributes[i].code != -1; i += 1)
-    if (subseqMatch (str, attributes[i].name))
+  gdb::optional<int> found;
+  for (const auto &item : attributes)
+    if (subseqMatch (str, item.name))
       {
-	if (k == -1)
-	  k = i;
+	if (!found.has_value ())
+	  found = item.code;
 	else
 	  error (_("ambiguous attribute name: `%s'"), str);
       }
-  if (k == -1)
+  if (!found.has_value ())
     error (_("unrecognized attribute: `%s'"), str);
 
-  return attributes[k].code;
+  return *found;
 }
 
 /* Back up lexptr by yyleng and then to the rightmost occurrence of
