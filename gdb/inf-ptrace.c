@@ -289,10 +289,14 @@ inf_ptrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 
 ptid_t
 inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
-			 target_wait_flags options)
+			 target_wait_flags target_options)
 {
   pid_t pid;
-  int status, save_errno;
+  int options, status, save_errno;
+
+  options = 0;
+  if (target_options & TARGET_WNOHANG)
+    options |= WNOHANG;
 
   do
     {
@@ -300,15 +304,32 @@ inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
       do
 	{
-	  pid = waitpid (ptid.pid (), &status, 0);
+	  pid = waitpid (ptid.pid (), &status, options);
 	  save_errno = errno;
 	}
       while (pid == -1 && errno == EINTR);
 
       clear_sigint_trap ();
 
+      if (pid == 0)
+	{
+	  gdb_assert (target_options & TARGET_WNOHANG);
+	  ourstatus->set_ignore ();
+	  return minus_one_ptid;
+	}
+
       if (pid == -1)
 	{
+	  /* In async mode the SIGCHLD might have raced and triggered
+	     a check for an event that had already been reported.  If
+	     the event was the exit of the only remaining child,
+	     waitpid() will fail with ECHILD.  */
+	  if (ptid == minus_one_ptid && save_errno == ECHILD)
+	    {
+	      ourstatus->set_no_resumed ();
+	      return minus_one_ptid;
+	    }
+
 	  fprintf_unfiltered (gdb_stderr,
 			      _("Child process unexpectedly missing: %s.\n"),
 			      safe_strerror (save_errno));
