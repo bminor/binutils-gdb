@@ -819,9 +819,9 @@ fbsd_nat_target::thread_name (struct thread_info *thr)
      if a name has not been set explicitly.  Return a NULL name in
      that case.  */
   if (!fbsd_fetch_kinfo_proc (pid, &kp))
-    perror_with_name (_("Failed to fetch process information"));
+    return nullptr;
   if (ptrace (PT_LWPINFO, lwp, (caddr_t) &pl, sizeof pl) == -1)
-    perror_with_name (("ptrace (PT_LWPINFO)"));
+    return nullptr;
   if (strcmp (kp.ki_comm, pl.pl_tdname) == 0)
     return NULL;
   xsnprintf (buf, sizeof buf, "%s", pl.pl_tdname);
