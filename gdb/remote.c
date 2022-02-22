@@ -6571,16 +6571,6 @@ remote_target::resume (ptid_t ptid, int step, enum gdb_signal siggnal)
   for (thread_info *tp : all_non_exited_threads (this, ptid))
     get_remote_thread_info (tp)->set_resumed ();
 
-  /* We are about to start executing the inferior, let's register it
-     with the event loop.  NOTE: this is the one place where all the
-     execution commands end up.  We could alternatively do this in each
-     of the execution commands in infcmd.c.  */
-  /* FIXME: ezannoni 1999-09-28: We may need to move this out of here
-     into infcmd.c in order to allow inferior function calls to work
-     NOT asynchronously.  */
-  if (target_can_async_p ())
-    target_async (1);
-
   /* We've just told the target to resume.  The remote server will
      wait for the inferior to stop, and then send a stop reply.  In
      the mean time, we can't start another command/query ourselves

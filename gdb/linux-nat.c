@@ -1703,9 +1703,6 @@ linux_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 			   ? strsignal (gdb_signal_to_host (signo)) : "0"));
 
   linux_resume_one_lwp (lp, step, signo);
-
-  if (target_can_async_p ())
-    target_async (1);
 }
 
 /* Send a signal to an LWP.  */

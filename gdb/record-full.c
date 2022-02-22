@@ -1095,11 +1095,6 @@ record_full_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 
       this->beneath ()->resume (ptid, step, signal);
     }
-
-  /* We are about to start executing the inferior (or simulate it),
-     let's register it with the event loop.  */
-  if (target_can_async_p ())
-    target_async (1);
 }
 
 static int record_full_get_sig = 0;
@@ -2062,11 +2057,6 @@ record_full_core_target::resume (ptid_t ptid, int step,
   record_full_resume_step = step;
   record_full_resumed = 1;
   record_full_execution_dir = ::execution_direction;
-
-  /* We are about to start executing the inferior (or simulate it),
-     let's register it with the event loop.  */
-  if (target_can_async_p ())
-    target_async (1);
 }
 
 /* "kill" method for prec over corefile.  */
