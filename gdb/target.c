@@ -2673,6 +2673,9 @@ target_resume (ptid_t ptid, int step, enum gdb_signal signal)
      thread's stop_pc as side effect.  */
   set_executing (curr_target, ptid, true);
   clear_inline_frame_state (curr_target, ptid);
+
+  if (target_can_async_p ())
+    target_async (1);
 }
 
 /* See target.h.  */

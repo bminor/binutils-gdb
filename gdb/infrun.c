@@ -2186,9 +2186,6 @@ do_target_resume (ptid_t resume_ptid, bool step, enum gdb_signal sig)
     target_pass_signals (signal_pass);
 
   target_resume (resume_ptid, step, sig);
-
-  if (target_can_async_p ())
-    target_async (1);
 }
 
 /* Resume the inferior.  SIG is the signal to give the inferior
