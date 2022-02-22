@@ -1005,9 +1005,17 @@ public:
   /* Try to complete this operation in the context of EXP.  TRACKER is
      the completion tracker to update.  Return true if completion was
      possible, false otherwise.  */
-  bool complete (struct expression *exp, completion_tracker &tracker);
+  virtual bool complete (struct expression *exp, completion_tracker &tracker)
+  {
+    return complete (exp, tracker, "");
+  }
 
 protected:
+
+  /* Do the work of the public 'complete' method.  PREFIX is prepended
+     to each result.  */
+  bool complete (struct expression *exp, completion_tracker &tracker,
+		 const char *prefix);
 
   using tuple_holding_operation::tuple_holding_operation;
 };

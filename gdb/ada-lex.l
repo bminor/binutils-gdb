@@ -108,8 +108,6 @@ static bool returned_complete = false;
       pstate->lexptr += 1;						\
     }
 
-static int find_dot_all (const char *);
-
 /* Depth of parentheses.  */
 static int paren_depth;
 
@@ -289,12 +287,20 @@ false		{ return FALSEKEYWORD; }
 		    }
 		}
 
-"."{WHITE}*{ID} {
+"."{WHITE}*{ID}{COMPLETE}? {
 	 	  yylval.sval = processId (yytext+1, yyleng-1);
+		  if (yytext[yyleng - 1] == COMPLETE_CHAR)
+		    return DOT_COMPLETE;
 	          return DOT_ID;
 		}
 
-{ID}({WHITE}*"."{WHITE}*({ID}|\"{OPER}\"))*(" "*"'")?  {
+"."{WHITE}*{COMPLETE} {
+		  yylval.sval.ptr = "";
+		  yylval.sval.length = 0;
+		  return DOT_COMPLETE;
+		}
+
+{ID}({WHITE}*"."{WHITE}*({ID}|\"{OPER}\"))*(" "*"'"|{COMPLETE})?  {
                   int all_posn = find_dot_all (yytext);
 
                   if (all_posn == -1 && yytext[yyleng-1] == '\'')
@@ -304,8 +310,9 @@ false		{ return FALSEKEYWORD; }
 		    }
                   else if (all_posn >= 0)
 		    yyless (all_posn);
+		  bool is_completion = yytext[yyleng - 1] == COMPLETE_CHAR;
                   yylval.sval = processId (yytext, yyleng);
-                  return NAME;
+                  return is_completion ? NAME_COMPLETE : NAME;
                }
 
 
@@ -541,7 +548,12 @@ processId (const char *name0, int len)
   i = i0 = 0;
   while (i0 < len)
     {
-      if (in_quotes)
+      if (name0[i0] == COMPLETE_CHAR)
+	{
+	  /* Just ignore.  */
+	  ++i0;
+	}
+      else if (in_quotes)
 	name[i++] = name0[i0++];
       else if (isalnum (name0[i0]))
 	{

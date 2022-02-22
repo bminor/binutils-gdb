@@ -969,11 +969,11 @@ structop_base_operation::evaluate_funcall
 
 /* Helper for structop_base_operation::complete which recursively adds
    field and method names from TYPE, a struct or union type, to the
-   OUTPUT list.  */
+   OUTPUT list.  PREFIX is prepended to each result.  */
 
 static void
 add_struct_fields (struct type *type, completion_list &output,
-		   const char *fieldname, int namelen)
+		   const char *fieldname, int namelen, const char *prefix)
 {
   int i;
   int computed_type_name = 0;
@@ -984,20 +984,21 @@ add_struct_fields (struct type *type, completion_list &output,
     {
       if (i < TYPE_N_BASECLASSES (type))
 	add_struct_fields (TYPE_BASECLASS (type, i),
-			   output, fieldname, namelen);
+			   output, fieldname, namelen, prefix);
       else if (type->field (i).name ())
 	{
 	  if (type->field (i).name ()[0] != '\0')
 	    {
 	      if (! strncmp (type->field (i).name (),
 			     fieldname, namelen))
-		output.emplace_back (xstrdup (type->field (i).name ()));
+		output.emplace_back (concat (prefix, type->field (i).name (),
+					     nullptr));
 	    }
 	  else if (type->field (i).type ()->code () == TYPE_CODE_UNION)
 	    {
 	      /* Recurse into anonymous unions.  */
 	      add_struct_fields (type->field (i).type (),
-				 output, fieldname, namelen);
+				 output, fieldname, namelen, prefix);
 	    }
 	}
     }
@@ -1015,7 +1016,7 @@ add_struct_fields (struct type *type, completion_list &output,
 	    }
 	  /* Omit constructors from the completion list.  */
 	  if (!type_name || strcmp (type_name, name))
-	    output.emplace_back (xstrdup (name));
+	    output.emplace_back (concat (prefix, name, nullptr));
 	}
     }
 }
@@ -1024,7 +1025,8 @@ add_struct_fields (struct type *type, completion_list &output,
 
 bool
 structop_base_operation::complete (struct expression *exp,
-				   completion_tracker &tracker)
+				   completion_tracker &tracker,
+				   const char *prefix)
 {
   const std::string &fieldname = std::get<1> (m_storage);
 
@@ -1045,7 +1047,7 @@ structop_base_operation::complete (struct expression *exp,
       completion_list result;
 
       add_struct_fields (type, result, fieldname.c_str (),
-			 fieldname.length ());
+			 fieldname.length (), prefix);
       tracker.add_completions (std::move (result));
       return true;
     }

@@ -68,6 +68,9 @@ struct name_info {
 
 static struct parser_state *pstate = NULL;
 
+/* The original expression string.  */
+static const char *original_expr;
+
 int yyparse (void);
 
 static int yylex (void);
@@ -82,6 +85,9 @@ static void write_object_renaming (struct parser_state *,
 
 static struct type* write_var_or_type (struct parser_state *,
 				       const struct block *, struct stoken);
+static struct type *write_var_or_type_completion (struct parser_state *,
+						  const struct block *,
+						  struct stoken);
 
 static void write_name_assoc (struct parser_state *, struct stoken);
 
@@ -103,6 +109,8 @@ static struct type *type_for_char (struct parser_state *, ULONGEST);
 static struct type *type_boolean (struct parser_state *);
 
 static struct type *type_system_address (struct parser_state *);
+
+static std::string find_completion_bounds (struct parser_state *);
 
 using namespace expr;
 
@@ -444,7 +452,7 @@ make_tick_completer (struct stoken tok)
 %token <typed_val_float> FLOAT
 %token TRUEKEYWORD FALSEKEYWORD
 %token COLONCOLON
-%token <sval> STRING NAME DOT_ID TICK_COMPLETE
+%token <sval> STRING NAME DOT_ID TICK_COMPLETE DOT_COMPLETE NAME_COMPLETE
 %type <bval> block
 %type <lval> arglist tick_arglist
 
@@ -475,7 +483,7 @@ make_tick_completer (struct stoken tok)
  /* The following are right-associative only so that reductions at this
     precedence have lower precedence than '.' and '('.  The syntax still
     forces a.b.c, e.g., to be LEFT-associated.  */
-%right '.' '(' '[' DOT_ID
+%right '.' '(' '[' DOT_ID DOT_COMPLETE
 
 %token NEW OTHERS
 
@@ -515,6 +523,20 @@ primary :	primary DOT_ID
 			      pstate->push_new<ada_structop_operation>
 				(std::move (arg), copy_name ($2));
 			    }
+			}
+	;
+
+primary :	primary DOT_COMPLETE
+			{
+			  /* This is done even for ".all", because
+			     that might be a prefix.  */
+			  operation_up arg = ada_pop ();
+			  ada_structop_operation *str_op
+			    = (new ada_structop_operation
+			       (std::move (arg), copy_name ($2)));
+			  str_op->set_prefix (find_completion_bounds (pstate));
+			  pstate->push (operation_up (str_op));
+			  pstate->mark_struct_expression (str_op);
 			}
 	;
 
@@ -928,8 +950,20 @@ primary	: 	NEW NAME
 
 var_or_type:	NAME   	    %prec VAR
 				{ $$ = write_var_or_type (pstate, NULL, $1); }
+	|	NAME_COMPLETE %prec VAR
+				{
+				  $$ = write_var_or_type_completion (pstate,
+								     NULL,
+								     $1);
+				}
 	|	block NAME  %prec VAR
 				{ $$ = write_var_or_type (pstate, $1, $2); }
+	|	block NAME_COMPLETE  %prec VAR
+				{
+				  $$ = write_var_or_type_completion (pstate,
+								     $1,
+								     $2);
+				}
 	|       NAME TICK_ACCESS 
 			{ 
 			  $$ = write_var_or_type (pstate, NULL, $1);
@@ -1109,6 +1143,7 @@ ada_parse (struct parser_state *par_state)
   scoped_restore pstate_restore = make_scoped_restore (&pstate);
   gdb_assert (par_state != NULL);
   pstate = par_state;
+  original_expr = par_state->lexptr;
 
   scoped_restore restore_yydebug = make_scoped_restore (&yydebug,
 							parser_debug);
@@ -1440,10 +1475,12 @@ chop_separator (const char *name)
 
 /* Given that SELS is a string of the form (<sep><identifier>)*, where
    <sep> is '__' or '.', write the indicated sequence of
-   STRUCTOP_STRUCT expression operators. */
-static void
+   STRUCTOP_STRUCT expression operators.  Returns a pointer to the
+   last operation that was pushed.  */
+static ada_structop_operation *
 write_selectors (struct parser_state *par_state, const char *sels)
 {
+  ada_structop_operation *result = nullptr;
   while (*sels != '\0')
     {
       const char *p = chop_separator (sels);
@@ -1452,9 +1489,11 @@ write_selectors (struct parser_state *par_state, const char *sels)
 	     && (sels[0] != '_' || sels[1] != '_'))
 	sels += 1;
       operation_up arg = ada_pop ();
-      pstate->push_new<ada_structop_operation>
-	(std::move (arg), std::string (p, sels - p));
+      result = new ada_structop_operation (std::move (arg),
+					   std::string (p, sels - p));
+      pstate->push (operation_up (result));
     }
+  return result;
 }
 
 /* Write a variable access (OP_VAR_VALUE) to ambiguous encoded name
@@ -1699,6 +1738,72 @@ write_var_or_type (struct parser_state *par_state,
 
   error (_("Could not find renamed symbol \"%s\""), name0.ptr);
 
+}
+
+/* Because ada_completer_word_break_characters does not contain '.' --
+   and it cannot easily be added, this breaks other completions -- we
+   have to recreate the completion word-splitting here, so that we can
+   provide a prefix that is then used when completing field names.
+   Without this, an attempt like "complete print abc.d" will give a
+   result like "print def" rather than "print abc.def".  */
+
+static std::string
+find_completion_bounds (struct parser_state *par_state)
+{
+  const char *end = pstate->lexptr;
+  /* First the end of the prefix.  Here we stop at the token start or
+     at '.' or space.  */
+  for (; end > original_expr && end[-1] != '.' && !isspace (end[-1]); --end)
+    {
+      /* Nothing.  */
+    }
+  /* Now find the start of the prefix.  */
+  const char *ptr = end;
+  /* Here we allow '.'.  */
+  for (;
+       ptr > original_expr && (ptr[-1] == '.'
+			       || ptr[-1] == '_'
+			       || (ptr[-1] >= 'a' && ptr[-1] <= 'z')
+			       || (ptr[-1] >= 'A' && ptr[-1] <= 'Z')
+			       || (ptr[-1] & 0xff) >= 0x80);
+       --ptr)
+    {
+      /* Nothing.  */
+    }
+  /* ... except, skip leading spaces.  */
+  ptr = skip_spaces (ptr);
+
+  return std::string (ptr, end);
+}
+
+/* A wrapper for write_var_or_type that is used specifically when
+   completion is requested for the last of a sequence of
+   identifiers.  */
+
+static struct type *
+write_var_or_type_completion (struct parser_state *par_state,
+			      const struct block *block, struct stoken name0)
+{
+  int tail_index = chop_selector (name0.ptr, name0.length);
+  /* If there's no separator, just defer to ordinary symbol
+     completion.  */
+  if (tail_index == -1)
+    return write_var_or_type (par_state, block, name0);
+
+  std::string copy (name0.ptr, tail_index);
+  struct type *type = write_var_or_type (par_state, block,
+					 { copy.c_str (),
+					   (int) copy.length () });
+  /* For completion purposes, it's enough that we return a type
+     here.  */
+  if (type != nullptr)
+    return type;
+
+  ada_structop_operation *op = write_selectors (par_state,
+						name0.ptr + tail_index);
+  op->set_prefix (find_completion_bounds (par_state));
+  par_state->mark_struct_expression (op);
+  return nullptr;
 }
 
 /* Write a left side of a component association (e.g., NAME in NAME =>
