@@ -1025,19 +1025,6 @@ fbsd_nat_target::close ()
   inf_ptrace_target::close ();
 }
 
-/* Implement the "attach" target method.  */
-
-void
-fbsd_nat_target::attach (const char *args, int from_tty)
-{
-  inf_ptrace_target::attach (args, from_tty);
-
-  /* Curiously, the core does not do this automatically.  */
-  if (target_can_async_p ())
-    target_async (1);
-}
-
-
 #ifdef TDP_RFPPWAIT
 /*
   To catch fork events, PT_FOLLOW_FORK is set on every traced process

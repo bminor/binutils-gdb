@@ -1159,9 +1159,6 @@ linux_nat_target::attach (const char *args, int from_tty)
      threads and associate pthread info with each LWP.  */
   linux_proc_attach_tgid_threads (lp->ptid.pid (),
 				  attach_proc_task_lwp_callback);
-
-  if (target_can_async_p ())
-    target_async (1);
 }
 
 /* Ptrace-detach the thread with pid PID.  */

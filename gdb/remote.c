@@ -6183,16 +6183,12 @@ extended_remote_target::attach (const char *args, int from_tty)
 	=  remote_notif_parse (this, &notif_client_stop, wait_status);
 
       push_stop_reply ((struct stop_reply *) reply);
-
-      if (target_can_async_p ())
-	target_async (1);
     }
   else
     {
       gdb_assert (wait_status == NULL);
 
       gdb_assert (target_can_async_p ());
-      target_async (1);
     }
 }
 

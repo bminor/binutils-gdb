@@ -77,8 +77,6 @@ public:
   thread_control_capabilities get_thread_control_capabilities () override
   { return tc_schedlock; }
 
-  void attach (const char *, int) override;
-
   void create_inferior (const char *, const std::string &,
 			char **, int) override;
 
