@@ -313,9 +313,8 @@ inf_ptrace_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 			      _("Child process unexpectedly missing: %s.\n"),
 			      safe_strerror (save_errno));
 
-	  /* Claim it exited with unknown signal.  */
-	  ourstatus->set_signalled (GDB_SIGNAL_UNKNOWN);
-	  return inferior_ptid;
+	  ourstatus->set_ignore ();
+	  return minus_one_ptid;
 	}
 
       /* Ignore terminated detached child processes.  */
