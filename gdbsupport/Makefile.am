@@ -35,6 +35,10 @@ if SELFTEST
 selftest = selftest.cc
 endif
 
+if HAVE_PIPE_OR_PIPE2
+eventpipe = event-pipe.cc
+endif
+
 libgdbsupport_a_SOURCES = \
     agent.cc \
     btrace-common.cc \
@@ -74,6 +78,7 @@ libgdbsupport_a_SOURCES = \
     tdesc.cc \
     thread-pool.cc \
     xml-utils.cc \
+    ${eventpipe} \
     $(selftest)
 
 # Double-check that no defines are missing from our configury.

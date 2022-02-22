@@ -144,7 +144,8 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libgdbsupport_a_AR = $(AR) $(ARFLAGS)
 libgdbsupport_a_LIBADD =
-@SELFTEST_TRUE@am__objects_1 = selftest.$(OBJEXT)
+@HAVE_PIPE_OR_PIPE2_TRUE@am__objects_1 = event-pipe.$(OBJEXT)
+@SELFTEST_TRUE@am__objects_2 = selftest.$(OBJEXT)
 am_libgdbsupport_a_OBJECTS = agent.$(OBJEXT) btrace-common.$(OBJEXT) \
 	buffer.$(OBJEXT) cleanups.$(OBJEXT) common-debug.$(OBJEXT) \
 	common-exceptions.$(OBJEXT) common-inferior.$(OBJEXT) \
@@ -160,7 +161,7 @@ am_libgdbsupport_a_OBJECTS = agent.$(OBJEXT) btrace-common.$(OBJEXT) \
 	safe-strerror.$(OBJEXT) scoped_mmap.$(OBJEXT) search.$(OBJEXT) \
 	signals.$(OBJEXT) signals-state-save-restore.$(OBJEXT) \
 	tdesc.$(OBJEXT) thread-pool.$(OBJEXT) xml-utils.$(OBJEXT) \
-	$(am__objects_1)
+	$(am__objects_1) $(am__objects_2)
 libgdbsupport_a_OBJECTS = $(am_libgdbsupport_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -338,7 +339,6 @@ pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
-runstatedir = @runstatedir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -361,6 +361,7 @@ AM_CPPFLAGS = -I$(srcdir)/../include -I$(srcdir)/../gdb \
 AM_CXXFLAGS = $(WARN_CFLAGS) $(WERROR_CFLAGS)
 noinst_LIBRARIES = libgdbsupport.a
 @SELFTEST_TRUE@selftest = selftest.cc
+@HAVE_PIPE_OR_PIPE2_TRUE@eventpipe = event-pipe.cc
 libgdbsupport_a_SOURCES = \
     agent.cc \
     btrace-common.cc \
@@ -400,6 +401,7 @@ libgdbsupport_a_SOURCES = \
     tdesc.cc \
     thread-pool.cc \
     xml-utils.cc \
+    ${eventpipe} \
     $(selftest)
 
 all: config.h
@@ -482,6 +484,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/environ.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/errors.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event-loop.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/event-pipe.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fileio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/filestuff.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/format.Po@am__quote@

@@ -626,6 +626,8 @@ LTLIBOBJS
 LIBOBJS
 WERROR_CFLAGS
 WARN_CFLAGS
+HAVE_PIPE_OR_PIPE2_FALSE
+HAVE_PIPE_OR_PIPE2_TRUE
 SELFTEST_FALSE
 SELFTEST_TRUE
 LTLIBIPT
@@ -10002,6 +10004,15 @@ else
 fi
 
 
+ if test x$ac_cv_func_pipe = xyes -o x$ac_cv_func_pipe2 = xyes ; then
+  HAVE_PIPE_OR_PIPE2_TRUE=
+  HAVE_PIPE_OR_PIPE2_FALSE='#'
+else
+  HAVE_PIPE_OR_PIPE2_TRUE='#'
+  HAVE_PIPE_OR_PIPE2_FALSE=
+fi
+
+
 # Check the return and argument types of ptrace.
 
 
@@ -10595,6 +10606,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${SELFTEST_TRUE}" && test -z "${SELFTEST_FALSE}"; then
   as_fn_error $? "conditional \"SELFTEST\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_PIPE_OR_PIPE2_TRUE}" && test -z "${HAVE_PIPE_OR_PIPE2_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_PIPE_OR_PIPE2\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 
