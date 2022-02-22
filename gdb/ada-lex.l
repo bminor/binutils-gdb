@@ -227,7 +227,7 @@ false		{ return FALSEKEYWORD; }
 
         /* ATTRIBUTES */
 
-{TICK}[a-z][a-z_]+ { BEGIN INITIAL; return processAttribute (yytext+1); }
+{TICK}[a-z][a-z_]+ { BEGIN INITIAL; return processAttribute (yytext); }
 
 	/* PUNCTUATION */
 
@@ -663,6 +663,11 @@ attributes[] = {
 static int
 processAttribute (const char *str)
 {
+  gdb_assert (*str == '\'');
+  ++str;
+  while (isspace (*str))
+    ++str;
+
   for (const auto &item : attributes)
     if (strcasecmp (str, item.name) == 0)
       return item.code;
