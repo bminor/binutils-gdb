@@ -541,33 +541,28 @@ processId (const char *name0, int len)
       return result;
     }
 
+  bool in_quotes = false;
   i = i0 = 0;
   while (i0 < len)
     {
-      if (isalnum (name0[i0]))
+      if (in_quotes)
+	name[i++] = name0[i0++];
+      else if (isalnum (name0[i0]))
 	{
 	  name[i] = tolower (name0[i0]);
 	  i += 1; i0 += 1;
 	}
-      else switch (name0[i0])
+      else if (isspace (name0[i0]))
+	i0 += 1;
+      else if (name0[i0] == '\'')
 	{
-	default:
-	  name[i] = name0[i0];
-	  i += 1; i0 += 1;
-	  break;
-	case ' ': case '\t':
-	  i0 += 1;
-	  break;
-	case '\'':
-	  do
-	    {
-	      name[i] = name0[i0];
-	      i += 1; i0 += 1;
-	    }
-	  while (i0 < len && name0[i0] != '\'');
-	  i0 += 1;
-	  break;
+	  /* Copy the starting quote, but not the ending quote.  */
+	  if (!in_quotes)
+	    name[i++] = name0[i0++];
+	  in_quotes = !in_quotes;
 	}
+      else
+	name[i++] = name0[i0++];
     }
   name[i] = '\000';
 
