@@ -289,8 +289,6 @@ false		{ return FALSEKEYWORD; }
 		    }
 		}
 
-"."{WHITE}*all  { return DOT_ALL; }
-
 "."{WHITE}*{ID} {
 	 	  yylval.sval = processId (yytext+1, yyleng-1);
 	          return DOT_ID;

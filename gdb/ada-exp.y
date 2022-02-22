@@ -448,8 +448,6 @@ make_tick_completer (struct stoken tok)
 %type <bval> block
 %type <lval> arglist tick_arglist
 
-%token DOT_ALL
-
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
 %token <sval> DOLLAR_VARIABLE
@@ -477,7 +475,7 @@ make_tick_completer (struct stoken tok)
  /* The following are right-associative only so that reductions at this
     precedence have lower precedence than '.' and '('.  The syntax still
     forces a.b.c, e.g., to be LEFT-associated.  */
-%right '.' '(' '[' DOT_ID DOT_ALL
+%right '.' '(' '[' DOT_ID
 
 %token NEW OTHERS
 
@@ -506,15 +504,17 @@ exp1	:	exp
 	;
 
 /* Expressions, not including the sequencing operator.  */
-primary :	primary DOT_ALL
-			{ ada_wrap<ada_unop_ind_operation> (); }
-	;
 
 primary :	primary DOT_ID
 			{
-			  operation_up arg = ada_pop ();
-			  pstate->push_new<ada_structop_operation>
-			    (std::move (arg), copy_name ($2));
+			  if (strcmp ($2.ptr, "all") == 0)
+			    ada_wrap<ada_unop_ind_operation> ();
+			  else
+			    {
+			      operation_up arg = ada_pop ();
+			      pstate->push_new<ada_structop_operation>
+				(std::move (arg), copy_name ($2));
+			    }
 			}
 	;
 
