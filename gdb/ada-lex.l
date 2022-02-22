@@ -39,6 +39,11 @@ OPER    ([-+*/=<>&]|"<="|">="|"**"|"/="|"and"|"or"|"xor"|"not"|"mod"|"rem"|"abs"
 EXP	(e[+-]{NUM10})
 POSEXP  (e"+"?{NUM10})
 
+/* This must agree with COMPLETION_CHAR below.  See the comment there
+   for the explanation.  */
+COMPLETE "\001"
+NOT_COMPLETE [^\001]
+
 %{
 
 #include "diagnostics.h"
@@ -73,16 +78,35 @@ static void rewind_to_char (int);
    Defining YY_NO_INPUT comments it out.  */
 #define YY_NO_INPUT
 
+/* When completing, we'll return a special character at the end of the
+   input, to signal the completion position to the lexer.  This is
+   done because flex does not have a generally useful way to detect
+   EOF in a pattern.  This variable records whether the special
+   character has been emitted.  */
+static bool returned_complete = false;
+
+/* The character we use to represent the completion point.  */
+#define COMPLETE_CHAR '\001'
+
 #undef YY_INPUT
-#define YY_INPUT(BUF, RESULT, MAX_SIZE) \
-    if ( *pstate->lexptr == '\000' ) \
-      (RESULT) = YY_NULL; \
-    else \
-      { \
-        *(BUF) = *pstate->lexptr; \
-        (RESULT) = 1; \
-	pstate->lexptr += 1; \
-      }
+#define YY_INPUT(BUF, RESULT, MAX_SIZE)					\
+  if ( *pstate->lexptr == '\000' )					\
+    {									\
+      if (pstate->parse_completion && !returned_complete)		\
+	{								\
+	  returned_complete = true;					\
+	  *(BUF) = COMPLETE_CHAR;					\
+	  (RESULT) = 1;							\
+	}								\
+      else								\
+	(RESULT) = YY_NULL;						\
+    }									\
+  else									\
+    {									\
+      *(BUF) = *pstate->lexptr == COMPLETE_CHAR ? ' ' : *pstate->lexptr; \
+      (RESULT) = 1;							\
+      pstate->lexptr += 1;						\
+    }
 
 static int find_dot_all (const char *);
 
@@ -227,7 +251,7 @@ false		{ return FALSEKEYWORD; }
 
         /* ATTRIBUTES */
 
-{TICK}[a-z][a-z_]+ { BEGIN INITIAL; return processAttribute (yytext); }
+{TICK}([a-z][a-z_]*)?{COMPLETE}? { BEGIN INITIAL; return processAttribute (yytext); }
 
 	/* PUNCTUATION */
 
@@ -239,7 +263,7 @@ false		{ return FALSEKEYWORD; }
 "<="		{ return LEQ; }
 ">="		{ return GEQ; }
 
-<BEFORE_QUAL_QUOTE>"'" { BEGIN INITIAL; return '\''; }
+<BEFORE_QUAL_QUOTE>"'"/{NOT_COMPLETE} { BEGIN INITIAL; return '\''; }
 
 [-&*+./:<>=|;\[\]] { return yytext[0]; }
 
@@ -320,6 +344,7 @@ lexer_init (FILE *inp)
 {
   BEGIN INITIAL;
   paren_depth = 0;
+  returned_complete = false;
   yyrestart (inp);
 }
 
@@ -668,6 +693,16 @@ processAttribute (const char *str)
   while (isspace (*str))
     ++str;
 
+  int len = strlen (str);
+  if (len > 0 && str[len - 1] == COMPLETE_CHAR)
+    {
+      /* This is enforced by YY_INPUT.  */
+      gdb_assert (pstate->parse_completion);
+      yylval.sval.ptr = obstack_strndup (&temp_parse_space, str, len - 1);
+      yylval.sval.length = len - 1;
+      return TICK_COMPLETE;
+    }
+
   for (const auto &item : attributes)
     if (strcasecmp (str, item.name) == 0)
       return item.code;
@@ -685,6 +720,20 @@ processAttribute (const char *str)
     error (_("unrecognized attribute: `%s'"), str);
 
   return *found;
+}
+
+bool
+ada_tick_completer::complete (struct expression *exp,
+			      completion_tracker &tracker)
+{
+  completion_list output;
+  for (const auto &item : attributes)
+    {
+      if (strncasecmp (item.name, m_name.c_str (), m_name.length ()) == 0)
+	output.emplace_back (xstrdup (item.name));
+    }
+  tracker.add_completions (std::move (output));
+  return true;
 }
 
 /* Back up lexptr by yyleng and then to the rightmost occurrence of

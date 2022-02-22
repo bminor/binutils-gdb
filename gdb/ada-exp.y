@@ -393,6 +393,30 @@ pop_associations (int n)
   return result;
 }
 
+/* Expression completer for attributes.  */
+struct ada_tick_completer : public expr_completion_base
+{
+  explicit ada_tick_completer (std::string &&name)
+    : m_name (std::move (name))
+  {
+  }
+
+  bool complete (struct expression *exp,
+		 completion_tracker &tracker) override;
+
+private:
+
+  std::string m_name;
+};
+
+/* Make a new ada_tick_completer and wrap it in a unique pointer.  */
+static std::unique_ptr<expr_completion_base>
+make_tick_completer (struct stoken tok)
+{
+  return (std::unique_ptr<expr_completion_base>
+	  (new ada_tick_completer (std::string (tok.ptr, tok.length))));
+}
+
 %}
 
 %union
@@ -420,7 +444,7 @@ pop_associations (int n)
 %token <typed_val_float> FLOAT
 %token TRUEKEYWORD FALSEKEYWORD
 %token COLONCOLON
-%token <sval> STRING NAME DOT_ID 
+%token <sval> STRING NAME DOT_ID TICK_COMPLETE
 %type <bval> block
 %type <lval> arglist tick_arglist
 
@@ -449,6 +473,7 @@ pop_associations (int n)
 %right TICK_ACCESS TICK_ADDRESS TICK_FIRST TICK_LAST TICK_LENGTH
 %right TICK_MAX TICK_MIN TICK_MODULUS
 %right TICK_POS TICK_RANGE TICK_SIZE TICK_TAG TICK_VAL
+%right TICK_COMPLETE
  /* The following are right-associative only so that reductions at this
     precedence have lower precedence than '.' and '('.  The syntax still
     forces a.b.c, e.g., to be LEFT-associated.  */
@@ -784,6 +809,10 @@ primary :	primary TICK_ACCESS
 			{ ada_addrof (); }
 	|	primary TICK_ADDRESS
 			{ ada_addrof (type_system_address (pstate)); }
+	|	primary TICK_COMPLETE
+			{
+			  pstate->mark_completion (make_tick_completer ($2));
+			}
 	|	primary TICK_FIRST tick_arglist
 			{
 			  operation_up arg = ada_pop ();

@@ -195,6 +195,14 @@ struct parser_state : public expr_builder
 
   void mark_completion_tag (enum type_code tag, const char *ptr, int length);
 
+  /* Mark for completion, using an arbitrary completer.  */
+
+  void mark_completion (std::unique_ptr<expr_completion_base> completer)
+  {
+    gdb_assert (m_completion_state == nullptr);
+    m_completion_state = std::move (completer);
+  }
+
   /* Push an operation on the stack.  */
   void push (expr::operation_up &&op)
   {

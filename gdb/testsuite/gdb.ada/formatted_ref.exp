@@ -82,6 +82,11 @@ proc test_p_x_addr { var addr } {
 	    }
 	}
     }
+
+    gdb_test "complete print/x $var'unres" "print/x $var'unrestricted_access"
+    gdb_test_no_output "complete print/x $var'abcd"
+    gdb_test "complete print $var'f" "print $var'first"
+
     return 0
 }
 
