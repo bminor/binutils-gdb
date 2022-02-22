@@ -14391,7 +14391,9 @@ if test "${enable_sim}" != no; then
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=aarch64
       fi
-            ac_config_files="$ac_config_files aarch64/Makefile.sim:aarch64/Makefile.in"
+            ac_config_files="$ac_config_files aarch64/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files aarch64/Makefile.sim:aarch64/Makefile.in"
 
     ac_config_commands="$ac_config_commands aarch64/Makefile"
 
@@ -14559,7 +14561,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=arm
       fi
-            ac_config_files="$ac_config_files arm/Makefile.sim:arm/Makefile.in"
+            ac_config_files="$ac_config_files arm/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files arm/Makefile.sim:arm/Makefile.in"
 
     ac_config_commands="$ac_config_commands arm/Makefile"
 
@@ -14600,7 +14604,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=avr
       fi
-            ac_config_files="$ac_config_files avr/Makefile.sim:avr/Makefile.in"
+            ac_config_files="$ac_config_files avr/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files avr/Makefile.sim:avr/Makefile.in"
 
     ac_config_commands="$ac_config_commands avr/Makefile"
 
@@ -14641,7 +14647,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bfin
       fi
-            ac_config_files="$ac_config_files bfin/Makefile.sim:bfin/Makefile.in"
+            ac_config_files="$ac_config_files bfin/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files bfin/Makefile.sim:bfin/Makefile.in"
 
     ac_config_commands="$ac_config_commands bfin/Makefile"
 
@@ -14722,7 +14730,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cr16
       fi
-            ac_config_files="$ac_config_files cr16/Makefile.sim:cr16/Makefile.in"
+            ac_config_files="$ac_config_files cr16/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files cr16/Makefile.sim:cr16/Makefile.in"
 
     ac_config_commands="$ac_config_commands cr16/Makefile"
 
@@ -14763,7 +14773,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cris
       fi
-            ac_config_files="$ac_config_files cris/Makefile.sim:cris/Makefile.in"
+            ac_config_files="$ac_config_files cris/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files cris/Makefile.sim:cris/Makefile.in"
 
     ac_config_commands="$ac_config_commands cris/Makefile"
 
@@ -14804,7 +14816,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=d10v
       fi
-            ac_config_files="$ac_config_files d10v/Makefile.sim:d10v/Makefile.in"
+            ac_config_files="$ac_config_files d10v/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files d10v/Makefile.sim:d10v/Makefile.in"
 
     ac_config_commands="$ac_config_commands d10v/Makefile"
 
@@ -14845,7 +14859,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=frv
       fi
-            ac_config_files="$ac_config_files frv/Makefile.sim:frv/Makefile.in"
+            ac_config_files="$ac_config_files frv/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files frv/Makefile.sim:frv/Makefile.in"
 
     ac_config_commands="$ac_config_commands frv/Makefile"
 
@@ -14886,7 +14902,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=ft32
       fi
-            ac_config_files="$ac_config_files ft32/Makefile.sim:ft32/Makefile.in"
+            ac_config_files="$ac_config_files ft32/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files ft32/Makefile.sim:ft32/Makefile.in"
 
     ac_config_commands="$ac_config_commands ft32/Makefile"
 
@@ -14927,7 +14945,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=h8300
       fi
-            ac_config_files="$ac_config_files h8300/Makefile.sim:h8300/Makefile.in"
+            ac_config_files="$ac_config_files h8300/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files h8300/Makefile.sim:h8300/Makefile.in"
 
     ac_config_commands="$ac_config_commands h8300/Makefile"
 
@@ -14968,7 +14988,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=iq2000
       fi
-            ac_config_files="$ac_config_files iq2000/Makefile.sim:iq2000/Makefile.in"
+            ac_config_files="$ac_config_files iq2000/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files iq2000/Makefile.sim:iq2000/Makefile.in"
 
     ac_config_commands="$ac_config_commands iq2000/Makefile"
 
@@ -15009,7 +15031,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=lm32
       fi
-            ac_config_files="$ac_config_files lm32/Makefile.sim:lm32/Makefile.in"
+            ac_config_files="$ac_config_files lm32/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files lm32/Makefile.sim:lm32/Makefile.in"
 
     ac_config_commands="$ac_config_commands lm32/Makefile"
 
@@ -15050,7 +15074,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32c
       fi
-            ac_config_files="$ac_config_files m32c/Makefile.sim:m32c/Makefile.in"
+            ac_config_files="$ac_config_files m32c/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files m32c/Makefile.sim:m32c/Makefile.in"
 
     ac_config_commands="$ac_config_commands m32c/Makefile"
 
@@ -15091,7 +15117,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32r
       fi
-            ac_config_files="$ac_config_files m32r/Makefile.sim:m32r/Makefile.in"
+            ac_config_files="$ac_config_files m32r/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files m32r/Makefile.sim:m32r/Makefile.in"
 
     ac_config_commands="$ac_config_commands m32r/Makefile"
 
@@ -15132,7 +15160,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m68hc11
       fi
-            ac_config_files="$ac_config_files m68hc11/Makefile.sim:m68hc11/Makefile.in"
+            ac_config_files="$ac_config_files m68hc11/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files m68hc11/Makefile.sim:m68hc11/Makefile.in"
 
     ac_config_commands="$ac_config_commands m68hc11/Makefile"
 
@@ -15173,7 +15203,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mcore
       fi
-            ac_config_files="$ac_config_files mcore/Makefile.sim:mcore/Makefile.in"
+            ac_config_files="$ac_config_files mcore/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files mcore/Makefile.sim:mcore/Makefile.in"
 
     ac_config_commands="$ac_config_commands mcore/Makefile"
 
@@ -15214,7 +15246,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=microblaze
       fi
-            ac_config_files="$ac_config_files microblaze/Makefile.sim:microblaze/Makefile.in"
+            ac_config_files="$ac_config_files microblaze/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files microblaze/Makefile.sim:microblaze/Makefile.in"
 
     ac_config_commands="$ac_config_commands microblaze/Makefile"
 
@@ -15331,7 +15365,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=moxie
       fi
-            ac_config_files="$ac_config_files moxie/Makefile.sim:moxie/Makefile.in"
+            ac_config_files="$ac_config_files moxie/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files moxie/Makefile.sim:moxie/Makefile.in"
 
     ac_config_commands="$ac_config_commands moxie/Makefile"
 
@@ -15372,7 +15408,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=msp430
       fi
-            ac_config_files="$ac_config_files msp430/Makefile.sim:msp430/Makefile.in"
+            ac_config_files="$ac_config_files msp430/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files msp430/Makefile.sim:msp430/Makefile.in"
 
     ac_config_commands="$ac_config_commands msp430/Makefile"
 
@@ -15489,7 +15527,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=pru
       fi
-            ac_config_files="$ac_config_files pru/Makefile.sim:pru/Makefile.in"
+            ac_config_files="$ac_config_files pru/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files pru/Makefile.sim:pru/Makefile.in"
 
     ac_config_commands="$ac_config_commands pru/Makefile"
 
@@ -15568,7 +15608,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rl78
       fi
-            ac_config_files="$ac_config_files rl78/Makefile.sim:rl78/Makefile.in"
+            ac_config_files="$ac_config_files rl78/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files rl78/Makefile.sim:rl78/Makefile.in"
 
     ac_config_commands="$ac_config_commands rl78/Makefile"
 
@@ -15609,7 +15651,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rx
       fi
-            ac_config_files="$ac_config_files rx/Makefile.sim:rx/Makefile.in"
+            ac_config_files="$ac_config_files rx/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files rx/Makefile.sim:rx/Makefile.in"
 
     ac_config_commands="$ac_config_commands rx/Makefile"
 
@@ -15650,7 +15694,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=sh
       fi
-            ac_config_files="$ac_config_files sh/Makefile.sim:sh/Makefile.in"
+            ac_config_files="$ac_config_files sh/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files sh/Makefile.sim:sh/Makefile.in"
 
     ac_config_commands="$ac_config_commands sh/Makefile"
 
@@ -15691,7 +15737,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=erc32
       fi
-            ac_config_files="$ac_config_files erc32/Makefile.sim:erc32/Makefile.in"
+            ac_config_files="$ac_config_files erc32/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files erc32/Makefile.sim:erc32/Makefile.in"
 
     ac_config_commands="$ac_config_commands erc32/Makefile"
 
@@ -15777,7 +15825,9 @@ fi
 
 as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_EXAMPLE_SYNACOR LD_FOR_TARGET_EXAMPLE_SYNACOR CC_FOR_TARGET_EXAMPLE_SYNACOR"
 
-          ac_config_files="$ac_config_files example-synacor/Makefile.sim:example-synacor/Makefile.in"
+          ac_config_files="$ac_config_files example-synacor/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files example-synacor/Makefile.sim:example-synacor/Makefile.in"
 
     ac_config_commands="$ac_config_commands example-synacor/Makefile"
 
@@ -17462,85 +17512,110 @@ do
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "Make-common.sim") CONFIG_FILES="$CONFIG_FILES Make-common.sim:common/Make-common.in" ;;
+    "aarch64/.gdbinit") CONFIG_FILES="$CONFIG_FILES aarch64/.gdbinit:common/gdbinit.in" ;;
     "aarch64/Makefile.sim") CONFIG_FILES="$CONFIG_FILES aarch64/Makefile.sim:aarch64/Makefile.in" ;;
     "aarch64/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS aarch64/Makefile" ;;
     "depdir-aarch64") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-aarch64" ;;
+    "arm/.gdbinit") CONFIG_FILES="$CONFIG_FILES arm/.gdbinit:common/gdbinit.in" ;;
     "arm/Makefile.sim") CONFIG_FILES="$CONFIG_FILES arm/Makefile.sim:arm/Makefile.in" ;;
     "arm/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS arm/Makefile" ;;
     "depdir-arm") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-arm" ;;
+    "avr/.gdbinit") CONFIG_FILES="$CONFIG_FILES avr/.gdbinit:common/gdbinit.in" ;;
     "avr/Makefile.sim") CONFIG_FILES="$CONFIG_FILES avr/Makefile.sim:avr/Makefile.in" ;;
     "avr/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS avr/Makefile" ;;
     "depdir-avr") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-avr" ;;
+    "bfin/.gdbinit") CONFIG_FILES="$CONFIG_FILES bfin/.gdbinit:common/gdbinit.in" ;;
     "bfin/Makefile.sim") CONFIG_FILES="$CONFIG_FILES bfin/Makefile.sim:bfin/Makefile.in" ;;
     "bfin/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS bfin/Makefile" ;;
     "depdir-bfin") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-bfin" ;;
     "depdir-bpf") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-bpf" ;;
+    "cr16/.gdbinit") CONFIG_FILES="$CONFIG_FILES cr16/.gdbinit:common/gdbinit.in" ;;
     "cr16/Makefile.sim") CONFIG_FILES="$CONFIG_FILES cr16/Makefile.sim:cr16/Makefile.in" ;;
     "cr16/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS cr16/Makefile" ;;
     "depdir-cr16") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-cr16" ;;
+    "cris/.gdbinit") CONFIG_FILES="$CONFIG_FILES cris/.gdbinit:common/gdbinit.in" ;;
     "cris/Makefile.sim") CONFIG_FILES="$CONFIG_FILES cris/Makefile.sim:cris/Makefile.in" ;;
     "cris/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS cris/Makefile" ;;
     "depdir-cris") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-cris" ;;
+    "d10v/.gdbinit") CONFIG_FILES="$CONFIG_FILES d10v/.gdbinit:common/gdbinit.in" ;;
     "d10v/Makefile.sim") CONFIG_FILES="$CONFIG_FILES d10v/Makefile.sim:d10v/Makefile.in" ;;
     "d10v/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS d10v/Makefile" ;;
     "depdir-d10v") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-d10v" ;;
+    "frv/.gdbinit") CONFIG_FILES="$CONFIG_FILES frv/.gdbinit:common/gdbinit.in" ;;
     "frv/Makefile.sim") CONFIG_FILES="$CONFIG_FILES frv/Makefile.sim:frv/Makefile.in" ;;
     "frv/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS frv/Makefile" ;;
     "depdir-frv") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-frv" ;;
+    "ft32/.gdbinit") CONFIG_FILES="$CONFIG_FILES ft32/.gdbinit:common/gdbinit.in" ;;
     "ft32/Makefile.sim") CONFIG_FILES="$CONFIG_FILES ft32/Makefile.sim:ft32/Makefile.in" ;;
     "ft32/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS ft32/Makefile" ;;
     "depdir-ft32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ft32" ;;
+    "h8300/.gdbinit") CONFIG_FILES="$CONFIG_FILES h8300/.gdbinit:common/gdbinit.in" ;;
     "h8300/Makefile.sim") CONFIG_FILES="$CONFIG_FILES h8300/Makefile.sim:h8300/Makefile.in" ;;
     "h8300/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS h8300/Makefile" ;;
     "depdir-h8300") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-h8300" ;;
+    "iq2000/.gdbinit") CONFIG_FILES="$CONFIG_FILES iq2000/.gdbinit:common/gdbinit.in" ;;
     "iq2000/Makefile.sim") CONFIG_FILES="$CONFIG_FILES iq2000/Makefile.sim:iq2000/Makefile.in" ;;
     "iq2000/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS iq2000/Makefile" ;;
     "depdir-iq2000") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-iq2000" ;;
+    "lm32/.gdbinit") CONFIG_FILES="$CONFIG_FILES lm32/.gdbinit:common/gdbinit.in" ;;
     "lm32/Makefile.sim") CONFIG_FILES="$CONFIG_FILES lm32/Makefile.sim:lm32/Makefile.in" ;;
     "lm32/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS lm32/Makefile" ;;
     "depdir-lm32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-lm32" ;;
+    "m32c/.gdbinit") CONFIG_FILES="$CONFIG_FILES m32c/.gdbinit:common/gdbinit.in" ;;
     "m32c/Makefile.sim") CONFIG_FILES="$CONFIG_FILES m32c/Makefile.sim:m32c/Makefile.in" ;;
     "m32c/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS m32c/Makefile" ;;
     "depdir-m32c") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m32c" ;;
+    "m32r/.gdbinit") CONFIG_FILES="$CONFIG_FILES m32r/.gdbinit:common/gdbinit.in" ;;
     "m32r/Makefile.sim") CONFIG_FILES="$CONFIG_FILES m32r/Makefile.sim:m32r/Makefile.in" ;;
     "m32r/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS m32r/Makefile" ;;
     "depdir-m32r") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m32r" ;;
+    "m68hc11/.gdbinit") CONFIG_FILES="$CONFIG_FILES m68hc11/.gdbinit:common/gdbinit.in" ;;
     "m68hc11/Makefile.sim") CONFIG_FILES="$CONFIG_FILES m68hc11/Makefile.sim:m68hc11/Makefile.in" ;;
     "m68hc11/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS m68hc11/Makefile" ;;
     "depdir-m68hc11") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m68hc11" ;;
+    "mcore/.gdbinit") CONFIG_FILES="$CONFIG_FILES mcore/.gdbinit:common/gdbinit.in" ;;
     "mcore/Makefile.sim") CONFIG_FILES="$CONFIG_FILES mcore/Makefile.sim:mcore/Makefile.in" ;;
     "mcore/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS mcore/Makefile" ;;
     "depdir-mcore") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mcore" ;;
+    "microblaze/.gdbinit") CONFIG_FILES="$CONFIG_FILES microblaze/.gdbinit:common/gdbinit.in" ;;
     "microblaze/Makefile.sim") CONFIG_FILES="$CONFIG_FILES microblaze/Makefile.sim:microblaze/Makefile.in" ;;
     "microblaze/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS microblaze/Makefile" ;;
     "depdir-microblaze") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-microblaze" ;;
     "depdir-mips") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mips" ;;
     "depdir-mn10300") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mn10300" ;;
+    "moxie/.gdbinit") CONFIG_FILES="$CONFIG_FILES moxie/.gdbinit:common/gdbinit.in" ;;
     "moxie/Makefile.sim") CONFIG_FILES="$CONFIG_FILES moxie/Makefile.sim:moxie/Makefile.in" ;;
     "moxie/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS moxie/Makefile" ;;
     "depdir-moxie") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-moxie" ;;
+    "msp430/.gdbinit") CONFIG_FILES="$CONFIG_FILES msp430/.gdbinit:common/gdbinit.in" ;;
     "msp430/Makefile.sim") CONFIG_FILES="$CONFIG_FILES msp430/Makefile.sim:msp430/Makefile.in" ;;
     "msp430/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS msp430/Makefile" ;;
     "depdir-msp430") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-msp430" ;;
     "depdir-or1k") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-or1k" ;;
     "depdir-ppc") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ppc" ;;
+    "pru/.gdbinit") CONFIG_FILES="$CONFIG_FILES pru/.gdbinit:common/gdbinit.in" ;;
     "pru/Makefile.sim") CONFIG_FILES="$CONFIG_FILES pru/Makefile.sim:pru/Makefile.in" ;;
     "pru/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS pru/Makefile" ;;
     "depdir-pru") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-pru" ;;
     "depdir-riscv") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-riscv" ;;
+    "rl78/.gdbinit") CONFIG_FILES="$CONFIG_FILES rl78/.gdbinit:common/gdbinit.in" ;;
     "rl78/Makefile.sim") CONFIG_FILES="$CONFIG_FILES rl78/Makefile.sim:rl78/Makefile.in" ;;
     "rl78/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS rl78/Makefile" ;;
     "depdir-rl78") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-rl78" ;;
+    "rx/.gdbinit") CONFIG_FILES="$CONFIG_FILES rx/.gdbinit:common/gdbinit.in" ;;
     "rx/Makefile.sim") CONFIG_FILES="$CONFIG_FILES rx/Makefile.sim:rx/Makefile.in" ;;
     "rx/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS rx/Makefile" ;;
     "depdir-rx") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-rx" ;;
+    "sh/.gdbinit") CONFIG_FILES="$CONFIG_FILES sh/.gdbinit:common/gdbinit.in" ;;
     "sh/Makefile.sim") CONFIG_FILES="$CONFIG_FILES sh/Makefile.sim:sh/Makefile.in" ;;
     "sh/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS sh/Makefile" ;;
     "depdir-sh") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-sh" ;;
+    "erc32/.gdbinit") CONFIG_FILES="$CONFIG_FILES erc32/.gdbinit:common/gdbinit.in" ;;
     "erc32/Makefile.sim") CONFIG_FILES="$CONFIG_FILES erc32/Makefile.sim:erc32/Makefile.in" ;;
     "erc32/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS erc32/Makefile" ;;
     "depdir-erc32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-erc32" ;;
     "depdir-v850") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-v850" ;;
+    "example-synacor/.gdbinit") CONFIG_FILES="$CONFIG_FILES example-synacor/.gdbinit:common/gdbinit.in" ;;
     "example-synacor/Makefile.sim") CONFIG_FILES="$CONFIG_FILES example-synacor/Makefile.sim:example-synacor/Makefile.in" ;;
     "example-synacor/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS example-synacor/Makefile" ;;
     "depdir-example-synacor") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-example-synacor" ;;

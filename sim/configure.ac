@@ -65,6 +65,7 @@ m4_define([SIM_BUILD_TARGET], [dnl
   m4_if($2, [true], [dnl
     AC_CONFIG_SUBDIRS($1)
   ], [dnl
+    AC_CONFIG_FILES($1/.gdbinit:common/gdbinit.in)
     AC_CONFIG_FILES($1/Makefile.sim:$1/Makefile.in)
     AC_CONFIG_COMMANDS([$1/Makefile],
 [sed -n \
