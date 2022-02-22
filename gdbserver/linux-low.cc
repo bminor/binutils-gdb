@@ -2148,46 +2148,50 @@ linux_process_target::filter_event (int lwpid, int wstat)
 
   child = find_lwp_pid (ptid_t (lwpid));
 
-  /* Check for stop events reported by a process we didn't already
-     know about - anything not already in our LWP list.
-
-     If we're expecting to receive stopped processes after
-     fork, vfork, and clone events, then we'll just add the
-     new one to our list and go back to waiting for the event
-     to be reported - the stopped process might be returned
-     from waitpid before or after the event is.
-
-     But note the case of a non-leader thread exec'ing after the
-     leader having exited, and gone from our lists (because
-     check_zombie_leaders deleted it).  The non-leader thread
-     changes its tid to the tgid.  */
-
-  if (WIFSTOPPED (wstat) && child == NULL && WSTOPSIG (wstat) == SIGTRAP
-      && linux_ptrace_get_extended_event (wstat) == PTRACE_EVENT_EXEC)
+  /* Check for events reported by anything not in our LWP list.  */
+  if (child == nullptr)
     {
-      ptid_t child_ptid;
+      if (WIFSTOPPED (wstat))
+	{
+	  if (WSTOPSIG (wstat) == SIGTRAP
+	      && linux_ptrace_get_extended_event (wstat) == PTRACE_EVENT_EXEC)
+	    {
+	      /* A non-leader thread exec'ed after we've seen the
+		 leader zombie, and removed it from our lists (in
+		 check_zombie_leaders).  The non-leader thread changes
+		 its tid to the tgid.  */
+	      threads_debug_printf
+		("Re-adding thread group leader LWP %d after exec.",
+		 lwpid);
 
-      /* A multi-thread exec after we had seen the leader exiting.  */
-      threads_debug_printf ("Re-adding thread group leader LWP %d after exec.",
-			    lwpid);
+	      child = add_lwp (ptid_t (lwpid, lwpid));
+	      child->stopped = 1;
+	      switch_to_thread (child->thread);
+	    }
+	  else
+	    {
+	      /* A process we are controlling has forked and the new
+		 child's stop was reported to us by the kernel.  Save
+		 its PID and go back to waiting for the fork event to
+		 be reported - the stopped process might be returned
+		 from waitpid before or after the fork event is.  */
+	      threads_debug_printf
+		("Saving LWP %d status %s in stopped_pids list",
+		 lwpid, status_to_str (wstat).c_str ());
+	      add_to_pid_list (&stopped_pids, lwpid, wstat);
+	    }
+	}
+      else
+	{
+	  /* Don't report an event for the exit of an LWP not in our
+	     list, i.e. not part of any inferior we're debugging.
+	     This can happen if we detach from a program we originally
+	     forked and then it exits.  */
+	}
 
-      child_ptid = ptid_t (lwpid, lwpid);
-      child = add_lwp (child_ptid);
-      child->stopped = 1;
-      switch_to_thread (child->thread);
+      if (child == nullptr)
+	return;
     }
-
-  /* If we didn't find a process, one of two things presumably happened:
-     - A process we started and then detached from has exited.  Ignore it.
-     - A process we are controlling has forked and the new child's stop
-     was reported to us by the kernel.  Save its PID.  */
-  if (child == NULL && WIFSTOPPED (wstat))
-    {
-      add_to_pid_list (&stopped_pids, lwpid, wstat);
-      return;
-    }
-  else if (child == NULL)
-    return;
 
   thread = get_lwp_thread (child);
 
