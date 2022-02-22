@@ -21,6 +21,8 @@
 #include "nat/linux-osdata.h"
 #include "gdbsupport/agent.h"
 #include "tdesc.h"
+#include "gdbsupport/event-loop.h"
+#include "gdbsupport/event-pipe.h"
 #include "gdbsupport/rsp-low.h"
 #include "gdbsupport/signals-state-save-restore.h"
 #include "nat/linux-nat.h"
@@ -308,12 +310,11 @@ lwp_in_step_range (struct lwp_info *lwp)
   return (pc >= lwp->step_range_start && pc < lwp->step_range_end);
 }
 
-/* The read/write ends of the pipe registered as waitable file in the
-   event loop.  */
-static int linux_event_pipe[2] = { -1, -1 };
+/* The event pipe registered as a waitable file in the event loop.  */
+static event_pipe linux_event_pipe;
 
 /* True if we're currently in async mode.  */
-#define target_is_async_p() (linux_event_pipe[0] != -1)
+#define target_is_async_p() (linux_event_pipe.is_open ())
 
 static void send_sigstop (struct lwp_info *lwp);
 
@@ -3506,28 +3507,14 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 static void
 async_file_flush (void)
 {
-  int ret;
-  char buf;
-
-  do
-    ret = read (linux_event_pipe[0], &buf, 1);
-  while (ret >= 0 || (ret == -1 && errno == EINTR));
+  linux_event_pipe.flush ();
 }
 
 /* Put something in the pipe, so the event loop wakes up.  */
 static void
 async_file_mark (void)
 {
-  int ret;
-
-  async_file_flush ();
-
-  do
-    ret = write (linux_event_pipe[1], "+", 1);
-  while (ret == 0 || (ret == -1 && errno == EINTR));
-
-  /* Ignore EAGAIN.  If the pipe is full, the event loop will already
-     be awakened anyway.  */
+  linux_event_pipe.mark ();
 }
 
 ptid_t
@@ -5823,21 +5810,16 @@ linux_process_target::async (bool enable)
 
       if (enable)
 	{
-	  if (pipe (linux_event_pipe) == -1)
+	  if (!linux_event_pipe.open ())
 	    {
-	      linux_event_pipe[0] = -1;
-	      linux_event_pipe[1] = -1;
 	      gdb_sigmask (SIG_UNBLOCK, &mask, NULL);
 
 	      warning ("creating event pipe failed.");
 	      return previous;
 	    }
 
-	  fcntl (linux_event_pipe[0], F_SETFL, O_NONBLOCK);
-	  fcntl (linux_event_pipe[1], F_SETFL, O_NONBLOCK);
-
 	  /* Register the event loop handler.  */
-	  add_file_handler (linux_event_pipe[0],
+	  add_file_handler (linux_event_pipe.event_fd (),
 			    handle_target_event, NULL,
 			    "linux-low");
 
@@ -5846,12 +5828,9 @@ linux_process_target::async (bool enable)
 	}
       else
 	{
-	  delete_file_handler (linux_event_pipe[0]);
+	  delete_file_handler (linux_event_pipe.event_fd ());
 
-	  close (linux_event_pipe[0]);
-	  close (linux_event_pipe[1]);
-	  linux_event_pipe[0] = -1;
-	  linux_event_pipe[1] = -1;
+	  linux_event_pipe.close ();
 	}
 
       gdb_sigmask (SIG_UNBLOCK, &mask, NULL);
