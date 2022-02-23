@@ -2019,14 +2019,11 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
   if (p == NULL)
     return false;
 
-  /* Parse the different classes of extensions in the specified order.  */
-  while (*p != '\0')
-    {
-      p = riscv_parse_prefixed_ext (rps, arch, p);
+  /* Parse prefixed extensions.  */
+  p = riscv_parse_prefixed_ext (rps, arch, p);
 
-      if (p == NULL)
-        return false;
-    }
+  if (p == NULL)
+    return false;
 
   /* Finally add implicit extensions according to the current
      extensions.  */
