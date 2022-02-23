@@ -441,42 +441,55 @@ linux_core_pid_to_str (struct gdbarch *gdbarch, ptid_t ptid)
   return normal_pid_to_str (ptid);
 }
 
+/* Data from one mapping from /proc/PID/maps.  */
+
+struct mapping
+{
+  ULONGEST addr;
+  ULONGEST endaddr;
+  gdb::string_view permissions;
+  ULONGEST offset;
+  gdb::string_view device;
+  ULONGEST inode;
+
+  /* This field is guaranteed to be NULL-terminated, hence it is not a
+     gdb::string_view.  */
+  const char *filename;
+};
+
 /* Service function for corefiles and info proc.  */
 
-static void
-read_mapping (const char *line,
-	      ULONGEST *addr, ULONGEST *endaddr,
-	      const char **permissions, size_t *permissions_len,
-	      ULONGEST *offset,
-	      const char **device, size_t *device_len,
-	      ULONGEST *inode,
-	      const char **filename)
+static mapping
+read_mapping (const char *line)
 {
+  struct mapping mapping;
   const char *p = line;
 
-  *addr = strtoulst (p, &p, 16);
+  mapping.addr = strtoulst (p, &p, 16);
   if (*p == '-')
     p++;
-  *endaddr = strtoulst (p, &p, 16);
+  mapping.endaddr = strtoulst (p, &p, 16);
 
   p = skip_spaces (p);
-  *permissions = p;
+  const char *permissions_start = p;
   while (*p && !isspace (*p))
     p++;
-  *permissions_len = p - *permissions;
+  mapping.permissions = {permissions_start, (size_t) (p - permissions_start)};
 
-  *offset = strtoulst (p, &p, 16);
+  mapping.offset = strtoulst (p, &p, 16);
 
   p = skip_spaces (p);
-  *device = p;
+  const char *device_start = p;
   while (*p && !isspace (*p))
     p++;
-  *device_len = p - *device;
+  mapping.device = {device_start, (size_t) (p - device_start)};
 
-  *inode = strtoulst (p, &p, 10);
+  mapping.inode = strtoulst (p, &p, 10);
 
   p = skip_spaces (p);
-  *filename = p;
+  mapping.filename = p;
+
+  return mapping;
 }
 
 /* Helper function to decode the "VmFlags" field in /proc/PID/smaps.
@@ -895,34 +908,27 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 	       line;
 	       line = strtok_r (NULL, "\n", &saveptr))
 	    {
-	      ULONGEST addr, endaddr, offset, inode;
-	      const char *permissions, *device, *mapping_filename;
-	      size_t permissions_len, device_len;
-
-	      read_mapping (line, &addr, &endaddr,
-			    &permissions, &permissions_len,
-			    &offset, &device, &device_len,
-			    &inode, &mapping_filename);
+	      struct mapping m = read_mapping (line);
 
 	      if (gdbarch_addr_bit (gdbarch) == 32)
 		{
 		  printf_filtered ("\t%10s %10s %7.5s %10s %10s %s\n",
-				   paddress (gdbarch, addr),
-				   paddress (gdbarch, endaddr),
-				   permissions,
-				   hex_string (endaddr - addr),
-				   hex_string (offset),
-				   *mapping_filename ? mapping_filename : "");
+				   paddress (gdbarch, m.addr),
+				   paddress (gdbarch, m.endaddr),
+				   m.permissions.data (),
+				   hex_string (m.endaddr - m.addr),
+				   hex_string (m.offset),
+				   m.filename);
 		}
 	      else
 		{
 		  printf_filtered ("  %18s %18s %7.5s %10s %10s %s\n",
-				   paddress (gdbarch, addr),
-				   paddress (gdbarch, endaddr),
-				   permissions,
-				   hex_string (endaddr - addr),
-				   hex_string (offset),
-				   *mapping_filename ? mapping_filename : "");
+				   paddress (gdbarch, m.addr),
+				   paddress (gdbarch, m.endaddr),
+				   m.permissions.data (),
+				   hex_string (m.endaddr - m.addr),
+				   hex_string (m.offset),
+				   m.filename);
 		}
 	    }
 	}
@@ -1322,19 +1328,15 @@ parse_smaps_data (const char *data,
 
   while (line != NULL)
     {
-      ULONGEST addr, endaddr, offset, inode;
-      const char *permissions, *device, *filename;
       struct smaps_vmflags v;
-      size_t permissions_len, device_len;
       int read, write, exec, priv;
       int has_anonymous = 0;
       int mapping_anon_p;
       int mapping_file_p;
 
       memset (&v, 0, sizeof (v));
-      read_mapping (line, &addr, &endaddr, &permissions, &permissions_len,
-		    &offset, &device, &device_len, &inode, &filename);
-      mapping_anon_p = mapping_is_anonymous_p (filename);
+      struct mapping m = read_mapping (line);
+      mapping_anon_p = mapping_is_anonymous_p (m.filename);
       /* If the mapping is not anonymous, then we can consider it
 	 to be file-backed.  These two states (anonymous or
 	 file-backed) seem to be exclusive, but they can actually
@@ -1347,9 +1349,12 @@ parse_smaps_data (const char *data,
       mapping_file_p = !mapping_anon_p;
 
       /* Decode permissions.  */
-      read = (memchr (permissions, 'r', permissions_len) != 0);
-      write = (memchr (permissions, 'w', permissions_len) != 0);
-      exec = (memchr (permissions, 'x', permissions_len) != 0);
+      auto has_perm = [&m] (char c)
+	{ return m.permissions.find (c) != gdb::string_view::npos; };
+      read = has_perm ('r');
+      write = has_perm ('w');
+      exec = has_perm ('x');
+
       /* 'private' here actually means VM_MAYSHARE, and not
 	 VM_SHARED.  In order to know if a mapping is really
 	 private or not, we must check the flag "sh" in the
@@ -1359,7 +1364,7 @@ parse_smaps_data (const char *data,
 	 not have the VmFlags there.  In this case, there is
 	 really no way to know if we are dealing with VM_SHARED,
 	 so we just assume that VM_MAYSHARE is enough.  */
-      priv = memchr (permissions, 'p', permissions_len) != 0;
+      priv = has_perm ('p');
 
       /* Try to detect if region should be dumped by parsing smaps
 	 counters.  */
@@ -1421,9 +1426,9 @@ parse_smaps_data (const char *data,
       /* Save the smaps entry to the vector.  */
 	struct smaps_data map;
 
-	map.start_address = addr;
-	map.end_address = endaddr;
-	map.filename = filename;
+	map.start_address = m.addr;
+	map.end_address = m.endaddr;
+	map.filename = m.filename;
 	map.vmflags = v;
 	map.read = read? true : false;
 	map.write = write? true : false;
@@ -1432,8 +1437,8 @@ parse_smaps_data (const char *data,
 	map.has_anonymous = has_anonymous;
 	map.mapping_anon_p = mapping_anon_p? true : false;
 	map.mapping_file_p = mapping_file_p? true : false;
-	map.offset = offset;
-	map.inode = inode;
+	map.offset = m.offset;
+	map.inode = m.inode;
 
 	smaps.emplace_back (map);
     }
