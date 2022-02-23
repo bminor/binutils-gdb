@@ -892,15 +892,15 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 	  printf_filtered (_("Mapped address spaces:\n\n"));
 	  if (gdbarch_addr_bit (gdbarch) == 32)
 	    {
-	      printf_filtered ("\t%10s %10s %7s %10s %10s %s\n",
-			   "Start Addr", "  End Addr", "Perms",
-			   "      Size", "    Offset", "objfile");
+	      printf_filtered ("\t%10s %10s %10s %10s  %s %s\n",
+			       "Start Addr", "  End Addr", "      Size",
+			       "    Offset", "Perms  ", "objfile");
 	    }
 	  else
 	    {
-	      printf_filtered ("  %18s %18s %7s %10s %10s %s\n",
-			   "Start Addr", "  End Addr", "Perms",
-			   "      Size", "    Offset", "objfile");
+	      printf_filtered ("  %18s %18s %10s %10s  %s %s\n",
+			       "Start Addr", "  End Addr", "      Size",
+			       "    Offset", "Perms ", "objfile");
 	    }
 
 	  char *saveptr;
@@ -912,22 +912,24 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
 
 	      if (gdbarch_addr_bit (gdbarch) == 32)
 		{
-		  printf_filtered ("\t%10s %10s %7.5s %10s %10s %s\n",
+		  printf_filtered ("\t%10s %10s %10s %10s  %-5.*s  %s\n",
 				   paddress (gdbarch, m.addr),
 				   paddress (gdbarch, m.endaddr),
-				   m.permissions.data (),
 				   hex_string (m.endaddr - m.addr),
 				   hex_string (m.offset),
+				   (int) m.permissions.size (),
+				   m.permissions.data (),
 				   m.filename);
 		}
 	      else
 		{
-		  printf_filtered ("  %18s %18s %7.5s %10s %10s %s\n",
+		  printf_filtered ("  %18s %18s %10s %10s  %-5.*s  %s\n",
 				   paddress (gdbarch, m.addr),
 				   paddress (gdbarch, m.endaddr),
-				   m.permissions.data (),
 				   hex_string (m.endaddr - m.addr),
 				   hex_string (m.offset),
+				   (int) m.permissions.size (),
+				   m.permissions.data (),
 				   m.filename);
 		}
 	    }
