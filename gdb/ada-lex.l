@@ -265,7 +265,7 @@ false		{ return FALSEKEYWORD; }
 
 <BEFORE_QUAL_QUOTE>"'"/{NOT_COMPLETE} { BEGIN INITIAL; return '\''; }
 
-[-&*+./:<>=|;\[\]] { return yytext[0]; }
+[-&*+{}@/:<>=|;\[\]] { return yytext[0]; }
 
 ","		{ if (paren_depth == 0 && pstate->comma_terminates)
 		    {
@@ -318,8 +318,6 @@ false		{ return FALSEKEYWORD; }
 		}
 
 "::"            { return COLONCOLON; }
-
-[{}@]		{ return yytext[0]; }
 
 	/* REGISTERS AND GDB CONVENIENCE VARIABLES */
 
