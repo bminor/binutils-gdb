@@ -1,6 +1,4 @@
 .*Assembler messages:
-.*Warning: invalid CSR `utval' for the privileged spec `1.9.1'
-.*Warning: invalid CSR `utval' for the privileged spec `1.9.1'
 .*Warning: read-only CSR is written `csrw cycle,a1'
 .*Warning: read-only CSR is written `csrw time,a1'
 .*Warning: read-only CSR is written `csrw instret,a1'
@@ -146,12 +144,18 @@
 .*Warning: read-only CSR is written `csrw mconfigptr,a1'
 .*Warning: invalid CSR `mcounteren' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `mcounteren' for the privileged spec `1.9.1'
-.*Warning: invalid CSR `menvcfg' for the privileged spec `1.9.1'
-.*Warning: invalid CSR `menvcfg' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `mstatush' for the current ISA
 .*Warning: invalid CSR `mstatush' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `mstatush' for the current ISA
 .*Warning: invalid CSR `mstatush' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `mtval' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `mtval' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `mtinst' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `mtinst' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `mtval2' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `mtval2' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `menvcfg' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `menvcfg' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `menvcfgh' for the current ISA
 .*Warning: invalid CSR `menvcfgh' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `menvcfgh' for the current ISA
@@ -162,12 +166,6 @@
 .*Warning: invalid CSR `mseccfgh' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `mseccfgh' for the current ISA
 .*Warning: invalid CSR `mseccfgh' for the privileged spec `1.9.1'
-.*Warning: invalid CSR `mtval' for the privileged spec `1.9.1'
-.*Warning: invalid CSR `mtval' for the privileged spec `1.9.1'
-.*Warning: invalid CSR `mtinst' for the privileged spec `1.9.1'
-.*Warning: invalid CSR `mtinst' for the privileged spec `1.9.1'
-.*Warning: invalid CSR `mtval2' for the privileged spec `1.9.1'
-.*Warning: invalid CSR `mtval2' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `pmpcfg0' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `pmpcfg0' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `pmpcfg1' for the current ISA
@@ -439,8 +437,6 @@
 .*Warning: invalid CSR `henvcfgh' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `hgatp' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `hgatp' for the privileged spec `1.9.1'
-.*Warning: invalid CSR `hcontext' for the privileged spec `1.9.1'
-.*Warning: invalid CSR `hcontext' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `htimedelta' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `htimedelta' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `htimedeltah' for the current ISA
@@ -465,6 +461,8 @@
 .*Warning: invalid CSR `vsip' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `vsatp' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `vsatp' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `utval' for the privileged spec `1.9.1'
+.*Warning: invalid CSR `utval' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `fflags' for the current ISA
 .*Warning: invalid CSR `fflags' for the current ISA
 .*Warning: invalid CSR `frm' for the current ISA

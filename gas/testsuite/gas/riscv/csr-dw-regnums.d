@@ -17,14 +17,6 @@ Contents of the .* section:
 #...
 [a-zA-Z0-9]+ [a-zA-Z0-9]+ [a-zA-Z0-9]+ FDE cie=00000000 pc=[a-zA-Z0-9]+\.\.[a-zA-Z0-9]+
   DW_CFA_advance_loc: 4 to 0+0000020
-  DW_CFA_offset_extended: r4096 \(ustatus\) at cfa\+0
-  DW_CFA_offset_extended_sf: r4100 \(uie\) at cfa\+16
-  DW_CFA_offset_extended_sf: r4101 \(utvec\) at cfa\+20
-  DW_CFA_offset_extended_sf: r4160 \(uscratch\) at cfa\+256
-  DW_CFA_offset_extended_sf: r4161 \(uepc\) at cfa\+260
-  DW_CFA_offset_extended_sf: r4162 \(ucause\) at cfa\+264
-  DW_CFA_offset_extended_sf: r4163 \(utval\) at cfa\+268
-  DW_CFA_offset_extended_sf: r4164 \(uip\) at cfa\+272
   DW_CFA_offset_extended_sf: r7168 \(cycle\) at cfa\+12288
   DW_CFA_offset_extended_sf: r7169 \(time\) at cfa\+12292
   DW_CFA_offset_extended_sf: r7170 \(instret\) at cfa\+12296
@@ -90,8 +82,6 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r7326 \(hpmcounter30h\) at cfa\+12920
   DW_CFA_offset_extended_sf: r7327 \(hpmcounter31h\) at cfa\+12924
   DW_CFA_offset_extended_sf: r4352 \(sstatus\) at cfa\+1024
-  DW_CFA_offset_extended_sf: r4354 \(sedeleg\) at cfa\+1032
-  DW_CFA_offset_extended_sf: r4355 \(sideleg\) at cfa\+1036
   DW_CFA_offset_extended_sf: r4356 \(sie\) at cfa\+1040
   DW_CFA_offset_extended_sf: r4357 \(stvec\) at cfa\+1044
   DW_CFA_offset_extended_sf: r4358 \(scounteren\) at cfa\+1048
@@ -114,11 +104,7 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4868 \(mie\) at cfa\+3088
   DW_CFA_offset_extended_sf: r4869 \(mtvec\) at cfa\+3092
   DW_CFA_offset_extended_sf: r4870 \(mcounteren\) at cfa\+3096
-  DW_CFA_offset_extended_sf: r4874 \(menvcfg\) at cfa\+3112
   DW_CFA_offset_extended_sf: r4880 \(mstatush\) at cfa\+3136
-  DW_CFA_offset_extended_sf: r4890 \(menvcfgh\) at cfa\+3176
-  DW_CFA_offset_extended_sf: r5959 \(mseccfg\) at cfa\+7452
-  DW_CFA_offset_extended_sf: r5975 \(mseccfgh\) at cfa\+7516
   DW_CFA_offset_extended_sf: r4928 \(mscratch\) at cfa\+3328
   DW_CFA_offset_extended_sf: r4929 \(mepc\) at cfa\+3332
   DW_CFA_offset_extended_sf: r4930 \(mcause\) at cfa\+3336
@@ -126,6 +112,10 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4932 \(mip\) at cfa\+3344
   DW_CFA_offset_extended_sf: r4938 \(mtinst\) at cfa\+3368
   DW_CFA_offset_extended_sf: r4939 \(mtval2\) at cfa\+3372
+  DW_CFA_offset_extended_sf: r4874 \(menvcfg\) at cfa\+3112
+  DW_CFA_offset_extended_sf: r4890 \(menvcfgh\) at cfa\+3176
+  DW_CFA_offset_extended_sf: r5959 \(mseccfg\) at cfa\+7452
+  DW_CFA_offset_extended_sf: r5975 \(mseccfgh\) at cfa\+7516
   DW_CFA_offset_extended_sf: r5024 \(pmpcfg0\) at cfa\+3712
   DW_CFA_offset_extended_sf: r5025 \(pmpcfg1\) at cfa\+3716
   DW_CFA_offset_extended_sf: r5026 \(pmpcfg2\) at cfa\+3720
@@ -312,7 +302,6 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r5642 \(henvcfg\) at cfa\+6184
   DW_CFA_offset_extended_sf: r5658 \(henvcfgh\) at cfa\+6248
   DW_CFA_offset_extended_sf: r5760 \(hgatp\) at cfa\+6656
-  DW_CFA_offset_extended_sf: r5800 \(hcontext\) at cfa\+6816
   DW_CFA_offset_extended_sf: r5637 \(htimedelta\) at cfa\+6164
   DW_CFA_offset_extended_sf: r5653 \(htimedeltah\) at cfa\+6228
   DW_CFA_offset_extended_sf: r4608 \(vsstatus\) at cfa\+2048
@@ -337,6 +326,16 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4997 \(mdbound\) at cfa\+3604
   DW_CFA_offset_extended_sf: r4897 \(mscounteren\) at cfa\+3204
   DW_CFA_offset_extended_sf: r4898 \(mhcounteren\) at cfa\+3208
+  DW_CFA_offset_extended: r4096 \(ustatus\) at cfa\+0
+  DW_CFA_offset_extended_sf: r4100 \(uie\) at cfa\+16
+  DW_CFA_offset_extended_sf: r4101 \(utvec\) at cfa\+20
+  DW_CFA_offset_extended_sf: r4160 \(uscratch\) at cfa\+256
+  DW_CFA_offset_extended_sf: r4161 \(uepc\) at cfa\+260
+  DW_CFA_offset_extended_sf: r4162 \(ucause\) at cfa\+264
+  DW_CFA_offset_extended_sf: r4163 \(utval\) at cfa\+268
+  DW_CFA_offset_extended_sf: r4164 \(uip\) at cfa\+272
+  DW_CFA_offset_extended_sf: r4354 \(sedeleg\) at cfa\+1032
+  DW_CFA_offset_extended_sf: r4355 \(sideleg\) at cfa\+1036
   DW_CFA_offset_extended_sf: r4097 \(fflags\) at cfa\+4
   DW_CFA_offset_extended_sf: r4098 \(frm\) at cfa\+8
   DW_CFA_offset_extended_sf: r4099 \(fcsr\) at cfa\+12
@@ -351,8 +350,12 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r6051 \(tdata3\) at cfa\+7820
   DW_CFA_offset_extended_sf: r6052 \(tinfo\) at cfa\+7824
   DW_CFA_offset_extended_sf: r6053 \(tcontrol\) at cfa\+7828
+  DW_CFA_offset_extended_sf: r5800 \(hcontext\) at cfa\+6816
+  DW_CFA_offset_extended_sf: r5544 \(scontext\) at cfa\+5792
   DW_CFA_offset_extended_sf: r6056 \(mcontext\) at cfa\+7840
-  DW_CFA_offset_extended_sf: r6058 \(scontext\) at cfa\+7848
+  DW_CFA_offset_extended_sf: r6058 \(mscontext\) at cfa\+7848
+  DW_CFA_offset_extended_sf: r6049 \(tdata1\) at cfa\+7812
+  DW_CFA_offset_extended_sf: r6049 \(tdata1\) at cfa\+7812
   DW_CFA_offset_extended_sf: r6049 \(tdata1\) at cfa\+7812
   DW_CFA_offset_extended_sf: r6049 \(tdata1\) at cfa\+7812
   DW_CFA_offset_extended_sf: r6049 \(tdata1\) at cfa\+7812

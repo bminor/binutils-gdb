@@ -3,19 +3,7 @@
 	csrw \val, a1
 	.endm
 
-	# Supported privileged specs from 1.9.1 to 1.11
-
-	# User Trap Setup
-	csr ustatus
-	csr uie
-	csr utvec
-
-	# User Trap Handling
-	csr uscratch
-	csr uepc
-	csr ucause
-	csr utval		# Added in 1.10
-	csr uip
+	# Supported privileged specs, 1.9.1, 1.10, 1.11 and 1.12.
 
 	# User Counter/Timers
 	csr cycle
@@ -85,11 +73,11 @@
 
 	# Supervisor Trap Setup
 	csr sstatus
-	csr sedeleg
-	csr sideleg
 	csr sie
 	csr stvec
 	csr scounteren		# Added in 1.10
+
+	# Supervisor Configuration
 	csr senvcfg		# Added in 1.12
 
 	# Supervisor Trap Handling
@@ -117,11 +105,7 @@
 	csr mie
 	csr mtvec
 	csr mcounteren		# Added in 1.10
-	csr menvcfg		# Added in 1.12
 	csr mstatush		# Added in 1.12
-	csr menvcfgh		# Added in 1.12
-	csr mseccfg		# Added in 1.12
-	csr mseccfgh		# Added in 1.12
 
 	# Machine Trap Handling
 	csr mscratch
@@ -131,6 +115,12 @@
 	csr mip
 	csr mtinst		# Added in 1.12
 	csr mtval2		# Added in 1.12
+
+	# Machine Configuration
+	csr menvcfg		# Added in 1.12
+	csr menvcfgh		# Added in 1.12
+	csr mseccfg		# Added in 1.12
+	csr mseccfgh		# Added in 1.12
 
 	# Machine Memory Protection
 	csr pmpcfg0		# Added in 1.10
@@ -310,7 +300,7 @@
 	csr mhpmevent30
 	csr mhpmevent31
 
-	# Hypervisor Trap Setup (1.12)
+	# Hypervisor Trap Setup
 	csr hstatus
 	csr hedeleg
 	csr hideleg
@@ -318,28 +308,25 @@
 	csr hcounteren
 	csr hgeie
 
-	# Hypervisor Trap Handling (1.12)
+	# Hypervisor Trap Handling
 	csr htval
 	csr hip
 	csr hvip
 	csr htinst
 	csr hgeip
 
-	# Hypervisor Configuration (1.12)
+	# Hypervisor Configuration
 	csr henvcfg
 	csr henvcfgh
 
-	# Hypervisor Protection and Translation (1.12)
+	# Hypervisor Protection and Translation
 	csr hgatp
 
-	# Debug/Trace Registers
-	csr hcontext
-
-	# Hypervisor Counter/Timer Virtualization Registers (1.12)
+	# Hypervisor Counter/Timer Virtualization Registers
 	csr htimedelta
 	csr htimedeltah
 
-	# Virtual Supervisor Registers (1.12)
+	# Virtual Supervisor Registers
 	csr vsstatus
 	csr vsie
 	csr vstvec
@@ -357,14 +344,24 @@
 	csr sptbr		# 0x180 in 1.9.1, but the value is satp since 1.10
 	csr mbadaddr		# 0x343 in 1.9.1, but the value is mtval since 1.10
 	csr mucounteren		# 0x320 in 1.9.1, dropped in 1.10, but the value is mcountinhibit since 1.11
-	csr mbase		# 0x380, dropped in 1.10
-	csr mbound		# 0x381, dropped in 1.10
-	csr mibase		# 0x382, dropped in 1.10
-	csr mibound		# 0x383, dropped in 1.10
-	csr mdbase		# 0x384, dropped in 1.10
-	csr mdbound		# 0x385, dropped in 1.10
-	csr mscounteren		# 0x321, dropped in 1.10
-	csr mhcounteren		# 0x322, dropped in 1.10
+	csr mbase		# 0x380 in 1.9.1, dropped in 1.10
+	csr mbound		# 0x381 in 1.9.1, dropped in 1.10
+	csr mibase		# 0x382 in 1.9.1, dropped in 1.10
+	csr mibound		# 0x383 in 1.9.1, dropped in 1.10
+	csr mdbase		# 0x384 in 1.9.1, dropped in 1.10
+	csr mdbound		# 0x385 in 1.9.1, dropped in 1.10
+	csr mscounteren		# 0x321 in 1.9.1, dropped in 1.10
+	csr mhcounteren		# 0x322 in 1.9.1, dropped in 1.10
+	csr ustatus		# 0x0   in 1.9.1, dropped in 1.12
+	csr uie			# 0x4   in 1.9.1, dropped in 1.12
+	csr utvec		# 0x5   in 1.9.1, dropped in 1.12
+	csr uscratch		# 0x40  in 1.9.1, dropped in 1.12
+	csr uepc		# 0x41  in 1.9.1, dropped in 1.12
+	csr ucause		# 0x42  in 1.9.1, dropped in 1.12
+	csr utval		# 0x43  in 1.10,  dropped in 1.12
+	csr uip			# 0x44  in 1.9.1, dropped in 1.12
+	csr sedeleg		# 0x102 in 1.9.1, dropped in 1.12
+	csr sideleg		# 0x103 in 1.9.1, dropped in 1.12
 
 	# Unprivileged CSR which are not controlled by privilege spec
 
@@ -387,12 +384,16 @@
 	csr tdata3
 	csr tinfo
 	csr tcontrol
-	csr mcontext
+	csr hcontext
 	csr scontext
+	csr mcontext
+	csr mscontext
 	csr mcontrol		# 0x7a1, alias to tdata1
+	csr mcontrol6		# 0x7a1, alias to tdata1
 	csr icount		# 0x7a1, alias to tdata1
 	csr itrigger		# 0x7a1, alias to tdata1
 	csr etrigger		# 0x7a1, alias to tdata1
+	csr tmexttrigger	# 0x7a1, alias to tdata1
 	csr textra32		# 0x7a3, alias to tdata3
 	csr textra64		# 0x7a3, alias to tdata3
 

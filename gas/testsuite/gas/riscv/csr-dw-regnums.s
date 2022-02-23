@@ -7,14 +7,7 @@
 _start:
 	.cfi_startproc
 	nop
-	.cfi_offset ustatus, 0
-	.cfi_offset uie, 16
-	.cfi_offset utvec, 20
-	.cfi_offset uscratch, 256
-	.cfi_offset uepc, 260
-	.cfi_offset ucause, 264
-	.cfi_offset utval, 268
-	.cfi_offset uip, 272
+	# user counters/timers
 	.cfi_offset cycle, 12288
 	.cfi_offset time, 12292
 	.cfi_offset instret, 12296
@@ -79,9 +72,8 @@ _start:
 	.cfi_offset hpmcounter29h, 12916
 	.cfi_offset hpmcounter30h, 12920
 	.cfi_offset hpmcounter31h, 12924
+	# supervisor
 	.cfi_offset sstatus, 1024
-	.cfi_offset sedeleg, 1032
-	.cfi_offset sideleg, 1036
 	.cfi_offset sie, 1040
 	.cfi_offset stvec, 1044
 	.cfi_offset scounteren, 1048
@@ -92,6 +84,7 @@ _start:
 	.cfi_offset stval, 1292
 	.cfi_offset sip, 1296
 	.cfi_offset satp, 1536
+	# machine
 	.cfi_offset mvendorid, 15428
 	.cfi_offset marchid, 15432
 	.cfi_offset mimpid, 15436
@@ -104,11 +97,7 @@ _start:
 	.cfi_offset mie, 3088
 	.cfi_offset mtvec, 3092
 	.cfi_offset mcounteren, 3096
-	.cfi_offset menvcfg, 3112
 	.cfi_offset mstatush, 3136
-	.cfi_offset menvcfgh, 3176
-	.cfi_offset mseccfg, 7452
-	.cfi_offset mseccfgh, 7516
 	.cfi_offset mscratch, 3328
 	.cfi_offset mepc, 3332
 	.cfi_offset mcause, 3336
@@ -116,6 +105,10 @@ _start:
 	.cfi_offset mip, 3344
 	.cfi_offset mtinst, 3368
 	.cfi_offset mtval2, 3372
+	.cfi_offset menvcfg, 3112
+	.cfi_offset menvcfgh, 3176
+	.cfi_offset mseccfg, 7452
+	.cfi_offset mseccfgh, 7516
 	.cfi_offset pmpcfg0, 3712
 	.cfi_offset pmpcfg1, 3716
 	.cfi_offset pmpcfg2, 3720
@@ -288,7 +281,7 @@ _start:
 	.cfi_offset mhpmevent29, 3316
 	.cfi_offset mhpmevent30, 3320
 	.cfi_offset mhpmevent31, 3324
-	# Hypervisor extension (Privileged Architecture, version 1.12)
+	# hypervisor
 	.cfi_offset hstatus, 6144
 	.cfi_offset hedeleg, 6152
 	.cfi_offset hideleg, 6156
@@ -303,7 +296,6 @@ _start:
 	.cfi_offset henvcfg, 6184
 	.cfi_offset henvcfgh, 6248
 	.cfi_offset hgatp, 6656
-	.cfi_offset hcontext, 6816
 	.cfi_offset htimedelta, 6164
 	.cfi_offset htimedeltah, 6228
 	.cfi_offset vsstatus, 2048
@@ -315,13 +307,12 @@ _start:
 	.cfi_offset vstval, 2316
 	.cfi_offset vsip, 2320
 	.cfi_offset vsatp, 2560
-	# dropped aliases
-	.cfi_offset ubadaddr, 268
-	.cfi_offset sbadaddr, 1292
-	.cfi_offset sptbr, 1536
-	.cfi_offset mbadaddr, 3340
-	.cfi_offset mucounteren, 3200
 	# dropped
+	.cfi_offset ubadaddr, 268	# aliases
+	.cfi_offset sbadaddr, 1292	# aliases
+	.cfi_offset sptbr, 1536		# aliases
+	.cfi_offset mbadaddr, 3340	# aliases
+	.cfi_offset mucounteren, 3200	# aliases
 	.cfi_offset mbase, 3584
 	.cfi_offset mbound, 3588
 	.cfi_offset mibase, 3592
@@ -330,6 +321,16 @@ _start:
 	.cfi_offset mdbound, 3604
 	.cfi_offset mscounteren, 3204
 	.cfi_offset mhcounteren, 3208
+	.cfi_offset ustatus, 0
+	.cfi_offset uie, 16
+	.cfi_offset utvec, 20
+	.cfi_offset uscratch, 256
+	.cfi_offset uepc, 260
+	.cfi_offset ucause, 264
+	.cfi_offset utval, 268
+	.cfi_offset uip, 272
+	.cfi_offset sedeleg, 1032
+	.cfi_offset sideleg, 1036
 	# unprivileged
 	.cfi_offset fflags, 4
 	.cfi_offset frm, 8
@@ -338,25 +339,25 @@ _start:
 	.cfi_offset dpc, 7876
 	.cfi_offset dscratch0, 7880
 	.cfi_offset dscratch1, 7884
-	# unprivileged alias
-	.cfi_offset dscratch, 7880
-	# unprivileged
+	.cfi_offset dscratch, 7880	# aliases
 	.cfi_offset tselect, 7808
 	.cfi_offset tdata1, 7812
 	.cfi_offset tdata2, 7816
 	.cfi_offset tdata3, 7820
 	.cfi_offset tinfo, 7824
 	.cfi_offset tcontrol, 7828
+	.cfi_offset hcontext, 6816
+	.cfi_offset scontext, 5792
 	.cfi_offset mcontext, 7840
-	.cfi_offset scontext, 7848
-	# aliases
-	.cfi_offset mcontrol, 7812
-	.cfi_offset icount, 7812
-	.cfi_offset itrigger, 7812
-	.cfi_offset etrigger, 7812
-	.cfi_offset textra32, 7820
-	.cfi_offset textra64, 7820
-	# unprivileged
+	.cfi_offset mscontext, 7848
+	.cfi_offset mcontrol, 7812	# aliases
+	.cfi_offset mcontrol6, 7812	# aliases
+	.cfi_offset icount, 7812	# aliases
+	.cfi_offset itrigger, 7812	# aliases
+	.cfi_offset etrigger, 7812	# aliases
+	.cfi_offset tmexttrigger, 7812	# aliases
+	.cfi_offset textra32, 7820	# aliases
+	.cfi_offset textra64, 7820	# aliases
 	.cfi_offset seed, 84
 	.cfi_offset vstart, 32
 	.cfi_offset vxsat, 36
