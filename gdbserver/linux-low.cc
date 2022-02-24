@@ -1721,57 +1721,56 @@ iterate_over_lwps (ptid_t filter,
 void
 linux_process_target::check_zombie_leaders ()
 {
-  for_each_process ([this] (process_info *proc) {
-    pid_t leader_pid = pid_of (proc);
-    struct lwp_info *leader_lp;
+  for_each_process ([this] (process_info *proc)
+    {
+      pid_t leader_pid = pid_of (proc);
+      lwp_info *leader_lp = find_lwp_pid (ptid_t (leader_pid));
 
-    leader_lp = find_lwp_pid (ptid_t (leader_pid));
+      threads_debug_printf ("leader_pid=%d, leader_lp!=NULL=%d, "
+			    "num_lwps=%d, zombie=%d",
+			    leader_pid, leader_lp!= NULL, num_lwps (leader_pid),
+			    linux_proc_pid_is_zombie (leader_pid));
 
-    threads_debug_printf ("leader_pid=%d, leader_lp!=NULL=%d, "
-			  "num_lwps=%d, zombie=%d",
-			  leader_pid, leader_lp!= NULL, num_lwps (leader_pid),
-			  linux_proc_pid_is_zombie (leader_pid));
+      if (leader_lp != NULL && !leader_lp->stopped
+	  /* Check if there are other threads in the group, as we may
+	     have raced with the inferior simply exiting.  */
+	  && !last_thread_of_process_p (leader_pid)
+	  && linux_proc_pid_is_zombie (leader_pid))
+	{
+	  /* A leader zombie can mean one of two things:
 
-    if (leader_lp != NULL && !leader_lp->stopped
-	/* Check if there are other threads in the group, as we may
-	   have raced with the inferior simply exiting.  */
-	&& !last_thread_of_process_p (leader_pid)
-	&& linux_proc_pid_is_zombie (leader_pid))
-      {
-	/* A leader zombie can mean one of two things:
+	     - It exited, and there's an exit status pending
+	     available, or only the leader exited (not the whole
+	     program).  In the latter case, we can't waitpid the
+	     leader's exit status until all other threads are gone.
 
-	   - It exited, and there's an exit status pending
-	   available, or only the leader exited (not the whole
-	   program).  In the latter case, we can't waitpid the
-	   leader's exit status until all other threads are gone.
+	     - There are 3 or more threads in the group, and a thread
+	     other than the leader exec'd.  On an exec, the Linux
+	     kernel destroys all other threads (except the execing
+	     one) in the thread group, and resets the execing thread's
+	     tid to the tgid.  No exit notification is sent for the
+	     execing thread -- from the ptracer's perspective, it
+	     appears as though the execing thread just vanishes.
+	     Until we reap all other threads except the leader and the
+	     execing thread, the leader will be zombie, and the
+	     execing thread will be in `D (disc sleep)'.  As soon as
+	     all other threads are reaped, the execing thread changes
+	     it's tid to the tgid, and the previous (zombie) leader
+	     vanishes, giving place to the "new" leader.  We could try
+	     distinguishing the exit and exec cases, by waiting once
+	     more, and seeing if something comes out, but it doesn't
+	     sound useful.  The previous leader _does_ go away, and
+	     we'll re-add the new one once we see the exec event
+	     (which is just the same as what would happen if the
+	     previous leader did exit voluntarily before some other
+	     thread execs).  */
 
-	   - There are 3 or more threads in the group, and a thread
-	   other than the leader exec'd.  On an exec, the Linux
-	   kernel destroys all other threads (except the execing
-	   one) in the thread group, and resets the execing thread's
-	   tid to the tgid.  No exit notification is sent for the
-	   execing thread -- from the ptracer's perspective, it
-	   appears as though the execing thread just vanishes.
-	   Until we reap all other threads except the leader and the
-	   execing thread, the leader will be zombie, and the
-	   execing thread will be in `D (disc sleep)'.  As soon as
-	   all other threads are reaped, the execing thread changes
-	   it's tid to the tgid, and the previous (zombie) leader
-	   vanishes, giving place to the "new" leader.  We could try
-	   distinguishing the exit and exec cases, by waiting once
-	   more, and seeing if something comes out, but it doesn't
-	   sound useful.  The previous leader _does_ go away, and
-	   we'll re-add the new one once we see the exec event
-	   (which is just the same as what would happen if the
-	   previous leader did exit voluntarily before some other
-	   thread execs).  */
+	  threads_debug_printf ("Thread group leader %d zombie "
+				"(it exited, or another thread execd).",
+				leader_pid);
 
-	threads_debug_printf ("Thread group leader %d zombie "
-			      "(it exited, or another thread execd).",
-			      leader_pid);
-
-	delete_lwp (leader_lp);
-      }
+	  delete_lwp (leader_lp);
+	}
     });
 }
 
