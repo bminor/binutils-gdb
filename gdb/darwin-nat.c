@@ -1063,7 +1063,7 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
     }
   else if (hdr->msgh_id == 0x48)
     {
-      /* MACH_NOTIFY_DEAD_NAME: notification for exit.  */
+      /* MACH_NOTIFY_DEAD_NAME: notification for exit *or* WIFSTOPPED.  */
       int res;
 
       res = darwin_decode_notify_message (hdr, &inf);
@@ -1103,15 +1103,34 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 		  return minus_one_ptid;
 		}
 	      if (WIFEXITED (wstatus))
-		status->set_exited (WEXITSTATUS (wstatus));
-	      else
+		{
+		  status->set_exited (WEXITSTATUS (wstatus));
+	          inferior_debug (4, _("darwin_wait: pid=%d exit, status=0x%x\n"),
+				  res_pid, wstatus);
+		}
+	      else if (WIFSTOPPED (wstatus))
+		{
+		  /* Ignore stopped state, it will be handled by the next
+		     exception.  */
+		  status->set_ignore ();
+		  inferior_debug (4, _("darwin_wait: pid %d received WIFSTOPPED\n"),
+				  res_pid);
+		  return minus_one_ptid;
+		}
+	      else if (WIFSIGNALED (wstatus))
 		{
 		  status->set_signalled
 		    (gdb_signal_from_host (WTERMSIG (wstatus)));
+		  inferior_debug (4, _("darwin_wait: pid=%d received signal %d\n"),
+				  res_pid, status->sig());
 		}
-
-	      inferior_debug (4, _("darwin_wait: pid=%d exit, status=0x%x\n"),
-			      res_pid, wstatus);
+	      else
+		{
+		  status->set_ignore ();
+		  warning (_("Unexpected wait status after MACH_NOTIFY_DEAD_NAME "
+		             "notification: 0x%x"), wstatus);
+		  return minus_one_ptid;
+		}
 
 	      return ptid_t (inf->pid);
 	    }
