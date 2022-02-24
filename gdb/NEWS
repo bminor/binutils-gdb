@@ -152,6 +152,12 @@ info win
   of the floating-point type, and the "f" is the marker for floating
   point.
 
+* MI changes
+
+ ** The '-add-inferior' with no option flags now inherits the
+    connection of the current inferior, this restores the behaviour of
+    GDB as it was prior to GDB 10.
+
 * New targets
 
 GNU/Linux/LoongArch    loongarch*-*-linux*

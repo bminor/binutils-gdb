@@ -1708,7 +1708,11 @@ mi_cmd_add_inferior (const char *command, char **argv, int argc)
   if (argc != 0)
     error (_("-add-inferior should be passed no arguments"));
 
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
+
   inf = add_inferior_with_spaces ();
+
+  switch_to_inferior_and_push_target (inf, false, current_inferior ());
 
   current_uiout->field_fmt ("inferior", "i%d", inf->num);
 }

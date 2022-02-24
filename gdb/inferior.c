@@ -759,11 +759,9 @@ add_inferior_with_spaces (void)
   return inf;
 }
 
-/* Switch to inferior NEW_INF, a new inferior, and unless
-   NO_CONNECTION is true, push the process_stratum_target of ORG_INF
-   to NEW_INF.  */
+/* See inferior.h.  */
 
-static void
+void
 switch_to_inferior_and_push_target (inferior *new_inf,
 				    bool no_connection, inferior *org_inf)
 {
