@@ -222,6 +222,7 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	i386/32bit-mpx.xml \
 	i386/32bit-avx512.xml \
 	i386/32bit-pkeys.xml \
+	i386/32bit-segments.xml \
 	i386/64bit-avx512.xml \
 	i386/64bit-core.xml \
 	i386/64bit-mpx.xml \
