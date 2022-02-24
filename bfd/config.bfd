@@ -184,6 +184,7 @@ alpha*)		 targ_archs=bfd_alpha_arch ;;
 am33_2.0*)	 targ_archs=bfd_mn10300_arch ;;
 arc*)		 targ_archs=bfd_arc_arch ;;
 arm*)		 targ_archs=bfd_arm_arch ;;
+amdgcn*)	 targ_archs=bfd_amdgcn_arch ;;
 bfin*)		 targ_archs=bfd_bfin_arch ;;
 c30*)		 targ_archs=bfd_tic30_arch ;;
 c4x*)		 targ_archs=bfd_tic4x_arch ;;
@@ -319,6 +320,10 @@ case "${targ}" in
     ;;
   alpha*-*-*)
     targ_defvec=alpha_ecoff_le_vec
+    want64=true
+    ;;
+  amdgcn-*-*)
+    targ_defvec=amdgcn_elf64_le_vec
     want64=true
     ;;
   ia64*-*-freebsd* | ia64*-*-netbsd* | ia64*-*-linux-* | ia64*-*-elf* | ia64*-*-kfreebsd*-gnu)

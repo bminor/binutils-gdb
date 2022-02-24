@@ -1938,6 +1938,19 @@ enum bfd_architecture
   bfd_arch_loongarch,       /* LoongArch */
 #define bfd_mach_loongarch32   1
 #define bfd_mach_loongarch64   2
+  bfd_arch_amdgcn,     /* AMDGCN */
+#define bfd_mach_amdgcn_unknown 0x000
+#define bfd_mach_amdgcn_gfx900  0x02c
+#define bfd_mach_amdgcn_gfx904  0x02e
+#define bfd_mach_amdgcn_gfx906  0x02f
+#define bfd_mach_amdgcn_gfx908  0x030
+#define bfd_mach_amdgcn_gfx90a  0x03f
+#define bfd_mach_amdgcn_gfx1010 0x033
+#define bfd_mach_amdgcn_gfx1011 0x034
+#define bfd_mach_amdgcn_gfx1012 0x035
+#define bfd_mach_amdgcn_gfx1030 0x036
+#define bfd_mach_amdgcn_gfx1031 0x037
+#define bfd_mach_amdgcn_gfx1032 0x038
   bfd_arch_last
   };
 
