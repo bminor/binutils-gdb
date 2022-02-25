@@ -3367,56 +3367,58 @@ of type @code{gdb.ExitedEvent}.  As you can see in the example the
 @code{ExitedEvent} object has an attribute which indicates the exit code of
 the inferior.
 
-The following is a listing of the event registries that are available and
-details of the events they emit:
-
-@table @code
-
-@item events.cont
-Emits @code{gdb.ThreadEvent}.
-
-Some events can be thread specific when @value{GDBN} is running in non-stop
-mode.  When represented in Python, these events all extend
-@code{gdb.ThreadEvent}.  Note, this event is not emitted directly; instead,
-events which are emitted by this or other modules might extend this event.
-Examples of these events are @code{gdb.BreakpointEvent} and
-@code{gdb.ContinueEvent}.
+Some events can be thread specific when @value{GDBN} is running in
+non-stop mode.  When represented in Python, these events all extend
+@code{gdb.ThreadEvent}.  This event is a base class and is never
+emitted directly; instead, events which are emitted by this or other
+modules might extend this event.  Examples of these events are
+@code{gdb.BreakpointEvent} and @code{gdb.ContinueEvent}.
+@code{gdb.ThreadEvent} holds the following attributes:
 
 @defvar ThreadEvent.inferior_thread
 In non-stop mode this attribute will be set to the specific thread which was
 involved in the emitted event. Otherwise, it will be set to @code{None}.
 @end defvar
 
-Emits @code{gdb.ContinueEvent} which extends @code{gdb.ThreadEvent}.
+The following is a listing of the event registries that are available and
+details of the events they emit:
 
-This event indicates that the inferior has been continued after a stop. For
-inherited attribute refer to @code{gdb.ThreadEvent} above.
+@table @code
+
+@item events.cont
+Emits @code{gdb.ContinueEvent}, which extends @code{gdb.ThreadEvent}.
+This event indicates that the inferior has been continued after a
+stop. For inherited attribute refer to @code{gdb.ThreadEvent} above.
 
 @item events.exited
-Emits @code{events.ExitedEvent} which indicates that the inferior has exited.
-@code{events.ExitedEvent} has two attributes:
+Emits @code{events.ExitedEvent}, which indicates that the inferior has
+exited.  @code{events.ExitedEvent} has two attributes:
+
 @defvar ExitedEvent.exit_code
 An integer representing the exit code, if available, which the inferior 
 has returned.  (The exit code could be unavailable if, for example,
 @value{GDBN} detaches from the inferior.) If the exit code is unavailable,
 the attribute does not exist.
 @end defvar
+
 @defvar ExitedEvent.inferior
 A reference to the inferior which triggered the @code{exited} event.
 @end defvar
 
 @item events.stop
-Emits @code{gdb.StopEvent} which extends @code{gdb.ThreadEvent}.
+Emits @code{gdb.StopEvent}, which extends @code{gdb.ThreadEvent}.
 
-Indicates that the inferior has stopped.  All events emitted by this registry
-extend StopEvent.  As a child of @code{gdb.ThreadEvent}, @code{gdb.StopEvent}
-will indicate the stopped thread when @value{GDBN} is running in non-stop
-mode.  Refer to @code{gdb.ThreadEvent} above for more details.
+Indicates that the inferior has stopped.  All events emitted by this
+registry extend @code{gdb.StopEvent}.  As a child of
+@code{gdb.ThreadEvent}, @code{gdb.StopEvent} will indicate the stopped
+thread when @value{GDBN} is running in non-stop mode.  Refer to
+@code{gdb.ThreadEvent} above for more details.
 
-Emits @code{gdb.SignalEvent} which extends @code{gdb.StopEvent}.
+Emits @code{gdb.SignalEvent}, which extends @code{gdb.StopEvent}.
 
-This event indicates that the inferior or one of its threads has received as
-signal.  @code{gdb.SignalEvent} has the following attributes:
+This event indicates that the inferior or one of its threads has
+received a signal.  @code{gdb.SignalEvent} has the following
+attributes:
 
 @defvar SignalEvent.stop_signal
 A string representing the signal received by the inferior.  A list of possible
@@ -3424,7 +3426,8 @@ signal values can be obtained by running the command @code{info signals} in
 the @value{GDBN} command prompt.
 @end defvar
 
-Also emits  @code{gdb.BreakpointEvent} which extends @code{gdb.StopEvent}.
+Also emits @code{gdb.BreakpointEvent}, which extends
+@code{gdb.StopEvent}.
 
 @code{gdb.BreakpointEvent} event indicates that one or more breakpoints have
 been hit, and has the following attributes:
@@ -3434,6 +3437,7 @@ A sequence containing references to all the breakpoints (type
 @code{gdb.Breakpoint}) that were hit.
 @xref{Breakpoints In Python}, for details of the @code{gdb.Breakpoint} object.
 @end defvar
+
 @defvar BreakpointEvent.breakpoint
 A reference to the first breakpoint that was hit.
 This function is maintained for backward compatibility and is now deprecated 
@@ -3555,7 +3559,7 @@ is removed, say via @code{remove-inferiors}.
 The event is of type @code{gdb.InferiorDeletedEvent}.  This has a single
 attribute:
 
-@defvar NewInferiorEvent.inferior
+@defvar InferiorDeletedEvent.inferior
 The inferior that is being removed, a @code{gdb.Inferior} object.
 @end defvar
 
