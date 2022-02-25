@@ -183,7 +183,7 @@ gdb_test_multiple "maint info line-table gdb.dwarf2/dw2-ranges-base.c" \
 	-re ".*linetable: \\(\\(struct linetable \\*\\) 0x0\\):\r\nNo line table.\r\n" {
 	    exp_continue
 	}
-	-re ".*linetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX\[ \t\]+LINE\[ \t\]+ADDRESS\[ \t\]+IS-STMT *\r\n" {
+	-re ".*linetable: \\(\\(struct linetable \\*\\) $hex\\):\r\nINDEX\[ \t\]+LINE\[ \t\]+ADDRESS\[ \t\]+IS-STMT\[ \t\]PROLOGUE-END *\r\n" {
 	    exp_continue
 	}
     }

@@ -116,6 +116,10 @@ enum linetable_entry_flag : unsigned
 {
   /* Indicates this PC is a good location to place a breakpoint at LINE.  */
   LEF_IS_STMT = 1 << 1,
+
+  /* Indicates this PC is a good location to place a breakpoint at the first
+     instruction past a function prologue.  */
+  LEF_PROLOGUE_END = 1 << 2,
 };
 DEF_ENUM_FLAGS_TYPE (enum linetable_entry_flag, linetable_entry_flags);
 

@@ -1398,6 +1398,10 @@ struct linetable_entry
   /* True if this PC is a good location to place a breakpoint for LINE.  */
   unsigned is_stmt : 1;
 
+  /* True if this location is a good location to place a breakpoint after a
+     function prologue.  */
+  bool prologue_end : 1;
+
   /* The address for this entry.  */
   CORE_ADDR pc;
 };

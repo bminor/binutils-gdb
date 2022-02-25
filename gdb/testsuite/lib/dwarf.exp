@@ -2269,14 +2269,13 @@ namespace eval Dwarf {
 	_op .byte $_default_is_stmt "default_is_stmt"
 	_op .byte 1 "line_base"
 	_op .byte 1 "line_range"
-	_op .byte 10 "opcode_base"
+	_op .byte 11 "opcode_base"
 
 	# The standard_opcode_lengths table.  The number of arguments
-	# for each of the standard opcodes.  Generating 9 entries here
-	# matches the use of 10 in the opcode_base above.  These 9
-	# entries match the 9 standard opcodes for DWARF2, making use
-	# of only 9 should be fine, even if we are generating DWARF3
-	# or DWARF4.
+	# for each of the standard opcodes.  Generating 10 entries here
+	# matches the use of 11 in the opcode_base above.  These 10
+	# entries match the 9 standard opcodes for DWARF2 plus
+	# DW_LNS_prologue_end from DWARF3.
 	_op .byte 0 "standard opcode 1"
 	_op .byte 1 "standard opcode 2"
 	_op .byte 1 "standard opcode 3"
@@ -2286,6 +2285,7 @@ namespace eval Dwarf {
 	_op .byte 0 "standard opcode 7"
 	_op .byte 0 "standard opcode 8"
 	_op .byte 1 "standard opcode 9"
+	_op .byte 0 "standard opcode 10"
 
 	proc include_dir {dirname} {
 	    variable _line_include_dirs
@@ -2479,6 +2479,10 @@ namespace eval Dwarf {
 
 	    proc DW_LNS_negate_stmt {} {
 		_op .byte 6
+	    }
+
+	    proc DW_LNS_set_prologue_end {} {
+		_op .byte 0x0a
 	    }
 
 	    proc DW_LNS_advance_pc {offset} {

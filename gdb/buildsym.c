@@ -725,6 +725,7 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
   e->line = line;
   e->is_stmt = (flags & LEF_IS_STMT) != 0;
   e->pc = pc;
+  e->prologue_end = (flags & LEF_PROLOGUE_END) != 0;
 }
 
 

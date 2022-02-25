@@ -10,6 +10,17 @@
 
 * DBX mode has been removed.
 
+* GDB now honours the DWARF prologue_end line-table entry flag the compiler can
+  emit to indicate where a breakpoint should be placed to break in a function
+  past its prologue.
+
+* Changed commands
+
+maintenance info line-table
+  Add a PROLOGUE-END column to the output which indicates that an
+  entry corresponds to an address where a breakpoint should be placed
+  to be at the first instruction past a function's prologue.
+
 * Python API
 
   ** New function gdb.format_address(ADDRESS, PROGSPACE, ARCHITECTURE),

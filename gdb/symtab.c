@@ -3818,6 +3818,44 @@ skip_prologue_using_lineinfo (CORE_ADDR func_addr, struct symtab *symtab)
   return func_addr;
 }
 
+/* Try to locate the address where a breakpoint should be placed past the
+   prologue of function starting at FUNC_ADDR using the line table.
+
+   Return the address associated with the first entry in the line-table for
+   the function starting at FUNC_ADDR which has prologue_end set to true if
+   such entry exist, otherwise return an empty optional.  */
+
+static gdb::optional<CORE_ADDR>
+skip_prologue_using_linetable (CORE_ADDR func_addr)
+{
+  CORE_ADDR start_pc, end_pc;
+
+  if (!find_pc_partial_function (func_addr, nullptr, &start_pc, &end_pc))
+    return {};
+
+  const struct symtab_and_line prologue_sal = find_pc_line (start_pc, 0);
+  if (prologue_sal.symtab != nullptr
+      && prologue_sal.symtab->language () != language_asm)
+    {
+      struct linetable *linetable = prologue_sal.symtab->linetable ();
+
+      auto it = std::lower_bound
+	(linetable->item, linetable->item + linetable->nitems, start_pc,
+	 [] (const linetable_entry &lte, CORE_ADDR pc) -> bool
+	 {
+	   return lte.pc < pc;
+	 });
+
+      for (;
+	   it < linetable->item + linetable->nitems && it->pc <= end_pc;
+	   it++)
+	if (it->prologue_end)
+	  return {it->pc};
+    }
+
+  return {};
+}
+
 /* Adjust SAL to the first instruction past the function prologue.
    If the PC was explicitly specified, the SAL is not changed.
    If the line number was explicitly specified then the SAL can still be
@@ -3900,6 +3938,21 @@ skip_prologue_sal (struct symtab_and_line *sal)
   do
     {
       pc = saved_pc;
+
+      /* Check if the compiler explicitly indicated where a breakpoint should
+         be placed to skip the prologue.  */
+      if (skip)
+	{
+	  gdb::optional<CORE_ADDR> linetable_pc
+	    = skip_prologue_using_linetable (pc);
+	  if (linetable_pc)
+	    {
+	      pc = *linetable_pc;
+	      start_sal = find_pc_sect_line (pc, section, 0);
+	      force_skip = 1;
+	      continue;
+	    }
+	}
 
       /* If the function is in an unmapped overlay, use its unmapped LMA address,
 	 so that gdbarch_skip_prologue has something unique to work on.  */
