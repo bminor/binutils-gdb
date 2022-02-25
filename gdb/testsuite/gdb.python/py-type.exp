@@ -296,6 +296,38 @@ proc test_is_signed {lang} {
     gdb_test "python print(gdb.parse_and_eval ('&uu').type.is_signed == False)" "True"
 }
 
+# Compare the types of different symbols from the inferior, we're
+# checking that the types of different sybols of the same declared
+# type, are equal (in Python).
+proc test_type_equality {} {
+
+    foreach_with_prefix type { char int } {
+	gdb_test_no_output "python v1 = gdb.parse_and_eval('global_unsigned_${type}')"
+	gdb_test_no_output "python v2 = gdb.parse_and_eval('global_${type}')"
+	gdb_test_no_output "python v3 = gdb.parse_and_eval('global_signed_${type}')"
+
+	gdb_test_no_output "python t1 = v1.type"
+	gdb_test_no_output "python t2 = v2.type"
+	gdb_test_no_output "python t3 = v3.type"
+
+	if { $type == "char" } {
+	    # In C/C++ there's an interesting property of 'char' based types;
+	    # 'signed char', 'unsigned char', and 'char' are all distinct
+	    # types.  Weird, right?  Here we check that this property is
+	    # visible to Python code.
+	    gdb_test "python print(t1 != t2)" "True"
+	    gdb_test "python print(t1 != t3)" "True"
+	    gdb_test "python print(t2 != t3)" "True"
+	} else {
+	    # For 'int' type, when neither signed or unsigned is given
+	    # we expect the type to be signed by default.
+	    gdb_test "python print(t1 != t2)" "True"
+	    gdb_test "python print(t1 != t3)" "True"
+	    gdb_test "python print(t2 == t3)" "True"
+	}
+    }
+}
+
 # Test the gdb.Type.is_scalar property.
 proc test_is_scalar { lang } {
     if {$lang == "c++"} {
@@ -347,6 +379,7 @@ if { [build_inferior "${binfile}" "c"] == 0 } {
       test_enums
       test_is_scalar "c"
       test_is_signed "c"
+      test_type_equality
   }
 }
 
@@ -362,5 +395,6 @@ if { [build_inferior "${binfile}-cxx" "c++"] == 0 } {
       test_enums
       test_is_scalar "c++"
       test_is_signed "c++"
+      test_type_equality
   }
 }
