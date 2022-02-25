@@ -16888,6 +16888,21 @@ also use the @value{GDBN} command-line word completion facilities to list the
 available choices, or to finish the type list for you.
 @xref{Completion,, Command Completion}, for details on how to do this.
 
+@item @r{Breakpoints in template functions}
+
+Similar to how overloaded symbols are handled, @value{GDBN} will ignore
+template parameter lists when it encounters a symbol which includes a
+C@t{++} template.  This permits setting breakpoints on families of template functions
+or functions whose parameters include template types.
+
+The @kbd{-qualified} flag may be used to override this behavior, causing
+@value{GDBN} to search for a specific function or type.
+
+The @value{GDBN} command-line word completion facility also understands
+template parameters and may be used to list available choices or finish
+template parameter lists for you. @xref{Completion,, Command Completion}, for
+details on how to do this.
+
 @item @r{Breakpoints in functions with ABI tags}
 
 The GNU C@t{++} compiler introduced the notion of ABI ``tags'', which

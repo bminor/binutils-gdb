@@ -1692,6 +1692,12 @@ cp_search_name_hash (const char *search_name)
 	  && string[5] != ':')
 	break;
 
+      /* Ignore template parameter lists.  */
+      if (string[0] == '<'
+	  && string[1] != '(' && string[1] != '<' && string[1] != '='
+	  && string[1] != ' ' && string[1] != '\0')
+	break;
+
       hash = SYMBOL_HASH_NEXT (hash, *string);
     }
   return hash;
@@ -1745,7 +1751,7 @@ cp_symbol_name_matches_1 (const char *symbol_search_name,
   while (true)
     {
       if (strncmp_iw_with_mode (sname, lookup_name, lookup_name_len,
-				mode, language_cplus, match_for_lcd) == 0)
+				mode, language_cplus, match_for_lcd, true) == 0)
 	{
 	  if (comp_match_res != NULL)
 	    {

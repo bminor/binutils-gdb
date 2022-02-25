@@ -614,3 +614,70 @@ gdb_test "print Garply<Garply<char> >::garply" \
 # Now should work fine
 gdb_test "break Garply<Garply<char> >::garply" \
     "Breakpoint \[0-9\]* at $hex: file .*templates.cc, line.*"
+
+#
+# Template wild-matching tests
+#
+
+# Turn off "ask" when multiple symbols are seen.
+gdb_test_no_output "set multiple-symbols all"
+
+# Test setting breakpoints in a method of all class template instantiations,
+# including overloads.
+gdb_test "break Foo::foo"  "Breakpoint.*at.* \\(3 locations\\)"
+foreach t [list "int" "char" "volatile char *"] {
+    gdb_breakpoint "Foo<$t>::foo (int, $t)"
+    gdb_breakpoint "Foo::foo (int, $t)"
+}
+
+gdb_test "break Bar::bar" "Breakpoint.*at.* \\(2 locations\\)"
+gdb_test "break Bar::bar (int, int)" "Breakpoint.*at.* \\(2 locations\\)"
+foreach val [list 1 33] {
+    gdb_breakpoint "Bar<int, $val>::bar (int, int)"
+}
+
+# Test setting breakpoints in a member function template of a class template,
+# including overloads.
+gdb_test "break Foozle::fogey" "Breakpoint.*at.* \\(9 locations\\)" \
+    "break at template method fogey"
+foreach t [list "int" "char" "Empty<int>"] {
+    gdb_test "break Foozle::fogey ($t)" "Breakpoint.*at.* \\(3 locations\\)"
+    gdb_test "break Foozle::fogey<$t>" "Breakpoint.*at.* \\(3 locations\\)"
+    foreach u [list "int" "char" "Empty<int>"] {
+	gdb_breakpoint "Foozle<$t>::fogey<$u>" message
+	gdb_breakpoint "Foozle<$t>::fogey<$u> ($u)" message
+    }
+}
+
+# Test templated operators < and <<.  Restrict results to only the test
+# source file.
+# operator<:
+#   1. operator< (const T2&, const T2&)
+#   2. operator< (const T2&, char)
+#   3. operator< <Empty<int>>
+#   4. operator< <Foozle<in>>
+#
+# operator<<:
+#   1. operator<< <Empty<int>>
+#   2. operator<< <Foozle<int>>
+gdb_test "break -source $srcfile -func operator<" \
+    "Breakpoint.*at.* \\(4 locations\\)"
+gdb_test "break -source $srcfile -func operator<<" \
+    "Breakpoint.*at.* \\(2 locations\\)"
+foreach t [list "Empty" "Foozle"] {
+    set tt "$t<int>"
+    gdb_breakpoint "operator< <$tt>" message
+    gdb_breakpoint "operator<< <$tt>" message
+
+    # Try a specific instance, both with and without whitespace
+    # after the template-template parameter.
+    gdb_breakpoint "operator< <$tt> ($tt&, $tt&)" message
+    gdb_breakpoint "operator< <$tt > ($tt&, $tt&)" message
+    gdb_breakpoint "operator<< <$tt> ($tt&, $tt&)" message
+    gdb_breakpoint "operator<< <$tt > ($tt&, $tt&)" message
+}
+
+# Test that "-qualified" finds no matching locations.
+gdb_test_no_output "set breakpoint pending off"
+gdb_test "break -qualified Foozle::fogey" \
+    "Function \"Foozle::fogey\" not defined."

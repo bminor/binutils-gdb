@@ -3,6 +3,20 @@
 
 *** Changes since GDB 11
 
+* Improved C++ template support
+
+  GDB now treats functions/types involving C++ templates like it does function
+  overloads.  Users may omit parameter lists to set breakpoints on families of
+  template functions, including types/functions composed of multiple template types:
+
+  (gdb) break template_func(template_1, int)
+
+  The above will set breakpoints at every function `template_func' where
+  the first function parameter is any template type named `template_1' and
+  the second function parameter is `int'.
+
+  TAB completion also gains similar improvements.
+
 * The FreeBSD native target now supports async mode.
 
 * Configure changes

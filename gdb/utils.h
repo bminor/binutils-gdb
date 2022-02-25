@@ -63,11 +63,14 @@ enum class strncmp_iw_mode
 
    MATCH_FOR_LCD is passed down so that the function can mark parts of
    the symbol name as ignored for completion matching purposes (e.g.,
-   to handle abi tags).  */
+   to handle abi tags).  If IGNORE_TEMPLATE_PARAMS is true, all template
+   parameter lists will be ignored when language is C++.  */
+
 extern int strncmp_iw_with_mode
   (const char *string1, const char *string2, size_t string2_len,
    strncmp_iw_mode mode, enum language language,
-   completion_match_for_lcd *match_for_lcd = NULL);
+   completion_match_for_lcd *match_for_lcd = NULL,
+   bool ignore_template_params = false);
 
 /* Do a strncmp() type operation on STRING1 and STRING2, ignoring any
    differences in whitespace.  STRING2_LEN is STRING2's length.

@@ -2252,13 +2252,45 @@ skip_abi_tag (const char **name)
   return false;
 }
 
+/* If *NAME points at a template parameter list, skip it and return true.
+   Otherwise do nothing and return false.  */
+
+static bool
+skip_template_parameter_list (const char **name)
+{
+  const char *p = *name;
+
+  if (*p == '<')
+    {
+      const char *template_param_list_end = find_toplevel_char (p + 1, '>');
+
+      if (template_param_list_end == NULL)
+	return false;
+
+      p = template_param_list_end + 1;
+
+      /* Skip any whitespace that might occur after the closing of the
+	 parameter list, but only if it is the end of parameter list.  */
+      const char *q = p;
+      while (ISSPACE (*q))
+	++q;
+      if (*q == '>')
+	p = q;
+      *name = p;
+      return true;
+    }
+
+  return false;
+}
+
 /* See utils.h.  */
 
 int
 strncmp_iw_with_mode (const char *string1, const char *string2,
 		      size_t string2_len, strncmp_iw_mode mode,
 		      enum language language,
-		      completion_match_for_lcd *match_for_lcd)
+		      completion_match_for_lcd *match_for_lcd,
+		      bool ignore_template_params)
 {
   const char *string1_start = string1;
   const char *end_str2 = string2 + string2_len;
@@ -2306,6 +2338,48 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
 
 	  while (ISSPACE (*string1))
 	    string1++;
+	}
+
+      /* Skip template parameters in STRING1 if STRING2 does not contain
+	 any.  E.g.:
+
+	 Case 1: User is looking for all functions named "foo".
+	 string1: foo <...> (...)
+	 string2: foo
+
+	 Case 2: User is looking for all methods named "foo" in all template
+	 class instantiations.
+	 string1: Foo<...>::foo <...> (...)
+	 string2: Foo::foo (...)
+
+	 Case 3: User is looking for a specific overload of a template
+	 function or method.
+	 string1: foo<...>
+	 string2: foo(...)
+
+	 Case 4: User is looking for a specific overload of a specific
+	 template instantiation.
+	 string1: foo<A> (...)
+	 string2: foo<B> (...)
+
+	 Case 5: User is looking wild parameter match.
+	 string1: foo<A<a<b<...> > > > (...)
+	 string2: foo<A
+      */
+      if (language == language_cplus && ignore_template_params
+	  && *string1 == '<' && *string2 != '<')
+	{
+	  /* Skip any parameter list in STRING1.  */
+	  const char *template_start = string1;
+
+	  if (skip_template_parameter_list (&string1))
+	    {
+	      /* Don't mark the parameter list ignored if the user didn't
+		 try to ignore it.  [Case #5 above]  */
+	      if (*string2 != '\0'
+		  && match_for_lcd != NULL && template_start != string1)
+		match_for_lcd->mark_ignored_range (template_start, string1);
+	    }
 	}
 
       if (*string1 == '\0' || string2 == end_str2)
@@ -2415,6 +2489,12 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
 		  if (*string1 == '\0' || string2 == end_str2)
 		    break;
 		  if (*string1 == '(' || *string2 == '(')
+		    break;
+
+		  /* If STRING1 or STRING2 starts with a template
+		     parameter list, break out of operator processing.  */
+		  skip_ws (string1, string2, end_str2);
+		  if (*string1 == '<' || *string2 == '<')
 		    break;
 		}
 
