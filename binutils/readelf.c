@@ -4284,6 +4284,17 @@ get_osabi_name (Filedata * filedata, unsigned int osabi)
       if (osabi >= 64)
 	switch (filedata->file_header.e_machine)
 	  {
+	  case EM_AMDGPU:
+	    switch (osabi)
+	      {
+	      case ELFOSABI_AMDGPU_HSA:    return "AMD HSA";
+	      case ELFOSABI_AMDGPU_PAL:    return "AMD PAL";
+	      case ELFOSABI_AMDGPU_MESA3D: return "AMD Mesa3D";
+	      default:
+		break;
+	      }
+	    break;
+
 	  case EM_ARM:
 	    switch (osabi)
 	      {
