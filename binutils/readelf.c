@@ -46,6 +46,10 @@
 #include <zlib.h>
 #include <wchar.h>
 
+#if defined HAVE_MSGPACK
+#include <msgpack.h>
+#endif
+
 #if __GNUC__ >= 2
 /* Define BFD64 here, even if our default architecture is 32 bit ELF
    as this will allow us to read in and parse 64bit and 32bit ELF files.
@@ -21307,6 +21311,177 @@ print_gnu_build_attribute_name (Elf_Internal_Note * pnote)
   return true;
 }
 
+/* Print the contents of PNOTE as hex.  */
+
+static void
+print_note_contents_hex (Elf_Internal_Note *pnote)
+{
+  if (pnote->descsz)
+    {
+      unsigned long i;
+
+      printf (_("   description data: "));
+      for (i = 0; i < pnote->descsz; i++)
+	printf ("%02x ", pnote->descdata[i] & 0xff);
+      if (!do_wide)
+	printf ("\n");
+    }
+
+  if (do_wide)
+    printf ("\n");
+}
+
+#if defined HAVE_MSGPACK
+
+static void
+print_indents (int n)
+{
+  printf ("    ");
+
+  for (int i = 0; i < n; i++)
+    printf ("  ");
+}
+
+/* Print OBJ in human-readable form.  */
+
+static void
+dump_msgpack_obj (const msgpack_object *obj, int indent)
+{
+  switch (obj->type)
+    {
+    case MSGPACK_OBJECT_NIL:
+      printf ("(nil)");
+      break;
+
+    case MSGPACK_OBJECT_BOOLEAN:
+      printf ("%s", obj->via.boolean ? "true" : "false");
+      break;
+
+    case MSGPACK_OBJECT_POSITIVE_INTEGER:
+      printf ("%" PRIu64, obj->via.u64);
+      break;
+
+    case MSGPACK_OBJECT_NEGATIVE_INTEGER:
+      printf ("%" PRIi64, obj->via.i64);
+      break;
+
+    case MSGPACK_OBJECT_FLOAT32:
+    case MSGPACK_OBJECT_FLOAT64:
+      printf ("%f", obj->via.f64);
+      break;
+
+    case MSGPACK_OBJECT_STR:
+      printf ("\"%.*s\"", obj->via.str.size, obj->via.str.ptr);
+      break;
+
+    case MSGPACK_OBJECT_ARRAY:
+      {
+	const msgpack_object_array *array = &obj->via.array;
+
+	printf ("[\n");
+	++indent;
+
+	for (uint32_t i = 0; i < array->size; ++i)
+	  {
+	    const msgpack_object *item = &array->ptr[i];
+
+	    print_indents (indent);
+	    dump_msgpack_obj (item, indent);
+	    printf (",\n");
+	  }
+
+	--indent;
+	print_indents (indent);
+	printf ("]");
+	break;
+      }
+      break;
+
+    case MSGPACK_OBJECT_MAP:
+      {
+	const msgpack_object_map *map = &obj->via.map;
+
+	printf ("{\n");
+	++indent;
+
+	for (uint32_t i = 0; i < map->size; ++i)
+	  {
+	    const msgpack_object_kv *kv = &map->ptr[i];
+	    const msgpack_object *key = &kv->key;
+	    const msgpack_object *val = &kv->val;
+
+	    print_indents (indent);
+	    dump_msgpack_obj (key, indent);
+	    printf (": ");
+	    dump_msgpack_obj (val, indent);
+
+	    printf (",\n");
+	  }
+
+	--indent;
+	print_indents (indent);
+	printf ("}");
+
+	break;
+      }
+
+    case MSGPACK_OBJECT_BIN:
+      printf ("(bin)");
+      break;
+
+    case MSGPACK_OBJECT_EXT:
+      printf ("(ext)");
+      break;
+    }
+}
+
+static void
+dump_msgpack (const msgpack_unpacked *msg)
+{
+  print_indents (0);
+  dump_msgpack_obj (&msg->data, 0);
+  printf ("\n");
+}
+
+#endif /* defined HAVE_MSGPACK */
+
+static bool
+print_amdgpu_note (Elf_Internal_Note *pnote)
+{
+#if defined HAVE_MSGPACK
+  /* If msgpack is available, decode and dump the note's content.  */
+  bool ret;
+  msgpack_unpacked msg;
+  msgpack_unpack_return msgpack_ret;
+
+  assert (pnote->type == NT_AMDGPU_METADATA);
+
+  msgpack_unpacked_init (&msg);
+  msgpack_ret = msgpack_unpack_next (&msg, pnote->descdata, pnote->descsz,
+				     NULL);
+
+  switch (msgpack_ret)
+    {
+    case MSGPACK_UNPACK_SUCCESS:
+      dump_msgpack (&msg);
+      ret = true;
+      break;
+
+    default:
+      error (_("failed to unpack msgpack contents in NT_AMDGPU_METADATA note"));
+      ret = false;
+      break;
+    }
+
+  msgpack_unpacked_destroy (&msg);
+  return ret;
+#else
+  /* msgpack is not available, dump contents as hex.  */
+  print_note_contents_hex (pnote);
+  return true;
+#endif
+}
+
 /* Note that by the ELF standard, the name field is already null byte
    terminated, and namesz includes the terminating null byte.
    I.E. the value of namesz for the name "FSF" is 4.
@@ -21404,21 +21579,11 @@ process_note (Elf_Internal_Note *  pnote,
 	   && (pnote->type == NT_GNU_BUILD_ATTRIBUTE_OPEN
 	       || pnote->type == NT_GNU_BUILD_ATTRIBUTE_FUNC))
     return print_gnu_build_attribute_description (pnote, filedata);
+  else if (startswith (pnote->namedata, "AMDGPU")
+	   && pnote->type == NT_AMDGPU_METADATA)
+    return print_amdgpu_note (pnote);
 
-  if (pnote->descsz)
-    {
-      unsigned long i;
-
-      printf (_("   description data: "));
-      for (i = 0; i < pnote->descsz; i++)
-	printf ("%02x ", pnote->descdata[i] & 0xff);
-      if (!do_wide)
-	printf ("\n");
-    }
-
-  if (do_wide)
-    printf ("\n");
-
+  print_note_contents_hex (pnote);
   return true;
 }
 
