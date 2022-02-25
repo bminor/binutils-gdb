@@ -1263,6 +1263,12 @@ The @code{gdb.Objfile} that this type was defined in, or @code{None} if
 there is no associated objfile.
 @end defvar
 
+@defvar Type.is_scalar
+This property is @code{True} if the type is a scalar type, otherwise,
+this property is @code{False}.  Examples of non-scalar types include
+structures, unions, and classes.
+@end defvar
+
 The following methods are provided:
 
 @defun Type.fields ()

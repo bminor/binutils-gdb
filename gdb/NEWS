@@ -232,6 +232,9 @@ GNU/Linux/LoongArch    loongarch*-*-linux*
      state information, or None, if there is no such additional
      information.
 
+  ** New read-only attribute gdb.Type.is_scalar, which is True for
+     scalar types, and False for all other types.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on OpenRISC GNU/Linux.
