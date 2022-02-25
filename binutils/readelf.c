@@ -19724,6 +19724,22 @@ decode_x86_compat_2_isa (unsigned int bitmask)
     }
 }
 
+static const char *
+get_amdgpu_elf_note_type (unsigned int e_type)
+{
+  switch (e_type)
+    {
+    case NT_AMDGPU_METADATA:
+      return _("NT_AMDGPU_METADATA (code object metadata)");
+    default:
+      {
+	static char buf[64];
+	snprintf (buf, sizeof (buf), _("Unknown note type: (0x%08x)"), e_type);
+	return buf;
+      }
+    }
+}
+
 static void
 decode_x86_isa (unsigned int bitmask)
 {
@@ -21312,6 +21328,10 @@ process_note (Elf_Internal_Note *  pnote,
   else if (startswith (pnote->namedata, "GNU"))
     /* GNU-specific object file notes.  */
     nt = get_gnu_elf_note_type (pnote->type);
+
+  else if (startswith (pnote->namedata, "AMDGPU"))
+    /* AMDGPU-specific object file notes.  */
+    nt = get_amdgpu_elf_note_type (pnote->type);
 
   else if (startswith (pnote->namedata, "FreeBSD"))
     /* FreeBSD-specific core file notes.  */
