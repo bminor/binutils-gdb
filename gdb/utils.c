@@ -2483,6 +2483,569 @@ strncmp_iw_with_mode (const char *string1, const char *string2,
     return 1;
 }
 
+#if GDB_SELF_TEST
+
+/* Unit tests for strncmp_iw_with_mode.  */
+
+#define CHECK_MATCH_LM(S1, S2, MODE, LANG, LCD)			\
+  SELF_CHECK (strncmp_iw_with_mode ((S1), (S2), strlen ((S2)),	\
+				    strncmp_iw_mode::MODE,				\
+				    (LANG), (LCD)) == 0)
+
+#define CHECK_MATCH_LANG(S1, S2, MODE, LANG)			\
+  CHECK_MATCH_LM ((S1), (S2), MODE, (LANG), nullptr)
+
+#define CHECK_MATCH(S1, S2, MODE)						\
+  CHECK_MATCH_LANG ((S1), (S2), MODE, language_minimal)
+
+#define CHECK_NO_MATCH_LM(S1, S2, MODE, LANG, LCD)		\
+  SELF_CHECK (strncmp_iw_with_mode ((S1), (S2), strlen ((S2)),	\
+				    strncmp_iw_mode::MODE,				\
+				    (LANG)) != 0)
+
+#define CHECK_NO_MATCH_LANG(S1, S2, MODE, LANG)		\
+  CHECK_NO_MATCH_LM ((S1), (S2), MODE, (LANG), nullptr)
+
+#define CHECK_NO_MATCH(S1, S2, MODE)				       \
+  CHECK_NO_MATCH_LANG ((S1), (S2), MODE, language_minimal)
+
+static void
+check_scope_operator (enum language lang)
+{
+  CHECK_MATCH_LANG ("::", "::", NORMAL, lang);
+  CHECK_MATCH_LANG ("::foo", "::", NORMAL, lang);
+  CHECK_MATCH_LANG ("::foo", "::foo", NORMAL, lang);
+  CHECK_MATCH_LANG (" :: foo ", "::foo", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b", "a ::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b", "a\t::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b", "a \t::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b", "a\t ::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b", "a:: b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b", "a::\tb", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b", "a:: \tb", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b", "a::\t b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b", "a :: b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b", "a ::\tb", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b", "a\t:: b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b", "a \t::\t b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a ::b", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a\t::b", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a \t::b", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a\t ::b", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a:: b", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::\tb", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a:: \tb", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::\t b", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a :: b", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a ::\tb", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a\t:: b", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a \t::\t b", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b::c", "a::b::c", NORMAL, lang);
+  CHECK_MATCH_LANG (" a:: b:: c", "a::b::c", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b::c", " a:: b:: c", NORMAL, lang);
+  CHECK_MATCH_LANG ("a ::b ::c", "a::b::c", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b::c", "a :: b:: c", NORMAL, lang);
+  CHECK_MATCH_LANG ("\ta::\tb::\tc", "\ta::\tb::\tc", NORMAL, lang);
+  CHECK_MATCH_LANG ("a\t::b\t::c\t", "a\t::b\t::c\t", NORMAL, lang);
+  CHECK_MATCH_LANG (" \ta:: \tb:: \tc", " \ta:: \tb:: \tc", NORMAL, lang);
+  CHECK_MATCH_LANG ("\t a::\t b::\t c", "\t a::\t b::\t c", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b::c", "\ta::\tb::\tc", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b::c", "a\t::b\t::c\t", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b::c", " \ta:: \tb:: \tc", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b::c", "\t a::\t b::\t c", NORMAL, lang);
+  CHECK_MATCH_LANG ("\ta::\tb::\tc", "a::b::c", NORMAL, lang);
+  CHECK_MATCH_LANG ("a\t::b\t::c\t", "a::b::c", NORMAL, lang);
+  CHECK_MATCH_LANG (" \ta:: \tb:: \tc", "a::b::c", NORMAL, lang);
+  CHECK_MATCH_LANG ("\t a::\t b::\t c", "a::b::c", NORMAL, lang);
+  CHECK_MATCH_LANG ("a :: b:: c\t", "\ta :: b\t::  c\t\t", NORMAL, lang);
+  CHECK_MATCH_LANG ("  a::\t  \t    b::     c\t", "\ta ::b::  c\t\t",
+	      NORMAL, lang);
+  CHECK_MATCH_LANG ("a      :: b               :: \t\t\tc\t",
+	      "\t\t\t\ta        ::   \t\t\t        b             \t\t::c",
+	      NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b()", "a", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b()", "a::", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b()", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b(a)", "a", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b(a)", "a::", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b(a)", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b(a,b)", "a", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b(a,b)", "a::", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b(a,b)", "a::b", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b(a,b,c)", "a", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b(a,b,c)", "a::", NORMAL, lang);
+  CHECK_MATCH_LANG ("a::b(a,b,c)", "a::b", NORMAL, lang);
+
+  CHECK_NO_MATCH_LANG ("a::", "::a", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("::a", "::a()", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("::", "::a", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a:::b", "a::b", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b()", "a::b(a)", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b(a)", "a::b()", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b(a,b)", "a::b(a,a)", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b", "a()", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b", "a::()", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b", "a::b()", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b", "a(a)", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b", "a::(a)", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b", "a::b()", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b", "a(a,b)", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b", "a::(a,b)", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b", "a::b(a,b)", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b", "a(a,b,c)", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b", "a::(a,b,c)", NORMAL, lang);
+  CHECK_NO_MATCH_LANG ("a::b", "a::b(a,b,c)", NORMAL, lang);
+}
+
+/* Callback for strncmp_iw_with_mode unit tests.  */
+
+static void
+strncmp_iw_with_mode_tests ()
+{
+  /* Some of the following tests are nonsensical, but could be input by a
+     deranged script (or user).  */
+
+  /* strncmp_iw_mode::NORMAL: strcmp()-like but ignore any whitespace...  */
+
+  CHECK_MATCH ("", "", NORMAL);
+  CHECK_MATCH ("foo", "foo", NORMAL);
+  CHECK_MATCH (" foo", "foo", NORMAL);
+  CHECK_MATCH ("foo ", "foo", NORMAL);
+  CHECK_MATCH (" foo ", "foo", NORMAL);
+  CHECK_MATCH ("  foo", "foo", NORMAL);
+  CHECK_MATCH ("foo  ", "foo", NORMAL);
+  CHECK_MATCH ("  foo  ", "foo", NORMAL);
+  CHECK_MATCH ("\tfoo", "foo", NORMAL);
+  CHECK_MATCH ("foo\t", "foo", NORMAL);
+  CHECK_MATCH ("\tfoo\t", "foo", NORMAL);
+  CHECK_MATCH (" \tfoo \t", "foo", NORMAL);
+  CHECK_MATCH ("\t foo\t ", "foo", NORMAL);
+  CHECK_MATCH ("\t \t     \t\t\t\t   foo\t\t\t  \t\t   \t   \t    \t  \t ",
+	       "foo", NORMAL);
+  CHECK_MATCH ("foo",
+	       "\t \t     \t\t\t\t   foo\t\t\t  \t\t   \t   \t    \t  \t ",
+	       NORMAL);
+  CHECK_MATCH ("foo bar", "foo", NORMAL);
+  CHECK_NO_MATCH ("foo", "bar", NORMAL);
+  CHECK_NO_MATCH ("foo bar", "foobar", NORMAL);
+  CHECK_NO_MATCH (" foo ", "bar", NORMAL);
+  CHECK_NO_MATCH ("foo", " bar ", NORMAL);
+  CHECK_NO_MATCH (" \t\t    foo\t\t ", "\t    \t    \tbar\t", NORMAL);
+  CHECK_NO_MATCH ("@!%&", "@!%&foo", NORMAL);
+
+  /* ... and function parameters in STRING1.  */
+  CHECK_MATCH ("foo()", "foo()", NORMAL);
+  CHECK_MATCH ("foo ()", "foo()", NORMAL);
+  CHECK_MATCH ("foo  ()", "foo()", NORMAL);
+  CHECK_MATCH ("foo\t()", "foo()", NORMAL);
+  CHECK_MATCH ("foo\t  ()", "foo()", NORMAL);
+  CHECK_MATCH ("foo  \t()", "foo()", NORMAL);
+  CHECK_MATCH ("foo()", "foo ()", NORMAL);
+  CHECK_MATCH ("foo()", "foo  ()", NORMAL);
+  CHECK_MATCH ("foo()", "foo\t()", NORMAL);
+  CHECK_MATCH ("foo()", "foo\t ()", NORMAL);
+  CHECK_MATCH ("foo()", "foo \t()", NORMAL);
+  CHECK_MATCH ("foo()", "foo()", NORMAL);
+  CHECK_MATCH ("foo ()", "foo ()", NORMAL);
+  CHECK_MATCH ("foo  ()", "foo  ()", NORMAL);
+  CHECK_MATCH ("foo\t()", "foo\t()", NORMAL);
+  CHECK_MATCH ("foo\t  ()", "foo\t ()", NORMAL);
+  CHECK_MATCH ("foo  \t()", "foo \t()", NORMAL);
+  CHECK_MATCH ("foo(a)", "foo(a)", NORMAL);
+  CHECK_MATCH ("foo( a)", "foo(a)", NORMAL);
+  CHECK_MATCH ("foo(a )", "foo(a)", NORMAL);
+  CHECK_MATCH ("foo(\ta)", "foo(a)", NORMAL);
+  CHECK_MATCH ("foo(a\t)", "foo(a)", NORMAL);
+  CHECK_MATCH ("foo(\t a)", "foo(a)", NORMAL);
+  CHECK_MATCH ("foo( \ta)", "foo(a)", NORMAL);
+  CHECK_MATCH ("foo(a\t )", "foo(a)", NORMAL);
+  CHECK_MATCH ("foo(a \t)", "foo(a)", NORMAL);
+  CHECK_MATCH ("foo( a )", "foo(a)", NORMAL);
+  CHECK_MATCH ("foo(\ta\t)", "foo(a)", NORMAL);
+  CHECK_MATCH ("foo(\t a\t )", "foo(a)", NORMAL);
+  CHECK_MATCH ("foo( \ta \t)", "foo(a)", NORMAL);
+  CHECK_MATCH ("foo(a)", "foo( a)", NORMAL);
+  CHECK_MATCH ("foo(a)", "foo(a )", NORMAL);
+  CHECK_MATCH ("foo(a)", "foo(\ta)", NORMAL);
+  CHECK_MATCH ("foo(a)", "foo(a\t)", NORMAL);
+  CHECK_MATCH ("foo(a)", "foo(\t a)", NORMAL);
+  CHECK_MATCH ("foo(a)", "foo( \ta)", NORMAL);
+  CHECK_MATCH ("foo(a)", "foo(a\t )", NORMAL);
+  CHECK_MATCH ("foo(a)", "foo(a \t)", NORMAL);
+  CHECK_MATCH ("foo(a)", "foo( a )", NORMAL);
+  CHECK_MATCH ("foo(a)", "foo(\ta\t)", NORMAL);
+  CHECK_MATCH ("foo(a)", "foo(\t a\t )", NORMAL);
+  CHECK_MATCH ("foo(a)", "foo( \ta \t)", NORMAL);
+  CHECK_MATCH ("foo(a,b)", "foo(a,b)", NORMAL);
+  CHECK_MATCH ("foo(a ,b)", "foo(a,b)", NORMAL);
+  CHECK_MATCH ("foo(a\t,b)", "foo(a,b)", NORMAL);
+  CHECK_MATCH ("foo(a,\tb)", "foo(a,b)", NORMAL);
+  CHECK_MATCH ("foo(a\t,\tb)", "foo(a,b)", NORMAL);
+  CHECK_MATCH ("foo(a \t,b)", "foo(a,b)", NORMAL);
+  CHECK_MATCH ("foo(a\t ,b)", "foo(a,b)", NORMAL);
+  CHECK_MATCH ("foo(a,\tb)", "foo(a,b)", NORMAL);
+  CHECK_MATCH ("foo(a, \tb)", "foo(a,b)", NORMAL);
+  CHECK_MATCH ("foo(a,\t b)", "foo(a,b)", NORMAL);
+  CHECK_MATCH ("foo(a,b)", "foo(a ,b)", NORMAL);
+  CHECK_MATCH ("foo(a,b)", "foo(a\t,b)", NORMAL);
+  CHECK_MATCH ("foo(a,b)", "foo(a,\tb)", NORMAL);
+  CHECK_MATCH ("foo(a,b)", "foo(a\t,\tb)", NORMAL);
+  CHECK_MATCH ("foo(a,b)", "foo(a \t,b)", NORMAL);
+  CHECK_MATCH ("foo(a,b)", "foo(a\t ,b)", NORMAL);
+  CHECK_MATCH ("foo(a,b)", "foo(a,\tb)", NORMAL);
+  CHECK_MATCH ("foo(a,b)", "foo(a, \tb)", NORMAL);
+  CHECK_MATCH ("foo(a,b)", "foo(a,\t b)", NORMAL);
+  CHECK_MATCH ("foo(a,b,c,d)", "foo(a,b,c,d)", NORMAL);
+  CHECK_MATCH (" foo ( a , b , c , d ) ", "foo(a,b,c,d)", NORMAL);
+  CHECK_MATCH (" foo ( a , b , c , d ) ", "foo( a , b , c , d )", NORMAL);
+  CHECK_MATCH ("foo &\t*(\ta b    *\t\t&)", "foo", NORMAL);
+  CHECK_MATCH ("foo &\t*(\ta b    *\t\t&)", "foo&*(a b * &)", NORMAL);
+  CHECK_MATCH ("foo(a) b", "foo(a)", NORMAL);
+  CHECK_MATCH ("*foo(*a&)", "*foo", NORMAL);
+  CHECK_MATCH ("*foo(*a&)", "*foo(*a&)", NORMAL);
+  CHECK_MATCH ("*a&b#c/^d$foo(*a&)", "*a&b#c/^d$foo", NORMAL);
+  CHECK_MATCH ("* foo", "*foo", NORMAL);
+  CHECK_MATCH ("foo&", "foo", NORMAL);
+  CHECK_MATCH ("foo*", "foo", NORMAL);
+  CHECK_MATCH ("foo.", "foo", NORMAL);
+  CHECK_MATCH ("foo->", "foo", NORMAL);
+
+  CHECK_NO_MATCH ("foo", "foo(", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo()", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo(a)", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo(a)", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo*", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo (*", NORMAL);
+  CHECK_NO_MATCH ("foo*", "foo (*", NORMAL);
+  CHECK_NO_MATCH ("foo *", "foo (*", NORMAL);
+  CHECK_NO_MATCH ("foo&", "foo (*", NORMAL);
+  CHECK_NO_MATCH ("foo &", "foo (*", NORMAL);
+  CHECK_NO_MATCH ("foo &*", "foo (&)", NORMAL);
+  CHECK_NO_MATCH ("foo & \t    *\t", "foo (*", NORMAL);
+  CHECK_NO_MATCH ("foo & \t    *\t", "foo (*", NORMAL);
+  CHECK_NO_MATCH ("foo(a*) b", "foo(a) b", NORMAL);
+  CHECK_NO_MATCH ("foo[aqi:A](a)", "foo(b)", NORMAL);
+  CHECK_NO_MATCH ("*foo", "foo", NORMAL);
+  CHECK_NO_MATCH ("*foo", "foo*", NORMAL);
+  CHECK_NO_MATCH ("*foo*", "*foo&", NORMAL);
+  CHECK_NO_MATCH ("*foo*", "foo *", NORMAL);
+  CHECK_NO_MATCH ("&foo", "foo", NORMAL);
+  CHECK_NO_MATCH ("&foo", "foo&", NORMAL);
+  CHECK_NO_MATCH ("foo&", "&foo", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo&", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo*", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo.", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo->", NORMAL);
+  CHECK_NO_MATCH ("foo bar", "foo()", NORMAL);
+  CHECK_NO_MATCH ("foo bar", "foo bar()", NORMAL);
+  CHECK_NO_MATCH ("foo()", "foo(a)", NORMAL);
+  CHECK_NO_MATCH ("*(*)&", "*(*)*", NORMAL);
+  CHECK_NO_MATCH ("foo(a)", "foo()", NORMAL);
+  CHECK_NO_MATCH ("foo(a)", "foo(b)", NORMAL);
+  CHECK_NO_MATCH ("foo(a,b)", "foo(a,b,c)", NORMAL);
+  CHECK_NO_MATCH ("foo(a\\b)", "foo()", NORMAL);
+  CHECK_NO_MATCH ("foo bar(a b c d)", "foobar", NORMAL);
+  CHECK_NO_MATCH ("foo bar(a b c d)", "foobar ( a b   c \td\t)\t", NORMAL);
+
+  /* Test scope operator.  */
+  check_scope_operator (language_minimal);
+  check_scope_operator (language_cplus);
+  check_scope_operator (language_fortran);
+  check_scope_operator (language_rust);
+
+  /* Test C++ user-defined operators.  */
+  CHECK_MATCH_LANG ("operator foo(int&)", "operator foo(int &)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("operator foo(int &)", "operator foo(int &)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("operator foo(int\t&)", "operator foo(int\t&)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("operator foo (int)", "operator foo(int)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("operator foo\t(int)", "operator foo(int)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("operator foo \t(int)", "operator foo(int)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("operator foo (int)", "operator foo \t(int)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("operator foo\t(int)", "operator foo \t(int)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("operator foo \t(int)", "operator foo \t(int)", NORMAL,
+		    language_cplus);
+
+  CHECK_MATCH_LANG ("a::operator foo(int&)", "a::operator foo(int &)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("a :: operator foo(int &)", "a::operator foo(int &)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("a \t:: \toperator foo(int\t&)", "a::operator foo(int\t&)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("a::operator foo (int)", "a::operator foo(int)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("a::operator foo\t(int)", "a::operator foo(int)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("a::operator foo \t(int)", "a::operator foo(int)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("a::operator foo (int)", "a::operator foo \t(int)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("a::operator foo\t(int)", "a::operator foo \t(int)", NORMAL,
+		    language_cplus);
+  CHECK_MATCH_LANG ("a::operator foo \t(int)", "a::operator foo \t(int)", NORMAL,
+		    language_cplus);
+
+  CHECK_NO_MATCH_LANG ("operator foo(int)", "operator foo(char)", NORMAL,
+		       language_cplus);
+  CHECK_NO_MATCH_LANG ("operator foo(int)", "operator foo(int *)", NORMAL,
+		       language_cplus);
+  CHECK_NO_MATCH_LANG ("operator foo(int)", "operator foo(int &)", NORMAL,
+		       language_cplus);
+  CHECK_NO_MATCH_LANG ("operator foo(int)", "operator foo(int, char *)", NORMAL,
+		       language_cplus);
+  CHECK_NO_MATCH_LANG ("operator foo(int)", "operator bar(int)", NORMAL,
+		       language_cplus);
+
+  CHECK_NO_MATCH_LANG ("a::operator b::foo(int)", "a::operator a::foo(char)", NORMAL,
+		       language_cplus);
+  CHECK_NO_MATCH_LANG ("a::operator foo(int)", "a::operator foo(int *)", NORMAL,
+		       language_cplus);
+  CHECK_NO_MATCH_LANG ("a::operator foo(int)", "a::operator foo(int &)", NORMAL,
+		       language_cplus);
+  CHECK_NO_MATCH_LANG ("a::operator foo(int)", "a::operator foo(int, char *)", NORMAL,
+		       language_cplus);
+  CHECK_NO_MATCH_LANG ("a::operator foo(int)", "a::operator bar(int)", NORMAL,
+		       language_cplus);
+
+  /* Skip "[abi:cxx11]" tags in the symbol name if the lookup name
+     doesn't include them.  These are not language-specific in
+     strncmp_iw_with_mode.  */
+
+  CHECK_MATCH ("foo[abi:a]", "foo", NORMAL);
+  CHECK_MATCH ("foo[abi:a]()", "foo", NORMAL);
+  CHECK_MATCH ("foo[abi:a](a)", "foo", NORMAL);
+  CHECK_MATCH ("foo[abi:a](a&,b*)", "foo", NORMAL);
+  CHECK_MATCH ("foo[abi:a](a,b)", "foo(a,b)", NORMAL);
+  CHECK_MATCH ("foo[abi:a](a,b) c", "foo(a,b) c", NORMAL);
+  CHECK_MATCH ("foo[abi:a](a)", "foo(a)", NORMAL);
+  CHECK_MATCH ("foo[abi:a](a,b)", "foo(a,b)", NORMAL);
+  CHECK_MATCH ("foo[abi:a]", "foo[abi:a]", NORMAL);
+  CHECK_MATCH ("foo[ abi:a]", "foo[abi:a]", NORMAL);
+  CHECK_MATCH ("foo[\tabi:a]", "foo[abi:a]", NORMAL);
+  CHECK_MATCH ("foo[ \tabi:a]", "foo[abi:a]", NORMAL);
+  CHECK_MATCH ("foo[\t abi:a]", "foo[abi:a]", NORMAL);
+  CHECK_MATCH ("foo[abi :a]", "foo[abi:a]", NORMAL);
+  CHECK_MATCH ("foo[abi\t:a]", "foo[abi:a]", NORMAL);
+  CHECK_MATCH ("foo[abi \t:a]", "foo[abi:a]", NORMAL);
+  CHECK_MATCH ("foo[abi\t :a]", "foo[abi:a]", NORMAL);
+  CHECK_MATCH ("foo[abi:a]", "foo[ abi:a]", NORMAL);
+  CHECK_MATCH ("foo[abi:a]", "foo[\tabi:a]", NORMAL);
+  CHECK_MATCH ("foo[abi:a]", "foo[ \tabi:a]", NORMAL);
+  CHECK_MATCH ("foo[abi:a]", "foo[\t abi:a]", NORMAL);
+  CHECK_MATCH ("foo[abi:a]", "foo[abi :a]", NORMAL);
+  CHECK_MATCH ("foo[abi:a]", "foo[abi\t:a]", NORMAL);
+  CHECK_MATCH ("foo[abi:a]", "foo[abi \t:a]", NORMAL);
+  CHECK_MATCH ("foo[abi:a]", "foo[abi\t :a]", NORMAL);
+  CHECK_MATCH ("foo[abi:a]", "foo[abi:a ]", NORMAL);
+  CHECK_MATCH ("foo[abi:a]", "foo[abi:a\t]", NORMAL);
+  CHECK_MATCH ("foo[abi:a]", "foo[abi:a \t]", NORMAL);
+  CHECK_MATCH ("foo[abi:a]", "foo[abi:a\t ]", NORMAL);
+  CHECK_MATCH ("foo[abi:a,b]", "foo[abi:a,b]", NORMAL);
+  CHECK_MATCH ("foo[abi:::]", "foo[abi:::]", NORMAL);
+  CHECK_MATCH ("foo[abi : : : ]", "foo[abi:::]", NORMAL);
+  CHECK_MATCH ("foo[abi:::]", "foo[abi : : : ]", NORMAL);
+  CHECK_MATCH ("foo[ \t abi  \t:\t:   :   \t]",
+	       "foo[   abi :                \t    ::]",
+	       NORMAL);
+  CHECK_MATCH ("foo< bar< baz< quxi > > >(int)", "foo<bar<baz<quxi>>>(int)",
+	       NORMAL);
+  CHECK_MATCH ("\tfoo<\tbar<\tbaz\t<\tquxi\t>\t>\t>(int)",
+	       "foo<bar<baz<quxi>>>(int)", NORMAL);
+  CHECK_MATCH (" \tfoo \t< \tbar \t< \tbaz \t< \tquxi \t> \t> \t> \t( \tint \t)",
+	       "foo<bar<baz<quxi>>>(int)", NORMAL);
+  CHECK_MATCH ("foo<bar<baz<quxi>>>(int)",
+	       "foo < bar < baz < quxi > > > (int)", NORMAL);
+  CHECK_MATCH ("foo<bar<baz<quxi>>>(int)",
+	       "\tfoo\t<\tbar\t<\tbaz\t<\tquxi\t>\t>\t>\t(int)", NORMAL);
+  CHECK_MATCH ("foo<bar<baz<quxi>>>(int)",
+	       " \tfoo \t< \tbar \t< \tbaz \t< \tquxi \t> \t> \t> \t( \tint \t)", NORMAL);
+  CHECK_MATCH ("foo<bar<baz>>::foo(quxi &)", "fo", NORMAL);
+  CHECK_MATCH ("foo<bar<baz>>::foo(quxi &)", "foo", NORMAL);
+  CHECK_MATCH ("foo<bar<baz>>::foo(quxi &)", "foo<bar<baz>>::", NORMAL);
+  CHECK_MATCH ("foo<bar<baz>>::foo(quxi &)", "foo<bar<baz> >::foo", NORMAL);
+  CHECK_MATCH ("foo[abi:a][abi:b](bar[abi:c][abi:d])", "foo[abi:a][abi:b](bar[abi:c][abi:d])",
+	       NORMAL);
+  CHECK_MATCH ("foo[abi:a][abi:b](bar[abi:c][abi:d])", "foo", NORMAL);
+  CHECK_MATCH ("foo[abi:a][abi:b](bar[abi:c][abi:d])", "foo(bar)", NORMAL);
+  CHECK_MATCH ("foo[abi:a][abi:b](bar[abi:c][abi:d])", "foo[abi:a](bar)", NORMAL);
+  CHECK_MATCH ("foo[abi:a][abi:b](bar[abi:c][abi:d])", "foo(bar[abi:c])", NORMAL);
+  CHECK_MATCH ("foo[abi:a][abi:b](bar[abi:c][abi:d])", "foo[abi:a](bar[abi:c])", NORMAL);
+  CHECK_MATCH ("foo[abi:a][abi:b](bar[abi:c][abi:d])", "foo[abi:a][abi:b](bar)", NORMAL);
+  CHECK_MATCH ("foo[abi:a][abi:b](bar[abi:c][abi:d])", "foo[abi:a][abi:b](bar[abi:c])",
+	       NORMAL);
+  CHECK_MATCH("foo<bar[abi:a]>(char *, baz[abi:b])", "foo", NORMAL);
+  CHECK_NO_MATCH("foo<bar[abi:a]>(char *, baz[abi:b])", "foo()", NORMAL);
+  CHECK_MATCH("foo<bar[abi:a]>(char *, baz[abi:b])", "foo<bar>", NORMAL);
+  CHECK_MATCH("foo<bar[abi:a]>(char *, baz[abi:b])", "foo<bar>(char*, baz)", NORMAL);
+  CHECK_MATCH("foo<bar[abi:a]>(char *, baz[abi:b])", "foo<bar>(char*, baz[abi:b])",
+	      NORMAL);
+  CHECK_NO_MATCH("foo<bar[abi:a]>(char *, baz[abi:b])", "foo<bar>(char*, baz[abi:A])",
+	      NORMAL);
+  CHECK_MATCH("foo<bar[abi:a]>(char *, baz[abi:b])", "foo<bar[abi:a]>(char*, baz)",
+	      NORMAL);
+  CHECK_NO_MATCH("foo<bar[abi:a]>(char *, baz[abi:b])", "foo<bar[abi:A]>(char*, baz)",
+	      NORMAL);
+  CHECK_MATCH("foo<bar[abi:a]>(char *, baz[abi:b])", "foo<bar[abi:a]>(char*, baz[abi:b])",
+	      NORMAL);
+  CHECK_NO_MATCH("foo<bar[abi:a]>(char *, baz[abi:b])",
+		 "foo<bar[abi:a]>(char*, baz[abi:B])", NORMAL);
+
+  CHECK_NO_MATCH ("foo", "foo[", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[ a]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[a ]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[ a ]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[\ta]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[a \t]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[a\t ]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[ \ta]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[\t a]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[ \ta \t]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[\t a\t ]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[ abi]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi ]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[\tabi]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi\t]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[ \tabi]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[\t abi]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi \t]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi\t ]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi :]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi\t:]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi \t:]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi\t :]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi: ]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi:\t]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi: \t]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi:\t ]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi: a]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi:\ta]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi: \ta]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi:\t a]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi:a ]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi:a\t]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi:a \t]", NORMAL);
+  CHECK_NO_MATCH ("foo", "foo[abi:a\t ]", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a]()", "foo(a)", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a]()", "foo(a)", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a]()", "foo(a)", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a]()", "foo(a)", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a]()", "foo(a) c", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a]()", "foo(a) .", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a]()", "foo(a) *", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a]()", "foo(a) &", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a](a,b)", "foo(a,b) c", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a](a,b)", "foo(a,b) .", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a](a,b)", "foo(a,b) *", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a](a,b)", "foo(a,b) &", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a](a,b)", "foo(a,b)c", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a](a,b)", "foo(a,b).", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a](a,b)", "foo(a,b)*", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a](a,b)", "foo(a,b)&", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a](a,b) d", "foo(a,b) c", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a](a)", "foo()", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a](a)", "foo(b)", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a](a)", "foo[abi:b](a)", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a](a)", "foo[abi:a](b)", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:]", "foo[abi:a]", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:", "foo[abi:a]", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:]", "foo[abi:a", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:,]", "foo[abi:a]", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:a,b]", "foo[abi:a]", NORMAL);
+  CHECK_NO_MATCH ("foo[abi::a]", "foo[abi:a]", NORMAL);
+  CHECK_NO_MATCH ("foo[abi:,([a]", "foo[abi:a]", NORMAL);
+
+  CHECK_MATCH ("foo <a, b [, c (",  "foo", NORMAL);
+  CHECK_MATCH ("foo >a, b ], c )",  "foo", NORMAL);
+  CHECK_MATCH ("@!%&\\*", "@!%&\\*", NORMAL);
+  CHECK_MATCH ("()", "()", NORMAL);
+  CHECK_MATCH ("*(*)*", "*(*)*", NORMAL);
+  CHECK_MATCH ("[]", "[]", NORMAL);
+  CHECK_MATCH ("<>", "<>", NORMAL);
+
+  /* strncmp_iw_with_mode::MATCH_PARAMS: the "strcmp_iw hack."  */
+  CHECK_MATCH ("foo2", "foo", NORMAL);
+  CHECK_NO_MATCH ("foo2", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2", "foo ", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2", "foo\t", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2", "foo \t", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2", "foo\t ", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2", "foo \t", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2", " foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2", "\tfoo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2", " \tfoo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2", "\t foo", MATCH_PARAMS);
+  CHECK_NO_MATCH (" foo2", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("\tfoo2", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH (" \tfoo2", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("\t foo2", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH (" foo2 ", " foo ", MATCH_PARAMS);
+  CHECK_NO_MATCH ("\tfoo2\t", "\tfoo\t", MATCH_PARAMS);
+  CHECK_NO_MATCH (" \tfoo2 \t", " \tfoo \t", MATCH_PARAMS);
+  CHECK_NO_MATCH ("\t foo2\t ", "\t foo\t ", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2 ", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2\t", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2 ", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2 \t", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2\t ", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2 (args)", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2 (args)", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2\t(args)", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2 \t(args)", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2\t (args)", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2 ( args)", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2(args )", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2(args\t)", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2 (args \t)", "foo", MATCH_PARAMS);
+  CHECK_NO_MATCH ("foo2 (args\t )", "foo", MATCH_PARAMS);
+  CHECK_MATCH ("foo[abi:a][abi:b](bar[abi:c][abi:d])", "foo[abi:a][abi:b](bar[abi:c][abi:d])",
+	       MATCH_PARAMS);
+  CHECK_MATCH ("foo[abi:a][abi:b](bar[abi:c][abi:d])", "foo", MATCH_PARAMS);
+
+  /* strncmp_iw_with_mode also supports case insensitivity.  */
+  {
+    CHECK_NO_MATCH ("FoO", "foo", NORMAL);
+    CHECK_NO_MATCH ("FoO", "foo", MATCH_PARAMS);
+
+    scoped_restore restore_case = make_scoped_restore (&case_sensitivity);
+    case_sensitivity = case_sensitive_off;
+
+    CHECK_MATCH ("FoO", "foo", NORMAL);
+    CHECK_MATCH ("FoO", "foo", MATCH_PARAMS);
+    CHECK_MATCH ("foo", "FoO", NORMAL);
+    CHECK_MATCH ("foo", "FoO", MATCH_PARAMS);
+
+    CHECK_MATCH ("FoO[AbI:abC]()", "foo", NORMAL);
+    CHECK_NO_MATCH ("FoO[AbI:abC]()", "foo", MATCH_PARAMS);
+    CHECK_MATCH ("FoO2[AbI:abC]()", "foo", NORMAL);
+    CHECK_NO_MATCH ("FoO2[AbI:abC]()", "foo", MATCH_PARAMS);
+
+    CHECK_MATCH ("foo[abi:abc]()", "FoO[AbI:abC]()", NORMAL);
+    CHECK_MATCH ("foo[abi:abc]()", "FoO[AbI:AbC]()", MATCH_PARAMS);
+    CHECK_MATCH ("foo[abi:abc](xyz)", "FoO[AbI:abC](XyZ)", NORMAL);
+    CHECK_MATCH ("foo[abi:abc](xyz)", "FoO[AbI:abC](XyZ)", MATCH_PARAMS);
+    CHECK_MATCH ("foo[abi:abc][abi:def](xyz)", "FoO[AbI:abC](XyZ)", NORMAL);
+    CHECK_MATCH ("foo[abi:abc][abi:def](xyz)", "FoO[AbI:abC](XyZ)",
+		 MATCH_PARAMS);
+    CHECK_MATCH ("foo<bar<baz>>(bar<baz>)", "FoO<bAr<BaZ>>(bAr<BaZ>)",
+		 NORMAL);
+    CHECK_MATCH ("foo<bar<baz>>(bar<baz>)", "FoO<bAr<BaZ>>(bAr<BaZ>)",
+		 MATCH_PARAMS);
+  }
+}
+
+#undef MATCH
+#undef NO_MATCH
+#endif
+
 /* See utils.h.  */
 
 int
@@ -3248,5 +3811,7 @@ When set, debugging messages will be marked with seconds and microseconds."),
 #if GDB_SELF_TEST
   selftests::register_test ("gdb_realpath", gdb_realpath_tests);
   selftests::register_test ("gdb_argv_array_view", gdb_argv_as_array_view_test);
+  selftests::register_test ("strncmp_iw_with_mode",
+			    strncmp_iw_with_mode_tests);
 #endif
 }
