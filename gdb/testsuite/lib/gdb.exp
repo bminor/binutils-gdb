@@ -770,6 +770,10 @@ proc gdb_internal_error_resync {} {
     set count 0
     while {$count < 10} {
 	gdb_expect {
+	    -re "Recursive internal problem\\." {
+		perror "Could not resync from internal error (recursive internal problem)"
+		return 0
+	    }
 	    -re "Quit this debugging session\\? \\(y or n\\) $" {
 		send_gdb "n\n" answer
 		incr count
