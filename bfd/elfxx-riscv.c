@@ -1887,10 +1887,11 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
       no_conflict = false;
     }
   if (riscv_lookup_subset (rps->subset_list, "q", &subset)
+      && (subset->major_version < 2 || (subset->major_version == 2
+					&& subset->minor_version < 2))
       && xlen < 64)
     {
-      rps->error_handler
-        (_("rv%d does not support the `q' extension"), xlen);
+      rps->error_handler (_("rv%d does not support the `q' extension"), xlen);
       no_conflict = false;
     }
   if (riscv_lookup_subset (rps->subset_list, "e", &subset)
