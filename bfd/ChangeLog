@@ -1,3 +1,9 @@
+2022-02-28  Torbjörn Svensson  <torbjorn.svensson@st.com>
+
+	PR 25713
+	* bfdio.c (_bfd_real_fopen): Fix handling of parhs longer than 260
+	characters on Windows hosts.
+
 2022-02-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 28886
