@@ -87,7 +87,9 @@ thpy_get_details (PyObject *self, void *ignore)
 
   THPY_REQUIRE_VALID (thread_obj);
 
-  const char *extra_info;
+  /* GCC can't tell that extra_info will always be assigned after the
+     'catch', so initialize it.  */
+  const char *extra_info = nullptr;
   try
     {
       extra_info = target_extra_thread_info (thread_obj->thread);
