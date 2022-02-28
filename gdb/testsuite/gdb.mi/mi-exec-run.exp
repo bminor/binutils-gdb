@@ -89,36 +89,43 @@ proc test {inftty_mode mi_mode force_fail} {
     if {$force_fail} {
 	set saw_perm_error 0
 	set saw_mi_error 0
+	set already_failed 0
 	set test "run failure detected"
 	send_gdb "-exec-run --start\n"
 
-	while {1} {
-	    gdb_expect {
-		-i "$inferior_spawn_id"
-		-re ".*Cannot exec.*Permission denied" {
-		    set saw_perm_error 1
-		    verbose -log "saw mi error"
-		}
-		-i "$gdb_spawn_id"
-		-re "\\^error,msg=\"During startup program exited with code 127" {
-		    set saw_mi_error 1
-		    verbose -log "saw mi error"
-		}
-		timeout {
-		    fail "$test (timeout)"
-		    break
-		}
-		-i "$gdb_main_spawn_id"
-		eof {
-		    fail "$test (eof)"
-		    break
+	gdb_expect {
+	    -i "$inferior_spawn_id"
+	    -re ".*Cannot exec.*Permission denied" {
+		set saw_perm_error 1
+		verbose -log "saw perm error"
+		if {!$saw_mi_error} {
+		    exp_continue
 		}
 	    }
+	    -i "$gdb_spawn_id"
+	    -re "\\^error,msg=\"(During startup program exited with code 127|Running .* on the remote target failed)" {
+		set saw_mi_error 1
+		verbose -log "saw mi error"
+		if {!$saw_perm_error} {
+		    exp_continue
+		}
+	    }
+	    timeout {
+		set already_failed 1
+		fail "$test (timeout)"
+	    }
+	    -i "$gdb_main_spawn_id"
+	    eof {
+		set already_failed 1
+		fail "$test (eof)"
+	    }
+	}
 
-	    if {$saw_perm_error && $saw_mi_error} {
-		pass $test
-		break
-	    }
+	if {$saw_perm_error && $saw_mi_error} {
+	    pass $test
+	} elseif {!$already_failed} {
+	    verbose -log "saw_perm_error=$saw_perm_error; saw_mi_error=$saw_mi_error"
+	    fail $test
 	}
     } else {
 	mi_run_cmd "--start"
