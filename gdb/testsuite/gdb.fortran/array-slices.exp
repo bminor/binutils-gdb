@@ -62,6 +62,12 @@ proc run_test { repack } {
 	return -1
     }
 
+    # This test relies on output from the inferior and is not supported on
+    # remote targets.
+    if {![gdb_is_target_native]} {
+	return 0
+    }
+
     # Avoid libc symbols, in particular the 'array' type.
     gdb_test_no_output "nosharedlibrary"
 
