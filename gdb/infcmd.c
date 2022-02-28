@@ -438,7 +438,8 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
       uiout->field_string (NULL, "Starting program");
       uiout->text (": ");
       if (exec_file)
-	uiout->field_string ("execfile", exec_file);
+	uiout->field_string ("execfile", exec_file,
+			     file_name_style.style ());
       uiout->spaces (1);
       uiout->field_string ("infargs", current_inferior ()->args ());
       uiout->text ("\n");

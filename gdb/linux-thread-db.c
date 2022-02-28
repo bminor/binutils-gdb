@@ -1944,7 +1944,8 @@ info_auto_load_libthread_db (const char *args, int from_tty)
 	ui_out_emit_tuple tuple_emitter (uiout, NULL);
 
 	info = array[i];
-	uiout->field_string ("filename", info->filename);
+	uiout->field_string ("filename", info->filename,
+			     file_name_style.style ());
 
 	std::string pids;
 	while (i < array.size () && strcmp (info->filename,

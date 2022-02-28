@@ -27,6 +27,7 @@
 #include "gdbthread.h"
 #include "inferior.h"
 #include <algorithm>
+#include "cli/cli-style.h"
 
 /* The last program space number assigned.  */
 static int last_program_space_num = 0;
@@ -321,7 +322,8 @@ print_program_space (struct ui_out *uiout, int requested)
       uiout->field_signed ("id", pspace->num);
 
       if (pspace->exec_filename != nullptr)
-	uiout->field_string ("exec", pspace->exec_filename.get ());
+	uiout->field_string ("exec", pspace->exec_filename.get (),
+			     file_name_style.style ());
       else
 	uiout->field_skip ("exec");
 

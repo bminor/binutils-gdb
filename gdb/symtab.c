@@ -4508,7 +4508,8 @@ info_sources_worker (struct ui_out *uiout,
       if (group_by_objfile)
 	{
 	  output_tuple.emplace (uiout, nullptr);
-	  uiout->field_string ("filename", objfile_name (objfile));
+	  uiout->field_string ("filename", objfile_name (objfile),
+			       file_name_style.style ());
 	  uiout->text (":\n");
 	  bool debug_fully_readin = !objfile->has_unexpanded_symtabs ();
 	  if (uiout->is_mi_like_p ())
