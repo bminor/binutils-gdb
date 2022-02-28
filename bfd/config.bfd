@@ -171,8 +171,8 @@ case $targ in
  we32k-*-* | \
  xc16x-*-* | \
  null)
-    echo "*** Configuration $targ is obsolete." >&2
-    echo "*** Support has been REMOVED." >&2
+    echo "*** Configuration $targ is now obsolete" >&2
+    echo "*** and so support for it has been REMOVED." >&2
     exit 1
     ;;
 esac

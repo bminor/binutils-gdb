@@ -1,3 +1,8 @@
+2022-02-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 28886
+	* config.bfd: Update error message for obsolete configurations.
+
 2022-02-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/sr.po: Updated Serbian translation.
