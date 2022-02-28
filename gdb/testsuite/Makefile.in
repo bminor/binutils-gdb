@@ -353,7 +353,7 @@ clean mostlyclean:
 
 distclean maintainer-clean realclean: clean
 	-rm -f *~ core
-	-rm -f Makefile config.status *-init.exp
+	-rm -f Makefile config.status *-init.exp lib/pdtrace
 	-rm -fr *.log summary detail *.plog *.sum *.psum site.*
 
 Makefile : Makefile.in config.status $(host_makefile_frag)

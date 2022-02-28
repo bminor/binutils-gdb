@@ -1959,7 +1959,7 @@ clean mostlyclean: $(CONFIG_CLEAN)
 # functionality described is if the distributed files are unmodified.
 distclean: clean
 	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(CLEANDIRS)" subdir_do
-	rm -f nm.h config.status config.h stamp-h b jit-reader.h
+	rm -f nm.h config.status config.h stamp-h b jit-reader.h gcore stamp-nmh
 	rm -f gdb-gdb.py gdb-gdb.gdb
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f config.log config.cache
