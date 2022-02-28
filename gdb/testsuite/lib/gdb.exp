@@ -3876,8 +3876,17 @@ proc skip_compile_feature_tests {} {
 # is a regexp that will match the output of "maint print target-stack" if
 # the target in question is currently pushed.  PROMPT_REGEXP is a regexp
 # matching the expected prompt after the command output.
+#
+# NOTE: GDB must be running BEFORE this procedure is called!
 
 proc gdb_is_target_1 { target_name target_stack_regexp prompt_regexp } {
+    global gdb_spawn_id
+
+    # Throw a Tcl error if gdb isn't already started.
+    if {![info exists gdb_spawn_id]} {
+	error "gdb_is_target_1 called with no running gdb instance"
+    }
+
     set test "probe for target ${target_name}"
     gdb_test_multiple "maint print target-stack" $test \
 	-prompt "$prompt_regexp" {
@@ -3893,6 +3902,8 @@ proc gdb_is_target_1 { target_name target_stack_regexp prompt_regexp } {
 }
 
 # Helper for gdb_is_target_remote where the expected prompt is variable.
+#
+# NOTE: GDB must be running BEFORE this procedure is called!
 
 proc gdb_is_target_remote_prompt { prompt_regexp } {
     return [gdb_is_target_1 "remote" ".*emote target using gdb-specific protocol.*" $prompt_regexp]
@@ -3900,6 +3911,8 @@ proc gdb_is_target_remote_prompt { prompt_regexp } {
 
 # Check whether we're testing with the remote or extended-remote
 # targets.
+#
+# NOTE: GDB must be running BEFORE this procedure is called!
 
 proc gdb_is_target_remote { } {
     global gdb_prompt
@@ -3908,6 +3921,8 @@ proc gdb_is_target_remote { } {
 }
 
 # Check whether we're testing with the native target.
+#
+# NOTE: GDB must be running BEFORE this procedure is called!
 
 proc gdb_is_target_native { } {
     global gdb_prompt
