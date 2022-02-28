@@ -54,33 +54,22 @@ foreach_with_prefix scenario {all minimal} {
     set kfail_packed_array_range_re \
 	"cannot subscript or call something of type `foo__packed_array_ptr'"
 
-    gdb_test_multiple "print pa_ptr.all" "" {
-	-re -wrap " = \\(10, 20, 30, 40, 50, 60, 62, 63, -23, 42\\)" {
-	    pass $gdb_test_name
-	}
-	-re -wrap $kfail_int128support_re {
-	    kfail gdb/20991 $gdb_test_name
-	}
+    # GNAT >= 12.0 has the needed fix here.
+    if {$scenario == "minimal" && ![test_compiler_info {gcc-1[2-9]-*}]} {
+	setup_kfail "minimal encodings" *-*-*
     }
+    gdb_test "print pa_ptr.all" \
+	" = \\(10, 20, 30, 40, 50, 60, 62, 63, -23, 42\\)"
 
-    gdb_test_multiple "print pa_ptr(3)" "" {
-	-re -wrap " = 30" {
-	    pass $gdb_test_name
-	}
-	-re -wrap $kfail_int128support_re {
-	    kfail gdb/20991 $gdb_test_name
-	}
-	-re -wrap $kfail_packed_array_range_re {
-	    kfail gdb/28115 $gdb_test_name
-	}
+    # GNAT >= 12.0 has the needed fix here.
+    if {$scenario == "minimal" && ![test_compiler_info {gcc-1[2-9]-*}]} {
+	setup_kfail "minimal encodings" *-*-*
     }
+    gdb_test "print pa_ptr(3)" " = 30"
 
-    gdb_test_multiple "print pa_ptr.all(3)" "" {
-	-re -wrap " = 30" {
-	    pass $gdb_test_name
-	}
-	-re -wrap $kfail_int128support_re {
-	    kfail gdb/20991 $gdb_test_name
-	}
+    # GNAT >= 12.0 has the needed fix here.
+    if {$scenario == "minimal" && ![test_compiler_info {gcc-1[2-9]-*}]} {
+	setup_kfail "minimal encodings" *-*-*
     }
+    gdb_test "print pa_ptr.all(3)" " = 30"
 }
