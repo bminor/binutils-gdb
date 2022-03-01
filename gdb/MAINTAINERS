@@ -269,6 +269,10 @@ the native maintainer when resolving ABI issues.
 
 	lm32		--target=lm32-elf ,-Werror
 
+	loongarch	--target=loongarch32-elf ,-Werror
+			--target=loongarch64-elf ,-Werror
+			Tiezhu Yang		yangtiezhu@loongson.cn
+
 	m32c		--target=m32c-elf ,-Werror
 
 	m32r		--target=m32r-elf ,-Werror
