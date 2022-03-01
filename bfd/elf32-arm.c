@@ -14523,6 +14523,14 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 	  out_attr[Tag_MPextension_use_legacy].i = 0;
 	}
 
+      /* PR 28859 and 28848:  Handle the case where the first input file,
+	 eg crti.o, has a Tag_ABI_HardFP_use of 3 but no Tag_FP_arch set.
+	 Using Tag_ABI_HardFP_use in this way is deprecated, so reset the
+	 attribute to zero.
+	 FIXME: Should we handle other non-zero values of Tag_ABI_HardFO_use ? */
+      if (out_attr[Tag_ABI_HardFP_use].i == 3 && out_attr[Tag_FP_arch].i == 0)
+	out_attr[Tag_ABI_HardFP_use].i = 0;
+
       return result;
     }
 

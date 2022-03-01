@@ -1,3 +1,10 @@
+2022-03-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 28848
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): If the first
+	input bfd has a Tag_ABI_HardFP_use set to 3 but does not also have
+	TAG_FP_arch set then reset the TAG_ABI_HardFP_use.
+
 2022-02-28  Torbjörn Svensson  <torbjorn.svensson@st.com>
 
 	PR 25713
