@@ -1,3 +1,9 @@
+2022-03-01  Torbjörn Svensson  <torbjorn.svensson@st.com>
+	    Fred Eisele  <fredrick.eisele@gmail.com>
+
+	PR 25713
+	* bfdio.c (_bfd_real_fopen): Fix typo.
+
 2022-03-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 28848
@@ -6,9 +12,10 @@
 	TAG_FP_arch set then reset the TAG_ABI_HardFP_use.
 
 2022-02-28  Torbjörn Svensson  <torbjorn.svensson@st.com>
+	    Fred Eisele  <fredrick.eisele@gmail.com>
 
 	PR 25713
-	* bfdio.c (_bfd_real_fopen): Fix handling of parhs longer than 260
+	* bfdio.c (_bfd_real_fopen): Fix handling of paths longer than 260
 	characters on Windows hosts.
 
 2022-02-28  Nick Clifton  <nickc@redhat.com>

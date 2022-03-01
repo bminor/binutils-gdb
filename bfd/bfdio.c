@@ -116,45 +116,47 @@ _bfd_real_fopen (const char *filename, const char *modes)
     }
 
 #elif defined (_WIN32)
-  /* PR 25713: Handle extra long path names possibly containing '..' and '.'. */
-
-   wchar_t **lpFilePart = {NULL};
-   const wchar_t prefix[] = L"\\\\?\\";
-   const wchar_t ccs[] = L", ccs=UNICODE";
-   const size_t partPathLen = strlen(filename) + 1;
+  /* PR 25713: Handle extra long path names possibly containing '..' and '.'.  */
+   wchar_t **     lpFilePart = {NULL};
+   const wchar_t  prefix[] = L"\\\\?\\";
+   const wchar_t  ccs[] = L", ccs=UNICODE";
+   const size_t   partPathLen = strlen (filename) + 1;
 
    /* Converting the partial path from ascii to unicode.
-      1) get the length: Calling with lpWideCharStr set to null returns the length.
-      2) convert the string: Calling with cbMultiByte set to -1 includes the terminating null.  */
-   size_t partPathWSize = MultiByteToWideChar (CP_UTF8, 0, partPathOrig, -1, NULL, 0);
-   wchar_t *partPath = calloc (partPathWSize, sizeof(wchar_t));
+      1) Get the length: Calling with lpWideCharStr set to null returns the length.
+      2) Convert the string: Calling with cbMultiByte set to -1 includes the terminating null.  */
+   size_t         partPathWSize = MultiByteToWideChar (CP_UTF8, 0, filename, -1, NULL, 0);
+   wchar_t *      partPath = calloc (partPathWSize, sizeof(wchar_t));
+   size_t         ix;
 
-   MultiByteToWideChar (CP_UTF8, 0, partPathOrig, -1, partPath, partPathWSize);
+   MultiByteToWideChar (CP_UTF8, 0, filename, -1, partPath, partPathWSize);
 
    /* Convert any UNIX style path separators into the DOS i.e. backslash separator.  */
-   size_t ix;
    for (ix = 0; ix < partPathLen; ix++)
      if (IS_UNIX_DIR_SEPARATOR(filename[ix]))
        partPath[ix] = '\\';
 
    /* Getting the full path from the provided partial path.
-      1) get the length:
-      2) resolve the path.  */
-   long fullPathWSize = GetFullPathNameW (partPath, 0, NULL, lpFilePart);
-   wchar_t *fullPath = calloc (fullPathWSize + sizeof(prefix) + 1, sizeof(wchar_t));
+      1) Get the length.
+      2) Resolve the path.  */
+   long       fullPathWSize = GetFullPathNameW (partPath, 0, NULL, lpFilePart);
+   wchar_t *  fullPath = calloc (fullPathWSize + sizeof(prefix) + 1, sizeof(wchar_t));
 
    wcscpy (fullPath, prefix);
-   int prefixLen = sizeof(prefix) / sizeof(wchar_t);
-   wchar_t* fullPathOffset = fullPath + prefixLen - 1;
+
+   int        prefixLen = sizeof(prefix) / sizeof(wchar_t);
+   wchar_t *  fullPathOffset = fullPath + prefixLen - 1;
+
    GetFullPathNameW (partPath, fullPathWSize, fullPathOffset, lpFilePart);
    free (partPath);
 
    /* It is non-standard for modes to exceed 16 characters.  */
-   wchar_t modesW[16 + sizeof(ccs)];
+   wchar_t    modesW[16 + sizeof(ccs)];
+
    MultiByteToWideChar (CP_UTF8, 0, modes, -1, modesW, sizeof(modesW));
    wcscat (modesW, ccs);
 
-   FILE* file = _wfopen (fullPath, mdesW);
+   FILE *     file = _wfopen (fullPath, modesW);
    free (fullPath);
 
    return close_on_exec (file);
