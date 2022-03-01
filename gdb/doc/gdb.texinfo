@@ -28037,7 +28037,7 @@ of a command.
 @smallexample
 (gdb) alias -a set print elms = set print elements
 (gdb) alias -a show print elms = show print elements
-(gdb) set p elms 20
+(gdb) set p elms 200
 (gdb) show p elms
 Limit on string chars or array elements to print is 200.
 @end smallexample
