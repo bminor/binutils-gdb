@@ -5086,6 +5086,7 @@ proc can_spawn_for_attach { } {
     # back the pid of the program.  On remote boards, that would give
     # us instead the PID of e.g., the ssh client, etc.
     if [is_remote target] then {
+	unsupported "skip attach tests (target is remote)"
 	return 0
     }
 
@@ -5093,6 +5094,7 @@ proc can_spawn_for_attach { } {
     # stub-like, where GDB finds the program already started on
     # initial connection.
     if {[target_info exists use_gdb_stub]} {
+	unsupported "skip attach tests (target is stub)"
 	return 0
     }
 
