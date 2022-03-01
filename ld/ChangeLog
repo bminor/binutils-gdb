@@ -1,3 +1,13 @@
+2022-03-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 21964
+	* testsuite/ld-elf/pr21964-1a.c: Fix array comparisons.
+	* testsuite/ld-elf/pr21964-1b.c: Likewise.
+	* testsuite/ld-elf/pr21964-1c.c: Likewise.
+	* testsuite/ld-elf/pr21964-2a.c: Likewise.
+	* testsuite/ld-elf/pr21964-2b.c: Likewise.
+	* testsuite/ld-elf/pr21964-3a.c: Likewise.
+
 2022-02-17  Roland McGrath  <mcgrathr@google.com>
 
 	* ld.texi (Output Section Type): Fix typo in @code syntax.
