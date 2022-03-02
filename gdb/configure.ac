@@ -1486,26 +1486,6 @@ if test "$gdb_cv_have_pt_getdbregs" = yes; then
   [Define if sys/ptrace.h defines the PT_GETDBREGS request.])
 fi
 
-# See if <sys/ptrace.h> provides the PT_GETXMMREGS request.
-AC_MSG_CHECKING(for PT_GETXMMREGS)
-AC_CACHE_VAL(
-  [gdb_cv_have_pt_getxmmregs],
-  [AC_COMPILE_IFELSE(
-     [AC_LANG_PROGRAM(
-	[#include <sys/types.h>
-	 #include <sys/ptrace.h>],
-	[PT_GETXMMREGS;]
-      )],
-     [gdb_cv_have_pt_getxmmregs=yes],
-     [gdb_cv_have_pt_getxmmregs=no]
-   )]
-)
-AC_MSG_RESULT($gdb_cv_have_pt_getxmmregs)
-if test "$gdb_cv_have_pt_getxmmregs" = yes; then
-  AC_DEFINE(HAVE_PT_GETXMMREGS, 1,
-  [Define if sys/ptrace.h defines the PT_GETXMMREGS request.])
-fi
-
 # See if <sys/ptrace.h> supports LWP names on FreeBSD
 # Older FreeBSD versions don't have the pl_tdname member of
 # `struct ptrace_lwpinfo'.
