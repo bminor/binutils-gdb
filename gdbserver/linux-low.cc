@@ -5810,7 +5810,7 @@ linux_process_target::async (bool enable)
 
       if (enable)
 	{
-	  if (!linux_event_pipe.open ())
+	  if (!linux_event_pipe.open_pipe ())
 	    {
 	      gdb_sigmask (SIG_UNBLOCK, &mask, NULL);
 
@@ -5830,7 +5830,7 @@ linux_process_target::async (bool enable)
 	{
 	  delete_file_handler (linux_event_pipe.event_fd ());
 
-	  linux_event_pipe.close ();
+	  linux_event_pipe.close_pipe ();
 	}
 
       gdb_sigmask (SIG_UNBLOCK, &mask, NULL);

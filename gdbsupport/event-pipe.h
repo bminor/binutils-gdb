@@ -34,10 +34,10 @@ public:
   DISABLE_COPY_AND_ASSIGN (event_pipe);
 
   /* Create a new pipe.  */
-  bool open ();
+  bool open_pipe ();
 
   /* Close the pipe.  */
-  void close ();
+  void close_pipe ();
 
   /* True if the event pipe has been opened.  */
   bool is_open () const

@@ -28,7 +28,7 @@
 event_pipe::~event_pipe ()
 {
   if (is_open ())
-    close ();
+    close_pipe ();
 }
 
 /* See event-pipe.h.  */
@@ -45,7 +45,7 @@ event_pipe::open ()
   if (fcntl (m_fds[0], F_SETFL, O_NONBLOCK) == -1
       || fcntl (m_fds[1], F_SETFL, O_NONBLOCK) == -1)
     {
-      close ();
+      close_pipe ();
       return false;
     }
 
@@ -55,7 +55,7 @@ event_pipe::open ()
 /* See event-pipe.h.  */
 
 void
-event_pipe::close ()
+event_pipe::close_pipe ()
 {
   ::close (m_fds[0]);
   ::close (m_fds[1]);

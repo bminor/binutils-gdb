@@ -77,9 +77,9 @@ struct inf_ptrace_target : public inf_child_target
 protected:
   /* Helper routines for interacting with the async event pipe.  */
   bool async_file_open ()
-  { return m_event_pipe.open (); }
+  { return m_event_pipe.open_pipe (); }
   void async_file_close ()
-  { m_event_pipe.close (); }
+  { m_event_pipe.close_pipe (); }
   void async_file_flush ()
   { m_event_pipe.flush (); }
   void async_file_mark ()
