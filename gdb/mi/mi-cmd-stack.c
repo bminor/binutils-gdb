@@ -36,6 +36,8 @@
 #include "mi-parse.h"
 #include "gdbsupport/gdb_optional.h"
 #include "safe-ctype.h"
+#include "inferior.h"
+#include "observable.h"
 
 enum what_to_list { locals, arguments, all };
 
@@ -756,7 +758,16 @@ mi_cmd_stack_select_frame (const char *command, char **argv, int argc)
   if (argc == 0 || argc > 1)
     error (_("-stack-select-frame: Usage: FRAME_SPEC"));
 
+  ptid_t previous_ptid = inferior_ptid;
+
   select_frame_for_mi (parse_frame_specification (argv[0]));
+
+  /* Notify if the thread has effectively changed.  */
+  if (inferior_ptid != previous_ptid)
+    {
+      gdb::observers::user_selected_context_changed.notify
+	(USER_SELECTED_THREAD | USER_SELECTED_FRAME);
+    }
 }
 
 void

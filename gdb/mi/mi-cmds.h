@@ -23,6 +23,7 @@
 #define MI_MI_CMDS_H
 
 #include "gdbsupport/gdb_optional.h"
+#include "mi/mi-main.h"
 
 enum print_values {
    PRINT_NO_VALUES,
@@ -162,6 +163,17 @@ struct mi_command
   /* Execute the MI command.  Can throw an exception if something goes
      wrong.  */
   void invoke (struct mi_parse *parse) const;
+
+  /* Return whether this command preserves user selected context (thread
+     and frame).  */
+  bool preserve_user_selected_context () const
+  {
+    /* Here we exploit the fact that if MI command is supposed to change
+       user context, then it should not emit change notifications.  Therefore if
+       command does not suppress user context change notifications, then it should
+       preserve the context.  */
+    return m_suppress_notification != &mi_suppress_notification.user_selected_context;
+  }
 
 protected:
 

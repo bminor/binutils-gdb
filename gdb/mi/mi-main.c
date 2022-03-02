@@ -1918,34 +1918,6 @@ mi_print_exception (const char *token, const struct gdb_exception &exception)
   fputs_unfiltered ("\n", mi->raw_stdout);
 }
 
-/* Determine whether the parsed command already notifies the
-   user_selected_context_changed observer.  */
-
-static int
-command_notifies_uscc_observer (struct mi_parse *command)
-{
-  if (command->op == CLI_COMMAND)
-    {
-      /* CLI commands "thread" and "inferior" already send it.  */
-      return (startswith (command->command, "thread ")
-	      || startswith (command->command, "inferior "));
-    }
-  else /* MI_COMMAND */
-    {
-      if (strcmp (command->command, "interpreter-exec") == 0
-	  && command->argc > 1)
-	{
-	  /* "thread" and "inferior" again, but through -interpreter-exec.  */
-	  return (startswith (command->argv[1], "thread ")
-		  || startswith (command->argv[1], "inferior "));
-	}
-
-      else
-	/* -thread-select already sends it.  */
-	return strcmp (command->command, "thread-select") == 0;
-    }
-}
-
 void
 mi_execute_command (const char *cmd, int from_tty)
 {
@@ -1971,8 +1943,6 @@ mi_execute_command (const char *cmd, int from_tty)
 
   if (command != NULL)
     {
-      ptid_t previous_ptid = inferior_ptid;
-
       command->token = token;
 
       if (do_timings)
@@ -2002,37 +1972,6 @@ mi_execute_command (const char *cmd, int from_tty)
 
       bpstat_do_actions ();
 
-      if (/* The notifications are only output when the top-level
-	     interpreter (specified on the command line) is MI.  */
-	  top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ()
-	  /* Don't try report anything if there are no threads --
-	     the program is dead.  */
-	  && any_thread_p ()
-	  /* If the command already reports the thread change, no need to do it
-	     again.  */
-	  && !command_notifies_uscc_observer (command.get ()))
-	{
-	  int report_change = 0;
-
-	  if (command->thread == -1)
-	    {
-	      report_change = (previous_ptid != null_ptid
-			       && inferior_ptid != previous_ptid
-			       && inferior_ptid != null_ptid);
-	    }
-	  else if (inferior_ptid != null_ptid)
-	    {
-	      struct thread_info *ti = inferior_thread ();
-
-	      report_change = (ti->global_num != command->thread);
-	    }
-
-	  if (report_change)
-	    {
-	      gdb::observers::user_selected_context_changed.notify
-		(USER_SELECTED_THREAD | USER_SELECTED_FRAME);
-	    }
-	}
     }
 }
 
@@ -2076,6 +2015,7 @@ mi_cmd_execute (struct mi_parse *parse)
       set_current_program_space (inf->pspace);
     }
 
+  gdb::optional<scoped_restore_current_thread> thread_saver;
   if (parse->thread != -1)
     {
       thread_info *tp = find_thread_global_id (parse->thread);
@@ -2086,9 +2026,13 @@ mi_cmd_execute (struct mi_parse *parse)
       if (tp->state == THREAD_EXITED)
 	error (_("Thread id: %d has terminated"), parse->thread);
 
+      if (parse->cmd->preserve_user_selected_context ())
+	thread_saver.emplace ();
+
       switch_to_thread (tp);
     }
 
+  gdb::optional<scoped_restore_selected_frame> frame_saver;
   if (parse->frame != -1)
     {
       struct frame_info *fid;
@@ -2096,8 +2040,12 @@ mi_cmd_execute (struct mi_parse *parse)
 
       fid = find_relative_frame (get_current_frame (), &frame);
       if (frame == 0)
-	/* find_relative_frame was successful */
-	select_frame (fid);
+	{
+	  if (parse->cmd->preserve_user_selected_context ())
+	    frame_saver.emplace ();
+
+	  select_frame (fid);
+	}
       else
 	error (_("Invalid frame id: %d"), frame);
     }
