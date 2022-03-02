@@ -510,6 +510,13 @@ struct fbsd_pspace_data
   LONGEST off_linkmap = 0;
   LONGEST off_tlsindex = 0;
   bool rtld_offsets_valid = false;
+
+  /* vDSO mapping range.  */
+  struct mem_range vdso_range {};
+
+  /* Zero if the range hasn't been searched for, > 0 if a range was
+     found, or < 0 if a range was not found.  */
+  int vdso_range_p = 0;
 };
 
 /* Per-program-space data for FreeBSD architectures.  */
@@ -2261,6 +2268,108 @@ fbsd_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout,
     }
 }
 
+/* Search a list of struct kinfo_vmmap entries in the ENTRIES buffer
+   of LEN bytes to find the length of the entry starting at ADDR.
+   Returns the length of the entry or zero if no entry was found.  */
+
+static ULONGEST
+fbsd_vmmap_length (struct gdbarch *gdbarch, unsigned char *entries, size_t len,
+		   CORE_ADDR addr)
+{
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      unsigned char *descdata = entries;
+      unsigned char *descend = descdata + len;
+
+      /* Skip over the structure size.  */
+      descdata += 4;
+
+      while (descdata + KVE_PATH < descend)
+	{
+	  ULONGEST structsize = extract_unsigned_integer (descdata
+							  + KVE_STRUCTSIZE, 4,
+							  byte_order);
+	  if (structsize < KVE_PATH)
+	    return false;
+
+	  ULONGEST start = extract_unsigned_integer (descdata + KVE_START, 8,
+						     byte_order);
+	  ULONGEST end = extract_unsigned_integer (descdata + KVE_END, 8,
+						   byte_order);
+	  if (start == addr)
+	    return end - start;
+
+	  descdata += structsize;
+	}
+      return 0;
+}
+
+/* Helper for fbsd_vsyscall_range that does the real work of finding
+   the vDSO's address range.  */
+
+static bool
+fbsd_vdso_range (struct gdbarch *gdbarch, struct mem_range *range)
+{
+  struct target_ops *ops = current_inferior ()->top_target ();
+
+  if (target_auxv_search (ops, AT_FREEBSD_KPRELOAD, &range->start) <= 0)
+    return false;
+
+  if (!target_has_execution ())
+    {
+      /* Search for the ending address in the NT_PROCSTAT_VMMAP note. */
+      asection *section = bfd_get_section_by_name (core_bfd,
+						   ".note.freebsdcore.vmmap");
+      if (section == nullptr)
+	return false;
+
+      size_t note_size = bfd_section_size (section);
+      if (note_size < 4)
+	return false;
+
+      gdb::def_vector<unsigned char> contents (note_size);
+      if (!bfd_get_section_contents (core_bfd, section, contents.data (),
+				     0, note_size))
+	return false;
+
+      range->length = fbsd_vmmap_length (gdbarch, contents.data (), note_size,
+					 range->start);
+    }
+  else
+    {
+      /* Fetch the list of address space entries from the running target. */
+      gdb::optional<gdb::byte_vector> buf =
+	target_read_alloc (ops, TARGET_OBJECT_FREEBSD_VMMAP, nullptr);
+      if (!buf || buf->empty ())
+	return false;
+
+      range->length = fbsd_vmmap_length (gdbarch, buf->data (), buf->size (),
+					 range->start);
+    }
+  return range->length != 0;
+}
+
+/* Return the address range of the vDSO for the current inferior.  */
+
+static int
+fbsd_vsyscall_range (struct gdbarch *gdbarch, struct mem_range *range)
+{
+  struct fbsd_pspace_data *data = get_fbsd_pspace_data (current_program_space);
+
+  if (data->vdso_range_p == 0)
+    {
+      if (fbsd_vdso_range (gdbarch, &data->vdso_range))
+	data->vdso_range_p = 1;
+      else
+	data->vdso_range_p = -1;
+    }
+
+  if (data->vdso_range_p < 0)
+    return 0;
+
+  *range = data->vdso_range;
+  return 1;
+}
+
 /* To be called from GDB_OSABI_FREEBSD handlers. */
 
 void
@@ -2277,6 +2386,7 @@ fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_gdb_signal_to_target (gdbarch, fbsd_gdb_signal_to_target);
   set_gdbarch_report_signal_info (gdbarch, fbsd_report_signal_info);
   set_gdbarch_skip_solib_resolver (gdbarch, fbsd_skip_solib_resolver);
+  set_gdbarch_vsyscall_range (gdbarch, fbsd_vsyscall_range);
 
   /* `catch syscall' */
   set_xml_syscall_file_name (gdbarch, "syscalls/freebsd.xml");
