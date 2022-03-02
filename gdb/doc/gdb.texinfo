@@ -3310,6 +3310,7 @@ remove inferiors from the debugging session use the
 @w{@code{remove-inferiors}} command.
 
 @table @code
+@anchor{add_inferior_cli}
 @kindex add-inferior
 @item add-inferior [ -copies @var{n} ] [ -exec @var{executable} ] [-no-connection ]
 Adds @var{n} inferiors to be run using @var{executable} as the
@@ -37141,15 +37142,45 @@ popup menu, but is needless clutter on the command line, and
 @subheading Synopsis
 
 @smallexample
--add-inferior
+-add-inferior [ --no-connection ]
 @end smallexample
 
 Creates a new inferior (@pxref{Inferiors Connections and Programs}).  The created
 inferior is not associated with any executable.  Such association may
 be established with the @samp{-file-exec-and-symbols} command
-(@pxref{GDB/MI File Commands}).  The command response has a single
-field, @samp{inferior}, whose value is the identifier of the
-thread group corresponding to the new inferior.
+(@pxref{GDB/MI File Commands}).
+
+By default, the new inferior begins connected to the same target
+connection as the current inferior.  For example, if the current
+inferior was connected to @code{gdbserver} with @code{target remote},
+then the new inferior will be connected to the same @code{gdbserver}
+instance.  The @samp{--no-connection} option starts the new inferior
+with no connection yet.  You can then for example use the
+@code{-target-select remote} command to connect to some other
+@code{gdbserver} instance, use @code{-exec-run} to spawn a local
+program, etc.
+
+The command response always has a field, @var{inferior}, whose value
+is the identifier of the thread group corresponding to the new
+inferior.
+
+An additional section field, @var{connection}, is optional.  This
+field will only exist if the new inferior has a target connection.  If
+this field exists, then its value will be a tuple containing the
+following fields:
+
+@table @samp
+@item number
+The number of the connection used for the new inferior.
+
+@item name
+The name of the connection type used for the new inferior.
+@end table
+
+@subheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{add-inferior}
+(@pxref{add_inferior_cli,,@samp{add-inferior}}).
 
 @subheading Example
 

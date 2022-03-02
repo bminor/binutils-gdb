@@ -79,7 +79,7 @@ mi_gdb_test "-add-inferior" \
     [multi_line "=thread-group-added,id=\"\[^\"\]+\"" \
 	 "~\"\\\[New inferior 2\\\]\\\\n\"" \
 	 "\~\"Added inferior 2 on connection ${conn_pattern}\\\\n\"" \
-	 "\\^done,inferior=\"\[^\"\]+\"" ] \
+	 "\\^done,inferior=\"\[^\"\]+\",connection=\{number=\"$decimal\",name=\"\[^\"\]+\"\}" ] \
     "mi add inferior"
 
 # Now run 'info inferiors' again to check that the currently selected
@@ -120,3 +120,11 @@ gdb_test_multiple "info inferiors" \
 	    pass $gdb_test_name
 	}
     }
+
+# Add a third inferior, but this time, use --no-connection.
+mi_gdb_test "-add-inferior --no-connection" \
+    [multi_line "=thread-group-added,id=\"\[^\"\]+\"" \
+	 "~\"\\\[New inferior 3\\\]\\\\n\"" \
+	 "\~\"Added inferior 3\\\\n\"" \
+	 "\\^done,inferior=\"\[^\"\]+\"" ] \
+    "mi add inferior with no connection"

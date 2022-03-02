@@ -158,6 +158,10 @@ info win
     connection of the current inferior, this restores the behaviour of
     GDB as it was prior to GDB 10.
 
+ ** The '-add-inferior' command now accepts a '--no-connection'
+    option, which causes the new inferior to start without a
+    connection.
+
 * New targets
 
 GNU/Linux/LoongArch    loongarch*-*-linux*

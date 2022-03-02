@@ -1703,18 +1703,53 @@ mi_cmd_list_target_features (const char *command, char **argv, int argc)
 void
 mi_cmd_add_inferior (const char *command, char **argv, int argc)
 {
-  struct inferior *inf;
+  bool no_connection = false;
 
-  if (argc != 0)
-    error (_("-add-inferior should be passed no arguments"));
+  /* Parse the command options.  */
+  enum opt
+    {
+      NO_CONNECTION_OPT,
+    };
+  static const struct mi_opt opts[] =
+    {
+	{"-no-connection", NO_CONNECTION_OPT, 0},
+	{NULL, 0, 0},
+    };
+
+  int oind = 0;
+  char *oarg;
+
+  while (1)
+    {
+      int opt = mi_getopt ("-add-inferior", argc, argv, opts, &oind, &oarg);
+
+      if (opt < 0)
+	break;
+      switch ((enum opt) opt)
+	{
+	case NO_CONNECTION_OPT:
+	  no_connection = true;
+	  break;
+	}
+    }
 
   scoped_restore_current_pspace_and_thread restore_pspace_thread;
 
-  inf = add_inferior_with_spaces ();
+  inferior *inf = add_inferior_with_spaces ();
 
-  switch_to_inferior_and_push_target (inf, false, current_inferior ());
+  switch_to_inferior_and_push_target (inf, no_connection,
+				      current_inferior ());
 
   current_uiout->field_fmt ("inferior", "i%d", inf->num);
+
+  process_stratum_target *proc_target = inf->process_target ();
+
+  if (proc_target != nullptr)
+    {
+      ui_out_emit_tuple tuple_emitter (current_uiout, "connection");
+      current_uiout->field_unsigned ("number", proc_target->connection_number);
+      current_uiout->field_string ("name", proc_target->shortname ());
+    }
 }
 
 void
