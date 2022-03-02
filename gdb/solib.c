@@ -23,6 +23,7 @@
 #include <fcntl.h>
 #include "symtab.h"
 #include "bfd.h"
+#include "build-id.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "gdbcore.h"
@@ -517,6 +518,55 @@ solib_bfd_open (const char *pathname)
 	   b->printable_name);
 
   return abfd;
+}
+
+/* Mapping of a core file's shared library sonames to their respective
+   build-ids.  Added to the registries of core file bfds.  */
+
+typedef std::unordered_map<std::string, std::string> soname_build_id_map;
+
+/* Key used to associate a soname_build_id_map to a core file bfd.  */
+
+static const struct bfd_key<soname_build_id_map> cbfd_soname_build_id_data_key;
+
+/* See solib.h.  */
+
+void
+set_cbfd_soname_build_id (gdb_bfd_ref_ptr abfd,
+			  const char *soname,
+			  const bfd_build_id *build_id)
+{
+  gdb_assert (abfd.get () != nullptr);
+  gdb_assert (soname != nullptr);
+  gdb_assert (build_id != nullptr);
+
+  soname_build_id_map *mapptr = cbfd_soname_build_id_data_key.get (abfd.get ());
+
+  if (mapptr == nullptr)
+    mapptr = cbfd_soname_build_id_data_key.emplace (abfd.get ());
+
+  (*mapptr)[soname] = build_id_to_string (build_id);
+}
+
+/* See solib.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+get_cbfd_soname_build_id (gdb_bfd_ref_ptr abfd, const char *soname)
+{
+  if (abfd.get () == nullptr || soname == nullptr)
+    return {};
+
+  soname_build_id_map *mapptr
+    = cbfd_soname_build_id_data_key.get (abfd.get ());
+
+  if (mapptr == nullptr)
+    return {};
+
+  auto it = mapptr->find (lbasename (soname));
+  if (it == mapptr->end ())
+    return {};
+
+  return make_unique_xstrdup (it->second.c_str ());
 }
 
 /* Given a pointer to one of the shared objects in our list of mapped
@@ -1584,6 +1634,43 @@ gdb_bfd_scan_elf_dyntag (const int desired_dyntag, bfd *abfd, CORE_ADDR *ptr,
   }
 
   return 0;
+}
+
+/* See solib.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+gdb_bfd_read_elf_soname (const char *filename)
+{
+  gdb_bfd_ref_ptr abfd = gdb_bfd_open (filename, gnutarget);
+
+  if (abfd == nullptr)
+    return {};
+
+  /* Check that ABFD is an ET_DYN ELF file.  */
+  if (!bfd_check_format (abfd.get (), bfd_object)
+      || !(bfd_get_file_flags (abfd.get ()) & DYNAMIC))
+    return {};
+
+  CORE_ADDR idx;
+  if (!gdb_bfd_scan_elf_dyntag (DT_SONAME, abfd.get (), &idx, nullptr))
+    return {};
+
+  struct bfd_section *dynstr = bfd_get_section_by_name (abfd.get (), ".dynstr");
+  int sect_size = bfd_section_size (dynstr);
+  if (dynstr == nullptr || sect_size <= idx)
+    return {};
+
+  /* Read soname from the string table.  */
+  gdb::byte_vector dynstr_buf;
+  if (!gdb_bfd_get_full_section_contents (abfd.get (), dynstr, &dynstr_buf))
+    return {};
+
+  /* Ensure soname is null-terminated before returning a copy.  */
+  char *soname = (char *) dynstr_buf.data () + idx;
+  if (strnlen (soname, sect_size - idx) == sect_size - idx)
+    return {};
+
+  return make_unique_xstrdup (soname);
 }
 
 /* Lookup the value for a specific symbol from symbol table.  Look up symbol

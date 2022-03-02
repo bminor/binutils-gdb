@@ -282,6 +282,17 @@ core_target::build_file_mappings ()
 
 	/* Set target_section fields.  */
 	m_core_file_mappings.emplace_back (start, end, sec);
+
+	/* If this is a bfd of a shared library, record its soname
+	   and build id.  */
+	if (build_id != nullptr)
+	  {
+	    gdb::unique_xmalloc_ptr<char> soname
+	      = gdb_bfd_read_elf_soname (bfd->filename);
+	    if (soname != nullptr)
+	      set_cbfd_soname_build_id (current_program_space->cbfd,
+					soname.get (), build_id);
+	  }
       });
 
   normalize_mem_ranges (&m_core_unavailable_mappings);

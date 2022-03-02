@@ -44,6 +44,7 @@
 #include "solib-svr4.h"
 
 #include <ctype.h>
+#include <unordered_map>
 
 /* This enum represents the values that the user can choose when
    informing the Linux kernel about which memory mappings will be
@@ -1185,6 +1186,22 @@ linux_read_core_file_mappings
   if (f != descend)
     warning (_("malformed note - filename area is too big"));
 
+  const bfd_build_id *orig_build_id = cbfd->build_id;
+  std::unordered_map<ULONGEST, const bfd_build_id *> vma_map;
+
+  /* Search for solib build-ids in the core file.  Each time one is found,
+     map the start vma of the corresponding elf header to the build-id.  */
+  for (bfd_section *sec = cbfd->sections; sec != nullptr; sec = sec->next)
+    {
+      cbfd->build_id = nullptr;
+
+      if (sec->flags & SEC_LOAD
+	  && (get_elf_backend_data (cbfd)->elf_backend_core_find_build_id
+	       (cbfd, (bfd_vma) sec->filepos)))
+	vma_map[sec->vma] = cbfd->build_id;
+    }
+
+  cbfd->build_id = orig_build_id;
   pre_loop_cb (count);
 
   for (int i = 0; i < count; i++)
@@ -1198,8 +1215,13 @@ linux_read_core_file_mappings
       descdata += addr_size;
       char * filename = filenames;
       filenames += strlen ((char *) filenames) + 1;
+      const bfd_build_id *build_id = nullptr;
+      auto vma_map_it = vma_map.find (start);
 
-      loop_cb (i, start, end, file_ofs, filename, nullptr);
+      if (vma_map_it != vma_map.end ())
+	build_id = vma_map_it->second;
+
+      loop_cb (i, start, end, file_ofs, filename, build_id);
     }
 }
 
