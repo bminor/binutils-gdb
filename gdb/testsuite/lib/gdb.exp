@@ -5130,6 +5130,10 @@ gdb_caching_proc can_spawn_for_attach {
           kill_wait_spawned_process $test_spawn_id
           return 1
         }
+        -re "A program is being debugged already.  Kill it. .y or n. " {
+          send_gdb "y\n"
+          exp_continue
+        }
     }
 
     kill_wait_spawned_process $test_spawn_id
