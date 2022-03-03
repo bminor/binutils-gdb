@@ -69,6 +69,15 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
   return scoped_fd (-ENOSYS);
 }
 
+scoped_fd
+debuginfod_exec_query (const unsigned char *build_id,
+		       int build_id_len,
+		       const char *filename,
+		       gdb::unique_xmalloc_ptr<char> *destname)
+{
+  return scoped_fd (-ENOSYS);
+}
+
 #define NO_IMPL _("Support for debuginfod is not compiled into GDB.")
 
 #else
@@ -264,6 +273,48 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 
   if (debuginfod_verbose > 0 && fd.get () < 0 && fd.get () != -ENOENT)
     printf_filtered (_("Download failed: %s.  Continuing without debug info for %ps.\n"),
+		     safe_strerror (-fd.get ()),
+		     styled_string (file_name_style.style (),  filename));
+
+  if (fd.get () >= 0)
+    destname->reset (dname);
+
+  return fd;
+}
+
+/* See debuginfod-support.h  */
+
+scoped_fd
+debuginfod_exec_query (const unsigned char *build_id,
+		       int build_id_len,
+		       const char *filename,
+		       gdb::unique_xmalloc_ptr<char> *destname)
+{
+  if (!debuginfod_is_enabled ())
+    return scoped_fd (-ENOSYS);
+
+  debuginfod_client *c = get_debuginfod_client ();
+
+  if (c == nullptr)
+    return scoped_fd (-ENOMEM);
+
+  char *dname = nullptr;
+  user_data data ("executable for", filename);
+
+  debuginfod_set_user_data (c, &data);
+  gdb::optional<target_terminal::scoped_restore_terminal_state> term_state;
+  if (target_supports_terminal_ours ())
+    {
+      term_state.emplace ();
+      target_terminal::ours ();
+    }
+
+  scoped_fd fd (debuginfod_find_executable (c, build_id, build_id_len, &dname));
+  debuginfod_set_user_data (c, nullptr);
+
+  if (debuginfod_verbose > 0 && fd.get () < 0 && fd.get () != -ENOENT)
+    printf_filtered (_("Download failed: %s. " \
+		       "Continuing without executable for %ps.\n"),
 		     safe_strerror (-fd.get ()),
 		     styled_string (file_name_style.style (),  filename));
 

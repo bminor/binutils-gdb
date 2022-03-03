@@ -49,6 +49,8 @@
 #include "filesystem.h"
 #include "gdb_bfd.h"
 #include "gdbsupport/filestuff.h"
+#include "gdbsupport/scoped_fd.h"
+#include "debuginfod-support.h"
 #include "source.h"
 #include "cli/cli-style.h"
 
@@ -588,6 +590,36 @@ solib_map_sections (struct so_list *so)
 
   gdb::unique_xmalloc_ptr<char> filename (tilde_expand (so->so_name));
   gdb_bfd_ref_ptr abfd (ops->bfd_open (filename.get ()));
+  gdb::unique_xmalloc_ptr<char> build_id_hexstr
+    = get_cbfd_soname_build_id (current_program_space->cbfd, so->so_name);
+
+  /* If we already know the build-id of this solib from a core file, verify
+     it matches ABFD's build-id.  If there is a mismatch or the solib wasn't
+     found, attempt to query debuginfod for the correct solib.  */
+  if (build_id_hexstr.get () != nullptr)
+    {
+      bool mismatch = false;
+
+      if (abfd != nullptr && abfd->build_id != nullptr)
+	{
+	  std::string build_id = build_id_to_string (abfd->build_id);
+
+	  if (build_id != build_id_hexstr.get ())
+	    mismatch = true;
+	}
+      if (abfd == nullptr || mismatch)
+	{
+	  scoped_fd fd = debuginfod_exec_query ((const unsigned char*)
+						build_id_hexstr.get (),
+						0, so->so_name, &filename);
+
+	  if (fd.get () >= 0)
+	    abfd = ops->bfd_open (filename.get ());
+	  else if (mismatch)
+	    warning (_("Build-id of %ps does not match core file."),
+		     styled_string (file_name_style.style (), filename.get ()));
+	}
+    }
 
   if (abfd == NULL)
     return 0;
