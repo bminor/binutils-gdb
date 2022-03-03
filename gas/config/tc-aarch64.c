@@ -8185,6 +8185,8 @@ try_to_encode_as_unscaled_ldst (aarch64_inst *instr)
     case OP_STRB_POS: new_op = OP_STURB; break;
     case OP_LDRSB_POS: new_op = OP_LDURSB; break;
     case OP_LDRH_POS: new_op = OP_LDURH; break;
+    case OP_LDRH_POS_A: new_op = OP_LDURH_A; break;
+
     case OP_STRH_POS: new_op = OP_STURH; break;
     case OP_LDRSH_POS: new_op = OP_LDURSH; break;
     case OP_LDR_POS: new_op = OP_LDUR; break;
@@ -8201,6 +8203,12 @@ try_to_encode_as_unscaled_ldst (aarch64_inst *instr)
     case OP_LDR_POS_AX: new_op = OP_LDUR_AX; break;
     case OP_STR_POS_AC: new_op = OP_STUR_AC; break;
     case OP_STR_POS_AX: new_op = OP_STUR_AX; break;
+
+    case OP_LDRFP_POS_A: new_op = OP_LDURFP_A; break;
+    case OP_LDRFPQ_POS_A: new_op = OP_LDURFPQ_POS_A; break;
+    case OP_STRFP_POS_A: new_op = OP_STURFP_POS_A; break;
+    case OP_STRFPQ_POS_A: new_op = OP_STURFPQ_POS_A; break;
+
     default: new_op = OP_NIL; break;
     }
 
@@ -8223,7 +8231,7 @@ try_to_encode_as_unscaled_ldst (aarch64_inst *instr)
   gas_assert (idx == 1);
   instr->operands[idx].qualifier = AARCH64_OPND_QLF_NIL;
 
-  DEBUG_TRACE ("Found LDURB entry to encode programmer-friendly LDRB");
+  DEBUG_TRACE ("Found LDUR entry to encode programmer-friendly LDR");
 
   if (!aarch64_opcode_encode (cpu_variant, instr->opcode, instr, &instr->value,
 			      NULL, NULL, insn_sequence))
