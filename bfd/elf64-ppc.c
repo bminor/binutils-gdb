@@ -13469,7 +13469,7 @@ sort_relr (struct ppc_link_hash_table *htab)
 }
 
 /* Look over GOT and PLT entries saved on elf_local_got_ents for all
-   all input files, stashing info about needed relative relocs.  */
+   input files, stashing info about needed relative relocs.  */
 
 static bool
 got_and_plt_relr_for_local_syms (struct bfd_link_info *info)
