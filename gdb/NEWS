@@ -3,6 +3,8 @@
 
 *** Changes since GDB 11
 
+* DBX mode is deprecated, and will be removed in GDB 13
+
 * Improved C++ template support
 
   GDB now treats functions/types involving C++ templates like it does function

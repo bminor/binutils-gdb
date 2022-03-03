@@ -1028,6 +1028,9 @@ captured_main_1 (struct captured_main_args *context)
       }
   }
 
+  if (dbx_commands)
+    warning (_("--dbx mode is deprecated and will be removed"));
+
   save_original_signals_state (quiet);
 
   /* Try to set up an alternate signal stack for SIGSEGV handlers.  */
