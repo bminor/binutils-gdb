@@ -34,7 +34,7 @@ event_pipe::~event_pipe ()
 /* See event-pipe.h.  */
 
 bool
-event_pipe::open ()
+event_pipe::open_pipe ()
 {
   if (is_open ())
     return false;
