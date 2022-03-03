@@ -277,12 +277,26 @@ morello_uimm_sub SP_
 morello_alt_uimm_sub ALTVAREG
 morello_alt_uimm_sub ALTSP
 
-	.macro morello_alt_uimmb_sub wt, xnsp
-	  .irp op, ldrb, strb
-	    \op    \wt, [\xnsp, #-1]
-	    \op    \wt, [\xnsp, #-16]
-	    \op    \wt, [\xnsp, #-256]
-	  .endr
+	.macro morello_alt_narrow_simm9_inner op, size, wt, xnsp
+	\op\size    \wt, [\xnsp]
+	\op\size    \wt, [\xnsp, #-1]
+	\op\size    \wt, [\xnsp, #-16]
+	\op\size    \wt, [\xnsp, #-256]
+	\op\size    \wt, [\xnsp, #1]
+	\op\size    \wt, [\xnsp, #16]
+	\op\size    \wt, [\xnsp, #255]
 	.endm
-morello_alt_uimmb_sub w4, ALTVAREG
-morello_alt_uimmb_sub w4, ALTSP
+
+	.macro morello_alt_narrow_simm9 xnsp
+	.irp op, ldr, ldrs, str, ldur, ldurs, stur
+	  morello_alt_narrow_simm9_inner \op, b, w4, \xnsp
+	  morello_alt_narrow_simm9_inner \op, h, w4, \xnsp
+	.endr
+	.irp size, b, h, w
+	  morello_alt_narrow_simm9_inner ldrs, \size, x4, \xnsp
+	  morello_alt_narrow_simm9_inner ldurs, \size, x4, \xnsp
+	.endr
+	.endm
+
+morello_alt_narrow_simm9 ALTVAREG
+morello_alt_narrow_simm9 ALTSP
