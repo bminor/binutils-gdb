@@ -61,9 +61,6 @@
    do_setshow_command will free it.  */
 char *interpreter_p;
 
-/* Whether dbx commands will be handled.  */
-int dbx_commands = 0;
-
 /* System root path, used to find libraries etc.  */
 std::string gdb_sysroot;
 
@@ -766,7 +763,6 @@ captured_main_1 (struct captured_main_args *context)
     static struct option long_options[] =
     {
       {"tui", no_argument, 0, OPT_TUI},
-      {"dbx", no_argument, &dbx_commands, 1},
       {"readnow", no_argument, NULL, OPT_READNOW},
       {"readnever", no_argument, NULL, OPT_READNEVER},
       {"r", no_argument, NULL, OPT_READNOW},
@@ -1027,9 +1023,6 @@ captured_main_1 (struct captured_main_args *context)
 	cli_styling = 0;
       }
   }
-
-  if (dbx_commands)
-    warning (_("--dbx mode is deprecated and will be removed"));
 
   save_original_signals_state (quiet);
 
@@ -1437,7 +1430,6 @@ Output and user interface control:\n\n\
 "), stream);
 #endif
   gdb_puts (_("\
-  --dbx              DBX compatibility mode.\n\
   -q, --quiet, --silent\n\
 		     Do not print version number on startup.\n\n\
 "), stream);

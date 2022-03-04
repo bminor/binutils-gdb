@@ -6932,17 +6932,6 @@ Prints the global and static variables.\n"),
 				      _("global and static variables"),
 				      true));
   set_cmd_completer_handle_brkchars (c, info_vars_funcs_command_completer);
-  if (dbx_commands)
-    {
-      c = add_com ("whereis", class_info, info_variables_command,
-		   info_print_args_help (_("\
-All global and static variable names, or those matching REGEXPs.\n\
-Usage: whereis [-q] [-n] [-t TYPEREGEXP] [NAMEREGEXP]\n\
-Prints the global and static variables.\n"),
-					 _("global and static variables"),
-					 true));
-      set_cmd_completer_handle_brkchars (c, info_vars_funcs_command_completer);
-    }
 
   c = add_info ("functions", info_functions_command,
 		info_print_args_help (_("\

@@ -2421,8 +2421,7 @@ User-defined commands.\n\
 The commands in this class are those defined by the user.\n\
 Use the \"define\" command to define a command."), &cmdlist);
   add_cmd ("support", class_support, _("Support facilities."), &cmdlist);
-  if (!dbx_commands)
-    add_cmd ("status", class_info, _("Status inquiries."), &cmdlist);
+  add_cmd ("status", class_info, _("Status inquiries."), &cmdlist);
   add_cmd ("files", class_files, _("Specifying and examining files."),
 	   &cmdlist);
   add_cmd ("breakpoints", class_breakpoint,
@@ -2666,9 +2665,6 @@ This can be changed using \"set listsize\", and the current value\n\
 can be shown using \"show listsize\"."));
 
   add_com_alias ("l", list_cmd, class_files, 1);
-
-  if (dbx_commands)
-    add_com_alias ("file", list_cmd, class_files, 1);
 
   c = add_com ("disassemble", class_vars, disassemble_command, _("\
 Disassemble a specified section of memory.\n\

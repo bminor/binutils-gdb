@@ -1926,9 +1926,6 @@ directory in which the source file was compiled into object code.\n\
 With no argument, reset the search path to $cdir:$cwd, the default."),
 	       &cmdlist);
 
-  if (dbx_commands)
-    add_com_alias ("use", directory_cmd, class_files, 0);
-
   set_cmd_completer (directory_cmd, filename_completer);
 
   add_setshow_optional_filename_cmd ("directories",

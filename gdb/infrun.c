@@ -8564,28 +8564,25 @@ normal_stop (void)
 
   /* Look up the hook_stop and run it (CLI internally handles problem
      of stop_command's pre-hook not existing).  */
-  if (stop_command != NULL)
+  stop_context saved_context;
+
+  try
     {
-      stop_context saved_context;
-
-      try
-	{
-	  execute_cmd_pre_hook (stop_command);
-	}
-      catch (const gdb_exception &ex)
-	{
-	  exception_fprintf (gdb_stderr, ex,
-			     "Error while running hook_stop:\n");
-	}
-
-      /* If the stop hook resumes the target, then there's no point in
-	 trying to notify about the previous stop; its context is
-	 gone.  Likewise if the command switches thread or inferior --
-	 the observers would print a stop for the wrong
-	 thread/inferior.  */
-      if (saved_context.changed ())
-	return 1;
+      execute_cmd_pre_hook (stop_command);
     }
+  catch (const gdb_exception &ex)
+    {
+      exception_fprintf (gdb_stderr, ex,
+			 "Error while running hook_stop:\n");
+    }
+
+  /* If the stop hook resumes the target, then there's no point in
+     trying to notify about the previous stop; its context is
+     gone.  Likewise if the command switches thread or inferior --
+     the observers would print a stop for the wrong
+     thread/inferior.  */
+  if (saved_context.changed ())
+    return 1;
 
   /* Notify observers about the stop.  This is where the interpreters
      print the stop event.  */
@@ -9489,9 +9486,8 @@ may be interspersed with actions, with the actions being performed for\n\
 all signals cumulatively specified."));
   set_cmd_completer (c, handle_completer);
 
-  if (!dbx_commands)
-    stop_command = add_cmd ("stop", class_obscure,
-			    not_just_help_class_command, _("\
+  stop_command = add_cmd ("stop", class_obscure,
+			  not_just_help_class_command, _("\
 There is no `stop' command, but you can set a hook on `stop'.\n\
 This allows you to set a list of commands to be run each time execution\n\
 of the program stops."), &cmdlist);

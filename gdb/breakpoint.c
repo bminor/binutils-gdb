@@ -9296,79 +9296,6 @@ thbreak_command (const char *arg, int from_tty)
   break_command_1 (arg, (BP_TEMPFLAG | BP_HARDWAREFLAG), from_tty);
 }
 
-static void
-stop_command (const char *arg, int from_tty)
-{
-  gdb_printf (_("Specify the type of breakpoint to set.\n\
-Usage: stop in <function | address>\n\
-       stop at <line>\n"));
-}
-
-static void
-stopin_command (const char *arg, int from_tty)
-{
-  int badInput = 0;
-
-  if (arg == NULL)
-    badInput = 1;
-  else if (*arg != '*')
-    {
-      const char *argptr = arg;
-      int hasColon = 0;
-
-      /* Look for a ':'.  If this is a line number specification, then
-	 say it is bad, otherwise, it should be an address or
-	 function/method name.  */
-      while (*argptr && !hasColon)
-	{
-	  hasColon = (*argptr == ':');
-	  argptr++;
-	}
-
-      if (hasColon)
-	badInput = (*argptr != ':');	/* Not a class::method */
-      else
-	badInput = isdigit (*arg);	/* a simple line number */
-    }
-
-  if (badInput)
-    gdb_printf (_("Usage: stop in <function | address>\n"));
-  else
-    break_command_1 (arg, 0, from_tty);
-}
-
-static void
-stopat_command (const char *arg, int from_tty)
-{
-  int badInput = 0;
-
-  if (arg == NULL || *arg == '*')	/* no line number */
-    badInput = 1;
-  else
-    {
-      const char *argptr = arg;
-      int hasColon = 0;
-
-      /* Look for a ':'.  If there is a '::' then get out, otherwise
-	 it is probably a line number.  */
-      while (*argptr && !hasColon)
-	{
-	  hasColon = (*argptr == ':');
-	  argptr++;
-	}
-
-      if (hasColon)
-	badInput = (*argptr == ':');	/* we have class::method */
-      else
-	badInput = !isdigit (*arg);	/* not a line number */
-    }
-
-  if (badInput)
-    gdb_printf (_("Usage: stop at LINE\n"));
-  else
-    break_command_1 (arg, 0, from_tty);
-}
-
 /* The dynamic printf command is mostly like a regular breakpoint, but
    with a prewired command list consisting of a single output command,
    built from extra arguments supplied on the dprintf command
@@ -15104,32 +15031,6 @@ BREAK_ARGS_HELP ("break")));
   add_com_alias ("br", break_cmd, class_run, 1);
   add_com_alias ("bre", break_cmd, class_run, 1);
   add_com_alias ("brea", break_cmd, class_run, 1);
-
-  if (dbx_commands)
-    {
-      add_abbrev_prefix_cmd ("stop", class_breakpoint, stop_command, _("\
-Break in function/address or break at a line in the current file."),
-			     &stoplist, 1, &cmdlist);
-      add_cmd ("in", class_breakpoint, stopin_command,
-	       _("Break in function or address."), &stoplist);
-      add_cmd ("at", class_breakpoint, stopat_command,
-	       _("Break at a line in the current file."), &stoplist);
-      add_com ("status", class_info, info_breakpoints_command, _("\
-Status of user-settable breakpoints, or breakpoint number NUMBER.\n\
-The \"Type\" column indicates one of:\n\
-\tbreakpoint     - normal breakpoint\n\
-\twatchpoint     - watchpoint\n\
-The \"Disp\" column contains one of \"keep\", \"del\", or \"dis\" to indicate\n\
-the disposition of the breakpoint after it gets hit.  \"dis\" means that the\n\
-breakpoint will be disabled.  The \"Address\" and \"What\" columns indicate the\n\
-address and file/line number respectively.\n\
-\n\
-Convenience variable \"$_\" and default examine address for \"x\"\n\
-are set to the address of the last breakpoint listed unless the command\n\
-is prefixed with \"server \".\n\n\
-Convenience variable \"$bpnum\" contains the number of the last\n\
-breakpoint set."));
-    }
 
   cmd_list_element *info_breakpoints_cmd
     = add_info ("breakpoints", info_breakpoints_command, _("\

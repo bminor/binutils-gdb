@@ -47713,9 +47713,6 @@ Read all symbols from the given symfile on the first access.
 @item --readnever
 Do not read symbol files.
 
-@item --dbx
-Run in DBX compatibility mode.
-
 @item --return-child-result
 @value{GDBN}'s exit code will be the same as the child's exit code.
 

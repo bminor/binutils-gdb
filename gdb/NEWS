@@ -8,6 +8,8 @@
 * Remove support for building against Python 2, it is now only possible to
   build GDB against Python 3.
 
+* DBX mode has been removed.
+
 * Python API
 
   ** New function gdb.format_address(ADDRESS, PROGSPACE, ARCHITECTURE),

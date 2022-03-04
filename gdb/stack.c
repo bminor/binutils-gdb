@@ -2903,24 +2903,6 @@ find_frame_for_function (const char *function_name)
   return frame;
 }
 
-/* Implements the dbx 'func' command.  */
-
-static void
-func_command (const char *arg, int from_tty)
-{
-  if (arg == NULL)
-    return;
-
-  struct frame_info *frame = find_frame_for_function (arg);
-  if (frame == NULL)
-    error (_("'%s' not within current stack frame."), arg);
-  if (frame != get_selected_frame (NULL))
-    {
-      select_frame (frame);
-      print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
-    }
-}
-
 /* The qcs command line flags for the "frame apply" commands.  Keep
    this in sync with the "thread apply" commands.  */
 
@@ -3559,11 +3541,6 @@ Prints the argument variables of the current stack frame.\n"),
 					_("argument variables"),
 					false));
   set_cmd_completer_handle_brkchars (cmd, info_print_command_completer);
-
-  if (dbx_commands)
-    add_com ("func", class_stack, func_command, _("\
-Select the stack frame that contains NAME.\n\
-Usage: func NAME"));
 
   /* Install "set print raw frame-arguments", a deprecated spelling of
      "set print raw-frame-arguments".  */

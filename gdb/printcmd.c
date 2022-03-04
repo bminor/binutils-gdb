@@ -3298,18 +3298,6 @@ Use \"set variable\" for variables with names identical to set subcommands.\n\
 With a subcommand, this command modifies parts of the gdb environment.\n\
 You can see these environment settings with the \"show\" command."),
 		  &setlist, 1, &cmdlist);
-  if (dbx_commands)
-    add_com ("assign", class_vars, set_command, _("\
-Evaluate expression EXP and assign result to variable VAR.\n\
-Usage: assign VAR = EXP\n\
-This uses assignment syntax appropriate for the current language\n\
-(VAR = EXP or VAR := EXP for example).\n\
-VAR may be a debugger \"convenience\" variable (names starting\n\
-with $), a register (a few standard names starting with $), or an actual\n\
-variable in the program being debugged.  EXP is any valid expression.\n\
-Use \"set variable\" for variables with names identical to set subcommands.\n\
-\nWith a subcommand, this command modifies parts of the gdb environment.\n\
-You can see these environment settings with the \"show\" command."));
 
   /* "call" is the same as "set", but handy for dbx users to call fns.  */
   c = add_com ("call", class_vars, call_command, _("\
