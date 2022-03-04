@@ -301,17 +301,17 @@ class ui_out
     progress_meter (const progress_meter &) = delete;
     progress_meter &operator= (const progress_meter &) = delete;
 
+    /* Emit some progress for this progress meter.  HOWMUCH may range
+       from 0.0 to 1.0.  */
+    void progress (double howmuch)
+    {
+      m_uiout->do_progress_notify (howmuch);
+    }
+
   private:
 
     struct ui_out *m_uiout;
   };
-
-  /* Emit some progress corresponding to the most recently created
-     progress meter.  HOWMUCH may range from 0.0 to 1.0.  */
-  void progress (double howmuch)
-  {
-    do_progress_notify (howmuch);
-  }
 
  protected:
 

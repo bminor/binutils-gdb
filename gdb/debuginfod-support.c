@@ -129,7 +129,7 @@ progressfn (debuginfod_client *c, long cur, long total)
       data->meter.emplace (current_uiout, message, 1);
     }
 
-  current_uiout->progress ((double)cur / (double)total);
+  data->meter->progress ((double)cur / (double)total);
 
   return 0;
 }
