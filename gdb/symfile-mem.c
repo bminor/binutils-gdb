@@ -88,7 +88,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
   struct bfd *nbfd;
   struct bfd_section *sec;
   bfd_vma loadbase;
-  symfile_add_flags add_flags = 0;
+  symfile_add_flags add_flags = SYMFILE_NOT_FILENAME;
 
   if (bfd_get_flavour (templ) != bfd_target_elf_flavour)
     error (_("add-symbol-file-from-memory not supported for this target"));
