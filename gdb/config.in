@@ -775,9 +775,6 @@
    python-config.py --exec-prefix. */
 #undef WITH_PYTHON_PATH
 
-/* Define if the simulator is being linked in. */
-#undef WITH_SIM
-
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
 #if defined AC_APPLE_UNIVERSAL_BUILD

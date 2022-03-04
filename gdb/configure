@@ -18673,9 +18673,6 @@ if test "${ignore_sim}" = "false"; then
     SIM="${gdb_sim}"
     SIM_OBS="remote-sim.o"
 
-$as_echo "#define WITH_SIM 1" >>confdefs.h
-
-
     # Some tdep code should only be compiled in when the ppc sim is
     # built.  PR sim/13418.
     case $target in

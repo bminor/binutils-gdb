@@ -2044,7 +2044,6 @@ if test "${ignore_sim}" = "false"; then
   if test x"${gdb_sim}" != x ; then
     SIM="${gdb_sim}"
     SIM_OBS="remote-sim.o"
-    AC_DEFINE(WITH_SIM, 1, [Define if the simulator is being linked in.])
 
     # Some tdep code should only be compiled in when the ppc sim is
     # built.  PR sim/13418.
