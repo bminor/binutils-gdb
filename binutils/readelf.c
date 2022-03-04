@@ -11297,12 +11297,12 @@ the .dynstr section doesn't match the DT_STRTAB and DT_STRSZ tags\n"));
 		filedata->file_name,
 		filedata->dynamic_addr,
 		(unsigned long) filedata->dynamic_nent);
-	  else
-	    printf (ngettext ("\nDynamic section at offset 0x%lx contains %lu entry:\n",
-			      "\nDynamic section at offset 0x%lx contains %lu entries:\n",
-			      (unsigned long) filedata->dynamic_nent),
-		    filedata->dynamic_addr,
-		    (unsigned long) filedata->dynamic_nent);
+      else
+	printf (ngettext ("\nDynamic section at offset 0x%lx contains %lu entry:\n",
+			  "\nDynamic section at offset 0x%lx contains %lu entries:\n",
+			  (unsigned long) filedata->dynamic_nent),
+		filedata->dynamic_addr,
+		(unsigned long) filedata->dynamic_nent);
     }
   if (do_dynamic)
     printf (_("  Tag        Type                         Name/Value\n"));
