@@ -2235,13 +2235,11 @@ backtrace_command_completer (struct cmd_list_element *ignore,
   expression_completer (ignore, tracker, text, word);
 }
 
-/* Iterate over the local variables of a block B, calling CB with
-   CB_DATA.  */
+/* Iterate over the local variables of a block B, calling CB.  */
 
 static void
 iterate_over_block_locals (const struct block *b,
-			   iterate_over_block_arg_local_vars_cb cb,
-			   void *cb_data)
+			   iterate_over_block_arg_local_vars_cb cb)
 {
   struct block_iterator iter;
   struct symbol *sym;
@@ -2260,7 +2258,7 @@ iterate_over_block_locals (const struct block *b,
 	    break;
 	  if (sym->domain () == COMMON_BLOCK_DOMAIN)
 	    break;
-	  (*cb) (sym->print_name (), sym, cb_data);
+	  cb (sym->print_name (), sym);
 	  break;
 
 	default:
@@ -2275,12 +2273,11 @@ iterate_over_block_locals (const struct block *b,
 
 void
 iterate_over_block_local_vars (const struct block *block,
-			       iterate_over_block_arg_local_vars_cb cb,
-			       void *cb_data)
+			       iterate_over_block_arg_local_vars_cb cb)
 {
   while (block)
     {
-      iterate_over_block_locals (block, cb, cb_data);
+      iterate_over_block_locals (block, cb);
       /* After handling the function's top-level block, stop.  Don't
 	 continue to its superblock, the block of per-file
 	 symbols.  */
@@ -2301,41 +2298,40 @@ struct print_variable_and_value_data
   int num_tabs;
   struct ui_file *stream;
   int values_printed;
+
+  void operator() (const char *print_name, struct symbol *sym);
 };
 
 /* The callback for the locals and args iterators.  */
 
-static void
-do_print_variable_and_value (const char *print_name,
-			     struct symbol *sym,
-			     void *cb_data)
+void
+print_variable_and_value_data::operator() (const char *print_name,
+					   struct symbol *sym)
 {
-  struct print_variable_and_value_data *p
-    = (struct print_variable_and_value_data *) cb_data;
   struct frame_info *frame;
 
-  if (p->preg.has_value ()
-      && p->preg->exec (sym->natural_name (), 0, NULL, 0) != 0)
+  if (preg.has_value ()
+      && preg->exec (sym->natural_name (), 0, NULL, 0) != 0)
     return;
-  if (p->treg.has_value ()
-      && !treg_matches_sym_type_name (*p->treg, sym))
+  if (treg.has_value ()
+      && !treg_matches_sym_type_name (*treg, sym))
     return;
   if (language_def (sym->language ())->symbol_printing_suppressed (sym))
     return;
 
-  frame = frame_find_by_id (p->frame_id);
+  frame = frame_find_by_id (frame_id);
   if (frame == NULL)
     {
       warning (_("Unable to restore previously selected frame."));
       return;
     }
 
-  print_variable_and_value (print_name, sym, frame, p->stream, p->num_tabs);
+  print_variable_and_value (print_name, sym, frame, stream, num_tabs);
 
   /* print_variable_and_value invalidates FRAME.  */
   frame = NULL;
 
-  p->values_printed = 1;
+  values_printed = 1;
 }
 
 /* Prepares the regular expression REG from REGEXP.
@@ -2404,9 +2400,7 @@ print_frame_local_vars (struct frame_info *frame,
   scoped_restore_selected_frame restore_selected_frame;
   select_frame (frame);
 
-  iterate_over_block_local_vars (block,
-				 do_print_variable_and_value,
-				 &cb_data);
+  iterate_over_block_local_vars (block, cb_data);
 
   if (!cb_data.values_printed && !quiet)
     {
@@ -2494,8 +2488,7 @@ info_locals_command (const char *args, int from_tty)
 
 void
 iterate_over_block_arg_vars (const struct block *b,
-			     iterate_over_block_arg_local_vars_cb cb,
-			     void *cb_data)
+			     iterate_over_block_arg_local_vars_cb cb)
 {
   struct block_iterator iter;
   struct symbol *sym, *sym2;
@@ -2518,7 +2511,7 @@ iterate_over_block_arg_vars (const struct block *b,
 
 	  sym2 = lookup_symbol_search_name (sym->search_name (),
 					    b, VAR_DOMAIN).symbol;
-	  (*cb) (sym->print_name (), sym2, cb_data);
+	  cb (sym->print_name (), sym2);
 	}
     }
 }
@@ -2569,8 +2562,7 @@ print_frame_arg_vars (struct frame_info *frame,
   cb_data.stream = stream;
   cb_data.values_printed = 0;
 
-  iterate_over_block_arg_vars (SYMBOL_BLOCK_VALUE (func),
-			       do_print_variable_and_value, &cb_data);
+  iterate_over_block_arg_vars (SYMBOL_BLOCK_VALUE (func), cb_data);
 
   /* do_print_variable_and_value invalidates FRAME.  */
   frame = NULL;

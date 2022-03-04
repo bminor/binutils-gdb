@@ -1041,36 +1041,6 @@ collection_list::collect_symbol (struct symbol *sym,
     }
 }
 
-/* Data to be passed around in the calls to the locals and args
-   iterators.  */
-
-struct add_local_symbols_data
-{
-  struct collection_list *collect;
-  struct gdbarch *gdbarch;
-  CORE_ADDR pc;
-  long frame_regno;
-  long frame_offset;
-  int count;
-  int trace_string;
-};
-
-/* The callback for the locals and args iterators.  */
-
-static void
-do_collect_symbol (const char *print_name,
-		   struct symbol *sym,
-		   void *cb_data)
-{
-  struct add_local_symbols_data *p = (struct add_local_symbols_data *) cb_data;
-
-  p->collect->collect_symbol (sym, p->gdbarch, p->frame_regno,
-			      p->frame_offset, p->pc, p->trace_string);
-  p->count++;
-
-  p->collect->add_wholly_collected (print_name);
-}
-
 void
 collection_list::add_wholly_collected (const char *print_name)
 {
@@ -1085,15 +1055,16 @@ collection_list::add_local_symbols (struct gdbarch *gdbarch, CORE_ADDR pc,
 				    int trace_string)
 {
   const struct block *block;
-  struct add_local_symbols_data cb_data;
+  int count = 0;
 
-  cb_data.collect = this;
-  cb_data.gdbarch = gdbarch;
-  cb_data.pc = pc;
-  cb_data.frame_regno = frame_regno;
-  cb_data.frame_offset = frame_offset;
-  cb_data.count = 0;
-  cb_data.trace_string = trace_string;
+  auto do_collect_symbol = [&] (const char *print_name,
+				struct symbol *sym)
+    {
+      collect_symbol (sym, gdbarch, frame_regno,
+		      frame_offset, pc, trace_string);
+      count++;
+      add_wholly_collected (print_name);
+    };
 
   if (type == 'L')
     {
@@ -1105,8 +1076,8 @@ collection_list::add_local_symbols (struct gdbarch *gdbarch, CORE_ADDR pc,
 	  return;
 	}
 
-      iterate_over_block_local_vars (block, do_collect_symbol, &cb_data);
-      if (cb_data.count == 0)
+      iterate_over_block_local_vars (block, do_collect_symbol);
+      if (count == 0)
 	warning (_("No locals found in scope."));
     }
   else
@@ -1119,8 +1090,8 @@ collection_list::add_local_symbols (struct gdbarch *gdbarch, CORE_ADDR pc,
 	  return;
 	}
 
-      iterate_over_block_arg_vars (block, do_collect_symbol, &cb_data);
-      if (cb_data.count == 0)
+      iterate_over_block_arg_vars (block, do_collect_symbol);
+      if (count == 0)
 	warning (_("No args found in scope."));
     }
 }
