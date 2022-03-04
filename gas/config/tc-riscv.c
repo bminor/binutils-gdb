@@ -3248,7 +3248,7 @@ riscv_ip_hardcode (char *str,
   insn->match = values[num - 1];
   create_insn (ip, insn);
   unsigned int bytes = riscv_insn_length (insn->match);
-  if (values[num - 1] >> (8 * bytes) != 0
+  if ((bytes < sizeof(values[0]) && values[num - 1] >> (8 * bytes) != 0)
       || (num == 2 && values[0] != bytes))
     return _("value conflicts with instruction length");
 
