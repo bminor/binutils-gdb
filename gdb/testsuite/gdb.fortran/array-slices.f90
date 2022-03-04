@@ -61,7 +61,7 @@ subroutine show_1d (array)
      end if
      write(*, fmt="(I0)", advance="no") array (i)
   end do
-  write(*, fmt="(A)", advance="no") ")"
+  write(*, fmt="(A)", advance="yes") ")"
 
   print *, ""	! Display Array Slice 1D
 end subroutine show_1d
