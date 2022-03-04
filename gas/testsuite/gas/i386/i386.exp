@@ -1331,7 +1331,6 @@ if [gas_64_check] then {
 	run_dump_test "x86-64-property-8"
 	run_dump_test "x86-64-property-9"
 	run_dump_test "x86-64-property-14"
-	run_dump_test "x86-64-code16-2"
 
 	if {[istarget "*-*-linux*"]} then {
 	    run_dump_test "x86-64-align-branch-3"
