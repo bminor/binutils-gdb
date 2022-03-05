@@ -70,12 +70,12 @@ struct hppa_unwind_info
 
 struct hppa_objfile_private
   {
-    struct hppa_unwind_info *unwind_info;	/* a pointer */
-    struct so_list *so_info;			/* a pointer  */
-    CORE_ADDR dp;
+    struct hppa_unwind_info *unwind_info = nullptr;	/* a pointer */
+    struct so_list *so_info = nullptr;			/* a pointer  */
+    CORE_ADDR dp = 0;
 
-    int dummy_call_sequence_reg;
-    CORE_ADDR dummy_call_sequence_addr;
+    int dummy_call_sequence_reg = 0;
+    CORE_ADDR dummy_call_sequence_addr = 0;
   };
 
 /* hppa-specific object data -- unwind and solib info.
@@ -84,9 +84,7 @@ struct hppa_objfile_private
    that separately and make this static. The solib data is probably hpux-
    specific, so we can create a separate extern objfile_data that is registered
    by hppa-hpux-tdep.c and shared with pa64solib.c and somsolib.c.  */
-static const struct objfile_key<hppa_objfile_private,
-				gdb::noop_deleter<hppa_objfile_private>>
-  hppa_objfile_priv_data;
+static const struct objfile_key<hppa_objfile_private> hppa_objfile_priv_data;
 
 /* Get at various relevant fields of an instruction word.  */
 #define MASK_5 0x1f
@@ -204,16 +202,6 @@ hppa_symbol_address(const char *sym)
     return (CORE_ADDR)-1;
 }
 
-static struct hppa_objfile_private *
-hppa_init_objfile_priv_data (struct objfile *objfile)
-{
-  hppa_objfile_private *priv
-    = OBSTACK_ZALLOC (&objfile->objfile_obstack, hppa_objfile_private);
-
-  hppa_objfile_priv_data.set (objfile, priv);
-
-  return priv;
-}
 
 
 /* Compare the start address for two unwind entries returning 1 if 
@@ -471,7 +459,7 @@ read_unwind_info (struct objfile *objfile)
   /* Keep a pointer to the unwind information.  */
   obj_private = hppa_objfile_priv_data.get (objfile);
   if (obj_private == NULL)
-    obj_private = hppa_init_objfile_priv_data (objfile);
+    obj_private = hppa_objfile_priv_data.emplace (objfile);
 
   obj_private->unwind_info = ui;
 }
@@ -485,7 +473,6 @@ struct unwind_table_entry *
 find_unwind_entry (CORE_ADDR pc)
 {
   int first, middle, last;
-  struct hppa_objfile_private *priv;
 
   if (hppa_debug)
     fprintf_unfiltered (gdb_stdlog, "{ find_unwind_entry %s -> ",
@@ -503,9 +490,9 @@ find_unwind_entry (CORE_ADDR pc)
     {
       struct hppa_unwind_info *ui;
       ui = NULL;
-      priv = hppa_objfile_priv_data.get (objfile);
+      struct hppa_objfile_private *priv = hppa_objfile_priv_data.get (objfile);
       if (priv)
-	ui = ((struct hppa_objfile_private *) priv)->unwind_info;
+	ui = priv->unwind_info;
 
       if (!ui)
 	{
@@ -513,7 +500,7 @@ find_unwind_entry (CORE_ADDR pc)
 	  priv = hppa_objfile_priv_data.get (objfile);
 	  if (priv == NULL)
 	    error (_("Internal error reading unwind information."));
-	  ui = ((struct hppa_objfile_private *) priv)->unwind_info;
+	  ui = priv->unwind_info;
 	}
 
       /* First, check the cache.  */
