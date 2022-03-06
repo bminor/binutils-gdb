@@ -1,3 +1,22 @@
+2021-03-06  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/binutils-all/mips/mips1-branch-alias.d: New test.
+	* testsuite/binutils-all/mips/mips1-branch-noalias.d: New test.
+	* testsuite/binutils-all/mips/mips2-branch-alias.d: New test.
+	* testsuite/binutils-all/mips/mips2-branch-noalias.d: New test.
+	* testsuite/binutils-all/mips/mips32r6-branch-alias.d: New test.
+	* testsuite/binutils-all/mips/mips32r6-branch-noalias.d: New
+	test.
+	* testsuite/binutils-all/mips/micromips-branch-alias.d: New
+	test.
+	* testsuite/binutils-all/mips/micromips-branch-noalias.d: New
+	test.
+	* testsuite/binutils-all/mips/mips-branch-alias.s: New test
+	source.
+	* testsuite/binutils-all/mips/micromips-branch-alias.s: New test
+	source.
+	* testsuite/binutils-all/mips/mips.exp: Run the new tests.
+
 2022-03-04  Simon Marchi  <simon.marchi@polymtl.ca>
 
 	* readelf.c (process_dynamic_section): Fix indentation.

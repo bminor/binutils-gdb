@@ -1,3 +1,11 @@
+2022-03-06  Sagar Patel  <sagarmp@cs.unc.edu>
+	    Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* mips-opc.c (mips_builtin_opcodes): Fix INSN2_ALIAS annotation
+	for "bal", "beqz", "beqzl", "bnez" and "bnezl" instructions.
+	* micromips-opc.c (micromips_opcodes): Likewise for "beqz" and
+	"bnez" instructions.
+
 2022-02-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/sr.po: Updated Serbian translation.
