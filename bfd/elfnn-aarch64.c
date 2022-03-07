@@ -2929,7 +2929,8 @@ c64_value_p (asection *section, unsigned int value)
 }
 
 /* The size of the thread control block which is defined to be two pointers.  */
-#define TCB_SIZE	(ARCH_SIZE/8)*2
+#define TCB_SIZE(cur_bfd) \
+  elf_elfheader(cur_bfd)->e_flags & EF_AARCH64_CHERI_PURECAP ? 32 : (ARCH_SIZE/8)*2
 
 struct elf_aarch64_local_symbol
 {
@@ -6043,7 +6044,7 @@ tpoff_base (struct bfd_link_info *info)
   /* If tls_sec is NULL, we should have signalled an error already.  */
   BFD_ASSERT (htab->tls_sec != NULL);
 
-  bfd_vma base = align_power ((bfd_vma) TCB_SIZE,
+  bfd_vma base = align_power ((bfd_vma) TCB_SIZE (info->output_bfd),
 			      htab->tls_sec->alignment_power);
   return htab->tls_sec->vma - base;
 }
@@ -7700,7 +7701,7 @@ elfNN_aarch64_tls_relax (bfd *input_bfd, struct bfd_link_info *info,
 
   BFD_ASSERT (globals && input_bfd && contents && rel);
 
-  if (is_local)
+  if (is_local || !bfd_link_pic (info))
     {
       if (h != NULL)
 	sym_size = h->size;
@@ -8106,7 +8107,7 @@ set_nop:
 	  /* No need of CALL26 relocation for tls_get_addr.  */
 	  rel[1].r_info = ELFNN_R_INFO (STN_UNDEF, R_AARCH64_NONE);
 	  bfd_putl32 (0xd53bd040, contents + rel->r_offset + 0);
-	  bfd_putl32 (add_R0_R0 | (TCB_SIZE << 10),
+	  bfd_putl32 (add_R0_R0 | (TCB_SIZE (input_bfd) << 10),
 		      contents + rel->r_offset + 4);
 	  return bfd_reloc_ok;
 	}
@@ -8135,7 +8136,7 @@ set_nop:
 	  BFD_ASSERT (ELFNN_R_TYPE (rel[1].r_info) == AARCH64_R (CALL26));
 	  /* No need of CALL26 relocation for tls_get_addr.  */
 	  rel[1].r_info = ELFNN_R_INFO (STN_UNDEF, R_AARCH64_NONE);
-	  bfd_putl32 (add_R0_R0 | (TCB_SIZE << 10),
+	  bfd_putl32 (add_R0_R0 | (TCB_SIZE (input_bfd) << 10),
 		      contents + rel->r_offset + 0);
 	  bfd_putl32 (INSN_NOP, contents + rel->r_offset + 4);
 	  return bfd_reloc_ok;
