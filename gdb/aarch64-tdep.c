@@ -3396,6 +3396,25 @@ aarch64_cannot_store_register (struct gdbarch *gdbarch, int regnum)
 	  || regnum == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base));
 }
 
+/* Implement the stack_frame_destroyed_p gdbarch method.  */
+
+static int
+aarch64_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  CORE_ADDR func_start, func_end;
+  if (!find_pc_partial_function (pc, NULL, &func_start, &func_end))
+    return 0;
+
+  enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
+  uint32_t insn = read_memory_unsigned_integer (pc, 4, byte_order_for_code);
+
+  aarch64_inst inst;
+  if (aarch64_decode_insn (insn, &inst, 1, nullptr) != 0)
+    return 0;
+
+  return streq (inst.opcode->name, "ret");
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -3601,6 +3620,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_double_format (gdbarch, floatformats_ieee_double);
   set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
   set_gdbarch_type_align (gdbarch, aarch64_type_align);
+
+  /* Detect whether PC is at a point where the stack has been destroyed.  */
+  set_gdbarch_stack_frame_destroyed_p (gdbarch, aarch64_stack_frame_destroyed_p);
 
   /* Internal <-> external register number maps.  */
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, aarch64_dwarf_reg_to_regnum);
