@@ -363,6 +363,23 @@ proc check_relro_support { } {
 #        Optionally match REGEXP against line from FILE_1.  If the REGEXP
 #        does not match then the next line from FILE_2 is tried.
 #
+#    #record: <names>
+#	Sets names under which to record matched subexpressions in the regexp
+#	on the next line.  Use all uppercase variable names to avoid
+#	interacting with local variables in the given function.
+#	N.b. PREVMATCH is always set to the *entire* of the previous match
+#	(whether or not said match was directly after a #record line).
+#
+#    #check: <name> <substitution>
+#       Replaces any occurance of <name> in the following regexp lines with the
+#       result of evaluating the string <substitution> in TCL.  Often used in
+#       combination with #record to set variables for future use in the
+#       <substitution> field.
+#
+#    #clearcheck
+#	Clears all extra substitutions added with #check for future regexp
+#	lines.
+#
 # Other # lines are comments.  Regexp lines starting with the `!' character
 # specify inverse matching (use `\!' for literal matching against a leading
 # `!').  Skip empty lines in both files.
@@ -383,6 +400,12 @@ proc regexp_diff { file_1 file_2 args } {
     set diff_pass 0
     set fail_if_match 0
     set ref_subst ""
+
+    set PREVMATCH ""
+    set extra_vars ""
+    # set STRPOS "uninitialised"
+    set extra_subst ""
+
     if { [llength $args] > 0 } {
 	set ref_subst [lindex $args 0]
     }
@@ -440,14 +463,19 @@ proc regexp_diff { file_1 file_2 args } {
 		foreach {name value} $ref_subst {
 		    regsub -- $name $line_bx $value line_bx
 		}
+		foreach {name value} $extra_subst {
+		    set value [eval $value];
+		    regsub -- $name $line_bx $value line_bx
+		}
 		verbose "looking for $n\"^$line_bx$\"" 3
-		while { [expr [regexp "^$line_bx$" "$line_a"] == $negated] } {
+		while { [expr [regexp "^$line_bx$" "$line_a" PREVMATCH {*}$extra_vars] == $negated] } {
 		    verbose "skipping    \"$line_a\"" 3
 		    if { [gets $file_a line_a] == $eof } {
 			set end_1 1
 			break
 		    }
 		}
+		set extra_vars ""
 		break
 	    } elseif { [string match "#\\?*" $line_b] } {
 		if { ! $end_1 } {
@@ -459,17 +487,46 @@ proc regexp_diff { file_1 file_2 args } {
 		    foreach {name value} $ref_subst {
 			regsub -- $name $line_bx $value line_bx
 		    }
+		    foreach {name value} $extra_subst {
+		        set value [eval $value];
+			regsub -- $name $line_bx $value line_bx
+		    }
 		    verbose "optional match for $n\"^$line_bx$\"" 3
-		    if { [expr [regexp "^$line_bx$" "$line_a"] != $negated] } {
+		    if { [expr [regexp "^$line_bx$" "$line_a" PREVMATCH {*}$extra_vars] != $negated] } {
+			# Choice here between having #?<regexp> *always* clear
+			# the extra_vars, or only clear the extra_vars if it
+			# actually matched.  Right now have no use case for
+			# extra_vars combined with the #?<regexp> pattern.
+			# Currently choosing to have this only clear the
+			# extra_vars if the line actually matched, but could
+			# happily change later on if needs be.
+			set extra_vars ""
 			break
 		    }
 		}
+	    } elseif { [string match "#record: *" $line_b] } {
+	        if { ! $end_1 } {
+		    set extra_vars [concat [string range $line_b 9 end]]
+		}
+	    } elseif { [string match "#clearcheck*" $line_b] } {
+	        if { ! $end_1 } {
+		    set extra_subst ""
+		}
+	    } elseif { [string match "#check: *" $line_b] } {
+	        if { ! $end_1 } {
+		    set value [lindex [regexp -inline "#check: (\\S+).*" $line_b] 1]
+		    lappend extra_subst $value
+		    lappend extra_subst	[string range $line_b [expr 8+[string length $value]] end]
+		}
+		# send_user "extra_subst is now:  $extra_subst\n"
 	    }
 	    if { [gets $file_b line_b] == $eof } {
 		set end_2 1
 		break
 	    }
 	}
+	# send_user "STRPOS is $STRPOS\n"
+	# send_user "$line_b\n"
 
 	if { $diff_pass } {
 	    break
@@ -494,13 +551,21 @@ proc regexp_diff { file_1 file_2 args } {
 	    foreach {name value} $ref_subst {
 		regsub -- $name $line_bx $value line_bx
 	    }
+	    foreach {name value} $extra_subst {
+		set value [eval $value];
+		# send_user "match:       $name\n"
+		# send_user "replacement: $value\n"
+		regsub -- $name $line_bx $value line_bx
+	    }
+	    # send_user "checking against $line_bx\n"
 	    verbose "regexp $n\"^$line_bx$\"\nline   \"$line_a\"" 3
-	    if { [expr [regexp "^$line_bx$" "$line_a"] == $negated] } {
+	    if { [expr [regexp "^$line_bx$" "$line_a" PREVMATCH {*}$extra_vars] == $negated] } {
 		send_log "regexp_diff match failure\n"
 		send_log "regexp $n\"^$line_bx$\"\nline   $s\"$line_a\"\n"
 		verbose "regexp_diff match failure\n" 3
 		set differences 1
 	    }
+	    set extra_vars ""
 	}
     }
 
