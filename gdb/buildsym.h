@@ -110,6 +110,16 @@ struct context_stack
 
   };
 
+/* Flags associated with a linetable entry.  */
+
+enum linetable_entry_flag : unsigned
+{
+  /* Indicates this PC is a good location to place a breakpoint at LINE.  */
+  LEF_IS_STMT = 1 << 1,
+};
+DEF_ENUM_FLAGS_TYPE (enum linetable_entry_flag, linetable_entry_flags);
+
+
 /* Buildsym's counterpart to struct compunit_symtab.  */
 
 struct buildsym_compunit
@@ -188,7 +198,7 @@ struct buildsym_compunit
   const char *pop_subfile ();
 
   void record_line (struct subfile *subfile, int line, CORE_ADDR pc,
-		    bool is_stmt);
+		    linetable_entry_flags flags);
 
   struct compunit_symtab *get_compunit_symtab ()
   {

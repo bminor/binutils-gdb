@@ -667,7 +667,7 @@ buildsym_compunit::pop_subfile ()
 
 void
 buildsym_compunit::record_line (struct subfile *subfile, int line,
-				CORE_ADDR pc, bool is_stmt)
+				CORE_ADDR pc, linetable_entry_flags flags)
 {
   struct linetable_entry *e;
 
@@ -723,7 +723,7 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
 
   e = subfile->line_vector->item + subfile->line_vector->nitems++;
   e->line = line;
-  e->is_stmt = is_stmt ? 1 : 0;
+  e->is_stmt = (flags & LEF_IS_STMT) != 0;
   e->pc = pc;
 }
 

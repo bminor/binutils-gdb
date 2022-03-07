@@ -210,7 +210,7 @@ record_line (struct subfile *subfile, int line, CORE_ADDR pc)
   gdb_assert (buildsym_compunit != nullptr);
   /* Assume every line entry is a statement start, that is a good place to
      put a breakpoint for that line number.  */
-  buildsym_compunit->record_line (subfile, line, pc, true);
+  buildsym_compunit->record_line (subfile, line, pc, LEF_IS_STMT);
 }
 
 /* Start a new compunit_symtab for a new source file in OBJFILE.  Called, for

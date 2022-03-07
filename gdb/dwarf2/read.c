@@ -20925,7 +20925,7 @@ public:
   /* Handle DW_LNS_negate_stmt.  */
   void handle_negate_stmt ()
   {
-    m_is_stmt = !m_is_stmt;
+    m_flags ^= LEF_IS_STMT;
   }
 
   /* Handle DW_LNS_const_add_pc.  */
@@ -20984,7 +20984,7 @@ private:
   /* These are initialized in the constructor.  */
 
   CORE_ADDR m_address;
-  bool m_is_stmt;
+  linetable_entry_flags m_flags;
   unsigned int m_discriminator;
 
   /* Additional bits of state we need to track.  */
@@ -20999,9 +20999,9 @@ private:
   CORE_ADDR m_last_address;
 
   /* Set to true when a previous line at the same address (using
-     m_last_address) had m_is_stmt true.  This is reset to false when a
-     line entry at a new address (m_address different to m_last_address) is
-     processed.  */
+     m_last_address) had LEF_IS_STMT set in m_flags.  This is reset to false
+     when a line entry at a new address (m_address different to
+     m_last_address) is processed.  */
   bool m_stmt_at_address = false;
 
   /* When true, record the lines we decode.  */
@@ -21131,7 +21131,8 @@ dwarf_record_line_p (struct dwarf2_cu *cu,
 
 static void
 dwarf_record_line_1 (struct gdbarch *gdbarch, struct subfile *subfile,
-		     unsigned int line, CORE_ADDR address, bool is_stmt,
+		     unsigned int line, CORE_ADDR address,
+		     linetable_entry_flags flags,
 		     struct dwarf2_cu *cu)
 {
   CORE_ADDR addr = gdbarch_addr_bits_remove (gdbarch, address);
@@ -21145,7 +21146,7 @@ dwarf_record_line_1 (struct gdbarch *gdbarch, struct subfile *subfile,
     }
 
   if (cu != nullptr)
-    cu->get_builder ()->record_line (subfile, line, addr, is_stmt);
+    cu->get_builder ()->record_line (subfile, line, addr, flags);
 }
 
 /* Subroutine of dwarf_decode_lines_1 to simplify it.
@@ -21168,7 +21169,7 @@ dwarf_finish_line (struct gdbarch *gdbarch, struct subfile *subfile,
 		  paddress (gdbarch, address));
     }
 
-  dwarf_record_line_1 (gdbarch, subfile, 0, address, true, cu);
+  dwarf_record_line_1 (gdbarch, subfile, 0, address, LEF_IS_STMT, cu);
 }
 
 void
@@ -21181,7 +21182,8 @@ lnp_state_machine::record_line (bool end_sequence)
 		  " address %s, is_stmt %u, discrim %u%s\n",
 		  m_line, m_file,
 		  paddress (m_gdbarch, m_address),
-		  m_is_stmt, m_discriminator,
+		  (m_flags & LEF_IS_STMT) != 0,
+		  m_discriminator,
 		  (end_sequence ? "\t(end sequence)" : ""));
     }
 
@@ -21216,7 +21218,8 @@ lnp_state_machine::record_line (bool end_sequence)
 	    = m_last_subfile != m_cu->get_builder ()->get_current_subfile ();
 	  bool ignore_this_line
 	   = ((file_changed && !end_sequence && m_last_address == m_address
-	       && !m_is_stmt && m_stmt_at_address)
+	       && ((m_flags & LEF_IS_STMT) == 0)
+	       && m_stmt_at_address)
 	      || (!end_sequence && m_line == 0));
 
 	  if ((file_changed && !ignore_this_line) || end_sequence)
@@ -21227,7 +21230,9 @@ lnp_state_machine::record_line (bool end_sequence)
 
 	  if (!end_sequence && !ignore_this_line)
 	    {
-	      bool is_stmt = producer_is_codewarrior (m_cu) || m_is_stmt;
+	      linetable_entry_flags lte_flags = m_flags;
+	      if (producer_is_codewarrior (m_cu))
+		lte_flags |= LEF_IS_STMT;
 
 	      if (dwarf_record_line_p (m_cu, m_line, m_last_line,
 				       m_line_has_non_zero_discriminator,
@@ -21236,7 +21241,7 @@ lnp_state_machine::record_line (bool end_sequence)
 		  buildsym_compunit *builder = m_cu->get_builder ();
 		  dwarf_record_line_1 (m_gdbarch,
 				       builder->get_current_subfile (),
-				       m_line, m_address, is_stmt,
+				       m_line, m_address, lte_flags,
 				       m_currently_recording_lines ? m_cu : nullptr);
 		}
 	      m_last_subfile = m_cu->get_builder ()->get_current_subfile ();
@@ -21245,14 +21250,14 @@ lnp_state_machine::record_line (bool end_sequence)
 	}
     }
 
-  /* Track whether we have seen any m_is_stmt true at m_address in case we
+  /* Track whether we have seen any IS_STMT true at m_address in case we
      have multiple line table entries all at m_address.  */
   if (m_last_address != m_address)
     {
       m_stmt_at_address = false;
       m_last_address = m_address;
     }
-  m_stmt_at_address |= m_is_stmt;
+  m_stmt_at_address |= (m_flags & LEF_IS_STMT) != 0;
 }
 
 lnp_state_machine::lnp_state_machine (struct dwarf2_cu *cu, gdbarch *arch,
@@ -21270,7 +21275,9 @@ lnp_state_machine::lnp_state_machine (struct dwarf2_cu *cu, gdbarch *arch,
      and also record it in case it needs it.  This is currently used by MIPS
      code, cf. `mips_adjust_dwarf2_line'.  */
   m_address = gdbarch_adjust_dwarf2_line (arch, 0, 0);
-  m_is_stmt = lh->default_is_stmt;
+  m_flags = 0;
+  if (lh->default_is_stmt)
+    m_flags |= LEF_IS_STMT;
   m_discriminator = 0;
 
   m_last_address = m_address;
