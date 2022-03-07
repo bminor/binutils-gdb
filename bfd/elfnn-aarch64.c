@@ -6456,6 +6456,15 @@ c64_symbol_section_adjustment (struct elf_link_hash_entry *h, bfd_vma value,
 	}
       return C64_SYM_LDSCRIPT_DEF;
     }
+
+  if (h->start_stop)
+    {
+      asection *s = h->u2.start_stop_section->output_section;
+      BFD_ASSERT (s != NULL);
+      *ret_sec = s;
+      return C64_SYM_LDSCRIPT_DEF;
+    }
+
   return C64_SYM_STANDARD;
 }
 
