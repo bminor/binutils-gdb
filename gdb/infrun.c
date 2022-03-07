@@ -4845,8 +4845,7 @@ handle_one (const wait_one_event &event)
 
       /* This may be the first time we see the inferior report
 	 a stop.  */
-      inferior *inf = find_inferior_ptid (event.target, event.ptid);
-      if (inf->needs_setup)
+      if (t->inf->needs_setup)
 	{
 	  switch_to_thread_no_regs (t);
 	  setup_inferior (0);
