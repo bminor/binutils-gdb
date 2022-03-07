@@ -23,7 +23,8 @@ Disassembly of section .got:
 
 Disassembly of section .data:
 
-0000000000010360 <str>:
+#record: STRPOS
+(0000000000010360|0000000000010380) <str>:
 .*:	6c6c6548 	.*
 .*:	6874206f 	.*
 .*:	20657265 	.*
@@ -34,11 +35,12 @@ Disassembly of section .data:
 			.*: R_AARCH64_RELATIVE	\*ABS\*\+.*
 
 .* <ptr>:
-.*:	00010360 	.*
+#check: SHORTSTR string range $STRPOS end-7 end
+.*:	SHORTSTR 	.*
 	...
 
 .* <cap>:
-.*:	00010360 	.*
+.*:	SHORTSTR 	.*
 			.*: R_MORELLO_RELATIVE	\*ABS\*
 .*:	00000000 	.*
 .*:	0000001b 	.*
