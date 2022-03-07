@@ -330,6 +330,43 @@ gld${EMULATION_NAME}_finish (void)
     }
 
   finish_default ();
+
+  struct bfd_link_hash_entry * h;
+  struct elf_link_hash_entry * eh;
+
+  if (!entry_symbol.name)
+    return;
+
+  h = bfd_link_hash_lookup (link_info.hash, entry_symbol.name,
+			    FALSE, FALSE, TRUE);
+  eh = (struct elf_link_hash_entry *)h;
+  if (!h || !(eh->target_internal & ST_BRANCH_TO_C64))
+    return;
+  if (h->type != bfd_link_hash_defined
+      && h->type != bfd_link_hash_defweak)
+    return;
+  if (h->u.def.section->output_section == NULL)
+    return;
+
+  static char buffer[67];
+  bfd_vma val;
+
+  /* Special procesing is required for a C64 entry symbol.  The
+      bottom bit of its address must be set.  */
+  val = (h->u.def.value
+	 + bfd_section_vma (h->u.def.section->output_section)
+	 + h->u.def.section->output_offset);
+
+  val |= 1;
+
+  /* Now convert this value into a string and store it in entry_symbol
+      where the lang_end() function will pick it up.  */
+  buffer[0] = '0';
+  buffer[1] = 'x';
+
+  sprintf_vma (buffer + 2, val);
+
+  entry_symbol.name = buffer;
 }
 
 /* This is a convenient point to tell BFD about target specific flags.
