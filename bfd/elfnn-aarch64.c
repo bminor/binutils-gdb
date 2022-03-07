@@ -6900,6 +6900,11 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       return bfd_reloc_ok;
 
     case BFD_RELOC_AARCH64_NN:
+      /* If we are relocating against a C64 symbol, then the value can't
+	 already have the LSB set (since STT_FUNC symbols are code labels and
+	 they will be aligned).  Hence it's safe just to or-equal in order
+	 to ensure the LSB is set in that case.  */
+      value |= to_c64 ? 1 : 0;
 
       /* When generating a shared object or relocatable executable, these
 	 relocations are copied into the output file to be resolved at
@@ -7115,8 +7120,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 						   signed_addend,
 						   weak_undef_p);
 
-      if (bfd_r_type == BFD_RELOC_AARCH64_ADR_LO21_PCREL && isym != NULL
-	  && isym->st_target_internal & ST_BRANCH_TO_C64)
+      if (bfd_r_type == BFD_RELOC_AARCH64_ADR_LO21_PCREL && to_c64)
 	value |= 1;
       break;
 
@@ -7172,8 +7176,13 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
 						   place, value,
 						   signed_addend, weak_undef_p);
-      if (bfd_r_type == BFD_RELOC_AARCH64_ADD_LO12 && isym != NULL
-	  && isym->st_target_internal & ST_BRANCH_TO_C64)
+      if ((bfd_r_type == BFD_RELOC_AARCH64_ADD_LO12
+	   || bfd_r_type == BFD_RELOC_AARCH64_MOVW_G0
+	   || bfd_r_type == BFD_RELOC_AARCH64_MOVW_G0_S
+	   || bfd_r_type == BFD_RELOC_AARCH64_MOVW_G0_NC
+	   || bfd_r_type == BFD_RELOC_AARCH64_32
+	   || bfd_r_type == BFD_RELOC_AARCH64_16)
+	  && to_c64)
 	value |= 1;
 
       break;
