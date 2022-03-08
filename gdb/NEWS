@@ -5,6 +5,10 @@
 
 * DBX mode is deprecated, and will be removed in GDB 13
 
+* GDB 12 is the last release of GDB that will support building against
+  Python 2.  From GDB 13, it will only be possible to build GDB itself
+  with Python 3 support.
+
 * Improved C++ template support
 
   GDB now treats functions/types involving C++ templates like it does function
