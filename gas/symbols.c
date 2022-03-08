@@ -61,8 +61,10 @@ struct symbol_flags
   /* Whether the symbol can be re-defined.  */
   unsigned int volatil : 1;
 
-  /* Whether the symbol is a forward reference.  */
+  /* Whether the symbol is a forward reference, and whether such has
+     been determined.  */
   unsigned int forward_ref : 1;
+  unsigned int forward_resolved : 1;
 
   /* This is set if the symbol is defined in an MRI common section.
      We handle such sections as single common symbols, so symbols
@@ -202,7 +204,7 @@ static void *
 symbol_entry_find (htab_t table, const char *name)
 {
   hashval_t hash = htab_hash_string (name);
-  symbol_entry_t needle = { { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+  symbol_entry_t needle = { { { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
 			      hash, name, 0, 0, 0 } };
   return htab_find_with_hash (table, &needle, hash);
 }
@@ -777,7 +779,9 @@ symbol_clone (symbolS *orgsymP, int replace)
 symbolS *
 symbol_clone_if_forward_ref (symbolS *symbolP, int is_forward)
 {
-  if (symbolP && !symbolP->flags.local_symbol)
+  if (symbolP
+      && !symbolP->flags.local_symbol
+      && !symbolP->flags.forward_resolved)
     {
       symbolS *orig_add_symbol = symbolP->x->value.X_add_symbol;
       symbolS *orig_op_symbol = symbolP->x->value.X_op_symbol;
@@ -830,6 +834,7 @@ symbol_clone_if_forward_ref (symbolS *symbolP, int is_forward)
 
       symbolP->x->value.X_add_symbol = add_symbol;
       symbolP->x->value.X_op_symbol = op_symbol;
+      symbolP->flags.forward_resolved = 1;
     }
 
   return symbolP;
