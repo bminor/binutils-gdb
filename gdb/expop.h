@@ -64,10 +64,6 @@ extern struct value *eval_op_func_static_var (struct type *expect_type,
 extern struct value *eval_op_register (struct type *expect_type,
 				       struct expression *exp,
 				       enum noside noside, const char *name);
-extern struct value *eval_op_string (struct type *expect_type,
-				     struct expression *exp,
-				     enum noside noside, int len,
-				     const char *string);
 extern struct value *eval_op_ternop (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside,
@@ -912,12 +908,7 @@ public:
 
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
-		   enum noside noside) override
-  {
-    const std::string &str = std::get<0> (m_storage);
-    return eval_op_string (expect_type, exp, noside,
-			   str.size (), str.c_str ());
-  }
+		   enum noside noside) override;
 
   enum exp_opcode opcode () const override
   { return OP_STRING; }

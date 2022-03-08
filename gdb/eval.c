@@ -1078,16 +1078,21 @@ eval_op_register (struct type *expect_type, struct expression *exp,
     return val;
 }
 
-/* Helper function that implements the body of OP_STRING.  */
-
-struct value *
-eval_op_string (struct type *expect_type, struct expression *exp,
-		enum noside noside, int len, const char *string)
+namespace expr
 {
+
+value *
+string_operation::evaluate (struct type *expect_type,
+			    struct expression *exp,
+			    enum noside noside)
+{
+  const std::string &str = std::get<0> (m_storage);
   struct type *type = language_string_char_type (exp->language_defn,
 						 exp->gdbarch);
-  return value_string (string, len, type);
+  return value_string (str.c_str (), str.size (), type);
 }
+
+} /* namespace expr */
 
 /* Helper function that implements the body of OP_OBJC_SELECTOR.  */
 
