@@ -43,3 +43,7 @@ gdb_test "print my_wws(1)" "= 32 ' '"
 
 gdb_test "print my_wws(2)" "= 104 'h'"
 
+gdb_test "print my_wws = \" helo\"" " = true"
+
+gdb_test "print my_ws = \"wide\"" " = true"
+gdb_test "print my_ws = \"nope\"" " = false"

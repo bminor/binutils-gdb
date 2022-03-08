@@ -10603,12 +10603,63 @@ ada_string_operation::evaluate (struct type *expect_type,
 				struct expression *exp,
 				enum noside noside)
 {
-  value *result = string_operation::evaluate (expect_type, exp, noside);
-  /* The result type will have code OP_STRING, bashed there from 
-     OP_ARRAY.  Bash it back.  */
-  if (value_type (result)->code () == TYPE_CODE_STRING)
-    value_type (result)->set_code (TYPE_CODE_ARRAY);
-  return result;
+  struct type *char_type;
+  if (expect_type != nullptr && ada_is_string_type (expect_type))
+    char_type = ada_array_element_type (expect_type, 1);
+  else
+    char_type = language_string_char_type (exp->language_defn, exp->gdbarch);
+
+  const std::string &str = std::get<0> (m_storage);
+  const char *encoding;
+  switch (TYPE_LENGTH (char_type))
+    {
+    case 1:
+      {
+	/* Simply copy over the data -- this isn't perhaps strictly
+	   correct according to the encodings, but it is gdb's
+	   historical behavior.  */
+	struct type *stringtype
+	  = lookup_array_range_type (char_type, 1, str.length ());
+	struct value *val = allocate_value (stringtype);
+	memcpy (value_contents_raw (val).data (), str.c_str (),
+		str.length ());
+	return val;
+      }
+
+    case 2:
+      if (gdbarch_byte_order (exp->gdbarch) == BFD_ENDIAN_BIG)
+	encoding = "UTF-16BE";
+      else
+	encoding = "UTF-16LE";
+      break;
+
+    case 4:
+      if (gdbarch_byte_order (exp->gdbarch) == BFD_ENDIAN_BIG)
+	encoding = "UTF-32BE";
+      else
+	encoding = "UTF-32LE";
+      break;
+
+    default:
+      error (_("unexpected character type size %s"),
+	     pulongest (TYPE_LENGTH (char_type)));
+    }
+
+  auto_obstack converted;
+  convert_between_encodings (host_charset (), encoding,
+			     (const gdb_byte *) str.c_str (),
+			     str.length (), 1,
+			     &converted, translit_none);
+
+  struct type *stringtype
+    = lookup_array_range_type (char_type, 1,
+			       obstack_object_size (&converted)
+			       / TYPE_LENGTH (char_type));
+  struct value *val = allocate_value (stringtype);
+  memcpy (value_contents_raw (val).data (),
+	  obstack_base (&converted),
+	  obstack_object_size (&converted));
+  return val;
 }
 
 value *
