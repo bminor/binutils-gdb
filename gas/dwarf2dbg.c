@@ -402,18 +402,27 @@ set_or_check_view (struct line_entry *e, struct line_entry *p,
   if (viewx.X_op != O_constant || viewx.X_add_number)
     {
       expressionS incv;
+      expressionS *p_view;
 
       if (!p->loc.u.view)
-	{
-	  p->loc.u.view = symbol_temp_make ();
-	  gas_assert (!S_IS_DEFINED (p->loc.u.view));
-	}
+	p->loc.u.view = symbol_temp_make ();
 
       memset (&incv, 0, sizeof (incv));
       incv.X_unsigned = 1;
       incv.X_op = O_symbol;
       incv.X_add_symbol = p->loc.u.view;
       incv.X_add_number = 1;
+      p_view = symbol_get_value_expression (p->loc.u.view);
+      if (p_view->X_op == O_constant || p_view->X_op == O_symbol)
+	{
+	  /* If we can, constant fold increments so that a chain of
+	     expressions v + 1 + 1 ... + 1 is not created.
+	     resolve_expression isn't ideal for this purpose.  The
+	     base v might not be resolvable until later.  */
+	  incv.X_op = p_view->X_op;
+	  incv.X_add_symbol = p_view->X_add_symbol;
+	  incv.X_add_number = p_view->X_add_number + 1;
+	}
 
       if (viewx.X_op == O_constant)
 	{
