@@ -51,6 +51,9 @@
    followed by the path of a python script to load.  */
 #define AUTO_SECTION_NAME ".debug_gdb_scripts"
 
+/* The section to look in for the name of a separate debug file.  */
+#define DEBUGLINK_SECTION_NAME ".gnu_debuglink"
+
 static void maybe_print_unsupported_script_warning
   (struct auto_load_pspace_info *, struct objfile *objfile,
    const struct extension_language_defn *language,
@@ -823,24 +826,61 @@ auto_load_objfile_script (struct objfile *objfile,
   gdb::unique_xmalloc_ptr<char> realname
     = gdb_realpath (objfile_name (objfile));
 
-  if (!auto_load_objfile_script_1 (objfile, realname.get (), language))
+  if (auto_load_objfile_script_1 (objfile, realname.get (), language))
+    return;
+
+  /* For Windows/DOS .exe executables, strip the .exe suffix, so that
+     FOO-gdb.gdb could be used for FOO.exe, and try again.  */
+
+  size_t len = strlen (realname.get ());
+  const size_t lexe = sizeof (".exe") - 1;
+
+  if (len > lexe && strcasecmp (realname.get () + len - lexe, ".exe") == 0)
     {
-      /* For Windows/DOS .exe executables, strip the .exe suffix, so that
-	 FOO-gdb.gdb could be used for FOO.exe, and try again.  */
+      len -= lexe;
+      realname.get ()[len] = '\0';
 
-      size_t len = strlen (realname.get ());
-      const size_t lexe = sizeof (".exe") - 1;
+      auto_load_debug_printf
+	("auto-load: Stripped .exe suffix, retrying with \"%s\".",
+	 realname.get ());
 
-      if (len > lexe && strcasecmp (realname.get () + len - lexe, ".exe") == 0)
+      auto_load_objfile_script_1 (objfile, realname.get (), language);
+      return;
+    }
+
+  /* If OBJFILE is a separate debug file and its name does not match
+     the name given in the parent's .gnu_debuglink section, try to
+     find the auto-load script using the parent's path and the
+     debuglink name.  */
+
+  struct objfile *parent = objfile->separate_debug_objfile_backlink;
+  if (parent != nullptr)
+    {
+      unsigned long crc32;
+      gdb::unique_xmalloc_ptr<char> debuglink
+	(bfd_get_debug_link_info (parent->obfd, &crc32));
+
+      if (debuglink.get () != nullptr
+	  && strcmp (debuglink.get (), lbasename (realname.get ())) != 0)
 	{
-	  len -= lexe;
-	  realname.get ()[len] = '\0';
+	  /* Replace the last component of the parent's path with the
+	     debuglink name.  */
 
-	  auto_load_debug_printf
-	    ("auto-load: Stripped .exe suffix, retrying with \"%s\".",
-	     realname.get ());
+	  std::string p_realname = gdb_realpath (objfile_name (parent)).get ();
+	  size_t last = p_realname.find_last_of ('/');
 
-	  auto_load_objfile_script_1 (objfile, realname.get (), language);
+	  if (last != std::string::npos)
+	    {
+	      p_realname.replace (last + 1, std::string::npos,
+				  debuglink.get ());
+
+	      auto_load_debug_printf
+		("Debug filename mismatch, retrying with \"%s\".",
+		 p_realname.c_str ());
+
+	      auto_load_objfile_script_1 (objfile,
+					  p_realname.c_str (), language);
+	    }
 	}
     }
 }
