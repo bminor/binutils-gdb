@@ -252,7 +252,7 @@ int
 binop_types_user_defined_p (enum exp_opcode op,
 			    struct type *type1, struct type *type2)
 {
-  if (op == BINOP_ASSIGN || op == BINOP_CONCAT)
+  if (op == BINOP_ASSIGN)
     return 0;
 
   type1 = check_typedef (type1);

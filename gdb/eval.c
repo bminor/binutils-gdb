@@ -1106,18 +1106,6 @@ eval_op_objc_selector (struct type *expect_type, struct expression *exp,
 			     lookup_child_selector (exp->gdbarch, sel));
 }
 
-/* Helper function that implements the body of BINOP_CONCAT.  */
-
-struct value *
-eval_op_concat (struct type *expect_type, struct expression *exp,
-		enum noside noside, struct value *arg1, struct value *arg2)
-{
-  if (binop_user_defined_p (BINOP_CONCAT, arg1, arg2))
-    return value_x_binop (arg1, arg2, BINOP_CONCAT, OP_NULL, noside);
-  else
-    return value_concat (arg1, arg2);
-}
-
 /* A helper function for TERNOP_SLICE.  */
 
 struct value *
