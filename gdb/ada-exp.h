@@ -769,6 +769,21 @@ public:
 			bool parse_completion,
 			innermost_block_tracker *tracker,
 			struct type *context_type) override;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+};
+
+class ada_concat_operation : public concat_operation
+{
+public:
+
+  using concat_operation::concat_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
 };
 
 } /* namespace expr */

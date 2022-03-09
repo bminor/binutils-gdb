@@ -18094,10 +18094,7 @@ operand of the membership (@code{in}) operator.
 @end itemize
 
 @item
-The names in
-@code{Characters.Latin_1} are not available and
-concatenation is not implemented.  Thus, escape characters in strings are 
-not currently available.
+The names in @code{Characters.Latin_1} are not available.
 
 @item
 Equality tests (@samp{=} and @samp{/=}) on arrays test for bitwise

@@ -651,153 +651,66 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 }
 
 
-/* Concatenate two values with the following conditions:
-
-   (1)  Both values must be either bitstring values or character string
-   values and the resulting value consists of the concatenation of
-   ARG1 followed by ARG2.
-
-   or
-
-   One value must be an integer value and the other value must be
-   either a bitstring value or character string value, which is
-   to be repeated by the number of times specified by the integer
-   value.
-
-
-   (2)  Boolean values are also allowed and are treated as bit string
-   values of length 1.
-
-   (3)  Character values are also allowed and are treated as character
-   string values of length 1.  */
+/* Concatenate two values.  One value must be an array; and the other
+   value must either be an array with the same element type, or be of
+   the array's element type.  */
 
 struct value *
 value_concat (struct value *arg1, struct value *arg2)
 {
-  struct value *inval1;
-  struct value *inval2;
-  struct value *outval = NULL;
-  int inval1len, inval2len;
-  int count, idx;
-  char inchar;
   struct type *type1 = check_typedef (value_type (arg1));
   struct type *type2 = check_typedef (value_type (arg2));
-  struct type *char_type;
 
-  /* First figure out if we are dealing with two values to be concatenated
-     or a repeat count and a value to be repeated.  INVAL1 is set to the
-     first of two concatenated values, or the repeat count.  INVAL2 is set
-     to the second of the two concatenated values or the value to be 
-     repeated.  */
+  if (type1->code () != TYPE_CODE_ARRAY && type2->code () != TYPE_CODE_ARRAY)
+    error ("no array provided to concatenation");
 
-  if (type2->code () == TYPE_CODE_INT)
+  LONGEST low1, high1;
+  struct type *elttype1 = type1;
+  if (elttype1->code () == TYPE_CODE_ARRAY)
     {
-      struct type *tmp = type1;
-
-      type1 = tmp;
-      tmp = type2;
-      inval1 = arg2;
-      inval2 = arg1;
+      elttype1 = TYPE_TARGET_TYPE (elttype1);
+      if (!get_array_bounds (type1, &low1, &high1))
+	error (_("could not determine array bounds on left-hand-side of "
+		 "array concatenation"));
     }
   else
     {
-      inval1 = arg1;
-      inval2 = arg2;
+      low1 = 0;
+      high1 = 0;
     }
 
-  /* Now process the input values.  */
-
-  if (type1->code () == TYPE_CODE_INT)
+  LONGEST low2, high2;
+  struct type *elttype2 = type2;
+  if (elttype2->code () == TYPE_CODE_ARRAY)
     {
-      /* We have a repeat count.  Validate the second value and then
-	 construct a value repeated that many times.  */
-      if (type2->code () == TYPE_CODE_STRING
-	  || type2->code () == TYPE_CODE_CHAR)
-	{
-	  count = longest_to_int (value_as_long (inval1));
-	  inval2len = TYPE_LENGTH (type2);
-	  std::vector<char> ptr (count * inval2len);
-	  if (type2->code () == TYPE_CODE_CHAR)
-	    {
-	      char_type = type2;
-
-	      inchar = (char) unpack_long (type2,
-					   value_contents (inval2).data ());
-	      for (idx = 0; idx < count; idx++)
-		{
-		  ptr[idx] = inchar;
-		}
-	    }
-	  else
-	    {
-	      char_type = TYPE_TARGET_TYPE (type2);
-
-	      for (idx = 0; idx < count; idx++)
-		memcpy (&ptr[idx * inval2len], value_contents (inval2).data (),
-			inval2len);
-	    }
-	  outval = value_string (ptr.data (), count * inval2len, char_type);
-	}
-      else if (type2->code () == TYPE_CODE_BOOL)
-	{
-	  error (_("unimplemented support for boolean repeats"));
-	}
-      else
-	{
-	  error (_("can't repeat values of that type"));
-	}
-    }
-  else if (type1->code () == TYPE_CODE_STRING
-	   || type1->code () == TYPE_CODE_CHAR)
-    {
-      /* We have two character strings to concatenate.  */
-      if (type2->code () != TYPE_CODE_STRING
-	  && type2->code () != TYPE_CODE_CHAR)
-	{
-	  error (_("Strings can only be concatenated with other strings."));
-	}
-      inval1len = TYPE_LENGTH (type1);
-      inval2len = TYPE_LENGTH (type2);
-      std::vector<char> ptr (inval1len + inval2len);
-      if (type1->code () == TYPE_CODE_CHAR)
-	{
-	  char_type = type1;
-
-	  ptr[0] = (char) unpack_long (type1, value_contents (inval1).data ());
-	}
-      else
-	{
-	  char_type = TYPE_TARGET_TYPE (type1);
-
-	  memcpy (ptr.data (), value_contents (inval1).data (), inval1len);
-	}
-      if (type2->code () == TYPE_CODE_CHAR)
-	{
-	  ptr[inval1len] =
-	    (char) unpack_long (type2, value_contents (inval2).data ());
-	}
-      else
-	{
-	  memcpy (&ptr[inval1len], value_contents (inval2).data (), inval2len);
-	}
-      outval = value_string (ptr.data (), inval1len + inval2len, char_type);
-    }
-  else if (type1->code () == TYPE_CODE_BOOL)
-    {
-      /* We have two bitstrings to concatenate.  */
-      if (type2->code () != TYPE_CODE_BOOL)
-	{
-	  error (_("Booleans can only be concatenated "
-		   "with other bitstrings or booleans."));
-	}
-      error (_("unimplemented support for boolean concatenation."));
+      elttype2 = TYPE_TARGET_TYPE (elttype2);
+      if (!get_array_bounds (type2, &low2, &high2))
+	error (_("could not determine array bounds on right-hand-side of "
+		 "array concatenation"));
     }
   else
     {
-      /* We don't know how to concatenate these operands.  */
-      error (_("illegal operands for concatenation."));
+      low2 = 0;
+      high2 = 0;
     }
-  return (outval);
+
+  if (!types_equal (elttype1, elttype2))
+    error (_("concatenation with different element types"));
+
+  LONGEST lowbound = current_language->c_style_arrays_p () ? 0 : 1;
+  LONGEST n_elts = (high1 - low1 + 1) + (high2 - low2 + 1);
+  struct type *atype = lookup_array_range_type (elttype1,
+						lowbound,
+						lowbound + n_elts - 1);
+
+  struct value *result = allocate_value (atype);
+  gdb::array_view<gdb_byte> contents = value_contents_raw (result);
+  gdb::array_view<const gdb_byte> lhs_contents = value_contents (arg1);
+  gdb::array_view<const gdb_byte> rhs_contents = value_contents (arg2);
+  gdb::copy (lhs_contents, contents.slice (0, lhs_contents.size ()));
+  gdb::copy (rhs_contents, contents.slice (lhs_contents.size ()));
+
+  return result;
 }
 
 /* Integer exponentiation: V1**V2, where both arguments are

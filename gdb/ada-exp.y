@@ -649,7 +649,7 @@ simple_exp	:	simple_exp '+' simple_exp
 	;
 
 simple_exp	:	simple_exp '&' simple_exp
-			{ ada_wrap2<concat_operation> (BINOP_CONCAT); }
+			{ ada_wrap2<ada_concat_operation> (BINOP_CONCAT); }
 	;
 
 simple_exp	:	simple_exp '-' simple_exp

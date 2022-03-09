@@ -10552,6 +10552,17 @@ convert_char_literal (struct type *type, LONGEST val)
   return val;
 }
 
+value *
+ada_char_operation::evaluate (struct type *expect_type,
+			      struct expression *exp,
+			      enum noside noside)
+{
+  value *result = long_const_operation::evaluate (expect_type, exp, noside);
+  if (expect_type != nullptr)
+    result = ada_value_cast (expect_type, result);
+  return result;
+}
+
 /* See ada-exp.h.  */
 
 operation_up
@@ -10572,7 +10583,7 @@ ada_char_operation::replace (operation_up &&owner,
 	= convert_char_literal (context_type, std::get<1> (m_storage));
     }
 
-  return make_operation<ada_wrapped_operation> (std::move (result));
+  return result;
 }
 
 value *
@@ -10660,6 +10671,51 @@ ada_string_operation::evaluate (struct type *expect_type,
 	  obstack_base (&converted),
 	  obstack_object_size (&converted));
   return val;
+}
+
+value *
+ada_concat_operation::evaluate (struct type *expect_type,
+				struct expression *exp,
+				enum noside noside)
+{
+  /* If one side is a literal, evaluate the other side first so that
+     the expected type can be set properly.  */
+  const operation_up &lhs_expr = std::get<0> (m_storage);
+  const operation_up &rhs_expr = std::get<1> (m_storage);
+
+  value *lhs, *rhs;
+  if (dynamic_cast<ada_string_operation *> (lhs_expr.get ()) != nullptr)
+    {
+      rhs = rhs_expr->evaluate (nullptr, exp, noside);
+      lhs = lhs_expr->evaluate (value_type (rhs), exp, noside);
+    }
+  else if (dynamic_cast<ada_char_operation *> (lhs_expr.get ()) != nullptr)
+    {
+      rhs = rhs_expr->evaluate (nullptr, exp, noside);
+      struct type *rhs_type = check_typedef (value_type (rhs));
+      struct type *elt_type = nullptr;
+      if (rhs_type->code () == TYPE_CODE_ARRAY)
+	elt_type = TYPE_TARGET_TYPE (rhs_type);
+      lhs = lhs_expr->evaluate (elt_type, exp, noside);
+    }
+  else if (dynamic_cast<ada_string_operation *> (rhs_expr.get ()) != nullptr)
+    {
+      lhs = lhs_expr->evaluate (nullptr, exp, noside);
+      rhs = rhs_expr->evaluate (value_type (lhs), exp, noside);
+    }
+  else if (dynamic_cast<ada_char_operation *> (rhs_expr.get ()) != nullptr)
+    {
+      lhs = lhs_expr->evaluate (nullptr, exp, noside);
+      struct type *lhs_type = check_typedef (value_type (lhs));
+      struct type *elt_type = nullptr;
+      if (lhs_type->code () == TYPE_CODE_ARRAY)
+	elt_type = TYPE_TARGET_TYPE (lhs_type);
+      rhs = rhs_expr->evaluate (elt_type, exp, noside);
+    }
+  else
+    return concat_operation::evaluate (expect_type, exp, noside);
+
+  return value_concat (lhs, rhs);
 }
 
 value *
