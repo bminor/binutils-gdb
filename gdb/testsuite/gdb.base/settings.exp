@@ -213,7 +213,7 @@ proc test-integer {variant} {
 
     if {$variant == "zinteger" || $variant == "zuinteger"} {
 	test_gdb_complete_none \
-	    "$set_cmd " \
+	    "$set_cmd "
     } else {
 	test_gdb_complete_unique \
 	    "$set_cmd " \
