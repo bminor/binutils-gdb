@@ -703,7 +703,7 @@ set show_confirm_seen 0
 set show_prompt_seen 0
 gdb_test_multiple "show" "show" {
     -re "confirm:  *Whether to confirm potentially dangerous operations is on.(\[^\r\n\]*\[\r\n\])+history filename:  *The filename in which to record the command history is (\[^\r\n\]*\[\r\n\])+history save:  *Saving of the history record on exit is on.(\[^\r\n\]*\[\r\n\])+history size:  *The size of the command history is(\[^\r\n\]*\[\r\n\])+listsize:  *Number of source lines gdb will list by default is 10(\[^\r\n]*\[\r\n\])+print elements:  *Limit on string chars or array elements to print is 200." {
-	verbose "Confirm dislayed"
+	verbose "Confirm displayed"
 	set show_confirm_seen 1
 	exp_continue
     }
