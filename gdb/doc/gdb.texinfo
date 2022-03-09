@@ -38651,7 +38651,7 @@ included with your operating system, you can find it in the xz package
 at @url{http://tukaani.org/xz/}.  If the LZMA library is available in
 the usual place, then the @file{configure} script will use it
 automatically.  If it is installed in an unusual path, you can use the
-@option{--with-lzma-prefix} option to specify its location.
+@option{--with-liblzma-prefix} option to specify its location.
 
 @item MPFR
 @anchor{MPFR}
