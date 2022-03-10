@@ -26238,7 +26238,7 @@ their characteristics and the visual aspect of each style.
 The style-able objects are:
 @table @code
 @item filename
-Control the styling of file names.  By default, this style's
+Control the styling of file names and URLs.  By default, this style's
 foreground color is green.
 
 @item function

@@ -1495,8 +1495,8 @@ GDB manual (available as on-line info or a printed manual).\n\
 "), stream);
   if (REPORT_BUGS_TO[0] && stream == gdb_stdout)
     gdb_printf (stream, _("\n\
-Report bugs to %s.\n\
-"), REPORT_BUGS_TO);
+Report bugs to %ps.\n\
+"), styled_string (file_name_style.style (), REPORT_BUGS_TO));
   if (stream == gdb_stdout)
     gdb_printf (stream, _("\n\
 You can ask GDB-related questions on the GDB users mailing list\n\

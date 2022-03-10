@@ -309,8 +309,9 @@ proc run_style_tests { } {
 	# Check that the version string is styled in the output of 'show
 	# version', and that this styling can be disabled.
 	set vers [style "GNU gdb.*" version]
-	gdb_test "show version" "${vers}.*" \
-	    "version is styled in 'show version'"
+	set url [limited_style "http:.*html" file]
+	gdb_test "show version" "${vers}.*<$url>.*" \
+	    "'show version' is styled"
     }
 }
 

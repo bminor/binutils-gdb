@@ -1428,9 +1428,11 @@ print_gdb_version (struct ui_file *stream, bool interactive)
      there is no warranty.  */
 
   gdb_printf (stream, "\
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\
+License GPLv3+: GNU GPL version 3 or later <%ps>\
 \nThis is free software: you are free to change and redistribute it.\n\
-There is NO WARRANTY, to the extent permitted by law.");
+There is NO WARRANTY, to the extent permitted by law.",
+		    styled_string (file_name_style.style (),
+				   "http://gnu.org/licenses/gpl.html"));
 
   if (!interactive)
     return;
@@ -1459,11 +1461,15 @@ There is NO WARRANTY, to the extent permitted by law.");
     {
       gdb_printf (stream,
 		  _("For bug reporting instructions, please see:\n"));
-      gdb_printf (stream, "%s.\n", REPORT_BUGS_TO);
+      gdb_printf (stream, "%ps.\n",
+		  styled_string (file_name_style.style (),
+				 REPORT_BUGS_TO));
     }
   gdb_printf (stream,
 	      _("Find the GDB manual and other documentation \
-resources online at:\n    <http://www.gnu.org/software/gdb/documentation/>."));
+resources online at:\n    <%ps>."),
+	      styled_string (file_name_style.style (),
+			     "http://www.gnu.org/software/gdb/documentation/"));
   gdb_printf (stream, "\n\n");
   gdb_printf (stream, _("For help, type \"help\".\n"));
   gdb_printf (stream,

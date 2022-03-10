@@ -181,10 +181,27 @@ debuginfod_is_enabled ()
 
   if (debuginfod_enabled == debuginfod_ask)
     {
-      int resp = nquery (_("\nThis GDB supports auto-downloading debuginfo " \
-			   "from the following URLs:\n%s\nEnable debuginfod " \
-			   "for this session? "),
-			 urls);
+      gdb_printf (_("\nThis GDB supports auto-downloading debuginfo " \
+		    "from the following URLs:\n"));
+
+      gdb::string_view url_view (urls);
+      while (true)
+	{
+	  url_view = url_view.substr (url_view.find_first_not_of (' '));
+	  if (url_view.empty ())
+	    break;
+	  size_t off = url_view.find_first_of (' ');
+	  gdb_printf
+	    (_("  <%ps>\n"),
+	     styled_string (file_name_style.style (),
+			    gdb::to_string (url_view.substr (0,
+							     off)).c_str ()));
+	  if (off == gdb::string_view::npos)
+	    break;
+	  url_view = url_view.substr (off);
+	}
+
+      int resp = nquery (_("Enable debuginfod for this session? "));
       if (!resp)
 	{
 	  gdb_printf (_("Debuginfod has been disabled.\nTo make this " \
