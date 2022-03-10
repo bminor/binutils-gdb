@@ -224,6 +224,9 @@ extern int do_debug_cu_index;
 extern int do_wide;
 extern int do_debug_links;
 extern int do_follow_links;
+#ifdef HAVE_LIBDEBUGINFOD
+extern int use_debuginfod;
+#endif
 extern bool do_checks;
 
 extern int dwarf_cutoff_level;

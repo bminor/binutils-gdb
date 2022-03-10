@@ -68,9 +68,26 @@ chosen when configuring the binutils via the
 @option{--enable-follow-debug-links=no} options.  If these are not
 used then the default is to enable the following of debug links.
 
+Note - if support for the debuginfod protocol was enabled when the
+binutils were built then this option will also include an attempt to
+contact any debuginfod servers mentioned in the @var{DEBUGINFOD_URLS}
+environment variable.  This could take some time to resolve.  This
+behaviour can be disabled via the @option{=do-not-use-debuginfod} debug
+option.
+
 @item N
 @itemx =no-follow-links
 Disables the following of links to separate debug info files.
+
+@item D
+@itemx =use-debuginfod
+Enables contacting debuginfod servers if there is a need to follow
+debug links.  This is the default behaviour.
+
+@item E
+@itemx =do-not-use-debuginfod
+Disables contacting debuginfod servers when there is a need to follow
+debug links.
 
 @item l
 @itemx =rawline

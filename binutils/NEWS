@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add an option to objdump and readelf to prevent attempts to access debuginfod
+  servers when following links.
+
 Changes in 2.38:
 
 * elfedit: Add --output-abiversion option to update ABIVERSION.

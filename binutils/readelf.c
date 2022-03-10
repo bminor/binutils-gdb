@@ -5127,6 +5127,14 @@ usage (FILE * stream)
                          Do not follow links to separate debug info files\n\
                           (default)\n"));
 #endif
+#if HAVE_LIBDEBUGINFOD
+  fprintf (stream, _("\
+  -wD --debug-dump=use-debuginfod\n\
+                         When following links, also query debuginfod servers (default)\n"));
+  fprintf (stream, _("\
+  -wE --debug-dump=do-not-use-debuginfod\n\
+                         When following links, do not query debuginfod servers\n"));
+#endif
   fprintf (stream, _("\
   --dwarf-depth=N        Do not display DIEs at depth N or greater\n"));
   fprintf (stream, _("\

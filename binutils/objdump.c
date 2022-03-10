@@ -282,6 +282,14 @@ usage (FILE *stream, int status)
                            Do not follow links to separate debug info files\n\
                             (default)\n"));
 #endif
+#if HAVE_LIBDEBUGINFOD
+  fprintf (stream, _("\
+  -WD --dwarf=use-debuginfod\n\
+                           When following links, also query debuginfod servers (default)\n"));
+  fprintf (stream, _("\
+  -WE --dwarf=do-not-use-debuginfod\n\
+                           When following links, do not query debuginfod servers\n"));
+#endif
   fprintf (stream, _("\
   -L, --process-links      Display the contents of non-debug sections in\n\
                             separate debuginfo files.  (Implies -WK)\n"));

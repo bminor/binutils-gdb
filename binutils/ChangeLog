@@ -1,3 +1,20 @@
+2022-03-10  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (use_debuginfod): New variable.  Set to 1.
+	(load_separate_debug_info): Only call
+	debuginfod_fetch_separate_debug_info is use_debuginfod is true.
+	(dwarf_select_sections_by_names): Add do-not-use-debuginfod and
+	use-debuginfod options.
+	(dwarf_select_sections_by_letters): Add D and E options.
+	* dwarf.h (use_debuginfod): New extern.
+	* objdump.c (usage): Mention the new options.
+	* readelf.c (usage): Likewise.
+	* doc/binutils.texi: Document the new options.
+	* doc/debug-options.texi: Describe the new options.
+	* NEWS: Mention the new feature.
+	* testsuite/binutils-all/debuginfod.exp: Add tests of the new
+	options.
+
 2021-03-06  Maciej W. Rozycki  <macro@orcam.me.uk>
 
 	* testsuite/binutils-all/mips/mips1-branch-alias.d: New test.

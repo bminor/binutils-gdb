@@ -2246,6 +2246,8 @@ objdump [@option{-a}|@option{--archive-headers}]
          @option{--dwarf}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links]]
         [@option{-WK}|@option{--dwarf=follow-links}]
         [@option{-WN}|@option{--dwarf=no-follow-links}]
+        [@option{-wD}|@option{--dwarf=use-debuginfod}]
+        [@option{-wE}|@option{--dwarf=do-not-use-debuginfod}]
         [@option{-L}|@option{--process-links}]
         [@option{--ctf=}@var{section}]
         [@option{-G}|@option{--stabs}]
@@ -4883,6 +4885,8 @@ readelf [@option{-a}|@option{--all}]
          @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links]]
         [@option{-wK}|@option{--debug-dump=follow-links}]
         [@option{-wN}|@option{--debug-dump=no-follow-links}]
+        [@option{-wD}|@option{--debug-dump=use-debuginfod}]
+        [@option{-wE}|@option{--debug-dump=do-not-use-debuginfod}]
         [@option{-P}|@option{--process-links}]
         [@option{--dwarf-depth=@var{n}}]
         [@option{--dwarf-start=@var{n}}]
@@ -5508,7 +5512,8 @@ deduced from the input file
 @cindex separate debug files
 
 debuginfod is a web service that indexes ELF/DWARF debugging resources
-by build-id and serves them over HTTP.
+by build-id and serves them over HTTP.  For more information see:
+@emph{https://sourceware.org/elfutils/Debuginfod.html}
 
 Binutils can be built with the debuginfod client library
 @code{libdebuginfod} using the @option{--with-debuginfod} configure option.
@@ -5519,6 +5524,10 @@ separate debug files when the files are otherwise not found.
 
 debuginfod is packaged with elfutils, starting with version 0.178.
 You can get the latest version from `https://sourceware.org/elfutils/'.
+
+The DWARF info dumping tools (@command{readelf} and @command{objdump})
+have options to control when they should access the debuginfod
+servers.  By default this access is enabled.
 
 @node Reporting Bugs
 @chapter Reporting Bugs
