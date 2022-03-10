@@ -888,6 +888,14 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
   if (is_fixed_point_type (type))
     type = type->fixed_point_type_base_type ();
 
+  /* Widen a subrange to its target type, then use that type's
+     printer.  */
+  while (type->code () == TYPE_CODE_RANGE)
+    {
+      type = check_typedef (TYPE_TARGET_TYPE (type));
+      val = value_cast (type, val);
+    }
+
   switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
@@ -936,7 +944,6 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
       generic_value_print_bool (val, stream, options, decorations);
       break;
 
-    case TYPE_CODE_RANGE:
     case TYPE_CODE_INT:
       generic_value_print_int (val, stream, options);
       break;
