@@ -222,6 +222,9 @@ struct private_thread_info
   virtual ~private_thread_info () = 0;
 };
 
+/* Unique pointer wrapper for private_thread_info.  */
+using private_thread_info_up = std::unique_ptr<private_thread_info>;
+
 /* Threads are intrusively refcounted objects.  Being the
    user-selected thread is normally considered an implicit strong
    reference and is thus not accounted in the refcount, unlike
@@ -522,7 +525,7 @@ public:
   struct frame_id initiating_frame = null_frame_id;
 
   /* Private data used by the target vector implementation.  */
-  std::unique_ptr<private_thread_info> priv;
+  private_thread_info_up priv;
 
   /* Branch trace information for this thread.  */
   struct btrace_thread_info btrace {};
@@ -616,7 +619,7 @@ extern struct thread_info *add_thread_silent (process_stratum_target *targ,
 /* Same as add_thread, and sets the private info.  */
 extern struct thread_info *add_thread_with_info (process_stratum_target *targ,
 						 ptid_t ptid,
-						 private_thread_info *);
+						 private_thread_info_up);
 
 /* Delete thread THREAD and notify of thread exit.  If the thread is
    currently not deletable, don't actually delete it but still tag it

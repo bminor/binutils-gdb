@@ -1366,7 +1366,8 @@ record_thread (struct thread_db_info *info,
      thread with this PTID, but it's marked exited, then the kernel
      reused the tid of an old thread.  */
   if (tp == NULL || tp->state == THREAD_EXITED)
-    tp = add_thread_with_info (info->process_target, ptid, priv);
+    tp = add_thread_with_info (info->process_target, ptid,
+			       private_thread_info_up (priv));
   else
     tp->priv.reset (priv);
 

@@ -351,7 +351,8 @@ darwin_nat_target::check_new_threads (inferior *inf)
 	  pti->msg_state = DARWIN_RUNNING;
 
 	  /* Add the new thread.  */
-	  add_thread_with_info (this, ptid_t (inf->pid, 0, new_id), pti);
+	  add_thread_with_info (this, ptid_t (inf->pid, 0, new_id),
+				private_thread_info_up (pti));
 	  new_thread_vec.push_back (pti);
 	  new_ix++;
 	  continue;

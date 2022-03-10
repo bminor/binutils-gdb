@@ -899,7 +899,7 @@ sync_threadlists (pid_t pid)
 
 	  thread = add_thread_with_info (proc_target,
 					 ptid_t (pid, 0, pbuf[pi].pthid),
-					 priv);
+					 private_thread_info_up (priv));
 
 	  pi++;
 	}

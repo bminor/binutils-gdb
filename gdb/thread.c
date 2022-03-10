@@ -306,11 +306,11 @@ add_thread_silent (process_stratum_target *targ, ptid_t ptid)
 
 struct thread_info *
 add_thread_with_info (process_stratum_target *targ, ptid_t ptid,
-		      private_thread_info *priv)
+		      private_thread_info_up priv)
 {
   thread_info *result = add_thread_silent (targ, ptid);
 
-  result->priv.reset (priv);
+  result->priv = std::move (priv);
 
   if (print_thread_events)
     gdb_printf (_("[New %s]\n"), target_pid_to_str (ptid).c_str ());
