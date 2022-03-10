@@ -841,8 +841,7 @@ auto_load_objfile_script (struct objfile *objfile,
       realname.get ()[len] = '\0';
 
       auto_load_debug_printf
-	("auto-load: Stripped .exe suffix, retrying with \"%s\".",
-	 realname.get ());
+	("Stripped .exe suffix, retrying with \"%s\".", realname.get ());
 
       auto_load_objfile_script_1 (objfile, realname.get (), language);
       return;
