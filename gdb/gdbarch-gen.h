@@ -296,8 +296,6 @@ extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register
    the register cache should call this function directly; others should
    use "register_type". */
 
-extern bool gdbarch_register_type_p (struct gdbarch *gdbarch);
-
 typedef struct type * (gdbarch_register_type_ftype) (struct gdbarch *gdbarch, int reg_nr);
 extern struct type * gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_type (struct gdbarch *gdbarch, gdbarch_register_type_ftype *register_type);

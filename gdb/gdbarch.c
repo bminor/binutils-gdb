@@ -443,7 +443,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of dwarf2_reg_to_regnum, invalid_p == 0 */
   if (gdbarch->register_name == 0)
     log.puts ("\n\tregister_name");
-  /* Skip verify of register_type, has predicate.  */
   /* Skip verify of dummy_id, invalid_p == 0 */
   /* Skip verify of deprecated_fp_regnum, invalid_p == 0 */
   /* Skip verify of push_dummy_call, has predicate.  */
@@ -780,9 +779,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_filtered (file,
                       "gdbarch_dump: register_name = <%s>\n",
                       host_address_to_string (gdbarch->register_name));
-  fprintf_filtered (file,
-                      "gdbarch_dump: gdbarch_register_type_p() = %d\n",
-                      gdbarch_register_type_p (gdbarch));
   fprintf_filtered (file,
                       "gdbarch_dump: register_type = <%s>\n",
                       host_address_to_string (gdbarch->register_type));
@@ -2217,13 +2213,6 @@ set_gdbarch_register_name (struct gdbarch *gdbarch,
                            gdbarch_register_name_ftype register_name)
 {
   gdbarch->register_name = register_name;
-}
-
-bool
-gdbarch_register_type_p (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  return gdbarch->register_type != NULL;
 }
 
 struct type *

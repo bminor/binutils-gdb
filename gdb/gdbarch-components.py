@@ -574,7 +574,6 @@ use "register_type".
     type="struct type *",
     name="register_type",
     params=[("int", "reg_nr")],
-    predicate=True,
     invalid=True,
 )
 
