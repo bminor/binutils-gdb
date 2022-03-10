@@ -65,7 +65,7 @@
 #
 # A gdbarch is zero-initialized.  Then, if a field has a pre-default,
 # the field is set to that value.  After initialization is complete
-# (that is, after the tdep code has a change to change the settings),
+# (that is, after the tdep code has a chance to change the settings),
 # the post-initialization step is done.
 #
 # There is a generic algorithm to generate a "validation function" for
