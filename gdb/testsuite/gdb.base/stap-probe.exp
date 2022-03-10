@@ -29,7 +29,9 @@ proc stap_test {exec_name {args ""}} {
     set semaphore_addr_var ""
     if {[string first "-DUSE_SEMAPHORES" $args] == -1} {
 	gdb_test_no_output "set breakpoint always-inserted on"
-	set semaphore_addr_var [get_hexadecimal_valueof "&relocation_marker" "0"]
+	set semaphore_addr_var \
+	    [get_hexadecimal_valueof "&relocation_marker" "0"\
+		"get original address of relocation_marker"]
     }
 
     if ![runto_main] {
@@ -54,8 +56,11 @@ proc stap_test {exec_name {args ""}} {
     }
 
     if {[string first "-DUSE_SEMAPHORES" $args] == -1} {
+	set updated_semaphore_addr_var \
+	    [get_hexadecimal_valueof "&relocation_marker" \
+		 "0" "get revised relocation_marker address"]
 	set relocation_base \
-	   [expr [get_hexadecimal_valueof "&relocation_marker" "0"] - $semaphore_addr_var]
+	   [expr $updated_semaphore_addr_var - $semaphore_addr_var]
 	if {$relocation_base != 0} {
 	   # Checks that GDB doesn't mistakenly relocate and write to null
 	   # semaphore addresses.  If it were to relocate a zero-valued
@@ -103,9 +108,9 @@ proc stap_test {exec_name {args ""}} {
     # Reinit GDB, set a breakpoint on probe ps.
     delete_breakpoints
     if {[runto "-pstap test:ps"]} {
-      pass "run to -pstap test:m4"
+      pass "run to -pstap test:ps"
     } else {
-      fail "run to -pstap test:m4"
+      fail "run to -pstap test:ps"
     }
 
     gdb_test "print \$_probe_argc" " = 3" \
@@ -169,9 +174,9 @@ proc stap_test_no_debuginfo {exec_name {args ""}} {
     # Reinit GDB, set a breakpoint on probe ps.
     delete_breakpoints
     if {[runto "-pstap test:ps"]} {
-      pass "run to -pstap test:m4"
+      pass "run to -pstap test:ps"
     } else {
-      fail "run to -pstap test:m4"
+      fail "run to -pstap test:ps"
     }
 
     gdb_test "print \$_probe_argc" " = 3" \
