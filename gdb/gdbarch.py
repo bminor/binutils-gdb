@@ -360,6 +360,16 @@ with open("gdbarch.c", "w") as f:
         elif c.predefault is not None:
             print(f"  if (gdbarch->{c.name} == {c.predefault})", file=f)
             print(f"""    log.puts ("\\n\\t{c.name}");""", file=f)
+        elif c.invalid is True:
+            print(f"  if (gdbarch->{c.name} == 0)", file=f)
+            print(f"""    log.puts ("\\n\\t{c.name}");""", file=f)
+        else:
+            # We should not allow ourselves to simply do nothing here
+            # because no other case applies.  If we end up here then
+            # either the input data needs adjusting so one of the
+            # above cases matches, or we need additional cases adding
+            # here.
+            raise Exception("unhandled case when generating gdbarch validation")
     print("  if (!log.empty ())", file=f)
     print("    internal_error (__FILE__, __LINE__,", file=f)
     print("""		    _("verify_gdbarch: the following are invalid ...%s"),""", file=f)

@@ -740,7 +740,7 @@ FRAME corresponds to the longjmp frame.
 Value(
     type="int",
     name="believe_pcc_promotion",
-    invalid=True,
+    invalid=False,
 )
 
 Method(
@@ -762,7 +762,7 @@ Function(
         ("int *", "optimizedp"),
         ("int *", "unavailablep"),
     ],
-    invalid=True,
+    invalid=False,
 )
 
 Function(
@@ -774,7 +774,7 @@ Function(
         ("struct type *", "type"),
         ("const gdb_byte *", "buf"),
     ],
-    invalid=True,
+    invalid=False,
 )
 
 Method(
@@ -1086,7 +1086,7 @@ Method(
 Value(
     type="int",
     name="frame_red_zone_size",
-    invalid=True,
+    invalid=False,
 )
 
 Method(
@@ -1767,7 +1767,7 @@ contents of all displaced step buffers in the child's address space.
     type="void",
     name="displaced_step_restore_all_in_ptid",
     params=[("inferior *", "parent_inf"), ("ptid_t", "child_ptid")],
-    invalid=True,
+    invalid=False,
 )
 
 Method(
@@ -2298,7 +2298,7 @@ compared to the names of the files GDB should load for debug info.
 """,
     type="const char *",
     name="solib_symbols_extension",
-    invalid=True,
+    invalid=False,
     printer="pstring (gdbarch->solib_symbols_extension)",
 )
 
