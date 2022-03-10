@@ -187,6 +187,15 @@ OP (OP_STRING)
    and they must all match.  */
 OP (OP_ARRAY)
 
+/* UNOP_EXTRACT takes a value and a type, like a cast, but, instead of
+   casting the value to the given type, a new value (of the given
+   type) is extracted from the contents of the old value, starting
+   from the least significant byte.
+
+   It is invalid for the given type to be larger than the type of the
+   given value.  */
+OP (UNOP_EXTRACT)
+
 /* UNOP_CAST is followed by a type pointer in the next exp_element.
    With another UNOP_CAST at the end, this makes three exp_elements.
    It casts the value of the following subexpression.  */

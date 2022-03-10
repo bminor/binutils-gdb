@@ -2460,6 +2460,22 @@ array_operation::evaluate (struct type *expect_type,
   return value_array (tem2, tem3, argvec);
 }
 
+value *
+unop_extract_operation::evaluate (struct type *expect_type,
+				  struct expression *exp,
+				  enum noside noside)
+{
+  value *old_value = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+  struct type *type = get_type ();
+
+  if (TYPE_LENGTH (type) > TYPE_LENGTH (value_type (old_value)))
+    error (_("length type is larger than the value type"));
+
+  struct value *result = allocate_value (type);
+  value_contents_copy (result, 0, old_value, 0, TYPE_LENGTH (type));
+  return result;
+}
+
 }
 
 

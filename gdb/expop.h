@@ -1947,6 +1947,37 @@ protected:
     override;
 };
 
+/* Not a cast!  Extract a value of a given type from the contents of a
+   value.  The new value is extracted from the least significant bytes
+   of the old value.  The new value's type must be no bigger than the
+   old values type.  */
+class unop_extract_operation
+  : public maybe_constant_operation<operation_up, struct type *>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type, struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return UNOP_EXTRACT; }
+
+  /* Return the type referenced by this object.  */
+  struct type *get_type () const
+  {
+    return std::get<1> (m_storage);
+  }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type) override;
+};
+
 /* A type cast.  */
 class unop_cast_operation
   : public maybe_constant_operation<operation_up, struct type *>

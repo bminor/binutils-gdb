@@ -1826,6 +1826,25 @@ unop_cast_operation::do_generate_ax (struct expression *exp,
 }
 
 void
+unop_extract_operation::do_generate_ax (struct expression *exp,
+					struct agent_expr *ax,
+					struct axs_value *value,
+					struct type *cast_type)
+{
+  std::get<0> (m_storage)->generate_ax (exp, ax, value);
+
+  struct type *to_type = get_type ();
+
+  if (!is_scalar_type (to_type))
+    error (_("can't generate agent expression to extract non-scalar type"));
+
+  if (to_type->is_unsigned ())
+    gen_extend (ax, to_type);
+  else
+    gen_sign_extend (ax, to_type);
+}
+
+void
 unop_memval_operation::do_generate_ax (struct expression *exp,
 				       struct agent_expr *ax,
 				       struct axs_value *value,
