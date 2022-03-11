@@ -661,6 +661,9 @@ elf_locate_base (void)
   struct bound_minimal_symbol msymbol;
   CORE_ADDR dyn_ptr, dyn_ptr_addr;
 
+  if (!svr4_have_link_map_offsets ())
+    return 0;
+
   /* Look for DT_MIPS_RLD_MAP first.  MIPS executables use this
      instead of DT_DEBUG, although they sometimes contain an unused
      DT_DEBUG.  */
@@ -716,45 +719,6 @@ elf_locate_base (void)
 
   /* DT_DEBUG entry not found.  */
   return 0;
-}
-
-/* Locate the base address of dynamic linker structs.
-
-   For both the SunOS and SVR4 shared library implementations, if the
-   inferior executable has been linked dynamically, there is a single
-   address somewhere in the inferior's data space which is the key to
-   locating all of the dynamic linker's runtime structures.  This
-   address is the value of the debug base symbol.  The job of this
-   function is to find and return that address, or to return 0 if there
-   is no such address (the executable is statically linked for example).
-
-   For SunOS, the job is almost trivial, since the dynamic linker and
-   all of it's structures are statically linked to the executable at
-   link time.  Thus the symbol for the address we are looking for has
-   already been added to the minimal symbol table for the executable's
-   objfile at the time the symbol file's symbols were read, and all we
-   have to do is look it up there.  Note that we explicitly do NOT want
-   to find the copies in the shared library.
-
-   The SVR4 version is a bit more complicated because the address
-   is contained somewhere in the dynamic info section.  We have to go
-   to a lot more work to discover the address of the debug base symbol.
-   Because of this complexity, we cache the value we find and return that
-   value on subsequent invocations.  Note there is no copy in the
-   executable symbol tables.  */
-
-static CORE_ADDR
-locate_base (struct svr4_info *info)
-{
-  /* Check to see if we have a currently valid address, and if so, avoid
-     doing all this work again and just return the cached address.  If
-     we have no cached address, try to locate it in the dynamic info
-     section for ELF executables.  There's no point in doing any of this
-     though if we don't have some link map offsets to work with.  */
-
-  if (info->debug_base == 0 && svr4_have_link_map_offsets ())
-    info->debug_base = elf_locate_base ();
-  return info->debug_base;
 }
 
 /* Find the first element in the inferior's dynamic link map, and
@@ -844,9 +808,8 @@ svr4_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
 
   info = get_svr4_info (current_program_space);
 
-  info->debug_base = 0;
-  locate_base (info);
-  if (!info->debug_base)
+  info->debug_base = elf_locate_base ();
+  if (info->debug_base == 0)
     return 0;
 
   ldsomap = solib_svr4_r_ldsomap (info);
@@ -880,8 +843,8 @@ open_symbol_file_object (int from_tty)
       return 0;
 
   /* Always locate the debug struct, in case it has moved.  */
-  info->debug_base = 0;
-  if (locate_base (info) == 0)
+  info->debug_base = elf_locate_base ();
+  if (info->debug_base == 0)
     return 0;	/* failed somehow...  */
 
   /* First link map member should be the executable.  */
@@ -1297,13 +1260,10 @@ svr4_current_sos_direct (struct svr4_info *info)
       return library_list.head ? library_list.head : svr4_default_sos (info);
     }
 
-  /* Always locate the debug struct, in case it has moved.  */
-  info->debug_base = 0;
-  locate_base (info);
-
   /* If we can't find the dynamic linker's base structure, this
      must not be a dynamically linked executable.  Hmm.  */
-  if (! info->debug_base)
+  info->debug_base = elf_locate_base ();
+  if (info->debug_base == 0)
     return svr4_default_sos (info);
 
   /* Assume that everything is a library if the dynamic loader was loaded
@@ -1839,8 +1799,8 @@ svr4_handle_solib_event (void)
       return;
 
     /* Always locate the debug struct, in case it moved.  */
-    info->debug_base = 0;
-    if (locate_base (info) == 0)
+    info->debug_base = elf_locate_base ();
+    if (info->debug_base == 0)
       {
 	/* It's possible for the reloc_complete probe to be triggered before
 	   the linker has set the DT_DEBUG pointer (for example, when the
