@@ -84,6 +84,7 @@ responsibility among the other maintainers.
   FRV		   Alexandre Oliva <aoliva@sourceware.org>
   GOLD		   Ian Lance Taylor <iant@google.com>
   GOLD		   Cary Coutant <ccoutant@gmail.com>
+  gprofng	   Vladimir Mezentsev <vladimir.mezentsev@oracle.com>
   H8300		   Prafulla Thakare <prafulla.thakare@kpitcummins.com>
   HPPA		   Dave Anglin <dave.anglin@bell.net>
   HPPA elf32	   Alan Modra <amodra@gmail.com>

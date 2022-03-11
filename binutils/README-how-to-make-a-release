@@ -35,7 +35,7 @@ Approx time to complete from here: 2 hours ....
      in the gold directory - it has its own release numbering.
 
      Likewise for the ChangeLog files in: bfd, binutils, config, cpu,
-     elfcpp, gas, gold, gprof, include, ld, libctf, libiberty, opcodes
+     elfcpp, gas, gold, gprof, gprofng, include, ld, libctf, libiberty, opcodes
      and toplevel.
 
      Add a note of the name of the new branch to binutils/BRANCHES.
@@ -97,8 +97,8 @@ Approx time to complete from here: 2 hours ....
        m4_define([BFD_VERSION], [2.39.50])
 
      Regenerate various files on both branch and HEAD by configuring
-     with "--enable-maintainer-mode --enable-gold" and then building
-     with "make all-binutils all-gas all-gold all-gprof all-ld"
+     with "--enable-maintainer-mode --enable-gold --enable-shared" and then building
+     with "make all-binutils all-gas all-gold all-gprof all-gprofng all-ld"
 
      Add ChangeLog entries for the updated files.  Commit the changes.
      Make sure that this includes the .pot files as well as the
@@ -114,7 +114,7 @@ Approx time to complete from here: 2 hours ....
 	  
      b. Create a source tarball of the BRANCH sources:
 
-          ./src-release -x binutils
+          ./src-release.sh -x binutils
 
      c. Build a test target using this tarball.
 
@@ -262,8 +262,8 @@ When the time comes to actually make the release....
 	chmod -R -w binutils-2.*
 	mkdir build
 	cd build
-	../binutils-2.*/configure --quiet --enable-gold --prefix=`pwd`/install --enable-plugins
-	make all-gas all-gold all-ld all-binutils all-gprof
+	../binutils-2.*/configure --quiet --enable-gold --prefix=`pwd`/install --enable-plugins --enable-shared
+	make all-gas all-gold all-ld all-binutils all-gprof all-gprofng
 	make check-gas check-binutils check-ld check-gold
         make install-gas install-gold install-ld install-binutils
 

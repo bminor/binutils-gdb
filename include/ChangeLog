@@ -1,3 +1,9 @@
+2022-03-11  Vladimir Mezentsev  <vladimir.mezentsev@oracle.com>
+
+	* collectorAPI.h: New file.
+	* libcollector.h: New file.
+	* libfcollector.h: New file.
+
 2022-01-25  Klaus Ziegler  <klausz@haus-gisela.de>
 
 	PR 28816
