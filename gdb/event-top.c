@@ -766,7 +766,25 @@ command_line_handler (gdb::unique_xmalloc_ptr<char> &&rl)
       /* stdin closed.  The connection with the terminal is gone.
 	 This happens at the end of a testsuite run, after Expect has
 	 hung up but GDB is still alive.  In such a case, we just quit
-	 gdb killing the inferior program too.  */
+	 gdb killing the inferior program too.  This also happens if the
+	 user sends EOF, which is usually bound to ctrl+d.
+
+	 What we want to do in this case is print "quit" after the GDB
+	 prompt, as if the user had just typed "quit" and pressed return.
+
+	 This used to work just fine, but unfortunately, doesn't play well
+	 with readline's bracketed paste mode.  By the time we get here,
+	 readline has already sent the control sequence to leave bracketed
+	 paste mode, and this sequence ends with a '\r' character.  As a
+	 result, if bracketed paste mode is on, and we print quit here,
+	 then this will overwrite the prompt.
+
+	 To work around this issue, when bracketed paste mode is enabled,
+	 we first print '\n' to move to the next line, and then print the
+	 quit.  This isn't ideal, but avoids corrupting the prompt.  */
+      const char *value = rl_variable_value ("enable-bracketed-paste");
+      if (value != nullptr && strcmp (value, "on") == 0)
+	printf_unfiltered ("\n");
       printf_unfiltered ("quit\n");
       execute_command ("quit", 1);
     }

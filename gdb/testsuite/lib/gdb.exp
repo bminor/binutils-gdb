@@ -2151,6 +2151,15 @@ proc default_gdb_start { } {
 	-re "\[\r\n\]$gdb_prompt $" {
 	    verbose "GDB initialized."
 	}
+	-re "\[\r\n\]\033\\\[.2004h$gdb_prompt $" {
+	    # This special case detects what happens when GDB is
+	    # started with bracketed paste mode enabled.  This mode is
+	    # usually forced off (see setting of INPUTRC in
+	    # default_gdb_init), but for at least one test we turn
+	    # bracketed paste mode back on, and then start GDB.  In
+	    # that case, this case is hit.
+	    verbose "GDB initialized."
+	}
 	-re "$gdb_prompt $"	{
 	    perror "GDB never initialized."
 	    unset gdb_spawn_id
