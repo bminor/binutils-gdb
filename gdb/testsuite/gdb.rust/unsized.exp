@@ -31,5 +31,4 @@ if {![runto ${srcfile}:$line]} {
     return -1
 }
 
-gdb_test "ptype *us" \
-    " = struct \[a-z:\]*V<\\\[u8\\\]> {.* data: \\\[u8\\\],.*}"
+gdb_test "ptype us" " = .*V<\\\[u8\\\]>.*"
