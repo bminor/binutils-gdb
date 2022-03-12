@@ -26,6 +26,7 @@
 #include "symtab.h"
 #include "inferior.h"
 #include "infrun.h"
+#include "observable.h"
 #include "bfd.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -2609,7 +2610,18 @@ target_wait (ptid_t ptid, struct target_waitstatus *status,
   if (!target_can_async_p (target))
     gdb_assert ((options & TARGET_WNOHANG) == 0);
 
-  return target->wait (ptid, status, options);
+  try
+    {
+      gdb::observers::target_pre_wait.notify (ptid);
+      ptid_t event_ptid = target->wait (ptid, status, options);
+      gdb::observers::target_post_wait.notify (event_ptid);
+      return event_ptid;
+    }
+  catch (...)
+    {
+      gdb::observers::target_post_wait.notify (null_ptid);
+      throw;
+    }
 }
 
 /* See target.h.  */

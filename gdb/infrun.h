@@ -124,9 +124,8 @@ extern process_stratum_target *user_visible_resume_target (ptid_t resume_ptid);
 extern int normal_stop (void);
 
 /* Return the cached copy of the last target/ptid/waitstatus returned
-   by target_wait()/deprecated_target_wait_hook().  The data is
-   actually cached by handle_inferior_event(), which gets called
-   immediately after target_wait()/deprecated_target_wait_hook().  */
+   by target_wait().  The data is actually cached by handle_inferior_event(),
+   which gets called immediately after target_wait().  */
 extern void get_last_target_status (process_stratum_target **target,
 				    ptid_t *ptid,
 				    struct target_waitstatus *status);

@@ -247,13 +247,6 @@ void (*deprecated_readline_end_hook) (void);
 void (*deprecated_attach_hook) (void);
 void (*deprecated_detach_hook) (void);
 
-/* Called when going to wait for the target.  Usually allows the GUI
-   to run while waiting for target events.  */
-
-ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
-				       struct target_waitstatus *status,
-				       int options);
-
 /* Used by UI as a wrapper around command execution.  May do various
    things like enabling/disabling buttons, etc...  */
 

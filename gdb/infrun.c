@@ -367,7 +367,7 @@ show_stop_on_solib_events (struct ui_file *file, int from_tty,
 static bool stop_print_frame;
 
 /* This is a cached copy of the target/ptid/waitstatus of the last
-   event returned by target_wait()/deprecated_target_wait_hook().
+   event returned by target_wait().
    This information is returned by get_last_target_status().  */
 static process_stratum_target *target_last_proc_target;
 static ptid_t target_last_wait_ptid;
@@ -3515,7 +3515,6 @@ static ptid_t
 do_target_wait_1 (inferior *inf, ptid_t ptid,
 		  target_waitstatus *status, target_wait_flags options)
 {
-  ptid_t event_ptid;
   struct thread_info *tp;
 
   /* We know that we are looking for an event in the target of inferior
@@ -3630,12 +3629,7 @@ do_target_wait_1 (inferior *inf, ptid_t ptid,
   if (!target_can_async_p ())
     options &= ~TARGET_WNOHANG;
 
-  if (deprecated_target_wait_hook)
-    event_ptid = deprecated_target_wait_hook (ptid, status, options);
-  else
-    event_ptid = target_wait (ptid, status, options);
-
-  return event_ptid;
+  return target_wait (ptid, status, options);
 }
 
 /* Wrapper for target_wait that first checks whether threads have
@@ -4591,10 +4585,7 @@ poll_one_curr_target (struct target_waitstatus *ws)
      don't get any event.  */
   target_dcache_invalidate ();
 
-  if (deprecated_target_wait_hook)
-    event_ptid = deprecated_target_wait_hook (minus_one_ptid, ws, TARGET_WNOHANG);
-  else
-    event_ptid = target_wait (minus_one_ptid, ws, TARGET_WNOHANG);
+  event_ptid = target_wait (minus_one_ptid, ws, TARGET_WNOHANG);
 
   if (debug_infrun)
     print_target_wait_results (minus_one_ptid, event_ptid, *ws);

@@ -79,6 +79,8 @@ DEFINE_OBSERVABLE (styling_changed);
 DEFINE_OBSERVABLE (current_source_symtab_and_line_changed);
 DEFINE_OBSERVABLE (gdb_exiting);
 DEFINE_OBSERVABLE (connection_removed);
+DEFINE_OBSERVABLE (target_pre_wait);
+DEFINE_OBSERVABLE (target_post_wait);
 
 } /* namespace observers */
 } /* namespace gdb */

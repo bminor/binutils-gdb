@@ -357,7 +357,6 @@ clear_interpreter_hooks (void)
   deprecated_readline_hook = 0;
   deprecated_readline_end_hook = 0;
   deprecated_context_hook = 0;
-  deprecated_target_wait_hook = 0;
   deprecated_call_command_hook = 0;
   deprecated_error_begin_hook = 0;
 }
