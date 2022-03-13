@@ -354,6 +354,12 @@ md_begin ()
   assert (8 <= sizeof (offsetT));
 }
 
+unsigned long
+loongarch_mach (void)
+{
+  return LARCH_opts.ase_lp64 ? bfd_mach_loongarch64 : bfd_mach_loongarch32;
+}
+
 static const expressionS const_0 = { .X_op = O_constant, .X_add_number = 0 };
 
 static const char *
