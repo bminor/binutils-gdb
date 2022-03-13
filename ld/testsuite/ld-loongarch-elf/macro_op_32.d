@@ -1,6 +1,6 @@
 #as:
 #objdump: -dr
-#skip: loongarch32-*-*
+#skip: loongarch64-*-*
 
 .*:[ 	]+file format .*
 
@@ -16,10 +16,12 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+10: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x800
 [ 	]+[ 	]+[ 	]+10: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+10: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+10: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+10: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+10: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+10: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+10: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+10: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+14:[ 	]+28c00084 [ 	]+ld.d[ 	]+[ 	]+\$a0, \$a0, 0
+[ 	]+14:[ 	]+28800084 [ 	]+ld.w[ 	]+[ 	]+\$a0, \$a0, 0
 [ 	]+[ 	]+[ 	]+14: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
 [ 	]+[ 	]+[ 	]+14: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+14: R_LARCH_SOP_ADD[ 	]+\*ABS\*
@@ -36,10 +38,12 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+18: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x800
 [ 	]+[ 	]+[ 	]+18: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+18: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+18: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+18: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+18: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+18: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+18: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+18: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+1c:[ 	]+28c00084 [ 	]+ld.d[ 	]+[ 	]+\$a0, \$a0, 0
+[ 	]+1c:[ 	]+28800084 [ 	]+ld.w[ 	]+[ 	]+\$a0, \$a0, 0
 [ 	]+[ 	]+[ 	]+1c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
 [ 	]+[ 	]+[ 	]+1c: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+1c: R_LARCH_SOP_ADD[ 	]+\*ABS\*
@@ -56,7 +60,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+20: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_
 [ 	]+[ 	]+[ 	]+20: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+20: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+20: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000000
+[ 	]+[ 	]+[ 	]+20: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x80000000
 [ 	]+[ 	]+[ 	]+20: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+20: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+20: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
@@ -73,7 +77,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+24: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
 [ 	]+[ 	]+[ 	]+24: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+24: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+24: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000004
+[ 	]+[ 	]+[ 	]+24: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffffc
 [ 	]+[ 	]+[ 	]+24: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+24: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+24: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
@@ -85,7 +89,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+24: R_LARCH_SOP_AND[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+24: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
 [ 	]+28:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
-[ 	]+[ 	]+[ 	]+28: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000008
+[ 	]+[ 	]+[ 	]+28: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffff8
 [ 	]+[ 	]+[ 	]+28: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+28: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+28: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
@@ -94,7 +98,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+28: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+28: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
 [ 	]+2c:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
-[ 	]+[ 	]+[ 	]+2c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x8000000c
+[ 	]+[ 	]+[ 	]+2c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffff4
 [ 	]+[ 	]+[ 	]+2c: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+2c: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+2c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
@@ -105,10 +109,12 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+34: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x800
 [ 	]+[ 	]+[ 	]+34: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+34: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+34: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+34: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+34: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+34: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+34: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+34: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+38:[ 	]+28c00084 [ 	]+ld.d[ 	]+[ 	]+\$a0, \$a0, 0
+[ 	]+38:[ 	]+28800084 [ 	]+ld.w[ 	]+[ 	]+\$a0, \$a0, 0
 [ 	]+[ 	]+[ 	]+38: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
 [ 	]+[ 	]+[ 	]+38: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+38: R_LARCH_SOP_ADD[ 	]+\*ABS\*
@@ -125,7 +131,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+3c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_
 [ 	]+[ 	]+[ 	]+3c: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+3c: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+3c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000000
+[ 	]+[ 	]+[ 	]+3c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x80000000
 [ 	]+[ 	]+[ 	]+3c: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+3c: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+3c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
@@ -142,7 +148,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+40: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
 [ 	]+[ 	]+[ 	]+40: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+40: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+40: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000004
+[ 	]+[ 	]+[ 	]+40: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffffc
 [ 	]+[ 	]+[ 	]+40: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+40: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+40: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
@@ -154,7 +160,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+40: R_LARCH_SOP_AND[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+40: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
 [ 	]+44:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
-[ 	]+[ 	]+[ 	]+44: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000008
+[ 	]+[ 	]+[ 	]+44: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffff8
 [ 	]+[ 	]+[ 	]+44: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+44: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+44: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
@@ -163,7 +169,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+44: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+44: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
 [ 	]+48:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
-[ 	]+[ 	]+[ 	]+48: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x8000000c
+[ 	]+[ 	]+[ 	]+48: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffff4
 [ 	]+[ 	]+[ 	]+48: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+48: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+48: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
@@ -174,10 +180,12 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+50: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x800
 [ 	]+[ 	]+[ 	]+50: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+50: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+50: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+50: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+50: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+50: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+50: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+50: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+54:[ 	]+28c00084 [ 	]+ld.d[ 	]+[ 	]+\$a0, \$a0, 0
+[ 	]+54:[ 	]+28800084 [ 	]+ld.w[ 	]+[ 	]+\$a0, \$a0, 0
 [ 	]+[ 	]+[ 	]+54: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
 [ 	]+[ 	]+[ 	]+54: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+54: R_LARCH_SOP_ADD[ 	]+\*ABS\*
@@ -194,7 +202,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+58: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_
 [ 	]+[ 	]+[ 	]+58: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+58: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+58: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000000
+[ 	]+[ 	]+[ 	]+58: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x80000000
 [ 	]+[ 	]+[ 	]+58: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+58: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+58: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
@@ -211,7 +219,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+5c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
 [ 	]+[ 	]+[ 	]+5c: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+5c: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+5c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000004
+[ 	]+[ 	]+[ 	]+5c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffffc
 [ 	]+[ 	]+[ 	]+5c: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+5c: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+5c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
@@ -223,7 +231,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+5c: R_LARCH_SOP_AND[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+5c: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
 [ 	]+60:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
-[ 	]+[ 	]+[ 	]+60: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000008
+[ 	]+[ 	]+[ 	]+60: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffff8
 [ 	]+[ 	]+[ 	]+60: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+60: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+60: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
@@ -232,7 +240,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+60: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+60: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
 [ 	]+64:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
-[ 	]+[ 	]+[ 	]+64: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x8000000c
+[ 	]+[ 	]+[ 	]+64: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffff4
 [ 	]+[ 	]+[ 	]+64: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+64: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+64: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
@@ -241,10 +249,12 @@ Disassembly of section .text:
 [ 	]+68:[ 	]+380c1484 [ 	]+ldx.d[ 	]+[ 	]+\$a0, \$a0, \$a1
 [ 	]+6c:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
 [ 	]+[ 	]+[ 	]+6c: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x800
-[ 	]+[ 	]+[ 	]+6c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+6c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+6c: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+6c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+6c: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+6c: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+70:[ 	]+02c00084 [ 	]+addi.d[ 	]+[ 	]+\$a0, \$a0, 0
+[ 	]+70:[ 	]+02800084 [ 	]+addi.w[ 	]+[ 	]+\$a0, \$a0, 0
 [ 	]+[ 	]+[ 	]+70: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x4
 [ 	]+[ 	]+[ 	]+70: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x804
 [ 	]+[ 	]+[ 	]+70: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
@@ -255,7 +265,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+70: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
 [ 	]+74:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
 [ 	]+[ 	]+[ 	]+74: R_LARCH_SOP_PUSH_PCREL[ 	]+L1
-[ 	]+[ 	]+[ 	]+74: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x80000000
+[ 	]+[ 	]+[ 	]+74: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\-0x80000000
 [ 	]+[ 	]+[ 	]+74: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+74: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+74: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
@@ -268,7 +278,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+74: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
 [ 	]+78:[ 	]+03800005 [ 	]+ori[ 	]+[ 	]+\$a1, \$zero, 0x0
 [ 	]+[ 	]+[ 	]+78: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x4
-[ 	]+[ 	]+[ 	]+78: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x80000004
+[ 	]+[ 	]+[ 	]+78: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\-0x7ffffffc
 [ 	]+[ 	]+[ 	]+78: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+78: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+78: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
@@ -278,24 +288,26 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+78: R_LARCH_SOP_AND[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+78: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
 [ 	]+7c:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
-[ 	]+[ 	]+[ 	]+7c: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x80000008
+[ 	]+[ 	]+[ 	]+7c: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\-0x7ffffff8
 [ 	]+[ 	]+[ 	]+7c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
 [ 	]+[ 	]+[ 	]+7c: R_LARCH_SOP_SL[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+7c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+7c: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+7c: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
 [ 	]+80:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
-[ 	]+[ 	]+[ 	]+80: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x8000000c
+[ 	]+[ 	]+[ 	]+80: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\-0x7ffffff4
 [ 	]+[ 	]+[ 	]+80: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
 [ 	]+[ 	]+[ 	]+80: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+80: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
 [ 	]+84:[ 	]+00109484 [ 	]+add.d[ 	]+[ 	]+\$a0, \$a0, \$a1
 [ 	]+88:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
 [ 	]+[ 	]+[ 	]+88: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x800
-[ 	]+[ 	]+[ 	]+88: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+88: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+88: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+88: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+88: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+88: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+8c:[ 	]+02c00084 [ 	]+addi.d[ 	]+[ 	]+\$a0, \$a0, 0
+[ 	]+8c:[ 	]+02800084 [ 	]+addi.w[ 	]+[ 	]+\$a0, \$a0, 0
 [ 	]+[ 	]+[ 	]+8c: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x4
 [ 	]+[ 	]+[ 	]+8c: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x804
 [ 	]+[ 	]+[ 	]+8c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
@@ -306,7 +318,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+8c: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
 [ 	]+90:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
 [ 	]+[ 	]+[ 	]+90: R_LARCH_SOP_PUSH_PCREL[ 	]+L1
-[ 	]+[ 	]+[ 	]+90: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x80000000
+[ 	]+[ 	]+[ 	]+90: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\-0x80000000
 [ 	]+[ 	]+[ 	]+90: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+90: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+90: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
@@ -319,7 +331,7 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+90: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
 [ 	]+94:[ 	]+03800005 [ 	]+ori[ 	]+[ 	]+\$a1, \$zero, 0x0
 [ 	]+[ 	]+[ 	]+94: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x4
-[ 	]+[ 	]+[ 	]+94: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x80000004
+[ 	]+[ 	]+[ 	]+94: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\-0x7ffffffc
 [ 	]+[ 	]+[ 	]+94: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+94: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+94: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
@@ -329,14 +341,14 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+94: R_LARCH_SOP_AND[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+94: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
 [ 	]+98:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
-[ 	]+[ 	]+[ 	]+98: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x80000008
+[ 	]+[ 	]+[ 	]+98: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\-0x7ffffff8
 [ 	]+[ 	]+[ 	]+98: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
 [ 	]+[ 	]+[ 	]+98: R_LARCH_SOP_SL[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+98: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+98: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+98: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
 [ 	]+9c:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
-[ 	]+[ 	]+[ 	]+9c: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x8000000c
+[ 	]+[ 	]+[ 	]+9c: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\-0x7ffffff4
 [ 	]+[ 	]+[ 	]+9c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
 [ 	]+[ 	]+[ 	]+9c: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+9c: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
@@ -344,9 +356,7 @@ Disassembly of section .text:
 [ 	]+a4:[ 	]+14000004 [ 	]+lu12i.w[ 	]+[ 	]+\$a0, 0
 [ 	]+[ 	]+[ 	]+a4: R_LARCH_MARK_LA[ 	]+L1
 [ 	]+[ 	]+[ 	]+a4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+L1
-[ 	]+[ 	]+[ 	]+a4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+a4: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+a4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
+[ 	]+[ 	]+[ 	]+a4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
 [ 	]+[ 	]+[ 	]+a4: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+a4: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
 [ 	]+a8:[ 	]+03800084 [ 	]+ori[ 	]+[ 	]+\$a0, \$a0, 0x0
@@ -354,24 +364,30 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+a8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xfff
 [ 	]+[ 	]+[ 	]+a8: R_LARCH_SOP_AND[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+a8: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
-[ 	]+ac:[ 	]+16000004 [ 	]+lu32i.d[ 	]+[ 	]+\$a0, 0
-[ 	]+[ 	]+[ 	]+ac: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+L1
-[ 	]+[ 	]+[ 	]+ac: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+ac:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
+[ 	]+[ 	]+[ 	]+ac: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x800
+[ 	]+[ 	]+[ 	]+ac: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+ac: R_LARCH_SOP_SL[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+ac: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+ac: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+ac: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+b0:[ 	]+03000084 [ 	]+lu52i.d[ 	]+[ 	]+\$a0, \$a0, 0
-[ 	]+[ 	]+[ 	]+b0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+L1
-[ 	]+[ 	]+[ 	]+b0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
+[ 	]+b0:[ 	]+02800084 [ 	]+addi.w[ 	]+[ 	]+\$a0, \$a0, 0
+[ 	]+[ 	]+[ 	]+b0: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x4
+[ 	]+[ 	]+[ 	]+b0: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x804
+[ 	]+[ 	]+[ 	]+b0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
 [ 	]+[ 	]+[ 	]+b0: R_LARCH_SOP_SR[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+b0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+b0: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+b0: R_LARCH_SOP_SUB[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+b0: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
 [ 	]+b4:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
 [ 	]+[ 	]+[ 	]+b4: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x800
-[ 	]+[ 	]+[ 	]+b4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+b4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+b4: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+b4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+b4: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+b4: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+b8:[ 	]+02c00084 [ 	]+addi.d[ 	]+[ 	]+\$a0, \$a0, 0
+[ 	]+b8:[ 	]+02800084 [ 	]+addi.w[ 	]+[ 	]+\$a0, \$a0, 0
 [ 	]+[ 	]+[ 	]+b8: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x4
 [ 	]+[ 	]+[ 	]+b8: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x804
 [ 	]+[ 	]+[ 	]+b8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
@@ -381,353 +397,333 @@ Disassembly of section .text:
 [ 	]+[ 	]+[ 	]+b8: R_LARCH_SOP_SUB[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+b8: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
 [ 	]+bc:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
-[ 	]+[ 	]+[ 	]+bc: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x800
-[ 	]+[ 	]+[ 	]+bc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+bc: R_LARCH_SOP_PUSH_PCREL[ 	]+L1
+[ 	]+[ 	]+[ 	]+bc: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\-0x80000000
+[ 	]+[ 	]+[ 	]+bc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+bc: R_LARCH_SOP_SR[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+bc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+bc: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+bc: R_LARCH_SOP_SUB[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+bc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+bc: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+bc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+bc: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+bc: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+c0:[ 	]+02c00084 [ 	]+addi.d[ 	]+[ 	]+\$a0, \$a0, 0
+[ 	]+c0:[ 	]+03800005 [ 	]+ori[ 	]+[ 	]+\$a1, \$zero, 0x0
 [ 	]+[ 	]+[ 	]+c0: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x4
-[ 	]+[ 	]+[ 	]+c0: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x804
-[ 	]+[ 	]+[ 	]+c0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+c0: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\-0x7ffffffc
+[ 	]+[ 	]+[ 	]+c0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+c0: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+c0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+c0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+c0: R_LARCH_SOP_SL[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+c0: R_LARCH_SOP_SUB[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+c0: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
-[ 	]+c4:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
-[ 	]+[ 	]+[ 	]+c4: R_LARCH_SOP_PUSH_PCREL[ 	]+L1
-[ 	]+[ 	]+[ 	]+c4: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x80000000
-[ 	]+[ 	]+[ 	]+c4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+c4: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+c4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+c4: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+c4: R_LARCH_SOP_SUB[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+c4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+c0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xfff
+[ 	]+[ 	]+[ 	]+c0: R_LARCH_SOP_AND[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+c0: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
+[ 	]+c4:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
+[ 	]+[ 	]+[ 	]+c4: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\-0x7ffffff8
+[ 	]+[ 	]+[ 	]+c4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
 [ 	]+[ 	]+[ 	]+c4: R_LARCH_SOP_SL[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+c4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+c4: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+c4: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+c8:[ 	]+03800005 [ 	]+ori[ 	]+[ 	]+\$a1, \$zero, 0x0
-[ 	]+[ 	]+[ 	]+c8: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x4
-[ 	]+[ 	]+[ 	]+c8: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x80000004
-[ 	]+[ 	]+[ 	]+c8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+c8:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
+[ 	]+[ 	]+[ 	]+c8: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\-0x7ffffff4
+[ 	]+[ 	]+[ 	]+c8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
 [ 	]+[ 	]+[ 	]+c8: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+c8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+c8: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+c8: R_LARCH_SOP_SUB[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+c8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xfff
-[ 	]+[ 	]+[ 	]+c8: R_LARCH_SOP_AND[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+c8: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
-[ 	]+cc:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
-[ 	]+[ 	]+[ 	]+cc: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x80000008
-[ 	]+[ 	]+[ 	]+cc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
-[ 	]+[ 	]+[ 	]+cc: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+cc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
-[ 	]+[ 	]+[ 	]+cc: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+cc: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+d0:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
-[ 	]+[ 	]+[ 	]+d0: R_LARCH_SOP_PUSH_PCREL[ 	]+L1\+0x8000000c
-[ 	]+[ 	]+[ 	]+d0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
+[ 	]+[ 	]+[ 	]+c8: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
+[ 	]+cc:[ 	]+00109484 [ 	]+add.d[ 	]+[ 	]+\$a0, \$a0, \$a1
+[ 	]+d0:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
+[ 	]+[ 	]+[ 	]+d0: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x800
+[ 	]+[ 	]+[ 	]+d0: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
+[ 	]+[ 	]+[ 	]+d0: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+d0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+d0: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+d0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+d0: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+d0: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
-[ 	]+d4:[ 	]+00109484 [ 	]+add.d[ 	]+[ 	]+\$a0, \$a0, \$a1
+[ 	]+[ 	]+[ 	]+d0: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
+[ 	]+d4:[ 	]+28800084 [ 	]+ld.w[ 	]+[ 	]+\$a0, \$a0, 0
+[ 	]+[ 	]+[ 	]+d4: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
+[ 	]+[ 	]+[ 	]+d4: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
+[ 	]+[ 	]+[ 	]+d4: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+d4: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x804
+[ 	]+[ 	]+[ 	]+d4: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
+[ 	]+[ 	]+[ 	]+d4: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+d4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+d4: R_LARCH_SOP_SR[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+d4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+d4: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+d4: R_LARCH_SOP_SUB[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+d4: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
 [ 	]+d8:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
-[ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x800
+[ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_
 [ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x80000000
+[ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
+[ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_SR[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_SUB[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+d8: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+dc:[ 	]+28c00084 [ 	]+ld.d[ 	]+[ 	]+\$a0, \$a0, 0
+[ 	]+dc:[ 	]+03800005 [ 	]+ori[ 	]+[ 	]+\$a1, \$zero, 0x0
 [ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
 [ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x804
+[ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffffc
 [ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_SL[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_SUB[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
-[ 	]+e0:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
-[ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_
+[ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xfff
+[ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_AND[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+dc: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
+[ 	]+e0:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
+[ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffff8
 [ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000000
-[ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
-[ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_SUB[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
 [ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_SL[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+e0: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+e4:[ 	]+03800005 [ 	]+ori[ 	]+[ 	]+\$a1, \$zero, 0x0
-[ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
+[ 	]+e4:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
+[ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffff4
 [ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
 [ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000004
-[ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
-[ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
 [ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_SUB[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xfff
-[ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_AND[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
-[ 	]+e8:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
-[ 	]+[ 	]+[ 	]+e8: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000008
-[ 	]+[ 	]+[ 	]+e8: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
-[ 	]+[ 	]+[ 	]+e8: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+e8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
-[ 	]+[ 	]+[ 	]+e8: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+e8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
-[ 	]+[ 	]+[ 	]+e8: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+e8: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+ec:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
-[ 	]+[ 	]+[ 	]+ec: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x8000000c
-[ 	]+[ 	]+[ 	]+ec: R_LARCH_SOP_PUSH_GPREL[ 	]+L1
-[ 	]+[ 	]+[ 	]+ec: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+ec: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
+[ 	]+[ 	]+[ 	]+e4: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
+[ 	]+e8:[ 	]+380c1484 [ 	]+ldx.d[ 	]+[ 	]+\$a0, \$a0, \$a1
+[ 	]+ec:[ 	]+14000004 [ 	]+lu12i.w[ 	]+[ 	]+\$a0, 0
+[ 	]+[ 	]+[ 	]+ec: R_LARCH_SOP_PUSH_TLS_TPREL[ 	]+L1
+[ 	]+[ 	]+[ 	]+ec: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
 [ 	]+[ 	]+[ 	]+ec: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+ec: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
-[ 	]+f0:[ 	]+380c1484 [ 	]+ldx.d[ 	]+[ 	]+\$a0, \$a0, \$a1
-[ 	]+f4:[ 	]+14000004 [ 	]+lu12i.w[ 	]+[ 	]+\$a0, 0
-[ 	]+[ 	]+[ 	]+f4: R_LARCH_SOP_PUSH_TLS_TPREL[ 	]+L1
+[ 	]+[ 	]+[ 	]+ec: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
+[ 	]+f0:[ 	]+03800084 [ 	]+ori[ 	]+[ 	]+\$a0, \$a0, 0x0
+[ 	]+[ 	]+[ 	]+f0: R_LARCH_SOP_PUSH_TLS_TPREL[ 	]+L1
+[ 	]+[ 	]+[ 	]+f0: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xfff
+[ 	]+[ 	]+[ 	]+f0: R_LARCH_SOP_AND[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+f0: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
+[ 	]+f4:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
+[ 	]+[ 	]+[ 	]+f4: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x800
+[ 	]+[ 	]+[ 	]+f4: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
+[ 	]+[ 	]+[ 	]+f4: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+f4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+f4: R_LARCH_SOP_SL[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+f4: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+f4: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+f4: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+f8:[ 	]+03800084 [ 	]+ori[ 	]+[ 	]+\$a0, \$a0, 0x0
-[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_PUSH_TLS_TPREL[ 	]+L1
-[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xfff
-[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_AND[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
-[ 	]+fc:[ 	]+16000004 [ 	]+lu32i.d[ 	]+[ 	]+\$a0, 0
-[ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_PUSH_TLS_TPREL[ 	]+L1
-[ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+f8:[ 	]+28800084 [ 	]+ld.w[ 	]+[ 	]+\$a0, \$a0, 0
+[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
+[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
+[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x804
+[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
+[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_SR[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_SUB[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+f8: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
+[ 	]+fc:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
+[ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_
+[ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
+[ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x80000000
+[ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
+[ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_SR[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_SUB[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_SL[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+fc: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+100:[ 	]+03000084 [ 	]+lu52i.d[ 	]+[ 	]+\$a0, \$a0, 0
-[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_PUSH_TLS_TPREL[ 	]+L1
-[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
+[ 	]+100:[ 	]+03800005 [ 	]+ori[ 	]+[ 	]+\$a1, \$zero, 0x0
+[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
+[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
+[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffffc
+[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
+[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
-[ 	]+104:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
-[ 	]+[ 	]+[ 	]+104: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x800
+[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_SUB[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xfff
+[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_AND[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+100: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
+[ 	]+104:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
+[ 	]+[ 	]+[ 	]+104: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffff8
 [ 	]+[ 	]+[ 	]+104: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
 [ 	]+[ 	]+[ 	]+104: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+104: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+104: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+104: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+104: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+104: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+108:[ 	]+28c00084 [ 	]+ld.d[ 	]+[ 	]+\$a0, \$a0, 0
-[ 	]+[ 	]+[ 	]+108: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
+[ 	]+108:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
+[ 	]+[ 	]+[ 	]+108: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffff4
 [ 	]+[ 	]+[ 	]+108: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
 [ 	]+[ 	]+[ 	]+108: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+108: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x804
-[ 	]+[ 	]+[ 	]+108: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
-[ 	]+[ 	]+[ 	]+108: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+108: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+108: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
 [ 	]+[ 	]+[ 	]+108: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+108: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
-[ 	]+[ 	]+[ 	]+108: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+108: R_LARCH_SOP_SUB[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+108: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
-[ 	]+10c:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000000
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_SUB[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+10c: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+110:[ 	]+03800005 [ 	]+ori[ 	]+[ 	]+\$a1, \$zero, 0x0
-[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
-[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
+[ 	]+10c:[ 	]+380c1484 [ 	]+ldx.d[ 	]+[ 	]+\$a0, \$a0, \$a1
+[ 	]+110:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
+[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x800
+[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
 [ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000004
-[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
-[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_SUB[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xfff
-[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_AND[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
-[ 	]+114:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
-[ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000008
-[ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
+[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
+[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_SR[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+110: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
+[ 	]+114:[ 	]+02800084 [ 	]+addi.w[ 	]+[ 	]+\$a0, \$a0, 0
+[ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
+[ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
+[ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x804
+[ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
 [ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
-[ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+118:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
-[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x8000000c
-[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_PUSH_TLS_GOT[ 	]+L1
+[ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_SUB[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+114: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
+[ 	]+118:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
+[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_
+[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
 [ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
+[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x80000000
+[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
+[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
-[ 	]+11c:[ 	]+380c1484 [ 	]+ldx.d[ 	]+[ 	]+\$a0, \$a0, \$a1
-[ 	]+120:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
-[ 	]+[ 	]+[ 	]+120: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x800
+[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_SUB[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
+[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_SR[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+118: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
+[ 	]+11c:[ 	]+03800005 [ 	]+ori[ 	]+[ 	]+\$a1, \$zero, 0x0
+[ 	]+[ 	]+[ 	]+11c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
+[ 	]+[ 	]+[ 	]+11c: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
+[ 	]+[ 	]+[ 	]+11c: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+11c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffffc
+[ 	]+[ 	]+[ 	]+11c: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
+[ 	]+[ 	]+[ 	]+11c: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+11c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+11c: R_LARCH_SOP_SR[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+11c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+11c: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+11c: R_LARCH_SOP_SUB[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+11c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xfff
+[ 	]+[ 	]+[ 	]+11c: R_LARCH_SOP_AND[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+11c: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
+[ 	]+120:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
+[ 	]+[ 	]+[ 	]+120: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffff8
 [ 	]+[ 	]+[ 	]+120: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
 [ 	]+[ 	]+[ 	]+120: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+120: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+120: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+120: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+120: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+120: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+124:[ 	]+02c00084 [ 	]+addi.d[ 	]+[ 	]+\$a0, \$a0, 0
-[ 	]+[ 	]+[ 	]+124: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
+[ 	]+124:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
+[ 	]+[ 	]+[ 	]+124: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffff4
 [ 	]+[ 	]+[ 	]+124: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
 [ 	]+[ 	]+[ 	]+124: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+124: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x804
-[ 	]+[ 	]+[ 	]+124: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
-[ 	]+[ 	]+[ 	]+124: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+124: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+124: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
 [ 	]+[ 	]+[ 	]+124: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+124: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
-[ 	]+[ 	]+[ 	]+124: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+124: R_LARCH_SOP_SUB[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+124: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
-[ 	]+128:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000000
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_SUB[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+128: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+12c:[ 	]+03800005 [ 	]+ori[ 	]+[ 	]+\$a1, \$zero, 0x0
-[ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
+[ 	]+128:[ 	]+00109484 [ 	]+add.d[ 	]+[ 	]+\$a0, \$a0, \$a1
+[ 	]+12c:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
+[ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x800
 [ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
 [ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000004
-[ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
-[ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_SUB[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xfff
-[ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_AND[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
-[ 	]+130:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
-[ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000008
+[ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
+[ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_SR[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+12c: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
+[ 	]+130:[ 	]+02800084 [ 	]+addi.w[ 	]+[ 	]+\$a0, \$a0, 0
+[ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
+[ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
+[ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x804
 [ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
 [ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
-[ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+134:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
-[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x8000000c
+[ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_SUB[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+130: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
+[ 	]+134:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
+[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_
 [ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
 [ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
+[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x80000000
+[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
+[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
 [ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
-[ 	]+138:[ 	]+00109484 [ 	]+add.d[ 	]+[ 	]+\$a0, \$a0, \$a1
-[ 	]+13c:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
-[ 	]+[ 	]+[ 	]+13c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x800
+[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_SUB[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
+[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_SR[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+134: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
+[ 	]+138:[ 	]+03800005 [ 	]+ori[ 	]+[ 	]+\$a1, \$zero, 0x0
+[ 	]+[ 	]+[ 	]+138: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
+[ 	]+[ 	]+[ 	]+138: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
+[ 	]+[ 	]+[ 	]+138: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+138: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffffc
+[ 	]+[ 	]+[ 	]+138: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
+[ 	]+[ 	]+[ 	]+138: R_LARCH_SOP_ADD[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+138: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+138: R_LARCH_SOP_SR[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+138: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
+[ 	]+[ 	]+[ 	]+138: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+138: R_LARCH_SOP_SUB[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+138: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xfff
+[ 	]+[ 	]+[ 	]+138: R_LARCH_SOP_AND[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+138: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
+[ 	]+13c:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
+[ 	]+[ 	]+[ 	]+13c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffff8
 [ 	]+[ 	]+[ 	]+13c: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
 [ 	]+[ 	]+[ 	]+13c: R_LARCH_SOP_ADD[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+13c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+13c: R_LARCH_SOP_SL[ 	]+\*ABS\*
+[ 	]+[ 	]+[ 	]+13c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
 [ 	]+[ 	]+[ 	]+13c: R_LARCH_SOP_SR[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+13c: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+140:[ 	]+02c00084 [ 	]+addi.d[ 	]+[ 	]+\$a0, \$a0, 0
-[ 	]+[ 	]+[ 	]+140: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
+[ 	]+140:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
+[ 	]+[ 	]+[ 	]+140: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\-0x7ffffff4
 [ 	]+[ 	]+[ 	]+140: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
 [ 	]+[ 	]+[ 	]+140: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+140: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x804
-[ 	]+[ 	]+[ 	]+140: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
-[ 	]+[ 	]+[ 	]+140: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+140: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
+[ 	]+[ 	]+[ 	]+140: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
 [ 	]+[ 	]+[ 	]+140: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+140: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
-[ 	]+[ 	]+[ 	]+140: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+140: R_LARCH_SOP_SUB[ 	]+\*ABS\*
 [ 	]+[ 	]+[ 	]+140: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
-[ 	]+144:[ 	]+1c000004 [ 	]+pcaddu12i[ 	]+[ 	]+\$a0, 0
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000000
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_SUB[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+144: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+148:[ 	]+03800005 [ 	]+ori[ 	]+[ 	]+\$a1, \$zero, 0x0
-[ 	]+[ 	]+[ 	]+148: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x4
-[ 	]+[ 	]+[ 	]+148: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
-[ 	]+[ 	]+[ 	]+148: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+148: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000004
-[ 	]+[ 	]+[ 	]+148: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
-[ 	]+[ 	]+[ 	]+148: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+148: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+148: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+148: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x20
-[ 	]+[ 	]+[ 	]+148: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+148: R_LARCH_SOP_SUB[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+148: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xfff
-[ 	]+[ 	]+[ 	]+148: R_LARCH_SOP_AND[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+148: R_LARCH_SOP_POP_32_U_10_12[ 	]+\*ABS\*
-[ 	]+14c:[ 	]+16000005 [ 	]+lu32i.d[ 	]+[ 	]+\$a1, 0
-[ 	]+[ 	]+[ 	]+14c: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x80000008
-[ 	]+[ 	]+[ 	]+14c: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
-[ 	]+[ 	]+[ 	]+14c: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+14c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0xc
-[ 	]+[ 	]+[ 	]+14c: R_LARCH_SOP_SL[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+14c: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x2c
-[ 	]+[ 	]+[ 	]+14c: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+14c: R_LARCH_SOP_POP_32_S_5_20[ 	]+\*ABS\*
-[ 	]+150:[ 	]+030000a5 [ 	]+lu52i.d[ 	]+[ 	]+\$a1, \$a1, 0
-[ 	]+[ 	]+[ 	]+150: R_LARCH_SOP_PUSH_PCREL[ 	]+_GLOBAL_OFFSET_TABLE_\+0x8000000c
-[ 	]+[ 	]+[ 	]+150: R_LARCH_SOP_PUSH_TLS_GD[ 	]+L1
-[ 	]+[ 	]+[ 	]+150: R_LARCH_SOP_ADD[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+150: R_LARCH_SOP_PUSH_ABSOLUTE[ 	]+\*ABS\*\+0x34
-[ 	]+[ 	]+[ 	]+150: R_LARCH_SOP_SR[ 	]+\*ABS\*
-[ 	]+[ 	]+[ 	]+150: R_LARCH_SOP_POP_32_S_10_12[ 	]+\*ABS\*
-[ 	]+154:[ 	]+00109484 [ 	]+add.d[ 	]+[ 	]+\$a0, \$a0, \$a1
+[ 	]+144:[ 	]+00109484 [ 	]+add.d[ 	]+[ 	]+\$a0, \$a0, \$a1

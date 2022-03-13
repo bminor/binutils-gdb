@@ -6,7 +6,7 @@
 
 Disassembly of section .text:
 
-0000000000000000 <.text>:
+0+0 <.text>:
 [ 	]+0:[ 	]+03400000 [ 	]+andi[ 	]+[ 	]+\$zero, \$zero, 0x0
 [ 	]+4:[ 	]+60000004 [ 	]+bgtz[ 	]+[ 	]+\$a0, 0[ 	]+# 0x4
 [ 	]+[ 	]+[ 	]+4: R_LARCH_SOP_PUSH_PCREL[ 	]+L1
