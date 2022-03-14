@@ -72,11 +72,6 @@
    large.  (400 - 31)/2 == 184 */
 #define MAX_AGENT_EXPR_LEN	184
 
-/* A hook used to notify the UI of tracepoint operations.  */
-
-void (*deprecated_trace_find_hook) (char *arg, int from_tty);
-void (*deprecated_trace_start_stop_hook) (int start, int from_tty);
-
 /* 
    Tracepoint.c:
 
