@@ -18014,7 +18014,6 @@ to be difficult.
 * Ada Tasks and Core Files::    Tasking Support when Debugging Core Files
 * Ravenscar Profile::           Tasking Support when using the Ravenscar
                                    Profile
-* Ada Settings::                New settable GDB parameters for Ada.
 * Ada Source Character Set::    Character set of Ada source files.
 * Ada Glitches::                Known peculiarities of Ada mode.
 @end menu
@@ -18747,37 +18746,6 @@ One known limitation of the Ravenscar support in @value{GDBN} is that
 it isn't currently possible to single-step through the runtime
 initialization sequence.  If you need to debug this code, you should
 use @code{set ravenscar task-switching off}.
-
-@node Ada Settings
-@subsubsection Ada Settings
-@cindex Ada settings
-
-@table @code
-@kindex set varsize-limit
-@item set varsize-limit @var{size}
-Prevent @value{GDBN} from attempting to evaluate objects whose size
-is above the given limit (@var{size}) when those sizes are computed
-from run-time quantities.  This is typically the case when the object
-has a variable size, such as an array whose bounds are not known at
-compile time for example.  Setting @var{size} to @code{unlimited}
-removes the size limitation.  By default, the limit is about 65KB.
-
-The purpose of having such a limit is to prevent @value{GDBN} from
-trying to grab enormous chunks of virtual memory when asked to evaluate
-a quantity whose bounds have been corrupted or have not yet been fully
-initialized.  The limit applies to the results of some subexpressions
-as well as to complete expressions.  For example, an expression denoting
-a simple integer component, such as @code{x.y.z}, may fail if the size of
-@code{x.y} is variable and exceeds @code{size}.  On the other hand,
-@value{GDBN} is sometimes clever; the expression @code{A(i)}, where
-@code{A} is an array variable with non-constant size, will generally
-succeed regardless of the bounds on @code{A}, as long as the component
-size is less than @var{size}.
-
-@kindex show varsize-limit
-@item show varsize-limit
-Show the limit on types whose size is determined by run-time quantities.
-@end table
 
 @node Ada Source Character Set
 @subsubsection Ada Source Character Set
