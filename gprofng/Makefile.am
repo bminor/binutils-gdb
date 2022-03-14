@@ -41,6 +41,7 @@ LD_NO_AS_NEEDED = @LD_NO_AS_NEEDED@
 GPROFNG_CFLAGS = @GPROFNG_CFLAGS@
 GPROFNG_CPPFLAGS = @GPROFNG_CPPFLAGS@
 GPROFNG_LIBDIR = @GPROFNG_LIBDIR@
+GPROFNG_BROKEN_JAVAC = @GPROFNG_BROKEN_JAVAC@
 
 AM_MAKEFLAGS = \
 	jdk_inc="$(jdk_inc)" \
@@ -59,6 +60,7 @@ check-DEJAGNU: site.exp development.exp
 	runtest=$(RUNTEST); \
 	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
 	  $$runtest --tool $(DEJATOOL) --srcdir $${srcroot}/testsuite \
+		GPROFNG_BROKEN_JAVAC="$(GPROFNG_BROKEN_JAVAC)" \
 		MAKE="$(MAKE)" CC="$(CC)" CFLAGS="$(CFLAGS) $(PTHREAD_CFLAGS)" \
 		LDFLAGS="$(LDFLAGS)" LIBS="$(PTHREAD_LIBS) $(LIBS)" \
 		BUILDDIR="$(abs_top_builddir)" $(RUNTESTFLAGS); \

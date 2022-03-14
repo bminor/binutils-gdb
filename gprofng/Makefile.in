@@ -262,6 +262,7 @@ EXEEXT = @EXEEXT@
 # Setup the testing framework, if you have one
 EXPECT = expect
 FGREP = @FGREP@
+GPROFNG_BROKEN_JAVAC = @GPROFNG_BROKEN_JAVAC@
 GPROFNG_CFLAGS = @GPROFNG_CFLAGS@
 GPROFNG_CPPFLAGS = @GPROFNG_CPPFLAGS@
 GPROFNG_LIBADD = @GPROFNG_LIBADD@
@@ -934,6 +935,7 @@ uninstall-am:
 @TCL_TRY_TRUE@	runtest=$(RUNTEST); \
 @TCL_TRY_TRUE@	if $(SHELL) -c "$$runtest --version" > /dev/null 2>&1; then \
 @TCL_TRY_TRUE@	  $$runtest --tool $(DEJATOOL) --srcdir $${srcroot}/testsuite \
+@TCL_TRY_TRUE@		GPROFNG_BROKEN_JAVAC="$(GPROFNG_BROKEN_JAVAC)" \
 @TCL_TRY_TRUE@		MAKE="$(MAKE)" CC="$(CC)" CFLAGS="$(CFLAGS) $(PTHREAD_CFLAGS)" \
 @TCL_TRY_TRUE@		LDFLAGS="$(LDFLAGS)" LIBS="$(PTHREAD_LIBS) $(LIBS)" \
 @TCL_TRY_TRUE@		BUILDDIR="$(abs_top_builddir)" $(RUNTESTFLAGS); \

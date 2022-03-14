@@ -128,13 +128,30 @@ fi
 if test "x$enable_gprofng_jp" = x; then
   AC_CHECK_HEADER([jni.h], [ enable_gprofng_jp=yes ], [], [] )
 fi
+GPROFNG_BROKEN_JAVAC=no
 if test "x$enable_gprofng_jp" = x; then
     AC_MSG_WARN([ Cannot find the JDK include directory.
       gprofng will be build without support for profiling Java applications.
       Use --with-jdk=PATH to specify directory for the installed JDK])
 else
     AC_DEFINE(GPROFNG_JAVA_PROFILING, 1, [Enable java profiling])
+    if test "x$JAVAC" != x; then
+      cat > configtest.java << EOF
+class Simple{
+  public static void main(String args[]){
+    System.out.println("Hello Java");
+  }
+}
+EOF
+      if AC_TRY_COMMAND($JAVAC conftest.java &AS_MESSAGE_LOG_FD 2>&1); then
+	GPROFNG_BROKEN_JAVAC=no
+      else
+	GPROFNG_BROKEN_JAVAC=yes
+      fi
+      rm -f configtest.*
+    fi
 fi
+AC_SUBST(GPROFNG_BROKEN_JAVAC)
 AC_SUBST(jdk_inc)
 
 DEBUG=
