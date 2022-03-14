@@ -758,6 +758,10 @@ pthread_mutex_lock (pthread_mutex_t *mp)
 static int
 __collector_pthread_cond_wait_symver (int(real_pthread_cond_wait) (), pthread_cond_t *cond, pthread_mutex_t *mutex);
 
+#if ARCH(Intel) || ARCH(SPARC)
+SYMVER_ATTRIBUTE (__collector_pthread_cond_wait_2_3_2,
+		  pthread_cond_wait@@GLIBC_2.3.2)
+#endif
 int
 __collector_pthread_cond_wait_2_3_2 (pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
@@ -767,12 +771,10 @@ __collector_pthread_cond_wait_2_3_2 (pthread_cond_t *cond, pthread_mutex_t *mute
   return __collector_pthread_cond_wait_symver (CALL_REAL (pthread_cond_wait_2_3_2), cond, mutex);
 }
 
-#if ARCH(Intel) || ARCH(SPARC)
-__asm__(".symver __collector_pthread_cond_wait_2_3_2,pthread_cond_wait@@GLIBC_2.3.2");
-#endif
-
 #if WSIZE(32)
 
+SYMVER_ATTRIBUTE (__collector_pthread_cond_wait_2_0,
+		  pthread_cond_wait@GLIBC_2.0)
 int
 __collector_pthread_cond_wait_2_0 (pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
@@ -781,11 +783,10 @@ __collector_pthread_cond_wait_2_0 (pthread_cond_t *cond, pthread_mutex_t *mutex)
   TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_pthread_cond_wait_2_0@%p\n", CALL_REAL (pthread_cond_wait_2_0));
   return __collector_pthread_cond_wait_symver (CALL_REAL (pthread_cond_wait_2_0), cond, mutex);
 }
-
-__asm__(".symver __collector_pthread_cond_wait_2_0,pthread_cond_wait@GLIBC_2.0");
-
 #else // WSIZE(64)
 #if ARCH(Intel)
+SYMVER_ATTRIBUTE (__collector_pthread_cond_wait_2_2_5,
+		  pthread_cond_wait@GLIBC_2.2.5)
 int
 __collector_pthread_cond_wait_2_2_5 (pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
@@ -794,10 +795,10 @@ __collector_pthread_cond_wait_2_2_5 (pthread_cond_t *cond, pthread_mutex_t *mute
   TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_pthread_cond_wait_2_2_5@%p\n", CALL_REAL (pthread_cond_wait_2_2_5));
   return __collector_pthread_cond_wait_symver (CALL_REAL (pthread_cond_wait_2_2_5), cond, mutex);
 }
-
-__asm__(".symver __collector_pthread_cond_wait_2_2_5,pthread_cond_wait@GLIBC_2.2.5");
 #elif ARCH(SPARC)
 
+SYMVER_ATTRIBUTE (__collector_pthread_cond_wait_2_2,
+		  pthread_cond_wait@GLIBC_2.2)
 int
 __collector_pthread_cond_wait_2_2 (pthread_cond_t *cond, pthread_mutex_t *mutex)
 {
@@ -806,8 +807,6 @@ __collector_pthread_cond_wait_2_2 (pthread_cond_t *cond, pthread_mutex_t *mutex)
   TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_pthread_cond_wait_2_2@%p\n", CALL_REAL (pthread_cond_wait_2_2));
   return __collector_pthread_cond_wait_symver (CALL_REAL (pthread_cond_wait_2_2), cond, mutex);
 }
-
-__asm__(".symver __collector_pthread_cond_wait_2_2,pthread_cond_wait@GLIBC_2.2");
 #endif  // ARCH()
 #endif  // WSIZE()
 
@@ -852,6 +851,10 @@ __collector_pthread_cond_timedwait_symver (int(real_pthread_cond_timedwait) (),
 					   pthread_mutex_t *mutex,
 					   const struct timespec *abstime);
 
+#if ARCH(Intel) || ARCH(SPARC)
+SYMVER_ATTRIBUTE (__collector_pthread_cond_timedwait_2_3_2,
+		  pthread_cond_timedwait@@GLIBC_2.3.2)
+#endif  // ARCH()
 int
 __collector_pthread_cond_timedwait_2_3_2 (pthread_cond_t *cond,
 					  pthread_mutex_t *mutex,
@@ -863,11 +866,9 @@ __collector_pthread_cond_timedwait_2_3_2 (pthread_cond_t *cond,
   return __collector_pthread_cond_timedwait_symver (CALL_REAL (pthread_cond_timedwait_2_3_2), cond, mutex, abstime);
 }
 
-#if ARCH(Intel) || ARCH(SPARC)
-__asm__(".symver __collector_pthread_cond_timedwait_2_3_2,pthread_cond_timedwait@@GLIBC_2.3.2");
-#endif  // ARCH()
-
 #if WSIZE(32)
+SYMVER_ATTRIBUTE (__collector_pthread_cond_timedwait_2_0,
+		  pthread_cond_timedwait@GLIBC_2.0)
 int
 __collector_pthread_cond_timedwait_2_0 (pthread_cond_t *cond,
 					pthread_mutex_t *mutex,
@@ -878,11 +879,10 @@ __collector_pthread_cond_timedwait_2_0 (pthread_cond_t *cond,
   TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_pthread_cond_timedwait_2_0@%p\n", CALL_REAL (pthread_cond_timedwait_2_0));
   return __collector_pthread_cond_timedwait_symver (CALL_REAL (pthread_cond_timedwait_2_0), cond, mutex, abstime);
 }
-
-__asm__(".symver __collector_pthread_cond_timedwait_2_0,pthread_cond_timedwait@GLIBC_2.0");
-
 #else // WSIZE(64)
 #if ARCH(Intel)
+SYMVER_ATTRIBUTE (__collector_pthread_cond_timedwait_2_2_5,
+		  pthread_cond_timedwait@GLIBC_2.2.5)
 int
 __collector_pthread_cond_timedwait_2_2_5 (pthread_cond_t *cond,
 					  pthread_mutex_t *mutex,
@@ -893,10 +893,10 @@ __collector_pthread_cond_timedwait_2_2_5 (pthread_cond_t *cond,
   TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_pthread_cond_timedwait_2_2_5@%p\n", CALL_REAL (pthread_cond_timedwait_2_2_5));
   return __collector_pthread_cond_timedwait_symver (CALL_REAL (pthread_cond_timedwait_2_2_5), cond, mutex, abstime);
 }
-
-__asm__(".symver __collector_pthread_cond_timedwait_2_2_5,pthread_cond_timedwait@GLIBC_2.2.5");
 #elif ARCH(SPARC)
 
+SYMVER_ATTRIBUTE (__collector_pthread_cond_timedwait_2_2,
+		  pthread_cond_timedwait@GLIBC_2.2)
 int
 __collector_pthread_cond_timedwait_2_2 (pthread_cond_t *cond,
 					pthread_mutex_t *mutex,
@@ -907,8 +907,6 @@ __collector_pthread_cond_timedwait_2_2 (pthread_cond_t *cond,
   TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_pthread_cond_timedwait_2_2@%p\n", CALL_REAL (pthread_cond_timedwait_2_2));
   return __collector_pthread_cond_timedwait_symver (CALL_REAL (pthread_cond_timedwait_2_2), cond, mutex, abstime);
 }
-
-__asm__(".symver __collector_pthread_cond_timedwait_2_2,pthread_cond_timedwait@GLIBC_2.2");
 #endif  // ARCH()
 #endif  // WSIZE()
 
@@ -987,6 +985,7 @@ pthread_join (pthread_t target_thread, void **status)
 static int
 __collector_sem_wait_symver (int(real_sem_wait) (), sem_t *sp);
 
+SYMVER_ATTRIBUTE (__collector_sem_wait_2_1, sem_wait@@GLIBC_2.1)
 int
 __collector_sem_wait_2_1 (sem_t *sp)
 {
@@ -996,6 +995,7 @@ __collector_sem_wait_2_1 (sem_t *sp)
   return __collector_sem_wait_symver (CALL_REAL (sem_wait_2_1), sp);
 }
 
+SYMVER_ATTRIBUTE (__collector_sem_wait_2_0, sem_wait@GLIBC_2.0)
 int
 __collector_sem_wait_2_0 (sem_t *sp)
 {
@@ -1004,9 +1004,6 @@ __collector_sem_wait_2_0 (sem_t *sp)
   TprintfT (DBG_LTT, "linetrace: GLIBC: __collector_sem_wait_2_0@%p\n", CALL_REAL (sem_wait_2_0));
   return __collector_sem_wait_symver (CALL_REAL (sem_wait_2_0), sp);
 }
-
-__asm__(".symver __collector_sem_wait_2_1,sem_wait@@GLIBC_2.1");
-__asm__(".symver __collector_sem_wait_2_0,sem_wait@GLIBC_2.0");
 #endif
 
 #if ARCH(Intel) && WSIZE(32)

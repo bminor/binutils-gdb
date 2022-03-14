@@ -1556,6 +1556,7 @@ munmap (void *start, size_t length)
 static void *
 __collector_dlopen_symver (void*(real_dlopen) (), void *caller, const char *pathname, int mode);
 
+SYMVER_ATTRIBUTE (__collector_dlopen_2_1, dlopen@@GLIBC_2.1)
 void *
 __collector_dlopen_2_1 (const char *pathname, int mode)
 {
@@ -1565,6 +1566,7 @@ __collector_dlopen_2_1 (const char *pathname, int mode)
   return __collector_dlopen_symver (CALL_REAL (dlopen_2_1), caller, pathname, mode);
 }
 
+SYMVER_ATTRIBUTE (__collector_dlopen_2_0, dlopen@GLIBC_2.0)
 void *
 __collector_dlopen_2_0 (const char *pathname, int mode)
 {
@@ -1573,10 +1575,6 @@ __collector_dlopen_2_0 (const char *pathname, int mode)
   void* caller = __builtin_return_address (0); // must be called inside dlopen first layer interpostion
   return __collector_dlopen_symver (CALL_REAL (dlopen_2_0), caller, pathname, mode);
 }
-
-__asm__(".symver __collector_dlopen_2_1,dlopen@@GLIBC_2.1");
-__asm__(".symver __collector_dlopen_2_0,dlopen@GLIBC_2.0");
-
 #endif
 
 #if (ARCH(Intel) && WSIZE(32)) || ARCH(SPARC)

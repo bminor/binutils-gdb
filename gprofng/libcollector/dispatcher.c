@@ -818,6 +818,7 @@ static int
 __collector_timer_create_symver (int(real_timer_create) (), clockid_t clockid, struct sigevent *sevp,
 				 timer_t *timerid);
 
+SYMVER_ATTRIBUTE (__collector_timer_create_2_3_3, timer_create@@GLIBC_2.3.3)
 int
 __collector_timer_create_2_3_3 (clockid_t clockid, struct sigevent *sevp,
 				timer_t *timerid)
@@ -827,11 +828,11 @@ __collector_timer_create_2_3_3 (clockid_t clockid, struct sigevent *sevp,
   TprintfT (DBG_LTT, "dispatcher: GLIBC: __collector_timer_create_2_3_3@%p\n", CALL_REAL (timer_create_2_3_3));
   return __collector_timer_create_symver (CALL_REAL (timer_create_2_3_3), clockid, sevp, timerid);
 }
-__asm__(".symver __collector_timer_create_2_3_3,timer_create@@GLIBC_2.3.3");
 #endif /* ARCH(SPARC) || ARCH(Intel)*/
 
 #if ARCH(SPARC)
 
+SYMVER_ATTRIBUTE (__collector_timer_create_2_2, timer_create@GLIBC_2.2)
 int
 __collector_timer_create_2_2 (clockid_t clockid, struct sigevent *sevp,
 			      timer_t *timerid)
@@ -842,10 +843,9 @@ __collector_timer_create_2_2 (clockid_t clockid, struct sigevent *sevp,
   return __collector_timer_create_symver (CALL_REAL (timer_create_2_2), clockid, sevp, timerid);
 }
 
-__asm__(".symver __collector_timer_create_2_2,timer_create@GLIBC_2.2");
-
 #elif ARCH(Intel)
 
+SYMVER_ATTRIBUTE (__collector_timer_create_2_2_5, timer_create@GLIBC_2.2.5)
 int
 __collector_timer_create_2_2_5 (clockid_t clockid, struct sigevent *sevp,
 				timer_t *timerid)
@@ -855,7 +855,6 @@ __collector_timer_create_2_2_5 (clockid_t clockid, struct sigevent *sevp,
   TprintfT (DBG_LTT, "dispatcher: GLIBC: __collector_timer_create_2_2_5@%p\n", CALL_REAL (timer_create_2_2_5));
   return __collector_timer_create_symver (CALL_REAL (timer_create_2_2_5), clockid, sevp, timerid);
 }
-__asm__(".symver __collector_timer_create_2_2_5,timer_create@GLIBC_2.2.5");
 #endif /* ARCH() */
 #endif /* WSIZE(64) */
 
@@ -1079,6 +1078,7 @@ __collector_pthread_create_symver (int(real_pthread_create) (),
 				   void *(*func)(void*),
 				   void *arg);
 
+SYMVER_ATTRIBUTE (__collector_pthread_create_2_1, pthread_create@@GLIBC_2.1)
 int
 __collector_pthread_create_2_1 (pthread_t *thread,
 				const pthread_attr_t *attr,
@@ -1091,6 +1091,7 @@ __collector_pthread_create_2_1 (pthread_t *thread,
   return __collector_pthread_create_symver (CALL_REAL (pthread_create_2_1), thread, attr, func, arg);
 }
 
+SYMVER_ATTRIBUTE (__collector_pthread_create_2_0, pthread_create@GLIBC_2.0)
 int
 __collector_pthread_create_2_0 (pthread_t *thread,
 				const pthread_attr_t *attr,
@@ -1102,9 +1103,6 @@ __collector_pthread_create_2_0 (pthread_t *thread,
   TprintfT (DBG_LTT, "dispatcher: GLIBC: __collector_pthread_create_2_0@%p\n", CALL_REAL (pthread_create_2_0));
   return __collector_pthread_create_symver (CALL_REAL (pthread_create_2_0), thread, attr, func, arg);
 }
-
-__asm__(".symver __collector_pthread_create_2_1,pthread_create@@GLIBC_2.1");
-__asm__(".symver __collector_pthread_create_2_0,pthread_create@GLIBC_2.0");
 
 #endif
 
