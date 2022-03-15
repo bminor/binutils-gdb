@@ -43706,6 +43706,12 @@ specified by the @samp{start} argument.  If unset or zero then
 the remote stub will expect that no @samp{struct link_map}
 exists prior to the starting point.
 
+@item lmid=@var{lmid}
+A hexadecimal number specifying a namespace identifier.  This is
+currently only used together with @samp{start} to provide the
+namespace identifier back to @value{GDBN} in the response.
+@value{GDBN} will only provide values that were previously reported to
+it.  If unset, the response will include @samp{lmid="0x0"}.
 @end table
 
 Arguments that are not understood by the remote stub will be silently
@@ -46244,6 +46250,11 @@ memory address.  It is a displacement of absolute memory address against
 address the file was prelinked to during the library load.
 @item
 @code{l_ld}, which is memory address of the @code{PT_DYNAMIC} segment
+@item
+@code{lmid}, which is an identifier for a linker namespace, such as
+the memory address of the @code{r_debug} object that contains this
+namespace's load map or the namespace identifier returned by
+@code{dlinfo (3)}.
 @end itemize
 
 Additionally the single @code{main-lm} attribute specifies address of
@@ -46259,9 +46270,9 @@ looks like this:
 @smallexample
 <library-list-svr4 version="1.0" main-lm="0xe4f8f8">
   <library name="/lib/ld-linux.so.2" lm="0xe4f51c" l_addr="0xe2d000"
-           l_ld="0xe4eefc"/>
+           l_ld="0xe4eefc" lmid="0xfffe0"/>
   <library name="/lib/libc.so.6" lm="0xe4fbe8" l_addr="0x154000"
-           l_ld="0x152350"/>
+           l_ld="0x152350" lmid="0xfffe0"/>
 </library-list-svr>
 @end smallexample
 
@@ -46277,6 +46288,7 @@ The format of an SVR4 library list is described by this DTD:
 <!ATTLIST library            lm      CDATA   #REQUIRED>
 <!ATTLIST library            l_addr  CDATA   #REQUIRED>
 <!ATTLIST library            l_ld    CDATA   #REQUIRED>
+<!ATTLIST library            lmid    CDATA   #IMPLIED>
 @end smallexample
 
 @node Memory Map Format

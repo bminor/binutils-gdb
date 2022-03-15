@@ -1067,8 +1067,37 @@ library_list_start_library (struct gdb_xml_parser *parser,
   new_elem->so_name[sizeof (new_elem->so_name) - 1] = 0;
   strcpy (new_elem->so_original_name, new_elem->so_name);
 
-  *list->tailp = new_elem;
-  list->tailp = &new_elem->next;
+  /* Older versions did not supply lmid.  Put the element into the flat
+     list of the special namespace zero in that case.  */
+  gdb_xml_value *at_lmid = xml_find_attribute (attributes, "lmid");
+  if (at_lmid == nullptr)
+    {
+      *list->tailp = new_elem;
+      list->tailp = &new_elem->next;
+    }
+  else
+    {
+      ULONGEST lmid = *(ULONGEST *) at_lmid->value.get ();
+
+      /* Ensure that the element is actually initialized.  */
+      if (list->solib_lists.find (lmid) == list->solib_lists.end ())
+	list->solib_lists[lmid] = nullptr;
+
+      so_list **psolist = &list->solib_lists[lmid];
+      so_list **pnext = psolist;
+
+      /* Walk to the end of the list if we have one.  */
+      so_list *solist = *psolist;
+      if (solist != nullptr)
+	{
+	  for (; solist->next != nullptr; solist = solist->next)
+	    /* Nothing.  */;
+
+	  pnext = &solist->next;
+	}
+
+      *pnext = new_elem;
+    }
 }
 
 /* Handle the start of a <library-list-svr4> element.  */
@@ -1108,6 +1137,7 @@ static const struct gdb_xml_attribute svr4_library_attributes[] =
   { "lm", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
   { "l_addr", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
   { "l_ld", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { "lmid", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
 
@@ -1869,7 +1899,9 @@ solist_update_incremental (svr4_info *info, CORE_ADDR debug_base,
       struct svr4_library_list library_list;
       char annex[64];
 
-      xsnprintf (annex, sizeof (annex), "start=%s;prev=%s",
+      /* Unknown key=value pairs are ignored by the gdbstub.  */
+      xsnprintf (annex, sizeof (annex), "lmid=%s;start=%s;prev=%s",
+		 phex_nz (debug_base, sizeof (debug_base)),
 		 phex_nz (lm, sizeof (lm)),
 		 phex_nz (prev_lm, sizeof (prev_lm)));
       if (!svr4_current_sos_via_xfer_libraries (&library_list, annex))
