@@ -54,6 +54,9 @@ case "${target}" in
 esac
 AC_SUBST(GPROFNG_VARIANT)
 
+ACX_PROG_CC_WARNING_OPTS([-Wno-nonnull-compare], [GPROFNG_NO_NONNULL_COMPARE_CFLAGS])
+AC_SUBST(GPROFNG_NO_NONNULL_COMPARE_CFLAGS)
+
 clock_gettime_link=
 # At least for glibc, clock_gettime is in librt.  But don't
 # pull that in if it still doesn't give us the function we want.  This

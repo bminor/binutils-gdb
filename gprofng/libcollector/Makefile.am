@@ -41,7 +41,7 @@ CSOURCES = \
 	collector.c \
 	$(NULL)
 
-AM_CFLAGS = $(GPROFNG_CFLAGS) -Wno-nonnull-compare
+AM_CFLAGS = $(GPROFNG_CFLAGS) $(GPROFNG_NO_NONNULL_COMPARE_CFLAGS)
 AM_CPPFLAGS = $(GPROFNG_CPPFLAGS) -I.. -I$(srcdir) \
 	-I$(srcdir)/../common -I$(srcdir)/../src \
 	-I$(srcdir)/../../include
