@@ -16523,12 +16523,13 @@ cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_BASENAME $ac_have_decl
 _ACEOF
 
-for ac_func in strsignal
+for ac_func in clock_gettime strsignal
 do :
-  ac_fn_c_check_func "$LINENO" "strsignal" "ac_cv_func_strsignal"
-if test "x$ac_cv_func_strsignal" = xyes; then :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
   cat >>confdefs.h <<_ACEOF
-#define HAVE_STRSIGNAL 1
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
 _ACEOF
 
 fi

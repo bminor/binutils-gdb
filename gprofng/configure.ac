@@ -178,7 +178,7 @@ AC_SUBST(GPROFNG_CPPFLAGS, [${gprofng_cppflags}])
 AC_SUBST(GPROFNG_LIBDIR, [${libdir}])
 
 AC_CHECK_DECLS([basename])
-AC_CHECK_FUNCS([strsignal])
+AC_CHECK_FUNCS(clock_gettime strsignal)
 
 AC_SUBST(BUILD_SUBDIRS)
 

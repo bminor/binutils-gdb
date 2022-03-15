@@ -63,7 +63,7 @@ libgp_collector_la_CPPFLAGS = $(AM_CPPFLAGS) $(jdk_inc) \
 # Prevent libtool from reordering -Wl,--no-as-needed after -lrt by
 # disguising -lrt as a linker flag.
 libgp_collector_la_LDFLAGS = $(AM_LDFLAGS)
-libgp_collector_la_LIBADD =
+libgp_collector_la_LIBADD = $(CLOCK_GETTIME_LINK)
 
 libgp_heap_la_SOURCES = heaptrace.c
 libgp_heap_la_LDFLAGS = $(AM_LDFLAGS)

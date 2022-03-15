@@ -54,6 +54,19 @@ case "${target}" in
 esac
 AC_SUBST(GPROFNG_VARIANT)
 
+clock_gettime_link=
+# At least for glibc, clock_gettime is in librt.  But don't
+# pull that in if it still doesn't give us the function we want.  This
+# test is copied from libgomp, and modified to not link in -lrt as
+# we're using this for test timing only.
+if test "$ac_cv_func_clock_gettime" = no; then
+  AC_CHECK_LIB(rt, clock_gettime,
+    [CLOCK_GETTIME_LINK=-lrt
+     AC_DEFINE(HAVE_CLOCK_GETTIME, 1,
+	       [Define to 1 if you have the `clock_gettime' function.])])
+fi
+AC_SUBST(CLOCK_GETTIME_LINK)
+
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_HEADERS([lib-config.h:../common/config.h.in])
 AC_OUTPUT

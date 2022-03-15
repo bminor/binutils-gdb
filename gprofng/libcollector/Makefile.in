@@ -156,7 +156,8 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(myincludedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-libgp_collector_la_DEPENDENCIES =
+am__DEPENDENCIES_1 =
+libgp_collector_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
 am__objects_1 = libgp_collector_la-gethrtime.lo \
 	libgp_collector_la-dispatcher.lo libgp_collector_la-iolib.lo \
 	libgp_collector_la-mmaptrace.lo libgp_collector_la-memmgr.lo \
@@ -305,6 +306,7 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CLOCK_GETTIME_LINK = @CLOCK_GETTIME_LINK@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -459,7 +461,7 @@ libgp_collector_la_CPPFLAGS = $(AM_CPPFLAGS) $(jdk_inc) \
 # Prevent libtool from reordering -Wl,--no-as-needed after -lrt by
 # disguising -lrt as a linker flag.
 libgp_collector_la_LDFLAGS = $(AM_LDFLAGS)
-libgp_collector_la_LIBADD = 
+libgp_collector_la_LIBADD = $(CLOCK_GETTIME_LINK)
 libgp_heap_la_SOURCES = heaptrace.c
 libgp_heap_la_LDFLAGS = $(AM_LDFLAGS)
 libgp_sync_la_SOURCES = synctrace.c

@@ -22,17 +22,22 @@
 #include <time.h>
 #include "gp-time.h"
 
-/*
- *  CLOCK_MONOTONIC
- *  Clock that cannot be set and represents monotonic time since some
- *           unspecified starting point.
- */
+/*  CLOCK_MONOTONIC
+    Clock that cannot be set and represents monotonic time since some
+             unspecified starting point.  */
+
 static hrtime_t
-linux_gethrtime ()
+linux_gethrtime (void)
 {
   struct timespec tp;
   hrtime_t rc = 0;
+
+#ifdef CLOCK_MONOTONIC_RAW
   int r = clock_gettime (CLOCK_MONOTONIC_RAW, &tp);
+#else
+  int r = clock_gettime (CLOCK_MONOTONIC, &tp);
+#endif
+
   if (r == 0)
     rc = ((hrtime_t) tp.tv_sec)*1000000000 + (hrtime_t) tp.tv_nsec;
   return rc;
