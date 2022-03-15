@@ -85,7 +85,6 @@ static int set_target_endian = 0;
 
 static bool reg_names_p = TARGET_REG_NAMES_P;
 
-static void ppc_macro (char *, const struct powerpc_macro *);
 static void ppc_byte (int);
 
 #if defined (OBJ_XCOFF) || defined (OBJ_ELF)
@@ -980,9 +979,6 @@ static unsigned int ppc_obj64 = BFD_DEFAULT_TARGET_SIZE == 64;
 /* Opcode hash table.  */
 static htab_t ppc_hash;
 
-/* Macro hash table.  */
-static htab_t ppc_macro_hash;
-
 #ifdef OBJ_ELF
 /* What type of shared library support to use.  */
 static enum { SHLIB_NONE, SHLIB_PIC, SHLIB_MRELOCATABLE } shlib = SHLIB_NONE;
@@ -1617,22 +1613,18 @@ insn_validate (const struct powerpc_opcode *op)
   return false;
 }
 
-/* Insert opcodes and macros into hash tables.  Called at startup and
-   for .machine pseudo.  */
+/* Insert opcodes into hash tables.  Called at startup and for
+   .machine pseudo.  */
 
 static void
 ppc_setup_opcodes (void)
 {
   const struct powerpc_opcode *op;
   const struct powerpc_opcode *op_end;
-  const struct powerpc_macro *macro;
-  const struct powerpc_macro *macro_end;
   bool bad_insn = false;
 
   if (ppc_hash != NULL)
     htab_delete (ppc_hash);
-  if (ppc_macro_hash != NULL)
-    htab_delete (ppc_macro_hash);
 
   /* Insert the opcodes into a hash table.  */
   ppc_hash = str_htab_create ();
@@ -1838,19 +1830,6 @@ ppc_setup_opcodes (void)
       for (op = spe2_opcodes; op < op_end; op++)
 	str_hash_insert (ppc_hash, op->name, op, 0);
     }
-
-  /* Insert the macros into a hash table.  */
-  ppc_macro_hash = str_htab_create ();
-
-  macro_end = powerpc_macros + powerpc_num_macros;
-  for (macro = powerpc_macros; macro < macro_end; macro++)
-    if (((macro->flags & ppc_cpu) != 0
-	 || (ppc_cpu & PPC_OPCODE_ANY) != 0)
-	&& str_hash_insert (ppc_macro_hash, macro->name, macro, 0) != NULL)
-      {
-	as_bad (_("duplicate %s"), macro->name);
-	bad_insn = true;
-      }
 
   if (bad_insn)
     abort ();
@@ -3292,15 +3271,7 @@ md_assemble (char *str)
   opcode = (const struct powerpc_opcode *) str_hash_find (ppc_hash, str);
   if (opcode == (const struct powerpc_opcode *) NULL)
     {
-      const struct powerpc_macro *macro;
-
-      macro = (const struct powerpc_macro *) str_hash_find (ppc_macro_hash,
-							    str);
-      if (macro == (const struct powerpc_macro *) NULL)
-	as_bad (_("unrecognized opcode: `%s'"), str);
-      else
-	ppc_macro (s, macro);
-
+      as_bad (_("unrecognized opcode: `%s'"), str);
       ppc_clear_labels ();
       return;
     }
@@ -4132,85 +4103,6 @@ md_assemble (char *str)
 	}
       fixP->fx_pcrel_adjust = fixups[i].opindex;
     }
-}
-
-/* Handle a macro.  Gather all the operands, transform them as
-   described by the macro, and call md_assemble recursively.  All the
-   operands are separated by commas; we don't accept parentheses
-   around operands here.  */
-
-static void
-ppc_macro (char *str, const struct powerpc_macro *macro)
-{
-  char *operands[10];
-  unsigned int count;
-  char *s;
-  unsigned int len;
-  const char *format;
-  unsigned int arg;
-  char *send;
-  char *complete;
-
-  /* Gather the users operands into the operands array.  */
-  count = 0;
-  s = str;
-  while (1)
-    {
-      if (count >= sizeof operands / sizeof operands[0])
-	break;
-      operands[count++] = s;
-      s = strchr (s, ',');
-      if (s == (char *) NULL)
-	break;
-      *s++ = '\0';
-    }
-
-  if (count != macro->operands)
-    {
-      as_bad (_("wrong number of operands"));
-      return;
-    }
-
-  /* Work out how large the string must be (the size is unbounded
-     because it includes user input).  */
-  len = 0;
-  format = macro->format;
-  while (*format != '\0')
-    {
-      if (*format != '%')
-	{
-	  ++len;
-	  ++format;
-	}
-      else
-	{
-	  arg = strtol (format + 1, &send, 10);
-	  know (send != format && arg < count);
-	  len += strlen (operands[arg]);
-	  format = send;
-	}
-    }
-
-  /* Put the string together.  */
-  complete = s = XNEWVEC (char, len + 1);
-  format = macro->format;
-  while (*format != '\0')
-    {
-      if (*format != '%')
-	*s++ = *format++;
-      else
-	{
-	  arg = strtol (format + 1, &send, 10);
-	  strcpy (s, operands[arg]);
-	  s += strlen (s);
-	  format = send;
-	}
-    }
-  *s = '\0';
-
-  /* Assemble the constructed instruction.  */
-  md_assemble (complete);
-  free (complete);
 }
 
 #ifdef OBJ_ELF

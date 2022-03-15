@@ -10504,24 +10504,6 @@ const struct powerpc_opcode vle_opcodes[] = {
 
 const unsigned int vle_num_opcodes =
   sizeof (vle_opcodes) / sizeof (vle_opcodes[0]);
-
-/* The macro table.  This is only used by the assembler.  */
-
-/* The expressions of the form (-x ! 31) & (x | 31) have the value 0
-   when x=0; 32-x when x is between 1 and 31; are negative if x is
-   negative; and are 32 or more otherwise.  This is what you want
-   when, for instance, you are emulating a right shift by a
-   rotate-left-and-mask, because the underlying instructions support
-   shifts of size 0 but not shifts of size 32.  By comparison, when
-   extracting x bits from some word you want to use just 32-x, because
-   the underlying instructions don't support extracting 0 bits but do
-   support extracting the whole word (32 bits in this case).  */
-
-const struct powerpc_macro powerpc_macros[] = {
-};
-
-const int powerpc_num_macros =
-  sizeof (powerpc_macros) / sizeof (powerpc_macros[0]);
 
 /* SPE v2 instruction set from SPE2PIM Rev. 2 08/2011 */
 const struct powerpc_opcode spe2_opcodes[] = {
