@@ -1082,8 +1082,8 @@ collection_list::add_local_symbols (struct gdbarch *gdbarch, CORE_ADDR pc,
     }
   else
     {
-      pc = get_pc_function_start (pc);
-      block = block_for_pc (pc);
+      CORE_ADDR fn_pc = get_pc_function_start (pc);
+      block = block_for_pc (fn_pc);
       if (block == NULL)
 	{
 	  warning (_("Can't collect args; no symbol table info available."));
