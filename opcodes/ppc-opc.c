@@ -1058,6 +1058,165 @@ extract_esync (uint64_t insn,
   return value;
 }
 
+/* The n operand of clrrwi, which sets the ME field to 31 - n.  */
+
+static uint64_t
+insert_crwn (uint64_t insn,
+	    int64_t value,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((~value & 0x1f) << 1);
+}
+
+static int64_t
+extract_crwn (uint64_t insn,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
+{
+  return ~(insn >> 1) & 0x1f;
+}
+
+/* The n operand of extlwi, which sets the ME field to n - 1.  */
+
+static uint64_t
+insert_elwn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | (((value - 1) & 0x1f) << 1);
+}
+
+static int64_t
+extract_elwn (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid ATTRIBUTE_UNUSED)
+{
+  return ((insn >> 1) & 0x1f) + 1;
+}
+
+/* The n operand of extrwi, sets MB = 32 - n.  */
+
+static uint64_t
+insert_erwn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((-value & 0x1f) << 6);
+}
+
+static int64_t
+extract_erwn (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid ATTRIBUTE_UNUSED)
+{
+  return (~(insn >> 6) & 0x1f) + 1;
+}
+
+/* The b operand of extrwi, sets SH = b + n.  */
+
+static uint64_t
+insert_erwb (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  int64_t n = extract_erwn (insn, dialect, NULL);
+  return insn | (((n + value) & 0x1f) << 11);
+}
+
+static int64_t
+extract_erwb (uint64_t insn,
+	      ppc_cpu_t dialect,
+	      int *invalid ATTRIBUTE_UNUSED)
+{
+  int64_t n = extract_erwn (insn, dialect, NULL);
+  return ((insn >> 11) - n) & 0x1f;
+}
+
+/* The n and b operands of clrlslwi.  */
+
+static uint64_t
+insert_cslwn (uint64_t insn,
+	      int64_t value,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      const char **errmsg ATTRIBUTE_UNUSED)
+{
+  uint64_t mb = 0x1f << 6;
+  int64_t b = (insn >> 6) & 0x1f;
+  return ((insn & ~mb) | ((value & 0x1f) << 11) | (((b - value) & 0x1f) << 6)
+	  | ((~value & 0x1f) << 1));
+}
+
+static int64_t
+extract_cslwb (uint64_t insn,
+	       ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	       int *invalid)
+{
+  int64_t sh = (insn >> 11) & 0x1f;
+  int64_t mb = (insn >> 6) & 0x1f;
+  int64_t me = (insn >> 1) & 0x1f;
+  if (sh != 31 - me)
+    *invalid = 1;
+  return (mb + sh) & 0x1f;
+}
+
+/* The n and b operands of inslwi.  */
+
+static uint64_t
+insert_ilwb (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  uint64_t me = 0x1f << 1;
+  int64_t n = (insn >> 1) & 0x1f;
+  return ((insn & ~me) | ((-value & 0x1f) << 11) | ((value & 0x1f) << 6)
+	  | (((value + n - 1) & 0x1f) << 1));
+}
+
+static int64_t
+extract_ilwn (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid)
+{
+  int64_t sh = (insn >> 11) & 0x1f;
+  int64_t mb = (insn >> 6) & 0x1f;
+  int64_t me = (insn >> 1) & 0x1f;
+  if (((sh + mb) & 0x1f) != 0)
+    *invalid = 1;
+  return ((me - mb) & 0x1f) + 1;
+}
+
+/* The n and b operands of insrwi.  */
+
+static uint64_t
+insert_irwb (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  uint64_t me = 0x1f << 1;
+  int64_t n = (insn >> 1) & 0x1f;
+  return ((insn & ~me) | ((-(value + n) & 0x1f) << 11) | ((value & 0x1f) << 6)
+	  | (((value + n - 1) & 0x1f) << 1));
+}
+
+static int64_t
+extract_irwn (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid)
+{
+  int64_t sh = (insn >> 11) & 0x1f;
+  int64_t mb = (insn >> 6) & 0x1f;
+  int64_t me = (insn >> 1) & 0x1f;
+  if (((sh + me + 1) & 0x1f) != 0)
+    *invalid = 1;
+  return ((me - mb) & 0x1f) + 1;
+}
+
 /* The MB and ME fields in an M form instruction expressed as a single
    operand which is itself a bitmask.  The extraction function always
    marks it as invalid, since we never want to recognize an
@@ -1587,6 +1746,71 @@ extract_oimm (uint64_t insn,
 	      int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn >> 4) & 0x1f) + 1;
+}
+
+/* The n operand of rotrwi, sets SH = 32 - n.  */
+
+static uint64_t
+insert_rrwn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((-value & 0x1f) << 11);
+}
+
+static int64_t
+extract_rrwn (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid ATTRIBUTE_UNUSED)
+{
+  return 31 & -(insn >> 11);
+}
+
+/* The n operand of slwi, sets SH = n and ME = 31 - n.  */
+
+static uint64_t
+insert_slwn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((value & 0x1f) << 11) | ((~value & 0x1f) << 1);
+}
+
+static int64_t
+extract_slwn (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid)
+{
+  int64_t sh = (insn >> 11) & 0x1f;
+  int64_t nme = ~(insn >> 1) & 0x1f;
+  if (sh != nme)
+    *invalid = 1;
+  return sh;
+}
+
+/* The n operand of srwi, sets SH = 32 - n and MB = n.  */
+
+static uint64_t
+insert_srwn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((-value & 0x1f) << 11) | ((value & 0x1f) << 6);
+}
+
+static int64_t
+extract_srwn (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid)
+{
+  int64_t nsh = -(insn >> 11) & 0x1f;
+  int64_t mb = (insn >> 6) & 0x1f;
+  if (nsh != mb)
+    *invalid = 1;
+  return nsh;
 }
 
 /* The SH field in an MD form instruction.  This is split.  */
@@ -2933,11 +3157,41 @@ const struct powerpc_operand powerpc_operands[] =
 #define ME_MASK (0x1f << 1)
   { 0x1f, 1, NULL, NULL, 0 },
 
+#define CRWn ME + 1
+  { 0x1f, 1, insert_crwn, extract_crwn, 0 },
+
+#define ELWn CRWn + 1
+  { 0x1f, 1, insert_elwn, extract_elwn, PPC_OPERAND_PLUS1 },
+
+#define ERWn ELWn + 1
+  { 0x1f, 6, insert_erwn, extract_erwn, 0 },
+
+#define ERWb ERWn + 1
+  { 0x1f, 11, insert_erwb, extract_erwb, 0 },
+
+#define CSLWb ERWb + 1
+  { 0x1f, 6, NULL, extract_cslwb, 0 },
+
+#define CSLWn CSLWb + 1
+  { 0x1f, 11, insert_cslwn, NULL, 0 },
+
+#define ILWn CSLWn + 1
+  { 0x1f, 1, NULL, extract_ilwn, PPC_OPERAND_PLUS1 },
+
+#define ILWb ILWn + 1
+  { 0x1f, 6, insert_ilwb, NULL, 0 },
+
+#define IRWn ILWb + 1
+  { 0x1f, 1, NULL, extract_irwn, PPC_OPERAND_PLUS1 },
+
+#define IRWb IRWn + 1
+  { 0x1f, 6, insert_irwb, NULL, 0 },
+
   /* The MB and ME fields in an M form instruction expressed a single
      operand which is a bitmask indicating which bits to select.  This
      is a two operand form using PPC_OPERAND_NEXT.  See the
      description in opcode/ppc.h for what this means.  */
-#define MBE ME + 1
+#define MBE IRWb + 1
   { 0x1f, 6, NULL, NULL, PPC_OPERAND_OPTIONAL | PPC_OPERAND_NEXT },
   { -1, 0, insert_mbe, extract_mbe, 0 },
 
@@ -3130,7 +3384,16 @@ const struct powerpc_operand powerpc_operands[] =
 #define UIM5 SH
   { 0x1f, 11, NULL, NULL, 0 },
 
-#define EVUIMM_LT8 SH + 1
+#define RRWn SH + 1
+  { 0x1f, 11, insert_rrwn, extract_rrwn, 0 },
+
+#define SLWn RRWn + 1
+  { 0x1f, 11, insert_slwn, extract_slwn, 0 },
+
+#define SRWn SLWn + 1
+  { 0x1f, 11, insert_srwn, extract_srwn, 0 },
+
+#define EVUIMM_LT8 SRWn + 1
   { 0x1f, 11, insert_evuimm_lt8, extract_evuimm_lt8, 0 },
 
 #define EVUIMM_LT16 EVUIMM_LT8 + 1
@@ -3823,11 +4086,20 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
   (M ((op), (rc))				\
    | ((((uint64_t)(me)) & 0x1f) << 1))
 
+/* An M_MASK with the MB field fixed.  */
+#define MMB_MASK (M_MASK | MB_MASK)
+
+/* An M_MASK with the ME field fixed.  */
+#define MME_MASK (M_MASK | ME_MASK)
+
 /* An M_MASK with the MB and ME fields fixed.  */
 #define MMBME_MASK (M_MASK | MB_MASK | ME_MASK)
 
 /* An M_MASK with the SH and ME fields fixed.  */
 #define MSHME_MASK (M_MASK | SH_MASK | ME_MASK)
+
+/* An M_MASK with the SH and MB fields fixed.  */
+#define MSHMB_MASK (M_MASK | SH_MASK | MB_MASK)
 
 /* An MD form instruction.  */
 #define MD(op, xop, rc)				\
@@ -6425,18 +6697,40 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"bctarl",  XLLK(19,560,1),		XLBH_MASK,     POWER8,	 PPCVLE,	{BO, BI, BH}},
 
 {"rlwimi",	M(20,0),	M_MASK,	     PPCCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
+{"inslwi",	M(20,0),	M_MASK,	     PPCCOM,	PPCVLE|EXT,	{RA, RS, ILWn, ILWb}},
+{"insrwi",	M(20,0),	M_MASK,	     PPCCOM,	PPCVLE|EXT,	{RA, RS, IRWn, IRWb}},
 {"rlimi",	M(20,0),	M_MASK,	     PWRCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
 
 {"rlwimi.",	M(20,1),	M_MASK,	     PPCCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
+{"inslwi.",	M(20,1),	M_MASK,	     PPCCOM,	PPCVLE|EXT,	{RA, RS, ILWn, ILWb}},
+{"insrwi.",	M(20,1),	M_MASK,	     PPCCOM,	PPCVLE|EXT,	{RA, RS, IRWn, IRWb}},
 {"rlimi.",	M(20,1),	M_MASK,	     PWRCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
 
 {"rotlwi",	MME(21,31,0),	MMBME_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, SH}},
+{"rotrwi",	MME(21,31,0),	MMBME_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, RRWn}},
 {"clrlwi",	MME(21,31,0),	MSHME_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, MB}},
+{"clrrwi",	M(21,0),	MSHMB_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, CRWn}},
+{"slwi",	M(21,0),	MMB_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, SLWn}},
+{"srwi",	MME(21,31,0),	MME_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, SRWn}},
 {"rlwinm",	M(21,0),	M_MASK,	     PPCCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
+{"extlwi",	M(21,0),	MMB_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, ELWn, SH}},
+{"extrwi",	MME(21,31,0),	MME_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, ERWn, ERWb}},
+{"clrlslwi",	M(21,0),	M_MASK,	     PPCCOM,	PPCVLE|EXT,	{RA, RS, CSLWb, CSLWn}},
+{"sli",		M(21,0),	MMB_MASK,    PWRCOM,	PPCVLE|EXT,	{RA, RS, SLWn}},
+{"sri",		MME(21,31,0),	MME_MASK,    PWRCOM,	PPCVLE|EXT,	{RA, RS, SRWn}},
 {"rlinm",	M(21,0),	M_MASK,	     PWRCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
 {"rotlwi.",	MME(21,31,1),	MMBME_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, SH}},
+{"rotrwi.",	MME(21,31,1),	MMBME_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, RRWn}},
 {"clrlwi.",	MME(21,31,1),	MSHME_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, MB}},
+{"clrrwi.",	M(21,1),	MSHMB_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, CRWn}},
+{"slwi.",	M(21,1),	MMB_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, SLWn}},
+{"srwi.",	MME(21,31,1),	MME_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, SRWn}},
 {"rlwinm.",	M(21,1),	M_MASK,	     PPCCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
+{"extlwi.",	M(21,1),	MMB_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, ELWn, SH}},
+{"extrwi.",	MME(21,31,1),	MME_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, ERWn, ERWb}},
+{"clrlslwi.",	M(21,1),	M_MASK,	     PPCCOM,	PPCVLE|EXT,	{RA, RS, CSLWb, CSLWn}},
+{"sli.",	M(21,1),	MMB_MASK,    PWRCOM,	PPCVLE|EXT,	{RA, RS, SLWn}},
+{"sri.",	MME(21,31,1),	MME_MASK,    PWRCOM,	PPCVLE|EXT,	{RA, RS, SRWn}},
 {"rlinm.",	M(21,1),	M_MASK,	     PWRCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
 
 {"rlmi",	M(22,0),	M_MASK,	     M601,	PPCVLE,		{RA, RS, RB, MBE, ME}},
@@ -10192,29 +10486,6 @@ const unsigned int vle_num_opcodes =
    support extracting the whole word (32 bits in this case).  */
 
 const struct powerpc_macro powerpc_macros[] = {
-{"extlwi",   4,	PPCCOM,	"rlwinm %0,%1,%3,0,(%2)-1"},
-{"extlwi.",  4,	PPCCOM,	"rlwinm. %0,%1,%3,0,(%2)-1"},
-{"extrwi",   4,	PPCCOM,	"rlwinm %0,%1,((%2)+(%3))&((%2)+(%3)<>32),32-(%2),31"},
-{"extrwi.",  4,	PPCCOM,	"rlwinm. %0,%1,((%2)+(%3))&((%2)+(%3)<>32),32-(%2),31"},
-{"inslwi",   4,	PPCCOM,	"rlwimi %0,%1,(-(%3)!31)&((%3)|31),%3,(%2)+(%3)-1"},
-{"inslwi.",  4,	PPCCOM,	"rlwimi. %0,%1,(-(%3)!31)&((%3)|31),%3,(%2)+(%3)-1"},
-{"insrwi",   4,	PPCCOM,	"rlwimi %0,%1,32-((%2)+(%3)),%3,(%2)+(%3)-1"},
-{"insrwi.",  4,	PPCCOM,	"rlwimi. %0,%1,32-((%2)+(%3)),%3,(%2)+(%3)-1"},
-{"rotrwi",   3,	PPCCOM,	"rlwinm %0,%1,(-(%2)!31)&((%2)|31),0,31"},
-{"rotrwi.",  3,	PPCCOM,	"rlwinm. %0,%1,(-(%2)!31)&((%2)|31),0,31"},
-{"slwi",     3,	PPCCOM,	"rlwinm %0,%1,%2,0,31-(%2)"},
-{"sli",      3,	PWRCOM,	"rlinm %0,%1,%2,0,31-(%2)"},
-{"slwi.",    3,	PPCCOM,	"rlwinm. %0,%1,%2,0,31-(%2)"},
-{"sli.",     3,	PWRCOM,	"rlinm. %0,%1,%2,0,31-(%2)"},
-{"srwi",     3,	PPCCOM,	"rlwinm %0,%1,(-(%2)!31)&((%2)|31),%2,31"},
-{"sri",      3,	PWRCOM,	"rlinm %0,%1,(-(%2)!31)&((%2)|31),%2,31"},
-{"srwi.",    3,	PPCCOM,	"rlwinm. %0,%1,(-(%2)!31)&((%2)|31),%2,31"},
-{"sri.",     3,	PWRCOM,	"rlinm. %0,%1,(-(%2)!31)&((%2)|31),%2,31"},
-{"clrrwi",   3,	PPCCOM,	"rlwinm %0,%1,0,0,31-(%2)"},
-{"clrrwi.",  3,	PPCCOM,	"rlwinm. %0,%1,0,0,31-(%2)"},
-{"clrlslwi", 4,	PPCCOM,	"rlwinm %0,%1,%3,(%2)-(%3),31-(%3)"},
-{"clrlslwi.",4, PPCCOM,	"rlwinm. %0,%1,%3,(%2)-(%3),31-(%3)"},
-
 {"e_extlwi", 4,	PPCVLE, "e_rlwinm %0,%1,%3,0,(%2)-1"},
 {"e_extrwi", 4,	PPCVLE, "e_rlwinm %0,%1,((%2)+(%3))&((%2)+(%3)<>32),32-(%2),31"},
 {"e_inslwi", 4,	PPCVLE, "e_rlwimi %0,%1,(-(%3)!31)&((%3)|31),%3,(%2)+(%3)-1"},
