@@ -1,3 +1,8 @@
+2022-03-15  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf-mode.el: Now 1.7.
+	(dwarf--sentinel): Switch to the process buffer.
+
 2022-03-11  Vladimir Mezentsev  <vladimir.mezentsev@oracle.com>
 
 	* MAINTAINERS: Add gprofng maintainer.
