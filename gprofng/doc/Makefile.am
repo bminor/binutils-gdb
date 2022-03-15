@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 #
 
-AUTOMAKE_OPTIONS = foreign no-texinfo.tex
+AUTOMAKE_OPTIONS = info-in-builddir foreign no-texinfo.tex
 
 info_TEXINFOS       = gprofng.texi
 gprofng_TEXINFOS    = fdl.texi

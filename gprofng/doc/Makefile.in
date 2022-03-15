@@ -165,7 +165,7 @@ AM_V_texidevnull = $(am__v_texidevnull_@AM_V@)
 am__v_texidevnull_ = $(am__v_texidevnull_@AM_DEFAULT_V@)
 am__v_texidevnull_0 = > /dev/null
 am__v_texidevnull_1 = 
-INFO_DEPS = $(srcdir)/gprofng.info
+INFO_DEPS = gprofng.info
 am__TEXINFO_TEX_DIR = $(srcdir)/.
 DVIS = gprofng.dvi
 PDFS = gprofng.pdf
@@ -349,7 +349,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AUTOMAKE_OPTIONS = foreign no-texinfo.tex
+AUTOMAKE_OPTIONS = info-in-builddir foreign no-texinfo.tex
 info_TEXINFOS = gprofng.texi
 gprofng_TEXINFOS = fdl.texi
 BUILT_SOURCES = version.texi
@@ -363,7 +363,7 @@ all: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .dvi .html .info .pdf .ps .texi
+.SUFFIXES: .dvi .ps
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -400,53 +400,45 @@ mostlyclean-libtool:
 clean-libtool:
 	-rm -rf .libs _libs
 
-.texi.info:
+gprofng.info: gprofng.texi $(srcdir)/version.texi $(gprofng_TEXINFOS)
 	$(AM_V_MAKEINFO)restore=: && backupdir="$(am__leading_dot)am$$$$" && \
-	am__cwd=`pwd` && $(am__cd) $(srcdir) && \
 	rm -rf $$backupdir && mkdir $$backupdir && \
 	if ($(MAKEINFO) --version) >/dev/null 2>&1; then \
 	  for f in $@ $@-[0-9] $@-[0-9][0-9] $(@:.info=).i[0-9] $(@:.info=).i[0-9][0-9]; do \
 	    if test -f $$f; then mv $$f $$backupdir; restore=mv; else :; fi; \
 	  done; \
 	else :; fi && \
-	cd "$$am__cwd"; \
 	if $(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
-	 -o $@ $<; \
+	 -o $@ `test -f 'gprofng.texi' || echo '$(srcdir)/'`gprofng.texi; \
 	then \
 	  rc=0; \
-	  $(am__cd) $(srcdir); \
 	else \
 	  rc=$$?; \
-	  $(am__cd) $(srcdir) && \
 	  $$restore $$backupdir/* `echo "./$@" | sed 's|[^/]*$$||'`; \
 	fi; \
 	rm -rf $$backupdir; exit $$rc
 
-.texi.dvi:
+gprofng.dvi: gprofng.texi $(srcdir)/version.texi $(gprofng_TEXINFOS) 
 	$(AM_V_TEXI2DVI)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
 	$(TEXI2DVI) $(AM_V_texinfo) --build-dir=$(@:.dvi=.t2d) -o $@ $(AM_V_texidevnull) \
-	$<
+	`test -f 'gprofng.texi' || echo '$(srcdir)/'`gprofng.texi
 
-.texi.pdf:
+gprofng.pdf: gprofng.texi $(srcdir)/version.texi $(gprofng_TEXINFOS) 
 	$(AM_V_TEXI2PDF)TEXINPUTS="$(am__TEXINFO_TEX_DIR)$(PATH_SEPARATOR)$$TEXINPUTS" \
 	MAKEINFO='$(MAKEINFO) $(AM_MAKEINFOFLAGS) $(MAKEINFOFLAGS) -I $(srcdir)' \
 	$(TEXI2PDF) $(AM_V_texinfo) --build-dir=$(@:.pdf=.t2p) -o $@ $(AM_V_texidevnull) \
-	$<
+	`test -f 'gprofng.texi' || echo '$(srcdir)/'`gprofng.texi
 
-.texi.html:
+gprofng.html: gprofng.texi $(srcdir)/version.texi $(gprofng_TEXINFOS) 
 	$(AM_V_MAKEINFO)rm -rf $(@:.html=.htp)
 	$(AM_V_at)if $(MAKEINFOHTML) $(AM_MAKEINFOHTMLFLAGS) $(MAKEINFOFLAGS) -I $(srcdir) \
-	 -o $(@:.html=.htp) $<; \
+	 -o $(@:.html=.htp) `test -f 'gprofng.texi' || echo '$(srcdir)/'`gprofng.texi; \
 	then \
 	  rm -rf $@ && mv $(@:.html=.htp) $@; \
 	else \
 	  rm -rf $(@:.html=.htp); exit 1; \
 	fi
-$(srcdir)/gprofng.info: gprofng.texi $(srcdir)/version.texi $(gprofng_TEXINFOS)
-gprofng.dvi: gprofng.texi $(srcdir)/version.texi $(gprofng_TEXINFOS)
-gprofng.pdf: gprofng.texi $(srcdir)/version.texi $(gprofng_TEXINFOS)
-gprofng.html: gprofng.texi $(srcdir)/version.texi $(gprofng_TEXINFOS)
 $(srcdir)/version.texi: @MAINTAINER_MODE_TRUE@ $(srcdir)/stamp-vti
 $(srcdir)/stamp-vti: gprofng.texi $(top_srcdir)/configure
 	@(dir=.; test -f ./gprofng.texi || dir=$(srcdir); \
