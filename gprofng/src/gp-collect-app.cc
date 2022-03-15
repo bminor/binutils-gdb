@@ -848,7 +848,7 @@ collect::check_args (int argc, char *argv[])
 	  }
 	case 'O':
 	  overwriteExp = true;
-	  __attribute__ ((fallthrough));
+          /* FALLTHROUGH */
 	case 'o':
 	  if (precheck == 1)
 	    {

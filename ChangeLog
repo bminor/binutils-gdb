@@ -1,3 +1,8 @@
+2022-03-15  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gprofng/src/gp-collect-app.cc (collect::check_args): Use
+	fallthrough comment instead of attribute.
+
 2022-03-11  Vladimir Mezentsev  <vladimir.mezentsev@oracle.com>
 
 	* Makefile.def: Add gprofng module.
