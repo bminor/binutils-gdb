@@ -1589,10 +1589,10 @@ insn_validate (const struct powerpc_opcode *op)
 	      val = -1;
 	      if ((operand->flags & PPC_OPERAND_NEGATIVE) != 0)
 		val = -val;
-	      else if ((operand->flags & PPC_OPERAND_PLUS1) != 0)
-		val += 1;
 	      mask = (*operand->insert) (0, val, ppc_cpu, &errmsg);
 	    }
+	  else if (operand->shift == (int) PPC_OPSHIFT_SH6)
+	    mask = (0x1f << 11) | 0x2;
 	  else if (operand->shift >= 0)
 	    mask = operand->bitm << operand->shift;
 	  else

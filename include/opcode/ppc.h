@@ -336,9 +336,11 @@ extern const struct powerpc_operand powerpc_operands[];
 extern const unsigned int num_powerpc_operands;
 
 /* Use with the shift field of a struct powerpc_operand to indicate
-     that BITM and SHIFT cannot be used to determine where the operand
-     goes in the insn.  */
-#define PPC_OPSHIFT_INV (-1U << 31)
+   that BITM and SHIFT cannot be used to determine where the operand
+   goes in the insn.  */
+#define PPC_OPSHIFT_INV (1U << 30)
+/* A special case, 6-bit SH field.  */
+#define PPC_OPSHIFT_SH6 (2U << 30)
 
 /* Values defined for the flags field of a struct powerpc_operand.
    Keep the register bits low:  They need to fit in an unsigned short.  */
