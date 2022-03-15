@@ -6490,8 +6490,7 @@ static const link_map_offsets lmo_64bit_offsets =
 
 static void
 read_link_map (std::string &document, CORE_ADDR lm_addr, CORE_ADDR lm_prev,
-	       int ptr_size, const link_map_offsets *lmo, bool ignore_first,
-	       int &header_done)
+	       int ptr_size, const link_map_offsets *lmo)
 {
   CORE_ADDR l_name, l_addr, l_ld, l_next, l_prev;
 
@@ -6516,37 +6515,19 @@ read_link_map (std::string &document, CORE_ADDR lm_addr, CORE_ADDR lm_prev,
 	  break;
 	}
 
-      /* Ignore the first entry even if it has valid name as the first entry
-	 corresponds to the main executable.  The first entry should not be
-	 skipped if the dynamic loader was loaded late by a static executable
-	 (see solib-svr4.c parameter ignore_first).  But in such case the main
-	 executable does not have PT_DYNAMIC present and this function already
-	 exited above due to failed get_r_debug.  */
-      if (ignore_first && lm_prev == 0)
-	string_appendf (document, " main-lm=\"0x%s\"", paddress (lm_addr));
-      else
+      /* Not checking for error because reading may stop before we've got
+	 PATH_MAX worth of characters.  */
+      libname[0] = '\0';
+      linux_read_memory (l_name, libname, sizeof (libname) - 1);
+      libname[sizeof (libname) - 1] = '\0';
+      if (libname[0] != '\0')
 	{
-	  /* Not checking for error because reading may stop before
-	     we've got PATH_MAX worth of characters.  */
-	  libname[0] = '\0';
-	  linux_read_memory (l_name, libname, sizeof (libname) - 1);
-	  libname[sizeof (libname) - 1] = '\0';
-	  if (libname[0] != '\0')
-	    {
-	      if (!header_done)
-		{
-		  /* Terminate `<library-list-svr4'.  */
-		  document += '>';
-		  header_done = 1;
-		}
-
-	      string_appendf (document, "<library name=\"");
-	      xml_escape_text_append (&document, (char *) libname);
-	      string_appendf (document, "\" lm=\"0x%s\" l_addr=\"0x%s\" "
-			      "l_ld=\"0x%s\"/>",
-			      paddress (lm_addr), paddress (l_addr),
-			      paddress (l_ld));
-	    }
+	  string_appendf (document, "<library name=\"");
+	  xml_escape_text_append (&document, (char *) libname);
+	  string_appendf (document, "\" lm=\"0x%s\" l_addr=\"0x%s\" "
+			  "l_ld=\"0x%s\"/>",
+			  paddress (lm_addr), paddress (l_addr),
+			  paddress (l_ld));
 	}
 
       lm_prev = lm_addr;
@@ -6567,7 +6548,6 @@ linux_process_target::qxfer_libraries_svr4 (const char *annex,
   int pid, is_elf64;
   unsigned int machine;
   CORE_ADDR lm_addr = 0, lm_prev = 0;
-  int header_done = 0;
 
   if (writebuf != NULL)
     return -2;
@@ -6624,8 +6604,10 @@ linux_process_target::qxfer_libraries_svr4 (const char *annex,
 
      Otherwise, start with R_DEBUG and traverse all namespaces we find.  */
   if (lm_addr != 0)
-    read_link_map (document, lm_addr, lm_prev, ptr_size, lmo, false,
-		   header_done);
+    {
+      document += ">";
+      read_link_map (document, lm_addr, lm_prev, ptr_size, lmo);
+    }
   else
     {
       if (lm_prev != 0)
@@ -6641,7 +6623,10 @@ linux_process_target::qxfer_libraries_svr4 (const char *annex,
       if (r_debug == (CORE_ADDR) -1)
 	return -1;
 
-      bool ignore_first = true;
+      /* Terminate the header if we end up with an empty list.  */
+      if (r_debug == 0)
+	document += ">";
+
       while (r_debug != 0)
 	{
 	  int r_version = 0;
@@ -6668,14 +6653,35 @@ linux_process_target::qxfer_libraries_svr4 (const char *annex,
 	      break;
 	    }
 
-	  read_link_map (document, lm_addr, 0, ptr_size, lmo,
-			 ignore_first, header_done);
+	  /* We read the entire namespace.  */
+	  lm_prev = 0;
+
+	  /* The first entry corresponds to the main executable unless the
+	     dynamic loader was loaded late by a static executable.  But
+	     in such case the main executable does not have PT_DYNAMIC
+	     present and we would not have gotten here.  */
+	  if (r_debug == priv->r_debug)
+	    {
+	      if (lm_addr != 0)
+		string_appendf (document, " main-lm=\"0x%s\">",
+				paddress (lm_addr));
+	      else
+		document += ">";
+
+	      lm_prev = lm_addr;
+	      if (read_one_ptr (lm_addr + lmo->l_next_offset,
+				&lm_addr, ptr_size) != 0)
+		{
+		  warning ("unable to read l_next from 0x%s",
+			   paddress (lm_addr + lmo->l_next_offset));
+		  break;
+		}
+	    }
+
+	  read_link_map (document, lm_addr, lm_prev, ptr_size, lmo);
 
 	  if (r_version < 2)
 	    break;
-
-	  /* Only applies to the default namespace.  */
-	  ignore_first = false;
 
 	  if (read_one_ptr (r_debug + lmo->r_next_offset, &r_debug,
 			    ptr_size) != 0)
@@ -6687,13 +6693,7 @@ linux_process_target::qxfer_libraries_svr4 (const char *annex,
 	}
     }
 
-  if (!header_done)
-    {
-      /* Empty list; terminate `<library-list-svr4'.  */
-      document += "/>";
-    }
-  else
-    document += "</library-list-svr4>";
+  document += "</library-list-svr4>";
 
   int document_len = document.length ();
   if (offset < document_len)
