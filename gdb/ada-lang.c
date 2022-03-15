@@ -1323,6 +1323,11 @@ ada_decode (const char *encoded, bool wrap)
      if we see this prefix.  */
   if (startswith (encoded, "_ada_"))
     encoded += 5;
+  /* The "___ghost_" prefix is used for ghost entities.  Normally
+     these aren't preserved but when they are, it's useful to see
+     them.  */
+  if (startswith (encoded, "___ghost_"))
+    encoded += 9;
 
   /* If the name starts with '_', then it is not a properly encoded
      name, so do not attempt to decode it.  Similarly, if the name
@@ -6015,6 +6020,9 @@ wild_match (const char *name, const char *patn)
 {
   const char *p;
   const char *name0 = name;
+
+  if (startswith (name, "___ghost_"))
+    name += 9;
 
   while (1)
     {
@@ -13218,6 +13226,10 @@ do_full_match (const char *symbol_search_name,
   if (startswith (symbol_search_name, "_ada_")
       && !startswith (lname, "_ada"))
     symbol_search_name += 5;
+  /* Likewise for ghost entities.  */
+  if (startswith (symbol_search_name, "___ghost_")
+      && !startswith (lname, "___ghost_"))
+    symbol_search_name += 9;
 
   int uscore_count = 0;
   while (*lname != '\0')
