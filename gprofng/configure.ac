@@ -42,6 +42,8 @@ AC_SUBST(GPROFNG_LIBADD)
 
 ACX_PROG_CC_WARNINGS_ARE_ERRORS([manual])
 ACX_PROG_CC_WARNING_OPTS([-Wall], [gprofng_cflags])
+ACX_PROG_CC_WARNING_OPTS([-Wno-format-truncation], [GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS])
+ACX_PROG_CC_WARNING_OPTS([-Wno-switch], [GPROFNG_NO_SWITCH_CFLAGS])
 gprofng_cppflags="-U_ASM"
 build_collector=
 build_src=
@@ -174,6 +176,8 @@ AM_CONDITIONAL([BUILD_MAN], [test x$build_man = xtrue])
 
 AC_SUBST(LD_NO_AS_NEEDED, [${no_as_needed}])
 AC_SUBST(GPROFNG_CFLAGS, [${gprofng_cflags}])
+AC_SUBST(GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS)
+AC_SUBST(GPROFNG_NO_SWITCH_CFLAGS)
 AC_SUBST(GPROFNG_CPPFLAGS, [${gprofng_cppflags}])
 AC_SUBST(GPROFNG_LIBDIR, [${libdir}])
 
