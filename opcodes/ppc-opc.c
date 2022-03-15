@@ -10366,7 +10366,16 @@ const struct powerpc_opcode vle_opcodes[] = {
 {"e_add2i.",	I16A(28,17),	I16A_MASK,	PPCVLE,	0,		{RA, VLESIMM}},
 {"e_li",	LI20(28,0),	LI20_MASK,	PPCVLE,	0,		{RT, IMM20}},
 {"e_rlwimi",	M(29,0),	M_MASK,		PPCVLE,	0,		{RA, RS, SH, MB, ME}},
-{"e_rlwinm",	M(29,1),	M_MASK,		PPCVLE,	0,		{RA, RT, SH, MBE, ME}},
+{"e_inslwi",	M(29,0),	M_MASK,		PPCVLE, EXT,		{RA, RS, ILWn, ILWb}},
+{"e_insrwi",	M(29,0),	M_MASK,		PPCVLE, EXT,		{RA, RS, IRWn, IRWb}},
+{"e_rotlwi",	MME(29,31,1),	MMBME_MASK,	PPCVLE, EXT,		{RA, RS, SH}},
+{"e_rotrwi",	MME(29,31,1),	MMBME_MASK,	PPCVLE, EXT,		{RA, RS, RRWn}},
+{"e_clrlwi",	MME(29,31,1),	MSHME_MASK,	PPCVLE, EXT,		{RA, RS, MB}},
+{"e_clrrwi",	M(29,1),	MSHMB_MASK,	PPCVLE, EXT,		{RA, RS, CRWn}},
+{"e_rlwinm",	M(29,1),	M_MASK,		PPCVLE,	0,		{RA, RS, SH, MBE, ME}},
+{"e_extlwi",	M(29,1),	MMB_MASK,	PPCVLE, EXT,		{RA, RS, ELWn, SH}},
+{"e_extrwi",	MME(29,31,1),	MME_MASK,	PPCVLE, EXT,		{RA, RS, ERWn, ERWb}},
+{"e_clrlslwi",	M(29,1),	M_MASK,		PPCVLE, EXT,		{RA, RS, CSLWb, CSLWn}},
 {"e_b",		BD24(30,0,0),	BD24_MASK,	PPCVLE,	0,		{B24}},
 {"e_bl",	BD24(30,0,1),	BD24_MASK,	PPCVLE,	0,		{B24}},
 {"e_bdnz",	EBD15(30,8,BO32DNZ,0),	EBD15_MASK, PPCVLE, EXT,	{B15}},
@@ -10486,18 +10495,6 @@ const unsigned int vle_num_opcodes =
    support extracting the whole word (32 bits in this case).  */
 
 const struct powerpc_macro powerpc_macros[] = {
-{"e_extlwi", 4,	PPCVLE, "e_rlwinm %0,%1,%3,0,(%2)-1"},
-{"e_extrwi", 4,	PPCVLE, "e_rlwinm %0,%1,((%2)+(%3))&((%2)+(%3)<>32),32-(%2),31"},
-{"e_inslwi", 4,	PPCVLE, "e_rlwimi %0,%1,(-(%3)!31)&((%3)|31),%3,(%2)+(%3)-1"},
-{"e_insrwi", 4,	PPCVLE, "e_rlwimi %0,%1,32-((%2)+(%3)),%3,(%2)+(%3)-1"},
-{"e_rotlwi", 3,	PPCVLE, "e_rlwinm %0,%1,%2,0,31"},
-{"e_rotrwi", 3,	PPCVLE, "e_rlwinm %0,%1,(-(%2)!31)&((%2)|31),0,31"},
-{"e_slwi",   3,	PPCVLE, "e_rlwinm %0,%1,%2,0,31-(%2)"},
-{"e_srwi",   3,	PPCVLE, "e_rlwinm %0,%1,(-(%2)!31)&((%2)|31),%2,31"},
-{"e_clrlwi", 3,	PPCVLE, "e_rlwinm %0,%1,0,%2,31"},
-{"e_clrrwi", 3,	PPCVLE, "e_rlwinm %0,%1,0,0,31-(%2)"},
-{"e_clrlslwi",4, PPCVLE, "e_rlwinm %0,%1,%3,(%2)-(%3),31-(%3)"},
-
 /* old SPE instructions have new names with the same opcodes */
 {"evsadd",      3, PPCSPE|PPCVLE, "efsadd %0,%1,%2"},
 {"evssub",      3, PPCSPE|PPCVLE, "efssub %0,%1,%2"},
