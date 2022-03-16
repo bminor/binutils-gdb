@@ -164,6 +164,8 @@ fi`
 ])
 AM_CONDITIONAL(TCL_TRY, test "${ac_cv_libctf_tcl_try}" = yes)
 
+AM_ZLIB
+
 
 # Generate manpages, if possible.
 if test $cross_compiling = no; then
@@ -190,4 +192,3 @@ AC_CONFIG_FILES([Makefile src/Makefile gp-display-html/Makefile doc/Makefile])
 AC_CONFIG_HEADERS([config.h:common/config.h.in])
 
 AC_OUTPUT
-

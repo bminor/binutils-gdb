@@ -17,7 +17,7 @@
 # <http://www.gnu.org/licenses/>.
 
 AUTOMAKE_OPTIONS = foreign
-ACLOCAL_AMFLAGS = -I . -I .. -I ../.. 
+ACLOCAL_AMFLAGS = -I . -I .. -I ../..
 
 CCSOURCES = \
 	Application.cc \
@@ -98,10 +98,16 @@ CSOURCES = \
 
 LIBGPROFNG = libgprofng.la
 
+# This is where we get zlib from.  zlibdir is -L../zlib and zlibinc is
+# -I../zlib, unless we were configured with --with-system-zlib, in which
+# case both are empty.
+ZLIB = @zlibdir@ -lz
+ZLIBINC = @zlibinc@
+
 AM_CPPFLAGS = $(GPROFNG_CPPFLAGS) -DLOCALEDIR=\"@localedir@\" -I.. -I$(srcdir) \
 	-I$(srcdir)/../common \
 	-I$(srcdir)/../../include -I$(srcdir)/../../opcodes \
-	-I../../bfd -I$(srcdir)/../../bfd
+	-I../../bfd -I$(srcdir)/../../bfd $(ZLIBINC)
 AM_CFLAGS = $(GPROFNG_CFLAGS) $(PTHREAD_CFLAGS) \
 	$(GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS) \
 	$(GPROFNG_NO_SWITCH_CFLAGS)
@@ -133,19 +139,19 @@ dbe_DATA = $(srcdir)/gprofng.rc
 bin_PROGRAMS = gp-archive gp-collect-app gprofng gp-display-text gp-display-src
 
 gp_archive_SOURCES = gp-archive.cc ArchiveExp.cc
-gp_archive_LDADD = $(LIBGPROFNG)
+gp_archive_LDADD = $(LIBGPROFNG) $(ZLIB)
 
 gp_collect_app_SOURCES = gp-collect-app.cc checks.cc envsets.cc count.cc
 gp_collect_app_LDADD = $(LIBGPROFNG)
 
 gprofng_SOURCES = gprofng.cc
-gprofng_LDADD = $(LIBGPROFNG)
+gprofng_LDADD = $(LIBGPROFNG) $(ZLIB)
 
 gp_display_src_SOURCES = gp-display-src.cc
-gp_display_src_LDADD = $(LIBGPROFNG)
+gp_display_src_LDADD = $(LIBGPROFNG) $(ZLIB)
 
 gp_display_text_SOURCES = gp-display-text.cc ipc.cc ipcio.cc
-gp_display_text_LDADD = $(LIBGPROFNG)
+gp_display_text_LDADD = $(LIBGPROFNG) $(ZLIB)
 
 
 if BUILD_MAN
@@ -200,4 +206,3 @@ endif
 # Distribution involves building the binaries to generate the manpage,
 # so ensure that the necessary libraries are built at dist time.
 dist-hook: $(LIBGPROFNG)
-
