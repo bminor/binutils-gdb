@@ -1,3 +1,11 @@
+2022-03-16  Fangrui Song  <maskray@google.com>
+
+	PR binutils/28926
+	* objcopy.c (filter_symbols): Apply weaken to STB_GNU_UNIQUE symbols
+	* NEWS: Mention feature.
+	* testsuite/binutils-all/objcopy.exp (objcopy_test_symbol_manipulation): New test.
+	* testsuite/binutils-all/weaken-gnu-unique.s: New.
+
 2022-03-16  Martin Storsjö  <martin@martin.st>
 
 	PR 28885

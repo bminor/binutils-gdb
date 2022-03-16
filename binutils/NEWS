@@ -2,6 +2,8 @@
 
 * Add an option to objdump and readelf to prevent attempts to access debuginfod
   servers when following links.
+* objcopy --weaken, --weaken-symbol, and --weaken-symbols now make ELF
+  STB_GNU_UNIQUE symbols weak.
 
 Changes in 2.38:
 
