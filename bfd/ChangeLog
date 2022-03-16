@@ -1,3 +1,24 @@
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* Makefile.am (ALL_MACHINES, ALL_MACHINES_CFILES):
+	Add cpu-amdgcn.c.
+	(BFD64_BACKENDS): Add elf64-amdgcn.lo.
+	(BFD64_BACKENDS_CFILES): Add elf64-amdgcn.c.
+	* Makefile.in: Re-generate.
+	* cpu-amdgcn.c: New.
+	* elf64-amdgcn.c: New.
+	* archures.c (bfd_architecture): Add bfd_arch_amdgcn and related
+	mach defines.
+	(bfd_amdgcn_arch): New.
+	(bfd_archures_list): Add bfd_amdgcn_arch.
+	* bfd-in2.h: Re-generate.
+	* config.bfd: Handle amdgcn* target.
+	* configure.ac: Handle amdgcn_elf64_le_vec.
+	* configure: Re-generate.
+	* elf-bfd.h (elf_target_id): Add AMDGCN_ELF_DATA.
+	* targets.c (amdgcn_elf64_le_vec): New.
+	(_bfd_target_vector): Add amdgcn_elf64_le_vec.
+
 2022-03-01  Torbjörn Svensson  <torbjorn.svensson@st.com>
 	    Fred Eisele  <fredrick.eisele@gmail.com>
 

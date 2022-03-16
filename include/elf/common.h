@@ -77,6 +77,7 @@
 #define ELFOSABI_OPENVOS     18 /* Stratus Technologies OpenVOS */
 
 #define ELFOSABI_C6000_ELFABI 64 /* Bare-metal TMS320C6000 */
+#define ELFOSABI_AMDGPU_HSA  64 /* AMD HSA Runtime */
 #define ELFOSABI_C6000_LINUX 65 /* Linux TMS320C6000 */
 #define ELFOSABI_ARM_FDPIC   65 /* ARM FDPIC */
 #define ELFOSABI_ARM	     97	/* ARM */

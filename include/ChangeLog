@@ -1,3 +1,8 @@
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* elf/amdgpu.h: New.
+	* elf/common.h (ELFOSABI_AMDGPU_HSA): Add.
+
 2022-03-11  Vladimir Mezentsev  <vladimir.mezentsev@oracle.com>
 
 	* collectorAPI.h: New file.
