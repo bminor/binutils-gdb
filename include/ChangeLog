@@ -1,5 +1,10 @@
 2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
+	* elf/amdgcn.h: Add EF_AMDGPU_MACH_AMDGCN_* and
+	EF_AMDGPU_FEATURE_* defines.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
 	* elf/common.h (ELFOSABI_AMDGPU_PAL, ELFOSABI_AMDGPU_MESA3D):
 	New.
 
