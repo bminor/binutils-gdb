@@ -87,4 +87,8 @@
 #define EF_AMDGPU_FEATURE_SRAMECC_OFF_V4         0x800
 #define EF_AMDGPU_FEATURE_SRAMECC_ON_V4          0xc00
 
+/* Notes. */
+
+#define NT_AMDGPU_METADATA                32
+
 #endif /* _ELF_AMDGPU_H */

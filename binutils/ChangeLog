@@ -1,5 +1,10 @@
 2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
+	* readelf.c (get_amdgpu_elf_note_type): New.
+	(process_note): Handle "AMDGPU" notes.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
 	* readelf.c: Include elf/amdgcn.h.
 	(decode_AMDGPU_machine_flags): New.
 	(get_machine_flags): Handle flags for EM_AMDGPU machine type.
