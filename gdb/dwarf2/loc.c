@@ -1569,11 +1569,13 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
    CORE_ADDR.  FRAME is the frame in which the expression is
    evaluated.  ADDR_STACK is a context (location of a variable) and
    might be needed to evaluate the location expression.
-   PUSH_INITIAL_VALUE is true if the address (either from ADDR_STACK,
-   or the default of 0) should be pushed on the DWARF expression
-   evaluation stack before evaluating the expression; this is required
-   by certain forms of DWARF expression.  Returns 1 on success, 0
-   otherwise.  */
+
+   PUSH_INITIAL_VALUE is true if the first address from ADDR_STACK, should
+   be pushed on the DWARF expression evaluation stack before evaluating the
+   expression; this is required by certain forms of DWARF expression.  When
+   PUSH_INITIAL_VALUE is true ADDR_STACK can't be nullptr.
+
+   Returns 1 on success, 0 otherwise.  */
 
 static int
 dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
@@ -1595,10 +1597,8 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
 
   if (push_initial_value)
     {
-      if (addr_stack != nullptr)
-	ctx.push_address (addr_stack->addr, false);
-      else
-	ctx.push_address (0, false);
+      gdb_assert (addr_stack != nullptr);
+      ctx.push_address (addr_stack->addr, false);
     }
 
   try
