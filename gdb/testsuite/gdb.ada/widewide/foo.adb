@@ -24,6 +24,7 @@ procedure Foo is
 begin
    Do_Nothing (Some_Easy'Address);  -- START
    Do_Nothing (Some_Larger'Address);
-   Do_Nothing (My_Ws'Address);
+   Do_Nothing (My_Ws);
+   Do_Nothing (My_WWS);
    Do_Nothing (Some_Big'Address);
 end Foo;
