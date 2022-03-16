@@ -1,5 +1,23 @@
 2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
+	* Makefile.am (readelf_CFLAGS): New.
+	(readelf_LDADD): Add MSGPACK_LIBS.
+	* Makefile.in: Re-generate.
+	* config.in: Re-generate.
+	* configure: Re-generate.
+	* configure.ac: Add --with-msgpack flag and check for msgpack
+	using pkg-config.
+	* readelf.c: Include msgpack.h if HAVE_MSGPACK.
+	(print_note_contents_hex): New.
+	(print_indents): New.
+	(dump_msgpack_obj): New.
+	(dump_msgpack): New.
+	(print_amdgpu_note): New.
+	(process_note): Handle NT_AMDGPU_METADATA note contents.
+	Use print_note_contents_hex.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
 	* readelf.c (get_amdgpu_elf_note_type): New.
 	(process_note): Handle "AMDGPU" notes.
 

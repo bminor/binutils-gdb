@@ -275,6 +275,23 @@ AM_ZLIB
 
 BFD_BINARY_FOPEN
 
+# Support for the msgpack C library.
+AC_ARG_WITH([msgpack],
+	    AC_HELP_STRING([--with-msgpack], [Enable msgpack support (auto/yes/no)]),
+	    [],
+	    [with_msgpack=auto])
+
+
+if test "$with_msgpack" != no; then
+  PKG_CHECK_MODULES(MSGPACK, msgpack, [
+    AC_DEFINE([HAVE_MSGPACK], [1], [Define to 1 if msgpack is available.])
+  ], [
+      if test "$with_msgpack" = yes; then
+	AC_MSG_ERROR([--with-msgpack was given, but msgpack is missing or unusable.])
+      fi
+  ])
+fi
+
 # target-specific stuff:
 
 # Canonicalize the secondary target names.
