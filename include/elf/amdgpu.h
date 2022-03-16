@@ -20,6 +20,8 @@
 #ifndef _ELF_AMDGPU_H
 #define _ELF_AMDGPU_H
 
+#include "elf/reloc-macros.h"
+
 /* e_ident[EI_ABIVERSION] values, when e_ident[EI_OSABI] is
    ELFOSABI_AMDGPU_HSA.  */
 
@@ -90,5 +92,24 @@
 /* Notes. */
 
 #define NT_AMDGPU_METADATA                32
+
+/* Relocations.  */
+
+START_RELOC_NUMBERS (elf_amdgpu_reloc_type)
+ RELOC_NUMBER (R_AMDGPU_NONE,           0)
+ RELOC_NUMBER (R_AMDGPU_ABS32_LO,       1)
+ RELOC_NUMBER (R_AMDGPU_ABS32_HI,       2)
+ RELOC_NUMBER (R_AMDGPU_ABS64,          3)
+ RELOC_NUMBER (R_AMDGPU_REL32,          4)
+ RELOC_NUMBER (R_AMDGPU_REL64,          5)
+ RELOC_NUMBER (R_AMDGPU_ABS32,          6)
+ RELOC_NUMBER (R_AMDGPU_GOTPCREL,       7)
+ RELOC_NUMBER (R_AMDGPU_GOTPCREL32_LO,  8)
+ RELOC_NUMBER (R_AMDGPU_GOTPCREL32_HI,  9)
+ RELOC_NUMBER (R_AMDGPU_REL32_LO,      10)
+ RELOC_NUMBER (R_AMDGPU_REL32_HI,      11)
+ RELOC_NUMBER (R_AMDGPU_RELATIVE64,    13)
+ RELOC_NUMBER (R_AMDGPU_REL16,         16)
+END_RELOC_NUMBERS (R_AMDGPU_max)
 
 #endif /* _ELF_AMDGPU_H */

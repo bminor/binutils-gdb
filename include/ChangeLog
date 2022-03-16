@@ -1,5 +1,9 @@
 2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
+	* elf/amdgpu.h: Add relocation values.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
 	* elf/amdgcn.h (NT_AMDGPU_METADATA): New.
 
 2022-03-16  Simon Marchi  <simon.marchi@efficios.com>

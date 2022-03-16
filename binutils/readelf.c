@@ -1930,6 +1930,9 @@ dump_relocations (Filedata *          filedata,
 	  rtype = elf_loongarch_reloc_type (type);
 	  break;
 
+	case EM_AMDGPU:
+	  rtype = elf_amdgpu_reloc_type (type);
+	  break;
 	}
 
       if (rtype == NULL)

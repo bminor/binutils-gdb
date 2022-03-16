@@ -1,5 +1,9 @@
 2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
+	* readelf.c (dump_relocations): Handle EM_AMDGPU.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
 	* Makefile.am (readelf_CFLAGS): New.
 	(readelf_LDADD): Add MSGPACK_LIBS.
 	* Makefile.in: Re-generate.
