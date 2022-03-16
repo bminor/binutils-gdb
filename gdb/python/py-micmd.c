@@ -134,9 +134,8 @@ struct mi_command_py : public mi_command
     m_pyobj = new_pyobj;
   }
 
-protected:
   /* Called when the MI command is invoked.  */
-  virtual void do_invoke(struct mi_parse *parse) const override;
+  virtual void invoke(struct mi_parse *parse) const override;
 
 private:
   /* The Python object representing this MI command.  */
@@ -311,7 +310,7 @@ serialize_mi_result (PyObject *result)
    command line arguments from the user.  */
 
 void
-mi_command_py::do_invoke (struct mi_parse *parse) const
+mi_command_py::invoke (struct mi_parse *parse) const
 {
   PYMICMD_SCOPED_DEBUG_ENTER_EXIT;
 

@@ -916,7 +916,7 @@ proc_with_prefix test_mi_thread_select { mode } {
 	}
     }
 
-    with_test_prefix "thread 1.2 with --thread" {
+    with_test_prefix "thread 1.2 with --thread 2" {
 	# Test selecting a thread from MI with a --thread option.  This test
 	# verifies that even if the thread GDB would switch to is the same as
 	# the thread specified with --thread, an event is still sent to CLI.
@@ -930,10 +930,28 @@ proc_with_prefix test_mi_thread_select { mode } {
 	}
 
 	with_spawn_id $gdb_main_spawn_id {
-	    # This doesn't work as of now, no event is sent on CLI.  It is
-	    # commented out so we don't have to wait for the timeout every time.
-	    # match_re_or_ensure_no_output "$cli_re\r\n" "-thread-select, event on cli"
-	    kfail "gdb/20631" "thread-select, event on cli"
+	    match_re_or_ensure_no_output "$cli_re\r\n" "-thread-select, event on cli"
+	}
+    }
+
+    with_test_prefix "thread 1.2 with --thread 3" {
+	# Test selecting a thread from MI with a --thread option.
+	# This test verifies that when different thread numbers are
+	# passed to the --thread option and the underlying
+	# -thread-select command, the correct thread is selected.
+	# In this case this is thread 1.2
+
+	reset_selection "1.1"
+
+	set mi_re [make_mi_re $mode 2 0 response]
+	set cli_re [make_cli_re $mode -1 1.2 0]
+
+	with_spawn_id $mi_spawn_id {
+	    mi_gdb_test "-thread-select --thread 3 2" $mi_re "-thread-select"
+	}
+
+	with_spawn_id $gdb_main_spawn_id {
+	    match_re_or_ensure_no_output "$cli_re\r\n" "-thread-select, event on cli"
 	}
     }
 
@@ -973,6 +991,36 @@ proc_with_prefix test_mi_stack_select_frame { mode } {
 
 	with_spawn_id $gdb_main_spawn_id {
 	    match_re_or_ensure_no_output $cli_re "-stack-select-frame again, event on CLI"
+	}
+
+	# Now use the '-stack-select-frame' command with the --frame
+	# option, this verifies that even when the frame GDB would
+	# swith to is the same as the frame specified with --frame, an
+	# event is still sent to the CLI.
+
+	set cli_re [make_cli_re $mode -1 -1 0]
+
+	with_spawn_id $mi_spawn_id {
+	    mi_gdb_test "-stack-select-frame --thread 2 --frame 0 0" $mi_re
+	}
+
+	with_spawn_id $gdb_main_spawn_id {
+	    match_re_or_ensure_no_output "$cli_re\r\n" "-stack-select-frame with --frame 0, event on CLI"
+	}
+
+	# Now use the '-stack-select-frame' command with the --frame
+	# option, this verifies that the correct event is sent to the
+	# CLI when the frame specified with --frame is different to
+	# the actual frame selected.
+
+	set cli_re [make_cli_re $mode -1 -1 1]
+
+	with_spawn_id $mi_spawn_id {
+	    mi_gdb_test "-stack-select-frame --thread 2 --frame 2 1" $mi_re
+	}
+
+	with_spawn_id $gdb_main_spawn_id {
+	    match_re_or_ensure_no_output "$cli_re\r\n" "-stack-select-frame with --frame 2, event on CLI"
 	}
     }
 

@@ -1841,14 +1841,6 @@ select_frame_command_core (struct frame_info *fi, bool ignored)
     gdb::observers::user_selected_context_changed.notify (USER_SELECTED_FRAME);
 }
 
-/* See stack.h.  */
-
-void
-select_frame_for_mi (struct frame_info *fi)
-{
-  select_frame_command_core (fi, false /* Ignored.  */);
-}
-
 /* The core of all the "frame" sub-commands.  Select frame FI, and if this
    means we change frame send out a change notification (otherwise, just
    reprint the current frame summary).   */

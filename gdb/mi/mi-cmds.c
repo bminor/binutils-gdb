@@ -45,11 +45,9 @@ struct mi_command_mi : public mi_command
     gdb_assert (func != nullptr);
   }
 
-protected:
-
   /* Called when this MI command has been invoked, calls m_argv_function
      with arguments contained within PARSE.  */
-  void do_invoke (struct mi_parse *parse) const override
+  void invoke (struct mi_parse *parse) const override
   {
     mi_parse_argv (parse->args, parse);
 
@@ -83,13 +81,11 @@ struct mi_command_cli : public mi_command
       m_args_p (args_p)
   { /* Nothing.  */ }
 
-protected:
-
   /* Called when this MI command has been invoked, calls the m_cli_name
      CLI function.  In m_args_p is true then the argument string from
      within PARSE is passed through to the CLI function, otherwise nullptr
      is passed through to the CLI function as its argument string.  */
-  void do_invoke (struct mi_parse *parse) const override
+  void invoke (struct mi_parse *parse) const override
   {
     const char *args = m_args_p ? parse->args : nullptr;
     mi_execute_cli_command (m_cli_name, m_args_p, args);
@@ -169,16 +165,6 @@ mi_command::mi_command (const char *name, int *suppress_notification)
     m_suppress_notification (suppress_notification)
 {
   gdb_assert (m_name != nullptr && m_name[0] != '\0');
-}
-
-/* See mi-cmds.h.  */
-
-void
-mi_command::invoke (struct mi_parse *parse) const
-{
-  gdb::optional<scoped_restore_tmpl<int>> restore
-    = do_suppress_notification ();
-  this->do_invoke (parse);
 }
 
 /* See mi-cmds.h.  */

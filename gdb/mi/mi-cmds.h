@@ -160,9 +160,10 @@ struct mi_command
   const char *name () const
   { return m_name; }
 
-  /* Execute the MI command.  Can throw an exception if something goes
-     wrong.  */
-  void invoke (struct mi_parse *parse) const;
+  /* Execute the MI command.  this needs to be overridden in each
+     base class.  PARSE is the parsed command line from the user.
+     Can throw an exception if something goes wrong.  */
+  virtual void invoke (struct mi_parse *parse) const = 0;
 
   /* Return whether this command preserves user selected context (thread
      and frame).  */
@@ -175,14 +176,6 @@ struct mi_command
     return m_suppress_notification != &mi_suppress_notification.user_selected_context;
   }
 
-protected:
-
-  /* The core of command invocation, this needs to be overridden in each
-     base class.  PARSE is the parsed command line from the user.  */
-  virtual void do_invoke (struct mi_parse *parse) const = 0;
-
-private:
-
   /* If this command was created with a suppress notifications pointer,
      then this function will set the suppress flag and return a
      gdb::optional with its value set to an object that will restore the
@@ -191,6 +184,8 @@ private:
      If this command was created without a suppress notifications points,
      then this function returns an empty gdb::optional.  */
   gdb::optional<scoped_restore_tmpl<int>> do_suppress_notification () const;
+
+private:
 
   /* The name of the command.  */
   const char *m_name;
