@@ -5122,12 +5122,12 @@ proc gdb_exit { } {
 # Return true if we can spawn a program on the target and attach to
 # it.
 
-gdb_caching_proc can_spawn_for_attach {
+proc can_spawn_for_attach { } {
     # We use exp_pid to get the inferior's pid, assuming that gives
     # back the pid of the program.  On remote boards, that would give
     # us instead the PID of e.g., the ssh client, etc.
     if [is_remote target] then {
-	unsupported "skip attach tests (target is remote)"
+	verbose -log "can't spawn for attach (target is remote)"
 	return 0
     }
 
@@ -5135,49 +5135,9 @@ gdb_caching_proc can_spawn_for_attach {
     # stub-like, where GDB finds the program already started on
     # initial connection.
     if {[target_info exists use_gdb_stub]} {
-	unsupported "skip attach tests (target is stub)"
+	verbose -log "can't spawn for attach (target is stub)"
 	return 0
     }
-
-    set me "can_spawn_for_attach"
-    set src { int main (void) { sleep (600); return 0; } }
-    if {![gdb_simple_compile $me $src executable]} {
-        return 0
-    }
-
-    set test_spawn_id [spawn_wait_for_attach $obj]
-    set test_pid [spawn_id_get_pid $test_spawn_id]
-
-    gdb_start
-    file delete $obj
-    gdb_test_multiple "attach $test_pid" "can spawn for attach" {
-        -re -wrap "Attaching to process $test_pid\r\n.*No executable file now.*" {
-          pass $gdb_test_name
-          kill_wait_spawned_process $test_spawn_id
-          return 1
-        }
-        -re -wrap "Attaching to process $test_pid\r\n.*ptrace: Operation not permitted\\." {
-          unsupported "$gdb_test_name (Operation not permitted)"
-          kill_wait_spawned_process $test_spawn_id
-          return 0
-        }
-        -re -wrap "Attaching to process $test_pid\r\n.*Attaching to process $test_pid failed" {
-          unsupported "$gdb_test_name (Attaching to process failed)"
-          kill_wait_spawned_process $test_spawn_id
-          return 0
-        }
-        -re -wrap "Attaching to process $test_pid\r\n.*XML support was disabled at compile time.*" {
-          pass $gdb_test_name
-          kill_wait_spawned_process $test_spawn_id
-          return 1
-        }
-        -re "A program is being debugged already.  Kill it. .y or n. " {
-          send_gdb "y\n"
-          exp_continue
-        }
-    }
-
-    kill_wait_spawned_process $test_spawn_id
 
     # Assume yes.
     return 1
@@ -5227,6 +5187,12 @@ proc spawn_id_get_pid { spawn_id } {
 
 proc spawn_wait_for_attach { executable_list } {
     set spawn_id_list {}
+
+    if ![can_spawn_for_attach] {
+	# The caller should have checked can_spawn_for_attach itself
+	# before getting here.
+	error "can't spawn for attach with this target/board"
+    }
 
     foreach {executable} $executable_list {
 	# Note we use Expect's spawn, not Tcl's exec, because with
