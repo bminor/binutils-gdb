@@ -431,12 +431,12 @@ emit_symtypetab_index (ctf_dict_t *fp, ctf_dict_t *symfp, uint32_t *dp,
   return 0;
 }
 
-/* Delete data symbols that have been assigned names from the variable section.
-   Must be called from within ctf_serialize, because that is the only place
-   you can safely delete variables without messing up ctf_rollback.  */
+/* Delete symbols that have been assigned names from the variable section.  Must
+   be called from within ctf_serialize, because that is the only place you can
+   safely delete variables without messing up ctf_rollback.  */
 
 static int
-symtypetab_delete_nonstatic_vars (ctf_dict_t *fp, ctf_dict_t *symfp)
+symtypetab_delete_nonstatics (ctf_dict_t *fp, ctf_dict_t *symfp)
 {
   ctf_dvdef_t *dvd, *nvd;
   ctf_id_t type;
@@ -445,8 +445,10 @@ symtypetab_delete_nonstatic_vars (ctf_dict_t *fp, ctf_dict_t *symfp)
     {
       nvd = ctf_list_next (dvd);
 
-      if (((type = (ctf_id_t) (uintptr_t)
-	    ctf_dynhash_lookup (fp->ctf_objthash, dvd->dvd_name)) > 0)
+      if ((((type = (ctf_id_t) (uintptr_t)
+	     ctf_dynhash_lookup (fp->ctf_objthash, dvd->dvd_name)) > 0)
+	   || (type = (ctf_id_t) (uintptr_t)
+	       ctf_dynhash_lookup (fp->ctf_funchash, dvd->dvd_name)) > 0)
 	  && ctf_dynhash_lookup (symfp->ctf_dynsyms, dvd->dvd_name) != NULL
 	  && type == dvd->dvd_type)
 	ctf_dvd_delete (fp, dvd);
@@ -560,13 +562,12 @@ ctf_symtypetab_sect_sizes (ctf_dict_t *fp, emit_symtypetab_state_t *s,
 
   /* If we are filtering symbols out, those symbols that the linker has not
      reported have now been removed from the ctf_objthash and ctf_funchash.
-     Delete entries from the variable section that duplicate newly-added data
-     symbols.  There's no need to migrate new ones in, because the compiler
-     always emits both a variable and a data symbol simultaneously, and
-     filtering only happens at final link time.  */
+     Delete entries from the variable section that duplicate newly-added
+     symbols.  There's no need to migrate new ones in: we do that (if necessary)
+     in ctf_link_deduplicating_variables.  */
 
   if (s->filter_syms && s->symfp->ctf_dynsyms &&
-      symtypetab_delete_nonstatic_vars (fp, s->symfp) < 0)
+      symtypetab_delete_nonstatics (fp, s->symfp) < 0)
     return -1;
 
   return 0;

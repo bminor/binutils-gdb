@@ -89,13 +89,13 @@ extern "C"
    entries and reorder them accordingly (dropping the indexes in the process).
 
    Variable records (as distinct from data objects) provide a modicum of support
-   for non-ELF systems, mapping a variable name to a CTF type ID.  The variable
-   names are sorted into ASCIIbetical order, permitting binary searching.  We do
-   not define how the consumer maps these variable names to addresses or
+   for non-ELF systems, mapping a variable or function name to a CTF type ID.
+   The names are sorted into ASCIIbetical order, permitting binary searching.
+   We do not define how the consumer maps these variable names to addresses or
    anything else, or indeed what these names represent: they might be names
    looked up at runtime via dlsym() or names extracted at runtime by a debugger
    or anything else the consumer likes.  Variable records with identically-
-   named entries in the data object section are removed.
+   named entries in the data object or function index section are removed.
 
    The data types section is a list of variable size records that represent each
    type, in order by their ID.  The types themselves form a directed graph,

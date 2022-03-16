@@ -807,7 +807,12 @@ ctf_link_deduplicating_close_inputs (ctf_dict_t *fp, ctf_dynhash_t *cu_names,
   return 0;
 }
 
-/* Do a deduplicating link of all variables in the inputs.  */
+/* Do a deduplicating link of all variables in the inputs.
+
+   Also, if we are not omitting the variable section, integrate all symbols from
+   the symtypetabs into the variable section too.  (Duplication with the
+   symtypetab section in the output will be eliminated at serialization time.)  */
+
 static int
 ctf_link_deduplicating_variables (ctf_dict_t *fp, ctf_dict_t **inputs,
 				  size_t ninputs, int cu_mapped)
@@ -820,9 +825,39 @@ ctf_link_deduplicating_variables (ctf_dict_t *fp, ctf_dict_t **inputs,
       ctf_id_t type;
       const char *name;
 
+      /* First the variables on the inputs.  */
+
       while ((type = ctf_variable_next (inputs[i], &it, &name)) != CTF_ERR)
 	{
 	  if (ctf_link_one_variable (fp, inputs[i], name, type, cu_mapped) < 0)
+	    {
+	      ctf_next_destroy (it);
+	      return -1;			/* errno is set for us.  */
+	    }
+	}
+      if (ctf_errno (inputs[i]) != ECTF_NEXT_END)
+	return ctf_set_errno (fp, ctf_errno (inputs[i]));
+
+      /* Next the symbols.  We integrate data symbols even though the compiler
+	 is currently doing the same, to allow the compiler to stop in
+	 future.  */
+
+      while ((type = ctf_symbol_next (inputs[i], &it, &name, 0)) != CTF_ERR)
+	{
+	  if (ctf_link_one_variable (fp, inputs[i], name, type, 1) < 0)
+	    {
+	      ctf_next_destroy (it);
+	      return -1;			/* errno is set for us.  */
+	    }
+	}
+      if (ctf_errno (inputs[i]) != ECTF_NEXT_END)
+	return ctf_set_errno (fp, ctf_errno (inputs[i]));
+
+      /* Finally the function symbols.  */
+
+      while ((type = ctf_symbol_next (inputs[i], &it, &name, 1)) != CTF_ERR)
+	{
+	  if (ctf_link_one_variable (fp, inputs[i], name, type, 1) < 0)
 	    {
 	      ctf_next_destroy (it);
 	      return -1;			/* errno is set for us.  */
