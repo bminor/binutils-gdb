@@ -1,5 +1,10 @@
 2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
+	* elf/common.h (ELFOSABI_AMDGPU_PAL, ELFOSABI_AMDGPU_MESA3D):
+	New.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
 	* elf/amdgpu.h: New.
 	* elf/common.h (ELFOSABI_AMDGPU_HSA): Add.
 
