@@ -114,14 +114,16 @@ struct property_addr_info
    Returns true if PROP could be converted and the static value is passed
    back into VALUE, otherwise returns false.
 
-   If PUSH_INITIAL_VALUE is true, then the top value of ADDR_STACK
-   will be pushed before evaluating a location expression.  */
+   Any values in PUSH_VALUES will be pushed before evaluating the location
+   expression, PUSH_VALUES[0] will be pushed first, then PUSH_VALUES[1],
+   etc.  This means the during evaluation PUSH_VALUES[0] will be at the
+   bottom of the stack.  */
 
 bool dwarf2_evaluate_property (const struct dynamic_prop *prop,
 			       struct frame_info *frame,
 			       const struct property_addr_info *addr_stack,
 			       CORE_ADDR *value,
-			       bool push_initial_value = false);
+			       gdb::array_view<CORE_ADDR> push_values = {});
 
 /* A helper for the compiler interface that compiles a single dynamic
    property to C code.

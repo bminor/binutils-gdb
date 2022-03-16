@@ -2601,7 +2601,7 @@ resolve_dynamic_struct (struct type *type,
 
 	  CORE_ADDR addr;
 	  if (dwarf2_evaluate_property (&prop, nullptr, addr_stack, &addr,
-					true))
+					{addr_stack->addr}))
 	    resolved_type->field (i).set_loc_bitpos
 	      (TARGET_CHAR_BIT * (addr - addr_stack->addr));
 	}
