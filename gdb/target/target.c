@@ -196,6 +196,7 @@ to_string (gdb_thread_options options)
 {
   static constexpr gdb_thread_options::string_mapping mapping[] = {
     MAP_ENUM_FLAG (GDB_THREAD_OPTION_CLONE),
+    MAP_ENUM_FLAG (GDB_THREAD_OPTION_EXIT),
   };
   return options.to_string (mapping);
 }
