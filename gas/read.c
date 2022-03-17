@@ -1940,7 +1940,6 @@ s_mri_common (int small ATTRIBUTE_UNUSED)
   if (S_IS_DEFINED (sym) && !S_IS_COMMON (sym))
     {
       as_bad (_("symbol `%s' is already defined"), S_GET_NAME (sym));
-      ignore_rest_of_line ();
       mri_comment_end (stop, stopc);
       return;
     }
@@ -3980,15 +3979,10 @@ demand_empty_rest_of_line (void)
 void
 ignore_rest_of_line (void)
 {
-  while (input_line_pointer < buffer_limit
-	 && !is_end_of_line[(unsigned char) *input_line_pointer])
-    input_line_pointer++;
-
-  input_line_pointer++;
-
+  while (input_line_pointer < buffer_limit)
+    if (is_end_of_line[(unsigned char) *input_line_pointer++])
+      break;
   /* Return pointing just after end-of-line.  */
-  if (input_line_pointer <= buffer_limit)
-    know (is_end_of_line[(unsigned char) input_line_pointer[-1]]);
 }
 
 /* Sets frag for given symbol to zero_address_frag, except when the

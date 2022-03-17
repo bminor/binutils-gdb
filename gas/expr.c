@@ -1212,9 +1212,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 		{
 		  as_bad (_("expected symbol name"));
 		  (void) restore_line_pointer (c);
-		  if (c != ')')
-		    ignore_rest_of_line ();
-		  else
+		  if (c == ')')
 		    ++input_line_pointer;
 		  break;
 		}
