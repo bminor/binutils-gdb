@@ -943,7 +943,7 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 		return TARGET_XFER_OK;
 	    }
 	}
-      /* FALL THROUGH */
+      return TARGET_XFER_E_IO;
 
     case TARGET_OBJECT_LIBRARIES_AIX:
       if (m_core_gdbarch != nullptr
@@ -964,7 +964,7 @@ core_target::xfer_partial (enum target_object object, const char *annex,
 		return TARGET_XFER_OK;
 	    }
 	}
-      /* FALL THROUGH */
+      return TARGET_XFER_E_IO;
 
     case TARGET_OBJECT_SIGNAL_INFO:
       if (readbuf)
