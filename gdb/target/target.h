@@ -31,6 +31,10 @@ enum gdb_thread_option : unsigned
   /* Tell the target to report TARGET_WAITKIND_THREAD_CLONED events
      for the thread.  */
   GDB_TO_CLONE = 1 << 0,
+
+  /* Tell the target to report TARGET_WAITKIND_THREAD_EXIT events for
+     the thread.  */
+  GDB_TO_EXIT = 1 << 1,
 };
 
 DEF_ENUM_FLAGS_TYPE (enum gdb_thread_option, gdb_thread_options);
