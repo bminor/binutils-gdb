@@ -54,7 +54,7 @@ myinclude_HEADERS = $(srcdir)/../../include/collectorAPI.h \
 	$(srcdir)/../../include/libcollector.h \
 	$(srcdir)/../../include/libfcollector.h
 
-lib_LTLIBRARIES = libgp-collector.la libgp-collectorAPI.la libgp-heap.la \
+pkglib_LTLIBRARIES = libgp-collector.la libgp-collectorAPI.la libgp-heap.la \
 	libgp-sync.la libgp-iotrace.la
 
 libgp_collector_la_SOURCES = $(CSOURCES)
@@ -77,3 +77,7 @@ libgp_iotrace_la_LDFLAGS = $(AM_LDFLAGS)
 libgp_collectorAPI_la_SOURCES = collectorAPI.c
 libgp_collectorAPI_la_LIBADD = -lc -ldl
 
+.PHONY: install-data-local
+
+install-data-local: install-pkglibLTLIBRARIES
+	rm -f $(DESTDIR)/$(pkglibdir)/*.la $(DESTDIR)/$(pkglibdir)/*.a

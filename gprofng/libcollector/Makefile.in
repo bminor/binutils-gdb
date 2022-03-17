@@ -156,8 +156,8 @@ am__uninstall_files_from_dir = { \
     || { echo " ( cd '$$dir' && rm -f" $$files ")"; \
          $(am__cd) "$$dir" && rm -f $$files; }; \
   }
-am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(myincludedir)"
-LTLIBRARIES = $(lib_LTLIBRARIES)
+am__installdirs = "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(myincludedir)"
+LTLIBRARIES = $(pkglib_LTLIBRARIES)
 libgp_collector_la_DEPENDENCIES =
 am__objects_1 = libgp_collector_la-gethrtime.lo \
 	libgp_collector_la-dispatcher.lo libgp_collector_la-iolib.lo \
@@ -456,7 +456,7 @@ myinclude_HEADERS = $(srcdir)/../../include/collectorAPI.h \
 	$(srcdir)/../../include/libcollector.h \
 	$(srcdir)/../../include/libfcollector.h
 
-lib_LTLIBRARIES = libgp-collector.la libgp-collectorAPI.la libgp-heap.la \
+pkglib_LTLIBRARIES = libgp-collector.la libgp-collectorAPI.la libgp-heap.la \
 	libgp-sync.la libgp-iotrace.la
 
 libgp_collector_la_SOURCES = $(CSOURCES)
@@ -529,33 +529,33 @@ $(top_srcdir)/../common/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps
 distclean-hdr:
 	-rm -f lib-config.h stamp-h1
 
-install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+install-pkglibLTLIBRARIES: $(pkglib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
-	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	@list='$(pkglib_LTLIBRARIES)'; test -n "$(pkglibdir)" || list=; \
 	list2=; for p in $$list; do \
 	  if test -f $$p; then \
 	    list2="$$list2 $$p"; \
 	  else :; fi; \
 	done; \
 	test -z "$$list2" || { \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(libdir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(libdir)" || exit 1; \
-	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(libdir)'"; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(libdir)"; \
+	  echo " $(MKDIR_P) '$(DESTDIR)$(pkglibdir)'"; \
+	  $(MKDIR_P) "$(DESTDIR)$(pkglibdir)" || exit 1; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 '$(DESTDIR)$(pkglibdir)'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL) $(INSTALL_STRIP_FLAG) $$list2 "$(DESTDIR)$(pkglibdir)"; \
 	}
 
-uninstall-libLTLIBRARIES:
+uninstall-pkglibLTLIBRARIES:
 	@$(NORMAL_UNINSTALL)
-	@list='$(lib_LTLIBRARIES)'; test -n "$(libdir)" || list=; \
+	@list='$(pkglib_LTLIBRARIES)'; test -n "$(pkglibdir)" || list=; \
 	for p in $$list; do \
 	  $(am__strip_dir) \
-	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(libdir)/$$f'"; \
-	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(libdir)/$$f"; \
+	  echo " $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f '$(DESTDIR)$(pkglibdir)/$$f'"; \
+	  $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=uninstall rm -f "$(DESTDIR)$(pkglibdir)/$$f"; \
 	done
 
-clean-libLTLIBRARIES:
-	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
-	@list='$(lib_LTLIBRARIES)'; \
+clean-pkglibLTLIBRARIES:
+	-test -z "$(pkglib_LTLIBRARIES)" || rm -f $(pkglib_LTLIBRARIES)
+	@list='$(pkglib_LTLIBRARIES)'; \
 	locs=`for p in $$list; do echo $$p; done | \
 	      sed 's|^[^/]*$$|.|; s|/[^/]*$$||; s|$$|/so_locations|' | \
 	      sort -u`; \
@@ -565,19 +565,19 @@ clean-libLTLIBRARIES:
 	}
 
 libgp-collector.la: $(libgp_collector_la_OBJECTS) $(libgp_collector_la_DEPENDENCIES) $(EXTRA_libgp_collector_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libgp_collector_la_LINK) -rpath $(libdir) $(libgp_collector_la_OBJECTS) $(libgp_collector_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libgp_collector_la_LINK) -rpath $(pkglibdir) $(libgp_collector_la_OBJECTS) $(libgp_collector_la_LIBADD) $(LIBS)
 
 libgp-collectorAPI.la: $(libgp_collectorAPI_la_OBJECTS) $(libgp_collectorAPI_la_DEPENDENCIES) $(EXTRA_libgp_collectorAPI_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(LINK) -rpath $(libdir) $(libgp_collectorAPI_la_OBJECTS) $(libgp_collectorAPI_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(LINK) -rpath $(pkglibdir) $(libgp_collectorAPI_la_OBJECTS) $(libgp_collectorAPI_la_LIBADD) $(LIBS)
 
 libgp-heap.la: $(libgp_heap_la_OBJECTS) $(libgp_heap_la_DEPENDENCIES) $(EXTRA_libgp_heap_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libgp_heap_la_LINK) -rpath $(libdir) $(libgp_heap_la_OBJECTS) $(libgp_heap_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libgp_heap_la_LINK) -rpath $(pkglibdir) $(libgp_heap_la_OBJECTS) $(libgp_heap_la_LIBADD) $(LIBS)
 
 libgp-iotrace.la: $(libgp_iotrace_la_OBJECTS) $(libgp_iotrace_la_DEPENDENCIES) $(EXTRA_libgp_iotrace_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libgp_iotrace_la_LINK) -rpath $(libdir) $(libgp_iotrace_la_OBJECTS) $(libgp_iotrace_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libgp_iotrace_la_LINK) -rpath $(pkglibdir) $(libgp_iotrace_la_OBJECTS) $(libgp_iotrace_la_LIBADD) $(LIBS)
 
 libgp-sync.la: $(libgp_sync_la_OBJECTS) $(libgp_sync_la_DEPENDENCIES) $(EXTRA_libgp_sync_la_DEPENDENCIES) 
-	$(AM_V_CCLD)$(libgp_sync_la_LINK) -rpath $(libdir) $(libgp_sync_la_OBJECTS) $(libgp_sync_la_LIBADD) $(LIBS)
+	$(AM_V_CCLD)$(libgp_sync_la_LINK) -rpath $(pkglibdir) $(libgp_sync_la_OBJECTS) $(libgp_sync_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -1003,7 +1003,7 @@ check-am: all-am
 check: check-am
 all-am: Makefile $(LTLIBRARIES) $(HEADERS) lib-config.h
 installdirs:
-	for dir in "$(DESTDIR)$(libdir)" "$(DESTDIR)$(myincludedir)"; do \
+	for dir in "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(myincludedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1038,7 +1038,7 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-generic clean-libLTLIBRARIES clean-libtool \
+clean-am: clean-generic clean-libtool clean-pkglibLTLIBRARIES \
 	mostlyclean-am
 
 distclean: distclean-am
@@ -1060,13 +1060,13 @@ info: info-am
 
 info-am:
 
-install-data-am: install-myincludeHEADERS
+install-data-am: install-data-local install-myincludeHEADERS
 
 install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-libLTLIBRARIES
+install-exec-am: install-pkglibLTLIBRARIES
 
 install-html: install-html-am
 
@@ -1108,30 +1108,37 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-libLTLIBRARIES uninstall-myincludeHEADERS
+uninstall-am: uninstall-myincludeHEADERS uninstall-pkglibLTLIBRARIES
 
 .MAKE: all install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--refresh check check-am clean \
-	clean-cscope clean-generic clean-libLTLIBRARIES clean-libtool \
-	cscope cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
-	dist-gzip dist-lzip dist-shar dist-tarZ dist-xz dist-zip \
-	distcheck distclean distclean-compile distclean-generic \
-	distclean-hdr distclean-libtool distclean-tags distcleancheck \
-	distdir distuninstallcheck dvi dvi-am html html-am info \
-	info-am install install-am install-data install-data-am \
-	install-dvi install-dvi-am install-exec install-exec-am \
-	install-html install-html-am install-info install-info-am \
-	install-libLTLIBRARIES install-man install-myincludeHEADERS \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags tags-am uninstall uninstall-am \
-	uninstall-libLTLIBRARIES uninstall-myincludeHEADERS
+	clean-cscope clean-generic clean-libtool \
+	clean-pkglibLTLIBRARIES cscope cscopelist-am ctags ctags-am \
+	dist dist-all dist-bzip2 dist-gzip dist-lzip dist-shar \
+	dist-tarZ dist-xz dist-zip distcheck distclean \
+	distclean-compile distclean-generic distclean-hdr \
+	distclean-libtool distclean-tags distcleancheck distdir \
+	distuninstallcheck dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am \
+	install-data-local install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-myincludeHEADERS \
+	install-pdf install-pdf-am install-pkglibLTLIBRARIES \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags tags-am uninstall uninstall-am uninstall-myincludeHEADERS \
+	uninstall-pkglibLTLIBRARIES
 
 .PRECIOUS: Makefile
 
+
+.PHONY: install-data-local
+
+install-data-local: install-pkglibLTLIBRARIES
+	rm -f $(DESTDIR)/$(pkglibdir)/*.la $(DESTDIR)/$(pkglibdir)/*.a
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

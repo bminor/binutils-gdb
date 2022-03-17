@@ -167,7 +167,7 @@ collect::putenv_libcollector_ld_misc ()
       char *fname;
       if (*s == '/')
 	{
-	  fname = dbe_sprintf ("%s/%s", s, LIBGP_COLLECTOR);
+	  fname = dbe_sprintf ("%s/%s/%s", s, PACKAGE, LIBGP_COLLECTOR);
 	  if (access (fname, R_OK | F_OK) == 0)
 	    {
 	      if (++cnt != 1)
@@ -177,12 +177,12 @@ collect::putenv_libcollector_ld_misc ()
 	}
       else
 	{
-	  fname = dbe_sprintf ("%s/%s/%s", run_dir, s, LIBGP_COLLECTOR);
+	  fname = dbe_sprintf ("%s/%s/%s/%s", run_dir, s, PACKAGE, LIBGP_COLLECTOR);
 	  if (access (fname, R_OK | F_OK) == 0)
 	    {
 	      if (++cnt != 1)
 		sb.append (':');
-	      sb.appendf ("%s/%s", run_dir, s);
+	      sb.appendf ("%s/%s/%s", run_dir, s, PACKAGE);
 	    }
 	}
       free (fname);

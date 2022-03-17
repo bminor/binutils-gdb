@@ -118,7 +118,7 @@ MAINTAINERCLEANFILES = $(man_MANS)
 EXTRA_DIST = $(man_MANS)
 
 
-lib_LTLIBRARIES = $(LIBGPROFNG)
+pkglib_LTLIBRARIES = $(LIBGPROFNG)
 libgprofng_la_SOURCES = $(CCSOURCES) $(CSOURCES)
 libgprofng_la_LDFLAGS = -version-info 0:0:0
 libgprofng_la_LIBADD = $(top_builddir)/../opcodes/libopcodes.la \
@@ -201,3 +201,7 @@ endif
 # so ensure that the necessary libraries are built at dist time.
 dist-hook: $(LIBGPROFNG)
 
+.PHONY: install-data-local
+
+install-data-local: install-pkglibLTLIBRARIES
+	rm -f $(DESTDIR)/$(pkglibdir)/*.la $(DESTDIR)/$(pkglibdir)/*.a

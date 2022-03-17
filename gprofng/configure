@@ -635,7 +635,6 @@ LTLIBOBJS
 LIBOBJS
 BUILD_SUBDIRS
 CLOCK_GETTIME_LINK
-GPROFNG_LIBDIR
 GPROFNG_CPPFLAGS
 GPROFNG_CFLAGS
 LD_NO_AS_NEEDED
@@ -12137,7 +12136,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12140 "configure"
+#line 12139 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12243,7 +12242,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12246 "configure"
+#line 12245 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16694,8 +16693,6 @@ GPROFNG_CFLAGS=${gprofng_cflags}
 
 
 GPROFNG_CPPFLAGS=${gprofng_cppflags}
-
-GPROFNG_LIBDIR=${libdir}
 
 
 ac_fn_c_check_decl "$LINENO" "basename" "ac_cv_have_decl_basename" "$ac_includes_default"
