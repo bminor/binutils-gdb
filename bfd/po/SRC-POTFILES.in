@@ -44,6 +44,7 @@ corefile.c
 cpu-aarch64.c
 cpu-aarch64.h
 cpu-alpha.c
+cpu-amdgcn.c
 cpu-arc.c
 cpu-arm.c
 cpu-arm.h
@@ -239,6 +240,7 @@ elf32-xtensa.c
 elf32-z80.c
 elf32.c
 elf64-alpha.c
+elf64-amdgcn.c
 elf64-bpf.c
 elf64-gen.c
 elf64-hppa.c
