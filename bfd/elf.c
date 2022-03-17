@@ -6028,6 +6028,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	      hash->root.u.def.section = bfd_abs_section_ptr;
 	    }
 
+	  hash->size = bed->s->sizeof_ehdr + elf_program_header_size (abfd);
 	  hash->root.type = bfd_link_hash_defined;
 	  hash->def_regular = 1;
 	  hash->non_elf = 0;
