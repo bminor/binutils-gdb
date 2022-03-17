@@ -20,6 +20,7 @@ m4_include([../../bfd/version.m4])
 AC_INIT([gprofng], BFD_VERSION)
 AC_CONFIG_MACRO_DIRS([../../config ../..])
 AC_CONFIG_AUX_DIR(../..)
+AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 

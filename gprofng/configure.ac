@@ -18,6 +18,7 @@ dnl <http://www.gnu.org/licenses/>.
 
 m4_include([../bfd/version.m4])
 AC_INIT([gprofng], BFD_VERSION)
+AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE([subdir-objects])
 AM_MAINTAINER_MODE
 

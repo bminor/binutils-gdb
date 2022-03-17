@@ -106,11 +106,13 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+target_triplet = @target@
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../../config/depstand.m4 \
 	$(top_srcdir)/../../config/lead-dot.m4 \
 	$(top_srcdir)/../../config/override.m4 \
+	$(top_srcdir)/../../config/warnings.m4 \
 	$(top_srcdir)/../../libtool.m4 \
 	$(top_srcdir)/../../ltoptions.m4 \
 	$(top_srcdir)/../../ltsugar.m4 \
@@ -412,7 +414,11 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
 sysconfdir = @sysconfdir@
+target = @target@
 target_alias = @target_alias@
+target_cpu = @target_cpu@
+target_os = @target_os@
+target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
