@@ -575,10 +575,11 @@ private: /* Back to private.  */
      exited.  */
   void check_zombie_leaders ();
 
-  /* Convenience function that is called when the kernel reports an exit
-     event.  This decides whether to report the event to GDB as a
-     process exit event, a thread exit event, or to suppress the
-     event.  */
+  /* Convenience function that is called when we're about to return an
+     event to the core.  If the event is an exit or signalled event,
+     then this decides whether to report it as process-wide event, as
+     a thread exit event, or to suppress it.  All other event kinds
+     are passed through unmodified.  */
   ptid_t filter_exit_event (lwp_info *event_child,
 			    target_waitstatus *ourstatus);
 
