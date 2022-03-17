@@ -6287,6 +6287,18 @@ ada_is_ignored_field (struct type *type, int field_num)
        should not be ignored either.  */
     if (name[0] == '_' && !startswith (name, "_parent"))
       return 1;
+
+    /* The compiler doesn't document this, but sometimes it emits
+       a field whose name starts with a capital letter, like 'V148s'.
+       These aren't marked as artificial in any way, but we know they
+       should be ignored.  However, wrapper fields should not be
+       ignored.  */
+    if (name[0] == 'S' || name[0] == 'R' || name[0] == 'O')
+      {
+	/* Wrapper field.  */
+      }
+    else if (isupper (name[0]))
+      return 1;
   }
 
   /* If this is the dispatch table of a tagged type or an interface tag,
@@ -6422,9 +6434,10 @@ ada_tag_value_at_base_address (struct value *obj)
   if (is_ada95_tag (tag))
     return obj;
 
-  ptr_type = language_lookup_primitive_type
-    (language_def (language_ada), target_gdbarch(), "storage_offset");
-  ptr_type = lookup_pointer_type (ptr_type);
+  struct type *offset_type
+    = language_lookup_primitive_type (language_def (language_ada),
+				      target_gdbarch(), "storage_offset");
+  ptr_type = lookup_pointer_type (offset_type);
   val = value_cast (ptr_type, tag);
   if (!val)
     return obj;
@@ -6456,16 +6469,28 @@ ada_tag_value_at_base_address (struct value *obj)
   if (offset_to_top == -1)
     return obj;
 
-  /* OFFSET_TO_TOP used to be a positive value to be subtracted
-     from the base address.  This was however incompatible with
-     C++ dispatch table: C++ uses a *negative* value to *add*
-     to the base address.  Ada's convention has therefore been
-     changed in GNAT 19.0w 20171023: since then, C++ and Ada
-     use the same convention.  Here, we support both cases by
-     checking the sign of OFFSET_TO_TOP.  */
-
-  if (offset_to_top > 0)
-    offset_to_top = -offset_to_top;
+  /* Storage_Offset'Last is used to indicate that a dynamic offset to
+     top is used.  In this situation the offset is stored just after
+     the tag, in the object itself.  */
+  ULONGEST last = (((ULONGEST) 1) << (8 * TYPE_LENGTH (offset_type) - 1)) - 1;
+  if (offset_to_top == last)
+    {
+      struct value *tem = value_addr (tag);
+      tem = value_ptradd (tem, 1);
+      tem = value_cast (ptr_type, tem);
+      offset_to_top = value_as_long (value_ind (tem));
+    }
+  else if (offset_to_top > 0)
+    {
+      /* OFFSET_TO_TOP used to be a positive value to be subtracted
+	 from the base address.  This was however incompatible with
+	 C++ dispatch table: C++ uses a *negative* value to *add*
+	 to the base address.  Ada's convention has therefore been
+	 changed in GNAT 19.0w 20171023: since then, C++ and Ada
+	 use the same convention.  Here, we support both cases by
+	 checking the sign of OFFSET_TO_TOP.  */
+      offset_to_top = -offset_to_top;
+    }
 
   base_address = value_address (obj) + offset_to_top;
   tag = value_tag_from_contents_and_address (obj_type, NULL, base_address);
