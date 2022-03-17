@@ -1,5 +1,10 @@
 -*- text -*-
 
+Changes in 2.39:
+
+* Remove (rudimentary) support for the x86-64 sub-architectures Intel L1OM and
+  Intel K1OM.
+
 Changes in 2.38:
 
 * Add support for AArch64 system registers that were missing in previous

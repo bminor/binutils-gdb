@@ -630,8 +630,6 @@ if [gas_32_check] then {
 	run_dump_test "ifunc"
 	run_list_test "ifunc-2"
 	run_dump_test "ifunc-3"
-	run_list_test "l1om-inval" "-march=l1om --32"
-	run_list_test "k1om-inval" "-march=k1om --32"
 	run_dump_test "localpic"
 	run_dump_test "debug1"
 
@@ -1285,8 +1283,6 @@ if [gas_64_check] then {
 	run_dump_test "x86-64-opcode-inval"
 	run_dump_test "x86-64-opcode-inval-intel"
 	run_dump_test "intel-got64"
-	run_dump_test "l1om"
-	run_dump_test "k1om"
 	run_dump_test "x86-64-localpic"
 	run_dump_test "debug1"
 	run_dump_test "x86-64-mpx-branch-1"

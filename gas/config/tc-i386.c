@@ -976,10 +976,6 @@ static const arch_entry cpu_arch[] =
     CPU_CORE2_FLAGS, 0 },
   { STRING_COMMA_LEN ("corei7"), PROCESSOR_COREI7,
     CPU_COREI7_FLAGS, 0 },
-  { STRING_COMMA_LEN ("l1om"), PROCESSOR_L1OM,
-    CPU_L1OM_FLAGS, 0 },
-  { STRING_COMMA_LEN ("k1om"), PROCESSOR_K1OM,
-    CPU_K1OM_FLAGS, 0 },
   { STRING_COMMA_LEN ("iamcu"), PROCESSOR_IAMCU,
     CPU_IAMCU_FLAGS, 0 },
   { STRING_COMMA_LEN ("k6"), PROCESSOR_K6,
@@ -1599,8 +1595,6 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	    case PROCESSOR_CORE:
 	    case PROCESSOR_CORE2:
 	    case PROCESSOR_COREI7:
-	    case PROCESSOR_L1OM:
-	    case PROCESSOR_K1OM:
 	    case PROCESSOR_GENERIC64:
 	    case PROCESSOR_K6:
 	    case PROCESSOR_ATHLON:
@@ -1656,8 +1650,6 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	    case PROCESSOR_CORE:
 	    case PROCESSOR_CORE2:
 	    case PROCESSOR_COREI7:
-	    case PROCESSOR_L1OM:
-	    case PROCESSOR_K1OM:
 	      if (fragP->tc_frag_data.isa_flags.bitfield.cpunop)
 		patt = alt_patt;
 	      else
@@ -2825,7 +2817,7 @@ check_cpu_arch_compatible (const char *name ATTRIBUTE_UNUSED,
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   static const char *arch;
 
-  /* Intel LIOM is only supported on ELF.  */
+  /* Intel MCU is only supported on ELF.  */
   if (!IS_ELF)
     return;
 
@@ -2841,16 +2833,6 @@ check_cpu_arch_compatible (const char *name ATTRIBUTE_UNUSED,
   /* If we are targeting Intel MCU, we must enable it.  */
   if ((get_elf_backend_data (stdoutput)->elf_machine_code == EM_IAMCU)
       == new_flag.bitfield.cpuiamcu)
-    return;
-
-  /* If we are targeting Intel L1OM, we must enable it.  */
-  if (get_elf_backend_data (stdoutput)->elf_machine_code != EM_L1OM
-      || new_flag.bitfield.cpul1om)
-    return;
-
-  /* If we are targeting Intel K1OM, we must enable it.  */
-  if (get_elf_backend_data (stdoutput)->elf_machine_code != EM_K1OM
-      || new_flag.bitfield.cpuk1om)
     return;
 
   as_bad (_("`%s' is not supported on `%s'"), name, arch);
@@ -2992,21 +2974,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 enum bfd_architecture
 i386_arch (void)
 {
-  if (cpu_arch_isa == PROCESSOR_L1OM)
-    {
-      if (OUTPUT_FLAVOR != bfd_target_elf_flavour
-	  || flag_code != CODE_64BIT)
-	as_fatal (_("Intel L1OM is 64bit ELF only"));
-      return bfd_arch_l1om;
-    }
-  else if (cpu_arch_isa == PROCESSOR_K1OM)
-    {
-      if (OUTPUT_FLAVOR != bfd_target_elf_flavour
-	  || flag_code != CODE_64BIT)
-	as_fatal (_("Intel K1OM is 64bit ELF only"));
-      return bfd_arch_k1om;
-    }
-  else if (cpu_arch_isa == PROCESSOR_IAMCU)
+  if (cpu_arch_isa == PROCESSOR_IAMCU)
     {
       if (OUTPUT_FLAVOR != bfd_target_elf_flavour
 	  || flag_code == CODE_64BIT)
@@ -3022,21 +2990,7 @@ i386_mach (void)
 {
   if (startswith (default_arch, "x86_64"))
     {
-      if (cpu_arch_isa == PROCESSOR_L1OM)
-	{
-	  if (OUTPUT_FLAVOR != bfd_target_elf_flavour
-	      || default_arch[6] != '\0')
-	    as_fatal (_("Intel L1OM is 64bit ELF only"));
-	  return bfd_mach_l1om;
-	}
-      else if (cpu_arch_isa == PROCESSOR_K1OM)
-	{
-	  if (OUTPUT_FLAVOR != bfd_target_elf_flavour
-	      || default_arch[6] != '\0')
-	    as_fatal (_("Intel K1OM is 64bit ELF only"));
-	  return bfd_mach_k1om;
-	}
-      else if (default_arch[6] == '\0')
+      if (default_arch[6] == '\0')
 	return bfd_mach_x86_64;
       else
 	return bfd_mach_x64_32;
@@ -14071,19 +14025,7 @@ i386_target_format (void)
 	    format = ELF_TARGET_FORMAT32;
 	    break;
 	  }
-	if (cpu_arch_isa == PROCESSOR_L1OM)
-	  {
-	    if (x86_elf_abi != X86_64_ABI)
-	      as_fatal (_("Intel L1OM is 64bit only"));
-	    return ELF_TARGET_L1OM_FORMAT;
-	  }
-	else if (cpu_arch_isa == PROCESSOR_K1OM)
-	  {
-	    if (x86_elf_abi != X86_64_ABI)
-	      as_fatal (_("Intel K1OM is 64bit only"));
-	    return ELF_TARGET_K1OM_FORMAT;
-	  }
-	else if (cpu_arch_isa == PROCESSOR_IAMCU)
+	if (cpu_arch_isa == PROCESSOR_IAMCU)
 	  {
 	    if (x86_elf_abi != I386_ABI)
 	      as_fatal (_("Intel MCU is 32bit only"));
