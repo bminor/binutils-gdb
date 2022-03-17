@@ -571,6 +571,10 @@ enum dynamic_prop_node_kind
   /* A property holding variant parts.  */
   DYN_PROP_VARIANT_PARTS,
 
+  /* A property representing DW_AT_rank. The presence of this attribute
+     indicates that the object is of assumed rank array type.  */
+  DYN_PROP_RANK,
+
   /* A property holding the size of the type.  */
   DYN_PROP_BYTE_SIZE,
 };
@@ -2088,6 +2092,7 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
 #define TYPE_RVALUE_REFERENCE_TYPE(thistype) (thistype)->rvalue_reference_type
 #define TYPE_CHAIN(thistype) (thistype)->chain
+#define TYPE_DYN_PROP(thistype)  TYPE_MAIN_TYPE(thistype)->dyn_prop_list
 /* * Note that if thistype is a TYPEDEF type, you have to call check_typedef.
    But check_typedef does set the TYPE_LENGTH of the TYPEDEF type,
    so you only have to call check_typedef once.  Since allocate_value
@@ -2130,6 +2135,8 @@ extern bool set_type_align (struct type *, ULONGEST);
   ((thistype)->dyn_prop (DYN_PROP_ALLOCATED))
 #define TYPE_ASSOCIATED_PROP(thistype) \
   ((thistype)->dyn_prop (DYN_PROP_ASSOCIATED))
+#define TYPE_RANK_PROP(thistype) \
+  ((thistype)->dyn_prop (DYN_PROP_RANK))
 
 /* C++ */
 

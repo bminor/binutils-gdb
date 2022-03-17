@@ -2199,7 +2199,7 @@ static struct type *resolve_dynamic_type_internal
 static struct type *
 resolve_dynamic_range (struct type *dyn_range_type,
 		       struct property_addr_info *addr_stack,
-		       bool resolve_p = true)
+		       int rank, bool resolve_p = true)
 {
   CORE_ADDR value;
   struct type *static_range_type, *static_target_type;
@@ -2208,13 +2208,15 @@ resolve_dynamic_range (struct type *dyn_range_type,
   gdb_assert (dyn_range_type->code () == TYPE_CODE_RANGE);
 
   const struct dynamic_prop *prop = &dyn_range_type->bounds ()->low;
-  if (resolve_p && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+  if (resolve_p && dwarf2_evaluate_property (prop, NULL, addr_stack, &value,
+					     { (CORE_ADDR) rank }))
     low_bound.set_const_val (value);
   else
     low_bound.set_undefined ();
 
   prop = &dyn_range_type->bounds ()->high;
-  if (resolve_p && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+  if (resolve_p && dwarf2_evaluate_property (prop, NULL, addr_stack, &value,
+					     { (CORE_ADDR) rank }))
     {
       high_bound.set_const_val (value);
 
@@ -2227,7 +2229,8 @@ resolve_dynamic_range (struct type *dyn_range_type,
 
   bool byte_stride_p = dyn_range_type->bounds ()->flag_is_byte_stride;
   prop = &dyn_range_type->bounds ()->stride;
-  if (resolve_p && dwarf2_evaluate_property (prop, NULL, addr_stack, &value))
+  if (resolve_p && dwarf2_evaluate_property (prop, NULL, addr_stack, &value,
+					     { (CORE_ADDR) rank }))
     {
       stride.set_const_val (value);
 
@@ -2258,18 +2261,29 @@ resolve_dynamic_range (struct type *dyn_range_type,
   return static_range_type;
 }
 
-/* Resolves dynamic bound values of an array or string type TYPE to static
-   ones.  ADDR_STACK is a stack of struct property_addr_info to be used if
-   needed during the dynamic resolution.
+/* Helper function for resolve_dynamic_array_or_string.  This function
+   resolves the properties for a single array at RANK within a nested array
+   of arrays structure.  The RANK value is always greater than 0, and
+   starts at it's maximum value and goes down by 1 for each recursive call
+   to this function.  So, for a 3-dimensional array, the first call to this
+   function has RANK == 3, then we call ourselves recursively with RANK ==
+   2, than again with RANK == 1, and at that point we should return.
+
+   TYPE is updated as the dynamic properties are resolved, and so, should
+   be a copy of the dynamic type, rather than the original dynamic type
+   itself.
+
+   ADDR_STACK is a stack of struct property_addr_info to be used if needed
+   during the dynamic resolution.
 
    When RESOLVE_P is true then the dynamic properties of TYPE are
    evaluated, otherwise the dynamic properties of TYPE are not evaluated,
    instead we assume the array is not allocated/associated yet.  */
 
 static struct type *
-resolve_dynamic_array_or_string (struct type *type,
-				 struct property_addr_info *addr_stack,
-				 bool resolve_p = true)
+resolve_dynamic_array_or_string_1 (struct type *type,
+				   struct property_addr_info *addr_stack,
+				   int rank, bool resolve_p)
 {
   CORE_ADDR value;
   struct type *elt_type;
@@ -2283,7 +2297,9 @@ resolve_dynamic_array_or_string (struct type *type,
   gdb_assert (type->code () == TYPE_CODE_ARRAY
 	      || type->code () == TYPE_CODE_STRING);
 
-  type = copy_type (type);
+  /* The outer resolve_dynamic_array_or_string should ensure we always have
+     a rank of at least 1 when we get here.  */
+  gdb_assert (rank > 0);
 
   /* Resolve the allocated and associated properties before doing anything
      else.  If an array is not allocated or not associated then (at least
@@ -2313,11 +2329,16 @@ resolve_dynamic_array_or_string (struct type *type,
     }
 
   range_type = check_typedef (type->index_type ());
-  range_type = resolve_dynamic_range (range_type, addr_stack, resolve_p);
+  range_type
+    = resolve_dynamic_range (range_type, addr_stack, rank, resolve_p);
 
   ary_dim = check_typedef (TYPE_TARGET_TYPE (type));
   if (ary_dim != NULL && ary_dim->code () == TYPE_CODE_ARRAY)
-    elt_type = resolve_dynamic_array_or_string (ary_dim, addr_stack, resolve_p);
+    {
+      ary_dim = copy_type (ary_dim);
+      elt_type = resolve_dynamic_array_or_string_1 (ary_dim, addr_stack,
+						    rank - 1, resolve_p);
+    }
   else
     elt_type = TYPE_TARGET_TYPE (type);
 
@@ -2343,6 +2364,78 @@ resolve_dynamic_array_or_string (struct type *type,
 
   return create_array_type_with_stride (type, elt_type, range_type, NULL,
 					bit_stride);
+}
+
+/* Resolve an array or string type with dynamic properties, return a new
+   type with the dynamic properties resolved to actual values.  The
+   ADDR_STACK represents the location of the object being resolved.  */
+
+static struct type *
+resolve_dynamic_array_or_string (struct type *type,
+				 struct property_addr_info *addr_stack)
+{
+  CORE_ADDR value;
+  int rank = 0;
+
+  /* For dynamic type resolution strings can be treated like arrays of
+     characters.  */
+  gdb_assert (type->code () == TYPE_CODE_ARRAY
+	      || type->code () == TYPE_CODE_STRING);
+
+  type = copy_type (type);
+
+  /* Resolve the rank property to get rank value.  */
+  struct dynamic_prop *prop = TYPE_RANK_PROP (type);
+  if (dwarf2_evaluate_property (prop, nullptr, addr_stack, &value))
+    {
+      prop->set_const_val (value);
+      rank = value;
+
+      if (rank == 0)
+	{
+	  /* The dynamic property list juggling below was from the original
+	     patch.  I don't understand what this is all about, so I've
+	     commented it out for now and added the following error.  */
+	  error (_("failed to resolve dynamic array rank"));
+	}
+      else if (type->code () == TYPE_CODE_STRING && rank != 1)
+	{
+	  /* What would this even mean?  A string with a dynamic rank
+	     greater than 1.  */
+	  error (_("unable to handle string with dynamic rank greater than 1"));
+	}
+      else if (rank > 1)
+	{
+	  /* Arrays with dynamic rank are initially just an array type
+	     with a target type that is the array element.
+
+	     However, now we know the rank of the array we need to build
+	     the array of arrays structure that GDB expects, that is we
+	     need an array type that has a target which is an array type,
+	     and so on, until eventually, we have the element type at the
+	     end of the chain.  Create all the additional array types here
+	     by copying the top level array type.  */
+	  struct type *element_type = TYPE_TARGET_TYPE (type);
+	  struct type *rank_type = type;
+	  for (int i = 1; i < rank; i++)
+	    {
+	      TYPE_TARGET_TYPE (rank_type) = copy_type (rank_type);
+	      rank_type = TYPE_TARGET_TYPE (rank_type);
+	    }
+	  TYPE_TARGET_TYPE (rank_type) = element_type;
+	}
+    }
+  else
+    {
+      rank = 1;
+
+      for (struct type *tmp_type = check_typedef (TYPE_TARGET_TYPE (type));
+	   tmp_type->code () == TYPE_CODE_ARRAY;
+	   tmp_type = check_typedef (TYPE_TARGET_TYPE (tmp_type)))
+	++rank;
+    }
+
+  return resolve_dynamic_array_or_string_1 (type, addr_stack, rank, true);
 }
 
 /* Resolve dynamic bounds of members of the union TYPE to static
@@ -2730,7 +2823,11 @@ resolve_dynamic_type_internal (struct type *type,
 	  break;
 
 	case TYPE_CODE_RANGE:
-	  resolved_type = resolve_dynamic_range (type, addr_stack);
+	  /* Pass 1 for the rank value here.  The assumption is that this
+	     rank value is not actually required for the resolution of the
+	     dynamic range, otherwise, we'd be resolving this range within
+	     the context of a dynamic array.  */
+	  resolved_type = resolve_dynamic_range (type, addr_stack, 1);
 	  break;
 
 	case TYPE_CODE_UNION:
