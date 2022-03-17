@@ -628,8 +628,6 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuPREFETCHWT1),
   BITFIELD (CpuSE1),
   BITFIELD (CpuCLWB),
-  BITFIELD (Cpu64),
-  BITFIELD (CpuNo64),
   BITFIELD (CpuMPX),
   BITFIELD (CpuAVX512IFMA),
   BITFIELD (CpuAVX512VBMI),
@@ -676,6 +674,8 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuINVLPGB),
   BITFIELD (CpuTLBSYNC),
   BITFIELD (CpuSNP),
+  BITFIELD (Cpu64),
+  BITFIELD (CpuNo64),
 #ifdef CpuUnused
   BITFIELD (CpuUnused),
 #endif
@@ -1068,9 +1068,10 @@ process_i386_cpu_flag (FILE *table, char *flag, int macro,
       else
 	next = flag + 1;
 
-      /* First we turn on everything except for cpu64.  */
+      /* First we turn on everything except for cpu64, cpuno64, and - if
+         present - the padding field.  */
       for (i = 0; i < ARRAY_SIZE (flags); i++)
-	if (flags[i].position != Cpu64)
+	if (flags[i].position < Cpu64)
 	  flags[i].value = 1;
 
       /* Turn off selective bits.  */

@@ -272,6 +272,9 @@ enum
   CpuTLBSYNC,
   /* SNP instructions required */
   CpuSNP,
+
+  /* NOTE: These last three items need to remain last and in this order. */
+
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
@@ -417,6 +420,7 @@ typedef union i386_cpu_flags
       unsigned int cpuinvlpgb:1;
       unsigned int cputlbsync:1;
       unsigned int cpusnp:1;
+      /* NOTE: These last three fields need to remain last and in this order. */
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
 #ifdef CpuUnused
