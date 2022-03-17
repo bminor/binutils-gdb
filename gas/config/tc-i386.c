@@ -13262,7 +13262,7 @@ md_parse_option (int c, const char *arg)
 	    *next++ = '\0';
 	  for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
 	    {
-	      if (strcmp (arch, cpu_arch [j].name) == 0)
+	      if (arch == saved && strcmp (arch, cpu_arch [j].name) == 0)
 		{
 		  /* Processor.  */
 		  if (! cpu_arch[j].flags.bitfield.cpui386)

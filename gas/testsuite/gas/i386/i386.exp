@@ -199,6 +199,7 @@ if [gas_32_check] then {
     run_list_test "arch-10-2" "-march=i686 -I${srcdir}/$subdir -al"
     run_list_test "arch-10-3" "-march=i686+mmx+sse4.2 -I${srcdir}/$subdir -al"
     run_list_test "arch-10-4" "-march=i686+mmx+sse4+vmx+smx -I${srcdir}/$subdir -al"
+    run_list_test "arch-10-5" "-march=generic32+i686 -al"
     run_dump_test "arch-11"
     run_dump_test "arch-12"
     run_dump_test "arch-13"
