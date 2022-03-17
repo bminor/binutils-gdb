@@ -46,7 +46,7 @@ typedef struct initializer
 static initializer cpu_flag_init[] =
 {
   { "CPU_UNKNOWN_FLAGS",
-    "unknown" },
+    "~CpuIAMCU" },
   { "CPU_GENERIC32_FLAGS",
     "Cpu186|Cpu286|Cpu386" },
   { "CPU_GENERIC64_FLAGS",
@@ -1044,22 +1044,15 @@ process_i386_cpu_flag (FILE *table, char *flag, int macro,
 		       const char *comma, const char *indent,
 		       int lineno)
 {
-  char *str, *next, *last;
+  char *str, *next = flag, *last;
   unsigned int i;
+  int value = 1;
   bitfield flags [ARRAY_SIZE (cpu_flags)];
 
   /* Copy the default cpu flags.  */
   memcpy (flags, cpu_flags, sizeof (cpu_flags));
 
-  if (strcasecmp (flag, "unknown") == 0)
-    {
-      /* We turn on everything except for cpu64 in case of
-	 CPU_UNKNOWN_FLAGS.  */
-      for (i = 0; i < ARRAY_SIZE (flags); i++)
-	if (flags[i].position != Cpu64)
-	  flags[i].value = 1;
-    }
-  else if (flag[0] == '~')
+  if (flag[0] == '~')
     {
       last = flag + strlen (flag);
 
@@ -1081,22 +1074,18 @@ process_i386_cpu_flag (FILE *table, char *flag, int macro,
 	  flags[i].value = 1;
 
       /* Turn off selective bits.  */
+      value = 0;
+    }
+
+  if (strcmp (flag, "0"))
+    {
+      /* Turn on/off selective bits.  */
+      last = flag + strlen (flag);
       for (; next && next < last; )
 	{
 	  str = next_field (next, '|', &next, last);
 	  if (str)
-	    set_bitfield (str, flags, 0, ARRAY_SIZE (flags), lineno);
-	}
-    }
-  else if (strcmp (flag, "0"))
-    {
-      /* Turn on selective bits.  */
-      last = flag + strlen (flag);
-      for (next = flag; next && next < last; )
-	{
-	  str = next_field (next, '|', &next, last);
-	  if (str)
-	    set_bitfield (str, flags, 1, ARRAY_SIZE (flags), lineno);
+	    set_bitfield (str, flags, value, ARRAY_SIZE (flags), lineno);
 	}
     }
 
