@@ -4352,9 +4352,13 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 
   /* Initialize tables with zero element.  */
   curr_srec = (struct srecinfo *) bfd_zalloc (abfd, sizeof (struct srecinfo));
+  if (!curr_srec)
+    return false;
   module->srec_table = curr_srec;
 
   curr_line = (struct lineinfo *) bfd_zalloc (abfd, sizeof (struct lineinfo));
+  if (!curr_line)
+    return false;
   module->line_table = curr_line;
 
   while (length == -1 || ptr < maxptr)
@@ -4389,6 +4393,8 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 	case DST__K_RTNBEG:
 	  funcinfo = (struct funcinfo *)
 	    bfd_zalloc (abfd, sizeof (struct funcinfo));
+	  if (!funcinfo)
+	    return false;
 	  funcinfo->name
 	    = _bfd_vms_save_counted_string (abfd, ptr + DST_S_B_RTNBEG_NAME,
 					    maxptr - (ptr + DST_S_B_RTNBEG_NAME));
@@ -4401,6 +4407,8 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 	  break;
 
 	case DST__K_RTNEND:
+	  if (!module->func_table)
+	    return false;
 	  module->func_table->high = module->func_table->low
 	    + bfd_getl32 (ptr + DST_S_L_RTNEND_SIZE) - 1;
 
