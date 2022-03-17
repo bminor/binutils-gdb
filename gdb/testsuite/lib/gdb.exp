@@ -5143,6 +5143,32 @@ proc can_spawn_for_attach { } {
     return 1
 }
 
+# Centralize the failure checking of "attach" command.
+# Return 0 if attach failed, otherwise return 1.
+
+proc gdb_attach { testpid args } {
+    parse_args {
+	{pattern ""}
+    }
+
+    if { [llength $args] != 0 } {
+	error "Unexpected arguments: $args"
+    }
+
+    gdb_test_multiple "attach $testpid" "attach" {
+	-re -wrap "Attaching to.*ptrace: Operation not permitted\\." {
+	    unsupported "$gdb_test_name (Operation not permitted)"
+	    return 0
+	}
+	-re -wrap "$pattern" {
+	    pass $gdb_test_name
+	    return 1
+	}
+    }
+
+    return 0
+}
+
 # Kill a progress previously started with spawn_wait_for_attach, and
 # reap its wait status.  PROC_SPAWN_ID is the spawn id associated with
 # the process.
