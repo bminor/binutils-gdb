@@ -2839,8 +2839,8 @@ check_cpu_arch_compatible (const char *name ATTRIBUTE_UNUSED,
     }
 
   /* If we are targeting Intel MCU, we must enable it.  */
-  if (get_elf_backend_data (stdoutput)->elf_machine_code != EM_IAMCU
-      || new_flag.bitfield.cpuiamcu)
+  if ((get_elf_backend_data (stdoutput)->elf_machine_code == EM_IAMCU)
+      == new_flag.bitfield.cpuiamcu)
     return;
 
   /* If we are targeting Intel L1OM, we must enable it.  */
@@ -2873,10 +2873,10 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	{
 	  if (strcmp (string, cpu_arch[j].name) == 0)
 	    {
-	      check_cpu_arch_compatible (string, cpu_arch[j].flags);
-
 	      if (*string != '.')
 		{
+		  check_cpu_arch_compatible (string, cpu_arch[j].flags);
+
 		  cpu_arch_name = cpu_arch[j].name;
 		  cpu_sub_arch_name = NULL;
 		  cpu_arch_flags = cpu_arch[j].flags;

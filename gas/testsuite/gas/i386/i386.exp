@@ -698,6 +698,7 @@ if [gas_32_check] then {
 	    run_dump_test "iamcu-3"
 	    run_dump_test "iamcu-4"
 	    run_dump_test "iamcu-5"
+	    run_dump_test "iamcu-6"
 	    run_list_test "iamcu-inval-1" "-march=iamcu -al"
 	}
     }
