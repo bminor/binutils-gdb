@@ -144,6 +144,18 @@ is_leader (thread_info *thread)
   return ptid.pid () == ptid.lwp ();
 }
 
+/* Return true if we should report thread exit events to GDB, for
+   THR.  */
+
+static bool
+report_exit_events_for (thread_info *thr)
+{
+  client_state &cs = get_client_state ();
+
+  return (cs.report_thread_events
+	  || (thr->thread_options & GDB_THREAD_OPTION_EXIT) != 0);
+}
+
 /* LWP accessors.  */
 
 /* See nat/linux-nat.h.  */
@@ -2230,7 +2242,6 @@ linux_low_ptrace_options (int attached)
 void
 linux_process_target::filter_event (int lwpid, int wstat)
 {
-  client_state &cs = get_client_state ();
   struct lwp_info *child;
   struct thread_info *thread;
   int have_stop_pc = 0;
@@ -2317,7 +2328,7 @@ linux_process_target::filter_event (int lwpid, int wstat)
       /* If this is not the leader LWP, then the exit signal was not
 	 the end of the debugged application and should be ignored,
 	 unless GDB wants to hear about thread exits.  */
-      if (cs.report_thread_events || is_leader (thread))
+      if (report_exit_events_for (thread) || is_leader (thread))
 	{
 	  /* Since events are serialized to GDB core, and we can't
 	     report this one right now.  Leave the status pending for
@@ -2879,13 +2890,20 @@ ptid_t
 linux_process_target::filter_exit_event (lwp_info *event_child,
 					 target_waitstatus *ourstatus)
 {
-  client_state &cs = get_client_state ();
   struct thread_info *thread = get_lwp_thread (event_child);
   ptid_t ptid = ptid_of (thread);
 
+  /* Note we must filter TARGET_WAITKIND_SIGNALLED as well, otherwise
+     if a non-leader thread exits with a signal, we'd report it to the
+     core which would interpret it as the whole-process exiting.
+     There is no TARGET_WAITKIND_THREAD_SIGNALLED event kind.  */
+  if (ourstatus->kind () != TARGET_WAITKIND_EXITED
+      && ourstatus->kind () != TARGET_WAITKIND_SIGNALLED)
+    return ptid;
+
   if (!is_leader (thread))
     {
-      if (cs.report_thread_events)
+      if (report_exit_events_for (thread))
 	ourstatus->set_thread_exited (0);
       else
 	ourstatus->set_ignore ();
@@ -3028,10 +3046,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 	     WTERMSIG (w));
 	}
 
-      if (ourstatus->kind () == TARGET_WAITKIND_EXITED)
-	return filter_exit_event (event_child, ourstatus);
-
-      return ptid_of (current_thread);
+      return filter_exit_event (event_child, ourstatus);
     }
 
   /* If step-over executes a breakpoint instruction, in the case of a
@@ -3600,10 +3615,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
 			target_pid_to_str (ptid_of (current_thread)).c_str (),
 			ourstatus->to_string ().c_str ());
 
-  if (ourstatus->kind () == TARGET_WAITKIND_EXITED)
-    return filter_exit_event (event_child, ourstatus);
-
-  return ptid_of (current_thread);
+  return filter_exit_event (event_child, ourstatus);
 }
 
 /* Get rid of any pending event in the pipe.  */
@@ -5908,7 +5920,7 @@ linux_process_target::supports_vfork_events ()
 gdb_thread_options
 linux_process_target::supported_thread_options ()
 {
-  return GDB_THREAD_OPTION_CLONE;
+  return GDB_THREAD_OPTION_CLONE | GDB_THREAD_OPTION_EXIT;
 }
 
 /* Check if exec events are supported.  */
