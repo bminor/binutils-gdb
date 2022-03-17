@@ -4172,6 +4172,15 @@ remote_target::update_thread_list ()
 	      if (has_single_non_exited_thread (tp->inf))
 		continue;
 
+	      /* Do not remove the thread if we've requested to be
+		 notified of its exit.  For example, the thread may be
+		 displaced stepping, infrun will need to handle the
+		 exit event, and displaced stepping info is recorded
+		 in the thread object.  If we deleted the thread now,
+		 we'd lose that info.  */
+	      if ((tp->thread_options () & GDB_THREAD_OPTION_EXIT) != 0)
+		continue;
+
 	      /* Not found.  */
 	      delete_thread (tp);
 	    }

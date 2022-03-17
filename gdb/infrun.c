@@ -2446,24 +2446,29 @@ do_target_resume (ptid_t resume_ptid, bool step, enum gdb_signal sig)
   else
     target_pass_signals (signal_pass);
 
-  /* Request that the target report thread-{created,cloned} events in
-     the following situations:
+  /* Request that the target report thread-{created,cloned,exited}
+     events in the following situations:
 
      - If we are performing an in-line step-over-breakpoint, then we
        will remove a breakpoint from the target and only run the
        current thread.  We don't want any new thread (spawned by the
-       step) to start running, as it might miss the breakpoint.
+       step) to start running, as it might miss the breakpoint.  We
+       need to clear the step-over state if the stepped thread exits,
+       so we also enable thread-exit events.
 
      - If we are stepping over a breakpoint out of line (displaced
        stepping) then we won't remove a breakpoint from the target,
        but, if the step spawns a new clone thread, then we will need
        to fixup the $pc address in the clone child too, so we need it
-       to start stopped.
+       to start stopped.  We need to release the displaced stepping
+       buffer if the stepped thread exits, so we also enable
+       thread-exit events.
   */
   if (step_over_info_valid_p ()
       || displaced_step_in_progress_thread (tp))
     {
-      gdb_thread_options options = GDB_THREAD_OPTION_CLONE;
+      gdb_thread_options options
+	= GDB_THREAD_OPTION_CLONE | GDB_THREAD_OPTION_EXIT;
       if (target_supports_set_thread_options (options))
 	tp->set_thread_options (options);
       else
