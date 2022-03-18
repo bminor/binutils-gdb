@@ -164,6 +164,19 @@ instance
 
 checks both the installed GDB and GDBserver.
 
+GDB_DATA_DIRECTORY
+
+If you set GDB, then by default the testsuite assumes you are
+exercising an installed GDB, and thus the testsuite lets GDB use its
+configured data directory.  Otherwise, if you don't set GDB, then by
+default the tested GDB uses the data directory found under the GDB
+build directory.  You can override this by setting GDB_DATA_DIRECTORY.
+For instance:
+
+    make check \
+      RUNTESTFLAGS="GDB=/path/to/other/build/gdb \
+                    GDB_DATA_DIRECTORY=/path/to/other/build/gdb/data-directory"
+
 INTERNAL_GDBFLAGS
 
 Command line options passed to all GDB invocations.

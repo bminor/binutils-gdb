@@ -92,7 +92,12 @@ load_lib gdb-utils.exp
 load_lib memory.exp
 load_lib check-test-names.exp
 
+# The path to the GDB binary to test.
 global GDB
+
+# The data directory to use for testing.  If this is the empty string,
+# then we let GDB use its own configured data directory.
+global GDB_DATA_DIRECTORY
 
 # The spawn ID used for I/O interaction with the inferior.  For native
 # targets, or remote targets that can do I/O through GDB
@@ -111,8 +116,23 @@ if ![info exists GDB] {
     } else {
 	set GDB [transform gdb]
     }
+} else {
+    # If the user specifies GDB on the command line, and doesn't
+    # specify GDB_DATA_DIRECTORY, then assume we're testing an
+    # installed GDB, and let it use its own configured data directory.
+    if ![info exists GDB_DATA_DIRECTORY] {
+	set GDB_DATA_DIRECTORY ""
+    }
 }
 verbose "using GDB = $GDB" 2
+
+# The data directory the testing GDB will use.  By default, assume
+# we're testing a non-installed GDB in the build directory.  Users may
+# also explictly override the -data-directory from the command line.
+if ![info exists GDB_DATA_DIRECTORY] {
+    set GDB_DATA_DIRECTORY "[pwd]/../data-directory"
+}
+verbose "using GDB_DATA_DIRECTORY = $GDB_DATA_DIRECTORY" 2
 
 # GDBFLAGS is available for the user to set on the command line.
 # E.g. make check RUNTESTFLAGS=GDBFLAGS=mumble
@@ -125,23 +145,35 @@ if ![info exists GDBFLAGS] {
 }
 verbose "using GDBFLAGS = $GDBFLAGS" 2
 
-# Make the build data directory available to tests.
-set BUILD_DATA_DIRECTORY "[pwd]/../data-directory"
+# Append the -data-directory option to pass to GDB to CMDLINE and
+# return the resulting string.  If GDB_DATA_DIRECTORY is empty,
+# nothing is appended.
+proc append_gdb_data_directory_option {cmdline} {
+    global GDB_DATA_DIRECTORY
+
+    if { $GDB_DATA_DIRECTORY != "" } {
+	return "$cmdline -data-directory $GDB_DATA_DIRECTORY"
+    } else {
+	return $cmdline
+    }
+}
 
 # INTERNAL_GDBFLAGS contains flags that the testsuite requires.
 # `-nw' disables any of the windowed interfaces.
 # `-nx' disables ~/.gdbinit, so that it doesn't interfere with the tests.
-# `-data-directory' points to the data directory in the build directory.
 # `-iex "set {height,width} 0"' disables pagination.
+# `-data-directory' points to the data directory, usually in the build
+# directory.
 global INTERNAL_GDBFLAGS
 if ![info exists INTERNAL_GDBFLAGS] {
     set INTERNAL_GDBFLAGS \
 	[join [list \
 		   "-nw" \
 		   "-nx" \
-		   "-data-directory $BUILD_DATA_DIRECTORY" \
 		   {-iex "set height 0"} \
 		   {-iex "set width 0"}]]
+
+    set INTERNAL_GDBFLAGS [append_gdb_data_directory_option $INTERNAL_GDBFLAGS]
 }
 
 # The variable gdb_prompt is a regexp which matches the gdb prompt.
@@ -8021,9 +8053,9 @@ proc verify_psymtab_expanded { filename readin } {
 # string (the default) means .gdb_index; "-dwarf-5" means .debug_names.
 
 proc add_gdb_index { program {style ""} } {
-    global srcdir GDB env BUILD_DATA_DIRECTORY
+    global srcdir GDB env
     set contrib_dir "$srcdir/../contrib"
-    set env(GDB) "$GDB --data-directory=$BUILD_DATA_DIRECTORY"
+    set env(GDB) [append_gdb_data_directory_option $GDB]
     set result [catch "exec $contrib_dir/gdb-add-index.sh $style $program" output]
     if { $result != 0 } {
 	verbose -log "result is $result"
