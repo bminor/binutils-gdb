@@ -2536,11 +2536,23 @@ static const bfd_vma elf32_arm_nacl_plt_entry [] =
   0xea000000,		/* b	.Lplt_tail			*/
 };
 
+/* PR 28924:
+   There was a bug due to too high values of THM_MAX_FWD_BRANCH_OFFSET and
+   THM2_MAX_FWD_BRANCH_OFFSET.  The first macro concerns the case when Thumb-2
+   is not available, and second macro when Thumb-2 is available.  Among other
+   things, they affect the range of branches represented as BLX instructions
+   in Encoding T2 defined in Section A8.8.25 of the ARM Architecture
+   Reference Manual ARMv7-A and ARMv7-R edition issue C.d.  Such branches are
+   specified there to have a maximum forward offset that is a multiple of 4.
+   Previously, the respective values defined here were multiples of 2 but not
+   4 and they are included in comments for reference.  */
 #define ARM_MAX_FWD_BRANCH_OFFSET  ((((1 << 23) - 1) << 2) + 8)
-#define ARM_MAX_BWD_BRANCH_OFFSET  ((-((1 << 23) << 2)) + 8)
-#define THM_MAX_FWD_BRANCH_OFFSET  ((1 << 22) -2 + 4)
+#define ARM_MAX_BWD_BRANCH_OFFSET ((-((1 << 23) << 2)) + 8)
+#define THM_MAX_FWD_BRANCH_OFFSET   ((1 << 22) - 4 + 4)
+/* #def THM_MAX_FWD_BRANCH_OFFSET   ((1 << 22) - 2 + 4) */
 #define THM_MAX_BWD_BRANCH_OFFSET  (-(1 << 22) + 4)
-#define THM2_MAX_FWD_BRANCH_OFFSET (((1 << 24) - 2) + 4)
+#define THM2_MAX_FWD_BRANCH_OFFSET (((1 << 24) - 4) + 4)
+/* #def THM2_MAX_FWD_BRANCH_OFFSET (((1 << 24) - 2) + 4) */
 #define THM2_MAX_BWD_BRANCH_OFFSET (-(1 << 24) + 4)
 #define THM2_MAX_FWD_COND_BRANCH_OFFSET (((1 << 20) -2) + 4)
 #define THM2_MAX_BWD_COND_BRANCH_OFFSET (-(1 << 20) + 4)

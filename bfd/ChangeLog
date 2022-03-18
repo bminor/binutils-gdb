@@ -1,3 +1,9 @@
+2022-03-18  Viorel Preoteasa  <viorel.preoteasa@gmail.com>
+
+	PR 28924
+	* elf32-arm.c (THM_MAX_FWD_BRANCH_OFFSET): Fix definition.
+	(THM2_MAX_FWD_BRANCH_OFFSET): Likewise.
+
 2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
 	* Makefile.am (ALL_MACHINES, ALL_MACHINES_CFILES):
