@@ -564,6 +564,7 @@ int gdbpy_initialize_connection ()
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_micommands (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+void gdbpy_finalize_micommands ();
 
 /* A wrapper for PyErr_Fetch that handles reference counting for the
    caller.  */

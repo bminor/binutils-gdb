@@ -22,6 +22,7 @@
 #ifndef MI_MI_CMDS_H
 #define MI_MI_CMDS_H
 
+#include "gdbsupport/function-view.h"
 #include "gdbsupport/gdb_optional.h"
 #include "mi/mi-main.h"
 
@@ -218,5 +219,11 @@ extern bool insert_mi_cmd_entry (mi_command_up command);
 
 extern bool remove_mi_cmd_entry (const std::string &name);
 
+/* Call CALLBACK for each registered MI command.  Remove commands for which
+   CALLBACK returns true.  */
+
+using remove_mi_cmd_entries_ftype
+  = gdb::function_view<bool (mi_command *)>;
+extern void remove_mi_cmd_entries (remove_mi_cmd_entries_ftype callback);
 
 #endif /* MI_MI_CMDS_H */

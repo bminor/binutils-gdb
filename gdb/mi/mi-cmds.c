@@ -128,6 +128,20 @@ remove_mi_cmd_entry (const std::string &name)
   return true;
 }
 
+/* See mi-cmds.h.  */
+
+void
+remove_mi_cmd_entries (remove_mi_cmd_entries_ftype callback)
+{
+  for (auto it = mi_cmd_table.cbegin (); it != mi_cmd_table.cend (); )
+    {
+      if (callback (it->second.get ()))
+	it = mi_cmd_table.erase (it);
+      else
+	++it;
+    }
+}
+
 /* Create and register a new MI command with an MI specific implementation.
    NAME must name an MI command that does not already exist, otherwise an
    assertion will trigger.  */

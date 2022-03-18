@@ -1795,6 +1795,8 @@ finalize_python (void *ignore)
   (void) PyGILState_Ensure ();
   gdbpy_enter::finalize ();
 
+  gdbpy_finalize_micommands ();
+
   Py_Finalize ();
 
   gdb_python_initialized = false;

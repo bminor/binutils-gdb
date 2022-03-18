@@ -88,9 +88,10 @@ struct mi_command_py : public mi_command
 
   mi_command_py (const char *name, micmdpy_object *object)
     : mi_command (name, nullptr),
-      m_pyobj (object)
+      m_pyobj (gdbpy_ref<micmdpy_object>::new_reference (object))
   {
     pymicmd_debug_printf ("this = %p", this);
+    m_pyobj->mi_command = this;
   }
 
   ~mi_command_py ()
@@ -117,21 +118,42 @@ struct mi_command_py : public mi_command
      then always returns true.  */
   static void validate_installation (micmdpy_object *cmd_obj);
 
-  /* Update m_pyobj to NEW_PYOBJ.  The pointer from M_PYOBJ that points
+  /* Update M_PYOBJ to NEW_PYOBJ.  The pointer from M_PYOBJ that points
      back to this object is swapped with the pointer in NEW_PYOBJ, which
      must be nullptr, so that NEW_PYOBJ now points back to this object.
-     Additionally our parent's name string is stored in m_pyobj, so we
+     Additionally our parent's name string is stored in M_PYOBJ, so we
      swap the name string with NEW_PYOBJ.
 
-     Before this call m_pyobj is the Python object representing this MI
+     Before this call M_PYOBJ is the Python object representing this MI
      command object.  After this call has completed, NEW_PYOBJ now
      represents this MI command object.  */
   void swap_python_object (micmdpy_object *new_pyobj)
   {
+    /* Current object has a backlink, new object doesn't have a backlink.  */
+    gdb_assert (m_pyobj->mi_command != nullptr);
     gdb_assert (new_pyobj->mi_command == nullptr);
+
+    /* Clear the current M_PYOBJ's backlink, set NEW_PYOBJ's backlink.  */
     std::swap (new_pyobj->mi_command, m_pyobj->mi_command);
+
+    /* Both object have names.  */
+    gdb_assert (m_pyobj->mi_command_name != nullptr);
+    gdb_assert (new_pyobj->mi_command_name != nullptr);
+
+    /* mi_command::m_name is the string owned by the current object.  */
+    gdb_assert (m_pyobj->mi_command_name == this->name ());
+
+    /* The name in mi_command::m_name is owned by the current object.  Rather
+       than changing the value of mi_command::m_name (which is not accessible
+       from here) to point to the name owned by the new object, swap the names
+       of the two objects, since we know they are identical strings.  */
+    gdb_assert (strcmp (new_pyobj->mi_command_name,
+			m_pyobj->mi_command_name) == 0);
     std::swap (new_pyobj->mi_command_name, m_pyobj->mi_command_name);
-    m_pyobj = new_pyobj;
+
+    /* Take a reference to the new object, drop the reference to the current
+       object.  */
+    m_pyobj = gdbpy_ref<micmdpy_object>::new_reference (new_pyobj);
   }
 
   /* Called when the MI command is invoked.  */
@@ -139,8 +161,10 @@ struct mi_command_py : public mi_command
 
 private:
   /* The Python object representing this MI command.  */
-  micmdpy_object *m_pyobj;
+  gdbpy_ref<micmdpy_object> m_pyobj;
 };
+
+using mi_command_py_up = std::unique_ptr<mi_command_py>;
 
 extern PyTypeObject micmdpy_object_type
 	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("micmdpy_object");
@@ -321,8 +345,6 @@ mi_command_py::invoke (struct mi_parse *parse) const
   if (parse->argv == nullptr)
     error (_("Problem parsing arguments: %s %s"), parse->command, parse->args);
 
-  PyObject *obj = (PyObject *) this->m_pyobj;
-  gdb_assert (obj != nullptr);
 
   gdbpy_enter enter_py;
 
@@ -341,9 +363,11 @@ mi_command_py::invoke (struct mi_parse *parse) const
 	gdbpy_handle_exception ();
     }
 
+  gdb_assert (this->m_pyobj != nullptr);
   gdb_assert (PyErr_Occurred () == nullptr);
-  gdbpy_ref<> result (PyObject_CallMethodObjArgs (obj, invoke_cst,
-						  argobj.get (), nullptr));
+  gdbpy_ref<> result
+    (PyObject_CallMethodObjArgs ((PyObject *) this->m_pyobj.get (), invoke_cst,
+				 argobj.get (), nullptr));
   if (result == nullptr)
     gdbpy_handle_exception ();
 
@@ -367,32 +391,13 @@ mi_command_py::validate_installation (micmdpy_object *cmd_obj)
   gdb_assert (cmd->m_pyobj == cmd_obj);
 }
 
-/* Return a reference to the gdb._mi_commands dictionary.  If the
-   dictionary can't be found for any reason then nullptr is returned, and
-   a Python exception will be set.  */
+/* Return CMD as an mi_command_py if it is a Python MI command, else
+   nullptr.  */
 
-static gdbpy_ref<>
-micmdpy_global_command_dictionary ()
+static mi_command_py *
+as_mi_command_py (mi_command *cmd)
 {
-  if (gdb_python_module == nullptr)
-    {
-      PyErr_SetString (PyExc_RuntimeError, _("unable to find gdb module"));
-      return nullptr;
-    }
-
-  gdbpy_ref<> mi_cmd_dict (PyObject_GetAttrString (gdb_python_module,
-						   "_mi_commands"));
-  if (mi_cmd_dict == nullptr)
-    return nullptr;
-
-  if (!PyDict_Check (mi_cmd_dict.get ()))
-    {
-      PyErr_SetString (PyExc_RuntimeError,
-		       _("gdb._mi_commands is not a dictionary as expected"));
-      return nullptr;
-    }
-
-  return mi_cmd_dict;
+  return dynamic_cast<mi_command_py *> (cmd);
 }
 
 /* Uninstall OBJ, making the MI command represented by OBJ unavailable for
@@ -409,40 +414,12 @@ micmdpy_uninstall_command (micmdpy_object *obj)
 
   pymicmd_debug_printf ("name = %s", obj->mi_command_name);
 
-  /* Remove the command from the internal MI table of commands, this will
-     cause the c++ object to be deleted, which will clear the mi_command
-     member variable within the Python object.  */
-  remove_mi_cmd_entry (obj->mi_command->name ());
+  /* Remove the command from the internal MI table of commands.  This will
+     cause the mi_command_py object to be deleted, which will clear the
+     backlink in OBJ.  */
+  bool removed = remove_mi_cmd_entry (obj->mi_command->name ());
+  gdb_assert (removed);
   gdb_assert (obj->mi_command == nullptr);
-
-  gdbpy_ref<> mi_cmd_dict = micmdpy_global_command_dictionary ();
-  if (mi_cmd_dict == nullptr)
-    return -1;
-
-  /* Grab the name for this command.  */
-  gdbpy_ref<> name_obj
-    = host_string_to_python_string (obj->mi_command_name);
-  if (name_obj == nullptr)
-    return -1;
-
-  /* Lookup the gdb.MICommand object in the dictionary of all Python MI
-     commands, this is gdb._mi_command, and remove it.  */
-  PyObject *curr = PyDict_GetItemWithError (mi_cmd_dict.get (),
-					    name_obj.get ());
-
-  /* Did we encounter an error?  Failing to find the object in the
-     dictionary isn't an error, that's fine.  */
-  if (curr == nullptr && PyErr_Occurred ())
-    return -1;
-
-  /* Did we find this command in the gdb._mi_commands dictionary?  If so,
-     then remove it.  */
-  if (curr != nullptr)
-    {
-      /* Yes we did!  Remove it.  */
-      if (PyDict_DelItem (mi_cmd_dict.get (), name_obj.get ()) < 0)
-	return -1;
-    }
 
   return 0;
 }
@@ -467,95 +444,35 @@ micmdpy_install_command (micmdpy_object *obj)
 
   pymicmd_debug_printf ("name = %s", obj->mi_command_name);
 
-  gdbpy_ref<> mi_cmd_dict = micmdpy_global_command_dictionary ();
-  if (mi_cmd_dict == nullptr)
-    return -1;
+  /* Look up this command name in MI_COMMANDS, a command with this name may
+     already exist.  */
+  mi_command *cmd = mi_cmd_lookup (obj->mi_command_name);
+  mi_command_py *cmd_py = as_mi_command_py (cmd);
 
-  /* Look up this command name in the gdb._mi_commands dictionary, a
-     command with this name may already exist.  */
-  gdbpy_ref<> name_obj
-    = host_string_to_python_string (obj->mi_command_name);
-
-  PyObject *curr = PyDict_GetItemWithError (mi_cmd_dict.get (),
-					    name_obj.get ());
-  if (curr == nullptr && PyErr_Occurred ())
-    return -1;
-  if (curr != nullptr)
+  if (cmd != nullptr && cmd_py == nullptr)
     {
-      /* There is a command with this name already in the gdb._mi_commands
-	 dictionary.  First, validate that the object in the dictionary is
-	 of the expected type, just in case something weird has happened.  */
-      if (!PyObject_IsInstance (curr, (PyObject *) &micmdpy_object_type))
-	{
-	  PyErr_SetString (PyExc_RuntimeError,
-			   _("unexpected object in gdb._mi_commands dictionary"));
-	  return -1;
-	}
+      /* There is already an MI command registered with that name, and it's not
+         a Python one.  Forbid replacing a non-Python MI command.  */
+      PyErr_SetString (PyExc_RuntimeError,
+		       _("unable to add command, name is already in use"));
+      return -1;
+    }
 
-      /* To get to this function OBJ should not be installed, which should
-	 mean OBJ is not in the gdb._mi_commands dictionary.  If we find
-	 that OBJ is the thing in the dictionary, then something weird is
-	 going on, we should throw an error.  */
-      micmdpy_object *other = (micmdpy_object *) curr;
-      if (other == obj || other->mi_command == nullptr)
-	{
-	  PyErr_SetString (PyExc_RuntimeError,
-			   _("uninstalled command found in gdb._mi_commands dictionary"));
-	  return -1;
-	}
-
-      /* All Python mi command object should always have a name set.  */
-      gdb_assert (other->mi_command_name != nullptr);
-
-      /* We always insert commands into the gdb._mi_commands dictionary
-	 using their name as a key, if this check fails then the dictionary
-	 is in some weird state.  */
-      if (other->mi_command_name != other->mi_command->name ()
-	  || strcmp (other->mi_command_name, obj->mi_command_name) != 0)
-	{
-	  PyErr_SetString (PyExc_RuntimeError,
-			   _("gdb._mi_commands dictionary is corrupted"));
-	  return -1;
-	}
-
-      /* Switch the state of the c++ object held in the MI command table
-	 so that it now references OBJ.  After this action the old Python
-	 object that used to be referenced from the MI command table will
-	 now show as uninstalled, while the new Python object will show as
-	 installed.  */
-      other->mi_command->swap_python_object (obj);
-
-      gdb_assert (other->mi_command == nullptr);
-      gdb_assert (obj->mi_command != nullptr);
-      gdb_assert (obj->mi_command->name () == obj->mi_command_name);
-
-      /* Remove the previous Python object from the gdb._mi_commands
-	 dictionary, we'll install the new object below.  */
-      if (PyDict_DelItem (mi_cmd_dict.get (), name_obj.get ()) < 0)
-       return -1;
+  if (cmd_py != nullptr)
+    {
+      /* There is already a Python MI command registered with that name, swap
+         in the new gdb.MICommand implementation.  */
+      cmd_py->swap_python_object (obj);
     }
   else
     {
-      /* There's no Python object for this command name in the
-	 gdb._mi_commands dictionary from which we can steal an existing
-	 object already held in the MI commands table, and so, we now
-	 create a new c++ object, and install it into the MI table.  */
-      obj->mi_command = new mi_command_py (obj->mi_command_name, obj);
-      mi_command_up micommand (obj->mi_command);
+      /* There's no MI command registered with that name at all, create one.  */
+      mi_command_py_up mi_cmd (new mi_command_py (obj->mi_command_name, obj));
 
       /* Add the command to the gdb internal MI command table.  */
-      bool result = insert_mi_cmd_entry (std::move (micommand));
-      if (!result)
-	{
-	  PyErr_SetString (PyExc_RuntimeError,
-			   _("unable to add command, name may already be in use"));
-	  return -1;
-	}
+      bool result = insert_mi_cmd_entry (std::move (mi_cmd));
+      gdb_assert (result);
     }
-
-  /* Finally, add the Python object to the gdb._mi_commands dictionary.  */
-  if (PyDict_SetItem (mi_cmd_dict.get (), name_obj.get (), (PyObject *) obj) < 0)
-    return -1;
 
   return 0;
 }
@@ -662,11 +579,10 @@ micmdpy_dealloc (PyObject *obj)
 			(cmd->mi_command_name == nullptr
 			 ? "(null)" : cmd->mi_command_name));
 
-  /* Remove the command from the MI command table if needed.  This will
-     cause the mi_command_py object to be deleted, which, in turn, will
-     clear the cmd->mi_command member variable, hence the assert.  */
-  if (cmd->mi_command != nullptr)
-    remove_mi_cmd_entry (cmd->mi_command->name ());
+  /* As the mi_command_py object holds a reference to the micmdpy_object,
+     the only way the dealloc function can be called is if the mi_command_py
+     object has been deleted, in which case the following assert will
+     hold.  */
   gdb_assert (cmd->mi_command == nullptr);
 
   /* Free the memory that holds the command name.  */
@@ -696,6 +612,18 @@ gdbpy_initialize_micommands ()
     return -1;
 
   return 0;
+}
+
+void
+gdbpy_finalize_micommands ()
+{
+  /* mi_command_py objects hold references to micmdpy_object objects.  They must
+     be dropped before the Python interpreter is finalized.  Do so by removing
+     those MI command entries, thus deleting the mi_command_py objects.  */
+  remove_mi_cmd_entries ([] (mi_command *cmd)
+    {
+      return as_mi_command_py (cmd) != nullptr;
+    });
 }
 
 /* Get the gdb.MICommand.name attribute, returns a string, the name of this

@@ -289,31 +289,6 @@ mi_gdb_test "-aa" \
     ".*\\^done,zzz={msg=\"message three\"}" \
     "call the -aa command looking for message three"
 
-# Remove the gdb._mi_commands dictionary, then try to register a new
-# command.
-mi_gdb_test "python del(gdb._mi_commands)" ".*\\^done"
-mi_gdb_test "python pycmd3('-hello', 'Hello', 'msg')" \
-    [multi_line \
-	 ".*" \
-	 "&\"AttributeError: module 'gdb' has no attribute '_mi_commands'..\"" \
-	 "&\"Error while executing Python code\\...\"" \
-	 "\\^error,msg=\"Error while executing Python code\\.\""] \
-    "register a command with no gdb._mi_commands available"
-
-# Set gdb._mi_commands to be something other than a dictionary, and
-# try to register a command.
-mi_gdb_test "python gdb._mi_commands = 'string'" ".*\\^done"
-mi_gdb_test "python pycmd3('-hello', 'Hello', 'msg')" \
-    [multi_line \
-	 ".*" \
-	 "&\"RuntimeError: gdb._mi_commands is not a dictionary as expected..\"" \
-	 "&\"Error while executing Python code\\...\"" \
-	 "\\^error,msg=\"Error while executing Python code\\.\""] \
-    "register a command when gdb._mi_commands is not a dictionary"
-
-# Restore gdb._mi_commands to a dictionary.
-mi_gdb_test "python gdb._mi_commands = {}" ".*\\^done"
-
 # Try to register a command object that is missing an invoke method.
 # This is accepted, but will give an error when the user tries to run
 # the command.
@@ -346,37 +321,11 @@ mi_gdb_test "-hello" \
 	 "\\^error,msg=\"Error occurred in Python: 'str' object is not callable\""] \
     "execute command with invoke set to a string"
 
-# Further checking of corruption to the gdb._mi_commands dictionary.
-#
-# First, insert an object of the wrong type, then try to register an
-# MI command that will go into that same dictionary slot.
-mi_gdb_test "python gdb._mi_commands\['blah'\] = 'blah blah blah'" ".*\\^done"
-mi_gdb_test "python pycmd2('-blah')" \
-    [multi_line \
-	 ".*" \
-	 "&\"RuntimeError: unexpected object in gdb\\._mi_commands dictionary..\"" \
-	 "&\"Error while executing Python code\\...\"" \
-	 "\\^error,msg=\"Error while executing Python code\\.\""] \
-    "hit unexpected object in gdb._mi_commands dictionary"
-
-# Next, create a command, uninstall it, then force the command back
-# into the dictionary.
-mi_gdb_test "python cmd = pycmd2('-foo')" ".*\\^done"
-mi_gdb_test "python cmd.installed = False" ".*\\^done"
-mi_gdb_test "python gdb._mi_commands\['foo'\] = cmd" ".*\\^done"
-mi_gdb_test "python cmd.installed = True" \
-    [multi_line \
-	 ".*" \
-	 "&\"RuntimeError: uninstalled command found in gdb\\._mi_commands dictionary..\"" \
-	 "&\"Error while executing Python code\\...\"" \
-	 "\\^error,msg=\"Error while executing Python code\\.\""] \
-    "found uninstalled command in gdb._mi_commands dictionary"
-
 # Try to create a new MI command that uses the name of a builtin MI command.
 mi_gdb_test "python cmd = pycmd2('-data-disassemble')" \
     [multi_line \
 	 ".*" \
-	 "&\"RuntimeError: unable to add command, name may already be in use..\"" \
+	 "&\"RuntimeError: unable to add command, name is already in use..\"" \
 	 "&\"Error while executing Python code\\...\"" \
 	 "\\^error,msg=\"Error while executing Python code\\.\""] \
     "try to register a command that replaces -data-disassemble"
