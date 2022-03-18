@@ -102,7 +102,7 @@ static const char *logical_input_file;
 /* 1-origin line number in a source file.  */
 /* A line ends in '\n' or eof.  */
 static unsigned int physical_input_line;
-static int logical_input_line;
+static unsigned int logical_input_line;
 
 /* Struct used to save the state of the input handler during include files */
 struct input_save {
@@ -111,10 +111,10 @@ struct input_save {
   size_t              partial_size;
   char                save_source[AFTER_SIZE];
   size_t              buffer_length;
-  const char *              physical_input_file;
-  const char *              logical_input_file;
+  const char *        physical_input_file;
+  const char *        logical_input_file;
   unsigned int        physical_input_line;
-  int                 logical_input_line;
+  unsigned int        logical_input_line;
   size_t              sb_index;
   sb                  from_sb;
   int                 from_sb_is_expansion; /* Should we do a conditional check?  */
@@ -137,7 +137,7 @@ static void
 input_scrub_reinit (void)
 {
   input_file_begin ();		/* Reinitialize! */
-  logical_input_line = -1;
+  logical_input_line = -1u;
   logical_input_file = NULL;
 
   buffer_length = input_file_buffer_size () * 2;
@@ -304,7 +304,7 @@ input_scrub_close (void)
 {
   input_file_close ();
   physical_input_line = 0;
-  logical_input_line = -1;
+  logical_input_line = -1u;
 }
 
 char *
@@ -431,7 +431,7 @@ bump_line_counters (void)
   if (sb_index == (size_t) -1)
     {
       ++physical_input_line;
-      if (logical_input_line >= 0)
+      if (logical_input_line != -1u)
 	++logical_input_line;
     }
 }
@@ -515,7 +515,7 @@ const char *
 as_where (unsigned int *linep)
 {
   if (logical_input_file != NULL
-      && (linep == NULL || logical_input_line >= 0))
+      && (linep == NULL || logical_input_line != -1u))
     {
       if (linep != NULL)
 	*linep = logical_input_line;
