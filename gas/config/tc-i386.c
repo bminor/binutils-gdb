@@ -12952,17 +12952,18 @@ parse_register (char *reg_string, char **end_op)
 	{
 	  const expressionS *e = symbol_get_value_expression (symbolP);
 
-	  know (e->X_op == O_register);
-	  know (e->X_add_number >= 0
-		&& (valueT) e->X_add_number < i386_regtab_size);
-	  r = i386_regtab + e->X_add_number;
-	  if (!check_register (r))
+	  if (e->X_op == O_register
+	      && (valueT) e->X_add_number < i386_regtab_size)
 	    {
-	      as_bad (_("register '%s%s' cannot be used here"),
-		      register_prefix, r->reg_name);
-	      r = &bad_reg;
+	      r = i386_regtab + e->X_add_number;
+	      if (!check_register (r))
+		{
+		  as_bad (_("register '%s%s' cannot be used here"),
+			  register_prefix, r->reg_name);
+		  r = &bad_reg;
+		}
+	      *end_op = input_line_pointer;
 	    }
-	  *end_op = input_line_pointer;
 	}
       *input_line_pointer = c;
       input_line_pointer = save;
