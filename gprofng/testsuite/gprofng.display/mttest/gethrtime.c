@@ -222,7 +222,12 @@ gethrtime (void)
 {
   struct timespec tp;
   hrtime_t rc = 0;
+#ifdef CLOCK_MONOTONIC_RAW
+  int r = clock_gettime (CLOCK_MONOTONIC_RAW, &tp);
+#else
   int r = clock_gettime (CLOCK_MONOTONIC, &tp);
+#endif
+
   if (r == 0)
     rc = ((hrtime_t) tp.tv_sec) * 1000000000 + (hrtime_t) tp.tv_nsec;
   return rc;

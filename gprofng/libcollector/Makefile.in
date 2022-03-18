@@ -158,8 +158,7 @@ am__uninstall_files_from_dir = { \
   }
 am__installdirs = "$(DESTDIR)$(libdir)" "$(DESTDIR)$(myincludedir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
-am__DEPENDENCIES_1 =
-libgp_collector_la_DEPENDENCIES = $(am__DEPENDENCIES_1)
+libgp_collector_la_DEPENDENCIES =
 am__objects_1 = libgp_collector_la-gethrtime.lo \
 	libgp_collector_la-dispatcher.lo libgp_collector_la-iolib.lo \
 	libgp_collector_la-mmaptrace.lo libgp_collector_la-memmgr.lo \
@@ -308,7 +307,6 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
-CLOCK_GETTIME_LINK = @CLOCK_GETTIME_LINK@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@

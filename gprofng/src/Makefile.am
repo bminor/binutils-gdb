@@ -133,19 +133,19 @@ dbe_DATA = $(srcdir)/gprofng.rc
 bin_PROGRAMS = gp-archive gp-collect-app gprofng gp-display-text gp-display-src
 
 gp_archive_SOURCES = gp-archive.cc ArchiveExp.cc
-gp_archive_LDADD = $(LIBGPROFNG)
+gp_archive_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK)
 
 gp_collect_app_SOURCES = gp-collect-app.cc checks.cc envsets.cc count.cc
-gp_collect_app_LDADD = $(LIBGPROFNG)
+gp_collect_app_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK)
 
 gprofng_SOURCES = gprofng.cc
-gprofng_LDADD = $(LIBGPROFNG)
+gprofng_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK)
 
 gp_display_src_SOURCES = gp-display-src.cc
-gp_display_src_LDADD = $(LIBGPROFNG)
+gp_display_src_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK)
 
 gp_display_text_SOURCES = gp-display-text.cc ipc.cc ipcio.cc
-gp_display_text_LDADD = $(LIBGPROFNG)
+gp_display_text_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK)
 
 
 if BUILD_MAN
