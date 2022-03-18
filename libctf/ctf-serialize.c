@@ -1229,7 +1229,13 @@ err:
 
 /* File writing.  */
 
-/* Write the compressed CTF data stream to the specified gzFile descriptor.  */
+/* Write the compressed CTF data stream to the specified gzFile descriptor.  The
+   whole stream is compressed, and cannot be read by CTF opening functions in
+   this library until it is decompressed.  (The functions below this one leave
+   the header uncompressed, and the CTF opening functions work on them without
+   manual decompression.)
+
+   No support for (testing-only) endian-flipping.  */
 int
 ctf_gzwrite (ctf_dict_t *fp, gzFile fd)
 {
@@ -1260,84 +1266,24 @@ ctf_gzwrite (ctf_dict_t *fp, gzFile fd)
   return 0;
 }
 
-/* Compress the specified CTF data stream and write it to the specified file
-   descriptor.  */
-int
-ctf_compress_write (ctf_dict_t *fp, int fd)
-{
-  unsigned char *buf;
-  unsigned char *bp;
-  ctf_header_t h;
-  ctf_header_t *hp = &h;
-  ssize_t header_len = sizeof (ctf_header_t);
-  ssize_t compress_len;
-  ssize_t len;
-  int rc;
-  int err = 0;
-
-  if (ctf_serialize (fp) < 0)
-    return -1;					/* errno is set for us.  */
-
-  memcpy (hp, fp->ctf_header, header_len);
-  hp->cth_flags |= CTF_F_COMPRESS;
-  compress_len = compressBound (fp->ctf_size);
-
-  if ((buf = malloc (compress_len)) == NULL)
-    {
-      ctf_err_warn (fp, 0, 0, _("ctf_compress_write: cannot allocate %li bytes"),
-		    (unsigned long) compress_len);
-      return (ctf_set_errno (fp, ECTF_ZALLOC));
-    }
-
-  if ((rc = compress (buf, (uLongf *) &compress_len,
-		      fp->ctf_buf, fp->ctf_size)) != Z_OK)
-    {
-      err = ctf_set_errno (fp, ECTF_COMPRESS);
-      ctf_err_warn (fp, 0, 0, _("zlib deflate err: %s"), zError (rc));
-      goto ret;
-    }
-
-  while (header_len > 0)
-    {
-      if ((len = write (fd, hp, header_len)) < 0)
-	{
-	  err = ctf_set_errno (fp, errno);
-	  ctf_err_warn (fp, 0, 0, _("ctf_compress_write: error writing header"));
-	  goto ret;
-	}
-      header_len -= len;
-      hp += len;
-    }
-
-  bp = buf;
-  while (compress_len > 0)
-    {
-      if ((len = write (fd, bp, compress_len)) < 0)
-	{
-	  err = ctf_set_errno (fp, errno);
-	  ctf_err_warn (fp, 0, 0, _("ctf_compress_write: error writing"));
-	  goto ret;
-	}
-      compress_len -= len;
-      bp += len;
-    }
-
-ret:
-  free (buf);
-  return err;
-}
-
 /* Optionally compress the specified CTF data stream and return it as a new
-   dynamically-allocated string.  */
+   dynamically-allocated string.  Possibly write it with reversed
+   endianness.  */
 unsigned char *
 ctf_write_mem (ctf_dict_t *fp, size_t *size, size_t threshold)
 {
   unsigned char *buf;
   unsigned char *bp;
   ctf_header_t *hp;
+  unsigned char *flipped, *src;
   ssize_t header_len = sizeof (ctf_header_t);
   ssize_t compress_len;
+  int flip_endian;
+  int uncompressed;
   int rc;
+
+  flip_endian = getenv ("LIBCTF_WRITE_FOREIGN_ENDIAN") != NULL;
+  uncompressed = (fp->ctf_size < threshold);
 
   if (ctf_serialize (fp) < 0)
     return NULL;				/* errno is set for us.  */
@@ -1359,17 +1305,43 @@ ctf_write_mem (ctf_dict_t *fp, size_t *size, size_t threshold)
   bp = buf + sizeof (struct ctf_header);
   *size = sizeof (struct ctf_header);
 
-  if (fp->ctf_size < threshold)
+  if (uncompressed)
+    hp->cth_flags &= ~CTF_F_COMPRESS;
+  else
+    hp->cth_flags |= CTF_F_COMPRESS;
+
+  src = fp->ctf_buf;
+  flipped = NULL;
+
+  if (flip_endian)
     {
-      hp->cth_flags &= ~CTF_F_COMPRESS;
-      memcpy (bp, fp->ctf_buf, fp->ctf_size);
+      if ((flipped = malloc (fp->ctf_size)) == NULL)
+	{
+	  ctf_set_errno (fp, ENOMEM);
+	  ctf_err_warn (fp, 0, 0, _("ctf_write_mem: cannot allocate %li bytes"),
+			(unsigned long) fp->ctf_size + sizeof (struct ctf_header));
+	  return NULL;
+	}
+      ctf_flip_header (hp);
+      memcpy (flipped, fp->ctf_buf, fp->ctf_size);
+      if (ctf_flip (fp, fp->ctf_header, flipped, 1) < 0)
+	{
+	  free (buf);
+	  free (flipped);
+	  return NULL;				/* errno is set for us.  */
+	}
+      src = flipped;
+    }
+
+  if (uncompressed)
+    {
+      memcpy (bp, src, fp->ctf_size);
       *size += fp->ctf_size;
     }
   else
     {
-      hp->cth_flags |= CTF_F_COMPRESS;
       if ((rc = compress (bp, (uLongf *) &compress_len,
-			  fp->ctf_buf, fp->ctf_size)) != Z_OK)
+			  src, fp->ctf_size)) != Z_OK)
 	{
 	  ctf_set_errno (fp, ECTF_COMPRESS);
 	  ctf_err_warn (fp, 0, 0, _("zlib deflate err: %s"), zError (rc));
@@ -1378,45 +1350,77 @@ ctf_write_mem (ctf_dict_t *fp, size_t *size, size_t threshold)
 	}
       *size += compress_len;
     }
+
+  free (flipped);
+
   return buf;
+}
+
+/* Compress the specified CTF data stream and write it to the specified file
+   descriptor.  */
+int
+ctf_compress_write (ctf_dict_t *fp, int fd)
+{
+  unsigned char *buf;
+  unsigned char *bp;
+  size_t tmp;
+  ssize_t buf_len;
+  ssize_t len;
+  int err = 0;
+
+  if ((buf = ctf_write_mem (fp, &tmp, 0)) == NULL)
+    return -1;					/* errno is set for us.  */
+
+  buf_len = tmp;
+  bp = buf;
+
+  while (buf_len > 0)
+    {
+      if ((len = write (fd, bp, buf_len)) < 0)
+	{
+	  err = ctf_set_errno (fp, errno);
+	  ctf_err_warn (fp, 0, 0, _("ctf_compress_write: error writing"));
+	  goto ret;
+	}
+      buf_len -= len;
+      bp += len;
+    }
+
+ret:
+  free (buf);
+  return err;
 }
 
 /* Write the uncompressed CTF data stream to the specified file descriptor.  */
 int
 ctf_write (ctf_dict_t *fp, int fd)
 {
-  const unsigned char *buf;
-  ssize_t resid;
+  unsigned char *buf;
+  unsigned char *bp;
+  size_t tmp;
+  ssize_t buf_len;
   ssize_t len;
+  int err = 0;
 
-  if (ctf_serialize (fp) < 0)
+  if ((buf = ctf_write_mem (fp, &tmp, (size_t) -1)) == NULL)
     return -1;					/* errno is set for us.  */
 
-  resid = sizeof (ctf_header_t);
-  buf = (unsigned char *) fp->ctf_header;
-  while (resid != 0)
+  buf_len = tmp;
+  bp = buf;
+
+  while (buf_len > 0)
     {
-      if ((len = write (fd, buf, resid)) <= 0)
+      if ((len = write (fd, bp, buf_len)) < 0)
 	{
-	  ctf_err_warn (fp, 0, errno, _("ctf_write: error writing header"));
-	  return (ctf_set_errno (fp, errno));
+	  err = ctf_set_errno (fp, errno);
+	  ctf_err_warn (fp, 0, 0, _("ctf_compress_write: error writing"));
+	  goto ret;
 	}
-      resid -= len;
-      buf += len;
+      buf_len -= len;
+      bp += len;
     }
 
-  resid = fp->ctf_size;
-  buf = fp->ctf_buf;
-  while (resid != 0)
-    {
-      if ((len = write (fd, buf, resid)) <= 0)
-	{
-	  ctf_err_warn (fp, 0, errno, _("ctf_write: error writing"));
-	  return (ctf_set_errno (fp, errno));
-	}
-      resid -= len;
-      buf += len;
-    }
-
-  return 0;
+ret:
+  free (buf);
+  return err;
 }
