@@ -362,7 +362,7 @@ struct mapped_debug_names final : public mapped_index_base
   { return this->name_count; }
 };
 
-/* See dwarf2read.h.  */
+/* See dwarf2/read.h.  */
 
 dwarf2_per_objfile *
 get_dwarf2_per_objfile (struct objfile *objfile)

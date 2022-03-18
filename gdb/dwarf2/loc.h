@@ -294,4 +294,4 @@ extern struct value *indirect_synthetic_pointer
    dwarf2_per_objfile *per_objfile, struct frame_info *frame,
    struct type *type, bool resolve_abstract_p = false);
 
-#endif /* dwarf2loc.h */
+#endif /* DWARF2LOC_H */

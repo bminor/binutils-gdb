@@ -585,7 +585,7 @@ const struct symbol_block_ops dwarf2_block_frame_base_loclist_funcs =
   loclist_get_frame_base
 };
 
-/* See dwarf2loc.h.  */
+/* See dwarf2/loc.h.  */
 
 void
 func_get_frame_base_dwarf_block (struct symbol *framefunc, CORE_ADDR pc,
@@ -617,7 +617,7 @@ compute_var_value (const char *name)
   return nullptr;
 }
 
-/* See dwarf2loc.h.  */
+/* See dwarf2/loc.h.  */
 
 unsigned int entry_values_debug = 0;
 
@@ -1604,7 +1604,7 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
   return 1;
 }
 
-/* See dwarf2loc.h.  */
+/* See dwarf2/loc.h.  */
 
 bool
 dwarf2_evaluate_property (const struct dynamic_prop *prop,
@@ -1738,7 +1738,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
   return false;
 }
 
-/* See dwarf2loc.h.  */
+/* See dwarf2/loc.h.  */
 
 void
 dwarf2_compile_property_to_c (string_file *stream,
@@ -2227,7 +2227,7 @@ unimplemented (unsigned int op)
 	   op);
 }
 
-/* See dwarf2loc.h.
+/* See dwarf2/loc.h.
 
    This is basically a wrapper on gdbarch_dwarf2_reg_to_regnum so that we
    can issue a complaint, which is better than having every target's
@@ -2260,7 +2260,7 @@ throw_bad_regnum_error (ULONGEST dwarf_reg)
 	 pulongest (dwarf_reg));
 }
 
-/* See dwarf2loc.h.  */
+/* See dwarf2/loc.h.  */
 
 int
 dwarf_reg_to_regnum_or_error (struct gdbarch *arch, ULONGEST dwarf_reg)

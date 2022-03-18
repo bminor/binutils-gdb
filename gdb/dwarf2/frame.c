@@ -179,7 +179,7 @@ static CORE_ADDR read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
 				     CORE_ADDR func_base);
 
 
-/* See dwarf2-frame.h.  */
+/* See dwarf2/frame.h.  */
 bool dwarf2_frame_unwinders_enabled_p = true;
 
 /* Store the length the expression for the CFA in the `cfa_reg' field,
@@ -769,7 +769,7 @@ dwarf2_frame_find_quirks (struct dwarf2_frame_state *fs,
 }
 
 
-/* See dwarf2-frame.h.  */
+/* See dwarf2/frame.h.  */
 
 int
 dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
