@@ -25,6 +25,7 @@ import gdbcopyright
 # All the components created in gdbarch-components.py.
 components = []
 
+
 def join_type_and_name(t, n):
     "Combine the type T and the name N into a C declaration."
     if t.endswith("*") or t.endswith("&"):

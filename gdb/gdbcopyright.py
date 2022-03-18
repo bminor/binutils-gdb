@@ -17,11 +17,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 def copyright(tool, description):
     # Search the tool source itself for the correct copyright years.
-    with open(tool, 'r') as f:
+    with open(tool, "r") as f:
         for line in f:
-            if line.startswith('# Copyright (C) '):
+            if line.startswith("# Copyright (C) "):
                 dateline = line[1:].strip()
                 break
     return f"""/* *INDENT-OFF* */ /* THIS FILE IS GENERATED -*- buffer-read-only: t -*- */
