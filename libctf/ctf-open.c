@@ -1517,26 +1517,39 @@ ctf_bufopen_internal (const ctf_sect_t *ctfsect, const ctf_sect_t *symsect,
 	  goto bad;
 	}
     }
-  else if (foreign_endian)
-    {
-      if ((fp->ctf_base = malloc (fp->ctf_size)) == NULL)
-	{
-	  err = ECTF_ZALLOC;
-	  goto bad;
-	}
-      fp->ctf_dynbase = fp->ctf_base;
-      memcpy (fp->ctf_base, ((unsigned char *) ctfsect->cts_data) + hdrsz,
-	      fp->ctf_size);
-      fp->ctf_buf = fp->ctf_base;
-    }
   else
     {
-      /* We are just using the section passed in -- but its header may be an old
-	 version.  Point ctf_buf past the old header, and never touch it
-	 again.  */
-      fp->ctf_base = (unsigned char *) ctfsect->cts_data;
-      fp->ctf_dynbase = NULL;
-      fp->ctf_buf = fp->ctf_base + hdrsz;
+      if (_libctf_unlikely_ (ctfsect->cts_size < hdrsz + fp->ctf_size))
+	{
+	  ctf_err_warn (NULL, 0, ECTF_CORRUPT,
+			_("%lu byte long CTF dictionary overruns %lu byte long CTF section"),
+			(unsigned long) ctfsect->cts_size,
+			(unsigned long) (hdrsz + fp->ctf_size));
+	  err = ECTF_CORRUPT;
+	  goto bad;
+	}
+
+      if (foreign_endian)
+	{
+	  if ((fp->ctf_base = malloc (fp->ctf_size)) == NULL)
+	    {
+	      err = ECTF_ZALLOC;
+	      goto bad;
+	    }
+	  fp->ctf_dynbase = fp->ctf_base;
+	  memcpy (fp->ctf_base, ((unsigned char *) ctfsect->cts_data) + hdrsz,
+		  fp->ctf_size);
+	  fp->ctf_buf = fp->ctf_base;
+	}
+      else
+	{
+	  /* We are just using the section passed in -- but its header may
+	     be an old version.  Point ctf_buf past the old header, and
+	     never touch it again.  */
+	  fp->ctf_base = (unsigned char *) ctfsect->cts_data;
+	  fp->ctf_dynbase = NULL;
+	  fp->ctf_buf = fp->ctf_base + hdrsz;
+	}
     }
 
   /* Once we have uncompressed and validated the CTF data buffer, we can
