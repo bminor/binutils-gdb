@@ -271,7 +271,10 @@ struct rust_parser
   operation_up parse_entry_point ()
   {
     lex ();
-    return parse_expr ();
+    operation_up result = parse_expr ();
+    if (current_token != 0)
+      error (_("Syntax error near '%s'"), pstate->prev_lexptr);
+    return result;
   }
 
   operation_up parse_tuple ();
@@ -2020,6 +2023,7 @@ rust_parser::parse_atom (bool required)
 
     case STRING:
       result = parse_string ();
+      lex ();
       break;
 
     case BYTESTRING:
