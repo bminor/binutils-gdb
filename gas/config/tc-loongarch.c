@@ -877,6 +877,8 @@ append_fixp_and_insn (struct loongarch_cl_insn *ip)
   struct reloc_info *reloc_info = ip->reloc_info;
   size_t i;
 
+  dwarf2_emit_insn (0);
+
   for (i = 0; i < ip->reloc_num; i++)
     {
       reloc_type = reloc_info[i].type;
@@ -893,8 +895,6 @@ append_fixp_and_insn (struct loongarch_cl_insn *ip)
     as_fatal (_("Internal error: not support relax now"));
   else
     append_fixed_insn (ip);
-
-  dwarf2_emit_insn (0);
 }
 
 /* Ask helper for returning a malloced c_str or NULL.  */
