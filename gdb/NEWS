@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 11
+*** Changes since GDB 12
+
+*** Changes in GDB 12
 
 * DBX mode is deprecated, and will be removed in GDB 13
 
