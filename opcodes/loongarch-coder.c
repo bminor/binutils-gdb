@@ -378,13 +378,18 @@ char *
 loongarch_expand_macro_with_format_map (
   const char *format, const char *macro, const char *const arg_strs[],
   const char *(*map) (char esc1, char esc2, const char *arg),
-  char *(*helper) (const char *const arg_strs[], void *context), void *context)
+  char *(*helper) (const char *const arg_strs[], void *context), void *context,
+  size_t len_str)
 {
   char esc1s[MAX_ARG_NUM_PLUS_2 - 1], esc2s[MAX_ARG_NUM_PLUS_2 - 1];
   const char *bit_fields[MAX_ARG_NUM_PLUS_2 - 1];
   const char *src;
   char *dest;
-  char buffer[8192];
+
+  /* The expanded macro character length does not exceed 1000, and number of
+     label is 6 at most in the expanded macro. The len_str is the length of
+     str.  */
+  char *buffer =(char *) malloc(1024 +  6 * len_str);
 
   if (format)
     loongarch_parse_format (format, esc1s, esc2s, bit_fields);
@@ -422,17 +427,17 @@ loongarch_expand_macro_with_format_map (
       *dest++ = *src++;
 
   *dest = '\0';
-  return strdup (buffer);
+  return buffer;
 }
 
 char *
 loongarch_expand_macro (const char *macro, const char *const arg_strs[],
 			char *(*helper) (const char *const arg_strs[],
 					 void *context),
-			void *context)
+			void *context, size_t len_str)
 {
   return loongarch_expand_macro_with_format_map (NULL, macro, arg_strs, I,
-						 helper, context);
+						 helper, context, len_str);
 }
 
 size_t
