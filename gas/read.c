@@ -1391,6 +1391,7 @@ read_a_source_file (const char *name)
 		  if (size < space)
 		    {
 		      new_tmp[size] = 0;
+		      new_length = new_tmp + size - new_buf;
 		      break;
 		    }
 
@@ -1408,7 +1409,6 @@ read_a_source_file (const char *name)
 		 actual macro expansion (possibly nested) and other
 		 input expansion work.  Beware that in messages, line
 		 numbers and possibly file names will be incorrect.  */
-	      new_length = strlen (new_buf);
 	      sb_build (&sbuf, new_length);
 	      sb_add_buffer (&sbuf, new_buf, new_length);
 	      input_scrub_include_sb (&sbuf, input_line_pointer, 0);
@@ -3950,12 +3950,19 @@ s_weakref (int ignore ATTRIBUTE_UNUSED)
 
 
 /* Verify that we are at the end of a line.  If not, issue an error and
-   skip to EOL.  */
+   skip to EOL.  This function may leave input_line_pointer one past
+   buffer_limit, so should not be called from places that may
+   dereference input_line_pointer unconditionally.  Note that when the
+   gas parser is switched to handling a string (where buffer_limit
+   should be the size of the string excluding the NUL terminator) this
+   will be one past the NUL; is_end_of_line(0) returns true.  */
 
 void
 demand_empty_rest_of_line (void)
 {
   SKIP_WHITESPACE ();
+  if (input_line_pointer > buffer_limit)
+    return;
   if (is_end_of_line[(unsigned char) *input_line_pointer])
     input_line_pointer++;
   else
@@ -3968,18 +3975,19 @@ demand_empty_rest_of_line (void)
 		 *input_line_pointer);
       ignore_rest_of_line ();
     }
-
   /* Return pointing just after end-of-line.  */
-  know (is_end_of_line[(unsigned char) input_line_pointer[-1]]);
 }
 
 /* Silently advance to the end of line.  Use this after already having
-   issued an error about something bad.  */
+   issued an error about something bad.  Like demand_empty_rest_of_line,
+   this function may leave input_line_pointer one after buffer_limit;
+   Don't call it from within expression parsing code in an attempt to
+   silence further errors.  */
 
 void
 ignore_rest_of_line (void)
 {
-  while (input_line_pointer < buffer_limit)
+  while (input_line_pointer <= buffer_limit)
     if (is_end_of_line[(unsigned char) *input_line_pointer++])
       break;
   /* Return pointing just after end-of-line.  */
