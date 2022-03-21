@@ -266,6 +266,18 @@ pending_status_str (lwp_info *lp)
     return status_to_str (lp->status);
 }
 
+/* Return true if we should report exit events for LP.  */
+
+static bool
+report_exit_events_for (lwp_info *lp)
+{
+  thread_info *thr = find_thread_ptid (linux_target, lp->ptid);
+  gdb_assert (thr != nullptr);
+
+  return (report_thread_events
+	  || (thr->thread_options () & GDB_TO_EXIT) != 0);
+}
+
 
 /* LWP accessors.  */
 
@@ -895,10 +907,11 @@ linux_nat_switch_fork (ptid_t new_ptid)
   registers_changed ();
 }
 
-/* Handle the exit of a single thread LP.  */
+/* Handle the exit of a single thread LP.  If DEL_THREAD is true,
+   delete the thread_info associated to LP, if it exists.  */
 
 static void
-exit_lwp (struct lwp_info *lp)
+exit_lwp (struct lwp_info *lp, bool del_thread = true)
 {
   struct thread_info *th = find_thread_ptid (linux_target, lp->ptid);
 
@@ -908,7 +921,8 @@ exit_lwp (struct lwp_info *lp)
 	gdb_printf (_("[%s exited]\n"),
 		    target_pid_to_str (lp->ptid).c_str ());
 
-      delete_thread (th);
+      if (del_thread)
+	delete_thread (th);
     }
 
   delete_lwp (lp->ptid);
@@ -1900,7 +1914,7 @@ linux_nat_target::follow_clone (ptid_t child_ptid)
     {
       new_lp->status = 0;
 
-      if (report_thread_events)
+      if (report_exit_events_for (new_lp))
 	new_lp->waitstatus.set_thread_created ();
     }
 }
@@ -2151,8 +2165,7 @@ wait_lwp (struct lwp_info *lp)
       /* Check if the thread has exited.  */
       if (WIFEXITED (status) || WIFSIGNALED (status))
 	{
-	  if (report_thread_events
-	      || lp->ptid.pid () == lp->ptid.lwp ())
+	  if (report_exit_events_for (lp) || is_leader (lp))
 	    {
 	      linux_nat_debug_printf ("LWP %d exited.", lp->ptid.pid ());
 
@@ -2933,7 +2946,7 @@ linux_nat_filter_event (int lwpid, int status)
   /* Check if the thread has exited.  */
   if (WIFEXITED (status) || WIFSIGNALED (status))
     {
-      if (!report_thread_events && !is_leader (lp))
+      if (!report_exit_events_for (lp) && !is_leader (lp))
 	{
 	  linux_nat_debug_printf ("%s exited.",
 				  lp->ptid.to_string ().c_str ());
@@ -3143,10 +3156,11 @@ check_zombie_leaders (void)
     }
 }
 
-/* Convenience function that is called when the kernel reports an exit
-   event.  This decides whether to report the event to GDB as a
-   process exit event, a thread exit event, or to suppress the
-   event.  */
+/* Convenience function that is called when we're about to return an
+   event to the core.  If the event is an exit or signalled event,
+   then this decides whether to report it as process-wide event, as a
+   thread exit event, or to suppress it.  All other event kinds are
+   passed through unmodified.  */
 
 static ptid_t
 filter_exit_event (struct lwp_info *event_child,
@@ -3154,14 +3168,28 @@ filter_exit_event (struct lwp_info *event_child,
 {
   ptid_t ptid = event_child->ptid;
 
+  /* Note we must filter TARGET_WAITKIND_SIGNALLED as well, otherwise
+     if a non-leader thread exits with a signal, we'd report it to the
+     core which would interpret it as the whole-process exiting.
+     There is no TARGET_WAITKIND_THREAD_SIGNALLED event kind.  */
+  if (ourstatus->kind () != TARGET_WAITKIND_EXITED
+      && ourstatus->kind () != TARGET_WAITKIND_SIGNALLED)
+    return ptid;
+
   if (!is_leader (event_child))
     {
-      if (report_thread_events)
-	ourstatus->set_thread_exited (0);
+      if (report_exit_events_for (event_child))
+	{
+	  ourstatus->set_thread_exited (0);
+	  /* Delete lwp, but not thread_info, infrun will need it to
+	     process the event.  */
+	  exit_lwp (event_child, false);
+	}
       else
-	ourstatus->set_ignore ();
-
-      exit_lwp (event_child);
+	{
+	  ourstatus->set_ignore ();
+	  exit_lwp (event_child);
+	}
     }
 
   return ptid;
@@ -3383,10 +3411,7 @@ linux_nat_wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
   else
     lp->core = linux_common_core_of_thread (lp->ptid);
 
-  if (ourstatus->kind () == TARGET_WAITKIND_EXITED)
-    return filter_exit_event (lp, ourstatus);
-
-  return lp->ptid;
+  return filter_exit_event (lp, ourstatus);
 }
 
 /* Resume LWPs that are currently stopped without any pending status
@@ -4419,7 +4444,8 @@ linux_nat_target::thread_events (int enable)
 bool
 linux_nat_target::supports_set_thread_options (gdb_thread_options options)
 {
-  constexpr gdb_thread_options supported_options = GDB_TO_CLONE;
+  constexpr gdb_thread_options supported_options
+    = GDB_TO_CLONE | GDB_TO_EXIT;
   return ((options & supported_options) == options);
 }
 
