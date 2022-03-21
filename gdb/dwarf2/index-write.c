@@ -1307,7 +1307,8 @@ write_cooked_index (cooked_index *table,
 	}
 
       gdb_index_symbol_kind kind;
-      if (entry->tag == DW_TAG_subprogram)
+      if (entry->tag == DW_TAG_subprogram
+	  || entry->tag == DW_TAG_entry_point)
 	kind = GDB_INDEX_SYMBOL_KIND_FUNCTION;
       else if (entry->tag == DW_TAG_variable
 	       || entry->tag == DW_TAG_constant

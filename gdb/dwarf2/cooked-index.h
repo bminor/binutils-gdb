@@ -141,7 +141,8 @@ struct cooked_index_entry : public allocate_on_obstack
 		|| tag == DW_TAG_constant
 		|| tag == DW_TAG_enumerator);
       case FUNCTIONS_DOMAIN:
-	return tag == DW_TAG_subprogram;
+	return (tag == DW_TAG_subprogram
+		|| tag == DW_TAG_entry_point);
       case TYPES_DOMAIN:
 	return tag_is_type (tag);
       case MODULES_DOMAIN:

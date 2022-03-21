@@ -88,6 +88,7 @@ tag_interesting_for_index (dwarf_tag tag)
     case DW_TAG_base_type:
     case DW_TAG_class_type:
     case DW_TAG_constant:
+    case DW_TAG_entry_point:
     case DW_TAG_enumeration_type:
     case DW_TAG_enumerator:
     case DW_TAG_imported_declaration:
