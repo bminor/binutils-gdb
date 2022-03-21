@@ -1,5 +1,5 @@
 /* Shared library declarations for GDB, the GNU Debugger.
-   
+
    Copyright (C) 1992-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -26,6 +26,7 @@ struct target_ops;
 struct target_so_ops;
 struct program_space;
 
+#include "gdb_bfd.h"
 #include "symfile-add-flags.h"
 
 /* Called when we free all symtabs, to free the shared library information
