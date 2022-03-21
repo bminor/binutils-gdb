@@ -370,9 +370,6 @@
 /* Define if sys/ptrace.h defines the PT_GETDBREGS request. */
 #undef HAVE_PT_GETDBREGS
 
-/* Define if sys/ptrace.h defines the PT_GETXMMREGS request. */
-#undef HAVE_PT_GETXMMREGS
-
 /* Define to 1 if you have the `pt_insn_event' function. */
 #undef HAVE_PT_INSN_EVENT
 
