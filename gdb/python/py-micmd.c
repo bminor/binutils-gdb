@@ -185,7 +185,7 @@ static gdb::unique_xmalloc_ptr<char>
 py_object_to_mi_key (PyObject *key_obj)
 {
   /* The key must be a string.  */
-  if (!PyString_Check (key_obj))
+  if (!PyUnicode_Check (key_obj))
     {
       gdbpy_ref<> key_repr (PyObject_Repr (key_obj));
       gdb::unique_xmalloc_ptr<char> key_repr_string;
@@ -261,7 +261,7 @@ serialize_mi_result_1 (PyObject *result, const char *field_name)
 	  serialize_mi_result_1 (value, key_string.get ());
 	}
     }
-  else if (PySequence_Check (result) && !PyString_Check (result))
+  else if (PySequence_Check (result) && !PyUnicode_Check (result))
     {
       ui_out_emit_list list_emitter (uiout, field_name);
       Py_ssize_t len = PySequence_Size (result);
@@ -607,7 +607,7 @@ gdbpy_initialize_micommands ()
       < 0)
     return -1;
 
-  invoke_cst = PyString_FromString ("invoke");
+  invoke_cst = PyUnicode_FromString ("invoke");
   if (invoke_cst == nullptr)
     return -1;
 
@@ -636,7 +636,7 @@ micmdpy_get_name (PyObject *self, void *closure)
 
   gdb_assert (micmd_obj->mi_command_name != nullptr);
   std::string name_str = string_printf ("-%s", micmd_obj->mi_command_name);
-  return PyString_FromString (name_str.c_str ());
+  return PyUnicode_FromString (name_str.c_str ());
 }
 
 /* Get the gdb.MICommand.installed property.  Returns true if this MI

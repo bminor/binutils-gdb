@@ -474,7 +474,7 @@ recpy_gap_reason_string (PyObject *self, void *closure)
 {
   const recpy_gap_object * const obj = (const recpy_gap_object *) self;
 
-  return PyString_FromString (obj->reason_string);
+  return PyUnicode_FromString (obj->reason_string);
 }
 
 /* Record method list.  */

@@ -152,8 +152,8 @@ python_string_to_host_string (PyObject *obj)
 gdbpy_ref<>
 host_string_to_python_string (const char *str)
 {
-  return gdbpy_ref<> (PyString_Decode (str, strlen (str), host_charset (),
-				       NULL));
+  return gdbpy_ref<> (PyUnicode_Decode (str, strlen (str), host_charset (),
+					NULL));
 }
 
 /* Return true if OBJ is a Python string or unicode object, false
@@ -294,13 +294,13 @@ gdb_py_object_from_ulongest (ULONGEST l)
   return gdbpy_ref<> (PyLong_FromUnsignedLong (l));
 }
 
-/* Like PyInt_AsLong, but returns 0 on failure, 1 on success, and puts
+/* Like PyLong_AsLong, but returns 0 on failure, 1 on success, and puts
    the value into an out parameter.  */
 
 int
 gdb_py_int_as_long (PyObject *obj, long *result)
 {
-  *result = PyInt_AsLong (obj);
+  *result = PyLong_AsLong (obj);
   return ! (*result == -1 && PyErr_Occurred ());
 }
 

@@ -510,10 +510,10 @@ objfpy_repr (PyObject *self_)
   objfile *obj = self->objfile;
 
   if (obj == nullptr)
-    return PyString_FromString ("<gdb.Objfile (invalid)>");
+    return PyUnicode_FromString ("<gdb.Objfile (invalid)>");
 
-  return PyString_FromFormat ("<gdb.Objfile filename=%s>",
-			      objfile_name (obj));
+  return PyUnicode_FromFormat ("<gdb.Objfile filename=%s>",
+			       objfile_name (obj));
 }
 
 /* Subroutine of gdbpy_lookup_objfile_by_build_id to simplify it.

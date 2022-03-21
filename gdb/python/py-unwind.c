@@ -213,7 +213,7 @@ unwind_infopy_str (PyObject *self)
     stb.puts (")");
   }
 
-  return PyString_FromString (stb.c_str ());
+  return PyUnicode_FromString (stb.c_str ());
 }
 
 /* Create UnwindInfo instance for given PendingFrame and frame ID.
@@ -349,7 +349,7 @@ pending_framepy_str (PyObject *self)
   const char *pc_str = NULL;
 
   if (frame == NULL)
-    return PyString_FromString ("Stale PendingFrame instance");
+    return PyUnicode_FromString ("Stale PendingFrame instance");
   try
     {
       sp_str = core_addr_to_string_nz (get_frame_sp (frame));
@@ -360,7 +360,7 @@ pending_framepy_str (PyObject *self)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  return PyString_FromFormat ("SP=%s,PC=%s", sp_str, pc_str);
+  return PyUnicode_FromFormat ("SP=%s,PC=%s", sp_str, pc_str);
 }
 
 /* Implementation of gdb.PendingFrame.read_register (self, reg) -> gdb.Value.

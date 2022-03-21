@@ -471,9 +471,9 @@ btpy_list_slice (PyObject *self, PyObject *value)
   const Py_ssize_t length = btpy_list_length (self);
   Py_ssize_t start, stop, step, slicelength;
 
-  if (PyInt_Check (value))
+  if (PyLong_Check (value))
     {
-      Py_ssize_t index = PyInt_AsSsize_t (value);
+      Py_ssize_t index = PyLong_AsSsize_t (value);
 
       /* Emulate Python behavior for negative indices.  */
       if (index < 0)
@@ -607,7 +607,7 @@ btpy_list_richcompare (PyObject *self, PyObject *other, int op)
 PyObject *
 recpy_bt_method (PyObject *self, void *closure)
 {
-  return PyString_FromString ("btrace");
+  return PyUnicode_FromString ("btrace");
 }
 
 /* Implementation of
@@ -628,7 +628,7 @@ recpy_bt_format (PyObject *self, void *closure)
   if (config == NULL)
     Py_RETURN_NONE;
 
-  return PyString_FromString (btrace_format_short_string (config->format));
+  return PyUnicode_FromString (btrace_format_short_string (config->format));
 }
 
 /* Implementation of

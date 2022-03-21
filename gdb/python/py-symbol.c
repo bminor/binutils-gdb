@@ -60,7 +60,7 @@ sympy_str (PyObject *self)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  result = PyString_FromString (symbol->print_name ());
+  result = PyUnicode_FromString (symbol->print_name ());
 
   return result;
 }
@@ -101,7 +101,7 @@ sympy_get_name (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return PyString_FromString (symbol->natural_name ());
+  return PyUnicode_FromString (symbol->natural_name ());
 }
 
 static PyObject *
@@ -111,7 +111,7 @@ sympy_get_linkage_name (PyObject *self, void *closure)
 
   SYMPY_REQUIRE_VALID (self, symbol);
 
-  return PyString_FromString (symbol->linkage_name ());
+  return PyUnicode_FromString (symbol->linkage_name ());
 }
 
 static PyObject *

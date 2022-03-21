@@ -224,7 +224,7 @@ bppy_set_thread (PyObject *self, PyObject *newvalue, void *closure)
 		       _("Cannot delete `thread' attribute."));
       return -1;
     }
-  else if (PyInt_Check (newvalue))
+  else if (PyLong_Check (newvalue))
     {
       if (! gdb_py_int_as_long (newvalue, &id))
 	return -1;
@@ -266,7 +266,7 @@ bppy_set_task (PyObject *self, PyObject *newvalue, void *closure)
 		       _("Cannot delete `task' attribute."));
       return -1;
     }
-  else if (PyInt_Check (newvalue))
+  else if (PyLong_Check (newvalue))
     {
       if (! gdb_py_int_as_long (newvalue, &id))
 	return -1;
@@ -341,7 +341,7 @@ bppy_set_ignore_count (PyObject *self, PyObject *newvalue, void *closure)
 		       _("Cannot delete `ignore_count' attribute."));
       return -1;
     }
-  else if (! PyInt_Check (newvalue))
+  else if (!PyLong_Check (newvalue))
     {
       PyErr_SetString (PyExc_TypeError,
 		       _("The value of `ignore_count' must be an integer."));
@@ -780,9 +780,9 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 
   if (lineobj != NULL)
     {
-      if (PyInt_Check (lineobj))
-	line = xstrprintf ("%ld", PyInt_AsLong (lineobj));
-      else if (PyString_Check (lineobj))
+      if (PyLong_Check (lineobj))
+	line = xstrprintf ("%ld", PyLong_AsLong (lineobj));
+      else if (PyUnicode_Check (lineobj))
 	line = python_string_to_host_string (lineobj);
       else
 	{

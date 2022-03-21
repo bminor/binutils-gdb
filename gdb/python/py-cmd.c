@@ -233,7 +233,7 @@ cmdpy_completer_handle_brkchars (struct cmd_list_element *command,
   if (resultobj == NULL)
     return;
 
-  if (PyInt_Check (resultobj.get ()))
+  if (PyLong_Check (resultobj.get ()))
     {
       /* User code may also return one of the completion constants,
 	 thus requesting that sort of completion.  We are only
@@ -277,7 +277,7 @@ cmdpy_completer (struct cmd_list_element *command,
   if (resultobj == NULL)
     return;
 
-  if (PyInt_Check (resultobj.get ()))
+  if (PyLong_Check (resultobj.get ()))
     {
       /* User code may also return one of the completion constants,
 	 thus requesting that sort of completion.  */
@@ -592,10 +592,10 @@ gdbpy_initialize_commands (void)
 			      (PyObject *) &cmdpy_object_type) < 0)
     return -1;
 
-  invoke_cst = PyString_FromString ("invoke");
+  invoke_cst = PyUnicode_FromString ("invoke");
   if (invoke_cst == NULL)
     return -1;
-  complete_cst = PyString_FromString ("complete");
+  complete_cst = PyUnicode_FromString ("complete");
   if (complete_cst == NULL)
     return -1;
 
@@ -684,7 +684,7 @@ gdbpy_string_to_argv (PyObject *self, PyObject *args)
 
       for (char *arg : c_argv)
 	{
-	  gdbpy_ref<> argp (PyString_FromString (arg));
+	  gdbpy_ref<> argp (PyUnicode_FromString (arg));
 
 	  if (argp == NULL
 	      || PyList_Append (py_argv.get (), argp.get ()) < 0)

@@ -73,7 +73,7 @@ thpy_get_name (PyObject *self, void *ignore)
   if (name == NULL)
     Py_RETURN_NONE;
 
-  return PyString_FromString (name);
+  return PyUnicode_FromString (name);
 }
 
 /* Return a string containing target specific additional information about
@@ -101,7 +101,7 @@ thpy_get_details (PyObject *self, void *ignore)
   if (extra_info == nullptr)
     Py_RETURN_NONE;
 
-  return PyString_FromString (extra_info);
+  return PyUnicode_FromString (extra_info);
 }
 
 static int

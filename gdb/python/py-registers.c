@@ -138,7 +138,7 @@ gdbpy_reggroup_to_string (PyObject *self)
   struct reggroup *reggroup = group->reggroup;
 
   const char *name = reggroup_name (reggroup);
-  return PyString_FromString (name);
+  return PyUnicode_FromString (name);
 }
 
 /* Implement gdb.RegisterGroup.name (self) -> String.
@@ -196,7 +196,7 @@ gdbpy_register_descriptor_to_string (PyObject *self)
   int regnum = reg->regnum;
 
   const char *name = gdbarch_register_name (gdbarch, regnum);
-  return PyString_FromString (name);
+  return PyUnicode_FromString (name);
 }
 
 /* Implement gdb.RegisterDescriptor.name attribute get function.  Return a
@@ -391,7 +391,7 @@ gdbpy_parse_register_id (struct gdbarch *gdbarch, PyObject *pyo_reg_id,
 	}
     }
   /* The register could be its internal GDB register number.  */
-  else if (PyInt_Check (pyo_reg_id))
+  else if (PyLong_Check (pyo_reg_id))
     {
       long value;
       if (gdb_py_int_as_long (pyo_reg_id, &value) && (int) value == value)

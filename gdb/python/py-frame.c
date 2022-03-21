@@ -80,7 +80,7 @@ static PyObject *
 frapy_str (PyObject *self)
 {
   const frame_id &fid = ((frame_object *) self)->frame_id;
-  return PyString_FromString (fid.to_string ().c_str ());
+  return PyUnicode_FromString (fid.to_string ().c_str ());
 }
 
 /* Implementation of gdb.Frame.is_valid (self) -> Boolean.

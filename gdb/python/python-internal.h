@@ -89,15 +89,6 @@
 
 #define Py_TPFLAGS_CHECKTYPES 0
 
-#define PyInt_Check PyLong_Check
-#define PyInt_AsLong PyLong_AsLong
-#define PyInt_AsSsize_t PyLong_AsSsize_t
-
-#define PyString_FromString PyUnicode_FromString
-#define PyString_Decode PyUnicode_Decode
-#define PyString_FromFormat PyUnicode_FromFormat
-#define PyString_Check PyUnicode_Check
-
 /* If Python.h does not define WITH_THREAD, then the various
    GIL-related functions will not be defined.  However,
    PyGILState_STATE will be.  */
@@ -140,19 +131,6 @@ typedef long Py_hash_t;
 #if PY_VERSION_HEX < 0x03040000
 #define PyMem_RawMalloc PyMem_Malloc
 #endif
-
-/* Python 2.6 did not wrap Py_DECREF in 'do {...} while (0)', leading
-   to 'suggest explicit braces to avoid ambiguous ‘else’' gcc errors.
-   Wrap it ourselves, so that callers don't need to care.  */
-
-static inline void
-gdb_Py_DECREF (void *op) /* ARI: editCase function */
-{
-  Py_DECREF (op);
-}
-
-#undef Py_DECREF
-#define Py_DECREF(op) gdb_Py_DECREF (op)
 
 /* PyObject_CallMethod's 'method' and 'format' parameters were missing
    the 'const' qualifier before Python 3.4.  Hence, we wrap the

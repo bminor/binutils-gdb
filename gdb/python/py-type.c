@@ -209,7 +209,7 @@ convert_field (struct type *type, int field)
 
       if (field_name[0] != '\0')
 	{
-	  arg.reset (PyString_FromString (type->field (field).name ()));
+	  arg.reset (PyUnicode_FromString (type->field (field).name ()));
 	  if (arg == NULL)
 	    return NULL;
 	}
@@ -261,7 +261,7 @@ field_name (struct type *type, int field)
   gdbpy_ref<> result;
 
   if (type->field (field).name ())
-    result.reset (PyString_FromString (type->field (field).name ()));
+    result.reset (PyUnicode_FromString (type->field (field).name ()));
   else
     result = gdbpy_ref<>::new_reference (Py_None);
 
@@ -399,9 +399,9 @@ typy_get_name (PyObject *self, void *closure)
     {
       std::string name = ada_decode (type->name (), false);
       if (!name.empty ())
-	return PyString_FromString (name.c_str ());
+	return PyUnicode_FromString (name.c_str ());
     }
-  return PyString_FromString (type->name ());
+  return PyUnicode_FromString (type->name ());
 }
 
 /* Return the type's tag, or None.  */
@@ -418,7 +418,7 @@ typy_get_tag (PyObject *self, void *closure)
 
   if (tagname == nullptr)
     Py_RETURN_NONE;
-  return PyString_FromString (tagname);
+  return PyUnicode_FromString (tagname);
 }
 
 /* Return the type's objfile, or None.  */
@@ -539,7 +539,7 @@ typy_array_1 (PyObject *self, PyObject *args, int is_vector)
 
   if (n2_obj)
     {
-      if (!PyInt_Check (n2_obj))
+      if (!PyLong_Check (n2_obj))
 	{
 	  PyErr_SetString (PyExc_RuntimeError,
 			   _("Array bound must be an integer"));

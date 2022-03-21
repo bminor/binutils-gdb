@@ -93,7 +93,7 @@ stpy_str (PyObject *self)
 
   STPY_REQUIRE_VALID (self, symtab);
 
-  result = PyString_FromString (symtab_to_filename_for_display (symtab));
+  result = PyUnicode_FromString (symtab_to_filename_for_display (symtab));
 
   return result;
 }
@@ -234,8 +234,8 @@ salpy_str (PyObject *self)
       filename = symtab_to_filename_for_display (symtab);
     }
 
-  return PyString_FromFormat ("symbol and line for %s, line %d", filename,
-			      sal->line);
+  return PyUnicode_FromFormat ("symbol and line for %s, line %d", filename,
+			       sal->line);
 }
 
 static void
