@@ -1144,7 +1144,7 @@ prepare_resume_reply (char *buf, ptid_t ptid, const target_waitstatus &status)
 	    gdb_assert (buf_start[0] == 'T');
 	    gdb_assert (isxdigit (buf_start[1]));
 	    gdb_assert (isxdigit (buf_start[2]));
-	    *buf = 'S';
+	    buf_start[0] = 'S';
 	    buf_start[3] = '\0';
 	    break;
 	  }
