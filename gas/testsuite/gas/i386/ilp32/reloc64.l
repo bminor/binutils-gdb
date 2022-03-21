@@ -52,3 +52,16 @@
 .*:176: Error: .*
 .*:177: Error: .*
 .*:189: Error: .*
+.*:192: Error: .* too large for field of 4 bytes at .*
+.*:193: Error: .* too large for field of 4 bytes at .*
+.*:194: Error: .* too large for field of 4 bytes at .*
+.*:195: Error: .* too large for field of 4 bytes at .*
+.*:196: Error: .* too large for field of 2 bytes at .*
+.*:196: Error: .* too large for field of 1 byte at .*
+.*:197: Error: .* too large for field of 2 bytes at .*
+.*:197: Error: .* too large for field of 1 byte at .*
+.*:200: Error: .* too large for field of 4 bytes at .*
+.*:201: Error: .* too large for field of 2 bytes at .*
+.*:202: Error: .* too large for field of 2 bytes at .*
+.*:203: Error: .* too large for field of 1 byte at .*
+.*:204: Error: .* too large for field of 1 byte at .*

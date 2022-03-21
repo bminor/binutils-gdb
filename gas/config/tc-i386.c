@@ -12769,7 +12769,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 #endif
   else if (use_rela_relocations)
     {
-      fixP->fx_no_overflow = 1;
+      if (!disallow_64bit_reloc || fixP->fx_r_type == NO_RELOC)
+	fixP->fx_no_overflow = 1;
       /* Remember value for tc_gen_reloc.  */
       fixP->fx_addnumber = value;
       value = 0;
