@@ -1,3 +1,10 @@
+2022-03-21  Steiner H Gunderson  <steinar+sourceware@gunderson.no>
+
+	PR 28978
+	* dwarf2.c (scan_unit_for_symbols): When performing second pass,
+	check to see if the function or variable being processed is the
+	same as the previous one.
+
 2022-03-18  Viorel Preoteasa  <viorel.preoteasa@gmail.com>
 
 	PR 28924

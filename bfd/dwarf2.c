@@ -3293,6 +3293,36 @@ lookup_var_by_offset (bfd_uint64_t offset, struct varinfo * table)
 
 /* DWARF2 Compilation unit functions.  */
 
+static struct funcinfo *
+reverse_funcinfo_list (struct funcinfo *head)
+{
+  struct funcinfo *rhead;
+  struct funcinfo *temp;
+
+  for (rhead = NULL; head; head = temp)
+    {
+      temp = head->prev_func;
+      head->prev_func = rhead;
+      rhead = head;
+    }
+  return rhead;
+}
+
+static struct varinfo *
+reverse_varinfo_list (struct varinfo *head)
+{
+  struct varinfo *rhead;
+  struct varinfo *temp;
+
+  for (rhead = NULL; head; head = temp)
+    {
+      temp = head->prev_var;
+      head->prev_var = rhead;
+      rhead = head;
+    }
+  return rhead;
+}
+
 /* Scan over each die in a comp. unit looking for functions to add
    to the function table and variables to the variable table.  */
 
@@ -3308,7 +3338,9 @@ scan_unit_for_symbols (struct comp_unit *unit)
     struct funcinfo *func;
   } *nested_funcs;
   int nested_funcs_size;
-
+  struct funcinfo *last_func;
+  struct varinfo *last_var;
+  
   /* Maintain a stack of in-scope functions and inlined functions, which we
      can use to set the caller_func field.  */
   nested_funcs_size = 32;
@@ -3442,10 +3474,16 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	}
     }
 
+  unit->function_table = reverse_funcinfo_list (unit->function_table);
+  unit->variable_table = reverse_varinfo_list (unit->variable_table);
+
   /* This is the second pass over the abbrevs.  */      
   info_ptr = unit->first_child_die_ptr;
   nesting_level = 0;
   
+  last_func = NULL;
+  last_var = NULL;
+
   while (nesting_level >= 0)
     {
       unsigned int abbrev_number, i;
@@ -3481,16 +3519,32 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	  || abbrev->tag == DW_TAG_entry_point
 	  || abbrev->tag == DW_TAG_inlined_subroutine)
 	{
-	  func = lookup_func_by_offset (current_offset, unit->function_table);
+	  if (last_func
+	      && last_func->prev_func
+	      && last_func->prev_func->unit_offset == current_offset)
+	    func = last_func->prev_func;
+	  else
+	    func = lookup_func_by_offset (current_offset, unit->function_table);
+
 	  if (func == NULL)
 	    goto fail;
+
+	  last_func = func;
 	}
       else if (abbrev->tag == DW_TAG_variable
 	       || abbrev->tag == DW_TAG_member)
 	{
-	  var = lookup_var_by_offset (current_offset, unit->variable_table);
+	  if (last_var
+	      && last_var->prev_var
+	      && last_var->prev_var->unit_offset == current_offset)
+	    var = last_var->prev_var;
+	  else
+	    var = lookup_var_by_offset (current_offset, unit->variable_table);
+
 	  if (var == NULL)
 	    goto fail;
+
+	  last_var = var;
 	}
 
       for (i = 0; i < abbrev->num_attrs; ++i)
@@ -3683,6 +3737,9 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	    goto fail;
 	}
     }
+
+  unit->function_table = reverse_funcinfo_list (unit->function_table);
+  unit->variable_table = reverse_varinfo_list (unit->variable_table);
 
   free (nested_funcs);
   return true;
@@ -4045,36 +4102,6 @@ comp_unit_find_line (struct comp_unit *unit,
   return lookup_symbol_in_variable_table (unit, sym, addr,
 					  filename_ptr,
 					  linenumber_ptr);
-}
-
-static struct funcinfo *
-reverse_funcinfo_list (struct funcinfo *head)
-{
-  struct funcinfo *rhead;
-  struct funcinfo *temp;
-
-  for (rhead = NULL; head; head = temp)
-    {
-      temp = head->prev_func;
-      head->prev_func = rhead;
-      rhead = head;
-    }
-  return rhead;
-}
-
-static struct varinfo *
-reverse_varinfo_list (struct varinfo *head)
-{
-  struct varinfo *rhead;
-  struct varinfo *temp;
-
-  for (rhead = NULL; head; head = temp)
-    {
-      temp = head->prev_var;
-      head->prev_var = rhead;
-      rhead = head;
-    }
-  return rhead;
 }
 
 /* Extract all interesting funcinfos and varinfos of a compilation
