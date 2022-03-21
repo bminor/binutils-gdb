@@ -266,7 +266,7 @@ set_default_source_symtab_and_line (void)
   /* Pull in a current source symtab if necessary.  */
   current_source_location *loc = get_source_location (current_program_space);
   if (loc->symtab () == nullptr)
-    select_source_symtab (0);
+    select_source_symtab ();
 }
 
 /* Return the current default file for listing and next line to list
@@ -307,16 +307,8 @@ clear_current_source_symtab_and_line (void)
 /* See source.h.  */
 
 void
-select_source_symtab (struct symtab *s)
+select_source_symtab ()
 {
-  if (s)
-    {
-      current_source_location *loc
-	= get_source_location (s->compunit ()->objfile ()->pspace);
-      loc->set (s, 1);
-      return;
-    }
-
   current_source_location *loc = get_source_location (current_program_space);
   if (loc->symtab () != nullptr)
     return;
@@ -363,7 +355,7 @@ select_source_symtab (struct symtab *s)
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      s = objfile->find_last_source_symtab ();
+      symtab *s = objfile->find_last_source_symtab ();
       if (s)
 	new_symtab = s;
     }
@@ -1617,7 +1609,7 @@ search_command_helper (const char *regex, int from_tty, bool forward)
   current_source_location *loc
     = get_source_location (current_program_space);
   if (loc->symtab () == nullptr)
-    select_source_symtab (0);
+    select_source_symtab ();
 
   if (!source_open)
     error (_("source code access disabled"));

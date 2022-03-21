@@ -202,13 +202,11 @@ extern void print_source_lines (struct symtab *s, source_lines_range r,
    may be found in a different directory now.  */
 extern void forget_cached_source_info (void);
 
-/* Set the source file default for the "list" command to be S.
-
-   If S is NULL, and we don't have a default, find one.  This
-   should only be called when the user actually tries to use the
-   default, since we produce an error if we can't find a reasonable
-   default.  Also, since this can cause symbols to be read, doing it
-   before we need to would make things slower than necessary.  */
-extern void select_source_symtab (struct symtab *s);
+/* Find a source file default for the "list" command.  This should
+   only be called when the user actually tries to use the default,
+   since we produce an error if we can't find a reasonable default.
+   Also, since this can cause symbols to be read, doing it before we
+   need to would make things slower than necessary.  */
+extern void select_source_symtab ();
 
 #endif
