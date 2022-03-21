@@ -3769,7 +3769,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_float_bit (gdbarch, 32);
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 128);
-  set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_quad);
   set_gdbarch_ptr_bit (gdbarch, riscv_isa_xlen (gdbarch) * 8);
   set_gdbarch_char_signed (gdbarch, 0);
   set_gdbarch_type_align (gdbarch, riscv_type_align);

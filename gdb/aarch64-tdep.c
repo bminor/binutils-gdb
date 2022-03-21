@@ -3618,7 +3618,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_wchar_signed (gdbarch, 0);
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
   set_gdbarch_double_format (gdbarch, floatformats_ieee_double);
-  set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_quad);
   set_gdbarch_type_align (gdbarch, aarch64_type_align);
 
   /* Detect whether PC is at a point where the stack has been destroyed.  */

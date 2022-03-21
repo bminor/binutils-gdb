@@ -61,10 +61,6 @@ struct regset;
    code that can handle both.  The 64-bit specific code lives in
    sparc64-tdep.c; don't add any here.  */
 
-/* The SPARC Floating-Point Quad-Precision format is similar to
-   big-endian IA-64 Quad-Precision format.  */
-#define floatformats_sparc_quad floatformats_ia64_quad
-
 /* The stack pointer is offset from the stack frame by a BIAS of 2047
    (0x7ff) for 64-bit code.  BIAS is likely to be defined on SPARC
    hosts, so undefine it first.  */
@@ -1837,7 +1833,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->cp0_registers_num = ARRAY_SIZE (sparc32_cp0_register_names);
 
   set_gdbarch_long_double_bit (gdbarch, 128);
-  set_gdbarch_long_double_format (gdbarch, floatformats_sparc_quad);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_quad);
 
   set_gdbarch_wchar_bit (gdbarch, 16);
   set_gdbarch_wchar_signed (gdbarch, 1);

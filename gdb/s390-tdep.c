@@ -7038,7 +7038,7 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      We can safely let them default to 128-bit, since the debug info
      will give the size of type actually used in each case.  */
   set_gdbarch_long_double_bit (gdbarch, 128);
-  set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_quad);
 
   set_gdbarch_type_align (gdbarch, s390_type_align);
 

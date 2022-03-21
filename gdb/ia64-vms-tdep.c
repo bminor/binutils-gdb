@@ -132,7 +132,7 @@ static struct libunwind_descr ia64_vms_libunwind_descr;
 static void
 ia64_openvms_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
+  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_quad);
 
 #ifdef HAVE_LIBUNWIND_IA64_H
   /* Override the default descriptor.  */

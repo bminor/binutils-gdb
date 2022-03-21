@@ -8243,7 +8243,7 @@ i386_floatformat_for_type (struct gdbarch *gdbarch,
 	|| strcmp (name, "real(kind=16)") == 0
 	|| strcmp (name, "real*16") == 0
 	|| strcmp (name, "REAL*16") == 0)
-      return floatformats_ia64_quad;
+      return floatformats_ieee_quad;
 
   return default_floatformat_for_type (gdbarch, name, len);
 }

@@ -85,6 +85,10 @@ const struct floatformat *floatformats_ieee_double[BFD_ENDIAN_UNKNOWN] = {
   &floatformat_ieee_double_big,
   &floatformat_ieee_double_little
 };
+const struct floatformat *floatformats_ieee_quad[BFD_ENDIAN_UNKNOWN] = {
+  &floatformat_ieee_quad_big,
+  &floatformat_ieee_quad_little
+};
 const struct floatformat *floatformats_ieee_double_littlebyte_bigword[BFD_ENDIAN_UNKNOWN] = {
   &floatformat_ieee_double_big,
   &floatformat_ieee_double_littlebyte_bigword
@@ -104,10 +108,6 @@ const struct floatformat *floatformats_arm_ext[BFD_ENDIAN_UNKNOWN] = {
 const struct floatformat *floatformats_ia64_spill[BFD_ENDIAN_UNKNOWN] = {
   &floatformat_ia64_spill_big,
   &floatformat_ia64_spill_little
-};
-const struct floatformat *floatformats_ia64_quad[BFD_ENDIAN_UNKNOWN] = {
-  &floatformat_ia64_quad_big,
-  &floatformat_ia64_quad_little
 };
 const struct floatformat *floatformats_vax_f[BFD_ENDIAN_UNKNOWN] = {
   &floatformat_vax_f,
