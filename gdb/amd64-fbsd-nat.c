@@ -29,26 +29,20 @@
 #include <sys/user.h>
 #include <machine/reg.h>
 
-#include "fbsd-nat.h"
 #include "amd64-tdep.h"
 #include "amd64-fbsd-tdep.h"
 #include "amd64-nat.h"
 #include "x86-nat.h"
 #include "gdbsupport/x86-xstate.h"
-#include "x86-bsd-nat.h"
+#include "x86-fbsd-nat.h"
 
-class amd64_fbsd_nat_target final
-  : public x86bsd_nat_target<fbsd_nat_target>
+class amd64_fbsd_nat_target final : public x86_fbsd_nat_target
 {
 public:
   void fetch_registers (struct regcache *, int) override;
   void store_registers (struct regcache *, int) override;
 
   const struct target_desc *read_description () override;
-
-#if defined(HAVE_PT_GETDBREGS)
-  bool supports_stopped_by_hw_breakpoint () override;
-#endif
 };
 
 static amd64_fbsd_nat_target the_amd64_fbsd_nat_target;
@@ -347,16 +341,6 @@ amd64_fbsd_nat_target::read_description ()
   else
     return i386_target_description (X86_XSTATE_SSE_MASK, true);
 }
-
-#if defined(HAVE_PT_GETDBREGS)
-/* Implement the supports_stopped_by_hw_breakpoints method.  */
-
-bool
-amd64_fbsd_nat_target::supports_stopped_by_hw_breakpoint ()
-{
-  return true;
-}
-#endif
 
 void _initialize_amd64fbsd_nat ();
 void
