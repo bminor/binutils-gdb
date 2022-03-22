@@ -46,6 +46,18 @@ struct x86_dr_low_type x86_dr_low;
 static std::unordered_map<pid_t,
 			  struct x86_debug_reg_state> x86_debug_process_state;
 
+/* See x86-nat.h.  */
+
+struct x86_debug_reg_state *
+x86_lookup_debug_reg_state (pid_t pid)
+{
+  auto it = x86_debug_process_state.find (pid);
+  if (it != x86_debug_process_state.end ())
+    return &it->second;
+
+  return nullptr;
+}
+
 /* Get debug registers state for process PID.  */
 
 struct x86_debug_reg_state *
