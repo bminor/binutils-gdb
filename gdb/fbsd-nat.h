@@ -115,6 +115,10 @@ public:
   virtual void low_new_fork (ptid_t parent, pid_t child)
   {}
 
+  /* The method to call, if any, when a thread is destroyed.  */
+  virtual void low_delete_thread (thread_info *)
+  {}
+
 protected:
 
   void post_startup_inferior (ptid_t) override;
