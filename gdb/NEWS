@@ -3,6 +3,8 @@
 
 *** Changes in GDB 12
 
+* GDB now supports hardware watchpoints on FreeBSD/Aarch64.
+
 * DBX mode is deprecated, and will be removed in GDB 13
 
 * GDB 12 is the last release of GDB that will support building against
