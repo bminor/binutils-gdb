@@ -80,4 +80,6 @@ libgp_collectorAPI_la_LIBADD = -lc -ldl
 .PHONY: install-data-local
 
 install-data-local: install-pkglibLTLIBRARIES
-	rm -f $(DESTDIR)/$(pkglibdir)/*.la $(DESTDIR)/$(pkglibdir)/*.a
+	for f in libgp-collector libgp-heap libgp-sync libgp-iotrace ; do \
+	  rm -f $(DESTDIR)/$(pkglibdir)/$$f.la $(DESTDIR)/$(pkglibdir)/$$f.a ; \
+	done

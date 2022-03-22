@@ -1138,7 +1138,9 @@ uninstall-am: uninstall-myincludeHEADERS uninstall-pkglibLTLIBRARIES
 .PHONY: install-data-local
 
 install-data-local: install-pkglibLTLIBRARIES
-	rm -f $(DESTDIR)/$(pkglibdir)/*.la $(DESTDIR)/$(pkglibdir)/*.a
+	for f in libgp-collector libgp-heap libgp-sync libgp-iotrace ; do \
+	  rm -f $(DESTDIR)/$(pkglibdir)/$$f.la $(DESTDIR)/$(pkglibdir)/$$f.a ; \
+	done
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
