@@ -1766,6 +1766,22 @@ fbsd_nat_target::store_register_set (struct regcache *regcache, int regnum,
   return false;
 }
 
+/* See fbsd-nat.h.  */
+
+bool
+fbsd_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo)
+{
+  struct ptrace_lwpinfo pl;
+  pid_t pid = get_ptrace_pid (ptid);
+
+  if (ptrace (PT_LWPINFO, pid, (caddr_t) &pl, sizeof pl) == -1)
+    return false;
+  if (!(pl.pl_flags & PL_FLAG_SI))
+    return false;;
+  *siginfo = pl.pl_siginfo;
+  return (true);
+}
+
 void _initialize_fbsd_nat ();
 void
 _initialize_fbsd_nat ()

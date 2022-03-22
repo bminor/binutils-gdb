@@ -166,4 +166,8 @@ protected:
   }
 };
 
+/* Fetch the signal information for PTID and store it in *SIGINFO.
+   Return true if successful.  */
+bool fbsd_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo);
+
 #endif /* fbsd-nat.h */
