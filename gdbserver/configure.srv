@@ -39,6 +39,7 @@ fi
 
 case "${gdbserver_host}" in
   aarch64*-*-linux*)	srv_tgtobj="linux-aarch64-low.o"
+			srv_tgtobj="$srv_tgtobj nat/aarch64-hw-point.o"
 			srv_tgtobj="$srv_tgtobj nat/aarch64-linux-hw-point.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch32-low.o"
 			srv_tgtobj="$srv_tgtobj linux-aarch32-tdesc.o"

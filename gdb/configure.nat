@@ -234,7 +234,8 @@ case ${gdb_host} in
 	    aarch64)
 		#  Host: AArch64 based machine running GNU/Linux
 		NATDEPFILES="${NATDEPFILES} aarch64-linux-nat.o \
-		aarch32-linux-nat.o nat/aarch64-linux-hw-point.o \
+		aarch32-linux-nat.o nat/aarch64-hw-point.o \
+		nat/aarch64-linux-hw-point.o \
 		nat/aarch64-linux.o \
 		nat/aarch64-sve-linux-ptrace.o \
 		nat/aarch64-mte-linux-ptrace.o"

@@ -834,7 +834,8 @@ aarch64_linux_nat_target::insert_hw_breakpoint (struct gdbarch *gdbarch,
        "insert_hw_breakpoint on entry (addr=0x%08lx, len=%d))\n",
        (unsigned long) addr, len);
 
-  ret = aarch64_handle_breakpoint (type, addr, len, 1 /* is_insert */, state);
+  ret = aarch64_handle_breakpoint (type, addr, len, 1 /* is_insert */,
+				   inferior_ptid, state);
 
   if (show_debug_regs)
     {
@@ -866,7 +867,8 @@ aarch64_linux_nat_target::remove_hw_breakpoint (struct gdbarch *gdbarch,
       (gdb_stdlog, "remove_hw_breakpoint on entry (addr=0x%08lx, len=%d))\n",
        (unsigned long) addr, len);
 
-  ret = aarch64_handle_breakpoint (type, addr, len, 0 /* is_insert */, state);
+  ret = aarch64_handle_breakpoint (type, addr, len, 0 /* is_insert */,
+				   inferior_ptid, state);
 
   if (show_debug_regs)
     {
@@ -899,7 +901,8 @@ aarch64_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
 
   gdb_assert (type != hw_execute);
 
-  ret = aarch64_handle_watchpoint (type, addr, len, 1 /* is_insert */, state);
+  ret = aarch64_handle_watchpoint (type, addr, len, 1 /* is_insert */,
+				   inferior_ptid, state);
 
   if (show_debug_regs)
     {
@@ -931,7 +934,8 @@ aarch64_linux_nat_target::remove_watchpoint (CORE_ADDR addr, int len,
 
   gdb_assert (type != hw_execute);
 
-  ret = aarch64_handle_watchpoint (type, addr, len, 0 /* is_insert */, state);
+  ret = aarch64_handle_watchpoint (type, addr, len, 0 /* is_insert */,
+				   inferior_ptid, state);
 
   if (show_debug_regs)
     {
@@ -947,7 +951,7 @@ aarch64_linux_nat_target::remove_watchpoint (CORE_ADDR addr, int len,
 int
 aarch64_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {
-  return aarch64_linux_region_ok_for_watchpoint (addr, len);
+  return aarch64_region_ok_for_watchpoint (addr, len);
 }
 
 /* Implement the "stopped_data_address" target_ops method.  */

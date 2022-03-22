@@ -413,9 +413,10 @@ aarch64_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
 
   if (targ_type != hw_execute)
     {
-      if (aarch64_linux_region_ok_for_watchpoint (addr, len))
+      if (aarch64_region_ok_for_watchpoint (addr, len))
 	ret = aarch64_handle_watchpoint (targ_type, addr, len,
-					 1 /* is_insert */, state);
+					 1 /* is_insert */,
+					 current_lwp_ptid (), state);
       else
 	ret = -1;
     }
@@ -429,7 +430,8 @@ aarch64_target::low_insert_point (raw_bkpt_type type, CORE_ADDR addr,
 	  len = 2;
 	}
       ret = aarch64_handle_breakpoint (targ_type, addr, len,
-				       1 /* is_insert */, state);
+				       1 /* is_insert */, current_lwp_ptid (),
+				       state);
     }
 
   if (show_debug_regs)
@@ -464,7 +466,7 @@ aarch64_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
   if (targ_type != hw_execute)
     ret =
       aarch64_handle_watchpoint (targ_type, addr, len, 0 /* is_insert */,
-				 state);
+				 current_lwp_ptid (), state);
   else
     {
       if (len == 3)
@@ -475,7 +477,8 @@ aarch64_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
 	  len = 2;
 	}
       ret = aarch64_handle_breakpoint (targ_type, addr, len,
-				       0 /* is_insert */,  state);
+				       0 /* is_insert */,  current_lwp_ptid (),
+				       state);
     }
 
   if (show_debug_regs)

@@ -81,9 +81,9 @@ aarch64_linux_new_thread (struct lwp_info *lwp)
   /* If there are hardware breakpoints/watchpoints in the process then mark that
      all the hardware breakpoint/watchpoint register pairs for this thread need
      to be initialized (with data from aarch_process_info.debug_reg_state).  */
-  if (aarch64_linux_any_set_debug_regs_state (state, false))
+  if (aarch64_any_set_debug_regs_state (state, false))
     DR_MARK_ALL_CHANGED (info->dr_changed_bp, aarch64_num_bp_regs);
-  if (aarch64_linux_any_set_debug_regs_state (state, true))
+  if (aarch64_any_set_debug_regs_state (state, true))
     DR_MARK_ALL_CHANGED (info->dr_changed_wp, aarch64_num_wp_regs);
 
   lwp_set_arch_private_info (lwp, info);
