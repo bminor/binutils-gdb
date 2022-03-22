@@ -1380,6 +1380,8 @@ fbsd_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 		warning (_("Failed to fetch process information"));
 #endif
 
+	      low_new_fork (wptid, child);
+
 	      if (is_vfork)
 		ourstatus->set_vforked (child_ptid);
 	      else
