@@ -46,7 +46,7 @@ public:
 
   void resume (ptid_t, int, enum gdb_signal) override;
 
-#if defined(HAVE_PT_GETDBREGS) && defined(USE_SIGTRAP_SIGINFO)
+#if defined(HAVE_PT_GETDBREGS)
   bool supports_stopped_by_hw_breakpoint () override;
 #endif
 };
@@ -361,7 +361,7 @@ i386_fbsd_nat_target::read_description ()
   return i386_target_description (X86_XSTATE_X87_MASK, true);
 }
 
-#if defined(HAVE_PT_GETDBREGS) && defined(USE_SIGTRAP_SIGINFO)
+#if defined(HAVE_PT_GETDBREGS)
 /* Implement the supports_stopped_by_hw_breakpoints method.  */
 
 bool
