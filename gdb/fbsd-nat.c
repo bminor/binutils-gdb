@@ -1293,6 +1293,7 @@ fbsd_nat_target::wait_1 (ptid_t ptid, struct target_waitstatus *ourstatus,
 		  if (print_thread_events)
 		    printf_unfiltered (_("[%s exited]\n"),
 				       target_pid_to_str (wptid).c_str ());
+		  low_delete_thread (thr);
 		  delete_thread (thr);
 		}
 	      if (ptrace (PT_CONTINUE, pid, (caddr_t) 1, 0) == -1)
