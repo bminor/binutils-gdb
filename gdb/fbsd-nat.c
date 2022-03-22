@@ -1138,6 +1138,8 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
 	    perror_with_name (request == PT_RESUME ?
 			      ("ptrace (PT_RESUME)") :
 			      ("ptrace (PT_SUSPEND)"));
+	  if (request == PT_RESUME)
+	    low_prepare_to_resume (tp);
 	}
     }
   else
@@ -1145,8 +1147,11 @@ fbsd_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
       /* If ptid is a wildcard, resume all matching threads (they won't run
 	 until the process is continued however).  */
       for (thread_info *tp : all_non_exited_threads (this, ptid))
-	if (ptrace (PT_RESUME, tp->ptid.lwp (), NULL, 0) == -1)
-	  perror_with_name (("ptrace (PT_RESUME)"));
+	{
+	  if (ptrace (PT_RESUME, tp->ptid.lwp (), NULL, 0) == -1)
+	    perror_with_name (("ptrace (PT_RESUME)"));
+	  low_prepare_to_resume (tp);
+	}
       ptid = inferior_ptid;
     }
 
