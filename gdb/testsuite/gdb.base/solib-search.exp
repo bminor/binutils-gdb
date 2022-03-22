@@ -54,7 +54,7 @@ set binfile2_lib [standard_output_file ${libname2}.so]
 
 set lib_flags [list debug ldflags=-Wl,-Bsymbolic]
 set wrong_lib_flags "$lib_flags additional_flags=-DARRAY_SIZE=1"
-set right_lib_flags "$lib_flags additional_flags=-DARRAY_SIZE=8192 -DRIGHT"
+set right_lib_flags "$lib_flags additional_flags=-DARRAY_SIZE=8192 additional_flags=-DRIGHT"
 
 # Binary file.
 standard_testfile .c
