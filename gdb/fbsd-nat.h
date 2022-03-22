@@ -109,6 +109,12 @@ public:
 
   bool supports_disable_randomization () override;
 
+  /* Methods meant to be overridden by arch-specific target
+     classes.  */
+
+  virtual void low_new_fork (ptid_t parent, pid_t child)
+  {}
+
 protected:
 
   void post_startup_inferior (ptid_t) override;
