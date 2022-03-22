@@ -30,6 +30,11 @@ namespace selftests
 
 static selftests_registry tests;
 
+/* Set of callback functions used to register selftests after GDB is fully
+   initialized.  */
+
+static std::vector<selftests_generator> lazy_generators;
+
 /* See selftest.h.  */
 
 void
@@ -40,6 +45,14 @@ register_test (const std::string &name,
   auto status = tests.emplace (name, std::move (function));
   if (!status.second)
     gdb_assert_not_reached ("Test already registered");
+}
+
+/* See selftest.h.  */
+
+void
+add_lazy_generator (selftests_generator generator)
+{
+  lazy_generators.push_back (std::move (generator));
 }
 
 /* See selftest.h.  */
@@ -104,6 +117,14 @@ run_tests (gdb::array_view<const char *const> filters, bool verbose)
 selftests_range
 all_selftests ()
 {
+  /* Execute any function which might still want to register tests.  Once each
+     function has been executed, clear lazy_generators to ensure that
+     callback functions are only executed once.  */
+  for (const auto &generator : lazy_generators)
+    for (selftest &test : generator ())
+      register_test (std::move (test.name), std::move (test.test));
+  lazy_generators.clear ();
+
   return selftests_range (tests.cbegin (), tests.cend ());
 }
 

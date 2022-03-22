@@ -23,6 +23,7 @@
 #include "gdbsupport/function-view.h"
 #include "gdbsupport/iterator-range.h"
 #include <set>
+#include <vector>
 
 /* A test is just a function that does some checks and throws an
    exception if something has gone wrong.  */
@@ -60,6 +61,16 @@ extern bool run_verbose ();
 
 extern void register_test (const std::string &name,
 			   std::function<void(void)> function);
+
+/* A selftest generator is a callback function used to delay the generation
+   of selftests.  */
+
+using selftests_generator = std::function<std::vector<selftest> (void)>;
+
+/* Register a function which can lazily register selftests once GDB is fully
+   initialized. */
+
+extern void add_lazy_generator (selftests_generator generator);
 
 /* Run all the self tests.  This print a message describing the number
    of test and the number of failures.
