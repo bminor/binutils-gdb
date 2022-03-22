@@ -40,6 +40,11 @@ extern void x86_set_debug_register_length (int len);
 
 extern void x86_cleanup_dregs (void);
 
+/* Return the debug register state for process PID.  If no existing
+   state is found for this process, return nullptr.  */
+
+struct x86_debug_reg_state *x86_lookup_debug_reg_state (pid_t pid);
+
 /* Called whenever GDB is no longer debugging process PID.  It deletes
    data structures that keep track of debug register state.  */
 
