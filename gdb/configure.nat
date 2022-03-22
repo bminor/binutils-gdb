@@ -154,7 +154,8 @@ case ${gdb_host} in
 	case ${gdb_host_cpu} in
 	    aarch64)
 		# Host: FreeBSD/aarch64
-		NATDEPFILES="${NATDEPFILES} aarch64-fbsd-nat.o"
+		NATDEPFILES="${NATDEPFILES} aarch64-nat.o \
+		nat/aarch64-hw-point.o aarch64-fbsd-nat.o"
 		LOADLIBES=
 		;;
 	    arm)

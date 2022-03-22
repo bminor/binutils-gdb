@@ -3,6 +3,8 @@
 
 *** Changes since GDB 12
 
+* GDB now supports hardware watchpoints on FreeBSD/Aarch64.
+
 * Python API
 
   ** New function gdb.format_address(ADDRESS, PROGSPACE, ARCHITECTURE),
