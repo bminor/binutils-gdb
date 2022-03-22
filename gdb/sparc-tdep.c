@@ -1126,7 +1126,6 @@ sparc_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 static CORE_ADDR
 sparc32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
-  struct symtab_and_line sal;
   CORE_ADDR func_addr;
   struct sparc_frame_cache cache;
 

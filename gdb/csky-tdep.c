@@ -1526,7 +1526,6 @@ static CORE_ADDR
 csky_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   CORE_ADDR func_addr, func_end;
-  struct symtab_and_line sal;
   const int default_search_limit = 128;
 
   /* See if we can find the end of the prologue using the symbol table.  */
