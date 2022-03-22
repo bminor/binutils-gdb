@@ -5267,7 +5267,11 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 
  done:
   if (functionname_ptr && function && function->is_linkage)
-    *functionname_ptr = function->name;
+    {
+      *functionname_ptr = function->name;
+      if (!found)
+        found = 2;
+    }
   else if (functionname_ptr
 	   && (!*functionname_ptr
 	       || (function && !function->is_linkage)))

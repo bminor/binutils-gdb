@@ -1,3 +1,8 @@
+2022-03-22  Steiner H Gunderson  <steinar+sourceware@gunderson.no>
+
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): if a function name is
+	found, but no line number info, then return a result of 2.
+
 2022-03-21  Steiner H Gunderson  <steinar+sourceware@gunderson.no>
 
 	PR 28978
