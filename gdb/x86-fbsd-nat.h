@@ -29,6 +29,8 @@ class x86_fbsd_nat_target : public x86bsd_nat_target<fbsd_nat_target>
 {
   bool supports_stopped_by_hw_breakpoint () override
   { return true; }
+
+  void low_new_fork (ptid_t parent, pid_t child) override;
 };
 
 #endif /* x86-bsd-nat.h */
