@@ -119,6 +119,10 @@ public:
   virtual void low_delete_thread (thread_info *)
   {}
 
+  /* Hook to call prior to resuming a thread.  */
+  virtual void low_prepare_to_resume (thread_info *)
+  {}
+
 protected:
 
   void post_startup_inferior (ptid_t) override;
