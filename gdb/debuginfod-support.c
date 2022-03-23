@@ -86,12 +86,12 @@ debuginfod_exec_query (const unsigned char *build_id,
 struct user_data
 {
   user_data (const char *desc, const char *fname)
-    : desc (desc), fname (fname)
+    : desc (desc), fname (fname), has_printed (false)
   { }
 
   const char * const desc;
   const char * const fname;
-  gdb::optional<ui_out::progress_meter> meter;
+  bool has_printed;
 };
 
 /* Deleter for a debuginfod_client.  */
@@ -121,24 +121,32 @@ progressfn (debuginfod_client *c, long cur, long total)
       return 1;
     }
 
-  if (total == 0)
-    return 0;
-
-  if (!data->meter.has_value ())
+  if (!data->has_printed)
     {
-      float size_in_mb = 1.0f * total / (1024 * 1024);
-      string_file styled_filename (current_uiout->can_emit_style_escape ());
-      fprintf_styled (&styled_filename,
-		      file_name_style.style (),
-		      "%s",
-		      data->fname);
-      std::string message
-	= string_printf ("Downloading %.2f MB %s %s", size_in_mb, data->desc,
-			 styled_filename.c_str());
-      data->meter.emplace (current_uiout, message, 1);
-    }
+      /* Include the transfer size, if available.  */
+      if (total > 0)
+	{
+	  float size = 1.0f * total / 1024;
+	  const char *unit = "KB";
 
-  data->meter->progress ((double)cur / (double)total);
+	  /* If size is greater than 0.01 MB, set unit to MB.  */
+	  if (size > 10.24)
+	    {
+	      size /= 1024;
+	      unit = "MB";
+	    }
+
+	  printf_filtered ("Downloading %.2f %s %s %ps...\n",
+			   size, unit, data->desc,
+			   styled_string (file_name_style.style (),
+					  data->fname));
+	}
+      else
+	printf_filtered ("Downloading %s %ps...\n", data->desc,
+			 styled_string (file_name_style.style (), data->fname));
+
+      data->has_printed = true;
+    }
 
   return 0;
 }
