@@ -289,6 +289,13 @@ i386_intel_simplify_register (expressionS *e)
       return 0;
     }
 
+  if (!check_register (&i386_regtab[reg_num]))
+    {
+      as_bad (_("register '%s%s' cannot be used here"),
+	      register_prefix, i386_regtab[reg_num].reg_name);
+      return 0;
+    }
+
   if (!intel_state.in_bracket)
     {
       if (i.op[this_operand].regs)

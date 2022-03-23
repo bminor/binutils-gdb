@@ -99,6 +99,7 @@ if [gas_32_check] then {
     run_list_test "suffix-bad"
     run_dump_test "immed32"
     run_dump_test "equ"
+    run_list_test "equ-2" "-al"
     run_list_test "equ-bad"
     run_dump_test "divide"
     run_dump_test "quoted"
