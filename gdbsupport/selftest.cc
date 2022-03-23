@@ -20,16 +20,15 @@
 #include "common-exceptions.h"
 #include "common-debug.h"
 #include "selftest.h"
-#include <map>
 #include <functional>
 
 namespace selftests
 {
-/* All the tests that have been registered.  Using an std::map allows keeping
+/* All the tests that have been registered.  Using an std::set allows keeping
    the order of tests stable and easily looking up whether a test name
    exists.  */
 
-static std::map<std::string, std::function<void(void)>> tests;
+static selftests_registry tests;
 
 /* See selftest.h.  */
 
@@ -38,9 +37,9 @@ register_test (const std::string &name,
 	       std::function<void(void)> function)
 {
   /* Check that no test with this name already exist.  */
-  gdb_assert (tests.find (name) == tests.end ());
-
-  tests[name] = function;
+  auto status = tests.emplace (name, std::move (function));
+  if (!status.second)
+    gdb_assert_not_reached ("Test already registered");
 }
 
 /* See selftest.h.  */
@@ -63,10 +62,8 @@ run_tests (gdb::array_view<const char *const> filters, bool verbose)
   int ran = 0, failed = 0;
   run_verbose_ = verbose;
 
-  for (const auto &pair : tests)
+  for (const auto &test : all_selftests ())
     {
-      const std::string &name = pair.first;
-      const auto &test = pair.second;
       bool run = false;
 
       if (filters.empty ())
@@ -75,7 +72,7 @@ run_tests (gdb::array_view<const char *const> filters, bool verbose)
 	{
 	  for (const char *filter : filters)
 	    {
-	      if (name.find (filter) != std::string::npos)
+	      if (test.name.find (filter) != std::string::npos)
 		run = true;
 	    }
 	}
@@ -85,9 +82,9 @@ run_tests (gdb::array_view<const char *const> filters, bool verbose)
 
       try
 	{
-	  debug_printf (_("Running selftest %s.\n"), name.c_str ());
+	  debug_printf (_("Running selftest %s.\n"), test.name.c_str ());
 	  ++ran;
-	  test ();
+	  test.test ();
 	}
       catch (const gdb_exception_error &ex)
 	{
@@ -104,10 +101,10 @@ run_tests (gdb::array_view<const char *const> filters, bool verbose)
 
 /* See selftest.h.  */
 
-void for_each_selftest (for_each_selftest_ftype func)
+selftests_range
+all_selftests ()
 {
-  for (const auto &pair : tests)
-    func (pair.first);
+  return selftests_range (tests.cbegin (), tests.cend ());
 }
 
 } // namespace selftests
