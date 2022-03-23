@@ -429,11 +429,10 @@ void
 bump_line_counters (void)
 {
   if (sb_index == (size_t) -1)
-    {
-      ++physical_input_line;
-      if (logical_input_line != -1u)
-	++logical_input_line;
-    }
+    ++physical_input_line;
+
+  if (logical_input_line != -1u)
+    ++logical_input_line;
 }
 
 /* Tells us what the new logical line number and file are.
