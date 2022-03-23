@@ -2271,11 +2271,15 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
 
       if (files[i].filename == NULL)
 	{
-	  /* Prevent a crash later, particularly for file 1.  DWARF5
-	     uses slot zero, but that is only set explicitly using a
-	     .file 0 directive.  If that isn't used, but file 1 is,
-	     then use that as main file name.  */
-	  if (DWARF2_LINE_VERSION >= 5 && i == 0 && files_in_use >= 1 && files[0].filename == NULL)
+	  if (DWARF2_LINE_VERSION < 5 || i != 0)
+	    {
+	      as_bad (_("unassigned file number %ld"), (long) i);
+	      continue;
+	    }
+	  /* DWARF5 uses slot zero, but that is only set explicitly using
+	     a .file 0 directive.  If that isn't used, but file 1 is, then
+	     use that as main file name.  */
+	  if (files_in_use > 1 && files[1].filename != NULL)
 	    {
 	      files[0].filename = files[1].filename;
 	      files[0].dir = files[1].dir;
@@ -2284,12 +2288,7 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
 		  files[0].md5[j] = files[1].md5[j];
 	    }
 	  else
-	    files[i].filename = "";
-	  if (DWARF2_LINE_VERSION < 5 || i != 0)
-	    {
-	      as_bad (_("unassigned file number %ld"), (long) i);
-	      continue;
-	    }
+	    files[0].filename = "";
 	}
 
       fullfilename = DWARF2_FILE_NAME (files[i].filename,
