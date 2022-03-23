@@ -2137,7 +2137,7 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
   bool emit_timestamps = true;
   bool emit_filesize = true;
   segT line_str_seg = NULL;
-  symbolS *line_strp;
+  symbolS *line_strp, *file0_strp = NULL;
 
   /* Output the Directory Table.  */
   if (DWARF2_LINE_VERSION >= 5)
@@ -2301,9 +2301,17 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
 	}
       else
 	{
-	  line_strp = add_line_strp (line_str_seg, fullfilename);
+	  if (!file0_strp)
+	    line_strp = add_line_strp (line_str_seg, fullfilename);
+	  else
+	    line_strp = file0_strp;
 	  subseg_set (line_seg, 0);
 	  TC_DWARF2_EMIT_OFFSET (line_strp, sizeof_offset);
+	  if (i == 0 && files_in_use > 1
+	      && files[0].filename == files[1].filename)
+	    file0_strp = line_strp;
+	  else
+	    file0_strp = NULL;
 	}
 
       /* Directory number.  */
