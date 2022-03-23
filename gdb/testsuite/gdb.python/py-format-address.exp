@@ -20,6 +20,7 @@ foreach func_name { foo bar } {
     if {[build_executable "build binary with ${func_name} function" \
 	     "$testfile-${func_name}" $srcfile \
 	     [list debug \
+		  nopie \
 		  additional_flags=-DFUNCTION_NAME=${func_name}]] == -1} {
 	return -1
     }
@@ -138,19 +139,19 @@ set bar_addr [get_hexadecimal_valueof "&bar" "UNKNOWN"]
 # architecture, this should display the 'bar' symbol rather than
 # 'foo'.
 gdb_test "python print(\"Got: \" + gdb.format_address($bar_addr))" \
-    "Got: $foo_addr <bar>" \
+    "Got: $bar_addr <bar>" \
     "gdb.format_address for bar, while inferior 2 is selected"
 
 # And again, but this time, specificy the program space and
 # architecture.
 gdb_test "python print(\"Got: \" + gdb.format_address($bar_addr, inf2.progspace, inf2.architecture()))" \
-    "Got: $foo_addr <bar>" \
+    "Got: $bar_addr <bar>" \
     "gdb.format_address for bar, while inferior 2 is selected, pass progspace and architecture"
 
 # Reselect inferior 1, and then format an address from inferior 2.
 gdb_test "inferior 1" ".*"
 gdb_test "python print(\"Got: \" + gdb.format_address($bar_addr, inf2.progspace, inf2.architecture()))" \
-    "Got: $foo_addr <bar>" \
+    "Got: $bar_addr <bar>" \
     "gdb.format_address for bar, while inferior 1 is selected, pass progspace and architecture"
 
 # Try pasing incorrect object types for program space and architecture.
