@@ -14188,6 +14188,17 @@ i386_cons_align (int ignore ATTRIBUTE_UNUSED)
 int
 i386_validate_fix (fixS *fixp)
 {
+  if (fixp->fx_addsy && S_GET_SEGMENT(fixp->fx_addsy) == reg_section)
+    {
+      reloc_howto_type *howto;
+
+      howto = bfd_reloc_type_lookup (stdoutput, fixp->fx_r_type);
+      as_bad_where (fixp->fx_file, fixp->fx_line,
+		    _("invalid %s relocation against register"),
+		    howto ? howto->name : "<unknown>");
+      return 0;
+    }
+
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   if (fixp->fx_r_type == BFD_RELOC_SIZE32
       || fixp->fx_r_type == BFD_RELOC_SIZE64)
