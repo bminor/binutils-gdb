@@ -2170,18 +2170,10 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
       line_str_seg->entsize = 1;
 
       /* DWARF5 uses slot zero, but that is only set explicitly
-	 using a .file 0 directive.  If that isn't used, but dir
-	 one is used, then use that as main file directory.
-	 Otherwise use pwd as main file directory.  */
-      if (dirs_in_use > 0 && dirs != NULL && dirs[0] != NULL)
+	 using a .file 0 directive.  Otherwise use pwd as main file
+	 directory.  */
+      if (dirs_in_use > 0 && dirs[0] != NULL)
 	dir = remap_debug_filename (dirs[0]);
-      else if (dirs_in_use > 1
-	       && dirs != NULL
-	       && dirs[1] != NULL
-	       /* DWARF-5 directory tables expect dir[0] to be the same as
-		  DW_AT_comp_dir, which is the same as pwd.  */
-	       && dwarf_level < 5)
-	dir = remap_debug_filename (dirs[1]);
       else
 	dir = remap_debug_filename (getpwd ());
 
