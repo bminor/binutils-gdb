@@ -536,6 +536,9 @@ static int i386_intel_simplify (expressionS *e)
       if (e->X_add_symbol
 	  && !i386_intel_simplify_symbol (e->X_add_symbol))
 	return 0;
+      if (!the_reg && this_operand >= 0
+	  && e->X_op == O_symbol && !e->X_add_number)
+	the_reg = i.op[this_operand].regs;
       if (e->X_op == O_add || e->X_op == O_subtract)
 	{
 	  base = intel_state.base;
