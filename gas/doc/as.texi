@@ -6186,6 +6186,27 @@ Note: this problem of correctly identifying string parameters to pseudo ops
 also applies to the identifiers used in @code{.irp} (@pxref{Irp})
 and @code{.irpc} (@pxref{Irpc}) as well.
 
+Another issue can occur with the actual arguments passed during macro
+invocation: Multiple arguments can be separated by blanks or commas.  To have
+arguments actually contain blanks or commas (or potentially other non-alpha-
+numeric characters), individual arguments will need to be enclosed in either
+parentheses @code{()}, square brackets @code{[]}, or double quote @code{"}
+characters.  The latter may be the only viable option in certain situations,
+as only double quotes are actually stripped while establishing arguments.  It
+may be important to be aware of two escaping models used when processing such
+quoted argument strings: For one two adjacent double quotes represent a single
+double quote in the resulting argument, going along the lines of the stripping
+of the enclosing quotes.  But then double quotes can also be escaped by a
+backslash @code{\}, but this backslash will not be retained in the resulting
+actual argument as then seen / used while expanding the macro.
+
+As a consequence to the first of these escaping mechanisms two string literals
+intended to be representing separate macro arguments need to be separated by
+white space (or, better yet, by a comma).  To state it differently, such
+adjacent string literals - even if separated only by a blank - will not be
+concatenated when determining macro arguments, even if they're only separated
+by white space.  This is unlike certain other pseudo ops, e.g. @code{.ascii}.
+
 @item .endm
 @cindex @code{endm} directive
 Mark the end of a macro definition.
