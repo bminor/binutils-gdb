@@ -178,7 +178,8 @@ bad	.byte	xtrn@tpoff
 
 	.text
 	mov	xtrn@tpoff (%rbx), %eax
-	movabsq	$xtrn - 4294967295, %rbp
+	movabsq	$xtrn + 0x7fffffff, %rbx
+	movabsq	$xtrn - 0x80000000, %rbp
 
 	.data
 	.quad	xtrn
