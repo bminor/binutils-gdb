@@ -1,3 +1,12 @@
+2022-03-23  Nick Clifton  <nickc@redhat.com>
+
+	Import patch from mainline:
+	2022-03-16  Martin Storsjö  <martin@martin.st>
+
+	PR 28885
+	* dlltool.c (main): use imp_name rather than dll_name when
+	generating a temporary file name.
+
 2022-03-16  Nick Clifton  <nickc@redhat.com>
 
 	* po/sr.po: Updated Serbian translation.
