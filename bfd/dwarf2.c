@@ -2544,13 +2544,12 @@ decode_line_info (struct comp_unit *unit)
   return NULL;
 }
 
-/* If ADDR is within TABLE set the output parameters and return the
-   range of addresses covered by the entry used to fill them out.
-   Otherwise set * FILENAME_PTR to NULL and return 0.
+/* If ADDR is within TABLE set the output parameters and return TRUE,
+   otherwise set *FILENAME_PTR to NULL and return FALSE.
    The parameters FILENAME_PTR, LINENUMBER_PTR and DISCRIMINATOR_PTR
    are pointers to the objects to be filled in.  */
 
-static bfd_vma
+static bool
 lookup_address_in_line_info_table (struct line_info_table *table,
 				   bfd_vma addr,
 				   const char **filename_ptr,
@@ -2609,12 +2608,12 @@ lookup_address_in_line_info_table (struct line_info_table *table,
       *linenumber_ptr = info->line;
       if (discriminator_ptr)
 	*discriminator_ptr = info->discriminator;
-      return seq->last_line->address - seq->low_pc;
+      return true;
     }
 
  fail:
   *filename_ptr = NULL;
-  return 0;
+  return false;
 }
 
 /* Read in the .debug_ranges section for future reference.  */
@@ -4009,14 +4008,11 @@ comp_unit_contains_address (struct comp_unit *unit, bfd_vma addr)
 }
 
 /* If UNIT contains ADDR, set the output parameters to the values for
-   the line containing ADDR.  The output parameters, FILENAME_PTR,
-   FUNCTION_PTR, and LINENUMBER_PTR, are pointers to the objects
-   to be filled in.
+   the line containing ADDR and return TRUE.  Otherwise return FALSE.
+   The output parameters, FILENAME_PTR, FUNCTION_PTR, and
+   LINENUMBER_PTR, are pointers to the objects to be filled in.  */
 
-   Returns the range of addresses covered by the entry that was used
-   to fill in *LINENUMBER_PTR or 0 if it was not filled in.  */
-
-static bfd_vma
+static bool
 comp_unit_find_nearest_line (struct comp_unit *unit,
 			     bfd_vma addr,
 			     const char **filename_ptr,
@@ -4024,7 +4020,7 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
 			     unsigned int *linenumber_ptr,
 			     unsigned int *discriminator_ptr)
 {
-  bool func_p;
+  bool line_p, func_p;
 
   if (!comp_unit_maybe_decode_line_info (unit))
     return false;
@@ -4034,10 +4030,11 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
   if (func_p && (*function_ptr)->tag == DW_TAG_inlined_subroutine)
     unit->stash->inliner_chain = *function_ptr;
 
-  return lookup_address_in_line_info_table (unit->line_table, addr,
-					    filename_ptr,
-					    linenumber_ptr,
-					    discriminator_ptr);
+  line_p = lookup_address_in_line_info_table (unit->line_table, addr,
+					      filename_ptr,
+					      linenumber_ptr,
+					      discriminator_ptr);
+  return line_p || func_p;
 }
 
 /* Check to see if line info is already decoded in a comp_unit.
@@ -5188,54 +5185,17 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
     }
   else
     {
-      bfd_vma min_range = (bfd_vma) -1;
-      const char * local_filename = NULL;
-      struct funcinfo *local_function = NULL;
-      unsigned int local_linenumber = 0;
-      unsigned int local_discriminator = 0;
-
       for (each = stash->f.all_comp_units; each; each = each->next_unit)
 	{
-	  bfd_vma range = (bfd_vma) -1;
-
 	  found = ((each->arange.high == 0
 		    || comp_unit_contains_address (each, addr))
-		   && (range = (comp_unit_find_nearest_line
-				(each, addr, &local_filename,
-				 &local_function, &local_linenumber,
-				 &local_discriminator))) != 0);
+		   && comp_unit_find_nearest_line (each, addr,
+						   filename_ptr,
+						   &function,
+						   linenumber_ptr,
+						   discriminator_ptr));
 	  if (found)
-	    {
-	      /* PRs 15935 15994: Bogus debug information may have provided us
-		 with an erroneous match.  We attempt to counter this by
-		 selecting the match that has the smallest address range
-		 associated with it.  (We are assuming that corrupt debug info
-		 will tend to result in extra large address ranges rather than
-		 extra small ranges).
-
-		 This does mean that we scan through all of the CUs associated
-		 with the bfd each time this function is called.  But this does
-		 have the benefit of producing consistent results every time the
-		 function is called.  */
-	      if (range <= min_range)
-		{
-		  if (filename_ptr && local_filename)
-		    * filename_ptr = local_filename;
-		  if (local_function)
-		    function = local_function;
-		  if (discriminator_ptr && local_discriminator)
-		    * discriminator_ptr = local_discriminator;
-		  if (local_linenumber)
-		    * linenumber_ptr = local_linenumber;
-		  min_range = range;
-		}
-	    }
-	}
-
-      if (* linenumber_ptr)
-	{
-	  found = true;
-	  goto done;
+	    goto done;
 	}
     }
 
@@ -5260,7 +5220,7 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 						 filename_ptr,
 						 &function,
 						 linenumber_ptr,
-						 discriminator_ptr) != 0);
+						 discriminator_ptr));
 
       if (found)
 	break;
