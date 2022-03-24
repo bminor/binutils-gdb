@@ -118,8 +118,6 @@ ALL_MACHINES = \
 	cpu-hppa.lo \
 	cpu-i386.lo \
 	cpu-iamcu.lo \
-	cpu-l1om.lo \
-	cpu-k1om.lo \
 	cpu-ia64.lo \
 	cpu-ip2k.lo \
 	cpu-iq2000.lo \
@@ -204,8 +202,6 @@ ALL_MACHINES_CFILES = \
 	cpu-hppa.c \
 	cpu-i386.c \
 	cpu-iamcu.c \
-	cpu-l1om.c \
-	cpu-k1om.c \
 	cpu-ia64.c \
 	cpu-ip2k.c \
 	cpu-iq2000.c \
