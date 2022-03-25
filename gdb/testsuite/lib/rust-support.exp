@@ -104,7 +104,7 @@ gdb_caching_proc rust_compiler_version {
     } else {
 	set output [lindex [remote_exec host "$rustc --version --verbose"] 1]
 	foreach line [split $output \n] {
-	    if {[regexp "rustc (\[0-9.\]+) .*\$" $output ignore version]} {
+	    if {[regexp "rustc (\[0-9.\]+).*\$" $output ignore version]} {
 		return $version
 	    }
 	}
