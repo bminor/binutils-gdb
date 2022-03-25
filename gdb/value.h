@@ -1089,10 +1089,6 @@ extern void print_floating (const gdb_byte *valaddr, struct type *type,
 extern void value_print (struct value *val, struct ui_file *stream,
 			 const struct value_print_options *options);
 
-extern void value_print_array_elements (struct value *val,
-					struct ui_file *stream, int format,
-					enum val_prettyformat pretty);
-
 /* Release values from the value chain and return them.  Values
    created after MARK are released.  If MARK is nullptr, or if MARK is
    not found on the value chain, then all values are released.  Values
