@@ -314,7 +314,8 @@ proc test_one_slice {svar length base range} {
     with_test_prefix $range {
 	global hex
 
-	set result " = &\\\[.*\\\] \\{data_ptr: $hex, length: $length\\}"
+	# Just accept any array here.
+	set result " = &\\\[.*\\\] \\\[.*\\\]"
 
 	gdb_test "print $svar" $result
 	gdb_test "print &${base}\[${range}\]" $result

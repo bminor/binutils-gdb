@@ -32,3 +32,11 @@ if {![runto ${srcfile}:$line]} {
 }
 
 gdb_test "ptype us" " = .*V<\\\[u8\\\]>.*"
+
+set v [split [rust_compiler_version] .]
+# The necessary debuginfo generation landed in 1.60, but had a bug
+# that was fixed in 1.61.
+if {[lindex $v 0] > 1 || [lindex $v 1] >= 61} {
+    gdb_test "print us2" " = .*Box<.*> \\\[1, 2, 3\\\]"
+    gdb_test "ptype us2" "type = .*"
+}
