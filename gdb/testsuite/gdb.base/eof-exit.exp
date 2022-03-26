@@ -38,7 +38,7 @@ proc run_test {} {
 	-re "$::gdb_prompt \[^\n\]*\r\[^\n\]*quit" {
 	    fail "$gdb_test_name (misplaced \\r)"
 	}
-	-re "$::gdb_prompt \[^\n\]*\r\[^\n\]*\r\nquit\r\n" {
+	-re "$::gdb_prompt (?:\[^\n\]*\r)?\[^\n\]*\r\nquit\r\n" {
 	    # For versions of readline that don't include the
 	    # RL_STATE_EOF patch, then the 'quit' is printed on the
 	    # subsequent line.
