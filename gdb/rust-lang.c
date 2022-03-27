@@ -624,6 +624,27 @@ rust_language::value_print_inner
     }
 }
 
+/* See language.h.  */
+
+void
+rust_language::value_print
+	(struct value *val, struct ui_file *stream,
+	 const struct value_print_options *options) const
+{
+  value_print_options opts = *options;
+  opts.deref_ref = true;
+
+  struct type *type = check_typedef (value_type (val));
+  if (type->is_pointer_or_reference ())
+    {
+      gdb_printf (stream, "(");
+      type_print (value_type (val), "", stream, -1);
+      gdb_printf (stream, ") ");
+    }
+
+  return common_val_print (val, stream, 0, &opts, this);
+}
+
 
 
 static void
