@@ -62,9 +62,6 @@ extern struct block *finish_block (struct symbol *symbol,
 				   CORE_ADDR start,
 				   CORE_ADDR end);
 
-extern void record_block_range (struct block *,
-				CORE_ADDR start, CORE_ADDR end_inclusive);
-
 extern void start_subfile (const char *name);
 
 extern void patch_subfile_names (struct subfile *subfile, const char *name);
@@ -87,9 +84,6 @@ extern struct compunit_symtab *start_symtab (struct objfile *objfile,
 					     CORE_ADDR start_addr,
 					     enum language language);
 
-extern void restart_symtab (struct compunit_symtab *cust,
-			    const char *name, CORE_ADDR start_addr);
-
 /* Record the name of the debug format in the current pending symbol
    table.  FORMAT must be a string with a lifetime at least as long as
    the symtab's objfile.  */
@@ -111,19 +105,6 @@ extern void set_last_source_file (const char *name);
 
 extern const char *get_last_source_file (void);
 
-/* Return the compunit symtab object.
-   It is only valid to call this between calls to start_symtab and the
-   end_symtab* functions.  */
-
-extern struct compunit_symtab *buildsym_compunit_symtab (void);
-
-/* Return the macro table.
-   Initialize it if this is the first use.
-   It is only valid to call this between calls to start_symtab and the
-   end_symtab* functions.  */
-
-extern struct macro_table *get_macro_table (void);
-
 /* Set the last source start address.  Can only be used between
    start_symtab and end_symtab* calls.  */
 
@@ -134,26 +115,9 @@ extern void set_last_source_start_addr (CORE_ADDR addr);
 
 extern CORE_ADDR get_last_source_start_addr ();
 
-/* Return the local using directives.  */
-
-extern struct using_direct **get_local_using_directives ();
-
-/* Set the list of local using directives.  */
-
-extern void set_local_using_directives (struct using_direct *new_local);
-
-/* Return the global using directives.  */
-
-extern struct using_direct **get_global_using_directives ();
-
 /* True if the context stack is empty.  */
 
 extern bool outermost_context_p ();
-
-/* Return the top of the context stack, or nullptr if there is an
-   entry.  */
-
-extern struct context_stack *get_current_context_stack ();
 
 /* Return the context stack depth.  */
 

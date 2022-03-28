@@ -79,47 +79,11 @@ get_last_source_start_addr ()
 
 /* See buildsym.h.  */
 
-struct using_direct **
-get_local_using_directives ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->get_local_using_directives ();
-}
-
-/* See buildsym.h.  */
-
-void
-set_local_using_directives (struct using_direct *new_local)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  buildsym_compunit->set_local_using_directives (new_local);
-}
-
-/* See buildsym.h.  */
-
-struct using_direct **
-get_global_using_directives ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->get_global_using_directives ();
-}
-
-/* See buildsym.h.  */
-
 bool
 outermost_context_p ()
 {
   gdb_assert (buildsym_compunit != nullptr);
   return buildsym_compunit->outermost_context_p ();
-}
-
-/* See buildsym.h.  */
-
-struct context_stack *
-get_current_context_stack ()
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  return buildsym_compunit->get_current_context_stack ();
 }
 
 /* See buildsym.h.  */
@@ -241,14 +205,6 @@ finish_block (struct symbol *symbol, struct pending_block *old_blocks,
 }
 
 void
-record_block_range (struct block *block, CORE_ADDR start,
-		    CORE_ADDR end_inclusive)
-{
-  gdb_assert (buildsym_compunit != nullptr);
-  buildsym_compunit->record_block_range (block, start, end_inclusive);
-}
-
-void
 record_line (struct subfile *subfile, int line, CORE_ADDR pc)
 {
   gdb_assert (buildsym_compunit != nullptr);
@@ -281,51 +237,6 @@ start_symtab (struct objfile *objfile, const char *name, const char *comp_dir,
 						    language, start_addr);
 
   return buildsym_compunit->get_compunit_symtab ();
-}
-
-/* Restart compilation for a symtab.
-   CUST is the result of end_expandable_symtab.
-   NAME, START_ADDR are the source file we are resuming with.
-
-   This is used when a symtab is built from multiple sources.
-   The symtab is first built with start_symtab/end_expandable_symtab
-   and then for each additional piece call restart_symtab/augment_*_symtab.
-   Note: At the moment there is only augment_type_symtab.  */
-
-void
-restart_symtab (struct compunit_symtab *cust,
-		const char *name, CORE_ADDR start_addr)
-{
-  /* These should have been reset either by successful completion of building
-     a symtab, or by the scoped_free_pendings destructor.  */
-  gdb_assert (buildsym_compunit == nullptr);
-
-  buildsym_compunit
-    = new struct buildsym_compunit (cust->objfile (),
-				    name,
-				    cust->dirname (),
-				    compunit_language (cust),
-				    start_addr,
-				    cust);
-}
-
-/* See buildsym.h.  */
-
-struct compunit_symtab *
-buildsym_compunit_symtab (void)
-{
-  gdb_assert (buildsym_compunit != NULL);
-
-  return buildsym_compunit->get_compunit_symtab ();
-}
-
-/* See buildsym.h.  */
-
-struct macro_table *
-get_macro_table (void)
-{
-  gdb_assert (buildsym_compunit != NULL);
-  return buildsym_compunit->get_macro_table ();
 }
 
 /* At end of reading syms, or in case of quit, ensure everything
