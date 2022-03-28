@@ -21921,6 +21921,41 @@ typename_concat (struct obstack *obs, const char *prefix, const char *suffix,
     }
 }
 
+/* Return a generic name for a DW_TAG_template_type_param or
+   DW_TAG_template_value_param tag, missing a DW_AT_name attribute.  We do this
+   per parent, so each function/class/struct template will have their own set
+   of template parameters named <unnnamed0>, <unnamed1>, ... where the
+   enumeration starts at 0 and represents the position of the template tag in
+   the list of unnamed template tags for this parent, counting both, type and
+   value tags.  */
+
+static const char *
+unnamed_template_tag_name (die_info *die, dwarf2_cu *cu)
+{
+  if (die->parent == nullptr)
+    return nullptr;
+
+  /* Count the parent types unnamed template type and value children until, we
+     arrive at our entry.  */
+  size_t nth_unnamed = 0;
+
+  die_info *child = die->parent->child;
+  while (child != die)
+  {
+    gdb_assert (child != nullptr);
+    if (child->tag == DW_TAG_template_type_param
+	|| child->tag == DW_TAG_template_value_param)
+      {
+	if (dwarf2_attr (child, DW_AT_name, cu) == nullptr)
+	  ++nth_unnamed;
+      }
+    child = child->sibling;
+  }
+
+  const std::string name_str = "<unnamed" + std::to_string (nth_unnamed) + ">";
+  return cu->per_objfile->objfile->intern (name_str.c_str ());
+}
+
 /* Get name of a die, return NULL if not found.  */
 
 static const char *
@@ -21956,7 +21991,9 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
       && die->tag != DW_TAG_interface_type
       && die->tag != DW_TAG_structure_type
       && die->tag != DW_TAG_namelist
-      && die->tag != DW_TAG_union_type)
+      && die->tag != DW_TAG_union_type
+      && die->tag != DW_TAG_template_type_param
+      && die->tag != DW_TAG_template_value_param)
     return NULL;
 
   switch (die->tag)
@@ -21976,6 +22013,12 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	return attr_name;
       return CP_ANONYMOUS_NAMESPACE_STR;
 
+    /* DWARF does not actually require template tags to have a name.  */
+    case DW_TAG_template_type_param:
+    case DW_TAG_template_value_param:
+      if (attr_name == nullptr)
+	return unnamed_template_tag_name (die, cu);
+      /* FALLTHROUGH.  */
     case DW_TAG_class_type:
     case DW_TAG_interface_type:
     case DW_TAG_structure_type:
