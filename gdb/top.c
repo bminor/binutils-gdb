@@ -141,10 +141,6 @@ show_confirm (struct ui_file *file, int from_tty,
 	      value);
 }
 
-/* Current working directory.  */
-
-char *current_directory;
-
 /* The last command line executed on the console.  Used for command
    repetitions when the user enters an empty line.  */
 

@@ -136,4 +136,7 @@ extern const char *get_shell ();
 
 extern gdb::char_vector make_temp_filename (const std::string &f);
 
+/* String containing the current directory (what getwd would return).  */
+extern char *current_directory;
+
 #endif /* COMMON_PATHSTUFF_H */

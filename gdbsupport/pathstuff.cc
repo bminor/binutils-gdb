@@ -29,6 +29,10 @@
 
 /* See gdbsupport/pathstuff.h.  */
 
+char *current_directory;
+
+/* See gdbsupport/pathstuff.h.  */
+
 gdb::unique_xmalloc_ptr<char>
 gdb_realpath (const char *filename)
 {

@@ -65,10 +65,6 @@
       break;					\
     }
 
-/* String containing the current directory (what getwd would return).  */
-
-char *current_directory;
-
 /* The environment to pass to the inferior when creating it.  */
 
 static gdb_environ our_environ;
