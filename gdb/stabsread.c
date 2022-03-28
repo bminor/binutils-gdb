@@ -4659,7 +4659,7 @@ stabsread_new_init (void)
 }
 
 /* Initialize anything that needs initializing at the same time as
-   start_symtab() is called.  */
+   start_compunit_symtab() is called.  */
 
 void
 start_stabs (void)
@@ -4675,7 +4675,7 @@ start_stabs (void)
   common_block_name = NULL;
 }
 
-/* Call after end_symtab().  */
+/* Call after end_compunit_symtab().  */
 
 void
 end_stabs (void)

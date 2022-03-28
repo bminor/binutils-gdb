@@ -21,7 +21,7 @@
 #include "symtab.h"
 
 /* The work-in-progress of the compunit we are building.
-   This is created first, before any subfiles by start_symtab.  */
+   This is created first, before any subfiles by start_compunit_symtab.  */
 
 static struct buildsym_compunit *buildsym_compunit;
 
@@ -171,11 +171,11 @@ free_buildsym_compunit (void)
 }
 
 struct compunit_symtab *
-end_symtab (CORE_ADDR end_addr, int section)
+end_compunit_symtab (CORE_ADDR end_addr, int section)
 {
   gdb_assert (buildsym_compunit != nullptr);
   struct compunit_symtab *result
-    = buildsym_compunit->end_symtab (end_addr, section);
+    = buildsym_compunit->end_compunit_symtab (end_addr, section);
   free_buildsym_compunit ();
   return result;
 }
@@ -213,10 +213,10 @@ record_line (struct subfile *subfile, int line, CORE_ADDR pc)
   buildsym_compunit->record_line (subfile, line, pc, true);
 }
 
-/* Start a new symtab for a new source file in OBJFILE.  Called, for example,
-   when a stabs symbol of type N_SO is seen, or when a DWARF
-   TAG_compile_unit DIE is seen.  It indicates the start of data for
-   one original source file.
+/* Start a new compunit_symtab for a new source file in OBJFILE.  Called, for
+   example, when a stabs symbol of type N_SO is seen, or when a DWARF
+   DW_TAG_compile_unit DIE is seen.  It indicates the start of data for one
+   original source file.
 
    NAME is the name of the file (cannot be NULL).  COMP_DIR is the
    directory in which the file was compiled (or NULL if not known).
@@ -226,8 +226,9 @@ record_line (struct subfile *subfile, int line, CORE_ADDR pc)
    the filename.  */
 
 struct compunit_symtab *
-start_symtab (struct objfile *objfile, const char *name, const char *comp_dir,
-	      CORE_ADDR start_addr, enum language language)
+start_compunit_symtab (struct objfile *objfile, const char *name,
+		       const char *comp_dir, CORE_ADDR start_addr,
+		       enum language language)
 {
   /* These should have been reset either by successful completion of building
      a symtab, or by the scoped_free_pendings destructor.  */

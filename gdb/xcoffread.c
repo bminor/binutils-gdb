@@ -415,7 +415,7 @@ add_stab_to_list (char *stabname, struct pending_stabs **stabvector)
    and return it in a newly created table.  If the old one is good
    enough, return the old one.  */
 /* FIXME: I think all this stuff can be replaced by just passing
-   sort_linevec = 1 to end_symtab.  */
+   sort_linevec = 1 to end_compunit_symtab.  */
 
 static struct linetable *
 arrange_linetable (struct linetable *oldLineTb)
@@ -514,7 +514,7 @@ arrange_linetable (struct linetable *oldLineTb)
 }
 
 /* include file support: C_BINCL/C_EINCL pairs will be kept in the 
-   following `IncludeChain'.  At the end of each symtab (end_symtab),
+   following `IncludeChain'.  At the end of each symtab (end_compunit_symtab),
    we will determine if we should create additional symtab's to
    represent if (the include files.  */
 
@@ -1042,8 +1042,8 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
   pst_symtab_language = deduce_language_from_filename (filestring);
 
   start_stabs ();
-  start_symtab (objfile, filestring, NULL, file_start_addr,
-		pst_symtab_language);
+  start_compunit_symtab (objfile, filestring, NULL, file_start_addr,
+			 pst_symtab_language);
   record_debugformat (debugfmt);
   symnum = ((struct symloc *) pst->read_symtab_private)->first_symnum;
   max_symnum =
@@ -1130,14 +1130,14 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 	{
 	  if (get_last_source_file ())
 	    {
-	      pst->compunit_symtab = end_symtab (cur_src_end_addr,
-						 SECT_OFF_TEXT (objfile));
+	      pst->compunit_symtab = end_compunit_symtab
+		(cur_src_end_addr, SECT_OFF_TEXT (objfile));
 	      end_stabs ();
 	    }
 
 	  start_stabs ();
-	  start_symtab (objfile, "_globals_", NULL,
-			0, pst_symtab_language);
+	  start_compunit_symtab (objfile, "_globals_", NULL,
+				 0, pst_symtab_language);
 	  record_debugformat (debugfmt);
 	  cur_src_end_addr = first_object_file_end;
 	  /* Done with all files, everything from here on is globals.  */
@@ -1221,12 +1221,13 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 			{
 			  complete_symtab (filestring, file_start_addr);
 			  cur_src_end_addr = file_end_addr;
-			  end_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
+			  end_compunit_symtab (file_end_addr,
+					       SECT_OFF_TEXT (objfile));
 			  end_stabs ();
 			  start_stabs ();
 			  /* Give all csects for this source file the same
 			     name.  */
-			  start_symtab (objfile, filestring, NULL,
+			  start_compunit_symtab (objfile, filestring, NULL,
 					0, pst_symtab_language);
 			  record_debugformat (debugfmt);
 			}
@@ -1327,7 +1328,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 
 	  complete_symtab (filestring, file_start_addr);
 	  cur_src_end_addr = file_end_addr;
-	  end_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
+	  end_compunit_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
 	  end_stabs ();
 
 	  /* XCOFF, according to the AIX 3.2 documentation, puts the
@@ -1346,7 +1347,8 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 	    filestring = cs->c_name;
 
 	  start_stabs ();
-	  start_symtab (objfile, filestring, NULL, 0, pst_symtab_language);
+	  start_compunit_symtab (objfile, filestring, NULL, 0,
+				 pst_symtab_language);
 	  record_debugformat (debugfmt);
 	  last_csect_name = 0;
 
@@ -1514,7 +1516,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 
       complete_symtab (filestring, file_start_addr);
       cur_src_end_addr = file_end_addr;
-      cust = end_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
+      cust = end_compunit_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
       /* When reading symbols for the last C_FILE of the objfile, try
 	 to make sure that we set pst->compunit_symtab to the symtab for the
 	 file, not to the _globals_ symtab.  I'm not sure whether this

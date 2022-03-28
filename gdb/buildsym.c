@@ -728,7 +728,7 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
 }
 
 
-/* Subroutine of end_symtab to simplify it.  Look for a subfile that
+/* Subroutine of end_compunit_symtab to simplify it.  Look for a subfile that
    matches the main source file's basename.  If there is only one, and
    if the main source file doesn't have any symbol or line number
    information, then copy this file's symtab and line_vector to the
@@ -796,13 +796,14 @@ buildsym_compunit::watch_main_source_file_lossage ()
     }
 }
 
-/* Implementation of the first part of end_symtab.  It allows modifying
-   STATIC_BLOCK before it gets finalized by end_symtab_from_static_block.
-   If the returned value is NULL there is no blockvector created for
-   this symtab (you still must call end_symtab_from_static_block).
+/* Implementation of the first part of end_compunit_symtab.  It allows modifying
+   STATIC_BLOCK before it gets finalized by
+   end_compunit_symtab_from_static_block.  If the returned value is NULL there
+   is no blockvector created for this symtab (you still must call
+   end_compunit_symtab_from_static_block).
 
-   END_ADDR is the same as for end_symtab: the address of the end of the
-   file's text.
+   END_ADDR is the same as for end_compunit_symtab: the address of the end of
+   the file's text.
 
    If EXPANDABLE is non-zero the STATIC_BLOCK dictionary is made
    expandable.
@@ -811,8 +812,9 @@ buildsym_compunit::watch_main_source_file_lossage ()
    not contain any symbols.  */
 
 struct block *
-buildsym_compunit::end_symtab_get_static_block (CORE_ADDR end_addr,
-						int expandable, int required)
+buildsym_compunit::end_compunit_symtab_get_static_block (CORE_ADDR end_addr,
+							 int expandable,
+							 int required)
 {
   /* Finish the lexical context of the last function in the file; pop
      the context stack.  */
@@ -832,7 +834,7 @@ buildsym_compunit::end_symtab_get_static_block (CORE_ADDR end_addr,
 	     same.  FIXME: Find out why it is happening.  This is not
 	     believed to happen in most cases (even for coffread.c);
 	     it used to be an abort().  */
-	  complaint (_("Context stack not empty in end_symtab"));
+	  complaint (_("Context stack not empty in end_compunit_symtab"));
 	  m_context_stack.clear ();
 	}
     }
@@ -896,13 +898,14 @@ buildsym_compunit::end_symtab_get_static_block (CORE_ADDR end_addr,
     }
 }
 
-/* Subroutine of end_symtab_from_static_block to simplify it.
+/* Subroutine of end_compunit_symtab_from_static_block to simplify it.
    Handle the "have blockvector" case.
-   See end_symtab_from_static_block for a description of the arguments.  */
+   See end_compunit_symtab_from_static_block for a description of the
+   arguments.  */
 
 struct compunit_symtab *
-buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
-						int section, int expandable)
+buildsym_compunit::end_compunit_symtab_with_blockvector
+  (struct block *static_block, int section, int expandable)
 {
   struct compunit_symtab *cu = m_compunit_symtab;
   struct blockvector *blockvector;
@@ -1057,18 +1060,18 @@ buildsym_compunit::end_symtab_with_blockvector (struct block *static_block,
   return cu;
 }
 
-/* Implementation of the second part of end_symtab.  Pass STATIC_BLOCK
-   as value returned by end_symtab_get_static_block.
+/* Implementation of the second part of end_compunit_symtab.  Pass STATIC_BLOCK
+   as value returned by end_compunit_symtab_get_static_block.
 
-   SECTION is the same as for end_symtab: the section number
+   SECTION is the same as for end_compunit_symtab: the section number
    (in objfile->section_offsets) of the blockvector and linetable.
 
    If EXPANDABLE is non-zero the GLOBAL_BLOCK dictionary is made
    expandable.  */
 
 struct compunit_symtab *
-buildsym_compunit::end_symtab_from_static_block (struct block *static_block,
-						 int section, int expandable)
+buildsym_compunit::end_compunit_symtab_from_static_block
+  (struct block *static_block, int section, int expandable)
 {
   struct compunit_symtab *cu;
 
@@ -1086,7 +1089,7 @@ buildsym_compunit::end_symtab_from_static_block (struct block *static_block,
       cu = NULL;
     }
   else
-    cu = end_symtab_with_blockvector (static_block, section, expandable);
+    cu = end_compunit_symtab_with_blockvector (static_block, section, expandable);
 
   return cu;
 }
@@ -1100,7 +1103,7 @@ buildsym_compunit::end_symtab_from_static_block (struct block *static_block,
    the section number (in objfile->section_offsets) of the blockvector
    and linetable.
 
-   Note that it is possible for end_symtab() to return NULL.  In
+   Note that it is possible for end_compunit_symtab() to return NULL.  In
    particular, for the DWARF case at least, it will return NULL when
    it finds a compilation unit that has exactly one DIE, a
    TAG_compile_unit DIE.  This can happen when we link in an object
@@ -1109,27 +1112,28 @@ buildsym_compunit::end_symtab_from_static_block (struct block *static_block,
    never know about this empty file (FIXME).
 
    If you need to modify STATIC_BLOCK before it is finalized you should
-   call end_symtab_get_static_block and end_symtab_from_static_block
-   yourself.  */
+   call end_compunit_symtab_get_static_block and
+   end_compunit_symtab_from_static_block yourself.  */
 
 struct compunit_symtab *
-buildsym_compunit::end_symtab (CORE_ADDR end_addr, int section)
+buildsym_compunit::end_compunit_symtab (CORE_ADDR end_addr, int section)
 {
   struct block *static_block;
 
-  static_block = end_symtab_get_static_block (end_addr, 0, 0);
-  return end_symtab_from_static_block (static_block, section, 0);
+  static_block = end_compunit_symtab_get_static_block (end_addr, 0, 0);
+  return end_compunit_symtab_from_static_block (static_block, section, 0);
 }
 
-/* Same as end_symtab except create a symtab that can be later added to.  */
+/* Same as end_compunit_symtab except create a symtab that can be later added
+   to.  */
 
 struct compunit_symtab *
 buildsym_compunit::end_expandable_symtab (CORE_ADDR end_addr, int section)
 {
   struct block *static_block;
 
-  static_block = end_symtab_get_static_block (end_addr, 1, 0);
-  return end_symtab_from_static_block (static_block, section, 1);
+  static_block = end_compunit_symtab_get_static_block (end_addr, 1, 0);
+  return end_compunit_symtab_from_static_block (static_block, section, 1);
 }
 
 /* Subroutine of augment_type_symtab to simplify it.
@@ -1153,7 +1157,7 @@ set_missing_symtab (struct pending *pending_list,
     }
 }
 
-/* Same as end_symtab, but for the case where we're adding more symbols
+/* Same as end_compunit_symtab, but for the case where we're adding more symbols
    to an existing symtab that is known to contain only type information.
    This is the case for DWARF4 Type Units.  */
 

@@ -365,18 +365,18 @@ coff_alloc_type (int index)
    it indicates the start of data for one original source file.  */
 
 static void
-coff_start_symtab (struct objfile *objfile, const char *name)
+coff_start_compunit_symtab (struct objfile *objfile, const char *name)
 {
   within_function = 0;
-  start_symtab (objfile,
-		name,
+  start_compunit_symtab (objfile,
+			 name,
   /* We never know the directory name for COFF.  */
-		 NULL,
+			 NULL,
   /* The start address is irrelevant, since we call
-     set_last_source_start_addr in coff_end_symtab.  */
-		 0,
+     set_last_source_start_addr in coff_end_compunit_symtab.  */
+			 0,
   /* Let buildsym.c deduce the language for this symtab.  */
-		 language_unknown);
+			 language_unknown);
   record_debugformat ("COFF");
 }
 
@@ -400,11 +400,11 @@ complete_symtab (const char *name, CORE_ADDR start_addr, unsigned int size)
    list of all such.  */
 
 static void
-coff_end_symtab (struct objfile *objfile)
+coff_end_compunit_symtab (struct objfile *objfile)
 {
   set_last_source_start_addr (current_source_start_addr);
 
-  end_symtab (current_source_end_addr, SECT_OFF_TEXT (objfile));
+  end_compunit_symtab (current_source_end_addr, SECT_OFF_TEXT (objfile));
 
   /* Reinitialize for beginning of new file.  */
   set_last_source_file (NULL);
@@ -812,7 +812,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
   type_vector_length = INITIAL_TYPE_VECTOR_LENGTH;
   type_vector = XCNEWVEC (struct type *, type_vector_length);
 
-  coff_start_symtab (objfile, "");
+  coff_start_compunit_symtab (objfile, "");
 
   symnum = 0;
   while (symnum < nsyms)
@@ -824,10 +824,10 @@ coff_symtab_read (minimal_symbol_reader &reader,
       if (cs->c_symnum == next_file_symnum && cs->c_sclass != C_FILE)
 	{
 	  if (get_last_source_file ())
-	    coff_end_symtab (objfile);
+	    coff_end_compunit_symtab (objfile);
 
-	  coff_start_symtab (objfile, "_globals_");
-	  /* coff_start_symtab will set the language of this symtab to
+	  coff_start_compunit_symtab (objfile, "_globals_");
+	  /* coff_start_compunit_symtab will set the language of this symtab to
 	     language_unknown, since such a ``file name'' is not
 	     recognized.  Override that with the minimal language to
 	     allow printing values in this symtab.  */
@@ -890,8 +890,8 @@ coff_symtab_read (minimal_symbol_reader &reader,
 	     containing debugging information.  */
 	  if (get_last_source_file ())
 	    {
-	      coff_end_symtab (objfile);
-	      coff_start_symtab (objfile, filestring);
+	      coff_end_compunit_symtab (objfile);
+	      coff_start_compunit_symtab (objfile, filestring);
 	    }
 	  in_source_file = 1;
 	  break;
@@ -1170,7 +1170,7 @@ coff_symtab_read (minimal_symbol_reader &reader,
     }
 
   if (get_last_source_file ())
-    coff_end_symtab (objfile);
+    coff_end_compunit_symtab (objfile);
 
   /* Patch up any opaque types (references to types that are not defined
      in the file where they are referenced, e.g. "struct foo *bar").  */

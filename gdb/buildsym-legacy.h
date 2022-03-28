@@ -30,20 +30,20 @@
    The basic way this module is used is as follows:
 
    scoped_free_pendings free_pending;
-   cust = start_symtab (...);
+   cust = start_compunit_symtab (...);
    ... read debug info ...
-   cust = end_symtab (...);
+   cust = end_compunit_symtab (...);
 
-   The compunit symtab pointer ("cust") is returned from both start_symtab
-   and end_symtab to simplify the debug info readers.
+   The compunit symtab pointer ("cust") is returned from both
+   start_compunit_symtab and end_compunit_symtab to simplify the debug info readers.
 
    dbxread.c and xcoffread.c use another variation:
 
    scoped_free_pendings free_pending;
-   cust = start_symtab (...);
+   cust = start_compunit_symtab (...);
    ... read debug info ...
-   cust = end_symtab (...);
-   ... start_symtab + read + end_symtab repeated ...
+   cust = end_compunit_symtab (...);
+   ... start_compunit_symtab + read + end_compunit_symtab repeated ...
 */
 
 class scoped_free_pendings
@@ -70,7 +70,8 @@ extern void push_subfile ();
 
 extern const char *pop_subfile ();
 
-extern struct compunit_symtab *end_symtab (CORE_ADDR end_addr, int section);
+extern struct compunit_symtab *end_compunit_symtab (CORE_ADDR end_addr,
+						    int section);
 
 extern struct context_stack *push_context (int desc, CORE_ADDR valu);
 
@@ -78,11 +79,11 @@ extern struct context_stack pop_context ();
 
 extern void record_line (struct subfile *subfile, int line, CORE_ADDR pc);
 
-extern struct compunit_symtab *start_symtab (struct objfile *objfile,
-					     const char *name,
-					     const char *comp_dir,
-					     CORE_ADDR start_addr,
-					     enum language language);
+extern struct compunit_symtab *start_compunit_symtab (struct objfile *objfile,
+						      const char *name,
+						      const char *comp_dir,
+						      CORE_ADDR start_addr,
+						      enum language language);
 
 /* Record the name of the debug format in the current pending symbol
    table.  FORMAT must be a string with a lifetime at least as long as
@@ -106,12 +107,12 @@ extern void set_last_source_file (const char *name);
 extern const char *get_last_source_file (void);
 
 /* Set the last source start address.  Can only be used between
-   start_symtab and end_symtab* calls.  */
+   start_compunit_symtab and end_compunit_symtab* calls.  */
 
 extern void set_last_source_start_addr (CORE_ADDR addr);
 
 /* Get the last source start address.  Can only be used between
-   start_symtab and end_symtab* calls.  */
+   start_compunit_symtab and end_compunit_symtab* calls.  */
 
 extern CORE_ADDR get_last_source_start_addr ();
 

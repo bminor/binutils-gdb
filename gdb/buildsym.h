@@ -271,13 +271,13 @@ struct buildsym_compunit
 
   struct context_stack pop_context ();
 
-  struct block *end_symtab_get_static_block (CORE_ADDR end_addr,
-					     int expandable, int required);
+  struct block *end_compunit_symtab_get_static_block
+    (CORE_ADDR end_addr, int expandable, int required);
 
-  struct compunit_symtab *end_symtab_from_static_block
-      (struct block *static_block, int section, int expandable);
+  struct compunit_symtab *end_compunit_symtab_from_static_block
+    (struct block *static_block, int section, int expandable);
 
-  struct compunit_symtab *end_symtab (CORE_ADDR end_addr, int section);
+  struct compunit_symtab *end_compunit_symtab (CORE_ADDR end_addr, int section);
 
   struct compunit_symtab *end_expandable_symtab (CORE_ADDR end_addr,
 						 int section);
@@ -299,8 +299,8 @@ private:
 
   void watch_main_source_file_lossage ();
 
-  struct compunit_symtab *end_symtab_with_blockvector
-      (struct block *static_block, int section, int expandable);
+  struct compunit_symtab *end_compunit_symtab_with_blockvector
+    (struct block *static_block, int section, int expandable);
 
   /* The objfile we're reading debug info from.  */
   struct objfile *m_objfile;

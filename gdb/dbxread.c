@@ -2318,8 +2318,8 @@ read_ofile_symtab (struct objfile *objfile, legacy_psymtab *pst)
   if (get_last_source_start_addr () > text_offset)
     set_last_source_start_addr (text_offset);
 
-  pst->compunit_symtab = end_symtab (text_offset + text_size,
-				     SECT_OFF_TEXT (objfile));
+  pst->compunit_symtab = end_compunit_symtab (text_offset + text_size,
+					      SECT_OFF_TEXT (objfile));
 
   end_stabs ();
 
@@ -2367,7 +2367,7 @@ cp_set_block_scope (const struct symbol *symbol,
    the pst->section_offsets.  All symbols that refer to memory
    locations need to be offset by these amounts.
    OBJFILE is the object file from which we are reading symbols.  It
-   is used in end_symtab.
+   is used in end_compunit_symtab.
    LANGUAGE is the language of the symtab.
 */
 
@@ -2575,7 +2575,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 	      patch_subfile_names (get_current_subfile (), name);
 	      break;		/* Ignore repeated SOs.  */
 	    }
-	  end_symtab (valu, SECT_OFF_TEXT (objfile));
+	  end_compunit_symtab (valu, SECT_OFF_TEXT (objfile));
 	  end_stabs ();
 	}
 
@@ -2587,7 +2587,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
       function_start_offset = 0;
 
       start_stabs ();
-      start_symtab (objfile, name, NULL, valu, language);
+      start_compunit_symtab (objfile, name, NULL, valu, language);
       record_debugformat ("stabs");
       break;
 

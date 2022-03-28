@@ -9458,7 +9458,8 @@ process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
   get_scope_pc_bounds (cu->dies, &lowpc, &highpc, cu);
 
   addr = gdbarch_adjust_dwarf2_addr (gdbarch, highpc + baseaddr);
-  static_block = cu->get_builder ()->end_symtab_get_static_block (addr, 0, 1);
+  static_block
+    = cu->get_builder ()->end_compunit_symtab_get_static_block (addr, 0, 1);
 
   /* If the comp unit has DW_AT_ranges, it may have discontiguous ranges.
      Also, DW_AT_ranges may record ranges not belonging to any child DIEs
@@ -9467,9 +9468,8 @@ process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
      this comp unit.  */
   dwarf2_record_block_ranges (cu->dies, static_block, baseaddr, cu);
 
-  cust = cu->get_builder ()->end_symtab_from_static_block (static_block,
-						    SECT_OFF_TEXT (objfile),
-						    0);
+  cust = cu->get_builder ()->end_compunit_symtab_from_static_block
+    (static_block, SECT_OFF_TEXT (objfile), 0);
 
   if (cust != NULL)
     {
@@ -10626,7 +10626,8 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   file_and_directory &fnd = find_file_and_directory (die, cu);
 
-  cu->start_symtab (fnd.get_name (), fnd.intern_comp_dir (objfile), lowpc);
+  cu->start_compunit_symtab (fnd.get_name (), fnd.intern_comp_dir (objfile),
+			     lowpc);
 
   gdb_assert (per_objfile->sym_cu == nullptr);
   scoped_restore restore_sym_cu
@@ -10719,7 +10720,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
   if (lh == NULL)
     {
       if (first_time)
-	start_symtab ("", NULL, 0);
+	start_compunit_symtab ("", NULL, 0);
       else
 	{
 	  gdb_assert (tug_unshare->symtabs == NULL);
@@ -10740,7 +10741,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 
   if (first_time)
     {
-      struct compunit_symtab *cust = start_symtab ("", NULL, 0);
+      struct compunit_symtab *cust = start_compunit_symtab ("", NULL, 0);
 
       /* Note: We don't assign tu_group->compunit_symtab yet because we're
 	 still initializing it, and our caller (a few levels up)
