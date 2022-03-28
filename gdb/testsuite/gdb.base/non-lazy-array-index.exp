@@ -40,12 +40,17 @@ gdb_test_no_output "set debug target 1"
 # To check this we 'set debug target 1' (above), and then look for any
 # xfer_partial calls; there shouldn't be any.
 set saw_memory_access false
+set saw_auxv_parse false
 gdb_test_multiple "p \$.array\[1\]" "" {
     -re "^p \\\$\\.array\\\[1\\\]\r\n" {
 	exp_continue
     }
     -re "^->\[^\r\n\]+xfer_partial\[^\r\n\]+\r\n" {
 	set saw_memory_access true
+	exp_continue
+    }
+    -re "^->\[^\r\n\]+auxv_parse\[^\r\n\]+\r\n" {
+	set saw_auxv_parse true
 	exp_continue
     }
     -re "^->\[^\r\n\]+\r\n" {
@@ -58,7 +63,18 @@ gdb_test_multiple "p \$.array\[1\]" "" {
 	exp_continue
     }
     -re "^\\\$${decimal} = 2\r\n$gdb_prompt " {
-	gdb_assert { ! $saw_memory_access }
+	if { $saw_memory_access } {
+	    if { $saw_auxv_parse } {
+		# The expression parser may look up global symbols, which
+		# may require reading AUXV in order to determine the debug
+		# base for SVR4 linker namespaces.
+		xfail "$gdb_test_name"
+	    } else {
+		fail "$gdb_test_name"
+	    }
+	} else {
+	    pass "$gdb_test_name"
+	}
     }
 }
 

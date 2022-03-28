@@ -78,13 +78,18 @@ foreach inf_sel {1 2} {
 
 	gdb_test_no_output "set debug remote 1"
 
-	set test "set breakpoint"
-	gdb_test_multiple "break -q main" $test {
+	gdb_test_multiple "break -q main" "set breakpoint" {
+	    -re "Sending packet: \\\$qXfer:auxv:read.*$gdb_prompt $" {
+		# Symbol lookup may access the target to read AUXV in
+		# order to determine the debug base for SVR4 linker
+		# namespaces.
+		xfail "$gdb_test_name"
+	    }
 	    -re "Sending packet.*$gdb_prompt $" {
-		fail $test
+		fail "$gdb_test_name"
 	    }
 	    -re "^break -q main\r\nBreakpoint .* at .*$gdb_prompt $" {
-		pass $test
+		pass "$gdb_test_name"
 	    }
 	}
 

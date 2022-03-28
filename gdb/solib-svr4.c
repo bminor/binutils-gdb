@@ -3313,9 +3313,60 @@ svr4_lp64_fetch_link_map_offsets (void)
 }
 
 
+/* Return the DSO matching OBJFILE or nullptr if none can be found.  */
+
+static so_list *
+find_solib_for_objfile (struct objfile *objfile)
+{
+  if (objfile == nullptr)
+    return nullptr;
+
+  /* If OBJFILE is a separate debug object file, look for the original
+     object file.  */
+  if (objfile->separate_debug_objfile_backlink != nullptr)
+    objfile = objfile->separate_debug_objfile_backlink;
+
+  for (so_list *so : current_program_space->solibs ())
+    if (so->objfile == objfile)
+      return so;
+
+  return nullptr;
+}
+
+/* Return the address of the r_debug object for the namespace containing
+   SOLIB or zero if it cannot be found.  This may happen when symbol files
+   are added manually, for example, or with the main executable.
+
+   Current callers treat zero as initial namespace so they are doing the
+   right thing for the main executable.  */
+
+static CORE_ADDR
+find_debug_base_for_solib (so_list *solib)
+{
+  if (solib == nullptr)
+    return 0;
+
+  svr4_info *info = get_svr4_info (current_program_space);
+  gdb_assert (info != nullptr);
+  for (const std::pair<CORE_ADDR, so_list *> tuple
+	 : info->solib_lists)
+    {
+      CORE_ADDR debug_base = tuple.first;
+      so_list *solist = tuple.second;
+
+      for (; solist != nullptr; solist = solist->next)
+	if (svr4_same (solib, solist))
+	  return debug_base;
+    }
+
+  return 0;
+}
+
 /* Search order for ELF DSOs linked with -Bsymbolic.  Those DSOs have a
-   different rule for symbol lookup.  The lookup begins here in the DSO, not in
-   the main executable.  */
+   different rule for symbol lookup.  The lookup begins here in the DSO,
+   not in the main executable.  When starting from CURRENT_OBJFILE, we
+   stay in the same namespace as that file.  Otherwise, we only consider
+   the initial namespace.  */
 
 static void
 svr4_iterate_over_objfiles_in_search_order
@@ -3344,10 +3395,33 @@ svr4_iterate_over_objfiles_in_search_order
 	}
     }
 
+  /* The linker namespace to iterate identified by the address of its
+     r_debug object, defaulting to the initial namespace.  */
+  CORE_ADDR initial = elf_locate_base ();
+  so_list *curr_solib = find_solib_for_objfile (current_objfile);
+  CORE_ADDR debug_base = find_debug_base_for_solib (curr_solib);
+  if (debug_base == 0)
+    debug_base = initial;
+
   for (objfile *objfile : current_program_space->objfiles ())
     {
       if (checked_current_objfile && objfile == current_objfile)
 	continue;
+
+      /* Try to determine the namespace into which objfile was loaded.
+
+	 If we fail, e.g. for manually added symbol files or for the main
+	 executable, we assume that they were added to the initial
+	 namespace.  */
+      so_list *solib = find_solib_for_objfile (objfile);
+      CORE_ADDR solib_base = find_debug_base_for_solib (solib);
+      if (solib_base == 0)
+	solib_base = initial;
+
+      /* Ignore objfiles that were added to a different namespace.  */
+      if (solib_base != debug_base)
+	continue;
+
       if (cb (objfile))
 	return;
     }

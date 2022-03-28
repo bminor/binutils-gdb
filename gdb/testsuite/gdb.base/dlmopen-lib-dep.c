@@ -17,12 +17,5 @@
 
 */
 
-extern int gdb_dlmopen_glob;
-
 __attribute__((visibility ("default")))
-int
-inc (int n)
-{
-  int amount = gdb_dlmopen_glob;
-  return n + amount;  /* bp.inc.  */
-}
+int gdb_dlmopen_glob = 1;

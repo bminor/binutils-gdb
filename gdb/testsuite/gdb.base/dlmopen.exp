@@ -32,13 +32,22 @@ set basename_lib dlmopen-lib
 set srcfile_lib $srcdir/$subdir/$basename_lib.c
 set binfile_lib1 [standard_output_file $basename_lib.1.so]
 set binfile_lib2 [standard_output_file $basename_lib.2.so]
+set srcfile_lib_dep $srcdir/$subdir/$basename_lib-dep.c
+set binfile_lib_dep [standard_output_file $basename_lib-dep.so]
 
-if { [gdb_compile_shlib $srcfile_lib $binfile_lib1 {debug}] != "" } {
+if { [gdb_compile_shlib $srcfile_lib_dep $binfile_lib_dep {debug}] != "" } {
     untested "failed to prepare shlib"
     return -1
 }
 
-if { [gdb_compile_shlib $srcfile_lib $binfile_lib2 {debug}] != "" } {
+if { [gdb_compile_shlib $srcfile_lib $binfile_lib1 \
+	  [list debug shlib_load libs=$binfile_lib_dep]] != "" } {
+    untested "failed to prepare shlib"
+    return -1
+}
+
+if { [gdb_compile_shlib $srcfile_lib $binfile_lib2 \
+	  [list debug shlib_load libs=$binfile_lib_dep]] != "" } {
     untested "failed to prepare shlib"
     return -1
 }
@@ -46,7 +55,7 @@ if { [gdb_compile_shlib $srcfile_lib $binfile_lib2 {debug}] != "" } {
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
 	  [list additional_flags=-DDSO1_NAME=\"$binfile_lib1\" \
 	       additional_flags=-DDSO2_NAME=\"$binfile_lib2\" \
-	       libs=-ldl debug]] } {
+	       shlib_load debug]] } {
     return -1
 }
 
@@ -73,7 +82,7 @@ proc check_dso_count { dso num } {
 }
 
 # The DSO part of the test.  We run it once per DSO call.
-proc test_dlmopen_one { ndso1 ndso2 } {
+proc test_dlmopen_one { ndso1 ndso2 exp_glob } {
     global srcfile_lib srcfile_lib basename_lib bp_inc
 
     # Try to reach the breakpoint in the dynamically loaded library.
@@ -87,16 +96,31 @@ proc test_dlmopen_one { ndso1 ndso2 } {
     # This might help debugging.
     gdb_test "info breakpoints" ".*"
     gdb_test "print \$pc" ".*"
+
+    # We expect different instances of GDB_DLMOPEN_GLOB per DSO.
+    gdb_test "print amount" "= $exp_glob"
+    gdb_test "print gdb_dlmopen_glob" "= $exp_glob"
+
+    # Modify that DSO's instance, which should leave the others intact.
+    gdb_test "print &gdb_dlmopen_glob" "= .*"
+    gdb_test "print gdb_dlmopen_glob = -1" "= -1"
 }
 
 # The actual test.  We run it twice.
 proc test_dlmopen {} {
     global srcfile basename_lib bp_main
 
-    with_test_prefix "dlmopen 1" { test_dlmopen_one 3 1 }
-    with_test_prefix "dlmopen 2" { test_dlmopen_one 2 1 }
-    with_test_prefix "dlmopen 3" { test_dlmopen_one 1 1 }
-    with_test_prefix "dlmopen 4" { test_dlmopen_one 0 1 }
+    # Note that when loading dlmopen-lib.1.so and dlmopen-lib.2.so into
+    # the same namespace, dlmopen-lib-dep.so is loaded only once, so in
+    # this case, the changes to gdb_dlmopen_glob inside test_dlmopen_one
+    # will actually be visible.
+    #
+    # Hence, we supply the expected value of this variable as argument to
+    # test_dlmopen_one.
+    with_test_prefix "dlmopen 1" { test_dlmopen_one 3 1 1 }
+    with_test_prefix "dlmopen 2" { test_dlmopen_one 2 1 1 }
+    with_test_prefix "dlmopen 3" { test_dlmopen_one 1 1 1 }
+    with_test_prefix "dlmopen 4" { test_dlmopen_one 0 1 -1 }
 
     with_test_prefix "main" {
 	# Try to reach the breakpoint in the dynamically loaded library.
