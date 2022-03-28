@@ -2144,6 +2144,98 @@ namespace eval Dwarf {
 	incr _debug_loclists_locdesc_count
     }
 
+    # Emit a DWARF .debug_macro section.
+    #
+    # BODY must be Tcl code that emits the content of the section.  It is
+    # evaluated in the caller's context.  The body can use the `unit` proc
+    # (see `_macro_unit`) to generate macro units.
+
+    proc macro { body } {
+	_section ".debug_macro"
+
+	with_override Dwarf::unit Dwarf::_macro_unit {
+	    uplevel $body
+	}
+    }
+
+    # Generate one macro unit.
+    #
+    # This proc is meant to be used within proc macro's body.  It is made
+    # available as `unit` while inside proc macro's body.
+    #
+    # BODY must be Tcl code that emits the content of the unit.  It may call
+    # procedures defined below, prefixed with `_macro_unit_`, to generate the
+    # unit's content.  It is evaluated in the caller's context.
+    #
+    # The `is-64 true|false` options tells whether to use 64-bit DWARF instead
+    # of 32-bit DWARF.  The default is 32-bit.
+    #
+    # If specified, the `debug-line-offset-label` option is the name of a label
+    # to use for the unit header's `debug_line_offset` field value.  If
+    # omitted, the unit header will not contain the `debug_line_offset` field.
+
+    proc _macro_unit { options body } {
+	parse_options {
+	    {"is-64" "false"}
+	    {"debug-line-offset-label" ""}
+	}
+
+	_op .2byte 5 "version"
+
+	# Flags:
+	#
+	#   offset_size_flag           = set if is-64 is true
+	#   debug_line_offset_flag     = set if debug-line-offset-label is set
+	#   opcode_operands_table_flag = 0
+	set flags 0
+
+	if { ${is-64} } {
+	    set flags [expr $flags | 0x1]
+	}
+
+	if { ${debug-line-offset-label} != "" } {
+	    set flags [expr $flags | 0x2]
+	}
+
+	_op .byte $flags "flags"
+
+	if { ${debug-line-offset-label} != "" } {
+	    if { ${is-64} } {
+		_op .8byte ${debug-line-offset-label} "debug_line offset"
+	    } else {
+		_op .4byte ${debug-line-offset-label} "debug_line offset"
+	    }
+	}
+
+	with_override Dwarf::define Dwarf::_macro_unit_define {
+	with_override Dwarf::start_file Dwarf::_macro_unit_start_file {
+	with_override Dwarf::end_file Dwarf::_macro_unit_end_file {
+	    uplevel $body
+	}}}
+    }
+
+    # Emit a DW_MACRO_define entry.
+
+    proc _macro_unit_define { lineno text } {
+	_op .byte 0x1 "DW_MACRO_define"
+	_op .uleb128 $lineno "Line number"
+	_op .asciz "\"$text\"" "Macro definition"
+    }
+
+    # Emit a DW_MACRO_start_file entry.
+
+    proc _macro_unit_start_file { lineno file_idx } {
+	_op .byte 0x3 "DW_MACRO_start_file"
+	_op .uleb128 $lineno
+	_op .uleb128 $file_idx
+    }
+
+    # Emit a DW_MACRO_end_file entry.
+
+    proc _macro_unit_end_file {} {
+	_op .byte 0x4 "DW_MACRO_end_file"
+    }
+
     # Emit a DWARF .debug_line unit.
     # OPTIONS is a list with an even number of elements containing
     # option-name and option-value pairs.
