@@ -107,8 +107,9 @@ source_cache::get_plain_source_lines (struct symtab *s,
     perror_with_name (symtab_to_filename_for_display (s));
 
   time_t mtime = 0;
-  if (s->objfile () != NULL && s->objfile ()->obfd != NULL)
-    mtime = s->objfile ()->mtime;
+  if (s->compunit ()->objfile () != NULL
+      && s->compunit ()->objfile ()->obfd != NULL)
+    mtime = s->compunit ()->objfile ()->mtime;
   else if (current_program_space->exec_bfd ())
     mtime = current_program_space->ebfd_mtime;
 

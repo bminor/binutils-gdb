@@ -1476,8 +1476,6 @@ struct symtab
     m_language = language;
   }
 
-  struct objfile *objfile () const;
-
   program_space *pspace () const;
 
   /* Unordered chain of all filetabs in the compunit,  with the exception
@@ -1752,12 +1750,6 @@ struct compunit_symtab
 };
 
 using compunit_symtab_range = next_range<compunit_symtab>;
-
-inline struct objfile *
-symtab::objfile () const
-{
-  return this->compunit ()->objfile ();
-}
 
 /* Return the language of CUST.  */
 

@@ -11862,8 +11862,8 @@ is_known_support_routine (struct frame_info *frame)
       re_comp (known_runtime_file_name_patterns[i]);
       if (re_exec (lbasename (sal.symtab->filename)))
 	return 1;
-      if (sal.symtab->objfile () != NULL
-	  && re_exec (objfile_name (sal.symtab->objfile ())))
+      if (sal.symtab->compunit ()->objfile () != NULL
+	  && re_exec (objfile_name (sal.symtab->compunit ()->objfile ())))
 	return 1;
     }
 

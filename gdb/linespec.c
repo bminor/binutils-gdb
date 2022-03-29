@@ -4245,10 +4245,10 @@ search_minsyms_for_name (struct collect_info *info,
 	{
 	  set_current_program_space (symtab->pspace ());
 	  iterate_over_minimal_symbols
-	    (symtab->objfile (), name,
+	    (symtab->compunit ()->objfile (), name,
 	     [&] (struct minimal_symbol *msym)
 	       {
-		 add_minsym (msym, symtab->objfile (), symtab,
+		 add_minsym (msym, symtab->compunit ()->objfile (), symtab,
 			     info->state->list_mode, &minsyms);
 		 return false;
 	       });

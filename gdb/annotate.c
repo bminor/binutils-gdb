@@ -448,7 +448,7 @@ annotate_source_line (struct symtab *s, int line, int mid_statement,
 	return false;
 
       annotate_source (s->fullname, line, (int) (*offsets)[line - 1],
-		       mid_statement, s->objfile ()->arch (),
+		       mid_statement, s->compunit ()->objfile ()->arch (),
 		       pc);
 
       /* Update the current symtab and line.  */

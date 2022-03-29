@@ -109,7 +109,7 @@ stscm_eq_symtab_smob (const void *ap, const void *bp)
 static htab_t
 stscm_objfile_symtab_map (struct symtab *symtab)
 {
-  struct objfile *objfile = symtab->objfile ();
+  struct objfile *objfile = symtab->compunit ()->objfile ();
   htab_t htab = (htab_t) objfile_data (objfile, stscm_objfile_data_key);
 
   if (htab == NULL)
@@ -348,7 +348,7 @@ gdbscm_symtab_objfile (SCM self)
     = stscm_get_valid_symtab_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symtab *symtab = st_smob->symtab;
 
-  return ofscm_scm_from_objfile (symtab->objfile ());
+  return ofscm_scm_from_objfile (symtab->compunit ()->objfile ());
 }
 
 /* (symtab-global-block <gdb:symtab>) -> <gdb:block>
@@ -366,7 +366,7 @@ gdbscm_symtab_global_block (SCM self)
   blockvector = symtab->compunit ()->blockvector ();
   block = BLOCKVECTOR_BLOCK (blockvector, GLOBAL_BLOCK);
 
-  return bkscm_scm_from_block (block, symtab->objfile ());
+  return bkscm_scm_from_block (block, symtab->compunit ()->objfile ());
 }
 
 /* (symtab-static-block <gdb:symtab>) -> <gdb:block>
@@ -384,7 +384,7 @@ gdbscm_symtab_static_block (SCM self)
   blockvector = symtab->compunit ()->blockvector ();
   block = BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK);
 
-  return bkscm_scm_from_block (block, symtab->objfile ());
+  return bkscm_scm_from_block (block, symtab->compunit ()->objfile ());
 }
 
 /* Administrivia for sal (symtab-and-line) smobs.  */

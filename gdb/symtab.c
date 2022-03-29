@@ -338,7 +338,7 @@ search_domain_name (enum search_domain e)
 program_space *
 symtab::pspace () const
 {
-  return this->objfile ()->pspace;
+  return this->compunit ()->objfile ()->pspace;
 }
 
 /* See symtab.h.  */
@@ -3724,7 +3724,7 @@ find_function_start_sal_1 (CORE_ADDR func_addr, obj_section *section,
       && (sal.symtab->compunit ()->locations_valid ()
 	  || sal.symtab->language () == language_asm))
     {
-      struct gdbarch *gdbarch = sal.symtab->objfile ()->arch ();
+      struct gdbarch *gdbarch = sal.symtab->compunit ()->objfile ()->arch ();
 
       sal.pc = func_addr;
       if (gdbarch_skip_entrypoint_p (gdbarch))
@@ -6593,7 +6593,7 @@ struct objfile *
 symbol_objfile (const struct symbol *symbol)
 {
   gdb_assert (symbol->is_objfile_owned ());
-  return symbol->owner.symtab->objfile ();
+  return symbol->owner.symtab->compunit ()->objfile ();
 }
 
 /* See symtab.h.  */
@@ -6603,7 +6603,7 @@ symbol_arch (const struct symbol *symbol)
 {
   if (!symbol->is_objfile_owned ())
     return symbol->owner.arch;
-  return symbol->owner.symtab->objfile ()->arch ();
+  return symbol->owner.symtab->compunit ()->objfile ()->arch ();
 }
 
 /* See symtab.h.  */
