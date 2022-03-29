@@ -453,7 +453,7 @@ annotate_source_line (struct symtab *s, int line, int mid_statement,
 
       /* Update the current symtab and line.  */
       symtab_and_line sal;
-      sal.pspace = s->pspace ();
+      sal.pspace = s->compunit ()->objfile ()->pspace;
       sal.symtab = s;
       sal.line = line;
       set_current_source_symtab_and_line (sal);

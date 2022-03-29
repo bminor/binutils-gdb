@@ -1476,8 +1476,6 @@ struct symtab
     m_language = language;
   }
 
-  program_space *pspace () const;
-
   /* Unordered chain of all filetabs in the compunit,  with the exception
      that the "main" source file is the first entry in the list.  */
 

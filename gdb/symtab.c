@@ -335,14 +335,6 @@ search_domain_name (enum search_domain e)
 
 /* See symtab.h.  */
 
-program_space *
-symtab::pspace () const
-{
-  return this->compunit ()->objfile ()->pspace;
-}
-
-/* See symtab.h.  */
-
 call_site *
 compunit_symtab::find_call_site (CORE_ADDR pc) const
 {
