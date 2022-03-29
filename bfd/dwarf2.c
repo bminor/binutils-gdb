@@ -1441,6 +1441,7 @@ non_mangled (int lang)
     case DW_LANG_PLI:
     case DW_LANG_UPC:
     case DW_LANG_C11:
+    case DW_LANG_Mips_Assembler:
       return true;
     }
 }
