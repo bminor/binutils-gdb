@@ -78,6 +78,7 @@
 #include "bt-utils.h"
 #include "gdbsupport/buildargv.h"
 #include "pager.h"
+#include "run-on-main-thread.h"
 
 void (*deprecated_error_begin_hook) (void);
 
@@ -681,6 +682,9 @@ quit (void)
 void
 maybe_quit (void)
 {
+  if (!is_main_thread ())
+    return;
+
   if (sync_quit_force_run)
     quit ();
 
