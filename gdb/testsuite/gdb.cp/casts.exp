@@ -180,6 +180,26 @@ gdb_test "print (unsigned long long) (LeftRight *) (Right *) &gd == gd_value" \
 gdb_test "print (unsigned long long) (LeftRight *) (Right *) r_value == gd_value" \
     " = true"
 
+gdb_test "print dynamic_cast<VirtualLeftRight *> (vlr) == vlr" " = true"
+gdb_test "print dynamic_cast<VirtualLeftRight *> (vl) == vlr" " = true"
+gdb_test "print dynamic_cast<VirtualLeftRight *> (vr) == vlr" " = true"
+gdb_test "print dynamic_cast<VirtualLeft *> (vlr) == vl" " = true"
+gdb_test "print dynamic_cast<VirtualLeft *> (vl) == vl" " = true"
+gdb_test "print dynamic_cast<VirtualLeft *> (vr) == vl" " = true"
+gdb_test "print dynamic_cast<VirtualRight *> (vlr) == vr" " = true"
+gdb_test "print dynamic_cast<VirtualRight *> (vl) == vr" " = true"
+gdb_test "print dynamic_cast<VirtualRight *> (vr) == vr" " = true"
+
+gdb_test "print &dynamic_cast<VirtualLeftRight &> (*vlr) == vlr" " = true"
+gdb_test "print &dynamic_cast<VirtualLeftRight &> (*vl) == vlr" " = true"
+gdb_test "print &dynamic_cast<VirtualLeftRight &> (*vr) == vlr" " = true"
+gdb_test "print &dynamic_cast<VirtualLeft &> (*vlr) == vl" " = true"
+gdb_test "print &dynamic_cast<VirtualLeft &> (*vl) == vl" " = true"
+gdb_test "print &dynamic_cast<VirtualLeft &> (*vr) == vl" " = true"
+gdb_test "print &dynamic_cast<VirtualRight &> (*vlr) == vr" " = true"
+gdb_test "print &dynamic_cast<VirtualRight &> (*vl) == vr" " = true"
+gdb_test "print &dynamic_cast<VirtualRight &> (*vr) == vr" " = true"
+
 if {[prepare_for_testing "failed to prepare" ${testfile}03 $srcfile2 \
 			 {debug c++ additional_flags=-std=c++03}]} {
     return -1
