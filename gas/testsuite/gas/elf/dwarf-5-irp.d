@@ -52,6 +52,22 @@ Raw dump of debug contents .*
 .*Advance PC by .*
 .*Extended opcode 1: End of Sequence
 
+.*Set File Name to entry 4 .*
+.*Extended opcode 2: .*
+.*Advance Line by 35 to 36
+.*Copy
+.*Special opcode .* and Line by 1 to 37
+.*Advance PC by .*
+.*Extended opcode 1: End of Sequence
+
+.*Set File Name to entry 4 .*
+.*Extended opcode 2: .*
+.*Advance Line by 35 to 36
+.*Copy
+.*Special opcode .* and Line by 1 to 37
+.*Advance PC by .*
+.*Extended opcode 1: End of Sequence
+
 
 Contents of the \.debug_aranges section:
 
@@ -66,11 +82,15 @@ Contents of the \.debug_aranges section:
     0+ [0-9a-f]+ ?
     0+ [0-9a-f]+ ?
     0+ [0-9a-f]+ ?
+    0+ [0-9a-f]+ ?
+    0+ [0-9a-f]+ ?
     0+ 0+ ?
 
 Contents of the \.debug_rnglists section:
 
     Offset +Begin +End
+    [0-9a-f]+ 0+ [0-9a-f]+ ?
+    [0-9a-f]+ 0+ [0-9a-f]+ ?
     [0-9a-f]+ 0+ [0-9a-f]+ ?
     [0-9a-f]+ 0+ [0-9a-f]+ ?
     [0-9a-f]+ 0+ [0-9a-f]+ ?

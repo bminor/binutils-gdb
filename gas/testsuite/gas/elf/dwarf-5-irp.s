@@ -29,3 +29,10 @@ _start:
 	.nop
 	n = n - 1
 	.endr
+
+	.irp n, cd, nm
+# 35 "irp.s"
+	.section .text.\n, "ax"
+	.nop
+	.nop
+	.endr

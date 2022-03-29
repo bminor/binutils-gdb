@@ -234,7 +234,8 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 	     number when expanding the macro), and since for short
 	     macros we clearly prefer reporting the point of expansion
 	     anyway, there's not an obviously better fix here.  */
-	  if (len >= 8 && strncasecmp (ptr->ptr + i, "linefile", 8) == 0)
+	  if (from != NULL && strcasecmp (from, "MACRO") == 0
+	      && len >= 8 && strncasecmp (ptr->ptr + i, "linefile", 8) == 0)
 	    {
 	      char saved_eol_char = ptr->ptr[ptr->len];
 
