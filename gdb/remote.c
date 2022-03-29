@@ -3145,14 +3145,15 @@ read_ptid (const char *buf, const char **obuf)
       return null_ptid;
     }
 
-  /* Since the stub is not sending a process id, then default to
-     what's in inferior_ptid, unless it's null at this point.  If so,
+  /* Since the stub is not sending a process id, default to what's
+     current_inferior, unless it doesn't have a PID yet.  If so,
      then since there's no way to know the pid of the reported
      threads, use the magic number.  */
-  if (inferior_ptid == null_ptid)
+  inferior *inf = current_inferior ();
+  if (inf->pid == 0)
     pid = magic_null_ptid.pid ();
   else
-    pid = inferior_ptid.pid ();
+    pid = inf->pid;
 
   if (obuf)
     *obuf = pp;
