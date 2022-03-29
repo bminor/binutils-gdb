@@ -780,7 +780,8 @@ command_line_handler (gdb::unique_xmalloc_ptr<char> &&rl)
 	 we first print '\n' to move to the next line, and then print the
 	 quit.  This isn't ideal, but avoids corrupting the prompt.  */
       const char *value = rl_variable_value ("enable-bracketed-paste");
-      if (value != nullptr && strcmp (value, "on") == 0)
+      if (value != nullptr && strcmp (value, "on") == 0
+	  && ((rl_readline_version >> 8) & 0xff) > 0x07)
 	printf_unfiltered ("\n");
       printf_unfiltered ("quit\n");
       execute_command ("quit", 1);

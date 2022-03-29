@@ -49,7 +49,7 @@ proc run_test {} {
 	    # line after the 'quit', this catches that case.
 	    fail $gdb_test_name
 	}
-	-re "$::gdb_prompt quit\[^\n\]*\r\n\[^\n\]*$" {
+       -re "$::gdb_prompt \[^\n\r\]*quit\[^\n\]*\r\n\[^\n\]*$" {
 	    pass $gdb_test_name
 	}
 	eof {
