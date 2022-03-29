@@ -5295,8 +5295,9 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 	  sec_vma = section->vma;
 	  if (section->output_section != NULL)
 	    sec_vma = section->output_section->vma + section->output_offset;
-	  if (fun != NULL
-	      && fun->value + sec_vma == function->arange.low)
+	  if (fun == NULL)
+	    *functionname_ptr = function->name;
+	  else if (fun->value + sec_vma == function->arange.low)
 	    function->name = *functionname_ptr;
 	  /* Even if we didn't find a linkage name, say that we have
 	     to stop a repeated search of symbols.  */
