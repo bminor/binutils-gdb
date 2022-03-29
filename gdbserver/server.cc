@@ -1067,19 +1067,12 @@ gdb_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
       /* (assume no half-trace half-real blocks for now) */
     }
 
-  res = prepare_to_access_memory ();
-  if (res == 0)
-    {
-      if (set_desired_thread ())
-	res = read_inferior_memory (memaddr, myaddr, len);
-      else
-	res = 1;
-      done_accessing_memory ();
-
-      return res == 0 ? len : -1;
-    }
+  if (set_desired_thread ())
+    res = read_inferior_memory (memaddr, myaddr, len);
   else
-    return -1;
+    res = 1;
+
+  return res == 0 ? len : -1;
 }
 
 /* Write trace frame or inferior memory.  Actually, writing to trace
@@ -1095,15 +1088,10 @@ gdb_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
     {
       int ret;
 
-      ret = prepare_to_access_memory ();
-      if (ret == 0)
-	{
-	  if (set_desired_thread ())
-	    ret = target_write_memory (memaddr, myaddr, len);
-	  else
-	    ret = EIO;
-	  done_accessing_memory ();
-	}
+      if (set_desired_thread ())
+	ret = target_write_memory (memaddr, myaddr, len);
+      else
+	ret = EIO;
       return ret;
     }
 }

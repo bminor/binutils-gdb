@@ -141,21 +141,6 @@ public:
      If REGNO is -1, store all registers; otherwise, store at least REGNO.  */
   virtual void store_registers (regcache *regcache, int regno) = 0;
 
-  /* Prepare to read or write memory from the inferior process.
-     Targets use this to do what is necessary to get the state of the
-     inferior such that it is possible to access memory.
-
-     This should generally only be called from client facing routines,
-     such as gdb_read_memory/gdb_write_memory, or the GDB breakpoint
-     insertion routine.
-
-     Like `read_memory' and `write_memory' below, returns 0 on success
-     and errno on failure.  */
-  virtual int prepare_to_access_memory ();
-
-  /* Undo the effects of prepare_to_access_memory.  */
-  virtual void done_accessing_memory ();
-
   /* Read memory from the inferior process.  This should generally be
      called through read_inferior_memory, which handles breakpoint shadowing.
 
@@ -690,12 +675,6 @@ target_read_btrace_conf (struct btrace_target_info *tinfo,
 
 ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	       target_wait_flags options, int connected_wait);
-
-/* Prepare to read or write memory from the inferior process.  See the
-   corresponding process_stratum_target methods for more details.  */
-
-int prepare_to_access_memory (void);
-void done_accessing_memory (void);
 
 #define target_core_of_thread(ptid)		\
   the_target->core_of_thread (ptid)
