@@ -766,9 +766,9 @@ const struct riscv_opcode riscv_opcodes[] =
 {"fcvt.l.q",  64, INSN_CLASS_Q_OR_ZQINX,   "d,S,m",     MATCH_FCVT_L_Q, MASK_FCVT_L_Q, match_opcode, 0 },
 {"fcvt.lu.q", 64, INSN_CLASS_Q_OR_ZQINX,   "d,S",       MATCH_FCVT_LU_Q|MASK_RM, MASK_FCVT_LU_Q|MASK_RM, match_opcode, 0 },
 {"fcvt.lu.q", 64, INSN_CLASS_Q_OR_ZQINX,   "d,S,m",     MATCH_FCVT_LU_Q, MASK_FCVT_LU_Q, match_opcode, 0 },
-{"fcvt.q.l",  64, INSN_CLASS_Q_OR_ZQINX,   "D,s",       MATCH_FCVT_Q_L|MASK_RM, MASK_FCVT_Q_L|MASK_RM, match_opcode, 0 },
+{"fcvt.q.l",  64, INSN_CLASS_Q_OR_ZQINX,   "D,s",       MATCH_FCVT_Q_L, MASK_FCVT_Q_L|MASK_RM, match_opcode, 0 },
 {"fcvt.q.l",  64, INSN_CLASS_Q_OR_ZQINX,   "D,s,m",     MATCH_FCVT_Q_L, MASK_FCVT_Q_L, match_opcode, 0 },
-{"fcvt.q.lu", 64, INSN_CLASS_Q_OR_ZQINX,   "D,s",       MATCH_FCVT_Q_LU|MASK_RM, MASK_FCVT_Q_LU|MASK_RM, match_opcode, 0 },
+{"fcvt.q.lu", 64, INSN_CLASS_Q_OR_ZQINX,   "D,s",       MATCH_FCVT_Q_LU, MASK_FCVT_Q_LU|MASK_RM, match_opcode, 0 },
 {"fcvt.q.lu", 64, INSN_CLASS_Q_OR_ZQINX,   "D,s,m",     MATCH_FCVT_Q_LU, MASK_FCVT_Q_LU, match_opcode, 0 },
 
 /* Compressed instructions.  */
