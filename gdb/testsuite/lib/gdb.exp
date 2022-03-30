@@ -1326,9 +1326,10 @@ proc gdb_test_multiline { name args } {
 #   omitted, then the pass/fail messages use the command string as the
 #   message.  (If this is the empty string, then sometimes we don't
 #   call pass or fail at all; I don't understand this at all.)
-# QUESTION is a question GDB may ask in response to COMMAND, like
-#   "are you sure?"
-# RESPONSE is the response to send if QUESTION appears.
+# QUESTION is a question GDB should ask in response to COMMAND, like
+#   "are you sure?"  If this is specified, the test fails if GDB
+#   doesn't print the question.
+# RESPONSE is the response to send when QUESTION appears.
 #
 # Returns:
 #    1 if the test failed,
@@ -1339,6 +1340,11 @@ proc gdb_test { args } {
     global gdb_prompt
     upvar timeout timeout
 
+    # Can't have a question without a response.
+    if { [llength $args] == 4 || [llength $args] > 5 } {
+	error "Unexpected arguments: $args"
+    }
+
     if [llength $args]>2 then {
 	set message [lindex $args 2]
     } else {
@@ -1347,11 +1353,21 @@ proc gdb_test { args } {
     set command [lindex $args 0]
     set pattern [lindex $args 1]
 
+    set must_see_question 0
+    if { [llength $args] == 5 } {
+	set must_see_question 1
+	set saw_question 0
+    }
+
     set user_code {}
     lappend user_code {
 	-re "\[\r\n\]*(?:$pattern)\[\r\n\]+$gdb_prompt $" {
 	    if ![string match "" $message] then {
-		pass "$message"
+		if {$must_see_question} {
+		    gdb_assert $saw_question "$message"
+		} else {
+		    pass "$message"
+		}
             }
         }
     }
@@ -1361,6 +1377,7 @@ proc gdb_test { args } {
 	set response_string [lindex $args 4]
 	lappend user_code {
 	    -re "(${question_string})$" {
+		set saw_question 1
 		send_gdb "$response_string\n"
 		exp_continue
 	    }
