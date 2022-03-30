@@ -63,13 +63,13 @@ reggroup_gdbarch_new (struct gdbarch *gdbarch, const char *name,
 /* Register group attributes.  */
 
 const char *
-reggroup_name (struct reggroup *group)
+reggroup_name (const struct reggroup *group)
 {
   return group->name;
 }
 
 enum reggroup_type
-reggroup_type (struct reggroup *group)
+reggroup_type (const struct reggroup *group)
 {
   return group->type;
 }
@@ -130,7 +130,7 @@ static struct reggroups default_groups = { NULL, &default_groups.first };
 /* A register group iterator.  */
 
 struct reggroup *
-reggroup_next (struct gdbarch *gdbarch, struct reggroup *last)
+reggroup_next (struct gdbarch *gdbarch, const struct reggroup *last)
 {
   struct reggroups *groups;
   struct reggroup_el *el;
@@ -161,7 +161,7 @@ reggroup_next (struct gdbarch *gdbarch, struct reggroup *last)
 /* See reggroups.h.  */
 
 struct reggroup *
-reggroup_prev (struct gdbarch *gdbarch, struct reggroup *curr)
+reggroup_prev (struct gdbarch *gdbarch, const struct reggroup *curr)
 {
   struct reggroups *groups;
   struct reggroup_el *el;

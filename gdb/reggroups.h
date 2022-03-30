@@ -50,17 +50,17 @@ extern struct reggroup *reggroup_gdbarch_new (struct gdbarch *gdbarch,
 extern void reggroup_add (struct gdbarch *gdbarch, struct reggroup *group);
 
 /* Register group attributes.  */
-extern const char *reggroup_name (struct reggroup *reggroup);
-extern enum reggroup_type reggroup_type (struct reggroup *reggroup);
+extern const char *reggroup_name (const struct reggroup *reggroup);
+extern enum reggroup_type reggroup_type (const struct reggroup *reggroup);
 
 /* Iterators for the architecture's register groups.  Pass in NULL, returns
    the first (for next), or last (for prev) group.  Pass in a group,
    returns the next or previous group, or NULL when either the end or the
    beginning of the group list is reached.  */
 extern struct reggroup *reggroup_next (struct gdbarch *gdbarch,
-				       struct reggroup *last);
+				       const struct reggroup *last);
 extern struct reggroup *reggroup_prev (struct gdbarch *gdbarch,
-				       struct reggroup *curr);
+				       const struct reggroup *curr);
 /* Find a reggroup by name.  */
 extern reggroup *reggroup_find (struct gdbarch *gdbarch, const char *name);
 
