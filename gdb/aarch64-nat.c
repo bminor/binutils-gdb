@@ -114,10 +114,9 @@ aarch64_insert_hw_breakpoint (struct gdbarch *gdbarch,
   gdbarch_breakpoint_from_pc (gdbarch, &addr, &len);
 
   if (show_debug_regs)
-    fprintf_unfiltered
-      (gdb_stdlog,
-       "insert_hw_breakpoint on entry (addr=0x%08lx, len=%d))\n",
-       (unsigned long) addr, len);
+    gdb_printf (gdb_stdlog,
+		"insert_hw_breakpoint on entry (addr=0x%08lx, len=%d))\n",
+		(unsigned long) addr, len);
 
   ret = aarch64_handle_breakpoint (type, addr, len, 1 /* is_insert */,
 				   inferior_ptid, state);
@@ -148,9 +147,9 @@ aarch64_remove_hw_breakpoint (struct gdbarch *gdbarch,
   gdbarch_breakpoint_from_pc (gdbarch, &addr, &len);
 
   if (show_debug_regs)
-    fprintf_unfiltered
-      (gdb_stdlog, "remove_hw_breakpoint on entry (addr=0x%08lx, len=%d))\n",
-       (unsigned long) addr, len);
+    gdb_printf (gdb_stdlog,
+		"remove_hw_breakpoint on entry (addr=0x%08lx, len=%d))\n",
+		(unsigned long) addr, len);
 
   ret = aarch64_handle_breakpoint (type, addr, len, 0 /* is_insert */,
 				   inferior_ptid, state);
@@ -177,9 +176,9 @@ aarch64_insert_watchpoint (CORE_ADDR addr, int len, enum target_hw_bp_type type,
     = aarch64_get_debug_reg_state (inferior_ptid.pid ());
 
   if (show_debug_regs)
-    fprintf_unfiltered (gdb_stdlog,
-			"insert_watchpoint on entry (addr=0x%08lx, len=%d)\n",
-			(unsigned long) addr, len);
+    gdb_printf (gdb_stdlog,
+		"insert_watchpoint on entry (addr=0x%08lx, len=%d)\n",
+		(unsigned long) addr, len);
 
   gdb_assert (type != hw_execute);
 
@@ -208,9 +207,9 @@ aarch64_remove_watchpoint (CORE_ADDR addr, int len, enum target_hw_bp_type type,
     = aarch64_get_debug_reg_state (inferior_ptid.pid ());
 
   if (show_debug_regs)
-    fprintf_unfiltered (gdb_stdlog,
-			"remove_watchpoint on entry (addr=0x%08lx, len=%d)\n",
-			(unsigned long) addr, len);
+    gdb_printf (gdb_stdlog,
+		"remove_watchpoint on entry (addr=0x%08lx, len=%d)\n",
+		(unsigned long) addr, len);
 
   gdb_assert (type != hw_execute);
 

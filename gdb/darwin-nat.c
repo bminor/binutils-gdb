@@ -170,7 +170,7 @@ inferior_debug (int level, const char *fmt, ...)
 
   va_start (ap, fmt);
   gdb_printf (gdb_stdlog, _("[%d inferior]: "), getpid ());
-  vfprintf_unfiltered (gdb_stdlog, fmt, ap);
+  gdb_vprintf (gdb_stdlog, fmt, ap);
   va_end (ap);
 }
 
