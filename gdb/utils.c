@@ -306,6 +306,16 @@ struct internal_problem
   bool should_print_backtrace;
 };
 
+/* Return true if the readline callbacks have been initialized for UI.
+   This is always true once GDB is fully initialized, but during the early
+   startup phase this is initially false.  */
+
+static bool
+readline_initialized (struct ui *ui)
+{
+  return ui->call_readline != nullptr;
+}
+
 /* Report a problem, internal to GDB, to the user.  Once the problem
    has been reported, and assuming GDB didn't quit, the caller can
    either allow execution to resume or throw an error.  */
@@ -378,6 +388,7 @@ internal_vproblem (struct internal_problem *problem,
   if (problem->should_quit != internal_problem_ask
       || !confirm
       || !filtered_printing_initialized ()
+      || !readline_initialized (current_ui)
       || problem->should_print_backtrace)
     gdb_printf (gdb_stderr, "%s\n", reason.c_str ());
 
@@ -389,7 +400,8 @@ internal_vproblem (struct internal_problem *problem,
       /* Default (yes/batch case) is to quit GDB.  When in batch mode
 	 this lessens the likelihood of GDB going into an infinite
 	 loop.  */
-      if (!confirm || !filtered_printing_initialized ())
+      if (!confirm || !filtered_printing_initialized ()
+	  || !readline_initialized (current_ui))
 	quit_p = 1;
       else
 	quit_p = query (_("%s\nQuit this debugging session? "),
@@ -413,7 +425,8 @@ internal_vproblem (struct internal_problem *problem,
     {
       if (!can_dump_core_warn (LIMIT_MAX, reason.c_str ()))
 	dump_core_p = 0;
-      else if (!filtered_printing_initialized ())
+      else if (!filtered_printing_initialized ()
+	       || !readline_initialized (current_ui))
 	dump_core_p = 1;
       else
 	{
