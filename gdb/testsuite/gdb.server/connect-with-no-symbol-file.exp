@@ -29,7 +29,7 @@ if { [skip_gdbserver_tests] } {
     return 0
 }
 
-if { [prepare_for_testing "failed to prepare" $testfile $srcfile debug] } {
+if { [build_executable "failed to prepare" $testfile $srcfile debug] } {
     return -1
 }
 
@@ -46,21 +46,15 @@ proc connect_no_symbol_file { sysroot action } {
 
     with_test_prefix "setup" {
 	# Copy the symbol file to the target.
-	gdb_remote_download target $binfile.bak $binfile 
+	set target_exec [gdb_remote_download target $binfile.bak $binfile]
 
 	# Make sure we're disconnected, in case we're testing with an
 	# extended-remote board, therefore already connected.
 	gdb_test "disconnect" ".*"
 
-	# Discard any symbol files that we have opened.
-	gdb_test "file" ".*" "discard symbol table" \
-	    {Discard symbol table from `.*'\? \(y or n\) } "y"
-
 	# Set sysroot to something non-target and possibly also invalid so that
 	# GDB is unable to open the symbol file.
 	gdb_test_no_output "set sysroot $sysroot" "adjust sysroot"
-
-	set target_exec [gdbserver_download_current_prog]
 
 	# Start GDBserver.
 	set res [gdbserver_start "" $target_exec]
@@ -70,9 +64,9 @@ proc connect_no_symbol_file { sysroot action } {
 
 	# Perform test actions to the symbol file on the target.
 	if { $action == "delete" } then {
-	  remote_file target delete $binfile
+	  remote_file target delete $target_exec
 	} elseif { $action == "permission" } {
-	  remote_spawn target "chmod 000 $binfile"
+	  remote_spawn target "chmod 000 $target_exec"
 	}
        
 	# Connect to GDBserver.
@@ -88,6 +82,9 @@ proc connect_no_symbol_file { sysroot action } {
 
 # Make sure we have the original symbol file in a safe place to copy from.
 gdb_remote_download host $binfile $binfile.bak
+
+# Start with no executable loaded.
+clean_restart
 
 # Run the test with different permutations.
 foreach_with_prefix sysroot {"" "target:"} {
