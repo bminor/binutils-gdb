@@ -266,9 +266,7 @@ proc run_style_tests { } {
 	}
 	gdb_test "file $binfile" \
 	    $pass_re \
-	    "filename is styled when loading symbol file" \
-	    "Are you sure you want to change the file.*" \
-	    "y"
+	    "filename is styled when loading symbol file"
 
 	gdb_test "pwd" "Working directory [limited_style .*? file].*"
 
