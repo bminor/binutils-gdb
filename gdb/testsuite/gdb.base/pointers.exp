@@ -209,7 +209,7 @@ gdb_test "print **ptr_to_ptr_to_float" " = 100" \
 
 gdb_test "break marker1" ".*" ""
 gdb_test "cont" "Break.* marker1 \\(\\) at .*:$decimal.*" \
-    continue to marker1"
+    "continue to marker1"
 gdb_test "up" "more_code.*" "up from marker1"
 
 gdb_test "print *pUC" " = 21 \'.025\'.*" "print value of *pUC"

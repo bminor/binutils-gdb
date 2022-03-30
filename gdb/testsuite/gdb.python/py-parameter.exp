@@ -199,7 +199,7 @@ proc_with_prefix test_file_parameter { } {
 	"The name of the file is foo.txt.*" "show initial file value"
     gdb_test "set test-file-param bar.txt" \
 	"The name of the file has been changed to bar.txt" \
-	"set new file parameter" 1
+	"set new file parameter"
     gdb_test "show test-file-param" \
 	"The name of the file is bar.txt.*" "show new file value"
     gdb_test "python print (test_file_param.value)" \
