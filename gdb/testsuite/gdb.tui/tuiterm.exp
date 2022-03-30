@@ -492,6 +492,34 @@ proc test_delete_line { } {
     } 3 0
 }
 
+proc test_delete_character { } {
+    Term::_move_cursor 2 1
+
+    Term::_csi_P
+    check "delete character, default param" {
+	"abcdefgh"
+	"ijlmnop "
+	"qrstuvwx"
+	"yz01234 "
+    } 2 1
+
+    Term::_csi_P 3
+    check "delete character, explicit param" {
+	"abcdefgh"
+	"ijop    "
+	"qrstuvwx"
+	"yz01234 "
+    } 2 1
+
+    Term::_csi_P 12
+    check "delete character, more than number of columns" {
+	"abcdefgh"
+	"ij      "
+	"qrstuvwx"
+	"yz01234 "
+    } 2 1
+}
+
 proc test_erase_character { } {
     Term::_move_cursor 3 2
     Term::_csi_X
@@ -600,6 +628,7 @@ foreach_with_prefix test {
     test_erase_in_display
     test_erase_in_line
     test_delete_line
+    test_delete_character
     test_erase_character
     test_repeat
     test_vertical_line_position_absolute

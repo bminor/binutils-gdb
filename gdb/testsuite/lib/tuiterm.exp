@@ -349,6 +349,33 @@ namespace eval Term {
 	}
     }
 
+    # Delete Character.
+    #
+    # https://vt100.net/docs/vt510-rm/DCH.html
+    proc _csi_P {args} {
+	set count [_default [lindex $args 0] 1]
+
+	_log_cur "Delete character ($count)" {
+	    variable _cur_row
+	    variable _cur_col
+	    variable _chars
+	    variable _cols
+
+	    # Move all characters right of the cursor N positions left.
+	    set out_col [expr $_cur_col]
+	    set in_col [expr $_cur_col + $count]
+
+	    while {$in_col < $_cols} {
+		set _chars($out_col,$_cur_row) $_chars($in_col,$_cur_row)
+		incr in_col
+		incr out_col
+	    }
+
+	    # Clear the rest of the line.
+	    _clear_in_line $out_col $_cols $_cur_row
+	}
+    }
+
     # Erase chars.
     #
     # https://vt100.net/docs/vt510-rm/ECH.html
