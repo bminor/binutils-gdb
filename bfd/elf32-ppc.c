@@ -2929,6 +2929,7 @@ ppc_elf_check_relocs (bfd *abfd,
       unsigned long r_symndx;
       enum elf_ppc_reloc_type r_type;
       struct elf_link_hash_entry *h;
+      Elf_Internal_Sym *isym;
       int tls_type;
       struct plt_entry **ifunc;
       struct plt_entry **pltent;
@@ -2936,13 +2937,19 @@ ppc_elf_check_relocs (bfd *abfd,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       if (r_symndx < symtab_hdr->sh_info)
-	h = NULL;
+	{
+	  h = NULL;
+	  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache, abfd, r_symndx);
+	  if (isym == NULL)
+	    return false;
+	}
       else
 	{
 	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  isym = NULL;
 	}
 
       /* If a relocation refers to _GLOBAL_OFFSET_TABLE_, create the .got.
@@ -2962,13 +2969,16 @@ ppc_elf_check_relocs (bfd *abfd,
       tls_type = 0;
       r_type = ELF32_R_TYPE (rel->r_info);
       ifunc = NULL;
-      if (h == NULL && htab->elf.target_os != is_vxworks)
+      if (h != NULL)
 	{
-	  Elf_Internal_Sym *isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
-							  abfd, r_symndx);
-	  if (isym == NULL)
-	    return false;
-
+	  if (h->type == STT_GNU_IFUNC)
+	    {
+	      h->needs_plt = 1;
+	      ifunc = &h->plt.plist;
+	    }
+	}
+      else if (htab->elf.target_os != is_vxworks)
+	{
 	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
 	    {
 	      /* Set PLT_IFUNC flag for this sym, no GOT entry yet.  */
@@ -3294,12 +3304,10 @@ ppc_elf_check_relocs (bfd *abfd,
 	      htab->plt_type = PLT_OLD;
 	      htab->old_bfd = abfd;
 	    }
-	  if (h != NULL && h->type == STT_GNU_IFUNC)
-	    {
-	      h->needs_plt = 1;
-	      if (!update_plt_info (abfd, &h->plt.plist, NULL, 0))
-		return false;
-	    }
+	  if (h != NULL
+	      && ifunc != NULL
+	      && !update_plt_info (abfd, ifunc, NULL, 0))
+	    return false;
 	  break;
 
 	  /* This relocation describes the C++ object vtable hierarchy.
@@ -3347,12 +3355,6 @@ ppc_elf_check_relocs (bfd *abfd,
 		 reliably deduce the GOT pointer value needed for
 		 PLT call stubs.  */
 	      asection *s;
-	      Elf_Internal_Sym *isym;
-
-	      isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
-					    abfd, r_symndx);
-	      if (isym == NULL)
-		return false;
 
 	      s = bfd_section_from_elf_index (abfd, isym->st_shndx);
 	      if (s == got2)
@@ -3421,38 +3423,21 @@ ppc_elf_check_relocs (bfd *abfd,
 	    }
 
 	dodyn:
-	  /* If we are creating a shared library, and this is a reloc
-	     against a global symbol, or a non PC relative reloc
-	     against a local symbol, then we need to copy the reloc
-	     into the shared library.  However, if we are linking with
-	     -Bsymbolic, we do not need to copy a reloc against a
-	     global symbol which is defined in an object we are
-	     including in the link (i.e., DEF_REGULAR is set).  At
-	     this point we have not seen all the input files, so it is
-	     possible that DEF_REGULAR is not set now but will be set
-	     later (it is never cleared).  In case of a weak definition,
-	     DEF_REGULAR may be cleared later by a strong definition in
-	     a shared library.  We account for that possibility below by
-	     storing information in the dyn_relocs field of the hash
-	     table entry.  A similar situation occurs when creating
-	     shared libraries and symbol visibility changes render the
-	     symbol local.
-
-	     If on the other hand, we are creating an executable, we
-	     may need to keep relocations for symbols satisfied by a
-	     dynamic library if we manage to avoid copy relocs for the
-	     symbol.  */
-	  if ((bfd_link_pic (info)
-	       && (must_be_dyn_reloc (info, r_type)
-		   || (h != NULL
-		       && (!SYMBOLIC_BIND (info, h)
-			   || h->root.type == bfd_link_hash_defweak
-			   || !h->def_regular))))
-	      || (ELIMINATE_COPY_RELOCS
-		  && !bfd_link_pic (info)
-		  && h != NULL
-		  && (h->root.type == bfd_link_hash_defweak
-		      || !h->def_regular)))
+	  /* Set up information for symbols that might need dynamic
+	     relocations.  At this point in linking we have read all
+	     the input files and resolved most symbols, but have not
+	     yet decided whether symbols are dynamic or finalized
+	     symbol flags.  In some cases we might be setting dynamic
+	     reloc info for symbols that do not end up needing such.
+	     That's OK, adjust_dynamic_symbol and allocate_dynrelocs
+	     work together with this code.  */
+	  if ((h != NULL
+	       && !SYMBOL_REFERENCES_LOCAL (info, h))
+	      || (bfd_link_pic (info)
+		  && (h != NULL
+		      ? !bfd_is_abs_symbol (&h->root)
+		      : isym->st_shndx != SHN_ABS)
+		  && must_be_dyn_reloc (info, r_type)))
 	    {
 #ifdef DEBUG
 	      fprintf (stderr,
@@ -3507,12 +3492,6 @@ ppc_elf_check_relocs (bfd *abfd,
 		  bool is_ifunc;
 		  asection *s;
 		  void *vpp;
-		  Elf_Internal_Sym *isym;
-
-		  isym = bfd_sym_from_r_symndx (&htab->elf.sym_cache,
-						abfd, r_symndx);
-		  if (isym == NULL)
-		    return false;
 
 		  s = bfd_section_from_elf_index (abfd, isym->st_shndx);
 		  if (s == NULL)
@@ -3520,7 +3499,7 @@ ppc_elf_check_relocs (bfd *abfd,
 
 		  vpp = &elf_section_data (s)->local_dynrel;
 		  rel_head = (struct ppc_dyn_relocs **) vpp;
-		  is_ifunc = ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC;
+		  is_ifunc = ifunc != NULL;
 		  p = *rel_head;
 		  if (p != NULL && p->sec == sec && p->ifunc != is_ifunc)
 		    p = p->next;
@@ -5170,7 +5149,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  if (((bfd_link_pic (info)
 		&& !((eh->tls_mask & TLS_TLS) != 0
 		     && bfd_link_executable (info)
-		     && SYMBOL_REFERENCES_LOCAL (info, &eh->elf)))
+		     && SYMBOL_REFERENCES_LOCAL (info, &eh->elf))
+		&& !bfd_is_abs_symbol (&h->root))
 	       || (htab->elf.dynamic_sections_created
 		   && eh->elf.dynindx != -1
 		   && !SYMBOL_REFERENCES_LOCAL (info, &eh->elf)))
@@ -5540,6 +5520,8 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
       char *lgot_masks;
       bfd_size_type locsymcount;
       Elf_Internal_Shdr *symtab_hdr;
+      Elf_Internal_Sym *local_syms;
+      Elf_Internal_Sym *isym;
 
       if (!is_ppc_elf (ibfd))
 	continue;
@@ -5596,8 +5578,18 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
       local_plt = (struct plt_entry **) end_local_got;
       end_local_plt = local_plt + locsymcount;
       lgot_masks = (char *) end_local_plt;
+      local_syms = (Elf_Internal_Sym *) symtab_hdr->contents;
+      if (local_syms == NULL && locsymcount != 0)
+	{
+	  local_syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, locsymcount,
+					     0, NULL, NULL, NULL);
+	  if (local_syms == NULL)
+	    return false;
+	}
 
-      for (; local_got < end_local_got; ++local_got, ++lgot_masks)
+      for (isym = local_syms;
+	   local_got < end_local_got;
+	   ++local_got, ++lgot_masks, ++isym)
 	if (*local_got > 0)
 	  {
 	    unsigned int need;
@@ -5611,7 +5603,8 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 		*local_got = allocate_got (htab, need);
 		if (bfd_link_pic (info)
 		    && !((*lgot_masks & TLS_TLS) != 0
-			 && bfd_link_executable (info)))
+			 && bfd_link_executable (info))
+		    && isym->st_shndx != SHN_ABS)
 		  {
 		    asection *srel;
 
@@ -5683,6 +5676,15 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	      }
 	    else
 	      ent->plt.offset = (bfd_vma) -1;
+	}
+
+      if (local_syms != NULL
+	  && symtab_hdr->contents != (unsigned char *) local_syms)
+	{
+	  if (!info->keep_memory)
+	    free (local_syms);
+	  else
+	    symtab_hdr->contents = (unsigned char *) local_syms;
 	}
     }
 
@@ -7796,7 +7798,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 				|| !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 			    && !(tls_ty != 0
 				 && bfd_link_executable (info)
-				 && SYMBOL_REFERENCES_LOCAL (info, h))))
+				 && SYMBOL_REFERENCES_LOCAL (info, h))
+			    && (h != NULL
+				? !bfd_is_abs_symbol (&h->root)
+				: sym->st_shndx != SHN_ABS)))
 		      {
 			asection *rsec = htab->elf.srelgot;
 			bfd_byte * loc;
