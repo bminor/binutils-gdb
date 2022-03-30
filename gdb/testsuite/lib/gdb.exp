@@ -4351,6 +4351,7 @@ set gdb_saved_set_unbuffered_mode_obj ""
 #   - nopie: Prevent creation of PIE executables.
 #   - macros: Add the required compiler flag to include macro information in
 #     debug information
+#   - text_segment=addr: Tell the linker to place the text segment at ADDR.
 #
 # And here are some of the not too obscure options understood by DejaGnu that
 # influence the compilation:
@@ -4470,6 +4471,19 @@ proc gdb_compile {source dest type options} {
 	} elseif { $opt == "getting_compiler_info" } {
 	    # If this is set, calling test_compiler_info will cause recursion.
 	    set getting_compiler_info 1
+        } elseif {[regexp "^text_segment=(.*)" $opt dummy_var addr]} {
+            if { [linker_supports_Ttext_segment_flag] } {
+                # For GNU ld.
+                lappend new_options "ldflags=-Wl,-Ttext-segment=$addr"
+            } elseif { [linker_supports_image_base_flag] } {
+                # For LLVM's lld.
+                lappend new_options "ldflags=-Wl,--image-base=$addr"
+            } elseif { [linker_supports_Ttext_flag] } {
+                # For old GNU gold versions.
+                lappend new_options "ldflags=-Wl,-Ttext=$addr"
+            } else {
+                error "Don't know how to handle text_segment option."
+            }
         } else {
             lappend new_options $opt
         }
@@ -8234,6 +8248,31 @@ gdb_caching_proc have_fuse_ld_gold {
     set src { int main() { return 0; } }
     return [gdb_simple_compile $me $src executable $flags]
 }
+
+# Return 1 if linker supports -Ttext-segment, otherwise return 0.
+gdb_caching_proc linker_supports_Ttext_segment_flag {
+    set me "linker_supports_Ttext_segment_flag"
+    set flags additional_flags="-Wl,-Ttext-segment=0x7000000"
+    set src { int main() { return 0; } }
+    return [gdb_simple_compile $me $src executable $flags]
+}
+
+# Return 1 if linker supports -Ttext, otherwise return 0.
+gdb_caching_proc linker_supports_Ttext_flag {
+    set me "linker_supports_Ttext_flag"
+    set flags additional_flags="-Wl,-Ttext=0x7000000"
+    set src { int main() { return 0; } }
+    return [gdb_simple_compile $me $src executable $flags]
+}
+
+# Return 1 if linker supports --image-base, otherwise 0.
+gdb_caching_proc linker_supports_image_base_flag {
+    set me "linker_supports_image_base_flag"
+    set flags additional_flags="-Wl,--image-base=0x7000000"
+    set src { int main() { return 0; } }
+    return [gdb_simple_compile $me $src executable $flags]
+}
+
 
 # Return 1 if compiler supports scalar_storage_order attribute, otherwise
 # return 0.

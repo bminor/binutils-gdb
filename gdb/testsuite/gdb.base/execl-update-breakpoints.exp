@@ -32,20 +32,8 @@ if { [gdb_compile [file join $srcdir $subdir $srcfile] $objfile \
     return -1
 }
 
-set opts1_ld [list debug ldflags=-Wl,-Ttext-segment=0x1000000]
-set opts1_gold [list debug ldflags=-Wl,-Ttext=0x1000000]
-set opts2_ld [list debug ldflags=-Wl,-Ttext-segment=0x2000000]
-set opts2_gold [list debug ldflags=-Wl,-Ttext=0x2000000]
-
-if { [gdb_compile $objfile $exec1 executable $opts1_ld] != "" } {
-    # Old gold linker versions don't support -Ttext-segment.  Fall
-    # back to -Ttext.
-    if { [gdb_compile $objfile $exec1 executable $opts1_gold] != ""
-	 || [gdb_compile $objfile $exec2 executable $opts2_gold] != ""} {
-	untested "link failed"
-	return -1
-    }
-} elseif { [gdb_compile $objfile $exec2 executable $opts2_ld] != "" } {
+if { [gdb_compile $objfile $exec1 executable {debug text_segment=0x1000000}] != ""
+     || [gdb_compile $objfile $exec2 executable {debug text_segment=0x2000000}] != ""} {
     untested "link failed"
     return -1
 }
