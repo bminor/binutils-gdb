@@ -339,10 +339,10 @@ Multiply64 (int sign, unsigned long op0)
 	  
       sign = (op0 ^ op1) & 0x80000000;
 	  
-      if (((signed long) op0) < 0)
+      if (op0 & 0x80000000)
 	op0 = - op0;
 	  
-      if (((signed long) op1) < 0)
+      if (op1 & 0x80000000)
 	op1 = - op1;
     }
       
