@@ -641,18 +641,24 @@ windows_nat_target::store_registers (struct regcache *regcache, int r)
 }
 
 /* Maintain a linked list of "so" information.  */
-struct lm_info_windows : public lm_info_base
+struct windows_solib
 {
   LPVOID load_addr = 0;
   CORE_ADDR text_offset = 0;
+
+  /* Original name.  */
+  std::string original_name;
+  /* Expanded form of the name.  */
+  std::string name;
 };
 
-static struct so_list solib_start, *solib_end;
+static std::vector<windows_solib> solibs;
 
-static struct so_list *
+/* See nat/windows-nat.h.  */
+
+static windows_solib *
 windows_make_so (const char *name, LPVOID load_addr)
 {
-  struct so_list *so;
   char *p;
 #ifndef __CYGWIN__
   char buf[__PMAX];
@@ -701,38 +707,43 @@ windows_make_so (const char *name, LPVOID load_addr)
 #endif
     }
 #endif
-  so = XCNEW (struct so_list);
-  lm_info_windows *li = new lm_info_windows;
-  so->lm_info = li;
-  li->load_addr = load_addr;
-  strcpy (so->so_original_name, name);
+  solibs.emplace_back ();
+  windows_solib *so = &solibs.back ();
+  so->load_addr = load_addr;
+  so->original_name = name;
 #ifndef __CYGWIN__
-  strcpy (so->so_name, buf);
+  so->name = buf;
 #else
   if (buf[0])
-    cygwin_conv_path (CCP_WIN_W_TO_POSIX, buf, so->so_name,
-		      SO_NAME_MAX_PATH_SIZE);
+    {
+      char name[SO_NAME_MAX_PATH_SIZE];
+      cygwin_conv_path (CCP_WIN_W_TO_POSIX, buf, name,
+			SO_NAME_MAX_PATH_SIZE);
+      so->name = name;
+    }
   else
     {
       char *rname = realpath (name, NULL);
       if (rname && strlen (rname) < SO_NAME_MAX_PATH_SIZE)
 	{
-	  strcpy (so->so_name, rname);
+	  so->name = rname;
 	  free (rname);
 	}
       else
 	{
 	  warning (_("dll path for \"%s\" too long or inaccessible"), name);
-	  strcpy (so->so_name, so->so_original_name);
+	  so->name = so->original_name;
 	}
     }
   /* Record cygwin1.dll .text start/end.  */
-  p = strchr (so->so_name, '\0') - (sizeof ("/cygwin1.dll") - 1);
-  if (p >= so->so_name && strcasecmp (p, "/cygwin1.dll") == 0)
+  size_t len = sizeof ("/cygwin1.dll") - 1;
+  if (so->name.size () >= len
+      && strcasecmp (so->name.c_str () + so->name.size () - len,
+		     "/cygwin1.dll") == 0)
     {
       asection *text = NULL;
 
-      gdb_bfd_ref_ptr abfd (gdb_bfd_open (so->so_name, "pei-i386"));
+      gdb_bfd_ref_ptr abfd (gdb_bfd_open (so->name, "pei-i386"));
 
       if (abfd == NULL)
 	return so;
@@ -760,22 +771,9 @@ windows_make_so (const char *name, LPVOID load_addr)
 void
 windows_nat::handle_load_dll (const char *dll_name, LPVOID base)
 {
-  solib_end->next = windows_make_so (dll_name, base);
-  solib_end = solib_end->next;
-
-  lm_info_windows *li = (lm_info_windows *) solib_end->lm_info;
-
-  DEBUG_EVENTS ("Loading dll \"%s\" at %s.", solib_end->so_name,
-		host_address_to_string (li->load_addr));
-}
-
-static void
-windows_free_so (struct so_list *so)
-{
-  lm_info_windows *li = (lm_info_windows *) so->lm_info;
-
-  delete li;
-  xfree (so);
+  windows_solib *solib = windows_make_so (dll_name, base);
+  DEBUG_EVENTS ("Loading dll \"%s\" at %s.", solib->name.c_str (),
+		host_address_to_string (solib->load_addr));
 }
 
 /* See nat/windows-nat.h.  */
@@ -784,24 +782,22 @@ void
 windows_nat::handle_unload_dll ()
 {
   LPVOID lpBaseOfDll = current_event.u.UnloadDll.lpBaseOfDll;
-  struct so_list *so;
 
-  for (so = &solib_start; so->next != NULL; so = so->next)
+  auto iter = std::remove_if (solibs.begin (), solibs.end (),
+			      [&] (windows_solib &lib)
     {
-      lm_info_windows *li_next = (lm_info_windows *) so->next->lm_info;
-
-      if (li_next->load_addr == lpBaseOfDll)
+      if (lib.load_addr == lpBaseOfDll)
 	{
-	  struct so_list *sodel = so->next;
-
-	  so->next = sodel->next;
-	  if (!so->next)
-	    solib_end = so;
-	  DEBUG_EVENTS ("Unloading dll \"%s\".", sodel->so_name);
-
-	  windows_free_so (sodel);
-	  return;
+	  DEBUG_EVENTS ("Unloading dll \"%s\".", lib.name.c_str ());
+	  return true;
 	}
+      return false;
+    });
+
+  if (iter != solibs.end ())
+    {
+      solibs.erase (iter, solibs.end ());
+      return;
     }
 
   /* We did not find any DLL that was previously loaded at this address,
@@ -835,15 +831,7 @@ catch_errors (void (*func) ())
 static void
 windows_clear_solib (void)
 {
-  struct so_list *so;
-
-  for (so = solib_start.next; so; so = solib_start.next)
-    {
-      solib_start.next = so->next;
-      windows_free_so (so);
-    }
-
-  solib_end = &solib_start;
+  solibs.clear ();
 }
 
 static void
@@ -2892,22 +2880,17 @@ windows_xfer_shared_libraries (struct target_ops *ops,
   struct obstack obstack;
   const char *buf;
   LONGEST len_avail;
-  struct so_list *so;
 
   if (writebuf)
     return TARGET_XFER_E_IO;
 
   obstack_init (&obstack);
   obstack_grow_str (&obstack, "<library-list>\n");
-  for (so = solib_start.next; so; so = so->next)
-    {
-      lm_info_windows *li = (lm_info_windows *) so->lm_info;
-
-      windows_xfer_shared_library (so->so_name, (CORE_ADDR)
-				   (uintptr_t) li->load_addr,
-				   &li->text_offset,
-				   target_gdbarch (), &obstack);
-    }
+  for (windows_solib &so : solibs)
+    windows_xfer_shared_library (so.name.c_str (),
+				 (CORE_ADDR) (uintptr_t) so.load_addr,
+				 &so.text_offset,
+				 target_gdbarch (), &obstack);
   obstack_grow_str0 (&obstack, "</library-list>\n");
 
   buf = (const char *) obstack_finish (&obstack);
