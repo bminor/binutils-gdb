@@ -124,8 +124,14 @@ done_accessing_memory (void)
 int
 read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
-  int res;
-  res = the_target->read_memory (memaddr, myaddr, len);
+  /* At the time of writing, GDB only sends write packets with LEN==0,
+     not read packets (see comment in target_write_memory), but it
+     doesn't hurt to prevent problems if it ever does, or we're
+     connected to some client other than GDB that does.  */
+  if (len == 0)
+    return 0;
+
+  int res = the_target->read_memory (memaddr, myaddr, len);
   check_mem_read (memaddr, myaddr, len);
   return res;
 }
@@ -152,6 +158,13 @@ int
 target_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 		     ssize_t len)
 {
+  /* GDB may send X packets with LEN==0, for probing packet support.
+     If we let such a request go through, then buffer.data() below may
+     return NULL, which may confuse target implementations.  Handle it
+     here to avoid lower levels having to care about this case.  */
+  if (len == 0)
+    return 0;
+
   /* Make a copy of the data because check_mem_write may need to
      update it.  */
   gdb::byte_vector buffer (myaddr, myaddr + len);
