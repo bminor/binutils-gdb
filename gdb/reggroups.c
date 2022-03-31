@@ -100,7 +100,7 @@ struct reggroups
 
   /* Return a reference to the list of all groups.  */
 
-  const std::vector<struct reggroup *> &
+  const std::vector<const struct reggroup *> &
   groups () const
   {
     return m_groups;
@@ -108,7 +108,7 @@ struct reggroups
 
 private:
   /* The register groups.  */
-  std::vector<struct reggroup *> m_groups;
+  std::vector<const struct reggroup *> m_groups;
 };
 
 static struct gdbarch_data *reggroups_data;
@@ -146,62 +146,15 @@ reggroups_init (struct obstack *obstack)
   return groups;
 }
 
-/* A register group iterator.  */
-
-struct reggroup *
-reggroup_next (struct gdbarch *gdbarch, const struct reggroup *last)
-{
-  /* Don't allow this function to be called during architecture
-     creation.  If there are no groups, use the default groups list.  */
-  struct reggroups *groups
-    = (struct reggroups *) gdbarch_data (gdbarch, reggroups_data);
-  gdb_assert (groups != nullptr);
-  gdb_assert (groups->size () > 0);
-
-  /* Return the first/next reggroup.  */
-  if (last == nullptr)
-    return groups->groups ().front ();
-  for (int i = 0; i < groups->size (); ++i)
-    {
-      if (groups->groups ()[i] == last)
-	{
-	  if (i + 1 < groups->size ())
-	    return groups->groups ()[i + 1];
-	  else
-	    return nullptr;
-	}
-    }
-
-  return nullptr;
-}
-
 /* See reggroups.h.  */
-
-struct reggroup *
-reggroup_prev (struct gdbarch *gdbarch, const struct reggroup *curr)
+const std::vector<const reggroup *> &
+gdbarch_reggroups (struct gdbarch *gdbarch)
 {
-  /* Don't allow this function to be called during architecture
-     creation.  If there are no groups, use the default groups list.  */
   struct reggroups *groups
     = (struct reggroups *) gdbarch_data (gdbarch, reggroups_data);
   gdb_assert (groups != nullptr);
   gdb_assert (groups->size () > 0);
-
-  /* Return the first/next reggroup.  */
-  if (curr == nullptr)
-    return groups->groups ().back ();
-  for (int i = groups->size () - 1; i >= 0; --i)
-    {
-      if (groups->groups ()[i] == curr)
-	{
-	  if (i - 1 >= 0)
-	    return groups->groups ()[i - 1];
-	  else
-	    return nullptr;
-	}
-    }
-
-  return nullptr;
+  return groups->groups ();
 }
 
 /* Is REGNUM a member of REGGROUP?  */
@@ -239,11 +192,7 @@ default_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 const reggroup *
 reggroup_find (struct gdbarch *gdbarch, const char *name)
 {
-  struct reggroup *group;
-
-  for (group = reggroup_next (gdbarch, NULL);
-       group != NULL;
-       group = reggroup_next (gdbarch, group))
+  for (const struct reggroup *group : gdbarch_reggroups (gdbarch))
     {
       if (strcmp (name, reggroup_name (group)) == 0)
 	return group;
@@ -256,52 +205,35 @@ reggroup_find (struct gdbarch *gdbarch, const char *name)
 static void
 reggroups_dump (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  struct reggroup *group = NULL;
+  static constexpr const char *fmt = " %-10s %-10s\n";
 
-  do
+  gdb_printf (file, fmt, "Group", "Type");
+
+  for (const struct reggroup *group : gdbarch_reggroups (gdbarch))
     {
       /* Group name.  */
-      {
-	const char *name;
-
-	if (group == NULL)
-	  name = "Group";
-	else
-	  name = reggroup_name (group);
-	gdb_printf (file, " %-10s", name);
-      }
+      const char *name = reggroup_name (group);
 
       /* Group type.  */
-      {
-	const char *type;
+      const char *type;
 
-	if (group == NULL)
-	  type = "Type";
-	else
-	  {
-	    switch (reggroup_type (group))
-	      {
-	      case USER_REGGROUP:
-		type = "user";
-		break;
-	      case INTERNAL_REGGROUP:
-		type = "internal";
-		break;
-	      default:
-		internal_error (__FILE__, __LINE__, _("bad switch"));
-	      }
-	  }
-	gdb_printf (file, " %-10s", type);
-      }
+      switch (reggroup_type (group))
+	{
+	case USER_REGGROUP:
+	  type = "user";
+	  break;
+	case INTERNAL_REGGROUP:
+	  type = "internal";
+	  break;
+	default:
+	  internal_error (__FILE__, __LINE__, _("bad switch"));
+	}
 
       /* Note: If you change this, be sure to also update the
 	 documentation.  */
-      
-      gdb_printf (file, "\n");
 
-      group = reggroup_next (gdbarch, group);
+      gdb_printf (file, fmt, name, type);
     }
-  while (group != NULL);
 }
 
 static void

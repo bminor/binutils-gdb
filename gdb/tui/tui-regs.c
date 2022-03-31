@@ -514,34 +514,48 @@ tui_data_item_window::rerender (WINDOW *handle, int field_width)
     (void) wstandend (handle);
 }
 
-/* Helper for "tui reg next", wraps a call to REGGROUP_NEXT, but adds wrap
-   around behaviour.  Will never return nullptr.  If CURRENT_GROUP is
-   nullptr (e.g. if the tui register window has only just been displayed
-   and has no current group selected), then the first register group will
-   be returned.  */
+/* Helper for "tui reg next", returns the next register group after
+   CURRENT_GROUP in the register group list for GDBARCH, with wrap around
+   behaviour.
+
+   If CURRENT_GROUP is nullptr (e.g. if the tui register window has only
+   just been displayed and has no current group selected) or the currently
+   selected register group can't be found (e.g. if the architecture has
+   changed since the register window was last updated), then the first
+   register group will be returned.  */
 
 static const reggroup *
 tui_reg_next (const reggroup *current_group, struct gdbarch *gdbarch)
 {
-  const reggroup *group = reggroup_next (gdbarch, current_group);
-  if (group == NULL)
-    group = reggroup_next (gdbarch, NULL);
-  return group;
+  const std::vector<const reggroup *> &groups = gdbarch_reggroups (gdbarch);
+  auto it = std::find (groups.begin (), groups.end (), current_group);
+  if (it != groups.end ())
+    it++;
+  if (it == groups.end ())
+    return groups.front ();
+  return *it;
 }
 
-/* Helper for "tui reg prev", wraps a call to REGGROUP_PREV, but adds wrap
-   around behaviour.  Will never return nullptr.  If CURRENT_GROUP is
-   nullptr (e.g. if the tui register window has only just been displayed
-   and has no current group selected), then the last register group will
-   be returned.  */
+/* Helper for "tui reg prev", returns the register group previous to
+   CURRENT_GROUP in the register group list for GDBARCH, with wrap around
+   behaviour.
+
+   If CURRENT_GROUP is nullptr (e.g. if the tui register window has only
+   just been displayed and has no current group selected) or the currently
+   selected register group can't be found (e.g. if the architecture has
+   changed since the register window was last updated), then the last
+   register group will be returned.  */
 
 static const reggroup *
 tui_reg_prev (const reggroup *current_group, struct gdbarch *gdbarch)
 {
-  const reggroup *group = reggroup_prev (gdbarch, current_group);
-  if (group == NULL)
-    group = reggroup_prev (gdbarch, NULL);
-  return group;
+  const std::vector<const reggroup *> &groups = gdbarch_reggroups (gdbarch);
+  auto it = std::find (groups.rbegin (), groups.rend (), current_group);
+  if (it != groups.rend ())
+    it++;
+  if (it == groups.rend ())
+    return groups.back ();
+  return *it;
 }
 
 /* Implement the 'tui reg' command.  Changes the register group displayed
@@ -555,7 +569,6 @@ tui_reg_command (const char *args, int from_tty)
 
   if (args != NULL)
     {
-      const reggroup *group, *match = NULL;
       size_t len = strlen (args);
 
       /* Make sure the curses mode is enabled.  */
@@ -569,6 +582,7 @@ tui_reg_command (const char *args, int from_tty)
       if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->is_visible ())
 	tui_regs_layout ();
 
+      const reggroup *match = nullptr;
       const reggroup *current_group = TUI_DATA_WIN->get_current_group ();
       if (strncmp (args, "next", len) == 0)
 	match = tui_reg_next (current_group, gdbarch);
@@ -579,9 +593,7 @@ tui_reg_command (const char *args, int from_tty)
 	  /* This loop matches on the initial part of a register group
 	     name.  If this initial part in ARGS matches only one register
 	     group then the switch is made.  */
-	  for (group = reggroup_next (gdbarch, NULL);
-	       group != NULL;
-	       group = reggroup_next (gdbarch, group))
+	  for (const struct reggroup *group : gdbarch_reggroups (gdbarch))
 	    {
 	      if (strncmp (reggroup_name (group), args, len) == 0)
 		{
@@ -599,19 +611,16 @@ tui_reg_command (const char *args, int from_tty)
     }
   else
     {
-      const reggroup *group;
-      int first;
-
       gdb_printf (_("\"tui reg\" must be followed by the name of "
 		    "either a register group,\nor one of 'next' "
 		    "or 'prev'.  Known register groups are:\n"));
 
-      for (first = 1, group = reggroup_next (gdbarch, NULL);
-	   group != NULL;
-	   first = 0, group = reggroup_next (gdbarch, group))
+      bool first = true;
+      for (const struct reggroup *group : gdbarch_reggroups (gdbarch))
 	{
 	  if (!first)
 	    gdb_printf (", ");
+	  first = false;
 	  gdb_printf ("%s", reggroup_name (group));
 	}
 

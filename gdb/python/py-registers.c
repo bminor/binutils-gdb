@@ -64,8 +64,8 @@ extern PyTypeObject register_descriptor_object_type
 struct reggroup_iterator_object {
   PyObject_HEAD
 
-  /* The last register group returned.  Initially this will be NULL.  */
-  const struct reggroup *reggroup;
+  /* The index into GROUPS for the next group to return.  */
+  std::vector<const reggroup *>::size_type index;
 
   /* Pointer back to the architecture we're finding registers for.  */
   struct gdbarch *gdbarch;
@@ -224,17 +224,18 @@ gdbpy_reggroup_iter_next (PyObject *self)
 {
   reggroup_iterator_object *iter_obj
     = (reggroup_iterator_object *) self;
-  struct gdbarch *gdbarch = iter_obj->gdbarch;
 
-  const reggroup *next_group = reggroup_next (gdbarch, iter_obj->reggroup);
-  if (next_group == NULL)
+  const std::vector<const reggroup *> &groups
+    = gdbarch_reggroups (iter_obj->gdbarch);
+  if (iter_obj->index >= groups.size ())
     {
       PyErr_SetString (PyExc_StopIteration, _("No more groups"));
       return NULL;
     }
 
-  iter_obj->reggroup = next_group;
-  return gdbpy_get_reggroup (iter_obj->reggroup).release ();
+  const reggroup *group = groups[iter_obj->index];
+  iter_obj->index++;
+  return gdbpy_get_reggroup (group).release ();
 }
 
 /* Return a new gdb.RegisterGroupsIterator over all the register groups in
@@ -251,7 +252,7 @@ gdbpy_new_reggroup_iterator (struct gdbarch *gdbarch)
 		    &reggroup_iterator_object_type);
   if (iter == NULL)
     return NULL;
-  iter->reggroup = NULL;
+  iter->index = 0;
   iter->gdbarch = gdbarch;
   return (PyObject *) iter;
 }

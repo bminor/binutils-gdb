@@ -2295,17 +2295,17 @@ registers_info (const char *addr_exp, int fpregs)
 
       /* A register group?  */
       {
-	struct reggroup *group;
-
-	for (group = reggroup_next (gdbarch, NULL);
-	     group != NULL;
-	     group = reggroup_next (gdbarch, group))
+	const struct reggroup *group = nullptr;
+	for (const struct reggroup *g : gdbarch_reggroups (gdbarch))
 	  {
 	    /* Don't bother with a length check.  Should the user
 	       enter a short register group name, go with the first
 	       group that matches.  */
-	    if (strncmp (start, reggroup_name (group), end - start) == 0)
-	      break;
+	    if (strncmp (start, reggroup_name (g), end - start) == 0)
+	      {
+		group = g;
+		break;
+	      }
 	  }
 	if (group != NULL)
 	  {

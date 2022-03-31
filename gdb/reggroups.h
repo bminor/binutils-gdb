@@ -53,14 +53,10 @@ extern void reggroup_add (struct gdbarch *gdbarch, struct reggroup *group);
 extern const char *reggroup_name (const struct reggroup *reggroup);
 extern enum reggroup_type reggroup_type (const struct reggroup *reggroup);
 
-/* Iterators for the architecture's register groups.  Pass in NULL, returns
-   the first (for next), or last (for prev) group.  Pass in a group,
-   returns the next or previous group, or NULL when either the end or the
-   beginning of the group list is reached.  */
-extern struct reggroup *reggroup_next (struct gdbarch *gdbarch,
-				       const struct reggroup *last);
-extern struct reggroup *reggroup_prev (struct gdbarch *gdbarch,
-				       const struct reggroup *curr);
+/* Return the list of all register groups for GDBARCH.  */
+extern const std::vector<const reggroup *> &
+	gdbarch_reggroups (struct gdbarch *gdbarch);
+
 /* Find a reggroup by name.  */
 extern const reggroup *reggroup_find (struct gdbarch *gdbarch,
 				      const char *name);

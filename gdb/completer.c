@@ -1819,11 +1819,7 @@ reg_or_group_completer_1 (completion_tracker &tracker,
 
   if ((targets & complete_reggroup_names) != 0)
     {
-      struct reggroup *group;
-
-      for (group = reggroup_next (gdbarch, NULL);
-	   group != NULL;
-	   group = reggroup_next (gdbarch, group))
+      for (const struct reggroup *group : gdbarch_reggroups (gdbarch))
 	{
 	  name = reggroup_name (group);
 	  if (strncmp (word, name, len) == 0)
