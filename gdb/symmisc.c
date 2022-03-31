@@ -781,6 +781,7 @@ maintenance_info_symtabs (const char *regexp, int from_tty)
 			gdb_printf ("    producer %s\n",
 				    (cust->producer () != nullptr
 				     ? cust->producer () : "(null)"));
+			gdb_printf ("    name %s\n", cust->name);
 			gdb_printf ("    dirname %s\n",
 				    (cust->dirname () != NULL
 				     ? cust->dirname () : "(null)"));
