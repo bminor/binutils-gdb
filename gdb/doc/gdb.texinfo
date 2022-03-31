@@ -42157,7 +42157,8 @@ A command response with no output.
 @item @var{OUTPUT}
 A command response with the hex encoded output string @var{OUTPUT}.
 @item E @var{NN}
-Indicate a badly formed request.
+Indicate a badly formed request.  The error number @var{NN} is given as
+hex digits.
 @item @w{}
 An empty reply indicates that @samp{qRcmd} is not recognized.
 @end table
