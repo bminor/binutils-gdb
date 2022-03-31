@@ -1449,6 +1449,7 @@ create_partial_symtab (const char *name,
   pst->context.of = objfile;
   pst->context.partial_symtabs = partial_symtabs;
   pst->context.pst = pst;
+  pst->context.builder = nullptr;
 
   return pst;
 }
