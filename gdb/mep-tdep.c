@@ -2427,10 +2427,6 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_stab_reg_to_regnum (gdbarch, mep_debug_reg_to_regnum);
 
   set_gdbarch_register_reggroup_p (gdbarch, mep_register_reggroup_p);
-  reggroup_add (gdbarch, all_reggroup);
-  reggroup_add (gdbarch, general_reggroup);
-  reggroup_add (gdbarch, save_reggroup);
-  reggroup_add (gdbarch, restore_reggroup);
   reggroup_add (gdbarch, mep_csr_reggroup);
   reggroup_add (gdbarch, mep_cr_reggroup);
   reggroup_add (gdbarch, mep_ccr_reggroup);

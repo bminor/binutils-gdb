@@ -3367,20 +3367,6 @@ aarch64_get_tdesc_vq (const struct target_desc *tdesc)
   return sve_vq_from_vl (vl);
 }
 
-/* Add all the expected register sets into GDBARCH.  */
-
-static void
-aarch64_add_reggroups (struct gdbarch *gdbarch)
-{
-  reggroup_add (gdbarch, general_reggroup);
-  reggroup_add (gdbarch, float_reggroup);
-  reggroup_add (gdbarch, system_reggroup);
-  reggroup_add (gdbarch, vector_reggroup);
-  reggroup_add (gdbarch, all_reggroup);
-  reggroup_add (gdbarch, save_reggroup);
-  reggroup_add (gdbarch, restore_reggroup);
-}
-
 /* Implement the "cannot_store_register" gdbarch method.  */
 
 static int
@@ -3635,9 +3621,6 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Virtual tables.  */
   set_gdbarch_vbit_in_delta (gdbarch, 1);
-
-  /* Register architecture.  */
-  aarch64_add_reggroups (gdbarch);
 
   /* Hook in the ABI-specific overrides, if they have been registered.  */
   info.target_desc = tdesc;

@@ -1952,20 +1952,6 @@ static const struct frame_base arc_normal_base = {
   arc_frame_base_address
 };
 
-/* Add all the expected register sets into GDBARCH.  */
-
-static void
-arc_add_reggroups (struct gdbarch *gdbarch)
-{
-  reggroup_add (gdbarch, general_reggroup);
-  reggroup_add (gdbarch, float_reggroup);
-  reggroup_add (gdbarch, system_reggroup);
-  reggroup_add (gdbarch, vector_reggroup);
-  reggroup_add (gdbarch, all_reggroup);
-  reggroup_add (gdbarch, save_reggroup);
-  reggroup_add (gdbarch, restore_reggroup);
-}
-
 static enum arc_isa
 mach_type_to_arc_isa (const unsigned long mach)
 {
@@ -2363,9 +2349,6 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* This doesn't include possible long-immediate value.  */
   set_gdbarch_max_insn_length (gdbarch, 4);
-
-  /* Add default register groups.  */
-  arc_add_reggroups (gdbarch);
 
   /* Frame unwinders and sniffers.  */
   dwarf2_frame_set_init_reg (gdbarch, arc_dwarf2_frame_init_reg);

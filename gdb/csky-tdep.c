@@ -2050,8 +2050,6 @@ csky_init_reggroup ()
 static void
 csky_add_reggroups (struct gdbarch *gdbarch)
 {
-  reggroup_add (gdbarch, all_reggroup);
-  reggroup_add (gdbarch, general_reggroup);
   reggroup_add (gdbarch, cr_reggroup);
   reggroup_add (gdbarch, fr_reggroup);
   reggroup_add (gdbarch, vr_reggroup);

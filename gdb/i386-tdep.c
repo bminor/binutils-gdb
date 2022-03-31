@@ -4546,13 +4546,6 @@ i386_add_reggroups (struct gdbarch *gdbarch)
 {
   reggroup_add (gdbarch, i386_sse_reggroup);
   reggroup_add (gdbarch, i386_mmx_reggroup);
-  reggroup_add (gdbarch, general_reggroup);
-  reggroup_add (gdbarch, float_reggroup);
-  reggroup_add (gdbarch, all_reggroup);
-  reggroup_add (gdbarch, save_reggroup);
-  reggroup_add (gdbarch, restore_reggroup);
-  reggroup_add (gdbarch, vector_reggroup);
-  reggroup_add (gdbarch, system_reggroup);
 }
 
 int

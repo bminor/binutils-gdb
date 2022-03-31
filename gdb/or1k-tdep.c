@@ -1260,19 +1260,7 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   if (tdesc_data != NULL)
-    {
-      /* If we are using tdesc, register our own reggroups, otherwise we
-	 will used the defaults.  */
-      reggroup_add (gdbarch, general_reggroup);
-      reggroup_add (gdbarch, system_reggroup);
-      reggroup_add (gdbarch, float_reggroup);
-      reggroup_add (gdbarch, vector_reggroup);
-      reggroup_add (gdbarch, all_reggroup);
-      reggroup_add (gdbarch, save_reggroup);
-      reggroup_add (gdbarch, restore_reggroup);
-
-      tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
-    }
+    tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

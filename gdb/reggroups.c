@@ -90,15 +90,6 @@ struct reggroups
 
 static struct gdbarch_data *reggroups_data;
 
-static void *
-reggroups_init (struct obstack *obstack)
-{
-  struct reggroups *groups = OBSTACK_ZALLOC (obstack, struct reggroups);
-
-  groups->last = &groups->first;
-  return groups;
-}
-
 /* Add a register group (with attribute values) to the pre-defined
    list.  */
 
@@ -119,13 +110,42 @@ reggroup_add (struct gdbarch *gdbarch, struct reggroup *group)
   struct reggroups *groups
     = (struct reggroups *) gdbarch_data (gdbarch, reggroups_data);
 
+  /* The same reggroup should not be added multiple times.  */
+  gdb_assert (groups != nullptr);
+  for (struct reggroup_el *el = groups->first; el != nullptr; el = el->next)
+    gdb_assert (group != el->group);
+
   add_group (groups, group,
 	     GDBARCH_OBSTACK_ZALLOC (gdbarch, struct reggroup_el));
 }
 
-/* The default register groups for an architecture.  */
+/* Called to initialize the per-gdbarch register group information.  */
 
-static struct reggroups default_groups = { NULL, &default_groups.first };
+static void *
+reggroups_init (struct obstack *obstack)
+{
+  struct reggroups *groups = OBSTACK_ZALLOC (obstack, struct reggroups);
+
+  groups->last = &groups->first;
+
+  /* Add the default groups.  */
+  add_group (groups, general_reggroup,
+	     OBSTACK_ZALLOC (obstack, struct reggroup_el));
+  add_group (groups, float_reggroup,
+	     OBSTACK_ZALLOC (obstack, struct reggroup_el));
+  add_group (groups, system_reggroup,
+	     OBSTACK_ZALLOC (obstack, struct reggroup_el));
+  add_group (groups, vector_reggroup,
+	     OBSTACK_ZALLOC (obstack, struct reggroup_el));
+  add_group (groups, all_reggroup,
+	     OBSTACK_ZALLOC (obstack, struct reggroup_el));
+  add_group (groups, save_reggroup,
+	     OBSTACK_ZALLOC (obstack, struct reggroup_el));
+  add_group (groups, restore_reggroup,
+	     OBSTACK_ZALLOC (obstack, struct reggroup_el));
+
+  return groups;
+}
 
 /* A register group iterator.  */
 
@@ -139,8 +159,7 @@ reggroup_next (struct gdbarch *gdbarch, const struct reggroup *last)
      creation.  If there are no groups, use the default groups list.  */
   groups = (struct reggroups *) gdbarch_data (gdbarch, reggroups_data);
   gdb_assert (groups != NULL);
-  if (groups->first == NULL)
-    groups = &default_groups;
+  gdb_assert (groups->first != NULL);
 
   /* Return the first/next reggroup.  */
   if (last == NULL)
@@ -171,8 +190,7 @@ reggroup_prev (struct gdbarch *gdbarch, const struct reggroup *curr)
      creation.  If there are no groups, use the default groups list.  */
   groups = (struct reggroups *) gdbarch_data (gdbarch, reggroups_data);
   gdb_assert (groups != NULL);
-  if (groups->first == NULL)
-    groups = &default_groups;
+  gdb_assert (groups->first != NULL);
 
   prev = NULL;
   for (el = groups->first; el != NULL; el = el->next)
@@ -326,15 +344,6 @@ void
 _initialize_reggroup ()
 {
   reggroups_data = gdbarch_data_register_pre_init (reggroups_init);
-
-  /* The pre-defined list of groups.  */
-  add_group (&default_groups, general_reggroup, XNEW (struct reggroup_el));
-  add_group (&default_groups, float_reggroup, XNEW (struct reggroup_el));
-  add_group (&default_groups, system_reggroup, XNEW (struct reggroup_el));
-  add_group (&default_groups, vector_reggroup, XNEW (struct reggroup_el));
-  add_group (&default_groups, all_reggroup, XNEW (struct reggroup_el));
-  add_group (&default_groups, save_reggroup, XNEW (struct reggroup_el));
-  add_group (&default_groups, restore_reggroup, XNEW (struct reggroup_el));
 
   add_cmd ("reggroups", class_maintenance,
 	   maintenance_print_reggroups, _("\

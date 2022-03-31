@@ -3497,21 +3497,11 @@ riscv_find_default_target_description (const struct gdbarch_info info)
   return riscv_lookup_target_description (features);
 }
 
-/* Add all the expected register sets into GDBARCH.  */
+/* Add all the RISC-V specific register groups into GDBARCH.  */
 
 static void
 riscv_add_reggroups (struct gdbarch *gdbarch)
 {
-  /* Add predefined register groups.  */
-  reggroup_add (gdbarch, all_reggroup);
-  reggroup_add (gdbarch, save_reggroup);
-  reggroup_add (gdbarch, restore_reggroup);
-  reggroup_add (gdbarch, system_reggroup);
-  reggroup_add (gdbarch, vector_reggroup);
-  reggroup_add (gdbarch, general_reggroup);
-  reggroup_add (gdbarch, float_reggroup);
-
-  /* Add RISC-V specific register groups.  */
   reggroup_add (gdbarch, csr_reggroup);
 }
 

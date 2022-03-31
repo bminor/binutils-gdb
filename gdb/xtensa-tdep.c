@@ -734,23 +734,12 @@ xtensa_init_reggroups (void)
 static void
 xtensa_add_reggroups (struct gdbarch *gdbarch)
 {
-  int i;
-
-  /* Predefined groups.  */
-  reggroup_add (gdbarch, all_reggroup);
-  reggroup_add (gdbarch, save_reggroup);
-  reggroup_add (gdbarch, restore_reggroup);
-  reggroup_add (gdbarch, system_reggroup);
-  reggroup_add (gdbarch, vector_reggroup);
-  reggroup_add (gdbarch, general_reggroup);
-  reggroup_add (gdbarch, float_reggroup);
-
   /* Xtensa-specific groups.  */
   reggroup_add (gdbarch, xtensa_ar_reggroup);
   reggroup_add (gdbarch, xtensa_user_reggroup);
   reggroup_add (gdbarch, xtensa_vectra_reggroup);
 
-  for (i = 0; i < XTENSA_MAX_COPROCESSOR; i++)
+  for (int i = 0; i < XTENSA_MAX_COPROCESSOR; i++)
     reggroup_add (gdbarch, xtensa_cp[i]);
 }
 

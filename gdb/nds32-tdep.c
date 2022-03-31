@@ -343,14 +343,6 @@ nds32_init_reggroups (void)
 static void
 nds32_add_reggroups (struct gdbarch *gdbarch)
 {
-  /* Add pre-defined register groups.  */
-  reggroup_add (gdbarch, general_reggroup);
-  reggroup_add (gdbarch, float_reggroup);
-  reggroup_add (gdbarch, system_reggroup);
-  reggroup_add (gdbarch, all_reggroup);
-  reggroup_add (gdbarch, save_reggroup);
-  reggroup_add (gdbarch, restore_reggroup);
-
   /* Add NDS32 register groups.  */
   reggroup_add (gdbarch, nds32_cr_reggroup);
   reggroup_add (gdbarch, nds32_ir_reggroup);
