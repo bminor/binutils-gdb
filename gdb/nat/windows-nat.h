@@ -109,79 +109,6 @@ enum thread_disposition_type
   INVALIDATE_CONTEXT
 };
 
-/* Find a thread record given a thread id.  THREAD_DISPOSITION
-   controls whether the thread is suspended, and whether the context
-   is invalidated.
-
-   This function must be supplied by the embedding application.  */
-extern windows_thread_info *thread_rec (ptid_t ptid,
-					thread_disposition_type disposition);
-
-
-/* Handle OUTPUT_DEBUG_STRING_EVENT from child process.  Updates
-   OURSTATUS and returns the thread id if this represents a thread
-   change (this is specific to Cygwin), otherwise 0.
-
-   Cygwin prepends its messages with a "cygwin:".  Interpret this as
-   a Cygwin signal.  Otherwise just print the string as a warning.
-
-   This function must be supplied by the embedding application.  */
-extern int handle_output_debug_string (struct target_waitstatus *ourstatus);
-
-/* Handle a DLL load event.
-
-   This function assumes that the current event did not occur during
-   inferior initialization.
-
-   DLL_NAME is the name of the library.  BASE is the base load
-   address.
-
-   This function must be supplied by the embedding application.  */
-
-extern void handle_load_dll (const char *dll_name, LPVOID base);
-
-/* Handle a DLL unload event.
-
-   This function assumes that this event did not occur during inferior
-   initialization.
-
-   This function must be supplied by the embedding application.  */
-
-extern void handle_unload_dll ();
-
-/* Handle MS_VC_EXCEPTION when processing a stop.  MS_VC_EXCEPTION is
-   somewhat undocumented but is used to tell the debugger the name of
-   a thread.
-
-   Return true if the exception was handled; return false otherwise.
-
-   This function must be supplied by the embedding application.  */
-
-extern bool handle_ms_vc_exception (const EXCEPTION_RECORD *rec);
-
-/* When EXCEPTION_ACCESS_VIOLATION is processed, we give the embedding
-   application a chance to change it to be considered "unhandled".
-   This function must be supplied by the embedding application.  If it
-   returns true, then the exception is "unhandled".  */
-
-extern bool handle_access_violation (const EXCEPTION_RECORD *rec);
-
-
-/* Currently executing process */
-extern HANDLE current_process_handle;
-extern DWORD current_process_id;
-extern DWORD main_thread_id;
-extern enum gdb_signal last_sig;
-
-/* The current debug event from WaitForDebugEvent or from a pending
-   stop.  */
-extern DEBUG_EVENT current_event;
-
-/* The ID of the thread for which we anticipate a stop event.
-   Normally this is -1, meaning we'll accept an event in any
-   thread.  */
-extern DWORD desired_stop_thread_id;
-
 /* A single pending stop.  See "pending_stops" for more
    information.  */
 struct pending_stop
@@ -197,27 +124,6 @@ struct pending_stop
   DEBUG_EVENT event;
 };
 
-/* A vector of pending stops.  Sometimes, Windows will report a stop
-   on a thread that has been ostensibly suspended.  We believe what
-   happens here is that two threads hit a breakpoint simultaneously,
-   and the Windows kernel queues the stop events.  However, this can
-   result in the strange effect of trying to single step thread A --
-   leaving all other threads suspended -- and then seeing a stop in
-   thread B.  To handle this scenario, we queue all such "pending"
-   stops here, and then process them once the step has completed.  See
-   PR gdb/22992.  */
-extern std::vector<pending_stop> pending_stops;
-
-/* Contents of $_siginfo */
-extern EXCEPTION_RECORD siginfo_er;
-
-#ifdef __x86_64__
-/* The target is a WOW64 process */
-extern bool wow64_process;
-/* Ignore first breakpoint exception of WOW64 process */
-extern bool ignore_first_breakpoint;
-#endif
-
 typedef enum
 {
   HANDLE_EXCEPTION_UNHANDLED = 0,
@@ -225,29 +131,140 @@ typedef enum
   HANDLE_EXCEPTION_IGNORED
 } handle_exception_result;
 
-extern handle_exception_result handle_exception
-  (struct target_waitstatus *ourstatus, bool debug_exceptions);
+/* A single Windows process.  An object of this type (or subclass) is
+   created by the client.  Some methods must be provided by the client
+   as well.  */
 
-/* Call to indicate that a DLL was loaded.  */
+struct windows_process_info
+{
+  /* The process handle */
+  HANDLE handle = 0;
+  DWORD id = 0;
+  DWORD main_thread_id = 0;
+  enum gdb_signal last_sig = GDB_SIGNAL_0;
 
-extern void dll_loaded_event ();
+  /* The current debug event from WaitForDebugEvent or from a pending
+     stop.  */
+  DEBUG_EVENT current_event {};
 
-/* Iterate over all DLLs currently mapped by our inferior, and
-   add them to our list of solibs.  */
+  /* The ID of the thread for which we anticipate a stop event.
+     Normally this is -1, meaning we'll accept an event in any
+     thread.  */
+  DWORD desired_stop_thread_id = -1;
 
-extern void windows_add_all_dlls ();
+  /* A vector of pending stops.  Sometimes, Windows will report a stop
+     on a thread that has been ostensibly suspended.  We believe what
+     happens here is that two threads hit a breakpoint simultaneously,
+     and the Windows kernel queues the stop events.  However, this can
+     result in the strange effect of trying to single step thread A --
+     leaving all other threads suspended -- and then seeing a stop in
+     thread B.  To handle this scenario, we queue all such "pending"
+     stops here, and then process them once the step has completed.  See
+     PR gdb/22992.  */
+  std::vector<pending_stop> pending_stops;
 
-/* Return true if there is a pending stop matching
-   desired_stop_thread_id.  If DEBUG_EVENTS is true, logging will be
-   enabled.  */
+  /* Contents of $_siginfo */
+  EXCEPTION_RECORD siginfo_er {};
 
-extern bool matching_pending_stop (bool debug_events);
+#ifdef __x86_64__
+  /* The target is a WOW64 process */
+  bool wow64_process = false;
+  /* Ignore first breakpoint exception of WOW64 process */
+  bool ignore_first_breakpoint = false;
+#endif
 
-/* See if a pending stop matches DESIRED_STOP_THREAD_ID.  If so,
-   remove it from the list of pending stops, set 'current_event', and
-   return it.  Otherwise, return an empty optional.  */
 
-extern gdb::optional<pending_stop> fetch_pending_stop (bool debug_events);
+  /* Find a thread record given a thread id.  THREAD_DISPOSITION
+     controls whether the thread is suspended, and whether the context
+     is invalidated.
+
+     This function must be supplied by the embedding application.  */
+  windows_thread_info *thread_rec (ptid_t ptid,
+				   thread_disposition_type disposition);
+
+  /* Handle OUTPUT_DEBUG_STRING_EVENT from child process.  Updates
+     OURSTATUS and returns the thread id if this represents a thread
+     change (this is specific to Cygwin), otherwise 0.
+
+     Cygwin prepends its messages with a "cygwin:".  Interpret this as
+     a Cygwin signal.  Otherwise just print the string as a warning.
+
+     This function must be supplied by the embedding application.  */
+  int handle_output_debug_string (struct target_waitstatus *ourstatus);
+
+  /* Handle a DLL load event.
+
+     This function assumes that the current event did not occur during
+     inferior initialization.
+
+     DLL_NAME is the name of the library.  BASE is the base load
+     address.
+
+     This function must be supplied by the embedding application.  */
+
+  void handle_load_dll (const char *dll_name, LPVOID base);
+
+  /* Handle a DLL unload event.
+
+     This function assumes that this event did not occur during inferior
+     initialization.
+
+     This function must be supplied by the embedding application.  */
+
+  void handle_unload_dll ();
+
+  /* Handle MS_VC_EXCEPTION when processing a stop.  MS_VC_EXCEPTION is
+     somewhat undocumented but is used to tell the debugger the name of
+     a thread.
+
+     Return true if the exception was handled; return false otherwise.
+
+     This function must be supplied by the embedding application.  */
+
+  bool handle_ms_vc_exception (const EXCEPTION_RECORD *rec);
+
+  /* When EXCEPTION_ACCESS_VIOLATION is processed, we give the embedding
+     application a chance to change it to be considered "unhandled".
+     This function must be supplied by the embedding application.  If it
+     returns true, then the exception is "unhandled".  */
+
+  bool handle_access_violation (const EXCEPTION_RECORD *rec);
+
+  handle_exception_result handle_exception
+       (struct target_waitstatus *ourstatus, bool debug_exceptions);
+
+  /* Call to indicate that a DLL was loaded.  */
+
+  void dll_loaded_event ();
+
+  /* Iterate over all DLLs currently mapped by our inferior, and
+     add them to our list of solibs.  */
+
+  void add_all_dlls ();
+
+  /* Return true if there is a pending stop matching
+     desired_stop_thread_id.  If DEBUG_EVENTS is true, logging will be
+     enabled.  */
+
+  bool matching_pending_stop (bool debug_events);
+
+  /* See if a pending stop matches DESIRED_STOP_THREAD_ID.  If so,
+     remove it from the list of pending stops, set 'current_event', and
+     return it.  Otherwise, return an empty optional.  */
+
+  gdb::optional<pending_stop> fetch_pending_stop (bool debug_events);
+
+private:
+
+  /* Iterate over all DLLs currently mapped by our inferior, looking for
+     a DLL which is loaded at LOAD_ADDR.  If found, add the DLL to our
+     list of solibs; otherwise do nothing.  LOAD_ADDR NULL means add all
+     DLLs to the list of solibs; this is used when the inferior finishes
+     its initialization, and all the DLLs it statically depends on are
+     presumed loaded.  */
+
+  void add_dll (LPVOID load_addr);
+};
 
 /* A simple wrapper for ContinueDebugEvent that continues the last
    waited-for event.  If DEBUG_EVENTS is true, logging will be

@@ -23,27 +23,12 @@
 namespace windows_nat
 {
 
-HANDLE current_process_handle;
-DWORD current_process_id;
-DWORD main_thread_id;
-enum gdb_signal last_sig = GDB_SIGNAL_0;
-DEBUG_EVENT current_event;
-
 /* The most recent event from WaitForDebugEvent.  Unlike
    current_event, this is guaranteed never to come from a pending
    stop.  This is important because only data from the most recent
    event from WaitForDebugEvent can be used when calling
    ContinueDebugEvent.  */
 static DEBUG_EVENT last_wait_event;
-
-DWORD desired_stop_thread_id = -1;
-std::vector<pending_stop> pending_stops;
-EXCEPTION_RECORD siginfo_er;
-
-#ifdef __x86_64__
-bool wow64_process = false;
-bool ignore_first_breakpoint = false;
-#endif
 
 AdjustTokenPrivileges_ftype *AdjustTokenPrivileges;
 DebugActiveProcessStop_ftype *DebugActiveProcessStop;
@@ -180,7 +165,8 @@ get_image_name (HANDLE h, void *address, int unicode)
 #define MS_VC_EXCEPTION 0x406d1388
 
 handle_exception_result
-handle_exception (struct target_waitstatus *ourstatus, bool debug_exceptions)
+windows_process_info::handle_exception (struct target_waitstatus *ourstatus,
+					bool debug_exceptions)
 {
 #define DEBUG_EXCEPTION_SIMPLE(x)       if (debug_exceptions) \
   debug_printf ("gdb: Target exception %s at %s\n", x, \
@@ -335,15 +321,10 @@ handle_exception (struct target_waitstatus *ourstatus, bool debug_exceptions)
 #undef DEBUG_EXCEPTION_SIMPLE
 }
 
-/* Iterate over all DLLs currently mapped by our inferior, looking for
-   a DLL which is loaded at LOAD_ADDR.  If found, add the DLL to our
-   list of solibs; otherwise do nothing.  LOAD_ADDR NULL means add all
-   DLLs to the list of solibs; this is used when the inferior finishes
-   its initialization, and all the DLLs it statically depends on are
-   presumed loaded.  */
+/* See nat/windows-nat.h.  */
 
-static void
-windows_add_dll (LPVOID load_addr)
+void
+windows_process_info::add_dll (LPVOID load_addr)
 {
   HMODULE dummy_hmodule;
   DWORD cb_needed;
@@ -353,7 +334,7 @@ windows_add_dll (LPVOID load_addr)
 #ifdef __x86_64__
   if (wow64_process)
     {
-      if (EnumProcessModulesEx (current_process_handle, &dummy_hmodule,
+      if (EnumProcessModulesEx (handle, &dummy_hmodule,
 				sizeof (HMODULE), &cb_needed,
 				LIST_MODULES_32BIT) == 0)
 	return;
@@ -361,7 +342,7 @@ windows_add_dll (LPVOID load_addr)
   else
 #endif
     {
-      if (EnumProcessModules (current_process_handle, &dummy_hmodule,
+      if (EnumProcessModules (handle, &dummy_hmodule,
 			      sizeof (HMODULE), &cb_needed) == 0)
 	return;
     }
@@ -373,7 +354,7 @@ windows_add_dll (LPVOID load_addr)
 #ifdef __x86_64__
   if (wow64_process)
     {
-      if (EnumProcessModulesEx (current_process_handle, hmodules,
+      if (EnumProcessModulesEx (handle, hmodules,
 				cb_needed, &cb_needed,
 				LIST_MODULES_32BIT) == 0)
 	return;
@@ -381,7 +362,7 @@ windows_add_dll (LPVOID load_addr)
   else
 #endif
     {
-      if (EnumProcessModules (current_process_handle, hmodules,
+      if (EnumProcessModules (handle, hmodules,
 			      cb_needed, &cb_needed) == 0)
 	return;
     }
@@ -426,11 +407,11 @@ windows_add_dll (LPVOID load_addr)
       char dll_name[MAX_PATH];
 #endif
       const char *name;
-      if (GetModuleInformation (current_process_handle, hmodules[i],
+      if (GetModuleInformation (handle, hmodules[i],
 				&mi, sizeof (mi)) == 0)
 	continue;
 
-      if (GetModuleFileNameEx (current_process_handle, hmodules[i],
+      if (GetModuleFileNameEx (handle, hmodules[i],
 			       dll_name, sizeof (dll_name)) == 0)
 	continue;
 #ifdef __USEWIDE
@@ -466,7 +447,7 @@ windows_add_dll (LPVOID load_addr)
 /* See nat/windows-nat.h.  */
 
 void
-dll_loaded_event ()
+windows_process_info::dll_loaded_event ()
 {
   gdb_assert (current_event.dwDebugEventCode == LOAD_DLL_DEBUG_EVENT);
 
@@ -478,29 +459,28 @@ dll_loaded_event ()
      in the sense that it might be NULL.  And the first DLL event in
      particular is explicitly documented as "likely not pass[ed]"
      (source: MSDN LOAD_DLL_DEBUG_INFO structure).  */
-  dll_name = get_image_name (current_process_handle,
-			     event->lpImageName, event->fUnicode);
+  dll_name = get_image_name (handle, event->lpImageName, event->fUnicode);
   /* If the DLL name could not be gleaned via lpImageName, try harder
      by enumerating all the DLLs loaded into the inferior, looking for
      one that is loaded at base address = lpBaseOfDll. */
   if (dll_name != nullptr)
     handle_load_dll (dll_name, event->lpBaseOfDll);
   else if (event->lpBaseOfDll != nullptr)
-    windows_add_dll (event->lpBaseOfDll);
+    add_dll (event->lpBaseOfDll);
 }
 
 /* See nat/windows-nat.h.  */
 
 void
-windows_add_all_dlls ()
+windows_process_info::add_all_dlls ()
 {
-  windows_add_dll (nullptr);
+  add_dll (nullptr);
 }
 
 /* See nat/windows-nat.h.  */
 
 bool
-matching_pending_stop (bool debug_events)
+windows_process_info::matching_pending_stop (bool debug_events)
 {
   /* If there are pending stops, and we might plausibly hit one of
      them, we don't want to actually continue the inferior -- we just
@@ -524,7 +504,7 @@ matching_pending_stop (bool debug_events)
 /* See nat/windows-nat.h.  */
 
 gdb::optional<pending_stop>
-fetch_pending_stop (bool debug_events)
+windows_process_info::fetch_pending_stop (bool debug_events)
 {
   gdb::optional<pending_stop> result;
   for (auto iter = pending_stops.begin ();
