@@ -177,7 +177,7 @@ tui_data_window::first_reg_element_no_inline (int line_no) const
 /* Show the registers of the given group in the data window
    and refresh the window.  */
 void
-tui_data_window::show_registers (struct reggroup *group)
+tui_data_window::show_registers (const reggroup *group)
 {
   if (group == 0)
     group = general_reggroup;
@@ -207,7 +207,7 @@ tui_data_window::show_registers (struct reggroup *group)
    refresh_values_only is true.  */
 
 void
-tui_data_window::show_register_group (struct reggroup *group,
+tui_data_window::show_register_group (const reggroup *group,
 				      struct frame_info *frame, 
 				      bool refresh_values_only)
 {
@@ -518,10 +518,10 @@ tui_data_item_window::rerender (WINDOW *handle, int field_width)
    around behaviour.  Returns the next register group, or NULL if the
    register window is not currently being displayed.  */
 
-static struct reggroup *
-tui_reg_next (struct reggroup *current_group, struct gdbarch *gdbarch)
+static const reggroup *
+tui_reg_next (const reggroup *current_group, struct gdbarch *gdbarch)
 {
-  struct reggroup *group = NULL;
+  const reggroup *group = NULL;
 
   if (current_group != NULL)
     {
@@ -536,10 +536,10 @@ tui_reg_next (struct reggroup *current_group, struct gdbarch *gdbarch)
    around behaviour.  Returns the previous register group, or NULL if the
    register window is not currently being displayed.  */
 
-static struct reggroup *
-tui_reg_prev (struct reggroup *current_group, struct gdbarch *gdbarch)
+static const reggroup *
+tui_reg_prev (const reggroup *current_group, struct gdbarch *gdbarch)
 {
-  struct reggroup *group = NULL;
+  const reggroup *group = NULL;
 
   if (current_group != NULL)
     {
@@ -561,7 +561,7 @@ tui_reg_command (const char *args, int from_tty)
 
   if (args != NULL)
     {
-      struct reggroup *group, *match = NULL;
+      const reggroup *group, *match = NULL;
       size_t len = strlen (args);
 
       /* Make sure the curses mode is enabled.  */
@@ -575,7 +575,7 @@ tui_reg_command (const char *args, int from_tty)
       if (TUI_DATA_WIN == NULL || !TUI_DATA_WIN->is_visible ())
 	tui_regs_layout ();
 
-      struct reggroup *current_group = TUI_DATA_WIN->get_current_group ();
+      const reggroup *current_group = TUI_DATA_WIN->get_current_group ();
       if (strncmp (args, "next", len) == 0)
 	match = tui_reg_next (current_group, gdbarch);
       else if (strncmp (args, "prev", len) == 0)
@@ -603,7 +603,7 @@ tui_reg_command (const char *args, int from_tty)
     }
   else
     {
-      struct reggroup *group;
+      const reggroup *group;
       int first;
 
       gdb_printf (_("\"tui reg\" must be followed by the name of "

@@ -23,6 +23,7 @@
 #define TUI_TUI_REGS_H
 
 #include "tui/tui-data.h"
+#include "reggroups.h"
 
 /* A data item window.  */
 
@@ -60,9 +61,9 @@ struct tui_data_window : public tui_win_info
 
   void check_register_values (struct frame_info *frame);
 
-  void show_registers (struct reggroup *group);
+  void show_registers (const reggroup *group);
 
-  struct reggroup *get_current_group () const
+  const reggroup *get_current_group () const
   {
     return m_current_group;
   }
@@ -99,7 +100,7 @@ private:
      display off the end of the register display.  */
   void display_reg_element_at_line (int start_element_no, int start_line_no);
 
-  void show_register_group (struct reggroup *group,
+  void show_register_group (const reggroup *group,
 			    struct frame_info *frame,
 			    bool refresh_values_only);
 
@@ -125,7 +126,7 @@ private:
   /* Windows that are used to display registers.  */
   std::vector<tui_data_item_window> m_regs_content;
   int m_regs_column_count = 0;
-  struct reggroup *m_current_group = nullptr;
+  const reggroup *m_current_group = nullptr;
 
   /* Width of each register's display area.  */
   int m_item_width = 0;
