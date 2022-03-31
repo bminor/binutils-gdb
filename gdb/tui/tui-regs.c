@@ -515,38 +515,32 @@ tui_data_item_window::rerender (WINDOW *handle, int field_width)
 }
 
 /* Helper for "tui reg next", wraps a call to REGGROUP_NEXT, but adds wrap
-   around behaviour.  Returns the next register group, or NULL if the
-   register window is not currently being displayed.  */
+   around behaviour.  Will never return nullptr.  If CURRENT_GROUP is
+   nullptr (e.g. if the tui register window has only just been displayed
+   and has no current group selected), then the first register group will
+   be returned.  */
 
 static const reggroup *
 tui_reg_next (const reggroup *current_group, struct gdbarch *gdbarch)
 {
-  const reggroup *group = NULL;
-
-  if (current_group != NULL)
-    {
-      group = reggroup_next (gdbarch, current_group);
-      if (group == NULL)
-	group = reggroup_next (gdbarch, NULL);
-    }
+  const reggroup *group = reggroup_next (gdbarch, current_group);
+  if (group == NULL)
+    group = reggroup_next (gdbarch, NULL);
   return group;
 }
 
 /* Helper for "tui reg prev", wraps a call to REGGROUP_PREV, but adds wrap
-   around behaviour.  Returns the previous register group, or NULL if the
-   register window is not currently being displayed.  */
+   around behaviour.  Will never return nullptr.  If CURRENT_GROUP is
+   nullptr (e.g. if the tui register window has only just been displayed
+   and has no current group selected), then the last register group will
+   be returned.  */
 
 static const reggroup *
 tui_reg_prev (const reggroup *current_group, struct gdbarch *gdbarch)
 {
-  const reggroup *group = NULL;
-
-  if (current_group != NULL)
-    {
-      group = reggroup_prev (gdbarch, current_group);
-      if (group == NULL)
-	group = reggroup_prev (gdbarch, NULL);
-    }
+  const reggroup *group = reggroup_prev (gdbarch, current_group);
+  if (group == NULL)
+    group = reggroup_prev (gdbarch, NULL);
   return group;
 }
 
