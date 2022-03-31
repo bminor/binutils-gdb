@@ -1369,7 +1369,7 @@ riscv_print_registers_info (struct gdbarch *gdbarch,
     }
   else
     {
-      struct reggroup *reggroup;
+      const struct reggroup *reggroup;
 
       if (print_all)
 	reggroup = all_reggroup;

@@ -28,15 +28,15 @@ struct reggroup;
 enum reggroup_type { USER_REGGROUP, INTERNAL_REGGROUP };
 
 /* Pre-defined, user visible, register groups.  */
-extern struct reggroup *const general_reggroup;
-extern struct reggroup *const float_reggroup;
-extern struct reggroup *const system_reggroup;
-extern struct reggroup *const vector_reggroup;
-extern struct reggroup *const all_reggroup;
+extern const reggroup *const general_reggroup;
+extern const reggroup *const float_reggroup;
+extern const reggroup *const system_reggroup;
+extern const reggroup *const vector_reggroup;
+extern const reggroup *const all_reggroup;
 
 /* Pre-defined, internal, register groups.  */
-extern struct reggroup *const save_reggroup;
-extern struct reggroup *const restore_reggroup;
+extern const reggroup *const save_reggroup;
+extern const reggroup *const restore_reggroup;
 
 /* Create a new local register group.  */
 extern const reggroup *reggroup_new (const char *name,

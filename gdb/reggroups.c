@@ -254,21 +254,21 @@ maintenance_print_reggroups (const char *args, int from_tty)
 }
 
 /* Pre-defined register groups.  */
-static struct reggroup general_group = { "general", USER_REGGROUP };
-static struct reggroup float_group = { "float", USER_REGGROUP };
-static struct reggroup system_group = { "system", USER_REGGROUP };
-static struct reggroup vector_group = { "vector", USER_REGGROUP };
-static struct reggroup all_group = { "all", USER_REGGROUP };
-static struct reggroup save_group = { "save", INTERNAL_REGGROUP };
-static struct reggroup restore_group = { "restore", INTERNAL_REGGROUP };
+static const reggroup general_group = { "general", USER_REGGROUP };
+static const reggroup float_group = { "float", USER_REGGROUP };
+static const reggroup system_group = { "system", USER_REGGROUP };
+static const reggroup vector_group = { "vector", USER_REGGROUP };
+static const reggroup all_group = { "all", USER_REGGROUP };
+static const reggroup save_group = { "save", INTERNAL_REGGROUP };
+static const reggroup restore_group = { "restore", INTERNAL_REGGROUP };
 
-struct reggroup *const general_reggroup = &general_group;
-struct reggroup *const float_reggroup = &float_group;
-struct reggroup *const system_reggroup = &system_group;
-struct reggroup *const vector_reggroup = &vector_group;
-struct reggroup *const all_reggroup = &all_group;
-struct reggroup *const save_reggroup = &save_group;
-struct reggroup *const restore_reggroup = &restore_group;
+const reggroup *const general_reggroup = &general_group;
+const reggroup *const float_reggroup = &float_group;
+const reggroup *const system_reggroup = &system_group;
+const reggroup *const vector_reggroup = &vector_group;
+const reggroup *const all_reggroup = &all_group;
+const reggroup *const save_reggroup = &save_group;
+const reggroup *const restore_reggroup = &restore_group;
 
 void _initialize_reggroup ();
 void
