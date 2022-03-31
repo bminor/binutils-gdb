@@ -1524,6 +1524,41 @@ Find core file memory regions
 
 Method(
     comment="""
+Given a bfd OBFD, segment ADDRESS and SIZE, create a memory tag section to be dumped to a core file
+""",
+    type="asection *",
+    name="create_memtag_section",
+    params=[("bfd *", "obfd"), ("CORE_ADDR", "address"), ("size_t", "size")],
+    predicate=True,
+    invalid=True,
+)
+
+Method(
+    comment="""
+Given a memory tag section OSEC, fill OSEC's contents with the appropriate tag data
+""",
+    type="bool",
+    name="fill_memtag_section",
+    params=[("asection *", "osec")],
+    predicate=True,
+    invalid=True,
+)
+
+Method(
+    comment="""
+Decode a memory tag SECTION and return the tags of type TYPE contained in
+the memory range [ADDRESS, ADDRESS + LENGTH).
+If no tags were found, return an empty vector.
+""",
+    type="gdb::byte_vector",
+    name="decode_memtag_section",
+    params=[("bfd_section *", "section"), ("int", "type"), ("CORE_ADDR", "address"), ("size_t", "length")],
+    predicate=True,
+    invalid=True,
+)
+
+Method(
+    comment="""
 Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
 core file into buffer READBUF with length LEN.  Return the number of bytes read
 (zero indicates failure).

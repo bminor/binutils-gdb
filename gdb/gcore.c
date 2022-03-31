@@ -349,6 +349,12 @@ make_output_phdrs (bfd *obfd, asection *osec)
   int p_flags = 0;
   int p_type = 0;
 
+  /* Memory tag segments have already been handled by the architecture, as
+     those contain arch-specific information.  If we have one of those, just
+     return.  */
+  if (startswith (bfd_section_name (osec), "memtag"))
+    return;
+
   /* FIXME: these constants may only be applicable for ELF.  */
   if (startswith (bfd_section_name (osec), "load"))
     p_type = PT_LOAD;
@@ -371,7 +377,8 @@ make_output_phdrs (bfd *obfd, asection *osec)
 
 static int
 gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
-		       int write, int exec, int modified, void *data)
+		       int write, int exec, int modified, bool memory_tagged,
+		       void *data)
 {
   bfd *obfd = (bfd *) data;
   asection *osec;
@@ -454,6 +461,45 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
   return 0;
 }
 
+/* gdbarch_find_memory_region callback for creating a memory tag section.
+   DATA is 'bfd *' for the core file GDB is creating.  */
+
+static int
+gcore_create_memtag_section_callback (CORE_ADDR vaddr, unsigned long size,
+				      int read, int write, int exec,
+				      int modified, bool memory_tagged,
+				      void *data)
+{
+  /* Are there memory tags in this particular memory map entry?  */
+  if (!memory_tagged)
+    return 0;
+
+  bfd *obfd = (bfd *) data;
+
+  /* Ask the architecture to create a memory tag section for this particular
+     memory map entry.  It will be populated with contents later, as we can't
+     start writing the contents before we have all the sections sorted out.  */
+  asection *memtag_section
+    = gdbarch_create_memtag_section (target_gdbarch (), obfd, vaddr, size);
+
+  if (memtag_section == nullptr)
+    {
+      warning (_("Couldn't make gcore memory tag segment: %s"),
+	       bfd_errmsg (bfd_get_error ()));
+      return 1;
+    }
+
+  if (info_verbose)
+    {
+      gdb_printf (gdb_stdout, "Saved memory tag segment, %s bytes "
+			      "at %s\n",
+		  plongest (bfd_section_size (memtag_section)),
+		  paddress (target_gdbarch (), vaddr));
+    }
+
+  return 0;
+}
+
 int
 objfile_find_memory_regions (struct target_ops *self,
 			     find_memory_region_ftype func, void *obfd)
@@ -483,6 +529,7 @@ objfile_find_memory_regions (struct target_ops *self,
 			   (flags & SEC_READONLY) == 0, /* Writable.  */
 			   (flags & SEC_CODE) != 0, /* Executable.  */
 			   1, /* MODIFIED is unknown, pass it as true.  */
+			   false, /* No memory tags in the object file.  */
 			   obfd);
 	    if (ret != 0)
 	      return ret;
@@ -496,6 +543,7 @@ objfile_find_memory_regions (struct target_ops *self,
 	     1, /* Stack section will be writable.  */
 	     0, /* Stack section will not be executable.  */
 	     1, /* Stack section will be modified.  */
+	     false, /* No memory tags in the object file.  */
 	     obfd);
 
   /* Make a heap segment.  */
@@ -506,6 +554,7 @@ objfile_find_memory_regions (struct target_ops *self,
 	     1, /* Heap section will be writable.  */
 	     0, /* Heap section will not be executable.  */
 	     1, /* Heap section will be modified.  */
+	     false, /* No memory tags in the object file.  */
 	     obfd);
 
   return 0;
@@ -555,6 +604,20 @@ gcore_copy_callback (bfd *obfd, asection *osec)
     }
 }
 
+/* Callback to copy contents to a particular memory tag section.  */
+
+static void
+gcore_copy_memtag_section_callback (bfd *obfd, asection *osec)
+{
+  /* We are only interested in "memtag" sections.  */
+  if (!startswith (bfd_section_name (osec), "memtag"))
+    return;
+
+  /* Fill the section with memory tag contents.  */
+  if (!gdbarch_fill_memtag_section (target_gdbarch (), osec))
+    error (_("Failed to fill memory tag section for core file."));
+}
+
 static int
 gcore_memory_sections (bfd *obfd)
 {
@@ -567,13 +630,27 @@ gcore_memory_sections (bfd *obfd)
 	return 0;			/* FIXME: error return/msg?  */
     }
 
+  /* Take care of dumping memory tags, if there are any.  */
+  if (!gdbarch_find_memory_regions_p (target_gdbarch ())
+      || gdbarch_find_memory_regions (target_gdbarch (),
+				      gcore_create_memtag_section_callback,
+				      obfd) != 0)
+    {
+      if (target_find_memory_regions (gcore_create_memtag_section_callback,
+				      obfd) != 0)
+	return 0;
+    }
+
   /* Record phdrs for section-to-segment mapping.  */
   for (asection *sect : gdb_bfd_sections (obfd))
     make_output_phdrs (obfd, sect);
 
-  /* Copy memory region contents.  */
+  /* Copy memory region and memory tag contents.  */
   for (asection *sect : gdb_bfd_sections (obfd))
-    gcore_copy_callback (obfd, sect);
+    {
+      gcore_copy_callback (obfd, sect);
+      gcore_copy_memtag_section_callback (obfd, sect);
+    }
 
   return 1;
 }

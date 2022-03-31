@@ -42,6 +42,7 @@
 #include "gcore.h"
 #include "gcore-elf.h"
 #include "solib-svr4.h"
+#include "memtag.h"
 
 #include <ctype.h>
 #include <unordered_map>
@@ -1320,6 +1321,7 @@ typedef int linux_find_memory_region_ftype (ULONGEST vaddr, ULONGEST size,
 					    ULONGEST offset, ULONGEST inode,
 					    int read, int write,
 					    int exec, int modified,
+					    bool memory_tagged,
 					    const char *filename,
 					    void *data);
 
@@ -1470,10 +1472,11 @@ parse_smaps_data (const char *data,
   return smaps;
 }
 
-/* See linux-tdep.h.  */
+/* Helper that checks if an address is in a memory tag page for a live
+   process.  */
 
-bool
-linux_address_in_memtag_page (CORE_ADDR address)
+static bool
+linux_process_address_in_memtag_page (CORE_ADDR address)
 {
   if (current_inferior ()->fake_pid_p)
     return false;
@@ -1503,6 +1506,30 @@ linux_address_in_memtag_page (CORE_ADDR address)
     }
 
   return false;
+}
+
+/* Helper that checks if an address is in a memory tag page for a core file
+   process.  */
+
+static bool
+linux_core_file_address_in_memtag_page (CORE_ADDR address)
+{
+  if (core_bfd == nullptr)
+    return false;
+
+  memtag_section_info info;
+  return get_next_core_memtag_section (core_bfd, nullptr, address, info);
+}
+
+/* See linux-tdep.h.  */
+
+bool
+linux_address_in_memtag_page (CORE_ADDR address)
+{
+  if (!target_has_execution ())
+    return linux_core_file_address_in_memtag_page (address);
+
+  return linux_process_address_in_memtag_page (address);
 }
 
 /* List memory regions in the inferior for a corefile.  */
@@ -1593,6 +1620,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 		map.offset, map.inode, map.read, map.write, map.exec,
 		1, /* MODIFIED is true because we want to dump
 		      the mapping.  */
+		map.vmflags.memory_tagging != 0,
 		map.filename.c_str (), obfd);
 	}
     }
@@ -1621,12 +1649,14 @@ static int
 linux_find_memory_regions_thunk (ULONGEST vaddr, ULONGEST size,
 				 ULONGEST offset, ULONGEST inode,
 				 int read, int write, int exec, int modified,
+				 bool memory_tagged,
 				 const char *filename, void *arg)
 {
   struct linux_find_memory_regions_data *data
     = (struct linux_find_memory_regions_data *) arg;
 
-  return data->func (vaddr, size, read, write, exec, modified, data->obfd);
+  return data->func (vaddr, size, read, write, exec, modified, memory_tagged,
+		     data->obfd);
 }
 
 /* A variant of linux_find_memory_regions_full that is suitable as the
@@ -1675,6 +1705,7 @@ static int
 linux_make_mappings_callback (ULONGEST vaddr, ULONGEST size,
 			      ULONGEST offset, ULONGEST inode,
 			      int read, int write, int exec, int modified,
+			      bool memory_tagged,
 			      const char *filename, void *data)
 {
   struct linux_make_mappings_data *map_data

@@ -53,6 +53,9 @@
 
 #include "gdbsupport/selftest.h"
 
+#include "elf/common.h"
+#include "elf/aarch64.h"
+
 /* Signal frame handling.
 
       +------------+  ^
@@ -1805,6 +1808,159 @@ aarch64_linux_report_signal_info (struct gdbarch *gdbarch,
     }
 }
 
+/* AArch64 Linux implementation of the gdbarch_create_memtag_section hook.  */
+
+static asection *
+aarch64_linux_create_memtag_section (struct gdbarch *gdbarch, bfd *obfd,
+				     CORE_ADDR address, size_t size)
+{
+  gdb_assert (obfd != nullptr);
+  gdb_assert (size > 0);
+
+  /* Create the section and associated program header.
+
+     Make sure the section's flags has SEC_HAS_CONTENTS, otherwise BFD will
+     refuse to write data to this section.  */
+  asection *mte_section
+    = bfd_make_section_anyway_with_flags (obfd, "memtag", SEC_HAS_CONTENTS);
+
+  if (mte_section == nullptr)
+    return nullptr;
+
+  bfd_set_section_vma (mte_section, address);
+  /* The size of the memory range covered by the memory tags.  We reuse the
+     section's rawsize field for this purpose.  */
+  mte_section->rawsize = size;
+
+  /* Fetch the number of tags we need to save.  */
+  size_t tags_count
+    = aarch64_mte_get_tag_granules (address, size, AARCH64_MTE_GRANULE_SIZE);
+  /* Tags are stored packed as 2 tags per byte.  */
+  bfd_set_section_size (mte_section, (tags_count + 1) >> 1);
+  /* Store program header information.  */
+  bfd_record_phdr (obfd, PT_AARCH64_MEMTAG_MTE, 1, 0, 0, 0, 0, 0, 1,
+		   &mte_section);
+
+  return mte_section;
+}
+
+/* Maximum number of tags to request.  */
+#define MAX_TAGS_TO_TRANSFER 1024
+
+/* AArch64 Linux implementation of the gdbarch_fill_memtag_section hook.  */
+
+static bool
+aarch64_linux_fill_memtag_section (struct gdbarch *gdbarch, asection *osec)
+{
+  /* We only handle MTE tags for now.  */
+
+  size_t segment_size = osec->rawsize;
+  CORE_ADDR start_address = bfd_section_vma (osec);
+  CORE_ADDR end_address = start_address + segment_size;
+
+  /* Figure out how many tags we need to store in this memory range.  */
+  size_t granules = aarch64_mte_get_tag_granules (start_address, segment_size,
+						  AARCH64_MTE_GRANULE_SIZE);
+
+  /* If there are no tag granules to fetch, just return.  */
+  if (granules == 0)
+    return true;
+
+  CORE_ADDR address = start_address;
+
+  /* Vector of tags.  */
+  gdb::byte_vector tags;
+
+  while (granules > 0)
+    {
+      /* Transfer tags in chunks.  */
+      gdb::byte_vector tags_read;
+      size_t xfer_len
+	= ((granules >= MAX_TAGS_TO_TRANSFER)
+	  ? MAX_TAGS_TO_TRANSFER * AARCH64_MTE_GRANULE_SIZE
+	  : granules * AARCH64_MTE_GRANULE_SIZE);
+
+      if (!target_fetch_memtags (address, xfer_len, tags_read,
+				 static_cast<int> (memtag_type::allocation)))
+	{
+	  warning (_("Failed to read MTE tags from memory range [%s,%s)."),
+		     phex_nz (start_address, sizeof (start_address)),
+		     phex_nz (end_address, sizeof (end_address)));
+	  return false;
+	}
+
+      /* Transfer over the tags that have been read.  */
+      tags.insert (tags.end (), tags_read.begin (), tags_read.end ());
+
+      /* Adjust the remaining granules and starting address.  */
+      granules -= tags_read.size ();
+      address += tags_read.size () * AARCH64_MTE_GRANULE_SIZE;
+    }
+
+  /* Pack the MTE tag bits.  */
+  aarch64_mte_pack_tags (tags);
+
+  if (!bfd_set_section_contents (osec->owner, osec, tags.data (),
+				 0, tags.size ()))
+    {
+      warning (_("Failed to write %s bytes of corefile memory "
+		 "tag content (%s)."),
+	       pulongest (tags.size ()),
+	       bfd_errmsg (bfd_get_error ()));
+    }
+  return true;
+}
+
+/* AArch64 Linux implementation of the gdbarch_decode_memtag_section
+   hook.  Decode a memory tag section and return the requested tags.
+
+   The section is guaranteed to cover the [ADDRESS, ADDRESS + length)
+   range.  */
+
+static gdb::byte_vector
+aarch64_linux_decode_memtag_section (struct gdbarch *gdbarch,
+				     bfd_section *section,
+				     int type,
+				     CORE_ADDR address, size_t length)
+{
+  gdb_assert (section != nullptr);
+
+  /* The requested address must not be less than section->vma.  */
+  gdb_assert (section->vma <= address);
+
+  /* Figure out how many tags we need to fetch in this memory range.  */
+  size_t granules = aarch64_mte_get_tag_granules (address, length,
+						  AARCH64_MTE_GRANULE_SIZE);
+  /* Sanity check.  */
+  gdb_assert (granules > 0);
+
+  /* Fetch the total number of tags in the range [VMA, address + length).  */
+  size_t granules_from_vma
+    = aarch64_mte_get_tag_granules (section->vma,
+				    address - section->vma + length,
+				    AARCH64_MTE_GRANULE_SIZE);
+
+  /* Adjust the tags vector to contain the exact number of packed bytes.  */
+  gdb::byte_vector tags (((granules - 1) >> 1) + 1);
+
+  /* Figure out the starting offset into the packed tags data.  */
+  file_ptr offset = ((granules_from_vma - granules) >> 1);
+
+  if (!bfd_get_section_contents (section->owner, section, tags.data (),
+				 offset, tags.size ()))
+    error (_("Couldn't read contents from memtag section."));
+
+  /* At this point, the tags are packed 2 per byte.  Unpack them before
+     returning.  */
+  bool skip_first = ((granules_from_vma - granules) % 2) != 0;
+  aarch64_mte_unpack_tags (tags, skip_first);
+
+  /* Resize to the exact number of tags that was requested.  */
+  tags.resize (granules);
+
+  return tags;
+}
+
 static void
 aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1888,6 +2044,21 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
       set_gdbarch_report_signal_info (gdbarch,
 				      aarch64_linux_report_signal_info);
+
+      /* Core file helpers.  */
+
+      /* Core file helper to create a memory tag section for a particular
+	 PT_LOAD segment.  */
+      set_gdbarch_create_memtag_section
+	(gdbarch, aarch64_linux_create_memtag_section);
+
+      /* Core file helper to fill a memory tag section with tag data.  */
+      set_gdbarch_fill_memtag_section
+	(gdbarch, aarch64_linux_fill_memtag_section);
+
+      /* Core file helper to decode a memory tag section.  */
+      set_gdbarch_decode_memtag_section (gdbarch,
+					 aarch64_linux_decode_memtag_section);
     }
 
   /* Initialize the aarch64_linux_record_tdep.  */

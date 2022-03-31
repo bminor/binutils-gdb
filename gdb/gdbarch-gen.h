@@ -874,6 +874,32 @@ typedef int (gdbarch_find_memory_regions_ftype) (struct gdbarch *gdbarch, find_m
 extern int gdbarch_find_memory_regions (struct gdbarch *gdbarch, find_memory_region_ftype func, void *data);
 extern void set_gdbarch_find_memory_regions (struct gdbarch *gdbarch, gdbarch_find_memory_regions_ftype *find_memory_regions);
 
+/* Given a bfd OBFD, segment ADDRESS and SIZE, create a memory tag section to be dumped to a core file */
+
+extern bool gdbarch_create_memtag_section_p (struct gdbarch *gdbarch);
+
+typedef asection * (gdbarch_create_memtag_section_ftype) (struct gdbarch *gdbarch, bfd *obfd, CORE_ADDR address, size_t size);
+extern asection * gdbarch_create_memtag_section (struct gdbarch *gdbarch, bfd *obfd, CORE_ADDR address, size_t size);
+extern void set_gdbarch_create_memtag_section (struct gdbarch *gdbarch, gdbarch_create_memtag_section_ftype *create_memtag_section);
+
+/* Given a memory tag section OSEC, fill OSEC's contents with the appropriate tag data */
+
+extern bool gdbarch_fill_memtag_section_p (struct gdbarch *gdbarch);
+
+typedef bool (gdbarch_fill_memtag_section_ftype) (struct gdbarch *gdbarch, asection *osec);
+extern bool gdbarch_fill_memtag_section (struct gdbarch *gdbarch, asection *osec);
+extern void set_gdbarch_fill_memtag_section (struct gdbarch *gdbarch, gdbarch_fill_memtag_section_ftype *fill_memtag_section);
+
+/* Decode a memory tag SECTION and return the tags of type TYPE contained in
+   the memory range [ADDRESS, ADDRESS + LENGTH).
+   If no tags were found, return an empty vector. */
+
+extern bool gdbarch_decode_memtag_section_p (struct gdbarch *gdbarch);
+
+typedef gdb::byte_vector (gdbarch_decode_memtag_section_ftype) (struct gdbarch *gdbarch, bfd_section *section, int type, CORE_ADDR address, size_t length);
+extern gdb::byte_vector gdbarch_decode_memtag_section (struct gdbarch *gdbarch, bfd_section *section, int type, CORE_ADDR address, size_t length);
+extern void set_gdbarch_decode_memtag_section (struct gdbarch *gdbarch, gdbarch_decode_memtag_section_ftype *decode_memtag_section);
+
 /* Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
    core file into buffer READBUF with length LEN.  Return the number of bytes read
    (zero indicates failure).

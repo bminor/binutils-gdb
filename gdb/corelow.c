@@ -52,6 +52,7 @@
 #include <unordered_set>
 #include "gdbcmd.h"
 #include "xml-tdesc.h"
+#include "memtag.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -100,6 +101,13 @@ public:
   bool has_execution (inferior *inf) override { return false; }
 
   bool info_proc (const char *, enum info_proc_what) override;
+
+  bool supports_memory_tagging () override;
+
+  /* Core file implementation of fetch_memtags.  Fetch the memory tags from
+     core file notes.  */
+  bool fetch_memtags (CORE_ADDR address, size_t len,
+		      gdb::byte_vector &tags, int type) override;
 
   /* A few helpers.  */
 
@@ -1175,6 +1183,60 @@ core_target::info_proc (const char *args, enum info_proc_what request)
     gdbarch_core_info_proc (gdbarch, args, request);
 
   return true;
+}
+
+/* Implementation of the "supports_memory_tagging" target_ops method.  */
+
+bool
+core_target::supports_memory_tagging ()
+{
+  /* Look for memory tag sections.  If they exist, that means this core file
+     supports memory tagging.  */
+
+  return (bfd_get_section_by_name (core_bfd, "memtag") != nullptr);
+}
+
+/* Implementation of the "fetch_memtags" target_ops method.  */
+
+bool
+core_target::fetch_memtags (CORE_ADDR address, size_t len,
+			    gdb::byte_vector &tags, int type)
+{
+  struct gdbarch *gdbarch = target_gdbarch ();
+
+  /* Make sure we have a way to decode the memory tag notes.  */
+  if (!gdbarch_decode_memtag_section_p (gdbarch))
+    error (_("gdbarch_decode_memtag_section not implemented for this "
+	     "architecture."));
+
+  memtag_section_info info;
+  info.memtag_section = nullptr;
+
+  while (get_next_core_memtag_section (core_bfd, info.memtag_section,
+				       address, info))
+  {
+    size_t adjusted_length
+      = (address + len < info.end_address) ? len : (info.end_address - address);
+
+    /* Decode the memory tag note and return the tags.  */
+    gdb::byte_vector tags_read
+      = gdbarch_decode_memtag_section (gdbarch, info.memtag_section, type,
+				       address, adjusted_length);
+
+    /* Transfer over the tags that have been read.  */
+    tags.insert (tags.end (), tags_read.begin (), tags_read.end ());
+
+    /* ADDRESS + LEN may cross the boundaries of a particular memory tag
+       segment.  Check if we need to fetch tags from a different section.  */
+    if (!tags_read.empty () && (address + len) < info.end_address)
+      return true;
+
+    /* There are more tags to fetch.  Update ADDRESS and LEN.  */
+    len -= (info.end_address - address);
+    address = info.end_address;
+  }
+
+  return false;
 }
 
 /* Get a pointer to the current core target.  If not connected to a
