@@ -1021,9 +1021,9 @@ mep_register_name (struct gdbarch *gdbarch, int regnr)
 
 
 /* Custom register groups for the MeP.  */
-static struct reggroup *mep_csr_reggroup; /* control/special */
-static struct reggroup *mep_cr_reggroup;  /* coprocessor general-purpose */
-static struct reggroup *mep_ccr_reggroup; /* coprocessor control */
+static const reggroup *mep_csr_reggroup; /* control/special */
+static const reggroup *mep_cr_reggroup;  /* coprocessor general-purpose */
+static const reggroup *mep_ccr_reggroup; /* coprocessor control */
 
 
 static int

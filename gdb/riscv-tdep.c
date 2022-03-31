@@ -129,7 +129,7 @@ struct riscv_unwind_cache
 
 /* RISC-V specific register group for CSRs.  */
 
-static reggroup *csr_reggroup = NULL;
+static const reggroup *csr_reggroup = nullptr;
 
 /* Callback function for user_reg_add.  */
 

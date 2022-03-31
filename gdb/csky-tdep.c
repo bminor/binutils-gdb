@@ -61,11 +61,11 @@
 /* Control debugging information emitted in this file.  */
 static bool csky_debug = false;
 
-static struct reggroup *cr_reggroup;
-static struct reggroup *fr_reggroup;
-static struct reggroup *vr_reggroup;
-static struct reggroup *mmu_reggroup;
-static struct reggroup *prof_reggroup;
+static const reggroup *cr_reggroup;
+static const reggroup *fr_reggroup;
+static const reggroup *vr_reggroup;
+static const reggroup *mmu_reggroup;
+static const reggroup *prof_reggroup;
 
 /* Convenience function to print debug messages in prologue analysis.  */
 

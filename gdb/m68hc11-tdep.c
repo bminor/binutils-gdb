@@ -1346,8 +1346,8 @@ m68hc11_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
 /* 68HC11/68HC12 register groups.
    Identify real hard registers and soft registers used by gcc.  */
 
-static struct reggroup *m68hc11_soft_reggroup;
-static struct reggroup *m68hc11_hard_reggroup;
+static const reggroup *m68hc11_soft_reggroup;
+static const reggroup *m68hc11_hard_reggroup;
 
 static void
 m68hc11_init_reggroups (void)

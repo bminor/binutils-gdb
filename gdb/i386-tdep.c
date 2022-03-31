@@ -4531,8 +4531,8 @@ i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 /* i386 register groups.  In addition to the normal groups, add "mmx"
    and "sse".  */
 
-static struct reggroup *i386_sse_reggroup;
-static struct reggroup *i386_mmx_reggroup;
+static const reggroup *i386_sse_reggroup;
+static const reggroup *i386_mmx_reggroup;
 
 static void
 i386_init_reggroups (void)

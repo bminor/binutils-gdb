@@ -314,16 +314,16 @@ nds32_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int num)
 }
 
 /* NDS32 register groups.  */
-static struct reggroup *nds32_cr_reggroup;
-static struct reggroup *nds32_ir_reggroup;
-static struct reggroup *nds32_mr_reggroup;
-static struct reggroup *nds32_dr_reggroup;
-static struct reggroup *nds32_pfr_reggroup;
-static struct reggroup *nds32_hspr_reggroup;
-static struct reggroup *nds32_dmar_reggroup;
-static struct reggroup *nds32_racr_reggroup;
-static struct reggroup *nds32_idr_reggroup;
-static struct reggroup *nds32_secur_reggroup;
+static const reggroup *nds32_cr_reggroup;
+static const reggroup *nds32_ir_reggroup;
+static const reggroup *nds32_mr_reggroup;
+static const reggroup *nds32_dr_reggroup;
+static const reggroup *nds32_pfr_reggroup;
+static const reggroup *nds32_hspr_reggroup;
+static const reggroup *nds32_dmar_reggroup;
+static const reggroup *nds32_racr_reggroup;
+static const reggroup *nds32_idr_reggroup;
+static const reggroup *nds32_secur_reggroup;
 
 static void
 nds32_init_reggroups (void)

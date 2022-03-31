@@ -712,10 +712,10 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
 		    _("invalid register number %d"), regnum);
 }
 
-static struct reggroup *xtensa_ar_reggroup;
-static struct reggroup *xtensa_user_reggroup;
-static struct reggroup *xtensa_vectra_reggroup;
-static struct reggroup *xtensa_cp[XTENSA_MAX_COPROCESSOR];
+static const reggroup *xtensa_ar_reggroup;
+static const reggroup *xtensa_user_reggroup;
+static const reggroup *xtensa_vectra_reggroup;
+static const reggroup *xtensa_cp[XTENSA_MAX_COPROCESSOR];
 
 static void
 xtensa_init_reggroups (void)

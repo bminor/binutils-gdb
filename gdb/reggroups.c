@@ -36,7 +36,7 @@ struct reggroup
   enum reggroup_type type;
 };
 
-struct reggroup *
+const reggroup *
 reggroup_new (const char *name, enum reggroup_type type)
 {
   struct reggroup *group = XNEW (struct reggroup);
@@ -48,7 +48,7 @@ reggroup_new (const char *name, enum reggroup_type type)
 
 /* See reggroups.h.  */
 
-struct reggroup *
+const reggroup *
 reggroup_gdbarch_new (struct gdbarch *gdbarch, const char *name,
 		      enum reggroup_type type)
 {
@@ -81,7 +81,7 @@ struct reggroups
 {
   /* Add GROUP to the list of register groups.  */
 
-  void add (struct reggroup *group)
+  void add (const reggroup *group)
   {
     gdb_assert (group != nullptr);
     gdb_assert (std::find (m_groups.begin(), m_groups.end(), group)
@@ -116,7 +116,7 @@ static struct gdbarch_data *reggroups_data;
 /* Add GROUP to the list of register groups for GDBARCH.  */
 
 void
-reggroup_add (struct gdbarch *gdbarch, struct reggroup *group)
+reggroup_add (struct gdbarch *gdbarch, const reggroup *group)
 {
   struct reggroups *groups
     = (struct reggroups *) gdbarch_data (gdbarch, reggroups_data);

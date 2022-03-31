@@ -35,7 +35,7 @@
 
 /* The m32c tdep structure.  */
 
-static struct reggroup *m32c_dma_reggroup;
+static const reggroup *m32c_dma_reggroup;
 
 /* The type of a function that moves the value of REG between CACHE or
    BUF --- in either direction.  */

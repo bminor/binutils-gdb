@@ -39,15 +39,16 @@ extern struct reggroup *const save_reggroup;
 extern struct reggroup *const restore_reggroup;
 
 /* Create a new local register group.  */
-extern struct reggroup *reggroup_new (const char *name,
-				      enum reggroup_type type);
+extern const reggroup *reggroup_new (const char *name,
+				     enum reggroup_type type);
+
 /* Create a new register group allocated onto the gdbarch obstack.  */
-extern struct reggroup *reggroup_gdbarch_new (struct gdbarch *gdbarch,
-					      const char *name,
-					      enum reggroup_type type);
+extern const reggroup *reggroup_gdbarch_new (struct gdbarch *gdbarch,
+					     const char *name,
+					     enum reggroup_type type);
 
 /* Add a register group (with attribute values) to the pre-defined list.  */
-extern void reggroup_add (struct gdbarch *gdbarch, struct reggroup *group);
+extern void reggroup_add (struct gdbarch *gdbarch, const reggroup *group);
 
 /* Register group attributes.  */
 extern const char *reggroup_name (const struct reggroup *reggroup);
