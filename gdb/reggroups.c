@@ -219,7 +219,7 @@ default_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
 /* See reggroups.h.  */
 
-reggroup *
+const reggroup *
 reggroup_find (struct gdbarch *gdbarch, const char *name)
 {
   struct reggroup *group;

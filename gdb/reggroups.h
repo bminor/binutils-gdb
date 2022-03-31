@@ -62,7 +62,8 @@ extern struct reggroup *reggroup_next (struct gdbarch *gdbarch,
 extern struct reggroup *reggroup_prev (struct gdbarch *gdbarch,
 				       const struct reggroup *curr);
 /* Find a reggroup by name.  */
-extern reggroup *reggroup_find (struct gdbarch *gdbarch, const char *name);
+extern const reggroup *reggroup_find (struct gdbarch *gdbarch,
+				      const char *name);
 
 /* Is REGNUM a member of REGGROUP?  */
 extern int default_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
