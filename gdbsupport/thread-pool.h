@@ -21,11 +21,13 @@
 #define GDBSUPPORT_THREAD_POOL_H
 
 #include <queue>
-#include <thread>
 #include <vector>
 #include <functional>
+#if CXX_STD_THREAD
+#include <thread>
 #include <mutex>
 #include <condition_variable>
+#endif
 #include <future>
 #include "gdbsupport/gdb_optional.h"
 
@@ -53,7 +55,11 @@ public:
   /* Return the number of executing threads.  */
   size_t thread_count () const
   {
+#if CXX_STD_THREAD
     return m_thread_count;
+#else
+    return 0;
+#endif
   }
 
   /* Post a task to the thread pool.  A future is returned, which can
@@ -64,6 +70,7 @@ private:
 
   thread_pool () = default;
 
+#if CXX_STD_THREAD
   /* The callback for each worker thread.  */
   void thread_function ();
 
@@ -83,6 +90,7 @@ private:
      between the main thread and the worker threads.  */
   std::condition_variable m_tasks_cv;
   std::mutex m_tasks_mutex;
+#endif /* CXX_STD_THREAD */
 };
 
 }

@@ -21,10 +21,7 @@
 #define GDBSUPPORT_PARALLEL_FOR_H
 
 #include <algorithm>
-#if CXX_STD_THREAD
-#include <thread>
 #include "gdbsupport/thread-pool.h"
-#endif
 
 namespace gdb
 {
@@ -41,7 +38,6 @@ template<class RandomIt, class RangeFunction>
 void
 parallel_for_each (RandomIt first, RandomIt last, RangeFunction callback)
 {
-#if CXX_STD_THREAD
   /* So we can use a local array below.  */
   const size_t local_max = 16;
   size_t n_threads = std::min (thread_pool::g_thread_pool->thread_count (),
@@ -70,15 +66,12 @@ parallel_for_each (RandomIt first, RandomIt last, RangeFunction callback)
 	  first = end;
 	}
     }
-#endif /* CXX_STD_THREAD */
 
   /* Process all the remaining elements in the main thread.  */
   callback (first, last);
 
-#if CXX_STD_THREAD
   for (int i = 0; i < n_actual_threads; ++i)
     futures[i].wait ();
-#endif /* CXX_STD_THREAD */
 }
 
 }

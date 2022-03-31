@@ -41,15 +41,12 @@
 #include "maint.h"
 #include "gdbsupport/selftest.h"
 #include "inferior.h"
+#include "gdbsupport/thread-pool.h"
 
 #include "cli/cli-decode.h"
 #include "cli/cli-utils.h"
 #include "cli/cli-setshow.h"
 #include "cli/cli-cmds.h"
-
-#if CXX_STD_THREAD
-#include "gdbsupport/thread-pool.h"
-#endif
 
 static void maintenance_do_deprecate (const char *, int);
 

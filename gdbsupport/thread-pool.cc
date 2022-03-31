@@ -18,10 +18,10 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "common-defs.h"
+#include "gdbsupport/thread-pool.h"
 
 #if CXX_STD_THREAD
 
-#include "gdbsupport/thread-pool.h"
 #include "gdbsupport/alt-stack.h"
 #include "gdbsupport/block-signals.h"
 #include <algorithm>
@@ -67,6 +67,7 @@ set_thread_name (int (*set_name) (const char *), const char *name)
 }
 
 #endif	/* USE_PTHREAD_SETNAME_NP */
+#endif /* CXX_STD_THREAD */
 
 namespace gdb
 {
@@ -93,6 +94,7 @@ thread_pool::~thread_pool ()
 void
 thread_pool::set_thread_count (size_t num_threads)
 {
+#if CXX_STD_THREAD
   std::lock_guard<std::mutex> guard (m_tasks_mutex);
 
   /* If the new size is larger, start some new threads.  */
@@ -127,6 +129,9 @@ thread_pool::set_thread_count (size_t num_threads)
     }
 
   m_thread_count = num_threads;
+#else
+  /* No threads available, simply ignore the request.  */
+#endif /* CXX_STD_THREAD */
 }
 
 std::future<void>
@@ -135,19 +140,23 @@ thread_pool::post_task (std::function<void ()> &&func)
   std::packaged_task<void ()> t (std::move (func));
   std::future<void> f = t.get_future ();
 
-  if (m_thread_count == 0)
-    {
-      /* Just execute it now.  */
-      t ();
-    }
-  else
+#if CXX_STD_THREAD
+  if (m_thread_count != 0)
     {
       std::lock_guard<std::mutex> guard (m_tasks_mutex);
       m_tasks.emplace (std::move (t));
       m_tasks_cv.notify_one ();
     }
+  else
+#endif
+    {
+      /* Just execute it now.  */
+      t ();
+    }
   return f;
 }
+
+#if CXX_STD_THREAD
 
 void
 thread_pool::thread_function ()
@@ -182,6 +191,6 @@ thread_pool::thread_function ()
     }
 }
 
-}
-
 #endif /* CXX_STD_THREAD */
+
+} /* namespace gdb */
