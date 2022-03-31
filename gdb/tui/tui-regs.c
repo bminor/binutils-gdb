@@ -580,19 +580,21 @@ tui_reg_command (const char *args, int from_tty)
 	match = tui_reg_next (current_group, gdbarch);
       else if (strncmp (args, "prev", len) == 0)
 	match = tui_reg_prev (current_group, gdbarch);
-
-      /* This loop matches on the initial part of a register group
-	 name.  If this initial part in ARGS matches only one register
-	 group then the switch is made.  */
-      for (group = reggroup_next (gdbarch, NULL);
-	   group != NULL;
-	   group = reggroup_next (gdbarch, group))
+      else
 	{
-	  if (strncmp (reggroup_name (group), args, len) == 0)
+	  /* This loop matches on the initial part of a register group
+	     name.  If this initial part in ARGS matches only one register
+	     group then the switch is made.  */
+	  for (group = reggroup_next (gdbarch, NULL);
+	       group != NULL;
+	       group = reggroup_next (gdbarch, group))
 	    {
-	      if (match != NULL)
-		error (_("ambiguous register group name '%s'"), args);
-	      match = group;
+	      if (strncmp (reggroup_name (group), args, len) == 0)
+		{
+		  if (match != NULL)
+		    error (_("ambiguous register group name '%s'"), args);
+		  match = group;
+		}
 	    }
 	}
 
