@@ -152,7 +152,7 @@ static CORE_ADDR cygwin_get_dr (int i);
 static unsigned long cygwin_get_dr6 (void);
 static unsigned long cygwin_get_dr7 (void);
 
-static std::vector<windows_thread_info *> thread_list;
+static std::vector<std::unique_ptr<windows_thread_info>> thread_list;
 
 /* Counts of things.  */
 static int saw_create;
@@ -319,7 +319,7 @@ check (BOOL ok, const char *file, int line)
 windows_thread_info *
 windows_nat::thread_rec (ptid_t ptid, thread_disposition_type disposition)
 {
-  for (windows_thread_info *th : thread_list)
+  for (auto &th : thread_list)
     if (th->tid == ptid.lwp ())
       {
 	if (!th->suspended)
@@ -340,7 +340,7 @@ windows_nat::thread_rec (ptid_t ptid, thread_disposition_type disposition)
 		break;
 	      }
 	  }
-	return th;
+	return th.get ();
       }
 
   return NULL;
@@ -372,7 +372,7 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
     base += 0x2000;
 #endif
   th = new windows_thread_info (ptid.lwp (), h, base);
-  thread_list.push_back (th);
+  thread_list.emplace_back (th);
 
   /* Add this new thread to the list of threads.
 
@@ -398,10 +398,6 @@ windows_init_thread_list (void)
 {
   DEBUG_EVENTS ("called");
   init_thread_list ();
-
-  for (windows_thread_info *here : thread_list)
-    delete here;
-
   thread_list.clear ();
 }
 
@@ -438,16 +434,13 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p)
   delete_thread (find_thread_ptid (&the_windows_nat_target, ptid));
 
   auto iter = std::find_if (thread_list.begin (), thread_list.end (),
-			    [=] (windows_thread_info *th)
+			    [=] (auto &th)
 			    {
 			      return th->tid == id;
 			    });
 
   if (iter != thread_list.end ())
-    {
-      delete *iter;
-      thread_list.erase (iter);
-    }
+    thread_list.erase (iter);
 }
 
 /* Fetches register number R from the given windows_thread_info,
@@ -1146,7 +1139,7 @@ windows_continue (DWORD continue_status, int id, int killed)
   if (matching_pending_stop (debug_events))
     return TRUE;
 
-  for (windows_thread_info *th : thread_list)
+  for (auto &th : thread_list)
     if (id == -1 || id == (int) th->tid)
       {
 #ifdef __x86_64__
@@ -3133,7 +3126,7 @@ cygwin_set_dr (int i, CORE_ADDR addr)
 		    _("Invalid register %d in cygwin_set_dr.\n"), i);
   dr[i] = addr;
 
-  for (windows_thread_info *th : thread_list)
+  for (auto &th : thread_list)
     th->debug_registers_changed = true;
 }
 
@@ -3145,7 +3138,7 @@ cygwin_set_dr7 (unsigned long val)
 {
   dr[7] = (CORE_ADDR) val;
 
-  for (windows_thread_info *th : thread_list)
+  for (auto &th : thread_list)
     th->debug_registers_changed = true;
 }
 
