@@ -93,27 +93,26 @@ AC_DEFUN([GDB_AC_COMMON], [
   # mingw and DJGPP.
   AC_LANG_PUSH([C++])
   AX_PTHREAD([threads=yes], [threads=no])
-  if test "$threads" = "yes"; then
-    save_LIBS="$LIBS"
-    LIBS="$PTHREAD_LIBS $LIBS"
-    save_CXXFLAGS="$CXXFLAGS"
-    CXXFLAGS="$PTHREAD_CFLAGS $save_CXXFLAGS"
-    AC_CACHE_CHECK([for std::thread],
-		   gdb_cv_cxx_std_thread,
-		   [AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
-    [[#include <thread>
-      void callback() { }]],
-    [[std::thread t(callback);]])],
-				  gdb_cv_cxx_std_thread=yes,
-				  gdb_cv_cxx_std_thread=no)])
+  save_LIBS="$LIBS"
+  LIBS="$PTHREAD_LIBS $LIBS"
+  save_CXXFLAGS="$CXXFLAGS"
+  CXXFLAGS="$PTHREAD_CFLAGS $save_CXXFLAGS"
+  AC_CACHE_CHECK([for std::thread],
+		 gdb_cv_cxx_std_thread,
+		 [AC_COMPILE_IFELSE([AC_LANG_PROGRAM(
+  [[#include <thread>
+    void callback() { }]],
+  [[std::thread t(callback);]])],
+				gdb_cv_cxx_std_thread=yes,
+				gdb_cv_cxx_std_thread=no)])
 
+  if test "$threads" = "yes"; then
     # This check must be here, while LIBS includes any necessary
     # threading library.
     AC_CHECK_FUNCS([pthread_sigmask pthread_setname_np])
-
-    LIBS="$save_LIBS"
-    CXXFLAGS="$save_CXXFLAGS"
   fi
+  LIBS="$save_LIBS"
+  CXXFLAGS="$save_CXXFLAGS"
 
   if test "$want_threading" = "yes"; then
     if test "$gdb_cv_cxx_std_thread" = "yes"; then

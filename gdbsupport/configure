@@ -8945,12 +8945,11 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-  if test "$threads" = "yes"; then
-    save_LIBS="$LIBS"
-    LIBS="$PTHREAD_LIBS $LIBS"
-    save_CXXFLAGS="$CXXFLAGS"
-    CXXFLAGS="$PTHREAD_CFLAGS $save_CXXFLAGS"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for std::thread" >&5
+  save_LIBS="$LIBS"
+  LIBS="$PTHREAD_LIBS $LIBS"
+  save_CXXFLAGS="$CXXFLAGS"
+  CXXFLAGS="$PTHREAD_CFLAGS $save_CXXFLAGS"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for std::thread" >&5
 $as_echo_n "checking for std::thread... " >&6; }
 if ${gdb_cv_cxx_std_thread+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -8958,7 +8957,7 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <thread>
-      void callback() { }
+    void callback() { }
 int
 main ()
 {
@@ -8977,6 +8976,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_cxx_std_thread" >&5
 $as_echo "$gdb_cv_cxx_std_thread" >&6; }
 
+  if test "$threads" = "yes"; then
     # This check must be here, while LIBS includes any necessary
     # threading library.
     for ac_func in pthread_sigmask pthread_setname_np
@@ -8991,10 +8991,9 @@ _ACEOF
 fi
 done
 
-
-    LIBS="$save_LIBS"
-    CXXFLAGS="$save_CXXFLAGS"
   fi
+  LIBS="$save_LIBS"
+  CXXFLAGS="$save_CXXFLAGS"
 
   if test "$want_threading" = "yes"; then
     if test "$gdb_cv_cxx_std_thread" = "yes"; then
