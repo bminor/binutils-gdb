@@ -1,3 +1,7 @@
+2022-03-31  Nick Clifton  <nickc@redhat.com>
+
+	* arlex.l: Accept the plus character as part of a filename.
+
 2022-03-16  Fangrui Song  <maskray@google.com>
 
 	PR binutils/28926
