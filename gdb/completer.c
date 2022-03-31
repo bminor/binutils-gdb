@@ -1821,7 +1821,7 @@ reg_or_group_completer_1 (completion_tracker &tracker,
     {
       for (const struct reggroup *group : gdbarch_reggroups (gdbarch))
 	{
-	  name = reggroup_name (group);
+	  name = group->name ();
 	  if (strncmp (word, name, len) == 0)
 	    tracker.add_completion (make_unique_xstrdup (name));
 	}

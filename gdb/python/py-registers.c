@@ -136,8 +136,7 @@ gdbpy_reggroup_to_string (PyObject *self)
   reggroup_object *group = (reggroup_object *) self;
   const reggroup *reggroup = group->reggroup;
 
-  const char *name = reggroup_name (reggroup);
-  return PyUnicode_FromString (name);
+  return PyUnicode_FromString (reggroup->name ());
 }
 
 /* Implement gdb.RegisterGroup.name (self) -> String.

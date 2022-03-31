@@ -390,7 +390,7 @@ nds32_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   /* The NDS32 reggroup contains registers whose name is prefixed
      by reggroup name.  */
   reg_name = gdbarch_register_name (gdbarch, regnum);
-  group_name = reggroup_name (reggroup);
+  group_name = reggroup->name ();
   return !strncmp (reg_name, group_name, strlen (group_name));
 }
 

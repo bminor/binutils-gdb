@@ -2301,7 +2301,7 @@ registers_info (const char *addr_exp, int fpregs)
 	    /* Don't bother with a length check.  Should the user
 	       enter a short register group name, go with the first
 	       group that matches.  */
-	    if (strncmp (start, reggroup_name (g), end - start) == 0)
+	    if (strncmp (start, g->name (), end - start) == 0)
 	      {
 		group = g;
 		break;

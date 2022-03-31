@@ -23,9 +23,35 @@
 #define REGGROUPS_H
 
 struct gdbarch;
-struct reggroup;
 
 enum reggroup_type { USER_REGGROUP, INTERNAL_REGGROUP };
+
+/* Individual register group.  */
+
+struct reggroup
+{
+  /* Create a new register group object.  The NAME is not owned by the new
+     reggroup object, so must outlive the object.  */
+  reggroup (const char *name, enum reggroup_type type)
+    : m_name (name),
+      m_type (type)
+  { /* Nothing.  */ }
+
+  /* Return the name for this register group.  */
+  const char *name () const
+  { return m_name; }
+
+  /* Return the type of this register group.  */
+  enum reggroup_type type () const
+  { return m_type; }
+
+private:
+  /* The name of this register group.  */
+  const char *m_name;
+
+  /* The type of this register group.  */
+  enum reggroup_type m_type;
+};
 
 /* Pre-defined, user visible, register groups.  */
 extern const reggroup *const general_reggroup;
@@ -49,10 +75,6 @@ extern const reggroup *reggroup_gdbarch_new (struct gdbarch *gdbarch,
 
 /* Add a register group (with attribute values) to the pre-defined list.  */
 extern void reggroup_add (struct gdbarch *gdbarch, const reggroup *group);
-
-/* Register group attributes.  */
-extern const char *reggroup_name (const struct reggroup *reggroup);
-extern enum reggroup_type reggroup_type (const struct reggroup *reggroup);
 
 /* Return the list of all register groups for GDBARCH.  */
 extern const std::vector<const reggroup *> &

@@ -216,7 +216,7 @@ tui_data_window::show_register_group (const reggroup *group,
   int regnum, pos;
 
   /* Make a new title showing which group we display.  */
-  title = string_printf ("Register group: %s", reggroup_name (group));
+  title = string_printf ("Register group: %s", group->name ());
 
   /* See how many registers must be displayed.  */
   nr_regs = 0;
@@ -595,7 +595,7 @@ tui_reg_command (const char *args, int from_tty)
 	     group then the switch is made.  */
 	  for (const struct reggroup *group : gdbarch_reggroups (gdbarch))
 	    {
-	      if (strncmp (reggroup_name (group), args, len) == 0)
+	      if (strncmp (group->name (), args, len) == 0)
 		{
 		  if (match != NULL)
 		    error (_("ambiguous register group name '%s'"), args);
@@ -621,7 +621,7 @@ tui_reg_command (const char *args, int from_tty)
 	  if (!first)
 	    gdb_printf (", ");
 	  first = false;
-	  gdb_printf ("%s", reggroup_name (group));
+	  gdb_printf ("%s", group->name ());
 	}
 
       gdb_printf ("\n");

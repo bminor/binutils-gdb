@@ -1012,7 +1012,7 @@ tdesc_register_in_reggroup_p (struct gdbarch *gdbarch, int regno,
   struct tdesc_reg *reg = tdesc_find_register (gdbarch, regno);
 
   if (reg != NULL && !reg->group.empty ()
-      && (reg->group == reggroup_name (reggroup)))
+      && (reg->group == reggroup->name ()))
 	return 1;
 
   if (reg != NULL

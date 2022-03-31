@@ -28,33 +28,6 @@
 #include "gdbcmd.h"		/* For maintenanceprintlist.  */
 #include "gdbsupport/gdb_obstack.h"
 
-/* Individual register groups.  */
-
-struct reggroup
-{
-  /* Create a new register group object.  The NAME is not owned by the new
-     reggroup object, so must outlive the object.  */
-  reggroup (const char *name, enum reggroup_type type)
-    : m_name (name),
-      m_type (type)
-  { /* Nothing.  */ }
-
-  /* Return the name for this register group.  */
-  const char *name () const
-  { return m_name; }
-
-  /* Return the type of this register group.  */
-  enum reggroup_type type () const
-  { return m_type; }
-
-private:
-  /* The name of this register group.  */
-  const char *m_name;
-
-  /* The type of this register group.  */
-  enum reggroup_type m_type;
-};
-
 const reggroup *
 reggroup_new (const char *name, enum reggroup_type type)
 {
@@ -70,20 +43,6 @@ reggroup_gdbarch_new (struct gdbarch *gdbarch, const char *name,
   name = gdbarch_obstack_strdup (gdbarch, name);
   return obstack_new<struct reggroup> (gdbarch_obstack (gdbarch),
 				       name, type);
-}
-
-/* Register group attributes.  */
-
-const char *
-reggroup_name (const struct reggroup *group)
-{
-  return group->name ();
-}
-
-enum reggroup_type
-reggroup_type (const struct reggroup *group)
-{
-  return group->type ();
 }
 
 /* A container holding all the register groups for a particular
