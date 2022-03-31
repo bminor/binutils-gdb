@@ -1531,21 +1531,6 @@ ctf_psymtab_var_cb (const char *name, ctf_id_t id, void *arg)
   return 0;
 }
 
-/* Start a subfile for CTF. FNAME is the name of the archive.  */
-
-static void
-ctf_start_archive (struct ctf_context *ccx, struct objfile *of,
-		   const char *fname)
-{
-  if (ccx->builder == nullptr)
-    {
-      ccx->builder = new buildsym_compunit (of,
-		      of->original_name, nullptr, language_c, 0);
-      ccx->builder->record_debugformat ("ctf");
-    }
-  ccx->builder->start_subfile (fname);
-}
-
 /* Setup partial_symtab's describing each source file for which
    debugging information is available.  */
 
@@ -1567,10 +1552,7 @@ scan_partial_symbols (ctf_dict_t *cfp, psymtab_storage *partial_symtabs,
 
   struct ctf_context *ccx = &pst->context;
   if (isparent == false)
-    {
-      ctf_start_archive (ccx, of, fname);
-      ccx->pst = pst;
-    }
+    ccx->pst = pst;
 
   if (ctf_type_iter (cfp, ctf_psymtab_type_cb, ccx) == CTF_ERR)
     complaint (_("ctf_type_iter scan_partial_symbols failed - %s"),
