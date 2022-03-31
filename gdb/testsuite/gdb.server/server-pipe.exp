@@ -74,7 +74,11 @@ proc do_test { target } {
     }
 }
 
-# Test with the two remote protocol types.
-foreach_with_prefix target { remote extended-remote } {
-    do_test ${target}
+save_vars { GDBFLAGS } {
+    set GDBFLAGS "$GDBFLAGS -ex \"set sysroot\""
+
+    # Test with the two remote protocol types.
+    foreach_with_prefix target { remote extended-remote } {
+	do_test ${target}
+    }
 }
