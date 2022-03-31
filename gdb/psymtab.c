@@ -1136,13 +1136,10 @@ psymbol_functions::expand_symtabs_matching
 					  *psym_lookup_name,
 					  symbol_matcher))
 	{
-	  struct compunit_symtab *symtab =
-	    psymtab_to_symtab (objfile, ps);
+	  compunit_symtab *cust = psymtab_to_symtab (objfile, ps);
 
-	  gdb_assert (symtab != nullptr);
-
-	  if (expansion_notify != NULL)
-	    if (!expansion_notify (symtab))
+	  if (cust != nullptr && expansion_notify != nullptr)
+	    if (!expansion_notify (cust))
 	      return false;
 	}
     }
