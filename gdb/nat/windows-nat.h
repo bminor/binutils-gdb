@@ -43,8 +43,6 @@ struct windows_thread_info
   {
   }
 
-  ~windows_thread_info ();
-
   DISABLE_COPY_AND_ASSIGN (windows_thread_info);
 
   /* Ensure that this thread has been suspended.  */

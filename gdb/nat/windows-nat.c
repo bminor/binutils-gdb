@@ -74,10 +74,6 @@ GenerateConsoleCtrlEvent_ftype *GenerateConsoleCtrlEvent;
   debug_prefixed_printf_cond (debug_events, "windows events", fmt, \
 			      ## __VA_ARGS__)
 
-windows_thread_info::~windows_thread_info ()
-{
-}
-
 void
 windows_thread_info::suspend ()
 {
