@@ -1116,6 +1116,7 @@ COMMON_SFILES = \
 	memattr.c \
 	memory-map.c \
 	memrange.c \
+	memtag.c \
 	minidebug.c \
 	minsyms.c \
 	mipsread.c \

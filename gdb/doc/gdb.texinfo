@@ -25381,6 +25381,25 @@ options that can be controlled at runtime and emulates the @code{prctl}
 option @code{PR_SET_TAGGED_ADDR_CTRL}.  For further information, see the
 documentation in the Linux kernel.
 
+@value{GDBN} supports dumping memory tag data to core files through the
+@command{gcore} command and reading memory tag data from core files generated
+by the @command{gcore} command or the Linux kernel.
+
+When a process uses memory-mapped pages protected by memory tags (for
+example, AArch64 MTE), this additional information will be recorded in
+the core file in the event of a crash or if @value{GDBN} generates a core file
+from the current process state.
+
+The memory tag data will be used so developers can display the memory
+tags from a particular memory region (using the @samp{m} modifier to the
+@command{x} command, using the @command{print} command or using the various
+@command{memory-tag} subcommands.
+
+In the case of a crash, @value{GDBN} will attempt to retrieve the memory tag
+information automatically from the core file, and will show one of the above
+messages depending on whether the synchronous or asynchronous mode is selected.
+@xref{Memory Tagging}. @xref{Memory}.
+
 @node i386
 @subsection x86 Architecture-specific Issues
 

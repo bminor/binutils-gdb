@@ -347,7 +347,8 @@ extern const char *pc_prefix (CORE_ADDR);
 
 typedef int (*find_memory_region_ftype) (CORE_ADDR addr, unsigned long size,
 					 int read, int write, int exec,
-					 int modified, void *data);
+					 int modified, bool memory_tagged,
+					 void *data);
 
 /* * Possible lvalue types.  Like enum language, this should be in
    value.h, but needs to be here for the same reason.  */

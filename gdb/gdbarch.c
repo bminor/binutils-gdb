@@ -171,6 +171,9 @@ struct gdbarch
   gdbarch_iterate_over_regset_sections_ftype *iterate_over_regset_sections;
   gdbarch_make_corefile_notes_ftype *make_corefile_notes;
   gdbarch_find_memory_regions_ftype *find_memory_regions;
+  gdbarch_create_memtag_section_ftype *create_memtag_section;
+  gdbarch_fill_memtag_section_ftype *fill_memtag_section;
+  gdbarch_decode_memtag_section_ftype *decode_memtag_section;
   gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries;
   gdbarch_core_xfer_shared_libraries_aix_ftype *core_xfer_shared_libraries_aix;
   gdbarch_core_pid_to_str_ftype *core_pid_to_str;
@@ -527,6 +530,9 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of iterate_over_regset_sections, has predicate.  */
   /* Skip verify of make_corefile_notes, has predicate.  */
   /* Skip verify of find_memory_regions, has predicate.  */
+  /* Skip verify of create_memtag_section, has predicate.  */
+  /* Skip verify of fill_memtag_section, has predicate.  */
+  /* Skip verify of decode_memtag_section, has predicate.  */
   /* Skip verify of core_xfer_shared_libraries, has predicate.  */
   /* Skip verify of core_xfer_shared_libraries_aix, has predicate.  */
   /* Skip verify of core_pid_to_str, has predicate.  */
@@ -1096,6 +1102,24 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_filtered (file,
                       "gdbarch_dump: find_memory_regions = <%s>\n",
                       host_address_to_string (gdbarch->find_memory_regions));
+  fprintf_filtered (file,
+                      "gdbarch_dump: gdbarch_create_memtag_section_p() = %d\n",
+                      gdbarch_create_memtag_section_p (gdbarch));
+  fprintf_filtered (file,
+                      "gdbarch_dump: create_memtag_section = <%s>\n",
+                      host_address_to_string (gdbarch->create_memtag_section));
+  fprintf_filtered (file,
+                      "gdbarch_dump: gdbarch_fill_memtag_section_p() = %d\n",
+                      gdbarch_fill_memtag_section_p (gdbarch));
+  fprintf_filtered (file,
+                      "gdbarch_dump: fill_memtag_section = <%s>\n",
+                      host_address_to_string (gdbarch->fill_memtag_section));
+  fprintf_filtered (file,
+                      "gdbarch_dump: gdbarch_decode_memtag_section_p() = %d\n",
+                      gdbarch_decode_memtag_section_p (gdbarch));
+  fprintf_filtered (file,
+                      "gdbarch_dump: decode_memtag_section = <%s>\n",
+                      host_address_to_string (gdbarch->decode_memtag_section));
   fprintf_filtered (file,
                       "gdbarch_dump: gdbarch_core_xfer_shared_libraries_p() = %d\n",
                       gdbarch_core_xfer_shared_libraries_p (gdbarch));
@@ -3742,6 +3766,78 @@ set_gdbarch_find_memory_regions (struct gdbarch *gdbarch,
                                  gdbarch_find_memory_regions_ftype find_memory_regions)
 {
   gdbarch->find_memory_regions = find_memory_regions;
+}
+
+bool
+gdbarch_create_memtag_section_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->create_memtag_section != NULL;
+}
+
+asection *
+gdbarch_create_memtag_section (struct gdbarch *gdbarch, bfd *obfd, CORE_ADDR address, size_t size)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->create_memtag_section != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_create_memtag_section called\n");
+  return gdbarch->create_memtag_section (gdbarch, obfd, address, size);
+}
+
+void
+set_gdbarch_create_memtag_section (struct gdbarch *gdbarch,
+                                   gdbarch_create_memtag_section_ftype create_memtag_section)
+{
+  gdbarch->create_memtag_section = create_memtag_section;
+}
+
+bool
+gdbarch_fill_memtag_section_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->fill_memtag_section != NULL;
+}
+
+bool
+gdbarch_fill_memtag_section (struct gdbarch *gdbarch, asection *osec)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->fill_memtag_section != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_fill_memtag_section called\n");
+  return gdbarch->fill_memtag_section (gdbarch, osec);
+}
+
+void
+set_gdbarch_fill_memtag_section (struct gdbarch *gdbarch,
+                                 gdbarch_fill_memtag_section_ftype fill_memtag_section)
+{
+  gdbarch->fill_memtag_section = fill_memtag_section;
+}
+
+bool
+gdbarch_decode_memtag_section_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->decode_memtag_section != NULL;
+}
+
+gdb::byte_vector
+gdbarch_decode_memtag_section (struct gdbarch *gdbarch, bfd_section *section, int type, CORE_ADDR address, size_t length)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->decode_memtag_section != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_decode_memtag_section called\n");
+  return gdbarch->decode_memtag_section (gdbarch, section, type, address, length);
+}
+
+void
+set_gdbarch_decode_memtag_section (struct gdbarch *gdbarch,
+                                   gdbarch_decode_memtag_section_ftype decode_memtag_section)
+{
+  gdbarch->decode_memtag_section = decode_memtag_section;
 }
 
 bool
