@@ -32,18 +32,33 @@
 
 struct reggroup
 {
-  const char *name;
-  enum reggroup_type type;
+  /* Create a new register group object.  The NAME is not owned by the new
+     reggroup object, so must outlive the object.  */
+  reggroup (const char *name, enum reggroup_type type)
+    : m_name (name),
+      m_type (type)
+  { /* Nothing.  */ }
+
+  /* Return the name for this register group.  */
+  const char *name () const
+  { return m_name; }
+
+  /* Return the type of this register group.  */
+  enum reggroup_type type () const
+  { return m_type; }
+
+private:
+  /* The name of this register group.  */
+  const char *m_name;
+
+  /* The type of this register group.  */
+  enum reggroup_type m_type;
 };
 
 const reggroup *
 reggroup_new (const char *name, enum reggroup_type type)
 {
-  struct reggroup *group = XNEW (struct reggroup);
-
-  group->name = name;
-  group->type = type;
-  return group;
+  return new reggroup (name, type);
 }
 
 /* See reggroups.h.  */
@@ -52,12 +67,9 @@ const reggroup *
 reggroup_gdbarch_new (struct gdbarch *gdbarch, const char *name,
 		      enum reggroup_type type)
 {
-  struct reggroup *group = GDBARCH_OBSTACK_ZALLOC (gdbarch,
-						   struct reggroup);
-
-  group->name = gdbarch_obstack_strdup (gdbarch, name);
-  group->type = type;
-  return group;
+  name = gdbarch_obstack_strdup (gdbarch, name);
+  return obstack_new<struct reggroup> (gdbarch_obstack (gdbarch),
+				       name, type);
 }
 
 /* Register group attributes.  */
@@ -65,13 +77,13 @@ reggroup_gdbarch_new (struct gdbarch *gdbarch, const char *name,
 const char *
 reggroup_name (const struct reggroup *group)
 {
-  return group->name;
+  return group->name ();
 }
 
 enum reggroup_type
 reggroup_type (const struct reggroup *group)
 {
-  return group->type;
+  return group->type ();
 }
 
 /* A container holding all the register groups for a particular
@@ -194,7 +206,7 @@ reggroup_find (struct gdbarch *gdbarch, const char *name)
 {
   for (const struct reggroup *group : gdbarch_reggroups (gdbarch))
     {
-      if (strcmp (name, reggroup_name (group)) == 0)
+      if (strcmp (name, group->name ()) == 0)
 	return group;
     }
   return NULL;
@@ -212,12 +224,12 @@ reggroups_dump (struct gdbarch *gdbarch, struct ui_file *file)
   for (const struct reggroup *group : gdbarch_reggroups (gdbarch))
     {
       /* Group name.  */
-      const char *name = reggroup_name (group);
+      const char *name = group->name ();
 
       /* Group type.  */
       const char *type;
 
-      switch (reggroup_type (group))
+      switch (group->type ())
 	{
 	case USER_REGGROUP:
 	  type = "user";
