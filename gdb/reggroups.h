@@ -24,7 +24,17 @@
 
 struct gdbarch;
 
-enum reggroup_type { USER_REGGROUP, INTERNAL_REGGROUP };
+/* The different register group types.  */
+enum reggroup_type {
+  /* Used for any register group that should be visible to the user.
+     Architecture specific register groups, as well as most of the default
+     groups will have this type.  */
+  USER_REGGROUP,
+
+  /* Used for a few groups that GDB uses while managing machine state.
+     These groups are mostly hidden from the user.  */
+  INTERNAL_REGGROUP
+};
 
 /* Individual register group.  */
 
@@ -73,7 +83,7 @@ extern const reggroup *reggroup_gdbarch_new (struct gdbarch *gdbarch,
 					     const char *name,
 					     enum reggroup_type type);
 
-/* Add a register group (with attribute values) to the pre-defined list.  */
+/* Add register group GROUP to the list of register groups for GDBARCH.  */
 extern void reggroup_add (struct gdbarch *gdbarch, const reggroup *group);
 
 /* Return the list of all register groups for GDBARCH.  */

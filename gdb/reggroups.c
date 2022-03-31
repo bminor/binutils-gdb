@@ -28,6 +28,8 @@
 #include "gdbcmd.h"		/* For maintenanceprintlist.  */
 #include "gdbsupport/gdb_obstack.h"
 
+/* See reggroups.h.  */
+
 const reggroup *
 reggroup_new (const char *name, enum reggroup_type type)
 {
@@ -82,9 +84,11 @@ private:
   std::vector<const struct reggroup *> m_groups;
 };
 
+/* Key used to lookup register group data from a gdbarch.  */
+
 static struct gdbarch_data *reggroups_data;
 
-/* Add GROUP to the list of register groups for GDBARCH.  */
+/* See reggroups.h.  */
 
 void
 reggroup_add (struct gdbarch *gdbarch, const reggroup *group)
@@ -128,7 +132,8 @@ gdbarch_reggroups (struct gdbarch *gdbarch)
   return groups->groups ();
 }
 
-/* Is REGNUM a member of REGGROUP?  */
+/* See reggroups.h.  */
+
 int
 default_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 			     const struct reggroup *group)
@@ -206,6 +211,8 @@ reggroups_dump (struct gdbarch *gdbarch, struct ui_file *file)
       gdb_printf (file, fmt, name, type);
     }
 }
+
+/* Implement 'maintenance print reggroups' command.  */
 
 static void
 maintenance_print_reggroups (const char *args, int from_tty)
