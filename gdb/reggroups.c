@@ -190,7 +190,7 @@ reggroup_prev (struct gdbarch *gdbarch, const struct reggroup *curr)
 /* Is REGNUM a member of REGGROUP?  */
 int
 default_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			     struct reggroup *group)
+			     const struct reggroup *group)
 {
   int vector_p;
   int float_p;

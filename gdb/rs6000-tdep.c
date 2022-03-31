@@ -2642,7 +2642,7 @@ rs6000_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 
 static int
 rs6000_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-				   struct reggroup *group)
+				   const struct reggroup *group)
 {
   ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 

@@ -322,7 +322,7 @@ ia64_ext_type (struct gdbarch *gdbarch)
 
 static int
 ia64_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			  struct reggroup *group)
+			  const struct reggroup *group)
 {
   int vector_p;
   int float_p;

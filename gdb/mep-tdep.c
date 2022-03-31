@@ -1028,7 +1028,7 @@ static struct reggroup *mep_ccr_reggroup; /* coprocessor control */
 
 static int
 mep_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			 struct reggroup *group)
+			 const struct reggroup *group)
 {
   /* Filter reserved or unused register numbers.  */
   {

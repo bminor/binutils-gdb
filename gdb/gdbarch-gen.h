@@ -833,8 +833,8 @@ extern void set_gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarc
 
 /* Is a register in a group */
 
-typedef int (gdbarch_register_reggroup_p_ftype) (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
-extern int gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
+typedef int (gdbarch_register_reggroup_p_ftype) (struct gdbarch *gdbarch, int regnum, const struct reggroup *reggroup);
+extern int gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, const struct reggroup *reggroup);
 extern void set_gdbarch_register_reggroup_p (struct gdbarch *gdbarch, gdbarch_register_reggroup_p_ftype *register_reggroup_p);
 
 /* Fetch the pointer to the ith function argument. */

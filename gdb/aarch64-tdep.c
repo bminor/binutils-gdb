@@ -2695,7 +2695,7 @@ aarch64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 
 static int
 aarch64_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-				    struct reggroup *group)
+				    const struct reggroup *group)
 {
   aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 

@@ -755,7 +755,7 @@ xtensa_add_reggroups (struct gdbarch *gdbarch)
 }
 
 static int 
-xtensa_coprocessor_register_group (struct reggroup *group)
+xtensa_coprocessor_register_group (const struct reggroup *group)
 {
   int i;
 
@@ -776,7 +776,7 @@ xtensa_coprocessor_register_group (struct reggroup *group)
 static int
 xtensa_register_reggroup_p (struct gdbarch *gdbarch,
 			    int regnum,
-			    struct reggroup *group)
+			    const struct reggroup *group)
 {
   xtensa_gdbarch_tdep *tdep = (xtensa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   xtensa_register_t* reg = &tdep->regmap[regnum];

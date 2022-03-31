@@ -698,7 +698,7 @@ mips_register_name (struct gdbarch *gdbarch, int regno)
 
 static int
 mips_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			  struct reggroup *reggroup)
+			  const struct reggroup *reggroup)
 {
   int vector_p;
   int float_p;
@@ -738,7 +738,7 @@ mips_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 
 static int
 mips_tdesc_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-				struct reggroup *reggroup)
+				const struct reggroup *reggroup)
 {
   int rawnum = regnum % gdbarch_num_regs (gdbarch);
   int pseudo = regnum / gdbarch_num_regs (gdbarch);

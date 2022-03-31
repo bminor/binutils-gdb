@@ -203,7 +203,7 @@ msp430_register_name (struct gdbarch *gdbarch, int regnr)
 
 static int
 msp430_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			    struct reggroup *group)
+			    const struct reggroup *group)
 {
   if (group == all_reggroup)
     return 1;

@@ -252,7 +252,7 @@ m32c_debug_info_reg_to_regnum (struct gdbarch *gdbarch, int reg_nr)
 
 static int
 m32c_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			  struct reggroup *group)
+			  const struct reggroup *group)
 {
   m32c_gdbarch_tdep *tdep = (m32c_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct m32c_reg *reg = &tdep->regs[regnum];

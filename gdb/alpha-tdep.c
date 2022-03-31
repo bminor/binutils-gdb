@@ -139,7 +139,7 @@ alpha_register_type (struct gdbarch *gdbarch, int regno)
 
 static int
 alpha_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			   struct reggroup *group)
+			   const struct reggroup *group)
 {
   /* Filter out any registers eliminated, but whose regnum is 
      reserved for backward compatibility, e.g. the vfp.  */

@@ -1372,7 +1372,7 @@ m68hc11_add_reggroups (struct gdbarch *gdbarch)
 
 static int
 m68hc11_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			     struct reggroup *group)
+			     const struct reggroup *group)
 {
   /* We must save the real hard register as well as gcc
      soft registers including the frame pointer.  */

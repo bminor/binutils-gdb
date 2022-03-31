@@ -9105,7 +9105,7 @@ arm_elf_osabi_sniffer (bfd *abfd)
 
 static int
 arm_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			  struct reggroup *group)
+			 const struct reggroup *group)
 {
   /* FPS register's type is INT, but belongs to float_reggroup.  Beside
      this, FPS register belongs to save_regroup, restore_reggroup, and

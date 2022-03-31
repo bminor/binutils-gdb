@@ -368,7 +368,7 @@ nds32_add_reggroups (struct gdbarch *gdbarch)
 
 static int
 nds32_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			   struct reggroup *reggroup)
+			   const struct reggroup *reggroup)
 {
   const char *reg_name;
   const char *group_name;

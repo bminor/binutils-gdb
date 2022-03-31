@@ -54,7 +54,7 @@
    group.  Put the LINUX_ORIG_EAX register in the system group.  */
 static int
 i386_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-				struct reggroup *group)
+				const struct reggroup *group)
 {
   if (regnum == I386_LINUX_ORIG_EAX_REGNUM)
     return (group == system_reggroup

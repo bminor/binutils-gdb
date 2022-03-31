@@ -4557,7 +4557,7 @@ i386_add_reggroups (struct gdbarch *gdbarch)
 
 int
 i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			  struct reggroup *group)
+			  const struct reggroup *group)
 {
   const i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int fp_regnum_p, mmx_regnum_p, xmm_regnum_p, mxcsr_regnum_p,

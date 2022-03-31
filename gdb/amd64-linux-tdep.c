@@ -279,7 +279,7 @@ static int amd64_linux_sc_reg_offset[] =
 
 static int
 amd64_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-				 struct reggroup *group)
+				 const struct reggroup *group)
 { 
   if (regnum == AMD64_LINUX_ORIG_RAX_REGNUM
       || regnum == AMD64_FSBASE_REGNUM

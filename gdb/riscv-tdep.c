@@ -1271,7 +1271,7 @@ riscv_is_unknown_csr (struct gdbarch *gdbarch, int regnum)
 
 static int
 riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
-			   struct reggroup *reggroup)
+			   const struct reggroup *reggroup)
 {
   /* Used by 'info registers' and 'info registers <groupname>'.  */
 

@@ -1460,7 +1460,7 @@ Is a register in a group
 """,
     type="int",
     name="register_reggroup_p",
-    params=[("int", "regnum"), ("struct reggroup *", "reggroup")],
+    params=[("int", "regnum"), ("const struct reggroup *", "reggroup")],
     predefault="default_register_reggroup_p",
     invalid=False,
 )

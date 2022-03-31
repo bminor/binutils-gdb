@@ -2063,7 +2063,7 @@ csky_add_reggroups (struct gdbarch *gdbarch)
 
 static int
 csky_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			  struct reggroup *reggroup)
+			  const struct reggroup *reggroup)
 {
   int raw_p;
 

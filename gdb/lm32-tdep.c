@@ -73,7 +73,7 @@ lm32_add_reggroups (struct gdbarch *gdbarch)
 
 static int
 lm32_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			  struct reggroup *group)
+			  const struct reggroup *group)
 {
   if (group == general_reggroup)
     return ((regnum >= SIM_LM32_R0_REGNUM) && (regnum <= SIM_LM32_RA_REGNUM))

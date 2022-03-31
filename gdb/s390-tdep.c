@@ -1440,7 +1440,7 @@ s390_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
 static int
 s390_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-				 struct reggroup *group)
+				 const struct reggroup *group)
 {
   s390_gdbarch_tdep *tdep = (s390_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 

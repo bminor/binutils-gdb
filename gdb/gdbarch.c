@@ -3632,7 +3632,7 @@ set_gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup)
+gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, const struct reggroup *reggroup)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->register_reggroup_p != NULL);
