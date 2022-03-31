@@ -183,6 +183,8 @@ windows_process_info::handle_exception (struct target_waitstatus *ourstatus,
   thread_rec (ptid_t (current_event.dwProcessId, current_event.dwThreadId, 0),
 	      DONT_SUSPEND);
 
+  last_sig = GDB_SIGNAL_0;
+
   switch (code)
     {
     case EXCEPTION_ACCESS_VIOLATION:
@@ -243,8 +245,10 @@ windows_process_info::handle_exception (struct target_waitstatus *ourstatus,
 	     on startup, first a BREAKPOINT for the 64bit ntdll.dll,
 	     then a WX86_BREAKPOINT for the 32bit ntdll.dll.
 	     Here we only care about the WX86_BREAKPOINT's.  */
+	  DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_BREAKPOINT - ignore_first_breakpoint");
 	  ourstatus->set_spurious ();
 	  ignore_first_breakpoint = false;
+	  break;
 	}
       else if (wow64_process)
 	{
@@ -255,7 +259,7 @@ windows_process_info::handle_exception (struct target_waitstatus *ourstatus,
 	     gdb lets the target process continue.
 	     So handle it as SIGINT instead, then the target is stopped
 	     unconditionally.  */
-	  DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_BREAKPOINT");
+	  DEBUG_EXCEPTION_SIMPLE ("EXCEPTION_BREAKPOINT - wow64_process");
 	  rec->ExceptionCode = DBG_CONTROL_C;
 	  ourstatus->set_stopped (GDB_SIGNAL_INT);
 	  break;
