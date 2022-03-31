@@ -2877,14 +2877,13 @@ windows_xfer_shared_libraries (struct target_ops *ops,
 			       ULONGEST offset, ULONGEST len,
 			       ULONGEST *xfered_len)
 {
-  struct obstack obstack;
+  auto_obstack obstack;
   const char *buf;
   LONGEST len_avail;
 
   if (writebuf)
     return TARGET_XFER_E_IO;
 
-  obstack_init (&obstack);
   obstack_grow_str (&obstack, "<library-list>\n");
   for (windows_solib &so : solibs)
     windows_xfer_shared_library (so.name.c_str (),
@@ -2904,7 +2903,6 @@ windows_xfer_shared_libraries (struct target_ops *ops,
       memcpy (readbuf, buf + offset, len);
     }
 
-  obstack_free (&obstack, NULL);
   *xfered_len = (ULONGEST) len;
   return len != 0 ? TARGET_XFER_OK : TARGET_XFER_EOF;
 }
