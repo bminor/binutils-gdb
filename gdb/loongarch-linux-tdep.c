@@ -25,6 +25,8 @@
 #include "loongarch-tdep.h"
 #include "solib-svr4.h"
 #include "target-descriptions.h"
+#include "trad-frame.h"
+#include "tramp-frame.h"
 
 /* Unpack an elf_gregset_t into GDB's register cache.  */
 
@@ -117,6 +119,50 @@ const struct regset loongarch_gregset =
   loongarch_fill_gregset,
 };
 
+/* Implement the "init" method of struct tramp_frame.  */
+
+#define LOONGARCH_RT_SIGFRAME_UCONTEXT_OFFSET	128
+#define LOONGARCH_UCONTEXT_SIGCONTEXT_OFFSET	176
+
+static void
+loongarch_linux_rt_sigframe_init (const struct tramp_frame *self,
+				  struct frame_info *this_frame,
+				  struct trad_frame_cache *this_cache,
+				  CORE_ADDR func)
+{
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  auto regs = tdep->regs;
+
+  CORE_ADDR frame_sp = get_frame_sp (this_frame);
+  CORE_ADDR sigcontext_base = (frame_sp + LOONGARCH_RT_SIGFRAME_UCONTEXT_OFFSET
+			       + LOONGARCH_UCONTEXT_SIGCONTEXT_OFFSET);
+
+  trad_frame_set_reg_addr (this_cache, regs.pc, sigcontext_base);
+  for (int i = 0; i < 32; i++)
+    trad_frame_set_reg_addr (this_cache, regs.r + i, sigcontext_base + 8 + i * 8);
+
+  trad_frame_set_id (this_cache, frame_id_build (frame_sp, func));
+}
+
+/* li.w    a7, __NR_rt_sigreturn  */
+#define LOONGARCH_INST_LIW_A7_RT_SIGRETURN	0x03822c0b
+/* syscall 0  */
+#define LOONGARCH_INST_SYSCALL			0x002b0000
+
+static const struct tramp_frame loongarch_linux_rt_sigframe =
+{
+  SIGTRAMP_FRAME,
+  4,
+  {
+    { LOONGARCH_INST_LIW_A7_RT_SIGRETURN, ULONGEST_MAX },
+    { LOONGARCH_INST_SYSCALL, ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
+  },
+  loongarch_linux_rt_sigframe_init,
+  NULL
+};
+
 /* Initialize LoongArch Linux ABI info.  */
 
 static void
@@ -134,8 +180,12 @@ loongarch_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* GNU/Linux uses the dynamic linker included in the GNU C Library.  */
   set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
+
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch, svr4_fetch_objfile_link_map);
+
+  /* Prepend tramp frame unwinder for signal.  */
+  tramp_frame_prepend_unwinder (gdbarch, &loongarch_linux_rt_sigframe);
 }
 
 /* Initialize LoongArch Linux target support.  */
