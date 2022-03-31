@@ -1619,11 +1619,11 @@ This GDB was configured as follows:\n\
 #endif
 
 #if CXX_STD_THREAD
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --enable-threading\n\
 "));
 #else
-  fprintf_filtered (stream, _("\
+  gdb_print (stream, _("\
 	     --disable-threading\n\
 "));
 #endif
