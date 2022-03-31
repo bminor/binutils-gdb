@@ -402,6 +402,9 @@ public:
   {
   }
 
+  bool can_emit_style_escape () override
+  { return m_stream->can_emit_style_escape (); }
+
   DISABLE_COPY_AND_ASSIGN (timestamped_file);
 
   void write (const char *buf, long len) override;

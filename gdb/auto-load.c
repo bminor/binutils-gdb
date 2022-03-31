@@ -733,8 +733,8 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
   gdb_file_up input = gdb_fopen_cloexec (filename.c_str (), "r");
   debugfile = filename.c_str ();
 
-  auto_load_debug_printf ("Attempted file \"%s\" %s.",
-			  debugfile,
+  auto_load_debug_printf ("Attempted file \"%ps\" %s.",
+			  styled_string (file_name_style.style (), debugfile),
 			  input != nullptr ? "exists" : "does not exist");
 
   std::string debugfile_holder;
@@ -763,8 +763,9 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 
 	  input = gdb_fopen_cloexec (debugfile, "r");
 
-	  auto_load_debug_printf ("Attempted file \"%s\" %s.",
-				  debugfile,
+	  auto_load_debug_printf ("Attempted file \"%ps\" %s.",
+				  styled_string (file_name_style.style (),
+						 debugfile),
 				  (input != nullptr
 				   ? "exists"
 				   : "does not exist"));
