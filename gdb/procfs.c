@@ -45,6 +45,7 @@
 #include "observable.h"
 #include "gdbsupport/scoped_fd.h"
 #include "gdbsupport/pathstuff.h"
+#include "gdbsupport/buildargv.h"
 
 /* This module provides the interface between GDB and the
    /proc file system, which is used on many versions of Unix
