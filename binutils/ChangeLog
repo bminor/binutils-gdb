@@ -1,3 +1,8 @@
+2022-04-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* readelf.c (get_freebsd_elfcore_note_type): Handle
+	NT_FREEBSD_X86_SEGBASES.
+
 2022-03-31  Nick Clifton  <nickc@redhat.com>
 
 	* arlex.l: Accept the plus character as part of a filename.

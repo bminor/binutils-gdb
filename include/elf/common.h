@@ -738,6 +738,7 @@
 #define	NT_FREEBSD_PROCSTAT_PSSTRINGS	15	/* Procstat ps_strings data. */
 #define	NT_FREEBSD_PROCSTAT_AUXV	16	/* Procstat auxv data. */
 #define	NT_FREEBSD_PTLWPINFO	17	/* Thread ptrace miscellaneous info. */
+#define	NT_FREEBSD_X86_SEGBASES	0x200	/* x86 segment base registers */
 
 /* Note segments for core files on NetBSD systems.  Note name
    must start with "NetBSD-CORE".  */

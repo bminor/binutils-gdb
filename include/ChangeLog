@@ -1,3 +1,7 @@
+2022-04-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf/common.h (NT_FREEBSD_X86_SEGBASES): Define.
+
 2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
 
 	* elf/amdgpu.h: Add relocation values.
