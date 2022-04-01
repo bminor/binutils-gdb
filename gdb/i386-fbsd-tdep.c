@@ -350,16 +350,13 @@ i386fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
   i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct regcache *regcache;
 
-  if (tdep->fsbase_regnum == -1)
-    error (_("Unable to fetch %%gsbase"));
-
   regcache = get_thread_arch_regcache (current_inferior ()->process_target (),
 				       ptid, gdbarch);
 
-  target_fetch_registers (regcache, tdep->fsbase_regnum + 1);
+  target_fetch_registers (regcache, I386_GSBASE_REGNUM);
 
   ULONGEST gsbase;
-  if (regcache->cooked_read (tdep->fsbase_regnum + 1, &gsbase) != REG_VALID)
+  if (regcache->cooked_read (I386_GSBASE_REGNUM, &gsbase) != REG_VALID)
     error (_("Unable to fetch %%gsbase"));
 
   CORE_ADDR dtv_addr = gsbase + gdbarch_ptr_bit (gdbarch) / 8;
