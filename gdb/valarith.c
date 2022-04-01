@@ -1070,6 +1070,66 @@ complex_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   return value_literal_complex (result_real, result_imag, result_type);
 }
 
+/* Return the type's length in bits.  */
+
+static int
+type_length_bits (type *type)
+{
+  int unit_size = gdbarch_addressable_memory_unit_size (type->arch ());
+  return unit_size * 8 * TYPE_LENGTH (type);
+}
+
+/* Check whether the RHS value of a shift is valid in C/C++ semantics.
+   SHIFT_COUNT is the shift amount, SHIFT_COUNT_TYPE is the type of
+   the shift count value, used to determine whether the type is
+   signed, and RESULT_TYPE is the result type.  This is used to avoid
+   both negative and too-large shift amounts, which are undefined, and
+   would crash a GDB built with UBSan.  Depending on the current
+   language, if the shift is not valid, this either warns and returns
+   false, or errors out.  Returns true if valid.  */
+
+static bool
+check_valid_shift_count (int op, type *result_type,
+			 type *shift_count_type, ULONGEST shift_count)
+{
+  if (!shift_count_type->is_unsigned () && (LONGEST) shift_count < 0)
+    {
+      auto error_or_warning = [] (const char *msg)
+      {
+	/* Shifts by a negative amount are always an error in Go.  Other
+	   languages are more permissive and their compilers just warn or
+	   have modes to disable the errors.  */
+	if (current_language->la_language == language_go)
+	  error (("%s"), msg);
+	else
+	  warning (("%s"), msg);
+      };
+
+      if (op == BINOP_RSH)
+	error_or_warning (_("right shift count is negative"));
+      else
+	error_or_warning (_("left shift count is negative"));
+      return false;
+    }
+
+  if (shift_count >= type_length_bits (result_type))
+    {
+      /* In Go, shifting by large amounts is defined.  Be silent and
+	 still return false, as the caller's error path does the right
+	 thing for Go.  */
+      if (current_language->la_language != language_go)
+	{
+	  if (op == BINOP_RSH)
+	    warning (_("right shift count >= width of type"));
+	  else
+	    warning (_("left shift count >= width of type"));
+	}
+      return false;
+    }
+
+  return true;
+}
+
 /* Perform a binary operation on two operands which have reasonable
    representations as integers or floats.  This includes booleans,
    characters, integers, or floats.
@@ -1233,11 +1293,17 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      break;
 
 	    case BINOP_LSH:
-	      v = v1 << v2;
+	      if (!check_valid_shift_count (op, result_type, type2, v2))
+		v = 0;
+	      else
+		v = v1 << v2;
 	      break;
 
 	    case BINOP_RSH:
-	      v = v1 >> v2;
+	      if (!check_valid_shift_count (op, result_type, type2, v2))
+		v = 0;
+	      else
+		v = v1 >> v2;
 	      break;
 
 	    case BINOP_BITWISE_AND:
@@ -1362,11 +1428,40 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      break;
 
 	    case BINOP_LSH:
-	      v = v1 << v2;
+	      if (!check_valid_shift_count (op, result_type, type2, v2))
+		v = 0;
+	      else
+		{
+		  /* Cast to unsigned to avoid undefined behavior on
+		     signed shift overflow (unless C++20 or later),
+		     which would crash GDB when built with UBSan.
+		     Note we don't warn on left signed shift overflow,
+		     because starting with C++20, that is actually
+		     defined behavior.  Also, note GDB assumes 2's
+		     complement throughout.  */
+		  v = (ULONGEST) v1 << v2;
+		}
 	      break;
 
 	    case BINOP_RSH:
-	      v = v1 >> v2;
+	      if (!check_valid_shift_count (op, result_type, type2, v2))
+		{
+		  /* Pretend the too-large shift was decomposed in a
+		     number of smaller shifts.  An arithmetic signed
+		     right shift of a negative number always yields -1
+		     with such semantics.  This is the right thing to
+		     do for Go, and we might as well do it for
+		     languages where it is undefined.  Also, pretend a
+		     shift by a negative number was a shift by the
+		     negative number cast to unsigned, which is the
+		     same as shifting by a too-large number.  */
+		  if (v1 < 0)
+		    v = -1;
+		  else
+		    v = 0;
+		}
+	      else
+		v = v1 >> v2;
 	      break;
 
 	    case BINOP_BITWISE_AND:
