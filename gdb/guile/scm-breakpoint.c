@@ -353,8 +353,8 @@ gdbscm_make_breakpoint (SCM location_scm, SCM rest)
   char *location;
   int type_arg_pos = -1, access_type_arg_pos = -1,
       internal_arg_pos = -1, temporary_arg_pos = -1;
-  enum bptype type = bp_breakpoint;
-  enum target_hw_bp_type access_type = hw_write;
+  int type = bp_breakpoint;
+  int access_type = hw_write;
   int internal = 0;
   int temporary = 0;
   SCM result;
@@ -403,7 +403,7 @@ gdbscm_make_breakpoint (SCM location_scm, SCM rest)
     case bp_access_watchpoint:
     case bp_catchpoint:
       {
-	const char *type_name = bpscm_type_to_string (type);
+	const char *type_name = bpscm_type_to_string ((enum bptype) type);
 	gdbscm_misc_error (FUNC_NAME, type_arg_pos,
 			   gdbscm_scm_from_c_string (type_name),
 			   _("unsupported breakpoint type"));
@@ -417,8 +417,8 @@ gdbscm_make_breakpoint (SCM location_scm, SCM rest)
 
   bp_smob->is_scheme_bkpt = 1;
   bp_smob->spec.location = location;
-  bp_smob->spec.type = type;
-  bp_smob->spec.access_type = access_type;
+  bp_smob->spec.type = (enum bptype) type;
+  bp_smob->spec.access_type = (enum target_hw_bp_type) access_type;
   bp_smob->spec.is_internal = internal;
   bp_smob->spec.is_temporary = temporary;
 
