@@ -902,6 +902,35 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 		regs[bits (insn, 0, 3)] = addr;
 	    }
 
+	  /* vstmdb Rn{!}, { D-registers } (aka vpush).  */
+	  else if ((insn & 0xff20) == 0xed20
+		   && (inst2 & 0x0f00) == 0x0b00
+		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
+	    {
+	      /* Address SP points to.  */
+	      pv_t addr = regs[bits (insn, 0, 3)];
+
+	      /* Number of registers saved.  */
+	      unsigned int number = bits (inst2, 0, 7) >> 1;
+
+	      /* First register to save.  */
+	      int vd = bits (inst2, 12, 15) | (bits (insn, 6, 6) << 4);
+
+	      if (stack.store_would_trash (addr))
+		break;
+
+	      /* Calculate offsets of saved registers.  */
+	      for (; number > 0; number--)
+		{
+		  addr = pv_add_constant (addr, -8);
+		  stack.store (addr, 8, pv_register (ARM_D0_REGNUM
+						     + vd + number, 0));
+		}
+
+	      /* Writeback SP to account for the saved registers.  */
+	      regs[bits (insn, 0, 3)] = addr;
+	    }
+
 	  else if ((insn & 0xff50) == 0xe940	/* strd Rt, Rt2,
 						   [Rn, #+/-imm]{!} */
 		   && pv_is_register (regs[bits (insn, 0, 3)], ARM_SP_REGNUM))
