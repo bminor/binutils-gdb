@@ -1,3 +1,7 @@
+2022-04-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_freebsd_note): Remove checks for namesz.
+
 2022-03-18  Viorel Preoteasa  <viorel.preoteasa@gmail.com>
 
 	PR 28924
