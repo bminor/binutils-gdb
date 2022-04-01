@@ -254,7 +254,7 @@ debuginfod_source_query (const unsigned char *build_id,
 					&dname));
   debuginfod_set_user_data (c, nullptr);
 
-  if (debuginfod_verbose > 0 && fd.get () < 0 && fd.get () != -ENOENT)
+  if (fd.get () < 0 && fd.get () != -ENOENT)
     gdb_printf (_("Download failed: %s.  Continuing without source file %ps.\n"),
 		safe_strerror (-fd.get ()),
 		styled_string (file_name_style.style (),  srcpath));
@@ -296,7 +296,7 @@ debuginfod_debuginfo_query (const unsigned char *build_id,
 					   &dname));
   debuginfod_set_user_data (c, nullptr);
 
-  if (debuginfod_verbose > 0 && fd.get () < 0 && fd.get () != -ENOENT)
+  if (fd.get () < 0 && fd.get () != -ENOENT)
     gdb_printf (_("Download failed: %s.  Continuing without debug info for %ps.\n"),
 		safe_strerror (-fd.get ()),
 		styled_string (file_name_style.style (),  filename));
@@ -337,7 +337,7 @@ debuginfod_exec_query (const unsigned char *build_id,
   scoped_fd fd (debuginfod_find_executable (c, build_id, build_id_len, &dname));
   debuginfod_set_user_data (c, nullptr);
 
-  if (debuginfod_verbose > 0 && fd.get () < 0 && fd.get () != -ENOENT)
+  if (fd.get () < 0 && fd.get () != -ENOENT)
     gdb_printf (_("Download failed: %s. " \
 		  "Continuing without executable for %ps.\n"),
 		safe_strerror (-fd.get ()),
