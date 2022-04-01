@@ -1,3 +1,7 @@
+2022-04-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_freebsd_note): Remove checks for namesz.
+
 2022-03-22  Steiner H Gunderson  <steinar+sourceware@gunderson.no>
 
 	* dwarf2.c (_bfd_dwarf2_find_nearest_line): if a function name is

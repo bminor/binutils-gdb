@@ -11010,10 +11010,7 @@ elfcore_grok_freebsd_note (bfd *abfd, Elf_Internal_Note *note)
       return elfcore_grok_freebsd_psinfo (abfd, note);
 
     case NT_FREEBSD_THRMISC:
-      if (note->namesz == 8)
-	return elfcore_make_note_pseudosection (abfd, ".thrmisc", note);
-      else
-	return true;
+      return elfcore_make_note_pseudosection (abfd, ".thrmisc", note);
 
     case NT_FREEBSD_PROCSTAT_PROC:
       return elfcore_make_note_pseudosection (abfd, ".note.freebsdcore.proc",
@@ -11031,10 +11028,7 @@ elfcore_grok_freebsd_note (bfd *abfd, Elf_Internal_Note *note)
       return elfcore_make_auxv_note_section (abfd, note, 4);
 
     case NT_X86_XSTATE:
-      if (note->namesz == 8)
-	return elfcore_grok_xstatereg (abfd, note);
-      else
-	return true;
+      return elfcore_grok_xstatereg (abfd, note);
 
     case NT_FREEBSD_PTLWPINFO:
       return elfcore_make_note_pseudosection (abfd, ".note.freebsdcore.lwpinfo",
