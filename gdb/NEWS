@@ -14,6 +14,15 @@
   emit to indicate where a breakpoint should be placed to break in a function
   past its prologue.
 
+* New commands
+
+maintenance set ignore-prologue-end-flag on|off
+maintenance show ignore-prologue-end-flag
+  This setting, which is off by default, controls whether GDB ignores the
+  PROLOGUE-END flag from the line-table when skipping prologue.  This can be
+  used to force GDB to use prologue analyzers if the line-table is constructed
+  from erroneous debug information.
+
 * Changed commands
 
 maintenance info line-table

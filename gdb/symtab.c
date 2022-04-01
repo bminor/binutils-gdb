@@ -288,6 +288,10 @@ static const char *const multiple_symbols_modes[] =
 };
 static const char *multiple_symbols_mode = multiple_symbols_all;
 
+/* When TRUE, ignore the prologue-end flag in linetable_entry when searching
+   for the SAL past a function prologue.  */
+static bool ignore_prologue_end_flag = false;
+
 /* Read-only accessor to AUTO_SELECT_MODE.  */
 
 const char *
@@ -3941,7 +3945,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
 
       /* Check if the compiler explicitly indicated where a breakpoint should
          be placed to skip the prologue.  */
-      if (skip)
+      if (!ignore_prologue_end_flag && skip)
 	{
 	  gdb::optional<CORE_ADDR> linetable_pc
 	    = skip_prologue_using_linetable (pc);
@@ -7112,6 +7116,19 @@ If zero then the symbol cache is disabled."),
 			     set_symbol_cache_size_handler, NULL,
 			     &maintenance_set_cmdlist,
 			     &maintenance_show_cmdlist);
+
+  add_setshow_boolean_cmd ("ignore-prologue-end-flag", no_class,
+			   &ignore_prologue_end_flag,
+			   _("Set if the PROLOGUE-END flag is ignored."),
+			   _("Show if the PROLOGUE-END flag is ignored."),
+			   _("\
+The PROLOGUE-END flag from the line-table entries is used to place \
+breakpoints past the prologue of functions.  Disabeling its use use forces \
+the use of prologue scanners."),
+			   nullptr, nullptr,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
+
 
   add_cmd ("symbol-cache", class_maintenance, maintenance_print_symbol_cache,
 	   _("Dump the symbol cache for each program space."),

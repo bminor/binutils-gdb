@@ -19857,6 +19857,19 @@ when collecting performance data.  The command @code{maint
 flush-symbol-cache} is deprecated in favor of @code{maint flush
 symbol-cache}..
 
+@kindex maint set ignore-prologue-end-flag
+@cindex prologue-end
+@item maint set ignore-prologue-end-flag [on|off]
+Enable or disable the use of the @samp{PROLOGUE-END} flag from the line-table.
+When @samp{off} (the default), @value{GDBN} uses the @samp{PROLOGUE-END} flag
+to place breakpoints past the end of a function prologue.  When @samp{on},
+@value{GDBN} ignores the flag and relies on prologue analyzers to skip function
+prologues.
+
+@kindex maint show ignore-prologue-end-flag
+@item maint show ignore-prologue-end-flag
+Show whether @value{GDBN} will ignore the @samp{PROLOGUE-END} flag.
+
 @end table
 
 @node Altering

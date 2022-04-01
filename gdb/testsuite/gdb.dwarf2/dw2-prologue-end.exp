@@ -89,3 +89,17 @@ if ![runto_main] {
 
 set prologue_end_line [gdb_get_line_number "main assign o"]
 gdb_test "frame" ".*main \\\(\\\) at \[^\r\n\]*:$prologue_end_line\r\n.*"
+
+with_test_prefix "ignore-prologue-end" {
+    clean_restart $binfile
+    gdb_test_no_output "maintenance set ignore-prologue-end-flag on"
+
+    if ![runto_main] {
+	return -1
+    }
+
+    # If we ignore the prologue-end flag, we should stop at the first statement
+    # of main which assigns m.
+    set prologue_end_line [gdb_get_line_number "main assign m"]
+    gdb_test "frame" ".*main \\\(\\\) at \[^\r\n\]*:$prologue_end_line\r\n.*"
+}
