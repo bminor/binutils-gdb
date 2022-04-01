@@ -125,10 +125,17 @@ struct arm_gdbarch_tdep : gdbarch_tdep
 				   register.  */
   int pacbti_pseudo_count = 0;	/* Total number of PACBTI pseudo registers.  */
 
-  int m_profile_msp_regnum = 0;	/* M-profile MSP register number.  */
-  int m_profile_psp_regnum = 0;	/* M-profile PSP register number.  */
+  int m_profile_msp_regnum = ARM_SP_REGNUM;	/* M-profile MSP register number.  */
+  int m_profile_psp_regnum = ARM_SP_REGNUM;	/* M-profile PSP register number.  */
+
+  /* Secure and Non-secure stack pointers with security extension.  */
+  int m_profile_msp_ns_regnum = ARM_SP_REGNUM;	/* M-profile MSP_NS register number.  */
+  int m_profile_psp_ns_regnum = ARM_SP_REGNUM;	/* M-profile PSP_NS register number.  */
+  int m_profile_msp_s_regnum = ARM_SP_REGNUM;	/* M-profile MSP_S register number.  */
+  int m_profile_psp_s_regnum = ARM_SP_REGNUM;	/* M-profile PSP_S register number.  */
 
   bool is_m = false;		/* Does the target follow the "M" profile.  */
+  bool have_sec_ext = false;	/* Do we have security extensions?  */
   CORE_ADDR lowest_pc = 0;	/* Lowest address at which instructions
 				   will appear.  */
 

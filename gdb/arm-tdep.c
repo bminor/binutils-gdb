@@ -276,7 +276,18 @@ struct arm_prologue_cache
   /* The stack pointer at the time this frame was created; i.e. the
      caller's stack pointer when this function was called.  It is used
      to identify this frame.  */
-  CORE_ADDR prev_sp;
+  CORE_ADDR sp;
+
+  /* Additional stack pointers used by M-profile with Security extension.  */
+  /* Use msp_s / psp_s to hold the values of msp / psp when there is
+     no Security extension.  */
+  CORE_ADDR msp_s;
+  CORE_ADDR msp_ns;
+  CORE_ADDR psp_s;
+  CORE_ADDR psp_ns;
+
+  /* Active stack pointer.  */
+  int active_sp_regnum;
 
   /* The frame base for this frame is just prev_sp - frame size.
      FRAMESIZE is the distance from the frame pointer to the
@@ -296,12 +307,28 @@ struct arm_prologue_cache
   arm_prologue_cache() = default;
 };
 
+/* Initialize stack pointers, and flag the active one.  */
+
+static inline void
+arm_cache_init_sp (int regnum, CORE_ADDR* member,
+				      struct arm_prologue_cache *cache,
+				      struct frame_info *frame)
+{
+  CORE_ADDR val = get_frame_register_unsigned (frame, regnum);
+  if (val == cache->sp)
+    cache->active_sp_regnum = regnum;
+
+  *member = val;
+}
+
 /* Initialize CACHE fields for which zero is not adequate (CACHE is
    expected to have been ZALLOC'ed before calling this function).  */
 
 static void
 arm_cache_init (struct arm_prologue_cache *cache, struct gdbarch *gdbarch)
 {
+  cache->active_sp_regnum = ARM_SP_REGNUM;
+
   cache->saved_regs = trad_frame_alloc_saved_regs (gdbarch);
 }
 
@@ -311,8 +338,109 @@ static void
 arm_cache_init (struct arm_prologue_cache *cache, struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   arm_cache_init (cache, gdbarch);
+
+  if (tdep->have_sec_ext)
+    {
+      arm_cache_init_sp (tdep->m_profile_msp_s_regnum, &cache->msp_s, cache, frame);
+      arm_cache_init_sp (tdep->m_profile_psp_s_regnum, &cache->psp_s, cache, frame);
+      arm_cache_init_sp (tdep->m_profile_msp_ns_regnum, &cache->msp_ns, cache, frame);
+      arm_cache_init_sp (tdep->m_profile_psp_ns_regnum, &cache->psp_ns, cache, frame);
+
+      /* Use MSP_S as default stack pointer.  */
+      if (cache->active_sp_regnum == ARM_SP_REGNUM)
+	  cache->active_sp_regnum = tdep->m_profile_msp_s_regnum;
+    }
+  else if (tdep->is_m)
+    {
+      arm_cache_init_sp (tdep->m_profile_msp_regnum, &cache->msp_s, cache, frame);
+      arm_cache_init_sp (tdep->m_profile_psp_regnum, &cache->psp_s, cache, frame);
+    }
+  else
+    arm_cache_init_sp (ARM_SP_REGNUM, &cache->msp_s, cache, frame);
+}
+
+/* Return the requested stack pointer value (in REGNUM), taking into
+   account whether we have a Security extension or an M-profile
+   CPU.  */
+
+static CORE_ADDR
+arm_cache_get_sp_register (struct arm_prologue_cache *cache,
+			   arm_gdbarch_tdep *tdep, int regnum)
+{
+  if (regnum == ARM_SP_REGNUM)
+    return cache->sp;
+
+  if (tdep->have_sec_ext)
+    {
+      if (regnum == tdep->m_profile_msp_s_regnum)
+	return cache->msp_s;
+      if (regnum == tdep->m_profile_msp_ns_regnum)
+	return cache->msp_ns;
+      if (regnum == tdep->m_profile_psp_s_regnum)
+	return cache->psp_s;
+      if (regnum == tdep->m_profile_psp_ns_regnum)
+	return cache->psp_ns;
+    }
+  else if (tdep->is_m)
+    {
+      if (regnum == tdep->m_profile_msp_regnum)
+	return cache->msp_s;
+      if (regnum == tdep->m_profile_psp_regnum)
+	return cache->psp_s;
+    }
+
+  gdb_assert_not_reached ("Invalid SP selection");
+}
+
+/* Return the previous stack address, depending on which SP register
+   is active.  */
+
+static CORE_ADDR
+arm_cache_get_prev_sp_value (struct arm_prologue_cache *cache, arm_gdbarch_tdep *tdep)
+{
+  CORE_ADDR val = arm_cache_get_sp_register (cache, tdep, cache->active_sp_regnum);
+  return val;
+}
+
+/* Set the active stack pointer to VAL.  */
+
+static void
+arm_cache_set_active_sp_value (struct arm_prologue_cache *cache,
+			       arm_gdbarch_tdep *tdep, CORE_ADDR val)
+{
+  if (cache->active_sp_regnum == ARM_SP_REGNUM)
+    {
+      cache->sp = val;
+      return;
+    }
+
+  if (tdep->have_sec_ext)
+    {
+      if (cache->active_sp_regnum == tdep->m_profile_msp_s_regnum)
+	cache->msp_s = val;
+      else if (cache->active_sp_regnum == tdep->m_profile_msp_ns_regnum)
+	cache->msp_ns = val;
+      else if (cache->active_sp_regnum == tdep->m_profile_psp_s_regnum)
+	cache->psp_s = val;
+      else if (cache->active_sp_regnum == tdep->m_profile_psp_ns_regnum)
+	cache->psp_ns = val;
+
+      return;
+    }
+  else if (tdep->is_m)
+    {
+      if (cache->active_sp_regnum == tdep->m_profile_msp_regnum)
+	cache->msp_s = val;
+      else if (cache->active_sp_regnum == tdep->m_profile_psp_regnum)
+	cache->psp_s = val;
+
+      return;
+    }
+
+  gdb_assert_not_reached ("Invalid SP selection");
 }
 
 namespace {
@@ -2010,14 +2138,17 @@ arm_make_prologue_cache (struct frame_info *this_frame)
   if (unwound_fp == 0)
     return cache;
 
-  cache->prev_sp = unwound_fp + cache->framesize;
+  arm_gdbarch_tdep *tdep =
+    (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+
+  arm_cache_set_active_sp_value (cache, tdep, unwound_fp + cache->framesize);
 
   /* Calculate actual addresses of saved registers using offsets
      determined by arm_scan_prologue.  */
   for (reg = 0; reg < gdbarch_num_regs (get_frame_arch (this_frame)); reg++)
     if (cache->saved_regs[reg].is_addr ())
       cache->saved_regs[reg].set_addr (cache->saved_regs[reg].addr ()
-				       + cache->prev_sp);
+				       + arm_cache_get_prev_sp_value (cache, tdep));
 
   return cache;
 }
@@ -2043,7 +2174,7 @@ arm_prologue_unwind_stop_reason (struct frame_info *this_frame,
     return UNWIND_OUTERMOST;
 
   /* If we've hit a wall, stop.  */
-  if (cache->prev_sp == 0)
+  if (arm_cache_get_prev_sp_value (cache, tdep) == 0)
     return UNWIND_OUTERMOST;
 
   return UNWIND_NO_REASON;
@@ -2065,6 +2196,9 @@ arm_prologue_this_id (struct frame_info *this_frame,
     *this_cache = arm_make_prologue_cache (this_frame);
   cache = (struct arm_prologue_cache *) *this_cache;
 
+  arm_gdbarch_tdep *tdep
+    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+
   /* Use function start address as part of the frame ID.  If we cannot
      identify the start address (due to missing symbol information),
      fall back to just using the current PC.  */
@@ -2073,7 +2207,7 @@ arm_prologue_this_id (struct frame_info *this_frame,
   if (!func)
     func = pc;
 
-  id = frame_id_build (cache->prev_sp, func);
+  id = frame_id_build (arm_cache_get_prev_sp_value (cache, tdep), func);
   *this_id = id;
 }
 
@@ -2114,7 +2248,8 @@ arm_prologue_prev_register (struct frame_info *this_frame,
      identified by the next frame's stack pointer at the time of the call.
      The value was already reconstructed into PREV_SP.  */
   if (prev_regnum == ARM_SP_REGNUM)
-    return frame_unwind_got_constant (this_frame, prev_regnum, cache->prev_sp);
+    return frame_unwind_got_constant (this_frame, prev_regnum,
+				      arm_cache_get_prev_sp_value (cache, tdep));
 
   /* The CPSR may have been changed by the call instruction and by the
      called function.  The only bit we can reconstruct is the T bit,
@@ -2752,7 +2887,9 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
     = vsp - get_frame_register_unsigned (this_frame, cache->framereg);
 
   /* We already got the previous SP.  */
-  cache->prev_sp = vsp;
+  arm_gdbarch_tdep *tdep
+    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+  arm_cache_set_active_sp_value (cache, tdep, vsp);
 
   return cache;
 }
@@ -2875,14 +3012,18 @@ arm_make_epilogue_frame_cache (struct frame_info *this_frame)
   arm_scan_prologue (this_frame, cache);
 
   /* Since we are in epilogue, the SP has been restored.  */
-  cache->prev_sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
+  arm_gdbarch_tdep *tdep
+    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+  arm_cache_set_active_sp_value (cache, tdep,
+				 get_frame_register_unsigned (this_frame,
+							      ARM_SP_REGNUM));
 
   /* Calculate actual addresses of saved registers using offsets
      determined by arm_scan_prologue.  */
   for (reg = 0; reg < gdbarch_num_regs (get_frame_arch (this_frame)); reg++)
     if (cache->saved_regs[reg].is_addr ())
       cache->saved_regs[reg].set_addr (cache->saved_regs[reg].addr ()
-				       + cache->prev_sp);
+				       + arm_cache_get_prev_sp_value (cache, tdep));
 
   return cache;
 }
@@ -2910,7 +3051,9 @@ arm_epilogue_frame_this_id (struct frame_info *this_frame,
   if (func == 0)
     func = pc;
 
-  (*this_id) = frame_id_build (cache->prev_sp, pc);
+  arm_gdbarch_tdep *tdep
+    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+  *this_id = frame_id_build (arm_cache_get_prev_sp_value (cache, tdep), pc);
 }
 
 /* Implementation of function hook 'prev_register' in
@@ -3032,7 +3175,11 @@ arm_make_stub_cache (struct frame_info *this_frame)
   cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
   arm_cache_init (cache, this_frame);
 
-  cache->prev_sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
+  arm_gdbarch_tdep *tdep
+    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+  arm_cache_set_active_sp_value (cache, tdep,
+				 get_frame_register_unsigned (this_frame,
+							      ARM_SP_REGNUM));
 
   return cache;
 }
@@ -3050,7 +3197,10 @@ arm_stub_this_id (struct frame_info *this_frame,
     *this_cache = arm_make_stub_cache (this_frame);
   cache = (struct arm_prologue_cache *) *this_cache;
 
-  *this_id = frame_id_build (cache->prev_sp, get_frame_pc (this_frame));
+  arm_gdbarch_tdep *tdep
+    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+  *this_id = frame_id_build (arm_cache_get_prev_sp_value (cache, tdep),
+			     get_frame_pc (this_frame));
 }
 
 static int
@@ -3171,12 +3321,12 @@ arm_m_exception_cache (struct frame_info *this_frame)
       cache->saved_regs[ARM_FPSCR_REGNUM].set_addr (unwound_sp + 0x60);
 
       /* Offset 0x64 is reserved.  */
-      cache->prev_sp = unwound_sp + 0x68;
+      arm_cache_set_active_sp_value (cache, tdep, unwound_sp + 0x68);
     }
   else
     {
       /* Standard stack frame type used.  */
-      cache->prev_sp = unwound_sp + 0x20;
+      arm_cache_set_active_sp_value (cache, tdep, unwound_sp + 0x20);
     }
 
   /* Check EXC_RETURN bit S if Secure or Non-secure stack used.  */
@@ -3198,7 +3348,8 @@ arm_m_exception_cache (struct frame_info *this_frame)
      previous context's stack pointer.  */
   if (safe_read_memory_integer (unwound_sp + 28, 4, byte_order, &xpsr)
       && (xpsr & (1 << 9)) != 0)
-    cache->prev_sp += 4;
+    arm_cache_set_active_sp_value (cache, tdep,
+				   arm_cache_get_prev_sp_value (cache, tdep) + 4);
 
   return cache;
 }
@@ -3218,7 +3369,9 @@ arm_m_exception_this_id (struct frame_info *this_frame,
   cache = (struct arm_prologue_cache *) *this_cache;
 
   /* Our frame ID for a stub frame is the current SP and LR.  */
-  *this_id = frame_id_build (cache->prev_sp,
+  arm_gdbarch_tdep *tdep
+    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+  *this_id = frame_id_build (arm_cache_get_prev_sp_value (cache, tdep),
 			     get_frame_pc (this_frame));
 }
 
@@ -3237,9 +3390,11 @@ arm_m_exception_prev_register (struct frame_info *this_frame,
   cache = (struct arm_prologue_cache *) *this_cache;
 
   /* The value was already reconstructed into PREV_SP.  */
+  arm_gdbarch_tdep *tdep
+    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
   if (prev_regnum == ARM_SP_REGNUM)
     return frame_unwind_got_constant (this_frame, prev_regnum,
-				      cache->prev_sp);
+				      arm_cache_get_prev_sp_value (cache, tdep));
 
   return trad_frame_get_prev_register (this_frame, cache->saved_regs,
 				       prev_regnum);
@@ -3284,7 +3439,9 @@ arm_normal_frame_base (struct frame_info *this_frame, void **this_cache)
     *this_cache = arm_make_prologue_cache (this_frame);
   cache = (struct arm_prologue_cache *) *this_cache;
 
-  return cache->prev_sp - cache->framesize;
+  arm_gdbarch_tdep *tdep
+    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+  return arm_cache_get_prev_sp_value (cache, tdep) - cache->framesize;
 }
 
 struct frame_base arm_normal_base = {
@@ -9249,6 +9406,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdesc_arch_data_up tdesc_data;
   int i;
   bool is_m = false;
+  bool have_sec_ext = false;
   int vfp_register_count = 0;
   bool have_s_pseudos = false, have_q_pseudos = false;
   bool have_wmmx_registers = false;
@@ -9263,6 +9421,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   bool have_m_profile_msp = false;
   int m_profile_msp_regnum = -1;
   int m_profile_psp_regnum = -1;
+  int m_profile_msp_ns_regnum = -1;
+  int m_profile_psp_ns_regnum = -1;
+  int m_profile_msp_s_regnum = -1;
+  int m_profile_psp_s_regnum = -1;
 
   /* If we have an object to base this architecture on, try to determine
      its ABI.  */
@@ -9679,6 +9841,56 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		 keys.  */
 	      have_pacbti = true;
 	    }
+
+	  /* Do we have the Security extension?  */
+	  feature = tdesc_find_feature (tdesc,
+					"org.gnu.gdb.arm.secext");
+	  if (feature != nullptr)
+	    {
+	      /* Secure/Non-secure stack pointers.  */
+	      /* MSP_NS */
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
+						 register_count, "msp_ns");
+	      if (!valid_p)
+		{
+		  warning (_("M-profile secext feature is missing required register msp_ns."));
+		  return nullptr;
+		}
+	      m_profile_msp_ns_regnum = register_count++;
+
+	      /* PSP_NS */
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
+						 register_count, "psp_ns");
+	      if (!valid_p)
+		{
+		  warning (_("M-profile secext feature is missing required register psp_ns."));
+		  return nullptr;
+		}
+	      m_profile_psp_ns_regnum = register_count++;
+
+	      /* MSP_S */
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
+						 register_count, "msp_s");
+	      if (!valid_p)
+		{
+		  warning (_("M-profile secext feature is missing required register msp_s."));
+		  return nullptr;
+		}
+	      m_profile_msp_s_regnum = register_count++;
+
+	      /* PSP_S */
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
+						 register_count, "psp_s");
+	      if (!valid_p)
+		{
+		  warning (_("M-profile secext feature is missing required register psp_s."));
+		  return nullptr;
+		}
+	      m_profile_psp_s_regnum = register_count++;
+
+	      have_sec_ext = true;
+	    }
+
 	}
     }
 
@@ -9725,6 +9937,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->arm_abi = arm_abi;
   tdep->fp_model = fp_model;
   tdep->is_m = is_m;
+  tdep->have_sec_ext = have_sec_ext;
   tdep->have_fpa_registers = have_fpa_registers;
   tdep->have_wmmx_registers = have_wmmx_registers;
   gdb_assert (vfp_register_count == 0
@@ -9750,6 +9963,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     {
       tdep->m_profile_msp_regnum = m_profile_msp_regnum;
       tdep->m_profile_psp_regnum = m_profile_psp_regnum;
+      tdep->m_profile_msp_ns_regnum = m_profile_msp_ns_regnum;
+      tdep->m_profile_psp_ns_regnum = m_profile_psp_ns_regnum;
+      tdep->m_profile_msp_s_regnum = m_profile_msp_s_regnum;
+      tdep->m_profile_psp_s_regnum = m_profile_psp_s_regnum;
     }
 
   arm_register_g_packet_guesses (gdbarch);
@@ -10041,6 +10258,14 @@ arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 	      tdep->m_profile_msp_regnum);
   gdb_printf (file, _("arm_dump_tdep: m_profile_psp_regnum = %i\n"),
 	      tdep->m_profile_psp_regnum);
+  gdb_printf (file, _("arm_dump_tdep: m_profile_msp_ns_regnum = %i\n"),
+	      tdep->m_profile_msp_ns_regnum);
+  gdb_printf (file, _("arm_dump_tdep: m_profile_psp_ns_regnum = %i\n"),
+	      tdep->m_profile_psp_ns_regnum);
+  gdb_printf (file, _("arm_dump_tdep: m_profile_msp_s_regnum = %i\n"),
+	      tdep->m_profile_msp_s_regnum);
+  gdb_printf (file, _("arm_dump_tdep: m_profile_psp_s_regnum = %i\n"),
+	      tdep->m_profile_psp_s_regnum);
   gdb_printf (file, _("arm_dump_tdep: Lowest pc = 0x%lx\n"),
 	      (unsigned long) tdep->lowest_pc);
   gdb_printf (file, _("arm_dump_tdep: have_pacbti = %s\n"),
