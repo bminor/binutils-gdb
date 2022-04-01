@@ -1,5 +1,14 @@
 2022-04-01  John Baldwin  <jhb@FreeBSD.org>
 
+	* elf-bfd.h (elfcore_write_x86_segbases): New.
+	* elf.c (elfcore_grok_freebsd_note): Add pseudosections for
+	NT_FREEBSD_X86_SEGBASES register notes.
+	(elfcore_write_x86_segbases): New.
+	(elfcore_write_register_note): Write NT_FREEBSD_X86_SEGBASES
+	register notes.
+
+2022-04-01  John Baldwin  <jhb@FreeBSD.org>
+
 	* elf.c (elfcore_grok_freebsd_note): Remove checks for namesz.
 
 2022-03-22  Steiner H Gunderson  <steinar+sourceware@gunderson.no>
