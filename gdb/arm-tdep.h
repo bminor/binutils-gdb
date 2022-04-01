@@ -125,6 +125,9 @@ struct arm_gdbarch_tdep : gdbarch_tdep
 				   register.  */
   int pacbti_pseudo_count = 0;	/* Total number of PACBTI pseudo registers.  */
 
+  int m_profile_msp_regnum = 0;	/* M-profile MSP register number.  */
+  int m_profile_psp_regnum = 0;	/* M-profile PSP register number.  */
+
   bool is_m = false;		/* Does the target follow the "M" profile.  */
   CORE_ADDR lowest_pc = 0;	/* Lowest address at which instructions
 				   will appear.  */

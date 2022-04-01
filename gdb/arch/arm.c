@@ -28,6 +28,7 @@
 #include "../features/arm/arm-m-profile.c"
 #include "../features/arm/arm-m-profile-with-fpa.c"
 #include "../features/arm/arm-m-profile-mve.c"
+#include "../features/arm/arm-m-system.c"
 
 /* See arm.h.  */
 
@@ -444,6 +445,11 @@ arm_create_mprofile_target_description (arm_m_profile_type m_type)
       regnum = create_feature_arm_arm_m_profile (tdesc, regnum);
       regnum = create_feature_arm_arm_vfpv2 (tdesc, regnum);
       regnum = create_feature_arm_arm_m_profile_mve (tdesc, regnum);
+      break;
+
+    case ARM_M_TYPE_SYSTEM:
+      regnum = create_feature_arm_arm_m_profile (tdesc, regnum);
+      regnum = create_feature_arm_arm_m_system (tdesc, regnum);
       break;
 
     default:

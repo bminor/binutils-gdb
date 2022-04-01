@@ -105,6 +105,7 @@ enum arm_m_profile_type {
    ARM_M_TYPE_VFP_D16,
    ARM_M_TYPE_WITH_FPA,
    ARM_M_TYPE_MVE,
+   ARM_M_TYPE_SYSTEM,
    ARM_M_TYPE_INVALID
 };
 

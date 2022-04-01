@@ -3076,9 +3076,9 @@ arm_m_exception_cache (struct frame_info *this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   struct arm_prologue_cache *cache;
   CORE_ADDR lr;
-  CORE_ADDR sp;
   CORE_ADDR unwound_sp;
   LONGEST xpsr;
   uint32_t exc_return;
@@ -3094,7 +3094,6 @@ arm_m_exception_cache (struct frame_info *this_frame)
      to the exception and if FPU is used (causing extended stack frame).  */
 
   lr = get_frame_register_unsigned (this_frame, ARM_LR_REGNUM);
-  sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
 
   /* Check EXC_RETURN indicator bits.  */
   exc_return = (((lr >> 28) & 0xf) == 0xf);
@@ -3103,37 +3102,13 @@ arm_m_exception_cache (struct frame_info *this_frame)
   process_stack_used = ((lr & (1 << 2)) != 0);
   if (exc_return && process_stack_used)
     {
-      /* Thread (process) stack used.
-	 Potentially this could be other register defined by target, but PSP
-	 can be considered a standard name for the "Process Stack Pointer".
-	 To be fully aware of system registers like MSP and PSP, these could
-	 be added to a separate XML arm-m-system-profile that is valid for
-	 ARMv6-M and ARMv7-M architectures. Also to be able to debug eg a
-	 corefile off-line, then these registers must be defined by GDB,
-	 and also be included in the corefile regsets.  */
-
-      int psp_regnum = user_reg_map_name_to_regnum (gdbarch, "psp", -1);
-      if (psp_regnum == -1)
-	{
-	  /* Thread (process) stack could not be fetched,
-	     give warning and exit.  */
-
-	  warning (_("no PSP thread stack unwinding supported."));
-
-	  /* Terminate any further stack unwinding by refer to self.  */
-	  cache->prev_sp = sp;
-	  return cache;
-	}
-      else
-	{
-	  /* Thread (process) stack used, use PSP as SP.  */
-	  unwound_sp = get_frame_register_unsigned (this_frame, psp_regnum);
-	}
+      /* Thread (process) stack used, use PSP as SP.  */
+      unwound_sp = get_frame_register_unsigned (this_frame, tdep->m_profile_psp_regnum);
     }
   else
     {
       /* Main stack used, use MSP as SP.  */
-      unwound_sp = sp;
+      unwound_sp = get_frame_register_unsigned (this_frame, tdep->m_profile_msp_regnum);
     }
 
   /* The hardware saves eight 32-bit words, comprising xPSR,
@@ -9188,6 +9163,10 @@ arm_register_g_packet_guesses (struct gdbarch *gdbarch)
       register_remote_g_packet_guess (gdbarch, ARM_CORE_REGS_SIZE
 				      + ARM_VFP2_REGS_SIZE
 				      + ARM_INT_REGISTER_SIZE, tdesc);
+
+      /* M-profile system (stack pointers).  */
+      tdesc = arm_read_mprofile_description (ARM_M_TYPE_SYSTEM);
+      register_remote_g_packet_guess (gdbarch, 2 * ARM_INT_REGISTER_SIZE, tdesc);
     }
 
   /* Otherwise we don't have a useful guess.  */
@@ -9260,6 +9239,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   bool have_pacbti = false;
   int mve_vpr_regnum = -1;
   int register_count = ARM_NUM_REGS;
+  bool have_m_profile_msp = false;
+  int m_profile_msp_regnum = -1;
+  int m_profile_psp_regnum = -1;
 
   /* If we have an object to base this architecture on, try to determine
      its ABI.  */
@@ -9490,6 +9472,35 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (!valid_p)
 	return NULL;
 
+      if (is_m)
+	{
+	  feature = tdesc_find_feature (tdesc,
+					"org.gnu.gdb.arm.m-system");
+	  if (feature != nullptr)
+	    {
+	      /* MSP */
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
+						  register_count, "msp");
+	      if (!valid_p)
+		{
+		  warning (_("M-profile m-system feature is missing required register msp."));
+		  return nullptr;
+		}
+	      have_m_profile_msp = true;
+	      m_profile_msp_regnum = register_count++;
+
+	      /* PSP */
+	      valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
+						  register_count, "psp");
+	      if (!valid_p)
+		{
+		  warning (_("M-profile m-system feature is missing required register psp."));
+		  return nullptr;
+		}
+	      m_profile_psp_regnum = register_count++;
+	    }
+	}
+
       feature = tdesc_find_feature (tdesc,
 				    "org.gnu.gdb.arm.fpa");
       if (feature != NULL)
@@ -9712,6 +9723,13 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Adjust the PACBTI feature settings.  */
   tdep->have_pacbti = have_pacbti;
+
+  /* Adjust the M-profile stack pointers settings.  */
+  if (have_m_profile_msp)
+    {
+      tdep->m_profile_msp_regnum = m_profile_msp_regnum;
+      tdep->m_profile_psp_regnum = m_profile_psp_regnum;
+    }
 
   arm_register_g_packet_guesses (gdbarch);
 
@@ -9998,6 +10016,10 @@ arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 	      tdep->mve_pseudo_base);
   gdb_printf (file, _("arm_dump_tdep: mve_pseudo_count = %i\n"),
 	      tdep->mve_pseudo_count);
+  gdb_printf (file, _("arm_dump_tdep: m_profile_msp_regnum = %i\n"),
+	      tdep->m_profile_msp_regnum);
+  gdb_printf (file, _("arm_dump_tdep: m_profile_psp_regnum = %i\n"),
+	      tdep->m_profile_psp_regnum);
   gdb_printf (file, _("arm_dump_tdep: Lowest pc = 0x%lx\n"),
 	      (unsigned long) tdep->lowest_pc);
   gdb_printf (file, _("arm_dump_tdep: have_pacbti = %s\n"),
