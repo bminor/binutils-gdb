@@ -5214,6 +5214,11 @@ show arm force-mode
   the current CPSR value for instructions without symbols; previous
   versions of GDB behaved as if "set arm fallback-mode arm".
 
+set arm unwind-secure-frames
+  Enable unwinding from Non-secure to Secure mode on Cortex-M with
+  Security extension.
+  This can trigger security exceptions when unwinding exception stacks.
+
 set disable-randomization
 show disable-randomization
   Standalone programs run with the virtual address space randomization enabled

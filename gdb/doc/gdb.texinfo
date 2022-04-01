@@ -25133,6 +25133,16 @@ of @samp{set arm fallback-mode}.
 @item show arm force-mode
 Show the current forced instruction mode.
 
+@item set arm unwind-secure-frames
+This command enables unwinding from Non-secure to Secure mode on
+Cortex-M with Security extension.
+This can trigger security exceptions when unwinding the exception
+stack.
+It is enabled by default.
+
+@item show arm unwind-secure-frames
+Show whether unwinding from Non-secure to Secure mode is enabled.
+
 @item set debug arm
 Toggle whether to display ARM-specific debugging messages from the ARM
 target support subsystem.

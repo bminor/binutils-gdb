@@ -443,6 +443,40 @@ arm_cache_set_active_sp_value (struct arm_prologue_cache *cache,
   gdb_assert_not_reached ("Invalid SP selection");
 }
 
+/* Return true if REGNUM is one of the stack pointers.  */
+
+static bool
+arm_cache_is_sp_register (struct arm_prologue_cache *cache,
+			  arm_gdbarch_tdep *tdep, int regnum)
+{
+  if ((regnum == ARM_SP_REGNUM)
+      || (regnum == tdep->m_profile_msp_regnum)
+      || (regnum == tdep->m_profile_msp_s_regnum)
+      || (regnum == tdep->m_profile_msp_ns_regnum)
+      || (regnum == tdep->m_profile_psp_regnum)
+      || (regnum == tdep->m_profile_psp_s_regnum)
+      || (regnum == tdep->m_profile_psp_ns_regnum))
+    return true;
+  else
+    return false;
+}
+
+/* Set the active stack pointer to SP_REGNUM.  */
+
+static void
+arm_cache_switch_prev_sp (struct arm_prologue_cache *cache,
+			  arm_gdbarch_tdep *tdep, int sp_regnum)
+{
+  gdb_assert (sp_regnum != ARM_SP_REGNUM);
+  gdb_assert (arm_cache_is_sp_register (cache, tdep, sp_regnum));
+
+  if (tdep->have_sec_ext)
+    gdb_assert (sp_regnum != tdep->m_profile_msp_regnum
+		&& sp_regnum != tdep->m_profile_psp_regnum);
+
+  cache->active_sp_regnum = sp_regnum;
+}
+
 namespace {
 
 /* Abstract class to read ARM instructions from memory.  */
@@ -479,6 +513,7 @@ static CORE_ADDR arm_analyze_prologue
 /* See arm-tdep.h.  */
 
 bool arm_apcs_32 = true;
+bool arm_unwind_secure_frames = true;
 
 /* Return the bit mask in ARM_PS_REGNUM that indicates Thumb mode.  */
 
@@ -695,28 +730,43 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
    0xFFFFFFBC    Return to Thread mode using the process stack.  */
 
 static int
-arm_m_addr_is_magic (CORE_ADDR addr)
+arm_m_addr_is_magic (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
-  switch (addr)
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  if (tdep->have_sec_ext)
     {
-      /* Values from ARMv8-M Architecture Technical Reference.  */
-      case 0xffffffb0:
-      case 0xffffffb8:
-      case 0xffffffbc:
-      /* Values from Tables in B1.5.8 the EXC_RETURN definitions of
-	 the exception return behavior.  */
-      case 0xffffffe1:
-      case 0xffffffe9:
-      case 0xffffffed:
-      case 0xfffffff1:
-      case 0xfffffff9:
-      case 0xfffffffd:
-	/* Address is magic.  */
-	return 1;
+      switch ((addr & 0xff000000))
+	{
+	case 0xff000000: /* EXC_RETURN pattern.  */
+	case 0xfe000000: /* FNC_RETURN pattern.  */
+	  return 1;
+	default:
+	  return 0;
+	}
+    }
+  else
+    {
+      switch (addr)
+	{
+	  /* Values from ARMv8-M Architecture Technical Reference.  */
+	case 0xffffffb0:
+	case 0xffffffb8:
+	case 0xffffffbc:
+	  /* Values from Tables in B1.5.8 the EXC_RETURN definitions of
+	     the exception return behavior.  */
+	case 0xffffffe1:
+	case 0xffffffe9:
+	case 0xffffffed:
+	case 0xfffffff1:
+	case 0xfffffff9:
+	case 0xfffffffd:
+	  /* Address is magic.  */
+	  return 1;
 
-      default:
-	/* Address is not magic.  */
-	return 0;
+	default:
+	  /* Address is not magic.  */
+	  return 0;
+	}
     }
 }
 
@@ -728,7 +778,7 @@ arm_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR val)
 
   /* On M-profile devices, do not strip the low bit from EXC_RETURN
      (the magic exception return address).  */
-  if (tdep->is_m && arm_m_addr_is_magic (val))
+  if (tdep->is_m && arm_m_addr_is_magic (gdbarch, val))
     return val;
 
   if (arm_apcs_32)
@@ -2218,6 +2268,7 @@ arm_prologue_prev_register (struct frame_info *this_frame,
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct arm_prologue_cache *cache;
+  CORE_ADDR sp_value;
 
   if (*this_cache == NULL)
     *this_cache = arm_make_prologue_cache (this_frame);
@@ -2250,6 +2301,14 @@ arm_prologue_prev_register (struct frame_info *this_frame,
   if (prev_regnum == ARM_SP_REGNUM)
     return frame_unwind_got_constant (this_frame, prev_regnum,
 				      arm_cache_get_prev_sp_value (cache, tdep));
+
+  /* The value might be one of the alternative SP, if so, use the
+     value already constructed.  */
+  if (arm_cache_is_sp_register (cache, tdep, prev_regnum))
+    {
+      sp_value = arm_cache_get_sp_register (cache, tdep, prev_regnum);
+      return frame_unwind_got_constant (this_frame, prev_regnum, sp_value);
+    }
 
   /* The CPSR may have been changed by the call instruction and by the
      called function.  The only bit we can reconstruct is the T bit,
@@ -3246,16 +3305,20 @@ static struct arm_prologue_cache *
 arm_m_exception_cache (struct frame_info *this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct arm_prologue_cache *cache;
   CORE_ADDR lr;
+  CORE_ADDR sp;
   CORE_ADDR unwound_sp;
+  uint32_t sp_r0_offset = 0;
   LONGEST xpsr;
   uint32_t exc_return;
-  uint32_t process_stack_used;
+  bool fnc_return;
   uint32_t extended_frame_used;
-  uint32_t secure_stack_used;
+  bool secure_stack_used = false;
+  bool default_callee_register_stacking = false;
+  bool exception_domain_is_secure = false;
 
   cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
   arm_cache_init (cache, this_frame);
@@ -3265,35 +3328,123 @@ arm_m_exception_cache (struct frame_info *this_frame)
      to the exception and if FPU is used (causing extended stack frame).  */
 
   lr = get_frame_register_unsigned (this_frame, ARM_LR_REGNUM);
+  sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
 
-  /* Check EXC_RETURN indicator bits.  */
-  exc_return = (((lr >> 28) & 0xf) == 0xf);
-
-  /* Check EXC_RETURN bit SPSEL if Main or Thread (process) stack used.  */
-  process_stack_used = ((lr & (1 << 2)) != 0);
-  if (exc_return && process_stack_used)
+  fnc_return = ((lr & 0xfffffffe) == 0xfefffffe);
+  if (tdep->have_sec_ext && fnc_return)
     {
-      /* Thread (process) stack used, use PSP as SP.  */
-      unwound_sp = get_frame_register_unsigned (this_frame, tdep->m_profile_psp_regnum);
+      int actual_sp;
+
+      arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_msp_ns_regnum);
+      arm_cache_set_active_sp_value (cache, tdep, sp);
+      if (lr & 1)
+	actual_sp = tdep->m_profile_msp_s_regnum;
+      else
+	actual_sp = tdep->m_profile_msp_ns_regnum;
+
+      arm_cache_switch_prev_sp (cache, tdep, actual_sp);
+      sp = get_frame_register_unsigned (this_frame, actual_sp);
+
+      cache->saved_regs[ARM_LR_REGNUM].set_addr (sp);
+
+      arm_cache_set_active_sp_value (cache, tdep, sp + 8);
+
+      return cache;
+    }
+
+  /* Check EXC_RETURN indicator bits (24-31).  */
+  exc_return = (((lr >> 24) & 0xff) == 0xff);
+  if (exc_return)
+    {
+      /* Check EXC_RETURN bit SPSEL if Main or Thread (process) stack used.  */
+      bool process_stack_used = ((lr & (1 << 2)) != 0);
+
+      if (tdep->have_sec_ext)
+	{
+	  secure_stack_used = ((lr & (1 << 6)) != 0);
+	  default_callee_register_stacking = ((lr & (1 << 5)) != 0);
+	  exception_domain_is_secure = ((lr & (1 << 0)) == 0);
+
+	  /* Unwinding from non-secure to secure can trip security
+	     measures.  In order to avoid the debugger being
+	     intrusive, rely on the user to configure the requested
+	     mode.  */
+	  if (secure_stack_used && !exception_domain_is_secure
+	      && !arm_unwind_secure_frames)
+	    {
+	      warning (_("Non-secure to secure stack unwinding disabled."));
+
+	      /* Terminate any further stack unwinding by referring to self.  */
+	      arm_cache_set_active_sp_value (cache, tdep, sp);
+	      return cache;
+	    }
+
+	  if (process_stack_used)
+	    {
+	      if (secure_stack_used)
+		/* Secure thread (process) stack used, use PSP_S as SP.  */
+		arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_psp_s_regnum);
+	      else
+		/* Non-secure thread (process) stack used, use PSP_NS as SP.  */
+		arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_psp_ns_regnum);
+	    }
+	  else
+	    {
+	      if (secure_stack_used)
+		/* Secure main stack used, use MSP_S as SP.  */
+		arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_msp_s_regnum);
+	      else
+		/* Non-secure main stack used, use MSP_NS as SP.  */
+		arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_msp_ns_regnum);
+	    }
+	}
+      else
+	{
+	  if (process_stack_used)
+	    /* Thread (process) stack used, use PSP as SP.  */
+	    arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_psp_regnum);
+	  else
+	    /* Main stack used, use MSP as SP.  */
+	    arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_msp_regnum);
+	}
     }
   else
     {
       /* Main stack used, use MSP as SP.  */
-      unwound_sp = get_frame_register_unsigned (this_frame, tdep->m_profile_msp_regnum);
+      arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_msp_regnum);
+    }
+
+  /* Fetch the SP to use for this frame.  */
+  unwound_sp = arm_cache_get_prev_sp_value (cache, tdep);
+
+  /* With the Security extension, the hardware saves R4..R11 too.  */
+  if (exc_return && tdep->have_sec_ext && secure_stack_used
+      && (!default_callee_register_stacking || exception_domain_is_secure))
+    {
+      /* Read R4..R11 from the integer callee registers.  */
+      cache->saved_regs[4].set_addr (unwound_sp + 0x08);
+      cache->saved_regs[5].set_addr (unwound_sp + 0x0C);
+      cache->saved_regs[6].set_addr (unwound_sp + 0x10);
+      cache->saved_regs[7].set_addr (unwound_sp + 0x14);
+      cache->saved_regs[8].set_addr (unwound_sp + 0x18);
+      cache->saved_regs[9].set_addr (unwound_sp + 0x1C);
+      cache->saved_regs[10].set_addr (unwound_sp + 0x20);
+      cache->saved_regs[11].set_addr (unwound_sp + 0x24);
+      sp_r0_offset = 0x28;
     }
 
   /* The hardware saves eight 32-bit words, comprising xPSR,
      ReturnAddress, LR (R14), R12, R3, R2, R1, R0.  See details in
      "B1.5.6 Exception entry behavior" in
      "ARMv7-M Architecture Reference Manual".  */
-  cache->saved_regs[0].set_addr (unwound_sp);
-  cache->saved_regs[1].set_addr (unwound_sp + 4);
-  cache->saved_regs[2].set_addr (unwound_sp + 8);
-  cache->saved_regs[3].set_addr (unwound_sp + 12);
-  cache->saved_regs[ARM_IP_REGNUM].set_addr (unwound_sp + 16);
-  cache->saved_regs[ARM_LR_REGNUM].set_addr (unwound_sp + 20);
-  cache->saved_regs[ARM_PC_REGNUM].set_addr (unwound_sp + 24);
-  cache->saved_regs[ARM_PS_REGNUM].set_addr (unwound_sp + 28);
+  cache->saved_regs[0].set_addr (unwound_sp + sp_r0_offset);
+  cache->saved_regs[1].set_addr (unwound_sp + sp_r0_offset + 4);
+  cache->saved_regs[2].set_addr (unwound_sp + sp_r0_offset + 8);
+  cache->saved_regs[3].set_addr (unwound_sp + sp_r0_offset + 12);
+  cache->saved_regs[ARM_IP_REGNUM].set_addr (unwound_sp + sp_r0_offset + 16);
+  cache->saved_regs[ARM_LR_REGNUM].set_addr (unwound_sp + sp_r0_offset + 20);
+  cache->saved_regs[ARM_PC_REGNUM].set_addr (unwound_sp + sp_r0_offset + 24);
+  cache->saved_regs[ARM_PS_REGNUM].set_addr (unwound_sp + sp_r0_offset + 28);
 
   /* Check EXC_RETURN bit FTYPE if extended stack frame (FPU regs stored)
      type used.  */
@@ -3312,41 +3463,43 @@ arm_m_exception_cache (struct frame_info *this_frame)
 	 This register is located at address 0xE000EF34.  */
 
       /* Extended stack frame type used.  */
-      fpu_regs_stack_offset = unwound_sp + 0x20;
+      fpu_regs_stack_offset = unwound_sp + sp_r0_offset + 0x20;
       for (i = 0; i < 16; i++)
 	{
 	  cache->saved_regs[ARM_D0_REGNUM + i].set_addr (fpu_regs_stack_offset);
 	  fpu_regs_stack_offset += 4;
 	}
-      cache->saved_regs[ARM_FPSCR_REGNUM].set_addr (unwound_sp + 0x60);
+      cache->saved_regs[ARM_FPSCR_REGNUM].set_addr (unwound_sp + sp_r0_offset + 0x60);
+      fpu_regs_stack_offset += 4;
 
-      /* Offset 0x64 is reserved.  */
-      arm_cache_set_active_sp_value (cache, tdep, unwound_sp + 0x68);
+      if (tdep->have_sec_ext && !default_callee_register_stacking)
+	{
+	  /* Handle floating-point callee saved registers.  */
+	  fpu_regs_stack_offset = 0x90;
+	  for (i = 16; i < 32; i++)
+	    {
+	      cache->saved_regs[ARM_D0_REGNUM + i].set_addr (fpu_regs_stack_offset);
+	      fpu_regs_stack_offset += 4;
+	    }
+
+	  arm_cache_set_active_sp_value (cache, tdep, unwound_sp + sp_r0_offset + 0xD0);
+	}
+      else
+	{
+	  /* Offset 0x64 is reserved.  */
+	  arm_cache_set_active_sp_value (cache, tdep, unwound_sp + sp_r0_offset + 0x68);
+	}
     }
   else
     {
       /* Standard stack frame type used.  */
-      arm_cache_set_active_sp_value (cache, tdep, unwound_sp + 0x20);
-    }
-
-  /* Check EXC_RETURN bit S if Secure or Non-secure stack used.  */
-  secure_stack_used = ((lr & (1 << 6)) != 0);
-  if (exc_return && secure_stack_used)
-    {
-      /* ARMv8-M Exception and interrupt handling is not considered here.
-	 In the ARMv8-M architecture also EXC_RETURN bit S is controlling if
-	 the Secure or Non-secure stack was used. To separate Secure and
-	 Non-secure stacks, processors that are based on the ARMv8-M
-	 architecture support 4 stack pointers: MSP_S, PSP_S, MSP_NS, PSP_NS.
-	 In addition, a stack limit feature is provided using stack limit
-	 registers (accessible using MSR and MRS instructions) in Privileged
-	 level.  */
+      arm_cache_set_active_sp_value (cache, tdep, unwound_sp + sp_r0_offset + 0x20);
     }
 
   /* If bit 9 of the saved xPSR is set, then there is a four-byte
      aligner between the top of the 32-byte stack frame and the
      previous context's stack pointer.  */
-  if (safe_read_memory_integer (unwound_sp + 28, 4, byte_order, &xpsr)
+  if (safe_read_memory_integer (unwound_sp + sp_r0_offset + 28, 4, byte_order, &xpsr)
       && (xpsr & (1 << 9)) != 0)
     arm_cache_set_active_sp_value (cache, tdep,
 				   arm_cache_get_prev_sp_value (cache, tdep) + 4);
@@ -3384,6 +3537,7 @@ arm_m_exception_prev_register (struct frame_info *this_frame,
 			       int prev_regnum)
 {
   struct arm_prologue_cache *cache;
+  CORE_ADDR sp_value;
 
   if (*this_cache == NULL)
     *this_cache = arm_m_exception_cache (this_frame);
@@ -3395,6 +3549,23 @@ arm_m_exception_prev_register (struct frame_info *this_frame,
   if (prev_regnum == ARM_SP_REGNUM)
     return frame_unwind_got_constant (this_frame, prev_regnum,
 				      arm_cache_get_prev_sp_value (cache, tdep));
+
+  /* The value might be one of the alternative SP, if so, use the
+     value already constructed.  */
+  if (arm_cache_is_sp_register (cache, tdep, prev_regnum))
+    {
+      sp_value = arm_cache_get_sp_register (cache, tdep, prev_regnum);
+      return frame_unwind_got_constant (this_frame, prev_regnum, sp_value);
+    }
+
+  if (prev_regnum == ARM_PC_REGNUM)
+    {
+      CORE_ADDR lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
+      struct gdbarch *gdbarch = get_frame_arch (this_frame);
+
+      return frame_unwind_got_constant (this_frame, prev_regnum,
+					arm_addr_bits_remove (gdbarch, lr));
+    }
 
   return trad_frame_get_prev_register (this_frame, cache->saved_regs,
 				       prev_regnum);
@@ -3408,13 +3579,14 @@ arm_m_exception_unwind_sniffer (const struct frame_unwind *self,
 				struct frame_info *this_frame,
 				void **this_prologue_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR this_pc = get_frame_pc (this_frame);
 
   /* No need to check is_m; this sniffer is only registered for
      M-profile architectures.  */
 
   /* Check if exception frame returns to a magic PC value.  */
-  return arm_m_addr_is_magic (this_pc);
+  return arm_m_addr_is_magic (gdbarch, this_pc);
 }
 
 /* Frame unwinder for M-profile exceptions.  */
@@ -8914,6 +9086,15 @@ arm_show_force_mode (struct ui_file *file, int from_tty,
 	      arm_force_mode_string);
 }
 
+static void
+arm_show_unwind_secure_frames (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *c, const char *value)
+{
+  gdb_printf (file,
+	      _("Usage of non-secure to secure exception stack unwinding is %s.\n"),
+	      arm_unwind_secure_frames ? "on" : "off");
+}
+
 /* If the user changes the register disassembly style used for info
    register and other commands, we have to also switch the style used
    in opcodes for disassembly output.  This function is run in the "set
@@ -10396,6 +10577,15 @@ vfp - VFP co-processor."),
 			_("Show the mode assumed even when symbols are available."),
 			NULL, NULL, arm_show_force_mode,
 			&setarmcmdlist, &showarmcmdlist);
+
+  /* Add a command to stop triggering security exceptions when
+     unwinding exception stacks.  */
+  add_setshow_boolean_cmd ("unwind-secure-frames", no_class, &arm_unwind_secure_frames,
+			   _("Set usage of non-secure to secure exception stack unwinding."),
+			   _("Show usage of non-secure to secure exception stack unwinding."),
+			   _("When on, the debugger can trigger memory access traps."),
+			   NULL, arm_show_unwind_secure_frames,
+			   &setarmcmdlist, &showarmcmdlist);
 
   /* Debugging flag.  */
   add_setshow_boolean_cmd ("arm", class_maintenance, &arm_debug,
