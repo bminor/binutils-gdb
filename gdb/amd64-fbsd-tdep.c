@@ -37,6 +37,9 @@
    16-bit segment registers.  */
 #define AMD64_FBSD_SIZEOF_GREGSET	(22 * 8)
 
+/* The segment base register set consists of 2 64-bit registers.  */
+#define AMD64_FBSD_SIZEOF_SEGBASES_REGSET	(2 * 8)
+
 /* Register maps.  */
 
 static const struct regcache_map_entry amd64_fbsd_gregmap[] =
@@ -67,6 +70,13 @@ static const struct regcache_map_entry amd64_fbsd_gregmap[] =
   { 1, AMD64_EFLAGS_REGNUM, 8 },
   { 1, AMD64_RSP_REGNUM, 0 },
   { 1, AMD64_SS_REGNUM, 8 },
+  { 0 }
+};
+
+static const struct regcache_map_entry amd64_fbsd_segbases_regmap[] =
+{
+  { 1, AMD64_FSBASE_REGNUM, 0 },
+  { 1, AMD64_GSBASE_REGNUM, 0 },
   { 0 }
 };
 
@@ -118,6 +128,11 @@ static const struct regcache_map_entry amd64_fbsd_mcregmap[] =
 const struct regset amd64_fbsd_gregset =
 {
   amd64_fbsd_gregmap, regcache_supply_regset, regcache_collect_regset
+};
+
+const struct regset amd64_fbsd_segbases_regset =
+{
+  amd64_fbsd_segbases_regmap, regcache_supply_regset, regcache_collect_regset
 };
 
 /* Support for signal handlers.  */
@@ -253,6 +268,9 @@ amd64fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
       &amd64_fbsd_gregset, NULL, cb_data);
   cb (".reg2", tdep->sizeof_fpregset, tdep->sizeof_fpregset, &amd64_fpregset,
       NULL, cb_data);
+  cb (".reg-x86-segbases", AMD64_FBSD_SIZEOF_SEGBASES_REGSET,
+      AMD64_FBSD_SIZEOF_SEGBASES_REGSET, &amd64_fbsd_segbases_regset,
+      "segment bases", cb_data);
   cb (".reg-xstate", X86_XSTATE_SIZE (tdep->xcr0), X86_XSTATE_SIZE (tdep->xcr0),
       &amd64fbsd_xstateregset, "XSAVE extended state", cb_data);
 }

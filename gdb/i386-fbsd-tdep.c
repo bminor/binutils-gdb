@@ -35,6 +35,9 @@
 /* The general-purpose regset consists of 19 32-bit slots.  */
 #define I386_FBSD_SIZEOF_GREGSET	(19 * 4)
 
+/* The segment base register set consists of 2 32-bit registers.  */
+#define I386_FBSD_SIZEOF_SEGBASES_REGSET	(2 * 4)
+
 /* Register maps.  */
 
 static const struct regcache_map_entry i386_fbsd_gregmap[] =
@@ -58,6 +61,13 @@ static const struct regcache_map_entry i386_fbsd_gregmap[] =
   { 1, I386_ESP_REGNUM, 0 },
   { 1, I386_SS_REGNUM, 4 },
   { 1, I386_GS_REGNUM, 4 },
+  { 0 }
+};
+
+static const struct regcache_map_entry i386_fbsd_segbases_regmap[] =
+{
+  { 1, I386_FSBASE_REGNUM, 0 },
+  { 1, I386_GSBASE_REGNUM, 0 },
   { 0 }
 };
 
@@ -101,6 +111,11 @@ static const struct regcache_map_entry i386_fbsd_mcregmap[] =
 const struct regset i386_fbsd_gregset =
 {
   i386_fbsd_gregmap, regcache_supply_regset, regcache_collect_regset
+};
+
+const struct regset i386_fbsd_segbases_regset =
+{
+  i386_fbsd_segbases_regmap, regcache_supply_regset, regcache_collect_regset
 };
 
 /* Support for signal handlers.  */
@@ -316,6 +331,9 @@ i386fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
       &i386_fbsd_gregset, NULL, cb_data);
   cb (".reg2", tdep->sizeof_fpregset, tdep->sizeof_fpregset, &i386_fpregset,
       NULL, cb_data);
+  cb (".reg-x86-segbases", I386_FBSD_SIZEOF_SEGBASES_REGSET,
+      I386_FBSD_SIZEOF_SEGBASES_REGSET, &i386_fbsd_segbases_regset,
+      "segment bases", cb_data);
 
   if (tdep->xcr0 & X86_XSTATE_AVX)
     cb (".reg-xstate", X86_XSTATE_SIZE (tdep->xcr0),
