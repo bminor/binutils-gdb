@@ -274,7 +274,7 @@ value_cast_structs (struct type *type, struct value *v2)
       if (v)
 	{
 	  /* Downcasting is possible (t1 is superclass of v2).  */
-	  CORE_ADDR addr2 = value_address (v2);
+	  CORE_ADDR addr2 = value_address (v2) + value_embedded_offset (v2);
 
 	  addr2 -= value_address (v) + value_embedded_offset (v);
 	  return value_at (type, addr2);
