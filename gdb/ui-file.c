@@ -60,12 +60,11 @@ ui_file::putstrn (const char *str, int n, int quoter, bool async_safe)
     printchar (str[i], quoter, async_safe);
 }
 
-int
+void
 ui_file::putc (int c)
 {
   char copy = (char) c;
   write (&copy, 1);
-  return c;
 }
 
 void

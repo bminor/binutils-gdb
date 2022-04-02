@@ -51,7 +51,7 @@ public:
      write_async_safe method.  */
   void putstrn (const char *str, int n, int quoter, bool async_safe = false);
 
-  int putc (int c);
+  void putc (int c);
 
   void vprintf (const char *, va_list) ATTRIBUTE_PRINTF (2, 0);
 

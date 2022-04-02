@@ -1838,16 +1838,13 @@ fputs_highlighted (const char *str, const compiled_regex &highlight,
     gdb_puts (str, stream);
 }
 
-/* Write character C to gdb_stdout using GDB's paging mechanism and return C.
-   May return nonlocally.  */
-
-int
+void
 gdb_putc (int c)
 {
   return gdb_stdout->putc (c);
 }
 
-int
+void
 gdb_putc (int c, struct ui_file *stream)
 {
   return stream->putc (c);
