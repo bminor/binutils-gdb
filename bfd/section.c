@@ -455,13 +455,6 @@ CODE_FRAGMENT
 .  {* The compressed size of the section in octets.  *}
 .  bfd_size_type compressed_size;
 .
-.  {* Relaxation table. *}
-.  struct relax_table *relax;
-.
-.  {* Count of used relaxation table entries. *}
-.  int relax_count;
-.
-.
 .  {* If this section is going to be output, then this value is the
 .     offset in *bytes* into the output section of the first byte in the
 .     input section (byte ==> smallest addressable unit on the
@@ -561,17 +554,6 @@ CODE_FRAGMENT
 .  unsigned int type;
 .
 .} asection;
-.
-.{* Relax table contains information about instructions which can
-.   be removed by relaxation -- replacing a long address with a
-.   short address.  *}
-.struct relax_table {
-.  {* Address where bytes may be deleted. *}
-.  bfd_vma addr;
-.
-.  {* Number of bytes to be deleted.  *}
-.  int size;
-.};
 .
 .static inline const char *
 .bfd_section_name (const asection *sec)
@@ -721,8 +703,8 @@ CODE_FRAGMENT
 .  {* sec_flg0, sec_flg1, sec_flg2, sec_flg3, sec_flg4, sec_flg5,    *}	\
 .     0,        0,        0,        0,        0,        0,		\
 .									\
-.  {* vma, lma, size, rawsize, compressed_size, relax, relax_count,  *}	\
-.     0,   0,   0,    0,       0,               0,     0,		\
+.  {* vma, lma, size, rawsize, compressed_size, *}			\
+.     0,   0,   0,    0,       0,					\
 .									\
 .  {* output_offset, output_section, alignment_power,                *}	\
 .     0,             &SEC,           0,					\
