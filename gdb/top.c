@@ -1629,7 +1629,7 @@ This GDB was configured as follows:\n\
 	     --enable-threading\n\
 "));
 #else
-  gdb_print (stream, _("\
+  gdb_printf (stream, _("\
 	     --disable-threading\n\
 "));
 #endif
