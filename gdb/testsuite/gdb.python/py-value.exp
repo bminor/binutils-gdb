@@ -62,6 +62,9 @@ proc test_value_creation {} {
 
   # Test address attribute is None in a non-addressable value
   gdb_test "python print ('result = %s' % i.address)" "= None" "test address attribute in non-addressable value"
+
+  # Test creating / printing an optimized out value
+  gdb_test "python print(gdb.Value(gdb.Value(5).type.optimized_out()))"
 }
 
 # Check that we can call gdb.Value.__init__ to change a value.

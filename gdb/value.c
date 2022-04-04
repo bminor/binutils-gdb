@@ -343,8 +343,10 @@ struct value
   LONGEST embedded_offset = 0;
   LONGEST pointed_to_offset = 0;
 
-  /* Actual contents of the value.  Target byte-order.  NULL or not
-     valid if lazy is nonzero.  */
+  /* Actual contents of the value.  Target byte-order.
+
+     May be nullptr if the value is lazy or is entirely optimized out.
+     Guaranteed to be non-nullptr otherwise.  */
   gdb::unique_xmalloc_ptr<gdb_byte> contents;
 
   /* Unavailable ranges in CONTENTS.  We mark unavailable ranges,
@@ -1725,8 +1727,10 @@ value_copy (const value *arg)
   val->stack = arg->stack;
   val->is_zero = arg->is_zero;
   val->initialized = arg->initialized;
+  val->unavailable = arg->unavailable;
+  val->optimized_out = arg->optimized_out;
 
-  if (!value_lazy (val))
+  if (!value_lazy (val) && !value_entirely_optimized_out (val))
     {
       gdb_assert (arg->contents != nullptr);
       ULONGEST length = TYPE_LENGTH (value_enclosing_type (arg));
@@ -1735,8 +1739,6 @@ value_copy (const value *arg)
       copy (arg_view, value_contents_all_raw (val));
     }
 
-  val->unavailable = arg->unavailable;
-  val->optimized_out = arg->optimized_out;
   val->parent = arg->parent;
   if (VALUE_LVAL (val) == lval_computed)
     {
@@ -4271,6 +4273,20 @@ test_insert_into_bit_range_vector ()
   }
 }
 
+static void
+test_value_copy ()
+{
+  type *type = builtin_type (current_inferior ()->gdbarch)->builtin_int;
+
+  /* Verify that we can copy an entirely optimized out value, that may not have
+     its contents allocated.  */
+  value_ref_ptr val = release_value (allocate_optimized_out_value (type));
+  value_ref_ptr copy = release_value (value_copy (val.get ()));
+
+  SELF_CHECK (value_entirely_optimized_out (val.get ()));
+  SELF_CHECK (value_entirely_optimized_out (copy.get ()));
+}
+
 } /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
@@ -4355,6 +4371,7 @@ and exceeds this limit will cause an error."),
   selftests::register_test ("ranges_contain", selftests::test_ranges_contain);
   selftests::register_test ("insert_into_bit_range_vector",
 			    selftests::test_insert_into_bit_range_vector);
+  selftests::register_test ("value_copy", selftests::test_value_copy);
 #endif
 }
 
