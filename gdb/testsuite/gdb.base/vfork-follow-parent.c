@@ -17,6 +17,8 @@
 
 #include <unistd.h>
 
+static volatile int unblock_parent = 0;
+
 static void
 break_parent (void)
 {
@@ -25,8 +27,18 @@ break_parent (void)
 int
 main (void)
 {
+  alarm (30);
+
   if (vfork () != 0)
-    break_parent ();
+    {
+      /* We want to guarantee that GDB processes the child exit event before
+	 the parent's breakpoint hit event.  Make the parent wait on this
+	 variable that is eventually set by the test.  */
+      while (!unblock_parent)
+	usleep (1000);
+
+      break_parent ();
+    }
   else
     _exit (0);
 
