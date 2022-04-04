@@ -1296,6 +1296,11 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
   struct target_ops *target = current_inferior ()->top_target ();
   struct gdbarch *gdbarch = target_gdbarch ();
 
+  /* If OBJFILE is a separate debug object file, look for the
+     original object file.  */
+  if (objfile->separate_debug_objfile_backlink != NULL)
+    objfile = objfile->separate_debug_objfile_backlink;
+
   if (gdbarch_fetch_tls_load_module_address_p (gdbarch))
     {
       ptid_t ptid = inferior_ptid;
