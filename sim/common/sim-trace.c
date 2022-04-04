@@ -906,6 +906,18 @@ dis_printf (SIM_CPU *cpu, const char *fmt, ...)
   return 0;
 }
 
+static int ATTRIBUTE_PRINTF (3, 4)
+dis_styled_printf (SIM_CPU *cpu, enum disassembler_style style,
+		   const char *fmt, ...)
+{
+  SIM_DESC sd = CPU_STATE (cpu);
+  va_list ap;
+  va_start (ap, fmt);
+  trace_vprintf (sd, cpu, fmt, ap);
+  va_end (ap);
+  return 0;
+}
+
 void
 trace_disasm (SIM_DESC sd, sim_cpu *cpu, address_word addr)
 {
@@ -922,7 +934,7 @@ trace_disasm (SIM_DESC sd, sim_cpu *cpu, address_word addr)
 			bfd_big_endian (trace_data->dis_bfd),
 			bfd_get_mach (trace_data->dis_bfd),
 			trace_data->dis_bfd);
-      INIT_DISASSEMBLE_INFO (*info, cpu, dis_printf);
+      INIT_DISASSEMBLE_INFO (*info, cpu, dis_printf, dis_styled_printf);
       info->read_memory_func = dis_read;
       info->arch = bfd_get_arch (bfd);
       info->mach = bfd_get_mach (bfd);

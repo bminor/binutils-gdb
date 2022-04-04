@@ -244,7 +244,8 @@ sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *callback,
 #ifdef F_GETFL
     termsave = fcntl(0, F_GETFL, 0);
 #endif
-    INIT_DISASSEMBLE_INFO(dinfo, stdout,(fprintf_ftype)fprintf);
+    INIT_DISASSEMBLE_INFO(dinfo, stdout,(fprintf_ftype)fprintf,
+			  fprintf_styled);
 #ifdef HOST_LITTLE_ENDIAN
     dinfo.endian = BFD_ENDIAN_LITTLE;
 #else
