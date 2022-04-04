@@ -8354,7 +8354,8 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
       && status->kind () != TARGET_WAITKIND_NO_RESUMED)
     {
       /* Expedited registers.  */
-      if (!stop_reply->regcache.empty ())
+      if (status->kind () != TARGET_WAITKIND_THREAD_EXITED
+	  && !stop_reply->regcache.empty ())
 	{
 	  struct regcache *regcache
 	    = get_thread_arch_regcache (this, ptid, stop_reply->arch);
@@ -8540,7 +8541,7 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
 	     again.  Keep waiting for events.  */
 	  rs->waiting_for_stop_reply = 1;
 	  break;
-	case 'N': case 'T': case 'S': case 'X': case 'W':
+	case 'N': case 'T': case 'S': case 'X': case 'W': case 'w':
 	  {
 	    /* There is a stop reply to handle.  */
 	    rs->waiting_for_stop_reply = 0;
