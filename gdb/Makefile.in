@@ -1289,6 +1289,7 @@ HFILES_NO_SRCDIR = \
 	defs.h \
 	dicos-tdep.h \
 	dictionary.h \
+	disasm-flags.h \
 	disasm.h \
 	dummy-frame.h \
 	dwarf2/cu.h \

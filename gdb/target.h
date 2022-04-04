@@ -79,7 +79,7 @@ struct inferior;
 #include "btrace.h"
 #include "record.h"
 #include "command.h"
-#include "disasm.h"
+#include "disasm-flags.h"
 #include "tracepoint.h"
 
 #include "gdbsupport/break-common.h" /* For enum target_hw_bp_type.  */

@@ -37,7 +37,6 @@
 #include "regcache.h"
 #include "remote.h"
 #include "sim-regno.h"
-#include "disasm.h"
 #include "trad-frame.h"
 #include "reggroups.h"
 #include "elf-bfd.h"

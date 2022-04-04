@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "gdbarch.h"
 #include "arch-utils.h"
-#include "disasm.h"
 #include "reggroups.h"
 #include "python-internal.h"
 #include "user-regs.h"

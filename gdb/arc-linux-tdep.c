@@ -24,6 +24,7 @@
 #include "opcode/arc.h"
 #include "osabi.h"
 #include "solib-svr4.h"
+#include "disasm.h"
 
 /* ARC header files.  */
 #include "opcodes/arc-dis.h"
