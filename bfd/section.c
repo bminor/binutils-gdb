@@ -151,6 +151,12 @@ CODE_FRAGMENT
 .     the same as that passed to bfd_make_section.  *}
 .  const char *name;
 .
+.  {* The next section in the list belonging to the BFD, or NULL.  *}
+.  struct bfd_section *next;
+.
+.  {* The previous section in the list belonging to the BFD, or NULL.  *}
+.  struct bfd_section *prev;
+.
 .  {* A unique sequence number.  *}
 .  unsigned int id;
 .
@@ -160,12 +166,6 @@ CODE_FRAGMENT
 .
 .  {* Which section in the bfd; 0..n-1 as sections are created in a bfd.  *}
 .  unsigned int index;
-.
-.  {* The next section in the list belonging to the BFD, or NULL.  *}
-.  struct bfd_section *next;
-.
-.  {* The previous section in the list belonging to the BFD, or NULL.  *}
-.  struct bfd_section *prev;
 .
 .  {* The field flags contains attributes of the section. Some
 .     flags are read in from the object file, and some are
@@ -467,10 +467,6 @@ CODE_FRAGMENT
 .  {* The output section through which to map on output.  *}
 .  struct bfd_section *output_section;
 .
-.  {* The alignment requirement of the section, as an exponent of 2 -
-.     e.g., 3 aligns to 2^3 (or 8).  *}
-.  unsigned int alignment_power;
-.
 .  {* If an input section, a pointer to a vector of relocation
 .     records for the data in this section.  *}
 .  struct reloc_cache_entry *relocation;
@@ -481,6 +477,10 @@ CODE_FRAGMENT
 .
 .  {* The number of relocation records in one of the above.  *}
 .  unsigned reloc_count;
+.
+.  {* The alignment requirement of the section, as an exponent of 2 -
+.     e.g., 3 aligns to 2^3 (or 8).  *}
+.  unsigned int alignment_power;
 .
 .  {* Information below is back end specific - and not always used
 .     or updated.  *}
@@ -691,8 +691,8 @@ CODE_FRAGMENT
 .}
 .
 .#define BFD_FAKE_SECTION(SEC, SYM, NAME, IDX, FLAGS)			\
-.  {* name, id,  section_id, index, next, prev, flags, user_set_vma, *}	\
-.  {  NAME, IDX, 0,          0,     NULL, NULL, FLAGS, 0,		\
+.  {* name, next, prev, id,  section_id, index, flags, user_set_vma, *}	\
+.  {  NAME, NULL, NULL, IDX, 0,          0,     FLAGS, 0,		\
 .									\
 .  {* linker_mark, linker_has_input, gc_mark, decompress_status,     *}	\
 .     0,           0,                1,       0,			\
@@ -703,14 +703,14 @@ CODE_FRAGMENT
 .  {* sec_flg0, sec_flg1, sec_flg2, sec_flg3, sec_flg4, sec_flg5,    *}	\
 .     0,        0,        0,        0,        0,        0,		\
 .									\
-.  {* vma, lma, size, rawsize, compressed_size, *}			\
+.  {* vma, lma, size, rawsize, compressed_size,                      *}	\
 .     0,   0,   0,    0,       0,					\
 .									\
-.  {* output_offset, output_section, alignment_power,                *}	\
-.     0,             &SEC,           0,					\
+.  {* output_offset, output_section, relocation, orelocation,        *}	\
+.     0,             &SEC,           NULL,       NULL,			\
 .									\
-.  {* relocation, orelocation, reloc_count, filepos, rel_filepos,    *}	\
-.     NULL,       NULL,        0,           0,       0,			\
+.  {* reloc_count, alignment_power, filepos, rel_filepos,            *}	\
+.     0,           0,               0,       0,				\
 .									\
 .  {* line_filepos, userdata, contents, lineno, lineno_count,        *}	\
 .     0,            NULL,     NULL,     NULL,   0,			\
