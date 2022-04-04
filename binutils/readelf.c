@@ -19379,6 +19379,8 @@ get_note_type (Filedata * filedata, unsigned e_type)
 	return _("NT_ARM_HW_BREAK (AArch hardware breakpoint registers)");
       case NT_ARM_HW_WATCH:
 	return _("NT_ARM_HW_WATCH (AArch hardware watchpoint registers)");
+      case NT_ARM_SYSTEM_CALL:
+	return _("NT_ARM_SYSTEM_CALL (AArch system call number)");
       case NT_ARM_SVE:
 	return _("NT_ARM_SVE (AArch SVE registers)");
       case NT_ARM_PAC_MASK:

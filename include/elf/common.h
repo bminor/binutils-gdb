@@ -675,6 +675,8 @@
 					/*   note name must be "LINUX".  */
 #define NT_ARM_HW_WATCH	0x403		/* AArch hardware watchpoint registers */
 					/*   note name must be "LINUX".  */
+#define NT_ARM_SYSTEM_CALL      0x404   /* AArch ARM system call number */
+					/*   note name must be "LINUX".  */
 #define NT_ARM_SVE	0x405		/* AArch SVE registers.  */
 					/*   note name must be "LINUX".  */
 #define NT_ARM_PAC_MASK	0x406		/* AArch pointer authentication code masks */
