@@ -165,31 +165,39 @@ private:
     ATTRIBUTE_PRINTF(3,4);
 };
 
-/* A non-printing disassemble_info management class.  The disassemble_info
-   setup by this class will not print anything to the output stream (there
-   is no output stream), and the instruction to be disassembled will be
-   read from target memory.  */
+/* This is a helper class, for use as an additional base-class, by some of
+   the disassembler classes below.  This class just defines a static method
+   for reading from target memory, which can then be used by the various
+   disassembler sub-classes.  */
 
-struct gdb_non_printing_memory_disassembler
-  : public gdb_non_printing_disassembler
+struct gdb_disassembler_memory_reader
 {
-  /* Constructor.  GDBARCH is the architecture to disassemble for.  */
-  gdb_non_printing_memory_disassembler (struct gdbarch *gdbarch)
-    :gdb_non_printing_disassembler (gdbarch, dis_asm_read_memory)
-  { /* Nothing.  */ }
-
-private:
-
   /* Implements the read_memory_func disassemble_info callback.  */
   static int dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr,
 				  unsigned int len,
 				  struct disassemble_info *info);
 };
 
+/* A non-printing disassemble_info management class.  The disassemble_info
+   setup by this class will not print anything to the output stream (there
+   is no output stream), and the instruction to be disassembled will be
+   read from target memory.  */
+
+struct gdb_non_printing_memory_disassembler
+  : public gdb_non_printing_disassembler,
+    private gdb_disassembler_memory_reader
+{
+  /* Constructor.  GDBARCH is the architecture to disassemble for.  */
+  gdb_non_printing_memory_disassembler (struct gdbarch *gdbarch)
+    :gdb_non_printing_disassembler (gdbarch, dis_asm_read_memory)
+  { /* Nothing.  */ }
+};
+
 /* A dissassembler class that provides 'print_insn', a method for
    disassembling a single instruction to the output stream.  */
 
-struct gdb_disassembler : public gdb_printing_disassembler
+struct gdb_disassembler : public gdb_printing_disassembler,
+			  private gdb_disassembler_memory_reader
 {
   gdb_disassembler (struct gdbarch *gdbarch, struct ui_file *file)
     : gdb_disassembler (gdbarch, file, dis_asm_read_memory)
@@ -239,9 +247,6 @@ private:
      (currently just to addresses and symbols) as it goes.  */
   static bool use_ext_lang_colorization_p;
 
-  static int dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr,
-				  unsigned int len,
-				  struct disassemble_info *info);
   static void dis_asm_memory_error (int err, bfd_vma memaddr,
 				    struct disassemble_info *info);
   static void dis_asm_print_address (bfd_vma addr,

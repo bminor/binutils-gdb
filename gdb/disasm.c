@@ -132,9 +132,9 @@ line_has_code_p (htab_t table, struct symtab *symtab, int line)
 /* Wrapper of target_read_code.  */
 
 int
-gdb_disassembler::dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr,
-				       unsigned int len,
-				       struct disassemble_info *info)
+gdb_disassembler_memory_reader::dis_asm_read_memory
+  (bfd_vma memaddr, gdb_byte *myaddr, unsigned int len,
+   struct disassemble_info *info)
 {
   return target_read_code (memaddr, myaddr, len);
 }
@@ -1019,16 +1019,6 @@ gdb_non_printing_disassembler::null_fprintf_styled_func
   (void *stream, enum disassembler_style style, const char *format, ...)
 {
   return 0;
-}
-
-/* See disasm.h.  */
-
-int
-gdb_non_printing_memory_disassembler::dis_asm_read_memory
-  (bfd_vma memaddr, bfd_byte *myaddr, unsigned int length,
-   struct disassemble_info *dinfo)
-{
-  return target_read_code (memaddr, myaddr, length);
 }
 
 /* A non-printing disassemble_info management class.  The disassemble_info
