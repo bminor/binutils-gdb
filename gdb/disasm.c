@@ -187,7 +187,7 @@ gdb_disassembler::dis_asm_styled_fprintf (void *stream,
   va_list args;
 
   va_start (args, format);
-  vfprintf_filtered ((struct ui_file *) stream, format, args);
+  gdb_vprintf ((struct ui_file *) stream, format, args);
   va_end (args);
   /* Something non -ve.  */
   return 0;
