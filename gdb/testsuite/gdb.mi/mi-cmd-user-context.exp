@@ -18,7 +18,7 @@
 
 load_lib mi-support.exp
 
-standard_testfile user-selected-context-sync.c
+standard_testfile
 
 if {[build_executable $testfile.exp $testfile ${srcfile} "debug pthreads"] == -1} {
     untested "failed to compile"
@@ -79,7 +79,7 @@ mi_gdb_test "thread" \
 
 # Check we're in frame 0.
 mi_gdb_test "frame" \
-    ".*#0  0x.*" \
+    ".*#0  .*child_sub_function .*" \
     "frame 1"
 
 # Ask about a different frame in the current thread, the current frame
@@ -93,7 +93,7 @@ mi_gdb_test "thread" \
     "info thread 6"
 
 mi_gdb_test "frame" \
-    ".*#0  0x.*" \
+    ".*#0  .*child_sub_function.*" \
     "frame 2"
 
 
@@ -108,7 +108,7 @@ mi_gdb_test "thread" \
     "info thread 7"
 
 mi_gdb_test "frame" \
-    ".*#0  0x.*" \
+    ".*#0  .*child_sub_function.*" \
     "frame 3"
 
 # Select a different frame in the current thread.  Despite the use of
@@ -123,7 +123,7 @@ mi_gdb_test "thread" \
     "info thread 8"
 
 mi_gdb_test "frame" \
-    ".*#1  0x.*" \
+    ".*#1  .*child_function.*" \
     "frame 4"
 
 # Similar to the previous test, but this time the --frame option is
