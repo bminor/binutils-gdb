@@ -2154,27 +2154,23 @@ elf_obj_symbol_clone_hook (symbolS *newsym, symbolS *orgsym ATTRIBUTE_UNUSED)
     }
 }
 
-/* When setting one symbol equal to another, by default we probably
-   want them to have the same "size", whatever it means in the current
-   context.  */
-
 void
 elf_copy_symbol_attributes (symbolS *dest, symbolS *src)
 {
   struct elf_obj_sy *srcelf = symbol_get_obj (src);
   struct elf_obj_sy *destelf = symbol_get_obj (dest);
-  if (srcelf->size)
+  /* If size is unset, copy size from src.  Because we don't track whether
+     .size has been used, we can't differentiate .size dest, 0 from the case
+     where dest's size is unset.  */
+  if (!destelf->size && S_GET_SIZE (dest) == 0)
     {
-      if (destelf->size == NULL)
-	destelf->size = XNEW (expressionS);
-      *destelf->size = *srcelf->size;
+      if (srcelf->size)
+	{
+	  destelf->size = XNEW (expressionS);
+	  *destelf->size = *srcelf->size;
+	}
+      S_SET_SIZE (dest, S_GET_SIZE (src));
     }
-  else
-    {
-      free (destelf->size);
-      destelf->size = NULL;
-    }
-  S_SET_SIZE (dest, S_GET_SIZE (src));
   /* Don't copy visibility.  */
   S_SET_OTHER (dest, (ELF_ST_VISIBILITY (S_GET_OTHER (dest))
 		      | (S_GET_OTHER (src) & ~ELF_ST_VISIBILITY (-1))));
