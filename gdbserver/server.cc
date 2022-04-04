@@ -3045,6 +3045,7 @@ resume (struct thread_resume *actions, size_t num_actions)
 
       if (cs.last_status.kind () != TARGET_WAITKIND_EXITED
 	  && cs.last_status.kind () != TARGET_WAITKIND_SIGNALLED
+	  && cs.last_status.kind () != TARGET_WAITKIND_THREAD_EXITED
 	  && cs.last_status.kind () != TARGET_WAITKIND_NO_RESUMED)
 	current_thread->last_status = cs.last_status;
 

@@ -8415,6 +8415,11 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
       /* Expedited registers.  */
       if (!stop_reply->regcache.empty ())
 	{
+	  /* 'w' stop replies don't cary expedited registers (which
+	     wouldn't make any sense for a thread that is gone
+	     already).  */
+	  gdb_assert (status->kind () != TARGET_WAITKIND_THREAD_EXITED);
+
 	  struct regcache *regcache
 	    = get_thread_arch_regcache (this, ptid, stop_reply->arch);
 
@@ -8599,7 +8604,7 @@ remote_target::wait_as (ptid_t ptid, target_waitstatus *status,
 	     again.  Keep waiting for events.  */
 	  rs->waiting_for_stop_reply = 1;
 	  break;
-	case 'N': case 'T': case 'S': case 'X': case 'W':
+	case 'N': case 'T': case 'S': case 'X': case 'W': case 'w':
 	  {
 	    /* There is a stop reply to handle.  */
 	    rs->waiting_for_stop_reply = 0;
