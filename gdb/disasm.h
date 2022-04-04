@@ -136,6 +136,56 @@ protected:
     ATTRIBUTE_PRINTF(3,4);
 };
 
+/* A basic disassembler that doesn't actually print anything.  */
+
+struct gdb_non_printing_disassembler : public gdb_disassemble_info
+{
+  gdb_non_printing_disassembler (struct gdbarch *gdbarch,
+				 read_memory_ftype read_memory_func)
+    : gdb_disassemble_info (gdbarch, nullptr /* stream */,
+			    read_memory_func,
+			    nullptr /* memory_error_func */,
+			    nullptr /* print_address_func */,
+			    null_fprintf_func,
+			    null_fprintf_styled_func)
+  { /* Nothing.  */ }
+
+private:
+
+  /* Callback used as the disassemble_info's fprintf_func callback, this
+     doesn't write anything to STREAM, but just returns 0.  */
+  static int null_fprintf_func (void *stream, const char *format, ...)
+    ATTRIBUTE_PRINTF(2,3);
+
+  /* Callback used as the disassemble_info's fprintf_styled_func callback,
+     , this doesn't write anything to STREAM, but just returns 0.  */
+  static int null_fprintf_styled_func (void *stream,
+				       enum disassembler_style style,
+				       const char *format, ...)
+    ATTRIBUTE_PRINTF(3,4);
+};
+
+/* A non-printing disassemble_info management class.  The disassemble_info
+   setup by this class will not print anything to the output stream (there
+   is no output stream), and the instruction to be disassembled will be
+   read from target memory.  */
+
+struct gdb_non_printing_memory_disassembler
+  : public gdb_non_printing_disassembler
+{
+  /* Constructor.  GDBARCH is the architecture to disassemble for.  */
+  gdb_non_printing_memory_disassembler (struct gdbarch *gdbarch)
+    :gdb_non_printing_disassembler (gdbarch, dis_asm_read_memory)
+  { /* Nothing.  */ }
+
+private:
+
+  /* Implements the read_memory_func disassemble_info callback.  */
+  static int dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr,
+				  unsigned int len,
+				  struct disassemble_info *info);
+};
+
 /* A dissassembler class that provides 'print_insn', a method for
    disassembling a single instruction to the output stream.  */
 
@@ -277,11 +327,5 @@ extern char *get_disassembler_options (struct gdbarch *gdbarch);
 /* Sets the active gdbarch's disassembler options to OPTIONS.  */
 
 extern void set_disassembler_options (const char *options);
-
-/* Setup DINFO with its output function and output stream setup so that
-   nothing is printed while disassembling.  */
-
-extern void init_disassemble_info_for_no_printing
-  (struct disassemble_info *dinfo);
 
 #endif

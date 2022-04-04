@@ -1003,66 +1003,56 @@ gdb_insn_length (struct gdbarch *gdbarch, CORE_ADDR addr)
   return gdb_print_insn (gdbarch, addr, &null_stream, NULL);
 }
 
-/* An fprintf-function for use by the disassembler when we know we don't
-   want to print anything.  Always returns success.  */
+/* See disasm.h.  */
 
-static int ATTRIBUTE_PRINTF (2, 3)
-gdb_disasm_null_printf (void *stream, const char *format, ...)
-{
-  return 0;
-}
-
-/* An fprintf-function for use by the disassembler when we know we don't
-   want to print anything, and the disassembler is using style.  Always
-   returns success.  */
-
-static int ATTRIBUTE_PRINTF (3, 4)
-gdb_disasm_null_styled_printf (void *stream,
-			       enum disassembler_style style,
-			       const char *format, ...)
+int
+gdb_non_printing_disassembler::null_fprintf_func (void *stream,
+						  const char *format, ...)
 {
   return 0;
 }
 
 /* See disasm.h.  */
 
-void
-init_disassemble_info_for_no_printing (struct disassemble_info *dinfo)
+int
+gdb_non_printing_disassembler::null_fprintf_styled_func
+  (void *stream, enum disassembler_style style, const char *format, ...)
 {
-  init_disassemble_info (dinfo, nullptr, gdb_disasm_null_printf,
-			 gdb_disasm_null_styled_printf);
+  return 0;
 }
 
-/* Initialize a struct disassemble_info for gdb_buffered_insn_length.
-   Upon return, *DISASSEMBLER_OPTIONS_HOLDER owns the string pointed
-   to by DI.DISASSEMBLER_OPTIONS.  */
+/* See disasm.h.  */
 
-static void
-gdb_buffered_insn_length_init_dis (struct gdbarch *gdbarch,
-				   struct disassemble_info *di,
-				   const gdb_byte *insn, int max_len,
-				   CORE_ADDR addr,
-				   std::string *disassembler_options_holder)
+int
+gdb_non_printing_memory_disassembler::dis_asm_read_memory
+  (bfd_vma memaddr, bfd_byte *myaddr, unsigned int length,
+   struct disassemble_info *dinfo)
 {
-  init_disassemble_info_for_no_printing (di);
-
-  /* init_disassemble_info installs buffer_read_memory, etc.
-     so we don't need to do that here.
-     The cast is necessary until disassemble_info is const-ified.  */
-  di->buffer = (gdb_byte *) insn;
-  di->buffer_length = max_len;
-  di->buffer_vma = addr;
-
-  di->arch = gdbarch_bfd_arch_info (gdbarch)->arch;
-  di->mach = gdbarch_bfd_arch_info (gdbarch)->mach;
-  di->endian = gdbarch_byte_order (gdbarch);
-  di->endian_code = gdbarch_byte_order_for_code (gdbarch);
-
-  *disassembler_options_holder = get_all_disassembler_options (gdbarch);
-  if (!disassembler_options_holder->empty ())
-    di->disassembler_options = disassembler_options_holder->c_str ();
-  disassemble_init_for_target (di);
+  return target_read_code (memaddr, myaddr, length);
 }
+
+/* A non-printing disassemble_info management class.  The disassemble_info
+   setup by this class will not print anything to the output stream (there
+   is no output stream), and the instruction to be disassembled will be
+   read from a buffer passed to the constructor.  */
+
+struct gdb_non_printing_buffer_disassembler
+  : public gdb_non_printing_disassembler
+{
+  /* Constructor.  GDBARCH is the architecture to disassemble for, BUFFER
+     contains the instruction to disassemble, and INSN_ADDRESS is the
+     address (in target memory) of the instruction to disassemble.  */
+  gdb_non_printing_buffer_disassembler (struct gdbarch *gdbarch,
+					gdb::array_view<const gdb_byte> buffer,
+					CORE_ADDR insn_address)
+    : gdb_non_printing_disassembler (gdbarch, nullptr)
+  {
+    /* The cast is necessary until disassemble_info is const-ified.  */
+    m_di.buffer = (gdb_byte *) buffer.data ();
+    m_di.buffer_length = buffer.size ();
+    m_di.buffer_vma = insn_address;
+  }
+};
 
 /* Return the length in bytes of INSN.  MAX_LEN is the size of the
    buffer containing INSN.  */
@@ -1071,14 +1061,10 @@ int
 gdb_buffered_insn_length (struct gdbarch *gdbarch,
 			  const gdb_byte *insn, int max_len, CORE_ADDR addr)
 {
-  struct disassemble_info di;
-  std::string disassembler_options_holder;
-
-  gdb_buffered_insn_length_init_dis (gdbarch, &di, insn, max_len, addr,
-				     &disassembler_options_holder);
-
-  int result = gdb_print_insn_1 (gdbarch, addr, &di);
-  disassemble_free_target (&di);
+  gdb::array_view<const gdb_byte> buffer
+    = gdb::make_array_view (insn, max_len);
+  gdb_non_printing_buffer_disassembler dis (gdbarch, buffer, addr);
+  int result = gdb_print_insn_1 (gdbarch, addr, dis.disasm_info ());
   return result;
 }
 

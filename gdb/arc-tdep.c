@@ -1306,24 +1306,6 @@ arc_is_in_prologue (struct gdbarch *gdbarch, const struct arc_instruction &insn,
   return false;
 }
 
-/* See arc-tdep.h.  */
-
-struct disassemble_info
-arc_disassemble_info (struct gdbarch *gdbarch)
-{
-  struct disassemble_info di;
-  init_disassemble_info_for_no_printing (&di);
-  di.arch = gdbarch_bfd_arch_info (gdbarch)->arch;
-  di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
-  di.endian = gdbarch_byte_order (gdbarch);
-  di.read_memory_func = [](bfd_vma memaddr, gdb_byte *myaddr,
-			   unsigned int len, struct disassemble_info *info)
-    {
-      return target_read_code (memaddr, myaddr, len);
-    };
-  return di;
-}
-
 /* Analyze the prologue and update the corresponding frame cache for the frame
    unwinder for unwinding frames that doesn't have debug info.  In such
    situation GDB attempts to parse instructions in the prologue to understand
@@ -1394,9 +1376,10 @@ arc_analyze_prologue (struct gdbarch *gdbarch, const CORE_ADDR entrypoint,
   while (current_prologue_end < limit_pc)
     {
       struct arc_instruction insn;
-      struct disassemble_info di = arc_disassemble_info (gdbarch);
-      arc_insn_decode (current_prologue_end, &di, arc_delayed_print_insn,
-		       &insn);
+
+      struct gdb_non_printing_memory_disassembler dis (gdbarch);
+      arc_insn_decode (current_prologue_end, dis.disasm_info (),
+		       arc_delayed_print_insn, &insn);
 
       if (arc_debug)
 	arc_insn_dump (insn);
@@ -2460,8 +2443,8 @@ dump_arc_instruction_command (const char *args, int from_tty)
 
   CORE_ADDR address = value_as_address (val);
   struct arc_instruction insn;
-  struct disassemble_info di = arc_disassemble_info (target_gdbarch ());
-  arc_insn_decode (address, &di, arc_delayed_print_insn, &insn);
+  struct gdb_non_printing_memory_disassembler dis (target_gdbarch ());
+  arc_insn_decode (address, dis.disasm_info (), arc_delayed_print_insn, &insn);
   arc_insn_dump (insn);
 }
 

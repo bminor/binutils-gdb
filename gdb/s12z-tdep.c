@@ -141,27 +141,6 @@ s12z_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int num)
 
 /* Support functions for frame handling.  */
 
-
-/* Return a disassemble_info initialized for s12z disassembly, however,
-   the disassembler will not actually print anything.  */
-
-static struct disassemble_info
-s12z_disassemble_info (struct gdbarch *gdbarch)
-{
-  struct disassemble_info di;
-  init_disassemble_info_for_no_printing (&di);
-  di.arch = gdbarch_bfd_arch_info (gdbarch)->arch;
-  di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
-  di.endian = gdbarch_byte_order (gdbarch);
-  di.read_memory_func = [](bfd_vma memaddr, gdb_byte *myaddr,
-			   unsigned int len, struct disassemble_info *info)
-    {
-      return target_read_code (memaddr, myaddr, len);
-    };
-  return di;
-}
-
-
 /* A struct (based on mem_read_abstraction_base) to read memory
    through the disassemble_info API.  */
 struct mem_read_abstraction
@@ -332,15 +311,14 @@ s12z_frame_cache (struct frame_info *this_frame, void **prologue_cache)
   int frame_size = 0;
   int saved_frame_size = 0;
 
-  struct disassemble_info di = s12z_disassemble_info (gdbarch);
-
+  struct gdb_non_printing_memory_disassembler dis (gdbarch);
 
   struct mem_read_abstraction mra;
   mra.base.read = (int (*)(mem_read_abstraction_base*,
 			   int, size_t, bfd_byte*)) abstract_read_memory;
   mra.base.advance = advance ;
   mra.base.posn = posn;
-  mra.info = &di;
+  mra.info = dis.disasm_info ();
 
   while (this_pc > addr)
     {

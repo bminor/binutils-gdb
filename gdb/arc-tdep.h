@@ -186,11 +186,6 @@ arc_arch_is_em (const struct bfd_arch_info* arch)
    can't be set to an actual NULL value - that would cause a crash.  */
 int arc_delayed_print_insn (bfd_vma addr, struct disassemble_info *info);
 
-/* Return properly initialized disassemble_info for ARC disassembler - it will
-   not print disassembled instructions to stderr.  */
-
-struct disassemble_info arc_disassemble_info (struct gdbarch *gdbarch);
-
 /* Get branch/jump target address for the INSN.  Note that this function
    returns branch target and doesn't evaluate if this branch is taken or not.
    For the indirect jumps value depends in register state, hence can change.
