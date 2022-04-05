@@ -285,6 +285,19 @@ f_language::f_type_print_varspec_suffix (struct type *type,
 /* See f-lang.h.  */
 
 void
+f_language::f_type_print_derivation_info (struct type *type,
+					  struct ui_file *stream) const
+{
+  /* Fortran doesn't support multiple inheritance.  */
+  const int i = 0;
+
+  if (TYPE_N_BASECLASSES (type) > 0)
+    gdb_printf (stream, ", extends(%s) ::", TYPE_BASECLASS (type, i)->name ());
+}
+
+/* See f-lang.h.  */
+
+void
 f_language::f_type_print_base (struct type *type, struct ui_file *stream,
 			       int show, int level) const
 {
@@ -396,10 +409,17 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
     case TYPE_CODE_UNION:
     case TYPE_CODE_NAMELIST:
       if (type->code () == TYPE_CODE_UNION)
-	gdb_printf (stream, "%*sType, C_Union :: ", level, "");
+	gdb_printf (stream, "%*sType, C_Union ::", level, "");
       else
-	gdb_printf (stream, "%*sType ", level, "");
+	gdb_printf (stream, "%*sType", level, "");
+
+      if (show > 0)
+	f_type_print_derivation_info (type, stream);
+
+      gdb_puts (" ", stream);
+
       gdb_puts (type->name (), stream);
+
       /* According to the definition,
 	 we only print structure elements in case show > 0.  */
       if (show > 0)

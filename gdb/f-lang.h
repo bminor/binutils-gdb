@@ -266,6 +266,17 @@ private:
 				    int arrayprint_recurse_level,
 				    bool print_rank_only) const;
 
+  /* If TYPE is an extended type, then print out derivation information.
+
+     A typical output could look like this:
+     "Type, extends(point) :: waypoint"
+     "    Type point :: point"
+     "    real(kind=4) :: angle"
+     "End Type waypoint".  */
+
+  void f_type_print_derivation_info (struct type *type,
+				     struct ui_file *stream) const;
+
   /* Print the name of the type (or the ultimate pointer target, function
      value or array element), or the description of a structure or union.
 

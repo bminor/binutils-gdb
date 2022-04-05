@@ -60,12 +60,24 @@ gdb_test "p wp%point" " = \\( coo = \\(1, 2, 1\\) \\)"
 gdb_test "p wp" " = \\( point = \\( coo = \\(1, 2, 1\\) \\), angle = 100 \\)"
 
 gdb_test "whatis wp" "type = Type waypoint"
-gdb_test "ptype wp" \
-  [multi_line "type = Type waypoint" \
-	      "    Type point :: point" \
-	      "    $real :: angle" \
-	      "End Type waypoint"]
+set output_pass_wp [multi_line "type = Type, extends\\(point\\) :: waypoint" \
+			       "    Type point :: point" \
+			       "    $real :: angle" \
+			       "End Type waypoint(, allocatable)?"]
+set output_kfail_wp [multi_line "type = Type waypoint" \
+			        "    Type point :: point" \
+			        "    $real :: angle" \
+			        "End Type waypoint(, allocatable)?"]
 
+set test "ptype wp"
+gdb_test_multiple "$test" "$test" {
+    -re "$output_pass_wp\r\n$gdb_prompt $" {
+      pass "$test"
+    }
+    -re "$output_kfail_wp\r\n$gdb_prompt $" {
+      kfail "gcc/49475" "$test"
+    }
+}
 set test "ptype wp%coo"
 gdb_test_multiple "$test" "$test" {
     -re "$real \\(3\\)\r\n$gdb_prompt $" {
@@ -105,11 +117,27 @@ gdb_test_multiple "$test" "$test" {
 }
 
 gdb_test "whatis fwp" "type = Type fancywaypoint"
-gdb_test "ptype fwp" \
-  [multi_line "type = Type fancywaypoint" \
-	      "    Type waypoint :: waypoint" \
-	      "    $logical :: is_fancy" \
-	      "End Type fancywaypoint"]
+set test "ptype fwp"
+
+set output_pass_fwp \
+    [multi_line "type = Type, extends\\(waypoint\\) :: fancywaypoint" \
+		"    Type waypoint :: waypoint" \
+		"    $logical :: is_fancy" \
+		"End Type fancywaypoint"]
+set output_kfail_fwp \
+    [multi_line "type = Type fancywaypoint" \
+		"    Type waypoint :: waypoint" \
+		"    $logical :: is_fancy" \
+		"End Type fancywaypoint"]
+
+gdb_test_multiple "$test" "$test" {
+    -re "$output_pass_fwp\r\n$gdb_prompt $" {
+	pass  "$test"
+    }
+    -re "$output_kfail_fwp\r\n$gdb_prompt $" {
+	kfail "gcc/49475" "$test"
+    }
+}
 
 set test "ptype fwp%coo"
 gdb_test_multiple "$test" "$test" {
@@ -140,12 +168,15 @@ gdb_test "p wp_vla(1)" " = \\( point = \\( coo = \\(10, 12, 10\\) \\), angle = 1
 gdb_test "whatis wp_vla" "type = Type waypoint, allocatable \\(3\\)" \
     "whatis wp_vla after allocation"
 
-gdb_test "ptype wp_vla" \
-  [multi_line "type = Type waypoint" \
-	      "    Type point :: point" \
-	      "    $real :: angle" \
-	      "End Type waypoint, allocatable \\(3\\)"]
-
+set test "ptype wp_vla"
+gdb_test_multiple "$test" "$test" {
+    -re "$output_pass_wp \\(3\\)\r\n$gdb_prompt $" {
+      pass "$test"
+    }
+    -re "$output_kfail_wp \\(3\\)\r\n$gdb_prompt $" {
+      kfail "gcc/49475" "$test"
+    }
+}
 set test "ptype wp_vla(1)%coo"
 gdb_test_multiple "$test" "$test" {
     -re "$real \\(3\\)\r\n$gdb_prompt $" {
