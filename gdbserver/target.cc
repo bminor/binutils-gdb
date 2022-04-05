@@ -29,14 +29,54 @@
 
 process_stratum_target *the_target;
 
-int
+/* See target.h.  */
+
+bool
 set_desired_thread ()
 {
   client_state &cs = get_client_state ();
   thread_info *found = find_thread_ptid (cs.general_thread);
 
-  switch_to_thread (found);
+  if (found == nullptr)
+    {
+      process_info *proc = find_process_pid (cs.general_thread.pid ());
+      if (proc == nullptr)
+	{
+	  threads_debug_printf
+	    ("did not find thread nor process for general_thread %s",
+	     cs.general_thread.to_string ().c_str ());
+	}
+      else
+	{
+	  threads_debug_printf
+	    ("did not find thread for general_thread %s, but found process",
+	     cs.general_thread.to_string ().c_str ());
+	}
+      switch_to_process (proc);
+    }
+  else
+    switch_to_thread (found);
+
   return (current_thread != NULL);
+}
+
+/* See target.h.  */
+
+bool
+set_desired_process ()
+{
+  client_state &cs = get_client_state ();
+
+  process_info *proc = find_process_pid (cs.general_thread.pid ());
+  if (proc == nullptr)
+    {
+      threads_debug_printf
+	("did not find process for general_thread %s",
+	 cs.general_thread.to_string ().c_str ());
+    }
+  switch_to_process (proc);
+
+  return proc != nullptr;
 }
 
 int

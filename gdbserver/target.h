@@ -699,7 +699,20 @@ target_thread_pending_child (thread_info *thread)
 
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 
-int set_desired_thread ();
+/* Set GDBserver's current thread to the thread the client requested
+   via Hg.  Also switches the current process to the requested
+   process.  If the requested thread is not found in the thread list,
+   then the current thread is set to NULL.  Likewise, if the requested
+   process is not found in the process list, then the current process
+   is set to NULL.  Returns true if the requested thread was found,
+   false otherwise.  */
+
+bool set_desired_thread ();
+
+/* Set GDBserver's current process to the process the client requested
+   via Hg.  The current thread is set to NULL.  */
+
+bool set_desired_process ();
 
 std::string target_pid_to_str (ptid_t);
 

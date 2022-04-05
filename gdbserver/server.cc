@@ -1067,7 +1067,7 @@ gdb_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
       /* (assume no half-trace half-real blocks for now) */
     }
 
-  if (set_desired_thread ())
+  if (set_desired_process ())
     res = read_inferior_memory (memaddr, myaddr, len);
   else
     res = 1;
@@ -1088,7 +1088,7 @@ gdb_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
     {
       int ret;
 
-      if (set_desired_thread ())
+      if (set_desired_process ())
 	ret = target_write_memory (memaddr, myaddr, len);
       else
 	ret = EIO;
