@@ -401,7 +401,6 @@ static void
 windows_init_thread_list (void)
 {
   DEBUG_EVENTS ("called");
-  init_thread_list ();
   thread_list.clear ();
 }
 
