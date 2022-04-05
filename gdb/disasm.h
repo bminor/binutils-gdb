@@ -58,16 +58,14 @@ protected:
   using fprintf_ftype = decltype (disassemble_info::fprintf_func);
   using fprintf_styled_ftype = decltype (disassemble_info::fprintf_styled_func);
 
-  /* Constructor, many fields in m_di are initialized from GDBARCH.  STREAM
-     is where the output of the disassembler will be written too, the
-     remaining arguments are function callbacks that are written into
-     m_di.  Of these function callbacks FPRINTF_FUNC and
-     FPRINTF_STYLED_FUNC must not be nullptr.  If READ_MEMORY_FUNC,
-     MEMORY_ERROR_FUNC, or PRINT_ADDRESS_FUNC are nullptr, then that field
-     within m_di is left with its default value (see the libopcodes
-     function init_disassemble_info for the defaults).  */
+  /* Constructor, many fields in m_di are initialized from GDBARCH.  The
+     remaining arguments are function callbacks that are written into m_di.
+     Of these function callbacks FPRINTF_FUNC and FPRINTF_STYLED_FUNC must
+     not be nullptr.  If READ_MEMORY_FUNC, MEMORY_ERROR_FUNC, or
+     PRINT_ADDRESS_FUNC are nullptr, then that field within m_di is left
+     with its default value (see the libopcodes function
+     init_disassemble_info for the defaults).  */
   gdb_disassemble_info (struct gdbarch *gdbarch,
-			struct ui_file *stream,
 			read_memory_ftype read_memory_func,
 			memory_error_ftype memory_error_func,
 			print_address_ftype print_address_func,
@@ -76,10 +74,6 @@ protected:
 
   /* Destructor.  */
   virtual ~gdb_disassemble_info ();
-
-  /* The stream that disassembler output is being written too.  */
-  struct ui_file *stream ()
-  { return (struct ui_file *) m_di.stream; }
 
   /* Stores data required for disassembling instructions in
      opcodes.  */
@@ -109,6 +103,10 @@ struct gdb_printing_disassembler : public gdb_disassemble_info
 
 protected:
 
+  /* The stream that disassembler output is being written too.  */
+  struct ui_file *stream ()
+  { return m_stream; }
+
   /* Constructor.  All the arguments are just passed to the parent class.
      We also add the two print functions to the arguments passed to the
      parent.  See gdb_disassemble_info for a description of how the
@@ -118,22 +116,41 @@ protected:
 			     read_memory_ftype read_memory_func,
 			     memory_error_ftype memory_error_func,
 			     print_address_ftype print_address_func)
-    : gdb_disassemble_info (gdbarch, stream, read_memory_func,
+    : gdb_disassemble_info (gdbarch, read_memory_func,
 			    memory_error_func, print_address_func,
-			    fprintf_func, fprintf_styled_func)
-  { /* Nothing.  */ }
+			    fprintf_func, fprintf_styled_func),
+      m_stream (stream)
+  {
+    gdb_assert (stream != nullptr);
+  }
 
-  /* Callback used as the disassemble_info's fprintf_func callback, this
-     writes to STREAM, which will be m_di.stream.  */
-  static int fprintf_func (void *stream, const char *format, ...)
+  /* Callback used as the disassemble_info's fprintf_func callback.  The
+     DIS_INFO pointer is a pointer to a gdb_printing_disassembler object.
+     Content is written to the m_stream extracted from DIS_INFO.  */
+  static int fprintf_func (void *dis_info, const char *format, ...)
     ATTRIBUTE_PRINTF(2,3);
 
-  /* Callback used as the disassemble_info's fprintf_styled_func callback,
-     this writes to STREAM, which will be m_di.stream.  */
-  static int fprintf_styled_func (void *stream,
+  /* Callback used as the disassemble_info's fprintf_styled_func callback.
+     The DIS_INFO pointer is a pointer to a gdb_printing_disassembler
+     object.  Content is written to the m_stream extracted from DIS_INFO.  */
+  static int fprintf_styled_func (void *dis_info,
 				  enum disassembler_style style,
 				  const char *format, ...)
     ATTRIBUTE_PRINTF(3,4);
+
+private:
+
+  /* When libopcodes calls the fprintf_func and fprintf_styled_func
+     callbacks, a 'void *' argument is passed.  We arrange, through our
+     call to init_disassemble_info that this argument will be a pointer to
+     a gdb_disassemble_info sub-class, specifically, a
+     gdb_printing_disassembler pointer.  This helper function casts
+     DIS_INFO to the correct type (with some asserts), and then returns the
+     m_stream member variable.  */
+  static ui_file *stream_from_gdb_disassemble_info (void *dis_info);
+
+  /* The stream to which output should be sent.  */
+  struct ui_file *m_stream;
 };
 
 /* A basic disassembler that doesn't actually print anything.  */
@@ -142,7 +159,7 @@ struct gdb_non_printing_disassembler : public gdb_disassemble_info
 {
   gdb_non_printing_disassembler (struct gdbarch *gdbarch,
 				 read_memory_ftype read_memory_func)
-    : gdb_disassemble_info (gdbarch, nullptr /* stream */,
+    : gdb_disassemble_info (gdbarch,
 			    read_memory_func,
 			    nullptr /* memory_error_func */,
 			    nullptr /* print_address_func */,

@@ -163,17 +163,33 @@ gdb_disassembler::dis_asm_print_address (bfd_vma addr,
   print_address (self->arch (), addr, self->stream ());
 }
 
+/* See disasm.h.  */
+
+ui_file *
+gdb_printing_disassembler::stream_from_gdb_disassemble_info (void *dis_info)
+{
+  gdb_disassemble_info *di = (gdb_disassemble_info *) dis_info;
+  gdb_printing_disassembler *dis
+    = dynamic_cast<gdb_printing_disassembler *> (di);
+  gdb_assert (dis != nullptr);
+  ui_file *stream = dis->stream ();
+  gdb_assert (stream != nullptr);
+  return stream;
+}
+
 /* Format disassembler output to STREAM.  */
 
 int
-gdb_printing_disassembler::fprintf_func (void *stream,
+gdb_printing_disassembler::fprintf_func (void *dis_info,
 					 const char *format, ...)
 {
-  va_list args;
+  ui_file *stream = stream_from_gdb_disassemble_info (dis_info);
 
+  va_list args;
   va_start (args, format);
-  gdb_vprintf ((struct ui_file *) stream, format, args);
+  gdb_vprintf (stream, format, args);
   va_end (args);
+
   /* Something non -ve.  */
   return 0;
 }
@@ -181,14 +197,15 @@ gdb_printing_disassembler::fprintf_func (void *stream,
 /* See disasm.h.  */
 
 int
-gdb_printing_disassembler::fprintf_styled_func (void *stream,
+gdb_printing_disassembler::fprintf_styled_func (void *dis_info,
 						enum disassembler_style style,
 						const char *format, ...)
 {
-  va_list args;
+  ui_file *stream = stream_from_gdb_disassemble_info (dis_info);
 
+  va_list args;
   va_start (args, format);
-  gdb_vprintf ((struct ui_file *) stream, format, args);
+  gdb_vprintf (stream, format, args);
   va_end (args);
   /* Something non -ve.  */
   return 0;
@@ -809,7 +826,7 @@ gdb_disassembler::gdb_disassembler (struct gdbarch *gdbarch,
 /* See disasm.h.  */
 
 gdb_disassemble_info::gdb_disassemble_info
-  (struct gdbarch *gdbarch, struct ui_file *stream,
+  (struct gdbarch *gdbarch,
    read_memory_ftype read_memory_func, memory_error_ftype memory_error_func,
    print_address_ftype print_address_func, fprintf_ftype fprintf_func,
    fprintf_styled_ftype fprintf_styled_func)
@@ -817,7 +834,7 @@ gdb_disassemble_info::gdb_disassemble_info
 {
   gdb_assert (fprintf_func != nullptr);
   gdb_assert (fprintf_styled_func != nullptr);
-  init_disassemble_info (&m_di, stream, fprintf_func,
+  init_disassemble_info (&m_di, (void *) this, fprintf_func,
 			 fprintf_styled_func);
   m_di.flavour = bfd_target_unknown_flavour;
 
@@ -930,7 +947,7 @@ gdb_disassembler::print_insn (CORE_ADDR memaddr,
   /* Push any disassemble output to the real destination stream.  We do
      this even if the disassembler reported failure (-1) as the
      disassembler may have printed something to its output stream.  */
-  m_di.fprintf_func (m_dest, "%s", m_buffer.c_str ());
+  gdb_printf (m_dest, "%s", m_buffer.c_str ());
 
   /* If the disassembler failed then report an appropriate error.  */
   if (length < 0)
