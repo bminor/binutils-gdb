@@ -39,7 +39,7 @@
 using namespace windows_nat;
 
 /* See win32-low.h.  */
-windows_process_info windows_process;
+gdbserver_windows_process windows_process;
 
 #ifndef USE_WIN32API
 #include <sys/cygwin.h>
@@ -66,25 +66,6 @@ windows_process_info windows_process;
 #endif
 
 int using_threads = 1;
-
-/* Globals.  */
-static int attaching = 0;
-
-/* A status that hasn't been reported to the core yet, and so
-   win32_wait should return it next, instead of fetching the next
-   debug event off the win32 API.  */
-static struct target_waitstatus cached_status;
-
-/* Non zero if an interrupt request is to be satisfied by suspending
-   all threads.  */
-static int soft_interrupt_requested = 0;
-
-/* Non zero if the inferior is stopped in a simulated breakpoint done
-   by suspending all the threads.  */
-static int faked_breakpoint = 0;
-
-/* True if current_process_handle needs to be closed.  */
-static bool open_process_used = false;
 
 const struct target_desc *win32_tdesc;
 #ifdef __x86_64__
@@ -166,7 +147,7 @@ win32_require_context (windows_thread_info *th)
 /* See nat/windows-nat.h.  */
 
 windows_thread_info *
-windows_nat::windows_process_info::thread_rec
+gdbserver_windows_process::thread_rec
      (ptid_t ptid, thread_disposition_type disposition)
 {
   thread_info *thread = find_thread_ptid (ptid);
@@ -326,10 +307,6 @@ child_init_thread_list (void)
   for_each_thread (delete_thread_info);
 }
 
-/* Zero during the child initialization phase, and nonzero otherwise.  */
-
-static int child_initialization_done = 0;
-
 static void
 do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 {
@@ -339,9 +316,9 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
   windows_process.handle = proch;
   windows_process.main_thread_id = 0;
 
-  soft_interrupt_requested = 0;
-  faked_breakpoint = 0;
-  open_process_used = true;
+  windows_process.soft_interrupt_requested = 0;
+  windows_process.faked_breakpoint = 0;
+  windows_process.open_process_used = true;
 
   memset (&windows_process.current_event, 0,
 	  sizeof (windows_process.current_event));
@@ -373,12 +350,12 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 #endif
     proc->tdesc = win32_tdesc;
   child_init_thread_list ();
-  child_initialization_done = 0;
+  windows_process.child_initialization_done = 0;
 
   if (the_low_target.initial_stuff != NULL)
     (*the_low_target.initial_stuff) ();
 
-  cached_status.set_ignore ();
+  windows_process.cached_status.set_ignore ();
 
   /* Flush all currently pending debug events (thread and dll list) up
      to the initial breakpoint.  */
@@ -391,7 +368,7 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
       /* Note win32_wait doesn't return thread events.  */
       if (status.kind () != TARGET_WAITKIND_LOADED)
 	{
-	  cached_status = status;
+	  windows_process.cached_status = status;
 	  break;
 	}
 
@@ -423,7 +400,7 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
      phase, and then process them all in one batch now.  */
   windows_process.add_all_dlls ();
 
-  child_initialization_done = 1;
+  windows_process.child_initialization_done = 1;
 }
 
 /* Resume all artificially suspended threads if we are continuing
@@ -470,7 +447,7 @@ child_continue (DWORD continue_status, int thread_id)
     {
       continue_one_thread (thread, thread_id);
     });
-  faked_breakpoint = 0;
+  windows_process.faked_breakpoint = 0;
 
   return continue_last_debug_event (continue_status, debug_threads);
 }
@@ -615,7 +592,7 @@ win32_process_target::create_inferior (const char *program,
   char *args = (char *) str_program_args.c_str ();
 
   /* win32_wait needs to know we're not attaching.  */
-  attaching = 0;
+  windows_process.attaching = 0;
 
   if (!program)
     error ("No executable specified, specify executable to debug.\n");
@@ -700,7 +677,7 @@ win32_process_target::attach (unsigned long pid)
 	  DebugSetProcessKillOnExit (FALSE);
 
 	  /* win32_wait needs to know we're attaching.  */
-	  attaching = 1;
+	  windows_process.attaching = 1;
 	  do_initial_child_stuff (h, pid, 1);
 	  return 0;
 	}
@@ -716,7 +693,7 @@ win32_process_target::attach (unsigned long pid)
 /* See nat/windows-nat.h.  */
 
 int
-windows_nat::windows_process_info::handle_output_debug_string
+gdbserver_windows_process::handle_output_debug_string
      (struct target_waitstatus *ourstatus)
 {
 #define READ_BUFFER_LEN 1024
@@ -765,10 +742,10 @@ windows_nat::windows_process_info::handle_output_debug_string
 static void
 win32_clear_inferiors (void)
 {
-  if (open_process_used)
+  if (windows_process.open_process_used)
     {
       CloseHandle (windows_process.handle);
-      open_process_used = false;
+      windows_process.open_process_used = false;
     }
 
   for_each_thread (delete_thread_info);
@@ -946,8 +923,7 @@ win32_process_target::resume (thread_resume *resume_info, size_t n)
 /* See nat/windows-nat.h.  */
 
 void
-windows_nat::windows_process_info::handle_load_dll (const char *name,
-						    LPVOID base)
+gdbserver_windows_process::handle_load_dll (const char *name, LPVOID base)
 {
   CORE_ADDR load_addr = (CORE_ADDR) (uintptr_t) base;
 
@@ -1001,7 +977,7 @@ windows_nat::windows_process_info::handle_load_dll (const char *name,
 /* See nat/windows-nat.h.  */
 
 void
-windows_nat::windows_process_info::handle_unload_dll ()
+gdbserver_windows_process::handle_unload_dll ()
 {
   CORE_ADDR load_addr =
 	  (CORE_ADDR) (uintptr_t) current_event.u.UnloadDll.lpBaseOfDll;
@@ -1026,7 +1002,7 @@ fake_breakpoint_event (void)
 {
   OUTMSG2(("fake_breakpoint_event\n"));
 
-  faked_breakpoint = 1;
+  windows_process.faked_breakpoint = 1;
 
   memset (&windows_process.current_event, 0,
 	  sizeof (windows_process.current_event));
@@ -1041,7 +1017,7 @@ fake_breakpoint_event (void)
 /* See nat/windows-nat.h.  */
 
 bool
-windows_nat::windows_process_info::handle_access_violation
+gdbserver_windows_process::handle_access_violation
      (const EXCEPTION_RECORD *rec)
 {
   return false;
@@ -1067,7 +1043,7 @@ maybe_adjust_pc ()
 	   == EXCEPTION_BREAKPOINT)
 	  || (windows_process.current_event.u.Exception.ExceptionRecord.ExceptionCode
 	      == STATUS_WX86_BREAKPOINT))
-      && child_initialization_done)
+      && windows_process.child_initialization_done)
     {
       th->stopped_at_software_breakpoint = true;
       CORE_ADDR pc = regcache_read_pc (regcache);
@@ -1093,14 +1069,14 @@ get_child_debug_event (DWORD *continue_status,
 
   DEBUG_EVENT *current_event = &windows_process.current_event;
 
-  if (soft_interrupt_requested)
+  if (windows_process.soft_interrupt_requested)
     {
-      soft_interrupt_requested = 0;
+      windows_process.soft_interrupt_requested = 0;
       fake_breakpoint_event ();
       goto gotevent;
     }
 
-  attaching = 0;
+  windows_process.attaching = 0;
   {
     gdb::optional<pending_stop> stop
       = windows_process.fetch_pending_stop (debug_threads);
@@ -1169,10 +1145,10 @@ get_child_debug_event (DWORD *continue_status,
 		(unsigned) current_event->dwThreadId));
       CloseHandle (current_event->u.CreateProcessInfo.hFile);
 
-      if (open_process_used)
+      if (windows_process.open_process_used)
 	{
 	  CloseHandle (windows_process.handle);
-	  open_process_used = false;
+	  windows_process.open_process_used = false;
 	}
 
       windows_process.handle = current_event->u.CreateProcessInfo.hProcess;
@@ -1211,7 +1187,7 @@ get_child_debug_event (DWORD *continue_status,
 		(unsigned) current_event->dwProcessId,
 		(unsigned) current_event->dwThreadId));
       CloseHandle (current_event->u.LoadDll.hFile);
-      if (! child_initialization_done)
+      if (! windows_process.child_initialization_done)
 	break;
       windows_process.dll_loaded_event ();
 
@@ -1223,7 +1199,7 @@ get_child_debug_event (DWORD *continue_status,
 		"for pid=%u tid=%x\n",
 		(unsigned) current_event->dwProcessId,
 		(unsigned) current_event->dwThreadId));
-      if (! child_initialization_done)
+      if (! windows_process.child_initialization_done)
 	break;
       windows_process.handle_unload_dll ();
       ourstatus->set_loaded ();
@@ -1285,14 +1261,14 @@ ptid_t
 win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 			    target_wait_flags options)
 {
-  if (cached_status.kind () != TARGET_WAITKIND_IGNORE)
+  if (windows_process.cached_status.kind () != TARGET_WAITKIND_IGNORE)
     {
       /* The core always does a wait after creating the inferior, and
 	 do_initial_child_stuff already ran the inferior to the
 	 initial breakpoint (or an exit, if creating the process
 	 fails).  Report it now.  */
-      *ourstatus = cached_status;
-      cached_status.set_ignore ();
+      *ourstatus = windows_process.cached_status;
+      windows_process.cached_status.set_ignore ();
       return debug_event_ptid (&windows_process.current_event);
     }
 
@@ -1384,7 +1360,7 @@ win32_process_target::request_interrupt ()
     return;
 
   /* Last resort, suspend all threads manually.  */
-  soft_interrupt_requested = 1;
+  windows_process.soft_interrupt_requested = 1;
 }
 
 bool

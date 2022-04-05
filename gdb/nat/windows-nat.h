@@ -183,8 +183,8 @@ struct windows_process_info
      is invalidated.
 
      This function must be supplied by the embedding application.  */
-  windows_thread_info *thread_rec (ptid_t ptid,
-				   thread_disposition_type disposition);
+  virtual windows_thread_info *thread_rec (ptid_t ptid,
+					   thread_disposition_type disposition) = 0;
 
   /* Handle OUTPUT_DEBUG_STRING_EVENT from child process.  Updates
      OURSTATUS and returns the thread id if this represents a thread
@@ -194,7 +194,7 @@ struct windows_process_info
      a Cygwin signal.  Otherwise just print the string as a warning.
 
      This function must be supplied by the embedding application.  */
-  int handle_output_debug_string (struct target_waitstatus *ourstatus);
+  virtual int handle_output_debug_string (struct target_waitstatus *ourstatus) = 0;
 
   /* Handle a DLL load event.
 
@@ -206,7 +206,7 @@ struct windows_process_info
 
      This function must be supplied by the embedding application.  */
 
-  void handle_load_dll (const char *dll_name, LPVOID base);
+  virtual void handle_load_dll (const char *dll_name, LPVOID base) = 0;
 
   /* Handle a DLL unload event.
 
@@ -215,14 +215,14 @@ struct windows_process_info
 
      This function must be supplied by the embedding application.  */
 
-  void handle_unload_dll ();
+  virtual void handle_unload_dll () = 0;
 
   /* When EXCEPTION_ACCESS_VIOLATION is processed, we give the embedding
      application a chance to change it to be considered "unhandled".
      This function must be supplied by the embedding application.  If it
      returns true, then the exception is "unhandled".  */
 
-  bool handle_access_violation (const EXCEPTION_RECORD *rec);
+  virtual bool handle_access_violation (const EXCEPTION_RECORD *rec) = 0;
 
   handle_exception_result handle_exception
        (struct target_waitstatus *ourstatus, bool debug_exceptions);
