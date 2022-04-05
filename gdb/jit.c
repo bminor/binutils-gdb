@@ -935,7 +935,7 @@ struct jit_unwind_private
 {
   /* Cached register values.  See jit_frame_sniffer to see how this
      works.  */
-  detached_regcache *regcache;
+  std::unique_ptr<detached_regcache> regcache;
 
   /* The frame being unwound.  */
   struct frame_info *this_frame;
@@ -1002,10 +1002,7 @@ static void
 jit_dealloc_cache (struct frame_info *this_frame, void *cache)
 {
   struct jit_unwind_private *priv_data = (struct jit_unwind_private *) cache;
-
-  gdb_assert (priv_data->regcache != NULL);
-  delete priv_data->regcache;
-  xfree (priv_data);
+  delete priv_data;
 }
 
 /* The frame sniffer for the pseudo unwinder.
@@ -1035,11 +1032,11 @@ jit_frame_sniffer (const struct frame_unwind *self,
 
   gdb_assert (!*cache);
 
-  *cache = XCNEW (struct jit_unwind_private);
-  priv_data = (struct jit_unwind_private *) *cache;
+  priv_data = new struct jit_unwind_private;
+  *cache = priv_data;
   /* Take a snapshot of current regcache.  */
-  priv_data->regcache = new detached_regcache (get_frame_arch (this_frame),
-					       true);
+  priv_data->regcache.reset
+    (new detached_regcache (get_frame_arch (this_frame), true));
   priv_data->this_frame = this_frame;
 
   callbacks.priv_data = priv_data;
@@ -1072,7 +1069,7 @@ jit_frame_this_id (struct frame_info *this_frame, void **cache,
   struct gdb_reader_funcs *funcs;
   struct gdb_unwind_callbacks callbacks;
 
-  priv.regcache = NULL;
+  priv.regcache.reset ();
   priv.this_frame = this_frame;
 
   /* We don't expect the frame_id function to set any registers, so we
