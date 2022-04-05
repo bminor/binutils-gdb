@@ -23,14 +23,19 @@
 
 /* A ui_file that implements output paging and unfiltered output.  */
 
-class pager_file : public ui_file
+class pager_file : public wrapped_file
 {
 public:
   /* Create a new pager_file.  The new object takes ownership of
      STREAM.  */
   explicit pager_file (ui_file *stream)
-    : m_stream (stream)
+    : wrapped_file (stream)
   {
+  }
+
+  ~pager_file ()
+  {
+    delete m_stream;
   }
 
   DISABLE_COPY_AND_ASSIGN (pager_file);
@@ -44,30 +49,10 @@ public:
     m_stream->write_async_safe (buf, length_buf);
   }
 
-  bool term_out () override
-  {
-    return m_stream->term_out ();
-  }
-
-  bool isatty () override
-  {
-    return m_stream->isatty ();
-  }
-
-  bool can_emit_style_escape () override
-  {
-    return m_stream->can_emit_style_escape ();
-  }
-
   void emit_style_escape (const ui_file_style &style) override;
   void reset_style () override;
 
   void flush () override;
-
-  int fd () const override
-  {
-    return m_stream->fd ();
-  }
 
   void wrap_here (int indent) override;
 
@@ -97,9 +82,6 @@ private:
 
   /* The style applied at the time that wrap_here was called.  */
   ui_file_style m_wrap_style;
-
-  /* The unfiltered output stream.  */
-  ui_file_up m_stream;
 
   /* This is temporarily set when paging.  This will cause some
      methods to change their behavior to ignore the wrap buffer.  */
