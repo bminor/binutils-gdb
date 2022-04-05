@@ -286,6 +286,13 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
   {
     return disable_randomization_available ();
   }
+
+private:
+
+  windows_thread_info *add_thread (ptid_t ptid, HANDLE h, void *tlb,
+				   bool main_thread_p);
+  void delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p);
+  DWORD fake_create_process ();
 };
 
 static windows_nat_target the_windows_nat_target;
@@ -357,8 +364,9 @@ windows_nat::windows_process_info::thread_rec
    MAIN_THREAD_P should be true if the thread to be added is
    the main thread, false otherwise.  */
 
-static windows_thread_info *
-windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
+windows_thread_info *
+windows_nat_target::add_thread (ptid_t ptid, HANDLE h, void *tlb,
+				bool main_thread_p)
 {
   windows_thread_info *th;
 
@@ -383,9 +391,9 @@ windows_add_thread (ptid_t ptid, HANDLE h, void *tlb, bool main_thread_p)
      the main thread silently (in reality, this thread is really
      more of a process to the user than a thread).  */
   if (main_thread_p)
-    add_thread_silent (&the_windows_nat_target, ptid);
+    add_thread_silent (this, ptid);
   else
-    add_thread (&the_windows_nat_target, ptid);
+    ::add_thread (this, ptid);
 
   /* It's simplest to always set this and update the debug
      registers.  */
@@ -410,8 +418,9 @@ windows_init_thread_list (void)
    MAIN_THREAD_P should be true if the thread to be deleted is
    the main thread, false otherwise.  */
 
-static void
-windows_delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p)
+void
+windows_nat_target::delete_thread (ptid_t ptid, DWORD exit_code,
+				   bool main_thread_p)
 {
   DWORD id;
 
@@ -433,7 +442,7 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p)
 		target_pid_to_str (ptid).c_str (),
 		(unsigned) exit_code);
 
-  delete_thread (find_thread_ptid (&the_windows_nat_target, ptid));
+  ::delete_thread (find_thread_ptid (&the_windows_nat_target, ptid));
 
   auto iter = std::find_if (thread_list.begin (), thread_list.end (),
 			    [=] (auto &th)
@@ -1174,8 +1183,8 @@ windows_continue (DWORD continue_status, int id, int killed)
 
 /* Called in pathological case where Windows fails to send a
    CREATE_PROCESS_DEBUG_EVENT after an attach.  */
-static DWORD
-fake_create_process (void)
+DWORD
+windows_nat_target::fake_create_process ()
 {
   windows_process.handle
     = OpenProcess (PROCESS_ALL_ACCESS, FALSE,
@@ -1188,7 +1197,7 @@ fake_create_process (void)
        (unsigned) GetLastError ());
       /*  We can not debug anything in that case.  */
     }
-  windows_add_thread (ptid_t (windows_process.current_event.dwProcessId, 0,
+  add_thread (ptid_t (windows_process.current_event.dwProcessId, 0,
 			      windows_process.current_event.dwThreadId),
 		      windows_process.current_event.u.CreateThread.hThread,
 		      windows_process.current_event.u.CreateThread.lpThreadLocalBase,
@@ -1438,7 +1447,7 @@ windows_nat_target::get_windows_debug_event (int pid,
 	}
       /* Record the existence of this thread.  */
       thread_id = current_event->dwThreadId;
-      windows_add_thread
+      add_thread
 	(ptid_t (current_event->dwProcessId, current_event->dwThreadId, 0),
 	 current_event->u.CreateThread.hThread,
 	 current_event->u.CreateThread.lpThreadLocalBase,
@@ -1451,10 +1460,10 @@ windows_nat_target::get_windows_debug_event (int pid,
 		    (unsigned) current_event->dwProcessId,
 		    (unsigned) current_event->dwThreadId,
 		    "EXIT_THREAD_DEBUG_EVENT");
-      windows_delete_thread (ptid_t (current_event->dwProcessId,
-				     current_event->dwThreadId, 0),
-			     current_event->u.ExitThread.dwExitCode,
-			     false /* main_thread_p */);
+      delete_thread (ptid_t (current_event->dwProcessId,
+			     current_event->dwThreadId, 0),
+		     current_event->u.ExitThread.dwExitCode,
+		     false /* main_thread_p */);
       break;
 
     case CREATE_PROCESS_DEBUG_EVENT:
@@ -1468,7 +1477,7 @@ windows_nat_target::get_windows_debug_event (int pid,
 
       windows_process.handle = current_event->u.CreateProcessInfo.hProcess;
       /* Add the main thread.  */
-      windows_add_thread
+      add_thread
 	(ptid_t (current_event->dwProcessId,
 		 current_event->dwThreadId, 0),
 	 current_event->u.CreateProcessInfo.hThread,
@@ -1491,9 +1500,9 @@ windows_nat_target::get_windows_debug_event (int pid,
 	}
       else if (saw_create == 1)
 	{
-	  windows_delete_thread (ptid_t (current_event->dwProcessId,
-					 current_event->dwThreadId, 0),
-				 0, true /* main_thread_p */);
+	  delete_thread (ptid_t (current_event->dwProcessId,
+				 current_event->dwThreadId, 0),
+			 0, true /* main_thread_p */);
 	  DWORD exit_status = current_event->u.ExitProcess.dwExitCode;
 	  /* If the exit status looks like a fatal exception, but we
 	     don't recognize the exception's code, make the original
