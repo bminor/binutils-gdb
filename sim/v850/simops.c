@@ -3267,7 +3267,14 @@ v850_bins (SIM_DESC sd, unsigned int source, unsigned int lsb, unsigned int msb,
   pos = lsb;
   width = (msb - lsb) + 1;
 
-  mask = ~ (-(1 << width));
+  /* A width of 32 exhibits undefined behavior on the shift.  The easiest
+     way to make this code safe is to just avoid that case and set the mask
+     to the right value.  */
+  if (width >= 32)
+    mask = 0xffffffff;
+  else
+    mask = ~ (-(1 << width));
+
   source &= mask;
   mask <<= pos;
   result = (* dest) & ~ mask;
