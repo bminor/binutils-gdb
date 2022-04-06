@@ -5217,30 +5217,44 @@ mips_n32n64_return_value (struct gdbarch *gdbarch, struct value *function,
      that all composite results be handled by conversion to implicit first
      parameters.  The MIPS/SGI Fortran implementation has always made a
      specific exception to return COMPLEX results in the floating point
-     registers.]  */
+     registers.]
+
+     From MIPSpro Assembly Language Programmer's Guide, Document Number:
+     007-2418-004
+
+              Software
+     Register Name(from
+     Name     fgregdef.h) Use and Linkage
+     -----------------------------------------------------------------
+     $f0, $f2 fv0, fv1    Hold results of floating-point type function
+                          ($f0) and complex type function ($f0 has the
+                          real part, $f2 has the imaginary part.)  */
 
   if (TYPE_LENGTH (type) > 2 * MIPS64_REGSIZE)
     return RETURN_VALUE_STRUCT_CONVENTION;
-  else if (type->code () == TYPE_CODE_FLT
-	   && TYPE_LENGTH (type) == 16
+  else if ((type->code () == TYPE_CODE_COMPLEX
+	    || (type->code () == TYPE_CODE_FLT && TYPE_LENGTH (type) == 16))
 	   && tdep->mips_fpu_type != MIPS_FPU_NONE)
     {
-      /* A 128-bit floating-point value fills both $f0 and $f2.  The
-	 two registers are used in the same as memory order, so the
-	 eight bytes with the lower memory address are in $f0.  */
+      /* A complex value of up to 128 bits in width as well as a 128-bit
+	 floating-point value goes in both $f0 and $f2.  A single complex
+	 value is held in the lower halves only of the respective registers.
+	 The two registers are used in the same as memory order, so the
+	 bytes with the lower memory address are in $f0.  */
       if (mips_debug)
 	gdb_printf (gdb_stderr, "Return float in $f0 and $f2\n");
       mips_xfer_register (gdbarch, regcache,
 			  (gdbarch_num_regs (gdbarch)
 			   + mips_regnum (gdbarch)->fp0),
-			  8, gdbarch_byte_order (gdbarch),
+			  TYPE_LENGTH (type) / 2, gdbarch_byte_order (gdbarch),
 			  readbuf, writebuf, 0);
       mips_xfer_register (gdbarch, regcache,
 			  (gdbarch_num_regs (gdbarch)
 			   + mips_regnum (gdbarch)->fp0 + 2),
-			  8, gdbarch_byte_order (gdbarch),
-			  readbuf ? readbuf + 8 : readbuf,
-			  writebuf ? writebuf + 8 : writebuf, 0);
+			  TYPE_LENGTH (type) / 2, gdbarch_byte_order (gdbarch),
+			  readbuf ? readbuf + TYPE_LENGTH (type) / 2 : readbuf,
+			  (writebuf
+			   ? writebuf + TYPE_LENGTH (type) / 2 : writebuf), 0);
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   else if (type->code () == TYPE_CODE_FLT
