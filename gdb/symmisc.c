@@ -278,7 +278,7 @@ dump_symtab_1 (struct symtab *symtab, struct ui_file *outfile)
   if (is_main_symtab_of_compunit_symtab (symtab))
     {
       gdb_printf (outfile, "\nBlockvector:\n\n");
-      bv = symtab->blockvector ();
+      bv = symtab->compunit ()->blockvector ();
       len = BLOCKVECTOR_NBLOCKS (bv);
       for (i = 0; i < len; i++)
 	{

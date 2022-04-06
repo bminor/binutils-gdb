@@ -181,7 +181,7 @@ stpy_global_block (PyObject *self, PyObject *args)
 
   STPY_REQUIRE_VALID (self, symtab);
 
-  blockvector = symtab->blockvector ();
+  blockvector = symtab->compunit ()->blockvector ();
   block = BLOCKVECTOR_BLOCK (blockvector, GLOBAL_BLOCK);
   return block_to_block_object (block, symtab->objfile ());
 }
@@ -197,7 +197,7 @@ stpy_static_block (PyObject *self, PyObject *args)
 
   STPY_REQUIRE_VALID (self, symtab);
 
-  blockvector = symtab->blockvector ();
+  blockvector = symtab->compunit ()->blockvector ();
   block = BLOCKVECTOR_BLOCK (blockvector, STATIC_BLOCK);
   return block_to_block_object (block, symtab->objfile ());
 }

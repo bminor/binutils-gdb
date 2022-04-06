@@ -4709,9 +4709,9 @@ cache_symbol (const char *name, domain_enum domain, struct symbol *sym,
      the symbol is local or not, we check the block where we found it
      against the global and static blocks of its associated symtab.  */
   if (sym
-      && BLOCKVECTOR_BLOCK (symbol_symtab (sym)->blockvector (),
+      && BLOCKVECTOR_BLOCK (symbol_symtab (sym)->compunit ()->blockvector (),
 			    GLOBAL_BLOCK) != block
-      && BLOCKVECTOR_BLOCK (symbol_symtab (sym)->blockvector (),
+      && BLOCKVECTOR_BLOCK (symbol_symtab (sym)->compunit ()->blockvector (),
 			    STATIC_BLOCK) != block)
     return;
 

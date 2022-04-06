@@ -421,7 +421,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
   lookup_name_info func_matcher (GCC_FE_WRAPPER_FUNCTION,
 				 symbol_name_match_type::SEARCH_NAME);
 
-  bv = func_sym->owner.symtab->blockvector ();
+  bv = func_sym->owner.symtab->compunit ()->blockvector ();
   nblocks = BLOCKVECTOR_NBLOCKS (bv);
 
   gdb_ptr_type_sym = NULL;
