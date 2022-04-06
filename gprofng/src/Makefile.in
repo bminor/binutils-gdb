@@ -120,7 +120,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../libtool.m4 \
 	$(top_srcdir)/../config/enable.m4 \
 	$(top_srcdir)/../config/ax_pthread.m4 \
 	$(top_srcdir)/config/bison.m4 $(top_srcdir)/../bfd/version.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/../config/zlib.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(am__DIST_COMMON)
@@ -193,21 +193,26 @@ libgprofng_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 PROGRAMS = $(bin_PROGRAMS)
 am_gp_archive_OBJECTS = gp-archive.$(OBJEXT) ArchiveExp.$(OBJEXT)
 gp_archive_OBJECTS = $(am_gp_archive_OBJECTS)
-gp_archive_DEPENDENCIES = $(LIBGPROFNG) $(am__DEPENDENCIES_1)
+gp_archive_DEPENDENCIES = $(LIBGPROFNG) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_gp_collect_app_OBJECTS = gp-collect-app.$(OBJEXT) checks.$(OBJEXT) \
 	envsets.$(OBJEXT) count.$(OBJEXT)
 gp_collect_app_OBJECTS = $(am_gp_collect_app_OBJECTS)
-gp_collect_app_DEPENDENCIES = $(LIBGPROFNG) $(am__DEPENDENCIES_1)
+gp_collect_app_DEPENDENCIES = $(LIBGPROFNG) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_gp_display_src_OBJECTS = gp-display-src.$(OBJEXT)
 gp_display_src_OBJECTS = $(am_gp_display_src_OBJECTS)
-gp_display_src_DEPENDENCIES = $(LIBGPROFNG) $(am__DEPENDENCIES_1)
+gp_display_src_DEPENDENCIES = $(LIBGPROFNG) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_gp_display_text_OBJECTS = gp-display-text.$(OBJEXT) ipc.$(OBJEXT) \
 	ipcio.$(OBJEXT)
 gp_display_text_OBJECTS = $(am_gp_display_text_OBJECTS)
-gp_display_text_DEPENDENCIES = $(LIBGPROFNG) $(am__DEPENDENCIES_1)
+gp_display_text_DEPENDENCIES = $(LIBGPROFNG) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am_gprofng_OBJECTS = gprofng.$(OBJEXT)
 gprofng_OBJECTS = $(am_gprofng_OBJECTS)
-gprofng_DEPENDENCIES = $(LIBGPROFNG) $(am__DEPENDENCIES_1)
+gprofng_DEPENDENCIES = $(LIBGPROFNG) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -440,6 +445,8 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+zlibdir = @zlibdir@
+zlibinc = @zlibinc@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I . -I .. -I ../.. 
 CCSOURCES = \
@@ -520,10 +527,16 @@ CSOURCES = \
 	$(NULL)
 
 LIBGPROFNG = libgprofng.la
+
+# This is where we get zlib from.  zlibdir is -L../zlib and zlibinc is
+# -I../zlib, unless we were configured with --with-system-zlib, in which
+# case both are empty.
+ZLIB = @zlibdir@ -lz
+ZLIBINC = @zlibinc@
 AM_CPPFLAGS = $(GPROFNG_CPPFLAGS) -DLOCALEDIR=\"@localedir@\" -I.. -I$(srcdir) \
 	-I$(srcdir)/../common \
 	-I$(srcdir)/../../include -I$(srcdir)/../../opcodes \
-	-I../../bfd -I$(srcdir)/../../bfd
+	-I../../bfd -I$(srcdir)/../../bfd $(ZLIBINC)
 
 AM_CFLAGS = $(GPROFNG_CFLAGS) $(PTHREAD_CFLAGS) \
 	$(GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS) \
@@ -549,15 +562,15 @@ libgprofng_la_LIBADD = $(top_builddir)/../opcodes/libopcodes.la \
 dbedir = $(prefix)/etc
 dbe_DATA = $(srcdir)/gprofng.rc
 gp_archive_SOURCES = gp-archive.cc ArchiveExp.cc
-gp_archive_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK)
+gp_archive_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
 gp_collect_app_SOURCES = gp-collect-app.cc checks.cc envsets.cc count.cc
-gp_collect_app_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK)
+gp_collect_app_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
 gprofng_SOURCES = gprofng.cc
-gprofng_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK)
+gprofng_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
 gp_display_src_SOURCES = gp-display-src.cc
-gp_display_src_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK)
+gp_display_src_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
 gp_display_text_SOURCES = gp-display-text.cc ipc.cc ipcio.cc
-gp_display_text_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK)
+gp_display_text_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
 
 # The man pages depend on the version number and on a help2man include file.
 @BUILD_MAN_TRUE@common_mandeps = $(top_srcdir)/../bfd/version.m4

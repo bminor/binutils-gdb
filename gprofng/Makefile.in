@@ -114,7 +114,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../libtool.m4 \
 	$(top_srcdir)/../config/enable.m4 \
 	$(top_srcdir)/../config/ax_pthread.m4 \
 	$(top_srcdir)/config/bison.m4 $(top_srcdir)/../bfd/version.m4 \
-	$(top_srcdir)/configure.ac
+	$(top_srcdir)/../config/zlib.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -375,6 +375,8 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+zlibdir = @zlibdir@
+zlibinc = @zlibinc@
 ACLOCAL_AMFLAGS = -I . -I .. 
 AUTOMAKE_OPTIONS = dejagnu foreign
 @BUILD_COLLECTOR_TRUE@COLLECTOR_SUBDIRS = libcollector

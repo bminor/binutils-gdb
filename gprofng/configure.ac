@@ -17,6 +17,7 @@ dnl along with this program; see the file COPYING3.  If not see
 dnl <http://www.gnu.org/licenses/>.
 
 m4_include([../bfd/version.m4])
+m4_include([../config/zlib.m4])
 AC_INIT([gprofng], BFD_VERSION)
 AC_CANONICAL_TARGET
 AM_INIT_AUTOMAKE([subdir-objects])
@@ -182,6 +183,7 @@ fi`
 ])
 AM_CONDITIONAL(TCL_TRY, test "${ac_cv_libctf_tcl_try}" = yes)
 
+AM_ZLIB
 
 # Generate manpages, if possible.
 if test $cross_compiling = no; then
