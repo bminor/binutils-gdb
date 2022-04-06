@@ -1,3 +1,27 @@
+2022-04-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 28981
+	* dwarf.c (fetch_indexed_value): Rename to fecth_indexed_addr and
+	return the address, rather than a string.
+	(fetch_indexed_value): New function - returns a value indexed by a
+	DW_FORM_loclistx or DW_FORM_rnglistx form.
+	(read_and_display_attr_value): Add support for DW_FORM_loclistx
+	and DW_FORM_rnglistx.
+	(process_debug_info): Load the loclists and rnglists sections.
+	(display_loclists_list): Add support for DW_LLE_base_addressx,
+	DW_LLE_startx_endx, DW_LLE_startx_length and
+	DW_LLE_default_location.
+	(display_offset_entry_loclists): New function.  Displays a
+	.debug_loclists section that contains offset entry tables.
+	(display_debug_loc): Call the new function.
+	(display_debug_rnglists_list): Add support for
+	DW_RLE_base_addressx, DW_RLE_startx_endx and DW_RLE_startx_length.
+	(display_debug_ranges): Display the contents of the section's
+	header.
+	* dwarf.h (struct debug_info): Add loclists_base field.
+	* testsuite/binutils-all/dw5.W: Update expected output.
+	* testsuite/binutils-all/x86-64/pr26808.dump: Likewise.
+
 2022-04-01  John Baldwin  <jhb@FreeBSD.org>
 
 	* readelf.c (get_freebsd_elfcore_note_type): Handle

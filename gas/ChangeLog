@@ -1,3 +1,8 @@
+2022-04-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 28981
+	* testsuite/gas/elf/dwarf-5-irp.d: Update expected output.
+
 2022-03-21  Nick Clifton  <nickc@redhat.com>
 
 	PR 28791

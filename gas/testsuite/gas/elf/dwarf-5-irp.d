@@ -87,7 +87,7 @@ Contents of the \.debug_aranges section:
     0+ 0+ ?
 
 Contents of the \.debug_rnglists section:
-
+#...
     Offset +Begin +End
     [0-9a-f]+ 0+ [0-9a-f]+ ?
     [0-9a-f]+ 0+ [0-9a-f]+ ?

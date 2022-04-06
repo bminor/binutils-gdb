@@ -281,7 +281,7 @@ Contents of the .debug_loclists section:
     00000039 <End of list>
 
 Contents of the .debug_rnglists section:
-
+#...
     Offset   Begin    End
     0000000c 0000000000001234 0000000000001236 
     00000016 0000000000001234 0000000000001239 

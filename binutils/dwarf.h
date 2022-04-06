@@ -181,9 +181,13 @@ typedef struct
   /* This is an array of offsets to the location view table.  */
   dwarf_vma *    loc_views;
   int *          have_frame_base;
+
+  /* Information for associating location lists with CUs.  */
   unsigned int   num_loc_offsets;
   unsigned int   max_loc_offsets;
   unsigned int   num_loc_views;
+  dwarf_vma      loclists_base;
+
   /* List of .debug_ranges offsets seen in this .debug_info.  */
   dwarf_vma *    range_lists;
   unsigned int   num_range_lists;
