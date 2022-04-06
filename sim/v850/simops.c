@@ -3135,8 +3135,8 @@ v850_div (SIM_DESC sd, unsigned int op0, unsigned int op1, unsigned int *op2p, u
   bfd_boolean     overflow = FALSE;
   
   /* Compute the result.  */
-  divide_by   = op0;
-  divide_this = op1;
+  divide_by   = (int32_t)op0;
+  divide_this = (int32_t)op1;
 
   if (divide_by == 0 || (divide_by == -1 && divide_this == (1 << 31)))
     {
