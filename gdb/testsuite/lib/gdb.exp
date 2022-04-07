@@ -4349,6 +4349,8 @@ set gdb_saved_set_unbuffered_mode_obj ""
 #   - nowarnings:  Inhibit all compiler warnings.
 #   - pie: Force creation of PIE executables.
 #   - nopie: Prevent creation of PIE executables.
+#   - macros: Add the required compiler flag to include macro information in
+#     debug information
 #
 # And here are some of the not too obscure options understood by DejaGnu that
 # influence the compilation:
@@ -4575,6 +4577,17 @@ proc gdb_compile {source dest type options} {
 	}
 	lappend options "$flag"
     }
+
+  set macros [lsearch -exact $options macros]
+  if {$macros != -1} {
+      if { [test_compiler_info "clang-*"] } {
+	  set flag "additional_flags=-fdebug-macro"
+      } else {
+	  set flag "additional_flags=-g3"
+      }
+
+      set options [lreplace $options $macros $macros $flag]
+  }
 
     if { $type == "executable" } {
 	if { ([istarget "*-*-mingw*"]

@@ -21,19 +21,7 @@ if [using_fission] {
     return -1
 }
 
-set options {debug}
-
-get_compiler_info
-if { [test_compiler_info gcc*] } {
-    lappend options "additional_flags=-g3"
-} elseif { [test_compiler_info clang*] } {
-    lappend options "additional_flags=-fdebug-macro"
-} else {
-    untested "no compiler info"
-    return -1
-}
-
-if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} $options] } {
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug macros}] } {
     return -1
 }
 

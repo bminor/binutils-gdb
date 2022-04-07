@@ -20,18 +20,7 @@ load_lib gdb-python.exp
 standard_testfile
 
 # Compile the test executable.
-set test_macros 0
-set options debug
-get_compiler_info
-if { [test_compiler_info "gcc-*"] } {
-    lappend options additional_flags=-g3
-    set test_macros 1
-} elseif { [test_compiler_info "clang-*"] } {
-    lappend options additional_flags=-fdebug-macro
-    set test_macros 1
-}
-
-if {[build_executable "failed to build" $testfile $srcfile $options]} {
+if {[build_executable "failed to build" $testfile $srcfile {debug macros}]} {
     return -1
 }
 
@@ -75,7 +64,7 @@ proc clean_restart_and_disable { args } {
 # CLEAN_RESTART_AND_DISABLE instead of CLEAN_RESTART, this ensures
 # that the test operates as expected as styles are disabled.
 proc run_style_tests { } {
-    global testfile srcfile hex binfile test_macros
+    global testfile srcfile hex binfile
     global currently_disabled_style decimal hex
 
     save_vars { env(TERM) } {
@@ -181,11 +170,9 @@ proc run_style_tests { } {
 	    gdb_test_no_output "set width 0" ""
 	}
 
-	if {$test_macros} {
-	    set macro_line [gdb_get_line_number "\#define SOME_MACRO"]
-	    gdb_test "info macro SOME_MACRO" \
-		"Defined at $base_file_expr:$macro_line\r\n#define SOME_MACRO 23"
-	}
+	set macro_line [gdb_get_line_number "\#define SOME_MACRO"]
+	gdb_test "info macro SOME_MACRO" \
+	    "Defined at $base_file_expr:$macro_line\r\n#define SOME_MACRO 23"
 
 	gdb_test_no_output "set width 0"
 
