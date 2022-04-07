@@ -206,8 +206,6 @@ enum aarch64_opnd
   AARCH64_OPND_Rn,	/* Integer register as source.  */
   AARCH64_OPND_Rm,	/* Integer register as source.  */
   AARCH64_OPND_Rt,	/* Integer register used in ld/st instructions.  */
-  AARCH64_OPND_Wt,	/* 32-bit integer register used in ld/st
-			   instructions.  */
   AARCH64_OPND_Rt2,	/* Integer register used in ld/st pair instructions.  */
   AARCH64_OPND_Rt_SP,	/* Integer Rt or SP used in STG instructions.  */
   AARCH64_OPND_Rs,	/* Integer register used in ld/st exclusive.  */

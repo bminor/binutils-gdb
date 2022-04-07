@@ -300,3 +300,45 @@ morello_alt_uimm_sub ALTSP
 
 morello_alt_narrow_simm9 ALTVAREG
 morello_alt_narrow_simm9 ALTSP
+
+	.macro morello_alt_zero_basic, op, reg
+	  \op \reg, [ALTVAREG]
+	  \op \reg, [ALTSP]
+	.endm
+
+	.macro morello_alt_zero_general, op, reg
+	  \op \reg, [ALTVAREG]
+	  \op \reg, [ALTVAREG, #16]
+	  \op \reg, [ALTSP, x10]
+	.endm
+
+	.macro morello_alt_zero_unscaled, op, reg
+	  \op \reg, [ALTVAREG]
+	  \op \reg, [ALTVAREG, #16]
+	  \op \reg, [ALTSP, #1]
+	.endm
+
+	.irp op, ldar, stlr, ldarb, stlrb
+	  morello_alt_zero_basic \op, wzr
+	.endr
+
+	.irp op, ldr, str
+	  morello_alt_zero_general \op, wzr
+	  morello_alt_zero_general \op, xzr
+	.endr
+
+	.irp op, ldur, stur
+	  morello_alt_zero_unscaled \op, wzr
+	  morello_alt_zero_unscaled \op, xzr
+	.endr
+
+	.irp size, b, h
+	  .irp op, ldr\size, ldrs\size, str\size
+	    morello_alt_zero_general \op, wzr
+	  .endr
+	  morello_alt_zero_general ldrs\size, xzr
+	  .irp op, ldur\size, ldurs\size, stur\size
+	    morello_alt_zero_unscaled \op, wzr
+	  .endr
+	  morello_alt_zero_unscaled ldurs\size, xzr
+	.endr

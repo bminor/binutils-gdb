@@ -4109,11 +4109,11 @@ struct aarch64_opcode aarch64_opcode_table[] =
 
   /* Load/stores with alternate base, i.e. [<Cn|CSP>] in A64 mode and [<Xn|SP>] in C64 mode.  */
   A64C_INSN ("ldar", 0x425f7c00, 0xfffffc00, ldstexcl, 0, OP2 (Cat, CAPADDR_SIMPLE), QL2_A64C_CA_CAPADDR, 0),
-  A64C_INSN ("ldar", 0x427ffc00, 0xfffffc00, ldstexcl, 0, OP2 (Wt, CAPADDR_SIMPLE), QL2_A64C_W_CAPADDR, 0),
-  A64C_INSN ("ldarb", 0x427f7c00, 0xfffffc00, ldstexcl, 0, OP2 (Wt, CAPADDR_SIMPLE), QL2_A64C_W_CAPADDR, 0),
+  A64C_INSN ("ldar", 0x427ffc00, 0xfffffc00, ldstexcl, 0, OP2 (Rt, CAPADDR_SIMPLE), QL2_A64C_W_CAPADDR, 0),
+  A64C_INSN ("ldarb", 0x427f7c00, 0xfffffc00, ldstexcl, 0, OP2 (Rt, CAPADDR_SIMPLE), QL2_A64C_W_CAPADDR, 0),
   A64C_INSN ("stlr", 0x421f7c00, 0xfffffc00, ldstexcl, 0, OP2 (Cat, CAPADDR_SIMPLE), QL2_A64C_CA_ADDR, 0),
-  A64C_INSN ("stlr", 0x423ffc00, 0xfffffc00, ldstexcl, 0, OP2 (Wt, CAPADDR_SIMPLE), QL2_A64C_W_CAPADDR, 0),
-  A64C_INSN ("stlrb", 0x423f7c00, 0xfffffc00, ldstexcl, 0, OP2 (Wt, CAPADDR_SIMPLE), QL2_A64C_W_CAPADDR, 0),
+  A64C_INSN ("stlr", 0x423ffc00, 0xfffffc00, ldstexcl, 0, OP2 (Rt, CAPADDR_SIMPLE), QL2_A64C_W_CAPADDR, 0),
+  A64C_INSN ("stlrb", 0x423f7c00, 0xfffffc00, ldstexcl, 0, OP2 (Rt, CAPADDR_SIMPLE), QL2_A64C_W_CAPADDR, 0),
   A64C_INSN ("ldr", 0x82600000, 0xffe00c00, ldst_altbase, OP_LDR_POS_AC, OP2 (Cat, CAPADDR_UIMM9), QL2_A64C_CA_CAPADDR, 0),
   A64C_INSN ("ldr", 0x82600800, 0xffe00800, ldst_altbase, OP_LDR_POS_AX, OP2 (Rsz, CAPADDR_UIMM9), QL2_A64C_R_CAPADDR, 0),
   A64C_INSN ("ldr", 0xc2e00c00, 0xffe00c00, ldst_altbase, 0, OP2 (Cat, CAPADDR_REGOFF), QL2_A64C_CA_CAPADDR, 0),
@@ -4139,38 +4139,38 @@ struct aarch64_opcode aarch64_opcode_table[] =
   A64C_INSN ("stur", 0xe2200000, 0xff200c00, ldst_altbase, OP_STURFP_POS_A, OP2 (Fsz, CAPADDR_SIMM9), QL_S_2SAME, F_HAS_ALIAS | F_P1),
   A64C_INSN ("stur", 0xe2200800, 0xffe00c00, ldst_altbase, OP_STURFPQ_POS_A, OP2 (St, CAPADDR_SIMM9), QL_I2SAMEQ, F_HAS_ALIAS | F_P1),
 
-  A64C_INSN ("ldrb", 0x82600400, 0xffe00c00, ldst_altbase, OP_LDRB_POS_A, OP2 (Wt, CAPADDR_UIMM9), QL2_B_ADDR, F_NOSHIFT),
-  A64C_INSN ("ldrb", 0x82c00000, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_REGOFF), QL2_B_ADDR, 0),
-  A64C_INSN ("strb", 0x82400400, 0xffe00c00, ldst_altbase, OP_STRB_POS_A, OP2 (Wt, CAPADDR_UIMM9), QL2_B_ADDR, F_NOSHIFT),
-  A64C_INSN ("strb", 0x82800000, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_REGOFF), QL2_B_ADDR, 0),
+  A64C_INSN ("ldrb", 0x82600400, 0xffe00c00, ldst_altbase, OP_LDRB_POS_A, OP2 (Rt, CAPADDR_UIMM9), QL2_B_ADDR, F_NOSHIFT),
+  A64C_INSN ("ldrb", 0x82c00000, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_REGOFF), QL2_B_ADDR, 0),
+  A64C_INSN ("strb", 0x82400400, 0xffe00c00, ldst_altbase, OP_STRB_POS_A, OP2 (Rt, CAPADDR_UIMM9), QL2_B_ADDR, F_NOSHIFT),
+  A64C_INSN ("strb", 0x82800000, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_REGOFF), QL2_B_ADDR, 0),
 
-  A64C_INSN ("ldrsb", 0x82c00400, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_REGOFF), QL2_B_ADDR, 0),
+  A64C_INSN ("ldrsb", 0x82c00400, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_REGOFF), QL2_B_ADDR, 0),
   A64C_INSN ("ldrsb", 0x82800400, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_REGOFF), QL2_X_ADDR, 0),
-  A64C_INSN ("ldrsh", 0x82c00800, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_REGOFF), QL2_B_ADDR, 0),
+  A64C_INSN ("ldrsh", 0x82c00800, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_REGOFF), QL2_B_ADDR, 0),
   A64C_INSN ("ldrsh", 0x82800800, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_REGOFF), QL2_X_ADDR, 0),
   /* These are aliases of LDURS[BHW]:  */
-  A64C_INSN ("ldrsb", 0xe2000c00, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_SIMM9), QL2_B_ADDR, F_ALIAS),
+  A64C_INSN ("ldrsb", 0xe2000c00, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_B_ADDR, F_ALIAS),
   A64C_INSN ("ldrsb", 0xe2000800, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_X_ADDR, F_ALIAS),
-  A64C_INSN ("ldrsh", 0xe2400c00, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_SIMM9), QL2_B_ADDR, F_ALIAS),
+  A64C_INSN ("ldrsh", 0xe2400c00, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_B_ADDR, F_ALIAS),
   A64C_INSN ("ldrsh", 0xe2400800, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_X_ADDR, F_ALIAS),
   A64C_INSN ("ldrsw", 0xe2800800, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_X_ADDR, F_ALIAS),
 
-  A64C_INSN ("ldursb", 0xe2000c00, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_SIMM9), QL2_B_ADDR, F_HAS_ALIAS | F_P1),
+  A64C_INSN ("ldursb", 0xe2000c00, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_B_ADDR, F_HAS_ALIAS | F_P1),
   A64C_INSN ("ldursb", 0xe2000800, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_X_ADDR, F_HAS_ALIAS | F_P1),
-  A64C_INSN ("ldursh", 0xe2400c00, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_SIMM9), QL2_B_ADDR, F_HAS_ALIAS | F_P1),
+  A64C_INSN ("ldursh", 0xe2400c00, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_B_ADDR, F_HAS_ALIAS | F_P1),
   A64C_INSN ("ldursh", 0xe2400800, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_X_ADDR, F_HAS_ALIAS | F_P1),
   A64C_INSN ("ldursw", 0xe2800800, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_X_ADDR, F_HAS_ALIAS | F_P1),
 
-  A64C_INSN ("ldrh", 0x82c00c00, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_REGOFF), QL2_H_ADDR, 0),
-  A64C_INSN ("strh", 0x82800c00, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_REGOFF), QL2_H_ADDR, 0),
+  A64C_INSN ("ldrh", 0x82c00c00, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_REGOFF), QL2_H_ADDR, 0),
+  A64C_INSN ("strh", 0x82800c00, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_REGOFF), QL2_H_ADDR, 0),
   /* These are aliases of LDURH and STURH:  */
-  A64C_INSN ("ldrh", 0xe2400400, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_SIMM9), QL2_H_ADDR, F_ALIAS),
-  A64C_INSN ("strh", 0xe2400000, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_SIMM9), QL2_H_ADDR, F_ALIAS),
+  A64C_INSN ("ldrh", 0xe2400400, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_H_ADDR, F_ALIAS),
+  A64C_INSN ("strh", 0xe2400000, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_H_ADDR, F_ALIAS),
 
-  A64C_INSN ("ldurb", 0xe2000400, 0xffe00c00, ldst_altbase, OP_LDURB_A, OP2 (Wt, CAPADDR_SIMM9), QL2_B_ADDR, 0),
-  A64C_INSN ("sturb", 0xe2000000, 0xffe00c00, ldst_altbase, OP_STURB_A, OP2 (Wt, CAPADDR_SIMM9), QL2_B_ADDR, 0),
-  A64C_INSN ("ldurh", 0xe2400400, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_SIMM9), QL2_H_ADDR, F_HAS_ALIAS | F_P1),
-  A64C_INSN ("sturh", 0xe2400000, 0xffe00c00, ldst_altbase, 0, OP2 (Wt, CAPADDR_SIMM9), QL2_H_ADDR, F_HAS_ALIAS | F_P1),
+  A64C_INSN ("ldurb", 0xe2000400, 0xffe00c00, ldst_altbase, OP_LDURB_A, OP2 (Rt, CAPADDR_SIMM9), QL2_B_ADDR, 0),
+  A64C_INSN ("sturb", 0xe2000000, 0xffe00c00, ldst_altbase, OP_STURB_A, OP2 (Rt, CAPADDR_SIMM9), QL2_B_ADDR, 0),
+  A64C_INSN ("ldurh", 0xe2400400, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_H_ADDR, F_HAS_ALIAS | F_P1),
+  A64C_INSN ("sturh", 0xe2400000, 0xffe00c00, ldst_altbase, 0, OP2 (Rt, CAPADDR_SIMM9), QL2_H_ADDR, F_HAS_ALIAS | F_P1),
 
   A64C_INSN ("ret", 0xc2c25000, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, F_OPD0_OPT | F_DEFAULT (30)),
   A64C_INSN ("retr", 0xc2c25003, 0xfffffc1f, a64c, 0, OP1 (Can), QL1_A64C_CA, 0),
@@ -5520,7 +5520,6 @@ struct aarch64_opcode aarch64_opcode_table[] =
     Y(INT_REG, regno, "Rn", 0, F(FLD_Rn), "an integer register")	\
     Y(INT_REG, regno, "Rm", 0, F(FLD_Rm), "an integer register")	\
     Y(INT_REG, regno, "Rt", 0, F(FLD_Rt), "an integer register")	\
-    Y(INT_REG, regno, "Wt", 0, F(FLD_Rt), "a 32-bit integer register")	\
     Y(INT_REG, regno, "Rt2", 0, F(FLD_Rt2), "an integer register")	\
     Y(INT_REG, regno, "Rt_SP", OPD_F_MAYBE_SP, F(FLD_Rt),		\
       "an integer or stack pointer register")				\
