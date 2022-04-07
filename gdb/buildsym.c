@@ -539,7 +539,6 @@ buildsym_compunit::start_subfile (const char *name)
 
   subfile = XNEW (struct subfile);
   memset (subfile, 0, sizeof (struct subfile));
-  subfile->buildsym_compunit = this;
 
   subfile->next = m_subfiles;
   m_subfiles = subfile;
