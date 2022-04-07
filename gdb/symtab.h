@@ -2601,6 +2601,17 @@ void fixup_section (struct general_symbol_info *ginfo,
 
 extern unsigned int symtab_create_debug;
 
+/* Print a "symtab-create" debug statement.  */
+
+#define symtab_create_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (symtab_create_debug >= 1, "symtab-create", fmt, ##__VA_ARGS__)
+
+/* Print a verbose "symtab-create" debug statement, only if
+   "set debug symtab-create" is set to 2 or higher.  */
+
+#define symtab_create_debug_printf_v(fmt, ...) \
+  debug_prefixed_printf_cond (symtab_create_debug >= 2, "symtab-create", fmt, ##__VA_ARGS__)
+
 extern unsigned int symbol_lookup_debug;
 
 extern bool basenames_may_differ;

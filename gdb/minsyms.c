@@ -1184,11 +1184,9 @@ minimal_symbol_reader::record_full (gdb::string_view name,
   if (ms_type == mst_file_text && startswith (name, "__gnu_compiled"))
     return (NULL);
 
-  if (symtab_create_debug >= 2)
-    gdb_printf (gdb_stdlog,
-		"Recording minsym:  %-21s  %18s  %4d  %.*s\n",
-		mst_str (ms_type), hex_string (address), section,
-		(int) name.size (), name.data ());
+  symtab_create_debug_printf_v ("recording minsym:  %-21s  %18s  %4d  %.*s",
+				mst_str (ms_type), hex_string (address), section,
+				(int) name.size (), name.data ());
 
   if (m_msym_bunch_index == BUNCH_SIZE)
     {
@@ -1389,12 +1387,8 @@ minimal_symbol_reader::install ()
 
   if (m_msym_count > 0)
     {
-      if (symtab_create_debug)
-	{
-	  gdb_printf (gdb_stdlog,
-		      "Installing %d minimal symbols of objfile %s.\n",
-		      m_msym_count, objfile_name (m_objfile));
-	}
+      symtab_create_debug_printf ("installing %d minimal symbols of objfile %s",
+				  m_msym_count, objfile_name (m_objfile));
 
       /* Allocate enough space, into which we will gather the bunches
 	 of new and existing minimal symbols, sort them, and then
