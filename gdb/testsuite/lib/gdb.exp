@@ -8486,5 +8486,25 @@ gdb_caching_proc has_hw_wp_support {
     return $has_hw_wp_support
 }
 
+# Return a list of all the accepted values of the set command SET_CMD.
+
+proc get_set_option_choices {set_cmd} {
+    global gdb_prompt
+
+    set values {}
+
+    set test "complete $set_cmd"
+    gdb_test_multiple "complete $set_cmd " "$test" {
+	-re "$set_cmd (\[^\r\n\]+)\r\n" {
+	    lappend values $expect_out(1,string)
+	    exp_continue
+	}
+	-re "$gdb_prompt " {
+	    pass $test
+	}
+    }
+    return $values
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

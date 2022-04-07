@@ -837,8 +837,8 @@ static int
 parse_number (struct parser_state *par_state,
 	      const char *p, int len, int parsed_float, YYSTYPE *putithere)
 {
-  LONGEST n = 0;
-  LONGEST prevn = 0;
+  ULONGEST n = 0;
+  ULONGEST prevn = 0;
   int c;
   int base = input_radix;
   int unsigned_p = 0;
@@ -869,7 +869,7 @@ parse_number (struct parser_state *par_state,
     }
 
   /* Handle base-switching prefixes 0x, 0t, 0d, 0 */
-  if (p[0] == '0')
+  if (p[0] == '0' && len > 1)
     switch (p[1])
       {
       case 'x':
@@ -929,7 +929,7 @@ parse_number (struct parser_state *par_state,
       /* If range checking enabled, portably test for unsigned overflow.  */
       if (RANGE_CHECK && n != 0)
 	{
-	  if ((unsigned_p && (unsigned)prevn >= (unsigned)n))
+	  if ((unsigned_p && prevn >= n))
 	    range_error (_("Overflow on numeric constant."));
 	}
       prevn = n;

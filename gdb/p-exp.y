@@ -803,10 +803,8 @@ static int
 parse_number (struct parser_state *par_state,
 	      const char *p, int len, int parsed_float, YYSTYPE *putithere)
 {
-  /* FIXME: Shouldn't these be unsigned?  We don't deal with negative values
-     here, and we do kind of silly things like cast to unsigned.  */
-  LONGEST n = 0;
-  LONGEST prevn = 0;
+  ULONGEST n = 0;
+  ULONGEST prevn = 0;
   ULONGEST un;
 
   int i = 0;
@@ -855,7 +853,7 @@ parse_number (struct parser_state *par_state,
     }
 
   /* Handle base-switching prefixes 0x, 0t, 0d, 0.  */
-  if (p[0] == '0')
+  if (p[0] == '0' && len > 1)
     switch (p[1])
       {
       case 'x':
@@ -933,7 +931,7 @@ parse_number (struct parser_state *par_state,
 	 on 0x123456789 when LONGEST is 32 bits.  */
       if (c != 'l' && c != 'u' && n != 0)
 	{
-	  if ((unsigned_p && (ULONGEST) prevn >= (ULONGEST) n))
+	  if (unsigned_p && prevn >= n)
 	    error (_("Numeric constant too large."));
 	}
       prevn = n;
@@ -951,7 +949,7 @@ parse_number (struct parser_state *par_state,
      the case where it is we just always shift the value more than
      once, with fewer bits each time.  */
 
-  un = (ULONGEST)n >> 2;
+  un = n >> 2;
   if (long_p == 0
       && (un >> (gdbarch_int_bit (par_state->gdbarch ()) - 2)) == 0)
     {
