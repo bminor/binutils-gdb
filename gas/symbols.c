@@ -1364,6 +1364,7 @@ resolve_symbol_value (symbolS *symp)
 
 	case O_symbol:
 	case O_symbol_rva:
+	case O_secidx:
 	  left = resolve_symbol_value (add_symbol);
 	  seg_left = S_GET_SEGMENT (add_symbol);
 	  if (finalize_syms)
@@ -1444,6 +1445,13 @@ resolve_symbol_value (symbolS *symp)
 	      final_val += symp->frag->fr_address + left;
 	      resolved = symbol_resolved_p (add_symbol);
 	      symp->flags.resolving = 0;
+
+	      if (op == O_secidx && seg_left != undefined_section)
+		{
+		  final_val = 0;
+		  break;
+		}
+
 	      goto exit_dont_set_value;
 	    }
 	  else

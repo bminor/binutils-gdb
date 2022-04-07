@@ -1,3 +1,19 @@
+2022-04-07  Mark Harmstone  <mark@harmstone.com>
+
+	* coff-i386.c (in_reloc_p): Add R_SECTION.
+	(howto_table): Add R_SECTION.
+	(coff_pe_i386_relocation_section): Add support for R_SECTION.
+	(coff_i386_reloc_type_lookup): Add support for
+	BFD_RELOC_16_SECCIDX.
+	* coff-x86_64.c (in_reloc_p): Add R_SECTION.
+	(howto_table): Add R_SECTION.
+	(coff_pe_amd64_relocation_section): Add support for R_SECTION.
+	(coff_amd64_reloc_type_lookup): Add support for
+	BFD_RELOC_16_SECCIDX.
+	* reloc.c: Add BFD_RELOC_16_SECIDX.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2022-04-01  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf-bfd.h (elfcore_write_x86_segbases): New.

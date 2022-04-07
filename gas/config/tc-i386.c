@@ -152,6 +152,7 @@ static void set_check (int);
 static void set_cpu_arch (int);
 #ifdef TE_PE
 static void pe_directive_secrel (int);
+static void pe_directive_secidx (int);
 #endif
 static void signed_cons (int);
 static char *output_invalid (int c);
@@ -1385,6 +1386,7 @@ const pseudo_typeS md_pseudo_table[] =
 #endif
 #ifdef TE_PE
   {"secrel32", pe_directive_secrel, 0},
+  {"secidx", pe_directive_secidx, 0},
 #endif
   {0, 0, 0}
 };
@@ -10267,6 +10269,8 @@ x86_cons_fix_new (fragS *frag, unsigned int off, unsigned int len,
       exp->X_op = O_symbol;
       r = BFD_RELOC_32_SECREL;
     }
+  else if (exp->X_op == O_secidx)
+    r = BFD_RELOC_16_SECIDX;
 #endif
 
   fix_new_exp (frag, off, len, exp, 0, r);
@@ -10306,13 +10310,16 @@ lex_got (enum bfd_reloc_code_real *rel,
      we don't yet know the operand size (this will be set by insn
      matching).  Hence we record the word32 relocation here,
      and adjust the reloc according to the real size in reloc().  */
-  static const struct {
+  static const struct
+  {
     const char *str;
     int len;
     const enum bfd_reloc_code_real rel[2];
     const i386_operand_type types64;
     bool need_GOT_symbol;
-  } gotrel[] = {
+  }
+    gotrel[] =
+  {
 #ifndef TE_PE
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
     { STRING_COMMA_LEN ("SIZE"),      { BFD_RELOC_SIZE32,
@@ -10551,6 +10558,25 @@ pe_directive_secrel (int dummy ATTRIBUTE_UNUSED)
 	exp.X_op = O_secrel;
 
       emit_expr (&exp, 4);
+    }
+  while (*input_line_pointer++ == ',');
+
+  input_line_pointer--;
+  demand_empty_rest_of_line ();
+}
+
+static void
+pe_directive_secidx (int dummy ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+
+  do
+    {
+      expression (&exp);
+      if (exp.X_op == O_symbol)
+	exp.X_op = O_secidx;
+
+      emit_expr (&exp, 2);
     }
   while (*input_line_pointer++ == ',');
 
@@ -14359,6 +14385,7 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
     case BFD_RELOC_VTABLE_INHERIT:
 #ifdef TE_PE
     case BFD_RELOC_32_SECREL:
+    case BFD_RELOC_16_SECIDX:
 #endif
       code = fixp->fx_r_type;
       break;

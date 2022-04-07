@@ -2229,6 +2229,7 @@ the section containing the relocation.  It depends on the specific target.  */
 
 /* Section relative relocations.  Some targets need this for DWARF2.  */
   BFD_RELOC_32_SECREL,
+  BFD_RELOC_16_SECIDX,
 
 /* For ELF.  */
   BFD_RELOC_32_GOT_PCREL,

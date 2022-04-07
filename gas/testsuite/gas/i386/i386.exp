@@ -703,11 +703,12 @@ if [gas_32_check] then {
 	}
     }
 
-    # This is a PE specific test.
+    # These are PE specific tests.
     if { [istarget "*-*-cygwin*"] || [istarget "*-*-pe"]
 	 || [istarget "*-*-mingw*"]
     } then {
 	run_dump_test "secrel"
+	run_dump_test "secidx"
     }
 
     # Miscellaneous tests.

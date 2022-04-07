@@ -1522,6 +1522,7 @@ static operator_rankT op_rank[O_max] = {
   0,	/* O_constant */
   0,	/* O_symbol */
   0,	/* O_symbol_rva */
+  0,	/* O_secidx */
   0,	/* O_register */
   0,	/* O_big */
   9,	/* O_uminus */

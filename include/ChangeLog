@@ -1,3 +1,8 @@
+2022-04-07  Mark Harmstone  <mark@harmstone.com>
+
+	* coff/i386.h: Define R_SECTION.
+	* coff/x86_64.h: Likewise.
+
 2022-04-01  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf/common.h (NT_FREEBSD_X86_SEGBASES): Define.

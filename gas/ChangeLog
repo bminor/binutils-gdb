@@ -1,3 +1,16 @@
+2022-04-07  Mark Harmstone  <mark@harmstone.com>
+
+	* config/tc-i386.c (pe_directive_secidx): New function.
+	(md_pseudo_table): Add support for secidx.
+	(x86_cons_fix_new): Likewise.
+	(tc_gen_reloc): Likewise.
+	* expr.c (op_rank): Add O_secidx.
+	* expr.h (operatorT): Likewise.
+	* symbols.c (resolve_symbol_value): Add support for O_secidx.
+	* testsuite/gas/i386/secidx.s: New test source file.
+	* testsuite/gas/i386/secidx.d: New test driver file.
+	* testsuite/gas/i386/i386.exp: Run new test.
+
 2022-04-07  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* config/tc-s390.c (s390_parse_cpu): Add z16 as alternate CPU
