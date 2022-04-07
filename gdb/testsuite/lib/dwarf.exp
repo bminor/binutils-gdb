@@ -2277,14 +2277,32 @@ namespace eval Dwarf {
 	_op .byte 1 "standard opcode 9"
 	_op .byte 0 "standard opcode 10"
 
+	# Add a directory entry to the line table header's directory table.
+	#
+	# Return the index by which this entry can be referred to.
 	proc include_dir {dirname} {
 	    variable _line_include_dirs
 	    lappend _line_include_dirs $dirname
+
+	    if { $Dwarf::_line_unit_version >= 5 } {
+		return [expr [llength $_line_include_dirs] - 1]
+	    } else {
+		return [llength $_line_include_dirs]
+	    }
 	}
 
+	# Add a file name entry to the line table header's file names table.
+	#
+	# Return the index by which this entry can be referred to.
 	proc file_name {filename diridx} {
 	    variable _line_file_names
 	    lappend _line_file_names $filename $diridx
+
+	    if { $Dwarf::_line_unit_version >= 5 } {
+		return [expr [llength $_line_file_names] - 1]
+	    } else {
+		return [llength $_line_file_names]
+	    }
 	}
 
 	proc _line_finalize_header {} {
@@ -2316,14 +2334,7 @@ namespace eval Dwarf {
 		}
 
 		set nr_dirs [llength $_line_include_dirs]
-		# For entry 0.
-		set nr_dirs [expr $nr_dirs + 1]
 		_op .byte $nr_dirs "directory_count"
-
-		# Entry 0.
-		set dirname [lindex $_line_include_dirs 0]
-		set _line_include_dirs \
-		    [concat [list $dirname] $_line_include_dirs]
 
 		foreach dirname $_line_include_dirs {
 		    switch $_line_string_form {
@@ -2360,15 +2371,7 @@ namespace eval Dwarf {
 		    "file_name_entry_format (form: DW_FORM_udata)"
 
 		set nr_files [expr [llength $_line_file_names] / 2]
-		# For entry 0.
-		set nr_files [expr $nr_files + 1]
 		_op .byte $nr_files "file_names_count"
-
-		# Entry 0.
-		set filename [lindex $_line_file_names 0]
-		set diridx [lindex $_line_file_names 1]
-		set _line_file_names \
-		    [concat [list $filename $diridx] $_line_file_names]
 
 		foreach { filename diridx } $_line_file_names {
 		    switch $_line_string_form {

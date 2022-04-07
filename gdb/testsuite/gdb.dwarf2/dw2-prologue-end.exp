@@ -48,10 +48,11 @@ Dwarf::assemble $asm_file {
     }
 
     lines {version 5} lines_label {
-	include_dir "${srcdir}/${subdir}"
-	file_name "$srcfile" 1
+	set diridx [include_dir "${srcdir}/${subdir}"]
+	file_name "$srcfile" $diridx
 
 	program {
+	    DW_LNS_set_file $diridx
 	    DW_LNE_set_address $main_start
 	    line [gdb_get_line_number "main prologue"]
 	    DW_LNS_copy
