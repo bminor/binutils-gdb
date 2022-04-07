@@ -2194,7 +2194,11 @@ static struct type *resolve_dynamic_type_internal
    and stride information set to undefined.  The RESOLVE_P set to false
    case will be used when evaluating a dynamic array that is not
    allocated, or not associated, i.e. the bounds information might not be
-   initialized yet.  */
+   initialized yet.
+
+   RANK is the array rank for which we are resolving this range, and is a
+   zero based count.  The rank should never be negative.
+*/
 
 static struct type *
 resolve_dynamic_range (struct type *dyn_range_type,
@@ -2206,6 +2210,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
   struct dynamic_prop low_bound, high_bound, stride;
 
   gdb_assert (dyn_range_type->code () == TYPE_CODE_RANGE);
+  gdb_assert (rank >= 0);
 
   const struct dynamic_prop *prop = &dyn_range_type->bounds ()->low;
   if (resolve_p && dwarf2_evaluate_property (prop, NULL, addr_stack, &value,
@@ -2263,11 +2268,11 @@ resolve_dynamic_range (struct type *dyn_range_type,
 
 /* Helper function for resolve_dynamic_array_or_string.  This function
    resolves the properties for a single array at RANK within a nested array
-   of arrays structure.  The RANK value is always greater than 0, and
+   of arrays structure.  The RANK value is greater than or equal to 0, and
    starts at it's maximum value and goes down by 1 for each recursive call
    to this function.  So, for a 3-dimensional array, the first call to this
-   function has RANK == 3, then we call ourselves recursively with RANK ==
-   2, than again with RANK == 1, and at that point we should return.
+   function has RANK == 2, then we call ourselves recursively with RANK ==
+   1, than again with RANK == 0, and at that point we should return.
 
    TYPE is updated as the dynamic properties are resolved, and so, should
    be a copy of the dynamic type, rather than the original dynamic type
@@ -2297,9 +2302,9 @@ resolve_dynamic_array_or_string_1 (struct type *type,
   gdb_assert (type->code () == TYPE_CODE_ARRAY
 	      || type->code () == TYPE_CODE_STRING);
 
-  /* The outer resolve_dynamic_array_or_string should ensure we always have
-     a rank of at least 1 when we get here.  */
-  gdb_assert (rank > 0);
+  /* As the rank is a zero based count we expect this to never be
+     negative.  */
+  gdb_assert (rank >= 0);
 
   /* Resolve the allocated and associated properties before doing anything
      else.  If an array is not allocated or not associated then (at least
@@ -2434,6 +2439,14 @@ resolve_dynamic_array_or_string (struct type *type,
 	   tmp_type = check_typedef (TYPE_TARGET_TYPE (tmp_type)))
 	++rank;
     }
+
+  /* The rank that we calculated above is actually a count of the number of
+     ranks.  However, when we resolve the type of each individual array
+     rank we should actually use a rank "offset", e.g. an array with a rank
+     count of 1 (calculated above) will use the rank offset 0 in order to
+     resolve the details of the first array dimension.  As a result, we
+     reduce the rank by 1 here.  */
+  --rank;
 
   return resolve_dynamic_array_or_string_1 (type, addr_stack, rank, true);
 }
@@ -2823,11 +2836,12 @@ resolve_dynamic_type_internal (struct type *type,
 	  break;
 
 	case TYPE_CODE_RANGE:
-	  /* Pass 1 for the rank value here.  The assumption is that this
-	     rank value is not actually required for the resolution of the
-	     dynamic range, otherwise, we'd be resolving this range within
-	     the context of a dynamic array.  */
-	  resolved_type = resolve_dynamic_range (type, addr_stack, 1);
+	  /* Pass 0 for the rank value here, which indicates this is a
+	     range for the first rank of an array.  The assumption is that
+	     this rank value is not actually required for the resolution of
+	     the dynamic range, otherwise, we'd be resolving this range
+	     within the context of a dynamic array.  */
+	  resolved_type = resolve_dynamic_range (type, addr_stack, 0);
 	  break;
 
 	case TYPE_CODE_UNION:

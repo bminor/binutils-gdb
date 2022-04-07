@@ -62,21 +62,28 @@ while { $test_count < 500 } {
 	    break
 	}
 
-	# First grab the expected answer.
-	set answer [get_valueof "" "rank(answer)" "**unknown**"]
+	# First grab the information from the assumed rank array.
+	set answer_rank [get_valueof "" "rank(answer)" "**unknown**"]
+	set answer_content [get_valueof "" "answer" "**unknown**"]
 
-	# Now move up a frame and figure out a command for us to run
-	# as a test.
-	set command ""
-	gdb_test_multiple "up" "up" {
-	-re -wrap "\r\n\[0-9\]+\[ \t\]+call test_rank (\[^\r\n\]+)" {
-		set command $expect_out(1,string)
+	# Now move up a frame and find the name of a non-assumed rank array
+	# which we can use to check the values we got above.
+	set test_array ""
+	gdb_test_multiple "up" "" {
+	    -re -wrap "\r\n\[0-9\]+\[ \t\]+call test_rank \\((\[^\r\n\]+)\\)" {
+		set test_array $expect_out(1,string)
 	    }
 	}
+	gdb_assert { ![string equal $test_array ""] } \
+	    "found the name of a test array to check against"
 
-	gdb_assert { ![string equal $command ""] } "found a command to run"
+	# Check we got the correct array rank.
+	gdb_test "p rank($test_array)" " = $answer_rank"
 
-	gdb_test "p rank($command)" " = ($answer)"
+	# Check we got the correct array content.
+	set content [get_valueof "" "$test_array" "**unknown**"]
+	gdb_assert { [string equal $content $answer_content] } \
+	    "answer array contains the expected contents"
     }
 }
 
