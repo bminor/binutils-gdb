@@ -569,12 +569,6 @@ namespace eval Dwarf {
     # Current .debug_line unit count.
     variable _line_count
 
-    # Whether a file_name entry was seen.
-    variable _line_saw_file
-
-    # Whether a line table program has been seen.
-    variable _line_saw_program
-
     # A Label for line table header generation.
     variable _line_header_end_label
 
@@ -2178,11 +2172,9 @@ namespace eval Dwarf {
 
     proc lines {options label body} {
 	variable _line_count
-	variable _line_saw_file
 	variable _line_include_dirs
 	variable _line_file_names
 	variable _line_header_finalized
-	variable _line_saw_program
 	variable _line_header_end_label
 	variable _line_unit_version
 	variable _line_is_64
@@ -2192,8 +2184,6 @@ namespace eval Dwarf {
 	set _line_is_64 0
 	set _line_unit_version 4
 	set _unit_addr_size default
-	set _line_saw_program 0
-	set _line_saw_file 0
 	set _line_include_dirs {}
 	set _line_file_names {}
 	set _line_header_finalized 0
@@ -2295,9 +2285,6 @@ namespace eval Dwarf {
 	proc file_name {filename diridx} {
 	    variable _line_file_names
 	    lappend _line_file_names $filename $diridx
-
-	    variable _line_saw_file 1
-	    set _line_saw_file 1
 	}
 
 	proc _line_finalize_header {} {
@@ -2424,11 +2411,9 @@ namespace eval Dwarf {
 	}
 
 	proc program {statements} {
-	    variable _line_saw_program
 	    variable _line_header_end_label
 	    variable _line
 
-	    set _line_saw_program 1
 
 	    set _line 1
 
@@ -2872,8 +2857,6 @@ namespace eval Dwarf {
 	variable _strings
 	variable _cu_count
 	variable _line_count
-	variable _line_saw_file
-	variable _line_saw_program
 	variable _line_header_end_label
 	variable _debug_ranges_64_bit
 	variable _debug_addr_index
@@ -2891,8 +2874,6 @@ namespace eval Dwarf {
 	_empty_array _strings
 
 	set _line_count 0
-	set _line_saw_file 0
-	set _line_saw_program 0
 	set _debug_ranges_64_bit [is_64_target]
 
 	set _debug_addr_index 0
