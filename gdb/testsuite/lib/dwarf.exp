@@ -2410,7 +2410,7 @@ namespace eval Dwarf {
 	    define_label $_line_header_end_label
 	}
 
-	proc program {statements} {
+	proc program { body } {
 	    variable _line_header_end_label
 	    variable _line
 
@@ -2502,9 +2502,7 @@ namespace eval Dwarf {
 		_op .sleb128 ${num}
 	    }
 
-	    foreach statement $statements {
-		uplevel 1 $statement
-	    }
+	    uplevel $body
 	}
 
 	uplevel $body
