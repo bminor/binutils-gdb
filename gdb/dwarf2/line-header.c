@@ -60,7 +60,7 @@ line_header::add_file_name (const char *name,
   m_file_names.emplace_back (name, d_index, mod_time, length);
 }
 
-gdb::unique_xmalloc_ptr<char>
+std::string
 line_header::file_file_name (int file) const
 {
   /* Is the file number a valid index into the line header's file name
@@ -73,26 +73,20 @@ line_header::file_file_name (int file) const
 	{
 	  const char *dir = fe->include_dir (this);
 	  if (dir != NULL)
-	    return gdb::unique_xmalloc_ptr<char> (concat (dir, SLASH_STRING,
-							  fe->name,
-							  (char *) NULL));
+	    return string_printf ("%s/%s", dir, fe->name);
 	}
-      return make_unique_xstrdup (fe->name);
+
+      return fe->name;
     }
   else
     {
       /* The compiler produced a bogus file number.  We can at least
 	 record the macro definitions made in the file, even if we
 	 won't be able to find the file by name.  */
-      char fake_name[80];
-
-      xsnprintf (fake_name, sizeof (fake_name),
-		 "<bad macro file number %d>", file);
-
       complaint (_("bad file number in macro information (%d)"),
 		 file);
 
-      return make_unique_xstrdup (fake_name);
+      return string_printf ("<bad macro file number %d>", file);
     }
 }
 

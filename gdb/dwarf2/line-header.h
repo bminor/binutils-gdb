@@ -163,10 +163,8 @@ struct line_header
   const gdb_byte *statement_program_start {}, *statement_program_end {};
 
   /* Return file name relative to the compilation directory of file
-     number I in this object's file name table.  The result is
-     allocated using xmalloc; the caller is responsible for freeing
-     it.  */
-  gdb::unique_xmalloc_ptr<char> file_file_name (int file) const;
+     number FILE in this object's file name table.  */
+  std::string file_file_name (int file) const;
 
  private:
   /* The include_directories table.  Note these are observing
