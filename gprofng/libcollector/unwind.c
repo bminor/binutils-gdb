@@ -120,6 +120,14 @@ fprintf_func (void *arg ATTRIBUTE_UNUSED, const char *fmt ATTRIBUTE_UNUSED, ...)
   return 0;
 }
 
+static int
+fprintf_styled_func (void *arg ATTRIBUTE_UNUSED,
+		      enum disassembler_style st ATTRIBUTE_UNUSED,
+		      const char *fmt ATTRIBUTE_UNUSED, ...)
+{
+  return 0;
+}
+
 /* Get LENGTH bytes from info's buffer, at target address memaddr.
    Transfer them to myaddr.  */
 static int
@@ -4347,6 +4355,7 @@ parse_x86_AVX_instruction (unsigned char *pc)
   dis_info.octets_per_byte = 1;
   dis_info.disassembler_needs_relocs = FALSE;
   dis_info.fprintf_func = fprintf_func;
+  dis_info.fprintf_styled_func = fprintf_styled_func;
   dis_info.stream = NULL;
   dis_info.disassembler_options = NULL;
   dis_info.read_memory_func = read_memory_func;

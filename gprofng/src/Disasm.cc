@@ -88,6 +88,21 @@ fprintf_func (void *arg, const char *fmt, ...)
   return cnt;
 }
 
+static int
+fprintf_styled_func (void *arg, enum disassembler_style st ATTRIBUTE_UNUSED,
+		      const char *fmt, ...)
+{
+  char buf[512];
+  va_list vp;
+  va_start (vp, fmt);
+  int cnt = vsnprintf (buf, sizeof (buf), fmt, vp);
+  va_end (vp);
+
+  Disasm *dis = (Disasm *) arg;
+  dis->dis_str->append (buf);
+  return cnt;
+}
+
 /* Get LENGTH bytes from info's buffer, at target address memaddr.
    Transfer them to myaddr.  */
 static int
@@ -165,6 +180,7 @@ Disasm::disasm_open ()
   dis_info.octets_per_byte = 1;
   dis_info.disassembler_needs_relocs = FALSE;
   dis_info.fprintf_func = fprintf_func;
+  dis_info.fprintf_styled_func = fprintf_styled_func;
   dis_info.stream = this;
   dis_info.disassembler_options = NULL;
   dis_info.read_memory_func = read_memory_func;
