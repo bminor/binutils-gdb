@@ -1,3 +1,10 @@
+2022-04-07  Andreas Krebbel  <krebbel@linux.ibm.com>
+
+	* config/tc-s390.c (s390_parse_cpu): Add z16 as alternate CPU
+	name.
+	* doc/as.texi: Add z16 and arch14 to CPU string list.
+	* doc/c-s390.texi: Add z16 to CPU string list.
+
 2022-04-06  Nick Clifton  <nickc@redhat.com>
 
 	PR 28981
