@@ -2674,14 +2674,55 @@ out_debug_aranges (segT aranges_seg, segT info_seg)
 static void
 out_debug_abbrev (segT abbrev_seg,
 		  segT info_seg ATTRIBUTE_UNUSED,
-		  segT line_seg ATTRIBUTE_UNUSED)
+		  segT line_seg ATTRIBUTE_UNUSED,
+		  unsigned char *func_formP)
 {
   int secoff_form;
+  bool have_efunc = false, have_lfunc = false;
+
+  /* Check the symbol table for function symbols which also have their size
+     specified.  */
+  if (symbol_rootP)
+    {
+      symbolS *symp;
+
+      for (symp = symbol_rootP; symp; symp = symbol_next (symp))
+	{
+	  /* A warning construct is a warning symbol followed by the
+	     symbol warned about.  Skip this and the following symbol.  */
+	  if (symbol_get_bfdsym (symp)->flags & BSF_WARNING)
+	    {
+	      symp = symbol_next (symp);
+	      if (!symp)
+	        break;
+	      continue;
+	    }
+
+	  if (!S_IS_DEFINED (symp) || !S_IS_FUNCTION (symp))
+	    continue;
+
+#if defined (OBJ_ELF) /* || defined (OBJ_MAYBE_ELF) */
+	  if (S_GET_SIZE (symp) == 0)
+	    {
+	      if (!IS_ELF || symbol_get_obj (symp)->size == NULL)
+		continue;
+	    }
+#else
+	  continue;
+#endif
+
+	  if (S_IS_EXTERNAL (symp))
+	    have_efunc = true;
+	  else
+	    have_lfunc = true;
+	}
+    }
+
   subseg_set (abbrev_seg, 0);
 
   out_uleb128 (1);
   out_uleb128 (DW_TAG_compile_unit);
-  out_byte (DW_CHILDREN_no);
+  out_byte (have_efunc || have_lfunc ? DW_CHILDREN_yes : DW_CHILDREN_no);
   if (DWARF2_VERSION < 4)
     {
       if (DWARF2_FORMAT (line_seg) == dwarf2_format_32bit)
@@ -2708,6 +2749,29 @@ out_debug_abbrev (segT abbrev_seg,
   out_abbrev (DW_AT_language, DW_FORM_data2);
   out_abbrev (0, 0);
 
+  if (have_efunc || have_lfunc)
+    {
+      out_uleb128 (2);
+      out_uleb128 (DW_TAG_subprogram);
+      out_byte (DW_CHILDREN_no);
+      out_abbrev (DW_AT_name, DW_FORM_strp);
+      if (have_efunc)
+	{
+	  if (have_lfunc || DWARF2_VERSION < 4)
+	    *func_formP = DW_FORM_flag;
+	  else
+	    *func_formP = DW_FORM_flag_present;
+	  out_abbrev (DW_AT_external, *func_formP);
+	}
+      else
+	/* Any non-zero value other than DW_FORM_flag will do.  */
+	*func_formP = DW_FORM_block;
+      out_abbrev (DW_AT_low_pc, DW_FORM_addr);
+      out_abbrev (DW_AT_high_pc,
+		  DWARF2_VERSION < 4 ? DW_FORM_addr : DW_FORM_udata);
+      out_abbrev (0, 0);
+    }
+
   /* Terminate the abbreviations for this compilation unit.  */
   out_byte (0);
 }
@@ -2715,9 +2779,10 @@ out_debug_abbrev (segT abbrev_seg,
 /* Emit a description of this compilation unit for .debug_info.  */
 
 static void
-out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg,
+out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
 		symbolS *ranges_sym, symbolS *name_sym,
-		symbolS *comp_dir_sym, symbolS *producer_sym)
+		symbolS *comp_dir_sym, symbolS *producer_sym,
+		unsigned char func_form)
 {
   expressionS exp;
   symbolS *info_end;
@@ -2798,6 +2863,81 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg,
   /* DW_AT_language.  Yes, this is probably not really MIPS, but the
      dwarf2 draft has no standard code for assembler.  */
   out_two (DW_LANG_Mips_Assembler);
+
+  if (func_form)
+    {
+      symbolS *symp;
+
+      for (symp = symbol_rootP; symp; symp = symbol_next (symp))
+	{
+	  const char *name;
+	  size_t len;
+
+	  /* Skip warning constructs (see above).  */
+	  if (symbol_get_bfdsym (symp)->flags & BSF_WARNING)
+	    {
+	      symp = symbol_next (symp);
+	      if (!symp)
+	        break;
+	      continue;
+	    }
+
+	  if (!S_IS_DEFINED (symp) || !S_IS_FUNCTION (symp))
+	    continue;
+
+	  subseg_set (str_seg, 0);
+	  name_sym = symbol_temp_new_now_octets ();
+	  name = S_GET_NAME (symp);
+	  len = strlen (name) + 1;
+	  memcpy (frag_more (len), name, len);
+
+	  subseg_set (info_seg, 0);
+
+	  /* DW_TAG_subprogram DIE abbrev */
+	  out_uleb128 (2);
+
+	  /* DW_AT_name */
+	  TC_DWARF2_EMIT_OFFSET (name_sym, sizeof_offset);
+
+	  /* DW_AT_external.  */
+	  if (func_form == DW_FORM_flag)
+	    out_byte (S_IS_EXTERNAL (symp));
+
+	  /* DW_AT_low_pc */
+	  exp.X_op = O_symbol;
+	  exp.X_add_symbol = symp;
+	  exp.X_add_number = 0;
+	  emit_expr (&exp, sizeof_address);
+
+	  /* DW_AT_high_pc */
+	  exp.X_op = O_constant;
+#if defined (OBJ_ELF) /* || defined (OBJ_MAYBE_ELF) */
+	  exp.X_add_number = S_GET_SIZE (symp);
+	  if (exp.X_add_number == 0 && IS_ELF
+	      && symbol_get_obj (symp)->size != NULL)
+	    {
+	      exp.X_op = O_add;
+	      exp.X_op_symbol = make_expr_symbol (symbol_get_obj (symp)->size);
+	    }
+#else
+	  exp.X_add_number = 0;
+#endif
+	  if (DWARF2_VERSION < 4)
+	    {
+	      if (exp.X_op == O_constant)
+		exp.X_op = O_symbol;
+	      exp.X_add_symbol = symp;
+	      emit_expr (&exp, sizeof_address);
+	    }
+	  else if (exp.X_op == O_constant)
+	    out_uleb128 (exp.X_add_number);
+	  else
+	    emit_leb128_expr (symbol_get_value_expression (exp.X_op_symbol), 0);
+	}
+
+      /* End of children.  */
+      out_leb128 (0);
+    }
 
   symbol_set_value_now (info_end);
 }
@@ -2968,6 +3108,7 @@ dwarf2_finish (void)
       segT aranges_seg;
       segT str_seg;
       symbolS *name_sym, *comp_dir_sym, *producer_sym, *ranges_sym;
+      unsigned char func_form = 0;
 
       gas_assert (all_segs);
 
@@ -3013,10 +3154,11 @@ dwarf2_finish (void)
 	}
 
       out_debug_aranges (aranges_seg, info_seg);
-      out_debug_abbrev (abbrev_seg, info_seg, line_seg);
+      out_debug_abbrev (abbrev_seg, info_seg, line_seg, &func_form);
       out_debug_str (str_seg, &name_sym, &comp_dir_sym, &producer_sym);
-      out_debug_info (info_seg, abbrev_seg, line_seg, ranges_sym,
-		      name_sym, comp_dir_sym, producer_sym);
+      out_debug_info (info_seg, abbrev_seg, line_seg, str_seg,
+		      ranges_sym, name_sym, comp_dir_sym, producer_sym,
+		      func_form);
     }
 }
 
