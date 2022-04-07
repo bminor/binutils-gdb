@@ -45,15 +45,25 @@ struct dynamic_prop;
 
 struct subfile
 {
-  struct subfile *next;
+  subfile () = default;
+
+  /* There's nothing wrong with copying a subfile, but we don't need to, so use
+     this to avoid copying one by mistake.  */
+  DISABLE_COPY_AND_ASSIGN (subfile);
+
+  struct subfile *next = nullptr;
+
   /* Space for this is malloc'd.  */
-  char *name;
+  char *name = nullptr;
+
   /* Space for this is malloc'd.  */
-  struct linetable *line_vector;
-  int line_vector_length;
-  enum language language;
-  struct symtab *symtab;
+  struct linetable *line_vector = nullptr;
+  int line_vector_length = 0;
+  enum language language = language_unknown;
+  struct symtab *symtab = nullptr;
 };
+
+using subfile_up = std::unique_ptr<subfile>;
 
 /* Record the symbols defined for each context in a list.  We don't
    create a struct block for the context until we know how long to

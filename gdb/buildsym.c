@@ -97,7 +97,7 @@ buildsym_compunit::~buildsym_compunit ()
       nextsub = subfile->next;
       xfree (subfile->name);
       xfree (subfile->line_vector);
-      xfree (subfile);
+      delete subfile;
     }
 
   struct pending *next, *next1;
@@ -504,13 +504,12 @@ void
 buildsym_compunit::start_subfile (const char *name)
 {
   const char *subfile_dirname;
-  struct subfile *subfile;
 
   subfile_dirname = m_comp_dir.get ();
 
   /* See if this subfile is already registered.  */
 
-  for (subfile = m_subfiles; subfile; subfile = subfile->next)
+  for (subfile *subfile = m_subfiles; subfile; subfile = subfile->next)
     {
       char *subfile_name;
 
@@ -537,13 +536,9 @@ buildsym_compunit::start_subfile (const char *name)
 
   /* This subfile is not known.  Add an entry for it.  */
 
-  subfile = XNEW (struct subfile);
-  memset (subfile, 0, sizeof (struct subfile));
+  subfile_up subfile (new struct subfile);
 
-  subfile->next = m_subfiles;
-  m_subfiles = subfile;
-
-  m_current_subfile = subfile;
+  m_current_subfile = subfile.get ();
 
   subfile->name = xstrdup (name);
 
@@ -562,11 +557,8 @@ buildsym_compunit::start_subfile (const char *name)
      source file.  */
 
   subfile->language = deduce_language_from_filename (subfile->name);
-  if (subfile->language == language_unknown
-      && subfile->next != NULL)
-    {
-      subfile->language = subfile->next->language;
-    }
+  if (subfile->language == language_unknown && m_subfiles != nullptr)
+    subfile->language = m_subfiles->language;
 
   /* If the filename of this subfile ends in .C, then change the
      language of any pending subfiles from C to C++.  We also accept
@@ -586,12 +578,14 @@ buildsym_compunit::start_subfile (const char *name)
 
   /* And patch up this file if necessary.  */
   if (subfile->language == language_c
-      && subfile->next != NULL
-      && (subfile->next->language == language_cplus
-	  || subfile->next->language == language_fortran))
-    {
-      subfile->language = subfile->next->language;
-    }
+      && m_subfiles != nullptr
+      && (m_subfiles->language == language_cplus
+	  || m_subfiles->language == language_fortran))
+    subfile->language = m_subfiles->language;
+
+  /* Link this subfile at the front of the subfile list.  */
+  subfile->next = m_subfiles;
+  m_subfiles = subfile.release ();
 }
 
 /* For stabs readers, the first N_SO symbol is assumed to be the
@@ -791,7 +785,8 @@ buildsym_compunit::watch_main_source_file_lossage ()
 	  else
 	    prev_mainsub_alias->next = mainsub_alias->next;
 	  xfree (mainsub_alias->name);
-	  xfree (mainsub_alias);
+
+	  delete mainsub_alias;
 	}
     }
 }

@@ -632,8 +632,6 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
   if (offset == 0)
     goto return_after_cleanup;
 
-  memset (&main_subfile, '\0', sizeof (main_subfile));
-
   if (inclIndx == 0)
     /* All source lines were in the main source file.  None in include
        files.  */
@@ -651,8 +649,6 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 
       for (ii = 0; ii < inclIndx; ++ii)
 	{
-	  struct subfile *tmpSubfile;
-
 	  /* If there is main file source before include file, enter it.  */
 	  if (offset < inclTable[ii].begin)
 	    {
@@ -675,14 +671,12 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	  else
 	    {
 	      /* Have a new subfile for the include file.  */
+	      inclTable[ii].subfile = new subfile;
 
-	      tmpSubfile = inclTable[ii].subfile = XNEW (struct subfile);
-
-	      memset (tmpSubfile, '\0', sizeof (struct subfile));
 	      firstLine = &(inclTable[ii].funStartLine);
 
 	      /* Enter include file's lines now.  */
-	      enter_line_range (tmpSubfile, inclTable[ii].begin,
+	      enter_line_range (inclTable[ii].subfile, inclTable[ii].begin,
 				inclTable[ii].end, start, 0, firstLine);
 	    }
 
