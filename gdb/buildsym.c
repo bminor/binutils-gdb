@@ -49,13 +49,6 @@ struct pending_block
     struct block *block;
   };
 
-/* Initial sizes of data structures.  These are realloc'd larger if
-   needed, and realloc'd down to the size actually used, when
-   completed.  */
-
-#define	INITIAL_LINE_VECTOR_LENGTH	1000
-
-
 buildsym_compunit::buildsym_compunit (struct objfile *objfile_,
 				      const char *name,
 				      const char *comp_dir_,
@@ -95,7 +88,6 @@ buildsym_compunit::~buildsym_compunit ()
        subfile = nextsub)
     {
       nextsub = subfile->next;
-      xfree (subfile->line_vector);
       delete subfile;
     }
 
@@ -536,9 +528,6 @@ buildsym_compunit::start_subfile (const char *name)
 
   m_current_subfile = subfile.get ();
 
-  /* Initialize line-number recording for this subfile.  */
-  subfile->line_vector = NULL;
-
   /* Default the source language to whatever can be deduced from the
      filename.  If nothing can be deduced (such as for a C/C++ include
      file with a ".h" extension), then inherit whatever language the
@@ -657,28 +646,7 @@ void
 buildsym_compunit::record_line (struct subfile *subfile, int line,
 				CORE_ADDR pc, linetable_entry_flags flags)
 {
-  struct linetable_entry *e;
-
-  /* Make sure line vector exists and is big enough.  */
-  if (!subfile->line_vector)
-    {
-      subfile->line_vector_length = INITIAL_LINE_VECTOR_LENGTH;
-      subfile->line_vector = (struct linetable *)
-	xmalloc (sizeof (struct linetable)
-	   + subfile->line_vector_length * sizeof (struct linetable_entry));
-      subfile->line_vector->nitems = 0;
-      m_have_line_numbers = true;
-    }
-
-  if (subfile->line_vector->nitems >= subfile->line_vector_length)
-    {
-      subfile->line_vector_length *= 2;
-      subfile->line_vector = (struct linetable *)
-	xrealloc ((char *) subfile->line_vector,
-		  (sizeof (struct linetable)
-		   + (subfile->line_vector_length
-		      * sizeof (struct linetable_entry))));
-    }
+  m_have_line_numbers = true;
 
   /* Normally, we treat lines as unsorted.  But the end of sequence
      marker is special.  We sort line markers at the same PC by line
@@ -695,25 +663,30 @@ buildsym_compunit::record_line (struct subfile *subfile, int line,
      anyway.  */
   if (line == 0)
     {
-      struct linetable_entry *last = nullptr;
-      while (subfile->line_vector->nitems > 0)
+      gdb::optional<int> last_line;
+
+      while (!subfile->line_vector_entries.empty ())
 	{
-	  last = subfile->line_vector->item + subfile->line_vector->nitems - 1;
+	  linetable_entry *last = &subfile->line_vector_entries.back ();
+	  last_line = last->line;
+
 	  if (last->pc != pc)
 	    break;
-	  subfile->line_vector->nitems--;
+
+	  subfile->line_vector_entries.pop_back ();
 	}
 
       /* Ignore an end-of-sequence marker marking an empty sequence.  */
-      if (last == nullptr || last->line == 0)
+      if (!last_line.has_value () || *last_line == 0)
 	return;
     }
 
-  e = subfile->line_vector->item + subfile->line_vector->nitems++;
-  e->line = line;
-  e->is_stmt = (flags & LEF_IS_STMT) != 0;
-  e->pc = pc;
-  e->prologue_end = (flags & LEF_PROLOGUE_END) != 0;
+  subfile->line_vector_entries.emplace_back ();
+  linetable_entry &e = subfile->line_vector_entries.back ();
+  e.line = line;
+  e.is_stmt = (flags & LEF_IS_STMT) != 0;
+  e.pc = pc;
+  e.prologue_end = (flags & LEF_PROLOGUE_END) != 0;
 }
 
 
@@ -738,7 +711,7 @@ buildsym_compunit::watch_main_source_file_lossage ()
   /* If the main source file doesn't have any line number or symbol
      info, look for an alias in another subfile.  */
 
-  if (mainsub->line_vector == NULL
+  if (mainsub->line_vector_entries.empty ()
       && mainsub->symtab == NULL)
     {
       const char *mainbase = lbasename (mainsub->name.c_str ());
@@ -771,8 +744,8 @@ buildsym_compunit::watch_main_source_file_lossage ()
 	     Copy its line_vector and symtab to the main subfile
 	     and then discard it.  */
 
-	  mainsub->line_vector = mainsub_alias->line_vector;
-	  mainsub->line_vector_length = mainsub_alias->line_vector_length;
+	  mainsub->line_vector_entries
+	    = std::move (mainsub_alias->line_vector_entries);
 	  mainsub->symtab = mainsub_alias->symtab;
 
 	  if (prev_mainsub_alias == NULL)
@@ -929,13 +902,8 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
        subfile != NULL;
        subfile = subfile->next)
     {
-      int linetablesize = 0;
-
-      if (subfile->line_vector)
+      if (!subfile->line_vector_entries.empty ())
 	{
-	  linetablesize = sizeof (struct linetable) +
-	    subfile->line_vector->nitems * sizeof (struct linetable_entry);
-
 	  const auto lte_is_less_than
 	    = [] (const linetable_entry &ln1,
 		  const linetable_entry &ln2) -> bool
@@ -953,9 +921,8 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 	     address, as this maintains the inline function caller/callee
 	     relationships, this is why std::stable_sort is used.  */
 	  if (m_objfile->flags & OBJF_REORDERED)
-	    std::stable_sort (subfile->line_vector->item,
-			      subfile->line_vector->item
-			      + subfile->line_vector->nitems,
+	    std::stable_sort (subfile->line_vector_entries.begin (),
+			      subfile->line_vector_entries.end (),
 			      lte_is_less_than);
 	}
 
@@ -967,13 +934,20 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 
       /* Fill in its components.  */
 
-      if (subfile->line_vector)
+      if (!subfile->line_vector_entries.empty ())
 	{
-	  /* Reallocate the line table on the symbol obstack.  */
+	  /* Reallocate the line table on the objfile obstack.  */
+	  size_t n_entries = subfile->line_vector_entries.size ();
+	  size_t entry_array_size = n_entries * sizeof (struct linetable_entry);
+	  int linetablesize = sizeof (struct linetable) + entry_array_size;
+
 	  symtab->set_linetable
-	    ((struct linetable *)
-	     obstack_alloc (&m_objfile->objfile_obstack, linetablesize));
-	  memcpy (symtab->linetable (), subfile->line_vector, linetablesize);
+	    (XOBNEWVAR (&m_objfile->objfile_obstack, struct linetable,
+			linetablesize));
+
+	  symtab->linetable ()->nitems = n_entries;
+	  memcpy (symtab->linetable ()->item,
+		  subfile->line_vector_entries.data (), entry_array_size);
 	}
       else
 	symtab->set_linetable (nullptr);

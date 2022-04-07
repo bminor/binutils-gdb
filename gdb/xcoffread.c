@@ -239,8 +239,6 @@ static void read_xcoff_symtab (struct objfile *, legacy_psymtab *);
 static void add_stab_to_list (char *, struct pending_stabs **);
 #endif
 
-static struct linetable *arrange_linetable (struct linetable *);
-
 static void record_include_end (struct coff_symbol *);
 
 static void process_linenos (CORE_ADDR, CORE_ADDR);
@@ -412,89 +410,77 @@ add_stab_to_list (char *stabname, struct pending_stabs **stabvector)
 
 /* Given a line table with function entries are marked, arrange its
    functions in ascending order and strip off function entry markers
-   and return it in a newly created table.  If the old one is good
-   enough, return the old one.  */
+   and return it in a newly created table.  */
+
 /* FIXME: I think all this stuff can be replaced by just passing
    sort_linevec = 1 to end_compunit_symtab.  */
 
-static struct linetable *
-arrange_linetable (struct linetable *oldLineTb)
+static void
+arrange_linetable (std::vector<linetable_entry> &old_linetable)
 {
   int extra_lines = 0;
 
   std::vector<linetable_entry> fentries;
 
-  for (int ii = 0; ii < oldLineTb->nitems; ++ii)
+  for (int ii = 0; ii < old_linetable.size (); ++ii)
     {
-      if (oldLineTb->item[ii].is_stmt == 0)
+      if (old_linetable[ii].is_stmt == 0)
 	continue;
 
-      if (oldLineTb->item[ii].line == 0)
+      if (old_linetable[ii].line == 0)
 	{
 	  /* Function entry found.  */
 	  fentries.emplace_back ();
 	  linetable_entry &e = fentries.back ();
 	  e.line = ii;
 	  e.is_stmt = 1;
-	  e.pc = oldLineTb->item[ii].pc;
+	  e.pc = old_linetable[ii].pc;
 
 	  /* If the function was compiled with XLC, we may have to add an
 	     extra line entry later.  Reserve space for that.  */
-	  if (ii + 1 < oldLineTb->nitems
-	      && oldLineTb->item[ii].pc != oldLineTb->item[ii + 1].pc)
+	  if (ii + 1 < old_linetable.size ()
+	      && old_linetable[ii].pc != old_linetable[ii + 1].pc)
 	    extra_lines++;
 	}
     }
 
   if (fentries.empty ())
-    return oldLineTb;
+    return;
 
   std::sort (fentries.begin (), fentries.end (),
 	     [] (const linetable_entry &lte1, const linetable_entry& lte2)
 	     { return lte1.pc < lte2.pc; });
 
   /* Allocate a new line table.  */
-  int new_linetable_nitems = oldLineTb->nitems - fentries.size () + extra_lines;
-  linetable *new_linetable
-    = XNEWVAR (linetable,
-	       (sizeof (struct linetable)
-		+ (new_linetable_nitems * sizeof (struct linetable_entry))));
+  std::vector<linetable_entry> new_linetable;
+  new_linetable.reserve (old_linetable.size ());
 
   /* If line table does not start with a function beginning, copy up until
      a function begin.  */
-
-  int newline = 0;
-  if (oldLineTb->item[0].line != 0)
-    for (newline = 0;
-	 newline < oldLineTb->nitems && oldLineTb->item[newline].line;
-	 ++newline)
-      new_linetable->item[newline] = oldLineTb->item[newline];
+  for (int i = 0; i < old_linetable.size () && old_linetable[i].line != 0; ++i)
+    new_linetable.push_back (old_linetable[i]);
 
   /* Now copy function lines one by one.  */
-
   for (const linetable_entry &entry : fentries)
     {
       /* If the function was compiled with XLC, we may have to add an
 	 extra line to cover the function prologue.  */
       int jj = entry.line;
-      if (jj + 1 < oldLineTb->nitems
-	  && oldLineTb->item[jj].pc != oldLineTb->item[jj + 1].pc)
+      if (jj + 1 < old_linetable.size ()
+	  && old_linetable[jj].pc != old_linetable[jj + 1].pc)
 	{
-	  new_linetable->item[newline] = oldLineTb->item[jj];
-	  new_linetable->item[newline].line = oldLineTb->item[jj + 1].line;
-	  newline++;
+	  new_linetable.push_back (old_linetable[jj]);
+	  new_linetable.back ().line = old_linetable[jj + 1].line;
 	}
 
       for (jj = entry.line + 1;
-	   jj < oldLineTb->nitems && oldLineTb->item[jj].line != 0;
-	   ++jj, ++newline)
-	new_linetable->item[newline] = oldLineTb->item[jj];
+	   jj < old_linetable.size () && old_linetable[jj].line != 0;
+	   ++jj)
+	new_linetable.push_back (old_linetable[jj]);
     }
 
-  /* The number of items in the line table must include these
-     extra lines which were added in case of XLC compiled functions.  */
-  new_linetable->nitems = new_linetable_nitems;
-  return new_linetable;
+  new_linetable.shrink_to_fit ();
+  old_linetable = std::move (new_linetable);
 }
 
 /* include file support: C_BINCL/C_EINCL pairs will be kept in the 
@@ -595,7 +581,7 @@ static struct objfile *this_symtab_objfile;
 static void
 process_linenos (CORE_ADDR start, CORE_ADDR end)
 {
-  int offset, ii;
+  int offset;
   file_ptr max_offset
     = XCOFF_DATA (this_symtab_objfile)->max_lineno_offset;
 
@@ -631,7 +617,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	coff_data (this_symtab_objfile->obfd)->local_linesz;
       main_source_baseline = 0;
 
-      for (ii = 0; ii < inclIndx; ++ii)
+      for (int ii = 0; ii < inclIndx; ++ii)
 	{
 	  /* If there is main file source before include file, enter it.  */
 	  if (offset < inclTable[ii].begin)
@@ -678,49 +664,23 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
     }
 
   /* Process main file's line numbers.  */
-  if (main_subfile.line_vector)
+  if (!main_subfile.line_vector_entries.empty ())
     {
-      struct linetable *lineTb, *lv;
-
-      lv = main_subfile.line_vector;
-
       /* Line numbers are not necessarily ordered.  xlc compilation will
 	 put static function to the end.  */
-
-      struct subfile *current_subfile = get_current_subfile ();
-      lineTb = arrange_linetable (lv);
-      if (lv == lineTb)
-	{
-	  current_subfile->line_vector = (struct linetable *)
-	    xrealloc (lv, (sizeof (struct linetable)
-			   + lv->nitems * sizeof (struct linetable_entry)));
-	}
-      else
-	{
-	  xfree (lv);
-	  current_subfile->line_vector = lineTb;
-	}
-
-      current_subfile->line_vector_length =
-	current_subfile->line_vector->nitems;
+      arrange_linetable (main_subfile.line_vector_entries);
     }
 
   /* Now, process included files' line numbers.  */
 
-  for (ii = 0; ii < inclIndx; ++ii)
+  for (int ii = 0; ii < inclIndx; ++ii)
     {
       if (inclTable[ii].subfile != ((struct subfile *) &main_subfile)
-	  && (inclTable[ii].subfile)->line_vector)	/* Useless if!!!
-							   FIXMEmgo */
+	  && !inclTable[ii].subfile->line_vector_entries.empty ())
 	{
-	  struct linetable *lineTb, *lv;
-
-	  lv = (inclTable[ii].subfile)->line_vector;
-
 	  /* Line numbers are not necessarily ordered.  xlc compilation will
 	     put static function to the end.  */
-
-	  lineTb = arrange_linetable (lv);
+	  arrange_linetable (inclTable[ii].subfile->line_vector_entries);
 
 	  push_subfile ();
 
@@ -755,22 +715,6 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	  current_subfile->name = inclTable[ii].name;
 #endif
 
-	  if (lv == lineTb)
-	    {
-	      current_subfile->line_vector =
-		(struct linetable *) xrealloc
-		(lv, (sizeof (struct linetable)
-		      + lv->nitems * sizeof (struct linetable_entry)));
-
-	    }
-	  else
-	    {
-	      xfree (lv);
-	      current_subfile->line_vector = lineTb;
-	    }
-
-	  current_subfile->line_vector_length =
-	    current_subfile->line_vector->nitems;
 	  start_subfile (pop_subfile ());
 	}
     }

@@ -20,6 +20,7 @@
 #define BUILDSYM_H 1
 
 #include "gdbsupport/gdb_obstack.h"
+#include "symtab.h"
 
 struct objfile;
 struct symbol;
@@ -53,10 +54,7 @@ struct subfile
 
   struct subfile *next = nullptr;
   std::string name;
-
-  /* Space for this is malloc'd.  */
-  struct linetable *line_vector = nullptr;
-  int line_vector_length = 0;
+  std::vector<linetable_entry> line_vector_entries;
   enum language language = language_unknown;
   struct symtab *symtab = nullptr;
 };
