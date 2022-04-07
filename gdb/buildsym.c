@@ -493,6 +493,8 @@ buildsym_compunit::start_subfile (const char *name)
 {
   /* See if this subfile is already registered.  */
 
+  symtab_create_debug_printf ("name = %s", name);
+
   for (subfile *subfile = m_subfiles; subfile; subfile = subfile->next)
     {
       std::string subfile_name_holder;
@@ -513,6 +515,8 @@ buildsym_compunit::start_subfile (const char *name)
 
       if (FILENAME_CMP (subfile_name, name) == 0)
 	{
+	  symtab_create_debug_printf ("found existing symtab with name %s (%s)",
+				      subfile->name.c_str (), subfile_name);
 	  m_current_subfile = subfile;
 	  return;
 	}
@@ -740,6 +744,9 @@ buildsym_compunit::watch_main_source_file_lossage ()
 	  /* Found a match for the main source file.
 	     Copy its line_vector and symtab to the main subfile
 	     and then discard it.  */
+
+	  symtab_create_debug_printf ("using subfile %s as the main subfile",
+				      mainsub_alias->name.c_str ());
 
 	  mainsub->line_vector_entries
 	    = std::move (mainsub_alias->line_vector_entries);
