@@ -618,6 +618,7 @@ CXX_FOR_TARGET
 CC_FOR_TARGET
 RANLIB_PLUGIN_OPTION
 AR_PLUGIN_OPTION
+PKG_CONFIG_PATH
 READELF
 OBJDUMP
 OBJCOPY
@@ -10304,6 +10305,7 @@ if test -z "$ac_cv_prog_READELF" ; then
     READELF="${ncn_tool_prefix}$2"
   fi
 fi
+
 
 
 

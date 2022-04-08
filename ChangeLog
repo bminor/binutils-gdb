@@ -1,3 +1,11 @@
+2022-04-08  Simon Marchi  <simon.marchi@efficios.com>
+
+	* configure.ac: Add AC_SUBST(PKG_CONFIG_PATH).
+	* configure: Re-generate.
+	* Makefile.tpl (HOST_EXPORTS): Pass PKG_CONFIG_PATH.
+	(PKG_CONFIG_PATH): New.
+	* Makefile.in: Re-generate.
+
 2022-03-15  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* gprofng/src/gp-collect-app.cc (collect::check_args): Use
