@@ -63,7 +63,7 @@ buildsym_compunit::buildsym_compunit (struct objfile *objfile_,
 				      CORE_ADDR last_addr)
   : m_objfile (objfile_),
     m_last_source_file (name == nullptr ? nullptr : xstrdup (name)),
-    m_comp_dir (comp_dir_ == nullptr ? nullptr : xstrdup (comp_dir_)),
+    m_comp_dir (comp_dir_ == nullptr ? "" : comp_dir_),
     m_language (language_),
     m_last_source_start_addr (last_addr)
 {
@@ -95,7 +95,6 @@ buildsym_compunit::~buildsym_compunit ()
        subfile = nextsub)
     {
       nextsub = subfile->next;
-      xfree (subfile->name);
       xfree (subfile->line_vector);
       delete subfile;
     }
@@ -503,44 +502,39 @@ buildsym_compunit::make_blockvector ()
 void
 buildsym_compunit::start_subfile (const char *name)
 {
-  const char *subfile_dirname;
-
-  subfile_dirname = m_comp_dir.get ();
-
   /* See if this subfile is already registered.  */
 
   for (subfile *subfile = m_subfiles; subfile; subfile = subfile->next)
     {
-      char *subfile_name;
+      std::string subfile_name_holder;
+      const char *subfile_name;
 
       /* If NAME is an absolute path, and this subfile is not, then
 	 attempt to create an absolute path to compare.  */
       if (IS_ABSOLUTE_PATH (name)
 	  && !IS_ABSOLUTE_PATH (subfile->name)
-	  && subfile_dirname != NULL)
-	subfile_name = concat (subfile_dirname, SLASH_STRING,
-			       subfile->name, (char *) NULL);
+	  && !m_comp_dir.empty ())
+	{
+	  subfile_name_holder = string_printf ("%s/%s", m_comp_dir.c_str (),
+					       subfile->name.c_str ());
+	  subfile_name = subfile_name_holder.c_str ();
+	}
       else
-	subfile_name = subfile->name;
+	subfile_name = subfile->name.c_str ();
 
       if (FILENAME_CMP (subfile_name, name) == 0)
 	{
 	  m_current_subfile = subfile;
-	  if (subfile_name != subfile->name)
-	    xfree (subfile_name);
 	  return;
 	}
-      if (subfile_name != subfile->name)
-	xfree (subfile_name);
     }
 
   /* This subfile is not known.  Add an entry for it.  */
 
   subfile_up subfile (new struct subfile);
+  subfile->name = name;
 
   m_current_subfile = subfile.get ();
-
-  subfile->name = xstrdup (name);
 
   /* Initialize line-number recording for this subfile.  */
   subfile->line_vector = NULL;
@@ -556,7 +550,7 @@ buildsym_compunit::start_subfile (const char *name)
      until after all the symbols have been processed for a given
      source file.  */
 
-  subfile->language = deduce_language_from_filename (subfile->name);
+  subfile->language = deduce_language_from_filename (subfile->name.c_str ());
   if (subfile->language == language_unknown && m_subfiles != nullptr)
     subfile->language = m_subfiles->language;
 
@@ -565,10 +559,10 @@ buildsym_compunit::start_subfile (const char *name)
      any other C++ suffixes accepted by deduce_language_from_filename.  */
   /* Likewise for f2c.  */
 
-  if (subfile->name)
+  if (!subfile->name.empty ())
     {
       struct subfile *s;
-      enum language sublang = deduce_language_from_filename (subfile->name);
+      language sublang = deduce_language_from_filename (subfile->name.c_str ());
 
       if (sublang == language_cplus || sublang == language_fortran)
 	for (s = m_subfiles; s != NULL; s = s->next)
@@ -605,12 +599,12 @@ buildsym_compunit::patch_subfile_names (struct subfile *subfile,
 					const char *name)
 {
   if (subfile != NULL
-      && m_comp_dir == NULL
-      && subfile->name != NULL
-      && IS_DIR_SEPARATOR (subfile->name[strlen (subfile->name) - 1]))
+      && m_comp_dir.empty ()
+      && !subfile->name.empty ()
+      && IS_DIR_SEPARATOR (subfile->name.back ()))
     {
-      m_comp_dir.reset (subfile->name);
-      subfile->name = xstrdup (name);
+      m_comp_dir = std::move (subfile->name);
+      subfile->name = name;
       set_last_source_file (name);
 
       /* Default the source language to whatever can be deduced from
@@ -624,7 +618,8 @@ buildsym_compunit::patch_subfile_names (struct subfile *subfile,
 	 symbols, since symtabs aren't allocated until after all the
 	 symbols have been processed for a given source file.  */
 
-      subfile->language = deduce_language_from_filename (subfile->name);
+      subfile->language
+	= deduce_language_from_filename (subfile->name.c_str ());
       if (subfile->language == language_unknown
 	  && subfile->next != NULL)
 	{
@@ -642,8 +637,8 @@ void
 buildsym_compunit::push_subfile ()
 {
   gdb_assert (m_current_subfile != NULL);
-  gdb_assert (m_current_subfile->name != NULL);
-  m_subfile_stack.push_back (m_current_subfile->name);
+  gdb_assert (!m_current_subfile->name.empty ());
+  m_subfile_stack.push_back (m_current_subfile->name.c_str ());
 }
 
 const char *
@@ -746,7 +741,7 @@ buildsym_compunit::watch_main_source_file_lossage ()
   if (mainsub->line_vector == NULL
       && mainsub->symtab == NULL)
     {
-      const char *mainbase = lbasename (mainsub->name);
+      const char *mainbase = lbasename (mainsub->name.c_str ());
       int nr_matches = 0;
       struct subfile *prevsub;
       struct subfile *mainsub_alias = NULL;
@@ -759,7 +754,7 @@ buildsym_compunit::watch_main_source_file_lossage ()
 	{
 	  if (subfile == mainsub)
 	    continue;
-	  if (filename_cmp (lbasename (subfile->name), mainbase) == 0)
+	  if (filename_cmp (lbasename (subfile->name.c_str ()), mainbase) == 0)
 	    {
 	      ++nr_matches;
 	      mainsub_alias = subfile;
@@ -784,7 +779,6 @@ buildsym_compunit::watch_main_source_file_lossage ()
 	    m_subfiles = mainsub_alias->next;
 	  else
 	    prev_mainsub_alias->next = mainsub_alias->next;
-	  xfree (mainsub_alias->name);
 
 	  delete mainsub_alias;
 	}
@@ -967,7 +961,8 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 
       /* Allocate a symbol table if necessary.  */
       if (subfile->symtab == NULL)
-	subfile->symtab = allocate_symtab (cu, subfile->name);
+	subfile->symtab = allocate_symtab (cu, subfile->name.c_str ());
+
       struct symtab *symtab = subfile->symtab;
 
       /* Fill in its components.  */
@@ -997,12 +992,11 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 
   /* Fill out the compunit symtab.  */
 
-  if (m_comp_dir != NULL)
+  if (!m_comp_dir.empty ())
     {
       /* Reallocate the dirname on the symbol obstack.  */
-      const char *comp_dir = m_comp_dir.get ();
       cu->set_dirname (obstack_strdup (&m_objfile->objfile_obstack,
-				       comp_dir));
+				       m_comp_dir.c_str ()));
     }
 
   /* Save the debug format string (if any) in the symtab.  */

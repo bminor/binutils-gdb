@@ -9740,8 +9740,8 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 		 assume there's a simple mapping from
 		 cu->line_header->file_names to subfiles, plus
 		 cu->line_header->file_names may contain dups.  */
-	      b->get_current_subfile ()->symtab
-		= allocate_symtab (cust, b->get_current_subfile ()->name);
+	      const char *name = b->get_current_subfile ()->name.c_str ();
+	      b->get_current_subfile ()->symtab = allocate_symtab (cust, name);
 	    }
 
 	  fe.symtab = b->get_current_subfile ()->symtab;
@@ -20083,7 +20083,7 @@ dwarf_record_line_1 (struct gdbarch *gdbarch, struct subfile *subfile,
     {
       gdb_printf (gdb_stdlog,
 		  "Recording line %u, file %s, address %s\n",
-		  line, lbasename (subfile->name),
+		  line, lbasename (subfile->name.c_str ()),
 		  paddress (gdbarch, address));
     }
 
@@ -20107,7 +20107,7 @@ dwarf_finish_line (struct gdbarch *gdbarch, struct subfile *subfile,
     {
       gdb_printf (gdb_stdlog,
 		  "Finishing current line, file %s, address %s\n",
-		  lbasename (subfile->name),
+		  lbasename (subfile->name.c_str ()),
 		  paddress (gdbarch, address));
     }
 
@@ -20500,7 +20500,7 @@ dwarf_decode_lines (struct line_header *lh, struct dwarf2_cu *cu,
 	{
 	  builder->get_current_subfile ()->symtab
 	    = allocate_symtab (cust,
-			       builder->get_current_subfile ()->name);
+			       builder->get_current_subfile ()->name.c_str ());
 	}
       fe.symtab = builder->get_current_subfile ()->symtab;
     }

@@ -766,10 +766,9 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	    if (fakename == NULL)
 	      fakename = " ?";
 	    start_subfile (fakename);
-	    xfree (get_current_subfile ()->name);
 	  }
 	  struct subfile *current_subfile = get_current_subfile ();
-	  current_subfile->name = xstrdup (inclTable[ii].name);
+	  current_subfile->name = inclTable[ii].name;
 #endif
 
 	  if (lv == lineTb)

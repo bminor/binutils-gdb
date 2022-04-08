@@ -52,9 +52,7 @@ struct subfile
   DISABLE_COPY_AND_ASSIGN (subfile);
 
   struct subfile *next = nullptr;
-
-  /* Space for this is malloc'd.  */
-  char *name = nullptr;
+  std::string name;
 
   /* Space for this is malloc'd.  */
   struct linetable *line_vector = nullptr;
@@ -154,7 +152,7 @@ struct buildsym_compunit
 		     CORE_ADDR last_addr, struct compunit_symtab *cust)
     : m_objfile (objfile_),
       m_last_source_file (name == nullptr ? nullptr : xstrdup (name)),
-      m_comp_dir (comp_dir_ == nullptr ? nullptr : xstrdup (comp_dir_)),
+      m_comp_dir (comp_dir_ == nullptr ? "" : comp_dir_),
       m_compunit_symtab (cust),
       m_language (language_),
       m_last_source_start_addr (last_addr)
@@ -342,7 +340,7 @@ private:
   gdb::unique_xmalloc_ptr<char> m_last_source_file;
 
   /* E.g., DW_AT_comp_dir if DWARF.  Space for this is malloc'd.  */
-  gdb::unique_xmalloc_ptr<char> m_comp_dir;
+  std::string m_comp_dir;
 
   /* Space for this is not malloc'd, and is assumed to have at least
      the same lifetime as objfile.  */
