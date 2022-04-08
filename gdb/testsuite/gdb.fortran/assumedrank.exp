@@ -58,6 +58,12 @@ while { $test_count < 500 } {
 	    }
 	}
 
+	# Currently, flang does not support rank0.
+	if {$test_count == 1 && [test_compiler_info {clang-*}]} {
+	   unsupported "compiler does not support rank 0"
+	   continue
+	}
+
 	if ($found_final_breakpoint) {
 	    break
 	}

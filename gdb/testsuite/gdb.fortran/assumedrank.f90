@@ -19,16 +19,19 @@
 
 PROGRAM  arank
 
+  REAL :: array0
   REAL :: array1(10)
   REAL :: array2(1, 2)
   REAL :: array3(3, 4, 5)
   REAL :: array4(4, 5, 6, 7)
 
+  array0 = 0
   array1 = 1.0
   array2 = 2.0
   array3 = 3.0
   array4 = 4.0
 
+  call test_rank (array0)
   call test_rank (array1)
   call test_rank (array2)
   call test_rank (array3)

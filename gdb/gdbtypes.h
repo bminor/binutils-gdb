@@ -2092,7 +2092,6 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
 #define TYPE_RVALUE_REFERENCE_TYPE(thistype) (thistype)->rvalue_reference_type
 #define TYPE_CHAIN(thistype) (thistype)->chain
-#define TYPE_DYN_PROP(thistype)  TYPE_MAIN_TYPE(thistype)->dyn_prop_list
 /* * Note that if thistype is a TYPEDEF type, you have to call check_typedef.
    But check_typedef does set the TYPE_LENGTH of the TYPEDEF type,
    so you only have to call check_typedef once.  Since allocate_value

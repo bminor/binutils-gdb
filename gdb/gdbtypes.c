@@ -47,6 +47,9 @@
 /* The value of an invalid conversion badness.  */
 #define INVALID_CONVERSION 100
 
+static struct dynamic_prop_list *
+copy_dynamic_prop_list (struct obstack *, struct dynamic_prop_list *);
+
 /* Initialize BADNESS constants.  */
 
 const struct rank LENGTH_MISMATCH_BADNESS = {INVALID_CONVERSION,0};
@@ -2398,10 +2401,21 @@ resolve_dynamic_array_or_string (struct type *type,
 
       if (rank == 0)
 	{
-	  /* The dynamic property list juggling below was from the original
-	     patch.  I don't understand what this is all about, so I've
-	     commented it out for now and added the following error.  */
-	  error (_("failed to resolve dynamic array rank"));
+	  /* Rank is zero, if a variable is passed as an argument to a
+	     function.  In this case the resolved type should not be an
+	     array, but should instead be that of an array element.  */
+	  struct type *dynamic_array_type = type;
+	  type = copy_type (TYPE_TARGET_TYPE (dynamic_array_type));
+	  struct dynamic_prop_list *prop_list
+	    = TYPE_MAIN_TYPE (dynamic_array_type)->dyn_prop_list;
+	  if (prop_list != nullptr)
+	    {
+	      struct obstack *obstack
+		= &type->objfile_owner ()->objfile_obstack;
+	      TYPE_MAIN_TYPE (type)->dyn_prop_list
+		= copy_dynamic_prop_list (obstack, prop_list);
+	    }
+	  return type;
 	}
       else if (type->code () == TYPE_CODE_STRING && rank != 1)
 	{
