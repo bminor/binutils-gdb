@@ -6,7 +6,7 @@ the assembler (gas), the profiler (gprof), a whole suite of other
 programs (binutils) and the libraries that they use (bfd and
 opcodes).  This project shares a common set of header files with the
 GCC and GDB projects (include), so maintainership of those files is
-shared amoungst the projects.
+shared amongst the projects.
 
 The home page for binutils is:
 
@@ -44,6 +44,10 @@ repository without obtaining approval first:
   Michael Meissner <gnu@the-meissners.org>
   Richard Sandiford <rdsandiford@googlemail.com>
   Jan Beulich <jbeulich@suse.com>
+
+GDB global maintainers also have permission to commit and approve
+patches to the top level files and to those parts of bfd files
+primarily used by GDB.
 
       --------- Maintainers ---------
 
