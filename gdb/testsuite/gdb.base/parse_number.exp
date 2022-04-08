@@ -28,7 +28,8 @@ proc test_parse_numbers {} {
 
 	set val "0xffffffffffffffff"
 	if {$lang == "ada"} {
-	    gdb_test "p/x $val" "Integer literal out of range"
+	    gdb_test "p/x $val" " = 0xffffffffffffffff"
+	    gdb_test "ptype $val" " = <8-byte integer>"
 	} elseif {$lang == "fortran"} {
 	    gdb_test "p/x $val" " = 0xffffffff"
 	    gdb_test "ptype $val" " = unsigned int"
