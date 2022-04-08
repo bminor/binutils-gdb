@@ -420,37 +420,23 @@ add_stab_to_list (char *stabname, struct pending_stabs **stabvector)
 static struct linetable *
 arrange_linetable (struct linetable *oldLineTb)
 {
-  int ii, jj, newline,		/* new line count */
-    function_count;		/* # of functions */
-
-  struct linetable_entry *fentry;	/* function entry vector */
-  int fentry_size;		/* # of function entries */
-  struct linetable *newLineTb;	/* new line table */
   int extra_lines = 0;
 
-#define NUM_OF_FUNCTIONS 20
+  std::vector<linetable_entry> fentries;
 
-  fentry_size = NUM_OF_FUNCTIONS;
-  fentry = XNEWVEC (struct linetable_entry, fentry_size);
-
-  for (function_count = 0, ii = 0; ii < oldLineTb->nitems; ++ii)
+  for (int ii = 0; ii < oldLineTb->nitems; ++ii)
     {
       if (oldLineTb->item[ii].is_stmt == 0)
 	continue;
 
       if (oldLineTb->item[ii].line == 0)
-	{			/* Function entry found.  */
-	  if (function_count >= fentry_size)
-	    {			/* Make sure you have room.  */
-	      fentry_size *= 2;
-	      fentry = (struct linetable_entry *)
-		xrealloc (fentry,
-			  fentry_size * sizeof (struct linetable_entry));
-	    }
-	  fentry[function_count].line = ii;
-	  fentry[function_count].is_stmt = 1;
-	  fentry[function_count].pc = oldLineTb->item[ii].pc;
-	  ++function_count;
+	{
+	  /* Function entry found.  */
+	  fentries.emplace_back ();
+	  linetable_entry &e = fentries.back ();
+	  e.line = ii;
+	  e.is_stmt = 1;
+	  e.pc = oldLineTb->item[ii].pc;
 
 	  /* If the function was compiled with XLC, we may have to add an
 	     extra line entry later.  Reserve space for that.  */
@@ -460,57 +446,55 @@ arrange_linetable (struct linetable *oldLineTb)
 	}
     }
 
-  if (function_count == 0)
-    {
-      xfree (fentry);
-      return oldLineTb;
-    }
-  else if (function_count > 1)
-    std::sort (fentry, fentry + function_count,
-	       [] (const linetable_entry &lte1, const linetable_entry& lte2)
-		{ return lte1.pc < lte2.pc; });
+  if (fentries.empty ())
+    return oldLineTb;
+
+  std::sort (fentries.begin (), fentries.end (),
+	     [] (const linetable_entry &lte1, const linetable_entry& lte2)
+	     { return lte1.pc < lte2.pc; });
 
   /* Allocate a new line table.  */
-  newLineTb = (struct linetable *)
-    xmalloc
-    (sizeof (struct linetable) +
-    (oldLineTb->nitems - function_count + extra_lines) * sizeof (struct linetable_entry));
+  int new_linetable_nitems = oldLineTb->nitems - fentries.size () + extra_lines;
+  linetable *new_linetable
+    = XNEWVAR (linetable,
+	       (sizeof (struct linetable)
+		+ (new_linetable_nitems * sizeof (struct linetable_entry))));
 
   /* If line table does not start with a function beginning, copy up until
      a function begin.  */
 
-  newline = 0;
+  int newline = 0;
   if (oldLineTb->item[0].line != 0)
     for (newline = 0;
 	 newline < oldLineTb->nitems && oldLineTb->item[newline].line;
 	 ++newline)
-      newLineTb->item[newline] = oldLineTb->item[newline];
+      new_linetable->item[newline] = oldLineTb->item[newline];
 
   /* Now copy function lines one by one.  */
 
-  for (ii = 0; ii < function_count; ++ii)
+  for (const linetable_entry &entry : fentries)
     {
       /* If the function was compiled with XLC, we may have to add an
 	 extra line to cover the function prologue.  */
-      jj = fentry[ii].line;
+      int jj = entry.line;
       if (jj + 1 < oldLineTb->nitems
 	  && oldLineTb->item[jj].pc != oldLineTb->item[jj + 1].pc)
 	{
-	  newLineTb->item[newline] = oldLineTb->item[jj];
-	  newLineTb->item[newline].line = oldLineTb->item[jj + 1].line;
+	  new_linetable->item[newline] = oldLineTb->item[jj];
+	  new_linetable->item[newline].line = oldLineTb->item[jj + 1].line;
 	  newline++;
 	}
 
-      for (jj = fentry[ii].line + 1;
+      for (jj = entry.line + 1;
 	   jj < oldLineTb->nitems && oldLineTb->item[jj].line != 0;
 	   ++jj, ++newline)
-	newLineTb->item[newline] = oldLineTb->item[jj];
+	new_linetable->item[newline] = oldLineTb->item[jj];
     }
-  xfree (fentry);
+
   /* The number of items in the line table must include these
      extra lines which were added in case of XLC compiled functions.  */
-  newLineTb->nitems = oldLineTb->nitems - function_count + extra_lines;
-  return newLineTb;
+  new_linetable->nitems = new_linetable_nitems;
+  return new_linetable;
 }
 
 /* include file support: C_BINCL/C_EINCL pairs will be kept in the 
