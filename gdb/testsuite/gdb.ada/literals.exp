@@ -34,3 +34,6 @@ gdb_test "print 2e1000" "Integer literal out of range"
 gdb_test "print 16#ffff#" " = 65535"
 gdb_test "print 16#f#e1" " = 240"
 gdb_test "print 16#1#e10" " = 1099511627776"
+
+gdb_test "print/x 16#7fffffffffffffff#" " = 0x7fffffffffffffff"
+gdb_test "print 16#ffffffffffffffff#" " = -1"

@@ -434,11 +434,11 @@ processInt (struct parser_state *par_state, const char *base0,
       return FLOAT;
     }
 
-  gdb_mpz maxval (ULONGEST_MAX / base);
+  gdb_mpz maxval (ULONGEST_MAX);
   if (mpz_cmp (result.val, maxval.val) > 0)
     error (_("Integer literal out of range"));
 
-  LONGEST value = result.as_integer<LONGEST> ();
+  ULONGEST value = result.as_integer<ULONGEST> ();
   if ((value >> (gdbarch_int_bit (par_state->gdbarch ())-1)) == 0)
     yylval.typed_val.type = type_int (par_state);
   else if ((value >> (gdbarch_long_bit (par_state->gdbarch ())-1)) == 0)
