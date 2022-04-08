@@ -1,3 +1,9 @@
+2022-04-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 29038
+	* coffgen.c (coff_find_nearest_line_with_names): Fix typo
+	retrieving saved bias.
+
 2022-04-07  Mark Harmstone  <mark@harmstone.com>
 
 	* coff-i386.c (in_reloc_p): Add R_SECTION.

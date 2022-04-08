@@ -2382,7 +2382,7 @@ coff_find_nearest_line_with_names (bfd *abfd,
 	}
 
       if (sec_data != NULL && sec_data->saved_bias)
-	bias = sec_data->saved_bias;
+	bias = sec_data->bias;
       else if (symbols)
 	{
 	  bias = _bfd_dwarf2_find_symbol_bias (symbols,
