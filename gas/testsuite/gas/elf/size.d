@@ -1,5 +1,7 @@
 #readelf: -sW
 #name: ELF symbol size
+#notarget: alpha-*-* hppa*-*-hpux*
+# The Alpha target uses its own .set pseudo-insn.
 
 #...
  +[0-9]+: 0+ +1 +NOTYPE +LOCAL +DEFAULT +[0-9]+ +foo1
