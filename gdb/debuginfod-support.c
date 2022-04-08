@@ -187,10 +187,11 @@ debuginfod_is_enabled ()
       gdb::string_view url_view (urls);
       while (true)
 	{
-	  url_view = url_view.substr (url_view.find_first_not_of (' '));
-	  if (url_view.empty ())
+	  size_t off = url_view.find_first_not_of (' ');
+	  if (off == gdb::string_view::npos)
 	    break;
-	  size_t off = url_view.find_first_of (' ');
+	  url_view = url_view.substr (off);
+	  off = url_view.find_first_of (' ');
 	  gdb_printf
 	    (_("  <%ps>\n"),
 	     styled_string (file_name_style.style (),

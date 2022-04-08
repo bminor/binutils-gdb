@@ -186,6 +186,28 @@ proc no_url { } {
     gdb_test "core $::corefile" ".*in ?? ().*" "file [file tail $::corefile]"
 }
 
+# Test that GDB prints the debuginfod URLs when loading files.  URLS
+# is the string set in the DEBUGINFOD_URLS environment variable.
+# PATTERN_RE is the URLs pattern we expect to see out of GDB.  TEST is
+# the test name.
+
+proc test_urls {urls pattern_re test} {
+    setenv DEBUGINFOD_URLS $urls
+    clean_restart
+
+    if {$pattern_re != ""} {
+	set urls_re " +${pattern_re}\r\n"
+    } else {
+	set urls_re ""
+    }
+
+    # Use "with confirm off" to avoid having to deal with the
+    # "Enable debuginfod for this session? (y or [n])" question.
+    gdb_test "with confirm off -- file $::binfile" \
+	"following URLs:\r\n${urls_re}Debuginfod .*" \
+	$test
+}
+
 proc local_url { } {
     global binfile outputdir db debugdir
 
@@ -279,6 +301,46 @@ proc local_url { } {
     gdb_test_no_output "set debuginfod enabled on"
     gdb_test "file $binfile" ".*Reading symbols from.*debuginfo.*" \
 	"file [file tail $binfile] cmd on"
+
+    # Test that URLs are printed correctly for the first-use notice.
+
+    # Empty URLS disables Debuginfod.
+    setenv DEBUGINFOD_URLS ""
+    clean_restart
+    # Disable confirmation to avoid having to deal with a query.  See
+    # test_urls.
+    gdb_test_multiple "with confirm off -- file $binfile" "notice empty URL" {
+	-re ".*Enable debuginfod.*" {
+	    fail $gdb_test_name
+	}
+	-re -wrap "" {
+	    pass $gdb_test_name
+	}
+    }
+
+    test_urls "   " \
+        "" \
+        "notice whitespace URL"
+
+    set url "http://127.0.0.1:$port"
+
+    test_urls $url \
+	"<$url>" \
+	"notice 1 URL"
+
+    test_urls "  $url  " \
+	"<$url>" \
+	"notice 1 URL with whitespace"
+
+    set url2 "127.0.0.1:$port"
+
+    test_urls "$url $url2" \
+	"<$url>\r\n +<$url2>" \
+	"notice 2 URLs"
+
+    test_urls "  $url $url2  " \
+	"<$url>\r\n +<$url2>" \
+	"notice 2 URLs with whitespace"
 }
 
 set envlist \
