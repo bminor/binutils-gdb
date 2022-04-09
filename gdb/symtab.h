@@ -772,7 +772,6 @@ extern CORE_ADDR get_msymbol_address (struct objfile *objf,
   ((symbol)->value.address = (new_value))
 #define MSYMBOL_VALUE_BYTES(symbol)	(symbol)->value.bytes
 #define MSYMBOL_BLOCK_VALUE(symbol)	(symbol)->value.block
-#define MSYMBOL_VALUE_CHAIN(symbol)	(symbol)->value.chain
 
 #include "minsyms.h"
 
