@@ -14272,7 +14272,7 @@ is_32bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_MT:
       return reloc_type == 2; /* R_MT_32.  */
     case EM_NDS32:
-      return reloc_type == 20; /* R_NDS32_RELA.  */
+      return reloc_type == 20; /* R_NDS32_32_RELA.  */
     case EM_ALTERA_NIOS2:
       return reloc_type == 12; /* R_NIOS2_BFD_RELOC_32.  */
     case EM_NIOS32:
@@ -14584,7 +14584,7 @@ is_16bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_MSP430_OLD:
       return reloc_type == 5; /* R_MSP430_16_BYTE.  */
     case EM_NDS32:
-      return reloc_type == 19; /* R_NDS32_RELA.  */
+      return reloc_type == 19; /* R_NDS32_16_RELA.  */
     case EM_ALTERA_NIOS2:
       return reloc_type == 13; /* R_NIOS2_BFD_RELOC_16.  */
     case EM_NIOS32:
@@ -14845,11 +14845,11 @@ is_none_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_METAG:
       return reloc_type == 3; /* R_METAG_NONE.  */
     case EM_NDS32:
-      return (reloc_type == 0       /* R_XTENSA_NONE.  */
-	      || reloc_type == 204  /* R_NDS32_DIFF8.  */
-	      || reloc_type == 205  /* R_NDS32_DIFF16.  */
-	      || reloc_type == 206  /* R_NDS32_DIFF32.  */
-	      || reloc_type == 207  /* R_NDS32_ULEB128.  */);
+      return (reloc_type == 0       /* R_NDS32_NONE.  */
+	      || reloc_type == 205  /* R_NDS32_DIFF8.  */
+	      || reloc_type == 206  /* R_NDS32_DIFF16.  */
+	      || reloc_type == 207  /* R_NDS32_DIFF32.  */
+	      || reloc_type == 208  /* R_NDS32_DIFF_ULEB128.  */);
     case EM_TI_PRU:
       return (reloc_type == 0       /* R_PRU_NONE.  */
 	      || reloc_type == 65   /* R_PRU_DIFF8.  */
