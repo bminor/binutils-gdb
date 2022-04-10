@@ -325,6 +325,12 @@ pe_as32 (void *ptr)
 
   return b[0] + (b[1] << 8) + (b[2] << 16) + (b[3] << 24);
 }
+
+#ifdef _WIN32
+void pdb_load_functions (const char *name, minimal_symbol_reader *reader,
+			 struct objfile *objfile);
+#endif
+
 
 /* Read the (non-debug) export symbol table from a portable
    executable.  Code originally lifted from the ld function
@@ -383,6 +389,10 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
 	 further architectures and loosen or remove this test.  */
       return;
     }
+
+#ifdef _WIN32
+  pdb_load_functions (dll_name, &reader, objfile);
+#endif
 
   /* Get pe_header, optional header and numbers of export entries.  */
   pe_header_offset = pe_get32 (dll, 0x3c);

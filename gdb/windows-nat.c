@@ -71,6 +71,7 @@
 #include "gdbsupport/gdb_wait.h"
 #include "nat/windows-nat.h"
 #include "gdbsupport/symbol.h"
+#include "buildsym.h"
 
 using namespace windows_nat;
 
@@ -3213,6 +3214,424 @@ windows_nat_target::thread_alive (ptid_t ptid)
   windows_thread_info *th
     = windows_process.thread_rec (ptid, DONT_INVALIDATE_CONTEXT);
   return WaitForSingleObject (th->h, 0) != WAIT_OBJECT_0;
+}
+
+
+typedef BOOL WINAPI (SymInitialize_ftype) (HANDLE, PCSTR, BOOL);
+typedef BOOL WINAPI (SymCleanup_ftype) (HANDLE);
+typedef DWORD64 WINAPI (SymLoadModule64_ftype) (HANDLE, HANDLE, PCSTR,
+						PCSTR, DWORD64, DWORD);
+typedef BOOL WINAPI (SymEnumSymbols_ftype)
+     (HANDLE, ULONG64, PCSTR, PSYM_ENUMERATESYMBOLS_CALLBACK, PVOID);
+typedef BOOL WINAPI (SymEnumSourceLines_ftype)
+     (HANDLE, ULONG64, PCSTR, PCSTR, DWORD, DWORD, PSYM_ENUMLINES_CALLBACK,
+      PVOID);
+typedef BOOL WINAPI (SymGetTypeInfo_ftype)
+     (HANDLE, DWORD64, ULONG, IMAGEHLP_SYMBOL_TYPE_INFO, PVOID);
+
+enum SymTagEnum
+{
+  SymTagNull,
+  SymTagExe,
+  SymTagCompiland,
+  SymTagCompilandDetails,
+  SymTagCompilandEnv,
+  SymTagFunction,
+  SymTagBlock,
+  SymTagData,
+  SymTagAnnotation,
+  SymTagLabel,
+  SymTagPublicSymbol,
+  SymTagUDT,
+  SymTagEnum,
+  SymTagFunctionType,
+  SymTagPointerType,
+  SymTagArrayType,
+  SymTagBaseType,
+  SymTagTypedef,
+  SymTagBaseClass,
+  SymTagFriend,
+  SymTagFunctionArgType,
+  SymTagFuncDebugStart,
+  SymTagFuncDebugEnd,
+  SymTagUsingNamespace,
+  SymTagVTableShape,
+  SymTagVTable,
+  SymTagCustom,
+  SymTagThunk,
+  SymTagCustomType,
+  SymTagManagedType,
+  SymTagDimension,
+  SymTagCallSite,
+  SymTagMax
+};
+
+enum UdtKind
+{
+  UdtStruct,
+  UdtClass,
+  UdtUnion,
+  UdtInterface
+};
+
+enum DataKind
+{
+  DataIsUnknown,
+  DataIsLocal,
+  DataIsStaticLocal,
+  DataIsParam,
+  DataIsObjectPtr,
+  DataIsFileStatic,
+  DataIsGlobal,
+  DataIsMember,
+  DataIsStaticMember,
+  DataIsConstant
+};
+
+struct pdb_line_info
+{
+  //minimal_symbol_reader *reader;
+  buildsym_compunit *builder;
+  objfile *objfile;
+  HANDLE p;
+  SymGetTypeInfo_ftype *fSymGetTypeInfo;
+  DWORD64 addr;
+  DWORD64 max_addr;
+};
+
+
+static const char *wchar_to_objfile (pdb_line_info *pli, WCHAR *nameW)
+{
+  int len = WideCharToMultiByte (CP_ACP, 0, nameW, -1,
+				 NULL, 0, NULL, NULL);
+  gdb::unique_xmalloc_ptr<char> name;
+  if (len > 1)
+    {
+      name.reset ((char *) xmalloc (len));
+      WideCharToMultiByte (CP_ACP, 0, nameW, -1,
+			   name.get (), len, NULL, NULL);
+    }
+  LocalFree (nameW);
+  return pli->objfile->intern (name.get ());
+}
+
+static type *get_pdb_type (pdb_line_info *pli, DWORD type_index)
+{
+  const struct objfile_type *ot = objfile_type (pli->objfile);
+
+  DWORD tag;
+  if (!pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+			     TI_GET_SYMTAG, &tag))
+    return ot->builtin_void;
+
+  switch (tag)
+    {
+    case SymTagFunctionType:
+	{
+	  DWORD tid;
+	  if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				    TI_GET_TYPEID, &tid))
+	    {
+	      type *ftype = lookup_function_type (get_pdb_type (pli, tid));
+
+	      DWORD children;
+	      if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+					TI_GET_CHILDRENCOUNT, &children)
+		  && children > 0)
+		{
+		  gdb::unique_xmalloc_ptr<TI_FINDCHILDREN_PARAMS> args
+		    ((TI_FINDCHILDREN_PARAMS *)
+		     xmalloc (sizeof (TI_FINDCHILDREN_PARAMS)
+			      + children * sizeof (ULONG)));
+		  args->Count = children;
+		  args->Start = 0;
+		  if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+					    TI_FINDCHILDREN, args.get ()))
+		    {
+		      std::vector<DWORD> arg_types;
+		      for (DWORD i = 0; i < children; i++)
+			{
+			  if (pli->fSymGetTypeInfo (pli->p, pli->addr,
+						    args->ChildId[i],
+						    TI_GET_SYMTAG, &tag)
+			      && tag == SymTagFunctionArgType
+			      && pli->fSymGetTypeInfo (pli->p, pli->addr,
+						       args->ChildId[i],
+						       TI_GET_TYPEID, &tid))
+			    arg_types.push_back (tid);
+			}
+		      if (!arg_types.empty ())
+			{
+			  int nparams = arg_types.size ();
+			  ftype->set_num_fields (nparams);
+			  ftype->set_fields
+			    ((struct field *) TYPE_ZALLOC
+			     (ftype, nparams * sizeof (struct field)));
+			  for (int i = 0; i < nparams; i++)
+			    ftype->field (i).set_type
+			      (get_pdb_type (pli, arg_types[i]));
+			}
+		    }
+		}
+
+	      return ftype;
+	    }
+	  break;
+	}
+
+    case SymTagBaseType:
+	{
+	  DWORD basetype;
+	  ULONG64 length;
+	  if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				    TI_GET_BASETYPE, &basetype)
+	      && pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				       TI_GET_LENGTH, &length))
+	    {
+	      switch (basetype)
+		{
+		case 1: // void
+		  return ot->builtin_void;
+		case 2: // signed char
+		  return ot->builtin_signed_char;
+		case 6: // signed short/int/long_long
+		  if (length == 2)
+		    return ot->builtin_short;
+		  else if (length == 4)
+		    return ot->builtin_int;
+		  else if (length == 8)
+		    return ot->builtin_long_long;
+		  break;
+		case 7: // unsigned char/short/int/long_long
+		  if (length == 1)
+		    return ot->builtin_unsigned_char;
+		  else if (length == 2)
+		    return ot->builtin_unsigned_short;
+		  else if (length == 4)
+		    return ot->builtin_unsigned_int;
+		  else if (length == 8)
+		    return ot->builtin_unsigned_long_long;
+		  break;
+		case 8: // float/double
+		  if (length == 4)
+		    return ot->builtin_float;
+		  else if (length == 8)
+		    return ot->builtin_double;
+		  break;
+		case 13: // signed long
+		  return ot->builtin_long;
+		case 14: // unsigned long
+		  return ot->builtin_unsigned_long;
+		}
+	    }
+	  break;
+	}
+
+    case SymTagPointerType:
+	{
+	  DWORD tid;
+	  if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				    TI_GET_TYPEID, &tid))
+	    return lookup_pointer_type (get_pdb_type (pli, tid));
+	  break;
+	}
+
+    case SymTagUDT:
+	{
+	  DWORD udtkind;
+	  WCHAR *nameW = NULL;
+	  ULONG64 length;
+	  if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				    TI_GET_UDTKIND, &udtkind)
+	      && pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				       TI_GET_SYMNAME, &nameW)
+	      && pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				       TI_GET_LENGTH, &length))
+	    {
+	      type *t = alloc_type (pli->objfile);
+	      INIT_CPLUS_SPECIFIC (t);
+
+	      t->set_name (wchar_to_objfile (pli, nameW));
+
+	      if (udtkind == UdtUnion)
+		t->set_code (TYPE_CODE_UNION);
+	      else
+		t->set_code (TYPE_CODE_STRUCT);
+	      TYPE_LENGTH (t) = length;
+
+	      DWORD children;
+	      if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+					TI_GET_CHILDRENCOUNT, &children)
+		  && children > 0)
+		{
+		  gdb::unique_xmalloc_ptr<TI_FINDCHILDREN_PARAMS> members
+		    ((TI_FINDCHILDREN_PARAMS *)
+		     xmalloc (sizeof (TI_FINDCHILDREN_PARAMS)
+			      + children * sizeof (ULONG)));
+		  members->Count = children;
+		  members->Start = 0;
+		  // TODO: bitfields
+		  if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+					    TI_FINDCHILDREN, members.get ()))
+		    {
+		      t->set_num_fields (children);
+		      t->set_fields ((struct field *) TYPE_ZALLOC
+				     (t, children * sizeof (struct field)));
+		      DWORD i;
+		      for (i = 0; i < children; i++)
+			{
+			  DWORD tid, dk, ofs;
+			  if (pli->fSymGetTypeInfo (pli->p, pli->addr,
+						    members->ChildId[i],
+						    TI_GET_SYMTAG, &tag)
+			      && tag == SymTagData
+			      && pli->fSymGetTypeInfo (pli->p, pli->addr,
+						       members->ChildId[i],
+						       TI_GET_TYPEID, &tid)
+			      && pli->fSymGetTypeInfo (pli->p, pli->addr,
+						       members->ChildId[i],
+						       TI_GET_DATAKIND, &dk)
+			      && dk == DataIsMember
+			      && pli->fSymGetTypeInfo (pli->p, pli->addr,
+						       members->ChildId[i],
+						       TI_GET_OFFSET, &ofs)
+			      && pli->fSymGetTypeInfo (pli->p, pli->addr,
+						       members->ChildId[i],
+						       TI_GET_SYMNAME, &nameW))
+			    {
+			      t->field (i).set_type (get_pdb_type (pli, tid));
+			      t->field (i).set_name (wchar_to_objfile
+						     (pli, nameW));
+			      t->field (i).set_loc_bitpos (ofs * 8);
+			    }
+			}
+		    }
+		}
+
+	      return t;
+	    }
+	  break;
+	}
+    }
+
+  return ot->builtin_void;
+}
+
+static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
+    ULONG /*SymbolSize*/, PVOID UserContext)
+{
+  pdb_line_info *pli = (pdb_line_info *) UserContext;
+  objfile *objfile = pli->objfile;
+
+  if (si->Tag == SymTagFunction)
+    {
+      //pli->reader->record (si->Name, si->Address, mst_text);
+
+      context_stack *newobj = pli->builder->push_context (0, si->Address);
+      symbol *sym = new (&objfile->objfile_obstack) symbol;
+      sym->set_linkage_name (objfile->intern (si->Name));
+      sym->set_domain (VAR_DOMAIN);
+      //type *ret_type = objfile_type (objfile)->builtin_void;
+      //type *ftype = lookup_function_type (ret_type);
+      sym->set_type (get_pdb_type (pli, si->TypeIndex));
+      sym->set_aclass_index (LOC_BLOCK);
+      SET_SYMBOL_VALUE_ADDRESS (sym, si->Address);
+      add_symbol_to_list (sym, pli->builder->get_global_symbols ());
+      newobj->name = sym;
+      struct context_stack cstk = pli->builder->pop_context ();
+      pli->builder->finish_block (cstk.name, cstk.old_blocks, cstk.static_link,
+				  si->Address, si->Address + si->Size);
+      gdbarch_make_symbol_special (objfile->arch (), cstk.name, objfile);
+    }
+  else if (si->Tag == SymTagData)
+    {
+      symbol *sym = new (&objfile->objfile_obstack) symbol;
+      sym->set_linkage_name (objfile->intern (si->Name));
+      sym->set_domain (VAR_DOMAIN);
+      sym->set_type (get_pdb_type (pli, si->TypeIndex));
+      sym->set_aclass_index (LOC_STATIC);
+      SET_SYMBOL_VALUE_ADDRESS (sym, si->Address);
+      add_symbol_to_list (sym, pli->builder->get_global_symbols ());
+    }
+
+  return TRUE;
+}
+
+static BOOL CALLBACK line_callback(PSRCCODEINFO li, PVOID UserContext)
+{
+  pdb_line_info *pli = (pdb_line_info *) UserContext;
+  if (li->Address > pli->max_addr)
+    pli->max_addr = li->Address;
+  buildsym_compunit *builder = pli->builder;
+  subfile *sf = builder->get_current_subfile ();
+  if (sf == nullptr || strcmp (sf->name, li->FileName) != 0)
+    {
+      builder->start_subfile (li->FileName);
+      sf = builder->get_current_subfile ();
+    }
+  builder->record_line (sf, li->LineNumber, 0, li->Address, true);
+
+  return TRUE;
+}
+
+void pdb_load_functions (const char *name, minimal_symbol_reader *reader,
+			 struct objfile *objfile);
+void
+pdb_load_functions (const char *name, minimal_symbol_reader *reader,
+		    struct objfile *objfile)
+{
+  if (!strstr (name, ".exe"))
+    return;
+
+  if (GetModuleHandle("ucrtbase.dll") == NULL)
+    LoadLibrary("ucrtbase.dll");
+
+  HMODULE dh = LoadLibrary("dbghelp.dll");
+  if (dh == NULL)
+    return;
+
+  SymInitialize_ftype *fSymInitialize = (SymInitialize_ftype *)
+    GetProcAddress (dh, "SymInitialize");
+  SymCleanup_ftype *fSymCleanup = (SymCleanup_ftype *)
+    GetProcAddress (dh, "SymCleanup");
+  SymEnumSymbols_ftype *fSymEnumSymbols = (SymEnumSymbols_ftype *)
+    GetProcAddress (dh, "SymEnumSymbols");
+  SymLoadModule64_ftype *fSymLoadModule64 = (SymLoadModule64_ftype *)
+    GetProcAddress (dh, "SymLoadModule64");
+  SymEnumSourceLines_ftype *fSymEnumSourceLines = (SymEnumSourceLines_ftype *)
+    GetProcAddress (dh, "SymEnumSourceLines");
+  SymGetTypeInfo_ftype *fSymGetTypeInfo = (SymGetTypeInfo_ftype *)
+    GetProcAddress (dh, "SymGetTypeInfo");
+  if (fSymInitialize != NULL && fSymCleanup != NULL
+      && fSymEnumSymbols != NULL && fSymLoadModule64 != NULL
+      && fSymEnumSourceLines != NULL && fSymGetTypeInfo != NULL)
+    {
+      HANDLE p = (void *) 1;
+
+      fSymInitialize (p, NULL, FALSE);
+      DWORD64 addr = fSymLoadModule64(p, NULL, name, NULL, 0, 0);
+
+      std::unique_ptr<buildsym_compunit> builder;
+      builder.reset (new buildsym_compunit
+		     (objfile, name, NULL, language_c, addr));
+      pdb_line_info pli;
+      //pli.reader = reader;
+      pli.builder = builder.get ();
+      pli.objfile = objfile;
+      pli.p = p;
+      pli.fSymGetTypeInfo = fSymGetTypeInfo;
+      pli.addr = addr;
+      pli.max_addr = 0;
+
+      fSymEnumSymbols(p, addr, NULL, symbol_callback, &pli);
+
+      fSymEnumSourceLines(p, addr, NULL, NULL, 0, 0, line_callback, &pli);
+      builder->end_symtab (pli.max_addr, SECT_OFF_TEXT (objfile));
+
+      fSymCleanup(p);
+    }
+
+  FreeLibrary(dh);
 }
 
 void _initialize_check_for_gdb_ini ();
