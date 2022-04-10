@@ -22,7 +22,7 @@
 // cd gprofng/src && bison QLParser.yy
 
 // For "api.parser.class"
-%require "3.3"
+%require "3.0"
 %language "C++"
 
 %code top {
@@ -43,12 +43,30 @@
 namespace QL
 {
   static QL::Parser::symbol_type yylex (QL::Result &result);
+
+  static Expression *
+  processName (std::string str)
+  {
+    const char *name = str.c_str();
+    int propID = dbeSession->getPropIdByName (name);
+    if (propID != PROP_NONE)
+      return new Expression (Expression::OP_NAME,
+		      new Expression (Expression::OP_NUM, (uint64_t) propID));
+
+    // If a name is not statically known try user defined objects
+    Expression *expr = dbeSession->findObjDefByName (name);
+    if (expr != NULL)
+      return expr->copy();
+
+    throw Parser::syntax_error ("Name not found");
+  }
 }
 }
 
 %defines
 %define api.namespace {QL}
-%define api.parser.class {Parser}
+// in Bison 3.3, use %define api.parser.class {Parser} instead parser_class_name
+%define parser_class_name {Parser}
 %define api.token.constructor
 %define api.value.type variant
 // Later: api.value.automove
@@ -60,14 +78,12 @@ namespace QL
 
 %token LPAR "("
   RPAR ")"
-  NUM "number"
-  NAME "name"
-  FNAME 
   HASPROP
-  JGROUP
-  JPARENT
-  QSTR
   FILEIOVFD
+
+%token YYEOF 0
+%token <uint64_t> NUM FNAME JGROUP JPARENT QSTR
+%token <std::string> NAME
 
 %nonassoc IN SOME ORDR
 %left  COMMA ","
@@ -95,14 +111,14 @@ namespace QL
        NOT "!"
        BITNOT "~"
 
-%type <Expression *> QSTR NUM NAME FNAME JGROUP JPARENT FILEIOVFD exp term
+%type <Expression *>  exp term
 
-%destructor { delete $$; } <*>;
+// %destructor { delete $$; } <Expression *>;
 
 %%
 
 S:	/* empty */		{ result.out = new Expression (Expression::OP_NUM, (uint64_t) 1); }
-|	exp			{ result.out = new Expression ($1); }
+|	exp			{ result.out = $1; }
 
 exp:	  exp DEG exp		{ $$ = new Expression (Expression::OP_DEG, $1, $3); } /* dead? */
 	| exp MUL exp		{ $$ = new Expression (Expression::OP_MUL, $1, $3); }
@@ -125,26 +141,56 @@ exp:	  exp DEG exp		{ $$ = new Expression (Expression::OP_DEG, $1, $3); } /* dea
 	| exp OR  exp		{ $$ = new Expression (Expression::OP_OR, $1, $3); }
 	| exp NEQV exp		{ $$ = new Expression (Expression::OP_NEQV, $1, $3); } /* dead? */
 	| exp EQV exp		{ $$ = new Expression (Expression::OP_EQV, $1, $3); } /* dead? */
-	| exp QWE exp COLON exp { Expression colon = Expression (Expression::OP_COLON, $3, $5);
-				  $$ = new Expression (Expression::OP_QWE, $1, &colon); }
+	| exp QWE exp COLON exp
+	  {
+	     $$ = new Expression (Expression::OP_QWE, $1,
+				  new Expression (Expression::OP_COLON, $3, $5));
+	  }
 	| exp COMMA  exp	{ $$ = new Expression (Expression::OP_COMMA, $1, $3); }
 	| exp IN exp		{ $$ = new Expression (Expression::OP_IN, $1, $3); }
 	| exp SOME IN exp	{ $$ = new Expression (Expression::OP_SOMEIN, $1, $4); }
 	| exp ORDR IN exp	{ $$ = new Expression (Expression::OP_ORDRIN, $1, $4); }
-	| term                  { $$ = new Expression ($1); }
+	| term                  { $$ = $1; }
 
-term:	  MINUS term 		{ Expression num = Expression (Expression::OP_NUM, (uint64_t) 0);
-				  $$ = new Expression (Expression::OP_MINUS, &num, $2); }
-	| NOT    term		{ $$ = new Expression (Expression::OP_NOT, $2, NULL); }
-	| BITNOT term		{ $$ = new Expression (Expression::OP_BITNOT, $2, NULL); }
-	| LPAR exp RPAR		{ $$ = new Expression ($2); }
-	| FNAME LPAR QSTR RPAR	{ $$ = new Expression (Expression::OP_FUNC, $1, $3); }
-	| HASPROP LPAR NAME RPAR { $$ = new Expression (Expression::OP_HASPROP, $3, NULL); }
-	| JGROUP LPAR QSTR RPAR { $$ = new Expression (Expression::OP_JAVA, $1, $3); }
-	| JPARENT LPAR QSTR RPAR { $$ = new Expression (Expression::OP_JAVA, $1, $3); }
-	| FILEIOVFD LPAR QSTR RPAR { $$ = new Expression (Expression::OP_FILE, $1, $3); }
-	| NUM			{ $$ = new Expression ($1); }
-	| NAME			{ $$ = new Expression ($1); }
+term:	  MINUS term
+	  {
+	     $$ = new Expression (Expression::OP_MINUS,
+				  new Expression (Expression::OP_NUM, (uint64_t) 0), $2);
+	  }
+	| NOT    term		{ $$ = new Expression (Expression::OP_NOT, $2); }
+	| BITNOT term		{ $$ = new Expression (Expression::OP_BITNOT, $2); }
+	| LPAR exp RPAR		{ $$ = $2; }
+	| FNAME LPAR QSTR RPAR
+	  {
+	    $$ = new Expression (Expression::OP_FUNC,
+				 new Expression (Expression::OP_NUM, $1),
+				 new Expression (Expression::OP_NUM, $3));
+	  }
+	| HASPROP LPAR NAME RPAR
+	  {
+	    $$ = new Expression (Expression::OP_HASPROP,
+				 new Expression (Expression::OP_NUM, processName($3)));
+	  }
+	| JGROUP LPAR QSTR RPAR
+	  {
+	    $$ = new Expression (Expression::OP_JAVA,
+				 new Expression (Expression::OP_NUM, $1),
+				 new Expression (Expression::OP_NUM, $3));
+	  }
+	| JPARENT LPAR QSTR RPAR
+	  {
+	     $$ = new Expression (Expression::OP_JAVA,
+				  new Expression (Expression::OP_NUM, $1),
+				  new Expression (Expression::OP_NUM, $3));
+	  }
+	| FILEIOVFD LPAR QSTR RPAR
+	  {
+	    $$ = new Expression (Expression::OP_FILE,
+				 new Expression (Expression::OP_NUM, (uint64_t) 0),
+				 new Expression (Expression::OP_NUM, $3));
+	  }
+	| NUM			{ $$ = new Expression (Expression::OP_NUM, $1); }
+	| NAME			{ $$ = processName($1); }
 
 %%
 
@@ -155,26 +201,6 @@ namespace QL
   {
     in.putback (c);
     return tok;
-  }
-
-  static Expression *
-  processName (char *name)
-  {
-    int propID = dbeSession->getPropIdByName (name);
-    if (propID != PROP_NONE)
-      {
-	Expression *expr = new Expression (Expression::OP_NUM, (uint64_t) propID);
-	Expression *ret = new Expression (Expression::OP_NAME, expr);
-	delete expr;
-	return ret;
-      }
-
-    // If a name is not statically known try user defined objects
-    Expression *expr = dbeSession->findObjDefByName (name);
-    if (expr != NULL)
-      return expr->copy();
-
-    throw Parser::syntax_error ("Name not found");
   }
 
   static Parser::symbol_type
@@ -191,6 +217,7 @@ namespace QL
 
     switch (c)
       {
+      case '\0':
       case '\n': return Parser::make_YYEOF ();
       case '(': return Parser::make_LPAR () ;
       case ')': return Parser::make_RPAR ();
@@ -264,7 +291,7 @@ namespace QL
 		case '"':
 		  *ptr = (char)0;
 		  // XXX omazur: need new string type
-		  return Parser::make_QSTR (new Expression (Expression::OP_NUM, (uint64_t) str));
+		  return Parser::make_QSTR ((uint64_t) str);
 		case 0:
 		case '\n':
 		  free (str);
@@ -331,7 +358,7 @@ namespace QL
 		lval = lval * base + digit;
 		c = result.in.get ();
 	      }
-	    return Parser::make_NUM (new Expression (Expression::OP_NUM, lval));
+	    return Parser::make_NUM (lval);
 	  }
 
 	if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
@@ -359,23 +386,24 @@ namespace QL
 	    else if (strcasecmp (name, NTXT ("ORDERED")) == 0)
 	      return Parser::make_ORDR ();
 	    else if (strcasecmp (name, NTXT ("TRUE")) == 0)
-	      return Parser::make_NUM (new Expression (Expression::OP_NUM, (uint64_t) 1));
+	      return Parser::make_NUM ((uint64_t) 1);
 	    else if (strcasecmp (name, NTXT ("FALSE")) == 0)
-	      return Parser::make_NUM (new Expression (Expression::OP_NUM, (uint64_t) 0));
+	      return Parser::make_NUM ((uint64_t) 0);
 	    else if (strcasecmp (name, NTXT ("FNAME")) == 0)
-	      return Parser::make_FNAME (new Expression (Expression::OP_NUM, Expression::FUNC_FNAME));
+	      return Parser::make_FNAME (Expression::FUNC_FNAME);
 	    else if (strcasecmp (name, NTXT ("HAS_PROP")) == 0)
 	      return Parser::make_HASPROP ();
 	    else if (strcasecmp (name, NTXT ("JGROUP")) == 0)
-	      return Parser::make_JGROUP (new Expression (Expression::OP_NUM, Expression::JAVA_JGROUP));
+	      return Parser::make_JGROUP (Expression::JAVA_JGROUP);
 	    else if (strcasecmp (name, NTXT ("JPARENT")) == 0 )
-	      return Parser::make_JPARENT (new Expression (Expression::OP_NUM, Expression::JAVA_JPARENT));
+	      return Parser::make_JPARENT (Expression::JAVA_JPARENT);
 	    else if (strcasecmp (name, NTXT ("DNAME")) == 0)
-	      return Parser::make_FNAME (new Expression (Expression::OP_NUM, Expression::FUNC_DNAME));
+	      return Parser::make_FNAME (Expression::FUNC_DNAME);
 	    else if (strcasecmp (name, NTXT ("FILEIOVFD")) == 0 )
-	      return Parser::make_FILEIOVFD (new Expression (Expression::OP_NUM, (uint64_t) 0));
+	      return Parser::make_FILEIOVFD ();
 
-	    return Parser::make_NAME (processName (name));
+	    std::string nm = std::string (name);
+	    return Parser::make_NAME (nm);
 	  }
 
 	throw Parser::syntax_error ("Syntax error");

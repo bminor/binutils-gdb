@@ -29,6 +29,10 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_RANLIB
 AM_PROG_AR
+gl_PROG_BISON([BISON],[3.0.4])
+if test x$BISON = "x:"; then
+  AC_MSG_ERROR([Building gprofng requires bison 3.0.4 or later.])
+fi
 
 AC_DISABLE_SHARED
 LT_INIT

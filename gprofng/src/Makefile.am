@@ -113,6 +113,9 @@ AM_CFLAGS = $(GPROFNG_CFLAGS) $(PTHREAD_CFLAGS) \
 	$(GPROFNG_NO_SWITCH_CFLAGS)
 AM_CXXFLAGS = $(AM_CFLAGS)
 
+QLParser.tab.cc QLParser.tab.hh: QLParser.yy
+	$(BISON) $^
+
 man_MANS = gprofng.1 \
 	gp-archive.1 \
 	gp-collect-app.1 \
@@ -121,7 +124,8 @@ man_MANS = gprofng.1 \
 
 MAINTAINERCLEANFILES = $(man_MANS)
 
-EXTRA_DIST = $(man_MANS)
+BUILT_SOURCES = QLParser.tab.hh
+EXTRA_DIST = QLParser.yy $(man_MANS)
 
 
 pkglib_LTLIBRARIES = $(LIBGPROFNG)

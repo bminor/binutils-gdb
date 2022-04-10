@@ -43,6 +43,16 @@
 #include "IndexObject.h"
 #include "PathTree.h"
 #include "Print.h"
+
+// Bison 3.0 doesn't define YY_NULLPTR. I copied this from QLParser.tab.cc.
+// Why this is not in QLParser.tab.hh ? YY_NULLPTR is used in QLParser.tab.hh
+# ifndef YY_NULLPTR
+#  if defined __cplusplus && 201103L <= __cplusplus
+#   define YY_NULLPTR nullptr
+#  else
+#   define YY_NULLPTR 0
+#  endif
+# endif
 #include "QLParser.tab.hh"
 #include "DbeView.h"
 #include "MemorySpace.h"
@@ -2954,7 +2964,7 @@ DbeSession::append (SourceFile *sf)
 }
 
 UserLabel *
-DbeSession::findUserLabel (char *name)
+DbeSession::findUserLabel (const char *name)
 {
   for (int i = 0, sz = userLabels ? userLabels->size () : 0; i < sz; i++)
     {
@@ -2966,7 +2976,7 @@ DbeSession::findUserLabel (char *name)
 }
 
 Expression *
-DbeSession::findObjDefByName (char *name)
+DbeSession::findObjDefByName (const char *name)
 {
   Expression *expr = NULL;
 
@@ -2994,25 +3004,13 @@ DbeSession::findObjDefByName (char *name)
 Expression *
 DbeSession::ql_parse (const char *expr_spec)
 {
-  /* (This slight duplication means we don't need to worry about copy
-     constructors for the QL::Result, nor about the lifetime of the
-     expr_spec.)  */
-  if (expr_spec != NULL)
-    {
-      QL::Result result (expr_spec);
-      QL::Parser qlparser (result);
-      if (qlparser () != 0)
-	return NULL;
-      return result ();
-    }
-  else
-    {
-      QL::Result result;
-      QL::Parser qlparser (result);
-      if (qlparser () != 0)
-	return NULL;
-      return result ();
-    }
+  if (expr_spec == NULL)
+    expr_spec = "";
+  QL::Result result (expr_spec);
+  QL::Parser qlparser (result);
+  if (qlparser.parse () != 0)
+    return NULL;
+  return result ();
 }
 
 Vector<void*> *

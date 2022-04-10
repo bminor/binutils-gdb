@@ -310,6 +310,7 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BISON = @BISON@
 BUILD_SUBDIRS = @BUILD_SUBDIRS@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
@@ -550,7 +551,8 @@ man_MANS = gprofng.1 \
 	gp-display-text.1
 
 MAINTAINERCLEANFILES = $(man_MANS)
-EXTRA_DIST = $(man_MANS)
+BUILT_SOURCES = QLParser.tab.hh
+EXTRA_DIST = QLParser.yy $(man_MANS)
 pkglib_LTLIBRARIES = $(LIBGPROFNG)
 libgprofng_la_SOURCES = $(CCSOURCES) $(CSOURCES)
 libgprofng_la_LDFLAGS = -version-info 0:0:0
@@ -593,7 +595,8 @@ gp_display_text_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
 @BUILD_MAN_TRUE@  | sed 's/See also:/\.SH SEE ALSO/' | sed 's/Documentation:/.SH DOCUMENTATION/' \
 @BUILD_MAN_TRUE@  | sed 's/Limitations:/.SH LIMITATIONS/'
 
-all: all-am
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .cc .lo .o .obj
@@ -1027,13 +1030,15 @@ distdir: $(DISTFILES)
 	  top_distdir="$(top_distdir)" distdir="$(distdir)" \
 	  dist-hook
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(MANS) $(DATA)
 installdirs:
 	for dir in "$(DESTDIR)$(pkglibdir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(man1dir)" "$(DESTDIR)$(dbedir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -1063,6 +1068,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-am
 
@@ -1138,7 +1144,7 @@ uninstall-am: uninstall-binPROGRAMS uninstall-dbeDATA uninstall-man \
 
 uninstall-man: uninstall-man1
 
-.MAKE: install-am install-strip
+.MAKE: all check install install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am check check-am clean \
 	clean-binPROGRAMS clean-generic clean-libtool \
@@ -1160,6 +1166,9 @@ uninstall-man: uninstall-man1
 
 .PRECIOUS: Makefile
 
+
+QLParser.tab.cc QLParser.tab.hh: QLParser.yy
+	$(BISON) $^
 
 @BUILD_MAN_TRUE@gprofng.1: $(srcdir)/gprofng.cc $(common_mandeps) | ./gprofng$(EXEEXT)
 @BUILD_MAN_TRUE@	$(AM_V_GEN)_BUILDING_MANPAGE=1 $(HELP2MAN) $(HELP2MAN_OPT) \

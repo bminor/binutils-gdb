@@ -332,7 +332,7 @@ public:
   char* getPropUName (int propId);
 
   Vector<UserLabel*> *userLabels; // List of er_labels
-  UserLabel *findUserLabel (char *name);
+  UserLabel *findUserLabel (const char *name);
   DbeJarFile *get_JarFile (const char *name);
   void append (UserLabel *lbl);
   void append (SourceFile *sf);
@@ -341,7 +341,7 @@ public:
   void set_need_refind ();
 
   // Find user defined object by name
-  Expression *findObjDefByName (char *);
+  Expression *findObjDefByName (const char *);
   void get_filter_keywords (Vector<void*> *res);
 
   // Get the Settings class object
