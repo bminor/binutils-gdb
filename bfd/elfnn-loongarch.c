@@ -3390,6 +3390,21 @@ loongarch_elf_gc_mark_hook (asection *sec, struct bfd_link_info *info,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
+/* Return TRUE if symbol H should be hashed in the `.gnu.hash' section.  For
+   executable PLT slots where the executable never takes the address of those
+   functions, the function symbols are not added to the hash table.  */
+
+static bool
+elf_loongarch64_hash_symbol (struct elf_link_hash_entry *h)
+{
+  if (h->plt.offset != (bfd_vma) -1
+      && !h->def_regular
+      && !h->pointer_equality_needed)
+    return false;
+
+  return _bfd_elf_hash_symbol (h);
+}
+
 #define TARGET_LITTLE_SYM loongarch_elfNN_vec
 #define TARGET_LITTLE_NAME "elfNN-loongarch"
 #define ELF_ARCH bfd_arch_loongarch
@@ -3421,5 +3436,6 @@ loongarch_elf_gc_mark_hook (asection *sec, struct bfd_link_info *info,
 #define elf_backend_plt_sym_val loongarch_elf_plt_sym_val
 #define elf_backend_grok_prstatus loongarch_elf_grok_prstatus
 #define elf_backend_grok_psinfo loongarch_elf_grok_psinfo
+#define elf_backend_hash_symbol elf_loongarch64_hash_symbol
 
 #include "elfNN-target.h"
