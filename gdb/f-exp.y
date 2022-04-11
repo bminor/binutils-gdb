@@ -1138,7 +1138,7 @@ static const struct f77_boolean_val boolean_values[]  =
   { ".false.", 0 }
 };
 
-static const struct token f77_keywords[] =
+static const token f_keywords[] =
 {
   /* Historically these have always been lowercase only in GDB.  */
   { "character", CHARACTER, OP_NULL, true },
@@ -1473,7 +1473,7 @@ yylex (void)
   
   /* Catch specific keywords.  */
 
-  for (const auto &keyword : f77_keywords)
+  for (const auto &keyword : f_keywords)
     if (strlen (keyword.oper) == namelen
 	&& ((!keyword.case_sensitive
 	     && strncasecmp (tokstart, keyword.oper, namelen) == 0)
