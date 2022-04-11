@@ -1583,11 +1583,8 @@ gdbpy_current_language (PyObject *unused1, PyObject *unused2)
 
 
 
-/* The "current" objfile.  This is set when gdb detects that a new
-   objfile has been loaded.  It is only set for the duration of a call to
-   gdbpy_source_objfile_script and gdbpy_execute_objfile_script; it is NULL
-   at other times.  */
-static struct objfile *gdbpy_current_objfile;
+/* See python.h.  */
+struct objfile *gdbpy_current_objfile;
 
 /* Set the current objfile to OBJFILE and then read FILE named FILENAME
    as Python code.  This does not throw any errors.  If an exception
