@@ -45,13 +45,13 @@ gdb_test "print c16" " = \\(-874,19\\)"
 gdb_test "whatis c" "type = $complex4"
 gdb_test "print \$_creal (c)" " = 1000"
 with_test_prefix "c" {
-    gdb_test "whatis \$" " = real"
+    gdb_test "whatis \$" " = real\\*4"
 }
 
 gdb_test "whatis c4" "type = $complex4"
 gdb_test "print \$_creal (c4)" " = 1000"
 with_test_prefix "c4" {
-    gdb_test "whatis \$" " = real"
+    gdb_test "whatis \$" " = real\\*4"
 }
 gdb_test "whatis c8" "type = $complex8"
 gdb_test "print \$_creal (c8)" " = 321"

@@ -1636,7 +1636,7 @@ build_fortran_types (struct gdbarch *gdbarch)
     = arch_integer_type (gdbarch, gdbarch_short_bit (gdbarch), 0, "integer*2");
 
   builtin_f_type->builtin_integer
-    = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch), 0, "integer");
+    = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch), 0, "integer*4");
 
   builtin_f_type->builtin_integer_s8
     = arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch), 0,
@@ -1644,7 +1644,7 @@ build_fortran_types (struct gdbarch *gdbarch)
 
   builtin_f_type->builtin_real
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
-		       "real", gdbarch_float_format (gdbarch));
+		       "real*4", gdbarch_float_format (gdbarch));
 
   builtin_f_type->builtin_real_s8
     = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
