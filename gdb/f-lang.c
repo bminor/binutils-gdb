@@ -101,8 +101,6 @@ f_language::get_encoding (struct type *type)
   return encoding;
 }
 
-
-
 /* A helper function for the "bound" intrinsics that checks that TYPE
    is an array.  LBOUND_P is true for lower bound; this is used for
    the error message, if any.  */
@@ -219,7 +217,6 @@ fortran_bounds_for_dimension (bool lbound_p,
 
   gdb_assert_not_reached ("failed to find matching dimension");
 }
-
 
 /* Return the number of dimensions for a Fortran array or string.  */
 
