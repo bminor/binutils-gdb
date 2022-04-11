@@ -56,6 +56,7 @@ proc test_basic_parsing_of_type_kinds {} {
     test_cast_1_to_type_kind "logical" "8" "\\.TRUE\\." "8"
 
     test_cast_1_to_type_kind "integer" "" "1" "4"
+    test_cast_1_to_type_kind "integer" "1" "1" "1"
     test_cast_1_to_type_kind "integer" "2" "1" "2"
     test_cast_1_to_type_kind "integer" "4" "1" "4"
     test_cast_1_to_type_kind "integer" "8" "1" "8"
@@ -92,6 +93,7 @@ proc test_old_star_type_sizes {} {
     gdb_test "p ((logical*4) 1)" " = \\.TRUE\\."
     gdb_test "p ((logical*8) 1)" " = \\.TRUE\\."
 
+    gdb_test "p ((integer*1) 1)" " = 1"
     gdb_test "p ((integer*2) 1)" " = 1"
     gdb_test "p ((integer*4) 1)" " = 1"
     gdb_test "p ((integer*8) 1)" " = 1"

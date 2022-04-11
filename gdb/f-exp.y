@@ -1051,7 +1051,9 @@ convert_to_kind_type (struct type *basetype, int kind)
     }
   else if (basetype == parse_f_type (pstate)->builtin_integer)
     {
-      if (kind == 2)
+      if (kind == 1)
+	return parse_f_type (pstate)->builtin_integer_s1;
+      else if (kind == 2)
 	return parse_f_type (pstate)->builtin_integer_s2;
       else if (kind == 4)
 	return parse_f_type (pstate)->builtin_integer;

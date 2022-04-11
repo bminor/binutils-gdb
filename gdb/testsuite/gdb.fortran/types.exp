@@ -74,7 +74,7 @@ proc test_float_literal_types_accepted {} {
 # Test the the primitive Fortran types, those that GDB should always
 # know, even if the program does not define them, are in fact, known.
 proc test_primitive_types_known {} {
-    foreach type {void character logical*1 integer*2 integer*8 \
+    foreach type {void character logical*1 integer*1 integer*2 integer*8 \
 		      logical*2 logical*8 integer logical*4 real \
 		      real*8 real*16} {
 	gdb_test "ptype $type" [string_to_regexp "type = $type"]
