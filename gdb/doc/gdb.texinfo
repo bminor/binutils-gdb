@@ -17176,8 +17176,8 @@ vector data types.
 @subsection Fortran
 @cindex Fortran-specific support in @value{GDBN}
 
-@value{GDBN} can be used to debug programs written in Fortran, but it
-currently supports only the features of Fortran 77 language.
+@value{GDBN} can be used to debug programs written in Fortran.  Note, that not
+all Fortran language features are available yet.
 
 @cindex trailing underscore, in Fortran symbols
 Some Fortran compilers (@sc{gnu} Fortran 77 and Fortran 95 compilers
@@ -17186,11 +17186,70 @@ functions.  When you debug programs compiled by those compilers, you
 will need to refer to variables and functions with a trailing
 underscore.
 
+@cindex Fortran Defaults
+Fortran symbols are usually case-insensitive, so @value{GDBN} by
+default uses case-insensitive matching for Fortran symbols.  You can
+change that with the @samp{set case-insensitive} command, see
+@ref{Symbols}, for the details.
+
 @menu
+* Fortran Types::               Fortran builtin types
 * Fortran Operators::           Fortran operators and expressions
-* Fortran Defaults::            Default settings for Fortran
+* Fortran Intrinsics::          Fortran intrinsic functions
 * Special Fortran Commands::    Special @value{GDBN} commands for Fortran
 @end menu
+
+@node Fortran Types
+@subsubsection Fortran Types
+
+@cindex Fortran Types
+
+In Fortran the primitive data-types have an associated @code{KIND} type
+parameter, written as @samp{@var{type}*@var{kindparam}},
+@samp{@var{type}*@var{kindparam}}, or in the @value{GDBN}-only dialect
+@samp{@var{type}_@var{kindparam}}.  A concrete example would be
+@samp{@code{Real*4}}, @samp{@code{Real(kind=4)}}, and @samp{@code{Real_4}}.
+The kind of a type can be retrieved by using the intrinsic function
+@code{KIND}, see @ref{Fortran Intrinsics}.
+
+Generally, the actual implementation of the @code{KIND} type parameter is
+compiler specific.  In @value{GDBN} the kind parameter is implemented in
+accordance with its use in the @sc{gnu} @command{gfortran} compiler.  Here, the
+kind parameter for a given @var{type} specifies its size in memory --- a
+Fortran @code{Integer*4} or @code{Integer(kind=4)} would be an integer type
+occupying 4 bytes of memory.  An exception to this rule is the @code{Complex}
+type for which the kind of the type does not specify its entire size, but
+the size of each of the two @code{Real}'s it is composed of.  A
+@code{Complex*4} would thus consist of two @code{Real*4}s and occupy 8 bytes
+of memory.
+
+For every type there is also a default kind associated with it, e.g.@
+@code{Integer} in @value{GDBN} will internally be an @code{Integer*4} (see the
+table below for default types).  The default types are the same as in @sc{gnu}
+compilers but note, that the @sc{gnu} default types can actually be changed by
+compiler flags such as @option{-fdefault-integer-8} and
+@option{-fdefault-real-8}.
+
+Not every kind parameter is valid for every type and in @value{GDBN} the
+following type kinds are available.
+
+@table @code
+@item Integer
+@code{Integer*1}, @code{Integer*2}, @code{Integer*4}, @code{Integer*8}, and
+@code{Integer} = @code{Integer*4}.
+
+@item Logical
+@code{Logical*1}, @code{Logical*2}, @code{Logical*4}, @code{Logical*8}, and
+@code{Logical} = @code{Logical*4}.
+
+@item Real
+@code{Real*4}, @code{Real*8}, @code{Real*16}, and @code{Real} = @code{Real*4}.
+
+@item Complex
+@code{Complex*4}, @code{Complex*8}, @code{Complex*16}, and @code{Complex} =
+@code{Complex*4}.
+
+@end table
 
 @node Fortran Operators
 @subsubsection Fortran Operators and Expressions
@@ -17221,15 +17280,79 @@ to set breakpoints on subroutines nested in modules or in other
 subroutines (internal subroutines).
 @end table
 
-@node Fortran Defaults
-@subsubsection Fortran Defaults
+@node Fortran Intrinsics
+@subsubsection Fortran Intrinsics
 
-@cindex Fortran Defaults
+@cindex Fortran Intrinsics
 
-Fortran symbols are usually case-insensitive, so @value{GDBN} by
-default uses case-insensitive matches for Fortran symbols.  You can
-change that with the @samp{set case-insensitive} command, see
-@ref{Symbols}, for the details.
+Fortran provides a large set of intrinsic procedures.  @value{GDBN} implements
+an incomplete subset of those procedures and their overloads.  Some of these
+procedures take an optional @code{KIND} parameter, see @ref{Fortran Types}.
+
+@table @code
+@item ABS(@var{a})
+Computes the absolute value of its argument @var{a}.  Currently not supported
+for @code{Complex} arguments.
+
+@item ALLOCATE(@var{array})
+Returns whether @var{array} is allocated or not.
+
+@item ASSOCIATED(@var{pointer} [, @var{target}])
+Returns the association status of the pointer @var{pointer} or, if @var{target}
+is present, whether @var{pointer} is associated with the target @var{target}.
+
+@item CEILING(@var{a} [, @var{kind}])
+Computes the least integer greater than or equal to @var{a}.  The optional
+parameter @var{kind} specifies the kind of the return type
+@code{Integer(@var{kind})}.
+
+@item CMPLX(@var{x} [, @var{y} [, @var{kind}]])
+Returns a complex number where @var{x} is converted to the real component.  If
+@var{y} is present it is converted to the imaginary component.  If @var{y} is
+not present then the imaginary component is set to @code{0.0} except if @var{x}
+itself is of @code{Complex} type.  The optional parameter @var{kind} specifies
+the kind of the return type @code{Complex(@var{kind})}.
+
+@item FLOOR(@var{a} [, @var{kind}])
+Computes the greatest integer less than or equal to @var{a}.  The optional
+parameter @var{kind} specifies the kind of the return type
+@code{Integer(@var{kind})}.
+
+@item KIND(@var{a})
+Returns the kind value of the argument @var{a}, see @ref{Fortran Types}.
+
+@item LBOUND(@var{array} [, @var{dim} [, @var{kind}]])
+Returns the lower bounds of an @var{array}, or a single lower bound along the
+@var{dim} dimension if present.  The optional parameter @var{kind} specifies
+the kind of the return type @code{Integer(@var{kind})}.
+
+@item LOC(@var{x})
+Returns the address of @var{x} as an @code{Integer}.
+
+@item MOD(@var{a}, @var{p})
+Computes the remainder of the division of @var{a} by @var{p}.
+
+@item MODULO(@var{a}, @var{p})
+Computes the @var{a} modulo @var{p}.
+
+@item RANK(@var{a})
+Returns the rank of a scalar or array (scalars have rank @code{0}).
+
+@item SHAPE(@var{a})
+Returns the shape of a scalar or array (scalars have shape @samp{()}).
+
+@item SIZE(@var{array}[, @var{dim} [, @var{kind}]])
+Returns the extent of @var{array} along a specified dimension @var{dim}, or the
+total number of elements in @var{array} if @var{dim} is absent.  The optional
+parameter @var{kind} specifies the kind of the return type
+@code{Integer(@var{kind})}.
+
+@item UBOUND(@var{array} [, @var{dim} [, @var{kind}]])
+Returns the upper bounds of an @var{array}, or a single upper bound along the
+@var{dim} dimension if present.  The optional parameter @var{kind} specifies
+the kind of the return type @code{Integer(@var{kind})}.
+
+@end table
 
 @node Special Fortran Commands
 @subsubsection Special Fortran Commands
