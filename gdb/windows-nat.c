@@ -3517,6 +3517,26 @@ static type *get_pdb_type_cached (pdb_line_info *pli, DWORD type_index)
 	    }
 	  break;
 	}
+
+    case SymTagArrayType:
+	{
+	  DWORD tid, index_tid;
+	  DWORD count;
+	  if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				    TI_GET_TYPEID, &tid)
+	      && pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				       TI_GET_ARRAYINDEXTYPEID, &index_tid)
+	      && pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				       TI_GET_COUNT, &count))
+	    {
+	      type *element_type = get_pdb_type (pli, tid);
+	      type *index_type = get_pdb_type (pli, index_tid);
+	      type *range_type
+		= create_static_range_type (NULL, index_type, 0, count - 1);
+	      return create_array_type (NULL, element_type, range_type);
+	    }
+	  break;
+	}
     }
 
   return ot->builtin_void;
