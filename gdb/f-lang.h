@@ -329,9 +329,9 @@ struct builtin_f_type
   struct type *builtin_real;
   struct type *builtin_real_s8;
   struct type *builtin_real_s16;
+  struct type *builtin_complex;
   struct type *builtin_complex_s8;
   struct type *builtin_complex_s16;
-  struct type *builtin_complex_s32;
   struct type *builtin_void;
 };
 

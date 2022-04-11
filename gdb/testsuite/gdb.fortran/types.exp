@@ -76,7 +76,7 @@ proc test_float_literal_types_accepted {} {
 proc test_primitive_types_known {} {
     foreach type {void character logical*1 integer*1 integer*2 integer*8 \
 		      logical*2 logical*8 integer logical*4 real \
-		      real*8 real*16} {
+		      real*8 real*16 complex*4 complex*8 complex*16} {
 	gdb_test "ptype $type" [string_to_regexp "type = $type"]
     }
 }

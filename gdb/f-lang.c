@@ -1565,8 +1565,8 @@ f_language::language_arch_info (struct gdbarch *gdbarch,
   add (builtin->builtin_real);
   add (builtin->builtin_real_s8);
   add (builtin->builtin_real_s16);
+  add (builtin->builtin_complex);
   add (builtin->builtin_complex_s8);
-  add (builtin->builtin_complex_s16);
   add (builtin->builtin_void);
 
   lai->set_string_char_type (builtin->builtin_character);
@@ -1665,17 +1665,17 @@ build_fortran_types (struct gdbarch *gdbarch)
     builtin_f_type->builtin_real_s16
       = arch_type (gdbarch, TYPE_CODE_ERROR, 128, "real*16");
 
+  builtin_f_type->builtin_complex
+    = init_complex_type ("complex*4", builtin_f_type->builtin_real);
   builtin_f_type->builtin_complex_s8
-    = init_complex_type ("complex*8", builtin_f_type->builtin_real);
-  builtin_f_type->builtin_complex_s16
-    = init_complex_type ("complex*16", builtin_f_type->builtin_real_s8);
+    = init_complex_type ("complex*8", builtin_f_type->builtin_real_s8);
 
   if (builtin_f_type->builtin_real_s16->code () == TYPE_CODE_ERROR)
-    builtin_f_type->builtin_complex_s32
-      = arch_type (gdbarch, TYPE_CODE_ERROR, 256, "complex*32");
+    builtin_f_type->builtin_complex_s16
+      = arch_type (gdbarch, TYPE_CODE_ERROR, 256, "complex*16");
   else
-    builtin_f_type->builtin_complex_s32
-      = init_complex_type ("complex*32", builtin_f_type->builtin_real_s16);
+    builtin_f_type->builtin_complex_s16
+      = init_complex_type ("complex*16", builtin_f_type->builtin_real_s16);
 
   return builtin_f_type;
 }

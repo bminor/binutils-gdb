@@ -171,7 +171,7 @@ static int parse_number (struct parser_state *, const char *, int,
 %token LOGICAL_S8_KEYWORD
 %token LOGICAL_KEYWORD REAL_KEYWORD REAL_S8_KEYWORD REAL_S16_KEYWORD 
 %token COMPLEX_KEYWORD
-%token COMPLEX_S8_KEYWORD COMPLEX_S16_KEYWORD COMPLEX_S32_KEYWORD 
+%token COMPLEX_S4_KEYWORD COMPLEX_S8_KEYWORD COMPLEX_S16_KEYWORD
 %token BOOL_AND BOOL_OR BOOL_NOT   
 %token SINGLE DOUBLE PRECISION
 %token <lval> CHARACTER 
@@ -778,21 +778,21 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 	|	REAL_S16_KEYWORD
 			{ $$ = parse_f_type (pstate)->builtin_real_s16; }
 	|	COMPLEX_KEYWORD
-			{ $$ = parse_f_type (pstate)->builtin_complex_s8; }
+			{ $$ = parse_f_type (pstate)->builtin_complex; }
+	|	COMPLEX_S4_KEYWORD
+			{ $$ = parse_f_type (pstate)->builtin_complex; }
 	|	COMPLEX_S8_KEYWORD
 			{ $$ = parse_f_type (pstate)->builtin_complex_s8; }
 	|	COMPLEX_S16_KEYWORD 
 			{ $$ = parse_f_type (pstate)->builtin_complex_s16; }
-	|	COMPLEX_S32_KEYWORD 
-			{ $$ = parse_f_type (pstate)->builtin_complex_s32; }
 	|	SINGLE PRECISION
 			{ $$ = parse_f_type (pstate)->builtin_real;}
 	|	DOUBLE PRECISION
 			{ $$ = parse_f_type (pstate)->builtin_real_s8;}
 	|	SINGLE COMPLEX_KEYWORD
-			{ $$ = parse_f_type (pstate)->builtin_complex_s8;}
+			{ $$ = parse_f_type (pstate)->builtin_complex;}
 	|	DOUBLE COMPLEX_KEYWORD
-			{ $$ = parse_f_type (pstate)->builtin_complex_s16;}
+			{ $$ = parse_f_type (pstate)->builtin_complex_s8;}
 	;
 
 nonempty_typelist
@@ -1020,14 +1020,14 @@ convert_to_kind_type (struct type *basetype, int kind)
       if (kind == 1)
 	return parse_f_type (pstate)->builtin_character;
     }
-  else if (basetype == parse_f_type (pstate)->builtin_complex_s8)
+  else if (basetype == parse_f_type (pstate)->builtin_complex)
     {
       if (kind == 4)
-	return parse_f_type (pstate)->builtin_complex_s8;
+	return parse_f_type (pstate)->builtin_complex;
       else if (kind == 8)
-	return parse_f_type (pstate)->builtin_complex_s16;
+	return parse_f_type (pstate)->builtin_complex_s8;
       else if (kind == 16)
-	return parse_f_type (pstate)->builtin_complex_s32;
+	return parse_f_type (pstate)->builtin_complex_s16;
     }
   else if (basetype == parse_f_type (pstate)->builtin_real)
     {
@@ -1130,18 +1130,18 @@ static const struct f77_boolean_val boolean_values[]  =
 static const struct token f77_keywords[] =
 {
   /* Historically these have always been lowercase only in GDB.  */
+  { "complex", COMPLEX_KEYWORD, OP_NULL, true },
+  { "complex_4", COMPLEX_S4_KEYWORD, OP_NULL, true },
+  { "complex_8", COMPLEX_S8_KEYWORD, OP_NULL, true },
   { "complex_16", COMPLEX_S16_KEYWORD, OP_NULL, true },
-  { "complex_32", COMPLEX_S32_KEYWORD, OP_NULL, true },
   { "character", CHARACTER, OP_NULL, true },
   { "integer_2", INT_S2_KEYWORD, OP_NULL, true },
   { "logical_1", LOGICAL_S1_KEYWORD, OP_NULL, true },
   { "logical_2", LOGICAL_S2_KEYWORD, OP_NULL, true },
   { "logical_8", LOGICAL_S8_KEYWORD, OP_NULL, true },
-  { "complex_8", COMPLEX_S8_KEYWORD, OP_NULL, true },
   { "integer", INT_KEYWORD, OP_NULL, true },
   { "logical", LOGICAL_KEYWORD, OP_NULL, true },
   { "real_16", REAL_S16_KEYWORD, OP_NULL, true },
-  { "complex", COMPLEX_KEYWORD, OP_NULL, true },
   { "sizeof", SIZEOF, OP_NULL, true },
   { "real_8", REAL_S8_KEYWORD, OP_NULL, true },
   { "real", REAL_KEYWORD, OP_NULL, true },
