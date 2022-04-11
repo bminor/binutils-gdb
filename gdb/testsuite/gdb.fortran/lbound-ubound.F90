@@ -17,8 +17,8 @@
   call do_test (lbound (ARRAY), ubound (ARRAY))
 
 subroutine do_test (lb, ub)
-  integer, dimension (:) :: lb
-  integer, dimension (:) :: ub
+  integer*4, dimension (:) :: lb
+  integer*4, dimension (:) :: ub
 
   print *, ""
   print *, "Expected GDB Output:"
@@ -51,8 +51,8 @@ end subroutine do_test
 program test
   interface
      subroutine do_test (lb, ub)
-       integer, dimension (:) :: lb
-       integer, dimension (:) :: ub
+       integer*4, dimension (:) :: lb
+       integer*4, dimension (:) :: ub
      end subroutine do_test
   end interface
 
@@ -70,10 +70,33 @@ program test
 
   integer, dimension (:), pointer :: pointer1d => null()
 
+  integer, parameter :: b1 = 127 - 10
+  integer, parameter :: b1_o = 127 + 2
+  integer, parameter :: b2 = 32767 - 10
+  integer, parameter :: b2_o = 32767 + 3
+  integer*8, parameter :: b4 = 2147483647 - 10
+  integer*8, parameter :: b4_o = 2147483647 + 5
+
+  integer, allocatable :: array_1d_1bytes_overflow (:)
+  integer, allocatable :: array_1d_2bytes_overflow (:)
+  integer, allocatable :: array_1d_4bytes_overflow (:)
+  integer, allocatable :: array_2d_1byte_overflow (:,:)
+  integer, allocatable :: array_2d_2bytes_overflow (:,:)
+  integer, allocatable :: array_3d_1byte_overflow (:,:,:)
+
   ! Allocate or associate any variables as needed.
   allocate (other (-5:4, -2:7))
   pointer2d => tarray
   pointer1d => array (3, 2:5)
+
+  allocate (array_1d_1bytes_overflow (-b1_o:-b1))
+  allocate (array_1d_2bytes_overflow (b2:b2_o))
+  allocate (array_1d_4bytes_overflow (-b4_o:-b4))
+
+  allocate (array_2d_1byte_overflow (-b1_o:-b1,b1:b1_o))
+  allocate (array_2d_2bytes_overflow (b2:b2_o,-b2_o:b2))
+
+  allocate (array_3d_1byte_overflow (-b1_o:-b1,b1:b1_o,-b1_o:-b1))
 
   DO_TEST (neg_array)
   DO_TEST (neg_array (-7:-3,-5:-4))
@@ -90,8 +113,26 @@ program test
   DO_TEST (pointer2d)
   DO_TEST (tarray)
 
+  DO_TEST (array_1d_1bytes_overflow)
+  DO_TEST (array_1d_2bytes_overflow)
+
+  DO_TEST (array_1d_4bytes_overflow)
+  DO_TEST (array_2d_1byte_overflow)
+  DO_TEST (array_2d_2bytes_overflow)
+  DO_TEST (array_3d_1byte_overflow)
+
   ! All done.  Deallocate.
+  print *, "" ! Breakpoint before deallocate.
   deallocate (other)
+
+  deallocate (array_3d_1byte_overflow)
+
+  deallocate (array_2d_2bytes_overflow)
+  deallocate (array_2d_1byte_overflow)
+
+  deallocate (array_1d_4bytes_overflow)
+  deallocate (array_1d_2bytes_overflow)
+  deallocate (array_1d_1bytes_overflow)
 
   ! GDB catches this final breakpoint to indicate the end of the test.
   print *, "" ! Final Breakpoint.

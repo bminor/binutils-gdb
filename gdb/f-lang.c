@@ -133,9 +133,9 @@ fortran_bounds_all_dims (bool lbound_p,
   /* Allocate a result value of the correct type.  */
   struct type *range
     = create_static_range_type (nullptr,
-				builtin_type (gdbarch)->builtin_int,
+				builtin_f_type (gdbarch)->builtin_integer,
 				1, ndimensions);
-  struct type *elm_type = builtin_type (gdbarch)->builtin_long_long;
+  struct type *elm_type = builtin_f_type (gdbarch)->builtin_integer;
   struct type *result_type = create_array_type (nullptr, elm_type, range);
   struct value *result = allocate_value (result_type);
 
@@ -170,13 +170,12 @@ fortran_bounds_all_dims (bool lbound_p,
 
 /* Return the lower bound (when LBOUND_P is true) or the upper bound (when
    LBOUND_P is false) for dimension DIM_VAL (which must be an integer) of
-   ARRAY (which must be an array).  GDBARCH is the current architecture.  */
+   ARRAY (which must be an array).  RESULT_TYPE corresponds to the type kind
+   the function should be evaluated in.  */
 
-static struct value *
-fortran_bounds_for_dimension (bool lbound_p,
-			      struct gdbarch *gdbarch,
-			      struct value *array,
-			      struct value *dim_val)
+static value *
+fortran_bounds_for_dimension (bool lbound_p, value *array, value *dim_val,
+			      type* result_type)
 {
   /* Check the requested dimension is valid for this array.  */
   type *array_type = check_typedef (value_type (array));
@@ -189,9 +188,6 @@ fortran_bounds_for_dimension (bool lbound_p,
       else
 	error (_("UBOUND dimension must be from 1 to %d"), ndimensions);
     }
-
-  /* The type for the result.  */
-  struct type *bound_type = builtin_type (gdbarch)->builtin_long_long;
 
   /* Walk the dimensions backwards, due to the ordering in which arrays are
      laid out the first dimension is the most inner.  */
@@ -208,7 +204,7 @@ fortran_bounds_for_dimension (bool lbound_p,
 	  else
 	    b = f77_get_upperbound (array_type);
 
-	  return value_from_longest (bound_type, b);
+	  return value_from_longest (result_type, b);
 	}
 
       /* Peel off another dimension of the array.  */
@@ -578,8 +574,8 @@ eval_op_f_associated (struct type *expect_type,
 }
 
 /* Implement FORTRAN_ARRAY_SIZE expression, this corresponds to the 'SIZE'
-   keyword.  Both GDBARCH and LANG are extracted from the expression being
-   evaluated.  ARRAY is the value that should be an array, though this will
+   keyword.  RESULT_TYPE corresponds to the type kind the function should be
+   evaluated in, ARRAY is the value that should be an array, though this will
    not have been checked before calling this function.  DIM is optional, if
    present then it should be an integer identifying a dimension of the
    array to ask about.  As with ARRAY the validity of DIM is not checked
@@ -588,9 +584,8 @@ eval_op_f_associated (struct type *expect_type,
    Return either the total number of elements in ARRAY (when DIM is
    nullptr), or the number of elements in dimension DIM.  */
 
-static struct value *
-fortran_array_size (struct gdbarch *gdbarch, const language_defn *lang,
-		    struct value *array, struct value *dim_val = nullptr)
+static value *
+fortran_array_size (value *array, value *dim_val, type *result_type)
 {
   /* Check that ARRAY is the correct type.  */
   struct type *array_type = check_typedef (value_type (array));
@@ -642,8 +637,6 @@ fortran_array_size (struct gdbarch *gdbarch, const language_defn *lang,
       array_type = TYPE_TARGET_TYPE (array_type);
     }
 
-  struct type *result_type
-    = builtin_f_type (gdbarch)->builtin_integer;
   return value_from_longest (result_type, result);
 }
 
@@ -657,7 +650,9 @@ eval_op_f_array_size (struct type *expect_type,
 		      struct value *arg1)
 {
   gdb_assert (opcode == FORTRAN_ARRAY_SIZE);
-  return fortran_array_size (exp->gdbarch, exp->language_defn, arg1);
+
+  type *result_type = builtin_f_type (exp->gdbarch)->builtin_integer;
+  return fortran_array_size (arg1, nullptr, result_type);
 }
 
 /* See f-exp.h.  */
@@ -671,7 +666,21 @@ eval_op_f_array_size (struct type *expect_type,
 		      struct value *arg2)
 {
   gdb_assert (opcode == FORTRAN_ARRAY_SIZE);
-  return fortran_array_size (exp->gdbarch, exp->language_defn, arg1, arg2);
+
+  type *result_type = builtin_f_type (exp->gdbarch)->builtin_integer;
+  return fortran_array_size (arg1, arg2, result_type);
+}
+
+/* See f-exp.h.  */
+
+value *eval_op_f_array_size (type *expect_type, expression *exp, noside noside,
+			     exp_opcode opcode, value *arg1, value *arg2,
+			     type *kind_arg)
+{
+  gdb_assert (opcode == FORTRAN_ARRAY_SIZE);
+  gdb_assert (kind_arg->code () == TYPE_CODE_INT);
+
+  return fortran_array_size (arg1, arg2, kind_arg);
 }
 
 /* Implement UNOP_FORTRAN_SHAPE expression.  Both GDBARCH and LANG are
@@ -820,7 +829,22 @@ eval_op_f_mod (struct type *expect_type, struct expression *exp,
   error (_("MOD of type %s not supported"), TYPE_SAFE_NAME (type));
 }
 
-/* A helper function for UNOP_FORTRAN_CEILING.  */
+/* A helper function for the different FORTRAN_CEILING overloads.  Calculates
+   CEILING for ARG1 (a float type) and returns it in the requested kind type
+   RESULT_TYPE.  */
+
+static value *
+fortran_ceil_operation (value *arg1, type *result_type)
+{
+  if (value_type (arg1)->code () != TYPE_CODE_FLT)
+    error (_("argument to CEILING must be of type float"));
+  double val = target_float_to_host_double (value_contents (arg1).data (),
+					    value_type (arg1));
+  val = ceil (val);
+  return value_from_longest (result_type, val);
+}
+
+/* A helper function for FORTRAN_CEILING.  */
 
 struct value *
 eval_op_f_ceil (struct type *expect_type, struct expression *exp,
@@ -828,32 +852,59 @@ eval_op_f_ceil (struct type *expect_type, struct expression *exp,
 		enum exp_opcode opcode,
 		struct value *arg1)
 {
-  struct type *type = value_type (arg1);
-  if (type->code () != TYPE_CODE_FLT)
-    error (_("argument to CEILING must be of type float"));
-  double val
-    = target_float_to_host_double (value_contents (arg1).data (),
-				   value_type (arg1));
-  val = ceil (val);
-  return value_from_host_double (type, val);
+  gdb_assert (opcode == FORTRAN_CEILING);
+  type *result_type = builtin_f_type (exp->gdbarch)->builtin_integer;
+  return fortran_ceil_operation (arg1, result_type);
 }
 
-/* A helper function for UNOP_FORTRAN_FLOOR.  */
+/* A helper function for FORTRAN_CEILING.  */
+
+value *
+eval_op_f_ceil (type *expect_type, expression *exp, noside noside,
+		exp_opcode opcode, value *arg1, type *kind_arg)
+{
+  gdb_assert (opcode == FORTRAN_CEILING);
+  gdb_assert (kind_arg->code () == TYPE_CODE_INT);
+  return fortran_ceil_operation (arg1, kind_arg);
+}
+
+/* A helper function for the different FORTRAN_FLOOR overloads.  Calculates
+   FLOOR for ARG1 (a float type) and returns it in the requested kind type
+   RESULT_TYPE.  */
+
+static value *
+fortran_floor_operation (value *arg1, type *result_type)
+{
+  if (value_type (arg1)->code () != TYPE_CODE_FLT)
+    error (_("argument to FLOOR must be of type float"));
+  double val = target_float_to_host_double (value_contents (arg1).data (),
+					    value_type (arg1));
+  val = floor (val);
+  return value_from_longest (result_type, val);
+}
+
+/* A helper function for FORTRAN_FLOOR.  */
 
 struct value *
 eval_op_f_floor (struct type *expect_type, struct expression *exp,
-		 enum noside noside,
-		 enum exp_opcode opcode,
-		 struct value *arg1)
+		enum noside noside,
+		enum exp_opcode opcode,
+		struct value *arg1)
 {
-  struct type *type = value_type (arg1);
-  if (type->code () != TYPE_CODE_FLT)
-    error (_("argument to FLOOR must be of type float"));
-  double val
-    = target_float_to_host_double (value_contents (arg1).data (),
-				   value_type (arg1));
-  val = floor (val);
-  return value_from_host_double (type, val);
+  gdb_assert (opcode == FORTRAN_FLOOR);
+  type *result_type = builtin_f_type (exp->gdbarch)->builtin_integer;
+  return fortran_floor_operation (arg1, result_type);
+}
+
+/* A helper function for FORTRAN_FLOOR.  */
+
+struct value *
+eval_op_f_floor (type *expect_type, expression *exp, noside noside,
+		 exp_opcode opcode, value *arg1, type *kind_arg)
+{
+  gdb_assert (opcode == FORTRAN_FLOOR);
+  gdb_assert (kind_arg->code () == TYPE_CODE_INT);
+  return fortran_floor_operation (arg1, kind_arg);
 }
 
 /* A helper function for BINOP_FORTRAN_MODULO.  */
@@ -896,7 +947,25 @@ eval_op_f_modulo (struct type *expect_type, struct expression *exp,
   error (_("MODULO of type %s not supported"), TYPE_SAFE_NAME (type));
 }
 
-/* A helper function for BINOP_FORTRAN_CMPLX.  */
+/* A helper function for FORTRAN_CMPLX.  */
+
+value *
+eval_op_f_cmplx (type *expect_type, expression *exp, noside noside,
+		 exp_opcode opcode, value *arg1)
+{
+  gdb_assert (opcode == FORTRAN_CMPLX);
+
+  type *result_type = builtin_f_type (exp->gdbarch)->builtin_complex;
+
+  if (value_type (arg1)->code () == TYPE_CODE_COMPLEX)
+    return value_cast (result_type, arg1);
+  else
+    return value_literal_complex (arg1,
+				  value_zero (value_type (arg1), not_lval),
+				  result_type);
+}
+
+/* A helper function for FORTRAN_CMPLX.  */
 
 struct value *
 eval_op_f_cmplx (struct type *expect_type, struct expression *exp,
@@ -904,8 +973,28 @@ eval_op_f_cmplx (struct type *expect_type, struct expression *exp,
 		 enum exp_opcode opcode,
 		 struct value *arg1, struct value *arg2)
 {
-  struct type *type = builtin_f_type(exp->gdbarch)->builtin_complex_s16;
-  return value_literal_complex (arg1, arg2, type);
+  if (value_type (arg1)->code () == TYPE_CODE_COMPLEX
+      || value_type (arg2)->code () == TYPE_CODE_COMPLEX)
+    error (_("Types of arguments for CMPLX called with more then one argument "
+	     "must be REAL or INTEGER"));
+
+  type *result_type = builtin_f_type (exp->gdbarch)->builtin_complex;
+  return value_literal_complex (arg1, arg2, result_type);
+}
+
+/* A helper function for FORTRAN_CMPLX.  */
+
+value *
+eval_op_f_cmplx (type *expect_type, expression *exp, noside noside,
+		 exp_opcode opcode, value *arg1, value *arg2, type *kind_arg)
+{
+  gdb_assert (kind_arg->code () == TYPE_CODE_COMPLEX);
+  if (value_type (arg1)->code () == TYPE_CODE_COMPLEX
+      || value_type (arg2)->code () == TYPE_CODE_COMPLEX)
+    error (_("Types of arguments for CMPLX called with more then one argument "
+	     "must be REAL or INTEGER"));
+
+  return value_literal_complex (arg1, arg2, kind_arg);
 }
 
 /* A helper function for UNOP_FORTRAN_KIND.  */
@@ -1478,8 +1567,8 @@ fortran_bound_2arg::evaluate (struct type *expect_type,
 
   /* User asked for the bounds of a specific dimension of the array.  */
   value *arg2 = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
-  struct type *type = check_typedef (value_type (arg2));
-  if (type->code () != TYPE_CODE_INT)
+  type *type_arg2 = check_typedef (value_type (arg2));
+  if (type_arg2->code () != TYPE_CODE_INT)
     {
       if (lbound_p)
 	error (_("LBOUND second argument should be an integer"));
@@ -1487,7 +1576,34 @@ fortran_bound_2arg::evaluate (struct type *expect_type,
 	error (_("UBOUND second argument should be an integer"));
     }
 
-  return fortran_bounds_for_dimension (lbound_p, exp->gdbarch, arg1, arg2);
+  type *result_type = builtin_f_type (exp->gdbarch)->builtin_integer;
+  return fortran_bounds_for_dimension (lbound_p, arg1, arg2, result_type);
+}
+
+value *
+fortran_bound_3arg::evaluate (type *expect_type,
+			      expression *exp,
+			      noside noside)
+{
+  const bool lbound_p = std::get<0> (m_storage) == FORTRAN_LBOUND;
+  value *arg1 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+  fortran_require_array (value_type (arg1), lbound_p);
+
+  /* User asked for the bounds of a specific dimension of the array.  */
+  value *arg2 = std::get<2> (m_storage)->evaluate (nullptr, exp, noside);
+  type *type_arg2 = check_typedef (value_type (arg2));
+  if (type_arg2->code () != TYPE_CODE_INT)
+    {
+      if (lbound_p)
+	error (_("LBOUND second argument should be an integer"));
+      else
+	error (_("UBOUND second argument should be an integer"));
+    }
+
+  type *kind_arg = std::get<3> (m_storage);
+  gdb_assert (kind_arg->code () == TYPE_CODE_INT);
+
+  return fortran_bounds_for_dimension (lbound_p, arg1, arg2, kind_arg);
 }
 
 /* Implement STRUCTOP_STRUCT for Fortran.  See operation::evaluate in

@@ -90,6 +90,18 @@ static void push_kind_type (LONGEST val, struct type *type);
 
 static struct type *convert_to_kind_type (struct type *basetype, int kind);
 
+static void wrap_unop_intrinsic (exp_opcode opcode);
+
+static void wrap_binop_intrinsic (exp_opcode opcode);
+
+static void wrap_ternop_intrinsic (exp_opcode opcode);
+
+template<typename T>
+static void fortran_wrap2_kind (type *base_type);
+
+template<typename T>
+static void fortran_wrap3_kind (type *base_type);
+
 using namespace expr;
 %}
 
@@ -181,7 +193,7 @@ static int parse_number (struct parser_state *, const char *, int,
 
 %token <opcode> ASSIGN_MODIFY
 %token <opcode> UNOP_INTRINSIC BINOP_INTRINSIC
-%token <opcode> UNOP_OR_BINOP_INTRINSIC
+%token <opcode> UNOP_OR_BINOP_INTRINSIC UNOP_OR_BINOP_OR_TERNOP_INTRINSIC
 
 %left ','
 %left ABOVE_COMMA
@@ -248,54 +260,6 @@ exp	:	KIND '(' exp ')'       %prec UNARY
 			{ pstate->wrap<fortran_kind_operation> (); }
 	;
 
-exp	:	UNOP_OR_BINOP_INTRINSIC '('
-			{ pstate->start_arglist (); }
-		one_or_two_args ')'
-			{
-			  int n = pstate->end_arglist ();
-			  gdb_assert (n == 1 || n == 2);
-			  if ($1 == FORTRAN_ASSOCIATED)
-			    {
-			      if (n == 1)
-				pstate->wrap<fortran_associated_1arg> ();
-			      else
-				pstate->wrap2<fortran_associated_2arg> ();
-			    }
-			  else if ($1 == FORTRAN_ARRAY_SIZE)
-			    {
-			      if (n == 1)
-				pstate->wrap<fortran_array_size_1arg> ();
-			      else
-				pstate->wrap2<fortran_array_size_2arg> ();
-			    }
-			  else
-			    {
-			      std::vector<operation_up> args
-				= pstate->pop_vector (n);
-			      gdb_assert ($1 == FORTRAN_LBOUND
-					  || $1 == FORTRAN_UBOUND);
-			      operation_up op;
-			      if (n == 1)
-				op.reset
-				  (new fortran_bound_1arg ($1,
-							   std::move (args[0])));
-			      else
-				op.reset
-				  (new fortran_bound_2arg ($1,
-							   std::move (args[0]),
-							   std::move (args[1])));
-			      pstate->push (std::move (op));
-			    }
-			}
-	;
-
-one_or_two_args
-	:	exp
-			{ pstate->arglist_len = 1; }
-	|	exp ',' exp
-			{ pstate->arglist_len = 2; }
-	;
-
 /* No more explicit array operators, we treat everything in F77 as 
    a function call.  The disambiguation as to whether we are 
    doing a subscript operation or a function call is done 
@@ -314,50 +278,56 @@ exp	:	exp '('
 
 exp	:	UNOP_INTRINSIC '(' exp ')'
 			{
-			  switch ($1)
-			    {
-			    case UNOP_ABS:
-			      pstate->wrap<fortran_abs_operation> ();
-			      break;
-			    case UNOP_FORTRAN_FLOOR:
-			      pstate->wrap<fortran_floor_operation> ();
-			      break;
-			    case UNOP_FORTRAN_CEILING:
-			      pstate->wrap<fortran_ceil_operation> ();
-			      break;
-			    case UNOP_FORTRAN_ALLOCATED:
-			      pstate->wrap<fortran_allocated_operation> ();
-			      break;
-			    case UNOP_FORTRAN_RANK:
-			      pstate->wrap<fortran_rank_operation> ();
-			      break;
-			    case UNOP_FORTRAN_SHAPE:
-			      pstate->wrap<fortran_array_shape_operation> ();
-			      break;
-			    case UNOP_FORTRAN_LOC:
-			      pstate->wrap<fortran_loc_operation> ();
-			      break;
-			    default:
-			      gdb_assert_not_reached ("unhandled intrinsic");
-			    }
+			  wrap_unop_intrinsic ($1);
 			}
 	;
 
 exp	:	BINOP_INTRINSIC '(' exp ',' exp ')'
 			{
-			  switch ($1)
+			  wrap_binop_intrinsic ($1);
+			}
+	;
+
+exp	:	UNOP_OR_BINOP_INTRINSIC '('
+			{ pstate->start_arglist (); }
+		arglist ')'
+			{
+			  const int n = pstate->end_arglist ();
+
+			  switch (n)
 			    {
-			    case BINOP_MOD:
-			      pstate->wrap2<fortran_mod_operation> ();
+			    case 1:
+			      wrap_unop_intrinsic ($1);
 			      break;
-			    case BINOP_FORTRAN_MODULO:
-			      pstate->wrap2<fortran_modulo_operation> ();
-			      break;
-			    case BINOP_FORTRAN_CMPLX:
-			      pstate->wrap2<fortran_cmplx_operation> ();
+			    case 2:
+			      wrap_binop_intrinsic ($1);
 			      break;
 			    default:
-			      gdb_assert_not_reached ("unhandled intrinsic");
+			      gdb_assert_not_reached
+				("wrong number of arguments for intrinsics");
+			    }
+			}
+
+exp	:	UNOP_OR_BINOP_OR_TERNOP_INTRINSIC '('
+			{ pstate->start_arglist (); }
+		arglist ')'
+			{
+			  const int n = pstate->end_arglist ();
+
+			  switch (n)
+			    {
+			    case 1:
+			      wrap_unop_intrinsic ($1);
+			      break;
+			    case 2:
+			      wrap_binop_intrinsic ($1);
+			      break;
+			    case 3:
+			      wrap_ternop_intrinsic ($1);
+			      break;
+			    default:
+			      gdb_assert_not_reached
+				("wrong number of arguments for intrinsics");
 			    }
 			}
 	;
@@ -838,6 +808,179 @@ name_not_typename :	NAME
 
 %%
 
+/* Called to match intrinsic function calls with one argument to their
+   respective implementation and push the operation.  */
+
+static void
+wrap_unop_intrinsic (exp_opcode code)
+{
+  switch (code)
+    {
+    case UNOP_ABS:
+      pstate->wrap<fortran_abs_operation> ();
+      break;
+    case FORTRAN_FLOOR:
+      pstate->wrap<fortran_floor_operation_1arg> ();
+      break;
+    case FORTRAN_CEILING:
+      pstate->wrap<fortran_ceil_operation_1arg> ();
+      break;
+    case UNOP_FORTRAN_ALLOCATED:
+      pstate->wrap<fortran_allocated_operation> ();
+      break;
+    case UNOP_FORTRAN_RANK:
+      pstate->wrap<fortran_rank_operation> ();
+      break;
+    case UNOP_FORTRAN_SHAPE:
+      pstate->wrap<fortran_array_shape_operation> ();
+      break;
+    case UNOP_FORTRAN_LOC:
+      pstate->wrap<fortran_loc_operation> ();
+      break;
+    case FORTRAN_ASSOCIATED:
+      pstate->wrap<fortran_associated_1arg> ();
+      break;
+    case FORTRAN_ARRAY_SIZE:
+      pstate->wrap<fortran_array_size_1arg> ();
+      break;
+    case FORTRAN_CMPLX:
+      pstate->wrap<fortran_cmplx_operation_1arg> ();
+      break;
+    case FORTRAN_LBOUND:
+    case FORTRAN_UBOUND:
+      pstate->push_new<fortran_bound_1arg> (code, pstate->pop ());
+      break;
+    default:
+      gdb_assert_not_reached ("unhandled intrinsic");
+    }
+}
+
+/* Called to match intrinsic function calls with two arguments to their
+   respective implementation and push the operation.  */
+
+static void
+wrap_binop_intrinsic (exp_opcode code)
+{
+  switch (code)
+    {
+    case FORTRAN_FLOOR:
+      fortran_wrap2_kind<fortran_floor_operation_2arg>
+	(parse_f_type (pstate)->builtin_integer);
+      break;
+    case FORTRAN_CEILING:
+      fortran_wrap2_kind<fortran_ceil_operation_2arg>
+	(parse_f_type (pstate)->builtin_integer);
+      break;
+    case BINOP_MOD:
+      pstate->wrap2<fortran_mod_operation> ();
+      break;
+    case BINOP_FORTRAN_MODULO:
+      pstate->wrap2<fortran_modulo_operation> ();
+      break;
+    case FORTRAN_CMPLX:
+      pstate->wrap2<fortran_cmplx_operation_2arg> ();
+      break;
+    case FORTRAN_ASSOCIATED:
+      pstate->wrap2<fortran_associated_2arg> ();
+      break;
+    case FORTRAN_ARRAY_SIZE:
+      pstate->wrap2<fortran_array_size_2arg> ();
+      break;
+    case FORTRAN_LBOUND:
+    case FORTRAN_UBOUND:
+      {
+	operation_up arg2 = pstate->pop ();
+	operation_up arg1 = pstate->pop ();
+	pstate->push_new<fortran_bound_2arg> (code, std::move (arg1),
+					      std::move (arg2));
+      }
+      break;
+    default:
+      gdb_assert_not_reached ("unhandled intrinsic");
+    }
+}
+
+/* Called to match intrinsic function calls with three arguments to their
+   respective implementation and push the operation.  */
+
+static void
+wrap_ternop_intrinsic (exp_opcode code)
+{
+  switch (code)
+    {
+    case FORTRAN_LBOUND:
+    case FORTRAN_UBOUND:
+      {
+	operation_up kind_arg = pstate->pop ();
+	operation_up arg2 = pstate->pop ();
+	operation_up arg1 = pstate->pop ();
+
+	value *val = kind_arg->evaluate (nullptr, pstate->expout.get (),
+					 EVAL_AVOID_SIDE_EFFECTS);
+	gdb_assert (val != nullptr);
+
+	type *follow_type
+	  = convert_to_kind_type (parse_f_type (pstate)->builtin_integer,
+				  value_as_long (val));
+
+	pstate->push_new<fortran_bound_3arg> (code, std::move (arg1),
+					      std::move (arg2), follow_type);
+      }
+      break;
+    case FORTRAN_ARRAY_SIZE:
+      fortran_wrap3_kind<fortran_array_size_3arg>
+	(parse_f_type (pstate)->builtin_integer);
+      break;
+    case FORTRAN_CMPLX:
+      fortran_wrap3_kind<fortran_cmplx_operation_3arg>
+	(parse_f_type (pstate)->builtin_complex);
+      break;
+    default:
+      gdb_assert_not_reached ("unhandled intrinsic");
+    }
+}
+
+/* A helper that pops two operations (similar to wrap2), evaluates the last one
+   assuming it is a kind parameter, and wraps them in some other operation
+   pushing it to the stack.  */
+
+template<typename T>
+static void
+fortran_wrap2_kind (type *base_type)
+{
+  operation_up kind_arg = pstate->pop ();
+  operation_up arg = pstate->pop ();
+
+  value *val = kind_arg->evaluate (nullptr, pstate->expout.get (),
+				   EVAL_AVOID_SIDE_EFFECTS);
+  gdb_assert (val != nullptr);
+
+  type *follow_type = convert_to_kind_type (base_type, value_as_long (val));
+
+  pstate->push_new<T> (std::move (arg), follow_type);
+}
+
+/* A helper that pops three operations, evaluates the last one assuming it is a
+   kind parameter, and wraps them in some other operation pushing it to the
+   stack.  */
+
+template<typename T>
+static void
+fortran_wrap3_kind (type *base_type)
+{
+  operation_up kind_arg = pstate->pop ();
+  operation_up arg2 = pstate->pop ();
+  operation_up arg1 = pstate->pop ();
+
+  value *val = kind_arg->evaluate (nullptr, pstate->expout.get (),
+				   EVAL_AVOID_SIDE_EFFECTS);
+  gdb_assert (val != nullptr);
+
+  type *follow_type = convert_to_kind_type (base_type, value_as_long (val));
+
+  pstate->push_new<T> (std::move (arg1), std::move (arg2), follow_type);
+}
+
 /* Take care of parsing a number (anything that starts with a digit).
    Set yylval and return the token type; update lexptr.
    LEN is the number of characters in it.  */
@@ -1169,16 +1312,16 @@ static const token f_keywords[] =
   { "kind", KIND, OP_NULL, false },
   { "abs", UNOP_INTRINSIC, UNOP_ABS, false },
   { "mod", BINOP_INTRINSIC, BINOP_MOD, false },
-  { "floor", UNOP_INTRINSIC, UNOP_FORTRAN_FLOOR, false },
-  { "ceiling", UNOP_INTRINSIC, UNOP_FORTRAN_CEILING, false },
+  { "floor", UNOP_OR_BINOP_INTRINSIC, FORTRAN_FLOOR, false },
+  { "ceiling", UNOP_OR_BINOP_INTRINSIC, FORTRAN_CEILING, false },
   { "modulo", BINOP_INTRINSIC, BINOP_FORTRAN_MODULO, false },
-  { "cmplx", BINOP_INTRINSIC, BINOP_FORTRAN_CMPLX, false },
-  { "lbound", UNOP_OR_BINOP_INTRINSIC, FORTRAN_LBOUND, false },
-  { "ubound", UNOP_OR_BINOP_INTRINSIC, FORTRAN_UBOUND, false },
+  { "cmplx", UNOP_OR_BINOP_OR_TERNOP_INTRINSIC, FORTRAN_CMPLX, false },
+  { "lbound", UNOP_OR_BINOP_OR_TERNOP_INTRINSIC, FORTRAN_LBOUND, false },
+  { "ubound", UNOP_OR_BINOP_OR_TERNOP_INTRINSIC, FORTRAN_UBOUND, false },
   { "allocated", UNOP_INTRINSIC, UNOP_FORTRAN_ALLOCATED, false },
   { "associated", UNOP_OR_BINOP_INTRINSIC, FORTRAN_ASSOCIATED, false },
   { "rank", UNOP_INTRINSIC, UNOP_FORTRAN_RANK, false },
-  { "size", UNOP_OR_BINOP_INTRINSIC, FORTRAN_ARRAY_SIZE, false },
+  { "size", UNOP_OR_BINOP_OR_TERNOP_INTRINSIC, FORTRAN_ARRAY_SIZE, false },
   { "shape", UNOP_INTRINSIC, UNOP_FORTRAN_SHAPE, false },
   { "loc", UNOP_INTRINSIC, UNOP_FORTRAN_LOC, false },
 };

@@ -41,9 +41,10 @@ if [target_info exists gdb,noinferiorio] {
 gdb_test_no_output "nosharedlibrary"
 
 gdb_breakpoint [gdb_get_line_number "Test Breakpoint"]
+gdb_breakpoint [gdb_get_line_number "Breakpoint before deallocate\."]
 gdb_breakpoint [gdb_get_line_number "Final Breakpoint"]
 
-set found_final_breakpoint false
+set found_dealloc_breakpoint false
 
 # We place a limit on the number of tests that can be run, just in
 # case something goes wrong, and GDB gets stuck in an loop here.
@@ -77,14 +78,14 @@ while { $test_count < 500 } {
 		set func_name "show_elem"
 		exp_continue
 	    }
-	    -re "! Final Breakpoint" {
-		set found_final_breakpoint true
+	    -re "! Breakpoint before deallocate" {
+		set found_dealloc_breakpoint true
 		exp_continue
 	    }
 	    -re "$gdb_prompt $" {
 		set found_prompt true
 
-		if {$found_final_breakpoint
+		if {$found_dealloc_breakpoint
 		    || ($expected_lbound != "" && $expected_ubound != "")} {
 		    # We're done.
 		} else {
@@ -93,7 +94,7 @@ while { $test_count < 500 } {
 	    }
 	}
 
-	if ($found_final_breakpoint) {
+	if ($found_dealloc_breakpoint) {
 	    break
 	}
 
@@ -210,10 +211,26 @@ while { $test_count < 500 } {
     }
 }
 
+gdb_assert {$found_dealloc_breakpoint} "ran all compiled in tests"
+
+# Test the kind parameter of ubound and lbound a few times.
+gdb_test "p lbound(array_1d_1bytes_overflow, 1, 1)" "= 127"
+gdb_test "p lbound(array_1d_1bytes_overflow, 1, 2)" "= -129"
+gdb_test "p ubound(array_1d_1bytes_overflow, 1, 1)" "= -117"
+
+gdb_test "p lbound(array_1d_2bytes_overflow, 1, 2)" "= 32757"
+gdb_test "p ubound(array_1d_2bytes_overflow, 1, 2)" "= -32766"
+gdb_test "p ubound(array_1d_2bytes_overflow, 1, 4)" "= 32770"
+
+gdb_test "p lbound(array_1d_4bytes_overflow, 1, 4)" "= 2147483644"
+gdb_test "p lbound(array_1d_4bytes_overflow, 1, 8)" "= -2147483652"
+gdb_test "p ubound(array_1d_4bytes_overflow, 1, 4)" "= -2147483637"
+gdb_test "p lbound(array_1d_4bytes_overflow)" "= \\(2147483644\\)"
+
 # Ensure we reached the final breakpoint.  If more tests have been added
 # to the test script, and this starts failing, then the safety 'while'
 # loop above might need to be increased.
-gdb_assert {$found_final_breakpoint} "reached final breakpoint"
+gdb_continue_to_breakpoint "Final Breakpoint"
 
 # Now for some final tests.  This is mostly testing that GDB gives the
 # correct errors in certain cases.

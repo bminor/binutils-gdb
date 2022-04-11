@@ -32,26 +32,85 @@ extern struct value *eval_op_f_mod (struct type *expect_type,
 				    enum noside noside,
 				    enum exp_opcode opcode,
 				    struct value *arg1, struct value *arg2);
+
+/* Implement expression evaluation for Fortran's CEILING intrinsic function
+   called with one argument.  For EXPECT_TYPE, EXP, and NOSIDE see
+   expression::evaluate (in expression.h).  OPCODE will always be
+   FORTRAN_CEILING and ARG1 is the argument passed to CEILING.  */
+
 extern struct value *eval_op_f_ceil (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside,
 				     enum exp_opcode opcode,
 				     struct value *arg1);
+
+/* Implement expression evaluation for Fortran's CEILING intrinsic function
+   called with two arguments.  For EXPECT_TYPE, EXP, and NOSIDE see
+   expression::evaluate (in expression.h).  OPCODE will always be
+   FORTRAN_CEILING, ARG1 is the first argument passed to CEILING, and KIND_ARG
+   is the type corresponding to the KIND parameter passed to CEILING.  */
+
+extern value *eval_op_f_ceil (type *expect_type, expression *exp,
+			      noside noside, exp_opcode opcode, value *arg1,
+			      type *kind_arg);
+
+/* Implement expression evaluation for Fortran's FLOOR intrinsic function
+   called with one argument.  For EXPECT_TYPE, EXP, and NOSIDE see
+   expression::evaluate (in expression.h).  OPCODE will always be FORTRAN_FLOOR
+   and ARG1 is the argument passed to FLOOR.  */
+
 extern struct value *eval_op_f_floor (struct type *expect_type,
 				      struct expression *exp,
 				      enum noside noside,
 				      enum exp_opcode opcode,
 				      struct value *arg1);
+
+/* Implement expression evaluation for Fortran's FLOOR intrinsic function
+   called with two arguments.  For EXPECT_TYPE, EXP, and NOSIDE see
+   expression::evaluate (in expression.h).  OPCODE will always be
+   FORTRAN_FLOOR, ARG1 is the first argument passed to FLOOR, and KIND_ARG is
+   the type corresponding to the KIND parameter passed to FLOOR.  */
+
+extern value *eval_op_f_floor (type *expect_type, expression *exp,
+			       noside noside, exp_opcode opcode, value *arg1,
+			       type *kind_arg);
+
 extern struct value *eval_op_f_modulo (struct type *expect_type,
 				       struct expression *exp,
 				       enum noside noside,
 				       enum exp_opcode opcode,
 				       struct value *arg1, struct value *arg2);
+
+/* Implement expression evaluation for Fortran's CMPLX intrinsic function
+   called with one argument.  For EXPECT_TYPE, EXP, and NOSIDE see
+   expression::evaluate (in expression.h). OPCODE will always be
+   FORTRAN_CMPLX and ARG1 is the argument passed to CMPLX if.  */
+
+extern value *eval_op_f_cmplx (type *expect_type, expression *exp,
+			       noside noside, exp_opcode opcode, value *arg1);
+
+/* Implement expression evaluation for Fortran's CMPLX intrinsic function
+   called with two arguments.  For EXPECT_TYPE, EXP, and NOSIDE see
+   expression::evaluate (in expression.h).  OPCODE will always be
+   FORTRAN_CMPLX, ARG1 and ARG2 are the arguments passed to CMPLX.  */
+
 extern struct value *eval_op_f_cmplx (struct type *expect_type,
 				      struct expression *exp,
 				      enum noside noside,
 				      enum exp_opcode opcode,
 				      struct value *arg1, struct value *arg2);
+
+/* Implement expression evaluation for Fortran's CMPLX intrinsic function
+   called with three arguments.  For EXPECT_TYPE, EXP, and NOSIDE see
+   expression::evaluate (in expression.h).  OPCODE will always be
+   FORTRAN_CMPLX, ARG1 and ARG2 are real and imaginary part passed to CMPLX,
+   and KIND_ARG is the type corresponding to the KIND parameter passed to
+   CMPLX.  */
+
+extern value *eval_op_f_cmplx (type *expect_type, expression *exp,
+			       noside noside, exp_opcode opcode, value *arg1,
+			       value *arg2, type *kind_arg);
+
 extern struct value *eval_op_f_kind (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside,
@@ -92,7 +151,7 @@ extern struct value *eval_op_f_rank (struct type *expect_type,
 
 /* Implement expression evaluation for Fortran's SIZE keyword. For
    EXPECT_TYPE, EXP, and NOSIDE see expression::evaluate (in
-   expression.h).  OP will always for FORTRAN_ARRAY_SIZE.  ARG1 is the
+   expression.h).  OPCODE will always for FORTRAN_ARRAY_SIZE.  ARG1 is the
    value passed to SIZE if it is only passed a single argument.  For the
    two argument form see the overload of this function below.  */
 
@@ -113,6 +172,16 @@ extern struct value *eval_op_f_array_size (struct type *expect_type,
 					   struct value *arg1,
 					   struct value *arg2);
 
+/* Implement expression evaluation for Fortran's SIZE intrinsic function called
+   with three arguments.  For EXPECT_TYPE, EXP, and NOSIDE see
+   expression::evaluate (in expression.h).  OPCODE will always be
+   FORTRAN_ARRAY_SIZE, ARG1 and ARG2 the first two values passed to SIZE, and
+   KIND_ARG is the type corresponding to the KIND parameter passed to SIZE.  */
+
+extern value *eval_op_f_array_size (type *expect_type, expression *exp,
+				    noside noside, exp_opcode opcode,
+				    value *arg1, value *arg2, type *kind_arg);
+
 /* Implement the evaluation of Fortran's SHAPE keyword.  EXPECTED_TYPE,
    EXP, and NOSIDE are as for expression::evaluate (see expression.h).  OP
    will always be UNOP_FORTRAN_SHAPE, and ARG1 is the argument being passed
@@ -127,11 +196,68 @@ extern struct value *eval_op_f_array_shape (struct type *expect_type,
 namespace expr
 {
 
+/* Function prototype for Fortran intrinsic functions taking one argument and
+   one kind argument.  */
+typedef value *binary_kind_ftype (type *expect_type, expression *exp,
+				  noside noside, exp_opcode op, value *arg1,
+				  type *kind_arg);
+
+/* Two-argument operation with the second argument being a kind argument.  */
+template<exp_opcode OP, binary_kind_ftype FUNC>
+class fortran_kind_2arg
+  : public tuple_holding_operation<operation_up, type*>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (type *expect_type, expression *exp, noside noside) override
+  {
+    value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    type *kind_arg = std::get<1> (m_storage);
+    return FUNC (expect_type, exp, noside, OP, arg1, kind_arg);
+  }
+
+  exp_opcode opcode () const override
+  { return OP; }
+};
+
+/* Function prototype for Fortran intrinsic functions taking two arguments and
+   one kind argument.  */
+typedef value *ternary_kind_ftype (type *expect_type, expression *exp,
+				   noside noside, exp_opcode op, value *arg1,
+				   value *arg2, type *kind_arg);
+
+/* Three-argument operation with the third argument being a kind argument.  */
+template<exp_opcode OP, ternary_kind_ftype FUNC>
+class fortran_kind_3arg
+  : public tuple_holding_operation<operation_up, operation_up, type *>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (type *expect_type, expression *exp, noside noside) override
+  {
+    value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
+    value *arg2 = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
+    type *kind_arg = std::get<2> (m_storage);
+    return FUNC (expect_type, exp, noside, OP, arg1, arg2, kind_arg);
+  }
+
+  exp_opcode opcode () const override
+  { return OP; }
+};
+
 using fortran_abs_operation = unop_operation<UNOP_ABS, eval_op_f_abs>;
-using fortran_ceil_operation = unop_operation<UNOP_FORTRAN_CEILING,
-					      eval_op_f_ceil>;
-using fortran_floor_operation = unop_operation<UNOP_FORTRAN_FLOOR,
-					       eval_op_f_floor>;
+using fortran_ceil_operation_1arg = unop_operation<FORTRAN_CEILING,
+						   eval_op_f_ceil>;
+using fortran_ceil_operation_2arg = fortran_kind_2arg<FORTRAN_CEILING,
+						      eval_op_f_ceil>;
+using fortran_floor_operation_1arg = unop_operation<FORTRAN_FLOOR,
+						    eval_op_f_floor>;
+using fortran_floor_operation_2arg = fortran_kind_2arg<FORTRAN_FLOOR,
+						       eval_op_f_floor>;
 using fortran_kind_operation = unop_operation<UNOP_FORTRAN_KIND,
 					      eval_op_f_kind>;
 using fortran_allocated_operation = unop_operation<UNOP_FORTRAN_ALLOCATED,
@@ -152,31 +278,16 @@ using fortran_array_size_1arg = unop_operation<FORTRAN_ARRAY_SIZE,
 					       eval_op_f_array_size>;
 using fortran_array_size_2arg = binop_operation<FORTRAN_ARRAY_SIZE,
 						eval_op_f_array_size>;
+using fortran_array_size_3arg = fortran_kind_3arg<FORTRAN_ARRAY_SIZE,
+						  eval_op_f_array_size>;
 using fortran_array_shape_operation = unop_operation<UNOP_FORTRAN_SHAPE,
 						     eval_op_f_array_shape>;
-
-/* The Fortran "complex" operation.  */
-class fortran_cmplx_operation
-  : public tuple_holding_operation<operation_up, operation_up>
-{
-public:
-
-  using tuple_holding_operation::tuple_holding_operation;
-
-  value *evaluate (struct type *expect_type,
-		   struct expression *exp,
-		   enum noside noside) override
-  {
-    value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
-    value *arg2 = std::get<1> (m_storage)->evaluate (value_type (arg1),
-						     exp, noside);
-    return eval_op_f_cmplx (expect_type, exp, noside, BINOP_FORTRAN_CMPLX,
-			    arg1, arg2);
-  }
-
-  enum exp_opcode opcode () const override
-  { return BINOP_FORTRAN_CMPLX; }
-};
+using fortran_cmplx_operation_1arg = unop_operation<FORTRAN_CMPLX,
+						    eval_op_f_cmplx>;
+using fortran_cmplx_operation_2arg = binop_operation<FORTRAN_CMPLX,
+						     eval_op_f_cmplx>;
+using fortran_cmplx_operation_3arg = fortran_kind_3arg<FORTRAN_CMPLX,
+						     eval_op_f_cmplx>;
 
 /* OP_RANGE for Fortran.  */
 class fortran_range_operation
@@ -270,6 +381,21 @@ public:
 		   enum noside noside) override;
 
   enum exp_opcode opcode () const override
+  { return std::get<0> (m_storage); }
+};
+
+/* Three-argument form of Fortran ubound/lbound intrinsics.  */
+class fortran_bound_3arg
+  : public tuple_holding_operation<exp_opcode, operation_up, operation_up,
+				   type *>
+{
+public:
+
+  using tuple_holding_operation::tuple_holding_operation;
+
+  value *evaluate (type *expect_type, expression *exp, noside noside) override;
+
+  exp_opcode opcode () const override
   { return std::get<0> (m_storage); }
 };
 
