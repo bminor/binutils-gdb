@@ -1620,39 +1620,36 @@ build_fortran_types (struct gdbarch *gdbarch)
     = arch_boolean_type (gdbarch, TARGET_CHAR_BIT, 1, "logical*1");
 
   builtin_f_type->builtin_integer_s1
-    = arch_integer_type (gdbarch, TARGET_CHAR_BIT, 0,
-			 "integer*1");
+    = arch_integer_type (gdbarch, TARGET_CHAR_BIT, 0, "integer*1");
 
   builtin_f_type->builtin_integer_s2
-    = arch_integer_type (gdbarch, gdbarch_short_bit (gdbarch), 0,
-			 "integer*2");
+    = arch_integer_type (gdbarch, gdbarch_short_bit (gdbarch), 0, "integer*2");
 
   builtin_f_type->builtin_integer_s8
     = arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch), 0,
 			 "integer*8");
 
   builtin_f_type->builtin_logical_s2
-    = arch_boolean_type (gdbarch, gdbarch_short_bit (gdbarch), 1,
-			 "logical*2");
+    = arch_boolean_type (gdbarch, gdbarch_short_bit (gdbarch), 1, "logical*2");
 
   builtin_f_type->builtin_logical_s8
     = arch_boolean_type (gdbarch, gdbarch_long_long_bit (gdbarch), 1,
 			 "logical*8");
 
   builtin_f_type->builtin_integer
-    = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch), 0,
-			 "integer");
+    = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch), 0, "integer");
 
   builtin_f_type->builtin_logical
-    = arch_boolean_type (gdbarch, gdbarch_int_bit (gdbarch), 1,
-			 "logical*4");
+    = arch_boolean_type (gdbarch, gdbarch_int_bit (gdbarch), 1, "logical*4");
 
   builtin_f_type->builtin_real
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
 		       "real", gdbarch_float_format (gdbarch));
+
   builtin_f_type->builtin_real_s8
     = arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
 		       "real*8", gdbarch_double_format (gdbarch));
+
   auto fmt = gdbarch_floatformat_for_type (gdbarch, "real(kind=16)", 128);
   if (fmt != nullptr)
     builtin_f_type->builtin_real_s16
@@ -1667,6 +1664,7 @@ build_fortran_types (struct gdbarch *gdbarch)
 
   builtin_f_type->builtin_complex
     = init_complex_type ("complex*4", builtin_f_type->builtin_real);
+
   builtin_f_type->builtin_complex_s8
     = init_complex_type ("complex*8", builtin_f_type->builtin_real_s8);
 
