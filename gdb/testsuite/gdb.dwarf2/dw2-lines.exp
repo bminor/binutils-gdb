@@ -114,7 +114,7 @@ proc test_1 { _cv _cdw64 _lv _ldw64 {_string_form ""}} {
 	return -1
     }
 
-    gdb_breakpoint "bar"
+    gdb_breakpoint "bar_label"
     gdb_continue_to_breakpoint "foo \\(1\\)"
 
     gdb_test "next" "foo \\(2\\).*" "next to foo (2)"
