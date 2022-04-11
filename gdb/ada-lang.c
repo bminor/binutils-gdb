@@ -13020,15 +13020,29 @@ ada_add_standard_exceptions (compiled_regex *preg,
     {
       if (preg == NULL || preg->exec (name, 0, NULL, 0) == 0)
 	{
-	  struct bound_minimal_symbol msymbol
-	    = ada_lookup_simple_minsym (name);
+	  symbol_name_match_type match_type = name_match_type_from_name (name);
+	  lookup_name_info lookup_name (name, match_type);
 
-	  if (msymbol.minsym != NULL)
+	  symbol_name_matcher_ftype *match_name
+	    = ada_get_symbol_name_matcher (lookup_name);
+
+	  /* Iterate over all objfiles irrespective of scope or linker
+	     namespaces so we get all exceptions anywhere in the
+	     progspace.  */
+	  for (objfile *objfile : current_program_space->objfiles ())
 	    {
-	      struct ada_exc_info info
-		= {name, msymbol.value_address ()};
+	      for (minimal_symbol *msymbol : objfile->msymbols ())
+		{
+		  if (match_name (msymbol->linkage_name (), lookup_name,
+				  nullptr)
+		      && msymbol->type () != mst_solib_trampoline)
+		    {
+		      ada_exc_info info
+			= {name, msymbol->value_address (objfile)};
 
-	      exceptions->push_back (info);
+		      exceptions->push_back (info);
+		    }
+		}
 	    }
 	}
     }
@@ -13126,6 +13140,8 @@ ada_add_global_exceptions (compiled_regex *preg,
 			   SEARCH_GLOBAL_BLOCK | SEARCH_STATIC_BLOCK,
 			   VARIABLES_DOMAIN);
 
+  /* Iterate over all objfiles irrespective of scope or linker namespaces
+     so we get all exceptions anywhere in the progspace.  */
   for (objfile *objfile : current_program_space->objfiles ())
     {
       for (compunit_symtab *s : objfile->compunits ())
