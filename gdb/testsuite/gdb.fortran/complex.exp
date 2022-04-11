@@ -41,6 +41,7 @@ gdb_test "print c8" " = \\(321,-22\\)"
 gdb_test "print dc" " = \\(321,-22\\)"
 
 gdb_test "print c16" " = \\(-874,19\\)"
+gdb_test "print ci" " = \\(-4,12\\)"
 
 gdb_test "whatis c" "type = $complex4"
 gdb_test "print \$_creal (c)" " = 1000"
@@ -70,3 +71,8 @@ with_test_prefix "c16" {
     gdb_test "whatis \$" " = real\\*16"
 }
 
+gdb_test "whatis ci" "type = $complex4"
+gdb_test "print \$_creal (ci)" " = -4"
+with_test_prefix "ci" {
+    gdb_test "whatis \$" " = real\\*4"
+}
