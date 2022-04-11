@@ -48,10 +48,10 @@ proc test_logical_literal_types_accepted {} {
     # Test the only possible values for a logical, TRUE and FALSE (and
     # also true and false).
 
-    gdb_test "pt .TRUE." "type = logical\\*2"
-    gdb_test "pt .FALSE." "type = logical\\*2"
-    gdb_test "pt .true." "type = logical\\*2"
-    gdb_test "pt .false." "type = logical\\*2"
+    gdb_test "pt .TRUE." "type = logical\\*4"
+    gdb_test "pt .FALSE." "type = logical\\*4"
+    gdb_test "pt .true." "type = logical\\*4"
+    gdb_test "pt .false." "type = logical\\*4"
 }
 
 proc test_float_literal_types_accepted {} {

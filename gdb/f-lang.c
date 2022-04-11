@@ -1570,7 +1570,7 @@ f_language::language_arch_info (struct gdbarch *gdbarch,
   add (builtin->builtin_void);
 
   lai->set_string_char_type (builtin->builtin_character);
-  lai->set_bool_type (builtin->builtin_logical_s2, "logical");
+  lai->set_bool_type (builtin->builtin_logical, "logical");
 }
 
 /* See language.h.  */
