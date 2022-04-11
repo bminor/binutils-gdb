@@ -167,11 +167,12 @@ static int parse_number (struct parser_state *, const char *, int,
 
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
-%token INT_KEYWORD INT_S2_KEYWORD LOGICAL_S1_KEYWORD LOGICAL_S2_KEYWORD 
+%token INT_S1_KEYWORD INT_S2_KEYWORD INT_KEYWORD INT_S4_KEYWORD INT_S8_KEYWORD
+%token LOGICAL_S1_KEYWORD LOGICAL_S2_KEYWORD LOGICAL_KEYWORD LOGICAL_S4_KEYWORD
 %token LOGICAL_S8_KEYWORD
-%token LOGICAL_KEYWORD REAL_KEYWORD REAL_S8_KEYWORD REAL_S16_KEYWORD 
-%token COMPLEX_KEYWORD
-%token COMPLEX_S4_KEYWORD COMPLEX_S8_KEYWORD COMPLEX_S16_KEYWORD
+%token REAL_KEYWORD REAL_S4_KEYWORD REAL_S8_KEYWORD REAL_S16_KEYWORD
+%token COMPLEX_KEYWORD COMPLEX_S4_KEYWORD COMPLEX_S8_KEYWORD
+%token COMPLEX_S16_KEYWORD
 %token BOOL_AND BOOL_OR BOOL_NOT   
 %token SINGLE DOUBLE PRECISION
 %token <lval> CHARACTER 
@@ -757,21 +758,31 @@ func_mod:	'(' ')'
 typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 	:	TYPENAME
 			{ $$ = $1.type; }
+	|	INT_S1_KEYWORD
+			{ $$ = parse_f_type (pstate)->builtin_integer_s1; }
+	|	INT_S2_KEYWORD
+			{ $$ = parse_f_type (pstate)->builtin_integer_s2; }
 	|	INT_KEYWORD
 			{ $$ = parse_f_type (pstate)->builtin_integer; }
-	|	INT_S2_KEYWORD 
-			{ $$ = parse_f_type (pstate)->builtin_integer_s2; }
+	|	INT_S4_KEYWORD
+			{ $$ = parse_f_type (pstate)->builtin_integer; }
+	|	INT_S8_KEYWORD
+			{ $$ = parse_f_type (pstate)->builtin_integer_s8; }
 	|	CHARACTER 
 			{ $$ = parse_f_type (pstate)->builtin_character; }
-	|	LOGICAL_S8_KEYWORD
-			{ $$ = parse_f_type (pstate)->builtin_logical_s8; }
-	|	LOGICAL_KEYWORD 
-			{ $$ = parse_f_type (pstate)->builtin_logical; }
-	|	LOGICAL_S2_KEYWORD
-			{ $$ = parse_f_type (pstate)->builtin_logical_s2; }
 	|	LOGICAL_S1_KEYWORD 
 			{ $$ = parse_f_type (pstate)->builtin_logical_s1; }
+	|	LOGICAL_S2_KEYWORD
+			{ $$ = parse_f_type (pstate)->builtin_logical_s2; }
+	|	LOGICAL_KEYWORD
+			{ $$ = parse_f_type (pstate)->builtin_logical; }
+	|	LOGICAL_S4_KEYWORD
+			{ $$ = parse_f_type (pstate)->builtin_logical; }
+	|	LOGICAL_S8_KEYWORD
+			{ $$ = parse_f_type (pstate)->builtin_logical_s8; }
 	|	REAL_KEYWORD 
+			{ $$ = parse_f_type (pstate)->builtin_real; }
+	|	REAL_S4_KEYWORD
 			{ $$ = parse_f_type (pstate)->builtin_real; }
 	|       REAL_S8_KEYWORD
 			{ $$ = parse_f_type (pstate)->builtin_real_s8; }
@@ -1130,21 +1141,26 @@ static const struct f77_boolean_val boolean_values[]  =
 static const struct token f77_keywords[] =
 {
   /* Historically these have always been lowercase only in GDB.  */
+  { "character", CHARACTER, OP_NULL, true },
   { "complex", COMPLEX_KEYWORD, OP_NULL, true },
   { "complex_4", COMPLEX_S4_KEYWORD, OP_NULL, true },
   { "complex_8", COMPLEX_S8_KEYWORD, OP_NULL, true },
   { "complex_16", COMPLEX_S16_KEYWORD, OP_NULL, true },
-  { "character", CHARACTER, OP_NULL, true },
+  { "integer_1", INT_S1_KEYWORD, OP_NULL, true },
   { "integer_2", INT_S2_KEYWORD, OP_NULL, true },
+  { "integer_4", INT_S4_KEYWORD, OP_NULL, true },
+  { "integer", INT_KEYWORD, OP_NULL, true },
+  { "integer_8", INT_S8_KEYWORD, OP_NULL, true },
   { "logical_1", LOGICAL_S1_KEYWORD, OP_NULL, true },
   { "logical_2", LOGICAL_S2_KEYWORD, OP_NULL, true },
-  { "logical_8", LOGICAL_S8_KEYWORD, OP_NULL, true },
-  { "integer", INT_KEYWORD, OP_NULL, true },
   { "logical", LOGICAL_KEYWORD, OP_NULL, true },
+  { "logical_4", LOGICAL_S4_KEYWORD, OP_NULL, true },
+  { "logical_8", LOGICAL_S8_KEYWORD, OP_NULL, true },
+  { "real", REAL_KEYWORD, OP_NULL, true },
+  { "real_4", REAL_S4_KEYWORD, OP_NULL, true },
+  { "real_8", REAL_S8_KEYWORD, OP_NULL, true },
   { "real_16", REAL_S16_KEYWORD, OP_NULL, true },
   { "sizeof", SIZEOF, OP_NULL, true },
-  { "real_8", REAL_S8_KEYWORD, OP_NULL, true },
-  { "real", REAL_KEYWORD, OP_NULL, true },
   { "single", SINGLE, OP_NULL, true },
   { "double", DOUBLE, OP_NULL, true },
   { "precision", PRECISION, OP_NULL, true },

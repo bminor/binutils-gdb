@@ -318,13 +318,13 @@ extern int calc_f77_array_dims (struct type *);
 struct builtin_f_type
 {
   struct type *builtin_character;
-  struct type *builtin_integer;
   struct type *builtin_integer_s1;
   struct type *builtin_integer_s2;
+  struct type *builtin_integer;
   struct type *builtin_integer_s8;
-  struct type *builtin_logical;
   struct type *builtin_logical_s1;
   struct type *builtin_logical_s2;
+  struct type *builtin_logical;
   struct type *builtin_logical_s8;
   struct type *builtin_real;
   struct type *builtin_real_s8;

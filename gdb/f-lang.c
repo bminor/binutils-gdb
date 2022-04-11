@@ -1619,28 +1619,28 @@ build_fortran_types (struct gdbarch *gdbarch)
   builtin_f_type->builtin_logical_s1
     = arch_boolean_type (gdbarch, TARGET_CHAR_BIT, 1, "logical*1");
 
+  builtin_f_type->builtin_logical_s2
+    = arch_boolean_type (gdbarch, gdbarch_short_bit (gdbarch), 1, "logical*2");
+
+  builtin_f_type->builtin_logical
+    = arch_boolean_type (gdbarch, gdbarch_int_bit (gdbarch), 1, "logical*4");
+
+  builtin_f_type->builtin_logical_s8
+    = arch_boolean_type (gdbarch, gdbarch_long_long_bit (gdbarch), 1,
+			 "logical*8");
+
   builtin_f_type->builtin_integer_s1
     = arch_integer_type (gdbarch, TARGET_CHAR_BIT, 0, "integer*1");
 
   builtin_f_type->builtin_integer_s2
     = arch_integer_type (gdbarch, gdbarch_short_bit (gdbarch), 0, "integer*2");
 
-  builtin_f_type->builtin_integer_s8
-    = arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch), 0,
-			 "integer*8");
-
-  builtin_f_type->builtin_logical_s2
-    = arch_boolean_type (gdbarch, gdbarch_short_bit (gdbarch), 1, "logical*2");
-
-  builtin_f_type->builtin_logical_s8
-    = arch_boolean_type (gdbarch, gdbarch_long_long_bit (gdbarch), 1,
-			 "logical*8");
-
   builtin_f_type->builtin_integer
     = arch_integer_type (gdbarch, gdbarch_int_bit (gdbarch), 0, "integer");
 
-  builtin_f_type->builtin_logical
-    = arch_boolean_type (gdbarch, gdbarch_int_bit (gdbarch), 1, "logical*4");
+  builtin_f_type->builtin_integer_s8
+    = arch_integer_type (gdbarch, gdbarch_long_long_bit (gdbarch), 0,
+			 "integer*8");
 
   builtin_f_type->builtin_real
     = arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
