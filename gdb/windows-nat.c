@@ -3297,6 +3297,7 @@ struct pdb_line_info
   SymGetTypeInfo_ftype *fSymGetTypeInfo;
   DWORD64 addr;
   DWORD64 max_addr;
+  std::vector<type *> cache;
 };
 
 
@@ -3315,7 +3316,9 @@ static const char *wchar_to_objfile (pdb_line_info *pli, WCHAR *nameW)
   return pli->objfile->intern (name.get ());
 }
 
-static type *get_pdb_type (pdb_line_info *pli, DWORD type_index)
+static type *get_pdb_type (pdb_line_info *pli, DWORD type_index);
+
+static type *get_pdb_type_cached (pdb_line_info *pli, DWORD type_index)
 {
   const struct objfile_type *ot = objfile_type (pli->objfile);
 
@@ -3451,6 +3454,8 @@ static type *get_pdb_type (pdb_line_info *pli, DWORD type_index)
 	      type *t = alloc_type (pli->objfile);
 	      INIT_CPLUS_SPECIFIC (t);
 
+	      pli->cache[type_index] = t;
+
 	      t->set_name (wchar_to_objfile (pli, nameW));
 
 	      if (udtkind == UdtUnion)
@@ -3515,6 +3520,19 @@ static type *get_pdb_type (pdb_line_info *pli, DWORD type_index)
     }
 
   return ot->builtin_void;
+}
+
+static type *get_pdb_type (pdb_line_info *pli, DWORD type_index)
+{
+  if (type_index >= pli->cache.size ())
+    pli->cache.resize (type_index + 1, nullptr);
+  else if (pli->cache[type_index] != nullptr)
+    return pli->cache[type_index];
+
+  type *t = get_pdb_type_cached (pli, type_index);
+  pli->cache[type_index] = t;
+
+  return t;
 }
 
 static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
