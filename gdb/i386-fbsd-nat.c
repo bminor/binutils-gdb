@@ -60,9 +60,6 @@ void
 i386_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-#if defined(PT_GETFSBASE) || defined(PT_GETGSBASE)
-  const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-#endif
   pid_t pid = get_ptrace_pid (regcache->ptid ());
 
   if (fetch_register_set<struct reg> (regcache, regnum, PT_GETREGS,
@@ -142,9 +139,6 @@ void
 i386_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-#if defined(PT_GETFSBASE) || defined(PT_GETGSBASE)
-  const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-#endif
   pid_t pid = get_ptrace_pid (regcache->ptid ());
 
   if (store_register_set<struct reg> (regcache, regnum, PT_GETREGS, PT_SETREGS,
