@@ -7127,7 +7127,7 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
     /* Ensure that complaints are handled correctly.  */
     complaint_interceptor complaint_handler;
 
-    using iter_type = typeof (per_bfd->all_comp_units.begin ());
+    using iter_type = decltype (per_bfd->all_comp_units.begin ());
 
     /* Each thread returns a pair holding a cooked index, and a vector
        of errors that should be printed.  The latter is done because
