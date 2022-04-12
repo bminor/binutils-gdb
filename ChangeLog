@@ -1,3 +1,7 @@
+2022-04-12  Nick Clifton  <nickc@redhat.com>
+
+	* zlib: Rebase to the 1.2.12 release.
+
 2022-04-08  Simon Marchi  <simon.marchi@efficios.com>
 
 	* configure.ac: Add AC_SUBST(PKG_CONFIG_PATH).
