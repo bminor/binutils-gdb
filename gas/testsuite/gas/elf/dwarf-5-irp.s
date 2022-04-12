@@ -36,3 +36,9 @@ _start:
 	.nop
 	.nop
 	.endr
+
+	.irp n, ef, kl
+	.section .text.\n, "ax"
+	.nop
+	.nop
+	.endr

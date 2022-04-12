@@ -440,7 +440,8 @@ bump_line_counters (void)
    number.  If it is -2, we decrement the logical line number (this is
    to support the .appfile pseudo-op inserted into the stream by
    do_scrub_chars).
-   If the fname is NULL, we don't change the current logical file name.
+   If fname is NULL, we don't change the current logical file name, unless
+   bit 3 of flags is set.
    Returns nonzero if the filename actually changes.  */
 
 int
@@ -459,6 +460,14 @@ new_logical_line_flags (const char *fname, /* DON'T destroy it!  We point to it!
     case 1 << 1:
     case 1 << 2:
       /* FIXME: we could check that include nesting is correct.  */
+      break;
+    case 1 << 3:
+      if (line_number < 0 || fname != NULL || next_saved_file == NULL)
+	abort ();
+      if (next_saved_file->logical_input_file)
+	fname = next_saved_file->logical_input_file;
+      else
+	fname = next_saved_file->physical_input_file;
       break;
     default:
       abort ();

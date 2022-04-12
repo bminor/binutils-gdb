@@ -126,6 +126,21 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
   else
     from_len = strlen (from);
 
+  /* Except for macros record the present source position, such that
+     diagnostics and debug info will be properly associated with the
+     respective original lines, rather than with the line of the ending
+     directive (TO).  */
+  if (from == NULL || strcasecmp (from, "MACRO") != 0)
+    {
+      unsigned int line;
+      char *linefile;
+
+      as_where (&line);
+      linefile = xasprintf ("\t.linefile %u .\n", line);
+      sb_add_buffer (ptr, linefile, strlen (linefile));
+      xfree (linefile);
+    }
+
   while (more)
     {
       /* Try to find the first pseudo op on the line.  */

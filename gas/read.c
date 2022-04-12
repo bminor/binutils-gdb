@@ -2067,7 +2067,7 @@ void
 s_app_line (int appline)
 {
   char *file = NULL;
-  int linenum;
+  int linenum, flags = 0;
 
   /* The given number is that of the next line.  */
   if (appline)
@@ -2092,7 +2092,6 @@ s_app_line (int appline)
 	     linenum);
   else
     {
-      int flags = 0;
       int length = 0;
 
       if (!appline)
@@ -2101,6 +2100,12 @@ s_app_line (int appline)
 
 	  if (*input_line_pointer == '"')
 	    file = demand_copy_string (&length);
+	  else if (*input_line_pointer == '.')
+	    {
+	      /* buffer_and_nest() may insert this form.  */
+	      ++input_line_pointer;
+	      flags = 1 << 3;
+	    }
 
 	  if (file)
 	    {
@@ -2147,7 +2152,7 @@ s_app_line (int appline)
 	    }
 	}
 
-      if (appline || file)
+      if (appline || file || flags)
 	{
 	  linenum--;
 	  new_logical_line_flags (file, linenum, flags);
@@ -2157,7 +2162,7 @@ s_app_line (int appline)
 #endif
 	}
     }
-  if (appline || file)
+  if (appline || file || flags)
     demand_empty_rest_of_line ();
   else
     ignore_rest_of_line ();
