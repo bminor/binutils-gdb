@@ -2096,7 +2096,6 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
 
       do
 	{
-	  QUIT;
 	  nfetch = std::min ((unsigned long) chunksize, fetchlimit - bufsize);
 
 	  if (*buffer == NULL)
@@ -2151,8 +2150,6 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
   /* bufptr and addr now point immediately beyond the last byte which we
      consider part of the string (including a '\0' which ends the string).  */
   *bytes_read = bufptr - buffer->get ();
-
-  QUIT;
 
   return errcode;
 }
