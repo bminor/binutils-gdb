@@ -1698,8 +1698,15 @@ write_var_or_type (struct parser_state *par_state,
 	    }
 	  else if (syms.empty ())
 	    {
+	      if (block == nullptr)
+		block = get_selected_block (nullptr);
+
+	      struct objfile *objfile = nullptr;
+	      if (block != nullptr)
+		objfile = block_objfile (block);
+
 	      struct bound_minimal_symbol msym
-		= ada_lookup_simple_minsym (decoded_name.c_str ());
+		= ada_lookup_simple_minsym (decoded_name.c_str (), objfile);
 	      if (msym.minsym != NULL)
 		{
 		  par_state->push_new<ada_var_msym_value_operation> (msym);

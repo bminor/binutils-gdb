@@ -4901,7 +4901,7 @@ add_defn_to_vec (std::vector<struct block_symbol> &result,
    global symbols are searched.  */
 
 struct bound_minimal_symbol
-ada_lookup_simple_minsym (const char *name)
+ada_lookup_simple_minsym (const char *name, struct objfile *objfile)
 {
   struct bound_minimal_symbol result;
 
@@ -4911,19 +4911,23 @@ ada_lookup_simple_minsym (const char *name)
   symbol_name_matcher_ftype *match_name
     = ada_get_symbol_name_matcher (lookup_name);
 
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      for (minimal_symbol *msymbol : objfile->msymbols ())
-	{
-	  if (match_name (msymbol->linkage_name (), lookup_name, NULL)
-	      && msymbol->type () != mst_solib_trampoline)
-	    {
-	      result.minsym = msymbol;
-	      result.objfile = objfile;
-	      break;
-	    }
-	}
-    }
+  gdbarch_iterate_over_objfiles_in_search_order
+    (objfile != NULL ? objfile->arch () : target_gdbarch (),
+     [&result, lookup_name, match_name] (struct objfile *obj)
+       {
+	 for (minimal_symbol *msymbol : obj->msymbols ())
+	   {
+	     if (match_name (msymbol->linkage_name (), lookup_name, nullptr)
+		 && msymbol->type () != mst_solib_trampoline)
+	       {
+		 result.minsym = msymbol;
+		 result.objfile = obj;
+		 return 1;
+	       }
+	   }
+
+	 return 0;
+       }, objfile);
 
   return result;
 }
