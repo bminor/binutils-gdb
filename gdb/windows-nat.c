@@ -1055,46 +1055,6 @@ display_selectors (const char * args, int from_tty)
 /* See nat/windows-nat.h.  */
 
 bool
-windows_nat::windows_process_info::handle_ms_vc_exception
-     (const EXCEPTION_RECORD *rec)
-{
-  if (rec->NumberParameters >= 3
-      && (rec->ExceptionInformation[0] & 0xffffffff) == 0x1000)
-    {
-      DWORD named_thread_id;
-      windows_thread_info *named_thread;
-      CORE_ADDR thread_name_target;
-
-      thread_name_target = rec->ExceptionInformation[1];
-      named_thread_id = (DWORD) (0xffffffff & rec->ExceptionInformation[2]);
-
-      if (named_thread_id == (DWORD) -1)
-	named_thread_id = current_event.dwThreadId;
-
-      named_thread = thread_rec (ptid_t (current_event.dwProcessId,
-					 named_thread_id, 0),
-				 DONT_INVALIDATE_CONTEXT);
-      if (named_thread != NULL)
-	{
-	  int thread_name_len;
-	  gdb::unique_xmalloc_ptr<char> thread_name
-	    = target_read_string (thread_name_target, 1025, &thread_name_len);
-	  if (thread_name_len > 0)
-	    {
-	      thread_name.get ()[thread_name_len - 1] = '\0';
-	      named_thread->name = std::move (thread_name);
-	    }
-	}
-
-      return true;
-    }
-
-  return false;
-}
-
-/* See nat/windows-nat.h.  */
-
-bool
 windows_nat::windows_process_info::handle_access_violation
      (const EXCEPTION_RECORD *rec)
 {

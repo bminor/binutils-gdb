@@ -1042,15 +1042,6 @@ fake_breakpoint_event (void)
 /* See nat/windows-nat.h.  */
 
 bool
-windows_nat::windows_process_info::handle_ms_vc_exception
-     (const EXCEPTION_RECORD *rec)
-{
-  return false;
-}
-
-/* See nat/windows-nat.h.  */
-
-bool
 windows_nat::windows_process_info::handle_access_violation
      (const EXCEPTION_RECORD *rec)
 {

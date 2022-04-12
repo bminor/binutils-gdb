@@ -92,7 +92,7 @@ struct windows_thread_info
      adjustments if the registers are read multiple times.  */
   bool pc_adjusted = false;
 
-  /* The name of the thread, allocated by xmalloc.  */
+  /* The name of the thread.  */
   gdb::unique_xmalloc_ptr<char> name;
 };
 
@@ -213,16 +213,6 @@ struct windows_process_info
 
   void handle_unload_dll ();
 
-  /* Handle MS_VC_EXCEPTION when processing a stop.  MS_VC_EXCEPTION is
-     somewhat undocumented but is used to tell the debugger the name of
-     a thread.
-
-     Return true if the exception was handled; return false otherwise.
-
-     This function must be supplied by the embedding application.  */
-
-  bool handle_ms_vc_exception (const EXCEPTION_RECORD *rec);
-
   /* When EXCEPTION_ACCESS_VIOLATION is processed, we give the embedding
      application a chance to change it to be considered "unhandled".
      This function must be supplied by the embedding application.  If it
@@ -255,6 +245,14 @@ struct windows_process_info
   gdb::optional<pending_stop> fetch_pending_stop (bool debug_events);
 
 private:
+
+  /* Handle MS_VC_EXCEPTION when processing a stop.  MS_VC_EXCEPTION is
+     somewhat undocumented but is used to tell the debugger the name of
+     a thread.
+
+     Return true if the exception was handled; return false otherwise.  */
+
+  bool handle_ms_vc_exception (const EXCEPTION_RECORD *rec);
 
   /* Iterate over all DLLs currently mapped by our inferior, looking for
      a DLL which is loaded at LOAD_ADDR.  If found, add the DLL to our
