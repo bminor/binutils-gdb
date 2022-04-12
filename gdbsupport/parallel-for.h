@@ -131,13 +131,13 @@ private:
 
 template<class RandomIt, class RangeFunction>
 typename gdb::detail::par_for_accumulator<
-    std::result_of_t<RangeFunction (RandomIt, RandomIt)>
+    typename std::result_of<RangeFunction (RandomIt, RandomIt)>::type
   >::result_type
 parallel_for_each (unsigned n, RandomIt first, RandomIt last,
 		   RangeFunction callback)
 {
-  typedef typename std::result_of_t<RangeFunction (RandomIt, RandomIt)>
-    result_type;
+  using result_type
+    = typename std::result_of<RangeFunction (RandomIt, RandomIt)>::type;
 
   size_t n_threads = thread_pool::g_thread_pool->thread_count ();
   size_t n_elements = last - first;
