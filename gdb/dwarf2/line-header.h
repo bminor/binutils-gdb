@@ -136,7 +136,6 @@ struct line_header
   /* OFFSET is for struct dwz_file associated with dwarf2_per_objfile.  */
   unsigned offset_in_dwz : 1; /* Can't initialize bitfields in-class.  */
 
-  unsigned int total_length {};
   unsigned short version {};
   unsigned int header_length {};
   unsigned char minimum_instruction_length {};

@@ -289,19 +289,19 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
   line_ptr = section->buffer + to_underlying (sect_off);
 
   /* Read in the header.  */
-  lh->total_length =
-    read_checked_initial_length_and_offset (abfd, line_ptr, cu_header,
-					    &bytes_read, &offset_size);
+  LONGEST unit_length
+    = read_checked_initial_length_and_offset (abfd, line_ptr, cu_header,
+					      &bytes_read, &offset_size);
   line_ptr += bytes_read;
 
   const gdb_byte *start_here = line_ptr;
 
-  if (line_ptr + lh->total_length > (section->buffer + section->size))
+  if (line_ptr + unit_length > (section->buffer + section->size))
     {
       dwarf2_statement_list_fits_in_line_number_section_complaint ();
       return 0;
     }
-  lh->statement_program_end = start_here + lh->total_length;
+  lh->statement_program_end = start_here + unit_length;
   lh->version = read_2_bytes (abfd, line_ptr);
   line_ptr += 2;
   if (lh->version > 5)
