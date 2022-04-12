@@ -329,11 +329,13 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
 	  return NULL;
 	}
     }
-  lh->header_length = read_offset (abfd, line_ptr, offset_size);
+
+  LONGEST header_length = read_offset (abfd, line_ptr, offset_size);
   line_ptr += offset_size;
-  lh->statement_program_start = line_ptr + lh->header_length;
+  lh->statement_program_start = line_ptr + header_length;
   lh->minimum_instruction_length = read_1_byte (abfd, line_ptr);
   line_ptr += 1;
+
   if (lh->version >= 4)
     {
       lh->maximum_ops_per_instruction = read_1_byte (abfd, line_ptr);

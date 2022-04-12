@@ -137,7 +137,6 @@ struct line_header
   unsigned offset_in_dwz : 1; /* Can't initialize bitfields in-class.  */
 
   unsigned short version {};
-  unsigned int header_length {};
   unsigned char minimum_instruction_length {};
   unsigned char maximum_ops_per_instruction {};
   unsigned char default_is_stmt {};
