@@ -2312,7 +2312,7 @@ add_file (const char *file_name, int indx ATTRIBUTE_UNUSED, int fake)
    compiler output, only in hand coded assembler.  */
 
 void
-ecoff_new_file (const char *name, int appfile ATTRIBUTE_UNUSED)
+ecoff_new_file (const char *name)
 {
   if (cur_file_ptr != NULL && filename_cmp (cur_file_ptr->name, name) == 0)
     return;

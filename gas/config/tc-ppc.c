@@ -5194,7 +5194,7 @@ ppc_file (int ignore ATTRIBUTE_UNUSED)
 	}
 
       /* Use coff dot_file creation and adjust auxiliary entries.  */
-      c_dot_file_symbol (sfname, 0);
+      c_dot_file_symbol (sfname);
       S_SET_NUMBER_AUXILIARY (symbol_rootP, auxnb);
       coffsym = coffsymbol (symbol_get_bfdsym (symbol_rootP));
       coffsym->native[1].u.auxent.x_file.x_ftype = XFT_FN;

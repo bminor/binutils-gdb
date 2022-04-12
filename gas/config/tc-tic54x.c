@@ -4966,7 +4966,7 @@ tic54x_adjust_symtab (void)
     {
       unsigned lineno;
       const char * filename = as_where (&lineno);
-      c_dot_file_symbol (filename, 0);
+      c_dot_file_symbol (filename);
     }
 }
 

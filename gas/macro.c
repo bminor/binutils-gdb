@@ -256,7 +256,7 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
 
 	      ptr->ptr[ptr->len] = '\0';
 	      temp_ilp (ptr->ptr + i + 8);
-	      s_app_line (0);
+	      s_linefile (0);
 	      restore_ilp ();
 	      ptr->ptr[ptr->len] = saved_eol_char;
 	      ptr->len = line_start;

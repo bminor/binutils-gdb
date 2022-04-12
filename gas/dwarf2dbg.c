@@ -1128,7 +1128,7 @@ dwarf2_emit_label (symbolS *label)
 }
 
 /* Handle two forms of .file directive:
-   - Pass .file "source.c" to s_app_file
+   - Pass .file "source.c" to s_file
    - Handle .file 1 "source.c" by adding an entry to the DWARF-2 file table
 
    If an entry is added to the file table, return a pointer to the filename.  */
@@ -1146,7 +1146,7 @@ dwarf2_directive_filename (void)
   SKIP_WHITESPACE ();
   if (*input_line_pointer == '"')
     {
-      s_app_file (0);
+      s_file (0);
       return NULL;
     }
 

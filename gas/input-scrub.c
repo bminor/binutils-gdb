@@ -445,9 +445,7 @@ bump_line_counters (void)
 
 /* Tells us what the new logical line number and file are.
    If the line_number is -1, we don't change the current logical line
-   number.  If it is -2, we decrement the logical line number (this is
-   to support the .appfile pseudo-op inserted into the stream by
-   do_scrub_chars).
+   number.
    If fname is NULL, we don't change the current logical file name, unless
    bit 3 of flags is set.
    Returns nonzero if the filename actually changes.  */

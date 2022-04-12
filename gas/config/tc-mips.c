@@ -19723,7 +19723,7 @@ s_mips_file (int x ATTRIBUTE_UNUSED)
   if (ECOFF_DEBUGGING)
     {
       get_number ();
-      s_app_file (0);
+      s_file (0);
     }
   else
     {
@@ -19738,7 +19738,7 @@ s_mips_file (int x ATTRIBUTE_UNUSED)
       if (filename != NULL && ! first_file_directive)
 	{
 	  (void) new_logical_line (filename, -1);
-	  s_app_file_string (filename, 0);
+	  s_file_string (filename);
 	}
       first_file_directive = 1;
     }
