@@ -6726,7 +6726,7 @@ section_for_dot (void)
 	if (stmt->header.type == lang_output_section_statement_enum)
 	  break;
 
-      os = &stmt->output_section_statement;
+      os = stmt ? &stmt->output_section_statement : NULL;
       while (os != NULL
 	     && !os->after_end
 	     && (os->bfd_section == NULL
