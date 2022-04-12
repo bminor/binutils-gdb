@@ -658,7 +658,7 @@ try_macro (char term, const char *line)
 	as_bad ("%s", err);
       *input_line_pointer++ = term;
       input_scrub_include_sb (&out,
-			      input_line_pointer, 1);
+			      input_line_pointer, expanding_macro);
       sb_kill (&out);
       buffer_limit =
 	input_scrub_next_buffer (&input_line_pointer);
@@ -1411,7 +1411,7 @@ read_a_source_file (const char *name)
 		 numbers and possibly file names will be incorrect.  */
 	      sb_build (&sbuf, new_length);
 	      sb_add_buffer (&sbuf, new_buf, new_length);
-	      input_scrub_include_sb (&sbuf, input_line_pointer, 0);
+	      input_scrub_include_sb (&sbuf, input_line_pointer, expanding_none);
 	      sb_kill (&sbuf);
 	      buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 	      free (new_buf);
@@ -2439,7 +2439,7 @@ s_irp (int irpc)
 
   sb_kill (&s);
 
-  input_scrub_include_sb (&out, input_line_pointer, 1);
+  input_scrub_include_sb (&out, input_line_pointer, expanding_repeat);
   sb_kill (&out);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
@@ -3140,7 +3140,7 @@ do_repeat (size_t count, const char *start, const char *end)
 
   sb_kill (&one);
 
-  input_scrub_include_sb (&many, input_line_pointer, 1);
+  input_scrub_include_sb (&many, input_line_pointer, expanding_repeat);
   sb_kill (&many);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
@@ -3198,7 +3198,7 @@ do_repeat_with_expander (size_t count,
 
   sb_kill (&one);
 
-  input_scrub_include_sb (&many, input_line_pointer, 1);
+  input_scrub_include_sb (&many, input_line_pointer, expanding_repeat);
   sb_kill (&many);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }
@@ -6311,7 +6311,7 @@ input_scrub_insert_line (const char *line)
   size_t len = strlen (line);
   sb_build (&newline, len);
   sb_add_buffer (&newline, line, len);
-  input_scrub_include_sb (&newline, input_line_pointer, 0);
+  input_scrub_include_sb (&newline, input_line_pointer, expanding_none);
   sb_kill (&newline);
   buffer_limit = input_scrub_next_buffer (&input_line_pointer);
 }

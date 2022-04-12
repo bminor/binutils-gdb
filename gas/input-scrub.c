@@ -80,7 +80,7 @@ static size_t sb_index = -1;
 static sb from_sb;
 
 /* Should we do a conditional check on from_sb? */
-static int from_sb_is_expansion = 1;
+static enum expansion from_sb_expansion = expanding_none;
 
 /* The number of nested sb structures we have included.  */
 int macro_nest;
@@ -117,7 +117,7 @@ struct input_save {
   unsigned int        logical_input_line;
   size_t              sb_index;
   sb                  from_sb;
-  int                 from_sb_is_expansion; /* Should we do a conditional check?  */
+  enum expansion      from_sb_expansion; /* Should we do a conditional check?  */
   struct input_save * next_saved_file;	/* Chain of input_saves.  */
   char *              input_file_save;	/* Saved state of input routines.  */
   char *              saved_position;	/* Caller's saved position in buf.  */
@@ -167,7 +167,7 @@ input_scrub_push (char *saved_position)
   saved->logical_input_line = logical_input_line;
   saved->sb_index = sb_index;
   saved->from_sb = from_sb;
-  saved->from_sb_is_expansion = from_sb_is_expansion;
+  saved->from_sb_expansion = from_sb_expansion;
   memcpy (saved->save_source, save_source, sizeof (save_source));
   saved->next_saved_file = next_saved_file;
   saved->input_file_save = input_file_push ();
@@ -196,7 +196,7 @@ input_scrub_pop (struct input_save *saved)
   logical_input_line = saved->logical_input_line;
   sb_index = saved->sb_index;
   from_sb = saved->from_sb;
-  from_sb_is_expansion = saved->from_sb_is_expansion;
+  from_sb_expansion = saved->from_sb_expansion;
   partial_where = saved->partial_where;
   partial_size = saved->partial_size;
   next_saved_file = saved->next_saved_file;
@@ -252,6 +252,7 @@ char *
 input_scrub_include_file (const char *filename, char *position)
 {
   next_saved_file = input_scrub_push (position);
+  from_sb_expansion = expanding_none;
   return input_scrub_new_file (filename);
 }
 
@@ -259,7 +260,7 @@ input_scrub_include_file (const char *filename, char *position)
    expanding a macro.  */
 
 void
-input_scrub_include_sb (sb *from, char *position, int is_expansion)
+input_scrub_include_sb (sb *from, char *position, enum expansion expansion)
 {
   int newline;
 
@@ -267,8 +268,10 @@ input_scrub_include_sb (sb *from, char *position, int is_expansion)
     as_fatal (_("macros nested too deeply"));
   ++macro_nest;
 
+  gas_assert (expansion < expanding_nested);
+
 #ifdef md_macro_start
-  if (is_expansion)
+  if (expansion == expanding_macro)
     {
       md_macro_start ();
     }
@@ -279,7 +282,9 @@ input_scrub_include_sb (sb *from, char *position, int is_expansion)
   /* Allocate sufficient space: from->len + optional newline.  */
   newline = from->len >= 1 && from->ptr[0] != '\n';
   sb_build (&from_sb, from->len + newline);
-  from_sb_is_expansion = is_expansion;
+  if (expansion == expanding_repeat && from_sb_expansion >= expanding_macro)
+    expansion = expanding_nested;
+  from_sb_expansion = expansion;
   if (newline)
     {
       /* Add the sentinel required by read.c.  */
@@ -317,7 +322,7 @@ input_scrub_next_buffer (char **bufp)
       if (sb_index >= from_sb.len)
 	{
 	  sb_kill (&from_sb);
-	  if (from_sb_is_expansion)
+	  if (from_sb_expansion == expanding_macro)
 	    {
 	      cond_finish_check (macro_nest);
 #ifdef md_macro_end
@@ -431,7 +436,10 @@ bump_line_counters (void)
   if (sb_index == (size_t) -1)
     ++physical_input_line;
 
-  if (logical_input_line != -1u)
+  /* PR gas/16908 workaround: Don't bump logical line numbers while
+     expanding macros, unless file (and maybe line; see as_where()) are
+     used inside the macro.  */
+  if (logical_input_line != -1u && from_sb_expansion < expanding_macro)
     ++logical_input_line;
 }
 
@@ -464,6 +472,10 @@ new_logical_line_flags (const char *fname, /* DON'T destroy it!  We point to it!
     case 1 << 3:
       if (line_number < 0 || fname != NULL || next_saved_file == NULL)
 	abort ();
+      /* PR gas/16908 workaround: Ignore updates when nested inside a macro
+	 expansion.  */
+      if (from_sb_expansion == expanding_nested)
+	return 0;
       if (next_saved_file->logical_input_file)
 	fname = next_saved_file->logical_input_file;
       else
@@ -481,6 +493,15 @@ new_logical_line_flags (const char *fname, /* DON'T destroy it!  We point to it!
       logical_input_line = physical_input_line;
       fname = NULL;
     }
+
+  /* When encountering file or line changes inside a macro, arrange for
+     bump_line_counters() to henceforth increment the logical line number
+     again, just like it does when expanding repeats.  See as_where() for
+     why changing file or line alone doesn't alter expansion mode.  */
+  if (from_sb_expansion == expanding_macro
+      && (logical_input_file != NULL || fname != NULL)
+      && logical_input_line != -1u)
+    from_sb_expansion = expanding_repeat;
 
   if (fname
       && (logical_input_file == NULL
