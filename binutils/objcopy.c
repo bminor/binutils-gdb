@@ -1358,8 +1358,20 @@ is_strip_section_1 (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 	{
 	  /* By default we don't want to strip .reloc section.
 	     This section has for pe-coff special meaning.   See
-	     pe-dll.c file in ld, and peXXigen.c in bfd for details.  */
-	  if (strcmp (bfd_section_name (sec), ".reloc") != 0)
+	     pe-dll.c file in ld, and peXXigen.c in bfd for details.
+	     Similarly we do not want to strip debuglink sections.  */
+	  const char * kept_sections[] =
+	    {
+	      ".reloc",
+	      ".gnu_debuglink",
+	      ".gnu_debugaltlink"
+	    };
+	  int i;
+
+	  for (i = ARRAY_SIZE (kept_sections);i--;)
+	    if (strcmp (bfd_section_name (sec), kept_sections[i]) == 0)
+	      break;
+	  if (i == -1)
 	    return true;
 	}
 
