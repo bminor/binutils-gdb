@@ -158,6 +158,8 @@ public:
   bool stopped_by_sw_breakpoint () override;
 
   bool supports_stopped_by_sw_breakpoint () override;
+
+  const char *thread_name (ptid_t thread) override;
 };
 
 /* Retrieve the context for this thread, if not already retrieved.  */

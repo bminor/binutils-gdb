@@ -1502,6 +1502,15 @@ win32_process_target::write_pc (struct regcache *regcache, CORE_ADDR pc)
   return (*the_low_target.set_pc) (regcache, pc);
 }
 
+const char *
+win32_process_target::thread_name (ptid_t thread)
+{
+  windows_thread_info *th
+    = windows_process.thread_rec (current_thread_ptid (),
+				  DONT_INVALIDATE_CONTEXT);
+  return th->name.get ();
+}
+
 /* The win32 target ops object.  */
 
 static win32_process_target the_win32_target;
