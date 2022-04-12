@@ -327,10 +327,8 @@ cooked_index_vector::finalize ()
 	m_entries = std::move (entries);
       else
 	{
-	  size_t old_size = m_entries.size ();
-	  m_entries.resize (m_entries.size () + entries.size ());
-	  memcpy (m_entries.data () + old_size,
-		  entries.data (), entries.size () * sizeof (entries[0]));
+	  m_entries.reserve (m_entries.size () + entries.size ());
+	  m_entries.insert (m_entries.end (), entries.begin (), entries.end ());
 	}
     }
 
