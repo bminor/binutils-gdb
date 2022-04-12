@@ -19737,7 +19737,7 @@ s_mips_file (int x ATTRIBUTE_UNUSED)
          after 3.1 in order to support DWARF-2 on MIPS.  */
       if (filename != NULL && ! first_file_directive)
 	{
-	  (void) new_logical_line (filename, -1);
+	  new_logical_line (filename, -1);
 	  s_file_string (filename);
 	}
       first_file_directive = 1;

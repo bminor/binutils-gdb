@@ -450,7 +450,7 @@ bump_line_counters (void)
    bit 3 of flags is set.
    Returns nonzero if the filename actually changes.  */
 
-int
+void
 new_logical_line_flags (const char *fname, /* DON'T destroy it!  We point to it!  */
 			int line_number,
 			int flags)
@@ -473,7 +473,7 @@ new_logical_line_flags (const char *fname, /* DON'T destroy it!  We point to it!
       /* PR gas/16908 workaround: Ignore updates when nested inside a macro
 	 expansion.  */
       if (from_sb_expansion == expanding_nested)
-	return 0;
+	return;
       if (next_saved_file->logical_input_file)
 	fname = next_saved_file->logical_input_file;
       else
@@ -492,30 +492,25 @@ new_logical_line_flags (const char *fname, /* DON'T destroy it!  We point to it!
       fname = NULL;
     }
 
+  if (fname
+      && (logical_input_file == NULL
+	  || filename_cmp (logical_input_file, fname)))
+    logical_input_file = fname;
+
   /* When encountering file or line changes inside a macro, arrange for
      bump_line_counters() to henceforth increment the logical line number
      again, just like it does when expanding repeats.  See as_where() for
      why changing file or line alone doesn't alter expansion mode.  */
   if (from_sb_expansion == expanding_macro
-      && (logical_input_file != NULL || fname != NULL)
+      && logical_input_file != NULL
       && logical_input_line != -1u)
     from_sb_expansion = expanding_repeat;
-
-  if (fname
-      && (logical_input_file == NULL
-	  || filename_cmp (logical_input_file, fname)))
-    {
-      logical_input_file = fname;
-      return 1;
-    }
-  else
-    return 0;
 }
 
-int
+void
 new_logical_line (const char *fname, int line_number)
 {
-  return new_logical_line_flags (fname, line_number, 0);
+  new_logical_line_flags (fname, line_number, 0);
 }
 
 
