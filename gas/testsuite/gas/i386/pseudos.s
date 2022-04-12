@@ -20,6 +20,7 @@ _start:
 	{vex} {disp8} vmovaps 128(%eax),%xmm2
 	{vex} {disp32} vmovaps 128(%eax),%xmm2
 	{evex} {disp8} vmovaps 128(%eax),%xmm2
+	{evex} {disp16} vmovaps 128(%bx),%xmm2
 	{evex} {disp32} vmovaps 128(%eax),%xmm2
 
 	mov %ecx, %eax
@@ -337,6 +338,7 @@ _start:
 	{vex} {disp8} vmovaps xmm2,XMMWORD PTR [eax+128]
 	{vex} {disp32} vmovaps xmm2,XMMWORD PTR [eax+128]
 	{evex} {disp8} vmovaps xmm2,XMMWORD PTR [eax+128]
+	{evex} {disp16} vmovaps xmm2,XMMWORD PTR [bx+128]
 	{evex} {disp32} vmovaps xmm2,XMMWORD PTR [eax+128]
 
 	mov eax,ecx
@@ -373,3 +375,8 @@ _start:
 	mov al, BYTE PTR [bp]
 	{disp8} mov al, BYTE PTR [bp]
 	{disp16} mov al, BYTE PTR [bp]
+
+	{disp32} jmp .
+	.code16
+	{disp16} jmp .
+	.byte -1, -1
