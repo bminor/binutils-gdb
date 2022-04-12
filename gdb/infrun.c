@@ -5240,12 +5240,7 @@ handle_no_resumed (struct execution_control_state *ecs)
   inferior *curr_inf = current_inferior ();
 
   scoped_restore_current_thread restore_thread;
-
-  for (auto *target : all_non_exited_process_targets ())
-    {
-      switch_to_target_no_thread (target);
-      update_thread_list ();
-    }
+  update_thread_list ();
 
   /* If:
 
