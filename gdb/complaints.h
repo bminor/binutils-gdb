@@ -70,11 +70,12 @@ private:
 
   /* The saved value of deprecated_warning_hook.  */
   void (*m_saved_warning_hook) (const char *, va_list)
-    ATTRIBUTE_FPTR_PRINTF(1,0);
+    ATTRIBUTE_FPTR_PRINTF (1,0);
 
   /* A helper function that is used by the 'complaint' implementation
      to issue a complaint.  */
-  static void issue_complaint (const char *, va_list);
+  static void issue_complaint (const char *, va_list)
+    ATTRIBUTE_PRINTF (1, 0);
 
   /* This object.  Used by the static callback function.  */
   static complaint_interceptor *g_complaint_interceptor;
