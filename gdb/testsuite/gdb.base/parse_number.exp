@@ -27,10 +27,7 @@ proc test_parse_numbers {} {
 	gdb_test_no_output "set language $lang"
 
 	set val "0xffffffffffffffff"
-	if {$lang == "ada"} {
-	    gdb_test "p/x $val" " = 0xffffffffffffffff"
-	    gdb_test "ptype $val" " = <8-byte integer>"
-	} elseif {$lang == "fortran"} {
+	if {$lang == "fortran"} {
 	    gdb_test "p/x $val" " = 0xffffffff"
 	    gdb_test "ptype $val" " = unsigned int"
 	} elseif {$lang == "modula-2"} {
@@ -40,7 +37,9 @@ proc test_parse_numbers {} {
 		"expression parsing not implemented for language \"Unknown\""
 	} else {
 	    gdb_test "p/x $val" " = $val"
-	    if {$lang == "d"} {
+	    if {$lang == "ada"} {
+		gdb_test "ptype $val" " = <8-byte integer>"
+	    } elseif {$lang == "d"} {
 		gdb_test "ptype $val" " = ulong"
 	    } elseif {$lang == "rust"} {
 		gdb_test "ptype $val" " = i64"
