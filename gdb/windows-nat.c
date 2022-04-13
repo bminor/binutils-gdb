@@ -2997,8 +2997,10 @@ windows_nat_target::get_ada_task_ptid (long lwp, ULONGEST thread)
 const char *
 windows_nat_target::thread_name (struct thread_info *thr)
 {
-  return windows_process.thread_rec (thr->ptid,
-				     DONT_INVALIDATE_CONTEXT)->name.get ();
+  windows_thread_info *th
+    = windows_process.thread_rec (thr->ptid,
+				  DONT_INVALIDATE_CONTEXT);
+  return th->thread_name ();
 }
 
 

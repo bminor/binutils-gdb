@@ -1508,7 +1508,7 @@ win32_process_target::thread_name (ptid_t thread)
   windows_thread_info *th
     = windows_process.thread_rec (current_thread_ptid (),
 				  DONT_INVALIDATE_CONTEXT);
-  return th->name.get ();
+  return th->thread_name ();
 }
 
 /* The win32 target ops object.  */

@@ -58,6 +58,10 @@ Wow64GetThreadSelectorEntry_ftype *Wow64GetThreadSelectorEntry;
 #endif
 GenerateConsoleCtrlEvent_ftype *GenerateConsoleCtrlEvent;
 
+#define GetThreadDescription dyn_GetThreadDescription
+typedef HRESULT WINAPI (GetThreadDescription_ftype) (HANDLE, PWSTR *);
+static GetThreadDescription_ftype *GetThreadDescription;
+
 /* Note that 'debug_events' must be locally defined in the relevant
    functions.  */
 #define DEBUG_EVENTS(fmt, ...) \
@@ -104,6 +108,29 @@ windows_thread_info::resume ()
 	}
     }
   suspended = 0;
+}
+
+const char *
+windows_thread_info::thread_name ()
+{
+  if (GetThreadDescription != nullptr)
+    {
+      PWSTR value;
+      HRESULT result = GetThreadDescription (h, &value);
+      if (SUCCEEDED (result))
+	{
+	  size_t needed = wcstombs (nullptr, value, 0);
+	  if (needed != (size_t) -1)
+	    {
+	      name.reset ((char *) xmalloc (needed));
+	      if (wcstombs (name.get (), value, needed) == (size_t) -1)
+		name.reset ();
+	    }
+	  LocalFree (value);
+	}
+    }
+
+  return name.get ();
 }
 
 /* Return the name of the DLL referenced by H at ADDRESS.  UNICODE
@@ -662,6 +689,7 @@ initialize_loadable ()
       GPA (hm, Wow64GetThreadSelectorEntry);
 #endif
       GPA (hm, GenerateConsoleCtrlEvent);
+      GPA (hm, GetThreadDescription);
     }
 
   /* Set variables to dummy versions of these processes if the function
@@ -716,6 +744,15 @@ initialize_loadable ()
       if (!OpenProcessToken || !LookupPrivilegeValueA
 	  || !AdjustTokenPrivileges)
 	OpenProcessToken = bad;
+    }
+
+  /* On some versions of Windows, this function is only available in
+     KernelBase.dll, not kernel32.dll.  */
+  if (GetThreadDescription == nullptr)
+    {
+      hm = LoadLibrary (TEXT ("KernelBase.dll"));
+      if (hm)
+	GPA (hm, GetThreadDescription);
     }
 
 #undef GPA

@@ -51,6 +51,11 @@ struct windows_thread_info
   /* Resume the thread if it has been suspended.  */
   void resume ();
 
+  /* Return the thread's name, or nullptr if not known.  The name is
+     stored in this thread and is guaranteed to live until at least
+     the next call.  */
+  const char *thread_name ();
+
   /* The Win32 thread identifier.  */
   DWORD tid;
 
