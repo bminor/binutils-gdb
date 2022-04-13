@@ -524,7 +524,7 @@ write_address_map (const addrmap *addrmap, data_buf &addr_vec,
 class debug_names
 {
 public:
-  debug_names (dwarf2_per_objfile *per_objfile, bool is_dwarf64,
+  debug_names (dwarf2_per_bfd *per_bfd, bool is_dwarf64,
 	       bfd_endian dwarf5_byte_order)
     : m_dwarf5_byte_order (dwarf5_byte_order),
       m_dwarf32 (dwarf5_byte_order),
@@ -534,7 +534,7 @@ public:
 	       : static_cast<dwarf &> (m_dwarf32)),
       m_name_table_string_offs (m_dwarf.name_table_string_offs),
       m_name_table_entry_offs (m_dwarf.name_table_entry_offs),
-      m_debugstrlookup (per_objfile)
+      m_debugstrlookup (per_bfd)
   {}
 
   int dwarf5_offset_size () const
@@ -787,23 +787,23 @@ private:
   {
   public:
 
-    /* Object constructor to be called for current DWARF2_PER_OBJFILE.
+    /* Object constructor to be called for current DWARF2_PER_BFD.
        All .debug_str section strings are automatically stored.  */
-    debug_str_lookup (dwarf2_per_objfile *per_objfile)
-      : m_abfd (per_objfile->objfile->obfd.get ()),
-	m_per_objfile (per_objfile)
+    debug_str_lookup (dwarf2_per_bfd *per_bfd)
+      : m_abfd (per_bfd->obfd),
+	m_per_bfd (per_bfd)
     {
-      per_objfile->per_bfd->str.read (per_objfile->objfile);
-      if (per_objfile->per_bfd->str.buffer == NULL)
+      gdb_assert (per_bfd->str.readin);
+      if (per_bfd->str.buffer == NULL)
 	return;
-      for (const gdb_byte *data = per_objfile->per_bfd->str.buffer;
-	   data < (per_objfile->per_bfd->str.buffer
-		   + per_objfile->per_bfd->str.size);)
+      for (const gdb_byte *data = per_bfd->str.buffer;
+	   data < (per_bfd->str.buffer
+		   + per_bfd->str.size);)
 	{
 	  const char *const s = reinterpret_cast<const char *> (data);
 	  const auto insertpair
 	    = m_str_table.emplace (c_str_view (s),
-				   data - per_objfile->per_bfd->str.buffer);
+				   data - per_bfd->str.buffer);
 	  if (!insertpair.second)
 	    complaint (_("Duplicate string \"%s\" in "
 			 ".debug_str section [in module %s]"),
@@ -820,7 +820,7 @@ private:
       const auto it = m_str_table.find (c_str_view (s));
       if (it != m_str_table.end ())
 	return it->second;
-      const size_t offset = (m_per_objfile->per_bfd->str.size
+      const size_t offset = (m_per_bfd->str.size
 			     + m_str_add_buf.size ());
       m_str_table.emplace (c_str_view (s), offset);
       m_str_add_buf.append_cstr0 (s);
@@ -836,7 +836,7 @@ private:
   private:
     std::unordered_map<c_str_view, size_t, c_str_view_hasher> m_str_table;
     bfd *const m_abfd;
-    dwarf2_per_objfile *m_per_objfile;
+    dwarf2_per_bfd *m_per_bfd;
 
     /* Data to add at the end of .debug_str for new needed symbol names.  */
     data_buf m_str_add_buf;
@@ -1048,9 +1048,9 @@ private:
    .debug_names section.  */
 
 static bool
-check_dwarf64_offsets (dwarf2_per_objfile *per_objfile)
+check_dwarf64_offsets (dwarf2_per_bfd *per_bfd)
 {
-  for (const auto &per_cu : per_objfile->per_bfd->all_units)
+  for (const auto &per_cu : per_bfd->all_units)
     {
       if (to_underlying (per_cu->sect_off)
 	  >= (static_cast<uint64_t> (1) << 32))
@@ -1199,7 +1199,7 @@ write_cooked_index (cooked_index *table,
    associated dwz file, DWZ_OUT_FILE must be NULL.  */
 
 static void
-write_gdbindex (dwarf2_per_objfile *per_objfile, cooked_index *table,
+write_gdbindex (dwarf2_per_bfd *per_bfd, cooked_index *table,
 		FILE *out_file, FILE *dwz_out_file)
 {
   mapped_symtab symtab;
@@ -1211,7 +1211,7 @@ write_gdbindex (dwarf2_per_objfile *per_objfile, cooked_index *table,
      in the index file).  This will later be needed to write the address
      table.  */
   cu_index_map cu_index_htab;
-  cu_index_htab.reserve (per_objfile->per_bfd->all_units.size ());
+  cu_index_htab.reserve (per_bfd->all_units.size ());
 
   /* Store out the .debug_type CUs, if any.  */
   data_buf types_cu_list;
@@ -1222,10 +1222,9 @@ write_gdbindex (dwarf2_per_objfile *per_objfile, cooked_index *table,
 
   int counter = 0;
   int types_counter = 0;
-  for (int i = 0; i < per_objfile->per_bfd->all_units.size (); ++i)
+  for (int i = 0; i < per_bfd->all_units.size (); ++i)
     {
-      dwarf2_per_cu_data *per_cu
-	= per_objfile->per_bfd->all_units[i].get ();
+      dwarf2_per_cu_data *per_cu = per_bfd->all_units[i].get ();
 
       int &this_counter = per_cu->is_debug_types ? types_counter : counter;
 
@@ -1288,26 +1287,24 @@ static const gdb_byte dwarf5_gdb_augmentation[] = { 'G', 'D', 'B', 0 };
    many bytes were expected to be written into OUT_FILE.  */
 
 static void
-write_debug_names (dwarf2_per_objfile *per_objfile, cooked_index *table,
+write_debug_names (dwarf2_per_bfd *per_bfd, cooked_index *table,
 		   FILE *out_file, FILE *out_file_str)
 {
-  const bool dwarf5_is_dwarf64 = check_dwarf64_offsets (per_objfile);
-  struct objfile *objfile = per_objfile->objfile;
+  const bool dwarf5_is_dwarf64 = check_dwarf64_offsets (per_bfd);
   const enum bfd_endian dwarf5_byte_order
-    = gdbarch_byte_order (objfile->arch ());
+    = bfd_big_endian (per_bfd->obfd) ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
 
   /* The CU list is already sorted, so we don't need to do additional
      work here.  Also, the debug_types entries do not appear in
      all_units, but only in their own hash table.  */
   data_buf cu_list;
   data_buf types_cu_list;
-  debug_names nametable (per_objfile, dwarf5_is_dwarf64, dwarf5_byte_order);
+  debug_names nametable (per_bfd, dwarf5_is_dwarf64, dwarf5_byte_order);
   int counter = 0;
   int types_counter = 0;
-  for (int i = 0; i < per_objfile->per_bfd->all_units.size (); ++i)
+  for (int i = 0; i < per_bfd->all_units.size (); ++i)
     {
-      dwarf2_per_cu_data *per_cu
-	= per_objfile->per_bfd->all_units[i].get ();
+      dwarf2_per_cu_data *per_cu = per_bfd->all_units[i].get ();
 
       int &this_counter = per_cu->is_debug_types ? types_counter : counter;
       data_buf &this_list = per_cu->is_debug_types ? types_cu_list : cu_list;
@@ -1320,8 +1317,8 @@ write_debug_names (dwarf2_per_objfile *per_objfile, cooked_index *table,
     }
 
    /* Verify that all units are represented.  */
-  gdb_assert (counter == per_objfile->per_bfd->all_comp_units.size ());
-  gdb_assert (types_counter == per_objfile->per_bfd->all_type_units.size ());
+  gdb_assert (counter == per_bfd->all_units.size ());
+  gdb_assert (types_counter == per_bfd->all_type_units.size ());
 
   for (const cooked_index_entry *entry : table->all_entries ())
     nametable.insert (entry);
@@ -1454,21 +1451,16 @@ struct index_wip_file
 /* See dwarf-index-write.h.  */
 
 void
-write_dwarf_index (dwarf2_per_objfile *per_objfile, const char *dir,
+write_dwarf_index (dwarf2_per_bfd *per_bfd, const char *dir,
 		   const char *basename, const char *dwz_basename,
 		   dw_index_kind index_kind)
 {
-  struct objfile *objfile = per_objfile->objfile;
-
-  if (per_objfile->per_bfd->index_table == nullptr)
+  if (per_bfd->index_table == nullptr)
     error (_("No debugging symbols"));
-  cooked_index *table = per_objfile->per_bfd->index_table->index_for_writing ();
+  cooked_index *table = per_bfd->index_table->index_for_writing ();
 
-  if (per_objfile->per_bfd->types.size () > 1)
+  if (per_bfd->types.size () > 1)
     error (_("Cannot make an index when the file has multiple .debug_types sections"));
-
-
-  gdb_assert ((objfile->flags & OBJF_NOT_FILENAME) == 0);
 
   const char *index_suffix = (index_kind == dw_index_kind::DEBUG_NAMES
 			      ? INDEX5_SUFFIX : INDEX4_SUFFIX);
@@ -1483,13 +1475,13 @@ write_dwarf_index (dwarf2_per_objfile *per_objfile, const char *dir,
     {
       index_wip_file str_wip_file (dir, basename, DEBUG_STR_SUFFIX);
 
-      write_debug_names (per_objfile, table, objfile_index_wip.out_file.get (),
+      write_debug_names (per_bfd, table, objfile_index_wip.out_file.get (),
 			 str_wip_file.out_file.get ());
 
       str_wip_file.finalize ();
     }
   else
-    write_gdbindex (per_objfile, table, objfile_index_wip.out_file.get (),
+    write_gdbindex (per_bfd, table, objfile_index_wip.out_file.get (),
 		    (dwz_index_wip.has_value ()
 		     ? dwz_index_wip->out_file.get () : NULL));
 
@@ -1544,8 +1536,8 @@ save_gdb_index_command (const char *arg, int from_tty)
 	      if (dwz != NULL)
 		dwz_basename = lbasename (dwz->filename ());
 
-	      write_dwarf_index (per_objfile, arg, basename, dwz_basename,
-				 index_kind);
+	      write_dwarf_index (per_objfile->per_bfd, arg, basename,
+				 dwz_basename, index_kind);
 	    }
 	  catch (const gdb_exception_error &except)
 	    {

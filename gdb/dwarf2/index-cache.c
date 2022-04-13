@@ -89,23 +89,17 @@ index_cache::disable ()
 /* See dwarf-index-cache.h.  */
 
 void
-index_cache::store (dwarf2_per_objfile *per_objfile)
+index_cache::store (dwarf2_per_bfd *per_bfd)
 {
-  objfile *obj = per_objfile->objfile;
-
   if (!enabled ())
     return;
 
-  /* If the objfile does not correspond to an actual file, skip it.  */
-  if ((obj->flags & OBJF_NOT_FILENAME) != 0)
-    return;
-
   /* Get build id of objfile.  */
-  const bfd_build_id *build_id = build_id_bfd_get (obj->obfd.get ());
+  const bfd_build_id *build_id = build_id_bfd_get (per_bfd->obfd);
   if (build_id == nullptr)
     {
       index_cache_debug ("objfile %s has no build id",
-			 objfile_name (obj));
+			 bfd_get_filename (per_bfd->obfd));
       return;
     }
 
@@ -113,7 +107,7 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
 
   /* Get build id of dwz file, if present.  */
   gdb::optional<std::string> dwz_build_id_str;
-  const dwz_file *dwz = dwarf2_get_dwz_file (per_objfile->per_bfd);
+  const dwz_file *dwz = dwarf2_get_dwz_file (per_bfd);
   const char *dwz_build_id_ptr = NULL;
 
   if (dwz != nullptr)
@@ -148,18 +142,18 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
 	}
 
       index_cache_debug ("writing index cache for objfile %s",
-			 objfile_name (obj));
+			 bfd_get_filename (per_bfd->obfd));
 
       /* Write the index itself to the directory, using the build id as the
 	 filename.  */
-      write_dwarf_index (per_objfile, m_dir.c_str (),
+      write_dwarf_index (per_bfd, m_dir.c_str (),
 			 build_id_str.c_str (), dwz_build_id_ptr,
 			 dw_index_kind::GDB_INDEX);
     }
   catch (const gdb_exception_error &except)
     {
       index_cache_debug ("couldn't store index cache for objfile %s: %s",
-			 objfile_name (obj), except.what ());
+			 bfd_get_filename (per_bfd->obfd), except.what ());
     }
 }
 

@@ -24,6 +24,8 @@
 #include "gdbsupport/array-view.h"
 #include "symfile.h"
 
+class dwarf2_per_bfd;
+
 /* Base of the classes used to hold the resources of the indices loaded from
    the cache (e.g. mmapped files).  */
 
@@ -53,7 +55,7 @@ public:
   void disable ();
 
   /* Store an index for the specified object file in the cache.  */
-  void store (dwarf2_per_objfile *per_objfile);
+  void store (dwarf2_per_bfd *per_bfd);
 
   /* Look for an index file matching BUILD_ID.  If found, return the contents
      as an array_view and store the underlying resources (allocated memory,

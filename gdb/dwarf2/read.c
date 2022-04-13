@@ -3424,7 +3424,7 @@ dwarf2_build_psymtabs (struct objfile *objfile)
       dwarf2_build_psymtabs_hard (per_objfile);
 
       /* (maybe) store an index in the cache.  */
-      global_index_cache.store (per_objfile);
+      global_index_cache.store (per_objfile->per_bfd);
     }
   catch (const gdb_exception_error &except)
     {

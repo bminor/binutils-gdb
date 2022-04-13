@@ -33,7 +33,7 @@
    same, but for the dwz file's index.  */
 
 extern void write_dwarf_index
-  (dwarf2_per_objfile *per_objfile, const char *dir, const char *basename,
+  (dwarf2_per_bfd *per_bfd, const char *dir, const char *basename,
    const char *dwz_basename, dw_index_kind index_kind);
 
 #endif /* DWARF_INDEX_WRITE_H */
