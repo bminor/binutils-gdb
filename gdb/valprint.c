@@ -2052,7 +2052,6 @@ partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
 int
 target_read_string (CORE_ADDR addr, int len, int width,
 		    unsigned int fetchlimit,
-		    enum bfd_endian byte_order,
 		    gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
 		    int *bytes_read)
 {
@@ -2122,12 +2121,15 @@ target_read_string (CORE_ADDR addr, int len, int width,
 	  limit = bufptr + nfetch * width;
 	  while (bufptr < limit)
 	    {
-	      unsigned long c;
+	      bool found_nonzero = false;
 
-	      c = extract_unsigned_integer (bufptr, width, byte_order);
+	      for (int i = 0; !found_nonzero && i < width; ++i)
+		if (bufptr[i] != 0)
+		  found_nonzero = true;
+
 	      addr += width;
 	      bufptr += width;
-	      if (c == 0)
+	      if (!found_nonzero)
 		{
 		  /* We don't care about any error which happened after
 		     the NUL terminator.  */
@@ -2733,7 +2735,7 @@ val_print_string (struct type *elttype, const char *encoding,
   fetchlimit = (len == -1 ? options->print_max : std::min ((unsigned) len,
 							   options->print_max));
 
-  err = target_read_string (addr, len, width, fetchlimit, byte_order,
+  err = target_read_string (addr, len, width, fetchlimit,
 			    &buffer, &bytes_read);
 
   addr += bytes_read;

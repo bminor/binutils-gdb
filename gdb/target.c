@@ -1406,8 +1406,7 @@ target_read_string (CORE_ADDR memaddr, int len, int *bytes_read)
     bytes_read = &ignore;
 
   /* Note that the endian-ness does not matter here.  */
-  int errcode = target_read_string (memaddr, -1, 1, len, BFD_ENDIAN_LITTLE,
-				    &buffer, bytes_read);
+  int errcode = target_read_string (memaddr, -1, 1, len, &buffer, bytes_read);
   if (errcode != 0)
     return {};
 
