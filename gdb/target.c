@@ -1394,25 +1394,6 @@ target_xfer_status_to_string (enum target_xfer_status status)
 };
 
 
-/* See target.h.  */
-
-gdb::unique_xmalloc_ptr<char>
-target_read_string (CORE_ADDR memaddr, int len, int *bytes_read)
-{
-  gdb::unique_xmalloc_ptr<gdb_byte> buffer;
-
-  int ignore;
-  if (bytes_read == nullptr)
-    bytes_read = &ignore;
-
-  /* Note that the endian-ness does not matter here.  */
-  int errcode = target_read_string (memaddr, -1, 1, len, &buffer, bytes_read);
-  if (errcode != 0)
-    return {};
-
-  return gdb::unique_xmalloc_ptr<char> ((char *) buffer.release ());
-}
-
 const target_section_table *
 target_get_section_table (struct target_ops *target)
 {

@@ -1567,14 +1567,6 @@ extern void target_dumpcore (const char *filename);
 
 extern bool target_can_run_breakpoint_commands ();
 
-/* Read a string from target memory at address MEMADDR.  The string
-   will be at most LEN bytes long (note that excess bytes may be read
-   in some cases -- but these will not be returned).  Returns nullptr
-   on error.  */
-
-extern gdb::unique_xmalloc_ptr<char> target_read_string
-  (CORE_ADDR memaddr, int len, int *bytes_read = nullptr);
-
 /* For target_read_memory see target/target.h.  */
 
 extern int target_read_raw_memory (CORE_ADDR memaddr, gdb_byte *myaddr,

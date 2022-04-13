@@ -165,11 +165,6 @@ extern void print_function_pointer_address (const struct value_print_options *op
 					    CORE_ADDR address,
 					    struct ui_file *stream);
 
-extern int target_read_string (CORE_ADDR addr, int len, int width,
-			       unsigned int fetchlimit,
-			       gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
-			       int *bytes_read);
-
 /* Helper function to check the validity of some bits of a value.
 
    If TYPE represents some aggregate type (e.g., a structure), return 1.

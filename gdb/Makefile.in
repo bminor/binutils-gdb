@@ -487,7 +487,7 @@ SELFTESTS_SRCS = \
 
 SELFTESTS_OBS = $(patsubst %.c,%.o,$(SELFTESTS_SRCS))
 
-SUBDIR_TARGET_SRCS = target/waitstatus.c
+SUBDIR_TARGET_SRCS = target/target.c target/waitstatus.c
 SUBDIR_TARGET_OBS = $(patsubst %.c,%.o,$(SUBDIR_TARGET_SRCS))
 
 

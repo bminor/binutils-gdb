@@ -223,6 +223,7 @@ SFILES = \
 	$(srcdir)/../gdb/nat/ppc-linux.c \
 	$(srcdir)/../gdb/nat/riscv-linux-tdesc.c \
 	$(srcdir)/../gdb/nat/fork-inferior.c \
+	$(srcdir)/../gdb/target/target.c \
 	$(srcdir)/../gdb/target/waitstatus.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
@@ -250,6 +251,7 @@ OBS = \
 	tracepoint.o \
 	utils.o \
 	version.o \
+	target/target.o \
 	target/waitstatus.o \
 	$(DEPFILES) \
 	$(LIBOBJS) \
