@@ -2167,12 +2167,7 @@ set_history_filename (const char *args,
      that was read.  */
   if (!history_filename.empty ()
       && !IS_ABSOLUTE_PATH (history_filename.c_str ()))
-    {
-      gdb::unique_xmalloc_ptr<char> temp
-	(gdb_abspath (history_filename.c_str ()));
-
-      history_filename = temp.get ();
-    }
+    history_filename = gdb_abspath (history_filename.c_str ());
 }
 
 /* Whether we're in quiet startup mode.  */
@@ -2444,7 +2439,6 @@ _initialize_top ()
       const char *fname = ".gdb_history";
 #endif
 
-      gdb::unique_xmalloc_ptr<char> temp (gdb_abspath (fname));
-      history_filename = temp.get ();
+      history_filename = gdb_abspath (fname);
     }
 }

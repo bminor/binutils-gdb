@@ -331,7 +331,7 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
 
   objfile_alloc_data (this);
 
-  gdb::unique_xmalloc_ptr<char> name_holder;
+  std::string name_holder;
   if (name == NULL)
     {
       gdb_assert (abfd == NULL);
@@ -344,7 +344,7 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
   else
     {
       name_holder = gdb_abspath (name);
-      expanded_name = name_holder.get ();
+      expanded_name = name_holder.c_str ();
     }
   original_name = obstack_strdup (&objfile_obstack, expanded_name);
 

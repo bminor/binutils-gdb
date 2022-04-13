@@ -90,31 +90,31 @@ bool non_stop;
 static struct {
   /* Set the PROGRAM_PATH.  Here we adjust the path of the provided
      binary if needed.  */
-  void set (gdb::unique_xmalloc_ptr<char> &&path)
+  void set (const char *path)
   {
-    m_path = std::move (path);
+    m_path = path;
 
     /* Make sure we're using the absolute path of the inferior when
        creating it.  */
-    if (!contains_dir_separator (m_path.get ()))
+    if (!contains_dir_separator (m_path.c_str ()))
       {
 	int reg_file_errno;
 
 	/* Check if the file is in our CWD.  If it is, then we prefix
 	   its name with CURRENT_DIRECTORY.  Otherwise, we leave the
 	   name as-is because we'll try searching for it in $PATH.  */
-	if (is_regular_file (m_path.get (), &reg_file_errno))
-	  m_path = gdb_abspath (m_path.get ());
+	if (is_regular_file (m_path.c_str (), &reg_file_errno))
+	  m_path = gdb_abspath (m_path.c_str ());
       }
   }
 
   /* Return the PROGRAM_PATH.  */
-  char *get ()
-  { return m_path.get (); }
+  const char *get ()
+  { return m_path.empty () ? nullptr : m_path.c_str (); }
 
 private:
   /* The program name, adjusted if needed.  */
-  gdb::unique_xmalloc_ptr<char> m_path;
+  std::string m_path;
 } program_path;
 static std::vector<char *> program_args;
 static std::string wrapper_argv;
@@ -3076,7 +3076,7 @@ handle_v_run (char *own_buf)
 	}
     }
   else
-    program_path.set (gdb::unique_xmalloc_ptr<char> (new_program_name));
+    program_path.set (new_program_name);
 
   /* Free the old argv and install the new one.  */
   free_vector_argv (program_args);
@@ -3933,7 +3933,7 @@ captured_main (int argc, char *argv[])
       int i, n;
 
       n = argc - (next_arg - argv);
-      program_path.set (make_unique_xstrdup (next_arg[0]));
+      program_path.set (next_arg[0]);
       for (i = 1; i < n; i++)
 	program_args.push_back (xstrdup (next_arg[i]));
 

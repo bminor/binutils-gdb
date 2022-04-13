@@ -537,15 +537,15 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 
   for (const gdb::unique_xmalloc_ptr<char> &name_up : dir_vec)
     {
-      char *name = name_up.get ();
+      const char *name = name_up.get ();
       char *p;
       struct stat st;
-      gdb::unique_xmalloc_ptr<char> new_name_holder;
+      std::string new_name_holder;
 
       /* Spaces and tabs will have been removed by buildargv().
 	 NAME is the start of the directory.
 	 P is the '\0' following the end.  */
-      p = name + strlen (name);
+      p = name_up.get () + strlen (name);
 
       while (!(IS_DIR_SEPARATOR (*name) && p <= name + 1)	/* "/" */
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
@@ -589,16 +589,18 @@ add_path (const char *dirname, char **which_path, int parse_separators)
       if (name[0] == '\0')
         goto skip_dup;
       if (name[0] == '~')
-	new_name_holder.reset (tilde_expand (name));
+	new_name_holder
+	  = gdb::unique_xmalloc_ptr<char[]> (tilde_expand (name)).get ();
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
       else if (IS_ABSOLUTE_PATH (name) && p == name + 2) /* "d:" => "d:." */
-	new_name_holder.reset (concat (name, ".", (char *) NULL));
+	new_name_holder = std::string (name) + ".";
 #endif
       else if (!IS_ABSOLUTE_PATH (name) && name[0] != '$')
 	new_name_holder = gdb_abspath (name);
       else
-	new_name_holder.reset (savestring (name, p - name));
-      name = new_name_holder.get ();
+	new_name_holder = std::string (name, p - name);
+
+      name = new_name_holder.c_str ();
 
       /* Unless it's a variable, check existence.  */
       if (name[0] != '$')
@@ -950,7 +952,8 @@ done:
       else if ((opts & OPF_RETURN_REALPATH) != 0)
 	*filename_opened = gdb_realpath (filename);
       else
-	*filename_opened = gdb_abspath (filename);
+	*filename_opened
+	  = make_unique_xstrdup (gdb_abspath (filename).c_str ());
     }
 
   errno = last_errno;

@@ -298,9 +298,7 @@ set_index_cache_directory_command (const char *arg, int from_tty,
 				   cmd_list_element *element)
 {
   /* Make sure the index cache directory is absolute and tilde-expanded.  */
-  gdb::unique_xmalloc_ptr<char> abs
-    = gdb_abspath (index_cache_directory.c_str ());
-  index_cache_directory = abs.get ();
+  index_cache_directory = gdb_abspath (index_cache_directory.c_str ());
   global_index_cache.set_directory (index_cache_directory);
 }
 

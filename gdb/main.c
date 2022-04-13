@@ -133,12 +133,7 @@ set_gdb_data_directory (const char *new_datadir)
      "../foo" and "../foo" doesn't exist then we'll record $(pwd)/../foo which
      isn't canonical, but that's ok.  */
   if (!IS_ABSOLUTE_PATH (gdb_datadir.c_str ()))
-    {
-      gdb::unique_xmalloc_ptr<char> abs_datadir
-	= gdb_abspath (gdb_datadir.c_str ());
-
-      gdb_datadir = abs_datadir.get ();
-    }
+    gdb_datadir = gdb_abspath (gdb_datadir.c_str ());
 }
 
 /* Relocate a file or directory.  PROGNAME is the name by which gdb

@@ -297,8 +297,8 @@ compile_file_command (const char *args, int from_tty)
     error (_("You must provide a filename for this command."));
 
   args = skip_spaces (args);
-  gdb::unique_xmalloc_ptr<char> abspath = gdb_abspath (args);
-  std::string buffer = string_printf ("#include \"%s\"\n", abspath.get ());
+  std::string abspath = gdb_abspath (args);
+  std::string buffer = string_printf ("#include \"%s\"\n", abspath.c_str ());
   eval_compile_command (NULL, buffer.c_str (), scope, NULL);
 }
 

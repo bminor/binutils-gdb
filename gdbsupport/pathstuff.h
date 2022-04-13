@@ -53,7 +53,7 @@ extern gdb::unique_xmalloc_ptr<char>
    If CURRENT_DIRECTORY is NULL, this function returns a copy of
    PATH.  */
 
-extern gdb::unique_xmalloc_ptr<char> gdb_abspath (const char *path);
+extern std::string gdb_abspath (const char *path);
 
 /* If the path in CHILD is a child of the path in PARENT, return a
    pointer to the first component in the CHILD's pathname below the
