@@ -20,6 +20,10 @@
 #include "nat/windows-nat.h"
 #include "gdbsupport/common-debug.h"
 
+#ifdef __CYGWIN__
+#define __USEWIDE
+#endif
+
 namespace windows_nat
 {
 
