@@ -36,6 +36,7 @@
 #include "gdbsupport/range-chain.h"
 
 struct dwarf2_per_cu_data;
+struct dwarf2_per_bfd;
 
 /* Flags that describe an entry in the index.  */
 enum cooked_index_flag_enum : unsigned char
@@ -365,7 +366,8 @@ public:
      object.  */
   using vec_type = std::vector<std::unique_ptr<cooked_index_shard>>;
 
-  explicit cooked_index (vec_type &&vec);
+  cooked_index (vec_type &&vec, dwarf2_per_bfd *per_bfd);
+  ~cooked_index () override;
   DISABLE_COPY_AND_ASSIGN (cooked_index);
 
   /* Wait until the finalization of the entire cooked_index is
@@ -374,19 +376,6 @@ public:
   {
     for (auto &item : m_vector)
       item->wait ();
-  }
-
-  ~cooked_index ()
-  {
-    /* The 'finalize' methods may be run in a different thread.  If
-       this object is destroyed before these complete, then one will
-       end up writing to freed memory.  Waiting for finalization to
-       complete avoids this problem; and the cost seems ignorable
-       because creating and immediately destroying the debug info is a
-       relatively rare thing to do.  Do not allow quitting from this
-       wait.  */
-    for (auto &item : m_vector)
-      item->wait (false);
   }
 
   /* A range over a vector of subranges.  */
@@ -430,11 +419,27 @@ public:
   /* Dump a human-readable form of the contents of the index.  */
   void dump (gdbarch *arch) const;
 
+  /* Wait for the index to be completely finished.  For ordinary uses,
+     the index code ensures this itself -- e.g., 'all_entries' will
+     wait on the 'finalize' future.  However, on destruction, if an
+     index is being written, it's also necessary to wait for that to
+     complete.  */
+  void wait_completely () override
+  {
+    m_write_future.wait ();
+  }
+
 private:
+
+  /* Maybe write the index to the index cache.  */
+  void maybe_write_index (dwarf2_per_bfd *per_bfd);
 
   /* The vector of cooked_index objects.  This is stored because the
      entries are stored on the obstacks in those objects.  */
   vec_type m_vector;
+
+  /* A future that tracks when the 'index_write' method is done.  */
+  std::future<void> m_write_future;
 };
 
 #endif /* GDB_DWARF2_COOKED_INDEX_H */

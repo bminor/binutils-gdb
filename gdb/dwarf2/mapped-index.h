@@ -73,6 +73,15 @@ struct dwarf_scanner_base
      will return 'this' as a cooked index.  For other forms, it will
      throw an exception with an appropriate error message.  */
   virtual cooked_index *index_for_writing () = 0;
+
+  /* Wait for reading of the debuginfo to be completely finished.
+     This normally has a trivial implementation, but if a subclass
+     does any background reading, it's needed to ensure that the
+     reading is completed before destroying the containing per-BFD
+     object.  */
+  virtual void wait_completely ()
+  {
+  }
 };
 
 /* Base class containing bits shared by both .gdb_index and

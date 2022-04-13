@@ -21,14 +21,23 @@
 #include "dwarf2/cooked-index.h"
 #include "dwarf2/read.h"
 #include "dwarf2/stringify.h"
+#include "dwarf2/index-cache.h"
 #include "cp-support.h"
 #include "c-lang.h"
 #include "ada-lang.h"
 #include "split-name.h"
+#include "observable.h"
+#include "run-on-main-thread.h"
 #include <algorithm>
 #include "safe-ctype.h"
 #include "gdbsupport/selftest.h"
 #include <chrono>
+#include <unordered_set>
+
+/* We don't want gdb to exit while it is in the process of writing to
+   the index cache.  So, all live cooked index vectors are stored
+   here, and then these are all waited for before exit proceeds.  */
+static std::unordered_set<cooked_index *> active_vectors;
 
 /* See cooked-index.h.  */
 
@@ -432,11 +441,46 @@ cooked_index_shard::wait (bool allow_quit) const
     m_future.wait ();
 }
 
-cooked_index::cooked_index (vec_type &&vec)
+cooked_index::cooked_index (vec_type &&vec, dwarf2_per_bfd *per_bfd)
   : m_vector (std::move (vec))
 {
   for (auto &idx : m_vector)
     idx->finalize ();
+
+  /* This must be set after all the finalization tasks have been
+     started, because it may call 'wait'.  */
+  m_write_future
+    = gdb::thread_pool::g_thread_pool->post_task ([this, per_bfd] ()
+      {
+	maybe_write_index (per_bfd);
+      });
+
+  /* ACTIVE_VECTORS is not locked, and this assert ensures that this
+     will be caught if ever moved to the background.  */
+  gdb_assert (is_main_thread ());
+  active_vectors.insert (this);
+}
+
+cooked_index::~cooked_index ()
+{
+  /* The 'finalize' method may be run in a different thread.  If
+     this object is destroyed before this completes, then the method
+     will end up writing to freed memory.  Waiting for this to
+     complete avoids this problem; and the cost seems ignorable
+     because creating and immediately destroying the debug info is a
+     relatively rare thing to do.  */
+  for (auto &item : m_vector)
+    item->wait (false);
+
+  /* Likewise for the index-creating future, though this one must also
+     waited for by the per-BFD object to ensure the required data
+     remains live.  */
+  wait_completely ();
+
+  /* Remove our entry from the global list.  See the assert in the
+     constructor to understand this.  */
+  gdb_assert (is_main_thread ());
+  active_vectors.erase (this);
 }
 
 /* See cooked-index.h.  */
@@ -576,6 +620,26 @@ cooked_index::dump (gdbarch *arch) const
     }
 }
 
+void
+cooked_index::maybe_write_index (dwarf2_per_bfd *per_bfd)
+{
+  /* Wait for finalization.  */
+  wait ();
+
+  /* (maybe) store an index in the cache.  */
+  global_index_cache.store (per_bfd);
+}
+
+/* Wait for all the index cache entries to be written before gdb
+   exits.  */
+static void
+wait_for_index_cache (int)
+{
+  gdb_assert (is_main_thread ());
+  for (cooked_index *item : active_vectors)
+    item->wait_completely ();
+}
+
 void _initialize_cooked_index ();
 void
 _initialize_cooked_index ()
@@ -583,4 +647,6 @@ _initialize_cooked_index ()
 #if GDB_SELF_TEST
   selftests::register_test ("cooked_index_entry::compare", test_compare);
 #endif
+
+  gdb::observers::gdb_exiting.attach (wait_for_index_cache, "cooked-index");
 }

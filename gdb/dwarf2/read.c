@@ -1234,6 +1234,11 @@ dwarf2_per_bfd::dwarf2_per_bfd (bfd *obfd, const dwarf2_debug_sections *names,
 
 dwarf2_per_bfd::~dwarf2_per_bfd ()
 {
+  /* Data from the per-BFD may be needed when finalizing the cooked
+     index table, so wait here while this happens.  */
+  if (index_table != nullptr)
+    index_table->wait_completely ();
+
   for (auto &per_cu : all_units)
     {
       per_cu->imported_symtabs_free ();
@@ -3422,9 +3427,6 @@ dwarf2_build_psymtabs (struct objfile *objfile)
   try
     {
       dwarf2_build_psymtabs_hard (per_objfile);
-
-      /* (maybe) store an index in the cache.  */
-      global_index_cache.store (per_objfile->per_bfd);
     }
   catch (const gdb_exception_error &except)
     {
@@ -5162,7 +5164,7 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
   indexes.push_back (index_storage.release ());
   indexes.shrink_to_fit ();
 
-  cooked_index *vec = new cooked_index (std::move (indexes));
+  cooked_index *vec = new cooked_index (std::move (indexes), per_bfd);
   per_bfd->index_table.reset (vec);
 
   const cooked_index_entry *main_entry = vec->get_main ();
