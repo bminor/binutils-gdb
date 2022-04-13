@@ -451,7 +451,7 @@ static int
 msymbol_is_mips (struct minimal_symbol *msym)
 {
   return !(MSYMBOL_TARGET_FLAG_MIPS16 (msym)
-	   | MSYMBOL_TARGET_FLAG_MICROMIPS (msym));
+	   || MSYMBOL_TARGET_FLAG_MICROMIPS (msym));
 }
 
 /* Return one iff MSYM refers to MIPS16 code.  */
