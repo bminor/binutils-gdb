@@ -39,8 +39,7 @@ extern gdb::unique_xmalloc_ptr<char> gdb_realpath (const char *filename);
 /* Return a copy of FILENAME, with its directory prefix canonicalized
    by gdb_realpath.  */
 
-extern gdb::unique_xmalloc_ptr<char>
-  gdb_realpath_keepfile (const char *filename);
+extern std::string gdb_realpath_keepfile (const char *filename);
 
 /* Return PATH in absolute form, performing tilde-expansion if necessary.
    PATH cannot be NULL or the empty string.

@@ -86,17 +86,16 @@ gdb_realpath (const char *filename)
 
 /* See gdbsupport/pathstuff.h.  */
 
-gdb::unique_xmalloc_ptr<char>
+std::string
 gdb_realpath_keepfile (const char *filename)
 {
   const char *base_name = lbasename (filename);
   char *dir_name;
-  char *result;
 
   /* Extract the basename of filename, and return immediately
      a copy of filename if it does not contain any directory prefix.  */
   if (base_name == filename)
-    return make_unique_xstrdup (filename);
+    return filename;
 
   dir_name = (char *) alloca ((size_t) (base_name - filename + 2));
   /* Allocate enough space to store the dir_name + plus one extra
@@ -121,11 +120,9 @@ gdb_realpath_keepfile (const char *filename)
   gdb::unique_xmalloc_ptr<char> path_storage = gdb_realpath (dir_name);
   const char *real_path = path_storage.get ();
   if (IS_DIR_SEPARATOR (real_path[strlen (real_path) - 1]))
-    result = concat (real_path, base_name, (char *) NULL);
+    return string_printf ("%s%s", real_path, base_name);
   else
-    result = concat (real_path, SLASH_STRING, base_name, (char *) NULL);
-
-  return gdb::unique_xmalloc_ptr<char> (result);
+    return string_printf ("%s/%s", real_path, base_name);
 }
 
 /* See gdbsupport/pathstuff.h.  */
