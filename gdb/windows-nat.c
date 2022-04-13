@@ -3043,6 +3043,62 @@ windows_nat_target::thread_name (struct thread_info *thr)
 }
 
 
+struct pdb_regrel_baton
+{
+  int regnum;
+  ULONG64 offset;
+};
+
+static value *
+pdb_read_variable (struct symbol *symbol, struct frame_info *frame)
+{
+  pdb_regrel_baton *baton
+    = (pdb_regrel_baton *) SYMBOL_LOCATION_BATON (symbol);
+  gdbarch *gdbarch = get_frame_arch (frame);
+  int regnum = gdbarch_sp_regnum (gdbarch);
+  ULONGEST regvalue = get_frame_register_unsigned (frame, regnum);
+  return value_at_lazy (symbol->type (), regvalue + baton->offset);
+}
+
+static enum symbol_needs_kind
+pdb_get_symbol_read_needs (struct symbol *symbol)
+{
+  return SYMBOL_NEEDS_FRAME;
+}
+
+static void
+pdb_describe_location (struct symbol *symbol, CORE_ADDR addr,
+		       struct ui_file *stream)
+{
+}
+
+static void
+pdb_tracepoint_var_ref (struct symbol *symbol, struct agent_expr *ax,
+			struct axs_value *value)
+{
+}
+
+static void
+pdb_generate_c_location (struct symbol *symbol, string_file *stream,
+			 struct gdbarch *gdbarch,
+			 std::vector<bool> &registers_used,
+			 CORE_ADDR pc, const char *result_name)
+{
+}
+
+
+const struct symbol_computed_ops pdb_regrel_funcs = {
+  pdb_read_variable,
+  NULL,
+  pdb_get_symbol_read_needs,
+  pdb_describe_location,
+  0,	/* location_has_loclist */
+  pdb_tracepoint_var_ref,
+  pdb_generate_c_location
+};
+static int pdb_regrel_index;
+
+
 void _initialize_windows_nat ();
 void
 _initialize_windows_nat ()
@@ -3144,6 +3200,9 @@ Show whether to display kernel exceptions in child process."), NULL,
 cannot automatically find executable file or library to read symbols.\n\
 Use \"file\" or \"dll\" command to load executable/libraries directly."));
     }
+
+  pdb_regrel_index = register_symbol_computed_impl (LOC_COMPUTED,
+						    &pdb_regrel_funcs);
 }
 
 /* Hardware watchpoint support, adapted from go32-nat.c code.  */
@@ -3228,6 +3287,8 @@ typedef BOOL WINAPI (SymEnumSourceLines_ftype)
       PVOID);
 typedef BOOL WINAPI (SymGetTypeInfo_ftype)
      (HANDLE, DWORD64, ULONG, IMAGEHLP_SYMBOL_TYPE_INFO, PVOID);
+typedef BOOL WINAPI (SymSetContext_ftype)
+     (HANDLE, PIMAGEHLP_STACK_FRAME, PIMAGEHLP_CONTEXT);
 
 enum SymTagEnum
 {
@@ -3292,9 +3353,12 @@ struct pdb_line_info
 {
   //minimal_symbol_reader *reader;
   buildsym_compunit *builder;
+  pending **local_symbols;
   objfile *objfile;
   HANDLE p;
   SymGetTypeInfo_ftype *fSymGetTypeInfo;
+  SymEnumSymbols_ftype *fSymEnumSymbols;
+  SymSetContext_ftype *fSymSetContext;
   DWORD64 addr;
   DWORD64 max_addr;
   std::vector<type *> cache;
@@ -3576,6 +3640,16 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
       SET_SYMBOL_VALUE_ADDRESS (sym, si->Address);
       add_symbol_to_list (sym, pli->builder->get_global_symbols ());
       newobj->name = sym;
+
+      // locals
+      pli->local_symbols = pli->builder->get_local_symbols ();
+      IMAGEHLP_STACK_FRAME isf;
+      memset (&isf, 0, sizeof (isf));
+      isf.InstructionOffset = si->Address;
+      pli->fSymSetContext (pli->p, &isf, NULL);
+      pli->fSymEnumSymbols (pli->p, 0, NULL, symbol_callback, pli);
+      pli->local_symbols = nullptr;
+
       struct context_stack cstk = pli->builder->pop_context ();
       pli->builder->finish_block (cstk.name, cstk.old_blocks, cstk.static_link,
 				  si->Address, si->Address + si->Size);
@@ -3587,9 +3661,26 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
       sym->set_linkage_name (objfile->intern (si->Name));
       sym->set_domain (VAR_DOMAIN);
       sym->set_type (get_pdb_type (pli, si->TypeIndex));
-      sym->set_aclass_index (LOC_STATIC);
-      SET_SYMBOL_VALUE_ADDRESS (sym, si->Address);
-      add_symbol_to_list (sym, pli->builder->get_global_symbols ());
+      if (si->Flags & SYMFLAG_REGREL)
+	{
+	  pdb_regrel_baton *baton
+	    = XOBNEW (&objfile->objfile_obstack, pdb_regrel_baton);
+	  baton->regnum = 5; // FIXME
+	  baton->offset = si->Address;
+	  SYMBOL_LOCATION_BATON (sym) = baton;
+	  sym->set_aclass_index (pdb_regrel_index);
+	  if (si->Flags & SYMFLAG_PARAMETER)
+	    sym->set_is_argument (true);
+	}
+      else
+	{
+	  SET_SYMBOL_VALUE_ADDRESS (sym, si->Address);
+	  sym->set_aclass_index (LOC_STATIC);
+	}
+      if (pli->local_symbols != nullptr)
+	add_symbol_to_list (sym, pli->local_symbols);
+      else
+	add_symbol_to_list (sym, pli->builder->get_global_symbols ());
     }
 
   return TRUE;
@@ -3640,9 +3731,12 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
     GetProcAddress (dh, "SymEnumSourceLines");
   SymGetTypeInfo_ftype *fSymGetTypeInfo = (SymGetTypeInfo_ftype *)
     GetProcAddress (dh, "SymGetTypeInfo");
+  SymSetContext_ftype *fSymSetContext = (SymSetContext_ftype *)
+    GetProcAddress (dh, "SymSetContext");
   if (fSymInitialize != NULL && fSymCleanup != NULL
       && fSymEnumSymbols != NULL && fSymLoadModule64 != NULL
-      && fSymEnumSourceLines != NULL && fSymGetTypeInfo != NULL)
+      && fSymEnumSourceLines != NULL && fSymGetTypeInfo != NULL
+      && fSymSetContext != NULL)
     {
       HANDLE p = (void *) 1;
 
@@ -3655,9 +3749,12 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
       pdb_line_info pli;
       //pli.reader = reader;
       pli.builder = builder.get ();
+      pli.local_symbols = nullptr;
       pli.objfile = objfile;
       pli.p = p;
       pli.fSymGetTypeInfo = fSymGetTypeInfo;
+      pli.fSymEnumSymbols = fSymEnumSymbols;
+      pli.fSymSetContext = fSymSetContext;
       pli.addr = addr;
       pli.max_addr = 0;
 
