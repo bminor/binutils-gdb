@@ -46,14 +46,15 @@
    difference.  */
 
 ATTRIBUTE_UNUSED static void
-set_thread_name (int (*set_name) (pthread_t, const char *, void *),
-				  const char *name)
+do_set_thread_name (int (*set_name) (pthread_t, const char *, void *),
+		    const char *name)
 {
   set_name (pthread_self (), "%s", const_cast<char *> (name));
 }
 
 ATTRIBUTE_UNUSED static void
-set_thread_name (int (*set_name) (pthread_t, const char *), const char *name)
+do_set_thread_name (int (*set_name) (pthread_t, const char *),
+		    const char *name)
 {
   set_name (pthread_self (), name);
 }
@@ -61,12 +62,69 @@ set_thread_name (int (*set_name) (pthread_t, const char *), const char *name)
 /* The macOS man page says that pthread_setname_np returns "void", but
    the headers actually declare it returning "int".  */
 ATTRIBUTE_UNUSED static void
-set_thread_name (int (*set_name) (const char *), const char *name)
+do_set_thread_name (int (*set_name) (const char *), const char *name)
 {
   set_name (name);
 }
 
-#endif	/* USE_PTHREAD_SETNAME_NP */
+static void
+set_thread_name (const char *name)
+{
+  do_set_thread_name (pthread_setname_np, name);
+}
+
+#elif defined (USE_WIN32API)
+
+#include <windows.h>
+
+typedef HRESULT WINAPI (SetThreadDescription_ftype) (HANDLE, PCWSTR);
+static SetThreadDescription_ftype *dyn_SetThreadDescription;
+static bool initialized;
+
+static void
+init_windows ()
+{
+  initialized = true;
+
+  HMODULE hm = LoadLibrary (TEXT ("kernel32.dll"));
+  if (hm)
+    dyn_SetThreadDescription
+      = (SetThreadDescription_ftype *) GetProcAddress (hm,
+						       "SetThreadDescription");
+
+  /* On some versions of Windows, this function is only available in
+     KernelBase.dll, not kernel32.dll.  */
+  if (dyn_SetThreadDescription == nullptr)
+    {
+      hm = LoadLibrary (TEXT ("KernelBase.dll"));
+      if (hm)
+	dyn_SetThreadDescription
+	  = (SetThreadDescription_ftype *) GetProcAddress (hm,
+							   "SetThreadDescription");
+    }
+}
+
+static void
+do_set_thread_name (const wchar_t *name)
+{
+  if (!initialized)
+    init_windows ();
+
+  if (dyn_SetThreadDescription != nullptr)
+    dyn_SetThreadDescription (GetCurrentThread (), name);
+}
+
+#define set_thread_name(NAME) do_set_thread_name (L ## NAME)
+
+#else /* USE_WIN32API */
+
+static void
+set_thread_name (const char *name)
+{
+}
+
+#endif
+
 #endif /* CXX_STD_THREAD */
 
 namespace gdb
@@ -159,11 +217,9 @@ thread_pool::do_post_task (std::packaged_task<void ()> &&func)
 void
 thread_pool::thread_function ()
 {
-#ifdef USE_PTHREAD_SETNAME_NP
   /* This must be done here, because on macOS one can only set the
      name of the current thread.  */
-  set_thread_name (pthread_setname_np, "gdb worker");
-#endif
+  set_thread_name ("gdb worker");
 
   /* Ensure that SIGSEGV is delivered to an alternate signal
      stack.  */
