@@ -2050,9 +2050,11 @@ partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
    failure happened.  Check BYTES_READ to recognize this situation.  */
 
 int
-read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
-	     enum bfd_endian byte_order, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
-	     int *bytes_read)
+target_read_string (CORE_ADDR addr, int len, int width,
+		    unsigned int fetchlimit,
+		    enum bfd_endian byte_order,
+		    gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
+		    int *bytes_read)
 {
   int errcode;			/* Errno returned from bad reads.  */
   unsigned int nfetch;		/* Chars to fetch / chars fetched.  */
@@ -2731,8 +2733,8 @@ val_print_string (struct type *elttype, const char *encoding,
   fetchlimit = (len == -1 ? options->print_max : std::min ((unsigned) len,
 							   options->print_max));
 
-  err = read_string (addr, len, width, fetchlimit, byte_order,
-		     &buffer, &bytes_read);
+  err = target_read_string (addr, len, width, fetchlimit, byte_order,
+			    &buffer, &bytes_read);
 
   addr += bytes_read;
 

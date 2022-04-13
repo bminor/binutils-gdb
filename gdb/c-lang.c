@@ -352,8 +352,8 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
       if (*length > 0)
 	fetchlimit = UINT_MAX;
 
-      err = read_string (addr, *length, width, fetchlimit,
-			 byte_order, buffer, length);
+      err = target_read_string (addr, *length, width, fetchlimit,
+				byte_order, buffer, length);
       if (err != 0)
 	memory_error (TARGET_XFER_E_IO, addr);
     }

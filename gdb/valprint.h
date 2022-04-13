@@ -165,11 +165,11 @@ extern void print_function_pointer_address (const struct value_print_options *op
 					    CORE_ADDR address,
 					    struct ui_file *stream);
 
-extern int read_string (CORE_ADDR addr, int len, int width,
-			unsigned int fetchlimit,
-			enum bfd_endian byte_order,
-			gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
-			int *bytes_read);
+extern int target_read_string (CORE_ADDR addr, int len, int width,
+			       unsigned int fetchlimit,
+			       enum bfd_endian byte_order,
+			       gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
+			       int *bytes_read);
 
 /* Helper function to check the validity of some bits of a value.
 
