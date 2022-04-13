@@ -1,3 +1,7 @@
+2022-04-13  Alexander von Gluck IV  <kallisti5@unixzen.com>
+
+	* config.bfd (x86-haiku): Add i386_pei_vec as a selectable format.
+
 2022-04-08  Nick Clifton  <nickc@redhat.com>
 
 	PR 29038

@@ -753,6 +753,7 @@ case "${targ}" in
     ;;
   i[3-7]86-*-haiku*)
     targ_defvec=i386_elf32_vec
+    targ_selvecs="i386_pei_vec"
     ;;
   i[3-7]86-*-interix*)
     targ_defvec=i386_pei_vec
