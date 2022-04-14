@@ -128,41 +128,64 @@ gdb_test_multiple "info break" "breakpoint info" {
 set binexp [string_to_regexp $binfile]
 
 set warning_slow_re \
-    "warning: File transfers from remote targets can be slow\[^\r\n\]+"
+    "warning: File transfers from remote targets can be slow\[^\r\n\]+\r\n"
 set warning_gdb_index_re \
     [multi_line \
 	 "warning: Skipping \[^\r\n\]+ .gdb_index section in \[^\r\n\]+" \
 	 "Do \"set use-deprecated-index-sections on\" before the file is read" \
-	 "to use the section anyway\\."]
+	 "to use the section anyway\\.\r\n"]
 set reading_re \
-    "Reading \[^\r\n\]+"
+    "Reading \[^\r\n\]+\r\n"
 set libthread_db_re \
     [multi_line \
 	 "\\\[Thread debugging using libthread_db enabled\\\]" \
-	 "Using host libthread_db library \[^\r\n\]+"]
+	 "Using host libthread_db library \[^\r\n\]+\r\n"]
+
+set optional_re \
+    [list \
+	 "\(" \
+	 "\($reading_re)" \
+	 "|" \
+	 "\($warning_slow_re\)" \
+	 "|" \
+	 "\($libthread_db_re\)" \
+	 "|" \
+	 "\(\r\n$warning_gdb_index_re\)?" \
+	 "\)*"]
+set optional_re [join $optional_re ""]
 
 set run_re \
     [list \
-	 "\r\n\032\032post-prompt\r\nStarting program: $binexp " \
-	 "\(\(\r\n$reading_re\)|\(\r\n$warning_slow_re\)\)*" \
-	 "\(\r\n$warning_gdb_index_re\)?" \
-	 "\(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)*\r\n\r\n" \
-	 "\032\032starting\(\(\r\n$reading_re\)|\(\r\n$warning_slow_re\)|\r\n$libthread_db_re\)*" \
-	 "\(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)*\r\n\r\n" \
-	 "\032\032breakpoint 1\r\n\r\n" \
-	 "Breakpoint 1, \r\n" \
-	 "\032\032frame-begin 0 $hex\r\n\r\n" \
-	 "\032\032frame-function-name\r\n" \
-	 "main\r\n" \
-	 "\032\032frame-args\r\n \\(\\)\r\n" \
-	 "\032\032frame-source-begin\r\n at \r\n" \
-	 "\032\032frame-source-file\r\n.*annota1.c\r\n" \
-	 "\032\032frame-source-file-end\r\n:\r\n" \
-	 "\032\032frame-source-line\r\n$main_line\r\n" \
-	 "\032\032frame-source-end\r\n\r\n\r\n" \
-	 "\032\032source.*$srcfile:$main_line:.*:beg:$hex\r\n\r\n" \
-	 "\032\032frame-end\r\n\r\n" \
-	 "\032\032stopped"]
+	 "\r\n\032\032post-prompt\r\n" \
+	 "Starting program: $binexp \r\n" \
+	 $optional_re \
+	 "\r\n\032\032starting\r\n" \
+	 $optional_re \
+	 "\r\n\032\032frames-invalid\r\n" \
+	 $optional_re \
+	 "\r\n\032\032breakpoints-invalid\r\n" \
+	 $optional_re \
+	 "\r\n\032\032breakpoint 1\r\n" \
+	 "\r\n" \
+	 "Breakpoint 1, " \
+	 "\r\n\032\032frame-begin 0 $hex\r\n" \
+	 "\r\n\032\032frame-function-name\r\n" \
+	 "main" \
+	 "\r\n\032\032frame-args\r\n" \
+	 " \\(\\)" \
+	 "\r\n\032\032frame-source-begin\r\n" \
+	 " at " \
+	 "\r\n\032\032frame-source-file\r\n" \
+	 ".*annota1.c" \
+	 "\r\n\032\032frame-source-file-end\r\n" \
+	 ":" \
+	 "\r\n\032\032frame-source-line\r\n" \
+	 "$main_line" \
+	 "\r\n\032\032frame-source-end\r\n" \
+	 "\r\n" \
+	 "\r\n\032\032source.*$srcfile:$main_line:.*:beg:$hex\r\n" \
+	 "\r\n\032\032frame-end\r\n" \
+	 "\r\n\032\032stopped\r\n"]
 
 set run_re [join $run_re ""]
 
