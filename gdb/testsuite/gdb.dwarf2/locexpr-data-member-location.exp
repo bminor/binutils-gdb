@@ -296,6 +296,9 @@ Dwarf::assemble ${asm_file} {
     }
 
     aranges {} cu_label {
+	# This 0,0 entry tests that the .debug_aranges reader can
+	# handle an apparent terminator before the end of the ranges.
+	arange {} 0 0
 	arange {} $foo_start $foo_end
 	arange {} $bar_start $bar_end
     }

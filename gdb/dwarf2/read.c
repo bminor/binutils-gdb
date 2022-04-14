@@ -2469,7 +2469,7 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 	 bytes.  */
       addr += (entry_end - addr) % (2 * address_size);
 
-      for (;;)
+      while (addr < entry_end)
 	{
 	  if (addr + 2 * address_size > entry_end)
 	    {
@@ -2487,7 +2487,14 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 						      dwarf5_byte_order);
 	  addr += address_size;
 	  if (start == 0 && length == 0)
-	    break;
+	    {
+	      /* This can happen on some targets with --gc-sections.
+		 This pair of values is also used to mark the end of
+		 the entries for a given CU, but we ignore it and
+		 instead handle termination using the check at the top
+		 of the loop.  */
+	      continue;
+	    }
 	  if (start == 0 && !per_bfd->has_section_at_zero)
 	    {
 	      /* Symbol was eliminated due to a COMDAT group.  */
