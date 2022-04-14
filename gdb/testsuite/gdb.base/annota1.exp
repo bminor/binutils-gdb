@@ -159,6 +159,8 @@ set run_re \
 	 "\r\n\032\032post-prompt\r\n" \
 	 "Starting program: $binexp \r\n" \
 	 $optional_re \
+	 "\(\r\n\032\032breakpoints-invalid\r\n\)?" \
+	 $optional_re \
 	 "\r\n\032\032starting\r\n" \
 	 $optional_re \
 	 "\r\n\032\032frames-invalid\r\n" \
