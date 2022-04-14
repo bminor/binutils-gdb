@@ -5186,6 +5186,52 @@ proc gdb_attach { testpid args } {
     return 0
 }
 
+# Start gdb with "--pid $TESTPID" on the command line and wait for the prompt.
+# Return 1 if GDB managed to start and attach to the process, 0 otherwise.
+
+proc_with_prefix gdb_spawn_attach_cmdline { testpid } {
+    if ![can_spawn_for_attach] {
+	# The caller should have checked can_spawn_for_attach itself
+	# before getting here.
+	error "can't spawn for attach with this target/board"
+    }
+
+    set test "start gdb with --pid"
+    set res [gdb_spawn_with_cmdline_opts "-quiet --pid=$testpid"]
+    if { $res != 0 } {
+	fail $test
+	return 0
+    }
+
+    gdb_test_multiple "" "$test" {
+	-re -wrap "ptrace: Operation not permitted\\." {
+	    untested "$gdb_test_name (operation not permitted)"
+	    return 0
+	}
+	-re -wrap "ptrace: No such process\\." {
+	    fail "$gdb_test_name (no such process)"
+	    return 0
+	}
+	-re -wrap "Attaching to process $testpid\r\n.*" {
+	    pass $gdb_test_name
+	}
+    }
+
+    # Check that we actually attached to a process, in case the
+    # error message is not caught by the patterns above.
+    gdb_test_multiple "info thread" "" {
+	-re -wrap "No threads\\." {
+	    fail "$gdb_test_name (no thread)"
+	}
+	-re -wrap "Id.*" {
+	    pass $gdb_test_name
+	    return 1
+	}
+    }
+
+    return 0
+}
+
 # Kill a progress previously started with spawn_wait_for_attach, and
 # reap its wait status.  PROC_SPAWN_ID is the spawn id associated with
 # the process.
