@@ -169,9 +169,7 @@ class cooked_index
 {
 public:
   cooked_index () = default;
-  explicit cooked_index (cooked_index &&other) = default;
   DISABLE_COPY_AND_ASSIGN (cooked_index);
-  cooked_index &operator= (cooked_index &&other) = default;
 
   /* Create a new cooked_index_entry and register it with this object.
      Entries are owned by this object.  The new item is returned.  */
