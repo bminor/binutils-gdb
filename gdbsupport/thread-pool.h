@@ -99,13 +99,13 @@ private:
   size_t m_thread_count = 0;
 
   /* A convenience typedef for the type of a task.  */
-  typedef std::packaged_task<void ()> task;
+  typedef std::packaged_task<void ()> task_t;
 
   /* The tasks that have not been processed yet.  An optional is used
      to represent a task.  If the optional is empty, then this means
      that the receiving thread should terminate.  If the optional is
      non-empty, then it is an actual task to evaluate.  */
-  std::queue<optional<task>> m_tasks;
+  std::queue<optional<task_t>> m_tasks;
 
   /* A condition variable and mutex that are used for communication
      between the main thread and the worker threads.  */

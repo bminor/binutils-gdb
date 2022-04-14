@@ -171,7 +171,7 @@ thread_pool::thread_function ()
 
   while (true)
     {
-      optional<task> t;
+      optional<task_t> t;
 
       {
 	/* We want to hold the lock while examining the task list, but
