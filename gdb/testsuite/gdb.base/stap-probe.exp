@@ -42,10 +42,10 @@ proc stap_test {exec_name {args ""}} {
 	"check argument not at probe point"
 
     if {[string first "-DUSE_SEMAPHORES" $args] != -1} {
-	gdb_test "info probes stap" \
+	gdb_test_lines "info probes stap" "" \
 	    "test *user *$hex *$hex .*"
     } else {
-	gdb_test "info probes stap" \
+	gdb_test_lines "info probes stap" "" \
 	    "test *user *$hex .*"
     }
 
