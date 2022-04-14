@@ -749,13 +749,13 @@ source_script_with_search (const char *file, int from_tty, int search_path)
      this if we (may have) used search_path, as printing the full path in
      errors for the non-search case can be more noise than signal.  */
   const char *file_to_open;
-  gdb::unique_xmalloc_ptr<char> tilde_expanded_file;
+  std::string tilde_expanded_file;
   if (search_path)
     file_to_open = opened->full_path.get ();
   else
     {
-      tilde_expanded_file = gdb_tilde_expand_up (file);
-      file_to_open = tilde_expanded_file.get ();
+      tilde_expanded_file = gdb_tilde_expand (file);
+      file_to_open = tilde_expanded_file.c_str ();
     }
   source_script_from_stream (opened->stream.get (), file, file_to_open);
 }
