@@ -8329,6 +8329,29 @@ gdb_caching_proc have_mpx {
 
     remote_file build delete $obj
 
+    if { $status == 0 } {
+	verbose "$me:  returning $status" 2
+	return $status
+    }
+
+    # Compile program with -mmpx -fcheck-pointer-bounds, try to trigger
+    # 'No MPX support', in other words, see if kernel supports mpx.
+    set src { int main (void) { return 0; } }
+    set comp_flags {}
+    append comp_flags " additional_flags=-mmpx"
+    append comp_flags " additional_flags=-fcheck-pointer-bounds"
+    if {![gdb_simple_compile $me-2 $src executable $comp_flags]} {
+        return 0
+    }
+
+    set result [remote_exec target $obj]
+    set status [lindex $result 0]
+    set output [lindex $result 1]
+    set status [expr ($status == 0) \
+		    && ![string equal $output "No MPX support\r\n"]]
+
+    remote_file build delete $obj
+
     verbose "$me:  returning $status" 2
     return $status
 }
