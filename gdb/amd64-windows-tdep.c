@@ -1033,7 +1033,7 @@ amd64_windows_find_unwind_info (struct gdbarch *gdbarch, CORE_ADDR pc,
   lo = 0;
   hi = dir->Size / sizeof (struct external_pex64_runtime_function);
   *unwind_info = 0;
-  while (lo <= hi)
+  while (lo < hi)
     {
       unsigned long mid = lo + (hi - lo) / 2;
       struct external_pex64_runtime_function d;
@@ -1046,7 +1046,7 @@ amd64_windows_find_unwind_info (struct gdbarch *gdbarch, CORE_ADDR pc,
       sa = extract_unsigned_integer (d.rva_BeginAddress, 4, byte_order);
       ea = extract_unsigned_integer (d.rva_EndAddress, 4, byte_order);
       if (pc < base + sa)
-	hi = mid - 1;
+	hi = mid;
       else if (pc >= base + ea)
 	lo = mid + 1;
       else if (pc >= base + sa && pc < base + ea)
