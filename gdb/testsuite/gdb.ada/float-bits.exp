@@ -42,12 +42,29 @@ gdb_test "print val_double := 16lf#bc0d83c94fb6d2ac#" " = -2.0e-19"
 gdb_test "print val_double" " = -2.0e-19" \
     "print val_double after assignment"
 
-gdb_test "print 16llf#7FFFF7FF4054A56FA5B99019A5C8#" " = 5.0e\\+25"
+set 16llf_supported 0
+gdb_test_multiple "ptype long_long_float" "" {
+    -re -wrap "<16-byte float>" {
+	set 16llf_supported 1
+	pass $gdb_test_name
+    }
+    -re -wrap "<\\d+-byte float>" {
+	pass $gdb_test_name
+    }
+}
+
+if { $16llf_supported } {
+    gdb_test "print 16llf#7FFFF7FF4054A56FA5B99019A5C8#" " = 5.0e\\+25"
+}
 gdb_test "print val_long_double" " = 5.0e\\+25"
-gdb_test "print val_long_double := 16llf#7FFFF7FF4054A56FA5B99019A5C8#" \
-    " = 5.0e\\+25"
+if { $16llf_supported } {
+    gdb_test "print val_long_double := 16llf#7FFFF7FF4054A56FA5B99019A5C8#" \
+	" = 5.0e\\+25"
+}
 gdb_test "print val_long_double" " = 5.0e\\+25" \
     "print val_long_double after assignment"
 
-gdb_test "print 16llf#a56fa5b99019a5c800007ffff7ff4054#" \
-    " = <invalid float value>"
+if { $16llf_supported } {
+    gdb_test "print 16llf#a56fa5b99019a5c800007ffff7ff4054#" \
+	" = <invalid float value>"
+}
