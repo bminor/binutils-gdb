@@ -1237,7 +1237,8 @@ amd64_windows_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   /* Check for jmp *<offset>(%rip) (jump near, absolute indirect (/4)).  */
-  if (pc && read_memory_unsigned_integer (pc, 2, byte_order) == 0x25ff)
+  unsigned instr = pc ? read_memory_unsigned_integer (pc, 2, byte_order) : 0;
+  if (instr == 0x25ff)
     {
       /* Get opcode offset and see if we can find a reference in our data.  */
       ULONGEST offset
@@ -1258,6 +1259,18 @@ amd64_windows_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	      || startswith (symname, "_imp_"))
 	    destination
 	      = read_memory_unsigned_integer (indirect_addr, 8, byte_order);
+	}
+    }
+  else if ((instr & 0xff) == 0xe9)
+    {
+      struct minimal_symbol *sym = lookup_minimal_symbol_by_pc (pc).minsym;
+      const char *symname = sym ? sym->linkage_name () : NULL;
+
+      if (symname && startswith (symname, "__thunk_"))
+	{
+	  ULONGEST offset
+	    = read_memory_unsigned_integer (pc + 1, 4, byte_order);
+	  destination = pc + offset + 5;
 	}
     }
 

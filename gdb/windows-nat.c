@@ -72,6 +72,7 @@
 #include "nat/windows-nat.h"
 #include "gdbsupport/symbol.h"
 #include "buildsym.h"
+#include "block.h"
 
 using namespace windows_nat;
 
@@ -3289,6 +3290,9 @@ typedef BOOL WINAPI (SymGetTypeInfo_ftype)
      (HANDLE, DWORD64, ULONG, IMAGEHLP_SYMBOL_TYPE_INFO, PVOID);
 typedef BOOL WINAPI (SymSetContext_ftype)
      (HANDLE, PIMAGEHLP_STACK_FRAME, PIMAGEHLP_CONTEXT);
+typedef BOOL WINAPI (SymSearch_ftype)
+     (HANDLE, ULONG64, DWORD, DWORD, PCSTR, DWORD64,
+      PSYM_ENUMERATESYMBOLS_CALLBACK, PVOID, DWORD);
 
 enum SymTagEnum
 {
@@ -3351,7 +3355,7 @@ enum DataKind
 
 struct pdb_line_info
 {
-  //minimal_symbol_reader *reader;
+  minimal_symbol_reader *reader;
   buildsym_compunit *builder;
   pending **local_symbols;
   objfile *objfile;
@@ -3362,6 +3366,7 @@ struct pdb_line_info
   DWORD64 addr;
   DWORD64 max_addr;
   std::vector<type *> cache;
+  std::vector<symbol *> functions;
 };
 
 
@@ -3632,6 +3637,7 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
       context_stack *newobj = pli->builder->push_context (0, si->Address);
       symbol *sym = new (&objfile->objfile_obstack) symbol;
       sym->set_linkage_name (objfile->intern (si->Name));
+      sym->set_language (language_c, &objfile->objfile_obstack);
       sym->set_domain (VAR_DOMAIN);
       //type *ret_type = objfile_type (objfile)->builtin_void;
       //type *ftype = lookup_function_type (ret_type);
@@ -3654,11 +3660,14 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
       pli->builder->finish_block (cstk.name, cstk.old_blocks, cstk.static_link,
 				  si->Address, si->Address + si->Size);
       gdbarch_make_symbol_special (objfile->arch (), cstk.name, objfile);
+
+      pli->functions.push_back (sym);
     }
   else if (si->Tag == SymTagData)
     {
       symbol *sym = new (&objfile->objfile_obstack) symbol;
       sym->set_linkage_name (objfile->intern (si->Name));
+      sym->set_language (language_c, &objfile->objfile_obstack);
       sym->set_domain (VAR_DOMAIN);
       sym->set_type (get_pdb_type (pli, si->TypeIndex));
       if (si->Flags & SYMFLAG_REGREL)
@@ -3681,6 +3690,21 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
 	add_symbol_to_list (sym, pli->local_symbols);
       else
 	add_symbol_to_list (sym, pli->builder->get_global_symbols ());
+    }
+  else if (si->Tag == SymTagThunk)
+    {
+      for (symbol *sym : pli->functions)
+	{
+	  if (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) == si->Value)
+	    {
+	      std::string imp_name
+		= string_printf ("__thunk_%s", sym->linkage_name ());
+	      struct minimal_symbol *msym = pli->reader->record_full
+		(imp_name.c_str (), true, si->Address, mst_data, 0);
+	      if (msym)
+		SET_MSYMBOL_SIZE (msym, si->Size);
+	    }
+	}
     }
 
   return TRUE;
@@ -3733,10 +3757,12 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
     GetProcAddress (dh, "SymGetTypeInfo");
   SymSetContext_ftype *fSymSetContext = (SymSetContext_ftype *)
     GetProcAddress (dh, "SymSetContext");
+  SymSearch_ftype *fSymSearch = (SymSearch_ftype *)
+    GetProcAddress (dh, "SymSearch");
   if (fSymInitialize != NULL && fSymCleanup != NULL
       && fSymEnumSymbols != NULL && fSymLoadModule64 != NULL
       && fSymEnumSourceLines != NULL && fSymGetTypeInfo != NULL
-      && fSymSetContext != NULL)
+      && fSymSetContext != NULL && fSymSearch != NULL)
     {
       HANDLE p = (void *) 1;
 
@@ -3747,7 +3773,7 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
       builder.reset (new buildsym_compunit
 		     (objfile, name, NULL, language_c, addr));
       pdb_line_info pli;
-      //pli.reader = reader;
+      pli.reader = reader;
       pli.builder = builder.get ();
       pli.local_symbols = nullptr;
       pli.objfile = objfile;
@@ -3759,6 +3785,9 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
       pli.max_addr = 0;
 
       fSymEnumSymbols(p, addr, NULL, symbol_callback, &pli);
+
+      fSymSearch (p, addr, 0, SymTagThunk, NULL, 0, symbol_callback, &pli,
+		  SYMSEARCH_RECURSE);
 
       fSymEnumSourceLines(p, addr, NULL, NULL, 0, 0, line_callback, &pli);
       builder->end_symtab (pli.max_addr, SECT_OFF_TEXT (objfile));
