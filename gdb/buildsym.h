@@ -385,7 +385,7 @@ private:
   /* The mutable address map for the compilation unit whose symbols
      we're currently reading.  The symtabs' shared blockvector will
      point to a fixed copy of this.  */
-  struct addrmap *m_pending_addrmap = nullptr;
+  struct addrmap_mutable *m_pending_addrmap = nullptr;
 
   /* The obstack on which we allocate pending_addrmap.
      If pending_addrmap is NULL, this is uninitialized; otherwise, it is

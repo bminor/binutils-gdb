@@ -202,10 +202,6 @@ private:
 };
 
 
-/* Create a mutable address map which maps every address to NULL.
-   Allocate entries in OBSTACK.  */
-struct addrmap *addrmap_create_mutable (struct obstack *obstack);
-
 /* Dump the addrmap to OUTFILE.  If PAYLOAD is non-NULL, only dump any
    components that map to PAYLOAD.  (If PAYLOAD is NULL, the entire
    map is dumped.)  */

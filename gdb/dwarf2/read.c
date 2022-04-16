@@ -2267,12 +2267,12 @@ create_addrmap_from_index (dwarf2_per_objfile *per_objfile,
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   struct gdbarch *gdbarch = objfile->arch ();
   const gdb_byte *iter, *end;
-  struct addrmap *mutable_map;
+  struct addrmap_mutable *mutable_map;
   CORE_ADDR baseaddr;
 
   auto_obstack temp_obstack;
 
-  mutable_map = addrmap_create_mutable (&temp_obstack);
+  mutable_map = new (&temp_obstack) addrmap_mutable (&temp_obstack);
 
   iter = index->address_table.data ();
   end = iter + index->address_table.size ();
@@ -2496,7 +2496,8 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
   auto_obstack temp_obstack;
-  addrmap *mutable_map = addrmap_create_mutable (&temp_obstack);
+  addrmap_mutable *mutable_map
+    = new (&temp_obstack) addrmap_mutable (&temp_obstack);
 
   if (read_addrmap_from_aranges (per_objfile, section, mutable_map))
     per_bfd->index_addrmap = mutable_map->create_fixed (&per_bfd->obstack);
@@ -6552,7 +6553,7 @@ public:
 					xcalloc, xfree)),
       m_index (new cooked_index),
       m_addrmap_storage (),
-      m_addrmap (addrmap_create_mutable (&m_addrmap_storage))
+      m_addrmap (new (&m_addrmap_storage) addrmap_mutable (&m_addrmap_storage))
   {
   }
 
@@ -6607,7 +6608,7 @@ public:
   }
 
   /* Return the mutable addrmap that is currently being created.  */
-  addrmap *get_addrmap ()
+  addrmap_mutable *get_addrmap ()
   {
     return m_addrmap;
   }
@@ -6639,7 +6640,7 @@ private:
   /* Storage for the writeable addrmap.  */
   auto_obstack m_addrmap_storage;
   /* A writeable addrmap being constructed by this scanner.  */
-  addrmap *m_addrmap;
+  addrmap_mutable *m_addrmap;
 };
 
 /* An instance of this is created to index a CU.  */
@@ -6655,7 +6656,7 @@ public:
       m_per_cu (per_cu),
       m_language (language),
       m_obstack (),
-      m_die_range_map (addrmap_create_mutable (&m_obstack))
+      m_die_range_map (new (&m_obstack) addrmap_mutable (&m_obstack))
   {
   }
 

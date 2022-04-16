@@ -406,12 +406,6 @@ addrmap_mutable::addrmap_mutable (struct obstack *obs)
 }
 
 
-struct addrmap *
-addrmap_create_mutable (struct obstack *obstack)
-{
-  return new (obstack) struct addrmap_mutable (obstack);
-}
-
 /* See addrmap.h.  */
 
 void
@@ -483,7 +477,8 @@ test_addrmap ()
   /* Create mutable addrmap.  */
   struct obstack temp_obstack;
   obstack_init (&temp_obstack);
-  struct addrmap *map = addrmap_create_mutable (&temp_obstack);
+  struct addrmap_mutable *map
+    = new (&temp_obstack) addrmap_mutable (&temp_obstack);
   SELF_CHECK (map != nullptr);
 
   /* Check initial state.  */

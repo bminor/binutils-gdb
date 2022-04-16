@@ -419,7 +419,9 @@ buildsym_compunit::record_block_range (struct block *block,
     m_pending_addrmap_interesting = true;
 
   if (m_pending_addrmap == nullptr)
-    m_pending_addrmap = addrmap_create_mutable (&m_pending_addrmap_obstack);
+    m_pending_addrmap
+      = (new (&m_pending_addrmap_obstack) addrmap_mutable
+	 (&m_pending_addrmap_obstack));
 
   m_pending_addrmap->set_empty (start, end_inclusive, block);
 }
