@@ -21,15 +21,18 @@
 #define GDB_DWARF2_ABBREV_CACHE_H
 
 #include "dwarf2/abbrev.h"
-#include <unordered_set>
 #include "gdbtypes.h"
 
+/* An abbrev cache holds abbrev tables for easier reuse.  */
 class abbrev_cache
 {
 public:
   abbrev_cache ();
   DISABLE_COPY_AND_ASSIGN (abbrev_cache);
 
+  /* Find an abbrev table coming from the abbrev section SECTION at
+     offset OFFSET.  Return the table, or nullptr if it has not yet
+     been registered.  */
   abbrev_table *find (struct dwarf2_section_info *section, sect_offset offset)
   {
     search_key key = { section, offset };
@@ -38,6 +41,11 @@ public:
 						 to_underlying (offset));
   }
 
+  /* Add TABLE to this cache.  Ownership of TABLE is transferred to
+     the cache.  Note that a table at a given section+offset may only
+     be registered once -- a violation of this will cause an assert.
+     To avoid this, call the 'find' method first, to see if the table
+     has already been read.  */
   void add (abbrev_table_up table);
 
 private:
