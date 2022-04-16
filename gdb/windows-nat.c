@@ -3365,6 +3365,7 @@ struct pdb_line_info
   SymGetTypeInfo_ftype *fSymGetTypeInfo;
   SymEnumSymbols_ftype *fSymEnumSymbols;
   SymSetContext_ftype *fSymSetContext;
+  SymSearch_ftype *fSymSearch;
   DWORD64 addr;
   DWORD64 max_addr;
   std::vector<type *> cache;
@@ -3727,6 +3728,51 @@ static type *get_pdb_type (pdb_line_info *pli, DWORD type_index)
 }
 
 static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
+    ULONG /*SymbolSize*/, PVOID UserContext);
+
+static void pdb_enum_locals(pdb_line_info *pli, PSYMBOL_INFO si)
+{
+  pending **local_symbols = pli->local_symbols;
+  pli->local_symbols = pli->builder->get_local_symbols ();
+  IMAGEHLP_STACK_FRAME isf;
+  memset (&isf, 0, sizeof (isf));
+  isf.InstructionOffset = si->Address;
+  pli->fSymSetContext (pli->p, &isf, NULL);
+  pli->fSymEnumSymbols (pli->p, 0, NULL, symbol_callback, pli);
+  pli->local_symbols = local_symbols;
+}
+
+static BOOL CALLBACK block_callback(PSYMBOL_INFO si,
+    ULONG /*SymbolSize*/, PVOID UserContext)
+{
+  pdb_line_info *pli = (pdb_line_info *) UserContext;
+
+  ULONG64 length;
+  if (si->Tag == SymTagBlock
+      && pli->fSymGetTypeInfo (pli->p, pli->addr, si->info,
+			       TI_GET_LENGTH, &length))
+    {
+      pli->builder->push_context (0, si->Address);
+
+      pdb_enum_locals (pli, si);
+
+      pli->fSymSearch (pli->p, 0, 0, SymTagBlock, NULL, 0,
+		       block_callback, pli, 0);
+
+      struct context_stack cstk = pli->builder->pop_context ();
+
+      if (*pli->builder->get_local_symbols () != NULL)
+	pli->builder->finish_block (0, cstk.old_blocks, NULL,
+				    si->Address, si->Address + length);
+
+      *pli->builder->get_local_symbols () = cstk.locals;
+      pli->builder->set_local_using_directives (cstk.local_using_directives);
+    }
+
+  return TRUE;
+}
+
+static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
     ULONG /*SymbolSize*/, PVOID UserContext)
 {
   pdb_line_info *pli = (pdb_line_info *) UserContext;
@@ -3750,13 +3796,11 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
       newobj->name = sym;
 
       // locals
-      pli->local_symbols = pli->builder->get_local_symbols ();
-      IMAGEHLP_STACK_FRAME isf;
-      memset (&isf, 0, sizeof (isf));
-      isf.InstructionOffset = si->Address;
-      pli->fSymSetContext (pli->p, &isf, NULL);
-      pli->fSymEnumSymbols (pli->p, 0, NULL, symbol_callback, pli);
-      pli->local_symbols = nullptr;
+      pdb_enum_locals (pli, si);
+
+      // inner scopes
+      pli->fSymSearch (pli->p, 0, 0, SymTagBlock, NULL, 0,
+		       block_callback, pli, 0);
 
       struct context_stack cstk = pli->builder->pop_context ();
       pli->builder->finish_block (cstk.name, cstk.old_blocks, cstk.static_link,
@@ -3767,11 +3811,17 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
     }
   else if (si->Tag == SymTagData)
     {
+      if (si->info >= pli->cache.size ())
+	pli->cache.resize (si->info + 1, nullptr);
+      else if (pli->cache[si->info] != nullptr)
+	return TRUE;
+
       symbol *sym = new (&objfile->objfile_obstack) symbol;
       sym->set_linkage_name (objfile->intern (si->Name));
       sym->set_language (language_c, &objfile->objfile_obstack);
       sym->set_domain (VAR_DOMAIN);
-      sym->set_type (get_pdb_type (pli, si->TypeIndex));
+      type *t = get_pdb_type (pli, si->TypeIndex);
+      sym->set_type (t);
       if (si->Flags & SYMFLAG_REGREL)
 	{
 	  pdb_regrel_baton *baton
@@ -3792,6 +3842,8 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
 	add_symbol_to_list (sym, pli->local_symbols);
       else
 	add_symbol_to_list (sym, pli->builder->get_global_symbols ());
+
+      pli->cache[si->info] = t;
     }
   else if (si->Tag == SymTagThunk)
     {
@@ -3897,6 +3949,7 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
       pli.fSymGetTypeInfo = fSymGetTypeInfo;
       pli.fSymEnumSymbols = fSymEnumSymbols;
       pli.fSymSetContext = fSymSetContext;
+      pli.fSymSearch = fSymSearch;
       pli.addr = addr;
       pli.max_addr = 0;
 
