@@ -84,24 +84,32 @@ addrmap_foreach (struct addrmap *map, addrmap_foreach_fn fn)
 
 /* Fixed address maps.  */
 
-/* A transition: a point in an address map where the value changes.
-   The map maps ADDR to VALUE, but if ADDR > 0, it maps ADDR-1 to
-   something else.  */
-struct addrmap_transition
-{
-  CORE_ADDR addr;
-  void *value;
-};
-
+struct addrmap_mutable;
 
 struct addrmap_fixed : public addrmap
 {
+public:
+
+  addrmap_fixed (struct obstack *obstack, addrmap_mutable *mut);
+  DISABLE_COPY_AND_ASSIGN (addrmap_fixed);
+
   void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
 		  void *obj) override;
   void *find (CORE_ADDR addr) const override;
   struct addrmap *create_fixed (struct obstack *obstack) override;
   void relocate (CORE_ADDR offset) override;
   int foreach (addrmap_foreach_fn fn) override;
+
+private:
+
+  /* A transition: a point in an address map where the value changes.
+     The map maps ADDR to VALUE, but if ADDR > 0, it maps ADDR-1 to
+     something else.  */
+  struct addrmap_transition
+  {
+    CORE_ADDR addr;
+    void *value;
+  };
 
   /* The number of transitions in TRANSITIONS.  */
   size_t num_transitions;
@@ -396,63 +404,46 @@ addrmap_mutable::find (CORE_ADDR addr) const
 }
 
 
-/* A function to pass to splay_tree_foreach to count the number of nodes
-   in the tree.  */
-static int
-splay_foreach_count (splay_tree_node n, void *closure)
+addrmap_fixed::addrmap_fixed (struct obstack *obstack, addrmap_mutable *mut)
 {
-  size_t *count = (size_t *) closure;
+  size_t transition_count = 0;
 
-  (*count)++;
-  return 0;
-}
+  /* Count the number of transitions in the tree.  */
+  addrmap_foreach (mut, [&] (CORE_ADDR start, void *obj)
+    {
+      ++transition_count;
+      return 0;
+    });
 
+  /* Include an extra entry for the transition at zero (which fixed
+     maps have, but mutable maps do not.)  */
+  transition_count++;
 
-/* A function to pass to splay_tree_foreach to copy entries into a
-   fixed address map.  */
-static int
-splay_foreach_copy (splay_tree_node n, void *closure)
-{
-  struct addrmap_fixed *fixed = (struct addrmap_fixed *) closure;
-  struct addrmap_transition *t = &fixed->transitions[fixed->num_transitions];
+  num_transitions = 1;
+  transitions = XOBNEWVEC (obstack, struct addrmap_transition,
+			   transition_count);
+  transitions[0].addr = 0;
+  transitions[0].value = NULL;
 
-  t->addr = addrmap_node_key (n);
-  t->value = addrmap_node_value (n);
-  fixed->num_transitions++;
+  /* Copy all entries from the splay tree to the array, in order 
+     of increasing address.  */
+  addrmap_foreach (mut, [&] (CORE_ADDR start, void *obj)
+    {
+      transitions[num_transitions].addr = start;
+      transitions[num_transitions].value = obj;
+      ++num_transitions;
+      return 0;
+    });
 
-  return 0;
+  /* We should have filled the array.  */
+  gdb_assert (num_transitions == transition_count);
 }
 
 
 struct addrmap *
 addrmap_mutable::create_fixed (struct obstack *obstack)
 {
-  struct addrmap_fixed *fixed;
-  size_t num_transitions;
-
-  /* Count the number of transitions in the tree.  */
-  num_transitions = 0;
-  splay_tree_foreach (tree, splay_foreach_count, &num_transitions);
-
-  /* Include an extra entry for the transition at zero (which fixed
-     maps have, but mutable maps do not.)  */
-  num_transitions++;
-
-  fixed = new (obstack) struct addrmap_fixed;
-  fixed->num_transitions = 1;
-  fixed->transitions = XOBNEWVEC (obstack, struct addrmap_transition,
-				  num_transitions);
-  fixed->transitions[0].addr = 0;
-  fixed->transitions[0].value = NULL;
-
-  /* Copy all entries from the splay tree to the array, in order 
-     of increasing address.  */
-  splay_tree_foreach (tree, splay_foreach_copy, fixed);
-
-  /* We should have filled the array.  */
-  gdb_assert (fixed->num_transitions == num_transitions);
-
-  return fixed;
+  return new (obstack) struct addrmap_fixed (obstack, this);
 }
 
 
