@@ -3281,6 +3281,8 @@ typedef BOOL WINAPI (SymInitialize_ftype) (HANDLE, PCSTR, BOOL);
 typedef BOOL WINAPI (SymCleanup_ftype) (HANDLE);
 typedef DWORD64 WINAPI (SymLoadModule64_ftype) (HANDLE, HANDLE, PCSTR,
 						PCSTR, DWORD64, DWORD);
+typedef BOOL WINAPI (SymEnumTypes_ftype)
+     (HANDLE, ULONG64, PSYM_ENUMERATESYMBOLS_CALLBACK, PVOID);
 typedef BOOL WINAPI (SymEnumSymbols_ftype)
      (HANDLE, ULONG64, PCSTR, PSYM_ENUMERATESYMBOLS_CALLBACK, PVOID);
 typedef BOOL WINAPI (SymEnumSourceLines_ftype)
@@ -3511,14 +3513,14 @@ static type *get_pdb_type_cached (pdb_line_info *pli, DWORD type_index)
     case SymTagUDT:
 	{
 	  DWORD udtkind;
-	  WCHAR *nameW = NULL;
 	  ULONG64 length;
+	  WCHAR *nameW = NULL;
 	  if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
 				    TI_GET_UDTKIND, &udtkind)
 	      && pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
-				       TI_GET_SYMNAME, &nameW)
+				       TI_GET_LENGTH, &length)
 	      && pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
-				       TI_GET_LENGTH, &length))
+				       TI_GET_SYMNAME, &nameW))
 	    {
 	      type *t = alloc_type (pli->objfile);
 	      INIT_CPLUS_SPECIFIC (t);
@@ -3603,6 +3605,23 @@ static type *get_pdb_type_cached (pdb_line_info *pli, DWORD type_index)
 	      type *range_type
 		= create_static_range_type (NULL, index_type, 0, count - 1);
 	      return create_array_type (NULL, element_type, range_type);
+	    }
+	  break;
+	}
+
+    case SymTagTypedef:
+	{
+	  DWORD tid;
+	  WCHAR *nameW = NULL;
+	  if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				    TI_GET_TYPEID, &tid)
+	      && pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				       TI_GET_SYMNAME, &nameW))
+	    {
+	      type *t = init_type (pli->objfile, TYPE_CODE_TYPEDEF, 0,
+				   wchar_to_objfile (pli, nameW));
+	      TYPE_TARGET_TYPE (t) = get_pdb_type (pli, tid);
+	      return t;
 	    }
 	  break;
 	}
@@ -3706,6 +3725,16 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
 	    }
 	}
     }
+  else if (si->Tag == SymTagUDT || si->Tag == SymTagTypedef)
+    {
+      symbol *sym = new (&objfile->objfile_obstack) symbol;
+      sym->set_linkage_name (objfile->intern (si->Name));
+      sym->set_language (language_c, &objfile->objfile_obstack);
+      sym->set_aclass_index (LOC_TYPEDEF);
+      sym->set_domain (si->Tag == SymTagTypedef ? VAR_DOMAIN : STRUCT_DOMAIN);
+      sym->set_type (get_pdb_type (pli, si->TypeIndex));
+      add_symbol_to_list (sym, pli->builder->get_global_symbols ());
+    }
 
   return TRUE;
 }
@@ -3747,6 +3776,8 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
     GetProcAddress (dh, "SymInitialize");
   SymCleanup_ftype *fSymCleanup = (SymCleanup_ftype *)
     GetProcAddress (dh, "SymCleanup");
+  SymEnumTypes_ftype *fSymEnumTypes = (SymEnumTypes_ftype *)
+    GetProcAddress (dh, "SymEnumTypes");
   SymEnumSymbols_ftype *fSymEnumSymbols = (SymEnumSymbols_ftype *)
     GetProcAddress (dh, "SymEnumSymbols");
   SymLoadModule64_ftype *fSymLoadModule64 = (SymLoadModule64_ftype *)
@@ -3760,7 +3791,8 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
   SymSearch_ftype *fSymSearch = (SymSearch_ftype *)
     GetProcAddress (dh, "SymSearch");
   if (fSymInitialize != NULL && fSymCleanup != NULL
-      && fSymEnumSymbols != NULL && fSymLoadModule64 != NULL
+      && fSymLoadModule64 != NULL
+      && fSymEnumTypes != NULL && fSymEnumSymbols != NULL
       && fSymEnumSourceLines != NULL && fSymGetTypeInfo != NULL
       && fSymSetContext != NULL && fSymSearch != NULL)
     {
@@ -3784,6 +3816,7 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
       pli.addr = addr;
       pli.max_addr = 0;
 
+      fSymEnumTypes(p, addr, symbol_callback, &pli);
       fSymEnumSymbols(p, addr, NULL, symbol_callback, &pli);
 
       fSymSearch (p, addr, 0, SymTagThunk, NULL, 0, symbol_callback, &pli,
