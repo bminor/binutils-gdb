@@ -898,6 +898,43 @@ proc_with_prefix test_format {} {
     }
   }
 
+  # Binary.
+  set opts "format='t'"
+  with_test_prefix $opts {
+    set binary_pointer_regexp "\[0-1\]+"
+    gdb_test "python print (gdb.Value (42).format_string (${opts}))" \
+      "101010" \
+      "42 with option ${opts}"
+
+    check_format_string "a_point_t" $opts
+    check_format_string "a_point_t_pointer" $opts \
+      $binary_pointer_regexp
+    check_format_string "another_point" $opts
+    check_format_string "a_struct_with_union" $opts \
+      "\\{the_union = \\{an_int = 101010001010100010101000101010, a_char = 101010\\}\\}"
+    check_format_string "an_enum" $opts \
+      "1"
+    check_format_string "a_string" $opts \
+      $binary_pointer_regexp
+    check_format_string "a_binary_string" $opts \
+      $binary_pointer_regexp
+    check_format_string "a_binary_string_array" $opts \
+      "\\{1101000, 1100101, 1101100, 1101100, 1101111, 0, 1110111, 1101111, 1110010, 1101100, 1100100, 0\\}"
+    check_format_string "a_big_string" $opts \
+      "\\{1000001, 1000010, 1000011, 1000100, 1000101, \[, 0-1\]+\.\.\.\\}"
+    check_format_string "an_array" $opts \
+      "\\{10, 11, 101\\}"
+    check_format_string "an_array_with_repetition" $opts \
+      "\\{1, 11 <repeats 12 times>, 101, 101, 101\\}"
+    check_format_string "a_symbol_pointer" $opts \
+      $binary_pointer_regexp
+
+    if { $current_lang == "c++" } {
+      check_format_string "a_point_t_ref" $opts
+      check_format_string "a_base_ref" $opts
+    }
+  }
+
   # Decimal.
   set opts "format='d'"
   with_test_prefix $opts {
