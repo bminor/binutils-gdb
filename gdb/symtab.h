@@ -1188,7 +1188,7 @@ enum symbol_subclass_kind
   SYMBOL_RUST_VTABLE
 };
 
-extern const struct symbol_impl *symbol_impls;
+extern gdb::array_view<const struct symbol_impl> symbol_impls;
 
 /* This structure is space critical.  See space comments at the top.  */
 

@@ -6502,7 +6502,7 @@ static struct symbol_impl symbol_impl[MAX_SYMBOL_IMPLS];
 /* The globally visible pointer.  This is separate from 'symbol_impl'
    so that it can be const.  */
 
-const struct symbol_impl *symbol_impls = &symbol_impl[0];
+gdb::array_view<const struct symbol_impl> symbol_impls (symbol_impl);
 
 /* Make sure we saved enough room in struct symbol.  */
 
