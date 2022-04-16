@@ -277,11 +277,11 @@ struct partial_symtab
   const char *dirname = nullptr;
 
   /* Range of text addresses covered by this file; texthigh is the
-     beginning of the next section.  Do not use if PSYMTABS_ADDRMAP_SUPPORTED
-     is set.  Do not refer directly to these fields.  Instead, use the
-     accessors.  The validity of these fields is determined by the
-     text_low_valid and text_high_valid fields; these are located later
-     in this structure for better packing.  */
+     beginning of the next section.  Do not refer directly to these
+     fields.  Instead, use the accessors.  The validity of these
+     fields is determined by the text_low_valid and text_high_valid
+     fields; these are located later in this structure for better
+     packing.  */
 
   CORE_ADDR m_text_low = 0;
   CORE_ADDR m_text_high = 0;
@@ -342,12 +342,6 @@ struct partial_symtab
      how long errors take).  */
 
   std::vector<partial_symbol *> static_psymbols;
-
-  /* True iff objfile->psymtabs_addrmap is properly populated for this
-     partial_symtab.  For discontiguous overlapping psymtabs is the only usable
-     info in PSYMTABS_ADDRMAP.  */
-
-  bool psymtabs_addrmap_supported = false;
 
   /* True if the name of this partial symtab is not a source file name.  */
 

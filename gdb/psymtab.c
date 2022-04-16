@@ -98,8 +98,6 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
   struct partial_symtab *best_pst = pst;
   CORE_ADDR best_addr = pst->text_low (objfile);
 
-  gdb_assert (!pst->psymtabs_addrmap_supported);
-
   /* An objfile that has its functions reordered might have
      many partial symbol tables containing the PC, but
      we want the partial symbol table that contains the
@@ -171,70 +169,8 @@ psymbol_functions::find_pc_sect_psymtab (struct objfile *objfile,
 					 struct obj_section *section,
 					 struct bound_minimal_symbol msymbol)
 {
-  /* Try just the PSYMTABS_ADDRMAP mapping first as it has better
-     granularity than the later used TEXTLOW/TEXTHIGH one.  However, we need
-     to take care as the PSYMTABS_ADDRMAP can hold things other than partial
-     symtabs in some cases.
-
-     This function should only be called for objfiles that are using partial
-     symtabs, not for objfiles that are using indexes (.gdb_index or
-     .debug_names), however 'maintenance print psymbols' calls this function
-     directly for all objfiles.  If we assume that PSYMTABS_ADDRMAP contains
-     partial symtabs then we will end up returning a pointer to an object
-     that is not a partial_symtab, which doesn't end well.  */
-
-  if (m_partial_symtabs->psymtabs != NULL
-      && m_partial_symtabs->psymtabs_addrmap != NULL)
-    {
-      CORE_ADDR baseaddr = objfile->text_section_offset ();
-
-      struct partial_symtab *pst
-	= ((struct partial_symtab *)
-	   m_partial_symtabs->psymtabs_addrmap->find (pc - baseaddr));
-      if (pst != NULL)
-	{
-	  /* FIXME: addrmaps currently do not handle overlayed sections,
-	     so fall back to the non-addrmap case if we're debugging
-	     overlays and the addrmap returned the wrong section.  */
-	  if (overlay_debugging && msymbol.minsym != NULL && section != NULL)
-	    {
-	      struct partial_symbol *p;
-
-	      /* NOTE: This assumes that every psymbol has a
-		 corresponding msymbol, which is not necessarily
-		 true; the debug info might be much richer than the
-		 object's symbol table.  */
-	      p = find_pc_sect_psymbol (objfile, pst, pc, section);
-	      if (p == NULL
-		  || (p->address (objfile)
-		      != msymbol.value_address ()))
-		goto next;
-	    }
-
-	  /* We do not try to call FIND_PC_SECT_PSYMTAB_CLOSER as
-	     PSYMTABS_ADDRMAP we used has already the best 1-byte
-	     granularity and FIND_PC_SECT_PSYMTAB_CLOSER may mislead us into
-	     a worse chosen section due to the TEXTLOW/TEXTHIGH ranges
-	     overlap.  */
-
-	  return pst;
-	}
-    }
-
- next:
-
-  /* Existing PSYMTABS_ADDRMAP mapping is present even for PARTIAL_SYMTABs
-     which still have no corresponding full SYMTABs read.  But it is not
-     present for non-DWARF2 debug infos not supporting PSYMTABS_ADDRMAP in GDB
-     so far.  */
-
-  /* Check even OBJFILE with non-zero PSYMTABS_ADDRMAP as only several of
-     its CUs may be missing in PSYMTABS_ADDRMAP as they may be varying
-     debug info type in single OBJFILE.  */
-
   for (partial_symtab *pst : partial_symbols (objfile))
-    if (!pst->psymtabs_addrmap_supported
-	&& pc >= pst->text_low (objfile) && pc < pst->text_high (objfile))
+    if (pc >= pst->text_low (objfile) && pc < pst->text_high (objfile))
       {
 	struct partial_symtab *best_pst;
 
@@ -780,8 +716,6 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
   gdb_printf (outfile, "-");
   gdb_puts (paddress (gdbarch, psymtab->text_high (objfile)), outfile);
   gdb_printf (outfile, "\n");
-  gdb_printf (outfile, "  Address map supported - %s.\n",
-	      psymtab->psymtabs_addrmap_supported ? "yes" : "no");
   gdb_printf (outfile, "  Depends on %d other partial symtabs.\n",
 	      psymtab->number_of_dependencies);
   for (i = 0; i < psymtab->number_of_dependencies; i++)
@@ -1450,27 +1384,6 @@ psymtab_storage::discard_psymtab (struct partial_symtab *pst)
 
 
 
-/* Helper function for maintenance_print_psymbols to print the addrmap
-   of PSYMTAB.  If PSYMTAB is NULL print the entire addrmap.  */
-
-static void
-dump_psymtab_addrmap (struct objfile *objfile,
-		      psymtab_storage *partial_symtabs,
-		      struct partial_symtab *psymtab,
-		      struct ui_file *outfile)
-{
-  if ((psymtab == NULL
-       || psymtab->psymtabs_addrmap_supported)
-      && partial_symtabs->psymtabs_addrmap != NULL)
-    {
-      if (psymtab == nullptr)
-	gdb_printf (outfile, _("Entire address map:\n"));
-      else
-	gdb_printf (outfile, _("Address map:\n"));
-      addrmap_dump (partial_symtabs->psymtabs_addrmap, outfile, psymtab);
-    }
-}
-
 static void
 maintenance_print_psymbols (const char *args, int from_tty)
 {
@@ -1564,9 +1477,6 @@ maintenance_print_psymbols (const char *args, int from_tty)
 	  if (psf == nullptr)
 	    continue;
 
-	  psymtab_storage *partial_symtabs
-	    = psf->get_partial_symtabs ().get ();
-
 	  if (address_arg != NULL)
 	    {
 	      struct bound_minimal_symbol msymbol;
@@ -1584,7 +1494,6 @@ maintenance_print_psymbols (const char *args, int from_tty)
 		      printed_objfile_header = 1;
 		    }
 		  dump_psymtab (objfile, ps, outfile);
-		  dump_psymtab_addrmap (objfile, partial_symtabs, ps, outfile);
 		  found = 1;
 		}
 	    }
@@ -1611,20 +1520,8 @@ maintenance_print_psymbols (const char *args, int from_tty)
 			  printed_objfile_header = 1;
 			}
 		      dump_psymtab (objfile, ps, outfile);
-		      dump_psymtab_addrmap (objfile, partial_symtabs, ps,
-					    outfile);
 		    }
 		}
-	    }
-
-	  /* If we're printing all the objfile's symbols dump the full addrmap.  */
-
-	  if (address_arg == NULL
-	      && source_arg == NULL
-	      && partial_symtabs->psymtabs_addrmap != NULL)
-	    {
-	      outfile->puts ("\n");
-	      dump_psymtab_addrmap (objfile, partial_symtabs, NULL, outfile);
 	    }
 	}
     }
@@ -1694,9 +1591,6 @@ maintenance_info_psymtabs (const char *regexp, int from_tty)
 		    gdb_puts (paddress (gdbarch,
 					psymtab->text_high (objfile)));
 		    gdb_printf ("\n");
-		    gdb_printf ("    psymtabs_addrmap_supported %s\n",
-				(psymtab->psymtabs_addrmap_supported
-				 ? "yes" : "no"));
 		    gdb_printf ("    globals ");
 		    if (!psymtab->global_psymbols.empty ())
 		      gdb_printf

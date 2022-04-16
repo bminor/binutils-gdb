@@ -2257,7 +2257,7 @@ create_signatured_type_table_from_debug_names
 }
 
 /* Read the address map data from the mapped index, and use it to
-   populate the psymtabs_addrmap.  */
+   populate the index_addrmap.  */
 
 static void
 create_addrmap_from_index (dwarf2_per_objfile *per_objfile,
@@ -2485,7 +2485,7 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 }
 
 /* Read the address map data from DWARF-5 .debug_aranges, and use it to
-   populate the psymtabs_addrmap.  */
+   populate the index_addrmap.  */
 
 static void
 create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
