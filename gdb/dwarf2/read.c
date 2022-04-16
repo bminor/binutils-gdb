@@ -20634,7 +20634,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       /* Handle DW_AT_artificial.  */
       attr = dwarf2_attr (die, DW_AT_artificial, cu);
       if (attr != nullptr)
-	sym->artificial = attr->as_boolean ();
+	sym->set_is_artificial (attr->as_boolean ());
 
       /* Default assumptions.
 	 Use the passed type or decode it from the die.  */

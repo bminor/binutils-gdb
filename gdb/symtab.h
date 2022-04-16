@@ -1203,7 +1203,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
       m_is_inlined (0),
       maybe_copied (0),
       subclass (SYMBOL_NONE),
-      artificial (false)
+      m_artificial (false)
     {
       /* We can't use an initializer list for members of a base class, and
 	 general_symbol_info needs to stay a POD type.  */
@@ -1369,6 +1369,18 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     m_value.chain = sym;
   }
 
+  /* Return true if this symbol was marked as artificial.  */
+  bool is_artificial () const
+  {
+    return m_artificial;
+  }
+
+  /* Set the 'artificial' flag on this symbol.  */
+  void set_is_artificial (bool artificial)
+  {
+    m_artificial = artificial;
+  }
+
   /* Data type of value */
 
   struct type *m_type = nullptr;
@@ -1423,7 +1435,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
 
   /* Whether this symbol is artificial.  */
 
-  bool artificial : 1;
+  bool m_artificial : 1;
 
   /* Line number of this symbol's definition, except for inlined
      functions.  For an inlined function (class LOC_BLOCK and

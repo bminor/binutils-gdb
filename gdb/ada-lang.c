@@ -3854,7 +3854,7 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
       candidates.end (),
       [] (block_symbol &bsym)
       {
-       return bsym.symbol->artificial;
+	return bsym.symbol->is_artificial ();
       }),
      candidates.end ());
 
@@ -13456,9 +13456,9 @@ public:
   }
 
   /* See language.h.  */
-  virtual bool symbol_printing_suppressed (struct symbol *symbol) const override
+  bool symbol_printing_suppressed (struct symbol *symbol) const override
   {
-    return symbol->artificial;
+    return symbol->is_artificial ();
   }
 
   /* See language.h.  */
