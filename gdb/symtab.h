@@ -1221,11 +1221,6 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
   symbol (const symbol &) = default;
   symbol &operator= (const symbol &) = default;
 
-  unsigned int aclass_index () const
-  {
-    return m_aclass_index;
-  }
-
   void set_aclass_index (unsigned int aclass_index)
   {
     m_aclass_index = aclass_index;
@@ -1233,7 +1228,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
 
   const symbol_impl &impl () const
   {
-    return symbol_impls[this->aclass_index ()];
+    return symbol_impls[this->m_aclass_index];
   }
 
   address_class aclass () const
