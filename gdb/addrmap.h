@@ -32,7 +32,7 @@
    Address maps come in two flavors: fixed, and mutable.  Mutable
    address maps consume more memory, but can be changed and extended.
    A fixed address map, once constructed (from a mutable address map),
-   can't be edited.  Both kinds of map are allocated in obstacks.  */
+   can't be edited.  */
 
 /* The type of a function used to iterate over the map.
    OBJ is NULL for unmapped regions.  */
@@ -40,7 +40,7 @@ typedef gdb::function_view<int (CORE_ADDR start_addr, void *obj)>
      addrmap_foreach_fn;
 
 /* The base class for addrmaps.  */
-struct addrmap : public allocate_on_obstack
+struct addrmap
 {
   virtual ~addrmap () = default;
 
@@ -101,7 +101,8 @@ struct addrmap : public allocate_on_obstack
 struct addrmap_mutable;
 
 /* Fixed address maps.  */
-struct addrmap_fixed : public addrmap
+struct addrmap_fixed : public addrmap,
+		       public allocate_on_obstack
 {
 public:
 
@@ -142,7 +143,8 @@ struct addrmap_mutable : public addrmap
 {
 public:
 
-  explicit addrmap_mutable (struct obstack *obs);
+  addrmap_mutable ();
+  ~addrmap_mutable ();
   DISABLE_COPY_AND_ASSIGN (addrmap_mutable);
 
   void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
@@ -152,16 +154,6 @@ public:
   int foreach (addrmap_foreach_fn fn) override;
 
 private:
-
-  /* The obstack to use for allocations for this map.  */
-  struct obstack *obstack;
-
-  /* A freelist for splay tree nodes, allocated on obstack, and
-     chained together by their 'right' pointers.  */
-  /* splay_tree_new_with_allocator uses the provided allocation
-     function to allocate the main splay_tree structure itself, so our
-     free list has to be initialized before we create the tree.  */
-  splay_tree_node free_nodes = nullptr;
 
   /* A splay tree, with a node for each transition; there is a
      transition at address T if T-1 and T map to different objects.
@@ -190,9 +182,6 @@ private:
   splay_tree_node splay_tree_successor (CORE_ADDR addr);
   void splay_tree_remove (CORE_ADDR addr);
   void splay_tree_insert (CORE_ADDR key, void *value);
-
-  static void *splay_obstack_alloc (int size, void *closure);
-  static void splay_obstack_free (void *obj, void *closure);
 };
 
 

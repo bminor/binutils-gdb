@@ -33,7 +33,6 @@
 #include "block.h"
 #include "cp-support.h"
 #include "dictionary.h"
-#include "addrmap.h"
 #include <algorithm>
 
 /* For cleanup_undefined_stabs_types and finish_global_stabs (somewhat
@@ -418,12 +417,7 @@ buildsym_compunit::record_block_range (struct block *block,
       || end_inclusive + 1 != block->end ())
     m_pending_addrmap_interesting = true;
 
-  if (m_pending_addrmap == nullptr)
-    m_pending_addrmap
-      = (new (&m_pending_addrmap_obstack) addrmap_mutable
-	 (&m_pending_addrmap_obstack));
-
-  m_pending_addrmap->set_empty (start, end_inclusive, block);
+  m_pending_addrmap.set_empty (start, end_inclusive, block);
 }
 
 struct blockvector *
@@ -458,10 +452,10 @@ buildsym_compunit::make_blockvector ()
 
   /* If we needed an address map for this symtab, record it in the
      blockvector.  */
-  if (m_pending_addrmap != nullptr && m_pending_addrmap_interesting)
+  if (m_pending_addrmap_interesting)
     blockvector->set_map
       (new (&m_objfile->objfile_obstack) addrmap_fixed
-       (&m_objfile->objfile_obstack, m_pending_addrmap));
+       (&m_objfile->objfile_obstack, &m_pending_addrmap));
   else
     blockvector->set_map (nullptr);
 

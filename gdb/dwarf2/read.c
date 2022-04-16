@@ -2267,12 +2267,9 @@ create_addrmap_from_index (dwarf2_per_objfile *per_objfile,
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
   struct gdbarch *gdbarch = objfile->arch ();
   const gdb_byte *iter, *end;
-  struct addrmap_mutable *mutable_map;
   CORE_ADDR baseaddr;
 
-  auto_obstack temp_obstack;
-
-  mutable_map = new (&temp_obstack) addrmap_mutable (&temp_obstack);
+  addrmap_mutable mutable_map;
 
   iter = index->address_table.data ();
   end = iter + index->address_table.size ();
@@ -2305,11 +2302,11 @@ create_addrmap_from_index (dwarf2_per_objfile *per_objfile,
 
       lo = gdbarch_adjust_dwarf2_addr (gdbarch, lo + baseaddr) - baseaddr;
       hi = gdbarch_adjust_dwarf2_addr (gdbarch, hi + baseaddr) - baseaddr;
-      mutable_map->set_empty (lo, hi - 1, per_bfd->get_cu (cu_index));
+      mutable_map.set_empty (lo, hi - 1, per_bfd->get_cu (cu_index));
     }
 
   per_bfd->index_addrmap
-    = new (&per_bfd->obstack) addrmap_fixed (&per_bfd->obstack, mutable_map);
+    = new (&per_bfd->obstack) addrmap_fixed (&per_bfd->obstack, &mutable_map);
 }
 
 /* Read the address map data from DWARF-5 .debug_aranges, and use it
@@ -2496,14 +2493,12 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 {
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
 
-  auto_obstack temp_obstack;
-  addrmap_mutable *mutable_map
-    = new (&temp_obstack) addrmap_mutable (&temp_obstack);
+  addrmap_mutable mutable_map;
 
-  if (read_addrmap_from_aranges (per_objfile, section, mutable_map))
+  if (read_addrmap_from_aranges (per_objfile, section, &mutable_map))
     per_bfd->index_addrmap
       = new (&per_bfd->obstack) addrmap_fixed (&per_bfd->obstack,
-					       mutable_map);
+					       &mutable_map);
 }
 
 /* A helper function that reads the .gdb_index from BUFFER and fills
@@ -6554,9 +6549,7 @@ public:
 					eq_cutu_reader,
 					htab_delete_entry<cutu_reader>,
 					xcalloc, xfree)),
-      m_index (new cooked_index),
-      m_addrmap_storage (),
-      m_addrmap (new (&m_addrmap_storage) addrmap_mutable (&m_addrmap_storage))
+      m_index (new cooked_index)
   {
   }
 
@@ -6606,14 +6599,14 @@ public:
      then transfer ownership of the index to the caller.  */
   std::unique_ptr<cooked_index> release ()
   {
-    m_index->install_addrmap (m_addrmap);
+    m_index->install_addrmap (&m_addrmap);
     return std::move (m_index);
   }
 
   /* Return the mutable addrmap that is currently being created.  */
   addrmap_mutable *get_addrmap ()
   {
-    return m_addrmap;
+    return &m_addrmap;
   }
 
 private:
@@ -6640,10 +6633,8 @@ private:
   /* The index that is being constructed.  */
   std::unique_ptr<cooked_index> m_index;
 
-  /* Storage for the writeable addrmap.  */
-  auto_obstack m_addrmap_storage;
   /* A writeable addrmap being constructed by this scanner.  */
-  addrmap_mutable *m_addrmap;
+  addrmap_mutable m_addrmap;
 };
 
 /* An instance of this is created to index a CU.  */
@@ -6657,9 +6648,7 @@ public:
 		  enum language language)
     : m_index_storage (storage),
       m_per_cu (per_cu),
-      m_language (language),
-      m_obstack (),
-      m_die_range_map (new (&m_obstack) addrmap_mutable (&m_obstack))
+      m_language (language)
   {
   }
 
@@ -6744,12 +6733,10 @@ private:
   /* The language that we're assuming when reading.  */
   enum language m_language;
 
-  /* Temporary storage.  */
-  auto_obstack m_obstack;
   /* An addrmap that maps from section offsets (see the form_addr
      method) to newly-created entries.  See m_deferred_entries to
      understand this.  */
-  addrmap *m_die_range_map;
+  addrmap_mutable m_die_range_map;
 
   /* A single deferred entry.  */
   struct deferred_entry
@@ -18146,7 +18133,7 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 	    {
 	      CORE_ADDR lookup = form_addr (origin_offset, origin_is_dwz);
 	      *parent_entry
-		= (cooked_index_entry *) m_die_range_map->find (lookup);
+		= (cooked_index_entry *) m_die_range_map.find (lookup);
 	    }
 
 	  unsigned int bytes_read;
@@ -18263,7 +18250,7 @@ cooked_indexer::recurse (cutu_reader *reader,
 				   reader->cu->per_cu->is_dwz);
       CORE_ADDR end = form_addr (sect_offset (info_ptr - 1 - reader->buffer),
 				 reader->cu->per_cu->is_dwz);
-      m_die_range_map->set_empty (start, end, (void *) parent_entry);
+      m_die_range_map.set_empty (start, end, (void *) parent_entry);
     }
 
   return info_ptr;
@@ -18436,7 +18423,7 @@ cooked_indexer::make_index (cutu_reader *reader)
     {
       CORE_ADDR key = form_addr (entry.die_offset, m_per_cu->is_dwz);
       cooked_index_entry *parent
-	= (cooked_index_entry *) m_die_range_map->find (key);
+	= (cooked_index_entry *) m_die_range_map.find (key);
       m_index_storage->add (entry.die_offset, entry.tag, entry.flags,
 			    entry.name, parent, m_per_cu);
     }

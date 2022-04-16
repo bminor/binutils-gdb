@@ -102,11 +102,11 @@ addrmap_fixed::foreach (addrmap_foreach_fn fn)
 
 /* Mutable address maps.  */
 
-/* Allocate a copy of CORE_ADDR in the obstack.  */
+/* Allocate a copy of CORE_ADDR.  */
 splay_tree_key
 addrmap_mutable::allocate_key (CORE_ADDR addr)
 {
-  CORE_ADDR *key = XOBNEW (obstack, CORE_ADDR);
+  CORE_ADDR *key = XNEW (CORE_ADDR);
 
   *key = addr;
   return (splay_tree_key) key;
@@ -325,42 +325,6 @@ addrmap_mutable::foreach (addrmap_foreach_fn fn)
 }
 
 
-void *
-addrmap_mutable::splay_obstack_alloc (int size, void *closure)
-{
-  struct addrmap_mutable *map = (struct addrmap_mutable *) closure;
-  splay_tree_node n;
-
-  /* We should only be asked to allocate nodes and larger things.
-     (If, at some point in the future, this is no longer true, we can
-     just round up the size to sizeof (*n).)  */
-  gdb_assert (size >= sizeof (*n));
-
-  if (map->free_nodes)
-    {
-      n = map->free_nodes;
-      map->free_nodes = n->right;
-      return n;
-    }
-  else
-    return obstack_alloc (map->obstack, size);
-}
-
-
-void
-addrmap_mutable::splay_obstack_free (void *obj, void *closure)
-{
-  struct addrmap_mutable *map = (struct addrmap_mutable *) closure;
-  splay_tree_node n = (splay_tree_node) obj;
-
-  /* We've asserted in the allocation function that we only allocate
-     nodes or larger things, so it should be safe to put whatever
-     we get passed back on the free list.  */
-  n->right = map->free_nodes;
-  map->free_nodes = n;
-}
-
-
 /* Compare keys as CORE_ADDR * values.  */
 static int
 splay_compare_CORE_ADDR_ptr (splay_tree_key ak, splay_tree_key bk)
@@ -378,15 +342,21 @@ splay_compare_CORE_ADDR_ptr (splay_tree_key ak, splay_tree_key bk)
 }
 
 
-addrmap_mutable::addrmap_mutable (struct obstack *obs)
-  : obstack (obs),
-    tree (splay_tree_new_with_allocator (splay_compare_CORE_ADDR_ptr,
-					 NULL, /* no delete key */
-					 NULL, /* no delete value */
-					 splay_obstack_alloc,
-					 splay_obstack_free,
-					 this))
+static void
+xfree_wrapper (splay_tree_key key)
 {
+  xfree ((void *) key);
+}
+
+addrmap_mutable::addrmap_mutable ()
+  : tree (splay_tree_new (splay_compare_CORE_ADDR_ptr, xfree_wrapper,
+			  nullptr /* no delete value */))
+{
+}
+
+addrmap_mutable::~addrmap_mutable ()
+{
+  splay_tree_delete (tree);
 }
 
 
@@ -461,8 +431,7 @@ test_addrmap ()
   /* Create mutable addrmap.  */
   struct obstack temp_obstack;
   obstack_init (&temp_obstack);
-  struct addrmap_mutable *map
-    = new (&temp_obstack) addrmap_mutable (&temp_obstack);
+  struct addrmap_mutable *map = new (&temp_obstack) addrmap_mutable;
   SELF_CHECK (map != nullptr);
 
   /* Check initial state.  */

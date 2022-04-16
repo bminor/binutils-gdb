@@ -21,6 +21,7 @@
 
 #include "gdbsupport/gdb_obstack.h"
 #include "symtab.h"
+#include "addrmap.h"
 
 struct objfile;
 struct symbol;
@@ -385,12 +386,7 @@ private:
   /* The mutable address map for the compilation unit whose symbols
      we're currently reading.  The symtabs' shared blockvector will
      point to a fixed copy of this.  */
-  struct addrmap_mutable *m_pending_addrmap = nullptr;
-
-  /* The obstack on which we allocate pending_addrmap.
-     If pending_addrmap is NULL, this is uninitialized; otherwise, it is
-     initialized (and holds pending_addrmap).  */
-  auto_obstack m_pending_addrmap_obstack;
+  struct addrmap_mutable m_pending_addrmap;
 
   /* True if we recorded any ranges in the addrmap that are different
      from those in the blockvector already.  We set this to false when
