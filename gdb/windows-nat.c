@@ -3387,6 +3387,28 @@ static const char *wchar_to_objfile (pdb_line_info *pli, WCHAR *nameW)
   return pli->objfile->intern (name.get ());
 }
 
+static LONGEST get_pdb_int_constant (pdb_line_info *pli, DWORD type_index)
+{
+  VARIANT v;
+  if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+			    TI_GET_VALUE, &v))
+    {
+      switch (v.vt)
+	{
+	case VT_I1:  return v.cVal;
+	case VT_I2:  return v.iVal;
+	case VT_I4:  return v.lVal;
+	case VT_I8:  return v.llVal;
+	case VT_UI1: return v.bVal;
+	case VT_UI2: return v.uiVal;
+	case VT_UI4: return v.ulVal;
+	case VT_UI8: return v.ullVal;
+	}
+    }
+
+  return 0;
+}
+
 static type *get_pdb_type (pdb_line_info *pli, DWORD type_index);
 
 static type *get_pdb_type_cached (pdb_line_info *pli, DWORD type_index)
@@ -3625,6 +3647,67 @@ static type *get_pdb_type_cached (pdb_line_info *pli, DWORD type_index)
 	    }
 	  break;
 	}
+
+    case SymTagEnum:
+	{
+	  DWORD tid;
+	  DWORD children;
+	  WCHAR *nameW = NULL;
+	  if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				    TI_GET_TYPEID, &tid)
+	      && pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				       TI_GET_CHILDRENCOUNT, &children)
+	      && children > 0
+	      && pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+				       TI_GET_SYMNAME, &nameW))
+	    {
+	      type *t = alloc_type (pli->objfile);
+	      t->set_code (TYPE_CODE_ENUM);
+	      t->set_name (wchar_to_objfile (pli, nameW));
+	      TYPE_TARGET_TYPE (t) = get_pdb_type (pli, tid);
+	      t->set_is_unsigned (TYPE_TARGET_TYPE (t)->is_unsigned ());
+	      TYPE_LENGTH (t) = TYPE_LENGTH (TYPE_TARGET_TYPE (t));
+
+	      gdb::unique_xmalloc_ptr<TI_FINDCHILDREN_PARAMS> values
+		((TI_FINDCHILDREN_PARAMS *)
+		 xmalloc (sizeof (TI_FINDCHILDREN_PARAMS)
+			  + children * sizeof (ULONG)));
+	      values->Count = children;
+	      values->Start = 0;
+	      if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
+					TI_FINDCHILDREN, values.get ()))
+		{
+		  t->set_num_fields (children);
+		  t->set_fields ((struct field *) TYPE_ZALLOC
+				 (t, children * sizeof (struct field)));
+		  DWORD i;
+		  for (i = 0; i < children; i++)
+		    {
+		      DWORD dk;
+		      if (pli->fSymGetTypeInfo (pli->p, pli->addr,
+						values->ChildId[i],
+						TI_GET_SYMTAG, &tag)
+			  && tag == SymTagData
+			  && pli->fSymGetTypeInfo (pli->p, pli->addr,
+						   values->ChildId[i],
+						   TI_GET_DATAKIND, &dk)
+			  && dk == DataIsConstant
+			  && pli->fSymGetTypeInfo (pli->p, pli->addr,
+						   values->ChildId[i],
+						   TI_GET_SYMNAME, &nameW))
+			{
+			  t->field (i).set_name (wchar_to_objfile
+						 (pli, nameW));
+			  t->field (i).set_loc_enumval
+			    (get_pdb_int_constant (pli, values->ChildId[i]));
+			}
+		    }
+		}
+
+	      return t;
+	    }
+	  break;
+	}
     }
 
   return ot->builtin_void;
@@ -3725,7 +3808,8 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
 	    }
 	}
     }
-  else if (si->Tag == SymTagUDT || si->Tag == SymTagTypedef)
+  else if (si->Tag == SymTagUDT || si->Tag == SymTagTypedef
+	   || si->Tag == SymTagEnum)
     {
       symbol *sym = new (&objfile->objfile_obstack) symbol;
       sym->set_linkage_name (objfile->intern (si->Name));
