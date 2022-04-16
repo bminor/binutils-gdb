@@ -92,7 +92,27 @@ static int i386_windows_gregset_reg_offset[] =
 static CORE_ADDR
 i386_windows_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
-  return i386_pe_skip_trampoline_code (frame, pc, NULL);
+  CORE_ADDR addr = i386_pe_skip_trampoline_code (frame, pc, NULL);
+  if (addr == 0 && pc != 0)
+    {
+      struct gdbarch *gdbarch = get_frame_arch (frame);
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+      if (read_memory_unsigned_integer (pc, 1, byte_order) == 0xe9)
+	{
+	  struct minimal_symbol *sym = lookup_minimal_symbol_by_pc (pc).minsym;
+	  const char *symname = sym ? sym->linkage_name () : NULL;
+
+	  if (symname && (startswith (symname, "__thunk_")
+			  || startswith (symname, "_thunk_")))
+	    {
+	      ULONGEST offset
+		= read_memory_unsigned_integer (pc + 1, 4, byte_order);
+	      return pc + offset + 5;
+	    }
+	}
+    }
+  return addr;
 }
 
 static const char *
