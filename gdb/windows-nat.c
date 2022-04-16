@@ -60,6 +60,9 @@
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
+#ifdef __x86_64__
+#include "amd64-tdep.h"
+#endif
 
 #include "windows-tdep.h"
 #include "windows-nat.h"
@@ -3056,7 +3059,13 @@ pdb_read_variable (struct symbol *symbol, struct frame_info *frame)
   pdb_regrel_baton *baton
     = (pdb_regrel_baton *) SYMBOL_LOCATION_BATON (symbol);
   gdbarch *gdbarch = get_frame_arch (frame);
-  int regnum = gdbarch_sp_regnum (gdbarch);
+  int regnum;
+#ifdef __x86_64__
+  if (gdbarch_ptr_bit (gdbarch) == 64)
+    regnum = AMD64_RSP_REGNUM;
+  else
+#endif
+    regnum = I386_EBP_REGNUM;
   ULONGEST regvalue = get_frame_register_unsigned (frame, regnum);
   return value_at_lazy (symbol->type (), regvalue + baton->offset);
 }
