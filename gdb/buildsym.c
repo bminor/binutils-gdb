@@ -421,7 +421,7 @@ buildsym_compunit::record_block_range (struct block *block,
   if (m_pending_addrmap == nullptr)
     m_pending_addrmap = addrmap_create_mutable (&m_pending_addrmap_obstack);
 
-  addrmap_set_empty (m_pending_addrmap, start, end_inclusive, block);
+  m_pending_addrmap->set_empty (start, end_inclusive, block);
 }
 
 struct blockvector *
@@ -458,7 +458,7 @@ buildsym_compunit::make_blockvector ()
      blockvector.  */
   if (m_pending_addrmap != nullptr && m_pending_addrmap_interesting)
     blockvector->set_map
-      (addrmap_create_fixed (m_pending_addrmap, &m_objfile->objfile_obstack));
+      (m_pending_addrmap->create_fixed (&m_objfile->objfile_obstack));
   else
     blockvector->set_map (nullptr);
 

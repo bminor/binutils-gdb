@@ -479,7 +479,7 @@ write_address_map (struct addrmap *addrmap, data_buf &addr_vec,
 {
   struct addrmap_index_data addrmap_index_data (addr_vec, cu_index_htab);
 
-  addrmap_foreach (addrmap, addrmap_index_data);
+  addrmap->foreach (addrmap_index_data);
 
   /* It's highly unlikely the last entry (end address = 0xff...ff)
      is valid, but we should still handle it.

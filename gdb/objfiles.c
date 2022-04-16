@@ -666,7 +666,7 @@ objfile_relocate1 (struct objfile *objfile,
 	int block_line_section = cust->block_line_section ();
 
 	if (bv->map () != nullptr)
-	  addrmap_relocate (bv->map (), delta[block_line_section]);
+	  bv->map ()->relocate (delta[block_line_section]);
 
 	for (block *b : bv->blocks ())
 	  {

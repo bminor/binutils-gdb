@@ -2946,7 +2946,7 @@ find_pc_sect_compunit_symtab (CORE_ADDR pc, struct obj_section *section)
 
 	  if (bv->map () != nullptr)
 	    {
-	      if (addrmap_find (bv->map (), pc) == nullptr)
+	      if (bv->map ()->find (pc) == nullptr)
 		continue;
 
 	      return cust;

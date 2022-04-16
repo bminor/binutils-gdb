@@ -2305,12 +2305,10 @@ create_addrmap_from_index (dwarf2_per_objfile *per_objfile,
 
       lo = gdbarch_adjust_dwarf2_addr (gdbarch, lo + baseaddr) - baseaddr;
       hi = gdbarch_adjust_dwarf2_addr (gdbarch, hi + baseaddr) - baseaddr;
-      addrmap_set_empty (mutable_map, lo, hi - 1,
-			 per_bfd->get_cu (cu_index));
+      mutable_map->set_empty (lo, hi - 1, per_bfd->get_cu (cu_index));
     }
 
-  per_bfd->index_addrmap = addrmap_create_fixed (mutable_map,
-						 &per_bfd->obstack);
+  per_bfd->index_addrmap = mutable_map->create_fixed (&per_bfd->obstack);
 }
 
 /* Read the address map data from DWARF-5 .debug_aranges, and use it
@@ -2479,7 +2477,7 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 		   - baseaddr);
 	  end = (gdbarch_adjust_dwarf2_addr (gdbarch, end + baseaddr)
 		 - baseaddr);
-	  addrmap_set_empty (mutable_map, start, end - 1, per_cu);
+	  mutable_map->set_empty (start, end - 1, per_cu);
 	}
 
       per_cu->addresses_seen = true;
@@ -2501,8 +2499,7 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
   addrmap *mutable_map = addrmap_create_mutable (&temp_obstack);
 
   if (read_addrmap_from_aranges (per_objfile, section, mutable_map))
-    per_bfd->index_addrmap = addrmap_create_fixed (mutable_map,
-						   &per_bfd->obstack);
+    per_bfd->index_addrmap = mutable_map->create_fixed (&per_bfd->obstack);
 }
 
 /* A helper function that reads the .gdb_index from BUFFER and fills
@@ -4254,8 +4251,8 @@ dwarf2_base_index_functions::find_per_cu (dwarf2_per_bfd *per_bfd,
 {
   if (per_bfd->index_addrmap == nullptr)
     return nullptr;
-  return (struct dwarf2_per_cu_data *) addrmap_find (per_bfd->index_addrmap,
-						     adjusted_pc);
+  return ((struct dwarf2_per_cu_data *)
+	  per_bfd->index_addrmap->find (adjusted_pc));
 }
 
 struct compunit_symtab *
@@ -12931,7 +12928,7 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
 	  highpc = (gdbarch_adjust_dwarf2_addr (gdbarch,
 						range_end + baseaddr)
 		    - baseaddr);
-	  addrmap_set_empty (map, lowpc, highpc - 1, datum);
+	  map->set_empty (lowpc, highpc - 1, datum);
 	}
 
       /* FIXME: This is recording everything as a low-high
@@ -17893,8 +17890,7 @@ cooked_indexer::check_bounds (cutu_reader *reader)
 	   - baseaddr - 1);
       /* Store the contiguous range if it is not empty; it can be
 	 empty for CUs with no code.  */
-      addrmap_set_empty (m_index_storage->get_addrmap (), low, high,
-			 cu->per_cu);
+      m_index_storage->get_addrmap ()->set_empty (low, high, cu->per_cu);
 
       cu->per_cu->addresses_seen = true;
     }
@@ -18146,8 +18142,7 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 	    {
 	      CORE_ADDR lookup = form_addr (origin_offset, origin_is_dwz);
 	      *parent_entry
-		= (cooked_index_entry *) addrmap_find (m_die_range_map,
-						       lookup);
+		= (cooked_index_entry *) m_die_range_map->find (lookup);
 	    }
 
 	  unsigned int bytes_read;
@@ -18187,8 +18182,8 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 	      CORE_ADDR hi
 		= (gdbarch_adjust_dwarf2_addr (gdbarch, *high_pc + baseaddr)
 		   - baseaddr);
-	      addrmap_set_empty (m_index_storage->get_addrmap (), lo, hi - 1,
-				 scanning_per_cu);
+	      m_index_storage->get_addrmap ()->set_empty (lo, hi - 1,
+							  scanning_per_cu);
 	    }
 	}
 
@@ -18264,7 +18259,7 @@ cooked_indexer::recurse (cutu_reader *reader,
 				   reader->cu->per_cu->is_dwz);
       CORE_ADDR end = form_addr (sect_offset (info_ptr - 1 - reader->buffer),
 				 reader->cu->per_cu->is_dwz);
-      addrmap_set_empty (m_die_range_map, start, end, (void *) parent_entry);
+      m_die_range_map->set_empty (start, end, (void *) parent_entry);
     }
 
   return info_ptr;
@@ -18437,7 +18432,7 @@ cooked_indexer::make_index (cutu_reader *reader)
     {
       CORE_ADDR key = form_addr (entry.die_offset, m_per_cu->is_dwz);
       cooked_index_entry *parent
-	= (cooked_index_entry *) addrmap_find (m_die_range_map, key);
+	= (cooked_index_entry *) m_die_range_map->find (key);
       m_index_storage->add (entry.die_offset, entry.tag, entry.flags,
 			    entry.name, parent, m_per_cu);
     }

@@ -28,44 +28,6 @@ gdb_static_assert (sizeof (splay_tree_key) >= sizeof (CORE_ADDR *));
 gdb_static_assert (sizeof (splay_tree_value) >= sizeof (void *));
 
 
-void
-addrmap_set_empty (struct addrmap *map,
-		   CORE_ADDR start, CORE_ADDR end_inclusive,
-		   void *obj)
-{
-  map->set_empty (start, end_inclusive, obj);
-}
-
-
-void *
-addrmap_find (const addrmap *map, CORE_ADDR addr)
-{
-  return map->find (addr);
-}
-
-
-struct addrmap *
-addrmap_create_fixed (struct addrmap *original, struct obstack *obstack)
-{
-  return original->create_fixed (obstack);
-}
-
-
-/* Relocate all the addresses in MAP by OFFSET.  (This can be applied
-   to either mutable or immutable maps.)  */
-void
-addrmap_relocate (struct addrmap *map, CORE_ADDR offset)
-{
-  map->relocate (offset);
-}
-
-
-int
-addrmap_foreach (struct addrmap *map, addrmap_foreach_fn fn)
-{
-  return map->foreach (fn);
-}
-
 /* Fixed address maps.  */
 
 void
@@ -313,7 +275,7 @@ addrmap_fixed::addrmap_fixed (struct obstack *obstack, addrmap_mutable *mut)
   size_t transition_count = 0;
 
   /* Count the number of transitions in the tree.  */
-  addrmap_foreach (mut, [&] (CORE_ADDR start, void *obj)
+  mut->foreach ([&] (CORE_ADDR start, void *obj)
     {
       ++transition_count;
       return 0;
@@ -331,7 +293,7 @@ addrmap_fixed::addrmap_fixed (struct obstack *obstack, addrmap_mutable *mut)
 
   /* Copy all entries from the splay tree to the array, in order 
      of increasing address.  */
-  addrmap_foreach (mut, [&] (CORE_ADDR start, void *obj)
+  mut->foreach ([&] (CORE_ADDR start, void *obj)
     {
       transitions[num_transitions].addr = start;
       transitions[num_transitions].value = obj;
@@ -482,7 +444,7 @@ addrmap_dump (struct addrmap *map, struct ui_file *outfile, void *payload)
     return 0;
   };
 
-  addrmap_foreach (map, callback);
+  map->foreach (callback);
 }
 
 #if GDB_SELF_TEST
@@ -502,7 +464,7 @@ core_addr (void *p)
   do									\
     {									\
       for (unsigned i = LOW; i <= HIGH; ++i)				\
-	SELF_CHECK (addrmap_find (MAP, core_addr (&ARRAY[i])) == VAL);	\
+	SELF_CHECK (MAP->find (core_addr (&ARRAY[i])) == VAL);		\
     }									\
   while (0)
 
@@ -528,14 +490,13 @@ test_addrmap ()
   CHECK_ADDRMAP_FIND (map, array, 0, 19, nullptr);
 
   /* Insert address range into mutable addrmap.  */
-  addrmap_set_empty (map, core_addr (&array[10]), core_addr (&array[12]),
-		     val1);
+  map->set_empty (core_addr (&array[10]), core_addr (&array[12]), val1);
   CHECK_ADDRMAP_FIND (map, array, 0, 9, nullptr);
   CHECK_ADDRMAP_FIND (map, array, 10, 12, val1);
   CHECK_ADDRMAP_FIND (map, array, 13, 19, nullptr);
 
   /* Create corresponding fixed addrmap.  */
-  struct addrmap *map2 = addrmap_create_fixed (map, &temp_obstack);
+  struct addrmap *map2 = map->create_fixed (&temp_obstack);
   SELF_CHECK (map2 != nullptr);
   CHECK_ADDRMAP_FIND (map2, array, 0, 9, nullptr);
   CHECK_ADDRMAP_FIND (map2, array, 10, 12, val1);
@@ -554,18 +515,17 @@ test_addrmap ()
 	SELF_CHECK (false);
       return 0;
     };
-  SELF_CHECK (addrmap_foreach (map, callback) == 0);
-  SELF_CHECK (addrmap_foreach (map2, callback) == 0);
+  SELF_CHECK (map->foreach (callback) == 0);
+  SELF_CHECK (map2->foreach (callback) == 0);
 
   /* Relocate fixed addrmap.  */
-  addrmap_relocate (map2, 1);
+  map2->relocate (1);
   CHECK_ADDRMAP_FIND (map2, array, 0, 10, nullptr);
   CHECK_ADDRMAP_FIND (map2, array, 11, 13, val1);
   CHECK_ADDRMAP_FIND (map2, array, 14, 19, nullptr);
 
   /* Insert partially overlapping address range into mutable addrmap.  */
-  addrmap_set_empty (map, core_addr (&array[11]), core_addr (&array[13]),
-		     val2);
+  map->set_empty (core_addr (&array[11]), core_addr (&array[13]), val2);
   CHECK_ADDRMAP_FIND (map, array, 0, 9, nullptr);
   CHECK_ADDRMAP_FIND (map, array, 10, 12, val1);
   CHECK_ADDRMAP_FIND (map, array, 13, 13, val2);

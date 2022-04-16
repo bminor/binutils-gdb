@@ -188,7 +188,7 @@ public:
   void install_addrmap (addrmap *map)
   {
     gdb_assert (m_addrmap == nullptr);
-    m_addrmap = addrmap_create_fixed (map, &m_storage);
+    m_addrmap = map->create_fixed (&m_storage);
   }
 
   /* Finalize the index.  This should be called a single time, when
@@ -233,7 +233,7 @@ private:
      found.  */
   dwarf2_per_cu_data *lookup (CORE_ADDR addr)
   {
-    return (dwarf2_per_cu_data *) addrmap_find (m_addrmap, addr);
+    return (dwarf2_per_cu_data *) m_addrmap->find (addr);
   }
 
   /* Create a new cooked_index_entry and register it with this object.

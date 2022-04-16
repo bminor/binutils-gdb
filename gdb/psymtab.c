@@ -190,8 +190,7 @@ psymbol_functions::find_pc_sect_psymtab (struct objfile *objfile,
 
       struct partial_symtab *pst
 	= ((struct partial_symtab *)
-	   addrmap_find (m_partial_symtabs->psymtabs_addrmap,
-			 pc - baseaddr));
+	   m_partial_symtabs->psymtabs_addrmap->find (pc - baseaddr));
       if (pst != NULL)
 	{
 	  /* FIXME: addrmaps currently do not handle overlayed sections,

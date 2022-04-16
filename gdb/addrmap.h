@@ -44,11 +44,61 @@ struct addrmap : public allocate_on_obstack
 {
   virtual ~addrmap () = default;
 
+  /* In the mutable address map MAP, associate the addresses from START
+     to END_INCLUSIVE that are currently associated with NULL with OBJ
+     instead.  Addresses mapped to an object other than NULL are left
+     unchanged.
+
+     As the name suggests, END_INCLUSIVE is also mapped to OBJ.  This
+     convention is unusual, but it allows callers to accurately specify
+     ranges that abut the top of the address space, and ranges that
+     cover the entire address space.
+
+     This operation seems a bit complicated for a primitive: if it's
+     needed, why not just have a simpler primitive operation that sets a
+     range to a value, wiping out whatever was there before, and then
+     let the caller construct more complicated operations from that,
+     along with some others for traversal?
+
+     It turns out this is the mutation operation we want to use all the
+     time, at least for now.  Our immediate use for address maps is to
+     represent lexical blocks whose address ranges are not contiguous.
+     We walk the tree of lexical blocks present in the debug info, and
+     only create 'struct block' objects after we've traversed all a
+     block's children.  If a lexical block declares no local variables
+     (and isn't the lexical block for a function's body), we omit it
+     from GDB's data structures entirely.
+
+     However, this means that we don't decide to create a block (and
+     thus record it in the address map) until after we've traversed its
+     children.  If we do decide to create the block, we do so at a time
+     when all its children have already been recorded in the map.  So
+     this operation --- change only those addresses left unset --- is
+     actually the operation we want to use every time.
+
+     It seems simpler to let the code which operates on the
+     representation directly deal with the hair of implementing these
+     semantics than to provide an interface which allows it to be
+     implemented efficiently, but doesn't reveal too much of the
+     representation.  */
   virtual void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
 			  void *obj) = 0;
+
+  /* Return the object associated with ADDR in MAP.  */
   virtual void *find (CORE_ADDR addr) const = 0;
+
+  /* Create a fixed address map which is a copy of this mutable
+     address map.  Allocate entries in OBSTACK.  */
   virtual struct addrmap *create_fixed (struct obstack *obstack) = 0;
+
+  /* Relocate all the addresses in MAP by OFFSET.  (This can be applied
+     to either mutable or immutable maps.)  */
   virtual void relocate (CORE_ADDR offset) = 0;
+
+  /* Call FN for every address in MAP, following an in-order traversal.
+     If FN ever returns a non-zero value, the iteration ceases
+     immediately, and the value is returned.  Otherwise, this function
+     returns 0.  */
   virtual int foreach (addrmap_foreach_fn fn) = 0;
 };
 
@@ -155,65 +205,6 @@ private:
 /* Create a mutable address map which maps every address to NULL.
    Allocate entries in OBSTACK.  */
 struct addrmap *addrmap_create_mutable (struct obstack *obstack);
-
-/* In the mutable address map MAP, associate the addresses from START
-   to END_INCLUSIVE that are currently associated with NULL with OBJ
-   instead.  Addresses mapped to an object other than NULL are left
-   unchanged.
-
-   As the name suggests, END_INCLUSIVE is also mapped to OBJ.  This
-   convention is unusual, but it allows callers to accurately specify
-   ranges that abut the top of the address space, and ranges that
-   cover the entire address space.
-
-   This operation seems a bit complicated for a primitive: if it's
-   needed, why not just have a simpler primitive operation that sets a
-   range to a value, wiping out whatever was there before, and then
-   let the caller construct more complicated operations from that,
-   along with some others for traversal?
-
-   It turns out this is the mutation operation we want to use all the
-   time, at least for now.  Our immediate use for address maps is to
-   represent lexical blocks whose address ranges are not contiguous.
-   We walk the tree of lexical blocks present in the debug info, and
-   only create 'struct block' objects after we've traversed all a
-   block's children.  If a lexical block declares no local variables
-   (and isn't the lexical block for a function's body), we omit it
-   from GDB's data structures entirely.
-
-   However, this means that we don't decide to create a block (and
-   thus record it in the address map) until after we've traversed its
-   children.  If we do decide to create the block, we do so at a time
-   when all its children have already been recorded in the map.  So
-   this operation --- change only those addresses left unset --- is
-   actually the operation we want to use every time.
-
-   It seems simpler to let the code which operates on the
-   representation directly deal with the hair of implementing these
-   semantics than to provide an interface which allows it to be
-   implemented efficiently, but doesn't reveal too much of the
-   representation.  */
-void addrmap_set_empty (struct addrmap *map,
-			CORE_ADDR start, CORE_ADDR end_inclusive,
-			void *obj);
-
-/* Return the object associated with ADDR in MAP.  */
-void *addrmap_find (const addrmap *map, CORE_ADDR addr);
-
-/* Create a fixed address map which is a copy of the mutable address
-   map ORIGINAL.  Allocate entries in OBSTACK.  */
-struct addrmap *addrmap_create_fixed (struct addrmap *original,
-				      struct obstack *obstack);
-
-/* Relocate all the addresses in MAP by OFFSET.  (This can be applied
-   to either mutable or immutable maps.)  */
-void addrmap_relocate (struct addrmap *map, CORE_ADDR offset);
-
-/* Call FN for every address in MAP, following an in-order traversal.
-   If FN ever returns a non-zero value, the iteration ceases
-   immediately, and the value is returned.  Otherwise, this function
-   returns 0.  */
-int addrmap_foreach (struct addrmap *map, addrmap_foreach_fn fn);
 
 /* Dump the addrmap to OUTFILE.  If PAYLOAD is non-NULL, only dump any
    components that map to PAYLOAD.  (If PAYLOAD is NULL, the entire

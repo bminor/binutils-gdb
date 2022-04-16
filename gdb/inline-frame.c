@@ -289,7 +289,7 @@ block_starting_point_at (CORE_ADDR pc, const struct block *block)
   if (bv->map () == nullptr)
     return 0;
 
-  new_block = (const struct block *) addrmap_find (bv->map (), pc - 1);
+  new_block = (const struct block *) bv->map ()->find (pc - 1);
   if (new_block == NULL)
     return 1;
 
