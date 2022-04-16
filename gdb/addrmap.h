@@ -87,10 +87,6 @@ struct addrmap : public allocate_on_obstack
   /* Return the object associated with ADDR in MAP.  */
   virtual void *find (CORE_ADDR addr) const = 0;
 
-  /* Create a fixed address map which is a copy of this mutable
-     address map.  Allocate entries in OBSTACK.  */
-  virtual struct addrmap *create_fixed (struct obstack *obstack) = 0;
-
   /* Relocate all the addresses in MAP by OFFSET.  (This can be applied
      to either mutable or immutable maps.)  */
   virtual void relocate (CORE_ADDR offset) = 0;
@@ -115,7 +111,6 @@ public:
   void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
 		  void *obj) override;
   void *find (CORE_ADDR addr) const override;
-  struct addrmap *create_fixed (struct obstack *obstack) override;
   void relocate (CORE_ADDR offset) override;
   int foreach (addrmap_foreach_fn fn) override;
 
@@ -153,7 +148,6 @@ public:
   void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
 		  void *obj) override;
   void *find (CORE_ADDR addr) const override;
-  struct addrmap *create_fixed (struct obstack *obstack) override;
   void relocate (CORE_ADDR offset) override;
   int foreach (addrmap_foreach_fn fn) override;
 

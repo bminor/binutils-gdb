@@ -2308,7 +2308,8 @@ create_addrmap_from_index (dwarf2_per_objfile *per_objfile,
       mutable_map->set_empty (lo, hi - 1, per_bfd->get_cu (cu_index));
     }
 
-  per_bfd->index_addrmap = mutable_map->create_fixed (&per_bfd->obstack);
+  per_bfd->index_addrmap
+    = new (&per_bfd->obstack) addrmap_fixed (&per_bfd->obstack, mutable_map);
 }
 
 /* Read the address map data from DWARF-5 .debug_aranges, and use it
@@ -2500,7 +2501,9 @@ create_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
     = new (&temp_obstack) addrmap_mutable (&temp_obstack);
 
   if (read_addrmap_from_aranges (per_objfile, section, mutable_map))
-    per_bfd->index_addrmap = mutable_map->create_fixed (&per_bfd->obstack);
+    per_bfd->index_addrmap
+      = new (&per_bfd->obstack) addrmap_fixed (&per_bfd->obstack,
+					       mutable_map);
 }
 
 /* A helper function that reads the .gdb_index from BUFFER and fills

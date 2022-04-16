@@ -72,15 +72,6 @@ addrmap_fixed::find (CORE_ADDR addr) const
 }
 
 
-struct addrmap *
-addrmap_fixed::create_fixed (struct obstack *obstack)
-{
-  internal_error (__FILE__, __LINE__,
-		  _("addrmap_create_fixed is not implemented yet "
-		    "for fixed addrmaps"));
-}
-
-
 void
 addrmap_fixed::relocate (CORE_ADDR offset)
 {
@@ -306,13 +297,6 @@ addrmap_fixed::addrmap_fixed (struct obstack *obstack, addrmap_mutable *mut)
 }
 
 
-struct addrmap *
-addrmap_mutable::create_fixed (struct obstack *obstack)
-{
-  return new (obstack) struct addrmap_fixed (obstack, this);
-}
-
-
 void
 addrmap_mutable::relocate (CORE_ADDR offset)
 {
@@ -491,7 +475,8 @@ test_addrmap ()
   CHECK_ADDRMAP_FIND (map, array, 13, 19, nullptr);
 
   /* Create corresponding fixed addrmap.  */
-  struct addrmap *map2 = map->create_fixed (&temp_obstack);
+  struct addrmap *map2
+    = new (&temp_obstack) addrmap_fixed (&temp_obstack, map);
   SELF_CHECK (map2 != nullptr);
   CHECK_ADDRMAP_FIND (map2, array, 0, 9, nullptr);
   CHECK_ADDRMAP_FIND (map2, array, 10, 12, val1);

@@ -460,7 +460,8 @@ buildsym_compunit::make_blockvector ()
      blockvector.  */
   if (m_pending_addrmap != nullptr && m_pending_addrmap_interesting)
     blockvector->set_map
-      (m_pending_addrmap->create_fixed (&m_objfile->objfile_obstack));
+      (new (&m_objfile->objfile_obstack) addrmap_fixed
+       (&m_objfile->objfile_obstack, m_pending_addrmap));
   else
     blockvector->set_map (nullptr);
 

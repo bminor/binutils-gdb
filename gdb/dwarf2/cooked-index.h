@@ -185,10 +185,10 @@ public:
 				 dwarf2_per_cu_data *per_cu);
 
   /* Install a new fixed addrmap from the given mutable addrmap.  */
-  void install_addrmap (addrmap *map)
+  void install_addrmap (addrmap_mutable *map)
   {
     gdb_assert (m_addrmap == nullptr);
-    m_addrmap = map->create_fixed (&m_storage);
+    m_addrmap = new (&m_storage) addrmap_fixed (&m_storage, map);
   }
 
   /* Finalize the index.  This should be called a single time, when
