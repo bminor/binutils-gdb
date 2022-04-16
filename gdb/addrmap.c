@@ -206,6 +206,11 @@ addrmap_fixed::foreach (addrmap_foreach_fn fn)
 
 struct addrmap_mutable : public addrmap
 {
+public:
+
+  explicit addrmap_mutable (struct obstack *obs);
+  DISABLE_COPY_AND_ASSIGN (addrmap_mutable);
+
   void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
 		  void *obj) override;
   void *find (CORE_ADDR addr) const override;
@@ -213,8 +218,17 @@ struct addrmap_mutable : public addrmap
   void relocate (CORE_ADDR offset) override;
   int foreach (addrmap_foreach_fn fn) override;
 
+private:
+
   /* The obstack to use for allocations for this map.  */
   struct obstack *obstack;
+
+  /* A freelist for splay tree nodes, allocated on obstack, and
+     chained together by their 'right' pointers.  */
+  /* splay_tree_new_with_allocator uses the provided allocation
+     function to allocate the main splay_tree structure itself, so our
+     free list has to be initialized before we create the tree.  */
+  splay_tree_node free_nodes = nullptr;
 
   /* A splay tree, with a node for each transition; there is a
      transition at address T if T-1 and T map to different objects.
@@ -235,17 +249,25 @@ struct addrmap_mutable : public addrmap
      from deleted nodes; they'll be freed when the obstack is freed.  */
   splay_tree tree;
 
-  /* A freelist for splay tree nodes, allocated on obstack, and
-     chained together by their 'right' pointers.  */
-  splay_tree_node free_nodes;
+  /* Various helper methods.  */
+  splay_tree_key allocate_key (CORE_ADDR addr);
+  void force_transition (CORE_ADDR addr);
+  splay_tree_node splay_tree_lookup (CORE_ADDR addr) const;
+  splay_tree_node splay_tree_predecessor (CORE_ADDR addr) const;
+  splay_tree_node splay_tree_successor (CORE_ADDR addr);
+  void splay_tree_remove (CORE_ADDR addr);
+  void splay_tree_insert (CORE_ADDR key, void *value);
+
+  static void *splay_obstack_alloc (int size, void *closure);
+  static void splay_obstack_free (void *obj, void *closure);
 };
 
 
-/* Allocate a copy of CORE_ADDR in MAP's obstack.  */
-static splay_tree_key
-allocate_key (struct addrmap_mutable *map, CORE_ADDR addr)
+/* Allocate a copy of CORE_ADDR in the obstack.  */
+splay_tree_key
+addrmap_mutable::allocate_key (CORE_ADDR addr)
 {
-  CORE_ADDR *key = XOBNEW (map->obstack, CORE_ADDR);
+  CORE_ADDR *key = XOBNEW (obstack, CORE_ADDR);
 
   *key = addr;
   return (splay_tree_key) key;
@@ -253,32 +275,31 @@ allocate_key (struct addrmap_mutable *map, CORE_ADDR addr)
 
 
 /* Type-correct wrappers for splay tree access.  */
-static splay_tree_node
-addrmap_splay_tree_lookup (const struct addrmap_mutable *map, CORE_ADDR addr)
+splay_tree_node
+addrmap_mutable::splay_tree_lookup (CORE_ADDR addr) const
 {
-  return splay_tree_lookup (map->tree, (splay_tree_key) &addr);
+  return ::splay_tree_lookup (tree, (splay_tree_key) &addr);
 }
 
 
-static splay_tree_node
-addrmap_splay_tree_predecessor (const struct addrmap_mutable *map,
-				CORE_ADDR addr)
+splay_tree_node
+addrmap_mutable::splay_tree_predecessor (CORE_ADDR addr) const
 {
-  return splay_tree_predecessor (map->tree, (splay_tree_key) &addr);
+  return ::splay_tree_predecessor (tree, (splay_tree_key) &addr);
 }
 
 
-static splay_tree_node
-addrmap_splay_tree_successor (struct addrmap_mutable *map, CORE_ADDR addr)
+splay_tree_node
+addrmap_mutable::splay_tree_successor (CORE_ADDR addr)
 {
-  return splay_tree_successor (map->tree, (splay_tree_key) &addr);
+  return ::splay_tree_successor (tree, (splay_tree_key) &addr);
 }
 
 
-static void
-addrmap_splay_tree_remove (struct addrmap_mutable *map, CORE_ADDR addr)
+void
+addrmap_mutable::splay_tree_remove (CORE_ADDR addr)
 {
-  splay_tree_remove (map->tree, (splay_tree_key) &addr);
+  ::splay_tree_remove (tree, (splay_tree_key) &addr);
 }
 
 
@@ -303,30 +324,27 @@ addrmap_node_set_value (splay_tree_node node, void *value)
 }
 
 
-static void
-addrmap_splay_tree_insert (struct addrmap_mutable *map,
-			   CORE_ADDR key, void *value)
+void
+addrmap_mutable::splay_tree_insert (CORE_ADDR key, void *value)
 {
-  splay_tree_insert (map->tree,
-		     allocate_key (map, key),
-		     (splay_tree_value) value);
+  ::splay_tree_insert (tree,
+		       allocate_key (key),
+		       (splay_tree_value) value);
 }
 
 
 /* Without changing the mapping of any address, ensure that there is a
    tree node at ADDR, even if it would represent a "transition" from
    one value to the same value.  */
-static void
-force_transition (struct addrmap_mutable *self, CORE_ADDR addr)
+void
+addrmap_mutable::force_transition (CORE_ADDR addr)
 {
-  splay_tree_node n
-    = addrmap_splay_tree_lookup (self, addr);
+  splay_tree_node n = splay_tree_lookup (addr);
 
   if (! n)
     {
-      n = addrmap_splay_tree_predecessor (self, addr);
-      addrmap_splay_tree_insert (self, addr,
-				 n ? addrmap_node_value (n) : NULL);
+      n = splay_tree_predecessor (addr);
+      splay_tree_insert (addr, n ? addrmap_node_value (n) : NULL);
     }
 }
 
@@ -351,14 +369,14 @@ addrmap_mutable::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
      - Second pass: remove any unnecessary transitions.  */
 
   /* Establish transitions at the start and end.  */
-  force_transition (this, start);
+  force_transition (start);
   if (end_inclusive < CORE_ADDR_MAX)
-    force_transition (this, end_inclusive + 1);
+    force_transition (end_inclusive + 1);
 
   /* Walk the area, changing all NULL regions to OBJ.  */
-  for (n = addrmap_splay_tree_lookup (this, start), gdb_assert (n);
+  for (n = splay_tree_lookup (start), gdb_assert (n);
        n && addrmap_node_key (n) <= end_inclusive;
-       n = addrmap_splay_tree_successor (this, addrmap_node_key (n)))
+       n = splay_tree_successor (addrmap_node_key (n)))
     {
       if (! addrmap_node_value (n))
 	addrmap_node_set_value (n, obj);
@@ -367,16 +385,16 @@ addrmap_mutable::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
   /* Walk the area again, removing transitions from any value to
      itself.  Be sure to visit both the transitions we forced
      above.  */
-  n = addrmap_splay_tree_predecessor (this, start);
+  n = splay_tree_predecessor (start);
   prior_value = n ? addrmap_node_value (n) : NULL;
-  for (n = addrmap_splay_tree_lookup (this, start), gdb_assert (n);
+  for (n = splay_tree_lookup (start), gdb_assert (n);
        n && (end_inclusive == CORE_ADDR_MAX
 	     || addrmap_node_key (n) <= end_inclusive + 1);
        n = next)
     {
-      next = addrmap_splay_tree_successor (this, addrmap_node_key (n));
+      next = splay_tree_successor (addrmap_node_key (n));
       if (addrmap_node_value (n) == prior_value)
-	addrmap_splay_tree_remove (this, addrmap_node_key (n));
+	splay_tree_remove (addrmap_node_key (n));
       else
 	prior_value = addrmap_node_value (n);
     }
@@ -386,14 +404,14 @@ addrmap_mutable::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
 void *
 addrmap_mutable::find (CORE_ADDR addr) const
 {
-  splay_tree_node n = addrmap_splay_tree_lookup (this, addr);
+  splay_tree_node n = splay_tree_lookup (addr);
   if (n != nullptr)
     {
       gdb_assert (addrmap_node_key (n) == addr);
       return addrmap_node_value (n);
     }
 
-  n = addrmap_splay_tree_predecessor (this, addr);
+  n = splay_tree_predecessor (addr);
   if (n != nullptr)
     {
       gdb_assert (addrmap_node_key (n) < addr);
@@ -475,8 +493,8 @@ addrmap_mutable::foreach (addrmap_foreach_fn fn)
 }
 
 
-static void *
-splay_obstack_alloc (int size, void *closure)
+void *
+addrmap_mutable::splay_obstack_alloc (int size, void *closure)
 {
   struct addrmap_mutable *map = (struct addrmap_mutable *) closure;
   splay_tree_node n;
@@ -497,8 +515,8 @@ splay_obstack_alloc (int size, void *closure)
 }
 
 
-static void
-splay_obstack_free (void *obj, void *closure)
+void
+addrmap_mutable::splay_obstack_free (void *obj, void *closure)
 {
   struct addrmap_mutable *map = (struct addrmap_mutable *) closure;
   splay_tree_node n = (splay_tree_node) obj;
@@ -528,26 +546,22 @@ splay_compare_CORE_ADDR_ptr (splay_tree_key ak, splay_tree_key bk)
 }
 
 
+addrmap_mutable::addrmap_mutable (struct obstack *obs)
+  : obstack (obs),
+    tree (splay_tree_new_with_allocator (splay_compare_CORE_ADDR_ptr,
+					 NULL, /* no delete key */
+					 NULL, /* no delete value */
+					 splay_obstack_alloc,
+					 splay_obstack_free,
+					 this))
+{
+}
+
+
 struct addrmap *
 addrmap_create_mutable (struct obstack *obstack)
 {
-  struct addrmap_mutable *map = new (obstack) struct addrmap_mutable;
-
-  map->obstack = obstack;
-
-  /* splay_tree_new_with_allocator uses the provided allocation
-     function to allocate the main splay_tree structure itself, so our
-     free list has to be initialized before we create the tree.  */
-  map->free_nodes = NULL;
-
-  map->tree = splay_tree_new_with_allocator (splay_compare_CORE_ADDR_ptr,
-					     NULL, /* no delete key */
-					     NULL, /* no delete value */
-					     splay_obstack_alloc,
-					     splay_obstack_free,
-					     map);
-
-  return map;
+  return new (obstack) struct addrmap_mutable (obstack);
 }
 
 /* See addrmap.h.  */
