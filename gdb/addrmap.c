@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "splay-tree.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "addrmap.h"
 #include "gdbsupport/selftest.h"
@@ -29,21 +28,6 @@ gdb_static_assert (sizeof (splay_tree_key) >= sizeof (CORE_ADDR *));
 gdb_static_assert (sizeof (splay_tree_value) >= sizeof (void *));
 
 
-/* The base class for addrmaps.  */
-
-struct addrmap : public allocate_on_obstack
-{
-  virtual ~addrmap () = default;
-
-  virtual void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
-			  void *obj) = 0;
-  virtual void *find (CORE_ADDR addr) const = 0;
-  virtual struct addrmap *create_fixed (struct obstack *obstack) = 0;
-  virtual void relocate (CORE_ADDR offset) = 0;
-  virtual int foreach (addrmap_foreach_fn fn) = 0;
-};
-
-
 void
 addrmap_set_empty (struct addrmap *map,
 		   CORE_ADDR start, CORE_ADDR end_inclusive,
@@ -83,45 +67,6 @@ addrmap_foreach (struct addrmap *map, addrmap_foreach_fn fn)
 }
 
 /* Fixed address maps.  */
-
-struct addrmap_mutable;
-
-struct addrmap_fixed : public addrmap
-{
-public:
-
-  addrmap_fixed (struct obstack *obstack, addrmap_mutable *mut);
-  DISABLE_COPY_AND_ASSIGN (addrmap_fixed);
-
-  void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
-		  void *obj) override;
-  void *find (CORE_ADDR addr) const override;
-  struct addrmap *create_fixed (struct obstack *obstack) override;
-  void relocate (CORE_ADDR offset) override;
-  int foreach (addrmap_foreach_fn fn) override;
-
-private:
-
-  /* A transition: a point in an address map where the value changes.
-     The map maps ADDR to VALUE, but if ADDR > 0, it maps ADDR-1 to
-     something else.  */
-  struct addrmap_transition
-  {
-    CORE_ADDR addr;
-    void *value;
-  };
-
-  /* The number of transitions in TRANSITIONS.  */
-  size_t num_transitions;
-
-  /* An array of transitions, sorted by address.  For every point in
-     the map where either ADDR == 0 or ADDR is mapped to one value and
-     ADDR - 1 is mapped to something different, we have an entry here
-     containing ADDR and VALUE.  (Note that this means we always have
-     an entry for address 0).  */
-  struct addrmap_transition *transitions;
-};
-
 
 void
 addrmap_fixed::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
@@ -203,65 +148,6 @@ addrmap_fixed::foreach (addrmap_foreach_fn fn)
 
 
 /* Mutable address maps.  */
-
-struct addrmap_mutable : public addrmap
-{
-public:
-
-  explicit addrmap_mutable (struct obstack *obs);
-  DISABLE_COPY_AND_ASSIGN (addrmap_mutable);
-
-  void set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
-		  void *obj) override;
-  void *find (CORE_ADDR addr) const override;
-  struct addrmap *create_fixed (struct obstack *obstack) override;
-  void relocate (CORE_ADDR offset) override;
-  int foreach (addrmap_foreach_fn fn) override;
-
-private:
-
-  /* The obstack to use for allocations for this map.  */
-  struct obstack *obstack;
-
-  /* A freelist for splay tree nodes, allocated on obstack, and
-     chained together by their 'right' pointers.  */
-  /* splay_tree_new_with_allocator uses the provided allocation
-     function to allocate the main splay_tree structure itself, so our
-     free list has to be initialized before we create the tree.  */
-  splay_tree_node free_nodes = nullptr;
-
-  /* A splay tree, with a node for each transition; there is a
-     transition at address T if T-1 and T map to different objects.
-
-     Any addresses below the first node map to NULL.  (Unlike
-     fixed maps, we have no entry at (CORE_ADDR) 0; it doesn't 
-     simplify enough.)
-
-     The last region is assumed to end at CORE_ADDR_MAX.
-
-     Since we can't know whether CORE_ADDR is larger or smaller than
-     splay_tree_key (unsigned long) --- I think both are possible,
-     given all combinations of 32- and 64-bit hosts and targets ---
-     our keys are pointers to CORE_ADDR values.  Since the splay tree
-     library doesn't pass any closure pointer to the key free
-     function, we can't keep a freelist for keys.  Since mutable
-     addrmaps are only used temporarily right now, we just leak keys
-     from deleted nodes; they'll be freed when the obstack is freed.  */
-  splay_tree tree;
-
-  /* Various helper methods.  */
-  splay_tree_key allocate_key (CORE_ADDR addr);
-  void force_transition (CORE_ADDR addr);
-  splay_tree_node splay_tree_lookup (CORE_ADDR addr) const;
-  splay_tree_node splay_tree_predecessor (CORE_ADDR addr) const;
-  splay_tree_node splay_tree_successor (CORE_ADDR addr);
-  void splay_tree_remove (CORE_ADDR addr);
-  void splay_tree_insert (CORE_ADDR key, void *value);
-
-  static void *splay_obstack_alloc (int size, void *closure);
-  static void splay_obstack_free (void *obj, void *closure);
-};
-
 
 /* Allocate a copy of CORE_ADDR in the obstack.  */
 splay_tree_key
