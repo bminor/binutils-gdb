@@ -3578,7 +3578,6 @@ static type *get_pdb_type_cached (pdb_line_info *pli, DWORD type_index)
 			      + children * sizeof (ULONG)));
 		  members->Count = children;
 		  members->Start = 0;
-		  // TODO: bitfields
 		  if (pli->fSymGetTypeInfo (pli->p, pli->addr, type_index,
 					    TI_FINDCHILDREN, members.get ()))
 		    {
@@ -3610,7 +3609,19 @@ static type *get_pdb_type_cached (pdb_line_info *pli, DWORD type_index)
 			      t->field (i).set_type (get_pdb_type (pli, tid));
 			      t->field (i).set_name (wchar_to_objfile
 						     (pli, nameW));
-			      t->field (i).set_loc_bitpos (ofs * 8);
+			      DWORD bitofs = 0;
+			      DWORD bitpos;
+			      if (pli->fSymGetTypeInfo
+				  (pli->p, pli->addr, members->ChildId[i],
+				   TI_GET_BITPOSITION, &bitpos)
+				  && pli->fSymGetTypeInfo
+				  (pli->p, pli->addr, members->ChildId[i],
+				   TI_GET_LENGTH, &length))
+				{
+				  bitofs = bitpos;
+				  FIELD_BITSIZE (t->field (i)) = length;
+				}
+			      t->field (i).set_loc_bitpos (ofs * 8 + bitofs);
 			    }
 			}
 		    }
