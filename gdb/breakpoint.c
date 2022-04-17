@@ -10921,7 +10921,8 @@ clear_command (const char *arg, int from_tty)
 	{
 	  int match = 0;
 	  /* Are we going to delete b?  */
-	  if (b->type != bp_none && !is_watchpoint (b))
+	  if (b->type != bp_none && !is_watchpoint (b)
+	      && user_breakpoint_p (b))
 	    {
 	      for (bp_location *loc : b->locations ())
 		{
