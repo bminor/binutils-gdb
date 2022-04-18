@@ -3058,15 +3058,7 @@ pdb_read_variable (struct symbol *symbol, struct frame_info *frame)
 {
   pdb_regrel_baton *baton
     = (pdb_regrel_baton *) SYMBOL_LOCATION_BATON (symbol);
-  gdbarch *gdbarch = get_frame_arch (frame);
-  int regnum;
-#ifdef __x86_64__
-  if (gdbarch_ptr_bit (gdbarch) == 64)
-    regnum = AMD64_RSP_REGNUM;
-  else
-#endif
-    regnum = I386_EBP_REGNUM;
-  ULONGEST regvalue = get_frame_register_unsigned (frame, regnum);
+  ULONGEST regvalue = get_frame_register_unsigned (frame, baton->regnum);
   return value_at_lazy (symbol->type (), regvalue + baton->offset);
 }
 
@@ -3792,6 +3784,74 @@ static BOOL CALLBACK block_callback(PSYMBOL_INFO si,
   return TRUE;
 }
 
+static symbol *
+pdb_read_data_symbol (PSYMBOL_INFO si, pdb_line_info *pli, const char *name)
+{
+  objfile *objfile = pli->objfile;
+
+  if (si->info >= pli->cache.size ())
+    pli->cache.resize (si->info + 1, nullptr);
+  else if (pli->cache[si->info] != nullptr)
+    return nullptr;
+
+  symbol *sym = new (&objfile->objfile_obstack) symbol;
+  sym->set_linkage_name (objfile->intern (name));
+  sym->set_language (language_c, &objfile->objfile_obstack);
+  sym->set_domain (VAR_DOMAIN);
+  type *t = get_pdb_type (pli, si->TypeIndex);
+  sym->set_type (t);
+  if (si->Flags & SYMFLAG_REGREL)
+    {
+      pdb_regrel_baton *baton
+	= XOBNEW (&objfile->objfile_obstack, pdb_regrel_baton);
+#ifdef __x86_64__
+      if (gdbarch_ptr_bit (objfile->arch ()) == 64)
+	baton->regnum = AMD64_RSP_REGNUM;
+      else
+#endif
+	baton->regnum = I386_EBP_REGNUM;
+      baton->offset = si->Address;
+      SYMBOL_LOCATION_BATON (sym) = baton;
+      sym->set_aclass_index (pdb_regrel_index);
+      if (si->Flags & SYMFLAG_PARAMETER)
+	sym->set_is_argument (true);
+    }
+  else if (si->Flags & SYMFLAG_TLSREL)
+    {
+      pdb_tls_baton *baton
+	= XOBNEW (&objfile->objfile_obstack, pdb_tls_baton);
+      baton->offset = si->Address;
+#ifdef __x86_64__
+      if (gdbarch_ptr_bit (objfile->arch ()) == 64)
+	{
+	  baton->tib_ofs = 88;
+	  baton->ptr_size = 8;
+	}
+      else
+#endif
+	{
+	  baton->tib_ofs = 44;
+	  baton->ptr_size = 4;
+	}
+      baton->tls_index_sym = pli->tls_index_sym;
+      SYMBOL_LOCATION_BATON (sym) = baton;
+      sym->set_aclass_index (pdb_tls_index);
+    }
+  else
+    {
+      SET_SYMBOL_VALUE_ADDRESS (sym, si->Address);
+      sym->set_aclass_index (LOC_STATIC);
+    }
+  if (pli->local_symbols != nullptr)
+    add_symbol_to_list (sym, pli->local_symbols);
+  else
+    add_symbol_to_list (sym, pli->builder->get_global_symbols ());
+
+  pli->cache[si->info] = t;
+
+  return sym;
+}
+
 static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
     ULONG /*SymbolSize*/, PVOID UserContext)
 {
@@ -3800,15 +3860,11 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
 
   if (si->Tag == SymTagFunction)
     {
-      //pli->reader->record (si->Name, si->Address, mst_text);
-
       context_stack *newobj = pli->builder->push_context (0, si->Address);
       symbol *sym = new (&objfile->objfile_obstack) symbol;
       sym->set_linkage_name (objfile->intern (si->Name));
       sym->set_language (language_c, &objfile->objfile_obstack);
       sym->set_domain (VAR_DOMAIN);
-      //type *ret_type = objfile_type (objfile)->builtin_void;
-      //type *ftype = lookup_function_type (ret_type);
       sym->set_type (get_pdb_type (pli, si->TypeIndex));
       sym->set_aclass_index (LOC_BLOCK);
       SET_SYMBOL_VALUE_ADDRESS (sym, si->Address);
@@ -3831,39 +3887,7 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
     }
   else if (si->Tag == SymTagData)
     {
-      if (si->info >= pli->cache.size ())
-	pli->cache.resize (si->info + 1, nullptr);
-      else if (pli->cache[si->info] != nullptr)
-	return TRUE;
-
-      symbol *sym = new (&objfile->objfile_obstack) symbol;
-      sym->set_linkage_name (objfile->intern (si->Name));
-      sym->set_language (language_c, &objfile->objfile_obstack);
-      sym->set_domain (VAR_DOMAIN);
-      type *t = get_pdb_type (pli, si->TypeIndex);
-      sym->set_type (t);
-      if (si->Flags & SYMFLAG_REGREL)
-	{
-	  pdb_regrel_baton *baton
-	    = XOBNEW (&objfile->objfile_obstack, pdb_regrel_baton);
-	  baton->regnum = 5; // FIXME
-	  baton->offset = si->Address;
-	  SYMBOL_LOCATION_BATON (sym) = baton;
-	  sym->set_aclass_index (pdb_regrel_index);
-	  if (si->Flags & SYMFLAG_PARAMETER)
-	    sym->set_is_argument (true);
-	}
-      else
-	{
-	  SET_SYMBOL_VALUE_ADDRESS (sym, si->Address);
-	  sym->set_aclass_index (LOC_STATIC);
-	}
-      if (pli->local_symbols != nullptr)
-	add_symbol_to_list (sym, pli->local_symbols);
-      else
-	add_symbol_to_list (sym, pli->builder->get_global_symbols ());
-
-      pli->cache[si->info] = t;
+      pdb_read_data_symbol (si, pli, si->Name);
     }
   else if (si->Tag == SymTagThunk)
     {
