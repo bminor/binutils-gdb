@@ -3327,6 +3327,8 @@ typedef BOOL WINAPI (SymInitialize_ftype) (HANDLE, PCSTR, BOOL);
 typedef BOOL WINAPI (SymCleanup_ftype) (HANDLE);
 typedef DWORD64 WINAPI (SymLoadModule64_ftype) (HANDLE, HANDLE, PCSTR,
 						PCSTR, DWORD64, DWORD);
+typedef BOOL WINAPI (SymGetModuleInfo64_ftype)
+     (HANDLE, DWORD64, PIMAGEHLP_MODULE64);
 typedef BOOL WINAPI (SymFromName_ftype) (HANDLE, PCSTR, PSYMBOL_INFO);
 typedef BOOL WINAPI (SymEnumTypes_ftype)
      (HANDLE, ULONG64, PSYM_ENUMERATESYMBOLS_CALLBACK, PVOID);
@@ -3414,6 +3416,7 @@ struct pdb_line_info
   SymSetContext_ftype *fSymSetContext;
   SymSearch_ftype *fSymSearch;
   DWORD64 addr;
+  ULONGEST base_ofs;
   DWORD64 max_addr;
   symbol *tls_index_sym;
   std::vector<type *> cache;
@@ -3815,7 +3818,9 @@ static BOOL CALLBACK block_callback(PSYMBOL_INFO si,
       && pli->fSymGetTypeInfo (pli->p, pli->addr, si->info,
 			       TI_GET_LENGTH, &length))
     {
-      pli->builder->push_context (0, si->Address);
+      ULONGEST addr = si->Address + pli->base_ofs;
+
+      pli->builder->push_context (0, addr);
 
       pdb_enum_locals (pli, si);
 
@@ -3826,7 +3831,7 @@ static BOOL CALLBACK block_callback(PSYMBOL_INFO si,
 
       if (*pli->builder->get_local_symbols () != NULL)
 	pli->builder->finish_block (0, cstk.old_blocks, NULL,
-				    si->Address, si->Address + length);
+				    addr, addr + length);
 
       *pli->builder->get_local_symbols () = cstk.locals;
       pli->builder->set_local_using_directives (cstk.local_using_directives);
@@ -3894,7 +3899,7 @@ pdb_read_data_symbol (PSYMBOL_INFO si, pdb_line_info *pli, const char *name)
     }
   else
     {
-      SET_SYMBOL_VALUE_ADDRESS (sym, si->Address);
+      SET_SYMBOL_VALUE_ADDRESS (sym, si->Address + pli->base_ofs);
       sym->set_aclass_index (LOC_STATIC);
     }
   if (pli->local_symbols != nullptr)
@@ -3912,17 +3917,20 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
 {
   pdb_line_info *pli = (pdb_line_info *) UserContext;
   objfile *objfile = pli->objfile;
+  ULONGEST base_ofs = pli->base_ofs;
 
   if (si->Tag == SymTagFunction)
     {
-      context_stack *newobj = pli->builder->push_context (0, si->Address);
+      ULONGEST addr = si->Address + base_ofs;
+
+      context_stack *newobj = pli->builder->push_context (0, addr);
       symbol *sym = new (&objfile->objfile_obstack) symbol;
       sym->set_linkage_name (objfile->intern (si->Name));
       sym->set_language (language_c, &objfile->objfile_obstack);
       sym->set_domain (VAR_DOMAIN);
       sym->set_type (get_pdb_type (pli, si->TypeIndex));
       sym->set_aclass_index (LOC_BLOCK);
-      SET_SYMBOL_VALUE_ADDRESS (sym, si->Address);
+      SET_SYMBOL_VALUE_ADDRESS (sym, addr);
       add_symbol_to_list (sym, pli->builder->get_global_symbols ());
       newobj->name = sym;
 
@@ -3935,7 +3943,7 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
 
       struct context_stack cstk = pli->builder->pop_context ();
       pli->builder->finish_block (cstk.name, cstk.old_blocks, cstk.static_link,
-				  si->Address, si->Address + si->Size);
+				  addr, addr + si->Size);
       gdbarch_make_symbol_special (objfile->arch (), cstk.name, objfile);
 
       pli->functions.push_back (sym);
@@ -3948,7 +3956,7 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
     {
       for (symbol *sym : pli->functions)
 	{
-	  if (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) == si->Value)
+	  if (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) == si->Value + base_ofs)
 	    {
 	      std::string imp_name
 		= string_printf ("__thunk_%s", sym->linkage_name ());
@@ -3977,8 +3985,9 @@ static BOOL CALLBACK symbol_callback(PSYMBOL_INFO si,
 static BOOL CALLBACK line_callback(PSRCCODEINFO li, PVOID UserContext)
 {
   pdb_line_info *pli = (pdb_line_info *) UserContext;
-  if (li->Address > pli->max_addr)
-    pli->max_addr = li->Address;
+  ULONGEST addr = li->Address + pli->base_ofs;
+  if (addr > pli->max_addr)
+    pli->max_addr = addr;
   buildsym_compunit *builder = pli->builder;
   subfile *sf = builder->get_current_subfile ();
   if (sf == nullptr || strcmp (sf->name, li->FileName) != 0)
@@ -3986,26 +3995,23 @@ static BOOL CALLBACK line_callback(PSRCCODEINFO li, PVOID UserContext)
       builder->start_subfile (li->FileName);
       sf = builder->get_current_subfile ();
     }
-  builder->record_line (sf, li->LineNumber, 0, li->Address, true);
+  builder->record_line (sf, li->LineNumber, 0, addr, true);
 
   return TRUE;
 }
 
-void pdb_load_functions (const char *name, minimal_symbol_reader *reader,
+bool pdb_load_functions (const char *name, minimal_symbol_reader *reader,
 			 struct objfile *objfile);
-void
+bool
 pdb_load_functions (const char *name, minimal_symbol_reader *reader,
 		    struct objfile *objfile)
 {
-  if (!strstr (name, ".exe"))
-    return;
-
   if (GetModuleHandle("ucrtbase.dll") == NULL)
     LoadLibrary("ucrtbase.dll");
 
   HMODULE dh = LoadLibrary("dbghelp.dll");
   if (dh == NULL)
-    return;
+    return false;
 
   SymInitialize_ftype *fSymInitialize = (SymInitialize_ftype *)
     GetProcAddress (dh, "SymInitialize");
@@ -4019,6 +4025,8 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
     GetProcAddress (dh, "SymEnumSymbols");
   SymLoadModule64_ftype *fSymLoadModule64 = (SymLoadModule64_ftype *)
     GetProcAddress (dh, "SymLoadModule64");
+  SymGetModuleInfo64_ftype *fSymGetModuleInfo64 = (SymGetModuleInfo64_ftype *)
+    GetProcAddress (dh, "SymGetModuleInfo64");
   SymEnumSourceLines_ftype *fSymEnumSourceLines = (SymEnumSourceLines_ftype *)
     GetProcAddress (dh, "SymEnumSourceLines");
   SymGetTypeInfo_ftype *fSymGetTypeInfo = (SymGetTypeInfo_ftype *)
@@ -4028,7 +4036,8 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
   SymSearch_ftype *fSymSearch = (SymSearch_ftype *)
     GetProcAddress (dh, "SymSearch");
   if (fSymInitialize != NULL && fSymCleanup != NULL
-      && fSymLoadModule64 != NULL && fSymFromName != NULL
+      && fSymLoadModule64 != NULL && fSymGetModuleInfo64 != NULL
+      && fSymFromName != NULL
       && fSymEnumTypes != NULL && fSymEnumSymbols != NULL
       && fSymEnumSourceLines != NULL && fSymGetTypeInfo != NULL
       && fSymSetContext != NULL && fSymSearch != NULL)
@@ -4037,6 +4046,16 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
 
       fSymInitialize (p, NULL, FALSE);
       DWORD64 addr = fSymLoadModule64(p, NULL, name, NULL, 0, 0);
+
+      IMAGEHLP_MODULE64 mi;
+      memset (&mi, 0, sizeof(mi));
+      mi.SizeOfStruct = sizeof(mi);
+      if (!fSymGetModuleInfo64 (p, addr, &mi) || mi.SymType != SymPdb)
+	{
+	  fSymCleanup(p);
+	  FreeLibrary(dh);
+	  return false;
+	}
 
       std::unique_ptr<buildsym_compunit> builder;
       builder.reset (new buildsym_compunit
@@ -4052,6 +4071,7 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
       pli.fSymSetContext = fSymSetContext;
       pli.fSymSearch = fSymSearch;
       pli.addr = addr;
+      pli.base_ofs = objfile->text_section_offset ();
       pli.max_addr = 0;
       pli.tls_index_sym = nullptr;
 
@@ -4074,6 +4094,8 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
     }
 
   FreeLibrary(dh);
+
+  return true;
 }
 
 void _initialize_check_for_gdb_ini ();
