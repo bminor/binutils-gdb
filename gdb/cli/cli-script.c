@@ -1500,39 +1500,49 @@ define_command (const char *comname, int from_tty)
   do_define_command (comname, from_tty, nullptr);
 }
 
-/* Document a user-defined command.  If COMMANDS is NULL, then this is a
-   top-level call and the document will be read using read_command_lines.
-   Otherwise, it is a "document" command in an existing command and the
-   commands are provided.  */
+/* Document a user-defined command or user defined alias.  If COMMANDS is NULL,
+   then this is a top-level call and the document will be read using
+   read_command_lines.  Otherwise, it is a "document" command in an existing
+   command and the commands are provided.  */
 static void
 do_document_command (const char *comname, int from_tty,
                      const counted_command_line *commands)
 {
-  struct cmd_list_element *c, **list;
-  const char *tem;
+  struct cmd_list_element *alias, *prefix_cmd, *c;
   const char *comfull;
 
   comfull = comname;
-  list = validate_comname (&comname);
+  validate_comname (&comname);
 
-  tem = comname;
-  c = lookup_cmd (&tem, *list, "", NULL, 0, 1);
+  lookup_cmd_composition (comfull, &alias, &prefix_cmd, &c);
 
-  if (c->theclass != class_user)
-    error (_("Command \"%s\" is built-in."), comfull);
+  if (c->theclass != class_user
+      && (alias == nullptr || alias->theclass != class_alias))
+    {
+      if (alias == nullptr)
+	error (_("Command \"%s\" is built-in."), comfull);
+      else
+	error (_("Alias \"%s\" is built-in."), comfull);
+    }
+
+  /* If we found an alias of class_alias, the user is documenting this
+     user-defined alias.  */
+  if (alias != nullptr)
+    c = alias;
 
   counted_command_line doclines;
 
   if (commands == nullptr)
     {
-      std::string prompt 
+      std::string prompt
         = string_printf ("Type documentation for \"%s\".", comfull);
       doclines = read_command_lines (prompt.c_str (), from_tty, 0, 0);
     }
   else
     doclines = *commands;
 
-  xfree ((char *) c->doc);
+  if (c->doc_allocated)
+    xfree ((char *) c->doc);
 
   {
     struct command_line *cl1;
@@ -1553,6 +1563,7 @@ do_document_command (const char *comname, int from_tty,
       }
 
     c->doc = doc;
+    c->doc_allocated = 1;
   }
 }
 
@@ -1681,8 +1692,8 @@ _initialize_cli_script ()
      its prefixes.  */
   document_cmd_element = add_com ("document", class_support, document_command,
                                   _("\
-Document a user-defined command.\n\
-Give command name as argument.  Give documentation on following lines.\n\
+Document a user-defined command or user-defined alias.\n\
+Give command or alias name as argument.  Give documentation on following lines.\n\
 End with a line of just \"end\"."));
   set_cmd_completer (document_cmd_element, command_completer);
   define_cmd_element = add_com ("define", class_support, define_command, _("\

@@ -2265,11 +2265,20 @@ one or more aliases, @value{GDBN} will display a first line with
 the command name and all its aliases separated by commas.
 This first line will be followed by the full definition of all aliases
 having default arguments.
+When asking the help for an alias, the documentation for the aliased
+command is shown.
+
+A user-defined alias can optionally be documented using the
+@code{document} command (@pxref{Define, document}).  @value{GDBN} then
+considers this alias as different from the aliased command: this alias
+is not listed in the aliased command help output, and asking help for
+this alias will show the documentation provided for the alias instead of
+the documentation of the aliased command.
 
 @kindex apropos
 @item apropos [-v] @var{regexp}
 The @code{apropos} command searches through all of the @value{GDBN}
-commands, and their documentation, for the regular expression specified in
+commands and aliases, and their documentation, for the regular expression specified in
 @var{args}.  It prints out all matches found.  The optional flag  @samp{-v},
 which stands for @samp{verbose}, indicates to output the full documentation
 of the matching commands and highlight the parts of the documentation
@@ -27967,6 +27976,13 @@ You may use the @code{document} command again to change the
 documentation of a command.  Redefining the command with @code{define}
 does not change the documentation.
 
+It is also possible to document user-defined aliases.  The alias documentation
+will then be used by the @code{help} and @code{apropos} commands
+instead of the documentation of the aliased command.
+Documenting a user-defined alias is particularly useful when defining
+an alias as a set of nested @code{with} commands
+(@pxref{Command aliases default args}).
+
 @kindex define-prefix
 @item define-prefix @var{commandname}
 Define or mark the command @var{commandname} as a user-defined prefix
@@ -28640,6 +28656,14 @@ using the temporary values of the settings and the arguments explicitly given
 by the user.
 For more information about the @code{with} command usage,
 see @ref{Command Settings}.
+
+By default, asking the help for an alias shows the documentation of
+the aliased command.  When the alias is a set of nested commands, @code{help}
+of an alias shows the documentation of the first command.  This help
+is not particularly useful for an alias such as @code{pp10}.
+For such an alias, it is useful to give a specific documentation
+using the @code{document} command (@pxref{Define, document}).
+
 
 @c Python docs live in a separate file.
 @include python.texi

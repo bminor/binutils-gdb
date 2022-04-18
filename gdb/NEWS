@@ -99,6 +99,16 @@ maintenance print frame-id [ LEVEL ]
 
 * Changed commands
 
+document user-defined
+  It is now possible to document user-defined aliases.
+  When a user-defined alias is documented, the help and apropos commands
+  use the provided documentation instead of the documentation of the
+  aliased command.
+  Documenting a user-defined alias is particularly useful when the alias
+  is a set of nested 'with' commands to avoid showing the help of
+  the with command for an alias that will in fact launch the
+  last command given in the nested commands.
+
 maintenance info line-table
   Add a PROLOGUE-END column to the output which indicates that an
   entry corresponds to an address where a breakpoint should be placed

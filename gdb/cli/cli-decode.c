@@ -1349,6 +1349,18 @@ fput_command_name_styled (const cmd_list_element &c, struct ui_file *stream)
 		  prefixname.c_str (), c.name);
 }
 
+/* True if ALIAS has a user-defined documentation.  */
+
+static bool
+user_documented_alias (const cmd_list_element &alias)
+{
+  gdb_assert (alias.is_alias ());
+  /* Alias is user documented if it has an allocated documentation
+     that differs from the aliased command.  */
+  return (alias.doc_allocated
+	  && strcmp (alias.doc, alias.alias_target->doc) != 0);
+}
+
 /* Print the definition of alias C using title style for alias
    and aliased command.  */
 
@@ -1364,20 +1376,22 @@ fput_alias_definition_styled (const cmd_list_element &c,
   gdb_printf (stream, " %s\n", c.default_args.c_str ());
 }
 
-/* Print the definition of the aliases of CMD that have default args.  */
+/* Print the definition of CMD aliases not deprecated and having default args
+   and not specifically documented by the user.  */
 
 static void
 fput_aliases_definition_styled (const cmd_list_element &cmd,
 				struct ui_file *stream)
 {
   for (const cmd_list_element &alias : cmd.aliases)
-    if (!alias.cmd_deprecated && !alias.default_args.empty ())
+    if (!alias.cmd_deprecated
+	&& !user_documented_alias (alias)
+	&& !alias.default_args.empty ())
       fput_alias_definition_styled (alias, stream);
 }
 
-
-/* If C has one or more aliases, style print the name of C and
-   the name of its aliases, separated by commas.
+/* If C has one or more aliases, style print the name of C and the name of its
+   aliases not documented specifically by the user, separated by commas.
    If ALWAYS_FPUT_C_NAME, print the name of C even if it has no aliases.
    If one or more names are printed, POSTFIX is printed after the last name.
 */
@@ -1389,11 +1403,11 @@ fput_command_names_styled (const cmd_list_element &c,
 {
   /* First, check if we are going to print something.  That is, either if
      ALWAYS_FPUT_C_NAME is true or if there exists at least one non-deprecated
-     alias.  */
+     alias not documented specifically by the user.  */
 
   auto print_alias = [] (const cmd_list_element &alias)
     {
-      return !alias.cmd_deprecated;
+      return !alias.cmd_deprecated && !user_documented_alias (alias);
     };
 
   bool print_something = always_fput_c_name;
@@ -1474,11 +1488,11 @@ apropos_cmd (struct ui_file *stream,
   /* Walk through the commands.  */
   for (c=commandlist;c;c=c->next)
     {
-      if (c->is_alias ())
+      if (c->is_alias () && !user_documented_alias (*c))
 	{
-	  /* Command aliases/abbreviations are skipped to ensure we print the
-	     doc of a command only once, when encountering the aliased
-	     command.  */
+	  /* Command aliases/abbreviations not specifically documented by the
+	     user are skipped to ensure we print the doc of a command only once,
+	     when encountering the aliased command.  */
 	  continue;
 	}
 
@@ -1571,11 +1585,24 @@ help_cmd (const char *command, struct ui_file *stream)
      number of this class so that the commands in the class will be
      listed.  */
 
-  /* If the user asked 'help somecommand' and there is no alias,
-     the false indicates to not output the (single) command name.  */
-  fput_command_names_styled (*c, false, "\n", stream);
-  fput_aliases_definition_styled (*c, stream);
-  gdb_puts (c->doc, stream);
+  if (alias == nullptr || !user_documented_alias (*alias))
+    {
+      /* Case of a normal command, or an alias not explictly
+	 documented by the user.  */
+      /* If the user asked 'help somecommand' and there is no alias,
+	 the false indicates to not output the (single) command name.  */
+      fput_command_names_styled (*c, false, "\n", stream);
+      fput_aliases_definition_styled (*c, stream);
+      gdb_puts (c->doc, stream);
+    }
+  else
+    {
+      /* Case of an alias explictly documented by the user.
+	 Only output the alias definition and its explicit documentation.  */
+      fput_alias_definition_styled (*alias, stream);
+      fput_command_names_styled (*alias, false, "\n", stream);
+      gdb_puts (alias->doc, stream);
+    }
   gdb_puts ("\n", stream);
 
   if (!c->is_prefix () && !c->is_command_class_help ())
