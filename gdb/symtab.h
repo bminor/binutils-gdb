@@ -1386,6 +1386,18 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
 
   struct gdbarch *arch () const;
 
+  /* Return the symtab of this symbol.  It is an error to call this if
+     is_objfile_owned is false, which only happens for
+     architecture-provided types.  */
+
+  struct symtab *symtab () const;
+
+  /* Set the symtab of this symbol to SYMTAB.  It is an error to call
+     this if is_objfile_owned is false, which only happens for
+     architecture-provided types.  */
+
+  void set_symtab (struct symtab *symtab);
+
   /* Data type of value */
 
   struct type *m_type = nullptr;
@@ -1501,18 +1513,6 @@ extern int register_symbol_block_impl (enum address_class aclass,
 
 extern int register_symbol_register_impl (enum address_class,
 					  const struct symbol_register_ops *);
-
-/* Return the SYMTAB of SYMBOL.
-   It is an error to call this if symbol.is_objfile_owned is false, which
-   only happens for architecture-provided types.  */
-
-extern struct symtab *symbol_symtab (const struct symbol *symbol);
-
-/* Set the symtab of SYMBOL to SYMTAB.
-   It is an error to call this if symbol.is_objfile_owned is false, which
-   only happens for architecture-provided types.  */
-
-extern void symbol_set_symtab (struct symbol *symbol, struct symtab *symtab);
 
 /* An instance of this type is used to represent a C++ template
    function.  A symbol is really of this type iff

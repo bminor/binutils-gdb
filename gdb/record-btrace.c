@@ -1067,7 +1067,7 @@ btrace_compute_src_line_range (const struct btrace_function *bfun,
   if (sym == NULL)
     goto out;
 
-  symtab = symbol_symtab (sym);
+  symtab = sym->symtab ();
 
   for (const btrace_insn &insn : bfun->insn)
     {
@@ -1100,7 +1100,7 @@ btrace_call_history_src_line (struct ui_out *uiout,
     return;
 
   uiout->field_string ("file",
-		       symtab_to_filename_for_display (symbol_symtab (sym)),
+		       symtab_to_filename_for_display (sym->symtab ()),
 		       file_name_style.style ());
 
   btrace_compute_src_line_range (bfun, &begin, &end);

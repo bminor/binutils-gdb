@@ -2188,7 +2188,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
       for (const auto &sym : ls->labels.label_symbols)
 	{
 	  struct program_space *pspace
-	    = symbol_symtab (sym.symbol)->compunit ()->objfile ()->pspace;
+	    = sym.symbol->symtab ()->compunit ()->objfile ()->pspace;
 
 	  if (symbol_to_sal (&sal, state->funfirstline, sym.symbol)
 	      && maybe_add_address (state->addr_set, pspace, sal.pc))
@@ -2210,7 +2210,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
 	  for (const auto &sym : ls->function_symbols)
 	    {
 	      program_space *pspace
-		= symbol_symtab (sym.symbol)->compunit ()->objfile ()->pspace;
+		= sym.symbol->symtab ()->compunit ()->objfile ()->pspace;
 	      set_current_program_space (pspace);
 
 	      /* Don't skip to the first line of the function if we
@@ -3483,8 +3483,8 @@ compare_symbols (const block_symbol &a, const block_symbol &b)
 {
   uintptr_t uia, uib;
 
-  uia = (uintptr_t) symbol_symtab (a.symbol)->compunit ()->objfile ()->pspace;
-  uib = (uintptr_t) symbol_symtab (b.symbol)->compunit ()->objfile ()->pspace;
+  uia = (uintptr_t) a.symbol->symtab ()->compunit ()->objfile ()->pspace;
+  uib = (uintptr_t) b.symbol->symtab ()->compunit ()->objfile ()->pspace;
 
   if (uia < uib)
     return true;
@@ -3608,7 +3608,7 @@ find_method (struct linespec_state *self,
 
       /* Program spaces that are executing startup should have
 	 been filtered out earlier.  */
-      pspace = symbol_symtab (sym)->compunit ()->objfile ()->pspace;
+      pspace = sym->symtab ()->compunit ()->objfile ()->pspace;
       gdb_assert (!pspace->executing_startup);
       set_current_program_space (pspace);
       t = check_typedef (sym->type ());
@@ -3619,7 +3619,7 @@ find_method (struct linespec_state *self,
 	 sure not to miss the last batch.  */
       if (ix == sym_classes->size () - 1
 	  || (pspace
-	      != (symbol_symtab (sym_classes->at (ix + 1).symbol)
+	      != (sym_classes->at (ix + 1).symbol->symtab ()
 		  ->compunit ()->objfile ()->pspace)))
 	{
 	  /* If we did not find a direct implementation anywhere in
@@ -3985,7 +3985,7 @@ find_label_symbols (struct linespec_state *self,
 	{
 	  fn_sym = elt.symbol;
 	  set_current_program_space
-	    (symbol_symtab (fn_sym)->compunit ()->objfile ()->pspace);
+	    (fn_sym->symtab ()->compunit ()->objfile ()->pspace);
 	  block = fn_sym->value_block ();
 
 	  find_label_symbols_in_block (block, name, fn_sym, completion_mode,
@@ -4380,7 +4380,7 @@ symbol_to_sal (struct symtab_and_line *result,
       if (sym->aclass () == LOC_LABEL && sym->value_address () != 0)
 	{
 	  *result = {};
-	  result->symtab = symbol_symtab (sym);
+	  result->symtab = sym->symtab ();
 	  result->symbol = sym;
 	  result->line = sym->line ();
 	  result->pc = sym->value_address ();
@@ -4396,7 +4396,7 @@ symbol_to_sal (struct symtab_and_line *result,
 	{
 	  /* We know its line number.  */
 	  *result = {};
-	  result->symtab = symbol_symtab (sym);
+	  result->symtab = sym->symtab ();
 	  result->symbol = sym;
 	  result->line = sym->line ();
 	  result->pc = sym->value_address ();

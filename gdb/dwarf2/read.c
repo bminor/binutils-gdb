@@ -7810,9 +7810,9 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 		  struct objfile *objfile = cu->per_objfile->objfile;
 		  if (strcmp (package_name.get (), this_package_name.get ()) != 0)
 		    complaint (_("Symtab %s has objects from two different Go packages: %s and %s"),
-			       (symbol_symtab (sym) != NULL
+			       (sym->symtab () != NULL
 				? symtab_to_filename_for_display
-				    (symbol_symtab (sym))
+				(sym->symtab ())
 				: objfile_name (objfile)),
 			       this_package_name.get (), package_name.get ());
 		}
@@ -12081,7 +12081,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	 of gdb assume that symbols do, and this is reasonably
 	 true.  */
       for (symbol *sym : template_args)
-	symbol_set_symtab (sym, symbol_symtab (templ_func));
+	sym->set_symtab (templ_func->symtab ());
     }
 
   /* In C++, we can have functions nested inside functions (e.g., when
@@ -14977,7 +14977,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  struct symtab *symtab;
 	  if (sym != nullptr)
-	    symtab = symbol_symtab (sym);
+	    symtab = sym->symtab ();
 	  else if (cu->line_header != nullptr)
 	    {
 	      /* Any related symtab will do.  */
@@ -15001,7 +15001,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 		 other parts of gdb assume that symbols do, and this is
 		 reasonably true.  */
 	      for (int i = 0; i < TYPE_N_TEMPLATE_ARGUMENTS (type); ++i)
-		symbol_set_symtab (TYPE_TEMPLATE_ARGUMENT (type, i), symtab);
+		TYPE_TEMPLATE_ARGUMENT (type, i)->set_symtab (symtab);
 	    }
 	}
     }
@@ -20667,7 +20667,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  if (fe == NULL)
 	    complaint (_("file index out of range"));
 	  else
-	    symbol_set_symtab (sym, fe->symtab);
+	    sym->set_symtab (fe->symtab);
 	}
 
       switch (die->tag)

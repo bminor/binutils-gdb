@@ -4486,7 +4486,7 @@ mylookup_symbol (const char *name, const struct block *block,
 static void
 add_symbol (struct symbol *s, struct symtab *symtab, struct block *b)
 {
-  symbol_set_symtab (s, symtab);
+  s->set_symtab (symtab);
   mdict_add_symbol (BLOCK_MULTIDICT (b), s);
 }
 

@@ -329,7 +329,7 @@ select_source_symtab (struct symtab *s)
       if (sal.symtab == NULL)
 	/* We couldn't find the location of `main', possibly due to missing
 	   line number info, fall back to line 1 in the corresponding file.  */
-	loc->set (symbol_symtab (bsym.symbol), 1);
+	loc->set (bsym.symbol->symtab (), 1);
       else
 	loc->set (sal.symtab, std::max (sal.line - (lines_to_list - 1), 1));
       return;

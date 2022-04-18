@@ -132,7 +132,7 @@ mi_symbol_info (enum search_domain kind, const char *name_regexp,
       /* As long as we have debug symbols...  */
       while (i < symbols.size () && symbols[i].msymbol.minsym == nullptr)
 	{
-	  symtab *symtab = symbol_symtab (symbols[i].symbol);
+	  symtab *symtab = symbols[i].symbol->symtab ();
 	  ui_out_emit_tuple symtab_tuple_emitter (uiout, nullptr);
 
 	  uiout->field_string ("filename",
@@ -144,7 +144,7 @@ mi_symbol_info (enum search_domain kind, const char *name_regexp,
 	  /* As long as we have debug symbols from this symtab...  */
 	  for (; (i < symbols.size ()
 		  && symbols[i].msymbol.minsym == nullptr
-		  && symbol_symtab (symbols[i].symbol) == symtab);
+		  && symbols[i].symbol->symtab () == symtab);
 	       ++i)
 	    {
 	      symbol_search &s = symbols[i];
@@ -256,7 +256,7 @@ output_module_symbols_in_single_module_and_file
 
   /* The symbol for the first result, and the symtab in which it resides.  */
   const symbol *first_result_symbol = iter->second.symbol;
-  symtab *first_symbtab = symbol_symtab (first_result_symbol);
+  symtab *first_symbtab = first_result_symbol->symtab ();
 
   /* Formatted output.  */
   ui_out_emit_tuple current_file (uiout, nullptr);
@@ -269,7 +269,7 @@ output_module_symbols_in_single_module_and_file
      we change module, or we change symtab.  */
   for (; (iter != end
 	  && first_module_symbol == iter->first.symbol
-	  && first_symbtab == symbol_symtab (iter->second.symbol));
+	  && first_symbtab == iter->second.symbol->symtab ());
        ++iter)
     output_debug_symbol (uiout, kind, iter->second.symbol,
 			 iter->second.block);

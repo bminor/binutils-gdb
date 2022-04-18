@@ -625,7 +625,7 @@ compile_cplus_convert_struct_or_union_members
 		       we can do but ignore this member.  */
 		    continue;
 		  }
-		const char *filename = symbol_symtab (sym.symbol)->filename;
+		const char *filename = sym.symbol->symtab ()->filename;
 		unsigned int line = sym.symbol->line ();
 
 		physaddr = sym.symbol->value_address ();
@@ -764,7 +764,7 @@ compile_cplus_convert_struct_or_union_methods (compile_cplus_instance *instance,
 	      continue;
 	    }
 
-	  const char *filename = symbol_symtab (sym.symbol)->filename;
+	  const char *filename = sym.symbol->symtab ()->filename;
 	  unsigned int line = sym.symbol->line ();
 	  CORE_ADDR address = BLOCK_START (sym.symbol->value_block ());
 	  const char *kind;

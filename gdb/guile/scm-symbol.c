@@ -364,7 +364,7 @@ gdbscm_symbol_symtab (SCM self)
 
   if (!symbol->is_objfile_owned ())
     return SCM_BOOL_F;
-  return stscm_scm_from_symtab (symbol_symtab (symbol));
+  return stscm_scm_from_symtab (symbol->symtab ());
 }
 
 /* (symbol-name <gdb:symbol>) -> string */

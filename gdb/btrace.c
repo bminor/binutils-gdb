@@ -102,7 +102,7 @@ ftrace_print_filename (const struct btrace_function *bfun)
   sym = bfun->sym;
 
   if (sym != NULL)
-    filename = symtab_to_filename_for_display (symbol_symtab (sym));
+    filename = symtab_to_filename_for_display (sym->symtab ());
   else
     filename = "<unknown>";
 
@@ -210,8 +210,8 @@ ftrace_function_switched (const struct btrace_function *bfun,
 	return 1;
 
       /* Check the location of those functions, as well.  */
-      bfname = symtab_to_fullname (symbol_symtab (sym));
-      fname = symtab_to_fullname (symbol_symtab (fun));
+      bfname = symtab_to_fullname (sym->symtab ());
+      fname = symtab_to_fullname (fun->symtab ());
       if (filename_cmp (fname, bfname) != 0)
 	return 1;
     }

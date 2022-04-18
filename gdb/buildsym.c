@@ -1006,15 +1006,15 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 	/* Inlined functions may have symbols not in the global or
 	   static symbol lists.  */
 	if (BLOCK_FUNCTION (block) != NULL)
-	  if (symbol_symtab (BLOCK_FUNCTION (block)) == NULL)
-	    symbol_set_symtab (BLOCK_FUNCTION (block), symtab);
+	  if (BLOCK_FUNCTION (block)->symtab () == NULL)
+	    BLOCK_FUNCTION (block)->set_symtab (symtab);
 
 	/* Note that we only want to fix up symbols from the local
 	   blocks, not blocks coming from included symtabs.  That is why
 	   we use ALL_DICT_SYMBOLS here and not ALL_BLOCK_SYMBOLS.  */
 	ALL_DICT_SYMBOLS (BLOCK_MULTIDICT (block), miter, sym)
-	  if (symbol_symtab (sym) == NULL)
-	    symbol_set_symtab (sym, symtab);
+	  if (sym->symtab () == NULL)
+	    sym->set_symtab (symtab);
       }
   }
 
@@ -1114,8 +1114,8 @@ set_missing_symtab (struct pending *pending_list,
     {
       for (i = 0; i < pending->nsyms; ++i)
 	{
-	  if (symbol_symtab (pending->symbol[i]) == NULL)
-	    symbol_set_symtab (pending->symbol[i], cu->primary_filetab ());
+	  if (pending->symbol[i]->symtab () == NULL)
+	    pending->symbol[i]->set_symtab (cu->primary_filetab ());
 	}
     }
 }
