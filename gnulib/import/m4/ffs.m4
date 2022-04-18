@@ -1,12 +1,12 @@
-# ffs.m4 serial 4
-dnl Copyright (C) 2011-2021 Free Software Foundation, Inc.
+# ffs.m4 serial 5
+dnl Copyright (C) 2011-2022 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
 dnl with or without modifications, as long as this notice is preserved.
 
 AC_DEFUN([gl_FUNC_FFS],
 [
-  AC_REQUIRE([gl_HEADER_STRINGS_H_DEFAULTS])
+  AC_REQUIRE([gl_STRINGS_H_DEFAULTS])
 
   dnl We can't use AC_CHECK_FUNC here, because ffs() is defined as a
   dnl static inline function when compiling for Android 4.2 or older.

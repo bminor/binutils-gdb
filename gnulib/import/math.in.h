@@ -1,18 +1,18 @@
 /* A GNU-like <math.h>.
 
-   Copyright (C) 2002-2003, 2007-2021 Free Software Foundation, Inc.
+   Copyright (C) 2002-2003, 2007-2022 Free Software Foundation, Inc.
 
-   This program is free software: you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
+   This file is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of the
+   License, or (at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
+   This file is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+   GNU Lesser General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
+   You should have received a copy of the GNU Lesser General Public License
    along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 #ifndef _@GUARD_PREFIX@_MATH_H
@@ -54,6 +54,16 @@
 _GL_INLINE_HEADER_BEGIN
 #ifndef _GL_MATH_INLINE
 # define _GL_MATH_INLINE _GL_INLINE
+#endif
+
+/* The __attribute__ feature is available in gcc versions 2.5 and later.
+   The attribute __const__ was added in gcc 2.95.  */
+#ifndef _GL_ATTRIBUTE_CONST
+# if __GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 95) || defined __clang__
+#  define _GL_ATTRIBUTE_CONST __attribute__ ((__const__))
+# else
+#  define _GL_ATTRIBUTE_CONST /* empty */
+# endif
 #endif
 
 /* The definitions of _GL_FUNCDECL_RPL etc. are copied here.  */
@@ -1322,6 +1332,7 @@ _GL_FUNCDECL_RPL (ilogbl, int, (long double x));
 _GL_CXXALIAS_RPL (ilogbl, int, (long double x));
 # else
 #  if !@HAVE_ILOGBL@
+#   undef ilogbl
 _GL_FUNCDECL_SYS (ilogbl, int, (long double x));
 #  endif
 _GL_CXXALIAS_SYS (ilogbl, int, (long double x));
@@ -2102,7 +2113,7 @@ _GL_FUNCDECL_RPL (sinf, float, (float x));
 _GL_CXXALIAS_RPL (sinf, float, (float x));
 # else
 #  if !@HAVE_SINF@
- #  undef sinf
+#   undef sinf
 _GL_FUNCDECL_SYS (sinf, float, (float x));
 #  endif
 _GL_CXXALIAS_SYS (sinf, float, (float x));
@@ -2422,6 +2433,7 @@ _GL_MATH_CXX_REAL_FLOATING_DECL_1 (isfinite)
      functions.  */
 _GL_MATH_CXX_REAL_FLOATING_DECL_2 (isfinite, rpl_isfinite, bool)
 #    define isfinite rpl_isfinite
+#    define GNULIB_NAMESPACE_LACKS_ISFINITE 1
 #   else
 _GL_MATH_CXX_REAL_FLOATING_DECL_2 (isfinite, isfinite, bool)
 #   endif
@@ -2456,6 +2468,7 @@ _GL_MATH_CXX_REAL_FLOATING_DECL_1 (isinf)
      functions.  */
 _GL_MATH_CXX_REAL_FLOATING_DECL_2 (isinf, rpl_isinf, bool)
 #    define isinf rpl_isinf
+#    define GNULIB_NAMESPACE_LACKS_ISINF 1
 #   else
 _GL_MATH_CXX_REAL_FLOATING_DECL_2 (isinf, isinf, bool)
 #   endif
@@ -2578,11 +2591,12 @@ _GL_EXTERN_C int rpl_isnanl (long double x) _GL_ATTRIBUTE_CONST;
 #  if defined isnan || defined GNULIB_NAMESPACE
 _GL_MATH_CXX_REAL_FLOATING_DECL_1 (isnan)
 #   undef isnan
-#   if __GNUC__ >= 6 || (defined __clang__ && !((defined __APPLE__ && defined __MACH__) || (defined __FreeBSD__ && __clang_major__ < 7) || defined __OpenBSD__ || (defined _WIN32 && !defined __CYGWIN__)))
+#   if __GNUC__ >= 6 || (defined __clang__ && !((defined __APPLE__ && defined __MACH__ && __clang_major__ < 12) || (defined __FreeBSD__ && __clang_major__ < 7) || defined __OpenBSD__ || (defined _WIN32 && !defined __CYGWIN__)))
   /* This platform's <cmath> possibly defines isnan through a set of inline
      functions.  */
 _GL_MATH_CXX_REAL_FLOATING_DECL_2 (isnan, rpl_isnan, bool)
 #    define isnan rpl_isnan
+#    define GNULIB_NAMESPACE_LACKS_ISNAN 1
 #   else
 _GL_MATH_CXX_REAL_FLOATING_DECL_2 (isnan, isnan, bool)
 #   endif
@@ -2666,6 +2680,7 @@ _GL_MATH_CXX_REAL_FLOATING_DECL_1 (signbit)
      functions.  */
 _GL_MATH_CXX_REAL_FLOATING_DECL_2 (signbit, rpl_signbit, bool)
 #    define signbit rpl_signbit
+#    define GNULIB_NAMESPACE_LACKS_SIGNBIT 1
 #   else
 _GL_MATH_CXX_REAL_FLOATING_DECL_2 (signbit, signbit, bool)
 #   endif
