@@ -3062,6 +3062,39 @@ pdb_read_variable (struct symbol *symbol, struct frame_info *frame)
   return value_at_lazy (symbol->type (), regvalue + baton->offset);
 }
 
+struct pdb_tls_baton
+{
+  ULONG64 offset;
+  int tib_ofs;
+  int ptr_size;
+  symbol *tls_index_sym;
+};
+
+static value *
+pdb_tls_read_variable (struct symbol *symbol, struct frame_info *frame)
+{
+  pdb_tls_baton *baton = (pdb_tls_baton *) SYMBOL_LOCATION_BATON (symbol);
+
+  CORE_ADDR tib;
+  if (baton->tls_index_sym != nullptr
+      && the_windows_nat_target.get_tib_address (inferior_ptid, &tib))
+    {
+      struct gdbarch *gdbarch = get_frame_arch (frame);
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      ULONGEST thread_local_storage
+	= read_memory_unsigned_integer (tib + baton->tib_ofs,
+					baton->ptr_size, byte_order);
+      DWORD tls_index = read_memory_unsigned_integer
+	(SYMBOL_VALUE_ADDRESS (baton->tls_index_sym), 4, byte_order);
+      ULONGEST tls = read_memory_unsigned_integer
+	(thread_local_storage + tls_index * baton->ptr_size,
+	 baton->ptr_size, byte_order);
+      return value_at_lazy (symbol->type (), tls + baton->offset);
+    }
+
+  return allocate_optimized_out_value (symbol->type ());
+}
+
 static enum symbol_needs_kind
 pdb_get_symbol_read_needs (struct symbol *symbol)
 {
@@ -3099,6 +3132,17 @@ const struct symbol_computed_ops pdb_regrel_funcs = {
   pdb_generate_c_location
 };
 static int pdb_regrel_index;
+
+const struct symbol_computed_ops pdb_tls_funcs = {
+  pdb_tls_read_variable,
+  NULL,
+  pdb_get_symbol_read_needs,
+  pdb_describe_location,
+  0,	/* location_has_loclist */
+  pdb_tracepoint_var_ref,
+  pdb_generate_c_location
+};
+static int pdb_tls_index;
 
 
 void _initialize_windows_nat ();
@@ -3205,6 +3249,7 @@ Use \"file\" or \"dll\" command to load executable/libraries directly."));
 
   pdb_regrel_index = register_symbol_computed_impl (LOC_COMPUTED,
 						    &pdb_regrel_funcs);
+  pdb_tls_index = register_symbol_computed_impl (LOC_COMPUTED, &pdb_tls_funcs);
 }
 
 /* Hardware watchpoint support, adapted from go32-nat.c code.  */
@@ -3282,6 +3327,7 @@ typedef BOOL WINAPI (SymInitialize_ftype) (HANDLE, PCSTR, BOOL);
 typedef BOOL WINAPI (SymCleanup_ftype) (HANDLE);
 typedef DWORD64 WINAPI (SymLoadModule64_ftype) (HANDLE, HANDLE, PCSTR,
 						PCSTR, DWORD64, DWORD);
+typedef BOOL WINAPI (SymFromName_ftype) (HANDLE, PCSTR, PSYMBOL_INFO);
 typedef BOOL WINAPI (SymEnumTypes_ftype)
      (HANDLE, ULONG64, PSYM_ENUMERATESYMBOLS_CALLBACK, PVOID);
 typedef BOOL WINAPI (SymEnumSymbols_ftype)
@@ -3369,6 +3415,7 @@ struct pdb_line_info
   SymSearch_ftype *fSymSearch;
   DWORD64 addr;
   DWORD64 max_addr;
+  symbol *tls_index_sym;
   std::vector<type *> cache;
   std::vector<symbol *> functions;
 };
@@ -3960,6 +4007,8 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
     GetProcAddress (dh, "SymInitialize");
   SymCleanup_ftype *fSymCleanup = (SymCleanup_ftype *)
     GetProcAddress (dh, "SymCleanup");
+  SymFromName_ftype *fSymFromName = (SymFromName_ftype *)
+    GetProcAddress (dh, "SymFromName");
   SymEnumTypes_ftype *fSymEnumTypes = (SymEnumTypes_ftype *)
     GetProcAddress (dh, "SymEnumTypes");
   SymEnumSymbols_ftype *fSymEnumSymbols = (SymEnumSymbols_ftype *)
@@ -3975,7 +4024,7 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
   SymSearch_ftype *fSymSearch = (SymSearch_ftype *)
     GetProcAddress (dh, "SymSearch");
   if (fSymInitialize != NULL && fSymCleanup != NULL
-      && fSymLoadModule64 != NULL
+      && fSymLoadModule64 != NULL && fSymFromName != NULL
       && fSymEnumTypes != NULL && fSymEnumSymbols != NULL
       && fSymEnumSourceLines != NULL && fSymGetTypeInfo != NULL
       && fSymSetContext != NULL && fSymSearch != NULL)
@@ -4000,6 +4049,13 @@ pdb_load_functions (const char *name, minimal_symbol_reader *reader,
       pli.fSymSearch = fSymSearch;
       pli.addr = addr;
       pli.max_addr = 0;
+      pli.tls_index_sym = nullptr;
+
+      SYMBOL_INFO si;
+      memset (&si, 0, sizeof (si));
+      si.SizeOfStruct = sizeof (si);
+      if (fSymFromName (p, "_tls_index", &si))
+	pli.tls_index_sym = pdb_read_data_symbol (&si, &pli, "_tls_index");
 
       fSymEnumTypes(p, addr, symbol_callback, &pli);
       fSymEnumSymbols(p, addr, NULL, symbol_callback, &pli);
