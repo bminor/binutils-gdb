@@ -2506,7 +2506,7 @@ info_scope_command (const char *args_in, int from_tty)
 	  if (symname == NULL || *symname == '\0')
 	    continue;		/* Probably botched, certainly useless.  */
 
-	  gdbarch = symbol_arch (sym);
+	  gdbarch = sym->arch ();
 
 	  gdb_printf ("Symbol %s is ", symname);
 

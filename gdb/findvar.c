@@ -753,7 +753,7 @@ language_defn::read_var_value (struct symbol *var,
 	lookup_data.name = var->linkage_name ();
 
 	gdbarch_iterate_over_objfiles_in_search_order
-	  (symbol_arch (var),
+	  (var->arch (),
 	   minsym_lookup_iterator_cb, &lookup_data,
 	   var->objfile ());
 	msym = lookup_data.result.minsym;

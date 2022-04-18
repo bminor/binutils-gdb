@@ -1684,7 +1684,7 @@ info_address_command (const char *exp, int from_tty)
     section = sym->obj_section (sym->objfile ());
   else
     section = NULL;
-  gdbarch = symbol_arch (sym);
+  gdbarch = sym->arch ();
 
   if (SYMBOL_COMPUTED_OPS (sym) != NULL)
     {

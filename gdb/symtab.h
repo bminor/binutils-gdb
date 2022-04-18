@@ -1382,6 +1382,10 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
 
   struct objfile *objfile () const;
 
+  /* Return the ARCH of this symbol.  */
+
+  struct gdbarch *arch () const;
+
   /* Data type of value */
 
   struct type *m_type = nullptr;
@@ -1497,10 +1501,6 @@ extern int register_symbol_block_impl (enum address_class aclass,
 
 extern int register_symbol_register_impl (enum address_class,
 					  const struct symbol_register_ops *);
-
-/* Return the ARCH of SYMBOL.  */
-
-extern struct gdbarch *symbol_arch (const struct symbol *symbol);
 
 /* Return the SYMTAB of SYMBOL.
    It is an error to call this if symbol.is_objfile_owned is false, which

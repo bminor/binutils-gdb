@@ -115,7 +115,7 @@ syscm_get_symbol_map (struct symbol *symbol)
     }
   else
     {
-      struct gdbarch *gdbarch = symbol_arch (symbol);
+      struct gdbarch *gdbarch = symbol->arch ();
       struct syscm_gdbarch_data *data
 	= (struct syscm_gdbarch_data *) gdbarch_data (gdbarch,
 						      syscm_gdbarch_data_key);

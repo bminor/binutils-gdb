@@ -6602,11 +6602,11 @@ symbol::objfile () const
 /* See symtab.h.  */
 
 struct gdbarch *
-symbol_arch (const struct symbol *symbol)
+symbol::arch () const
 {
-  if (!symbol->is_objfile_owned ())
-    return symbol->owner.arch;
-  return symbol->owner.symtab->compunit ()->objfile ()->arch ();
+  if (!is_objfile_owned ())
+    return owner.arch;
+  return owner.symtab->compunit ()->objfile ()->arch ();
 }
 
 /* See symtab.h.  */
