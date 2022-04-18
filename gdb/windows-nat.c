@@ -3888,6 +3888,10 @@ pdb_read_data_symbol (PSYMBOL_INFO si, pdb_line_info *pli, const char *name)
       SYMBOL_LOCATION_BATON (sym) = baton;
       sym->set_aclass_index (pdb_tls_index);
     }
+  else if (si->Flags & 0x80000) // SYMFLAG_NULL
+    {
+      sym->set_aclass_index (LOC_OPTIMIZED_OUT);
+    }
   else
     {
       SET_SYMBOL_VALUE_ADDRESS (sym, si->Address);
