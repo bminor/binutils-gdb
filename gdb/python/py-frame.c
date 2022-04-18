@@ -306,7 +306,7 @@ frapy_block (PyObject *self, PyObject *args)
   if (block)
     {
       return block_to_block_object
-	(block, symbol_objfile (BLOCK_FUNCTION (fn_block)));
+	(block, BLOCK_FUNCTION (fn_block)->objfile ());
     }
 
   Py_RETURN_NONE;

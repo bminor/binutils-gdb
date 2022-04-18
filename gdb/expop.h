@@ -225,7 +225,7 @@ check_objfile (struct type *type, struct objfile *objfile)
 static inline bool
 check_objfile (struct symbol *sym, struct objfile *objfile)
 {
-  return check_objfile (symbol_objfile (sym), objfile);
+  return check_objfile (sym->objfile (), objfile);
 }
 
 static inline bool

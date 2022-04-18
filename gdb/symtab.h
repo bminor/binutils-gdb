@@ -1376,6 +1376,12 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
     m_artificial = artificial;
   }
 
+  /* Return the OBJFILE of this symbol.  It is an error to call this
+     if is_objfile_owned is false, which only happens for
+     architecture-provided types.  */
+
+  struct objfile *objfile () const;
+
   /* Data type of value */
 
   struct type *m_type = nullptr;
@@ -1491,12 +1497,6 @@ extern int register_symbol_block_impl (enum address_class aclass,
 
 extern int register_symbol_register_impl (enum address_class,
 					  const struct symbol_register_ops *);
-
-/* Return the OBJFILE of SYMBOL.
-   It is an error to call this if symbol.is_objfile_owned is false, which
-   only happens for architecture-provided types.  */
-
-extern struct objfile *symbol_objfile (const struct symbol *symbol);
 
 /* Return the ARCH of SYMBOL.  */
 

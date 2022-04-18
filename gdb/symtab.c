@@ -1806,7 +1806,7 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
   gdb_assert (objfile || symbol_symtab (sym));
 
   if (objfile == NULL)
-    objfile = symbol_objfile (sym);
+    objfile = sym->objfile ();
 
   if (sym->obj_section (objfile) != nullptr)
     return sym;
@@ -3780,7 +3780,7 @@ find_function_start_sal (symbol *sym, bool funfirstline)
   fixup_symbol_section (sym, NULL);
   symtab_and_line sal
     = find_function_start_sal_1 (BLOCK_ENTRY_PC (sym->value_block ()),
-				 sym->obj_section (symbol_objfile (sym)),
+				 sym->obj_section (sym->objfile ()),
 				 funfirstline);
   sal.symbol = sym;
   return sal;
@@ -3907,7 +3907,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
     {
       fixup_symbol_section (sym, NULL);
 
-      objfile = symbol_objfile (sym);
+      objfile = sym->objfile ();
       pc = BLOCK_ENTRY_PC (sym->value_block ());
       section = sym->obj_section (objfile);
       name = sym->linkage_name ();
@@ -5789,7 +5789,7 @@ find_gnu_ifunc (const symbol *sym)
 
   lookup_name_info lookup_name (sym->search_name (),
 				symbol_name_match_type::SEARCH_NAME);
-  struct objfile *objfile = symbol_objfile (sym);
+  struct objfile *objfile = sym->objfile ();
 
   CORE_ADDR address = BLOCK_ENTRY_PC (sym->value_block ());
   minimal_symbol *ifunc = NULL;
@@ -6593,10 +6593,10 @@ initialize_ordinary_address_classes (void)
 /* See symtab.h.  */
 
 struct objfile *
-symbol_objfile (const struct symbol *symbol)
+symbol::objfile () const
 {
-  gdb_assert (symbol->is_objfile_owned ());
-  return symbol->owner.symtab->compunit ()->objfile ();
+  gdb_assert (is_objfile_owned ());
+  return owner.symtab->compunit ()->objfile ();
 }
 
 /* See symtab.h.  */

@@ -127,7 +127,7 @@ find_function_in_inferior (const char *name, struct objfile **objf_p)
 	}
 
       if (objf_p)
-	*objf_p = symbol_objfile (sym.symbol);
+	*objf_p = sym.symbol->objfile ();
 
       return value_of_variable (sym.symbol, sym.block);
     }

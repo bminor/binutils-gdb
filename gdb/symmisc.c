@@ -503,7 +503,7 @@ print_symbol (struct gdbarch *gdbarch, struct symbol *symbol,
   struct obj_section *section;
 
   if (symbol->is_objfile_owned ())
-    section = symbol->obj_section (symbol_objfile (symbol));
+    section = symbol->obj_section (symbol->objfile ());
   else
     section = NULL;
 

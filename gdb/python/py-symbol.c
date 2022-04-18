@@ -305,7 +305,7 @@ set_symbol (symbol_object *obj, struct symbol *symbol)
   if (symbol->is_objfile_owned ()
       && symbol_symtab (symbol) != NULL)
     {
-      struct objfile *objfile = symbol_objfile (symbol);
+      struct objfile *objfile = symbol->objfile ();
 
       obj->next = ((symbol_object *)
 		   objfile_data (objfile, sympy_objfile_data_key));
@@ -351,7 +351,7 @@ sympy_dealloc (PyObject *obj)
 	   && sym_obj->symbol->is_objfile_owned ()
 	   && symbol_symtab (sym_obj->symbol) != NULL)
     {
-      set_objfile_data (symbol_objfile (sym_obj->symbol),
+      set_objfile_data (sym_obj->symbol->objfile (),
 			sympy_objfile_data_key, sym_obj->next);
     }
   if (sym_obj->next)

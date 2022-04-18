@@ -624,7 +624,7 @@ gdbscm_frame_block (SCM self)
   if (block != NULL)
     {
       return bkscm_scm_from_block
-	(block, symbol_objfile (BLOCK_FUNCTION (fn_block)));
+	(block, BLOCK_FUNCTION (fn_block)->objfile ());
     }
 
   return SCM_BOOL_F;
