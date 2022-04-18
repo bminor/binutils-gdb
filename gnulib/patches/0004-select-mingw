@@ -1,0 +1,33 @@
+commit 21fccfa0451ba59fba479e439465da9c360353d3
+Author: Paul Eggert <eggert@cs.ucla.edu>
+Date:   Thu Jul 8 10:00:30 2021 -0700
+
+    select: port better to MinGW
+    
+    Problem reported by Eli Zaretskii in:
+    https://lists.gnu.org/r/bug-gnulib/2021-07/msg00017.html
+    * lib/select.c (rpl_select) [_WIN32 && !__CYGWIN__]:
+    Pass a SOCKET, not a HANDLE, to FD_ISSET.
+
+diff --git a/gnulib/import/select.c b/gnulib/import/select.c
+index 2fe6a18064..eddac4b61f 100644
+--- a/gnulib/import/select.c
++++ b/gnulib/import/select.c
+@@ -530,12 +530,13 @@ restart:
+       if (h != handle_array[nhandles])
+         {
+           /* Perform handle->descriptor mapping.  */
+-          WSAEventSelect ((SOCKET) h, NULL, 0);
+-          if (FD_ISSET (h, &handle_rfds))
++          SOCKET s = (SOCKET) h;
++          WSAEventSelect (s, NULL, 0);
++          if (FD_ISSET (s, &handle_rfds))
+             FD_SET (i, rfds);
+-          if (FD_ISSET (h, &handle_wfds))
++          if (FD_ISSET (s, &handle_wfds))
+             FD_SET (i, wfds);
+-          if (FD_ISSET (h, &handle_xfds))
++          if (FD_ISSET (s, &handle_xfds))
+             FD_SET (i, xfds);
+         }
+       else

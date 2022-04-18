@@ -2033,9 +2033,17 @@ _GL_WARN_ON_USE (sleep, "sleep is unportable - "
 #   undef swab
 #   define swab _swab
 #  endif
-_GL_CXXALIAS_MDA (swab, void, (char *from, char *to, int n));
+/* Need to cast, because in old mingw the arguments are
+                             (const char *from, char *to, size_t n).  */
+_GL_CXXALIAS_MDA_CAST (swab, void, (char *from, char *to, int n));
 # else
+#  if defined __hpux /* HP-UX */
+_GL_CXXALIAS_SYS (swab, void, (const char *from, char *to, int n));
+#  elif defined __sun && !defined _XPG4 /* Solaris */
+_GL_CXXALIAS_SYS (swab, void, (const char *from, char *to, ssize_t n));
+#  else
 _GL_CXXALIAS_SYS (swab, void, (const void *from, void *to, ssize_t n));
+#  endif
 # endif
 _GL_CXXALIASWARN (swab);
 #endif

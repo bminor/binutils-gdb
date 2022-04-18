@@ -1,0 +1,36 @@
+commit c7b1e060d17023065c776757da406d728310cc38
+Author: Bruno Haible <bruno@clisp.org>
+Date:   Sun Jun 20 17:18:26 2021 +0200
+
+    unistd: Avoid compilation error in C++ mode on Solaris, HP-UX, mingw.
+    
+    Reported by Eli Zaretskii <eliz@gnu.org> in
+    <https://lists.gnu.org/archive/html/bug-gnulib/2021-03/msg00135.html>.
+    
+    * lib/unistd.in.h (swab): Consider different declarations on Solaris,
+    HP-UX, and old mingw.
+
+diff --git a/gnulib/import/unistd.in.h b/gnulib/import/unistd.in.h
+index d4d4ba7743..73c882f97b 100644
+--- a/gnulib/import/unistd.in.h
++++ b/gnulib/import/unistd.in.h
+@@ -2034,9 +2034,17 @@ _GL_WARN_ON_USE (sleep, "sleep is unportable - "
+ #   undef swab
+ #   define swab _swab
+ #  endif
+-_GL_CXXALIAS_MDA (swab, void, (char *from, char *to, int n));
+-# else
++/* Need to cast, because in old mingw the arguments are
++                             (const char *from, char *to, size_t n).  */
++_GL_CXXALIAS_MDA_CAST (swab, void, (char *from, char *to, int n));
++# else
++#  if defined __hpux /* HP-UX */
++_GL_CXXALIAS_SYS (swab, void, (const char *from, char *to, int n));
++#  elif defined __sun && !defined _XPG4 /* Solaris */
++_GL_CXXALIAS_SYS (swab, void, (const char *from, char *to, ssize_t n));
++#  else
+ _GL_CXXALIAS_SYS (swab, void, (const void *from, void *to, ssize_t n));
++#  endif
+ # endif
+ _GL_CXXALIASWARN (swab);
+ #endif

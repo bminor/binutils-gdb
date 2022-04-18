@@ -1,0 +1,49 @@
+commit 38d0749a3077b03fda46567510b1217fb5e4e170
+Author: Bruno Haible <bruno@clisp.org>
+Date:   Fri Apr 2 17:34:46 2021 +0200
+
+    glob: Reject ~user syntax, when flag GLOB_TILDE_CHECK is given.
+    
+    Reported and patch suggested by Eli Zaretskii <eliz@gnu.org> in
+    <https://lists.gnu.org/archive/html/bug-gnulib/2021-03/msg00136.html>.
+    
+    * lib/glob.c (__glob) [WINDOWS32]: If flag GLOB_TILDE_CHECK is given, do
+    error handling like when ~user is allowed by the user is unknown.
+
+diff --git a/gnulib/import/glob.c b/gnulib/import/glob.c
+index 775911ef5b..e148f8d761 100644
+--- a/gnulib/import/glob.c
++++ b/gnulib/import/glob.c
+@@ -743,6 +743,8 @@ __glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
+       else
+         {
+ #ifndef WINDOWS32
++          /* Recognize ~user as a shorthand for the specified user's home
++             directory.  */
+           char *end_name = strchr (dirname, '/');
+           char *user_name;
+           int malloc_user_name = 0;
+@@ -881,7 +883,22 @@ __glob (const char *pattern, int flags, int (*errfunc) (const char *, int),
+               }
+             scratch_buffer_free (&pwtmpbuf);
+           }
+-#endif /* !WINDOWS32 */
++#else /* WINDOWS32 */
++          /* On native Windows, access to a user's home directory
++             (via GetUserProfileDirectory) or to a user's environment
++             variables (via ExpandEnvironmentStringsForUser) requires
++             the credentials of the user.  Therefore we cannot support
++             the ~user syntax on this platform.
++             Handling ~user specially (and treat it like plain ~) if
++             user is getenv ("USERNAME") would not be a good idea,
++             since it would make people think that ~user is supported
++             in general.  */
++          if (flags & GLOB_TILDE_CHECK)
++            {
++              retval = GLOB_NOMATCH;
++              goto out;
++            }
++#endif /* WINDOWS32 */
+         }
+     }
+ 

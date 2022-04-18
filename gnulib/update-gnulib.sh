@@ -180,6 +180,7 @@ fi
 # Apply our local patches.
 apply_patches ()
 {
+    echo "Applying $1..."
     patch -p2 -f -i "$1"
     if [ $? -ne 0 ]; then
         echo "Failed to apply some patches.  Aborting."
@@ -188,6 +189,9 @@ apply_patches ()
 }
 
 apply_patches "patches/0001-use-windows-stat"
+apply_patches "patches/0002-glob-tilde-check"
+apply_patches "patches/0003-unistd-h-fix"
+apply_patches "patches/0004-select-mingw"
 
 # Regenerate all necessary files...
 aclocal &&
