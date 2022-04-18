@@ -3492,6 +3492,8 @@ static type *get_pdb_type_cached (pdb_line_info *pli, DWORD type_index)
 		  return ot->builtin_void;
 		case 2: // signed char
 		  return ot->builtin_signed_char;
+		case 3: // wchar
+		  return builtin_type (pli->objfile->arch ())->builtin_wchar;
 		case 6: // signed short/int/long_long
 		  if (length == 2)
 		    return ot->builtin_short;
@@ -3516,6 +3518,8 @@ static type *get_pdb_type_cached (pdb_line_info *pli, DWORD type_index)
 		  else if (length == 8)
 		    return ot->builtin_double;
 		  break;
+		case 10: // bool
+		  return builtin_type (pli->objfile->arch ())->builtin_bool;
 		case 13: // signed long
 		  return ot->builtin_long;
 		case 14: // unsigned long
