@@ -79,7 +79,35 @@ proc test { non_stop } {
 
     # Start the second inferior.
     with_test_prefix "second inferior" {
-	gdb_test "add-inferior -no-connection" "New inferior 2.*"
+	# With stub targets that do reload on run, if we let the new
+	# inferior share inferior 1's connection, runto_main would
+	# fail because GDB is already connected to something, like
+	# e.g. with --target_board=native-gdbserver:
+	#
+	#  (gdb) kill
+	#  ...
+	#  (gdb) target remote localhost:2348
+	#  Already connected to a remote target.  Disconnect? (y or n)
+	#
+	# Instead, start the inferior with no connection, and let
+	# gdb_load/runto_main spawn a new remote connection/gdbserver.
+	#
+	# OTOH, with extended-remote, we must let the new inferior
+	# reuse the current connection, so that runto_main below can
+	# issue the "run" command, and have the inferior run on the
+	# remote target.  If we forced no connection, then "run" would
+	# either fail if "set auto-connect-native-target" is on, like
+	# the native-extended-gdbserver board enforces, or it would
+	# run the inferior on the native target, which isn't what is
+	# being tested.
+	#
+	# Since it's reload_on_run targets that need special care, we
+	# default to reusing the connection on most targets.
+	if [target_info exists gdb,do_reload_on_run] {
+	    gdb_test "add-inferior -no-connection" "New inferior 2.*"
+	} else {
+	    gdb_test "add-inferior" "New inferior 2.*"
+	}
 	gdb_test "inferior 2" "Switching to inferior 2 .*"
 
 	gdb_load $binfile
