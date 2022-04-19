@@ -933,9 +933,9 @@ _start:
 	vcvtsh2usi	r12, WORD PTR [rcx+254]	 #AVX512-FP16 Disp8(7f)
 	vcvtsh2usi	r12, WORD PTR [rdx-256]	 #AVX512-FP16 Disp8(80)
 	vcvtsi2sh	xmm30, xmm29, r12	 #AVX512-FP16
-	vcvtsi2sh	xmm30, xmm29, {rn-sae}, r12	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtsi2sh	xmm30, xmm29, r12, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
 	vcvtsi2sh	xmm30, xmm29, edx	 #AVX512-FP16
-	vcvtsi2sh	xmm30, xmm29, {rn-sae}, edx	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtsi2sh	xmm30, xmm29, edx, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
 	vcvtsi2sh	xmm30, xmm29, DWORD PTR [rbp+r14*8+0x10000000]	 #AVX512-FP16
 	vcvtsi2sh	xmm30, xmm29, DWORD PTR [r9]	 #AVX512-FP16
 	vcvtsi2sh	xmm30, xmm29, DWORD PTR [rcx+508]	 #AVX512-FP16 Disp8(7f)
@@ -1030,9 +1030,9 @@ _start:
 	vcvtuqq2ph	xmm30, ZMMWORD PTR [rcx+8128]	 #AVX512-FP16 Disp8(7f)
 	vcvtuqq2ph	xmm30{k7}{z}, QWORD PTR [rdx-1024]{1to8}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING ZEROCTL
 	vcvtusi2sh	xmm30, xmm29, r12	 #AVX512-FP16
-	vcvtusi2sh	xmm30, xmm29, {rn-sae}, r12	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtusi2sh	xmm30, xmm29, r12, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
 	vcvtusi2sh	xmm30, xmm29, edx	 #AVX512-FP16
-	vcvtusi2sh	xmm30, xmm29, {rn-sae}, edx	 #AVX512-FP16 HAS_SAE RC_CTRL
+	vcvtusi2sh	xmm30, xmm29, edx, {rn-sae}	 #AVX512-FP16 HAS_SAE RC_CTRL
 	vcvtusi2sh	xmm30, xmm29, DWORD PTR [rbp+r14*8+0x10000000]	 #AVX512-FP16
 	vcvtusi2sh	xmm30, xmm29, DWORD PTR [r9]	 #AVX512-FP16
 	vcvtusi2sh	xmm30, xmm29, DWORD PTR [rcx+508]	 #AVX512-FP16 Disp8(7f)
