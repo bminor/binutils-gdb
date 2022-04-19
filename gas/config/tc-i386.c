@@ -6287,6 +6287,11 @@ check_VecOperands (const insn_template *t)
 	  return 1;
 	}
     }
+  else if (t->opcode_modifier.sae)
+    {
+	i.error = unsupported_syntax;
+	return 1;
+    }
 
   /* Check the special Imm4 cases; must be the first operand.  */
   if (t->cpu_flags.bitfield.cpuxop && t->operands == 5)

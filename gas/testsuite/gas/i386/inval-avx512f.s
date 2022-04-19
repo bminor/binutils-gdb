@@ -317,4 +317,8 @@ _start:
 	vcvtneps2bf16 (%eax){1to4}, %xmm1
 	vcvtneps2bf16 (%eax){1to8}, %xmm1
 	vcvtneps2bf16 (%eax){1to16}, %xmm1
+
+	vaddps $0xcc, %zmm0, %zmm0, %zmm0
+	vcmpss $0, $0xcc, %xmm0, %xmm0, %k0
+
 	.p2align 4
