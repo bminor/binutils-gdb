@@ -525,20 +525,20 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
       /* First handle forward cases.  */
       if (func_rva >= export_rva && func_rva < export_rva + export_size)
 	{
-	  char *forward_name = (char *) (erva + func_rva);
-	  char *funcname = (char *) (erva + name_rva);
-	  char *forward_dll_name = forward_name;
-	  char *forward_func_name = forward_name;
-	  char *sep = strrchr (forward_name, '.');
+	  const char *forward_name = (const char *) (erva + func_rva);
+	  const char *funcname = (const char *) (erva + name_rva);
+	  const char *forward_dll_name = forward_name;
+	  const char *forward_func_name = forward_name;
+	  const char *sep = strrchr (forward_name, '.');
 
-	  if (sep)
+	  std::string name_storage;
+	  if (sep != nullptr)
 	    {
 	      int len = (int) (sep - forward_name);
 
-	      forward_dll_name = (char *) alloca (len + 1);
-	      strncpy (forward_dll_name, forward_name, len);
-	      forward_dll_name[len] = '\0';
-	      forward_func_name = ++sep;
+	      name_storage = std::string (forward_name, len);
+	      forward_dll_name = name_storage.c_str ();
+	      forward_func_name = sep + 1;
 	    }
 	  if (add_pe_forwarded_sym (reader, funcname, forward_dll_name,
 				    forward_func_name, ordinal,
@@ -552,7 +552,7 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
 	  if ((func_rva >= section_data[sectix].rva_start)
 	      && (func_rva < section_data[sectix].rva_end))
 	    {
-	      char *sym_name = (char *) (erva + name_rva);
+	      const char *sym_name = (const char *) (erva + name_rva);
 
 	      section_found = 1;
 	      add_pe_exported_sym (reader, sym_name, func_rva, ordinal,
@@ -563,7 +563,7 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
 	}
       if (!section_found)
 	{
-	  char *funcname = (char *) (erva + name_rva);
+	  const char *funcname = (const char *) (erva + name_rva);
 
 	  if (name_rva == 0)
 	    {
