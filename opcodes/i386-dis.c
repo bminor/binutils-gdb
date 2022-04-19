@@ -98,8 +98,7 @@ static void VPCOM_Fixup (instr_info *, int, int);
 static void OP_0f07 (instr_info *, int, int);
 static void OP_Monitor (instr_info *, int, int);
 static void OP_Mwait (instr_info *, int, int);
-static void NOP_Fixup1 (instr_info *, int, int);
-static void NOP_Fixup2 (instr_info *, int, int);
+static void NOP_Fixup (instr_info *, int, int);
 static void OP_3DNowSuffix (instr_info *, int, int);
 static void CMP_Fixup (instr_info *, int, int);
 static void BadOp (instr_info *);
@@ -2913,9 +2912,9 @@ static const struct dis386 reg_table[][8] = {
 static const struct dis386 prefix_table[][4] = {
   /* PREFIX_90 */
   {
-    { "xchgS", { { NOP_Fixup1, eAX_reg }, { NOP_Fixup2, eAX_reg } }, 0 },
+    { "xchgS", { { NOP_Fixup, 0 }, { NOP_Fixup, 1 } }, 0 },
     { "pause", { XX }, 0 },
-    { "xchgS", { { NOP_Fixup1, eAX_reg }, { NOP_Fixup2, eAX_reg } }, 0 },
+    { "xchgS", { { NOP_Fixup, 0 }, { NOP_Fixup, 1 } }, 0 },
     { NULL, { { NULL, 0 } }, PREFIX_IGNORED }
   },
 
@@ -12724,25 +12723,14 @@ OP_0f07 (instr_info *ins, int bytemode, int sizeflag)
    32bit mode and "xchg %rax,%rax" in 64bit mode.  */
 
 static void
-NOP_Fixup1 (instr_info *ins, int bytemode, int sizeflag)
+NOP_Fixup (instr_info *ins, int opnd, int sizeflag)
 {
-  if ((ins->prefixes & PREFIX_DATA) != 0
-      || (ins->rex != 0
-	  && ins->rex != 0x48
-	  && ins->address_mode == mode_64bit))
-    OP_REG (ins, bytemode, sizeflag);
-  else
+  if ((ins->prefixes & PREFIX_DATA) == 0 && (ins->rex & REX_B) == 0)
     strcpy (ins->obuf, "nop");
-}
-
-static void
-NOP_Fixup2 (instr_info *ins, int bytemode, int sizeflag)
-{
-  if ((ins->prefixes & PREFIX_DATA) != 0
-      || (ins->rex != 0
-	  && ins->rex != 0x48
-	  && ins->address_mode == mode_64bit))
-    OP_IMREG (ins, bytemode, sizeflag);
+  else if (opnd == 0)
+    OP_REG (ins, eAX_reg, sizeflag);
+  else
+    OP_IMREG (ins, eAX_reg, sizeflag);
 }
 
 static const char *const Suffix3DNow[] = {
