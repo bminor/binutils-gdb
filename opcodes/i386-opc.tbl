@@ -3914,7 +3914,7 @@ vfnmsub<fma>ph, 0x668e | 0x<fma:opc>, None, CpuAVX512_FP16, Modrm|EVex512|VexVVV
 vfnmsub<fma>sh, 0x668f | 0x<fma:opc>, None, CpuAVX512_FP16, Modrm|EVexLIG|VexVVVV|Masking=3|EVexMap6|VexW0|Disp8MemShift=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|Word|Unspecified|BaseIndex, RegXMM, RegXMM }
 vfnmsub<fma>sh, 0x668f | 0x<fma:opc>, None, CpuAVX512_FP16, Modrm|EVexLIG|VexVVVV|Masking=3|EVexMap6|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|StaticRounding|SAE, { Imm8, RegXMM, RegXMM, RegXMM }
 
-vfpclassph, 0x66, None, CpuAVX512_FP16, Modrm|Masking=2|Space0F3A|VexW0|Broadcast|Disp8ShiftVL|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegXMM|RegYMM|RegZMM|Word|BaseIndex, RegMask }
+vfpclassph, 0x66, None, CpuAVX512_FP16, Modrm|Masking=2|Space0F3A|VexW0|Broadcast|Disp8ShiftVL|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, RegXMM|RegYMM|RegZMM|Word|BaseIndex, RegMask }
 vfpclassphz, 0x66, None, CpuAVX512_FP16, Modrm|EVex512|Masking=2|Space0F3A|VexW0|Disp8MemShift=6|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTSyntax, { Imm8, RegZMM|Unspecified|BaseIndex, RegMask }
 vfpclassphx, 0x66, None, CpuAVX512_FP16|CpuAVX512VL, Modrm|EVex128|Masking=2|Space0F3A|VexW0|Disp8MemShift=4|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTSyntax, { Imm8, RegXMM|Unspecified|BaseIndex, RegMask }
 vfpclassphy, 0x66, None, CpuAVX512_FP16|CpuAVX512VL, Modrm|EVex256|Masking=2|Space0F3A|VexW0|Disp8MemShift=5|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTSyntax, { Imm8, RegYMM|Unspecified|BaseIndex, RegMask }
