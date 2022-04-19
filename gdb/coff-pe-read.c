@@ -311,7 +311,6 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
   unsigned long exp_funcbase;
   unsigned char *expdata, *erva;
   unsigned long name_rvas, ordinals, nexp, ordbase;
-  char *dll_name = (char *) bfd_get_filename (dll);
   int otherix = PE_SECTION_TABLE_SIZE;
   int is_pe64 = 0;
   int is_pe32 = 0;
@@ -394,12 +393,12 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
 	      if (debug_coff_pe_read)
 		gdb_printf (gdb_stdlog, _("Export RVA for dll "
 					  "\"%s\" is in section \"%s\"\n"),
-			    dll_name, sname);
+			    bfd_get_filename (dll), sname);
 	    }
 	  else if (export_opthdrrva != vaddr && debug_coff_pe_read)
 	    gdb_printf (gdb_stdlog, _("Wrong value of export RVA"
 				      " for dll \"%s\": 0x%lx instead of 0x%lx\n"),
-			dll_name, export_opthdrrva, vaddr);
+			bfd_get_filename (dll), export_opthdrrva, vaddr);
 	  expptr = fptr + (export_opthdrrva - vaddr);
 	  break;
 	}
@@ -484,7 +483,7 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
   exp_funcbase = pe_as32 (expdata + 28);
 
   /* Use internal dll name instead of full pathname.  */
-  dll_name = (char *) (pe_as32 (expdata + 12) + erva);
+  char *dll_name = (char *) (pe_as32 (expdata + 12) + erva);
 
   for (asection *sectp : gdb_bfd_sections (dll))
     {
