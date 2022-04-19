@@ -119,12 +119,23 @@ windows_thread_info::thread_name ()
       HRESULT result = GetThreadDescription (h, &value);
       if (SUCCEEDED (result))
 	{
-	  size_t needed = wcstombs (nullptr, value, 0);
-	  if (needed != (size_t) -1)
+	  int needed = WideCharToMultiByte (CP_ACP, 0, value, -1, nullptr, 0,
+					    nullptr, nullptr);
+	  if (needed != 0)
 	    {
-	      name.reset ((char *) xmalloc (needed));
-	      if (wcstombs (name.get (), value, needed) == (size_t) -1)
-		name.reset ();
+	      /* USED_DEFAULT is how we detect that the encoding
+		 conversion had to fall back to the substitution
+		 character.  It seems better to just reject bad
+		 conversions here.  */
+	      BOOL used_default = FALSE;
+	      gdb::unique_xmalloc_ptr<char> new_name
+		((char *) xmalloc (needed));
+	      if (WideCharToMultiByte (CP_ACP, 0, value, -1,
+				       new_name.get (), needed,
+				       nullptr, &used_default) == needed
+		  && !used_default
+		  && strlen (new_name.get ()) > 0)
+		name = std::move (new_name);
 	    }
 	  LocalFree (value);
 	}
