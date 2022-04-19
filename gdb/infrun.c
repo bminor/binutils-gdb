@@ -101,6 +101,8 @@ static void restart_threads (struct thread_info *event_thread,
 
 static bool start_step_over (void);
 
+static bool step_over_info_valid_p (void);
+
 /* Asynchronous signal handler registered as event loop source for
    when we have pending events ready to be passed to the core.  */
 static struct async_event_handler *infrun_async_inferior_event_token;
@@ -1088,8 +1090,10 @@ handle_vfork_done (thread_info *event_thread)
       scoped_restore_current_thread restore_thread;
 
       insert_breakpoints ();
-      restart_threads (event_thread, event_thread->inf);
       start_step_over ();
+
+      if (!step_over_info_valid_p ())
+	restart_threads (event_thread, event_thread->inf);
     }
 }
 
@@ -5876,6 +5880,8 @@ restart_threads (struct thread_info *event_thread, inferior *inf)
   INFRUN_SCOPED_DEBUG_START_END ("event_thread=%s, inf=%d",
 				 event_thread->ptid.to_string ().c_str (),
 				 inf != nullptr ? inf->num : -1);
+
+  gdb_assert (!step_over_info_valid_p ());
 
   /* In case the instruction just stepped spawned a new thread.  */
   update_thread_list ();
