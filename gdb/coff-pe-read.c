@@ -178,16 +178,13 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
   struct bound_minimal_symbol msymbol;
   enum minimal_symbol_type msymtype;
   int forward_dll_name_len = strlen (forward_dll_name);
-  int forward_func_name_len = strlen (forward_func_name);
-  int forward_len = forward_dll_name_len + forward_func_name_len + 2;
-  char *forward_qualified_name = (char *) alloca (forward_len);
   short section;
 
-  xsnprintf (forward_qualified_name, forward_len, "%s!%s", forward_dll_name,
-	     forward_func_name);
+  std::string forward_qualified_name = string_printf ("%s!%s",
+						      forward_dll_name,
+						      forward_func_name);
 
-
-  msymbol = lookup_bound_minimal_symbol (forward_qualified_name);
+  msymbol = lookup_bound_minimal_symbol (forward_qualified_name.c_str ());
 
   if (!msymbol.minsym)
     {
@@ -195,7 +192,7 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
 
       for (i = 0; i < forward_dll_name_len; i++)
 	forward_qualified_name[i] = tolower (forward_qualified_name[i]);
-      msymbol = lookup_bound_minimal_symbol (forward_qualified_name);
+      msymbol = lookup_bound_minimal_symbol (forward_qualified_name.c_str ());
     }
 
   if (!msymbol.minsym)
