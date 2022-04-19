@@ -5340,18 +5340,13 @@ dwarf2_initialize_objfile (struct objfile *objfile)
 
 /* Build a partial symbol table.  */
 
-void
-dwarf2_build_psymtabs (struct objfile *objfile, bool already_attached)
+static void
+dwarf2_build_psymtabs (struct objfile *objfile)
 {
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
-  if (already_attached)
-    {
-      if (per_objfile->per_bfd->index_table != nullptr)
-	return;
-    }
-  else
-    objfile->qf.push_front (make_cooked_index_funcs ());
+  if (per_objfile->per_bfd->index_table != nullptr)
+    return;
 
   try
     {
@@ -18457,7 +18452,7 @@ struct cooked_index_functions : public dwarf2_base_index_functions
   void read_partial_symbols (struct objfile *objfile) override
   {
     if (dwarf2_has_info (objfile, nullptr))
-      dwarf2_build_psymtabs (objfile, true);
+      dwarf2_build_psymtabs (objfile);
   }
 };
 
