@@ -100,45 +100,14 @@ read_pe_section_index (const char *section_name)
 
 static int
 get_pe_section_index (const char *section_name,
-		      struct read_pe_section_data *sections,
-		      int nb_sections)
+		      const std::vector<read_pe_section_data> &sections)
 {
-  int i;
-
-  for (i = 0; i < nb_sections; i++)
+  for (int i = 0; i < sections.size (); i++)
     if (sections[i].section_name == section_name)
       return i;
   return PE_SECTION_INDEX_INVALID;
 }
 
-/* Structure used by get_section_vmas function below
-   to access section_data array and the size of the array
-   stored in nb_sections field.  */
-struct pe_sections_info
-{
-  int nb_sections;
-  struct read_pe_section_data *sections;
-};
-
-/* Record the virtual memory address of a section.  */
-
-static void
-get_section_vmas (bfd *abfd, asection *sectp, void *context)
-{
-  struct pe_sections_info *data = (struct pe_sections_info *) context;
-  struct read_pe_section_data *sections = data->sections;
-  int sectix = get_pe_section_index (sectp->name, sections,
-				     data->nb_sections);
-
-  if (sectix != PE_SECTION_INDEX_INVALID)
-    {
-      /* Data within the section start at rva_start in the pe and at
-	 bfd_get_section_vma() within memory.  Store the offset.  */
-
-      sections[sectix].vma_offset
-	= bfd_section_vma (sectp) - sections[sectix].rva_start;
-    }
-}
 
 /* Create a minimal symbol entry for an exported symbol.
    SYM_NAME contains the exported name or NULL if exported by ordinal,
@@ -347,11 +316,6 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
   int is_pe64 = 0;
   int is_pe32 = 0;
 
-  /* Array elements are for text, data and bss in that order
-     Initialization with RVA_START > RVA_END guarantees that
-     unused sections won't be matched.  */
-  struct pe_sections_info pe_sections_info;
-
   char const *target = bfd_get_target (objfile->obfd);
 
   std::vector<struct read_pe_section_data> section_data
@@ -522,10 +486,17 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
   /* Use internal dll name instead of full pathname.  */
   dll_name = (char *) (pe_as32 (expdata + 12) + erva);
 
-  pe_sections_info.nb_sections = otherix;
-  pe_sections_info.sections = section_data.data ();
-
-  bfd_map_over_sections (dll, get_section_vmas, &pe_sections_info);
+  for (asection *sectp : gdb_bfd_sections (dll))
+    {
+      int sectix = get_pe_section_index (sectp->name, section_data);
+      if (sectix != PE_SECTION_INDEX_INVALID)
+	{
+	  /* Data within the section start at rva_start in the pe and at
+	     bfd_get_section_vma() within memory.  Store the offset.  */
+	  section_data[sectix].vma_offset
+	    = bfd_section_vma (sectp) - section_data[sectix].rva_start;
+	}
+    }
 
   /* Truncate name at first dot. Should maybe also convert to all
      lower case for convenience on Windows.  */
