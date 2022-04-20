@@ -4316,9 +4316,10 @@ bfd_xcoff_link_generate_rtinit (bfd *abfd,
 
 /* Get the name of a csect which will contain stubs.
    It has the same pattern as AIX linker: @FIX"number".  */
-static char * xcoff_stub_csect_name (unsigned int n)
+static char *
+xcoff_stub_csect_name (unsigned int n)
 {
-  char buf[6];
+  char buf[8];
   size_t len;
   char *csect_name;
 
@@ -4360,30 +4361,30 @@ xcoff_stub_get_csect_in_range (asection *section,
        csect = csect->next, it++)
     {
       /* A csect is in range if everything instructions in SECTION
-         can branch to every stubs in the stub csect.  This can
+	 can branch to every stubs in the stub csect.  This can
 	 be simplify by saying that the first entry of each sections
 	 (ie the vma of this section) can reach the last entry of the
 	 stub csect (ie the vma of the csect + its size).
-         However, as the stub csect might be growing its size isn't
-         fixed.  Thus, the last entry of SECTION might not be able
-         to reach the first entry of the stub csect anymore.
-         If this case happens, the following condition will be
-         false during the next pass of bfd_xcoff_size_stubs and
-         another csect will be used.
-         This means we might create more stubs than needed.  */
+	 However, as the stub csect might be growing its size isn't
+	 fixed.  Thus, the last entry of SECTION might not be able
+	 to reach the first entry of the stub csect anymore.
+	 If this case happens, the following condition will be
+	 false during the next pass of bfd_xcoff_size_stubs and
+	 another csect will be used.
+	 This means we might create more stubs than needed.  */
       bfd_vma csect_vma, section_vma;
       bfd_vma csect_last_vma, section_last_vma;
 
       csect_vma = (csect->output_section->vma
-			+ csect->output_offset);
+		   + csect->output_offset);
       csect_last_vma = (csect->output_section->vma
 			+ csect->output_offset
 			+ csect->size);
       section_vma = (section->output_section->vma
 		     + section->output_offset);
       section_last_vma = (section->output_section->vma
-		     + section->output_offset
-		     + section->size);
+			  + section->output_offset
+			  + section->size);
 
       if (csect_last_vma - section_vma + (1 << 25) < 2 * (1 << 25)
 	  && section_last_vma - csect_vma + (1 << 25) < 2 * (1 << 25))
@@ -4703,7 +4704,7 @@ xcoff_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       BFD_ASSERT (hstub->htarget->toc_section != NULL);
       /* The first instruction in the stub code needs to be
 	 cooked to hold the correct offset in the toc.  It will
-         be filled by xcoff_stub_create_relocations.  */
+	 be filled by xcoff_stub_create_relocations.  */
       for (i = 0; i < bfd_xcoff_stub_indirect_call_size(output_bfd) / 4; i++)
 	bfd_put_32 (stub_bfd,
 		    (bfd_vma) bfd_xcoff_stub_indirect_call_code(output_bfd, i),
@@ -4714,7 +4715,7 @@ xcoff_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       BFD_ASSERT (hstub->htarget->toc_section != NULL);
       /* The first instruction in the glink code needs to be
 	 cooked to hold the correct offset in the toc.  It will
-         be filled by xcoff_stub_create_relocations.  */
+	 be filled by xcoff_stub_create_relocations.  */
       for (i = 0; i < bfd_xcoff_stub_shared_call_size(output_bfd) / 4; i++)
 	bfd_put_32 (stub_bfd,
 		    (bfd_vma) bfd_xcoff_stub_shared_call_code(output_bfd, i),
@@ -4871,7 +4872,7 @@ bfd_xcoff_size_stubs (struct bfd_link_info *info)
 		      _bfd_error_handler (_("%pB: Unable to find a stub csect in range"
 					    "of relocation at %#" PRIx64 " targeting"
 					    "'%s'"),
-					  section->owner, irel->r_vaddr,
+					  section->owner, (uint64_t) irel->r_vaddr,
 					  hsym->root.root.string);
 		      goto error_ret;
 		    }
@@ -4896,10 +4897,10 @@ bfd_xcoff_size_stubs (struct bfd_link_info *info)
 		  hstub = xcoff_add_stub (stub_name, hstub_csect, hsym, info, stub_type);
 		  if (hstub == NULL)
 		    {
-		      free (stub_name);
 		      /* xgettext:c-format */
 		      _bfd_error_handler (_("%pB: Cannot create stub entry '%s'"),
 					  section->owner, stub_name);
+		      free (stub_name);
 		      goto error_ret;
 		    }
 
@@ -4999,7 +5000,7 @@ xcoff_stub_create_relocations (struct bfd_hash_entry *bh, void * inf)
       return false;
 
       /* The first instruction of this stub code need
-         a R_TOC relocation.  */
+	 a R_TOC relocation.  */
     case xcoff_stub_indirect_call:
     case xcoff_stub_shared_call:
       irel->r_size = 0xf;
