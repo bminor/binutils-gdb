@@ -104,9 +104,8 @@ struct xcoff_link_hash_table
   /* The .loader section we will use for the final output.  */
   asection *loader_section;
 
-  /* A count of non TOC relative relocs which will need to be
-     allocated in the .loader section.  */
-  size_t ldrel_count;
+  /* The structure holding information about the .loader section.  */
+  struct xcoff_loader_info ldinfo;
 
   /* The .loader section header.  */
   struct internal_ldhdr ldhdr;
@@ -2841,7 +2840,7 @@ xcoff_mark_symbol (struct bfd_link_info *info, struct xcoff_link_hash_entry *h)
 
 	  /* A function descriptor uses two relocs: one for the
 	     associated code, and one for the TOC address.  */
-	  xcoff_hash_table (info)->ldrel_count += 2;
+	  xcoff_hash_table (info)->ldinfo.ldrel_count += 2;
 	  sec->reloc_count += 2;
 
 	  /* Mark the function itself.  */
@@ -2913,7 +2912,7 @@ xcoff_mark_symbol (struct bfd_link_info *info, struct xcoff_link_hash_entry *h)
 
 	      /* Allocate room for a static and dynamic R_TOC
 		 relocation.  */
-	      ++xcoff_hash_table (info)->ldrel_count;
+	      ++xcoff_hash_table (info)->ldinfo.ldrel_count;
 	      ++hds->toc_section->reloc_count;
 
 	      /* Set the index to -2 to force this symbol to
@@ -3077,7 +3076,7 @@ xcoff_mark (struct bfd_link_info *info, asection *sec)
 	  if ((sec->flags & SEC_DEBUGGING) == 0
 	      && xcoff_need_ldrel_p (info, rel, h, sec))
 	    {
-	      ++xcoff_hash_table (info)->ldrel_count;
+	      ++xcoff_hash_table (info)->ldinfo.ldrel_count;
 	      if (h != NULL)
 		h->flags |= XCOFF_LDREL;
 	    }
@@ -3341,7 +3340,7 @@ bfd_xcoff_link_count_reloc (bfd *output_bfd,
   if (xcoff_hash_table (info)->loader_section)
     {
       h->flags |= XCOFF_LDREL;
-      ++xcoff_hash_table (info)->ldrel_count;
+      ++xcoff_hash_table (info)->ldinfo.ldrel_count;
     }
 
   /* Mark the symbol to avoid garbage collection.  */
@@ -3632,12 +3631,11 @@ xcoff_keep_symbol_p (struct bfd_link_info *info, bfd *input_bfd,
   return 1;
 }
 
-/* Lay out the .loader section, filling in the header and the import paths.
-   LIBPATH is as for bfd_xcoff_size_dynamic_sections.  */
+/* Compute the current size of the .loader section. Start filling
+   its header but it will be finalized in xcoff_build_loader_section.   */
 
 static bool
-xcoff_build_loader_section (struct xcoff_loader_info *ldinfo,
-			    const char *libpath)
+xcoff_size_loader_section (struct xcoff_loader_info *ldinfo)
 {
   bfd *output_bfd;
   struct xcoff_link_hash_table *htab;
@@ -3646,7 +3644,18 @@ xcoff_build_loader_section (struct xcoff_loader_info *ldinfo,
   bfd_size_type stoff;
   size_t impsize, impcount;
   asection *lsec;
-  char *out;
+
+  output_bfd = ldinfo->output_bfd;
+  htab = xcoff_hash_table (ldinfo->info);
+  ldhdr = &htab->ldhdr;
+
+  /* If this function has already been called (ie l_version is set)
+     and the number of symbols or relocations haven't changed since
+     last call, the size is already known.  */
+  if (ldhdr->l_version != 0
+      && ldhdr->l_nsyms == ldinfo->ldsym_count
+      && ldhdr->l_nreloc == ldinfo->ldrel_count)
+    return true;
 
   /* Work out the size of the import file names.  Each import file ID
      consists of three null terminated strings: the path, the file
@@ -3654,31 +3663,31 @@ xcoff_build_loader_section (struct xcoff_loader_info *ldinfo,
      of names is the path to use to find objects, which the linker has
      passed in as the libpath argument.  For some reason, the path
      entry in the other import file names appears to always be empty.  */
-  output_bfd = ldinfo->output_bfd;
-  htab = xcoff_hash_table (ldinfo->info);
-  impsize = strlen (libpath) + 3;
-  impcount = 1;
-  for (fl = htab->imports; fl != NULL; fl = fl->next)
+  if (ldhdr->l_nimpid == 0)
     {
-      ++impcount;
-      impsize += (strlen (fl->path)
-		  + strlen (fl->file)
-		  + strlen (fl->member)
-		  + 3);
+      impsize = strlen (ldinfo->libpath) + 3;
+      impcount = 1;
+      for (fl = htab->imports; fl != NULL; fl = fl->next)
+	{
+	  ++impcount;
+	  impsize += (strlen (fl->path)
+		      + strlen (fl->file)
+		      + strlen (fl->member)
+		      + 3);
+	}
+      ldhdr->l_istlen = impsize;
+      ldhdr->l_nimpid = impcount;
     }
 
   /* Set up the .loader section header.  */
-  ldhdr = &htab->ldhdr;
   ldhdr->l_version = bfd_xcoff_ldhdr_version(output_bfd);
   ldhdr->l_nsyms = ldinfo->ldsym_count;
-  ldhdr->l_nreloc = htab->ldrel_count;
-  ldhdr->l_istlen = impsize;
-  ldhdr->l_nimpid = impcount;
+  ldhdr->l_nreloc = ldinfo->ldrel_count;
   ldhdr->l_impoff = (bfd_xcoff_ldhdrsz (output_bfd)
 		     + ldhdr->l_nsyms * bfd_xcoff_ldsymsz (output_bfd)
 		     + ldhdr->l_nreloc * bfd_xcoff_ldrelsz (output_bfd));
   ldhdr->l_stlen = ldinfo->string_size;
-  stoff = ldhdr->l_impoff + impsize;
+  stoff = ldhdr->l_impoff + ldhdr->l_istlen;
   if (ldinfo->string_size == 0)
     ldhdr->l_stoff = 0;
   else
@@ -3692,62 +3701,19 @@ xcoff_build_loader_section (struct xcoff_loader_info *ldinfo,
   ldhdr->l_rldoff = (bfd_xcoff_ldhdrsz (output_bfd)
 		     + ldhdr->l_nsyms * bfd_xcoff_ldsymsz (output_bfd));
 
-  /* We now know the final size of the .loader section.  Allocate
-     space for it.  */
+  /* Save the size of the .loader section.  */
   lsec = htab->loader_section;
   lsec->size = stoff + ldhdr->l_stlen;
-  lsec->contents = bfd_zalloc (output_bfd, lsec->size);
-  if (lsec->contents == NULL)
-    return false;
-
-  /* Set up the header.  */
-  bfd_xcoff_swap_ldhdr_out (output_bfd, ldhdr, lsec->contents);
-
-  /* Set up the import file names.  */
-  out = (char *) lsec->contents + ldhdr->l_impoff;
-  strcpy (out, libpath);
-  out += strlen (libpath) + 1;
-  *out++ = '\0';
-  *out++ = '\0';
-  for (fl = htab->imports; fl != NULL; fl = fl->next)
-    {
-      const char *s;
-
-      s = fl->path;
-      while ((*out++ = *s++) != '\0')
-	;
-      s = fl->file;
-      while ((*out++ = *s++) != '\0')
-	;
-      s = fl->member;
-      while ((*out++ = *s++) != '\0')
-	;
-    }
-
-  BFD_ASSERT ((bfd_size_type) ((bfd_byte *) out - lsec->contents) == stoff);
-
-  /* Set up the symbol string table.  */
-  if (ldinfo->string_size > 0)
-    {
-      memcpy (out, ldinfo->strings, ldinfo->string_size);
-      free (ldinfo->strings);
-      ldinfo->strings = NULL;
-    }
-
-  /* We can't set up the symbol table or the relocs yet, because we
-     don't yet know the final position of the various sections.  The
-     .loader symbols are written out when the corresponding normal
-     symbols are written out in xcoff_link_input_bfd or
-     xcoff_write_global_symbol.  The .loader relocs are written out
-     when the corresponding normal relocs are handled in
-     xcoff_link_input_bfd.  */
 
   return true;
 }
 
-/* Build the .loader section.  This is called by the XCOFF linker
+/* Prepare the .loader section.  This is called by the XCOFF linker
    emulation before_allocation routine.  We must set the size of the
-   .loader section before the linker lays out the output file.
+   .loader section before the linker lays out the output file.  However,
+   some symbols or relocations might be append to the .loader section
+   when processing the addresses, thus it's not layout right now and
+   its size might change.
    LIBPATH is the library path to search for shared objects; this is
    normally built from the -L arguments passed to the linker.  ENTRY
    is the name of the entry point symbol (the -e linker option).
@@ -3776,12 +3742,10 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 				 asection **special_sections,
 				 bool rtld)
 {
-  struct xcoff_loader_info ldinfo;
+  struct xcoff_loader_info *ldinfo;
   int i;
   asection *sec;
   bfd *sub;
-  struct bfd_strtab_hash *debug_strtab;
-  bfd_byte *debug_contents = NULL;
   size_t amt;
 
   if (bfd_get_flavour (output_bfd) != bfd_target_xcoff_flavour)
@@ -3791,14 +3755,18 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
       return true;
     }
 
-  ldinfo.failed = false;
-  ldinfo.output_bfd = output_bfd;
-  ldinfo.info = info;
-  ldinfo.auto_export_flags = auto_export_flags;
-  ldinfo.ldsym_count = 0;
-  ldinfo.string_size = 0;
-  ldinfo.strings = NULL;
-  ldinfo.string_alc = 0;
+  /* Setup ldinfo.  */
+  ldinfo = &(xcoff_hash_table (info)->ldinfo);
+
+  ldinfo->failed = false;
+  ldinfo->output_bfd = output_bfd;
+  ldinfo->info = info;
+  ldinfo->auto_export_flags = auto_export_flags;
+  ldinfo->ldsym_count = 0;
+  ldinfo->string_size = 0;
+  ldinfo->strings = NULL;
+  ldinfo->string_alc = 0;
+  ldinfo->libpath = libpath;
 
   xcoff_data (output_bfd)->maxstack = maxstack;
   xcoff_data (output_bfd)->maxdata = maxdata;
@@ -3843,13 +3811,13 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 
 	 The first 3 symbol table indices are reserved to indicate the data,
 	 text and bss sections.  */
-      BFD_ASSERT (0 == ldinfo.ldsym_count);
+      BFD_ASSERT (0 == ldinfo->ldsym_count);
 
       hsym->ldindx = 3;
-      ldinfo.ldsym_count = 1;
+      ldinfo->ldsym_count = 1;
       hsym->ldsym = ldsym;
 
-      if (! bfd_xcoff_put_ldsymbol_name (ldinfo.output_bfd, &ldinfo,
+      if (! bfd_xcoff_put_ldsymbol_name (ldinfo->output_bfd, ldinfo,
 					 hsym->ldsym, hsym->root.root.string))
 	return false;
 
@@ -3901,8 +3869,8 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
       if (auto_export_flags != 0)
 	{
 	  xcoff_link_hash_traverse (xcoff_hash_table (info),
-				    xcoff_mark_auto_exports, &ldinfo);
-	  if (ldinfo.failed)
+				    xcoff_mark_auto_exports, ldinfo);
+	  if (ldinfo->failed)
 	    goto error_return;
 	}
       xcoff_sweep (info);
@@ -3927,13 +3895,114 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
     return true;
 
   xcoff_link_hash_traverse (xcoff_hash_table (info), xcoff_post_gc_symbol,
-			    (void *) &ldinfo);
-  if (ldinfo.failed)
+			    (void *) ldinfo);
+  if (ldinfo->failed)
     goto error_return;
 
   if (xcoff_hash_table (info)->loader_section
-      && !xcoff_build_loader_section (&ldinfo, libpath))
+      && !xcoff_size_loader_section (ldinfo))
     goto error_return;
+
+  return true;
+
+ error_return:
+  free (ldinfo->strings);
+  return false;
+}
+
+/* Lay out the .loader section, finalizing its header and
+   filling the import paths  */
+static bool
+xcoff_build_loader_section (struct xcoff_loader_info *ldinfo)
+{
+  bfd *output_bfd;
+  asection *lsec;
+  struct xcoff_link_hash_table *htab;
+  struct internal_ldhdr *ldhdr;
+  struct xcoff_import_file *fl;
+  char *out;
+
+  output_bfd = ldinfo->output_bfd;
+  htab = xcoff_hash_table (ldinfo->info);
+  lsec = htab->loader_section;
+  ldhdr = &htab->ldhdr;
+
+  /* We could have called xcoff_size_loader_section one more time.
+     However, this function is called once all the addresses have
+     been layout thus the .loader section shouldn't be changed
+     anymore.  */
+  BFD_ASSERT (ldhdr->l_nsyms == ldinfo->ldsym_count);
+  BFD_ASSERT (ldhdr->l_nreloc == ldinfo->ldrel_count);
+
+  /* We now know the final size of the .loader section.  Allocate
+     space for it.  */
+  lsec->contents = bfd_zalloc (output_bfd, lsec->size);
+  if (lsec->contents == NULL)
+    return false;
+
+  /* Set up the header.  */
+  bfd_xcoff_swap_ldhdr_out (output_bfd, ldhdr, lsec->contents);
+
+  /* Set up the import file names.  */
+  out = (char *) lsec->contents + ldhdr->l_impoff;
+  strcpy (out, ldinfo->libpath);
+  out += strlen (ldinfo->libpath) + 1;
+  *out++ = '\0';
+  *out++ = '\0';
+  for (fl = htab->imports; fl != NULL; fl = fl->next)
+    {
+      const char *s;
+
+      s = fl->path;
+      while ((*out++ = *s++) != '\0')
+	;
+      s = fl->file;
+      while ((*out++ = *s++) != '\0')
+	;
+      s = fl->member;
+      while ((*out++ = *s++) != '\0')
+	;
+    }
+
+  BFD_ASSERT ((bfd_size_type) ((bfd_byte *) out - lsec->contents) == ldhdr->l_impoff + ldhdr->l_istlen);
+
+  /* Set up the symbol string table.  */
+  if (ldinfo->string_size > 0)
+    {
+      memcpy (out, ldinfo->strings, ldinfo->string_size);
+      free (ldinfo->strings);
+      ldinfo->strings = NULL;
+    }
+
+  /* We can't set up the symbol table or the relocs yet, because we
+     don't yet know the final position of the various sections.  The
+     .loader symbols are written out when the corresponding normal
+     symbols are written out in xcoff_link_input_bfd or
+     xcoff_write_global_symbol.  The .loader relocs are written out
+     when the corresponding normal relocs are handled in
+     xcoff_link_input_bfd.  */
+
+  return true;
+}
+
+
+/* Lay out the .loader section and allocate the space for
+   the other dynamic sections of XCOFF.  */
+bool
+bfd_xcoff_build_dynamic_sections (bfd *output_bfd,
+				  struct bfd_link_info *info)
+{
+  struct xcoff_loader_info *ldinfo;
+  struct bfd_strtab_hash *debug_strtab;
+  bfd_byte *debug_contents = NULL;
+  bfd *sub;
+  asection *sec;
+
+  ldinfo = &(xcoff_hash_table (info)->ldinfo);
+
+  if (xcoff_hash_table (info)->loader_section
+      && !xcoff_build_loader_section (ldinfo))
+    return false;
 
   /* Allocate space for the magic sections.  */
   sec = xcoff_hash_table (info)->linkage_section;
@@ -3941,21 +4010,21 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
     {
       sec->contents = bfd_zalloc (output_bfd, sec->size);
       if (sec->contents == NULL)
-	goto error_return;
+	return false;
     }
   sec = xcoff_hash_table (info)->toc_section;
   if (sec->size > 0)
     {
       sec->contents = bfd_zalloc (output_bfd, sec->size);
       if (sec->contents == NULL)
-	goto error_return;
+	return false;
     }
   sec = xcoff_hash_table (info)->descriptor_section;
   if (sec->size > 0)
     {
       sec->contents = bfd_zalloc (output_bfd, sec->size);
       if (sec->contents == NULL)
-	goto error_return;
+	return false;
     }
 
   /* Now that we've done garbage collection, decide which symbols to keep,
@@ -4051,7 +4120,7 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
 	  keep_p = xcoff_keep_symbol_p (info, sub, &sym, &aux,
 					*sym_hash, csect, name);
 	  if (keep_p < 0)
-	    return false;
+	    goto error_return;
 
 	  if (!keep_p)
 	    /* Use a debug_index of -2 to record that a symbol should
@@ -4110,7 +4179,6 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
   return true;
 
  error_return:
-  free (ldinfo.strings);
   free (debug_contents);
   return false;
 }

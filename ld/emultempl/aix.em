@@ -1009,6 +1009,14 @@ gld${EMULATION_NAME}_before_allocation (void)
   before_allocation_default ();
 }
 
+static void
+gld${EMULATION_NAME}_after_allocation (void)
+{
+  /* Now that everything is in place, finalize the dynamic sections.  */
+  if (!bfd_xcoff_build_dynamic_sections (link_info.output_bfd, &link_info))
+    einfo (_("%F%P: failed to layout dynamic sections: %E\n"));
+}
+
 static char *
 gld${EMULATION_NAME}_choose_target (int argc, char **argv)
 {
@@ -1607,6 +1615,7 @@ LDEMUL_AFTER_OPEN=gld${EMULATION_NAME}_after_open
 LDEMUL_SET_OUTPUT_ARCH=gld${EMULATION_NAME}_set_output_arch
 LDEMUL_CHOOSE_TARGET=gld${EMULATION_NAME}_choose_target
 LDEMUL_BEFORE_ALLOCATION=gld${EMULATION_NAME}_before_allocation
+LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
 LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=gld${EMULATION_NAME}_create_output_section_statements
 LDEMUL_OPEN_DYNAMIC_ARCHIVE=gld${EMULATION_NAME}_open_dynamic_archive
 LDEMUL_PARSE_ARGS=gld${EMULATION_NAME}_parse_args

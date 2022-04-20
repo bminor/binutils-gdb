@@ -1,3 +1,8 @@
+2022-04-20  Clément Chigot  <clement.chigot@atos.net>
+
+	* coff/xcoff.h (struct xcoff_loader_info): Add ldrel_count and
+	libpath fields.
+
 2022-04-07  Mark Harmstone  <mark@harmstone.com>
 
 	* coff/i386.h: Define R_SECTION.

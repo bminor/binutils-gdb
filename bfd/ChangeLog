@@ -1,3 +1,22 @@
+2022-04-20  Clément Chigot  <clement.chigot@atos.net>
+
+	* coff-rs6000.c (_bfd_xcoff_put_ldsymbol_name): Write len in
+	ldinfo->strings instead of directly in the output_bfd.
+	* coff64-rs6000.c (_bfd_xcoff64_put_ldsymbol_name): Likewise.
+	* xcofflink.c (struct xcoff_link_hash_table): Remove ldrel_count
+	field. Add ldinfo field.
+	(xcoff_mark_symbol): Adjust to new ldinfo field.
+	(xcoff_mark): Likewise.
+	(bfd_xcoff_link_count_reloc): Likewise.
+	(xcoff_build_loader_section): Split into two functions: one that
+	build the loader section (this function) and one that only size
+	it...
+	(xcoff_size_loader_section): ... (this function).
+	(bfd_xcoff_size_dynamic_sections): Adapt to new ldinfo field.
+	Move the part where the dynamic sections are build to ...
+	(bfd_xcoff_build_dynamic_sections): ... this function.
+	* xcofflink.h: Add bfd_xcoff_build_dynamic_sections prototype.
+
 2022-04-13  Alexander von Gluck IV  <kallisti5@unixzen.com>
 
 	* config.bfd (x86-haiku): Add i386_pei_vec as a selectable format.

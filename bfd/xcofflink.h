@@ -37,5 +37,7 @@ extern bool bfd_xcoff_size_dynamic_sections
   (bfd *, struct bfd_link_info *, const char *, const char *,
    unsigned long, unsigned long, unsigned long, bool,
    int, bool, unsigned int, struct bfd_section **, bool);
+extern bool bfd_xcoff_build_dynamic_sections
+  (bfd *, struct bfd_link_info *);
 extern bool bfd_xcoff_link_generate_rtinit
   (bfd *, const char *, const char *, bool);

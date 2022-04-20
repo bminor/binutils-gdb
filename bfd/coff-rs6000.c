@@ -3881,8 +3881,8 @@ _bfd_xcoff_put_ldsymbol_name (bfd *abfd ATTRIBUTE_UNUSED,
 	  ldinfo->strings = newstrings;
 	}
 
-      bfd_put_16 (ldinfo->output_bfd, (bfd_vma) (len + 1),
-		  ldinfo->strings + ldinfo->string_size);
+      ldinfo->strings[ldinfo->string_size] = ((len + 1) >> 8) & 0xff;
+      ldinfo->strings[ldinfo->string_size + 1] = ((len + 1)) & 0xff;
       strcpy (ldinfo->strings + ldinfo->string_size + 2, name);
       ldsym->_l._l_l._l_zeroes = 0;
       ldsym->_l._l_l._l_offset = ldinfo->string_size + 2;

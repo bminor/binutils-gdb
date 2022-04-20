@@ -1,3 +1,7 @@
+2022-04-20  Clément Chigot  <clement.chigot@atos.net>
+
+	* emultempl/aix.em (_after_allocation): New function.
+
 2022-04-07  Mark Harmstone  <mark@harmstone.com>
 
 	* testsuite/ld-pe/secidx1.s: New test source file.
