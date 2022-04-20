@@ -371,6 +371,9 @@ delete_thread_object (struct thread_info *tp, int ignore)
   if (inf_obj == NULL)
     return;
 
+  if (emit_thread_exit_event (tp) < 0)
+    gdbpy_print_stack ();
+
   auto it = inf_obj->threads->find (tp);
   if (it != inf_obj->threads->end ())
     {

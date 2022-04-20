@@ -140,6 +140,8 @@ info main
 
 * Python API
 
+  ** gdb.ThreadExitedEvent added.  Emits a ThreadEvent.
+
   ** The gdb.unwinder.Unwinder.name attribute is now read-only.
 
   ** The name argument passed to gdb.unwinder.Unwinder.__init__ must

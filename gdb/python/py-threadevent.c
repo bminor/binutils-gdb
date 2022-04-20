@@ -53,3 +53,24 @@ create_thread_event_object (PyTypeObject *py_type, PyObject *thread)
 
   return thread_event_obj;
 }
+
+/* Emits a thread exit event for THREAD */
+
+int
+emit_thread_exit_event (thread_info * thread)
+{
+  if (evregpy_no_listeners_p (gdb_py_events.thread_exited))
+    return 0;
+
+  auto py_thr = thread_to_thread_object (thread);
+
+  if (py_thr == nullptr)
+    return -1;
+
+  auto inf_thr = create_thread_event_object (&thread_exited_event_object_type,
+				     py_thr.get ());
+  if (inf_thr == nullptr)
+    return -1;
+
+  return evpy_emit_event (inf_thr.get (), gdb_py_events.thread_exited);
+}

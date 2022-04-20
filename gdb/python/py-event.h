@@ -61,6 +61,9 @@ extern int emit_memory_changed_event (CORE_ADDR addr, ssize_t len);
 extern int evpy_emit_event (PyObject *event,
 			    eventregistry_object *registry);
 
+/* Emits a thread exit event for THREAD */
+extern int emit_thread_exit_event (thread_info * thread);
+
 extern gdbpy_ref<> create_event_object (PyTypeObject *py_type);
 
 /* thread events can either be thread specific or process wide.  If gdb is
