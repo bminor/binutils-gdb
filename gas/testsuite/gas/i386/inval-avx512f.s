@@ -321,4 +321,7 @@ _start:
 	vaddps $0xcc, %zmm0, %zmm0, %zmm0
 	vcmpss $0, $0xcc, %xmm0, %xmm0, %k0
 
+	vaddss {sae}, %xmm0, %xmm0, %xmm0
+	vcmpps $0, {rn-sae}, %zmm0, %zmm0, %k0
+
 	.p2align 4
