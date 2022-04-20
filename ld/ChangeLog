@@ -1,5 +1,16 @@
 2022-04-20  Clément Chigot  <clement.chigot@atos.net>
 
+	* emultempl/aix.em (params): New variable.
+	(stub_file): New variable.
+	(xcoff_add_stub_section): New function.
+	(xcoff_layout_sections_again): New function
+	(hook_in_stub): New function.
+	(_after_allocation): Add stub creation.
+	(_create_output_section_statements): Allocate stub file and
+	pass params to backend.
+
+2022-04-20  Clément Chigot  <clement.chigot@atos.net>
+
 	* emultempl/aix.em (_after_allocation): New function.
 
 2022-04-07  Mark Harmstone  <mark@harmstone.com>

@@ -1,5 +1,65 @@
 2022-04-20  Clément Chigot  <clement.chigot@atos.net>
 
+	* coff-rs6000.c (xcoff_reloc_type_noop): Add info argument.
+	(xcoff_reloc_type_fail): Likewise.
+	(xcoff_reloc_type_pos): Likewise.
+	(xcoff_reloc_type_neg): Likewise.
+	(xcoff_reloc_type_rel): Likewise.
+	(xcoff_reloc_type_toc): Likewise.
+	(xcoff_reloc_type_ba): Likewise.
+	(xcoff_reloc_type_crel): Likewise.
+	(xcoff_reloc_type_tls): Likewise.
+	(xcoff_reloc_type_br): Add stub handler.
+	(xcoff_ppc_relocate_section): Add info to
+	xcoff_calculate_relocation.
+	(xcoff_stub_indirect_call_code): New constant.
+	(xcoff_stub_shared_call_code): Likewise.
+	(bfd_xcoff_backend_data): Add stub code fields.
+	(bfd_pmac_xcoff_backend_data): Likewise.
+	* coff64-rs6000.c (xcoff64_reloc_type_br): Add stub handler.
+	(xcoff64_ppc_relocate_section): Add info to
+	xcoff64_calculate_relocation.
+	(xcoff64_stub_indirect_call_code): New constant.
+	(xcoff64_stub_shared_call_code): Likewise.
+	(bfd_xcoff_backend_data): Add stub code fields.
+	(bfd_xcoff_aix5_backend_data): Likewise.
+	* libxcoff.h (struct xcoff_backend_data_rec): Add stub fields.
+	(bfd_xcoff_stub_indirect_call_code): New define.
+	(bfd_xcoff_stub_indirect_call_size): New define.
+	(bfd_xcoff_stub_shared_call_code): New define.
+	(bfd_xcoff_stub_shared_call_size): New define.
+	(xcoff_reloc_function): Add info argument.
+	(enum xcoff_stub_type): New enum.
+	(struct xcoff_stub_hash_entry): New structure.
+	* xcofflink.c (struct xcoff_link_hash_table): Add stub hash
+	table and params fields.
+	(xcoff_stub_hash_entry): New define.
+	(xcoff_stub_hash_lookup): New define.
+	(stub_hash_newfunc): New function.
+	(_bfd_xcoff_bfd_link_hash_table_free): Free the new stub hash
+	table.
+	(_bfd_xcoff_bfd_link_hash_table_create): Create the new stub
+	hash table.
+	(xcoff_link_add_symbols): Save rawsize for XTY_SD.
+	(bfd_xcoff_link_init): New function.
+	(xcoff_stub_csect_name): New function.
+	(xcoff_stub_get_csect_in_range): New function.
+	(xcoff_stub_name): New function.
+	(bfd_xcoff_get_stub_entry): New function.
+	(bfd_xcoff_type_of_stub): New function.
+	(xcoff_add_stub): New function.
+	(xcoff_build_one_stub): New function.
+	(bfd_xcoff_size_stubs): New function.
+	(bfd_xcoff_build_stubs): New function.
+	(xcoff_stub_create_relocations): New function.
+	(xcoff_link_input_bfd): Adapt relocations to stub.
+	(xcoff_write_global_symbol): Adapt to new TOC entries generated
+	for stubs.
+	(_bfd_xcoff_bfd_final_link): Handle stub file.
+	* xcofflink.h (struct bfd_xcoff_link_params): New structure.
+
+2022-04-20  Clément Chigot  <clement.chigot@atos.net>
+
 	* coff-rs6000.c (_bfd_xcoff_put_ldsymbol_name): Write len in
 	ldinfo->strings instead of directly in the output_bfd.
 	* coff64-rs6000.c (_bfd_xcoff64_put_ldsymbol_name): Likewise.
