@@ -22,10 +22,130 @@
 #include "dwarf2/frame.h"
 #include "elf-bfd.h"
 #include "frame-unwind.h"
+#include "gdbcore.h"
 #include "loongarch-tdep.h"
+#include "target.h"
 #include "target-descriptions.h"
 #include "trad-frame.h"
 #include "user-regs.h"
+
+/* Fetch the instruction at PC.  */
+
+static insn_t
+loongarch_fetch_instruction (CORE_ADDR pc)
+{
+  size_t insn_len = loongarch_insn_length (0);
+  gdb_byte buf[insn_len];
+  int err;
+
+  err = target_read_memory (pc, buf, insn_len);
+  if (err)
+    memory_error (TARGET_XFER_E_IO, pc);
+
+  return extract_unsigned_integer (buf, insn_len, BFD_ENDIAN_LITTLE);
+}
+
+/* Return TRUE if INSN is a branch instruction, otherwise return FALSE.  */
+
+static bool
+loongarch_insn_is_branch (insn_t insn)
+{
+  if ((insn & 0xfc000000) == 0x4c000000       /* jirl	rd, rj, offs16  */
+      || (insn & 0xfc000000) == 0x50000000    /* b	offs26  */
+      || (insn & 0xfc000000) == 0x54000000    /* bl	offs26  */
+      || (insn & 0xfc000000) == 0x58000000    /* beq	rj, rd, offs16  */
+      || (insn & 0xfc000000) == 0x5c000000    /* bne	rj, rd, offs16  */
+      || (insn & 0xfc000000) == 0x60000000    /* blt	rj, rd, offs16  */
+      || (insn & 0xfc000000) == 0x64000000    /* bge	rj, rd, offs16  */
+      || (insn & 0xfc000000) == 0x68000000    /* bltu	rj, rd, offs16  */
+      || (insn & 0xfc000000) == 0x6c000000    /* bgeu	rj, rd, offs16  */
+      || (insn & 0xfc000000) == 0x40000000    /* beqz	rj, offs21  */
+      || (insn & 0xfc000000) == 0x44000000)   /* bnez	rj, offs21  */
+    return true;
+  return false;
+}
+
+/* Analyze the function prologue from START_PC to LIMIT_PC.
+   Return the address of the first instruction past the prologue.  */
+
+static CORE_ADDR
+loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
+			 CORE_ADDR limit_pc, struct frame_info *this_frame,
+			 struct trad_frame_cache *this_cache)
+{
+  CORE_ADDR cur_pc = start_pc, prologue_end = 0;
+  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  auto regs = tdep->regs;
+  int32_t sp = regs.r + 3;
+  int32_t fp = regs.r + 22;
+  int32_t reg_value[32] = {0};
+  int32_t reg_used[32] = {1, 0};
+
+  while (cur_pc < limit_pc)
+    {
+      insn_t insn = loongarch_fetch_instruction (cur_pc);
+      size_t insn_len = loongarch_insn_length (insn);
+      int32_t rd = loongarch_decode_imm ("0:5", insn, 0);
+      int32_t rj = loongarch_decode_imm ("5:5", insn, 0);
+      int32_t rk = loongarch_decode_imm ("10:5", insn, 0);
+      int32_t si12 = loongarch_decode_imm ("10:12", insn, 1);
+      int32_t si20 = loongarch_decode_imm ("5:20", insn, 1);
+
+      if ((insn & 0xffc00000) == 0x02c00000	/* addi.d sp,sp,si12  */
+	  && rd == sp && rj == sp && si12 < 0)
+	{
+	  prologue_end = cur_pc + insn_len;
+	}
+      else if ((insn & 0xffc00000) == 0x02c00000 /* addi.d fp,sp,si12  */
+	       && rd == fp && rj == sp && si12 > 0)
+	{
+	  prologue_end = cur_pc + insn_len;
+	}
+      else if ((insn & 0xffc00000) == 0x29c00000 /* st.d rd,sp,si12  */
+	       && rj == sp)
+	{
+	  prologue_end = cur_pc + insn_len;
+	}
+      else if ((insn & 0xff000000) == 0x27000000 /* stptr.d rd,sp,si14  */
+	       && rj == sp)
+	{
+	  prologue_end = cur_pc + insn_len;
+	}
+      else if ((insn & 0xfe000000) == 0x14000000) /* lu12i.w rd,si20  */
+	{
+	  reg_value[rd] = si20 << 12;
+	  reg_used[rd] = 1;
+	}
+      else if ((insn & 0xffc00000) == 0x03800000) /* ori rd,rj,si12  */
+	{
+	  if (reg_used[rj])
+	  {
+	    reg_value[rd] = reg_value[rj] | (si12 & 0xfff);
+	    reg_used[rd] = 1;
+	  }
+	}
+      else if ((insn & 0xffff8000) == 0x00108000 /* add.d sp,sp,rk  */
+	       && rd == sp && rj == sp)
+	{
+	  if (reg_used[rk] == 1 && reg_value[rk] < 0)
+	    {
+	      prologue_end = cur_pc + insn_len;
+	      break;
+	    }
+	}
+      else if (loongarch_insn_is_branch (insn))
+	{
+	  break;
+	}
+
+      cur_pc += insn_len;
+    }
+
+  if (prologue_end == 0)
+    prologue_end = cur_pc;
+
+  return prologue_end;
+}
 
 /* Implement the loongarch_skip_prologue gdbarch method.  */
 
@@ -45,7 +165,17 @@ loongarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	return std::max (pc, post_prologue_pc);
     }
 
-  return 0;
+  /* Can't determine prologue from the symbol table, need to examine
+     instructions.  */
+
+  /* Find an upper limit on the function prologue using the debug
+     information.  If the debug information could not be used to provide
+     that bound, then use an arbitrary large number as the upper bound.  */
+  CORE_ADDR limit_pc = skip_prologue_using_sal (gdbarch, pc);
+  if (limit_pc == 0)
+    limit_pc = pc + 100;	/* Arbitrary large number.  */
+
+  return loongarch_scan_prologue (gdbarch, pc, limit_pc, nullptr, nullptr);
 }
 
 /* Adjust the address downward (direction of stack growth) so that it
