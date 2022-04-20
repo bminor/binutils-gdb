@@ -286,11 +286,10 @@ block_starting_point_at (CORE_ADDR pc, const struct block *block)
   const struct block *new_block;
 
   bv = blockvector_for_pc (pc, NULL);
-  if (BLOCKVECTOR_MAP (bv) == NULL)
+  if (bv->map () == nullptr)
     return 0;
 
-  new_block = (const struct block *) addrmap_find (BLOCKVECTOR_MAP (bv),
-						   pc - 1);
+  new_block = (const struct block *) addrmap_find (bv->map (), pc - 1);
   if (new_block == NULL)
     return 1;
 

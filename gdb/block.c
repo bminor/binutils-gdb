@@ -138,8 +138,8 @@ find_block_in_blockvector (const struct blockvector *bl, CORE_ADDR pc)
 
   /* If we have an addrmap mapping code addresses to blocks, then use
      that.  */
-  if (BLOCKVECTOR_MAP (bl))
-    return (const struct block *) addrmap_find (BLOCKVECTOR_MAP (bl), pc);
+  if (bl->map () != nullptr)
+    return (const struct block *) addrmap_find (bl->map (), pc);
 
   /* Otherwise, use binary search to find the last block that starts
      before PC.

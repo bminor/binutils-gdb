@@ -296,20 +296,30 @@ struct blockvector
   const struct block *static_block () const
   { return this->block (STATIC_BLOCK); }
 
+  /* Return the address -> block map of this blockvector.  */
+  addrmap *map ()
+  { return m_map; }
+
+  /* Const version of the above.  */
+  const addrmap *map () const
+  { return m_map; }
+
+  /* Set this blockvector's address -> block map.  */
+  void set_map (addrmap *map)
+  { m_map = map; }
+
+private:
   /* An address map mapping addresses to blocks in this blockvector.
      This pointer is zero if the blocks' start and end addresses are
      enough.  */
-  struct addrmap *map;
+  struct addrmap *m_map;
 
-private:
   /* Number of blocks in the list.  */
   int m_num_blocks;
 
   /* The blocks themselves.  */
   struct block *m_blocks[1];
 };
-
-#define BLOCKVECTOR_MAP(blocklist) ((blocklist)->map)
 
 /* Return the objfile of BLOCK, which must be non-NULL.  */
 

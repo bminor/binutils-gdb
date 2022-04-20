@@ -457,10 +457,10 @@ buildsym_compunit::make_blockvector ()
   /* If we needed an address map for this symtab, record it in the
      blockvector.  */
   if (m_pending_addrmap != nullptr && m_pending_addrmap_interesting)
-    BLOCKVECTOR_MAP (blockvector)
-      = addrmap_create_fixed (m_pending_addrmap, &m_objfile->objfile_obstack);
+    blockvector->set_map
+      (addrmap_create_fixed (m_pending_addrmap, &m_objfile->objfile_obstack));
   else
-    BLOCKVECTOR_MAP (blockvector) = 0;
+    blockvector->set_map (nullptr);
 
   /* Some compilers output blocks in the wrong order, but we depend on
      their being in the right order so we can binary search.  Check the
