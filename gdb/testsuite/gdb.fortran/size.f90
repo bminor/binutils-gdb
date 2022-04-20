@@ -17,6 +17,7 @@
 ! Start of test program.
 !
 program test
+  use ISO_C_BINDING, only: C_NULL_PTR, C_SIZEOF
 
   ! Things to perform tests on.
   integer, target :: array_1d (1:10) = 0
@@ -30,7 +31,17 @@ program test
 
   integer, parameter :: b1_o = 127 + 1
   integer, parameter :: b2_o = 32767 + 3
-  integer*8, parameter :: b4_o = 2147483647 + 5
+
+  ! This test tests the GDB overflow behavior when using a KIND parameter
+  ! too small to hold the actual output argument.  This is done for 1, 2, and
+  ! 4 byte overflow.  On 32-bit machines most compilers will complain when
+  ! trying to allocate an array with ranges outside the 4 byte integer range.
+  ! We take the byte size of a C pointer as indication as to whether or not we
+  ! are on a 32 bit machine an skip the 4 byte overflow tests in that case.
+  integer, parameter :: bytes_c_ptr = C_SIZEOF(C_NULL_PTR)
+  integer*8, parameter :: max_signed_4byte_int = 2147483647
+  integer*8 :: b4_o
+  logical :: is_64_bit
 
   integer, allocatable :: array_1d_1byte_overflow (:)
   integer, allocatable :: array_1d_2bytes_overflow (:)
@@ -42,12 +53,22 @@ program test
   ! Loop counters.
   integer :: s1, s2
 
+  ! Set the 4 byte overflow only on 64 bit machines.
+  if (bytes_c_ptr < 8) then
+    b4_o = 0
+    is_64_bit = .FALSE.
+  else
+    b4_o = max_signed_4byte_int + 5
+    is_64_bit = .TRUE.
+  end if
+
   allocate (array_1d_1byte_overflow (1:b1_o))
   allocate (array_1d_2bytes_overflow (1:b2_o))
-  allocate (array_1d_4bytes_overflow (1:b4_o))
-
+  if (is_64_bit) then
+    allocate (array_1d_4bytes_overflow (b4_o-b2_o:b4_o))
+  end if
   allocate (array_2d_1byte_overflow (1:b1_o, 1:b1_o))
-  allocate (array_2d_2bytes_overflow (1:b2_o, 1:b2_o))
+  allocate (array_2d_2bytes_overflow (b2_o-b1_o:b2_o, b2_o-b1_o:b2_o))
 
   allocate (array_3d_1byte_overflow (1:b1_o, 1:b1_o, 1:b1_o))
 
@@ -123,8 +144,10 @@ program test
   call test_size_4 (size (array_1d_1byte_overflow, 1))
   call test_size_4 (size (array_1d_2bytes_overflow, 1))
 
-  call test_size_4 (size (array_1d_4bytes_overflow))
-  call test_size_4 (size (array_1d_4bytes_overflow, 1))
+  if (is_64_bit) then
+    call test_size_4 (size (array_1d_4bytes_overflow))
+    call test_size_4 (size (array_1d_4bytes_overflow, 1))
+  end if
 
   call test_size_4 (size (array_2d_1byte_overflow, 1))
   call test_size_4 (size (array_2d_1byte_overflow, 2))
@@ -139,7 +162,9 @@ program test
 
   call test_size_1 (size (array_1d_1byte_overflow, 1, 1))
   call test_size_1 (size (array_1d_2bytes_overflow, 1, 1))
-  call test_size_1 (size (array_1d_4bytes_overflow, 1, 1))
+  if (is_64_bit) then
+    call test_size_1 (size (array_1d_4bytes_overflow, 1, 1))
+  end if
 
   call test_size_1 (size (array_2d_1byte_overflow, 1, 1))
   call test_size_1 (size (array_2d_1byte_overflow, 2, 1))
@@ -153,7 +178,9 @@ program test
   ! Kind 2.
   call test_size_2 (size (array_1d_1byte_overflow, 1, 2))
   call test_size_2 (size (array_1d_2bytes_overflow, 1, 2))
-  call test_size_2 (size (array_1d_4bytes_overflow, 1, 2))
+  if (is_64_bit) then
+    call test_size_2 (size (array_1d_4bytes_overflow, 1, 2))
+  end if
 
   call test_size_2 (size (array_2d_1byte_overflow, 1, 2))
   call test_size_2 (size (array_2d_1byte_overflow, 2, 2))
@@ -167,7 +194,9 @@ program test
   ! Kind 4.
   call test_size_4 (size (array_1d_1byte_overflow, 1, 4))
   call test_size_4 (size (array_1d_2bytes_overflow, 1, 4))
-  call test_size_4 (size (array_1d_4bytes_overflow, 1, 4))
+  if (is_64_bit) then
+    call test_size_4 (size (array_1d_4bytes_overflow, 1, 4))
+  end if
 
   call test_size_4 (size (array_2d_1byte_overflow, 1, 4))
   call test_size_4 (size (array_2d_1byte_overflow, 2, 4))
@@ -181,7 +210,9 @@ program test
   ! Kind 8.
   call test_size_8 (size (array_1d_1byte_overflow, 1, 8))
   call test_size_8 (size (array_1d_2bytes_overflow, 1, 8))
-  call test_size_8 (size (array_1d_4bytes_overflow, 1, 8))
+  if (is_64_bit) then
+    call test_size_8 (size (array_1d_4bytes_overflow, 1, 8))
+  end if
 
   call test_size_8 (size (array_2d_1byte_overflow, 1, 8))
   call test_size_8 (size (array_2d_1byte_overflow, 2, 8))
@@ -202,7 +233,9 @@ program test
   deallocate (array_2d_2bytes_overflow)
   deallocate (array_2d_1byte_overflow)
 
-  deallocate (array_1d_4bytes_overflow)
+  if (is_64_bit) then
+    deallocate (array_1d_4bytes_overflow)
+  end if
   deallocate (array_1d_2bytes_overflow)
   deallocate (array_1d_1byte_overflow)
 

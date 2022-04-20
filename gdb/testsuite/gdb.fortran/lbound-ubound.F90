@@ -49,6 +49,8 @@ end subroutine do_test
 ! Start of test program.
 !
 program test
+  use ISO_C_BINDING, only: C_NULL_PTR, C_SIZEOF
+
   interface
      subroutine do_test (lb, ub)
        integer*4, dimension (:) :: lb
@@ -74,8 +76,19 @@ program test
   integer, parameter :: b1_o = 127 + 2
   integer, parameter :: b2 = 32767 - 10
   integer, parameter :: b2_o = 32767 + 3
-  integer*8, parameter :: b4 = 2147483647 - 10
-  integer*8, parameter :: b4_o = 2147483647 + 5
+
+  ! This tests the GDB overflow behavior when using a KIND parameter too small
+  ! to hold the actual output argument.  This is done for 1, 2, and 4 byte
+  ! overflow.  On 32-bit machines most compilers will complain when trying to
+  ! allocate an array with ranges outside the 4 byte integer range.
+  ! We take the byte size of a C pointer as indication as to whether or not we
+  ! are on a 32 bit machine an skip the 4 byte overflow tests in that case.
+  integer, parameter :: bytes_c_ptr = C_SIZEOF(C_NULL_PTR)
+
+  integer*8, parameter :: max_signed_4byte_int = 2147483647
+  integer*8, parameter :: b4 = max_signed_4byte_int - 10
+  integer*8 :: b4_o
+  logical :: is_64_bit
 
   integer, allocatable :: array_1d_1bytes_overflow (:)
   integer, allocatable :: array_1d_2bytes_overflow (:)
@@ -84,6 +97,15 @@ program test
   integer, allocatable :: array_2d_2bytes_overflow (:,:)
   integer, allocatable :: array_3d_1byte_overflow (:,:,:)
 
+  ! Set the 4 byte overflow only on 64 bit machines.
+  if (bytes_c_ptr < 8) then
+    b4_o = 0
+    is_64_bit = .FALSE.
+  else
+    b4_o = max_signed_4byte_int + 5
+    is_64_bit = .TRUE.
+  end if
+
   ! Allocate or associate any variables as needed.
   allocate (other (-5:4, -2:7))
   pointer2d => tarray
@@ -91,8 +113,9 @@ program test
 
   allocate (array_1d_1bytes_overflow (-b1_o:-b1))
   allocate (array_1d_2bytes_overflow (b2:b2_o))
-  allocate (array_1d_4bytes_overflow (-b4_o:-b4))
-
+  if (is_64_bit) then
+    allocate (array_1d_4bytes_overflow (-b4_o:-b4))
+  end if
   allocate (array_2d_1byte_overflow (-b1_o:-b1,b1:b1_o))
   allocate (array_2d_2bytes_overflow (b2:b2_o,-b2_o:b2))
 
@@ -116,7 +139,9 @@ program test
   DO_TEST (array_1d_1bytes_overflow)
   DO_TEST (array_1d_2bytes_overflow)
 
-  DO_TEST (array_1d_4bytes_overflow)
+  if (is_64_bit) then
+    DO_TEST (array_1d_4bytes_overflow)
+  end if
   DO_TEST (array_2d_1byte_overflow)
   DO_TEST (array_2d_2bytes_overflow)
   DO_TEST (array_3d_1byte_overflow)
@@ -130,7 +155,9 @@ program test
   deallocate (array_2d_2bytes_overflow)
   deallocate (array_2d_1byte_overflow)
 
-  deallocate (array_1d_4bytes_overflow)
+  if (is_64_bit) then
+    deallocate (array_1d_4bytes_overflow)
+  end if
   deallocate (array_1d_2bytes_overflow)
   deallocate (array_1d_1bytes_overflow)
 

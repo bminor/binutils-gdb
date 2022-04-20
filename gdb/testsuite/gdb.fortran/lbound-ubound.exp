@@ -222,10 +222,15 @@ gdb_test "p lbound(array_1d_2bytes_overflow, 1, 2)" "= 32757"
 gdb_test "p ubound(array_1d_2bytes_overflow, 1, 2)" "= -32766"
 gdb_test "p ubound(array_1d_2bytes_overflow, 1, 4)" "= 32770"
 
-gdb_test "p lbound(array_1d_4bytes_overflow, 1, 4)" "= 2147483644"
-gdb_test "p lbound(array_1d_4bytes_overflow, 1, 8)" "= -2147483652"
-gdb_test "p ubound(array_1d_4bytes_overflow, 1, 4)" "= -2147483637"
-gdb_test "p lbound(array_1d_4bytes_overflow)" "= \\(2147483644\\)"
+# On 32-bit machines most compilers will complain when trying to allocate an
+# array with ranges outside the 4 byte integer range.  As the behavior is
+# compiler implementation dependent, we do not run these test on 32 bit targets.
+if {[is_64_target]} {
+    gdb_test "p lbound(array_1d_4bytes_overflow, 1, 4)" "= 2147483644"
+    gdb_test "p lbound(array_1d_4bytes_overflow, 1, 8)" "= -2147483652"
+    gdb_test "p ubound(array_1d_4bytes_overflow, 1, 4)" "= -2147483637"
+    gdb_test "p lbound(array_1d_4bytes_overflow)" "= \\(2147483644\\)"
+}
 
 # Ensure we reached the final breakpoint.  If more tests have been added
 # to the test script, and this starts failing, then the safety 'while'
