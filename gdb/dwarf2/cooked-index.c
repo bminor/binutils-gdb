@@ -50,7 +50,7 @@ eq_entry (const void *a, const void *b)
 const char *
 cooked_index_entry::full_name (struct obstack *storage) const
 {
-  if ((flags & IS_LINKAGE) != 0)
+  if ((flags & IS_LINKAGE) != 0 || parent_entry == nullptr)
     return canonical;
 
   const char *sep = nullptr;
@@ -66,13 +66,12 @@ cooked_index_entry::full_name (struct obstack *storage) const
     case language_ada:
       sep = ".";
       break;
+
+    default:
+      return canonical;
     }
 
-  if (sep == nullptr)
-    return canonical;
-
-  if (parent_entry != nullptr)
-    parent_entry->write_scope (storage, sep);
+  parent_entry->write_scope (storage, sep);
   obstack_grow0 (storage, canonical, strlen (canonical));
   return (const char *) obstack_finish (storage);
 }
