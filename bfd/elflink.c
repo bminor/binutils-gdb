@@ -7124,13 +7124,23 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
   /* Determine any GNU_STACK segment requirements, after the backend
      has had a chance to set a default segment size.  */
   if (info->execstack)
-    elf_stack_flags (output_bfd) = PF_R | PF_W | PF_X;
+    {
+      /* If the user has explicitly requested warnings, then generate one even
+	 though the choice is the result of another command line option.  */
+      if (info->warn_execstack == 1)
+	_bfd_error_handler
+	  (_("\
+warning: enabling an executable stack because of -z execstack command line option"));
+      elf_stack_flags (output_bfd) = PF_R | PF_W | PF_X;
+    }
   else if (info->noexecstack)
     elf_stack_flags (output_bfd) = PF_R | PF_W;
   else
     {
       bfd *inputobj;
       asection *notesec = NULL;
+      bfd *noteobj = NULL;
+      bfd *emptyobj = NULL;
       int exec = 0;
 
       for (inputobj = info->input_bfds;
@@ -7149,15 +7159,45 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	  s = bfd_get_section_by_name (inputobj, ".note.GNU-stack");
 	  if (s)
 	    {
-	      if (s->flags & SEC_CODE)
-		exec = PF_X;
 	      notesec = s;
+	      if (s->flags & SEC_CODE)
+		{
+		  noteobj = inputobj;
+		  exec = PF_X;
+		  /* There is no point in scanning the remaining bfds.  */
+		  break;
+		}
 	    }
 	  else if (bed->default_execstack)
-	    exec = PF_X;
+	    {
+	      exec = PF_X;
+	      emptyobj = inputobj;
+	    }
 	}
+
       if (notesec || info->stacksize > 0)
-	elf_stack_flags (output_bfd) = PF_R | PF_W | exec;
+	{
+	  if (exec)
+	    {
+	      if (info->warn_execstack != 2)
+		{
+		  /* PR 29072: Because an executable stack is a serious
+		     security risk, make sure that the user knows that it is
+		     being enabled despite the fact that it was not requested
+		     on the command line.  */
+		  if (noteobj)
+		    _bfd_error_handler (_("\
+warning: %s: requires executable stack (because the .note.GNU-stack section is executable)"),
+		       bfd_get_filename (noteobj));
+		  else if (emptyobj)
+		    _bfd_error_handler (_("\
+warning: %s: missing .note.GNU-stack section implies executable stack"),
+		       bfd_get_filename (emptyobj));
+		}
+	    }
+	  elf_stack_flags (output_bfd) = PF_R | PF_W | exec;
+	}
+
       if (notesec && exec && bfd_link_relocatable (info)
 	  && notesec->output_section != bfd_abs_section_ptr)
 	notesec->output_section->flags |= SEC_CODE;

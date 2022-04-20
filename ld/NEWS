@@ -1,5 +1,13 @@
 -*- text -*-
 
+* The linker will now generate a warning message if the stack is made
+  executable.  By default this warning is not issued if the user has
+  specifically requested an executable stack via the "-z execstack"
+  command line option, but the warning can be forced via the new
+  "--warn-execstack" option.  Alternatively all warnings about creating
+  an executable stack can be suppressed via the "--no-warn-execstack"
+  option.
+
 * TYPE=<type> is now supported in an output section description to set the
   section type value.
 

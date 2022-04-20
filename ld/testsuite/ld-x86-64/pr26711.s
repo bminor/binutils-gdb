@@ -31,3 +31,4 @@
 	.type	foo, @function
 foo:
 	ret
+	.section	.note.GNU-stack

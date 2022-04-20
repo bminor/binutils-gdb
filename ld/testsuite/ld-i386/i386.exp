@@ -240,12 +240,12 @@ set i386tests {
      "--32 -mx86-used-note=yes"
      { pr19827a.S }  {{readelf {-rW} pr19827.rd}} "pr19827.so"}
     {"Build pr27193a.so"
-     "-melf_i386 -shared" ""
+     "-melf_i386 -shared -z noexecstack" ""
      "--32"
      { pr27193a.o.bz2 pr27193b.s }
      {{objdump {-dw} pr27193.dd}} "pr27193a.so"}
     {"Build pr27193b.so"
-     "-melf_i386 -shared --reduce-memory-overheads" ""
+     "-melf_i386 -shared --reduce-memory-overheads -z noexecstack" ""
      "--32"
      { pr27193a.o.bz2 pr27193b.s }
      {{objdump {-dw} pr27193.dd}} "pr27193b.so"}

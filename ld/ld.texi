@@ -2653,6 +2653,33 @@ Warn if any global constructors are used.  This is only useful for a few
 object file formats.  For formats like COFF or ELF, the linker can not
 detect the use of global constructors.
 
+@kindex --warn-execstack
+@cindex warnings, on exectuable stack
+@cindex executable stack, warnings on
+@item --warn-execstack
+@itemx --no-warn-execstack
+On ELF platforms this option controls how the linker generates warning
+messages when it creates an output file with an executable stack.  By
+default the linker will not warn if the @command{-z execstack} command
+line option has been used, but this behaviour can be overridden by the
+@option{--warn-execstack} option.
+
+On the other hand the linker will normally warn if the stack is made
+executable because one or more of the input files need an execuable
+stack and neither of the @command{-z execstack} or @command{-z
+noexecstack} comman line options have been specified.  This warning
+can be disabled via the @command{--no-warn-execstack} option.
+
+Note: ELF format input files specify that they need an executable
+stack by having a @var{.note.GNU-stack} section with the executable
+bit set in its section flags.  They can specify that they do not need
+an executable stack by having that section, but without the executable
+flag bit set.  If an input file does not have a @var{.note.GNU-stack}
+section present then the default behaviour is target specific.  For
+some targets, then absence of such a section implies that an
+executable stack @emph{is} required.  This is often a problem for hand
+crafted assembler files.
+
 @kindex --warn-multiple-gp
 @item --warn-multiple-gp
 Warn if multiple global pointer values are required in the output file.

@@ -536,6 +536,10 @@ static const struct ld_option ld_options[] =
   { {"warn-constructors", no_argument, NULL, OPTION_WARN_CONSTRUCTORS},
     '\0', NULL, N_("Warn if global constructors/destructors are seen"),
     TWO_DASHES },
+  { {"warn-execstack", no_argument, NULL, OPTION_WARN_EXECSTACK},
+    '\0', NULL, N_("Warn when creating an executable stack"), TWO_DASHES },
+  { {"no-warn-execstack", no_argument, NULL, OPTION_NO_WARN_EXECSTACK},
+    '\0', NULL, N_("Do not warn when creating an executable stack"), TWO_DASHES },
   { {"warn-multiple-gp", no_argument, NULL, OPTION_WARN_MULTIPLE_GP},
     '\0', NULL, N_("Warn if the multiple GP values are used"), TWO_DASHES },
   { {"warn-once", no_argument, NULL, OPTION_WARN_ONCE},
@@ -914,6 +918,12 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_NON_CONTIGUOUS_REGIONS_WARNINGS:
 	  link_info.non_contiguous_regions_warnings = true;
+	  break;
+	case OPTION_WARN_EXECSTACK:
+	  link_info.warn_execstack = 1;
+	  break;
+	case OPTION_NO_WARN_EXECSTACK:
+	  link_info.warn_execstack = 2;
 	  break;
 	case 'e':
 	  lang_add_entry (optarg, true);
@@ -2149,6 +2159,10 @@ elf_static_list_options (FILE *file)
   -z execstack                Mark executable as requiring executable stack\n"));
   fprintf (file, _("\
   -z noexecstack              Mark executable as not requiring executable stack\n"));
+  fprintf (file, _("\
+  --warn-execstack            Generate a warning if the stack is executable\n"));
+  fprintf (file, _("\
+  --no-warn-execstack         Do not generate a warning if the stack is executable\n"));
   fprintf (file, _("\
   -z unique-symbol            Avoid duplicated local symbol names\n"));
   fprintf (file, _("\

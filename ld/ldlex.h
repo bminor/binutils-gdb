@@ -164,6 +164,8 @@ enum option_values
   OPTION_CTF_VARIABLES,
   OPTION_NO_CTF_VARIABLES,
   OPTION_CTF_SHARE_TYPES,
+  OPTION_WARN_EXECSTACK,
+  OPTION_NO_WARN_EXECSTACK,
 };
 
 /* The initial parser states.  */

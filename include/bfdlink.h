@@ -489,6 +489,10 @@ struct bfd_link_info
      flags.  */
   unsigned int noexecstack: 1;
 
+  /* Tri-state variable: 0 => not set by user; 1 => set, warnings
+     enabled; 2 => warnings disabled; 3 => unused.  */
+  unsigned int warn_execstack: 2;
+
   /* TRUE if we want to produced optimized output files.  This might
      need much more time and therefore must be explicitly selected.  */
   unsigned int optimize: 1;
