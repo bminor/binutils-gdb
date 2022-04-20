@@ -189,7 +189,7 @@ proc target_defaults_to_execstack {} {
 	|| [istarget "powerpc64*-*-*"]
 	|| [istarget "riscv*-*-*"]
 	|| [istarget "tilegx*-*-*"]
-        || [istarget "tilepro*-*-*"] } {
+	|| [istarget "tilepro*-*-*"] } {
 	  return 0
     }
     return 1
@@ -227,7 +227,7 @@ if {   [istarget *-*-*linux*]
 	    {pr23900-1.s} \
 	    [list [list "readelf" {-Wl} $pr23900_1_exp]] \
 	    "pr23900-1.exe"] \
-	[list "PR ld/29072 (warn about an executable .note-GNU-stack)" \
+	[list "PR ld/29072 (warn about an executable .note.GNU-stack)" \
 	    "-e 0" \
 	    "" \
 	    "" \
@@ -250,8 +250,12 @@ if {   [istarget *-*-*linux*]
 	    "pr29072-d.exe"] \
 	]
     if { [target_defaults_to_execstack] } {
+	rename prune_warnings_extra old_prune_warnings_extra
+	proc prune_warnings_extra { text } {
+	    return $text
+	}
 	run_ld_link_tests [list \
-          [list "PR ld/29072 (warn about absent .note-GNU-stack)" \
+	   [list "PR ld/29072 (warn about absent .note.GNU-stack)" \
 	    "-e 0 -z stack-size=0x123400" \
 	    "" \
 	    "" \
@@ -259,9 +263,11 @@ if {   [istarget *-*-*linux*]
 	    {{ld pr29072.b.warn}} \
 	    "pr29072-b.exe"] \
 	]
+	rename prune_warnings_extra ""
+	rename old_prune_warnings_extra prune_warnings_extra
     } else {
 	run_ld_link_tests [list \
-          [list "PR ld/29072 (ignore absent .note-GNU-stackk)" \
+	   [list "PR ld/29072 (ignore absent .note.GNU-stack)" \
 	    "-e 0 -z stack-size=0x123400" \
 	    "" \
 	    "" \
