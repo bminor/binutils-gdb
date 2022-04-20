@@ -41,4 +41,8 @@ extern bool producer_is_icc (const char *producer, int *major, int *minor);
    false otherwise.*/
 extern bool producer_is_llvm (const char *producer);
 
+/* Returns true if the given PRODUCER string is clang, false otherwise.
+   Sets MAJOR and MINOR accordingly, if not NULL.  */
+extern bool producer_is_clang (const char *producer, int *major, int *minor);
+
 #endif

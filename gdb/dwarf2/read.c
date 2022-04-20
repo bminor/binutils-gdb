@@ -9484,6 +9484,16 @@ producer_is_gcc_lt_4_3 (struct dwarf2_cu *cu)
   return cu->producer_is_gcc_lt_4_3;
 }
 
+/* See dwarf2/read.h.  */
+bool
+producer_is_clang (struct dwarf2_cu *cu)
+{
+  if (!cu->checked_producer)
+    check_producer (cu);
+
+  return cu->producer_is_clang;
+}
+
 static file_and_directory &
 find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu)
 {
@@ -13342,6 +13352,8 @@ check_producer (struct dwarf2_cu *cu)
     }
   else if (startswith (cu->producer, "CodeWarrior S12/L-ISA"))
     cu->producer_is_codewarrior = true;
+  else if (producer_is_clang (cu->producer, &major, &minor))
+    cu->producer_is_clang = true;
   else
     {
       /* For other non-GCC compilers, expect their behavior is DWARF version
@@ -23366,7 +23378,7 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
 
   dwarf_decode_macros (per_objfile, builder, section, lh,
 		       offset_size, offset, str_section, str_offsets_section,
-		       str_offsets_base, section_is_gnu);
+		       str_offsets_base, section_is_gnu, cu);
 }
 
 /* Return the .debug_loc section to use for CU.

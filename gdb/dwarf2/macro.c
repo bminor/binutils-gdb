@@ -445,7 +445,7 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 			  struct dwarf2_section_info *str_section,
 			  struct dwarf2_section_info *str_offsets_section,
 			  gdb::optional<ULONGEST> str_offsets_base,
-			  htab_t include_hash)
+			  htab_t include_hash, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = per_objfile->objfile;
   enum dwarf_macro_record_type macinfo_type;
@@ -672,6 +672,17 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 	  if (! current_file)
 	    complaint (_("macro debug info has an unmatched "
 			 "`close_file' directive"));
+	  else if (current_file->included_by == nullptr
+		   && producer_is_clang (cu))
+	    {
+	      /* Clang, until the current version, misplaces some macro
+		 definitions - such as ones defined in the command line,
+		 putting them after the last DW_MACRO_end_file instead of
+		 before the first DW_MACRO_start_file.  Since at the time
+		 of writing there is no clang version with this bug fixed,
+		 we check for any clang producer.  This should be changed
+		 to producer_is_clang_lt_XX when possible. */
+	    }
 	  else
 	    {
 	      current_file = current_file->included_by;
@@ -751,7 +762,7 @@ dwarf_decode_macro_bytes (dwarf2_per_objfile *per_objfile,
 					  current_file, lh, section,
 					  section_is_gnu, is_dwz, offset_size,
 					  str_section, str_offsets_section,
-					  str_offsets_base, include_hash);
+					  str_offsets_base, include_hash, cu);
 
 		htab_remove_elt (include_hash, (void *) new_mac_ptr);
 	      }
@@ -795,7 +806,7 @@ dwarf_decode_macros (dwarf2_per_objfile *per_objfile,
 		     unsigned int offset, struct dwarf2_section_info *str_section,
 		     struct dwarf2_section_info *str_offsets_section,
 		     gdb::optional<ULONGEST> str_offsets_base,
-		     int section_is_gnu)
+		     int section_is_gnu, struct dwarf2_cu *cu)
 {
   bfd *abfd;
   const gdb_byte *mac_ptr, *mac_end;
@@ -956,5 +967,5 @@ dwarf_decode_macros (dwarf2_per_objfile *per_objfile,
   dwarf_decode_macro_bytes (per_objfile, builder, abfd, mac_ptr, mac_end,
 			    current_file, lh, section, section_is_gnu, 0,
 			    offset_size, str_section, str_offsets_section,
-			    str_offsets_base, include_hash.get ());
+			    str_offsets_base, include_hash.get (), cu);
 }

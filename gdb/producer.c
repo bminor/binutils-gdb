@@ -127,6 +127,30 @@ producer_is_llvm (const char *producer)
 				 || startswith (producer, " F90 Flang ")));
 }
 
+/* See producer.h.  */
+
+bool
+producer_is_clang (const char *producer, int *major, int *minor)
+{
+  if (producer != nullptr && startswith (producer, "clang version "))
+    {
+      int maj, min;
+      if (major == nullptr)
+	major = &maj;
+      if (minor == nullptr)
+	minor = &min;
+
+      /* The full producer string will look something like
+	 "clang version XX.X.X ..."
+	 So we can safely ignore all characters before the first digit.  */
+      const char *cs = producer + strlen ("clang version ");
+
+      if (sscanf (cs, "%d.%d", major, minor) == 2)
+	return true;
+    }
+  return false;
+}
+
 #if defined GDB_SELF_TEST
 namespace selftests {
 namespace producer {

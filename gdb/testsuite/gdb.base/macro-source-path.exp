@@ -62,11 +62,6 @@ proc test { src name } {
 	}
 
 	# Print the macro that is defined on the command-line.
-	if { [test_compiler_info "clang-*"] } {
-	    # This is really a clang bug, it puts the macros defined on the command
-	    # line after the main source file, in the macro table.
-	    setup_kfail "gdb/29034" "*-*-*"
-	}
 	gdb_test "print ONE" " = 1"
 
 	# Print the macro that is defined in the main file.
