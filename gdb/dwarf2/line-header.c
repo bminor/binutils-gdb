@@ -24,6 +24,7 @@
 #include "dwarf2/read.h"
 #include "complaints.h"
 #include "filenames.h"
+#include "gdbsupport/pathstuff.h"
 
 void
 line_header::add_include_dir (const char *include_dir)
@@ -73,7 +74,7 @@ line_header::file_file_name (int file) const
 	{
 	  const char *dir = fe->include_dir (this);
 	  if (dir != NULL)
-	    return string_printf ("%s/%s", dir, fe->name);
+	    return path_join (dir, fe->name);
 	}
 
       return fe->name;

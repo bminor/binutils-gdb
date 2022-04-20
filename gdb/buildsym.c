@@ -20,6 +20,7 @@
 #include "buildsym-legacy.h"
 #include "bfd.h"
 #include "gdbsupport/gdb_obstack.h"
+#include "gdbsupport/pathstuff.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
@@ -507,8 +508,8 @@ buildsym_compunit::start_subfile (const char *name)
 	  && !IS_ABSOLUTE_PATH (subfile->name)
 	  && !m_comp_dir.empty ())
 	{
-	  subfile_name_holder = string_printf ("%s/%s", m_comp_dir.c_str (),
-					       subfile->name.c_str ());
+	  subfile_name_holder = path_join (m_comp_dir.c_str (),
+					   subfile->name.c_str ());
 	  subfile_name = subfile_name_holder.c_str ();
 	}
       else
