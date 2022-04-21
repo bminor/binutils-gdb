@@ -280,6 +280,17 @@ abbrev_table::read (struct dwarf2_section_info *section,
 	    = (cur_abbrev->tag == DW_TAG_namespace
 	       || cur_abbrev->tag == DW_TAG_enumeration_type);
 	}
+      else if ((cur_abbrev->tag == DW_TAG_structure_type
+		|| cur_abbrev->tag == DW_TAG_class_type
+		|| cur_abbrev->tag == DW_TAG_union_type)
+	       && cur_abbrev->has_children)
+	{
+	  /* We have to record this as interesting, regardless of how
+	     DW_AT_declaration is set, so that any subsequent
+	     DW_AT_specification pointing at a child of this will get
+	     the correct scope.  */
+	  cur_abbrev->interesting = true;
+	}
       else if (has_hardcoded_declaration
 	       && (cur_abbrev->tag != DW_TAG_variable || !has_external))
 	cur_abbrev->interesting = false;
