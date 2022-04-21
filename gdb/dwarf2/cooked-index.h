@@ -32,6 +32,7 @@
 #include "gdbsupport/iterator-range.h"
 #include "gdbsupport/thread-pool.h"
 #include "dwarf2/mapped-index.h"
+#include "dwarf2/tag.h"
 
 struct dwarf2_per_cu_data;
 
@@ -107,11 +108,13 @@ struct cooked_index_entry : public allocate_on_obstack
     switch (kind)
       {
       case VARIABLES_DOMAIN:
-	return tag == DW_TAG_variable;
+	return (tag == DW_TAG_variable
+		|| tag == DW_TAG_constant
+		|| tag == DW_TAG_enumerator);
       case FUNCTIONS_DOMAIN:
 	return tag == DW_TAG_subprogram;
       case TYPES_DOMAIN:
-	return tag == DW_TAG_typedef || tag == DW_TAG_structure_type;
+	return tag_is_type (tag);
       case MODULES_DOMAIN:
 	return tag == DW_TAG_module;
       }

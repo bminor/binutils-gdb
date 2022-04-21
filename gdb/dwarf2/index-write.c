@@ -37,6 +37,7 @@
 #include "gdbcmd.h"
 #include "objfiles.h"
 #include "ada-lang.h"
+#include "dwarf2/tag.h"
 
 #include <algorithm>
 #include <cmath>
@@ -569,7 +570,18 @@ public:
     const auto it = m_cu_index_htab.find (entry->per_cu);
     gdb_assert (it != m_cu_index_htab.cend ());
     const char *name = entry->full_name (&m_string_obstack);
-    insert (entry->tag, name, it->second, (entry->flags & IS_STATIC) != 0,
+
+    /* This is incorrect but it mirrors gdb's historical behavior; and
+       because the current .debug_names generation is also incorrect,
+       it seems better to follow what was done before, rather than
+       introduce a mismatch between the newer and older gdb.  */
+    dwarf_tag tag = entry->tag;
+    if (tag != DW_TAG_typedef && tag_is_type (tag))
+      tag = DW_TAG_structure_type;
+    else if (tag == DW_TAG_enumerator || tag == DW_TAG_constant)
+      tag = DW_TAG_variable;
+
+    insert (tag, name, it->second, (entry->flags & IS_STATIC) != 0,
 	    entry->per_cu->is_debug_types ? unit_kind::tu : unit_kind::cu,
 	    entry->per_cu->lang);
   }
