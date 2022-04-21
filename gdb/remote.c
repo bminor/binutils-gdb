@@ -1968,15 +1968,17 @@ add_packet_config_cmd (struct packet_config *config, const char *name,
   /* set/show remote NAME-packet {auto,on,off} -- legacy.  */
   if (legacy)
     {
-      /* It's not clear who should take ownership of this string, so, for
-	 now, make it static, and give copies to each of the add_alias_cmd
-	 calls below.  */
-      static gdb::unique_xmalloc_ptr<char> legacy_name
+      /* It's not clear who should take ownership of the LEGACY_NAME string
+	 created below, so, for now, place the string into a static vector
+	 which ensures the strings is released when GDB exits.  */
+      static std::vector<gdb::unique_xmalloc_ptr<char>> legacy_names;
+      gdb::unique_xmalloc_ptr<char> legacy_name
 	= xstrprintf ("%s-packet", name);
       add_alias_cmd (legacy_name.get (), cmds.set, class_obscure, 0,
 		     &remote_set_cmdlist);
       add_alias_cmd (legacy_name.get (), cmds.show, class_obscure, 0,
 		     &remote_show_cmdlist);
+      legacy_names.emplace_back (std::move (legacy_name));
     }
 }
 
