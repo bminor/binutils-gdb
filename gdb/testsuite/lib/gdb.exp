@@ -5205,7 +5205,7 @@ proc_with_prefix gdb_spawn_attach_cmdline { testpid } {
 
     gdb_test_multiple "" "$test" {
 	-re -wrap "ptrace: Operation not permitted\\." {
-	    untested "$gdb_test_name (operation not permitted)"
+	    unsupported "$gdb_test_name (operation not permitted)"
 	    return 0
 	}
 	-re -wrap "ptrace: No such process\\." {
