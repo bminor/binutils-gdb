@@ -5063,6 +5063,9 @@ stop_all_threads (const char *reason, inferior *inf)
   INFRUN_SCOPED_DEBUG_START_END ("reason=%s, inf=%d", reason,
 				 inf != nullptr ? inf->num : -1);
 
+  infrun_debug_show_threads ("non-exited threads",
+			     all_non_exited_threads ());
+
   scoped_restore_current_thread restore_thread;
 
   /* Enable thread events on relevant targets.  */

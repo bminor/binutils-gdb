@@ -238,6 +238,9 @@ post_create_inferior (int from_tty)
   /* Be sure we own the terminal in case write operations are performed.  */ 
   target_terminal::ours_for_output ();
 
+  infrun_debug_show_threads ("threads in the newly created inferior",
+			     current_inferior ()->non_exited_threads ());
+
   /* If the target hasn't taken care of this already, do it now.
      Targets which need to access registers during to_open,
      to_create_inferior, or to_attach should do it earlier; but many
@@ -453,6 +456,9 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
   /* to_create_inferior should push the target, so after this point we
      shouldn't refer to run_target again.  */
   run_target = NULL;
+
+  infrun_debug_show_threads ("immediately after create_process",
+			     current_inferior ()->non_exited_threads ());
 
   /* We're starting off a new process.  When we get out of here, in
      non-stop mode, finish the state of all threads of that process,
@@ -2589,17 +2595,8 @@ attach_command (const char *args, int from_tty)
      shouldn't refer to attach_target again.  */
   attach_target = NULL;
 
-  if (debug_infrun)
-    {
-      infrun_debug_printf ("immediately after attach:");
-      for (thread_info *thread : inferior->non_exited_threads ())
-	infrun_debug_printf ("  thread %s, executing = %d, resumed = %d, "
-			     "state = %s",
-			     thread->ptid.to_string ().c_str (),
-			     thread->executing (),
-			     thread->resumed (),
-			     thread_state_string (thread->state));
-    }
+  infrun_debug_show_threads ("immediately after attach",
+			     current_inferior ()->non_exited_threads ());
 
   /* Enable async mode if it is supported by the target.  */
   if (target_can_async_p ())

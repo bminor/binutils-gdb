@@ -48,6 +48,32 @@ extern bool debug_infrun;
 #define INFRUN_SCOPED_DEBUG_ENTER_EXIT \
   scoped_debug_enter_exit (debug_infrun, "infrun")
 
+/* A infrun debug helper routine to print out all the threads in the set
+   THREADS (which should be a range type that returns thread_info*
+   objects).
+
+   The TITLE is a string that is printed before the list of threads.
+
+   Output is only produced when 'set debug infrun on'.  */
+
+template<typename ThreadRange>
+static inline void
+infrun_debug_show_threads (const char *title, ThreadRange threads)
+{
+  if (debug_infrun)
+    {
+      infrun_debug_printf ("%s:", title);
+      for (thread_info *thread : threads)
+	infrun_debug_printf ("  thread %s, executing = %d, resumed = %d, "
+			     "state = %s",
+			     thread->ptid.to_string ().c_str (),
+			     thread->executing (),
+			     thread->resumed (),
+			     thread_state_string (thread->state));
+    }
+}
+
+
 /* Nonzero if we want to give control to the user when we're notified
    of shared library events by the dynamic linker.  */
 extern int stop_on_solib_events;
