@@ -1,6 +1,6 @@
 /* Base class for mapped indices
 
-   Copyright (C) 2021 Free Software Foundation, Inc.
+   Copyright (C) 2021, 2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -47,6 +47,8 @@ struct name_component
   offset_type idx;
 };
 
+class cooked_index_vector;
+
 /* Base class of all DWARF scanner types.  */
 
 struct dwarf_scanner_base
@@ -66,6 +68,11 @@ struct dwarf_scanner_base
   {
     return true;
   }
+
+  /* This is called when writing an index.  For a cooked index, it
+     will return 'this' as a cooked index.  For other forms, it will
+     throw an exception with an appropriate error message.  */
+  virtual cooked_index_vector *index_for_writing () = 0;
 };
 
 /* Base class containing bits shared by both .gdb_index and
@@ -109,6 +116,11 @@ struct mapped_index_base : public dwarf_scanner_base
     find_name_components_bounds (const lookup_name_info &ln_no_params,
 				 enum language lang,
 				 dwarf2_per_objfile *per_objfile) const;
+
+  cooked_index_vector *index_for_writing () override
+  {
+    error (_("Cannot use an index to create the index"));
+  }
 };
 
 #endif /* GDB_DWARF2_MAPPED_INDEX_H */

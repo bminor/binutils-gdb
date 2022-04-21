@@ -1163,8 +1163,9 @@ write_cooked_index (cooked_index_vector *table,
    associated dwz file, DWZ_OUT_FILE must be NULL.  */
 
 static void
-write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
-		FILE *dwz_out_file)
+write_gdbindex (dwarf2_per_objfile *per_objfile,
+		cooked_index_vector *table,
+		FILE *out_file, FILE *dwz_out_file)
 {
   mapped_symtab symtab;
   data_buf objfile_cu_list;
@@ -1218,9 +1219,6 @@ write_gdbindex (dwarf2_per_objfile *per_objfile, FILE *out_file,
       ++this_counter;
     }
 
-  cooked_index_vector *table
-    = (static_cast<cooked_index_vector *>
-       (per_objfile->per_bfd->index_table.get ()));
   write_cooked_index (table, cu_index_htab, &symtab);
 
   /* Dump the address map.  */
@@ -1256,6 +1254,7 @@ static const gdb_byte dwarf5_gdb_augmentation[] = { 'G', 'D', 'B', 0 };
 
 static void
 write_debug_names (dwarf2_per_objfile *per_objfile,
+		   cooked_index_vector *table,
 		   FILE *out_file, FILE *out_file_str)
 {
   const bool dwarf5_is_dwarf64 = check_dwarf64_offsets (per_objfile);
@@ -1291,9 +1290,6 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
 			  - per_objfile->per_bfd->tu_stats.nr_tus));
   gdb_assert (types_counter == per_objfile->per_bfd->tu_stats.nr_tus);
 
-  cooked_index_vector *table
-    = (static_cast<cooked_index_vector *>
-       (per_objfile->per_bfd->index_table.get ()));
   for (const cooked_index_entry *entry : table->all_entries ())
     nametable.insert (entry);
 
@@ -1431,15 +1427,10 @@ write_dwarf_index (dwarf2_per_objfile *per_objfile, const char *dir,
 {
   struct objfile *objfile = per_objfile->objfile;
 
+  if (per_objfile->per_bfd->index_table == nullptr)
+    error (_("No debugging symbols"));
   cooked_index_vector *table
-    = (static_cast<cooked_index_vector *>
-       (per_objfile->per_bfd->index_table.get ()));
-  if (table == nullptr)
-    {
-      if (per_objfile->per_bfd->index_table != nullptr)
-	error (_("Cannot use an index to create the index"));
-      error (_("No debugging symbols"));
-    }
+    = per_objfile->per_bfd->index_table->index_for_writing ();
 
   if (per_objfile->per_bfd->types.size () > 1)
     error (_("Cannot make an index when the file has multiple .debug_types sections"));
@@ -1460,13 +1451,13 @@ write_dwarf_index (dwarf2_per_objfile *per_objfile, const char *dir,
     {
       index_wip_file str_wip_file (dir, basename, DEBUG_STR_SUFFIX);
 
-      write_debug_names (per_objfile, objfile_index_wip.out_file.get (),
+      write_debug_names (per_objfile, table, objfile_index_wip.out_file.get (),
 			 str_wip_file.out_file.get ());
 
       str_wip_file.finalize ();
     }
   else
-    write_gdbindex (per_objfile, objfile_index_wip.out_file.get (),
+    write_gdbindex (per_objfile, table, objfile_index_wip.out_file.get (),
 		    (dwz_index_wip.has_value ()
 		     ? dwz_index_wip->out_file.get () : NULL));
 

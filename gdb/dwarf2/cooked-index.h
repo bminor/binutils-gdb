@@ -295,6 +295,11 @@ public:
      "main".  This will return NULL if no such entry is available.  */
   const cooked_index_entry *get_main () const;
 
+  cooked_index_vector *index_for_writing () override
+  {
+    return this;
+  }
+
   quick_symbol_functions_up make_quick_functions () const override;
 
 private:
