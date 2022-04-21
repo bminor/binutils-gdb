@@ -1865,14 +1865,15 @@ proc mi_send_resuming_command {command test} {
 # Does not check that the line is the same as requested.
 # The caller can check itself if required.
 proc_with_prefix mi_continue_to_line {location test} {
-
-    mi_tbreak $location "set temporary breakpoint"
-    mi_send_resuming_command "exec-continue" "continue to breakpoint"
-    return [mi_get_stop_line $test]
+    with_test_prefix $test {
+	mi_tbreak $location "set temporary breakpoint"
+	mi_send_resuming_command "exec-continue" "continue to breakpoint"
+	return [mi_get_stop_line]
+    }
 }
 
 # Wait until gdb prints the current line.
-proc mi_get_stop_line {test} {
+proc mi_get_stop_line {} {
 
   global mi_gdb_prompt
   global async
@@ -1888,10 +1889,10 @@ proc mi_get_stop_line {test} {
 	  return $expect_out(1,string)
       }
       -re ".*$mi_gdb_prompt" {
-	  fail "wait for stop ($test)"
+	  fail "wait for stop (unexpected output)"
       }
       timeout {
-	  fail "wait for stop ($test)"
+	  fail "wait for stop (timeout)"
       }
   }
 }
@@ -1958,7 +1959,7 @@ proc mi_run_inline_test { testcase } {
 	    if { [mi_run_cmd] < 0 } {
 		return -1
 	    }
-	    set line_now [mi_get_stop_line "$testcase: step to $line"]
+	    set line_now [mi_get_stop_line]
 	    set first 0
 	} elseif {$line_now!=$line} {
 	    set line_now [mi_continue_to_line "$mi_autotest_source:$line" "continue to $line"]
@@ -1976,7 +1977,7 @@ proc mi_run_inline_test { testcase } {
 	if { [mi_send_resuming_command "exec-next" "$testcase: step over $line"] != 0 } {
 	    return -1
 	}
-	set line_now [mi_get_stop_line "$testcase: step over $line"]
+	set line_now [mi_get_stop_line]
 
 	# We probably want to use 'uplevel' so that statements
 	# have direct access to global variables that the
