@@ -737,7 +737,7 @@ public: /* Remote specific methods.  */
 
   char *append_resumption (char *p, char *endp,
 			   ptid_t ptid, int step, gdb_signal siggnal);
-  int remote_resume_with_vcont (ptid_t ptid, int step,
+  int remote_resume_with_vcont (ptid_t scope_ptid, int step,
 				gdb_signal siggnal);
 
   thread_info *add_current_inferior_and_thread (const char *wait_status);
@@ -6274,9 +6274,8 @@ remote_target::remote_vcont_probe ()
    thread to be resumed is PTID; STEP and SIGGNAL indicate whether the
    resumed thread should be single-stepped and/or signalled.  If PTID
    equals minus_one_ptid, then all threads are resumed; if PTID
-   represents a process, then all threads of the process are resumed;
-   the thread to be stepped and/or signalled is given in the global
-   INFERIOR_PTID.  */
+   represents a process, then all threads of the process are
+   resumed.  */
 
 char *
 remote_target::append_resumption (char *p, char *endp,
@@ -6433,18 +6432,15 @@ remote_target::remote_resume_with_hc (ptid_t ptid, int step,
   putpkt (buf);
 }
 
-/* Resume the remote inferior by using a "vCont" packet.  The thread
-   to be resumed is PTID; STEP and SIGGNAL indicate whether the
-   resumed thread should be single-stepped and/or signalled.  If PTID
-   equals minus_one_ptid, then all threads are resumed; the thread to
-   be stepped and/or signalled is given in the global INFERIOR_PTID.
-   This function returns non-zero iff it resumes the inferior.
+/* Resume the remote inferior by using a "vCont" packet.  SCOPE_PTID,
+   STEP, and SIGGNAL have the same meaning as in target_resume.  This
+   function returns non-zero iff it resumes the inferior.
 
    This function issues a strict subset of all possible vCont commands
    at the moment.  */
 
 int
-remote_target::remote_resume_with_vcont (ptid_t ptid, int step,
+remote_target::remote_resume_with_vcont (ptid_t scope_ptid, int step,
 					 enum gdb_signal siggnal)
 {
   struct remote_state *rs = get_remote_state ();
@@ -6470,7 +6466,7 @@ remote_target::remote_resume_with_vcont (ptid_t ptid, int step,
 
   p += xsnprintf (p, endp - p, "vCont");
 
-  if (ptid == magic_null_ptid)
+  if (scope_ptid == magic_null_ptid)
     {
       /* MAGIC_NULL_PTID means that we don't have any active threads,
 	 so we don't have any TID numbers the inferior will
@@ -6478,7 +6474,7 @@ remote_target::remote_resume_with_vcont (ptid_t ptid, int step,
 	 a TID.  */
       append_resumption (p, endp, minus_one_ptid, step, siggnal);
     }
-  else if (ptid == minus_one_ptid || ptid.is_pid ())
+  else if (scope_ptid == minus_one_ptid || scope_ptid.is_pid ())
     {
       /* Resume all threads (of all processes, or of a single
 	 process), with preference for INFERIOR_PTID.  This assumes
@@ -6492,15 +6488,15 @@ remote_target::remote_resume_with_vcont (ptid_t ptid, int step,
 
       /* Also pass down any pending signaled resumption for other
 	 threads not the current.  */
-      p = append_pending_thread_resumptions (p, endp, ptid);
+      p = append_pending_thread_resumptions (p, endp, scope_ptid);
 
       /* And continue others without a signal.  */
-      append_resumption (p, endp, ptid, /*step=*/ 0, GDB_SIGNAL_0);
+      append_resumption (p, endp, scope_ptid, /*step=*/ 0, GDB_SIGNAL_0);
     }
   else
     {
-      /* Scheduler locking; resume only PTID.  */
-      append_resumption (p, endp, ptid, step, siggnal);
+      /* Scheduler locking; resume only SCOPE_PTID.  */
+      append_resumption (p, endp, scope_ptid, step, siggnal);
     }
 
   gdb_assert (strlen (rs->buf.data ()) < get_remote_packet_size ());
@@ -6523,7 +6519,7 @@ remote_target::remote_resume_with_vcont (ptid_t ptid, int step,
 /* Tell the remote machine to resume.  */
 
 void
-remote_target::resume (ptid_t ptid, int step, enum gdb_signal siggnal)
+remote_target::resume (ptid_t scope_ptid, int step, enum gdb_signal siggnal)
 {
   struct remote_state *rs = get_remote_state ();
 
@@ -6536,18 +6532,20 @@ remote_target::resume (ptid_t ptid, int step, enum gdb_signal siggnal)
      able to do vCont action coalescing.  */
   if (target_is_non_stop_p () && ::execution_direction != EXEC_REVERSE)
     {
-      remote_thread_info *remote_thr;
-
-      if (minus_one_ptid == ptid || ptid.is_pid ())
-	remote_thr = get_remote_thread_info (this, inferior_ptid);
-      else
-	remote_thr = get_remote_thread_info (this, ptid);
+      remote_thread_info *remote_thr
+	= get_remote_thread_info (inferior_thread ());
 
       /* We don't expect the core to ask to resume an already resumed (from
          its point of view) thread.  */
       gdb_assert (remote_thr->get_resume_state () == resume_state::NOT_RESUMED);
 
       remote_thr->set_resumed_pending_vcont (step, siggnal);
+
+      /* There's actually nothing that says that the core can't
+	 request a wildcard resume in non-stop mode, though.  It's
+	 just that we know it doesn't currently, so we don't bother
+	 with it.  */
+      gdb_assert (scope_ptid == inferior_ptid);
       return;
     }
 
@@ -6563,11 +6561,11 @@ remote_target::resume (ptid_t ptid, int step, enum gdb_signal siggnal)
   rs->last_resume_exec_dir = ::execution_direction;
 
   /* Prefer vCont, and fallback to s/c/S/C, which use Hc.  */
-  if (!remote_resume_with_vcont (ptid, step, siggnal))
-    remote_resume_with_hc (ptid, step, siggnal);
+  if (!remote_resume_with_vcont (scope_ptid, step, siggnal))
+    remote_resume_with_hc (scope_ptid, step, siggnal);
 
   /* Update resumed state tracked by the remote target.  */
-  for (thread_info *tp : all_non_exited_threads (this, ptid))
+  for (thread_info *tp : all_non_exited_threads (this, scope_ptid))
     get_remote_thread_info (tp)->set_resumed ();
 
   /* We've just told the target to resume.  The remote server will

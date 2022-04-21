@@ -1471,23 +1471,32 @@ extern void target_detach (inferior *inf, int from_tty);
 
 extern void target_disconnect (const char *, int);
 
-/* Resume execution (or prepare for execution) of a target thread,
-   process or all processes.  STEP says whether to hardware
-   single-step or to run free; SIGGNAL is the signal to be given to
-   the target, or GDB_SIGNAL_0 for no signal.  The caller may not pass
-   GDB_SIGNAL_DEFAULT.  A specific PTID means `step/resume only this
-   process id'.  A wildcard PTID (all threads, or all threads of
-   process) means `step/resume INFERIOR_PTID, and let other threads
-   (for which the wildcard PTID matches) resume with their
-   'thread->suspend.stop_signal' signal (usually GDB_SIGNAL_0) if it
-   is in "pass" state, or with no signal if in "no pass" state.
+/* Resume execution (or prepare for execution) of the current thread
+   (INFERIOR_PTID), while optionally letting other threads of the
+   current process or all processes run free.
+
+   STEP says whether to hardware single-step the current thread or to
+   let it run free; SIGNAL is the signal to be given to the current
+   thread, or GDB_SIGNAL_0 for no signal.  The caller may not pass
+   GDB_SIGNAL_DEFAULT.
+
+   SCOPE_PTID indicates the resumption scope.  I.e., which threads
+   (other than the current) run free.  If resuming a single thread,
+   SCOPE_PTID is the same thread as the current thread.  A wildcard
+   SCOPE_PTID (all threads, or all threads of process) lets threads
+   other than the current (for which the wildcard SCOPE_PTID matches)
+   resume with their 'thread->suspend.stop_signal' signal (usually
+   GDB_SIGNAL_0) if it is in "pass" state, or with no signal if in "no
+   pass" state.  Note neither STEP nor SIGNAL apply to any thread
+   other than the current.
 
    In order to efficiently handle batches of resumption requests,
    targets may implement this method such that it records the
    resumption request, but defers the actual resumption to the
    target_commit_resume method implementation.  See
    target_commit_resume below.  */
-extern void target_resume (ptid_t ptid, int step, enum gdb_signal signal);
+extern void target_resume (ptid_t scope_ptid,
+			   int step, enum gdb_signal signal);
 
 /* Ensure that all resumed threads are committed to the target.
 

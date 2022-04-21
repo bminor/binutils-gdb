@@ -2655,21 +2655,24 @@ target_thread_info_to_thread_handle (struct thread_info *tip)
 }
 
 void
-target_resume (ptid_t ptid, int step, enum gdb_signal signal)
+target_resume (ptid_t scope_ptid, int step, enum gdb_signal signal)
 {
   process_stratum_target *curr_target = current_inferior ()->process_target ();
   gdb_assert (!curr_target->commit_resumed_state);
 
+  gdb_assert (inferior_ptid != null_ptid);
+  gdb_assert (inferior_ptid.matches (scope_ptid));
+
   target_dcache_invalidate ();
 
-  current_inferior ()->top_target ()->resume (ptid, step, signal);
+  current_inferior ()->top_target ()->resume (scope_ptid, step, signal);
 
-  registers_changed_ptid (curr_target, ptid);
+  registers_changed_ptid (curr_target, scope_ptid);
   /* We only set the internal executing state here.  The user/frontend
      running state is set at a higher level.  This also clears the
      thread's stop_pc as side effect.  */
-  set_executing (curr_target, ptid, true);
-  clear_inline_frame_state (curr_target, ptid);
+  set_executing (curr_target, scope_ptid, true);
+  clear_inline_frame_state (curr_target, scope_ptid);
 
   if (target_can_async_p ())
     target_async (1);

@@ -1595,32 +1595,22 @@ resume_set_callback (struct lwp_info *lp)
 }
 
 void
-linux_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
+linux_nat_target::resume (ptid_t scope_ptid, int step, enum gdb_signal signo)
 {
   struct lwp_info *lp;
-  int resume_many;
 
   linux_nat_debug_printf ("Preparing to %s %s, %s, inferior_ptid %s",
 			  step ? "step" : "resume",
-			  ptid.to_string ().c_str (),
+			  scope_ptid.to_string ().c_str (),
 			  (signo != GDB_SIGNAL_0
 			   ? strsignal (gdb_signal_to_host (signo)) : "0"),
 			  inferior_ptid.to_string ().c_str ());
 
-  /* A specific PTID means `step only this process id'.  */
-  resume_many = (minus_one_ptid == ptid
-		 || ptid.is_pid ());
-
   /* Mark the lwps we're resuming as resumed and update their
      last_resume_kind to resume_continue.  */
-  iterate_over_lwps (ptid, resume_set_callback);
+  iterate_over_lwps (scope_ptid, resume_set_callback);
 
-  /* See if it's the current inferior that should be handled
-     specially.  */
-  if (resume_many)
-    lp = find_lwp_pid (inferior_ptid);
-  else
-    lp = find_lwp_pid (ptid);
+  lp = find_lwp_pid (inferior_ptid);
   gdb_assert (lp != NULL);
 
   /* Remember if we're stepping.  */
@@ -1669,11 +1659,12 @@ linux_nat_target::resume (ptid_t ptid, int step, enum gdb_signal signo)
       return;
     }
 
-  if (resume_many)
-    iterate_over_lwps (ptid, [=] (struct lwp_info *info)
-			     {
-			       return linux_nat_resume_callback (info, lp);
-			     });
+  /* No use iterating unless we're resuming other threads.  */
+  if (scope_ptid != lp->ptid)
+    iterate_over_lwps (scope_ptid, [=] (struct lwp_info *info)
+      {
+	return linux_nat_resume_callback (info, lp);
+      });
 
   linux_nat_debug_printf ("%s %s, %s (resume event thread)",
 			  step ? "PTRACE_SINGLESTEP" : "PTRACE_CONT",
