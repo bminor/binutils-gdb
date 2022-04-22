@@ -4278,6 +4278,18 @@ fetch_inferior_event ()
        reinstalled here.  */
   }
 
+  /* Handling this event might have caused some inferiors to become prunable.
+     For example, the exit of an inferior that was automatically added.  Try
+     to get rid of them.  Keeping those around slows down things linearly.
+
+     Note that this never removes the current inferior.  Therefore, call this
+     after RESTORE_THREAD went out of scope, in case the event inferior (which was
+     temporarily made the current inferior) is meant to be deleted.
+
+     Call this before all_uis_check_sync_execution_done, so that notifications about
+     removed inferiors appear before the prompt.  */
+  prune_inferiors ();
+
   /* If a UI was in sync execution mode, and now isn't, restore its
      prompt (a synchronous execution command has finished, and we're
      ready for input).  */
@@ -8768,11 +8780,6 @@ normal_stop (void)
 	   Delete any breakpoint that is to be deleted at the next stop.  */
 	breakpoint_auto_delete (inferior_thread ()->control.stop_bpstat);
     }
-
-  /* Try to get rid of automatically added inferiors that are no
-     longer needed.  Keeping those around slows down things linearly.
-     Note that this never removes the current inferior.  */
-  prune_inferiors ();
 
   return 0;
 }
