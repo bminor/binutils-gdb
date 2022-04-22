@@ -547,6 +547,9 @@ private:
      yet.  */
   process_info *add_linux_process_no_mem_file (int pid, int attached);
 
+  /* Free resources associated to PROC and remove it.  */
+  void remove_linux_process (process_info *proc); 
+
   /* Add a new thread.  */
   lwp_info *add_lwp (ptid_t ptid);
 

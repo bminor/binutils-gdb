@@ -440,6 +440,20 @@ linux_process_target::add_linux_process (int pid, int attached)
   return proc;
 }
 
+void
+linux_process_target::remove_linux_process (process_info *proc)
+{
+  if (proc->priv->mem_fd >= 0)
+    close (proc->priv->mem_fd);
+
+  this->low_delete_process (proc->priv->arch_private);
+
+  xfree (proc->priv);
+  proc->priv = nullptr;
+
+  remove_process (proc);
+}
+
 arch_process_info *
 linux_process_target::low_new_process ()
 {
@@ -1136,7 +1150,7 @@ linux_process_target::attach (unsigned long pid)
   err = attach_lwp (ptid);
   if (err != 0)
     {
-      remove_process (proc);
+      this->remove_linux_process (proc);
 
       std::string reason = linux_ptrace_attach_fail_reason_string (ptid, err);
       error ("Cannot attach to process %ld: %s", pid, reason.c_str ());
@@ -1565,8 +1579,6 @@ linux_process_target::detach (process_info *process)
 void
 linux_process_target::mourn (process_info *process)
 {
-  struct process_info_private *priv;
-
 #ifdef USE_THREAD_DB
   thread_db_mourn (process);
 #endif
@@ -1576,14 +1588,7 @@ linux_process_target::mourn (process_info *process)
       delete_lwp (get_thread_lwp (thread));
     });
 
-  /* Freeing all private data.  */
-  priv = process->priv;
-  close (priv->mem_fd);
-  low_delete_process (priv->arch_private);
-  free (priv);
-  process->priv = NULL;
-
-  remove_process (process);
+  this->remove_linux_process (process);
 }
 
 void
