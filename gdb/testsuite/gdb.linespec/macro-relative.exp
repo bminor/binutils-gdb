@@ -32,13 +32,12 @@ if { [file pathtype $objdir] == "relative" } {
     untested "objdir $objdir should be absolute"
     return
 }
-set saved_pwd [pwd]
-cd $srcdir/${subdir}/base/two
-set err [gdb_compile "../../${srcfile}" "${binfile}" executable $opts]
-cd $saved_pwd
-if { $err != "" } {
-    untested "compilation failed"
-    return -1
+
+with_cwd $srcdir/${subdir}/base/two {
+    if { [gdb_compile "../../${srcfile}" "${binfile}" executable $opts] != "" } {
+	untested "compilation failed"
+	return
+    }
 }
 
 clean_restart ${testfile}

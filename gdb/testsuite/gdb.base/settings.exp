@@ -585,11 +585,9 @@ proc test-string {variant} {
 	# ${srcdir} may be a relative path.  We want to make sure we
 	# end up in the right directory - so make sure we know where
 	# it is.
-	global srcdir
-	set mydir [pwd]
-	cd ${srcdir}
-	set fullsrcdir [pwd]
-	cd ${mydir}
+	with_cwd $::srcdir {
+	    set fullsrcdir [pwd]
+	}
 
 	gdb_test "cd ${fullsrcdir}" \
 	    "Working directory [string_to_regexp ${fullsrcdir}].*" \
