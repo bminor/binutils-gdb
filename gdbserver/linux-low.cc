@@ -2972,7 +2972,6 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
   int report_to_gdb;
   int trace_event;
   int in_step_range;
-  int any_resumed;
 
   threads_debug_printf ("[%s]", target_pid_to_str (ptid).c_str ());
 
@@ -2986,23 +2985,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
   in_step_range = 0;
   ourstatus->set_ignore ();
 
-  auto status_pending_p_any = [&] (thread_info *thread)
-    {
-      return status_pending_p_callback (thread, minus_one_ptid);
-    };
-
-  auto not_stopped = [&] (thread_info *thread)
-    {
-      return not_stopped_callback (thread, minus_one_ptid);
-    };
-
-  /* Find a resumed LWP, if any.  */
-  if (find_thread (status_pending_p_any) != NULL)
-    any_resumed = 1;
-  else if (find_thread (not_stopped) != NULL)
-    any_resumed = 1;
-  else
-    any_resumed = 0;
+  bool was_any_resumed = any_resumed ();
 
   if (step_over_bkpt == null_ptid)
     pid = wait_for_event (ptid, &w, options);
@@ -3013,7 +2996,7 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
       pid = wait_for_event (step_over_bkpt, &w, options & ~WNOHANG);
     }
 
-  if (pid == 0 || (pid == -1 && !any_resumed))
+  if (pid == 0 || (pid == -1 && !was_any_resumed))
     {
       gdb_assert (target_options & TARGET_WNOHANG);
 
@@ -6175,6 +6158,32 @@ bool
 linux_process_target::thread_stopped (thread_info *thread)
 {
   return get_thread_lwp (thread)->stopped;
+}
+
+bool
+linux_process_target::any_resumed ()
+{
+  bool any_resumed;
+
+  auto status_pending_p_any = [&] (thread_info *thread)
+    {
+      return status_pending_p_callback (thread, minus_one_ptid);
+    };
+
+  auto not_stopped = [&] (thread_info *thread)
+    {
+      return not_stopped_callback (thread, minus_one_ptid);
+    };
+
+  /* Find a resumed LWP, if any.  */
+  if (find_thread (status_pending_p_any) != NULL)
+    any_resumed = 1;
+  else if (find_thread (not_stopped) != NULL)
+    any_resumed = 1;
+  else
+    any_resumed = 0;
+
+  return any_resumed;
 }
 
 /* This exposes stop-all-threads functionality to other modules.  */

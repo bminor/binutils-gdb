@@ -259,6 +259,8 @@ public:
 
   bool thread_stopped (thread_info *thread) override;
 
+  bool any_resumed () override;
+
   void pause_all (bool freeze) override;
 
   void unpause_all (bool unfreeze) override;
