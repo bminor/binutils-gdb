@@ -319,6 +319,9 @@ public:
   /* Return true if THREAD is known to be stopped now.  */
   virtual bool thread_stopped (thread_info *thread);
 
+  /* Return true if any thread is known to be resumed.  */
+  virtual bool any_resumed ();
+
   /* Return true if the get_tib_address op is supported.  */
   virtual bool supports_get_tib_address ();
 
@@ -681,6 +684,9 @@ target_read_btrace_conf (struct btrace_target_info *tinfo,
 
 #define target_supports_software_single_step() \
   the_target->supports_software_single_step ()
+
+#define target_any_resumed() \
+  the_target->any_resumed ()
 
 ptid_t mywait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	       target_wait_flags options, int connected_wait);

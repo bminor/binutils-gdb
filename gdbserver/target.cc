@@ -615,6 +615,12 @@ process_stratum_target::thread_stopped (thread_info *thread)
 }
 
 bool
+process_stratum_target::any_resumed ()
+{
+  return true;
+}
+
+bool
 process_stratum_target::supports_get_tib_address ()
 {
   return false;

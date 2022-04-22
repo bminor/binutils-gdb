@@ -4724,7 +4724,17 @@ handle_target_event (int err, gdb_client_data client_data)
 	    }
 	}
       else
-	push_stop_notification (cs.last_ptid, cs.last_status);
+	{
+	  push_stop_notification (cs.last_ptid, cs.last_status);
+
+	  if (cs.last_status.kind () == TARGET_WAITKIND_THREAD_EXITED
+	      && !target_any_resumed ())
+	    {
+	      target_waitstatus ws;
+	      ws.set_no_resumed ();
+	      push_stop_notification (null_ptid, ws);
+	    }
+	}
     }
 
   /* Be sure to not change the selected thread behind GDB's back.
