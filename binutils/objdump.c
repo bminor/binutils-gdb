@@ -1640,14 +1640,15 @@ objdump_print_addr (bfd_vma vma,
     {
       if (!no_addresses)
 	{
-	  (*inf->fprintf_func) (inf->stream, "0x");
+	  (*inf->fprintf_styled_func) (inf->stream, dis_style_address, "0x");
 	  objdump_print_value (vma, inf, skip_zeroes);
 	}
 
       if (display_file_offsets)
-	inf->fprintf_func (inf->stream, _(" (File Offset: 0x%lx)"),
-			   (long int) (inf->section->filepos
-				       + (vma - inf->section->vma)));
+	inf->fprintf_styled_func (inf->stream, dis_style_text,
+				  _(" (File Offset: 0x%lx)"),
+				  (long int) (inf->section->filepos
+					      + (vma - inf->section->vma)));
       return;
     }
 
