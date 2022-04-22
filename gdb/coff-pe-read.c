@@ -208,7 +208,7 @@ add_pe_forwarded_sym (minimal_symbol_reader &reader,
   if (debug_coff_pe_read > 1)
     gdb_printf (gdb_stdlog, _("Adding forwarded exported symbol"
 			      " \"%s\" in dll \"%s\", pointing to \"%s\"\n"),
-		sym_name, dll_name, forward_qualified_name);
+		sym_name, dll_name, forward_qualified_name.c_str ());
 
   vma = msymbol.value_address ();
   msymtype = msymbol.minsym->type ();
