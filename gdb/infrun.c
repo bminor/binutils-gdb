@@ -4056,12 +4056,19 @@ reinstall_readline_callback_handler_cleanup ()
 static void
 clean_up_just_stopped_threads_fsms (struct execution_control_state *ecs)
 {
+  /* The first clean_up call below assumes the event thread is the current
+     one.  */
+  if (ecs->event_thread != nullptr)
+    gdb_assert (ecs->event_thread == inferior_thread ());
+
   if (ecs->event_thread != nullptr
       && ecs->event_thread->thread_fsm () != nullptr)
     ecs->event_thread->thread_fsm ()->clean_up (ecs->event_thread);
 
   if (!non_stop)
     {
+      scoped_restore_current_thread restore_thread;
+
       for (thread_info *thr : all_non_exited_threads ())
 	{
 	  if (thr->thread_fsm () == nullptr)
@@ -4072,9 +4079,6 @@ clean_up_just_stopped_threads_fsms (struct execution_control_state *ecs)
 	  switch_to_thread (thr);
 	  thr->thread_fsm ()->clean_up (thr);
 	}
-
-      if (ecs->event_thread != nullptr)
-	switch_to_thread (ecs->event_thread);
     }
 }
 
