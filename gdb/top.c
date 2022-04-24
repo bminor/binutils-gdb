@@ -257,6 +257,41 @@ void (*deprecated_context_hook) (int id);
 /* The highest UI number ever assigned.  */
 static int highest_ui_num;
 
+/* Unbuffer STREAM.  This is a wrapper around setbuf(STREAM, nullptr)
+   which applies some special rules for MS-Windows hosts.  */
+
+static void
+unbuffer_stream (FILE *stream)
+{
+  /* Unbuffer the input stream so that in gdb_readline_no_editing_callback,
+     the calls to fgetc fetch only one char at the time from STREAM.
+
+     This is important because gdb_readline_no_editing_callback will read
+     from STREAM up to the first '\n' character, after this GDB returns to
+     the event loop and relies on a select on STREAM indicating that more
+     input is pending.
+
+     If STREAM is buffered then the fgetc calls may have moved all the
+     pending input from the kernel into a local buffer, after which the
+     select will not indicate that more input is pending, and input after
+     the first '\n' will not be processed immediately.
+
+     Please ensure that any changes in this area run the MI tests with the
+     FORCE_SEPARATE_MI_TTY=1 flag being passed.  */
+
+#ifdef __MINGW32__
+  /* With MS-Windows runtime, making stdin unbuffered when it's
+     connected to the terminal causes it to misbehave.  */
+  if (!ISATTY (stream))
+    setbuf (stream, nullptr);
+#else
+  /* On GNU/Linux the issues described above can impact GDB even when
+     dealing with input from a terminal.  For now we unbuffer the input
+     stream for everyone except MS-Windows.  */
+  setbuf (stream, nullptr);
+#endif
+}
+
 /* See top.h.  */
 
 ui::ui (FILE *instream_, FILE *outstream_, FILE *errstream_)
@@ -282,6 +317,8 @@ ui::ui (FILE *instream_, FILE *outstream_, FILE *errstream_)
     m_current_uiout (nullptr)
 {
   buffer_init (&line_buffer);
+
+  unbuffer_stream (instream_);
 
   if (ui_list == NULL)
     ui_list = this;
@@ -411,6 +448,8 @@ void
 read_command_file (FILE *stream)
 {
   struct ui *ui = current_ui;
+
+  unbuffer_stream (stream);
 
   scoped_restore save_instream
     = make_scoped_restore (&ui->instream, stream);
