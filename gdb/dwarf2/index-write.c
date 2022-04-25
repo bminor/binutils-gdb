@@ -1103,6 +1103,15 @@ write_cooked_index (cooked_index_vector *table,
 		    const cu_index_map &cu_index_htab,
 		    struct mapped_symtab *symtab)
 {
+  /* We track type names and only enter a given type once.  */
+  htab_up type_names (htab_create_alloc (10, htab_hash_string, htab_eq_string,
+					 nullptr, xcalloc, xfree));
+  /* Same with variable names.  However, if a type and variable share
+     a name, we want both, which is why there are two hash tables
+     here.  */
+  htab_up var_names (htab_create_alloc (10, htab_hash_string, htab_eq_string,
+					nullptr, xcalloc, xfree));
+
   for (const cooked_index_entry *entry : table->all_entries ())
     {
       /* GDB never put linkage names into .gdb_index.  The theory here
@@ -1124,12 +1133,24 @@ write_cooked_index (cooked_index_vector *table,
       else if (entry->tag == DW_TAG_variable
 	       || entry->tag == DW_TAG_constant
 	       || entry->tag == DW_TAG_enumerator)
-	kind = GDB_INDEX_SYMBOL_KIND_VARIABLE;
+	{
+	  kind = GDB_INDEX_SYMBOL_KIND_VARIABLE;
+	  void **slot = htab_find_slot (var_names.get (), name, INSERT);
+	  if (*slot != nullptr)
+	    continue;
+	  *slot = (void *) name;
+	}
       else if (entry->tag == DW_TAG_module
 	       || entry->tag == DW_TAG_common_block)
 	kind = GDB_INDEX_SYMBOL_KIND_OTHER;
       else
-	kind = GDB_INDEX_SYMBOL_KIND_TYPE;
+	{
+	  kind = GDB_INDEX_SYMBOL_KIND_TYPE;
+	  void **slot = htab_find_slot (type_names.get (), name, INSERT);
+	  if (*slot != nullptr)
+	    continue;
+	  *slot = (void *) name;
+	}
 
       add_index_entry (symtab, name, (entry->flags & IS_STATIC) != 0,
 		       kind, it->second);
