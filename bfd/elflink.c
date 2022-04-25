@@ -7190,9 +7190,13 @@ warning: enabling an executable stack because of -z execstack command line optio
 warning: %s: requires executable stack (because the .note.GNU-stack section is executable)"),
 		       bfd_get_filename (noteobj));
 		  else if (emptyobj)
-		    _bfd_error_handler (_("\
+		    {
+		      _bfd_error_handler (_("\
 warning: %s: missing .note.GNU-stack section implies executable stack"),
-		       bfd_get_filename (emptyobj));
+					  bfd_get_filename (emptyobj));
+		      _bfd_error_handler (_("\
+NOTE: This behaviour is deprecated and will be removed in a future version of the linker"));
+		    }
 		}
 	    }
 	  elf_stack_flags (output_bfd) = PF_R | PF_W | exec;

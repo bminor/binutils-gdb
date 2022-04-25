@@ -638,6 +638,7 @@ proc prune_warnings_extra { text } {
     # PR binutils/23898: It is OK to have gaps in build notes.
     regsub -all "(^|\n)(\[^\n\]*: Warning: Gap in build notes detected from\[^\n\]*\n?)+" $text "\\1" text
     regsub -all "(^|\n)(\[^\n\]*: warning:\[^\n\]*missing \\.note\\.GNU-stack section\[^\n\]*\n?)+" $text "\\1" text
+    regsub -all "(^|\n)(\[^\n\]*: NOTE: This behaviour is deprecated\[^\n\]*\n?)+" $text "\\1" text
     return $text
 }
 

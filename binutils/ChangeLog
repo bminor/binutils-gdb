@@ -1,3 +1,9 @@
+2022-04-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 29072
+	* testsuite/lib/binutils-common.exp (prune_warnings_extra): Filter
+	out notes about the executable stacjk behaviour beign deprecated.
+
 2022-04-12  Nick Clifton  <nickc@redhat.com>
 
 	PR 28992

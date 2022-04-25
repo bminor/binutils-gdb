@@ -1,3 +1,9 @@
+2022-04-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 29072
+	* testsuite/ld-elf/pr29072.b.warn: Update to include the note
+	about the linker's behaviour being depreccated.
+
 2022-04-20  Clément Chigot  <clement.chigot@atos.net>
 
 	* emultempl/aix.em (params): New variable.

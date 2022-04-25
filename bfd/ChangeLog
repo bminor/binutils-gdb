@@ -1,3 +1,11 @@
+2022-04-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 29072
+	* elflink.c (bfd_elf_size_dynamic_sections): Display a note to the
+	user that the current ehaviour of creating an executable stack
+	because of a missing .note.GNU-stack section is deprecated and
+	will be changed in a future release.
+
 2022-04-20  Clément Chigot  <clement.chigot@atos.net>
 
 	* coff-rs6000.c (xcoff_reloc_type_noop): Add info argument.
