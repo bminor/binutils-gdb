@@ -522,6 +522,14 @@ set lto_link_elf_tests [list \
    {{"nm" {-D} "pr28849.d"}} \
    "pr28849" \
   ] \
+  [list \
+   "PR ld/pr29086" \
+   "-Wl,--wrap=foo" \
+   "-O0 -flto" \
+   {pr29086.c} \
+   {} \
+   "pr29086" \
+  ] \
 ]
 
 # PR 14918 checks that libgcc is not spuriously included in a shared link of

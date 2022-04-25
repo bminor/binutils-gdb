@@ -599,6 +599,7 @@ bfd_wrapped_link_hash_lookup (bfd *abfd,
 	  n[1] = '\0';
 	  strcat (n, l + sizeof REAL - 1);
 	  h = bfd_link_hash_lookup (info->hash, n, create, true, follow);
+	  h->ref_real = 1;
 	  free (n);
 	  return h;
 	}
