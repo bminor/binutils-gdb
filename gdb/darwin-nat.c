@@ -2373,7 +2373,7 @@ set_enable_mach_exceptions (const char *args, int from_tty,
     }
 }
 
-char *
+const char *
 darwin_nat_target::pid_to_exec_file (int pid)
 {
   static char path[PATH_MAX];

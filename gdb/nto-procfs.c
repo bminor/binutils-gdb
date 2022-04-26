@@ -121,7 +121,7 @@ struct nto_procfs_target : public inf_child_target
 
   const char *extra_thread_info (struct thread_info *) override;
 
-  char *pid_to_exec_file (int pid) override;
+  const char *pid_to_exec_file (int pid) override;
 };
 
 /* For "target native".  */
@@ -664,7 +664,7 @@ nto_procfs_target::files_info ()
 
 /* Target to_pid_to_exec_file implementation.  */
 
-char *
+const char *
 nto_procfs_target::pid_to_exec_file (const int pid)
 {
   int proc_fd;

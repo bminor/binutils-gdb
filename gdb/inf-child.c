@@ -220,7 +220,7 @@ inf_child_target::can_attach ()
   return true;
 }
 
-char *
+const char *
 inf_child_target::pid_to_exec_file (int pid)
 {
   /* This target doesn't support translation of a process ID to the

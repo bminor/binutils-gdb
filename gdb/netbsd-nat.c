@@ -34,10 +34,10 @@
 /* Return the name of a file that can be opened to get the symbols for
    the child process identified by PID.  */
 
-char *
+const char *
 nbsd_nat_target::pid_to_exec_file (int pid)
 {
-  return const_cast<char *> (netbsd_nat::pid_to_exec_file (pid));
+  return netbsd_nat::pid_to_exec_file (pid);
 }
 
 /* Return the current directory for the process identified by PID.  */

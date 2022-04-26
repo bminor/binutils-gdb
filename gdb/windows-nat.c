@@ -276,7 +276,7 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
 
   void interrupt () override;
 
-  char *pid_to_exec_file (int pid) override;
+  const char *pid_to_exec_file (int pid) override;
 
   ptid_t get_ada_task_ptid (long lwp, ULONGEST thread) override;
 
@@ -2005,7 +2005,7 @@ windows_get_exec_module_filename (char *exe_name_ret, size_t exe_name_max_len)
 
 /* The pid_to_exec_file target_ops method for this platform.  */
 
-char *
+const char *
 windows_nat_target::pid_to_exec_file (int pid)
 {
   static char path[__PMAX];

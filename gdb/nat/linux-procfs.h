@@ -78,7 +78,7 @@ extern int linux_proc_task_list_dir_exists (pid_t pid);
    to create the process PID.  The returned value persists until this
    function is next called.  */
 
-extern char *linux_proc_pid_to_exec_file (int pid);
+extern const char *linux_proc_pid_to_exec_file (int pid);
 
 /* Display possible problems on this system.  Display them only once
    per GDB execution.  */

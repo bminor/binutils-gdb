@@ -688,7 +688,7 @@ struct target_ops
       TARGET_DEFAULT_FUNC (default_target_pass_ctrlc);
     virtual void rcmd (const char *command, struct ui_file *output)
       TARGET_DEFAULT_FUNC (default_rcmd);
-    virtual char *pid_to_exec_file (int pid)
+    virtual const char *pid_to_exec_file (int pid)
       TARGET_DEFAULT_RETURN (NULL);
     virtual void log_command (const char *)
       TARGET_DEFAULT_IGNORE ();
@@ -1951,7 +1951,7 @@ extern gdb::byte_vector target_thread_info_to_thread_handle
    the client if the string will not be immediately used, or if
    it must persist.  */
 
-extern char *target_pid_to_exec_file (int pid);
+extern const char *target_pid_to_exec_file (int pid);
 
 /* See the to_thread_architecture description in struct target_ops.  */
 

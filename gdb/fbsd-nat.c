@@ -57,7 +57,7 @@
 /* Return the name of a file that can be opened to get the symbols for
    the child process identified by PID.  */
 
-char *
+const char *
 fbsd_nat_target::pid_to_exec_file (int pid)
 {
   static char buf[PATH_MAX];

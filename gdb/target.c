@@ -423,7 +423,7 @@ target_extra_thread_info (thread_info *tp)
 
 /* See target.h.  */
 
-char *
+const char *
 target_pid_to_exec_file (int pid)
 {
   return current_inferior ()->top_target ()->pid_to_exec_file (pid);

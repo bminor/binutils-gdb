@@ -44,7 +44,7 @@
 class fbsd_nat_target : public inf_ptrace_target
 {
 public:
-  char *pid_to_exec_file (int pid) override;
+  const char *pid_to_exec_file (int pid) override;
 
   int find_memory_regions (find_memory_region_ftype func, void *data) override;
 

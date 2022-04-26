@@ -100,7 +100,7 @@ class darwin_nat_target : public inf_child_target
 
   std::string pid_to_str (ptid_t) override;
 
-  char *pid_to_exec_file (int pid) override;
+  const char *pid_to_exec_file (int pid) override;
 
   enum target_xfer_status xfer_partial (enum target_object object,
 					const char *annex,

@@ -94,7 +94,7 @@ struct dummy_target : public target_ops
   void interrupt () override;
   void pass_ctrlc () override;
   void rcmd (const char *arg0, struct ui_file *arg1) override;
-  char *pid_to_exec_file (int arg0) override;
+  const char *pid_to_exec_file (int arg0) override;
   void log_command (const char *arg0) override;
   const target_section_table *get_section_table () override;
   thread_control_capabilities get_thread_control_capabilities () override;
@@ -268,7 +268,7 @@ struct debug_target : public target_ops
   void interrupt () override;
   void pass_ctrlc () override;
   void rcmd (const char *arg0, struct ui_file *arg1) override;
-  char *pid_to_exec_file (int arg0) override;
+  const char *pid_to_exec_file (int arg0) override;
   void log_command (const char *arg0) override;
   const target_section_table *get_section_table () override;
   thread_control_capabilities get_thread_control_capabilities () override;
@@ -1983,28 +1983,28 @@ debug_target::rcmd (const char *arg0, struct ui_file *arg1)
   gdb_puts (")\n", gdb_stdlog);
 }
 
-char *
+const char *
 target_ops::pid_to_exec_file (int arg0)
 {
   return this->beneath ()->pid_to_exec_file (arg0);
 }
 
-char *
+const char *
 dummy_target::pid_to_exec_file (int arg0)
 {
   return NULL;
 }
 
-char *
+const char *
 debug_target::pid_to_exec_file (int arg0)
 {
-  char * result;
+  const char * result;
   gdb_printf (gdb_stdlog, "-> %s->pid_to_exec_file (...)\n", this->beneath ()->shortname ());
   result = this->beneath ()->pid_to_exec_file (arg0);
   gdb_printf (gdb_stdlog, "<- %s->pid_to_exec_file (", this->beneath ()->shortname ());
   target_debug_print_int (arg0);
   gdb_puts (") = ", gdb_stdlog);
-  target_debug_print_char_p (result);
+  target_debug_print_const_char_p (result);
   gdb_puts ("\n", gdb_stdlog);
   return result;
 }

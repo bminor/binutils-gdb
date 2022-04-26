@@ -508,7 +508,7 @@ public:
 
   void rcmd (const char *command, struct ui_file *output) override;
 
-  char *pid_to_exec_file (int pid) override;
+  const char *pid_to_exec_file (int pid) override;
 
   void log_command (const char *cmd) override
   {
@@ -14353,7 +14353,7 @@ remote_target::load (const char *name, int from_tty)
    can be opened on the remote side to get the symbols for the child
    process.  Returns NULL if the operation is not supported.  */
 
-char *
+const char *
 remote_target::pid_to_exec_file (int pid)
 {
   static gdb::optional<gdb::char_vector> filename;
