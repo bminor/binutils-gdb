@@ -1,4 +1,4 @@
-#ld: -r tmpdir/lto-5a.o tmpdir/lto-5b.o -z noexecstack
+#ld: -r tmpdir/lto-5a.o tmpdir/lto-5b.o
 #source: dummy.s
 #nm: -p
 

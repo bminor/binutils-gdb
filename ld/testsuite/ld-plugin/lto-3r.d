@@ -1,4 +1,4 @@
-#ld: -r tmpdir/lto-3b.o -z noexecstack
+#ld: -r tmpdir/lto-3b.o
 #source: dummy.s
 #nm: -p
 
