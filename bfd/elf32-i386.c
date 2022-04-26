@@ -1772,28 +1772,14 @@ elf_i386_scan_relocs (bfd *abfd,
 		}
 	      else
 		{
-		  h->pointer_equality_needed = 1;
-		  /* R_386_32 can be resolved at run-time.  */
+		  /* R_386_32 can be resolved at run-time.  Function
+		     pointer reference doesn't need PLT for pointer
+		     equality.  */
 		  if (r_type == R_386_32
 		      && (sec->flags & SEC_READONLY) == 0)
 		    func_pointer_ref = true;
-		}
-
-	      if (h->pointer_equality_needed
-		  && h->type == STT_FUNC
-		  && eh->def_protected
-		  && elf_has_indirect_extern_access (h->root.u.def.section->owner))
-		{
-		  /* Disallow non-canonical reference to canonical
-		     protected function.  */
-		  _bfd_error_handler
-		    /* xgettext:c-format */
-		    (_("%pB: non-canonical reference to canonical "
-		       "protected function `%s' in %pB"),
-		     abfd, h->root.root.string,
-		     h->root.u.def.section->owner);
-		  bfd_set_error (bfd_error_bad_value);
-		  goto error_return;
+		  else
+		    h->pointer_equality_needed = 1;
 		}
 
 	      if (!func_pointer_ref)
@@ -1815,6 +1801,23 @@ elf_i386_scan_relocs (bfd *abfd,
 		  if (!h->def_regular
 		      || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
 		    h->plt.refcount = 1;
+
+		  if (h->pointer_equality_needed
+		      && h->type == STT_FUNC
+		      && eh->def_protected
+		      && elf_has_indirect_extern_access (h->root.u.def.section->owner))
+		    {
+		      /* Disallow non-canonical reference to canonical
+			 protected function.  */
+		      _bfd_error_handler
+			/* xgettext:c-format */
+			(_("%pB: non-canonical reference to canonical "
+			   "protected function `%s' in %pB"),
+			 abfd, h->root.root.string,
+			 h->root.u.def.section->owner);
+		      bfd_set_error (bfd_error_bad_value);
+		      goto error_return;
+		    }
 		}
 	    }
 
