@@ -183,6 +183,16 @@ save_vars { env(TERM) } {
 	    }
 	}
 
+	# Use the up arrow to select a previous command.  Check that
+	# no unexpected output is added between the previously
+	# selected command, and the output of that command.
+	gdb_test "print 123" "\\\$\[0-9\]* = 123"
+	gdb_test_multiple "\033\[A" "use up arrow" {
+	    -re -wrap "print 123\r\n\\\$\[0-9\]* = 123" {
+		pass $gdb_test_name
+	    }
+	}
+
 	# Now repeat the first test with a history file that fills the entire
 	# history list.
 
