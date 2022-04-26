@@ -96,6 +96,10 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
   if (!enabled ())
     return;
 
+  /* If the objfile does not correspond to an actual file, skip it.  */
+  if ((obj->flags & OBJF_NOT_FILENAME) != 0)
+    return;
+
   /* Get build id of objfile.  */
   const bfd_build_id *build_id = build_id_bfd_get (obj->obfd);
   if (build_id == nullptr)

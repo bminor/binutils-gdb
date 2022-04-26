@@ -1411,9 +1411,8 @@ write_dwarf_index (dwarf2_per_objfile *per_objfile, const char *dir,
   if (per_objfile->per_bfd->types.size () > 1)
     error (_("Cannot make an index when the file has multiple .debug_types sections"));
 
-  struct stat st;
-  if (stat (objfile_name (objfile), &st) < 0)
-    perror_with_name (objfile_name (objfile));
+
+  gdb_assert ((objfile->flags & OBJF_NOT_FILENAME) == 0);
 
   const char *index_suffix = (index_kind == dw_index_kind::DEBUG_NAMES
 			      ? INDEX5_SUFFIX : INDEX4_SUFFIX);
@@ -1472,10 +1471,8 @@ save_gdb_index_command (const char *arg, int from_tty)
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      struct stat st;
-
       /* If the objfile does not correspond to an actual file, skip it.  */
-      if (stat (objfile_name (objfile), &st) < 0)
+      if ((objfile->flags & OBJF_NOT_FILENAME) != 0)
 	continue;
 
       dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
