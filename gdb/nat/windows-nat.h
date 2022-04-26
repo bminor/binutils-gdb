@@ -248,6 +248,8 @@ struct windows_process_info
 
   gdb::optional<pending_stop> fetch_pending_stop (bool debug_events);
 
+  const char *pid_to_exec_file (int);
+
 private:
 
   /* Handle MS_VC_EXCEPTION when processing a stop.  MS_VC_EXCEPTION is
@@ -266,6 +268,18 @@ private:
      presumed loaded.  */
 
   void add_dll (LPVOID load_addr);
+
+  /* Try to determine the executable filename.
+
+     EXE_NAME_RET is a pointer to a buffer whose size is EXE_NAME_MAX_LEN.
+
+     Upon success, the filename is stored inside EXE_NAME_RET, and
+     this function returns nonzero.
+
+     Otherwise, this function returns zero and the contents of
+     EXE_NAME_RET is undefined.  */
+
+  int get_exec_module_filename (char *exe_name_ret, size_t exe_name_max_len);
 };
 
 /* A simple wrapper for ContinueDebugEvent that continues the last

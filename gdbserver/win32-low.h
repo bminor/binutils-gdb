@@ -160,6 +160,11 @@ public:
   bool supports_stopped_by_sw_breakpoint () override;
 
   const char *thread_name (ptid_t thread) override;
+
+  bool supports_pid_to_exec_file () override
+  { return true; }
+
+  const char *pid_to_exec_file (int pid) override;
 };
 
 /* The sole Windows process.  */

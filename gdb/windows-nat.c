@@ -1937,98 +1937,12 @@ windows_nat_target::detach (inferior *inf, int from_tty)
   maybe_unpush_target ();
 }
 
-/* Try to determine the executable filename.
-
-   EXE_NAME_RET is a pointer to a buffer whose size is EXE_NAME_MAX_LEN.
-
-   Upon success, the filename is stored inside EXE_NAME_RET, and
-   this function returns nonzero.
-
-   Otherwise, this function returns zero and the contents of
-   EXE_NAME_RET is undefined.  */
-
-static int
-windows_get_exec_module_filename (char *exe_name_ret, size_t exe_name_max_len)
-{
-  DWORD len;
-  HMODULE dh_buf;
-  DWORD cbNeeded;
-
-  cbNeeded = 0;
-#ifdef __x86_64__
-  if (windows_process.wow64_process)
-    {
-      if (!EnumProcessModulesEx (windows_process.handle,
-				 &dh_buf, sizeof (HMODULE), &cbNeeded,
-				 LIST_MODULES_32BIT)
-	  || !cbNeeded)
-	return 0;
-    }
-  else
-#endif
-    {
-      if (!EnumProcessModules (windows_process.handle,
-			       &dh_buf, sizeof (HMODULE), &cbNeeded)
-	  || !cbNeeded)
-	return 0;
-    }
-
-  /* We know the executable is always first in the list of modules,
-     which we just fetched.  So no need to fetch more.  */
-
-#ifdef __CYGWIN__
-  {
-    /* Cygwin prefers that the path be in /x/y/z format, so extract
-       the filename into a temporary buffer first, and then convert it
-       to POSIX format into the destination buffer.  */
-    cygwin_buf_t *pathbuf = (cygwin_buf_t *) alloca (exe_name_max_len * sizeof (cygwin_buf_t));
-
-    len = GetModuleFileNameEx (current_process_handle,
-			       dh_buf, pathbuf, exe_name_max_len);
-    if (len == 0)
-      error (_("Error getting executable filename: %u."),
-	     (unsigned) GetLastError ());
-    if (cygwin_conv_path (CCP_WIN_W_TO_POSIX, pathbuf, exe_name_ret,
-			  exe_name_max_len) < 0)
-      error (_("Error converting executable filename to POSIX: %d."), errno);
-  }
-#else
-  len = GetModuleFileNameEx (windows_process.handle,
-			     dh_buf, exe_name_ret, exe_name_max_len);
-  if (len == 0)
-    error (_("Error getting executable filename: %u."),
-	   (unsigned) GetLastError ());
-#endif
-
-    return 1;	/* success */
-}
-
 /* The pid_to_exec_file target_ops method for this platform.  */
 
 const char *
 windows_nat_target::pid_to_exec_file (int pid)
 {
-  static char path[__PMAX];
-#ifdef __CYGWIN__
-  /* Try to find exe name as symlink target of /proc/<pid>/exe.  */
-  int nchars;
-  char procexe[sizeof ("/proc/4294967295/exe")];
-
-  xsnprintf (procexe, sizeof (procexe), "/proc/%u/exe", pid);
-  nchars = readlink (procexe, path, sizeof(path));
-  if (nchars > 0 && nchars < sizeof (path))
-    {
-      path[nchars] = '\0';	/* Got it */
-      return path;
-    }
-#endif
-
-  /* If we get here then either Cygwin is hosed, this isn't a Cygwin version
-     of gdb, or we're trying to debug a non-Cygwin windows executable.  */
-  if (!windows_get_exec_module_filename (path, sizeof (path)))
-    path[0] = '\0';
-
-  return path;
+  return windows_process.pid_to_exec_file (pid);
 }
 
 /* Print status information about what we're accessing.  */

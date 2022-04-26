@@ -1515,6 +1515,12 @@ win32_process_target::thread_name (ptid_t thread)
   return th->thread_name ();
 }
 
+const char *
+win32_process_target::pid_to_exec_file (int pid)
+{
+  return windows_process.pid_to_exec_file (pid);
+}
+
 /* The win32 target ops object.  */
 
 static win32_process_target the_win32_target;
