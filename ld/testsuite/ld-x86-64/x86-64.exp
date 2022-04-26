@@ -1887,6 +1887,24 @@ if { [isnative] && [check_compiler_available] } {
 	    "-fPIE" \
 	] \
 	[list \
+	    "Run protected-func-3a without PIE" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-func-2a.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-func-3.c } \
+	    "protected-func-3a" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run protected-func-3b with PIE" \
+	    "-Wl,--no-as-needed -pie tmpdir/libprotected-func-2a.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-func-3.c } \
+	    "protected-func-2b" \
+	    "pass.out" \
+	    "-fPIE" \
+	] \
+	[list \
 	    "Run protected-data-1a without PIE" \
 	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-data-1a.so" \
 	    "-Wa,-mx86-used-note=yes" \
