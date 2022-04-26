@@ -1460,30 +1460,30 @@ add_symbol_overload_list_qualified (const char *func_name,
   /* Go through the symtabs and check the externs and statics for
      symbols which match.  */
 
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      for (compunit_symtab *cust : objfile->compunits ())
-	{
-	  QUIT;
-	  const block *b = cust->blockvector ()->global_block ();
-	  add_symbol_overload_list_block (func_name, b, overload_list);
-	}
-    }
+  const block *block = get_selected_block (0);
+  struct objfile *current_objfile = block ? block_objfile (block) : nullptr;
 
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      for (compunit_symtab *cust : objfile->compunits ())
-	{
-	  QUIT;
-	  const block *b = cust->blockvector ()->static_block ();
+  gdbarch_iterate_over_objfiles_in_search_order
+    (current_objfile ? current_objfile->arch () : target_gdbarch (),
+     [func_name, surrounding_static_block, &overload_list]
+     (struct objfile *obj)
+       {
+	 for (compunit_symtab *cust : obj->compunits ())
+	   {
+	     QUIT;
+	     const struct block *b = cust->blockvector ()->global_block ();
+	     add_symbol_overload_list_block (func_name, b, overload_list);
 
-	  /* Don't do this block twice.  */
-	  if (b == surrounding_static_block)
-	    continue;
+	     b = cust->blockvector ()->static_block ();
+	     /* Don't do this block twice.  */
+	     if (b == surrounding_static_block)
+	       continue;
 
-	  add_symbol_overload_list_block (func_name, b, overload_list);
-	}
-    }
+	     add_symbol_overload_list_block (func_name, b, overload_list);
+	   }
+
+	 return 0;
+       }, current_objfile);
 }
 
 /* Lookup the rtti type for a class name.  */
