@@ -813,7 +813,8 @@ if { [isnative]
 	] \
 	[list \
 	    "Build gotpc1" \
-	    "$NOPIE_LDFLAGS -Wl,--as-needed tmpdir/gotpc1.o tmpdir/got1d.so" \
+	    "$NOPIE_LDFLAGS -Wl,--as-needed,-z,noexecstack \
+	     tmpdir/gotpc1.o tmpdir/got1d.so" \
 	    "-Wa,-mx86-used-note=no" \
 	    { dummy.s } \
 	    {{objdump {-dw} got1.dd}} \
@@ -990,7 +991,8 @@ if { [isnative]
 	] \
 	[list \
 	    "Build property-6" \
-	    "-Wl,--as-needed tmpdir/property-6.o tmpdir/property-6.so" \
+	    "-Wl,--as-needed,-z,noexecstack \
+	     tmpdir/property-6.o tmpdir/property-6.so" \
 	    "-Wa,-mx86-used-note=no" \
 	    { dummy.s } \
 	    {{readelf {-n} property-2.r}} \
