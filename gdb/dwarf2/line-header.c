@@ -48,47 +48,28 @@ line_header::add_file_name (const char *name,
 			    unsigned int mod_time,
 			    unsigned int length)
 {
+  file_name_index index
+    = version >= 5 ? file_names_size (): file_names_size () + 1;
+
   if (dwarf_line_debug >= 2)
-    {
-      size_t new_size;
-      if (version >= 5)
-	new_size = file_names_size ();
-      else
-	new_size = file_names_size () + 1;
-      gdb_printf (gdb_stdlog, "Adding file %zu: %s\n",
-		  new_size, name);
-    }
-  m_file_names.emplace_back (name, d_index, mod_time, length);
+    gdb_printf (gdb_stdlog, "Adding file %d: %s\n", index, name);
+
+  m_file_names.emplace_back (name, index, d_index, mod_time, length);
 }
 
 std::string
-line_header::file_file_name (int file) const
+line_header::file_file_name (const file_entry &fe) const
 {
-  /* Is the file number a valid index into the line header's file name
-     table?  Remember that file numbers start with one, not zero.  */
-  if (is_valid_file_index (file))
-    {
-      const file_entry *fe = file_name_at (file);
+  gdb_assert (is_valid_file_index (fe.index));
 
-      if (!IS_ABSOLUTE_PATH (fe->name))
-	{
-	  const char *dir = fe->include_dir (this);
-	  if (dir != NULL)
-	    return path_join (dir, fe->name);
-	}
+  if (IS_ABSOLUTE_PATH (fe.name))
+    return fe.name;
 
-      return fe->name;
-    }
-  else
-    {
-      /* The compiler produced a bogus file number.  We can at least
-	 record the macro definitions made in the file, even if we
-	 won't be able to find the file by name.  */
-      complaint (_("bad file number in macro information (%d)"),
-		 file);
+  const char *dir = fe.include_dir (this);
+  if (dir == nullptr)
+    return fe.name;
 
-      return string_printf ("<bad macro file number %d>", file);
-    }
+  return path_join (dir, fe.name);
 }
 
 static void

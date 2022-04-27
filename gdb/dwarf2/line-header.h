@@ -36,9 +36,10 @@ struct file_entry
 {
   file_entry () = default;
 
-  file_entry (const char *name_, dir_index d_index_,
+  file_entry (const char *name_, file_name_index index_, dir_index d_index_,
 	      unsigned int mod_time_, unsigned int length_)
     : name (name_),
+      index (index_),
       d_index (d_index_),
       mod_time (mod_time_),
       length (length_)
@@ -51,6 +52,9 @@ struct file_entry
   /* The file name.  Note this is an observing pointer.  The memory is
      owned by debug_line_buffer.  */
   const char *name {};
+
+  /* The index of this file in the file table.  */
+  file_name_index index {};
 
   /* The directory index (1-based).  */
   dir_index d_index {};
@@ -168,8 +172,8 @@ struct line_header
   const gdb_byte *statement_program_start {}, *statement_program_end {};
 
   /* Return file name relative to the compilation directory of file
-     number FILE in this object's file name table.  */
-  std::string file_file_name (int file) const;
+     FE in this object's file name table.  */
+  std::string file_file_name (const file_entry &fe) const;
 
   /* Return the compilation directory of the compilation unit in the context of
      which this line header is read.  Return nullptr if non applicable.  */
