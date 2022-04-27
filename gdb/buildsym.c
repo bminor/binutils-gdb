@@ -495,31 +495,13 @@ buildsym_compunit::start_subfile (const char *name, const char *name_for_id)
   symtab_create_debug_printf ("name = %s, name_for_id = %s", name, name_for_id);
 
   for (subfile *subfile = m_subfiles; subfile; subfile = subfile->next)
-    {
-      std::string subfile_name_holder;
-      const char *subfile_name_for_id;
-
-      /* If NAME is an absolute path, and this subfile is not, then
-	 attempt to create an absolute path to compare.  */
-      if (IS_ABSOLUTE_PATH (name_for_id)
-	  && !IS_ABSOLUTE_PATH (subfile->name_for_id)
-	  && !m_comp_dir.empty ())
-	{
-	  subfile_name_holder = path_join (m_comp_dir.c_str (),
-					   subfile->name_for_id.c_str ());
-	  subfile_name_for_id = subfile_name_holder.c_str ();
-	}
-      else
-	subfile_name_for_id = subfile->name_for_id.c_str ();
-
-      if (FILENAME_CMP (subfile_name_for_id, name_for_id) == 0)
-	{
-	  symtab_create_debug_printf ("found existing symtab with name_for_id %s (%s)",
-				      subfile->name_for_id.c_str (), subfile_name_for_id);
-	  m_current_subfile = subfile;
-	  return;
-	}
-    }
+    if (FILENAME_CMP (subfile->name_for_id.c_str (), name_for_id) == 0)
+      {
+	symtab_create_debug_printf ("found existing symtab with name_for_id %s",
+				    subfile->name_for_id.c_str ());
+	m_current_subfile = subfile;
+	return;
+      }
 
   /* This subfile is not known.  Add an entry for it.  */
 
