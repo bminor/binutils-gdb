@@ -71,7 +71,7 @@ enum command_class
 };
 
 /* Types of "set" or "show" command.  */
-typedef enum var_types
+enum var_types
   {
     /* "on" or "off".  *VAR is a bool which is true for on,
        false for off.  */
@@ -120,8 +120,7 @@ typedef enum var_types
        *VAR is a char pointer to the name of the element that we
        find.  */
     var_enum
-  }
-var_types;
+  };
 
 /* Return true if a setting of type VAR_TYPE is backed with type T.
 

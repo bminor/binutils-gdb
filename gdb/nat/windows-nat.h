@@ -129,12 +129,12 @@ struct pending_stop
   DEBUG_EVENT event;
 };
 
-typedef enum
+enum handle_exception_result
 {
   HANDLE_EXCEPTION_UNHANDLED = 0,
   HANDLE_EXCEPTION_HANDLED,
   HANDLE_EXCEPTION_IGNORED
-} handle_exception_result;
+};
 
 /* A single Windows process.  An object of this type (or subclass) is
    created by the client.  Some methods must be provided by the client

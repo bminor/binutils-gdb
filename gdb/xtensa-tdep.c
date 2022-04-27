@@ -2058,7 +2058,7 @@ call0_ret (CORE_ADDR start_pc, CORE_ADDR finish_pc)
    The purpose of this is to simplify prologue analysis by separating 
    instruction decoding (libisa) from the semantics of prologue analysis.  */
 
-typedef enum
+enum xtensa_insn_kind
 {
   c0opc_illegal,       /* Unknown to libisa (invalid) or 'ill' opcode.  */
   c0opc_uninteresting, /* Not interesting for Call0 prologue analysis.  */
@@ -2079,7 +2079,7 @@ typedef enum
   c0opc_rfwo,          /* RFWO instruction.  */
   c0opc_rfwu,          /* RFWU instruction.  */
   c0opc_NrOf	       /* Number of opcode classifications.  */
-} xtensa_insn_kind;
+};
 
 /* Return true,  if OPCNAME is RSR,  WRS,  or XSR instruction.  */
 
@@ -2753,12 +2753,12 @@ execute_s32e (struct gdbarch *gdbarch, int at, int as, int offset, CORE_ADDR wb)
 
 #define XTENSA_MAX_WINDOW_INTERRUPT_HANDLER_LEN  200
 
-typedef enum
+enum xtensa_exception_handler_t
 {
   xtWindowOverflow,
   xtWindowUnderflow,
   xtNoExceptionHandler
-} xtensa_exception_handler_t;
+};
 
 /* Execute instruction stream from current PC until hitting RFWU or RFWO.
    Return type of Xtensa Window Interrupt Handler on success.  */

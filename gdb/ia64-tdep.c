@@ -75,7 +75,7 @@ static gdb::optional<gdb::byte_vector> ktab_buf;
 
 /* An enumeration of the different IA-64 instruction types.  */
 
-typedef enum instruction_type
+enum instruction_type
 {
   A,			/* Integer ALU ;    I-unit or M-unit */
   I,			/* Non-ALU integer; I-unit */
@@ -85,7 +85,7 @@ typedef enum instruction_type
   L,			/* Extended (L+X) ; I-unit */
   X,			/* Extended (L+X) ; I-unit */
   undefined		/* undefined or reserved */
-} instruction_type;
+};
 
 /* We represent IA-64 PC addresses as the value of the instruction
    pointer or'd with some bit combination in the low nibble which

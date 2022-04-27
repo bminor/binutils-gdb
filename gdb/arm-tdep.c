@@ -10701,18 +10701,18 @@ enum arm_record_result
   ARM_RECORD_FAILURE = 1
 };
 
-typedef enum
+enum arm_record_strx_t
 {
   ARM_RECORD_STRH=1,
   ARM_RECORD_STRD
-} arm_record_strx_t;
+};
 
-typedef enum
+enum record_type_t
 {
   ARM_RECORD=1,
   THUMB_RECORD,
   THUMB2_RECORD
-} record_type_t;
+};
 
 
 static int

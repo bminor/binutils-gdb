@@ -197,12 +197,11 @@ create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch,
   install_breakpoint (0, std::move (c), 1);
 }
 
-typedef enum
+enum catch_fork_kind
 {
   catch_fork_temporary, catch_vfork_temporary,
   catch_fork_permanent, catch_vfork_permanent
-}
-catch_fork_kind;
+};
 
 static void
 catch_fork_command_1 (const char *arg, int from_tty,

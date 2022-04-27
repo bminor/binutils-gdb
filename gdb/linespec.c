@@ -228,7 +228,7 @@ struct symbol_searcher_collect_info
 
 /* Token types  */
 
-enum ls_token_type
+enum linespec_token_type
 {
   /* A keyword  */
   LSTOKEN_KEYWORD = 0,
@@ -251,7 +251,6 @@ enum ls_token_type
   /* Consumed token  */
   LSTOKEN_CONSUMED
 };
-typedef enum ls_token_type linespec_token_type;
 
 /* List of keywords.  This is NULL-terminated so that it can be used
    as enum completer.  */

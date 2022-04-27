@@ -206,7 +206,7 @@ x86_get_debug_register_length ()
 #define X86_DR_WATCH_HIT(dr6, i) ((dr6) & (1 << (i)))
 
 /* Types of operations supported by x86_handle_nonaligned_watchpoint.  */
-typedef enum { WP_INSERT, WP_REMOVE, WP_COUNT } x86_wp_op_t;
+enum x86_wp_op_t { WP_INSERT, WP_REMOVE, WP_COUNT };
 
 /* Print the values of the mirrored debug registers.  */
 

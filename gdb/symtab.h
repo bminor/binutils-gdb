@@ -866,7 +866,7 @@ struct minimal_symbol : public general_symbol_info
 /* Different name domains for symbols.  Looking up a symbol specifies a
    domain and ignores symbol definitions in other name domains.  */
 
-typedef enum domain_enum_tag
+enum domain_enum
 {
   /* UNDEF_DOMAIN is used when a domain has not been discovered or
      none of the following apply.  This usually indicates an error either
@@ -899,7 +899,7 @@ typedef enum domain_enum_tag
 
   /* This must remain last.  */
   NR_DOMAINS
-} domain_enum;
+};
 
 /* The number of bits in a symbol used to represent the domain.  */
 
@@ -1418,7 +1418,7 @@ struct symbol : public general_symbol_info, public allocate_on_obstack
 
   /* Domain code.  */
 
-  ENUM_BITFIELD(domain_enum_tag) m_domain : SYMBOL_DOMAIN_BITS;
+  ENUM_BITFIELD(domain_enum) m_domain : SYMBOL_DOMAIN_BITS;
 
   /* Address class.  This holds an index into the 'symbol_impls'
      table.  The actual enum address_class value is stored there,
