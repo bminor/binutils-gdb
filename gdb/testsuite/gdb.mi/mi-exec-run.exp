@@ -93,10 +93,27 @@ proc test {inftty_mode mi_mode force_fail} {
 	set test "run failure detected"
 	send_gdb "-exec-run --start\n"
 
+	# Redirect through SPAWN_LIST global.  If the
+	# inferior_spawn_id is not the same as gdb_spawn_id, e.g. when
+	# testing with gdbserver, the gdbserver can exit after
+	# emitting it's error message.
+	#
+	# If inferior_spawn_id exits then we may see the eof from that
+	# spawn-id before we see the pattern from the gdb_spawn_id,
+	# which will kick us out of the gdb_expect, and cause us to
+	# fail the test.
+	#
+	# Instead we clean SPAWN_LIST once we've seen the expected
+	# pattern from that spawn-id, and after that we no longer care
+	# when gdbserver exits.
+	global spawn_list
+	set spawn_list "$inferior_spawn_id"
+
 	gdb_expect {
-	    -i "$inferior_spawn_id"
+	    -i spawn_list
 	    -re ".*Cannot exec.*Permission denied" {
 		set saw_perm_error 1
+		set spawn_list ""
 		verbose -log "saw perm error"
 		if {!$saw_mi_error} {
 		    exp_continue
