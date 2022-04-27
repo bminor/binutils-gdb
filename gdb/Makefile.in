@@ -715,9 +715,12 @@ ALL_64_TARGET_OBS = \
 	arch/aarch64-mte-linux.o \
 	arch/amd64.o \
 	arch/riscv.o \
+	bpf-tdep.o \
 	ia64-linux-tdep.o \
 	ia64-tdep.o \
 	ia64-vms-tdep.o \
+	loongarch-linux-tdep.o \
+	loongarch-tdep.o \
 	mips-fbsd-tdep.o \
 	mips-linux-tdep.o \
 	mips-netbsd-tdep.o \
@@ -734,7 +737,10 @@ ALL_64_TARGET_OBS = \
 	sparc64-netbsd-tdep.o \
 	sparc64-obsd-tdep.o \
 	sparc64-sol2-tdep.o \
-	sparc64-tdep.o
+	sparc64-tdep.o \
+	tilegx-linux-tdep.o \
+	tilegx-tdep.o
+
 
 # All other target-dependent objects files (used with --enable-targets=all).
 ALL_TARGET_OBS = \
@@ -762,7 +768,6 @@ ALL_TARGET_OBS = \
 	avr-tdep.o \
 	bfin-linux-tdep.o \
 	bfin-tdep.o \
-	bpf-tdep.o \
 	bsd-uthread.o \
 	cris-linux-tdep.o \
 	cris-tdep.o \
@@ -798,8 +803,6 @@ ALL_TARGET_OBS = \
 	linux-record.o \
 	linux-tdep.o \
 	lm32-tdep.o \
-	loongarch-linux-tdep.o \
-	loongarch-tdep.o \
 	m32c-tdep.o \
 	m32r-linux-tdep.o \
 	m32r-tdep.o \
@@ -856,8 +859,6 @@ ALL_TARGET_OBS = \
 	symfile-mem.o \
 	tic6x-linux-tdep.o \
 	tic6x-tdep.o \
-	tilegx-linux-tdep.o \
-	tilegx-tdep.o \
 	v850-tdep.o \
 	vax-netbsd-tdep.o \
 	vax-tdep.o \
