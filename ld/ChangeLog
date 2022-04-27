@@ -1,3 +1,13 @@
+2022-04-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 29006
+	* pe-dll.c (make_head): Use asprintf to allocate and populate a
+	buffer containing the temporary name.
+	(make_tail, make_one, make_singleton_name_thunk): Likewise.
+	(make_import_fixup_mark, make_import_fixup_entry): Likewise.
+	(make_runtime_pseudo_reloc): Likewise.
+	(pe_create_runtime_relocator_reference): Likewise.
+
 2022-04-25  Nick Clifton  <nickc@redhat.com>
 
 	PR 29072
