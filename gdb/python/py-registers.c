@@ -381,21 +381,27 @@ gdbpy_parse_register_id (struct gdbarch *gdbarch, PyObject *pyo_reg_id,
 	{
 	  *reg_num = user_reg_map_name_to_regnum (gdbarch, reg_name.get (),
 						  strlen (reg_name.get ()));
-	  return *reg_num >= 0;
+	  if (*reg_num >= 0)
+	    return true;
+	  PyErr_SetString (PyExc_ValueError, "Bad register");
 	}
     }
   /* The register could be its internal GDB register number.  */
   else if (PyLong_Check (pyo_reg_id))
     {
       long value;
-      if (gdb_py_int_as_long (pyo_reg_id, &value) && (int) value == value)
+      if (gdb_py_int_as_long (pyo_reg_id, &value) == 0)
 	{
-	  if (user_reg_map_regnum_to_name (gdbarch, value) != NULL)
-	    {
-	      *reg_num = (int) value;
-	      return true;
-	    }
+	  /* Nothing -- error.  */
 	}
+      else if ((int) value == value
+	       && user_reg_map_regnum_to_name (gdbarch, value) != NULL)
+	{
+	  *reg_num = (int) value;
+	  return true;
+	}
+      else
+	PyErr_SetString (PyExc_ValueError, "Bad register");
     }
   /* The register could be a gdb.RegisterDescriptor object.  */
   else if (PyObject_IsInstance (pyo_reg_id,
@@ -412,6 +418,8 @@ gdbpy_parse_register_id (struct gdbarch *gdbarch, PyObject *pyo_reg_id,
 	PyErr_SetString (PyExc_ValueError,
 			 _("Invalid Architecture in RegisterDescriptor"));
     }
+  else
+    PyErr_SetString (PyExc_TypeError, _("Invalid type for register"));
 
   gdb_assert (PyErr_Occurred ());
   return false;

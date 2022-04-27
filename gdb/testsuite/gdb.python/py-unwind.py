@@ -17,6 +17,11 @@ import gdb
 from gdb.unwinder import Unwinder
 
 
+# These are set to test whether invalid register names cause an error.
+add_saved_register_error = False
+read_register_error = False
+
+
 class FrameId(object):
     def __init__(self, sp, pc):
         self._sp = sp
@@ -101,6 +106,12 @@ class TestUnwinder(Unwinder):
             previous_ip = self._read_word(bp + 8)
             previous_sp = bp + 16
 
+            try:
+                pending_frame.read_register("nosuchregister")
+            except ValueError:
+                global read_register_error
+                read_register_error = True
+
             frame_id = FrameId(
                 pending_frame.read_register(TestUnwinder.AMD64_RSP),
                 pending_frame.read_register(TestUnwinder.AMD64_RIP),
@@ -109,6 +120,11 @@ class TestUnwinder(Unwinder):
             unwind_info.add_saved_register(TestUnwinder.AMD64_RBP, previous_bp)
             unwind_info.add_saved_register("rip", previous_ip)
             unwind_info.add_saved_register("rsp", previous_sp)
+            try:
+                unwind_info.add_saved_register("nosuchregister", previous_sp)
+            except ValueError:
+                global add_saved_register_error
+                add_saved_register_error = True
             return unwind_info
         except (gdb.error, RuntimeError):
             return None

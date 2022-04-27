@@ -57,3 +57,9 @@ gdb_test_sequence "where"  "Backtrace restored by unwinder" {
 
 # Check that the Python unwinder frames can be flushed / released.
 gdb_test "maint flush register-cache" "Register cache flushed\\." "flush frames"
+
+# Check that invalid register names cause errors.
+gdb_test "python print(add_saved_register_error)" "True" \
+    "add_saved_register error"
+gdb_test "python print(read_register_error)" "True" \
+    "read_register error"

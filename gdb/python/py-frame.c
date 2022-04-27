@@ -253,10 +253,7 @@ frapy_read_register (PyObject *self, PyObject *args)
 
       if (!gdbpy_parse_register_id (get_frame_arch (frame), pyo_reg_id,
 				    &regnum))
-	{
-	  PyErr_SetString (PyExc_ValueError, "Bad register");
-	  return NULL;
-	}
+	return nullptr;
 
       gdb_assert (regnum >= 0);
       val = value_of_register (regnum, frame);

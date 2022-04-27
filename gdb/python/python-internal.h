@@ -819,7 +819,8 @@ typedef std::unique_ptr<Py_buffer, Py_buffer_deleter> Py_buffer_up;
 
    If a register is parsed successfully then *REG_NUM will have been
    updated, and true is returned.  Otherwise the contents of *REG_NUM are
-   undefined, and false is returned.
+   undefined, and false is returned.  When false is returned, the
+   Python error is set.
 
    The PYO_REG_ID object can be a string, the name of the register.  This
    is the slowest approach as GDB has to map the name to a number for each

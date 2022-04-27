@@ -260,10 +260,7 @@ unwind_infopy_add_saved_register (PyObject *self, PyObject *args)
 			  &pyo_reg_id, &pyo_reg_value))
     return NULL;
   if (!gdbpy_parse_register_id (pending_frame->gdbarch, pyo_reg_id, &regnum))
-    {
-      PyErr_SetString (PyExc_ValueError, "Bad register");
-      return NULL;
-    }
+    return nullptr;
 
   /* If REGNUM identifies a user register then *maybe* we can convert this
      to a real (i.e. non-user) register.  The maybe qualifier is because we
@@ -381,10 +378,7 @@ pending_framepy_read_register (PyObject *self, PyObject *args)
   if (!PyArg_UnpackTuple (args, "read_register", 1, 1, &pyo_reg_id))
     return NULL;
   if (!gdbpy_parse_register_id (pending_frame->gdbarch, pyo_reg_id, &regnum))
-    {
-      PyErr_SetString (PyExc_ValueError, "Bad register");
-      return NULL;
-    }
+    return nullptr;
 
   try
     {
