@@ -38,7 +38,8 @@
 
 using namespace windows_nat;
 
-static windows_process_info windows_process;
+/* See win32-low.h.  */
+windows_process_info windows_process;
 
 #ifndef USE_WIN32API
 #include <sys/cygwin.h>
@@ -113,7 +114,7 @@ static void
 win32_get_thread_context (windows_thread_info *th)
 {
 #ifdef __x86_64__
-  if (wow64_process)
+  if (windows_process.wow64_process)
     memset (&th->wow64_context, 0, sizeof (WOW64_CONTEXT));
   else
 #endif
@@ -127,7 +128,7 @@ static void
 win32_set_thread_context (windows_thread_info *th)
 {
 #ifdef __x86_64__
-  if (wow64_process)
+  if (windows_process.wow64_process)
     Wow64SetThreadContext (th->h, &th->wow64_context);
   else
 #endif
@@ -150,7 +151,7 @@ win32_require_context (windows_thread_info *th)
 {
   DWORD context_flags;
 #ifdef __x86_64__
-  if (wow64_process)
+  if (windows_process.wow64_process)
     context_flags = th->wow64_context.ContextFlags;
   else
 #endif
@@ -192,7 +193,7 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
 #ifdef __x86_64__
   /* For WOW64 processes, this is actually the pointer to the 64bit TIB,
      and the 32bit TIB is exactly 2 pages after it.  */
-  if (wow64_process)
+  if (windows_process.wow64_process)
     base += 2 * 4096; /* page size = 4096 */
 #endif
   th = new windows_thread_info (tid, h, base);
@@ -354,19 +355,20 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
       error ("Check if WOW64 process failed (error %d): %s\n",
 	     (int) err, strwinerror (err));
     }
-  wow64_process = wow64;
+  windows_process.wow64_process = wow64;
 
-  if (wow64_process
+  if (windows_process.wow64_process
       && (Wow64GetThreadContext == nullptr
 	  || Wow64SetThreadContext == nullptr))
     error ("WOW64 debugging is not supported on this system.\n");
 
-  ignore_first_breakpoint = !attached && wow64_process;
+  windows_process.ignore_first_breakpoint
+    = !attached && windows_process.wow64_process;
 #endif
 
   proc = add_process (pid, attached);
 #ifdef __x86_64__
-  if (wow64_process)
+  if (windows_process.wow64_process)
     proc->tdesc = wow64_win32_tdesc;
   else
 #endif
@@ -440,7 +442,7 @@ continue_one_thread (thread_info *thread, int thread_id)
 	{
 	  DWORD *context_flags;
 #ifdef __x86_64__
-	  if (wow64_process)
+	  if (windows_process.wow64_process)
 	    context_flags = &th->wow64_context.ContextFlags;
 	  else
 #endif
@@ -913,7 +915,7 @@ win32_process_target::resume (thread_resume *resume_info, size_t n)
 
       DWORD *context_flags;
 #ifdef __x86_64__
-      if (wow64_process)
+      if (windows_process.wow64_process)
 	context_flags = &th->wow64_context.ContextFlags;
       else
 #endif
@@ -1419,19 +1421,22 @@ win32_process_target::qxfer_siginfo (const char *annex,
 
 #ifdef __x86_64__
   EXCEPTION_RECORD32 er32;
-  if (wow64_process)
+  if (windows_process.wow64_process)
     {
       buf = (char *) &er32;
       bufsize = sizeof (er32);
 
-      er32.ExceptionCode = siginfo_er.ExceptionCode;
-      er32.ExceptionFlags = siginfo_er.ExceptionFlags;
-      er32.ExceptionRecord = (uintptr_t) siginfo_er.ExceptionRecord;
-      er32.ExceptionAddress = (uintptr_t) siginfo_er.ExceptionAddress;
-      er32.NumberParameters = siginfo_er.NumberParameters;
+      er32.ExceptionCode = windows_process.siginfo_er.ExceptionCode;
+      er32.ExceptionFlags = windows_process.siginfo_er.ExceptionFlags;
+      er32.ExceptionRecord
+	= (uintptr_t) windows_process.siginfo_er.ExceptionRecord;
+      er32.ExceptionAddress
+	= (uintptr_t) windows_process.siginfo_er.ExceptionAddress;
+      er32.NumberParameters = windows_process.siginfo_er.NumberParameters;
       int i;
       for (i = 0; i < EXCEPTION_MAXIMUM_PARAMETERS; i++)
-	er32.ExceptionInformation[i] = siginfo_er.ExceptionInformation[i];
+	er32.ExceptionInformation[i]
+	  = windows_process.siginfo_er.ExceptionInformation[i];
     }
 #endif
 

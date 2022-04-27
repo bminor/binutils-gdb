@@ -162,6 +162,9 @@ public:
   const char *thread_name (ptid_t thread) override;
 };
 
+/* The sole Windows process.  */
+extern windows_nat::windows_process_info windows_process;
+
 /* Retrieve the context for this thread, if not already retrieved.  */
 extern void win32_require_context (windows_nat::windows_thread_info *th);
 
