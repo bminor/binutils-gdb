@@ -39,8 +39,8 @@ DISPLAY	    = $(GPROFNG) display text
 EXPERIMENT  = test.er
 DISPLAY_LOG = display.log
 
-
-export LD_LIBRARY_PATH := $(shell dirname $$(find ../root -name libgprofng.so.0 | head -1))
+gprofng_dir := $(shell dirname $$(find ../root -name libgprofng.so.0 | head -1))
+export LD_LIBRARY_PATH := $(gprofng_dir):$(gprofng_dir)/..
 
 .PHONY: all collect compare clobber clean
 
