@@ -17,37 +17,89 @@
 # around parsing large 64-bit numbers, hitting undefined behavior, and
 # thus crashing a GDB built with UBSan.  This testcase goes over all
 # languages exercising printing the max 64-bit number, making sure
-# that GDB doesn't crash.
+# that GDB doesn't crash.  ARCH is the architecture to test with.
 
-proc test_parse_numbers {} {
-    clean_restart
+proc test_parse_numbers {arch} {
+    set arch_re [string_to_regexp $arch]
+    gdb_test "set architecture $arch" "The target architecture is set to \"$arch_re\"."
 
-    set all_languages [get_set_option_choices "set language"]
-    foreach_with_prefix lang $all_languages {
+    gdb_test_no_output "set language c"
+
+    # Types have different sizes depending on the architecture.
+    # Figure out type sizes before matching patterns in the upcoming
+    # tests.
+
+    set sizeof_long_long [get_sizeof "long long" -1]
+    set sizeof_long [get_sizeof "long" -1]
+    set sizeof_int [get_sizeof "int" -1]
+
+    if {$sizeof_long_long == 8 && $sizeof_long == 8} {
+	set 8B_type "unsigned long"
+	set fortran_type "unsigned long"
+	set fortran_value "0xffffffffffffffff"
+    } elseif {$sizeof_long_long == 8 && $sizeof_long == 4 && $sizeof_int == 4} {
+	set 8B_type "unsigned long long"
+	set fortran_type "unsigned int"
+	set fortran_value "0xffffffff"
+    } elseif {$sizeof_long == 4 && $sizeof_int == 2} {
+	set 8B_type "unsigned long long"
+	set fortran_type "unsigned long"
+	set fortran_value "0xffffffff"
+    } else {
+	error "missing case for long long = $sizeof_long_long, long = $sizeof_long, int = $sizeof_int"
+    }
+
+    foreach_with_prefix lang $::all_languages {
 	gdb_test_no_output "set language $lang"
 
 	set val "0xffffffffffffffff"
 	if {$lang == "fortran"} {
-	    gdb_test "p/x $val" " = 0xffffffff"
-	    gdb_test "ptype $val" " = unsigned int"
+	    gdb_test "p/x $val" " = $fortran_value"
+	    gdb_test "ptype $val" " = $fortran_type"
 	} elseif {$lang == "modula-2"} {
 	    gdb_test "p/x 0FFFFFFFFFFFFFFFFH" "Overflow on numeric constant\\."
 	} elseif {$lang == "unknown"} {
 	    gdb_test "p/x $val" \
 		"expression parsing not implemented for language \"Unknown\""
 	} else {
-	    gdb_test "p/x $val" " = $val"
+	    # D and Rust define their own built-in 64-bit types, and
+	    # are thus always able to parse/print 64-bit values.
+	    if {$sizeof_long_long == 4 && $lang != "d" && $lang != "rust"} {
+		set out "0xffffffff"
+	    } else {
+		set out $val
+	    }
+	    gdb_test "p/x $val" " = $out"
 	    if {$lang == "ada"} {
-		gdb_test "ptype $val" " = <8-byte integer>"
+		if {$sizeof_long_long == 4} {
+		    gdb_test "ptype $val" " = <4-byte integer>"
+		} else {
+		    gdb_test "ptype $val" " = <8-byte integer>"
+		}
 	    } elseif {$lang == "d"} {
 		gdb_test "ptype $val" " = ulong"
 	    } elseif {$lang == "rust"} {
 		gdb_test "ptype $val" " = i64"
 	    } else {
-		gdb_test "ptype $val" " = unsigned long long"
+		gdb_test "ptype $val" " = $8B_type"
 	    }
 	}
     }
 }
 
-test_parse_numbers
+clean_restart
+
+gdb_test_no_output "set max-completions unlimited"
+
+set supported_archs [get_set_option_choices "set architecture"]
+# There should be at least one more than "auto".
+gdb_assert {[llength $supported_archs] > 1} "at least one architecture"
+
+set all_languages [get_set_option_choices "set language"]
+
+foreach_with_prefix arch $supported_archs {
+    if {$arch == "auto"} {
+	continue
+    }
+    test_parse_numbers $arch
+}
