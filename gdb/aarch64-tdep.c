@@ -1470,6 +1470,7 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
   switch (type->code ())
     {
     case TYPE_CODE_FLT:
+    case TYPE_CODE_DECFLOAT:
       if (TYPE_LENGTH (type) > 16)
 	return -1;
 
@@ -1780,6 +1781,7 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
   switch (arg_type->code ())
     {
     case TYPE_CODE_FLT:
+    case TYPE_CODE_DECFLOAT:
       return pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (arg_type),
 			value_contents (arg).data ());
       break;
