@@ -1,3 +1,7 @@
+2022-04-27  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_freebsd_note): Handle NT_ARM_TLS notes.
+
 2022-04-25  Nick Clifton  <nickc@redhat.com>
 
 	PR 29072
