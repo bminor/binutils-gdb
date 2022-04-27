@@ -60,7 +60,7 @@ proc test {inftty_mode mi_mode force_fail} {
 	lappend start_ops "separate-mi-tty"
     }
 
-    if [eval mi_gdb_start $start_ops] {
+    if [mi_gdb_start $start_ops] {
 	return
     }
 

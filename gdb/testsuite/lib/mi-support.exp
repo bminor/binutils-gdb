@@ -131,7 +131,13 @@ proc mi_create_inferior_pty {} {
     }
 }
 
-proc mi_gdb_start_separate_mi_tty { args } {
+#
+# Like default_mi_gdb_start below, but the MI is created as a separate
+# ui in a new tty.  The global MI_SPAWN_ID is updated to point at the
+# new tty created for the MI interface.  The global GDB_MAIN_SPAWN_ID
+# is updated to the current value of the global GDB_SPAWN_ID.
+#
+proc mi_gdb_start_separate_mi_tty { { flags {} } } {
     global gdb_prompt mi_gdb_prompt
     global timeout
     global gdb_spawn_id gdb_main_spawn_id mi_spawn_id
@@ -139,8 +145,8 @@ proc mi_gdb_start_separate_mi_tty { args } {
 
     set separate_inferior_pty 0
 
-    foreach arg $args {
-	if {$arg == "separate-inferior-tty"} {
+    foreach flag $flags {
+	if {$flag == "separate-inferior-tty"} {
 	    set separate_inferior_pty 1
 	}
     }
@@ -183,6 +189,8 @@ proc mi_gdb_start_separate_mi_tty { args } {
 #
 # default_mi_gdb_start [FLAGS] -- start gdb running, default procedure
 #
+# FLAGS is a list of flags, each flag is a string.
+#
 # If "separate-inferior-tty" is specified, the inferior works with
 # it's own PTY.
 #
@@ -193,7 +201,7 @@ proc mi_gdb_start_separate_mi_tty { args } {
 # tests on different hosts all using the same server, things can
 # get really slow.  Give gdb at least 3 minutes to start up.
 #
-proc default_mi_gdb_start { args } {
+proc default_mi_gdb_start { { flags {} } } {
     global use_gdb_stub
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
@@ -218,16 +226,16 @@ proc default_mi_gdb_start { args } {
 
     set separate_inferior_pty 0
 
-    foreach arg $args {
-	if {$arg == "separate-mi-tty"} {
+    foreach flag $flags {
+	if {$flag == "separate-mi-tty"} {
 	    set separate_mi_pty 1
-	} elseif {$arg == "separate-inferior-tty"} {
+	} elseif {$flag == "separate-inferior-tty"} {
 	    set separate_inferior_pty 1
 	}
     }
 
     if {$separate_mi_pty} {
-	return [eval mi_gdb_start_separate_mi_tty $args]
+	return [mi_gdb_start_separate_mi_tty $flags]
     }
 
     set inferior_pty no-tty
