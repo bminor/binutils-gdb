@@ -949,7 +949,8 @@ static struct die_info *die_specification (struct die_info *die,
 					   struct dwarf2_cu **);
 
 static line_header_up dwarf_decode_line_header (sect_offset sect_off,
-						struct dwarf2_cu *cu);
+						struct dwarf2_cu *cu,
+						const char *comp_dir);
 
 static void dwarf_decode_lines (struct line_header *,
 				struct dwarf2_cu *,
@@ -2746,6 +2747,8 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   line_header_up lh;
   sect_offset line_offset {};
 
+  file_and_directory &fnd = find_file_and_directory (comp_unit_die, cu);
+
   attr = dwarf2_attr (comp_unit_die, DW_AT_stmt_list, cu);
   if (attr != nullptr && attr->form_is_unsigned ())
     {
@@ -2765,10 +2768,8 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
 	  return;
 	}
 
-      lh = dwarf_decode_line_header (line_offset, cu);
+      lh = dwarf_decode_line_header (line_offset, cu, fnd.get_comp_dir ());
     }
-
-  file_and_directory &fnd = find_file_and_directory (comp_unit_die, cu);
 
   int offset = 0;
   if (!fnd.is_unknown ())
@@ -9451,11 +9452,11 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu)
 
 static void
 handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
+			const file_and_directory &fnd,
 			CORE_ADDR lowpc) /* ARI: editCase function */
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct attribute *attr;
-  struct line_header line_header_local;
   hashval_t line_header_local_hash;
   void **slot;
   int decode_mapping;
@@ -9484,8 +9485,7 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
 				   xcalloc, xfree));
     }
 
-  line_header_local.sect_off = line_offset;
-  line_header_local.offset_in_dwz = cu->per_cu->is_dwz;
+  line_header line_header_local (line_offset, cu->per_cu->is_dwz);
   line_header_local_hash = line_header_hash (&line_header_local);
   if (per_objfile->line_header_hash != NULL)
     {
@@ -9506,7 +9506,8 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
 
   /* dwarf_decode_line_header does not yet provide sufficient information.
      We always have to call also dwarf_decode_lines for it.  */
-  line_header_up lh = dwarf_decode_line_header (line_offset, cu);
+  line_header_up lh = dwarf_decode_line_header (line_offset, cu,
+						fnd.get_comp_dir ());
   if (lh == NULL)
     return;
 
@@ -9584,7 +9585,7 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
      lnp_state_machine::check_line_address) will fail to properly
      exclude an entry that was removed via --gc-sections.  */
   if (lowpc != highpc)
-    handle_DW_AT_stmt_list (die, cu, lowpc);
+    handle_DW_AT_stmt_list (die, cu, fnd, lowpc);
 
   /* Process all dies in compilation unit.  */
   if (die->child != NULL)
@@ -9658,7 +9659,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
   if (attr != NULL && attr->form_is_unsigned ())
     {
       sect_offset line_offset = (sect_offset) attr->as_unsigned ();
-      lh = dwarf_decode_line_header (line_offset, this);
+      lh = dwarf_decode_line_header (line_offset, this, nullptr);
     }
   if (lh == NULL)
     {
@@ -19739,7 +19740,8 @@ get_debug_line_section (struct dwarf2_cu *cu)
    and must not be freed.  */
 
 static line_header_up
-dwarf_decode_line_header (sect_offset sect_off, struct dwarf2_cu *cu)
+dwarf_decode_line_header (sect_offset sect_off, struct dwarf2_cu *cu,
+			  const char *comp_dir)
 {
   struct dwarf2_section_info *section;
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
@@ -19756,7 +19758,8 @@ dwarf_decode_line_header (sect_offset sect_off, struct dwarf2_cu *cu)
     }
 
   return dwarf_decode_line_header (sect_off, cu->per_cu->is_dwz,
-				   per_objfile, section, &cu->header);
+				   per_objfile, section, &cu->header,
+				   comp_dir);
 }
 
 /* Subroutine of dwarf_decode_lines to simplify it.

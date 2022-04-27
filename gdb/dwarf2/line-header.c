@@ -264,7 +264,8 @@ line_header_up
 dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
 			   dwarf2_per_objfile *per_objfile,
 			   struct dwarf2_section_info *section,
-			   const struct comp_unit_head *cu_header)
+			   const struct comp_unit_head *cu_header,
+			   const char *comp_dir)
 {
   const gdb_byte *line_ptr;
   unsigned int bytes_read, offset_size;
@@ -281,7 +282,7 @@ dwarf_decode_line_header  (sect_offset sect_off, bool is_dwz,
       return 0;
     }
 
-  line_header_up lh (new line_header ());
+  line_header_up lh (new line_header (comp_dir));
 
   lh->sect_off = sect_off;
   lh->offset_in_dwz = is_dwz;
