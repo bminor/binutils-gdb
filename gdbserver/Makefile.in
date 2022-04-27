@@ -470,7 +470,8 @@ UST_CFLAGS = $(ustinc) -DCONFIG_UST_GDB_INTEGRATION
 # Undo gnulib replacements for the IPA shared library build.
 # The gnulib headers are still needed, but gnulib is not linked
 # into the IPA lib so replacement apis don't work.
-UNDO_GNULIB_CFLAGS = -Drpl_strerror_r=strerror_r -Drpl_free=free
+UNDO_GNULIB_CFLAGS = -Drpl_strerror_r=strerror_r -Drpl_free=free \
+	-Drpl_malloc=malloc -Drpl_realloc=realloc
 
 # Note, we only build the IPA if -fvisibility=hidden is supported in
 # the first place.
