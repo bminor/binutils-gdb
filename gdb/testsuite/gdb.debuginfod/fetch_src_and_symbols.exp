@@ -309,7 +309,8 @@ proc local_url { } {
     clean_restart
     # Disable confirmation to avoid having to deal with a query.  See
     # test_urls.
-    gdb_test_multiple "with confirm off -- file $binfile" "notice empty URL" {
+    set file_cmd "with confirm off -- file $binfile"
+    gdb_test_multiple $file_cmd "notice empty URL" {
 	-re -wrap "This GDB supports auto-downloading.*" {
 	    fail $gdb_test_name
 	}
@@ -318,9 +319,17 @@ proc local_url { } {
 	}
     }
 
-    test_urls "   " \
-        "" \
-        "notice whitespace URL"
+    # Whitespace-only URLS disables Debuginfod.
+    setenv DEBUGINFOD_URLS "    "
+    clean_restart
+    gdb_test_multiple $file_cmd "notice whitespace URL" {
+	-re -wrap "This GDB supports auto-downloading.*" {
+	    fail $gdb_test_name
+	}
+	-re -wrap "" {
+	    pass $gdb_test_name
+	}
+    }
 
     set url "http://127.0.0.1:$port"
 

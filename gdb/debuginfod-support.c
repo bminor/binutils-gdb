@@ -173,10 +173,11 @@ get_debuginfod_client ()
 static bool
 debuginfod_is_enabled ()
 {
-  const char *urls = getenv (DEBUGINFOD_URLS_ENV_VAR);
+  const char *urls = skip_spaces (getenv (DEBUGINFOD_URLS_ENV_VAR));
 
-  if (urls == nullptr || urls[0] == '\0'
-      || debuginfod_enabled == debuginfod_off)
+  if (debuginfod_enabled == debuginfod_off
+      || urls == nullptr
+      || *urls == '\0')
     return false;
 
   if (debuginfod_enabled == debuginfod_ask)
