@@ -1542,6 +1542,11 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f3 56 2f c2 ac f4 c0 1d fe ff 7b 	vcmpsh k5\{k7\},xmm5,WORD PTR \[esp\+esi\*8-0x1e240\],0x7b
 [ 	]*[a-f0-9]+:	62 f3 56 28 c2 69 7f 7b 	vcmpsh k5,xmm5,WORD PTR \[ecx\+0xfe\],0x7b
 [ 	]*[a-f0-9]+:	62 f3 56 2f c2 6a 80 7b 	vcmpsh k5\{k7\},xmm5,WORD PTR \[edx-0x100\],0x7b
+[ 	]*[a-f0-9]+:	62 f3 7c 28 67 ec 7b 	vfpclasssh k5,xmm4,0x7b
+[ 	]*[a-f0-9]+:	62 f3 7c 28 67 29 7b 	vfpclasssh k5,WORD PTR \[ecx\],0x7b
+[ 	]*[a-f0-9]+:	62 f3 7c 2f 67 ac f4 c0 1d fe ff 7b 	vfpclasssh k5\{k7\},WORD PTR \[esp\+esi\*8-0x1e240\],0x7b
+[ 	]*[a-f0-9]+:	62 f3 7c 28 67 69 7f 7b 	vfpclasssh k5,WORD PTR \[ecx\+0xfe\],0x7b
+[ 	]*[a-f0-9]+:	62 f3 7c 2f 67 6a 80 7b 	vfpclasssh k5\{k7\},WORD PTR \[edx-0x100\],0x7b
 [ 	]*[a-f0-9]+:	62 f1 d7 2f 58 f4    	vaddsd xmm6\{k7\},xmm5,xmm4
 [ 	]*[a-f0-9]+:	62 f1 d7 af 58 f4    	vaddsd xmm6\{k7\}\{z\},xmm5,xmm4
 [ 	]*[a-f0-9]+:	62 f1 d7 1f 58 f4    	vaddsd xmm6\{k7\},xmm5,xmm4,\{rn-sae\}
@@ -3075,4 +3080,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f3 56 2f c2 ac f4 c0 1d fe ff 7b 	vcmpsh k5\{k7\},xmm5,WORD PTR \[esp\+esi\*8-0x1e240\],0x7b
 [ 	]*[a-f0-9]+:	62 f3 56 28 c2 69 7f 7b 	vcmpsh k5,xmm5,WORD PTR \[ecx\+0xfe\],0x7b
 [ 	]*[a-f0-9]+:	62 f3 56 2f c2 6a 80 7b 	vcmpsh k5\{k7\},xmm5,WORD PTR \[edx-0x100\],0x7b
+[ 	]*[a-f0-9]+:	62 f3 7c 28 67 ec 7b 	vfpclasssh k5,xmm4,0x7b
+[ 	]*[a-f0-9]+:	62 f3 7c 28 67 29 7b 	vfpclasssh k5,WORD PTR \[ecx\],0x7b
+[ 	]*[a-f0-9]+:	62 f3 7c 2f 67 ac f4 c0 1d fe ff 7b 	vfpclasssh k5\{k7\},WORD PTR \[esp\+esi\*8-0x1e240\],0x7b
+[ 	]*[a-f0-9]+:	62 f3 7c 28 67 69 7f 7b 	vfpclasssh k5,WORD PTR \[ecx\+0xfe\],0x7b
+[ 	]*[a-f0-9]+:	62 f3 7c 2f 67 6a 80 7b 	vfpclasssh k5\{k7\},WORD PTR \[edx-0x100\],0x7b
 #pass

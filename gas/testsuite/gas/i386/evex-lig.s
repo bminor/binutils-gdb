@@ -1710,6 +1710,12 @@ _start:
 	vcmpsh	$123, 254(%ecx), %xmm5, %k5	# AVX512-FP16 Disp8
 	vcmpsh	$123, -256(%edx), %xmm5, %k5{%k7}	# AVX512-FP16 Disp8
 
+	vfpclasssh	$123, %xmm4, %k5	# AVX512-FP16
+	vfpclasssh	$123, (%ecx), %k5	# AVX512-FP16
+	vfpclasssh	$123, -123456(%esp, %esi, 8), %k5{%k7}	# AVX512-FP16
+	vfpclasssh	$123, 254(%ecx), %k5	# AVX512-FP16 Disp8
+	vfpclasssh	$123, -256(%edx), %k5{%k7}	# AVX512-FP16 Disp8
+
 	.intel_syntax noprefix
 	vaddsd	xmm6{k7}, xmm5, xmm4	 # AVX512
 	vaddsd	xmm6{k7}{z}, xmm5, xmm4	 # AVX512
@@ -3416,3 +3422,9 @@ _start:
 	vcmpsh	k5{k7}, xmm5, WORD PTR [esp+esi*8-123456], 123	# AVX512-FP16
 	vcmpsh	k5, xmm5, WORD PTR [ecx+254], 123	# AVX512-FP16 Disp8
 	vcmpsh	k5{k7}, xmm5, WORD PTR [edx-256], 123	# AVX512-FP16 Disp8
+
+	vfpclasssh	k5, xmm4, 123	# AVX512-FP16
+	vfpclasssh	k5, WORD PTR [ecx], 123	# AVX512-FP16
+	vfpclasssh	k5{k7}, WORD PTR [esp+esi*8-123456], 123	# AVX512-FP16
+	vfpclasssh	k5, WORD PTR [ecx+254], 123	# AVX512-FP16 Disp8
+	vfpclasssh	k5{k7}, WORD PTR [edx-256], 123	# AVX512-FP16 Disp8
