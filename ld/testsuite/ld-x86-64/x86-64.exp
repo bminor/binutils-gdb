@@ -2314,8 +2314,8 @@ run_ld_link_tests [list \
     ] \
 ]
 
-# Linux only tests
-if { "$LD_CLASS" == "64bit" } then {
+# Linux only tests.  Disabled due to large memory requirement.
+if { "x$LD_CLASS" == "64bit" } then {
     # This test needs 64-bit linker.
     run_dump_test "pr17618"
 }

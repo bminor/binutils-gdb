@@ -726,7 +726,8 @@ run_list_test "string-bad" ""
 run_list_test "reg-bad" ""
 run_list_test "space1" "-al"
 run_list_test "xmmword" ""
-run_dump_test rept
+# Disabled due to large memory requirement.
+# run_dump_test rept
 run_dump_test pr19498
 run_list_test "nop-bad-1" ""
 run_list_test "unspec" ""
