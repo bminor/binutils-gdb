@@ -1876,7 +1876,20 @@ elf_s390_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       else if (startswith (bfd_section_name (s), ".rela"))
 	{
 	  if (s->size != 0 && s != htab->elf.srelplt)
-	    relocs = true;
+	    {
+	      relocs = true;
+	      if (s == htab->elf.irelplt)
+		{
+		  /* In static-pie case, there are IRELATIVE-relocs in
+		     .rela.iplt (htab->irelplt), which will later be grouped
+		     to .rela.plt.  On s390, the IRELATIVE relocations are
+		     always located in .rela.iplt - even for non-static case.
+		     Ensure that DT_JMPREL, DT_PLTRELA, DT_PLTRELASZ is added
+		     to the dynamic section even if htab->srelplt->size == 0.
+		     See _bfd_elf_add_dynamic_tags in bfd/elflink.c.  */
+		  htab->elf.dt_jmprel_required = true;
+		}
+	    }
 
 	  /* We use the reloc_count field as a counter if we need
 	     to copy relocs into the output file.  */
