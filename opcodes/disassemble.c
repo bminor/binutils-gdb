@@ -610,6 +610,7 @@ disassemble_init_for_target (struct disassemble_info * info)
     case bfd_arch_aarch64:
       info->symbol_is_valid = aarch64_symbol_is_valid;
       info->disassembler_needs_relocs = true;
+      info->created_styled_output = true;
       break;
 #endif
 #ifdef ARCH_arc

@@ -3038,18 +3038,78 @@ expand_fp_imm (int size, uint32_t imm8)
   return imm;
 }
 
+/* Return a string based on FMT with the register style applied.  */
+
+static const char *
+style_reg (struct aarch64_styler *styler, const char *fmt, ...)
+{
+  const char *txt;
+  va_list ap;
+
+  va_start (ap, fmt);
+  txt = styler->apply_style (styler, dis_style_register, fmt, ap);
+  va_end (ap);
+
+  return txt;
+}
+
+/* Return a string based on FMT with the immediate style applied.  */
+
+static const char *
+style_imm (struct aarch64_styler *styler, const char *fmt, ...)
+{
+  const char *txt;
+  va_list ap;
+
+  va_start (ap, fmt);
+  txt = styler->apply_style (styler, dis_style_immediate, fmt, ap);
+  va_end (ap);
+
+  return txt;
+}
+
+/* Return a string based on FMT with the sub-mnemonic style applied.  */
+
+static const char *
+style_sub_mnem (struct aarch64_styler *styler, const char *fmt, ...)
+{
+  const char *txt;
+  va_list ap;
+
+  va_start (ap, fmt);
+  txt = styler->apply_style (styler, dis_style_sub_mnemonic, fmt, ap);
+  va_end (ap);
+
+  return txt;
+}
+
+/* Return a string based on FMT with the address style applied.  */
+
+static const char *
+style_addr (struct aarch64_styler *styler, const char *fmt, ...)
+{
+  const char *txt;
+  va_list ap;
+
+  va_start (ap, fmt);
+  txt = styler->apply_style (styler, dis_style_address, fmt, ap);
+  va_end (ap);
+
+  return txt;
+}
+
 /* Produce the string representation of the register list operand *OPND
    in the buffer pointed by BUF of size SIZE.  PREFIX is the part of
    the register name that comes before the register number, such as "v".  */
 static void
 print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
-		     const char *prefix)
+		     const char *prefix, struct aarch64_styler *styler)
 {
   const int num_regs = opnd->reglist.num_regs;
   const int first_reg = opnd->reglist.first_regno;
   const int last_reg = (first_reg + num_regs - 1) & 0x1f;
   const char *qlf_name = aarch64_get_qualifier_name (opnd->qualifier);
-  char tb[8];	/* Temporary buffer.  */
+  char tb[16];	/* Temporary buffer.  */
 
   assert (opnd->type != AARCH64_OPND_LEt || opnd->reglist.has_index);
   assert (num_regs >= 1 && num_regs <= 4);
@@ -3057,7 +3117,8 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
   /* Prepare the index if any.  */
   if (opnd->reglist.has_index)
     /* PR 21096: The %100 is to silence a warning about possible truncation.  */
-    snprintf (tb, 8, "[%" PRIi64 "]", (opnd->reglist.index % 100));
+    snprintf (tb, sizeof (tb), "[%s]",
+	      style_imm (styler, "%" PRIi64, (opnd->reglist.index % 100)));
   else
     tb[0] = '\0';
 
@@ -3065,8 +3126,9 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
      more than two registers in the list, and the register numbers
      are monotonically increasing in increments of one.  */
   if (num_regs > 2 && last_reg > first_reg)
-    snprintf (buf, size, "{%s%d.%s-%s%d.%s}%s", prefix, first_reg, qlf_name,
-	      prefix, last_reg, qlf_name, tb);
+    snprintf (buf, size, "{%s-%s}%s",
+	      style_reg (styler, "%s%d.%s", prefix, first_reg, qlf_name),
+	      style_reg (styler, "%s%d.%s", prefix, last_reg, qlf_name), tb);
   else
     {
       const int reg0 = first_reg;
@@ -3077,21 +3139,30 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
       switch (num_regs)
 	{
 	case 1:
-	  snprintf (buf, size, "{%s%d.%s}%s", prefix, reg0, qlf_name, tb);
+	  snprintf (buf, size, "{%s}%s",
+		    style_reg (styler, "%s%d.%s", prefix, reg0, qlf_name),
+		    tb);
 	  break;
 	case 2:
-	  snprintf (buf, size, "{%s%d.%s, %s%d.%s}%s", prefix, reg0, qlf_name,
-		    prefix, reg1, qlf_name, tb);
+	  snprintf (buf, size, "{%s, %s}%s",
+		    style_reg (styler, "%s%d.%s", prefix, reg0, qlf_name),
+		    style_reg (styler, "%s%d.%s", prefix, reg1, qlf_name),
+		    tb);
 	  break;
 	case 3:
-	  snprintf (buf, size, "{%s%d.%s, %s%d.%s, %s%d.%s}%s",
-		    prefix, reg0, qlf_name, prefix, reg1, qlf_name,
-		    prefix, reg2, qlf_name, tb);
+	  snprintf (buf, size, "{%s, %s, %s}%s",
+		    style_reg (styler, "%s%d.%s", prefix, reg0, qlf_name),
+		    style_reg (styler, "%s%d.%s", prefix, reg1, qlf_name),
+		    style_reg (styler, "%s%d.%s", prefix, reg2, qlf_name),
+		    tb);
 	  break;
 	case 4:
-	  snprintf (buf, size, "{%s%d.%s, %s%d.%s, %s%d.%s, %s%d.%s}%s",
-		    prefix, reg0, qlf_name, prefix, reg1, qlf_name,
-		    prefix, reg2, qlf_name, prefix, reg3, qlf_name, tb);
+	  snprintf (buf, size, "{%s, %s, %s, %s}%s",
+		    style_reg (styler, "%s%d.%s", prefix, reg0, qlf_name),
+		    style_reg (styler, "%s%d.%s", prefix, reg1, qlf_name),
+		    style_reg (styler, "%s%d.%s", prefix, reg2, qlf_name),
+		    style_reg (styler, "%s%d.%s", prefix, reg3, qlf_name),
+		    tb);
 	  break;
 	}
     }
@@ -3103,32 +3174,41 @@ print_register_list (char *buf, size_t size, const aarch64_opnd_info *opnd,
 static void
 print_immediate_offset_address (char *buf, size_t size,
 				const aarch64_opnd_info *opnd,
-				const char *base)
+				const char *base,
+				struct aarch64_styler *styler)
 {
   if (opnd->addr.writeback)
     {
       if (opnd->addr.preind)
         {
 	  if (opnd->type == AARCH64_OPND_ADDR_SIMM10 && !opnd->addr.offset.imm)
-            snprintf (buf, size, "[%s]!", base);
+	    snprintf (buf, size, "[%s]!", style_reg (styler, base));
           else
-	    snprintf (buf, size, "[%s, #%d]!", base, opnd->addr.offset.imm);
+	    snprintf (buf, size, "[%s, %s]!",
+		      style_reg (styler, base),
+		      style_imm (styler, "#%d", opnd->addr.offset.imm));
         }
       else
-	snprintf (buf, size, "[%s], #%d", base, opnd->addr.offset.imm);
+	snprintf (buf, size, "[%s], %s",
+		  style_reg (styler, base),
+		  style_imm (styler, "#%d", opnd->addr.offset.imm));
     }
   else
     {
       if (opnd->shifter.operator_present)
 	{
 	  assert (opnd->shifter.kind == AARCH64_MOD_MUL_VL);
-	  snprintf (buf, size, "[%s, #%d, mul vl]",
-		    base, opnd->addr.offset.imm);
+	  snprintf (buf, size, "[%s, %s, %s]",
+		    style_reg (styler, base),
+		    style_imm (styler, "#%d", opnd->addr.offset.imm),
+		    style_sub_mnem (styler, "mul vl"));
 	}
       else if (opnd->addr.offset.imm)
-	snprintf (buf, size, "[%s, #%d]", base, opnd->addr.offset.imm);
+	snprintf (buf, size, "[%s, %s]",
+		  style_reg (styler, base),
+		  style_imm (styler, "#%d", opnd->addr.offset.imm));
       else
-	snprintf (buf, size, "[%s]", base);
+	snprintf (buf, size, "[%s]", style_reg (styler, base));
     }
 }
 
@@ -3138,9 +3218,10 @@ print_immediate_offset_address (char *buf, size_t size,
 static void
 print_register_offset_address (char *buf, size_t size,
 			       const aarch64_opnd_info *opnd,
-			       const char *base, const char *offset)
+			       const char *base, const char *offset,
+			       struct aarch64_styler *styler)
 {
-  char tb[16];			/* Temporary buffer.  */
+  char tb[32];			/* Temporary buffer.  */
   bool print_extend_p = true;
   bool print_amount_p = true;
   const char *shift_name = aarch64_operand_modifiers[opnd->shifter.kind].name;
@@ -3161,16 +3242,20 @@ print_register_offset_address (char *buf, size_t size,
   if (print_extend_p)
     {
       if (print_amount_p)
-	snprintf (tb, sizeof (tb), ", %s #%" PRIi64, shift_name,
+	snprintf (tb, sizeof (tb), ", %s %s",
+		  style_sub_mnem (styler, shift_name),
+		  style_imm (styler, "#%" PRIi64,
   /* PR 21096: The %100 is to silence a warning about possible truncation.  */
-		  (opnd->shifter.amount % 100));
+			     (opnd->shifter.amount % 100)));
       else
-	snprintf (tb, sizeof (tb), ", %s", shift_name);
+	snprintf (tb, sizeof (tb), ", %s",
+		  style_sub_mnem (styler, shift_name));
     }
   else
     tb[0] = '\0';
 
-  snprintf (buf, size, "[%s, %s%s]", base, offset, tb);
+  snprintf (buf, size, "[%s, %s%s]", style_reg (styler, base),
+	    style_reg (styler, offset), tb);
 }
 
 /* Print ZA tiles from imm8 in ZERO instruction.
@@ -3183,7 +3268,8 @@ print_register_offset_address (char *buf, size_t size,
     * An all-zeros immediate is disassembled as an empty list { }.
 */
 static void
-print_sme_za_list(char *buf, size_t size, int mask)
+print_sme_za_list (char *buf, size_t size, int mask,
+		   struct aarch64_styler *styler)
 {
   const char* zan[] = { "za",    "za0.h", "za1.h", "za0.s",
                         "za1.s", "za2.s", "za3.s", "za0.d",
@@ -3203,9 +3289,9 @@ print_sme_za_list(char *buf, size_t size, int mask)
         {
           mask &= ~zan_v[i];
           if (k > 1)
-            k += snprintf (buf + k, size - k, ", %s", zan[i]);
-          else
-            k += snprintf (buf + k, size - k, "%s", zan[i]);
+	    k += snprintf (buf + k, size - k, ", ");
+
+	  k += snprintf (buf + k, size - k, "%s", style_reg (styler, zan[i]));
         }
       if (mask == 0)
         break;
@@ -3230,7 +3316,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 		       const aarch64_opnd_info *opnds, int idx, int *pcrel_p,
 		       bfd_vma *address, char** notes,
 		       char *comment, size_t comment_size,
-		       aarch64_feature_set features)
+		       aarch64_feature_set features,
+		       struct aarch64_styler *styler)
 {
   unsigned int i, num_conds;
   const char *name = NULL;
@@ -3279,7 +3366,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       assert (opnd->qualifier == AARCH64_OPND_QLF_W
 	      || opnd->qualifier == AARCH64_OPND_QLF_X);
       snprintf (buf, size, "%s",
-		get_int_reg_name (opnd->reg.regno, opnd->qualifier, 0));
+		style_reg (styler, get_int_reg_name (opnd->reg.regno,
+						     opnd->qualifier, 0)));
       break;
 
     case AARCH64_OPND_Rd_SP:
@@ -3292,7 +3380,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	      || opnd->qualifier == AARCH64_OPND_QLF_X
 	      || opnd->qualifier == AARCH64_OPND_QLF_SP);
       snprintf (buf, size, "%s",
-		get_int_reg_name (opnd->reg.regno, opnd->qualifier, 1));
+		style_reg (styler, get_int_reg_name (opnd->reg.regno,
+						     opnd->qualifier, 1)));
       break;
 
     case AARCH64_OPND_Rm_EXT:
@@ -3312,19 +3401,21 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	    {
 	      /* Shifter omitted.  */
 	      snprintf (buf, size, "%s",
-			get_int_reg_name (opnd->reg.regno, opnd->qualifier, 0));
+			style_reg (styler,
+				   get_int_reg_name (opnd->reg.regno,
+						     opnd->qualifier, 0)));
 	      break;
 	    }
 	}
       if (opnd->shifter.amount)
-	snprintf (buf, size, "%s, %s #%" PRIi64,
-		  get_int_reg_name (opnd->reg.regno, opnd->qualifier, 0),
-		  aarch64_operand_modifiers[kind].name,
-		  opnd->shifter.amount);
+	snprintf (buf, size, "%s, %s %s",
+		  style_reg (styler, get_int_reg_name (opnd->reg.regno, opnd->qualifier, 0)),
+		  style_sub_mnem (styler, aarch64_operand_modifiers[kind].name),
+		  style_imm (styler, "#%" PRIi64, opnd->shifter.amount));
       else
 	snprintf (buf, size, "%s, %s",
-		  get_int_reg_name (opnd->reg.regno, opnd->qualifier, 0),
-		  aarch64_operand_modifiers[kind].name);
+		  style_reg (styler, get_int_reg_name (opnd->reg.regno, opnd->qualifier, 0)),
+		  style_sub_mnem (styler, aarch64_operand_modifiers[kind].name));
       break;
 
     case AARCH64_OPND_Rm_SFT:
@@ -3332,12 +3423,13 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	      || opnd->qualifier == AARCH64_OPND_QLF_X);
       if (opnd->shifter.amount == 0 && opnd->shifter.kind == AARCH64_MOD_LSL)
 	snprintf (buf, size, "%s",
-		  get_int_reg_name (opnd->reg.regno, opnd->qualifier, 0));
+		  style_reg (styler, get_int_reg_name (opnd->reg.regno,
+						       opnd->qualifier, 0)));
       else
-	snprintf (buf, size, "%s, %s #%" PRIi64,
-		  get_int_reg_name (opnd->reg.regno, opnd->qualifier, 0),
-		  aarch64_operand_modifiers[opnd->shifter.kind].name,
-		  opnd->shifter.amount);
+	snprintf (buf, size, "%s, %s %s",
+		  style_reg (styler, get_int_reg_name (opnd->reg.regno, opnd->qualifier, 0)),
+		  style_sub_mnem (styler, aarch64_operand_modifiers[opnd->shifter.kind].name),
+		  style_imm (styler, "#%" PRIi64, opnd->shifter.amount));
       break;
 
     case AARCH64_OPND_Fd:
@@ -3353,16 +3445,19 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Vd:
     case AARCH64_OPND_SVE_Vm:
     case AARCH64_OPND_SVE_Vn:
-      snprintf (buf, size, "%s%d", aarch64_get_qualifier_name (opnd->qualifier),
-		opnd->reg.regno);
+      snprintf (buf, size, "%s",
+		style_reg (styler, "%s%d",
+			   aarch64_get_qualifier_name (opnd->qualifier),
+			   opnd->reg.regno));
       break;
 
     case AARCH64_OPND_Va:
     case AARCH64_OPND_Vd:
     case AARCH64_OPND_Vn:
     case AARCH64_OPND_Vm:
-      snprintf (buf, size, "v%d.%s", opnd->reg.regno,
-		aarch64_get_qualifier_name (opnd->qualifier));
+      snprintf (buf, size, "%s",
+		style_reg (styler, "v%d.%s", opnd->reg.regno,
+			   aarch64_get_qualifier_name (opnd->qualifier)));
       break;
 
     case AARCH64_OPND_Ed:
@@ -3370,21 +3465,24 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_Em:
     case AARCH64_OPND_Em16:
     case AARCH64_OPND_SM3_IMM2:
-      snprintf (buf, size, "v%d.%s[%" PRIi64 "]", opnd->reglane.regno,
-		aarch64_get_qualifier_name (opnd->qualifier),
-		opnd->reglane.index);
+      snprintf (buf, size, "%s[%s]",
+		style_reg (styler, "v%d.%s", opnd->reglane.regno,
+			   aarch64_get_qualifier_name (opnd->qualifier)),
+		style_imm (styler, "%" PRIi64, opnd->reglane.index));
       break;
 
     case AARCH64_OPND_VdD1:
     case AARCH64_OPND_VnD1:
-      snprintf (buf, size, "v%d.d[1]", opnd->reg.regno);
+      snprintf (buf, size, "%s[%s]",
+		style_reg (styler, "v%d.d", opnd->reg.regno),
+		style_imm (styler, "1"));
       break;
 
     case AARCH64_OPND_LVn:
     case AARCH64_OPND_LVt:
     case AARCH64_OPND_LVt_AL:
     case AARCH64_OPND_LEt:
-      print_register_list (buf, size, opnd, "v");
+      print_register_list (buf, size, opnd, "v", styler);
       break;
 
     case AARCH64_OPND_SVE_Pd:
@@ -3397,14 +3495,17 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Pt:
     case AARCH64_OPND_SME_Pm:
       if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
-	snprintf (buf, size, "p%d", opnd->reg.regno);
+	snprintf (buf, size, "%s",
+		  style_reg (styler, "p%d", opnd->reg.regno));
       else if (opnd->qualifier == AARCH64_OPND_QLF_P_Z
 	       || opnd->qualifier == AARCH64_OPND_QLF_P_M)
-	snprintf (buf, size, "p%d/%s", opnd->reg.regno,
-		  aarch64_get_qualifier_name (opnd->qualifier));
+	snprintf (buf, size, "%s",
+		  style_reg (styler, "p%d/%s", opnd->reg.regno,
+			     aarch64_get_qualifier_name (opnd->qualifier)));
       else
-	snprintf (buf, size, "p%d.%s", opnd->reg.regno,
-		  aarch64_get_qualifier_name (opnd->qualifier));
+	snprintf (buf, size, "%s",
+		  style_reg (styler, "p%d.%s", opnd->reg.regno,
+			     aarch64_get_qualifier_name (opnd->qualifier)));
       break;
 
     case AARCH64_OPND_SVE_Za_5:
@@ -3415,15 +3516,16 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Zn:
     case AARCH64_OPND_SVE_Zt:
       if (opnd->qualifier == AARCH64_OPND_QLF_NIL)
-	snprintf (buf, size, "z%d", opnd->reg.regno);
+	snprintf (buf, size, "%s", style_reg (styler, "z%d", opnd->reg.regno));
       else
-	snprintf (buf, size, "z%d.%s", opnd->reg.regno,
-		  aarch64_get_qualifier_name (opnd->qualifier));
+	snprintf (buf, size, "%s",
+		  style_reg (styler, "z%d.%s", opnd->reg.regno,
+			     aarch64_get_qualifier_name (opnd->qualifier)));
       break;
 
     case AARCH64_OPND_SVE_ZnxN:
     case AARCH64_OPND_SVE_ZtxN:
-      print_register_list (buf, size, opnd, "z");
+      print_register_list (buf, size, opnd, "z", styler);
       break;
 
     case AARCH64_OPND_SVE_Zm3_INDEX:
@@ -3432,55 +3534,61 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_Zm4_11_INDEX:
     case AARCH64_OPND_SVE_Zm4_INDEX:
     case AARCH64_OPND_SVE_Zn_INDEX:
-      snprintf (buf, size, "z%d.%s[%" PRIi64 "]", opnd->reglane.regno,
-		aarch64_get_qualifier_name (opnd->qualifier),
-		opnd->reglane.index);
+      snprintf (buf, size, "%s[%s]",
+		style_reg (styler, "z%d.%s", opnd->reglane.regno,
+			   aarch64_get_qualifier_name (opnd->qualifier)),
+		style_imm (styler, "%" PRIi64, opnd->reglane.index));
       break;
 
     case AARCH64_OPND_SME_ZAda_2b:
     case AARCH64_OPND_SME_ZAda_3b:
-      snprintf (buf, size, "za%d.%s", opnd->reg.regno,
-                aarch64_get_qualifier_name (opnd->qualifier));
+      snprintf (buf, size, "%s",
+		style_reg (styler, "za%d.%s", opnd->reg.regno,
+			   aarch64_get_qualifier_name (opnd->qualifier)));
       break;
 
     case AARCH64_OPND_SME_ZA_HV_idx_src:
     case AARCH64_OPND_SME_ZA_HV_idx_dest:
     case AARCH64_OPND_SME_ZA_HV_idx_ldstr:
-      snprintf (buf, size, "%sza%d%c.%s[w%d, %d]%s",
-                opnd->type == AARCH64_OPND_SME_ZA_HV_idx_ldstr ? "{" : "",
-                opnd->za_tile_vector.regno,
-                opnd->za_tile_vector.v == 1 ? 'v' : 'h',
-                aarch64_get_qualifier_name (opnd->qualifier),
-                opnd->za_tile_vector.index.regno,
-                opnd->za_tile_vector.index.imm,
-                opnd->type == AARCH64_OPND_SME_ZA_HV_idx_ldstr ? "}" : "");
+      snprintf (buf, size, "%s%s[%s, %s]%s",
+		opnd->type == AARCH64_OPND_SME_ZA_HV_idx_ldstr ? "{" : "",
+		style_reg (styler, "za%d%c.%s",
+			   opnd->za_tile_vector.regno,
+			   opnd->za_tile_vector.v == 1 ? 'v' : 'h',
+			   aarch64_get_qualifier_name (opnd->qualifier)),
+		style_reg (styler, "w%d", opnd->za_tile_vector.index.regno),
+		style_imm (styler, "%d", opnd->za_tile_vector.index.imm),
+		opnd->type == AARCH64_OPND_SME_ZA_HV_idx_ldstr ? "}" : "");
       break;
 
     case AARCH64_OPND_SME_list_of_64bit_tiles:
-      print_sme_za_list (buf, size, opnd->reg.regno);
+      print_sme_za_list (buf, size, opnd->reg.regno, styler);
       break;
 
     case AARCH64_OPND_SME_ZA_array:
-      snprintf (buf, size, "za[w%d, %d]",
-                opnd->za_tile_vector.index.regno,
-                opnd->za_tile_vector.index.imm);
+      snprintf (buf, size, "%s[%s, %s]",
+		style_reg (styler, "za"),
+		style_reg (styler, "w%d", opnd->za_tile_vector.index.regno),
+		style_imm (styler, "%d", opnd->za_tile_vector.index.imm));
       break;
 
     case AARCH64_OPND_SME_SM_ZA:
-      snprintf (buf, size, "%s", opnd->reg.regno == 's' ? "sm" : "za");
+      snprintf (buf, size, "%s",
+		style_reg (styler, opnd->reg.regno == 's' ? "sm" : "za"));
       break;
 
     case AARCH64_OPND_SME_PnT_Wm_imm:
-      snprintf (buf, size, "p%d.%s[w%d, %d]",
-                opnd->za_tile_vector.regno,
-                aarch64_get_qualifier_name (opnd->qualifier),
-                opnd->za_tile_vector.index.regno,
-                opnd->za_tile_vector.index.imm);
+      snprintf (buf, size, "%s[%s, %s]",
+		style_reg (styler, "p%d.%s", opnd->za_tile_vector.regno,
+			   aarch64_get_qualifier_name (opnd->qualifier)),
+                style_reg (styler, "w%d", opnd->za_tile_vector.index.regno),
+                style_imm (styler, "%d", opnd->za_tile_vector.index.imm));
       break;
 
     case AARCH64_OPND_CRn:
     case AARCH64_OPND_CRm:
-      snprintf (buf, size, "C%" PRIi64, opnd->imm.value);
+      snprintf (buf, size, "%s",
+		style_reg (styler, "C%" PRIi64, opnd->imm.value));
       break;
 
     case AARCH64_OPND_IDX:
@@ -3521,7 +3629,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_IMM_ROT1:
     case AARCH64_OPND_SVE_IMM_ROT2:
     case AARCH64_OPND_SVE_IMM_ROT3:
-      snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
+      snprintf (buf, size, "%s",
+		style_imm (styler, "#%" PRIi64, opnd->imm.value));
       break;
 
     case AARCH64_OPND_SVE_I1_HALF_ONE:
@@ -3530,7 +3639,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       {
 	single_conv_t c;
 	c.i = opnd->imm.value;
-	snprintf (buf, size, "#%.1f", c.f);
+	snprintf (buf, size, "%s", style_imm (styler, "#%.1f", c.f));
 	break;
       }
 
@@ -3541,9 +3650,11 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       enum_value = opnd->imm.value;
       assert (enum_value < ARRAY_SIZE (aarch64_sve_pattern_array));
       if (aarch64_sve_pattern_array[enum_value])
-	snprintf (buf, size, "%s", aarch64_sve_pattern_array[enum_value]);
+	snprintf (buf, size, "%s",
+		  style_reg (styler, aarch64_sve_pattern_array[enum_value]));
       else
-	snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
+	snprintf (buf, size, "%s",
+		  style_imm (styler, "#%" PRIi64, opnd->imm.value));
       break;
 
     case AARCH64_OPND_SVE_PATTERN_SCALED:
@@ -3554,15 +3665,20 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       enum_value = opnd->imm.value;
       assert (enum_value < ARRAY_SIZE (aarch64_sve_pattern_array));
       if (aarch64_sve_pattern_array[opnd->imm.value])
-	snprintf (buf, size, "%s", aarch64_sve_pattern_array[opnd->imm.value]);
+	snprintf (buf, size, "%s",
+		  style_reg (styler,
+			     aarch64_sve_pattern_array[opnd->imm.value]));
       else
-	snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
+	snprintf (buf, size, "%s",
+		  style_imm (styler, "#%" PRIi64, opnd->imm.value));
       if (opnd->shifter.operator_present)
 	{
 	  size_t len = strlen (buf);
-	  snprintf (buf + len, size - len, ", %s #%" PRIi64,
-		    aarch64_operand_modifiers[opnd->shifter.kind].name,
-		    opnd->shifter.amount);
+	  const char *shift_name
+	    = aarch64_operand_modifiers[opnd->shifter.kind].name;
+	  snprintf (buf + len, size - len, ", %s %s",
+		    style_sub_mnem (styler, shift_name),
+		    style_imm (styler, "#%" PRIi64, opnd->shifter.amount));
 	}
       break;
 
@@ -3570,9 +3686,11 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       enum_value = opnd->imm.value;
       assert (enum_value < ARRAY_SIZE (aarch64_sve_prfop_array));
       if (aarch64_sve_prfop_array[enum_value])
-	snprintf (buf, size, "%s", aarch64_sve_prfop_array[enum_value]);
+	snprintf (buf, size, "%s",
+		  style_reg (styler, aarch64_sve_prfop_array[enum_value]));
       else
-	snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
+	snprintf (buf, size, "%s",
+		  style_imm (styler, "#%" PRIi64, opnd->imm.value));
       break;
 
     case AARCH64_OPND_IMM_MOV:
@@ -3581,12 +3699,14 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	case 4:	/* e.g. MOV Wd, #<imm32>.  */
 	    {
 	      int imm32 = opnd->imm.value;
-	      snprintf (buf, size, "#0x%-20x", imm32);
+	      snprintf (buf, size, "%s",
+			style_imm (styler, "#0x%-20x", imm32));
 	      snprintf (comment, comment_size, "#%d", imm32);
 	    }
 	  break;
 	case 8:	/* e.g. MOV Xd, #<imm64>.  */
-	  snprintf (buf, size, "#0x%-20" PRIx64, opnd->imm.value);
+	  snprintf (buf, size, "%s", style_imm (styler, "#0x%-20" PRIx64,
+						opnd->imm.value));
 	  snprintf (comment, comment_size, "#%" PRIi64, opnd->imm.value);
 	  break;
 	default:
@@ -3596,7 +3716,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_FPIMM0:
-      snprintf (buf, size, "#0.0");
+      snprintf (buf, size, "%s", style_imm (styler, "#0.0"));
       break;
 
     case AARCH64_OPND_LIMM:
@@ -3606,30 +3726,38 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_LIMM:
     case AARCH64_OPND_SVE_LIMM_MOV:
       if (opnd->shifter.amount)
-	snprintf (buf, size, "#0x%" PRIx64 ", lsl #%" PRIi64, opnd->imm.value,
-		  opnd->shifter.amount);
+	snprintf (buf, size, "%s, %s %s",
+		  style_imm (styler, "#0x%" PRIx64, opnd->imm.value),
+		  style_sub_mnem (styler, "lsl"),
+		  style_imm (styler, "#%" PRIi64, opnd->shifter.amount));
       else
-	snprintf (buf, size, "#0x%" PRIx64, opnd->imm.value);
+	snprintf (buf, size, "%s",
+		  style_imm (styler, "#0x%" PRIx64, opnd->imm.value));
       break;
 
     case AARCH64_OPND_SIMD_IMM:
     case AARCH64_OPND_SIMD_IMM_SFT:
       if ((! opnd->shifter.amount && opnd->shifter.kind == AARCH64_MOD_LSL)
 	  || opnd->shifter.kind == AARCH64_MOD_NONE)
-	snprintf (buf, size, "#0x%" PRIx64, opnd->imm.value);
+	snprintf (buf, size, "%s",
+		  style_imm (styler, "#0x%" PRIx64, opnd->imm.value));
       else
-	snprintf (buf, size, "#0x%" PRIx64 ", %s #%" PRIi64, opnd->imm.value,
-		  aarch64_operand_modifiers[opnd->shifter.kind].name,
-		  opnd->shifter.amount);
+	snprintf (buf, size, "%s, %s %s",
+		  style_imm (styler, "#0x%" PRIx64, opnd->imm.value),
+		  style_sub_mnem (styler, aarch64_operand_modifiers[opnd->shifter.kind].name),
+		  style_imm (styler, "#%" PRIi64, opnd->shifter.amount));
       break;
 
     case AARCH64_OPND_SVE_AIMM:
     case AARCH64_OPND_SVE_ASIMM:
       if (opnd->shifter.amount)
-	snprintf (buf, size, "#%" PRIi64 ", lsl #%" PRIi64, opnd->imm.value,
-		  opnd->shifter.amount);
+	snprintf (buf, size, "%s, %s %s",
+		  style_imm (styler, "#%" PRIi64, opnd->imm.value),
+		  style_sub_mnem (styler, "lsl"),
+		  style_imm (styler, "#%" PRIi64, opnd->shifter.amount));
       else
-	snprintf (buf, size, "#%" PRIi64, opnd->imm.value);
+	snprintf (buf, size, "%s",
+		  style_imm (styler, "#%" PRIi64, opnd->imm.value));
       break;
 
     case AARCH64_OPND_FPIMM:
@@ -3641,21 +3769,21 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	    {
 	      half_conv_t c;
 	      c.i = expand_fp_imm (2, opnd->imm.value);
-	      snprintf (buf, size,  "#%.18e", c.f);
+	      snprintf (buf, size, "%s", style_imm (styler, "#%.18e", c.f));
 	    }
 	  break;
 	case 4:	/* e.g. FMOV <Vd>.4S, #<imm>.  */
 	    {
 	      single_conv_t c;
 	      c.i = expand_fp_imm (4, opnd->imm.value);
-	      snprintf (buf, size,  "#%.18e", c.f);
+	      snprintf (buf, size, "%s", style_imm (styler, "#%.18e", c.f));
 	    }
 	  break;
 	case 8:	/* e.g. FMOV <Sd>, #<imm>.  */
 	    {
 	      double_conv_t c;
 	      c.i = expand_fp_imm (8, opnd->imm.value);
-	      snprintf (buf, size,  "#%.18e", c.d);
+	      snprintf (buf, size, "%s", style_imm (styler, "#%.18e", c.d));
 	    }
 	  break;
 	default:
@@ -3676,12 +3804,14 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	      (int64_t) get_optional_operand_default_value (opcode)))
 	/* Omit the operand, e.g. DCPS1.  */
 	break;
-      snprintf (buf, size, "#0x%x", (unsigned int)opnd->imm.value);
+      snprintf (buf, size, "%s",
+		style_imm (styler, "#0x%x", (unsigned int) opnd->imm.value));
       break;
 
     case AARCH64_OPND_COND:
     case AARCH64_OPND_COND1:
-      snprintf (buf, size, "%s", opnd->cond->names[0]);
+      snprintf (buf, size, "%s",
+		style_sub_mnem (styler, opnd->cond->names[0]));
       num_conds = ARRAY_SIZE (opnd->cond->names);
       for (i = 1; i < num_conds && opnd->cond->names[i]; ++i)
 	{
@@ -3706,7 +3836,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	 in the disassemble_info will take care of the printing.  But some
 	 other callers may be still interested in getting the string in *STR,
 	 so here we do snprintf regardless.  */
-      snprintf (buf, size, "#0x%" PRIx64, addr);
+      snprintf (buf, size, "%s", style_addr (styler, "#0x%" PRIx64 , addr));
       break;
 
     case AARCH64_OPND_ADDR_PCREL14:
@@ -3722,7 +3852,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	 in the disassemble_info will take care of the printing.  But some
 	 other callers may be still interested in getting the string in *STR,
 	 so here we do snprintf regardless.  */
-      snprintf (buf, size, "#0x%" PRIx64, addr);
+      snprintf (buf, size, "%s", style_addr (styler, "#0x%" PRIx64, addr));
       break;
 
     case AARCH64_OPND_ADDR_SIMPLE:
@@ -3732,12 +3862,16 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       if (opnd->type == AARCH64_OPND_SIMD_ADDR_POST)
 	{
 	  if (opnd->addr.offset.is_reg)
-	    snprintf (buf, size, "[%s], x%d", name, opnd->addr.offset.regno);
+	    snprintf (buf, size, "[%s], %s",
+		      style_reg (styler, name),
+		      style_reg (styler, "x%d", opnd->addr.offset.regno));
 	  else
-	    snprintf (buf, size, "[%s], #%d", name, opnd->addr.offset.imm);
+	    snprintf (buf, size, "[%s], %s",
+		      style_reg (styler, name),
+		      style_imm (styler, "#%d", opnd->addr.offset.imm));
 	}
       else
-	snprintf (buf, size, "[%s]", name);
+	snprintf (buf, size, "[%s]", style_reg (styler, name));
       break;
 
     case AARCH64_OPND_ADDR_REGOFF:
@@ -3753,14 +3887,14 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_ADDR_RX_LSL3:
       print_register_offset_address
 	(buf, size, opnd, get_64bit_int_reg_name (opnd->addr.base_regno, 1),
-	 get_offset_int_reg_name (opnd));
+	 get_offset_int_reg_name (opnd), styler);
       break;
 
     case AARCH64_OPND_SVE_ADDR_ZX:
       print_register_offset_address
 	(buf, size, opnd,
 	 get_addr_sve_reg_name (opnd->addr.base_regno, opnd->qualifier),
-	 get_64bit_int_reg_name (opnd->addr.offset.regno, 0));
+	 get_64bit_int_reg_name (opnd->addr.offset.regno, 0), styler);
       break;
 
     case AARCH64_OPND_SVE_ADDR_RZ:
@@ -3777,7 +3911,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_ADDR_RZ_XTW3_22:
       print_register_offset_address
 	(buf, size, opnd, get_64bit_int_reg_name (opnd->addr.base_regno, 1),
-	 get_addr_sve_reg_name (opnd->addr.offset.regno, opnd->qualifier));
+	 get_addr_sve_reg_name (opnd->addr.offset.regno, opnd->qualifier),
+	 styler);
       break;
 
     case AARCH64_OPND_ADDR_SIMM7:
@@ -3801,7 +3936,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_ADDR_RI_U6x4:
     case AARCH64_OPND_SVE_ADDR_RI_U6x8:
       print_immediate_offset_address
-	(buf, size, opnd, get_64bit_int_reg_name (opnd->addr.base_regno, 1));
+	(buf, size, opnd, get_64bit_int_reg_name (opnd->addr.base_regno, 1),
+	 styler);
       break;
 
     case AARCH64_OPND_SVE_ADDR_ZI_U5:
@@ -3810,7 +3946,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_ADDR_ZI_U5x8:
       print_immediate_offset_address
 	(buf, size, opnd,
-	 get_addr_sve_reg_name (opnd->addr.base_regno, opnd->qualifier));
+	 get_addr_sve_reg_name (opnd->addr.base_regno, opnd->qualifier),
+	 styler);
       break;
 
     case AARCH64_OPND_SVE_ADDR_ZZ_LSL:
@@ -3819,15 +3956,18 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       print_register_offset_address
 	(buf, size, opnd,
 	 get_addr_sve_reg_name (opnd->addr.base_regno, opnd->qualifier),
-	 get_addr_sve_reg_name (opnd->addr.offset.regno, opnd->qualifier));
+	 get_addr_sve_reg_name (opnd->addr.offset.regno, opnd->qualifier),
+	 styler);
       break;
 
     case AARCH64_OPND_ADDR_UIMM12:
       name = get_64bit_int_reg_name (opnd->addr.base_regno, 1);
       if (opnd->addr.offset.imm)
-	snprintf (buf, size, "[%s, #%d]", name, opnd->addr.offset.imm);
+	snprintf (buf, size, "[%s, %s]",
+		  style_reg (styler, name),
+		  style_imm (styler, "#%d", opnd->addr.offset.imm));
       else
-	snprintf (buf, size, "[%s]", name);
+	snprintf (buf, size, "[%s]", style_reg (styler, name));
       break;
 
     case AARCH64_OPND_SYSREG:
@@ -3866,14 +4006,16 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 	}
 
       if (name)
-	snprintf (buf, size, "%s", name);
+	snprintf (buf, size, "%s", style_reg (styler, name));
       else
 	{
 	  /* Implementation defined system register.  */
 	  unsigned int value = opnd->sysreg.value;
-	  snprintf (buf, size, "s%u_%u_c%u_c%u_%u", (value >> 14) & 0x3,
-		    (value >> 11) & 0x7, (value >> 7) & 0xf, (value >> 3) & 0xf,
-		    value & 0x7);
+	  snprintf (buf, size, "%s",
+		    style_reg (styler, "s%u_%u_c%u_c%u_%u",
+			       (value >> 14) & 0x3, (value >> 11) & 0x7,
+			       (value >> 7) & 0xf, (value >> 3) & 0xf,
+			       value & 0x7));
 	}
       break;
 
@@ -3891,7 +4033,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
             break;
           }
       assert (aarch64_pstatefields[i].name);
-      snprintf (buf, size, "%s", aarch64_pstatefields[i].name);
+      snprintf (buf, size, "%s",
+		style_reg (styler, aarch64_pstatefields[i].name));
       break;
 
     case AARCH64_OPND_SYSREG_AT:
@@ -3899,12 +4042,18 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SYSREG_IC:
     case AARCH64_OPND_SYSREG_TLBI:
     case AARCH64_OPND_SYSREG_SR:
-      snprintf (buf, size, "%s", opnd->sysins_op->name);
+      snprintf (buf, size, "%s", style_reg (styler, opnd->sysins_op->name));
       break;
 
     case AARCH64_OPND_BARRIER:
     case AARCH64_OPND_BARRIER_DSB_NXS:
-      snprintf (buf, size, "%s", opnd->barrier->name);
+      {
+	if (opnd->barrier->name[0] == '#')
+	  snprintf (buf, size, "%s", style_imm (styler, opnd->barrier->name));
+	else
+	  snprintf (buf, size, "%s",
+		    style_sub_mnem (styler, opnd->barrier->name));
+      }
       break;
 
     case AARCH64_OPND_BARRIER_ISB:
@@ -3912,34 +4061,40 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       if (! optional_operand_p (opcode, idx)
 	  || (opnd->barrier->value
 	      != get_optional_operand_default_value (opcode)))
-	snprintf (buf, size, "#0x%x", opnd->barrier->value);
+	snprintf (buf, size, "%s",
+		  style_imm (styler, "#0x%x", opnd->barrier->value));
       break;
 
     case AARCH64_OPND_PRFOP:
       if (opnd->prfop->name != NULL)
-	snprintf (buf, size, "%s", opnd->prfop->name);
+	snprintf (buf, size, "%s", style_sub_mnem (styler, opnd->prfop->name));
       else
-	snprintf (buf, size, "#0x%02x", opnd->prfop->value);
+	snprintf (buf, size, "%s", style_imm (styler, "#0x%02x",
+					      opnd->prfop->value));
       break;
 
     case AARCH64_OPND_BARRIER_PSB:
-      snprintf (buf, size, "csync");
+      snprintf (buf, size, "%s", style_sub_mnem (styler, "csync"));
       break;
 
     case AARCH64_OPND_BTI_TARGET:
       if ((HINT_FLAG (opnd->hint_option->value) & HINT_OPD_F_NOPRINT) == 0)
-	snprintf (buf, size, "%s", opnd->hint_option->name);
+	snprintf (buf, size, "%s",
+		  style_sub_mnem (styler, opnd->hint_option->name));
       break;
 
     case AARCH64_OPND_MOPS_ADDR_Rd:
     case AARCH64_OPND_MOPS_ADDR_Rs:
       snprintf (buf, size, "[%s]!",
-		get_int_reg_name (opnd->reg.regno, AARCH64_OPND_QLF_X, 0));
+		style_reg (styler,
+			   get_int_reg_name (opnd->reg.regno,
+					     AARCH64_OPND_QLF_X, 0)));
       break;
 
     case AARCH64_OPND_MOPS_WB_Rn:
       snprintf (buf, size, "%s!",
-		get_int_reg_name (opnd->reg.regno, AARCH64_OPND_QLF_X, 0));
+		style_reg (styler, get_int_reg_name (opnd->reg.regno,
+						     AARCH64_OPND_QLF_X, 0)));
       break;
 
     default:

@@ -25,8 +25,17 @@
 #include "opintl.h"
 #include "aarch64-dis.h"
 #include "elf-bfd.h"
+#include "safe-ctype.h"
+#include "obstack.h"
+
+#define obstack_chunk_alloc xmalloc
+#define obstack_chunk_free free
 
 #define INSNLEN 4
+
+/* This character is used to encode style information within the output
+   buffers.  See get_style_text and print_operands for more details.  */
+#define STYLE_MARKER_CHAR '\002'
 
 /* Cached mapping symbol state.  */
 enum map_type
@@ -3275,6 +3284,90 @@ aarch64_decode_insn (aarch64_insn insn, aarch64_inst *inst,
   return ERR_UND;
 }
 
+/* Return a short string to indicate a switch to STYLE.  These strings
+   will be embedded into the disassembled operand text (as produced by
+   aarch64_print_operand), and then spotted in the print_operands function
+   so that the disassembler output can be split by style.  */
+
+static const char *
+get_style_text (enum disassembler_style style)
+{
+  static bool init = false;
+  static char formats[16][4];
+  unsigned num;
+
+  /* First time through we build a string for every possible format.  This
+     code relies on there being no more than 16 different styles (there's
+     an assert below for this).  */
+  if (!init)
+    {
+      int i;
+
+      for (i = 0; i <= 0xf; ++i)
+	{
+	  int res = snprintf (&formats[i][0], sizeof (formats[i]), "%c%x%c",
+			      STYLE_MARKER_CHAR, i, STYLE_MARKER_CHAR);
+	  assert (res == 3);
+	}
+
+      init = true;
+    }
+
+  /* Return the string that marks switching to STYLE.  */
+  num = (unsigned) style;
+  assert (style <= 0xf);
+  return formats[num];
+}
+
+/* Callback used by aarch64_print_operand to apply STYLE to the
+   disassembler output created from FMT and ARGS.  The STYLER object holds
+   any required state.  Must return a pointer to a string (created from FMT
+   and ARGS) that will continue to be valid until the complete disassembled
+   instruction has been printed.
+
+   We return a string that includes two embedded style markers, the first,
+   places at the start of the string, indicates a switch to STYLE, and the
+   second, placed at the end of the string, indicates a switch back to the
+   default text style.
+
+   Later, when we print the operand text we take care to collapse any
+   adjacent style markers, and to ignore any style markers that appear at
+   the very end of a complete operand string.  */
+
+static const char *aarch64_apply_style (struct aarch64_styler *styler,
+					enum disassembler_style style,
+					const char *fmt,
+					va_list args)
+{
+  int res;
+  char *ptr, *tmp;
+  struct obstack *stack = (struct obstack *) styler->state;
+  va_list ap;
+
+  /* These are the two strings for switching styles.  */
+  const char *style_on = get_style_text (style);
+  const char *style_off = get_style_text (dis_style_text);
+
+  /* Calculate space needed once FMT and ARGS are expanded.  */
+  va_copy (ap, args);
+  res = vsnprintf (NULL, 0, fmt, ap);
+  va_end (ap);
+  assert (res >= 0);
+
+  /* Allocate space on the obstack for the expanded FMT and ARGS, as well
+     as the two strings for switching styles, then write all of these
+     strings onto the obstack.  */
+  ptr = (char *) obstack_alloc (stack, res + strlen (style_on)
+				+ strlen (style_off) + 1);
+  tmp = stpcpy (ptr, style_on);
+  res = vsnprintf (tmp, (res + 1), fmt, args);
+  assert (res >= 0);
+  tmp += res;
+  strcpy (tmp, style_off);
+
+  return ptr;
+}
+
 /* Print operands.  */
 
 static void
@@ -3284,6 +3377,13 @@ print_operands (bfd_vma pc, const aarch64_opcode *opcode,
 {
   char *notes = NULL;
   int i, pcrel_p, num_printed;
+  struct aarch64_styler styler;
+  struct obstack content;
+  obstack_init (&content);
+
+  styler.apply_style = aarch64_apply_style;
+  styler.state = (void *) &content;
+
   for (i = 0, num_printed = 0; i < AARCH64_MAX_OPND_NUM; ++i)
     {
       char str[128];
@@ -3301,33 +3401,97 @@ print_operands (bfd_vma pc, const aarch64_opcode *opcode,
       /* Generate the operand string in STR.  */
       aarch64_print_operand (str, sizeof (str), pc, opcode, opnds, i, &pcrel_p,
 			     &info->target, &notes, cmt, sizeof (cmt),
-			     arch_variant);
+			     arch_variant, &styler);
 
       /* Print the delimiter (taking account of omitted operand(s)).  */
       if (str[0] != '\0')
-	(*info->fprintf_func) (info->stream, "%s",
-			       num_printed++ == 0 ? "\t" : ", ");
+	(*info->fprintf_styled_func) (info->stream, dis_style_text, "%s",
+				      num_printed++ == 0 ? "\t" : ", ");
 
       /* Print the operand.  */
       if (pcrel_p)
 	(*info->print_address_func) (info->target, info);
       else
 	{
-	  (*info->fprintf_func) (info->stream, "%s", str);
+	  /* This operand came from aarch64_print_operand, and will include
+	     embedded strings indicating which style each character should
+	     have.  In the following code we split the text based on
+	     CURR_STYLE, and call the styled print callback to print each
+	     block of text in the appropriate style.  */
+	  char *start, *curr;
+	  enum disassembler_style curr_style = dis_style_text;
 
-	  /* Print the comment.  This works because only the last operand
-	     ever adds a comment.  If that ever changes then we'll need to
-	     be smarter here.  */
-	  if (cmt[0] != '\0')
-	    (*info->fprintf_func) (info->stream, "\t// %s", cmt);
+	  start = curr = str;
+	  do
+	    {
+	      if (*curr == '\0'
+		  || (*curr == STYLE_MARKER_CHAR
+		      && ISXDIGIT (*(curr + 1))
+		      && *(curr + 2) == STYLE_MARKER_CHAR))
+		{
+		  /* Output content between our START position and CURR.  */
+		  int len = curr - start;
+		  if (len > 0)
+		    {
+		      if ((*info->fprintf_styled_func) (info->stream,
+							curr_style,
+							"%.*s",
+							len, start) < 0)
+			break;
+		    }
+
+		  if (*curr == '\0')
+		    break;
+
+		  /* Skip over the initial STYLE_MARKER_CHAR.  */
+		  ++curr;
+
+		  /* Update the CURR_STYLE.  As there are less than 16
+		     styles, it is possible, that if the input is corrupted
+		     in some way, that we might set CURR_STYLE to an
+		     invalid value.  Don't worry though, we check for this
+		     situation.  */
+		  if (*curr >= '0' && *curr <= '9')
+		    curr_style = (enum disassembler_style) (*curr - '0');
+		  else if (*curr >= 'a' && *curr <= 'f')
+		    curr_style = (enum disassembler_style) (*curr - 'a' + 10);
+		  else
+		    curr_style = dis_style_text;
+
+		  /* Check for an invalid style having been selected.  This
+		     should never happen, but it doesn't hurt to be a
+		     little paranoid.  */
+		  if (curr_style > dis_style_comment_start)
+		    curr_style = dis_style_text;
+
+		  /* Skip the hex character, and the closing STYLE_MARKER_CHAR.  */
+		  curr += 2;
+
+		  /* Reset the START to after the style marker.  */
+		  start = curr;
+		}
+	      else
+		++curr;
+	    }
+	  while (true);
 	}
+
+      /* Print the comment.  This works because only the last operand ever
+	 adds a comment.  If that ever changes then we'll need to be
+	 smarter here.  */
+      if (cmt[0] != '\0')
+	(*info->fprintf_styled_func) (info->stream, dis_style_comment_start,
+				      "\t// %s", cmt);
     }
 
     if (notes && !no_notes)
       {
 	*has_notes = true;
-	(*info->fprintf_func) (info->stream, "  // note: %s", notes);
+	(*info->fprintf_styled_func) (info->stream, dis_style_comment_start,
+				      "  // note: %s", notes);
       }
+
+    obstack_free (&content, NULL);
 }
 
 /* Set NAME to a copy of INST's mnemonic with the "." suffix removed.  */
@@ -3359,10 +3523,12 @@ print_mnemonic_name (const aarch64_inst *inst, struct disassemble_info *info)
       char name[8];
 
       remove_dot_suffix (name, inst);
-      (*info->fprintf_func) (info->stream, "%s.%s", name, inst->cond->names[0]);
+      (*info->fprintf_styled_func) (info->stream, dis_style_mnemonic,
+				    "%s.%s", name, inst->cond->names[0]);
     }
   else
-    (*info->fprintf_func) (info->stream, "%s", inst->opcode->name);
+    (*info->fprintf_styled_func) (info->stream, dis_style_mnemonic,
+				  "%s", inst->opcode->name);
 }
 
 /* Decide whether we need to print a comment after the operands of
@@ -3379,9 +3545,10 @@ print_comment (const aarch64_inst *inst, struct disassemble_info *info)
       remove_dot_suffix (name, inst);
       num_conds = ARRAY_SIZE (inst->cond->names);
       for (i = 1; i < num_conds && inst->cond->names[i]; ++i)
-	(*info->fprintf_func) (info->stream, "%s %s.%s",
-			       i == 1 ? "  //" : ",",
-			       name, inst->cond->names[i]);
+	(*info->fprintf_styled_func) (info->stream, dis_style_comment_start,
+				      "%s %s.%s",
+				      i == 1 ? "  //" : ",",
+				      name, inst->cond->names[i]);
     }
 }
 
@@ -3398,28 +3565,30 @@ print_verifier_notes (aarch64_operand_error *detail,
      would not have succeeded.  We can safely ignore these.  */
   assert (detail->non_fatal);
 
-  (*info->fprintf_func) (info->stream, "  // note: ");
+  (*info->fprintf_styled_func) (info->stream, dis_style_comment_start,
+				"  // note: ");
   switch (detail->kind)
     {
     case AARCH64_OPDE_A_SHOULD_FOLLOW_B:
-      (*info->fprintf_func) (info->stream,
-			     _("this `%s' should have an immediately"
-			       " preceding `%s'"),
-			     detail->data[0].s, detail->data[1].s);
+      (*info->fprintf_styled_func) (info->stream, dis_style_text,
+				    _("this `%s' should have an immediately"
+				      " preceding `%s'"),
+				    detail->data[0].s, detail->data[1].s);
       break;
 
     case AARCH64_OPDE_EXPECTED_A_AFTER_B:
-      (*info->fprintf_func) (info->stream,
-			     _("expected `%s' after previous `%s'"),
-			     detail->data[0].s, detail->data[1].s);
+      (*info->fprintf_styled_func) (info->stream, dis_style_text,
+				    _("expected `%s' after previous `%s'"),
+				    detail->data[0].s, detail->data[1].s);
       break;
 
     default:
       assert (detail->error);
-      (*info->fprintf_func) (info->stream, "%s", detail->error);
+      (*info->fprintf_styled_func) (info->stream, dis_style_text,
+				    "%s", detail->error);
       if (detail->index >= 0)
-	(*info->fprintf_func) (info->stream, " at operand %d",
-			       detail->index + 1);
+	(*info->fprintf_styled_func) (info->stream, dis_style_text,
+				      " at operand %d", detail->index + 1);
       break;
     }
 }
@@ -3511,8 +3680,13 @@ print_insn_aarch64_word (bfd_vma pc,
     case ERR_NYI:
       /* Handle undefined instructions.  */
       info->insn_type = dis_noninsn;
-      (*info->fprintf_func) (info->stream,".inst\t0x%08x ; %s",
-			     word, err_msg[ret]);
+      (*info->fprintf_styled_func) (info->stream,
+				    dis_style_assembler_directive,
+				    ".inst\t");
+      (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
+				    "0x%08x", word);
+      (*info->fprintf_styled_func) (info->stream, dis_style_comment_start,
+				    " ; %s", err_msg[ret]);
       break;
     case ERR_OK:
       user_friendly_fixup (&inst);
@@ -3554,13 +3728,22 @@ print_insn_data (bfd_vma pc ATTRIBUTE_UNUSED,
   switch (info->bytes_per_chunk)
     {
     case 1:
-      info->fprintf_func (info->stream, ".byte\t0x%02x", word);
+      info->fprintf_styled_func (info->stream, dis_style_assembler_directive,
+				 ".byte\t");
+      info->fprintf_styled_func (info->stream, dis_style_immediate,
+				 "0x%02x", word);
       break;
     case 2:
-      info->fprintf_func (info->stream, ".short\t0x%04x", word);
+      info->fprintf_styled_func (info->stream, dis_style_assembler_directive,
+				 ".short\t");
+      info->fprintf_styled_func (info->stream, dis_style_immediate,
+				 "0x%04x", word);
       break;
     case 4:
-      info->fprintf_func (info->stream, ".word\t0x%08x", word);
+      info->fprintf_styled_func (info->stream, dis_style_assembler_directive,
+				 ".word\t");
+      info->fprintf_styled_func (info->stream, dis_style_immediate,
+				 "0x%08x", word);
       break;
     default:
       abort ();

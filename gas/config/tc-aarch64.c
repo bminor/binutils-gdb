@@ -5324,6 +5324,41 @@ assign_qualifier_sequence (aarch64_inst *instr,
     instr->operands[i].qualifier = *qualifiers;
 }
 
+/* Callback used by aarch64_print_operand to apply STYLE to the
+   disassembler output created from FMT and ARGS.  The STYLER object holds
+   any required state.  Must return a pointer to a string (created from FMT
+   and ARGS) that will continue to be valid until the complete disassembled
+   instruction has been printed.
+
+   We don't currently add any styling to the output of the disassembler as
+   used within assembler error messages, and so STYLE is ignored here.  A
+   new string is allocated on the obstack help within STYLER and returned
+   to the caller.  */
+
+static const char *aarch64_apply_style
+	(struct aarch64_styler *styler,
+	 enum disassembler_style style ATTRIBUTE_UNUSED,
+	 const char *fmt, va_list args)
+{
+  int res;
+  char *ptr;
+  struct obstack *stack = (struct obstack *) styler->state;
+  va_list ap;
+
+  /* Calculate the required space.  */
+  va_copy (ap, args);
+  res = vsnprintf (NULL, 0, fmt, ap);
+  va_end (ap);
+  gas_assert (res >= 0);
+
+  /* Allocate space on the obstack and format the result.  */
+  ptr = (char *) obstack_alloc (stack, res + 1);
+  res = vsnprintf (ptr, (res + 1), fmt, args);
+  gas_assert (res >= 0);
+
+  return ptr;
+}
+
 /* Print operands for the diagnosis purpose.  */
 
 static void
@@ -5331,6 +5366,12 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 		const aarch64_opnd_info *opnds)
 {
   int i;
+  struct aarch64_styler styler;
+  struct obstack content;
+  obstack_init (&content);
+
+  styler.apply_style = aarch64_apply_style;
+  styler.state = (void *) &content;
 
   for (i = 0; i < AARCH64_MAX_OPND_NUM; ++i)
     {
@@ -5348,7 +5389,7 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 
       /* Generate the operand string in STR.  */
       aarch64_print_operand (str, sizeof (str), 0, opcode, opnds, i, NULL, NULL,
-			     NULL, cmt, sizeof (cmt), cpu_variant);
+			     NULL, cmt, sizeof (cmt), cpu_variant, &styler);
 
       /* Delimiter.  */
       if (str[0] != '\0')
@@ -5366,6 +5407,8 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 	  strcat (buf, cmt);
 	}
     }
+
+  obstack_free (&content, NULL);
 }
 
 /* Send to stderr a string as information.  */
