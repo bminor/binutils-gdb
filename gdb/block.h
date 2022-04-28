@@ -157,11 +157,21 @@ struct block
 
   /* Return a view on this block's ranges.  */
   gdb::array_view<blockrange> ranges ()
-  { return gdb::make_array_view (m_ranges->range, m_ranges->nranges); }
+  {
+    if (m_ranges == nullptr)
+      return {};
+    else
+      return gdb::make_array_view (m_ranges->range, m_ranges->nranges);
+  }
 
   /* Const version of the above.  */
   gdb::array_view<const blockrange> ranges () const
-  { return gdb::make_array_view (m_ranges->range, m_ranges->nranges); }
+  {
+    if (m_ranges == nullptr)
+      return {};
+    else
+      return gdb::make_array_view (m_ranges->range, m_ranges->nranges);
+  }
 
   /* Set this block's ranges array.  */
   void set_ranges (blockranges *ranges)
