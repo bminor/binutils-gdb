@@ -274,6 +274,7 @@ run_dump_test_lp64 "morello-sizeless-got-syms"
 run_dump_test_lp64 "morello-disallow-merged-binaries"
 run_dump_test_lp64 "c64-ehdr-sized-reloc"
 
+run_dump_test_lp64 "morello-dt-init-fini"
 run_dump_test_lp64 "morello-capinit"
 run_dump_test_lp64 "morello-stubs"
 run_dump_test_lp64 "morello-stubs-static"
