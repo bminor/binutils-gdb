@@ -274,6 +274,17 @@ run_dump_test_lp64 "morello-sizeless-got-syms"
 run_dump_test_lp64 "morello-disallow-merged-binaries"
 run_dump_test_lp64 "c64-ehdr-sized-reloc"
 
+# Test for morello dynamic relocs can not be written in the usual manner since
+# we need to specify different `ld` command lines for different objects.
+if { [ld_assemble_flags $as -march=morello+c64 $srcdir/$subdir/morello-dynamic-relocs-lib.s tmpdir/morello-dynamic-relocs-lib.o]
+     && [ld_link $ld tmpdir/morello-dynamic-relocs.so "--shared tmpdir/morello-dynamic-relocs-lib.o"] } {
+  run_dump_test_lp64 "morello-dynamic-link-rela-dyn"
+  run_dump_test_lp64 "morello-dynamic-link-rela-dyn2"
+  run_dump_test_lp64 "morello-dynamic-local-got"
+}
+
+run_dump_test_lp64 "morello-static-got"
+run_dump_test_lp64 "morello-dynamic-got"
 run_dump_test_lp64 "morello-dt-init-fini"
 run_dump_test_lp64 "morello-capinit"
 run_dump_test_lp64 "morello-stubs"
@@ -291,6 +302,8 @@ run_dump_test_lp64 "morello-sec-start_stop-round"
 run_dump_test_lp64 "morello-tlsdesc"
 run_dump_test_lp64 "morello-tlsdesc-static"
 run_dump_test_lp64 "morello-tlsdesc-staticpie"
+
+run_dump_test "no-morello-syms-static"
 
 run_dump_test "reloc-overflow-bad"
 

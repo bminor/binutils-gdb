@@ -7211,6 +7211,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       off = symbol_got_offset (input_bfd, h, r_symndx);
       base_got = globals->root.sgot;
 
+      bfd_boolean is_dynamic = elf_hash_table (info)->dynamic_sections_created;
       bfd_boolean c64_reloc =
 	(bfd_r_type == BFD_RELOC_MORELLO_LD128_GOT_LO12_NC
 	 || bfd_r_type == BFD_RELOC_MORELLO_ADR_GOT_PAGE);
@@ -7235,8 +7236,6 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	{
 	  bfd_vma addend = 0;
 	  bfd_vma frag_value;
-	  bfd_boolean is_dynamic
-	    = elf_hash_table (info)->dynamic_sections_created;
 
 	  /* If a symbol is not dynamic and is not undefined weak, bind it
 	     locally and generate a RELATIVE relocation under PIC mode.
@@ -7404,7 +7403,12 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    {
 	      rtype = MORELLO_R (RELATIVE);
 
-	      if (bfd_link_executable (info) && !bfd_link_pic (info))
+	      /* Ensure that Morello RELATIVE relocations for static non-PIE
+		 binaries are all stored in the same input section.  This is
+		 done so that we can mark that section with
+		 __rela_dyn_{start,end} symbols for the runtime to find and
+		 initialise relocations with.  */
+	      if (bfd_link_executable (info) && !is_dynamic)
 		s = globals->srelcaps;
 
 	      outrel.r_addend = signed_addend;
@@ -9073,7 +9077,7 @@ aarch64_elf_init_got_section (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* Track capability initialisation for static non-PIE binaries.  */
-  if (bfd_link_executable (info) && !bfd_link_pic (info)
+  if (bfd_link_executable (info) && !globals->root.dynamic_sections_created
       && globals->srelcaps == NULL)
     globals->srelcaps = globals->root.srelgot;
 
@@ -10211,18 +10215,26 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	{
 	  h->got.offset = htab->root.sgot->size;
 	  htab->root.sgot->size += GOT_ENTRY_SIZE (htab);
-	  if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-	       || h->root.type != bfd_link_hash_undefweak)
-	      && (bfd_link_pic (info)
-		  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
-	      /* Undefined weak symbol in static PIE resolves to 0 without
-		 any dynamic relocations.  */
-	      && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
+	  if (((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+		|| h->root.type != bfd_link_hash_undefweak)
+	       && (bfd_link_pic (info)
+		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
+	       /* Undefined weak symbol in static PIE resolves to 0 without
+		  any dynamic relocations.  */
+	       && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
+	      /* Any capability relocations required in a dynamic binary
+		 should go in the srelgot.  */
+	      || ((got_type == GOT_CAP) && dyn))
 	    {
 	      htab->root.srelgot->size += RELOC_SIZE (htab);
 	    }
-	  else if (bfd_link_executable (info) && !bfd_link_pic (info))
-	    htab->srelcaps->size += RELOC_SIZE (htab);
+	  else if (bfd_link_executable (info) && (got_type == GOT_CAP))
+	    {
+	      /* If we have a capability relocation that is not handled by the
+		 case above then this must be a statically linked executable.  */
+	      BFD_ASSERT (!bfd_link_pic (info) && !dyn);
+	      htab->srelcaps->size += RELOC_SIZE (htab);
+	    }
 	}
       else
 	{
@@ -10568,8 +10580,13 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd,
 		    htab->root.srelgot->size += RELOC_SIZE (htab);
 		}
 	      /* Static binary; put relocs into srelcaps.  */
-	      else if (bfd_link_executable (info) && (got_type & GOT_CAP))
+	      else if (bfd_link_executable (info)
+		       && !htab->root.dynamic_sections_created
+		       && (got_type & GOT_CAP))
 		htab->srelcaps->size += RELOC_SIZE (htab);
+	      /* Else capability relocation needs to go into srelgot.  */
+	      else if (got_type & GOT_CAP)
+		htab->root.srelgot->size += RELOC_SIZE (htab);
 	    }
 	  else
 	    {
@@ -10595,7 +10612,7 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd,
 		 info);
 
   if (bfd_link_executable (info)
-      && !bfd_link_pic (info)
+      && !htab->root.dynamic_sections_created
       && htab->srelcaps
       && htab->srelcaps->size > 0)
     {
