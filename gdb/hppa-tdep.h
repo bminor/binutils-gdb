@@ -210,10 +210,6 @@ extern void hppa_write_pc (struct regcache *regcache, CORE_ADDR pc);
 extern CORE_ADDR hppa_unwind_pc (struct gdbarch *gdbarch,
 				 frame_info_ptr next_frame);
 
-extern struct bound_minimal_symbol
-  hppa_lookup_stub_minimal_symbol (const char *name,
-				   enum unwind_stub_types stub_type);
-
 extern int hppa_in_solib_call_trampoline (struct gdbarch *gdbarch,
 					  CORE_ADDR pc);
 extern CORE_ADDR hppa_skip_trampoline_code (frame_info_ptr , CORE_ADDR pc);
