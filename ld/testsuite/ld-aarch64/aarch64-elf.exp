@@ -278,6 +278,7 @@ run_dump_test_lp64 "c64-ehdr-sized-reloc"
 # we need to specify different `ld` command lines for different objects.
 if { [ld_assemble_flags $as -march=morello+c64 $srcdir/$subdir/morello-dynamic-relocs-lib.s tmpdir/morello-dynamic-relocs-lib.o]
      && [ld_link $ld tmpdir/morello-dynamic-relocs.so "--shared tmpdir/morello-dynamic-relocs-lib.o"] } {
+  run_dump_test_lp64 "morello-dynamic-relocs"
   run_dump_test_lp64 "morello-dynamic-link-rela-dyn"
   run_dump_test_lp64 "morello-dynamic-link-rela-dyn2"
   run_dump_test_lp64 "morello-dynamic-local-got"

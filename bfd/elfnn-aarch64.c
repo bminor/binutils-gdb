@@ -7244,17 +7244,28 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	     should only generate one RELATIVE relocation for that symbol.
 	     Therefore, check GOT offset mark first.
 
-	     NOTE2: Symbol references via GOT in C64 static binaries without
-	     PIC should always have relative relocations, so we do that here
-	     early.  */
+	     NOTE2: Symbol references via GOT in C64 should always have
+	     relocations of some kind.  Here we try to catch any such GOT
+	     reference which would not otherwise be caught by
+	     finish_dynamic_symbol.  */
 	  if (((h->dynindx == -1
 		&& !h->forced_local
 		&& h->root.type != bfd_link_hash_undefweak
 		&& bfd_link_pic (info))
-	       || (!bfd_link_pic (info) && bfd_link_executable (info)
-		   && c64_reloc))
+	       || (!bfd_link_pic (info)
+		   && !WILL_CALL_FINISH_DYNAMIC_SYMBOL
+		      (is_dynamic, bfd_link_pic (info), h)
+		   && bfd_link_executable (info) && c64_reloc))
 	      && !symbol_got_offset_mark_p (input_bfd, h, r_symndx))
 	    {
+	      /* If we would call finish_dynamic_symbol for this symbol then we
+		 should not be introducing a relocation for the GOT entry
+		 (that function handles creating relocations for the GOT entry
+		 in the usual case, this bit of code is to handle special
+		 cases where the relocation would not otherwise be generated).
+		 */
+	      BFD_ASSERT (!WILL_CALL_FINISH_DYNAMIC_SYMBOL
+			    (is_dynamic, bfd_link_pic (info), h));
 	      relative_reloc = TRUE;
 	      c64_needs_frag_fixup = c64_reloc ? TRUE : FALSE;
 	    }
