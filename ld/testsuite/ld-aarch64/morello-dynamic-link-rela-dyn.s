@@ -6,6 +6,8 @@
 _start:
 .LFB0:
 	.cfi_startproc purecap
+	adrp	c0, :got:undefweakval
+	ldr	c0, [c0, #:got_lo12:undefweakval]
 	adrp	c0, :got:weakval
 	ldr	c0, [c0, #:got_lo12:weakval]
 	adrp	c0, :got:globval
@@ -39,3 +41,4 @@ weakval:
 	.byte 0x1
 	.byte 0x1
 	.size weakval, .-weakval
+        .weak undefweakval
