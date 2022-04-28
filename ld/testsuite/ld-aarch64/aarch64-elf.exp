@@ -78,6 +78,19 @@ proc run_dump_test_lp64 { testname } {
 		      [list ld [concat "-m " [aarch64_choose_lp64_emul]]]]
 }
 
+# Return the hexadecimal representation of the value we need to add to $base in
+# order to return $result plus 1.  Both $base and $result are assumed to be
+# hexadecimal numbers without the leading 0x prefix.
+#
+# This procedure is especially useful for checking the addend of a RELATIVE
+# relocation against a function in a testcase using the `#check:` directive.
+# Dumping `objdump -DR -j .got -j .text` will give us the address we're trying
+# to reach and base stored in the relocation fragment before reaching the
+# addend we're using for this relocation.
+proc aarch64_required_func_addend { base result } {
+  return [format %x [expr "0x$result + 1 - 0x$base"]];
+}
+
 set eh-frame-merge-lp64 [list [list "EH Frame merge" \
 			      [concat "-m " [aarch64_choose_lp64_emul] \
 				      " -Ttext 0x8000"] \
@@ -251,6 +264,7 @@ run_dump_test_lp64 "emit-relocs-morello-6b"
 run_dump_test_lp64 "emit-relocs-morello-7"
 run_dump_test_lp64 "emit-relocs-morello-8"
 run_dump_test_lp64 "emit-relocs-morello-9"
+run_dump_test_lp64 "emit-relocs-morello-hidden"
 run_dump_test_lp64 "emit-morello-reloc-markers-1"
 run_dump_test_lp64 "emit-morello-reloc-markers-2"
 run_dump_test_lp64 "emit-morello-reloc-markers-3"

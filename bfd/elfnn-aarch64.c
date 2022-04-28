@@ -6633,6 +6633,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
   struct elf_aarch64_link_hash_table *globals;
   bfd_boolean weak_undef_p;
   bfd_boolean relative_reloc;
+  bfd_boolean c64_needs_frag_fixup;
   asection *base_got;
   bfd_vma orig_value = value;
   bfd_boolean resolved_to_zero;
@@ -7229,10 +7230,13 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	BFD_ASSERT (h != NULL);
 
       relative_reloc = FALSE;
+      c64_needs_frag_fixup = FALSE;
       if (h != NULL)
 	{
 	  bfd_vma addend = 0;
 	  bfd_vma frag_value;
+	  bfd_boolean is_dynamic
+	    = elf_hash_table (info)->dynamic_sections_created;
 
 	  /* If a symbol is not dynamic and is not undefined weak, bind it
 	     locally and generate a RELATIVE relocation under PIC mode.
@@ -7251,7 +7255,37 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	       || (!bfd_link_pic (info) && bfd_link_executable (info)
 		   && c64_reloc))
 	      && !symbol_got_offset_mark_p (input_bfd, h, r_symndx))
-	    relative_reloc = TRUE;
+	    {
+	      relative_reloc = TRUE;
+	      c64_needs_frag_fixup = c64_reloc ? TRUE : FALSE;
+	    }
+	  /* If this is a dynamic symbol that binds locally then the generic
+	     code and elfNN_aarch64_finish_dynamic_symbol will already handle
+	     creating the RELATIVE reloc pointing into the GOT for this symbol.
+	     That means that this function does not need to handle *creating*
+	     such a relocation.  This function does already handle setting the
+	     base value as the fragment for that relocation, hence we should
+	     ensure that we set the fragment correctly for C64 code (i.e.
+	     including the required permissions and bounds).  */
+	  else if (c64_reloc
+		   && WILL_CALL_FINISH_DYNAMIC_SYMBOL (is_dynamic,
+						       bfd_link_pic (info), h)
+		   && bfd_link_pic (info)
+		   && SYMBOL_REFERENCES_LOCAL (info, h))
+	    {
+	      /* We believe that if `h` were undefined weak it would not have
+		 SYMBOL_REFERENCES_LOCAL return true.  However this is not 100%
+		 clear based purely on the members that we check in the code.
+		 The reason it matters is if we could have a
+		 SYMBOL_REFERENCES_LOCAL symbol which is also
+		 !UNDEFWEAK_NO_DYNAMIC_RELOC then the check above would
+		 determine that we need to fix up the fragment for the RELATIVE
+		 relocation that elfNN_aarch64_finish_dynamic_symbol will
+		 create, but in actual fact elfNN_aarch64_finish_dynamic_symbol
+		 would not create that relocation.  */
+	      BFD_ASSERT (!UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
+	      c64_needs_frag_fixup = TRUE;
+	    }
 
 	  if (c64_reloc
 	      && c64_symbol_adjust (h, value, sym_sec, info, &frag_value))
@@ -7311,11 +7345,20 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	       linking stage.  While for shared library, we need to update the
 	       content of GOT entry according to the shared object's runtime
 	       base address.  So, we need to generate a R_AARCH64_RELATIVE reloc
-	       for dynamic linker.  */
+	       for dynamic linker.
+
+	       For any C64 binary we need to ensure there are RELATIVE
+	       relocations to initialise the capabilities.  The only case when
+	       we would not want to emit such relocations is when the producing
+	       a relocatable object file (since such files should not have
+	       dynamic relocations).  */
 	    if (bfd_link_pic (info)
 		|| (!bfd_link_pic (info) && bfd_link_executable (info)
 		    && c64_reloc))
-	      relative_reloc = TRUE;
+	      {
+		relative_reloc = TRUE;
+		c64_needs_frag_fixup = c64_reloc ? TRUE : FALSE;
+	      }
 
 	    symbol_got_offset_mark (input_bfd, h, r_symndx);
 	  }
@@ -7332,6 +7375,22 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 						     addend, weak_undef_p);
       }
 
+      if (c64_needs_frag_fixup)
+	{
+	  BFD_ASSERT (c64_reloc);
+	  /* For a C64 relative relocation, also add size and permissions into
+	     the frag.  */
+	  bfd_reloc_status_type ret;
+
+	  ret = c64_fixup_frag (input_bfd, info, bfd_r_type, sym, h,
+				sym_sec, globals->root.srelgot,
+				base_got->contents + off + 8,
+				orig_value, 0, off);
+
+	  if (ret != bfd_reloc_continue)
+	    return ret;
+	}
+
       if (relative_reloc)
 	{
 	  asection *s;
@@ -7341,19 +7400,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	  s = globals->root.srelgot;
 
-	  /* For a C64 relative relocation, also add size and permissions into
-	     the frag.  */
 	  if (c64_reloc)
 	    {
-	      bfd_reloc_status_type ret;
-
-	      ret = c64_fixup_frag (input_bfd, info, bfd_r_type, sym, h,
-				    sym_sec, s, base_got->contents + off + 8,
-				    orig_value, 0, off);
-
-	      if (ret != bfd_reloc_continue)
-		return ret;
-
 	      rtype = MORELLO_R (RELATIVE);
 
 	      if (bfd_link_executable (info) && !bfd_link_pic (info))
@@ -11025,17 +11073,23 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 	    return FALSE;
 
 	  BFD_ASSERT ((h->got.offset & 1) != 0);
+	  bfd_vma value = h->root.u.def.value
+	    + h->root.u.def.section->output_section->vma
+	    + h->root.u.def.section->output_offset;
 	  if (is_c64)
 	    {
 	      rela.r_info = ELFNN_R_INFO (0, MORELLO_R (RELATIVE));
-	      rela.r_addend = 0;
+	      bfd_vma base_value = 0;
+	      if (c64_symbol_adjust (h, value, h->root.u.def.section, info,
+				     &base_value))
+		rela.r_addend = (value | h->target_internal) - base_value;
+	      else
+		rela.r_addend = 0;
 	    }
 	  else
 	    {
 	      rela.r_info = ELFNN_R_INFO (0, AARCH64_R (RELATIVE));
-	      rela.r_addend = (h->root.u.def.value
-			       + h->root.u.def.section->output_section->vma
-			       + h->root.u.def.section->output_offset);
+	      rela.r_addend = value;
 	    }
 	}
       else
