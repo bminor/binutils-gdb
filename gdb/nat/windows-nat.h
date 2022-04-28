@@ -144,7 +144,6 @@ struct windows_process_info
 {
   /* The process handle */
   HANDLE handle = 0;
-  DWORD id = 0;
   DWORD main_thread_id = 0;
   enum gdb_signal last_sig = GDB_SIGNAL_0;
 

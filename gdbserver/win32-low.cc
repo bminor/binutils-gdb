@@ -337,7 +337,6 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 
   windows_process.last_sig = GDB_SIGNAL_0;
   windows_process.handle = proch;
-  windows_process.id = pid;
   windows_process.main_thread_id = 0;
 
   soft_interrupt_requested = 0;
@@ -678,12 +677,12 @@ win32_process_target::create_inferior (const char *program,
 
   /* Wait till we are at 1st instruction in program, return new pid
      (assuming success).  */
-  cs.last_ptid = wait (ptid_t (windows_process.id), &cs.last_status, 0);
+  cs.last_ptid = wait (ptid_t (pi.dwProcessId), &cs.last_status, 0);
 
   /* Necessary for handle_v_kill.  */
-  signal_pid = windows_process.id;
+  signal_pid = pi.dwProcessId;
 
-  return windows_process.id;
+  return pi.dwProcessId;
 }
 
 /* Attach to a running process.
@@ -816,7 +815,7 @@ win32_process_target::detach (process_info *process)
   resume.sig = 0;
   this->resume (&resume, 1);
 
-  if (!DebugActiveProcessStop (windows_process.id))
+  if (!DebugActiveProcessStop (process->pid))
     return -1;
 
   DebugSetProcessKillOnExit (FALSE);
@@ -1375,7 +1374,7 @@ win32_process_target::write_memory (CORE_ADDR memaddr,
 void
 win32_process_target::request_interrupt ()
 {
-  if (GenerateConsoleCtrlEvent (CTRL_BREAK_EVENT, windows_process.id))
+  if (GenerateConsoleCtrlEvent (CTRL_BREAK_EVENT, signal_pid))
     return;
 
   /* GenerateConsoleCtrlEvent can fail if process id being debugged is
