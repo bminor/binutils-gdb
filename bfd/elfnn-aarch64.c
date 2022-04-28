@@ -11241,6 +11241,7 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 
   if (htab->root.dynamic_sections_created)
     {
+      const char *name;
       ElfNN_External_Dyn *dyncon, *dynconend;
 
       if (sdyn == NULL || htab->root.sgot == NULL)
@@ -11286,6 +11287,27 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	      BFD_ASSERT (htab->root.tlsdesc_got != (bfd_vma)-1);
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset
 		+ htab->root.tlsdesc_got;
+	      break;
+
+	      /* Set the bottom bit of DT_INIT/FINI if the
+		 corresponding function is C64.  */
+	    case DT_INIT:
+	      name = info->init_function;
+	      goto get_sym;
+	    case DT_FINI:
+	      name = info->fini_function;
+get_sym:
+	      /* If it wasn't set by elf_bfd_final_link
+		 then there is nothing to adjust.  */
+	      if (dyn.d_un.d_val != 0)
+		{
+		  struct elf_link_hash_entry * eh;
+
+		  eh = elf_link_hash_lookup (elf_hash_table (info), name,
+					     FALSE, FALSE, TRUE);
+		  if (eh != NULL)
+		    dyn.d_un.d_val |= eh->target_internal;
+		}
 	      break;
 	    }
 
