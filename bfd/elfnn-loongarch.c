@@ -389,6 +389,27 @@ elfNN_loongarch_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   if (!_bfd_elf_merge_object_attributes (ibfd, info))
     return false;
 
+  /* If the input BFD is not a dynamic object and it does not contain any
+     non-data sections, do not account its ABI.  For example, various
+     packages produces such data-only relocatable objects with
+     `ld -r -b binary` or `objcopy`, and these objects have zero e_flags.
+     But they are compatible with all ABIs.  */
+  if (!(ibfd->flags & DYNAMIC))
+    {
+      asection *sec;
+      bool have_code_sections = false;
+      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+	if ((bfd_section_flags (sec)
+	     & (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
+	    == (SEC_LOAD | SEC_CODE | SEC_HAS_CONTENTS))
+	  {
+	    have_code_sections = true;
+	    break;
+	  }
+      if (!have_code_sections)
+	return true;
+    }
+
   if (!elf_flags_init (obfd))
     {
       elf_flags_init (obfd) = true;
