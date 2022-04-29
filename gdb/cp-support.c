@@ -70,17 +70,15 @@ static void add_symbol_overload_list_qualified
 
 struct cmd_list_element *maint_cplus_cmd_list = NULL;
 
-/* A list of typedefs which should not be substituted by replace_typedefs.  */
-static const char * const ignore_typedefs[] =
-  {
-    "std::istream", "std::iostream", "std::ostream", "std::string"
-  };
-
 static void
   replace_typedefs (struct demangle_parse_info *info,
 		    struct demangle_component *ret_comp,
 		    canonicalization_ftype *finder,
 		    void *data);
+
+static struct demangle_component *
+  gdb_cplus_demangle_v3_components (const char *mangled,
+				    int options, void **mem);
 
 /* A convenience function to copy STRING into OBSTACK, returning a pointer
    to the newly allocated string and saving the number of bytes saved in LEN.
@@ -145,13 +143,6 @@ inspect_type (struct demangle_parse_info *info,
   name = (char *) alloca (ret_comp->u.s_name.len + 1);
   memcpy (name, ret_comp->u.s_name.s, ret_comp->u.s_name.len);
   name[ret_comp->u.s_name.len] = '\0';
-
-  /* Ignore any typedefs that should not be substituted.  */
-  for (const char *ignorable : ignore_typedefs)
-    {
-      if (strcmp (name, ignorable) == 0)
-	return 0;
-    }
 
   sym = NULL;
 
@@ -670,8 +661,8 @@ mangled_name_to_comp (const char *mangled_name, int options,
     {
       struct demangle_component *ret;
 
-      ret = cplus_demangle_v3_components (mangled_name,
-					  options, memory);
+      ret = gdb_cplus_demangle_v3_components (mangled_name,
+					      options, memory);
       if (ret)
 	{
 	  std::unique_ptr<demangle_parse_info> info (new demangle_parse_info);
@@ -1635,7 +1626,7 @@ gdb_demangle (const char *name, int options)
 #endif
 
   if (crash_signal == 0)
-    result.reset (bfd_demangle (NULL, name, options));
+    result.reset (bfd_demangle (NULL, name, options | DMGL_VERBOSE));
 
 #ifdef HAVE_WORKING_FORK
   if (catch_demangler_crashes)
@@ -1666,6 +1657,28 @@ gdb_demangle (const char *name, int options)
 #endif
 
   return result;
+}
+
+/* See cp-support.h.  */
+
+char *
+gdb_cplus_demangle_print (int options,
+			  struct demangle_component *tree,
+			  int estimated_length,
+			  size_t *p_allocated_size)
+{
+  return cplus_demangle_print (options | DMGL_VERBOSE, tree,
+			       estimated_length, p_allocated_size);
+}
+
+/* A wrapper for cplus_demangle_v3_components that forces
+   DMGL_VERBOSE.  */
+
+static struct demangle_component *
+gdb_cplus_demangle_v3_components (const char *mangled,
+				  int options, void **mem)
+{
+  return cplus_demangle_v3_components (mangled, options | DMGL_VERBOSE, mem);
 }
 
 /* See cp-support.h.  */
