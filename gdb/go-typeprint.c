@@ -59,5 +59,5 @@ go_language::print_type (struct type *type, const char *varstring,
     }
 
   /* Punt the rest to C for now.  */
-  c_print_type (type, varstring, stream, show, level, flags);
+  c_print_type (type, varstring, stream, show, level, la_language, flags);
 }

@@ -669,7 +669,7 @@ rust_print_struct_def (struct type *type, const char *varstring,
 
   /* If we see a base class, delegate to C.  */
   if (TYPE_N_BASECLASSES (type) > 0)
-    c_print_type (type, varstring, stream, show, level, flags);
+    c_print_type (type, varstring, stream, show, level, language_rust, flags);
 
   if (flags->print_offsets)
     {
@@ -922,7 +922,8 @@ rust_internal_print_type (struct type *type, const char *varstring,
 
     default:
     c_printer:
-      c_print_type (type, varstring, stream, show, level, flags);
+      c_print_type (type, varstring, stream, show, level, language_rust,
+		    flags);
     }
 }
 

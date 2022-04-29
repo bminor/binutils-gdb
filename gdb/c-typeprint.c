@@ -163,22 +163,6 @@ c_print_type_1 (struct type *type,
     }
 }
 
-/* LEVEL is the depth to indent lines by.  */
-
-void
-c_print_type (struct type *type,
-	      const char *varstring,
-	      struct ui_file *stream,
-	      int show, int level,
-	      const struct type_print_options *flags)
-{
-  struct print_offset_data podata (flags);
-
-  c_print_type_1 (type, varstring, stream, show, level,
-		  current_language->la_language, flags, &podata);
-}
-
-
 /* See c-lang.h.  */
 
 void
@@ -303,7 +287,7 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 	  if (FIELD_ARTIFICIAL (arg))
 	    continue;
 
-	  c_print_type (arg.type (), "", stream, 0, 0, flags);
+	  c_print_type (arg.type (), "", stream, 0, 0, language, flags);
 
 	  if (i == nargs && varargs)
 	    gdb_printf (stream, ", ...");
@@ -872,7 +856,8 @@ c_type_print_varspec_suffix (struct type *type,
 
 static void
 c_type_print_template_args (const struct type_print_options *flags,
-			    struct type *type, struct ui_file *stream)
+			    struct type *type, struct ui_file *stream,
+			    enum language language)
 {
   int first = 1, i;
 
@@ -899,7 +884,7 @@ c_type_print_template_args (const struct type_print_options *flags,
 	  gdb_printf (stream, "%s = ", sym->linkage_name ());
 	}
 
-      c_print_type (sym->type (), "", stream, -1, 0, flags);
+      c_print_type (sym->type (), "", stream, -1, 0, language, flags);
     }
 
   if (!first)
@@ -1094,7 +1079,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
       struct type *basetype;
       int vptr_fieldno;
 
-      c_type_print_template_args (&local_flags, type, stream);
+      c_type_print_template_args (&local_flags, type, stream, language);
 
       /* Add in template parameters when printing derivation info.  */
       if (local_flags.local_typedefs != NULL)

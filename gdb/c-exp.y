@@ -1783,6 +1783,7 @@ oper:	OPERATOR NEW
 			{
 			  string_file buf;
 			  c_print_type ($2, NULL, &buf, -1, 0,
+					pstate->language ()->la_language,
 					&type_print_raw_options);
 			  std::string name = buf.release ();
 

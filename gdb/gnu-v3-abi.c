@@ -659,7 +659,8 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
     {
       /* Found a non-virtual function: print out the type.  */
       gdb_puts ("(", stream);
-      c_print_type (type, "", stream, -1, 0, &type_print_raw_options);
+      c_print_type (type, "", stream, -1, 0, current_language->la_language,
+		    &type_print_raw_options);
       gdb_puts (") ", stream);
     }
 

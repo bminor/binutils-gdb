@@ -981,7 +981,7 @@ ada_print_type (struct type *type0, const char *varstring,
       {
       default:
 	gdb_printf (stream, "<");
-	c_print_type (type, "", stream, show, level, flags);
+	c_print_type (type, "", stream, show, level, language_ada, flags);
 	gdb_printf (stream, ">");
 	break;
       case TYPE_CODE_PTR:
