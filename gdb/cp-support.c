@@ -41,6 +41,7 @@
 #include <atomic>
 #include "event-top.h"
 #include "run-on-main-thread.h"
+#include "typeprint.h"
 
 #define d_left(dc) (dc)->u.s_binary.left
 #define d_right(dc) (dc)->u.s_binary.right
@@ -229,7 +230,14 @@ inspect_type (struct demangle_parse_info *info,
 	  string_file buf;
 	  try
 	    {
-	      type_print (type, "", &buf, -1);
+	      /* Avoid using the current language.  If the language is
+		 C, and TYPE is a struct/class, the printed type is
+		 prefixed with "struct " or "class ", which we don't
+		 want when we're expanding a C++ typedef.  Print using
+		 the type symbol's language to expand a C++ typedef
+		 the C++ way even if the current language is C.  */
+	      const language_defn *lang = language_def (sym->language ());
+	      lang->print_type (type, "", &buf, -1, 0, &type_print_raw_options);
 	    }
 	  /* If type_print threw an exception, there is little point
 	     in continuing, so just bow out gracefully.  */

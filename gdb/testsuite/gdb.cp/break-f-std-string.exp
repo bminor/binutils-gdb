@@ -93,10 +93,17 @@ proc test {cxx11_abi} {
 	}
     }
 
-    gdb_test "break f($type)" "$srcfile, line $::decimal\\."
+    # GDB should be able to expand the std::string typedef in the
+    # function prototype using C++ logic even if the current language
+    # is C.
+    foreach_with_prefix lang {"c" "c++"} {
+	gdb_test_no_output "set language $lang"
 
-    if { $realtype != "" } {
-	gdb_test "break f($realtype)" "$srcfile, line $::decimal\\."
+	gdb_test "break f($type)" "$srcfile, line $::decimal\\."
+
+	if { $realtype != "" } {
+	    gdb_test "break f($realtype)" "$srcfile, line $::decimal\\."
+	}
     }
 }
 
