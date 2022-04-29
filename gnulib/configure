@@ -27062,7 +27062,7 @@ if ${gl_cv_glob_omit_nondir_symlinks+:} false; then :
   $as_echo_n "(cached) " >&6
 else
   if test $cross_compiling != yes; then
-           if ln -s conf-file conf$$-globtest 2>/dev/null && touch conf-file
+           if ln -s conf$$-file conf$$-globtest 2>/dev/null && touch conf$$-file
            then
              gl_cv_glob_omit_nondir_symlinks=maybe
            else
@@ -27101,7 +27101,7 @@ rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
 fi
 
            fi
-           rm -f conf$$-globtest
+           rm -f conf$$-file conf$$-globtest
          else
            gl_cv_glob_omit_nondir_symlinks="$gl_cross_guess_normal"
          fi

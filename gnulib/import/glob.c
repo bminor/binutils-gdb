@@ -1357,7 +1357,8 @@ glob_in_dir (const char *pattern, const char *directory, int flags,
         }
       else
         {
-          int dfd = dirfd (stream);
+          DIR *dirp = stream;
+          int dfd = dirfd (dirp);
           int fnm_flags = ((!(flags & GLOB_PERIOD) ? FNM_PERIOD : 0)
                            | ((flags & GLOB_NOESCAPE) ? FNM_NOESCAPE : 0));
           flags |= GLOB_MAGCHAR;

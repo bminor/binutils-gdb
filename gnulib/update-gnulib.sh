@@ -84,7 +84,7 @@ IMPORTED_GNULIB_MODULES="\
 "
 
 # The gnulib commit ID to use for the update.
-GNULIB_COMMIT_SHA1="0cda5beb7962f6567f0c4e377df870fa05c6d681"
+GNULIB_COMMIT_SHA1="bd11400942d63de12371988dca8144925de9e2c3"
 
 # The expected version number for the various auto tools we will
 # use after the import.

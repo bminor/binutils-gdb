@@ -1,4 +1,4 @@
-# glob.m4 serial 25
+# glob.m4 serial 26
 dnl Copyright (C) 2005-2007, 2009-2022 Free Software Foundation, Inc.
 dnl This file is free software; the Free Software Foundation
 dnl gives unlimited permission to copy and/or distribute it,
@@ -70,7 +70,7 @@ char a[_GNU_GLOB_INTERFACE_VERSION == 1 || _GNU_GLOB_INTERFACE_VERSION == 2 ? 1 
       AC_CACHE_CHECK([whether glob NOTDIR*/ omits symlink to nondir],
                      [gl_cv_glob_omit_nondir_symlinks],
         [if test $cross_compiling != yes; then
-           if ln -s conf-file conf$$-globtest 2>/dev/null && touch conf-file
+           if ln -s conf$$-file conf$$-globtest 2>/dev/null && touch conf$$-file
            then
              gl_cv_glob_omit_nondir_symlinks=maybe
            else
@@ -94,7 +94,7 @@ char a[_GNU_GLOB_INTERFACE_VERSION == 1 || _GNU_GLOB_INTERFACE_VERSION == 2 ? 1 
                 :
                ])
            fi
-           rm -f conf$$-globtest
+           rm -f conf$$-file conf$$-globtest
          else
            gl_cv_glob_omit_nondir_symlinks="$gl_cross_guess_normal"
          fi

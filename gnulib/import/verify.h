@@ -215,6 +215,9 @@ template <int w>
 # define _GL_VERIFY(R, DIAGNOSTIC, ...)                                \
     extern int (*_GL_GENSYM (_gl_verify_function) (void))	       \
       [_GL_VERIFY_TRUE (R, DIAGNOSTIC)]
+# if 4 < __GNUC__ + (6 <= __GNUC_MINOR__)
+#  pragma GCC diagnostic ignored "-Wnested-externs"
+# endif
 #endif
 
 /* _GL_STATIC_ASSERT_H is defined if this code is copied into assert.h.  */
