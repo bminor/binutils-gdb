@@ -166,9 +166,7 @@ private:
 
   bool getVal (int propId, Context *ctx);
   bool bEval (Context *ctx);
-
   bool hasLoadObject ();
-  void fixupValues ();
 
   OpCode op;
   Value v;

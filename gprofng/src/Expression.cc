@@ -91,12 +91,18 @@ Expression::Expression (const Expression &rhs)
   op = rhs.op;
   arg0 = NULL;
   arg1 = NULL;
+  v = Value (rhs.v);
   if (rhs.arg0)
-    arg0 = rhs.arg0->copy ();
+    {
+      arg0 = rhs.arg0->copy ();
+      if (v.next)
+	{
+	  assert (arg0 && v.next == &(rhs.arg0->v));
+	  v.next = &(arg0->v);
+	}
+    }
   if (rhs.arg1)
     arg1 = rhs.arg1->copy ();
-  v = Value (rhs.v);
-  fixupValues ();
 }
 
 Expression::Expression (const Expression *rhs)
@@ -114,12 +120,18 @@ Expression::copy (const Expression *rhs)
   delete arg1;
   arg0 = NULL;
   arg1 = NULL;
+  v = Value (rhs->v);
   if (rhs->arg0)
-    arg0 = rhs->arg0->copy ();
+    {
+      arg0 = rhs->arg0->copy ();
+      if (v.next)
+	{
+	  assert (arg0 && v.next == &(rhs->arg0->v));
+	  v.next = &(arg0->v);
+	}
+    }
   if (rhs->arg1)
     arg1 = rhs->arg1->copy ();
-  v = Value (rhs->v);
-  fixupValues ();
 }
 
 Expression &
@@ -129,16 +141,6 @@ Expression::operator= (const Expression &rhs)
     return *this;
   copy (&rhs);
   return *this;
-}
-
-void
-Expression::fixupValues ()
-{
-  if (v.next)
-    {
-      assert (arg0 && v.next == &(arg0->v));
-      v.next = &(arg0->v);
-    }
 }
 
 bool
