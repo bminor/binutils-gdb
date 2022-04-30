@@ -40,6 +40,12 @@
 
 struct signal_catchpoint : public breakpoint
 {
+  signal_catchpoint (std::vector<gdb_signal> &&sigs, bool catch_all_)
+    : signals_to_be_caught (std::move (sigs)),
+      catch_all (catch_all_)
+  {
+  }
+
   int insert_location (struct bp_location *) override;
   int remove_location (struct bp_location *,
 		       enum remove_bp_reason reason) override;
@@ -316,10 +322,9 @@ create_signal_catchpoint (int tempflag, std::vector<gdb_signal> &&filter,
 {
   struct gdbarch *gdbarch = get_current_arch ();
 
-  std::unique_ptr<signal_catchpoint> c (new signal_catchpoint ());
+  std::unique_ptr<signal_catchpoint> c
+    (new signal_catchpoint (std::move (filter), catch_all));
   init_catchpoint (c.get (), gdbarch, tempflag, nullptr);
-  c->signals_to_be_caught = std::move (filter);
-  c->catch_all = catch_all;
 
   install_breakpoint (0, std::move (c), 1);
 }
