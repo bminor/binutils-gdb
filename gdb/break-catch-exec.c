@@ -205,7 +205,6 @@ catch_exec_command_1 (const char *arg, int from_tty,
 
   std::unique_ptr<exec_catchpoint> c (new exec_catchpoint ());
   init_catchpoint (c.get (), gdbarch, temp, cond_string);
-  c->exec_pathname.reset ();
 
   install_breakpoint (0, std::move (c), 1);
 }
