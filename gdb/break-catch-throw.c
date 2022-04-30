@@ -67,6 +67,17 @@ static const struct exception_names exception_functions[] =
 
 struct exception_catchpoint : public base_breakpoint
 {
+  exception_catchpoint (enum exception_event_kind kind_,
+			std::string &&except_rx)
+    : kind (kind_),
+      exception_rx (std::move (except_rx)),
+      pattern (exception_rx.empty ()
+	       ? nullptr
+	       : new compiled_regex (exception_rx.c_str (), REG_NOSUB,
+				     _("invalid type-matching regexp")))
+  {
+  }
+
   void re_set () override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (bp_location **) const override;
@@ -355,20 +366,10 @@ handle_gnu_v3_exceptions (int tempflag, std::string &&except_rx,
 			  const char *cond_string,
 			  enum exception_event_kind ex_event, int from_tty)
 {
-  std::unique_ptr<compiled_regex> pattern;
-
-  if (!except_rx.empty ())
-    {
-      pattern.reset (new compiled_regex (except_rx.c_str (), REG_NOSUB,
-					 _("invalid type-matching regexp")));
-    }
-
-  std::unique_ptr<exception_catchpoint> cp (new exception_catchpoint ());
+  std::unique_ptr<exception_catchpoint> cp
+    (new exception_catchpoint (ex_event, std::move (except_rx)));
 
   init_catchpoint (cp.get (), get_current_arch (), tempflag, cond_string);
-  cp->kind = ex_event;
-  cp->exception_rx = std::move (except_rx);
-  cp->pattern = std::move (pattern);
 
   cp->re_set ();
 
