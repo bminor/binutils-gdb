@@ -5021,12 +5021,24 @@ remote_target::start_remote_1 (int from_tty, int extended_p)
 	target_async (1);
     }
 
-  /* If we connected to a live target, do some additional setup.  */
-  if (target_has_execution ())
+  /* Give the target a chance to look up symbols.  */
+  for (inferior *inf : all_inferiors (this))
     {
+      /* The inferiors that exist at this point were created from what
+	 was found already running on the remote side, so we know they
+	 have execution.  */
+      gdb_assert (this->has_execution (inf));
+
       /* No use without a symbol-file.  */
-      if (current_program_space->symfile_object_file)
-	remote_check_symbols ();
+      if (inf->pspace->symfile_object_file == nullptr)
+	continue;
+
+      /* Need to switch to a specific thread, because remote_check_symbols
+         uses INFERIOR_PTID to set the general thread.  */
+      scoped_restore_current_thread restore_thread;
+      thread_info *thread = any_thread_of_inferior (inf);
+      switch_to_thread (thread);
+      this->remote_check_symbols ();
     }
 
   /* Possibly the target has been engaged in a trace run started
