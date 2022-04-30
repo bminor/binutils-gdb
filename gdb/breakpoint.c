@@ -303,7 +303,7 @@ struct ranged_breakpoint : public ordinary_breakpoint
 		      const target_waitstatus &ws) override;
   int resources_needed (const struct bp_location *) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
-  bool print_one (struct bp_location **) override;
+  bool print_one (bp_location **) const override;
   void print_one_detail (struct ui_out *) const override;
   void print_mention () override;
   void print_recreate (struct ui_file *fp) override;
@@ -5922,7 +5922,7 @@ wrap_indent_at_field (struct ui_out *uiout, const char *col_name)
 */
 
 static const char *
-bp_condition_evaluator (struct breakpoint *b)
+bp_condition_evaluator (const breakpoint *b)
 {
   char host_evals = 0;
   char target_evals = 0;
@@ -5975,7 +5975,7 @@ bp_location_condition_evaluator (struct bp_location *bl)
 /* Print the LOC location out of the list of B->LOC locations.  */
 
 static void
-print_breakpoint_location (struct breakpoint *b,
+print_breakpoint_location (const breakpoint *b,
 			   struct bp_location *loc)
 {
   struct ui_out *uiout = current_uiout;
@@ -9240,7 +9240,7 @@ ranged_breakpoint::print_it (const bpstat *bs) const
 /* Implement the "print_one" method for ranged breakpoints.  */
 
 bool
-ranged_breakpoint::print_one (struct bp_location **last_loc)
+ranged_breakpoint::print_one (bp_location **last_loc) const
 {
   struct bp_location *bl = loc;
   struct value_print_options opts;
@@ -11514,7 +11514,7 @@ say_where (struct breakpoint *b)
 
 /* See breakpoint.h.  */
 
-bp_location_range breakpoint::locations ()
+bp_location_range breakpoint::locations () const
 {
   return bp_location_range (this->loc);
 }

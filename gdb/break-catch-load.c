@@ -44,7 +44,7 @@ struct solib_catchpoint : public breakpoint
 		      const target_waitstatus &ws) override;
   void check_status (struct bpstat *bs) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
-  bool print_one (struct bp_location **) override;
+  bool print_one (bp_location **) const override;
   void print_mention () override;
   void print_recreate (struct ui_file *fp) override;
 
@@ -147,7 +147,7 @@ solib_catchpoint::print_it (const bpstat *bs) const
 }
 
 bool
-solib_catchpoint::print_one (struct bp_location **locs)
+solib_catchpoint::print_one (bp_location **locs) const
 {
   struct value_print_options opts;
   struct ui_out *uiout = current_uiout;

@@ -675,7 +675,7 @@ struct breakpoint
   /* Display information about this breakpoint, for "info
      breakpoints".  Returns false if this method should use the
      default behavior.  */
-  virtual bool print_one (struct bp_location **)
+  virtual bool print_one (bp_location **) const
   {
     return false;
   }
@@ -729,7 +729,7 @@ struct breakpoint
   }
 
   /* Return a range of this breakpoint's locations.  */
-  bp_location_range locations ();
+  bp_location_range locations () const;
 
   breakpoint *next = NULL;
   /* Type of breakpoint.  */

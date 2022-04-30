@@ -44,7 +44,7 @@ struct exec_catchpoint : public breakpoint
 		      CORE_ADDR bp_addr,
 		      const target_waitstatus &ws) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
-  bool print_one (struct bp_location **) override;
+  bool print_one (bp_location **) const override;
   void print_mention () override;
   void print_recreate (struct ui_file *fp) override;
 
@@ -105,7 +105,7 @@ exec_catchpoint::print_it (const bpstat *bs) const
 }
 
 bool
-exec_catchpoint::print_one (struct bp_location **last_loc)
+exec_catchpoint::print_one (bp_location **last_loc) const
 {
   struct value_print_options opts;
   struct ui_out *uiout = current_uiout;
