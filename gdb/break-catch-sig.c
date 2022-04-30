@@ -51,7 +51,7 @@ struct signal_catchpoint : public breakpoint
   bool print_one (struct bp_location **) override;
   void print_mention () override;
   void print_recreate (struct ui_file *fp) override;
-  int explains_signal (enum gdb_signal) override;
+  bool explains_signal (enum gdb_signal) override;
 
   /* Signal numbers used for the 'catch signal' feature.  If no signal
      has been specified for filtering, it is empty.  Otherwise,
@@ -297,10 +297,10 @@ signal_catchpoint::print_recreate (struct ui_file *fp)
 
 /* Implement the "explains_signal" method for signal catchpoints.  */
 
-int
+bool
 signal_catchpoint::explains_signal (enum gdb_signal sig)
 {
-  return 1;
+  return true;
 }
 
 /* Create a new signal catchpoint.  TEMPFLAG is true if this should be

@@ -721,9 +721,9 @@ struct breakpoint
 
   /* Return true if this breakpoint explains a signal.  See
      bpstat_explains_signal.  */
-  virtual int explains_signal (enum gdb_signal)
+  virtual bool explains_signal (enum gdb_signal)
   {
-    return 1;
+    return true;
   }
 
   /* Called after evaluating the breakpoint's condition,
@@ -882,7 +882,7 @@ struct watchpoint : public breakpoint
   enum print_stop_action print_it (struct bpstat *bs) override;
   void print_mention () override;
   void print_recreate (struct ui_file *fp) override;
-  int explains_signal (enum gdb_signal) override;
+  bool explains_signal (enum gdb_signal) override;
 
   /* String form of exp to use for displaying to the user (malloc'd),
      or NULL if none.  */

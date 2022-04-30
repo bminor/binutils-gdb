@@ -9716,15 +9716,15 @@ watchpoint::print_recreate (struct ui_file *fp)
 
 /* Implement the "explains_signal" method for watchpoints.  */
 
-int
+bool
 watchpoint::explains_signal (enum gdb_signal sig)
 {
   /* A software watchpoint cannot cause a signal other than
      GDB_SIGNAL_TRAP.  */
   if (type == bp_watchpoint && sig != GDB_SIGNAL_TRAP)
-    return 0;
+    return false;
 
-  return 1;
+  return true;
 }
 
 struct masked_watchpoint : public watchpoint
