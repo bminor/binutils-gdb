@@ -45,7 +45,7 @@ struct solib_catchpoint : public breakpoint
   void check_status (struct bpstat *bs) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (bp_location **) const override;
-  void print_mention () override;
+  void print_mention () const override;
   void print_recreate (struct ui_file *fp) override;
 
   /* True for "catch load", false for "catch unload".  */
@@ -189,7 +189,7 @@ solib_catchpoint::print_one (bp_location **locs) const
 }
 
 void
-solib_catchpoint::print_mention ()
+solib_catchpoint::print_mention () const
 {
   gdb_printf (_("Catchpoint %d (%s)"), number,
 	      is_load ? "load" : "unload");

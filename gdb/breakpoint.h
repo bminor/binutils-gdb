@@ -699,7 +699,7 @@ struct breakpoint
 
   /* Display information about this breakpoint after setting it
      (roughly speaking; this is called from "mention").  */
-  virtual void print_mention ();
+  virtual void print_mention () const;
 
   /* Print to FP the CLI command that recreates this breakpoint.  */
   virtual void print_recreate (struct ui_file *fp);
@@ -880,7 +880,7 @@ struct watchpoint : public breakpoint
   virtual bool works_in_software_mode () const;
 
   enum print_stop_action print_it (const bpstat *bs) const override;
-  void print_mention () override;
+  void print_mention () const override;
   void print_recreate (struct ui_file *fp) override;
   bool explains_signal (enum gdb_signal) override;
 
@@ -961,7 +961,7 @@ struct tracepoint : public breakpoint
 		      const address_space *aspace, CORE_ADDR bp_addr,
 		      const target_waitstatus &ws) override;
   void print_one_detail (struct ui_out *uiout) const override;
-  void print_mention () override;
+  void print_mention () const override;
   void print_recreate (struct ui_file *fp) override;
   std::vector<symtab_and_line> decode_location
        (struct event_location *location,

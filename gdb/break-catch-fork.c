@@ -43,7 +43,7 @@ struct fork_catchpoint : public breakpoint
 		      const target_waitstatus &ws) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (bp_location **) const override;
-  void print_mention () override;
+  void print_mention () const override;
   void print_recreate (struct ui_file *fp) override;
 
   /* True if the breakpoint is for vfork, false for fork.  */
@@ -160,7 +160,7 @@ fork_catchpoint::print_one (bp_location **last_loc) const
 /* Implement the "print_mention" method for fork catchpoints.  */
 
 void
-fork_catchpoint::print_mention ()
+fork_catchpoint::print_mention () const
 {
   gdb_printf (_("Catchpoint %d (%s)"), number,
 	      is_vfork ? "vfork" : "fork");

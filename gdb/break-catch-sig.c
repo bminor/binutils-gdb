@@ -49,7 +49,7 @@ struct signal_catchpoint : public breakpoint
 		      const target_waitstatus &ws) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (bp_location **) const override;
-  void print_mention () override;
+  void print_mention () const override;
   void print_recreate (struct ui_file *fp) override;
   bool explains_signal (enum gdb_signal) override;
 
@@ -255,7 +255,7 @@ signal_catchpoint::print_one (bp_location **last_loc) const
 /* Implement the "print_mention" method for signal catchpoints.  */
 
 void
-signal_catchpoint::print_mention ()
+signal_catchpoint::print_mention () const
 {
   if (!signals_to_be_caught.empty ())
     {

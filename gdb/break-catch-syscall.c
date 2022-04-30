@@ -46,7 +46,7 @@ struct syscall_catchpoint : public breakpoint
 		      const target_waitstatus &ws) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (bp_location **) const override;
-  void print_mention () override;
+  void print_mention () const override;
   void print_recreate (struct ui_file *fp) override;
 
   /* Syscall numbers used for the 'catch syscall' feature.  If no
@@ -284,7 +284,7 @@ syscall_catchpoint::print_one (bp_location **last_loc) const
 /* Implement the "print_mention" method for syscall catchpoints.  */
 
 void
-syscall_catchpoint::print_mention ()
+syscall_catchpoint::print_mention () const
 {
   struct gdbarch *gdbarch = loc->gdbarch;
 

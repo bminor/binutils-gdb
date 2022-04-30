@@ -110,7 +110,7 @@ static std::vector<symtab_and_line> decode_location_default
 static int can_use_hardware_watchpoint
     (const std::vector<value_ref_ptr> &vals);
 
-static void mention (struct breakpoint *);
+static void mention (const breakpoint *);
 
 static struct breakpoint *set_raw_breakpoint_without_location (struct gdbarch *,
 							       enum bptype);
@@ -260,7 +260,7 @@ struct ordinary_breakpoint : public base_breakpoint
 {
   int resources_needed (const struct bp_location *) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
-  void print_mention () override;
+  void print_mention () const override;
   void print_recreate (struct ui_file *fp) override;
 };
 
@@ -270,7 +270,7 @@ struct internal_breakpoint : public base_breakpoint
   void re_set () override;
   void check_status (struct bpstat *bs) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
-  void print_mention () override;
+  void print_mention () const override;
 };
 
 /* Momentary breakpoints.  */
@@ -279,7 +279,7 @@ struct momentary_breakpoint : public base_breakpoint
   void re_set () override;
   void check_status (struct bpstat *bs) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
-  void print_mention () override;
+  void print_mention () const override;
 };
 
 /* DPrintf breakpoints.  */
@@ -305,7 +305,7 @@ struct ranged_breakpoint : public ordinary_breakpoint
   enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (bp_location **) const override;
   void print_one_detail (struct ui_out *) const override;
-  void print_mention () override;
+  void print_mention () const override;
   void print_recreate (struct ui_file *fp) override;
 };
 
@@ -8050,7 +8050,7 @@ set_momentary_breakpoint_at_pc (struct gdbarch *gdbarch, CORE_ADDR pc,
 /* Tell the user we have just set a breakpoint B.  */
 
 static void
-mention (struct breakpoint *b)
+mention (const breakpoint *b)
 {
   b->print_mention ();
   current_uiout->text ("\n");
@@ -9287,7 +9287,7 @@ ranged_breakpoint::print_one_detail (struct ui_out *uiout) const
 /* Implement the "print_mention" method for ranged breakpoints.  */
 
 void
-ranged_breakpoint::print_mention ()
+ranged_breakpoint::print_mention () const
 {
   struct bp_location *bl = loc;
   struct ui_out *uiout = current_uiout;
@@ -9654,7 +9654,7 @@ watchpoint::print_it (const bpstat *bs) const
 /* Implement the "print_mention" method for hardware watchpoints.  */
 
 void
-watchpoint::print_mention ()
+watchpoint::print_mention () const
 {
   struct ui_out *uiout = current_uiout;
   const char *tuple_name;
@@ -9736,7 +9736,7 @@ struct masked_watchpoint : public watchpoint
   bool works_in_software_mode () const override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   void print_one_detail (struct ui_out *) const override;
-  void print_mention () override;
+  void print_mention () const override;
   void print_recreate (struct ui_file *fp) override;
 };
 
@@ -9845,7 +9845,7 @@ masked_watchpoint::print_one_detail (struct ui_out *uiout) const
    watchpoints.  */
 
 void
-masked_watchpoint::print_mention ()
+masked_watchpoint::print_mention () const
 {
   struct ui_out *uiout = current_uiout;
   const char *tuple_name;
@@ -11442,7 +11442,7 @@ bpstat_remove_breakpoint_callback (struct thread_info *th, void *data)
    callbacks.  */
 
 static void
-say_where (struct breakpoint *b)
+say_where (const breakpoint *b)
 {
   struct value_print_options opts;
 
@@ -11563,7 +11563,7 @@ breakpoint::print_it (const bpstat *bs) const
 }
 
 void
-breakpoint::print_mention ()
+breakpoint::print_mention () const
 {
   internal_error_pure_virtual_called ();
 }
@@ -11719,7 +11719,7 @@ ordinary_breakpoint::print_it (const bpstat *bs) const
 }
 
 void
-ordinary_breakpoint::print_mention ()
+ordinary_breakpoint::print_mention () const
 {
   if (current_uiout->is_mi_like_p ())
     return;
@@ -11871,7 +11871,7 @@ internal_breakpoint::print_it (const bpstat *bs) const
 }
 
 void
-internal_breakpoint::print_mention ()
+internal_breakpoint::print_mention () const
 {
   /* Nothing to mention.  These breakpoints are internal.  */
 }
@@ -11900,7 +11900,7 @@ momentary_breakpoint::print_it (const bpstat *bs) const
 }
 
 void
-momentary_breakpoint::print_mention ()
+momentary_breakpoint::print_mention () const
 {
   /* Nothing to mention.  These breakpoints are internal.  */
 }
@@ -11975,7 +11975,7 @@ tracepoint::print_one_detail (struct ui_out *uiout) const
 }
 
 void
-tracepoint::print_mention ()
+tracepoint::print_mention () const
 {
   if (current_uiout->is_mi_like_p ())
     return;

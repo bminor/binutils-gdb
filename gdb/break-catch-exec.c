@@ -45,7 +45,7 @@ struct exec_catchpoint : public breakpoint
 		      const target_waitstatus &ws) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (bp_location **) const override;
-  void print_mention () override;
+  void print_mention () const override;
   void print_recreate (struct ui_file *fp) override;
 
   /* Filename of a program whose exec triggered this catchpoint.
@@ -133,7 +133,7 @@ exec_catchpoint::print_one (bp_location **last_loc) const
 }
 
 void
-exec_catchpoint::print_mention ()
+exec_catchpoint::print_mention () const
 {
   gdb_printf (_("Catchpoint %d (exec)"), number);
 }

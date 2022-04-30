@@ -12132,7 +12132,7 @@ struct ada_catchpoint : public base_breakpoint
   void check_status (struct bpstat *bs) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (bp_location **) const override;
-  void print_mention () override;
+  void print_mention () const override;
   void print_recreate (struct ui_file *fp) override;
 
   /* The name of the specific exception the user specified.  */
@@ -12440,7 +12440,7 @@ ada_catchpoint::print_one (bp_location **last_loc) const
    for all exception catchpoint kinds.  */
 
 void
-ada_catchpoint::print_mention ()
+ada_catchpoint::print_mention () const
 {
   struct ui_out *uiout = current_uiout;
 
