@@ -259,7 +259,7 @@ static const struct breakpoint_ops tracepoint_probe_breakpoint_ops =
 struct ordinary_breakpoint : public base_breakpoint
 {
   int resources_needed (const struct bp_location *) override;
-  enum print_stop_action print_it (struct bpstat *bs) override;
+  enum print_stop_action print_it (const bpstat *bs) const override;
   void print_mention () override;
   void print_recreate (struct ui_file *fp) override;
 };
@@ -269,7 +269,7 @@ struct internal_breakpoint : public base_breakpoint
 {
   void re_set () override;
   void check_status (struct bpstat *bs) override;
-  enum print_stop_action print_it (struct bpstat *bs) override;
+  enum print_stop_action print_it (const bpstat *bs) const override;
   void print_mention () override;
 };
 
@@ -278,7 +278,7 @@ struct momentary_breakpoint : public base_breakpoint
 {
   void re_set () override;
   void check_status (struct bpstat *bs) override;
-  enum print_stop_action print_it (struct bpstat *bs) override;
+  enum print_stop_action print_it (const bpstat *bs) const override;
   void print_mention () override;
 };
 
@@ -302,7 +302,7 @@ struct ranged_breakpoint : public ordinary_breakpoint
 		      CORE_ADDR bp_addr,
 		      const target_waitstatus &ws) override;
   int resources_needed (const struct bp_location *) override;
-  enum print_stop_action print_it (struct bpstat *bs) override;
+  enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (struct bp_location **) override;
   void print_one_detail (struct ui_out *) const override;
   void print_mention () override;
@@ -9207,7 +9207,7 @@ ranged_breakpoint::resources_needed (const struct bp_location *bl)
 /* Implement the "print_it" method for ranged breakpoints.  */
 
 enum print_stop_action
-ranged_breakpoint::print_it (bpstat *bs)
+ranged_breakpoint::print_it (const bpstat *bs) const
 {
   struct bp_location *bl = loc;
   struct ui_out *uiout = current_uiout;
@@ -9566,7 +9566,7 @@ watchpoint::works_in_software_mode () const
 }
 
 enum print_stop_action
-watchpoint::print_it (bpstat *bs)
+watchpoint::print_it (const bpstat *bs) const
 {
   struct breakpoint *b;
   enum print_stop_action result;
@@ -9734,7 +9734,7 @@ struct masked_watchpoint : public watchpoint
 		       enum remove_bp_reason reason) override;
   int resources_needed (const struct bp_location *) override;
   bool works_in_software_mode () const override;
-  enum print_stop_action print_it (struct bpstat *bs) override;
+  enum print_stop_action print_it (const bpstat *bs) const override;
   void print_one_detail (struct ui_out *) const override;
   void print_mention () override;
   void print_recreate (struct ui_file *fp) override;
@@ -9781,7 +9781,7 @@ masked_watchpoint::works_in_software_mode () const
    watchpoints.  */
 
 enum print_stop_action
-masked_watchpoint::print_it (bpstat *bs)
+masked_watchpoint::print_it (const bpstat *bs) const
 {
   struct breakpoint *b = bs->breakpoint_at;
   struct ui_out *uiout = current_uiout;
@@ -11557,7 +11557,7 @@ breakpoint::resources_needed (const struct bp_location *bl)
 }
 
 enum print_stop_action
-breakpoint::print_it (bpstat *bs)
+breakpoint::print_it (const bpstat *bs) const
 {
   internal_error_pure_virtual_called ();
 }
@@ -11686,7 +11686,7 @@ ordinary_breakpoint::resources_needed (const struct bp_location *bl)
 }
 
 enum print_stop_action
-ordinary_breakpoint::print_it (bpstat *bs)
+ordinary_breakpoint::print_it (const bpstat *bs) const
 {
   const struct bp_location *bl;
   int bp_temp;
@@ -11827,7 +11827,7 @@ internal_breakpoint::check_status (bpstat *bs)
 }
 
 enum print_stop_action
-internal_breakpoint::print_it (bpstat *bs)
+internal_breakpoint::print_it (const bpstat *bs) const
 {
   switch (type)
     {
@@ -11894,7 +11894,7 @@ momentary_breakpoint::check_status (bpstat *bs)
 }
 
 enum print_stop_action
-momentary_breakpoint::print_it (bpstat *bs)
+momentary_breakpoint::print_it (const bpstat *bs) const
 {
   return PRINT_UNKNOWN;
 }

@@ -670,7 +670,7 @@ struct breakpoint
 
   /* The normal print routine for this breakpoint, called when we
      hit it.  */
-  virtual enum print_stop_action print_it (struct bpstat *bs);
+  virtual enum print_stop_action print_it (const bpstat *bs) const;
 
   /* Display information about this breakpoint, for "info
      breakpoints".  Returns false if this method should use the
@@ -879,7 +879,7 @@ struct watchpoint : public breakpoint
      there are not enough hardware resources available.  */
   virtual bool works_in_software_mode () const;
 
-  enum print_stop_action print_it (struct bpstat *bs) override;
+  enum print_stop_action print_it (const bpstat *bs) const override;
   void print_mention () override;
   void print_recreate (struct ui_file *fp) override;
   bool explains_signal (enum gdb_signal) override;

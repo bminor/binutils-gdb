@@ -41,7 +41,7 @@ struct fork_catchpoint : public breakpoint
 		      const address_space *aspace,
 		      CORE_ADDR bp_addr,
 		      const target_waitstatus &ws) override;
-  enum print_stop_action print_it (struct bpstat *bs) override;
+  enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (struct bp_location **) override;
   void print_mention () override;
   void print_recreate (struct ui_file *fp) override;
@@ -98,7 +98,7 @@ fork_catchpoint::breakpoint_hit (const struct bp_location *bl,
 /* Implement the "print_it" method for fork catchpoints.  */
 
 enum print_stop_action
-fork_catchpoint::print_it (bpstat *bs)
+fork_catchpoint::print_it (const bpstat *bs) const
 {
   struct ui_out *uiout = current_uiout;
 

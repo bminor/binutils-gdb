@@ -68,7 +68,7 @@ static const struct exception_names exception_functions[] =
 struct exception_catchpoint : public base_breakpoint
 {
   void re_set () override;
-  enum print_stop_action print_it (struct bpstat *bs) override;
+  enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (struct bp_location **) override;
   void print_mention () override;
   void print_recreate (struct ui_file *fp) override;
@@ -228,7 +228,7 @@ exception_catchpoint::re_set ()
 }
 
 enum print_stop_action
-exception_catchpoint::print_it (bpstat *bs)
+exception_catchpoint::print_it (const bpstat *bs) const
 {
   struct ui_out *uiout = current_uiout;
   int bp_temp;

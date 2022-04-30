@@ -43,7 +43,7 @@ struct solib_catchpoint : public breakpoint
 		      CORE_ADDR bp_addr,
 		      const target_waitstatus &ws) override;
   void check_status (struct bpstat *bs) override;
-  enum print_stop_action print_it (struct bpstat *bs) override;
+  enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (struct bp_location **) override;
   void print_mention () override;
   void print_recreate (struct ui_file *fp) override;
@@ -127,7 +127,7 @@ solib_catchpoint::check_status (struct bpstat *bs)
 }
 
 enum print_stop_action
-solib_catchpoint::print_it (bpstat *bs)
+solib_catchpoint::print_it (const bpstat *bs) const
 {
   struct breakpoint *b = bs->breakpoint_at;
   struct ui_out *uiout = current_uiout;
