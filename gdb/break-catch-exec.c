@@ -144,7 +144,7 @@ void
 exec_catchpoint::print_recreate (struct ui_file *fp)
 {
   gdb_printf (fp, "catch exec");
-  print_recreate_thread (this, fp);
+  print_recreate_thread (fp);
 }
 
 /* This function attempts to parse an optional "if <cond>" clause

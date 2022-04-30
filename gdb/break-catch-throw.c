@@ -338,7 +338,7 @@ exception_catchpoint::print_recreate (struct ui_file *fp)
       gdb_printf (fp, "rethrow");
       break;
     }
-  print_recreate_thread (this, fp);
+  print_recreate_thread (fp);
 }
 
 /* Implement the "allocate_location" method for throw and catch

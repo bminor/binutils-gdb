@@ -12519,7 +12519,7 @@ ada_catchpoint::print_recreate (struct ui_file *fp)
       default:
 	internal_error (__FILE__, __LINE__, _("unexpected catchpoint type"));
     }
-  print_recreate_thread (this, fp);
+  print_recreate_thread (fp);
 }
 
 /* See ada-lang.h.  */

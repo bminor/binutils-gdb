@@ -9335,7 +9335,7 @@ ranged_breakpoint::print_recreate (struct ui_file *fp)
   gdb_printf (fp, "break-range %s, %s",
 	      event_location_to_string (location.get ()),
 	      event_location_to_string (location_range_end.get ()));
-  print_recreate_thread (this, fp);
+  print_recreate_thread (fp);
 }
 
 /* Find the address where the end of the breakpoint range should be
@@ -9739,7 +9739,7 @@ watchpoint::print_recreate (struct ui_file *fp)
     }
 
   gdb_printf (fp, " %s", exp_string.get ());
-  print_recreate_thread (this, fp);
+  print_recreate_thread (fp);
 }
 
 /* Implement the "explains_signal" method for watchpoints.  */
@@ -9927,7 +9927,7 @@ masked_watchpoint::print_recreate (struct ui_file *fp)
 
   gdb_printf (fp, " %s mask 0x%s", exp_string.get (),
 	      phex (hw_wp_mask, sizeof (CORE_ADDR)));
-  print_recreate_thread (this, fp);
+  print_recreate_thread (fp);
 }
 
 /* Tell whether the given watchpoint is a masked hardware watchpoint.  */
@@ -11807,7 +11807,7 @@ ordinary_breakpoint::print_recreate (struct ui_file *fp)
   if (loc == NULL && extra_string != NULL)
     gdb_printf (fp, " %s", extra_string.get ());
 
-  print_recreate_thread (this, fp);
+  print_recreate_thread (fp);
 }
 
 std::vector<symtab_and_line>
@@ -12055,7 +12055,7 @@ tracepoint::print_recreate (struct ui_file *fp)
 		    _("unhandled tracepoint type %d"), (int) type);
 
   gdb_printf (fp, " %s", event_location_to_string (location.get ()));
-  print_recreate_thread (this, fp);
+  print_recreate_thread (fp);
 
   if (pass_count)
     gdb_printf (fp, "  passcount %d\n", pass_count);
@@ -12112,7 +12112,7 @@ dprintf_breakpoint::print_recreate (struct ui_file *fp)
   gdb_printf (fp, "dprintf %s,%s",
 	      event_location_to_string (location.get ()),
 	      extra_string.get ());
-  print_recreate_thread (this, fp);
+  print_recreate_thread (fp);
 }
 
 /* Implement the "after_condition_true" method for dprintf.
@@ -14044,13 +14044,13 @@ get_tracepoint_by_number (const char **arg,
 }
 
 void
-print_recreate_thread (struct breakpoint *b, struct ui_file *fp)
+breakpoint::print_recreate_thread (struct ui_file *fp) const
 {
-  if (b->thread != -1)
-    gdb_printf (fp, " thread %d", b->thread);
+  if (thread != -1)
+    gdb_printf (fp, " thread %d", thread);
 
-  if (b->task != 0)
-    gdb_printf (fp, " task %d", b->task);
+  if (task != 0)
+    gdb_printf (fp, " task %d", task);
 
   gdb_printf (fp, "\n");
 }

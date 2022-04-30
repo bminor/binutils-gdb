@@ -172,7 +172,7 @@ void
 fork_catchpoint::print_recreate (struct ui_file *fp)
 {
   gdb_printf (fp, "catch %s", is_vfork ? "vfork" : "fork");
-  print_recreate_thread (this, fp);
+  print_recreate_thread (fp);
 }
 
 static void

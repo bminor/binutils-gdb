@@ -586,15 +586,6 @@ struct breakpoint_ops
 				  int, int, int, unsigned);
 };
 
-/* Helper for breakpoint_ops->print_recreate implementations.  Prints
-   the "thread" or "task" condition of B, and then a newline.
-
-   Necessary because most breakpoint implementations accept
-   thread/task conditions at the end of the spec line, like "break foo
-   thread 1", which needs outputting before any breakpoint-type
-   specific extra command necessary for B's recreation.  */
-extern void print_recreate_thread (struct breakpoint *b, struct ui_file *fp);
-
 enum watchpoint_triggered
 {
   /* This watchpoint definitely did not trigger.  */
@@ -742,7 +733,6 @@ struct breakpoint
     /* Nothing to do.  */
   }
 
-
   /* Return a range of this breakpoint's locations.  */
   bp_location_range locations ();
 
@@ -846,6 +836,17 @@ struct breakpoint
 
   /* Same as py_bp_object, but for Scheme.  */
   gdbscm_breakpoint_object *scm_bp_object = NULL;
+
+protected:
+
+  /* Helper for breakpoint_ops->print_recreate implementations.  Prints
+     the "thread" or "task" condition of B, and then a newline.
+
+     Necessary because most breakpoint implementations accept
+     thread/task conditions at the end of the spec line, like "break foo
+     thread 1", which needs outputting before any breakpoint-type
+     specific extra command necessary for B's recreation.  */
+  void print_recreate_thread (struct ui_file *fp) const;
 };
 
 /* The structure to be inherit by all kinds of breakpoints (real

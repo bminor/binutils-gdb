@@ -331,7 +331,7 @@ syscall_catchpoint::print_recreate (struct ui_file *fp)
 	gdb_printf (fp, " %d", s.number);
     }
 
-  print_recreate_thread (this, fp);
+  print_recreate_thread (fp);
 }
 
 /* Returns non-zero if 'b' is a syscall catchpoint.  */
