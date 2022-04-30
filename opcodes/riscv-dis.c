@@ -1002,24 +1002,20 @@ riscv_get_disassembler (bfd *abfd)
 {
   const char *default_arch = "rv64gc";
 
-  if (abfd)
+  if (abfd && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
-      const struct elf_backend_data *ebd = get_elf_backend_data (abfd);
-      if (ebd)
+      const char *sec_name = get_elf_backend_data (abfd)->obj_attrs_section;
+      if (bfd_get_section_by_name (abfd, sec_name) != NULL)
 	{
-	  const char *sec_name = ebd->obj_attrs_section;
-	  if (bfd_get_section_by_name (abfd, sec_name) != NULL)
-	    {
-	      obj_attribute *attr = elf_known_obj_attributes_proc (abfd);
-	      unsigned int Tag_a = Tag_RISCV_priv_spec;
-	      unsigned int Tag_b = Tag_RISCV_priv_spec_minor;
-	      unsigned int Tag_c = Tag_RISCV_priv_spec_revision;
-	      riscv_get_priv_spec_class_from_numbers (attr[Tag_a].i,
-						      attr[Tag_b].i,
-						      attr[Tag_c].i,
-						      &default_priv_spec);
-	      default_arch = attr[Tag_RISCV_arch].s;
-	    }
+	  obj_attribute *attr = elf_known_obj_attributes_proc (abfd);
+	  unsigned int Tag_a = Tag_RISCV_priv_spec;
+	  unsigned int Tag_b = Tag_RISCV_priv_spec_minor;
+	  unsigned int Tag_c = Tag_RISCV_priv_spec_revision;
+	  riscv_get_priv_spec_class_from_numbers (attr[Tag_a].i,
+						  attr[Tag_b].i,
+						  attr[Tag_c].i,
+						  &default_priv_spec);
+	  default_arch = attr[Tag_RISCV_arch].s;
 	}
     }
 
