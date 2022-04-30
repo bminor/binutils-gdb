@@ -736,9 +736,6 @@ struct breakpoint
   /* Return a range of this breakpoint's locations.  */
   bp_location_range locations ();
 
-  /* Methods associated with this breakpoint.  */
-  const breakpoint_ops *ops = NULL;
-
   breakpoint *next = NULL;
   /* Type of breakpoint.  */
   bptype type = bp_none;
