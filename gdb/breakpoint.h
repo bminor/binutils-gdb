@@ -702,7 +702,7 @@ struct breakpoint
   virtual void print_mention () const;
 
   /* Print to FP the CLI command that recreates this breakpoint.  */
-  virtual void print_recreate (struct ui_file *fp);
+  virtual void print_recreate (struct ui_file *fp) const;
 
   /* Given the location (second parameter), this method decodes it and
      returns the SAL locations related to it.  For ordinary
@@ -881,7 +881,7 @@ struct watchpoint : public breakpoint
 
   enum print_stop_action print_it (const bpstat *bs) const override;
   void print_mention () const override;
-  void print_recreate (struct ui_file *fp) override;
+  void print_recreate (struct ui_file *fp) const override;
   bool explains_signal (enum gdb_signal) override;
 
   /* String form of exp to use for displaying to the user (malloc'd),
@@ -962,7 +962,7 @@ struct tracepoint : public breakpoint
 		      const target_waitstatus &ws) override;
   void print_one_detail (struct ui_out *uiout) const override;
   void print_mention () const override;
-  void print_recreate (struct ui_file *fp) override;
+  void print_recreate (struct ui_file *fp) const override;
   std::vector<symtab_and_line> decode_location
        (struct event_location *location,
 	struct program_space *search_pspace) override;

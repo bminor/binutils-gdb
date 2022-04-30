@@ -261,7 +261,7 @@ struct ordinary_breakpoint : public base_breakpoint
   int resources_needed (const struct bp_location *) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   void print_mention () const override;
-  void print_recreate (struct ui_file *fp) override;
+  void print_recreate (struct ui_file *fp) const override;
 };
 
 /* Internal breakpoints.  */
@@ -290,7 +290,7 @@ struct dprintf_breakpoint : public ordinary_breakpoint
 		      const address_space *aspace,
 		      CORE_ADDR bp_addr,
 		      const target_waitstatus &ws) override;
-  void print_recreate (struct ui_file *fp) override;
+  void print_recreate (struct ui_file *fp) const override;
   void after_condition_true (struct bpstat *bs) override;
 };
 
@@ -306,7 +306,7 @@ struct ranged_breakpoint : public ordinary_breakpoint
   bool print_one (bp_location **) const override;
   void print_one_detail (struct ui_out *) const override;
   void print_mention () const override;
-  void print_recreate (struct ui_file *fp) override;
+  void print_recreate (struct ui_file *fp) const override;
 };
 
 /* Static tracepoints with marker (`-m').  */
@@ -9303,7 +9303,7 @@ ranged_breakpoint::print_mention () const
 /* Implement the "print_recreate" method for ranged breakpoints.  */
 
 void
-ranged_breakpoint::print_recreate (struct ui_file *fp)
+ranged_breakpoint::print_recreate (struct ui_file *fp) const
 {
   gdb_printf (fp, "break-range %s, %s",
 	      event_location_to_string (location.get ()),
@@ -9691,7 +9691,7 @@ watchpoint::print_mention () const
 /* Implement the "print_recreate" method for watchpoints.  */
 
 void
-watchpoint::print_recreate (struct ui_file *fp)
+watchpoint::print_recreate (struct ui_file *fp) const
 {
   switch (type)
     {
@@ -9737,7 +9737,7 @@ struct masked_watchpoint : public watchpoint
   enum print_stop_action print_it (const bpstat *bs) const override;
   void print_one_detail (struct ui_out *) const override;
   void print_mention () const override;
-  void print_recreate (struct ui_file *fp) override;
+  void print_recreate (struct ui_file *fp) const override;
 };
 
 /* Implement the "insert" method for masked hardware watchpoints.  */
@@ -9879,7 +9879,7 @@ masked_watchpoint::print_mention () const
    watchpoints.  */
 
 void
-masked_watchpoint::print_recreate (struct ui_file *fp)
+masked_watchpoint::print_recreate (struct ui_file *fp) const
 {
   switch (type)
     {
@@ -11569,7 +11569,7 @@ breakpoint::print_mention () const
 }
 
 void
-breakpoint::print_recreate (struct ui_file *fp)
+breakpoint::print_recreate (struct ui_file *fp) const
 {
   internal_error_pure_virtual_called ();
 }
@@ -11748,7 +11748,7 @@ ordinary_breakpoint::print_mention () const
 }
 
 void
-ordinary_breakpoint::print_recreate (struct ui_file *fp)
+ordinary_breakpoint::print_recreate (struct ui_file *fp) const
 {
   if (type == bp_breakpoint && disposition == disp_del)
     gdb_printf (fp, "tbreak");
@@ -12004,7 +12004,7 @@ tracepoint::print_mention () const
 }
 
 void
-tracepoint::print_recreate (struct ui_file *fp)
+tracepoint::print_recreate (struct ui_file *fp) const
 {
   if (type == bp_fast_tracepoint)
     gdb_printf (fp, "ftrace");
@@ -12070,7 +12070,7 @@ dprintf_breakpoint::re_set ()
 /* Implement the "print_recreate" method for dprintf.  */
 
 void
-dprintf_breakpoint::print_recreate (struct ui_file *fp)
+dprintf_breakpoint::print_recreate (struct ui_file *fp) const
 {
   gdb_printf (fp, "dprintf %s,%s",
 	      event_location_to_string (location.get ()),

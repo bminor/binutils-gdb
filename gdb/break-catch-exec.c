@@ -46,7 +46,7 @@ struct exec_catchpoint : public breakpoint
   enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (bp_location **) const override;
   void print_mention () const override;
-  void print_recreate (struct ui_file *fp) override;
+  void print_recreate (struct ui_file *fp) const override;
 
   /* Filename of a program whose exec triggered this catchpoint.
      This field is only valid immediately after this catchpoint has
@@ -141,7 +141,7 @@ exec_catchpoint::print_mention () const
 /* Implement the "print_recreate" method for exec catchpoints.  */
 
 void
-exec_catchpoint::print_recreate (struct ui_file *fp)
+exec_catchpoint::print_recreate (struct ui_file *fp) const
 {
   gdb_printf (fp, "catch exec");
   print_recreate_thread (fp);

@@ -71,7 +71,7 @@ struct exception_catchpoint : public base_breakpoint
   enum print_stop_action print_it (const bpstat *bs) const override;
   bool print_one (bp_location **) const override;
   void print_mention () const override;
-  void print_recreate (struct ui_file *fp) override;
+  void print_recreate (struct ui_file *fp) const override;
   void print_one_detail (struct ui_out *) const override;
   void check_status (struct bpstat *bs) override;
   struct bp_location *allocate_location () override;
@@ -320,7 +320,7 @@ exception_catchpoint::print_mention () const
    catchpoints.  */
 
 void
-exception_catchpoint::print_recreate (struct ui_file *fp)
+exception_catchpoint::print_recreate (struct ui_file *fp) const
 {
   int bp_temp;
 
