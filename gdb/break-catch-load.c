@@ -35,6 +35,15 @@
 
 struct solib_catchpoint : public breakpoint
 {
+  solib_catchpoint (bool is_load_, const char *arg)
+    : is_load (is_load_),
+      regex (arg == nullptr ? nullptr : make_unique_xstrdup (arg)),
+      compiled (arg == nullptr
+		? nullptr
+		: new compiled_regex (arg, REG_NOSUB, _("Invalid regexp")))
+  {
+  }
+
   int insert_location (struct bp_location *) override;
   int remove_location (struct bp_location *,
 		       enum remove_bp_reason reason) override;
@@ -216,17 +225,11 @@ add_solib_catchpoint (const char *arg, bool is_load, bool is_temp, bool enabled)
   if (!arg)
     arg = "";
   arg = skip_spaces (arg);
+  if (*arg == '\0')
+    arg = nullptr;
 
-  std::unique_ptr<solib_catchpoint> c (new solib_catchpoint ());
+  std::unique_ptr<solib_catchpoint> c (new solib_catchpoint (is_load, arg));
 
-  if (*arg != '\0')
-    {
-      c->compiled.reset (new compiled_regex (arg, REG_NOSUB,
-					     _("Invalid regexp")));
-      c->regex = make_unique_xstrdup (arg);
-    }
-
-  c->is_load = is_load;
   init_catchpoint (c.get (), gdbarch, is_temp, NULL);
 
   c->enable_state = enabled ? bp_enabled : bp_disabled;
