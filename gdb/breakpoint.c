@@ -2144,7 +2144,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 		= target_can_use_hardware_watchpoint (type, i, other_type_used);
 	      if (target_resources_ok <= 0)
 		{
-		  int sw_mode = b->works_in_software_mode ();
+		  bool sw_mode = b->works_in_software_mode ();
 
 		  if (target_resources_ok == 0 && !sw_mode)
 		    error (_("Target does not support this type of "
@@ -9558,7 +9558,7 @@ watchpoint::resources_needed (const struct bp_location *bl)
 /* Implement the "works_in_software_mode" method for hardware
    watchpoints.  */
 
-int
+bool
 watchpoint::works_in_software_mode () const
 {
   /* Read and access watchpoints only work with hardware support.  */
@@ -9733,7 +9733,7 @@ struct masked_watchpoint : public watchpoint
   int remove_location (struct bp_location *,
 		       enum remove_bp_reason reason) override;
   int resources_needed (const struct bp_location *) override;
-  int works_in_software_mode () const override;
+  bool works_in_software_mode () const override;
   enum print_stop_action print_it (struct bpstat *bs) override;
   void print_one_detail (struct ui_out *) const override;
   void print_mention () override;
@@ -9771,10 +9771,10 @@ masked_watchpoint::resources_needed (const struct bp_location *bl)
 /* Implement the "works_in_software_mode" method for masked hardware
    watchpoints.  */
 
-int
+bool
 masked_watchpoint::works_in_software_mode () const
 {
-  return 0;
+  return false;
 }
 
 /* Implement the "print_it" method for masked hardware
@@ -11546,12 +11546,6 @@ breakpoint::breakpoint_hit (const struct bp_location *bl,
 			    const address_space *aspace,
 			    CORE_ADDR bp_addr,
 			    const target_waitstatus &ws)
-{
-  internal_error_pure_virtual_called ();
-}
-
-int
-breakpoint::works_in_software_mode () const
 {
   internal_error_pure_virtual_called ();
 }

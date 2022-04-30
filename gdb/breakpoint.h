@@ -668,11 +668,6 @@ struct breakpoint
      the breakpoint or watchpoint needs one debug register.  */
   virtual int resources_needed (const struct bp_location *);
 
-  /* Tell whether we can downgrade from a hardware watchpoint to a software
-     one.  If not, the user will not be able to enable the watchpoint when
-     there are not enough hardware resources available.  */
-  virtual int works_in_software_mode () const;
-
   /* The normal print routine for this breakpoint, called when we
      hit it.  */
   virtual enum print_stop_action print_it (struct bpstat *bs);
@@ -878,7 +873,12 @@ struct watchpoint : public breakpoint
 		      const target_waitstatus &ws) override;
   void check_status (struct bpstat *bs) override;
   int resources_needed (const struct bp_location *) override;
-  int works_in_software_mode () const override;
+
+  /* Tell whether we can downgrade from a hardware watchpoint to a software
+     one.  If not, the user will not be able to enable the watchpoint when
+     there are not enough hardware resources available.  */
+  virtual bool works_in_software_mode () const;
+
   enum print_stop_action print_it (struct bpstat *bs) override;
   void print_mention () override;
   void print_recreate (struct ui_file *fp) override;
