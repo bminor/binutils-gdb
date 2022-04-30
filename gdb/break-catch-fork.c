@@ -34,6 +34,11 @@
 
 struct fork_catchpoint : public breakpoint
 {
+  explicit fork_catchpoint (bool is_vfork_)
+    : is_vfork (is_vfork_)
+  {
+  }
+
   int insert_location (struct bp_location *) override;
   int remove_location (struct bp_location *,
 		       enum remove_bp_reason reason) override;
@@ -52,7 +57,7 @@ struct fork_catchpoint : public breakpoint
   /* Process id of a child process whose forking triggered this
      catchpoint.  This field is only valid immediately after this
      catchpoint has triggered.  */
-  ptid_t forked_inferior_pid;
+  ptid_t forked_inferior_pid = null_ptid;
 };
 
 /* Implement the "insert" method for fork catchpoints.  */
@@ -180,11 +185,9 @@ create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch,
 				    bool temp, const char *cond_string,
 				    bool is_vfork)
 {
-  std::unique_ptr<fork_catchpoint> c (new fork_catchpoint ());
+  std::unique_ptr<fork_catchpoint> c (new fork_catchpoint (is_vfork));
 
   init_catchpoint (c.get (), gdbarch, temp, cond_string);
-  c->is_vfork = is_vfork;
-  c->forked_inferior_pid = null_ptid;
 
   install_breakpoint (0, std::move (c), 1);
 }
