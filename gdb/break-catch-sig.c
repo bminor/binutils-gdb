@@ -38,11 +38,12 @@
 /* An instance of this type is used to represent a signal
    catchpoint.  */
 
-struct signal_catchpoint : public breakpoint
+struct signal_catchpoint : public catchpoint
 {
-  signal_catchpoint (struct gdbarch *gdbarch, std::vector<gdb_signal> &&sigs,
+  signal_catchpoint (struct gdbarch *gdbarch, bool temp,
+		     std::vector<gdb_signal> &&sigs,
 		     bool catch_all_)
-    : breakpoint (gdbarch, bp_catchpoint),
+    : catchpoint (gdbarch, temp, nullptr),
       signals_to_be_caught (std::move (sigs)),
       catch_all (catch_all_)
   {
@@ -325,8 +326,7 @@ create_signal_catchpoint (int tempflag, std::vector<gdb_signal> &&filter,
   struct gdbarch *gdbarch = get_current_arch ();
 
   std::unique_ptr<signal_catchpoint> c
-    (new signal_catchpoint (gdbarch, std::move (filter), catch_all));
-  init_catchpoint (c.get (), gdbarch, tempflag, nullptr);
+    (new signal_catchpoint (gdbarch, tempflag, std::move (filter), catch_all));
 
   install_breakpoint (0, std::move (c), 1);
 }

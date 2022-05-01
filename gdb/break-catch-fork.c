@@ -32,10 +32,11 @@
    catchpoint.  A breakpoint is really of this type iff its ops pointer points
    to CATCH_FORK_BREAKPOINT_OPS.  */
 
-struct fork_catchpoint : public breakpoint
+struct fork_catchpoint : public catchpoint
 {
-  fork_catchpoint (struct gdbarch *gdbarch, bool is_vfork_)
-    : breakpoint (gdbarch, bp_catchpoint),
+  fork_catchpoint (struct gdbarch *gdbarch, bool temp,
+		   const char *cond_string, bool is_vfork_)
+    : catchpoint (gdbarch, temp, cond_string),
       is_vfork (is_vfork_)
   {
   }
@@ -186,10 +187,8 @@ create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch,
 				    bool temp, const char *cond_string,
 				    bool is_vfork)
 {
-  std::unique_ptr<fork_catchpoint> c (new fork_catchpoint (gdbarch,
-							   is_vfork));
-
-  init_catchpoint (c.get (), gdbarch, temp, cond_string);
+  std::unique_ptr<fork_catchpoint> c
+    (new fork_catchpoint (gdbarch, temp, cond_string, is_vfork));
 
   install_breakpoint (0, std::move (c), 1);
 }

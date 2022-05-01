@@ -34,10 +34,10 @@
    A breakpoint is really of this type iff its ops pointer points to
    CATCH_EXEC_BREAKPOINT_OPS.  */
 
-struct exec_catchpoint : public breakpoint
+struct exec_catchpoint : public catchpoint
 {
-  explicit exec_catchpoint (struct gdbarch *gdbarch)
-    : breakpoint (gdbarch, bp_catchpoint)
+  exec_catchpoint (struct gdbarch *gdbarch, bool temp, const char *cond_string)
+    : catchpoint (gdbarch, temp, cond_string)
   {
   }
 
@@ -208,8 +208,8 @@ catch_exec_command_1 (const char *arg, int from_tty,
   if ((*arg != '\0') && !isspace (*arg))
     error (_("Junk at end of arguments."));
 
-  std::unique_ptr<exec_catchpoint> c (new exec_catchpoint (gdbarch));
-  init_catchpoint (c.get (), gdbarch, temp, cond_string);
+  std::unique_ptr<exec_catchpoint> c
+    (new exec_catchpoint (gdbarch, temp, cond_string));
 
   install_breakpoint (0, std::move (c), 1);
 }

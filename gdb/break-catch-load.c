@@ -33,10 +33,12 @@
    A breakpoint is really of this type iff its ops pointer points to
    CATCH_SOLIB_BREAKPOINT_OPS.  */
 
-struct solib_catchpoint : public breakpoint
+struct solib_catchpoint : public catchpoint
 {
-  solib_catchpoint (struct gdbarch *gdbarch, bool is_load_, const char *arg)
-    : breakpoint (gdbarch, bp_catchpoint),
+  solib_catchpoint (struct gdbarch *gdbarch, bool temp,
+		    const char *cond_string,
+		    bool is_load_, const char *arg)
+    : catchpoint (gdbarch, temp, cond_string),
       is_load (is_load_),
       regex (arg == nullptr ? nullptr : make_unique_xstrdup (arg)),
       compiled (arg == nullptr
@@ -229,10 +231,9 @@ add_solib_catchpoint (const char *arg, bool is_load, bool is_temp, bool enabled)
   if (*arg == '\0')
     arg = nullptr;
 
-  std::unique_ptr<solib_catchpoint> c (new solib_catchpoint (gdbarch,
+  std::unique_ptr<solib_catchpoint> c (new solib_catchpoint (gdbarch, is_temp,
+							     nullptr,
 							     is_load, arg));
-
-  init_catchpoint (c.get (), gdbarch, is_temp, NULL);
 
   c->enable_state = enabled ? bp_enabled : bp_disabled;
 

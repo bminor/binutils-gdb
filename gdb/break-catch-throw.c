@@ -65,12 +65,13 @@ static const struct exception_names exception_functions[] =
 
 /* The type of an exception catchpoint.  */
 
-struct exception_catchpoint : public base_breakpoint
+struct exception_catchpoint : public catchpoint
 {
   exception_catchpoint (struct gdbarch *gdbarch,
+			bool temp, const char *cond_string,
 			enum exception_event_kind kind_,
 			std::string &&except_rx)
-    : base_breakpoint (gdbarch, bp_catchpoint),
+    : catchpoint (gdbarch, temp, cond_string),
       kind (kind_),
       exception_rx (std::move (except_rx)),
       pattern (exception_rx.empty ()
@@ -371,9 +372,8 @@ handle_gnu_v3_exceptions (int tempflag, std::string &&except_rx,
   struct gdbarch *gdbarch = get_current_arch ();
 
   std::unique_ptr<exception_catchpoint> cp
-    (new exception_catchpoint (gdbarch, ex_event, std::move (except_rx)));
-
-  init_catchpoint (cp.get (), gdbarch, tempflag, cond_string);
+    (new exception_catchpoint (gdbarch, tempflag, cond_string,
+			       ex_event, std::move (except_rx)));
 
   cp->re_set ();
 

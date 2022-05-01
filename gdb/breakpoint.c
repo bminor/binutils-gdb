@@ -7804,23 +7804,18 @@ disable_breakpoints_in_freed_objfile (struct objfile *objfile)
 
 /* See breakpoint.h.  */
 
-void
-init_catchpoint (struct breakpoint *b,
-		 struct gdbarch *gdbarch, bool temp,
-		 const char *cond_string)
+catchpoint::catchpoint (struct gdbarch *gdbarch, bool temp,
+			const char *cond_string_)
+  : base_breakpoint (gdbarch, bp_catchpoint)
 {
   symtab_and_line sal;
   sal.pspace = current_program_space;
 
-  /* This should already have been set in the constructor.  */
-  gdb_assert (b->type == bp_catchpoint);
-  init_raw_breakpoint (b, sal, bp_catchpoint);
+  init_raw_breakpoint (this, sal, bp_catchpoint);
 
-  if (cond_string == nullptr)
-    b->cond_string.reset ();
-  else
-    b->cond_string = make_unique_xstrdup (cond_string);
-  b->disposition = temp ? disp_del : disp_donttouch;
+  if (cond_string_ != nullptr)
+    cond_string = make_unique_xstrdup (cond_string_);
+  disposition = temp ? disp_del : disp_donttouch;
 }
 
 void

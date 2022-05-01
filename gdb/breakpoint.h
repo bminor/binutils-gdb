@@ -1012,6 +1012,20 @@ struct tracepoint : public breakpoint
   int static_trace_marker_id_idx = 0;
 };
 
+/* The base class for catchpoints.  */
+
+struct catchpoint : public base_breakpoint
+{
+  /* If TEMP is true, then make the breakpoint temporary.  If
+     COND_STRING is not NULL, then store it in the breakpoint.  */
+  catchpoint (struct gdbarch *gdbarch, bool temp, const char *cond_string);
+
+  void re_set () override
+  {
+    /* For catchpoints, the default is to do nothing.  */
+  }
+};
+
 
 /* The following stuff is an abstract data type "bpstat" ("breakpoint
    status").  This provides the ability to determine whether we have
@@ -1439,14 +1453,6 @@ extern void
 				 int tempflag,
 				 int enabled,
 				 int from_tty);
-
-/* Initialize a new breakpoint of the bp_catchpoint kind.  If TEMP
-   is true, then make the breakpoint temporary.  If COND_STRING is
-   not NULL, then store it in the breakpoint.  */
-
-extern void init_catchpoint (struct breakpoint *b,
-			     struct gdbarch *gdbarch, bool temp,
-			     const char *cond_string);
 
 /* Add breakpoint B on the breakpoint list, and notify the user, the
    target and breakpoint_created observers of its existence.  If
