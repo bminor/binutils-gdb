@@ -32,6 +32,7 @@ if {[build_executable "build" $testfile $srcfile {debug}] == -1} {
 
 proc test {target_non_stop} {
     global binfile
+    global gdb_prompt
 
     save_vars { ::GDBFLAGS } {
 	# If GDB and GDBserver are both running locally, set the sysroot to avoid
@@ -64,9 +65,11 @@ proc test {target_non_stop} {
     set spawn_id_list [spawn_wait_for_attach [list $binfile]]
     set test_spawn_id [lindex $spawn_id_list 0]
     set testpid [spawn_id_get_pid $test_spawn_id]
-    gdb_test "attach $testpid" \
-	"Attaching to Remote target.*" \
-	"attach to the program via remote"
+    gdb_test_multiple "attach $testpid" "attach to the program via remote" {
+	-re "Attaching to Remote target.*\[\r\n\]+$gdb_prompt " {
+	    pass $gdb_test_name
+	}
+    }
 
     # Check that we have two threads.  Bad GDB duplicated the
     # thread coming from the remote when target-non-stop is off;
