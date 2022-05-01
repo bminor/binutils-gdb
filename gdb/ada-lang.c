@@ -12122,8 +12122,10 @@ public:
 
 struct ada_catchpoint : public base_breakpoint
 {
-  explicit ada_catchpoint (enum ada_exception_catchpoint_kind kind)
-    : m_kind (kind)
+  ada_catchpoint (struct gdbarch *gdbarch_,
+		  enum ada_exception_catchpoint_kind kind)
+    : base_breakpoint (gdbarch_, bp_catchpoint),
+      m_kind (kind)
   {
   }
 
@@ -12757,7 +12759,7 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
   std::string addr_string;
   struct symtab_and_line sal = ada_exception_sal (ex_kind, &addr_string);
 
-  std::unique_ptr<ada_catchpoint> c (new ada_catchpoint (ex_kind));
+  std::unique_ptr<ada_catchpoint> c (new ada_catchpoint (gdbarch, ex_kind));
   init_ada_exception_breakpoint (c.get (), gdbarch, sal, addr_string.c_str (),
 				 tempflag, disabled, from_tty);
   c->excep_string = excep_string;

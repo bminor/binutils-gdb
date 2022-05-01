@@ -37,8 +37,9 @@
 
 struct syscall_catchpoint : public breakpoint
 {
-  explicit syscall_catchpoint (std::vector<int> &&calls)
-    : syscalls_to_be_caught (std::move (calls))
+  syscall_catchpoint (struct gdbarch *gdbarch, std::vector<int> &&calls)
+    : breakpoint (gdbarch, bp_catchpoint),
+      syscalls_to_be_caught (std::move (calls))
   {
   }
 
@@ -353,7 +354,7 @@ create_syscall_event_catchpoint (int tempflag, std::vector<int> &&filter)
   struct gdbarch *gdbarch = get_current_arch ();
 
   std::unique_ptr<syscall_catchpoint> c
-    (new syscall_catchpoint (std::move (filter)));
+    (new syscall_catchpoint (gdbarch, std::move (filter)));
   init_catchpoint (c.get (), gdbarch, tempflag, nullptr);
 
   install_breakpoint (0, std::move (c), 1);

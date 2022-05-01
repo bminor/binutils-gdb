@@ -620,7 +620,15 @@ using bp_location_range = next_range<bp_location>;
 
 struct breakpoint
 {
-  breakpoint () = default;
+  breakpoint (struct gdbarch *gdbarch_, enum bptype bptype)
+    : type (bptype),
+      gdbarch (gdbarch_),
+      language (current_language->la_language),
+      input_radix (::input_radix),
+      related_breakpoint (this)
+  {
+  }
+
   DISABLE_COPY_AND_ASSIGN (breakpoint);
 
   virtual ~breakpoint () = default;
@@ -784,11 +792,11 @@ struct breakpoint
   event_location_up location_range_end;
 
   /* Architecture we used to set the breakpoint.  */
-  struct gdbarch *gdbarch = NULL;
+  struct gdbarch *gdbarch;
   /* Language we used to set the breakpoint.  */
-  enum language language = language_unknown;
+  enum language language;
   /* Input radix we used to set the breakpoint.  */
-  int input_radix = 0;
+  int input_radix;
   /* String form of the breakpoint condition (malloc'd), or NULL if
      there is no condition.  */
   gdb::unique_xmalloc_ptr<char> cond_string;
@@ -801,7 +809,7 @@ struct breakpoint
      using watchpoints on local variables (might the concept of a
      related breakpoint be useful elsewhere, if not just call it the
      watchpoint_scope breakpoint or something like that.  FIXME).  */
-  breakpoint *related_breakpoint = NULL;
+  breakpoint *related_breakpoint;
 
   /* Thread number for thread-specific breakpoint, or -1 if don't
      care.  */
@@ -849,6 +857,8 @@ protected:
    breakpoints, etc.).  */
 struct base_breakpoint : public breakpoint
 {
+  using breakpoint::breakpoint;
+
   void re_set () override;
   int insert_location (struct bp_location *) override;
   int remove_location (struct bp_location *,
@@ -866,6 +876,8 @@ struct base_breakpoint : public breakpoint
 
 struct watchpoint : public breakpoint
 {
+  using breakpoint::breakpoint;
+
   void re_set () override;
   int insert_location (struct bp_location *) override;
   int remove_location (struct bp_location *,
@@ -959,6 +971,8 @@ extern bool is_exception_catchpoint (breakpoint *bp);
 
 struct tracepoint : public breakpoint
 {
+  using breakpoint::breakpoint;
+
   void re_set () override;
   int breakpoint_hit (const struct bp_location *bl,
 		      const address_space *aspace, CORE_ADDR bp_addr,

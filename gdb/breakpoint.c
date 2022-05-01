@@ -258,6 +258,8 @@ static const struct breakpoint_ops tracepoint_probe_breakpoint_ops =
 /* The structure to be used in regular breakpoints.  */
 struct ordinary_breakpoint : public base_breakpoint
 {
+  using base_breakpoint::base_breakpoint;
+
   int resources_needed (const struct bp_location *) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
   void print_mention () const override;
@@ -267,6 +269,8 @@ struct ordinary_breakpoint : public base_breakpoint
 /* Internal breakpoints.  */
 struct internal_breakpoint : public base_breakpoint
 {
+  using base_breakpoint::base_breakpoint;
+
   void re_set () override;
   void check_status (struct bpstat *bs) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
@@ -276,6 +280,8 @@ struct internal_breakpoint : public base_breakpoint
 /* Momentary breakpoints.  */
 struct momentary_breakpoint : public base_breakpoint
 {
+  using base_breakpoint::base_breakpoint;
+
   void re_set () override;
   void check_status (struct bpstat *bs) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
@@ -285,6 +291,8 @@ struct momentary_breakpoint : public base_breakpoint
 /* DPrintf breakpoints.  */
 struct dprintf_breakpoint : public ordinary_breakpoint
 {
+  using ordinary_breakpoint::ordinary_breakpoint;
+
   void re_set () override;
   int breakpoint_hit (const struct bp_location *bl,
 		      const address_space *aspace,
@@ -297,6 +305,11 @@ struct dprintf_breakpoint : public ordinary_breakpoint
 /* Ranged breakpoints.  */
 struct ranged_breakpoint : public ordinary_breakpoint
 {
+  explicit ranged_breakpoint (struct gdbarch *gdbarch)
+    : ordinary_breakpoint (gdbarch, bp_hardware_breakpoint)
+  {
+  }
+
   int breakpoint_hit (const struct bp_location *bl,
 		      const address_space *aspace,
 		      CORE_ADDR bp_addr,
@@ -312,6 +325,8 @@ struct ranged_breakpoint : public ordinary_breakpoint
 /* Static tracepoints with marker (`-m').  */
 struct static_marker_tracepoint : public tracepoint
 {
+  using tracepoint::tracepoint;
+
   std::vector<symtab_and_line> decode_location
        (struct event_location *location,
 	struct program_space *search_pspace) override;
@@ -1193,6 +1208,8 @@ check_no_tracepoint_commands (struct command_line *commands)
 
 struct longjmp_breakpoint : public momentary_breakpoint
 {
+  using momentary_breakpoint::momentary_breakpoint;
+
   ~longjmp_breakpoint () override;
 };
 
@@ -1219,7 +1236,7 @@ is_tracepoint (const struct breakpoint *b)
    TYPE.  */
 
 static std::unique_ptr<breakpoint>
-new_breakpoint_from_type (bptype type)
+new_breakpoint_from_type (struct gdbarch *gdbarch, bptype type)
 {
   breakpoint *b;
 
@@ -1227,21 +1244,21 @@ new_breakpoint_from_type (bptype type)
     {
     case bp_breakpoint:
     case bp_hardware_breakpoint:
-      b = new ordinary_breakpoint ();
+      b = new ordinary_breakpoint (gdbarch, type);
       break;
 
     case bp_fast_tracepoint:
     case bp_static_tracepoint:
     case bp_tracepoint:
-      b = new tracepoint ();
+      b = new tracepoint (gdbarch, type);
       break;
 
     case bp_static_marker_tracepoint:
-      b = new static_marker_tracepoint ();
+      b = new static_marker_tracepoint (gdbarch, type);
       break;
 
     case bp_dprintf:
-      b = new dprintf_breakpoint ();
+      b = new dprintf_breakpoint (gdbarch, type);
       break;
 
     case bp_overlay_event:
@@ -1251,12 +1268,12 @@ new_breakpoint_from_type (bptype type)
     case bp_thread_event:
     case bp_jit_event:
     case bp_shlib_event:
-      b = new internal_breakpoint ();
+      b = new internal_breakpoint (gdbarch, type);
       break;
 
     case bp_longjmp:
     case bp_exception:
-      b = new longjmp_breakpoint ();
+      b = new longjmp_breakpoint (gdbarch, type);
       break;
 
     case bp_watchpoint_scope:
@@ -1270,7 +1287,7 @@ new_breakpoint_from_type (bptype type)
     case bp_call_dummy:
     case bp_until:
     case bp_std_terminate:
-      b = new momentary_breakpoint ();
+      b = new momentary_breakpoint (gdbarch, type);
       break;
 
     default:
@@ -7215,20 +7232,6 @@ add_to_breakpoint_chain (std::unique_ptr<breakpoint> &&b)
   return result;
 }
 
-/* Initializes breakpoint B with type BPTYPE and no locations yet.  */
-
-static void
-init_raw_breakpoint_without_location (struct breakpoint *b,
-				      struct gdbarch *gdbarch,
-				      enum bptype bptype)
-{
-  b->type = bptype;
-  b->gdbarch = gdbarch;
-  b->language = current_language->la_language;
-  b->input_radix = input_radix;
-  b->related_breakpoint = b;
-}
-
 /* Helper to set_raw_breakpoint below.  Creates a breakpoint
    that has type BPTYPE and has no locations as yet.  */
 
@@ -7236,9 +7239,8 @@ static struct breakpoint *
 set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
 				     enum bptype bptype)
 {
-  std::unique_ptr<breakpoint> b = new_breakpoint_from_type (bptype);
+  std::unique_ptr<breakpoint> b = new_breakpoint_from_type (gdbarch, bptype);
 
-  init_raw_breakpoint_without_location (b.get (), gdbarch, bptype);
   return add_to_breakpoint_chain (std::move (b));
 }
 
@@ -7303,11 +7305,9 @@ get_sal_arch (struct symtab_and_line sal)
    information regarding the creation of a new breakpoint.  */
 
 static void
-init_raw_breakpoint (struct breakpoint *b, struct gdbarch *gdbarch,
-		     struct symtab_and_line sal, enum bptype bptype)
+init_raw_breakpoint (struct breakpoint *b, struct symtab_and_line sal,
+		     enum bptype bptype)
 {
-  init_raw_breakpoint_without_location (b, gdbarch, bptype);
-
   add_location_to_breakpoint (b, &sal);
 
   if (bptype != bp_catchpoint)
@@ -7339,9 +7339,9 @@ static struct breakpoint *
 set_raw_breakpoint (struct gdbarch *gdbarch,
 		    struct symtab_and_line sal, enum bptype bptype)
 {
-  std::unique_ptr<breakpoint> b = new_breakpoint_from_type (bptype);
+  std::unique_ptr<breakpoint> b = new_breakpoint_from_type (gdbarch, bptype);
 
-  init_raw_breakpoint (b.get (), gdbarch, sal, bptype);
+  init_raw_breakpoint (b.get (), sal, bptype);
   return add_to_breakpoint_chain (std::move (b));
 }
 
@@ -7812,7 +7812,9 @@ init_catchpoint (struct breakpoint *b,
   symtab_and_line sal;
   sal.pspace = current_program_space;
 
-  init_raw_breakpoint (b, gdbarch, sal, bp_catchpoint);
+  /* This should already have been set in the constructor.  */
+  gdb_assert (b->type == bp_catchpoint);
+  init_raw_breakpoint (b, sal, bp_catchpoint);
 
   if (cond_string == nullptr)
     b->cond_string.reset ();
@@ -7944,9 +7946,8 @@ enable_breakpoints_after_startup (void)
 static struct breakpoint *
 new_single_step_breakpoint (int thread, struct gdbarch *gdbarch)
 {
-  std::unique_ptr<breakpoint> b (new momentary_breakpoint ());
-
-  init_raw_breakpoint_without_location (b.get (), gdbarch, bp_single_step);
+  std::unique_ptr<breakpoint> b (new momentary_breakpoint (gdbarch,
+							   bp_single_step));
 
   b->disposition = disp_donttouch;
   b->frame_id = null_frame_id;
@@ -8325,7 +8326,7 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 
       if (&sal == &sals[0])
 	{
-	  init_raw_breakpoint (b, gdbarch, sal, type);
+	  init_raw_breakpoint (b, sal, type);
 	  b->thread = thread;
 	  b->task = task;
 
@@ -8435,7 +8436,7 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		       int enabled, int internal, unsigned flags,
 		       int display_canonical)
 {
-  std::unique_ptr<breakpoint> b = new_breakpoint_from_type (type);
+  std::unique_ptr<breakpoint> b = new_breakpoint_from_type (gdbarch, type);
 
   init_breakpoint_sal (b.get (), gdbarch,
 		       sals, std::move (location),
@@ -8984,9 +8985,8 @@ create_breakpoint (struct gdbarch *gdbarch,
     }
   else
     {
-      std::unique_ptr <breakpoint> b = new_breakpoint_from_type (type_wanted);
-
-      init_raw_breakpoint_without_location (b.get (), gdbarch, type_wanted);
+      std::unique_ptr <breakpoint> b = new_breakpoint_from_type (gdbarch,
+								 type_wanted);
       b->location = copy_event_location (location);
 
       if (parse_extra)
@@ -9432,9 +9432,8 @@ break_range_command (const char *arg, int from_tty)
     }
 
   /* Now set up the breakpoint.  */
-  std::unique_ptr<breakpoint> br (new ranged_breakpoint ());
-  init_raw_breakpoint (br.get (), get_current_arch (),
-		       sal_start, bp_hardware_breakpoint);
+  std::unique_ptr<breakpoint> br (new ranged_breakpoint (get_current_arch ()));
+  init_raw_breakpoint (br.get (), sal_start, bp_hardware_breakpoint);
   b = add_to_breakpoint_chain (std::move (br));
 
   set_breakpoint_count (breakpoint_count + 1);
@@ -9729,6 +9728,8 @@ watchpoint::explains_signal (enum gdb_signal sig)
 
 struct masked_watchpoint : public watchpoint
 {
+  using watchpoint::watchpoint;
+
   int insert_location (struct bp_location *) override;
   int remove_location (struct bp_location *,
 		       enum remove_bp_reason reason) override;
@@ -10164,10 +10165,9 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 
   std::unique_ptr<watchpoint> w;
   if (use_mask)
-    w.reset (new masked_watchpoint ());
+    w.reset (new masked_watchpoint (nullptr, bp_type));
   else
-    w.reset (new watchpoint ());
-  init_raw_breakpoint_without_location (w.get (), nullptr, bp_type);
+    w.reset (new watchpoint (nullptr, bp_type));
 
   w->thread = thread;
   w->task = task;
@@ -10620,7 +10620,7 @@ init_ada_exception_breakpoint (struct breakpoint *b,
 	 enough for now, though.  */
     }
 
-  init_raw_breakpoint (b, gdbarch, sal, bp_catchpoint);
+  init_raw_breakpoint (b, sal, bp_catchpoint);
 
   b->enable_state = enabled ? bp_enabled : bp_disabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;
@@ -12154,7 +12154,8 @@ strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
       event_location_up location
 	= copy_event_location (canonical->location.get ());
 
-      std::unique_ptr<tracepoint> tp (new tracepoint ());
+      std::unique_ptr<tracepoint> tp (new tracepoint (gdbarch,
+						      type_wanted));
       init_breakpoint_sal (tp.get (), gdbarch, lsal.sals[i],
 			   std::move (location), NULL,
 			   std::move (cond_string),

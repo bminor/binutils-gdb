@@ -34,8 +34,9 @@
 
 struct fork_catchpoint : public breakpoint
 {
-  explicit fork_catchpoint (bool is_vfork_)
-    : is_vfork (is_vfork_)
+  fork_catchpoint (struct gdbarch *gdbarch, bool is_vfork_)
+    : breakpoint (gdbarch, bp_catchpoint),
+      is_vfork (is_vfork_)
   {
   }
 
@@ -185,7 +186,8 @@ create_fork_vfork_event_catchpoint (struct gdbarch *gdbarch,
 				    bool temp, const char *cond_string,
 				    bool is_vfork)
 {
-  std::unique_ptr<fork_catchpoint> c (new fork_catchpoint (is_vfork));
+  std::unique_ptr<fork_catchpoint> c (new fork_catchpoint (gdbarch,
+							   is_vfork));
 
   init_catchpoint (c.get (), gdbarch, temp, cond_string);
 

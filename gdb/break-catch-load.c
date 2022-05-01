@@ -35,8 +35,9 @@
 
 struct solib_catchpoint : public breakpoint
 {
-  solib_catchpoint (bool is_load_, const char *arg)
-    : is_load (is_load_),
+  solib_catchpoint (struct gdbarch *gdbarch, bool is_load_, const char *arg)
+    : breakpoint (gdbarch, bp_catchpoint),
+      is_load (is_load_),
       regex (arg == nullptr ? nullptr : make_unique_xstrdup (arg)),
       compiled (arg == nullptr
 		? nullptr
@@ -228,7 +229,8 @@ add_solib_catchpoint (const char *arg, bool is_load, bool is_temp, bool enabled)
   if (*arg == '\0')
     arg = nullptr;
 
-  std::unique_ptr<solib_catchpoint> c (new solib_catchpoint (is_load, arg));
+  std::unique_ptr<solib_catchpoint> c (new solib_catchpoint (gdbarch,
+							     is_load, arg));
 
   init_catchpoint (c.get (), gdbarch, is_temp, NULL);
 

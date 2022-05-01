@@ -36,6 +36,11 @@
 
 struct exec_catchpoint : public breakpoint
 {
+  explicit exec_catchpoint (struct gdbarch *gdbarch)
+    : breakpoint (gdbarch, bp_catchpoint)
+  {
+  }
+
   int insert_location (struct bp_location *) override;
   int remove_location (struct bp_location *,
 		       enum remove_bp_reason reason) override;
@@ -203,7 +208,7 @@ catch_exec_command_1 (const char *arg, int from_tty,
   if ((*arg != '\0') && !isspace (*arg))
     error (_("Junk at end of arguments."));
 
-  std::unique_ptr<exec_catchpoint> c (new exec_catchpoint ());
+  std::unique_ptr<exec_catchpoint> c (new exec_catchpoint (gdbarch));
   init_catchpoint (c.get (), gdbarch, temp, cond_string);
 
   install_breakpoint (0, std::move (c), 1);

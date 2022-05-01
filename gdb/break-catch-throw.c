@@ -67,9 +67,11 @@ static const struct exception_names exception_functions[] =
 
 struct exception_catchpoint : public base_breakpoint
 {
-  exception_catchpoint (enum exception_event_kind kind_,
+  exception_catchpoint (struct gdbarch *gdbarch,
+			enum exception_event_kind kind_,
 			std::string &&except_rx)
-    : kind (kind_),
+    : base_breakpoint (gdbarch, bp_catchpoint),
+      kind (kind_),
       exception_rx (std::move (except_rx)),
       pattern (exception_rx.empty ()
 	       ? nullptr
@@ -366,10 +368,12 @@ handle_gnu_v3_exceptions (int tempflag, std::string &&except_rx,
 			  const char *cond_string,
 			  enum exception_event_kind ex_event, int from_tty)
 {
-  std::unique_ptr<exception_catchpoint> cp
-    (new exception_catchpoint (ex_event, std::move (except_rx)));
+  struct gdbarch *gdbarch = get_current_arch ();
 
-  init_catchpoint (cp.get (), get_current_arch (), tempflag, cond_string);
+  std::unique_ptr<exception_catchpoint> cp
+    (new exception_catchpoint (gdbarch, ex_event, std::move (except_rx)));
+
+  init_catchpoint (cp.get (), gdbarch, tempflag, cond_string);
 
   cp->re_set ();
 
