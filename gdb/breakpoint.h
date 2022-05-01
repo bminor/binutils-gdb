@@ -620,6 +620,9 @@ using bp_location_range = next_range<bp_location>;
 
 struct breakpoint
 {
+  breakpoint () = default;
+  DISABLE_COPY_AND_ASSIGN (breakpoint);
+
   virtual ~breakpoint () = default;
 
   /* Allocate a location for this breakpoint.  */
