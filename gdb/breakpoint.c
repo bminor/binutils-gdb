@@ -91,8 +91,7 @@ static void breakpoint_re_set_default (struct breakpoint *);
 
 static void
   create_sals_from_location_default (struct event_location *location,
-				     struct linespec_result *canonical,
-				     enum bptype type_wanted);
+				     struct linespec_result *canonical);
 
 static void create_breakpoints_sal (struct gdbarch *,
 				    struct linespec_result *,
@@ -234,12 +233,10 @@ static int strace_marker_p (struct breakpoint *b);
 
 static void bkpt_probe_create_sals_from_location
      (struct event_location *location,
-      struct linespec_result *canonical,
-      enum bptype type_wanted);
+      struct linespec_result *canonical);
 static void tracepoint_probe_create_sals_from_location
      (struct event_location *location,
-      struct linespec_result *canonical,
-      enum bptype type_wanted);
+      struct linespec_result *canonical);
 
 const struct breakpoint_ops base_breakpoint_ops =
 {
@@ -8892,7 +8889,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 
   try
     {
-      ops->create_sals_from_location (location, &canonical, type_wanted);
+      ops->create_sals_from_location (location, &canonical);
     }
   catch (const gdb_exception_error &e)
     {
@@ -11960,8 +11957,8 @@ longjmp_breakpoint::~longjmp_breakpoint ()
 
 static void
 bkpt_probe_create_sals_from_location (struct event_location *location,
-				      struct linespec_result *canonical,
-				      enum bptype type_wanted)
+				      struct linespec_result *canonical)
+
 {
   struct linespec_sals lsal;
 
@@ -12079,11 +12076,10 @@ tracepoint::decode_location (struct event_location *location,
 static void
 tracepoint_probe_create_sals_from_location
   (struct event_location *location,
-   struct linespec_result *canonical,
-   enum bptype type_wanted)
+   struct linespec_result *canonical)
 {
   /* We use the same method for breakpoint on probes.  */
-  bkpt_probe_create_sals_from_location (location, canonical, type_wanted);
+  bkpt_probe_create_sals_from_location (location, canonical);
 }
 
 void
@@ -12150,8 +12146,7 @@ dprintf_breakpoint::after_condition_true (struct bpstat *bs)
 
 static void
 strace_marker_create_sals_from_location (struct event_location *location,
-					 struct linespec_result *canonical,
-					 enum bptype type_wanted)
+					 struct linespec_result *canonical)
 {
   struct linespec_sals lsal;
   const char *arg_start, *arg;
@@ -12894,8 +12889,7 @@ breakpoint_re_set_default (struct breakpoint *b)
 
 static void
 create_sals_from_location_default (struct event_location *location,
-				   struct linespec_result *canonical,
-				   enum bptype type_wanted)
+				   struct linespec_result *canonical)
 {
   parse_breakpoint_sals (location, canonical);
 }

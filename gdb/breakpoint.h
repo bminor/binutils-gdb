@@ -568,8 +568,7 @@ struct breakpoint_ops
 
      This function is called inside `create_breakpoint'.  */
   void (*create_sals_from_location) (struct event_location *location,
-				     struct linespec_result *canonical,
-				     enum bptype type_wanted);
+				     struct linespec_result *canonical);
 
   /* This method will be responsible for creating a breakpoint given its SALs.
      Usually, it just calls `create_breakpoints_sal' (for ordinary
