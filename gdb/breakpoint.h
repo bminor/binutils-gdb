@@ -987,18 +987,18 @@ struct tracepoint : public breakpoint
 
   /* Number of times this tracepoint should single-step and collect
      additional data.  */
-  long step_count;
+  long step_count = 0;
 
   /* Number of times this tracepoint should be hit before
      disabling/ending.  */
-  int pass_count;
+  int pass_count = 0;
 
   /* The number of the tracepoint on the target.  */
-  int number_on_target;
+  int number_on_target = 0;
 
   /* The total space taken by all the trace frames for this
      tracepoint.  */
-  ULONGEST traceframe_usage;
+  ULONGEST traceframe_usage = 0;
 
   /* The static tracepoint marker id, if known.  */
   std::string static_trace_marker_id;
@@ -1009,7 +1009,7 @@ struct tracepoint : public breakpoint
      the array of markers we found for the given marker ID for which
      this static tracepoint corresponds.  When resetting breakpoints,
      we will use this index to try to find the same marker again.  */
-  int static_trace_marker_id_idx;
+  int static_trace_marker_id_idx = 0;
 };
 
 
