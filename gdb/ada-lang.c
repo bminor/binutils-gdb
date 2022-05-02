@@ -12122,7 +12122,7 @@ public:
 
 /* An instance of this type is used to represent an Ada catchpoint.  */
 
-struct ada_catchpoint : public breakpoint
+struct ada_catchpoint : public base_breakpoint
 {
   explicit ada_catchpoint (enum ada_exception_catchpoint_kind kind)
     : m_kind (kind)
