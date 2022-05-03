@@ -18,13 +18,17 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "inferior.h"
 #include "target.h"
+
+#include "elf/common.h"
 
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <machine/reg.h>
 
 #include "fbsd-nat.h"
+#include "arm-tdep.h"
 #include "arm-fbsd-tdep.h"
 #include "inf-ptrace.h"
 
@@ -49,6 +53,27 @@ arm_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
   fetch_register_set<struct vfpreg> (regcache, regnum, PT_GETVFPREGS,
 				     &arm_fbsd_vfpregset);
 #endif
+#ifdef PT_GETREGSET
+  gdbarch *gdbarch = regcache->arch ();
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  if (tdep->tls_regnum > 0)
+    {
+      const struct regcache_map_entry arm_fbsd_tlsregmap[] =
+	{
+	  { 1, tdep->tls_regnum, 4 },
+	  { 0 }
+	};
+
+      const struct regset arm_fbsd_tlsregset =
+	{
+	  arm_fbsd_tlsregmap,
+	  regcache_supply_regset, regcache_collect_regset
+	};
+
+      fetch_regset<uint32_t> (regcache, regnum, NT_ARM_TLS, &arm_fbsd_tlsregset);
+    }
+#endif
 }
 
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
@@ -63,6 +88,27 @@ arm_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
   store_register_set<struct vfpreg> (regcache, regnum, PT_GETVFPREGS,
 				     PT_SETVFPREGS, &arm_fbsd_vfpregset);
 #endif
+#ifdef PT_GETREGSET
+  gdbarch *gdbarch = regcache->arch ();
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  if (tdep->tls_regnum > 0)
+    {
+      const struct regcache_map_entry arm_fbsd_tlsregmap[] =
+	{
+	  { 1, tdep->tls_regnum, 4 },
+	  { 0 }
+	};
+
+      const struct regset arm_fbsd_tlsregset =
+	{
+	  arm_fbsd_tlsregmap,
+	  regcache_supply_regset, regcache_collect_regset
+	};
+
+      store_regset<uint32_t> (regcache, regnum, NT_ARM_TLS, &arm_fbsd_tlsregset);
+    }
+#endif
 }
 
 /* Implement the to_read_description method.  */
@@ -71,8 +117,12 @@ const struct target_desc *
 arm_fbsd_nat_target::read_description ()
 {
   const struct target_desc *desc;
+  bool tls = false;
 
-  desc = arm_fbsd_read_description_auxv (this, false);
+#ifdef PT_GETREGSET
+  tls = have_regset (inferior_ptid, NT_ARM_TLS) != 0;
+#endif
+  desc = arm_fbsd_read_description_auxv (this, tls);
   if (desc == NULL)
     desc = this->beneath ()->read_description ();
   return desc;
