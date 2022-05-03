@@ -28,7 +28,6 @@
 #define ARCH_aarch64
 #define ARCH_alpha
 #define ARCH_bpf
-#define ARCH_cris
 #define ARCH_ia64
 #define ARCH_loongarch
 #define ARCH_mips
@@ -43,6 +42,7 @@
 #define ARCH_avr
 #define ARCH_bfin
 #define ARCH_cr16
+#define ARCH_cris
 #define ARCH_crx
 #define ARCH_csky
 #define ARCH_d10v
