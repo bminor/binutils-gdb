@@ -151,6 +151,17 @@ private:
   bool store_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   int store_op, const struct regset *regset,
 			   void *regs, size_t size);
+
+  /* Helper routines which use PT_GETREGSET and PT_SETREGSET for the
+     specified NOTE instead of regset-specific fetch and store
+     ops.  */
+
+  bool fetch_regset (struct regcache *regcache, int regnum, int note,
+		     const struct regset *regset, void *regs, size_t size);
+
+  bool store_regset (struct regcache *regcache, int regnum, int note,
+		     const struct regset *regset, void *regs, size_t size);
+
 protected:
   /* Wrapper versions of the above helpers which accept a register set
      type such as 'struct reg' or 'struct fpreg'.  */
@@ -171,6 +182,33 @@ protected:
     Regset regs;
     return store_register_set (regcache, regnum, fetch_op, store_op, regset,
 			       &regs, sizeof (regs));
+  }
+
+  /* Helper routine for use in read_description in subclasses.  This
+     routine checks if the register set for the specified NOTE is
+     present for a given PTID.  If the register set is present, the
+     the size of the register set is returned.  If the register set is
+     not present, zero is returned.  */
+
+  bool have_regset (ptid_t ptid, int note);
+
+  /* Wrapper versions of the PT_GETREGSET and PT_REGSET helpers which
+     accept a register set type.  */
+
+  template <class Regset>
+  bool fetch_regset (struct regcache *regcache, int regnum, int note,
+		     const struct regset *regset)
+  {
+    Regset regs;
+    return fetch_regset (regcache, regnum, note, regset, &regs, sizeof (regs));
+  }
+
+  template <class Regset>
+  bool store_regset (struct regcache *regcache, int regnum, int note,
+		     const struct regset *regset)
+  {
+    Regset regs;
+    return store_regset (regcache, regnum, note, regset, &regs, sizeof (regs));
   }
 };
 
