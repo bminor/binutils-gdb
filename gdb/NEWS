@@ -3,6 +3,9 @@
 
 *** Changes since GDB 12
 
+* Support for Thread Local Storage (TLS) variables on FreeBSD arm and
+  aarch64 architectures.
+
 * GDB now supports hardware watchpoints on FreeBSD/Aarch64.
 
 * Remove support for building against Python 2, it is now only possible to
