@@ -287,6 +287,26 @@ aarch64_store_mteregset (struct regcache *regcache, const void *buf)
   supply_register (regcache, mte_base, mte_regset);
 }
 
+/* Fill BUF with TLS register from the regcache.  */
+
+static void
+aarch64_fill_tlsregset (struct regcache *regcache, void *buf)
+{
+  int tls_regnum  = find_regno (regcache->tdesc, "tpidr");
+
+  collect_register (regcache, tls_regnum, buf);
+}
+
+/* Store TLS register to regcache.  */
+
+static void
+aarch64_store_tlsregset (struct regcache *regcache, const void *buf)
+{
+  int tls_regnum  = find_regno (regcache->tdesc, "tpidr");
+
+  supply_register (regcache, tls_regnum, buf);
+}
+
 bool
 aarch64_target::low_supports_breakpoints ()
 {
@@ -719,6 +739,10 @@ static struct regset_info aarch64_regsets[] =
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_TAGGED_ADDR_CTRL,
     0, OPTIONAL_REGS,
     aarch64_fill_mteregset, aarch64_store_mteregset },
+  /* TLS register.  */
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_ARM_TLS,
+    0, OPTIONAL_REGS,
+    aarch64_fill_tlsregset, aarch64_store_tlsregset },
   NULL_REGSET
 };
 
@@ -770,6 +794,10 @@ aarch64_adjust_register_sets (const struct aarch64_features &features)
 	  if (features.mte)
 	    regset->size = AARCH64_LINUX_SIZEOF_MTE;
 	  break;
+	case NT_ARM_TLS:
+	  if (features.tls)
+	    regset->size = AARCH64_TLS_REGS_SIZE;
+	  break;
 	default:
 	  gdb_assert_not_reached ("Unknown register set found.");
 	}
@@ -802,9 +830,11 @@ aarch64_target::low_arch_setup ()
       features.pauth = linux_get_hwcap (8) & AARCH64_HWCAP_PACA;
       /* A-profile MTE is 64-bit only.  */
       features.mte = linux_get_hwcap2 (8) & HWCAP2_MTE;
+      features.tls = true;
 
       current_process ()->tdesc
-	= aarch64_linux_read_description (vq, features.pauth, features.mte);
+	= aarch64_linux_read_description (vq, features.pauth, features.mte,
+					  features.tls);
 
       /* Adjust the register sets we should use for this particular set of
 	 features.  */
