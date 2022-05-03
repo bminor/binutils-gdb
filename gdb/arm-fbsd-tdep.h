@@ -26,6 +26,9 @@
    PC, and CPSR registers.  */
 #define ARM_FBSD_SIZEOF_GREGSET  (17 * 4)
 
+/* The TLS regset consists of a single register.  */
+#define	ARM_FBSD_SIZEOF_TLSREGSET	(4)
+
 /* The VFP regset consists of 32 D registers plus FPSCR, and the whole
    structure is padded to 64-bit alignment.  */
 #define	ARM_FBSD_SIZEOF_VFPREGSET	(33 * 8)
@@ -40,6 +43,6 @@ extern const struct regset arm_fbsd_vfpregset;
 #define	HWCAP_VFPD32		0x00080000
 
 extern const struct target_desc *
-arm_fbsd_read_description_auxv (struct target_ops *target);
+arm_fbsd_read_description_auxv (struct target_ops *target, bool tls);
 
 #endif /* ARM_FBSD_TDEP_H */

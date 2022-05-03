@@ -72,7 +72,7 @@ arm_fbsd_nat_target::read_description ()
 {
   const struct target_desc *desc;
 
-  desc = arm_fbsd_read_description_auxv (this);
+  desc = arm_fbsd_read_description_auxv (this, false);
   if (desc == NULL)
     desc = this->beneath ()->read_description ();
   return desc;
