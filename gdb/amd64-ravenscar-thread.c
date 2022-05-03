@@ -26,17 +26,6 @@
 #include "ravenscar-thread.h"
 #include "amd64-ravenscar-thread.h"
 
-struct amd64_ravenscar_ops : public ravenscar_arch_ops
-{
-  void fetch_registers (struct regcache *regcache, int regnum) override;
-  void store_registers (struct regcache *regcache, int regnum) override;
-
-private:
-
-  /* Return the offset of the register in the context buffer.  */
-  int register_offset (struct gdbarch *arch, int regnum);
-};
-
 /* x86-64 Ravenscar stores registers as:
 
    type Context_Buffer is record
@@ -54,92 +43,29 @@ private:
 */
 static const int register_layout[] =
 {
-  AMD64_RIP_REGNUM,
-  AMD64_EFLAGS_REGNUM,
-  AMD64_RSP_REGNUM,
-  AMD64_RBX_REGNUM,
-  AMD64_RBP_REGNUM,
-  AMD64_R12_REGNUM,
-  AMD64_R13_REGNUM,
-  AMD64_R14_REGNUM,
-  AMD64_R15_REGNUM,
+  /* RAX */ -1,
+  /* RBX */ 3 * 8,
+  /* RCX */ -1,
+  /* RDX */ -1,
+  /* RSI */ -1,
+  /* RDI */ -1,
+  /* RBP */ 4 * 8,
+  /* RSP */ 2 * 8,
+  /* R8 */ -1,
+  /* R9 */ -1,
+  /* R10 */ -1,
+  /* R11 */ -1,
+  /* R12 */ 5 * 8,
+  /* R13 */ 6 * 8,
+  /* R14 */ 7 * 8,
+  /* R15 */ 8 * 8,
+  /* RIP */ 0 * 8,
+  /* EFLAGS */ 1 * 8,
 };
-
-int
-amd64_ravenscar_ops::register_offset (struct gdbarch *arch, int regnum)
-{
-  for (int i = 0; i < ARRAY_SIZE (register_layout); ++i)
-    if (register_layout[i] == regnum)
-      return i * 8;
-  /* Not saved.  */
-  return -1;
-}
-
-/* Supply register REGNUM, which has been saved at REGISTER_ADDR, to
-   the regcache.  */
-
-static void
-supply_register_at_address (struct regcache *regcache, int regnum,
-                            CORE_ADDR register_addr)
-{
-  struct gdbarch *gdbarch = regcache->arch ();
-  int buf_size = register_size (gdbarch, regnum);
-  gdb_byte *buf;
-
-  buf = (gdb_byte *) alloca (buf_size);
-  read_memory (register_addr, buf, buf_size);
-  regcache->raw_supply (regnum, buf);
-}
-
-void
-amd64_ravenscar_ops::fetch_registers (struct regcache *regcache, int regnum)
-{
-  struct gdbarch *gdbarch = regcache->arch ();
-  const int num_regs = gdbarch_num_regs (gdbarch);
-  int current_regnum;
-  CORE_ADDR current_address;
-  CORE_ADDR thread_descriptor_address;
-
-  /* The tid is the thread_id field, which is a pointer to the thread.  */
-  thread_descriptor_address = (CORE_ADDR) inferior_ptid.tid ();
-
-  /* Read registers.  */
-  for (current_regnum = 0; current_regnum < num_regs; current_regnum++)
-    {
-      int offset = register_offset (gdbarch, current_regnum);
-
-      if (offset != -1)
-        {
-          current_address = thread_descriptor_address + offset;
-          supply_register_at_address (regcache, current_regnum,
-                                      current_address);
-        }
-    }
-}
-
-void
-amd64_ravenscar_ops::store_registers (struct regcache *regcache, int regnum)
-{
-  struct gdbarch *gdbarch = regcache->arch ();
-  int buf_size = register_size (gdbarch, regnum);
-  gdb_byte buf[buf_size];
-  CORE_ADDR register_address;
-
-  int offset = register_offset (gdbarch, regnum);
-  if (offset != -1)
-    {
-      register_address = inferior_ptid.tid () + offset;
-
-      regcache->raw_collect (regnum, buf);
-      write_memory (register_address,
-		    buf,
-		    buf_size);
-    }
-}
 
 /* The ravenscar_arch_ops vector for AMD64 targets.  */
 
-static struct amd64_ravenscar_ops amd64_ravenscar_ops;
+static struct ravenscar_arch_ops amd64_ravenscar_ops (register_layout);
 
 /* Register amd64_ravenscar_ops in GDBARCH.  */
 

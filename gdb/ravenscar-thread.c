@@ -477,6 +477,116 @@ ravenscar_thread_target::pid_to_str (ptid_t ptid)
 			phex_nz (ptid.tid (), sizeof (ULONGEST)));
 }
 
+CORE_ADDR
+ravenscar_arch_ops::get_stack_base (struct regcache *regcache) const
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  const int sp_regnum = gdbarch_sp_regnum (gdbarch);
+  ULONGEST stack_address;
+  regcache_cooked_read_unsigned (regcache, sp_regnum, &stack_address);
+  return (CORE_ADDR) stack_address;
+}
+
+void
+ravenscar_arch_ops::supply_one_register (struct regcache *regcache,
+					 int regnum,
+					 CORE_ADDR descriptor,
+					 CORE_ADDR stack_base) const
+{
+  CORE_ADDR addr;
+  if (regnum >= first_stack_register && regnum <= last_stack_register)
+    addr = stack_base;
+  else
+    addr = descriptor;
+  addr += offsets[regnum];
+
+  struct gdbarch *gdbarch = regcache->arch ();
+  int size = register_size (gdbarch, regnum);
+  gdb_byte *buf = (gdb_byte *) alloca (size);
+  read_memory (addr, buf, size);
+  regcache->raw_supply (regnum, buf);
+}
+
+void
+ravenscar_arch_ops::fetch_registers (struct regcache *regcache,
+				     int regnum) const
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  /* The tid is the thread_id field, which is a pointer to the thread.  */
+  CORE_ADDR thread_descriptor_address
+    = (CORE_ADDR) regcache->ptid ().tid ();
+
+  int sp_regno = -1;
+  CORE_ADDR stack_address = 0;
+  if (regnum == -1
+      || (regnum >= first_stack_register && regnum <= last_stack_register))
+    {
+      /* We must supply SP for get_stack_base, so recurse.  */
+      sp_regno = gdbarch_sp_regnum (gdbarch);
+      gdb_assert (!(sp_regno >= first_stack_register
+		    && sp_regno <= last_stack_register));
+      fetch_registers (regcache, sp_regno);
+      stack_address = get_stack_base (regcache);
+    }
+
+  if (regnum == -1)
+    {
+      /* Fetch all registers.  */
+      for (int reg = 0; reg < offsets.size (); ++reg)
+	if (reg != sp_regno && offsets[reg] != -1)
+	  supply_one_register (regcache, reg, thread_descriptor_address,
+			       stack_address);
+    }
+  else if (regnum < offsets.size () && offsets[regnum] != -1)
+    supply_one_register (regcache, regnum, thread_descriptor_address,
+			 stack_address);
+}
+
+void
+ravenscar_arch_ops::store_one_register (struct regcache *regcache, int regnum,
+					CORE_ADDR descriptor,
+					CORE_ADDR stack_base) const
+{
+  CORE_ADDR addr;
+  if (regnum >= first_stack_register && regnum <= last_stack_register)
+    addr = stack_base;
+  else
+    addr = descriptor;
+  addr += offsets[regnum];
+
+  struct gdbarch *gdbarch = regcache->arch ();
+  int size = register_size (gdbarch, regnum);
+  gdb_byte *buf = (gdb_byte *) alloca (size);
+  regcache->raw_collect (regnum, buf);
+  write_memory (addr, buf, size);
+}
+
+void
+ravenscar_arch_ops::store_registers (struct regcache *regcache,
+				     int regnum) const
+{
+  /* The tid is the thread_id field, which is a pointer to the thread.  */
+  CORE_ADDR thread_descriptor_address
+    = (CORE_ADDR) regcache->ptid ().tid ();
+
+  CORE_ADDR stack_address = 0;
+  if (regnum == -1
+      || (regnum >= first_stack_register && regnum <= last_stack_register))
+    stack_address = get_stack_base (regcache);
+
+  if (regnum == -1)
+    {
+      /* Store all registers.  */
+      for (int reg = 0; reg < offsets.size (); ++reg)
+	if (offsets[reg] != -1)
+	  store_one_register (regcache, reg, thread_descriptor_address,
+			      stack_address);
+    }
+  else if (regnum < offsets.size () && offsets[regnum] != -1)
+    store_one_register (regcache, regnum, thread_descriptor_address,
+			stack_address);
+}
+
 /* Temporarily set the ptid of a regcache to some other value.  When
    this object is destroyed, the regcache's original ptid is
    restored.  */
@@ -506,7 +616,8 @@ private:
 };
 
 void
-ravenscar_thread_target::fetch_registers (struct regcache *regcache, int regnum)
+ravenscar_thread_target::fetch_registers (struct regcache *regcache,
+					  int regnum)
 {
   ptid_t ptid = regcache->ptid ();
 
