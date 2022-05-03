@@ -49,6 +49,11 @@
 
 #include <list>
 
+#ifndef PT_GETREGSET
+#define	PT_GETREGSET	42	/* Get a target register set */
+#define	PT_SETREGSET	43	/* Set a target register set */
+#endif
+
 /* Return the name of a file that can be opened to get the symbols for
    the child process identified by PID.  */
 
@@ -1766,6 +1771,76 @@ fbsd_nat_target::store_register_set (struct regcache *regcache, int regnum,
       regcache->collect_regset (regset, regnum, regs, size);
 
       if (ptrace (store_op, pid, (PTRACE_TYPE_ARG3) regs, 0) == -1)
+	perror_with_name (_("Couldn't write registers"));
+      return true;
+    }
+  return false;
+}
+
+/* See fbsd-nat.h.  */
+
+bool
+fbsd_nat_target::have_regset (ptid_t ptid, int note)
+{
+  pid_t pid = get_ptrace_pid (ptid);
+  struct iovec iov;
+
+  iov.iov_base = nullptr;
+  iov.iov_len = 0;
+  if (ptrace (PT_GETREGSET, pid, (PTRACE_TYPE_ARG3) &iov, note) == -1)
+    return 0;
+  return iov.iov_len;
+}
+
+/* See fbsd-nat.h.  */
+
+bool
+fbsd_nat_target::fetch_regset (struct regcache *regcache, int regnum, int note,
+			       const struct regset *regset, void *regs,
+			       size_t size)
+{
+  const struct regcache_map_entry *map
+    = (const struct regcache_map_entry *) regset->regmap;
+  pid_t pid = get_ptrace_pid (regcache->ptid ());
+
+  if (regnum == -1 || regcache_map_supplies (map, regnum, regcache->arch(),
+					     size))
+    {
+      struct iovec iov;
+
+      iov.iov_base = regs;
+      iov.iov_len = size;
+      if (ptrace (PT_GETREGSET, pid, (PTRACE_TYPE_ARG3) &iov, note) == -1)
+	perror_with_name (_("Couldn't get registers"));
+
+      regcache->supply_regset (regset, regnum, regs, size);
+      return true;
+    }
+  return false;
+}
+
+bool
+fbsd_nat_target::store_regset (struct regcache *regcache, int regnum, int note,
+			       const struct regset *regset, void *regs,
+			       size_t size)
+{
+  const struct regcache_map_entry *map
+    = (const struct regcache_map_entry *) regset->regmap;
+  pid_t pid = get_ptrace_pid (regcache->ptid ());
+
+  if (regnum == -1 || regcache_map_supplies (map, regnum, regcache->arch(),
+					     size))
+    {
+      struct iovec iov;
+
+      iov.iov_base = regs;
+      iov.iov_len = size;
+      if (ptrace (PT_GETREGSET, pid, (PTRACE_TYPE_ARG3) &iov, note) == -1)
+	perror_with_name (_("Couldn't get registers"));
+
+      regcache->collect_regset (regset, regnum, regs, size);
+
+      if (ptrace (PT_SETREGSET, pid, (PTRACE_TYPE_ARG3) &iov, note) == -1)
 	perror_with_name (_("Couldn't write registers"));
       return true;
     }
