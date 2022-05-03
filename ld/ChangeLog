@@ -1,3 +1,9 @@
+2022-05-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 29101
+	* libdep_plugin.c (get_libdeps): Check for overflow when computing
+	amount of memory to allocate.
+
 2022-04-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 29006
