@@ -193,7 +193,7 @@ unsigned long shifted_reg_val (struct regcache *regcache,
 
 /* Create an Arm target description with the given FP hardware type.  */
 
-target_desc *arm_create_target_description (arm_fp_type fp_type);
+target_desc *arm_create_target_description (arm_fp_type fp_type, bool tls);
 
 /* Create an Arm M-profile target description with the given hardware type.  */
 

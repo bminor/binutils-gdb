@@ -119,6 +119,8 @@ struct arm_gdbarch_tdep : gdbarch_tdep
   int mve_pseudo_base = 0;	/* Number of the first MVE pseudo register.  */
   int mve_pseudo_count = 0;	/* Total number of MVE pseudo registers.  */
 
+  int tls_regnum = 0;		/* Number of the tpidruro register.  */
+
   bool is_m = false;		/* Does the target follow the "M" profile.  */
   CORE_ADDR lowest_pc = 0;	/* Lowest address at which instructions
 				   will appear.  */
@@ -301,7 +303,7 @@ extern void
 				       const struct regcache *regcache);
 
 /* Get the correct Arm target description with given FP hardware type.  */
-const target_desc *arm_read_description (arm_fp_type fp_type);
+const target_desc *arm_read_description (arm_fp_type fp_type, bool tls);
 
 /* Get the correct Arm M-Profile target description with given hardware
    type.  */

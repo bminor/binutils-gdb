@@ -22,6 +22,7 @@
 #include "arm.h"
 
 #include "../features/arm/arm-core.c"
+#include "../features/arm/arm-tls.c"
 #include "../features/arm/arm-vfpv2.c"
 #include "../features/arm/arm-vfpv3.c"
 #include "../features/arm/xscale-iwmmxt.c"
@@ -373,7 +374,7 @@ shifted_reg_val (struct regcache *regcache, unsigned long inst,
 /* See arch/arm.h.  */
 
 target_desc *
-arm_create_target_description (arm_fp_type fp_type)
+arm_create_target_description (arm_fp_type fp_type, bool tls)
 {
   target_desc_up tdesc = allocate_target_description ();
 
@@ -408,6 +409,9 @@ arm_create_target_description (arm_fp_type fp_type)
     default:
       error (_("Invalid Arm FP type: %d"), fp_type);
     }
+
+  if (tls)
+    regnum = create_feature_arm_arm_tls (tdesc.get (), regnum);
 
   return tdesc.release ();
 }

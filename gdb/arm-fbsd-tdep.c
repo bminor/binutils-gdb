@@ -188,9 +188,9 @@ arm_fbsd_read_description_auxv (struct target_ops *target)
 	return aarch32_read_description ();
       else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPD32))
 	       == (HWCAP_VFPv3 | HWCAP_VFPD32))
-	return arm_read_description (ARM_FP_TYPE_VFPV3);
+	return arm_read_description (ARM_FP_TYPE_VFPV3, false);
       else
-	return arm_read_description (ARM_FP_TYPE_VFPV2);
+	return arm_read_description (ARM_FP_TYPE_VFPV2, false);
     }
 
   return nullptr;
