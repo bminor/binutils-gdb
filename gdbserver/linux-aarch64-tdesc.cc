@@ -42,7 +42,7 @@ aarch64_linux_read_description (uint64_t vq, bool pauth_p, bool mte_p)
 
   if (tdesc == NULL)
     {
-      tdesc = aarch64_create_target_description (vq, pauth_p, mte_p);
+      tdesc = aarch64_create_target_description (vq, pauth_p, mte_p, false);
 
       static const char *expedite_regs_aarch64[] = { "x29", "sp", "pc", NULL };
       static const char *expedite_regs_aarch64_sve[] = { "x29", "sp", "pc",

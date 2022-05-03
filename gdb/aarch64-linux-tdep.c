@@ -763,7 +763,7 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
   bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
   bool mte_p = hwcap2 & HWCAP2_MTE;
   return aarch64_read_description (aarch64_linux_core_read_vq (gdbarch, abfd),
-				   pauth_p, mte_p);
+				   pauth_p, mte_p, false);
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
