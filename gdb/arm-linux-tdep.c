@@ -741,9 +741,9 @@ arm_linux_core_read_description (struct gdbarch *gdbarch,
       if (arm_hwcap & HWCAP_NEON)
 	return aarch32_read_description ();
       else if ((arm_hwcap & (HWCAP_VFPv3 | HWCAP_VFPv3D16)) == HWCAP_VFPv3)
-	return arm_read_description (ARM_FP_TYPE_VFPV3);
+	return arm_read_description (ARM_FP_TYPE_VFPV3, false);
 
-      return arm_read_description (ARM_FP_TYPE_VFPV2);
+      return arm_read_description (ARM_FP_TYPE_VFPV2, false);
     }
 
   return nullptr;

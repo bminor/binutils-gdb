@@ -240,7 +240,7 @@ static const char **valid_disassembly_styles;
 static const char *disassembly_style;
 
 /* All possible arm target descriptors.  */
-static struct target_desc *tdesc_arm_list[ARM_FP_TYPE_INVALID];
+static struct target_desc *tdesc_arm_list[ARM_FP_TYPE_INVALID][2];
 static struct target_desc *tdesc_arm_mprofile_list[ARM_M_TYPE_INVALID];
 
 /* This is used to keep the bfd arch_info in sync with the disassembly
@@ -9606,6 +9606,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int m_profile_psp_ns_regnum = -1;
   int m_profile_msp_s_regnum = -1;
   int m_profile_psp_s_regnum = -1;
+  int tls_regnum = 0;
 
   /* If we have an object to base this architecture on, try to determine
      its ABI.  */
@@ -9973,6 +9974,19 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    }
 	}
 
+      /* Check for the TLS register feature.  */
+      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.arm.tls");
+      if (feature != nullptr)
+	{
+	  valid_p &= tdesc_numbered_register (feature, tdesc_data.get (),
+					      register_count, "tpidruro");
+	  if (!valid_p)
+	    return nullptr;
+
+	  tls_regnum = register_count;
+	  register_count++;
+	}
+
       /* Check for MVE after all the checks for GPR's, VFP and Neon.
 	 MVE (Helium) is an M-profile extension.  */
       if (is_m)
@@ -10128,6 +10142,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->have_s_pseudos = have_s_pseudos;
   tdep->have_q_pseudos = have_q_pseudos;
   tdep->have_neon = have_neon;
+  tdep->tls_regnum = tls_regnum;
 
   /* Adjust the MVE feature settings.  */
   if (have_mve)
@@ -14416,14 +14431,14 @@ arm_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 /* See arm-tdep.h.  */
 
 const target_desc *
-arm_read_description (arm_fp_type fp_type)
+arm_read_description (arm_fp_type fp_type, bool tls)
 {
-  struct target_desc *tdesc = tdesc_arm_list[fp_type];
+  struct target_desc *tdesc = tdesc_arm_list[fp_type][tls];
 
   if (tdesc == nullptr)
     {
-      tdesc = arm_create_target_description (fp_type);
-      tdesc_arm_list[fp_type] = tdesc;
+      tdesc = arm_create_target_description (fp_type, tls);
+      tdesc_arm_list[fp_type][tls] = tdesc;
     }
 
   return tdesc;
