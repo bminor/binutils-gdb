@@ -58,7 +58,7 @@
 #define HA_MAX_NUM_FLDS		4
 
 /* All possible aarch64 target descriptors.  */
-static target_desc *tdesc_aarch64_list[AARCH64_MAX_SVE_VQ + 1][2/*pauth*/][2 /* mte */];
+static target_desc *tdesc_aarch64_list[AARCH64_MAX_SVE_VQ + 1][2/*pauth*/][2 /* mte */][2 /* tls */];
 
 /* The standard register names, and all the valid aliases for them.  */
 static const struct
@@ -3327,21 +3327,23 @@ aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch)
    If VQ is zero then it is assumed SVE is not supported.
    (It is not possible to set VQ to zero on an SVE system).
 
-   MTE_P indicates the presence of the Memory Tagging Extension feature. */
+   MTE_P indicates the presence of the Memory Tagging Extension feature.
+
+   TLS_P indicates the presence of the Thread Local Storage feature.  */
 
 const target_desc *
-aarch64_read_description (uint64_t vq, bool pauth_p, bool mte_p)
+aarch64_read_description (uint64_t vq, bool pauth_p, bool mte_p, bool tls_p)
 {
   if (vq > AARCH64_MAX_SVE_VQ)
     error (_("VQ is %" PRIu64 ", maximum supported value is %d"), vq,
 	   AARCH64_MAX_SVE_VQ);
 
-  struct target_desc *tdesc = tdesc_aarch64_list[vq][pauth_p][mte_p];
+  struct target_desc *tdesc = tdesc_aarch64_list[vq][pauth_p][mte_p][tls_p];
 
   if (tdesc == NULL)
     {
-      tdesc = aarch64_create_target_description (vq, pauth_p, mte_p);
-      tdesc_aarch64_list[vq][pauth_p][mte_p] = tdesc;
+      tdesc = aarch64_create_target_description (vq, pauth_p, mte_p, tls_p);
+      tdesc_aarch64_list[vq][pauth_p][mte_p][tls_p] = tdesc;
     }
 
   return tdesc;
@@ -3430,7 +3432,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   bool valid_p = true;
   int i, num_regs = 0, num_pseudo_regs = 0;
   int first_pauth_regnum = -1, pauth_ra_state_offset = -1;
-  int first_mte_regnum = -1;
+  int first_mte_regnum = -1, tls_regnum = -1;
 
   /* Use the vector length passed via the target info.  Here -1 is used for no
      SVE, and 0 is unset.  If unset then use the vector length from the existing
@@ -3462,7 +3464,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      value.  */
   const struct target_desc *tdesc = info.target_desc;
   if (!tdesc_has_registers (tdesc) || vq != aarch64_get_tdesc_vq (tdesc))
-    tdesc = aarch64_read_description (vq, false, false);
+    tdesc = aarch64_read_description (vq, false, false, false);
   gdb_assert (tdesc);
 
   feature_core = tdesc_find_feature (tdesc,"org.gnu.gdb.aarch64.core");
@@ -3471,6 +3473,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   feature_pauth = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth");
   const struct tdesc_feature *feature_mte
     = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.mte");
+  const struct tdesc_feature *feature_tls
+    = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.tls");
 
   if (feature_core == nullptr)
     return nullptr;
@@ -3525,6 +3529,18 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       num_pseudo_regs += 32;	/* add the Bn scalar register pseudos */
     }
 
+  /* Add the TLS register.  */
+  if (feature_tls != nullptr)
+    {
+      tls_regnum = num_regs;
+      /* Validate the descriptor provides the mandatory TLS register
+	 and allocate its number.  */
+      valid_p = tdesc_numbered_register (feature_tls, tdesc_data.get (),
+					 tls_regnum, "tpidr");
+
+      num_regs++;
+    }
+
   /* Add the pauth registers.  */
   if (feature_pauth != NULL)
     {
@@ -3573,6 +3589,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->pauth_ra_state_regnum = (feature_pauth == NULL) ? -1
 				: pauth_ra_state_offset + num_regs;
   tdep->mte_reg_base = first_mte_regnum;
+  tdep->tls_regnum = tls_regnum;
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);

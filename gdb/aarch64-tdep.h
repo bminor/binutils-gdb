@@ -111,10 +111,18 @@ struct aarch64_gdbarch_tdep : gdbarch_tdep
   {
     return mte_reg_base != -1;
   }
+
+  /* TLS register.  This is -1 if the TLS register is not available.  */
+  int tls_regnum = 0;
+
+  bool has_tls() const
+  {
+    return tls_regnum != -1;
+  }
 };
 
 const target_desc *aarch64_read_description (uint64_t vq, bool pauth_p,
-					     bool mte_p);
+					     bool mte_p, bool tls_p);
 
 extern int aarch64_process_record (struct gdbarch *gdbarch,
 			       struct regcache *regcache, CORE_ADDR addr);

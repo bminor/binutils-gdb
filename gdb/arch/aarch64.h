@@ -29,6 +29,7 @@ struct aarch64_features
   bool sve = false;
   bool pauth = false;
   bool mte = false;
+  bool tls = false;
 };
 
 /* Create the aarch64 target description.  A non zero VQ value indicates both
@@ -36,10 +37,12 @@ struct aarch64_features
    an SVE Z register.  HAS_PAUTH_P indicates the presence of the PAUTH
    feature.
 
-   MTE_P indicates the presence of the Memory Tagging Extension feature.  */
+   MTE_P indicates the presence of the Memory Tagging Extension feature.
+
+   TLS_P indicates the presence of the Thread Local Storage feature.  */
 
 target_desc *aarch64_create_target_description (uint64_t vq, bool has_pauth_p,
-						bool mte_p);
+						bool mte_p, bool tls_p);
 
 /* Register numbers of various important registers.
    Note that on SVE, the Z registers reuse the V register numbers and the V
@@ -91,6 +94,7 @@ enum aarch64_regnum
 #define AARCH64_NUM_REGS AARCH64_FPCR_REGNUM + 1
 #define AARCH64_SVE_NUM_REGS AARCH64_SVE_VG_REGNUM + 1
 
+#define	AARCH64_TLS_REGS_SIZE (8)
 
 /* There are a number of ways of expressing the current SVE vector size:
 

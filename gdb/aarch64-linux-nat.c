@@ -646,7 +646,8 @@ aarch64_linux_nat_target::read_description ()
   bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
   bool mte_p = hwcap2 & HWCAP2_MTE;
 
-  return aarch64_read_description (aarch64_sve_get_vq (tid), pauth_p, mte_p);
+  return aarch64_read_description (aarch64_sve_get_vq (tid), pauth_p, mte_p,
+				   false);
 }
 
 /* Convert a native/host siginfo object, into/from the siginfo in the
