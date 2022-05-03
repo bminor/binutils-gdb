@@ -17,6 +17,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
+#include "diagnostics.h"
 #include <errno.h>
 #include "gdbsupport/scoped_fd.h"
 #include "debuginfod-support.h"
@@ -192,7 +193,17 @@ debuginfod_is_enabled ()
 	  if (off == gdb::string_view::npos)
 	    break;
 	  url_view = url_view.substr (off);
+#if defined (__s390x__)
+	  /* g++ 11.2.1 on s390x seems convinced url_view might be of
+	     SIZE_MAX length.  And so complains because the length of
+	     an array can only be PTRDIFF_MAX.  */
+	  DIAGNOSTIC_PUSH
+	  DIAGNOSTIC_IGNORE_STRINGOP_OVERREAD
+#endif
 	  off = url_view.find_first_of (' ');
+#if defined (__s390x__)
+	  DIAGNOSTIC_POP
+#endif
 	  gdb_printf
 	    (_("  <%ps>\n"),
 	     styled_string (file_name_style.style (),
