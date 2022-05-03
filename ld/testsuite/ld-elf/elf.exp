@@ -182,6 +182,7 @@ if { [check_gc_sections_available] && ![istarget "v850-*-*"] } {
 
 proc target_defaults_to_execstack {} {
     if {   [istarget "aarch64*-*-*"]
+	|| [istarget "*-*-nacl"]
 	|| [istarget "arc*-*-*"]
 	|| [istarget "ia64*-*-*"]
 	|| [istarget "loongarch*-*-*"]
@@ -226,7 +227,18 @@ if {   [istarget *-*-*linux*]
 	    "" \
 	    {pr23900-1.s} \
 	    [list [list "readelf" {-Wl} $pr23900_1_exp]] \
-	    "pr23900-1.exe"] \
+	     "pr23900-1.exe"] \
+	  ]
+
+    # Test the linker's generation of execstack and executable segment warnings.
+    # Since these are normally pruned from the linker's output we temporarily
+    # disable tha action here.
+    rename prune_warnings_extra old_prune_warnings_extra
+    proc prune_warnings_extra { text } {
+	return $text
+    }
+    
+    run_ld_link_tests [list \
 	[list "PR ld/29072 (warn about an executable .note.GNU-stack)" \
 	    "-e 0" \
 	    "" \
@@ -248,23 +260,39 @@ if {   [istarget *-*-*linux*]
 	    {pr29072-a.s} \
 	    {} \
 	    "pr29072-d.exe"] \
-	]
+	[list "Ensure that a warning issued when creating a segment with RWX permissions" \
+	    "-e 0 -Tnobits-1.t --warn-rwx-segments" \
+	    "" \
+	    "" \
+	    {nobits-1.s} \
+	     {{ld rwx-segments-1.l}} \
+	    "rwx-segments-1.exe"] \
+	[list "Ensure that a warning issued when creating a TLS segment with execute permission" \
+	    "-e 0 -T rwx-segments-2.t --warn-rwx-segments" \
+	    "" \
+	    "" \
+	    {size-2.s} \
+	     {{ld rwx-segments-2.l}} \
+	    "rwx-segments-2.exe"] \
+	[list "Ensure that the warning can be suppressed" \
+	    "-e 0 -Tnobits-1.t --no-warn-rwx-segments" \
+	    "" \
+	    "" \
+	    {nobits-1.s} \
+	     {} \
+	    "rwx-segments-3.exe"] \
+	  ]
+
     if { [target_defaults_to_execstack] } {
-	rename prune_warnings_extra old_prune_warnings_extra
-	proc prune_warnings_extra { text } {
-	    return $text
-	}
 	run_ld_link_tests [list \
 	   [list "PR ld/29072 (warn about absent .note.GNU-stack)" \
-	    "-e 0 -z stack-size=0x123400" \
+	    "-e 0 -z stack-size=0x123400  --warn-execstack" \
 	    "" \
 	    "" \
 	    {pr29072-b.s} \
 	    {{ld pr29072.b.warn}} \
 	    "pr29072-b.exe"] \
 	]
-	rename prune_warnings_extra ""
-	rename old_prune_warnings_extra prune_warnings_extra
     } else {
 	run_ld_link_tests [list \
 	   [list "PR ld/29072 (ignore absent .note.GNU-stack)" \
@@ -276,6 +304,10 @@ if {   [istarget *-*-*linux*]
 	    "pr29072-b.exe"] \
 	]
     }
+
+    # Restore the normal pruning behaviour.
+    rename prune_warnings_extra ""
+    rename old_prune_warnings_extra prune_warnings_extra
 }
 
 if [check_gc_sections_available] {

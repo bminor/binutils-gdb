@@ -6461,6 +6461,29 @@ assign_file_positions_except_relocs (bfd *abfd,
   alloc = i_ehdrp->e_phnum;
   if (alloc != 0)
     {
+      if (link_info != NULL && ! link_info->no_warn_rwx_segments)
+	{
+	  /* Memory resident segments with non-zero size and RWX permissions are a
+	     security risk, so we generate a warning here if we are creating any.  */
+	  unsigned int i;
+
+	  for (i = 0; i < alloc; i++)
+	    {
+	      const Elf_Internal_Phdr * phdr = tdata->phdr + i;
+
+	      if (phdr->p_memsz == 0)
+		continue;
+
+	      if (phdr->p_type == PT_TLS && (phdr->p_flags & PF_X))
+		_bfd_error_handler (_("warning: %pB has a TLS segment with execute permission"),
+				    abfd);
+	      else if (phdr->p_type == PT_LOAD
+		       && (phdr->p_flags & (PF_R | PF_W | PF_X)) == (PF_R | PF_W | PF_X))
+		_bfd_error_handler (_("warning: %pB has a LOAD segment with RWX permissions"),
+				    abfd);
+	    }
+	}
+      
       if (bfd_seek (abfd, i_ehdrp->e_phoff, SEEK_SET) != 0
 	  || bed->s->write_out_phdrs (abfd, tdata->phdr, alloc) != 0)
 	return false;

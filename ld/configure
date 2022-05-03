@@ -838,6 +838,9 @@ enable_new_dtags
 enable_relro
 enable_textrel_check
 enable_separate_code
+enable_warn_execstack
+enable_warn_rwx_segments
+enable_default_execstack
 enable_error_handling_script
 enable_default_hash_style
 enable_initfini_array
@@ -1510,6 +1513,13 @@ Optional Features:
   --enable-textrel-check=[yes|no|warning|error]
                           enable DT_TEXTREL check in ELF linker
   --enable-separate-code  enable -z separate-code in ELF linker by default
+  --enable-warn-execstack enable warnings when creating an executable stack
+  --enable-warn-rwx-segments
+                          enable warnings when creating segements with RWX
+                          permissions
+  --enable-default-execstack
+                          create an executable stack if an input file is
+                          missing a .note.GNU-stack section
   --enable-error-handling-script
                           enable/disable support for the
                           --error-handling-script option
@@ -11460,7 +11470,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11463 "configure"
+#line 11473 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11566,7 +11576,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11569 "configure"
+#line 11579 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15427,6 +15437,38 @@ esac
 fi
 
 
+
+ac_default_ld_warn_execstack=unset
+# Check whether --enable-warn-execstack was given.
+if test "${enable_warn_execstack+set}" = set; then :
+  enableval=$enable_warn_execstack; case "${enableval}" in
+  yes) ac_default_ld_warn_execstack=1 ;;
+  no)  ac_default_ld_warn_execstack=-1 ;;
+esac
+fi
+
+
+ac_default_ld_warn_rwx_segments=unset
+# Check whether --enable-warn-rwx-segments was given.
+if test "${enable_warn_rwx_segments+set}" = set; then :
+  enableval=$enable_warn_rwx_segments; case "${enableval}" in
+  yes) ac_default_ld_warn_rwx_segments=1 ;;
+  no)  ac_default_ld_warn_rwx_segments=0 ;;
+esac
+fi
+
+
+ac_default_ld_default_execstack=unset
+# Check whether --enable-default-execstack was given.
+if test "${enable_default_execstack+set}" = set; then :
+  enableval=$enable_default_execstack; case "${enableval}" in
+  yes) ac_default_ld_default_execstack=1 ;;
+  no)  ac_default_ld_default_execstack=0 ;;
+esac
+fi
+
+
+
 # Decide if --error-handling-script should be supported.
 ac_support_error_handling_script=unset
 # Check whether --enable-error-handling-script was given.
@@ -16952,6 +16994,35 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define DEFAULT_LD_Z_SEPARATE_CODE $ac_default_ld_z_separate_code
 _ACEOF
+
+
+
+if test "${ac_default_ld_warn_execstack}" = unset; then
+  ac_default_ld_warn_execstack=0
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_LD_WARN_EXECSTACK $ac_default_ld_warn_execstack
+_ACEOF
+
+
+if test "${ac_default_ld_warn_rwx_segments}" = unset; then
+  ac_default_ld_warn_rwx_segments=1
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_LD_WARN_RWX_SEGMENTS $ac_default_ld_warn_rwx_segments
+_ACEOF
+
+
+if test "${ac_default_ld_default_execstack}" = unset; then
+  ac_default_ld_default_execstack=1
+fi
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_LD_EXECSTACK $ac_default_ld_default_execstack
+_ACEOF
+
 
 
 if test "${ac_support_error_handling_script}" = unset; then

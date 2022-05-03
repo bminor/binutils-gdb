@@ -7168,7 +7168,7 @@ warning: enabling an executable stack because of -z execstack command line optio
 		  break;
 		}
 	    }
-	  else if (bed->default_execstack)
+	  else if (bed->default_execstack && info->default_execstack)
 	    {
 	      exec = PF_X;
 	      emptyobj = inputobj;

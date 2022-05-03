@@ -1,12 +1,34 @@
 -*- text -*-
 
-* The linker will now generate a warning message if the stack is made
+* The ELF linker will now generate a warning message if the stack is made
   executable.  By default this warning is not issued if the user has
   specifically requested an executable stack via the "-z execstack"
   command line option, but the warning can be forced via the new
   "--warn-execstack" option.  Alternatively all warnings about creating
   an executable stack can be suppressed via the "--no-warn-execstack"
   option.
+
+  In addition the ELF linker will also warn if it creates a memory resident
+  segment with all three of the Read, Write and eXecute permissions set, or
+  if it creates a thread local data segment with the eXecute permission set.
+  These warnings can be disabled via --no-warn-rwx-segments option and
+  re-enabled via the --warn-rwx-segments option.
+
+  New configure options can also control these new features:
+  
+  --enable-warn-execstack=no
+     will disable the warnings about creating an executable stack.
+     
+  --enable-warn-execstack=yes
+     will make --warn-execstack enabled by default.
+     
+  --enable-warn-rwx-segments=no
+     will make --no-warn-rwx-segments enabled by default.
+     
+  --enable-defaul-execstack=no
+     will stop the creation of an executable stack simply because an input file
+     is missing a .note.GNU-stack section, even on architectures where this
+     ehaviour is the default.
 
 * TYPE=<type> is now supported in an output section description to set the
   section type value.

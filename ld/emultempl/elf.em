@@ -92,6 +92,9 @@ EOF
 fi
 fragment <<EOF
   link_info.separate_code = DEFAULT_LD_Z_SEPARATE_CODE;
+  link_info.warn_execstack = DEFAULT_LD_WARN_EXECSTACK;
+  link_info.no_warn_rwx_segments = ! DEFAULT_LD_WARN_RWX_SEGMENTS;
+  link_info.default_execstack = DEFAULT_LD_EXECSTACK;
 }
 
 EOF

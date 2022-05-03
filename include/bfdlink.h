@@ -489,10 +489,25 @@ struct bfd_link_info
      flags.  */
   unsigned int noexecstack: 1;
 
-  /* Tri-state variable: 0 => not set by user; 1 => set, warnings
-     enabled; 2 => warnings disabled; 3 => unused.  */
+  /* Tri-state variable:
+     0 => warn if the linker is creating an executable stack, but
+     execstack (above) is 0.
+     1 => warn if the linker is creating an executable stack; ignores
+     the value of execstack.
+     2 => do not warn.
+     3 => not used.  */
   unsigned int warn_execstack: 2;
 
+  /* TRUE if warnings should not be generated for TLS segments with eXecute
+     permission or LOAD segments with RWX permissions.  */
+  unsigned int no_warn_rwx_segments: 1;
+
+  /* TRUE if the stack can be made executable because of the absence of a
+     .note.GNU-stack section in an input file.  Note - even if this field
+     is set, some targets may choose to ignore the setting and not create
+     an executable stack.  */
+  unsigned int default_execstack : 1;
+  
   /* TRUE if we want to produced optimized output files.  This might
      need much more time and therefore must be explicitly selected.  */
   unsigned int optimize: 1;

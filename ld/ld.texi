@@ -2701,6 +2701,22 @@ option causes a warning to be issued whenever this case occurs.
 Only warn once for each undefined symbol, rather than once per module
 which refers to it.
 
+@kindex --warn-rwx-segments
+@cindex warnings, on writeable and exectuable segments
+@cindex executable segments, warnings on
+@item --warn-rwx-segments
+@itemx --no-warn-rwx-segments
+Warn if the linker creates a loadable, non-zero sized segment that has
+all three of the read, write and execute permission flags set.  Such a
+segment represents a potential security vulnerability.  In addition
+warnings will be generated if a thread local storage segment is
+created with the execute permission flag set, regardless of whether or
+not it has the read and/or write flags set.
+
+These warnings are enabled by default.  They can be disabled via the
+@option{--no-warn-rwx-segments} option and re-enabled via the
+@option{--warn-rwx-segments} option.
+
 @kindex --warn-section-align
 @cindex warnings, on section alignment
 @cindex section alignment, warnings on

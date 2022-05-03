@@ -540,6 +540,10 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Warn when creating an executable stack"), TWO_DASHES },
   { {"no-warn-execstack", no_argument, NULL, OPTION_NO_WARN_EXECSTACK},
     '\0', NULL, N_("Do not warn when creating an executable stack"), TWO_DASHES },
+  { {"warn-rwx-segments", no_argument, NULL, OPTION_WARN_RWX_SEGMENTS},
+    '\0', NULL, N_("Warn when creating executable segments"), TWO_DASHES },
+  { {"no-warn-rwx-segments", no_argument, NULL, OPTION_NO_WARN_RWX_SEGMENTS},
+    '\0', NULL, N_("Do not warn when creating executable segments"), TWO_DASHES },
   { {"warn-multiple-gp", no_argument, NULL, OPTION_WARN_MULTIPLE_GP},
     '\0', NULL, N_("Warn if the multiple GP values are used"), TWO_DASHES },
   { {"warn-once", no_argument, NULL, OPTION_WARN_ONCE},
@@ -924,6 +928,12 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_NO_WARN_EXECSTACK:
 	  link_info.warn_execstack = 2;
+	  break;
+	case OPTION_WARN_RWX_SEGMENTS:
+	  link_info.no_warn_rwx_segments = 0;
+	  break;
+	case OPTION_NO_WARN_RWX_SEGMENTS:
+	  link_info.no_warn_rwx_segments = 1;
 	  break;
 	case 'e':
 	  lang_add_entry (optarg, true);
@@ -2159,10 +2169,31 @@ elf_static_list_options (FILE *file)
   -z execstack                Mark executable as requiring executable stack\n"));
   fprintf (file, _("\
   -z noexecstack              Mark executable as not requiring executable stack\n"));
+#if DEFAULT_LD_WARN_EXECSTACK > 0
+  fprintf (file, _("\
+  --warn-execstack            Generate a warning if the stack is executable (default)\n"));
+#else
   fprintf (file, _("\
   --warn-execstack            Generate a warning if the stack is executable\n"));
+#endif
+#if DEFAULT_LD_WARN_EXECSTACK < 0
+  fprintf (file, _("\
+  --no-warn-execstack         Do not generate a warning if the stack is executable (default)\n"));
+#else
   fprintf (file, _("\
   --no-warn-execstack         Do not generate a warning if the stack is executable\n"));
+#endif
+#if DEFAULT_LD_WARN_RWX_SEGMENTS
+  fprintf (file, _("\
+  --warn-rwx-segments         Generate a warning if a LOAD segment has RWX permissions (default)\n"));
+  fprintf (file, _("\
+  --no-warn-rwx-segments      Do not generate a warning if a LOAD segments has RWX permissions\n"));
+#else
+  fprintf (file, _("\
+  --warn-rwx-segments         Generate a warning if a LOAD segment has RWX permissions\n"));
+  fprintf (file, _("\
+  --no-warn-rwx-segments      Do not generate a warning if a LOAD segments has RWX permissions (default)\n"));
+#endif
   fprintf (file, _("\
   -z unique-symbol            Avoid duplicated local symbol names\n"));
   fprintf (file, _("\
