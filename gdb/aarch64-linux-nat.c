@@ -431,6 +431,60 @@ store_mteregs_to_thread (struct regcache *regcache)
     perror_with_name (_("unable to store MTE registers."));
 }
 
+/* Fill GDB's register array with the TLS register values from
+   the current thread.  */
+
+static void
+fetch_tlsregs_from_thread (struct regcache *regcache)
+{
+  aarch64_gdbarch_tdep *tdep
+    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+  int regno = tdep->tls_regnum;
+
+  gdb_assert (regno != -1);
+
+  uint64_t tpidr = 0;
+  struct iovec iovec;
+
+  iovec.iov_base = &tpidr;
+  iovec.iov_len = sizeof (tpidr);
+
+  int tid = get_ptrace_pid (regcache->ptid ());
+  if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_TLS, &iovec) != 0)
+      perror_with_name (_("unable to fetch TLS register."));
+
+  regcache->raw_supply (regno, &tpidr);
+}
+
+/* Store to the current thread the valid TLS register set in GDB's
+   register array.  */
+
+static void
+store_tlsregs_to_thread (struct regcache *regcache)
+{
+  aarch64_gdbarch_tdep *tdep
+    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+  int regno = tdep->tls_regnum;
+
+  gdb_assert (regno != -1);
+
+  uint64_t tpidr = 0;
+
+  if (REG_VALID != regcache->get_register_status (regno))
+    return;
+
+  regcache->raw_collect (regno, (char *) &tpidr);
+
+  struct iovec iovec;
+
+  iovec.iov_base = &tpidr;
+  iovec.iov_len = sizeof (tpidr);
+
+  int tid = get_ptrace_pid (regcache->ptid ());
+  if (ptrace (PTRACE_SETREGSET, tid, NT_ARM_TLS, &iovec) != 0)
+    perror_with_name (_("unable to store TLS register."));
+}
+
 /* Implement the "fetch_registers" target_ops method.  */
 
 void
@@ -453,6 +507,9 @@ aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
 
       if (tdep->has_mte ())
 	fetch_mteregs_from_thread (regcache);
+
+      if (tdep->has_tls ())
+	fetch_tlsregs_from_thread (regcache);
     }
   else if (regno < AARCH64_V0_REGNUM)
     fetch_gregs_from_thread (regcache);
@@ -472,6 +529,9 @@ aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
   if (tdep->has_mte ()
       && (regno == tdep->mte_reg_base))
     fetch_mteregs_from_thread (regcache);
+
+  if (tdep->has_tls () && regno == tdep->tls_regnum)
+    fetch_tlsregs_from_thread (regcache);
 }
 
 /* Implement the "store_registers" target_ops method.  */
@@ -493,6 +553,9 @@ aarch64_linux_nat_target::store_registers (struct regcache *regcache,
 
       if (tdep->has_mte ())
 	store_mteregs_to_thread (regcache);
+
+      if (tdep->has_tls ())
+	store_tlsregs_to_thread (regcache);
     }
   else if (regno < AARCH64_V0_REGNUM)
     store_gregs_to_thread (regcache);
@@ -505,6 +568,9 @@ aarch64_linux_nat_target::store_registers (struct regcache *regcache,
   if (tdep->has_mte ()
       && (regno == tdep->mte_reg_base))
     store_mteregs_to_thread (regcache);
+
+  if (tdep->has_tls () && regno == tdep->tls_regnum)
+    store_tlsregs_to_thread (regcache);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -647,7 +713,7 @@ aarch64_linux_nat_target::read_description ()
   bool mte_p = hwcap2 & HWCAP2_MTE;
 
   return aarch64_read_description (aarch64_sve_get_vq (tid), pauth_p, mte_p,
-				   false);
+				   true);
 }
 
 /* Convert a native/host siginfo object, into/from the siginfo in the
