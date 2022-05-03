@@ -507,7 +507,9 @@ TARGET64_LIBOPCODES_CFILES = \
 	mmix-opc.c \
 	nfp-dis.c \
 	riscv-dis.c \
-	riscv-opc.c
+	riscv-opc.c \
+	tilegx-dis.c \
+	tilegx-opc.c
 
 TARGET32_LIBOPCODES_CFILES = \
 	arc-dis.c \
@@ -644,8 +646,6 @@ TARGET32_LIBOPCODES_CFILES = \
 	tic54x-dis.c \
 	tic54x-opc.c \
 	tic6x-dis.c \
-	tilegx-dis.c \
-	tilegx-opc.c \
 	tilepro-dis.c \
 	tilepro-opc.c \
 	v850-dis.c \
