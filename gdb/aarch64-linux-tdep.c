@@ -749,6 +749,24 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	  AARCH64_LINUX_SIZEOF_MTE_REGSET, &aarch64_linux_mte_regset,
 	  "MTE registers", cb_data);
     }
+
+  if (tdep->has_tls ())
+    {
+      const struct regcache_map_entry tls_regmap[] =
+	{
+	  { 1, tdep->tls_regnum, 8 },
+	  { 0 }
+	};
+
+      const struct regset aarch64_linux_tls_regset =
+	{
+	  tls_regmap, regcache_supply_regset, regcache_collect_regset
+	};
+
+      cb (".reg-aarch-tls", AARCH64_LINUX_SIZEOF_TLSREGSET,
+	  AARCH64_LINUX_SIZEOF_TLSREGSET, &aarch64_linux_tls_regset,
+	  "TLS register", cb_data);
+    }
 }
 
 /* Implement the "core_read_description" gdbarch method.  */
@@ -757,13 +775,14 @@ static const struct target_desc *
 aarch64_linux_core_read_description (struct gdbarch *gdbarch,
 				     struct target_ops *target, bfd *abfd)
 {
+  asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
   CORE_ADDR hwcap = linux_get_hwcap (target);
   CORE_ADDR hwcap2 = linux_get_hwcap2 (target);
 
   bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
   bool mte_p = hwcap2 & HWCAP2_MTE;
   return aarch64_read_description (aarch64_linux_core_read_vq (gdbarch, abfd),
-				   pauth_p, mte_p, false);
+				   pauth_p, mte_p, tls != nullptr);
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
