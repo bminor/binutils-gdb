@@ -23,6 +23,7 @@
 #include "fbsd-tdep.h"
 #include "aarch64-tdep.h"
 #include "aarch64-fbsd-tdep.h"
+#include "inferior.h"
 #include "osabi.h"
 #include "solib-svr4.h"
 #include "target.h"
@@ -180,6 +181,30 @@ aarch64_fbsd_core_read_description (struct gdbarch *gdbarch,
   return aarch64_read_description (0, false, false, tls != nullptr);
 }
 
+/* Implement the get_thread_local_address gdbarch method.  */
+
+static CORE_ADDR
+aarch64_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
+				       CORE_ADDR lm_addr, CORE_ADDR offset)
+{
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  struct regcache *regcache;
+
+  regcache = get_thread_arch_regcache (current_inferior ()->process_target (),
+				       ptid, gdbarch);
+
+  target_fetch_registers (regcache, tdep->tls_regnum);
+
+  ULONGEST tpidr;
+  if (regcache->cooked_read (tdep->tls_regnum, &tpidr) != REG_VALID)
+    error (_("Unable to fetch %%tpidr"));
+
+  /* %tpidr points to the TCB whose first member is the dtv
+      pointer.  */
+  CORE_ADDR dtv_addr = tpidr;
+  return fbsd_get_thread_local_address (gdbarch, dtv_addr, lm_addr, offset);
+}
+
 /* Implement the 'init_osabi' method of struct gdb_osabi_handler.  */
 
 static void
@@ -202,6 +227,14 @@ aarch64_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     (gdbarch, aarch64_fbsd_iterate_over_regset_sections);
   set_gdbarch_core_read_description (gdbarch,
 				     aarch64_fbsd_core_read_description);
+
+  if (tdep->has_tls ())
+    {
+      set_gdbarch_fetch_tls_load_module_address (gdbarch,
+						 svr4_fetch_objfile_link_map);
+      set_gdbarch_get_thread_local_address
+	(gdbarch, aarch64_fbsd_get_thread_local_address);
+    }
 }
 
 void _initialize_aarch64_fbsd_tdep ();
