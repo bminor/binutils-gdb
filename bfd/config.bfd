@@ -460,7 +460,6 @@ case "${targ}" in
     targ_underscore=yes
     ;;
 
-#ifdef BFD64
   cris-*-* | crisv32-*-*)
     targ_defvec=cris_aout_vec
     targ_selvecs="cris_elf32_us_vec cris_elf32_vec"
@@ -470,7 +469,6 @@ case "${targ}" in
     esac
     want64=true
     ;;
-#endif
 
   crx-*-elf*)
     targ_defvec=crx_elf32_vec
