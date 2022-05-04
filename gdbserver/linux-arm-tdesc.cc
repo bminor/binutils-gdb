@@ -35,7 +35,7 @@ arm_linux_read_description (arm_fp_type fp_type)
 
   if (tdesc == nullptr)
     {
-      tdesc = arm_create_target_description (fp_type);
+      tdesc = arm_create_target_description (fp_type, false);
 
       static const char *expedite_regs[] = { "r11", "sp", "pc", 0 };
       init_target_desc (tdesc, expedite_regs);
