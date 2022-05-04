@@ -1315,18 +1315,12 @@ shared_objfile_contains_address_p (struct program_space *pspace,
 
 void
 default_iterate_over_objfiles_in_search_order
-  (struct gdbarch *gdbarch,
-   iterate_over_objfiles_in_search_order_cb_ftype *cb,
-   void *cb_data, struct objfile *current_objfile)
+  (gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb,
+   objfile *current_objfile)
 {
-  int stop = 0;
-
   for (objfile *objfile : current_program_space->objfiles ())
-    {
-       stop = cb (objfile, cb_data);
-       if (stop)
-	 return;
-    }
+    if (cb (objfile))
+	return;
 }
 
 /* See objfiles.h.  */

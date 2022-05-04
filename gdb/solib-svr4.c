@@ -51,9 +51,9 @@ static int svr4_have_link_map_offsets (void);
 static void svr4_relocate_main_executable (void);
 static void svr4_free_library_list (void *p_list);
 static void probes_table_remove_objfile_probes (struct objfile *objfile);
-static void svr4_iterate_over_objfiles_in_search_order (
-  struct gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype *cb,
-  void *cb_data, struct objfile *objfile);
+static void svr4_iterate_over_objfiles_in_search_order
+  (gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb,
+   objfile *current_objfile);
 
 
 /* On SVR4 systems, a list of symbols in the dynamic linker where
@@ -3135,9 +3135,8 @@ struct target_so_ops svr4_so_ops;
 
 static void
 svr4_iterate_over_objfiles_in_search_order
-  (struct gdbarch *gdbarch,
-   iterate_over_objfiles_in_search_order_cb_ftype *cb,
-   void *cb_data, struct objfile *current_objfile)
+  (gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb,
+   objfile *current_objfile)
 {
   bool checked_current_objfile = false;
   if (current_objfile != nullptr)
@@ -3156,7 +3155,7 @@ svr4_iterate_over_objfiles_in_search_order
 	  && gdb_bfd_scan_elf_dyntag (DT_SYMBOLIC, abfd, nullptr, nullptr) == 1)
 	{
 	  checked_current_objfile = true;
-	  if (cb (current_objfile, cb_data) != 0)
+	  if (cb (current_objfile))
 	    return;
 	}
     }
@@ -3165,7 +3164,7 @@ svr4_iterate_over_objfiles_in_search_order
     {
       if (checked_current_objfile && objfile == current_objfile)
 	continue;
-      if (cb (objfile, cb_data) != 0)
+      if (cb (objfile))
 	return;
     }
 }

@@ -573,28 +573,21 @@ windows_xfer_shared_library (const char* so_name, CORE_ADDR load_addr,
 
 static void
 windows_iterate_over_objfiles_in_search_order
-  (struct gdbarch *gdbarch,
-   iterate_over_objfiles_in_search_order_cb_ftype *cb,
-   void *cb_data, struct objfile *current_objfile)
+  (gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb,
+   objfile *current_objfile)
 {
-  int stop;
-
   if (current_objfile)
     {
-      stop = cb (current_objfile, cb_data);
-      if (stop)
+      if (cb (current_objfile))
 	return;
     }
 
   for (objfile *objfile : current_program_space->objfiles ())
-    {
-      if (objfile != current_objfile)
-	{
-	  stop = cb (objfile, cb_data);
-	  if (stop)
-	    return;
-	}
-    }
+    if (objfile != current_objfile)
+      {
+	if (cb (objfile))
+	  return;
+      }
 }
 
 static void

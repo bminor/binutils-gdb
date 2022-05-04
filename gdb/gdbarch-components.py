@@ -2362,13 +2362,8 @@ Method(
 Iterate over all objfiles in the order that makes the most sense
 for the architecture to make global symbol searches.
 
-CB is a callback function where OBJFILE is the objfile to be searched,
-and CB_DATA a pointer to user-defined data (the same data that is passed
-when calling this gdbarch method).  The iteration stops if this function
-returns nonzero.
-
-CB_DATA is a pointer to some user-defined data to be passed to
-the callback.
+CB is a callback function passed an objfile to be searched.  The iteration stops
+if this function returns nonzero.
 
 If not NULL, CURRENT_OBJFILE corresponds to the objfile being
 inspected when the symbol search was requested.
@@ -2376,8 +2371,7 @@ inspected when the symbol search was requested.
     type="void",
     name="iterate_over_objfiles_in_search_order",
     params=[
-        ("iterate_over_objfiles_in_search_order_cb_ftype *", "cb"),
-        ("void *", "cb_data"),
+        ("iterate_over_objfiles_in_search_order_cb_ftype", "cb"),
         ("struct objfile *", "current_objfile"),
     ],
     predefault="default_iterate_over_objfiles_in_search_order",

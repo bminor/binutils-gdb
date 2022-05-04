@@ -4928,13 +4928,13 @@ set_gdbarch_core_info_proc (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_iterate_over_objfiles_in_search_order (struct gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype *cb, void *cb_data, struct objfile *current_objfile)
+gdbarch_iterate_over_objfiles_in_search_order (struct gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype cb, struct objfile *current_objfile)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->iterate_over_objfiles_in_search_order != NULL);
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_iterate_over_objfiles_in_search_order called\n");
-  gdbarch->iterate_over_objfiles_in_search_order (gdbarch, cb, cb_data, current_objfile);
+  gdbarch->iterate_over_objfiles_in_search_order (gdbarch, cb, current_objfile);
 }
 
 void

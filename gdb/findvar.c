@@ -399,37 +399,6 @@ symbol_read_needs_frame (struct symbol *sym)
   return symbol_read_needs (sym) == SYMBOL_NEEDS_FRAME;
 }
 
-/* Private data to be used with minsym_lookup_iterator_cb.  */
-
-struct minsym_lookup_data
-{
-  /* The name of the minimal symbol we are searching for.  */
-  const char *name = nullptr;
-
-  /* The field where the callback should store the minimal symbol
-     if found.  It should be initialized to NULL before the search
-     is started.  */
-  struct bound_minimal_symbol result;
-};
-
-/* A callback function for gdbarch_iterate_over_objfiles_in_search_order.
-   It searches by name for a minimal symbol within the given OBJFILE.
-   The arguments are passed via CB_DATA, which in reality is a pointer
-   to struct minsym_lookup_data.  */
-
-static int
-minsym_lookup_iterator_cb (struct objfile *objfile, void *cb_data)
-{
-  struct minsym_lookup_data *data = (struct minsym_lookup_data *) cb_data;
-
-  gdb_assert (data->result.minsym == NULL);
-
-  data->result = lookup_minimal_symbol (data->name, NULL, objfile);
-
-  /* The iterator should stop iff a match was found.  */
-  return (data->result.minsym != NULL);
-}
-
 /* Given static link expression and the frame it lives in, look for the frame
    the static links points to and return it.  Return NULL if we could not find
    such a frame.   */
@@ -746,22 +715,25 @@ language_defn::read_var_value (struct symbol *var,
 
     case LOC_UNRESOLVED:
       {
-	struct minsym_lookup_data lookup_data;
-	struct minimal_symbol *msym;
 	struct obj_section *obj_section;
-
-	lookup_data.name = var->linkage_name ();
+	bound_minimal_symbol bmsym;
 
 	gdbarch_iterate_over_objfiles_in_search_order
 	  (var->arch (),
-	   minsym_lookup_iterator_cb, &lookup_data,
+	   [var, &bmsym] (objfile *objfile)
+	     {
+		bmsym = lookup_minimal_symbol (var->linkage_name (), nullptr,
+					       objfile);
+
+		/* Stop if a match is found.  */
+		return bmsym.minsym != nullptr;
+	     },
 	   var->objfile ());
-	msym = lookup_data.result.minsym;
 
 	/* If we can't find the minsym there's a problem in the symbol info.
 	   The symbol exists in the debug info, but it's missing in the minsym
 	   table.  */
-	if (msym == NULL)
+	if (bmsym.minsym == nullptr)
 	  {
 	    const char *flavour_name
 	      = objfile_flavour_name (var->objfile ());
@@ -772,14 +744,15 @@ language_defn::read_var_value (struct symbol *var,
 	    error (_("Missing %s symbol \"%s\"."),
 		   flavour_name, var->linkage_name ());
 	  }
-	obj_section = msym->obj_section (lookup_data.result.objfile);
+
+	obj_section = bmsym.minsym->obj_section (bmsym.objfile);
 	/* Relocate address, unless there is no section or the variable is
 	   a TLS variable. */
 	if (obj_section == NULL
 	    || (obj_section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
-	   addr = msym->value_raw_address ();
+	   addr = bmsym.minsym->value_raw_address ();
 	else
-	   addr = lookup_data.result.value_address ();
+	   addr = bmsym.value_address ();
 	if (overlay_debugging)
 	  addr = symbol_overlayed_address (addr, obj_section);
 	/* Determine address of TLS variable. */
