@@ -193,7 +193,7 @@ is_64bit_tdesc (void)
 {
   /* We may not have a current thread at this point, so go straight to
      the process's target description.  */
-  return register_size (current_process ()->tdesc) == 8;
+  return register_size (current_process ()->tdesc, 0) == 8;
 }
 
 static void
