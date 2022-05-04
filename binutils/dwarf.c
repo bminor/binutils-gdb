@@ -825,8 +825,8 @@ fetch_indexed_addr (dwarf_vma offset, uint32_t num_bytes)
    Returns 0 if the value could not be found.  */
 
 static dwarf_vma
-fetch_indexed_value (dwarf_vma                        index,
-		     enum dwarf_section_display_enum  sec_enum)
+fetch_indexed_value (dwarf_vma idx,
+		     enum dwarf_section_display_enum sec_enum)
 {
   struct dwarf_section *section = &debug_displays [sec_enum].section;
 
@@ -849,7 +849,7 @@ fetch_indexed_value (dwarf_vma                        index,
       bias = 12;
     }
  
-  dwarf_vma offset = index * pointer_size;
+  dwarf_vma offset = idx * pointer_size;
 
   /* Offsets are biased by the size of the section header.  */
   offset += bias;
