@@ -61,10 +61,17 @@ static const int aarch64_context_offsets[] =
   112,       116,
 };
 
+#define V_INIT_OFFSET 640
+
 /* The ravenscar_arch_ops vector for most Aarch64 targets.  */
 
 static struct ravenscar_arch_ops aarch64_ravenscar_ops
-     (aarch64_context_offsets);
+     (aarch64_context_offsets,
+      -1, -1,
+      V_INIT_OFFSET,
+      /* The FPU context buffer starts with the FPSR register.  */
+      aarch64_context_offsets[AARCH64_FPSR_REGNUM],
+      AARCH64_V0_REGNUM, AARCH64_FPCR_REGNUM);
 
 /* Register aarch64_ravenscar_ops in GDBARCH.  */
 

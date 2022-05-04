@@ -164,6 +164,32 @@ private:
     switch_to_thread (find_thread_ptid (proc_target, underlying));
   }
 
+  /* Some targets use lazy FPU initialization.  On these, the FP
+     registers for a given task might be uninitialized, or stored in
+     the per-task context, or simply be the live registers on the CPU.
+     This enum is used to encode this information.  */
+  enum fpu_state
+  {
+    /* This target doesn't do anything special for FP registers -- if
+       any exist, they are treated just identical to non-FP
+       registers.  */
+    NOTHING_SPECIAL,
+    /* This target uses the lazy FP scheme, and the FP registers are
+       taken from the CPU.  This can happen for any task, because if a
+       task switch occurs, the registers aren't immediately written to
+       the per-task context -- this is deferred until the current task
+       causes an FPU trap.  */
+    LIVE_FP_REGISTERS,
+    /* This target uses the lazy FP scheme, and the FP registers are
+       not available.  Maybe this task never initialized the FPU, or
+       maybe GDB couldn't find the required symbol.  */
+    NO_FP_REGISTERS
+  };
+
+  /* Return the FPU state.  */
+  fpu_state get_fpu_state (struct regcache *regcache,
+			   const ravenscar_arch_ops *arch_ops);
+
   /* This maps a TID to the CPU on which it was running.  This is
      needed because sometimes the runtime will report an active task
      that hasn't yet been put on the list of tasks that is read by
@@ -508,9 +534,11 @@ ravenscar_arch_ops::supply_one_register (struct regcache *regcache,
 }
 
 void
-ravenscar_arch_ops::fetch_registers (struct regcache *regcache,
-				     int regnum) const
+ravenscar_arch_ops::fetch_register (struct regcache *regcache,
+				    int regnum) const
 {
+  gdb_assert (regnum != -1);
+
   struct gdbarch *gdbarch = regcache->arch ();
   /* The tid is the thread_id field, which is a pointer to the thread.  */
   CORE_ADDR thread_descriptor_address
@@ -518,26 +546,17 @@ ravenscar_arch_ops::fetch_registers (struct regcache *regcache,
 
   int sp_regno = -1;
   CORE_ADDR stack_address = 0;
-  if (regnum == -1
-      || (regnum >= first_stack_register && regnum <= last_stack_register))
+  if (regnum >= first_stack_register && regnum <= last_stack_register)
     {
       /* We must supply SP for get_stack_base, so recurse.  */
       sp_regno = gdbarch_sp_regnum (gdbarch);
       gdb_assert (!(sp_regno >= first_stack_register
 		    && sp_regno <= last_stack_register));
-      fetch_registers (regcache, sp_regno);
+      fetch_register (regcache, sp_regno);
       stack_address = get_stack_base (regcache);
     }
 
-  if (regnum == -1)
-    {
-      /* Fetch all registers.  */
-      for (int reg = 0; reg < offsets.size (); ++reg)
-	if (reg != sp_regno && offsets[reg] != -1)
-	  supply_one_register (regcache, reg, thread_descriptor_address,
-			       stack_address);
-    }
-  else if (regnum < offsets.size () && offsets[regnum] != -1)
+  if (regnum < offsets.size () && offsets[regnum] != -1)
     supply_one_register (regcache, regnum, thread_descriptor_address,
 			 stack_address);
 }
@@ -562,27 +581,20 @@ ravenscar_arch_ops::store_one_register (struct regcache *regcache, int regnum,
 }
 
 void
-ravenscar_arch_ops::store_registers (struct regcache *regcache,
-				     int regnum) const
+ravenscar_arch_ops::store_register (struct regcache *regcache,
+				    int regnum) const
 {
+  gdb_assert (regnum != -1);
+
   /* The tid is the thread_id field, which is a pointer to the thread.  */
   CORE_ADDR thread_descriptor_address
     = (CORE_ADDR) regcache->ptid ().tid ();
 
   CORE_ADDR stack_address = 0;
-  if (regnum == -1
-      || (regnum >= first_stack_register && regnum <= last_stack_register))
+  if (regnum >= first_stack_register && regnum <= last_stack_register)
     stack_address = get_stack_base (regcache);
 
-  if (regnum == -1)
-    {
-      /* Store all registers.  */
-      for (int reg = 0; reg < offsets.size (); ++reg)
-	if (offsets[reg] != -1)
-	  store_one_register (regcache, reg, thread_descriptor_address,
-			      stack_address);
-    }
-  else if (regnum < offsets.size () && offsets[regnum] != -1)
+  if (regnum < offsets.size () && offsets[regnum] != -1)
     store_one_register (regcache, regnum, thread_descriptor_address,
 			stack_address);
 }
@@ -615,6 +627,48 @@ private:
   ptid_t m_save_ptid;
 };
 
+ravenscar_thread_target::fpu_state
+ravenscar_thread_target::get_fpu_state (struct regcache *regcache,
+					const ravenscar_arch_ops *arch_ops)
+{
+  /* We want to return true if the special FP register handling is
+     needed.  If this target doesn't have lazy FP, then no special
+     treatment is ever needed.  */
+  if (!arch_ops->on_demand_fp ())
+    return NOTHING_SPECIAL;
+
+  bound_minimal_symbol fpu_context
+    = lookup_minimal_symbol ("system__bb__cpu_primitives__current_fpu_context",
+			     nullptr, nullptr);
+  /* If the symbol can't be found, just fall back.  */
+  if (fpu_context.minsym == nullptr)
+    return NO_FP_REGISTERS;
+
+  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  ptr_type = lookup_pointer_type (ptr_type);
+  value *val = value_from_pointer (ptr_type, fpu_context.value_address ());
+
+  int cpu = get_thread_base_cpu (regcache->ptid ());
+  /* The array index type has a lower bound of 1 -- it is Ada code --
+     so subtract 1 here.  */
+  val = value_ptradd (val, cpu - 1);
+
+  val = value_ind (val);
+  CORE_ADDR fpu_task = value_as_long (val);
+
+  /* The tid is the thread_id field, which is a pointer to the thread.  */
+  CORE_ADDR thread_descriptor_address
+    = (CORE_ADDR) regcache->ptid ().tid ();
+  if (fpu_task == (thread_descriptor_address
+		   + arch_ops->get_fpu_context_offset ()))
+    return LIVE_FP_REGISTERS;
+
+  int v_init_offset = arch_ops->get_v_init_offset ();
+  gdb_byte init = 0;
+  read_memory (thread_descriptor_address + v_init_offset, &init, 1);
+  return init ? NOTHING_SPECIAL : NO_FP_REGISTERS;
+}
+
 void
 ravenscar_thread_target::fetch_registers (struct regcache *regcache,
 					  int regnum)
@@ -623,19 +677,38 @@ ravenscar_thread_target::fetch_registers (struct regcache *regcache,
 
   if (runtime_initialized () && is_ravenscar_task (ptid))
     {
-      if (task_is_currently_active (ptid))
-	{
-	  ptid_t base = get_base_thread_from_ravenscar_task (ptid);
-	  temporarily_change_regcache_ptid changer (regcache, base);
-	  beneath ()->fetch_registers (regcache, regnum);
-	}
-      else
-	{
-	  struct gdbarch *gdbarch = regcache->arch ();
-	  struct ravenscar_arch_ops *arch_ops
-	    = gdbarch_ravenscar_ops (gdbarch);
+      struct gdbarch *gdbarch = regcache->arch ();
+      bool is_active = task_is_currently_active (ptid);
+      struct ravenscar_arch_ops *arch_ops = gdbarch_ravenscar_ops (gdbarch);
+      gdb::optional<fpu_state> fp_state;
 
-	  arch_ops->fetch_registers (regcache, regnum);
+      int low_reg = regnum == -1 ? 0 : regnum;
+      int high_reg = regnum == -1 ? gdbarch_num_regs (gdbarch) : regnum + 1;
+
+      ptid_t base = get_base_thread_from_ravenscar_task (ptid);
+      for (int i = low_reg; i < high_reg; ++i)
+	{
+	  bool use_beneath = false;
+	  if (arch_ops->is_fp_register (i))
+	    {
+	      if (!fp_state.has_value ())
+		fp_state = get_fpu_state (regcache, arch_ops);
+	      if (*fp_state == NO_FP_REGISTERS)
+		continue;
+	      if (*fp_state == LIVE_FP_REGISTERS
+		  || (is_active && *fp_state == NOTHING_SPECIAL))
+		use_beneath = true;
+	    }
+	  else
+	    use_beneath = is_active;
+
+	  if (use_beneath)
+	    {
+	      temporarily_change_regcache_ptid changer (regcache, base);
+	      beneath ()->fetch_registers (regcache, i);
+	    }
+	  else
+	    arch_ops->fetch_register (regcache, i);
 	}
     }
   else
@@ -650,19 +723,38 @@ ravenscar_thread_target::store_registers (struct regcache *regcache,
 
   if (runtime_initialized () && is_ravenscar_task (ptid))
     {
-      if (task_is_currently_active (ptid))
-	{
-	  ptid_t base = get_base_thread_from_ravenscar_task (ptid);
-	  temporarily_change_regcache_ptid changer (regcache, base);
-	  beneath ()->store_registers (regcache, regnum);
-	}
-      else
-	{
-	  struct gdbarch *gdbarch = regcache->arch ();
-	  struct ravenscar_arch_ops *arch_ops
-	    = gdbarch_ravenscar_ops (gdbarch);
+      struct gdbarch *gdbarch = regcache->arch ();
+      bool is_active = task_is_currently_active (ptid);
+      struct ravenscar_arch_ops *arch_ops = gdbarch_ravenscar_ops (gdbarch);
+      gdb::optional<fpu_state> fp_state;
 
-	  arch_ops->store_registers (regcache, regnum);
+      int low_reg = regnum == -1 ? 0 : regnum;
+      int high_reg = regnum == -1 ? gdbarch_num_regs (gdbarch) : regnum + 1;
+
+      ptid_t base = get_base_thread_from_ravenscar_task (ptid);
+      for (int i = low_reg; i < high_reg; ++i)
+	{
+	  bool use_beneath = false;
+	  if (arch_ops->is_fp_register (i))
+	    {
+	      if (!fp_state.has_value ())
+		fp_state = get_fpu_state (regcache, arch_ops);
+	      if (*fp_state == NO_FP_REGISTERS)
+		continue;
+	      if (*fp_state == LIVE_FP_REGISTERS
+		  || (is_active && *fp_state == NOTHING_SPECIAL))
+		use_beneath = true;
+	    }
+	  else
+	    use_beneath = is_active;
+
+	  if (use_beneath)
+	    {
+	      temporarily_change_regcache_ptid changer (regcache, base);
+	      beneath ()->store_registers (regcache, i);
+	    }
+	  else
+	    arch_ops->store_register (regcache, i);
 	}
     }
   else
