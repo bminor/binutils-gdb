@@ -200,7 +200,7 @@ path_join (gdb::array_view<const gdb::string_view> paths)
       const gdb::string_view path = paths[i];
 
       if (i > 0)
-	gdb_assert (!IS_ABSOLUTE_PATH (path));
+	gdb_assert (path.empty () || !IS_ABSOLUTE_PATH (path));
 
       if (!ret.empty () && !IS_DIR_SEPARATOR (ret.back ()))
 	  ret += '/';
