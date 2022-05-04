@@ -5324,33 +5324,17 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (NO_OPD_RELOCS && is_opd)
 	    break;
 
-	  /* If we are creating a shared library, and this is a reloc
-	     against a global symbol, or a non PC relative reloc
-	     against a local symbol, then we need to copy the reloc
-	     into the shared library.  However, if we are linking with
-	     -Bsymbolic, we do not need to copy a reloc against a
-	     global symbol which is defined in an object we are
-	     including in the link (i.e., DEF_REGULAR is set).  At
-	     this point we have not seen all the input files, so it is
-	     possible that DEF_REGULAR is not set now but will be set
-	     later (it is never cleared).  In case of a weak definition,
-	     DEF_REGULAR may be cleared later by a strong definition in
-	     a shared library.  We account for that possibility below by
-	     storing information in the dyn_relocs field of the hash
-	     table entry.  A similar situation occurs when creating
-	     shared libraries and symbol visibility changes render the
-	     symbol local.
-
-	     If on the other hand, we are creating an executable, we
-	     may need to keep relocations for symbols satisfied by a
-	     dynamic library if we manage to avoid copy relocs for the
-	     symbol.  */
+	  /* Set up information for symbols that might need dynamic
+	     relocations.  At this point in linking we have read all
+	     the input files and resolved most symbols, but have not
+	     yet decided whether symbols are dynamic or finalized
+	     symbol flags.  In some cases we might be setting dynamic
+	     reloc info for symbols that do not end up needing such.
+	     That's OK, adjust_dynamic_symbol and allocate_dynrelocs
+	     work together with this code.  */
 	dodyn:
 	  if ((h != NULL
-	       && (h->root.type == bfd_link_hash_defweak
-		   || (!h->def_regular && !h->root.ldscript_def)))
-	      || (h != NULL
-		  && !SYMBOL_REFERENCES_LOCAL (info, h))
+	       && !SYMBOL_REFERENCES_LOCAL (info, h))
 	      || (bfd_link_pic (info)
 		  && (h != NULL
 		      ? !bfd_is_abs_symbol (&h->root)
@@ -7245,10 +7229,7 @@ dec_dynrel_count (const Elf_Internal_Rela *rel,
     }
 
   if ((h != NULL
-       && (h->root.type == bfd_link_hash_defweak
-	   || (!h->def_regular && !h->root.ldscript_def)))
-      || (h != NULL
-	  && !SYMBOL_REFERENCES_LOCAL (info, h))
+       && !SYMBOL_REFERENCES_LOCAL (info, h))
       || (bfd_link_pic (info)
 	  && (h != NULL
 	      ? !bfd_is_abs_symbol (&h->root)
