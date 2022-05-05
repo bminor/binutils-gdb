@@ -54,18 +54,13 @@ gprofng_cppflags="-U_ASM"
 build_collector=
 build_src=
 
-# This is annoying: it means we have to pass --enable-shared explicitly to
-# get gprofng, while the configure default is supposed to be that shared libs
-# are on by default.  But as long as libiberty has code like this, so must
-# we...
-
-  case "${target}" in
+  case "${host}" in
     x86_64-*-linux*)
       build_src=true
       build_collector=true
       ;;
     i?86-*-linux*)
-      build_collector=true
+      build_src=true
       build_collector=true
       ;;
     aarch64-*-linux*)

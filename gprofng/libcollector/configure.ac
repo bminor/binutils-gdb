@@ -42,7 +42,7 @@ if test "$enable_shared" != "yes"; then
 fi
 
 GPROFNG_VARIANT=unknown
-case "${target}" in
+case "${host}" in
   x86_64-*-linux*)
     GPROFNG_VARIANT=amd64-Linux
     ;;
