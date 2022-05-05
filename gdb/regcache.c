@@ -1944,30 +1944,9 @@ cooked_read_test (struct gdbarch *gdbarch)
 static void
 cooked_write_test (struct gdbarch *gdbarch)
 {
-  /* Error out if debugging something, because we're going to push the
-     test target, which would pop any existing target.  */
-  if (current_inferior ()->top_target ()->stratum () >= process_stratum)
-    error (_("target already pushed"));
-
   /* Create a mock environment.  A process_stratum target pushed.  */
-
-  target_ops_no_register mock_target;
-
-  /* Push the process_stratum target so we can mock accessing
-     registers.  */
-  current_inferior ()->push_target (&mock_target);
-
-  /* Pop it again on exit (return/exception).  */
-  struct on_exit
-  {
-    ~on_exit ()
-    {
-      pop_all_targets_at_and_above (process_stratum);
-    }
-  } pop_targets;
-
-  readwrite_regcache readwrite (&mock_target, gdbarch);
-
+  scoped_mock_context<target_ops_no_register> ctx (gdbarch);
+  readwrite_regcache readwrite (&ctx.mock_target, gdbarch);
   const int num_regs = gdbarch_num_cooked_regs (gdbarch);
 
   for (auto regnum = 0; regnum < num_regs; regnum++)
