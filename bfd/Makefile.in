@@ -2331,7 +2331,7 @@ libbfd.a: stamp-lib ; @true
 # vector names.  It is built from config.bfd.  It is not compiled by
 # itself, but is included by targets.c.
 targmatch.h: config.bfd targmatch.sed
-	$(AM_V_at)rm -f targmatch.h
+	$(AM_V_at)rm -f targmatch.new
 	$(AM_V_GEN)$(SED) -f $(srcdir)/targmatch.sed < $(srcdir)/config.bfd > targmatch.new
 	$(AM_V_at)mv -f targmatch.new targmatch.h
 
