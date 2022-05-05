@@ -258,38 +258,28 @@ mi_ui_out::main_stream ()
   return (string_file *) m_streams.back ();
 }
 
-/* Indicate that a task described by NAME is in progress:
-
-   - SHOULD_PRINT == true:
-     <NAME
-     >
-   - SHOULD_PRINT == false:
-     <>
-*/
-
 void
-mi_ui_out::do_progress_start (const std::string &name, bool should_print)
+mi_ui_out::do_progress_start ()
 {
-  struct ui_file *stream = gdb_stdout;
   mi_progress_info info;
 
-  if (should_print)
-    {
-      fprintf_unfiltered (stream, "%s\n", name.c_str ());
-      gdb_flush (stream);
-    }
-
-  info.state = progress_update::WORKING;
+  info.state = progress_update::START;
   m_progress_info.push_back (std::move (info));
 }
 
-/* Get the state of the most recent progress update.  */
+/* Indicate that a task described by NAME is in progress.  */
 
-mi_ui_out::progress_update::state
-mi_ui_out::get_progress_state ()
+void
+mi_ui_out::do_progress_notify (const std::string &msg, double howmuch)
 {
-  mi_progress_info &info = m_progress_info.back ();
-  return info.state;
+  mi_progress_info &info (m_progress_info.back ());
+
+  if (info.state == progress_update::START)
+    {
+      struct ui_file *stream = gdb_stdout;
+      fprintf_unfiltered (stream, "%s\n", msg.c_str ());
+      info.state = progress_update::WORKING;
+    }
 }
 
 /* Clear the buffer.  */

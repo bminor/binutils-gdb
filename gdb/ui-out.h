@@ -293,35 +293,20 @@ class ui_out
       WORKING,
       /* Progress bar printing has already started.  */
       BAR,
-      /* Spinner printing has already started.  */
-      SPIN,
-      /* Percent printing has already started.  */
-      PERCENT,
       /* Printing should not be done.  */
       NO_PRINT
     };
 
     /* SHOULD_PRINT indicates whether something should be printed for a tty.  */
-    progress_update (struct ui_out *uiout, const std::string &name,
-		     bool should_print)
-      : m_uiout (uiout)
+    progress_update ()
     {
-      m_uiout->do_progress_start (name, should_print);
+      m_uiout = current_uiout;
+      m_uiout->do_progress_start ();
     }
 
     ~progress_update ()
     {
-      m_uiout->do_progress_end ();
-    }
 
-    void update_name (std::string &name)
-    {
-      m_uiout->update_progress_name (name);
-    }
-
-    state get_state ()
-    {
-      return m_uiout->get_progress_state ();
     }
 
     progress_update (const progress_update &) = delete;
@@ -334,20 +319,12 @@ class ui_out
 
   /* Emit some progress corresponding to the most recently created
      progress_update object.  */
-  void update_progress_bar (double howmuch)
+  void update_progress (std::string &msg, double howmuch)
   {
-    do_progress_notify (howmuch, progress_update::BAR);
+    do_progress_notify (msg, howmuch);
   }
 
-  void update_progress_percent (double howmuch)
-  {
-    do_progress_notify (howmuch, progress_update::PERCENT);
-  }
-
-  void update_progress_spin ()
-  {
-    do_progress_notify (0, progress_update::SPIN);
-  }
+  virtual void do_progress_end () = 0;
 
  protected:
 
@@ -383,11 +360,8 @@ class ui_out
   virtual void do_flush () = 0;
   virtual void do_redirect (struct ui_file *outstream) = 0;
 
-  virtual void do_progress_start (const std::string &, bool) = 0;
-  virtual void do_progress_notify (double, progress_update::state) = 0;
-  virtual void do_progress_end () = 0;
-  virtual void update_progress_name (const std::string &) = 0;
-  virtual progress_update::state get_progress_state () = 0;
+  virtual void do_progress_start () = 0;
+  virtual void do_progress_notify (const std::string &, double) = 0;
 
   /* Set as not MI-like by default.  It is overridden in subclasses if
      necessary.  */

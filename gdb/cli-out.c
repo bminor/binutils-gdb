@@ -265,134 +265,106 @@ cli_ui_out::do_redirect (ui_file *outstream)
     m_streams.pop_back ();
 }
 
-/* The cli_ui_out::do_progress_{start, notify} functions result in
-   the following:
-
-   - printed for tty, SHOULD_PRINT == true
-      - next state == PERCENT:
-	<(XX%) NAME\r>
-      - next state == SPIN:
-	<-\|/ NAME\r>
-      - next state == BAR:
-	<NAME
-	[#####                      ]\r>
-   - printed for tty, SHOULD_PRINT == false:
-     <>
-   - printed for not-a-tty:
-     <NAME...
-     >
-*/
-
 void
-cli_ui_out::do_progress_start (const std::string &name, bool should_print)
+cli_ui_out::do_progress_start ()
 {
-  struct ui_file *stream = m_streams.back ();
   cli_progress_info info;
 
-  info.name = name;
-  if (!stream->isatty ())
-    {
-      fprintf_unfiltered (stream, "%s\n", info.name.c_str ());
-      gdb_flush (stream);
-      info.state = progress_update::WORKING;
-    }
-  else
-    {
-      /* Don't actually emit anything until the first call notifies us
-	 of progress.  This makes it so a second progress message can
-	 be started before the first one has been notified, without
-	 messy output.  */
-      info.state = should_print ? progress_update::START
-				: progress_update::NO_PRINT;
-    }
-
+  info.pos = 0;
+  info.state = progress_update::START;
   m_progress_info.push_back (std::move (info));
 }
 
 /* Pick a reasonable limit for the progress update length.  */
 #define MAX_CHARS_PER_LINE 4096
 
+/* Print a progress update.  MSG is a string to be printed before
+   If HOWMUCH is between 0.0 and 1.0, a progress bar is displayed
+   indicating the percentage of completion.  If HOWMUCH is negative, 
+   a progress indicator ticks across the screen.  Multiple calls
+   to this function progressively update the display.
+   
+   - printed for tty, HOWMUCH between 0.0 and 1.0:
+	<NAME
+	[########                   ]\r>
+   - printed for tty, HOWMUCH < 0.0:
+	<NAME
+	[    ###                    ]\r>
+   - printed for not-a-tty:
+     <NAME...
+     >
+*/
+
 void
-cli_ui_out::do_progress_notify (double howmuch,
-			        progress_update::state next_state)
+cli_ui_out::do_progress_notify (const std::string &msg, double howmuch)
 {
   struct ui_file *stream = m_streams.back ();
   cli_progress_info &info (m_progress_info.back ());
 
-  if (info.state == progress_update::NO_PRINT)
-    return;
+  if (info.state == progress_update::START)
+    {
+      if (!stream->isatty ())
+	{
+	  fprintf_unfiltered (stream, "%s...\n", msg.c_str ());
+	  info.state = progress_update::WORKING;
+	}
+      else
+	{
+	  fprintf_unfiltered (stream, "%s\n", msg.c_str ());
+	  info.state = progress_update::BAR;
+	}
+    }
 
   int chars_per_line = get_chars_per_line ();
   if (chars_per_line > MAX_CHARS_PER_LINE)
     chars_per_line = MAX_CHARS_PER_LINE;
 
-  if (info.state == progress_update::START)
-    {
-      fprintf_unfiltered (stream, "%s", info.name.c_str ());
-      if (chars_per_line <= 0)
-	fprintf_unfiltered (stream, "\n");
-      gdb_flush (stream);
-      info.state = progress_update::WORKING;
-    }
-
-  if (chars_per_line <= 0)
+  if (chars_per_line <= 0
+      || info.state == progress_update::WORKING
+      || !stream->isatty ())
     return;
-
-  if (info.state == progress_update::WORKING && howmuch >= 1.0)
-    return;
-
-  if (!stream->isatty ())
-    return;
-
-  if (next_state == progress_update::PERCENT)
+/*
+  if (howmuch >= 0)
     {
-      fprintf_unfiltered (stream, "\r(%2.0f%%) %s",
-			  howmuch * 100, info.name.c_str ());
-      gdb_flush (stream);
-      info.state = progress_update::PERCENT;
-    }
-  else if (next_state == progress_update::SPIN)
-    {
-      using namespace std::chrono;
-      seconds diff = duration_cast<seconds>
-	(steady_clock::now () - info.last_update);
-
-      /* Advance the spinner no faster than 1 tick per second.  */
-      if (diff.count () >= 1.0)
-	{
-	  static int spin = 0;
-
-	  fprintf_unfiltered (stream, "\r%c %s", "-\\|/"[spin++ % 4],
-			      info.name.c_str ());
-	  gdb_flush (stream);
-	  info.last_update = steady_clock::now ();
-	}
-      info.state = progress_update::SPIN;
-    }
-  else if (next_state == progress_update::BAR)
-    {
-      int i, max;
       int width = chars_per_line - 3;
-      max = width * howmuch;
-
-      if (info.state == progress_update::SPIN
-	  || info.state == progress_update::PERCENT)
-	{
-	  /* Ensure the progress bar prints on its own line so that
-	     progress updates don't overwrite NAME.  */
-	  fprintf_unfiltered (stream, "\r%s\n", info.name.c_str ());
-	  gdb_flush (stream);
-	}
+      int max = width * howmuch;
 
       fprintf_unfiltered (stream, "\r[");
-
-      for (i = 0; i < width; ++i)
+      for (int i = 0; i < width; ++i)
 	fprintf_unfiltered (stream, i < max ? "#" : " ");
       fprintf_unfiltered (stream, "]");
       gdb_flush (stream);
-      info.state = progress_update::BAR;
     }
+  else
+    {
+      using namespace std::chrono;
+      milliseconds diff = duration_cast<milliseconds>
+	(steady_clock::now () - info.last_update);
 
+      * Advance the progress indicator at a rate of 1 tick every
+	 every 0.5 seconds.  *
+      if (diff.count () >= 500)
+	{
+	  int width = chars_per_line - 3;
+
+	  fprintf_unfiltered (stream, "\r[");
+          
+	  for (int i = 0; i < width; ++i)
+	    {
+	      if (i >= info.pos % width
+		  && i < (info.pos + 3) % width)
+	        fprintf_unfiltered (stream, "#");
+	      else
+		fprintf_unfiltered (stream, " ");
+	    }	
+
+	  fprintf_unfiltered (stream, "]");
+	  gdb_flush (stream);
+	  info.last_update = steady_clock::now ();
+	  info.pos++;
+	}
+    }
+*/
   return;
 }
 
@@ -409,39 +381,15 @@ cli_ui_out::clear_current_line ()
       || chars_per_line > MAX_CHARS_PER_LINE)
     chars_per_line = MAX_CHARS_PER_LINE;
 
-  int i;
   int width = chars_per_line;
 
   fprintf_unfiltered (stream, "\r");
-  for (i = 0; i < width; ++i)
+  for (int i = 0; i < width; ++i)
     fprintf_unfiltered (stream, " ");
   fprintf_unfiltered (stream, "\r");
 
   gdb_flush (stream);
 }
-
-/* Set NAME as the new description of the most recent progress update.  */
-
-void
-cli_ui_out::update_progress_name (const std::string &name)
-{
-  struct ui_file *stream = m_streams.back ();
-  cli_progress_info &info = m_progress_info.back ();
-  info.name = name;
-
-  if (stream->isatty ())
-    clear_current_line ();
-}
-
-/* Get the current state of the most recent progress update.  */
-
-cli_ui_out::progress_update::state
-cli_ui_out::get_progress_state ()
-{
-  cli_progress_info &info = m_progress_info.back ();
-  return info.state;
-}
-
 
 /* Remove the most recent progress update from the stack and
    overwrite the current line with whitespace.  */

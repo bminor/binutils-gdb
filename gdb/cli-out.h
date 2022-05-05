@@ -72,11 +72,9 @@ protected:
   virtual void do_flush () override;
   virtual void do_redirect (struct ui_file *outstream) override;
 
-  virtual void do_progress_start (const std::string &, bool) override;
-  virtual void do_progress_notify (double, progress_update::state) override;
+  virtual void do_progress_start () override;
+  virtual void do_progress_notify (const std::string &, double) override;
   virtual void do_progress_end () override;
-  virtual void update_progress_name (const std::string &) override;
-  virtual progress_update::state get_progress_state () override;
 
   bool suppress_output ()
   { return m_suppress_output; }
@@ -91,10 +89,10 @@ private:
   /* The state of a recent progress update.  */
   struct cli_progress_info
   {
+    /* Position of indicator.  */
+    int pos;
     /* The current state.  */
     progress_update::state state;
-    /* The name to print.  */
-    std::string name;
     /* Time of last spinner update.  */
     std::chrono::steady_clock::time_point last_update;
   };

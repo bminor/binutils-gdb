@@ -84,7 +84,7 @@ struct user_data
 
   const char * const desc;
   std::string & fname;
-  gdb::optional<ui_out::progress_update> progress;
+  ui_out::progress_update progress;
 };
 
 /* Deleter for a debuginfod_client.  */
@@ -119,200 +119,51 @@ get_size_and_unit (double *size, const char **unit)
     *unit = "KB";
 }
 
-/* Ensure the progress message can fit on a single line. Otherwise
-   garbled output is possible with \r.
-
-   An example of possible truncations, starting with the original message:
-   "Downloading XX MB separate debug info for /aa/bb/cc/dd/ee"
-   "Downloading XX MB separate debug info for /aa/bb/.../ee"
-   "Downloading XX MB separate debug info for ee"
-   "Downloading XX MB separate debug info"
-   "Downloading XX MB"
-   "Downloading"
-  */
-
-static std::string
-build_message (std::string size, std::string unit, std::string desc, std::string fname)
-{
-  int width = get_chars_per_line ();
-  std::stringstream message;
-
-  message << "Downloading";
-  /* Leave room for spinner and percent indicator.  */
-  int message_size = message.str ().length () + 6;
-
-  if (!size.empty () && !unit.empty ())
-    {
-      message_size += size.size () + unit.size () + 2;
-      if (message_size > width)
-	return message.str ();
-
-      /* "Downloading XX MB" */
-      message << " " << size << " " << unit;
-    }
-
-  /* If FNAME does not fit then message will end with DESC_END.
-     In case DESC_END is "separate debug info for", remove " for".  */
-  std::string desc_end = desc;
-  if (desc.substr (desc.size () - 4) == " for")
-    desc_end = desc.substr (0, desc.size () - 4);
-
-  if (message_size + desc_end.size () + 1 > width)
-    return message.str ();
-
-  string_file styled_fname (current_uiout->can_emit_style_escape ());
-  if (message_size + desc.size () + fname.size () + 2 <= width)
-    {
-      /* Truncation is not necessary. Return untruncated message.
-	 "Downloading XX MB separate debug info for /usr/libxyz.so" */
-      fprintf_styled (&styled_fname, file_name_style.style (), "%s",
-		      fname.c_str ());
-
-      message << " " << desc << " " << styled_fname.c_str ();
-      return message.str ();
-    }
-
-   while (fname.back () == '/')
-    fname.pop_back ();
-
-  /* Find path separators for the first, second and final components.
-     If FNAME does not have path separators and it does not fit in the
-     available space, do not include it in message.  */
-  size_t sep1 = fname.find ('/');
-  if (sep1 == std::string::npos)
-    {
-      message << " " << desc_end;
-      return message.str ();
-    }
-
-  size_t sep2 = fname.find ('/', sep1 + 1);
-  size_t sep3;
-  if (sep2 == std::string::npos)
-    sep3 = std::string::npos;
-  else
-    sep3 = fname.find ('/', sep2 + 1);
-  size_t seplast = fname.find_last_of ('/');
-
-  /* If the first, second, and final path components are distinct, try to
-     truncate FNAME so that it fits in the available space.  Preserve the
-     first, second and final path components.  For example,
-     "/aa/bb/cc/dd/ee" becomes "/aa/bb/.../ee" and
-     "../aa/bb/cc/dd/" becomes "../aa/.../ee"  */
-  std::stringstream trunc;
-  if (sep2 != sep3 && sep2 != seplast && sep2 != std::string::npos)
-    {
-      std::stringstream fnametmp;
-
-      if (sep1 == 0 && sep3 != seplast && sep3 != std::string::npos)
-	fnametmp << fname.substr (0, sep3 + 1)
-		 << "..." << fname.substr (seplast);
-      else if (sep1 != 0)
-	fnametmp << fname.substr (0, sep2 + 1)
-		 << "..." << fname.substr (seplast);
-
-      if (!fnametmp.str ().empty ())
-	{
-	  trunc << " " << desc << " ";
-	  if (message_size + trunc.str ().size () + fnametmp.str ().size () <= width)
-	    {
-	      fprintf_styled (&styled_fname, file_name_style.style (), "%s",
-			      fnametmp.str ().c_str ());
-	      message << trunc.str () << styled_fname.c_str ();
-	      return message.str ();
-	    }
-	}
-    }
-
-  /* The first, second and final components are not distinct or
-     "/aa/bb/.../ee" does not fit. Try "ee" instead.  */
-  trunc.str ("");
-  trunc << " " << desc << " ";
-  fname = fname.substr (seplast + 1);
-  if (message_size + trunc.str ().size () + fname.size () <= width)
-    {
-      fprintf_styled (&styled_fname, file_name_style.style (), "%s",
-		      fname.c_str ());
-      message << trunc.str () << styled_fname.c_str ();
-      return message.str ();
-    }
-
-  /* We aren't able to fit anything from FNAME. End message with DESC_END
-     since we already confirmed it will fit.  */
-  message << " " << desc_end;
-  return message.str ();
-}
-
-
 static int
 progressfn (debuginfod_client *c, long cur, long total)
 {
   user_data *data = static_cast<user_data *> (debuginfod_get_user_data (c));
   gdb_assert (data != nullptr);
 
+  string_file styled_fname (current_uiout->can_emit_style_escape ());
+  fprintf_styled (&styled_fname, file_name_style.style (), "%s",
+		  data->fname.c_str ());
+
   if (check_quit_flag ())
     {
-      if (data->progress.has_value ())
-	data->progress.reset ();
-
-      string_file styled_fname (current_uiout->can_emit_style_escape ());
-      fprintf_styled (&styled_fname, file_name_style.style (), "%s",
-		      data->fname.c_str ());
+      current_uiout->do_progress_end (); ///?
 
       printf_filtered ("Cancelled download of %s %s\n",
 		       data->desc, styled_fname.c_str ());
       return 1;
     }
 
-  if (debuginfod_verbose == 0
-      || (data->progress.has_value ()
-	  && data->progress->get_state () == ui_out::progress_update::WORKING))
+  if (debuginfod_verbose == 0)
     return 0;
 
   /* Print progress update.  Include the transfer size if available.  */
   if (total > 0)
     {
       /* Transfer size is known.  */
-      double percent = (double)cur / (double)total;
+      double howmuch = (double) cur / (double) total;
 
-      if (percent >= 0.0 && percent <= 1.0)
+      if (howmuch >= 0.0 && howmuch <= 1.0)
 	{
-	  if (!data->progress.has_value ()
-	      || data->progress->get_state ()
-		 != ui_out::progress_update::PERCENT)
-	    {
-	      double size = (double)total;
-	      const char *unit = "";
+	  double size = (double) total;
+	  const char *unit = "";
 
-	      get_size_and_unit (&size, &unit);
-	      std::string fsize = string_printf ("%.2f", size);
-	      std::string message = build_message (fsize, unit, data->desc,
-						   data->fname);
-	      if (!data->progress.has_value ())
-		data->progress.emplace (current_uiout, message, 1);
-	      else
-		data->progress->update_name (message);
-	    }
-
-	    /* Ensure PERCENT doesn't require three digits to display.  */
-	    if (percent > 0.99 && percent <= 1.0)
-	      percent = .99;
-	    current_uiout->update_progress_percent (percent);
-	    return 0;
+	  get_size_and_unit (&size, &unit);
+	  std::string msg = string_printf ("Downloading %0.2f %s %s %s\n",
+					   size, unit, data->desc,
+					   styled_fname.c_str ());
+	  current_uiout->update_progress (msg, howmuch);
+	  return 0;
 	}
     }
 
-  if (!data->progress.has_value ()
-      || data->progress->get_state () != ui_out::progress_update::SPIN)
-    {
-      std::string message = build_message ("", "", data->desc, data->fname);
-
-      if (!data->progress.has_value ())
-	data->progress.emplace (current_uiout, message, 1);
-      else
-	data->progress->update_name (message);
-    }
-
-  current_uiout->update_progress_spin ();
+  std::string msg = string_printf ("Downloading %s %s\n",
+				   data->desc, styled_fname.c_str ());
+  current_uiout->update_progress (msg, -1);
   return 0;
 }
 
@@ -374,8 +225,7 @@ static void
 print_outcome (user_data &data, int fd)
 {
   /* Clears the current line of progress output.  */
-  if (data.progress.has_value ())
-    data.progress.reset ();
+  current_uiout->do_progress_end ();
 
   string_file styled_fname (current_uiout->can_emit_style_escape ());
   fprintf_styled (&styled_fname, file_name_style.style (), "%s",
