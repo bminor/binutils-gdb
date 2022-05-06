@@ -100,7 +100,6 @@ static void create_breakpoints_sal (struct gdbarch *,
 				    enum bptype,
 				    enum bpdisp, int, int,
 				    int,
-				    const struct breakpoint_ops *,
 				    int, int, int, unsigned);
 
 static std::vector<symtab_and_line> decode_location_default
@@ -8305,7 +8304,7 @@ init_breakpoint_sal (base_breakpoint *b, struct gdbarch *gdbarch,
 		     gdb::unique_xmalloc_ptr<char> extra_string,
 		     enum bptype type, enum bpdisp disposition,
 		     int thread, int task, int ignore_count,
-		     const struct breakpoint_ops *ops, int from_tty,
+		     int from_tty,
 		     int enabled, int internal, unsigned flags,
 		     int display_canonical)
 {
@@ -8449,7 +8448,7 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		       gdb::unique_xmalloc_ptr<char> extra_string,
 		       enum bptype type, enum bpdisp disposition,
 		       int thread, int task, int ignore_count,
-		       const struct breakpoint_ops *ops, int from_tty,
+		       int from_tty,
 		       int enabled, int internal, unsigned flags,
 		       int display_canonical)
 {
@@ -8462,7 +8461,7 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		       std::move (extra_string),
 		       type, disposition,
 		       thread, task, ignore_count,
-		       ops, from_tty,
+		       from_tty,
 		       enabled, internal, flags,
 		       display_canonical);
 
@@ -8491,7 +8490,7 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
 			gdb::unique_xmalloc_ptr<char> extra_string,
 			enum bptype type, enum bpdisp disposition,
 			int thread, int task, int ignore_count,
-			const struct breakpoint_ops *ops, int from_tty,
+			int from_tty,
 			int enabled, int internal, unsigned flags)
 {
   if (canonical->pre_expanded)
@@ -8513,7 +8512,7 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
 			     std::move (cond_string),
 			     std::move (extra_string),
 			     type, disposition,
-			     thread, task, ignore_count, ops,
+			     thread, task, ignore_count,
 			     from_tty, enabled, internal, flags,
 			     canonical->special_display);
     }
@@ -8997,7 +8996,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 				   std::move (extra_string_copy),
 				   type_wanted,
 				   tempflag ? disp_del : disp_donttouch,
-				   thread, task, ignore_count, ops,
+				   thread, task, ignore_count,
 				   from_tty, enabled, internal, flags);
     }
   else
@@ -12128,7 +12127,6 @@ strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
 				      enum bpdisp disposition,
 				      int thread,
 				      int task, int ignore_count,
-				      const struct breakpoint_ops *ops,
 				      int from_tty, int enabled,
 				      int internal, unsigned flags)
 {
@@ -12153,7 +12151,7 @@ strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
 			   std::move (cond_string),
 			   std::move (extra_string),
 			   type_wanted, disposition,
-			   thread, task, ignore_count, ops,
+			   thread, task, ignore_count,
 			   from_tty, enabled, internal, flags,
 			   canonical->special_display);
       /* Given that its possible to have multiple markers with

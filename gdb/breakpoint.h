@@ -582,8 +582,7 @@ struct breakpoint_ops
 				  gdb::unique_xmalloc_ptr<char>,
 				  gdb::unique_xmalloc_ptr<char>,
 				  enum bptype, enum bpdisp, int, int,
-				  int, const struct breakpoint_ops *,
-				  int, int, int, unsigned);
+				  int, int, int, int, unsigned);
 };
 
 enum watchpoint_triggered
