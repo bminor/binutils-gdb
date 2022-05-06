@@ -111,13 +111,7 @@ static int can_use_hardware_watchpoint
 
 static void mention (const breakpoint *);
 
-static struct breakpoint *set_raw_breakpoint_without_location (struct gdbarch *,
-							       enum bptype);
-/* This function is used in gdbtk sources and thus can not be made
-   static.  */
-static struct breakpoint *set_raw_breakpoint (struct gdbarch *gdbarch,
-					      struct symtab_and_line,
-					      enum bptype);
+static breakpoint *add_to_breakpoint_chain (std::unique_ptr<breakpoint> &&b);
 
 static breakpoint *add_to_breakpoint_chain (std::unique_ptr<breakpoint> &&b);
 
@@ -1297,27 +1291,6 @@ new_breakpoint_from_type (struct gdbarch *gdbarch, bptype type,
     case bp_dprintf:
       b = new dprintf_breakpoint (gdbarch, type,
 				  std::forward<Arg> (args)...);
-      break;
-
-    case bp_longjmp:
-    case bp_exception:
-      b = new longjmp_breakpoint (gdbarch, type,
-				  std::forward<Arg> (args)...);
-      break;
-
-    case bp_watchpoint_scope:
-    case bp_finish:
-    case bp_gnu_ifunc_resolver_return:
-    case bp_step_resume:
-    case bp_hp_step_resume:
-    case bp_longjmp_resume:
-    case bp_longjmp_call_dummy:
-    case bp_exception_resume:
-    case bp_call_dummy:
-    case bp_until:
-    case bp_std_terminate:
-      b = new momentary_breakpoint (gdbarch, type,
-				    std::forward<Arg> (args)...);
       break;
 
     default:
@@ -7256,18 +7229,6 @@ add_to_breakpoint_chain (std::unique_ptr<breakpoint> &&b)
   return result;
 }
 
-/* Helper to set_raw_breakpoint below.  Creates a breakpoint
-   that has type BPTYPE and has no locations as yet.  */
-
-static struct breakpoint *
-set_raw_breakpoint_without_location (struct gdbarch *gdbarch,
-				     enum bptype bptype)
-{
-  std::unique_ptr<breakpoint> b = new_breakpoint_from_type (gdbarch, bptype);
-
-  return add_to_breakpoint_chain (std::move (b));
-}
-
 /* Initialize loc->function_name.  */
 
 static void
@@ -7342,31 +7303,6 @@ init_raw_breakpoint (struct breakpoint *b, struct symtab_and_line sal,
      program space.  */
   if (bptype != bp_breakpoint && bptype != bp_hardware_breakpoint)
     b->pspace = sal.pspace;
-}
-
-/* set_raw_breakpoint is a low level routine for allocating and
-   partially initializing a breakpoint of type BPTYPE.  The newly
-   created breakpoint's address, section, source file name, and line
-   number are provided by SAL.  The newly created and partially
-   initialized breakpoint is added to the breakpoint chain and
-   is also returned as the value of this function.
-
-   It is expected that the caller will complete the initialization of
-   the newly created breakpoint struct as well as output any status
-   information regarding the creation of a new breakpoint.  In
-   particular, set_raw_breakpoint does NOT set the breakpoint
-   number!  Care should be taken to not allow an error to occur
-   prior to completing the initialization of the breakpoint.  If this
-   should happen, a bogus breakpoint will be left on the chain.  */
-
-static struct breakpoint *
-set_raw_breakpoint (struct gdbarch *gdbarch,
-		    struct symtab_and_line sal, enum bptype bptype)
-{
-  std::unique_ptr<breakpoint> b = new_breakpoint_from_type (gdbarch, bptype);
-
-  init_raw_breakpoint (b.get (), sal, bptype);
-  return add_to_breakpoint_chain (std::move (b));
 }
 
 /* Call this routine when stepping and nexting to enable a breakpoint
@@ -7977,6 +7913,17 @@ new_single_step_breakpoint (int thread, struct gdbarch *gdbarch)
   return add_to_breakpoint_chain (std::move (b));
 }
 
+/* Allocate a new momentary breakpoint.  */
+
+static momentary_breakpoint *
+new_momentary_breakpoint (struct gdbarch *gdbarch, enum bptype type)
+{
+  if (type == bp_longjmp || type == bp_exception)
+    return new longjmp_breakpoint (gdbarch, type);
+  else
+    return new momentary_breakpoint (gdbarch, type);
+}
+
 /* Set a momentary breakpoint of type TYPE at address specified by
    SAL.  If FRAME_ID is valid, the breakpoint is restricted to that
    frame.  */
@@ -7985,22 +7932,26 @@ breakpoint_up
 set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
 			  struct frame_id frame_id, enum bptype type)
 {
-  struct breakpoint *b;
-
   /* If FRAME_ID is valid, it should be a real frame, not an inlined or
      tail-called one.  */
   gdb_assert (!frame_id_artificial_p (frame_id));
 
-  b = set_raw_breakpoint (gdbarch, sal, type);
+  std::unique_ptr<momentary_breakpoint> b
+    (new_momentary_breakpoint (gdbarch, type));
+
+  b->add_location (sal);
+  b->pspace = sal.pspace;
   b->enable_state = bp_enabled;
   b->disposition = disp_donttouch;
   b->frame_id = frame_id;
 
   b->thread = inferior_thread ()->global_num;
 
+  breakpoint_up bp (add_to_breakpoint_chain (std::move (b)));
+
   update_global_location_list_nothrow (UGLL_MAY_INSERT);
 
-  return breakpoint_up (b);
+  return bp;
 }
 
 /* Make a momentary breakpoint based on the master breakpoint ORIG.
@@ -8012,9 +7963,8 @@ momentary_breakpoint_from_master (struct breakpoint *orig,
 				  enum bptype type,
 				  int loc_enabled)
 {
-  struct breakpoint *copy;
-
-  copy = set_raw_breakpoint_without_location (orig->gdbarch, type);
+  std::unique_ptr<breakpoint> copy
+    (new_momentary_breakpoint (orig->gdbarch, type));
   copy->loc = copy->allocate_location ();
   set_breakpoint_location_function (copy->loc);
 
@@ -8035,8 +7985,9 @@ momentary_breakpoint_from_master (struct breakpoint *orig,
   copy->disposition = disp_donttouch;
   copy->number = internal_breakpoint_number--;
 
+  breakpoint *b = add_to_breakpoint_chain (std::move (copy));
   update_global_location_list_nothrow (UGLL_DONT_INSERT);
-  return copy;
+  return b;
 }
 
 /* Make a deep copy of momentary breakpoint ORIG.  Returns NULL if
