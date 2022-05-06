@@ -317,9 +317,20 @@ struct dprintf_breakpoint : public ordinary_breakpoint
 /* Ranged breakpoints.  */
 struct ranged_breakpoint : public ordinary_breakpoint
 {
-  explicit ranged_breakpoint (struct gdbarch *gdbarch)
+  explicit ranged_breakpoint (struct gdbarch *gdbarch,
+			      const symtab_and_line &sal_start,
+			      int length,
+			      event_location_up start_location,
+			      event_location_up end_location)
     : ordinary_breakpoint (gdbarch, bp_hardware_breakpoint)
   {
+    bp_location *bl = add_location (sal_start);
+    bl->length = length;
+
+    disposition = disp_donttouch;
+
+    location = std::move (start_location);
+    location_range_end = std::move (end_location);
   }
 
   int breakpoint_hit (const struct bp_location *bl,
@@ -9436,13 +9447,13 @@ break_range_command (const char *arg, int from_tty)
       return;
     }
 
-  /* Now set up the breakpoint.  */
-  std::unique_ptr<breakpoint> br (new ranged_breakpoint (get_current_arch ()));
-  br->add_location (sal_start);
-  br->disposition = disp_donttouch;
-  br->location = std::move (start_location);
-  br->location_range_end = std::move (end_location);
-  br->loc->length = length;
+  /* Now set up the breakpoint and install it.  */
+
+  std::unique_ptr<breakpoint> br
+    (new ranged_breakpoint (get_current_arch (),
+			    sal_start, length,
+			    std::move (start_location),
+			    std::move (end_location)));
 
   install_breakpoint (false, std::move (br), true);
 }
