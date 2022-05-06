@@ -861,6 +861,22 @@ struct base_breakpoint : public breakpoint
 {
   using breakpoint::breakpoint;
 
+  /* Create a breakpoint with SALS as locations.  Use LOCATION as a
+     description of the location, and COND_STRING as condition
+     expression.  If LOCATION is NULL then create an "address
+     location" from the address in the SAL.  */
+  base_breakpoint (struct gdbarch *gdbarch, bptype type,
+		   gdb::array_view<const symtab_and_line> sals,
+		   event_location_up &&location,
+		   gdb::unique_xmalloc_ptr<char> filter,
+		   gdb::unique_xmalloc_ptr<char> cond_string,
+		   gdb::unique_xmalloc_ptr<char> extra_string,
+		   enum bpdisp disposition,
+		   int thread, int task, int ignore_count,
+		   int from_tty,
+		   int enabled, unsigned flags,
+		   int display_canonical);
+
   ~base_breakpoint () override = 0;
 
   void re_set () override;

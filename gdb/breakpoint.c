@@ -1257,8 +1257,10 @@ is_tracepoint (const struct breakpoint *b)
 /* Factory function to create an appropriate instance of breakpoint given
    TYPE.  */
 
+template<typename... Arg>
 static std::unique_ptr<base_breakpoint>
-new_breakpoint_from_type (struct gdbarch *gdbarch, bptype type)
+new_breakpoint_from_type (struct gdbarch *gdbarch, bptype type,
+			  Arg&&... args)
 {
   base_breakpoint *b;
 
@@ -1266,21 +1268,25 @@ new_breakpoint_from_type (struct gdbarch *gdbarch, bptype type)
     {
     case bp_breakpoint:
     case bp_hardware_breakpoint:
-      b = new ordinary_breakpoint (gdbarch, type);
+      b = new ordinary_breakpoint (gdbarch, type,
+				   std::forward<Arg> (args)...);
       break;
 
     case bp_fast_tracepoint:
     case bp_static_tracepoint:
     case bp_tracepoint:
-      b = new tracepoint (gdbarch, type);
+      b = new tracepoint (gdbarch, type,
+			  std::forward<Arg> (args)...);
       break;
 
     case bp_static_marker_tracepoint:
-      b = new static_marker_tracepoint (gdbarch, type);
+      b = new static_marker_tracepoint (gdbarch, type,
+					std::forward<Arg> (args)...);
       break;
 
     case bp_dprintf:
-      b = new dprintf_breakpoint (gdbarch, type);
+      b = new dprintf_breakpoint (gdbarch, type,
+				  std::forward<Arg> (args)...);
       break;
 
     case bp_overlay_event:
@@ -1290,12 +1296,14 @@ new_breakpoint_from_type (struct gdbarch *gdbarch, bptype type)
     case bp_thread_event:
     case bp_jit_event:
     case bp_shlib_event:
-      b = new internal_breakpoint (gdbarch, type);
+      b = new internal_breakpoint (gdbarch, type,
+				   std::forward<Arg> (args)...);
       break;
 
     case bp_longjmp:
     case bp_exception:
-      b = new longjmp_breakpoint (gdbarch, type);
+      b = new longjmp_breakpoint (gdbarch, type,
+				  std::forward<Arg> (args)...);
       break;
 
     case bp_watchpoint_scope:
@@ -1309,7 +1317,8 @@ new_breakpoint_from_type (struct gdbarch *gdbarch, bptype type)
     case bp_call_dummy:
     case bp_until:
     case bp_std_terminate:
-      b = new momentary_breakpoint (gdbarch, type);
+      b = new momentary_breakpoint (gdbarch, type,
+				    std::forward<Arg> (args)...);
       break;
 
     default:
@@ -8290,23 +8299,19 @@ update_dprintf_commands (const char *args, int from_tty,
 	update_dprintf_command_list (b);
 }
 
-/* Create a breakpoint with SAL as location.  Use LOCATION
-   as a description of the location, and COND_STRING
-   as condition expression.  If LOCATION is NULL then create an
-   "address location" from the address in the SAL.  */
-
-static void
-init_breakpoint_sal (base_breakpoint *b, struct gdbarch *gdbarch,
-		     gdb::array_view<const symtab_and_line> sals,
-		     event_location_up &&location,
-		     gdb::unique_xmalloc_ptr<char> filter,
-		     gdb::unique_xmalloc_ptr<char> cond_string,
-		     gdb::unique_xmalloc_ptr<char> extra_string,
-		     enum bptype type, enum bpdisp disposition,
-		     int thread, int task, int ignore_count,
-		     int from_tty,
-		     int enabled, unsigned flags,
-		     int display_canonical)
+base_breakpoint::base_breakpoint (struct gdbarch *gdbarch_,
+				  enum bptype type_,
+				  gdb::array_view<const symtab_and_line> sals,
+				  event_location_up &&location_,
+				  gdb::unique_xmalloc_ptr<char> filter_,
+				  gdb::unique_xmalloc_ptr<char> cond_string_,
+				  gdb::unique_xmalloc_ptr<char> extra_string_,
+				  enum bpdisp disposition_,
+				  int thread_, int task_, int ignore_count_,
+				  int from_tty,
+				  int enabled_, unsigned flags,
+				  int display_canonical_)
+  : breakpoint (gdbarch_, type_)
 {
   int i;
 
@@ -8326,80 +8331,63 @@ init_breakpoint_sal (base_breakpoint *b, struct gdbarch *gdbarch,
 
   gdb_assert (!sals.empty ());
 
+  thread = thread_;
+  task = task_;
+
+  cond_string = std::move (cond_string_);
+  extra_string = std::move (extra_string_);
+  ignore_count = ignore_count_;
+  enable_state = enabled_ ? bp_enabled : bp_disabled;
+  disposition = disposition_;
+
+  if (type == bp_static_tracepoint
+      || type == bp_static_marker_tracepoint)
+    {
+      auto *t = static_cast<struct tracepoint *> (this);
+      struct static_tracepoint_marker marker;
+
+      if (strace_marker_p (this))
+	{
+	  /* We already know the marker exists, otherwise, we wouldn't
+	     see a sal for it.  */
+	  const char *p = &event_location_to_string (location_.get ())[3];
+	  const char *endp;
+
+	  p = skip_spaces (p);
+
+	  endp = skip_to_space (p);
+
+	  t->static_trace_marker_id.assign (p, endp - p);
+
+	  gdb_printf (_("Probed static tracepoint marker \"%s\"\n"),
+		      t->static_trace_marker_id.c_str ());
+	}
+      else if (target_static_tracepoint_marker_at (sals[0].pc, &marker))
+	{
+	  t->static_trace_marker_id = std::move (marker.str_id);
+
+	  gdb_printf (_("Probed static tracepoint marker \"%s\"\n"),
+		      t->static_trace_marker_id.c_str ());
+	}
+      else
+	warning (_("Couldn't determine the static tracepoint marker to probe"));
+    }
+
   for (const auto &sal : sals)
     {
-      struct bp_location *loc;
-
       if (from_tty)
 	{
 	  struct gdbarch *loc_gdbarch = get_sal_arch (sal);
-	  if (!loc_gdbarch)
+	  if (loc_gdbarch == nullptr)
 	    loc_gdbarch = gdbarch;
 
 	  describe_other_breakpoints (loc_gdbarch,
 				      sal.pspace, sal.pc, sal.section, thread);
 	}
 
-      if (&sal == &sals[0])
-	{
-	  init_raw_breakpoint (b, sal, type);
-	  b->thread = thread;
-	  b->task = task;
-
-	  b->cond_string = std::move (cond_string);
-	  b->extra_string = std::move (extra_string);
-	  b->ignore_count = ignore_count;
-	  b->enable_state = enabled ? bp_enabled : bp_disabled;
-	  b->disposition = disposition;
-
-	  if ((flags & CREATE_BREAKPOINT_FLAGS_INSERTED) != 0)
-	    b->loc->inserted = 1;
-
-	  if (type == bp_static_tracepoint
-	      || type == bp_static_marker_tracepoint)
-	    {
-	      auto *t = static_cast<struct tracepoint *> (b);
-	      struct static_tracepoint_marker marker;
-
-	      if (strace_marker_p (b))
-		{
-		  /* We already know the marker exists, otherwise, we
-		     wouldn't see a sal for it.  */
-		  const char *p
-		    = &event_location_to_string (b->location.get ())[3];
-		  const char *endp;
-
-		  p = skip_spaces (p);
-
-		  endp = skip_to_space (p);
-
-		  t->static_trace_marker_id.assign (p, endp - p);
-
-		  gdb_printf (_("Probed static tracepoint "
-				"marker \"%s\"\n"),
-			      t->static_trace_marker_id.c_str ());
-		}
-	      else if (target_static_tracepoint_marker_at (sal.pc, &marker))
-		{
-		  t->static_trace_marker_id = std::move (marker.str_id);
-
-		  gdb_printf (_("Probed static tracepoint "
-				"marker \"%s\"\n"),
-			      t->static_trace_marker_id.c_str ());
-		}
-	      else
-		warning (_("Couldn't determine the static "
-			   "tracepoint marker to probe"));
-	    }
-
-	  loc = b->loc;
-	}
-      else
-	{
-	  loc = b->add_location (sal);
-	  if ((flags & CREATE_BREAKPOINT_FLAGS_INSERTED) != 0)
-	    loc->inserted = 1;
-	}
+      bp_location *new_loc = add_location (sal);
+      if ((flags & CREATE_BREAKPOINT_FLAGS_INSERTED) != 0)
+	new_loc->inserted = 1;
 
       /* Do not set breakpoint locations conditions yet.  As locations
 	 are inserted, they get sorted based on their addresses.  Let
@@ -8409,34 +8397,33 @@ init_breakpoint_sal (base_breakpoint *b, struct gdbarch *gdbarch,
 	 command line, otherwise it's an error.  */
       if (type == bp_dprintf)
 	{
-	  if (b->extra_string)
-	    update_dprintf_command_list (b);
+	  if (extra_string != nullptr)
+	    update_dprintf_command_list (this);
 	  else
 	    error (_("Format string required"));
 	}
-      else if (b->extra_string)
-	error (_("Garbage '%s' at end of command"), b->extra_string.get ());
+      else if (extra_string != nullptr)
+	error (_("Garbage '%s' at end of command"), extra_string.get ());
     }
-
 
   /* The order of the locations is now stable.  Set the location
      condition using the location's number.  */
   int loc_num = 1;
-  for (bp_location *loc : b->locations ())
+  for (bp_location *bl : locations ())
     {
-      if (b->cond_string != nullptr)
-	set_breakpoint_location_condition (b->cond_string.get (), loc,
-					   b->number, loc_num);
+      if (cond_string != nullptr)
+	set_breakpoint_location_condition (cond_string.get (), bl,
+					   number, loc_num);
 
       ++loc_num;
     }
 
-  b->display_canonical = display_canonical;
-  if (location != NULL)
-    b->location = std::move (location);
+  display_canonical = display_canonical_;
+  if (location_ != nullptr)
+    location = std::move (location_);
   else
-    b->location = new_address_location (b->loc->address, NULL, 0);
-  b->filter = std::move (filter);
+    location = new_address_location (this->loc->address, NULL, 0);
+  filter = std::move (filter_);
 }
 
 static void
@@ -8452,18 +8439,19 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		       int enabled, int internal, unsigned flags,
 		       int display_canonical)
 {
-  std::unique_ptr<base_breakpoint> b = new_breakpoint_from_type (gdbarch, type);
-
-  init_breakpoint_sal (b.get (), gdbarch,
-		       sals, std::move (location),
-		       std::move (filter),
-		       std::move (cond_string),
-		       std::move (extra_string),
-		       type, disposition,
-		       thread, task, ignore_count,
-		       from_tty,
-		       enabled, flags,
-		       display_canonical);
+  std::unique_ptr<base_breakpoint> b
+    = new_breakpoint_from_type (gdbarch,
+				type,
+				sals,
+				std::move (location),
+				std::move (filter),
+				std::move (cond_string),
+				std::move (extra_string),
+				disposition,
+				thread, task, ignore_count,
+				from_tty,
+				enabled, flags,
+				display_canonical);
 
   install_breakpoint (internal, std::move (b), 0);
 }
@@ -12144,16 +12132,19 @@ strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
       event_location_up location
 	= copy_event_location (canonical->location.get ());
 
-      std::unique_ptr<tracepoint> tp (new tracepoint (gdbarch,
-						      type_wanted));
-      init_breakpoint_sal (tp.get (), gdbarch, lsal.sals[i],
-			   std::move (location), NULL,
-			   std::move (cond_string),
-			   std::move (extra_string),
-			   type_wanted, disposition,
-			   thread, task, ignore_count,
-			   from_tty, enabled, flags,
-			   canonical->special_display);
+      std::unique_ptr<tracepoint> tp
+	(new tracepoint (gdbarch,
+			 type_wanted,
+			 lsal.sals[i],
+			 std::move (location),
+			 NULL,
+			 std::move (cond_string),
+			 std::move (extra_string),
+			 disposition,
+			 thread, task, ignore_count,
+			 from_tty, enabled, flags,
+			 canonical->special_display));
+
       /* Given that its possible to have multiple markers with
 	 the same string id, if the user is creating a static
 	 tracepoint by marker id ("strace -m MARKER_ID"), then
