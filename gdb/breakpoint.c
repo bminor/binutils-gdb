@@ -9356,7 +9356,6 @@ break_range_command (const char *arg, int from_tty)
   struct linespec_result canonical_start, canonical_end;
   int bp_count, can_use_bp, length;
   CORE_ADDR end;
-  struct breakpoint *b;
 
   /* We don't support software ranged breakpoints.  */
   if (target_ranged_break_num_registers () < 0)
@@ -9440,18 +9439,12 @@ break_range_command (const char *arg, int from_tty)
   /* Now set up the breakpoint.  */
   std::unique_ptr<breakpoint> br (new ranged_breakpoint (get_current_arch ()));
   br->add_location (sal_start);
-  b = add_to_breakpoint_chain (std::move (br));
+  br->disposition = disp_donttouch;
+  br->location = std::move (start_location);
+  br->location_range_end = std::move (end_location);
+  br->loc->length = length;
 
-  set_breakpoint_count (breakpoint_count + 1);
-  b->number = breakpoint_count;
-  b->disposition = disp_donttouch;
-  b->location = std::move (start_location);
-  b->location_range_end = std::move (end_location);
-  b->loc->length = length;
-
-  mention (b);
-  gdb::observers::breakpoint_created.notify (b);
-  update_global_location_list (UGLL_MAY_INSERT);
+  install_breakpoint (false, std::move (br), true);
 }
 
 /*  Return non-zero if EXP is verified as constant.  Returned zero
