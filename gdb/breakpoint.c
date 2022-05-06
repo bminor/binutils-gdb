@@ -9439,7 +9439,7 @@ break_range_command (const char *arg, int from_tty)
 
   /* Now set up the breakpoint.  */
   std::unique_ptr<breakpoint> br (new ranged_breakpoint (get_current_arch ()));
-  init_raw_breakpoint (br.get (), sal_start, bp_hardware_breakpoint);
+  br->add_location (sal_start);
   b = add_to_breakpoint_chain (std::move (br));
 
   set_breakpoint_count (breakpoint_count + 1);
