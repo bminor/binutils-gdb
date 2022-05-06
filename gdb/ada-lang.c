@@ -12107,10 +12107,45 @@ static std::string ada_exception_catchpoint_cond_string
 struct ada_catchpoint : public base_breakpoint
 {
   ada_catchpoint (struct gdbarch *gdbarch_,
-		  enum ada_exception_catchpoint_kind kind)
+		  enum ada_exception_catchpoint_kind kind,
+		  struct symtab_and_line sal,
+		  const char *addr_string_,
+		  bool tempflag,
+		  bool enabled,
+		  bool from_tty)
     : base_breakpoint (gdbarch_, bp_catchpoint),
       m_kind (kind)
   {
+    add_location (sal);
+
+    /* Unlike most base_breakpoint types, Ada catchpoints are
+       pspace-specific.  */
+    gdb_assert (sal.pspace != nullptr);
+    this->pspace = sal.pspace;
+
+    if (from_tty)
+      {
+	struct gdbarch *loc_gdbarch = get_sal_arch (sal);
+	if (!loc_gdbarch)
+	  loc_gdbarch = gdbarch;
+
+	describe_other_breakpoints (loc_gdbarch,
+				    sal.pspace, sal.pc, sal.section, -1);
+	/* FIXME: brobecker/2006-12-28: Actually, re-implement a special
+	   version for exception catchpoints, because two catchpoints
+	   used for different exception names will use the same address.
+	   In this case, a "breakpoint ... also set at..." warning is
+	   unproductive.  Besides, the warning phrasing is also a bit
+	   inappropriate, we should use the word catchpoint, and tell
+	   the user what type of catchpoint it is.  The above is good
+	   enough for now, though.  */
+      }
+
+    enable_state = enabled ? bp_enabled : bp_disabled;
+    disposition = tempflag ? disp_del : disp_donttouch;
+    location = string_to_event_location (&addr_string_,
+					 language_def (language_ada));
+    language = language_ada;
   }
 
   struct bp_location *allocate_location () override;
@@ -12759,9 +12794,9 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
   std::string addr_string;
   struct symtab_and_line sal = ada_exception_sal (ex_kind, &addr_string);
 
-  std::unique_ptr<ada_catchpoint> c (new ada_catchpoint (gdbarch, ex_kind));
-  init_ada_exception_breakpoint (c.get (), gdbarch, sal, addr_string.c_str (),
-				 tempflag, disabled, from_tty);
+  std::unique_ptr<ada_catchpoint> c
+    (new ada_catchpoint (gdbarch, ex_kind, sal, addr_string.c_str (),
+			 tempflag, disabled, from_tty));
   c->excep_string = excep_string;
   create_excep_cond_exprs (c.get (), ex_kind);
   if (!cond_string.empty ())

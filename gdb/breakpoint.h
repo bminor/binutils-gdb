@@ -1460,17 +1460,6 @@ extern void
 		     void *user_data_catch,
 		     void *user_data_tcatch);
 
-/* Initialize a breakpoint struct for Ada exception catchpoints.  */
-
-extern void
-  init_ada_exception_breakpoint (struct breakpoint *b,
-				 struct gdbarch *gdbarch,
-				 struct symtab_and_line sal,
-				 const char *addr_string,
-				 int tempflag,
-				 int enabled,
-				 int from_tty);
-
 /* Add breakpoint B on the breakpoint list, and notify the user, the
    target and breakpoint_created observers of its existence.  If
    INTERNAL is non-zero, the breakpoint number will be allocated from
@@ -1904,5 +1893,13 @@ extern void catch_exception_event (enum exception_event_kind ex_event,
    catchpoint, false otherwise.  */
 
 extern void print_solib_event (bool is_catchpoint);
+
+/* Print a message describing any user-breakpoints set at PC.  This
+   concerns with logical breakpoints, so we match program spaces, not
+   address spaces.  */
+
+extern void describe_other_breakpoints (struct gdbarch *,
+					struct program_space *, CORE_ADDR,
+					struct obj_section *, int);
 
 #endif /* !defined (BREAKPOINT_H) */

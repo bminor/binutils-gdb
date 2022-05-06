@@ -130,10 +130,6 @@ static CORE_ADDR adjust_breakpoint_address (struct gdbarch *gdbarch,
 					    CORE_ADDR bpaddr,
 					    enum bptype bptype);
 
-static void describe_other_breakpoints (struct gdbarch *,
-					struct program_space *, CORE_ADDR,
-					struct obj_section *, int);
-
 static int watchpoint_locations_match (struct bp_location *loc1,
 				       struct bp_location *loc2);
 
@@ -6862,11 +6858,9 @@ breakpoint_has_pc (struct breakpoint *b,
   return 0;
 }
 
-/* Print a message describing any user-breakpoints set at PC.  This
-   concerns with logical breakpoints, so we match program spaces, not
-   address spaces.  */
+/* See breakpoint.h.  */
 
-static void
+void
 describe_other_breakpoints (struct gdbarch *gdbarch,
 			    struct program_space *pspace, CORE_ADDR pc,
 			    struct obj_section *section, int thread)
@@ -10588,42 +10582,6 @@ until_break_command (const char *arg, int from_tty, int anywhere)
     lj_deleter->release ();
 
   proceed (-1, GDB_SIGNAL_DEFAULT);
-}
-
-void
-init_ada_exception_breakpoint (struct breakpoint *b,
-			       struct gdbarch *gdbarch,
-			       struct symtab_and_line sal,
-			       const char *addr_string,
-			       int tempflag,
-			       int enabled,
-			       int from_tty)
-{
-  if (from_tty)
-    {
-      struct gdbarch *loc_gdbarch = get_sal_arch (sal);
-      if (!loc_gdbarch)
-	loc_gdbarch = gdbarch;
-
-      describe_other_breakpoints (loc_gdbarch,
-				  sal.pspace, sal.pc, sal.section, -1);
-      /* FIXME: brobecker/2006-12-28: Actually, re-implement a special
-	 version for exception catchpoints, because two catchpoints
-	 used for different exception names will use the same address.
-	 In this case, a "breakpoint ... also set at..." warning is
-	 unproductive.  Besides, the warning phrasing is also a bit
-	 inappropriate, we should use the word catchpoint, and tell
-	 the user what type of catchpoint it is.  The above is good
-	 enough for now, though.  */
-    }
-
-  init_raw_breakpoint (b, sal, bp_catchpoint);
-
-  b->enable_state = enabled ? bp_enabled : bp_disabled;
-  b->disposition = tempflag ? disp_del : disp_donttouch;
-  b->location = string_to_event_location (&addr_string,
-					  language_def (language_ada));
-  b->language = language_ada;
 }
 
 
