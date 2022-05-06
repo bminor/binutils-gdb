@@ -182,6 +182,7 @@ if { [check_gc_sections_available] && ![istarget "v850-*-*"] } {
 
 proc target_defaults_to_execstack {} {
     if {   [istarget "aarch64*-*-*"]
+	|| [istarget "arm-*-*"]
 	|| [istarget "*-*-nacl"]
 	|| [istarget "arc*-*-*"]
 	|| [istarget "ia64*-*-*"]
@@ -274,7 +275,7 @@ if {   [istarget *-*-*linux*]
 	    {size-2.s} \
 	     {{ld rwx-segments-2.l}} \
 	    "rwx-segments-2.exe"] \
-	[list "Ensure that the warning can be suppressed" \
+	[list "Ensure that the RWX warning can be suppressed" \
 	    "-e 0 -Tnobits-1.t --no-warn-rwx-segments" \
 	    "" \
 	    "" \

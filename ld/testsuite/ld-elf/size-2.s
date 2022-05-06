@@ -7,3 +7,5 @@
 
 	.section .tbss
 	.long 0,0,0,0,0,0,0,0,0,0,0,0
+
+	.section	.note.GNU-stack,"",%progbits
