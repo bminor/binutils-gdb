@@ -66,83 +66,93 @@ if ![dwarf2_support] {
 set main_basename ${::gdb_test_file_name}-main
 set lib_basename ${::gdb_test_file_name}-lib
 
-# We're generating DWARF assembly for the shared object; therefore,
-# the source file for the library / shared object must be listed first
-# (in the standard_testfile invocation) since ${srcfile} is used by
-# get_func_info (for determining the start, end, and length of a
-# function).
-#
+# We're generating DWARF assembly for the shared object;
 # The output of Dwarf::assemble will be placed in $lib_basename.S
 # which will be ${srcfile3} after the execution of standard_testfile.
 
-standard_testfile $lib_basename.c $main_basename.c $lib_basename.S
+standard_testfile $main_basename.c $lib_basename.c $lib_basename.S
 
-set libsrc "${::srcdir}/${::subdir}/${::srcfile}"
+set libsrc "${::srcdir}/${::subdir}/${::srcfile2}"
 set lib_so [standard_output_file ${lib_basename}.so]
 set asm_file [standard_output_file ${::srcfile3}]
 
-# We need to know the size of some types in order to write some of the
-# debugging info that we're about to generate.  For that, we ask GDB
-# by debugging the shared object associated with this test case.
-
-# Compile the shared library: -DIS_SHAREDLIB prevents main() from
-# being defined.  Note that debugging symbols will be present for
-# this compilation.
+# Compile the shared library for the first GDB session.  Note that debugging
+# symbols will be present for this compilation, because we want to print some
+# type information.
 if {[gdb_compile_shlib $libsrc $lib_so \
-                       {additional_flags=-DIS_SHAREDLIB debug}] != ""} {
+                       {debug}] != ""} {
     untested "failed to compile shared library"
     return
 }
 
-# Start a fresh GDB and load the shared library.
-clean_restart $lib_so
+# Compile the main program for use with the shared object.  Note we're using
+# debug, such that "finish out of foo" prints:
+#   Value returned is $1 = (class B *) $hex <g_>
+# instead of:
+#   Value returned is $1 = (B *) $hex <g_>
+# Note that this compilation is used for all GDB sessions.
+set exec_options [list debug shlib=$lib_so]
+if [prepare_for_testing "failed to prepare" ${testfile} \
+                        ${::srcfile} $exec_options] {
+    return -1
+}
 
-# Using our running GDB session, determine sizes of several types.
-set long_size [get_sizeof "long" -1]
-set addr_size [get_sizeof "void *" -1]
-set struct_A_size [get_sizeof "g_A" -1]
-set struct_B_size [get_sizeof "g_B" -1]
+# Do whatever is necessary to make sure that the shared library is
+# loaded for remote targets.
+gdb_load_shlib ${lib_so}
+
+
+### First GDB session.
+
+# Run to foo to make sure foo refers to the function, and not foo@PLT.
+if ![runto foo qualified] then {
+    return
+}
+
+with_shared_gdb {
+
+    set session_options $exec_options
+
+    # Rather than start a new session, declare the current session the
+    # shared one.  Otherwise, get_func_info would compile an executable
+    # in a temp dir, which means -Wl,-rpath,\\\$ORIGIN no longer finds
+    # the shared lib.
+    share_gdb ${srcdir}/${subdir}/$srcfile $session_options
+
+    get_func_info foo $session_options
+    get_func_info bar $session_options
+
+    # Using our running GDB session, determine sizes of several types.
+    set long_size [get_sizeof "long" -1]
+    set addr_size [get_sizeof "void *" -1]
+    set struct_A_size [get_sizeof "g_A" -1]
+    set struct_B_size [get_sizeof "g_B" -1]
+
+    # Retrieve struct offset of MBR in struct TP
+    proc get_offsetof { tp mbr } {
+	return [get_integer_valueof "&((${tp} *) 0)->${mbr}" -1]
+    }
+
+    # Use running GDB session to get struct offsets
+    set A_a [get_offsetof A a]
+    set A_x [get_offsetof A x]
+    set B_a [get_offsetof B a]
+    set B_b [get_offsetof B b]
+    set B_x2 [get_offsetof B x2]
+}
 
 if { $long_size == -1 || $addr_size == -1 \
-     || $struct_A_size == -1 || $struct_B_size == -1} {
+	 || $struct_A_size == -1 || $struct_B_size == -1} {
     perror "Can't determine type sizes"
     return
 }
 
-# Retrieve struct offset of MBR in struct TP
-proc get_offsetof { tp mbr } {
-    return [get_integer_valueof "&((${tp} *) 0)->${mbr}" -1]
-}
-
-# Use running GDB session to get struct offsets
-set A_a [get_offsetof A a]
-set A_x [get_offsetof A x]
-set B_a [get_offsetof B a]
-set B_b [get_offsetof B b]
-set B_x2 [get_offsetof B x2]
-
 # Create the DWARF.
 Dwarf::assemble ${asm_file} {
     declare_labels L
-
-    # Find start, end, and length of functions foo and bar.
-    # These calls to get_func_info will create and set variables
-    # foo_start, bar_start, foo_end, bar_end, foo_len, and
-    # bar_len.
-    #
-    # In order to get the right answers, get_func_info (and,
-    # underneath, function_range) should use the same compiler flags
-    # as those used to make a shared object.  For any targets that get
-    # this far, -fpic is probably correct.
-    #
-    # Also, it should be noted that IS_SHAREDLIB is NOT defined as one
-    # of the additional flags.  Not defining IS_SHAREDLIB will cause a
-    # main() to be defined for the compilation of the shared library
-    # source file which happens as a result of using get_func_info;
-    # this is currently required in order to this facility.
-    set flags {additional_flags=-fpic debug}
-    get_func_info foo $flags
-    get_func_info bar $flags
+    global foo_start foo_end
+    global bar_start bar_end
+    global libsrc
 
     cu { label cu_label } {
 	DW_TAG_compile_unit {
@@ -263,17 +273,17 @@ Dwarf::assemble ${asm_file} {
 
     lines {version 2} L {
 	include_dir "${::srcdir}/${::subdir}"
-	file_name "${::srcfile}" 1
+	file_name "${::srcfile2}" 1
 
 	# Generate a line table program.
 	program {
 	    DW_LNE_set_address $foo_start
-	    line [gdb_get_line_number "foo prologue"]
+	    line [gdb_get_line_number "foo prologue" $libsrc]
 	    DW_LNS_copy
 	    DW_LNE_set_address foo_label
-	    line [gdb_get_line_number "foo return"]
+	    line [gdb_get_line_number "foo return" $libsrc]
 	    DW_LNS_copy
-	    line [gdb_get_line_number "foo end"]
+	    line [gdb_get_line_number "foo end" $libsrc]
 	    DW_LNS_copy
 	    DW_LNE_set_address $foo_end
 	    DW_LNS_advance_line 1
@@ -281,12 +291,12 @@ Dwarf::assemble ${asm_file} {
 	    DW_LNE_end_sequence
 
 	    DW_LNE_set_address $bar_start
-	    line [gdb_get_line_number "bar prologue"]
+	    line [gdb_get_line_number "bar prologue" $libsrc]
 	    DW_LNS_copy
 	    DW_LNE_set_address bar_label
-	    line [gdb_get_line_number "bar return"]
+	    line [gdb_get_line_number "bar return" $libsrc]
 	    DW_LNS_copy
-	    line [gdb_get_line_number "bar end"]
+	    line [gdb_get_line_number "bar end" $libsrc]
 	    DW_LNS_copy
 	    DW_LNE_set_address $bar_end
 	    DW_LNS_advance_line 1
@@ -305,24 +315,20 @@ Dwarf::assemble ${asm_file} {
 }
 
 # Compile the shared object again, but this time include / use the
-# DWARF info that we've created above.  Note that (again)
-# -DIS_SHAREDLIB is used to prevent inclusion of main() in the shared
-# object.  Also note the use of the "nodebug" option.  Any debugging
-# information that we need will be provided by the DWARF info created
-# above.
+# DWARF info that we've created above.  Note the use of the "nodebug" option.
+# Any debugging information that we need will be provided by the DWARF info
+# created above.
 if {[gdb_compile_shlib [list $libsrc $asm_file] $lib_so \
-                       {additional_flags=-DIS_SHAREDLIB nodebug}] != ""} {
+                       {nodebug}] != ""} {
     untested "failed to compile shared library"
     return
 }
 
-# Compile the main program for use with the shared object.
-if [prepare_for_testing "failed to prepare" ${testfile} \
-                        ${::srcfile2} [list debug shlib=$lib_so]] {
-    return -1
-}
+### Second GDB session.
 
-# Do whatever is necessary to make sure that the shared library is
+clean_restart $binfile
+
+# Again, do whatever is necessary to make sure that the shared library is
 # loaded for remote targets.
 gdb_load_shlib ${lib_so}
 
@@ -346,6 +352,9 @@ gdb_test "p *$" { = {<A> = {a = 8, x = 9}, b = 10, x2 = 11}} \
 # The original PR28030 reproducer stepped back into the shared object,
 # so we'll do the same here:
 gdb_test "step" "bar \\(.*" "step into bar"
+
+
+### Third GDB session.
 
 # We don't want a clean restart here since that will be too clean.
 # The original reproducer for PR28030 set a breakpoint in the shared

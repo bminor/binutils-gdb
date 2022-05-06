@@ -33,16 +33,3 @@ bar (B *v)
   asm ("bar_label: .globl bar_label");
   return v;					/* bar return */
 }						/* bar end */
-
-/* Some of the DWARF assembler procs (e.g. function_range) compile
-   this file, expecting it to be a complete program with a main()
-   function.  When IS_SHAREDLIB is NOT defined, we have main() as
-   defined below.  */
-
-#ifndef IS_SHAREDLIB
-int
-main ()
-{
-  B *b = foo ();
-}
-#endif

@@ -268,6 +268,18 @@ proc shared_gdb_disable {} {
     }
 }
 
+# Share the current gdb session.
+
+proc share_gdb { src options } {
+    global shared_gdb_started
+    global shared_gdb_src
+    global shared_gdb_options
+
+    set shared_gdb_started 1
+    set shared_gdb_src $src
+    set shared_gdb_options $options
+}
+
 # See above.
 
 proc shared_gdb_start_use { src options } {
@@ -299,9 +311,7 @@ proc shared_gdb_start_use { src options } {
 	gdb_load "$exe"
 
 	if { $shared_gdb_enabled } {
-	    set shared_gdb_started 1
-	    set shared_gdb_src $src
-	    set shared_gdb_options $options
+	    share_gdb $src $options
 	}
     }
 }
