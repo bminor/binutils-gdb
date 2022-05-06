@@ -119,6 +119,8 @@ static struct breakpoint *set_raw_breakpoint (struct gdbarch *gdbarch,
 					      struct symtab_and_line,
 					      enum bptype);
 
+static breakpoint *add_to_breakpoint_chain (std::unique_ptr<breakpoint> &&b);
+
 static struct breakpoint *
   momentary_breakpoint_from_master (struct breakpoint *orig,
 				    enum bptype type,
@@ -276,7 +278,19 @@ struct ordinary_breakpoint : public base_breakpoint
 /* Internal breakpoints.  */
 struct internal_breakpoint : public base_breakpoint
 {
-  using base_breakpoint::base_breakpoint;
+  internal_breakpoint (struct gdbarch *gdbarch,
+		       enum bptype type, CORE_ADDR address)
+    : base_breakpoint (gdbarch, type)
+  {
+    symtab_and_line sal;
+    sal.pc = address;
+    sal.section = find_pc_overlay (sal.pc);
+    sal.pspace = current_program_space;
+    add_location (sal);
+
+    pspace = current_program_space;
+    disposition = disp_donttouch;
+  }
 
   void re_set () override;
   void check_status (struct bpstat *bs) override;
@@ -1283,17 +1297,6 @@ new_breakpoint_from_type (struct gdbarch *gdbarch, bptype type,
     case bp_dprintf:
       b = new dprintf_breakpoint (gdbarch, type,
 				  std::forward<Arg> (args)...);
-      break;
-
-    case bp_overlay_event:
-    case bp_longjmp_master:
-    case bp_std_terminate_master:
-    case bp_exception_master:
-    case bp_thread_event:
-    case bp_jit_event:
-    case bp_shlib_event:
-      b = new internal_breakpoint (gdbarch, type,
-				   std::forward<Arg> (args)...);
       break;
 
     case bp_longjmp:
@@ -3294,16 +3297,12 @@ static struct breakpoint *
 create_internal_breakpoint (struct gdbarch *gdbarch,
 			    CORE_ADDR address, enum bptype type)
 {
-  symtab_and_line sal;
-  sal.pc = address;
-  sal.section = find_pc_overlay (sal.pc);
-  sal.pspace = current_program_space;
+  std::unique_ptr<internal_breakpoint> b
+    (new internal_breakpoint (gdbarch, type, address));
 
-  breakpoint *b = set_raw_breakpoint (gdbarch, sal, type);
   b->number = internal_breakpoint_number--;
-  b->disposition = disp_donttouch;
 
-  return b;
+  return add_to_breakpoint_chain (std::move (b));
 }
 
 static const char *const longjmp_names[] =
