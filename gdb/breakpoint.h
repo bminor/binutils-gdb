@@ -974,21 +974,16 @@ extern bool is_exception_catchpoint (breakpoint *bp);
 /* An instance of this type is used to represent all kinds of
    tracepoints.  */
 
-struct tracepoint : public breakpoint
+struct tracepoint : public base_breakpoint
 {
-  using breakpoint::breakpoint;
+  using base_breakpoint::base_breakpoint;
 
-  void re_set () override;
   int breakpoint_hit (const struct bp_location *bl,
 		      const address_space *aspace, CORE_ADDR bp_addr,
 		      const target_waitstatus &ws) override;
   void print_one_detail (struct ui_out *uiout) const override;
   void print_mention () const override;
   void print_recreate (struct ui_file *fp) const override;
-  std::vector<symtab_and_line> decode_location
-       (struct event_location *location,
-	struct program_space *search_pspace) override;
-
 
   /* Number of times this tracepoint should single-step and collect
      additional data.  */

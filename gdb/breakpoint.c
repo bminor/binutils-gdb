@@ -1258,10 +1258,10 @@ is_tracepoint (const struct breakpoint *b)
 /* Factory function to create an appropriate instance of breakpoint given
    TYPE.  */
 
-static std::unique_ptr<breakpoint>
+static std::unique_ptr<base_breakpoint>
 new_breakpoint_from_type (struct gdbarch *gdbarch, bptype type)
 {
-  breakpoint *b;
+  base_breakpoint *b;
 
   switch (type)
     {
@@ -1317,7 +1317,7 @@ new_breakpoint_from_type (struct gdbarch *gdbarch, bptype type)
       gdb_assert_not_reached ("invalid type");
     }
 
-  return std::unique_ptr<breakpoint> (b);
+  return std::unique_ptr<base_breakpoint> (b);
 }
 
 /* A helper function that validates that COMMANDS are valid for a
@@ -8297,7 +8297,7 @@ update_dprintf_commands (const char *args, int from_tty,
    "address location" from the address in the SAL.  */
 
 static void
-init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
+init_breakpoint_sal (base_breakpoint *b, struct gdbarch *gdbarch,
 		     gdb::array_view<const symtab_and_line> sals,
 		     event_location_up &&location,
 		     gdb::unique_xmalloc_ptr<char> filter,
@@ -8359,7 +8359,7 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 	  if (type == bp_static_tracepoint
 	      || type == bp_static_marker_tracepoint)
 	    {
-	      struct tracepoint *t = (struct tracepoint *) b;
+	      auto *t = static_cast<struct tracepoint *> (b);
 	      struct static_tracepoint_marker marker;
 
 	      if (strace_marker_p (b))
@@ -8453,7 +8453,7 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		       int enabled, int internal, unsigned flags,
 		       int display_canonical)
 {
-  std::unique_ptr<breakpoint> b = new_breakpoint_from_type (gdbarch, type);
+  std::unique_ptr<base_breakpoint> b = new_breakpoint_from_type (gdbarch, type);
 
   init_breakpoint_sal (b.get (), gdbarch,
 		       sals, std::move (location),
@@ -11952,14 +11952,6 @@ bkpt_probe_decode_location (struct breakpoint *b,
   return sals;
 }
 
-/* The breakpoint_ops structure to be used in tracepoints.  */
-
-void
-tracepoint::re_set ()
-{
-  breakpoint_re_set_default (this);
-}
-
 int
 tracepoint::breakpoint_hit (const struct bp_location *bl,
 			    const address_space *aspace, CORE_ADDR bp_addr,
@@ -12032,16 +12024,6 @@ tracepoint::print_recreate (struct ui_file *fp) const
 
   if (pass_count)
     gdb_printf (fp, "  passcount %d\n", pass_count);
-}
-
-std::vector<symtab_and_line>
-tracepoint::decode_location (struct event_location *location,
-			     struct program_space *search_pspace)
-{
-  if (event_location_type (location) == PROBE_LOCATION)
-    return bkpt_probe_decode_location (this, location, search_pspace);
-
-  return decode_location_default (this, location, search_pspace);
 }
 
 /* Virtual table for tracepoints on static probes.  */
