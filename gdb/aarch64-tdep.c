@@ -2236,9 +2236,6 @@ aarch64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 
   if (tdep->has_pauth ())
     {
-      if (reg >= AARCH64_DWARF_PAUTH_DMASK && reg <= AARCH64_DWARF_PAUTH_CMASK)
-	return tdep->pauth_reg_base + reg - AARCH64_DWARF_PAUTH_DMASK;
-
       if (reg == AARCH64_DWARF_RA_SIGN_STATE)
 	return tdep->ra_sign_state_regnum;
     }
