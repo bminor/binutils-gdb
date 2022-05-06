@@ -12102,22 +12102,6 @@ static std::string ada_exception_catchpoint_cond_string
    exception, in order to be able to re-set the condition expression
    when symbols change.  */
 
-/* An instance of this type is used to represent an Ada catchpoint
-   breakpoint location.  */
-
-class ada_catchpoint_location : public bp_location
-{
-public:
-  ada_catchpoint_location (breakpoint *owner)
-    : bp_location (owner, bp_loc_software_breakpoint)
-  {}
-
-  /* The condition that checks whether the exception that was raised
-     is the specific exception the user specified on catchpoint
-     creation.  */
-  expression_up excep_cond_expr;
-};
-
 /* An instance of this type is used to represent an Ada catchpoint.  */
 
 struct ada_catchpoint : public base_breakpoint
@@ -12142,6 +12126,22 @@ struct ada_catchpoint : public base_breakpoint
 
   /* What kind of catchpoint this is.  */
   enum ada_exception_catchpoint_kind m_kind;
+};
+
+/* An instance of this type is used to represent an Ada catchpoint
+   breakpoint location.  */
+
+class ada_catchpoint_location : public bp_location
+{
+public:
+  explicit ada_catchpoint_location (ada_catchpoint *owner)
+    : bp_location (owner, bp_loc_software_breakpoint)
+  {}
+
+  /* The condition that checks whether the exception that was raised
+     is the specific exception the user specified on catchpoint
+     creation.  */
+  expression_up excep_cond_expr;
 };
 
 /* Parse the exception condition string in the context of each of the
