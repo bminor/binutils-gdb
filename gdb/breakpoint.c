@@ -8305,7 +8305,7 @@ init_breakpoint_sal (base_breakpoint *b, struct gdbarch *gdbarch,
 		     enum bptype type, enum bpdisp disposition,
 		     int thread, int task, int ignore_count,
 		     int from_tty,
-		     int enabled, int internal, unsigned flags,
+		     int enabled, unsigned flags,
 		     int display_canonical)
 {
   int i;
@@ -8462,7 +8462,7 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		       type, disposition,
 		       thread, task, ignore_count,
 		       from_tty,
-		       enabled, internal, flags,
+		       enabled, flags,
 		       display_canonical);
 
   install_breakpoint (internal, std::move (b), 0);
@@ -12152,7 +12152,7 @@ strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
 			   std::move (extra_string),
 			   type_wanted, disposition,
 			   thread, task, ignore_count,
-			   from_tty, enabled, internal, flags,
+			   from_tty, enabled, flags,
 			   canonical->special_display);
       /* Given that its possible to have multiple markers with
 	 the same string id, if the user is creating a static
