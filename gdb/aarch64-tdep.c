@@ -253,7 +253,7 @@ aarch64_frame_unmask_lr (aarch64_gdbarch_tdep *tdep,
 {
   if (tdep->has_pauth ()
       && frame_unwind_register_unsigned (this_frame,
-					 tdep->pauth_ra_state_regnum))
+					 tdep->ra_sign_state_regnum))
     {
       int cmask_num = AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base);
       CORE_ADDR cmask = frame_unwind_register_unsigned (this_frame, cmask_num);
@@ -529,7 +529,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 
 	  if (tdep->has_pauth () && cache != nullptr)
 	    {
-	      int regnum = tdep->pauth_ra_state_regnum;
+	      int regnum = tdep->ra_sign_state_regnum;
 	      cache->saved_regs[regnum].set_value (ra_state_val);
 	    }
 	}
@@ -869,7 +869,7 @@ aarch64_analyze_prologue_test (void)
 
       if (tdep->has_pauth ())
 	{
-	  int regnum = tdep->pauth_ra_state_regnum;
+	  int regnum = tdep->ra_sign_state_regnum;
 	  SELF_CHECK (cache.saved_regs[regnum].is_value ());
 	}
     }
@@ -1124,7 +1124,7 @@ aarch64_prologue_prev_register (struct frame_info *this_frame,
       lr = frame_unwind_register_unsigned (this_frame, AARCH64_LR_REGNUM);
 
       if (tdep->has_pauth ()
-	  && cache->saved_regs[tdep->pauth_ra_state_regnum].is_value ())
+	  && cache->saved_regs[tdep->ra_sign_state_regnum].is_value ())
 	lr = aarch64_frame_unmask_lr (tdep, this_frame, lr);
 
       return frame_unwind_got_constant (this_frame, prev_regnum, lr);
@@ -1331,7 +1331,7 @@ aarch64_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
   /* Init pauth registers.  */
   if (tdep->has_pauth ())
     {
-      if (regnum == tdep->pauth_ra_state_regnum)
+      if (regnum == tdep->ra_sign_state_regnum)
 	{
 	  /* Initialize RA_STATE to zero.  */
 	  reg->how = DWARF2_FRAME_REG_SAVED_VAL_EXP;
@@ -1364,10 +1364,10 @@ aarch64_execute_dwarf_cfa_vendor_op (struct gdbarch *gdbarch, gdb_byte op,
 	return true;
 
       /* Allocate RA_STATE column if it's not allocated yet.  */
-      fs->regs.alloc_regs (AARCH64_DWARF_PAUTH_RA_STATE + 1);
+      fs->regs.alloc_regs (AARCH64_DWARF_RA_SIGN_STATE + 1);
 
       /* Toggle the status of RA_STATE between 0 and 1.  */
-      ra_state = &(fs->regs.reg[AARCH64_DWARF_PAUTH_RA_STATE]);
+      ra_state = &(fs->regs.reg[AARCH64_DWARF_RA_SIGN_STATE]);
       ra_state->how = DWARF2_FRAME_REG_SAVED_VAL_EXP;
 
       if (ra_state->loc.exp.start == nullptr
@@ -2239,8 +2239,8 @@ aarch64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
       if (reg >= AARCH64_DWARF_PAUTH_DMASK && reg <= AARCH64_DWARF_PAUTH_CMASK)
 	return tdep->pauth_reg_base + reg - AARCH64_DWARF_PAUTH_DMASK;
 
-      if (reg == AARCH64_DWARF_PAUTH_RA_STATE)
-	return tdep->pauth_ra_state_regnum;
+      if (reg == AARCH64_DWARF_RA_SIGN_STATE)
+	return tdep->ra_sign_state_regnum;
     }
 
   return -1;
@@ -2647,7 +2647,7 @@ aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
   /* RA_STATE is used for unwinding only.  Do not assign it a name - this
      prevents it from being read by methods such as
      mi_cmd_trace_frame_collected.  */
-  if (tdep->has_pauth () && regnum == tdep->pauth_ra_state_regnum)
+  if (tdep->has_pauth () && regnum == tdep->ra_sign_state_regnum)
     return "";
 
   internal_error (__FILE__, __LINE__,
@@ -2683,7 +2683,7 @@ aarch64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
       && p_regnum < AARCH64_SVE_V0_REGNUM + AARCH64_V_REGS_NUM)
     return aarch64_vnv_type (gdbarch);
 
-  if (tdep->has_pauth () && regnum == tdep->pauth_ra_state_regnum)
+  if (tdep->has_pauth () && regnum == tdep->ra_sign_state_regnum)
     return builtin_type (gdbarch)->builtin_uint64;
 
   internal_error (__FILE__, __LINE__,
@@ -2717,7 +2717,7 @@ aarch64_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 	   && p_regnum < AARCH64_SVE_V0_REGNUM + AARCH64_V_REGS_NUM)
     return group == all_reggroup || group == vector_reggroup;
   /* RA_STATE is used for unwinding only.  Do not assign it to any groups.  */
-  if (tdep->has_pauth () && regnum == tdep->pauth_ra_state_regnum)
+  if (tdep->has_pauth () && regnum == tdep->ra_sign_state_regnum)
     return 0;
 
   return group == all_reggroup;
@@ -3417,7 +3417,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   const struct tdesc_feature *feature_pauth;
   bool valid_p = true;
   int i, num_regs = 0, num_pseudo_regs = 0;
-  int first_pauth_regnum = -1, pauth_ra_state_offset = -1;
+  int first_pauth_regnum = -1, ra_sign_state_offset = -1;
   int first_mte_regnum = -1, tls_regnum = -1;
 
   /* Use the vector length passed via the target info.  Here -1 is used for no
@@ -3531,7 +3531,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (feature_pauth != NULL)
     {
       first_pauth_regnum = num_regs;
-      pauth_ra_state_offset = num_pseudo_regs;
+      ra_sign_state_offset = num_pseudo_regs;
       /* Validate the descriptor provides the mandatory PAUTH registers and
 	 allocate their numbers.  */
       for (i = 0; i < ARRAY_SIZE (aarch64_pauth_register_names); i++)
@@ -3572,8 +3572,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->jb_elt_size = 8;
   tdep->vq = vq;
   tdep->pauth_reg_base = first_pauth_regnum;
-  tdep->pauth_ra_state_regnum = (feature_pauth == NULL) ? -1
-				: pauth_ra_state_offset + num_regs;
+  tdep->ra_sign_state_regnum = (feature_pauth == NULL) ? -1
+				: ra_sign_state_offset + num_regs;
   tdep->mte_reg_base = first_mte_regnum;
   tdep->tls_regnum = tls_regnum;
 
