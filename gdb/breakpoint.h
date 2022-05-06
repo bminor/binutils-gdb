@@ -739,6 +739,9 @@ struct breakpoint
     /* Nothing to do.  */
   }
 
+  /* Add a location for SAL to this breakpoint.  */
+  bp_location *add_location (const symtab_and_line &sal);
+
   /* Return a range of this breakpoint's locations.  */
   bp_location_range locations () const;
 

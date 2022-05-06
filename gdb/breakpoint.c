@@ -114,9 +114,6 @@ static void mention (const breakpoint *);
 
 static struct breakpoint *set_raw_breakpoint_without_location (struct gdbarch *,
 							       enum bptype);
-static struct bp_location *add_location_to_breakpoint (struct breakpoint *,
-						       const struct symtab_and_line *);
-
 /* This function is used in gdbtk sources and thus can not be made
    static.  */
 static struct breakpoint *set_raw_breakpoint (struct gdbarch *gdbarch,
@@ -7308,7 +7305,7 @@ static void
 init_raw_breakpoint (struct breakpoint *b, struct symtab_and_line sal,
 		     enum bptype bptype)
 {
-  add_location_to_breakpoint (b, &sal);
+  b->add_location (sal);
 
   if (bptype != bp_catchpoint)
     gdb_assert (sal.pspace != NULL);
@@ -8109,16 +8106,15 @@ handle_automatic_hardware_breakpoints (bp_location *bl)
     }
 }
 
-static struct bp_location *
-add_location_to_breakpoint (struct breakpoint *b,
-			    const struct symtab_and_line *sal)
+bp_location *
+breakpoint::add_location (const symtab_and_line &sal)
 {
-  struct bp_location *loc, **tmp;
+  struct bp_location *new_loc, **tmp;
   CORE_ADDR adjusted_address;
-  struct gdbarch *loc_gdbarch = get_sal_arch (*sal);
+  struct gdbarch *loc_gdbarch = get_sal_arch (sal);
 
   if (loc_gdbarch == NULL)
-    loc_gdbarch = b->gdbarch;
+    loc_gdbarch = gdbarch;
 
   /* Adjust the breakpoint's address prior to allocating a location.
      Once we call allocate_location(), that mostly uninitialized
@@ -8127,31 +8123,31 @@ add_location_to_breakpoint (struct breakpoint *b,
      not want its scan of the location chain to find a breakpoint and
      location that's only been partially initialized.  */
   adjusted_address = adjust_breakpoint_address (loc_gdbarch,
-						sal->pc, b->type);
+						sal.pc, type);
 
   /* Sort the locations by their ADDRESS.  */
-  loc = b->allocate_location ();
-  for (tmp = &(b->loc); *tmp != NULL && (*tmp)->address <= adjusted_address;
+  new_loc = allocate_location ();
+  for (tmp = &(loc); *tmp != NULL && (*tmp)->address <= adjusted_address;
        tmp = &((*tmp)->next))
     ;
-  loc->next = *tmp;
-  *tmp = loc;
+  new_loc->next = *tmp;
+  *tmp = new_loc;
 
-  loc->requested_address = sal->pc;
-  loc->address = adjusted_address;
-  loc->pspace = sal->pspace;
-  loc->probe.prob = sal->prob;
-  loc->probe.objfile = sal->objfile;
-  gdb_assert (loc->pspace != NULL);
-  loc->section = sal->section;
-  loc->gdbarch = loc_gdbarch;
-  loc->line_number = sal->line;
-  loc->symtab = sal->symtab;
-  loc->symbol = sal->symbol;
-  loc->msymbol = sal->msymbol;
-  loc->objfile = sal->objfile;
+  new_loc->requested_address = sal.pc;
+  new_loc->address = adjusted_address;
+  new_loc->pspace = sal.pspace;
+  new_loc->probe.prob = sal.prob;
+  new_loc->probe.objfile = sal.objfile;
+  gdb_assert (new_loc->pspace != NULL);
+  new_loc->section = sal.section;
+  new_loc->gdbarch = loc_gdbarch;
+  new_loc->line_number = sal.line;
+  new_loc->symtab = sal.symtab;
+  new_loc->symbol = sal.symbol;
+  new_loc->msymbol = sal.msymbol;
+  new_loc->objfile = sal.objfile;
 
-  set_breakpoint_location_function (loc);
+  set_breakpoint_location_function (new_loc);
 
   /* While by definition, permanent breakpoints are already present in the
      code, we don't mark the location as inserted.  Normally one would expect
@@ -8166,10 +8162,10 @@ add_location_to_breakpoint (struct breakpoint *b,
      (If GDB later needs to continue execution past the permanent breakpoint,
      it manually increments the PC, thus avoiding executing the breakpoint
      instruction.)  */
-  if (bp_loc_is_permanent (loc))
-    loc->permanent = 1;
+  if (bp_loc_is_permanent (new_loc))
+    new_loc->permanent = 1;
 
-  return loc;
+  return new_loc;
 }
 
 
@@ -8375,7 +8371,7 @@ init_breakpoint_sal (struct breakpoint *b, struct gdbarch *gdbarch,
 	}
       else
 	{
-	  loc = add_location_to_breakpoint (b, &sal);
+	  loc = b->add_location (sal);
 	  if ((flags & CREATE_BREAKPOINT_FLAGS_INSERTED) != 0)
 	    loc->inserted = 1;
 	}
@@ -12646,7 +12642,7 @@ update_breakpoint_locations (struct breakpoint *b,
 
       switch_to_program_space_and_thread (sal.pspace);
 
-      new_loc = add_location_to_breakpoint (b, &sal);
+      new_loc = b->add_location (sal);
 
       /* Reparse conditions, they might contain references to the
 	 old symtab.  */
@@ -13537,7 +13533,7 @@ insert_single_step_breakpoint (struct gdbarch *gdbarch,
   sal.pc = pc;
   sal.section = find_pc_overlay (pc);
   sal.explicit_pc = 1;
-  add_location_to_breakpoint (tp->control.single_step_breakpoints, &sal);
+  tp->control.single_step_breakpoints->add_location (sal);
 
   update_global_location_list (UGLL_INSERT);
 }
