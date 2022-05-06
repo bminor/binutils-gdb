@@ -252,6 +252,21 @@ static const struct breakpoint_ops tracepoint_probe_breakpoint_ops =
   create_breakpoints_sal,
 };
 
+/* Implementation of abstract dtors.  These must exist to satisfy the
+   linker.  */
+
+breakpoint::~breakpoint ()
+{
+}
+
+base_breakpoint::~base_breakpoint ()
+{
+}
+
+catchpoint::~catchpoint ()
+{
+}
+
 /* The structure to be used in regular breakpoints.  */
 struct ordinary_breakpoint : public base_breakpoint
 {

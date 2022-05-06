@@ -631,7 +631,7 @@ struct breakpoint
 
   DISABLE_COPY_AND_ASSIGN (breakpoint);
 
-  virtual ~breakpoint () = default;
+  virtual ~breakpoint () = 0;
 
   /* Allocate a location for this breakpoint.  */
   virtual struct bp_location *allocate_location ();
@@ -862,6 +862,8 @@ struct base_breakpoint : public breakpoint
 {
   using breakpoint::breakpoint;
 
+  ~base_breakpoint () override = 0;
+
   void re_set () override;
   int insert_location (struct bp_location *) override;
   int remove_location (struct bp_location *,
@@ -1022,6 +1024,8 @@ struct catchpoint : public base_breakpoint
   /* If TEMP is true, then make the breakpoint temporary.  If
      COND_STRING is not NULL, then store it in the breakpoint.  */
   catchpoint (struct gdbarch *gdbarch, bool temp, const char *cond_string);
+
+  ~catchpoint () override = 0;
 
   void re_set () override
   {
