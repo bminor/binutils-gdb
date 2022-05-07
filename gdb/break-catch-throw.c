@@ -73,7 +73,7 @@ struct exception_catchpoint : public base_breakpoint
 			bool temp, const char *cond_string_,
 			enum exception_event_kind kind_,
 			std::string &&except_rx)
-    : base_breakpoint (gdbarch, bp_catchpoint),
+    : base_breakpoint (gdbarch, bp_catchpoint, temp, cond_string_),
       kind (kind_),
       exception_rx (std::move (except_rx)),
       pattern (exception_rx.empty ()
@@ -81,10 +81,6 @@ struct exception_catchpoint : public base_breakpoint
 	       : new compiled_regex (exception_rx.c_str (), REG_NOSUB,
 				     _("invalid type-matching regexp")))
   {
-    if (cond_string_ != nullptr)
-      cond_string = make_unique_xstrdup (cond_string_);
-    disposition = temp ? disp_del : disp_donttouch;
-
     pspace = current_program_space;
     re_set ();
   }

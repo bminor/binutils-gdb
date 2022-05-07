@@ -7725,17 +7725,29 @@ disable_breakpoints_in_freed_objfile (struct objfile *objfile)
 
 /* See breakpoint.h.  */
 
+breakpoint::breakpoint (struct gdbarch *gdbarch_, enum bptype bptype,
+			bool temp, const char *cond_string_)
+  : type (bptype),
+    disposition (temp ? disp_del : disp_donttouch),
+    gdbarch (gdbarch_),
+    language (current_language->la_language),
+    input_radix (::input_radix),
+    cond_string (cond_string_ != nullptr
+		 ? make_unique_xstrdup (cond_string_)
+		 : nullptr),
+    related_breakpoint (this)
+{
+}
+
+/* See breakpoint.h.  */
+
 catchpoint::catchpoint (struct gdbarch *gdbarch, bool temp,
-			const char *cond_string_)
-  : breakpoint (gdbarch, bp_catchpoint)
+			const char *cond_string)
+  : breakpoint (gdbarch, bp_catchpoint, temp, cond_string)
 {
   add_dummy_location (this, current_program_space);
 
   pspace = current_program_space;
-
-  if (cond_string_ != nullptr)
-    cond_string = make_unique_xstrdup (cond_string_);
-  disposition = temp ? disp_del : disp_donttouch;
 }
 
 void

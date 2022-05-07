@@ -620,14 +620,8 @@ using bp_location_range = next_range<bp_location>;
 
 struct breakpoint
 {
-  breakpoint (struct gdbarch *gdbarch_, enum bptype bptype)
-    : type (bptype),
-      gdbarch (gdbarch_),
-      language (current_language->la_language),
-      input_radix (::input_radix),
-      related_breakpoint (this)
-  {
-  }
+  breakpoint (struct gdbarch *gdbarch_, enum bptype bptype,
+	      bool temp = true, const char *cond_string = nullptr);
 
   DISABLE_COPY_AND_ASSIGN (breakpoint);
 
