@@ -11634,7 +11634,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 		{
 		  *ins->obufp++ = '-';
 		  *ins->obufp = '\0';
-		  disp = - (bfd_signed_vma) disp;
+		  disp = -disp;
 		}
 
 	      if (havedisp)
@@ -11739,7 +11739,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 		{
 		  *ins->obufp++ = '-';
 		  *ins->obufp = '\0';
-		  disp = - (bfd_signed_vma) disp;
+		  disp = -disp;
 		}
 
 	      print_displacement (ins, ins->scratchbuf, disp);
@@ -11905,28 +11905,28 @@ get64 (instr_info *ins ATTRIBUTE_UNUSED)
 static bfd_signed_vma
 get32 (instr_info *ins)
 {
-  bfd_signed_vma x = 0;
+  bfd_vma x = 0;
 
   FETCH_DATA (ins->info, ins->codep + 4);
-  x = *ins->codep++ & (bfd_signed_vma) 0xff;
-  x |= (*ins->codep++ & (bfd_signed_vma) 0xff) << 8;
-  x |= (*ins->codep++ & (bfd_signed_vma) 0xff) << 16;
-  x |= (*ins->codep++ & (bfd_signed_vma) 0xff) << 24;
+  x = *ins->codep++ & (bfd_vma) 0xff;
+  x |= (*ins->codep++ & (bfd_vma) 0xff) << 8;
+  x |= (*ins->codep++ & (bfd_vma) 0xff) << 16;
+  x |= (*ins->codep++ & (bfd_vma) 0xff) << 24;
   return x;
 }
 
 static bfd_signed_vma
 get32s (instr_info *ins)
 {
-  bfd_signed_vma x = 0;
+  bfd_vma x = 0;
 
   FETCH_DATA (ins->info, ins->codep + 4);
-  x = *ins->codep++ & (bfd_signed_vma) 0xff;
-  x |= (*ins->codep++ & (bfd_signed_vma) 0xff) << 8;
-  x |= (*ins->codep++ & (bfd_signed_vma) 0xff) << 16;
-  x |= (*ins->codep++ & (bfd_signed_vma) 0xff) << 24;
+  x = *ins->codep++ & (bfd_vma) 0xff;
+  x |= (*ins->codep++ & (bfd_vma) 0xff) << 8;
+  x |= (*ins->codep++ & (bfd_vma) 0xff) << 16;
+  x |= (*ins->codep++ & (bfd_vma) 0xff) << 24;
 
-  x = (x ^ ((bfd_signed_vma) 1 << 31)) - ((bfd_signed_vma) 1 << 31);
+  x = (x ^ ((bfd_vma) 1 << 31)) - ((bfd_vma) 1 << 31);
 
   return x;
 }
