@@ -125,14 +125,11 @@ struct loongarch_elf_link_hash_table
 #define elf_backend_want_plt_sym 0
 #define elf_backend_plt_alignment 4
 #define elf_backend_can_gc_sections 1
-/* #define elf_backend_can_refcount 1 */
 #define elf_backend_want_got_sym 1
 
 #define elf_backend_got_header_size (GOT_ENTRY_SIZE * 1)
 
 #define elf_backend_want_dynrelro 1
-/* #define elf_backend_rela_normal 1
-#define elf_backend_default_execstack 0 */
 
 /* Generate a PLT header.  */
 
