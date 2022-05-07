@@ -63,15 +63,17 @@ static const struct exception_names exception_functions[] =
   { "-probe-stap libstdcxx:catch", "__cxa_begin_catch" }
 };
 
-/* The type of an exception catchpoint.  */
+/* The type of an exception catchpoint.  Unlike most catchpoints, this
+   one is implemented with code breakpoints, so it inherits struct
+   base_breakpoint, not struct catchpoint.  */
 
-struct exception_catchpoint : public catchpoint
+struct exception_catchpoint : public base_breakpoint
 {
   exception_catchpoint (struct gdbarch *gdbarch,
-			bool temp, const char *cond_string,
+			bool temp, const char *cond_string_,
 			enum exception_event_kind kind_,
 			std::string &&except_rx)
-    : catchpoint (gdbarch, temp, cond_string),
+    : base_breakpoint (gdbarch, bp_catchpoint),
       kind (kind_),
       exception_rx (std::move (except_rx)),
       pattern (exception_rx.empty ()
@@ -79,6 +81,12 @@ struct exception_catchpoint : public catchpoint
 	       : new compiled_regex (exception_rx.c_str (), REG_NOSUB,
 				     _("invalid type-matching regexp")))
   {
+    if (cond_string_ != nullptr)
+      cond_string = make_unique_xstrdup (cond_string_);
+    disposition = temp ? disp_del : disp_donttouch;
+
+    pspace = current_program_space;
+    re_set ();
   }
 
   void re_set () override;
@@ -374,8 +382,6 @@ handle_gnu_v3_exceptions (int tempflag, std::string &&except_rx,
   std::unique_ptr<exception_catchpoint> cp
     (new exception_catchpoint (gdbarch, tempflag, cond_string,
 			       ex_event, std::move (except_rx)));
-
-  cp->re_set ();
 
   install_breakpoint (0, std::move (cp), 1);
 }
