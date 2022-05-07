@@ -1030,18 +1030,13 @@ struct tracepoint : public base_breakpoint
 
 /* The base class for catchpoints.  */
 
-struct catchpoint : public base_breakpoint
+struct catchpoint : public breakpoint
 {
   /* If TEMP is true, then make the breakpoint temporary.  If
      COND_STRING is not NULL, then store it in the breakpoint.  */
   catchpoint (struct gdbarch *gdbarch, bool temp, const char *cond_string);
 
   ~catchpoint () override = 0;
-
-  void re_set () override
-  {
-    /* For catchpoints, the default is to do nothing.  */
-  }
 };
 
 

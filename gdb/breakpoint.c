@@ -7266,30 +7266,6 @@ get_sal_arch (struct symtab_and_line sal)
   return NULL;
 }
 
-/* Low level routine for partially initializing a breakpoint of type
-   BPTYPE.  The newly created breakpoint's address, section, source
-   file name, and line number are provided by SAL.
-
-   It is expected that the caller will complete the initialization of
-   the newly created breakpoint struct as well as output any status
-   information regarding the creation of a new breakpoint.  */
-
-static void
-init_raw_breakpoint (struct breakpoint *b, struct symtab_and_line sal,
-		     enum bptype bptype)
-{
-  b->add_location (sal);
-
-  if (bptype != bp_catchpoint)
-    gdb_assert (sal.pspace != NULL);
-
-  /* Store the program space that was used to set the breakpoint,
-     except for ordinary breakpoints, which are independent of the
-     program space.  */
-  if (bptype != bp_breakpoint && bptype != bp_hardware_breakpoint)
-    b->pspace = sal.pspace;
-}
-
 /* Call this routine when stepping and nexting to enable a breakpoint
    if we do a longjmp() or 'throw' in TP.  FRAME is the frame which
    initiated the operation.  */
@@ -7751,12 +7727,11 @@ disable_breakpoints_in_freed_objfile (struct objfile *objfile)
 
 catchpoint::catchpoint (struct gdbarch *gdbarch, bool temp,
 			const char *cond_string_)
-  : base_breakpoint (gdbarch, bp_catchpoint)
+  : breakpoint (gdbarch, bp_catchpoint)
 {
-  symtab_and_line sal;
-  sal.pspace = current_program_space;
+  add_dummy_location (this, current_program_space);
 
-  init_raw_breakpoint (this, sal, bp_catchpoint);
+  pspace = current_program_space;
 
   if (cond_string_ != nullptr)
     cond_string = make_unique_xstrdup (cond_string_);
