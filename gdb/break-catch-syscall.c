@@ -35,10 +35,11 @@
 /* An instance of this type is used to represent a syscall
    catchpoint.  */
 
-struct syscall_catchpoint : public breakpoint
+struct syscall_catchpoint : public catchpoint
 {
-  syscall_catchpoint (struct gdbarch *gdbarch, std::vector<int> &&calls)
-    : breakpoint (gdbarch, bp_catchpoint),
+  syscall_catchpoint (struct gdbarch *gdbarch, bool tempflag,
+		      std::vector<int> &&calls)
+    : catchpoint (gdbarch, tempflag, nullptr),
       syscalls_to_be_caught (std::move (calls))
   {
   }
@@ -354,7 +355,7 @@ create_syscall_event_catchpoint (int tempflag, std::vector<int> &&filter)
   struct gdbarch *gdbarch = get_current_arch ();
 
   std::unique_ptr<syscall_catchpoint> c
-    (new syscall_catchpoint (gdbarch, std::move (filter)));
+    (new syscall_catchpoint (gdbarch, tempflag, std::move (filter)));
 
   install_breakpoint (0, std::move (c), 1);
 }
