@@ -663,11 +663,47 @@ namespace eval Term {
 	_clear_lines 0 $_rows
     }
 
+    # Accept some output from gdb and update the screen.
+    # Return 1 if successful, or 0 if a timeout occurred.
+    proc accept_gdb_output { } {
+	global expect_out
+	gdb_expect {
+	    -re "^\[\x07\x08\x0a\x0d\]" {
+		scan $expect_out(0,string) %c val
+		set hexval [format "%02x" $val]
+		_log "wait_for: _ctl_0x${hexval}"
+		_ctl_0x${hexval}
+	    }
+	    -re "^\x1b(\[0-9a-zA-Z\])" {
+		_log "wait_for: unsupported escape"
+		error "unsupported escape"
+	    }
+	    -re "^\x1b\\\[(\[0-9;\]*)(\[a-zA-Z@\])" {
+		set cmd $expect_out(2,string)
+		set params [split $expect_out(1,string) ";"]
+		_log "wait_for: _csi_$cmd <<<$expect_out(1,string)>>>"
+		eval _csi_$cmd $params
+	    }
+	    -re "^\[^\x07\x08\x0a\x0d\x1b\]+" {
+		_insert $expect_out(0,string)
+		variable _last_char
+		set _last_char [string index $expect_out(0,string) end]
+	    }
+
+	    timeout {
+		# Assume a timeout means we somehow missed the
+		# expected result, and carry on.
+		return 0
+	    }
+	}
+
+	return 1
+    }
+
     # Accept some output from gdb and update the screen.  WAIT_FOR is
     # a regexp matching the line to wait for.  Return 0 on timeout, 1
     # on success.
     proc wait_for {wait_for} {
-	global expect_out
 	global gdb_prompt
 	variable _cur_col
 	variable _cur_row
@@ -675,34 +711,8 @@ namespace eval Term {
 	set prompt_wait_for "$gdb_prompt \$"
 
 	while 1 {
-	    gdb_expect {
-		-re "^\[\x07\x08\x0a\x0d\]" {
-		    scan $expect_out(0,string) %c val
-		    set hexval [format "%02x" $val]
-		    _log "wait_for: _ctl_0x${hexval}"
-		    _ctl_0x${hexval}
-		}
-		-re "^\x1b(\[0-9a-zA-Z\])" {
-		    _log "wait_for: unsupported escape"
-		    error "unsupported escape"
-		}
-		-re "^\x1b\\\[(\[0-9;\]*)(\[a-zA-Z@\])" {
-		    set cmd $expect_out(2,string)
-		    set params [split $expect_out(1,string) ";"]
-		    _log "wait_for: _csi_$cmd <<<$expect_out(1,string)>>>"
-		    eval _csi_$cmd $params
-		}
-		-re "^\[^\x07\x08\x0a\x0d\x1b\]+" {
-		    _insert $expect_out(0,string)
-		    variable _last_char
-		    set _last_char [string index $expect_out(0,string) end]
-		}
-
-		timeout {
-		    # Assume a timeout means we somehow missed the
-		    # expected result, and carry on.
-		    return 0
-		}
+	    if { [accept_gdb_output] == 0 } {
+		return 0
 	    }
 
 	    # If the cursor appears just after the prompt, return.  It
@@ -718,6 +728,23 @@ namespace eval Term {
 		    break
 		}
 		set wait_for $prompt_wait_for
+	    }
+	}
+
+	return 1
+    }
+
+    # Accept some output from gdb and update the screen.  Wait for the screen
+    # region X/Y/WIDTH/HEIGTH to matches REGEXP.  Return 0 on timeout, 1 on
+    # success.
+    proc wait_for_region_contents {x y width height regexp} {
+	while 1 {
+	    if { [accept_gdb_output] == 0 } {
+		return 0
+	    }
+
+	    if { [check_region_contents_p $x $y $width $height $regexp] } {
+		break
 	    }
 	}
 
@@ -940,15 +967,23 @@ namespace eval Term {
     # and HEIGHT match REGEXP.  This is like check_contents except
     # only part of the screen is checked.  This can be used to check
     # the contents within a box (though check_box_contents is a better
-    # choice for boxes with a border).
-    proc check_region_contents { test_name x y width height regexp } {
+    # choice for boxes with a border).  Return 1 if check succeeded.
+    proc check_region_contents_p { x y width height regexp } {
 	variable _chars
 	dump_box $x $y $width $height
 
 	# Now grab the contents of the box, join each line together
 	# with a '\r\n' sequence and match against REGEXP.
 	set result [get_region $x $y $width $height "\r\n"]
-	gdb_assert {[regexp -- $regexp $result]} $test_name
+	return [regexp -- $regexp $result]
+    }
+
+    # Check that the region of the screen described by X, Y, WIDTH,
+    # and HEIGHT match REGEXP.  As check_region_contents_p, but produce
+    # a pass/fail message.
+    proc check_region_contents { test_name x y width height regexp } {
+	set ok [check_region_contents_p $x $y $width $height $regexp]
+	gdb_assert {$ok} $test_name
     }
 
     # Check the contents of a box on the screen.  This is a little

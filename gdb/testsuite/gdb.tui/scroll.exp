@@ -60,7 +60,13 @@ Term::command "winheight cmd 8"
 Term::check_box "src window after resize" 0 8 80 16
 
 for {set i 10} {$i < 20} {incr i 1} {
-    Term::command "p $i"
+    set cmd "p $i"
+    send_gdb "$cmd\n"
+    Term::wait_for_region_contents 0 0 80 8 \
+	[multi_line \
+	     "$gdb_prompt [string_to_regexp $cmd]\\s+" \
+	     "\\\$\\d+ = $i\\s+" \
+	     "$gdb_prompt "]
 }
 
 # Now check that the contents of the command window are as expected.
