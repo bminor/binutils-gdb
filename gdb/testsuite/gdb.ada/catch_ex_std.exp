@@ -63,6 +63,10 @@ if {[gdb_compile_ada $srcfile $binfile executable $options] != ""} {
 
 clean_restart ${testfile}
 
+# Do whatever is necessary to make sure that the shared library is
+# loaded for remote targets.
+gdb_load_shlib $sofile
+
 if {![runto_main]} then {
    return 0
 }
