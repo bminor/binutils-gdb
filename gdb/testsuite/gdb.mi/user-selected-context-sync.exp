@@ -393,7 +393,7 @@ proc_with_prefix test_setup { mode } {
 	}
 
 	if { [mi_gdb_start "separate-mi-tty"] != 0 } {
-	    return
+	    return -1
 	}
     }
 
@@ -402,7 +402,7 @@ proc_with_prefix test_setup { mode } {
     mi_gdb_load $binfile
 
     if { [mi_runto_main] < 0 } {
-	return
+	return -1
     }
 
     # When using mi_expect_stop, we don't expect a prompt after the *stopped
@@ -443,6 +443,8 @@ proc_with_prefix test_setup { mode } {
 	# Prepare the second inferior for the test.
 	test_continue_to_start $mode 2
     }
+
+    return 0
 }
 
 # Reset the selection to frame #0 of thread THREAD.
@@ -1300,7 +1302,12 @@ proc_with_prefix test_cli_in_mi_frame { mode cli_in_mi_mode } {
 }
 
 foreach_with_prefix mode { "all-stop" "non-stop" } {
-    test_setup $mode
+    set test "setup done"
+    if { [test_setup $mode] == -1 } {
+	fail $test
+	continue
+    }
+    pass $test
 
     # Test selecting inferior, thread and frame from CLI
 
