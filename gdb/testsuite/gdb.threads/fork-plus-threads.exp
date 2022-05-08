@@ -88,23 +88,15 @@ proc do_test { detach-on-fork } {
 
     set test "inferior 1 exited"
     gdb_test_multiple "" $test {
-	-re "Cannot remove breakpoints" {
+	-re "^Cannot remove breakpoints" {
 	    set saw_cannot_remove_breakpoints 1
 	    exp_continue
 	}
-	-re "Thread \[^\r\n\]+ stopped\\." {
+	-re "^\\\[Thread \[^\r\n\]+ stopped\\." {
 	    set saw_thread_stopped 1
 	    exp_continue
 	}
-	-re "(Thread|LWP) \[^\r\n\]+ exited" {
-	    # Avoid timeout with check-read1
-	    exp_continue
-	}
-	-re "New (Thread|LWP) \[^\r\n\]+" {
-	    # Avoid timeout with check-read1
-	    exp_continue
-	}
-	-re "Inferior ($::decimal) \(\[^\r\n\]+\) exited normally" {
+	-re "^\\\[Inferior ($::decimal) \(\[^\r\n\]+\) exited normally\\\]" {
 	    set infnum $expect_out(1,string)
 	    incr num_inferior_exits_seen
 	    incr inferior_exits_seen($infnum) 1
@@ -114,6 +106,10 @@ proc do_test { detach-on-fork } {
 	    } else {
 		exp_continue
 	    }
+	}
+	-re "^\[^\r\n]*\r\n" {
+	    # Skip line.
+	    exp_continue
 	}
     }
 
