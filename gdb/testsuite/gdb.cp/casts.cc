@@ -1,3 +1,5 @@
+#include <cstdint>
+
 struct A
 {
   int a;
@@ -65,7 +67,7 @@ main (int argc, char **argv)
   LeftRight gd;
   gd.left = 23;
   gd.right = 27;
-  unsigned long long gd_value = (unsigned long long) &gd;
+  unsigned long long gd_value = (unsigned long long) (std::uintptr_t)&gd;
   unsigned long long r_value = (unsigned long long) (Right *) &gd;
 
   return 0;  /* breakpoint spot: casts.exp: 1 */
