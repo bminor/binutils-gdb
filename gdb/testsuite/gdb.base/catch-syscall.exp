@@ -669,35 +669,90 @@ proc fill_all_syscalls_numbers {} {
     set unknown_syscall_number [get_integer_valueof "unknown_syscall" -1]
 }
 
-# Set up the vector all_syscalls.
+# Set up the vector all_syscalls.  Returns 1 upon success, 0 upon failure.
 
 proc setup_all_syscalls {} {
     global all_syscalls
     global gdb_prompt
+    global decimal
 
     # They are ordered according to the file, so do not change this.
     lappend all_syscalls "close"
     lappend all_syscalls "chroot"
 
+    if { ![runto_main] } {
+	return 0
+    }
+
     # SYS_pipe doesn't exist on aarch64 kernel.
     set test "check SYS_pipe"
+    set have_SYS_pipe 0
     gdb_test_multiple "p pipe_syscall" $test {
-	-re " = .*$gdb_prompt $" {
+	-re -wrap " = $decimal" {
 	    pass $test
-	    lappend all_syscalls "pipe"
+	    set have_SYS_pipe 1
 	}
-	-re "No symbol .*$gdb_prompt $" {
+	-re -wrap "No symbol .*" {
 	    pass $test
-	    # SYS_pipe isn't defined, use SYS_pipe2 instead.
-	    lappend all_syscalls "pipe2"
+	}
+    }
+
+    set test "check SYS_pipe2"
+    set have_SYS_pipe2 0
+    gdb_test_multiple "p pipe2_syscall" $test {
+	-re -wrap " = $decimal" {
+	    pass $test
+	    set have_SYS_pipe2 1
+	}
+	-re -wrap "No symbol .*" {
+	    pass $test
+	}
+    }
+
+    if { $have_SYS_pipe == 0 && $have_SYS_pipe2 == 0 } {
+	return 0
+    }
+
+    with_test_prefix "determine pipe syscall" {
+	set line [gdb_get_line_number "pipe (fd)"]
+	gdb_test "break $line"
+	gdb_continue_to_breakpoint "before pipe call"
+	if { $have_SYS_pipe } {
+	    gdb_test "catch syscall pipe"
+	}
+	if { $have_SYS_pipe2 } {
+	    gdb_test "catch syscall pipe2"
+	}
+	set ok 0
+	gdb_test_multiple "continue" "" {
+	    -re -wrap "Catchpoint $decimal \\(call to syscall pipe\\).*" {
+		lappend all_syscalls pipe
+		pass $gdb_test_name
+		set ok 1
+	    }
+	    -re -wrap "Catchpoint $decimal \\(call to syscall pipe2\\).*" {
+		lappend all_syscalls pipe2
+		pass $gdb_test_name
+		set ok 1
+	    }
+	    -re -wrap "" {
+		fail $gdb_test_name
+	    }
+	}
+	if { ! $ok } {
+	    return 0
 	}
     }
 
     lappend all_syscalls "write"
     lappend all_syscalls "read"
+
+    return 1
 }
 
-setup_all_syscalls
+if { ![setup_all_syscalls] } {
+    return -1
+}
 
 # Fill all the syscalls numbers before starting anything.
 fill_all_syscalls_numbers
