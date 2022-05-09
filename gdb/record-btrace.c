@@ -2017,7 +2017,7 @@ record_btrace_start_replaying (struct thread_info *tp)
 
   /* We can't start replaying without trace.  */
   if (btinfo->functions.empty ())
-    return NULL;
+    error (_("No trace."));
 
   /* GDB stores the current frame_id when stepping in order to detects steps
      into subroutines.
