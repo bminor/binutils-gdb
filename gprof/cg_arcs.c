@@ -38,13 +38,13 @@
 #include "utils.h"
 #include "sym_ids.h"
 
-static int cmp_topo (const PTR, const PTR);
+static int cmp_topo (const void *, const void *);
 static void propagate_time (Sym *);
 static void cycle_time (void);
 static void cycle_link (void);
 static void inherit_flags (Sym *);
 static void propagate_flags (Sym **);
-static int cmp_total (const PTR, const PTR);
+static int cmp_total (const void *, const void *);
 
 Sym *cycle_header;
 unsigned int num_cycles;
@@ -151,7 +151,7 @@ arc_add (Sym *parent, Sym *child, unsigned long count)
 
 
 static int
-cmp_topo (const PTR lp, const PTR rp)
+cmp_topo (const void *lp, const void *rp)
 {
   const Sym *left = *(const Sym **) lp;
   const Sym *right = *(const Sym **) rp;
@@ -535,7 +535,7 @@ propagate_flags (Sym **symbols)
  * first.  All else being equal, compare by names.
  */
 static int
-cmp_total (const PTR lp, const PTR rp)
+cmp_total (const void *lp, const void *rp)
 {
   const Sym *left = *(const Sym **) lp;
   const Sym *right = *(const Sym **) rp;

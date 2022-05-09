@@ -58,6 +58,6 @@ extern Source_File *source_file_lookup_name (const char *);
    is not stdout, it should be closed when done with it.  */
 extern FILE *annotate_source
   (Source_File *sf, unsigned int max_width,
-	   void (*annote) (char *, unsigned int, int, PTR arg),
-	   PTR arg);
+	   void (*annote) (char *, unsigned int, int, void *),
+	   void *arg);
 #endif /* source_h */
