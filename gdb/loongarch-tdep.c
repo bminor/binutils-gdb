@@ -247,6 +247,36 @@ static const struct frame_unwind loongarch_frame_unwind = {
   /*.prev_arch	   =*/nullptr,
 };
 
+/* Implement the return_value gdbarch method for LoongArch.  */
+
+static enum return_value_convention
+loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
+			struct type *type, struct regcache *regcache,
+			gdb_byte *readbuf, const gdb_byte *writebuf)
+{
+  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  auto regs = tdep->regs;
+  int len = TYPE_LENGTH (type);
+  int regnum = -1;
+
+  /* See if our value is returned through a register.  If it is, then
+     store the associated register number in REGNUM.  */
+  switch (type->code ())
+    {
+      case TYPE_CODE_INT:
+	regnum = regs.r + 4;
+	break;
+    }
+
+  /* Extract the return value from the register where it was stored.  */
+  if (readbuf)
+    regcache->raw_read_part (regnum, 0, len, readbuf);
+  if (writebuf)
+    regcache->raw_write_part (regnum, 0, len, writebuf);
+
+  return RETURN_VALUE_REGISTER_CONVENTION;
+}
+
 /* Implement the "dwarf2_reg_to_regnum" gdbarch method.  */
 
 static int
@@ -417,6 +447,9 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Finalise the target description registers.  */
   tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
+
+  /* Return value info  */
+  set_gdbarch_return_value (gdbarch, loongarch_return_value);
 
   /* Advance PC across function entry code.  */
   set_gdbarch_skip_prologue (gdbarch, loongarch_skip_prologue);
