@@ -330,7 +330,7 @@ private:
   /* A future that tracks when the 'finalize' method is done.  Note
      that the 'get' method is never called on this future, only
      'wait'.  */
-  std::future<void> m_future;
+  gdb::future<void> m_future;
 };
 
 #endif /* GDB_DWARF2_COOKED_INDEX_H */

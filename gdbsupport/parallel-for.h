@@ -72,7 +72,7 @@ private:
   
   /* A vector of futures coming from the tasks run in the
      background.  */
-  std::vector<std::future<T>> m_futures;
+  std::vector<gdb::future<T>> m_futures;
 };
 
 /* See the generic template.  */
@@ -108,7 +108,7 @@ public:
 
 private:
 
-  std::vector<std::future<void>> m_futures;
+  std::vector<gdb::future<void>> m_futures;
 };
 
 }

@@ -192,12 +192,13 @@ thread_pool::set_thread_count (size_t num_threads)
 #endif /* CXX_STD_THREAD */
 }
 
+#if CXX_STD_THREAD
+
 void
 thread_pool::do_post_task (std::packaged_task<void ()> &&func)
 {
   std::packaged_task<void ()> t (std::move (func));
 
-#if CXX_STD_THREAD
   if (m_thread_count != 0)
     {
       std::lock_guard<std::mutex> guard (m_tasks_mutex);
@@ -205,14 +206,11 @@ thread_pool::do_post_task (std::packaged_task<void ()> &&func)
       m_tasks_cv.notify_one ();
     }
   else
-#endif
     {
       /* Just execute it now.  */
       t ();
     }
 }
-
-#if CXX_STD_THREAD
 
 void
 thread_pool::thread_function ()
