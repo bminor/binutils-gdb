@@ -62,7 +62,6 @@ So instead we use the macro below and test it against specific values.  */
 #define GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
 #endif /* GCC_VERSION */
 
-#if defined (__STDC__) || defined(__cplusplus) || defined (_AIX) || (defined (__mips) && defined (_SYSTYPE_SVR4)) || defined(_WIN32)
 /* All known AIX compilers implement these things (but don't always
    define __STDC__).  The RISC/OS MIPS compiler defines these things
    in SVR4 mode, but does not define __STDC__.  */
@@ -79,7 +78,7 @@ So instead we use the macro below and test it against specific values.  */
 /* inline requires special treatment; it's in C99, and GCC >=2.7 supports
    it too, but it's not in C89.  */
 #undef inline
-#if __STDC_VERSION__ >= 199901L || defined(__cplusplus) || (defined(__SUNPRO_C) && defined(__C99FEATURES__))
+#if (!defined(__cplusplus) && __STDC_VERSION__ >= 199901L) || defined(__cplusplus) || (defined(__SUNPRO_C) && defined(__C99FEATURES__))
 /* it's a keyword */
 #else
 # if GCC_VERSION >= 2007
@@ -88,22 +87,6 @@ So instead we use the macro below and test it against specific values.  */
 #  define inline  /* nothing */
 # endif
 #endif
-
-#else	/* Not ANSI C.  */
-
-#define PTR		char *
-
-/* some systems define these in header files for non-ansi mode */
-#undef const
-#undef volatile
-#undef signed
-#undef inline
-#define const
-#define volatile
-#define signed
-#define inline
-
-#endif	/* ANSI C.  */
 
 /* Define macros for some gcc attributes.  This permits us to use the
    macros freely, and know that they will come into play for the
@@ -356,7 +339,7 @@ So instead we use the macro below and test it against specific values.  */
 #define ENUM_BITFIELD(TYPE) unsigned int
 #endif
 
-#if __cpp_constexpr >= 200704
+#if defined(__cplusplus) && __cpp_constexpr >= 200704
 #define CONSTEXPR constexpr
 #else
 #define CONSTEXPR
@@ -419,7 +402,7 @@ So instead we use the macro below and test it against specific values.  */
 
    so that most attempts at copy are caught at compile-time.  */
 
-#if __cplusplus >= 201103
+#if defined(__cplusplus) && __cplusplus >= 201103
 #define DISABLE_COPY_AND_ASSIGN(TYPE)		\
   TYPE (const TYPE&) = delete;			\
   void operator= (const TYPE &) = delete
