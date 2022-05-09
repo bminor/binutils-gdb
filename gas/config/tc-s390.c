@@ -1619,6 +1619,7 @@ md_gather_operands (char *str,
      md_apply_fix.  */
   for (i = 0; i < fc; i++)
     {
+      fixS *fixP;
 
       if (fixups[i].opindex < 0)
 	{
@@ -1633,7 +1634,6 @@ md_gather_operands (char *str,
       if (fixups[i].reloc != BFD_RELOC_UNUSED)
 	{
 	  reloc_howto_type *reloc_howto;
-	  fixS *fixP;
 	  int size;
 
 	  reloc_howto = bfd_reloc_type_lookup (stdoutput, fixups[i].reloc);
@@ -1661,10 +1661,14 @@ md_gather_operands (char *str,
 	    fixP->fx_pcrel_adjust = operand->shift / 8;
 	}
       else
-	fix_new_exp (frag_now, f - frag_now->fr_literal, 4, &fixups[i].exp,
-		     (operand->flags & S390_OPERAND_PCREL) != 0,
-		     ((bfd_reloc_code_real_type)
-		      (fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
+	fixP = fix_new_exp (frag_now, f - frag_now->fr_literal, 4,
+			    &fixups[i].exp,
+			    (operand->flags & S390_OPERAND_PCREL) != 0,
+			    ((bfd_reloc_code_real_type)
+			     (fixups[i].opindex + (int) BFD_RELOC_UNUSED)));
+      /* s390_insert_operand () does the range checking.  */
+      if (operand->flags & S390_OPERAND_PCREL)
+	fixP->fx_no_overflow = 1;
     }
   return str;
 }

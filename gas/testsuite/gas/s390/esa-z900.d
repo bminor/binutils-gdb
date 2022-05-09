@@ -52,6 +52,10 @@ Disassembly of section .text:
 .*:	c0 f4 00 00 00 00 [	 ]*jg	102 <foo\+0x102>
 .*:	c0 65 00 00 00 00 [	 ]*brasl	%r6,108 <foo\+0x108>
 .*:	c0 65 00 00 00 00 [	 ]*brasl	%r6,10e <foo\+0x10e>
+.*:	c0 65 80 00 00 00 [	 ]*brasl	%r6,114 <foo\+0x114>
+.*:	c0 65 80 00 00 00 [	 ]*brasl	%r6,11a <foo\+0x11a>
+.*:	c0 65 7f ff ff ff [	 ]*brasl	%r6,11e <foo\+0x11e>
+.*:	c0 65 7f ff ff ff [	 ]*brasl	%r6,124 <foo\+0x124>
 .*:	01 0b [	 ]*tam
 .*:	01 0c [	 ]*sam24
 .*:	01 0d [	 ]*sam31
@@ -62,7 +66,7 @@ Disassembly of section .text:
 .*:	b9 97 00 69 [	 ]*dlr	%r6,%r9
 .*:	b9 98 00 69 [	 ]*alcr	%r6,%r9
 .*:	b9 99 00 69 [	 ]*slbr	%r6,%r9
-.*:	c0 60 00 00 00 00 [	 ]*larl	%r6,136 <foo\+0x136>
+.*:	c0 60 00 00 00 00 [	 ]*larl	%r6,14e <foo\+0x14e>
 .*:	e3 65 af ff 00 1e [	 ]*lrv	%r6,4095\(%r5,%r10\)
 .*:	e3 65 af ff 00 1f [	 ]*lrvh	%r6,4095\(%r5,%r10\)
 .*:	e3 65 af ff 00 3e [	 ]*strv	%r6,4095\(%r5,%r10\)
