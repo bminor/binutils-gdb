@@ -110,7 +110,7 @@ print_insn_rl78_common (bfd_vma addr, disassemble_info * dis, RL78_Dis_Isa isa)
 #endif
   struct private priv;
 
-  dis->private_data = (PTR) &priv;
+  dis->private_data = &priv;
   rl78_data.pc = addr;
   rl78_data.dis = dis;
 

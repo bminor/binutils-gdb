@@ -529,7 +529,7 @@ print_arg (argument *a, bfd_vma memaddr, struct disassemble_info *info)
   int sign_flag = 0;
   int relative = 0;
   bfd_vma number;
-  PTR stream = info->stream;
+  void *stream = info->stream;
   fprintf_ftype func = info->fprintf_func;
 
   switch (a->type)

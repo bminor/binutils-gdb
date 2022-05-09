@@ -221,7 +221,7 @@ print_insn_rx (bfd_vma addr, disassemble_info * dis)
   const char * s;
   struct private priv;
 
-  dis->private_data = (PTR) &priv;
+  dis->private_data = &priv;
   rx_data.pc = addr;
   rx_data.dis = dis;
 

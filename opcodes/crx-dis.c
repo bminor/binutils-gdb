@@ -487,7 +487,7 @@ print_arg (argument *a, bfd_vma memaddr, struct disassemble_info *info)
   bfd_vma number;
   int op_index = 0;
   char string[200];
-  PTR stream = info->stream;
+  void *stream = info->stream;
   fprintf_ftype func = info->fprintf_func;
 
   switch (a->type)
