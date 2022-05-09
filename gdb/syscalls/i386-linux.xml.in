@@ -337,4 +337,5 @@
   <syscall name="eventfd" number="323"/>
   <syscall name="fallocate" number="324"/>
   <syscall name="timerfd_settime" number="325"/>
+  <syscall name="pipe2" number="331"/>
 </syscalls_info>

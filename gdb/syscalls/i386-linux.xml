@@ -334,4 +334,5 @@
   <syscall name="eventfd" number="323" groups="descriptor"/>
   <syscall name="fallocate" number="324" groups="descriptor"/>
   <syscall name="timerfd_settime" number="325" groups="descriptor"/>
+  <syscall name="pipe2" number="331" groups="descriptor"/>
 </syscalls_info>
