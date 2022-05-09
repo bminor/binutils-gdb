@@ -66,7 +66,7 @@
 static bfd_reloc_status_type
 ia64_elf_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc,
 		asymbol *sym ATTRIBUTE_UNUSED,
-		PTR data ATTRIBUTE_UNUSED, asection *input_section,
+		void *data ATTRIBUTE_UNUSED, asection *input_section,
 		bfd *output_bfd, char **error_message)
 {
   if (output_bfd)

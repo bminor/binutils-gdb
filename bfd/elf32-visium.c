@@ -28,7 +28,7 @@
 #include "libiberty.h"
 
 static bfd_reloc_status_type visium_elf_howto_parity_reloc
-  (bfd *, arelent *, asymbol *, PTR, asection *, bfd *, char **);
+  (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
 
 static reloc_howto_type visium_elf_howto_table[] = {
   /* This reloc does nothing.  */
@@ -304,7 +304,7 @@ visium_parity_bit (bfd_vma insn)
 
 static bfd_reloc_status_type
 visium_elf_howto_parity_reloc (bfd * input_bfd, arelent *reloc_entry,
-			       asymbol *symbol, PTR data,
+			       asymbol *symbol, void *data,
 			       asection *input_section, bfd *output_bfd,
 			       char **error_message ATTRIBUTE_UNUSED)
 {

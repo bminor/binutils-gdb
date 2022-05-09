@@ -3843,7 +3843,7 @@ coff_write_object_contents (bfd * abfd)
       bfd_byte *b = bfd_zmalloc (fill_size);
       if (b)
 	{
-	  bfd_bwrite ((PTR)b, fill_size, abfd);
+	  bfd_bwrite (b, fill_size, abfd);
 	  free (b);
 	}
     }

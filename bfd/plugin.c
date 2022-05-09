@@ -617,7 +617,7 @@ bfd_plugin_bfd_copy_private_symbol_data (bfd *ibfd ATTRIBUTE_UNUSED,
 }
 
 static bool
-bfd_plugin_bfd_print_private_bfd_data (bfd *abfd ATTRIBUTE_UNUSED, PTR ptr ATTRIBUTE_UNUSED)
+bfd_plugin_bfd_print_private_bfd_data (bfd *abfd ATTRIBUTE_UNUSED, void *ptr ATTRIBUTE_UNUSED)
 {
   BFD_ASSERT (0);
   return true;
@@ -749,7 +749,7 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
 
 static void
 bfd_plugin_print_symbol (bfd *abfd ATTRIBUTE_UNUSED,
-			 PTR afile ATTRIBUTE_UNUSED,
+			 void *afile ATTRIBUTE_UNUSED,
 			 asymbol *symbol ATTRIBUTE_UNUSED,
 			 bfd_print_symbol_type how ATTRIBUTE_UNUSED)
 {

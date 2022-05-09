@@ -5413,7 +5413,7 @@ nios2_elf32_adjust_dynamic_symbol (struct bfd_link_info *info,
 
 /* Worker function for nios2_elf32_size_dynamic_sections.  */
 static bool
-adjust_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
+adjust_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
   struct elf32_nios2_link_hash_table *htab;
@@ -5442,7 +5442,7 @@ adjust_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
    Allocate space in .plt, .got and associated reloc sections for
    dynamic relocs.  */
 static bool
-allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
+allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
   struct elf32_nios2_link_hash_table *htab;

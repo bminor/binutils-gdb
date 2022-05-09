@@ -1181,7 +1181,7 @@ struct csky_elf_link_hash_entry
 #define csky_elf_link_hash_traverse(table, func, info)			\
   (elf_link_hash_traverse						\
    (&(table)->root,							\
-    (bool (*) PARAMS ((struct elf_link_hash_entry *, PTR))) (func),	\
+    (bool (*) (struct elf_link_hash_entry *, void *)) (func),		\
     (info)))
 
 /* Get the C-SKY ELF linker hash table from a link_info structure.  */
@@ -1659,7 +1659,7 @@ csky_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
    dynamic relocs.  */
 
 static bool
-csky_allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
+csky_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
   struct csky_elf_link_hash_table *htab;
@@ -2010,7 +2010,7 @@ csky_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
-  elf_link_hash_traverse (&htab->elf, csky_allocate_dynrelocs, (PTR) info);
+  elf_link_hash_traverse (&htab->elf, csky_allocate_dynrelocs, info);
 
   /* Check for GOT overflow.  */
   if (check_got_overflow == 1
