@@ -34,7 +34,7 @@ dmetrics i.heapalloccnt:e!heapalloccnt:
 #     Ovw_data.h, BaseMetricTreeNode.cc and Experiment.cc metric registration
 dmetrics i!total:e!.total
 #   Show total cpu time
-dmetrics ei.totalcpu
+dmetrics ei%.totalcpu
 dmetrics i!.user:e!.user
 dmetrics i!system:e!.system
 dmetrics i!trap:e!.trap
@@ -72,7 +72,7 @@ dmetrics i!K_IPC:e!.K_IPC
 dmetrics i!K_CPI:e!.K_CPI
 
 # for HWC, show exclusive only
-dmetrics i!hwc:e.hwc
+dmetrics i!hwc:e%.hwc
 
 # for synctrace, show inclusive only
 dmetrics i.sync:e!sync
