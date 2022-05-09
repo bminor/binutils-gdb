@@ -869,11 +869,8 @@ mep_cgen_expand_macros_and_parse_operand (CGEN_CPU_DESC cd, int opindex,
 
 #define CGEN_VALIDATE_INSN_SUPPORTED
 
-static void print_tpreg (CGEN_CPU_DESC, PTR, CGEN_KEYWORD *, long, unsigned int);
-static void print_spreg (CGEN_CPU_DESC, PTR, CGEN_KEYWORD *, long, unsigned int);
-
 static void
-print_tpreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, PTR dis_info,
+print_tpreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, void *dis_info,
 	     CGEN_KEYWORD *table ATTRIBUTE_UNUSED, long val ATTRIBUTE_UNUSED,
 	     unsigned int flags ATTRIBUTE_UNUSED)
 {
@@ -883,7 +880,7 @@ print_tpreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, PTR dis_info,
 }
 
 static void
-print_spreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, PTR dis_info, 
+print_spreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, void *dis_info,
 	     CGEN_KEYWORD *table ATTRIBUTE_UNUSED, long val ATTRIBUTE_UNUSED,
 	     unsigned int flags ATTRIBUTE_UNUSED)
 {

@@ -65,11 +65,8 @@ static int read_insn
 
 #define CGEN_VALIDATE_INSN_SUPPORTED
 
-static void print_tpreg (CGEN_CPU_DESC, PTR, CGEN_KEYWORD *, long, unsigned int);
-static void print_spreg (CGEN_CPU_DESC, PTR, CGEN_KEYWORD *, long, unsigned int);
-
 static void
-print_tpreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, PTR dis_info,
+print_tpreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, void *dis_info,
 	     CGEN_KEYWORD *table ATTRIBUTE_UNUSED, long val ATTRIBUTE_UNUSED,
 	     unsigned int flags ATTRIBUTE_UNUSED)
 {
@@ -79,7 +76,7 @@ print_tpreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, PTR dis_info,
 }
 
 static void
-print_spreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, PTR dis_info,
+print_spreg (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED, void *dis_info,
 	     CGEN_KEYWORD *table ATTRIBUTE_UNUSED, long val ATTRIBUTE_UNUSED,
 	     unsigned int flags ATTRIBUTE_UNUSED)
 {
@@ -722,7 +719,7 @@ mep_print_insn (CGEN_CPU_DESC cd, bfd_vma pc, disassemble_info *info)
 /* -- opc.c */
 
 void mep_cgen_print_operand
-  (CGEN_CPU_DESC, int, PTR, CGEN_FIELDS *, void const *, bfd_vma, int);
+  (CGEN_CPU_DESC, int, void *, CGEN_FIELDS *, void const *, bfd_vma, int);
 
 /* Main entry point for printing operands.
    XINFO is a `void *' and not a `disassemble_info *' to not put a requirement
