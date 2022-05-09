@@ -320,6 +320,7 @@ enum amd64_syscall {
   amd64_sys_sync_file_range = 277,
   amd64_sys_vmsplice = 278,
   amd64_sys_move_pages = 279,
+  amd64_sys_pipe2 = 293
 };
 
 /* Enum that defines the syscall identifiers for x32 linux.
