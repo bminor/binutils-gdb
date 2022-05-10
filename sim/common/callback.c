@@ -812,7 +812,7 @@ cb_read_target_syscall_maps (host_callback *cb, const char *file)
   if (cb->signal_map)
     free (cb->signal_map);
   if (cb->stat_map)
-    free ((PTR) cb->stat_map);
+    free ((void *) cb->stat_map);
 
   cb->syscall_map = syscall_map;
   cb->errno_map = errno_map;

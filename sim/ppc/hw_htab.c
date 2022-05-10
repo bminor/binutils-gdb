@@ -388,7 +388,7 @@ typedef struct _htab_binary_sizes {
 static void
 htab_sum_binary(bfd *abfd,
 		sec_ptr sec,
-		PTR data)
+		void *data)
 {
   htab_binary_sizes *sizes = (htab_binary_sizes*)data;
   unsigned_word size = bfd_section_size (sec);
@@ -422,7 +422,7 @@ htab_sum_binary(bfd *abfd,
 static void
 htab_dma_binary(bfd *abfd,
 		sec_ptr sec,
-		PTR data)
+		void *data)
 {
   htab_binary_sizes *sizes = (htab_binary_sizes*)data;
   void *section_init;
@@ -526,7 +526,7 @@ htab_map_binary(device *me,
   }
 
   /* determine the size of each of the files regions */
-  bfd_map_over_sections (image, htab_sum_binary, (PTR) &sizes);
+  bfd_map_over_sections (image, htab_sum_binary, &sizes);
 
   /* if needed, determine the real addresses of the sections */
   if (ra != -1) {
@@ -590,7 +590,7 @@ htab_map_binary(device *me,
 		  htaborg, htabmask);
 
   /* dma the sections into physical memory */
-  bfd_map_over_sections (image, htab_dma_binary, (PTR) &sizes);
+  bfd_map_over_sections (image, htab_dma_binary, &sizes);
 }
 
 static void

@@ -1022,7 +1022,7 @@ cris_disassemble_insn (SIM_CPU *cpu,
   disasm_info.endian = BFD_ENDIAN_LITTLE;
   disasm_info.read_memory_func = sim_disasm_read_memory;
   disasm_info.memory_error_func = sim_disasm_perror_memory;
-  disasm_info.application_data = (PTR) cpu;
+  disasm_info.application_data = cpu;
   pinsn = cris_get_disassembler (STATE_PROG_BFD (sd));
   (*pinsn) (pc, &disasm_info);
 }

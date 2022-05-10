@@ -1299,8 +1299,8 @@ sim_monitor (SIM_DESC sd,
 	   MIPS simulator's memory model is still 32-bit.  */
 	s.arg1 = A0 & 0xFFFFFFFF;
 	s.arg2 = A1 & 0xFFFFFFFF;
-	s.p1 = (PTR) sd;
-	s.p2 = (PTR) cpu;
+	s.p1 = sd;
+	s.p2 = cpu;
 	s.read_mem = sim_syscall_read_mem;
 	s.write_mem = sim_syscall_write_mem;
 

@@ -132,8 +132,8 @@ bfin_syscall (SIM_CPU *cpu)
       sc.arg5 = args[4] = GET_LONG (DREG (0) + 16);
       sc.arg6 = args[5] = GET_LONG (DREG (0) + 20);
     }
-  sc.p1 = (PTR) sd;
-  sc.p2 = (PTR) cpu;
+  sc.p1 = sd;
+  sc.p2 = cpu;
   sc.read_mem = sim_syscall_read_mem;
   sc.write_mem = sim_syscall_write_mem;
 

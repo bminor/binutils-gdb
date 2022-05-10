@@ -316,7 +316,7 @@ static device_callbacks const hw_data_callbacks = {
 static void
 update_for_binary_section(bfd *abfd,
 			  asection *the_section,
-			  PTR obj)
+			  void *obj)
 {
   unsigned_word section_vma;
   unsigned_word section_size;
@@ -431,7 +431,7 @@ hw_binary_init_data_callback(device *me)
   /* and the data sections */
   bfd_map_over_sections(image,
 			update_for_binary_section,
-			(PTR)me);
+			me);
 
   bfd_close(image);
 }

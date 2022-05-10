@@ -83,7 +83,7 @@ remove_useless_symbols (asymbol ** symbols, long count)
 }
 
 static int
-compare_symbols (const PTR ap, const PTR bp)
+compare_symbols (const void *ap, const void *bp)
 {
   const asymbol *a = *(const asymbol **) ap;
   const asymbol *b = *(const asymbol **) bp;

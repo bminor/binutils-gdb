@@ -433,7 +433,7 @@ sim_cgen_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
   disasm_info.buffer = insn_buf.bytes;
   disasm_info.buffer_length = length;
 
-  ex_info.dis_info = (PTR) &disasm_info;
+  ex_info.dis_info = &disasm_info;
   ex_info.valid = (1 << length) - 1;
   ex_info.insn_bytes = insn_buf.bytes;
 

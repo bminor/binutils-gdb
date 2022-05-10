@@ -1442,8 +1442,8 @@ cris_break_13_handler (SIM_CPU *current_cpu, USI callnum, USI arg1,
       sim_engine_halt (sd, current_cpu, NULL, pc, sim_exited, arg1);
     }
 
-  s.p1 = (PTR) sd;
-  s.p2 = (PTR) current_cpu;
+  s.p1 = sd;
+  s.p2 = current_cpu;
   s.read_mem = sim_syscall_read_mem;
   s.write_mem = sim_syscall_write_mem;
 
