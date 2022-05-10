@@ -3212,7 +3212,7 @@ proc support_displaced_stepping {} {
     if { [istarget "x86_64-*-linux*"] || [istarget "i\[34567\]86-*-linux*"]
 	 || [istarget "arm*-*-linux*"] || [istarget "powerpc-*-linux*"]
 	 || [istarget "powerpc64-*-linux*"] || [istarget "s390*-*-*"]
-	 || [istarget "aarch64*-*-linux*"] } {
+	 || [istarget "aarch64*-*-linux*"] || [istarget "loongarch*-*-linux*"] } {
 	return 1
     }
 
