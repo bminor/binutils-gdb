@@ -111,6 +111,10 @@ maintenance print frame-id [ LEVEL ]
   Print GDB's internal frame-id for the frame at LEVEL.  If LEVEL is
   not given, then print the frame-id for the currently selected frame.
 
+set debug infcall on|off
+show debug infcall
+  Print additional debug messages about inferior function calls.
+
 * Changed commands
 
 document user-defined

@@ -27587,6 +27587,13 @@ for implementing operations such as single-stepping the inferior.
 @item show debug infrun
 Displays the current state of @value{GDBN} inferior debugging.
 
+@item set debug infcall
+@cindex inferior function call debugging info
+Turns on or off display of debugging info related to inferior function
+calls made by @value{GDBN}.
+@item show debug infcall
+Displays the current state of @value{GDBN} inferior function call debugging.
+
 @item set debug jit
 @cindex just-in-time compilation, debugging messages
 Turn on or off debugging messages from JIT debug support.

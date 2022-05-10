@@ -44,6 +44,34 @@
 #include "gdbsupport/scope-exit.h"
 #include <list>
 
+/* True if we are debugging inferior calls.  */
+
+static bool debug_infcall = false;
+
+/* Print an "infcall" debug statement.  */
+
+#define infcall_debug_printf(fmt, ...) \
+  debug_prefixed_printf_cond (debug_infcall, "infcall", fmt, ##__VA_ARGS__)
+
+/* Print "infcall" enter/exit debug statements.  */
+
+#define INFCALL_SCOPED_DEBUG_ENTER_EXIT \
+  scoped_debug_enter_exit (debug_infcall, "infcall")
+
+/* Print "infcall" start/end debug statements.  */
+
+#define INFCALL_SCOPED_DEBUG_START_END(fmt, ...) \
+  scoped_debug_start_end (debug_infrun, "infcall", fmt, ##__VA_ARGS__)
+
+/* Implement 'show debug infcall'.  */
+
+static void
+show_debug_infcall (struct ui_file *file, int from_tty,
+		   struct cmd_list_element *c, const char *value)
+{
+  gdb_printf (file, _("Inferior call debugging is %s.\n"), value);
+}
+
 /* If we can't find a function's name from its address,
    we print this instead.  */
 #define RAW_FUNCTION_ADDRESS_FORMAT "at 0x%s"
@@ -529,6 +557,8 @@ call_thread_fsm::call_thread_fsm (struct ui *waiting_ui,
 bool
 call_thread_fsm::should_stop (struct thread_info *thread)
 {
+  INFCALL_SCOPED_DEBUG_ENTER_EXIT;
+
   if (stop_stack_dummy == STOP_STACK_DUMMY)
     {
       /* Done.  */
@@ -577,9 +607,16 @@ static struct gdb_exception
 run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
 		   struct thread_info *call_thread, CORE_ADDR real_pc)
 {
+  INFCALL_SCOPED_DEBUG_ENTER_EXIT;
+
   struct gdb_exception caught_error;
   ptid_t call_thread_ptid = call_thread->ptid;
   int was_running = call_thread->state == THREAD_RUNNING;
+
+  infcall_debug_printf ("call function at %s in thread %s, was_running = %d",
+			core_addr_to_string (real_pc),
+			call_thread_ptid.to_string ().c_str (),
+			was_running);
 
   current_ui->unregister_file_handler ();
 
@@ -610,14 +647,24 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
 
       proceed (real_pc, GDB_SIGNAL_0);
 
+      infrun_debug_show_threads ("non-exited threads after proceed for inferior-call",
+				 all_non_exited_threads ());
+
       /* Inferior function calls are always synchronous, even if the
 	 target supports asynchronous execution.  */
       wait_sync_command_done ();
+
+      infcall_debug_printf ("inferior call completed successfully");
     }
   catch (gdb_exception &e)
     {
+      infcall_debug_printf ("exception while making inferior call (%d): %s",
+			    e.reason, e.what ());
       caught_error = std::move (e);
     }
+
+  infcall_debug_printf ("thread is now: %s",
+			inferior_ptid.to_string ().c_str ());
 
   /* If GDB has the prompt blocked before, then ensure that it remains
      so.  normal_stop calls async_enable_stdin, so reset the prompt
@@ -764,6 +811,8 @@ call_function_by_hand_dummy (struct value *function,
 			     dummy_frame_dtor_ftype *dummy_dtor,
 			     void *dummy_dtor_data)
 {
+  INFCALL_SCOPED_DEBUG_ENTER_EXIT;
+
   CORE_ADDR sp;
   struct type *target_values_type;
   function_call_return_method return_method = return_method_normal;
@@ -829,6 +878,9 @@ call_function_by_hand_dummy (struct value *function,
 
   if (args.size () < ftype->num_fields ())
     error (_("Too few arguments in function call."));
+
+  infcall_debug_printf ("calling %s", get_function_name (funaddr, name_buf,
+							 sizeof (name_buf)));
 
   /* A holder for the inferior status.
      This is only needed while we're preparing the inferior function call.  */
@@ -1276,6 +1328,12 @@ call_function_by_hand_dummy (struct value *function,
       e = run_inferior_call (std::move (sm_up), call_thread.get (), real_pc);
     }
 
+    if (e.reason < 0)
+      infcall_debug_printf ("after inferior call, exception (%d): %s",
+			    e.reason, e.what ());
+    infcall_debug_printf ("after inferior call, thread state is: %s",
+			  thread_state_string (call_thread->state));
+
     gdb::observers::inferior_call_post.notify (call_thread_ptid, funaddr);
 
     if (call_thread->state != THREAD_EXITED)
@@ -1286,6 +1344,8 @@ call_function_by_hand_dummy (struct value *function,
 	if (call_thread->thread_fsm ()->finished_p ())
 	  {
 	    struct value *retval;
+
+	    infcall_debug_printf ("call completed");
 
 	    /* The inferior call is successful.  Pop the dummy frame,
 	       which runs its destructors and restores the inferior's
@@ -1317,6 +1377,8 @@ call_function_by_hand_dummy (struct value *function,
 
 	    return retval;
 	  }
+	else
+	  infcall_debug_printf ("call did not complete");
 
 	/* Didn't complete.  Clean up / destroy the call FSM, and restore the
 	   previous state machine, and handle the error.  */
@@ -1572,4 +1634,10 @@ The default is to unwind the frame."),
 			   show_unwind_on_terminating_exception_p,
 			   &setlist, &showlist);
 
+  add_setshow_boolean_cmd
+    ("infcall", class_maintenance, &debug_infcall,
+     _("Set inferior call debugging."),
+     _("Show inferior call debugging."),
+     _("When on, inferior function call specific debugging is enabled."),
+     NULL, show_debug_infcall, &setdebuglist, &showdebuglist);
 }
