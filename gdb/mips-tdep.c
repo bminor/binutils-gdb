@@ -3588,8 +3588,11 @@ restart:
 	       || (inst & 0xFF9F07FF) == 0x00800021 /* move reg,$a0-$a3 */
 	       || high_word == 0x3c1c /* lui $gp,n */
 	       || high_word == 0x279c /* addiu $gp,$gp,n */
+	       || high_word == 0x679c /* daddiu $gp,$gp,n */
 	       || inst == 0x0399e021 /* addu $gp,$gp,$t9 */
 	       || inst == 0x033ce021 /* addu $gp,$t9,$gp */
+	       || inst == 0x0399e02d /* daddu $gp,$gp,$t9 */
+	       || inst == 0x033ce02d /* daddu $gp,$t9,$gp */
 	      )
 	{
 	  /* These instructions are part of the prologue, but we don't
