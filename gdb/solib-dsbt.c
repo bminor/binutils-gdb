@@ -107,7 +107,7 @@ struct ext_elf32_dsbt_loadaddr
   ext_ptr map;			/* struct elf32_dsbt_loadmap *map; */
 };
 
-struct ext_link_map
+struct dbst_ext_link_map
 {
   struct ext_elf32_dsbt_loadaddr l_addr;
 
@@ -546,7 +546,7 @@ dsbt_current_sos (void)
      building the solist chain.  */
   while (lm_addr)
     {
-      struct ext_link_map lm_buf;
+      struct dbst_ext_link_map lm_buf;
       ext_Elf32_Word indexword;
       CORE_ADDR map_addr;
       int dsbt_index;
