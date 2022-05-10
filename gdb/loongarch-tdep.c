@@ -269,9 +269,9 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* Extract the return value from the register where it was stored.  */
-  if (readbuf)
+  if (readbuf != nullptr)
     regcache->raw_read_part (regnum, 0, len, readbuf);
-  if (writebuf)
+  if (writebuf != nullptr)
     regcache->raw_write_part (regnum, 0, len, writebuf);
 
   return RETURN_VALUE_REGISTER_CONVENTION;
