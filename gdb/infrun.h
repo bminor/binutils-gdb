@@ -62,6 +62,8 @@ infrun_debug_show_threads (const char *title, ThreadRange threads)
 {
   if (debug_infrun)
     {
+      INFRUN_SCOPED_DEBUG_ENTER_EXIT;
+
       infrun_debug_printf ("%s:", title);
       for (thread_info *thread : threads)
 	infrun_debug_printf ("  thread %s, executing = %d, resumed = %d, "
