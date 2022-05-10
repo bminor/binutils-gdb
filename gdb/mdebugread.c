@@ -86,7 +86,7 @@ static struct objfile *mdebugread_objfile;
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
 
-struct symloc
+struct md_symloc
   {
     /* Index of the FDR that this psymtab represents.  */
     int fdr_idx;
@@ -102,7 +102,7 @@ struct symloc
     enum language pst_language;
   };
 
-#define PST_PRIVATE(p) ((struct symloc *)(p)->read_symtab_private)
+#define PST_PRIVATE(p) ((struct md_symloc *)(p)->read_symtab_private)
 #define FDR_IDX(p) (PST_PRIVATE(p)->fdr_idx)
 #define CUR_BFD(p) (PST_PRIVATE(p)->cur_bfd)
 #define DEBUG_SWAP(p) (PST_PRIVATE(p)->debug_swap)
@@ -2604,8 +2604,8 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	textlow = 0;
       pst = new legacy_psymtab (fdr_name (fh), partial_symtabs,
 				objfile->per_bfd, textlow);
-      pst->read_symtab_private = XOBNEW (&objfile->objfile_obstack, symloc);
-      memset (pst->read_symtab_private, 0, sizeof (struct symloc));
+      pst->read_symtab_private = XOBNEW (&objfile->objfile_obstack, md_symloc);
+      memset (pst->read_symtab_private, 0, sizeof (struct md_symloc));
 
       save_pst = pst;
       FDR_IDX (pst) = f_idx;
@@ -4649,7 +4649,7 @@ new_psymtab (const char *name, psymtab_storage *partial_symtabs,
   /* Keep a backpointer to the file's symbols.  */
 
   psymtab->read_symtab_private
-    = OBSTACK_ZALLOC (&objfile->objfile_obstack, symloc);
+    = OBSTACK_ZALLOC (&objfile->objfile_obstack, md_symloc);
   CUR_BFD (psymtab) = cur_bfd;
   DEBUG_SWAP (psymtab) = debug_swap;
   DEBUG_INFO (psymtab) = debug_info;

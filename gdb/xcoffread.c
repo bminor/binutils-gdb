@@ -59,7 +59,7 @@
 /* We put a pointer to this structure in the read_symtab_private field
    of the psymtab.  */
 
-struct symloc
+struct xcoff_symloc
   {
 
     /* First symbol number for this file.  */
@@ -598,7 +598,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
   unsigned *firstLine;
 
   offset =
-    ((struct symloc *) this_symtab_psymtab->read_symtab_private)->lineno_off;
+    ((struct xcoff_symloc *) this_symtab_psymtab->read_symtab_private)->lineno_off;
   if (offset == 0)
     goto return_after_cleanup;
 
@@ -966,9 +966,9 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
   start_compunit_symtab (objfile, filestring, NULL, file_start_addr,
 			 pst_symtab_language);
   record_debugformat (debugfmt);
-  symnum = ((struct symloc *) pst->read_symtab_private)->first_symnum;
+  symnum = ((struct xcoff_symloc *) pst->read_symtab_private)->first_symnum;
   max_symnum =
-    symnum + ((struct symloc *) pst->read_symtab_private)->numsyms;
+    symnum + ((struct xcoff_symloc *) pst->read_symtab_private)->numsyms;
   first_object_file_end = 0;
 
   raw_symbol = xcoff->symtbl + symnum * local_symesz;
@@ -1747,7 +1747,7 @@ xcoff_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
   /* Read in all partial symtabs on which this one is dependent.  */
   pst->expand_dependencies (objfile);
 
-  if (((struct symloc *) pst->read_symtab_private)->numsyms != 0)
+  if (((struct xcoff_symloc *) pst->read_symtab_private)->numsyms != 0)
     {
       /* Init stuff necessary for reading in symbols.  */
       stabsread_init ();
@@ -1767,7 +1767,7 @@ xcoff_read_symtab (legacy_psymtab *self, struct objfile *objfile)
 {
   gdb_assert (!self->readin);
 
-  if (((struct symloc *) self->read_symtab_private)->numsyms != 0
+  if (((struct xcoff_symloc *) self->read_symtab_private)->numsyms != 0
       || self->number_of_dependencies)
     {
       next_symbol_text_func = xcoff_next_symbol_text;
@@ -1892,8 +1892,8 @@ xcoff_start_psymtab (psymtab_storage *partial_symtabs,
 					       objfile->per_bfd, 0);
 
   result->read_symtab_private =
-    XOBNEW (&objfile->objfile_obstack, struct symloc);
-  ((struct symloc *) result->read_symtab_private)->first_symnum = first_symnum;
+    XOBNEW (&objfile->objfile_obstack, struct xcoff_symloc);
+  ((struct xcoff_symloc *) result->read_symtab_private)->first_symnum = first_symnum;
   result->legacy_read_symtab = xcoff_read_symtab;
   result->legacy_expand_psymtab = xcoff_expand_psymtab;
 
@@ -1922,10 +1922,10 @@ xcoff_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
   int i;
 
   if (capping_symbol_number != -1)
-    ((struct symloc *) pst->read_symtab_private)->numsyms =
+    ((struct xcoff_symloc *) pst->read_symtab_private)->numsyms =
       capping_symbol_number
-      - ((struct symloc *) pst->read_symtab_private)->first_symnum;
-  ((struct symloc *) pst->read_symtab_private)->lineno_off =
+      - ((struct xcoff_symloc *) pst->read_symtab_private)->first_symnum;
+  ((struct xcoff_symloc *) pst->read_symtab_private)->lineno_off =
     first_fun_line_offset;
   first_fun_line_offset = 0;
 
@@ -1947,9 +1947,9 @@ xcoff_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
       legacy_psymtab *subpst =
 	new legacy_psymtab (include_list[i], partial_symtabs, objfile->per_bfd);
 
-      subpst->read_symtab_private = XOBNEW (&objfile->objfile_obstack, symloc);
-      ((struct symloc *) subpst->read_symtab_private)->first_symnum = 0;
-      ((struct symloc *) subpst->read_symtab_private)->numsyms = 0;
+      subpst->read_symtab_private = XOBNEW (&objfile->objfile_obstack, xcoff_symloc);
+      ((struct xcoff_symloc *) subpst->read_symtab_private)->first_symnum = 0;
+      ((struct xcoff_symloc *) subpst->read_symtab_private)->numsyms = 0;
 
       /* We could save slight bits of space by only making one of these,
 	 shared by the entire set of include files.  FIXME-someday.  */
