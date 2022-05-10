@@ -61,9 +61,9 @@ int *this_object_header_files;
 int n_this_object_header_files;
 int n_allocated_this_object_header_files;
 
-struct nextfield
+struct stabs_nextfield
 {
-  struct nextfield *next;
+  struct stabs_nextfield *next;
 
   /* This is the raw visibility from the stab.  It is not checked
      for being one of the visibilities we recognize, so code which
@@ -87,7 +87,7 @@ struct next_fnfieldlist
 
 struct stab_field_info
   {
-    struct nextfield *list = nullptr;
+    struct stabs_nextfield *list = nullptr;
     struct next_fnfieldlist *fnlist = nullptr;
 
     auto_obstack obstack;
@@ -2922,7 +2922,7 @@ read_struct_fields (struct stab_field_info *fip, const char **pp,
 		    struct type *type, struct objfile *objfile)
 {
   const char *p;
-  struct nextfield *newobj;
+  struct stabs_nextfield *newobj;
 
   /* We better set p right now, in case there are no fields at all...    */
 
@@ -2938,7 +2938,7 @@ read_struct_fields (struct stab_field_info *fip, const char **pp,
     {
       STABS_CONTINUE (pp, objfile);
       /* Get space to record the next field's data.  */
-      newobj = OBSTACK_ZALLOC (&fip->obstack, struct nextfield);
+      newobj = OBSTACK_ZALLOC (&fip->obstack, struct stabs_nextfield);
 
       newobj->next = fip->list;
       fip->list = newobj;
@@ -3019,7 +3019,7 @@ read_baseclasses (struct stab_field_info *fip, const char **pp,
 		  struct type *type, struct objfile *objfile)
 {
   int i;
-  struct nextfield *newobj;
+  struct stabs_nextfield *newobj;
 
   if (**pp != '!')
     {
@@ -3059,7 +3059,7 @@ read_baseclasses (struct stab_field_info *fip, const char **pp,
 
   for (i = 0; i < TYPE_N_BASECLASSES (type); i++)
     {
-      newobj = OBSTACK_ZALLOC (&fip->obstack, struct nextfield);
+      newobj = OBSTACK_ZALLOC (&fip->obstack, struct stabs_nextfield);
 
       newobj->next = fip->list;
       fip->list = newobj;
@@ -3245,7 +3245,7 @@ attach_fields_to_type (struct stab_field_info *fip, struct type *type,
 {
   int nfields = 0;
   int non_public_fields = 0;
-  struct nextfield *scan;
+  struct stabs_nextfield *scan;
 
   /* Count up the number of fields that we have, as well as taking note of
      whether or not there are any non-public fields, which requires us to
