@@ -28,6 +28,7 @@ struct objfile;
 struct thread_info;
 struct inferior;
 struct process_stratum_target;
+struct target_ops;
 struct trace_state_variable;
 
 namespace gdb
