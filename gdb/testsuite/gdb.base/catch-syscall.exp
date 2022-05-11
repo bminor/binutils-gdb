@@ -565,58 +565,32 @@ proc test_catch_syscall_with_wrong_args_noxml {} {
     }
 }
 
-proc test_catch_syscall_multi_arch {} {
+proc test_catch_syscall_multi_arch_1 {
+  arch1 arch2 syscall1_name syscall2_name syscall_number
+} {
     global decimal binfile
 
-    if { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } {
-	set arch1 "i386"
-	set arch2 "i386:x86-64"
-	set syscall1_name "exit"
-	set syscall2_name "write"
-	set syscall_number 1
-    } elseif { [istarget "powerpc-*-linux*"] \
-		   || [istarget "powerpc64*-linux*"] } {
-	set arch1 "powerpc:common"
-	set arch2 "powerpc:common64"
-	set syscall1_name "openat"
-	set syscall2_name "unlinkat"
-	set syscall_number 286
-    } elseif { [istarget "sparc-*-linux*"] \
-		   || [istarget "sparc64-*-linux*"] } {
-	set arch1 "sparc"
-	set arch2 "sparc:v9"
-	set syscall1_name "setresuid32"
-	set syscall2_name "setresuid"
-	set syscall_number 108
-    } elseif { [istarget "mips*-linux*"] } {
-	# MIPS does not use the same numbers for syscalls on 32 and 64
-	# bits.
-	verbose "Not testing MIPS for multi-arch syscall support"
-	return
-    } elseif { [istarget "arm*-linux*"] } {
-	# catch syscall supports only 32-bit ARM for now.
-	verbose "Not testing ARM for multi-arch syscall support"
-	return
-    } elseif { [istarget "aarch64*-linux*"] } {
-	set arch1 "aarch64"
-	set arch2 "arm"
-	set syscall1_name "reboot"
-	set syscall2_name "_newselect"
-	set syscall_number 142
-    } elseif { [istarget "s390*-linux*"] } {
-	set arch1 "s390:31-bit"
-	set arch2 "s390:64-bit"
-	set syscall1_name "_newselect"
-	set syscall2_name "select"
-	set syscall_number 142
-    }
-
-    with_test_prefix "multiple targets" {
+    with_test_prefix "multiple targets: $arch1 vs $arch2" {
 	# We are not interested in loading any binary here, and in
 	# some systems (PowerPC, for example), if we load a binary
 	# there is no way to set other architecture.
 	gdb_exit
 	gdb_start
+
+	set supported 1
+	foreach arch [list $arch1 $arch2] {
+	    gdb_test_multiple "set architecture $arch" "" {
+		-re -wrap "Undefined item: \"$arch\"\\." {
+		    set supported 0
+		    unsupported $gdb_test_name
+		}
+		-re -wrap "The target architecture is set to \"$arch\"\\." {
+		}
+	    }
+	}
+	if { $supported == 0 } {
+	    return
+	}
 
 	gdb_test "set architecture $arch1" \
 	    "The target architecture is set to \"$arch1\"\\."
@@ -634,6 +608,48 @@ proc test_catch_syscall_multi_arch {} {
 
 	clean_restart $binfile
     }
+}
+
+proc test_catch_syscall_multi_arch {} {
+    set arch1 "i386"
+    set arch2 "i386:x86-64"
+    set syscall1_name "exit"
+    set syscall2_name "write"
+    set syscall_number 1
+    test_catch_syscall_multi_arch_1 $arch1 $arch2 $syscall1_name \
+	$syscall2_name $syscall_number
+
+    set arch1 "powerpc:common"
+    set arch2 "powerpc:common64"
+    set syscall1_name "openat"
+    set syscall2_name "unlinkat"
+    set syscall_number 286
+    test_catch_syscall_multi_arch_1 $arch1 $arch2 $syscall1_name \
+	$syscall2_name $syscall_number
+
+    set arch1 "sparc"
+    set arch2 "sparc:v9"
+    set syscall1_name "setresuid32"
+    set syscall2_name "setresuid"
+    set syscall_number 108
+    test_catch_syscall_multi_arch_1 $arch1 $arch2 $syscall1_name \
+	$syscall2_name $syscall_number
+
+    set arch1 "aarch64"
+    set arch2 "arm"
+    set syscall1_name "reboot"
+    set syscall2_name "_newselect"
+    set syscall_number 142
+    test_catch_syscall_multi_arch_1 $arch1 $arch2 $syscall1_name \
+	$syscall2_name $syscall_number
+
+    set arch1 "s390:31-bit"
+    set arch2 "s390:64-bit"
+    set syscall1_name "_newselect"
+    set syscall2_name "select"
+    set syscall_number 142
+    test_catch_syscall_multi_arch_1 $arch1 $arch2 $syscall1_name \
+	$syscall2_name $syscall_number
 }
 
 proc do_syscall_tests_without_xml {} {
