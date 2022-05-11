@@ -568,7 +568,7 @@ proc test_catch_syscall_with_wrong_args_noxml {} {
 proc test_catch_syscall_multi_arch_1 {
   arch1 arch2 syscall1_name syscall2_name syscall_number
 } {
-    global decimal binfile
+    global decimal
 
     with_test_prefix "multiple targets: $arch1 vs $arch2" {
 	# We are not interested in loading any binary here, and in
@@ -605,12 +605,12 @@ proc test_catch_syscall_multi_arch_1 {
 	gdb_test "catch syscall $syscall_number" \
 	    "Catchpoint $decimal \\(syscall .${syscall2_name}. \\\[${syscall_number}\\\]\\)" \
 	    "insert catch syscall on syscall $syscall_number -- $syscall2_name on $arch2"
-
-	clean_restart $binfile
     }
 }
 
 proc test_catch_syscall_multi_arch {} {
+    global binfile
+
     set arch1 "i386"
     set arch2 "i386:x86-64"
     set syscall1_name "exit"
@@ -650,6 +650,8 @@ proc test_catch_syscall_multi_arch {} {
     set syscall_number 142
     test_catch_syscall_multi_arch_1 $arch1 $arch2 $syscall1_name \
 	$syscall2_name $syscall_number
+
+    clean_restart $binfile
 }
 
 proc do_syscall_tests_without_xml {} {
