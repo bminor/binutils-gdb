@@ -9404,7 +9404,6 @@ _bfd_elf_set_section_contents (bfd *abfd,
 			       bfd_size_type count)
 {
   Elf_Internal_Shdr *hdr;
-  file_ptr pos;
 
   if (! abfd->output_has_begun
       && ! _bfd_elf_compute_section_file_positions (abfd, NULL))
@@ -9457,12 +9456,8 @@ _bfd_elf_set_section_contents (bfd *abfd,
       return true;
     }
 
-  pos = hdr->sh_offset + offset;
-  if (bfd_seek (abfd, pos, SEEK_SET) != 0
-      || bfd_bwrite (location, count, abfd) != count)
-    return false;
-
-  return true;
+  return _bfd_generic_set_section_contents (abfd, section,
+					    location, offset, count);
 }
 
 bool
