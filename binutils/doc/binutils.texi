@@ -817,10 +817,9 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}]
    [@option{-s}|@option{--print-armap}]
    [@option{-t} @var{radix}|@option{--radix=}@var{radix}]
    [@option{-u}|@option{--undefined-only}]
-   [@option{-U} @var{method}] [@option{--unicode=}@var{method}]
+   [@option{-U}|@option{--defined-only}]
    [@option{-V}|@option{--version}]
    [@option{-X 32_64}]
-   [@option{--defined-only}]
    [@option{--no-demangle}]
    [@option{--no-recurse-limit}|@option{--recurse-limit}]]
    [@option{--plugin} @var{name}]
@@ -828,6 +827,7 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}]
    [@option{--special-syms}]
    [@option{--synthetic}]
    [@option{--target=}@var{bfdname}]
+   [@option{--unicode=}@var{method}]
    [@option{--with-symbol-versions}]
    [@option{--without-symbol-versions}]
    [@var{objfile}@dots{}]
@@ -1137,21 +1137,14 @@ Use @var{radix} as the radix for printing the symbol values.  It must be
 @cindex external symbols
 @cindex undefined symbols
 Display only undefined symbols (those external to each object file).
+By default both defined and undefined symbols are displayed.
 
-@item -U @var{[d|i|l|e|x|h]}
-@itemx --unicode=@var{[default|invalid|locale|escape|hex|highlight]}
-Controls the display of UTF-8 encoded multibyte characters in strings.
-The default (@option{--unicode=default}) is to give them no special
-treatment.  The @option{--unicode=locale} option displays the sequence
-in the current locale, which may or may not support them.  The options
-@option{--unicode=hex} and @option{--unicode=invalid} display them as
-hex byte sequences enclosed by either angle brackets or curly braces.
-
-The @option{--unicode=escape} option displays them as escape sequences
-(@var{\uxxxx}) and the @option{--unicode=highlight} option displays
-them as escape sequences highlighted in red (if supported by the
-output device).  The colouring is intended to draw attention to the
-presence of unicode sequences where they might not be expected.
+@item -U
+@itemx --defined-only
+@cindex external symbols
+@cindex undefined symbols
+Display only defined symbols for each object file.
+By default both defined and undefined symbols are displayed.
 
 @item -V
 @itemx --version
@@ -1162,11 +1155,6 @@ This option is ignored for compatibility with the AIX version of
 @command{nm}.  It takes one parameter which must be the string
 @option{32_64}.  The default mode of AIX @command{nm} corresponds
 to @option{-X 32}, which is not supported by @sc{gnu} @command{nm}.
-
-@item --defined-only
-@cindex external symbols
-@cindex undefined symbols
-Display only defined symbols for each object file.
 
 @item --plugin @var{name}
 @cindex plugins
@@ -1196,6 +1184,9 @@ with the next higher value.  If the @code{bsd} output format is used
 the size of the symbol is printed, rather than the value, and
 @samp{-S} must be used in order both size and value to be printed.
 
+Note - this option does not work if @option{--undefined-only} has been
+enabled as undefined symbols have no size.
+
 @item --special-syms
 Display symbols which have a target-specific special meaning.  These
 symbols are usually used by the target for some special processing and
@@ -1207,6 +1198,20 @@ used to mark transitions between ARM code, THUMB code and data.
 Include synthetic symbols in the output.  These are special symbols
 created by the linker for various purposes.  They are not shown by
 default since they are not part of the binary's original source code.
+
+@item --unicode=@var{[default|invalid|locale|escape|hex|highlight]}
+Controls the display of UTF-8 encoded multibyte characters in strings.
+The default (@option{--unicode=default}) is to give them no special
+treatment.  The @option{--unicode=locale} option displays the sequence
+in the current locale, which may or may not support them.  The options
+@option{--unicode=hex} and @option{--unicode=invalid} display them as
+hex byte sequences enclosed by either angle brackets or curly braces.
+
+The @option{--unicode=escape} option displays them as escape sequences
+(@var{\uxxxx}) and the @option{--unicode=highlight} option displays
+them as escape sequences highlighted in red (if supported by the
+output device).  The colouring is intended to draw attention to the
+presence of unicode sequences where they might not be expected.
 
 @item --with-symbol-versions
 @item --without-symbol-versions

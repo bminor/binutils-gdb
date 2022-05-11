@@ -242,6 +242,7 @@ enum long_option_values
   OPTION_RECURSE_LIMIT,
   OPTION_NO_RECURSE_LIMIT,
   OPTION_IFUNC_CHARS,
+  OPTION_UNICODE,
   OPTION_QUIET
 };
 
@@ -276,9 +277,9 @@ static struct option long_options[] =
   {"special-syms", no_argument, &allow_special_symbols, 1},
   {"synthetic", no_argument, &show_synthetic, 1},
   {"target", required_argument, 0, OPTION_TARGET},
-  {"defined-only", no_argument, &defined_only, 1},
-  {"undefined-only", no_argument, &undefined_only, 1},
-  {"unicode", required_argument, NULL, 'U'},
+  {"defined-only", no_argument, 0, 'U'},
+  {"undefined-only", no_argument, 0, 'u'},
+  {"unicode", required_argument, NULL, OPTION_UNICODE},
   {"version", no_argument, &show_version, 1},
   {"with-symbol-versions", no_argument, &with_symbol_versions, 1},
   {"without-symbol-versions", no_argument, &with_symbol_versions, 0},
@@ -311,8 +312,6 @@ usage (FILE *stream, int status)
       --no-recurse-limit Disable a demangling recursion limit.\n"));
   fprintf (stream, _("\
   -D, --dynamic          Display dynamic symbols instead of normal symbols\n"));
-  fprintf (stream, _("\
-      --defined-only     Display only defined symbols\n"));
   fprintf (stream, _("\
   -e                     (ignored)\n"));
   fprintf (stream, _("\
@@ -361,8 +360,10 @@ usage (FILE *stream, int status)
   fprintf (stream, _("\
   -u, --undefined-only   Display only undefined symbols\n"));
   fprintf (stream, _("\
-  -U {d|s|i|x|e|h}       Specify how to treat UTF-8 encoded unicode characters\n\
-      --unicode={default|show|invalid|hex|escape|highlight}\n"));
+  -U, --defined-only     Display only defined symbols\n"));
+  fprintf (stream, _("\
+      --unicode={default|show|invalid|hex|escape|highlight}\n\
+                         Specify how to treat UTF-8 encoded unicode characters\n"));
   fprintf (stream, _("\
       --with-symbol-versions  Display version strings after symbol names\n"));
   fprintf (stream, _("\
@@ -2143,9 +2144,14 @@ main (int argc, char **argv)
 	  break;
 	case 'u':
 	  undefined_only = 1;
+	  defined_only = 0;
+	  break;
+	case 'U':
+	  defined_only = 1;
+	  undefined_only = 0;
 	  break;
 
-	case 'U':
+	case OPTION_UNICODE:
 	  if (streq (optarg, "default") || streq (optarg, "d"))
 	    unicode_display = unicode_default;
 	  else if (streq (optarg, "locale") || streq (optarg, "l"))
