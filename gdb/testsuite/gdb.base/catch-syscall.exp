@@ -621,9 +621,9 @@ proc test_catch_syscall_multi_arch {} {
 
     set arch1 "powerpc:common"
     set arch2 "powerpc:common64"
-    set syscall1_name "openat"
-    set syscall2_name "unlinkat"
-    set syscall_number 286
+    set syscall1_name "fstatat64"
+    set syscall2_name "newfstatat"
+    set syscall_number 291
     test_catch_syscall_multi_arch_1 $arch1 $arch2 $syscall1_name \
 	$syscall2_name $syscall_number
 
