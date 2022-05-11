@@ -193,15 +193,15 @@ debuginfod_is_enabled ()
 	  if (off == gdb::string_view::npos)
 	    break;
 	  url_view = url_view.substr (off);
-#if defined (__s390x__)
-	  /* g++ 11.2.1 on s390x seems convinced url_view might be of
-	     SIZE_MAX length.  And so complains because the length of
-	     an array can only be PTRDIFF_MAX.  */
+#if defined (__s390x__) || defined (__powerpc64__)
+	  /* g++ 11.2.1 on s390x and g++ 11.3.1 on ppc64le seem convinced
+	     url_view might be of SIZE_MAX length.  And so complains
+	     because the length of an array can only be PTRDIFF_MAX.  */
 	  DIAGNOSTIC_PUSH
 	  DIAGNOSTIC_IGNORE_STRINGOP_OVERREAD
 #endif
 	  off = url_view.find_first_of (' ');
-#if defined (__s390x__)
+#if defined (__s390x__) || defined (__powerpc64__)
 	  DIAGNOSTIC_POP
 #endif
 	  gdb_printf
