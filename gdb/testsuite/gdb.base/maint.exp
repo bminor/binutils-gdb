@@ -226,7 +226,9 @@ set header 0
 set psymtabs 0
 set cooked_index 0
 set symtabs 0
-gdb_test_multiple "maint print objfiles" "" -lbl {
+set cmd "maint print objfiles"
+set re "maint"
+gdb_test_multiple "$cmd $re" "$cmd" -lbl {
     -re "\r\nObject file.*maint($EXEEXT)?:  Objfile at ${hex}" {
 	set header 1
 	exp_continue
