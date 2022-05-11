@@ -26,6 +26,11 @@
 std::list<process_info *> all_processes;
 std::list<thread_info *> all_threads;
 
+/* The current process.  */
+static process_info *current_process_;
+
+/* The current thread.  This is either a thread of CURRENT_PROCESS, or
+   NULL.  */
 struct thread_info *current_thread;
 
 /* The current working directory used to start the inferior.
@@ -130,6 +135,7 @@ clear_inferiors (void)
   clear_dlls ();
 
   switch_to_thread (nullptr);
+  current_process_ = nullptr;
 }
 
 struct process_info *
@@ -153,6 +159,8 @@ remove_process (struct process_info *process)
   free_all_breakpoints (process);
   gdb_assert (find_thread_process (process) == NULL);
   all_processes.remove (process);
+  if (current_process () == process)
+    switch_to_process (nullptr);
   delete process;
 }
 
@@ -205,8 +213,7 @@ get_thread_process (const struct thread_info *thread)
 struct process_info *
 current_process (void)
 {
-  gdb_assert (current_thread != NULL);
-  return get_thread_process (current_thread);
+  return current_process_;
 }
 
 /* See gdbsupport/common-gdbthread.h.  */
@@ -223,6 +230,10 @@ switch_to_thread (process_stratum_target *ops, ptid_t ptid)
 void
 switch_to_thread (thread_info *thread)
 {
+  if (thread != nullptr)
+    current_process_ = get_thread_process (thread);
+  else
+    current_process_ = nullptr;
   current_thread = thread;
 }
 
@@ -231,9 +242,8 @@ switch_to_thread (thread_info *thread)
 void
 switch_to_process (process_info *proc)
 {
-  int pid = pid_of (proc);
-
-  switch_to_thread (find_any_thread_of_pid (pid));
+  current_process_ = proc;
+  current_thread = nullptr;
 }
 
 /* See gdbsupport/common-inferior.h.  */
@@ -254,6 +264,7 @@ set_inferior_cwd (std::string cwd)
 
 scoped_restore_current_thread::scoped_restore_current_thread ()
 {
+  m_process = current_process_;
   m_thread = current_thread;
 }
 
@@ -262,5 +273,8 @@ scoped_restore_current_thread::~scoped_restore_current_thread ()
   if (m_dont_restore)
     return;
 
-  switch_to_thread (m_thread);
+  if (m_thread != nullptr)
+    switch_to_thread (m_thread);
+  else
+    switch_to_process (m_process);
 }

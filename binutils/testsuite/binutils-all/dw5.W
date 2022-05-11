@@ -281,7 +281,7 @@ Contents of the .debug_loclists section:
     00000039 <End of list>
 
 Contents of the .debug_rnglists section:
-
+#...
     Offset   Begin    End
     0000000c 0000000000001234 0000000000001236 
     00000016 0000000000001234 0000000000001239 
@@ -347,7 +347,7 @@ Raw dump of debug contents of section .debug_line:
 
 Contents of the .debug_line section:
 
-CU: ./main.c:
+main.c:
 File name                            Line number    Starting address    View    Stmt
 main.c                                         6              0x1234               x
 main.c                                         6             0x12346               x

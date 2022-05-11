@@ -139,7 +139,7 @@ alpha_register_type (struct gdbarch *gdbarch, int regno)
 
 static int
 alpha_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			   struct reggroup *group)
+			   const struct reggroup *group)
 {
   /* Filter out any registers eliminated, but whose regnum is 
      reserved for backward compatibility, e.g. the vfp.  */
@@ -1102,7 +1102,7 @@ enclosing function for address %s"), paddress (gdbarch, orig_pc));
 
       if (!blurb_printed)
 	{
-	  printf_filtered (_("\
+	  gdb_printf (_("\
 This warning occurs if you are debugging a function without any symbols\n\
 (for example, in a stripped executable).  In that case, you may wish to\n\
 increase the size of the search with the `set heuristic-fence-post' command.\n\

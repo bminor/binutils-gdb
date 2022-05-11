@@ -200,11 +200,11 @@ set re \
 	 "  Number of symbol tables: $decimal" \
 	 "  Number of symbol tables with line tables: $decimal" \
 	 "  Number of symbol tables with blockvectors: $decimal" \
-	 "(  Number of read CUs: $decimal" \
-	 "  Number of unread CUs: $decimal" \
-	 ")?(  Number of \"partial\" symbols read: $decimal" \
+	 "(  Number of \"partial\" symbols read: $decimal" \
 	 ")?(  Number of psym tables \\(not yet expanded\\): $decimal" \
 	 ")?(  Total memory used for psymbol cache: $decimal" \
+	 ")?(  Number of read CUs: $decimal" \
+	 "  Number of unread CUs: $decimal" \
 	 ")?  Total memory used for objfile obstack: $decimal" \
 	 "  Total memory used for BFD obstack: $decimal" \
 	 "  Total memory used for string cache: $decimal" \
@@ -224,10 +224,15 @@ gdb_test_no_output "maint print dummy-frames"
 
 set header 0
 set psymtabs 0
+set cooked_index 0
 set symtabs 0
 gdb_test_multiple "maint print objfiles" "" -lbl {
     -re "\r\nObject file.*maint($EXEEXT)?:  Objfile at ${hex}" {
 	set header 1
+	exp_continue
+    }
+    -re "\r\nCooked index" {
+	set cooked_index 1
 	exp_continue
     }
     -re "\r\nPsymtabs:\[\r\t \]+" {
@@ -248,6 +253,9 @@ proc maint_pass_if {val name} {
 }
 
 maint_pass_if $header   "maint print objfiles: header"
+if {$cooked_index} {
+    set have_psyms 0
+}
 if { $have_psyms } {
     maint_pass_if $psymtabs "maint print objfiles: psymtabs"
 }

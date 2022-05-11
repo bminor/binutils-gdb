@@ -161,7 +161,7 @@ connpy_connection_removed (process_stratum_target *target)
   if (!gdb_python_initialized)
     return;
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   if (!evregpy_no_listeners_p (gdb_py_events.connection_removed))
     if (emit_connection_event (target, gdb_py_events.connection_removed) < 0)
@@ -204,12 +204,12 @@ connpy_repr (PyObject *obj)
   process_stratum_target *target = self->target;
 
   if (target == nullptr)
-    return PyString_FromFormat ("<%s (invalid)>", Py_TYPE (obj)->tp_name);
+    return PyUnicode_FromFormat ("<%s (invalid)>", Py_TYPE (obj)->tp_name);
 
-  return PyString_FromFormat ("<%s num=%d, what=\"%s\">",
-			      Py_TYPE (obj)->tp_name,
-			      target->connection_number,
-			      make_target_connection_string (target).c_str ());
+  return PyUnicode_FromFormat ("<%s num=%d, what=\"%s\">",
+			       Py_TYPE (obj)->tp_name,
+			       target->connection_number,
+			       make_target_connection_string (target).c_str ());
 }
 
 /* Implementation of gdb.TargetConnection.is_valid() -> Boolean.  Returns

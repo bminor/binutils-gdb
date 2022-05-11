@@ -41,7 +41,7 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 
 set line [gdb_get_line_number "STOP" ${testdir}/prot.adb]
-mi_continue_to_line $line "continue to protected method"
+mi_continue_to_line "$srcfile:$line" "continue to protected method"
 
 # The bug was that this crashed.
 mi_gdb_test "-stack-list-arguments --no-frame-filters 1" \

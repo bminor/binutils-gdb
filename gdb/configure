@@ -11262,7 +11262,12 @@ $as_echo_n "checking for python... " >&6; }
 int
 main ()
 {
-Py_Initialize ();
+
+				    #if PY_MAJOR_VERSION != 3
+				    # error "We only support Python 3"
+				    #endif
+				    Py_Initialize ();
+
   ;
   return 0;
 }
@@ -11280,81 +11285,6 @@ rm -f core conftest.err conftest.$ac_objext \
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
 $as_echo "${found_usable_python}" >&6; }
 
-  elif test "${have_python_config}" != failed; then
-    if test "${have_libpython}" = no; then
-
-
-  new_CPPFLAGS=${python_includes}
-  new_LIBS="-lpython2.7 ${python_libs}"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for python" >&5
-$as_echo_n "checking for python... " >&6; }
-  save_CPPFLAGS=$CPPFLAGS
-  save_LIBS=$LIBS
-  CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
-  LIBS="$new_LIBS $LIBS"
-  found_usable_python=no
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include "Python.h"
-int
-main ()
-{
-Py_Initialize ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  have_libpython=yes
-                  found_usable_python=yes
-                  PYTHON_CPPFLAGS=$new_CPPFLAGS
-                  PYTHON_LIBS=$new_LIBS
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-  CPPFLAGS=$save_CPPFLAGS
-  LIBS=$save_LIBS
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
-$as_echo "${found_usable_python}" >&6; }
-
-    fi
-    if test "${have_libpython}" = no; then
-
-
-  new_CPPFLAGS=${python_includes}
-  new_LIBS="-lpython2.6 ${python_libs}"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for python" >&5
-$as_echo_n "checking for python... " >&6; }
-  save_CPPFLAGS=$CPPFLAGS
-  save_LIBS=$LIBS
-  CPPFLAGS="$CPPFLAGS $new_CPPFLAGS"
-  LIBS="$new_LIBS $LIBS"
-  found_usable_python=no
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include "Python.h"
-int
-main ()
-{
-Py_Initialize ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  have_libpython=yes
-                  found_usable_python=yes
-                  PYTHON_CPPFLAGS=$new_CPPFLAGS
-                  PYTHON_LIBS=$new_LIBS
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-  CPPFLAGS=$save_CPPFLAGS
-  LIBS=$save_LIBS
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${found_usable_python}" >&5
-$as_echo "${found_usable_python}" >&6; }
-
-    fi
   fi
 
   if test "${have_libpython}" = no; then
@@ -12148,10 +12078,10 @@ ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
-      save_CFLAGS="$CFLAGS"
-      save_LDFLAGS="$LDFLAGS"
-      CFLAGS="$CFLAGS $srchigh_pkg_cflags"
-      LDFLAGS="$LDFLAGS $srchigh_pkg_libs"
+      save_CXXFLAGS="$CXXFLAGS"
+      save_LIBS="$LIBS"
+      CXXFLAGS="$CXXFLAGS $srchigh_pkg_cflags"
+      LIBS="$LIBS $srchigh_pkg_libs"
       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <srchilite/sourcehighlight.h>
@@ -12173,8 +12103,8 @@ else
 fi
 rm -f core conftest.err conftest.$ac_objext \
     conftest$ac_exeext conftest.$ac_ext
-      CFLAGS="$save_CFLAGS"
-      LDFLAGS="$save_LDFLAGS"
+      CXXFLAGS="$save_CXXFLAGS"
+      LIBS="$save_LIBS"
       ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -14738,12 +14668,11 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-  if test "$threads" = "yes"; then
-    save_LIBS="$LIBS"
-    LIBS="$PTHREAD_LIBS $LIBS"
-    save_CXXFLAGS="$CXXFLAGS"
-    CXXFLAGS="$PTHREAD_CFLAGS $save_CXXFLAGS"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for std::thread" >&5
+  save_LIBS="$LIBS"
+  LIBS="$PTHREAD_LIBS $LIBS"
+  save_CXXFLAGS="$CXXFLAGS"
+  CXXFLAGS="$PTHREAD_CFLAGS $save_CXXFLAGS"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for std::thread" >&5
 $as_echo_n "checking for std::thread... " >&6; }
 if ${gdb_cv_cxx_std_thread+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -14751,7 +14680,7 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <thread>
-      void callback() { }
+    void callback() { }
 int
 main ()
 {
@@ -14770,6 +14699,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_cxx_std_thread" >&5
 $as_echo "$gdb_cv_cxx_std_thread" >&6; }
 
+  if test "$threads" = "yes"; then
     # This check must be here, while LIBS includes any necessary
     # threading library.
     for ac_func in pthread_sigmask pthread_setname_np
@@ -14784,10 +14714,9 @@ _ACEOF
 fi
 done
 
-
-    LIBS="$save_LIBS"
-    CXXFLAGS="$save_CXXFLAGS"
   fi
+  LIBS="$save_LIBS"
+  CXXFLAGS="$save_CXXFLAGS"
 
   if test "$want_threading" = "yes"; then
     if test "$gdb_cv_cxx_std_thread" = "yes"; then
@@ -16245,43 +16174,6 @@ $as_echo "#define HAVE_PT_GETDBREGS 1" >>confdefs.h
 
 fi
 
-# See if <sys/ptrace.h> provides the PT_GETXMMREGS request.
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for PT_GETXMMREGS" >&5
-$as_echo_n "checking for PT_GETXMMREGS... " >&6; }
-if ${gdb_cv_have_pt_getxmmregs+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/types.h>
-	 #include <sys/ptrace.h>
-int
-main ()
-{
-PT_GETXMMREGS;
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gdb_cv_have_pt_getxmmregs=yes
-else
-  gdb_cv_have_pt_getxmmregs=no
-
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_have_pt_getxmmregs" >&5
-$as_echo "$gdb_cv_have_pt_getxmmregs" >&6; }
-if test "$gdb_cv_have_pt_getxmmregs" = yes; then
-
-$as_echo "#define HAVE_PT_GETXMMREGS 1" >>confdefs.h
-
-fi
-
 # See if <sys/ptrace.h> supports LWP names on FreeBSD
 # Older FreeBSD versions don't have the pl_tdname member of
 # `struct ptrace_lwpinfo'.
@@ -17000,6 +16892,64 @@ _ACEOF
 
 
 
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking the compiler type" >&5
+$as_echo_n "checking the compiler type... " >&6; }
+if ${gdb_cv_compiler_type+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  gdb_cv_compiler_type=unknown
+  if test "$gdb_cv_compiler_type" = unknown; then
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+                          #if !defined __GNUC__ || defined __clang__
+                          #error not gcc
+                          #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gdb_cv_compiler_type=gcc
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  fi
+
+  if test "$gdb_cv_compiler_type" = unknown; then
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+                          #ifndef __clang__
+                          #error not clang
+                          #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gdb_cv_compiler_type=clang
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_compiler_type" >&5
+$as_echo "$gdb_cv_compiler_type" >&6; }
+
+ GDB_COMPILER_TYPE="$gdb_cv_compiler_type"
+
+
 # Check whether --enable-werror was given.
 if test "${enable_werror+set}" = set; then :
   enableval=$enable_werror; case "${enableval}" in
@@ -17036,9 +16986,15 @@ build_warnings="-Wall -Wpointer-arith \
 -Wdeprecated-copy-dtor \
 -Wredundant-move \
 -Wmissing-declarations \
--Wmissing-prototypes \
 -Wstrict-null-sentinel \
 "
+
+# The -Wmissing-prototypes flag will be accepted by GCC, but results
+# in a warning being printed about the flag not being valid for C++,
+# this is something to do with using ccache, and argument ordering.
+if test "$GDB_COMPILER_TYPE" != gcc; then
+  build_warnings="$build_warnings -Wmissing-prototypes"
+fi
 
 case "${host}" in
   *-*-mingw32*)
@@ -18716,9 +18672,6 @@ if test "${ignore_sim}" = "false"; then
   if test x"${gdb_sim}" != x ; then
     SIM="${gdb_sim}"
     SIM_OBS="remote-sim.o"
-
-$as_echo "#define WITH_SIM 1" >>confdefs.h
-
 
     # Some tdep code should only be compiled in when the ppc sim is
     # built.  PR sim/13418.

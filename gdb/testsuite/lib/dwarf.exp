@@ -569,12 +569,6 @@ namespace eval Dwarf {
     # Current .debug_line unit count.
     variable _line_count
 
-    # Whether a file_name entry was seen.
-    variable _line_saw_file
-
-    # Whether a line table program has been seen.
-    variable _line_saw_program
-
     # A Label for line table header generation.
     variable _line_header_end_label
 
@@ -2178,11 +2172,9 @@ namespace eval Dwarf {
 
     proc lines {options label body} {
 	variable _line_count
-	variable _line_saw_file
 	variable _line_include_dirs
 	variable _line_file_names
 	variable _line_header_finalized
-	variable _line_saw_program
 	variable _line_header_end_label
 	variable _line_unit_version
 	variable _line_is_64
@@ -2192,8 +2184,6 @@ namespace eval Dwarf {
 	set _line_is_64 0
 	set _line_unit_version 4
 	set _unit_addr_size default
-	set _line_saw_program 0
-	set _line_saw_file 0
 	set _line_include_dirs {}
 	set _line_file_names {}
 	set _line_header_finalized 0
@@ -2269,14 +2259,13 @@ namespace eval Dwarf {
 	_op .byte $_default_is_stmt "default_is_stmt"
 	_op .byte 1 "line_base"
 	_op .byte 1 "line_range"
-	_op .byte 10 "opcode_base"
+	_op .byte 11 "opcode_base"
 
 	# The standard_opcode_lengths table.  The number of arguments
-	# for each of the standard opcodes.  Generating 9 entries here
-	# matches the use of 10 in the opcode_base above.  These 9
-	# entries match the 9 standard opcodes for DWARF2, making use
-	# of only 9 should be fine, even if we are generating DWARF3
-	# or DWARF4.
+	# for each of the standard opcodes.  Generating 10 entries here
+	# matches the use of 11 in the opcode_base above.  These 10
+	# entries match the 9 standard opcodes for DWARF2 plus
+	# DW_LNS_prologue_end from DWARF3.
 	_op .byte 0 "standard opcode 1"
 	_op .byte 1 "standard opcode 2"
 	_op .byte 1 "standard opcode 3"
@@ -2286,18 +2275,34 @@ namespace eval Dwarf {
 	_op .byte 0 "standard opcode 7"
 	_op .byte 0 "standard opcode 8"
 	_op .byte 1 "standard opcode 9"
+	_op .byte 0 "standard opcode 10"
 
+	# Add a directory entry to the line table header's directory table.
+	#
+	# Return the index by which this entry can be referred to.
 	proc include_dir {dirname} {
 	    variable _line_include_dirs
 	    lappend _line_include_dirs $dirname
+
+	    if { $Dwarf::_line_unit_version >= 5 } {
+		return [expr [llength $_line_include_dirs] - 1]
+	    } else {
+		return [llength $_line_include_dirs]
+	    }
 	}
 
+	# Add a file name entry to the line table header's file names table.
+	#
+	# Return the index by which this entry can be referred to.
 	proc file_name {filename diridx} {
 	    variable _line_file_names
 	    lappend _line_file_names $filename $diridx
 
-	    variable _line_saw_file 1
-	    set _line_saw_file 1
+	    if { $Dwarf::_line_unit_version >= 5 } {
+		return [expr [llength $_line_file_names] - 1]
+	    } else {
+		return [llength $_line_file_names]
+	    }
 	}
 
 	proc _line_finalize_header {} {
@@ -2329,14 +2334,7 @@ namespace eval Dwarf {
 		}
 
 		set nr_dirs [llength $_line_include_dirs]
-		# For entry 0.
-		set nr_dirs [expr $nr_dirs + 1]
 		_op .byte $nr_dirs "directory_count"
-
-		# Entry 0.
-		set dirname [lindex $_line_include_dirs 0]
-		set _line_include_dirs \
-		    [concat [list $dirname] $_line_include_dirs]
 
 		foreach dirname $_line_include_dirs {
 		    switch $_line_string_form {
@@ -2373,15 +2371,7 @@ namespace eval Dwarf {
 		    "file_name_entry_format (form: DW_FORM_udata)"
 
 		set nr_files [expr [llength $_line_file_names] / 2]
-		# For entry 0.
-		set nr_files [expr $nr_files + 1]
 		_op .byte $nr_files "file_names_count"
-
-		# Entry 0.
-		set filename [lindex $_line_file_names 0]
-		set diridx [lindex $_line_file_names 1]
-		set _line_file_names \
-		    [concat [list $filename $diridx] $_line_file_names]
 
 		foreach { filename diridx } $_line_file_names {
 		    switch $_line_string_form {
@@ -2423,12 +2413,10 @@ namespace eval Dwarf {
 	    define_label $_line_header_end_label
 	}
 
-	proc program {statements} {
-	    variable _line_saw_program
+	proc program { body } {
 	    variable _line_header_end_label
 	    variable _line
 
-	    set _line_saw_program 1
 
 	    set _line 1
 
@@ -2481,6 +2469,10 @@ namespace eval Dwarf {
 		_op .byte 6
 	    }
 
+	    proc DW_LNS_set_prologue_end {} {
+		_op .byte 0x0a
+	    }
+
 	    proc DW_LNS_advance_pc {offset} {
 		_op .byte 2
 		_op .uleb128 ${offset}
@@ -2513,9 +2505,7 @@ namespace eval Dwarf {
 		_op .sleb128 ${num}
 	    }
 
-	    foreach statement $statements {
-		uplevel 1 $statement
-	    }
+	    uplevel $body
 	}
 
 	uplevel $body
@@ -2868,8 +2858,6 @@ namespace eval Dwarf {
 	variable _strings
 	variable _cu_count
 	variable _line_count
-	variable _line_saw_file
-	variable _line_saw_program
 	variable _line_header_end_label
 	variable _debug_ranges_64_bit
 	variable _debug_addr_index
@@ -2887,8 +2875,6 @@ namespace eval Dwarf {
 	_empty_array _strings
 
 	set _line_count 0
-	set _line_saw_file 0
-	set _line_saw_program 0
 	set _debug_ranges_64_bit [is_64_target]
 
 	set _debug_addr_index 0

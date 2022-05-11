@@ -21,11 +21,13 @@
 #define GDBSUPPORT_THREAD_POOL_H
 
 #include <queue>
-#include <thread>
 #include <vector>
 #include <functional>
+#if CXX_STD_THREAD
+#include <thread>
 #include <mutex>
 #include <condition_variable>
+#endif
 #include <future>
 #include "gdbsupport/gdb_optional.h"
 
@@ -53,36 +55,63 @@ public:
   /* Return the number of executing threads.  */
   size_t thread_count () const
   {
+#if CXX_STD_THREAD
     return m_thread_count;
+#else
+    return 0;
+#endif
   }
 
   /* Post a task to the thread pool.  A future is returned, which can
      be used to wait for the result.  */
-  std::future<void> post_task (std::function<void ()> &&func);
+  std::future<void> post_task (std::function<void ()> &&func)
+  {
+    std::packaged_task<void ()> task (std::move (func));
+    std::future<void> result = task.get_future ();
+    do_post_task (std::packaged_task<void ()> (std::move (task)));
+    return result;
+  }
+
+  /* Post a task to the thread pool.  A future is returned, which can
+     be used to wait for the result.  */
+  template<typename T>
+  std::future<T> post_task (std::function<T ()> &&func)
+  {
+    std::packaged_task<T ()> task (std::move (func));
+    std::future<T> result = task.get_future ();
+    do_post_task (std::packaged_task<void ()> (std::move (task)));
+    return result;
+  }
 
 private:
 
   thread_pool () = default;
 
+#if CXX_STD_THREAD
   /* The callback for each worker thread.  */
   void thread_function ();
+
+  /* Post a task to the thread pool.  A future is returned, which can
+     be used to wait for the result.  */
+  void do_post_task (std::packaged_task<void ()> &&func);
 
   /* The current thread count.  */
   size_t m_thread_count = 0;
 
   /* A convenience typedef for the type of a task.  */
-  typedef std::packaged_task<void ()> task;
+  typedef std::packaged_task<void ()> task_t;
 
   /* The tasks that have not been processed yet.  An optional is used
      to represent a task.  If the optional is empty, then this means
      that the receiving thread should terminate.  If the optional is
      non-empty, then it is an actual task to evaluate.  */
-  std::queue<optional<task>> m_tasks;
+  std::queue<optional<task_t>> m_tasks;
 
   /* A condition variable and mutex that are used for communication
      between the main thread and the worker threads.  */
   std::condition_variable m_tasks_cv;
   std::mutex m_tasks_mutex;
+#endif /* CXX_STD_THREAD */
 };
 
 }

@@ -79,28 +79,33 @@ proc test_1 { _cv _cdw64 _lv _ldw64 {_string_form ""}} {
 	}
 
 	lines [list version $lv is_64 $ldw64 string_form $string_form] Llines {
-	    include_dir "${srcdir}/${subdir}"
-	    file_name "$srcfile" 1
+	    set diridx [include_dir "${srcdir}/${subdir}"]
+	    file_name "$srcfile" $diridx
 
 	    program {
-		{DW_LNE_set_address bar_label}
-		{line [line_for bar_label]}
-		{DW_LNS_copy}
+		# If using DWARF 5, we want to refer to file 0, but the LNP
+		# state machine is still initialized with file 1.  So we need
+		# to set the current file explicitly.
+		DW_LNS_set_file $diridx
 
-		{DW_LNE_set_address bar_label_2}
-		{line [line_for bar_label_2]}
-		{DW_LNS_copy}
+		DW_LNE_set_address bar_label
+		line [line_for bar_label]
+		DW_LNS_copy
 
-		{DW_LNE_set_address bar_label_3}
-		{line [line_for bar_label_3]}
-		{DW_LNS_copy}
+		DW_LNE_set_address bar_label_2
+		line [line_for bar_label_2]
+		DW_LNS_copy
 
-		{DW_LNE_set_address bar_label_4}
-		{line [line_for bar_label_4]}
-		{DW_LNS_copy}
+		DW_LNE_set_address bar_label_3
+		line [line_for bar_label_3]
+		DW_LNS_copy
 
-		{DW_LNE_set_address bar_label_5}
-		{DW_LNE_end_sequence}
+		DW_LNE_set_address bar_label_4
+		line [line_for bar_label_4]
+		DW_LNS_copy
+
+		DW_LNE_set_address bar_label_5
+		DW_LNE_end_sequence
 	    }
 	}
     }
@@ -114,7 +119,7 @@ proc test_1 { _cv _cdw64 _lv _ldw64 {_string_form ""}} {
 	return -1
     }
 
-    gdb_breakpoint "bar"
+    gdb_breakpoint "bar_label"
     gdb_continue_to_breakpoint "foo \\(1\\)"
 
     gdb_test "next" "foo \\(2\\).*" "next to foo (2)"

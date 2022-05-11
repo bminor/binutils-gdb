@@ -1876,7 +1876,7 @@ DESCRIPTION
 void
 bfd_set_gp_value (bfd *abfd, bfd_vma v)
 {
-  return _bfd_set_gp_value (abfd, v);
+  _bfd_set_gp_value (abfd, v);
 }
 
 /*
@@ -2344,7 +2344,7 @@ FUNCTION
 	bfd_emul_get_commonpagesize
 
 SYNOPSIS
-	bfd_vma bfd_emul_get_commonpagesize (const char *, bool);
+	bfd_vma bfd_emul_get_commonpagesize (const char *);
 
 DESCRIPTION
 	Returns the common page size, in bytes, as determined by
@@ -2355,7 +2355,7 @@ RETURNS
 */
 
 bfd_vma
-bfd_emul_get_commonpagesize (const char *emul, bool relro)
+bfd_emul_get_commonpagesize (const char *emul)
 {
   const bfd_target *target;
 
@@ -2366,10 +2366,7 @@ bfd_emul_get_commonpagesize (const char *emul, bool relro)
       const struct elf_backend_data *bed;
 
       bed = xvec_get_elf_backend_data (target);
-      if (relro)
-	return bed->relropagesize;
-      else
-	return bed->commonpagesize;
+      return bed->commonpagesize;
     }
   return 0;
 }

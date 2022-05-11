@@ -596,7 +596,7 @@ set inline_tests {
 # Needs to be last, following tests rely on this.
 lappend inline_tests floating
 
-foreach inline_test $inline_tests {
+foreach_with_prefix inline_test $inline_tests {
     if { [mi_run_inline_test $inline_test] < 0 } {
 	return -1
     }

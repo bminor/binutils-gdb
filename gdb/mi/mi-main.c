@@ -123,9 +123,9 @@ show_mi_async_command (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c,
 		       const char *value)
 {
-  fprintf_filtered (file,
-		    _("Whether MI is in asynchronous mode is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Whether MI is in asynchronous mode is %s.\n"),
+	      value);
 }
 
 /* A wrapper for target_can_async_p that takes the MI setting into
@@ -153,8 +153,8 @@ mi_cmd_gdb_exit (const char *command, char **argv, int argc)
 
   /* We have to print everything right here because we never return.  */
   if (current_token)
-    fputs_unfiltered (current_token, mi->raw_stdout);
-  fputs_unfiltered ("^exit\n", mi->raw_stdout);
+    gdb_puts (current_token, mi->raw_stdout);
+  gdb_puts ("^exit\n", mi->raw_stdout);
   mi_out_put (current_uiout, mi->raw_stdout);
   gdb_flush (mi->raw_stdout);
   /* FIXME: The function called is not yet a formal libgdb function.  */
@@ -556,19 +556,10 @@ mi_cmd_thread_select (const char *command, char **argv, int argc)
   if (thr == NULL)
     error (_("Thread ID %d not known."), num);
 
-  ptid_t previous_ptid = inferior_ptid;
-
   thread_select (argv[0], thr);
 
   print_selected_thread_frame (current_uiout,
 			       USER_SELECTED_THREAD | USER_SELECTED_FRAME);
-
-  /* Notify if the thread has effectively changed.  */
-  if (inferior_ptid != previous_ptid)
-    {
-      gdb::observers::user_selected_context_changed.notify
-	(USER_SELECTED_THREAD | USER_SELECTED_FRAME);
-    }
 }
 
 void
@@ -1703,14 +1694,53 @@ mi_cmd_list_target_features (const char *command, char **argv, int argc)
 void
 mi_cmd_add_inferior (const char *command, char **argv, int argc)
 {
-  struct inferior *inf;
+  bool no_connection = false;
 
-  if (argc != 0)
-    error (_("-add-inferior should be passed no arguments"));
+  /* Parse the command options.  */
+  enum opt
+    {
+      NO_CONNECTION_OPT,
+    };
+  static const struct mi_opt opts[] =
+    {
+	{"-no-connection", NO_CONNECTION_OPT, 0},
+	{NULL, 0, 0},
+    };
 
-  inf = add_inferior_with_spaces ();
+  int oind = 0;
+  char *oarg;
+
+  while (1)
+    {
+      int opt = mi_getopt ("-add-inferior", argc, argv, opts, &oind, &oarg);
+
+      if (opt < 0)
+	break;
+      switch ((enum opt) opt)
+	{
+	case NO_CONNECTION_OPT:
+	  no_connection = true;
+	  break;
+	}
+    }
+
+  scoped_restore_current_pspace_and_thread restore_pspace_thread;
+
+  inferior *inf = add_inferior_with_spaces ();
+
+  switch_to_inferior_and_push_target (inf, no_connection,
+				      current_inferior ());
 
   current_uiout->field_fmt ("inferior", "i%d", inf->num);
+
+  process_stratum_target *proc_target = inf->process_target ();
+
+  if (proc_target != nullptr)
+    {
+      ui_out_emit_tuple tuple_emitter (current_uiout, "connection");
+      current_uiout->field_unsigned ("number", proc_target->connection_number);
+      current_uiout->field_string ("name", proc_target->shortname ());
+    }
 }
 
 void
@@ -1786,9 +1816,9 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
     case MI_COMMAND:
       /* A MI command was read from the input stream.  */
       if (mi_debug_p)
-	fprintf_unfiltered (gdb_stdlog,
-			    " token=`%s' command=`%s' args=`%s'\n",
-			    context->token, context->command, context->args);
+	gdb_printf (gdb_stdlog,
+		    " token=`%s' command=`%s' args=`%s'\n",
+		    context->token, context->command, context->args);
 
       mi_cmd_execute (context);
 
@@ -1800,15 +1830,15 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	 uiout will most likely crash in the mi_out_* routines.  */
       if (!running_result_record_printed)
 	{
-	  fputs_unfiltered (context->token, mi->raw_stdout);
+	  gdb_puts (context->token, mi->raw_stdout);
 	  /* There's no particularly good reason why target-connect results
 	     in not ^done.  Should kill ^connected for MI3.  */
-	  fputs_unfiltered (strcmp (context->command, "target-select") == 0
-			    ? "^connected" : "^done", mi->raw_stdout);
+	  gdb_puts (strcmp (context->command, "target-select") == 0
+		    ? "^connected" : "^done", mi->raw_stdout);
 	  mi_out_put (uiout, mi->raw_stdout);
 	  mi_out_rewind (uiout);
 	  mi_print_timing_maybe (mi->raw_stdout);
-	  fputs_unfiltered ("\n", mi->raw_stdout);
+	  gdb_puts ("\n", mi->raw_stdout);
 	}
       else
 	/* The command does not want anything to be printed.  In that
@@ -1825,7 +1855,7 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	/* This "feature" will be removed as soon as we have a
 	   complete set of mi commands.  */
 	/* Echo the command on the console.  */
-	fprintf_unfiltered (gdb_stdlog, "%s\n", context->command);
+	gdb_printf (gdb_stdlog, "%s\n", context->command);
 	/* Call the "console" interpreter.  */
 	argv[0] = (char *) INTERP_CONSOLE;
 	argv[1] = context->command;
@@ -1839,12 +1869,12 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	  {
 	    if (!running_result_record_printed)
 	      {
-		fputs_unfiltered (context->token, mi->raw_stdout);
-		fputs_unfiltered ("^done", mi->raw_stdout);
+		gdb_puts (context->token, mi->raw_stdout);
+		gdb_puts ("^done", mi->raw_stdout);
 		mi_out_put (uiout, mi->raw_stdout);
 		mi_out_rewind (uiout);
 		mi_print_timing_maybe (mi->raw_stdout);
-		fputs_unfiltered ("\n", mi->raw_stdout);
+		gdb_puts ("\n", mi->raw_stdout);
 	      }
 	    else
 	      mi_out_rewind (uiout);
@@ -1861,50 +1891,22 @@ mi_print_exception (const char *token, const struct gdb_exception &exception)
 {
   struct mi_interp *mi = (struct mi_interp *) current_interpreter ();
 
-  fputs_unfiltered (token, mi->raw_stdout);
-  fputs_unfiltered ("^error,msg=\"", mi->raw_stdout);
+  gdb_puts (token, mi->raw_stdout);
+  gdb_puts ("^error,msg=\"", mi->raw_stdout);
   if (exception.message == NULL)
-    fputs_unfiltered ("unknown error", mi->raw_stdout);
+    gdb_puts ("unknown error", mi->raw_stdout);
   else
     mi->raw_stdout->putstr (exception.what (), '"');
-  fputs_unfiltered ("\"", mi->raw_stdout);
+  gdb_puts ("\"", mi->raw_stdout);
 
   switch (exception.error)
     {
       case UNDEFINED_COMMAND_ERROR:
-	fputs_unfiltered (",code=\"undefined-command\"", mi->raw_stdout);
+	gdb_puts (",code=\"undefined-command\"", mi->raw_stdout);
 	break;
     }
 
-  fputs_unfiltered ("\n", mi->raw_stdout);
-}
-
-/* Determine whether the parsed command already notifies the
-   user_selected_context_changed observer.  */
-
-static int
-command_notifies_uscc_observer (struct mi_parse *command)
-{
-  if (command->op == CLI_COMMAND)
-    {
-      /* CLI commands "thread" and "inferior" already send it.  */
-      return (startswith (command->command, "thread ")
-	      || startswith (command->command, "inferior "));
-    }
-  else /* MI_COMMAND */
-    {
-      if (strcmp (command->command, "interpreter-exec") == 0
-	  && command->argc > 1)
-	{
-	  /* "thread" and "inferior" again, but through -interpreter-exec.  */
-	  return (startswith (command->argv[1], "thread ")
-		  || startswith (command->argv[1], "inferior "));
-	}
-
-      else
-	/* -thread-select already sends it.  */
-	return strcmp (command->command, "thread-select") == 0;
-    }
+  gdb_puts ("\n", mi->raw_stdout);
 }
 
 void
@@ -1932,8 +1934,6 @@ mi_execute_command (const char *cmd, int from_tty)
 
   if (command != NULL)
     {
-      ptid_t previous_ptid = inferior_ptid;
-
       command->token = token;
 
       if (do_timings)
@@ -1963,39 +1963,63 @@ mi_execute_command (const char *cmd, int from_tty)
 
       bpstat_do_actions ();
 
-      if (/* The notifications are only output when the top-level
-	     interpreter (specified on the command line) is MI.  */
-	  top_level_interpreter ()->interp_ui_out ()->is_mi_like_p ()
-	  /* Don't try report anything if there are no threads --
-	     the program is dead.  */
-	  && any_thread_p ()
-	  /* If the command already reports the thread change, no need to do it
-	     again.  */
-	  && !command_notifies_uscc_observer (command.get ()))
-	{
-	  int report_change = 0;
-
-	  if (command->thread == -1)
-	    {
-	      report_change = (previous_ptid != null_ptid
-			       && inferior_ptid != previous_ptid
-			       && inferior_ptid != null_ptid);
-	    }
-	  else if (inferior_ptid != null_ptid)
-	    {
-	      struct thread_info *ti = inferior_thread ();
-
-	      report_change = (ti->global_num != command->thread);
-	    }
-
-	  if (report_change)
-	    {
-	      gdb::observers::user_selected_context_changed.notify
-		(USER_SELECTED_THREAD | USER_SELECTED_FRAME);
-	    }
-	}
     }
 }
+
+/* Captures the current user selected context state, that is the current
+   thread and frame.  Later we can then check if the user selected context
+   has changed at all.  */
+
+struct user_selected_context
+{
+  /* Constructor.  */
+  user_selected_context ()
+    : m_previous_ptid (inferior_ptid)
+  {
+    save_selected_frame (&m_previous_frame_id, &m_previous_frame_level);
+  }
+
+  /* Return true if the user selected context has changed since this object
+     was created.  */
+  bool has_changed () const
+  {
+    /* Did the selected thread change?  */
+    if (m_previous_ptid != null_ptid && inferior_ptid != null_ptid
+	&& m_previous_ptid != inferior_ptid)
+      return true;
+
+    /* Grab details of the currently selected frame, for comparison.  */
+    frame_id current_frame_id;
+    int current_frame_level;
+    save_selected_frame (&current_frame_id, &current_frame_level);
+
+    /* Did the selected frame level change?  */
+    if (current_frame_level != m_previous_frame_level)
+      return true;
+
+    /* Did the selected frame id change?  If the innermost frame is
+       selected then the level will be -1, and the frame-id will be
+       null_frame_id.  As comparing null_frame_id with itself always
+       reports not-equal, we only do the equality test if we have something
+       other than the innermost frame selected.  */
+    if (current_frame_level != -1
+	&& !frame_id_eq (current_frame_id, m_previous_frame_id))
+      return true;
+
+    /* Nothing changed!  */
+    return false;
+  }
+private:
+  /* The previously selected thread.  This might be null_ptid if there was
+     no previously selected thread.  */
+  ptid_t m_previous_ptid;
+
+  /* The previously selected frame.  If the innermost frame is selected, or
+     no frame is selected, then the frame_id will be null_frame_id, and the
+     level will be -1.  */
+  frame_id m_previous_frame_id;
+  int m_previous_frame_level;
+};
 
 static void
 mi_cmd_execute (struct mi_parse *parse)
@@ -2037,6 +2061,9 @@ mi_cmd_execute (struct mi_parse *parse)
       set_current_program_space (inf->pspace);
     }
 
+  user_selected_context current_user_selected_context;
+
+  gdb::optional<scoped_restore_current_thread> thread_saver;
   if (parse->thread != -1)
     {
       thread_info *tp = find_thread_global_id (parse->thread);
@@ -2047,9 +2074,13 @@ mi_cmd_execute (struct mi_parse *parse)
       if (tp->state == THREAD_EXITED)
 	error (_("Thread id: %d has terminated"), parse->thread);
 
+      if (parse->cmd->preserve_user_selected_context ())
+	thread_saver.emplace ();
+
       switch_to_thread (tp);
     }
 
+  gdb::optional<scoped_restore_selected_frame> frame_saver;
   if (parse->frame != -1)
     {
       struct frame_info *fid;
@@ -2057,8 +2088,12 @@ mi_cmd_execute (struct mi_parse *parse)
 
       fid = find_relative_frame (get_current_frame (), &frame);
       if (frame == 0)
-	/* find_relative_frame was successful */
-	select_frame (fid);
+	{
+	  if (parse->cmd->preserve_user_selected_context ())
+	    frame_saver.emplace ();
+
+	  select_frame (fid);
+	}
       else
 	error (_("Invalid frame id: %d"), frame);
     }
@@ -2073,7 +2108,16 @@ mi_cmd_execute (struct mi_parse *parse)
   current_context = parse;
 
   gdb_assert (parse->cmd != nullptr);
+
+  gdb::optional<scoped_restore_tmpl<int>> restore_suppress_notification
+    = parse->cmd->do_suppress_notification ();
+
   parse->cmd->invoke (parse);
+
+  if (!parse->cmd->preserve_user_selected_context ()
+      && current_user_selected_context.has_changed ())
+    gdb::observers::user_selected_context_changed.notify
+      (USER_SELECTED_THREAD | USER_SELECTED_FRAME);
 }
 
 /* See mi-main.h.  */
@@ -2091,8 +2135,8 @@ mi_execute_cli_command (const char *cmd, bool args_p, const char *args)
 	gdb_assert (args == nullptr);
 
       if (mi_debug_p)
-	fprintf_unfiltered (gdb_stdlog, "cli=%s run=%s\n",
-			    cmd, run.c_str ());
+	gdb_printf (gdb_stdlog, "cli=%s run=%s\n",
+		    cmd, run.c_str ());
 
       execute_command (run.c_str (), 0 /* from_tty */ );
     }
@@ -2143,8 +2187,8 @@ mi_load_progress (const char *section_name,
       previous_sect_name = xstrdup (section_name);
 
       if (current_token)
-	fputs_unfiltered (current_token, mi->raw_stdout);
-      fputs_unfiltered ("+download", mi->raw_stdout);
+	gdb_puts (current_token, mi->raw_stdout);
+      gdb_puts ("+download", mi->raw_stdout);
       {
 	ui_out_emit_tuple tuple_emitter (uiout.get (), NULL);
 	uiout->field_string ("section", section_name);
@@ -2152,7 +2196,7 @@ mi_load_progress (const char *section_name,
 	uiout->field_signed ("total-size", grand_total);
       }
       mi_out_put (uiout.get (), mi->raw_stdout);
-      fputs_unfiltered ("\n", mi->raw_stdout);
+      gdb_puts ("\n", mi->raw_stdout);
       gdb_flush (mi->raw_stdout);
     }
 
@@ -2161,8 +2205,8 @@ mi_load_progress (const char *section_name,
     {
       last_update = time_now;
       if (current_token)
-	fputs_unfiltered (current_token, mi->raw_stdout);
-      fputs_unfiltered ("+download", mi->raw_stdout);
+	gdb_puts (current_token, mi->raw_stdout);
+      gdb_puts ("+download", mi->raw_stdout);
       {
 	ui_out_emit_tuple tuple_emitter (uiout.get (), NULL);
 	uiout->field_string ("section", section_name);
@@ -2172,7 +2216,7 @@ mi_load_progress (const char *section_name,
 	uiout->field_signed ("total-size", grand_total);
       }
       mi_out_put (uiout.get (), mi->raw_stdout);
-      fputs_unfiltered ("\n", mi->raw_stdout);
+      gdb_puts ("\n", mi->raw_stdout);
       gdb_flush (mi->raw_stdout);
     }
 }
@@ -2214,7 +2258,7 @@ print_diff (struct ui_file *file, struct mi_timestamp *start,
   duration<double> utime = end->utime - start->utime;
   duration<double> stime = end->stime - start->stime;
 
-  fprintf_unfiltered
+  gdb_printf
     (file,
      ",time={wallclock=\"%0.5f\",user=\"%0.5f\",system=\"%0.5f\"}",
      wallclock.count (), utime.count (), stime.count ());

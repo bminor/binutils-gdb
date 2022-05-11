@@ -1,5 +1,5 @@
 #source: ifunc-2-i386.s
-#ld: -z now -m elf_i386 -shared --hash-style=sysv -z noseparate-code
+#ld: -z now -m elf_i386 -shared --hash-style=sysv -z noseparate-code $NO_DT_RELR_LDFLAGS
 #as: --32
 #objdump: -dw
 #target: x86_64-*-* i?86-*-*

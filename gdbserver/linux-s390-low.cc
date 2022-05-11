@@ -1503,9 +1503,8 @@ add_insns (const unsigned char *start, int len)
 {
   CORE_ADDR buildaddr = current_insn_ptr;
 
-  if (debug_threads)
-    debug_printf ("Adding %d bytes of insn at %s\n",
-		  len, paddress (buildaddr));
+  threads_debug_printf ("Adding %d bytes of insn at %s",
+			len, paddress (buildaddr));
 
   append_insns (&buildaddr, len, start);
   current_insn_ptr = buildaddr;

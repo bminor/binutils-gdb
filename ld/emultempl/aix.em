@@ -63,6 +63,15 @@ static void gld${EMULATION_NAME}_free (void *);
 static void gld${EMULATION_NAME}_find_relocs (lang_statement_union_type *);
 static void gld${EMULATION_NAME}_find_exp_assignment (etree_type *);
 
+static asection *xcoff_add_stub_section (const char *, asection *);
+static void xcoff_layout_sections_again (void);
+
+static struct bfd_xcoff_link_params params = {
+  NULL,
+  &xcoff_add_stub_section,
+  &xcoff_layout_sections_again
+};
+
 
 /* The file alignment required for each section.  */
 static unsigned long file_align;
@@ -138,6 +147,9 @@ static int rtld;
 /* Explicit command line library path, -blibpath */
 static char *command_line_blibpath = NULL;
 
+/* Fake input file for stubs.  */
+static lang_input_statement_type *stub_file;
+
 /* This routine is called before anything else is done.  */
 
 static void
@@ -154,6 +166,7 @@ gld${EMULATION_NAME}_before_parse (void)
 
   link_info.init_function = NULL;
   link_info.fini_function = NULL;
+
 }
 
 /* Handle AIX specific options.  */
@@ -1009,6 +1022,159 @@ gld${EMULATION_NAME}_before_allocation (void)
   before_allocation_default ();
 }
 
+struct hook_stub_info
+{
+  lang_statement_list_type add;
+  asection *input_section;
+};
+
+/* Traverse the linker tree to find the spot where the stub goes.  */
+
+static bool
+hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
+{
+  lang_statement_union_type *l;
+  bool ret;
+
+  for (; (l = *lp) != NULL; lp = &l->header.next)
+    {
+      switch (l->header.type)
+	{
+	case lang_constructors_statement_enum:
+	  ret = hook_in_stub (info, &constructor_list.head);
+	  if (ret)
+	    return ret;
+	  break;
+
+	case lang_output_section_statement_enum:
+	  ret = hook_in_stub (info,
+			      &l->output_section_statement.children.head);
+	  if (ret)
+	    return ret;
+	  break;
+
+	case lang_wild_statement_enum:
+	  ret = hook_in_stub (info, &l->wild_statement.children.head);
+	  if (ret)
+	    return ret;
+	  break;
+
+	case lang_group_statement_enum:
+	  ret = hook_in_stub (info, &l->group_statement.children.head);
+	  if (ret)
+	    return ret;
+	  break;
+
+	case lang_input_section_enum:
+	  if (l->input_section.section == info->input_section)
+	    {
+	      /* We've found our section.  Insert the stub immediately
+		 after its associated input section.  */
+	      *(info->add.tail) = l->header.next;
+	      l->header.next = info->add.head;
+	      return true;
+	    }
+	  break;
+
+	case lang_data_statement_enum:
+	case lang_reloc_statement_enum:
+	case lang_object_symbols_statement_enum:
+	case lang_output_statement_enum:
+	case lang_target_statement_enum:
+	case lang_input_statement_enum:
+	case lang_assignment_statement_enum:
+	case lang_padding_statement_enum:
+	case lang_address_statement_enum:
+	case lang_fill_statement_enum:
+	  break;
+
+	default:
+	  FAIL ();
+	  break;
+	}
+    }
+  return false;
+}
+
+/* Call-back for bfd_xcoff_link_relocations.
+   Create a new stub section, and arrange for it to be linked
+   immediately before INPUT_SECTION.  */
+
+static asection *
+xcoff_add_stub_section (const char *stub_sec_name, asection *input_section)
+{
+  asection *stub_sec;
+  flagword flags;
+  asection *output_section;
+  lang_output_section_statement_type *os;
+  struct hook_stub_info info;
+
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
+	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_KEEP);
+  stub_sec = bfd_make_section_anyway_with_flags (stub_file->the_bfd,
+						 stub_sec_name, flags);
+  if (stub_sec == NULL)
+    goto err_ret;
+
+  output_section = input_section->output_section;
+  os = lang_output_section_get (output_section);
+
+  info.input_section = input_section;
+  lang_list_init (&info.add);
+  lang_add_section (&info.add, stub_sec, NULL, NULL, os);
+
+  if (info.add.head == NULL)
+    goto err_ret;
+
+  if (hook_in_stub (&info, &os->children.head))
+    return stub_sec;
+
+ err_ret:
+  einfo (_("%X%P: can not make stub section: %E\n"));
+  return NULL;
+}
+
+/* Another call-back for bfd_xcoff_link_relocations.  */
+
+static void
+xcoff_layout_sections_again (void)
+{
+  /* If we have changed sizes of the stub sections, then we need
+     to recalculate all the section offsets.  This may mean we need to
+     add even more stubs.  */
+   lang_relax_sections (true);
+}
+
+/* Call the back-end to verify relocations.  */
+
+static void
+gld${EMULATION_NAME}_after_allocation (void)
+{
+
+  /* If generating a relocatable output file, then we don't have any
+     stubs.  */
+  if (stub_file != NULL && !bfd_link_relocatable (&link_info))
+    {
+      /* Call into the BFD backend to do the real work.  */
+      if (!bfd_xcoff_size_stubs (&link_info))
+	einfo (_("%X%P: can not size stub sections: %E\n"));
+    }
+
+  /* Now that everything is in place, finalize the dynamic sections.  */
+  if (!bfd_xcoff_build_dynamic_sections (link_info.output_bfd, &link_info))
+    einfo (_("%F%P: failed to layout dynamic sections: %E\n"));
+
+  if (!bfd_link_relocatable (&link_info))
+    {
+      /* Now build the linker stubs.  */
+      if (stub_file != NULL && stub_file->the_bfd->sections != NULL)
+	{
+	  if (! bfd_xcoff_build_stubs (&link_info))
+	    einfo (_("%X%P: can not build stubs: %E\n"));
+	}
+    }
+}
+
 static char *
 gld${EMULATION_NAME}_choose_target (int argc, char **argv)
 {
@@ -1495,11 +1661,35 @@ fragment <<EOF
 static void
 gld${EMULATION_NAME}_create_output_section_statements (void)
 {
+  if ((bfd_get_flavour (link_info.output_bfd) != bfd_target_xcoff_flavour))
+    return;
+
+  /* Stub file */
+  stub_file = lang_add_input_file ("linker stubs",
+				   lang_input_file_is_fake_enum,
+				   NULL);
+  stub_file->the_bfd = bfd_create ("linker stubs", link_info.output_bfd);
+  if (stub_file->the_bfd == NULL
+      || !bfd_set_arch_mach (stub_file->the_bfd,
+			     bfd_get_arch (link_info.output_bfd),
+			     bfd_get_mach (link_info.output_bfd)))
+    {
+      einfo (_("%F%P: can not create stub BFD: %E\n"));
+      return;
+    }
+
+  stub_file->the_bfd->flags |= BFD_LINKER_CREATED;
+  ldlang_add_file (stub_file);
+  params.stub_bfd = stub_file->the_bfd;
+
+  /* Pass linker params to the back-end. */
+  if (!bfd_xcoff_link_init (&link_info, &params))
+    einfo (_("%F%P: can not init BFD: %E\n"));
+
   /* __rtinit */
-  if ((bfd_get_flavour (link_info.output_bfd) == bfd_target_xcoff_flavour)
-      && (link_info.init_function != NULL
-	  || link_info.fini_function != NULL
-	  || rtld))
+  if (link_info.init_function != NULL
+      || link_info.fini_function != NULL
+      || rtld)
     {
       initfini_file = lang_add_input_file ("initfini",
 					   lang_input_file_is_file_enum,
@@ -1601,39 +1791,19 @@ gld${EMULATION_NAME}_print_symbol (struct bfd_link_hash_entry *hash_entry,
 
   return true;
 }
-
-struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {
-  gld${EMULATION_NAME}_before_parse,
-  syslib_default,
-  hll_default,
-  after_parse_default,
-  gld${EMULATION_NAME}_after_open,
-  after_check_relocs_default,
-  before_place_orphans_default,
-  after_allocation_default,
-  gld${EMULATION_NAME}_set_output_arch,
-  gld${EMULATION_NAME}_choose_target,
-  gld${EMULATION_NAME}_before_allocation,
-  gld${EMULATION_NAME}_get_script,
-  "${EMULATION_NAME}",
-  "${OUTPUT_FORMAT}",
-  finish_default,
-  gld${EMULATION_NAME}_create_output_section_statements,
-  gld${EMULATION_NAME}_open_dynamic_archive,
-  0,				/* place_orphan */
-  0,				/* set_symbols */
-  gld${EMULATION_NAME}_parse_args,
-  gld${EMULATION_NAME}_add_options,
-  gld${EMULATION_NAME}_handle_option,
-  gld${EMULATION_NAME}_unrecognized_file,
-  NULL,				/* list_options */
-  NULL,				/* recognized_file */
-  NULL,				/* find potential_libraries */
-  NULL,				/* new_vers_pattern */
-  NULL,				/* extra_map_file_text */
-  ${LDEMUL_EMIT_CTF_EARLY-NULL},
-  ${LDEMUL_ACQUIRE_STRINGS_FOR_CTF-NULL},
-  ${LDEMUL_NEW_DYNSYM_FOR_CTF-NULL},
-  gld${EMULATION_NAME}_print_symbol
-};
 EOF
+
+LDEMUL_AFTER_OPEN=gld${EMULATION_NAME}_after_open
+LDEMUL_SET_OUTPUT_ARCH=gld${EMULATION_NAME}_set_output_arch
+LDEMUL_CHOOSE_TARGET=gld${EMULATION_NAME}_choose_target
+LDEMUL_BEFORE_ALLOCATION=gld${EMULATION_NAME}_before_allocation
+LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
+LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=gld${EMULATION_NAME}_create_output_section_statements
+LDEMUL_OPEN_DYNAMIC_ARCHIVE=gld${EMULATION_NAME}_open_dynamic_archive
+LDEMUL_PARSE_ARGS=gld${EMULATION_NAME}_parse_args
+LDEMUL_ADD_OPTIONS=gld${EMULATION_NAME}_add_options
+LDEMUL_HANDLE_OPTION=gld${EMULATION_NAME}_handle_option
+LDEMUL_UNRECOGNIZED_FILE=gld${EMULATION_NAME}_unrecognized_file
+LDEMUL_PRINT_SYMBOL=gld${EMULATION_NAME}_print_symbol
+
+source_em ${srcdir}/emultempl/emulation.em

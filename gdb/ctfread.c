@@ -329,8 +329,8 @@ set_symbol_address (struct objfile *of, struct symbol *sym, const char *name)
   msym = lookup_minimal_symbol (name, nullptr, of);
   if (msym.minsym != NULL)
     {
-      SET_SYMBOL_VALUE_ADDRESS (sym, BMSYMBOL_VALUE_ADDRESS (msym));
-      SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
+      sym->set_value_address (msym.value_address ());
+      sym->set_aclass_index (LOC_STATIC);
       sym->set_section_index (msym.minsym->section_index ());
     }
 }
@@ -450,9 +450,9 @@ ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
 
       sym->set_language (language_c, &ccp->of->objfile_obstack);
       sym->compute_and_set_names (name, false, ccp->of->per_bfd);
-      SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
-      SYMBOL_TYPE (sym) = fip->ptype;
+      sym->set_aclass_index (LOC_CONST);
+      sym->set_domain (VAR_DOMAIN);
+      sym->set_type (fip->ptype);
       add_symbol_to_list (sym, ccp->builder->get_global_symbols ());
     }
 
@@ -479,11 +479,11 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
 
       sym->set_language (language_c, &objfile->objfile_obstack);
       sym->compute_and_set_names (name, false, objfile->per_bfd);
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
-      SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
+      sym->set_domain (VAR_DOMAIN);
+      sym->set_aclass_index (LOC_OPTIMIZED_OUT);
 
       if (type != nullptr)
-	SYMBOL_TYPE (sym) = type;
+	sym->set_type (type);
 
       uint32_t kind = ctf_type_kind (fp, tid);
       switch (kind)
@@ -491,22 +491,22 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
 	  case CTF_K_STRUCT:
 	  case CTF_K_UNION:
 	  case CTF_K_ENUM:
-	    SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
-	    SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
+	    sym->set_aclass_index (LOC_TYPEDEF);
+	    sym->set_domain (STRUCT_DOMAIN);
 	    break;
 	  case CTF_K_FUNCTION:
-	    SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
+	    sym->set_aclass_index (LOC_STATIC);
 	    set_symbol_address (objfile, sym, sym->linkage_name ());
 	    break;
 	  case CTF_K_CONST:
-	    if (SYMBOL_TYPE (sym)->code () == TYPE_CODE_VOID)
-	      SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_int;
+	    if (sym->type ()->code () == TYPE_CODE_VOID)
+	      sym->set_type (objfile_type (objfile)->builtin_int);
 	    break;
 	  case CTF_K_TYPEDEF:
 	  case CTF_K_INTEGER:
 	  case CTF_K_FLOAT:
-	    SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
-	    SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+	    sym->set_aclass_index (LOC_TYPEDEF);
+	    sym->set_domain (VAR_DOMAIN);
 	    break;
 	  case CTF_K_POINTER:
 	    break;
@@ -1169,9 +1169,9 @@ ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
 	  }
 	sym = new (&ccp->of->objfile_obstack) symbol;
 	OBJSTAT (ccp->of, n_syms++);
-	SYMBOL_TYPE (sym) = type;
-	SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
-	SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
+	sym->set_type (type);
+	sym->set_domain (VAR_DOMAIN);
+	sym->set_aclass_index (LOC_OPTIMIZED_OUT);
 	sym->compute_and_set_names (name, false, ccp->of->per_bfd);
 	add_symbol_to_list (sym, ccp->builder->get_file_symbols ());
 	break;
@@ -1205,9 +1205,9 @@ add_stt_entries (struct ctf_context *ccp, int functions)
 	continue;
       sym = new (&ccp->of->objfile_obstack) symbol;
       OBJSTAT (ccp->of, n_syms++);
-      SYMBOL_TYPE (sym) = type;
-      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
-      SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
+      sym->set_type (type);
+      sym->set_domain (VAR_DOMAIN);
+      sym->set_aclass_index (LOC_STATIC);
       sym->compute_and_set_names (tname, false, ccp->of->per_bfd);
       add_symbol_to_list (sym, ccp->builder->get_global_symbols ());
       set_symbol_address (ccp->of, sym, tname);
@@ -1246,14 +1246,14 @@ get_objfile_text_range (struct objfile *of, int *tsize)
 /* Start a symtab for OBJFILE in CTF format.  */
 
 static void
-ctf_start_symtab (ctf_psymtab *pst,
-		  struct objfile *of, CORE_ADDR text_offset)
+ctf_start_compunit_symtab (ctf_psymtab *pst,
+			   struct objfile *of, CORE_ADDR text_offset)
 {
   struct ctf_context *ccp;
 
   ccp = &pst->context;
   ccp->builder = new buildsym_compunit
-		       (of, of->original_name, nullptr,
+		       (of, pst->filename, nullptr,
 		       language_c, text_offset);
   ccp->builder->record_debugformat ("ctf");
 }
@@ -1263,14 +1263,14 @@ ctf_start_symtab (ctf_psymtab *pst,
    the .text section number.  */
 
 static struct compunit_symtab *
-ctf_end_symtab (ctf_psymtab *pst,
-		CORE_ADDR end_addr, int section)
+ctf_end_compunit_symtab (ctf_psymtab *pst,
+			 CORE_ADDR end_addr, int section)
 {
   struct ctf_context *ccp;
 
   ccp = &pst->context;
   struct compunit_symtab *result
-    = ccp->builder->end_symtab (end_addr, section);
+    = ccp->builder->end_compunit_symtab (end_addr, section);
   delete ccp->builder;
   ccp->builder = nullptr;
   return result;
@@ -1398,7 +1398,7 @@ ctf_psymtab::read_symtab (struct objfile *objfile)
     {
       if (info_verbose)
 	{
-	  printf_filtered (_("Reading in CTF data for %s..."), filename);
+	  gdb_printf (_("Reading in CTF data for %s..."), filename);
 	  gdb_flush (gdb_stdout);
 	}
 
@@ -1407,17 +1407,17 @@ ctf_psymtab::read_symtab (struct objfile *objfile)
       int tsize;
 
       offset = get_objfile_text_range (objfile, &tsize);
-      ctf_start_symtab (this, objfile, offset);
+      ctf_start_compunit_symtab (this, objfile, offset);
       expand_psymtab (objfile);
 
       set_text_low (offset);
       set_text_high (offset + tsize);
-      compunit_symtab = ctf_end_symtab (this, offset + tsize,
-					SECT_OFF_TEXT (objfile));
+      compunit_symtab = ctf_end_compunit_symtab (this, offset + tsize,
+						 SECT_OFF_TEXT (objfile));
 
       /* Finish up the debug error message.  */
       if (info_verbose)
-	printf_filtered (_("done.\n"));
+	gdb_printf (_("done.\n"));
     }
 }
 
@@ -1449,6 +1449,7 @@ create_partial_symtab (const char *name,
   pst->context.of = objfile;
   pst->context.partial_symtabs = partial_symtabs;
   pst->context.pst = pst;
+  pst->context.builder = nullptr;
 
   return pst;
 }
@@ -1530,21 +1531,6 @@ ctf_psymtab_var_cb (const char *name, ctf_id_t id, void *arg)
   return 0;
 }
 
-/* Start a subfile for CTF. FNAME is the name of the archive.  */
-
-static void
-ctf_start_archive (struct ctf_context *ccx, struct objfile *of,
-		   const char *fname)
-{
-  if (ccx->builder == nullptr)
-    {
-      ccx->builder = new buildsym_compunit (of,
-		      of->original_name, nullptr, language_c, 0);
-      ccx->builder->record_debugformat ("ctf");
-    }
-  ccx->builder->start_subfile (fname);
-}
-
 /* Setup partial_symtab's describing each source file for which
    debugging information is available.  */
 
@@ -1566,10 +1552,7 @@ scan_partial_symbols (ctf_dict_t *cfp, psymtab_storage *partial_symtabs,
 
   struct ctf_context *ccx = &pst->context;
   if (isparent == false)
-    {
-      ctf_start_archive (ccx, of, fname);
-      ccx->pst = pst;
-    }
+    ccx->pst = pst;
 
   if (ctf_type_iter (cfp, ctf_psymtab_type_cb, ccx) == CTF_ERR)
     complaint (_("ctf_type_iter scan_partial_symbols failed - %s"),
@@ -1601,7 +1584,7 @@ build_ctf_archive_member (ctf_dict_t *ctf, const char *name, void *arg)
 
   if (info_verbose)
     {
-      printf_filtered (_("Scanning archive member %s..."), name);
+      gdb_printf (_("Scanning archive member %s..."), name);
       gdb_flush (gdb_stdout);
     }
 

@@ -227,6 +227,16 @@ proc jit_reader_test {} {
 		    "Attempt to assign to an unmodifiable value\." \
 		    "cannot assign to register"
 	    }
+
+	    if { ![skip_python_tests] } {
+		gdb_test "python print(gdb.objfiles())" \
+		    "$any<gdb.Objfile filename=<< JIT compiled code at $hex >>>$any" \
+		    "python gdb.Objfile.__repr__ ()"
+
+		gdb_test "python print(list(map(lambda objf : objf.filename, gdb.objfiles())))" \
+		    "$any'<< JIT compiled code at $hex >>'$any" \
+		    "python gdb.Objfile.filename"
+	    }
 	}
     }
 

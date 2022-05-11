@@ -878,8 +878,8 @@ s390_linux_nat_target::remove_watchpoint (CORE_ADDR addr, int len,
 	}
     }
 
-  fprintf_unfiltered (gdb_stderr,
-		      "Attempt to remove nonexistent watchpoint.\n");
+  gdb_printf (gdb_stderr,
+	      "Attempt to remove nonexistent watchpoint.\n");
   return -1;
 }
 
@@ -931,8 +931,8 @@ s390_linux_nat_target::remove_hw_breakpoint (struct gdbarch *gdbarch,
 	}
     }
 
-  fprintf_unfiltered (gdb_stderr,
-		      "Attempt to remove nonexistent breakpoint.\n");
+  gdb_printf (gdb_stderr,
+	      "Attempt to remove nonexistent breakpoint.\n");
   return -1;
 }
 

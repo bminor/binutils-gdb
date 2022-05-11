@@ -267,35 +267,38 @@ Dwarf::assemble ${asm_file} {
 
 	# Generate a line table program.
 	program {
-	    {DW_LNE_set_address $foo_start}
-	    {line [gdb_get_line_number "foo prologue"]}
-	    {DW_LNS_copy}
-	    {DW_LNE_set_address foo_label}
-	    {line [gdb_get_line_number "foo return"]}
-	    {DW_LNS_copy}
-	    {line [gdb_get_line_number "foo end"]}
-	    {DW_LNS_copy}
-	    {DW_LNE_set_address $foo_end}
-	    {DW_LNS_advance_line 1}
-	    {DW_LNS_copy}
-	    {DW_LNE_end_sequence}
+	    DW_LNE_set_address $foo_start
+	    line [gdb_get_line_number "foo prologue"]
+	    DW_LNS_copy
+	    DW_LNE_set_address foo_label
+	    line [gdb_get_line_number "foo return"]
+	    DW_LNS_copy
+	    line [gdb_get_line_number "foo end"]
+	    DW_LNS_copy
+	    DW_LNE_set_address $foo_end
+	    DW_LNS_advance_line 1
+	    DW_LNS_copy
+	    DW_LNE_end_sequence
 
-	    {DW_LNE_set_address $bar_start}
-	    {line [gdb_get_line_number "bar prologue"]}
-	    {DW_LNS_copy}
-	    {DW_LNE_set_address bar_label}
-	    {line [gdb_get_line_number "bar return"]}
-	    {DW_LNS_copy}
-	    {line [gdb_get_line_number "bar end"]}
-	    {DW_LNS_copy}
-	    {DW_LNE_set_address $bar_end}
-	    {DW_LNS_advance_line 1}
-	    {DW_LNS_copy}
-	    {DW_LNE_end_sequence}
+	    DW_LNE_set_address $bar_start
+	    line [gdb_get_line_number "bar prologue"]
+	    DW_LNS_copy
+	    DW_LNE_set_address bar_label
+	    line [gdb_get_line_number "bar return"]
+	    DW_LNS_copy
+	    line [gdb_get_line_number "bar end"]
+	    DW_LNS_copy
+	    DW_LNE_set_address $bar_end
+	    DW_LNS_advance_line 1
+	    DW_LNS_copy
+	    DW_LNE_end_sequence
 	}
     }
 
     aranges {} cu_label {
+	# This 0,0 entry tests that the .debug_aranges reader can
+	# handle an apparent terminator before the end of the ranges.
+	arange {} 0 0
 	arange {} $foo_start $foo_end
 	arange {} $bar_start $bar_end
     }

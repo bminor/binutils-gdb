@@ -1,5 +1,5 @@
 /* Shared library declarations for GDB, the GNU Debugger.
-   
+
    Copyright (C) 1992-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -26,6 +26,7 @@ struct target_ops;
 struct target_so_ops;
 struct program_space;
 
+#include "gdb_bfd.h"
 #include "symfile-add-flags.h"
 
 /* Called when we free all symtabs, to free the shared library information
@@ -118,6 +119,12 @@ extern CORE_ADDR gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
 extern int gdb_bfd_scan_elf_dyntag (const int desired_dyntag, bfd *abfd,
 				    CORE_ADDR *ptr, CORE_ADDR *ptr_addr);
 
+/* If FILENAME refers to an ELF shared object then attempt to return the
+   string referred to by its DT_SONAME tag.   */
+
+extern gdb::unique_xmalloc_ptr<char> gdb_bfd_read_elf_soname
+  (const char *filename);
+
 /* Enable or disable optional solib event breakpoints as appropriate.  */
 
 extern void update_solib_breakpoints (void);
@@ -125,5 +132,19 @@ extern void update_solib_breakpoints (void);
 /* Handle an solib event by calling solib_add.  */
 
 extern void handle_solib_event (void);
+
+/* Associate SONAME with BUILD_ID in ABFD's registry so that it can be
+   retrieved with get_cbfd_soname_build_id.  */
+
+extern void set_cbfd_soname_build_id (gdb_bfd_ref_ptr abfd,
+				      const char *soname,
+				      const bfd_build_id *build_id);
+
+/* If SONAME had a build-id associated with it in ABFD's registry by a
+   previous call to set_cbfd_soname_build_id then return the build-id
+   as a NULL-terminated hex string.  */
+
+extern gdb::unique_xmalloc_ptr<char> get_cbfd_soname_build_id
+  (gdb_bfd_ref_ptr abfd, const char *soname);
 
 #endif /* SOLIB_H */

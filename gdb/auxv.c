@@ -94,14 +94,14 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
   if (msym.minsym == NULL)
     return TARGET_XFER_E_IO;
 
-  if (MSYMBOL_SIZE (msym.minsym) != ptr_size)
+  if (msym.minsym->size () != ptr_size)
     return TARGET_XFER_E_IO;
 
   /* POINTER_ADDRESS is a location where the `_dl_auxv' variable
      resides.  DATA_ADDRESS is the inferior value present in
      `_dl_auxv', therefore the real inferior AUXV address.  */
 
-  pointer_address = BMSYMBOL_VALUE_ADDRESS (msym);
+  pointer_address = msym.value_address ();
 
   /* The location of the _dl_auxv symbol may no longer be correct if
      ld.so runs at a different address than the one present in the
@@ -414,15 +414,15 @@ fprint_auxv_entry (struct ui_file *file, const char *name,
 		   const char *description, enum auxv_format format,
 		   CORE_ADDR type, CORE_ADDR val)
 {
-  fprintf_filtered (file, ("%-4s %-20s %-30s "),
-		    plongest (type), name, description);
+  gdb_printf (file, ("%-4s %-20s %-30s "),
+	      plongest (type), name, description);
   switch (format)
     {
     case AUXV_FORMAT_DEC:
-      fprintf_filtered (file, ("%s\n"), plongest (val));
+      gdb_printf (file, ("%s\n"), plongest (val));
       break;
     case AUXV_FORMAT_HEX:
-      fprintf_filtered (file, ("%s\n"), paddress (target_gdbarch (), val));
+      gdb_printf (file, ("%s\n"), paddress (target_gdbarch (), val));
       break;
     case AUXV_FORMAT_STR:
       {
@@ -430,10 +430,10 @@ fprint_auxv_entry (struct ui_file *file, const char *name,
 
 	get_user_print_options (&opts);
 	if (opts.addressprint)
-	  fprintf_filtered (file, ("%s "), paddress (target_gdbarch (), val));
+	  gdb_printf (file, ("%s "), paddress (target_gdbarch (), val));
 	val_print_string (builtin_type (target_gdbarch ())->builtin_char,
 			  NULL, val, -1, file, &opts);
-	fprintf_filtered (file, ("\n"));
+	gdb_printf (file, ("\n"));
       }
       break;
     }

@@ -79,6 +79,8 @@ DEFINE_OBSERVABLE (styling_changed);
 DEFINE_OBSERVABLE (current_source_symtab_and_line_changed);
 DEFINE_OBSERVABLE (gdb_exiting);
 DEFINE_OBSERVABLE (connection_removed);
+DEFINE_OBSERVABLE (target_pre_wait);
+DEFINE_OBSERVABLE (target_post_wait);
 
 } /* namespace observers */
 } /* namespace gdb */
@@ -87,7 +89,7 @@ static void
 show_observer_debug (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Observer debugging is %s.\n"), value);
+  gdb_printf (file, _("Observer debugging is %s.\n"), value);
 }
 
 void _initialize_observer ();

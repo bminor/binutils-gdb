@@ -289,6 +289,13 @@ i386_intel_simplify_register (expressionS *e)
       return 0;
     }
 
+  if (!check_register (&i386_regtab[reg_num]))
+    {
+      as_bad (_("register '%s%s' cannot be used here"),
+	      register_prefix, i386_regtab[reg_num].reg_name);
+      return 0;
+    }
+
   if (!intel_state.in_bracket)
     {
       if (i.op[this_operand].regs)
@@ -529,6 +536,9 @@ static int i386_intel_simplify (expressionS *e)
       if (e->X_add_symbol
 	  && !i386_intel_simplify_symbol (e->X_add_symbol))
 	return 0;
+      if (!the_reg && this_operand >= 0
+	  && e->X_op == O_symbol && !e->X_add_number)
+	the_reg = i.op[this_operand].regs;
       if (e->X_op == O_add || e->X_op == O_subtract)
 	{
 	  base = intel_state.base;

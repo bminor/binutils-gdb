@@ -1,5 +1,16 @@
 -*- text -*-
 
+* Add an option to objdump and readelf to prevent attempts to access debuginfod
+  servers when following links.
+* objcopy --weaken, --weaken-symbol, and --weaken-symbols now make ELF
+  STB_GNU_UNIQUE symbols weak.
+
+* objdump now supports syntax highlighting of disassembler output for some
+  architectures.  Use the --disassembler-color=MODE command line flag, with
+  mode being either off, color, or extended-color.
+
+Changes in 2.38:
+
 * elfedit: Add --output-abiversion option to update ABIVERSION.
 
 * Add support for the LoongArch instruction set.

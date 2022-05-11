@@ -18,19 +18,12 @@
 standard_testfile macscp1.c
 set objfile [standard_output_file ${testfile}.o]
 
-set options { debug additional_flags=-DFROM_COMMANDLINE=ARG}
-
-get_compiler_info
-if { [test_compiler_info "gcc-*"] } {
-    lappend options additional_flags=-g3
-} elseif { [test_compiler_info "clang-*"] } {
-    lappend options additional_flags=-fdebug-macro
-}
+set options {debug macros additional_flags=-DFROM_COMMANDLINE=ARG}
 
 # Generate the intermediate object file.  This is required by Darwin to
 # have access to the .debug_macinfo section.
 if  {[gdb_compile "${srcdir}/${subdir}/macscp1.c" "${objfile}" \
-	  object $options] != "" 
+	  object $options] != ""
      || [gdb_compile "${objfile}" "${binfile}" executable $options] != "" } {
     untested "failed to compile"
     return -1

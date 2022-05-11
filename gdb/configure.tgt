@@ -91,6 +91,11 @@ ia64*-*-*)
 	cpu_obs="ia64-tdep.o"
 	;;
 
+loongarch*-*-*)
+	# Target: LoongArch baremetal
+	cpu_obs="loongarch-tdep.o arch/loongarch.o"
+	;;
+
 riscv*-*-*)
 	cpu_obs="riscv-tdep.o riscv-none-tdep.o arch/riscv.o \
 	         ravenscar-thread.o riscv-ravenscar-thread.o";;
@@ -341,6 +346,12 @@ lm32-*-*)
 	gdb_target_obs="lm32-tdep.o" 
 	;;
 
+loongarch*-*-linux*)
+	# Target: LoongArch running Linux
+	gdb_target_obs="loongarch-linux-tdep.o glibc-tdep.o \
+			linux-tdep.o solib-svr4.o"
+	;;
+
 m32c-*-*)
 	# Target: Renesas M32C family
 	gdb_target_obs="m32c-tdep.o"
@@ -537,11 +548,6 @@ rl78-*-elf)
 rx-*-*)
 	# Target: Renesas RX
 	gdb_target_obs="rx-tdep.o"
-	;;
-
-score-*-*)
-	# Target: S+core embedded system
-	gdb_target_obs="score-tdep.o"
 	;;
 
 sh*-*-linux*)

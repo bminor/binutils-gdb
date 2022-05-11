@@ -29,6 +29,8 @@ if ![fortran_runto_main] {
 
 # Check the values of VLA's in subroutine can be evaluated correctly
 
+gdb_test_no_output "set print repeats unlimited"
+
 # Try to access values from a fixed array handled as VLA in subroutine.
 gdb_breakpoint [gdb_get_line_number "not-filled"]
 gdb_continue_to_breakpoint "not-filled (1st)"

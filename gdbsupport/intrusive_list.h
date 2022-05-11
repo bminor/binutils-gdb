@@ -24,15 +24,26 @@
 /* A list node.  The elements put in an intrusive_list either inherit
    from this, or have a field of this type.  */
 template<typename T>
-struct intrusive_list_node
+class intrusive_list_node
 {
+public:
   bool is_linked () const
   {
     return next != INTRUSIVE_LIST_UNLINKED_VALUE;
   }
 
+private:
   T *next = INTRUSIVE_LIST_UNLINKED_VALUE;
   T *prev = INTRUSIVE_LIST_UNLINKED_VALUE;
+
+  template<typename T2, typename AsNode>
+  friend struct intrusive_list_iterator;
+
+  template<typename T2, typename AsNode>
+  friend struct intrusive_list_reverse_iterator;
+
+  template<typename T2, typename AsNode>
+  friend struct intrusive_list;
 };
 
 /* Follows a couple types used by intrusive_list as template parameter to find

@@ -49,14 +49,15 @@ static bool skip_arch (const char *arch)
   return false;
 }
 
-/* Register a kind of selftest that calls the test function once for each
-   gdbarch known to GDB.  */
+/* Generate a selftest for each gdbarch known to GDB.  */
 
-void
-register_test_foreach_arch (const std::string &name,
-			    self_test_foreach_arch_function *function)
+static std::vector<selftest>
+foreach_arch_test_generator (const std::string &name,
+			     self_test_foreach_arch_function *function)
 {
+  std::vector<selftest> tests;
   std::vector<const char *> arches = gdbarch_printable_names ();
+  tests.reserve (arches.size ());
   for (const char *arch : arches)
     {
       if (skip_arch (arch))
@@ -73,10 +74,22 @@ register_test_foreach_arch (const std::string &name,
 	     reset ();
 	   });
 
-      std::string test_name
-	= name + std::string ("::") + std::string (arch);
-      register_test (test_name, test_fn);
+      tests.emplace_back (string_printf ("%s::%s", name.c_str (), arch),
+			  test_fn);
     }
+  return tests;
+}
+
+/* See selftest-arch.h.  */
+
+void
+register_test_foreach_arch (const std::string &name,
+			    self_test_foreach_arch_function *function)
+{
+  add_lazy_generator ([=] ()
+		      {
+		        return foreach_arch_test_generator (name, function);
+		      });
 }
 
 void

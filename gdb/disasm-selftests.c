@@ -135,14 +135,14 @@ print_one_insn_test (struct gdbarch *gdbarch)
     {
       if (run_verbose ())
 	{
-	  fprintf_unfiltered (stream (), "%s ",
-			      gdbarch_bfd_arch_info (arch ())->arch_name);
+	  gdb_printf (stream (), "%s ",
+		      gdbarch_bfd_arch_info (arch ())->arch_name);
 	}
 
       int len = gdb_disassembler::print_insn (memaddr);
 
       if (run_verbose ())
-	fprintf_unfiltered (stream (), "\n");
+	gdb_printf (stream (), "\n");
 
       return len;
     }

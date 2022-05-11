@@ -21,7 +21,7 @@
 #define OBJFILES_H
 
 #include "hashtab.h"
-#include "gdb_obstack.h"	/* For obstack internals.  */
+#include "gdbsupport/gdb_obstack.h"	/* For obstack internals.  */
 #include "objfile-flags.h"
 #include "symfile.h"
 #include "progspace.h"

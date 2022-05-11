@@ -80,14 +80,6 @@ extern unsigned long i386_mach (void);
 #define ELF_TARGET_FORMAT32	"elf32-x86-64"
 #endif
 
-#ifndef ELF_TARGET_L1OM_FORMAT
-#define ELF_TARGET_L1OM_FORMAT	"elf64-l1om"
-#endif
-
-#ifndef ELF_TARGET_K1OM_FORMAT
-#define ELF_TARGET_K1OM_FORMAT	"elf64-k1om"
-#endif
-
 #ifndef ELF_TARGET_IAMCU_FORMAT
 #define ELF_TARGET_IAMCU_FORMAT	"elf32-iamcu"
 #endif
@@ -244,8 +236,6 @@ enum processor_type
   PROCESSOR_CORE,
   PROCESSOR_CORE2,
   PROCESSOR_COREI7,
-  PROCESSOR_L1OM,
-  PROCESSOR_K1OM,
   PROCESSOR_IAMCU,
   PROCESSOR_K6,
   PROCESSOR_ATHLON,

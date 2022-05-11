@@ -684,7 +684,7 @@ dtrace_probe::is_enabled () const
 CORE_ADDR
 dtrace_probe::get_relocated_address (struct objfile *objfile)
 {
-  return this->get_address () + objfile->data_section_offset ();
+  return this->get_address () + objfile->text_section_offset ();
 }
 
 /* Implementation of the get_argument_count method.  */
@@ -851,7 +851,7 @@ dtrace_static_probe_ops::get_probes
 	  if (bfd_malloc_and_get_section (abfd, sect, &dof) && dof != NULL)
 	    dtrace_process_dof (sect, objfile, probesp,
 				(struct dtrace_dof_hdr *) dof);
-	 else
+	  else
 	    complaint (_("could not obtain the contents of"
 			 "section '%s' in objfile `%s'."),
 		       bfd_section_name (sect), bfd_get_filename (abfd));

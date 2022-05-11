@@ -6,7 +6,7 @@ the assembler (gas), the profiler (gprof), a whole suite of other
 programs (binutils) and the libraries that they use (bfd and
 opcodes).  This project shares a common set of header files with the
 GCC and GDB projects (include), so maintainership of those files is
-shared amoungst the projects.
+shared amongst the projects.
 
 The home page for binutils is:
 
@@ -43,6 +43,11 @@ repository without obtaining approval first:
   Alan Modra <amodra@gmail.com>
   Michael Meissner <gnu@the-meissners.org>
   Richard Sandiford <rdsandiford@googlemail.com>
+  Jan Beulich <jbeulich@suse.com>
+
+GDB global maintainers also have permission to commit and approve
+patches to the top level files and to those parts of bfd files
+primarily used by GDB.
 
       --------- Maintainers ---------
 
@@ -84,6 +89,7 @@ responsibility among the other maintainers.
   FRV		   Alexandre Oliva <aoliva@sourceware.org>
   GOLD		   Ian Lance Taylor <iant@google.com>
   GOLD		   Cary Coutant <ccoutant@gmail.com>
+  gprofng	   Vladimir Mezentsev <vladimir.mezentsev@oracle.com>
   H8300		   Prafulla Thakare <prafulla.thakare@kpitcummins.com>
   HPPA		   Dave Anglin <dave.anglin@bell.net>
   HPPA elf32	   Alan Modra <amodra@gmail.com>
@@ -93,7 +99,7 @@ responsibility among the other maintainers.
   ix86		   H.J. Lu <hjl.tools@gmail.com>
   ix86 COFF	   DJ Delorie <dj@redhat.com>
   ix86 PE/COFF	   Dave Korn <dave.korn.cygwin@gmail.com>
-  ix86 INTEL MODE  Jan Beulich <jbeulich@novell.com>
+  ix86 INTEL MODE  Jan Beulich <jbeulich@suse.com>
   LM32             Jon Beniston <jon@beniston.com>
   LoongArch	   Chenghua Xu <xuchenghua@loongson.cn>
   LoongArch	   Zhensong Liu <liuzhensong@loongson.cn>

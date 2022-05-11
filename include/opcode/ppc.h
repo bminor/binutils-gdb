@@ -336,9 +336,11 @@ extern const struct powerpc_operand powerpc_operands[];
 extern const unsigned int num_powerpc_operands;
 
 /* Use with the shift field of a struct powerpc_operand to indicate
-     that BITM and SHIFT cannot be used to determine where the operand
-     goes in the insn.  */
-#define PPC_OPSHIFT_INV (-1U << 31)
+   that BITM and SHIFT cannot be used to determine where the operand
+   goes in the insn.  */
+#define PPC_OPSHIFT_INV (1U << 30)
+/* A special case, 6-bit SH field.  */
+#define PPC_OPSHIFT_SH6 (2U << 30)
 
 /* Values defined for the flags field of a struct powerpc_operand.
    Keep the register bits low:  They need to fit in an unsigned short.  */
@@ -451,32 +453,6 @@ extern const unsigned int num_powerpc_operands;
 #define PPC_OPERAND_FSL (0x800000)
 #define PPC_OPERAND_FCR (0x1000000)
 #define PPC_OPERAND_UDI (0x2000000)
-
-/* The POWER and PowerPC assemblers use a few macros.  We keep them
-   with the operands table for simplicity.  The macro table is an
-   array of struct powerpc_macro.  */
-
-struct powerpc_macro
-{
-  /* The macro name.  */
-  const char *name;
-
-  /* The number of operands the macro takes.  */
-  unsigned int operands;
-
-  /* One bit flags for the opcode.  These are used to indicate which
-     specific processors support the instructions.  The values are the
-     same as those for the struct powerpc_opcode flags field.  */
-  ppc_cpu_t flags;
-
-  /* A format string to turn the macro into a normal instruction.
-     Each %N in the string is replaced with operand number N (zero
-     based).  */
-  const char *format;
-};
-
-extern const struct powerpc_macro powerpc_macros[];
-extern const int powerpc_num_macros;
 
 extern ppc_cpu_t ppc_parse_cpu (ppc_cpu_t, ppc_cpu_t *, const char *);
 

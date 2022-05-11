@@ -7,13 +7,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#define mybasename(x) ({ const char *x_ = (x), *y_ = strrchr (x_, '/'); y_ != NULL ? y_ + 1 : x_; })
 
 int main (int argc, char *argv[])
 {
   char path[1024] = "/";
   struct stat buf;
 
-  strcat (path, basename (argv[0]));
+  strcat (path, mybasename (argv[0]));
   if (stat (".", &buf) != 0
       || !S_ISDIR (buf.st_mode))
     abort ();

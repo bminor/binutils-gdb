@@ -25,6 +25,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #define SIM_FPU_H
 
 
+#include <stdbool.h>
+
 
 /* The FPU intermediate type - this object, passed by reference,
    should be treated as opaque.
@@ -157,6 +159,24 @@ typedef enum
 
 
 
+/* State used by the FPU.
+
+   FIXME: This state is global, but should be moved to SIM_CPU.  */
+
+typedef enum
+{
+  sim_fpu_ieee754_1985,
+  sim_fpu_ieee754_2008,
+} sim_fpu_mode;
+
+typedef struct _sim_fpu_state {
+  bool quiet_nan_inverted; /* Toggle quiet NaN semantics.  */
+  sim_fpu_mode current_mode;
+} sim_fpu_state;
+
+
+
+
 /* Directly map between a 32/64 bit register and the sim_fpu internal
    type.
 
@@ -248,6 +268,18 @@ INLINE_SIM_FPU (int) sim_fpu_sqrt (sim_fpu *f,
 
 
 
+/* NaN handling.
+
+   Assuming that at least one of the inputs is NAN choose the correct
+   NAN result for the binary operation.  */
+
+INLINE_SIM_FPU (int) sim_fpu_op_nan (sim_fpu *f,
+				     const sim_fpu *l, const sim_fpu *r);
+INLINE_SIM_FPU (int) sim_fpu_minmax_nan (sim_fpu *f,
+					 const sim_fpu *l, const sim_fpu *r);
+
+
+
 /* Conversion of integer <-> floating point. */
 
 INLINE_SIM_FPU (int) sim_fpu_i32to (sim_fpu *f, int32_t i,
@@ -295,7 +327,8 @@ INLINE_SIM_FPU (double) sim_fpu_2d (const sim_fpu *d);
 /* INLINE_SIM_FPU (void) sim_fpu_f2 (sim_fpu *f, float s); */
 INLINE_SIM_FPU (void) sim_fpu_d2 (sim_fpu *f, double d);
 
-
+/* IEEE754-2008 classifiction function.  */
+INLINE_SIM_FPU (int) sim_fpu_classify (const sim_fpu *f);
 
 /* Specific number classes.
 
@@ -344,7 +377,20 @@ INLINE_SIM_FPU (int) sim_fpu_is_ne (const sim_fpu *l, const sim_fpu *r);
 INLINE_SIM_FPU (int) sim_fpu_is_ge (const sim_fpu *l, const sim_fpu *r);
 INLINE_SIM_FPU (int) sim_fpu_is_gt (const sim_fpu *l, const sim_fpu *r);
 
+/* Unordered/ordered comparison operators.  */
 
+INLINE_SIM_FPU (int) sim_fpu_un (int *is, const sim_fpu *l, const sim_fpu *r);
+INLINE_SIM_FPU (int) sim_fpu_or (int *is, const sim_fpu *l, const sim_fpu *r);
+
+INLINE_SIM_FPU (int) sim_fpu_is_un (const sim_fpu *l, const sim_fpu *r);
+INLINE_SIM_FPU (int) sim_fpu_is_or (const sim_fpu *l, const sim_fpu *r);
+
+/* Changes the behaviour of the library to IEEE754-2008 or IEEE754-1985.
+   The default for the library is IEEE754-1985.  */
+
+INLINE_SIM_FPU (bool) sim_fpu_is_ieee754_1985 (void);
+INLINE_SIM_FPU (bool) sim_fpu_is_ieee754_2008 (void);
+INLINE_SIM_FPU (void) sim_fpu_set_mode (const sim_fpu_mode m);
 
 /* General number class and comparison operators.
 
@@ -375,7 +421,20 @@ enum {
 INLINE_SIM_FPU (int) sim_fpu_is (const sim_fpu *l);
 INLINE_SIM_FPU (int) sim_fpu_cmp (const sim_fpu *l, const sim_fpu *r);
 
+/* Global FPU state.  */
 
+extern sim_fpu_state _sim_fpu;
+
+
+/* IEEE 754-1985 specifies the top bit of the mantissa as an indicator
+   of signalling vs. quiet NaN, but does not specify the semantics.
+   Most architectures treat this bit as quiet NaN, but legacy (pre-R6)
+   MIPS goes the other way and treats it as signalling.  This variable
+   tracks the current semantics of the NaN bit and allows differentiation
+   between pre-R6 and R6 MIPS cores.  */
+
+#define sim_fpu_quiet_nan_inverted _sim_fpu.quiet_nan_inverted
+#define sim_fpu_current_mode _sim_fpu.current_mode
 
 /* A number of useful constants.  */
 

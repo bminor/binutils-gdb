@@ -1164,7 +1164,12 @@ regcache::transfer_regset_register (struct regcache *out_regcache, int regnum,
 	memset (out_buf + offs + reg_size, 0, slot_size - reg_size);
     }
   else if (in_buf != nullptr)
-    out_regcache->raw_supply_part (regnum, 0, reg_size, in_buf + offs);
+    {
+      /* Zero-extend the register value if the slot is smaller than the register.  */
+      if (slot_size < register_size (gdbarch, regnum))
+	out_regcache->raw_supply_zeroed (regnum);
+      out_regcache->raw_supply_part (regnum, 0, reg_size, in_buf + offs);
+    }
   else
     {
       /* Invalidate the register.  */
@@ -1378,34 +1383,34 @@ regcache::debug_print_register (const char *func,  int regno)
 {
   struct gdbarch *gdbarch = arch ();
 
-  fprintf_unfiltered (gdb_stdlog, "%s ", func);
+  gdb_printf (gdb_stdlog, "%s ", func);
   if (regno >= 0 && regno < gdbarch_num_regs (gdbarch)
       && gdbarch_register_name (gdbarch, regno) != NULL
       && gdbarch_register_name (gdbarch, regno)[0] != '\0')
-    fprintf_unfiltered (gdb_stdlog, "(%s)",
-			gdbarch_register_name (gdbarch, regno));
+    gdb_printf (gdb_stdlog, "(%s)",
+		gdbarch_register_name (gdbarch, regno));
   else
-    fprintf_unfiltered (gdb_stdlog, "(%d)", regno);
+    gdb_printf (gdb_stdlog, "(%d)", regno);
   if (regno >= 0 && regno < gdbarch_num_regs (gdbarch))
     {
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
       int size = register_size (gdbarch, regno);
       gdb_byte *buf = register_buffer (regno);
 
-      fprintf_unfiltered (gdb_stdlog, " = ");
+      gdb_printf (gdb_stdlog, " = ");
       for (int i = 0; i < size; i++)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
+	  gdb_printf (gdb_stdlog, "%02x", buf[i]);
 	}
       if (size <= sizeof (LONGEST))
 	{
 	  ULONGEST val = extract_unsigned_integer (buf, size, byte_order);
 
-	  fprintf_unfiltered (gdb_stdlog, " %s %s",
-			      core_addr_to_string_nz (val), plongest (val));
+	  gdb_printf (gdb_stdlog, " %s %s",
+		      core_addr_to_string_nz (val), plongest (val));
 	}
     }
-  fprintf_unfiltered (gdb_stdlog, "\n");
+  gdb_printf (gdb_stdlog, "\n");
 }
 
 /* Implement 'maint flush register-cache' command.  */
@@ -1416,7 +1421,7 @@ reg_flush_command (const char *command, int from_tty)
   /* Force-flush the register cache.  */
   registers_changed ();
   if (from_tty)
-    printf_filtered (_("Register cache flushed.\n"));
+    gdb_printf (_("Register cache flushed.\n"));
 }
 
 void
@@ -1436,7 +1441,7 @@ register_dump::dump (ui_file *file)
     {
       /* Name.  */
       if (regnum < 0)
-	fprintf_filtered (file, " %-10s", "Name");
+	gdb_printf (file, " %-10s", "Name");
       else
 	{
 	  const char *p = gdbarch_register_name (m_gdbarch, regnum);
@@ -1445,31 +1450,31 @@ register_dump::dump (ui_file *file)
 	    p = "";
 	  else if (p[0] == '\0')
 	    p = "''";
-	  fprintf_filtered (file, " %-10s", p);
+	  gdb_printf (file, " %-10s", p);
 	}
 
       /* Number.  */
       if (regnum < 0)
-	fprintf_filtered (file, " %4s", "Nr");
+	gdb_printf (file, " %4s", "Nr");
       else
-	fprintf_filtered (file, " %4d", regnum);
+	gdb_printf (file, " %4d", regnum);
 
       /* Relative number.  */
       if (regnum < 0)
-	fprintf_filtered (file, " %4s", "Rel");
+	gdb_printf (file, " %4s", "Rel");
       else if (regnum < gdbarch_num_regs (m_gdbarch))
-	fprintf_filtered (file, " %4d", regnum);
+	gdb_printf (file, " %4d", regnum);
       else
-	fprintf_filtered (file, " %4d",
-			  (regnum - gdbarch_num_regs (m_gdbarch)));
+	gdb_printf (file, " %4d",
+		    (regnum - gdbarch_num_regs (m_gdbarch)));
 
       /* Offset.  */
       if (regnum < 0)
-	fprintf_filtered (file, " %6s  ", "Offset");
+	gdb_printf (file, " %6s  ", "Offset");
       else
 	{
-	  fprintf_filtered (file, " %6ld",
-			    descr->register_offset[regnum]);
+	  gdb_printf (file, " %6ld",
+		      descr->register_offset[regnum]);
 	  if (register_offset != descr->register_offset[regnum]
 	      || (regnum > 0
 		  && (descr->register_offset[regnum]
@@ -1479,19 +1484,19 @@ register_dump::dump (ui_file *file)
 	    {
 	      if (!footnote_register_offset)
 		footnote_register_offset = ++footnote_nr;
-	      fprintf_filtered (file, "*%d", footnote_register_offset);
+	      gdb_printf (file, "*%d", footnote_register_offset);
 	    }
 	  else
-	    fprintf_filtered (file, "  ");
+	    gdb_printf (file, "  ");
 	  register_offset = (descr->register_offset[regnum]
 			     + descr->sizeof_register[regnum]);
 	}
 
       /* Size.  */
       if (regnum < 0)
-	fprintf_filtered (file, " %5s ", "Size");
+	gdb_printf (file, " %5s ", "Size");
       else
-	fprintf_filtered (file, " %5ld", descr->sizeof_register[regnum]);
+	gdb_printf (file, " %5ld", descr->sizeof_register[regnum]);
 
       /* Type.  */
       {
@@ -1517,24 +1522,24 @@ register_dump::dump (ui_file *file)
 	    if (startswith (t, blt))
 	      t += strlen (blt);
 	  }
-	fprintf_filtered (file, " %-15s", t);
+	gdb_printf (file, " %-15s", t);
       }
 
       /* Leading space always present.  */
-      fprintf_filtered (file, " ");
+      gdb_printf (file, " ");
 
       dump_reg (file, regnum);
 
-      fprintf_filtered (file, "\n");
+      gdb_printf (file, "\n");
     }
 
   if (footnote_register_offset)
-    fprintf_filtered (file, "*%d: Inconsistent register offsets.\n",
-		      footnote_register_offset);
+    gdb_printf (file, "*%d: Inconsistent register offsets.\n",
+		footnote_register_offset);
   if (footnote_register_type_name_null)
-    fprintf_filtered (file,
-		      "*%d: Register type's name NULL.\n",
-		      footnote_register_type_name_null);
+    gdb_printf (file,
+		"*%d: Register type's name NULL.\n",
+		footnote_register_type_name_null);
 }
 
 #if GDB_SELF_TEST
@@ -1939,30 +1944,9 @@ cooked_read_test (struct gdbarch *gdbarch)
 static void
 cooked_write_test (struct gdbarch *gdbarch)
 {
-  /* Error out if debugging something, because we're going to push the
-     test target, which would pop any existing target.  */
-  if (current_inferior ()->top_target ()->stratum () >= process_stratum)
-    error (_("target already pushed"));
-
   /* Create a mock environment.  A process_stratum target pushed.  */
-
-  target_ops_no_register mock_target;
-
-  /* Push the process_stratum target so we can mock accessing
-     registers.  */
-  current_inferior ()->push_target (&mock_target);
-
-  /* Pop it again on exit (return/exception).  */
-  struct on_exit
-  {
-    ~on_exit ()
-    {
-      pop_all_targets_at_and_above (process_stratum);
-    }
-  } pop_targets;
-
-  readwrite_regcache readwrite (&mock_target, gdbarch);
-
+  scoped_mock_context<target_ops_no_register> ctx (gdbarch);
+  readwrite_regcache readwrite (&ctx.mock_target, gdbarch);
   const int num_regs = gdbarch_num_cooked_regs (gdbarch);
 
   for (auto regnum = 0; regnum < num_regs; regnum++)

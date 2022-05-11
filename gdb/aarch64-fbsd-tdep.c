@@ -23,6 +23,7 @@
 #include "fbsd-tdep.h"
 #include "aarch64-tdep.h"
 #include "aarch64-fbsd-tdep.h"
+#include "inferior.h"
 #include "osabi.h"
 #include "solib-svr4.h"
 #include "target.h"
@@ -142,10 +143,66 @@ aarch64_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					   void *cb_data,
 					   const struct regcache *regcache)
 {
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
   cb (".reg", AARCH64_FBSD_SIZEOF_GREGSET, AARCH64_FBSD_SIZEOF_GREGSET,
       &aarch64_fbsd_gregset, NULL, cb_data);
   cb (".reg2", AARCH64_FBSD_SIZEOF_FPREGSET, AARCH64_FBSD_SIZEOF_FPREGSET,
       &aarch64_fbsd_fpregset, NULL, cb_data);
+
+  if (tdep->has_tls ())
+    {
+      const struct regcache_map_entry aarch64_fbsd_tls_regmap[] =
+	{
+	  { 1, tdep->tls_regnum, 8 },
+	  { 0 }
+	};
+
+      const struct regset aarch64_fbsd_tls_regset =
+	{
+	  aarch64_fbsd_tls_regmap,
+	  regcache_supply_regset, regcache_collect_regset
+	};
+
+      cb (".reg-aarch-tls", AARCH64_FBSD_SIZEOF_TLSREGSET,
+	  AARCH64_FBSD_SIZEOF_TLSREGSET, &aarch64_fbsd_tls_regset,
+	  "TLS register", cb_data);
+    }
+}
+
+/* Implement the "core_read_description" gdbarch method.  */
+
+static const struct target_desc *
+aarch64_fbsd_core_read_description (struct gdbarch *gdbarch,
+				    struct target_ops *target, bfd *abfd)
+{
+  asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
+
+  return aarch64_read_description (0, false, false, tls != nullptr);
+}
+
+/* Implement the get_thread_local_address gdbarch method.  */
+
+static CORE_ADDR
+aarch64_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
+				       CORE_ADDR lm_addr, CORE_ADDR offset)
+{
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  struct regcache *regcache;
+
+  regcache = get_thread_arch_regcache (current_inferior ()->process_target (),
+				       ptid, gdbarch);
+
+  target_fetch_registers (regcache, tdep->tls_regnum);
+
+  ULONGEST tpidr;
+  if (regcache->cooked_read (tdep->tls_regnum, &tpidr) != REG_VALID)
+    error (_("Unable to fetch %%tpidr"));
+
+  /* %tpidr points to the TCB whose first member is the dtv
+      pointer.  */
+  CORE_ADDR dtv_addr = tpidr;
+  return fbsd_get_thread_local_address (gdbarch, dtv_addr, lm_addr, offset);
 }
 
 /* Implement the 'init_osabi' method of struct gdb_osabi_handler.  */
@@ -168,6 +225,16 @@ aarch64_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_iterate_over_regset_sections
     (gdbarch, aarch64_fbsd_iterate_over_regset_sections);
+  set_gdbarch_core_read_description (gdbarch,
+				     aarch64_fbsd_core_read_description);
+
+  if (tdep->has_tls ())
+    {
+      set_gdbarch_fetch_tls_load_module_address (gdbarch,
+						 svr4_fetch_objfile_link_map);
+      set_gdbarch_get_thread_local_address
+	(gdbarch, aarch64_fbsd_get_thread_local_address);
+    }
 }
 
 void _initialize_aarch64_fbsd_tdep ();

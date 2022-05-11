@@ -467,14 +467,9 @@ proc_with_prefix do_command_attach_tests {} {
 
     gdb_exit
 
-    set res [gdb_spawn_with_cmdline_opts \
-		 "-quiet -iex \"set height 0\" -iex \"set width 0\" --pid=$testpid"]
-    set test "starting with --pid"
-    gdb_test_multiple "" $test {
-	-re "Reading symbols from.*$gdb_prompt $" {
-	    pass "$test"
-	}
-    }
+    # gdb_spawn_attach_cmdline records test results.  No need to explicitly
+    # call pass/fail here.
+    gdb_spawn_attach_cmdline $testpid
 
     # Get rid of the process
     kill_wait_spawned_process $test_spawn_id

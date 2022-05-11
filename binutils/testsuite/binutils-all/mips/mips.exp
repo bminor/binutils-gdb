@@ -238,6 +238,14 @@ run_dump_test_o32 "mips16-extend-insn" noarch
 run_dump_test_o32 "mips16e2-extend-insn" noarch
 run_dump_test_o32 "mips16-alias" noarch
 run_dump_test_o32 "mips16-noalias" noarch
+run_dump_test_o32 "mips1-branch-alias"
+run_dump_test_o32 "mips1-branch-noalias"
+run_dump_test_o32 "mips2-branch-alias"
+run_dump_test_o32 "mips2-branch-noalias"
+run_dump_test_o32 "mips32r6-branch-alias"
+run_dump_test_o32 "mips32r6-branch-noalias"
+run_dump_test_o32 "micromips-branch-alias"
+run_dump_test_o32 "micromips-branch-noalias"
 
 run_dump_test_o32 "mips-note-2"
 run_dump_test_n32 "mips-note-2-n32"

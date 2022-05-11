@@ -31,7 +31,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include "gdbcore.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "symfile.h"
 #include "objfiles.h"
 #include "annotate.h"
@@ -50,6 +50,7 @@
 #include "observable.h"
 #include "build-id.h"
 #include "debuginfod-support.h"
+#include "gdbsupport/buildargv.h"
 
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
@@ -127,10 +128,10 @@ static void
 show_lines_to_list (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Number of source lines gdb "
-		      "will list by default is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Number of source lines gdb "
+		"will list by default is %s.\n"),
+	      value);
 }
 
 /* Possible values of 'set filename-display'.  */
@@ -151,7 +152,7 @@ static void
 show_filename_display_string (struct ui_file *file, int from_tty,
 			      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Filenames are displayed as \"%s\".\n"), value);
+  gdb_printf (file, _("Filenames are displayed as \"%s\".\n"), value);
 }
 
 /* When true GDB will stat and open source files as required, but when
@@ -165,7 +166,7 @@ static void
 show_source_open (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Source opening is \"%s\".\n"), value);
+  gdb_printf (file, _("Source opening is \"%s\".\n"), value);
 }
 
 /* Line number of last line printed.  Default for various commands.
@@ -310,7 +311,7 @@ select_source_symtab (struct symtab *s)
   if (s)
     {
       current_source_location *loc
-	= get_source_location (SYMTAB_PSPACE (s));
+	= get_source_location (s->compunit ()->objfile ()->pspace);
       loc->set (s, 1);
       return;
     }
@@ -322,13 +323,13 @@ select_source_symtab (struct symtab *s)
   /* Make the default place to list be the function `main'
      if one exists.  */
   block_symbol bsym = lookup_symbol (main_name (), 0, VAR_DOMAIN, 0);
-  if (bsym.symbol != nullptr && SYMBOL_CLASS (bsym.symbol) == LOC_BLOCK)
+  if (bsym.symbol != nullptr && bsym.symbol->aclass () == LOC_BLOCK)
     {
       symtab_and_line sal = find_function_start_sal (bsym.symbol, true);
       if (sal.symtab == NULL)
 	/* We couldn't find the location of `main', possibly due to missing
 	   line number info, fall back to line 1 in the corresponding file.  */
-	loc->set (symbol_symtab (bsym.symbol), 1);
+	loc->set (bsym.symbol->symtab (), 1);
       else
 	loc->set (sal.symtab, std::max (sal.line - (lines_to_list - 1), 1));
       return;
@@ -343,7 +344,7 @@ select_source_symtab (struct symtab *s)
     {
       for (compunit_symtab *cu : ofp->compunits ())
 	{
-	  for (symtab *symtab : compunit_filetabs (cu))
+	  for (symtab *symtab : cu->filetabs ())
 	    {
 	      const char *name = symtab->filename;
 	      int len = strlen (name);
@@ -402,9 +403,9 @@ set_directories_command (const char *args,
 static void
 show_directories_1 (ui_file *file, char *ignore, int from_tty)
 {
-  fputs_filtered ("Source directories searched: ", file);
-  fputs_filtered (source_path.c_str (), file);
-  fputs_filtered ("\n", file);
+  gdb_puts ("Source directories searched: ", file);
+  gdb_puts (source_path.c_str (), file);
+  gdb_puts ("\n", file);
 }
 
 /* Handler for "show directories" command.  */
@@ -423,7 +424,7 @@ forget_cached_source_info_for_objfile (struct objfile *objfile)
 {
   for (compunit_symtab *cu : objfile->compunits ())
     {
-      for (symtab *s : compunit_filetabs (cu))
+      for (symtab *s : cu->filetabs ())
 	{
 	  if (s->fullname != NULL)
 	    {
@@ -536,15 +537,15 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 
   for (const gdb::unique_xmalloc_ptr<char> &name_up : dir_vec)
     {
-      char *name = name_up.get ();
+      const char *name = name_up.get ();
       char *p;
       struct stat st;
-      gdb::unique_xmalloc_ptr<char> new_name_holder;
+      std::string new_name_holder;
 
       /* Spaces and tabs will have been removed by buildargv().
 	 NAME is the start of the directory.
 	 P is the '\0' following the end.  */
-      p = name + strlen (name);
+      p = name_up.get () + strlen (name);
 
       while (!(IS_DIR_SEPARATOR (*name) && p <= name + 1)	/* "/" */
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
@@ -588,16 +589,18 @@ add_path (const char *dirname, char **which_path, int parse_separators)
       if (name[0] == '\0')
         goto skip_dup;
       if (name[0] == '~')
-	new_name_holder.reset (tilde_expand (name));
+	new_name_holder
+	  = gdb::unique_xmalloc_ptr<char[]> (tilde_expand (name)).get ();
 #ifdef HAVE_DOS_BASED_FILE_SYSTEM
       else if (IS_ABSOLUTE_PATH (name) && p == name + 2) /* "d:" => "d:." */
-	new_name_holder.reset (concat (name, ".", (char *) NULL));
+	new_name_holder = std::string (name) + ".";
 #endif
       else if (!IS_ABSOLUTE_PATH (name) && name[0] != '$')
 	new_name_holder = gdb_abspath (name);
       else
-	new_name_holder.reset (savestring (name, p - name));
-      name = new_name_holder.get ();
+	new_name_holder = std::string (name, p - name);
+
+      name = new_name_holder.c_str ();
 
       /* Unless it's a variable, check existence.  */
       if (name[0] != '$')
@@ -615,7 +618,7 @@ add_path (const char *dirname, char **which_path, int parse_separators)
 	    {
 	      int save_errno = errno;
 
-	      fprintf_unfiltered (gdb_stderr, "Warning: ");
+	      gdb_printf (gdb_stderr, "Warning: ");
 	      print_sys_errmsg (name, save_errno);
 	    }
 	  else if ((st.st_mode & S_IFMT) != S_IFDIR)
@@ -706,30 +709,31 @@ info_source_command (const char *ignore, int from_tty)
 
   if (!s)
     {
-      printf_filtered (_("No current source file.\n"));
+      gdb_printf (_("No current source file.\n"));
       return;
     }
 
-  cust = SYMTAB_COMPUNIT (s);
-  printf_filtered (_("Current source file is %s\n"), s->filename);
-  if (SYMTAB_DIRNAME (s) != NULL)
-    printf_filtered (_("Compilation directory is %s\n"), SYMTAB_DIRNAME (s));
+  cust = s->compunit ();
+  gdb_printf (_("Current source file is %s\n"), s->filename);
+  if (s->compunit ()->dirname () != NULL)
+    gdb_printf (_("Compilation directory is %s\n"), s->compunit ()->dirname ());
   if (s->fullname)
-    printf_filtered (_("Located in %s\n"), s->fullname);
+    gdb_printf (_("Located in %s\n"), s->fullname);
   const std::vector<off_t> *offsets;
   if (g_source_cache.get_line_charpos (s, &offsets))
-    printf_filtered (_("Contains %d line%s.\n"), (int) offsets->size (),
-		     offsets->size () == 1 ? "" : "s");
+    gdb_printf (_("Contains %d line%s.\n"), (int) offsets->size (),
+		offsets->size () == 1 ? "" : "s");
 
-  printf_filtered (_("Source language is %s.\n"), language_str (s->language));
-  printf_filtered (_("Producer is %s.\n"),
-		   COMPUNIT_PRODUCER (cust) != NULL
-		   ? COMPUNIT_PRODUCER (cust) : _("unknown"));
-  printf_filtered (_("Compiled with %s debugging format.\n"),
-		   COMPUNIT_DEBUGFORMAT (cust));
-  printf_filtered (_("%s preprocessor macro info.\n"),
-		   COMPUNIT_MACRO_TABLE (cust) != NULL
-		   ? "Includes" : "Does not include");
+  gdb_printf (_("Source language is %s.\n"),
+	      language_str (s->language ()));
+  gdb_printf (_("Producer is %s.\n"),
+	      (cust->producer ()) != nullptr
+	      ? cust->producer () : _("unknown"));
+  gdb_printf (_("Compiled with %s debugging format.\n"),
+	      cust->debugformat ());
+  gdb_printf (_("%s preprocessor macro info.\n"),
+	      (cust->macro_table () != nullptr
+	       ? "Includes" : "Does not include"));
 }
 
 
@@ -948,7 +952,8 @@ done:
       else if ((opts & OPF_RETURN_REALPATH) != 0)
 	*filename_opened = gdb_realpath (filename);
       else
-	*filename_opened = gdb_abspath (filename);
+	*filename_opened
+	  = make_unique_xstrdup (gdb_abspath (filename).c_str ());
     }
 
   errno = last_errno;
@@ -1178,21 +1183,21 @@ open_source_file (struct symtab *s)
 
   gdb::unique_xmalloc_ptr<char> fullname (s->fullname);
   s->fullname = NULL;
-  scoped_fd fd = find_and_open_source (s->filename, SYMTAB_DIRNAME (s),
+  scoped_fd fd = find_and_open_source (s->filename, s->compunit ()->dirname (),
 				       &fullname);
 
   if (fd.get () < 0)
     {
-      if (SYMTAB_COMPUNIT (s) != nullptr)
+      if (s->compunit () != nullptr)
 	{
-	  const objfile *ofp = COMPUNIT_OBJFILE (SYMTAB_COMPUNIT (s));
+	  const objfile *ofp = s->compunit ()->objfile ();
 
 	  std::string srcpath;
 	  if (IS_ABSOLUTE_PATH (s->filename))
 	    srcpath = s->filename;
-	  else if (SYMTAB_DIRNAME (s) != nullptr)
+	  else if (s->compunit ()->dirname () != nullptr)
 	    {
-	      srcpath = SYMTAB_DIRNAME (s);
+	      srcpath = s->compunit ()->dirname ();
 	      srcpath += SLASH_STRING;
 	      srcpath += s->filename;
 	    }
@@ -1266,10 +1271,11 @@ symtab_to_fullname (struct symtab *s)
 	  /* rewrite_source_path would be applied by find_and_open_source, we
 	     should report the pathname where GDB tried to find the file.  */
 
-	  if (SYMTAB_DIRNAME (s) == NULL || IS_ABSOLUTE_PATH (s->filename))
+	  if (s->compunit ()->dirname () == nullptr
+	      || IS_ABSOLUTE_PATH (s->filename))
 	    fullname.reset (xstrdup (s->filename));
 	  else
-	    fullname.reset (concat (SYMTAB_DIRNAME (s), SLASH_STRING,
+	    fullname.reset (concat (s->compunit ()->dirname (), SLASH_STRING,
 				    s->filename, (char *) NULL));
 
 	  s->fullname = rewrite_source_path (fullname.get ()).release ();
@@ -1540,48 +1546,48 @@ info_line_command (const char *arg, int from_tty)
 	{
 	  struct gdbarch *gdbarch = get_current_arch ();
 
-	  printf_filtered (_("No line number information available"));
+	  gdb_printf (_("No line number information available"));
 	  if (sal.pc != 0)
 	    {
 	      /* This is useful for "info line *0x7f34".  If we can't tell the
 		 user about a source line, at least let them have the symbolic
 		 address.  */
-	      printf_filtered (" for address ");
-	      wrap_here ("  ");
+	      gdb_printf (" for address ");
+	      gdb_stdout->wrap_here (2);
 	      print_address (gdbarch, sal.pc, gdb_stdout);
 	    }
 	  else
-	    printf_filtered (".");
-	  printf_filtered ("\n");
+	    gdb_printf (".");
+	  gdb_printf ("\n");
 	}
       else if (sal.line > 0
 	       && find_line_pc_range (sal, &start_pc, &end_pc))
 	{
-	  struct gdbarch *gdbarch = SYMTAB_OBJFILE (sal.symtab)->arch ();
+	  gdbarch *gdbarch = sal.symtab->compunit ()->objfile ()->arch ();
 
 	  if (start_pc == end_pc)
 	    {
-	      printf_filtered ("Line %d of \"%s\"",
-			       sal.line,
-			       symtab_to_filename_for_display (sal.symtab));
-	      wrap_here ("  ");
-	      printf_filtered (" is at address ");
+	      gdb_printf ("Line %d of \"%s\"",
+			  sal.line,
+			  symtab_to_filename_for_display (sal.symtab));
+	      gdb_stdout->wrap_here (2);
+	      gdb_printf (" is at address ");
 	      print_address (gdbarch, start_pc, gdb_stdout);
-	      wrap_here ("  ");
-	      printf_filtered (" but contains no code.\n");
+	      gdb_stdout->wrap_here (2);
+	      gdb_printf (" but contains no code.\n");
 	    }
 	  else
 	    {
-	      printf_filtered ("Line %d of \"%s\"",
-			       sal.line,
-			       symtab_to_filename_for_display (sal.symtab));
-	      wrap_here ("  ");
-	      printf_filtered (" starts at address ");
+	      gdb_printf ("Line %d of \"%s\"",
+			  sal.line,
+			  symtab_to_filename_for_display (sal.symtab));
+	      gdb_stdout->wrap_here (2);
+	      gdb_printf (" starts at address ");
 	      print_address (gdbarch, start_pc, gdb_stdout);
-	      wrap_here ("  ");
-	      printf_filtered (" and ends at ");
+	      gdb_stdout->wrap_here (2);
+	      gdb_printf (" and ends at ");
 	      print_address (gdbarch, end_pc, gdb_stdout);
-	      printf_filtered (".\n");
+	      gdb_printf (".\n");
 	    }
 
 	  /* x/i should display this line's code.  */
@@ -1599,8 +1605,8 @@ info_line_command (const char *arg, int from_tty)
 	/* Is there any case in which we get here, and have an address
 	   which the user would want to see?  If we have debugging symbols
 	   and no line numbers?  */
-	printf_filtered (_("Line number %d is out of range for \"%s\".\n"),
-			 sal.line, symtab_to_filename_for_display (sal.symtab));
+	gdb_printf (_("Line number %d is out of range for \"%s\".\n"),
+		    sal.line, symtab_to_filename_for_display (sal.symtab));
     }
 }
 
@@ -1697,7 +1703,7 @@ search_command_helper (const char *regex, int from_tty, bool forward)
 	}
     }
 
-  printf_filtered (_("Expression not found\n"));
+  gdb_printf (_("Expression not found\n"));
 }
 
 static void
@@ -1755,16 +1761,16 @@ show_substitute_path_command (const char *args, int from_tty)
   /* Print the substitution rules.  */
 
   if (from != NULL)
-    printf_filtered
+    gdb_printf
       (_("Source path substitution rule matching `%s':\n"), from);
   else
-    printf_filtered (_("List of all source path substitution rules:\n"));
+    gdb_printf (_("List of all source path substitution rules:\n"));
 
   for (substitute_path_rule &rule : substitute_path_rules)
     {
       if (from == NULL || substitute_path_rule_matches (&rule, from) != 0)
-	printf_filtered ("  `%s' -> `%s'.\n", rule.from.c_str (),
-			 rule.to.c_str ());
+	gdb_printf ("  `%s' -> `%s'.\n", rule.from.c_str (),
+		    rule.to.c_str ());
     }
 }
 
@@ -1923,9 +1929,6 @@ DIR can also be $cwd for the current working directory, or $cdir for the\n\
 directory in which the source file was compiled into object code.\n\
 With no argument, reset the search path to $cdir:$cwd, the default."),
 	       &cmdlist);
-
-  if (dbx_commands)
-    add_com_alias ("use", directory_cmd, class_files, 0);
 
   set_cmd_completer (directory_cmd, filename_completer);
 

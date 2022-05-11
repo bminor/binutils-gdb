@@ -292,10 +292,10 @@ lm_addr_check (const struct so_list *so, bfd *abfd)
 	      && (l_addr & align) == ((l_dynaddr - dynaddr) & align))
 	    {
 	      if (info_verbose)
-		printf_unfiltered (_("Using PIC (Position Independent Code) "
-				     "prelink displacement %s for \"%s\".\n"),
-				   paddress (target_gdbarch (), l_addr),
-				   so->so_name);
+		gdb_printf (_("Using PIC (Position Independent Code) "
+			      "prelink displacement %s for \"%s\".\n"),
+			    paddress (target_gdbarch (), l_addr),
+			    so->so_name);
 	    }
 	  else
 	    {
@@ -713,7 +713,7 @@ elf_locate_base (void)
   msymbol = lookup_minimal_symbol ("_r_debug", NULL,
 				   current_program_space->symfile_object_file);
   if (msymbol.minsym != NULL)
-    return BMSYMBOL_VALUE_ADDRESS (msymbol);
+    return msymbol.value_address ();
 
   /* DT_DEBUG entry not found.  */
   return 0;
@@ -1452,11 +1452,6 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
   /* svr4_current_sos() will set main_lm_addr for the main executable.  */
   if (objfile == current_program_space->symfile_object_file)
     return info->main_lm_addr;
-
-  /* If OBJFILE is a separate debug object file, look for the
-     original object file.  */
-  if (objfile->separate_debug_objfile_backlink != NULL)
-    objfile = objfile->separate_debug_objfile_backlink;
 
   /* The other link map addresses may be found by examining the list
      of shared libraries.  */
@@ -2374,9 +2369,9 @@ enable_break (struct svr4_info *info, int from_tty)
     {
       msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, objf);
       if ((msymbol.minsym != NULL)
-	  && (BMSYMBOL_VALUE_ADDRESS (msymbol) != 0))
+	  && (msymbol.value_address () != 0))
 	{
-	  sym_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
+	  sym_addr = msymbol.value_address ();
 	  sym_addr = gdbarch_convert_from_func_ptr_addr
 	    (target_gdbarch (), sym_addr, current_inferior ()->top_target ());
 	  svr4_create_solib_event_breakpoints (info, target_gdbarch (),
@@ -2391,9 +2386,9 @@ enable_break (struct svr4_info *info, int from_tty)
 	{
 	  msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, objf);
 	  if ((msymbol.minsym != NULL)
-	      && (BMSYMBOL_VALUE_ADDRESS (msymbol) != 0))
+	      && (msymbol.value_address () != 0))
 	    {
-	      sym_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
+	      sym_addr = msymbol.value_address ();
 	      sym_addr = gdbarch_convert_from_func_ptr_addr
 		(target_gdbarch (), sym_addr,
 		 current_inferior ()->top_target ());
@@ -2834,10 +2829,10 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 	 the executable symbols/file has been already relocated to
 	 displacement.  */
 
-      printf_unfiltered (_("Using PIE (Position Independent Executable) "
-			   "displacement %s for \"%s\".\n"),
-			 paddress (target_gdbarch (), exec_displacement),
-			 bfd_get_filename (current_program_space->exec_bfd ()));
+      gdb_printf (_("Using PIE (Position Independent Executable) "
+		    "displacement %s for \"%s\".\n"),
+		  paddress (target_gdbarch (), exec_displacement),
+		  bfd_get_filename (current_program_space->exec_bfd ()));
     }
 
   *displacementp = exec_displacement;

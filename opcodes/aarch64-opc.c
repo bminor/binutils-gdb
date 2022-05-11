@@ -3974,7 +3974,6 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
   SYSREG ((n), (e), (f) | F_ARCHEXT, \
 	  AARCH64_FEATURE_##fe1 | AARCH64_FEATURE_##fe2)
 
-#define SR_RNG(n,e,f)	 SR_FEAT2(n,e,f,RNG,V8_5)
 #define SR_V8_1_A(n,e,f) SR_FEAT2(n,e,f,V8_A,V8_1)
 #define SR_V8_4_A(n,e,f) SR_FEAT2(n,e,f,V8_A,V8_4)
 
@@ -3994,6 +3993,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
 #define SR_LOR(n,e,f)	  SR_FEAT (n,e,f,LOR)
 #define SR_PAN(n,e,f)	  SR_FEAT (n,e,f,PAN)
 #define SR_RAS(n,e,f)	  SR_FEAT (n,e,f,RAS)
+#define SR_RNG(n,e,f)	  SR_FEAT (n,e,f,RNG)
 #define SR_SME(n,e,f)	  SR_FEAT (n,e,f,SME)
 #define SR_SSBS(n,e,f)	  SR_FEAT (n,e,f,SSBS)
 #define SR_SVE(n,e,f)	  SR_FEAT (n,e,f,SVE)

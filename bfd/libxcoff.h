@@ -99,6 +99,15 @@ struct xcoff_backend_data_rec
   unsigned int _xcoff_rtinit_size;
   bool (*_xcoff_generate_rtinit)
     (bfd *, const char *, const char *, bool);
+
+  /* Stubs code generation.
+     The code part is an array which might need to be modified by
+     some relocations.
+     The size is in bytes.  */
+  const unsigned long *_xcoff_stub_indirect_call_code;
+  unsigned long _xcoff_stub_indirect_call_size;
+  const unsigned long *_xcoff_stub_shared_call_code;
+  unsigned long _xcoff_stub_shared_call_size;
 };
 
 /* Look up an entry in an XCOFF link hash table.  */
@@ -185,6 +194,11 @@ struct xcoff_backend_data_rec
 #define bfd_xcoff_glink_code(a, b)   ((xcoff_backend (a)->_xcoff_glink_code[(b)]))
 #define bfd_xcoff_glink_code_size(a) ((xcoff_backend (a)->_xcoff_glink_size))
 
+#define bfd_xcoff_stub_indirect_call_code(a, b)   ((xcoff_backend (a)->_xcoff_stub_indirect_call_code[(b)]))
+#define bfd_xcoff_stub_indirect_call_size(a) ((xcoff_backend (a)->_xcoff_stub_indirect_call_size))
+#define bfd_xcoff_stub_shared_call_code(a, b)   ((xcoff_backend (a)->_xcoff_stub_shared_call_code[(b)]))
+#define bfd_xcoff_stub_shared_call_size(a) ((xcoff_backend (a)->_xcoff_stub_shared_call_size))
+
 /* Check for the magic number U803XTOCMAGIC or U64_TOCMAGIC for 64 bit
    targets.  */
 #define bfd_xcoff_is_xcoff64(a) \
@@ -211,11 +225,12 @@ struct xcoff_backend_data_rec
 #define N_ONES(n) (((((bfd_vma) 1 << ((n) - 1)) - 1) << 1) | 1)
 
 typedef bool xcoff_reloc_function (bfd *, asection *, bfd *,
-					  struct internal_reloc *,
-					  struct internal_syment *,
-					  struct reloc_howto_struct *,
-					  bfd_vma, bfd_vma,
-					  bfd_vma *, bfd_byte *);
+				   struct internal_reloc *,
+				   struct internal_syment *,
+				   struct reloc_howto_struct *,
+				   bfd_vma, bfd_vma,
+				   bfd_vma *, bfd_byte *,
+				   struct bfd_link_info *);
 
 typedef bool xcoff_complain_function (bfd *, bfd_vma, bfd_vma,
 					     struct reloc_howto_struct *);
@@ -260,5 +275,43 @@ struct xcoff_dwsect_name {
 /* The dwarf sections array.  */
 extern const struct xcoff_dwsect_name
   xcoff_dwsect_names[XCOFF_DWSECT_NBR_NAMES];
+
+/* Structure and functions needed by backend in order to handle
+   stubs created in xcofflink.c.  */
+
+enum xcoff_stub_type
+  {
+    xcoff_stub_none,
+    xcoff_stub_indirect_call,
+    xcoff_stub_shared_call
+  };
+
+struct xcoff_stub_hash_entry
+{
+  /* Base hash table entry structure.  */
+  struct bfd_hash_entry root;
+
+  enum xcoff_stub_type stub_type;
+
+  /* The hash table entry of the stub's csect.  */
+  struct xcoff_link_hash_entry *hcsect;
+
+  /* Offset in the stub's csect.  */
+  bfd_vma stub_offset;
+
+  /* The target's section.  */
+  asection *target_section;
+
+  /* The target's hash table entry.  */
+  struct xcoff_link_hash_entry *htarget;
+};
+
+
+extern enum xcoff_stub_type bfd_xcoff_type_of_stub
+  (asection *, const struct internal_reloc *, bfd_vma,
+   struct xcoff_link_hash_entry *);
+
+extern struct xcoff_stub_hash_entry *bfd_xcoff_get_stub_entry
+  (asection *, struct xcoff_link_hash_entry *, struct bfd_link_info *);
 
 #endif /* LIBXCOFF_H */

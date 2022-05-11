@@ -904,6 +904,26 @@ ext_lang_colorize (const std::string &filename, const std::string &contents)
   return result;
 }
 
+/* See extension.h.  */
+
+gdb::optional<std::string>
+ext_lang_colorize_disasm (const std::string &content, gdbarch *gdbarch)
+{
+  gdb::optional<std::string> result;
+
+  for (const struct extension_language_defn *extlang : extension_languages)
+    {
+      if (extlang->ops == nullptr
+	  || extlang->ops->colorize_disasm == nullptr)
+	continue;
+      result = extlang->ops->colorize_disasm (content, gdbarch);
+      if (result.has_value ())
+	return result;
+    }
+
+  return result;
+}
+
 /* Called via an observer before gdb prints its prompt.
    Iterate over the extension languages giving them a chance to
    change the prompt.  The first one to change the prompt wins,

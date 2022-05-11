@@ -77,11 +77,7 @@ gdb_py_test_silent_cmd "python addr = gdb.selected_frame ().read_var ('str')" \
   "read str address" 0
 gdb_py_test_silent_cmd "python str = gdb.inferiors()\[0\].read_memory (addr, 5); print(str)" \
   "read str contents" 1
-if { $gdb_py_is_py3k == 0 } {
-  gdb_py_test_silent_cmd "python a = 'a'" "" 0
-} else {
-  gdb_py_test_silent_cmd "python a = bytes('a', 'ascii')" "" 0
-}
+gdb_py_test_silent_cmd "python a = bytes('a', 'ascii')" "" 0
 gdb_py_test_silent_cmd "python str\[1\] = a" "change str" 0
 gdb_py_test_silent_cmd "python gdb.inferiors()\[0\].write_memory (addr, str)" \
   "write str" 1
@@ -220,6 +216,7 @@ with_test_prefix "is_valid" {
     gdb_test "python print (inf_list\[0\].is_valid())" "True" \
 	"check inferior validity 1"
 
+    # The "dummy" line below used to cause a gdb crash.
     gdb_test_multiline "install new inferior event handler" \
 	"python" "" \
 	"my_inferior_count = 1" "" \
@@ -227,6 +224,7 @@ with_test_prefix "is_valid" {
 	"  global my_inferior_count" "" \
 	"  if evt.inferior is not None:" "" \
 	"    my_inferior_count = my_inferior_count + 1" "" \
+	"    dummy = gdb.Value(True)" "" \
 	"gdb.events.new_inferior.connect(new_inf_handler)" "" \
 	"end" ""
     gdb_test_multiline "install inferior deleted event handler" \

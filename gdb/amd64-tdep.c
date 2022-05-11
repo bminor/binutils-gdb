@@ -2474,8 +2474,8 @@ amd64_skip_xmm_prologue (CORE_ADDR pc, CORE_ADDR start_pc)
 
   start_pc_sal = find_pc_sect_line (start_pc, NULL, 0);
   if (start_pc_sal.symtab == NULL
-      || producer_is_gcc_ge_4 (COMPUNIT_PRODUCER
-	   (SYMTAB_COMPUNIT (start_pc_sal.symtab))) < 6
+      || producer_is_gcc_ge_4 (start_pc_sal.symtab->compunit ()
+			       ->producer ()) < 6
       || start_pc_sal.pc != start_pc || pc >= start_pc_sal.end)
     return pc;
 
@@ -2545,9 +2545,9 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 	 compilers to emit usable line notes.  */
       if (post_prologue_pc
 	  && (cust != NULL
-	      && COMPUNIT_PRODUCER (cust) != NULL
-	      && (producer_is_llvm (COMPUNIT_PRODUCER (cust))
-	      || producer_is_icc_ge_19 (COMPUNIT_PRODUCER (cust)))))
+	      && cust->producer () != nullptr
+	      && (producer_is_llvm (cust->producer ())
+	      || producer_is_icc_ge_19 (cust->producer ()))))
         return std::max (start_pc, post_prologue_pc);
     }
 
@@ -2901,7 +2901,7 @@ amd64_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   struct compunit_symtab *cust;
 
   cust = find_pc_compunit_symtab (pc);
-  if (cust != NULL && COMPUNIT_EPILOGUE_UNWIND_VALID (cust))
+  if (cust != NULL && cust->epilogue_unwind_valid ())
     return 0;
 
   if (target_read_memory (pc, &insn, 1))

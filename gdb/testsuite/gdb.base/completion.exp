@@ -675,10 +675,9 @@ gdb_test "complete whatis &values\[0\]->z" \
 
 # ${srcdir} may be a relative path.  We want to make sure we end up
 # in the right directory - so make sure we know where it is.
-set mydir [pwd]
-cd ${srcdir}
-set fullsrcdir [pwd]
-cd ${mydir}
+with_cwd $srcdir {
+    set fullsrcdir [pwd]
+}
 
 # If the directory name contains a '+' we must escape it, adding a backslash.
 # If not, the test below will fail because it will interpret the '+' as a 

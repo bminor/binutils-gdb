@@ -4939,6 +4939,7 @@ som_set_reloc_info (unsigned char *fixup,
 		    arelent *internal_relocs,
 		    asection *section,
 		    asymbol **symbols,
+		    unsigned int symcount,
 		    bool just_count)
 {
   unsigned int op, varname, deallocate_contents = 0;
@@ -5032,7 +5033,7 @@ som_set_reloc_info (unsigned char *fixup,
 	      else if (ISLOWER (c))
 		{
 		  int bits = (c - 'a') * 8;
-		  for (v = 0; c > 'a'; --c)
+		  for (v = 0; c > 'a' && fixup < end_fixups; --c)
 		    v = (v << 8) | *fixup++;
 		  if (varname == 'V')
 		    v = sign_extend (v, bits);
@@ -5093,7 +5094,7 @@ som_set_reloc_info (unsigned char *fixup,
 	    /* A symbol to use in the relocation.  Make a note
 	       of this if we are not just counting.  */
 	    case 'S':
-	      if (! just_count)
+	      if (! just_count && (unsigned int) c < symcount)
 		rptr->sym_ptr_ptr = &symbols[c];
 	      break;
 	    /* Argument relocation bits for a function call.  */
@@ -5309,7 +5310,7 @@ som_slurp_reloc_table (bfd *abfd,
 	 need it again.  */
       section->reloc_count = som_set_reloc_info (external_relocs,
 						 fixup_stream_size,
-						 NULL, NULL, NULL, true);
+						 NULL, NULL, NULL, 0, true);
 
       som_section_data (section)->reloc_stream = external_relocs;
     }
@@ -5335,7 +5336,8 @@ som_slurp_reloc_table (bfd *abfd,
 
   /* Process and internalize the relocations.  */
   som_set_reloc_info (external_relocs, fixup_stream_size,
-		      internal_relocs, section, symbols, false);
+		      internal_relocs, section, symbols,
+		      bfd_get_symcount (abfd), false);
 
   /* We're done with the external relocations.  Free them.  */
   free (external_relocs);

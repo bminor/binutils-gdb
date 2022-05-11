@@ -99,6 +99,7 @@ if [gas_32_check] then {
     run_list_test "suffix-bad"
     run_dump_test "immed32"
     run_dump_test "equ"
+    run_list_test "equ-2" "-al"
     run_list_test "equ-bad"
     run_dump_test "divide"
     run_dump_test "quoted"
@@ -199,6 +200,7 @@ if [gas_32_check] then {
     run_list_test "arch-10-2" "-march=i686 -I${srcdir}/$subdir -al"
     run_list_test "arch-10-3" "-march=i686+mmx+sse4.2 -I${srcdir}/$subdir -al"
     run_list_test "arch-10-4" "-march=i686+mmx+sse4+vmx+smx -I${srcdir}/$subdir -al"
+    run_list_test "arch-10-5" "-march=generic32+i686 -al"
     run_dump_test "arch-11"
     run_dump_test "arch-12"
     run_dump_test "arch-13"
@@ -630,8 +632,6 @@ if [gas_32_check] then {
 	run_dump_test "ifunc"
 	run_list_test "ifunc-2"
 	run_dump_test "ifunc-3"
-	run_list_test "l1om-inval" "-march=l1om --32"
-	run_list_test "k1om-inval" "-march=k1om --32"
 	run_dump_test "localpic"
 	run_dump_test "debug1"
 
@@ -698,15 +698,17 @@ if [gas_32_check] then {
 	    run_dump_test "iamcu-3"
 	    run_dump_test "iamcu-4"
 	    run_dump_test "iamcu-5"
+	    run_dump_test "iamcu-6"
 	    run_list_test "iamcu-inval-1" "-march=iamcu -al"
 	}
     }
 
-    # This is a PE specific test.
+    # These are PE specific tests.
     if { [istarget "*-*-cygwin*"] || [istarget "*-*-pe"]
 	 || [istarget "*-*-mingw*"]
     } then {
 	run_dump_test "secrel"
+	run_dump_test "secidx"
     }
 
     # Miscellaneous tests.
@@ -724,7 +726,8 @@ run_list_test "string-bad" ""
 run_list_test "reg-bad" ""
 run_list_test "space1" "-al"
 run_list_test "xmmword" ""
-run_dump_test rept
+# Disabled due to large memory requirement.
+# run_dump_test rept
 run_dump_test pr19498
 run_list_test "nop-bad-1" ""
 run_list_test "unspec" ""
@@ -1284,8 +1287,6 @@ if [gas_64_check] then {
 	run_dump_test "x86-64-opcode-inval"
 	run_dump_test "x86-64-opcode-inval-intel"
 	run_dump_test "intel-got64"
-	run_dump_test "l1om"
-	run_dump_test "k1om"
 	run_dump_test "x86-64-localpic"
 	run_dump_test "debug1"
 	run_dump_test "x86-64-mpx-branch-1"
@@ -1331,7 +1332,6 @@ if [gas_64_check] then {
 	run_dump_test "x86-64-property-8"
 	run_dump_test "x86-64-property-9"
 	run_dump_test "x86-64-property-14"
-	run_dump_test "x86-64-code16-2"
 
 	if {[istarget "*-*-linux*"]} then {
 	    run_dump_test "x86-64-align-branch-3"

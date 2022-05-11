@@ -22,7 +22,7 @@
 
 #include "defs.h"
 #include <ctype.h>
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "symtab.h"
 #include "buildsym.h"
 #include "dictionary.h"

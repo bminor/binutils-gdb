@@ -24,6 +24,9 @@
 #define TARGET_BYTES_BIG_ENDIAN 0
 #define TARGET_ARCH bfd_arch_loongarch
 
+#define TARGET_MACH (loongarch_mach ())
+extern unsigned long loongarch_mach (void);
+
 #define WORKING_DOT_WORD 1
 #define REPEAT_CONS_EXPRESSIONS
 

@@ -774,7 +774,7 @@ elf_s390_tls_transition (struct bfd_link_info *info,
 			 int r_type,
 			 int is_local)
 {
-  if (bfd_link_pic (info))
+  if (bfd_link_dll (info))
     return r_type;
 
   switch (r_type)
@@ -1026,7 +1026,7 @@ elf_s390_check_relocs (bfd *abfd,
 	case R_390_TLS_GOTIE20:
 	case R_390_TLS_GOTIE64:
 	case R_390_TLS_IEENT:
-	  if (bfd_link_pic (info))
+	  if (bfd_link_dll (info))
 	    info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
 
@@ -1107,7 +1107,7 @@ elf_s390_check_relocs (bfd *abfd,
 	  if (r_type == R_390_TLS_LE64 && bfd_link_pie (info))
 	    break;
 
-	  if (!bfd_link_pic (info))
+	  if (!bfd_link_dll (info))
 	    break;
 	  info->flags |= DF_STATIC_TLS;
 	  /* Fall through */
@@ -1571,7 +1571,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h,
      to R_390_TLS_LE64 requiring no TLS entry. For GOTIE12 and IEENT
      we can save the dynamic TLS relocation.  */
   if (h->got.refcount > 0
-      && !bfd_link_pic (info)
+      && !bfd_link_dll (info)
       && h->dynindx == -1
       && elf_s390_hash_entry(h)->tls_type >= GOT_TLS_IE)
     {
@@ -1876,7 +1876,20 @@ elf_s390_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       else if (startswith (bfd_section_name (s), ".rela"))
 	{
 	  if (s->size != 0 && s != htab->elf.srelplt)
-	    relocs = true;
+	    {
+	      relocs = true;
+	      if (s == htab->elf.irelplt)
+		{
+		  /* In static-pie case, there are IRELATIVE-relocs in
+		     .rela.iplt (htab->irelplt), which will later be grouped
+		     to .rela.plt.  On s390, the IRELATIVE relocations are
+		     always located in .rela.iplt - even for non-static case.
+		     Ensure that DT_JMPREL, DT_PLTRELA, DT_PLTRELASZ is added
+		     to the dynamic section even if htab->srelplt->size == 0.
+		     See _bfd_elf_add_dynamic_tags in bfd/elflink.c.  */
+		  htab->elf.dt_jmprel_required = true;
+		}
+	    }
 
 	  /* We use the reloc_count field as a counter if we need
 	     to copy relocs into the output file.  */
@@ -2662,7 +2675,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 
 	  /* Relocations for tls literal pool entries.  */
 	case R_390_TLS_IE64:
-	  if (bfd_link_pic (info))
+	  if (bfd_link_dll (info))
 	    {
 	      Elf_Internal_Rela outrel;
 	      asection *sreloc;
@@ -2690,7 +2703,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  else if (h != NULL)
 	    {
 	      tls_type = elf_s390_hash_entry(h)->tls_type;
-	      if (!bfd_link_pic (info) && h->dynindx == -1 && tls_type >= GOT_TLS_IE)
+	      if (!bfd_link_dll (info) && h->dynindx == -1 && tls_type >= GOT_TLS_IE)
 		r_type = R_390_TLS_LE64;
 	    }
 	  if (r_type == R_390_TLS_GD64 && tls_type >= GOT_TLS_IE)
@@ -2801,14 +2814,14 @@ elf_s390_relocate_section (bfd *output_bfd,
 	      if (local_got_offsets == NULL)
 		abort();
 	      off = local_got_offsets[r_symndx];
-	      if (bfd_link_pic (info))
+	      if (bfd_link_dll (info))
 		goto emit_tls_relocs;
 	    }
 	  else
 	    {
 	      off = h->got.offset;
 	      tls_type = elf_s390_hash_entry(h)->tls_type;
-	      if (bfd_link_pic (info) || h->dynindx != -1 || tls_type < GOT_TLS_IE)
+	      if (bfd_link_dll (info) || h->dynindx != -1 || tls_type < GOT_TLS_IE)
 		goto emit_tls_relocs;
 	    }
 
@@ -2825,7 +2838,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_390_TLS_LDM64:
-	  if (! bfd_link_pic (info))
+	  if (! bfd_link_dll (info))
 	    /* The literal pool entry this relocation refers to gets ignored
 	       by the optimized code of the local exec model. Do nothing
 	       and the value will turn out zero.  */
@@ -2900,7 +2913,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  continue;
 
 	case R_390_TLS_LDO64:
-	  if (bfd_link_pic (info) || (input_section->flags & SEC_DEBUGGING))
+	  if (bfd_link_dll (info) || (input_section->flags & SEC_DEBUGGING))
 	    relocation -= dtpoff_base (info);
 	  else
 	    /* When converting LDO to LE, we must negate.  */
@@ -2922,7 +2935,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 
 	  if (r_type == R_390_TLS_LOAD)
 	    {
-	      if (!bfd_link_pic (info) && (h == NULL || h->dynindx == -1))
+	      if (!bfd_link_dll (info) && (h == NULL || h->dynindx == -1))
 		{
 		  /* IE->LE transition. Four valid cases:
 		     lg %rx,(0,%ry)    -> sllg %rx,%ry,0
@@ -2972,7 +2985,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 		  invalid_tls_insn (input_bfd, input_section, rel);
 		  return false;
 		}
-	      if (!bfd_link_pic (info) && (h == NULL || h->dynindx == -1))
+	      if (!bfd_link_dll (info) && (h == NULL || h->dynindx == -1))
 		{
 		  /* GD->LE transition.
 		     brasl %r14,__tls_get_addr@plt -> brcl 0,. */
@@ -2991,7 +3004,7 @@ elf_s390_relocate_section (bfd *output_bfd,
 	    }
 	  else if (r_type == R_390_TLS_LDCALL)
 	    {
-	      if (!bfd_link_pic (info))
+	      if (!bfd_link_dll (info))
 		{
 		  unsigned int insn0, insn1;
 

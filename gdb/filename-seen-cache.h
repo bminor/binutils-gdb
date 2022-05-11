@@ -22,6 +22,7 @@
 
 #include "defs.h"
 #include "gdbsupport/function-view.h"
+#include "gdbsupport/gdb-hashtab.h"
 
 /* Cache to watch for file names already seen.  */
 

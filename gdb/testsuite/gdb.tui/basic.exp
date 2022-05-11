@@ -104,5 +104,5 @@ Term::command "layout split"
 Term::check_contents "split layout contents" \
     "$main_line *$main_re.*$hex <main>"
 
-Term::check_box "source box in split layout" 0 0 80 7
-Term::check_box "asm box in split layout" 0 6 80 9
+Term::check_box "source box in split layout" 0 0 80 8
+Term::check_box "asm box in split layout" 0 7 80 8

@@ -1104,7 +1104,8 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 
   if (!bfd_set_section_vma (newsect, hdr->sh_addr / opb)
       || !bfd_set_section_size (newsect, hdr->sh_size)
-      || !bfd_set_section_alignment (newsect, bfd_log2 (hdr->sh_addralign)))
+      || !bfd_set_section_alignment (newsect, bfd_log2 (hdr->sh_addralign
+							& -hdr->sh_addralign)))
     return false;
 
   /* As a GNU extension, if the name begins with .gnu.linkonce, we
@@ -2714,6 +2715,7 @@ static const struct bfd_elf_special_section special_sections_r[] =
 {
   { STRING_COMMA_LEN (".rodata"), -2, SHT_PROGBITS, SHF_ALLOC },
   { STRING_COMMA_LEN (".rodata1"), 0, SHT_PROGBITS, SHF_ALLOC },
+  { STRING_COMMA_LEN (".relr.dyn"), 0, SHT_RELR, SHF_ALLOC },
   { STRING_COMMA_LEN (".rela"),	  -1, SHT_RELA,	    0 },
   { STRING_COMMA_LEN (".rel"),	  -1, SHT_REL,	    0 },
   { NULL,		    0,	   0, 0,	    0 }
@@ -3278,7 +3280,9 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 
   /* If the section type is unspecified, we set it based on
      asect->flags.  */
-  if ((asect->flags & SEC_GROUP) != 0)
+  if (asect->type != 0)
+    sh_type = asect->type;
+  else if ((asect->flags & SEC_GROUP) != 0)
     sh_type = SHT_GROUP;
   else
     sh_type = bfd_elf_get_default_section_type (asect->flags);
@@ -4226,7 +4230,7 @@ _bfd_elf_assign_file_position_for_section (Elf_Internal_Shdr *i_shdrp,
 					   bool align)
 {
   if (align && i_shdrp->sh_addralign > 1)
-    offset = BFD_ALIGN (offset, i_shdrp->sh_addralign);
+    offset = BFD_ALIGN (offset, i_shdrp->sh_addralign & -i_shdrp->sh_addralign);
   i_shdrp->sh_offset = offset;
   if (i_shdrp->bfd_section != NULL)
     i_shdrp->bfd_section->filepos = offset;
@@ -4342,6 +4346,20 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
   return true;
 }
 
+/* Retrieve .eh_frame_hdr.  Prior to size_dynamic_sections the
+   function effectively returns whether --eh-frame-hdr is given on the
+   command line.  After size_dynamic_sections the result reflects
+   whether .eh_frame_hdr will actually be output (sizing isn't done
+   until ldemul_after_allocation).  */
+
+static asection *
+elf_eh_frame_hdr (const struct bfd_link_info *info)
+{
+  if (info != NULL && is_elf_hash_table (info->hash))
+    return elf_hash_table (info)->eh_info.hdr_sec;
+  return NULL;
+}
+
 /* Make an initial estimate of the size of the program header.  If we
    get the number wrong here, we'll redo section placement.  */
 
@@ -4378,7 +4396,7 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
       ++segs;
     }
 
-  if (elf_eh_frame_hdr (abfd))
+  if (elf_eh_frame_hdr (info))
     {
       /* We need a PT_GNU_EH_FRAME segment.  */
       ++segs;
@@ -4608,10 +4626,13 @@ elf_modify_segment_map (bfd *abfd,
 #define IS_TBSS(s) \
   ((s->flags & (SEC_THREAD_LOCAL | SEC_LOAD)) == SEC_THREAD_LOCAL)
 
-/* Set up a mapping from BFD sections to program segments.  */
+/* Set up a mapping from BFD sections to program segments.  Update
+   NEED_LAYOUT if the section layout is changed.  */
 
 bool
-_bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
+_bfd_elf_map_sections_to_segments (bfd *abfd,
+				   struct bfd_link_info *info,
+				   bool *need_layout)
 {
   unsigned int count;
   struct elf_segment_map *m;
@@ -4622,7 +4643,17 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
   no_user_phdrs = elf_seg_map (abfd) == NULL;
 
   if (info != NULL)
-    info->user_phdrs = !no_user_phdrs;
+    {
+      info->user_phdrs = !no_user_phdrs;
+
+      /* Size the relative relocations if DT_RELR is enabled.  */
+      if (info->enable_dt_relr
+	  && need_layout != NULL
+	  && bed->size_relative_relocs
+	  && !bed->size_relative_relocs (info, need_layout))
+	info->callbacks->einfo
+	  (_("%F%P: failed to size relative relocations\n"));
+    }
 
   if (no_user_phdrs && bfd_count_sections (abfd) != 0)
     {
@@ -5120,7 +5151,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 
       /* If there is a .eh_frame_hdr section, throw in a PT_GNU_EH_FRAME
 	 segment.  */
-      eh_frame_hdr = elf_eh_frame_hdr (abfd);
+      eh_frame_hdr = elf_eh_frame_hdr (info);
       if (eh_frame_hdr != NULL
 	  && (eh_frame_hdr->output_section->flags & SEC_LOAD) != 0)
 	{
@@ -5415,7 +5446,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
   unsigned int opb = bfd_octets_per_byte (abfd, NULL);
 
   if (link_info == NULL
-      && !_bfd_elf_map_sections_to_segments (abfd, link_info))
+      && !_bfd_elf_map_sections_to_segments (abfd, link_info, NULL))
     return false;
 
   alloc = 0;
@@ -6121,6 +6152,7 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
   for (hdrpp = i_shdrpp + 1; hdrpp < end_hdrpp; hdrpp++)
     {
       Elf_Internal_Shdr *hdr;
+      bfd_vma align;
 
       hdr = *hdrpp;
       if (hdr->bfd_section != NULL
@@ -6146,11 +6178,10 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 		: hdr->bfd_section->name));
 	  /* We don't need to page align empty sections.  */
 	  if ((abfd->flags & D_PAGED) != 0 && hdr->sh_size != 0)
-	    off += vma_page_aligned_bias (hdr->sh_addr, off,
-					  maxpagesize);
+	    align = maxpagesize;
 	  else
-	    off += vma_page_aligned_bias (hdr->sh_addr, off,
-					  hdr->sh_addralign);
+	    align = hdr->sh_addralign & -hdr->sh_addralign;
+	  off += vma_page_aligned_bias (hdr->sh_addr, off, align);
 	  off = _bfd_elf_assign_file_position_for_section (hdr, off,
 							   false);
 	}
@@ -6430,6 +6461,29 @@ assign_file_positions_except_relocs (bfd *abfd,
   alloc = i_ehdrp->e_phnum;
   if (alloc != 0)
     {
+      if (link_info != NULL && ! link_info->no_warn_rwx_segments)
+	{
+	  /* Memory resident segments with non-zero size and RWX permissions are a
+	     security risk, so we generate a warning here if we are creating any.  */
+	  unsigned int i;
+
+	  for (i = 0; i < alloc; i++)
+	    {
+	      const Elf_Internal_Phdr * phdr = tdata->phdr + i;
+
+	      if (phdr->p_memsz == 0)
+		continue;
+
+	      if (phdr->p_type == PT_TLS && (phdr->p_flags & PF_X))
+		_bfd_error_handler (_("warning: %pB has a TLS segment with execute permission"),
+				    abfd);
+	      else if (phdr->p_type == PT_LOAD
+		       && (phdr->p_flags & (PF_R | PF_W | PF_X)) == (PF_R | PF_W | PF_X))
+		_bfd_error_handler (_("warning: %pB has a LOAD segment with RWX permissions"),
+				    abfd);
+	    }
+	}
+      
       if (bfd_seek (abfd, i_ehdrp->e_phoff, SEEK_SET) != 0
 	  || bed->s->write_out_phdrs (abfd, tdata->phdr, alloc) != 0)
 	return false;
@@ -10979,10 +11033,7 @@ elfcore_grok_freebsd_note (bfd *abfd, Elf_Internal_Note *note)
       return elfcore_grok_freebsd_psinfo (abfd, note);
 
     case NT_FREEBSD_THRMISC:
-      if (note->namesz == 8)
-	return elfcore_make_note_pseudosection (abfd, ".thrmisc", note);
-      else
-	return true;
+      return elfcore_make_note_pseudosection (abfd, ".thrmisc", note);
 
     case NT_FREEBSD_PROCSTAT_PROC:
       return elfcore_make_note_pseudosection (abfd, ".note.freebsdcore.proc",
@@ -10999,15 +11050,18 @@ elfcore_grok_freebsd_note (bfd *abfd, Elf_Internal_Note *note)
     case NT_FREEBSD_PROCSTAT_AUXV:
       return elfcore_make_auxv_note_section (abfd, note, 4);
 
+    case NT_FREEBSD_X86_SEGBASES:
+      return elfcore_make_note_pseudosection (abfd, ".reg-x86-segbases", note);
+
     case NT_X86_XSTATE:
-      if (note->namesz == 8)
-	return elfcore_grok_xstatereg (abfd, note);
-      else
-	return true;
+      return elfcore_grok_xstatereg (abfd, note);
 
     case NT_FREEBSD_PTLWPINFO:
       return elfcore_make_note_pseudosection (abfd, ".note.freebsdcore.lwpinfo",
 					      note);
+
+    case NT_ARM_TLS:
+      return elfcore_grok_aarch_tls (abfd, note);
 
     case NT_ARM_VFP:
       return elfcore_grok_arm_vfp (abfd, note);
@@ -11880,6 +11934,15 @@ elfcore_write_xstatereg (bfd *abfd, char *buf, int *bufsiz,
 }
 
 char *
+elfcore_write_x86_segbases (bfd *abfd, char *buf, int *bufsiz,
+			    const void *regs, int size)
+{
+  char *note_name = "FreeBSD";
+  return elfcore_write_note (abfd, buf, bufsiz,
+			     note_name, NT_FREEBSD_X86_SEGBASES, regs, size);
+}
+
+char *
 elfcore_write_ppc_vmx (bfd *abfd,
 		       char *buf,
 		       int *bufsiz,
@@ -12416,6 +12479,8 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_prxfpreg (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-xstate") == 0)
     return elfcore_write_xstatereg (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-x86-segbases") == 0)
+    return elfcore_write_x86_segbases (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-ppc-vmx") == 0)
     return elfcore_write_ppc_vmx (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-ppc-vsx") == 0)

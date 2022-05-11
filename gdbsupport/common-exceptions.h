@@ -24,6 +24,7 @@
 #include <new>
 #include <memory>
 #include <string>
+#include <functional>
 
 /* Reasons for calling throw_exceptions().  NOTE: all reason values
    must be different from zero.  enum value 0 is reserved for internal
@@ -186,6 +187,24 @@ struct gdb_exception
   enum errors error;
   std::shared_ptr<std::string> message;
 };
+
+namespace std
+{
+
+/* Specialization of std::hash for gdb_exception.  */
+template<>
+struct hash<gdb_exception>
+{
+  size_t operator() (const gdb_exception &exc) const
+  {
+    size_t result = exc.reason + exc.error;
+    if (exc.message != nullptr)
+      result += std::hash<std::string> {} (*exc.message);
+    return result;
+  }
+};
+
+}
 
 /* Functions to drive the sjlj-based exceptions state machine.  Though
    declared here by necessity, these functions should be considered

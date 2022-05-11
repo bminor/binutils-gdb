@@ -164,10 +164,15 @@ enum option_values
   OPTION_CTF_VARIABLES,
   OPTION_NO_CTF_VARIABLES,
   OPTION_CTF_SHARE_TYPES,
+  OPTION_WARN_EXECSTACK,
+  OPTION_NO_WARN_EXECSTACK,
+  OPTION_WARN_RWX_SEGMENTS,
+  OPTION_NO_WARN_RWX_SEGMENTS,
 };
 
 /* The initial parser states.  */
-typedef enum input_enum {
+typedef enum input_enum
+{
   input_selected,		/* We've set the initial state.  */
   input_script,
   input_mri_script,

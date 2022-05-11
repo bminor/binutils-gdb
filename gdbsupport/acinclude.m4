@@ -6,5 +6,8 @@ m4_include([../gdb/libiberty.m4])
 m4_include([selftest.m4])
 m4_include([ptrace.m4])
 
+dnl This gets AM_GDB_COMPILER_TYPE.
+m4_include(compiler-type.m4)
+
 dnl This gets AM_GDB_WARNINGS.
 m4_include(warning.m4)

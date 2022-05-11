@@ -87,22 +87,7 @@
 #include <frameobject.h>
 #include "py-ref.h"
 
-#if PY_MAJOR_VERSION >= 3
-#define IS_PY3K 1
-#endif
-
-#ifdef IS_PY3K
 #define Py_TPFLAGS_CHECKTYPES 0
-
-#define PyInt_Check PyLong_Check
-#define PyInt_AsLong PyLong_AsLong
-#define PyInt_AsSsize_t PyLong_AsSsize_t
-
-#define PyString_FromString PyUnicode_FromString
-#define PyString_Decode PyUnicode_Decode
-#define PyString_FromFormat PyUnicode_FromFormat
-#define PyString_Check PyUnicode_Check
-#endif
 
 /* If Python.h does not define WITH_THREAD, then the various
    GIL-related functions will not be defined.  However,
@@ -146,19 +131,6 @@ typedef long Py_hash_t;
 #if PY_VERSION_HEX < 0x03040000
 #define PyMem_RawMalloc PyMem_Malloc
 #endif
-
-/* Python 2.6 did not wrap Py_DECREF in 'do {...} while (0)', leading
-   to 'suggest explicit braces to avoid ambiguous ‘else’' gcc errors.
-   Wrap it ourselves, so that callers don't need to care.  */
-
-static inline void
-gdb_Py_DECREF (void *op) /* ARI: editCase function */
-{
-  Py_DECREF (op);
-}
-
-#undef Py_DECREF
-#define Py_DECREF(op) gdb_Py_DECREF (op)
 
 /* PyObject_CallMethod's 'method' and 'format' parameters were missing
    the 'const' qualifier before Python 3.4.  Hence, we wrap the
@@ -209,11 +181,7 @@ gdb_PySys_GetObject (const char *name)
    before Python 3.6.  Hence, we wrap it in a function to avoid errors
    when compiled with -Werror.  */
 
-#ifdef IS_PY3K
 # define GDB_PYSYS_SETPATH_CHAR wchar_t
-#else
-# define GDB_PYSYS_SETPATH_CHAR char
-#endif
 
 static inline void
 gdb_PySys_SetPath (const GDB_PYSYS_SETPATH_CHAR *path)
@@ -412,6 +380,7 @@ extern enum ext_lang_rc gdbpy_get_matching_xmethod_workers
 
 PyObject *gdbpy_history (PyObject *self, PyObject *args);
 PyObject *gdbpy_add_history (PyObject *self, PyObject *args);
+extern PyObject *gdbpy_history_count (PyObject *self, PyObject *args);
 PyObject *gdbpy_convenience_variable (PyObject *self, PyObject *args);
 PyObject *gdbpy_set_convenience_variable (PyObject *self, PyObject *args);
 PyObject *gdbpy_breakpoints (PyObject *, PyObject *);
@@ -496,6 +465,13 @@ struct symtab_and_line *sal_object_to_symtab_and_line (PyObject *obj);
 struct frame_info *frame_object_to_frame_info (PyObject *frame_obj);
 struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
 
+/* Convert Python object OBJ to a program_space pointer.  OBJ must be a
+   gdb.Progspace reference.  Return nullptr if the gdb.Progspace is not
+   valid (see gdb.Progspace.is_valid), otherwise return the program_space
+   pointer.  */
+
+extern struct program_space *progspace_object_to_program_space (PyObject *obj);
+
 void gdbpy_initialize_gdb_readline (void);
 int gdbpy_initialize_auto_load (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
@@ -561,6 +537,9 @@ int gdbpy_initialize_membuf ()
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_connection ()
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_micommands (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+void gdbpy_finalize_micommands ();
 
 /* A wrapper for PyErr_Fetch that handles reference counting for the
    caller.  */
@@ -625,13 +604,35 @@ class gdbpy_enter
 {
  public:
 
-  gdbpy_enter (struct gdbarch *gdbarch, const struct language_defn *language);
+  /* Set the ambient Python architecture to GDBARCH and the language
+     to LANGUAGE.  If GDBARCH is nullptr, then the architecture will
+     be computed, when needed, using get_current_arch; see the
+     get_gdbarch method.  If LANGUAGE is not nullptr, then the current
+     language at time of construction will be saved (to be restored on
+     destruction), and the current language will be set to
+     LANGUAGE.  */
+  explicit gdbpy_enter (struct gdbarch *gdbarch = nullptr,
+			const struct language_defn *language = nullptr);
 
   ~gdbpy_enter ();
 
   DISABLE_COPY_AND_ASSIGN (gdbpy_enter);
 
+  /* Return the current gdbarch, as known to the Python layer.  This
+     is either python_gdbarch (which comes from the most recent call
+     to the gdbpy_enter constructor), or, if that is nullptr, the
+     result of get_current_arch.  */
+  static struct gdbarch *get_gdbarch ();
+
+  /* Called only during gdb shutdown.  This sets python_gdbarch to an
+     acceptable value.  */
+  static void finalize ();
+
  private:
+
+  /* The current gdbarch, according to Python.  This can be
+     nullptr.  */
+  static struct gdbarch *python_gdbarch;
 
   struct active_ext_lang_state *m_previous_active;
   PyGILState_STATE m_state;
@@ -680,9 +681,6 @@ private:
   PyThreadState *m_save;
 };
 
-extern struct gdbarch *python_gdbarch;
-extern const struct language_defn *python_language;
-
 /* Use this after a TRY_EXCEPT to throw the appropriate Python
    exception.  */
 #define GDB_PY_HANDLE_EXCEPTION(Exception)	\
@@ -709,6 +707,17 @@ int gdbpy_print_python_errors_p (void);
 void gdbpy_print_stack (void);
 void gdbpy_print_stack_or_quit ();
 void gdbpy_handle_exception () ATTRIBUTE_NORETURN;
+
+/* A wrapper around calling 'error'.  Prefixes the error message with an
+   'Error occurred in Python' string.  Use this in C++ code if we spot
+   something wrong with an object returned from Python code.  The prefix
+   string gives the user a hint that the mistake is within Python code,
+   rather than some other part of GDB.
+
+   This always calls error, and never returns.  */
+
+void gdbpy_error (const char *fmt, ...)
+  ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
 
 gdbpy_ref<> python_string_to_unicode (PyObject *obj);
 gdb::unique_xmalloc_ptr<char> unicode_to_target_string (PyObject *unicode_str);
@@ -803,5 +812,14 @@ typedef std::unique_ptr<Py_buffer, Py_buffer_deleter> Py_buffer_up;
 
 extern bool gdbpy_parse_register_id (struct gdbarch *gdbarch,
 				     PyObject *pyo_reg_id, int *reg_num);
+
+/* Return true if OBJ is a gdb.Architecture object, otherwise, return
+   false.  */
+
+extern bool gdbpy_is_architecture (PyObject *obj);
+
+/* Return true if OBJ is a gdb.Progspace object, otherwise, return false.  */
+
+extern bool gdbpy_is_progspace (PyObject *obj);
 
 #endif /* PYTHON_PYTHON_INTERNAL_H */

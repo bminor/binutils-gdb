@@ -28,7 +28,7 @@
 #include "psymtab.h"
 #include "solib.h"
 #include "solist.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 
 /* Return to the client the absolute path and line number of the 
    current file being executed.  */
@@ -59,7 +59,7 @@ mi_cmd_file_list_exec_source_file (const char *command, char **argv, int argc)
   uiout->field_string ("fullname", symtab_to_fullname (st.symtab));
 
   uiout->field_signed ("macro-info",
-		       COMPUNIT_MACRO_TABLE (SYMTAB_COMPUNIT (st.symtab)) != NULL);
+		       st.symtab->compunit ()->macro_table () != NULL);
 }
 
 /* Implement -file-list-exec-source-files command.  */

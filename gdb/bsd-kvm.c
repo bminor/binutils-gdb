@@ -21,6 +21,7 @@
 #include "defs.h"
 #include "cli/cli-cmds.h"
 #include "command.h"
+#include "filenames.h"
 #include "frame.h"
 #include "regcache.h"
 #include "target.h"
@@ -30,6 +31,7 @@
 #include "inferior.h"          /* for get_exec_file */
 #include "gdbthread.h"
 #include "gdbsupport/pathstuff.h"
+#include "gdbsupport/gdb_tilde_expand.h"
 
 #include <fcntl.h>
 #include <kvm.h>
@@ -47,7 +49,7 @@
 #include "bsd-kvm.h"
 
 /* Kernel memory device file.  */
-static const char *bsd_kvm_corefile;
+static std::string bsd_kvm_corefile;
 
 /* Kernel memory interface descriptor.  */
 static kvm_t *core_kd;
@@ -109,24 +111,19 @@ bsd_kvm_target_open (const char *arg, int from_tty)
   char errbuf[_POSIX2_LINE_MAX];
   const char *execfile = NULL;
   kvm_t *temp_kd;
-  char *filename = NULL;
+  std::string filename;
 
   target_preopen (from_tty);
 
   if (arg)
     {
-      filename = tilde_expand (arg);
-      if (filename[0] != '/')
-	{
-	  gdb::unique_xmalloc_ptr<char> temp (gdb_abspath (filename));
-
-	  xfree (filename);
-	  filename = temp.release ();
-	}
+      filename = gdb_tilde_expand (arg);
+      if (!IS_ABSOLUTE_PATH (filename))
+	filename = gdb_abspath (filename.c_str ());
     }
 
   execfile = get_exec_file (0);
-  temp_kd = kvm_openfiles (execfile, filename, NULL,
+  temp_kd = kvm_openfiles (execfile, filename.c_str (), NULL,
 			   write_files ? O_RDWR : O_RDONLY, errbuf);
   if (temp_kd == NULL)
     error (("%s"), errbuf);
@@ -155,6 +152,7 @@ bsd_kvm_target::close ()
       core_kd = NULL;
     }
 
+  bsd_kvm_corefile.clear ();
   switch_to_no_thread ();
   exit_inferior_silent (current_inferior ());
 }
@@ -203,11 +201,11 @@ bsd_kvm_target::xfer_partial (enum target_object object,
 void
 bsd_kvm_target::files_info ()
 {
-  if (bsd_kvm_corefile && strcmp (bsd_kvm_corefile, _PATH_MEM) != 0)
-    printf_filtered (_("\tUsing the kernel crash dump %s.\n"),
-		     bsd_kvm_corefile);
+  if (bsd_kvm_corefile != _PATH_MEM)
+    gdb_printf (_("\tUsing the kernel crash dump %s.\n"),
+		bsd_kvm_corefile.c_str ());
   else
-    printf_filtered (_("\tUsing the currently running kernel.\n"));
+    gdb_printf (_("\tUsing the currently running kernel.\n"));
 }
 
 /* Fetch process control block at address PADDR.  */

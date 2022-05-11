@@ -1,6 +1,6 @@
 #source: bnd-branch-1.s
 #as: --64 -mx86-used-note=no
-#ld: -z now -shared -melf_x86_64 -z bndplt --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code
+#ld: -z now -shared -melf_x86_64 -z bndplt --hash-style=sysv -z max-page-size=0x200000 -z noseparate-code $NO_DT_RELR_LDFLAGS
 #objdump: -dw
 
 .*: +file format .*

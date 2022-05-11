@@ -220,9 +220,9 @@ nto_procfs_target::open (const char *arg, int from_tty)
       if (nto_procfs_node == -1)
 	{
 	  if (errno == ENOTSUP)
-	    printf_filtered ("QNX Net Manager not found.\n");
-	  printf_filtered ("Invalid QNX node %s: error %d (%s).\n", nodestr,
-			   errno, safe_strerror (errno));
+	    gdb_printf ("QNX Net Manager not found.\n");
+	  gdb_printf ("Invalid QNX node %s: error %d (%s).\n", nodestr,
+		      errno, safe_strerror (errno));
 	  xfree (nodestr);
 	  nodestr = NULL;
 	  nto_procfs_node = ND_LOCAL_NODE;
@@ -241,16 +241,16 @@ nto_procfs_target::open (const char *arg, int from_tty)
   scoped_fd fd (open (nto_procfs_path, O_RDONLY));
   if (fd.get () == -1)
     {
-      printf_filtered ("Error opening %s : %d (%s)\n", nto_procfs_path, errno,
-		       safe_strerror (errno));
+      gdb_printf ("Error opening %s : %d (%s)\n", nto_procfs_path, errno,
+		  safe_strerror (errno));
       error (_("Invalid procfs arg"));
     }
 
   sysinfo = (void *) buffer;
   if (devctl (fd.get (), DCMD_PROC_SYSINFO, sysinfo, sizeof buffer, 0) != EOK)
     {
-      printf_filtered ("Error getting size: %d (%s)\n", errno,
-		       safe_strerror (errno));
+      gdb_printf ("Error getting size: %d (%s)\n", errno,
+		  safe_strerror (errno));
       error (_("Devctl failed."));
     }
   else
@@ -259,8 +259,8 @@ nto_procfs_target::open (const char *arg, int from_tty)
       sysinfo = alloca (total_size);
       if (sysinfo == NULL)
 	{
-	  printf_filtered ("Memory error: %d (%s)\n", errno,
-			   safe_strerror (errno));
+	  gdb_printf ("Memory error: %d (%s)\n", errno,
+		      safe_strerror (errno));
 	  error (_("alloca failed."));
 	}
       else
@@ -268,8 +268,8 @@ nto_procfs_target::open (const char *arg, int from_tty)
 	  if (devctl (fd.get (), DCMD_PROC_SYSINFO, sysinfo, total_size, 0)
 	      != EOK)
 	    {
-	      printf_filtered ("Error getting sysinfo: %d (%s)\n", errno,
-			       safe_strerror (errno));
+	      gdb_printf ("Error getting sysinfo: %d (%s)\n", errno,
+			  safe_strerror (errno));
 	      error (_("Devctl failed."));
 	    }
 	  else
@@ -283,7 +283,7 @@ nto_procfs_target::open (const char *arg, int from_tty)
     }
 
   inf_child_target::open (arg, from_tty);
-  printf_filtered ("Debugging using %s\n", nto_procfs_path);
+  gdb_printf ("Debugging using %s\n", nto_procfs_path);
 }
 
 static void
@@ -437,8 +437,8 @@ procfs_pidlist (const char *args, int from_tty)
   gdb_dir_up dp (opendir (procfs_dir));
   if (dp == NULL)
     {
-      fprintf_unfiltered (gdb_stderr, "failed to opendir \"%s\" - %d (%s)",
-			  procfs_dir, errno, safe_strerror (errno));
+      gdb_printf (gdb_stderr, "failed to opendir \"%s\" - %d (%s)",
+		  procfs_dir, errno, safe_strerror (errno));
       return;
     }
 
@@ -464,17 +464,17 @@ procfs_pidlist (const char *args, int from_tty)
       scoped_fd fd (open (buf, O_RDONLY));
       if (fd.get () == -1)
 	{
-	  fprintf_unfiltered (gdb_stderr, "failed to open %s - %d (%s)\n",
-			      buf, errno, safe_strerror (errno));
+	  gdb_printf (gdb_stderr, "failed to open %s - %d (%s)\n",
+		      buf, errno, safe_strerror (errno));
 	  continue;
 	}
 
       pidinfo = (procfs_info *) buf;
       if (devctl (fd.get (), DCMD_PROC_INFO, pidinfo, sizeof (buf), 0) != EOK)
 	{
-	  fprintf_unfiltered (gdb_stderr,
-			      "devctl DCMD_PROC_INFO failed - %d (%s)\n",
-			      errno, safe_strerror (errno));
+	  gdb_printf (gdb_stderr,
+		      "devctl DCMD_PROC_INFO failed - %d (%s)\n",
+		      errno, safe_strerror (errno));
 	  break;
 	}
       num_threads = pidinfo->num_threads;
@@ -492,12 +492,12 @@ procfs_pidlist (const char *args, int from_tty)
 	{
 	  const int err
 	    = devctl (fd.get (), DCMD_PROC_TIDSTATUS, status, sizeof (buf), 0);
-	  printf_filtered ("%s - %d", name, pid);
+	  gdb_printf ("%s - %d", name, pid);
 	  if (err == EOK && status->tid != 0)
-	    printf_filtered ("/%d\n", status->tid);
+	    gdb_printf ("/%d\n", status->tid);
 	  else
 	    {
-	      printf_filtered ("\n");
+	      gdb_printf ("\n");
 	      break;
 	    }
 	}
@@ -629,22 +629,22 @@ procfs_meminfo (const char *args, int from_tty)
 	}
       mapinfo_p->ino = 0;
 
-      printf_filtered ("%s\n", printme.name);
-      printf_filtered ("\ttext=%08x bytes @ 0x%08x\n", printme.text.size,
-		       printme.text.addr);
-      printf_filtered ("\t\tflags=%08x\n", printme.text.flags);
-      printf_filtered ("\t\tdebug=%08x\n", printme.text.debug_vaddr);
-      printf_filtered ("\t\toffset=%s\n", phex (printme.text.offset, 8));
+      gdb_printf ("%s\n", printme.name);
+      gdb_printf ("\ttext=%08x bytes @ 0x%08x\n", printme.text.size,
+		  printme.text.addr);
+      gdb_printf ("\t\tflags=%08x\n", printme.text.flags);
+      gdb_printf ("\t\tdebug=%08x\n", printme.text.debug_vaddr);
+      gdb_printf ("\t\toffset=%s\n", phex (printme.text.offset, 8));
       if (printme.data.size)
 	{
-	  printf_filtered ("\tdata=%08x bytes @ 0x%08x\n", printme.data.size,
-			   printme.data.addr);
-	  printf_filtered ("\t\tflags=%08x\n", printme.data.flags);
-	  printf_filtered ("\t\tdebug=%08x\n", printme.data.debug_vaddr);
-	  printf_filtered ("\t\toffset=%s\n", phex (printme.data.offset, 8));
+	  gdb_printf ("\tdata=%08x bytes @ 0x%08x\n", printme.data.size,
+		      printme.data.addr);
+	  gdb_printf ("\t\tflags=%08x\n", printme.data.flags);
+	  gdb_printf ("\t\tdebug=%08x\n", printme.data.debug_vaddr);
+	  gdb_printf ("\t\toffset=%s\n", phex (printme.data.offset, 8));
 	}
-      printf_filtered ("\tdev=0x%x\n", printme.dev);
-      printf_filtered ("\tino=0x%x\n", (unsigned int) printme.ino);
+      gdb_printf ("\tdev=0x%x\n", printme.dev);
+      gdb_printf ("\tino=0x%x\n", (unsigned int) printme.ino);
     }
   xfree (mapinfos);
   return;
@@ -656,10 +656,10 @@ nto_procfs_target::files_info ()
 {
   struct inferior *inf = current_inferior ();
 
-  printf_filtered ("\tUsing the running image of %s %s via %s.\n",
-		   inf->attach_flag ? "attached" : "child",
-		   target_pid_to_str (inferior_ptid).c_str (),
-		   (nodestr != NULL) ? nodestr : "local node");
+  gdb_printf ("\tUsing the running image of %s %s via %s.\n",
+	      inf->attach_flag ? "attached" : "child",
+	      target_pid_to_str (inferior_ptid).c_str (),
+	      (nodestr != NULL) ? nodestr : "local node");
 }
 
 /* Target to_pid_to_exec_file implementation.  */
@@ -1384,9 +1384,9 @@ nto_procfs_target::store_registers (struct regcache *regcache, int regno)
 
 	  err = devctl (ctl_fd, dev_set, &reg, regsize, 0);
 	  if (err != EOK)
-	    fprintf_unfiltered (gdb_stderr,
-				"Warning unable to write regset %d: %s\n",
-				regno, safe_strerror (err));
+	    gdb_printf (gdb_stderr,
+			"Warning unable to write regset %d: %s\n",
+			regno, safe_strerror (err));
 	}
     }
   else
@@ -1409,9 +1409,9 @@ nto_procfs_target::store_registers (struct regcache *regcache, int regno)
 
       err = devctl (ctl_fd, dev_set, &reg, regsize, 0);
       if (err != EOK)
-	fprintf_unfiltered (gdb_stderr,
-			    "Warning unable to write regset %d: %s\n", regno,
-			    safe_strerror (err));
+	gdb_printf (gdb_stderr,
+		    "Warning unable to write regset %d: %s\n", regno,
+		    safe_strerror (err));
     }
 }
 

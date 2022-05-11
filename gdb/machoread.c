@@ -404,7 +404,7 @@ macho_resolve_oso_sym_with_minsym (struct objfile *main_objfile, asymbol *sym)
       return 0;
     }
   else
-    return BMSYMBOL_VALUE_ADDRESS (msym);
+    return msym.value_address ();
 }
 
 /* Add oso file OSO/ABFD as a symbol file.  */
@@ -860,7 +860,7 @@ macho_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   if (dwarf2_has_info (objfile, NULL))
     {
       /* DWARF 2 sections */
-      dwarf2_build_psymtabs (objfile);
+      dwarf2_initialize_objfile (objfile);
     }
 
   /* Then the oso.  */

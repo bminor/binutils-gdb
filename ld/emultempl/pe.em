@@ -172,7 +172,7 @@ static int is_underscoring (void)
 }
 
 static void
-gld_${EMULATION_NAME}_before_parse (void)
+gld${EMULATION_NAME}_before_parse (void)
 {
   is_underscoring ();
   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
@@ -454,7 +454,7 @@ static definfo init[] =
 
 
 static void
-gld_${EMULATION_NAME}_list_options (FILE *file)
+gld${EMULATION_NAME}_list_options (FILE *file)
 {
   fprintf (file, _("  --base_file <basefile>             Generate a base file for relocatable DLLs\n"));
   fprintf (file, _("  --dll                              Set image base to the default for DLLs\n"));
@@ -1002,7 +1002,7 @@ compute_dll_image_base (const char *ofile)
    read.  */
 
 static void
-gld_${EMULATION_NAME}_set_symbols (void)
+gld${EMULATION_NAME}_set_symbols (void)
 {
   /* Run through and invent symbols for all the
      names and insert the defaults.  */
@@ -1069,7 +1069,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
    have been read.  */
 
 static void
-gld_${EMULATION_NAME}_after_parse (void)
+gld${EMULATION_NAME}_after_parse (void)
 {
   /* PR ld/6744:  Warn the user if they have used an ELF-only
      option hoping it will work on PE.  */
@@ -1382,7 +1382,7 @@ setup_build_id (bfd *ibfd)
 }
 
 static void
-gld_${EMULATION_NAME}_after_open (void)
+gld${EMULATION_NAME}_after_open (void)
 {
   after_open_default ();
 
@@ -1803,7 +1803,7 @@ gld_${EMULATION_NAME}_after_open (void)
 }
 
 static void
-gld_${EMULATION_NAME}_before_allocation (void)
+gld${EMULATION_NAME}_before_allocation (void)
 {
 #if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_wince_pe)
   /* FIXME: we should be able to set the size of the interworking stub
@@ -1849,7 +1849,7 @@ saw_option (char *option)
 #endif /* DLL_SUPPORT */
 
 static bool
-gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIBUTE_UNUSED)
+gld${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIBUTE_UNUSED)
 {
 #ifdef DLL_SUPPORT
   const char *ext = entry->filename + strlen (entry->filename) - 4;
@@ -1930,7 +1930,7 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 }
 
 static bool
-gld_${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUTE_UNUSED)
+gld${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUTE_UNUSED)
 {
 #ifdef DLL_SUPPORT
 #ifdef TARGET_IS_i386pe
@@ -1952,7 +1952,7 @@ gld_${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUT
 }
 
 static void
-gld_${EMULATION_NAME}_finish (void)
+gld${EMULATION_NAME}_finish (void)
 {
 #if defined(TARGET_IS_armpe) || defined(TARGET_IS_arm_wince_pe)
   struct bfd_link_hash_entry * h;
@@ -2052,9 +2052,9 @@ gld_${EMULATION_NAME}_finish (void)
    sort_sections.  */
 
 static lang_output_section_statement_type *
-gld_${EMULATION_NAME}_place_orphan (asection *s,
-				    const char *secname,
-				    int constraint)
+gld${EMULATION_NAME}_place_orphan (asection *s,
+				   const char *secname,
+				   int constraint)
 {
   const char *orig_secname = secname;
   char *dollar = NULL;
@@ -2251,7 +2251,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
 }
 
 static bool
-gld_${EMULATION_NAME}_open_dynamic_archive
+gld${EMULATION_NAME}_open_dynamic_archive
   (const char *arch ATTRIBUTE_UNUSED,
    search_dirs_type *search,
    lang_input_statement_type *entry)
@@ -2357,14 +2357,14 @@ gld_${EMULATION_NAME}_open_dynamic_archive
 }
 
 static int
-gld_${EMULATION_NAME}_find_potential_libraries
+gld${EMULATION_NAME}_find_potential_libraries
   (char *name, lang_input_statement_type *entry)
 {
   return ldfile_open_file_search (name, entry, "", ".lib");
 }
 
 static char *
-gld_${EMULATION_NAME}_get_script (int *isfile)
+gld${EMULATION_NAME}_get_script (int *isfile)
 EOF
 
 if test x"$COMPILE_IN" = xyes
@@ -2426,42 +2426,18 @@ fragment <<EOF
 EOF
 fi
 
-fragment <<EOF
+LDEMUL_AFTER_PARSE=gld${EMULATION_NAME}_after_parse
+LDEMUL_AFTER_OPEN=gld${EMULATION_NAME}_after_open
+LDEMUL_BEFORE_ALLOCATION=gld${EMULATION_NAME}_before_allocation
+LDEMUL_FINISH=gld${EMULATION_NAME}_finish
+LDEMUL_OPEN_DYNAMIC_ARCHIVE=gld${EMULATION_NAME}_open_dynamic_archive
+LDEMUL_PLACE_ORPHAN=gld${EMULATION_NAME}_place_orphan
+LDEMUL_SET_SYMBOLS=gld${EMULATION_NAME}_set_symbols
+LDEMUL_ADD_OPTIONS=gld${EMULATION_NAME}_add_options
+LDEMUL_HANDLE_OPTION=gld${EMULATION_NAME}_handle_option
+LDEMUL_UNRECOGNIZED_FILE=gld${EMULATION_NAME}_unrecognized_file
+LDEMUL_LIST_OPTIONS=gld${EMULATION_NAME}_list_options
+LDEMUL_RECOGNIZED_FILE=gld${EMULATION_NAME}_recognized_file
+LDEMUL_FIND_POTENTIAL_LIBRARIES=gld${EMULATION_NAME}_find_potential_libraries
 
-
-struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
-{
-  gld_${EMULATION_NAME}_before_parse,
-  syslib_default,
-  hll_default,
-  gld_${EMULATION_NAME}_after_parse,
-  gld_${EMULATION_NAME}_after_open,
-  after_check_relocs_default,
-  before_place_orphans_default,
-  after_allocation_default,
-  set_output_arch_default,
-  ldemul_default_target,
-  gld_${EMULATION_NAME}_before_allocation,
-  gld_${EMULATION_NAME}_get_script,
-  "${EMULATION_NAME}",
-  "${OUTPUT_FORMAT}",
-  gld_${EMULATION_NAME}_finish,
-  NULL, /* Create output section statements.  */
-  gld_${EMULATION_NAME}_open_dynamic_archive,
-  gld_${EMULATION_NAME}_place_orphan,
-  gld_${EMULATION_NAME}_set_symbols,
-  NULL, /* parse_args */
-  gld${EMULATION_NAME}_add_options,
-  gld${EMULATION_NAME}_handle_option,
-  gld_${EMULATION_NAME}_unrecognized_file,
-  gld_${EMULATION_NAME}_list_options,
-  gld_${EMULATION_NAME}_recognized_file,
-  gld_${EMULATION_NAME}_find_potential_libraries,
-  NULL,	/* new_vers_pattern.  */
-  NULL,	/* extra_map_file_text.  */
-  ${LDEMUL_EMIT_CTF_EARLY-NULL},
-  ${LDEMUL_ACQUIRE_STRINGS_FOR_CTF-NULL},
-  ${LDEMUL_NEW_DYNSYM_FOR_CTF-NULL},
-  ${LDEMUL_PRINT_SYMBOL-NULL}
-};
-EOF
+source_em ${srcdir}/emultempl/emulation.em

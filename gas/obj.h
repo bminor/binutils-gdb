@@ -42,7 +42,7 @@ struct format_ops {
   unsigned dfl_leading_underscore : 1;
   unsigned emit_section_symbols : 1;
   void (*begin) (void);
-  void (*app_file) (const char *, int);
+  void (*app_file) (const char *);
   void (*frob_symbol) (symbolS *, int *);
   void (*frob_file) (void);
   void (*frob_file_before_adjust) (void);

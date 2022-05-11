@@ -160,7 +160,8 @@ proc fortran_character1 {} {
 proc fortran_main {} {
     if {[test_compiler_info {gcc-4-[012]-*}]
          || [test_compiler_info {gcc-*}]
-         || [test_compiler_info {icc-*}]} {
+         || [test_compiler_info {icc-*}]
+         || [test_compiler_info {intel-*}]} {
 	return "MAIN__"
     } elseif {[test_compiler_info {clang-*}]} {
 	return "MAIN_"

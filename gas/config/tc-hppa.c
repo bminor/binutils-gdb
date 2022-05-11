@@ -2432,24 +2432,37 @@ pa_chk_field_selector (char **str)
   int middle, low, high;
   int cmp;
   char name[4];
+  char *s = *str;
 
   /* Read past any whitespace.  */
-  /* FIXME: should we read past newlines and formfeeds??? */
-  while (**str == ' ' || **str == '\t' || **str == '\n' || **str == '\f')
-    *str = *str + 1;
+  while (*s == ' ' || *s == '\t')
+    s++;
+  *str = s;
 
-  if ((*str)[1] == '\'' || (*str)[1] == '%')
-    name[0] = TOLOWER ((*str)[0]),
-    name[1] = 0;
-  else if ((*str)[2] == '\'' || (*str)[2] == '%')
-    name[0] = TOLOWER ((*str)[0]),
-    name[1] = TOLOWER ((*str)[1]),
-    name[2] = 0;
-  else if ((*str)[3] == '\'' || (*str)[3] == '%')
-    name[0] = TOLOWER ((*str)[0]),
-    name[1] = TOLOWER ((*str)[1]),
-    name[2] = TOLOWER ((*str)[2]),
-    name[3] = 0;
+  if (is_end_of_line [(unsigned char) s[0]])
+    return e_fsel;
+  else if (s[1] == '\'' || s[1] == '%')
+    {
+      name[0] = TOLOWER (s[0]);
+      name[1] = 0;
+    }
+  else if (is_end_of_line [(unsigned char) s[1]])
+    return e_fsel;
+  else if (s[2] == '\'' || s[2] == '%')
+    {
+      name[0] = TOLOWER (s[0]);
+      name[1] = TOLOWER (s[1]);
+      name[2] = 0;
+    }
+  else if (is_end_of_line [(unsigned char) s[2]])
+    return e_fsel;
+  else if (s[3] == '\'' || s[3] == '%')
+    {
+      name[0] = TOLOWER (s[0]);
+      name[1] = TOLOWER (s[1]);
+      name[2] = TOLOWER (s[2]);
+      name[3] = 0;
+    }
   else
     return e_fsel;
 

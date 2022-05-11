@@ -125,6 +125,11 @@ public:
 
   /* See language.h.  */
 
+  void value_print (struct value *val, struct ui_file *stream,
+		    const struct value_print_options *options) const override;
+
+  /* See language.h.  */
+
   struct block_symbol lookup_symbol_nonlocal
 	(const char *name, const struct block *block,
 	 const domain_enum domain) const override
@@ -133,11 +138,11 @@ public:
 
     if (symbol_lookup_debug)
       {
-	fprintf_unfiltered (gdb_stdlog,
-			    "rust_lookup_symbol_non_local"
-			    " (%s, %s (scope %s), %s)\n",
-			    name, host_address_to_string (block),
-			    block_scope (block), domain_name (domain));
+	gdb_printf (gdb_stdlog,
+		    "rust_lookup_symbol_non_local"
+		    " (%s, %s (scope %s), %s)\n",
+		    name, host_address_to_string (block),
+		    block_scope (block), domain_name (domain));
       }
 
     /* Look up bare names in the block's scope.  */
@@ -178,9 +183,9 @@ public:
   void printchar (int ch, struct type *chtype,
 		  struct ui_file *stream) const override
   {
-    fputs_filtered ("'", stream);
+    gdb_puts ("'", stream);
     emitchar (ch, chtype, stream, '\'');
-    fputs_filtered ("'", stream);
+    gdb_puts ("'", stream);
   }
 
   /* See language.h.  */
@@ -196,9 +201,9 @@ public:
 		      struct ui_file *stream) const override
   {
     type = check_typedef (type);
-    fprintf_filtered (stream, "type %s = ", new_symbol->print_name ());
+    gdb_printf (stream, "type %s = ", new_symbol->print_name ());
     type_print (type, "", stream, 0);
-    fprintf_filtered (stream, ";");
+    gdb_printf (stream, ";");
   }
 
   /* See language.h.  */

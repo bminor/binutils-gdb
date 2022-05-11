@@ -131,7 +131,13 @@ proc mi_create_inferior_pty {} {
     }
 }
 
-proc mi_gdb_start_separate_mi_tty { args } {
+#
+# Like default_mi_gdb_start below, but the MI is created as a separate
+# ui in a new tty.  The global MI_SPAWN_ID is updated to point at the
+# new tty created for the MI interface.  The global GDB_MAIN_SPAWN_ID
+# is updated to the current value of the global GDB_SPAWN_ID.
+#
+proc mi_gdb_start_separate_mi_tty { { flags {} } } {
     global gdb_prompt mi_gdb_prompt
     global timeout
     global gdb_spawn_id gdb_main_spawn_id mi_spawn_id
@@ -139,8 +145,8 @@ proc mi_gdb_start_separate_mi_tty { args } {
 
     set separate_inferior_pty 0
 
-    foreach arg $args {
-	if {$arg == "separate-inferior-tty"} {
+    foreach flag $flags {
+	if {$flag == "separate-inferior-tty"} {
 	    set separate_inferior_pty 1
 	}
     }
@@ -183,6 +189,8 @@ proc mi_gdb_start_separate_mi_tty { args } {
 #
 # default_mi_gdb_start [FLAGS] -- start gdb running, default procedure
 #
+# FLAGS is a list of flags, each flag is a string.
+#
 # If "separate-inferior-tty" is specified, the inferior works with
 # it's own PTY.
 #
@@ -193,7 +201,7 @@ proc mi_gdb_start_separate_mi_tty { args } {
 # tests on different hosts all using the same server, things can
 # get really slow.  Give gdb at least 3 minutes to start up.
 #
-proc default_mi_gdb_start { args } {
+proc default_mi_gdb_start { { flags {} } } {
     global use_gdb_stub
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
@@ -218,16 +226,16 @@ proc default_mi_gdb_start { args } {
 
     set separate_inferior_pty 0
 
-    foreach arg $args {
-	if {$arg == "separate-mi-tty"} {
+    foreach flag $flags {
+	if {$flag == "separate-mi-tty"} {
 	    set separate_mi_pty 1
-	} elseif {$arg == "separate-inferior-tty"} {
+	} elseif {$flag == "separate-inferior-tty"} {
 	    set separate_inferior_pty 1
 	}
     }
 
     if {$separate_mi_pty} {
-	return [eval mi_gdb_start_separate_mi_tty $args]
+	return [mi_gdb_start_separate_mi_tty $flags]
     }
 
     set inferior_pty no-tty
@@ -1802,13 +1810,13 @@ proc mi_get_inline_test {testcase} {
 }
 
 # Sets temporary breakpoint at LOCATION.
-proc mi_tbreak {location} {
+proc mi_tbreak {location test} {
 
     global mi_gdb_prompt
 
     mi_gdb_test "-break-insert -t $location" \
 	{\^done,bkpt=.*} \
-	"run to $location (set breakpoint)"
+	$test
 }
 
 # Send COMMAND that must be a command that resumes
@@ -1864,15 +1872,16 @@ proc mi_send_resuming_command {command test} {
 # be determined.
 # Does not check that the line is the same as requested.
 # The caller can check itself if required.
-proc mi_continue_to_line {location test} {
-
-    mi_tbreak $location
-    mi_send_resuming_command "exec-continue" "run to $location (exec-continue)"
-    return [mi_get_stop_line $test]
+proc_with_prefix mi_continue_to_line {location test} {
+    with_test_prefix $test {
+	mi_tbreak $location "set temporary breakpoint"
+	mi_send_resuming_command "exec-continue" "continue to breakpoint"
+	return [mi_get_stop_line]
+    }
 }
 
 # Wait until gdb prints the current line.
-proc mi_get_stop_line {test} {
+proc mi_get_stop_line {} {
 
   global mi_gdb_prompt
   global async
@@ -1888,10 +1897,10 @@ proc mi_get_stop_line {test} {
 	  return $expect_out(1,string)
       }
       -re ".*$mi_gdb_prompt" {
-	  fail "wait for stop ($test)"
+	  fail "wait for stop (unexpected output)"
       }
       timeout {
-	  fail "wait for stop ($test)"
+	  fail "wait for stop (timeout)"
       }
   }
 }
@@ -1954,11 +1963,11 @@ proc mi_run_inline_test { testcase } {
 
 	if {$first==1} {
 	    # Start the program afresh.
-	    mi_tbreak "$mi_autotest_source:$line"
+	    mi_tbreak "$mi_autotest_source:$line" "set temporary breakpoint"
 	    if { [mi_run_cmd] < 0 } {
 		return -1
 	    }
-	    set line_now [mi_get_stop_line "$testcase: step to $line"]
+	    set line_now [mi_get_stop_line]
 	    set first 0
 	} elseif {$line_now!=$line} {
 	    set line_now [mi_continue_to_line "$mi_autotest_source:$line" "continue to $line"]
@@ -1976,7 +1985,7 @@ proc mi_run_inline_test { testcase } {
 	if { [mi_send_resuming_command "exec-next" "$testcase: step over $line"] != 0 } {
 	    return -1
 	}
-	set line_now [mi_get_stop_line "$testcase: step over $line"]
+	set line_now [mi_get_stop_line]
 
 	# We probably want to use 'uplevel' so that statements
 	# have direct access to global variables that the

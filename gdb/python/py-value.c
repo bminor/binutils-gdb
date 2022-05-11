@@ -35,23 +35,26 @@
    GDB (which uses target arithmetic).  */
 
 /* Python's integer type corresponds to C's long type.  */
-#define builtin_type_pyint builtin_type (python_gdbarch)->builtin_long
+#define builtin_type_pyint \
+  builtin_type (gdbpy_enter::get_gdbarch ())->builtin_long
 
 /* Python's float type corresponds to C's double type.  */
-#define builtin_type_pyfloat builtin_type (python_gdbarch)->builtin_double
+#define builtin_type_pyfloat \
+  builtin_type (gdbpy_enter::get_gdbarch ())->builtin_double
 
 /* Python's long type corresponds to C's long long type.  */
-#define builtin_type_pylong builtin_type (python_gdbarch)->builtin_long_long
+#define builtin_type_pylong \
+  builtin_type (gdbpy_enter::get_gdbarch ())->builtin_long_long
 
 /* Python's long type corresponds to C's long long type.  Unsigned version.  */
 #define builtin_type_upylong builtin_type \
-  (python_gdbarch)->builtin_unsigned_long_long
+  (gdbpy_enter::get_gdbarch ())->builtin_unsigned_long_long
 
 #define builtin_type_pybool \
-  language_bool_type (python_language, python_gdbarch)
+  language_bool_type (current_language, gdbpy_enter::get_gdbarch ())
 
 #define builtin_type_pychar \
-  language_string_char_type (python_language, python_gdbarch)
+  language_string_char_type (current_language, gdbpy_enter::get_gdbarch ())
 
 struct value_object {
   PyObject_HEAD
@@ -636,6 +639,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
       "symbols",		/* See set print symbol on|off.  */
       "unions",			/* See set print union on|off.  */
       "address",		/* See set print address on|off.  */
+      "styling",		/* Should we apply styling.  */
       /* C++ options.  */
       "deref_refs",		/* No corresponding setting.  */
       "actual_objects",		/* See set print object on|off.  */
@@ -680,13 +684,14 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
   PyObject *symbols_obj = NULL;
   PyObject *unions_obj = NULL;
   PyObject *address_obj = NULL;
+  PyObject *styling_obj = Py_False;
   PyObject *deref_refs_obj = NULL;
   PyObject *actual_objects_obj = NULL;
   PyObject *static_members_obj = NULL;
   char *format = NULL;
   if (!gdb_PyArg_ParseTupleAndKeywords (args,
 					kw,
-					"|O!O!O!O!O!O!O!O!O!O!IIIs",
+					"|O!O!O!O!O!O!O!O!O!O!O!IIIs",
 					keywords,
 					&PyBool_Type, &raw_obj,
 					&PyBool_Type, &pretty_arrays_obj,
@@ -695,6 +700,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 					&PyBool_Type, &symbols_obj,
 					&PyBool_Type, &unions_obj,
 					&PyBool_Type, &address_obj,
+					&PyBool_Type, &styling_obj,
 					&PyBool_Type, &deref_refs_obj,
 					&PyBool_Type, &actual_objects_obj,
 					&PyBool_Type, &static_members_obj,
@@ -749,12 +755,12 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 	}
     }
 
-  string_file stb;
+  string_file stb (PyObject_IsTrue (styling_obj));
 
   try
     {
       common_val_print (((value_object *) self)->value, &stb, 0,
-			&opts, python_language);
+			&opts, current_language);
     }
   catch (const gdb_exception &except)
     {
@@ -1160,7 +1166,7 @@ valpy_str (PyObject *self)
   try
     {
       common_val_print (((value_object *) self)->value, &stb, 0,
-			&opts, python_language);
+			&opts, current_language);
     }
   catch (const gdb_exception &except)
     {
@@ -1689,41 +1695,6 @@ valpy_richcompare (PyObject *self, PyObject *other, int op)
   Py_RETURN_FALSE;
 }
 
-#ifndef IS_PY3K
-/* Implements conversion to int.  */
-static PyObject *
-valpy_int (PyObject *self)
-{
-  struct value *value = ((value_object *) self)->value;
-  struct type *type = value_type (value);
-  LONGEST l = 0;
-
-  try
-    {
-      if (is_floating_value (value))
-	{
-	  type = builtin_type_pylong;
-	  value = value_cast (type, value);
-	}
-
-      if (!is_integral_type (type)
-	  && type->code () != TYPE_CODE_PTR)
-	error (_("Cannot convert value to int."));
-
-      l = value_as_long (value);
-    }
-  catch (const gdb_exception &except)
-    {
-      GDB_PY_HANDLE_EXCEPTION (except);
-    }
-
-  if (type->is_unsigned ())
-    return gdb_py_object_from_ulongest (l).release ();
-  else
-    return gdb_py_object_from_longest (l).release ();
-}
-#endif
-
 /* Implements conversion to long.  */
 static PyObject *
 valpy_long (PyObject *self)
@@ -1908,15 +1879,6 @@ convert_value_from_python (PyObject *obj)
 	  else
 	    value = value_from_longest (builtin_type_pylong, l);
 	}
-#if PY_MAJOR_VERSION == 2
-      else if (PyInt_Check (obj))
-	{
-	  long l = PyInt_AsLong (obj);
-
-	  if (! PyErr_Occurred ())
-	    value = value_from_longest (builtin_type_pyint, l);
-	}
-#endif
       else if (PyFloat_Check (obj))
 	{
 	  double d = PyFloat_AsDouble (obj);
@@ -1942,14 +1904,8 @@ convert_value_from_python (PyObject *obj)
 	  value = value_copy (((value_object *) result)->value);
 	}
       else
-#ifdef IS_PY3K
 	PyErr_Format (PyExc_TypeError,
 		      _("Could not convert Python object: %S."), obj);
-#else
-	PyErr_Format (PyExc_TypeError,
-		      _("Could not convert Python object: %s."),
-		      PyString_AsString (PyObject_Str (obj)));
-#endif
     }
   catch (const gdb_exception &except)
     {
@@ -2009,6 +1965,14 @@ gdbpy_add_history (PyObject *self, PyObject *args)
   return nullptr;
 }
 
+/* Return an integer, the number of items in GDB's history.  */
+
+PyObject *
+gdbpy_history_count (PyObject *self, PyObject *args)
+{
+  return gdb_py_object_from_ulongest (value_history_count ()).release ();
+}
+
 /* Return the value of a convenience variable.  */
 PyObject *
 gdbpy_convenience_variable (PyObject *self, PyObject *args)
@@ -2025,7 +1989,7 @@ gdbpy_convenience_variable (PyObject *self, PyObject *args)
 
       if (var != NULL)
 	{
-	  res_val = value_of_internalvar (python_gdbarch, var);
+	  res_val = value_of_internalvar (gdbpy_enter::get_gdbarch (), var);
 	  if (value_type (res_val)->code () == TYPE_CODE_VOID)
 	    res_val = NULL;
 	}
@@ -2162,9 +2126,6 @@ static PyNumberMethods value_object_as_number = {
   valpy_add,
   valpy_subtract,
   valpy_multiply,
-#ifndef IS_PY3K
-  valpy_divide,
-#endif
   valpy_remainder,
   NULL,			      /* nb_divmod */
   valpy_power,		      /* nb_power */
@@ -2178,25 +2139,12 @@ static PyNumberMethods value_object_as_number = {
   valpy_and,		      /* nb_and */
   valpy_xor,		      /* nb_xor */
   valpy_or,		      /* nb_or */
-#ifdef IS_PY3K
   valpy_long,		      /* nb_int */
   NULL,			      /* reserved */
-#else
-  NULL,			      /* nb_coerce */
-  valpy_int,		      /* nb_int */
-  valpy_long,		      /* nb_long */
-#endif
   valpy_float,		      /* nb_float */
-#ifndef IS_PY3K
-  NULL,			      /* nb_oct */
-  NULL,                       /* nb_hex */
-#endif
   NULL,                       /* nb_inplace_add */
   NULL,                       /* nb_inplace_subtract */
   NULL,                       /* nb_inplace_multiply */
-#ifndef IS_PY3K
-  NULL,                       /* nb_inplace_divide */
-#endif
   NULL,                       /* nb_inplace_remainder */
   NULL,                       /* nb_inplace_power */
   NULL,                       /* nb_inplace_lshift */

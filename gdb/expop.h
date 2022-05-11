@@ -64,10 +64,6 @@ extern struct value *eval_op_func_static_var (struct type *expect_type,
 extern struct value *eval_op_register (struct type *expect_type,
 				       struct expression *exp,
 				       enum noside noside, const char *name);
-extern struct value *eval_op_string (struct type *expect_type,
-				     struct expression *exp,
-				     enum noside noside, int len,
-				     const char *string);
 extern struct value *eval_op_ternop (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside,
@@ -84,10 +80,6 @@ extern struct value *eval_op_structop_ptr (struct type *expect_type,
 					   struct value *arg1,
 					   const char *string);
 extern struct value *eval_op_member (struct type *expect_type,
-				     struct expression *exp,
-				     enum noside noside,
-				     struct value *arg1, struct value *arg2);
-extern struct value *eval_op_concat (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside,
 				     struct value *arg1, struct value *arg2);
@@ -233,7 +225,7 @@ check_objfile (struct type *type, struct objfile *objfile)
 static inline bool
 check_objfile (struct symbol *sym, struct objfile *objfile)
 {
-  return check_objfile (symbol_objfile (sym), objfile);
+  return check_objfile (sym->objfile (), objfile);
 }
 
 static inline bool
@@ -354,7 +346,7 @@ void
 dump_for_expression (struct ui_file *stream, int depth,
 		     const std::vector<T> &vals)
 {
-  fprintf_filtered (stream, _("%*sVector:\n"), depth, "");
+  gdb_printf (stream, _("%*sVector:\n"), depth, "");
   for (auto &item : vals)
     dump_for_expression (stream, depth + 1, item);
 }
@@ -482,7 +474,7 @@ check_constant (ULONGEST cst)
 static inline bool
 check_constant (struct symbol *sym)
 {
-  enum address_class sc = SYMBOL_CLASS (sym);
+  enum address_class sc = sym->aclass ();
   return (sc == LOC_BLOCK
 	  || sc == LOC_CONST
 	  || sc == LOC_CONST_BYTES
@@ -912,12 +904,7 @@ public:
 
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
-		   enum noside noside) override
-  {
-    const std::string &str = std::get<0> (m_storage);
-    return eval_op_string (expect_type, exp, noside,
-			   str.size (), str.c_str ());
-  }
+		   enum noside noside) override;
 
   enum exp_opcode opcode () const override
   { return OP_STRING; }
@@ -1010,19 +997,25 @@ public:
     return std::get<1> (m_storage);
   }
 
-  /* Used for completion.  Evaluate the LHS for type.  */
-  value *evaluate_lhs (struct expression *exp)
-  {
-    return std::get<0> (m_storage)->evaluate (nullptr, exp,
-					      EVAL_AVOID_SIDE_EFFECTS);
-  }
-
   value *evaluate_funcall (struct type *expect_type,
 			   struct expression *exp,
 			   enum noside noside,
 			   const std::vector<operation_up> &args) override;
 
+  /* Try to complete this operation in the context of EXP.  TRACKER is
+     the completion tracker to update.  Return true if completion was
+     possible, false otherwise.  */
+  virtual bool complete (struct expression *exp, completion_tracker &tracker)
+  {
+    return complete (exp, tracker, "");
+  }
+
 protected:
+
+  /* Do the work of the public 'complete' method.  PREFIX is prepended
+     to each result.  */
+  bool complete (struct expression *exp, completion_tracker &tracker,
+		 const char *prefix);
 
   using tuple_holding_operation::tuple_holding_operation;
 };
@@ -1167,7 +1160,7 @@ public:
       = std::get<0> (m_storage)->evaluate_with_coercion (exp, noside);
     value *rhs
       = std::get<1> (m_storage)->evaluate_with_coercion (exp, noside);
-    return eval_op_concat (expect_type, exp, noside, lhs, rhs);
+    return value_concat (lhs, rhs);
   }
 
   enum exp_opcode opcode () const override
@@ -1958,6 +1951,37 @@ protected:
 		       struct axs_value *value,
 		       struct type *cast_type)
     override;
+};
+
+/* Not a cast!  Extract a value of a given type from the contents of a
+   value.  The new value is extracted from the least significant bytes
+   of the old value.  The new value's type must be no bigger than the
+   old values type.  */
+class unop_extract_operation
+  : public maybe_constant_operation<operation_up, struct type *>
+{
+public:
+
+  using maybe_constant_operation::maybe_constant_operation;
+
+  value *evaluate (struct type *expect_type, struct expression *exp,
+		   enum noside noside) override;
+
+  enum exp_opcode opcode () const override
+  { return UNOP_EXTRACT; }
+
+  /* Return the type referenced by this object.  */
+  struct type *get_type () const
+  {
+    return std::get<1> (m_storage);
+  }
+
+protected:
+
+  void do_generate_ax (struct expression *exp,
+		       struct agent_expr *ax,
+		       struct axs_value *value,
+		       struct type *cast_type) override;
 };
 
 /* A type cast.  */

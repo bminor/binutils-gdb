@@ -126,13 +126,13 @@ setup_sections_data::setup_one_section (asection *sect)
 	prot |= GDB_MMAP_PROT_EXEC;
 
       if (compile_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "module \"%s\" section \"%s\" size %s prot %u\n",
-			    bfd_get_filename (m_bfd),
-			    bfd_section_name (sect),
-			    paddress (target_gdbarch (),
-				      bfd_section_size (sect)),
-			    prot);
+	gdb_printf (gdb_stdlog,
+		    "module \"%s\" section \"%s\" size %s prot %u\n",
+		    bfd_get_filename (m_bfd),
+		    bfd_section_name (sect),
+		    paddress (target_gdbarch (),
+			      bfd_section_size (sect)),
+		    prot);
     }
   else
     prot = -1;
@@ -149,11 +149,11 @@ setup_sections_data::setup_one_section (asection *sect)
 				       m_last_prot);
 	  munmap_list.add (addr, m_last_size);
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"allocated %s bytes at %s prot %u\n",
-				paddress (target_gdbarch (), m_last_size),
-				paddress (target_gdbarch (), addr),
-				m_last_prot);
+	    gdb_printf (gdb_stdlog,
+			"allocated %s bytes at %s prot %u\n",
+			paddress (target_gdbarch (), m_last_size),
+			paddress (target_gdbarch (), addr),
+			m_last_prot);
 	}
       else
 	addr = 0;
@@ -421,8 +421,8 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
   lookup_name_info func_matcher (GCC_FE_WRAPPER_FUNCTION,
 				 symbol_name_match_type::SEARCH_NAME);
 
-  bv = SYMTAB_BLOCKVECTOR (func_sym->owner.symtab);
-  nblocks = BLOCKVECTOR_NBLOCKS (bv);
+  bv = func_sym->symtab ()->compunit ()->blockvector ();
+  nblocks = bv->num_blocks ();
 
   gdb_ptr_type_sym = NULL;
   for (block_loop = 0; block_loop < nblocks; block_loop++)
@@ -430,8 +430,8 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
       struct symbol *function = NULL;
       const struct block *function_block;
 
-      block = BLOCKVECTOR_BLOCK (bv, block_loop);
-      if (BLOCK_FUNCTION (block) != NULL)
+      block = bv->block (block_loop);
+      if (block->function () != NULL)
 	continue;
       gdb_val_sym = block_lookup_symbol (block,
 					 COMPILE_I_EXPR_VAL,
@@ -441,24 +441,23 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 	continue;
 
       function_block = block;
-      while (function_block != BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK)
-	     && function_block != BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK))
+      while (function_block != bv->static_block ()
+	     && function_block != bv->global_block ())
 	{
-	  function_block = BLOCK_SUPERBLOCK (function_block);
-	  function = BLOCK_FUNCTION (function_block);
+	  function_block = function_block->superblock ();
+	  function = function_block->function ();
 	  if (function != NULL)
 	    break;
 	}
       if (function != NULL
-	  && (BLOCK_SUPERBLOCK (function_block)
-	      == BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK))
+	  && function_block->superblock () == bv->static_block ()
 	  && symbol_matches_search_name (function, func_matcher))
 	break;
     }
   if (block_loop == nblocks)
     error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_VAL);
 
-  gdb_type = SYMBOL_TYPE (gdb_val_sym);
+  gdb_type = gdb_val_sym->type ();
   gdb_type = check_typedef (gdb_type);
 
   gdb_ptr_type_sym = block_lookup_symbol (block, COMPILE_I_EXPR_PTR_TYPE,
@@ -466,7 +465,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 					  VAR_DOMAIN);
   if (gdb_ptr_type_sym == NULL)
     error (_("No \"%s\" symbol found"), COMPILE_I_EXPR_PTR_TYPE);
-  gdb_ptr_type = SYMBOL_TYPE (gdb_ptr_type_sym);
+  gdb_ptr_type = gdb_ptr_type_sym->type ();
   gdb_ptr_type = check_typedef (gdb_ptr_type);
   if (gdb_ptr_type->code () != TYPE_CODE_PTR)
     error (_("Type of \"%s\" is not a pointer"), COMPILE_I_EXPR_PTR_TYPE);
@@ -517,7 +516,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 static struct type *
 get_regs_type (struct symbol *func_sym, struct objfile *objfile)
 {
-  struct type *func_type = SYMBOL_TYPE (func_sym);
+  struct type *func_type = func_sym->type ();
   struct type *regsp_type, *regs_type;
 
   /* No register parameter present.  */
@@ -656,7 +655,7 @@ compile_object_load (const compile_file_names &file_names,
   if (func_sym == NULL)
     error (_("Cannot find function \"%s\" in compiled module \"%s\"."),
 	   GCC_FE_WRAPPER_FUNCTION, objfile_name (objfile));
-  func_type = SYMBOL_TYPE (func_sym);
+  func_type = func_sym->type ();
   if (func_type->code () != TYPE_CODE_FUNC)
     error (_("Invalid type code %d of function \"%s\" in compiled "
 	     "module \"%s\"."),
@@ -713,9 +712,9 @@ compile_object_load (const compile_file_names &file_names,
       if (strcmp (sym->name, "_GLOBAL_OFFSET_TABLE_") == 0)
 	{
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"ELF symbol \"%s\" relocated to zero\n",
-				sym->name);
+	    gdb_printf (gdb_stdlog,
+			"ELF symbol \"%s\" relocated to zero\n",
+			sym->name);
 
 	  /* It seems to be a GCC bug, with -mcmodel=large there should be no
 	     need for _GLOBAL_OFFSET_TABLE_.  Together with -fPIE the data
@@ -757,36 +756,36 @@ compile_object_load (const compile_file_names &file_names,
 	  sym->value = 0x8000;
 	  bfd_set_gp_value(abfd.get(), toc_fallback->vma);
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"Connectiong ELF symbol \"%s\" to the .toc section (%s)\n",
-				sym->name,
-				paddress (target_gdbarch (), sym->value));
+	    gdb_printf (gdb_stdlog,
+			"Connectiong ELF symbol \"%s\" to the .toc section (%s)\n",
+			sym->name,
+			paddress (target_gdbarch (), sym->value));
 	  continue;
 	}
 
       bmsym = lookup_minimal_symbol (sym->name, NULL, NULL);
       switch (bmsym.minsym == NULL
-	      ? mst_unknown : MSYMBOL_TYPE (bmsym.minsym))
+	      ? mst_unknown : bmsym.minsym->type ())
 	{
 	case mst_text:
 	case mst_bss:
 	case mst_data:
-	  sym->value = BMSYMBOL_VALUE_ADDRESS (bmsym);
+	  sym->value = bmsym.value_address ();
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"ELF mst_text symbol \"%s\" relocated to %s\n",
-				sym->name,
-				paddress (target_gdbarch (), sym->value));
+	    gdb_printf (gdb_stdlog,
+			"ELF mst_text symbol \"%s\" relocated to %s\n",
+			sym->name,
+			paddress (target_gdbarch (), sym->value));
 	  break;
 	case mst_text_gnu_ifunc:
 	  sym->value = gnu_ifunc_resolve_addr (target_gdbarch (),
-					       BMSYMBOL_VALUE_ADDRESS (bmsym));
+					       bmsym.value_address ());
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"ELF mst_text_gnu_ifunc symbol \"%s\" "
-				"relocated to %s\n",
-				sym->name,
-				paddress (target_gdbarch (), sym->value));
+	    gdb_printf (gdb_stdlog,
+			"ELF mst_text_gnu_ifunc symbol \"%s\" "
+			"relocated to %s\n",
+			sym->name,
+			paddress (target_gdbarch (), sym->value));
 	  break;
 	default:
 	  warning (_("Could not find symbol \"%s\" "
@@ -812,11 +811,11 @@ compile_object_load (const compile_file_names &file_names,
       gdb_assert (regs_addr != 0);
       setup_sections_data.munmap_list.add (regs_addr, TYPE_LENGTH (regs_type));
       if (compile_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "allocated %s bytes at %s for registers\n",
-			    paddress (target_gdbarch (),
-				      TYPE_LENGTH (regs_type)),
-			    paddress (target_gdbarch (), regs_addr));
+	gdb_printf (gdb_stdlog,
+		    "allocated %s bytes at %s for registers\n",
+		    paddress (target_gdbarch (),
+			      TYPE_LENGTH (regs_type)),
+		    paddress (target_gdbarch (), regs_addr));
       store_regs (regs_type, regs_addr);
     }
 
@@ -835,11 +834,11 @@ compile_object_load (const compile_file_names &file_names,
       setup_sections_data.munmap_list.add (out_value_addr,
 					   TYPE_LENGTH (out_value_type));
       if (compile_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "allocated %s bytes at %s for printed value\n",
-			    paddress (target_gdbarch (),
-				      TYPE_LENGTH (out_value_type)),
-			    paddress (target_gdbarch (), out_value_addr));
+	gdb_printf (gdb_stdlog,
+		    "allocated %s bytes at %s for printed value\n",
+		    paddress (target_gdbarch (),
+			      TYPE_LENGTH (out_value_type)),
+		    paddress (target_gdbarch (), out_value_addr));
     }
 
   compile_module_up retval (new struct compile_module);

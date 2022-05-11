@@ -29,13 +29,14 @@
 #include "ui-out.h"
 #include "command.h"
 #include "readline/tilde.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "dictionary.h"
 #include "language.h"
 #include "cp-support.h"
 #include "gdbcmd.h"
 #include <algorithm>
 #include <set>
+#include "gdbsupport/buildargv.h"
 
 static struct partial_symbol *lookup_partial_symbol (struct objfile *,
 						     struct partial_symtab *,
@@ -133,7 +134,7 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
 	     object's symbol table.  */
 	  p = find_pc_sect_psymbol (objfile, tpst, pc, section);
 	  if (p != NULL
-	      && (p->address (objfile) == BMSYMBOL_VALUE_ADDRESS (msymbol)))
+	      && (p->address (objfile) == msymbol.value_address ()))
 	    return tpst;
 
 	  /* Also accept the textlow value of a psymtab as a
@@ -210,7 +211,7 @@ psymbol_functions::find_pc_sect_psymtab (struct objfile *objfile,
 	      p = find_pc_sect_psymbol (objfile, pst, pc, section);
 	      if (p == NULL
 		  || (p->address (objfile)
-		      != BMSYMBOL_VALUE_ADDRESS (msymbol)))
+		      != msymbol.value_address ()))
 		goto next;
 	    }
 
@@ -587,8 +588,8 @@ psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
 
       if (info_verbose)
 	{
-	  printf_filtered (_("Reading in symbols for %s...\n"),
-			   pst->filename);
+	  gdb_printf (_("Reading in symbols for %s...\n"),
+		      pst->filename);
 	  gdb_flush (gdb_stdout);
 	}
 
@@ -630,7 +631,7 @@ psymbol_functions::find_last_source_symtab (struct objfile *ofp)
 
 	  if (cust == NULL)
 	    return NULL;
-	  return compunit_primary_filetab (cust);
+	  return cust->primary_filetab ();
 	}
     }
   return NULL;
@@ -657,95 +658,95 @@ print_partial_symbols (struct gdbarch *gdbarch, struct objfile *objfile,
 		       const std::vector<partial_symbol *> &symbols,
 		       const char *what, struct ui_file *outfile)
 {
-  fprintf_filtered (outfile, "  %s partial symbols:\n", what);
+  gdb_printf (outfile, "  %s partial symbols:\n", what);
   for (partial_symbol *p : symbols)
     {
       QUIT;
-      fprintf_filtered (outfile, "    `%s'", p->ginfo.linkage_name ());
+      gdb_printf (outfile, "    `%s'", p->ginfo.linkage_name ());
       if (p->ginfo.demangled_name () != NULL)
 	{
-	  fprintf_filtered (outfile, "  `%s'",
-			    p->ginfo.demangled_name ());
+	  gdb_printf (outfile, "  `%s'",
+		      p->ginfo.demangled_name ());
 	}
-      fputs_filtered (", ", outfile);
+      gdb_puts (", ", outfile);
       switch (p->domain)
 	{
 	case UNDEF_DOMAIN:
-	  fputs_filtered ("undefined domain, ", outfile);
+	  gdb_puts ("undefined domain, ", outfile);
 	  break;
 	case VAR_DOMAIN:
 	  /* This is the usual thing -- don't print it.  */
 	  break;
 	case STRUCT_DOMAIN:
-	  fputs_filtered ("struct domain, ", outfile);
+	  gdb_puts ("struct domain, ", outfile);
 	  break;
 	case MODULE_DOMAIN:
-	  fputs_filtered ("module domain, ", outfile);
+	  gdb_puts ("module domain, ", outfile);
 	  break;
 	case LABEL_DOMAIN:
-	  fputs_filtered ("label domain, ", outfile);
+	  gdb_puts ("label domain, ", outfile);
 	  break;
 	case COMMON_BLOCK_DOMAIN:
-	  fputs_filtered ("common block domain, ", outfile);
+	  gdb_puts ("common block domain, ", outfile);
 	  break;
 	default:
-	  fputs_filtered ("<invalid domain>, ", outfile);
+	  gdb_puts ("<invalid domain>, ", outfile);
 	  break;
 	}
       switch (p->aclass)
 	{
 	case LOC_UNDEF:
-	  fputs_filtered ("undefined", outfile);
+	  gdb_puts ("undefined", outfile);
 	  break;
 	case LOC_CONST:
-	  fputs_filtered ("constant int", outfile);
+	  gdb_puts ("constant int", outfile);
 	  break;
 	case LOC_STATIC:
-	  fputs_filtered ("static", outfile);
+	  gdb_puts ("static", outfile);
 	  break;
 	case LOC_REGISTER:
-	  fputs_filtered ("register", outfile);
+	  gdb_puts ("register", outfile);
 	  break;
 	case LOC_ARG:
-	  fputs_filtered ("pass by value", outfile);
+	  gdb_puts ("pass by value", outfile);
 	  break;
 	case LOC_REF_ARG:
-	  fputs_filtered ("pass by reference", outfile);
+	  gdb_puts ("pass by reference", outfile);
 	  break;
 	case LOC_REGPARM_ADDR:
-	  fputs_filtered ("register address parameter", outfile);
+	  gdb_puts ("register address parameter", outfile);
 	  break;
 	case LOC_LOCAL:
-	  fputs_filtered ("stack parameter", outfile);
+	  gdb_puts ("stack parameter", outfile);
 	  break;
 	case LOC_TYPEDEF:
-	  fputs_filtered ("type", outfile);
+	  gdb_puts ("type", outfile);
 	  break;
 	case LOC_LABEL:
-	  fputs_filtered ("label", outfile);
+	  gdb_puts ("label", outfile);
 	  break;
 	case LOC_BLOCK:
-	  fputs_filtered ("function", outfile);
+	  gdb_puts ("function", outfile);
 	  break;
 	case LOC_CONST_BYTES:
-	  fputs_filtered ("constant bytes", outfile);
+	  gdb_puts ("constant bytes", outfile);
 	  break;
 	case LOC_UNRESOLVED:
-	  fputs_filtered ("unresolved", outfile);
+	  gdb_puts ("unresolved", outfile);
 	  break;
 	case LOC_OPTIMIZED_OUT:
-	  fputs_filtered ("optimized out", outfile);
+	  gdb_puts ("optimized out", outfile);
 	  break;
 	case LOC_COMPUTED:
-	  fputs_filtered ("computed at runtime", outfile);
+	  gdb_puts ("computed at runtime", outfile);
 	  break;
 	default:
-	  fputs_filtered ("<invalid location>", outfile);
+	  gdb_puts ("<invalid location>", outfile);
 	  break;
 	}
-      fputs_filtered (", ", outfile);
-      fputs_filtered (paddress (gdbarch, p->unrelocated_address ()), outfile);
-      fprintf_filtered (outfile, "\n");
+      gdb_puts (", ", outfile);
+      gdb_puts (paddress (gdbarch, p->unrelocated_address ()), outfile);
+      gdb_printf (outfile, "\n");
     }
 }
 
@@ -758,41 +759,41 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
 
   if (psymtab->anonymous)
     {
-      fprintf_filtered (outfile, "\nAnonymous partial symtab (%s) ",
-			psymtab->filename);
+      gdb_printf (outfile, "\nAnonymous partial symtab (%s) ",
+		  psymtab->filename);
     }
   else
     {
-      fprintf_filtered (outfile, "\nPartial symtab for source file %s ",
-			psymtab->filename);
+      gdb_printf (outfile, "\nPartial symtab for source file %s ",
+		  psymtab->filename);
     }
-  fprintf_filtered (outfile, "(object %s)\n\n",
-		    host_address_to_string (psymtab));
-  fprintf_filtered (outfile, "  Read from object file %s (%s)\n",
-		    objfile_name (objfile),
-		    host_address_to_string (objfile));
+  gdb_printf (outfile, "(object %s)\n\n",
+	      host_address_to_string (psymtab));
+  gdb_printf (outfile, "  Read from object file %s (%s)\n",
+	      objfile_name (objfile),
+	      host_address_to_string (objfile));
 
   if (psymtab->readin_p (objfile))
-    fprintf_filtered
+    gdb_printf
       (outfile,
        "  Full symtab was read (at %s)\n",
        host_address_to_string (psymtab->get_compunit_symtab (objfile)));
 
-  fprintf_filtered (outfile, "  Symbols cover text addresses ");
-  fputs_filtered (paddress (gdbarch, psymtab->text_low (objfile)), outfile);
-  fprintf_filtered (outfile, "-");
-  fputs_filtered (paddress (gdbarch, psymtab->text_high (objfile)), outfile);
-  fprintf_filtered (outfile, "\n");
-  fprintf_filtered (outfile, "  Address map supported - %s.\n",
-		    psymtab->psymtabs_addrmap_supported ? "yes" : "no");
-  fprintf_filtered (outfile, "  Depends on %d other partial symtabs.\n",
-		    psymtab->number_of_dependencies);
+  gdb_printf (outfile, "  Symbols cover text addresses ");
+  gdb_puts (paddress (gdbarch, psymtab->text_low (objfile)), outfile);
+  gdb_printf (outfile, "-");
+  gdb_puts (paddress (gdbarch, psymtab->text_high (objfile)), outfile);
+  gdb_printf (outfile, "\n");
+  gdb_printf (outfile, "  Address map supported - %s.\n",
+	      psymtab->psymtabs_addrmap_supported ? "yes" : "no");
+  gdb_printf (outfile, "  Depends on %d other partial symtabs.\n",
+	      psymtab->number_of_dependencies);
   for (i = 0; i < psymtab->number_of_dependencies; i++)
-    fprintf_filtered (outfile, "    %d %s\n", i,
-		      host_address_to_string (psymtab->dependencies[i]));
+    gdb_printf (outfile, "    %d %s\n", i,
+		host_address_to_string (psymtab->dependencies[i]));
   if (psymtab->user != NULL)
-    fprintf_filtered (outfile, "  Shared partial symtab with user %s\n",
-		      host_address_to_string (psymtab->user));
+    gdb_printf (outfile, "  Shared partial symtab with user %s\n",
+		host_address_to_string (psymtab->user));
   if (!psymtab->global_psymbols.empty ())
     {
       print_partial_symbols
@@ -805,7 +806,7 @@ dump_psymtab (struct objfile *objfile, struct partial_symtab *psymtab,
 	(gdbarch, objfile, psymtab->static_psymbols,
 	 "Static", outfile);
     }
-  fprintf_filtered (outfile, "\n");
+  gdb_printf (outfile, "\n");
 }
 
 /* Count the number of partial symbols in OBJFILE.  */
@@ -834,8 +835,8 @@ psymbol_functions::print_stats (struct objfile *objfile, bool print_bcache)
     {
       int n_psyms = count_psyms ();
       if (n_psyms > 0)
-	printf_filtered (_("  Number of \"partial\" symbols read: %d\n"),
-			 n_psyms);
+	gdb_printf (_("  Number of \"partial\" symbols read: %d\n"),
+		    n_psyms);
 
       i = 0;
       for (partial_symtab *ps : require_partial_symbols (objfile))
@@ -843,14 +844,14 @@ psymbol_functions::print_stats (struct objfile *objfile, bool print_bcache)
 	  if (!ps->readin_p (objfile))
 	    i++;
 	}
-      printf_filtered (_("  Number of psym tables (not yet expanded): %d\n"),
-		       i);
-      printf_filtered (_("  Total memory used for psymbol cache: %d\n"),
-		       m_partial_symtabs->psymbol_cache.memory_used ());
+      gdb_printf (_("  Number of psym tables (not yet expanded): %d\n"),
+		  i);
+      gdb_printf (_("  Total memory used for psymbol cache: %d\n"),
+		  m_partial_symtabs->psymbol_cache.memory_used ());
     }
   else
     {
-      printf_filtered (_("Psymbol byte cache statistics:\n"));
+      gdb_printf (_("Psymbol byte cache statistics:\n"));
       m_partial_symtabs->psymbol_cache.print_statistics
 	("partial symbol cache");
     }
@@ -866,14 +867,14 @@ psymbol_functions::dump (struct objfile *objfile)
 
   if (m_partial_symtabs->psymtabs)
     {
-      printf_filtered ("Psymtabs:\n");
+      gdb_printf ("Psymtabs:\n");
       for (psymtab = m_partial_symtabs->psymtabs;
 	   psymtab != NULL;
 	   psymtab = psymtab->next)
-	printf_filtered ("%s at %s\n",
-			 psymtab->filename,
-			 host_address_to_string (psymtab));
-      printf_filtered ("\n\n");
+	gdb_printf ("%s at %s\n",
+		    psymtab->filename,
+		    host_address_to_string (psymtab));
+      gdb_printf ("\n\n");
     }
 }
 
@@ -1135,13 +1136,10 @@ psymbol_functions::expand_symtabs_matching
 					  *psym_lookup_name,
 					  symbol_matcher))
 	{
-	  struct compunit_symtab *symtab =
-	    psymtab_to_symtab (objfile, ps);
+	  compunit_symtab *cust = psymtab_to_symtab (objfile, ps);
 
-	  gdb_assert (symtab != nullptr);
-
-	  if (expansion_notify != NULL)
-	    if (!expansion_notify (symtab))
+	  if (cust != nullptr && expansion_notify != nullptr)
+	    if (!expansion_notify (cust))
 	      return false;
 	}
     }
@@ -1289,7 +1287,7 @@ psymbol_bcache::hash (const void *addr, int length)
   unsigned int domain = psymbol->domain;
   unsigned int theclass = psymbol->aclass;
 
-  h = fast_hash (&psymbol->ginfo.value, sizeof (psymbol->ginfo.value), h);
+  h = fast_hash (&psymbol->ginfo.m_value, sizeof (psymbol->ginfo.m_value), h);
   h = fast_hash (&lang, sizeof (unsigned int), h);
   h = fast_hash (&domain, sizeof (unsigned int), h);
   h = fast_hash (&theclass, sizeof (unsigned int), h);
@@ -1308,8 +1306,8 @@ psymbol_bcache::compare (const void *addr1, const void *addr2, int length)
   struct partial_symbol *sym1 = (struct partial_symbol *) addr1;
   struct partial_symbol *sym2 = (struct partial_symbol *) addr2;
 
-  return (memcmp (&sym1->ginfo.value, &sym2->ginfo.value,
-		  sizeof (sym1->ginfo.value)) == 0
+  return (memcmp (&sym1->ginfo.m_value, &sym2->ginfo.m_value,
+		  sizeof (sym1->ginfo.m_value)) == 0
 	  && sym1->ginfo.language () == sym2->ginfo.language ()
 	  && sym1->domain == sym2->domain
 	  && sym1->aclass == sym2->aclass
@@ -1397,13 +1395,13 @@ partial_symtab::partial_symtab (const char *filename_,
       if (last_bfd_name.empty () || last_bfd_name != this_bfd_name)
 	{
 	  last_bfd_name = this_bfd_name;
-	  fprintf_filtered (gdb_stdlog,
-			    "Creating one or more psymtabs for %s ...\n",
-			    this_bfd_name);
+	  gdb_printf (gdb_stdlog,
+		      "Creating one or more psymtabs for %s ...\n",
+		      this_bfd_name);
 	}
-      fprintf_filtered (gdb_stdlog,
-			"Created psymtab %s for module %s.\n",
-			host_address_to_string (this), filename);
+      gdb_printf (gdb_stdlog,
+		  "Created psymtab %s for module %s.\n",
+		  host_address_to_string (this), filename);
     }
 }
 
@@ -1420,12 +1418,11 @@ partial_symtab::expand_dependencies (struct objfile *objfile)
 	  /* Inform about additional files to be read in.  */
 	  if (info_verbose)
 	    {
-	      fputs_filtered (" ", gdb_stdout);
-	      wrap_here ("");
-	      fputs_filtered ("and ", gdb_stdout);
-	      wrap_here ("");
-	      printf_filtered ("%s...", dependencies[i]->filename);
-	      wrap_here ("");	/* Flush output */
+	      gdb_puts (" ");
+	      gdb_stdout->wrap_here (0);
+	      gdb_puts ("and ");
+	      gdb_stdout->wrap_here (0);
+	      gdb_printf ("%s...", dependencies[i]->filename);
 	      gdb_flush (gdb_stdout);
 	    }
 	  dependencies[i]->expand_psymtab (objfile);
@@ -1471,9 +1468,9 @@ dump_psymtab_addrmap (struct objfile *objfile,
       && partial_symtabs->psymtabs_addrmap != NULL)
     {
       if (psymtab == nullptr)
-	fprintf_filtered (outfile, _("Entire address map:\n"));
+	gdb_printf (outfile, _("Entire address map:\n"));
       else
-	fprintf_filtered (outfile, _("Address map:\n"));
+	gdb_printf (outfile, _("Address map:\n"));
       addrmap_dump (partial_symtabs->psymtabs_addrmap, outfile, psymtab);
     }
 }
@@ -1576,7 +1573,7 @@ maintenance_print_psymbols (const char *args, int from_tty)
 
 	  if (address_arg != NULL)
 	    {
-	      struct bound_minimal_symbol msymbol = { NULL, NULL };
+	      struct bound_minimal_symbol msymbol;
 
 	      /* We don't assume each pc has a unique objfile (this is for
 		 debugging).  */
@@ -1677,84 +1674,82 @@ maintenance_info_psymtabs (const char *regexp, int from_tty)
 		  {
 		    if (! printed_objfile_start)
 		      {
-			printf_filtered ("{ objfile %s ", objfile_name (objfile));
-			wrap_here ("  ");
-			printf_filtered ("((struct objfile *) %s)\n",
-					 host_address_to_string (objfile));
+			gdb_printf ("{ objfile %s ", objfile_name (objfile));
+			gdb_stdout->wrap_here (2);
+			gdb_printf ("((struct objfile *) %s)\n",
+				    host_address_to_string (objfile));
 			printed_objfile_start = 1;
 		      }
 
-		    printf_filtered ("  { psymtab %s ", psymtab->filename);
-		    wrap_here ("    ");
-		    printf_filtered ("((struct partial_symtab *) %s)\n",
-				     host_address_to_string (psymtab));
+		    gdb_printf ("  { psymtab %s ", psymtab->filename);
+		    gdb_stdout->wrap_here (4);
+		    gdb_printf ("((struct partial_symtab *) %s)\n",
+				host_address_to_string (psymtab));
 
-		    printf_filtered ("    readin %s\n",
-				     psymtab->readin_p (objfile) ? "yes" : "no");
-		    printf_filtered ("    fullname %s\n",
-				     psymtab->fullname
-				     ? psymtab->fullname : "(null)");
-		    printf_filtered ("    text addresses ");
-		    fputs_filtered (paddress (gdbarch,
-					      psymtab->text_low (objfile)),
-				    gdb_stdout);
-		    printf_filtered (" -- ");
-		    fputs_filtered (paddress (gdbarch,
-					      psymtab->text_high (objfile)),
-				    gdb_stdout);
-		    printf_filtered ("\n");
-		    printf_filtered ("    psymtabs_addrmap_supported %s\n",
-				     (psymtab->psymtabs_addrmap_supported
-				      ? "yes" : "no"));
-		    printf_filtered ("    globals ");
+		    gdb_printf ("    readin %s\n",
+				psymtab->readin_p (objfile) ? "yes" : "no");
+		    gdb_printf ("    fullname %s\n",
+				psymtab->fullname
+				? psymtab->fullname : "(null)");
+		    gdb_printf ("    text addresses ");
+		    gdb_puts (paddress (gdbarch,
+					psymtab->text_low (objfile)));
+		    gdb_printf (" -- ");
+		    gdb_puts (paddress (gdbarch,
+					psymtab->text_high (objfile)));
+		    gdb_printf ("\n");
+		    gdb_printf ("    psymtabs_addrmap_supported %s\n",
+				(psymtab->psymtabs_addrmap_supported
+				 ? "yes" : "no"));
+		    gdb_printf ("    globals ");
 		    if (!psymtab->global_psymbols.empty ())
-		      printf_filtered
+		      gdb_printf
 			("(* (struct partial_symbol **) %s @ %d)\n",
 			 host_address_to_string (psymtab->global_psymbols.data ()),
 			 (int) psymtab->global_psymbols.size ());
 		    else
-		      printf_filtered ("(none)\n");
-		    printf_filtered ("    statics ");
+		      gdb_printf ("(none)\n");
+		    gdb_printf ("    statics ");
 		    if (!psymtab->static_psymbols.empty ())
-		      printf_filtered
+		      gdb_printf
 			("(* (struct partial_symbol **) %s @ %d)\n",
 			 host_address_to_string (psymtab->static_psymbols.data ()),
 			 (int) psymtab->static_psymbols.size ());
 		    else
-		      printf_filtered ("(none)\n");
+		      gdb_printf ("(none)\n");
 		    if (psymtab->user)
-		      printf_filtered ("    user %s "
-				       "((struct partial_symtab *) %s)\n",
-				       psymtab->user->filename,
-				       host_address_to_string (psymtab->user));
-		    printf_filtered ("    dependencies ");
+		      gdb_printf ("    user %s "
+				  "((struct partial_symtab *) %s)\n",
+				  psymtab->user->filename,
+				  host_address_to_string (psymtab->user));
+		    gdb_printf ("    dependencies ");
 		    if (psymtab->number_of_dependencies)
 		      {
 			int i;
 
-			printf_filtered ("{\n");
+			gdb_printf ("{\n");
 			for (i = 0; i < psymtab->number_of_dependencies; i++)
 			  {
 			    struct partial_symtab *dep = psymtab->dependencies[i];
 
 			    /* Note the string concatenation there --- no
 			       comma.  */
-			    printf_filtered ("      psymtab %s "
-					     "((struct partial_symtab *) %s)\n",
-					     dep->filename,
-					     host_address_to_string (dep));
+			    gdb_printf ("      psymtab %s "
+					"((struct partial_symtab *) %s)\n",
+					dep->filename,
+					host_address_to_string (dep));
 			  }
-			printf_filtered ("    }\n");
+			gdb_printf ("    }\n");
 		      }
 		    else
-		      printf_filtered ("(none)\n");
-		    printf_filtered ("  }\n");
+		      gdb_printf ("(none)\n");
+		    gdb_printf ("  }\n");
 		  }
 	      }
 	  }
 
 	if (printed_objfile_start)
-	  printf_filtered ("}\n");
+	  gdb_printf ("}\n");
       }
 }
 
@@ -1789,29 +1784,27 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 	      /* First do some checks that don't require the associated symtab.  */
 	      if (ps->text_high (objfile) < ps->text_low (objfile))
 		{
-		  printf_filtered ("Psymtab ");
-		  puts_filtered (ps->filename);
-		  printf_filtered (" covers bad range ");
-		  fputs_filtered (paddress (gdbarch, ps->text_low (objfile)),
-				  gdb_stdout);
-		  printf_filtered (" - ");
-		  fputs_filtered (paddress (gdbarch, ps->text_high (objfile)),
-				  gdb_stdout);
-		  printf_filtered ("\n");
+		  gdb_printf ("Psymtab ");
+		  gdb_puts (ps->filename);
+		  gdb_printf (" covers bad range ");
+		  gdb_puts (paddress (gdbarch, ps->text_low (objfile)));
+		  gdb_printf (" - ");
+		  gdb_puts (paddress (gdbarch, ps->text_high (objfile)));
+		  gdb_printf ("\n");
 		  continue;
 		}
 
 	      /* Now do checks requiring the associated symtab.  */
 	      if (cust == NULL)
 		continue;
-	      bv = COMPUNIT_BLOCKVECTOR (cust);
-	      b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
+	      bv = cust->blockvector ();
+	      b = bv->static_block ();
 	      for (partial_symbol *psym : ps->static_psymbols)
 		{
 		  /* Skip symbols for inlined functions without address.  These may
 		     or may not have a match in the full symtab.  */
 		  if (psym->aclass == LOC_BLOCK
-		      && psym->ginfo.value.address == 0)
+		      && psym->ginfo.value_address () == 0)
 		    continue;
 
 		  sym = block_lookup_symbol (b, psym->ginfo.search_name (),
@@ -1819,14 +1812,14 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 					     psym->domain);
 		  if (!sym)
 		    {
-		      printf_filtered ("Static symbol `");
-		      puts_filtered (psym->ginfo.linkage_name ());
-		      printf_filtered ("' only found in ");
-		      puts_filtered (ps->filename);
-		      printf_filtered (" psymtab\n");
+		      gdb_printf ("Static symbol `");
+		      gdb_puts (psym->ginfo.linkage_name ());
+		      gdb_printf ("' only found in ");
+		      gdb_puts (ps->filename);
+		      gdb_printf (" psymtab\n");
 		    }
 		}
-	      b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
+	      b = bv->global_block ();
 	      for (partial_symbol *psym : ps->global_psymbols)
 		{
 		  sym = block_lookup_symbol (b, psym->ginfo.search_name (),
@@ -1834,30 +1827,28 @@ maintenance_check_psymtabs (const char *ignore, int from_tty)
 					     psym->domain);
 		  if (!sym)
 		    {
-		      printf_filtered ("Global symbol `");
-		      puts_filtered (psym->ginfo.linkage_name ());
-		      printf_filtered ("' only found in ");
-		      puts_filtered (ps->filename);
-		      printf_filtered (" psymtab\n");
+		      gdb_printf ("Global symbol `");
+		      gdb_puts (psym->ginfo.linkage_name ());
+		      gdb_printf ("' only found in ");
+		      gdb_puts (ps->filename);
+		      gdb_printf (" psymtab\n");
 		    }
 		}
 	      if (ps->raw_text_high () != 0
-		  && (ps->text_low (objfile) < BLOCK_START (b)
-		      || ps->text_high (objfile) > BLOCK_END (b)))
+		  && (ps->text_low (objfile) < b->start ()
+		      || ps->text_high (objfile) > b->end ()))
 		{
-		  printf_filtered ("Psymtab ");
-		  puts_filtered (ps->filename);
-		  printf_filtered (" covers ");
-		  fputs_filtered (paddress (gdbarch, ps->text_low (objfile)),
-				  gdb_stdout);
-		  printf_filtered (" - ");
-		  fputs_filtered (paddress (gdbarch, ps->text_high (objfile)),
-				  gdb_stdout);
-		  printf_filtered (" but symtab covers only ");
-		  fputs_filtered (paddress (gdbarch, BLOCK_START (b)), gdb_stdout);
-		  printf_filtered (" - ");
-		  fputs_filtered (paddress (gdbarch, BLOCK_END (b)), gdb_stdout);
-		  printf_filtered ("\n");
+		  gdb_printf ("Psymtab ");
+		  gdb_puts (ps->filename);
+		  gdb_printf (" covers ");
+		  gdb_puts (paddress (gdbarch, ps->text_low (objfile)));
+		  gdb_printf (" - ");
+		  gdb_puts (paddress (gdbarch, ps->text_high (objfile)));
+		  gdb_printf (" but symtab covers only ");
+		  gdb_puts (paddress (gdbarch, b->start ()));
+		  gdb_printf (" - ");
+		  gdb_puts (paddress (gdbarch, b->end ()));
+		  gdb_printf ("\n");
 		}
 	    }
 	}

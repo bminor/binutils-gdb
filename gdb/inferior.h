@@ -219,8 +219,14 @@ extern void detach_command (const char *, int);
 
 extern void notice_new_inferior (struct thread_info *, bool, int);
 
-extern struct value *get_return_value (struct value *function,
-				       struct type *value_type);
+/* Return the value of the result of a function at the end of a 'finish'
+   command/BP.  If the result's value cannot be retrieved, return NULL.
+
+   FUNC_SYMBOL is the symbol of the function being returned from.  FUNCTION is
+   a value containing the address of the function.  */
+
+extern struct value *get_return_value (struct symbol *func_symbol,
+				       struct value *function);
 
 /* Prepare for execution command.  TARGET is the target that will run
    the command.  BACKGROUND determines whether this is a foreground
@@ -531,10 +537,10 @@ public:
      exits or execs.  */
   bool pending_detach = false;
 
-  /* True if this inferior is a vfork parent waiting for a vfork child
-     not under our control to be done with the shared memory region,
-     either by exiting or execing.  */
-  bool waiting_for_vfork_done = false;
+  /* If non-nullptr, points to a thread that called vfork and is now waiting
+     for a vfork child not under our control to be done with the shared memory
+     region, either by exiting or execing.  */
+  thread_info *thread_waiting_for_vfork_done = nullptr;
 
   /* True if we're in the process of detaching from this inferior.  */
   bool detaching = false;
@@ -733,5 +739,12 @@ extern struct inferior *add_inferior_with_spaces (void);
 
 /* Print the current selected inferior.  */
 extern void print_selected_inferior (struct ui_out *uiout);
+
+/* Switch to inferior NEW_INF, a new inferior, and unless
+   NO_CONNECTION is true, push the process_stratum_target of ORG_INF
+   to NEW_INF.  */
+
+extern void switch_to_inferior_and_push_target
+  (inferior *new_inf, bool no_connection, inferior *org_inf);
 
 #endif /* !defined (INFERIOR_H) */

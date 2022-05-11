@@ -1,3 +1,4 @@
+#progos: nowhere:disabled-due-to-randomness
 #mach: crisv10 crisv32
 #sim(crisv10): --hw-device "/rv/trace? true"
 #sim(crisv32): --hw-device "/rv/trace? true"

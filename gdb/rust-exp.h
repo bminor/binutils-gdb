@@ -33,11 +33,6 @@ extern struct value *eval_op_rust_array (struct type *expect_type,
 					 enum exp_opcode opcode,
 					 struct value *ncopies,
 					 struct value *elt);
-extern struct value *eval_op_rust_ind (struct type *expect_type,
-				       struct expression *exp,
-				       enum noside noside,
-				       enum exp_opcode opcode,
-				       struct value *value);
 extern struct value *rust_subscript (struct type *expect_type,
 				     struct expression *exp,
 				     enum noside noside, bool for_addr,
@@ -46,16 +41,6 @@ extern struct value *rust_range (struct type *expect_type,
 				 struct expression *exp,
 				 enum noside noside, enum range_flag kind,
 				 struct value *low, struct value *high);
-extern struct value *eval_op_rust_struct_anon (struct type *expect_type,
-					       struct expression *exp,
-					       enum noside noside,
-					       int field_number,
-					       struct value *lhs);
-extern struct value *eval_op_rust_structop (struct type *expect_type,
-					    struct expression *exp,
-					    enum noside noside,
-					    struct value *lhs,
-					    const char *field_name);
 
 namespace expr
 {
@@ -75,14 +60,7 @@ public:
 
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
-		   enum noside noside) override
-  {
-    if (noside != EVAL_NORMAL)
-      return unop_ind_operation::evaluate (expect_type, exp, noside);
-
-    value *arg1 = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
-    return eval_op_rust_ind (expect_type, exp, noside, UNOP_IND, arg1);
-  }
+		   enum noside noside) override;
 };
 
 /* Subscript operator for Rust.  */
@@ -174,13 +152,7 @@ public:
 
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
-		   enum noside noside) override
-  {
-    value *lhs = std::get<1> (m_storage)->evaluate (nullptr, exp, noside);
-    return eval_op_rust_struct_anon (expect_type, exp, noside,
-				     std::get<0> (m_storage), lhs);
-
-  }
+		   enum noside noside) override;
 
   enum exp_opcode opcode () const override
   { return STRUCTOP_ANONYMOUS; }
@@ -196,12 +168,7 @@ public:
 
   value *evaluate (struct type *expect_type,
 		   struct expression *exp,
-		   enum noside noside) override
-  {
-    value *lhs = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
-    return eval_op_rust_structop (expect_type, exp, noside, lhs,
-				  std::get<1> (m_storage).c_str ());
-  }
+		   enum noside noside) override;
 
   value *evaluate_funcall (struct type *expect_type,
 			   struct expression *exp,
@@ -228,6 +195,33 @@ public:
 
   enum exp_opcode opcode () const override
   { return OP_AGGREGATE; }
+};
+
+/* Rust parenthesized operation.  This is needed to distinguish
+   between 'obj.f()', which is a method call, and '(obj.f)()', which
+   is a call of a function-valued field 'f'.  */
+class rust_parenthesized_operation
+  : public tuple_holding_operation<operation_up>
+{
+public:
+
+  explicit rust_parenthesized_operation (operation_up op)
+    : tuple_holding_operation (std::move (op))
+  {
+  }
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override
+  {
+    return std::get<0> (m_storage)->evaluate (expect_type, exp, noside);
+  }
+
+  enum exp_opcode opcode () const override
+  {
+    /* A lie but this isn't worth introducing a new opcode for.  */
+    return UNOP_PLUS;
+  }
 };
 
 } /* namespace expr */

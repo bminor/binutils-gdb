@@ -132,11 +132,11 @@ mi_ui_out::do_field_string (int fldno, int width, ui_align align,
   field_separator ();
 
   if (fldname)
-    fprintf_unfiltered (stream, "%s=", fldname);
-  fprintf_unfiltered (stream, "\"");
+    gdb_printf (stream, "%s=", fldname);
+  gdb_printf (stream, "\"");
   if (string)
     stream->putstr (string, '"');
-  fprintf_unfiltered (stream, "\"");
+  gdb_printf (stream, "\"");
 }
 
 void
@@ -148,11 +148,11 @@ mi_ui_out::do_field_fmt (int fldno, int width, ui_align align,
   field_separator ();
 
   if (fldname)
-    fprintf_unfiltered (stream, "%s=\"", fldname);
+    gdb_printf (stream, "%s=\"", fldname);
   else
-    fputs_unfiltered ("\"", stream);
-  vfprintf_unfiltered (stream, format, args);
-  fputs_unfiltered ("\"", stream);
+    gdb_puts ("\"", stream);
+  gdb_vprintf (stream, format, args);
+  gdb_puts ("\"", stream);
 }
 
 void
@@ -172,9 +172,9 @@ mi_ui_out::do_message (const ui_file_style &style,
 }
 
 void
-mi_ui_out::do_wrap_hint (const char *identstring)
+mi_ui_out::do_wrap_hint (int indent)
 {
-  wrap_here (identstring);
+  m_streams.back ()->wrap_here (indent);
 }
 
 void
@@ -199,7 +199,7 @@ mi_ui_out::field_separator ()
   if (m_suppress_field_separator)
     m_suppress_field_separator = false;
   else
-    fputc_unfiltered (',', m_streams.back ());
+    gdb_putc (',', m_streams.back ());
 }
 
 void
@@ -211,16 +211,16 @@ mi_ui_out::open (const char *name, ui_out_type type)
   m_suppress_field_separator = true;
 
   if (name)
-    fprintf_unfiltered (stream, "%s=", name);
+    gdb_printf (stream, "%s=", name);
 
   switch (type)
     {
     case ui_out_type_tuple:
-      fputc_unfiltered ('{', stream);
+      gdb_putc ('{', stream);
       break;
 
     case ui_out_type_list:
-      fputc_unfiltered ('[', stream);
+      gdb_putc ('[', stream);
       break;
 
     default:
@@ -236,11 +236,11 @@ mi_ui_out::close (ui_out_type type)
   switch (type)
     {
     case ui_out_type_tuple:
-      fputc_unfiltered ('}', stream);
+      gdb_putc ('}', stream);
       break;
 
     case ui_out_type_list:
-      fputc_unfiltered (']', stream);
+      gdb_putc (']', stream);
       break;
 
     default:
@@ -277,7 +277,7 @@ mi_ui_out::do_progress_notify (const std::string &msg, double howmuch)
   if (info.state == progress_update::START)
     {
       struct ui_file *stream = gdb_stdout;
-      fprintf_unfiltered (stream, "%s\n", msg.c_str ());
+      gdb_printf (stream, "%s\n", msg.c_str ());
       info.state = progress_update::WORKING;
     }
 }

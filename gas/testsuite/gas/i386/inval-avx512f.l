@@ -218,6 +218,10 @@
 .*:313: Error: .*unsupported broadcast for `vcvtneps2bf16'
 .*:316: Error: .*unsupported broadcast for `vcvtneps2bf16'
 .*:319: Error: .*unsupported broadcast for `vcvtneps2bf16'
+.*:321: Error: .*vaddps.*
+.*:322: Error: .*vcmpss.*
+.*:324: Error: .*vaddss.*
+.*:325: Error: .*vcmpps.*
 GAS LISTING .*
 
 
@@ -569,6 +573,12 @@ GAS LISTING .*
 [ 	]*318 \?\?\?\? 62F27E38[ 	]+vcvtneps2bf16 \(%eax\)\{1to8\}, %xmm1
 [ 	]*318[ 	]+7208
 [ 	]*319[ 	]+vcvtneps2bf16 \(%eax\)\{1to16\}, %xmm1
-[ 	]*320[ 	]+\?\?\?\? 8DB42600 		\.p2align 4
-[ 	]*320[ 	]+0000008D 
-[ 	]*320[ 	]+7600
+[ 	]*320[ 	]*
+[ 	]*321[ 	]+vaddps \$0xcc, %zmm0, %zmm0, %zmm0
+[ 	]*322[ 	]+vcmpss \$0, \$0xcc, %xmm0, %xmm0, %k0
+[ 	]*323[ 	]*
+GAS LISTING .*
+#...
+[ 	]*324[ 	]+vaddss \{sae\}, %xmm0, %xmm0, %xmm0
+[ 	]*325[ 	]+vcmpps \$0, \{rn-sae\}, %zmm0, %zmm0, %k0
+#pass

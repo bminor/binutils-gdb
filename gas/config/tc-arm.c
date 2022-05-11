@@ -4033,6 +4033,8 @@ s_arm_elf_inst (int nbytes)
       mapping_state (MAP_ARM);
     }
 
+  dwarf2_emit_insn (0);
+
   do
     {
       expressionS exp;

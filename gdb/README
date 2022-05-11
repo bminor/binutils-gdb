@@ -506,7 +506,7 @@ more obscure GDB `configure' options are not listed here.
      GDB scripting much more powerful than the restricted CLI
      scripting language.  If your host does not have Python installed,
      you can find it on `http://www.python.org/download/'.  The oldest
-     version of Python supported by GDB is 2.6.  The optional argument
+     version of Python supported by GDB is 3.2.  The optional argument
      PYTHON is used to find the Python headers and libraries.  It can
      be either the name of a Python executable, or the name of the
      directory in which Python is installed.

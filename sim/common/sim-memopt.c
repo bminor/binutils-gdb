@@ -639,6 +639,17 @@ sim_memory_uninstall (SIM_DESC sd)
     }
 }
 
+void sim_dump_memory (SIM_DESC sd);
+
+/* Convenience function for use when debugging the simulator, to be
+   called from within e.g. gdb.  */
+
+void
+sim_dump_memory (SIM_DESC sd)
+{
+  memory_option_handler (sd, NULL, OPTION_MEMORY_INFO, NULL, 0);
+  memory_option_handler (sd, NULL, OPTION_MAP_INFO, NULL, 0);
+}
 
 static SIM_RC
 sim_memory_init (SIM_DESC sd)

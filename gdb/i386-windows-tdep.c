@@ -23,7 +23,7 @@
 #include "i386-tdep.h"
 #include "windows-tdep.h"
 #include "regset.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "xml-support.h"
 #include "gdbcore.h"
 #include "inferior.h"

@@ -437,7 +437,7 @@ proc test_ld {file ifmain trynosym displacement} {
 		} else {
 		    set pc $expect_out(1,string)
 		    regsub "0x0*" $pc "" pc
-		    gdb_test "p /x 0x$pc" ".*"
+		    gdb_test "p /x 0x$pc" ".*" "p /x \$pc"
 		    gdb_test_multiple "info probes stap rtld" $gdb_test_name {
 			-re -wrap "(?:init_start|init_complete) +0x0*$pc .*" {
 			    pass $gdb_test_name

@@ -54,12 +54,12 @@
 } while (0)
 
 #define PRINT_FIELD(structure, field) \
-  printf_filtered(_(#field":\t%#lx\n"), (unsigned long) (structure)->field)
+  gdb_printf(_(#field":\t%#lx\n"), (unsigned long) (structure)->field)
 
 #define PRINT_TV_FIELD(structure, field) \
-  printf_filtered(_(#field":\t%u.%06u sec\n"),	\
-  (unsigned) (structure)->field.seconds, \
-  (unsigned) (structure)->field.microseconds)
+  gdb_printf(_(#field":\t%u.%06u sec\n"),			\
+	     (unsigned) (structure)->field.seconds,		\
+	     (unsigned) (structure)->field.microseconds)
 
 #define task_self mach_task_self
 #define task_by_unix_pid task_for_pid
@@ -83,7 +83,7 @@ info_mach_tasks_command (const char *args, int from_tty)
   sysctl (sysControl, 3, procInfo, &length, NULL, 0);
 
   count = (length / sizeof (struct kinfo_proc));
-  printf_filtered (_("%d processes:\n"), count);
+  gdb_printf (_("%d processes:\n"), count);
   for (index = 0; index < count; ++index)
     {
       kern_return_t result;
@@ -94,15 +94,15 @@ info_mach_tasks_command (const char *args, int from_tty)
 			  &taskPort);
       if (KERN_SUCCESS == result)
 	{
-	  printf_filtered (_("    %s is %d has task %#x\n"),
-			   procInfo[index].kp_proc.p_comm,
-			   procInfo[index].kp_proc.p_pid, taskPort);
+	  gdb_printf (_("    %s is %d has task %#x\n"),
+		      procInfo[index].kp_proc.p_comm,
+		      procInfo[index].kp_proc.p_pid, taskPort);
 	}
       else
 	{
-	  printf_filtered (_("    %s is %d unknown task port\n"),
-			   procInfo[index].kp_proc.p_comm,
-			   procInfo[index].kp_proc.p_pid);
+	  gdb_printf (_("    %s is %d unknown task port\n"),
+		      procInfo[index].kp_proc.p_comm,
+		      procInfo[index].kp_proc.p_pid);
 	}
     }
 
@@ -118,7 +118,7 @@ get_task_from_args (const char *args)
   if (args == NULL || *args == 0)
     {
       if (inferior_ptid == null_ptid)
-	printf_filtered (_("No inferior running\n"));
+	gdb_printf (_("No inferior running\n"));
 
       darwin_inferior *priv = get_darwin_inferior (current_inferior ());
 
@@ -129,7 +129,7 @@ get_task_from_args (const char *args)
   task = strtoul (args, &eptr, 0);
   if (*eptr)
     {
-      printf_filtered (_("cannot parse task id '%s'\n"), args);
+      gdb_printf (_("cannot parse task id '%s'\n"), args);
       return TASK_NULL;
     }
   return task;
@@ -153,7 +153,7 @@ info_mach_task_command (const char *args, int from_tty)
   if (task == TASK_NULL)
     return;
 
-  printf_filtered (_("TASK_BASIC_INFO for 0x%x:\n"), task);
+  gdb_printf (_("TASK_BASIC_INFO for 0x%x:\n"), task);
   info_count = TASK_BASIC_INFO_COUNT;
   result = task_info (task,
 		      TASK_BASIC_INFO,
@@ -165,7 +165,7 @@ info_mach_task_command (const char *args, int from_tty)
   PRINT_FIELD (&task_info_data.basic, resident_size);
   PRINT_TV_FIELD (&task_info_data.basic, user_time);
   PRINT_TV_FIELD (&task_info_data.basic, system_time);
-  printf_filtered (_("\nTASK_EVENTS_INFO:\n"));
+  gdb_printf (_("\nTASK_EVENTS_INFO:\n"));
   info_count = TASK_EVENTS_INFO_COUNT;
   result = task_info (task,
 		      TASK_EVENTS_INFO,
@@ -181,7 +181,7 @@ info_mach_task_command (const char *args, int from_tty)
   PRINT_FIELD (&task_info_data.events, cow_faults);
   PRINT_FIELD (&task_info_data.events, messages_sent);
   PRINT_FIELD (&task_info_data.events, messages_received);
-  printf_filtered (_("\nTASK_THREAD_TIMES_INFO:\n"));
+  gdb_printf (_("\nTASK_THREAD_TIMES_INFO:\n"));
   info_count = TASK_THREAD_TIMES_INFO_COUNT;
   result = task_info (task,
 		      TASK_THREAD_TIMES_INFO,
@@ -211,8 +211,8 @@ info_mach_ports_command (const char *args, int from_tty)
 
   gdb_assert (name_count == type_count);
 
-  printf_filtered (_("Ports for task 0x%x:\n"), task);
-  printf_filtered (_("port   type\n"));
+  gdb_printf (_("Ports for task 0x%x:\n"), task);
+  gdb_printf (_("port   type\n"));
   for (index = 0; index < name_count; ++index)
     {
       mach_port_t port = names[index];
@@ -232,47 +232,47 @@ info_mach_ports_command (const char *args, int from_tty)
 	  {MACH_PORT_TYPE_DEAD_NAME, "dead", MACH_PORT_RIGHT_DEAD_NAME}
 	};
 
-      printf_filtered (_("%04x: %08x "), port, types[index]);
+      gdb_printf (_("%04x: %08x "), port, types[index]);
       for (j = 0; j < sizeof(descrs) / sizeof(*descrs); j++)
 	if (types[index] & descrs[j].type)
 	  {
 	    mach_port_urefs_t ref;
 	    kern_return_t ret;
 
-	    printf_filtered (_(" %s("), descrs[j].name);
+	    gdb_printf (_(" %s("), descrs[j].name);
 	    ret = mach_port_get_refs (task, port, descrs[j].right, &ref);
 	    if (ret != KERN_SUCCESS)
-	      printf_filtered (_("??"));
+	      gdb_printf (_("??"));
 	    else
-	      printf_filtered (_("%u"), ref);
-	    printf_filtered (_(" refs)"));
+	      gdb_printf (_("%u"), ref);
+	    gdb_printf (_(" refs)"));
 	  }
       
       if (task == task_self ())
 	{
 	  if (port == task_self())
-	    printf_filtered (_(" gdb-task"));
+	    gdb_printf (_(" gdb-task"));
 	  else if (port == darwin_host_self)
-	    printf_filtered (_(" host-self"));
+	    gdb_printf (_(" host-self"));
 	  else if (port == darwin_ex_port)
-	    printf_filtered (_(" gdb-exception"));
+	    gdb_printf (_(" gdb-exception"));
 	  else if (port == darwin_port_set)
-	    printf_filtered (_(" gdb-port_set"));
+	    gdb_printf (_(" gdb-port_set"));
 	  else if (inferior_ptid != null_ptid)
 	    {
 	      struct inferior *inf = current_inferior ();
 	      darwin_inferior *priv = get_darwin_inferior (inf);
 
 	      if (port == priv->task)
-		printf_filtered (_(" inferior-task"));
+		gdb_printf (_(" inferior-task"));
 	      else if (port == priv->notify_port)
-		printf_filtered (_(" inferior-notify"));
+		gdb_printf (_(" inferior-notify"));
 	      else
 		{
 		  for (int k = 0; k < priv->exception_info.count; k++)
 		    if (port == priv->exception_info.ports[k])
 		      {
-			printf_filtered (_(" inferior-excp-port"));
+			gdb_printf (_(" inferior-excp-port"));
 			break;
 		      }
 
@@ -280,8 +280,8 @@ info_mach_ports_command (const char *args, int from_tty)
 		    {
 		      if (port == t->gdb_port)
 			{
-			  printf_filtered (_(" inferior-thread for 0x%x"),
-					   priv->task);
+			  gdb_printf (_(" inferior-thread for 0x%x"),
+				      priv->task);
 			  break;
 			}
 		    }
@@ -289,7 +289,7 @@ info_mach_ports_command (const char *args, int from_tty)
 		}
 	    }
 	}
-      printf_filtered (_("\n"));
+      gdb_printf (_("\n"));
     }
 
   vm_deallocate (task_self (), (vm_address_t) names,
@@ -310,18 +310,18 @@ darwin_debug_port_info (task_t task, mach_port_t port)
     (task, port, MACH_PORT_RECEIVE_STATUS, (mach_port_info_t)&status, &len);
   MACH_CHECK_ERROR (kret);
 
-  printf_filtered (_("Port 0x%lx in task 0x%lx:\n"), (unsigned long) port,
-		   (unsigned long) task);
-  printf_filtered (_("  port set: 0x%x\n"), status.mps_pset);
-  printf_filtered (_("     seqno: 0x%x\n"), status.mps_seqno);
-  printf_filtered (_("   mscount: 0x%x\n"), status.mps_mscount);
-  printf_filtered (_("    qlimit: 0x%x\n"), status.mps_qlimit);
-  printf_filtered (_("  msgcount: 0x%x\n"), status.mps_msgcount);
-  printf_filtered (_("  sorights: 0x%x\n"), status.mps_sorights);
-  printf_filtered (_("   srights: 0x%x\n"), status.mps_srights);
-  printf_filtered (_(" pdrequest: 0x%x\n"), status.mps_pdrequest);
-  printf_filtered (_(" nsrequest: 0x%x\n"), status.mps_nsrequest);
-  printf_filtered (_("     flags: 0x%x\n"), status.mps_flags);
+  gdb_printf (_("Port 0x%lx in task 0x%lx:\n"), (unsigned long) port,
+	      (unsigned long) task);
+  gdb_printf (_("  port set: 0x%x\n"), status.mps_pset);
+  gdb_printf (_("     seqno: 0x%x\n"), status.mps_seqno);
+  gdb_printf (_("   mscount: 0x%x\n"), status.mps_mscount);
+  gdb_printf (_("    qlimit: 0x%x\n"), status.mps_qlimit);
+  gdb_printf (_("  msgcount: 0x%x\n"), status.mps_msgcount);
+  gdb_printf (_("  sorights: 0x%x\n"), status.mps_sorights);
+  gdb_printf (_("   srights: 0x%x\n"), status.mps_srights);
+  gdb_printf (_(" pdrequest: 0x%x\n"), status.mps_pdrequest);
+  gdb_printf (_(" nsrequest: 0x%x\n"), status.mps_nsrequest);
+  gdb_printf (_("     flags: 0x%x\n"), status.mps_flags);
 }
 
 static void
@@ -352,10 +352,10 @@ info_mach_threads_command (const char *args, int from_tty)
   result = task_threads (task, &threads, &thread_count);
   MACH_CHECK_ERROR (result);
 
-  printf_filtered (_("Threads in task %#x:\n"), task);
+  gdb_printf (_("Threads in task %#x:\n"), task);
   for (i = 0; i < thread_count; ++i)
     {
-      printf_filtered (_("    %#x\n"), threads[i]);
+      gdb_printf (_("    %#x\n"), threads[i]);
       mach_port_deallocate (task_self (), threads[i]);
     }
 
@@ -378,7 +378,7 @@ info_mach_thread_command (const char *args, int from_tty)
   CHECK_ARGS (_("Thread"), args);
   sscanf (args, "0x%x", &thread);
 
-  printf_filtered (_("THREAD_BASIC_INFO\n"));
+  gdb_printf (_("THREAD_BASIC_INFO\n"));
   info_count = THREAD_BASIC_INFO_COUNT;
   result = thread_info (thread,
 			THREAD_BASIC_INFO,
@@ -526,7 +526,7 @@ darwin_debug_regions (task_t task, mach_vm_address_t address, int max)
 			 (vm_region_info_t) &info, &count, &object_name);
   if (kret != KERN_SUCCESS)
     {
-      printf_filtered (_("No memory regions."));
+      gdb_printf (_("No memory regions."));
       return;
     }
   memcpy (&prev_info, &info, sizeof (vm_region_basic_info_data_64_t));
@@ -570,19 +570,19 @@ darwin_debug_regions (task_t task, mach_vm_address_t address, int max)
 
       if (print)
 	{
-	  printf_filtered (_("%s-%s %s/%s  %s %s %s"),
-			   paddress (target_gdbarch (), prev_address),
-			   paddress (target_gdbarch (), prev_address + prev_size),
-			   unparse_protection (prev_info.protection),
-			   unparse_protection (prev_info.max_protection),
-			   unparse_inheritance (prev_info.inheritance),
-			   prev_info.shared ? _("shrd") : _("priv"),
-			   prev_info.reserved ? _("reserved") : _("not-rsvd"));
+	  gdb_printf (_("%s-%s %s/%s  %s %s %s"),
+		      paddress (target_gdbarch (), prev_address),
+		      paddress (target_gdbarch (), prev_address + prev_size),
+		      unparse_protection (prev_info.protection),
+		      unparse_protection (prev_info.max_protection),
+		      unparse_inheritance (prev_info.inheritance),
+		      prev_info.shared ? _("shrd") : _("priv"),
+		      prev_info.reserved ? _("reserved") : _("not-rsvd"));
 
 	  if (nsubregions > 1)
-	    printf_filtered (_(" (%d sub-rgn)"), nsubregions);
+	    gdb_printf (_(" (%d sub-rgn)"), nsubregions);
 
-	  printf_filtered (_("\n"));
+	  gdb_printf (_("\n"));
 
 	  prev_address = address;
 	  prev_size = size;
@@ -743,48 +743,48 @@ disp_exception (const darwin_exception_info *info)
 {
   int i;
 
-  printf_filtered (_("%d exceptions:\n"), info->count);
+  gdb_printf (_("%d exceptions:\n"), info->count);
   for (i = 0; i < info->count; i++)
     {
       exception_mask_t mask = info->masks[i];
 
-      printf_filtered (_("port 0x%04x, behavior: "), info->ports[i]);
+      gdb_printf (_("port 0x%04x, behavior: "), info->ports[i]);
       switch (info->behaviors[i])
 	{
 	case EXCEPTION_DEFAULT:
-	  printf_filtered (_("default"));
+	  gdb_printf (_("default"));
 	  break;
 	case EXCEPTION_STATE:
-	  printf_filtered (_("state"));
+	  gdb_printf (_("state"));
 	  break;
 	case EXCEPTION_STATE_IDENTITY:
-	  printf_filtered (_("state-identity"));
+	  gdb_printf (_("state-identity"));
 	  break;
 	default:
-	  printf_filtered (_("0x%x"), info->behaviors[i]);
+	  gdb_printf (_("0x%x"), info->behaviors[i]);
 	}
-      printf_filtered (_(", masks:"));
+      gdb_printf (_(", masks:"));
       if (mask & EXC_MASK_BAD_ACCESS)
-	printf_filtered (_(" BAD_ACCESS"));
+	gdb_printf (_(" BAD_ACCESS"));
       if (mask & EXC_MASK_BAD_INSTRUCTION)
-	printf_filtered (_(" BAD_INSTRUCTION"));
+	gdb_printf (_(" BAD_INSTRUCTION"));
       if (mask & EXC_MASK_ARITHMETIC)
-	printf_filtered (_(" ARITHMETIC"));
+	gdb_printf (_(" ARITHMETIC"));
       if (mask & EXC_MASK_EMULATION)
-	printf_filtered (_(" EMULATION"));
+	gdb_printf (_(" EMULATION"));
       if (mask & EXC_MASK_SOFTWARE)
-	printf_filtered (_(" SOFTWARE"));
+	gdb_printf (_(" SOFTWARE"));
       if (mask & EXC_MASK_BREAKPOINT)
-	printf_filtered (_(" BREAKPOINT"));
+	gdb_printf (_(" BREAKPOINT"));
       if (mask & EXC_MASK_SYSCALL)
-	printf_filtered (_(" SYSCALL"));
+	gdb_printf (_(" SYSCALL"));
       if (mask & EXC_MASK_MACH_SYSCALL)
-	printf_filtered (_(" MACH_SYSCALL"));
+	gdb_printf (_(" MACH_SYSCALL"));
       if (mask & EXC_MASK_RPC_ALERT)
-	printf_filtered (_(" RPC_ALERT"));
+	gdb_printf (_(" RPC_ALERT"));
       if (mask & EXC_MASK_CRASH)
-	printf_filtered (_(" CRASH"));
-      printf_filtered (_("\n"));
+	gdb_printf (_(" CRASH"));
+      gdb_printf (_("\n"));
     }
 }
 
@@ -801,7 +801,7 @@ info_mach_exceptions_command (const char *args, int from_tty)
       if (strcmp (args, "saved") == 0)
 	{
 	  if (inferior_ptid == null_ptid)
-	    printf_filtered (_("No inferior running\n"));
+	    gdb_printf (_("No inferior running\n"));
 
 	  darwin_inferior *priv = get_darwin_inferior (current_inferior ());
 
@@ -825,7 +825,7 @@ info_mach_exceptions_command (const char *args, int from_tty)
       struct inferior *inf;
 
       if (inferior_ptid == null_ptid)
-	printf_filtered (_("No inferior running\n"));
+	gdb_printf (_("No inferior running\n"));
       inf = current_inferior ();
       
       darwin_inferior *priv = get_darwin_inferior (inf);

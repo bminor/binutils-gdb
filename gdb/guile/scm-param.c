@@ -320,7 +320,7 @@ pascm_set_func (const char *args, int from_tty, struct cmd_list_element *c)
 
   /* GDB is usually silent when a parameter is set.  */
   if (*msg.get () != '\0')
-    fprintf_filtered (gdb_stdout, "%s\n", msg.get ());
+    gdb_printf ("%s\n", msg.get ());
 }
 
 /* A callback function that is registered against the respective
@@ -362,7 +362,7 @@ pascm_show_func (struct ui_file *file, int from_tty,
       error (_("Error converting show text to host string."));
     }
 
-  fprintf_filtered (file, "%s\n", msg.get ());
+  gdb_printf (file, "%s\n", msg.get ());
 }
 
 /* A helper function that dispatches to the appropriate add_setshow
@@ -458,12 +458,12 @@ add_setshow_generic (enum var_types param_type, enum command_class cmd_class,
       break;
 
     case var_enum:
+      /* Initialize the value, just in case.  */
+      make_setting (self).set<const char *> (self->enumeration[0]);
       commands = add_setshow_enum_cmd (cmd_name, cmd_class, self->enumeration,
 				       &self->value.cstringval, set_doc,
 				       show_doc, help_doc, set_func, show_func,
 				       set_list, show_list);
-      /* Initialize the value, just in case.  */
-      make_setting (self).set<const char *> (self->enumeration[0]);
       break;
 
     default:

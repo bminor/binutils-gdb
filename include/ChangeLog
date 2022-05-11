@@ -1,3 +1,63 @@
+2022-04-20  Clément Chigot  <clement.chigot@atos.net>
+
+	* coff/xcoff.h (struct xcoff_loader_info): Add ldrel_count and
+	libpath fields.
+
+2022-04-07  Mark Harmstone  <mark@harmstone.com>
+
+	* coff/i386.h: Define R_SECTION.
+	* coff/x86_64.h: Likewise.
+
+2022-04-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf/common.h (NT_FREEBSD_X86_SEGBASES): Define.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* elf/amdgpu.h: Add relocation values.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* elf/amdgcn.h (NT_AMDGPU_METADATA): New.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* elf/amdgcn.h: Add EF_AMDGPU_MACH_AMDGCN_* and
+	EF_AMDGPU_FEATURE_* defines.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* elf/common.h (ELFOSABI_AMDGPU_PAL, ELFOSABI_AMDGPU_MESA3D):
+	New.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* elf/amdgpu.h: New.
+	* elf/common.h (ELFOSABI_AMDGPU_HSA): Add.
+
+2022-03-11  Vladimir Mezentsev  <vladimir.mezentsev@oracle.com>
+
+	* collectorAPI.h: New file.
+	* libcollector.h: New file.
+	* libfcollector.h: New file.
+
+2022-01-25  Klaus Ziegler  <klausz@haus-gisela.de>
+
+	PR 28816
+	* elf/common.h (AT_SUN_HWCAP): Make definition conditional.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* 2.38 release branch created.
+
+2022-01-13  Nick Clifton  <nickc@redhat.com>
+
+	Import from gcc mainline:
+
+	2021-01-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* libiberty.h (strverscmp): Delete duplicate prototype.
+
 2021-12-07  John Baldwin  <jhb@FreeBSD.org>
 
 	* elf/common.h (AT_FREEBSD_FXRNG, AT_FREEBSD_KPRELOAD): Define.

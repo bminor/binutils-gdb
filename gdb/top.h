@@ -25,8 +25,6 @@
 #include "gdbsupport/next-iterator.h"
 #include "value.h"
 
-struct tl_interp_info;
-
 /* Prompt state.  */
 
 enum prompt_state

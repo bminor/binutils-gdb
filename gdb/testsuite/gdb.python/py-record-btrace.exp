@@ -85,11 +85,7 @@ with_test_prefix "instruction " {
     gdb_test "python print(i.number)" "1"
     gdb_test "python print(i.sal)" "symbol and line for .*"
     gdb_test "python print(i.pc)" "$decimal"
-    if { $gdb_py_is_py3k == 0 } {
-	gdb_test "python print(repr(i.data))" "<read-only buffer for $hex,.*>"
-    } else {
-	gdb_test "python print(repr(i.data))" "<memory at $hex>"
-    }
+    gdb_test "python print(repr(i.data))" "<memory at $hex>"
     gdb_test "python print(i.decoded)" ".*"
     gdb_test "python print(i.size)" "$decimal"
     gdb_test "python print(i.is_speculative)" "False"

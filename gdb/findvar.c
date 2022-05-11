@@ -358,7 +358,7 @@ symbol_read_needs (struct symbol *sym)
   if (SYMBOL_COMPUTED_OPS (sym) != NULL)
     return SYMBOL_COMPUTED_OPS (sym)->get_symbol_read_needs (sym);
 
-  switch (SYMBOL_CLASS (sym))
+  switch (sym->aclass ())
     {
       /* All cases listed explicitly so that gcc -Wall will detect it if
 	 we failed to consider one.  */
@@ -404,7 +404,7 @@ symbol_read_needs_frame (struct symbol *sym)
 struct minsym_lookup_data
 {
   /* The name of the minimal symbol we are searching for.  */
-  const char *name;
+  const char *name = nullptr;
 
   /* The field where the callback should store the minimal symbol
      if found.  It should be initialized to NULL before the search
@@ -534,7 +534,7 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
       /* Assuming we have a block for this frame: if we are at the function
 	 level, the immediate upper lexical block is in an outer function:
 	 follow the static link.  */
-      else if (BLOCK_FUNCTION (frame_block))
+      else if (frame_block->function ())
 	{
 	  const struct dynamic_prop *static_link
 	    = block_static_link (frame_block);
@@ -559,7 +559,7 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
       else
 	/* We must be in some function nested lexical block.  Just get the
 	   outer block: both must share the same frame.  */
-	frame_block = BLOCK_SUPERBLOCK (frame_block);
+	frame_block = frame_block->superblock ();
     }
 
   /* Old compilers may not provide a static link, or they may provide an
@@ -571,11 +571,11 @@ get_hosting_frame (struct symbol *var, const struct block *var_block,
       frame = block_innermost_frame (var_block);
       if (frame == NULL)
 	{
-	  if (BLOCK_FUNCTION (var_block)
+	  if (var_block->function ()
 	      && !block_inlined_p (var_block)
-	      && BLOCK_FUNCTION (var_block)->print_name ())
+	      && var_block->function ()->print_name ())
 	    error (_("No frame is currently executing in block %s."),
-		   BLOCK_FUNCTION (var_block)->print_name ());
+		   var_block->function ()->print_name ());
 	  else
 	    error (_("No frame is currently executing in specified"
 		     " block"));
@@ -593,7 +593,7 @@ language_defn::read_var_value (struct symbol *var,
 			       struct frame_info *frame) const
 {
   struct value *v;
-  struct type *type = SYMBOL_TYPE (var);
+  struct type *type = var->type ();
   CORE_ADDR addr;
   enum symbol_needs_kind sym_need;
 
@@ -616,7 +616,7 @@ language_defn::read_var_value (struct symbol *var,
   if (SYMBOL_COMPUTED_OPS (var) != NULL)
     return SYMBOL_COMPUTED_OPS (var)->read_variable (var, frame);
 
-  switch (SYMBOL_CLASS (var))
+  switch (var->aclass ())
     {
     case LOC_CONST:
       if (is_dynamic_type (type))
@@ -627,8 +627,7 @@ language_defn::read_var_value (struct symbol *var,
       /* Put the constant back in target format. */
       v = allocate_value (type);
       store_signed_integer (value_contents_raw (v).data (), TYPE_LENGTH (type),
-			    type_byte_order (type),
-			    (LONGEST) SYMBOL_VALUE (var));
+			    type_byte_order (type), var->value_longest ());
       VALUE_LVAL (v) = not_lval;
       return v;
 
@@ -637,14 +636,14 @@ language_defn::read_var_value (struct symbol *var,
       v = allocate_value (type);
       if (overlay_debugging)
 	{
-	  struct objfile *var_objfile = symbol_objfile (var);
-	  addr = symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (var),
+	  struct objfile *var_objfile = var->objfile ();
+	  addr = symbol_overlayed_address (var->value_address (),
 					   var->obj_section (var_objfile));
 	  store_typed_address (value_contents_raw (v).data (), type, addr);
 	}
       else
 	store_typed_address (value_contents_raw (v).data (), type,
-			      SYMBOL_VALUE_ADDRESS (var));
+			      var->value_address ());
       VALUE_LVAL (v) = not_lval;
       return v;
 
@@ -655,7 +654,7 @@ language_defn::read_var_value (struct symbol *var,
 	  type = resolve_dynamic_type (type, {}, /* Unused address.  */ 0);
 	}
       v = allocate_value (type);
-      memcpy (value_contents_raw (v).data (), SYMBOL_VALUE_BYTES (var),
+      memcpy (value_contents_raw (v).data (), var->value_bytes (),
 	      TYPE_LENGTH (type));
       VALUE_LVAL (v) = not_lval;
       return v;
@@ -663,10 +662,10 @@ language_defn::read_var_value (struct symbol *var,
     case LOC_STATIC:
       if (overlay_debugging)
 	addr
-	  = symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (var),
-				      var->obj_section (symbol_objfile (var)));
+	  = symbol_overlayed_address (var->value_address (),
+				      var->obj_section (var->objfile ()));
       else
-	addr = SYMBOL_VALUE_ADDRESS (var);
+	addr = var->value_address ();
       break;
 
     case LOC_ARG:
@@ -674,7 +673,7 @@ language_defn::read_var_value (struct symbol *var,
       if (!addr)
 	error (_("Unknown argument list address for `%s'."),
 	       var->print_name ());
-      addr += SYMBOL_VALUE (var);
+      addr += var->value_longest ();
       break;
 
     case LOC_REF_ARG:
@@ -686,7 +685,7 @@ language_defn::read_var_value (struct symbol *var,
 	if (!argref)
 	  error (_("Unknown argument list address for `%s'."),
 		 var->print_name ());
-	argref += SYMBOL_VALUE (var);
+	argref += var->value_longest ();
 	ref = value_at (lookup_pointer_type (type), argref);
 	addr = value_as_address (ref);
 	break;
@@ -694,7 +693,7 @@ language_defn::read_var_value (struct symbol *var,
 
     case LOC_LOCAL:
       addr = get_frame_locals_address (frame);
-      addr += SYMBOL_VALUE (var);
+      addr += var->value_longest ();
       break;
 
     case LOC_TYPEDEF:
@@ -705,10 +704,10 @@ language_defn::read_var_value (struct symbol *var,
     case LOC_BLOCK:
       if (overlay_debugging)
 	addr = symbol_overlayed_address
-	  (BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (var)),
-	   var->obj_section (symbol_objfile (var)));
+	  (var->value_block ()->entry_pc (),
+	   var->obj_section (var->objfile ()));
       else
-	addr = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (var));
+	addr = var->value_block ()->entry_pc ();
       break;
 
     case LOC_REGISTER:
@@ -718,7 +717,7 @@ language_defn::read_var_value (struct symbol *var,
 		      ->register_number (var, get_frame_arch (frame));
 	struct value *regval;
 
-	if (SYMBOL_CLASS (var) == LOC_REGPARM_ADDR)
+	if (var->aclass () == LOC_REGPARM_ADDR)
 	  {
 	    regval = value_from_register (lookup_pointer_type (type),
 					  regno,
@@ -751,13 +750,12 @@ language_defn::read_var_value (struct symbol *var,
 	struct minimal_symbol *msym;
 	struct obj_section *obj_section;
 
-	memset (&lookup_data, 0, sizeof (lookup_data));
 	lookup_data.name = var->linkage_name ();
 
 	gdbarch_iterate_over_objfiles_in_search_order
-	  (symbol_arch (var),
+	  (var->arch (),
 	   minsym_lookup_iterator_cb, &lookup_data,
-	   symbol_objfile (var));
+	   var->objfile ());
 	msym = lookup_data.result.minsym;
 
 	/* If we can't find the minsym there's a problem in the symbol info.
@@ -766,7 +764,7 @@ language_defn::read_var_value (struct symbol *var,
 	if (msym == NULL)
 	  {
 	    const char *flavour_name
-	      = objfile_flavour_name (symbol_objfile (var));
+	      = objfile_flavour_name (var->objfile ());
 
 	    /* We can't get here unless we've opened the file, so flavour_name
 	       can't be NULL.  */
@@ -779,9 +777,9 @@ language_defn::read_var_value (struct symbol *var,
 	   a TLS variable. */
 	if (obj_section == NULL
 	    || (obj_section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
-	   addr = MSYMBOL_VALUE_RAW_ADDRESS (msym);
+	   addr = msym->value_raw_address ();
 	else
-	   addr = BMSYMBOL_VALUE_ADDRESS (lookup_data.result);
+	   addr = lookup_data.result.value_address ();
 	if (overlay_debugging)
 	  addr = symbol_overlayed_address (addr, obj_section);
 	/* Determine address of TLS variable. */

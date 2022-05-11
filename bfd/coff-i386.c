@@ -190,8 +190,10 @@ coff_i386_reloc (bfd *abfd,
 static bool
 in_reloc_p (bfd *abfd ATTRIBUTE_UNUSED, reloc_howto_type *howto)
 {
-  return ! howto->pc_relative && howto->type != R_IMAGEBASE
-	 && howto->type != R_SECREL32;
+  return ! howto->pc_relative
+    && howto->type != R_IMAGEBASE
+    && howto->type != R_SECREL32
+    && howto->type != R_SECTION;
 }
 #endif /* COFF_WITH_PE */
 
@@ -236,8 +238,21 @@ static reloc_howto_type howto_table[] =
 	 false),		/* pcrel_offset */
   EMPTY_HOWTO (010),
   EMPTY_HOWTO (011),
-  EMPTY_HOWTO (012),
 #ifdef COFF_WITH_PE
+  /* 16-bit word section relocation (012).  */
+  HOWTO (R_SECTION,		/* type */
+	 0,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 false,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 coff_i386_reloc,	/* special_function */
+	 "secidx",		/* name */
+	 true,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,		/* dst_mask */
+	 true),			/* pcrel_offset */
   /* 32-bit longword section relative relocation (013).  */
   HOWTO (R_SECREL32,		/* type */
 	 0,			/* rightshift */
@@ -253,6 +268,7 @@ static reloc_howto_type howto_table[] =
 	 0xffffffff,		/* dst_mask */
 	 true),			/* pcrel_offset */
 #else
+  EMPTY_HOWTO (012),
   EMPTY_HOWTO (013),
 #endif
   EMPTY_HOWTO (014),
@@ -407,9 +423,9 @@ static reloc_howto_type howto_table[] =
 
 #else /* COFF_WITH_PE */
 
-/* The PE relocate section routine.  The only difference between this
-   and the regular routine is that we don't want to do anything for a
-   relocatable link.  */
+/* The PE relocate section routine.  We handle secidx relocations here,
+   as well as making sure that we don't do anything for a relocatable
+   link.  */
 
 static bool
 coff_pe_i386_relocate_section (bfd *output_bfd,
@@ -421,8 +437,77 @@ coff_pe_i386_relocate_section (bfd *output_bfd,
 			       struct internal_syment *syms,
 			       asection **sections)
 {
+  struct internal_reloc *rel;
+  struct internal_reloc *relend;
+
   if (bfd_link_relocatable (info))
     return true;
+
+  rel = relocs;
+  relend = rel + input_section->reloc_count;
+
+  for (; rel < relend; rel++)
+    {
+      long symndx;
+      struct coff_link_hash_entry *h;
+      asection *sec, *s;
+      uint16_t idx = 0, i = 1;
+
+      if (rel->r_type != R_SECTION)
+	continue;
+
+      /* Make sure that _bfd_coff_generic_relocate_section won't parse
+         this reloc after us.  */
+      rel->r_type = 0;
+
+      symndx = rel->r_symndx;
+
+      if (symndx < 0
+	  || (unsigned long) symndx >= obj_raw_syment_count (input_bfd))
+	continue;
+
+      h = obj_coff_sym_hashes (input_bfd)[symndx];
+
+      if (h == NULL)
+	sec = sections[symndx];
+      else
+	{
+	  if (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	    {
+	      /* Defined weak symbols are a GNU extension.  */
+	      sec = h->root.u.def.section;
+	    }
+	  else
+	    {
+	      sec = NULL;
+	    }
+	}
+
+      if (!sec)
+	continue;
+
+      if (bfd_is_abs_section (sec))
+	continue;
+
+      if (discarded_section (sec))
+	continue;
+
+      s = output_bfd->sections;
+      while (s)
+	{
+	  if (s == sec->output_section)
+	    {
+	      idx = i;
+	      break;
+	    }
+
+	  i++;
+	  s = s->next;
+	}
+
+      bfd_putl16 (idx, contents + rel->r_vaddr - input_section->vma);
+    }
 
   return _bfd_coff_generic_relocate_section (output_bfd, info, input_bfd,
 					     input_section, contents,
@@ -573,6 +658,8 @@ coff_i386_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 #ifdef COFF_WITH_PE
     case BFD_RELOC_32_SECREL:
       return howto_table + R_SECREL32;
+    case BFD_RELOC_16_SECIDX:
+      return howto_table + R_SECTION;
 #endif
     default:
       BFD_FAIL ();

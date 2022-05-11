@@ -102,7 +102,8 @@ case "${target}" in
 			sim_gen=MULTI
 			sim_multi_configs="\
 			  micromips:micromips64,micromipsdsp:32,64,f:mips_micromips\
-			  mips64r2:mips64r2,mips3d,mips16,mips16e,mdmx,dsp,dsp2,smartmips:32,64,f:mipsisa64r2"
+			  mipsisa64r2:mips64r2,mips16,mips16e,mdmx,dsp,dsp2,mips3d,smartmips:32,64,f:mipsisa32r2,mipsisa64r2,mipsisa32r5,mipsisa64r5\
+			  mipsisa64r6:mips64r6:32,64,f:mipsisa32r6,mipsisa64r6"
 			sim_multi_default=mipsisa64r2
 			;;
   mips64*-*-*)		sim_igen_filter="32,64,f"
@@ -118,6 +119,11 @@ case "${target}" in
 			  mips32r2:mips32r2,mips3d,mips16,mips16e,mdmx,dsp,dsp2,smartmips:32,f:mipsisa32r2"
 			sim_multi_default=mipsisa32r2
 			;;
+  mipsisa32r6*-*-*)	sim_gen=IGEN
+			sim_igen_machine="-M mips32r6"
+			sim_igen_filter="32,f"
+			sim_mach_default="mipsisa32r6"
+			;;
   mipsisa32*-*-*)	sim_gen=M16
 			sim_igen_machine="-M mips32,mips16,mips16e,smartmips"
 			sim_m16_machine="-M mips16,mips16e,mips32"
@@ -129,6 +135,11 @@ case "${target}" in
 			sim_m16_machine="-M mips16,mips16e,mips64r2"
 			sim_igen_filter="32,64,f"
 			sim_mach_default="mipsisa64r2"
+			;;
+  mipsisa64r6*-*-*)	sim_gen=IGEN
+			sim_igen_machine="-M mips64r6"
+			sim_igen_filter="32,64,f"
+			sim_mach_default="mipsisa64r6"
 			;;
   mipsisa64sb1*-*-*)	sim_gen=IGEN
 			sim_igen_machine="-M mips64,mips3d,sb1"
@@ -216,6 +227,7 @@ if test ${sim_gen} = MULTI; then
 #include "sim-main.h"
 #include "multi-include.h"
 #include "elf-bfd.h"
+#include "elfxx-mips.h"
 #include "elf/mips.h"
 
 #define SD sd
@@ -235,7 +247,11 @@ sim_engine_run (SIM_DESC sd,
 	   & EF_MIPS_ARCH_ASE_MICROMIPS)
     mach = bfd_mach_mips_micromips;
   else
-    mach = STATE_ARCHITECTURE (SD)->mach;
+  {
+     mach = _bfd_elf_mips_mach (elf_elfheader (STATE_PROG_BFD (sd))->e_flags);
+     if (!mach)
+       mach = STATE_ARCHITECTURE (SD)->mach;
+  }
 
   switch (mach)
     {

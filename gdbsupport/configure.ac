@@ -53,10 +53,14 @@ GDB_AC_COMMON
 GDB_AC_SELFTEST
 AM_CONDITIONAL(SELFTEST, $enable_unittests)
 
+AM_CONDITIONAL(HAVE_PIPE_OR_PIPE2,
+   [test x$ac_cv_func_pipe = xyes -o x$ac_cv_func_pipe2 = xyes ])
+
 # Check the return and argument types of ptrace.
 GDB_AC_PTRACE
 
 # Detect support warning flags.
+AM_GDB_COMPILER_TYPE
 AM_GDB_WARNINGS
 
 case ${host} in

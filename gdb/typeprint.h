@@ -19,7 +19,7 @@
 #ifndef TYPEPRINT_H
 #define TYPEPRINT_H
 
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 
 enum language;
 struct ui_file;

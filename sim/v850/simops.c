@@ -339,10 +339,10 @@ Multiply64 (int sign, unsigned long op0)
 	  
       sign = (op0 ^ op1) & 0x80000000;
 	  
-      if (((signed long) op0) < 0)
+      if (op0 & 0x80000000)
 	op0 = - op0;
 	  
-      if (((signed long) op1) < 0)
+      if (op1 & 0x80000000)
 	op1 = - op1;
     }
       
@@ -3135,8 +3135,8 @@ v850_div (SIM_DESC sd, unsigned int op0, unsigned int op1, unsigned int *op2p, u
   bfd_boolean     overflow = FALSE;
   
   /* Compute the result.  */
-  divide_by   = op0;
-  divide_this = op1;
+  divide_by   = (int32_t)op0;
+  divide_this = (int32_t)op1;
 
   if (divide_by == 0 || (divide_by == -1 && divide_this == (1 << 31)))
     {
@@ -3267,7 +3267,14 @@ v850_bins (SIM_DESC sd, unsigned int source, unsigned int lsb, unsigned int msb,
   pos = lsb;
   width = (msb - lsb) + 1;
 
-  mask = ~ (-(1 << width));
+  /* A width of 32 exhibits undefined behavior on the shift.  The easiest
+     way to make this code safe is to just avoid that case and set the mask
+     to the right value.  */
+  if (width >= 32)
+    mask = 0xffffffff;
+  else
+    mask = ~ (-(1 << width));
+
   source &= mask;
   mask <<= pos;
   result = (* dest) & ~ mask;

@@ -38,9 +38,6 @@ enum class dw_index_kind
    entry on the objfile's "qf" list.  */
 extern void dwarf2_initialize_objfile (struct objfile *objfile);
 
-struct psymbol_functions;
-extern void dwarf2_build_psymtabs (struct objfile *,
-				   psymbol_functions *psf = nullptr);
 extern void dwarf2_build_frame_info (struct objfile *);
 
 #endif /* DWARF2_PUBLIC_H */

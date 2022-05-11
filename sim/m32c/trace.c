@@ -101,6 +101,18 @@ op_printf (char *buf, char *fmt, ...)
   return ret;
 }
 
+static int
+op_styled_printf (char *buf, enum disassembler_style style, char *fmt, ...)
+{
+  int ret;
+  va_list ap;
+
+  va_start (ap, fmt);
+  ret = vsprintf (opbuf + strlen (opbuf), fmt, ap);
+  va_end (ap);
+  return ret;
+}
+
 static bfd *current_bfd;
 
 void
@@ -210,7 +222,7 @@ sim_disasm_one (void)
     {
       initted = 1;
       memset (&info, 0, sizeof (info));
-      INIT_DISASSEMBLE_INFO (info, stdout, op_printf);
+      INIT_DISASSEMBLE_INFO (info, stdout, op_printf, op_styled_printf);
       info.read_memory_func = sim_dis_read;
       info.arch = bfd_get_arch (current_bfd);
       info.mach = bfd_get_mach (current_bfd);

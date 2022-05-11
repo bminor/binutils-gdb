@@ -316,7 +316,7 @@ c_symbol_merge (symbolS *debug, symbolS *normal)
 }
 
 void
-c_dot_file_symbol (const char *filename, int appfile ATTRIBUTE_UNUSED)
+c_dot_file_symbol (const char *filename)
 {
   symbolS *symbolP;
 
@@ -447,11 +447,11 @@ coff_add_linesym (symbolS *sym)
 }
 
 static void
-obj_coff_ln (int appline)
+obj_coff_ln (int ignore ATTRIBUTE_UNUSED)
 {
   int l;
 
-  if (! appline && def_symbol_in_progress != NULL)
+  if (def_symbol_in_progress != NULL)
     {
       as_warn (_(".ln pseudo-op inside .def/.endef: ignored."));
       demand_empty_rest_of_line ();
@@ -460,9 +460,9 @@ obj_coff_ln (int appline)
 
   l = get_absolute_expression ();
 
-  /* If there is no lineno symbol, treat a .ln
-     directive as if it were a .appline directive.  */
-  if (appline || current_lineno_sym == NULL)
+  /* If there is no lineno symbol, treat a .ln directive
+     as if it were a (no longer existing) .appline one.  */
+  if (current_lineno_sym == NULL)
     new_logical_line ((char *) NULL, l - 1);
   else
     add_lineno (frag_now, frag_now_fix (), l);
@@ -473,8 +473,7 @@ obj_coff_ln (int appline)
 
     if (listing)
       {
-	if (! appline)
-	  l += coff_line_base - 1;
+	l += coff_line_base - 1;
 	listing_source_line (l);
       }
   }
@@ -1705,7 +1704,7 @@ coff_adjust_symtab (void)
 {
   if (symbol_rootP == NULL
       || S_GET_STORAGE_CLASS (symbol_rootP) != C_FILE)
-    c_dot_file_symbol ("fake", 0);
+    c_dot_file_symbol ("fake");
 }
 
 void
@@ -1849,7 +1848,6 @@ symbol_dump (void)
 const pseudo_typeS coff_pseudo_table[] =
 {
   {"ABORT", s_abort, 0},
-  {"appline", obj_coff_ln, 1},
   /* We accept the .bss directive for backward compatibility with
      earlier versions of gas.  */
   {"bss", obj_coff_bss, 0},

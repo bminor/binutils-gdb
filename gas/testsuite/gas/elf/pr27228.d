@@ -2,7 +2,7 @@
 #name: .reloc against undefined local symbol (PR 27228)
 #readelf: -sW
 # hppa doesn't support use of any BFD_RELOC_*
-#xfail: hppa*-*-*
+#notarget: hppa*-*-*
 
 Symbol table '\.symtab' contains [0-9]+ entries:
 #...

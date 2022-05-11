@@ -145,3 +145,5 @@ gdb_test "print 0x0 as fn(i64) -> ()" " = \\\(\\*mut fn \\\(i64\\\) -> \\\(\\\)\
 gdb_test "print r#" "No symbol 'r' in current context"
 
 gdb_test "printf \"%d %d\\n\", 23+1, 23-1" "24 22"
+
+gdb_test "print 5," "Syntax error near ','"

@@ -30,6 +30,7 @@
 #include <sys/types.h>
 
 #include "command.h"
+#include "gdbsupport/buildargv.h"
 
 struct ser_windows_state
 {

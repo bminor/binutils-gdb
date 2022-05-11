@@ -20,15 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-/* MIPS uses an unusual format for floating point quiet NaNs.  */
-#define SIM_QUIET_NAN_NEGATED
-
 #define SIM_CORE_SIGNAL(SD,CPU,CIA,MAP,NR_BYTES,ADDR,TRANSFER,ERROR) \
 mips_core_signal ((SD), (CPU), (CIA), (MAP), (NR_BYTES), (ADDR), (TRANSFER), (ERROR))
 
 #include "sim-basics.h"
 #include "sim-base.h"
 #include "bfd.h"
+#include "elf-bfd.h"
+#include "elf/mips.h"
 
 /* Deprecated macros and types for manipulating 64bit values.  Use
    ../common/sim-bits.h and ../common/sim-endian.h macros instead. */
@@ -75,6 +74,9 @@ typedef enum {
  fmt_word    = 4,
  fmt_long    = 5,
  fmt_ps      = 6,
+ /* The following is a special case for FP conditions where only
+    the lower 32bits are considered.  This is a HACK.  */
+ fmt_dc32    = 7,
  /* The following are well outside the normal acceptable format
     range, and are used in the register status vector. */
  fmt_unknown       = 0x10000000,
@@ -264,6 +266,7 @@ struct _sim_cpu {
 #define DSPC ((CPU)->dspc)
 
 #define DELAY_SLOT(TARGET) NIA = delayslot32 (SD_, (TARGET))
+#define FORBIDDEN_SLOT() { NIA = forbiddenslot32 (SD_); }
 #define NULLIFY_NEXT_INSTRUCTION() NIA = nullify_next_insn32 (SD_)
 
 
@@ -274,15 +277,16 @@ struct _sim_cpu {
 #define DSSTATE ((CPU)->dsstate)
 
 /* Flags in the "state" variable: */
-#define simHALTEX       (1 << 2)  /* 0 = run; 1 = halt on exception */
-#define simHALTIN       (1 << 3)  /* 0 = run; 1 = halt on interrupt */
-#define simTRACE        (1 << 8)  /* 0 = do nothing; 1 = trace address activity */
-#define simPCOC0        (1 << 17) /* COC[1] from current */
-#define simPCOC1        (1 << 18) /* COC[1] from previous */
-#define simDELAYSLOT    (1 << 24) /* 0 = do nothing; 1 = delay slot entry exists */
-#define simSKIPNEXT     (1 << 25) /* 0 = do nothing; 1 = skip instruction */
-#define simSIGINT	(1 << 28)  /* 0 = do nothing; 1 = SIGINT has occured */
-#define simJALDELAYSLOT	(1 << 29) /* 1 = in jal delay slot */
+#define simHALTEX        (1 << 2)  /* 0 = run; 1 = halt on exception */
+#define simHALTIN        (1 << 3)  /* 0 = run; 1 = halt on interrupt */
+#define simTRACE         (1 << 8)  /* 1 = trace address activity */
+#define simPCOC0         (1 << 17) /* COC[1] from current */
+#define simPCOC1         (1 << 18) /* COC[1] from previous */
+#define simDELAYSLOT     (1 << 24) /* 1 = delay slot entry exists */
+#define simSKIPNEXT      (1 << 25) /* 0 = do nothing; 1 = skip instruction */
+#define simSIGINT        (1 << 28)  /* 0 = do nothing; 1 = SIGINT has occured */
+#define simJALDELAYSLOT  (1 << 29) /* 1 = in jal delay slot */
+#define simFORBIDDENSLOT (1 << 30) /* 1 = n forbidden slot */
 
 #ifndef ENGINE_ISSUE_PREFIX_HOOK
 #define ENGINE_ISSUE_PREFIX_HOOK() \
@@ -535,6 +539,10 @@ struct mips_sim_state {
 /* Bits reserved for implementations:  */
 #define status_SBX       (1 << 16)      /* Enable SiByte SB-1 extensions.  */
 
+/* From R6 onwards, some instructions (e.g. ADDIUPC) change behaviour based
+ * on the Status.UX bits to either sign extend, or act as full 64 bit. */
+#define status_optional_EXTEND32(x) ((SR & status_UX) ? x : EXTEND32(x))
+
 #define cause_BD ((unsigned)1 << 31)    /* L1 Exception in branch delay slot */
 #define cause_BD2         (1 << 30)     /* L2 Exception in branch delay slot */
 #define cause_CE_mask     0x30000000	/* Coprocessor exception */
@@ -722,8 +730,55 @@ void test_fcsr (SIM_STATE);
 
 
 /* FPU operations.  */
-void fp_cmp (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt, int abs, int cond, int cc);
-#define Compare(op1,op2,fmt,cond,cc) fp_cmp(SIM_ARGS, op1, op2, fmt, 0, cond, cc)
+/* Non-signalling */
+#define FP_R6CMP_AF  0x0
+#define FP_R6CMP_EQ  0x2
+#define FP_R6CMP_LE  0x6
+#define FP_R6CMP_LT  0x4
+#define FP_R6CMP_NE  0x13
+#define FP_R6CMP_OR  0x11
+#define FP_R6CMP_UEQ 0x3
+#define FP_R6CMP_ULE 0x7
+#define FP_R6CMP_ULT 0x5
+#define FP_R6CMP_UN  0x1
+#define FP_R6CMP_UNE 0x12
+
+/* Signalling */
+#define FP_R6CMP_SAF  0x8
+#define FP_R6CMP_SEQ  0xa
+#define FP_R6CMP_SLE  0xe
+#define FP_R6CMP_SLT  0xc
+#define FP_R6CMP_SNE  0x1b
+#define FP_R6CMP_SOR  0x19
+#define FP_R6CMP_SUEQ 0xb
+#define FP_R6CMP_SULE 0xf
+#define FP_R6CMP_SULT 0xd
+#define FP_R6CMP_SUN  0x9
+#define FP_R6CMP_SUNE 0x1a
+
+/* FPU Class */
+#define FP_R6CLASS_SNAN    (1<<0)
+#define FP_R6CLASS_QNAN    (1<<1)
+#define FP_R6CLASS_NEGINF  (1<<2)
+#define FP_R6CLASS_NEGNORM (1<<3)
+#define FP_R6CLASS_NEGSUB  (1<<4)
+#define FP_R6CLASS_NEGZERO (1<<5)
+#define FP_R6CLASS_POSINF  (1<<6)
+#define FP_R6CLASS_POSNORM (1<<7)
+#define FP_R6CLASS_POSSUB  (1<<8)
+#define FP_R6CLASS_POSZERO (1<<9)
+
+void fp_cmp (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt,
+	     int abs, int cond, int cc);
+#define Compare(op1,op2,fmt,cond,cc)  \
+  fp_cmp(SIM_ARGS, op1, op2, fmt, 0, cond, cc)
+uint64_t fp_r6_cmp (SIM_STATE, uint64_t op1, uint64_t op2,
+		      FP_formats fmt, int cond);
+#define R6Compare(op1,op2,fmt,cond) fp_r6_cmp(SIM_ARGS, op1, op2, fmt, cond)
+uint64_t fp_classify(SIM_STATE, uint64_t op, FP_formats fmt);
+#define Classify(op, fmt) fp_classify(SIM_ARGS, op, fmt)
+int fp_rint(SIM_STATE, uint64_t op, uint64_t *ans, FP_formats fmt);
+#define RoundToIntegralExact(op, ans, fmt) fp_rint(SIM_ARGS, op, ans, fmt)
 uint64_t fp_abs (SIM_STATE, uint64_t op, FP_formats fmt);
 #define AbsoluteValue(op,fmt) fp_abs(SIM_ARGS, op, fmt)
 uint64_t fp_neg (SIM_STATE, uint64_t op, FP_formats fmt);
@@ -736,6 +791,14 @@ uint64_t fp_mul (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt);
 #define Multiply(op1,op2,fmt) fp_mul(SIM_ARGS, op1, op2, fmt)
 uint64_t fp_div (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt);
 #define Divide(op1,op2,fmt) fp_div(SIM_ARGS, op1, op2, fmt)
+uint64_t fp_min (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt);
+#define Min(op1,op2,fmt) fp_min(SIM_ARGS, op1, op2, fmt)
+uint64_t fp_max (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt);
+#define Max(op1,op2,fmt) fp_max(SIM_ARGS, op1, op2, fmt)
+uint64_t fp_mina (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt);
+#define MinA(op1,op2,fmt) fp_mina(SIM_ARGS, op1, op2, fmt)
+uint64_t fp_maxa (SIM_STATE, uint64_t op1, uint64_t op2, FP_formats fmt);
+#define MaxA(op1,op2,fmt) fp_maxa(SIM_ARGS, op1, op2, fmt)
 uint64_t fp_recip (SIM_STATE, uint64_t op, FP_formats fmt);
 #define Recip(op,fmt) fp_recip(SIM_ARGS, op, fmt)
 uint64_t fp_sqrt (SIM_STATE, uint64_t op, FP_formats fmt);
@@ -744,6 +807,12 @@ uint64_t fp_rsqrt (SIM_STATE, uint64_t op, FP_formats fmt);
 #define RSquareRoot(op,fmt) fp_rsqrt(SIM_ARGS, op, fmt)
 uint64_t fp_madd (SIM_STATE, uint64_t op1, uint64_t op2,
 		    uint64_t op3, FP_formats fmt);
+#define FusedMultiplyAdd(op1,op2,op3,fmt) fp_fmadd(SIM_ARGS, op1, op2, op3, fmt)
+uint64_t fp_fmadd (SIM_STATE, uint64_t op1, uint64_t op2,
+		     uint64_t op3, FP_formats fmt);
+#define FusedMultiplySub(op1,op2,op3,fmt) fp_fmsub(SIM_ARGS, op1, op2, op3, fmt)
+uint64_t fp_fmsub (SIM_STATE, uint64_t op1, uint64_t op2,
+		     uint64_t op3, FP_formats fmt);
 #define MultiplyAdd(op1,op2,op3,fmt) fp_madd(SIM_ARGS, op1, op2, op3, fmt)
 uint64_t fp_msub (SIM_STATE, uint64_t op1, uint64_t op2,
 		    uint64_t op3, FP_formats fmt);

@@ -388,7 +388,7 @@ pspy_block_for_pc (PyObject *o, PyObject *args)
       set_current_program_space (self->pspace);
       cust = find_pc_compunit_symtab (pc);
 
-      if (cust != NULL && COMPUNIT_OBJFILE (cust) != NULL)
+      if (cust != NULL && cust->objfile () != NULL)
 	block = block_for_pc (pc);
     }
   catch (const gdb_exception &except)
@@ -396,11 +396,11 @@ pspy_block_for_pc (PyObject *o, PyObject *args)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  if (cust == NULL || COMPUNIT_OBJFILE (cust) == NULL)
+  if (cust == NULL || cust->objfile () == NULL)
     Py_RETURN_NONE;
 
   if (block)
-    return block_to_block_object (block, COMPUNIT_OBJFILE (cust));
+    return block_to_block_object (block, cust->objfile ());
 
   Py_RETURN_NONE;
 }
@@ -472,7 +472,7 @@ py_free_pspace (struct program_space *pspace, void *datum)
      being deleted.  */
   struct gdbarch *arch = target_gdbarch ();
 
-  gdbpy_enter enter_py (arch, current_language);
+  gdbpy_enter enter_py (arch);
   gdbpy_ref<pspace_object> object ((pspace_object *) datum);
   object->pspace = NULL;
 }
@@ -502,6 +502,23 @@ pspace_to_pspace_object (struct program_space *pspace)
     }
 
   return gdbpy_ref<>::new_reference (result);
+}
+
+/* See python-internal.h.  */
+
+struct program_space *
+progspace_object_to_program_space (PyObject *obj)
+{
+  gdb_assert (gdbpy_is_progspace (obj));
+  return ((pspace_object *) obj)->pspace;
+}
+
+/* See python-internal.h.  */
+
+bool
+gdbpy_is_progspace (PyObject *obj)
+{
+  return PyObject_TypeCheck (obj, &pspace_object_type);
 }
 
 void _initialize_py_progspace ();

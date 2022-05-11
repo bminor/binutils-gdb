@@ -180,7 +180,7 @@ extern void elf_frob_file_after_relocs (void);
 #ifndef obj_app_file
 #define obj_app_file elf_file_symbol
 #endif
-extern void elf_file_symbol (const char *, int);
+extern void elf_file_symbol (const char *);
 
 extern void obj_elf_section_change_hook (void);
 

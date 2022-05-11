@@ -435,14 +435,14 @@ arc_insn_get_branch_target (const struct arc_instruction &insn)
   /* JLI and EI depend on optional AUX registers.  Not supported right now.  */
   else if (insn.insn_class == JLI)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  "JLI_S instruction is not supported by the GDB.");
+      gdb_printf (gdb_stderr,
+		  "JLI_S instruction is not supported by the GDB.");
       return 0;
     }
   else if (insn.insn_class == EI)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  "EI_S instruction is not supported by the GDB.");
+      gdb_printf (gdb_stderr,
+		  "EI_S instruction is not supported by the GDB.");
       return 0;
     }
   /* LEAVE_S: PC = BLINK.  */
@@ -1306,19 +1306,13 @@ arc_is_in_prologue (struct gdbarch *gdbarch, const struct arc_instruction &insn,
   return false;
 }
 
-/* Copy of gdb_buffered_insn_length_fprintf from disasm.c.  */
-
-static int ATTRIBUTE_PRINTF (2, 3)
-arc_fprintf_disasm (void *stream, const char *format, ...)
-{
-  return 0;
-}
+/* See arc-tdep.h.  */
 
 struct disassemble_info
 arc_disassemble_info (struct gdbarch *gdbarch)
 {
   struct disassemble_info di;
-  init_disassemble_info (&di, &null_stream, arc_fprintf_disasm);
+  init_disassemble_info_for_no_printing (&di);
   di.arch = gdbarch_bfd_arch_info (gdbarch)->arch;
   di.mach = gdbarch_bfd_arch_info (gdbarch)->mach;
   di.endian = gdbarch_byte_order (gdbarch);
@@ -1958,20 +1952,6 @@ static const struct frame_base arc_normal_base = {
   arc_frame_base_address
 };
 
-/* Add all the expected register sets into GDBARCH.  */
-
-static void
-arc_add_reggroups (struct gdbarch *gdbarch)
-{
-  reggroup_add (gdbarch, general_reggroup);
-  reggroup_add (gdbarch, float_reggroup);
-  reggroup_add (gdbarch, system_reggroup);
-  reggroup_add (gdbarch, vector_reggroup);
-  reggroup_add (gdbarch, all_reggroup);
-  reggroup_add (gdbarch, save_reggroup);
-  reggroup_add (gdbarch, restore_reggroup);
-}
-
 static enum arc_isa
 mach_type_to_arc_isa (const unsigned long mach)
 {
@@ -2370,9 +2350,6 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* This doesn't include possible long-immediate value.  */
   set_gdbarch_max_insn_length (gdbarch, 4);
 
-  /* Add default register groups.  */
-  arc_add_reggroups (gdbarch);
-
   /* Frame unwinders and sniffers.  */
   dwarf2_frame_set_init_reg (gdbarch, arc_dwarf2_frame_init_reg);
   dwarf2_append_unwinders (gdbarch);
@@ -2456,16 +2433,16 @@ arc_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
   arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
-  fprintf_filtered (file, "arc_dump_tdep: jb_pc = %i\n", tdep->jb_pc);
+  gdb_printf (file, "arc_dump_tdep: jb_pc = %i\n", tdep->jb_pc);
 
-  fprintf_filtered (file, "arc_dump_tdep: is_sigtramp = <%s>\n",
-		    host_address_to_string (tdep->is_sigtramp));
-  fprintf_filtered (file, "arc_dump_tdep: sigcontext_addr = <%s>\n",
-		    host_address_to_string (tdep->sigcontext_addr));
-  fprintf_filtered (file, "arc_dump_tdep: sc_reg_offset = <%s>\n",
-		    host_address_to_string (tdep->sc_reg_offset));
-  fprintf_filtered (file, "arc_dump_tdep: sc_num_regs = %d\n",
-		    tdep->sc_num_regs);
+  gdb_printf (file, "arc_dump_tdep: is_sigtramp = <%s>\n",
+	      host_address_to_string (tdep->is_sigtramp));
+  gdb_printf (file, "arc_dump_tdep: sigcontext_addr = <%s>\n",
+	      host_address_to_string (tdep->sigcontext_addr));
+  gdb_printf (file, "arc_dump_tdep: sc_reg_offset = <%s>\n",
+	      host_address_to_string (tdep->sc_reg_offset));
+  gdb_printf (file, "arc_dump_tdep: sc_num_regs = %d\n",
+	      tdep->sc_num_regs);
 }
 
 /* This command accepts single argument - address of instruction to

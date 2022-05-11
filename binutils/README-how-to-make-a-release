@@ -35,7 +35,7 @@ Approx time to complete from here: 2 hours ....
      in the gold directory - it has its own release numbering.
 
      Likewise for the ChangeLog files in: bfd, binutils, config, cpu,
-     elfcpp, gas, gold, gprof, include, ld, libctf, libiberty, opcodes
+     elfcpp, gas, gold, gprof, gprofng, include, ld, libctf, libiberty, opcodes
      and toplevel.
 
      Add a note of the name of the new branch to binutils/BRANCHES.
@@ -44,8 +44,8 @@ Approx time to complete from here: 2 hours ....
 
   4. Create the release branch using:
 
-	git branch binutils-2_38-branch
-        git push origin binutils-2_38-branch
+	git branch binutils-2_39-branch
+        git push origin binutils-2_39-branch
 
      If you get a message like:
      
@@ -55,7 +55,7 @@ Approx time to complete from here: 2 hours ....
 
   5. Make sure that the branch is there.  IE check out the branch sources:
   
-        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_38-branch 2.38
+        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_39-branch 2.39
 
      If you get a message about being in a "detached head" state, something
      has gone wrong...
@@ -83,19 +83,22 @@ Approx time to complete from here: 2 hours ....
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
   8. Update bfd/version.m4 on HEAD to indicate that is now a snapshot
-     of the next release:
-     
-       m4_define([BFD_VERSION], [2.38.50])
-       
-     Update the release number in bfd/version.m4 for the BRANCH.
-     The branch only needs the point value set to 90 as the release
-     has not actually happened yet.
+     of the next release.  Note if the release is going to be 2.39 then
+     the version number on the branch is set to 2.38.90 - ie almost, but
+     not quite at 2.39, and the version number on the mainline is set to
+     2.39.50 - ie half way to the next release after 2.39.
 
-       m4_define([BFD_VERSION], [2.37.90])
+     So the branch bfd/version.m4 has:
+     
+       m4_define([BFD_VERSION], [2.38.90])
+       
+     and the mainline has:
+
+       m4_define([BFD_VERSION], [2.39.50])
 
      Regenerate various files on both branch and HEAD by configuring
-     with "--enable-maintainer-mode --enable-gold" and then building
-     with "make all-binutils all-gas all-gold all-gprof all-ld"
+     with "--enable-maintainer-mode --enable-gold --enable-shared" and then building
+     with "make all-binutils all-gas all-gold all-gprof all-gprofng all-ld"
 
      Add ChangeLog entries for the updated files.  Commit the changes.
      Make sure that this includes the .pot files as well as the
@@ -111,16 +114,16 @@ Approx time to complete from here: 2 hours ....
 	  
      b. Create a source tarball of the BRANCH sources:
 
-          ./src-release -x binutils
+          ./src-release.sh -x binutils
 
      c. Build a test target using this tarball.
 
-           cp binutils-2.37.90.tar.xz /dev/shm
+           cp binutils-2.38.90.tar.xz /dev/shm
 	   pushd /dev/shm
-	   tar xvf binutils-2.36.90.tar.xz
+	   tar xvf binutils-2.38.90.tar.xz
 	   mkdir build
 	   cd build
-	   ../binutils-2.37.90/configure --quiet --enable-gold
+	   ../binutils-2.38.90/configure --quiet --enable-gold
 	   make
 	   popd
 
@@ -128,8 +131,8 @@ Approx time to complete from here: 2 hours ....
 
      d. Upload the pre-release snapshot to the sourceware FTP site:
 
-          scp binutils-2.37.90.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
-          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.37.90.tar.xz
+          scp binutils-2.38.90.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
+          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.38.90.tar.xz
 
      e. Clean up the source directory again.
 
@@ -142,11 +145,11 @@ Approx time to complete from here: 2 hours ....
 ------------------------------------------------------------------------
 Dear Translation Project
 
-  The 2.38 release branch has been created for the GNU Binutils project.
+  The 2.39 release branch has been created for the GNU Binutils project.
 
   A snapshot of the branch sources can be found here:
 
-    https://sourceware.org/pub/binutils/snapshots/binutils-2.37.90.tar.xz
+    https://sourceware.org/pub/binutils/snapshots/binutils-2.38.90.tar.xz
 
   We hope to make the official release of the sources on the <DATE>
   although that could change if there are important bugs that need to
@@ -199,13 +202,24 @@ When the time comes to actually make the release....
          cd <branch>
 	 git clean -fdx
 
-  21. Update the release number in bfd/version.m4 on the release
-      branch to a whole new minor version number, without a point
-      value.  Eg "2.37.90" becomes "2.38".  Change bfd/development.sh
-      to set all values to "false".  Regenerate the configure and
-      makefiles.  And *info* files.  Add ChangeLog entries for the
-      updates and add a  "this-is-the-2.38-release" comment and
-      commit.
+  21. a. Update the release number in bfd/version.m4 on the release
+         branch to a whole new minor version number, without a point
+         value.  Eg "2.38.90" becomes "2.39".
+	 
+      b. Change bfd/development.sh to set all values to "false".
+      
+      c. Regenerate the configure and makefiles.  And *info* files.
+
+      d. Create a ChangeLog from the git refs for all of the commits
+         from when changelog entries were no longer required:
+
+           gitlog-to-changelog --since=2021-07-03 > ChangeLog.git
+
+        The gitlog-to-changelog script is part of the sources
+	of the "config" project.
+	
+      e.  Add ChangeLog entries for all of the updates and add a
+          "this-is-the-2.38-release" comment and commit.
 
   22. Check that your file creation mask will create the
       correct file permissions.  Eg:
@@ -221,49 +235,48 @@ When the time comes to actually make the release....
   23. Note - check to see if any new files have been added to the top
       level of the source directory, but which are not in the
       DEVO_SUPPORT variable in the src-release.sh script.  If they are
-      needed then add them.
+      needed then add them.  NB/ Add the new ChangeLog.git file.
 
-       Create the release tarballs:
+      Create the release tarballs:
   
             ./src-release.sh -b -g -l -x binutils
 
   24. Check that the files in the tarballs have the correct
       permissions.
 
-           tar tvf binutils-2.37.tar.bz2 | grep -e "---"
+           tar tvf binutils-2.39.tar.bz2 | grep -e "---"
 
       Also check that the man files are not empty.  (cf PR 28144).
 
-           tar tvf binutils-2.37.tar.xz | grep -e "\.1"
+           tar tvf binutils-2.39.tar.xz | grep -e "\.1"
 
   25. Sanity check the release on x86_64-pc-linux-gnu by building and
       running the testsuites (gas, gold, binutils and ld).  Make the
       source directory read-only before building.  Also test
       "make install".  If necessary fix any problems.
 
-        cd /dev/shm
+        pushd /dev/shm
 	mkdir delme
 	cd delme
 	tar xvf <path-to-sources>/binutils-2.*.tar.lz
 	chmod -R -w binutils-2.*
 	mkdir build
 	cd build
-	../binutils-2.X/configure --enable-gold --prefix=`pwd`/install --enable-plugins
-	make all-gas all-gold all-ld all-binutils all-gprof
+	../binutils-2.*/configure --quiet --enable-gold --prefix=`pwd`/install --enable-plugins --enable-shared
+	make all-gas all-gold all-ld all-binutils all-gprof all-gprofng
 	make check-gas check-binutils check-ld check-gold
         make install-gas install-gold install-ld install-binutils
 
         # Needed for step 29...
         make html pdf
 
+        popd
+	
   26. Tag the branch with the new release number:
+	[optional: add "-u XXXXX" to sign with a gpg key]
+	enter a tag message such as: "Official GNU Binutils 2.3x release"
 
-            git tag -a binutils-2_3x     <=== Be careful to get the tag right
-	    
-	      [optional: add "-u XXXXX" to sign with a gpg key]
-	      enter a tag message such as: "Official Binutils 2.3x release"
-
-            eg: git tag -a binutils-2_37 -u DD9E3C4F
+	    git tag -a binutils-2_38 -u DD9E3C4F      <=== Be careful to get the tag right
 
         NB/ If you do sign the binaries make sure to use a key
 	that has been published with the FSF.
@@ -272,18 +285,20 @@ When the time comes to actually make the release....
 	
 	    git push origin binutils-2_3x
 
-        If you get an error message along the lines of "Invalid revision range ..." you can ignore it.
+        If you get an error message along the lines of:
+	"Invalid revision range ..." you can ignore it.
 
-  27. Upload the tarballs to ftp.gnu.org.
+  27.  Upload the tarballs to ftp.gnu.org.
 
-       gnupload --to ftp.gnu.org:binutils binutils-2.3*.tar.*
+            gnupload --to ftp.gnu.org:binutils binutils-2.3*.tar.*
 
-      Be prepared to provide the password for the key, if you signed the binaries.
+        Be prepared to provide the password for the key, if you
+	signed the binaries.
       
-      The gnupload script is in the gnulib/build-aux directory.
+        The gnupload script is in the gnulib/build-aux directory.
 
-      Check for an email response from the upload.  If necessary
-      fix any problems.
+        Check for an email response from the upload.  If necessary
+        fix any problems.
 
   28. Upload the tarballs (and signatures) to sourceware.org:
 
@@ -293,9 +308,9 @@ When the time comes to actually make the release....
  	 chmod 644 binutils-2.3x.tar.*
 	 quit
 
-      FIXME: Are the signatures (created by the gnupload script in step 27) needed ?
-      [The above commands upload them and nobody has complained, so suggest that they
-      are retained].
+      FIXME: Are the signatures (created by the gnupload script in step 27)
+      needed ?  [The above commands upload them and nobody has complained,
+      so suggest that they are retained].
 
   29. Update web pages.  For sourceware.org:
 
@@ -332,28 +347,28 @@ When the time comes to actually make the release....
 	 cd ..
 	 put as.html
 	 put as.pdf
-	 cd ../bfd
+	 cd bfd
 	 lcd ../../bfd/doc/bfd
 	 put *
 	 cd ..
 	 lcd ..
 	 put bfd.html
 	 put bfd.pdf
-	 cd ../binutils
-	 lcd ../../binutils/doc/binutils
+	 cd binutils
+	 lcd ../../binutils/binutils      <=== NB/ Path not like others
 	 put *
 	 cd ..
-	 lcd ..
+	 lcd ../doc
 	 put binutils.html
 	 put binutils.pdf
-	 cd ../gprof
+	 cd gprof
 	 lcd ../../gprof/doc/gprof
 	 put *
 	 cd ..
 	 lcd ../..
 	 put gprof.html
 	 put gprof.pdf
-	 cd ../ld
+	 cd ld
 	 lcd ../ld/doc/ld
 	 put *
 	 cd ..

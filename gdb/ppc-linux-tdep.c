@@ -1427,9 +1427,9 @@ ppc_linux_syscall_record (struct regcache *regcache)
 
   if (syscall_gdb < 0)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record and replay target doesn't "
-			    "support syscall number %d\n"), (int) scnum);
+      gdb_printf (gdb_stderr,
+		  _("Process record and replay target doesn't "
+		    "support syscall number %d\n"), (int) scnum);
       return 0;
     }
 
@@ -1639,7 +1639,7 @@ ppc_elfv2_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
     default:
       break;
     case 8:
-      MSYMBOL_TARGET_FLAG_1 (msym) = 1;
+      msym->set_target_flag_1 (true);
       break;
     }
 }
@@ -1659,12 +1659,12 @@ ppc_elfv2_skip_entrypoint (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   /* See ppc_elfv2_elf_make_msymbol_special for how local entry point
      offset values are encoded.  */
-  if (MSYMBOL_TARGET_FLAG_1 (fun.minsym))
+  if (fun.minsym->target_flag_1 ())
     local_entry_offset = 8;
 
-  if (BMSYMBOL_VALUE_ADDRESS (fun) <= pc
-      && pc < BMSYMBOL_VALUE_ADDRESS (fun) + local_entry_offset)
-    return BMSYMBOL_VALUE_ADDRESS (fun) + local_entry_offset;
+  if (fun.value_address () <= pc
+      && pc < fun.value_address () + local_entry_offset)
+    return fun.value_address () + local_entry_offset;
 
   return pc;
 }
@@ -1974,7 +1974,7 @@ ppc_floatformat_for_type (struct gdbarch *gdbarch,
 	  || strcmp (name, "_Float64x") == 0
 	  || strcmp (name, "complex _Float128") == 0
 	  || strcmp (name, "complex _Float64x") == 0)
-	return floatformats_ia64_quad;
+	return floatformats_ieee_quad;
 
       if (strcmp (name, "__ibm128") == 0)
 	return floatformats_ibm_long_double;
@@ -2053,7 +2053,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
      to distinguish between the IBM long double and IEEE quad cases.  */
   set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);
   if (tdep->long_double_abi == POWERPC_LONG_DOUBLE_IEEE128)
-    set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
+    set_gdbarch_long_double_format (gdbarch, floatformats_ieee_quad);
   else
     set_gdbarch_long_double_format (gdbarch, floatformats_ibm_long_double);
 

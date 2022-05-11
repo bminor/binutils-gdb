@@ -158,8 +158,27 @@ proc test_float_rejected {} {
 # Regression test for PR gdb/21675
 proc test_radices {} {
     gdb_test "print/o 16777211" " = 077777773"
-    gdb_test "print/d 1.5" " = 1"
-    gdb_test "print/u 1.5" " = 1"
+
+    # This is written in a somewhat funny way to avoid assuming a
+    # particular float format.
+    set s_int [get_sizeof int -1]
+    set s_float [get_sizeof float -1]
+    if {$s_int == $s_float && $s_int != -1} {
+	foreach fmt {d u x t o} {
+	    set ival [get_valueof "/$fmt" "*(int *) &f_var" "FAIL" \
+			  "get_valueof int/$fmt"]
+	    set fval [get_valueof "/$fmt" f_var "FAIL" \
+			  "get_valueof float/$fmt"]
+	    # See PR gdb/16242 for this.
+	    if {[string compare $ival $fval] == 0 && $ival != "FAIL"} {
+		pass "print/$fmt f_var"
+	    } else {
+		fail "print/$fmt f_var"
+	    }
+	}
+    }
+
+    gdb_test "print/c f_var" " = 65 'A'"
 
     gdb_test "print/u (char) -1" " = 255"
     gdb_test "print/d (unsigned char) -1" " = -1"

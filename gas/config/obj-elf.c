@@ -258,46 +258,36 @@ elf_sec_sym_ok_for_reloc (asection *sec)
 }
 
 void
-elf_file_symbol (const char *s, int appfile)
+elf_file_symbol (const char *s)
 {
   asymbol *bsym;
+  symbolS *sym = symbol_new (s, absolute_section, &zero_address_frag, 0);
+  size_t name_length = strlen (s);
 
-  if (!appfile
-      || symbol_rootP == NULL
-      || (bsym = symbol_get_bfdsym (symbol_rootP)) == NULL
-      || (bsym->flags & BSF_FILE) == 0)
+  if (name_length > strlen (S_GET_NAME (sym)))
     {
-      symbolS *sym;
-      size_t name_length;
+      obstack_grow (&notes, s, name_length + 1);
+      S_SET_NAME (sym, (const char *) obstack_finish (&notes));
+    }
+  else
+    strcpy ((char *) S_GET_NAME (sym), s);
 
-      sym = symbol_new (s, absolute_section, &zero_address_frag, 0);
+  symbol_get_bfdsym (sym)->flags |= BSF_FILE;
 
-      name_length = strlen (s);
-      if (name_length > strlen (S_GET_NAME (sym)))
-	{
-	  obstack_grow (&notes, s, name_length + 1);
-	  S_SET_NAME (sym, (const char *) obstack_finish (&notes));
-	}
-      else
-	strcpy ((char *) S_GET_NAME (sym), s);
-
-      symbol_get_bfdsym (sym)->flags |= BSF_FILE;
-
-      if (symbol_rootP != sym
-	  && ((bsym = symbol_get_bfdsym (symbol_rootP)) == NULL
-	      || (bsym->flags & BSF_FILE) == 0))
-	{
-	  symbol_remove (sym, &symbol_rootP, &symbol_lastP);
-	  symbol_insert (sym, symbol_rootP, &symbol_rootP, &symbol_lastP);
-	}
-
-#ifdef DEBUG
-      verify_symbol_chain (symbol_rootP, symbol_lastP);
-#endif
+  if (symbol_rootP != sym
+      && ((bsym = symbol_get_bfdsym (symbol_rootP)) == NULL
+	  || (bsym->flags & BSF_FILE) == 0))
+    {
+      symbol_remove (sym, &symbol_rootP, &symbol_lastP);
+      symbol_insert (sym, symbol_rootP, &symbol_rootP, &symbol_lastP);
     }
 
+#ifdef DEBUG
+  verify_symbol_chain (symbol_rootP, symbol_lastP);
+#endif
+
 #ifdef NEED_ECOFF_DEBUG
-  ecoff_new_file (s, appfile);
+  ecoff_new_file (s);
 #endif
 }
 
@@ -2154,27 +2144,23 @@ elf_obj_symbol_clone_hook (symbolS *newsym, symbolS *orgsym ATTRIBUTE_UNUSED)
     }
 }
 
-/* When setting one symbol equal to another, by default we probably
-   want them to have the same "size", whatever it means in the current
-   context.  */
-
 void
 elf_copy_symbol_attributes (symbolS *dest, symbolS *src)
 {
   struct elf_obj_sy *srcelf = symbol_get_obj (src);
   struct elf_obj_sy *destelf = symbol_get_obj (dest);
-  if (srcelf->size)
+  /* If size is unset, copy size from src.  Because we don't track whether
+     .size has been used, we can't differentiate .size dest, 0 from the case
+     where dest's size is unset.  */
+  if (!destelf->size && S_GET_SIZE (dest) == 0)
     {
-      if (destelf->size == NULL)
-	destelf->size = XNEW (expressionS);
-      *destelf->size = *srcelf->size;
+      if (srcelf->size)
+	{
+	  destelf->size = XNEW (expressionS);
+	  *destelf->size = *srcelf->size;
+	}
+      S_SET_SIZE (dest, S_GET_SIZE (src));
     }
-  else
-    {
-      free (destelf->size);
-      destelf->size = NULL;
-    }
-  S_SET_SIZE (dest, S_GET_SIZE (src));
   /* Don't copy visibility.  */
   S_SET_OTHER (dest, (ELF_ST_VISIBILITY (S_GET_OTHER (dest))
 		      | (S_GET_OTHER (src) & ~ELF_ST_VISIBILITY (-1))));

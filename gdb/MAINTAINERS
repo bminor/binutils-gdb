@@ -239,7 +239,7 @@ the native maintainer when resolving ABI issues.
 
 	aarch64		--target=aarch64-elf ,-Werror
 			Alan Hayward		alan.hayward@arm.com
-			Luis Machado		luis.machado@linaro.org
+			Luis Machado		luis.machado@arm.com
 
 	alpha		--target=alpha-elf ,-Werror
 
@@ -248,7 +248,7 @@ the native maintainer when resolving ABI issues.
 
 	arm		--target=arm-elf ,-Werror
 			Alan Hayward		alan.hayward@arm.com
-			Luis Machado		luis.machado@linaro.org
+			Luis Machado		luis.machado@arm.com
 
 	avr		--target=avr ,-Werror
 
@@ -268,6 +268,10 @@ the native maintainer when resolving ABI issues.
 			(--target=ia64-elf broken)
 
 	lm32		--target=lm32-elf ,-Werror
+
+	loongarch	--target=loongarch32-elf ,-Werror
+			--target=loongarch64-elf ,-Werror
+			Tiezhu Yang		yangtiezhu@loongson.cn
 
 	m32c		--target=m32c-elf ,-Werror
 
@@ -554,6 +558,7 @@ Janis Johnson					janisjo@codesourcery.com
 Jeff Johnston					jjohnstn@redhat.com
 Ruslan Kabatsayev				b7.10110111@gmail.com
 Geoff Keating					geoffk@redhat.com
+Nils-Christian Kempke				nils-christian.kempke@intel.com
 Mark Kettenis					kettenis@gnu.org
 Marc Khouzam					marc.khouzam@ericsson.com
 Toshihito Kikuchi				k.toshihito@yahoo.de
@@ -565,6 +570,7 @@ Jan Kratochvil					jan.kratochvil@redhat.com
 Maxim Kuvyrkov					maxim@kugelworks.com
 Pierre Langlois 				pierre.langlois@arm.com
 Jonathan Larmour				jifl@ecoscentric.com
+Bruno Larsen					blarsen@redhat.com
 Jeff Law					law@redhat.com
 Justin Lebar					justin.lebar@gmail.com
 David Lecomber					david@streamline-computing.com
@@ -578,7 +584,7 @@ Carl Love                  			cel@us.ibm.com
 H.J. Lu						hjl.tools@gmail.com
 Michal Ludvig                                   mludvig@suse.cz
 Edjunior B. Machado				emachado@linux.vnet.ibm.com
-Luis Machado					luis.machado@linaro.org
+Luis Machado					luis.machado@arm.com
 Jose E. Marchesi                                jose.marchesi@oracle.com
 Glen McCready					gkm@redhat.com
 Greg McGary					greg@mcgary.org

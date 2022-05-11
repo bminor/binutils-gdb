@@ -109,7 +109,7 @@ blpy_get_start (PyObject *self, void *closure)
 
   BLPY_REQUIRE_VALID (self, block);
 
-  return gdb_py_object_from_ulongest (BLOCK_START (block)).release ();
+  return gdb_py_object_from_ulongest (block->start ()).release ();
 }
 
 static PyObject *
@@ -119,7 +119,7 @@ blpy_get_end (PyObject *self, void *closure)
 
   BLPY_REQUIRE_VALID (self, block);
 
-  return gdb_py_object_from_ulongest (BLOCK_END (block)).release ();
+  return gdb_py_object_from_ulongest (block->end ()).release ();
 }
 
 static PyObject *
@@ -130,7 +130,7 @@ blpy_get_function (PyObject *self, void *closure)
 
   BLPY_REQUIRE_VALID (self, block);
 
-  sym = BLOCK_FUNCTION (block);
+  sym = block->function ();
   if (sym)
     return symbol_to_symbol_object (sym);
 
@@ -146,7 +146,7 @@ blpy_get_superblock (PyObject *self, void *closure)
 
   BLPY_REQUIRE_VALID (self, block);
 
-  super_block = BLOCK_SUPERBLOCK (block);
+  super_block = block->superblock ();
   if (super_block)
     return block_to_block_object (super_block, self_obj->objfile);
 
@@ -183,7 +183,7 @@ blpy_get_static_block (PyObject *self, void *closure)
 
   BLPY_REQUIRE_VALID (self, block);
 
-  if (BLOCK_SUPERBLOCK (block) == NULL)
+  if (block->superblock () == NULL)
     Py_RETURN_NONE;
 
   static_block = block_static_block (block);
@@ -201,7 +201,7 @@ blpy_is_global (PyObject *self, void *closure)
 
   BLPY_REQUIRE_VALID (self, block);
 
-  if (BLOCK_SUPERBLOCK (block))
+  if (block->superblock ())
     Py_RETURN_FALSE;
 
   Py_RETURN_TRUE;
@@ -217,8 +217,8 @@ blpy_is_static (PyObject *self, void *closure)
 
   BLPY_REQUIRE_VALID (self, block);
 
-  if (BLOCK_SUPERBLOCK (block) != NULL
-     && BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) == NULL)
+  if (block->superblock () != NULL
+     && block->superblock ()->superblock () == NULL)
     Py_RETURN_TRUE;
 
   Py_RETURN_FALSE;

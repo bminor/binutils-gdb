@@ -1358,8 +1358,20 @@ is_strip_section_1 (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
 	{
 	  /* By default we don't want to strip .reloc section.
 	     This section has for pe-coff special meaning.   See
-	     pe-dll.c file in ld, and peXXigen.c in bfd for details.  */
-	  if (strcmp (bfd_section_name (sec), ".reloc") != 0)
+	     pe-dll.c file in ld, and peXXigen.c in bfd for details.
+	     Similarly we do not want to strip debuglink sections.  */
+	  const char * kept_sections[] =
+	    {
+	      ".reloc",
+	      ".gnu_debuglink",
+	      ".gnu_debugaltlink"
+	    };
+	  int i;
+
+	  for (i = ARRAY_SIZE (kept_sections);i--;)
+	    if (strcmp (bfd_section_name (sec), kept_sections[i]) == 0)
+	      break;
+	  if (i == -1)
 	    return true;
 	}
 
@@ -1681,11 +1693,11 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 
       if (keep)
 	{
-	  if (((flags & BSF_GLOBAL) != 0
+	  if (((flags & (BSF_GLOBAL | BSF_GNU_UNIQUE))
 	       || undefined)
 	      && (weaken || is_specified_symbol (name, weaken_specific_htab)))
 	    {
-	      sym->flags &= ~ BSF_GLOBAL;
+	      sym->flags &= ~ (BSF_GLOBAL | BSF_GNU_UNIQUE);
 	      sym->flags |= BSF_WEAK;
 	    }
 
@@ -4085,9 +4097,6 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       goto loser;
     }
 
-  if (make_nobits)
-    elf_section_type (osection) = SHT_NOBITS;
-
   size = bfd_section_size (isection);
   size = bfd_convert_section_size (ibfd, isection, obfd, size);
   if (copy_byte >= 0)
@@ -4180,6 +4189,9 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       err = _("failed to copy private data");
       goto loser;
     }
+
+  if (make_nobits)
+    elf_section_type (osection) = SHT_NOBITS;
 
   /* All went well.  */
   return;

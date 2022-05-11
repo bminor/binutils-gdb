@@ -17,19 +17,14 @@
 
 sim_init
 
-if [istarget *] {
-    set all_machs "or1k"
+set all_machs "or1k"
 
-    global LDFLAGS_FOR_TARGET
-    set LDFLAGS_FOR_TARGET "-T $srcdir/$subdir/or1k-test.ld"
+global LDFLAGS_FOR_TARGET
+set LDFLAGS_FOR_TARGET "-T $srcdir/$subdir/or1k-test.ld"
 
-    foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.S]] {
-
-	if ![runtest_file_p $runtests $src] {
-	    continue
-	}
-
-	run_sim_test $src $all_machs
+foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.S]] {
+    if ![runtest_file_p $runtests $src] {
+	continue
     }
-
+    run_sim_test $src $all_machs
 }

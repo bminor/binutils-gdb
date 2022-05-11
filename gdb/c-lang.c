@@ -32,7 +32,7 @@
 #include "demangle.h"
 #include "cp-abi.h"
 #include "cp-support.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include <ctype.h>
 #include "gdbcore.h"
 #include "gdbarch.h"
@@ -167,19 +167,19 @@ language_defn::printchar (int c, struct type *type,
     case C_CHAR:
       break;
     case C_WIDE_CHAR:
-      fputc_filtered ('L', stream);
+      gdb_putc ('L', stream);
       break;
     case C_CHAR_16:
-      fputc_filtered ('u', stream);
+      gdb_putc ('u', stream);
       break;
     case C_CHAR_32:
-      fputc_filtered ('U', stream);
+      gdb_putc ('U', stream);
       break;
     }
 
-  fputc_filtered ('\'', stream);
+  gdb_putc ('\'', stream);
   emitchar (c, type, stream, '\'');
-  fputc_filtered ('\'', stream);
+  gdb_putc ('\'', stream);
 }
 
 /* Print the character string STRING, printing at most LENGTH
@@ -206,13 +206,13 @@ c_printstr (struct ui_file *stream, struct type *type,
     case C_STRING:
       break;
     case C_WIDE_STRING:
-      fputs_filtered ("L", stream);
+      gdb_puts ("L", stream);
       break;
     case C_STRING_16:
-      fputs_filtered ("u", stream);
+      gdb_puts ("u", stream);
       break;
     case C_STRING_32:
-      fputs_filtered ("U", stream);
+      gdb_puts ("U", stream);
       break;
     }
 
@@ -352,8 +352,8 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
       if (*length > 0)
 	fetchlimit = UINT_MAX;
 
-      err = read_string (addr, *length, width, fetchlimit,
-			 byte_order, buffer, length);
+      err = target_read_string (addr, *length, width, fetchlimit,
+				buffer, length);
       if (err != 0)
 	memory_error (TARGET_XFER_E_IO, addr);
     }
@@ -410,7 +410,7 @@ convert_ucn (const char *p, const char *limit, const char *dest_charset,
   int i;
 
   for (i = 0; i < length && p < limit && ISXDIGIT (*p); ++i, ++p)
-    result = (result << 4) + host_hex_value (*p);
+    result = (result << 4) + fromhex (*p);
 
   for (i = 3; i >= 0; --i)
     {
@@ -454,7 +454,7 @@ convert_octal (struct type *type, const char *p,
        i < 3 && p < limit && ISDIGIT (*p) && *p != '8' && *p != '9';
        ++i)
     {
-      value = 8 * value + host_hex_value (*p);
+      value = 8 * value + fromhex (*p);
       ++p;
     }
 
@@ -476,7 +476,7 @@ convert_hex (struct type *type, const char *p,
 
   while (p < limit && ISXDIGIT (*p))
     {
-      value = 16 * value + host_hex_value (*p);
+      value = 16 * value + fromhex (*p);
       ++p;
     }
 

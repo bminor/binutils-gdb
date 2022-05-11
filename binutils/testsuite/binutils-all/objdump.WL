@@ -3,7 +3,7 @@
 
 Contents of the \.debug_line section:
 
-CU: \./dw2-decodedline\.c:
+dw2-decodedline\.c:
 File name                            Line number    Starting address    View    Stmt
 
 directory/file1\.c:

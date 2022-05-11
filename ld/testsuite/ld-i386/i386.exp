@@ -177,12 +177,6 @@ set i386tests {
      {{readelf -Ssrl tlsbindesc.rd} {objdump -drj.text tlsbindesc.dd}
       {objdump -sj.got tlsbindesc.sd} {objdump -sj.tdata tlsbindesc.td}}
       "tlsbindesc"}
-    {"TLS -fno-pic -shared"
-     "-shared -melf_i386 --no-ld-generated-unwind-info -z notext \
-      -z noseparate-code --hash-style=sysv" ""
-     "--32" {tlsnopic1.s tlsnopic2.s}
-     {{readelf -Ssrl tlsnopic.rd} {objdump -drj.text tlsnopic.dd}
-      {objdump -sj.got tlsnopic.sd}} "libtlsnopic.so"}
     {"TLS with global dynamic and descriptors"
      "-shared -melf_i386 --no-ld-generated-unwind-info \
       -z noseparate-code --hash-style=sysv" ""
@@ -246,12 +240,12 @@ set i386tests {
      "--32 -mx86-used-note=yes"
      { pr19827a.S }  {{readelf {-rW} pr19827.rd}} "pr19827.so"}
     {"Build pr27193a.so"
-     "-melf_i386 -shared" ""
+     "-melf_i386 -shared -z noexecstack" ""
      "--32"
      { pr27193a.o.bz2 pr27193b.s }
      {{objdump {-dw} pr27193.dd}} "pr27193a.so"}
     {"Build pr27193b.so"
-     "-melf_i386 -shared --reduce-memory-overheads" ""
+     "-melf_i386 -shared --reduce-memory-overheads -z noexecstack" ""
      "--32"
      { pr27193a.o.bz2 pr27193b.s }
      {{objdump {-dw} pr27193.dd}} "pr27193b.so"}
@@ -292,6 +286,20 @@ proc iamcu_tests {} {
 iamcu_tests
 
 run_ld_link_tests $i386tests
+
+run_ld_link_tests [list \
+    [list \
+	"TLS -fno-pic -shared" \
+	"-shared -melf_i386 --no-ld-generated-unwind-info -z notext \
+	 -z noseparate-code --hash-style=sysv $NO_DT_RELR_LDFLAGS" \
+	"" "--32" \
+	{tlsnopic1.s tlsnopic2.s} \
+	{{readelf -Ssrl tlsnopic.rd} \
+	 {objdump -drj.text tlsnopic.dd} \
+	 {objdump -sj.got tlsnopic.sd}} \
+	"libtlsnopic.so" \
+    ] \
+]
 
 run_dump_test "abs"
 run_dump_test "pcrel8"
@@ -499,6 +507,10 @@ run_dump_test "pr27491-1c"
 run_dump_test "pr27491-2"
 run_dump_test "pr27491-3"
 run_dump_test "pr27491-4"
+run_dump_test "dt-relr-1a"
+run_dump_test "dt-relr-1b"
+run_dump_test "pr28870"
+run_dump_test "pr28894"
 
 if { !([istarget "i?86-*-linux*"]
        || [istarget "i?86-*-gnu*"]
@@ -801,7 +813,8 @@ if { [isnative]
 	] \
 	[list \
 	    "Build gotpc1" \
-	    "$NOPIE_LDFLAGS -Wl,--as-needed tmpdir/gotpc1.o tmpdir/got1d.so" \
+	    "$NOPIE_LDFLAGS -Wl,--as-needed,-z,noexecstack \
+	     tmpdir/gotpc1.o tmpdir/got1d.so" \
 	    "-Wa,-mx86-used-note=no" \
 	    { dummy.s } \
 	    {{objdump {-dw} got1.dd}} \
@@ -978,7 +991,8 @@ if { [isnative]
 	] \
 	[list \
 	    "Build property-6" \
-	    "-Wl,--as-needed tmpdir/property-6.o tmpdir/property-6.so" \
+	    "-Wl,--as-needed,-z,noexecstack \
+	     tmpdir/property-6.o tmpdir/property-6.so" \
 	    "-Wa,-mx86-used-note=no" \
 	    { dummy.s } \
 	    {{readelf {-n} property-2.r}} \
@@ -1277,6 +1291,30 @@ if { [isnative]
 	    {} \
 	    "pr22842.so" \
 	] \
+	[list \
+	    "Build pr28875.so" \
+	    "-shared -Wl,-z,indirect-extern-access" \
+	    "-fPIC" \
+	    { pr28875a.c } \
+	    {} \
+	    "pr28875.so" \
+	] \
+	[list \
+	    "Build pr28875" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/pr28875.so" \
+	    "$NOPIE_CFLAGS" \
+	    { pr28875b.c } \
+	    {{error_output "pr28875.err"}} \
+	    "pr28875" \
+	] \
+	[list \
+	    "Build pr21997-1" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed,-z,notext tmpdir/pr21997-1.so" \
+	    "$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
+	    { pr21997-1b.c } \
+	    {{error_output "pr21997-1.err"}} \
+	    "pr21997-1" \
+	] \
     ]
 
     run_ld_link_exec_tests [list \
@@ -1331,15 +1369,6 @@ if { [isnative]
 	    "pr22001-1-pic-2" \
 	    "pass.out" \
 	    "-fPIC" \
-	] \
-	[list \
-	    "Run pr21997-1" \
-	    "$NOPIE_LDFLAGS -Wl,--no-as-needed,-z,notext tmpdir/pr21997-1.so" \
-	    "-Wa,-mx86-used-note=yes" \
-	    { pr21997-1b.c } \
-	    "pr21997-1" \
-	    "pass.out" \
-	    "$NOPIE_CFLAGS" \
 	] \
 	[list \
 	    "Run pr21997-1 (PIC 1)" \

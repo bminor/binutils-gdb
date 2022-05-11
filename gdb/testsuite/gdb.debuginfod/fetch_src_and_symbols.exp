@@ -63,6 +63,11 @@ if { [gdb_compile "$sourcetmp" "$binfile" executable {debug}] != "" } {
     return -1
 }
 
+if { [gdb_compile "$sourcetmp" "${binfile}2" executable {debug}] != "" } {
+    fail "compile"
+    return -1
+}
+
 # Write some assembly that just has a .gnu_debugaltlink section.
 # Copied from testsuite/gdb.dwarf2/dwzbuildid.exp.
 proc write_just_debugaltlink {filename dwzname buildid} {
@@ -113,6 +118,8 @@ proc write_dwarf_file {filename buildid {value 99}} {
 	}
     }
 }
+
+set corefile [standard_output_file "corefile"]
 
 proc no_url { } {
     global binfile outputdir debugdir
@@ -167,6 +174,38 @@ proc no_url { } {
     gdb_test "file ${binfile}_alt.o" \
 	".*could not find '.gnu_debugaltlink'.*" \
 	"file [file tail ${binfile}_alt.o]"
+
+    # Generate a core file and test that gdb cannot find the executable
+    clean_restart ${binfile}2
+    gdb_test "start" "Temporary breakpoint.*"
+    gdb_test "generate-core-file $::corefile" "Saved corefile $::corefile" \
+	"file [file tail $::corefile] gen"
+    file rename -force ${binfile}2 $debugdir
+
+    clean_restart
+    gdb_test "core $::corefile" ".*in ?? ().*" "file [file tail $::corefile]"
+}
+
+# Test that GDB prints the debuginfod URLs when loading files.  URLS
+# is the string set in the DEBUGINFOD_URLS environment variable.
+# PATTERN_RE is the URLs pattern we expect to see out of GDB.  TEST is
+# the test name.
+
+proc test_urls {urls pattern_re test} {
+    setenv DEBUGINFOD_URLS $urls
+    clean_restart
+
+    if {$pattern_re != ""} {
+	set urls_re " +${pattern_re}\r\n"
+    } else {
+	set urls_re ""
+    }
+
+    # Use "with confirm off" to avoid having to deal with the
+    # "Enable debuginfod for this session? (y or [n])" question.
+    gdb_test "with confirm off -- file $::binfile" \
+	"following URLs:\r\n${urls_re}Debuginfod .*" \
+	$test
 }
 
 proc local_url { } {
@@ -234,6 +273,11 @@ proc local_url { } {
     gdb_test "br main" "Breakpoint 1 at.*file.*"
     gdb_test "l" ".*This program is distributed in the hope.*"
 
+    # gdb should now find the executable file
+    clean_restart
+    gdb_test "core $::corefile" ".*return 0.*" "file [file tail $::corefile]" \
+	"Enable debuginfod?.*" "y"
+
     # gdb should now find the debugaltlink file
     clean_restart
     gdb_test "file ${binfile}_alt.o" \
@@ -257,6 +301,55 @@ proc local_url { } {
     gdb_test_no_output "set debuginfod enabled on"
     gdb_test "file $binfile" ".*Reading symbols from.*debuginfo.*" \
 	"file [file tail $binfile] cmd on"
+
+    # Test that URLs are printed correctly for the first-use notice.
+
+    # Empty URLS disables Debuginfod.
+    setenv DEBUGINFOD_URLS ""
+    clean_restart
+    # Disable confirmation to avoid having to deal with a query.  See
+    # test_urls.
+    set file_cmd "with confirm off -- file $binfile"
+    gdb_test_multiple $file_cmd "notice empty URL" {
+	-re -wrap "This GDB supports auto-downloading.*" {
+	    fail $gdb_test_name
+	}
+	-re -wrap "" {
+	    pass $gdb_test_name
+	}
+    }
+
+    # Whitespace-only URLS disables Debuginfod.
+    setenv DEBUGINFOD_URLS "    "
+    clean_restart
+    gdb_test_multiple $file_cmd "notice whitespace URL" {
+	-re -wrap "This GDB supports auto-downloading.*" {
+	    fail $gdb_test_name
+	}
+	-re -wrap "" {
+	    pass $gdb_test_name
+	}
+    }
+
+    set url "http://127.0.0.1:$port"
+
+    test_urls $url \
+	"<$url>" \
+	"notice 1 URL"
+
+    test_urls "  $url  " \
+	"<$url>" \
+	"notice 1 URL with whitespace"
+
+    set url2 "127.0.0.1:$port"
+
+    test_urls "$url $url2" \
+	"<$url>\r\n +<$url2>" \
+	"notice 2 URLs"
+
+    test_urls "  $url $url2  " \
+	"<$url>\r\n +<$url2>" \
+	"notice 2 URLs with whitespace"
 }
 
 set envlist \

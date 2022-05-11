@@ -8,6 +8,7 @@ source_sh ${srcdir}/emulparams/x86-report-relative.sh
 source_sh ${srcdir}/emulparams/x86-64-level.sh
 source_sh ${srcdir}/emulparams/x86-64-lam.sh
 source_sh ${srcdir}/emulparams/static.sh
+source_sh ${srcdir}/emulparams/dt-relr.sh
 SCRIPT_NAME=elf
 ELFSIZE=64
 OUTPUT_FORMAT="elf64-x86-64"

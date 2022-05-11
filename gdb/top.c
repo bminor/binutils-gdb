@@ -56,6 +56,7 @@
 #include "gdbarch.h"
 #include "gdbsupport/pathstuff.h"
 #include "cli/cli-style.h"
+#include "pager.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -135,14 +136,10 @@ static void
 show_confirm (struct ui_file *file, int from_tty,
 	      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Whether to confirm potentially "
-			    "dangerous operations is %s.\n"),
-		    value);
+  gdb_printf (file, _("Whether to confirm potentially "
+		      "dangerous operations is %s.\n"),
+	      value);
 }
-
-/* Current working directory.  */
-
-char *current_directory;
 
 /* The last command line executed on the console.  Used for command
    repetitions when the user enters an empty line.  */
@@ -247,13 +244,6 @@ void (*deprecated_readline_end_hook) (void);
 void (*deprecated_attach_hook) (void);
 void (*deprecated_detach_hook) (void);
 
-/* Called when going to wait for the target.  Usually allows the GUI
-   to run while waiting for target events.  */
-
-ptid_t (*deprecated_target_wait_hook) (ptid_t ptid,
-				       struct target_waitstatus *status,
-				       int options);
-
 /* Used by UI as a wrapper around command execution.  May do various
    things like enabling/disabling buttons, etc...  */
 
@@ -266,6 +256,41 @@ void (*deprecated_context_hook) (int id);
 
 /* The highest UI number ever assigned.  */
 static int highest_ui_num;
+
+/* Unbuffer STREAM.  This is a wrapper around setbuf(STREAM, nullptr)
+   which applies some special rules for MS-Windows hosts.  */
+
+static void
+unbuffer_stream (FILE *stream)
+{
+  /* Unbuffer the input stream so that in gdb_readline_no_editing_callback,
+     the calls to fgetc fetch only one char at the time from STREAM.
+
+     This is important because gdb_readline_no_editing_callback will read
+     from STREAM up to the first '\n' character, after this GDB returns to
+     the event loop and relies on a select on STREAM indicating that more
+     input is pending.
+
+     If STREAM is buffered then the fgetc calls may have moved all the
+     pending input from the kernel into a local buffer, after which the
+     select will not indicate that more input is pending, and input after
+     the first '\n' will not be processed immediately.
+
+     Please ensure that any changes in this area run the MI tests with the
+     FORCE_SEPARATE_MI_TTY=1 flag being passed.  */
+
+#ifdef __MINGW32__
+  /* With MS-Windows runtime, making stdin unbuffered when it's
+     connected to the terminal causes it to misbehave.  */
+  if (!ISATTY (stream))
+    setbuf (stream, nullptr);
+#else
+  /* On GNU/Linux the issues described above can impact GDB even when
+     dealing with input from a terminal.  For now we unbuffer the input
+     stream for everyone except MS-Windows.  */
+  setbuf (stream, nullptr);
+#endif
+}
 
 /* See top.h.  */
 
@@ -285,13 +310,15 @@ ui::ui (FILE *instream_, FILE *outstream_, FILE *errstream_)
     input_fd (fileno (instream)),
     input_interactive_p (ISATTY (instream)),
     prompt_state (PROMPT_NEEDED),
-    m_gdb_stdout (new stdio_file (outstream)),
+    m_gdb_stdout (new pager_file (new stdio_file (outstream))),
     m_gdb_stdin (new stdio_file (instream)),
     m_gdb_stderr (new stderr_file (errstream)),
     m_gdb_stdlog (m_gdb_stderr),
     m_current_uiout (nullptr)
 {
   buffer_init (&line_buffer);
+
+  unbuffer_stream (instream_);
 
   if (ui_list == NULL)
     ui_list = this;
@@ -385,7 +412,7 @@ new_ui_command (const char *args, int from_tty)
     ui.release ();
   }
 
-  printf_filtered ("New UI allocated\n");
+  gdb_printf ("New UI allocated\n");
 }
 
 /* Handler for SIGHUP.  */
@@ -421,6 +448,8 @@ void
 read_command_file (FILE *stream)
 {
   struct ui *ui = current_ui;
+
+  unbuffer_stream (stream);
 
   scoped_restore save_instream
     = make_scoped_restore (&ui->instream, stream);
@@ -499,7 +528,7 @@ check_frame_language_change (void)
 	  && flang != language_unknown
 	  && flang != current_language->la_language)
 	{
-	  printf_filtered ("%s\n", _(lang_frame_mismatch_warn));
+	  gdb_printf ("%s\n", _(lang_frame_mismatch_warn));
 	  warned = 1;
 	}
     }
@@ -652,7 +681,7 @@ execute_command (const char *p, int from_tty)
 	  std::string prefixname = c->prefixname ();
           std::string prefixname_no_space
 	    = prefixname.substr (0, prefixname.length () - 1);
-	  printf_filtered
+	  gdb_printf
 	    ("\"%s\" must be followed by the name of a subcommand.\n",
 	     prefixname_no_space.c_str ());
 	  help_list (*c->subcommands, prefixname.c_str (), all_commands,
@@ -873,7 +902,7 @@ gdb_readline_no_editing (const char *prompt)
       /* Don't use a _filtered function here.  It causes the assumed
 	 character position to be off, since the newline we read from
 	 the user is not accounted for.  */
-      fputs_unfiltered (prompt, gdb_stdout);
+      printf_unfiltered ("%s", prompt);
       gdb_flush (gdb_stdout);
     }
 
@@ -952,11 +981,11 @@ show_write_history_p (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
   if (!write_history_p || !history_filename.empty ())
-    fprintf_filtered (file, _("Saving of the history record on exit is %s.\n"),
-		      value);
+    gdb_printf (file, _("Saving of the history record on exit is %s.\n"),
+		value);
   else
-    fprintf_filtered (file, _("Saving of the history is disabled due to "
-			      "the value of 'history filename'.\n"));
+    gdb_printf (file, _("Saving of the history is disabled due to "
+			"the value of 'history filename'.\n"));
 }
 
 /* The variable associated with the "set/show history size"
@@ -967,8 +996,8 @@ static void
 show_history_size (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("The size of the command history is %s.\n"),
-		    value);
+  gdb_printf (file, _("The size of the command history is %s.\n"),
+	      value);
 }
 
 /* Variable associated with the "history remove-duplicates" option.
@@ -979,10 +1008,10 @@ static void
 show_history_remove_duplicates (struct ui_file *file, int from_tty,
 				struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("The number of history entries to look back at for "
-		      "duplicates is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("The number of history entries to look back at for "
+		"duplicates is %s.\n"),
+	      value);
 }
 
 /* Implement 'show history filename'.  */
@@ -991,12 +1020,12 @@ show_history_filename (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
   if (!history_filename.empty ())
-    fprintf_filtered (file, _("The filename in which to record "
-			      "the command history is \"%ps\".\n"),
-		      styled_string (file_name_style.style (), value));
+    gdb_printf (file, _("The filename in which to record "
+			"the command history is \"%ps\".\n"),
+		styled_string (file_name_style.style (), value));
   else
-    fprintf_filtered (file, _("There is no filename currently set for "
-			      "recording the command history in.\n"));
+    gdb_printf (file, _("There is no filename currently set for "
+			"recording the command history in.\n"));
 }
 
 /* This is like readline(), but it has some gdb-specific behavior.
@@ -1364,7 +1393,6 @@ command_line_input (const char *prompt_arg, const char *annotation_suffix)
       /* Make sure that all output has been output.  Some machines may
 	 let you get away with leaving out some of the gdb_flush, but
 	 not all.  */
-      wrap_here ("");
       gdb_flush (gdb_stdout);
       gdb_flush (gdb_stderr);
 
@@ -1372,11 +1400,7 @@ command_line_input (const char *prompt_arg, const char *annotation_suffix)
 	++source_line_number;
 
       if (from_tty && annotation_level > 1)
-	{
-	  puts_unfiltered ("\n\032\032pre-");
-	  puts_unfiltered (annotation_suffix);
-	  puts_unfiltered ("\n");
-	}
+	printf_unfiltered ("\n\032\032pre-%s\n", annotation_suffix);
 
       /* Don't use fancy stuff if not talking to stdin.  */
       if (deprecated_readline_hook
@@ -1429,60 +1453,66 @@ print_gdb_version (struct ui_file *stream, bool interactive)
      number, which starts after last space.  */
 
   std::string v_str = string_printf ("GNU gdb %s%s", PKGVERSION, version);
-  fprintf_filtered (stream, "%ps\n",
-		    styled_string (version_style.style (), v_str.c_str ()));
+  gdb_printf (stream, "%ps\n",
+	      styled_string (version_style.style (), v_str.c_str ()));
 
   /* Second line is a copyright notice.  */
 
-  fprintf_filtered (stream,
-		    "Copyright (C) 2022 Free Software Foundation, Inc.\n");
+  gdb_printf (stream,
+	      "Copyright (C) 2022 Free Software Foundation, Inc.\n");
 
   /* Following the copyright is a brief statement that the program is
      free software, that users are free to copy and change it on
      certain conditions, that it is covered by the GNU GPL, and that
      there is no warranty.  */
 
-  fprintf_filtered (stream, "\
-License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\
+  gdb_printf (stream, "\
+License GPLv3+: GNU GPL version 3 or later <%ps>\
 \nThis is free software: you are free to change and redistribute it.\n\
-There is NO WARRANTY, to the extent permitted by law.");
+There is NO WARRANTY, to the extent permitted by law.",
+		    styled_string (file_name_style.style (),
+				   "http://gnu.org/licenses/gpl.html"));
 
   if (!interactive)
     return;
 
-  fprintf_filtered (stream, ("\nType \"show copying\" and "
-			     "\"show warranty\" for details.\n"));
+  gdb_printf (stream, ("\nType \"show copying\" and "
+		       "\"show warranty\" for details.\n"));
 
   /* After the required info we print the configuration information.  */
 
-  fprintf_filtered (stream, "This GDB was configured as \"");
+  gdb_printf (stream, "This GDB was configured as \"");
   if (strcmp (host_name, target_name) != 0)
     {
-      fprintf_filtered (stream, "--host=%s --target=%s",
-			host_name, target_name);
+      gdb_printf (stream, "--host=%s --target=%s",
+		  host_name, target_name);
     }
   else
     {
-      fprintf_filtered (stream, "%s", host_name);
+      gdb_printf (stream, "%s", host_name);
     }
-  fprintf_filtered (stream, "\".\n");
+  gdb_printf (stream, "\".\n");
 
-  fprintf_filtered (stream, _("Type \"show configuration\" "
-			      "for configuration details.\n"));
+  gdb_printf (stream, _("Type \"show configuration\" "
+			"for configuration details.\n"));
 
   if (REPORT_BUGS_TO[0])
     {
-      fprintf_filtered (stream,
-			_("For bug reporting instructions, please see:\n"));
-      fprintf_filtered (stream, "%s.\n", REPORT_BUGS_TO);
+      gdb_printf (stream,
+		  _("For bug reporting instructions, please see:\n"));
+      gdb_printf (stream, "%ps.\n",
+		  styled_string (file_name_style.style (),
+				 REPORT_BUGS_TO));
     }
-  fprintf_filtered (stream,
-		    _("Find the GDB manual and other documentation \
-resources online at:\n    <http://www.gnu.org/software/gdb/documentation/>."));
-  fprintf_filtered (stream, "\n\n");
-  fprintf_filtered (stream, _("For help, type \"help\".\n"));
-  fprintf_filtered (stream,
-		    _("Type \"apropos word\" to search for commands \
+  gdb_printf (stream,
+	      _("Find the GDB manual and other documentation \
+resources online at:\n    <%ps>."),
+	      styled_string (file_name_style.style (),
+			     "http://www.gnu.org/software/gdb/documentation/"));
+  gdb_printf (stream, "\n\n");
+  gdb_printf (stream, _("For help, type \"help\".\n"));
+  gdb_printf (stream,
+	      _("Type \"apropos word\" to search for commands \
 related to \"word\"."));
 }
 
@@ -1490,178 +1520,188 @@ related to \"word\"."));
 void
 print_gdb_configuration (struct ui_file *stream)
 {
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 This GDB was configured as follows:\n\
    configure --host=%s --target=%s\n\
 "), host_name, target_name);
 
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --with-auto-load-dir=%s\n\
 	     --with-auto-load-safe-path=%s\n\
 "), AUTO_LOAD_DIR, AUTO_LOAD_SAFE_PATH);
 
 #if HAVE_LIBEXPAT
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --with-expat\n\
 "));
 #else
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --without-expat\n\
 "));
 #endif
 
   if (GDB_DATADIR[0])
-    fprintf_filtered (stream, _("\
+    gdb_printf (stream, _("\
 	     --with-gdb-datadir=%s%s\n\
 "), GDB_DATADIR, GDB_DATADIR_RELOCATABLE ? " (relocatable)" : "");
 
 #ifdef ICONV_BIN
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --with-iconv-bin=%s%s\n\
 "), ICONV_BIN, ICONV_BIN_RELOCATABLE ? " (relocatable)" : "");
 #endif
 
   if (JIT_READER_DIR[0])
-    fprintf_filtered (stream, _("\
+    gdb_printf (stream, _("\
 	     --with-jit-reader-dir=%s%s\n\
 "), JIT_READER_DIR, JIT_READER_DIR_RELOCATABLE ? " (relocatable)" : "");
 
 #if HAVE_LIBUNWIND_IA64_H
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --with-libunwind-ia64\n\
 "));
 #else
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --without-libunwind-ia64\n\
 "));
 #endif
 
 #if HAVE_LIBLZMA
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --with-lzma\n\
 "));
 #else
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --without-lzma\n\
 "));
 #endif
 
 #if HAVE_LIBBABELTRACE
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --with-babeltrace\n\
 "));
 #else
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --without-babeltrace\n\
 "));
 #endif
 
 #if HAVE_LIBIPT
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --with-intel-pt\n\
 "));
 #else
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --without-intel-pt\n\
 "));
 #endif
 
 #if HAVE_LIBMPFR
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --with-mpfr\n\
 "));
 #else
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --without-mpfr\n\
 "));
 #endif
 #if HAVE_LIBXXHASH
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --with-xxhash\n\
 "));
 #else
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --without-xxhash\n\
 "));
 #endif
 #ifdef WITH_PYTHON_PATH
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --with-python=%s%s\n\
 "), WITH_PYTHON_PATH, PYTHON_PATH_RELOCATABLE ? " (relocatable)" : "");
 #else
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --without-python\n\
 "));
 #endif
 #ifdef WITH_PYTHON_LIBDIR
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --with-python-libdir=%s%s\n\
 "), WITH_PYTHON_LIBDIR, PYTHON_LIBDIR_RELOCATABLE ? " (relocatable)" : "");
 #else
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --without-python-libdir\n\
 "));
 #endif
 
 #if HAVE_LIBDEBUGINFOD
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --with-debuginfod\n\
 "));
 #else
-   fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --without-debuginfod\n\
 "));
 #endif
 
 #if HAVE_GUILE
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --with-guile\n\
 "));
 #else
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --without-guile\n\
 "));
 #endif
 
 #if HAVE_SOURCE_HIGHLIGHT
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --enable-source-highlight\n\
 "));
 #else
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --disable-source-highlight\n\
 "));
 #endif
 
+#if CXX_STD_THREAD
+  gdb_printf (stream, _("\
+	     --enable-threading\n\
+"));
+#else
+  gdb_printf (stream, _("\
+	     --disable-threading\n\
+"));
+#endif
+
 #ifdef RELOC_SRCDIR
-  fprintf_filtered (stream, _("\
+  gdb_printf (stream, _("\
 	     --with-relocated-sources=%s\n\
 "), RELOC_SRCDIR);
 #endif
 
   if (DEBUGDIR[0])
-    fprintf_filtered (stream, _("\
+    gdb_printf (stream, _("\
 	     --with-separate-debug-dir=%s%s\n\
 "), DEBUGDIR, DEBUGDIR_RELOCATABLE ? " (relocatable)" : "");
 
   if (TARGET_SYSTEM_ROOT[0])
-    fprintf_filtered (stream, _("\
+    gdb_printf (stream, _("\
 	     --with-sysroot=%s%s\n\
 "), TARGET_SYSTEM_ROOT, TARGET_SYSTEM_ROOT_RELOCATABLE ? " (relocatable)" : "");
 
   if (SYSTEM_GDBINIT[0])
-    fprintf_filtered (stream, _("\
+    gdb_printf (stream, _("\
 	     --with-system-gdbinit=%s%s\n\
 "), SYSTEM_GDBINIT, SYSTEM_GDBINIT_RELOCATABLE ? " (relocatable)" : "");
 
   if (SYSTEM_GDBINIT_DIR[0])
-    fprintf_filtered (stream, _("\
+    gdb_printf (stream, _("\
 	     --with-system-gdbinit-dir=%s%s\n\
 "), SYSTEM_GDBINIT_DIR, SYSTEM_GDBINIT_DIR_RELOCATABLE ? " (relocatable)" : "");
 
   /* We assume "relocatable" will be printed at least once, thus we always
      print this text.  It's a reasonably safe assumption for now.  */
-  fprintf_filtered (stream, _("\n\
+  gdb_printf (stream, _("\n\
 (\"Relocatable\" means the directory can be moved with the GDB installation\n\
 tree, and GDB will still find it.)\n\
 "));
@@ -1724,13 +1764,13 @@ print_inferior_quit_action (inferior *inf, ui_file *out)
     return;
 
   if (inf->attach_flag)
-    fprintf_filtered (out,
-		      _("\tInferior %d [%s] will be detached.\n"), inf->num,
-		      target_pid_to_str (ptid_t (inf->pid)).c_str ());
+    gdb_printf (out,
+		_("\tInferior %d [%s] will be detached.\n"), inf->num,
+		target_pid_to_str (ptid_t (inf->pid)).c_str ());
   else
-    fprintf_filtered (out,
-		      _("\tInferior %d [%s] will be killed.\n"), inf->num,
-		      target_pid_to_str (ptid_t (inf->pid)).c_str ());
+    gdb_printf (out,
+		_("\tInferior %d [%s] will be killed.\n"), inf->num,
+		target_pid_to_str (ptid_t (inf->pid)).c_str ());
 }
 
 /* If necessary, make the user confirm that we should quit.  Return
@@ -1881,11 +1921,11 @@ show_interactive_mode (struct ui_file *file, int from_tty,
 		       const char *value)
 {
   if (interactive_mode == AUTO_BOOLEAN_AUTO)
-    fprintf_filtered (file, "Debugger's interactive mode "
-			    "is %s (currently %s).\n",
-		      value, input_interactive_p (current_ui) ? "on" : "off");
+    gdb_printf (file, "Debugger's interactive mode "
+		"is %s (currently %s).\n",
+		value, input_interactive_p (current_ui) ? "on" : "off");
   else
-    fprintf_filtered (file, "Debugger's interactive mode is %s.\n", value);
+    gdb_printf (file, "Debugger's interactive mode is %s.\n", value);
 }
 
 /* Returns whether GDB is running on an interactive terminal.  */
@@ -1957,8 +1997,8 @@ show_commands (const char *args, int from_tty)
        offset < num + Hist_print && offset < history_length;
        offset++)
     {
-      printf_filtered ("%5d  %s\n", history_base + offset,
-		       (history_get (history_base + offset))->line);
+      gdb_printf ("%5d  %s\n", history_base + offset,
+		  (history_get (history_base + offset))->line);
     }
 
   /* The next command we want to display is the next one that we haven't
@@ -2083,7 +2123,7 @@ static void
 show_prompt (struct ui_file *file, int from_tty,
 	     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Gdb's prompt is \"%s\".\n"), value);
+  gdb_printf (file, _("Gdb's prompt is \"%s\".\n"), value);
 }
 
 /* "set editing" command.  */
@@ -2101,25 +2141,25 @@ static void
 show_editing (struct ui_file *file, int from_tty,
 	      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Editing of command lines as "
-			    "they are typed is %s.\n"),
-		    current_ui->command_editing ? _("on") : _("off"));
+  gdb_printf (file, _("Editing of command lines as "
+		      "they are typed is %s.\n"),
+	      current_ui->command_editing ? _("on") : _("off"));
 }
 
 static void
 show_annotation_level (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Annotation_level is %s.\n"), value);
+  gdb_printf (file, _("Annotation_level is %s.\n"), value);
 }
 
 static void
 show_exec_done_display_p (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Notification of completion for "
-			    "asynchronous execution commands is %s.\n"),
-		    value);
+  gdb_printf (file, _("Notification of completion for "
+		      "asynchronous execution commands is %s.\n"),
+	      value);
 }
 
 /* New values of the "data-directory" parameter are staged here.
@@ -2150,9 +2190,9 @@ static void
 show_gdb_datadir (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("GDB's data directory is \"%ps\".\n"),
-		    styled_string (file_name_style.style (),
-				   gdb_datadir.c_str ()));
+  gdb_printf (file, _("GDB's data directory is \"%ps\".\n"),
+	      styled_string (file_name_style.style (),
+			     gdb_datadir.c_str ()));
 }
 
 /* Implement 'set history filename'.  */
@@ -2166,12 +2206,7 @@ set_history_filename (const char *args,
      that was read.  */
   if (!history_filename.empty ()
       && !IS_ABSOLUTE_PATH (history_filename.c_str ()))
-    {
-      gdb::unique_xmalloc_ptr<char> temp
-	(gdb_abspath (history_filename.c_str ()));
-
-      history_filename = temp.get ();
-    }
+    history_filename = gdb_abspath (history_filename.c_str ());
 }
 
 /* Whether we're in quiet startup mode.  */
@@ -2192,8 +2227,8 @@ static void
 show_startup_quiet (struct ui_file *file, int from_tty,
 	      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Whether to start up quietly is %s.\n"),
-		    value);
+  gdb_printf (file, _("Whether to start up quietly is %s.\n"),
+	      value);
 }
 
 static void
@@ -2229,6 +2264,7 @@ init_main (void)
   rl_completion_display_matches_hook = cli_display_match_list;
   rl_readline_name = "gdb";
   rl_terminal_name = getenv ("TERM");
+  rl_deprep_term_function = gdb_rl_deprep_term_function;
 
   /* The name for this defun comes from Bash, where it originated.
      15 is Control-o, the same binding this function has in Bash.  */
@@ -2443,7 +2479,6 @@ _initialize_top ()
       const char *fname = ".gdb_history";
 #endif
 
-      gdb::unique_xmalloc_ptr<char> temp (gdb_abspath (fname));
-      history_filename = temp.get ();
+      history_filename = gdb_abspath (fname);
     }
 }

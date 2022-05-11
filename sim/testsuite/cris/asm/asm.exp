@@ -17,31 +17,29 @@
 
 sim_init
 
-if [istarget *] {
-    global ASFLAGS_FOR_TARGET
-    # All machines we test and the corresponding assembler option.  Needs
-    # update if we build the simulator for crisv0 crisv3 and crisv8 too.
+global ASFLAGS_FOR_TARGET
+# All machines we test and the corresponding assembler option.  Needs
+# update if we build the simulator for crisv0 crisv3 and crisv8 too.
 
-    set combos {{"crisv10" "--march=v10 --no-mul-bug-abort"}
-                {"crisv32" "--march=v32"}}
+set combos {{"crisv10" "--march=v10 --no-mul-bug-abort"}
+	    {"crisv32" "--march=v32"}}
 
-    # We need to pass different assembler flags for each machine.
-    # Specifying it here rather than adding a specifier to each and every
-    # test-file is preferrable.
+# We need to pass different assembler flags for each machine.
+# Specifying it here rather than adding a specifier to each and every
+# test-file is preferrable.
 
-    foreach combo $combos {
-	set mach [lindex $combo 0]
-	set ASFLAGS_FOR_TARGET "[lindex $combo 1]"
+foreach combo $combos {
+    set mach [lindex $combo 0]
+    set ASFLAGS_FOR_TARGET "[lindex $combo 1]"
 
-	# The .ms suffix is for "miscellaneous .s".
-	foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.ms]] {
-	    # If we're only testing specific files and this isn't one of them,
-	    # skip it.
-	    if ![runtest_file_p $runtests $src] {
-		continue
-	    }
-
-	    run_sim_test $src $mach
+    # The .ms suffix is for "miscellaneous .s".
+    foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.ms]] {
+	# If we're only testing specific files and this isn't one of them,
+	# skip it.
+	if ![runtest_file_p $runtests $src] {
+	    continue
 	}
+
+	run_sim_test $src $mach
     }
 }

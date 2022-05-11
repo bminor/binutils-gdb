@@ -146,6 +146,7 @@ fi
 AC_SUBST(ustlibs)
 AC_SUBST(ustinc)
 
+AM_GDB_COMPILER_TYPE
 AM_GDB_WARNINGS
 
 dnl dladdr is glibc-specific.  It is used by thread-db.c but only for

@@ -83,15 +83,11 @@ public:
   void thread_events (int) override;
 
   bool can_async_p () override;
-  bool is_async_p () override;
 
   bool supports_non_stop () override;
   bool always_non_stop_p () override;
 
-  int async_wait_fd () override;
   void async (int) override;
-
-  void close () override;
 
   void stop (ptid_t) override;
 

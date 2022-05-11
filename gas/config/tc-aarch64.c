@@ -1982,6 +1982,7 @@ static void
 s_aarch64_inst (int ignored ATTRIBUTE_UNUSED)
 {
   expressionS exp;
+  unsigned n = 0;
 
 #ifdef md_flush_pending_output
   md_flush_pending_output ();
@@ -2020,9 +2021,12 @@ s_aarch64_inst (int ignored ATTRIBUTE_UNUSED)
 	  unsigned int val = exp.X_add_number;
 	  exp.X_add_number = SWAP_32 (val);
 	}
-      emit_expr (&exp, 4);
+      emit_expr (&exp, INSN_SIZE);
+      ++n;
     }
   while (*input_line_pointer++ == ',');
+
+  dwarf2_emit_insn (n * INSN_SIZE);
 
   /* Put terminator back into stream.  */
   input_line_pointer--;
@@ -10465,17 +10469,17 @@ aarch64_elf_copy_symbol_attributes (symbolS *dest, symbolS *src)
 {
   struct elf_obj_sy *srcelf = symbol_get_obj (src);
   struct elf_obj_sy *destelf = symbol_get_obj (dest);
-  if (srcelf->size)
+  /* If size is unset, copy size from src.  Because we don't track whether
+     .size has been used, we can't differentiate .size dest, 0 from the case
+     where dest's size is unset.  */
+  if (!destelf->size && S_GET_SIZE (dest) == 0)
     {
-      if (destelf->size == NULL)
-	destelf->size = XNEW (expressionS);
-      *destelf->size = *srcelf->size;
+      if (srcelf->size)
+	{
+	  destelf->size = XNEW (expressionS);
+	  *destelf->size = *srcelf->size;
+	}
+      S_SET_SIZE (dest, S_GET_SIZE (src));
     }
-  else
-    {
-      free (destelf->size);
-      destelf->size = NULL;
-    }
-  S_SET_SIZE (dest, S_GET_SIZE (src));
 }
 #endif

@@ -209,6 +209,7 @@ def main():
 EXCLUDE_LIST = (
     "gdb/nat/glibc_thread_db.h",
     "gdb/CONTRIBUTE",
+    "gdbsupport/Makefile.in",
     "gnulib/import",
     "gnulib/config.in",
     "gnulib/Makefile.in",
@@ -244,7 +245,6 @@ BY_HAND = (
 MULTIPLE_COPYRIGHT_HEADERS = (
     "gdb/doc/gdb.texinfo",
     "gdb/doc/refcard.tex",
-    "gdb/gdbarch.sh",
     "gdb/syscalls/update-netbsd.sh",
 )
 

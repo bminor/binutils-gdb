@@ -134,7 +134,7 @@ compile_object_run (compile_module_up &&module)
 
   try
     {
-      struct type *func_type = SYMBOL_TYPE (func_sym);
+      struct type *func_type = func_sym->type ();
       int current_arg = 0;
       struct value **vargs;
 
@@ -145,7 +145,7 @@ compile_object_run (compile_module_up &&module)
 
       gdb_assert (func_type->code () == TYPE_CODE_FUNC);
       func_val = value_from_pointer (lookup_pointer_type (func_type),
-				   BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (func_sym)));
+				   func_sym->value_block ()->entry_pc ());
 
       vargs = XALLOCAVEC (struct value *, func_type->num_fields ());
       if (func_type->num_fields () >= 1)

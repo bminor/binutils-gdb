@@ -28,16 +28,6 @@
 #include "disasm.h"
 #include "gdbarch.h"
 
-#if defined (IS_PY3K)
-
-#define BTPY_PYSLICE(x) (x)
-
-#else
-
-#define BTPY_PYSLICE(x) ((PySliceObject *) x)
-
-#endif
-
 /* Python object for btrace record lists.  */
 
 struct btpy_list_object {
@@ -295,12 +285,7 @@ recpy_bt_insn_data (PyObject *self, void *closure)
   if (object == NULL)
     return NULL;
 
-#ifdef IS_PY3K
   return PyMemoryView_FromObject (object);
-#else
-  return PyBuffer_FromObject (object, 0, Py_END_OF_BUFFER);
-#endif
-
 }
 
 /* Implementation of RecordInstruction.decoded [str] for btrace.
@@ -486,9 +471,9 @@ btpy_list_slice (PyObject *self, PyObject *value)
   const Py_ssize_t length = btpy_list_length (self);
   Py_ssize_t start, stop, step, slicelength;
 
-  if (PyInt_Check (value))
+  if (PyLong_Check (value))
     {
-      Py_ssize_t index = PyInt_AsSsize_t (value);
+      Py_ssize_t index = PyLong_AsSsize_t (value);
 
       /* Emulate Python behavior for negative indices.  */
       if (index < 0)
@@ -500,7 +485,7 @@ btpy_list_slice (PyObject *self, PyObject *value)
   if (!PySlice_Check (value))
     return PyErr_Format (PyExc_TypeError, _("Index must be int or slice."));
 
-  if (0 != PySlice_GetIndicesEx (BTPY_PYSLICE (value), length, &start, &stop,
+  if (0 != PySlice_GetIndicesEx (value, length, &start, &stop,
 				 &step, &slicelength))
     return NULL;
 
@@ -622,7 +607,7 @@ btpy_list_richcompare (PyObject *self, PyObject *other, int op)
 PyObject *
 recpy_bt_method (PyObject *self, void *closure)
 {
-  return PyString_FromString ("btrace");
+  return PyUnicode_FromString ("btrace");
 }
 
 /* Implementation of
@@ -643,7 +628,7 @@ recpy_bt_format (PyObject *self, void *closure)
   if (config == NULL)
     Py_RETURN_NONE;
 
-  return PyString_FromString (btrace_format_short_string (config->format));
+  return PyUnicode_FromString (btrace_format_short_string (config->format));
 }
 
 /* Implementation of

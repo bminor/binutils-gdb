@@ -612,15 +612,15 @@ exp	:	THIS
 block	:	BLOCKNAME
 			{
 			  if ($1.sym.symbol != 0)
-			      $$ = SYMBOL_BLOCK_VALUE ($1.sym.symbol);
+			      $$ = $1.sym.symbol->value_block ();
 			  else
 			    {
 			      std::string copy = copy_name ($1.stoken);
 			      struct symtab *tem =
 				  lookup_symtab (copy.c_str ());
 			      if (tem)
-				$$ = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (tem),
-							STATIC_BLOCK);
+				$$ = (tem->compunit ()->blockvector ()
+				      ->static_block ());
 			      else
 				error (_("No file or function \"%s\"."),
 				       copy.c_str ());
@@ -635,10 +635,10 @@ block	:	block COLONCOLON name
 			    = lookup_symbol (copy.c_str (), $1,
 					     VAR_DOMAIN, NULL).symbol;
 
-			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
+			  if (!tem || tem->aclass () != LOC_BLOCK)
 			    error (_("No function \"%s\" in specified context."),
 				   copy.c_str ());
-			  $$ = SYMBOL_BLOCK_VALUE (tem); }
+			  $$ = tem->value_block (); }
 	;
 
 variable:	block COLONCOLON name
@@ -690,7 +690,7 @@ variable:	name_not_typename
 				pstate->block_tracker->update (sym);
 
 			      pstate->push_new<var_value_operation> (sym);
-			      current_type = sym.symbol->type; }
+			      current_type = sym.symbol->type (); }
 			  else if ($1.is_a_field_of_this)
 			    {
 			      struct value * this_val;
@@ -802,10 +802,8 @@ static int
 parse_number (struct parser_state *par_state,
 	      const char *p, int len, int parsed_float, YYSTYPE *putithere)
 {
-  /* FIXME: Shouldn't these be unsigned?  We don't deal with negative values
-     here, and we do kind of silly things like cast to unsigned.  */
-  LONGEST n = 0;
-  LONGEST prevn = 0;
+  ULONGEST n = 0;
+  ULONGEST prevn = 0;
   ULONGEST un;
 
   int i = 0;
@@ -854,7 +852,7 @@ parse_number (struct parser_state *par_state,
     }
 
   /* Handle base-switching prefixes 0x, 0t, 0d, 0.  */
-  if (p[0] == '0')
+  if (p[0] == '0' && len > 1)
     switch (p[1])
       {
       case 'x':
@@ -932,7 +930,7 @@ parse_number (struct parser_state *par_state,
 	 on 0x123456789 when LONGEST is 32 bits.  */
       if (c != 'l' && c != 'u' && n != 0)
 	{
-	  if ((unsigned_p && (ULONGEST) prevn >= (ULONGEST) n))
+	  if (unsigned_p && prevn >= n)
 	    error (_("Numeric constant too large."));
 	}
       prevn = n;
@@ -950,7 +948,7 @@ parse_number (struct parser_state *par_state,
      the case where it is we just always shift the value more than
      once, with fewer bits each time.  */
 
-  un = (ULONGEST)n >> 2;
+  un = n >> 2;
   if (long_p == 0
       && (un >> (gdbarch_int_bit (par_state->gdbarch ()) - 2)) == 0)
     {
@@ -1544,7 +1542,7 @@ yylex (void)
     /* Call lookup_symtab, not lookup_partial_symtab, in case there are
        no psymtabs (coff, xcoff, or some future change to blow away the
        psymtabs once once symbols are read).  */
-    if ((sym && SYMBOL_CLASS (sym) == LOC_BLOCK)
+    if ((sym && sym->aclass () == LOC_BLOCK)
 	|| lookup_symtab (tmp.c_str ()))
       {
 	yylval.ssym.sym.symbol = sym;
@@ -1553,7 +1551,7 @@ yylex (void)
 	free (uptokstart);
 	return BLOCKNAME;
       }
-    if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+    if (sym && sym->aclass () == LOC_TYPEDEF)
 	{
 #if 1
 	  /* Despite the following flaw, we need to keep this code enabled.
@@ -1622,7 +1620,7 @@ yylex (void)
 					 VAR_DOMAIN, NULL).symbol;
 		      if (cur_sym)
 			{
-			  if (SYMBOL_CLASS (cur_sym) == LOC_TYPEDEF)
+			  if (cur_sym->aclass () == LOC_TYPEDEF)
 			    {
 			      best_sym = cur_sym;
 			      pstate->lexptr = p;
@@ -1640,9 +1638,9 @@ yylex (void)
 		break;
 	    }
 
-	  yylval.tsym.type = SYMBOL_TYPE (best_sym);
+	  yylval.tsym.type = best_sym->type ();
 #else /* not 0 */
-	  yylval.tsym.type = SYMBOL_TYPE (sym);
+	  yylval.tsym.type = sym->type ();
 #endif /* not 0 */
 	  free (uptokstart);
 	  return TYPENAME;

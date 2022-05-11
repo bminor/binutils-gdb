@@ -119,7 +119,25 @@ struct arm_gdbarch_tdep : gdbarch_tdep
   int mve_pseudo_base = 0;	/* Number of the first MVE pseudo register.  */
   int mve_pseudo_count = 0;	/* Total number of MVE pseudo registers.  */
 
+  bool have_pacbti = false;	/* True if we have the ARMv8.1-m PACBTI
+				   extensions.  */
+  int pacbti_pseudo_base = 0;	/* Number of the first PACBTI pseudo
+				   register.  */
+  int pacbti_pseudo_count = 0;	/* Total number of PACBTI pseudo registers.  */
+
+  int m_profile_msp_regnum = ARM_SP_REGNUM;	/* M-profile MSP register number.  */
+  int m_profile_psp_regnum = ARM_SP_REGNUM;	/* M-profile PSP register number.  */
+
+  /* Secure and Non-secure stack pointers with security extension.  */
+  int m_profile_msp_ns_regnum = ARM_SP_REGNUM;	/* M-profile MSP_NS register number.  */
+  int m_profile_psp_ns_regnum = ARM_SP_REGNUM;	/* M-profile PSP_NS register number.  */
+  int m_profile_msp_s_regnum = ARM_SP_REGNUM;	/* M-profile MSP_S register number.  */
+  int m_profile_psp_s_regnum = ARM_SP_REGNUM;	/* M-profile PSP_S register number.  */
+
+  int tls_regnum = 0;		/* Number of the tpidruro register.  */
+
   bool is_m = false;		/* Does the target follow the "M" profile.  */
+  bool have_sec_ext = false;	/* Do we have security extensions?  */
   CORE_ADDR lowest_pc = 0;	/* Lowest address at which instructions
 				   will appear.  */
 
@@ -301,7 +319,7 @@ extern void
 				       const struct regcache *regcache);
 
 /* Get the correct Arm target description with given FP hardware type.  */
-const target_desc *arm_read_description (arm_fp_type fp_type);
+const target_desc *arm_read_description (arm_fp_type fp_type, bool tls);
 
 /* Get the correct Arm M-Profile target description with given hardware
    type.  */

@@ -36,6 +36,8 @@
 #include "mi-parse.h"
 #include "gdbsupport/gdb_optional.h"
 #include "safe-ctype.h"
+#include "inferior.h"
+#include "observable.h"
 
 enum what_to_list { locals, arguments, all };
 
@@ -520,13 +522,13 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
     stb.puts ("@entry");
   uiout->field_stream ("name", stb);
 
-  if (what == all && SYMBOL_IS_ARGUMENT (arg->sym))
+  if (what == all && arg->sym->is_argument ())
     uiout->field_signed ("arg", 1);
 
   if (values == PRINT_SIMPLE_VALUES)
     {
-      check_typedef (arg->sym->type);
-      type_print (arg->sym->type, "", &stb, -1);
+      check_typedef (arg->sym->type ());
+      type_print (arg->sym->type (), "", &stb, -1);
       uiout->field_stream ("type", stb);
     }
 
@@ -599,7 +601,7 @@ list_args_or_locals (const frame_print_options &fp_opts,
 	{
 	  int print_me = 0;
 
-	  switch (SYMBOL_CLASS (sym))
+	  switch (sym->aclass ())
 	    {
 	    default:
 	    case LOC_UNDEF:	/* catches errors        */
@@ -623,9 +625,9 @@ list_args_or_locals (const frame_print_options &fp_opts,
 	      if (what == all)
 		print_me = 1;
 	      else if (what == locals)
-		print_me = !SYMBOL_IS_ARGUMENT (sym);
+		print_me = !sym->is_argument ();
 	      else
-		print_me = SYMBOL_IS_ARGUMENT (sym);
+		print_me = sym->is_argument ();
 	      break;
 	    }
 	  if (print_me)
@@ -633,7 +635,7 @@ list_args_or_locals (const frame_print_options &fp_opts,
 	      struct symbol *sym2;
 	      struct frame_arg arg, entryarg;
 
-	      if (SYMBOL_IS_ARGUMENT (sym))
+	      if (sym->is_argument ())
 		sym2 = lookup_symbol_search_name (sym->search_name (),
 						  block, VAR_DOMAIN).symbol;
 	      else
@@ -648,13 +650,13 @@ list_args_or_locals (const frame_print_options &fp_opts,
 	      switch (values)
 		{
 		case PRINT_SIMPLE_VALUES:
-		  type = check_typedef (sym2->type);
+		  type = check_typedef (sym2->type ());
 		  if (type->code () != TYPE_CODE_ARRAY
 		      && type->code () != TYPE_CODE_STRUCT
 		      && type->code () != TYPE_CODE_UNION)
 		    {
 		case PRINT_ALL_VALUES:
-		  if (SYMBOL_IS_ARGUMENT (sym))
+		  if (sym->is_argument ())
 		    read_frame_arg (fp_opts, sym2, fi, &arg, &entryarg);
 		  else
 		    read_frame_local (sym2, fi, &arg);
@@ -669,10 +671,10 @@ list_args_or_locals (const frame_print_options &fp_opts,
 	    }
 	}
 
-      if (BLOCK_FUNCTION (block))
+      if (block->function ())
 	break;
       else
-	block = BLOCK_SUPERBLOCK (block);
+	block = block->superblock ();
     }
 }
 
@@ -755,8 +757,7 @@ mi_cmd_stack_select_frame (const char *command, char **argv, int argc)
 {
   if (argc == 0 || argc > 1)
     error (_("-stack-select-frame: Usage: FRAME_SPEC"));
-
-  select_frame_for_mi (parse_frame_specification (argv[0]));
+  select_frame (parse_frame_specification (argv[0]));
 }
 
 void

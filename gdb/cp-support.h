@@ -26,7 +26,7 @@
 
 #include "symtab.h"
 #include "gdbsupport/gdb_vecs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/array-view.h"
 #include <vector>
 
@@ -189,5 +189,12 @@ extern struct cmd_list_element *maint_cplus_cmd_list;
 /* A wrapper for bfd_demangle.  */
 
 gdb::unique_xmalloc_ptr<char> gdb_demangle (const char *name, int options);
+
+/* Find an instance of the character C in the string S that is outside
+   of all parenthesis pairs, single-quoted strings, and double-quoted
+   strings.  Also, ignore the char within a template name, like a ','
+   within foo<int, int>.  */
+
+extern const char *find_toplevel_char (const char *s, char c);
 
 #endif /* CP_SUPPORT_H */

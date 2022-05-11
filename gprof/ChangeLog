@@ -1,3 +1,21 @@
+2022-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* po/ru.po: Updated Russian translation.
+
+2022-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/ro.po: Updated Romanian translation.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* po/gprof.pot: Regenerate.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* 2.38 release branch created.
+
 2021-09-27  Nick Alcock  <nick.alcock@oracle.com>
 
 	* configure: Regenerate.

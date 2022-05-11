@@ -314,7 +314,13 @@ extern ctf_next_t *ctf_next_copy (ctf_next_t *);
    archives: so they can be used to open both.  CTF files will appear to be an
    archive with one member named '.ctf'.  The low-level functions
    ctf_simple_open and ctf_bufopen return ctf_dict_t's directly, and cannot
-   be used on CTF archives.  */
+   be used on CTF archives.
+
+   Some of these functions take raw symtab and strtab section content in the
+   form of ctf_sect_t structures.  For CTF in ELF files, these should be
+   extracted from .dynsym and its associated string table (usually .dynsym)
+   whenever the CTF_F_DYNSTR flag is set in the CTF preamble (which it almost
+   always will be for linked objects, but not for .o files).  */
 
 extern ctf_archive_t *ctf_bfdopen (struct bfd *, int *);
 extern ctf_archive_t *ctf_bfdopen_ctfsect (struct bfd *, const ctf_sect_t *,

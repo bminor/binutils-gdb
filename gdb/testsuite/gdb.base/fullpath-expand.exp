@@ -25,13 +25,13 @@ if { [file pathtype $objdir] != "absolute" } {
     return -1
 }
 
-set saved_pwd [pwd]
-cd $srcdir
-set err [gdb_compile "${subdir}/${srcfile} ${subdir}/${srcfile2}" $binfile executable {debug}]
-cd $saved_pwd
-if { $err != "" } {
-    untested "${srcfile} or ${srcfile2} compilation failed"
-    return -1
+with_cwd $srcdir {
+    set err [gdb_compile "${subdir}/${srcfile} ${subdir}/${srcfile2}" $binfile executable {debug}]
+
+    if { $err != "" } {
+	untested "${srcfile} or ${srcfile2} compilation failed"
+	return -1
+    }
 }
 
 set result [catch "exec realpath ${srcdir}/${subdir}/${srcfile2}" realsrcfile2]

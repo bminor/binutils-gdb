@@ -53,12 +53,9 @@ enum ui_out_flag
 {
   ui_source_list = (1 << 0),
   fix_multi_location_breakpoint_output = (1 << 1),
-  /* For CLI output, this flag is set if unfiltered output is desired.
-     This should only be used by low-level formatting functions.  */
-  unfiltered_output = (1 << 2),
   /* This indicates that %pF should be disallowed in a printf format
      string.  */
-  disallow_ui_out_field = (1 << 3)
+  disallow_ui_out_field = (1 << 2)
 };
 
 DEF_ENUM_FLAGS_TYPE (ui_out_flag, ui_out_flags);
@@ -257,7 +254,7 @@ class ui_out
   void vmessage (const ui_file_style &in_style,
 		 const char *format, va_list args) ATTRIBUTE_PRINTF (3, 0);
 
-  void wrap_hint (const char *identstring);
+  void wrap_hint (int indent);
 
   void flush ();
 
@@ -312,6 +309,13 @@ class ui_out
     progress_update (const progress_update &) = delete;
     progress_update &operator= (const progress_update &) = delete;
 
+    /* Emit some progress for this progress meter.  HOWMUCH may range
+       from 0.0 to 1.0.  */
+    void progress (const std::string& msg, double howmuch)
+    {
+      m_uiout->do_progress_notify (msg, howmuch);
+    }
+
   private:
 
     struct ui_out *m_uiout;
@@ -356,7 +360,7 @@ class ui_out
   virtual void do_message (const ui_file_style &style,
 			   const char *format, va_list args)
     ATTRIBUTE_PRINTF (3,0) = 0;
-  virtual void do_wrap_hint (const char *identstring) = 0;
+  virtual void do_wrap_hint (int indent) = 0;
   virtual void do_flush () = 0;
   virtual void do_redirect (struct ui_file *outstream) = 0;
 

@@ -1163,22 +1163,18 @@ static struct riscv_supported_ext riscv_supported_std_ext[] =
   {"q",		ISA_SPEC_CLASS_20191213,	2, 2, 0 },
   {"q",		ISA_SPEC_CLASS_20190608,	2, 2, 0 },
   {"q",		ISA_SPEC_CLASS_2P2,		2, 0, 0 },
-  {"l",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
   {"c",		ISA_SPEC_CLASS_20191213,	2, 0, 0 },
   {"c",		ISA_SPEC_CLASS_20190608,	2, 0, 0 },
   {"c",		ISA_SPEC_CLASS_2P2,		2, 0, 0 },
-  {"b",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
-  {"k",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
-  {"j",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
-  {"t",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
-  {"p",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
   {"v",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
-  {"n",		ISA_SPEC_CLASS_NONE, RISCV_UNKNOWN_VERSION, RISCV_UNKNOWN_VERSION, 0 },
   {NULL, 0, 0, 0, 0}
 };
 
 static struct riscv_supported_ext riscv_supported_std_z_ext[] =
 {
+  {"zicbom",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zicbop",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zicboz",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
   {"zicsr",		ISA_SPEC_CLASS_20190608,	2, 0,  0 },
   {"zifencei",		ISA_SPEC_CLASS_20191213,	2, 0,  0 },
@@ -1341,6 +1337,9 @@ riscv_recognized_prefixed_ext (const char *ext)
   return false;
 }
 
+/* Canonical order for single letter extensions.  */
+static const char riscv_ext_canonical_order[] = "eigmafdqlcbjktpvn";
+
 /* Array is used to compare the orders of standard extensions quickly.  */
 static int riscv_ext_order[26] = {0};
 
@@ -1356,16 +1355,8 @@ riscv_init_ext_order (void)
   /* The orders of all standard extensions are positive.  */
   int order = 1;
 
-  int i = 0;
-  while (riscv_supported_std_ext[i].name != NULL)
-    {
-      const char *ext = riscv_supported_std_ext[i].name;
-      riscv_ext_order[(*ext - 'a')] = order++;
-      i++;
-      while (riscv_supported_std_ext[i].name
-	     && strcmp (ext, riscv_supported_std_ext[i].name) == 0)
-	i++;
-    }
+  for (const char *ext = &riscv_ext_canonical_order[0]; *ext; ++ext)
+    riscv_ext_order[(*ext - 'a')] = order++;
 
   /* Some of the prefixed keyword are not single letter, so we set
      their prefixed orders in the riscv_compare_subsets directly,
@@ -2031,14 +2022,11 @@ riscv_parse_subset (riscv_parse_subset_t *rps,
   if (p == NULL)
     return false;
 
-  /* Parse the different classes of extensions in the specified order.  */
-  while (*p != '\0')
-    {
-      p = riscv_parse_prefixed_ext (rps, arch, p);
+  /* Parse prefixed extensions.  */
+  p = riscv_parse_prefixed_ext (rps, arch, p);
 
-      if (p == NULL)
-        return false;
-    }
+  if (p == NULL)
+    return false;
 
   /* Finally add implicit extensions according to the current
      extensions.  */
@@ -2331,6 +2319,12 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
     {
     case INSN_CLASS_I:
       return riscv_subset_supports (rps, "i");
+    case INSN_CLASS_ZICBOM:
+      return riscv_subset_supports (rps, "zicbom");
+    case INSN_CLASS_ZICBOP:
+      return riscv_subset_supports (rps, "zicbop");
+    case INSN_CLASS_ZICBOZ:
+      return riscv_subset_supports (rps, "zicboz");
     case INSN_CLASS_ZICSR:
       return riscv_subset_supports (rps, "zicsr");
     case INSN_CLASS_ZIFENCEI:
@@ -2412,5 +2406,99 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));
       return false;
+    }
+}
+
+/* Each instuction is belonged to an instruction class INSN_CLASS_*.
+   Call riscv_subset_supports_ext to determine the missing extension.  */
+
+const char *
+riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
+				 enum riscv_insn_class insn_class)
+{
+  switch (insn_class)
+    {
+    case INSN_CLASS_I:
+      return "i";
+    case INSN_CLASS_ZICSR:
+      return "zicsr";
+    case INSN_CLASS_ZIFENCEI:
+      return "zifencei";
+    case INSN_CLASS_ZIHINTPAUSE:
+      return "zihintpause";
+    case INSN_CLASS_M:
+      return "m";
+    case INSN_CLASS_A:
+      return "a";
+    case INSN_CLASS_F:
+      return "f";
+    case INSN_CLASS_D:
+      return "d";
+    case INSN_CLASS_Q:
+      return "q";
+    case INSN_CLASS_C:
+      return "c";
+    case INSN_CLASS_F_AND_C:
+      if (!riscv_subset_supports (rps, "f")
+	  && !riscv_subset_supports (rps, "c"))
+	return "f' and `c";
+      else if (!riscv_subset_supports (rps, "f"))
+	return "f";
+      else
+	return "c";
+    case INSN_CLASS_D_AND_C:
+      if (!riscv_subset_supports (rps, "d")
+	  && !riscv_subset_supports (rps, "c"))
+	return "d' and `c";
+      else if (!riscv_subset_supports (rps, "d"))
+	return "d";
+      else
+	return "c";
+    case INSN_CLASS_F_OR_ZFINX:
+      return "f' or `zfinx";
+    case INSN_CLASS_D_OR_ZDINX:
+      return "d' or `zdinx";
+    case INSN_CLASS_Q_OR_ZQINX:
+      return "q' or `zqinx";
+    case INSN_CLASS_ZBA:
+      return "zba";
+    case INSN_CLASS_ZBB:
+      return "zbb";
+    case INSN_CLASS_ZBC:
+      return "zbc";
+    case INSN_CLASS_ZBS:
+      return "zbs";
+    case INSN_CLASS_ZBKB:
+      return "zbkb";
+    case INSN_CLASS_ZBKC:
+      return "zbkc";
+    case INSN_CLASS_ZBKX:
+      return "zbkx";
+    case INSN_CLASS_ZBB_OR_ZBKB:
+      return "zbb' or `zbkb";
+    case INSN_CLASS_ZBC_OR_ZBKC:
+      return "zbc' or `zbkc";
+    case INSN_CLASS_ZKND:
+      return "zknd";
+    case INSN_CLASS_ZKNE:
+      return "zkne";
+    case INSN_CLASS_ZKNH:
+      return "zknh";
+    case INSN_CLASS_ZKND_OR_ZKNE:
+      return "zknd' or `zkne";
+    case INSN_CLASS_ZKSED:
+      return "zksed";
+    case INSN_CLASS_ZKSH:
+      return "zksh";
+    case INSN_CLASS_V:
+      return "v' or `zve64x' or `zve32x";
+    case INSN_CLASS_ZVEF:
+      return "v' or `zve64d' or `zve64f' or `zve32f";
+    case INSN_CLASS_SVINVAL:
+      return "svinval";
+    default:
+      rps->error_handler
+        (_("internal: unreachable INSN_CLASS_*"));
+      return NULL;
     }
 }

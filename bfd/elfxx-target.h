@@ -379,10 +379,6 @@
 #define ELF_COMMONPAGESIZE ELF_MAXPAGESIZE
 #endif
 
-#ifndef ELF_RELROPAGESIZE
-#define ELF_RELROPAGESIZE ELF_COMMONPAGESIZE
-#endif
-
 #ifndef ELF_MINPAGESIZE
 #define ELF_MINPAGESIZE ELF_COMMONPAGESIZE
 #endif
@@ -390,14 +386,8 @@
 #if ELF_COMMONPAGESIZE > ELF_MAXPAGESIZE
 # error ELF_COMMONPAGESIZE > ELF_MAXPAGESIZE
 #endif
-#if ELF_RELROPAGESIZE > ELF_MAXPAGESIZE
-# error ELF_RELROPAGESIZE > ELF_MAXPAGESIZE
-#endif
 #if ELF_MINPAGESIZE > ELF_COMMONPAGESIZE
 # error ELF_MINPAGESIZE > ELF_COMMONPAGESIZE
-#endif
-#if ELF_MINPAGESIZE > ELF_RELROPAGESIZE
-# error ELF_MINPAGESIZE > ELF_RELROPAGESIZE
 #endif
 
 #ifndef ELF_P_ALIGN
@@ -477,6 +467,12 @@
 #endif
 #ifndef elf_backend_check_relocs
 #define elf_backend_check_relocs	0
+#endif
+#ifndef elf_backend_size_relative_relocs
+#define elf_backend_size_relative_relocs 0
+#endif
+#ifndef elf_backend_finish_relative_relocs
+#define elf_backend_finish_relative_relocs 0
 #endif
 #ifndef elf_backend_check_directives
 #define elf_backend_check_directives	0
@@ -816,7 +812,6 @@ static const struct elf_backend_data elfNN_bed =
   ELF_MAXPAGESIZE,		/* maxpagesize */
   ELF_MINPAGESIZE,		/* minpagesize */
   ELF_COMMONPAGESIZE,		/* commonpagesize */
-  ELF_RELROPAGESIZE,		/* commonpagesize to use with -z relro */
   ELF_P_ALIGN,			/* p_align */
   ELF_DYNAMIC_SEC_FLAGS,	/* dynamic_sec_flags */
   elf_backend_arch_data,
@@ -842,6 +837,8 @@ static const struct elf_backend_data elfNN_bed =
   elf_backend_omit_section_dynsym,
   elf_backend_relocs_compatible,
   elf_backend_check_relocs,
+  elf_backend_size_relative_relocs,
+  elf_backend_finish_relative_relocs,
   elf_backend_check_directives,
   elf_backend_notice_as_needed,
   elf_backend_adjust_dynamic_symbol,

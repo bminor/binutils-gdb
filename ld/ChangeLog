@@ -1,3 +1,112 @@
+2022-05-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 29101
+	* libdep_plugin.c (get_libdeps): Check for overflow when computing
+	amount of memory to allocate.
+
+2022-04-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 29006
+	* pe-dll.c (make_head): Use asprintf to allocate and populate a
+	buffer containing the temporary name.
+	(make_tail, make_one, make_singleton_name_thunk): Likewise.
+	(make_import_fixup_mark, make_import_fixup_entry): Likewise.
+	(make_runtime_pseudo_reloc): Likewise.
+	(pe_create_runtime_relocator_reference): Likewise.
+
+2022-04-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 29072
+	* testsuite/ld-elf/pr29072.b.warn: Update to include the note
+	about the linker's behaviour being depreccated.
+
+2022-04-20  Clément Chigot  <clement.chigot@atos.net>
+
+	* emultempl/aix.em (params): New variable.
+	(stub_file): New variable.
+	(xcoff_add_stub_section): New function.
+	(xcoff_layout_sections_again): New function
+	(hook_in_stub): New function.
+	(_after_allocation): Add stub creation.
+	(_create_output_section_statements): Allocate stub file and
+	pass params to backend.
+
+2022-04-20  Clément Chigot  <clement.chigot@atos.net>
+
+	* emultempl/aix.em (_after_allocation): New function.
+
+2022-04-07  Mark Harmstone  <mark@harmstone.com>
+
+	* testsuite/ld-pe/secidx1.s: New test source file.
+	* testsuite/ld-pe/secidx2.s: New test source file.
+	* testsuite/ld-pe/secidx.d: New test driver file.
+	* testsuite/ld-pe/secidx_64.d: New test driver file.
+	* testsuite/ld-pe/pe.exp: Add new tests.
+
+2022-03-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 21964
+	* testsuite/ld-elf/pr21964-1a.c: Fix array comparisons.
+	* testsuite/ld-elf/pr21964-1b.c: Likewise.
+	* testsuite/ld-elf/pr21964-1c.c: Likewise.
+	* testsuite/ld-elf/pr21964-2a.c: Likewise.
+	* testsuite/ld-elf/pr21964-2b.c: Likewise.
+	* testsuite/ld-elf/pr21964-3a.c: Likewise.
+
+2022-02-17  Roland McGrath  <mcgrathr@google.com>
+
+	* ld.texi (Output Section Type): Fix typo in @code syntax.
+
+2022-02-17  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
+2022-02-16  Fangrui Song  <maskray@google.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR ld/28841
+	* ld.texi: Document new output section type.
+	* ldlex.l: Add new token TYPE.
+	* ldgram.y: Handle TYPE=exp and READONLY (TYPE=exp).
+	* ldlang.h: Add type_section to list of section types.
+	* ldlang.c (lang_add_section): Handle type_section.
+	(map_input_to_output_sections): Handle type_section.
+	* testsuite/ld-scripts/output-section-types.t: Add tests.
+	* testsuite/ld-scripts/output-section-types.d: Update.
+
+2022-02-02  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+
+2022-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated Bulgarian translation.
+	* po/uk.po: Updated Ukranian translation.
+
+2022-01-22  Alexander von Gluck IV  <kallisti5@unixzen.com>
+
+	* configure.tgt (arm-haiku): Fix typo.
+	* emulparams/armelf_haiku.su (MAXPAGESIZE): Use the default value.
+	(COMMONPAGESIZE): Likewise.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+	* po/ld.pot: Regenerate.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* 2.38 release branch created.
+
+2022-01-21  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
+2022-01-17  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* po/ld.pot: Regenerate.
+
 2022-01-11  Martin Storsjö  <martin@martin.st>
 
 	* pe-dll.c (make_head): Prefix the symbol name with the dll name.

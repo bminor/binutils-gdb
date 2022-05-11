@@ -1854,7 +1854,7 @@ info: info-recursive
 
 info-am: $(INFO_DEPS) info-local
 
-install-data-am: install-data-local install-info-am install-man
+install-data-am: install-info-am install-man
 
 install-dvi: install-dvi-recursive
 
@@ -2008,10 +2008,10 @@ uninstall-man: uninstall-man1
 	distclean-DEJAGNU distclean-compile distclean-generic \
 	distclean-hdr distclean-libtool distclean-tags dvi dvi-am html \
 	html-am html-local info info-am info-local install install-am \
-	install-data install-data-am install-data-local install-dvi \
-	install-dvi-am install-exec install-exec-am install-exec-local \
-	install-html install-html-am install-info install-info-am \
-	install-man install-man1 install-pdf install-pdf-am install-ps \
+	install-data install-data-am install-dvi install-dvi-am \
+	install-exec install-exec-am install-exec-local install-html \
+	install-html-am install-info install-info-am install-man \
+	install-man1 install-pdf install-pdf-am install-ps \
 	install-ps-am install-strip installcheck installcheck-am \
 	installdirs installdirs-am maintainer-clean \
 	maintainer-clean-aminfo maintainer-clean-generic mostlyclean \
@@ -2210,10 +2210,6 @@ doc/asconfig.texi: doc/$(CONFIG).texi doc/$(am__dirstamp)
 	$(AM_V_at)rm -f doc/asconfig.texi
 	$(AM_V_GEN)cp $(srcdir)/doc/$(CONFIG).texi doc/asconfig.texi
 	$(AM_V_at)chmod u+w doc/asconfig.texi
-
-# We want install to imply install-info as per GNU standards, despite the
-# cygnus option.
-install-data-local: install-info
 
 # Maintenance
 

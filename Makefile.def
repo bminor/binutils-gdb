@@ -75,6 +75,7 @@ host_modules= { module= libelf; lib_path=.libs; bootstrap=true;
 		no_install= true; };
 host_modules= { module= gold; bootstrap=true; };
 host_modules= { module= gprof; };
+host_modules= { module= gprofng; };
 host_modules= { module= intl; bootstrap=true; };
 host_modules= { module= tcl;
                 missing=mostlyclean; };
@@ -508,6 +509,16 @@ dependencies = { module=all-gprof; on=all-bfd; };
 dependencies = { module=all-gprof; on=all-opcodes; };
 dependencies = { module=all-gprof; on=all-intl; };
 dependencies = { module=all-gprof; on=all-gas; };
+
+dependencies = { module=configure-gprofng; on=configure-intl; };
+dependencies = { module=all-gprofng; on=all-libiberty; };
+dependencies = { module=all-gprofng; on=all-bfd; };
+dependencies = { module=all-gprofng; on=all-opcodes; };
+dependencies = { module=all-gprofng; on=all-intl; };
+dependencies = { module=all-gprofng; on=all-gas; };
+dependencies = { module=install-gprofng; on=install-opcodes; };
+dependencies = { module=install-gprofng; on=install-bfd; };
+
 dependencies = { module=configure-ld; on=configure-intl; };
 dependencies = { module=all-ld; on=all-libiberty; };
 dependencies = { module=all-ld; on=all-bfd; };
@@ -570,7 +581,7 @@ dependencies = { module=all-sim; on=all-intl; };
 dependencies = { module=all-sim; on=all-libiberty; };
 dependencies = { module=all-sim; on=all-bfd; };
 dependencies = { module=all-sim; on=all-opcodes; };
-dependencies = { module=all-sim; on=all-readline; };
+dependencies = { module=configure-sim; on=all-readline; };
 
 // Other host modules.
 dependencies = { module=all-fastjar; on=all-zlib; };

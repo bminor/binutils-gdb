@@ -815,10 +815,10 @@ s390_linux_syscall_record (struct regcache *regcache, LONGEST syscall_native)
 
   if (syscall_gdb < 0)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record and replay target doesn't "
-			    "support syscall number %s\n"),
-			  plongest (syscall_native));
+      gdb_printf (gdb_stderr,
+		  _("Process record and replay target doesn't "
+		    "support syscall number %s\n"),
+		  plongest (syscall_native));
       return -1;
     }
 

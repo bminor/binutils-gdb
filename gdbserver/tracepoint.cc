@@ -77,27 +77,20 @@ trace_vdebug (const char *fmt, ...)
   va_end (ap);
 }
 
-#define trace_debug_1(level, fmt, args...)	\
+#define trace_debug(fmt, args...)	\
   do {						\
-    if (level <= debug_threads)		\
+    if (debug_threads)				\
       trace_vdebug ((fmt), ##args);		\
   } while (0)
 
 #else
 
-#define trace_debug_1(level, fmt, args...)	\
+#define trace_debug(fmt, args...)	\
   do {						\
-    if (level <= debug_threads)			\
-      {						\
-	debug_printf ((fmt), ##args);		\
-	debug_printf ("\n");			\
-      }						\
+      threads_debug_printf ((fmt), ##args);	\
   } while (0)
 
 #endif
-
-#define trace_debug(FMT, args...)		\
-  trace_debug_1 (1, FMT, ##args)
 
 /* Prefix exported symbols, for good citizenship.  All the symbols
    that need exporting are defined in this module.  Note that all
@@ -327,8 +320,7 @@ tracepoint_look_up_symbols (void)
 
       if (look_up_one_symbol (symbol_list[i].name, addrp, 1) == 0)
 	{
-	  if (debug_threads)
-	    debug_printf ("symbol `%s' not found\n", symbol_list[i].name);
+	  threads_debug_printf ("symbol `%s' not found", symbol_list[i].name);
 	  return;
 	}
     }
@@ -2792,21 +2784,10 @@ cmd_qtenable_disable (char *own_buf, int enable)
 
       if (tp->type == fast_tracepoint || tp->type == static_tracepoint)
 	{
-	  int ret;
 	  int offset = offsetof (struct tracepoint, enabled);
 	  CORE_ADDR obj_addr = tp->obj_addr_on_target + offset;
 
-	  ret = prepare_to_access_memory ();
-	  if (ret)
-	    {
-	      trace_debug ("Failed to temporarily stop inferior threads");
-	      write_enn (own_buf);
-	      return;
-	    }
-
-	  ret = write_inferior_int8 (obj_addr, enable);
-	  done_accessing_memory ();
-	  
+	  int ret = write_inferior_int8 (obj_addr, enable);
 	  if (ret)
 	    {
 	      trace_debug ("Cannot write enabled flag into "
@@ -4522,15 +4503,14 @@ handle_tracepoint_bkpts (struct thread_info *tinfo, CORE_ADDR stop_pc)
 		   ipa_expr_eval_result,
 		   paddress (ipa_error_tracepoint));
 
-      if (debug_threads)
-	{
-	  if (ipa_trace_buffer_is_full)
-	    trace_debug ("lib stopped due to full buffer.");
-	  if (ipa_stopping_tracepoint)
-	    trace_debug ("lib stopped due to tpoint");
-	  if (ipa_error_tracepoint)
-	    trace_debug ("lib stopped due to error");
-	}
+      if (ipa_trace_buffer_is_full)
+	trace_debug ("lib stopped due to full buffer.");
+
+      if (ipa_stopping_tracepoint)
+	trace_debug ("lib stopped due to tpoint");
+
+      if (ipa_error_tracepoint)
+	trace_debug ("lib stopped due to error");
 
       if (ipa_stopping_tracepoint != 0)
 	{

@@ -51,7 +51,7 @@ run_ld_link_tests [list \
 run_ld_link_exec_tests [list \
     [list \
 	"Run PR ld/23428 test" \
-	"--no-dynamic-linker -z separate-code" \
+	"--no-dynamic-linker -z separate-code -z noexecstack" \
 	"" \
 	{ linux-x86.S pr23428.c dummy.s } \
 	"pr23428" \
@@ -76,7 +76,7 @@ run_ld_link_tests [list \
 run_cc_link_tests [list \
     [list \
 	"Build indirect-extern-access-1.so" \
-	"-shared" \
+	"-shared -z noexecstack" \
 	"-fPIC" \
 	{ indirect-extern-access-1a.c } \
 	{} \
@@ -84,7 +84,7 @@ run_cc_link_tests [list \
     ] \
     [list \
 	"Build indirect-extern-access-1a without PIE" \
-	"$NOPIE_LDFLAGS -Wl,--no-as-needed  \
+	"$NOPIE_LDFLAGS -Wl,--no-as-needed -z noexecstack \
 	 tmpdir/indirect-extern-access-1.so" \
 	"$NOPIE_CFLAGS" \
 	{ indirect-extern-access.S indirect-extern-access-1b.c } \
@@ -101,7 +101,7 @@ run_cc_link_tests [list \
     ] \
     [list \
 	"Build indirect-extern-access-2a without PIE" \
-	"$NOPIE_LDFLAGS -Wl,--no-as-needed  \
+	"$NOPIE_LDFLAGS -Wl,--no-as-needed -z noexecstack \
 	 tmpdir/indirect-extern-access-2.so" \
 	"$NOPIE_CFLAGS" \
 	{ indirect-extern-access.S indirect-extern-access-1b.c } \
@@ -110,7 +110,7 @@ run_cc_link_tests [list \
     ] \
     [list \
 	"Build indirect-extern-access-2b with PIE" \
-	"-pie -Wl,--no-as-needed  \
+	"-pie -Wl,--no-as-needed -z noexecstack \
 	 tmpdir/indirect-extern-access-2.so" \
 	"-fpie" \
 	{ indirect-extern-access.S indirect-extern-access-2b.c } \
@@ -139,7 +139,7 @@ run_cc_link_tests [list \
 run_ld_link_exec_tests [list \
     [list \
 	"Run indirect-extern-access-1a without PIE" \
-	"$NOPIE_LDFLAGS" \
+	"$NOPIE_LDFLAGS -z noexecstack" \
 	"" \
 	{ indirect-extern-access.S indirect-extern-access-1b.c } \
 	"indirect-extern-access-1a" \
@@ -151,7 +151,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run indirect-extern-access-1b with PIE" \
-	"-pie" \
+	"-pie -z noexecstack" \
 	"" \
 	{ indirect-extern-access.S indirect-extern-access-1b.c } \
 	"indirect-extern-access-1b" \
@@ -163,7 +163,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run indirect-extern-access-2a without PIE" \
-	"$NOPIE_LDFLAGS" \
+	"$NOPIE_LDFLAGS -z noexecstack" \
 	"" \
 	{ indirect-extern-access.S indirect-extern-access-2b.c } \
 	"indirect-extern-access-2a" \
@@ -175,7 +175,7 @@ run_ld_link_exec_tests [list \
     ] \
     [list \
 	"Run indirect-extern-access-2b with PIE" \
-	"-pie" \
+	"-pie -z noexecstack" \
 	"" \
 	{ indirect-extern-access.S indirect-extern-access-2b.c } \
 	"indirect-extern-access-2b" \
@@ -292,7 +292,7 @@ proc check_pr25749a {testname srcfilea srcfileb cflags ldflags lderror} {
 	run_cc_link_tests [list \
 	    [list \
 		"Build $testname ($ldflags $cflags)" \
-		"$ldflags tmpdir/pr25749-bin.o" \
+		"$ldflags tmpdir/pr25749-bin.o -z noexecstack" \
 		"$cflags -I../bfd" \
 		[list $srcfilea $srcfileb]\
 		{{readelf {-Wr} pr25749.rd}}  \
@@ -302,7 +302,7 @@ proc check_pr25749a {testname srcfilea srcfileb cflags ldflags lderror} {
 	run_ld_link_exec_tests [list \
 	    [list \
 		"Run ${testname}a ($ldflags $cflags)" \
-		"$ldflags tmpdir/pr25749-bin.o" \
+		"$ldflags tmpdir/pr25749-bin.o -z noexecstack" \
 		"" \
 		[list $srcfilea $srcfileb]\
 		"${testname}a" \
@@ -314,7 +314,7 @@ proc check_pr25749a {testname srcfilea srcfileb cflags ldflags lderror} {
 	run_cc_link_tests [list \
 	    [list \
 		"Build $testname ($ldflags $cflags)" \
-		"$ldflags tmpdir/pr25749-bin.o" \
+		"$ldflags tmpdir/pr25749-bin.o -z noexecstack" \
 		"$cflags -I../bfd" \
 		[list $srcfilea $srcfileb]\
 		[list [list error_output $lderror]] \
@@ -395,7 +395,7 @@ proc check_pr25749b {testname srcfilea srcfileb cflags ldflags dsoldflags args} 
     run_cc_link_tests [list \
 	[list \
 	    "Build lib${testname}.so ($dsoldflags)" \
-	    "-shared $dsoldflags tmpdir/pr25749-bin.o" \
+	    "-shared $dsoldflags tmpdir/pr25749-bin.o -z noexecstack" \
 	    "-fPIC -I../bfd" \
 	    [list $srcfileb] \
 	    {{readelf {-Wr} pr25749.rd}}  \
@@ -411,7 +411,7 @@ proc check_pr25749b {testname srcfilea srcfileb cflags ldflags dsoldflags args} 
     run_ld_link_exec_tests [list \
 	[list \
 	    "Run ${testname}b ($ldflags $cflags)" \
-	    "$ldflags -Wl,--no-as-needed tmpdir/lib${testname}.so" \
+	    "$ldflags -Wl,--no-as-needed tmpdir/lib${testname}.so -z noexecstack" \
 	    "" \
 	    [list $srcfilea]\
 	    "${testname}b" \

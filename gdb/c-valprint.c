@@ -158,7 +158,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 					 demangle);
   else if (options->addressprint)
     {
-      fputs_filtered (paddress (gdbarch, address), stream);
+      gdb_puts (paddress (gdbarch, address), stream);
       want_space = 1;
     }
 
@@ -169,7 +169,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
       && address != 0)
     {
       if (want_space)
-	fputs_filtered (" ", stream);
+	gdb_puts (" ", stream);
       val_print_string (unresolved_elttype, NULL, address, -1, stream, options);
     }
   else if (cp_is_vtbl_member (type))
@@ -182,13 +182,13 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
       /* If 'symbol_print' is set, we did the work above.  */
       if (!options->symbol_print
 	  && (msymbol.minsym != NULL)
-	  && (vt_address == BMSYMBOL_VALUE_ADDRESS (msymbol)))
+	  && (vt_address == msymbol.value_address ()))
 	{
 	  if (want_space)
-	    fputs_filtered (" ", stream);
-	  fputs_filtered (" <", stream);
-	  fputs_filtered (msymbol.minsym->print_name (), stream);
-	  fputs_filtered (">", stream);
+	    gdb_puts (" ", stream);
+	  gdb_puts (" <", stream);
+	  gdb_puts (msymbol.minsym->print_name (), stream);
+	  gdb_puts (">", stream);
 	  want_space = 1;
 	}
 
@@ -199,7 +199,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 	  struct type *wtype;
 
 	  if (want_space)
-	    fputs_filtered (" ", stream);
+	    gdb_puts (" ", stream);
 
 	  if (msymbol.minsym != NULL)
 	    {
@@ -210,7 +210,7 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 
 	  if (wsym)
 	    {
-	      wtype = SYMBOL_TYPE (wsym);
+	      wtype = wsym->type ();
 	    }
 	  else
 	    {
@@ -221,8 +221,8 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
 			    current_language);
 	  if (options->prettyformat)
 	    {
-	      fprintf_filtered (stream, "\n");
-	      print_spaces_filtered (2 + 2 * recurse, stream);
+	      gdb_printf (stream, "\n");
+	      print_spaces (2 + 2 * recurse, stream);
 	    }
 	}
     }
@@ -277,7 +277,7 @@ c_value_print_array (struct value *val,
 		   ++temp_len)
 		;
 
-	      /* Force LA_PRINT_STRING to print ellipses if
+	      /* Force printstr to print ellipses if
 		 we've printed the maximum characters and
 		 the next character is not \000.  */
 	      if (temp_len == options->print_max && temp_len < len)
@@ -292,24 +292,24 @@ c_value_print_array (struct value *val,
 	      len = temp_len;
 	    }
 
-	  LA_PRINT_STRING (stream, unresolved_elttype, valaddr, len,
-			   NULL, force_ellipses, options);
+	  current_language->printstr (stream, unresolved_elttype, valaddr, len,
+				      NULL, force_ellipses, options);
 	}
       else
 	{
 	  unsigned int i = 0;
-	  fprintf_filtered (stream, "{");
+	  gdb_printf (stream, "{");
 	  /* If this is a virtual function table, print the 0th
 	     entry specially, and the rest of the members
 	     normally.  */
 	  if (cp_is_vtbl_ptr_type (elttype))
 	    {
 	      i = 1;
-	      fprintf_filtered (stream, _("%d vtable entries"),
-				len - 1);
+	      gdb_printf (stream, _("%d vtable entries"),
+			  len - 1);
 	    }
 	  value_print_array_elements (val, stream, recurse, options, i);
-	  fprintf_filtered (stream, "}");
+	  gdb_printf (stream, "}");
 	}
     }
   else
@@ -365,7 +365,7 @@ c_value_print_struct (struct value *val, struct ui_file *stream, int recurse,
   struct type *type = check_typedef (value_type (val));
 
   if (type->code () == TYPE_CODE_UNION && recurse && !options->unionprint)
-    fprintf_filtered (stream, "{...}");
+    gdb_printf (stream, "{...}");
   else if (options->vtblprint && cp_is_vtbl_ptr_type (type))
     {
       /* Print the unmangled name if desired.  */
@@ -408,8 +408,9 @@ c_value_print_int (struct value *val, struct ui_file *stream,
       const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       if (c_textual_element_type (type, options->format))
 	{
-	  fputs_filtered (" ", stream);
-	  LA_PRINT_CHAR (unpack_long (type, valaddr), type, stream);
+	  gdb_puts (" ", stream);
+	  current_language->printchar (unpack_long (type, valaddr), type,
+				       stream);
 	}
     }
 }
@@ -516,7 +517,7 @@ c_value_print (struct value *val, struct ui_file *stream,
 	    }
 
 	  /* Pointer to class, check real type of object.  */
-	  fprintf_filtered (stream, "(");
+	  gdb_printf (stream, "(");
 
 	  if (value_entirely_available (val))
 	    {
@@ -541,19 +542,19 @@ c_value_print (struct value *val, struct ui_file *stream,
 
 	  type = value_type (val);
 	  type_print (type, "", stream, -1);
-	  fprintf_filtered (stream, ") ");
+	  gdb_printf (stream, ") ");
 	}
       else
 	{
 	  /* normal case */
-	  fprintf_filtered (stream, "(");
+	  gdb_printf (stream, "(");
 	  type_print (value_type (val), "", stream, -1);
-	  fprintf_filtered (stream, ") ");
+	  gdb_printf (stream, ") ");
 	}
     }
 
   if (!value_initialized (val))
-    fprintf_filtered (stream, " [uninitialized] ");
+    gdb_printf (stream, " [uninitialized] ");
 
   if (options->objectprint && (type->code () == TYPE_CODE_STRUCT))
     {
@@ -571,15 +572,15 @@ c_value_print (struct value *val, struct ui_file *stream,
 		&& (TYPE_LENGTH (real_type)
 		    < TYPE_LENGTH (value_enclosing_type (val)))))
 	    val = value_cast (real_type, val);
-	  fprintf_filtered (stream, "(%s%s) ",
-			    real_type->name (),
-			    full ? "" : _(" [incomplete object]"));
+	  gdb_printf (stream, "(%s%s) ",
+		      real_type->name (),
+		      full ? "" : _(" [incomplete object]"));
 	}
       else if (type != check_typedef (value_enclosing_type (val)))
 	{
 	  /* No RTTI information, so let's do our best.  */
-	  fprintf_filtered (stream, "(%s ?) ",
-			    value_enclosing_type (val)->name ());
+	  gdb_printf (stream, "(%s ?) ",
+		      value_enclosing_type (val)->name ());
 	  val = value_cast (value_enclosing_type (val), val);
 	}
     }

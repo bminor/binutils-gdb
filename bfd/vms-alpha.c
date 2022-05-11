@@ -4352,9 +4352,13 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 
   /* Initialize tables with zero element.  */
   curr_srec = (struct srecinfo *) bfd_zalloc (abfd, sizeof (struct srecinfo));
+  if (!curr_srec)
+    return false;
   module->srec_table = curr_srec;
 
   curr_line = (struct lineinfo *) bfd_zalloc (abfd, sizeof (struct lineinfo));
+  if (!curr_line)
+    return false;
   module->line_table = curr_line;
 
   while (length == -1 || ptr < maxptr)
@@ -4389,6 +4393,8 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 	case DST__K_RTNBEG:
 	  funcinfo = (struct funcinfo *)
 	    bfd_zalloc (abfd, sizeof (struct funcinfo));
+	  if (!funcinfo)
+	    return false;
 	  funcinfo->name
 	    = _bfd_vms_save_counted_string (abfd, ptr + DST_S_B_RTNBEG_NAME,
 					    maxptr - (ptr + DST_S_B_RTNBEG_NAME));
@@ -4401,6 +4407,8 @@ parse_module (bfd *abfd, struct module *module, unsigned char *ptr,
 	  break;
 
 	case DST__K_RTNEND:
+	  if (!module->func_table)
+	    return false;
 	  module->func_table->high = module->func_table->low
 	    + bfd_getl32 (ptr + DST_S_L_RTNEND_SIZE) - 1;
 
@@ -5939,9 +5947,9 @@ evax_bfd_print_emh (FILE *file, unsigned char *rec, unsigned int rec_len)
     case EMH__C_MHD:
       {
 	struct vms_emh_mhd *mhd = (struct vms_emh_mhd *) rec;
-	const char * name;
-	const char * nextname;
-	const char * maxname;
+	unsigned char *name;
+	unsigned char *nextname;
+	unsigned char *maxname;
 
 	/* PR 21840: Check for invalid lengths.  */
 	if (rec_len < sizeof (* mhd))
@@ -5953,8 +5961,8 @@ evax_bfd_print_emh (FILE *file, unsigned char *rec, unsigned int rec_len)
 	fprintf (file, _("   structure level: %u\n"), mhd->strlvl);
 	fprintf (file, _("   max record size: %u\n"),
 		 (unsigned) bfd_getl32 (mhd->recsiz));
-	name = (char *)(mhd + 1);
-	maxname = (char *) rec + rec_len;
+	name = (unsigned char *) (mhd + 1);
+	maxname = (unsigned char *) rec + rec_len;
 	if (name > maxname - 2)
 	  {
 	    fprintf (file, _("   Error: The module name is missing\n"));
@@ -7390,12 +7398,14 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	  fprintf (file, _("standard data: %s\n"),
 		   evax_bfd_get_dsc_name (type));
 	  evax_bfd_print_valspec (buf, len, 4, file);
-	  fprintf (file, _("    name: %.*s\n"), buf[5], buf + 6);
+	  if (len > 6)
+	    fprintf (file, _("    name: %.*s\n"),
+		     buf[5] > len - 6 ? len - 6 : buf[5], buf + 6);
 	  break;
 	case DST__K_MODBEG:
 	  {
 	    struct vms_dst_modbeg *dst = (void *)buf;
-	    const char *name = (const char *)buf + sizeof (*dst);
+	    unsigned char *name = buf + sizeof (*dst);
 
 	    fprintf (file, _("modbeg\n"));
 	    if (len < sizeof (*dst))
@@ -7419,7 +7429,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 		    name += name[0] + 1;
 		    nlen = len - 1;
 		    fprintf (file, _("   compiler   : %.*s\n"),
-			     name[0] > nlen ? nlen: name[0], name + 1);
+			     name[0] > nlen ? nlen : name[0], name + 1);
 		  }
 	      }
 	  }
@@ -7430,7 +7440,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	case DST__K_RTNBEG:
 	  {
 	    struct vms_dst_rtnbeg *dst = (void *)buf;
-	    const char *name = (const char *)buf + sizeof (*dst);
+	    unsigned char *name = buf + sizeof (*dst);
 
 	    fputs (_("rtnbeg\n"), file);
 	    if (len >= sizeof (*dst))
@@ -7483,7 +7493,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	case DST__K_BLKBEG:
 	  {
 	    struct vms_dst_blkbeg *dst = (void *)buf;
-	    const char *name = (const char *)buf + sizeof (*dst);
+	    unsigned char *name = buf + sizeof (*dst);
 
 	    if (len > sizeof (*dst))
 	      {
@@ -7534,7 +7544,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 	case DST__K_RECBEG:
 	  {
 	    struct vms_dst_recbeg *recbeg = (void *)buf;
-	    const char *name = (const char *)buf + sizeof (*recbeg);
+	    unsigned char *name = buf + sizeof (*recbeg);
 
 	    if (len > sizeof (*recbeg))
 	      {
@@ -7748,7 +7758,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 		  case DST__K_SRC_DECLFILE:
 		    {
 		      struct vms_dst_src_decl_src *src = (void *) buf;
-		      const char *name;
+		      unsigned char *name;
 		      int nlen;
 
 		      if (len < sizeof (*src))
@@ -7770,7 +7780,7 @@ evax_bfd_print_dst (struct bfd *abfd, unsigned int dst_size, FILE *file)
 		      if (src->length > len || src->length <= sizeof (*src))
 			break;
 		      nlen = src->length - sizeof (*src) - 1;
-		      name = (const char *) buf + sizeof (*src);
+		      name = buf + sizeof (*src);
 		      fprintf (file, _("   filename   : %.*s\n"),
 			       name[0] > nlen ? nlen : name[0], name + 1);
 		      if (name[0] >= nlen)

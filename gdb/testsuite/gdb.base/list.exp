@@ -251,36 +251,28 @@ proc test_list_filename_and_function {} {
     global gdb_prompt
     global last_line_re
 
-    set testcnt 0
-
     # gcc appears to generate incorrect debugging information for code
     # in include files, which breaks this test.
     # SunPRO cc is the second case below, it's also correct.
-    send_gdb "list list0.c:main\n"
-    gdb_expect {
-	-re "1\[ \t\]+#include .*10\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$gdb_prompt $" {
-	    incr testcnt
+    gdb_test_multiple "list list0.c:main" "" {
+	-re -wrap "1\[ \t\]+#include .*10\[ \t\]+foo \[(\]+.*\[)\]+;" {
+	    pass $gdb_test_name
 	}
-	-re "5\[ \t\]+int x;.*14\[ \t\]+foo \[(\]+.*\[)\]+;\r\n$gdb_prompt $" {
-	    pass "list function in source file 1"
+	-re -wrap "5\[ \t\]+int x;.*14\[ \t\]+foo \[(\]+.*\[)\]+;" {
+	    pass $gdb_test_name
 	}
-	-re ".*$gdb_prompt $" { fail "list list0.c:main" }
-	timeout { fail "list list0.c:main (timeout)" }
     }
 
     # Not sure what the point of having this function be unused is.
     # AIX is legitimately removing it.
     setup_xfail "rs6000-*-aix*"
-    send_gdb "list list0.c:unused\n"
-    gdb_expect {
-	-re "40\[ \t\]+unused.*${last_line_re}\r\n$gdb_prompt $" {
-	    incr testcnt
+    gdb_test_multiple "list list0.c:unused" "" {
+	-re -wrap "40\[ \t\]+unused.*${last_line_re}" {
+	    pass $gdb_test_name
 	}
-	-re "37.*42\[ \t\]+\}\r\n$gdb_prompt $" {
-	    incr testcnt
+	-re -wrap "37.*42\[ \t\]+\}" {
+	    pass $gdb_test_name
 	}
-	-re ".*$gdb_prompt $" { fail "list list0.c:unused" }
-	timeout { fail "list list0.c:unused (timeout)" }
     }
     clear_xfail "rs6000-*-aix*"
 
@@ -290,57 +282,46 @@ proc test_list_filename_and_function {} {
     # SunPRO cc is the third case.
     setup_xfail "rs6000-*-*" 1804
     setup_xfail_format "COFF"
-    send_gdb "list list0.h:foo\n"
-    gdb_expect {
-	-re "2\[ \t\]+including file.  This.*11\[ \t\]+bar \[(\]+.*\[)\]+;\r\n$gdb_prompt $" {
-	    incr testcnt
+    gdb_test_multiple "list list0.h:foo" "" {
+	-re -wrap "2\[ \t\]+including file.  This.*11\[ \t\]+bar \[(\]+.*\[)\]+;" {
+	    pass $gdb_test_name
 	}
-	-re "1\[ \t\]+/. An include file.*10\[ \t\]+bar \[(\]+.*\[)\]+;\r\n$gdb_prompt $" {
-	    incr testcnt
+	-re -wrap "1\[ \t\]+/. An include file.*10\[ \t\]+bar \[(\]+.*\[)\]+;" {
+	    pass $gdb_test_name
 	}
-	-re "3\[ \t\]+.*12\[ \t\]+bar \[(\]+.*\[)\]+;\r\n$gdb_prompt $" {
-	    incr testcnt
+	-re -wrap "3\[ \t\]+.*12\[ \t\]+bar \[(\]+.*\[)\]+;" {
+	    pass $gdb_test_name
 	}
-	-re "No source file named list0.h.\r\n$gdb_prompt $" {
-	    fail "list list0.h:foo"
+	-re -wrap "No source file named list0.h." {
+	    fail $gdb_test_name
 	}
-	-re ".*$gdb_prompt $" { fail "list list0.h:foo" }
-	timeout { fail "list list0.h:foo (timeout)" }
     }
 
     # Ultrix gdb is the second case.
-    send_gdb "list list1.c:bar\n"
-    gdb_expect {
-	-re "4\[ \t\]+void.*13\[ \t\]+\}\r\n$gdb_prompt $" {
-	    incr testcnt
+    gdb_test_multiple "list list1.c:bar" "" {
+	-re -wrap "4\[ \t\]+void.*13\[ \t\]+\}" {
+	    pass $gdb_test_name
 	}
-	-re "4\[ \t\]+void.*12\[ \t\]*long_line ..;\r\n$gdb_prompt $" {
-	    incr testcnt
+	-re -wrap "4\[ \t\]+void.*12\[ \t\]*long_line ..;" {
+	    pass $gdb_test_name
 	}
-	-re "4\[ \t\]+void.*11\[ \t\]*\r\n$gdb_prompt $" {
-	    incr testcnt
+	-re -wrap "4\[ \t\]+void.*11\[ \t\]*" {
+	    pass $gdb_test_name
 	}
-	-re ".*$gdb_prompt $" { fail "list list1.c:bar" }
-	timeout { fail "list list1.c:bar (timeout)" }
     }
 
     # Not sure what the point of having this function be unused is.
     # AIX is legitimately removing it.
     setup_xfail "rs6000-*-aix*"
-    send_gdb "list list1.c:unused\n"
-    gdb_expect {
-	-re "12\[ \t\]+long_line \[(\]\[)\];.*13\[ \t\]+\}\r\n.*$gdb_prompt $" {
-	    incr testcnt
+    gdb_test_multiple "list list1.c:unused" "" {
+	-re -wrap "12\[ \t\]+long_line \[(\]\[)\];.*13\[ \t\]+\}.*" {
+	    pass $gdb_test_name
 	}
-	-re "14.*19\[ \t\]+\}\r\n.*$gdb_prompt $" {
-	    incr testcnt
+	-re -wrap "14.*19\[ \t\]+\}.*" {
+	    pass $gdb_test_name
 	}
-	-re ".*$gdb_prompt $" { fail "list list1.c:unused" }
-	timeout { fail "list list1.c:unused (timeout)" }
     }
     clear_xfail "rs6000-*-aix*"
-
-    pass "list filename:function ($testcnt tests)"
 
     # Test with quoting.
     gdb_test "list 'list0.c:main'" "int main.*"

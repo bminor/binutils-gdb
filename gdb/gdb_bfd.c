@@ -32,6 +32,7 @@
 #include "target.h"
 #include "gdb/fileio.h"
 #include "inferior.h"
+#include "cli/cli-style.h"
 
 /* An object of this type is stored in the section's user data when
    mapping a section.  */
@@ -131,7 +132,7 @@ static void
 show_bfd_sharing  (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("BFD sharing is %s.\n"), value);
+  gdb_printf (file, _("BFD sharing is %s.\n"), value);
 }
 
 /* When true debugging of the bfd caches is enabled.  */
@@ -147,7 +148,7 @@ static void
 show_bfd_cache_debug (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("BFD cache debugging is %s.\n"), value);
+  gdb_printf (file, _("BFD cache debugging is %s.\n"), value);
 }
 
 /* The type of an object being looked up in gdb_bfd_cache.  We use
@@ -1101,7 +1102,8 @@ print_one_bfd (void **slot, void *data)
   ui_out_emit_tuple tuple_emitter (uiout, NULL);
   uiout->field_signed ("refcount", gdata->refc);
   uiout->field_string ("addr", host_address_to_string (abfd));
-  uiout->field_string ("filename", bfd_get_filename (abfd));
+  uiout->field_string ("filename", bfd_get_filename (abfd),
+		       file_name_style.style ());
   uiout->text ("\n");
 
   return 1;

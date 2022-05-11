@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "dwarf2/cu.h"
 #include "dwarf2/read.h"
+#include "objfiles.h"
 
 /* Initialize dwarf2_cu to read PER_CU, in the context of PER_OBJFILE.  */
 
@@ -32,6 +33,7 @@ dwarf2_cu::dwarf2_cu (dwarf2_per_cu_data *per_cu,
     checked_producer (false),
     producer_is_gxx_lt_4_6 (false),
     producer_is_gcc_lt_4_3 (false),
+    producer_is_gcc_11 (false),
     producer_is_icc (false),
     producer_is_icc_lt_14 (false),
     producer_is_codewarrior (false),
@@ -53,8 +55,8 @@ dwarf2_cu::addr_sized_int_type (bool unsigned_p) const
    buildsym_compunit constructor.  */
 
 struct compunit_symtab *
-dwarf2_cu::start_symtab (const char *name, const char *comp_dir,
-			 CORE_ADDR low_pc)
+dwarf2_cu::start_compunit_symtab (const char *name, const char *comp_dir,
+				  CORE_ADDR low_pc)
 {
   gdb_assert (m_builder == nullptr);
 

@@ -1621,6 +1621,8 @@ the section containing the relocation.  It depends on the specific target.
 
 ENUM
   BFD_RELOC_32_SECREL
+ENUMX
+  BFD_RELOC_16_SECIDX
 ENUMDOC
   Section relative relocations.  Some targets need this for DWARF2.
 

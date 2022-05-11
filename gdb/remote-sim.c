@@ -44,6 +44,7 @@
 #include "gdbsupport/byte-vector.h"
 #include "memory-map.h"
 #include "remote.h"
+#include "gdbsupport/buildargv.h"
 
 /* Prototypes */
 
@@ -61,7 +62,7 @@ static void gdb_os_flush_stderr (host_callback *);
 
 static int gdb_os_poll_quit (host_callback *);
 
-/* printf_filtered is depreciated.  */
+/* gdb_printf is depreciated.  */
 static void gdb_os_printf_filtered (host_callback *, const char *, ...);
 
 static void gdb_os_vprintf_filtered (host_callback *, const char *, va_list);
@@ -293,26 +294,26 @@ sim_inferior_data::~sim_inferior_data ()
 static void
 dump_mem (const gdb_byte *buf, int len)
 {
-  fputs_unfiltered ("\t", gdb_stdlog);
+  gdb_puts ("\t", gdb_stdlog);
 
   if (len == 8 || len == 4)
     {
       uint32_t l[2];
 
       memcpy (l, buf, len);
-      fprintf_unfiltered (gdb_stdlog, "0x%08x", l[0]);
+      gdb_printf (gdb_stdlog, "0x%08x", l[0]);
       if (len == 8)
-	fprintf_unfiltered (gdb_stdlog, " 0x%08x", l[1]);
+	gdb_printf (gdb_stdlog, " 0x%08x", l[1]);
     }
   else
     {
       int i;
 
       for (i = 0; i < len; i++)
-	fprintf_unfiltered (gdb_stdlog, "0x%02x ", buf[i]);
+	gdb_printf (gdb_stdlog, "0x%02x ", buf[i]);
     }
 
-  fputs_unfiltered ("\n", gdb_stdlog);
+  gdb_puts ("\n", gdb_stdlog);
 }
 
 /* Initialize gdb_callback.  */
@@ -392,7 +393,7 @@ gdb_os_flush_stderr (host_callback *p)
   gdb_stdtargerr->flush ();
 }
 
-/* GDB version of printf_filtered callback.  */
+/* GDB version of gdb_printf callback.  */
 
 static void ATTRIBUTE_PRINTF (2, 3)
 gdb_os_printf_filtered (host_callback * p, const char *format, ...)
@@ -400,16 +401,16 @@ gdb_os_printf_filtered (host_callback * p, const char *format, ...)
   va_list args;
 
   va_start (args, format);
-  vfprintf_filtered (gdb_stdout, format, args);
+  gdb_vprintf (gdb_stdout, format, args);
   va_end (args);
 }
 
-/* GDB version of error vprintf_filtered.  */
+/* GDB version of error gdb_vprintf.  */
 
 static void ATTRIBUTE_PRINTF (2, 0)
 gdb_os_vprintf_filtered (host_callback * p, const char *format, va_list ap)
 {
-  vfprintf_filtered (gdb_stdout, format, ap);
+  gdb_vprintf (gdb_stdout, format, ap);
 }
 
 /* GDB version of error evprintf_filtered.  */
@@ -417,7 +418,7 @@ gdb_os_vprintf_filtered (host_callback * p, const char *format, va_list ap)
 static void ATTRIBUTE_PRINTF (2, 0)
 gdb_os_evprintf_filtered (host_callback * p, const char *format, va_list ap)
 {
-  vfprintf_filtered (gdb_stderr, format, ap);
+  gdb_vprintf (gdb_stderr, format, ap);
 }
 
 /* GDB version of error callback.  */
@@ -481,13 +482,13 @@ gdbsim_target::fetch_registers (struct regcache *regcache, int regno)
 				       buf.data (), regsize);
 	if (nr_bytes > 0 && nr_bytes != regsize && warn_user)
 	  {
-	    fprintf_unfiltered (gdb_stderr,
-				"Size of register %s (%d/%d) "
-				"incorrect (%d instead of %d))",
-				gdbarch_register_name (gdbarch, regno),
-				regno,
-				gdbarch_register_sim_regno (gdbarch, regno),
-				nr_bytes, regsize);
+	    gdb_printf (gdb_stderr,
+			"Size of register %s (%d/%d) "
+			"incorrect (%d instead of %d))",
+			gdbarch_register_name (gdbarch, regno),
+			regno,
+			gdbarch_register_sim_regno (gdbarch, regno),
+			nr_bytes, regsize);
 	    warn_user = 0;
 	  }
 	/* FIXME: cagney/2002-05-27: Should check `nr_bytes == 0'
@@ -498,8 +499,8 @@ gdbsim_target::fetch_registers (struct regcache *regcache, int regno)
 	regcache->raw_supply (regno, buf.data ());
 	if (remote_debug)
 	  {
-	    fprintf_unfiltered (gdb_stdlog,
-				"gdbsim_fetch_register: %d", regno);
+	    gdb_printf (gdb_stdlog,
+			"gdbsim_fetch_register: %d", regno);
 	    /* FIXME: We could print something more intelligible.  */
 	    dump_mem (buf.data (), regsize);
 	  }
@@ -547,7 +548,7 @@ gdbsim_target::store_registers (struct regcache *regcache, int regno)
 
       if (remote_debug)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "gdbsim_store_register: %d", regno);
+	  gdb_printf (gdb_stdlog, "gdbsim_store_register: %d", regno);
 	  /* FIXME: We could print something more intelligible.  */
 	  dump_mem (tmp.data (), regsize);
 	}
@@ -561,7 +562,7 @@ void
 gdbsim_target::kill ()
 {
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "gdbsim_kill\n");
+    gdb_printf (gdb_stdlog, "gdbsim_kill\n");
 
   /* There is no need to `kill' running simulator - the simulator is
      not running.  Mourning it is enough.  */
@@ -590,7 +591,7 @@ gdbsim_target::load (const char *args, int fromtty)
     error (_("GDB sim does not yet support a load offset."));
 
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "gdbsim_load: prog \"%s\"\n", prog);
+    gdb_printf (gdb_stdlog, "gdbsim_load: prog \"%s\"\n", prog);
 
   /* FIXME: We will print two messages on error.
      Need error to either not print anything if passed NULL or need
@@ -630,10 +631,10 @@ gdbsim_target::create_inferior (const char *exec_file,
     warning (_("No program loaded."));
 
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"gdbsim_create_inferior: exec_file \"%s\", args \"%s\"\n",
-			(exec_file ? exec_file : "(NULL)"),
-			args);
+    gdb_printf (gdb_stdlog,
+		"gdbsim_create_inferior: exec_file \"%s\", args \"%s\"\n",
+		(exec_file ? exec_file : "(NULL)"),
+		args);
 
   if (inferior_ptid == sim_data->remote_sim_ptid)
     kill ();
@@ -687,8 +688,8 @@ gdbsim_target_open (const char *args, int from_tty)
     sysroot += strlen (TARGET_SYSROOT_PREFIX);
 
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"gdbsim_open: args \"%s\"\n", args ? args : "(null)");
+    gdb_printf (gdb_stdlog,
+		"gdbsim_open: args \"%s\"\n", args ? args : "(null)");
 
   /* Ensure that the sim target is not on the target stack.  This is
      necessary, because if it is on the target stack, the call to
@@ -763,7 +764,7 @@ gdbsim_target_open (const char *args, int from_tty)
   sim_data->gdbsim_desc = gdbsim_desc;
 
   current_inferior ()->push_target (&gdbsim_ops);
-  printf_filtered ("Connected to the simulator.\n");
+  gdb_printf ("Connected to the simulator.\n");
 
   /* There's nothing running after "target sim" or "load"; not until
      "run".  */
@@ -803,7 +804,7 @@ void
 gdbsim_target::close ()
 {
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "gdbsim_close\n");
+    gdb_printf (gdb_stdlog, "gdbsim_close\n");
 
   for (inferior *inf : all_inferiors (this))
     close_one_inferior (inf);
@@ -831,11 +832,11 @@ void
 gdbsim_target::detach (inferior *inf, int from_tty)
 {
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "gdbsim_detach\n");
+    gdb_printf (gdb_stdlog, "gdbsim_detach\n");
 
   inf->unpush_target (this);		/* calls gdbsim_close to do the real work */
   if (from_tty)
-    printf_filtered ("Ending simulator %s debugging\n", target_shortname ());
+    gdb_printf ("Ending simulator %s debugging\n", target_shortname ());
 }
 
 /* Resume execution of the target process.  STEP says whether to single-step
@@ -855,9 +856,9 @@ gdbsim_target::resume_one_inferior (inferior *inf, bool step,
       sim_data->resume_step = step;
 
       if (remote_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    _("gdbsim_resume: pid %d, step %d, signal %d\n"),
-			    inf->pid, step, siggnal);
+	gdb_printf (gdb_stdlog,
+		    _("gdbsim_resume: pid %d, step %d, signal %d\n"),
+		    inf->pid, step, siggnal);
     }
 }
 
@@ -955,7 +956,7 @@ gdbsim_target::wait (ptid_t ptid, struct target_waitstatus *status,
     }
 
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "gdbsim_wait\n");
+    gdb_printf (gdb_stdlog, "gdbsim_wait\n");
 
 #if defined (HAVE_SIGACTION) && defined (SA_RESTART)
   {
@@ -1049,13 +1050,13 @@ gdbsim_xfer_memory (struct target_ops *target,
   gdb_assert (sim_data->gdbsim_desc != NULL);
 
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"gdbsim_xfer_memory: readbuf %s, writebuf %s, "
-			"memaddr %s, len %s\n",
-			host_address_to_string (readbuf),
-			host_address_to_string (writebuf),
-			paddress (target_gdbarch (), memaddr),
-			pulongest (len));
+    gdb_printf (gdb_stdlog,
+		"gdbsim_xfer_memory: readbuf %s, writebuf %s, "
+		"memaddr %s, len %s\n",
+		host_address_to_string (readbuf),
+		host_address_to_string (writebuf),
+		paddress (target_gdbarch (), memaddr),
+		pulongest (len));
 
   if (writebuf)
     {
@@ -1110,12 +1111,12 @@ gdbsim_target::files_info ()
     file = bfd_get_filename (current_program_space->exec_bfd ());
 
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "gdbsim_files_info: file \"%s\"\n", file);
+    gdb_printf (gdb_stdlog, "gdbsim_files_info: file \"%s\"\n", file);
 
   if (current_program_space->exec_bfd ())
     {
-      printf_filtered ("\tAttached to %s running program %s\n",
-		       target_shortname (), file);
+      gdb_printf ("\tAttached to %s running program %s\n",
+		  target_shortname (), file);
       sim_info (sim_data->gdbsim_desc, 0);
     }
 }
@@ -1126,7 +1127,7 @@ void
 gdbsim_target::mourn_inferior ()
 {
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "gdbsim_mourn_inferior:\n");
+    gdb_printf (gdb_stdlog, "gdbsim_mourn_inferior:\n");
 
   remove_breakpoints ();
   generic_mourn_inferior ();

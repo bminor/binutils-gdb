@@ -183,11 +183,11 @@ gdb_xml_parser::vdebug (const char *format, va_list ap)
 
   std::string message = string_vprintf (format, ap);
   if (line)
-    fprintf_unfiltered (gdb_stderr, "%s (line %d): %s\n",
-			m_name, line, message.c_str ());
+    gdb_printf (gdb_stderr, "%s (line %d): %s\n",
+		m_name, line, message.c_str ());
   else
-    fprintf_unfiltered (gdb_stderr, "%s: %s\n",
-			m_name, message.c_str ());
+    gdb_printf (gdb_stderr, "%s: %s\n",
+		m_name, message.c_str ());
 }
 
 void
@@ -959,7 +959,7 @@ static void
 show_debug_xml (struct ui_file *file, int from_tty,
 		struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("XML debugging is %s.\n"), value);
+  gdb_printf (file, _("XML debugging is %s.\n"), value);
 }
 
 gdb::optional<gdb::char_vector>

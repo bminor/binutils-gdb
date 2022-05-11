@@ -23,10 +23,11 @@
 
 /* Include the public interfaces.  */
 #include "command.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "cli-script.h"
 #include "completer.h"
 #include "gdbsupport/intrusive_list.h"
+#include "gdbsupport/buildargv.h"
 
 /* Not a set/show command.  Note that some commands which begin with
    "set" or "show" might be in this category, if their syntax does
@@ -78,6 +79,12 @@ struct cmd_list_element
 
      For non-prefix commands, return an empty string.  */
   std::string prefixname () const;
+
+  /* Return a vector of strings describing the components of the full name
+     of this command.  For example, if this command is 'set AA BB CC',
+     then the vector will contain 4 elements 'set', 'AA', 'BB', and 'CC'
+     in that order.  */
+  std::vector<std::string> command_components () const;
 
   /* Return true if this command is an alias of another command.  */
   bool is_alias () const
@@ -264,7 +271,7 @@ struct cmd_list_element
      cli_suppress_notification', which will be set to true in cmd_func
      when this command is being executed.  It will be set back to false
      when the command has been executed.  */
-  int *suppress_notification = nullptr;
+  bool *suppress_notification = nullptr;
 
 private:
   /* Local state (context) for this command.  This can be anything.  */

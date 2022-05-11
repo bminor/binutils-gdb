@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "producer.h"
 #include "gdbsupport/selftest.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 
 /* See producer.h.  */
 

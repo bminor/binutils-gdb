@@ -35,6 +35,11 @@
 
 if {[skip_fortran_tests]} { return -1 }
 
+# This test relies on output from the inferior.
+if [target_info exists gdb,noinferiorio] {
+    return -1
+}
+
 standard_testfile ".f90"
 load_lib fortran.exp
 
@@ -91,11 +96,19 @@ proc run_test { repack } {
 	    set found_final_breakpoint false
 	    set expected_result ""
 	    set func_name ""
+	    set found_prompt false
 	    gdb_test_multiple "continue" "continue" {
+		-i $::inferior_spawn_id
+
 		-re ".*GDB = (\[^\r\n\]+)\r\n" {
 		    set expected_result $expect_out(1,string)
-		    exp_continue
+		    if {!$found_prompt} {
+			exp_continue
+		    }
 		}
+
+		-i $::gdb_spawn_id
+
 		-re "! Display Element" {
 		    set func_name "show_elem"
 		    exp_continue
@@ -113,7 +126,14 @@ proc run_test { repack } {
 		    exp_continue
 		}
 		-re "$gdb_prompt $" {
-		    # We're done.
+		    set found_prompt true
+
+		    if {$found_final_breakpoint
+			|| ($expected_result != "" && $func_name != "")} {
+			# We're done.
+		    } else {
+			exp_continue
+		    }
 		}
 	    }
 

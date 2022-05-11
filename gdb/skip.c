@@ -33,10 +33,11 @@
 #include "source.h"
 #include "filenames.h"
 #include "fnmatch.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "gdbsupport/gdb_optional.h"
 #include <list>
 #include "cli/cli-style.h"
+#include "gdbsupport/buildargv.h"
 
 /* True if we want to print debug printouts related to file/function
    skipping. */
@@ -183,7 +184,7 @@ skip_file_command (const char *arg, int from_tty)
   skiplist_entry::add_entry (false, std::string (filename),
 			     false, std::string ());
 
-  printf_filtered (_("File %s will be skipped when stepping.\n"), filename);
+  gdb_printf (_("File %s will be skipped when stepping.\n"), filename);
 }
 
 /* Create a skiplist entry for the given function NAME and add it to the
@@ -194,7 +195,7 @@ skip_function (const char *name)
 {
   skiplist_entry::add_entry (false, std::string (), false, std::string (name));
 
-  printf_filtered (_("Function %s will be skipped when stepping.\n"), name);
+  gdb_printf (_("Function %s will be skipped when stepping.\n"), name);
 }
 
 static void
@@ -330,20 +331,20 @@ skip_command (const char *arg, int from_tty)
 
     if (function_to_print == NULL)
       {
-	printf_filtered (_("%s %s will be skipped when stepping.\n"),
-			 file_text, file_to_print);
+	gdb_printf (_("%s %s will be skipped when stepping.\n"),
+		    file_text, file_to_print);
       }
     else if (file_to_print == NULL)
       {
-	printf_filtered (_("%s %s will be skipped when stepping.\n"),
-			 function_text, function_to_print);
+	gdb_printf (_("%s %s will be skipped when stepping.\n"),
+		    function_text, function_to_print);
       }
     else
       {
-	printf_filtered (_("%s %s in %s %s will be skipped"
-			   " when stepping.\n"),
-			 function_text, function_to_print,
-			 lower_file_text, file_to_print);
+	gdb_printf (_("%s %s in %s %s will be skipped"
+		      " when stepping.\n"),
+		    function_text, function_to_print,
+		    lower_file_text, file_to_print);
       }
   }
 }
@@ -485,9 +486,9 @@ bool
 skiplist_entry::do_skip_file_p (const symtab_and_line &function_sal) const
 {
   if (debug_skip)
-    fprintf_unfiltered (gdb_stdlog,
-			"skip: checking if file %s matches non-glob %s...",
-			function_sal.symtab->filename, m_file.c_str ());
+    gdb_printf (gdb_stdlog,
+		"skip: checking if file %s matches non-glob %s...",
+		function_sal.symtab->filename, m_file.c_str ());
 
   bool result;
 
@@ -512,7 +513,7 @@ skiplist_entry::do_skip_file_p (const symtab_and_line &function_sal) const
     }
 
   if (debug_skip)
-    fprintf_unfiltered (gdb_stdlog, result ? "yes.\n" : "no.\n");
+    gdb_printf (gdb_stdlog, result ? "yes.\n" : "no.\n");
 
   return result;
 }
@@ -521,9 +522,9 @@ bool
 skiplist_entry::do_skip_gfile_p (const symtab_and_line &function_sal) const
 {
   if (debug_skip)
-    fprintf_unfiltered (gdb_stdlog,
-			"skip: checking if file %s matches glob %s...",
-			function_sal.symtab->filename, m_file.c_str ());
+    gdb_printf (gdb_stdlog,
+		"skip: checking if file %s matches glob %s...",
+		function_sal.symtab->filename, m_file.c_str ());
 
   bool result;
 
@@ -552,7 +553,7 @@ skiplist_entry::do_skip_gfile_p (const symtab_and_line &function_sal) const
     }
 
   if (debug_skip)
-    fprintf_unfiltered (gdb_stdlog, result ? "yes.\n" : "no.\n");
+    gdb_printf (gdb_stdlog, result ? "yes.\n" : "no.\n");
 
   return result;
 }
@@ -583,9 +584,9 @@ skiplist_entry::skip_function_p (const char *function_name) const
   if (m_function_is_regexp)
     {
       if (debug_skip)
-	fprintf_unfiltered (gdb_stdlog,
-			    "skip: checking if function %s matches regex %s...",
-			    function_name, m_function.c_str ());
+	gdb_printf (gdb_stdlog,
+		    "skip: checking if function %s matches regex %s...",
+		    function_name, m_function.c_str ());
 
       gdb_assert (m_compiled_function_regexp);
       result
@@ -594,15 +595,15 @@ skiplist_entry::skip_function_p (const char *function_name) const
   else
     {
       if (debug_skip)
-	fprintf_unfiltered (gdb_stdlog,
-			    ("skip: checking if function %s matches non-regex "
-			     "%s..."),
-			    function_name, m_function.c_str ());
+	gdb_printf (gdb_stdlog,
+		    ("skip: checking if function %s matches non-regex "
+		     "%s..."),
+		    function_name, m_function.c_str ());
       result = (strcmp_iw (function_name, m_function.c_str ()) == 0);
     }
 
   if (debug_skip)
-    fprintf_unfiltered (gdb_stdlog, result ? "yes.\n" : "no.\n");
+    gdb_printf (gdb_stdlog, result ? "yes.\n" : "no.\n");
 
   return result;
 }

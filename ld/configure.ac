@@ -203,6 +203,35 @@ AC_ARG_ENABLE(separate-code,
   no) ac_default_ld_z_separate_code=0 ;;
 esac])
 
+
+ac_default_ld_warn_execstack=unset
+AC_ARG_ENABLE(warn-execstack,
+	      AS_HELP_STRING([--enable-warn-execstack],
+	      [enable warnings when creating an executable stack]),
+[case "${enableval}" in
+  yes) ac_default_ld_warn_execstack=1 ;;
+  no)  ac_default_ld_warn_execstack=-1 ;;
+esac])
+
+ac_default_ld_warn_rwx_segments=unset
+AC_ARG_ENABLE(warn-rwx-segments,
+	      AS_HELP_STRING([--enable-warn-rwx-segments],
+	      [enable warnings when creating segements with RWX permissions]),
+[case "${enableval}" in
+  yes) ac_default_ld_warn_rwx_segments=1 ;;
+  no)  ac_default_ld_warn_rwx_segments=0 ;;
+esac])
+
+ac_default_ld_default_execstack=unset
+AC_ARG_ENABLE(default-execstack,
+	      AS_HELP_STRING([--enable-default-execstack],
+	      [create an executable stack if an input file is missing a .note.GNU-stack section]),
+[case "${enableval}" in
+  yes) ac_default_ld_default_execstack=1 ;;
+  no)  ac_default_ld_default_execstack=0 ;;
+esac])
+
+
 # Decide if --error-handling-script should be supported.
 ac_support_error_handling_script=unset
 AC_ARG_ENABLE(error-handling-script,
@@ -500,6 +529,29 @@ fi
 AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_SEPARATE_CODE,
   $ac_default_ld_z_separate_code,
   [Define to 1 if you want to enable -z separate-code in ELF linker by default.])
+
+
+if test "${ac_default_ld_warn_execstack}" = unset; then
+  ac_default_ld_warn_execstack=0
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_LD_WARN_EXECSTACK,
+  $ac_default_ld_warn_execstack,
+  [Define to 1 if you want to enable --warn-execstack in ELF linker by default.])
+
+if test "${ac_default_ld_warn_rwx_segments}" = unset; then
+  ac_default_ld_warn_rwx_segments=1
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_LD_WARN_RWX_SEGMENTS,
+  $ac_default_ld_warn_rwx_segments,
+  [Define to 0 if you want to disable --warn-rwx-segments in ELF linker by default.])
+
+if test "${ac_default_ld_default_execstack}" = unset; then
+  ac_default_ld_default_execstack=1
+fi
+AC_DEFINE_UNQUOTED(DEFAULT_LD_EXECSTACK,
+  $ac_default_ld_default_execstack,
+  [Define to 0 if you want to disable the generation of an executable stack when a .note-GNU-stack section is missing.])
+
 
 if test "${ac_support_error_handling_script}" = unset; then
   ac_support_error_handling_script=1

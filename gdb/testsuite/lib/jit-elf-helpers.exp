@@ -88,14 +88,14 @@ proc compile_and_download_n_jit_so {jit_solib_basename jit_solib_srcfile count} 
 	# wouldn't work for .debug sections.  Also, output for "info
 	# function" changes when debug info is present.
 	set addr [format 0x%x [expr $jit_load_address + $jit_load_increment * [expr $i-1]]]
-	# Using -Ttext-segment flag to ask linked to relocate everything
-	# in the compiled shared library against a fixed base address.  Combined
+
+	# Use "text_segment=..." to ask the linker to relocate everything in the
+	# compiled shared library against a fixed base address.  Combined
 	# with mapping the resulting binary to the same fixed base it allows
 	# to dynamically execute functions from it without any further adjustments.
 	set options [list \
 	    additional_flags=-DFUNCTION_NAME=[format "jit_function_%04d" $i] \
-	    additional_flags=-Xlinker \
-	    additional_flags=-Ttext-segment=$addr]
+	    text_segment=$addr]
 	if { [gdb_compile_shlib ${jit_solib_srcfile} ${binfile} \
 		  $options] != "" } {
 	    set f [file tail $binfile]

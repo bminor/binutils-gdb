@@ -21,7 +21,7 @@
 #include <ctype.h>
 #include "auto-load.h"
 #include "progspace.h"
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "ui-out.h"
 #include "filenames.h"
 #include "command.h"
@@ -51,6 +51,9 @@
    followed by the path of a python script to load.  */
 #define AUTO_SECTION_NAME ".debug_gdb_scripts"
 
+/* The section to look in for the name of a separate debug file.  */
+#define DEBUGLINK_SECTION_NAME ".gnu_debuglink"
+
 static void maybe_print_unsupported_script_warning
   (struct auto_load_pspace_info *, struct objfile *objfile,
    const struct extension_language_defn *language,
@@ -71,9 +74,9 @@ static void
 show_debug_auto_load (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Debugging output for files "
-			    "of 'set auto-load ...' is %s.\n"),
-		    value);
+  gdb_printf (file, _("Debugging output for files "
+		      "of 'set auto-load ...' is %s.\n"),
+	      value);
 }
 
 /* User-settable option to enable/disable auto-loading of GDB_AUTO_FILE_NAME
@@ -89,9 +92,9 @@ static void
 show_auto_load_gdb_scripts (struct ui_file *file, int from_tty,
 			    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Auto-loading of canned sequences of commands "
-			    "scripts is %s.\n"),
-		    value);
+  gdb_printf (file, _("Auto-loading of canned sequences of commands "
+		      "scripts is %s.\n"),
+	      value);
 }
 
 /* See auto-load.h.  */
@@ -129,9 +132,9 @@ static void
 show_auto_load_local_gdbinit (struct ui_file *file, int from_tty,
 			      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Auto-loading of .gdbinit script from current "
-			    "directory is %s.\n"),
-		    value);
+  gdb_printf (file, _("Auto-loading of .gdbinit script from current "
+		      "directory is %s.\n"),
+	      value);
 }
 
 /* Directory list from which to load auto-loaded scripts.  It is not checked
@@ -155,9 +158,9 @@ static void
 show_auto_load_dir (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("List of directories from which to load "
-			    "auto-loaded scripts is %s.\n"),
-		    value);
+  gdb_printf (file, _("List of directories from which to load "
+		      "auto-loaded scripts is %s.\n"),
+	      value);
 }
 
 /* Directory list safe to hold auto-loaded files.  It is not checked for
@@ -272,12 +275,12 @@ show_auto_load_safe_path (struct ui_file *file, int from_tty,
   for (cs = value; *cs && (*cs == DIRNAME_SEPARATOR || IS_DIR_SEPARATOR (*cs));
        cs++);
   if (*cs == 0)
-    fprintf_filtered (file, _("Auto-load files are safe to load from any "
-			      "directory.\n"));
+    gdb_printf (file, _("Auto-load files are safe to load from any "
+			"directory.\n"));
   else
-    fprintf_filtered (file, _("List of directories from which it is safe to "
-			      "auto-load files is %s.\n"),
-		      value);
+    gdb_printf (file, _("List of directories from which it is safe to "
+			"auto-load files is %s.\n"),
+		value);
 }
 
 /* "add-auto-load-safe-path" command for the auto_load_safe_path configuration
@@ -473,18 +476,21 @@ file_is_auto_load_safe (const char *filename)
 	    }
 	}
 
-      printf_filtered (_("\
+      gdb_printf (_("\
 To enable execution of this file add\n\
 \tadd-auto-load-safe-path %s\n\
-line to your configuration file \"%s\".\n\
+line to your configuration file \"%ps\".\n\
 To completely disable this security protection add\n\
 \tset auto-load safe-path /\n\
-line to your configuration file \"%s\".\n\
+line to your configuration file \"%ps\".\n\
 For more information about this security protection see the\n\
 \"Auto-loading safe path\" section in the GDB manual.  E.g., run from the shell:\n\
 \tinfo \"(gdb)Auto-loading safe path\"\n"),
 		       filename_real.get (),
-		       home_config.c_str (), home_config.c_str ());
+		       styled_string (file_name_style.style (),
+				      home_config.c_str ()),
+		       styled_string (file_name_style.style (),
+				      home_config.c_str ()));
       advice_printed = true;
     }
 
@@ -727,8 +733,8 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
   gdb_file_up input = gdb_fopen_cloexec (filename.c_str (), "r");
   debugfile = filename.c_str ();
 
-  auto_load_debug_printf ("Attempted file \"%s\" %s.",
-			  debugfile,
+  auto_load_debug_printf ("Attempted file \"%ps\" %s.",
+			  styled_string (file_name_style.style (), debugfile),
 			  input != nullptr ? "exists" : "does not exist");
 
   std::string debugfile_holder;
@@ -757,8 +763,9 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 
 	  input = gdb_fopen_cloexec (debugfile, "r");
 
-	  auto_load_debug_printf ("Attempted file \"%s\" %s.",
-				  debugfile,
+	  auto_load_debug_printf ("Attempted file \"%ps\" %s.",
+				  styled_string (file_name_style.style (),
+						 debugfile),
 				  (input != nullptr
 				   ? "exists"
 				   : "does not exist"));
@@ -820,24 +827,60 @@ auto_load_objfile_script (struct objfile *objfile,
   gdb::unique_xmalloc_ptr<char> realname
     = gdb_realpath (objfile_name (objfile));
 
-  if (!auto_load_objfile_script_1 (objfile, realname.get (), language))
+  if (auto_load_objfile_script_1 (objfile, realname.get (), language))
+    return;
+
+  /* For Windows/DOS .exe executables, strip the .exe suffix, so that
+     FOO-gdb.gdb could be used for FOO.exe, and try again.  */
+
+  size_t len = strlen (realname.get ());
+  const size_t lexe = sizeof (".exe") - 1;
+
+  if (len > lexe && strcasecmp (realname.get () + len - lexe, ".exe") == 0)
     {
-      /* For Windows/DOS .exe executables, strip the .exe suffix, so that
-	 FOO-gdb.gdb could be used for FOO.exe, and try again.  */
+      len -= lexe;
+      realname.get ()[len] = '\0';
 
-      size_t len = strlen (realname.get ());
-      const size_t lexe = sizeof (".exe") - 1;
+      auto_load_debug_printf
+	("Stripped .exe suffix, retrying with \"%s\".", realname.get ());
 
-      if (len > lexe && strcasecmp (realname.get () + len - lexe, ".exe") == 0)
+      auto_load_objfile_script_1 (objfile, realname.get (), language);
+      return;
+    }
+
+  /* If OBJFILE is a separate debug file and its name does not match
+     the name given in the parent's .gnu_debuglink section, try to
+     find the auto-load script using the parent's path and the
+     debuglink name.  */
+
+  struct objfile *parent = objfile->separate_debug_objfile_backlink;
+  if (parent != nullptr)
+    {
+      unsigned long crc32;
+      gdb::unique_xmalloc_ptr<char> debuglink
+	(bfd_get_debug_link_info (parent->obfd, &crc32));
+
+      if (debuglink.get () != nullptr
+	  && strcmp (debuglink.get (), lbasename (realname.get ())) != 0)
 	{
-	  len -= lexe;
-	  realname.get ()[len] = '\0';
+	  /* Replace the last component of the parent's path with the
+	     debuglink name.  */
 
-	  auto_load_debug_printf
-	    ("auto-load: Stripped .exe suffix, retrying with \"%s\".",
-	     realname.get ());
+	  std::string p_realname = gdb_realpath (objfile_name (parent)).get ();
+	  size_t last = p_realname.find_last_of ('/');
 
-	  auto_load_objfile_script_1 (objfile, realname.get (), language);
+	  if (last != std::string::npos)
+	    {
+	      p_realname.replace (last + 1, std::string::npos,
+				  debuglink.get ());
+
+	      auto_load_debug_printf
+		("Debug filename mismatch, retrying with \"%s\".",
+		 p_realname.c_str ());
+
+	      auto_load_objfile_script_1 (objfile,
+					  p_realname.c_str (), language);
+	    }
 	}
     }
 }
@@ -1315,15 +1358,15 @@ static void
 info_auto_load_local_gdbinit (const char *args, int from_tty)
 {
   if (auto_load_local_gdbinit_pathname == NULL)
-    printf_filtered (_("Local .gdbinit file was not found.\n"));
+    gdb_printf (_("Local .gdbinit file was not found.\n"));
   else if (auto_load_local_gdbinit_loaded)
-    printf_filtered (_("Local .gdbinit file \"%ps\" has been loaded.\n"),
-		     styled_string (file_name_style.style (),
-				    auto_load_local_gdbinit_pathname));
+    gdb_printf (_("Local .gdbinit file \"%ps\" has been loaded.\n"),
+		styled_string (file_name_style.style (),
+			       auto_load_local_gdbinit_pathname));
   else
-    printf_filtered (_("Local .gdbinit file \"%ps\" has not been loaded.\n"),
-		     styled_string (file_name_style.style (),
-				    auto_load_local_gdbinit_pathname));
+    gdb_printf (_("Local .gdbinit file \"%ps\" has not been loaded.\n"),
+		styled_string (file_name_style.style (),
+			       auto_load_local_gdbinit_pathname));
 }
 
 /* Print an "unsupported script" warning if it has not already been printed.

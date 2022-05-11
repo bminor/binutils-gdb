@@ -443,6 +443,29 @@ public:
 
   enum exp_opcode opcode () const override
   { return STRUCTOP_STRUCT; }
+
+  /* Set the completion prefix.  */
+  void set_prefix (std::string &&prefix)
+  {
+    m_prefix = std::move (prefix);
+  }
+
+  bool complete (struct expression *exp, completion_tracker &tracker) override
+  {
+    return structop_base_operation::complete (exp, tracker, m_prefix.c_str ());
+  }
+
+  void dump (struct ui_file *stream, int depth) const override
+  {
+    structop_base_operation::dump (stream, depth);
+    dump_for_expression (stream, depth + 1, m_prefix);
+  }
+
+private:
+
+  /* We may need to provide a prefix to field name completion.  See
+     ada-exp.y:find_completion_bounds for details.  */
+  std::string m_prefix;
 };
 
 /* Function calls for Ada.  */
@@ -769,6 +792,21 @@ public:
 			bool parse_completion,
 			innermost_block_tracker *tracker,
 			struct type *context_type) override;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
+};
+
+class ada_concat_operation : public concat_operation
+{
+public:
+
+  using concat_operation::concat_operation;
+
+  value *evaluate (struct type *expect_type,
+		   struct expression *exp,
+		   enum noside noside) override;
 };
 
 } /* namespace expr */

@@ -89,9 +89,9 @@ proc test_info_inferiors {multi_process} {
 		[multi_line \
 		     "Num${ws}What${ws}Description${ws}" \
 		     "[connection_num 1 $inf]${ws}native${ws}Native process${ws}" \
-		     "[connection_num 2 $inf]${ws}extended-remote localhost:$decimal${ws}Extended remote serial target in gdb-specific protocol${ws}" \
+		     "[connection_num 2 $inf]${ws}extended-remote localhost:$decimal${ws}Extended remote target using gdb-specific protocol${ws}" \
 		     "[connection_num 3 $inf]${ws}core${ws}Local core dump file${ws}" \
-		     "[connection_num 4 $inf]${ws}extended-remote localhost:$decimal${ws}Extended remote serial target in gdb-specific protocol${ws}" \
+		     "[connection_num 4 $inf]${ws}extended-remote localhost:$decimal${ws}Extended remote target using gdb-specific protocol${ws}" \
 		     "[connection_num 5 $inf]${ws}core${ws}Local core dump file${ws}" \
 		    ]
 
@@ -100,9 +100,9 @@ proc test_info_inferiors {multi_process} {
 		    [multi_line \
 			 "Num${ws}What${ws}Description" \
 			 "[connection_num 1 $inf]${ws}native${ws}Native process" \
-			 "[connection_num 2 $inf]${ws}extended-remote localhost:$decimal${ws}Extended remote serial target in gdb-specific protocol" \
+			 "[connection_num 2 $inf]${ws}extended-remote localhost:$decimal${ws}Extended remote target using gdb-specific protocol" \
 			 "[connection_num 3 $inf]${ws}core${ws}Local core dump file" \
-			 "[connection_num 4 $inf]${ws}extended-remote localhost:$decimal${ws}Extended remote serial target in gdb-specific protocol" \
+			 "[connection_num 4 $inf]${ws}extended-remote localhost:$decimal${ws}Extended remote target using gdb-specific protocol" \
 			 "[connection_num 5 $inf]${ws}core${ws}Local core dump file" \
 			]
 	    }

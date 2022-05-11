@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "charset.h"
 #include "gdbcmd.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/gdb_wait.h"
 #include "charset-list.h"
 #include "gdbsupport/environ.h"
@@ -232,11 +232,11 @@ show_host_charset_name (struct ui_file *file, int from_tty,
 			const char *value)
 {
   if (!strcmp (value, "auto"))
-    fprintf_filtered (file,
-		      _("The host character set is \"auto; currently %s\".\n"),
-		      auto_host_charset_name);
+    gdb_printf (file,
+		_("The host character set is \"auto; currently %s\".\n"),
+		auto_host_charset_name);
   else
-    fprintf_filtered (file, _("The host character set is \"%s\".\n"), value);
+    gdb_printf (file, _("The host character set is \"%s\".\n"), value);
 }
 
 static const char *target_charset_name = "auto";
@@ -245,13 +245,13 @@ show_target_charset_name (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
   if (!strcmp (value, "auto"))
-    fprintf_filtered (file,
-		      _("The target character set is \"auto; "
-			"currently %s\".\n"),
-		      gdbarch_auto_charset (get_current_arch ()));
+    gdb_printf (file,
+		_("The target character set is \"auto; "
+		  "currently %s\".\n"),
+		gdbarch_auto_charset (get_current_arch ()));
   else
-    fprintf_filtered (file, _("The target character set is \"%s\".\n"),
-		      value);
+    gdb_printf (file, _("The target character set is \"%s\".\n"),
+		value);
 }
 
 static const char *target_wide_charset_name = "auto";
@@ -262,13 +262,13 @@ show_target_wide_charset_name (struct ui_file *file,
 			       const char *value)
 {
   if (!strcmp (value, "auto"))
-    fprintf_filtered (file,
-		      _("The target wide character set is \"auto; "
-			"currently %s\".\n"),
-		      gdbarch_auto_wide_charset (get_current_arch ()));
+    gdb_printf (file,
+		_("The target wide character set is \"auto; "
+		  "currently %s\".\n"),
+		gdbarch_auto_wide_charset (get_current_arch ()));
   else
-    fprintf_filtered (file, _("The target wide character set is \"%s\".\n"),
-		      value);
+    gdb_printf (file, _("The target wide character set is \"%s\".\n"),
+		value);
 }
 
 static const char * const default_charset_names[] =
@@ -461,20 +461,6 @@ host_letter_to_control_character (char c)
   if (c == '?')
     return 0177;
   return c & 0237;
-}
-
-/* Convert a host character, C, to its hex value.  C must already have
-   been validated using isxdigit.  */
-
-int
-host_hex_value (char c)
-{
-  if (isdigit (c))
-    return c - '0';
-  if (c >= 'a' && c <= 'f')
-    return 10 + c - 'a';
-  gdb_assert (c >= 'A' && c <= 'F');
-  return 10 + c - 'A';
 }
 
 
@@ -1029,6 +1015,9 @@ _initialize_charset ()
 #endif
 #endif
 
+  /* Recall that the first element is always "auto".  */
+  host_charset_name = charset_enum[0];
+  gdb_assert (strcmp (host_charset_name, "auto") == 0);
   add_setshow_enum_cmd ("charset", class_support,
 			charset_enum, &host_charset_name, _("\
 Set the host and target character sets."), _("\
@@ -1057,6 +1046,9 @@ To see a list of the character sets GDB supports, type `set host-charset <TAB>'.
 			show_host_charset_name,
 			&setlist, &showlist);
 
+  /* Recall that the first element is always "auto".  */
+  target_charset_name = charset_enum[0];
+  gdb_assert (strcmp (target_charset_name, "auto") == 0);
   add_setshow_enum_cmd ("target-charset", class_support,
 			charset_enum, &target_charset_name, _("\
 Set the target character set."), _("\
@@ -1069,6 +1061,9 @@ To see a list of the character sets GDB supports, type `set target-charset'<TAB>
 			show_target_charset_name,
 			&setlist, &showlist);
 
+  /* Recall that the first element is always "auto".  */
+  target_wide_charset_name = charset_enum[0];
+  gdb_assert (strcmp (target_wide_charset_name, "auto") == 0);
   add_setshow_enum_cmd ("target-wide-charset", class_support,
 			charset_enum, &target_wide_charset_name,
 			_("\

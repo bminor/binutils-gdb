@@ -96,10 +96,12 @@ if {$result == 0} {
     fail $test
 }
 
-set prelink_args [build_executable_own_libs ${test}.exp $executable $srcfile \
-		      [list pie "additional_flags=-DGEN=\"$genfile\""]]
-if {$prelink_args == ""} {
-    return -1
+with_test_prefix "rebuild with DGEN defined" {
+    set prelink_args [build_executable_own_libs ${testfile}.exp $executable $srcfile \
+			  [list pie "additional_flags=-DGEN=\"$genfile\""]]
+    if {$prelink_args == ""} {
+	return -1
+    }
 }
 
 # x86_64 file has 25MB, no need to keep it.

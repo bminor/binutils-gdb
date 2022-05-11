@@ -20,19 +20,7 @@
 #define DISASM_H
 
 #include "dis-asm.h"
-#include "gdbsupport/enum-flags.h"
-
-enum gdb_disassembly_flag
-  {
-    DISASSEMBLY_SOURCE_DEPRECATED = (0x1 << 0),
-    DISASSEMBLY_RAW_INSN = (0x1 << 1),
-    DISASSEMBLY_OMIT_FNAME = (0x1 << 2),
-    DISASSEMBLY_FILENAME = (0x1 << 3),
-    DISASSEMBLY_OMIT_PC = (0x1 << 4),
-    DISASSEMBLY_SOURCE = (0x1 << 5),
-    DISASSEMBLY_SPECULATIVE = (0x1 << 6),
-  };
-DEF_ENUM_FLAGS_TYPE (enum gdb_disassembly_flag, gdb_disassembly_flags);
+#include "disasm-flags.h"
 
 struct gdbarch;
 struct ui_out;
@@ -82,8 +70,40 @@ private:
      non-memory error.  */
   gdb::optional<CORE_ADDR> m_err_memaddr;
 
+  /* Disassembler output is built up into this buffer.  Whether this
+     string_file is created with styling support or not depends on the
+     value of use_ext_lang_colorization_p, as well as whether disassembler
+     styling in general is turned on, and also, whether *m_dest supports
+     styling or not.  */
+  string_file m_buffer;
+
+  /* The stream to which disassembler output will be written.  */
+  ui_file *m_dest;
+
+  /* When true, m_buffer will be created without styling support,
+     otherwise, m_buffer will be created with styling support.
+
+     This field will initially be true, but will be set to false if
+     ext_lang_colorize_disasm fails to add styling at any time.
+
+     If the extension language is going to add the styling then m_buffer
+     should be created without styling support, the extension language will
+     then add styling at the end of the disassembly process.
+
+     If the extension language is not going to add the styling, then we
+     create m_buffer with styling support, and GDB will add minimal styling
+     (currently just to addresses and symbols) as it goes.  */
+  static bool use_ext_lang_colorization_p;
+
   static int dis_asm_fprintf (void *stream, const char *format, ...)
     ATTRIBUTE_PRINTF(2,3);
+
+  /* Print formatted message to STREAM, the content can be styled based on
+     STYLE if desired.  */
+  static int dis_asm_styled_fprintf (void *stream,
+				     enum disassembler_style style,
+				     const char *format, ...)
+    ATTRIBUTE_PRINTF(3,4);
 
   static int dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr,
 				  unsigned int len,
@@ -173,5 +193,11 @@ extern char *get_disassembler_options (struct gdbarch *gdbarch);
 /* Sets the active gdbarch's disassembler options to OPTIONS.  */
 
 extern void set_disassembler_options (const char *options);
+
+/* Setup DINFO with its output function and output stream setup so that
+   nothing is printed while disassembling.  */
+
+extern void init_disassemble_info_for_no_printing
+  (struct disassemble_info *dinfo);
 
 #endif

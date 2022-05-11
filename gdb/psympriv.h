@@ -46,14 +46,14 @@ struct partial_symbol
   /* Return the unrelocated address of this partial symbol.  */
   CORE_ADDR unrelocated_address () const
   {
-    return ginfo.value.address;
+    return ginfo.value_address ();
   }
 
   /* Return the address of this partial symbol, relocated according to
      the offsets provided in OBJFILE.  */
   CORE_ADDR address (const struct objfile *objfile) const
   {
-    return (ginfo.value.address
+    return (ginfo.value_address ()
 	    + objfile->section_offsets[ginfo.section_index ()]);
   }
 
@@ -61,7 +61,7 @@ struct partial_symbol
      unrelocated.  */
   void set_unrelocated_address (CORE_ADDR addr)
   {
-    ginfo.value.address = addr;
+    ginfo.set_value_address (addr);
   }
 
   /* Note that partial_symbol does not derive from general_symbol_info
@@ -71,7 +71,7 @@ struct partial_symbol
 
   /* Name space code.  */
 
-  ENUM_BITFIELD(domain_enum_tag) domain : SYMBOL_DOMAIN_BITS;
+  ENUM_BITFIELD(domain_enum) domain : SYMBOL_DOMAIN_BITS;
 
   /* Address class (for info_symbols).  Note that we don't allow
      synthetic "aclass" values here at present, simply because there's

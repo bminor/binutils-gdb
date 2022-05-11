@@ -210,9 +210,9 @@ fetch_register (struct regcache *regcache, int regno)
   else if (nr < 0)
     {
       if (regno >= gdbarch_num_regs (gdbarch))
-	fprintf_unfiltered (gdb_stderr,
-			    "gdb error: register no %d not implemented.\n",
-			    regno);
+	gdb_printf (gdb_stderr,
+		    "gdb error: register no %d not implemented.\n",
+		    regno);
       return;
     }
 
@@ -272,9 +272,9 @@ store_register (struct regcache *regcache, int regno)
   else if (nr < 0)
     {
       if (regno >= gdbarch_num_regs (gdbarch))
-	fprintf_unfiltered (gdb_stderr,
-			    "gdb error: register no %d not implemented.\n",
-			    regno);
+	gdb_printf (gdb_stderr,
+		    "gdb error: register no %d not implemented.\n",
+		    regno);
     }
 
   /* Fixed-point registers.  */
@@ -519,9 +519,9 @@ rs6000_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
       if (pid == -1)
 	{
-	  fprintf_unfiltered (gdb_stderr,
-			      _("Child process unexpectedly missing: %s.\n"),
-			      safe_strerror (save_errno));
+	  gdb_printf (gdb_stderr,
+		      _("Child process unexpectedly missing: %s.\n"),
+		      safe_strerror (save_errno));
 
 	  /* Claim it exited with unknown signal.  */
 	  ourstatus->set_signalled (GDB_SIGNAL_UNKNOWN);

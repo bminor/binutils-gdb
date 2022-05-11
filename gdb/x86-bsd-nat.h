@@ -22,9 +22,6 @@
 
 #include "x86-nat.h"
 
-/* Low level x86 XSAVE info.  */
-extern size_t x86bsd_xsave_len;
-
 /* A prototype *BSD/x86 target.  */
 
 #ifdef HAVE_PT_GETDBREGS

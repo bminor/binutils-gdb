@@ -35,6 +35,8 @@ if {[istarget i*86-*-cygwin*]
       set pe_tests {
 	{".secrel32" "--disable-reloc-section" "" "" {secrel1.s secrel2.s}
 	 {{objdump -s secrel_64.d}} "secrel.x"}
+	{".secidx" "--disable-reloc-section" "" "" {secidx1.s secidx2.s}
+	 {{objdump -s secidx_64.d}} "secidx.x"}
 	{"Empty export table" "" "" "" "exports.s"
 	 {{objdump -p exports64.d}} "exports.dll"}
 	{"TLS directory entry" "" "" "" "tlssec.s"
@@ -43,6 +45,17 @@ if {[istarget i*86-*-cygwin*]
     } elseif {[istarget i*86-*-cygwin*] } {
       set pe_tests {
 	{".secrel32" "--disable-auto-import --disable-reloc-section" "" "" {secrel1.s secrel2.s}
+	 {{objdump -s secrel.d}} "secrel.x"}
+	{".secidx" "--disable-auto-import --disable-reloc-section" "" "" {secidx1.s secidx2.s}
+	 {{objdump -s secidx.d}} "secidx.x"}
+	{"Empty export table" "" "" "" "exports.s"
+	 {{objdump -p exports.d}} "exports.dll"}
+	{"TLS directory entry" "" "" "" "tlssec.s"
+	 {{objdump -p tlssec32.d}} "tlssec.dll"}
+      }
+    } elseif {[istarget arm-wince-pe] } {
+      set pe_tests {
+	{".secrel32" "--disable-reloc-section" "" "" {secrel1.s secrel2.s}
 	 {{objdump -s secrel.d}} "secrel.x"}
 	{"Empty export table" "" "" "" "exports.s"
 	 {{objdump -p exports.d}} "exports.dll"}
@@ -53,6 +66,8 @@ if {[istarget i*86-*-cygwin*]
       set pe_tests {
 	{".secrel32" "--disable-reloc-section" "" "" {secrel1.s secrel2.s}
 	 {{objdump -s secrel.d}} "secrel.x"}
+	{".secidx" "--disable-reloc-section" "" "" {secidx1.s secidx2.s}
+	 {{objdump -s secidx.d}} "secidx.x"}
 	{"Empty export table" "" "" "" "exports.s"
 	 {{objdump -p exports.d}} "exports.dll"}
 	{"TLS directory entry" "" "" "" "tlssec.s"

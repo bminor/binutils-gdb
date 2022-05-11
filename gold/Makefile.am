@@ -243,10 +243,6 @@ install-exec-local: ld-new$(EXEEXT)
 	  fi; \
 	fi
 
-# We want install to imply install-info as per GNU standards, despite
-# the cygnus option.
-install-data-local: install-info
-
 POTFILES= $(CCFILES) $(HFILES) $(TARGETSOURCES)
 
 po/POTFILES.in: @MAINT@ Makefile

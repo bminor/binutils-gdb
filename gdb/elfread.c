@@ -483,7 +483,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
 	      if (type != ST_SYNTHETIC)
 		{
 		  /* Pass symbol size field in via BFD.  FIXME!!!  */
-		  SET_MSYMBOL_SIZE (msym, elf_sym->internal_elf_sym.st_size);
+		  msym->set_size (elf_sym->internal_elf_sym.st_size);
 		}
 
 	      msym->filename = filesymname;
@@ -522,7 +522,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
 			 symaddr, mst_solib_trampoline, sym->section, objfile);
 		      if (mtramp)
 			{
-			  SET_MSYMBOL_SIZE (mtramp, MSYMBOL_SIZE (msym));
+			  mtramp->set_size (msym->size());
 			  mtramp->created_by_gdb = 1;
 			  mtramp->filename = filesymname;
 			  if (elf_make_msymbol_special_p)
@@ -640,7 +640,7 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
 				    true, address, mst_slot_got_plt,
 				    msym_section, objfile);
       if (msym)
-	SET_MSYMBOL_SIZE (msym, ptr_size);
+	msym->set_size (ptr_size);
     }
 }
 
@@ -703,7 +703,7 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
   msym = lookup_minimal_symbol_by_pc (addr);
   if (msym.minsym == NULL)
     return 0;
-  if (BMSYMBOL_VALUE_ADDRESS (msym) != addr)
+  if (msym.value_address () != addr)
     return 0;
   objfile = msym.objfile;
 
@@ -828,15 +828,15 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
       msym = lookup_minimal_symbol (name_got_plt, NULL, objfile);
       if (msym.minsym == NULL)
 	continue;
-      if (MSYMBOL_TYPE (msym.minsym) != mst_slot_got_plt)
+      if (msym.minsym->type () != mst_slot_got_plt)
 	continue;
-      pointer_address = BMSYMBOL_VALUE_ADDRESS (msym);
+      pointer_address = msym.value_address ();
 
       plt = bfd_get_section_by_name (obfd, ".plt");
       if (plt == NULL)
 	continue;
 
-      if (MSYMBOL_SIZE (msym.minsym) != ptr_size)
+      if (msym.minsym->size () != ptr_size)
 	continue;
       if (target_read_memory (pointer_address, buf, ptr_size) != 0)
 	continue;
@@ -1049,9 +1049,9 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 
   if (symtab_create_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "Reading minimal symbols of objfile %s ...\n",
-			  objfile_name (objfile));
+      gdb_printf (gdb_stdlog,
+		  "Reading minimal symbols of objfile %s ...\n",
+		  objfile_name (objfile));
     }
 
   /* If we already have minsyms, then we can skip some work here.
@@ -1065,8 +1065,8 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
       && ei->ctfsect == NULL)
     {
       if (symtab_create_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "... minimal symbols previously read\n");
+	gdb_printf (gdb_stdlog,
+		    "... minimal symbols previously read\n");
       return;
     }
 
@@ -1171,7 +1171,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
   reader.install ();
 
   if (symtab_create_debug)
-    fprintf_unfiltered (gdb_stdlog, "Done reading minimal symbols.\n");
+    gdb_printf (gdb_stdlog, "Done reading minimal symbols.\n");
 }
 
 /* Scan and build partial symbols for a symbol file.

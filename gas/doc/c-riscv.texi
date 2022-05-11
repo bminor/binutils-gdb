@@ -206,7 +206,6 @@ know what you're doing, this should only be at the top of a file.
 Enables or disables relaxation.  The RISC-V assembler and linker
 opportunistically relax some code sequences, but sometimes this behavior is not
 desirable.
-@end table
 
 @item csr-check
 @itemx no-csr-check
@@ -224,6 +223,7 @@ sometimes.  Besides, @samp{.option arch, -i} is illegal, since we cannot
 remove the base i extension anytime.  If you want to reset the whole ISA
 string, you can also use @samp{.option arch, =rv32imac} to overwrite the
 previous settings.
+@end table
 
 @cindex INSN directives
 @item .insn @var{type}, @var{operand} [,...,@var{operand_n}]

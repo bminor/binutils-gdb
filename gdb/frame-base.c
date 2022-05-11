@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "frame-base.h"
 #include "frame.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbarch.h"
 
 /* A default frame base implementations.  If it wasn't for the old

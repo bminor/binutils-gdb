@@ -169,8 +169,8 @@ inferior_debug (int level, const char *fmt, ...)
     return;
 
   va_start (ap, fmt);
-  fprintf_unfiltered (gdb_stdlog, _("[%d inferior]: "), getpid ());
-  vfprintf_unfiltered (gdb_stdlog, fmt, ap);
+  gdb_printf (gdb_stdlog, _("[%d inferior]: "), getpid ());
+  gdb_vprintf (gdb_stdlog, fmt, ap);
   va_end (ap);
 }
 
@@ -459,20 +459,20 @@ darwin_resume_inferior (struct inferior *inf)
 static void
 darwin_dump_message (mach_msg_header_t *hdr, int disp_body)
 {
-  fprintf_unfiltered (gdb_stdlog,
-		      _("message header:\n"));
-  fprintf_unfiltered (gdb_stdlog,
-		      _(" bits: 0x%x\n"), hdr->msgh_bits);
-  fprintf_unfiltered (gdb_stdlog,
-		      _(" size: 0x%x\n"), hdr->msgh_size);
-  fprintf_unfiltered (gdb_stdlog,
-		      _(" remote-port: 0x%x\n"), hdr->msgh_remote_port);
-  fprintf_unfiltered (gdb_stdlog,
-		      _(" local-port: 0x%x\n"), hdr->msgh_local_port);
-  fprintf_unfiltered (gdb_stdlog,
-		      _(" reserved: 0x%x\n"), hdr->msgh_reserved);
-  fprintf_unfiltered (gdb_stdlog,
-		      _(" id: 0x%x\n"), hdr->msgh_id);
+  gdb_printf (gdb_stdlog,
+	      _("message header:\n"));
+  gdb_printf (gdb_stdlog,
+	      _(" bits: 0x%x\n"), hdr->msgh_bits);
+  gdb_printf (gdb_stdlog,
+	      _(" size: 0x%x\n"), hdr->msgh_size);
+  gdb_printf (gdb_stdlog,
+	      _(" remote-port: 0x%x\n"), hdr->msgh_remote_port);
+  gdb_printf (gdb_stdlog,
+	      _(" local-port: 0x%x\n"), hdr->msgh_local_port);
+  gdb_printf (gdb_stdlog,
+	      _(" reserved: 0x%x\n"), hdr->msgh_reserved);
+  gdb_printf (gdb_stdlog,
+	      _(" id: 0x%x\n"), hdr->msgh_id);
 
   if (disp_body)
     {
@@ -491,24 +491,24 @@ darwin_dump_message (mach_msg_header_t *hdr, int disp_body)
 	    (mach_msg_port_descriptor_t *)(bod + 1);
 	  int k;
 	  NDR_record_t *ndr;
-	  fprintf_unfiltered (gdb_stdlog,
-			      _("body: descriptor_count=%u\n"),
-			      bod->msgh_descriptor_count);
+	  gdb_printf (gdb_stdlog,
+		      _("body: descriptor_count=%u\n"),
+		      bod->msgh_descriptor_count);
 	  data += sizeof (mach_msg_body_t);
 	  size -= sizeof (mach_msg_body_t);
 	  for (k = 0; k < bod->msgh_descriptor_count; k++)
 	    switch (desc[k].type)
 	      {
 	      case MACH_MSG_PORT_DESCRIPTOR:
-		fprintf_unfiltered
+		gdb_printf
 		  (gdb_stdlog,
 		   _(" descr %d: type=%u (port) name=0x%x, dispo=%d\n"),
 		   k, desc[k].type, desc[k].name, desc[k].disposition);
 		break;
 	      default:
-		fprintf_unfiltered (gdb_stdlog,
-				    _(" descr %d: type=%u\n"),
-				    k, desc[k].type);
+		gdb_printf (gdb_stdlog,
+			    _(" descr %d: type=%u\n"),
+			    k, desc[k].type);
 		break;
 	      }
 	  data += bod->msgh_descriptor_count
@@ -516,7 +516,7 @@ darwin_dump_message (mach_msg_header_t *hdr, int disp_body)
 	  size -= bod->msgh_descriptor_count
 	    * sizeof (mach_msg_port_descriptor_t);
 	  ndr = (NDR_record_t *)(desc + bod->msgh_descriptor_count);
-	  fprintf_unfiltered
+	  gdb_printf
 	    (gdb_stdlog,
 	     _("NDR: mig=%02x if=%02x encod=%02x "
 	       "int=%02x char=%02x float=%02x\n"),
@@ -526,11 +526,11 @@ darwin_dump_message (mach_msg_header_t *hdr, int disp_body)
 	  size -= sizeof (NDR_record_t);
 	}
 
-      fprintf_unfiltered (gdb_stdlog, _("  data:"));
+      gdb_printf (gdb_stdlog, _("  data:"));
       ldata = (const unsigned int *)data;
       for (i = 0; i < size / sizeof (unsigned int); i++)
-	fprintf_unfiltered (gdb_stdlog, " %08x", ldata[i]);
-      fprintf_unfiltered (gdb_stdlog, _("\n"));
+	gdb_printf (gdb_stdlog, " %08x", ldata[i]);
+      gdb_printf (gdb_stdlog, _("\n"));
     }
 }
 
@@ -1063,7 +1063,7 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
     }
   else if (hdr->msgh_id == 0x48)
     {
-      /* MACH_NOTIFY_DEAD_NAME: notification for exit.  */
+      /* MACH_NOTIFY_DEAD_NAME: notification for exit *or* WIFSTOPPED.  */
       int res;
 
       res = darwin_decode_notify_message (hdr, &inf);
@@ -1103,18 +1103,34 @@ darwin_nat_target::decode_message (mach_msg_header_t *hdr,
 		  return minus_one_ptid;
 		}
 	      if (WIFEXITED (wstatus))
-		status->set_exited (WEXITSTATUS (wstatus));
-	      else
+		{
+		  status->set_exited (WEXITSTATUS (wstatus));
+	          inferior_debug (4, _("darwin_wait: pid=%d exit, status=0x%x\n"),
+				  res_pid, wstatus);
+		}
+	      else if (WIFSTOPPED (wstatus))
+		{
+		  /* Ignore stopped state, it will be handled by the next
+		     exception.  */
+		  status->set_ignore ();
+		  inferior_debug (4, _("darwin_wait: pid %d received WIFSTOPPED\n"),
+				  res_pid);
+		  return minus_one_ptid;
+		}
+	      else if (WIFSIGNALED (wstatus))
 		{
 		  status->set_signalled
 		    (gdb_signal_from_host (WTERMSIG (wstatus)));
+		  inferior_debug (4, _("darwin_wait: pid=%d received signal %d\n"),
+				  res_pid, status->sig());
 		}
-
-	      inferior_debug (4, _("darwin_wait: pid=%d exit, status=0x%x\n"),
-			      res_pid, wstatus);
-
-	      /* Looks necessary on Leopard and harmless...  */
-	      wait4 (inf->pid, &wstatus, 0, NULL);
+	      else
+		{
+		  status->set_ignore ();
+		  warning (_("Unexpected wait status after MACH_NOTIFY_DEAD_NAME "
+		             "notification: 0x%x"), wstatus);
+		  return minus_one_ptid;
+		}
 
 	      return ptid_t (inf->pid);
 	    }
@@ -1777,7 +1793,7 @@ darwin_execvp (const char *file, char * const argv[], char * const env[])
   res = posix_spawnattr_init (&attr);
   if (res != 0)
     {
-      fprintf_unfiltered
+      gdb_printf
 	(gdb_stderr, "Cannot initialize attribute for posix_spawn\n");
       return;
     }
@@ -1794,7 +1810,7 @@ darwin_execvp (const char *file, char * const argv[], char * const env[])
   res = posix_spawnattr_setflags (&attr, ps_flags);
   if (res != 0)
     {
-      fprintf_unfiltered (gdb_stderr, "Cannot set posix_spawn flags\n");
+      gdb_printf (gdb_stderr, "Cannot set posix_spawn flags\n");
       return;
     }
 
@@ -1929,11 +1945,11 @@ you \"run\".  To prevent these attempts, you can use:\n\
 	  return false;
 	}
 
-      printf_filtered (_("Note: this version of macOS has System Integrity Protection.\n\
+      gdb_printf (_("Note: this version of macOS has System Integrity Protection.\n\
 Because `startup-with-shell' is enabled, gdb has worked around this by\n\
 caching a copy of your shell.  The shell used by \"run\" is now:\n\
     %s\n"),
-		       new_name.c_str ());
+		  new_name.c_str ());
     }
 
   /* We need to make sure that the new name has the correct lifetime.  */

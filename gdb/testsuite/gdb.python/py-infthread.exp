@@ -77,6 +77,11 @@ gdb_py_test_silent_cmd "python gdb.selected_thread().name = None" \
 gdb_test "python print (gdb.selected_thread().name == name)" "True" \
     "check name of current thread again"
 
+gdb_test_no_output "python details = gdb.selected_thread().details" \
+    "record the thread details string"
+gdb_test "python print(details is None or isinstance(details, str))" "True" \
+    "check that the details has an acceptable type"
+
 gdb_test "python print ('result = %s' % t0.is_stopped ())" " = True" "test InferiorThread.is_stopped"
 gdb_test "python print ('result = %s' % t0.is_running ())" " = False" "test InferiorThread.is_running"
 gdb_test "python print ('result = %s' % t0.is_exited ())" " = False" "test InferiorThread.is_exited"

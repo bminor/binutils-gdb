@@ -18,5 +18,7 @@ with System;
 package Pck is
 
    procedure Do_Nothing (A : System.Address);
+   procedure Do_Nothing (A : Wide_String);
+   procedure Do_Nothing (A : Wide_Wide_String);
 
 end Pck;

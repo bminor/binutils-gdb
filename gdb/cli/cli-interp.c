@@ -68,10 +68,7 @@ cli_interp::~cli_interp ()
 }
 
 /* Suppress notification struct.  */
-struct cli_suppress_notification cli_suppress_notification =
-  {
-    0   /* user_selected_context_changed */
-  };
+struct cli_suppress_notification cli_suppress_notification;
 
 /* Returns the INTERP's data cast as cli_interp if INTERP is a CLI,
    and returns NULL otherwise.  */
@@ -111,9 +108,9 @@ should_print_stop_to_console (struct interp *console_interp,
 {
   if ((bpstat_what (tp->control.stop_bpstat).main_action
        == BPSTAT_WHAT_STOP_NOISY)
-      || tp->thread_fsm == NULL
-      || tp->thread_fsm->command_interp == console_interp
-      || !tp->thread_fsm->finished_p ())
+      || tp->thread_fsm () == nullptr
+      || tp->thread_fsm ()->command_interp == console_interp
+      || !tp->thread_fsm ()->finished_p ())
     return 1;
   return 0;
 }
@@ -128,6 +125,10 @@ static void
 cli_on_normal_stop (struct bpstat *bs, int print_frame)
 {
   if (!print_frame)
+    return;
+
+  /* This event is suppressed.  */
+  if (cli_suppress_notification.normal_stop)
     return;
 
   SWITCH_THRU_ALL_UIS ()
@@ -395,9 +396,10 @@ struct saved_output_files
   ui_file *log;
   ui_file *targ;
   ui_file *targerr;
-  ui_file *file_to_delete;
+  ui_file_up file_to_delete;
+  ui_file_up log_to_delete;
 };
-static saved_output_files saved_output;
+static std::unique_ptr<saved_output_files> saved_output;
 
 /* See cli-interp.h.  */
 
@@ -407,61 +409,43 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
 {
   if (logfile != nullptr)
     {
-      saved_output.out = gdb_stdout;
-      saved_output.err = gdb_stderr;
-      saved_output.log = gdb_stdlog;
-      saved_output.targ = gdb_stdtarg;
-      saved_output.targerr = gdb_stdtargerr;
-
-      /* If something is being redirected, then grab logfile.  */
-      ui_file *logfile_p = nullptr;
-      if (logging_redirect || debug_redirect)
-	{
-	  logfile_p = logfile.get ();
-	  saved_output.file_to_delete = logfile_p;
-	}
+      saved_output.reset (new saved_output_files);
+      saved_output->out = gdb_stdout;
+      saved_output->err = gdb_stderr;
+      saved_output->log = gdb_stdlog;
+      saved_output->targ = gdb_stdtarg;
+      saved_output->targerr = gdb_stdtargerr;
 
       /* If something is not being redirected, then a tee containing both the
 	 logfile and stdout.  */
+      ui_file *logfile_p = logfile.get ();
       ui_file *tee = nullptr;
       if (!logging_redirect || !debug_redirect)
 	{
 	  tee = new tee_file (gdb_stdout, std::move (logfile));
-	  saved_output.file_to_delete = tee;
+	  saved_output->file_to_delete.reset (tee);
 	}
+      else
+	saved_output->file_to_delete = std::move (logfile);
 
-      /* Make sure that the call to logfile's dtor does not delete the
-         underlying pointer if we still keep a reference to it.  If
-         logfile_p is not referenced as the file_to_delete, then either
-         the logfile is not used (no redirection) and it should be
-         deleted, or a tee took ownership of the pointer. */
-      if (logfile_p != nullptr && saved_output.file_to_delete == logfile_p)
-	logfile.release ();
+      saved_output->log_to_delete.reset
+	(new timestamped_file (debug_redirect ? logfile_p : tee));
 
       gdb_stdout = logging_redirect ? logfile_p : tee;
-      gdb_stdlog = debug_redirect ? logfile_p : tee;
+      gdb_stdlog = saved_output->log_to_delete.get ();
       gdb_stderr = logging_redirect ? logfile_p : tee;
       gdb_stdtarg = logging_redirect ? logfile_p : tee;
       gdb_stdtargerr = logging_redirect ? logfile_p : tee;
     }
   else
     {
-      /* Delete the correct file.  If it's the tee then the logfile will also
-	 be deleted.  */
-      delete saved_output.file_to_delete;
+      gdb_stdout = saved_output->out;
+      gdb_stderr = saved_output->err;
+      gdb_stdlog = saved_output->log;
+      gdb_stdtarg = saved_output->targ;
+      gdb_stdtargerr = saved_output->targerr;
 
-      gdb_stdout = saved_output.out;
-      gdb_stderr = saved_output.err;
-      gdb_stdlog = saved_output.log;
-      gdb_stdtarg = saved_output.targ;
-      gdb_stdtargerr = saved_output.targerr;
-
-      saved_output.out = nullptr;
-      saved_output.err = nullptr;
-      saved_output.log = nullptr;
-      saved_output.targ = nullptr;
-      saved_output.targerr = nullptr;
-      saved_output.file_to_delete = nullptr;
+      saved_output.reset (nullptr);
     }
 }
 

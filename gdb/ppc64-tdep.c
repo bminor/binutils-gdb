@@ -798,6 +798,6 @@ ppc64_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
   if ((sym->flags & BSF_SYNTHETIC) != 0 && sym->udata.p != NULL)
     {
       elf_symbol_type *elf_sym = (elf_symbol_type *) sym->udata.p;
-      SET_MSYMBOL_SIZE (msym, elf_sym->internal_elf_sym.st_size);
+      msym->set_size (elf_sym->internal_elf_sym.st_size);
     }
 }

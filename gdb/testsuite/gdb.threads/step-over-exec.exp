@@ -47,8 +47,8 @@ proc do_test { execr_thread different_text_segments displaced_stepping } {
     set execd_opts [list debug]
 
     if { $different_text_segments } {
-	lappend execr_opts "ldflags=-Wl,-Ttext-segment=0x600000"
-	lappend execd_opts "ldflags=-Wl,-Ttext-segment=0x800000"
+	lappend execr_opts "text_segment=0x600000"
+	lappend execd_opts "text_segment=0x800000"
     }
 
     if { $execr_thread == "leader" } {

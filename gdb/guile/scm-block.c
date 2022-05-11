@@ -151,16 +151,16 @@ bkscm_print_block_smob (SCM self, SCM port, scm_print_state *pstate)
 
   gdbscm_printf (port, "#<%s", block_smob_name);
 
-  if (BLOCK_SUPERBLOCK (b) == NULL)
+  if (b->superblock () == NULL)
     gdbscm_printf (port, " global");
-  else if (BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (b)) == NULL)
+  else if (b->superblock ()->superblock () == NULL)
     gdbscm_printf (port, " static");
 
-  if (BLOCK_FUNCTION (b) != NULL)
-    gdbscm_printf (port, " %s", BLOCK_FUNCTION (b)->print_name ());
+  if (b->function () != NULL)
+    gdbscm_printf (port, " %s", b->function ()->print_name ());
 
   gdbscm_printf (port, " %s-%s",
-		 hex_string (BLOCK_START (b)), hex_string (BLOCK_END (b)));
+		 hex_string (b->start ()), hex_string (b->end ()));
 
   scm_puts (">", port);
 
@@ -379,7 +379,7 @@ gdbscm_block_start (SCM self)
     = bkscm_get_valid_block_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct block *block = b_smob->block;
 
-  return gdbscm_scm_from_ulongest (BLOCK_START (block));
+  return gdbscm_scm_from_ulongest (block->start ());
 }
 
 /* (block-end <gdb:block>) -> address */
@@ -391,7 +391,7 @@ gdbscm_block_end (SCM self)
     = bkscm_get_valid_block_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct block *block = b_smob->block;
 
-  return gdbscm_scm_from_ulongest (BLOCK_END (block));
+  return gdbscm_scm_from_ulongest (block->end ());
 }
 
 /* (block-function <gdb:block>) -> <gdb:symbol> */
@@ -404,7 +404,7 @@ gdbscm_block_function (SCM self)
   const struct block *block = b_smob->block;
   struct symbol *sym;
 
-  sym = BLOCK_FUNCTION (block);
+  sym = block->function ();
 
   if (sym != NULL)
     return syscm_scm_from_symbol (sym);
@@ -421,7 +421,7 @@ gdbscm_block_superblock (SCM self)
   const struct block *block = b_smob->block;
   const struct block *super_block;
 
-  super_block = BLOCK_SUPERBLOCK (block);
+  super_block = block->superblock ();
 
   if (super_block)
     return bkscm_scm_from_block (super_block, b_smob->objfile);
@@ -456,7 +456,7 @@ gdbscm_block_static_block (SCM self)
   const struct block *block = b_smob->block;
   const struct block *static_block;
 
-  if (BLOCK_SUPERBLOCK (block) == NULL)
+  if (block->superblock () == NULL)
     return SCM_BOOL_F;
 
   static_block = block_static_block (block);
@@ -474,7 +474,7 @@ gdbscm_block_global_p (SCM self)
     = bkscm_get_valid_block_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct block *block = b_smob->block;
 
-  return scm_from_bool (BLOCK_SUPERBLOCK (block) == NULL);
+  return scm_from_bool (block->superblock () == NULL);
 }
 
 /* (block-static? <gdb:block>) -> boolean
@@ -487,8 +487,8 @@ gdbscm_block_static_p (SCM self)
     = bkscm_get_valid_block_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct block *block = b_smob->block;
 
-  if (BLOCK_SUPERBLOCK (block) != NULL
-      && BLOCK_SUPERBLOCK (BLOCK_SUPERBLOCK (block)) == NULL)
+  if (block->superblock () != NULL
+      && block->superblock ()->superblock () == NULL)
     return SCM_BOOL_T;
   return SCM_BOOL_F;
 }
@@ -554,7 +554,7 @@ bkscm_print_block_syms_progress_smob (SCM self, SCM port,
 		    : i_smob->iter.d.compunit_symtab->includes[i_smob->iter.idx]);
 	    gdbscm_printf (port, " %s",
 			   symtab_to_filename_for_display
-			     (compunit_primary_filetab (cust)));
+			     (cust->primary_filetab ()));
 	    break;
 	  }
 	case FIRST_LOCAL_BLOCK:
@@ -685,7 +685,7 @@ gdbscm_lookup_block (SCM pc_scm)
     {
       cust = find_pc_compunit_symtab (pc);
 
-      if (cust != NULL && COMPUNIT_OBJFILE (cust) != NULL)
+      if (cust != NULL && cust->objfile () != NULL)
 	block = block_for_pc (pc);
     }
   catch (const gdb_exception &except)
@@ -694,14 +694,14 @@ gdbscm_lookup_block (SCM pc_scm)
     }
 
   GDBSCM_HANDLE_GDB_EXCEPTION (exc);
-  if (cust == NULL || COMPUNIT_OBJFILE (cust) == NULL)
+  if (cust == NULL || cust->objfile () == NULL)
     {
       gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, pc_scm,
 				 _("cannot locate object file for block"));
     }
 
   if (block != NULL)
-    return bkscm_scm_from_block (block, COMPUNIT_OBJFILE (cust));
+    return bkscm_scm_from_block (block, cust->objfile ());
   return SCM_BOOL_F;
 }
 

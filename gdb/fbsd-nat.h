@@ -66,6 +66,10 @@ public:
 
   void update_thread_list () override;
 
+  bool can_async_p () override;
+
+  void async (int) override;
+
   thread_control_capabilities get_thread_control_capabilities () override
   { return tc_schedlock; }
 
@@ -105,11 +109,27 @@ public:
 
   bool supports_disable_randomization () override;
 
+  /* Methods meant to be overridden by arch-specific target
+     classes.  */
+
+  virtual void low_new_fork (ptid_t parent, pid_t child)
+  {}
+
+  /* The method to call, if any, when a thread is destroyed.  */
+  virtual void low_delete_thread (thread_info *)
+  {}
+
+  /* Hook to call prior to resuming a thread.  */
+  virtual void low_prepare_to_resume (thread_info *)
+  {}
+
 protected:
 
   void post_startup_inferior (ptid_t) override;
 
 private:
+  ptid_t wait_1 (ptid_t, struct target_waitstatus *, target_wait_flags);
+
   /* Helper routines for use in fetch_registers and store_registers in
      subclasses.  These routines fetch and store a single set of
      registers described by REGSET.  The REGSET's 'regmap' field must
@@ -120,35 +140,80 @@ private:
      of registers to a native thread.
 
      The caller must provide storage for the set of registers in REGS,
-     and SIZE is the size of the storage.  */
+     and SIZE is the size of the storage.
 
-  void fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
+     Returns true if the register set was transferred due to a
+     matching REGNUM.*/
+
+  bool fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   const struct regset *regset, void *regs, size_t size);
 
-  void store_register_set (struct regcache *regcache, int regnum, int fetch_op,
+  bool store_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   int store_op, const struct regset *regset,
 			   void *regs, size_t size);
+
+  /* Helper routines which use PT_GETREGSET and PT_SETREGSET for the
+     specified NOTE instead of regset-specific fetch and store
+     ops.  */
+
+  bool fetch_regset (struct regcache *regcache, int regnum, int note,
+		     const struct regset *regset, void *regs, size_t size);
+
+  bool store_regset (struct regcache *regcache, int regnum, int note,
+		     const struct regset *regset, void *regs, size_t size);
+
 protected:
   /* Wrapper versions of the above helpers which accept a register set
      type such as 'struct reg' or 'struct fpreg'.  */
 
   template <class Regset>
-  void fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
+  bool fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   const struct regset *regset)
   {
     Regset regs;
-    fetch_register_set (regcache, regnum, fetch_op, regset, &regs,
-			sizeof (regs));
+    return fetch_register_set (regcache, regnum, fetch_op, regset, &regs,
+			       sizeof (regs));
   }
 
   template <class Regset>
-  void store_register_set (struct regcache *regcache, int regnum, int fetch_op,
+  bool store_register_set (struct regcache *regcache, int regnum, int fetch_op,
 			   int store_op, const struct regset *regset)
   {
     Regset regs;
-    store_register_set (regcache, regnum, fetch_op, store_op, regset, &regs,
-			sizeof (regs));
+    return store_register_set (regcache, regnum, fetch_op, store_op, regset,
+			       &regs, sizeof (regs));
+  }
+
+  /* Helper routine for use in read_description in subclasses.  This
+     routine checks if the register set for the specified NOTE is
+     present for a given PTID.  If the register set is present, the
+     the size of the register set is returned.  If the register set is
+     not present, zero is returned.  */
+
+  bool have_regset (ptid_t ptid, int note);
+
+  /* Wrapper versions of the PT_GETREGSET and PT_REGSET helpers which
+     accept a register set type.  */
+
+  template <class Regset>
+  bool fetch_regset (struct regcache *regcache, int regnum, int note,
+		     const struct regset *regset)
+  {
+    Regset regs;
+    return fetch_regset (regcache, regnum, note, regset, &regs, sizeof (regs));
+  }
+
+  template <class Regset>
+  bool store_regset (struct regcache *regcache, int regnum, int note,
+		     const struct regset *regset)
+  {
+    Regset regs;
+    return store_regset (regcache, regnum, note, regset, &regs, sizeof (regs));
   }
 };
+
+/* Fetch the signal information for PTID and store it in *SIGINFO.
+   Return true if successful.  */
+bool fbsd_nat_get_siginfo (ptid_t ptid, siginfo_t *siginfo);
 
 #endif /* fbsd-nat.h */

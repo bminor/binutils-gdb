@@ -58,7 +58,7 @@ proc mi_gdb_start { args } {
     global gdbserver_reconnect_p
 
     # Spawn GDB.
-    set res [extended_gdbserver_mi_gdb_start $args]
+    set res [eval extended_gdbserver_mi_gdb_start $args]
     if { $res } {
 	return $res
     }

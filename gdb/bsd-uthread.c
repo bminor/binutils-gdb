@@ -29,7 +29,7 @@
 #include "symfile.h"
 #include "target.h"
 
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 
 #include "bsd-uthread.h"
 
@@ -163,7 +163,7 @@ bsd_uthread_lookup_address (const char *name, struct objfile *objfile)
 
   sym = lookup_minimal_symbol (name, NULL, objfile);
   if (sym.minsym)
-    return BMSYMBOL_VALUE_ADDRESS (sym);
+    return sym.value_address ();
 
   return 0;
 }

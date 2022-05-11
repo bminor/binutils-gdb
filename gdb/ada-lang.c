@@ -20,7 +20,7 @@
 
 #include "defs.h"
 #include <ctype.h>
-#include "gdb_regex.h"
+#include "gdbsupport/gdb_regex.h"
 #include "frame.h"
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -35,7 +35,7 @@
 #include "breakpoint.h"
 #include "gdbcore.h"
 #include "hashtab.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "ada-lang.h"
 #include "completer.h"
 #include "ui-out.h"
@@ -59,6 +59,7 @@
 #include "gdbsupport/byte-vector.h"
 #include <algorithm>
 #include "ada-exp.h"
+#include "charset.h"
 
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C).
@@ -206,6 +207,38 @@ static struct type *ada_find_any_type (const char *name);
 
 static symbol_name_matcher_ftype *ada_get_symbol_name_matcher
   (const lookup_name_info &lookup_name);
+
+
+
+/* The character set used for source files.  */
+static const char *ada_source_charset;
+
+/* The string "UTF-8".  This is here so we can check for the UTF-8
+   charset using == rather than strcmp.  */
+static const char ada_utf8[] = "UTF-8";
+
+/* Each entry in the UTF-32 case-folding table is of this form.  */
+struct utf8_entry
+{
+  /* The start and end, inclusive, of this range of codepoints.  */
+  uint32_t start, end;
+  /* The delta to apply to get the upper-case form.  0 if this is
+     already upper-case.  */
+  int upper_delta;
+  /* The delta to apply to get the lower-case form.  0 if this is
+     already lower-case.  */
+  int lower_delta;
+
+  bool operator< (uint32_t val) const
+  {
+    return end < val;
+  }
+};
+
+static const utf8_entry ada_case_fold[] =
+{
+#include "ada-casefold.h"
+};
 
 
 
@@ -786,7 +819,7 @@ ada_main_name (void)
 
   if (msym.minsym != NULL)
     {
-      CORE_ADDR main_program_name_addr = BMSYMBOL_VALUE_ADDRESS (msym);
+      CORE_ADDR main_program_name_addr = msym.value_address ();
       if (main_program_name_addr == 0)
 	error (_("Invalid address for Ada main program name."));
 
@@ -843,6 +876,52 @@ is_compiler_suffix (const char *str)
   return *str == '\0' || (str[0] == ']' && str[1] == '\0');
 }
 
+/* Append a non-ASCII character to RESULT.  */
+static void
+append_hex_encoded (std::string &result, uint32_t one_char)
+{
+  if (one_char <= 0xff)
+    {
+      result.append ("U");
+      result.append (phex (one_char, 1));
+    }
+  else if (one_char <= 0xffff)
+    {
+      result.append ("W");
+      result.append (phex (one_char, 2));
+    }
+  else
+    {
+      result.append ("WW");
+      result.append (phex (one_char, 4));
+    }
+}
+
+/* Return a string that is a copy of the data in STORAGE, with
+   non-ASCII characters replaced by the appropriate hex encoding.  A
+   template is used because, for UTF-8, we actually want to work with
+   UTF-32 codepoints.  */
+template<typename T>
+std::string
+copy_and_hex_encode (struct obstack *storage)
+{
+  const T *chars = (T *) obstack_base (storage);
+  int num_chars = obstack_object_size (storage) / sizeof (T);
+  std::string result;
+  for (int i = 0; i < num_chars; ++i)
+    {
+      if (chars[i] <= 0x7f)
+	{
+	  /* The host character set has to be a superset of ASCII, as
+	     are all the other character sets we can use.  */
+	  result.push_back (chars[i]);
+	}
+      else
+	append_hex_encoded (result, chars[i]);
+    }
+  return result;
+}
+
 /* The "encoded" form of DECODED, according to GNAT conventions.  If
    THROW_ERRORS, throw an error if invalid operator name is found.
    Otherwise, return the empty string in that case.  */
@@ -854,8 +933,12 @@ ada_encode_1 (const char *decoded, bool throw_errors)
     return {};
 
   std::string encoding_buffer;
+  bool saw_non_ascii = false;
   for (const char *p = decoded; *p != '\0'; p += 1)
     {
+      if ((*p & 0x80) != 0)
+	saw_non_ascii = true;
+
       if (*p == '.')
 	encoding_buffer.append ("__");
       else if (*p == '[' && is_compiler_suffix (p))
@@ -887,23 +970,70 @@ ada_encode_1 (const char *decoded, bool throw_errors)
 	encoding_buffer.push_back (*p);
     }
 
+  /* If a non-ASCII character is seen, we must convert it to the
+     appropriate hex form.  As this is more expensive, we keep track
+     of whether it is even necessary.  */
+  if (saw_non_ascii)
+    {
+      auto_obstack storage;
+      bool is_utf8 = ada_source_charset == ada_utf8;
+      try
+	{
+	  convert_between_encodings
+	    (host_charset (),
+	     is_utf8 ? HOST_UTF32 : ada_source_charset,
+	     (const gdb_byte *) encoding_buffer.c_str (),
+	     encoding_buffer.length (), 1,
+	     &storage, translit_none);
+	}
+      catch (const gdb_exception &)
+	{
+	  static bool warned = false;
+
+	  /* Converting to UTF-32 shouldn't fail, so if it doesn't, we
+	     might like to know why.  */
+	  if (!warned)
+	    {
+	      warned = true;
+	      warning (_("charset conversion failure for '%s'.\n"
+			 "You may have the wrong value for 'set ada source-charset'."),
+		       encoding_buffer.c_str ());
+	    }
+
+	  /* We don't try to recover from errors.  */
+	  return encoding_buffer;
+	}
+
+      if (is_utf8)
+	return copy_and_hex_encode<uint32_t> (&storage);
+      return copy_and_hex_encode<gdb_byte> (&storage);
+    }
+
   return encoding_buffer;
 }
 
-/* The "encoded" form of DECODED, according to GNAT conventions.  */
-
-std::string
-ada_encode (const char *decoded)
+/* Find the entry for C in the case-folding table.  Return nullptr if
+   the entry does not cover C.  */
+static const utf8_entry *
+find_case_fold_entry (uint32_t c)
 {
-  return ada_encode_1 (decoded, true);
+  auto iter = std::lower_bound (std::begin (ada_case_fold),
+				std::end (ada_case_fold),
+				c);
+  if (iter == std::end (ada_case_fold)
+      || c < iter->start
+      || c > iter->end)
+    return nullptr;
+  return &*iter;
 }
 
 /* Return NAME folded to lower case, or, if surrounded by single
-   quotes, unfolded, but with the quotes stripped away.  Result good
-   to next call.  */
+   quotes, unfolded, but with the quotes stripped away.  If
+   THROW_ON_ERROR is true, encoding failures will throw an exception
+   rather than emitting a warning.  Result good to next call.  */
 
 static const char *
-ada_fold_name (gdb::string_view name)
+ada_fold_name (gdb::string_view name, bool throw_on_error = false)
 {
   static std::string fold_storage;
 
@@ -911,12 +1041,118 @@ ada_fold_name (gdb::string_view name)
     fold_storage = gdb::to_string (name.substr (1, name.size () - 2));
   else
     {
-      fold_storage = gdb::to_string (name);
-      for (int i = 0; i < name.size (); i += 1)
-	fold_storage[i] = tolower (fold_storage[i]);
+      /* Why convert to UTF-32 and implement our own case-folding,
+	 rather than convert to wchar_t and use the platform's
+	 functions?  I'm glad you asked.
+
+	 The main problem is that GNAT implements an unusual rule for
+	 case folding.  For ASCII letters, letters in single-byte
+	 encodings (such as ISO-8859-*), and Unicode letters that fit
+	 in a single byte (i.e., code point is <= 0xff), the letter is
+	 folded to lower case.  Other Unicode letters are folded to
+	 upper case.
+
+	 This rule means that the code must be able to examine the
+	 value of the character.  And, some hosts do not use Unicode
+	 for wchar_t, so examining the value of such characters is
+	 forbidden.  */
+      auto_obstack storage;
+      try
+	{
+	  convert_between_encodings
+	    (host_charset (), HOST_UTF32,
+	     (const gdb_byte *) name.data (),
+	     name.length (), 1,
+	     &storage, translit_none);
+	}
+      catch (const gdb_exception &)
+	{
+	  if (throw_on_error)
+	    throw;
+
+	  static bool warned = false;
+
+	  /* Converting to UTF-32 shouldn't fail, so if it doesn't, we
+	     might like to know why.  */
+	  if (!warned)
+	    {
+	      warned = true;
+	      warning (_("could not convert '%s' from the host encoding (%s) to UTF-32.\n"
+			 "This normally should not happen, please file a bug report."),
+		       gdb::to_string (name).c_str (), host_charset ());
+	    }
+
+	  /* We don't try to recover from errors; just return the
+	     original string.  */
+	  fold_storage = gdb::to_string (name);
+	  return fold_storage.c_str ();
+	}
+
+      bool is_utf8 = ada_source_charset == ada_utf8;
+      uint32_t *chars = (uint32_t *) obstack_base (&storage);
+      int num_chars = obstack_object_size (&storage) / sizeof (uint32_t);
+      for (int i = 0; i < num_chars; ++i)
+	{
+	  const struct utf8_entry *entry = find_case_fold_entry (chars[i]);
+	  if (entry != nullptr)
+	    {
+	      uint32_t low = chars[i] + entry->lower_delta;
+	      if (!is_utf8 || low <= 0xff)
+		chars[i] = low;
+	      else
+		chars[i] = chars[i] + entry->upper_delta;
+	    }
+	}
+
+      /* Now convert back to ordinary characters.  */
+      auto_obstack reconverted;
+      try
+	{
+	  convert_between_encodings (HOST_UTF32,
+				     host_charset (),
+				     (const gdb_byte *) chars,
+				     num_chars * sizeof (uint32_t),
+				     sizeof (uint32_t),
+				     &reconverted,
+				     translit_none);
+	  obstack_1grow (&reconverted, '\0');
+	  fold_storage = std::string ((const char *) obstack_base (&reconverted));
+	}
+      catch (const gdb_exception &)
+	{
+	  if (throw_on_error)
+	    throw;
+
+	  static bool warned = false;
+
+	  /* Converting back from UTF-32 shouldn't normally fail, but
+	     there are some host encodings without upper/lower
+	     equivalence.  */
+	  if (!warned)
+	    {
+	      warned = true;
+	      warning (_("could not convert the lower-cased variant of '%s'\n"
+			 "from UTF-32 to the host encoding (%s)."),
+		       gdb::to_string (name).c_str (), host_charset ());
+	    }
+
+	  /* We don't try to recover from errors; just return the
+	     original string.  */
+	  fold_storage = gdb::to_string (name);
+	}
     }
 
   return fold_storage.c_str ();
+}
+
+/* The "encoded" form of DECODED, according to GNAT conventions.  */
+
+std::string
+ada_encode (const char *decoded)
+{
+  if (decoded[0] != '<')
+    decoded = ada_fold_name (decoded);
+  return ada_encode_1 (decoded, true);
 }
 
 /* Return nonzero if C is either a digit or a lowercase alphabet character.  */
@@ -999,12 +1235,78 @@ remove_compiler_suffix (const char *encoded, int *len)
   return -1;
 }
 
+/* Convert an ASCII hex string to a number.  Reads exactly N
+   characters from STR.  Returns true on success, false if one of the
+   digits was not a hex digit.  */
+static bool
+convert_hex (const char *str, int n, uint32_t *out)
+{
+  uint32_t result = 0;
+
+  for (int i = 0; i < n; ++i)
+    {
+      if (!isxdigit (str[i]))
+	return false;
+      result <<= 4;
+      result |= fromhex (str[i]);
+    }
+
+  *out = result;
+  return true;
+}
+
+/* Convert a wide character from its ASCII hex representation in STR
+   (consisting of exactly N characters) to the host encoding,
+   appending the resulting bytes to OUT.  If N==2 and the Ada source
+   charset is not UTF-8, then hex refers to an encoding in the
+   ADA_SOURCE_CHARSET; otherwise, use UTF-32.  Return true on success.
+   Return false and do not modify OUT on conversion failure.  */
+static bool
+convert_from_hex_encoded (std::string &out, const char *str, int n)
+{
+  uint32_t value;
+
+  if (!convert_hex (str, n, &value))
+    return false;
+  try
+    {
+      auto_obstack bytes;
+      /* In the 'U' case, the hex digits encode the character in the
+	 Ada source charset.  However, if the source charset is UTF-8,
+	 this really means it is a single-byte UTF-32 character.  */
+      if (n == 2 && ada_source_charset != ada_utf8)
+	{
+	  gdb_byte one_char = (gdb_byte) value;
+
+	  convert_between_encodings (ada_source_charset, host_charset (),
+				     &one_char,
+				     sizeof (one_char), sizeof (one_char),
+				     &bytes, translit_none);
+	}
+      else
+	convert_between_encodings (HOST_UTF32, host_charset (),
+				   (const gdb_byte *) &value,
+				   sizeof (value), sizeof (value),
+				   &bytes, translit_none);
+      obstack_1grow (&bytes, '\0');
+      out.append ((const char *) obstack_base (&bytes));
+    }
+  catch (const gdb_exception &)
+    {
+      /* On failure, the caller will just let the encoded form
+	 through, which seems basically reasonable.  */
+      return false;
+    }
+
+  return true;
+}
+
 /* See ada-lang.h.  */
 
 std::string
-ada_decode (const char *encoded, bool wrap)
+ada_decode (const char *encoded, bool wrap, bool operators)
 {
-  int i, j;
+  int i;
   int len0;
   const char *p;
   int at_start_name;
@@ -1021,6 +1323,11 @@ ada_decode (const char *encoded, bool wrap)
      if we see this prefix.  */
   if (startswith (encoded, "_ada_"))
     encoded += 5;
+  /* The "___ghost_" prefix is used for ghost entities.  Normally
+     these aren't preserved but when they are, it's useful to see
+     them.  */
+  if (startswith (encoded, "___ghost_"))
+    encoded += 9;
 
   /* If the name starts with '_', then it is not a properly encoded
      name, so do not attempt to decode it.  Similarly, if the name
@@ -1068,10 +1375,6 @@ ada_decode (const char *encoded, bool wrap)
   if (len0 > 1 && startswith (encoded + len0 - 1, "B"))
     len0 -= 1;
 
-  /* Make decoded big enough for possible expansion by operator name.  */
-
-  decoded.resize (2 * len0 + 1, 'X');
-
   /* Remove trailing __{digit}+ or trailing ${digit}+.  */
 
   if (len0 > 1 && isdigit (encoded[len0 - 1]))
@@ -1089,14 +1392,14 @@ ada_decode (const char *encoded, bool wrap)
   /* The first few characters that are not alphabetic are not part
      of any encoding we use, so we can copy them over verbatim.  */
 
-  for (i = 0, j = 0; i < len0 && !isalpha (encoded[i]); i += 1, j += 1)
-    decoded[j] = encoded[i];
+  for (i = 0; i < len0 && !isalpha (encoded[i]); i += 1)
+    decoded.push_back (encoded[i]);
 
   at_start_name = 1;
   while (i < len0)
     {
       /* Is this a symbol function?  */
-      if (at_start_name && encoded[i] == 'O')
+      if (operators && at_start_name && encoded[i] == 'O')
 	{
 	  int k;
 
@@ -1107,10 +1410,9 @@ ada_decode (const char *encoded, bool wrap)
 			    op_len - 1) == 0)
 		  && !isalnum (encoded[i + op_len]))
 		{
-		  strcpy (&decoded.front() + j, ada_opname_table[k].decoded);
+		  decoded.append (ada_opname_table[k].decoded);
 		  at_start_name = 0;
 		  i += op_len;
-		  j += strlen (ada_opname_table[k].decoded);
 		  break;
 		}
 	    }
@@ -1196,6 +1498,32 @@ ada_decode (const char *encoded, bool wrap)
 	    i++;
 	}
 
+      if (i < len0 + 3 && encoded[i] == 'U' && isxdigit (encoded[i + 1]))
+	{
+	  if (convert_from_hex_encoded (decoded, &encoded[i + 1], 2))
+	    {
+	      i += 3;
+	      continue;
+	    }
+	}
+      else if (i < len0 + 5 && encoded[i] == 'W' && isxdigit (encoded[i + 1]))
+	{
+	  if (convert_from_hex_encoded (decoded, &encoded[i + 1], 4))
+	    {
+	      i += 5;
+	      continue;
+	    }
+	}
+      else if (i < len0 + 10 && encoded[i] == 'W' && encoded[i + 1] == 'W'
+	       && isxdigit (encoded[i + 2]))
+	{
+	  if (convert_from_hex_encoded (decoded, &encoded[i + 2], 8))
+	    {
+	      i += 10;
+	      continue;
+	    }
+	}
+
       if (encoded[i] == 'X' && i != 0 && isalnum (encoded[i - 1]))
 	{
 	  /* This is a X[bn]* sequence not separated from the previous
@@ -1214,28 +1542,28 @@ ada_decode (const char *encoded, bool wrap)
       else if (i < len0 - 2 && encoded[i] == '_' && encoded[i + 1] == '_')
 	{
 	 /* Replace '__' by '.'.  */
-	  decoded[j] = '.';
+	  decoded.push_back ('.');
 	  at_start_name = 1;
 	  i += 2;
-	  j += 1;
 	}
       else
 	{
 	  /* It's a character part of the decoded name, so just copy it
 	     over.  */
-	  decoded[j] = encoded[i];
+	  decoded.push_back (encoded[i]);
 	  i += 1;
-	  j += 1;
 	}
     }
-  decoded.resize (j);
 
   /* Decoded names should never contain any uppercase character.
      Double-check this, and abort the decoding if we find one.  */
 
-  for (i = 0; i < decoded.length(); ++i)
-    if (isupper (decoded[i]) || decoded[i] == ' ')
-      goto Suppress;
+  if (operators)
+    {
+      for (i = 0; i < decoded.length(); ++i)
+	if (isupper (decoded[i]) || decoded[i] == ' ')
+	  goto Suppress;
+    }
 
   /* If the compiler added a suffix, append it now.  */
   if (suffix >= 0)
@@ -3163,9 +3491,9 @@ static void
 ada_print_symbol_signature (struct ui_file *stream, struct symbol *sym,
 			    const struct type_print_options *flags)
 {
-  struct type *type = SYMBOL_TYPE (sym);
+  struct type *type = sym->type ();
 
-  fprintf_filtered (stream, "%s", sym->print_name ());
+  gdb_printf (stream, "%s", sym->print_name ());
   if (!print_signatures
       || type == NULL
       || type->code () != TYPE_CODE_FUNC)
@@ -3175,20 +3503,20 @@ ada_print_symbol_signature (struct ui_file *stream, struct symbol *sym,
     {
       int i;
 
-      fprintf_filtered (stream, " (");
+      gdb_printf (stream, " (");
       for (i = 0; i < type->num_fields (); ++i)
 	{
 	  if (i > 0)
-	    fprintf_filtered (stream, "; ");
+	    gdb_printf (stream, "; ");
 	  ada_print_type (type->field (i).type (), NULL, stream, -1, 0,
 			  flags);
 	}
-      fprintf_filtered (stream, ")");
+      gdb_printf (stream, ")");
     }
   if (TYPE_TARGET_TYPE (type) != NULL
       && TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
     {
-      fprintf_filtered (stream, " return ");
+      gdb_printf (stream, " return ");
       ada_print_type (TYPE_TARGET_TYPE (type), NULL, stream, -1, 0, flags);
     }
 }
@@ -3314,9 +3642,9 @@ See set/show multiple-symbol."));
   if (select_mode == multiple_symbols_all && max_results > 1)
     return nsyms;
 
-  printf_filtered (_("[0] cancel\n"));
+  gdb_printf (_("[0] cancel\n"));
   if (max_results > 1)
-    printf_filtered (_("[1] all\n"));
+    gdb_printf (_("[1] all\n"));
 
   sort_choices (syms, nsyms);
 
@@ -3325,19 +3653,19 @@ See set/show multiple-symbol."));
       if (syms[i].symbol == NULL)
 	continue;
 
-      if (SYMBOL_CLASS (syms[i].symbol) == LOC_BLOCK)
+      if (syms[i].symbol->aclass () == LOC_BLOCK)
 	{
 	  struct symtab_and_line sal =
 	    find_function_start_sal (syms[i].symbol, 1);
 
-	  printf_filtered ("[%d] ", i + first_choice);
+	  gdb_printf ("[%d] ", i + first_choice);
 	  ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
 				      &type_print_raw_options);
 	  if (sal.symtab == NULL)
-	    printf_filtered (_(" at %p[<no source file available>%p]:%d\n"),
-			     metadata_style.style ().ptr (), nullptr, sal.line);
+	    gdb_printf (_(" at %p[<no source file available>%p]:%d\n"),
+			metadata_style.style ().ptr (), nullptr, sal.line);
 	  else
-	    printf_filtered
+	    gdb_printf
 	      (_(" at %ps:%d\n"),
 	       styled_string (file_name_style.style (),
 			      symtab_to_filename_for_display (sal.symtab)),
@@ -3347,47 +3675,47 @@ See set/show multiple-symbol."));
       else
 	{
 	  int is_enumeral =
-	    (SYMBOL_CLASS (syms[i].symbol) == LOC_CONST
-	     && SYMBOL_TYPE (syms[i].symbol) != NULL
-	     && SYMBOL_TYPE (syms[i].symbol)->code () == TYPE_CODE_ENUM);
+	    (syms[i].symbol->aclass () == LOC_CONST
+	     && syms[i].symbol->type () != NULL
+	     && syms[i].symbol->type ()->code () == TYPE_CODE_ENUM);
 	  struct symtab *symtab = NULL;
 
-	  if (SYMBOL_OBJFILE_OWNED (syms[i].symbol))
-	    symtab = symbol_symtab (syms[i].symbol);
+	  if (syms[i].symbol->is_objfile_owned ())
+	    symtab = syms[i].symbol->symtab ();
 
-	  if (SYMBOL_LINE (syms[i].symbol) != 0 && symtab != NULL)
+	  if (syms[i].symbol->line () != 0 && symtab != NULL)
 	    {
-	      printf_filtered ("[%d] ", i + first_choice);
+	      gdb_printf ("[%d] ", i + first_choice);
 	      ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
 					  &type_print_raw_options);
-	      printf_filtered (_(" at %s:%d\n"),
-			       symtab_to_filename_for_display (symtab),
-			       SYMBOL_LINE (syms[i].symbol));
+	      gdb_printf (_(" at %s:%d\n"),
+			  symtab_to_filename_for_display (symtab),
+			  syms[i].symbol->line ());
 	    }
 	  else if (is_enumeral
-		   && SYMBOL_TYPE (syms[i].symbol)->name () != NULL)
+		   && syms[i].symbol->type ()->name () != NULL)
 	    {
-	      printf_filtered (("[%d] "), i + first_choice);
-	      ada_print_type (SYMBOL_TYPE (syms[i].symbol), NULL,
+	      gdb_printf (("[%d] "), i + first_choice);
+	      ada_print_type (syms[i].symbol->type (), NULL,
 			      gdb_stdout, -1, 0, &type_print_raw_options);
-	      printf_filtered (_("'(%s) (enumeral)\n"),
-			       syms[i].symbol->print_name ());
+	      gdb_printf (_("'(%s) (enumeral)\n"),
+			  syms[i].symbol->print_name ());
 	    }
 	  else
 	    {
-	      printf_filtered ("[%d] ", i + first_choice);
+	      gdb_printf ("[%d] ", i + first_choice);
 	      ada_print_symbol_signature (gdb_stdout, syms[i].symbol,
 					  &type_print_raw_options);
 
 	      if (symtab != NULL)
-		printf_filtered (is_enumeral
-				 ? _(" in %s (enumeral)\n")
-				 : _(" at %s:?\n"),
-				 symtab_to_filename_for_display (symtab));
+		gdb_printf (is_enumeral
+			    ? _(" in %s (enumeral)\n")
+			    : _(" at %s:?\n"),
+			    symtab_to_filename_for_display (symtab));
 	      else
-		printf_filtered (is_enumeral
-				 ? _(" (enumeral)\n")
-				 : _(" at ?\n"));
+		gdb_printf (is_enumeral
+			    ? _(" (enumeral)\n")
+			    : _(" at ?\n"));
 	    }
 	}
     }
@@ -3467,7 +3795,7 @@ ada_resolve_enum (std::vector<struct block_symbol> &syms,
     {
       /* We already know the name matches, so we're just looking for
 	 an element of the correct enum type.  */
-      if (ada_check_typedef (SYMBOL_TYPE (syms[i].symbol)) == context_type)
+      if (ada_check_typedef (syms[i].symbol->type ()) == context_type)
 	return i;
     }
 
@@ -3491,7 +3819,7 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
 		   candidates.end (),
 		   [] (block_symbol &bsym)
 		   {
-		     switch (SYMBOL_CLASS (bsym.symbol))
+		     switch (bsym.symbol->aclass ())
 		       {
 		       case LOC_REGISTER:
 		       case LOC_ARG:
@@ -3514,7 +3842,7 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
 	  candidates.end (),
 	  [] (block_symbol &bsym)
 	  {
-	    return SYMBOL_CLASS (bsym.symbol) == LOC_TYPEDEF;
+	    return bsym.symbol->aclass () == LOC_TYPEDEF;
 	  }),
 	 candidates.end ());
     }
@@ -3526,7 +3854,7 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
       candidates.end (),
       [] (block_symbol &bsym)
       {
-       return bsym.symbol->artificial;
+	return bsym.symbol->is_artificial ();
       }),
      candidates.end ());
 
@@ -3550,7 +3878,7 @@ ada_resolve_variable (struct symbol *sym, const struct block *block,
     }
   else
     {
-      printf_filtered (_("Multiple matches for %s\n"), sym->print_name ());
+      gdb_printf (_("Multiple matches for %s\n"), sym->print_name ());
       user_select_syms (candidates.data (), candidates.size (), 1);
       i = 0;
     }
@@ -3626,9 +3954,9 @@ static int
 ada_args_match (struct symbol *func, struct value **actuals, int n_actuals)
 {
   int i;
-  struct type *func_type = SYMBOL_TYPE (func);
+  struct type *func_type = func->type ();
 
-  if (SYMBOL_CLASS (func) == LOC_CONST
+  if (func->aclass () == LOC_CONST
       && func_type->code () == TYPE_CODE_ENUM)
     return (n_actuals == 0);
   else if (func_type == NULL || func_type->code () != TYPE_CODE_FUNC)
@@ -3714,7 +4042,7 @@ ada_resolve_function (std::vector<struct block_symbol> &syms,
     {
       for (k = 0; k < syms.size (); k += 1)
 	{
-	  struct type *type = ada_check_typedef (SYMBOL_TYPE (syms[k].symbol));
+	  struct type *type = ada_check_typedef (syms[k].symbol->type ());
 
 	  if (ada_args_match (syms[k].symbol, args, nargs)
 	      && (fallback || return_match (type, context_type)))
@@ -3733,7 +4061,7 @@ ada_resolve_function (std::vector<struct block_symbol> &syms,
     return -1;
   else if (m > 1 && !parse_completion)
     {
-      printf_filtered (_("Multiple matches for %s\n"), name);
+      gdb_printf (_("Multiple matches for %s\n"), name);
       user_select_syms (syms.data (), m, 1);
       return 0;
     }
@@ -3934,7 +4262,7 @@ ada_parse_renaming (struct symbol *sym,
 
   if (sym == NULL)
     return ADA_NOT_RENAMING;
-  switch (SYMBOL_CLASS (sym)) 
+  switch (sym->aclass ()) 
     {
     default:
       return ADA_NOT_RENAMING;
@@ -4376,19 +4704,20 @@ cache_symbol (const char *name, domain_enum domain, struct symbol *sym,
 
   /* Symbols for builtin types don't have a block.
      For now don't cache such symbols.  */
-  if (sym != NULL && !SYMBOL_OBJFILE_OWNED (sym))
+  if (sym != NULL && !sym->is_objfile_owned ())
     return;
 
   /* If the symbol is a local symbol, then do not cache it, as a search
      for that symbol depends on the context.  To determine whether
      the symbol is local or not, we check the block where we found it
      against the global and static blocks of its associated symtab.  */
-  if (sym
-      && BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symbol_symtab (sym)),
-			    GLOBAL_BLOCK) != block
-      && BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symbol_symtab (sym)),
-			    STATIC_BLOCK) != block)
-    return;
+  if (sym != nullptr)
+    {
+      const blockvector &bv = *sym->symtab ()->compunit ()->blockvector ();
+
+      if (bv.global_block () != block && bv.static_block () != block)
+	return;
+    }
 
   h = msymbol_hash (name) % HASH_SIZE;
   e = XOBNEW (&sym_cache->cache_space, cache_entry);
@@ -4441,9 +4770,9 @@ static int
 is_nonfunction (const std::vector<struct block_symbol> &syms)
 {
   for (const block_symbol &sym : syms)
-    if (SYMBOL_TYPE (sym.symbol)->code () != TYPE_CODE_FUNC
-	&& (SYMBOL_TYPE (sym.symbol)->code () != TYPE_CODE_ENUM
-	    || SYMBOL_CLASS (sym.symbol) != LOC_CONST))
+    if (sym.symbol->type ()->code () != TYPE_CODE_FUNC
+	&& (sym.symbol->type ()->code () != TYPE_CODE_ENUM
+	    || sym.symbol->aclass () != LOC_CONST))
       return 1;
 
   return 0;
@@ -4477,18 +4806,18 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
 {
   if (sym0 == sym1)
     return 1;
-  if (SYMBOL_DOMAIN (sym0) != SYMBOL_DOMAIN (sym1)
-      || SYMBOL_CLASS (sym0) != SYMBOL_CLASS (sym1))
+  if (sym0->domain () != sym1->domain ()
+      || sym0->aclass () != sym1->aclass ())
     return 0;
 
-  switch (SYMBOL_CLASS (sym0))
+  switch (sym0->aclass ())
     {
     case LOC_UNDEF:
       return 1;
     case LOC_TYPEDEF:
       {
-	struct type *type0 = SYMBOL_TYPE (sym0);
-	struct type *type1 = SYMBOL_TYPE (sym1);
+	struct type *type0 = sym0->type ();
+	struct type *type1 = sym1->type ();
 	const char *name0 = sym0->linkage_name ();
 	const char *name1 = sym1->linkage_name ();
 	int len0 = strlen (name0);
@@ -4500,15 +4829,15 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
 		  && startswith (name1 + len0, "___XV")));
       }
     case LOC_CONST:
-      return SYMBOL_VALUE (sym0) == SYMBOL_VALUE (sym1)
-	&& equiv_types (SYMBOL_TYPE (sym0), SYMBOL_TYPE (sym1));
+      return sym0->value_longest () == sym1->value_longest ()
+	&& equiv_types (sym0->type (), sym1->type ());
 
     case LOC_STATIC:
       {
 	const char *name0 = sym0->linkage_name ();
 	const char *name1 = sym1->linkage_name ();
 	return (strcmp (name0, name1) == 0
-		&& SYMBOL_VALUE_ADDRESS (sym0) == SYMBOL_VALUE_ADDRESS (sym1));
+		&& sym0->value_address () == sym1->value_address ());
       }
 
     default:
@@ -4562,8 +4891,6 @@ ada_lookup_simple_minsym (const char *name)
 {
   struct bound_minimal_symbol result;
 
-  memset (&result, 0, sizeof (result));
-
   symbol_name_match_type match_type = name_match_type_from_name (name);
   lookup_name_info lookup_name (name, match_type);
 
@@ -4575,7 +4902,7 @@ ada_lookup_simple_minsym (const char *name)
       for (minimal_symbol *msymbol : objfile->msymbols ())
 	{
 	  if (match_name (msymbol->linkage_name (), lookup_name, NULL)
-	      && MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
+	      && msymbol->type () != mst_solib_trampoline)
 	    {
 	      result.minsym = msymbol;
 	      result.objfile = objfile;
@@ -4675,26 +5002,26 @@ symbols_are_identical_enums (const std::vector<struct block_symbol> &syms)
 
   /* Quick check: All symbols should have an enum type.  */
   for (i = 0; i < syms.size (); i++)
-    if (SYMBOL_TYPE (syms[i].symbol)->code () != TYPE_CODE_ENUM)
+    if (syms[i].symbol->type ()->code () != TYPE_CODE_ENUM)
       return 0;
 
   /* Quick check: They should all have the same value.  */
   for (i = 1; i < syms.size (); i++)
-    if (SYMBOL_VALUE (syms[i].symbol) != SYMBOL_VALUE (syms[0].symbol))
+    if (syms[i].symbol->value_longest () != syms[0].symbol->value_longest ())
       return 0;
 
   /* Quick check: They should all have the same number of enumerals.  */
   for (i = 1; i < syms.size (); i++)
-    if (SYMBOL_TYPE (syms[i].symbol)->num_fields ()
-	!= SYMBOL_TYPE (syms[0].symbol)->num_fields ())
+    if (syms[i].symbol->type ()->num_fields ()
+	!= syms[0].symbol->type ()->num_fields ())
       return 0;
 
   /* All the sanity checks passed, so we might have a set of
      identical enumeration types.  Perform a more complete
      comparison of the type of each symbol.  */
   for (i = 1; i < syms.size (); i++)
-    if (!ada_identical_enum_types_p (SYMBOL_TYPE (syms[i].symbol),
-				     SYMBOL_TYPE (syms[0].symbol)))
+    if (!ada_identical_enum_types_p (syms[i].symbol->type (),
+				     syms[0].symbol->type ()))
       return 0;
 
   return 1;
@@ -4725,13 +5052,13 @@ remove_extra_symbols (std::vector<struct block_symbol> *syms)
       /* If two symbols have the same name and one of them is a stub type,
 	 the get rid of the stub.  */
 
-      if (SYMBOL_TYPE ((*syms)[i].symbol)->is_stub ()
+      if ((*syms)[i].symbol->type ()->is_stub ()
 	  && (*syms)[i].symbol->linkage_name () != NULL)
 	{
 	  for (j = 0; j < syms->size (); j++)
 	    {
 	      if (j != i
-		  && !SYMBOL_TYPE ((*syms)[j].symbol)->is_stub ()
+		  && !(*syms)[j].symbol->type ()->is_stub ()
 		  && (*syms)[j].symbol->linkage_name () != NULL
 		  && strcmp ((*syms)[i].symbol->linkage_name (),
 			     (*syms)[j].symbol->linkage_name ()) == 0)
@@ -4743,8 +5070,8 @@ remove_extra_symbols (std::vector<struct block_symbol> *syms)
 	 should be identical.  */
 
       else if ((*syms)[i].symbol->linkage_name () != NULL
-	  && SYMBOL_CLASS ((*syms)[i].symbol) == LOC_STATIC
-	  && is_nondebugging_type (SYMBOL_TYPE ((*syms)[i].symbol)))
+	  && (*syms)[i].symbol->aclass () == LOC_STATIC
+	  && is_nondebugging_type ((*syms)[i].symbol->type ()))
 	{
 	  for (j = 0; j < syms->size (); j += 1)
 	    {
@@ -4752,10 +5079,10 @@ remove_extra_symbols (std::vector<struct block_symbol> *syms)
 		  && (*syms)[j].symbol->linkage_name () != NULL
 		  && strcmp ((*syms)[i].symbol->linkage_name (),
 			     (*syms)[j].symbol->linkage_name ()) == 0
-		  && SYMBOL_CLASS ((*syms)[i].symbol)
-		       == SYMBOL_CLASS ((*syms)[j].symbol)
-		  && SYMBOL_VALUE_ADDRESS ((*syms)[i].symbol)
-		  == SYMBOL_VALUE_ADDRESS ((*syms)[j].symbol))
+		  && ((*syms)[i].symbol->aclass ()
+		      == (*syms)[j].symbol->aclass ())
+		  && (*syms)[i].symbol->value_address ()
+		  == (*syms)[j].symbol->value_address ())
 		remove_p = 1;
 	    }
 	}
@@ -4845,10 +5172,10 @@ is_package_name (const char *name)
 static int
 old_renaming_is_invisible (const struct symbol *sym, const char *function_name)
 {
-  if (SYMBOL_CLASS (sym) != LOC_TYPEDEF)
+  if (sym->aclass () != LOC_TYPEDEF)
     return 0;
 
-  std::string scope = xget_renaming_scope (SYMBOL_TYPE (sym));
+  std::string scope = xget_renaming_scope (sym->type ());
 
   /* If the rename has been defined in a package, then it is visible.  */
   if (is_package_name (scope.c_str ()))
@@ -4924,7 +5251,7 @@ remove_irrelevant_renamings (std::vector<struct block_symbol> *syms,
       const char *name;
       const char *suffix;
 
-      if (sym == NULL || SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+      if (sym == NULL || sym->aclass () == LOC_TYPEDEF)
 	continue;
       name = sym->linkage_name ();
       suffix = strstr (name, "___XR");
@@ -5005,10 +5332,10 @@ ada_add_local_symbols (std::vector<struct block_symbol> &result,
       /* If we found a non-function match, assume that's the one.  We
 	 only check this when finding a function boundary, so that we
 	 can accumulate all results from intervening blocks first.  */
-      if (BLOCK_FUNCTION (block) != nullptr && is_nonfunction (result))
+      if (block->function () != nullptr && is_nonfunction (result))
 	return;
 
-      block = BLOCK_SUPERBLOCK (block);
+      block = block->superblock ();
     }
 }
 
@@ -5051,9 +5378,9 @@ match_data::operator() (struct block_symbol *bsym)
     }
   else 
     {
-      if (SYMBOL_CLASS (sym) == LOC_UNRESOLVED)
+      if (sym->aclass () == LOC_UNRESOLVED)
 	return true;
-      else if (SYMBOL_IS_ARGUMENT (sym))
+      else if (sym->is_argument ())
 	arg_sym = sym;
       else
 	{
@@ -5237,7 +5564,7 @@ map_matching_symbols (struct objfile *objfile,
   for (compunit_symtab *symtab : objfile->compunits ())
     {
       const struct block *block
-	= BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (symtab), block_kind);
+	= symtab->blockvector ()->block (block_kind);
       if (!iterate_over_symbols_terminated (block, lookup_name,
 					    domain, data))
 	break;
@@ -5266,7 +5593,7 @@ add_nonlocal_symbols (std::vector<struct block_symbol> &result,
       for (compunit_symtab *cu : objfile->compunits ())
 	{
 	  const struct block *global_block
-	    = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (cu), GLOBAL_BLOCK);
+	    = cu->blockvector ()->global_block ();
 
 	  if (ada_add_block_renamings (result, global_block, lookup_name,
 				       domain))
@@ -5698,6 +6025,9 @@ wild_match (const char *name, const char *patn)
   const char *p;
   const char *name0 = name;
 
+  if (startswith (name, "___ghost_"))
+    name += 9;
+
   while (1)
     {
       const char *match = name;
@@ -5740,11 +6070,11 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
        sym != NULL;
        sym = block_iter_match_next (lookup_name, &iter))
     {
-      if (symbol_matches_domain (sym->language (), SYMBOL_DOMAIN (sym), domain))
+      if (symbol_matches_domain (sym->language (), sym->domain (), domain))
 	{
-	  if (SYMBOL_CLASS (sym) != LOC_UNRESOLVED)
+	  if (sym->aclass () != LOC_UNRESOLVED)
 	    {
-	      if (SYMBOL_IS_ARGUMENT (sym))
+	      if (sym->is_argument ())
 		arg_sym = sym;
 	      else
 		{
@@ -5780,7 +6110,7 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
       ALL_BLOCK_SYMBOLS (block, iter, sym)
       {
 	if (symbol_matches_domain (sym->language (),
-				   SYMBOL_DOMAIN (sym), domain))
+				   sym->domain (), domain))
 	  {
 	    int cmp;
 
@@ -5796,9 +6126,9 @@ ada_add_block_symbols (std::vector<struct block_symbol> &result,
 	    if (cmp == 0
 		&& is_name_suffix (sym->linkage_name () + name_len + 5))
 	      {
-		if (SYMBOL_CLASS (sym) != LOC_UNRESOLVED)
+		if (sym->aclass () != LOC_UNRESOLVED)
 		  {
-		    if (SYMBOL_IS_ARGUMENT (sym))
+		    if (sym->is_argument ())
 		      arg_sym = sym;
 		    else
 		      {
@@ -5969,6 +6299,18 @@ ada_is_ignored_field (struct type *type, int field_num)
        should not be ignored either.  */
     if (name[0] == '_' && !startswith (name, "_parent"))
       return 1;
+
+    /* The compiler doesn't document this, but sometimes it emits
+       a field whose name starts with a capital letter, like 'V148s'.
+       These aren't marked as artificial in any way, but we know they
+       should be ignored.  However, wrapper fields should not be
+       ignored.  */
+    if (name[0] == 'S' || name[0] == 'R' || name[0] == 'O')
+      {
+	/* Wrapper field.  */
+      }
+    else if (isupper (name[0]))
+      return 1;
   }
 
   /* If this is the dispatch table of a tagged type or an interface tag,
@@ -6104,9 +6446,10 @@ ada_tag_value_at_base_address (struct value *obj)
   if (is_ada95_tag (tag))
     return obj;
 
-  ptr_type = language_lookup_primitive_type
-    (language_def (language_ada), target_gdbarch(), "storage_offset");
-  ptr_type = lookup_pointer_type (ptr_type);
+  struct type *offset_type
+    = language_lookup_primitive_type (language_def (language_ada),
+				      target_gdbarch(), "storage_offset");
+  ptr_type = lookup_pointer_type (offset_type);
   val = value_cast (ptr_type, tag);
   if (!val)
     return obj;
@@ -6138,16 +6481,28 @@ ada_tag_value_at_base_address (struct value *obj)
   if (offset_to_top == -1)
     return obj;
 
-  /* OFFSET_TO_TOP used to be a positive value to be subtracted
-     from the base address.  This was however incompatible with
-     C++ dispatch table: C++ uses a *negative* value to *add*
-     to the base address.  Ada's convention has therefore been
-     changed in GNAT 19.0w 20171023: since then, C++ and Ada
-     use the same convention.  Here, we support both cases by
-     checking the sign of OFFSET_TO_TOP.  */
-
-  if (offset_to_top > 0)
-    offset_to_top = -offset_to_top;
+  /* Storage_Offset'Last is used to indicate that a dynamic offset to
+     top is used.  In this situation the offset is stored just after
+     the tag, in the object itself.  */
+  ULONGEST last = (((ULONGEST) 1) << (8 * TYPE_LENGTH (offset_type) - 1)) - 1;
+  if (offset_to_top == last)
+    {
+      struct value *tem = value_addr (tag);
+      tem = value_ptradd (tem, 1);
+      tem = value_cast (ptr_type, tem);
+      offset_to_top = value_as_long (value_ind (tem));
+    }
+  else if (offset_to_top > 0)
+    {
+      /* OFFSET_TO_TOP used to be a positive value to be subtracted
+	 from the base address.  This was however incompatible with
+	 C++ dispatch table: C++ uses a *negative* value to *add*
+	 to the base address.  Ada's convention has therefore been
+	 changed in GNAT 19.0w 20171023: since then, C++ and Ada
+	 use the same convention.  Here, we support both cases by
+	 checking the sign of OFFSET_TO_TOP.  */
+      offset_to_top = -offset_to_top;
+    }
 
   base_address = value_address (obj) + offset_to_top;
   tag = value_tag_from_contents_and_address (obj_type, NULL, base_address);
@@ -6222,7 +6577,6 @@ ada_get_tsd_from_tag (struct value *tag)
 static gdb::unique_xmalloc_ptr<char>
 ada_tag_name_from_tsd (struct value *tsd)
 {
-  char *p;
   struct value *val;
 
   val = ada_value_struct_elt (tsd, "expanded_name", 1);
@@ -6233,13 +6587,18 @@ ada_tag_name_from_tsd (struct value *tsd)
   if (buffer == nullptr)
     return nullptr;
 
-  for (p = buffer.get (); *p != '\0'; ++p)
+  try
     {
-      if (isalpha (*p))
-	*p = tolower (*p);
+      /* Let this throw an exception on error.  If the data is
+	 uninitialized, we'd rather not have the user see a
+	 warning.  */
+      const char *folded = ada_fold_name (buffer.get (), true);
+      return make_unique_xstrdup (folded);
     }
-
-  return buffer;
+  catch (const gdb_exception &)
+    {
+      return nullptr;
+    }
 }
 
 /* The type name of the dynamic type denoted by the 'tag value TAG, as
@@ -6915,7 +7274,7 @@ type_as_string (struct type *type)
 
   type_print (type, "", &tmp_stream, -1);
 
-  return std::move (tmp_stream.string ());
+  return tmp_stream.release ();
 }
 
 /* Given a type TYPE, look up the type of the component of type named NAME.
@@ -7214,7 +7573,7 @@ ada_find_any_type_symbol (const char *name)
   struct symbol *sym;
 
   sym = standard_lookup (name, get_selected_block (NULL), VAR_DOMAIN);
-  if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
+  if (sym != NULL && sym->aclass () == LOC_TYPEDEF)
     return sym;
 
   sym = standard_lookup (name, NULL, STRUCT_DOMAIN);
@@ -7231,7 +7590,7 @@ ada_find_any_type (const char *name)
   struct symbol *sym = ada_find_any_type_symbol (name);
 
   if (sym != NULL)
-    return SYMBOL_TYPE (sym);
+    return sym->type ();
 
   return NULL;
 }
@@ -8788,7 +9147,13 @@ ada_enum_name (const char *name)
 
       if (name[1] == 'U' || name[1] == 'W')
 	{
-	  if (sscanf (name + 2, "%x", &v) != 1)
+	  int offset = 2;
+	  if (name[1] == 'W' && name[2] == 'W')
+	    {
+	      /* Also handle the QWW case.  */
+	      ++offset;
+	    }
+	  if (sscanf (name + offset, "%x", &v) != 1)
 	    return name;
 	}
       else if (((name[1] >= '0' && name[1] <= '9')
@@ -8804,9 +9169,11 @@ ada_enum_name (const char *name)
       if (isascii (v) && isprint (v))
 	storage = string_printf ("'%c'", v);
       else if (name[1] == 'U')
-	storage = string_printf ("[\"%02x\"]", v);
+	storage = string_printf ("'[\"%02x\"]'", v);
+      else if (name[2] != 'W')
+	storage = string_printf ("'[\"%04x\"]'", v);
       else
-	storage = string_printf ("[\"%04x\"]", v);
+	storage = string_printf ("'[\"%06x\"]'", v);
 
       return storage.c_str ();
     }
@@ -9136,7 +9503,7 @@ ada_aggregate_component::uses_objfile (struct objfile *objfile)
 void
 ada_aggregate_component::dump (ui_file *stream, int depth)
 {
-  fprintf_filtered (stream, _("%*sAggregate\n"), depth, "");
+  gdb_printf (stream, _("%*sAggregate\n"), depth, "");
   for (const auto &item : m_components)
     item->dump (stream, depth + 1);
 }
@@ -9203,8 +9570,8 @@ ada_positional_component::uses_objfile (struct objfile *objfile)
 void
 ada_positional_component::dump (ui_file *stream, int depth)
 {
-  fprintf_filtered (stream, _("%*sPositional, index = %d\n"),
-		    depth, "", m_index);
+  gdb_printf (stream, _("%*sPositional, index = %d\n"),
+	      depth, "", m_index);
   m_op->dump (stream, depth + 1);
 }
 
@@ -9238,7 +9605,7 @@ ada_discrete_range_association::uses_objfile (struct objfile *objfile)
 void
 ada_discrete_range_association::dump (ui_file *stream, int depth)
 {
-  fprintf_filtered (stream, _("%*sDiscrete range:\n"), depth, "");
+  gdb_printf (stream, _("%*sDiscrete range:\n"), depth, "");
   m_low->dump (stream, depth + 1);
   m_high->dump (stream, depth + 1);
 }
@@ -9274,7 +9641,7 @@ ada_name_association::uses_objfile (struct objfile *objfile)
 void
 ada_name_association::dump (ui_file *stream, int depth)
 {
-  fprintf_filtered (stream, _("%*sName:\n"), depth, "");
+  gdb_printf (stream, _("%*sName:\n"), depth, "");
   m_val->dump (stream, depth + 1);
 }
 
@@ -9332,7 +9699,7 @@ ada_choices_component::uses_objfile (struct objfile *objfile)
 void
 ada_choices_component::dump (ui_file *stream, int depth)
 {
-  fprintf_filtered (stream, _("%*sChoices:\n"), depth, "");
+  gdb_printf (stream, _("%*sChoices:\n"), depth, "");
   m_op->dump (stream, depth + 1);
   for (const auto &item : m_assocs)
     item->dump (stream, depth + 1);
@@ -9361,7 +9728,7 @@ ada_others_component::uses_objfile (struct objfile *objfile)
 void
 ada_others_component::dump (ui_file *stream, int depth)
 {
-  fprintf_filtered (stream, _("%*sOthers:\n"), depth, "");
+  gdb_printf (stream, _("%*sOthers:\n"), depth, "");
   m_op->dump (stream, depth + 1);
 }
 
@@ -10181,7 +10548,7 @@ ada_resolvable::replace (operation_up &&owner,
   return std::move (owner);
 }
 
-/* Convert the character literal whose ASCII value would be VAL to the
+/* Convert the character literal whose value would be VAL to the
    appropriate value of type TYPE, if there is a translation.
    Otherwise return VAL.  Hence, in an enumeration type ('A', 'B'),
    the literal 'A' (VAL == 65), returns 0.  */
@@ -10189,7 +10556,7 @@ ada_resolvable::replace (operation_up &&owner,
 static LONGEST
 convert_char_literal (struct type *type, LONGEST val)
 {
-  char name[7];
+  char name[12];
   int f;
 
   if (type == NULL)
@@ -10200,8 +10567,12 @@ convert_char_literal (struct type *type, LONGEST val)
 
   if ((val >= 'a' && val <= 'z') || (val >= '0' && val <= '9'))
     xsnprintf (name, sizeof (name), "Q%c", (int) val);
+  else if (val >= 0 && val < 256)
+    xsnprintf (name, sizeof (name), "QU%02x", (unsigned) val);
+  else if (val >= 0 && val < 0x10000)
+    xsnprintf (name, sizeof (name), "QW%04x", (unsigned) val);
   else
-    xsnprintf (name, sizeof (name), "QU%02x", (int) val);
+    xsnprintf (name, sizeof (name), "QWW%08lx", (unsigned long) val);
   size_t len = strlen (name);
   for (f = 0; f < type->num_fields (); f += 1)
     {
@@ -10216,6 +10587,17 @@ convert_char_literal (struct type *type, LONGEST val)
 	return type->field (f).loc_enumval ();
     }
   return val;
+}
+
+value *
+ada_char_operation::evaluate (struct type *expect_type,
+			      struct expression *exp,
+			      enum noside noside)
+{
+  value *result = long_const_operation::evaluate (expect_type, exp, noside);
+  if (expect_type != nullptr)
+    result = ada_value_cast (expect_type, result);
+  return result;
 }
 
 /* See ada-exp.h.  */
@@ -10238,7 +10620,7 @@ ada_char_operation::replace (operation_up &&owner,
 	= convert_char_literal (context_type, std::get<1> (m_storage));
     }
 
-  return make_operation<ada_wrapped_operation> (std::move (result));
+  return result;
 }
 
 value *
@@ -10269,12 +10651,108 @@ ada_string_operation::evaluate (struct type *expect_type,
 				struct expression *exp,
 				enum noside noside)
 {
-  value *result = string_operation::evaluate (expect_type, exp, noside);
-  /* The result type will have code OP_STRING, bashed there from 
-     OP_ARRAY.  Bash it back.  */
-  if (value_type (result)->code () == TYPE_CODE_STRING)
-    value_type (result)->set_code (TYPE_CODE_ARRAY);
-  return result;
+  struct type *char_type;
+  if (expect_type != nullptr && ada_is_string_type (expect_type))
+    char_type = ada_array_element_type (expect_type, 1);
+  else
+    char_type = language_string_char_type (exp->language_defn, exp->gdbarch);
+
+  const std::string &str = std::get<0> (m_storage);
+  const char *encoding;
+  switch (TYPE_LENGTH (char_type))
+    {
+    case 1:
+      {
+	/* Simply copy over the data -- this isn't perhaps strictly
+	   correct according to the encodings, but it is gdb's
+	   historical behavior.  */
+	struct type *stringtype
+	  = lookup_array_range_type (char_type, 1, str.length ());
+	struct value *val = allocate_value (stringtype);
+	memcpy (value_contents_raw (val).data (), str.c_str (),
+		str.length ());
+	return val;
+      }
+
+    case 2:
+      if (gdbarch_byte_order (exp->gdbarch) == BFD_ENDIAN_BIG)
+	encoding = "UTF-16BE";
+      else
+	encoding = "UTF-16LE";
+      break;
+
+    case 4:
+      if (gdbarch_byte_order (exp->gdbarch) == BFD_ENDIAN_BIG)
+	encoding = "UTF-32BE";
+      else
+	encoding = "UTF-32LE";
+      break;
+
+    default:
+      error (_("unexpected character type size %s"),
+	     pulongest (TYPE_LENGTH (char_type)));
+    }
+
+  auto_obstack converted;
+  convert_between_encodings (host_charset (), encoding,
+			     (const gdb_byte *) str.c_str (),
+			     str.length (), 1,
+			     &converted, translit_none);
+
+  struct type *stringtype
+    = lookup_array_range_type (char_type, 1,
+			       obstack_object_size (&converted)
+			       / TYPE_LENGTH (char_type));
+  struct value *val = allocate_value (stringtype);
+  memcpy (value_contents_raw (val).data (),
+	  obstack_base (&converted),
+	  obstack_object_size (&converted));
+  return val;
+}
+
+value *
+ada_concat_operation::evaluate (struct type *expect_type,
+				struct expression *exp,
+				enum noside noside)
+{
+  /* If one side is a literal, evaluate the other side first so that
+     the expected type can be set properly.  */
+  const operation_up &lhs_expr = std::get<0> (m_storage);
+  const operation_up &rhs_expr = std::get<1> (m_storage);
+
+  value *lhs, *rhs;
+  if (dynamic_cast<ada_string_operation *> (lhs_expr.get ()) != nullptr)
+    {
+      rhs = rhs_expr->evaluate (nullptr, exp, noside);
+      lhs = lhs_expr->evaluate (value_type (rhs), exp, noside);
+    }
+  else if (dynamic_cast<ada_char_operation *> (lhs_expr.get ()) != nullptr)
+    {
+      rhs = rhs_expr->evaluate (nullptr, exp, noside);
+      struct type *rhs_type = check_typedef (value_type (rhs));
+      struct type *elt_type = nullptr;
+      if (rhs_type->code () == TYPE_CODE_ARRAY)
+	elt_type = TYPE_TARGET_TYPE (rhs_type);
+      lhs = lhs_expr->evaluate (elt_type, exp, noside);
+    }
+  else if (dynamic_cast<ada_string_operation *> (rhs_expr.get ()) != nullptr)
+    {
+      lhs = lhs_expr->evaluate (nullptr, exp, noside);
+      rhs = rhs_expr->evaluate (value_type (lhs), exp, noside);
+    }
+  else if (dynamic_cast<ada_char_operation *> (rhs_expr.get ()) != nullptr)
+    {
+      lhs = lhs_expr->evaluate (nullptr, exp, noside);
+      struct type *lhs_type = check_typedef (value_type (lhs));
+      struct type *elt_type = nullptr;
+      if (lhs_type->code () == TYPE_CODE_ARRAY)
+	elt_type = TYPE_TARGET_TYPE (lhs_type);
+      rhs = rhs_expr->evaluate (elt_type, exp, noside);
+    }
+  else
+    return concat_operation::evaluate (expect_type, exp, noside);
+
+  return value_concat (lhs, rhs);
 }
 
 value *
@@ -10411,7 +10889,7 @@ ada_var_value_operation::evaluate (struct type *expect_type,
 {
   symbol *sym = std::get<0> (m_storage).symbol;
 
-  if (SYMBOL_DOMAIN (sym) == UNDEF_DOMAIN)
+  if (sym->domain () == UNDEF_DOMAIN)
     /* Only encountered when an unresolved symbol occurs in a
        context other than a function call, in which case, it is
        invalid.  */
@@ -10420,7 +10898,7 @@ ada_var_value_operation::evaluate (struct type *expect_type,
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     {
-      struct type *type = static_unwrap_type (SYMBOL_TYPE (sym));
+      struct type *type = static_unwrap_type (sym->type ());
       /* Check to see if this is a tagged type.  We also need to handle
 	 the case where the type is a reference to a tagged type, but
 	 we have to be careful to exclude pointers to tagged types.
@@ -10501,7 +10979,7 @@ ada_var_value_operation::resolve (struct expression *exp,
 				  struct type *context_type)
 {
   symbol *sym = std::get<0> (m_storage).symbol;
-  if (SYMBOL_DOMAIN (sym) == UNDEF_DOMAIN)
+  if (sym->domain () == UNDEF_DOMAIN)
     {
       block_symbol resolved
 	= ada_resolve_variable (sym, std::get<0> (m_storage).block,
@@ -10511,7 +10989,7 @@ ada_var_value_operation::resolve (struct expression *exp,
     }
 
   if (deprocedure_p
-      && (SYMBOL_TYPE (std::get<0> (m_storage).symbol)->code ()
+      && (std::get<0> (m_storage).symbol->type ()->code ()
 	  == TYPE_CODE_FUNC))
     return true;
 
@@ -10666,7 +11144,7 @@ ada_funcall_operation::evaluate (struct type *expect_type,
   ada_var_value_operation *avv
     = dynamic_cast<ada_var_value_operation *> (callee_op.get ());
   if (avv != nullptr
-      && SYMBOL_DOMAIN (avv->get_symbol ()) == UNDEF_DOMAIN)
+      && avv->get_symbol ()->domain () == UNDEF_DOMAIN)
     error (_("Unexpected unresolved symbol, %s, during evaluation"),
 	   avv->get_symbol ()->print_name ());
 
@@ -10810,7 +11288,7 @@ ada_funcall_operation::resolve (struct expression *exp,
     return false;
 
   symbol *sym = avv->get_symbol ();
-  if (SYMBOL_DOMAIN (sym) != UNDEF_DOMAIN)
+  if (sym->domain () != UNDEF_DOMAIN)
     return false;
 
   const std::vector<operation_up> &args_up = std::get<1> (m_storage);
@@ -11243,7 +11721,7 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
       struct bound_minimal_symbol msym
 	= lookup_minimal_symbol (einfo->catch_exception_sym, NULL, NULL);
 
-      if (msym.minsym && MSYMBOL_TYPE (msym.minsym) != mst_solib_trampoline)
+      if (msym.minsym && msym.minsym->type () != mst_solib_trampoline)
 	error (_("Your Ada runtime appears to be missing some debugging "
 		 "information.\nCannot insert Ada exception catchpoint "
 		 "in this configuration."));
@@ -11253,10 +11731,10 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
 
   /* Make sure that the symbol we found corresponds to a function.  */
 
-  if (SYMBOL_CLASS (sym) != LOC_BLOCK)
+  if (sym->aclass () != LOC_BLOCK)
     {
       error (_("Symbol \"%s\" is not a function (class = %d)"),
-	     sym->linkage_name (), SYMBOL_CLASS (sym));
+	     sym->linkage_name (), sym->aclass ());
       return 0;
     }
 
@@ -11266,7 +11744,7 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
       struct bound_minimal_symbol msym
 	= lookup_minimal_symbol (einfo->catch_handlers_sym, NULL, NULL);
 
-      if (msym.minsym && MSYMBOL_TYPE (msym.minsym) != mst_solib_trampoline)
+      if (msym.minsym && msym.minsym->type () != mst_solib_trampoline)
 	error (_("Your Ada runtime appears to be missing some debugging "
 		 "information.\nCannot insert Ada exception catchpoint "
 		 "in this configuration."));
@@ -11276,10 +11754,10 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
 
   /* Make sure that the symbol we found corresponds to a function.  */
 
-  if (SYMBOL_CLASS (sym) != LOC_BLOCK)
+  if (sym->aclass () != LOC_BLOCK)
     {
       error (_("Symbol \"%s\" is not a function (class = %d)"),
-	     sym->linkage_name (), SYMBOL_CLASS (sym));
+	     sym->linkage_name (), sym->aclass ());
       return 0;
     }
 
@@ -11388,8 +11866,8 @@ is_known_support_routine (struct frame_info *frame)
       re_comp (known_runtime_file_name_patterns[i]);
       if (re_exec (lbasename (sal.symtab->filename)))
 	return 1;
-      if (SYMTAB_OBJFILE (sal.symtab) != NULL
-	  && re_exec (objfile_name (SYMTAB_OBJFILE (sal.symtab))))
+      if (sal.symtab->compunit ()->objfile () != NULL
+	  && re_exec (objfile_name (sal.symtab->compunit ()->objfile ())))
 	return 1;
     }
 
@@ -11644,12 +12122,20 @@ public:
 
 /* An instance of this type is used to represent an Ada catchpoint.  */
 
-struct ada_catchpoint : public breakpoint
+struct ada_catchpoint : public base_breakpoint
 {
   explicit ada_catchpoint (enum ada_exception_catchpoint_kind kind)
     : m_kind (kind)
   {
   }
+
+  struct bp_location *allocate_location () override;
+  void re_set () override;
+  void check_status (struct bpstat *bs) override;
+  enum print_stop_action print_it (struct bpstat *bs) override;
+  bool print_one (struct bp_location **) override;
+  void print_mention () override;
+  void print_recreate (struct ui_file *fp) override;
 
   /* The name of the specific exception the user specified.  */
   std::string excep_string;
@@ -11709,30 +12195,28 @@ create_excep_cond_exprs (struct ada_catchpoint *c,
     }
 }
 
-/* Implement the ALLOCATE_LOCATION method in the breakpoint_ops
-   structure for all exception catchpoint kinds.  */
-
-static struct bp_location *
-allocate_location_exception (struct breakpoint *self)
-{
-  return new ada_catchpoint_location (self);
-}
-
-/* Implement the RE_SET method in the breakpoint_ops structure for all
+/* Implement the ALLOCATE_LOCATION method in the structure for all
    exception catchpoint kinds.  */
 
-static void
-re_set_exception (struct breakpoint *b)
+struct bp_location *
+ada_catchpoint::allocate_location ()
 {
-  struct ada_catchpoint *c = (struct ada_catchpoint *) b;
+  return new ada_catchpoint_location (this);
+}
 
+/* Implement the RE_SET method in the structure for all exception
+   catchpoint kinds.  */
+
+void
+ada_catchpoint::re_set ()
+{
   /* Call the base class's method.  This updates the catchpoint's
      locations.  */
-  bkpt_breakpoint_ops.re_set (b);
+  this->breakpoint::re_set ();
 
   /* Reparse the exception conditional expressions.  One for each
      location.  */
-  create_excep_cond_exprs (c, c->m_kind);
+  create_excep_cond_exprs (this, m_kind);
 }
 
 /* Returns true if we should stop for this breakpoint hit.  If the
@@ -11800,36 +12284,35 @@ should_stop_exception (const struct bp_location *bl)
   return stop;
 }
 
-/* Implement the CHECK_STATUS method in the breakpoint_ops structure
-   for all exception catchpoint kinds.  */
+/* Implement the CHECK_STATUS method in the structure for all
+   exception catchpoint kinds.  */
 
-static void
-check_status_exception (bpstat *bs)
+void
+ada_catchpoint::check_status (bpstat *bs)
 {
   bs->stop = should_stop_exception (bs->bp_location_at.get ());
 }
 
-/* Implement the PRINT_IT method in the breakpoint_ops structure
-   for all exception catchpoint kinds.  */
+/* Implement the PRINT_IT method in the structure for all exception
+   catchpoint kinds.  */
 
-static enum print_stop_action
-print_it_exception (bpstat *bs)
+enum print_stop_action
+ada_catchpoint::print_it (bpstat *bs)
 {
   struct ui_out *uiout = current_uiout;
-  struct breakpoint *b = bs->breakpoint_at;
 
-  annotate_catchpoint (b->number);
+  annotate_catchpoint (number);
 
   if (uiout->is_mi_like_p ())
     {
       uiout->field_string ("reason",
 			   async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
-      uiout->field_string ("disp", bpdisp_text (b->disposition));
+      uiout->field_string ("disp", bpdisp_text (disposition));
     }
 
-  uiout->text (b->disposition == disp_del
+  uiout->text (disposition == disp_del
 	       ? "\nTemporary catchpoint " : "\nCatchpoint ");
-  uiout->field_signed ("bkptno", b->number);
+  uiout->field_signed ("bkptno", number);
   uiout->text (", ");
 
   /* ada_exception_name_addr relies on the selected frame being the
@@ -11839,14 +12322,13 @@ print_it_exception (bpstat *bs)
      ada_find_printable_frame).  */
   select_frame (get_current_frame ());
 
-  struct ada_catchpoint *c = (struct ada_catchpoint *) b;
-  switch (c->m_kind)
+  switch (m_kind)
     {
       case ada_catch_exception:
       case ada_catch_exception_unhandled:
       case ada_catch_handlers:
 	{
-	  const CORE_ADDR addr = ada_exception_name_addr (c->m_kind, b);
+	  const CORE_ADDR addr = ada_exception_name_addr (m_kind, this);
 	  char exception_name[256];
 
 	  if (addr != 0)
@@ -11870,7 +12352,7 @@ print_it_exception (bpstat *bs)
 	     it clearer to the user which kind of catchpoint just got
 	     hit.  We used ui_out_text to make sure that this extra
 	     info does not pollute the exception name in the MI case.  */
-	  if (c->m_kind == ada_catch_exception_unhandled)
+	  if (m_kind == ada_catch_exception_unhandled)
 	    uiout->text ("unhandled ");
 	  uiout->field_string ("exception-name", exception_name);
 	}
@@ -11899,14 +12381,13 @@ print_it_exception (bpstat *bs)
   return PRINT_SRC_AND_LOC;
 }
 
-/* Implement the PRINT_ONE method in the breakpoint_ops structure
-   for all exception catchpoint kinds.  */
+/* Implement the PRINT_ONE method in the structure for all exception
+   catchpoint kinds.  */
 
-static void
-print_one_exception (struct breakpoint *b, struct bp_location **last_loc)
+bool
+ada_catchpoint::print_one (struct bp_location **last_loc)
 { 
   struct ui_out *uiout = current_uiout;
-  struct ada_catchpoint *c = (struct ada_catchpoint *) b;
   struct value_print_options opts;
 
   get_user_print_options (&opts);
@@ -11915,13 +12396,13 @@ print_one_exception (struct breakpoint *b, struct bp_location **last_loc)
     uiout->field_skip ("addr");
 
   annotate_field (5);
-  switch (c->m_kind)
+  switch (m_kind)
     {
       case ada_catch_exception:
-	if (!c->excep_string.empty ())
+	if (!excep_string.empty ())
 	  {
 	    std::string msg = string_printf (_("`%s' Ada exception"),
-					     c->excep_string.c_str ());
+					     excep_string.c_str ());
 
 	    uiout->field_string ("what", msg);
 	  }
@@ -11935,11 +12416,11 @@ print_one_exception (struct breakpoint *b, struct bp_location **last_loc)
 	break;
       
       case ada_catch_handlers:
-	if (!c->excep_string.empty ())
+	if (!excep_string.empty ())
 	  {
 	    uiout->field_fmt ("what",
 			      _("`%s' Ada exception handlers"),
-			      c->excep_string.c_str ());
+			      excep_string.c_str ());
 	  }
 	else
 	  uiout->field_string ("what", "all Ada exceptions handlers");
@@ -11953,29 +12434,30 @@ print_one_exception (struct breakpoint *b, struct bp_location **last_loc)
 	internal_error (__FILE__, __LINE__, _("unexpected catchpoint type"));
 	break;
     }
+
+  return true;
 }
 
 /* Implement the PRINT_MENTION method in the breakpoint_ops structure
    for all exception catchpoint kinds.  */
 
-static void
-print_mention_exception (struct breakpoint *b)
+void
+ada_catchpoint::print_mention ()
 {
-  struct ada_catchpoint *c = (struct ada_catchpoint *) b;
   struct ui_out *uiout = current_uiout;
 
-  uiout->text (b->disposition == disp_del ? _("Temporary catchpoint ")
+  uiout->text (disposition == disp_del ? _("Temporary catchpoint ")
 						 : _("Catchpoint "));
-  uiout->field_signed ("bkptno", b->number);
+  uiout->field_signed ("bkptno", number);
   uiout->text (": ");
 
-  switch (c->m_kind)
+  switch (m_kind)
     {
       case ada_catch_exception:
-	if (!c->excep_string.empty ())
+	if (!excep_string.empty ())
 	  {
 	    std::string info = string_printf (_("`%s' Ada exception"),
-					      c->excep_string.c_str ());
+					      excep_string.c_str ());
 	    uiout->text (info);
 	  }
 	else
@@ -11987,11 +12469,11 @@ print_mention_exception (struct breakpoint *b)
 	break;
 
       case ada_catch_handlers:
-	if (!c->excep_string.empty ())
+	if (!excep_string.empty ())
 	  {
 	    std::string info
 	      = string_printf (_("`%s' Ada exception handlers"),
-			       c->excep_string.c_str ());
+			       excep_string.c_str ());
 	    uiout->text (info);
 	  }
 	else
@@ -12008,55 +12490,44 @@ print_mention_exception (struct breakpoint *b)
     }
 }
 
-/* Implement the PRINT_RECREATE method in the breakpoint_ops structure
-   for all exception catchpoint kinds.  */
+/* Implement the PRINT_RECREATE method in the structure for all
+   exception catchpoint kinds.  */
 
-static void
-print_recreate_exception (struct breakpoint *b, struct ui_file *fp)
+void
+ada_catchpoint::print_recreate (struct ui_file *fp)
 {
-  struct ada_catchpoint *c = (struct ada_catchpoint *) b;
-
-  switch (c->m_kind)
+  switch (m_kind)
     {
       case ada_catch_exception:
-	fprintf_filtered (fp, "catch exception");
-	if (!c->excep_string.empty ())
-	  fprintf_filtered (fp, " %s", c->excep_string.c_str ());
+	gdb_printf (fp, "catch exception");
+	if (!excep_string.empty ())
+	  gdb_printf (fp, " %s", excep_string.c_str ());
 	break;
 
       case ada_catch_exception_unhandled:
-	fprintf_filtered (fp, "catch exception unhandled");
+	gdb_printf (fp, "catch exception unhandled");
 	break;
 
       case ada_catch_handlers:
-	fprintf_filtered (fp, "catch handlers");
+	gdb_printf (fp, "catch handlers");
 	break;
 
       case ada_catch_assert:
-	fprintf_filtered (fp, "catch assert");
+	gdb_printf (fp, "catch assert");
 	break;
 
       default:
 	internal_error (__FILE__, __LINE__, _("unexpected catchpoint type"));
     }
-  print_recreate_thread (b, fp);
+  print_recreate_thread (this, fp);
 }
-
-/* Virtual tables for various breakpoint types.  */
-static struct breakpoint_ops catch_exception_breakpoint_ops;
-static struct breakpoint_ops catch_exception_unhandled_breakpoint_ops;
-static struct breakpoint_ops catch_assert_breakpoint_ops;
-static struct breakpoint_ops catch_handlers_breakpoint_ops;
 
 /* See ada-lang.h.  */
 
 bool
 is_ada_exception_catchpoint (breakpoint *bp)
 {
-  return (bp->ops == &catch_exception_breakpoint_ops
-	  || bp->ops == &catch_exception_unhandled_breakpoint_ops
-	  || bp->ops == &catch_assert_breakpoint_ops
-	  || bp->ops == &catch_handlers_breakpoint_ops);
+  return dynamic_cast<ada_catchpoint *> (bp) != nullptr;
 }
 
 /* Split the arguments specified in a "catch exception" command.  
@@ -12166,32 +12637,6 @@ ada_exception_sym_name (enum ada_exception_catchpoint_kind ex)
     }
 }
 
-/* Return the breakpoint ops "virtual table" used for catchpoints
-   of the EX kind.  */
-
-static const struct breakpoint_ops *
-ada_exception_breakpoint_ops (enum ada_exception_catchpoint_kind ex)
-{
-  switch (ex)
-    {
-      case ada_catch_exception:
-	return (&catch_exception_breakpoint_ops);
-	break;
-      case ada_catch_exception_unhandled:
-	return (&catch_exception_unhandled_breakpoint_ops);
-	break;
-      case ada_catch_assert:
-	return (&catch_assert_breakpoint_ops);
-	break;
-      case ada_catch_handlers:
-	return (&catch_handlers_breakpoint_ops);
-	break;
-      default:
-	internal_error (__FILE__, __LINE__,
-			_("unexpected catchpoint kind (%d)"), ex);
-    }
-}
-
 /* Return the condition that will be used to match the current exception
    being raised with the exception that the user wants to catch.  This
    assumes that this condition is used when the inferior just triggered
@@ -12262,7 +12707,7 @@ ada_exception_catchpoint_cond_string (const char *excep_string,
 
 static struct symtab_and_line
 ada_exception_sal (enum ada_exception_catchpoint_kind ex,
-		   std::string *addr_string, const struct breakpoint_ops **ops)
+		   std::string *addr_string)
 {
   const char *sym_name;
   struct symbol *sym;
@@ -12278,14 +12723,11 @@ ada_exception_sal (enum ada_exception_catchpoint_kind ex,
   if (sym == NULL)
     error (_("Catchpoint symbol not found: %s"), sym_name);
 
-  if (SYMBOL_CLASS (sym) != LOC_BLOCK)
+  if (sym->aclass () != LOC_BLOCK)
     error (_("Unable to insert catchpoint. %s is not a function."), sym_name);
 
   /* Set ADDR_STRING.  */
   *addr_string = sym_name;
-
-  /* Set OPS.  */
-  *ops = ada_exception_breakpoint_ops (ex);
 
   return find_function_start_sal (sym, 1);
 }
@@ -12315,12 +12757,11 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 int from_tty)
 {
   std::string addr_string;
-  const struct breakpoint_ops *ops = NULL;
-  struct symtab_and_line sal = ada_exception_sal (ex_kind, &addr_string, &ops);
+  struct symtab_and_line sal = ada_exception_sal (ex_kind, &addr_string);
 
   std::unique_ptr<ada_catchpoint> c (new ada_catchpoint (ex_kind));
   init_ada_exception_breakpoint (c.get (), gdbarch, sal, addr_string.c_str (),
-				 ops, tempflag, disabled, from_tty);
+				 tempflag, disabled, from_tty);
   c->excep_string = excep_string;
   create_excep_cond_exprs (c.get (), ex_kind);
   if (!cond_string.empty ())
@@ -12450,12 +12891,12 @@ catch_assert_command (const char *arg_entry, int from_tty,
 static int
 ada_is_exception_sym (struct symbol *sym)
 {
-  const char *type_name = SYMBOL_TYPE (sym)->name ();
+  const char *type_name = sym->type ()->name ();
 
-  return (SYMBOL_CLASS (sym) != LOC_TYPEDEF
-	  && SYMBOL_CLASS (sym) != LOC_BLOCK
-	  && SYMBOL_CLASS (sym) != LOC_CONST
-	  && SYMBOL_CLASS (sym) != LOC_UNRESOLVED
+  return (sym->aclass () != LOC_TYPEDEF
+	  && sym->aclass () != LOC_BLOCK
+	  && sym->aclass () != LOC_CONST
+	  && sym->aclass () != LOC_UNRESOLVED
 	  && type_name != NULL && strcmp (type_name, "exception") == 0);
 }
 
@@ -12545,7 +12986,7 @@ ada_add_standard_exceptions (compiled_regex *preg,
 	  if (msymbol.minsym != NULL)
 	    {
 	      struct ada_exc_info info
-		= {name, BMSYMBOL_VALUE_ADDRESS (msymbol)};
+		= {name, msymbol.value_address ()};
 
 	      exceptions->push_back (info);
 	    }
@@ -12577,7 +13018,7 @@ ada_add_exceptions_from_frame (compiled_regex *preg,
 
       ALL_BLOCK_SYMBOLS (block, iter, sym)
 	{
-	  switch (SYMBOL_CLASS (sym))
+	  switch (sym->aclass ())
 	    {
 	    case LOC_TYPEDEF:
 	    case LOC_BLOCK:
@@ -12587,15 +13028,15 @@ ada_add_exceptions_from_frame (compiled_regex *preg,
 	      if (ada_is_exception_sym (sym))
 		{
 		  struct ada_exc_info info = {sym->print_name (),
-					      SYMBOL_VALUE_ADDRESS (sym)};
+					      sym->value_address ()};
 
 		  exceptions->push_back (info);
 		}
 	    }
 	}
-      if (BLOCK_FUNCTION (block) != NULL)
+      if (block->function () != NULL)
 	break;
-      block = BLOCK_SUPERBLOCK (block);
+      block = block->superblock ();
     }
 }
 
@@ -12649,12 +13090,12 @@ ada_add_global_exceptions (compiled_regex *preg,
     {
       for (compunit_symtab *s : objfile->compunits ())
 	{
-	  const struct blockvector *bv = COMPUNIT_BLOCKVECTOR (s);
+	  const struct blockvector *bv = s->blockvector ();
 	  int i;
 
 	  for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
 	    {
-	      const struct block *b = BLOCKVECTOR_BLOCK (bv, i);
+	      const struct block *b = bv->block (i);
 	      struct block_iterator iter;
 	      struct symbol *sym;
 
@@ -12663,7 +13104,7 @@ ada_add_global_exceptions (compiled_regex *preg,
 		    && name_matches_regex (sym->natural_name (), preg))
 		  {
 		    struct ada_exc_info info
-		      = {sym->print_name (), SYMBOL_VALUE_ADDRESS (sym)};
+		      = {sym->print_name (), sym->value_address ()};
 
 		    exceptions->push_back (info);
 		  }
@@ -12746,13 +13187,13 @@ info_exceptions_command (const char *regexp, int from_tty)
   std::vector<ada_exc_info> exceptions = ada_exceptions_list (regexp);
 
   if (regexp != NULL)
-    printf_filtered
+    gdb_printf
       (_("All Ada exceptions matching regular expression \"%s\":\n"), regexp);
   else
-    printf_filtered (_("All defined Ada exceptions:\n"));
+    gdb_printf (_("All defined Ada exceptions:\n"));
 
   for (const ada_exc_info &info : exceptions)
-    printf_filtered ("%s: %s\n", info.name, paddress (gdbarch, info.addr));
+    gdb_printf ("%s: %s\n", info.name, paddress (gdbarch, info.addr));
 }
 
 
@@ -12784,6 +13225,10 @@ do_full_match (const char *symbol_search_name,
   if (startswith (symbol_search_name, "_ada_")
       && !startswith (lname, "_ada"))
     symbol_search_name += 5;
+  /* Likewise for ghost entities.  */
+  if (startswith (symbol_search_name, "___ghost_")
+      && !startswith (lname, "___ghost_"))
+    symbol_search_name += 9;
 
   int uscore_count = 0;
   while (*lname != '\0')
@@ -12983,7 +13428,7 @@ public:
     struct value *index_value = val_atr (index_type, index);
 
     value_print (index_value, stream, options);
-    fprintf_filtered (stream, " => ");
+    gdb_printf (stream, " => ");
   }
 
   /* Implement the "read_var_value" language_defn method for Ada.  */
@@ -13007,9 +13452,9 @@ public:
   }
 
   /* See language.h.  */
-  virtual bool symbol_printing_suppressed (struct symbol *symbol) const override
+  bool symbol_printing_suppressed (struct symbol *symbol) const override
   {
-    return symbol->artificial;
+    return symbol->is_artificial ();
   }
 
   /* See language.h.  */
@@ -13031,9 +13476,11 @@ public:
     add (arch_integer_type (gdbarch, gdbarch_short_bit (gdbarch),
 			    0, "short_integer"));
     struct type *char_type = arch_character_type (gdbarch, TARGET_CHAR_BIT,
-						  0, "character");
+						  1, "character");
     lai->set_string_char_type (char_type);
     add (char_type);
+    add (arch_character_type (gdbarch, 16, 1, "wide_character"));
+    add (arch_character_type (gdbarch, 32, 1, "wide_wide_character"));
     add (arch_float_type (gdbarch, gdbarch_float_bit (gdbarch),
 			  "float", gdbarch_float_format (gdbarch)));
     add (arch_float_type (gdbarch, gdbarch_double_bit (gdbarch),
@@ -13211,9 +13658,9 @@ public:
     /* Search upwards from currently selected frame (so that we can
        complete on local vars.  */
 
-    for (b = get_selected_block (0); b != NULL; b = BLOCK_SUPERBLOCK (b))
+    for (b = get_selected_block (0); b != NULL; b = b->superblock ())
       {
-	if (!BLOCK_SUPERBLOCK (b))
+	if (!b->superblock ())
 	  surrounding_static_block = b;   /* For elmin of dups */
 
 	ALL_BLOCK_SYMBOLS (b, iter, sym)
@@ -13236,7 +13683,7 @@ public:
 	for (compunit_symtab *s : objfile->compunits ())
 	  {
 	    QUIT;
-	    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), GLOBAL_BLOCK);
+	    b = s->blockvector ()->global_block ();
 	    ALL_BLOCK_SYMBOLS (b, iter, sym)
 	      {
 		if (completion_skip_symbol (mode, sym))
@@ -13255,7 +13702,7 @@ public:
 	for (compunit_symtab *s : objfile->compunits ())
 	  {
 	    QUIT;
-	    b = BLOCKVECTOR_BLOCK (COMPUNIT_BLOCKVECTOR (s), STATIC_BLOCK);
+	    b = s->blockvector ()->static_block ();
 	    /* Don't do this block twice.  */
 	    if (b == surrounding_static_block)
 	      continue;
@@ -13429,54 +13876,6 @@ static ada_language ada_language_defn;
 static struct cmd_list_element *set_ada_list;
 static struct cmd_list_element *show_ada_list;
 
-static void
-initialize_ada_catchpoint_ops (void)
-{
-  struct breakpoint_ops *ops;
-
-  initialize_breakpoint_ops ();
-
-  ops = &catch_exception_breakpoint_ops;
-  *ops = bkpt_breakpoint_ops;
-  ops->allocate_location = allocate_location_exception;
-  ops->re_set = re_set_exception;
-  ops->check_status = check_status_exception;
-  ops->print_it = print_it_exception;
-  ops->print_one = print_one_exception;
-  ops->print_mention = print_mention_exception;
-  ops->print_recreate = print_recreate_exception;
-
-  ops = &catch_exception_unhandled_breakpoint_ops;
-  *ops = bkpt_breakpoint_ops;
-  ops->allocate_location = allocate_location_exception;
-  ops->re_set = re_set_exception;
-  ops->check_status = check_status_exception;
-  ops->print_it = print_it_exception;
-  ops->print_one = print_one_exception;
-  ops->print_mention = print_mention_exception;
-  ops->print_recreate = print_recreate_exception;
-
-  ops = &catch_assert_breakpoint_ops;
-  *ops = bkpt_breakpoint_ops;
-  ops->allocate_location = allocate_location_exception;
-  ops->re_set = re_set_exception;
-  ops->check_status = check_status_exception;
-  ops->print_it = print_it_exception;
-  ops->print_one = print_one_exception;
-  ops->print_mention = print_mention_exception;
-  ops->print_recreate = print_recreate_exception;
-
-  ops = &catch_handlers_breakpoint_ops;
-  *ops = bkpt_breakpoint_ops;
-  ops->allocate_location = allocate_location_exception;
-  ops->re_set = re_set_exception;
-  ops->check_status = check_status_exception;
-  ops->print_it = print_it_exception;
-  ops->print_one = print_one_exception;
-  ops->print_mention = print_mention_exception;
-  ops->print_recreate = print_recreate_exception;
-}
-
 /* This module's 'new_objfile' observer.  */
 
 static void
@@ -13493,12 +13892,30 @@ ada_free_objfile_observer (struct objfile *objfile)
   ada_clear_symbol_cache ();
 }
 
+/* Charsets known to GNAT.  */
+static const char * const gnat_source_charsets[] =
+{
+  /* Note that code below assumes that the default comes first.
+     Latin-1 is the default here, because that is also GNAT's
+     default.  */
+  "ISO-8859-1",
+  "ISO-8859-2",
+  "ISO-8859-3",
+  "ISO-8859-4",
+  "ISO-8859-5",
+  "ISO-8859-15",
+  "CP437",
+  "CP850",
+  /* Note that this value is special-cased in the encoder and
+     decoder.  */
+  ada_utf8,
+  nullptr
+};
+
 void _initialize_ada_language ();
 void
 _initialize_ada_language ()
 {
-  initialize_ada_catchpoint_ops ();
-
   add_setshow_prefix_cmd
     ("ada", no_class,
      _("Prefix command for changing Ada-specific settings."),
@@ -13527,6 +13944,17 @@ overloads selection menu."), _("\
 Show whether the output of formal and return types for functions in the \
 overloads selection menu is activated."),
 			   NULL, NULL, NULL, &set_ada_list, &show_ada_list);
+
+  ada_source_charset = gnat_source_charsets[0];
+  add_setshow_enum_cmd ("source-charset", class_files,
+			gnat_source_charsets,
+			&ada_source_charset,  _("\
+Set the Ada source character set."), _("\
+Show the Ada source character set."), _("\
+The character set used for Ada source files.\n\
+This must correspond to the '-gnati' or '-gnatW' option passed to GNAT."),
+			nullptr, nullptr,
+			&set_ada_list, &show_ada_list);
 
   add_catch_command ("exception", _("\
 Catch Ada exceptions, when raised.\n\

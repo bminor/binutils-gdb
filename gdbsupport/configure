@@ -626,6 +626,8 @@ LTLIBOBJS
 LIBOBJS
 WERROR_CFLAGS
 WARN_CFLAGS
+HAVE_PIPE_OR_PIPE2_FALSE
+HAVE_PIPE_OR_PIPE2_TRUE
 SELFTEST_FALSE
 SELFTEST_TRUE
 LTLIBIPT
@@ -8943,12 +8945,11 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
-  if test "$threads" = "yes"; then
-    save_LIBS="$LIBS"
-    LIBS="$PTHREAD_LIBS $LIBS"
-    save_CXXFLAGS="$CXXFLAGS"
-    CXXFLAGS="$PTHREAD_CFLAGS $save_CXXFLAGS"
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for std::thread" >&5
+  save_LIBS="$LIBS"
+  LIBS="$PTHREAD_LIBS $LIBS"
+  save_CXXFLAGS="$CXXFLAGS"
+  CXXFLAGS="$PTHREAD_CFLAGS $save_CXXFLAGS"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for std::thread" >&5
 $as_echo_n "checking for std::thread... " >&6; }
 if ${gdb_cv_cxx_std_thread+:} false; then :
   $as_echo_n "(cached) " >&6
@@ -8956,7 +8957,7 @@ else
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <thread>
-      void callback() { }
+    void callback() { }
 int
 main ()
 {
@@ -8975,6 +8976,7 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_cxx_std_thread" >&5
 $as_echo "$gdb_cv_cxx_std_thread" >&6; }
 
+  if test "$threads" = "yes"; then
     # This check must be here, while LIBS includes any necessary
     # threading library.
     for ac_func in pthread_sigmask pthread_setname_np
@@ -8989,10 +8991,9 @@ _ACEOF
 fi
 done
 
-
-    LIBS="$save_LIBS"
-    CXXFLAGS="$save_CXXFLAGS"
   fi
+  LIBS="$save_LIBS"
+  CXXFLAGS="$save_CXXFLAGS"
 
   if test "$want_threading" = "yes"; then
     if test "$gdb_cv_cxx_std_thread" = "yes"; then
@@ -10002,6 +10003,15 @@ else
 fi
 
 
+ if test x$ac_cv_func_pipe = xyes -o x$ac_cv_func_pipe2 = xyes ; then
+  HAVE_PIPE_OR_PIPE2_TRUE=
+  HAVE_PIPE_OR_PIPE2_FALSE='#'
+else
+  HAVE_PIPE_OR_PIPE2_TRUE='#'
+  HAVE_PIPE_OR_PIPE2_FALSE=
+fi
+
+
 # Check the return and argument types of ptrace.
 
 
@@ -10192,6 +10202,64 @@ fi
 
 # Detect support warning flags.
 
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking the compiler type" >&5
+$as_echo_n "checking the compiler type... " >&6; }
+if ${gdb_cv_compiler_type+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  gdb_cv_compiler_type=unknown
+  if test "$gdb_cv_compiler_type" = unknown; then
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+                          #if !defined __GNUC__ || defined __clang__
+                          #error not gcc
+                          #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gdb_cv_compiler_type=gcc
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  fi
+
+  if test "$gdb_cv_compiler_type" = unknown; then
+     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+                          #ifndef __clang__
+                          #error not clang
+                          #endif
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gdb_cv_compiler_type=clang
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_compiler_type" >&5
+$as_echo "$gdb_cv_compiler_type" >&6; }
+
+ GDB_COMPILER_TYPE="$gdb_cv_compiler_type"
+
+
 # Check whether --enable-werror was given.
 if test "${enable_werror+set}" = set; then :
   enableval=$enable_werror; case "${enableval}" in
@@ -10228,9 +10296,15 @@ build_warnings="-Wall -Wpointer-arith \
 -Wdeprecated-copy-dtor \
 -Wredundant-move \
 -Wmissing-declarations \
--Wmissing-prototypes \
 -Wstrict-null-sentinel \
 "
+
+# The -Wmissing-prototypes flag will be accepted by GCC, but results
+# in a warning being printed about the flag not being valid for C++,
+# this is something to do with using ccache, and argument ordering.
+if test "$GDB_COMPILER_TYPE" != gcc; then
+  build_warnings="$build_warnings -Wmissing-prototypes"
+fi
 
 case "${host}" in
   *-*-mingw32*)
@@ -10531,6 +10605,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${SELFTEST_TRUE}" && test -z "${SELFTEST_FALSE}"; then
   as_fn_error $? "conditional \"SELFTEST\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_PIPE_OR_PIPE2_TRUE}" && test -z "${HAVE_PIPE_OR_PIPE2_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_PIPE_OR_PIPE2\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 

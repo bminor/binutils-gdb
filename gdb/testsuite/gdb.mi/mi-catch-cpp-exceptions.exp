@@ -183,8 +183,8 @@ with_test_prefix "all with -t" {
 
 if { $libstdcxx_probe_tests_supported  == 1 } {
     # Check that the temporary switch works when used with a regexp.
-    restart_for_test
     with_test_prefix "all with -t and regexp" {
+	restart_for_test
 	setup_catchpoint "throw" "-t -r my_ex"
 	setup_catchpoint "rethrow" "-t -r _except"
 	setup_catchpoint "catch" "-t -r my_exception"

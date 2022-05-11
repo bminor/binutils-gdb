@@ -239,8 +239,6 @@ static void read_xcoff_symtab (struct objfile *, legacy_psymtab *);
 static void add_stab_to_list (char *, struct pending_stabs **);
 #endif
 
-static struct linetable *arrange_linetable (struct linetable *);
-
 static void record_include_end (struct coff_symbol *);
 
 static void process_linenos (CORE_ADDR, CORE_ADDR);
@@ -412,109 +410,81 @@ add_stab_to_list (char *stabname, struct pending_stabs **stabvector)
 
 /* Given a line table with function entries are marked, arrange its
    functions in ascending order and strip off function entry markers
-   and return it in a newly created table.  If the old one is good
-   enough, return the old one.  */
+   and return it in a newly created table.  */
+
 /* FIXME: I think all this stuff can be replaced by just passing
-   sort_linevec = 1 to end_symtab.  */
+   sort_linevec = 1 to end_compunit_symtab.  */
 
-static struct linetable *
-arrange_linetable (struct linetable *oldLineTb)
+static void
+arrange_linetable (std::vector<linetable_entry> &old_linetable)
 {
-  int ii, jj, newline,		/* new line count */
-    function_count;		/* # of functions */
-
-  struct linetable_entry *fentry;	/* function entry vector */
-  int fentry_size;		/* # of function entries */
-  struct linetable *newLineTb;	/* new line table */
   int extra_lines = 0;
 
-#define NUM_OF_FUNCTIONS 20
+  std::vector<linetable_entry> fentries;
 
-  fentry_size = NUM_OF_FUNCTIONS;
-  fentry = XNEWVEC (struct linetable_entry, fentry_size);
-
-  for (function_count = 0, ii = 0; ii < oldLineTb->nitems; ++ii)
+  for (int ii = 0; ii < old_linetable.size (); ++ii)
     {
-      if (oldLineTb->item[ii].is_stmt == 0)
+      if (old_linetable[ii].is_stmt == 0)
 	continue;
 
-      if (oldLineTb->item[ii].line == 0)
-	{			/* Function entry found.  */
-	  if (function_count >= fentry_size)
-	    {			/* Make sure you have room.  */
-	      fentry_size *= 2;
-	      fentry = (struct linetable_entry *)
-		xrealloc (fentry,
-			  fentry_size * sizeof (struct linetable_entry));
-	    }
-	  fentry[function_count].line = ii;
-	  fentry[function_count].is_stmt = 1;
-	  fentry[function_count].pc = oldLineTb->item[ii].pc;
-	  ++function_count;
+      if (old_linetable[ii].line == 0)
+	{
+	  /* Function entry found.  */
+	  fentries.emplace_back ();
+	  linetable_entry &e = fentries.back ();
+	  e.line = ii;
+	  e.is_stmt = 1;
+	  e.pc = old_linetable[ii].pc;
 
 	  /* If the function was compiled with XLC, we may have to add an
 	     extra line entry later.  Reserve space for that.  */
-	  if (ii + 1 < oldLineTb->nitems
-	      && oldLineTb->item[ii].pc != oldLineTb->item[ii + 1].pc)
+	  if (ii + 1 < old_linetable.size ()
+	      && old_linetable[ii].pc != old_linetable[ii + 1].pc)
 	    extra_lines++;
 	}
     }
 
-  if (function_count == 0)
-    {
-      xfree (fentry);
-      return oldLineTb;
-    }
-  else if (function_count > 1)
-    std::sort (fentry, fentry + function_count,
-	       [] (const linetable_entry &lte1, const linetable_entry& lte2)
-		{ return lte1.pc < lte2.pc; });
+  if (fentries.empty ())
+    return;
+
+  std::sort (fentries.begin (), fentries.end (),
+	     [] (const linetable_entry &lte1, const linetable_entry& lte2)
+	     { return lte1.pc < lte2.pc; });
 
   /* Allocate a new line table.  */
-  newLineTb = (struct linetable *)
-    xmalloc
-    (sizeof (struct linetable) +
-    (oldLineTb->nitems - function_count + extra_lines) * sizeof (struct linetable_entry));
+  std::vector<linetable_entry> new_linetable;
+  new_linetable.reserve (old_linetable.size ());
 
   /* If line table does not start with a function beginning, copy up until
      a function begin.  */
-
-  newline = 0;
-  if (oldLineTb->item[0].line != 0)
-    for (newline = 0;
-	 newline < oldLineTb->nitems && oldLineTb->item[newline].line;
-	 ++newline)
-      newLineTb->item[newline] = oldLineTb->item[newline];
+  for (int i = 0; i < old_linetable.size () && old_linetable[i].line != 0; ++i)
+    new_linetable.push_back (old_linetable[i]);
 
   /* Now copy function lines one by one.  */
-
-  for (ii = 0; ii < function_count; ++ii)
+  for (const linetable_entry &entry : fentries)
     {
       /* If the function was compiled with XLC, we may have to add an
 	 extra line to cover the function prologue.  */
-      jj = fentry[ii].line;
-      if (jj + 1 < oldLineTb->nitems
-	  && oldLineTb->item[jj].pc != oldLineTb->item[jj + 1].pc)
+      int jj = entry.line;
+      if (jj + 1 < old_linetable.size ()
+	  && old_linetable[jj].pc != old_linetable[jj + 1].pc)
 	{
-	  newLineTb->item[newline] = oldLineTb->item[jj];
-	  newLineTb->item[newline].line = oldLineTb->item[jj + 1].line;
-	  newline++;
+	  new_linetable.push_back (old_linetable[jj]);
+	  new_linetable.back ().line = old_linetable[jj + 1].line;
 	}
 
-      for (jj = fentry[ii].line + 1;
-	   jj < oldLineTb->nitems && oldLineTb->item[jj].line != 0;
-	   ++jj, ++newline)
-	newLineTb->item[newline] = oldLineTb->item[jj];
+      for (jj = entry.line + 1;
+	   jj < old_linetable.size () && old_linetable[jj].line != 0;
+	   ++jj)
+	new_linetable.push_back (old_linetable[jj]);
     }
-  xfree (fentry);
-  /* The number of items in the line table must include these
-     extra lines which were added in case of XLC compiled functions.  */
-  newLineTb->nitems = oldLineTb->nitems - function_count + extra_lines;
-  return newLineTb;
+
+  new_linetable.shrink_to_fit ();
+  old_linetable = std::move (new_linetable);
 }
 
 /* include file support: C_BINCL/C_EINCL pairs will be kept in the 
-   following `IncludeChain'.  At the end of each symtab (end_symtab),
+   following `IncludeChain'.  At the end of each symtab (end_compunit_symtab),
    we will determine if we should create additional symtab's to
    represent if (the include files.  */
 
@@ -611,7 +581,7 @@ static struct objfile *this_symtab_objfile;
 static void
 process_linenos (CORE_ADDR start, CORE_ADDR end)
 {
-  int offset, ii;
+  int offset;
   file_ptr max_offset
     = XCOFF_DATA (this_symtab_objfile)->max_lineno_offset;
 
@@ -632,8 +602,6 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
   if (offset == 0)
     goto return_after_cleanup;
 
-  memset (&main_subfile, '\0', sizeof (main_subfile));
-
   if (inclIndx == 0)
     /* All source lines were in the main source file.  None in include
        files.  */
@@ -649,10 +617,8 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	coff_data (this_symtab_objfile->obfd)->local_linesz;
       main_source_baseline = 0;
 
-      for (ii = 0; ii < inclIndx; ++ii)
+      for (int ii = 0; ii < inclIndx; ++ii)
 	{
-	  struct subfile *tmpSubfile;
-
 	  /* If there is main file source before include file, enter it.  */
 	  if (offset < inclTable[ii].begin)
 	    {
@@ -675,14 +641,12 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	  else
 	    {
 	      /* Have a new subfile for the include file.  */
+	      inclTable[ii].subfile = new subfile;
 
-	      tmpSubfile = inclTable[ii].subfile = XNEW (struct subfile);
-
-	      memset (tmpSubfile, '\0', sizeof (struct subfile));
 	      firstLine = &(inclTable[ii].funStartLine);
 
 	      /* Enter include file's lines now.  */
-	      enter_line_range (tmpSubfile, inclTable[ii].begin,
+	      enter_line_range (inclTable[ii].subfile, inclTable[ii].begin,
 				inclTable[ii].end, start, 0, firstLine);
 	    }
 
@@ -700,49 +664,23 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
     }
 
   /* Process main file's line numbers.  */
-  if (main_subfile.line_vector)
+  if (!main_subfile.line_vector_entries.empty ())
     {
-      struct linetable *lineTb, *lv;
-
-      lv = main_subfile.line_vector;
-
       /* Line numbers are not necessarily ordered.  xlc compilation will
 	 put static function to the end.  */
-
-      struct subfile *current_subfile = get_current_subfile ();
-      lineTb = arrange_linetable (lv);
-      if (lv == lineTb)
-	{
-	  current_subfile->line_vector = (struct linetable *)
-	    xrealloc (lv, (sizeof (struct linetable)
-			   + lv->nitems * sizeof (struct linetable_entry)));
-	}
-      else
-	{
-	  xfree (lv);
-	  current_subfile->line_vector = lineTb;
-	}
-
-      current_subfile->line_vector_length =
-	current_subfile->line_vector->nitems;
+      arrange_linetable (main_subfile.line_vector_entries);
     }
 
   /* Now, process included files' line numbers.  */
 
-  for (ii = 0; ii < inclIndx; ++ii)
+  for (int ii = 0; ii < inclIndx; ++ii)
     {
       if (inclTable[ii].subfile != ((struct subfile *) &main_subfile)
-	  && (inclTable[ii].subfile)->line_vector)	/* Useless if!!!
-							   FIXMEmgo */
+	  && !inclTable[ii].subfile->line_vector_entries.empty ())
 	{
-	  struct linetable *lineTb, *lv;
-
-	  lv = (inclTable[ii].subfile)->line_vector;
-
 	  /* Line numbers are not necessarily ordered.  xlc compilation will
 	     put static function to the end.  */
-
-	  lineTb = arrange_linetable (lv);
+	  arrange_linetable (inclTable[ii].subfile->line_vector_entries);
 
 	  push_subfile ();
 
@@ -772,28 +710,11 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	    if (fakename == NULL)
 	      fakename = " ?";
 	    start_subfile (fakename);
-	    xfree (get_current_subfile ()->name);
 	  }
 	  struct subfile *current_subfile = get_current_subfile ();
-	  current_subfile->name = xstrdup (inclTable[ii].name);
+	  current_subfile->name = inclTable[ii].name;
 #endif
 
-	  if (lv == lineTb)
-	    {
-	      current_subfile->line_vector =
-		(struct linetable *) xrealloc
-		(lv, (sizeof (struct linetable)
-		      + lv->nitems * sizeof (struct linetable_entry)));
-
-	    }
-	  else
-	    {
-	      xfree (lv);
-	      current_subfile->line_vector = lineTb;
-	    }
-
-	  current_subfile->line_vector_length =
-	    current_subfile->line_vector->nitems;
 	  start_subfile (pop_subfile ());
 	}
     }
@@ -1042,8 +963,8 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
   pst_symtab_language = deduce_language_from_filename (filestring);
 
   start_stabs ();
-  start_symtab (objfile, filestring, NULL, file_start_addr,
-		pst_symtab_language);
+  start_compunit_symtab (objfile, filestring, NULL, file_start_addr,
+			 pst_symtab_language);
   record_debugformat (debugfmt);
   symnum = ((struct symloc *) pst->read_symtab_private)->first_symnum;
   max_symnum =
@@ -1130,14 +1051,14 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 	{
 	  if (get_last_source_file ())
 	    {
-	      pst->compunit_symtab = end_symtab (cur_src_end_addr,
-						 SECT_OFF_TEXT (objfile));
+	      pst->compunit_symtab = end_compunit_symtab
+		(cur_src_end_addr, SECT_OFF_TEXT (objfile));
 	      end_stabs ();
 	    }
 
 	  start_stabs ();
-	  start_symtab (objfile, "_globals_", NULL,
-			0, pst_symtab_language);
+	  start_compunit_symtab (objfile, "_globals_", NULL,
+				 0, pst_symtab_language);
 	  record_debugformat (debugfmt);
 	  cur_src_end_addr = first_object_file_end;
 	  /* Done with all files, everything from here on is globals.  */
@@ -1221,12 +1142,13 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 			{
 			  complete_symtab (filestring, file_start_addr);
 			  cur_src_end_addr = file_end_addr;
-			  end_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
+			  end_compunit_symtab (file_end_addr,
+					       SECT_OFF_TEXT (objfile));
 			  end_stabs ();
 			  start_stabs ();
 			  /* Give all csects for this source file the same
 			     name.  */
-			  start_symtab (objfile, filestring, NULL,
+			  start_compunit_symtab (objfile, filestring, NULL,
 					0, pst_symtab_language);
 			  record_debugformat (debugfmt);
 			}
@@ -1327,7 +1249,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 
 	  complete_symtab (filestring, file_start_addr);
 	  cur_src_end_addr = file_end_addr;
-	  end_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
+	  end_compunit_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
 	  end_stabs ();
 
 	  /* XCOFF, according to the AIX 3.2 documentation, puts the
@@ -1346,7 +1268,8 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 	    filestring = cs->c_name;
 
 	  start_stabs ();
-	  start_symtab (objfile, filestring, NULL, 0, pst_symtab_language);
+	  start_compunit_symtab (objfile, filestring, NULL, 0,
+				 pst_symtab_language);
 	  record_debugformat (debugfmt);
 	  last_csect_name = 0;
 
@@ -1514,7 +1437,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 
       complete_symtab (filestring, file_start_addr);
       cur_src_end_addr = file_end_addr;
-      cust = end_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
+      cust = end_compunit_symtab (file_end_addr, SECT_OFF_TEXT (objfile));
       /* When reading symbols for the last C_FILE of the objfile, try
 	 to make sure that we set pst->compunit_symtab to the symtab for the
 	 file, not to the _globals_ symtab.  I'm not sure whether this
@@ -1561,8 +1484,8 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
     ++name;
 
   /* default assumptions */
-  SET_SYMBOL_VALUE_ADDRESS (sym, cs->c_value + off);
-  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+  sym->set_value_address (cs->c_value + off);
+  sym->set_domain (VAR_DOMAIN);
   sym->set_section_index (secnum_to_section (cs->c_secnum, objfile));
 
   if (ISFCN (cs->c_type))
@@ -1572,9 +1495,9 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
 	 patch_block_stabs (), unless the file was compiled without -g.  */
 
       sym->set_linkage_name (SYMNAME_ALLOC (name, symname_alloced));
-      SYMBOL_TYPE (sym) = objfile_type (objfile)->nodebug_text_symbol;
+      sym->set_type (objfile_type (objfile)->nodebug_text_symbol);
 
-      SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
+      sym->set_aclass_index (LOC_BLOCK);
       sym2 = new (&objfile->objfile_obstack) symbol (*sym);
 
       if (cs->c_sclass == C_EXT || C_WEAKEXT)
@@ -1585,7 +1508,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
   else
     {
       /* In case we can't figure out the type, provide default.  */
-      SYMBOL_TYPE (sym) = objfile_type (objfile)->nodebug_data_symbol;
+      sym->set_type (objfile_type (objfile)->nodebug_data_symbol);
 
       switch (cs->c_sclass)
 	{
@@ -1658,9 +1581,8 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
 			       cs->c_name, 0, 0, objfile);
 	  if (sym != NULL)
 	    {
-	      SET_SYMBOL_VALUE_ADDRESS (sym,
-					SYMBOL_VALUE_ADDRESS (sym)
-					+ static_block_base);
+	      sym->set_value_address
+		(sym->value_address () + static_block_base);
 	      sym->set_section_index (static_block_section);
 	    }
 	  return sym;
@@ -2734,13 +2656,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 	      case 'f':
 		if (! pst)
 		  {
-		    int name_len = p - namestring;
-		    char *name = (char *) xmalloc (name_len + 1);
-
-		    memcpy (name, namestring, name_len);
-		    name[name_len] = '\0';
-		    function_outside_compilation_unit_complaint (name);
-		    xfree (name);
+		    std::string name (namestring, (p - namestring));
+		    function_outside_compilation_unit_complaint (name.c_str ());
 		  }
 		pst->add_psymbol (gdb::string_view (namestring,
 						    p - namestring),
@@ -2758,13 +2675,8 @@ scan_xcoff_symtab (minimal_symbol_reader &reader,
 	      case 'F':
 		if (! pst)
 		  {
-		    int name_len = p - namestring;
-		    char *name = (char *) xmalloc (name_len + 1);
-
-		    memcpy (name, namestring, name_len);
-		    name[name_len] = '\0';
-		    function_outside_compilation_unit_complaint (name);
-		    xfree (name);
+		    std::string name (namestring, (p - namestring));
+		    function_outside_compilation_unit_complaint (name.c_str ());
 		  }
 
 		/* We need only the minimal symbols for these
@@ -2960,9 +2872,7 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
   /* DWARF2 sections.  */
 
   if (dwarf2_has_info (objfile, &dwarf2_xcoff_names))
-    dwarf2_build_psymtabs (objfile);
-
-  dwarf2_build_frame_info (objfile);
+    dwarf2_initialize_objfile (objfile);
 }
 
 static void

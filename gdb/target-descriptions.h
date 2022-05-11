@@ -229,7 +229,7 @@ struct type *tdesc_find_type (struct gdbarch *gdbarch, const char *id);
    specify a group.  */
 
 int tdesc_register_in_reggroup_p (struct gdbarch *gdbarch, int regno,
-				  struct reggroup *reggroup);
+				  const struct reggroup *reggroup);
 
 /* Methods for constructing a target description.  */
 

@@ -58,6 +58,7 @@ arc*)			gdb_host_cpu=arc ;;
 arm*)			gdb_host_cpu=arm ;;
 hppa*)			gdb_host_cpu=pa ;;
 i[34567]86*)		gdb_host_cpu=i386 ;;
+loongarch*)		gdb_host_cpu=loongarch ;;
 m68*)			gdb_host_cpu=m68k ;;
 mips*)			gdb_host_cpu=mips ;;
 powerpc* | rs6000)	gdb_host_cpu=powerpc ;;
@@ -116,6 +117,8 @@ i[34567]86-*-solaris2* | x86_64-*-solaris2*)
 i[34567]86-*-cygwin*)	gdb_host=cygwin ;;
 
 ia64-*-linux*)		gdb_host=linux ;;
+
+loongarch*-linux*)	gdb_host=linux ;;
 
 m68*-*-linux*)		gdb_host=linux ;;
 m68*-*-netbsd* | m68*-*-knetbsd*-gnu)

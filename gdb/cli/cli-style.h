@@ -128,6 +128,9 @@ extern cli_style_option version_style;
 /* True if source styling is enabled.  */
 extern bool source_styling;
 
+/* True if disassembler styling is enabled.  */
+extern bool disassembler_styling;
+
 /* True if styling is enabled.  */
 extern bool cli_styling;
 

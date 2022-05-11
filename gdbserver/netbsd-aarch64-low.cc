@@ -96,7 +96,7 @@ void
 netbsd_aarch64_target::low_arch_setup ()
 {
   target_desc *tdesc
-    = aarch64_create_target_description (0, false);
+    = aarch64_create_target_description (0, false, false, false);
 
   static const char *expedite_regs_aarch64[] = { "x29", "sp", "pc", NULL };
   init_target_desc (tdesc, expedite_regs_aarch64);

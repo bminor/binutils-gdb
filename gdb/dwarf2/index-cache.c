@@ -63,7 +63,7 @@ index_cache::set_directory (std::string dir)
 
   m_dir = std::move (dir);
 
-  index_cache_debug ("now using directory %s\n", m_dir.c_str ());
+  index_cache_debug ("now using directory %s", m_dir.c_str ());
 }
 
 /* See dwarf-index-cache.h.  */
@@ -71,7 +71,7 @@ index_cache::set_directory (std::string dir)
 void
 index_cache::enable ()
 {
-  index_cache_debug ("enabling (%s)\n", m_dir.c_str ());
+  index_cache_debug ("enabling (%s)", m_dir.c_str ());
 
   m_enabled = true;
 }
@@ -81,7 +81,7 @@ index_cache::enable ()
 void
 index_cache::disable ()
 {
-  index_cache_debug ("disabling\n");
+  index_cache_debug ("disabling");
 
   m_enabled = false;
 }
@@ -96,11 +96,15 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
   if (!enabled ())
     return;
 
+  /* If the objfile does not correspond to an actual file, skip it.  */
+  if ((obj->flags & OBJF_NOT_FILENAME) != 0)
+    return;
+
   /* Get build id of objfile.  */
   const bfd_build_id *build_id = build_id_bfd_get (obj->obfd);
   if (build_id == nullptr)
     {
-      index_cache_debug ("objfile %s has no build id\n",
+      index_cache_debug ("objfile %s has no build id",
 			 objfile_name (obj));
       return;
     }
@@ -118,7 +122,7 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
 
       if (dwz_build_id == nullptr)
 	{
-	  index_cache_debug ("dwz objfile %s has no build id\n",
+	  index_cache_debug ("dwz objfile %s has no build id",
 			     dwz->filename ());
 	  return;
 	}
@@ -143,19 +147,19 @@ index_cache::store (dwarf2_per_objfile *per_objfile)
 	  return;
 	}
 
-      index_cache_debug ("writing index cache for objfile %s\n",
+      index_cache_debug ("writing index cache for objfile %s",
 			 objfile_name (obj));
 
       /* Write the index itself to the directory, using the build id as the
 	 filename.  */
-      write_psymtabs_to_index (per_objfile, m_dir.c_str (),
-			       build_id_str.c_str (), dwz_build_id_ptr,
-			       dw_index_kind::GDB_INDEX);
+      write_dwarf_index (per_objfile, m_dir.c_str (),
+			 build_id_str.c_str (), dwz_build_id_ptr,
+			 dw_index_kind::GDB_INDEX);
     }
   catch (const gdb_exception_error &except)
     {
-      index_cache_debug ("couldn't store index cache for objfile "
-			 "%s: %s", objfile_name (obj), except.what ());
+      index_cache_debug ("couldn't store index cache for objfile %s: %s",
+			 objfile_name (obj), except.what ());
     }
 }
 
@@ -195,7 +199,7 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
 
   try
     {
-      index_cache_debug ("trying to read %s\n",
+      index_cache_debug ("trying to read %s",
 			 filename.c_str ());
 
       /* Try to map that file.  */
@@ -211,7 +215,7 @@ index_cache::lookup_gdb_index (const bfd_build_id *build_id,
     }
   catch (const gdb_exception_error &except)
     {
-      index_cache_debug ("couldn't read %s: %s\n",
+      index_cache_debug ("couldn't read %s: %s",
 			 filename.c_str (), except.what ());
     }
 
@@ -257,8 +261,8 @@ show_index_cache_command (const char *arg, int from_tty)
   /* Call all "show index-cache" subcommands.  */
   cmd_show_list (show_index_cache_prefix_list, from_tty);
 
-  printf_filtered ("\n");
-  printf_filtered
+  gdb_printf ("\n");
+  gdb_printf
     (_("The index cache is currently %s.\n"),
      global_index_cache.enabled () ? _("enabled") : _("disabled"));
 }
@@ -288,7 +292,7 @@ static void
 show_index_cache_enabled_command (ui_file *stream, int from_tty,
 				  cmd_list_element *cmd, const char *value)
 {
-  fprintf_filtered (stream, _("The index cache is %s.\n"), value);
+  gdb_printf (stream, _("The index cache is %s.\n"), value);
 }
 
 /* "set index-cache directory" handler.  */
@@ -298,9 +302,7 @@ set_index_cache_directory_command (const char *arg, int from_tty,
 				   cmd_list_element *element)
 {
   /* Make sure the index cache directory is absolute and tilde-expanded.  */
-  gdb::unique_xmalloc_ptr<char> abs
-    = gdb_abspath (index_cache_directory.c_str ());
-  index_cache_directory = abs.get ();
+  index_cache_directory = gdb_abspath (index_cache_directory.c_str ());
   global_index_cache.set_directory (index_cache_directory);
 }
 
@@ -316,13 +318,13 @@ show_index_cache_stats_command (const char *arg, int from_tty)
   if (in_show_index_cache_command)
     {
       indent = "  ";
-      printf_filtered ("\n");
+      gdb_printf ("\n");
     }
 
-  printf_filtered (_("%s  Cache hits (this session): %u\n"),
-		   indent, global_index_cache.n_hits ());
-  printf_filtered (_("%sCache misses (this session): %u\n"),
-		   indent, global_index_cache.n_misses ());
+  gdb_printf (_("%s  Cache hits (this session): %u\n"),
+	      indent, global_index_cache.n_hits ());
+  gdb_printf (_("%sCache misses (this session): %u\n"),
+	      indent, global_index_cache.n_misses ());
 }
 
 void _initialize_index_cache ();

@@ -38,7 +38,7 @@ static void xprintf (host_callback *, const char *, ...);
 static void report_transfer_performance
   (host_callback *, unsigned long, time_t, time_t);
 
-/* Load program PROG into the simulator using the function DO_LOAD.
+/* Load program PROG into the simulator using the function DO_WRITE.
    If PROG_BFD is non-NULL, the file has already been opened.
    If VERBOSE_P is non-zero statistics are printed of each loaded section
    and the transfer rate (for consistency with gdb).

@@ -1,3 +1,186 @@
+2022-04-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 29072
+	* testsuite/lib/binutils-common.exp (prune_warnings_extra): Filter
+	out notes about the executable stacjk behaviour beign deprecated.
+
+2022-04-12  Nick Clifton  <nickc@redhat.com>
+
+	PR 28992
+	* objcopy.c (is_strip_section_1): Do not delete debuglink sections
+	when stripping debug information.
+
+2022-04-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 28981
+	* dwarf.c (fetch_indexed_value): Rename to fecth_indexed_addr and
+	return the address, rather than a string.
+	(fetch_indexed_value): New function - returns a value indexed by a
+	DW_FORM_loclistx or DW_FORM_rnglistx form.
+	(read_and_display_attr_value): Add support for DW_FORM_loclistx
+	and DW_FORM_rnglistx.
+	(process_debug_info): Load the loclists and rnglists sections.
+	(display_loclists_list): Add support for DW_LLE_base_addressx,
+	DW_LLE_startx_endx, DW_LLE_startx_length and
+	DW_LLE_default_location.
+	(display_offset_entry_loclists): New function.  Displays a
+	.debug_loclists section that contains offset entry tables.
+	(display_debug_loc): Call the new function.
+	(display_debug_rnglists_list): Add support for
+	DW_RLE_base_addressx, DW_RLE_startx_endx and DW_RLE_startx_length.
+	(display_debug_ranges): Display the contents of the section's
+	header.
+	* dwarf.h (struct debug_info): Add loclists_base field.
+	* testsuite/binutils-all/dw5.W: Update expected output.
+	* testsuite/binutils-all/x86-64/pr26808.dump: Likewise.
+
+2022-04-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* readelf.c (get_freebsd_elfcore_note_type): Handle
+	NT_FREEBSD_X86_SEGBASES.
+
+2022-03-31  Nick Clifton  <nickc@redhat.com>
+
+	* arlex.l: Accept the plus character as part of a filename.
+
+2022-03-16  Fangrui Song  <maskray@google.com>
+
+	PR binutils/28926
+	* objcopy.c (filter_symbols): Apply weaken to STB_GNU_UNIQUE symbols
+	* NEWS: Mention feature.
+	* testsuite/binutils-all/objcopy.exp (objcopy_test_symbol_manipulation): New test.
+	* testsuite/binutils-all/weaken-gnu-unique.s: New.
+
+2022-03-16  Martin Storsjö  <martin@martin.st>
+
+	PR 28885
+	* dlltool.c (main): use imp_name rather than dll_name when
+	generating a temporary file name.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* readelf.c (dump_relocations): Handle EM_AMDGPU.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* Makefile.am (readelf_CFLAGS): New.
+	(readelf_LDADD): Add MSGPACK_LIBS.
+	* Makefile.in: Re-generate.
+	* config.in: Re-generate.
+	* configure: Re-generate.
+	* configure.ac: Add --with-msgpack flag and check for msgpack
+	using pkg-config.
+	* readelf.c: Include msgpack.h if HAVE_MSGPACK.
+	(print_note_contents_hex): New.
+	(print_indents): New.
+	(dump_msgpack_obj): New.
+	(dump_msgpack): New.
+	(print_amdgpu_note): New.
+	(process_note): Handle NT_AMDGPU_METADATA note contents.
+	Use print_note_contents_hex.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* readelf.c (get_amdgpu_elf_note_type): New.
+	(process_note): Handle "AMDGPU" notes.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* readelf.c: Include elf/amdgcn.h.
+	(decode_AMDGPU_machine_flags): New.
+	(get_machine_flags): Handle flags for EM_AMDGPU machine type.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* readelf.c (get_osabi_name): Handle EM_AMDGPU OS ABIs.
+
+2022-03-16  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
+2022-03-15  Tom Tromey  <tromey@adacore.com>
+
+	* dwarf-mode.el: Now 1.7.
+	(dwarf--sentinel): Switch to the process buffer.
+
+2022-03-11  Vladimir Mezentsev  <vladimir.mezentsev@oracle.com>
+
+	* MAINTAINERS: Add gprofng maintainer.
+	* README-how-to-make-a-release: Add gprofng.
+
+2022-03-10  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (use_debuginfod): New variable.  Set to 1.
+	(load_separate_debug_info): Only call
+	debuginfod_fetch_separate_debug_info is use_debuginfod is true.
+	(dwarf_select_sections_by_names): Add do-not-use-debuginfod and
+	use-debuginfod options.
+	(dwarf_select_sections_by_letters): Add D and E options.
+	* dwarf.h (use_debuginfod): New extern.
+	* objdump.c (usage): Mention the new options.
+	* readelf.c (usage): Likewise.
+	* doc/binutils.texi: Document the new options.
+	* doc/debug-options.texi: Describe the new options.
+	* NEWS: Mention the new feature.
+	* testsuite/binutils-all/debuginfod.exp: Add tests of the new
+	options.
+
+2021-03-06  Maciej W. Rozycki  <macro@orcam.me.uk>
+
+	* testsuite/binutils-all/mips/mips1-branch-alias.d: New test.
+	* testsuite/binutils-all/mips/mips1-branch-noalias.d: New test.
+	* testsuite/binutils-all/mips/mips2-branch-alias.d: New test.
+	* testsuite/binutils-all/mips/mips2-branch-noalias.d: New test.
+	* testsuite/binutils-all/mips/mips32r6-branch-alias.d: New test.
+	* testsuite/binutils-all/mips/mips32r6-branch-noalias.d: New
+	test.
+	* testsuite/binutils-all/mips/micromips-branch-alias.d: New
+	test.
+	* testsuite/binutils-all/mips/micromips-branch-noalias.d: New
+	test.
+	* testsuite/binutils-all/mips/mips-branch-alias.s: New test
+	source.
+	* testsuite/binutils-all/mips/micromips-branch-alias.s: New test
+	source.
+	* testsuite/binutils-all/mips/mips.exp: Run the new tests.
+
+2022-03-04  Simon Marchi  <simon.marchi@polymtl.ca>
+
+	* readelf.c (process_dynamic_section): Fix indentation.
+
+2022-02-09  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Update after the 2.38 release.
+
+2022-01-27  Nick Clifton  <nickc@redhat.com>
+
+	* po/sv.po: Updated Swedish translation.
+
+2022-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/bg.po: Updated Bulgarian translation.
+	* po/fr.po: Updated French translation.
+	* po/ro.po: Updated Romanian translation.
+	* po/uk.po: Updated Ukranian translation.
+
+2022-01-22  Martin Storsjö  <martin@martin.st>
+
+	* dlltool.c (main): Allow inferring tmp_prefix from the dll name
+	from a def file.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+	* po/binutils.pot: Regenerate.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* 2.38 release branch created.
+
+2022-01-17  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+
 2022-01-11  Fangrui Song  <maskray@google.com>
 
 	PR binutils/28759

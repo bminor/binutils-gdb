@@ -967,6 +967,60 @@ proc keep_debug_symbols_and_check_links { prog flags test } {
     }
 }
 
+# For ELF relocatables, test that --only-keep-debug
+# marks non-debug output sections as NOBITS.
+
+proc keep_debug_symbols_for_elf_relocatable { prog flags test } {
+    global srcdir
+    global subdir
+    global READELF
+
+    if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog.o object debug] != "" } {
+	untested $test
+	return
+    }
+
+    if [is_remote host] {
+	set relocatable [remote_download host tmpdir/testprog.o]
+    } else {
+	set relocatable tmpdir/testprog.o
+    }
+
+    set non_debug_sections {}
+    set got [binutils_run $READELF "-S --wide ${relocatable}"]
+    while { [regexp \
+	    {[^a-zA-Z]+([a-zA-Z0-9_\.]+)[ \t]+([A-Z]+)[ \t]+[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ [0-9]+[ \t]+([A-Z]*)[ \t]+[0-9]+(.*)} \
+	    $got all name type flag rest] } {
+	if { $type != "NOTE" && [regexp {[AG]} $flag] } {
+	    lappend non_debug_sections $name
+	}
+	set got $rest
+    }
+
+    set exec_output [binutils_run $prog "$flags ${relocatable}"]
+    if ![string equal "" $exec_output] {
+	fail $test
+	return
+    }
+
+    set fails 0
+    set got [binutils_run $READELF "-S --wide ${relocatable}"]
+    while { [regexp \
+	    {[^a-zA-Z]+([a-zA-Z0-9_\.]+)[ \t]+([A-Z]+)[ \t]+[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ [0-9]+[ \t]+[A-Z]*[ \t]+[0-9]+(.*)} \
+	    $got all name type rest] } {
+	if { [lsearch -exact $non_debug_sections $name] >= 0 && $type != "NOBITS" } {
+	    set fails 1
+	    send_log "Expected SHT_NOBITS type for .$name\n"
+	}
+	set got $rest
+    }
+    if { $fails == 1 } {
+	fail $test
+	return
+    }
+
+    pass $test
+}
 
 set test1 "simple objcopy of executable"
 set test1r "run objcopy of executable"
@@ -978,6 +1032,7 @@ set test4 "keep only debug data"
 set test5 "simple objcopy of debug data"
 if [is_elf_format] {
     set test6 "NOBITS sections retain sh_link field"
+    set test7 "--only-keep-debug for ELF relocatables"
 }
 
 switch [copy_setup] {
@@ -1008,6 +1063,7 @@ switch [copy_setup] {
 					 "$OBJCOPY" "$OBJCOPYFLAGS" "$test5"
 	if [is_elf_format] {
 	    keep_debug_symbols_and_check_links "$STRIP" "--only-keep-debug $STRIPFLAGS" "$test6"
+	    keep_debug_symbols_for_elf_relocatable "$STRIP" "--only-keep-debug $STRIPFLAGS" "$test7"
 	}
     }
     "0" {
@@ -1018,6 +1074,7 @@ switch [copy_setup] {
 					 "$OBJCOPY" "$OBJCOPYFLAGS" "$test5"
 	if [is_elf_format] {
 	    keep_debug_symbols_and_check_links "$STRIP" "--only-keep-debug $STRIPFLAGS" "$test6"
+	    keep_debug_symbols_for_elf_relocatable "$STRIP" "--only-keep-debug $STRIPFLAGS" "$test7"
 	}
     }
 }
@@ -1086,6 +1143,10 @@ proc objcopy_test_symbol_manipulation {} {
         # We need to strip the ".d", but can leave the dirname.
         verbose [file rootname $t]
         run_dump_test [file rootname $t]
+    }
+
+    if { [supports_gnu_unique] } {
+	run_dump_test "weaken-gnu-unique"
     }
 }
 

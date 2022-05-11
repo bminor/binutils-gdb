@@ -31,8 +31,6 @@ struct tui_cmd_window : public tui_win_info
 
   DISABLE_COPY_AND_ASSIGN (tui_cmd_window);
 
-  int max_height () const override;
-
   void refresh_window () override
   {
   }

@@ -2084,8 +2084,12 @@ make_head (bfd *parent)
   char *oname;
   bfd *abfd;
 
-  oname = xmalloc (20 + dll_symname_len);
-  sprintf (oname, "%s_d%06d.o", dll_symname, tmp_seq);
+  if (asprintf (&oname, "%s_d%06d.o", dll_symname, tmp_seq) < 4)
+    /* In theory we should return NULL here at let our caller decide what to
+       do.  But currently the return value is not checked, just used, and
+       besides, this condition only happens when the system has run out of
+       memory.  So just give up.  */
+    exit (EXIT_FAILURE);
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
@@ -2173,8 +2177,12 @@ make_tail (bfd *parent)
   char *oname;
   bfd *abfd;
 
-  oname = xmalloc (20 + dll_symname_len);
-  sprintf (oname, "%s_d%06d.o", dll_symname, tmp_seq);
+  if (asprintf (&oname, "%s_d%06d.o", dll_symname, tmp_seq) < 4)
+    /* In theory we should return NULL here at let our caller decide what to
+       do.  But currently the return value is not checked, just used, and
+       besides, this condition only happens when the system has run out of
+       memory.  So just give up.  */
+    exit (EXIT_FAILURE);
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
@@ -2324,8 +2332,12 @@ make_one (def_file_export *exp, bfd *parent, bool include_jmp_stub)
 	}
     }
 
-  oname = xmalloc (20 + dll_symname_len);
-  sprintf (oname, "%s_d%06d.o", dll_symname, tmp_seq);
+  if (asprintf (&oname, "%s_d%06d.o", dll_symname, tmp_seq) < 4)
+    /* In theory we should return NULL here at let our caller decide what to
+       do.  But currently the return value is not checked, just used, and
+       besides, this condition only happens when the system has run out of
+       memory.  So just give up.  */
+    exit (EXIT_FAILURE);
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
@@ -2510,8 +2522,12 @@ make_singleton_name_thunk (const char *import, bfd *parent)
   char *oname;
   bfd *abfd;
 
-  oname = xmalloc (20 + dll_symname_len);
-  sprintf (oname, "%s_nmth%06d.o", dll_symname, tmp_seq);
+  if (asprintf (&oname, "%s_nmth%06d.o", dll_symname, tmp_seq) < 4)
+    /* In theory we should return NULL here at let our caller decide what to
+       do.  But currently the return value is not checked, just used, and
+       besides, this condition only happens when the system has run out of
+       memory.  So just give up.  */
+    exit (EXIT_FAILURE);
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
@@ -2551,7 +2567,7 @@ make_import_fixup_mark (arelent *rel, char *name)
   struct bfd_symbol *sym = *rel->sym_ptr_ptr;
   bfd *abfd = bfd_asymbol_bfd (sym);
   struct bfd_link_hash_entry *bh;
-  char *fixup_name, buf[26];
+  char *fixup_name, buf[256];
   size_t prefix_len;
 
   /* "name" buffer has space before the symbol name for prefixes.  */
@@ -2586,8 +2602,12 @@ make_import_fixup_entry (const char *name,
   char *oname;
   bfd *abfd;
 
-  oname = xmalloc (20 + dll_symname_len);
-  sprintf (oname, "%s_fu%06d.o", dll_symname, tmp_seq);
+  if (asprintf (&oname, "%s_fu%06d.o", dll_symname, tmp_seq) < 4)
+    /* In theory we should return NULL here at let our caller decide what to
+       do.  But currently the return value is not checked, just used, and
+       besides, this condition only happens when the system has run out of
+       memory.  So just give up.  */
+    exit (EXIT_FAILURE);
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
@@ -2640,8 +2660,12 @@ make_runtime_pseudo_reloc (const char *name ATTRIBUTE_UNUSED,
   bfd *abfd;
   bfd_size_type size;
 
-  oname = xmalloc (20 + dll_symname_len);
-  sprintf (oname, "%s_rtr%06d.o", dll_symname, tmp_seq);
+  if (asprintf (&oname, "%s_rtr%06d.o", dll_symname, tmp_seq) < 4)
+    /* In theory we should return NULL here at let our caller decide what to
+       do.  But currently the return value is not checked, just used, and
+       besides, this condition only happens when the system has run out of
+       memory.  So just give up.  */
+    exit (EXIT_FAILURE);
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);
@@ -2727,8 +2751,12 @@ pe_create_runtime_relocator_reference (bfd *parent)
   char *oname;
   bfd *abfd;
 
-  oname = xmalloc (20 + dll_symname_len);
-  sprintf (oname, "%s_ertr%06d.o", dll_symname, tmp_seq);
+  if (asprintf (&oname, "%s_ertr%06d.o", dll_symname, tmp_seq) < 4)
+    /* In theory we should return NULL here at let our caller decide what to
+       do.  But currently the return value is not checked, just used, and
+       besides, this condition only happens when the system has run out of
+       memory.  So just give up.  */
+    exit (EXIT_FAILURE);
   tmp_seq++;
 
   abfd = bfd_create (oname, parent);

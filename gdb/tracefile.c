@@ -24,6 +24,7 @@
 #include "regcache.h"
 #include "gdbsupport/byte-vector.h"
 #include "gdbarch.h"
+#include "gdbsupport/buildargv.h"
 
 /* Helper macros.  */
 
@@ -350,8 +351,8 @@ tsave_command (const char *args, int from_tty)
     trace_save_tfile (filename, target_does_save);
 
   if (from_tty)
-    printf_filtered (_("Trace data saved to %s '%s'.\n"),
-		     generate_ctf ? "directory" : "file", filename);
+    gdb_printf (_("Trace data saved to %s '%s'.\n"),
+		generate_ctf ? "directory" : "file", filename);
 }
 
 /* Save the trace data to file FILENAME of tfile format.  */

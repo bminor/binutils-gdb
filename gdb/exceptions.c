@@ -46,19 +46,15 @@ print_flush (void)
     }
 
   /* We want all output to appear now, before we print the error.  We
-     have 3 levels of buffering we have to flush (it's possible that
+     have 2 levels of buffering we have to flush (it's possible that
      some of these should be changed to flush the lower-level ones
      too):  */
 
-  /* 1.  The _filtered buffer.  */
-  if (filtered_printing_initialized ())
-    wrap_here ("");
-
-  /* 2.  The stdio buffer.  */
+  /* 1.  The stdio buffer.  */
   gdb_flush (gdb_stdout);
   gdb_flush (gdb_stderr);
 
-  /* 3.  The system-level buffer.  */
+  /* 2.  The system-level buffer.  */
   gdb_stdout_serial = serial_fdopen (fileno (ui->outstream));
   if (gdb_stdout_serial)
     {
@@ -81,14 +77,14 @@ print_exception (struct ui_file *file, const struct gdb_exception &e)
     {
       end = strchr (start, '\n');
       if (end == NULL)
-	fputs_filtered (start, file);
+	gdb_puts (start, file);
       else
 	{
 	  end++;
 	  file->write (start, end - start);
 	}
     }					    
-  fprintf_filtered (file, "\n");
+  gdb_printf (file, "\n");
 
   /* Now append the annotation.  */
   switch (e.reason)
@@ -127,7 +123,7 @@ exception_fprintf (struct ui_file *file, const struct gdb_exception &e,
 
       /* Print the prefix.  */
       va_start (args, prefix);
-      vfprintf_filtered (file, prefix, args);
+      gdb_vprintf (file, prefix, args);
       va_end (args);
 
       print_exception (file, e);

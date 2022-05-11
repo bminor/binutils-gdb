@@ -49,19 +49,19 @@ static unsigned int xtensa_debug_level = 0;
 
 #define DEBUGWARN(args...) \
   if (xtensa_debug_level > 0) \
-    fprintf_unfiltered (gdb_stdlog, "(warn ) " args)
+    gdb_printf (gdb_stdlog, "(warn ) " args)
 
 #define DEBUGINFO(args...) \
   if (xtensa_debug_level > 1) \
-    fprintf_unfiltered (gdb_stdlog, "(info ) " args)
+    gdb_printf (gdb_stdlog, "(info ) " args)
 
 #define DEBUGTRACE(args...) \
   if (xtensa_debug_level > 2) \
-    fprintf_unfiltered (gdb_stdlog, "(trace) " args)
+    gdb_printf (gdb_stdlog, "(trace) " args)
 
 #define DEBUGVERB(args...) \
   if (xtensa_debug_level > 3) \
-    fprintf_unfiltered (gdb_stdlog, "(verb ) " args)
+    gdb_printf (gdb_stdlog, "(verb ) " args)
 
 
 /* According to the ABI, the SP must be aligned to 16-byte boundaries.  */
@@ -712,10 +712,10 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
 		    _("invalid register number %d"), regnum);
 }
 
-static struct reggroup *xtensa_ar_reggroup;
-static struct reggroup *xtensa_user_reggroup;
-static struct reggroup *xtensa_vectra_reggroup;
-static struct reggroup *xtensa_cp[XTENSA_MAX_COPROCESSOR];
+static const reggroup *xtensa_ar_reggroup;
+static const reggroup *xtensa_user_reggroup;
+static const reggroup *xtensa_vectra_reggroup;
+static const reggroup *xtensa_cp[XTENSA_MAX_COPROCESSOR];
 
 static void
 xtensa_init_reggroups (void)
@@ -734,28 +734,17 @@ xtensa_init_reggroups (void)
 static void
 xtensa_add_reggroups (struct gdbarch *gdbarch)
 {
-  int i;
-
-  /* Predefined groups.  */
-  reggroup_add (gdbarch, all_reggroup);
-  reggroup_add (gdbarch, save_reggroup);
-  reggroup_add (gdbarch, restore_reggroup);
-  reggroup_add (gdbarch, system_reggroup);
-  reggroup_add (gdbarch, vector_reggroup);
-  reggroup_add (gdbarch, general_reggroup);
-  reggroup_add (gdbarch, float_reggroup);
-
   /* Xtensa-specific groups.  */
   reggroup_add (gdbarch, xtensa_ar_reggroup);
   reggroup_add (gdbarch, xtensa_user_reggroup);
   reggroup_add (gdbarch, xtensa_vectra_reggroup);
 
-  for (i = 0; i < XTENSA_MAX_COPROCESSOR; i++)
+  for (int i = 0; i < XTENSA_MAX_COPROCESSOR; i++)
     reggroup_add (gdbarch, xtensa_cp[i]);
 }
 
 static int 
-xtensa_coprocessor_register_group (struct reggroup *group)
+xtensa_coprocessor_register_group (const struct reggroup *group)
 {
   int i;
 
@@ -776,7 +765,7 @@ xtensa_coprocessor_register_group (struct reggroup *group)
 static int
 xtensa_register_reggroup_p (struct gdbarch *gdbarch,
 			    int regnum,
-			    struct reggroup *group)
+			    const struct reggroup *group)
 {
   xtensa_gdbarch_tdep *tdep = (xtensa_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   xtensa_register_t* reg = &tdep->regmap[regnum];
@@ -1732,23 +1721,23 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	{
 	  struct value *arg = args[i];
 	  struct type *arg_type = check_typedef (value_type (arg));
-	  fprintf_unfiltered (gdb_stdlog, "%2d: %s %3s ", i,
-			      host_address_to_string (arg),
-			      pulongest (TYPE_LENGTH (arg_type)));
+	  gdb_printf (gdb_stdlog, "%2d: %s %3s ", i,
+		      host_address_to_string (arg),
+		      pulongest (TYPE_LENGTH (arg_type)));
 	  switch (arg_type->code ())
 	    {
 	    case TYPE_CODE_INT:
-	      fprintf_unfiltered (gdb_stdlog, "int");
+	      gdb_printf (gdb_stdlog, "int");
 	      break;
 	    case TYPE_CODE_STRUCT:
-	      fprintf_unfiltered (gdb_stdlog, "struct");
+	      gdb_printf (gdb_stdlog, "struct");
 	      break;
 	    default:
-	      fprintf_unfiltered (gdb_stdlog, "%3d", arg_type->code ());
+	      gdb_printf (gdb_stdlog, "%3d", arg_type->code ());
 	      break;
 	    }
-	  fprintf_unfiltered (gdb_stdlog, " %s\n",
-			      host_address_to_string (value_contents (arg).data ()));
+	  gdb_printf (gdb_stdlog, " %s\n",
+		      host_address_to_string (value_contents (arg).data ()));
 	}
     }
 
@@ -2069,7 +2058,7 @@ call0_ret (CORE_ADDR start_pc, CORE_ADDR finish_pc)
    The purpose of this is to simplify prologue analysis by separating 
    instruction decoding (libisa) from the semantics of prologue analysis.  */
 
-typedef enum
+enum xtensa_insn_kind
 {
   c0opc_illegal,       /* Unknown to libisa (invalid) or 'ill' opcode.  */
   c0opc_uninteresting, /* Not interesting for Call0 prologue analysis.  */
@@ -2090,7 +2079,7 @@ typedef enum
   c0opc_rfwo,          /* RFWO instruction.  */
   c0opc_rfwu,          /* RFWU instruction.  */
   c0opc_NrOf	       /* Number of opcode classifications.  */
-} xtensa_insn_kind;
+};
 
 /* Return true,  if OPCNAME is RSR,  WRS,  or XSR instruction.  */
 
@@ -2764,12 +2753,12 @@ execute_s32e (struct gdbarch *gdbarch, int at, int as, int offset, CORE_ADDR wb)
 
 #define XTENSA_MAX_WINDOW_INTERRUPT_HANDLER_LEN  200
 
-typedef enum
+enum xtensa_exception_handler_t
 {
   xtWindowOverflow,
   xtWindowUnderflow,
   xtNoExceptionHandler
-} xtensa_exception_handler_t;
+};
 
 /* Execute instruction stream from current PC until hitting RFWU or RFWO.
    Return type of Xtensa Window Interrupt Handler on success.  */

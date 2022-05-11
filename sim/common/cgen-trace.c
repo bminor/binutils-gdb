@@ -320,6 +320,22 @@ sim_disasm_sprintf (SFILE *f, const char *format, ...)
   return n;
 }
 
+/* sprintf to a "stream" with styling.  */
+
+int
+sim_disasm_styled_sprintf (SFILE *f, enum disassembler_style style,
+			   const char *format, ...)
+{
+  int n;
+  va_list args;
+
+  va_start (args, format);
+  vsprintf (f->current, format, args);
+  f->current += n = strlen (f->current);
+  va_end (args);
+  return n;
+}
+
 /* Memory read support for an opcodes disassembler.  */
 
 int
@@ -383,7 +399,8 @@ sim_cgen_disassemble_insn (SIM_CPU *cpu, const CGEN_INSN *insn,
 
   sfile.buffer = sfile.current = buf;
   INIT_DISASSEMBLE_INFO (disasm_info, (FILE *) &sfile,
-			 (fprintf_ftype) sim_disasm_sprintf);
+			 (fprintf_ftype) sim_disasm_sprintf,
+			 (fprintf_styled_ftype) sim_disasm_styled_sprintf);
   disasm_info.endian =
     (bfd_big_endian (STATE_PROG_BFD (sd)) ? BFD_ENDIAN_BIG
      : bfd_little_endian (STATE_PROG_BFD (sd)) ? BFD_ENDIAN_LITTLE

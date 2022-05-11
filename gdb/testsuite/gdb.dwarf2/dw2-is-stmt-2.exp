@@ -68,84 +68,84 @@ Dwarf::assemble $asm_file {
 	file_name "$srcfile" 1
 
 	program {
-	    {DW_LNE_set_address main}
-	    {line [gdb_get_line_number "main prologue"]}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address main
+	    line [gdb_get_line_number "main prologue"]
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_0}
-	    {line [gdb_get_line_number "main start"]}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_0
+	    line [gdb_get_line_number "main start"]
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_1}
-	    {line [gdb_get_line_number "Line 1"]}
-	    {DW_LNS_negate_stmt}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_1
+	    line [gdb_get_line_number "Line 1"]
+	    DW_LNS_negate_stmt
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_2}
-	    {DW_LNS_negate_stmt}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_2
+	    DW_LNS_negate_stmt
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_3}
-	    {line [gdb_get_line_number "Line 2"]}
-	    {DW_LNS_negate_stmt}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_3
+	    line [gdb_get_line_number "Line 2"]
+	    DW_LNS_negate_stmt
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_4}
-	    {line [gdb_get_line_number "Line 1"]}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_4
+	    line [gdb_get_line_number "Line 1"]
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_5}
-	    {line [gdb_get_line_number "Line 3"]}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_5
+	    line [gdb_get_line_number "Line 3"]
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_6}
-	    {line [gdb_get_line_number "Line 4"]}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_6
+	    line [gdb_get_line_number "Line 4"]
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_7}
-	    {DW_LNS_negate_stmt}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_7
+	    DW_LNS_negate_stmt
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_8}
-	    {line [gdb_get_line_number "Line 2"]}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_8
+	    line [gdb_get_line_number "Line 2"]
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_9}
-	    {DW_LNS_negate_stmt}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_9
+	    DW_LNS_negate_stmt
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_10}
-	    {line [gdb_get_line_number "Line 3"]}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_10
+	    line [gdb_get_line_number "Line 3"]
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_11}
-	    {line [gdb_get_line_number "Line 5"]}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_11
+	    line [gdb_get_line_number "Line 5"]
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_12}
-	    {DW_LNS_negate_stmt}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_12
+	    DW_LNS_negate_stmt
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_13}
-	    {line [gdb_get_line_number "Line 3"]}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_13
+	    line [gdb_get_line_number "Line 3"]
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_14}
-	    {line [gdb_get_line_number "Line 4"]}
-	    {DW_LNS_negate_stmt}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_14
+	    line [gdb_get_line_number "Line 4"]
+	    DW_LNS_negate_stmt
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_15}
-	    {line [gdb_get_line_number "Line 5"]}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_15
+	    line [gdb_get_line_number "Line 5"]
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address line_label_16}
-	    {line [gdb_get_line_number "main end"]}
-	    {DW_LNS_negate_stmt}
-	    {DW_LNS_copy}
+	    DW_LNE_set_address line_label_16
+	    line [gdb_get_line_number "main end"]
+	    DW_LNS_negate_stmt
+	    DW_LNS_copy
 
-	    {DW_LNE_set_address ${main_end}}
-	    {DW_LNE_end_sequence}
+	    DW_LNE_set_address ${main_end}
+	    DW_LNE_end_sequence
 	}
     }
 }

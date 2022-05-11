@@ -23,6 +23,7 @@ standard_testfile .c
 # Try to compile the test case.  If we can't, assume the
 # toolchain does not yet provide DFP support and bail out.
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {quiet debug}] != "" } {
+    unsupported "decimal floating point not supported for this target."
     verbose "Skipping DFP tests."
     return -1
 }

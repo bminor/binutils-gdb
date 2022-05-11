@@ -136,7 +136,7 @@ static void
 show_dcache_enabled_p (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Deprecated remotecache flag is %s.\n"), value);
+  gdb_printf (file, _("Deprecated remotecache flag is %s.\n"), value);
 }
 
 /* Add BLOCK to circular block list BLIST, behind the block at *BLIST.
@@ -554,7 +554,7 @@ dcache_print_line (DCACHE *dcache, int index)
 
   if (dcache == NULL)
     {
-      printf_filtered (_("No data cache available.\n"));
+      gdb_printf (_("No data cache available.\n"));
       return;
     }
 
@@ -569,24 +569,24 @@ dcache_print_line (DCACHE *dcache, int index)
 
   if (!n)
     {
-      printf_filtered (_("No such cache line exists.\n"));
+      gdb_printf (_("No such cache line exists.\n"));
       return;
     }
     
   db = (struct dcache_block *) n->value;
 
-  printf_filtered (_("Line %d: address %s [%d hits]\n"),
-		   index, paddress (target_gdbarch (), db->addr), db->refs);
+  gdb_printf (_("Line %d: address %s [%d hits]\n"),
+	      index, paddress (target_gdbarch (), db->addr), db->refs);
 
   for (j = 0; j < dcache->line_size; j++)
     {
-      printf_filtered ("%02x ", db->data[j]);
+      gdb_printf ("%02x ", db->data[j]);
 
       /* Print a newline every 16 bytes (48 characters).  */
       if ((j % 16 == 15) && (j != dcache->line_size - 1))
-	printf_filtered ("\n");
+	gdb_printf ("\n");
     }
-  printf_filtered ("\n");
+  gdb_printf ("\n");
 }
 
 /* Parse EXP and show the info about DCACHE.  */
@@ -604,7 +604,7 @@ dcache_info_1 (DCACHE *dcache, const char *exp)
       i = strtol (exp, &linestart, 10);
       if (linestart == exp || i < 0)
 	{
-	  printf_filtered (_("Usage: info dcache [LINENUMBER]\n"));
+	  gdb_printf (_("Usage: info dcache [LINENUMBER]\n"));
 	  return;
 	}
 
@@ -612,19 +612,19 @@ dcache_info_1 (DCACHE *dcache, const char *exp)
       return;
     }
 
-  printf_filtered (_("Dcache %u lines of %u bytes each.\n"),
-		   dcache_size,
-		   dcache ? (unsigned) dcache->line_size
-		   : dcache_line_size);
+  gdb_printf (_("Dcache %u lines of %u bytes each.\n"),
+	      dcache_size,
+	      dcache ? (unsigned) dcache->line_size
+	      : dcache_line_size);
 
   if (dcache == NULL || dcache->ptid == null_ptid)
     {
-      printf_filtered (_("No data cache available.\n"));
+      gdb_printf (_("No data cache available.\n"));
       return;
     }
 
-  printf_filtered (_("Contains data for %s\n"),
-		   target_pid_to_str (dcache->ptid).c_str ());
+  gdb_printf (_("Contains data for %s\n"),
+	      target_pid_to_str (dcache->ptid).c_str ());
 
   refcount = 0;
 
@@ -635,15 +635,15 @@ dcache_info_1 (DCACHE *dcache, const char *exp)
     {
       struct dcache_block *db = (struct dcache_block *) n->value;
 
-      printf_filtered (_("Line %d: address %s [%d hits]\n"),
-		       i, paddress (target_gdbarch (), db->addr), db->refs);
+      gdb_printf (_("Line %d: address %s [%d hits]\n"),
+		  i, paddress (target_gdbarch (), db->addr), db->refs);
       i++;
       refcount += db->refs;
 
       n = splay_tree_successor (dcache->tree, n->key);
     }
 
-  printf_filtered (_("Cache state: %d active lines, %d hits\n"), i, refcount);
+  gdb_printf (_("Cache state: %d active lines, %d hits\n"), i, refcount);
 }
 
 static void

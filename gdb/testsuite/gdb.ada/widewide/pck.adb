@@ -20,4 +20,14 @@ package body Pck is
       null;
    end Do_Nothing;
 
+   procedure Do_Nothing (A : Wide_String) is
+   begin
+      null;
+   end Do_Nothing;
+
+   procedure Do_Nothing (A : Wide_Wide_String) is
+   begin
+      null;
+   end Do_Nothing;
+
 end Pck;

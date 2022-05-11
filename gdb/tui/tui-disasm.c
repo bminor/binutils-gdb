@@ -130,14 +130,12 @@ tui_disassemble (struct gdbarch *gdbarch,
 	}
 
       /* Capture the disassembled instruction.  */
-      tal.insn = std::move (gdb_dis_out.string ());
-      gdb_dis_out.clear ();
+      tal.insn = gdb_dis_out.release ();
 
       /* And capture the address the instruction is at.  */
       tal.addr = orig_pc;
       print_address (gdbarch, orig_pc, &gdb_dis_out);
-      tal.addr_string = std::move (gdb_dis_out.string ());
-      gdb_dis_out.clear ();
+      tal.addr_string = gdb_dis_out.release ();
 
       if (addr_size != nullptr)
 	{
@@ -170,9 +168,9 @@ tui_find_backward_disassembly_start_address (CORE_ADDR addr)
 					      lookup_msym_prefer::TEXT,
 					      &msym_prev);
   if (msym.minsym != nullptr)
-    return BMSYMBOL_VALUE_ADDRESS (msym);
+    return msym.value_address ();
   else if (msym_prev.minsym != nullptr)
-    return BMSYMBOL_VALUE_ADDRESS (msym_prev);
+    return msym_prev.value_address ();
 
   /* Find the section that ADDR is in, and look for the start of the
      section.  */
@@ -406,7 +404,7 @@ tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
 	  struct bound_minimal_symbol main_symbol
 	    = lookup_minimal_symbol (main_name (), nullptr, nullptr);
 	  if (main_symbol.minsym != nullptr)
-	    addr = BMSYMBOL_VALUE_ADDRESS (main_symbol);
+	    addr = main_symbol.value_address ();
 	}
     }
   else				/* The target is executing.  */

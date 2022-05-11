@@ -1058,6 +1058,165 @@ extract_esync (uint64_t insn,
   return value;
 }
 
+/* The n operand of clrrwi, which sets the ME field to 31 - n.  */
+
+static uint64_t
+insert_crwn (uint64_t insn,
+	    int64_t value,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((~value & 0x1f) << 1);
+}
+
+static int64_t
+extract_crwn (uint64_t insn,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
+{
+  return ~(insn >> 1) & 0x1f;
+}
+
+/* The n operand of extlwi, which sets the ME field to n - 1.  */
+
+static uint64_t
+insert_elwn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | (((value - 1) & 0x1f) << 1);
+}
+
+static int64_t
+extract_elwn (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid ATTRIBUTE_UNUSED)
+{
+  return ((insn >> 1) & 0x1f) + 1;
+}
+
+/* The n operand of extrwi, sets MB = 32 - n.  */
+
+static uint64_t
+insert_erwn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((-value & 0x1f) << 6);
+}
+
+static int64_t
+extract_erwn (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid ATTRIBUTE_UNUSED)
+{
+  return (~(insn >> 6) & 0x1f) + 1;
+}
+
+/* The b operand of extrwi, sets SH = b + n.  */
+
+static uint64_t
+insert_erwb (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  int64_t n = extract_erwn (insn, dialect, NULL);
+  return insn | (((n + value) & 0x1f) << 11);
+}
+
+static int64_t
+extract_erwb (uint64_t insn,
+	      ppc_cpu_t dialect,
+	      int *invalid ATTRIBUTE_UNUSED)
+{
+  int64_t n = extract_erwn (insn, dialect, NULL);
+  return ((insn >> 11) - n) & 0x1f;
+}
+
+/* The n and b operands of clrlslwi.  */
+
+static uint64_t
+insert_cslwn (uint64_t insn,
+	      int64_t value,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      const char **errmsg ATTRIBUTE_UNUSED)
+{
+  uint64_t mb = 0x1f << 6;
+  int64_t b = (insn >> 6) & 0x1f;
+  return ((insn & ~mb) | ((value & 0x1f) << 11) | (((b - value) & 0x1f) << 6)
+	  | ((~value & 0x1f) << 1));
+}
+
+static int64_t
+extract_cslwb (uint64_t insn,
+	       ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	       int *invalid)
+{
+  int64_t sh = (insn >> 11) & 0x1f;
+  int64_t mb = (insn >> 6) & 0x1f;
+  int64_t me = (insn >> 1) & 0x1f;
+  if (sh != 31 - me)
+    *invalid = 1;
+  return (mb + sh) & 0x1f;
+}
+
+/* The n and b operands of inslwi.  */
+
+static uint64_t
+insert_ilwb (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  uint64_t me = 0x1f << 1;
+  int64_t n = (insn >> 1) & 0x1f;
+  return ((insn & ~me) | ((-value & 0x1f) << 11) | ((value & 0x1f) << 6)
+	  | (((value + n - 1) & 0x1f) << 1));
+}
+
+static int64_t
+extract_ilwn (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid)
+{
+  int64_t sh = (insn >> 11) & 0x1f;
+  int64_t mb = (insn >> 6) & 0x1f;
+  int64_t me = (insn >> 1) & 0x1f;
+  if (((sh + mb) & 0x1f) != 0)
+    *invalid = 1;
+  return ((me - mb) & 0x1f) + 1;
+}
+
+/* The n and b operands of insrwi.  */
+
+static uint64_t
+insert_irwb (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  uint64_t me = 0x1f << 1;
+  int64_t n = (insn >> 1) & 0x1f;
+  return ((insn & ~me) | ((-(value + n) & 0x1f) << 11) | ((value & 0x1f) << 6)
+	  | (((value + n - 1) & 0x1f) << 1));
+}
+
+static int64_t
+extract_irwn (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid)
+{
+  int64_t sh = (insn >> 11) & 0x1f;
+  int64_t mb = (insn >> 6) & 0x1f;
+  int64_t me = (insn >> 1) & 0x1f;
+  if (((sh + me + 1) & 0x1f) != 0)
+    *invalid = 1;
+  return ((me - mb) & 0x1f) + 1;
+}
+
 /* The MB and ME fields in an M form instruction expressed as a single
    operand which is itself a bitmask.  The extraction function always
    marks it as invalid, since we never want to recognize an
@@ -1164,6 +1323,63 @@ extract_mb6 (uint64_t insn,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn >> 6) & 0x1f) | (insn & 0x20);
+}
+
+/* The n operand of extrdi, which sets MB field.  */
+
+static uint64_t
+insert_erdn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect,
+	     const char **errmsg)
+{
+  return insert_mb6 (insn, -value, dialect, errmsg);
+}
+
+static int64_t
+extract_erdn (uint64_t insn,
+	      ppc_cpu_t dialect,
+	      int *invalid)
+{
+  return (~extract_mb6 (insn, dialect, invalid) & 63) + 1;
+}
+
+/* The n operand of extldi, which sets ME field.  */
+
+static uint64_t
+insert_eldn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect,
+	     const char **errmsg)
+{
+  return insert_mb6 (insn, value - 1, dialect, errmsg);
+}
+
+static int64_t
+extract_eldn (uint64_t insn,
+	      ppc_cpu_t dialect,
+	      int *invalid)
+{
+  return extract_mb6 (insn, dialect, invalid) + 1;
+}
+
+/* The n operand of clrrdi, which set ME field.  */
+
+static uint64_t
+insert_crdn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect,
+	     const char **errmsg)
+{
+  return insert_mb6 (insn, 63 - value, dialect, errmsg);
+}
+
+static int64_t
+extract_crdn (uint64_t insn,
+	      ppc_cpu_t dialect,
+	      int *invalid)
+{
+  return 63 - extract_mb6 (insn, dialect, invalid);
 }
 
 /* The NB field in an X form instruction.  The value 32 is stored as
@@ -1532,6 +1748,71 @@ extract_oimm (uint64_t insn,
   return ((insn >> 4) & 0x1f) + 1;
 }
 
+/* The n operand of rotrwi, sets SH = 32 - n.  */
+
+static uint64_t
+insert_rrwn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((-value & 0x1f) << 11);
+}
+
+static int64_t
+extract_rrwn (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid ATTRIBUTE_UNUSED)
+{
+  return 31 & -(insn >> 11);
+}
+
+/* The n operand of slwi, sets SH = n and ME = 31 - n.  */
+
+static uint64_t
+insert_slwn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((value & 0x1f) << 11) | ((~value & 0x1f) << 1);
+}
+
+static int64_t
+extract_slwn (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid)
+{
+  int64_t sh = (insn >> 11) & 0x1f;
+  int64_t nme = ~(insn >> 1) & 0x1f;
+  if (sh != nme)
+    *invalid = 1;
+  return sh;
+}
+
+/* The n operand of srwi, sets SH = 32 - n and MB = n.  */
+
+static uint64_t
+insert_srwn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((-value & 0x1f) << 11) | ((value & 0x1f) << 6);
+}
+
+static int64_t
+extract_srwn (uint64_t insn,
+	      ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	      int *invalid)
+{
+  int64_t nsh = -(insn >> 11) & 0x1f;
+  int64_t mb = (insn >> 6) & 0x1f;
+  if (nsh != mb)
+    *invalid = 1;
+  return nsh;
+}
+
 /* The SH field in an MD form instruction.  This is split.  */
 
 static uint64_t
@@ -1549,6 +1830,143 @@ extract_sh6 (uint64_t insn,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn >> 11) & 0x1f) | ((insn << 4) & 0x20);
+}
+
+/* The n operand of rotrdi, which writes to SH field.  */
+
+static uint64_t
+insert_rrdn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect,
+	     const char **errmsg)
+{
+  return insert_sh6 (insn, -value, dialect, errmsg);
+}
+
+static int64_t
+extract_rrdn (uint64_t insn,
+	      ppc_cpu_t dialect,
+	      int *invalid)
+{
+  return -extract_sh6 (insn, dialect, invalid) & 63;
+}
+
+/* The n operand of sldi, which writes to SH and ME fields.  */
+
+static uint64_t
+insert_sldn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect,
+	     const char **errmsg)
+{
+  insn = insert_sh6 (insn, value, dialect, errmsg);
+  return insert_crdn (insn, value, dialect, errmsg);
+}
+
+static int64_t
+extract_sldn (uint64_t insn,
+	      ppc_cpu_t dialect,
+	      int *invalid)
+{
+  int64_t sh = extract_sh6 (insn, dialect, invalid);
+  int64_t me = extract_crdn (insn, dialect, invalid);
+  if (me != sh)
+    *invalid = 1;
+  return sh;
+}
+
+/* The n operand of srdi, which writes to SH and MB fields.  */
+
+static uint64_t
+insert_srdn (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect,
+	     const char **errmsg)
+{
+  insn = insert_rrdn (insn, value, dialect, errmsg);
+  return insert_mb6 (insn, value, dialect, errmsg);
+}
+
+static int64_t
+extract_srdn (uint64_t insn,
+	      ppc_cpu_t dialect,
+	      int *invalid)
+{
+  int64_t sh = extract_rrdn (insn, dialect, invalid);
+  int64_t mb = extract_mb6 (insn, dialect, invalid);
+  if (mb != sh)
+    *invalid = 1;
+  return sh;
+}
+
+/* The b operand of extrdi, which sets SH field.  */
+
+static uint64_t
+insert_erdb (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect,
+	     const char **errmsg)
+{
+  int64_t n = extract_erdn (insn, dialect, NULL);
+  return insert_sh6 (insn, value + n, dialect, errmsg);
+}
+
+static int64_t
+extract_erdb (uint64_t insn,
+	      ppc_cpu_t dialect,
+	      int *invalid)
+{
+  int64_t sh = extract_sh6 (insn, dialect, invalid);
+  int64_t n = extract_erdn (insn, dialect, invalid);
+  return (sh - n) & 63;
+}
+
+/* The b and n operands of clrlsldi.  */
+
+static uint64_t
+insert_csldn (uint64_t insn,
+	      int64_t value,
+	      ppc_cpu_t dialect,
+	      const char **errmsg)
+{
+  uint64_t mb6 = 0x3f << 5;
+  int64_t b = extract_mb6 (insn, dialect, NULL);
+  insn = insert_mb6 (insn & ~mb6, b - value, dialect, errmsg);
+  return insert_sh6 (insn, value, dialect, errmsg);
+}
+
+static int64_t
+extract_csldb (uint64_t insn,
+	       ppc_cpu_t dialect,
+	       int *invalid)
+{
+  int64_t sh = extract_sh6 (insn, dialect, invalid);
+  int64_t mb = extract_mb6 (insn, dialect, invalid);
+  return (mb + sh) & 63;
+}
+
+/* The b and n operands of insrdi.  */
+
+static uint64_t
+insert_irdb (uint64_t insn,
+	     int64_t value,
+	     ppc_cpu_t dialect,
+	     const char **errmsg)
+{
+  uint64_t sh6 = (0x1f << 11) | 2;
+  int64_t n = extract_sh6 (insn, dialect, NULL);
+  insn = insert_sh6 (insn & ~sh6, -(value + n), dialect, errmsg);
+  return insert_mb6 (insn, value, dialect, errmsg);
+}
+
+static int64_t
+extract_irdn (uint64_t insn,
+	      ppc_cpu_t dialect,
+	      int *invalid)
+{
+  int64_t sh = extract_sh6 (insn, dialect, invalid);
+  int64_t mb = extract_mb6 (insn, dialect, invalid);
+  return (~(mb + sh) & 63) + 1;
 }
 
 /* The SPR field in an XFX form instruction.  This is flipped--the
@@ -2739,11 +3157,41 @@ const struct powerpc_operand powerpc_operands[] =
 #define ME_MASK (0x1f << 1)
   { 0x1f, 1, NULL, NULL, 0 },
 
+#define CRWn ME + 1
+  { 0x1f, 1, insert_crwn, extract_crwn, 0 },
+
+#define ELWn CRWn + 1
+  { 0x1f, 1, insert_elwn, extract_elwn, PPC_OPERAND_PLUS1 },
+
+#define ERWn ELWn + 1
+  { 0x1f, 6, insert_erwn, extract_erwn, 0 },
+
+#define ERWb ERWn + 1
+  { 0x1f, 11, insert_erwb, extract_erwb, 0 },
+
+#define CSLWb ERWb + 1
+  { 0x1f, 6, NULL, extract_cslwb, 0 },
+
+#define CSLWn CSLWb + 1
+  { 0x1f, 11, insert_cslwn, NULL, 0 },
+
+#define ILWn CSLWn + 1
+  { 0x1f, 1, NULL, extract_ilwn, PPC_OPERAND_PLUS1 },
+
+#define ILWb ILWn + 1
+  { 0x1f, 6, insert_ilwb, NULL, 0 },
+
+#define IRWn ILWb + 1
+  { 0x1f, 1, NULL, extract_irwn, PPC_OPERAND_PLUS1 },
+
+#define IRWb IRWn + 1
+  { 0x1f, 6, insert_irwb, NULL, 0 },
+
   /* The MB and ME fields in an M form instruction expressed a single
      operand which is a bitmask indicating which bits to select.  This
      is a two operand form using PPC_OPERAND_NEXT.  See the
      description in opcode/ppc.h for what this means.  */
-#define MBE ME + 1
+#define MBE IRWb + 1
   { 0x1f, 6, NULL, NULL, PPC_OPERAND_OPTIONAL | PPC_OPERAND_NEXT },
   { -1, 0, insert_mbe, extract_mbe, 0 },
 
@@ -2754,9 +3202,18 @@ const struct powerpc_operand powerpc_operands[] =
 #define MB6_MASK (0x3f << 5)
   { 0x3f, 5, insert_mb6, extract_mb6, 0 },
 
+#define ELDn MB6 + 1
+  { 0x3f, 5, insert_eldn, extract_eldn, PPC_OPERAND_PLUS1 },
+
+#define ERDn ELDn + 1
+  { 0x3f, 5, insert_erdn, extract_erdn, 0 },
+
+#define CRDn ERDn + 1
+  { 0x3f, 5, insert_crdn, extract_crdn, 0 },
+
   /* The NB field in an X form instruction.  The value 32 is stored as
      0.  */
-#define NB MB6 + 1
+#define NB CRDn + 1
   { 0x1f, 11, NULL, extract_nb, PPC_OPERAND_PLUS1 },
 
   /* The NBI field in an lswi instruction, which has special value
@@ -2927,7 +3384,16 @@ const struct powerpc_operand powerpc_operands[] =
 #define UIM5 SH
   { 0x1f, 11, NULL, NULL, 0 },
 
-#define EVUIMM_LT8 SH + 1
+#define RRWn SH + 1
+  { 0x1f, 11, insert_rrwn, extract_rrwn, 0 },
+
+#define SLWn RRWn + 1
+  { 0x1f, 11, insert_slwn, extract_slwn, 0 },
+
+#define SRWn SLWn + 1
+  { 0x1f, 11, insert_srwn, extract_srwn, 0 },
+
+#define EVUIMM_LT8 SRWn + 1
   { 0x1f, 11, insert_evuimm_lt8, extract_evuimm_lt8, 0 },
 
 #define EVUIMM_LT16 EVUIMM_LT8 + 1
@@ -2942,9 +3408,33 @@ const struct powerpc_operand powerpc_operands[] =
 #define SH6_MASK ((0x1f << 11) | (1 << 1))
   { 0x3f, PPC_OPSHIFT_INV, insert_sh6, extract_sh6, 0 },
 
+#define RRDn SH6 + 1
+  { 0x3f, PPC_OPSHIFT_INV, insert_rrdn, extract_rrdn, 0 },
+
+#define SLDn RRDn + 1
+  { 0x3f, PPC_OPSHIFT_INV, insert_sldn, extract_sldn, 0 },
+
+#define SRDn SLDn + 1
+  { 0x3f, PPC_OPSHIFT_INV, insert_srdn, extract_srdn, 0 },
+
+#define ERDb SRDn + 1
+  { 0x3f, PPC_OPSHIFT_INV, insert_erdb, extract_erdb, 0 },
+
+#define CSLDn ERDb + 1
+  { 0x3f, PPC_OPSHIFT_SH6, insert_csldn, extract_sh6, 0 },
+
+#define CSLDb CSLDn + 1
+  { 0x3f, 5, insert_mb6, extract_csldb, 0 },
+
+#define IRDn CSLDb + 1
+  { 0x3f, PPC_OPSHIFT_INV, insert_sh6, extract_irdn, PPC_OPERAND_PLUS1 },
+
+#define IRDb IRDn + 1
+  { 0x3f, 5, insert_irdb, extract_mb6, 0 },
+
   /* The SH field of some variants of the tlbre and tlbwe
      instructions, and the ELEV field of the e_sc instruction.  */
-#define SHO SH6 + 1
+#define SHO IRDb + 1
 #define ELEV SHO
   { 0x1f, 11, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
@@ -3596,11 +4086,20 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
   (M ((op), (rc))				\
    | ((((uint64_t)(me)) & 0x1f) << 1))
 
+/* An M_MASK with the MB field fixed.  */
+#define MMB_MASK (M_MASK | MB_MASK)
+
+/* An M_MASK with the ME field fixed.  */
+#define MME_MASK (M_MASK | ME_MASK)
+
 /* An M_MASK with the MB and ME fields fixed.  */
 #define MMBME_MASK (M_MASK | MB_MASK | ME_MASK)
 
 /* An M_MASK with the SH and ME fields fixed.  */
 #define MSHME_MASK (M_MASK | SH_MASK | ME_MASK)
+
+/* An M_MASK with the SH and MB fields fixed.  */
+#define MSHMB_MASK (M_MASK | SH_MASK | MB_MASK)
 
 /* An MD form instruction.  */
 #define MD(op, xop, rc)				\
@@ -4755,48 +5254,71 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"cput",	APU(4, 348,0),	APU_RT_MASK, PPC405,	0,		{RA, FSL}},
 {"efdmin",	VX (4, 697),	VX_MASK,     PPCEFS2,	0,		{RD, RA, RB}},
 {"efsadd",	VX (4, 704),	VX_MASK,     PPCEFS,	0,		{RS, RA, RB}},
+{"evsadd",	VX (4, 704),	VX_MASK,     PPCEFS,	0,		{RS, RA, RB}},
 {"efssub",	VX (4, 705),	VX_MASK,     PPCEFS,	0,		{RS, RA, RB}},
+{"evssub",	VX (4, 705),	VX_MASK,     PPCEFS,	0,		{RS, RA, RB}},
 {"efsmadd",	VX (4, 706),	VX_MASK,     PPCEFS2,	0,		{RS, RA, RB}},
 {"vminud",	VX (4, 706),	VX_MASK,     PPCVEC2,	0,		{VD, VA, VB}},
 {"efsmsub",	VX (4, 707),	VX_MASK,     PPCEFS2,	0,		{RS, RA, RB}},
 {"efsabs",	VX (4, 708),	VX_MASK,     PPCEFS,	0,		{RS, RA}},
+{"evsabs",	VX (4, 708),	VX_MASK,     PPCEFS,	0,		{RS, RA}},
 {"vsr",		VX (4, 708),	VX_MASK,     PPCVEC,	0,		{VD, VA, VB}},
 {"efsnabs",	VX (4, 709),	VX_MASK,     PPCEFS,	0,		{RS, RA}},
+{"evsnabs",	VX (4, 709),	VX_MASK,     PPCEFS,	0,		{RS, RA}},
 {"efsneg",	VX (4, 710),	VX_MASK,     PPCEFS,	0,		{RS, RA}},
+{"evsneg",	VX (4, 710),	VX_MASK,     PPCEFS,	0,		{RS, RA}},
 {"vcmpgtfp",	VXR(4, 710,0),	VXR_MASK,    PPCVEC,	0,		{VD, VA, VB}},
 {"efssqrt",	VX_RB_CONST(4, 711, 0), VX_RB_CONST_MASK,PPCEFS2, 0,	{RD, RA}},
 {"vcmpgtud",	VXR(4, 711,0),	VXR_MASK,    PPCVEC2,	0,		{VD, VA, VB}},
 {"vmuleud",	VX (4, 712),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"efsmul",	VX (4, 712),	VX_MASK,     PPCEFS,	0,		{RS, RA, RB}},
+{"evsmul",	VX (4, 712),	VX_MASK,     PPCEFS,	0,		{RS, RA, RB}},
 {"vmulhud",	VX (4, 713),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"efsdiv",	VX (4, 713),	VX_MASK,     PPCEFS,	0,		{RS, RA, RB}},
+{"evsdiv",	VX (4, 713),	VX_MASK,     PPCEFS,	0,		{RS, RA, RB}},
 {"efsnmadd",	VX (4, 714),	VX_MASK,     PPCEFS2,	0,		{RS, RA, RB}},
 {"vrfim",	VX (4, 714),	VXVA_MASK,   PPCVEC,	0,		{VD, VB}},
 {"vdiveud",	VX (4, 715),	VX_MASK,     POWER10,	0,		{VD, VA, VB}},
 {"efsnmsub",	VX (4, 715),	VX_MASK,     PPCEFS2,	0,		{RS, RA, RB}},
 {"efscmpgt",	VX (4, 716),	VX_MASK,     PPCEFS,	0,		{CRFD, RA, RB}},
+{"evscmpgt",	VX (4, 716),	VX_MASK,     PPCEFS,	0,		{CRFD, RA, RB}},
 {"vextractd",	VX (4, 717),   VXUIMM4_MASK, PPCVEC3,	0,		{VD, VB, UIMM4}},
 {"efscmplt",	VX (4, 717),	VX_MASK,     PPCEFS,	0,		{CRFD, RA, RB}},
+{"evsgmplt",	VX (4, 717),	VX_MASK,     PPCEFS,	0,		{CRFD, RA, RB}},
 {"efscmpeq",	VX (4, 718),	VX_MASK,     PPCEFS,	0,		{CRFD, RA, RB}},
+{"evsgmpeq",	VX (4, 718),	VX_MASK,     PPCEFS,	0,		{CRFD, RA, RB}},
 {"vupklsh",	VX (4, 718),	VXVA_MASK,   PPCVEC,	0,		{VD, VB}},
 {"vinsdlx",	VX (4, 719),	VX_MASK,     POWER10,	0,		{VD, RA, RB}},
 {"efscfd",	VX (4, 719),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
 {"efscfui",	VX (4, 720),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
+{"evscfui",	VX (4, 720),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
 {"efscfh",	VX_RA_CONST(4, 721, 4), VX_RA_CONST_MASK, PPCEFS2, 0,	{RD, RB}},
 {"efscfsi",	VX (4, 721),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
+{"evscfsi",	VX (4, 721),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
 {"efscfuf",	VX (4, 722),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
+{"evscfuf",	VX (4, 722),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
 {"efscfsf",	VX (4, 723),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
+{"evscfsf",	VX (4, 723),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
 {"efsctui",	VX (4, 724),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
+{"evsctui",	VX (4, 724),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
 {"efscth",	VX_RA_CONST(4, 725, 4), VX_RA_CONST_MASK, PPCEFS2, 0,	{RD, RB}},
 {"efsctsi",	VX (4, 725),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
+{"evsctsi",	VX (4, 725),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
 {"efsctuf",	VX (4, 726),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
+{"evsctuf",	VX (4, 726),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
 {"efsctsf",	VX (4, 727),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
+{"evsctsf",	VX (4, 727),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
 {"efsctuiz",	VX (4, 728),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
+{"evsctuiz",	VX (4, 728),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
 {"nput",	APU(4, 364,0),	APU_RT_MASK, PPC405,	0,		{RA, FSL}},
 {"efsctsiz",	VX (4, 730),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
+{"evsctsiz",	VX (4, 730),	VX_MASK,     PPCEFS,	0,		{RS, RB}},
 {"efststgt",	VX (4, 732),	VX_MASK,     PPCEFS,	0,		{CRFD, RA, RB}},
+{"evststgt",	VX (4, 732),	VX_MASK,     PPCEFS,	0,		{CRFD, RA, RB}},
 {"efststlt",	VX (4, 733),	VX_MASK,     PPCEFS,	0,		{CRFD, RA, RB}},
+{"evststlt",	VX (4, 733),	VX_MASK,     PPCEFS,	0,		{CRFD, RA, RB}},
 {"efststeq",	VX (4, 734),	VX_MASK,     PPCEFS,	0,		{CRFD, RA, RB}},
+{"evststeq",	VX (4, 734),	VX_MASK,     PPCEFS,	0,		{CRFD, RA, RB}},
 {"efdadd",	VX (4, 736),	VX_MASK,     PPCEFS,	0,		{RS, RA, RB}},
 {"efdsub",	VX (4, 737),	VX_MASK,     PPCEFS,	0,		{RS, RA, RB}},
 {"efdmadd",	VX (4, 738),	VX_MASK,     PPCEFS2, 	E500|E500MC,	{RD, RA, RB}},
@@ -6198,18 +6720,40 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"bctarl",  XLLK(19,560,1),		XLBH_MASK,     POWER8,	 PPCVLE,	{BO, BI, BH}},
 
 {"rlwimi",	M(20,0),	M_MASK,	     PPCCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
+{"inslwi",	M(20,0),	M_MASK,	     PPCCOM,	PPCVLE|EXT,	{RA, RS, ILWn, ILWb}},
+{"insrwi",	M(20,0),	M_MASK,	     PPCCOM,	PPCVLE|EXT,	{RA, RS, IRWn, IRWb}},
 {"rlimi",	M(20,0),	M_MASK,	     PWRCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
 
 {"rlwimi.",	M(20,1),	M_MASK,	     PPCCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
+{"inslwi.",	M(20,1),	M_MASK,	     PPCCOM,	PPCVLE|EXT,	{RA, RS, ILWn, ILWb}},
+{"insrwi.",	M(20,1),	M_MASK,	     PPCCOM,	PPCVLE|EXT,	{RA, RS, IRWn, IRWb}},
 {"rlimi.",	M(20,1),	M_MASK,	     PWRCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
 
 {"rotlwi",	MME(21,31,0),	MMBME_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, SH}},
+{"rotrwi",	MME(21,31,0),	MMBME_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, RRWn}},
 {"clrlwi",	MME(21,31,0),	MSHME_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, MB}},
+{"clrrwi",	M(21,0),	MSHMB_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, CRWn}},
+{"slwi",	M(21,0),	MMB_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, SLWn}},
+{"srwi",	MME(21,31,0),	MME_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, SRWn}},
 {"rlwinm",	M(21,0),	M_MASK,	     PPCCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
+{"extlwi",	M(21,0),	MMB_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, ELWn, SH}},
+{"extrwi",	MME(21,31,0),	MME_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, ERWn, ERWb}},
+{"clrlslwi",	M(21,0),	M_MASK,	     PPCCOM,	PPCVLE|EXT,	{RA, RS, CSLWb, CSLWn}},
+{"sli",		M(21,0),	MMB_MASK,    PWRCOM,	PPCVLE|EXT,	{RA, RS, SLWn}},
+{"sri",		MME(21,31,0),	MME_MASK,    PWRCOM,	PPCVLE|EXT,	{RA, RS, SRWn}},
 {"rlinm",	M(21,0),	M_MASK,	     PWRCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
 {"rotlwi.",	MME(21,31,1),	MMBME_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, SH}},
+{"rotrwi.",	MME(21,31,1),	MMBME_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, RRWn}},
 {"clrlwi.",	MME(21,31,1),	MSHME_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, MB}},
+{"clrrwi.",	M(21,1),	MSHMB_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, CRWn}},
+{"slwi.",	M(21,1),	MMB_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, SLWn}},
+{"srwi.",	MME(21,31,1),	MME_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, SRWn}},
 {"rlwinm.",	M(21,1),	M_MASK,	     PPCCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
+{"extlwi.",	M(21,1),	MMB_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, ELWn, SH}},
+{"extrwi.",	MME(21,31,1),	MME_MASK,    PPCCOM,	PPCVLE|EXT,	{RA, RS, ERWn, ERWb}},
+{"clrlslwi.",	M(21,1),	M_MASK,	     PPCCOM,	PPCVLE|EXT,	{RA, RS, CSLWb, CSLWn}},
+{"sli.",	M(21,1),	MMB_MASK,    PWRCOM,	PPCVLE|EXT,	{RA, RS, SLWn}},
+{"sri.",	MME(21,31,1),	MME_MASK,    PWRCOM,	PPCVLE|EXT,	{RA, RS, SRWn}},
 {"rlinm.",	M(21,1),	M_MASK,	     PWRCOM,	PPCVLE,		{RA, RS, SH, MBE, ME}},
 
 {"rlmi",	M(22,0),	M_MASK,	     M601,	PPCVLE,		{RA, RS, RB, MBE, ME}},
@@ -6244,20 +6788,36 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"andiu.",	OP(29),		OP_MASK,     PWRCOM,	PPCVLE,		{RA, RS, UI}},
 
 {"rotldi",	MD(30,0,0),	MDMB_MASK,   PPC64,	PPCVLE|EXT,	{RA, RS, SH6}},
+{"rotrdi",	MD(30,0,0),	MDMB_MASK,   PPC64,	PPCVLE|EXT,	{RA, RS, RRDn}},
 {"clrldi",	MD(30,0,0),	MDSH_MASK,   PPC64,	PPCVLE|EXT,	{RA, RS, MB6}},
+{"srdi",	MD(30,0,0),	MD_MASK,     PPC64,	PPCVLE|EXT,	{RA, RS, SRDn}},
 {"rldicl",	MD(30,0,0),	MD_MASK,     PPC64,	PPCVLE,		{RA, RS, SH6, MB6}},
+{"extrdi",	MD(30,0,0),	MD_MASK,     PPC64,	PPCVLE|EXT,	{RA, RS, ERDn, ERDb}},
 {"rotldi.",	MD(30,0,1),	MDMB_MASK,   PPC64,	PPCVLE|EXT,	{RA, RS, SH6}},
+{"rotrdi.",	MD(30,0,1),	MDMB_MASK,   PPC64,	PPCVLE|EXT,	{RA, RS, RRDn}},
 {"clrldi.",	MD(30,0,1),	MDSH_MASK,   PPC64,	PPCVLE|EXT,	{RA, RS, MB6}},
+{"srdi.",	MD(30,0,1),	MD_MASK,     PPC64,	PPCVLE|EXT,	{RA, RS, SRDn}},
 {"rldicl.",	MD(30,0,1),	MD_MASK,     PPC64,	PPCVLE,		{RA, RS, SH6, MB6}},
+{"extrdi.",	MD(30,0,1),	MD_MASK,     PPC64,	PPCVLE|EXT,	{RA, RS, ERDn, ERDb}},
 
+{"clrrdi",	MD(30,1,0),	MDSH_MASK,   PPC64,	PPCVLE|EXT,	{RA, RS, CRDn}},
+{"sldi",	MD(30,1,0),	MD_MASK,     PPC64,	PPCVLE|EXT,	{RA, RS, SLDn}},
 {"rldicr",	MD(30,1,0),	MD_MASK,     PPC64,	PPCVLE,		{RA, RS, SH6, ME6}},
+{"extldi",	MD(30,1,0),	MD_MASK,     PPC64,	PPCVLE,		{RA, RS, ELDn, SH6}},
+{"clrrdi.",	MD(30,1,1),	MDSH_MASK,   PPC64,	PPCVLE|EXT,	{RA, RS, CRDn}},
+{"sldi.",	MD(30,1,1),	MD_MASK,     PPC64,	PPCVLE|EXT,	{RA, RS, SLDn}},
 {"rldicr.",	MD(30,1,1),	MD_MASK,     PPC64,	PPCVLE,		{RA, RS, SH6, ME6}},
+{"extldi.",	MD(30,1,1),	MD_MASK,     PPC64,	PPCVLE,		{RA, RS, ELDn, SH6}},
 
 {"rldic",	MD(30,2,0),	MD_MASK,     PPC64,	PPCVLE,		{RA, RS, SH6, MB6}},
+{"clrlsldi",	MD(30,2,0),	MD_MASK,     PPC64,	PPCVLE|EXT,	{RA, RS, CSLDb, CSLDn}},
 {"rldic.",	MD(30,2,1),	MD_MASK,     PPC64,	PPCVLE,		{RA, RS, SH6, MB6}},
+{"clrlsldi.",	MD(30,2,1),	MD_MASK,     PPC64,	PPCVLE|EXT,	{RA, RS, CSLDb, CSLDn}},
 
 {"rldimi",	MD(30,3,0),	MD_MASK,     PPC64,	PPCVLE,		{RA, RS, SH6, MB6}},
+{"insrdi",	MD(30,3,0),	MD_MASK,     PPC64,	PPCVLE|EXT,	{RA, RS, IRDn, IRDb}},
 {"rldimi.",	MD(30,3,1),	MD_MASK,     PPC64,	PPCVLE,		{RA, RS, SH6, MB6}},
+{"insrdi.",	MD(30,3,1),	MD_MASK,     PPC64,	PPCVLE|EXT,	{RA, RS, IRDn, IRDb}},
 
 {"rotld",	MDS(30,8,0),	MDSMB_MASK,  PPC64,	PPCVLE|EXT,	{RA, RS, RB}},
 {"rldcl",	MDS(30,8,0),	MDS_MASK,    PPC64,	PPCVLE,		{RA, RS, RB, MB6}},
@@ -9829,7 +10389,16 @@ const struct powerpc_opcode vle_opcodes[] = {
 {"e_add2i.",	I16A(28,17),	I16A_MASK,	PPCVLE,	0,		{RA, VLESIMM}},
 {"e_li",	LI20(28,0),	LI20_MASK,	PPCVLE,	0,		{RT, IMM20}},
 {"e_rlwimi",	M(29,0),	M_MASK,		PPCVLE,	0,		{RA, RS, SH, MB, ME}},
-{"e_rlwinm",	M(29,1),	M_MASK,		PPCVLE,	0,		{RA, RT, SH, MBE, ME}},
+{"e_inslwi",	M(29,0),	M_MASK,		PPCVLE, EXT,		{RA, RS, ILWn, ILWb}},
+{"e_insrwi",	M(29,0),	M_MASK,		PPCVLE, EXT,		{RA, RS, IRWn, IRWb}},
+{"e_rotlwi",	MME(29,31,1),	MMBME_MASK,	PPCVLE, EXT,		{RA, RS, SH}},
+{"e_rotrwi",	MME(29,31,1),	MMBME_MASK,	PPCVLE, EXT,		{RA, RS, RRWn}},
+{"e_clrlwi",	MME(29,31,1),	MSHME_MASK,	PPCVLE, EXT,		{RA, RS, MB}},
+{"e_clrrwi",	M(29,1),	MSHMB_MASK,	PPCVLE, EXT,		{RA, RS, CRWn}},
+{"e_rlwinm",	M(29,1),	M_MASK,		PPCVLE,	0,		{RA, RS, SH, MBE, ME}},
+{"e_extlwi",	M(29,1),	MMB_MASK,	PPCVLE, EXT,		{RA, RS, ELWn, SH}},
+{"e_extrwi",	MME(29,31,1),	MME_MASK,	PPCVLE, EXT,		{RA, RS, ERWn, ERWb}},
+{"e_clrlslwi",	M(29,1),	M_MASK,		PPCVLE, EXT,		{RA, RS, CSLWb, CSLWn}},
 {"e_b",		BD24(30,0,0),	BD24_MASK,	PPCVLE,	0,		{B24}},
 {"e_bl",	BD24(30,0,1),	BD24_MASK,	PPCVLE,	0,		{B24}},
 {"e_bdnz",	EBD15(30,8,BO32DNZ,0),	EBD15_MASK, PPCVLE, EXT,	{B15}},
@@ -9935,106 +10504,6 @@ const struct powerpc_opcode vle_opcodes[] = {
 
 const unsigned int vle_num_opcodes =
   sizeof (vle_opcodes) / sizeof (vle_opcodes[0]);
-
-/* The macro table.  This is only used by the assembler.  */
-
-/* The expressions of the form (-x ! 31) & (x | 31) have the value 0
-   when x=0; 32-x when x is between 1 and 31; are negative if x is
-   negative; and are 32 or more otherwise.  This is what you want
-   when, for instance, you are emulating a right shift by a
-   rotate-left-and-mask, because the underlying instructions support
-   shifts of size 0 but not shifts of size 32.  By comparison, when
-   extracting x bits from some word you want to use just 32-x, because
-   the underlying instructions don't support extracting 0 bits but do
-   support extracting the whole word (32 bits in this case).  */
-
-const struct powerpc_macro powerpc_macros[] = {
-{"extldi",   4,	PPC64,	"rldicr %0,%1,%3,(%2)-1"},
-{"extldi.",  4,	PPC64,	"rldicr. %0,%1,%3,(%2)-1"},
-{"extrdi",   4,	PPC64,	"rldicl %0,%1,((%2)+(%3))&((%2)+(%3)<>64),64-(%2)"},
-{"extrdi.",  4,	PPC64,	"rldicl. %0,%1,((%2)+(%3))&((%2)+(%3)<>64),64-(%2)"},
-{"insrdi",   4,	PPC64,	"rldimi %0,%1,64-((%2)+(%3)),%3"},
-{"insrdi.",  4,	PPC64,	"rldimi. %0,%1,64-((%2)+(%3)),%3"},
-{"rotrdi",   3,	PPC64,	"rldicl %0,%1,(-(%2)!63)&((%2)|63),0"},
-{"rotrdi.",  3,	PPC64,	"rldicl. %0,%1,(-(%2)!63)&((%2)|63),0"},
-{"sldi",     3,	PPC64,	"rldicr %0,%1,%2,63-(%2)"},
-{"sldi.",    3,	PPC64,	"rldicr. %0,%1,%2,63-(%2)"},
-{"srdi",     3,	PPC64,	"rldicl %0,%1,(-(%2)!63)&((%2)|63),%2"},
-{"srdi.",    3,	PPC64,	"rldicl. %0,%1,(-(%2)!63)&((%2)|63),%2"},
-{"clrrdi",   3,	PPC64,	"rldicr %0,%1,0,63-(%2)"},
-{"clrrdi.",  3,	PPC64,	"rldicr. %0,%1,0,63-(%2)"},
-{"clrlsldi", 4,	PPC64,	"rldic %0,%1,%3,(%2)-(%3)"},
-{"clrlsldi.",4,	PPC64,	"rldic. %0,%1,%3,(%2)-(%3)"},
-
-{"extlwi",   4,	PPCCOM,	"rlwinm %0,%1,%3,0,(%2)-1"},
-{"extlwi.",  4,	PPCCOM,	"rlwinm. %0,%1,%3,0,(%2)-1"},
-{"extrwi",   4,	PPCCOM,	"rlwinm %0,%1,((%2)+(%3))&((%2)+(%3)<>32),32-(%2),31"},
-{"extrwi.",  4,	PPCCOM,	"rlwinm. %0,%1,((%2)+(%3))&((%2)+(%3)<>32),32-(%2),31"},
-{"inslwi",   4,	PPCCOM,	"rlwimi %0,%1,(-(%3)!31)&((%3)|31),%3,(%2)+(%3)-1"},
-{"inslwi.",  4,	PPCCOM,	"rlwimi. %0,%1,(-(%3)!31)&((%3)|31),%3,(%2)+(%3)-1"},
-{"insrwi",   4,	PPCCOM,	"rlwimi %0,%1,32-((%2)+(%3)),%3,(%2)+(%3)-1"},
-{"insrwi.",  4,	PPCCOM,	"rlwimi. %0,%1,32-((%2)+(%3)),%3,(%2)+(%3)-1"},
-{"rotrwi",   3,	PPCCOM,	"rlwinm %0,%1,(-(%2)!31)&((%2)|31),0,31"},
-{"rotrwi.",  3,	PPCCOM,	"rlwinm. %0,%1,(-(%2)!31)&((%2)|31),0,31"},
-{"slwi",     3,	PPCCOM,	"rlwinm %0,%1,%2,0,31-(%2)"},
-{"sli",      3,	PWRCOM,	"rlinm %0,%1,%2,0,31-(%2)"},
-{"slwi.",    3,	PPCCOM,	"rlwinm. %0,%1,%2,0,31-(%2)"},
-{"sli.",     3,	PWRCOM,	"rlinm. %0,%1,%2,0,31-(%2)"},
-{"srwi",     3,	PPCCOM,	"rlwinm %0,%1,(-(%2)!31)&((%2)|31),%2,31"},
-{"sri",      3,	PWRCOM,	"rlinm %0,%1,(-(%2)!31)&((%2)|31),%2,31"},
-{"srwi.",    3,	PPCCOM,	"rlwinm. %0,%1,(-(%2)!31)&((%2)|31),%2,31"},
-{"sri.",     3,	PWRCOM,	"rlinm. %0,%1,(-(%2)!31)&((%2)|31),%2,31"},
-{"clrrwi",   3,	PPCCOM,	"rlwinm %0,%1,0,0,31-(%2)"},
-{"clrrwi.",  3,	PPCCOM,	"rlwinm. %0,%1,0,0,31-(%2)"},
-{"clrlslwi", 4,	PPCCOM,	"rlwinm %0,%1,%3,(%2)-(%3),31-(%3)"},
-{"clrlslwi.",4, PPCCOM,	"rlwinm. %0,%1,%3,(%2)-(%3),31-(%3)"},
-
-{"e_extlwi", 4,	PPCVLE, "e_rlwinm %0,%1,%3,0,(%2)-1"},
-{"e_extrwi", 4,	PPCVLE, "e_rlwinm %0,%1,((%2)+(%3))&((%2)+(%3)<>32),32-(%2),31"},
-{"e_inslwi", 4,	PPCVLE, "e_rlwimi %0,%1,(-(%3)!31)&((%3)|31),%3,(%2)+(%3)-1"},
-{"e_insrwi", 4,	PPCVLE, "e_rlwimi %0,%1,32-((%2)+(%3)),%3,(%2)+(%3)-1"},
-{"e_rotlwi", 3,	PPCVLE, "e_rlwinm %0,%1,%2,0,31"},
-{"e_rotrwi", 3,	PPCVLE, "e_rlwinm %0,%1,(-(%2)!31)&((%2)|31),0,31"},
-{"e_slwi",   3,	PPCVLE, "e_rlwinm %0,%1,%2,0,31-(%2)"},
-{"e_srwi",   3,	PPCVLE, "e_rlwinm %0,%1,(-(%2)!31)&((%2)|31),%2,31"},
-{"e_clrlwi", 3,	PPCVLE, "e_rlwinm %0,%1,0,%2,31"},
-{"e_clrrwi", 3,	PPCVLE, "e_rlwinm %0,%1,0,0,31-(%2)"},
-{"e_clrlslwi",4, PPCVLE, "e_rlwinm %0,%1,%3,(%2)-(%3),31-(%3)"},
-
-/* old SPE instructions have new names with the same opcodes */
-{"evsadd",      3, PPCSPE|PPCVLE, "efsadd %0,%1,%2"},
-{"evssub",      3, PPCSPE|PPCVLE, "efssub %0,%1,%2"},
-{"evsabs",      2, PPCSPE|PPCVLE, "efsabs %0,%1"},
-{"evsnabs",     2, PPCSPE|PPCVLE, "efsnabs %0,%1"},
-{"evsneg",      2, PPCSPE|PPCVLE, "efsneg %0,%1"},
-{"evsmul",	3, PPCSPE|PPCVLE, "efsmul %0,%1,%2"},
-{"evsdiv",	3, PPCSPE|PPCVLE, "efsdiv %0,%1,%2"},
-{"evscmpgt",	3, PPCSPE|PPCVLE, "efscmpgt %0,%1,%2"},
-{"evsgmplt",	3, PPCSPE|PPCVLE, "efscmplt %0,%1,%2"},
-{"evsgmpeq",    3, PPCSPE|PPCVLE, "efscmpeq %0,%1,%2"},
-{"evscfui",     2, PPCSPE|PPCVLE, "efscfui %0,%1"},
-{"evscfsi",     2, PPCSPE|PPCVLE, "efscfsi %0,%1"},
-{"evscfuf",     2, PPCSPE|PPCVLE, "efscfuf %0,%1"},
-{"evscfsf",     2, PPCSPE|PPCVLE, "efscfsf %0,%1"},
-{"evsctui",     2, PPCSPE|PPCVLE, "efsctui %0,%1"},
-{"evsctsi",     2, PPCSPE|PPCVLE, "efsctsi %0,%1"},
-{"evsctuf",     2, PPCSPE|PPCVLE, "efsctuf %0,%1"},
-{"evsctsf",     2, PPCSPE|PPCVLE, "efsctsf %0,%1"},
-{"evsctuiz",    2, PPCSPE|PPCVLE, "efsctuiz %0,%1"},
-{"evsctsiz",    2, PPCSPE|PPCVLE, "efsctsiz %0,%1"},
-{"evststgt",    3, PPCSPE|PPCVLE, "efststgt %0,%1,%2"},
-{"evststlt",    3, PPCSPE|PPCVLE, "efststlt %0,%1,%2"},
-{"evststeq",    3, PPCSPE|PPCVLE, "efststeq %0,%1,%2"},
-
-/* SPE2 instructions which just are mapped to SPE2 */
-{"evdotphsssi",  3, PPCSPE2, "evdotphssmi %0,%1,%2"},
-{"evdotphsssia", 3, PPCSPE2, "evdotphssmia %0,%1,%2"},
-{"evdotpwsssi",  3, PPCSPE2, "evdotpwssmi %0,%1,%2"},
-{"evdotpwsssia", 3, PPCSPE2, "evdotpwssmia %0,%1,%2"}
-};
-
-const int powerpc_num_macros =
-  sizeof (powerpc_macros) / sizeof (powerpc_macros[0]);
 
 /* SPE v2 instruction set from SPE2PIM Rev. 2 08/2011 */
 const struct powerpc_opcode spe2_opcodes[] = {
@@ -10128,6 +10597,7 @@ const struct powerpc_opcode spe2_opcodes[] = {
 {"evdotphasumi",	  VX (4, 330),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotphassfr",	  VX (4, 331),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotphssmi",		  VX (4, 333),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
+{"evdotphsssi",		  VX (4, 333),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotphsssfr",	  VX (4, 335),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotphausiaaw3",	  VX (4, 336),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotphassiaaw3",	  VX (4, 337),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
@@ -10151,6 +10621,7 @@ const struct powerpc_opcode spe2_opcodes[] = {
 {"evdotphasumia",	  VX (4, 362),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotphassfra",	  VX (4, 363),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotphssmia",	  VX (4, 365),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
+{"evdotphsssia",	  VX (4, 365),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotphsssfra",	  VX (4, 367),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotphausiaaw",	  VX (4, 368),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotphassiaaw",	  VX (4, 369),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
@@ -10223,6 +10694,7 @@ const struct powerpc_opcode spe2_opcodes[] = {
 {"evdotpwasmi",		  VX (4, 457),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotpwasumi",	  VX (4, 458),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotpwssmi",		  VX (4, 461),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
+{"evdotpwsssi",		  VX (4, 461),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotpwausiaa3",	  VX (4, 464),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotpwassiaa3",	  VX (4, 465),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotpwasusiaa3",	  VX (4, 466),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
@@ -10238,6 +10710,7 @@ const struct powerpc_opcode spe2_opcodes[] = {
 {"evdotpwasmia",	  VX (4, 489),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotpwasumia",	  VX (4, 490),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotpwssmia",	  VX (4, 493),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
+{"evdotpwsssia",	  VX (4, 493),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotpwausiaa",	  VX (4, 496),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotpwassiaa",	  VX (4, 497),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},
 {"evdotpwasusiaa",	  VX (4, 498),		VX_MASK,		PPCSPE2, 0, {RD, RA, RB}},

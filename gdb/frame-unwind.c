@@ -24,7 +24,7 @@
 #include "inline-frame.h"
 #include "value.h"
 #include "regcache.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "target.h"
 #include "gdbarch.h"
 #include "dwarf2/frame-tailcall.h"

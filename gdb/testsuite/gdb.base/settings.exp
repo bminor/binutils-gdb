@@ -213,7 +213,7 @@ proc test-integer {variant} {
 
     if {$variant == "zinteger" || $variant == "zuinteger"} {
 	test_gdb_complete_none \
-	    "$set_cmd " \
+	    "$set_cmd "
     } else {
 	test_gdb_complete_unique \
 	    "$set_cmd " \
@@ -585,11 +585,9 @@ proc test-string {variant} {
 	# ${srcdir} may be a relative path.  We want to make sure we
 	# end up in the right directory - so make sure we know where
 	# it is.
-	global srcdir
-	set mydir [pwd]
-	cd ${srcdir}
-	set fullsrcdir [pwd]
-	cd ${mydir}
+	with_cwd $::srcdir {
+	    set fullsrcdir [pwd]
+	}
 
 	gdb_test "cd ${fullsrcdir}" \
 	    "Working directory [string_to_regexp ${fullsrcdir}].*" \

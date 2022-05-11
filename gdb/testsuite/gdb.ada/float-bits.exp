@@ -1,0 +1,70 @@
+# Copyright 2022 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test floating-point literal extension.
+
+load_lib "ada.exp"
+
+if { [skip_ada_tests] } { return -1 }
+
+standard_ada_testfile prog
+
+if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
+    return -1
+}
+
+clean_restart ${testfile}
+
+set bp_location [gdb_get_line_number "BREAK" ${testdir}/prog.adb]
+runto "prog.adb:$bp_location"
+
+gdb_test "print 16f#41b80000#" " = 23.0"
+gdb_test "print val_float" " = 23.0"
+gdb_test "print val_float := 16f#41b80000#" " = 23.0"
+gdb_test "print val_float" " = 23.0" \
+    "print val_float after assignment"
+
+gdb_test "print 16lf#bc0d83c94fb6d2ac#" " = -2.0e-19"
+gdb_test "print val_double" " = -2.0e-19"
+gdb_test "print val_double := 16lf#bc0d83c94fb6d2ac#" " = -2.0e-19"
+gdb_test "print val_double" " = -2.0e-19" \
+    "print val_double after assignment"
+
+set 16llf_supported 0
+gdb_test_multiple "ptype long_long_float" "" {
+    -re -wrap "<16-byte float>" {
+	set 16llf_supported 1
+	pass $gdb_test_name
+    }
+    -re -wrap "<\\d+-byte float>" {
+	pass $gdb_test_name
+    }
+}
+
+if { $16llf_supported } {
+    gdb_test "print 16llf#7FFFF7FF4054A56FA5B99019A5C8#" " = 5.0e\\+25"
+}
+gdb_test "print val_long_double" " = 5.0e\\+25"
+if { $16llf_supported } {
+    gdb_test "print val_long_double := 16llf#7FFFF7FF4054A56FA5B99019A5C8#" \
+	" = 5.0e\\+25"
+}
+gdb_test "print val_long_double" " = 5.0e\\+25" \
+    "print val_long_double after assignment"
+
+if { $16llf_supported } {
+    gdb_test "print 16llf#a56fa5b99019a5c800007ffff7ff4054#" \
+	" = <invalid float value>"
+}

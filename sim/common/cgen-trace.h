@@ -78,6 +78,7 @@ typedef struct {
 
 /* String printer for the disassembler.  */
 extern int sim_disasm_sprintf (SFILE *, const char *, ...) ATTRIBUTE_PRINTF_2;
+extern int sim_disasm_styled_sprintf (SFILE *, enum disassembler_style, const char *, ...) ATTRIBUTE_PRINTF_3;
 
 /* For opcodes based disassemblers.  */
 #ifdef __BFD_H_SEEN__

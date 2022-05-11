@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
@@ -150,7 +150,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	}
     }
 
-  fprintf_filtered (stream, "{");
+  gdb_printf (stream, "{");
   len = type->num_fields ();
   n_baseclasses = TYPE_N_BASECLASSES (type);
 
@@ -198,42 +198,42 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 
 	  if (fields_seen)
 	    {
-	      fputs_filtered (",", stream);
+	      gdb_puts (",", stream);
 	      if (!options->prettyformat)
-		fputs_filtered (" ", stream);
+		gdb_puts (" ", stream);
 	    }
 	  else if (n_baseclasses > 0)
 	    {
 	      if (options->prettyformat)
 		{
-		  fprintf_filtered (stream, "\n");
-		  print_spaces_filtered (2 + 2 * recurse, stream);
-		  fputs_filtered ("members of ", stream);
-		  fputs_filtered (type->name (), stream);
-		  fputs_filtered (":", stream);
+		  gdb_printf (stream, "\n");
+		  print_spaces (2 + 2 * recurse, stream);
+		  gdb_puts ("members of ", stream);
+		  gdb_puts (type->name (), stream);
+		  gdb_puts (":", stream);
 		}
 	    }
 	  fields_seen = 1;
 
 	  if (options->prettyformat)
 	    {
-	      fprintf_filtered (stream, "\n");
-	      print_spaces_filtered (2 + 2 * recurse, stream);
+	      gdb_printf (stream, "\n");
+	      print_spaces (2 + 2 * recurse, stream);
 	    }
 	  else
 	    {
-	      wrap_here (n_spaces (2 + 2 * recurse));
+	      stream->wrap_here (2 + 2 * recurse);
 	    }
 
 	  annotate_field_begin (type->field (i).type ());
 
 	  if (field_is_static (&type->field (i)))
 	    {
-	      fputs_filtered ("static ", stream);
-	      fprintf_symbol_filtered (stream,
-				       type->field (i).name (),
-				       current_language->la_language,
-				       DMGL_PARAMS | DMGL_ANSI);
+	      gdb_puts ("static ", stream);
+	      fprintf_symbol (stream,
+			      type->field (i).name (),
+			      current_language->la_language,
+			      DMGL_PARAMS | DMGL_ANSI);
 	    }
 	  else
 	    fputs_styled (type->field (i).name (),
@@ -247,7 +247,7 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 	  /* Do not print leading '=' in case of anonymous
 	     unions.  */
 	  if (strcmp (type->field (i).name (), ""))
-	    fputs_filtered (" = ", stream);
+	    gdb_puts (" = ", stream);
 	  else
 	    {
 	      /* If this is an anonymous field then we want to consider it
@@ -373,12 +373,12 @@ cp_print_value_fields (struct value *val, struct ui_file *stream,
 
       if (options->prettyformat)
 	{
-	  fprintf_filtered (stream, "\n");
-	  print_spaces_filtered (2 * recurse, stream);
+	  gdb_printf (stream, "\n");
+	  print_spaces (2 * recurse, stream);
 	}
     }				/* if there are data fields */
 
-  fprintf_filtered (stream, "}");
+  gdb_printf (stream, "}");
 }
 
 /* Special val_print routine to avoid printing multiple copies of
@@ -478,14 +478,14 @@ cp_print_value (struct value *val, struct ui_file *stream,
       /* Now do the printing.  */
       if (options->prettyformat)
 	{
-	  fprintf_filtered (stream, "\n");
-	  print_spaces_filtered (2 * recurse, stream);
+	  gdb_printf (stream, "\n");
+	  print_spaces (2 * recurse, stream);
 	}
-      fputs_filtered ("<", stream);
+      gdb_puts ("<", stream);
       /* Not sure what the best notation is in the case where there is
 	 no baseclass name.  */
-      fputs_filtered (basename ? basename : "", stream);
-      fputs_filtered ("> = ", stream);
+      gdb_puts (basename ? basename : "", stream);
+      gdb_puts ("> = ", stream);
 
       if (skip < 0)
 	val_print_unavailable (stream);
@@ -516,7 +516,7 @@ cp_print_value (struct value *val, struct ui_file *stream,
 				       0);
 	    }
 	}
-      fputs_filtered (", ", stream);
+      gdb_puts (", ", stream);
 
     flush_it:
       ;
@@ -691,7 +691,7 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
 
   if (val == -1)
     {
-      fprintf_filtered (stream, "NULL");
+      gdb_printf (stream, "NULL");
       return;
     }
 
@@ -701,18 +701,18 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
     {
       const char *name;
 
-      fputs_filtered (prefix, stream);
+      gdb_puts (prefix, stream);
       name = self_type->name ();
       if (name)
-	fputs_filtered (name, stream);
+	gdb_puts (name, stream);
       else
 	c_type_print_base (self_type, stream, 0, 0, &type_print_raw_options);
-      fprintf_filtered (stream, "::");
+      gdb_printf (stream, "::");
       fputs_styled (self_type->field (fieldno).name (),
 		    variable_name_style.style (), stream);
     }
   else
-    fprintf_filtered (stream, "%ld", (long) val);
+    gdb_printf (stream, "%ld", (long) val);
 }
 
 #if GDB_SELF_TEST

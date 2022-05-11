@@ -231,7 +231,7 @@ mi_varobj_update_dynamic container2 \
 
 mi_continue_to_line \
     [gdb_get_line_number {MI outer breakpoint here} ${srcfile}] \
-    "step to outer breakpoint"
+    "step to first outer breakpoint"
 
 mi_create_dynamic_varobj outer outer 1 \
   "create outer varobj"
@@ -261,7 +261,7 @@ mi_varobj_update_with_type_change container int 0 "update after type change"
 
 mi_continue_to_line \
     [gdb_get_line_number {break to inspect struct and union} ${srcfile}] \
-    "step to outer breakpoint"
+    "step to second outer breakpoint"
 
 with_test_prefix "varobj nscont" {
     mi_create_dynamic_varobj nscont nstype 1 \

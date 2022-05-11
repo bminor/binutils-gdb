@@ -116,7 +116,7 @@ const pseudo_typeS md_pseudo_table[] = {
   {"segm"   , s_segm          , 1},
   {"unsegm" , s_segm          , 0},
   {"unseg"  , s_segm          , 0},
-  {"name"   , s_app_file      , 0},
+  {"name"   , s_file          , 0},
   {"global" , s_globl         , 0},
   {"wval"   , cons            , 2},
   {"lval"   , cons            , 4},

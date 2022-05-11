@@ -813,6 +813,9 @@ SIM_ENABLE_ARCH_aarch64_TRUE
 CC_FOR_TARGET_AARCH64
 LD_FOR_TARGET_AARCH64
 AS_FOR_TARGET_AARCH64
+LD_FOR_TARGET
+AS_FOR_TARGET
+CC_FOR_TARGET
 SIM_COMMON_BUILD_FALSE
 SIM_COMMON_BUILD_TRUE
 SIM_SUBDIRS
@@ -6011,25 +6014,31 @@ else
      lt_nm_to_check="$lt_nm_to_check nm"
    fi
  fi
- for lt_tmp_nm in $lt_nm_to_check; do
+ for lt_tmp_nm in "$lt_nm_to_check"; do
    lt_save_ifs="$IFS"; IFS=$PATH_SEPARATOR
    for ac_dir in $PATH /usr/ccs/bin/elf /usr/ccs/bin /usr/ucb /bin; do
      IFS="$lt_save_ifs"
      test -z "$ac_dir" && ac_dir=.
-     case "$lt_tmp_nm" in
+     # Strip out any user-provided options from the nm to test twice,
+     # the first time to test to see if nm (rather than its options) has
+     # an explicit path, the second time to yield a file which can be
+     # nm'ed itself.
+     tmp_nm_path="`$ECHO "$lt_tmp_nm" | sed 's, -.*$,,'`"
+     case "$tmp_nm_path" in
      */*|*\\*) tmp_nm="$lt_tmp_nm";;
      *) tmp_nm="$ac_dir/$lt_tmp_nm";;
      esac
-     if test -f "$tmp_nm" || test -f "$tmp_nm$ac_exeext" ; then
+     tmp_nm_to_nm="`$ECHO "$tmp_nm" | sed 's, -.*$,,'`"
+     if test -f "$tmp_nm_to_nm" || test -f "$tmp_nm_to_nm$ac_exeext" ; then
        # Check to see if the nm accepts a BSD-compat flag.
        # Adding the `sed 1q' prevents false positives on HP-UX, which says:
        #   nm: unknown option "B" ignored
-       case `"$tmp_nm" -B "$tmp_nm" 2>&1 | grep -v '^ *$' | sed '1q'` in
+       case `"$tmp_nm" -B "$tmp_nm_to_nm" 2>&1 | grep -v '^ *$' | sed '1q'` in
        *$tmp_nm*) lt_cv_path_NM="$tmp_nm -B"
 	 break
 	 ;;
        *)
-	 case `"$tmp_nm" -p "$tmp_nm" 2>&1 | grep -v '^ *$' | sed '1q'` in
+	 case `"$tmp_nm" -p "$tmp_nm_to_nm" 2>&1 | grep -v '^ *$' | sed '1q'` in
 	 *$tmp_nm*)
 	   lt_cv_path_NM="$tmp_nm -p"
 	   break
@@ -12632,7 +12641,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12635 "configure"
+#line 12644 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12738,7 +12747,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12741 "configure"
+#line 12750 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14382,7 +14391,9 @@ if test "${enable_sim}" != no; then
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=aarch64
       fi
-            ac_config_files="$ac_config_files aarch64/Makefile.sim:aarch64/Makefile.in"
+            ac_config_files="$ac_config_files aarch64/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files aarch64/Makefile.sim:aarch64/Makefile.in"
 
     ac_config_commands="$ac_config_commands aarch64/Makefile"
 
@@ -14395,13 +14406,141 @@ if test "${enable_sim}" != no; then
 
       ;;
   esac
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking where to find the target cc" >&5
+$as_echo_n "checking where to find the target cc... " >&6; }
+if test "x${build}" != "x${host}" ; then
+  if expr "x$CC_FOR_TARGET" : "x/" > /dev/null; then
+    # We already found the complete path
+    ac_dir=`dirname $CC_FOR_TARGET`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed in $ac_dir" >&5
+$as_echo "pre-installed in $ac_dir" >&6; }
+  else
+    # Canadian cross, just use what we found
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed" >&5
+$as_echo "pre-installed" >&6; }
+  fi
+else
+  ok=yes
+  case " ${configdirs} " in
+    *" ${target_alias}-gcc "*) ;;
+    *) ok=no ;;
+  esac
+
+  if test $ok = yes; then
+    # An in-tree tool is available and we can use it
+    CC_FOR_TARGET='$$r/$(HOST_SUBDIR)/${target_alias}-gcc'
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: just compiled" >&5
+$as_echo "just compiled" >&6; }
+  elif expr "x$CC_FOR_TARGET" : "x/" > /dev/null; then
+    # We already found the complete path
+    ac_dir=`dirname $CC_FOR_TARGET`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed in $ac_dir" >&5
+$as_echo "pre-installed in $ac_dir" >&6; }
+  elif test "x$target" = "x$host"; then
+    # We can use an host tool
+    CC_FOR_TARGET='$(CC)'
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: host tool" >&5
+$as_echo "host tool" >&6; }
+  else
+    # We need a cross tool
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed" >&5
+$as_echo "pre-installed" >&6; }
+  fi
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking where to find the target as" >&5
+$as_echo_n "checking where to find the target as... " >&6; }
+if test "x${build}" != "x${host}" ; then
+  if expr "x$AS_FOR_TARGET" : "x/" > /dev/null; then
+    # We already found the complete path
+    ac_dir=`dirname $AS_FOR_TARGET`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed in $ac_dir" >&5
+$as_echo "pre-installed in $ac_dir" >&6; }
+  else
+    # Canadian cross, just use what we found
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed" >&5
+$as_echo "pre-installed" >&6; }
+  fi
+else
+  ok=yes
+  case " ${configdirs} " in
+    *" \$(abs_builddir) "*) ;;
+    *) ok=no ;;
+  esac
+
+  if test $ok = yes; then
+    # An in-tree tool is available and we can use it
+    AS_FOR_TARGET='$$r/$(HOST_SUBDIR)/\$(abs_builddir)/../gas/as-new'
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: just compiled" >&5
+$as_echo "just compiled" >&6; }
+  elif expr "x$AS_FOR_TARGET" : "x/" > /dev/null; then
+    # We already found the complete path
+    ac_dir=`dirname $AS_FOR_TARGET`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed in $ac_dir" >&5
+$as_echo "pre-installed in $ac_dir" >&6; }
+  elif test "x$target" = "x$host"; then
+    # We can use an host tool
+    AS_FOR_TARGET='$(AS)'
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: host tool" >&5
+$as_echo "host tool" >&6; }
+  else
+    # We need a cross tool
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed" >&5
+$as_echo "pre-installed" >&6; }
+  fi
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking where to find the target ld" >&5
+$as_echo_n "checking where to find the target ld... " >&6; }
+if test "x${build}" != "x${host}" ; then
+  if expr "x$LD_FOR_TARGET" : "x/" > /dev/null; then
+    # We already found the complete path
+    ac_dir=`dirname $LD_FOR_TARGET`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed in $ac_dir" >&5
+$as_echo "pre-installed in $ac_dir" >&6; }
+  else
+    # Canadian cross, just use what we found
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed" >&5
+$as_echo "pre-installed" >&6; }
+  fi
+else
+  ok=yes
+  case " ${configdirs} " in
+    *" \$(abs_builddir) "*) ;;
+    *) ok=no ;;
+  esac
+
+  if test $ok = yes; then
+    # An in-tree tool is available and we can use it
+    LD_FOR_TARGET='$$r/$(HOST_SUBDIR)/\$(abs_builddir)/../ld/ld-new'
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: just compiled" >&5
+$as_echo "just compiled" >&6; }
+  elif expr "x$LD_FOR_TARGET" : "x/" > /dev/null; then
+    # We already found the complete path
+    ac_dir=`dirname $LD_FOR_TARGET`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed in $ac_dir" >&5
+$as_echo "pre-installed in $ac_dir" >&6; }
+  elif test "x$target" = "x$host"; then
+    # We can use an host tool
+    LD_FOR_TARGET='$(LD)'
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: host tool" >&5
+$as_echo "host tool" >&6; }
+  else
+    # We need a cross tool
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: pre-installed" >&5
+$as_echo "pre-installed" >&6; }
+  fi
+fi
+
+
+
 
 
 
   if test "$SIM_PRIMARY_TARGET" = "aarch64"; then :
-      : "${AS_FOR_TARGET_AARCH64:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_AARCH64:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_AARCH64:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_AARCH64:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_AARCH64:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_AARCH64:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14422,7 +14561,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=arm
       fi
-            ac_config_files="$ac_config_files arm/Makefile.sim:arm/Makefile.in"
+            ac_config_files="$ac_config_files arm/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files arm/Makefile.sim:arm/Makefile.in"
 
     ac_config_commands="$ac_config_commands arm/Makefile"
 
@@ -14438,10 +14579,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "arm"; then :
-      : "${AS_FOR_TARGET_ARM:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_ARM:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_ARM:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_ARM:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_ARM:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_ARM:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14462,7 +14604,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=avr
       fi
-            ac_config_files="$ac_config_files avr/Makefile.sim:avr/Makefile.in"
+            ac_config_files="$ac_config_files avr/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files avr/Makefile.sim:avr/Makefile.in"
 
     ac_config_commands="$ac_config_commands avr/Makefile"
 
@@ -14478,10 +14622,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "avr"; then :
-      : "${AS_FOR_TARGET_AVR:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_AVR:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_AVR:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_AVR:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_AVR:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_AVR:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14502,7 +14647,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bfin
       fi
-            ac_config_files="$ac_config_files bfin/Makefile.sim:bfin/Makefile.in"
+            ac_config_files="$ac_config_files bfin/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files bfin/Makefile.sim:bfin/Makefile.in"
 
     ac_config_commands="$ac_config_commands bfin/Makefile"
 
@@ -14518,10 +14665,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "bfin"; then :
-      : "${AS_FOR_TARGET_BFIN:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_BFIN:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_BFIN:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_BFIN:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_BFIN:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_BFIN:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14557,10 +14705,11 @@ subdirs="$subdirs bpf"
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "bpf"; then :
-      : "${AS_FOR_TARGET_BPF:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_BPF:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_BPF:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_BPF:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_BPF:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_BPF:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14581,7 +14730,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cr16
       fi
-            ac_config_files="$ac_config_files cr16/Makefile.sim:cr16/Makefile.in"
+            ac_config_files="$ac_config_files cr16/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files cr16/Makefile.sim:cr16/Makefile.in"
 
     ac_config_commands="$ac_config_commands cr16/Makefile"
 
@@ -14597,10 +14748,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "cr16"; then :
-      : "${AS_FOR_TARGET_CR16:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_CR16:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_CR16:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_CR16:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_CR16:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_CR16:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14621,7 +14773,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cris
       fi
-            ac_config_files="$ac_config_files cris/Makefile.sim:cris/Makefile.in"
+            ac_config_files="$ac_config_files cris/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files cris/Makefile.sim:cris/Makefile.in"
 
     ac_config_commands="$ac_config_commands cris/Makefile"
 
@@ -14637,10 +14791,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "cris"; then :
-      : "${AS_FOR_TARGET_CRIS:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_CRIS:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_CRIS:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_CRIS:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_CRIS:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_CRIS:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14661,7 +14816,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=d10v
       fi
-            ac_config_files="$ac_config_files d10v/Makefile.sim:d10v/Makefile.in"
+            ac_config_files="$ac_config_files d10v/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files d10v/Makefile.sim:d10v/Makefile.in"
 
     ac_config_commands="$ac_config_commands d10v/Makefile"
 
@@ -14677,10 +14834,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "d10v"; then :
-      : "${AS_FOR_TARGET_D10V:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_D10V:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_D10V:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_D10V:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_D10V:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_D10V:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14701,7 +14859,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=frv
       fi
-            ac_config_files="$ac_config_files frv/Makefile.sim:frv/Makefile.in"
+            ac_config_files="$ac_config_files frv/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files frv/Makefile.sim:frv/Makefile.in"
 
     ac_config_commands="$ac_config_commands frv/Makefile"
 
@@ -14717,10 +14877,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "frv"; then :
-      : "${AS_FOR_TARGET_FRV:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_FRV:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_FRV:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_FRV:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_FRV:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_FRV:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14741,7 +14902,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=ft32
       fi
-            ac_config_files="$ac_config_files ft32/Makefile.sim:ft32/Makefile.in"
+            ac_config_files="$ac_config_files ft32/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files ft32/Makefile.sim:ft32/Makefile.in"
 
     ac_config_commands="$ac_config_commands ft32/Makefile"
 
@@ -14757,10 +14920,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "ft32"; then :
-      : "${AS_FOR_TARGET_FT32:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_FT32:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_FT32:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_FT32:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_FT32:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_FT32:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14781,7 +14945,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=h8300
       fi
-            ac_config_files="$ac_config_files h8300/Makefile.sim:h8300/Makefile.in"
+            ac_config_files="$ac_config_files h8300/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files h8300/Makefile.sim:h8300/Makefile.in"
 
     ac_config_commands="$ac_config_commands h8300/Makefile"
 
@@ -14797,10 +14963,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "h8300"; then :
-      : "${AS_FOR_TARGET_H8300:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_H8300:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_H8300:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_H8300:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_H8300:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_H8300:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14821,7 +14988,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=iq2000
       fi
-            ac_config_files="$ac_config_files iq2000/Makefile.sim:iq2000/Makefile.in"
+            ac_config_files="$ac_config_files iq2000/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files iq2000/Makefile.sim:iq2000/Makefile.in"
 
     ac_config_commands="$ac_config_commands iq2000/Makefile"
 
@@ -14837,10 +15006,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "iq2000"; then :
-      : "${AS_FOR_TARGET_IQ2000:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_IQ2000:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_IQ2000:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_IQ2000:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_IQ2000:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_IQ2000:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14861,7 +15031,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=lm32
       fi
-            ac_config_files="$ac_config_files lm32/Makefile.sim:lm32/Makefile.in"
+            ac_config_files="$ac_config_files lm32/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files lm32/Makefile.sim:lm32/Makefile.in"
 
     ac_config_commands="$ac_config_commands lm32/Makefile"
 
@@ -14877,10 +15049,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "lm32"; then :
-      : "${AS_FOR_TARGET_LM32:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_LM32:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_LM32:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_LM32:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_LM32:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_LM32:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14901,7 +15074,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32c
       fi
-            ac_config_files="$ac_config_files m32c/Makefile.sim:m32c/Makefile.in"
+            ac_config_files="$ac_config_files m32c/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files m32c/Makefile.sim:m32c/Makefile.in"
 
     ac_config_commands="$ac_config_commands m32c/Makefile"
 
@@ -14917,10 +15092,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "m32c"; then :
-      : "${AS_FOR_TARGET_M32C:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_M32C:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_M32C:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_M32C:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_M32C:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_M32C:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14941,7 +15117,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32r
       fi
-            ac_config_files="$ac_config_files m32r/Makefile.sim:m32r/Makefile.in"
+            ac_config_files="$ac_config_files m32r/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files m32r/Makefile.sim:m32r/Makefile.in"
 
     ac_config_commands="$ac_config_commands m32r/Makefile"
 
@@ -14957,10 +15135,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "m32r"; then :
-      : "${AS_FOR_TARGET_M32R:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_M32R:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_M32R:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_M32R:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_M32R:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_M32R:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -14981,7 +15160,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m68hc11
       fi
-            ac_config_files="$ac_config_files m68hc11/Makefile.sim:m68hc11/Makefile.in"
+            ac_config_files="$ac_config_files m68hc11/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files m68hc11/Makefile.sim:m68hc11/Makefile.in"
 
     ac_config_commands="$ac_config_commands m68hc11/Makefile"
 
@@ -14997,10 +15178,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "m68hc11"; then :
-      : "${AS_FOR_TARGET_M68HC11:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_M68HC11:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_M68HC11:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_M68HC11:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_M68HC11:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_M68HC11:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15021,7 +15203,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mcore
       fi
-            ac_config_files="$ac_config_files mcore/Makefile.sim:mcore/Makefile.in"
+            ac_config_files="$ac_config_files mcore/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files mcore/Makefile.sim:mcore/Makefile.in"
 
     ac_config_commands="$ac_config_commands mcore/Makefile"
 
@@ -15037,10 +15221,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "mcore"; then :
-      : "${AS_FOR_TARGET_MCORE:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_MCORE:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_MCORE:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_MCORE:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_MCORE:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_MCORE:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15061,7 +15246,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=microblaze
       fi
-            ac_config_files="$ac_config_files microblaze/Makefile.sim:microblaze/Makefile.in"
+            ac_config_files="$ac_config_files microblaze/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files microblaze/Makefile.sim:microblaze/Makefile.in"
 
     ac_config_commands="$ac_config_commands microblaze/Makefile"
 
@@ -15077,10 +15264,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "microblaze"; then :
-      : "${AS_FOR_TARGET_MICROBLAZE:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_MICROBLAZE:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_MICROBLAZE:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_MICROBLAZE:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_MICROBLAZE:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_MICROBLAZE:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15114,10 +15302,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "mips"; then :
-      : "${AS_FOR_TARGET_MIPS:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_MIPS:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_MIPS:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_MIPS:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_MIPS:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_MIPS:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15151,10 +15340,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "mn10300"; then :
-      : "${AS_FOR_TARGET_MN10300:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_MN10300:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_MN10300:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_MN10300:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_MN10300:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_MN10300:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15175,7 +15365,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=moxie
       fi
-            ac_config_files="$ac_config_files moxie/Makefile.sim:moxie/Makefile.in"
+            ac_config_files="$ac_config_files moxie/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files moxie/Makefile.sim:moxie/Makefile.in"
 
     ac_config_commands="$ac_config_commands moxie/Makefile"
 
@@ -15191,10 +15383,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "moxie"; then :
-      : "${AS_FOR_TARGET_MOXIE:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_MOXIE:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_MOXIE:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_MOXIE:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_MOXIE:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_MOXIE:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15215,7 +15408,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=msp430
       fi
-            ac_config_files="$ac_config_files msp430/Makefile.sim:msp430/Makefile.in"
+            ac_config_files="$ac_config_files msp430/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files msp430/Makefile.sim:msp430/Makefile.in"
 
     ac_config_commands="$ac_config_commands msp430/Makefile"
 
@@ -15231,10 +15426,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "msp430"; then :
-      : "${AS_FOR_TARGET_MSP430:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_MSP430:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_MSP430:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_MSP430:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_MSP430:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_MSP430:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15268,10 +15464,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "or1k"; then :
-      : "${AS_FOR_TARGET_OR1K:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_OR1K:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_OR1K:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_OR1K:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_OR1K:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_OR1K:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15305,10 +15502,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "ppc"; then :
-      : "${AS_FOR_TARGET_PPC:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_PPC:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_PPC:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_PPC:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_PPC:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_PPC:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15329,7 +15527,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=pru
       fi
-            ac_config_files="$ac_config_files pru/Makefile.sim:pru/Makefile.in"
+            ac_config_files="$ac_config_files pru/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files pru/Makefile.sim:pru/Makefile.in"
 
     ac_config_commands="$ac_config_commands pru/Makefile"
 
@@ -15345,10 +15545,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "pru"; then :
-      : "${AS_FOR_TARGET_PRU:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_PRU:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_PRU:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_PRU:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_PRU:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_PRU:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15382,10 +15583,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "riscv"; then :
-      : "${AS_FOR_TARGET_RISCV:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_RISCV:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_RISCV:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_RISCV:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_RISCV:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_RISCV:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15406,7 +15608,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rl78
       fi
-            ac_config_files="$ac_config_files rl78/Makefile.sim:rl78/Makefile.in"
+            ac_config_files="$ac_config_files rl78/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files rl78/Makefile.sim:rl78/Makefile.in"
 
     ac_config_commands="$ac_config_commands rl78/Makefile"
 
@@ -15422,10 +15626,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "rl78"; then :
-      : "${AS_FOR_TARGET_RL78:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_RL78:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_RL78:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_RL78:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_RL78:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_RL78:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15446,7 +15651,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rx
       fi
-            ac_config_files="$ac_config_files rx/Makefile.sim:rx/Makefile.in"
+            ac_config_files="$ac_config_files rx/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files rx/Makefile.sim:rx/Makefile.in"
 
     ac_config_commands="$ac_config_commands rx/Makefile"
 
@@ -15462,10 +15669,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "rx"; then :
-      : "${AS_FOR_TARGET_RX:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_RX:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_RX:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_RX:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_RX:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_RX:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15486,7 +15694,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=sh
       fi
-            ac_config_files="$ac_config_files sh/Makefile.sim:sh/Makefile.in"
+            ac_config_files="$ac_config_files sh/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files sh/Makefile.sim:sh/Makefile.in"
 
     ac_config_commands="$ac_config_commands sh/Makefile"
 
@@ -15502,10 +15712,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "sh"; then :
-      : "${AS_FOR_TARGET_SH:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_SH:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_SH:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_SH:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_SH:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_SH:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15526,7 +15737,9 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=erc32
       fi
-            ac_config_files="$ac_config_files erc32/Makefile.sim:erc32/Makefile.in"
+            ac_config_files="$ac_config_files erc32/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files erc32/Makefile.sim:erc32/Makefile.in"
 
     ac_config_commands="$ac_config_commands erc32/Makefile"
 
@@ -15542,10 +15755,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "erc32"; then :
-      : "${AS_FOR_TARGET_ERC32:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_ERC32:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_ERC32:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_ERC32:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_ERC32:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_ERC32:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15579,10 +15793,11 @@ fi
 
 
 
+
   if test "$SIM_PRIMARY_TARGET" = "v850"; then :
-      : "${AS_FOR_TARGET_V850:=\$(abs_builddir)/../gas/as-new}"
-    : "${LD_FOR_TARGET_V850:=\$(abs_builddir)/../ld/ld-new}"
-            : "${CC_FOR_TARGET_V850:=${target_alias}-gcc}"
+      : "${AS_FOR_TARGET_V850:=\$(AS_FOR_TARGET)}"
+    : "${LD_FOR_TARGET_V850:=\$(LD_FOR_TARGET)}"
+    : "${CC_FOR_TARGET_V850:=\$(CC_FOR_TARGET)}"
 
 fi
 
@@ -15603,13 +15818,16 @@ fi
 
 
 
-  : "${AS_FOR_TARGET_EXAMPLE_SYNACOR:=\$(abs_builddir)/../gas/as-new}"
-  : "${LD_FOR_TARGET_EXAMPLE_SYNACOR:=\$(abs_builddir)/../ld/ld-new}"
+
+  : "${AS_FOR_TARGET_EXAMPLE_SYNACOR:=\$(AS_FOR_TARGET)}"
+  : "${LD_FOR_TARGET_EXAMPLE_SYNACOR:=\$(LD_FOR_TARGET)}"
   : "${CC_FOR_TARGET_EXAMPLE_SYNACOR:=\$(CC)}"
 
 as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_EXAMPLE_SYNACOR LD_FOR_TARGET_EXAMPLE_SYNACOR CC_FOR_TARGET_EXAMPLE_SYNACOR"
 
-          ac_config_files="$ac_config_files example-synacor/Makefile.sim:example-synacor/Makefile.in"
+          ac_config_files="$ac_config_files example-synacor/.gdbinit:common/gdbinit.in"
+
+    ac_config_files="$ac_config_files example-synacor/Makefile.sim:example-synacor/Makefile.in"
 
     ac_config_commands="$ac_config_commands example-synacor/Makefile"
 
@@ -16125,7 +16343,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files arch-subdir.mk Makefile"
+ac_config_files="$ac_config_files arch-subdir.mk Makefile .gdbinit:gdbinit.in"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -17294,90 +17512,116 @@ do
     "libtool") CONFIG_COMMANDS="$CONFIG_COMMANDS libtool" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "Make-common.sim") CONFIG_FILES="$CONFIG_FILES Make-common.sim:common/Make-common.in" ;;
+    "aarch64/.gdbinit") CONFIG_FILES="$CONFIG_FILES aarch64/.gdbinit:common/gdbinit.in" ;;
     "aarch64/Makefile.sim") CONFIG_FILES="$CONFIG_FILES aarch64/Makefile.sim:aarch64/Makefile.in" ;;
     "aarch64/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS aarch64/Makefile" ;;
     "depdir-aarch64") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-aarch64" ;;
+    "arm/.gdbinit") CONFIG_FILES="$CONFIG_FILES arm/.gdbinit:common/gdbinit.in" ;;
     "arm/Makefile.sim") CONFIG_FILES="$CONFIG_FILES arm/Makefile.sim:arm/Makefile.in" ;;
     "arm/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS arm/Makefile" ;;
     "depdir-arm") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-arm" ;;
+    "avr/.gdbinit") CONFIG_FILES="$CONFIG_FILES avr/.gdbinit:common/gdbinit.in" ;;
     "avr/Makefile.sim") CONFIG_FILES="$CONFIG_FILES avr/Makefile.sim:avr/Makefile.in" ;;
     "avr/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS avr/Makefile" ;;
     "depdir-avr") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-avr" ;;
+    "bfin/.gdbinit") CONFIG_FILES="$CONFIG_FILES bfin/.gdbinit:common/gdbinit.in" ;;
     "bfin/Makefile.sim") CONFIG_FILES="$CONFIG_FILES bfin/Makefile.sim:bfin/Makefile.in" ;;
     "bfin/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS bfin/Makefile" ;;
     "depdir-bfin") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-bfin" ;;
     "depdir-bpf") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-bpf" ;;
+    "cr16/.gdbinit") CONFIG_FILES="$CONFIG_FILES cr16/.gdbinit:common/gdbinit.in" ;;
     "cr16/Makefile.sim") CONFIG_FILES="$CONFIG_FILES cr16/Makefile.sim:cr16/Makefile.in" ;;
     "cr16/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS cr16/Makefile" ;;
     "depdir-cr16") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-cr16" ;;
+    "cris/.gdbinit") CONFIG_FILES="$CONFIG_FILES cris/.gdbinit:common/gdbinit.in" ;;
     "cris/Makefile.sim") CONFIG_FILES="$CONFIG_FILES cris/Makefile.sim:cris/Makefile.in" ;;
     "cris/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS cris/Makefile" ;;
     "depdir-cris") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-cris" ;;
+    "d10v/.gdbinit") CONFIG_FILES="$CONFIG_FILES d10v/.gdbinit:common/gdbinit.in" ;;
     "d10v/Makefile.sim") CONFIG_FILES="$CONFIG_FILES d10v/Makefile.sim:d10v/Makefile.in" ;;
     "d10v/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS d10v/Makefile" ;;
     "depdir-d10v") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-d10v" ;;
+    "frv/.gdbinit") CONFIG_FILES="$CONFIG_FILES frv/.gdbinit:common/gdbinit.in" ;;
     "frv/Makefile.sim") CONFIG_FILES="$CONFIG_FILES frv/Makefile.sim:frv/Makefile.in" ;;
     "frv/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS frv/Makefile" ;;
     "depdir-frv") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-frv" ;;
+    "ft32/.gdbinit") CONFIG_FILES="$CONFIG_FILES ft32/.gdbinit:common/gdbinit.in" ;;
     "ft32/Makefile.sim") CONFIG_FILES="$CONFIG_FILES ft32/Makefile.sim:ft32/Makefile.in" ;;
     "ft32/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS ft32/Makefile" ;;
     "depdir-ft32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ft32" ;;
+    "h8300/.gdbinit") CONFIG_FILES="$CONFIG_FILES h8300/.gdbinit:common/gdbinit.in" ;;
     "h8300/Makefile.sim") CONFIG_FILES="$CONFIG_FILES h8300/Makefile.sim:h8300/Makefile.in" ;;
     "h8300/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS h8300/Makefile" ;;
     "depdir-h8300") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-h8300" ;;
+    "iq2000/.gdbinit") CONFIG_FILES="$CONFIG_FILES iq2000/.gdbinit:common/gdbinit.in" ;;
     "iq2000/Makefile.sim") CONFIG_FILES="$CONFIG_FILES iq2000/Makefile.sim:iq2000/Makefile.in" ;;
     "iq2000/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS iq2000/Makefile" ;;
     "depdir-iq2000") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-iq2000" ;;
+    "lm32/.gdbinit") CONFIG_FILES="$CONFIG_FILES lm32/.gdbinit:common/gdbinit.in" ;;
     "lm32/Makefile.sim") CONFIG_FILES="$CONFIG_FILES lm32/Makefile.sim:lm32/Makefile.in" ;;
     "lm32/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS lm32/Makefile" ;;
     "depdir-lm32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-lm32" ;;
+    "m32c/.gdbinit") CONFIG_FILES="$CONFIG_FILES m32c/.gdbinit:common/gdbinit.in" ;;
     "m32c/Makefile.sim") CONFIG_FILES="$CONFIG_FILES m32c/Makefile.sim:m32c/Makefile.in" ;;
     "m32c/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS m32c/Makefile" ;;
     "depdir-m32c") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m32c" ;;
+    "m32r/.gdbinit") CONFIG_FILES="$CONFIG_FILES m32r/.gdbinit:common/gdbinit.in" ;;
     "m32r/Makefile.sim") CONFIG_FILES="$CONFIG_FILES m32r/Makefile.sim:m32r/Makefile.in" ;;
     "m32r/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS m32r/Makefile" ;;
     "depdir-m32r") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m32r" ;;
+    "m68hc11/.gdbinit") CONFIG_FILES="$CONFIG_FILES m68hc11/.gdbinit:common/gdbinit.in" ;;
     "m68hc11/Makefile.sim") CONFIG_FILES="$CONFIG_FILES m68hc11/Makefile.sim:m68hc11/Makefile.in" ;;
     "m68hc11/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS m68hc11/Makefile" ;;
     "depdir-m68hc11") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-m68hc11" ;;
+    "mcore/.gdbinit") CONFIG_FILES="$CONFIG_FILES mcore/.gdbinit:common/gdbinit.in" ;;
     "mcore/Makefile.sim") CONFIG_FILES="$CONFIG_FILES mcore/Makefile.sim:mcore/Makefile.in" ;;
     "mcore/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS mcore/Makefile" ;;
     "depdir-mcore") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mcore" ;;
+    "microblaze/.gdbinit") CONFIG_FILES="$CONFIG_FILES microblaze/.gdbinit:common/gdbinit.in" ;;
     "microblaze/Makefile.sim") CONFIG_FILES="$CONFIG_FILES microblaze/Makefile.sim:microblaze/Makefile.in" ;;
     "microblaze/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS microblaze/Makefile" ;;
     "depdir-microblaze") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-microblaze" ;;
     "depdir-mips") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mips" ;;
     "depdir-mn10300") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mn10300" ;;
+    "moxie/.gdbinit") CONFIG_FILES="$CONFIG_FILES moxie/.gdbinit:common/gdbinit.in" ;;
     "moxie/Makefile.sim") CONFIG_FILES="$CONFIG_FILES moxie/Makefile.sim:moxie/Makefile.in" ;;
     "moxie/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS moxie/Makefile" ;;
     "depdir-moxie") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-moxie" ;;
+    "msp430/.gdbinit") CONFIG_FILES="$CONFIG_FILES msp430/.gdbinit:common/gdbinit.in" ;;
     "msp430/Makefile.sim") CONFIG_FILES="$CONFIG_FILES msp430/Makefile.sim:msp430/Makefile.in" ;;
     "msp430/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS msp430/Makefile" ;;
     "depdir-msp430") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-msp430" ;;
     "depdir-or1k") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-or1k" ;;
     "depdir-ppc") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-ppc" ;;
+    "pru/.gdbinit") CONFIG_FILES="$CONFIG_FILES pru/.gdbinit:common/gdbinit.in" ;;
     "pru/Makefile.sim") CONFIG_FILES="$CONFIG_FILES pru/Makefile.sim:pru/Makefile.in" ;;
     "pru/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS pru/Makefile" ;;
     "depdir-pru") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-pru" ;;
     "depdir-riscv") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-riscv" ;;
+    "rl78/.gdbinit") CONFIG_FILES="$CONFIG_FILES rl78/.gdbinit:common/gdbinit.in" ;;
     "rl78/Makefile.sim") CONFIG_FILES="$CONFIG_FILES rl78/Makefile.sim:rl78/Makefile.in" ;;
     "rl78/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS rl78/Makefile" ;;
     "depdir-rl78") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-rl78" ;;
+    "rx/.gdbinit") CONFIG_FILES="$CONFIG_FILES rx/.gdbinit:common/gdbinit.in" ;;
     "rx/Makefile.sim") CONFIG_FILES="$CONFIG_FILES rx/Makefile.sim:rx/Makefile.in" ;;
     "rx/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS rx/Makefile" ;;
     "depdir-rx") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-rx" ;;
+    "sh/.gdbinit") CONFIG_FILES="$CONFIG_FILES sh/.gdbinit:common/gdbinit.in" ;;
     "sh/Makefile.sim") CONFIG_FILES="$CONFIG_FILES sh/Makefile.sim:sh/Makefile.in" ;;
     "sh/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS sh/Makefile" ;;
     "depdir-sh") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-sh" ;;
+    "erc32/.gdbinit") CONFIG_FILES="$CONFIG_FILES erc32/.gdbinit:common/gdbinit.in" ;;
     "erc32/Makefile.sim") CONFIG_FILES="$CONFIG_FILES erc32/Makefile.sim:erc32/Makefile.in" ;;
     "erc32/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS erc32/Makefile" ;;
     "depdir-erc32") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-erc32" ;;
     "depdir-v850") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-v850" ;;
+    "example-synacor/.gdbinit") CONFIG_FILES="$CONFIG_FILES example-synacor/.gdbinit:common/gdbinit.in" ;;
     "example-synacor/Makefile.sim") CONFIG_FILES="$CONFIG_FILES example-synacor/Makefile.sim:example-synacor/Makefile.in" ;;
     "example-synacor/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS example-synacor/Makefile" ;;
     "depdir-example-synacor") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-example-synacor" ;;
     "arch-subdir.mk") CONFIG_FILES="$CONFIG_FILES arch-subdir.mk" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
+    ".gdbinit") CONFIG_FILES="$CONFIG_FILES .gdbinit:gdbinit.in" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac

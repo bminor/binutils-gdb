@@ -22,7 +22,9 @@
 #ifndef MI_MI_CMDS_H
 #define MI_MI_CMDS_H
 
+#include "gdbsupport/function-view.h"
 #include "gdbsupport/gdb_optional.h"
+#include "mi/mi-main.h"
 
 enum print_values {
    PRINT_NO_VALUES,
@@ -159,17 +161,21 @@ struct mi_command
   const char *name () const
   { return m_name; }
 
-  /* Execute the MI command.  Can throw an exception if something goes
-     wrong.  */
-  void invoke (struct mi_parse *parse) const;
+  /* Execute the MI command.  this needs to be overridden in each
+     base class.  PARSE is the parsed command line from the user.
+     Can throw an exception if something goes wrong.  */
+  virtual void invoke (struct mi_parse *parse) const = 0;
 
-protected:
-
-  /* The core of command invocation, this needs to be overridden in each
-     base class.  PARSE is the parsed command line from the user.  */
-  virtual void do_invoke (struct mi_parse *parse) const = 0;
-
-private:
+  /* Return whether this command preserves user selected context (thread
+     and frame).  */
+  bool preserve_user_selected_context () const
+  {
+    /* Here we exploit the fact that if MI command is supposed to change
+       user context, then it should not emit change notifications.  Therefore if
+       command does not suppress user context change notifications, then it should
+       preserve the context.  */
+    return m_suppress_notification != &mi_suppress_notification.user_selected_context;
+  }
 
   /* If this command was created with a suppress notifications pointer,
      then this function will set the suppress flag and return a
@@ -180,6 +186,8 @@ private:
      then this function returns an empty gdb::optional.  */
   gdb::optional<scoped_restore_tmpl<int>> do_suppress_notification () const;
 
+private:
+
   /* The name of the command.  */
   const char *m_name;
 
@@ -187,11 +195,35 @@ private:
   int *m_suppress_notification;
 };
 
+/* A command held in the global mi_cmd_table.  */
+
+using mi_command_up = std::unique_ptr<struct mi_command>;
+
 /* Lookup a command in the MI command table, returns nullptr if COMMAND is
    not found.  */
 
 extern mi_command *mi_cmd_lookup (const char *command);
 
 extern void mi_execute_command (const char *cmd, int from_tty);
+
+/* Insert COMMAND into the global mi_cmd_table.  Return false if
+   COMMAND->name already exists in mi_cmd_table, in which case COMMAND will
+   not have been added to mi_cmd_table.  Otherwise, return true, and
+   COMMAND was added to mi_cmd_table.  */
+
+extern bool insert_mi_cmd_entry (mi_command_up command);
+
+/* Remove the command called NAME from the global mi_cmd_table.  Return
+   true if the removal was a success, otherwise return false, which
+   indicates no command called NAME was found in the mi_cmd_table. */
+
+extern bool remove_mi_cmd_entry (const std::string &name);
+
+/* Call CALLBACK for each registered MI command.  Remove commands for which
+   CALLBACK returns true.  */
+
+using remove_mi_cmd_entries_ftype
+  = gdb::function_view<bool (mi_command *)>;
+extern void remove_mi_cmd_entries (remove_mi_cmd_entries_ftype callback);
 
 #endif /* MI_MI_CMDS_H */

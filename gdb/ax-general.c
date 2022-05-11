@@ -365,11 +365,11 @@ ax_print (struct ui_file *f, struct agent_expr *x)
 {
   int i;
 
-  fprintf_filtered (f, _("Scope: %s\n"), paddress (x->gdbarch, x->scope));
-  fprintf_filtered (f, _("Reg mask:"));
+  gdb_printf (f, _("Scope: %s\n"), paddress (x->gdbarch, x->scope));
+  gdb_printf (f, _("Reg mask:"));
   for (i = 0; i < x->reg_mask_len; ++i)
-    fprintf_filtered (f, _(" %02x"), x->reg_mask[i]);
-  fprintf_filtered (f, _("\n"));
+    gdb_printf (f, _(" %02x"), x->reg_mask[i]);
+  gdb_printf (f, _("\n"));
 
   /* Check the size of the name array against the number of entries in
      the enum, to catch additions that people didn't sync.  */
@@ -384,21 +384,21 @@ ax_print (struct ui_file *f, struct agent_expr *x)
       if (op >= (sizeof (aop_map) / sizeof (aop_map[0]))
 	  || !aop_map[op].name)
 	{
-	  fprintf_filtered (f, _("%3d  <bad opcode %02x>\n"), i, op);
+	  gdb_printf (f, _("%3d  <bad opcode %02x>\n"), i, op);
 	  i++;
 	  continue;
 	}
       if (i + 1 + aop_map[op].op_size > x->len)
 	{
-	  fprintf_filtered (f, _("%3d  <incomplete opcode %s>\n"),
-			    i, aop_map[op].name);
+	  gdb_printf (f, _("%3d  <incomplete opcode %s>\n"),
+		      i, aop_map[op].name);
 	  break;
 	}
 
-      fprintf_filtered (f, "%3d  %s", i, aop_map[op].name);
+      gdb_printf (f, "%3d  %s", i, aop_map[op].name);
       if (aop_map[op].op_size > 0)
 	{
-	  fputs_filtered (" ", f);
+	  gdb_puts (" ", f);
 
 	  print_longest (f, 'd', 0,
 			 read_const (x, i + 1, aop_map[op].op_size));
@@ -412,11 +412,11 @@ ax_print (struct ui_file *f, struct agent_expr *x)
 	  nargs = x->buf[i++];
 	  slen = x->buf[i++];
 	  slen = slen * 256 + x->buf[i++];
-	  fprintf_filtered (f, _(" \"%s\", %d args"),
-			    &(x->buf[i]), nargs);
+	  gdb_printf (f, _(" \"%s\", %d args"),
+		      &(x->buf[i]), nargs);
 	  i += slen - 1;
 	}
-      fprintf_filtered (f, "\n");
+      gdb_printf (f, "\n");
       i += 1 + aop_map[op].op_size;
     }
 }

@@ -139,6 +139,21 @@ run_sim(struct pstate *sregs, uint64_t icount, int dis)
 }
 
 int
+fprintf_styled (void *stream, enum disassembler_style style,
+		const char *fmt, ...)
+{
+  int ret;
+  FILE *out = (FILE *) stream;
+  va_list args;
+
+  va_start (args, fmt);
+  ret = vfprintf (out, fmt, args);
+  va_end (args);
+
+  return ret;
+}
+
+int
 main(int argc, char **argv)
 {
 
@@ -212,7 +227,8 @@ main(int argc, char **argv)
 #endif
     sregs.freq = freq;
 
-    INIT_DISASSEMBLE_INFO(dinfo, stdout, (fprintf_ftype) fprintf);
+    INIT_DISASSEMBLE_INFO(dinfo, stdout, (fprintf_ftype) fprintf,
+			  (fprintf_styled_ftype) fprintf_styled);
 #ifdef HOST_LITTLE_ENDIAN
     dinfo.endian = BFD_ENDIAN_LITTLE;
 #else

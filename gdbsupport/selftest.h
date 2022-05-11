@@ -21,12 +21,37 @@
 
 #include "gdbsupport/array-view.h"
 #include "gdbsupport/function-view.h"
+#include "gdbsupport/iterator-range.h"
+#include <set>
+#include <vector>
 
 /* A test is just a function that does some checks and throws an
    exception if something has gone wrong.  */
 
 namespace selftests
 {
+
+/* Selftests are registered under a unique name.  */
+
+struct selftest
+{
+  selftest (std::string name, std::function<void (void)> test)
+    : name { std::move (name) }, test { std::move (test) }
+  { }
+  bool operator< (const selftest &rhs) const
+  { return name < rhs.name; }
+
+  std::string name;
+  std::function<void (void)> test;
+};
+
+/* Type of the container of all the registered selftests.  */
+using selftests_registry = std::set<selftest>;
+using selftests_range = iterator_range<selftests_registry::const_iterator>;
+
+/* Create a range to iterate over all registered tests.  */
+
+selftests_range all_selftests ();
 
 /* True if selftest should run verbosely.  */
 
@@ -36,6 +61,16 @@ extern bool run_verbose ();
 
 extern void register_test (const std::string &name,
 			   std::function<void(void)> function);
+
+/* A selftest generator is a callback function used to delay the generation
+   of selftests.  */
+
+using selftests_generator = std::function<std::vector<selftest> (void)>;
+
+/* Register a function which can lazily register selftests once GDB is fully
+   initialized. */
+
+extern void add_lazy_generator (selftests_generator generator);
 
 /* Run all the self tests.  This print a message describing the number
    of test and the number of failures.
@@ -48,13 +83,6 @@ extern void run_tests (gdb::array_view<const char *const> filters,
 
 /* Reset GDB or GDBserver's internal state.  */
 extern void reset ();
-
-using for_each_selftest_ftype
-  = gdb::function_view<void(const std::string &name)>;
-
-/* Call FUNC for each registered selftest.  */
-
-extern void for_each_selftest (for_each_selftest_ftype func);
 }
 
 /* Check that VALUE is true, and, if not, throw an exception.  */

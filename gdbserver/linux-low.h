@@ -127,6 +127,9 @@ struct process_info_private
 
   /* &_r_debug.  0 if not yet determined.  -1 if no PT_DYNAMIC in Phdrs.  */
   CORE_ADDR r_debug;
+
+  /* The /proc/pid/mem file used for reading/writing memory.  */
+  int mem_fd;
 };
 
 struct lwp_info;
@@ -162,10 +165,6 @@ public:
   void fetch_registers (regcache *regcache, int regno) override;
 
   void store_registers (regcache *regcache, int regno) override;
-
-  int prepare_to_access_memory () override;
-
-  void done_accessing_memory () override;
 
   int read_memory (CORE_ADDR memaddr, unsigned char *myaddr,
 		   int len) override;
@@ -276,7 +275,7 @@ public:
   bool supports_agent () override;
 
 #ifdef HAVE_LINUX_BTRACE
-  btrace_target_info *enable_btrace (ptid_t ptid,
+  btrace_target_info *enable_btrace (thread_info *tp,
 				     const btrace_config *conf) override;
 
   int disable_btrace (btrace_target_info *tinfo) override;
@@ -543,6 +542,13 @@ private:
   /* Add a process to the common process list, and set its private
      data.  */
   process_info *add_linux_process (int pid, int attached);
+
+  /* Same as add_linux_process, but don't open the /proc/PID/mem file
+     yet.  */
+  process_info *add_linux_process_no_mem_file (int pid, int attached);
+
+  /* Free resources associated to PROC and remove it.  */
+  void remove_linux_process (process_info *proc); 
 
   /* Add a new thread.  */
   lwp_info *add_lwp (ptid_t ptid);

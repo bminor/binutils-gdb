@@ -20,7 +20,9 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* This file was created with the aid of ``gdbarch.py''.  */
+/* To regenerate this file, run:
+   ./gdbarch.py
+*/
 
 
 
@@ -293,8 +295,6 @@ extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register
 /* Return the type of a register specified by the architecture.  Only
    the register cache should call this function directly; others should
    use "register_type". */
-
-extern bool gdbarch_register_type_p (struct gdbarch *gdbarch);
 
 typedef struct type * (gdbarch_register_type_ftype) (struct gdbarch *gdbarch, int reg_nr);
 extern struct type * gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr);
@@ -833,8 +833,8 @@ extern void set_gdbarch_address_class_name_to_type_flags (struct gdbarch *gdbarc
 
 /* Is a register in a group */
 
-typedef int (gdbarch_register_reggroup_p_ftype) (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
-extern int gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, struct reggroup *reggroup);
+typedef int (gdbarch_register_reggroup_p_ftype) (struct gdbarch *gdbarch, int regnum, const struct reggroup *reggroup);
+extern int gdbarch_register_reggroup_p (struct gdbarch *gdbarch, int regnum, const struct reggroup *reggroup);
 extern void set_gdbarch_register_reggroup_p (struct gdbarch *gdbarch, gdbarch_register_reggroup_p_ftype *register_reggroup_p);
 
 /* Fetch the pointer to the ith function argument. */

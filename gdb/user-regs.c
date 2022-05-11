@@ -223,9 +223,9 @@ maintenance_print_user_registers (const char *args, int from_tty)
   regs = (struct gdb_user_regs *) gdbarch_data (gdbarch, user_regs_data);
   regnum = gdbarch_num_cooked_regs (gdbarch);
 
-  printf_filtered (" %-11s %3s\n", "Name", "Nr");
+  gdb_printf (" %-11s %3s\n", "Name", "Nr");
   for (reg = regs->first; reg != NULL; reg = reg->next, ++regnum)
-    printf_filtered (" %-11s %3d\n", reg->name, regnum);
+    gdb_printf (" %-11s %3d\n", reg->name, regnum);
 }
 
 void _initialize_user_regs ();

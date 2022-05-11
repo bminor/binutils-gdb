@@ -121,9 +121,10 @@ proc sim_init_toolchain {} {
     set global_cpp_works [string equal "" "$result"]
 
     # See if we have a compiler available, and which environment it's targeting.
+    set global_cc_os ""
+    set global_cc_works 0
     if { $arch != $SIM_PRIMARY_TARGET && $CC_FOR_TARGET == "false" } {
 	verbose -log "Can't find a compatible C compiler"
-	set global_cc_works 0
     } elseif { [target_compile $srcdir/lib/newlibcheck.c \
 		$objdir/compilercheck.x "executable" $cc_options] == "" } {
 	verbose -log "Found newlib C compiler"
@@ -138,10 +139,8 @@ proc sim_init_toolchain {} {
 		$objdir/compilercheck.x "executable" $cc_options] == "" } {
 	verbose -log "Found C compiler, but unknown OS"
 	set global_cc_works 1
-	set global_cc_os ""
     } {
 	verbose -log "Can't execute C compiler"
-	set global_cc_works 0
     }
 
     file delete $objdir/compilercheck.x
@@ -260,6 +259,41 @@ proc sim_run { prog sim_opts prog_opts redir options } {
     return [list $return_code $output]
 }
 
+# Support function for "#requires: simoption <xx>":
+# Looks in "run --help" output for <xx>, returns 1 iff <xx> is mentioned
+# there and looks like an option name, otherwise 0.
+
+proc sim_check_requires_simoption { optname } {
+    global sim_path
+    set testrun "$sim_path --help"
+    verbose -log "Checking for simoption `$optname'" 3
+    remote_spawn host $testrun
+    set result [remote_wait host 240]
+
+    set return_code [lindex $result 0]
+    if { $return_code != 0 } {
+	perror "Can't execute `$testrun' to check for `$optname'"
+	return 0
+    }
+
+    set output [lindex $result 1]
+    # Remove \r as for regular runs.
+    regsub -all -- "\r" $output "" output
+
+    # The option output format for --help for each line where an
+    # option name is mentioned, is assumed to be two space followed
+    # by the option name followed by a space or left square bracket,
+    # like in (optname=--foo): "  --foo " or "  --foo[this|that]".
+    # Beware not to match "  --foo-bar" nor "  --foobar".
+    if [string match "*\n  $optname\[\[ \]*" $output] {
+	verbose -log "Found `$optname'" 3
+	return 1
+    }
+    verbose -log "Did not find `$optname'" 3
+
+    return 0
+}
+
 # Run testcase NAME.
 # NAME is either a fully specified file name, or just the file name in which
 # case $srcdir/$subdir will be prepended.
@@ -325,6 +359,7 @@ proc run_sim_test { name requested_machs } {
     set opts(cc) ""
     set opts(progopts) ""
     set opts(progos) ""
+    set opts(requires) {}
     set opts(sim) ""
     set opts(status) "0"
     set opts(output) ""
@@ -372,6 +407,14 @@ proc run_sim_test { name requested_machs } {
 	# Similar with "xfail" and "kfail", but arguments are space-separated.
 	if { $opt_name == "xfail" || $opt_name == "kfail" } {
 	    set opt_val "$opts($opt_name) $opt_val"
+	}
+
+	# Similar for "requires", except we append a pair to a list, and
+	# that doesn't match the processing in the rest of the loop, so we
+	# "continue" early.
+	if { $opt_name == "requires" } {
+	    lappend opts($opt_name) [split $opt_val " "]
+	    continue
 	}
 
 	foreach m $opt_machs {
@@ -446,6 +489,22 @@ proc run_sim_test { name requested_machs } {
 
 	if ![info exists opts(cc,$mach)] {
 	    set opts(cc,$mach) $opts(cc)
+	}
+
+	foreach req $opts(requires) {
+	    set what [lindex $req 0]
+	    set what_opt [lindex $req 1]
+	    verbose -log "requires: <$what> <$what_opt>"
+	    if { [info procs sim_check_requires_${what}] != [list] } {
+		if ![sim_check_requires_${what} $what_opt] {
+		    untested $subdir/$name
+		    return
+		}
+	    } {
+		perror "unknown requirement `requires: $what' in file $file"
+		unresolved $subdir/$name
+		return
+	    }
 	}
 
 	if [string match "*.c" $sourcefile] {

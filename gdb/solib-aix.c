@@ -713,7 +713,7 @@ static void
 show_solib_aix_debug (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("solib-aix debugging is %s.\n"), value);
+  gdb_printf (file, _("solib-aix debugging is %s.\n"), value);
 }
 
 /* The target_so_ops for AIX targets.  */

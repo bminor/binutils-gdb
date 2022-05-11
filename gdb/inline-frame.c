@@ -181,7 +181,7 @@ inline_frame_this_id (struct frame_info *this_frame,
      in the frame ID (and eventually, to set breakpoints).  */
   func = get_frame_function (this_frame);
   gdb_assert (func != NULL);
-  (*this_id).code_addr = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (func));
+  (*this_id).code_addr = func->value_block ()->entry_pc ();
   (*this_id).artificial_depth++;
 }
 
@@ -226,14 +226,14 @@ inline_frame_sniffer (const struct frame_unwind *self,
      location.  */
   depth = 0;
   cur_block = frame_block;
-  while (BLOCK_SUPERBLOCK (cur_block))
+  while (cur_block->superblock ())
     {
       if (block_inlined_p (cur_block))
 	depth++;
-      else if (BLOCK_FUNCTION (cur_block) != NULL)
+      else if (cur_block->function () != NULL)
 	break;
 
-      cur_block = BLOCK_SUPERBLOCK (cur_block);
+      cur_block = cur_block->superblock ();
     }
 
   /* Check how many inlined functions already have frames.  */
@@ -286,11 +286,10 @@ block_starting_point_at (CORE_ADDR pc, const struct block *block)
   const struct block *new_block;
 
   bv = blockvector_for_pc (pc, NULL);
-  if (BLOCKVECTOR_MAP (bv) == NULL)
+  if (bv->map () == nullptr)
     return 0;
 
-  new_block = (const struct block *) addrmap_find (BLOCKVECTOR_MAP (bv),
-						   pc - 1);
+  new_block = (const struct block *) addrmap_find (bv->map (), pc - 1);
   if (new_block == NULL)
     return 1;
 
@@ -329,7 +328,7 @@ stopped_by_user_bp_inline_frame (const block *frame_block, bpstat *stop_chain)
 		 to presenting the stop at the innermost inline
 		 function.  */
 	      if (loc->symbol == nullptr
-		  || frame_block == SYMBOL_BLOCK_VALUE (loc->symbol))
+		  || frame_block == loc->symbol->value_block ())
 		return true;
 	    }
 	}
@@ -356,13 +355,13 @@ skip_inline_frames (thread_info *thread, bpstat *stop_chain)
   if (frame_block != NULL)
     {
       cur_block = frame_block;
-      while (BLOCK_SUPERBLOCK (cur_block))
+      while (cur_block->superblock ())
 	{
 	  if (block_inlined_p (cur_block))
 	    {
 	      /* See comments in inline_frame_this_id about this use
 		 of BLOCK_ENTRY_PC.  */
-	      if (BLOCK_ENTRY_PC (cur_block) == this_pc
+	      if (cur_block->entry_pc () == this_pc
 		  || block_starting_point_at (this_pc, cur_block))
 		{
 		  /* Do not skip the inlined frame if execution
@@ -372,15 +371,15 @@ skip_inline_frames (thread_info *thread, bpstat *stop_chain)
 		    break;
 
 		  skip_count++;
-		  skipped_syms.push_back (BLOCK_FUNCTION (cur_block));
+		  skipped_syms.push_back (cur_block->function ());
 		}
 	      else
 		break;
 	    }
-	  else if (BLOCK_FUNCTION (cur_block) != NULL)
+	  else if (cur_block->function () != NULL)
 	    break;
 
-	  cur_block = BLOCK_SUPERBLOCK (cur_block);
+	  cur_block = cur_block->superblock ();
 	}
     }
 

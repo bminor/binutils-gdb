@@ -717,7 +717,12 @@ AC_DEFUN([AC_TRY_LIBPYTHON],
   LIBS="$new_LIBS $LIBS"
   found_usable_python=no
   AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include "Python.h"]],
-                                 [[Py_Initialize ();]])],
+                                 [[
+				    #if PY_MAJOR_VERSION != 3
+				    # error "We only support Python 3"
+				    #endif
+				    Py_Initialize ();
+				 ]])],
                  [have_libpython_var=yes
                   found_usable_python=yes
                   PYTHON_CPPFLAGS=$new_CPPFLAGS
@@ -733,7 +738,6 @@ dnl no -   Don't include python support.
 dnl yes -  Include python support, error if it's missing.
 dnl        If we find python in $PATH, use it to fetch configure options,
 dnl        otherwise assume the compiler can find it with no help from us.
-dnl        Python 2.7 and 2.6 are tried in turn.
 dnl auto - Same as "yes", but if python is missing from the system,
 dnl        fall back to "no".
 dnl /path/to/python/exec-prefix -
@@ -742,7 +746,6 @@ dnl        If /path/to/python/exec-prefix/bin/python exists, use it to find
 dnl        the compilation parameters.  Otherwise use
 dnl        -I/path/to/python/exec-prefix/include,
 dnl        -L/path/to/python/exec-prefix/lib.
-dnl        Python 2.7 and 2.6 are tried in turn.
 dnl        NOTE: This case is historical.  It is what was done for 7.0/7.1
 dnl        but is deprecated.
 dnl /path/to/python/executable -
@@ -877,15 +880,6 @@ else
   if test "${have_python_config}" = yes; then
     AC_TRY_LIBPYTHON(have_libpython,
                      ${python_includes}, ${python_libs})
-  elif test "${have_python_config}" != failed; then
-    if test "${have_libpython}" = no; then
-      AC_TRY_LIBPYTHON(have_libpython,
-                       ${python_includes}, "-lpython2.7 ${python_libs}")
-    fi
-    if test "${have_libpython}" = no; then
-      AC_TRY_LIBPYTHON(have_libpython,
-                       ${python_includes}, "-lpython2.6 ${python_libs}")
-    fi
   fi
 
   if test "${have_libpython}" = no; then
@@ -1242,10 +1236,10 @@ either use --disable-source-highlight or dnl
       # This situation can occur for instance when using a source highlight
       # library compiled with g++ 7.5.0 while building gdb with g++ 4.8.5.
       AC_LANG_PUSH(C++)
-      save_CFLAGS="$CFLAGS"
-      save_LDFLAGS="$LDFLAGS"
-      CFLAGS="$CFLAGS $srchigh_pkg_cflags"
-      LDFLAGS="$LDFLAGS $srchigh_pkg_libs"
+      save_CXXFLAGS="$CXXFLAGS"
+      save_LIBS="$LIBS"
+      CXXFLAGS="$CXXFLAGS $srchigh_pkg_cflags"
+      LIBS="$LIBS $srchigh_pkg_libs"
       AC_LINK_IFELSE(
         [AC_LANG_PROGRAM(
           [#include <srchilite/sourcehighlight.h>],
@@ -1255,8 +1249,8 @@ either use --disable-source-highlight or dnl
         [have_usable_source_highlight=yes],
         [have_usable_source_highlight=no]
       )
-      CFLAGS="$save_CFLAGS"
-      LDFLAGS="$save_LDFLAGS"
+      CXXFLAGS="$save_CXXFLAGS"
+      LIBS="$save_LIBS"
       AC_LANG_POP(C++)
 
       if test "${have_usable_source_highlight}" = "yes"; then
@@ -1484,26 +1478,6 @@ AC_MSG_RESULT($gdb_cv_have_pt_getdbregs)
 if test "$gdb_cv_have_pt_getdbregs" = yes; then
   AC_DEFINE(HAVE_PT_GETDBREGS, 1,
   [Define if sys/ptrace.h defines the PT_GETDBREGS request.])
-fi
-
-# See if <sys/ptrace.h> provides the PT_GETXMMREGS request.
-AC_MSG_CHECKING(for PT_GETXMMREGS)
-AC_CACHE_VAL(
-  [gdb_cv_have_pt_getxmmregs],
-  [AC_COMPILE_IFELSE(
-     [AC_LANG_PROGRAM(
-	[#include <sys/types.h>
-	 #include <sys/ptrace.h>],
-	[PT_GETXMMREGS;]
-      )],
-     [gdb_cv_have_pt_getxmmregs=yes],
-     [gdb_cv_have_pt_getxmmregs=no]
-   )]
-)
-AC_MSG_RESULT($gdb_cv_have_pt_getxmmregs)
-if test "$gdb_cv_have_pt_getxmmregs" = yes; then
-  AC_DEFINE(HAVE_PT_GETXMMREGS, 1,
-  [Define if sys/ptrace.h defines the PT_GETXMMREGS request.])
 fi
 
 # See if <sys/ptrace.h> supports LWP names on FreeBSD
@@ -1833,6 +1807,7 @@ GDB_AC_WITH_DIR(SYSTEM_GDBINIT_DIR, system-gdbinit-dir,
     [automatically load system-wide gdbinit files from this directory],
     [])
 
+AM_GDB_COMPILER_TYPE
 AM_GDB_WARNINGS
 AM_GDB_UBSAN
 
@@ -2069,7 +2044,6 @@ if test "${ignore_sim}" = "false"; then
   if test x"${gdb_sim}" != x ; then
     SIM="${gdb_sim}"
     SIM_OBS="remote-sim.o"
-    AC_DEFINE(WITH_SIM, 1, [Define if the simulator is being linked in.])
 
     # Some tdep code should only be compiled in when the ppc sim is
     # built.  PR sim/13418.

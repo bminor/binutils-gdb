@@ -21,7 +21,7 @@ import gdb
 
 
 def warn(msg):
-    print "warning: %s" % msg
+    print("warning: %s" % msg)
 
 
 def get_elinos_environment():

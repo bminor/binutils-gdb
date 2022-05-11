@@ -343,8 +343,10 @@ struct value
   LONGEST embedded_offset = 0;
   LONGEST pointed_to_offset = 0;
 
-  /* Actual contents of the value.  Target byte-order.  NULL or not
-     valid if lazy is nonzero.  */
+  /* Actual contents of the value.  Target byte-order.
+
+     May be nullptr if the value is lazy or is entirely optimized out.
+     Guaranteed to be non-nullptr otherwise.  */
   gdb::unique_xmalloc_ptr<gdb_byte> contents;
 
   /* Unavailable ranges in CONTENTS.  We mark unavailable ranges,
@@ -989,10 +991,10 @@ show_max_value_size (struct ui_file *file, int from_tty,
 		     struct cmd_list_element *c, const char *value)
 {
   if (max_value_size == -1)
-    fprintf_filtered (file, _("Maximum value size is unlimited.\n"));
+    gdb_printf (file, _("Maximum value size is unlimited.\n"));
   else
-    fprintf_filtered (file, _("Maximum value size is %d bytes.\n"),
-		      max_value_size);
+    gdb_printf (file, _("Maximum value size is %d bytes.\n"),
+		max_value_size);
 }
 
 /* Called before we attempt to allocate or reallocate a buffer for the
@@ -1703,7 +1705,7 @@ value_release_to_mark (const struct value *mark)
    but it's a different block of storage.  */
 
 struct value *
-value_copy (struct value *arg)
+value_copy (const value *arg)
 {
   struct type *encl_type = value_enclosing_type (arg);
   struct value *val;
@@ -1713,7 +1715,7 @@ value_copy (struct value *arg)
   else
     val = allocate_value (encl_type);
   val->type = arg->type;
-  VALUE_LVAL (val) = VALUE_LVAL (arg);
+  VALUE_LVAL (val) = arg->lval;
   val->location = arg->location;
   val->offset = arg->offset;
   val->bitpos = arg->bitpos;
@@ -1725,13 +1727,18 @@ value_copy (struct value *arg)
   val->stack = arg->stack;
   val->is_zero = arg->is_zero;
   val->initialized = arg->initialized;
-
-  if (!value_lazy (val))
-    copy (value_contents_all_raw (arg),
-	  value_contents_all_raw (val));
-
   val->unavailable = arg->unavailable;
   val->optimized_out = arg->optimized_out;
+
+  if (!value_lazy (val) && !value_entirely_optimized_out (val))
+    {
+      gdb_assert (arg->contents != nullptr);
+      ULONGEST length = TYPE_LENGTH (value_enclosing_type (arg));
+      const auto &arg_view
+	= gdb::make_array_view (arg->contents.get (), length);
+      copy (arg_view, value_contents_all_raw (val));
+    }
+
   val->parent = arg->parent;
   if (VALUE_LVAL (val) == lval_computed)
     {
@@ -1909,6 +1916,14 @@ access_value_history (int num)
   return value_copy (value_history[absnum].get ());
 }
 
+/* See value.h.  */
+
+ULONGEST
+value_history_count ()
+{
+  return value_history.size ();
+}
+
 static void
 show_values (const char *num_exp, int from_tty)
 {
@@ -1937,10 +1952,10 @@ show_values (const char *num_exp, int from_tty)
       struct value_print_options opts;
 
       val = access_value_history (i);
-      printf_filtered (("$%d = "), i);
+      gdb_printf (("$%d = "), i);
       get_user_print_options (&opts);
       value_print (val, gdb_stdout, &opts);
-      printf_filtered (("\n"));
+      gdb_printf (("\n"));
     }
 
   /* The next "show values +" should start after what we just printed.  */
@@ -2441,11 +2456,6 @@ clear_internalvar (struct internalvar *var)
       xfree (var->u.string);
       break;
 
-    case INTERNALVAR_MAKE_VALUE:
-      if (var->u.make_value.functions->destroy != NULL)
-	var->u.make_value.functions->destroy (var->u.make_value.data);
-      break;
-
     default:
       break;
     }
@@ -2626,7 +2636,7 @@ show_convenience (const char *ignore, int from_tty)
 	{
 	  varseen = 1;
 	}
-      printf_filtered (("$%s = "), var->name);
+      gdb_printf (("$%s = "), var->name);
 
       try
 	{
@@ -2641,7 +2651,7 @@ show_convenience (const char *ignore, int from_tty)
 			  _("<error: %s>"), ex.what ());
 	}
 
-      printf_filtered (("\n"));
+      gdb_printf (("\n"));
     }
   if (!varseen)
     {
@@ -2649,11 +2659,11 @@ show_convenience (const char *ignore, int from_tty)
 	 The user can't create them except via Python, and if Python support
 	 is installed this message will never be printed ($_streq will
 	 exist).  */
-      printf_filtered (_("No debugger convenience variables now defined.\n"
-			 "Convenience variables have "
-			 "names starting with \"$\";\n"
-			 "use \"set\" as in \"set "
-			 "$foo = 5\" to define them.\n"));
+      gdb_printf (_("No debugger convenience variables now defined.\n"
+		    "Convenience variables have "
+		    "names starting with \"$\";\n"
+		    "use \"set\" as in \"set "
+		    "$foo = 5\" to define them.\n"));
     }
 }
 
@@ -2976,7 +2986,7 @@ value_static_field (struct type *type, int fieldno)
 	  if (!msym.minsym)
 	    retval = allocate_optimized_out_value (field_type);
 	  else
-	    retval = value_at_lazy (field_type, BMSYMBOL_VALUE_ADDRESS (msym));
+	    retval = value_at_lazy (field_type, msym.value_address ());
 	}
       else
 	retval = value_of_variable (sym.symbol, sym.block);
@@ -3163,13 +3173,8 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
   struct bound_minimal_symbol msym;
 
   sym = lookup_symbol (physname, 0, VAR_DOMAIN, 0).symbol;
-  if (sym != NULL)
+  if (sym == nullptr)
     {
-      memset (&msym, 0, sizeof (msym));
-    }
-  else
-    {
-      gdb_assert (sym == NULL);
       msym = lookup_bound_minimal_symbol (physname);
       if (msym.minsym == NULL)
 	return NULL;
@@ -3179,7 +3184,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
   VALUE_LVAL (v) = lval_memory;
   if (sym)
     {
-      set_value_address (v, BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym)));
+      set_value_address (v, sym->value_block ()->entry_pc ());
     }
   else
     {
@@ -3190,7 +3195,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 
       set_value_address (v,
 	gdbarch_convert_from_func_ptr_addr
-	   (gdbarch, BMSYMBOL_VALUE_ADDRESS (msym),
+	   (gdbarch, msym.value_address (),
 	    current_inferior ()->top_target ()));
     }
 
@@ -3997,15 +4002,15 @@ value_fetch_lazy_register (struct value *val)
       gdbarch = get_frame_arch (frame);
 
       string_file debug_file;
-      fprintf_unfiltered (&debug_file,
-			  "(frame=%d, regnum=%d(%s), ...) ",
-			  frame_relative_level (frame), regnum,
-			  user_reg_map_regnum_to_name (gdbarch, regnum));
+      gdb_printf (&debug_file,
+		  "(frame=%d, regnum=%d(%s), ...) ",
+		  frame_relative_level (frame), regnum,
+		  user_reg_map_regnum_to_name (gdbarch, regnum));
 
-      fprintf_unfiltered (&debug_file, "->");
+      gdb_printf (&debug_file, "->");
       if (value_optimized_out (new_val))
 	{
-	  fprintf_unfiltered (&debug_file, " ");
+	  gdb_printf (&debug_file, " ");
 	  val_print_optimized_out (new_val, &debug_file);
 	}
       else
@@ -4014,20 +4019,20 @@ value_fetch_lazy_register (struct value *val)
 	  gdb::array_view<const gdb_byte> buf = value_contents (new_val);
 
 	  if (VALUE_LVAL (new_val) == lval_register)
-	    fprintf_unfiltered (&debug_file, " register=%d",
-				VALUE_REGNUM (new_val));
+	    gdb_printf (&debug_file, " register=%d",
+			VALUE_REGNUM (new_val));
 	  else if (VALUE_LVAL (new_val) == lval_memory)
-	    fprintf_unfiltered (&debug_file, " address=%s",
-				paddress (gdbarch,
-					  value_address (new_val)));
+	    gdb_printf (&debug_file, " address=%s",
+			paddress (gdbarch,
+				  value_address (new_val)));
 	  else
-	    fprintf_unfiltered (&debug_file, " computed");
+	    gdb_printf (&debug_file, " computed");
 
-	  fprintf_unfiltered (&debug_file, " bytes=");
-	  fprintf_unfiltered (&debug_file, "[");
+	  gdb_printf (&debug_file, " bytes=");
+	  gdb_printf (&debug_file, "[");
 	  for (i = 0; i < register_size (gdbarch, regnum); i++)
-	    fprintf_unfiltered (&debug_file, "%02x", buf[i]);
-	  fprintf_unfiltered (&debug_file, "]");
+	    gdb_printf (&debug_file, "%02x", buf[i]);
+	  gdb_printf (&debug_file, "]");
 	}
 
       frame_debug_printf ("%s", debug_file.c_str ());
@@ -4268,6 +4273,20 @@ test_insert_into_bit_range_vector ()
   }
 }
 
+static void
+test_value_copy ()
+{
+  type *type = builtin_type (current_inferior ()->gdbarch)->builtin_int;
+
+  /* Verify that we can copy an entirely optimized out value, that may not have
+     its contents allocated.  */
+  value_ref_ptr val = release_value (allocate_optimized_out_value (type));
+  value_ref_ptr copy = release_value (value_copy (val.get ()));
+
+  SELF_CHECK (value_entirely_optimized_out (val.get ()));
+  SELF_CHECK (value_entirely_optimized_out (copy.get ()));
+}
+
 } /* namespace selftests */
 #endif /* GDB_SELF_TEST */
 
@@ -4352,6 +4371,7 @@ and exceeds this limit will cause an error."),
   selftests::register_test ("ranges_contain", selftests::test_ranges_contain);
   selftests::register_test ("insert_into_bit_range_vector",
 			    selftests::test_insert_into_bit_range_vector);
+  selftests::register_test ("value_copy", selftests::test_value_copy);
 #endif
 }
 

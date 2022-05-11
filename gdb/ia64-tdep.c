@@ -75,7 +75,7 @@ static gdb::optional<gdb::byte_vector> ktab_buf;
 
 /* An enumeration of the different IA-64 instruction types.  */
 
-typedef enum instruction_type
+enum instruction_type
 {
   A,			/* Integer ALU ;    I-unit or M-unit */
   I,			/* Non-ALU integer; I-unit */
@@ -85,7 +85,7 @@ typedef enum instruction_type
   L,			/* Extended (L+X) ; I-unit */
   X,			/* Extended (L+X) ; I-unit */
   undefined		/* undefined or reserved */
-} instruction_type;
+};
 
 /* We represent IA-64 PC addresses as the value of the instruction
    pointer or'd with some bit combination in the low nibble which
@@ -322,7 +322,7 @@ ia64_ext_type (struct gdbarch *gdbarch)
 
 static int
 ia64_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			  struct reggroup *group)
+			  const struct reggroup *group)
 {
   int vector_p;
   int float_p;
@@ -1895,13 +1895,13 @@ ia64_frame_this_id (struct frame_info *this_frame, void **this_cache,
   if (cache->base != 0)
     (*this_id) = frame_id_build_special (cache->base, cache->pc, cache->bsp);
   if (gdbarch_debug >= 1)
-    fprintf_unfiltered (gdb_stdlog,
-			"regular frame id: code %s, stack %s, "
-			"special %s, this_frame %s\n",
-			paddress (gdbarch, this_id->code_addr),
-			paddress (gdbarch, this_id->stack_addr),
-			paddress (gdbarch, cache->bsp),
-			host_address_to_string (this_frame));
+    gdb_printf (gdb_stdlog,
+		"regular frame id: code %s, stack %s, "
+		"special %s, this_frame %s\n",
+		paddress (gdbarch, this_id->code_addr),
+		paddress (gdbarch, this_id->stack_addr),
+		paddress (gdbarch, cache->bsp),
+		host_address_to_string (this_frame));
 }
 
 static struct value *
@@ -2269,13 +2269,13 @@ ia64_sigtramp_frame_this_id (struct frame_info *this_frame,
 				       get_frame_pc (this_frame),
 				       cache->bsp);
   if (gdbarch_debug >= 1)
-    fprintf_unfiltered (gdb_stdlog,
-			"sigtramp frame id: code %s, stack %s, "
-			"special %s, this_frame %s\n",
-			paddress (gdbarch, this_id->code_addr),
-			paddress (gdbarch, this_id->stack_addr),
-			paddress (gdbarch, cache->bsp),
-			host_address_to_string (this_frame));
+    gdb_printf (gdb_stdlog,
+		"sigtramp frame id: code %s, stack %s, "
+		"special %s, this_frame %s\n",
+		paddress (gdbarch, this_id->code_addr),
+		paddress (gdbarch, this_id->stack_addr),
+		paddress (gdbarch, cache->bsp),
+		host_address_to_string (this_frame));
 }
 
 static struct value *
@@ -2524,11 +2524,11 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
     }
       
   if (gdbarch_debug >= 1)
-    fprintf_unfiltered (gdb_stdlog, 
-			"  access_reg: from cache: %4s=%s\n",
-			(((unsigned) regnum <= IA64_NAT127_REGNUM)
-			? ia64_register_names[regnum] : "r??"), 
-			paddress (gdbarch, *val));
+    gdb_printf (gdb_stdlog, 
+		"  access_reg: from cache: %4s=%s\n",
+		(((unsigned) regnum <= IA64_NAT127_REGNUM)
+		 ? ia64_register_names[regnum] : "r??"), 
+		paddress (gdbarch, *val));
   return 0;
 }
 
@@ -2595,11 +2595,11 @@ ia64_access_rse_reg (unw_addr_space_t as, unw_regnum_t uw_regnum,
     }
       
   if (gdbarch_debug >= 1)
-    fprintf_unfiltered (gdb_stdlog, 
-			"  access_rse_reg: from cache: %4s=%s\n",
-			(((unsigned) regnum <= IA64_NAT127_REGNUM)
-			 ? ia64_register_names[regnum] : "r??"), 
-			paddress (gdbarch, *val));
+    gdb_printf (gdb_stdlog, 
+		"  access_rse_reg: from cache: %4s=%s\n",
+		(((unsigned) regnum <= IA64_NAT127_REGNUM)
+		 ? ia64_register_names[regnum] : "r??"), 
+		paddress (gdbarch, *val));
 
   return 0;
 }
@@ -2693,12 +2693,12 @@ get_kernel_table (unw_word_t ip, unw_dyn_info_t *di)
   di->u.ti.table_data = (unw_word_t *) ktab;
   
   if (gdbarch_debug >= 1)
-    fprintf_unfiltered (gdb_stdlog, "get_kernel_table: found table `%s': "
-			"segbase=%s, length=%s, gp=%s\n",
-			(char *) di->u.ti.name_ptr, 
-			hex_string (di->u.ti.segbase),
-			pulongest (di->u.ti.table_len), 
-			hex_string (di->gp));
+    gdb_printf (gdb_stdlog, "get_kernel_table: found table `%s': "
+		"segbase=%s, length=%s, gp=%s\n",
+		(char *) di->u.ti.name_ptr, 
+		hex_string (di->u.ti.segbase),
+		pulongest (di->u.ti.table_len), 
+		hex_string (di->gp));
   return 0;
 }
 
@@ -2799,15 +2799,15 @@ ia64_find_proc_info_x (unw_addr_space_t as, unw_word_t ip, unw_proc_info_t *pi,
 	return -UNW_ENOINFO;
 
       if (gdbarch_debug >= 1)
-	fprintf_unfiltered (gdb_stdlog, "ia64_find_proc_info_x: %s -> "
-			    "(name=`%s',segbase=%s,start=%s,end=%s,gp=%s,"
-			    "length=%s,data=%s)\n",
-			    hex_string (ip), (char *)di.u.ti.name_ptr,
-			    hex_string (di.u.ti.segbase),
-			    hex_string (di.start_ip), hex_string (di.end_ip),
-			    hex_string (di.gp),
-			    pulongest (di.u.ti.table_len), 
-			    hex_string ((CORE_ADDR)di.u.ti.table_data));
+	gdb_printf (gdb_stdlog, "ia64_find_proc_info_x: %s -> "
+		    "(name=`%s',segbase=%s,start=%s,end=%s,gp=%s,"
+		    "length=%s,data=%s)\n",
+		    hex_string (ip), (char *)di.u.ti.name_ptr,
+		    hex_string (di.u.ti.segbase),
+		    hex_string (di.start_ip), hex_string (di.end_ip),
+		    hex_string (di.gp),
+		    pulongest (di.u.ti.table_len), 
+		    hex_string ((CORE_ADDR)di.u.ti.table_data));
     }
   else
     {
@@ -2816,15 +2816,15 @@ ia64_find_proc_info_x (unw_addr_space_t as, unw_word_t ip, unw_proc_info_t *pi,
 	return ret;
 
       if (gdbarch_debug >= 1)
-	fprintf_unfiltered (gdb_stdlog, "ia64_find_proc_info_x: %s -> "
-			    "(name=`%s',segbase=%s,start=%s,end=%s,gp=%s,"
-			    "length=%s,data=%s)\n",
-			    hex_string (ip), (char *)di.u.rti.name_ptr,
-			    hex_string (di.u.rti.segbase),
-			    hex_string (di.start_ip), hex_string (di.end_ip),
-			    hex_string (di.gp),
-			    pulongest (di.u.rti.table_len), 
-			    hex_string (di.u.rti.table_data));
+	gdb_printf (gdb_stdlog, "ia64_find_proc_info_x: %s -> "
+		    "(name=`%s',segbase=%s,start=%s,end=%s,gp=%s,"
+		    "length=%s,data=%s)\n",
+		    hex_string (ip), (char *)di.u.rti.name_ptr,
+		    hex_string (di.u.rti.segbase),
+		    hex_string (di.start_ip), hex_string (di.end_ip),
+		    hex_string (di.gp),
+		    pulongest (di.u.rti.table_len), 
+		    hex_string (di.u.rti.table_data));
     }
 
   ret = libunwind_search_unwind_table (&as, ip, &di, pi, need_unwind_info,
@@ -2874,11 +2874,11 @@ ia64_get_dyn_info_list (unw_addr_space_t as,
 	  if (addr)
 	    {
 	      if (gdbarch_debug >= 1)
-		fprintf_unfiltered (gdb_stdlog,
-				    "dynamic unwind table in objfile %s "
-				    "at %s (gp=%s)\n",
-				    bfd_get_filename (objfile->obfd),
-				    hex_string (addr), hex_string (di.gp));
+		gdb_printf (gdb_stdlog,
+			    "dynamic unwind table in objfile %s "
+			    "at %s (gp=%s)\n",
+			    bfd_get_filename (objfile->obfd),
+			    hex_string (addr), hex_string (di.gp));
 	      *dilap = addr;
 	      return 0;
 	    }
@@ -2915,13 +2915,13 @@ ia64_libunwind_frame_this_id (struct frame_info *this_frame, void **this_cache,
   (*this_id) = frame_id_build_special (id.stack_addr, id.code_addr, bsp);
 
   if (gdbarch_debug >= 1)
-    fprintf_unfiltered (gdb_stdlog,
-			"libunwind frame id: code %s, stack %s, "
-			"special %s, this_frame %s\n",
-			paddress (gdbarch, id.code_addr),
-			paddress (gdbarch, id.stack_addr),
-			paddress (gdbarch, bsp),
-			host_address_to_string (this_frame));
+    gdb_printf (gdb_stdlog,
+		"libunwind frame id: code %s, stack %s, "
+		"special %s, this_frame %s\n",
+		paddress (gdbarch, id.code_addr),
+		paddress (gdbarch, id.stack_addr),
+		paddress (gdbarch, bsp),
+		host_address_to_string (this_frame));
 }
 
 static struct value *
@@ -3047,13 +3047,13 @@ ia64_libunwind_sigtramp_frame_this_id (struct frame_info *this_frame,
   (*this_id) = frame_id_build_special (id.stack_addr, id.code_addr, bsp);
 
   if (gdbarch_debug >= 1)
-    fprintf_unfiltered (gdb_stdlog,
-			"libunwind sigtramp frame id: code %s, "
-			"stack %s, special %s, this_frame %s\n",
-			paddress (gdbarch, id.code_addr),
-			paddress (gdbarch, id.stack_addr),
-			paddress (gdbarch, bsp),
-			host_address_to_string (this_frame));
+    gdb_printf (gdb_stdlog,
+		"libunwind sigtramp frame id: code %s, "
+		"stack %s, special %s, this_frame %s\n",
+		paddress (gdbarch, id.code_addr),
+		paddress (gdbarch, id.stack_addr),
+		paddress (gdbarch, bsp),
+		host_address_to_string (this_frame));
 }
 
 static struct value *
@@ -3876,10 +3876,10 @@ ia64_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
   bsp = extract_unsigned_integer (buf, 8, byte_order);
 
   if (gdbarch_debug >= 1)
-    fprintf_unfiltered (gdb_stdlog,
-			"dummy frame id: code %s, stack %s, special %s\n",
-			paddress (gdbarch, get_frame_pc (this_frame)),
-			paddress (gdbarch, sp), paddress (gdbarch, bsp));
+    gdb_printf (gdb_stdlog,
+		"dummy frame id: code %s, stack %s, special %s\n",
+		paddress (gdbarch, get_frame_pc (this_frame)),
+		paddress (gdbarch, sp), paddress (gdbarch, bsp));
 
   return frame_id_build_special (sp, get_frame_pc (this_frame), bsp);
 }

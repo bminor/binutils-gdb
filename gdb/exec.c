@@ -49,6 +49,7 @@
 #include <algorithm>
 #include "gdbsupport/pathstuff.h"
 #include "cli/cli-style.h"
+#include "gdbsupport/buildargv.h"
 
 void (*deprecated_file_changed_hook) (const char *);
 
@@ -102,9 +103,9 @@ static void
 show_exec_file_mismatch_command (struct ui_file *file, int from_tty,
 				 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("exec-file-mismatch handling is currently \"%s\".\n"),
-		    exec_file_mismatch_names[exec_file_mismatch_mode]);
+  gdb_printf (file,
+	      _("exec-file-mismatch handling is currently \"%s\".\n"),
+	      exec_file_mismatch_names[exec_file_mismatch_mode]);
 }
 
 /* Set command.  Change the setting for range checking.  */
@@ -135,8 +136,8 @@ static void
 show_write_files (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Writing into executable and core files is %s.\n"),
-		    value);
+  gdb_printf (file, _("Writing into executable and core files is %s.\n"),
+	      value);
 }
 
 
@@ -378,7 +379,7 @@ exec_file_attach (const char *filename, int from_tty)
   if (!filename)
     {
       if (from_tty)
-	printf_filtered (_("No executable file now.\n"));
+	gdb_printf (_("No executable file now.\n"));
 
       set_gdbarch_from_file (NULL);
     }
@@ -466,7 +467,8 @@ exec_file_attach (const char *filename, int from_tty)
 	     (bfd_get_filename (current_program_space->exec_bfd ())));
       else
 	current_program_space->exec_filename
-	  = gdb_realpath_keepfile (scratch_pathname);
+	  = make_unique_xstrdup (gdb_realpath_keepfile
+				   (scratch_pathname).c_str ());
 
       if (!bfd_check_format_matches (current_program_space->exec_bfd (),
 				     bfd_object, &matching))
@@ -905,11 +907,11 @@ print_section_info (const target_section_table *t, bfd *abfd)
   /* FIXME: 16 is not wide enough when gdbarch_addr_bit > 64.  */
   int wid = gdbarch_addr_bit (gdbarch) <= 32 ? 8 : 16;
 
-  printf_filtered ("\t`%ps', ",
-		   styled_string (file_name_style.style (),
-				  bfd_get_filename (abfd)));
-  wrap_here ("        ");
-  printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
+  gdb_printf ("\t`%ps', ",
+	      styled_string (file_name_style.style (),
+			     bfd_get_filename (abfd)));
+  gdb_stdout->wrap_here (8);
+  gdb_printf (_("file type %s.\n"), bfd_get_target (abfd));
   if (abfd == current_program_space->exec_bfd ())
     {
       /* gcc-3.4 does not like the initialization in
@@ -943,16 +945,16 @@ print_section_info (const target_section_table *t, bfd *abfd)
       entry_point = gdbarch_addr_bits_remove (gdbarch, 
 					      bfd_get_start_address (abfd) 
 						+ displacement);
-      printf_filtered (_("\tEntry point: %s\n"),
-		       paddress (gdbarch, entry_point));
+      gdb_printf (_("\tEntry point: %s\n"),
+		  paddress (gdbarch, entry_point));
     }
   for (const target_section &p : *t)
     {
       struct bfd_section *psect = p.the_bfd_section;
       bfd *pbfd = psect->owner;
 
-      printf_filtered ("\t%s", hex_string_custom (p.addr, wid));
-      printf_filtered (" - %s", hex_string_custom (p.endaddr, wid));
+      gdb_printf ("\t%s", hex_string_custom (p.addr, wid));
+      gdb_printf (" - %s", hex_string_custom (p.endaddr, wid));
 
       /* FIXME: A format of "08l" is not wide enough for file offsets
 	 larger than 4GB.  OTOH, making it "016l" isn't desirable either
@@ -961,14 +963,14 @@ print_section_info (const target_section_table *t, bfd *abfd)
 	 format string accordingly.  */
       /* FIXME: i18n: Need to rewrite this sentence.  */
       if (info_verbose)
-	printf_filtered (" @ %s",
-			 hex_string_custom (psect->filepos, 8));
-      printf_filtered (" is %s", bfd_section_name (psect));
+	gdb_printf (" @ %s",
+		    hex_string_custom (psect->filepos, 8));
+      gdb_printf (" is %s", bfd_section_name (psect));
       if (pbfd != abfd)
-	printf_filtered (" in %ps",
-			 styled_string (file_name_style.style (),
-					bfd_get_filename (pbfd)));
-      printf_filtered ("\n");
+	gdb_printf (" in %ps",
+		    styled_string (file_name_style.style (),
+				   bfd_get_filename (pbfd)));
+      gdb_printf ("\n");
     }
 }
 
@@ -979,7 +981,7 @@ exec_target::files_info ()
     print_section_info (&current_program_space->target_sections (),
 			current_program_space->exec_bfd ());
   else
-    puts_filtered (_("\t<no file loaded>\n"));
+    gdb_puts (_("\t<no file loaded>\n"));
 }
 
 static void
@@ -1059,17 +1061,14 @@ _initialize_exec ()
 {
   struct cmd_list_element *c;
 
-  if (!dbx_commands)
-    {
-      c = add_cmd ("file", class_files, file_command, _("\
+  c = add_cmd ("file", class_files, file_command, _("\
 Use FILE as program to be debugged.\n\
 It is read for its symbols, for getting the contents of pure memory,\n\
 and it is the program executed when you use the `run' command.\n\
 If FILE cannot be found as specified, your execution directory path\n\
 ($PATH) is searched for a command of that name.\n\
 No arg means to have no executable file and no symbols."), &cmdlist);
-      set_cmd_completer (c, filename_completer);
-    }
+  set_cmd_completer (c, filename_completer);
 
   c = add_cmd ("exec-file", class_files, exec_file_command, _("\
 Use FILE as program for getting contents of pure memory.\n\

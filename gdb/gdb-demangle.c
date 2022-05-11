@@ -50,10 +50,10 @@ static void
 show_demangle (struct ui_file *file, int from_tty,
 	       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Demangling of encoded C++/ObjC names "
-		      "when displaying symbols is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Demangling of encoded C++/ObjC names "
+		"when displaying symbols is %s.\n"),
+	      value);
 }
 
 /* See documentation in gdb-demangle.h.  */
@@ -63,10 +63,10 @@ static void
 show_asm_demangle (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Demangling of C++/ObjC names in "
-		      "disassembly listings is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Demangling of C++/ObjC names in "
+		"disassembly listings is %s.\n"),
+	      value);
 }
 
 /* String name for the current demangling style.  Set by the
@@ -83,8 +83,8 @@ static void
 show_demangling_style_names(struct ui_file *file, int from_tty,
 			    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("The current C++ demangling style is \"%s\".\n"),
-		    value);
+  gdb_printf (file, _("The current C++ demangling style is \"%s\".\n"),
+	      value);
 }
 
 /* Set current demangling style.  Called by the "set demangle-style"
@@ -204,7 +204,7 @@ demangle_command (const char *args, int from_tty)
   gdb::unique_xmalloc_ptr<char> demangled
     = language_demangle (lang, name, DMGL_ANSI | DMGL_PARAMS);
   if (demangled != NULL)
-    printf_filtered ("%s\n", demangled.get ());
+    gdb_printf ("%s\n", demangled.get ());
   else
     error (_("Can't demangle \"%s\""), name);
 }

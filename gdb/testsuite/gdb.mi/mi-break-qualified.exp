@@ -95,7 +95,7 @@ proc test_break_qualified {} {
 
 mi_gdb_exit
 
-if [mi_gdb_start ""] {
+if [mi_gdb_start] {
     return
 }
 

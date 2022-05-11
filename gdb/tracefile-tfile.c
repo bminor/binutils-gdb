@@ -471,7 +471,7 @@ tfile_target_open (const char *arg, int from_tty)
 
   gdb::unique_xmalloc_ptr<char> filename (tilde_expand (arg));
   if (!IS_ABSOLUTE_PATH (filename.get ()))
-    filename = gdb_abspath (filename.get ());
+    filename = make_unique_xstrdup (gdb_abspath (filename.get ()).c_str ());
 
   flags = O_BINARY | O_LARGEFILE;
   flags |= O_RDONLY;
@@ -634,7 +634,7 @@ tfile_target::close ()
 void
 tfile_target::files_info ()
 {
-  printf_filtered ("\t`%s'\n", trace_filename);
+  gdb_printf ("\t`%s'\n", trace_filename);
 }
 
 void

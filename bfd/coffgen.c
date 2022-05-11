@@ -1092,6 +1092,7 @@ coff_write_alien_symbol (bfd *abfd,
 	memset (isym, 0, sizeof (*isym));
       return true;
     }
+  memset (dummy, 0, sizeof dummy);
   native = dummy;
   native->is_sym = true;
   native[1].is_sym = false;
@@ -2185,7 +2186,7 @@ coff_print_symbol (bfd *abfd,
 		    - (bfd_hostptr_t) root)
 		   / sizeof (combined_entry_type));
 
-	  fprintf (file, "(sec %2d)(fl 0x%02x)(ty %3x)(scl %3d) (nx %d) 0x",
+	  fprintf (file, "(sec %2d)(fl 0x%02x)(ty %4x)(scl %3d) (nx %d) 0x",
 		   combined->u.syment.n_scnum,
 		   combined->u.syment.n_flags,
 		   combined->u.syment.n_type,
@@ -2381,7 +2382,7 @@ coff_find_nearest_line_with_names (bfd *abfd,
 	}
 
       if (sec_data != NULL && sec_data->saved_bias)
-	bias = sec_data->saved_bias;
+	bias = sec_data->bias;
       else if (symbols)
 	{
 	  bias = _bfd_dwarf2_find_symbol_bias (symbols,

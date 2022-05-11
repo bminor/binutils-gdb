@@ -46,7 +46,7 @@ static void
 show_serial_hwflow (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Hardware flow control is %s.\n"), value);
+  gdb_printf (file, _("Hardware flow control is %s.\n"), value);
 }
 #endif
 
@@ -142,21 +142,21 @@ hardwire_print_tty_state (struct serial *scb,
   struct hardwire_ttystate *state = (struct hardwire_ttystate *) ttystate;
   int i;
 
-  fprintf_filtered (stream, "c_iflag = 0x%x, c_oflag = 0x%x,\n",
-		    (int) state->termios.c_iflag,
-		    (int) state->termios.c_oflag);
-  fprintf_filtered (stream, "c_cflag = 0x%x, c_lflag = 0x%x\n",
-		    (int) state->termios.c_cflag,
-		    (int) state->termios.c_lflag);
+  gdb_printf (stream, "c_iflag = 0x%x, c_oflag = 0x%x,\n",
+	      (int) state->termios.c_iflag,
+	      (int) state->termios.c_oflag);
+  gdb_printf (stream, "c_cflag = 0x%x, c_lflag = 0x%x\n",
+	      (int) state->termios.c_cflag,
+	      (int) state->termios.c_lflag);
 #if 0
   /* This not in POSIX, and is not really documented by those systems
      which have it (at least not Sun).  */
-  fprintf_filtered (stream, "c_line = 0x%x.\n", state->termios.c_line);
+  gdb_printf (stream, "c_line = 0x%x.\n", state->termios.c_line);
 #endif
-  fprintf_filtered (stream, "c_cc: ");
+  gdb_printf (stream, "c_cc: ");
   for (i = 0; i < NCCS; i += 1)
-    fprintf_filtered (stream, "0x%x ", state->termios.c_cc[i]);
-  fprintf_filtered (stream, "\n");
+    gdb_printf (stream, "0x%x ", state->termios.c_cc[i]);
+  gdb_printf (stream, "\n");
 }
 
 /* Wait for the output to drain away, as opposed to flushing
@@ -197,8 +197,8 @@ hardwire_raw (struct serial *scb)
   struct hardwire_ttystate state;
 
   if (get_tty_state (scb, &state))
-    fprintf_unfiltered (gdb_stderr, "get_tty_state failed: %s\n",
-			safe_strerror (errno));
+    gdb_printf (gdb_stderr, "get_tty_state failed: %s\n",
+		safe_strerror (errno));
 
   state.termios.c_iflag = 0;
   state.termios.c_oflag = 0;
@@ -222,8 +222,8 @@ hardwire_raw (struct serial *scb)
   state.termios.c_cc[VTIME] = 0;
 
   if (set_tty_state (scb, &state))
-    fprintf_unfiltered (gdb_stderr, "set_tty_state failed: %s\n",
-			safe_strerror (errno));
+    gdb_printf (gdb_stderr, "set_tty_state failed: %s\n",
+		safe_strerror (errno));
 }
 
 #ifndef B19200

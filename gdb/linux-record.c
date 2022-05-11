@@ -120,11 +120,11 @@ record_linux_sockaddr (struct regcache *regcache,
   if (target_read_memory ((CORE_ADDR) len, a, tdep->size_int))
     {
       if (record_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Process record: error reading "
-			    "memory at addr = 0x%s len = %d.\n",
-			    phex_nz (len, tdep->size_pointer),
-			    tdep->size_int);
+	gdb_printf (gdb_stdlog,
+		    "Process record: error reading "
+		    "memory at addr = 0x%s len = %d.\n",
+		    phex_nz (len, tdep->size_pointer),
+		    tdep->size_int);
       return -1;
     }
   addrlen = (int) extract_unsigned_integer (a, tdep->size_int, byte_order);
@@ -157,12 +157,12 @@ record_linux_msghdr (struct regcache *regcache,
   if (target_read_memory ((CORE_ADDR) addr, a, tdep->size_msghdr))
     {
       if (record_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "Process record: error reading "
-			    "memory at addr = 0x%s "
-			    "len = %d.\n",
-			    phex_nz (addr, tdep->size_pointer),
-			    tdep->size_msghdr);
+	gdb_printf (gdb_stdlog,
+		    "Process record: error reading "
+		    "memory at addr = 0x%s "
+		    "len = %d.\n",
+		    phex_nz (addr, tdep->size_pointer),
+		    tdep->size_msghdr);
       return -1;
     }
 
@@ -194,13 +194,13 @@ record_linux_msghdr (struct regcache *regcache,
 	  if (target_read_memory ((CORE_ADDR) addr, iov, tdep->size_iovec))
 	    {
 	      if (record_debug)
-		fprintf_unfiltered (gdb_stdlog,
-				    "Process record: error "
-				    "reading memory at "
-				    "addr = 0x%s "
-				    "len = %d.\n",
-				    phex_nz (addr,tdep->size_pointer),
-				    tdep->size_iovec);
+		gdb_printf (gdb_stdlog,
+			    "Process record: error "
+			    "reading memory at "
+			    "addr = 0x%s "
+			    "len = %d.\n",
+			    phex_nz (addr,tdep->size_pointer),
+			    tdep->size_iovec);
 	      return -1;
 	    }
 	  tmpaddr = (CORE_ADDR) extract_unsigned_integer (iov,
@@ -492,17 +492,17 @@ record_linux_system_call (enum gdb_syscall syscall,
 	}
       else if (tmpulongest == tdep->ioctl_TIOCSERGSTRUCT)
 	{
-	  fprintf_unfiltered (gdb_stderr,
-			      _("Process record and replay target doesn't "
-				"support ioctl request TIOCSERGSTRUCT\n"));
+	  gdb_printf (gdb_stderr,
+		      _("Process record and replay target doesn't "
+			"support ioctl request TIOCSERGSTRUCT\n"));
 	  return 1;
 	}
       else
 	{
-	  fprintf_unfiltered (gdb_stderr,
-			      _("Process record and replay target doesn't "
-				"support ioctl request 0x%s.\n"),
-			      OUTPUT_REG (tmpulongest, tdep->arg2));
+	  gdb_printf (gdb_stderr,
+		      _("Process record and replay target doesn't "
+			"support ioctl request 0x%s.\n"),
+		      OUTPUT_REG (tmpulongest, tdep->arg2));
 	  return 1;
 	}
       break;
@@ -616,11 +616,11 @@ record_linux_system_call (enum gdb_syscall syscall,
 	    if (target_read_memory (tmpulongest, a, sz_sel_arg))
 	      {
 		if (record_debug)
-		  fprintf_unfiltered (gdb_stdlog,
-				      "Process record: error reading memory "
-				      "at addr = 0x%s len = %lu.\n",
-				      OUTPUT_REG (tmpulongest, tdep->arg1),
-				      sz_sel_arg);
+		  gdb_printf (gdb_stdlog,
+			      "Process record: error reading memory "
+			      "at addr = 0x%s len = %lu.\n",
+			      OUTPUT_REG (tmpulongest, tdep->arg1),
+			      sz_sel_arg);
 		return -1;
 	      }
 	    /* Skip n. */
@@ -764,12 +764,12 @@ Do you want to stop the program?"),
 				  tdep->size_int))
 	    {
 	      if (record_debug)
-		fprintf_unfiltered (gdb_stdlog,
-				    "Process record: error reading "
-				    "memory at addr = 0x%s "
-				    "len = %d.\n",
-				    OUTPUT_REG (tmpulongest, tdep->arg5),
-				    tdep->size_int);
+		gdb_printf (gdb_stdlog,
+			    "Process record: error reading "
+			    "memory at addr = 0x%s "
+			    "len = %d.\n",
+			    OUTPUT_REG (tmpulongest, tdep->arg5),
+			    tdep->size_int);
 	      return -1;
 	    }
 	  regcache_raw_read_unsigned (regcache, tdep->arg4, &optvalp);
@@ -808,11 +808,11 @@ Do you want to stop the program?"),
 					tdep->size_ulong * 2))
 		  {
 		    if (record_debug)
-		      fprintf_unfiltered (gdb_stdlog,
-					  "Process record: error reading "
-					  "memory at addr = 0x%s len = %d.\n",
-					  OUTPUT_REG (tmpulongest, tdep->arg2),
-					  tdep->size_ulong * 2);
+		      gdb_printf (gdb_stdlog,
+				  "Process record: error reading "
+				  "memory at addr = 0x%s len = %d.\n",
+				  OUTPUT_REG (tmpulongest, tdep->arg2),
+				  tdep->size_ulong * 2);
 		    return -1;
 		  }
 		tmpulongest = extract_unsigned_integer (a,
@@ -839,11 +839,11 @@ Do you want to stop the program?"),
 					tdep->size_ulong))
 		  {
 		    if (record_debug)
-		      fprintf_unfiltered (gdb_stdlog,
-					  "Process record: error reading "
-					  "memory at addr = 0x%s len = %d.\n",
-					  OUTPUT_REG (tmpulongest, tdep->arg2),
-					  tdep->size_ulong);
+		      gdb_printf (gdb_stdlog,
+				  "Process record: error reading "
+				  "memory at addr = 0x%s len = %d.\n",
+				  OUTPUT_REG (tmpulongest, tdep->arg2),
+				  tdep->size_ulong);
 		    return -1;
 		  }
 		tmpaddr
@@ -870,11 +870,11 @@ Do you want to stop the program?"),
 				      tdep->size_ulong * 2))
 		{
 		  if (record_debug)
-		    fprintf_unfiltered (gdb_stdlog,
-					"Process record: error reading "
-					"memory at addr = 0x%s len = %d.\n",
-					OUTPUT_REG (tmpulongest, tdep->arg2),
-					tdep->size_ulong * 2);
+		    gdb_printf (gdb_stdlog,
+				"Process record: error reading "
+				"memory at addr = 0x%s len = %d.\n",
+				OUTPUT_REG (tmpulongest, tdep->arg2),
+				tdep->size_ulong * 2);
 		  return -1;
 		}
 	      tmpulongest = extract_unsigned_integer (a, tdep->size_ulong,
@@ -897,11 +897,11 @@ Do you want to stop the program?"),
 				      tdep->size_ulong))
 		{
 		  if (record_debug)
-		    fprintf_unfiltered (gdb_stdlog,
-					"Process record: error reading "
-					"memory at addr = 0x%s len = %d.\n",
-					OUTPUT_REG (tmpulongest, tdep->arg2),
-					tdep->size_ulong);
+		    gdb_printf (gdb_stdlog,
+				"Process record: error reading "
+				"memory at addr = 0x%s len = %d.\n",
+				OUTPUT_REG (tmpulongest, tdep->arg2),
+				tdep->size_ulong);
 		  return -1;
 		}
 	      tmpulongest = extract_unsigned_integer (a, tdep->size_ulong,
@@ -934,11 +934,11 @@ Do you want to stop the program?"),
 					tdep->size_ulong * 2))
 		  {
 		    if (record_debug)
-		      fprintf_unfiltered (gdb_stdlog,
-					  "Process record: error reading "
-					  "memory at addr = 0x%s len = %d.\n",
-					  OUTPUT_REG (tmpulongest, tdep->arg2),
-					  tdep->size_ulong * 2);
+		      gdb_printf (gdb_stdlog,
+				  "Process record: error reading "
+				  "memory at addr = 0x%s len = %d.\n",
+				  OUTPUT_REG (tmpulongest, tdep->arg2),
+				  tdep->size_ulong * 2);
 		    return -1;
 		  }
 		tmpulongest = extract_unsigned_integer (a + tdep->size_ulong,
@@ -950,13 +950,13 @@ Do you want to stop the program?"),
 					    tdep->size_int))
 		      {
 			if (record_debug)
-			  fprintf_unfiltered (gdb_stdlog,
-					      "Process record: error reading "
-					      "memory at addr = 0x%s "
-					      "len = %d.\n",
-					      phex_nz (tmpulongest,
-						       tdep->size_ulong),
-					      tdep->size_int);
+			  gdb_printf (gdb_stdlog,
+				      "Process record: error reading "
+				      "memory at addr = 0x%s "
+				      "len = %d.\n",
+				      phex_nz (tmpulongest,
+					       tdep->size_ulong),
+				      tdep->size_int);
 			return -1;
 		      }
 		    tmpaddr
@@ -995,11 +995,11 @@ Do you want to stop the program?"),
 					tdep->size_ulong))
 		  {
 		    if (record_debug)
-		      fprintf_unfiltered (gdb_stdlog,
-					  "Process record: error reading "
-					  "memory at addr = 0x%s len = %d.\n",
-					  OUTPUT_REG (tmpulongest, tdep->arg2),
-					  tdep->size_ulong);
+		      gdb_printf (gdb_stdlog,
+				  "Process record: error reading "
+				  "memory at addr = 0x%s len = %d.\n",
+				  OUTPUT_REG (tmpulongest, tdep->arg2),
+				  tdep->size_ulong);
 		    return -1;
 		  }
 		tmpulongest = extract_unsigned_integer (a, tdep->size_ulong,
@@ -1010,10 +1010,10 @@ Do you want to stop the program?"),
 	  }
 	  break;
 	default:
-	  fprintf_unfiltered (gdb_stderr,
-			      _("Process record and replay target "
-				"doesn't support socketcall call 0x%s\n"),
-			      OUTPUT_REG (tmpulongest, tdep->arg1));
+	  gdb_printf (gdb_stderr,
+		      _("Process record and replay target "
+			"doesn't support socketcall call 0x%s\n"),
+		      OUTPUT_REG (tmpulongest, tdep->arg1));
 	  return -1;
 	  break;
 	}
@@ -1151,10 +1151,10 @@ Do you want to stop the program?"),
 	  break;
 	default:
 	  /* XXX RECORD_SEMCTL still not supported.  */
-	  fprintf_unfiltered (gdb_stderr,
-			      _("Process record and replay target doesn't "
-				"support ipc number %s\n"),
-			      pulongest (tmpulongest));
+	  gdb_printf (gdb_stderr,
+		      _("Process record and replay target doesn't "
+			"support ipc number %s\n"),
+		      pulongest (tmpulongest));
 	  break;
 	}
       break;
@@ -1292,11 +1292,11 @@ Do you want to stop the program?"),
 					tdep->size_iovec))
 		  {
 		    if (record_debug)
-		      fprintf_unfiltered (gdb_stdlog,
-					  "Process record: error reading "
-					  "memory at addr = 0x%s len = %d.\n",
-					  OUTPUT_REG (vec, tdep->arg2),
-					  tdep->size_iovec);
+		      gdb_printf (gdb_stdlog,
+				  "Process record: error reading "
+				  "memory at addr = 0x%s len = %d.\n",
+				  OUTPUT_REG (vec, tdep->arg2),
+				  tdep->size_iovec);
 		    return -1;
 		  }
 		tmpaddr
@@ -1712,11 +1712,11 @@ Do you want to stop the program?"),
 				  nr * tdep->size_pointer))
 	    {
 	      if (record_debug)
-		fprintf_unfiltered (gdb_stdlog,
-				    "Process record: error reading memory "
-				    "at addr = 0x%s len = %u.\n",
-				    OUTPUT_REG (tmpulongest, tdep->arg2),
-				    (int) (nr * tdep->size_pointer));
+		gdb_printf (gdb_stdlog,
+			    "Process record: error reading memory "
+			    "at addr = 0x%s len = %u.\n",
+			    OUTPUT_REG (tmpulongest, tdep->arg2),
+			    (int) (nr * tdep->size_pointer));
 	      return -1;
 	    }
 	  for (i = 0; i < nr; i++)
@@ -2036,9 +2036,9 @@ Do you want to stop the program?"),
       break;
 
     default:
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record and replay target doesn't "
-			    "support syscall number %d\n"), syscall);
+      gdb_printf (gdb_stderr,
+		  _("Process record and replay target doesn't "
+		    "support syscall number %d\n"), syscall);
       return -1;
       break;
     }

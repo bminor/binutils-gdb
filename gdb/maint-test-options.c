@@ -143,22 +143,22 @@ struct test_options_opts
      arguments.  */
   void dump (ui_file *file, const char *args) const
   {
-    fprintf_filtered (file,
-		      _("-flag %d -xx1 %d -xx2 %d -bool %d "
-			"-enum %s -uint %s -zuint-unl %s -string '%s' -- %s\n"),
-		      flag_opt,
-		      xx1_opt,
-		      xx2_opt,
-		      boolean_opt,
-		      enum_opt,
-		      (uint_opt == UINT_MAX
-		       ? "unlimited"
-		       : pulongest (uint_opt)),
-		      (zuint_unl_opt == -1
-		       ? "unlimited"
-		       : plongest (zuint_unl_opt)),
-		      string_opt.c_str (),
-		      args);
+    gdb_printf (file,
+		_("-flag %d -xx1 %d -xx2 %d -bool %d "
+		  "-enum %s -uint %s -zuint-unl %s -string '%s' -- %s\n"),
+		flag_opt,
+		xx1_opt,
+		xx2_opt,
+		boolean_opt,
+		enum_opt,
+		(uint_opt == UINT_MAX
+		 ? "unlimited"
+		 : pulongest (uint_opt)),
+		(zuint_unl_opt == -1
+		 ? "unlimited"
+		 : plongest (zuint_unl_opt)),
+		string_opt.c_str (),
+		args);
   }
 };
 
@@ -279,7 +279,7 @@ static void
 maintenance_show_test_options_completion_result (const char *args,
 						 int from_tty)
 {
-  puts_filtered (maintenance_test_options_command_completion_text.c_str ());
+  gdb_puts (maintenance_test_options_command_completion_text.c_str ());
 }
 
 /* Save the completion result in the global variables read by the
@@ -295,8 +295,7 @@ save_completion_result (const test_options_opts &opts, bool res,
 
       stream.puts ("1 ");
       opts.dump (&stream, text);
-      maintenance_test_options_command_completion_text
-	= std::move (stream.string ());
+      maintenance_test_options_command_completion_text = stream.release ();
     }
   else
     {

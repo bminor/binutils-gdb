@@ -202,9 +202,9 @@ fputsn_filtered (const char *s, size_t size, struct ui_file *stream)
   for (i = 0; i < size; ++i)
     {
       if (s[i] == '\0')
-	fputs_filtered ("\\000", stream);
+	gdb_puts ("\\000", stream);
       else
-	fputc_filtered (s[i], stream);
+	gdb_putc (s[i], stream);
     }
 }
 

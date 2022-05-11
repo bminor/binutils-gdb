@@ -948,6 +948,10 @@ extern void binop_promote (const struct language_defn *language,
 
 extern struct value *access_value_history (int num);
 
+/* Return the number of items in the value history.  */
+
+extern ULONGEST value_history_count ();
+
 extern struct value *value_of_internalvar (struct gdbarch *gdbarch,
 					   struct internalvar *var);
 
@@ -998,12 +1002,6 @@ struct internalvar_funcs
 			 struct agent_expr *expr,
 			 struct axs_value *value,
 			 void *data);
-
-  /* If non-NULL, this is called to destroy DATA.  The DATA argument
-     passed to this function is the same argument that was passed to
-     `create_internalvar_type_lazy'.  */
-
-  void (*destroy) (void *data);
 };
 
 extern struct internalvar *create_internalvar_type_lazy (const char *name,
@@ -1091,10 +1089,6 @@ extern void print_floating (const gdb_byte *valaddr, struct type *type,
 extern void value_print (struct value *val, struct ui_file *stream,
 			 const struct value_print_options *options);
 
-extern void value_print_array_elements (struct value *val,
-					struct ui_file *stream, int format,
-					enum val_prettyformat pretty);
-
 /* Release values from the value chain and return them.  Values
    created after MARK are released.  If MARK is nullptr, or if MARK is
    not found on the value chain, then all values are released.  Values
@@ -1129,7 +1123,7 @@ extern void preserve_values (struct objfile *);
 
 /* From values.c */
 
-extern struct value *value_copy (struct value *);
+extern struct value *value_copy (const value *);
 
 extern struct value *value_non_lval (struct value *);
 

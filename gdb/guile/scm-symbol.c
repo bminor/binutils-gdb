@@ -101,9 +101,9 @@ syscm_get_symbol_map (struct symbol *symbol)
 {
   htab_t htab;
 
-  if (SYMBOL_OBJFILE_OWNED (symbol))
+  if (symbol->is_objfile_owned ())
     {
-      struct objfile *objfile = symbol_objfile (symbol);
+      struct objfile *objfile = symbol->objfile ();
 
       htab = (htab_t) objfile_data (objfile, syscm_objfile_data_key);
       if (htab == NULL)
@@ -115,7 +115,7 @@ syscm_get_symbol_map (struct symbol *symbol)
     }
   else
     {
-      struct gdbarch *gdbarch = symbol_arch (symbol);
+      struct gdbarch *gdbarch = symbol->arch ();
       struct syscm_gdbarch_data *data
 	= (struct syscm_gdbarch_data *) gdbarch_data (gdbarch,
 						      syscm_gdbarch_data_key);
@@ -345,10 +345,10 @@ gdbscm_symbol_type (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  if (SYMBOL_TYPE (symbol) == NULL)
+  if (symbol->type () == NULL)
     return SCM_BOOL_F;
 
-  return tyscm_scm_from_type (SYMBOL_TYPE (symbol));
+  return tyscm_scm_from_type (symbol->type ());
 }
 
 /* (symbol-symtab <gdb:symbol>) -> <gdb:symtab> | #f
@@ -362,9 +362,9 @@ gdbscm_symbol_symtab (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  if (!SYMBOL_OBJFILE_OWNED (symbol))
+  if (!symbol->is_objfile_owned ())
     return SCM_BOOL_F;
-  return stscm_scm_from_symtab (symbol_symtab (symbol));
+  return stscm_scm_from_symtab (symbol->symtab ());
 }
 
 /* (symbol-name <gdb:symbol>) -> string */
@@ -412,7 +412,7 @@ gdbscm_symbol_addr_class (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  return scm_from_int (SYMBOL_CLASS (symbol));
+  return scm_from_int (symbol->aclass ());
 }
 
 /* (symbol-argument? <gdb:symbol>) -> boolean */
@@ -424,7 +424,7 @@ gdbscm_symbol_argument_p (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  return scm_from_bool (SYMBOL_IS_ARGUMENT (symbol));
+  return scm_from_bool (symbol->is_argument ());
 }
 
 /* (symbol-constant? <gdb:symbol>) -> boolean */
@@ -437,7 +437,7 @@ gdbscm_symbol_constant_p (SCM self)
   const struct symbol *symbol = s_smob->symbol;
   enum address_class theclass;
 
-  theclass = SYMBOL_CLASS (symbol);
+  theclass = symbol->aclass ();
 
   return scm_from_bool (theclass == LOC_CONST || theclass == LOC_CONST_BYTES);
 }
@@ -452,7 +452,7 @@ gdbscm_symbol_function_p (SCM self)
   const struct symbol *symbol = s_smob->symbol;
   enum address_class theclass;
 
-  theclass = SYMBOL_CLASS (symbol);
+  theclass = symbol->aclass ();
 
   return scm_from_bool (theclass == LOC_BLOCK);
 }
@@ -467,9 +467,9 @@ gdbscm_symbol_variable_p (SCM self)
   const struct symbol *symbol = s_smob->symbol;
   enum address_class theclass;
 
-  theclass = SYMBOL_CLASS (symbol);
+  theclass = symbol->aclass ();
 
-  return scm_from_bool (!SYMBOL_IS_ARGUMENT (symbol)
+  return scm_from_bool (!symbol->is_argument ()
 			&& (theclass == LOC_LOCAL || theclass == LOC_REGISTER
 			    || theclass == LOC_STATIC || theclass == LOC_COMPUTED
 			    || theclass == LOC_OPTIMIZED_OUT));
@@ -510,7 +510,7 @@ gdbscm_symbol_line (SCM self)
     = syscm_get_valid_symbol_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   const struct symbol *symbol = s_smob->symbol;
 
-  return scm_from_int (SYMBOL_LINE (symbol));
+  return scm_from_int (symbol->line ());
 }
 
 /* (symbol-value <gdb:symbol> [#:frame <gdb:frame>]) -> <gdb:value>
@@ -534,7 +534,7 @@ gdbscm_symbol_value (SCM self, SCM rest)
   if (!gdbscm_is_false (frame_scm))
     f_smob = frscm_get_frame_smob_arg_unsafe (frame_scm, frame_pos, FUNC_NAME);
 
-  if (SYMBOL_CLASS (symbol) == LOC_TYPEDEF)
+  if (symbol->aclass () == LOC_TYPEDEF)
     {
       gdbscm_out_of_range_error (FUNC_NAME, SCM_ARG1, self,
 				 _("cannot get the value of a typedef"));

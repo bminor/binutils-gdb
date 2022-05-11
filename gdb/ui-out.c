@@ -790,9 +790,9 @@ ui_out::message (const char *format, ...)
 }
 
 void
-ui_out::wrap_hint (const char *identstring)
+ui_out::wrap_hint (int indent)
 {
-  do_wrap_hint (identstring);
+  do_wrap_hint (indent);
 }
 
 void

@@ -21,11 +21,6 @@ import gdb.types
 import re
 import sys
 
-if sys.version_info[0] > 2:
-    # Python 3 removed basestring and long
-    basestring = str
-    long = int
-
 
 class PrettyPrinter(object):
     """A basic pretty-printer.
@@ -132,7 +127,7 @@ def register_pretty_printer(obj, printer, replace=False):
     # Printers implemented as functions are old-style.  In order to not risk
     # breaking anything we do not check __name__ here.
     if hasattr(printer, "name"):
-        if not isinstance(printer.name, basestring):
+        if not isinstance(printer.name, str):
             raise TypeError("printer name is not a string")
         # If printer provides a name, make sure it doesn't contain ";".
         # Semicolon is used by the info/enable/disable pretty-printer commands
@@ -232,7 +227,7 @@ class _EnumInstance:
 
     def to_string(self):
         flag_list = []
-        v = long(self.val)
+        v = int(self.val)
         any_found = False
         for (e_name, e_value) in self.enumerators:
             if v & e_value != 0:

@@ -57,7 +57,7 @@ static void
 show_expressiondebug (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Expression debugging is %s.\n"), value);
+  gdb_printf (file, _("Expression debugging is %s.\n"), value);
 }
 
 
@@ -68,14 +68,15 @@ static void
 show_parserdebug (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Parser debugging is %s.\n"), value);
+  gdb_printf (file, _("Parser debugging is %s.\n"), value);
 }
 
 
-static expression_up parse_exp_in_context (const char **, CORE_ADDR,
-					   const struct block *, int,
-					   bool, innermost_block_tracker *,
-					   expr_completion_state *);
+static expression_up parse_exp_in_context
+     (const char **, CORE_ADDR,
+      const struct block *, int,
+      bool, innermost_block_tracker *,
+      std::unique_ptr<expr_completion_base> *);
 
 /* Documented at it's declaration.  */
 
@@ -102,7 +103,7 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
 {
   bound_minimal_symbol bound_msym = {msymbol, objfile};
   struct obj_section *section = msymbol->obj_section (objfile);
-  enum minimal_symbol_type type = MSYMBOL_TYPE (msymbol);
+  enum minimal_symbol_type type = msymbol->type ();
 
   bool is_tls = (section != NULL
 		 && section->the_bfd_section->flags & SEC_THREAD_LOCAL);
@@ -114,16 +115,16 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
     {
       /* Addresses of TLS symbols are really offsets into a
 	 per-objfile/per-thread storage block.  */
-      addr = MSYMBOL_VALUE_RAW_ADDRESS (bound_msym.minsym);
+      addr = bound_msym.minsym->value_raw_address ();
     }
   else if (msymbol_is_function (objfile, msymbol, &addr))
     {
-      if (addr != BMSYMBOL_VALUE_ADDRESS (bound_msym))
+      if (addr != bound_msym.value_address ())
 	{
 	  /* This means we resolved a function descriptor, and we now
 	     have an address for a code/text symbol instead of a data
 	     symbol.  */
-	  if (MSYMBOL_TYPE (msymbol) == mst_data_gnu_ifunc)
+	  if (msymbol->type () == mst_data_gnu_ifunc)
 	    type = mst_text_gnu_ifunc;
 	  else
 	    type = mst_text;
@@ -131,7 +132,7 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
 	}
     }
   else
-    addr = BMSYMBOL_VALUE_ADDRESS (bound_msym);
+    addr = bound_msym.value_address ();
 
   if (overlay_debugging)
     addr = symbol_overlayed_address (addr, section);
@@ -171,15 +172,22 @@ find_minsym_type_and_address (minimal_symbol *msymbol,
     }
 }
 
+bool
+expr_complete_tag::complete (struct expression *exp,
+			     completion_tracker &tracker)
+{
+  collect_symbol_completion_matches_type (tracker, m_name.get (),
+					  m_name.get (), m_code);
+  return true;
+}
+
 /* See parser-defs.h.  */
 
 void
 parser_state::mark_struct_expression (expr::structop_base_operation *op)
 {
-  gdb_assert (parse_completion
-	      && (m_completion_state.expout_tag_completion_type
-		  == TYPE_CODE_UNDEF));
-  m_completion_state.expout_last_op = op;
+  gdb_assert (parse_completion && m_completion_state == nullptr);
+  m_completion_state.reset (new expr_complete_structop (op));
 }
 
 /* Indicate that the current parser invocation is completing a tag.
@@ -190,17 +198,12 @@ void
 parser_state::mark_completion_tag (enum type_code tag, const char *ptr,
 				   int length)
 {
-  gdb_assert (parse_completion
-	      && (m_completion_state.expout_tag_completion_type
-		  == TYPE_CODE_UNDEF)
-	      && m_completion_state.expout_completion_name == NULL
-	      && m_completion_state.expout_last_op == nullptr);
+  gdb_assert (parse_completion && m_completion_state == nullptr);
   gdb_assert (tag == TYPE_CODE_UNION
 	      || tag == TYPE_CODE_STRUCT
 	      || tag == TYPE_CODE_ENUM);
-  m_completion_state.expout_tag_completion_type = tag;
-  m_completion_state.expout_completion_name
-    = make_unique_xstrndup (ptr, length);
+  m_completion_state.reset
+    (new expr_complete_tag (tag, make_unique_xstrndup (ptr, length)));
 }
 
 /* See parser-defs.h.  */
@@ -433,7 +436,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 		      const struct block *block,
 		      int comma, bool void_context_p,
 		      innermost_block_tracker *tracker,
-		      expr_completion_state *cstate)
+		      std::unique_ptr<expr_completion_base> *completer)
 {
   const struct language_defn *lang = NULL;
 
@@ -451,7 +454,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   if (!expression_context_block)
     expression_context_block = get_selected_block (&expression_context_pc);
   else if (pc == 0)
-    expression_context_pc = BLOCK_ENTRY_PC (expression_context_block);
+    expression_context_pc = expression_context_block->entry_pc ();
   else
     expression_context_pc = pc;
 
@@ -460,12 +463,13 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   if (!expression_context_block)
     {
       struct symtab_and_line cursal = get_current_source_symtab_and_line ();
+
       if (cursal.symtab)
 	expression_context_block
-	  = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (cursal.symtab),
-			       STATIC_BLOCK);
+	  = cursal.symtab->compunit ()->blockvector ()->static_block ();
+
       if (expression_context_block)
-	expression_context_pc = BLOCK_ENTRY_PC (expression_context_block);
+	expression_context_pc = expression_context_block->entry_pc ();
     }
 
   if (language_mode == language_mode_auto && block != NULL)
@@ -501,7 +505,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 
   parser_state ps (lang, get_current_arch (), expression_context_block,
 		   expression_context_pc, comma, *stringptr,
-		   cstate != nullptr, tracker, void_context_p);
+		   completer != nullptr, tracker, void_context_p);
 
   scoped_restore_current_language lang_saver;
   set_language (lang->la_language);
@@ -525,8 +529,8 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   if (expressiondebug)
     dump_prefix_expression (result.get (), gdb_stdlog);
 
-  if (cstate != nullptr)
-    *cstate = std::move (ps.m_completion_state);
+  if (completer != nullptr)
+    *completer = std::move (ps.m_completion_state);
   *stringptr = ps.lexptr;
   return result;
 }
@@ -566,47 +570,32 @@ parse_expression_with_language (const char *string, enum language lang)
   return parse_expression (string);
 }
 
-/* Parse STRING as an expression.  If parsing ends in the middle of a
-   field reference, return the type of the left-hand-side of the
-   reference; furthermore, if the parsing ends in the field name,
-   return the field name in *NAME.  If the parsing ends in the middle
-   of a field reference, but the reference is somehow invalid, throw
-   an exception.  In all other cases, return NULL.  */
+/* Parse STRING as an expression.  If the parse is marked for
+   completion, set COMPLETER and return the expression.  In all other
+   cases, return NULL.  */
 
-struct type *
-parse_expression_for_completion (const char *string,
-				 gdb::unique_xmalloc_ptr<char> *name,
-				 enum type_code *code)
+expression_up
+parse_expression_for_completion
+     (const char *string,
+      std::unique_ptr<expr_completion_base> *completer)
 {
   expression_up exp;
-  expr_completion_state cstate;
 
   try
     {
-      exp = parse_exp_in_context (&string, 0, 0, 0, false, nullptr, &cstate);
+      exp = parse_exp_in_context (&string, 0, 0, 0, false, nullptr, completer);
     }
   catch (const gdb_exception_error &except)
     {
       /* Nothing, EXP remains NULL.  */
     }
 
-  if (exp == NULL)
-    return NULL;
-
-  if (cstate.expout_tag_completion_type != TYPE_CODE_UNDEF)
-    {
-      *code = cstate.expout_tag_completion_type;
-      *name = std::move (cstate.expout_completion_name);
-      return NULL;
-    }
-
-  if (cstate.expout_last_op == nullptr)
+  /* If we didn't get a completion result, be sure to also not return
+     an expression to our caller.  */
+  if (*completer == nullptr)
     return nullptr;
 
-  expr::structop_base_operation *op = cstate.expout_last_op;
-  const std::string &fld = op->get_string ();
-  *name = make_unique_xstrdup (fld.c_str ());
-  return value_type (op->evaluate_lhs (exp.get ()));
+  return exp;
 }
 
 /* Parse floating point value P of length LEN.
@@ -632,11 +621,11 @@ parser_fprintf (FILE *x, const char *y, ...)
 
   va_start (args, y);
   if (x == stderr)
-    vfprintf_unfiltered (gdb_stderr, y, args); 
+    gdb_vprintf (gdb_stderr, y, args); 
   else
     {
-      fprintf_unfiltered (gdb_stderr, " Unknown FILE used.\n");
-      vfprintf_unfiltered (gdb_stderr, y, args);
+      gdb_printf (gdb_stderr, " Unknown FILE used.\n");
+      gdb_vprintf (gdb_stderr, y, args);
     }
   va_end (args);
 }

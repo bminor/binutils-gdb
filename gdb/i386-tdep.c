@@ -1853,9 +1853,9 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 	 compilers to emit usable line notes.  */
       if (post_prologue_pc
 	  && (cust != NULL
-	      && COMPUNIT_PRODUCER (cust) != NULL
-	      && (producer_is_llvm (COMPUNIT_PRODUCER (cust))
-	      || producer_is_icc_ge_19 (COMPUNIT_PRODUCER (cust)))))
+	      && cust->producer () != NULL
+	      && (producer_is_llvm (cust->producer ())
+	      || producer_is_icc_ge_19 (cust->producer ()))))
         return std::max (start_pc, post_prologue_pc);
     }
  
@@ -2222,7 +2222,7 @@ i386_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   struct compunit_symtab *cust;
 
   cust = find_pc_compunit_symtab (pc);
-  if (cust != NULL && COMPUNIT_EPILOGUE_UNWIND_VALID (cust))
+  if (cust != NULL && cust->epilogue_unwind_valid ())
     return 0;
 
   if (target_read_memory (pc, &insn, 1))
@@ -4531,8 +4531,8 @@ i386_svr4_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 /* i386 register groups.  In addition to the normal groups, add "mmx"
    and "sse".  */
 
-static struct reggroup *i386_sse_reggroup;
-static struct reggroup *i386_mmx_reggroup;
+static const reggroup *i386_sse_reggroup;
+static const reggroup *i386_mmx_reggroup;
 
 static void
 i386_init_reggroups (void)
@@ -4546,18 +4546,11 @@ i386_add_reggroups (struct gdbarch *gdbarch)
 {
   reggroup_add (gdbarch, i386_sse_reggroup);
   reggroup_add (gdbarch, i386_mmx_reggroup);
-  reggroup_add (gdbarch, general_reggroup);
-  reggroup_add (gdbarch, float_reggroup);
-  reggroup_add (gdbarch, all_reggroup);
-  reggroup_add (gdbarch, save_reggroup);
-  reggroup_add (gdbarch, restore_reggroup);
-  reggroup_add (gdbarch, vector_reggroup);
-  reggroup_add (gdbarch, system_reggroup);
 }
 
 int
 i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			  struct reggroup *group)
+			  const struct reggroup *group)
 {
   const i386_gdbarch_tdep *tdep = (i386_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   int fp_regnum_p, mmx_regnum_p, xmm_regnum_p, mxcsr_regnum_p,
@@ -5091,9 +5084,9 @@ i386_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   ir.gdbarch = gdbarch;
 
   if (record_debug > 1)
-    fprintf_unfiltered (gdb_stdlog, "Process record: i386_process_record "
-				    "addr = %s\n",
-			paddress (gdbarch, ir.addr));
+    gdb_printf (gdb_stdlog, "Process record: i386_process_record "
+		"addr = %s\n",
+		paddress (gdbarch, ir.addr));
 
   /* prefixes */
   while (1)
@@ -6864,9 +6857,9 @@ Do you want to stop the program?"),
 
       /* XXX */
     case 0xcc:    /* int3 */
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record does not support instruction "
-			    "int3.\n"));
+      gdb_printf (gdb_stderr,
+		  _("Process record does not support instruction "
+		    "int3.\n"));
       ir.addr -= 1;
       goto no_support;
       break;
@@ -6882,10 +6875,10 @@ Do you want to stop the program?"),
 	if (interrupt != 0x80
 	    || tdep->i386_intx80_record == NULL)
 	  {
-	    fprintf_unfiltered (gdb_stderr,
-				_("Process record does not support "
-				  "instruction int 0x%02x.\n"),
-				interrupt);
+	    gdb_printf (gdb_stderr,
+			_("Process record does not support "
+			  "instruction int 0x%02x.\n"),
+			interrupt);
 	    ir.addr -= 2;
 	    goto no_support;
 	  }
@@ -6897,9 +6890,9 @@ Do you want to stop the program?"),
 
       /* XXX */
     case 0xce:    /* into */
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record does not support "
-			    "instruction into.\n"));
+      gdb_printf (gdb_stderr,
+		  _("Process record does not support "
+		    "instruction into.\n"));
       ir.addr -= 1;
       goto no_support;
       break;
@@ -6909,9 +6902,9 @@ Do you want to stop the program?"),
       break;
 
     case 0x62:    /* bound */
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record does not support "
-			    "instruction bound.\n"));
+      gdb_printf (gdb_stderr,
+		  _("Process record does not support "
+		    "instruction bound.\n"));
       ir.addr -= 1;
       goto no_support;
       break;
@@ -6946,17 +6939,17 @@ Do you want to stop the program?"),
       break;
 
     case 0x0f30:    /* wrmsr */
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record does not support "
-			    "instruction wrmsr.\n"));
+      gdb_printf (gdb_stderr,
+		  _("Process record does not support "
+		    "instruction wrmsr.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
 
     case 0x0f32:    /* rdmsr */
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record does not support "
-			    "instruction rdmsr.\n"));
+      gdb_printf (gdb_stderr,
+		  _("Process record does not support "
+		    "instruction rdmsr.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
@@ -6976,9 +6969,9 @@ Do you want to stop the program?"),
 	  }
 	if (tdep->i386_sysenter_record == NULL)
 	  {
-	    fprintf_unfiltered (gdb_stderr,
-				_("Process record does not support "
-				  "instruction sysenter.\n"));
+	    gdb_printf (gdb_stderr,
+			_("Process record does not support "
+			  "instruction sysenter.\n"));
 	    ir.addr -= 2;
 	    goto no_support;
 	  }
@@ -6989,9 +6982,9 @@ Do you want to stop the program?"),
       break;
 
     case 0x0f35:    /* sysexit */
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record does not support "
-			    "instruction sysexit.\n"));
+      gdb_printf (gdb_stderr,
+		  _("Process record does not support "
+		    "instruction sysexit.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
@@ -7001,9 +6994,9 @@ Do you want to stop the program?"),
 	int ret;
 	if (tdep->i386_syscall_record == NULL)
 	  {
-	    fprintf_unfiltered (gdb_stderr,
-				_("Process record does not support "
-				  "instruction syscall.\n"));
+	    gdb_printf (gdb_stderr,
+			_("Process record does not support "
+			  "instruction syscall.\n"));
 	    ir.addr -= 2;
 	    goto no_support;
 	  }
@@ -7014,9 +7007,9 @@ Do you want to stop the program?"),
       break;
 
     case 0x0f07:    /* sysret */
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record does not support "
-			    "instruction sysret.\n"));
+      gdb_printf (gdb_stderr,
+		  _("Process record does not support "
+		    "instruction sysret.\n"));
       ir.addr -= 2;
       goto no_support;
       break;
@@ -7029,9 +7022,9 @@ Do you want to stop the program?"),
       break;
 
     case 0xf4:    /* hlt */
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record does not support "
-			    "instruction hlt.\n"));
+      gdb_printf (gdb_stderr,
+		  _("Process record does not support "
+		    "instruction hlt.\n"));
       ir.addr -= 1;
       goto no_support;
       break;
@@ -8149,11 +8142,11 @@ reswitch_prefix_add:
   return 0;
 
  no_support:
-  fprintf_unfiltered (gdb_stderr,
-		      _("Process record does not support instruction 0x%02x "
-			"at address %s.\n"),
-		      (unsigned int) (opcode),
-		      paddress (gdbarch, ir.orig_addr));
+  gdb_printf (gdb_stderr,
+	      _("Process record does not support instruction 0x%02x "
+		"at address %s.\n"),
+	      (unsigned int) (opcode),
+	      paddress (gdbarch, ir.orig_addr));
   return -1;
 }
 
@@ -8243,7 +8236,7 @@ i386_floatformat_for_type (struct gdbarch *gdbarch,
 	|| strcmp (name, "real(kind=16)") == 0
 	|| strcmp (name, "real*16") == 0
 	|| strcmp (name, "REAL*16") == 0)
-      return floatformats_ia64_quad;
+      return floatformats_ieee_quad;
 
   return default_floatformat_for_type (gdbarch, name, len);
 }
@@ -8992,14 +8985,14 @@ i386_mpx_info_bounds (const char *args, int from_tty)
   if (gdbarch_bfd_arch_info (gdbarch)->arch != bfd_arch_i386
       || !i386_mpx_enabled ())
     {
-      printf_filtered (_("Intel Memory Protection Extensions not "
-			 "supported on this target.\n"));
+      gdb_printf (_("Intel Memory Protection Extensions not "
+		    "supported on this target.\n"));
       return;
     }
 
   if (args == NULL)
     {
-      printf_filtered (_("Address of pointer variable expected.\n"));
+      gdb_printf (_("Address of pointer variable expected.\n"));
       return;
     }
 

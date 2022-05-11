@@ -59,6 +59,12 @@ public:
   }
 
   /* See language.h.  */
+  void print_array_index (struct type *index_type,
+			  LONGEST index,
+			  struct ui_file *stream,
+			  const value_print_options *options) const override;
+
+  /* See language.h.  */
   void language_arch_info (struct gdbarch *gdbarch,
 			   struct language_arch_info *lai) const override;
 
@@ -155,9 +161,9 @@ public:
   void printchar (int ch, struct type *chtype,
 		  struct ui_file *stream) const override
   {
-    fputs_filtered ("'", stream);
+    gdb_puts ("'", stream);
     emitchar (ch, chtype, stream, '\'');
-    fputs_filtered ("'", stream);
+    gdb_puts ("'", stream);
   }
 
   /* See language.h.  */
@@ -170,7 +176,7 @@ public:
     const char *type_encoding = get_encoding (elttype);
 
     if (TYPE_LENGTH (elttype) == 4)
-      fputs_filtered ("4_", stream);
+      gdb_puts ("4_", stream);
 
     if (!encoding || !*encoding)
       encoding = type_encoding;
@@ -260,6 +266,17 @@ private:
 				    int arrayprint_recurse_level,
 				    bool print_rank_only) const;
 
+  /* If TYPE is an extended type, then print out derivation information.
+
+     A typical output could look like this:
+     "Type, extends(point) :: waypoint"
+     "    Type point :: point"
+     "    real(kind=4) :: angle"
+     "End Type waypoint".  */
+
+  void f_type_print_derivation_info (struct type *type,
+				     struct ui_file *stream) const;
+
   /* Print the name of the type (or the ultimate pointer target, function
      value or array element), or the description of a structure or union.
 
@@ -301,19 +318,20 @@ extern int calc_f77_array_dims (struct type *);
 struct builtin_f_type
 {
   struct type *builtin_character;
-  struct type *builtin_integer;
+  struct type *builtin_integer_s1;
   struct type *builtin_integer_s2;
+  struct type *builtin_integer;
   struct type *builtin_integer_s8;
-  struct type *builtin_logical;
   struct type *builtin_logical_s1;
   struct type *builtin_logical_s2;
+  struct type *builtin_logical;
   struct type *builtin_logical_s8;
   struct type *builtin_real;
   struct type *builtin_real_s8;
   struct type *builtin_real_s16;
+  struct type *builtin_complex;
   struct type *builtin_complex_s8;
   struct type *builtin_complex_s16;
-  struct type *builtin_complex_s32;
   struct type *builtin_void;
 };
 

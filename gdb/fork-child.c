@@ -98,7 +98,7 @@ postfork_child_hook ()
   static int debug_setpgrp = 657473;
 
   /* Make sure we switch to main_ui here in order to be able to
-     use the fprintf_unfiltered/warning/error functions.  */
+     use the gdb_printf/warning/error functions.  */
   current_ui = main_ui;
 
   /* Create a new session for the inferior process, if necessary.
@@ -146,9 +146,9 @@ static void
 show_startup_with_shell (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file,
-		    _("Use of shell to start subprocesses is %s.\n"),
-		    value);
+  gdb_printf (file,
+	      _("Use of shell to start subprocesses is %s.\n"),
+	      value);
 }
 
 void _initialize_fork_child ();

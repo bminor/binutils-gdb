@@ -74,7 +74,7 @@ run_ld_link_tests [list \
 run_ld_link_tests [list \
     [list \
 	"$testname (final shared object)" \
-	"-shared -Tdata=0x12340000 tmpdir/i386-export-class-ref-r.o tmpdir/i386-export-class-lib.so" "" \
+	"-shared $NO_DT_RELR_LDFLAGS -Tdata=0x12340000 tmpdir/i386-export-class-ref-r.o tmpdir/i386-export-class-lib.so" "" \
 	"" \
 	{ ../ld-elf/export-class-dep.s ../ld-elf/export-class-def.s } \
 	{ \

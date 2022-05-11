@@ -154,7 +154,8 @@ case ${gdb_host} in
 	case ${gdb_host_cpu} in
 	    aarch64)
 		# Host: FreeBSD/aarch64
-		NATDEPFILES="${NATDEPFILES} aarch64-fbsd-nat.o"
+		NATDEPFILES="${NATDEPFILES} aarch64-nat.o \
+		nat/aarch64-hw-point.o aarch64-fbsd-nat.o"
 		LOADLIBES=
 		;;
 	    arm)
@@ -165,7 +166,7 @@ case ${gdb_host} in
 	    i386)
 		# Host: FreeBSD/i386
 		NATDEPFILES="${NATDEPFILES} x86-nat.o nat/x86-dregs.o \
-		x86-bsd-nat.o i386-bsd-nat.o i386-fbsd-nat.o bsd-kvm.o"
+		x86-bsd-nat.o x86-fbsd-nat.o i386-fbsd-nat.o bsd-kvm.o"
 		;;
 	    mips)
 		# Host: FreeBSD/mips
@@ -192,9 +193,9 @@ case ${gdb_host} in
 	case ${gdb_host_cpu} in
 	    i386)
 		# Host: FreeBSD/amd64
-		NATDEPFILES="${NATDEPFILES} amd64-nat.o amd64-bsd-nat.o \
+		NATDEPFILES="${NATDEPFILES} amd64-nat.o \
 		amd64-fbsd-nat.o bsd-kvm.o x86-nat.o nat/x86-dregs.o \
-		x86-bsd-nat.o"
+		x86-bsd-nat.o x86-fbsd-nat.o"
 		;;
 	esac
 	;;
@@ -233,8 +234,9 @@ case ${gdb_host} in
 	case ${gdb_host_cpu} in
 	    aarch64)
 		#  Host: AArch64 based machine running GNU/Linux
-		NATDEPFILES="${NATDEPFILES} aarch64-linux-nat.o \
-		aarch32-linux-nat.o nat/aarch64-linux-hw-point.o \
+		NATDEPFILES="${NATDEPFILES} aarch64-nat.o aarch64-linux-nat.o \
+		aarch32-linux-nat.o nat/aarch64-hw-point.o \
+		nat/aarch64-linux-hw-point.o \
 		nat/aarch64-linux.o \
 		nat/aarch64-sve-linux-ptrace.o \
 		nat/aarch64-mte-linux-ptrace.o"
@@ -257,6 +259,10 @@ case ${gdb_host} in
 	    ia64)
 		# Host: Intel IA-64 running GNU/Linux
 		NATDEPFILES="${NATDEPFILES} ia64-linux-nat.o"
+		;;
+	    loongarch)
+		# Host: LoongArch, running GNU/Linux.
+		NATDEPFILES="${NATDEPFILES} loongarch-linux-nat.o linux-nat-trad.o"
 		;;
 	    m32r)
 		# Host: M32R based machine running GNU/Linux

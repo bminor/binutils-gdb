@@ -1075,7 +1075,7 @@ exp     :       FALSEKEYWORD
 block	:	BLOCKNAME
 			{
 			  if ($1.sym.symbol)
-			    $$ = SYMBOL_BLOCK_VALUE ($1.sym.symbol);
+			    $$ = $1.sym.symbol->value_block ();
 			  else
 			    error (_("No file or function \"%s\"."),
 				   copy_name ($1.stoken).c_str ());
@@ -1093,16 +1093,16 @@ block	:	block COLONCOLON name
 			    = lookup_symbol (copy.c_str (), $1,
 					     VAR_DOMAIN, NULL).symbol;
 
-			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
+			  if (!tem || tem->aclass () != LOC_BLOCK)
 			    error (_("No function \"%s\" in specified context."),
 				   copy.c_str ());
-			  $$ = SYMBOL_BLOCK_VALUE (tem); }
+			  $$ = tem->value_block (); }
 	;
 
 variable:	name_not_typename ENTRY
 			{ struct symbol *sym = $1.sym.symbol;
 
-			  if (sym == NULL || !SYMBOL_IS_ARGUMENT (sym)
+			  if (sym == NULL || !sym->is_argument ()
 			      || !symbol_read_needs_frame (sym))
 			    error (_("@entry can be used only for function "
 				     "parameters, not for \"%s\""),
@@ -1232,14 +1232,14 @@ variable:	name_not_typename
 				 is important for example for "p
 				 *__errno_location()".  */
 			      symbol *alias_target
-				= ((msymbol.minsym->type != mst_text_gnu_ifunc
-				    && msymbol.minsym->type != mst_data_gnu_ifunc)
+				= ((msymbol.minsym->type () != mst_text_gnu_ifunc
+				    && msymbol.minsym->type () != mst_data_gnu_ifunc)
 				   ? find_function_alias_target (msymbol)
 				   : NULL);
 			      if (alias_target != NULL)
 				{
 				  block_symbol bsym { alias_target,
-				    SYMBOL_BLOCK_VALUE (alias_target) };
+				    alias_target->value_block () };
 				  pstate->push_new<var_value_operation> (bsym);
 				}
 			      else
@@ -1780,11 +1780,11 @@ oper:	OPERATOR NEW
 	|	OPERATOR OBJC_LBRAC ']'
 			{ $$ = operator_stoken ("[]"); }
 	|	OPERATOR conversion_type_id
-			{ string_file buf;
-
+			{
+			  string_file buf;
 			  c_print_type ($2, NULL, &buf, -1, 0,
 					&type_print_raw_options);
-			  std::string name = std::move (buf.string ());
+			  std::string name = buf.release ();
 
 			  /* This also needs canonicalization.  */
 			  gdb::unique_xmalloc_ptr<char> canon
@@ -3067,7 +3067,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
 			par_state->language ()->name_of_this ()
 			? &is_a_field_of_this : NULL);
 
-  if (bsym.symbol && SYMBOL_CLASS (bsym.symbol) == LOC_BLOCK)
+  if (bsym.symbol && bsym.symbol->aclass () == LOC_BLOCK)
     {
       yylval.ssym.sym = bsym;
       yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
@@ -3090,7 +3090,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
 				&inner_is_a_field_of_this);
 	  if (bsym.symbol != NULL)
 	    {
-	      yylval.tsym.type = SYMBOL_TYPE (bsym.symbol);
+	      yylval.tsym.type = bsym.symbol->type ();
 	      return TYPENAME;
 	    }
 	}
@@ -3109,16 +3109,17 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	  symtab = lookup_symtab (copy.c_str ());
 	  if (symtab)
 	    {
-	      yylval.bval = BLOCKVECTOR_BLOCK (SYMTAB_BLOCKVECTOR (symtab),
-					       STATIC_BLOCK);
+	      yylval.bval
+		= symtab->compunit ()->blockvector ()->static_block ();
+
 	      return FILENAME;
 	    }
 	}
     }
 
-  if (bsym.symbol && SYMBOL_CLASS (bsym.symbol) == LOC_TYPEDEF)
+  if (bsym.symbol && bsym.symbol->aclass () == LOC_TYPEDEF)
     {
-      yylval.tsym.type = SYMBOL_TYPE (bsym.symbol);
+      yylval.tsym.type = bsym.symbol->type ();
       return TYPENAME;
     }
 
@@ -3135,7 +3136,7 @@ classify_name (struct parser_state *par_state, const struct block *block,
 	  sym = lookup_struct_typedef (copy.c_str (),
 				       par_state->expression_context_block, 1);
 	  if (sym)
-	    yylval.theclass.type = SYMBOL_TYPE (sym);
+	    yylval.theclass.type = sym->type ();
 	  return CLASSNAME;
 	}
     }
@@ -3211,7 +3212,7 @@ classify_inner_name (struct parser_state *par_state,
       return ERROR;
     }
 
-  switch (SYMBOL_CLASS (yylval.ssym.sym.symbol))
+  switch (yylval.ssym.sym.symbol->aclass ())
     {
     case LOC_BLOCK:
     case LOC_LABEL:
@@ -3231,7 +3232,7 @@ classify_inner_name (struct parser_state *par_state,
       return ERROR;
 
     case LOC_TYPEDEF:
-      yylval.tsym.type = SYMBOL_TYPE (yylval.ssym.sym.symbol);
+      yylval.tsym.type = yylval.ssym.sym.symbol->type ();
       return TYPENAME;
 
     default:

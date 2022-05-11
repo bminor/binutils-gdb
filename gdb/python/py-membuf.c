@@ -54,15 +54,7 @@ gdbpy_buffer_to_membuf (gdb::unique_xmalloc_ptr<gdb_byte> buffer,
   membuf_obj->addr = address;
   membuf_obj->length = length;
 
-  PyObject *result;
-#ifdef IS_PY3K
-  result = PyMemoryView_FromObject ((PyObject *) membuf_obj.get ());
-#else
-  result = PyBuffer_FromReadWriteObject ((PyObject *) membuf_obj.get (), 0,
-					 Py_END_OF_BUFFER);
-#endif
-
-  return result;
+  return PyMemoryView_FromObject ((PyObject *) membuf_obj.get ());
 }
 
 /* Destructor for gdb.Membuf objects.  */
@@ -81,13 +73,12 @@ mbpy_str (PyObject *self)
 {
   membuf_object *membuf_obj = (membuf_object *) self;
 
-  return PyString_FromFormat (_("Memory buffer for address %s, \
+  return PyUnicode_FromFormat (_("Memory buffer for address %s, \
 which is %s bytes long."),
-			      paddress (python_gdbarch, membuf_obj->addr),
-			      pulongest (membuf_obj->length));
+			       paddress (gdbpy_enter::get_gdbarch (),
+					 membuf_obj->addr),
+			       pulongest (membuf_obj->length));
 }
-
-#ifdef IS_PY3K
 
 static int
 get_buffer (PyObject *self, Py_buffer *buf, int flags)
@@ -106,54 +97,6 @@ get_buffer (PyObject *self, Py_buffer *buf, int flags)
   return ret;
 }
 
-#else
-
-static Py_ssize_t
-get_read_buffer (PyObject *self, Py_ssize_t segment, void **ptrptr)
-{
-  membuf_object *membuf_obj = (membuf_object *) self;
-
-  if (segment)
-    {
-      PyErr_SetString (PyExc_SystemError,
-		       _("The memory buffer supports only one segment."));
-      return -1;
-    }
-
-  *ptrptr = membuf_obj->buffer;
-
-  return membuf_obj->length;
-}
-
-static Py_ssize_t
-get_write_buffer (PyObject *self, Py_ssize_t segment, void **ptrptr)
-{
-  return get_read_buffer (self, segment, ptrptr);
-}
-
-static Py_ssize_t
-get_seg_count (PyObject *self, Py_ssize_t *lenp)
-{
-  if (lenp)
-    *lenp = ((membuf_object *) self)->length;
-
-  return 1;
-}
-
-static Py_ssize_t
-get_char_buffer (PyObject *self, Py_ssize_t segment, char **ptrptr)
-{
-  void *ptr = nullptr;
-  Py_ssize_t ret;
-
-  ret = get_read_buffer (self, segment, &ptr);
-  *ptrptr = (char *) ptr;
-
-  return ret;
-}
-
-#endif	/* IS_PY3K */
-
 /* General Python initialization callback.  */
 
 int
@@ -167,23 +110,10 @@ gdbpy_initialize_membuf (void)
 				 (PyObject *) &membuf_object_type);
 }
 
-#ifdef IS_PY3K
-
 static PyBufferProcs buffer_procs =
 {
   get_buffer
 };
-
-#else
-
-static PyBufferProcs buffer_procs = {
-  get_read_buffer,
-  get_write_buffer,
-  get_seg_count,
-  get_char_buffer
-};
-
-#endif	/* IS_PY3K */
 
 PyTypeObject membuf_object_type = {
   PyVarObject_HEAD_INIT (nullptr, 0)

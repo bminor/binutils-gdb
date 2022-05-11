@@ -279,7 +279,7 @@ static int amd64_linux_sc_reg_offset[] =
 
 static int
 amd64_linux_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-				 struct reggroup *group)
+				 const struct reggroup *group)
 { 
   if (regnum == AMD64_LINUX_ORIG_RAX_REGNUM
       || regnum == AMD64_FSBASE_REGNUM
@@ -1496,10 +1496,10 @@ amd64_linux_syscall_record_common (struct regcache *regcache,
 
   if (syscall_gdb == gdb_sys_no_syscall)
     {
-      fprintf_unfiltered (gdb_stderr,
-			  _("Process record and replay target doesn't "
-			    "support syscall number %s\n"), 
-			  pulongest (syscall_native));
+      gdb_printf (gdb_stderr,
+		  _("Process record and replay target doesn't "
+		    "support syscall number %s\n"), 
+		  pulongest (syscall_native));
       return -1;
     }
   else
@@ -1578,14 +1578,16 @@ amd64_linux_read_description (uint64_t xcr0_features_bit, bool is_x32)
 {
   static target_desc *amd64_linux_tdescs \
     [2/*AVX*/][2/*MPX*/][2/*AVX512*/][2/*PKRU*/] = {};
-  static target_desc *x32_linux_tdescs[2/*AVX*/][2/*AVX512*/] = {};
+  static target_desc *x32_linux_tdescs \
+    [2/*AVX*/][2/*AVX512*/][2/*PKRU*/] = {};
 
   target_desc **tdesc;
 
   if (is_x32)
     {
       tdesc = &x32_linux_tdescs[(xcr0_features_bit & X86_XSTATE_AVX) ? 1 : 0 ]
-	[(xcr0_features_bit & X86_XSTATE_AVX512) ? 1 : 0];
+	[(xcr0_features_bit & X86_XSTATE_AVX512) ? 1 : 0]
+	[(xcr0_features_bit & X86_XSTATE_PKRU) ? 1 : 0];
     }
   else
     {

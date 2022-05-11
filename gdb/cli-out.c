@@ -171,10 +171,10 @@ cli_ui_out::do_field_string (int fldno, int width, ui_align align,
 
   if (string)
     {
-      if (test_flags (unfiltered_output))
-	fputs_styled_unfiltered (string, style, m_streams.back ());
-      else
-	fputs_styled (string, style, m_streams.back ());
+      ui_file *stream = m_streams.back ();
+      stream->emit_style_escape (style);
+      stream->puts (string);
+      stream->emit_style_escape (ui_file_style ());
     }
 
   if (after)
@@ -205,10 +205,7 @@ cli_ui_out::do_spaces (int numspaces)
   if (m_suppress_output)
     return;
 
-  if (test_flags (unfiltered_output))
-    fprintf_unfiltered (m_streams.back (), "%*s", numspaces, "");
-  else
-    print_spaces_filtered (numspaces, m_streams.back ());
+  print_spaces (numspaces, m_streams.back ());
 }
 
 void
@@ -217,10 +214,7 @@ cli_ui_out::do_text (const char *string)
   if (m_suppress_output)
     return;
 
-  if (test_flags (unfiltered_output))
-    fputs_unfiltered (string, m_streams.back ());
-  else
-    fputs_filtered (string, m_streams.back ());
+  gdb_puts (string, m_streams.back ());
 }
 
 void
@@ -230,20 +224,23 @@ cli_ui_out::do_message (const ui_file_style &style,
   if (m_suppress_output)
     return;
 
-  /* Use the "no_gdbfmt" variant here to avoid recursion.
-     vfprintf_styled calls into cli_ui_out::message to handle the
-     gdb-specific printf formats.  */
-  vfprintf_styled_no_gdbfmt (m_streams.back (), style,
-			     !test_flags (unfiltered_output), format, args);
+  std::string str = string_vprintf (format, args);
+  if (!str.empty ())
+    {
+      ui_file *stream = m_streams.back ();
+      stream->emit_style_escape (style);
+      stream->puts (str.c_str ());
+      stream->emit_style_escape (ui_file_style ());
+    }
 }
 
 void
-cli_ui_out::do_wrap_hint (const char *identstring)
+cli_ui_out::do_wrap_hint (int indent)
 {
   if (m_suppress_output)
     return;
 
-  wrap_here (identstring);
+  m_streams.back ()->wrap_here (indent);
 }
 
 void
@@ -305,12 +302,12 @@ cli_ui_out::do_progress_notify (const std::string &msg, double howmuch)
     {
       if (!stream->isatty ())
 	{
-	  fprintf_unfiltered (stream, "%s...\n", msg.c_str ());
+	  gdb_printf (stream, "%s...\n", msg.c_str ());
 	  info.state = progress_update::WORKING;
 	}
       else
 	{
-	  fprintf_unfiltered (stream, "%s\n", msg.c_str ());
+	  gdb_printf (stream, "%s\n", msg.c_str ());
 	  info.state = progress_update::BAR;
 	}
     }
@@ -323,16 +320,16 @@ cli_ui_out::do_progress_notify (const std::string &msg, double howmuch)
       || info.state == progress_update::WORKING
       || !stream->isatty ())
     return;
-/*
+
   if (howmuch >= 0)
     {
       int width = chars_per_line - 3;
       int max = width * howmuch;
 
-      fprintf_unfiltered (stream, "\r[");
+      gdb_printf (stream, "\r[");
       for (int i = 0; i < width; ++i)
-	fprintf_unfiltered (stream, i < max ? "#" : " ");
-      fprintf_unfiltered (stream, "]");
+	gdb_printf (stream, i < max ? "#" : " ");
+      gdb_printf (stream, "]");
       gdb_flush (stream);
     }
   else
@@ -341,30 +338,30 @@ cli_ui_out::do_progress_notify (const std::string &msg, double howmuch)
       milliseconds diff = duration_cast<milliseconds>
 	(steady_clock::now () - info.last_update);
 
-      * Advance the progress indicator at a rate of 1 tick every
-	 every 0.5 seconds.  *
+      /* Advance the progress indicator at a rate of 1 tick every
+	 every 0.5 seconds.  */
       if (diff.count () >= 500)
 	{
 	  int width = chars_per_line - 3;
 
-	  fprintf_unfiltered (stream, "\r[");
+	  gdb_printf (stream, "\r[");
           
 	  for (int i = 0; i < width; ++i)
 	    {
 	      if (i >= info.pos % width
 		  && i < (info.pos + 3) % width)
-	        fprintf_unfiltered (stream, "#");
+	        gdb_printf (stream, "#");
 	      else
-		fprintf_unfiltered (stream, " ");
+		gdb_printf (stream, " ");
 	    }	
 
-	  fprintf_unfiltered (stream, "]");
+	  gdb_printf (stream, "]");
 	  gdb_flush (stream);
 	  info.last_update = steady_clock::now ();
 	  info.pos++;
 	}
     }
-*/
+
   return;
 }
 
@@ -383,10 +380,10 @@ cli_ui_out::clear_current_line ()
 
   int width = chars_per_line;
 
-  fprintf_unfiltered (stream, "\r");
+  gdb_printf (stream, "\r");
   for (int i = 0; i < width; ++i)
-    fprintf_unfiltered (stream, " ");
-  fprintf_unfiltered (stream, "\r");
+    gdb_printf (stream, " ");
+  gdb_printf (stream, "\r");
 
   gdb_flush (stream);
 }
@@ -409,10 +406,7 @@ cli_ui_out::do_progress_end ()
 void
 cli_ui_out::field_separator ()
 {
-  if (test_flags (unfiltered_output))
-    fputc_unfiltered (' ', m_streams.back ());
-  else
-    fputc_filtered (' ', m_streams.back ());
+  gdb_putc (' ', m_streams.back ());
 }
 
 /* Constructor for cli_ui_out.  */

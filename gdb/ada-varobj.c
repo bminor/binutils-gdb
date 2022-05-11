@@ -82,7 +82,7 @@ ada_varobj_scalar_image (struct type *type, LONGEST val)
   string_file buf;
 
   ada_print_scalar (type, val, &buf);
-  return std::move (buf.string ());
+  return buf.release ();
 }
 
 /* Assuming that the (PARENT_VALUE, PARENT_TYPE) pair designates
@@ -817,7 +817,7 @@ ada_varobj_get_value_image (struct value *value,
   string_file buffer;
 
   common_val_print (value, &buffer, 0, opts, current_language);
-  return std::move (buffer.string ());
+  return buffer.release ();
 }
 
 /* Assuming that the (VALUE, TYPE) pair designates an array varobj,

@@ -35,6 +35,8 @@
 #include "target-descriptions.h"
 #include "readline/tilde.h"
 #include "progspace-and-thread.h"
+#include "gdbsupport/buildargv.h"
+#include "cli/cli-style.h"
 
 /* Keep a registry of per-inferior data-pointers required by other GDB
    modules.  */
@@ -162,11 +164,11 @@ add_inferior (int pid)
   if (print_inferior_events)
     {
       if (pid != 0)
-	printf_unfiltered (_("[New inferior %d (%s)]\n"),
-			   inf->num,
-			   target_pid_to_str (ptid_t (pid)).c_str ());
+	gdb_printf (_("[New inferior %d (%s)]\n"),
+		    inf->num,
+		    target_pid_to_str (ptid_t (pid)).c_str ());
       else
-	printf_unfiltered (_("[New inferior %d]\n"), inf->num);
+	gdb_printf (_("[New inferior %d]\n"), inf->num);
     }
 
   return inf;
@@ -262,9 +264,9 @@ detach_inferior (inferior *inf)
   exit_inferior_1 (inf, 0);
 
   if (print_inferior_events)
-    printf_unfiltered (_("[Inferior %d (%s) detached]\n"),
-		       inf->num,
-		       target_pid_to_str (ptid_t (pid)).c_str ());
+    gdb_printf (_("[Inferior %d (%s) detached]\n"),
+		inf->num,
+		target_pid_to_str (ptid_t (pid)).c_str ());
 }
 
 void
@@ -520,7 +522,8 @@ print_inferior (struct ui_out *uiout, const char *requested_inferiors)
       uiout->field_string ("connection-id", conn);
 
       if (inf->pspace->exec_filename != nullptr)
-	uiout->field_string ("exec", inf->pspace->exec_filename.get ());
+	uiout->field_string ("exec", inf->pspace->exec_filename.get (),
+			     file_name_style.style ());
       else
 	uiout->field_skip ("exec");
 
@@ -647,9 +650,9 @@ inferior_command (const char *args, int from_tty)
       if (filename == nullptr)
 	filename = _("<noexec>");
 
-      printf_filtered (_("[Current inferior is %d [%s] (%s)]\n"),
-		       inf->num, inferior_pid_to_str (inf->pid).c_str (),
-		       filename);
+      gdb_printf (_("[Current inferior is %d [%s] (%s)]\n"),
+		  inf->num, inferior_pid_to_str (inf->pid).c_str (),
+		  filename);
     }
   else
     {
@@ -756,11 +759,9 @@ add_inferior_with_spaces (void)
   return inf;
 }
 
-/* Switch to inferior NEW_INF, a new inferior, and unless
-   NO_CONNECTION is true, push the process_stratum_target of ORG_INF
-   to NEW_INF.  */
+/* See inferior.h.  */
 
-static void
+void
 switch_to_inferior_and_push_target (inferior *new_inf,
 				    bool no_connection, inferior *org_inf)
 {
@@ -775,19 +776,19 @@ switch_to_inferior_and_push_target (inferior *new_inf,
     {
       new_inf->push_target (proc_target);
       if (proc_target->connection_string () != NULL)
-	printf_filtered (_("Added inferior %d on connection %d (%s %s)\n"),
-			 new_inf->num,
-			 proc_target->connection_number,
-			 proc_target->shortname (),
-			 proc_target->connection_string ());
+	gdb_printf (_("Added inferior %d on connection %d (%s %s)\n"),
+		    new_inf->num,
+		    proc_target->connection_number,
+		    proc_target->shortname (),
+		    proc_target->connection_string ());
       else
-	printf_filtered (_("Added inferior %d on connection %d (%s)\n"),
-			 new_inf->num,
-			 proc_target->connection_number,
-			 proc_target->shortname ());
+	gdb_printf (_("Added inferior %d on connection %d (%s)\n"),
+		    new_inf->num,
+		    proc_target->connection_number,
+		    proc_target->shortname ());
     }
   else
-    printf_filtered (_("Added inferior %d\n"), new_inf->num);
+    gdb_printf (_("Added inferior %d\n"), new_inf->num);
 }
 
 /* add-inferior [-copies N] [-exec FILENAME] [-no-connection] */
@@ -959,7 +960,7 @@ static void
 show_print_inferior_events (struct ui_file *file, int from_tty,
 			   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Printing of inferior events is %s.\n"), value);
+  gdb_printf (file, _("Printing of inferior events is %s.\n"), value);
 }
 
 /* Return a new value for the selected inferior's id.  */
@@ -979,7 +980,6 @@ static const struct internalvar_funcs inferior_funcs =
 {
   inferior_id_make_value,
   NULL,
-  NULL
 };
 
 

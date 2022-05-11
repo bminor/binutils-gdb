@@ -32,7 +32,7 @@
 */
 
 #include "defs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "block.h"
 #include "symtab.h"
 #include "language.h"
@@ -418,7 +418,7 @@ go_block_package_name (const struct block *block)
 {
   while (block != NULL)
     {
-      struct symbol *function = BLOCK_FUNCTION (block);
+      struct symbol *function = block->function ();
 
       if (function != NULL)
 	{
@@ -433,7 +433,7 @@ go_block_package_name (const struct block *block)
 	  return NULL;
 	}
 
-      block = BLOCK_SUPERBLOCK (block);
+      block = block->superblock ();
     }
 
   return NULL;

@@ -1490,7 +1490,7 @@ sh_default_register_type (struct gdbarch *gdbarch, int reg_nr)
    TODO: sh2a and dsp registers.  */
 static int
 sh_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
-			struct reggroup *reggroup)
+			const struct reggroup *reggroup)
 {
   if (gdbarch_register_name (gdbarch, regnum) == NULL
       || *gdbarch_register_name (gdbarch, regnum) == '\0')

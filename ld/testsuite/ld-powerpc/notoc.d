@@ -23,7 +23,7 @@ Disassembly of section \.text:
 .*:	(a6 03 88 7d|7d 88 03 a6) 	mtlr    r12
 .*:	(ff 7f 80 3d|3d 80 7f ff) 	lis     r12,32767
 .*:	(ff ff 8c 61|61 8c ff ff) 	ori     r12,r12,65535
-.*:	(c6 07 9c 79|79 9c 07 c6) 	rldicr  r28,r12,32,31
+.*:	(c6 07 9c 79|79 9c 07 c6) 	sldi    r28,r12,32
 .*:	(ff ef 8c 65|65 8c ef ff) 	oris    r12,r12,61439
 .*:	(28 ff 8c 61|61 8c ff 28) 	ori     r12,r12,65320
 .*:	(14 62 8b 7d|7d 8b 62 14) 	add     r12,r11,r12

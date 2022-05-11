@@ -301,6 +301,14 @@ if ![info exists READELFFLAGS] then {
     set READELFFLAGS {}
 }
 
+if ![info exists SIZE] then {
+    set SIZE [findfile $base_dir/../binutils/size]
+}
+
+if ![info exists SIZEFLAGS] then {
+    set SIZEFLAGS ""
+}
+
 if ![info exists ELFEDIT] then {
     set ELFEDIT [findfile $base_dir/../binutils/elfedit]
 }
@@ -311,6 +319,38 @@ if ![info exists LD] then {
 
 if ![info exists LDFLAGS] then {
     set LDFLAGS {}
+}
+
+if { ![info exists DT_RELR_LDFLAGS] } then {
+    if { [supports_dt_relr] } then {
+	set DT_RELR_LDFLAGS "-z pack-relative-relocs"
+    } else {
+	set DT_RELR_LDFLAGS {}
+    }
+}
+
+if { ![info exists DT_RELR_CC_LDFLAGS] } then {
+    if { [supports_dt_relr] } then {
+	set DT_RELR_CC_LDFLAGS "-Wl,-z,pack-relative-relocs"
+    } else {
+	set DT_RELR_CC_LDFLAGS {}
+    }
+}
+
+if { ![info exists NO_DT_RELR_LDFLAGS] } then {
+    if { [supports_dt_relr] } then {
+	set NO_DT_RELR_LDFLAGS "-z nopack-relative-relocs"
+    } else {
+	set NO_DT_RELR_LDFLAGS {}
+    }
+}
+
+if { ![info exists NO_DT_RELR_CC_LDFLAGS] } then {
+    if { [supports_dt_relr] } then {
+	set NO_DT_RELR_CC_LDFLAGS "-Wl,-z,nopack-relative-relocs"
+    } else {
+	set NO_DT_RELR_CC_LDFLAGS {}
+    }
 }
 
 # Set LD_CLASS to "64bit" for a 64-bit *host* linker.

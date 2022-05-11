@@ -26,7 +26,7 @@
 PyObject *
 recpy_full_method (PyObject *self, void *closure)
 {
-  return PyString_FromString ("full");
+  return PyUnicode_FromString ("full");
 }
 
 /* Implementation of
@@ -35,5 +35,5 @@ recpy_full_method (PyObject *self, void *closure)
 PyObject *
 recpy_full_format (PyObject *self, void *closure)
 {
-  return PyString_FromString ("full");
+  return PyUnicode_FromString ("full");
 }

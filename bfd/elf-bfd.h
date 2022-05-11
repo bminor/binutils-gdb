@@ -291,9 +291,12 @@ weakdef (struct elf_link_hash_entry *h)
   _bfd_elf_symbol_refs_local_p (H, INFO, 1)
 
 /* Whether an undefined weak symbol should resolve to its link-time
-   value, even in PIC or PIE objects.  */
+   value, even in PIC or PIE objects.  The linker_def test is to
+   handle symbols like __ehdr_start that may be undefweak in early
+   stages of linking but are guaranteed to be defined later.  */
 #define UNDEFWEAK_NO_DYNAMIC_RELOC(INFO, H)		\
   ((H)->root.type == bfd_link_hash_undefweak		\
+   && !(H)->root.linker_def				\
    && (ELF_ST_VISIBILITY ((H)->other) != STV_DEFAULT	\
        || (INFO)->dynamic_undefined_weak == 0))
 
@@ -496,6 +499,7 @@ enum elf_target_id
 {
   AARCH64_ELF_DATA = 1,
   ALPHA_ELF_DATA,
+  AMDGCN_ELF_DATA,
   ARC_ELF_DATA,
   ARM_ELF_DATA,
   AVR_ELF_DATA,
@@ -595,6 +599,9 @@ struct elf_link_hash_table
 
   /* TRUE if DT_JMPREL is a required dynamic tag.  */
   bool dt_jmprel_required;
+
+  /* TRUE when we are handling DT_NEEDED entries.  */
+  bool handling_dt_needed;
 
   /* The BFD used to hold special sections created by the linker.
      This will be the first BFD found which requires these sections to
@@ -707,6 +714,7 @@ struct elf_link_hash_table
   asection *irelplt;
   asection *irelifunc;
   asection *dynsym;
+  asection *srelrdyn;
 };
 
 /* Returns TRUE if the hash table is a struct elf_link_hash_table.  */
@@ -942,9 +950,6 @@ struct elf_backend_data
   /* The common page size for this backend.  */
   bfd_vma commonpagesize;
 
-  /* The value of commonpagesize to use when -z relro for this backend.  */
-  bfd_vma relropagesize;
-
   /* The p_align value for this backend.  If it is set, p_align of
       PT_LOAD alignment will be to p_align by default.  */
   bfd_vma p_align;
@@ -1103,6 +1108,16 @@ struct elf_backend_data
   bool (*check_relocs)
     (bfd *abfd, struct bfd_link_info *info, asection *o,
      const Elf_Internal_Rela *relocs);
+
+  /* The SIZE_RELATIVE_RELOCS function is called to size relative
+     relocations when mappig sections to segments.  */
+  bool (*size_relative_relocs)
+    (struct bfd_link_info *info, bool *need_layout);
+
+  /* The FINISH_RELATIVE_RELOCS function is called to finish relative
+     relocations in bfd_elf_final_link.  */
+  bool (*finish_relative_relocs)
+    (struct bfd_link_info *info);
 
   /* The CHECK_DIRECTIVES function is called once per input file by
      the add_symbols phase of the ELF backend linker.  The function
@@ -1895,10 +1910,6 @@ struct output_elf_obj_tdata
   /* STT_SECTION symbols for each section */
   asymbol **section_syms;
 
-  /* Used to determine if PT_GNU_EH_FRAME segment header should be
-     created.  */
-  asection *eh_frame_hdr;
-
   /* NT_GNU_BUILD_ID note type info.  */
   struct
   {
@@ -2102,7 +2113,6 @@ struct elf_obj_tdata
 #define elf_seg_map(bfd)	(elf_tdata(bfd) -> o->seg_map)
 #define elf_link_info(bfd)	(elf_tdata(bfd) -> o->link_info)
 #define elf_next_file_pos(bfd)	(elf_tdata(bfd) -> o->next_file_pos)
-#define elf_eh_frame_hdr(bfd)	(elf_tdata(bfd) -> o->eh_frame_hdr)
 #define elf_stack_flags(bfd)	(elf_tdata(bfd) -> o->stack_flags)
 #define elf_shstrtab(bfd)	(elf_tdata(bfd) -> o->strtab_ptr)
 #define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
@@ -2398,7 +2408,7 @@ extern bool _bfd_elf_discard_section_eh_frame
 extern bool _bfd_elf_adjust_eh_frame_global_symbol
   (struct elf_link_hash_entry *, void *);
 extern bool _bfd_elf_discard_section_eh_frame_hdr
-  (bfd *, struct bfd_link_info *);
+  (struct bfd_link_info *);
 extern bfd_vma _bfd_elf_eh_frame_section_offset
   (bfd *, struct bfd_link_info *, asection *, bfd_vma);
 extern bool _bfd_elf_write_section_eh_frame
@@ -2716,7 +2726,7 @@ extern struct elf_segment_map * _bfd_elf_make_dynamic_segment
   (bfd *, asection *);
 
 extern bool _bfd_elf_map_sections_to_segments
-  (bfd *, struct bfd_link_info *);
+  (bfd *, struct bfd_link_info *, bool *);
 
 extern bool _bfd_elf_is_function_type (unsigned int);
 
@@ -2775,6 +2785,8 @@ extern char *elfcore_write_prfpreg
 extern char *elfcore_write_prxfpreg
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_xstatereg
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_x86_segbases
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_ppc_vmx
   (bfd *, char *, int *, const void *, int);

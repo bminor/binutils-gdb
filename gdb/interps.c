@@ -38,6 +38,7 @@
 #include "completer.h"
 #include "top.h"		/* For command_loop.  */
 #include "main.h"
+#include "gdbsupport/buildargv.h"
 
 /* Each UI has its own independent set of interpreters.  */
 
@@ -126,7 +127,7 @@ interp_factory_register (const char *name, interp_factory_func func)
 
 /* Add interpreter INTERP to the gdb interpreter list.  The
    interpreter must not have previously been added.  */
-void
+static void
 interp_add (struct ui *ui, struct interp *interp)
 {
   struct ui_interp_info *ui_interp = get_interp_info (ui);
@@ -356,7 +357,6 @@ clear_interpreter_hooks (void)
   deprecated_readline_hook = 0;
   deprecated_readline_end_hook = 0;
   deprecated_context_hook = 0;
-  deprecated_target_wait_hook = 0;
   deprecated_call_command_hook = 0;
   deprecated_error_begin_hook = 0;
 }

@@ -408,7 +408,7 @@ rl78_get_disassembler (bfd *abfd)
 {
   int cpu = E_FLAG_RL78_ANY_CPU;
 
-  if (abfd != NULL)
+  if (abfd != NULL && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     cpu = abfd->tdata.elf_obj_data->elf_header->e_flags & E_FLAG_RL78_CPU_MASK;
 
   switch (cpu)

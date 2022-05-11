@@ -18,8 +18,6 @@
 # BUILDDIR.
 
 proc target_compile_ada_from_dir {builddir source dest type options} {
-    set saved_cwd [pwd]
-
     global board
     set board [target_info name]
     set save_multilib_flag [board_info $board multilib_flags]
@@ -39,10 +37,10 @@ proc target_compile_ada_from_dir {builddir source dest type options} {
     }
 
     catch {
-        cd $builddir
-        return [target_compile $source $dest $type $options]
+	with_cwd $builddir {
+	    return [target_compile $source $dest $type $options]
+	}
     } result options
-    cd $saved_cwd
 
     if { $save_multilib_flag != "" } {
 	unset_board_info "multilib_flags"

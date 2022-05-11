@@ -40,7 +40,7 @@ static void
 show_debug_displaced (struct ui_file *file, int from_tty,
 		      struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Displace stepping debugging is %s.\n"), value);
+  gdb_printf (file, _("Displace stepping debugging is %s.\n"), value);
 }
 
 displaced_step_prepare_status
@@ -232,7 +232,7 @@ displaced_step_buffers::finish (gdbarch *arch, thread_info *thread,
 		     buffer->saved_copy.data (), len);
 
   displaced_debug_printf ("restored %s %s",
-			  target_pid_to_str (thread->ptid).c_str (),
+			  thread->ptid.to_string ().c_str (),
 			  paddress (arch, buffer->addr));
 
   regcache *rc = get_thread_regcache (thread);
@@ -285,7 +285,7 @@ displaced_step_buffers::restore_in_ptid (ptid_t ptid)
       write_memory_ptid (ptid, buffer.addr, buffer.saved_copy.data (), len);
 
       displaced_debug_printf ("restored in ptid %s %s",
-			      target_pid_to_str (ptid).c_str (),
+			      ptid.to_string ().c_str (),
 			      paddress (arch, buffer.addr));
     }
 }

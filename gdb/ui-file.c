@@ -21,10 +21,12 @@
 
 #include "defs.h"
 #include "ui-file.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/gdb_select.h"
 #include "gdbsupport/filestuff.h"
+#include "cli-out.h"
 #include "cli/cli-style.h"
+#include <chrono>
 
 null_file null_stream;
 
@@ -40,7 +42,7 @@ ui_file::printf (const char *format, ...)
   va_list args;
 
   va_start (args, format);
-  vfprintf_unfiltered (this, format, args);
+  vprintf (format, args);
   va_end (args);
 }
 
@@ -58,16 +60,42 @@ ui_file::putstrn (const char *str, int n, int quoter, bool async_safe)
     printchar (str[i], quoter, async_safe);
 }
 
-int
+void
 ui_file::putc (int c)
 {
-  return fputc_unfiltered (c, this);
+  char copy = (char) c;
+  write (&copy, 1);
 }
 
 void
 ui_file::vprintf (const char *format, va_list args)
 {
-  vfprintf_unfiltered (this, format, args);
+  ui_out_flags flags = disallow_ui_out_field;
+  cli_ui_out (this, flags).vmessage (m_applied_style, format, args);
+}
+
+/* See ui-file.h.  */
+
+void
+ui_file::emit_style_escape (const ui_file_style &style)
+{
+  if (can_emit_style_escape () && style != m_applied_style)
+    {
+      m_applied_style = style;
+      this->puts (style.to_ansi ().c_str ());
+    }
+}
+
+/* See ui-file.h.  */
+
+void
+ui_file::reset_style ()
+{
+  if (can_emit_style_escape ())
+    {
+      m_applied_style = ui_file_style ();
+      this->puts (m_applied_style.to_ansi ().c_str ());
+    }
 }
 
 /* See ui-file.h.  */
@@ -324,8 +352,7 @@ stdio_file::isatty ()
 bool
 stdio_file::can_emit_style_escape ()
 {
-  return ((this == gdb_stdout || this == gdb_stderr)
-	  && this->isatty ()
+  return (this->isatty ()
 	  && term_cli_styling ());
 }
 
@@ -413,8 +440,7 @@ tee_file::term_out ()
 bool
 tee_file::can_emit_style_escape ()
 {
-  return ((this == gdb_stdout || this == gdb_stderr)
-	  && m_one->term_out ()
+  return (m_one->term_out ()
 	  && term_cli_styling ());
 }
 
@@ -448,4 +474,32 @@ no_terminal_escape_file::puts (const char *buf)
 
   if (*buf != '\0')
     this->stdio_file::write (buf, strlen (buf));
+}
+
+void
+timestamped_file::write (const char *buf, long len)
+{
+  if (debug_timestamp)
+    {
+      /* Print timestamp if previous print ended with a \n.  */
+      if (m_needs_timestamp)
+	{
+	  using namespace std::chrono;
+
+	  steady_clock::time_point now = steady_clock::now ();
+	  seconds s = duration_cast<seconds> (now.time_since_epoch ());
+	  microseconds us = duration_cast<microseconds> (now.time_since_epoch () - s);
+	  std::string timestamp = string_printf ("%ld.%06ld ",
+						 (long) s.count (),
+						 (long) us.count ());
+	  m_stream->puts (timestamp.c_str ());
+	}
+
+      /* Print the message.  */
+      m_stream->write (buf, len);
+
+      m_needs_timestamp = (len > 0 && buf[len - 1] == '\n');
+    }
+  else
+    m_stream->write (buf, len);
 }

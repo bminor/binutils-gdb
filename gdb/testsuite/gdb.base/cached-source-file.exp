@@ -100,3 +100,41 @@ gdb_test "run" $re "rerun program" $q y
 # changed for GDB.
 gdb_test "list" "${bp_line}\[ \t\]+printf \\(\"foo\\\\n\"\\); /\\\* new-marker \\\*/.*" \
     "verify that the source code is properly reloaded"
+
+# Modify the source file again.  As before, this only works locally
+# because of the TCL commands.
+set bkpsrc [standard_output_file $testfile].c.bkp
+set bkpsrcfd [open $bkpsrc w]
+set srcfd [open $srcfile r]
+
+while { [gets $srcfd line] != -1 } {
+    if { [string first "new-marker" $line] != -1 } {
+	# Modify the printf line that we added previously.
+	puts $bkpsrcfd "  printf (\"foo\\n\"); /* new-marker updated */"
+    } else {
+	puts $bkpsrcfd $line
+    }
+}
+
+close $bkpsrcfd
+close $srcfd
+file rename -force -- $bkpsrc $srcfile
+
+# As before, delay so that at least one second has passed.  GDB still
+# will not spot that the source file has changed, as GDB doesn't do a
+# time check unless the binary has also changed, this delay just
+# allows us to confirm this behaviour.
+sleep 1
+
+# List the printf line again, we should not see the file changes yet
+# as the binary is unchanged, so the cached contents will still be
+# used.
+gdb_test "list ${bp_line}" "${bp_line}\[ \t\]+printf \\(\"foo\\\\n\"\\); /\\\* new-marker \\\*/.*" \
+    "verify that the source code change is not seen yet"
+
+gdb_test "maint flush source-cache" "Source cache flushed\\."
+
+# List the printf line again.  After the cache flush GDB will re-read
+# the source file and we should now see the changes.
+gdb_test "list ${bp_line}" "${bp_line}\[ \t\]+printf \\(\"foo\\\\n\"\\); /\\\* new-marker updated \\\*/.*" \
+    "verify that the updated source code change is not seen"

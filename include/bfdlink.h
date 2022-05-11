@@ -114,6 +114,9 @@ struct bfd_link_hash_entry
      as distinct from a LTO IR object file.  */
   unsigned int non_ir_ref_dynamic : 1;
 
+  /* The symbol, SYM, is referenced by __real_SYM in an object file.  */
+  unsigned int ref_real : 1;
+
   /* Symbol is a built-in define.  These will be overridden by PROVIDE
      in a linker script.  */
   unsigned int linker_def : 1;
@@ -413,6 +416,10 @@ struct bfd_link_info
   /* TRUE if PT_GNU_RELRO segment should be created.  */
   unsigned int relro: 1;
 
+  /* TRUE if DT_RELR should be enabled for compact relative
+     relocations.  */
+  unsigned int enable_dt_relr: 1;
+
   /* TRUE if separate code segment should be created.  */
   unsigned int separate_code: 1;
 
@@ -485,6 +492,25 @@ struct bfd_link_info
      flags.  */
   unsigned int noexecstack: 1;
 
+  /* Tri-state variable:
+     0 => warn if the linker is creating an executable stack, but
+     execstack (above) is 0.
+     1 => warn if the linker is creating an executable stack; ignores
+     the value of execstack.
+     2 => do not warn.
+     3 => not used.  */
+  unsigned int warn_execstack: 2;
+
+  /* TRUE if warnings should not be generated for TLS segments with eXecute
+     permission or LOAD segments with RWX permissions.  */
+  unsigned int no_warn_rwx_segments: 1;
+
+  /* TRUE if the stack can be made executable because of the absence of a
+     .note.GNU-stack section in an input file.  Note - even if this field
+     is set, some targets may choose to ignore the setting and not create
+     an executable stack.  */
+  unsigned int default_execstack : 1;
+  
   /* TRUE if we want to produced optimized output files.  This might
      need much more time and therefore must be explicitly selected.  */
   unsigned int optimize: 1;
@@ -527,6 +553,9 @@ struct bfd_link_info
 
   /* TRUE if maxpagesize is set on command-line.  */
   unsigned int maxpagesize_is_set : 1;
+
+  /* TRUE if commonpagesize is set on command-line.  */
+  unsigned int commonpagesize_is_set : 1;
 
   /* Char that may appear as the first char of a symbol, but should be
      skipped (like symbol_leading_char) when looking up symbols in

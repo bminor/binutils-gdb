@@ -239,7 +239,7 @@ csky_get_disassembler (bfd *abfd)
 {
   obj_attribute *attr;
   const char *sec_name = NULL;
-  if (!abfd)
+  if (!abfd || bfd_get_flavour (abfd) != bfd_target_elf_flavour)
     dis_info.isa = CSKY_DEFAULT_ISA;
   else
     {

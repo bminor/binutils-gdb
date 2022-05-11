@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include "frame-unwind.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "gdbcmd.h"
 #include "language.h"
 #include "observable.h"
@@ -39,7 +39,7 @@ static void
 show_pyuw_debug (struct ui_file *file, int from_tty,
 		 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Python unwinder debugging is %s.\n"), value);
+  gdb_printf (file, _("Python unwinder debugging is %s.\n"), value);
 }
 
 /* Print a "py-unwind" debug statement.  */
@@ -213,7 +213,7 @@ unwind_infopy_str (PyObject *self)
     stb.puts (")");
   }
 
-  return PyString_FromString (stb.c_str ());
+  return PyUnicode_FromString (stb.c_str ());
 }
 
 /* Create UnwindInfo instance for given PendingFrame and frame ID.
@@ -349,7 +349,7 @@ pending_framepy_str (PyObject *self)
   const char *pc_str = NULL;
 
   if (frame == NULL)
-    return PyString_FromString ("Stale PendingFrame instance");
+    return PyUnicode_FromString ("Stale PendingFrame instance");
   try
     {
       sp_str = core_addr_to_string_nz (get_frame_sp (frame));
@@ -360,7 +360,7 @@ pending_framepy_str (PyObject *self)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  return PyString_FromFormat ("SP=%s,PC=%s", sp_str, pc_str);
+  return PyUnicode_FromFormat ("SP=%s,PC=%s", sp_str, pc_str);
 }
 
 /* Implementation of gdb.PendingFrame.read_register (self, reg) -> gdb.Value.
@@ -524,7 +524,7 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
   struct gdbarch *gdbarch = (struct gdbarch *) (self->unwind_data);
   cached_frame_info *cached_frame;
 
-  gdbpy_enter enter_py (gdbarch, current_language);
+  gdbpy_enter enter_py (gdbarch);
 
   pyuw_debug_printf ("frame=%d, sp=%s, pc=%s",
 		     frame_relative_level (this_frame),

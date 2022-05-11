@@ -140,11 +140,11 @@ deprecated_show_value_hack (struct ui_file *ignore_file,
     case var_optional_filename:
     case var_filename:
     case var_enum:
-      printf_filtered ((" is \"%s\".\n"), value);
+      gdb_printf ((" is \"%s\".\n"), value);
       break;
 
     default:
-      printf_filtered ((" is %s.\n"), value);
+      gdb_printf ((" is %s.\n"), value);
       break;
     }
 }
@@ -659,7 +659,7 @@ get_setshow_command_value_string (const setting &var)
       gdb_assert_not_reached ("bad var_type");
     }
 
-  return std::move (stb.string ());
+  return stb.release ();
 }
 
 

@@ -65,6 +65,13 @@ extern size_t sb_skip_white (size_t, sb *);
 extern size_t sb_skip_comma (size_t, sb *);
 
 /* Actually in input-scrub.c.  */
-extern void input_scrub_include_sb (sb *, char *, int);
+enum expansion {
+  /* Note: Order matters!  */
+  expanding_none,
+  expanding_repeat,
+  expanding_macro,
+  expanding_nested, /* Only for internal use of input-scrub.c.  */
+};
+extern void input_scrub_include_sb (sb *, char *, enum expansion);
 
 #endif /* SB_H */

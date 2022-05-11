@@ -20,7 +20,7 @@
 #ifndef PSYMTAB_H
 #define PSYMTAB_H
 
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "symfile.h"
 #include "gdbsupport/next-iterator.h"
 #include "bcache.h"

@@ -62,7 +62,7 @@ static int dll;
 extern const char *output_filename;
 
 static void
-gld_${EMULATION_NAME}_before_parse (void)
+gld${EMULATION_NAME}_before_parse (void)
 {
   ldfile_set_output_arch ("${OUTPUT_ARCH}", bfd_arch_`echo ${ARCH} | sed -e 's/:.*//'`);
   output_filename = "a.exe";
@@ -322,7 +322,7 @@ gld${EMULATION_NAME}_handle_option (int optc)
    read.  */
 
 static void
-gld_${EMULATION_NAME}_set_symbols (void)
+gld${EMULATION_NAME}_set_symbols (void)
 {
   /* Run through and invent symbols for all the
      names and insert the defaults. */
@@ -372,7 +372,7 @@ gld_${EMULATION_NAME}_set_symbols (void)
 }
 
 static void
-gld_${EMULATION_NAME}_after_open (void)
+gld${EMULATION_NAME}_after_open (void)
 {
   after_open_default ();
 
@@ -606,7 +606,7 @@ sort_sections (lang_statement_union_type *s)
 }
 
 static void
-gld_${EMULATION_NAME}_before_allocation (void)
+gld${EMULATION_NAME}_before_allocation (void)
 {
 #ifdef TARGET_IS_armpe
   /* FIXME: we should be able to set the size of the interworking stub
@@ -710,7 +710,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 }
 
 static char *
-gld_${EMULATION_NAME}_get_script (int *isfile)
+gld${EMULATION_NAME}_get_script (int *isfile)
 EOF
 
 if test x"$COMPILE_IN" = xyes
@@ -759,42 +759,11 @@ fragment <<EOF
 EOF
 fi
 
-fragment <<EOF
+LDEMUL_AFTER_OPEN=gld${EMULATION_NAME}_after_open
+LDEMUL_BEFORE_ALLOCATION=gld${EMULATION_NAME}_before_allocation
+LDEMUL_PLACE_ORPHAN=gld${EMULATION_NAME}_place_orphan
+LDEMUL_SET_SYMBOLS=gld${EMULATION_NAME}_set_symbols
+LDEMUL_ADD_OPTIONS=gld${EMULATION_NAME}_add_options
+LDEMUL_HANDLE_OPTION=gld${EMULATION_NAME}_handle_option
 
-
-struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation =
-{
-  gld_${EMULATION_NAME}_before_parse,
-  syslib_default,
-  hll_default,
-  after_parse_default,
-  gld_${EMULATION_NAME}_after_open,
-  after_check_relocs_default,
-  before_place_orphans_default,
-  after_allocation_default,
-  set_output_arch_default,
-  ldemul_default_target,
-  gld_${EMULATION_NAME}_before_allocation,
-  gld_${EMULATION_NAME}_get_script,
-  "${EMULATION_NAME}",
-  "${OUTPUT_FORMAT}",
-  finish_default,
-  NULL, /* create output section statements */
-  NULL, /* open dynamic archive */
-  gld${EMULATION_NAME}_place_orphan,
-  gld_${EMULATION_NAME}_set_symbols,
-  NULL, /* parse_args */
-  gld${EMULATION_NAME}_add_options,
-  gld${EMULATION_NAME}_handle_option,
-  NULL,	/* unrecognized file */
-  NULL,	/* list options */
-  NULL,	/* recognized file */
-  NULL,	/* find_potential_libraries */
-  NULL,	/* new_vers_pattern */
-  NULL,	/* extra_map_file_text */
-  ${LDEMUL_EMIT_CTF_EARLY-NULL},
-  ${LDEMUL_ACQUIRE_STRINGS_FOR_CTF-NULL},
-  ${LDEMUL_NEW_DYNSYM_FOR_CTF-NULL},
-  ${LDEMUL_PRINT_SYMBOL-NULL}
-};
-EOF
+source_em ${srcdir}/emultempl/emulation.em

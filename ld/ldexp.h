@@ -136,7 +136,10 @@ enum relro_enum {
 typedef struct {
   enum phase_enum phase;
 
-  bfd_vma base, relro_offset, relro_end, end, pagesize, maxpagesize;
+  bfd_vma base, relro_offset, relro_end, end;
+  /* MAXPAGESIZE and COMMMONPAGESIZE as passed to DATA_SEGMENT_ALIGN.
+     relropagesize sets the alignment of the end of the relro segment.  */
+  bfd_vma maxpagesize, commonpagesize, relropagesize;
 
   enum relro_enum relro;
 

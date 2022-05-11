@@ -55,6 +55,10 @@ Term::check_region_contents "check cmd window" 0 16 80 8 \
 Term::command "tui new-layout flip cmd 1 src 1"
 Term::command "layout flip"
 
+Term::check_box "src window" 0 8 80 16
+Term::command "winheight cmd 8"
+Term::check_box "src window after resize" 0 8 80 16
+
 for {set i 10} {$i < 20} {incr i 1} {
     Term::command "p $i"
 }

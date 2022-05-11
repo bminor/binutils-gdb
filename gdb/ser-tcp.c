@@ -296,8 +296,8 @@ net_open (struct serial *scb, const char *name)
 
   if (r != 0)
     {
-      fprintf_unfiltered (gdb_stderr, _("%s: cannot resolve name: %s\n"),
-			  name, gai_strerror (r));
+      gdb_printf (gdb_stderr, _("%s: cannot resolve name: %s\n"),
+		  name, gai_strerror (r));
       errno = ENOENT;
       return -1;
     }

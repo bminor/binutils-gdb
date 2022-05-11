@@ -45,28 +45,6 @@ set x86_64tests {
     {"basic PLT generation"
      "-melf_x86_64 tmpdir/libpltlib.so" "" "--64" {plt.s}
      {{objdump -drj.plt plt.pd}} "plt"}
-    {"TLS -fpic -shared transitions"
-     "-shared -melf_x86_64 --no-ld-generated-unwind-info \
-      -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv" ""
-     "--64" {tlspic1.s tlspic2.s}
-     {{readelf -WSsrl tlspic.rd} {objdump -drj.text\ -Mintel64 tlspic.dd}
-      {objdump -sj.got tlspic.sd} {objdump -sj.tdata tlspic.td}}
-      "libtlspic.so"}
-    {"TLS -fpic -shared transitions with r15 as GOT base"
-     "-shared -melf_x86_64 --no-ld-generated-unwind-info \
-      -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv" ""
-     "--64 -mrelax-relocations=yes"
-     {tlspic3.s tlspic2.s}
-     {{readelf -WSsrl tlspic2.rd} {objdump -drj.text\ -Mintel64 tlspic2.dd}
-      {objdump -sj.got tlspic2.sd} {objdump -sj.tdata tlspic2.td}}
-      "libtlspic2.so"}
-    {"TLS descriptor -fpic -shared transitions"
-     "-shared -melf_x86_64 --no-ld-generated-unwind-info \
-      -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv" ""
-     "--64" {tlsdesc.s tlspic2.s}
-     {{readelf -WSsrld tlsdesc.rd} {objdump -drj.text tlsdesc.dd}
-      {objdump "-s -j.got -j.got.plt" tlsdesc.sd} {objdump -sj.tdata tlsdesc.td}
-      {objdump -drj.plt tlsdesc.pd}} "libtlsdesc.so"}
     {"Helper shared library" "-shared -melf_x86_64" ""
      "--64" {tlslib.s} {} "libtlslib.so"}
     {"TLS -fpic and -fno-pic exec transitions"
@@ -240,6 +218,49 @@ set x86_64tests {
 
 run_ld_link_tests $x86_64tests
 
+run_ld_link_tests [list \
+    [list \
+	"TLS -fpic -shared transitions" \
+	"-shared -melf_x86_64 --no-ld-generated-unwind-info \
+	 -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv \
+	 $NO_DT_RELR_LDFLAGS" \
+	"" "--64" \
+	{tlspic1.s tlspic2.s} \
+	{{readelf -WSsrl tlspic.rd} \
+	 {objdump {-drj.text -Mintel64} tlspic.dd} \
+	 {objdump -sj.got tlspic.sd} \
+	 {objdump -sj.tdata tlspic.td}} \
+	"libtlspic.so" \
+    ] \
+    [list \
+	"TLS -fpic -shared transitions with r15 as GOT base" \
+	"-shared -melf_x86_64 --no-ld-generated-unwind-info \
+	 -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv \
+	 $NO_DT_RELR_LDFLAGS" \
+	 "" "--64 -mrelax-relocations=yes" \
+	{tlspic3.s tlspic2.s} \
+	{{readelf -WSsrl tlspic2.rd} \
+	 {objdump {-drj.text -Mintel64} tlspic2.dd} \
+	 {objdump -sj.got tlspic2.sd} \
+	 {objdump -sj.tdata tlspic2.td}} \
+	"libtlspic2.so" \
+    ] \
+    [list \
+	"TLS descriptor -fpic -shared transitions" \
+	"-shared -melf_x86_64 --no-ld-generated-unwind-info \
+	 -z noseparate-code -z max-page-size=0x200000 --hash-style=sysv \
+	 $NO_DT_RELR_LDFLAGS" \
+	"" "--64" \
+	{tlsdesc.s tlspic2.s} \
+	{{readelf -WSsrld tlsdesc.rd} \
+	 {objdump -drj.text tlsdesc.dd} \
+	 {objdump {-s -j.got -j.got.plt} tlsdesc.sd} \
+	 {objdump -sj.tdata tlsdesc.td} \
+	 {objdump -drj.plt tlsdesc.pd}} \
+	 "libtlsdesc.so" \
+    ] \
+]
+
 set test_name "Mixed x86_64 and i386 input test 1"
 set test mixed1
 if { ![ld_link $ld tmpdir/$test "-m$emul tmpdir/${test}a.o tmpdir/${test}b.o"] } {
@@ -261,8 +282,6 @@ if { ![ld_link $ld tmpdir/$test "-m$emul tmpdir/${test}a.o tmpdir/${test}b.o"] }
 }
 
 run_dump_test "abs"
-run_dump_test "abs-k1om"
-run_dump_test "abs-l1om"
 run_dump_test "apic"
 run_dump_test "pcrel8"
 run_dump_test "pcrel16"
@@ -281,11 +300,7 @@ run_dump_test "hidden4"
 run_dump_test "hidden5"
 run_dump_test "protected1"
 run_dump_test "protected2"
-run_dump_test "protected2-k1om"
-run_dump_test "protected2-l1om"
 run_dump_test "protected3"
-run_dump_test "protected3-k1om"
-run_dump_test "protected3-l1om"
 run_dump_test "protected4"
 run_dump_test "protected5"
 run_dump_test "protected6a"
@@ -486,6 +501,10 @@ run_dump_test "pr27491-1c"
 run_dump_test "pr27491-2"
 run_dump_test "pr27491-3"
 run_dump_test "pr27491-4"
+run_dump_test "dt-relr-1a"
+run_dump_test "dt-relr-1a-x32"
+run_dump_test "dt-relr-1b"
+run_dump_test "dt-relr-1b-x32"
 
 if ![istarget "x86_64-*-linux*"] {
     return
@@ -1357,6 +1376,14 @@ if { [isnative] && [check_compiler_available] } {
 	    "libprotected-func-2b.so" \
 	] \
 	[list \
+	    "Build protected-func-2 without PIE" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-func-2b.so" \
+	    "$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
+	    { protected-func-1b.c } \
+	    {{error_output "pr28875-func.err"}} \
+	    "protected-func-2" \
+	] \
+	[list \
 	    "Build libprotected-data-1a.so" \
 	    "-shared -z noindirect-extern-access" \
 	    "-fPIC -Wa,-mx86-used-note=yes" \
@@ -1377,7 +1404,7 @@ if { [isnative] && [check_compiler_available] } {
 	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-data-1b.so" \
 	    "$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
 	    { protected-data-1b.c } \
-	    {} \
+	    {{error_output "pr28875-data.err"}} \
 	    "protected-data-1" \
 	] \
 	[list \
@@ -1443,6 +1470,14 @@ if { [isnative] && [check_compiler_available] } {
 		"-Wa,-mx86-used-note=yes" \
 		{ pr25416-5d.s } \
 	    ] \
+	    [list \
+		"Build pr21997-1b" \
+		"$NOPIE_LDFLAGS -Wl,--no-as-needed,-z,notext tmpdir/pr21997-1.so" \
+		"$NOPIE_CFLAGS -Wa,-mx86-used-note=yes" \
+		{ pr21997-1c.c } \
+		{{error_output "pr21997-1b.err"}} \
+		"pr21997-1b" \
+	    ] \
 	]
 
 	run_ld_link_exec_tests [list \
@@ -1452,15 +1487,6 @@ if { [isnative] && [check_compiler_available] } {
 		"-Wa,-mx86-used-note=yes" \
 		{ pr22001-1c.c } \
 		"pr22001-1b" \
-		"pass.out" \
-		"$NOPIE_CFLAGS" \
-	    ] \
-	    [list \
-		"Run pr21997-1b" \
-		"$NOPIE_LDFLAGS -Wl,--no-as-needed,-z,notext tmpdir/pr21997-1.so" \
-		"-Wa,-mx86-used-note=yes" \
-		{ pr21997-1c.c } \
-		"pr21997-1b" \
 		"pass.out" \
 		"$NOPIE_CFLAGS" \
 	    ] \
@@ -1857,6 +1883,24 @@ if { [isnative] && [check_compiler_available] } {
 	    "-Wa,-mx86-used-note=yes" \
 	    { protected-func-2b.S } \
 	    "protected-func-2d" \
+	    "pass.out" \
+	    "-fPIE" \
+	] \
+	[list \
+	    "Run protected-func-3a without PIE" \
+	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-func-2a.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-func-3.c } \
+	    "protected-func-3a" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run protected-func-3b with PIE" \
+	    "-Wl,--no-as-needed -pie tmpdir/libprotected-func-2a.so" \
+	    "-Wa,-mx86-used-note=yes" \
+	    { protected-func-3.c } \
+	    "protected-func-2b" \
 	    "pass.out" \
 	    "-fPIE" \
 	] \
@@ -2288,8 +2332,8 @@ run_ld_link_tests [list \
     ] \
 ]
 
-# Linux only tests
-if { "$LD_CLASS" == "64bit" } then {
+# Linux only tests.  Disabled due to large memory requirement.
+if { "x$LD_CLASS" == "64bit" } then {
     # This test needs 64-bit linker.
     run_dump_test "pr17618"
 }

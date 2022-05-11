@@ -22,12 +22,14 @@
 #include "arm.h"
 
 #include "../features/arm/arm-core.c"
+#include "../features/arm/arm-tls.c"
 #include "../features/arm/arm-vfpv2.c"
 #include "../features/arm/arm-vfpv3.c"
 #include "../features/arm/xscale-iwmmxt.c"
 #include "../features/arm/arm-m-profile.c"
 #include "../features/arm/arm-m-profile-with-fpa.c"
 #include "../features/arm/arm-m-profile-mve.c"
+#include "../features/arm/arm-m-system.c"
 
 /* See arm.h.  */
 
@@ -373,7 +375,7 @@ shifted_reg_val (struct regcache *regcache, unsigned long inst,
 /* See arch/arm.h.  */
 
 target_desc *
-arm_create_target_description (arm_fp_type fp_type)
+arm_create_target_description (arm_fp_type fp_type, bool tls)
 {
   target_desc_up tdesc = allocate_target_description ();
 
@@ -408,6 +410,9 @@ arm_create_target_description (arm_fp_type fp_type)
     default:
       error (_("Invalid Arm FP type: %d"), fp_type);
     }
+
+  if (tls)
+    regnum = create_feature_arm_arm_tls (tdesc.get (), regnum);
 
   return tdesc.release ();
 }
@@ -444,6 +449,11 @@ arm_create_mprofile_target_description (arm_m_profile_type m_type)
       regnum = create_feature_arm_arm_m_profile (tdesc, regnum);
       regnum = create_feature_arm_arm_vfpv2 (tdesc, regnum);
       regnum = create_feature_arm_arm_m_profile_mve (tdesc, regnum);
+      break;
+
+    case ARM_M_TYPE_SYSTEM:
+      regnum = create_feature_arm_arm_m_profile (tdesc, regnum);
+      regnum = create_feature_arm_arm_m_system (tdesc, regnum);
       break;
 
     default:

@@ -20,7 +20,7 @@
 #define NAMESPACE_H
 
 #include "gdbsupport/gdb_vecs.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 
 /* This struct is designed to store data from using directives.  It
    says that names from namespace IMPORT_SRC should be visible within

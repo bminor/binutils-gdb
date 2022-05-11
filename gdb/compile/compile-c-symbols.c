@@ -57,17 +57,17 @@ convert_one_symbol (compile_c_instance *context,
 		    int is_local)
 {
   gcc_type sym_type;
-  const char *filename = symbol_symtab (sym.symbol)->filename;
-  unsigned short line = SYMBOL_LINE (sym.symbol);
+  const char *filename = sym.symbol->symtab ()->filename;
+  unsigned short line = sym.symbol->line ();
 
   context->error_symbol_once (sym.symbol);
 
-  if (SYMBOL_CLASS (sym.symbol) == LOC_LABEL)
+  if (sym.symbol->aclass () == LOC_LABEL)
     sym_type = 0;
   else
-    sym_type = context->convert_type (SYMBOL_TYPE (sym.symbol));
+    sym_type = context->convert_type (sym.symbol->type ());
 
-  if (SYMBOL_DOMAIN (sym.symbol) == STRUCT_DOMAIN)
+  if (sym.symbol->domain () == STRUCT_DOMAIN)
     {
       /* Binding a tag, so we don't need to build a decl.  */
       context->plugin ().tagbind (sym.symbol->natural_name (),
@@ -80,7 +80,7 @@ convert_one_symbol (compile_c_instance *context,
       CORE_ADDR addr = 0;
       gdb::unique_xmalloc_ptr<char> symbol_name;
 
-      switch (SYMBOL_CLASS (sym.symbol))
+      switch (sym.symbol->aclass ())
 	{
 	case LOC_TYPEDEF:
 	  kind = GCC_C_SYMBOL_TYPEDEF;
@@ -88,25 +88,25 @@ convert_one_symbol (compile_c_instance *context,
 
 	case LOC_LABEL:
 	  kind = GCC_C_SYMBOL_LABEL;
-	  addr = SYMBOL_VALUE_ADDRESS (sym.symbol);
+	  addr = sym.symbol->value_address ();
 	  break;
 
 	case LOC_BLOCK:
 	  kind = GCC_C_SYMBOL_FUNCTION;
-	  addr = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym.symbol));
-	  if (is_global && SYMBOL_TYPE (sym.symbol)->is_gnu_ifunc ())
+	  addr = sym.symbol->value_block ()->entry_pc ();
+	  if (is_global && sym.symbol->type ()->is_gnu_ifunc ())
 	    addr = gnu_ifunc_resolve_addr (target_gdbarch (), addr);
 	  break;
 
 	case LOC_CONST:
-	  if (SYMBOL_TYPE (sym.symbol)->code () == TYPE_CODE_ENUM)
+	  if (sym.symbol->type ()->code () == TYPE_CODE_ENUM)
 	    {
 	      /* Already handled by convert_enum.  */
 	      return;
 	    }
 	  context->plugin ().build_constant
 	    (sym_type, sym.symbol->natural_name (),
-	     SYMBOL_VALUE (sym.symbol),
+	     sym.symbol->value_longest (),
 	     filename, line);
 	  return;
 
@@ -179,7 +179,7 @@ convert_one_symbol (compile_c_instance *context,
 
 	case LOC_STATIC:
 	  kind = GCC_C_SYMBOL_VARIABLE;
-	  addr = SYMBOL_VALUE_ADDRESS (sym.symbol);
+	  addr = sym.symbol->value_address ();
 	  break;
 
 	case LOC_FINAL_VALUE:
@@ -241,17 +241,17 @@ convert_symbol_sym (compile_c_instance *context, const char *identifier,
 	  && global_sym.block != block_static_block (global_sym.block))
 	{
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"gcc_convert_symbol \"%s\": global symbol\n",
-				identifier);
+	    gdb_printf (gdb_stdlog,
+			"gcc_convert_symbol \"%s\": global symbol\n",
+			identifier);
 	  convert_one_symbol (context, global_sym, 1, 0);
 	}
     }
 
   if (compile_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"gcc_convert_symbol \"%s\": local symbol\n",
-			identifier);
+    gdb_printf (gdb_stdlog,
+		"gcc_convert_symbol \"%s\": local symbol\n",
+		identifier);
   convert_one_symbol (context, sym, 0, is_local_symbol);
 }
 
@@ -270,10 +270,10 @@ convert_symbol_bmsym (compile_c_instance *context,
   gcc_decl decl;
   CORE_ADDR addr;
 
-  addr = MSYMBOL_VALUE_ADDRESS (objfile, msym);
+  addr = msym->value_address (objfile);
 
   /* Conversion copied from write_exp_msymbol.  */
-  switch (MSYMBOL_TYPE (msym))
+  switch (msym->type ())
     {
     case mst_text:
     case mst_file_text:
@@ -373,9 +373,9 @@ gcc_convert_symbol (void *datum,
     }
 
   if (compile_debug && !found)
-    fprintf_unfiltered (gdb_stdlog,
-			"gcc_convert_symbol \"%s\": lookup_symbol failed\n",
-			identifier);
+    gdb_printf (gdb_stdlog,
+		"gcc_convert_symbol \"%s\": lookup_symbol failed\n",
+		identifier);
   return;
 }
 
@@ -398,14 +398,14 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 
       /* We only need global functions here.  */
       sym = lookup_symbol (identifier, NULL, VAR_DOMAIN, NULL).symbol;
-      if (sym != NULL && SYMBOL_CLASS (sym) == LOC_BLOCK)
+      if (sym != NULL && sym->aclass () == LOC_BLOCK)
 	{
 	  if (compile_debug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"gcc_symbol_address \"%s\": full symbol\n",
-				identifier);
-	  result = BLOCK_ENTRY_PC (SYMBOL_BLOCK_VALUE (sym));
-	  if (SYMBOL_TYPE (sym)->is_gnu_ifunc ())
+	    gdb_printf (gdb_stdlog,
+			"gcc_symbol_address \"%s\": full symbol\n",
+			identifier);
+	  result = sym->value_block ()->entry_pc ();
+	  if (sym->type ()->is_gnu_ifunc ())
 	    result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
 	  found = 1;
 	}
@@ -417,12 +417,12 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
 	  if (msym.minsym != NULL)
 	    {
 	      if (compile_debug)
-		fprintf_unfiltered (gdb_stdlog,
-				    "gcc_symbol_address \"%s\": minimal "
-				    "symbol\n",
-				    identifier);
-	      result = BMSYMBOL_VALUE_ADDRESS (msym);
-	      if (MSYMBOL_TYPE (msym.minsym) == mst_text_gnu_ifunc)
+		gdb_printf (gdb_stdlog,
+			    "gcc_symbol_address \"%s\": minimal "
+			    "symbol\n",
+			    identifier);
+	      result = msym.value_address ();
+	      if (msym.minsym->type () == mst_text_gnu_ifunc)
 		result = gnu_ifunc_resolve_addr (target_gdbarch (), result);
 	      found = 1;
 	    }
@@ -435,9 +435,9 @@ gcc_symbol_address (void *datum, struct gcc_c_context *gcc_context,
     }
 
   if (compile_debug && !found)
-    fprintf_unfiltered (gdb_stdlog,
-			"gcc_symbol_address \"%s\": failed\n",
-			identifier);
+    gdb_printf (gdb_stdlog,
+		"gcc_symbol_address \"%s\": failed\n",
+		identifier);
   return result;
 }
 
@@ -548,14 +548,14 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 
   try
     {
-      if (is_dynamic_type (SYMBOL_TYPE (sym)))
+      if (is_dynamic_type (sym->type ()))
 	{
 	  /* We need to emit to a temporary buffer in case an error
 	     occurs in the middle.  */
 	  string_file local_file;
 
 	  generate_vla_size (compiler, &local_file, gdbarch, registers_used, pc,
-			     SYMBOL_TYPE (sym), sym);
+			     sym->type (), sym);
 
 	  stream->write (local_file.c_str (), local_file.size ());
 	}
@@ -577,7 +577,7 @@ generate_c_for_for_one_variable (compile_instance *compiler,
 	}
       else
 	{
-	  switch (SYMBOL_CLASS (sym))
+	  switch (sym->aclass ())
 	    {
 	    case LOC_REGISTER:
 	    case LOC_ARG:
@@ -645,9 +645,9 @@ generate_c_for_variable_locations (compile_instance *compiler,
 
       /* If we just finished the outermost block of a function, we're
 	 done.  */
-      if (BLOCK_FUNCTION (block) != NULL)
+      if (block->function () != NULL)
 	break;
-      block = BLOCK_SUPERBLOCK (block);
+      block = block->superblock ();
     }
 
   return registers_used;

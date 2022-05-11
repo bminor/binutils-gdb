@@ -1,3 +1,261 @@
+2022-04-27  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_freebsd_note): Handle NT_ARM_TLS notes.
+
+2022-04-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 29072
+	* elflink.c (bfd_elf_size_dynamic_sections): Display a note to the
+	user that the current ehaviour of creating an executable stack
+	because of a missing .note.GNU-stack section is deprecated and
+	will be changed in a future release.
+
+2022-04-20  Clément Chigot  <clement.chigot@atos.net>
+
+	* coff-rs6000.c (xcoff_reloc_type_noop): Add info argument.
+	(xcoff_reloc_type_fail): Likewise.
+	(xcoff_reloc_type_pos): Likewise.
+	(xcoff_reloc_type_neg): Likewise.
+	(xcoff_reloc_type_rel): Likewise.
+	(xcoff_reloc_type_toc): Likewise.
+	(xcoff_reloc_type_ba): Likewise.
+	(xcoff_reloc_type_crel): Likewise.
+	(xcoff_reloc_type_tls): Likewise.
+	(xcoff_reloc_type_br): Add stub handler.
+	(xcoff_ppc_relocate_section): Add info to
+	xcoff_calculate_relocation.
+	(xcoff_stub_indirect_call_code): New constant.
+	(xcoff_stub_shared_call_code): Likewise.
+	(bfd_xcoff_backend_data): Add stub code fields.
+	(bfd_pmac_xcoff_backend_data): Likewise.
+	* coff64-rs6000.c (xcoff64_reloc_type_br): Add stub handler.
+	(xcoff64_ppc_relocate_section): Add info to
+	xcoff64_calculate_relocation.
+	(xcoff64_stub_indirect_call_code): New constant.
+	(xcoff64_stub_shared_call_code): Likewise.
+	(bfd_xcoff_backend_data): Add stub code fields.
+	(bfd_xcoff_aix5_backend_data): Likewise.
+	* libxcoff.h (struct xcoff_backend_data_rec): Add stub fields.
+	(bfd_xcoff_stub_indirect_call_code): New define.
+	(bfd_xcoff_stub_indirect_call_size): New define.
+	(bfd_xcoff_stub_shared_call_code): New define.
+	(bfd_xcoff_stub_shared_call_size): New define.
+	(xcoff_reloc_function): Add info argument.
+	(enum xcoff_stub_type): New enum.
+	(struct xcoff_stub_hash_entry): New structure.
+	* xcofflink.c (struct xcoff_link_hash_table): Add stub hash
+	table and params fields.
+	(xcoff_stub_hash_entry): New define.
+	(xcoff_stub_hash_lookup): New define.
+	(stub_hash_newfunc): New function.
+	(_bfd_xcoff_bfd_link_hash_table_free): Free the new stub hash
+	table.
+	(_bfd_xcoff_bfd_link_hash_table_create): Create the new stub
+	hash table.
+	(xcoff_link_add_symbols): Save rawsize for XTY_SD.
+	(bfd_xcoff_link_init): New function.
+	(xcoff_stub_csect_name): New function.
+	(xcoff_stub_get_csect_in_range): New function.
+	(xcoff_stub_name): New function.
+	(bfd_xcoff_get_stub_entry): New function.
+	(bfd_xcoff_type_of_stub): New function.
+	(xcoff_add_stub): New function.
+	(xcoff_build_one_stub): New function.
+	(bfd_xcoff_size_stubs): New function.
+	(bfd_xcoff_build_stubs): New function.
+	(xcoff_stub_create_relocations): New function.
+	(xcoff_link_input_bfd): Adapt relocations to stub.
+	(xcoff_write_global_symbol): Adapt to new TOC entries generated
+	for stubs.
+	(_bfd_xcoff_bfd_final_link): Handle stub file.
+	* xcofflink.h (struct bfd_xcoff_link_params): New structure.
+
+2022-04-20  Clément Chigot  <clement.chigot@atos.net>
+
+	* coff-rs6000.c (_bfd_xcoff_put_ldsymbol_name): Write len in
+	ldinfo->strings instead of directly in the output_bfd.
+	* coff64-rs6000.c (_bfd_xcoff64_put_ldsymbol_name): Likewise.
+	* xcofflink.c (struct xcoff_link_hash_table): Remove ldrel_count
+	field. Add ldinfo field.
+	(xcoff_mark_symbol): Adjust to new ldinfo field.
+	(xcoff_mark): Likewise.
+	(bfd_xcoff_link_count_reloc): Likewise.
+	(xcoff_build_loader_section): Split into two functions: one that
+	build the loader section (this function) and one that only size
+	it...
+	(xcoff_size_loader_section): ... (this function).
+	(bfd_xcoff_size_dynamic_sections): Adapt to new ldinfo field.
+	Move the part where the dynamic sections are build to ...
+	(bfd_xcoff_build_dynamic_sections): ... this function.
+	* xcofflink.h: Add bfd_xcoff_build_dynamic_sections prototype.
+
+2022-04-13  Alexander von Gluck IV  <kallisti5@unixzen.com>
+
+	* config.bfd (x86-haiku): Add i386_pei_vec as a selectable format.
+
+2022-04-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 29038
+	* coffgen.c (coff_find_nearest_line_with_names): Fix typo
+	retrieving saved bias.
+
+2022-04-07  Mark Harmstone  <mark@harmstone.com>
+
+	* coff-i386.c (in_reloc_p): Add R_SECTION.
+	(howto_table): Add R_SECTION.
+	(coff_pe_i386_relocation_section): Add support for R_SECTION.
+	(coff_i386_reloc_type_lookup): Add support for
+	BFD_RELOC_16_SECCIDX.
+	* coff-x86_64.c (in_reloc_p): Add R_SECTION.
+	(howto_table): Add R_SECTION.
+	(coff_pe_amd64_relocation_section): Add support for R_SECTION.
+	(coff_amd64_reloc_type_lookup): Add support for
+	BFD_RELOC_16_SECCIDX.
+	* reloc.c: Add BFD_RELOC_16_SECIDX.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
+2022-04-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf-bfd.h (elfcore_write_x86_segbases): New.
+	* elf.c (elfcore_grok_freebsd_note): Add pseudosections for
+	NT_FREEBSD_X86_SEGBASES register notes.
+	(elfcore_write_x86_segbases): New.
+	(elfcore_write_register_note): Write NT_FREEBSD_X86_SEGBASES
+	register notes.
+
+2022-04-01  John Baldwin  <jhb@FreeBSD.org>
+
+	* elf.c (elfcore_grok_freebsd_note): Remove checks for namesz.
+
+2022-03-22  Steiner H Gunderson  <steinar+sourceware@gunderson.no>
+
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): if a function name is
+	found, but no line number info, then return a result of 2.
+
+2022-03-21  Steiner H Gunderson  <steinar+sourceware@gunderson.no>
+
+	PR 28978
+	* dwarf2.c (scan_unit_for_symbols): When performing second pass,
+	check to see if the function or variable being processed is the
+	same as the previous one.
+
+2022-03-18  Viorel Preoteasa  <viorel.preoteasa@gmail.com>
+
+	PR 28924
+	* elf32-arm.c (THM_MAX_FWD_BRANCH_OFFSET): Fix definition.
+	(THM2_MAX_FWD_BRANCH_OFFSET): Likewise.
+
+2022-03-16  Simon Marchi  <simon.marchi@efficios.com>
+
+	* Makefile.am (ALL_MACHINES, ALL_MACHINES_CFILES):
+	Add cpu-amdgcn.c.
+	(BFD64_BACKENDS): Add elf64-amdgcn.lo.
+	(BFD64_BACKENDS_CFILES): Add elf64-amdgcn.c.
+	* Makefile.in: Re-generate.
+	* cpu-amdgcn.c: New.
+	* elf64-amdgcn.c: New.
+	* archures.c (bfd_architecture): Add bfd_arch_amdgcn and related
+	mach defines.
+	(bfd_amdgcn_arch): New.
+	(bfd_archures_list): Add bfd_amdgcn_arch.
+	* bfd-in2.h: Re-generate.
+	* config.bfd: Handle amdgcn* target.
+	* configure.ac: Handle amdgcn_elf64_le_vec.
+	* configure: Re-generate.
+	* elf-bfd.h (elf_target_id): Add AMDGCN_ELF_DATA.
+	* targets.c (amdgcn_elf64_le_vec): New.
+	(_bfd_target_vector): Add amdgcn_elf64_le_vec.
+
+2022-03-01  Torbjörn Svensson  <torbjorn.svensson@st.com>
+	    Fred Eisele  <fredrick.eisele@gmail.com>
+
+	PR 25713
+	* bfdio.c (_bfd_real_fopen): Fix typo.
+
+2022-03-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 28848
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): If the first
+	input bfd has a Tag_ABI_HardFP_use set to 3 but does not also have
+	TAG_FP_arch set then reset the TAG_ABI_HardFP_use.
+
+2022-02-28  Torbjörn Svensson  <torbjorn.svensson@st.com>
+	    Fred Eisele  <fredrick.eisele@gmail.com>
+
+	PR 25713
+	* bfdio.c (_bfd_real_fopen): Fix handling of paths longer than 260
+	characters on Windows hosts.
+
+2022-02-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 28886
+	* config.bfd: Update error message for obsolete configurations.
+
+2022-02-17  Nick Clifton  <nickc@redhat.com>
+
+	* po/sr.po: Updated Serbian translation.
+
+2022-02-16  Fangrui Song  <maskray@google.com>
+	Nick Clifton  <nickc@redhat.com>
+
+	PR ld/28841
+	* bfd-in2.h (struct bfd_section): Add type.
+	(discarded_section): Add field.
+	* elf.c (elf_fake_sections): Handle bfd_section::type.
+	* section.c (BFD_FAKE_SECTION): Add field.
+	* mri.c (mri_draw_tree): Update function call.
+
+2022-02-11  Michael Forney  <mforney@mforney.org>
+
+        * bfd.c (bfd_set_gp_value): Remove return with expression
+        in void function.
+
+2022-02-09  Nick Clifton  <nickc@redhat.com>
+
+	* config.bfd: Move pending obsolesence targets into the definitely
+	obsolete list.
+
+2022-02-02  Nick Clifton  <nickc@redhat.com>
+
+	PR 28834
+	* dwarf2.c (read_section): Change the heuristic that checks for
+	overlarge dwarf debug info sections.
+
+2022-02-02  Stafford Horne  <shorne@gmail.com>
+
+	PR 28735
+	* elf32-or1k.c (or1k_elf_got16_no_overflow_howto): Define.
+	(or1k_elf_relocate_section): Use new howto instead of trying to
+	mask out relocation bits.
+
+2022-01-24  Roland McGrath  <mcgrathr@google.com>
+
+	* doc/local.mk (%D%/bfdver.texi): Add mkdir command.
+
+2022-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* po/fr.po: Updated French translation.
+	* po/ro.po: Updated Romanian translation.
+	* po/uk.po: Updated Ukranian translation.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* version.m4: Change to 2.38.50.
+	* configure: Regenerate.
+	* po/bfd.pot: Regenerate.
+
+2022-01-22  Nick Clifton  <nickc@redhat.com>
+
+	* 2.38 release branch created.
+
+2022-01-17  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+
 2021-12-15  Nikita Popov  <npv1310@gmail.com>
 
 	PR 28687

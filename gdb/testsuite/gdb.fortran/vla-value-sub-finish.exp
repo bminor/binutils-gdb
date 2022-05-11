@@ -32,6 +32,8 @@ if ![fortran_runto_main] {
 # We need both variants as depending on the arch we optionally may still be
 # executing the caller line or not after `finish'.
 
+gdb_test_no_output "set print repeats unlimited"
+
 gdb_breakpoint [gdb_get_line_number "array2-almost-filled"]
 gdb_continue_to_breakpoint "array2-almost-filled"
 # array2 size is 296352 bytes.

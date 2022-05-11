@@ -38,6 +38,9 @@
 
 using namespace windows_nat;
 
+/* See win32-low.h.  */
+windows_process_info windows_process;
+
 #ifndef USE_WIN32API
 #include <sys/cygwin.h>
 #endif
@@ -111,7 +114,7 @@ static void
 win32_get_thread_context (windows_thread_info *th)
 {
 #ifdef __x86_64__
-  if (wow64_process)
+  if (windows_process.wow64_process)
     memset (&th->wow64_context, 0, sizeof (WOW64_CONTEXT));
   else
 #endif
@@ -125,7 +128,7 @@ static void
 win32_set_thread_context (windows_thread_info *th)
 {
 #ifdef __x86_64__
-  if (wow64_process)
+  if (windows_process.wow64_process)
     Wow64SetThreadContext (th->h, &th->wow64_context);
   else
 #endif
@@ -148,7 +151,7 @@ win32_require_context (windows_thread_info *th)
 {
   DWORD context_flags;
 #ifdef __x86_64__
-  if (wow64_process)
+  if (windows_process.wow64_process)
     context_flags = th->wow64_context.ContextFlags;
   else
 #endif
@@ -163,7 +166,8 @@ win32_require_context (windows_thread_info *th)
 /* See nat/windows-nat.h.  */
 
 windows_thread_info *
-windows_nat::thread_rec (ptid_t ptid, thread_disposition_type disposition)
+windows_nat::windows_process_info::thread_rec
+     (ptid_t ptid, thread_disposition_type disposition)
 {
   thread_info *thread = find_thread_ptid (ptid);
   if (thread == NULL)
@@ -182,14 +186,14 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
   windows_thread_info *th;
   ptid_t ptid = ptid_t (pid, tid, 0);
 
-  if ((th = thread_rec (ptid, DONT_INVALIDATE_CONTEXT)))
+  if ((th = windows_process.thread_rec (ptid, DONT_INVALIDATE_CONTEXT)))
     return th;
 
   CORE_ADDR base = (CORE_ADDR) (uintptr_t) tlb;
 #ifdef __x86_64__
   /* For WOW64 processes, this is actually the pointer to the 64bit TIB,
      and the 32bit TIB is exactly 2 pages after it.  */
-  if (wow64_process)
+  if (windows_process.wow64_process)
     base += 2 * 4096; /* page size = 4096 */
 #endif
   th = new windows_thread_info (tid, h, base);
@@ -295,15 +299,15 @@ child_xfer_memory (CORE_ADDR memaddr, char *our, int len,
 
   if (write)
     {
-      success = WriteProcessMemory (current_process_handle, (LPVOID) addr,
+      success = WriteProcessMemory (windows_process.handle, (LPVOID) addr,
 				    (LPCVOID) our, len, &done);
       if (!success)
 	lasterror = GetLastError ();
-      FlushInstructionCache (current_process_handle, (LPCVOID) addr, len);
+      FlushInstructionCache (windows_process.handle, (LPCVOID) addr, len);
     }
   else
     {
-      success = ReadProcessMemory (current_process_handle, (LPCVOID) addr,
+      success = ReadProcessMemory (windows_process.handle, (LPCVOID) addr,
 				   (LPVOID) our, len, &done);
       if (!success)
 	lasterror = GetLastError ();
@@ -331,17 +335,17 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 {
   struct process_info *proc;
 
-  last_sig = GDB_SIGNAL_0;
-
-  current_process_handle = proch;
-  current_process_id = pid;
-  main_thread_id = 0;
+  windows_process.last_sig = GDB_SIGNAL_0;
+  windows_process.handle = proch;
+  windows_process.id = pid;
+  windows_process.main_thread_id = 0;
 
   soft_interrupt_requested = 0;
   faked_breakpoint = 0;
   open_process_used = true;
 
-  memset (&current_event, 0, sizeof (current_event));
+  memset (&windows_process.current_event, 0,
+	  sizeof (windows_process.current_event));
 
 #ifdef __x86_64__
   BOOL wow64;
@@ -351,19 +355,20 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
       error ("Check if WOW64 process failed (error %d): %s\n",
 	     (int) err, strwinerror (err));
     }
-  wow64_process = wow64;
+  windows_process.wow64_process = wow64;
 
-  if (wow64_process
+  if (windows_process.wow64_process
       && (Wow64GetThreadContext == nullptr
 	  || Wow64SetThreadContext == nullptr))
     error ("WOW64 debugging is not supported on this system.\n");
 
-  ignore_first_breakpoint = !attached && wow64_process;
+  windows_process.ignore_first_breakpoint
+    = !attached && windows_process.wow64_process;
 #endif
 
   proc = add_process (pid, attached);
 #ifdef __x86_64__
-  if (wow64_process)
+  if (windows_process.wow64_process)
     proc->tdesc = wow64_win32_tdesc;
   else
 #endif
@@ -417,7 +422,7 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
      Rather than try to work around this sort of issue, it is much
      simpler to just ignore DLL load/unload events during the startup
      phase, and then process them all in one batch now.  */
-  windows_add_all_dlls ();
+  windows_process.add_all_dlls ();
 
   child_initialization_done = 1;
 }
@@ -437,7 +442,7 @@ continue_one_thread (thread_info *thread, int thread_id)
 	{
 	  DWORD *context_flags;
 #ifdef __x86_64__
-	  if (wow64_process)
+	  if (windows_process.wow64_process)
 	    context_flags = &th->wow64_context.ContextFlags;
 	  else
 #endif
@@ -456,8 +461,8 @@ continue_one_thread (thread_info *thread, int thread_id)
 static BOOL
 child_continue (DWORD continue_status, int thread_id)
 {
-  desired_stop_thread_id = thread_id;
-  if (matching_pending_stop (debug_threads))
+  windows_process.desired_stop_thread_id = thread_id;
+  if (windows_process.matching_pending_stop (debug_threads))
     return TRUE;
 
   /* The inferior will only continue after the ContinueDebugEvent
@@ -476,8 +481,9 @@ static void
 child_fetch_inferior_registers (struct regcache *regcache, int r)
 {
   int regno;
-  windows_thread_info *th = thread_rec (current_thread_ptid (),
-					INVALIDATE_CONTEXT);
+  windows_thread_info *th
+    = windows_process.thread_rec (current_thread_ptid (),
+				  INVALIDATE_CONTEXT);
   if (r == -1 || r > NUM_REGS)
     child_fetch_inferior_registers (regcache, NUM_REGS);
   else
@@ -491,8 +497,9 @@ static void
 child_store_inferior_registers (struct regcache *regcache, int r)
 {
   int regno;
-  windows_thread_info *th = thread_rec (current_thread_ptid (),
-					INVALIDATE_CONTEXT);
+  windows_thread_info *th
+    = windows_process.thread_rec (current_thread_ptid (),
+				  INVALIDATE_CONTEXT);
   if (r == -1 || r == 0 || r > NUM_REGS)
     child_store_inferior_registers (regcache, NUM_REGS);
   else
@@ -671,12 +678,12 @@ win32_process_target::create_inferior (const char *program,
 
   /* Wait till we are at 1st instruction in program, return new pid
      (assuming success).  */
-  cs.last_ptid = wait (ptid_t (current_process_id), &cs.last_status, 0);
+  cs.last_ptid = wait (ptid_t (windows_process.id), &cs.last_status, 0);
 
   /* Necessary for handle_v_kill.  */
-  signal_pid = current_process_id;
+  signal_pid = windows_process.id;
 
-  return current_process_id;
+  return windows_process.id;
 }
 
 /* Attach to a running process.
@@ -712,7 +719,8 @@ win32_process_target::attach (unsigned long pid)
 /* See nat/windows-nat.h.  */
 
 int
-windows_nat::handle_output_debug_string (struct target_waitstatus *ourstatus)
+windows_nat::windows_process_info::handle_output_debug_string
+     (struct target_waitstatus *ourstatus)
 {
 #define READ_BUFFER_LEN 1024
   CORE_ADDR addr;
@@ -762,12 +770,12 @@ win32_clear_inferiors (void)
 {
   if (open_process_used)
     {
-      CloseHandle (current_process_handle);
+      CloseHandle (windows_process.handle);
       open_process_used = false;
     }
 
   for_each_thread (delete_thread_info);
-  siginfo_er.ExceptionCode = 0;
+  windows_process.siginfo_er.ExceptionCode = 0;
   clear_inferiors ();
 }
 
@@ -776,17 +784,19 @@ win32_clear_inferiors (void)
 int
 win32_process_target::kill (process_info *process)
 {
-  TerminateProcess (current_process_handle, 0);
+  TerminateProcess (windows_process.handle, 0);
   for (;;)
     {
       if (!child_continue (DBG_CONTINUE, -1))
 	break;
-      if (!wait_for_debug_event (&current_event, INFINITE))
+      if (!wait_for_debug_event (&windows_process.current_event, INFINITE))
 	break;
-      if (current_event.dwDebugEventCode == EXIT_PROCESS_DEBUG_EVENT)
+      if (windows_process.current_event.dwDebugEventCode
+	  == EXIT_PROCESS_DEBUG_EVENT)
 	break;
-      else if (current_event.dwDebugEventCode == OUTPUT_DEBUG_STRING_EVENT)
-	handle_output_debug_string (nullptr);
+      else if (windows_process.current_event.dwDebugEventCode
+	       == OUTPUT_DEBUG_STRING_EVENT)
+	windows_process.handle_output_debug_string (nullptr);
     }
 
   win32_clear_inferiors ();
@@ -806,7 +816,7 @@ win32_process_target::detach (process_info *process)
   resume.sig = 0;
   this->resume (&resume, 1);
 
-  if (!DebugActiveProcessStop (current_process_id))
+  if (!DebugActiveProcessStop (windows_process.id))
     return -1;
 
   DebugSetProcessKillOnExit (FALSE);
@@ -866,7 +876,7 @@ win32_process_target::resume (thread_resume *resume_info, size_t n)
   else
     /* Yes, we're ignoring resume_info[0].thread.  It'd be tricky to make
        the Windows resume code do the right thing for thread switching.  */
-    tid = current_event.dwThreadId;
+    tid = windows_process.current_event.dwThreadId;
 
   if (resume_info[0].thread != minus_one_ptid)
     {
@@ -881,30 +891,31 @@ win32_process_target::resume (thread_resume *resume_info, size_t n)
 
   if (sig != GDB_SIGNAL_0)
     {
-      if (current_event.dwDebugEventCode != EXCEPTION_DEBUG_EVENT)
+      if (windows_process.current_event.dwDebugEventCode
+	  != EXCEPTION_DEBUG_EVENT)
 	{
 	  OUTMSG (("Cannot continue with signal %s here.\n",
 		   gdb_signal_to_string (sig)));
 	}
-      else if (sig == last_sig)
+      else if (sig == windows_process.last_sig)
 	continue_status = DBG_EXCEPTION_NOT_HANDLED;
       else
 	OUTMSG (("Can only continue with received signal %s.\n",
-		 gdb_signal_to_string (last_sig)));
+		 gdb_signal_to_string (windows_process.last_sig)));
     }
 
-  last_sig = GDB_SIGNAL_0;
+  windows_process.last_sig = GDB_SIGNAL_0;
 
   /* Get context for the currently selected thread.  */
-  ptid = debug_event_ptid (&current_event);
-  th = thread_rec (ptid, DONT_INVALIDATE_CONTEXT);
+  ptid = debug_event_ptid (&windows_process.current_event);
+  th = windows_process.thread_rec (ptid, DONT_INVALIDATE_CONTEXT);
   if (th)
     {
       win32_prepare_to_resume (th);
 
       DWORD *context_flags;
 #ifdef __x86_64__
-      if (wow64_process)
+      if (windows_process.wow64_process)
 	context_flags = &th->wow64_context.ContextFlags;
       else
 #endif
@@ -938,7 +949,8 @@ win32_process_target::resume (thread_resume *resume_info, size_t n)
 /* See nat/windows-nat.h.  */
 
 void
-windows_nat::handle_load_dll (const char *name, LPVOID base)
+windows_nat::windows_process_info::handle_load_dll (const char *name,
+						    LPVOID base)
 {
   CORE_ADDR load_addr = (CORE_ADDR) (uintptr_t) base;
 
@@ -992,7 +1004,7 @@ windows_nat::handle_load_dll (const char *name, LPVOID base)
 /* See nat/windows-nat.h.  */
 
 void
-windows_nat::handle_unload_dll ()
+windows_nat::windows_process_info::handle_unload_dll ()
 {
   CORE_ADDR load_addr =
 	  (CORE_ADDR) (uintptr_t) current_event.u.UnloadDll.lpBaseOfDll;
@@ -1019,10 +1031,11 @@ fake_breakpoint_event (void)
 
   faked_breakpoint = 1;
 
-  memset (&current_event, 0, sizeof (current_event));
-  current_event.dwThreadId = main_thread_id;
-  current_event.dwDebugEventCode = EXCEPTION_DEBUG_EVENT;
-  current_event.u.Exception.ExceptionRecord.ExceptionCode
+  memset (&windows_process.current_event, 0,
+	  sizeof (windows_process.current_event));
+  windows_process.current_event.dwThreadId = windows_process.main_thread_id;
+  windows_process.current_event.dwDebugEventCode = EXCEPTION_DEBUG_EVENT;
+  windows_process.current_event.u.Exception.ExceptionRecord.ExceptionCode
     = EXCEPTION_BREAKPOINT;
 
   for_each_thread (suspend_one_thread);
@@ -1031,15 +1044,8 @@ fake_breakpoint_event (void)
 /* See nat/windows-nat.h.  */
 
 bool
-windows_nat::handle_ms_vc_exception (const EXCEPTION_RECORD *rec)
-{
-  return false;
-}
-
-/* See nat/windows-nat.h.  */
-
-bool
-windows_nat::handle_access_violation (const EXCEPTION_RECORD *rec)
+windows_nat::windows_process_info::handle_access_violation
+     (const EXCEPTION_RECORD *rec)
 {
   return false;
 }
@@ -1054,14 +1060,15 @@ maybe_adjust_pc ()
   struct regcache *regcache = get_thread_regcache (current_thread, 1);
   child_fetch_inferior_registers (regcache, -1);
 
-  windows_thread_info *th = thread_rec (current_thread_ptid (),
-					DONT_INVALIDATE_CONTEXT);
+  windows_thread_info *th
+    = windows_process.thread_rec (current_thread_ptid (),
+				  DONT_INVALIDATE_CONTEXT);
   th->stopped_at_software_breakpoint = false;
 
-  if (current_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT
-      && ((current_event.u.Exception.ExceptionRecord.ExceptionCode
+  if (windows_process.current_event.dwDebugEventCode == EXCEPTION_DEBUG_EVENT
+      && ((windows_process.current_event.u.Exception.ExceptionRecord.ExceptionCode
 	   == EXCEPTION_BREAKPOINT)
-	  || (current_event.u.Exception.ExceptionRecord.ExceptionCode
+	  || (windows_process.current_event.u.Exception.ExceptionRecord.ExceptionCode
 	      == STATUS_WX86_BREAKPOINT))
       && child_initialization_done)
     {
@@ -1080,12 +1087,14 @@ get_child_debug_event (DWORD *continue_status,
 {
   ptid_t ptid;
 
-  last_sig = GDB_SIGNAL_0;
+  windows_process.last_sig = GDB_SIGNAL_0;
   ourstatus->set_spurious ();
   *continue_status = DBG_CONTINUE;
 
   /* Check if GDB sent us an interrupt request.  */
   check_remote_input_interrupt_request ();
+
+  DEBUG_EVENT *current_event = &windows_process.current_event;
 
   if (soft_interrupt_requested)
     {
@@ -1096,12 +1105,13 @@ get_child_debug_event (DWORD *continue_status,
 
   attaching = 0;
   {
-    gdb::optional<pending_stop> stop = fetch_pending_stop (debug_threads);
+    gdb::optional<pending_stop> stop
+      = windows_process.fetch_pending_stop (debug_threads);
     if (stop.has_value ())
       {
 	*ourstatus = stop->status;
-	current_event = stop->event;
-	ptid = debug_event_ptid (&current_event);
+	windows_process.current_event = stop->event;
+	ptid = debug_event_ptid (&windows_process.current_event);
 	switch_to_thread (find_thread_ptid (ptid));
 	return 1;
       }
@@ -1109,7 +1119,7 @@ get_child_debug_event (DWORD *continue_status,
     /* Keep the wait time low enough for comfortable remote
        interruption, but high enough so gdbserver doesn't become a
        bottleneck.  */
-    if (!wait_for_debug_event (&current_event, 250))
+    if (!wait_for_debug_event (&windows_process.current_event, 250))
       {
 	DWORD e  = GetLastError();
 
@@ -1129,28 +1139,28 @@ get_child_debug_event (DWORD *continue_status,
 
  gotevent:
 
-  switch (current_event.dwDebugEventCode)
+  switch (current_event->dwDebugEventCode)
     {
     case CREATE_THREAD_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event CREATE_THREAD_DEBUG_EVENT "
 		"for pid=%u tid=%x)\n",
-		(unsigned) current_event.dwProcessId,
-		(unsigned) current_event.dwThreadId));
+		(unsigned) current_event->dwProcessId,
+		(unsigned) current_event->dwThreadId));
 
       /* Record the existence of this thread.  */
-      child_add_thread (current_event.dwProcessId,
-			current_event.dwThreadId,
-			current_event.u.CreateThread.hThread,
-			current_event.u.CreateThread.lpThreadLocalBase);
+      child_add_thread (current_event->dwProcessId,
+			current_event->dwThreadId,
+			current_event->u.CreateThread.hThread,
+			current_event->u.CreateThread.lpThreadLocalBase);
       break;
 
     case EXIT_THREAD_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event EXIT_THREAD_DEBUG_EVENT "
 		"for pid=%u tid=%x\n",
-		(unsigned) current_event.dwProcessId,
-		(unsigned) current_event.dwThreadId));
-      child_delete_thread (current_event.dwProcessId,
-			   current_event.dwThreadId);
+		(unsigned) current_event->dwProcessId,
+		(unsigned) current_event->dwThreadId));
+      child_delete_thread (current_event->dwProcessId,
+			   current_event->dwThreadId);
 
       switch_to_thread (get_first_thread ());
       return 1;
@@ -1158,33 +1168,33 @@ get_child_debug_event (DWORD *continue_status,
     case CREATE_PROCESS_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event CREATE_PROCESS_DEBUG_EVENT "
 		"for pid=%u tid=%x\n",
-		(unsigned) current_event.dwProcessId,
-		(unsigned) current_event.dwThreadId));
-      CloseHandle (current_event.u.CreateProcessInfo.hFile);
+		(unsigned) current_event->dwProcessId,
+		(unsigned) current_event->dwThreadId));
+      CloseHandle (current_event->u.CreateProcessInfo.hFile);
 
       if (open_process_used)
 	{
-	  CloseHandle (current_process_handle);
+	  CloseHandle (windows_process.handle);
 	  open_process_used = false;
 	}
 
-      current_process_handle = current_event.u.CreateProcessInfo.hProcess;
-      main_thread_id = current_event.dwThreadId;
+      windows_process.handle = current_event->u.CreateProcessInfo.hProcess;
+      windows_process.main_thread_id = current_event->dwThreadId;
 
       /* Add the main thread.  */
-      child_add_thread (current_event.dwProcessId,
-			main_thread_id,
-			current_event.u.CreateProcessInfo.hThread,
-			current_event.u.CreateProcessInfo.lpThreadLocalBase);
+      child_add_thread (current_event->dwProcessId,
+			windows_process.main_thread_id,
+			current_event->u.CreateProcessInfo.hThread,
+			current_event->u.CreateProcessInfo.lpThreadLocalBase);
       break;
 
     case EXIT_PROCESS_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event EXIT_PROCESS_DEBUG_EVENT "
 		"for pid=%u tid=%x\n",
-		(unsigned) current_event.dwProcessId,
-		(unsigned) current_event.dwThreadId));
+		(unsigned) current_event->dwProcessId,
+		(unsigned) current_event->dwThreadId));
       {
-	DWORD exit_status = current_event.u.ExitProcess.dwExitCode;
+	DWORD exit_status = current_event->u.ExitProcess.dwExitCode;
 	/* If the exit status looks like a fatal exception, but we
 	   don't recognize the exception's code, make the original
 	   exit status value available, to avoid losing information.  */
@@ -1195,18 +1205,18 @@ get_child_debug_event (DWORD *continue_status,
 	else
 	  ourstatus->set_signalled (gdb_signal_from_host (exit_signal));
       }
-      child_continue (DBG_CONTINUE, desired_stop_thread_id);
+      child_continue (DBG_CONTINUE, windows_process.desired_stop_thread_id);
       break;
 
     case LOAD_DLL_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event LOAD_DLL_DEBUG_EVENT "
 		"for pid=%u tid=%x\n",
-		(unsigned) current_event.dwProcessId,
-		(unsigned) current_event.dwThreadId));
-      CloseHandle (current_event.u.LoadDll.hFile);
+		(unsigned) current_event->dwProcessId,
+		(unsigned) current_event->dwThreadId));
+      CloseHandle (current_event->u.LoadDll.hFile);
       if (! child_initialization_done)
 	break;
-      dll_loaded_event ();
+      windows_process.dll_loaded_event ();
 
       ourstatus->set_loaded ();
       break;
@@ -1214,20 +1224,20 @@ get_child_debug_event (DWORD *continue_status,
     case UNLOAD_DLL_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event UNLOAD_DLL_DEBUG_EVENT "
 		"for pid=%u tid=%x\n",
-		(unsigned) current_event.dwProcessId,
-		(unsigned) current_event.dwThreadId));
+		(unsigned) current_event->dwProcessId,
+		(unsigned) current_event->dwThreadId));
       if (! child_initialization_done)
 	break;
-      handle_unload_dll ();
+      windows_process.handle_unload_dll ();
       ourstatus->set_loaded ();
       break;
 
     case EXCEPTION_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event EXCEPTION_DEBUG_EVENT "
 		"for pid=%u tid=%x\n",
-		(unsigned) current_event.dwProcessId,
-		(unsigned) current_event.dwThreadId));
-      if (handle_exception (ourstatus, debug_threads)
+		(unsigned) current_event->dwProcessId,
+		(unsigned) current_event->dwThreadId));
+      if (windows_process.handle_exception (ourstatus, debug_threads)
 	  == HANDLE_EXCEPTION_UNHANDLED)
 	*continue_status = DBG_EXCEPTION_NOT_HANDLED;
       break;
@@ -1236,31 +1246,33 @@ get_child_debug_event (DWORD *continue_status,
       /* A message from the kernel (or Cygwin).  */
       OUTMSG2 (("gdbserver: kernel event OUTPUT_DEBUG_STRING_EVENT "
 		"for pid=%u tid=%x\n",
-		(unsigned) current_event.dwProcessId,
-		(unsigned) current_event.dwThreadId));
-      handle_output_debug_string (nullptr);
+		(unsigned) current_event->dwProcessId,
+		(unsigned) current_event->dwThreadId));
+      windows_process.handle_output_debug_string (nullptr);
       break;
 
     default:
       OUTMSG2 (("gdbserver: kernel event unknown "
 		"for pid=%u tid=%x code=%x\n",
-		(unsigned) current_event.dwProcessId,
-		(unsigned) current_event.dwThreadId,
-		(unsigned) current_event.dwDebugEventCode));
+		(unsigned) current_event->dwProcessId,
+		(unsigned) current_event->dwThreadId,
+		(unsigned) current_event->dwDebugEventCode));
       break;
     }
 
-  ptid = debug_event_ptid (&current_event);
+  ptid = debug_event_ptid (&windows_process.current_event);
 
-  if (desired_stop_thread_id != -1 && desired_stop_thread_id != ptid.lwp ())
+  if (windows_process.desired_stop_thread_id != -1
+      && windows_process.desired_stop_thread_id != ptid.lwp ())
     {
       /* Pending stop.  See the comment by the definition of
 	 "pending_stops" for details on why this is needed.  */
       OUTMSG2 (("get_windows_debug_event - "
 		"unexpected stop in 0x%lx (expecting 0x%x)\n",
-		ptid.lwp (), desired_stop_thread_id));
+		ptid.lwp (), windows_process.desired_stop_thread_id));
       maybe_adjust_pc ();
-      pending_stops.push_back ({(DWORD) ptid.lwp (), *ourstatus, current_event});
+      windows_process.pending_stops.push_back
+	({(DWORD) ptid.lwp (), *ourstatus, *current_event});
       ourstatus->set_spurious ();
     }
   else
@@ -1284,7 +1296,7 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 	 fails).  Report it now.  */
       *ourstatus = cached_status;
       cached_status.set_ignore ();
-      return debug_event_ptid (&current_event);
+      return debug_event_ptid (&windows_process.current_event);
     }
 
   while (1)
@@ -1299,7 +1311,7 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 	  OUTMSG2 (("Child exited with retcode = %x\n",
 		    ourstatus->exit_status ()));
 	  win32_clear_inferiors ();
-	  return ptid_t (current_event.dwProcessId);
+	  return ptid_t (windows_process.current_event.dwProcessId);
 	case TARGET_WAITKIND_STOPPED:
 	case TARGET_WAITKIND_SIGNALLED:
 	case TARGET_WAITKIND_LOADED:
@@ -1307,7 +1319,7 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 	    OUTMSG2 (("Child Stopped with signal = %d \n",
 		      ourstatus->sig ()));
 	    maybe_adjust_pc ();
-	    return debug_event_ptid (&current_event);
+	    return debug_event_ptid (&windows_process.current_event);
 	  }
 	default:
 	  OUTMSG (("Ignoring unknown internal event, %d\n",
@@ -1315,7 +1327,8 @@ win32_process_target::wait (ptid_t ptid, target_waitstatus *ourstatus,
 	  /* fall-through */
 	case TARGET_WAITKIND_SPURIOUS:
 	  /* do nothing, just continue */
-	  child_continue (continue_status, desired_stop_thread_id);
+	  child_continue (continue_status,
+			  windows_process.desired_stop_thread_id);
 	  break;
 	}
     }
@@ -1362,7 +1375,7 @@ win32_process_target::write_memory (CORE_ADDR memaddr,
 void
 win32_process_target::request_interrupt ()
 {
-  if (GenerateConsoleCtrlEvent (CTRL_BREAK_EVENT, current_process_id))
+  if (GenerateConsoleCtrlEvent (CTRL_BREAK_EVENT, windows_process.id))
     return;
 
   /* GenerateConsoleCtrlEvent can fail if process id being debugged is
@@ -1370,7 +1383,7 @@ win32_process_target::request_interrupt ()
      Fallback to XP/Vista 'DebugBreakProcess', which generates a
      breakpoint exception in the interior process.  */
 
-  if (DebugBreakProcess (current_process_handle))
+  if (DebugBreakProcess (windows_process.handle))
     return;
 
   /* Last resort, suspend all threads manually.  */
@@ -1397,30 +1410,33 @@ win32_process_target::qxfer_siginfo (const char *annex,
 				     unsigned const char *writebuf,
 				     CORE_ADDR offset, int len)
 {
-  if (siginfo_er.ExceptionCode == 0)
+  if (windows_process.siginfo_er.ExceptionCode == 0)
     return -1;
 
   if (readbuf == nullptr)
     return -1;
 
-  char *buf = (char *) &siginfo_er;
-  size_t bufsize = sizeof (siginfo_er);
+  char *buf = (char *) &windows_process.siginfo_er;
+  size_t bufsize = sizeof (windows_process.siginfo_er);
 
 #ifdef __x86_64__
   EXCEPTION_RECORD32 er32;
-  if (wow64_process)
+  if (windows_process.wow64_process)
     {
       buf = (char *) &er32;
       bufsize = sizeof (er32);
 
-      er32.ExceptionCode = siginfo_er.ExceptionCode;
-      er32.ExceptionFlags = siginfo_er.ExceptionFlags;
-      er32.ExceptionRecord = (uintptr_t) siginfo_er.ExceptionRecord;
-      er32.ExceptionAddress = (uintptr_t) siginfo_er.ExceptionAddress;
-      er32.NumberParameters = siginfo_er.NumberParameters;
+      er32.ExceptionCode = windows_process.siginfo_er.ExceptionCode;
+      er32.ExceptionFlags = windows_process.siginfo_er.ExceptionFlags;
+      er32.ExceptionRecord
+	= (uintptr_t) windows_process.siginfo_er.ExceptionRecord;
+      er32.ExceptionAddress
+	= (uintptr_t) windows_process.siginfo_er.ExceptionAddress;
+      er32.NumberParameters = windows_process.siginfo_er.NumberParameters;
       int i;
       for (i = 0; i < EXCEPTION_MAXIMUM_PARAMETERS; i++)
-	er32.ExceptionInformation[i] = siginfo_er.ExceptionInformation[i];
+	er32.ExceptionInformation[i]
+	  = windows_process.siginfo_er.ExceptionInformation[i];
     }
 #endif
 
@@ -1447,7 +1463,7 @@ int
 win32_process_target::get_tib_address (ptid_t ptid, CORE_ADDR *addr)
 {
   windows_thread_info *th;
-  th = thread_rec (ptid, DONT_INVALIDATE_CONTEXT);
+  th = windows_process.thread_rec (ptid, DONT_INVALIDATE_CONTEXT);
   if (th == NULL)
     return 0;
   if (addr != NULL)
@@ -1467,8 +1483,9 @@ win32_process_target::sw_breakpoint_from_kind (int kind, int *size)
 bool
 win32_process_target::stopped_by_sw_breakpoint ()
 {
-  windows_thread_info *th = thread_rec (current_thread_ptid (),
-					DONT_INVALIDATE_CONTEXT);
+  windows_thread_info *th
+    = windows_process.thread_rec (current_thread_ptid (),
+				  DONT_INVALIDATE_CONTEXT);
   return th == nullptr ? false : th->stopped_at_software_breakpoint;
 }
 
@@ -1488,6 +1505,15 @@ void
 win32_process_target::write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   return (*the_low_target.set_pc) (regcache, pc);
+}
+
+const char *
+win32_process_target::thread_name (ptid_t thread)
+{
+  windows_thread_info *th
+    = windows_process.thread_rec (current_thread_ptid (),
+				  DONT_INVALIDATE_CONTEXT);
+  return th->thread_name ();
 }
 
 /* The win32 target ops object.  */

@@ -261,7 +261,7 @@ structures.
 @include  reloc.texi
 
 @node Core Files, Targets, Relocations, BFD front end
-@include  core.texi
+@include  corefile.texi
 
 @node Targets, Architectures, Core Files, BFD front end
 @include  targets.texi

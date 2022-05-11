@@ -1200,7 +1200,7 @@ ctf_target::close ()
 void
 ctf_target::files_info ()
 {
-  printf_filtered ("\t`%s'\n", trace_dirname);
+  gdb_printf ("\t`%s'\n", trace_dirname);
 }
 
 /* This is the implementation of target_ops method to_fetch_registers.

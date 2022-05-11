@@ -211,8 +211,8 @@ static struct cmd_list_element *set_record_btrace_cpu_cmdlist;
   do									\
     {									\
       if (record_debug != 0)						\
-	fprintf_unfiltered (gdb_stdlog,					\
-			    "[record-btrace] " msg "\n", ##args);	\
+	gdb_printf (gdb_stdlog,						\
+		    "[record-btrace] " msg "\n", ##args);		\
     }									\
   while (0)
 
@@ -279,10 +279,10 @@ require_btrace (void)
   return &tp->btrace;
 }
 
-/* Enable branch tracing for one thread.  Warn on errors.  */
+/* The new thread observer.  */
 
 static void
-record_btrace_enable_warn (struct thread_info *tp)
+record_btrace_on_new_thread (struct thread_info *tp)
 {
   /* Ignore this thread if its inferior is not recorded by us.  */
   target_ops *rec = tp->inf->target_at (record_stratum);
@@ -306,7 +306,7 @@ record_btrace_auto_enable (void)
 {
   DEBUG ("attach thread observer");
 
-  gdb::observers::new_thread.attach (record_btrace_enable_warn,
+  gdb::observers::new_thread.attach (record_btrace_on_new_thread,
 				     record_btrace_thread_observer_token,
 				     "record-btrace");
 }
@@ -506,7 +506,7 @@ record_btrace_print_bts_conf (const struct btrace_config_bts *conf)
   if (size > 0)
     {
       suffix = record_btrace_adjust_size (&size);
-      printf_filtered (_("Buffer size: %u%s.\n"), size, suffix);
+      gdb_printf (_("Buffer size: %u%s.\n"), size, suffix);
     }
 }
 
@@ -522,7 +522,7 @@ record_btrace_print_pt_conf (const struct btrace_config_pt *conf)
   if (size > 0)
     {
       suffix = record_btrace_adjust_size (&size);
-      printf_filtered (_("Buffer size: %u%s.\n"), size, suffix);
+      gdb_printf (_("Buffer size: %u%s.\n"), size, suffix);
     }
 }
 
@@ -531,8 +531,8 @@ record_btrace_print_pt_conf (const struct btrace_config_pt *conf)
 static void
 record_btrace_print_conf (const struct btrace_config *conf)
 {
-  printf_filtered (_("Recording format: %s.\n"),
-		   btrace_format_string (conf->format));
+  gdb_printf (_("Recording format: %s.\n"),
+	      btrace_format_string (conf->format));
 
   switch (conf->format)
     {
@@ -602,14 +602,14 @@ record_btrace_target::info_record ()
       gaps = btinfo->ngaps;
     }
 
-  printf_filtered (_("Recorded %u instructions in %u functions (%u gaps) "
-		     "for thread %s (%s).\n"), insns, calls, gaps,
-		   print_thread_id (tp),
-		   target_pid_to_str (tp->ptid).c_str ());
+  gdb_printf (_("Recorded %u instructions in %u functions (%u gaps) "
+		"for thread %s (%s).\n"), insns, calls, gaps,
+	      print_thread_id (tp),
+	      target_pid_to_str (tp->ptid).c_str ());
 
   if (btrace_is_replaying (tp))
-    printf_filtered (_("Replay in progress.  At instruction %u.\n"),
-		     btrace_insn_number (btinfo->replay));
+    gdb_printf (_("Replay in progress.  At instruction %u.\n"),
+		btrace_insn_number (btinfo->replay));
 }
 
 /* Print a decode error.  */
@@ -713,7 +713,7 @@ btrace_find_line_range (CORE_ADDR pc)
   if (symtab == NULL)
     return btrace_mk_line_range (NULL, 0, 0);
 
-  ltable = SYMTAB_LINETABLE (symtab);
+  ltable = symtab->linetable ();
   if (ltable == NULL)
     return btrace_mk_line_range (symtab, 0, 0);
 
@@ -938,9 +938,9 @@ record_btrace_target::insn_history (int size, gdb_disassembly_flags flags)
   else
     {
       if (size < 0)
-	printf_filtered (_("At the start of the branch trace record.\n"));
+	gdb_printf (_("At the start of the branch trace record.\n"));
       else
-	printf_filtered (_("At the end of the branch trace record.\n"));
+	gdb_printf (_("At the end of the branch trace record.\n"));
     }
 
   btrace_set_insn_history (btinfo, &begin, &end);
@@ -1067,7 +1067,7 @@ btrace_compute_src_line_range (const struct btrace_function *bfun,
   if (sym == NULL)
     goto out;
 
-  symtab = symbol_symtab (sym);
+  symtab = sym->symtab ();
 
   for (const btrace_insn &insn : bfun->insn)
     {
@@ -1100,7 +1100,7 @@ btrace_call_history_src_line (struct ui_out *uiout,
     return;
 
   uiout->field_string ("file",
-		       symtab_to_filename_for_display (symbol_symtab (sym)),
+		       symtab_to_filename_for_display (sym->symtab ()),
 		       file_name_style.style ());
 
   btrace_compute_src_line_range (bfun, &begin, &end);
@@ -1295,9 +1295,9 @@ record_btrace_target::call_history (int size, record_print_flags flags)
   else
     {
       if (size < 0)
-	printf_filtered (_("At the start of the branch trace record.\n"));
+	gdb_printf (_("At the start of the branch trace record.\n"));
       else
-	printf_filtered (_("At the end of the branch trace record.\n"));
+	gdb_printf (_("At the end of the branch trace record.\n"));
     }
 
   btrace_set_call_history (btinfo, &begin, &end);
@@ -1962,7 +1962,7 @@ record_btrace_resume_thread (struct thread_info *tp,
   struct btrace_thread_info *btinfo;
 
   DEBUG ("resuming thread %s (%s): %x (%s)", print_thread_id (tp),
-	 target_pid_to_str (tp->ptid).c_str (), flag,
+	 tp->ptid.to_string ().c_str (), flag,
 	 btrace_thread_flag_to_str (flag));
 
   btinfo = &tp->btrace;
@@ -2125,7 +2125,7 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
 {
   enum btrace_thread_flag flag, cflag;
 
-  DEBUG ("resume %s: %s%s", target_pid_to_str (ptid).c_str (),
+  DEBUG ("resume %s: %s%s", ptid.to_string ().c_str (),
 	 ::execution_direction == EXEC_REVERSE ? "reverse-" : "",
 	 step ? "step" : "cont");
 
@@ -2205,7 +2205,7 @@ record_btrace_cancel_resume (struct thread_info *tp)
 
   DEBUG ("cancel resume thread %s (%s): %x (%s)",
 	 print_thread_id (tp),
-	 target_pid_to_str (tp->ptid).c_str (), flags.raw (),
+	 tp->ptid.to_string ().c_str (), flags.raw (),
 	 btrace_thread_flag_to_str (flags));
 
   tp->btrace.flags &= ~(BTHR_MOVE | BTHR_STOP);
@@ -2431,7 +2431,7 @@ record_btrace_step_thread (struct thread_info *tp)
   btinfo->flags &= ~(BTHR_MOVE | BTHR_STOP);
 
   DEBUG ("stepping thread %s (%s): %x (%s)", print_thread_id (tp),
-	 target_pid_to_str (tp->ptid).c_str (), flags.raw (),
+	 tp->ptid.to_string ().c_str (), flags.raw (),
 	 btrace_thread_flag_to_str (flags));
 
   /* We can't step without an execution history.  */
@@ -2519,7 +2519,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
   /* Clear this, if needed we'll re-mark it below.  */
   clear_async_event_handler (record_btrace_async_inferior_event_handler);
 
-  DEBUG ("wait %s (0x%x)", target_pid_to_str (ptid).c_str (),
+  DEBUG ("wait %s (0x%x)", ptid.to_string ().c_str (),
 	 (unsigned) options);
 
   /* As long as we're not replaying, just forward the request.  */
@@ -2539,7 +2539,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
     {
       *status = btrace_step_no_resumed ();
 
-      DEBUG ("wait ended by %s: %s", target_pid_to_str (null_ptid).c_str (),
+      DEBUG ("wait ended by %s: %s", null_ptid.to_string ().c_str (),
 	     status->to_string ().c_str ());
 
       return null_ptid;
@@ -2630,7 +2630,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
 
   DEBUG ("wait ended by thread %s (%s): %s",
 	 print_thread_id (eventing),
-	 target_pid_to_str (eventing->ptid).c_str (),
+	 eventing->ptid.to_string ().c_str (),
 	 status->to_string ().c_str ());
 
   return eventing->ptid;
@@ -2641,7 +2641,7 @@ record_btrace_target::wait (ptid_t ptid, struct target_waitstatus *status,
 void
 record_btrace_target::stop (ptid_t ptid)
 {
-  DEBUG ("stop %s", target_pid_to_str (ptid).c_str ());
+  DEBUG ("stop %s", ptid.to_string ().c_str ());
 
   /* As long as we're not replaying, just forward the request.  */
   if ((::execution_direction != EXEC_REVERSE)
@@ -2956,8 +2956,8 @@ static void
 cmd_show_replay_memory_access (struct ui_file *file, int from_tty,
 			       struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Replay memory access is %s.\n"),
-		    replay_memory_access);
+  gdb_printf (file, _("Replay memory access is %s.\n"),
+	      replay_memory_access);
 }
 
 /* The "set record btrace cpu none" command.  */
@@ -3037,11 +3037,11 @@ cmd_show_record_btrace_cpu (const char *args, int from_tty)
   switch (record_btrace_cpu_state)
     {
     case CS_AUTO:
-      printf_filtered (_("btrace cpu is 'auto'.\n"));
+      gdb_printf (_("btrace cpu is 'auto'.\n"));
       return;
 
     case CS_NONE:
-      printf_filtered (_("btrace cpu is 'none'.\n"));
+      gdb_printf (_("btrace cpu is 'none'.\n"));
       return;
 
     case CS_CPU:
@@ -3049,14 +3049,14 @@ cmd_show_record_btrace_cpu (const char *args, int from_tty)
 	{
 	case CV_INTEL:
 	  if (record_btrace_cpu.stepping == 0)
-	    printf_filtered (_("btrace cpu is 'intel: %u/%u'.\n"),
-			     record_btrace_cpu.family,
-			     record_btrace_cpu.model);
+	    gdb_printf (_("btrace cpu is 'intel: %u/%u'.\n"),
+			record_btrace_cpu.family,
+			record_btrace_cpu.model);
 	  else
-	    printf_filtered (_("btrace cpu is 'intel: %u/%u/%u'.\n"),
-			     record_btrace_cpu.family,
-			     record_btrace_cpu.model,
-			     record_btrace_cpu.stepping);
+	    gdb_printf (_("btrace cpu is 'intel: %u/%u/%u'.\n"),
+			record_btrace_cpu.family,
+			record_btrace_cpu.model,
+			record_btrace_cpu.stepping);
 	  return;
 	}
     }
@@ -3071,8 +3071,8 @@ show_record_bts_buffer_size_value (struct ui_file *file, int from_tty,
 				   struct cmd_list_element *c,
 				   const char *value)
 {
-  fprintf_filtered (file, _("The record/replay bts buffer size is %s.\n"),
-		    value);
+  gdb_printf (file, _("The record/replay bts buffer size is %s.\n"),
+	      value);
 }
 
 /* The "record pt buffer-size" show value function.  */
@@ -3082,8 +3082,8 @@ show_record_pt_buffer_size_value (struct ui_file *file, int from_tty,
 				  struct cmd_list_element *c,
 				  const char *value)
 {
-  fprintf_filtered (file, _("The record/replay pt buffer size is %s.\n"),
-		    value);
+  gdb_printf (file, _("The record/replay pt buffer size is %s.\n"),
+	      value);
 }
 
 /* Initialize btrace commands.  */

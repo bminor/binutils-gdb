@@ -1,0 +1,256 @@
+#!/usr/bin/perl
+
+#   Copyright (C) 2021 Free Software Foundation, Inc.
+#   Contributed by Oracle.
+#
+#   This file is part of GNU Binutils.
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 3, or (at your option)
+#   any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, 51 Franklin Street - Fifth Floor, Boston,
+#   MA 02110-1301, USA.
+ 
+#------------------------------------------------------------------------------
+# gp-display-html, last updated July 2021
+#
+# NOTE: This is a skeleton version. The real code will follow as an update.
+#------------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+#------------------------------------------------------------------------------
+# Poor man's version of a boolean.
+#------------------------------------------------------------------------------
+my $TRUE    = 1;
+my $FALSE   = 0;
+
+#-------------------------------------------------------------------------------
+# Define the driver command, tool name and version number.
+#-------------------------------------------------------------------------------
+my $driver_cmd       = "gprofng display html";
+my $tool_name        = "gp-display-html";
+my $binutils_version = "BINUTILS_VERSION";
+my $version_info     = $tool_name . " GNU binutils version " . $binutils_version;
+
+#------------------------------------------------------------------------------
+# This is cosmetic, but helps with the scoping of variables.
+#------------------------------------------------------------------------------
+
+  main ();
+
+  exit (0);
+
+#------------------------------------------------------------------------------
+#                             THE SUBROUTINES
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# This is the driver part of the program.
+#------------------------------------------------------------------------------
+sub
+main
+{
+  my $subr_name = "main";
+  my $ignore_value; 
+
+#------------------------------------------------------------------------------
+# If no options are given, print the help info and exit.
+#------------------------------------------------------------------------------
+  $ignore_value = early_scan_specific_options();
+
+  $ignore_value = be_patient (); 
+
+  return (0);
+
+} #-- End of subroutine main
+
+sub
+be_patient
+{
+  print "Functionality not implemented yet - please stay tuned for updates\n";
+
+} #-- End of subroutine be_patient
+
+#------------------------------------------------------------------------------
+# Prints the version number and license information.
+#------------------------------------------------------------------------------
+sub 
+print_version_info 
+{
+  print "$version_info\n";
+  print "Copyright (C) 2021 Free Software Foundation, Inc.\n";
+  print "License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>.\n";
+  print "This is free software: you are free to change and redistribute it.\n";
+  print "There is NO WARRANTY, to the extent permitted by law.\n";
+
+  return (0);
+
+} #-- End of subroutine print_version_info
+
+#-------------------------------------------------------------------------------
+# Print the help overview
+#-------------------------------------------------------------------------------
+sub 
+print_help_info 
+{
+  print
+    "Usage: $driver_cmd [OPTION(S)] EXPERIMENT(S)\n".
+    "\n".
+    "Process one or more experiments to generate a directory containing an index.html\n".
+    "file that can be used to browse the experiment data\n".
+    "\n".
+    "Options:\n".
+    "\n".
+    " --help              print usage information and exit.\n".
+    " --version           print the version number and exit.\n".
+    " --verbose {on|off}  enable (on) or disable (off) verbose mode; the default is \"off\".\n".
+    "\n".
+    "\n".
+    " -o, --output <dir-name>  use <dir-name> to store the results in; the default\n".
+    "                           name is ./display.<n>.html with <n> the first number\n".
+    "                           not in use; an existing directory is not overwritten.\n".
+    "\n".
+    " -O, --overwrite <dir-name>  use <dir-name> to store the results in and overwrite\n".
+    "                              any existing directory with the same name; make sure\n".
+    "                              that umask is set to the correct access permissions.\n".
+    "\n".
+    " -fl, --func_limit <limit>  impose a limit on the number of functions processed;\n".
+    "                             this is an integer number; set to 0 to process all\n".
+    "                             functions; the default value is 100.\n".
+    "\n".
+    "  -ct, --calltree {on|off}  enable or disable an html page with a call tree linked\n".
+    "                             from the bottom of the first page; default is off.\n".
+    "\n".
+    "  -tp, --threshold_percentage <percentage>  provide a percentage of metric accountability; the\n".
+    "                                             inclusion of functions for each metric will take\n".
+    "                                             place in sort order until the percentage has been\n".
+    "                                             reached.\n".
+    "\n".
+    "  -dm, --default_metrics {on|off}  enable or disable automatic selection of metrics\n".
+    "                                   and use a default set of metrics; the default is off.\n".
+    "\n".
+    "  -im, --ignore_metrics <metric-list>  ignore the metrics from <metric-list>.\n".
+    "\n".
+    "  -db, --debug {on|off}  enable/disable debug mode; print detailed information to assist with troubleshooting\n".
+    "                          or further development of this tool; default is off.\n".
+    "\n".
+    "  -q, --quiet {on|off}  disable/enable the display of warnings; default is off.\n".
+    "\n".
+    "Environment:\n".
+    "\n".
+    "The options can be set in a configuration file called .gp-display-html.rc. This\n".
+    "file needs to be either in the current directory, or in the home directory of the user.\n".
+    "The long name of the option without the leading dashes is supported. For example calltree\n".
+    "to enable or disable the call tree. Note that some options take a value. In case the same option\n".
+    "occurs multiple times in this file, only the last setting encountered is preserved.\n".
+    "\n".
+    "Documentation:\n".
+    "\n".
+    "A getting started guide for gprofng is maintained as a Texinfo manual. If the info and\n".
+    "gprofng programs are properly installed at your site, the command \"info gprofng\"\n".
+    "should give you access to this document.\n".
+    "\n".
+    "See also:\n".
+    "\n".
+    "gprofng(1), gp-archive(1), gp-collect-app(1), gp-display-src(1), gp-display-text(1)\n";
+
+    return (0);
+
+} #-- End of subroutine print_help_info
+
+#------------------------------------------------------------------------------
+# Scan the command line for specific options.
+#------------------------------------------------------------------------------
+sub
+early_scan_specific_options
+{
+  my $subr_name = "early_scan_specific_options";
+
+  my $ignore_value;
+  my $found_option;
+  my $option_has_value;
+  my $option_value;
+
+  my $verbose_setting = $FALSE;
+  my $debug_setting   = $FALSE;
+  my $quiet_setting   = $FALSE;
+
+  $option_has_value = $FALSE;
+  ($found_option, $option_value) = find_target_option (\@ARGV, $option_has_value, "--version");
+  if ($found_option)
+    {
+      $ignore_value = print_version_info ();
+      exit(0);
+    }
+  $option_has_value = $FALSE;
+  ($found_option, $option_value) = find_target_option (\@ARGV, $option_has_value, "--help");
+  if ($found_option)
+    {
+      $ignore_value = print_help_info ();
+      exit(0);
+    }
+
+  return (0);
+
+} #-- End of subroutine early_scan_specific_options
+
+#------------------------------------------------------------------------------
+# Scan the command line to see if the specified option is present.
+#
+# Two types of options are supported: options without value (e.g. --help) or
+# those that are set to "on" or "off".
+#------------------------------------------------------------------------------
+sub
+find_target_option
+{
+  my ($command_line_ref, $has_value, $target_option) = @_;
+
+  my @command_line = @{ $command_line_ref };
+
+  my ($command_line_string) = join(" ", @command_line);
+
+  my $option_value = "not set";
+  my $found_option = $FALSE;
+
+  if ($command_line_string =~ /\s*($target_option)\s*(on|off)*\s*/)
+    {
+      if ($has_value)
+        {
+#------------------------------------------------------------------------------
+# We are looking for this kind if substring: "--verbose on"
+#------------------------------------------------------------------------------
+          if (defined($1) and defined($2))
+            {
+              if ( ($2 eq "on") or ($2 eq "off") )
+                {
+                  $found_option = $TRUE;
+                  $option_value = $2;
+                }
+            }
+        }
+      else
+        {
+#------------------------------------------------------------------------------
+# We are looking for this kind if substring: "--help"
+#------------------------------------------------------------------------------
+          if (defined($1))
+            {
+              $found_option = $TRUE;
+            }
+        }
+    }
+
+  return($found_option, $option_value);
+
+} #-- End of subroutine find_target_option

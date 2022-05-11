@@ -125,12 +125,8 @@ static PyObject *show_doc_cst;
 static PyObject *
 get_attr (PyObject *obj, PyObject *attr_name)
 {
-  if (PyString_Check (attr_name)
-#ifdef IS_PY3K
+  if (PyUnicode_Check (attr_name)
       && ! PyUnicode_CompareWithASCIIString (attr_name, "value"))
-#else
-      && ! strcmp (PyString_AsString (attr_name), "value"))
-#endif
     {
       parmpy_object *self = (parmpy_object *) obj;
 
@@ -247,7 +243,7 @@ set_parameter_value (parmpy_object *self, PyObject *value)
 	long l;
 	int ok;
 
-	if (! PyInt_Check (value))
+	if (!PyLong_Check (value))
 	  {
 	    PyErr_SetString (PyExc_RuntimeError,
 			     _("The value must be integer."));
@@ -312,12 +308,8 @@ set_parameter_value (parmpy_object *self, PyObject *value)
 static int
 set_attr (PyObject *obj, PyObject *attr_name, PyObject *val)
 {
-  if (PyString_Check (attr_name)
-#ifdef IS_PY3K
+  if (PyUnicode_Check (attr_name)
       && ! PyUnicode_CompareWithASCIIString (attr_name, "value"))
-#else
-      && ! strcmp (PyString_AsString (attr_name), "value"))
-#endif
     {
       if (!val)
 	{
@@ -331,13 +323,58 @@ set_attr (PyObject *obj, PyObject *attr_name, PyObject *val)
   return PyObject_GenericSetAttr (obj, attr_name, val);
 }
 
+/* Build up the path to command C, but drop the first component of the
+   command prefix.  This is only intended for use with the set/show
+   parameters this file deals with, the first prefix should always be
+   either 'set' or 'show'.
+
+   As an example, if this full command is 'set prefix_a prefix_b command'
+   this function will return the string 'prefix_a prefix_b command'.  */
+
+static std::string
+full_cmd_name_without_first_prefix (struct cmd_list_element *c)
+{
+  std::vector<std::string> components
+    = c->command_components ();
+  gdb_assert (components.size () > 1);
+  std::string result = components[1];
+  for (int i = 2; i < components.size (); ++i)
+    result += " " + components[i];
+  return result;
+}
+
+/* The different types of documentation string.  */
+
+enum doc_string_type
+{
+  doc_string_set,
+  doc_string_show,
+  doc_string_description
+};
+
 /* A helper function which returns a documentation string for an
    object. */
 
 static gdb::unique_xmalloc_ptr<char>
-get_doc_string (PyObject *object, PyObject *attr)
+get_doc_string (PyObject *object, enum doc_string_type doc_type,
+		const char *cmd_name)
 {
   gdb::unique_xmalloc_ptr<char> result;
+
+  PyObject *attr = nullptr;
+  switch (doc_type)
+    {
+    case doc_string_set:
+      attr = set_doc_cst;
+      break;
+    case doc_string_show:
+      attr = show_doc_cst;
+      break;
+    case doc_string_description:
+      attr = gdbpy_doc_cst;
+      break;
+    }
+  gdb_assert (attr != nullptr);
 
   if (PyObject_HasAttr (object, attr))
     {
@@ -350,8 +387,21 @@ get_doc_string (PyObject *object, PyObject *attr)
 	    gdbpy_print_stack ();
 	}
     }
-  if (! result)
-    result.reset (xstrdup (_("This command is not documented.")));
+
+  if (result == nullptr)
+    {
+      if (doc_type == doc_string_description)
+	result.reset (xstrdup (_("This command is not documented.")));
+      else
+	{
+	  if (doc_type == doc_string_show)
+	    result = xstrprintf (_("Show the current value of '%s'."),
+				 cmd_name);
+	  else
+	    result = xstrprintf (_("Set the current value of '%s'."),
+				 cmd_name);
+	}
+    }
   return result;
 }
 
@@ -396,8 +446,8 @@ get_set_value (const char *args, int from_tty,
   PyObject *obj = (PyObject *) c->context ();
   gdb::unique_xmalloc_ptr<char> set_doc_string;
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
-  gdbpy_ref<> set_doc_func (PyString_FromString ("get_set_string"));
+  gdbpy_enter enter_py;
+  gdbpy_ref<> set_doc_func (PyUnicode_FromString ("get_set_string"));
 
   if (set_doc_func == NULL)
     {
@@ -414,7 +464,7 @@ get_set_value (const char *args, int from_tty,
 
   const char *str = set_doc_string.get ();
   if (str != nullptr && str[0] != '\0')
-    fprintf_filtered (gdb_stdout, "%s\n", str);
+    gdb_printf ("%s\n", str);
 }
 
 /* A callback function that is registered against the respective
@@ -431,8 +481,8 @@ get_show_value (struct ui_file *file, int from_tty,
   PyObject *obj = (PyObject *) c->context ();
   gdb::unique_xmalloc_ptr<char> show_doc_string;
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
-  gdbpy_ref<> show_doc_func (PyString_FromString ("get_show_string"));
+  gdbpy_enter enter_py;
+  gdbpy_ref<> show_doc_func (PyUnicode_FromString ("get_show_string"));
 
   if (show_doc_func == NULL)
     {
@@ -442,7 +492,7 @@ get_show_value (struct ui_file *file, int from_tty,
 
   if (PyObject_HasAttr (obj, show_doc_func.get ()))
     {
-      gdbpy_ref<> val_obj (PyString_FromString (value));
+      gdbpy_ref<> val_obj (PyUnicode_FromString (value));
 
       if (val_obj == NULL)
 	{
@@ -458,15 +508,19 @@ get_show_value (struct ui_file *file, int from_tty,
 	  return;
 	}
 
-      fprintf_filtered (file, "%s\n", show_doc_string.get ());
+      gdb_printf (file, "%s\n", show_doc_string.get ());
     }
   else
     {
-      /* We have to preserve the existing < GDB 7.3 API.  If a
-	 callback function does not exist, then attempt to read the
-	 show_doc attribute.  */
-      show_doc_string  = get_doc_string (obj, show_doc_cst);
-      fprintf_filtered (file, "%s %s\n", show_doc_string.get (), value);
+      /* If there is no 'get_show_string' callback then we want to show
+	 something sensible here.  In older versions of GDB (< 7.3) we
+	 didn't support 'get_show_string', and instead we just made use of
+	 GDB's builtin use of the show_doc.  However, GDB's builtin
+	 show_doc adjustment is not i18n friendly, so, instead, we just
+	 print this generic string.  */
+      std::string cmd_path = full_cmd_name_without_first_prefix (c);
+      gdb_printf (file, _("The current value of '%s' is \"%s\".\n"),
+		  cmd_path.c_str (), value);
     }
 }
 
@@ -572,13 +626,13 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
       break;
 
     case var_enum:
+      /* Initialize the value, just in case.  */
+      self->value.cstringval = self->enumeration[0];
       commands = add_setshow_enum_cmd (cmd_name.get (), cmdclass,
 				       self->enumeration,
 				       &self->value.cstringval, set_doc,
 				       show_doc, help_doc, get_set_value,
 				       get_show_value, set_list, show_list);
-      /* Initialize the value, just in case.  */
-      self->value.cstringval = self->enumeration[0];
       break;
 
     default:
@@ -737,9 +791,9 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   if (cmd_name == nullptr)
     return -1;
 
-  set_doc = get_doc_string (self, set_doc_cst);
-  show_doc = get_doc_string (self, show_doc_cst);
-  doc = get_doc_string (self, gdbpy_doc_cst);
+  set_doc = get_doc_string (self, doc_string_set, name);
+  show_doc = get_doc_string (self, doc_string_show, name);
+  doc = get_doc_string (self, doc_string_description, cmd_name.get ());
 
   Py_INCREF (self);
 
@@ -781,10 +835,10 @@ gdbpy_initialize_parameters (void)
   if (PyType_Ready (&parmpy_object_type) < 0)
     return -1;
 
-  set_doc_cst = PyString_FromString ("set_doc");
+  set_doc_cst = PyUnicode_FromString ("set_doc");
   if (! set_doc_cst)
     return -1;
-  show_doc_cst = PyString_FromString ("show_doc");
+  show_doc_cst = PyUnicode_FromString ("show_doc");
   if (! show_doc_cst)
     return -1;
 

@@ -3930,23 +3930,6 @@ main (int ac, char **av)
 	}
     }
 
-  if (tmp_prefix == NULL)
-    {
-      /* If possible use a deterministic prefix.  */
-      if (dll_name)
-        {
-          tmp_prefix = xmalloc (strlen (dll_name) + 2);
-          sprintf (tmp_prefix, "%s_", dll_name);
-          for (i = 0; tmp_prefix[i]; i++)
-            if (!ISALNUM (tmp_prefix[i]))
-              tmp_prefix[i] = '_';
-        }
-      else
-        {
-          tmp_prefix = prefix_encode ("d", getpid ());
-        }
-    }
-
   for (i = 0; mtable[i].type; i++)
     if (strcmp (mtable[i].type, mname) == 0)
       break;
@@ -4004,6 +3987,24 @@ main (int ac, char **av)
 	firstarg = av[optind];
       scan_obj_file (av[optind]);
       optind++;
+    }
+
+  if (tmp_prefix == NULL)
+    {
+      /* If possible use a deterministic prefix.  */
+      if (imp_name || delayimp_name)
+        {
+          const char *input = imp_name ? imp_name : delayimp_name;
+          tmp_prefix = xmalloc (strlen (input) + 2);
+          sprintf (tmp_prefix, "%s_", input);
+          for (i = 0; tmp_prefix[i]; i++)
+            if (!ISALNUM (tmp_prefix[i]))
+              tmp_prefix[i] = '_';
+        }
+      else
+        {
+          tmp_prefix = prefix_encode ("d", getpid ());
+        }
     }
 
   mangle_defs ();

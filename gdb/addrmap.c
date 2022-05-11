@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "splay-tree.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "addrmap.h"
 #include "gdbsupport/selftest.h"
 
@@ -38,7 +38,7 @@ struct addrmap_funcs
   void (*set_empty) (struct addrmap *self,
 		     CORE_ADDR start, CORE_ADDR end_inclusive,
 		     void *obj);
-  void *(*find) (struct addrmap *self, CORE_ADDR addr);
+  void *(*find) (const addrmap *self, CORE_ADDR addr);
   struct addrmap *(*create_fixed) (struct addrmap *self,
 				   struct obstack *obstack);
   void (*relocate) (struct addrmap *self, CORE_ADDR offset);
@@ -62,7 +62,7 @@ addrmap_set_empty (struct addrmap *map,
 
 
 void *
-addrmap_find (struct addrmap *map, CORE_ADDR addr)
+addrmap_find (const addrmap *map, CORE_ADDR addr)
 {
   return map->funcs->find (map, addr);
 }
@@ -130,11 +130,11 @@ addrmap_fixed_set_empty (struct addrmap *self,
 
 
 static void *
-addrmap_fixed_find (struct addrmap *self, CORE_ADDR addr)
+addrmap_fixed_find (const addrmap *self, CORE_ADDR addr)
 {
-  struct addrmap_fixed *map = (struct addrmap_fixed *) self;
-  struct addrmap_transition *bottom = &map->transitions[0];
-  struct addrmap_transition *top = &map->transitions[map->num_transitions - 1];
+  const addrmap_fixed *map = (const addrmap_fixed *) self;
+  const addrmap_transition *bottom = &map->transitions[0];
+  const addrmap_transition *top = &map->transitions[map->num_transitions - 1];
 
   while (bottom < top)
     {
@@ -142,7 +142,7 @@ addrmap_fixed_find (struct addrmap *self, CORE_ADDR addr)
 	 1 (i.e., two entries are under consideration), then mid ==
 	 bottom, and then we may not narrow the range when (mid->addr
 	 < addr).  */
-      struct addrmap_transition *mid = top - (top - bottom) / 2;
+      const addrmap_transition *mid = top - (top - bottom) / 2;
 
       if (mid->addr == addr)
 	{
@@ -389,7 +389,7 @@ addrmap_mutable_set_empty (struct addrmap *self,
 
 
 static void *
-addrmap_mutable_find (struct addrmap *self, CORE_ADDR addr)
+addrmap_mutable_find (const addrmap *self, CORE_ADDR addr)
 {
   struct addrmap_mutable *map = (struct addrmap_mutable *) self;
   splay_tree_node n = addrmap_splay_tree_lookup (map, addr);
@@ -612,10 +612,10 @@ addrmap_dump (struct addrmap *map, struct ui_file *outfile, void *payload)
       addr_str = "<ends here>";
 
     if (matches || previous_matched)
-      fprintf_filtered (outfile, "  %s%s %s\n",
-			payload != nullptr ? "  " : "",
-			core_addr_to_string (start_addr),
-			addr_str);
+      gdb_printf (outfile, "  %s%s %s\n",
+		  payload != nullptr ? "  " : "",
+		  core_addr_to_string (start_addr),
+		  addr_str);
 
     previous_matched = matches;
 

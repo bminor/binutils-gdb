@@ -88,16 +88,8 @@ namespace eval Term {
 	_log_cur "Backspace" {
 	    variable _cur_col
 
-	    incr _cur_col -1
-	    if {$_cur_col < 0} {
-		variable _cur_row
-		variable _cols
-
-		set _cur_col [expr {$_cols - 1}]
-		incr _cur_row -1
-		if {$_cur_row < 0} {
-		    set _cur_row 0
-		}
+	    if {$_cur_col > 0} {
+		incr _cur_col -1
 	    }
 	}
     }
@@ -133,15 +125,18 @@ namespace eval Term {
 	_log_cur "Insert Character ($n)" {
 	    variable _cur_col
 	    variable _cur_row
+	    variable _cols
 	    variable _chars
 
-	    set in_x $_cur_col
-	    set out_x [expr {$_cur_col + $n}]
-	    for {set i 0} {$i < $n} {incr i} {
-		set _chars($out_x,$_cur_row) $_chars($in_x,$_cur_row)
-		incr in_x
-		incr out_x
+	    # Move characters right of the cursor right by N positions,
+	    # starting with the rightmost one.
+	    for {set in_col [expr $_cols - $n - 1]} {$in_col >= $_cur_col} {incr in_col -1} {
+		set out_col [expr $in_col + $n]
+		set _chars($out_col,$_cur_row) $_chars($in_col,$_cur_row)
 	    }
+
+	    # Write N blank spaces starting from the cursor.
+	    _clear_in_line $_cur_col [expr $_cur_col + $n] $_cur_row
 	}
     }
 
@@ -168,7 +163,7 @@ namespace eval Term {
 	    variable _cur_row
 	    variable _rows
 
-	    set _cur_row [expr {min ($_cur_row + $arg, $_rows)}]
+	    set _cur_row [expr {min ($_cur_row + $arg, $_rows - 1)}]
 	}
     }
 
@@ -182,7 +177,7 @@ namespace eval Term {
 	    variable _cur_col
 	    variable _cols
 
-	    set _cur_col [expr {min ($_cur_col + $arg, $_cols)}]
+	    set _cur_col [expr {min ($_cur_col + $arg, $_cols - 1)}]
 	}
     }
 
@@ -211,7 +206,7 @@ namespace eval Term {
 	    variable _rows
 
 	    set _cur_col 0
-	    set _cur_row [expr {min ($_cur_row + $arg, $_rows)}]
+	    set _cur_row [expr {min ($_cur_row + $arg, $_rows - 1)}]
 	}
     }
 
@@ -291,12 +286,15 @@ namespace eval Term {
 	    variable _cols
 
 	    if {$arg == 0} {
+		# Cursor (inclusive) to end of display.
 		_clear_in_line $_cur_col $_cols $_cur_row
 		_clear_lines [expr {$_cur_row + 1}] $_rows
 	    } elseif {$arg == 1} {
-		_clear_lines 0 [expr {$_cur_row - 1}]
-		_clear_in_line 0 $_cur_col $_cur_row
+		# Beginning of display to cursor (inclusive).
+		_clear_lines 0 $_cur_row
+		_clear_in_line 0 [expr $_cur_col + 1] $_cur_row
 	    } elseif {$arg == 2} {
+		# Entire display.
 		_clear_lines 0 $_rows
 	    }
 	}
@@ -314,13 +312,42 @@ namespace eval Term {
 	    variable _cols
 
 	    if {$arg == 0} {
-		# From cursor to end.
+		# Cursor (inclusive) to end of line.
 		_clear_in_line $_cur_col $_cols $_cur_row
 	    } elseif {$arg == 1} {
-		_clear_in_line 0 $_cur_col $_cur_row
+		# Beginning of line to cursor (inclusive).
+		_clear_in_line 0 [expr $_cur_col + 1] $_cur_row
 	    } elseif {$arg == 2} {
+		# Entire line.
 		_clear_in_line 0 $_cols $_cur_row
 	    }
+	}
+    }
+
+    # Insert Line
+    #
+    # https://vt100.net/docs/vt510-rm/IL.html
+    proc _csi_L {args} {
+	set arg [_default [lindex $args 0] 1]
+
+	_log_cur "Insert Line ($arg)" {
+	    variable _cur_col
+	    variable _cur_row
+	    variable _rows
+	    variable _cols
+	    variable _chars
+
+	    set y [expr $_rows - 2]
+	    set next_y [expr $y + $arg]
+	    while {$y >= $_cur_row} {
+		for {set x 0} {$x < $_cols} {incr x} {
+		    set _chars($x,$next_y) $_chars($x,$y)
+		}
+		incr y -1
+		incr next_y -1
+	    }
+
+	    _clear_lines $_cur_row [expr $_cur_row + $arg]
 	}
     }
 
@@ -346,6 +373,101 @@ namespace eval Term {
 		incr next_y
 	    }
 	    _clear_lines $y $_rows
+	}
+    }
+
+    # Delete Character.
+    #
+    # https://vt100.net/docs/vt510-rm/DCH.html
+    proc _csi_P {args} {
+	set count [_default [lindex $args 0] 1]
+
+	_log_cur "Delete character ($count)" {
+	    variable _cur_row
+	    variable _cur_col
+	    variable _chars
+	    variable _cols
+
+	    # Move all characters right of the cursor N positions left.
+	    set out_col [expr $_cur_col]
+	    set in_col [expr $_cur_col + $count]
+
+	    while {$in_col < $_cols} {
+		set _chars($out_col,$_cur_row) $_chars($in_col,$_cur_row)
+		incr in_col
+		incr out_col
+	    }
+
+	    # Clear the rest of the line.
+	    _clear_in_line $out_col $_cols $_cur_row
+	}
+    }
+
+    # Pan Down
+    #
+    # https://vt100.net/docs/vt510-rm/SU.html
+    proc _csi_S {args} {
+	set count [_default [lindex $args 0] 1]
+
+	_log_cur "Pan Down ($count)" {
+	    variable _cur_col
+	    variable _cur_row
+	    variable _cols
+	    variable _rows
+	    variable _chars
+
+	    # The following code is written without consideration for
+	    # the scroll margins.  At this time this comment was
+	    # written the tuiterm library doesn't support the scroll
+	    # margins.  If/when that changes, then the following will
+	    # need to be updated.
+
+	    set dy 0
+	    set y $count
+
+	    while {$y < $_rows} {
+		for {set x 0} {$x < $_cols} {incr x} {
+		    set _chars($x,$dy) $_chars($x,$y)
+		}
+		incr y 1
+		incr dy 1
+	    }
+
+	    _clear_lines $dy $_rows
+	}
+    }
+
+    # Pan Up
+    #
+    # https://vt100.net/docs/vt510-rm/SD.html
+    proc _csi_T {args} {
+	set count [_default [lindex $args 0] 1]
+
+	_log_cur "Pan Up ($count)" {
+	    variable _cur_col
+	    variable _cur_row
+	    variable _cols
+	    variable _rows
+	    variable _chars
+
+	    # The following code is written without consideration for
+	    # the scroll margins.  At this time this comment was
+	    # written the tuiterm library doesn't support the scroll
+	    # margins.  If/when that changes, then the following will
+	    # need to be updated.
+
+	    set y [expr $_rows - $count]
+	    set dy $_rows
+
+	    while {$dy >= $count} {
+		for {set x 0} {$x < $_cols} {incr x} {
+		    set _chars($x,$dy) $_chars($x,$y)
+		}
+		incr y -1
+		incr dy -1
+	    }
+
+	    _clear_lines 0 $count
 	}
     }
 
@@ -405,8 +527,9 @@ namespace eval Term {
 
 	_log_cur "Vertical Line Position Absolute ($row)" {
 	    variable _cur_row
+	    variable _rows
 
-	    set _cur_row [expr {$row - 1}]
+	    set _cur_row [expr min ($row - 1, $_rows - 1)]
 	}
     }
 
@@ -490,6 +613,26 @@ namespace eval Term {
 		}
 	    }
 	}
+    }
+
+    # Move the cursor to the (0-based) COL and ROW positions.
+    proc _move_cursor { col row } {
+	variable _cols
+	variable _rows
+	variable _cur_col
+	variable _cur_row
+
+	if { $col < 0 || $col >= $_cols } {
+	    error "_move_cursor: invalid col value: $col"
+	}
+
+	if { $row < 0 || $row >= $_rows } {
+	    error "_move_cursor: invalid row value: $row"
+	}
+
+
+	set _cur_col $col
+	set _cur_row $row
     }
 
     # Initialize.
@@ -833,7 +976,11 @@ namespace eval Term {
     proc dump_screen {} {
 	variable _rows
 	variable _cols
-	verbose -log "Screen Dump ($_cols x $_rows):"
+	variable _cur_row
+	variable _cur_col
+
+	verbose -log "Screen Dump (size $_cols columns x $_rows rows, cursor at column $_cur_col, row $_cur_row):"
+
 	for {set y 0} {$y < $_rows} {incr y} {
 	    set fmt [format %5d $y]
 	    verbose -log "$fmt [get_line $y]"

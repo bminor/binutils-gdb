@@ -76,7 +76,7 @@ build_id_to_debug_bfd_1 (const std::string &link, size_t build_id_len,
 {
   if (separate_debug_file_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, _("  Trying %s..."), link.c_str ());
+      gdb_printf (gdb_stdlog, _("  Trying %s..."), link.c_str ());
       gdb_flush (gdb_stdlog);
     }
 
@@ -94,8 +94,8 @@ build_id_to_debug_bfd_1 (const std::string &link, size_t build_id_len,
   if (filename == NULL)
     {
       if (separate_debug_file_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    _(" no, unable to compute real path\n"));
+	gdb_printf (gdb_stdlog,
+		    _(" no, unable to compute real path\n"));
 
       return {};
     }
@@ -106,7 +106,7 @@ build_id_to_debug_bfd_1 (const std::string &link, size_t build_id_len,
   if (debug_bfd == NULL)
     {
       if (separate_debug_file_debug)
-	fprintf_unfiltered (gdb_stdlog, _(" no, unable to open.\n"));
+	gdb_printf (gdb_stdlog, _(" no, unable to open.\n"));
 
       return {};
     }
@@ -114,13 +114,13 @@ build_id_to_debug_bfd_1 (const std::string &link, size_t build_id_len,
   if (!build_id_verify (debug_bfd.get(), build_id_len, build_id))
     {
       if (separate_debug_file_debug)
-	fprintf_unfiltered (gdb_stdlog, _(" no, build-id does not match.\n"));
+	gdb_printf (gdb_stdlog, _(" no, build-id does not match.\n"));
 
       return {};
     }
 
   if (separate_debug_file_debug)
-    fprintf_unfiltered (gdb_stdlog, _(" yes!\n"));
+    gdb_printf (gdb_stdlog, _(" yes!\n"));
 
   return debug_bfd;
 }
@@ -210,9 +210,9 @@ find_separate_debug_file_by_buildid (struct objfile *objfile)
   if (build_id != NULL)
     {
       if (separate_debug_file_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    _("\nLooking for separate debug info (build-id) for "
-			      "%s\n"), objfile_name (objfile));
+	gdb_printf (gdb_stdlog,
+		    _("\nLooking for separate debug info (build-id) for "
+		      "%s\n"), objfile_name (objfile));
 
       gdb_bfd_ref_ptr abfd (build_id_to_debug_bfd (build_id->size,
 						   build_id->data));

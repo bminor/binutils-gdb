@@ -120,12 +120,16 @@ struct ravenscar_thread_target final : public target_ops
 
   ptid_t get_ada_task_ptid (long lwp, ULONGEST thread) override;
 
-  struct btrace_target_info *enable_btrace (ptid_t ptid,
+  struct btrace_target_info *enable_btrace (thread_info *tp,
 					    const struct btrace_config *conf)
     override
   {
-    ptid = get_base_thread_from_ravenscar_task (ptid);
-    return beneath ()->enable_btrace (ptid, conf);
+    process_stratum_target *proc_target
+      = as_process_stratum_target (this->beneath ());
+    ptid_t underlying = get_base_thread_from_ravenscar_task (tp->ptid);
+    tp = find_thread_ptid (proc_target, underlying);
+
+    return beneath ()->enable_btrace (tp, conf);
   }
 
   void mourn_inferior () override;
@@ -357,7 +361,7 @@ get_running_thread_id (int cpu)
     return 0;
 
   object_size = TYPE_LENGTH (builtin_type_void_data_ptr);
-  object_addr = (BMSYMBOL_VALUE_ADDRESS (object_msym)
+  object_addr = (object_msym.value_address ()
 		 + (cpu - 1) * object_size);
   buf_size = object_size;
   buf = (gdb_byte *) alloca (buf_size);
@@ -699,10 +703,10 @@ show_ravenscar_task_switching_command (struct ui_file *file, int from_tty,
 				       const char *value)
 {
   if (ravenscar_task_support)
-    fprintf_filtered (file, _("\
+    gdb_printf (file, _("\
 Support for Ravenscar task/thread switching is enabled\n"));
   else
-    fprintf_filtered (file, _("\
+    gdb_printf (file, _("\
 Support for Ravenscar task/thread switching is disabled\n"));
 }
 

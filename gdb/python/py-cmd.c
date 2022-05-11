@@ -90,7 +90,7 @@ cmdpy_dont_repeat (PyObject *self, PyObject *args)
 static void
 cmdpy_destroyer (struct cmd_list_element *self, void *context)
 {
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   /* Release our hold on the command object.  */
   gdbpy_ref<cmdpy_object> cmd ((cmdpy_object *) context);
@@ -104,7 +104,7 @@ cmdpy_function (const char *args, int from_tty, cmd_list_element *command)
 {
   cmdpy_object *obj = (cmdpy_object *) command->context ();
 
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   if (! obj)
     error (_("Invalid invocation of Python command object."));
@@ -223,7 +223,7 @@ cmdpy_completer_handle_brkchars (struct cmd_list_element *command,
 				 completion_tracker &tracker,
 				 const char *text, const char *word)
 {
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   /* Calling our helper to obtain a reference to the PyObject of the Python
      function.  */
@@ -233,7 +233,7 @@ cmdpy_completer_handle_brkchars (struct cmd_list_element *command,
   if (resultobj == NULL)
     return;
 
-  if (PyInt_Check (resultobj.get ()))
+  if (PyLong_Check (resultobj.get ()))
     {
       /* User code may also return one of the completion constants,
 	 thus requesting that sort of completion.  We are only
@@ -266,7 +266,7 @@ cmdpy_completer (struct cmd_list_element *command,
 		 completion_tracker &tracker,
 		 const char *text, const char *word)
 {
-  gdbpy_enter enter_py (get_current_arch (), current_language);
+  gdbpy_enter enter_py;
 
   /* Calling our helper to obtain a reference to the PyObject of the Python
      function.  */
@@ -277,7 +277,7 @@ cmdpy_completer (struct cmd_list_element *command,
   if (resultobj == NULL)
     return;
 
-  if (PyInt_Check (resultobj.get ()))
+  if (PyLong_Check (resultobj.get ()))
     {
       /* User code may also return one of the completion constants,
 	 thus requesting that sort of completion.  */
@@ -592,10 +592,10 @@ gdbpy_initialize_commands (void)
 			      (PyObject *) &cmdpy_object_type) < 0)
     return -1;
 
-  invoke_cst = PyString_FromString ("invoke");
+  invoke_cst = PyUnicode_FromString ("invoke");
   if (invoke_cst == NULL)
     return -1;
-  complete_cst = PyString_FromString ("complete");
+  complete_cst = PyUnicode_FromString ("complete");
   if (complete_cst == NULL)
     return -1;
 
@@ -684,7 +684,7 @@ gdbpy_string_to_argv (PyObject *self, PyObject *args)
 
       for (char *arg : c_argv)
 	{
-	  gdbpy_ref<> argp (PyString_FromString (arg));
+	  gdbpy_ref<> argp (PyUnicode_FromString (arg));
 
 	  if (argp == NULL
 	      || PyList_Append (py_argv.get (), argp.get ()) < 0)

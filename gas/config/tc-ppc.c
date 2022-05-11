@@ -85,7 +85,6 @@ static int set_target_endian = 0;
 
 static bool reg_names_p = TARGET_REG_NAMES_P;
 
-static void ppc_macro (char *, const struct powerpc_macro *);
 static void ppc_byte (int);
 
 #if defined (OBJ_XCOFF) || defined (OBJ_ELF)
@@ -110,6 +109,7 @@ static void ppc_change_csect (symbolS *, offsetT);
 static void ppc_file (int);
 static void ppc_function (int);
 static void ppc_extern (int);
+static void ppc_globl (int);
 static void ppc_lglobl (int);
 static void ppc_ref (int);
 static void ppc_section (int);
@@ -119,6 +119,8 @@ static void ppc_rename (int);
 static void ppc_toc (int);
 static void ppc_xcoff_cons (int);
 static void ppc_vbyte (int);
+static void ppc_weak (int);
+static void ppc_GNU_visibility (int);
 #endif
 
 #ifdef OBJ_ELF
@@ -230,6 +232,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "extern",	ppc_extern,	0 },
   { "file",	ppc_file,	0 },
   { "function",	ppc_function,	0 },
+  { "globl",    ppc_globl,	0 },
   { "lglobl",	ppc_lglobl,	0 },
   { "ref",	ppc_ref,	0 },
   { "rename",	ppc_rename,	0 },
@@ -242,6 +245,12 @@ const pseudo_typeS md_pseudo_table[] =
   { "word",	ppc_xcoff_cons,	1 },
   { "short",	ppc_xcoff_cons,	1 },
   { "vbyte",    ppc_vbyte,	0 },
+  { "weak",     ppc_weak,	0 },
+
+  /* Enable GNU syntax for symbol visibility.  */
+  {"internal",  ppc_GNU_visibility, SYM_V_INTERNAL},
+  {"hidden",    ppc_GNU_visibility, SYM_V_HIDDEN},
+  {"protected", ppc_GNU_visibility, SYM_V_PROTECTED},
 #endif
 
 #ifdef OBJ_ELF
@@ -970,9 +979,6 @@ static unsigned int ppc_obj64 = BFD_DEFAULT_TARGET_SIZE == 64;
 /* Opcode hash table.  */
 static htab_t ppc_hash;
 
-/* Macro hash table.  */
-static htab_t ppc_macro_hash;
-
 #ifdef OBJ_ELF
 /* What type of shared library support to use.  */
 static enum { SHLIB_NONE, SHLIB_PIC, SHLIB_MRELOCATABLE } shlib = SHLIB_NONE;
@@ -1579,10 +1585,10 @@ insn_validate (const struct powerpc_opcode *op)
 	      val = -1;
 	      if ((operand->flags & PPC_OPERAND_NEGATIVE) != 0)
 		val = -val;
-	      else if ((operand->flags & PPC_OPERAND_PLUS1) != 0)
-		val += 1;
 	      mask = (*operand->insert) (0, val, ppc_cpu, &errmsg);
 	    }
+	  else if (operand->shift == (int) PPC_OPSHIFT_SH6)
+	    mask = (0x1f << 11) | 0x2;
 	  else if (operand->shift >= 0)
 	    mask = operand->bitm << operand->shift;
 	  else
@@ -1607,22 +1613,18 @@ insn_validate (const struct powerpc_opcode *op)
   return false;
 }
 
-/* Insert opcodes and macros into hash tables.  Called at startup and
-   for .machine pseudo.  */
+/* Insert opcodes into hash tables.  Called at startup and for
+   .machine pseudo.  */
 
 static void
 ppc_setup_opcodes (void)
 {
   const struct powerpc_opcode *op;
   const struct powerpc_opcode *op_end;
-  const struct powerpc_macro *macro;
-  const struct powerpc_macro *macro_end;
   bool bad_insn = false;
 
   if (ppc_hash != NULL)
     htab_delete (ppc_hash);
-  if (ppc_macro_hash != NULL)
-    htab_delete (ppc_macro_hash);
 
   /* Insert the opcodes into a hash table.  */
   ppc_hash = str_htab_create ();
@@ -1828,19 +1830,6 @@ ppc_setup_opcodes (void)
       for (op = spe2_opcodes; op < op_end; op++)
 	str_hash_insert (ppc_hash, op->name, op, 0);
     }
-
-  /* Insert the macros into a hash table.  */
-  ppc_macro_hash = str_htab_create ();
-
-  macro_end = powerpc_macros + powerpc_num_macros;
-  for (macro = powerpc_macros; macro < macro_end; macro++)
-    if (((macro->flags & ppc_cpu) != 0
-	 || (ppc_cpu & PPC_OPCODE_ANY) != 0)
-	&& str_hash_insert (ppc_macro_hash, macro->name, macro, 0) != NULL)
-      {
-	as_bad (_("duplicate %s"), macro->name);
-	bad_insn = true;
-      }
 
   if (bad_insn)
     abort ();
@@ -3282,15 +3271,7 @@ md_assemble (char *str)
   opcode = (const struct powerpc_opcode *) str_hash_find (ppc_hash, str);
   if (opcode == (const struct powerpc_opcode *) NULL)
     {
-      const struct powerpc_macro *macro;
-
-      macro = (const struct powerpc_macro *) str_hash_find (ppc_macro_hash,
-							    str);
-      if (macro == (const struct powerpc_macro *) NULL)
-	as_bad (_("unrecognized opcode: `%s'"), str);
-      else
-	ppc_macro (s, macro);
-
+      as_bad (_("unrecognized opcode: `%s'"), str);
       ppc_clear_labels ();
       return;
     }
@@ -4123,85 +4104,6 @@ md_assemble (char *str)
       fixP->fx_pcrel_adjust = fixups[i].opindex;
     }
 }
-
-/* Handle a macro.  Gather all the operands, transform them as
-   described by the macro, and call md_assemble recursively.  All the
-   operands are separated by commas; we don't accept parentheses
-   around operands here.  */
-
-static void
-ppc_macro (char *str, const struct powerpc_macro *macro)
-{
-  char *operands[10];
-  unsigned int count;
-  char *s;
-  unsigned int len;
-  const char *format;
-  unsigned int arg;
-  char *send;
-  char *complete;
-
-  /* Gather the users operands into the operands array.  */
-  count = 0;
-  s = str;
-  while (1)
-    {
-      if (count >= sizeof operands / sizeof operands[0])
-	break;
-      operands[count++] = s;
-      s = strchr (s, ',');
-      if (s == (char *) NULL)
-	break;
-      *s++ = '\0';
-    }
-
-  if (count != macro->operands)
-    {
-      as_bad (_("wrong number of operands"));
-      return;
-    }
-
-  /* Work out how large the string must be (the size is unbounded
-     because it includes user input).  */
-  len = 0;
-  format = macro->format;
-  while (*format != '\0')
-    {
-      if (*format != '%')
-	{
-	  ++len;
-	  ++format;
-	}
-      else
-	{
-	  arg = strtol (format + 1, &send, 10);
-	  know (send != format && arg < count);
-	  len += strlen (operands[arg]);
-	  format = send;
-	}
-    }
-
-  /* Put the string together.  */
-  complete = s = XNEWVEC (char, len + 1);
-  format = macro->format;
-  while (*format != '\0')
-    {
-      if (*format != '%')
-	*s++ = *format++;
-      else
-	{
-	  arg = strtol (format + 1, &send, 10);
-	  strcpy (s, operands[arg]);
-	  s += strlen (s);
-	  format = send;
-	}
-    }
-  *s = '\0';
-
-  /* Assemble the constructed instruction.  */
-  md_assemble (complete);
-  free (complete);
-}
 
 #ifdef OBJ_ELF
 /* For ELF, add support for SHT_ORDERED.  */
@@ -4285,6 +4187,71 @@ ppc_byte (int ignore ATTRIBUTE_UNUSED)
    to handle symbol suffixes for such symbols.  */
 static bool ppc_stab_symbol;
 
+/* Retrieve the visiblity input for pseudo-ops having ones.  */
+static unsigned short
+ppc_xcoff_get_visibility (void) {
+  SKIP_WHITESPACE();
+
+  if (startswith (input_line_pointer, "exported"))
+    {
+      input_line_pointer += 8;
+      return SYM_V_EXPORTED;
+    }
+
+  if (startswith (input_line_pointer, "hidden"))
+    {
+      input_line_pointer += 6;
+      return SYM_V_HIDDEN;
+    }
+
+  if (startswith (input_line_pointer, "internal"))
+    {
+      input_line_pointer += 8;
+      return SYM_V_INTERNAL;
+    }
+
+  if (startswith (input_line_pointer, "protected"))
+    {
+      input_line_pointer += 9;
+      return SYM_V_PROTECTED;
+    }
+
+  return 0;
+}
+
+/* Retrieve visiblity using GNU syntax.  */
+static void ppc_GNU_visibility (int visibility) {
+  int c;
+  char *name;
+  symbolS *symbolP;
+  coff_symbol_type *coffsym;
+
+  do
+    {
+      if ((name = read_symbol_name ()) == NULL)
+	break;
+      symbolP = symbol_find_or_make (name);
+      coffsym = coffsymbol (symbol_get_bfdsym (symbolP));
+
+      coffsym->native->u.syment.n_type &= ~SYM_V_MASK;
+      coffsym->native->u.syment.n_type |= visibility;
+
+      c = *input_line_pointer;
+      if (c == ',')
+	{
+	  input_line_pointer ++;
+
+	  SKIP_WHITESPACE ();
+
+	  if (*input_line_pointer == '\n')
+	    c = '\n';
+	}
+    }
+  while (c == ',');
+
+  demand_empty_rest_of_line ();
+}
+
 /* The .comm and .lcomm pseudo-ops for XCOFF.  XCOFF puts common
    symbols in the .bss segment as though they were local common
    symbols, and uses a different smclas.  The native Aix 4.3.3 assembler
@@ -4305,6 +4272,7 @@ ppc_comm (int lcomm)
   symbolS *lcomm_sym = NULL;
   symbolS *sym;
   char *pfrag;
+  unsigned short visibility = 0;
   struct ppc_xcoff_section *section;
 
   endc = get_symbol_name (&name);
@@ -4340,6 +4308,19 @@ ppc_comm (int lcomm)
 	    {
 	      as_warn (_("ignoring bad alignment"));
 	      align = 2;
+	    }
+
+	  /* The fourth argument to .comm is the visibility.  */
+	  if (*input_line_pointer == ',')
+	    {
+	      input_line_pointer++;
+	      visibility = ppc_xcoff_get_visibility ();
+	      if (!visibility)
+		{
+		  as_bad (_("Unknown visibility field in .comm"));
+		  ignore_rest_of_line ();
+		  return;
+		}
 	    }
 	}
     }
@@ -4461,6 +4442,14 @@ ppc_comm (int lcomm)
       symbol_set_frag (sym, symbol_get_frag (lcomm_sym));
       S_SET_VALUE (sym, symbol_get_frag (lcomm_sym)->fr_offset);
       symbol_get_frag (lcomm_sym)->fr_offset += size;
+    }
+
+  if (!lcomm && visibility)
+    {
+      /* Add visibility to .comm symbol.  */
+      coff_symbol_type *coffsym = coffsymbol (symbol_get_bfdsym (sym));
+      coffsym->native->u.syment.n_type &= ~SYM_V_MASK;
+      coffsym->native->u.syment.n_type |= visibility;
     }
 
   subseg_set (current_seg, current_subseg);
@@ -4842,13 +4831,102 @@ static void
 ppc_extern (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
-  char endc;
+  symbolS *sym;
 
-  endc = get_symbol_name (&name);
+  if ((name = read_symbol_name ()) == NULL)
+    return;
 
-  (void) symbol_find_or_make (name);
+  sym = symbol_find_or_make (name);
 
-  (void) restore_line_pointer (endc);
+  if (*input_line_pointer == ',')
+    {
+      unsigned short visibility;
+      coff_symbol_type *coffsym = coffsymbol (symbol_get_bfdsym (sym));
+
+      input_line_pointer++;
+      visibility = ppc_xcoff_get_visibility ();
+      if (!visibility)
+	{
+	  as_bad (_("Unknown visibility field in .extern"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      coffsym->native->u.syment.n_type &= ~SYM_V_MASK;
+      coffsym->native->u.syment.n_type |= visibility;
+    }
+
+  demand_empty_rest_of_line ();
+}
+
+/* XCOFF semantic for .globl says that the second parameter is
+   the symbol visibility.  */
+
+static void
+ppc_globl (int ignore ATTRIBUTE_UNUSED)
+{
+  char *name;
+  symbolS *sym;
+
+  if ((name = read_symbol_name ()) == NULL)
+    return;
+
+  sym = symbol_find_or_make (name);
+  S_SET_EXTERNAL (sym);
+
+  if (*input_line_pointer == ',')
+    {
+      unsigned short visibility;
+      coff_symbol_type *coffsym = coffsymbol (symbol_get_bfdsym (sym));
+
+      input_line_pointer++;
+      visibility = ppc_xcoff_get_visibility ();
+      if (!visibility)
+	{
+	  as_bad (_("Unknown visibility field in .globl"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      coffsym->native->u.syment.n_type &= ~SYM_V_MASK;
+      coffsym->native->u.syment.n_type |= visibility;
+    }
+
+  demand_empty_rest_of_line ();
+}
+
+/* XCOFF semantic for .weak says that the second parameter is
+   the symbol visibility.  */
+
+static void
+ppc_weak (int ignore ATTRIBUTE_UNUSED)
+{
+  char *name;
+  symbolS *sym;
+
+  if ((name = read_symbol_name ()) == NULL)
+    return;
+
+  sym = symbol_find_or_make (name);
+  S_SET_WEAK (sym);
+
+  if (*input_line_pointer == ',')
+    {
+      unsigned short visibility;
+      coff_symbol_type *coffsym = coffsymbol (symbol_get_bfdsym (sym));
+
+      input_line_pointer++;
+      visibility = ppc_xcoff_get_visibility ();
+      if (!visibility)
+	{
+	  as_bad (_("Unknown visibility field in .weak"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      coffsym->native->u.syment.n_type &= ~SYM_V_MASK;
+      coffsym->native->u.syment.n_type |= visibility;
+    }
 
   demand_empty_rest_of_line ();
 }
@@ -5116,7 +5194,7 @@ ppc_file (int ignore ATTRIBUTE_UNUSED)
 	}
 
       /* Use coff dot_file creation and adjust auxiliary entries.  */
-      c_dot_file_symbol (sfname, 0);
+      c_dot_file_symbol (sfname);
       S_SET_NUMBER_AUXILIARY (symbol_rootP, auxnb);
       coffsym = coffsymbol (symbol_get_bfdsym (symbol_rootP));
       coffsym->native[1].u.auxent.x_file.x_ftype = XFT_FN;
@@ -5779,7 +5857,30 @@ ppc_machine (int ignore ATTRIBUTE_UNUSED)
 	     options do not count as a new machine, instead they add
 	     to currently selected opcodes.  */
 	  ppc_cpu_t machine_sticky = 0;
-	  new_cpu = ppc_parse_cpu (ppc_cpu, &machine_sticky, cpu_string);
+	  /* Unfortunately, some versions of gcc emit a .machine
+	     directive very near the start of the compiler's assembly
+	     output file.  This is bad because it overrides user -Wa
+	     cpu selection.  Worse, there are versions of gcc that
+	     emit the *wrong* cpu, not even respecting the -mcpu given
+	     to gcc.  See gcc pr101393.  And to compound the problem,
+	     as of 20220222 gcc doesn't pass the correct cpu option to
+	     gas on the command line.  See gcc pr59828.  Hack around
+	     this by keeping sticky options for an early .machine.  */
+	  asection *sec;
+	  for (sec = stdoutput->sections; sec != NULL; sec = sec->next)
+	    {
+	      segment_info_type *info = seg_info (sec);
+	      /* Are the frags for this section perturbed from their
+		 initial state?  Even .align will count here.  */
+	      if (info != NULL
+		  && (info->frchainP->frch_root != info->frchainP->frch_last
+		      || info->frchainP->frch_root->fr_type != rs_fill
+		      || info->frchainP->frch_root->fr_fix != 0))
+		break;
+	    }
+	  new_cpu = ppc_parse_cpu (ppc_cpu,
+				   sec == NULL ? &sticky : &machine_sticky,
+				   cpu_string);
 	  if (new_cpu != 0)
 	    ppc_cpu = new_cpu;
 	  else

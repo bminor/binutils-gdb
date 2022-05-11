@@ -190,9 +190,9 @@ show_tui_active_border_mode (struct ui_file *file,
 			     struct cmd_list_element *c, 
 			     const char *value)
 {
-  fprintf_filtered (file, _("\
+  gdb_printf (file, _("\
 The attribute mode to use for the active TUI window border is \"%s\".\n"),
-		    value);
+	      value);
 }
 
 static const char *tui_border_mode = "normal";
@@ -202,9 +202,9 @@ show_tui_border_mode (struct ui_file *file,
 		      struct cmd_list_element *c, 
 		      const char *value)
 {
-  fprintf_filtered (file, _("\
+  gdb_printf (file, _("\
 The attribute mode to use for the TUI window borders is \"%s\".\n"),
-		    value);
+	      value);
 }
 
 static const char *tui_border_kind = "acs";
@@ -214,8 +214,8 @@ show_tui_border_kind (struct ui_file *file,
 		      struct cmd_list_element *c, 
 		      const char *value)
 {
-  fprintf_filtered (file, _("The kind of border for TUI windows is \"%s\".\n"),
-		    value);
+  gdb_printf (file, _("The kind of border for TUI windows is \"%s\".\n"),
+	      value);
 }
 
 
@@ -332,7 +332,7 @@ static void
 show_tui_resize_message (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("TUI resize messaging is %s.\n"), value);
+  gdb_printf (file, _("TUI resize messaging is %s.\n"), value);
 }
 
 
@@ -511,8 +511,10 @@ tui_resize_all (void)
 	 AIX 5.3 does not define clear.  */
       erase ();
       clearok (curscr, TRUE);
-      tui_apply_current_layout ();
-      /* Turn keypad back on.  */
+      /* Apply the current layout.  The 'false' here allows the command
+	 window to resize proportionately with containing terminal, rather
+	 than maintaining a fixed size.  */
+      tui_apply_current_layout (false); /* Turn keypad back on.  */
       keypad (TUI_CMD_WIN->handle.get (), TRUE);
     }
 }
@@ -698,8 +700,8 @@ tui_set_focus_command (const char *arg, int from_tty)
     error (_("Window \"%s\" is not visible"), arg);
 
   tui_set_win_focus_to (win_info);
-  printf_filtered (_("Focus set to %s window.\n"),
-		   tui_win_with_focus ()->name ());
+  gdb_printf (_("Focus set to %s window.\n"),
+	      tui_win_with_focus ()->name ());
 }
 
 static void
@@ -707,16 +709,17 @@ tui_all_windows_info (const char *arg, int from_tty)
 {
   if (!tui_active)
     {
-      printf_filtered (_("The TUI is not active.\n"));
+      gdb_printf (_("The TUI is not active.\n"));
       return;
     }
 
   struct tui_win_info *win_with_focus = tui_win_with_focus ();
   struct ui_out *uiout = current_uiout;
 
-  ui_out_emit_table table_emitter (uiout, 3, -1, "tui-windows");
+  ui_out_emit_table table_emitter (uiout, 4, -1, "tui-windows");
   uiout->table_header (10, ui_left, "name", "Name");
   uiout->table_header (5, ui_right, "lines", "Lines");
+  uiout->table_header (7, ui_right, "columns", "Columns");
   uiout->table_header (10, ui_left, "focus", "Focus");
   uiout->table_body ();
 
@@ -727,6 +730,7 @@ tui_all_windows_info (const char *arg, int from_tty)
 
 	uiout->field_string ("name", win_info->name ());
 	uiout->field_signed ("lines", win_info->height);
+	uiout->field_signed ("columns", win_info->width);
 	if (win_with_focus == win_info)
 	  uiout->field_string ("focus", _("(has focus)"));
 	else
@@ -790,7 +794,7 @@ static void
 tui_show_tab_width (struct ui_file *file, int from_tty,
 		    struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("TUI tab width is %s spaces.\n"), value);
+  gdb_printf (file, _("TUI tab width is %s spaces.\n"), value);
 
 }
 
@@ -814,7 +818,7 @@ static void
 tui_show_compact_source (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("TUI source window compactness is %s.\n"), value);
+  gdb_printf (file, _("TUI source window compactness is %s.\n"), value);
 }
 
 /* Set the tab width of the specified window.  */
@@ -840,10 +844,21 @@ tui_set_tab_width_command (const char *arg, int from_tty)
     }
 }
 
+/* Helper function for the user commands to adjust a window's width or
+   height.  The ARG string contains the command line arguments from the
+   user, which should give the name of a window, and how to adjust the
+   size.
 
-/* Set the height of the specified window.  */
+   When SET_WIDTH_P is true the width of the window is adjusted based on
+   ARG, and when SET_WIDTH_P is false, the height of the window is adjusted
+   based on ARG.
+
+   On invalid input, or if the size can't be adjusted as requested, then an
+   error is thrown, otherwise, the window sizes are adjusted, and the
+   windows redrawn.  */
+
 static void
-tui_set_win_height_command (const char *arg, int from_tty)
+tui_set_win_size (const char *arg, bool set_width_p)
 {
   /* Make sure the curses mode is enabled.  */
   tui_enable ();
@@ -852,7 +867,7 @@ tui_set_win_height_command (const char *arg, int from_tty)
 
   const char *buf = arg;
   const char *buf_ptr = buf;
-  int new_height;
+  int new_size;
   struct tui_win_info *win_info;
 
   buf_ptr = skip_to_space (buf_ptr);
@@ -888,18 +903,51 @@ tui_set_win_height_command (const char *arg, int from_tty)
 	  if (negate)
 	    input_no *= (-1);
 	  if (fixed_size)
-	    new_height = input_no;
+	    new_size = input_no;
 	  else
-	    new_height = win_info->height + input_no;
+	    {
+	      int curr_size;
+	      if (set_width_p)
+		curr_size = win_info->width;
+	      else
+		curr_size = win_info->height;
+	      new_size = curr_size + input_no;
+	    }
 
 	  /* Now change the window's height, and adjust
 	     all other windows around it.  */
-	  tui_adjust_window_height (win_info, new_height);
+	  if (set_width_p)
+	    tui_adjust_window_width (win_info, new_size);
+	  else
+	    tui_adjust_window_height (win_info, new_size);
 	  tui_update_gdb_sizes ();
 	}
       else
-	error (_("Invalid window height specified"));
+	{
+	  if (set_width_p)
+	    error (_("Invalid window width specified"));
+	  else
+	    error (_("Invalid window height specified"));
+	}
     }
+}
+
+/* Implement the 'tui window height' command (alias 'winheight').  */
+
+static void
+tui_set_win_height_command (const char *arg, int from_tty)
+{
+  /* Pass false as the final argument to set the height.  */
+  tui_set_win_size (arg, false);
+}
+
+/* Implement the 'tui window width' command (alias 'winwidth').  */
+
+static void
+tui_set_win_width_command (const char *arg, int from_tty)
+{
+  /* Pass true as the final argument to set the width.  */
+  tui_set_win_size (arg, true);
 }
 
 /* See tui-data.h.  */
@@ -907,7 +955,7 @@ tui_set_win_height_command (const char *arg, int from_tty)
 int
 tui_win_info::max_height () const
 {
-  return tui_term_height () - 2;
+  return tui_term_height ();
 }
 
 /* See tui-data.h.  */
@@ -915,7 +963,7 @@ tui_win_info::max_height () const
 int
 tui_win_info::max_width () const
 {
-  return tui_term_width () - 2;
+  return tui_term_width ();
 }
 
 static void
@@ -975,6 +1023,18 @@ parse_scrolling_args (const char *arg,
     }
 }
 
+/* The list of 'tui window' sub-commands.  */
+
+static cmd_list_element *tui_window_cmds = nullptr;
+
+/* Called to implement 'tui window'.  */
+
+static void
+tui_window_command (const char *args, int from_tty)
+{
+  help_list (tui_window_cmds, "tui window ", all_commands, gdb_stdout);
+}
+
 /* Function to initialize gdb commands, for tui window
    manipulation.  */
 
@@ -993,8 +1053,11 @@ _initialize_tui_win ()
 			  &tui_setlist, &tui_showlist,
 			  &setlist, &showlist);
 
-  add_com ("refresh", class_tui, tui_refresh_all_command,
-	   _("Refresh the terminal display."));
+  cmd_list_element *refresh_cmd
+    = add_cmd ("refresh", class_tui, tui_refresh_all_command,
+	       _("Refresh the terminal display."),
+	       tui_get_cmd_list ());
+  add_com_alias ("refresh", refresh_cmd, class_tui, 0);
 
   cmd_list_element *tabset_cmd
     = add_com ("tabset", class_tui, tui_set_tab_width_command, _("\
@@ -1002,21 +1065,40 @@ Set the width (in characters) of tab stops.\n\
 Usage: tabset N"));
   deprecate_cmd (tabset_cmd, "set tui tab-width");
 
+  /* Setup the 'tui window' list of command.  */
+  add_prefix_cmd ("window", class_tui, tui_window_command,
+		  _("Text User Interface window commands."),
+		  &tui_window_cmds, 1, tui_get_cmd_list ());
+
   cmd_list_element *winheight_cmd
-    = add_com ("winheight", class_tui, tui_set_win_height_command, _("\
+    = add_cmd ("height", class_tui, tui_set_win_height_command, _("\
 Set or modify the height of a specified window.\n\
-Usage: winheight WINDOW-NAME [+ | -] NUM-LINES\n\
-Use \"info win\" to see the names of the windows currently being displayed."));
+Usage: tui window height WINDOW-NAME [+ | -] NUM-LINES\n\
+Use \"info win\" to see the names of the windows currently being displayed."),
+	       &tui_window_cmds);
+  add_com_alias ("winheight", winheight_cmd, class_tui, 0);
   add_com_alias ("wh", winheight_cmd, class_tui, 0);
   set_cmd_completer (winheight_cmd, winheight_completer);
+
+  cmd_list_element *winwidth_cmd
+    = add_cmd ("width", class_tui, tui_set_win_width_command, _("\
+Set or modify the width of a specified window.\n\
+Usage: tui window width WINDOW-NAME [+ | -] NUM-LINES\n\
+Use \"info win\" to see the names of the windows currently being displayed."),
+	       &tui_window_cmds);
+  add_com_alias ("winwidth", winwidth_cmd, class_tui, 0);
+  set_cmd_completer (winwidth_cmd, winheight_completer);
+
   add_info ("win", tui_all_windows_info,
 	    _("List of all displayed windows.\n\
 Usage: info win"));
   cmd_list_element *focus_cmd
-    = add_com ("focus", class_tui, tui_set_focus_command, _("\
+    = add_cmd ("focus", class_tui, tui_set_focus_command, _("\
 Set focus to named window or next/prev window.\n\
-Usage: focus [WINDOW-NAME | next | prev]\n\
-Use \"info win\" to see the names of the windows currently being displayed."));
+Usage: tui focus [WINDOW-NAME | next | prev]\n\
+Use \"info win\" to see the names of the windows currently being displayed."),
+	       tui_get_cmd_list ());
+  add_com_alias ("focus", focus_cmd, class_tui, 0);
   add_com_alias ("fs", focus_cmd, class_tui, 0);
   set_cmd_completer (focus_cmd, focus_completer);
   add_com ("+", class_tui, tui_scroll_forward_command, _("\

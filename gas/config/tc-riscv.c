@@ -89,6 +89,20 @@ struct riscv_csr_extra
   struct riscv_csr_extra *next;
 };
 
+/* This structure contains information about errors that occur within the
+   riscv_ip function */
+struct riscv_ip_error
+{
+  /* General error message */
+  const char* msg;
+
+  /* Statement that caused the error */
+  char* statement;
+
+  /* Missing extension that needs to be enabled */
+  const char* missing_ext;
+};
+
 #ifndef DEFAULT_ARCH
 #define DEFAULT_ARCH "riscv64"
 #endif
@@ -882,38 +896,44 @@ riscv_csr_address (const char *csr_name,
 {
   struct riscv_csr_extra *saved_entry = entry;
   enum riscv_csr_class csr_class = entry->csr_class;
-  bool need_check_version = true;
-  bool result = true;
+  bool need_check_version = false;
+  bool rv32_only = true;
+  const char* extension = NULL;
 
   switch (csr_class)
     {
-    case CSR_CLASS_I:
-      result = riscv_subset_supports (&riscv_rps_as, "i");
-      break;
     case CSR_CLASS_I_32:
-      result = (xlen == 32 && riscv_subset_supports (&riscv_rps_as, "i"));
+      rv32_only = (xlen == 32);
+      /* Fall through.  */
+    case CSR_CLASS_I:
+      need_check_version = true;
+      extension = "i";
       break;
     case CSR_CLASS_F:
-      result = riscv_subset_supports (&riscv_rps_as, "f");
-      need_check_version = false;
+      extension = "f";
       break;
     case CSR_CLASS_ZKR:
-      result = riscv_subset_supports (&riscv_rps_as, "zkr");
-      need_check_version = false;
+      extension = "zkr";
       break;
     case CSR_CLASS_V:
-      result = riscv_subset_supports (&riscv_rps_as, "v");
-      need_check_version = false;
+      extension = "v";
       break;
     case CSR_CLASS_DEBUG:
-      need_check_version = false;
       break;
     default:
       as_bad (_("internal: bad RISC-V CSR class (0x%x)"), csr_class);
     }
 
-  if (riscv_opts.csr_check && !result)
-    as_warn (_("invalid CSR `%s' for the current ISA"), csr_name);
+  if (riscv_opts.csr_check)
+    {
+      if (!rv32_only)
+	as_warn (_("invalid CSR `%s', needs rv32i extension"), csr_name);
+
+      if (extension != NULL
+	  && !riscv_subset_supports (&riscv_rps_as, extension))
+	as_warn (_("invalid CSR `%s', needs `%s' extension"),
+		 csr_name, extension);
+    }
 
   while (entry != NULL)
     {
@@ -1159,6 +1179,7 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	case 'j': used_bits |= ENCODE_ITYPE_IMM (-1U); break;
 	case 'a': used_bits |= ENCODE_JTYPE_IMM (-1U); break;
 	case 'p': used_bits |= ENCODE_BTYPE_IMM (-1U); break;
+	case 'f': /* Fall through.  */
 	case 'q': used_bits |= ENCODE_STYPE_IMM (-1U); break;
 	case 'u': used_bits |= ENCODE_UTYPE_IMM (-1U); break;
 	case 'z': break; /* Zero immediate.  */
@@ -2215,7 +2236,7 @@ riscv_is_priv_insn (insn_t insn)
    side effect, it sets the global variable imm_reloc to the type of
    relocation to do if one of the operands is an address expression.  */
 
-static const char *
+static struct riscv_ip_error
 riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	  bfd_reloc_code_real_type *imm_reloc, htab_t hash)
 {
@@ -2228,7 +2249,10 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
   unsigned int regno;
   int argnum;
   const struct percent_op_match *p;
-  const char *error = "unrecognized opcode";
+  struct riscv_ip_error error;
+  error.msg = "unrecognized opcode";
+  error.statement = str;
+  error.missing_ext = NULL;
   /* Indicate we are assembling instruction with CSR.  */
   bool insn_with_csr = false;
 
@@ -2251,10 +2275,15 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	continue;
 
       if (!riscv_multi_subset_supports (&riscv_rps_as, insn->insn_class))
-	continue;
+	{
+	  error.missing_ext = riscv_multi_subset_supports_ext (&riscv_rps_as,
+							       insn->insn_class);
+	  continue;
+	}
 
       /* Reset error message of the previous round.  */
-      error = _("illegal operands");
+      error.msg = _("illegal operands");
+      error.missing_ext = NULL;
       create_insn (ip, insn);
       argnum = 1;
 
@@ -2304,14 +2333,14 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      && riscv_subset_supports (&riscv_rps_as, "zve32x")
 		      && !riscv_subset_supports (&riscv_rps_as, "zve64x"))
 		    {
-		      error = _("illegal opcode for zve32x");
+		      error.msg = _("illegal opcode for zve32x");
 		      break;
 		    }
 		}
 	      if (*asarg != '\0')
 		break;
 	      /* Successful assembly.  */
-	      error = NULL;
+	      error.msg = NULL;
 	      insn_with_csr = false;
 	      goto out;
 
@@ -3163,6 +3192,23 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      imm_expr->X_op = O_absent;
 	      continue;
 
+	    case 'f': /* Prefetch offset, pseudo S-type but lower 5-bits zero.  */
+	      if (riscv_handle_implicit_zero_offset (imm_expr, asarg))
+		continue;
+	      my_getExpression (imm_expr, asarg);
+	      check_absolute_expr (ip, imm_expr, false);
+	      if (((unsigned) (imm_expr->X_add_number) & 0x1fU)
+		  || imm_expr->X_add_number >= (signed) RISCV_IMM_REACH / 2
+		  || imm_expr->X_add_number < -(signed) RISCV_IMM_REACH / 2)
+		as_bad (_("improper prefetch offset (%ld)"),
+			(long) imm_expr->X_add_number);
+	      ip->insn_opcode |=
+		ENCODE_STYPE_IMM ((unsigned) (imm_expr->X_add_number) &
+				  ~ 0x1fU);
+	      imm_expr->X_op = O_absent;
+	      asarg = expr_end;
+	      continue;
+
 	    default:
 	    unknown_riscv_ip_operand:
 	      as_fatal (_("internal: unknown argument type `%s'"),
@@ -3220,7 +3266,7 @@ riscv_ip_hardcode (char *str,
   insn->match = values[num - 1];
   create_insn (ip, insn);
   unsigned int bytes = riscv_insn_length (insn->match);
-  if (values[num - 1] >> (8 * bytes) != 0
+  if ((bytes < sizeof(values[0]) && values[num - 1] >> (8 * bytes) != 0)
       || (num == 2 && values[0] != bytes))
     return _("value conflicts with instruction length");
 
@@ -3247,11 +3293,16 @@ md_assemble (char *str)
 
   riscv_mapping_state (MAP_INSN, 0);
 
-  const char *error = riscv_ip (str, &insn, &imm_expr, &imm_reloc, op_hash);
+  const struct riscv_ip_error error = riscv_ip (str, &insn, &imm_expr,
+						&imm_reloc, op_hash);
 
-  if (error)
+  if (error.msg)
     {
-      as_bad ("%s `%s'", error, str);
+      if (error.missing_ext)
+	as_bad ("%s `%s', extension `%s' required", error.msg,
+		error.statement, error.missing_ext);
+      else
+	as_bad ("%s `%s'", error.msg, error.statement);
       return;
     }
 
@@ -3913,6 +3964,12 @@ riscv_frag_align_code (int n)
 
   riscv_mapping_state (MAP_INSN, worst_case_bytes);
 
+  /* We need to start a new frag after the alignment which may be removed by
+     the linker, to prevent the assembler from computing static offsets.
+     This is necessary to get correct EH info.  */
+  frag_wane (frag_now);
+  frag_new (0);
+
   return true;
 }
 
@@ -4254,17 +4311,23 @@ s_riscv_insn (int x ATTRIBUTE_UNUSED)
 
   riscv_mapping_state (MAP_INSN, 0);
 
-  const char *error = riscv_ip (str, &insn, &imm_expr,
+  struct riscv_ip_error error = riscv_ip (str, &insn, &imm_expr,
 				&imm_reloc, insn_type_hash);
-  if (error)
+  if (error.msg)
     {
       char *save_in = input_line_pointer;
-      error = riscv_ip_hardcode (str, &insn, &imm_expr, error);
+      error.msg = riscv_ip_hardcode (str, &insn, &imm_expr, error.msg);
       input_line_pointer = save_in;
     }
 
-  if (error)
-    as_bad ("%s `%s'", error, str);
+  if (error.msg)
+    {
+      if (error.missing_ext)
+	as_bad ("%s `%s', extension `%s' required", error.msg, error.statement,
+		error.missing_ext);
+      else
+	as_bad ("%s `%s'", error.msg, error.statement);
+    }
   else
     {
       gas_assert (insn.insn_mo->pinfo != INSN_MACRO);
@@ -4477,19 +4540,18 @@ riscv_elf_copy_symbol_attributes (symbolS *dest, symbolS *src)
 {
   struct elf_obj_sy *srcelf = symbol_get_obj (src);
   struct elf_obj_sy *destelf = symbol_get_obj (dest);
-  if (srcelf->size)
+  /* If size is unset, copy size from src.  Because we don't track whether
+     .size has been used, we can't differentiate .size dest, 0 from the case
+     where dest's size is unset.  */
+  if (!destelf->size && S_GET_SIZE (dest) == 0)
     {
-      if (destelf->size == NULL)
-	destelf->size = XNEW (expressionS);
-      *destelf->size = *srcelf->size;
+      if (srcelf->size)
+	{
+	  destelf->size = XNEW (expressionS);
+	  *destelf->size = *srcelf->size;
+	}
+      S_SET_SIZE (dest, S_GET_SIZE (src));
     }
-  else
-    {
-      if (destelf->size != NULL)
-	free (destelf->size);
-      destelf->size = NULL;
-    }
-  S_SET_SIZE (dest, S_GET_SIZE (src));
 }
 
 /* RISC-V pseudo-ops table.  */

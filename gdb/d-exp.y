@@ -448,7 +448,7 @@ PrimaryExpression:
 		  sym = lookup_symbol (copy.c_str (),
 				       pstate->expression_context_block,
 				       VAR_DOMAIN, &is_a_field_of_this);
-		  if (sym.symbol && SYMBOL_CLASS (sym.symbol) != LOC_TYPEDEF)
+		  if (sym.symbol && sym.symbol->aclass () != LOC_TYPEDEF)
 		    {
 		      if (symbol_read_needs_frame (sym.symbol))
 			pstate->block_tracker->update (sym);
@@ -1341,9 +1341,9 @@ classify_name (struct parser_state *par_state, const struct block *block)
   std::string copy = copy_name (yylval.sval);
 
   sym = lookup_symbol (copy.c_str (), block, VAR_DOMAIN, &is_a_field_of_this);
-  if (sym.symbol && SYMBOL_CLASS (sym.symbol) == LOC_TYPEDEF)
+  if (sym.symbol && sym.symbol->aclass () == LOC_TYPEDEF)
     {
-      yylval.tsym.type = SYMBOL_TYPE (sym.symbol);
+      yylval.tsym.type = sym.symbol->type ();
       return TYPENAME;
     }
   else if (sym.symbol == NULL)
@@ -1355,7 +1355,7 @@ classify_name (struct parser_state *par_state, const struct block *block)
 
       if (sym.symbol != NULL)
 	{
-	  yylval.tsym.type = SYMBOL_TYPE (sym.symbol);
+	  yylval.tsym.type = sym.symbol->type ();
 	  return TYPENAME;
 	}
 
@@ -1388,9 +1388,9 @@ classify_inner_name (struct parser_state *par_state,
   if (yylval.ssym.sym.symbol == NULL)
     return ERROR;
 
-  if (SYMBOL_CLASS (yylval.ssym.sym.symbol) == LOC_TYPEDEF)
+  if (yylval.ssym.sym.symbol->aclass () == LOC_TYPEDEF)
     {
-      yylval.tsym.type = SYMBOL_TYPE (yylval.ssym.sym.symbol);
+      yylval.tsym.type = yylval.ssym.sym.symbol->type ();
       return TYPENAME;
     }
 

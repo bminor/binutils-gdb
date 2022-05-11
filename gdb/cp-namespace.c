@@ -20,7 +20,7 @@
 
 #include "defs.h"
 #include "cp-support.h"
-#include "gdb_obstack.h"
+#include "gdbsupport/gdb_obstack.h"
 #include "symtab.h"
 #include "symfile.h"
 #include "block.h"
@@ -220,7 +220,7 @@ cp_lookup_bare_symbol (const struct language_defn *langdef,
 	return {};
 
 
-      type = check_typedef (TYPE_TARGET_TYPE (SYMBOL_TYPE (lang_this.symbol)));
+      type = check_typedef (TYPE_TARGET_TYPE (lang_this.symbol->type ()));
       /* If TYPE_NAME is NULL, abandon trying to find this symbol.
 	 This can happen for lambda functions compiled with clang++,
 	 which outputs no name for the container class.  */
@@ -274,14 +274,14 @@ cp_search_static_and_baseclasses (const char *name,
   if (scope_sym.symbol == NULL)
     return {};
 
-  struct type *scope_type = SYMBOL_TYPE (scope_sym.symbol);
+  struct type *scope_type = scope_sym.symbol->type ();
 
   /* If the scope is a function/method, then look up NESTED as a local
      static variable.  E.g., "print 'function()::static_var'".  */
   if ((scope_type->code () == TYPE_CODE_FUNC
        || scope_type->code () == TYPE_CODE_METHOD)
       && domain == VAR_DOMAIN)
-    return lookup_symbol (nested, SYMBOL_BLOCK_VALUE (scope_sym.symbol),
+    return lookup_symbol (nested, scope_sym.symbol->value_block (),
 			  VAR_DOMAIN, NULL);
 
   /* Look for a symbol named NESTED in this class/namespace.
@@ -504,22 +504,22 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 				      const struct block *block,
 				      const domain_enum domain)
 {
-  struct symbol *function = BLOCK_FUNCTION (block);
+  struct symbol *function = block->function ();
   struct block_symbol result;
 
   if (symbol_lookup_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "cp_lookup_symbol_imports_or_template"
-			  " (%s, %s, %s, %s)\n",
-			  scope, name, host_address_to_string (block),
-			  domain_name (domain));
+      gdb_printf (gdb_stdlog,
+		  "cp_lookup_symbol_imports_or_template"
+		  " (%s, %s, %s, %s)\n",
+		  scope, name, host_address_to_string (block),
+		  domain_name (domain));
     }
 
   if (function != NULL && function->language () == language_cplus)
     {
       /* Search the function's template parameters.  */
-      if (SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION (function))
+      if (function->is_cplus_template_function ())
 	{
 	  struct template_symbol *templ
 	    = (struct template_symbol *) function;
@@ -531,10 +531,10 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 	    {
 	      if (symbol_lookup_debug)
 		{
-		  fprintf_unfiltered (gdb_stdlog,
-				      "cp_lookup_symbol_imports_or_template"
-				      " (...) = %s\n",
-				      host_address_to_string (sym));
+		  gdb_printf (gdb_stdlog,
+			      "cp_lookup_symbol_imports_or_template"
+			      " (...) = %s\n",
+			      host_address_to_string (sym));
 		}
 	      return (struct block_symbol) {sym, block};
 	    }
@@ -547,7 +547,7 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 	  struct type *context;
 	  std::string name_copy (function->natural_name ());
 	  const struct language_defn *lang = language_def (language_cplus);
-	  const struct block *parent = BLOCK_SUPERBLOCK (block);
+	  const struct block *parent = block->superblock ();
 	  struct symbol *sym;
 
 	  while (1)
@@ -576,7 +576,7 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 		{
 		  if (symbol_lookup_debug)
 		    {
-		      fprintf_unfiltered
+		      gdb_printf
 			(gdb_stdlog,
 			 "cp_lookup_symbol_imports_or_template (...) = %s\n",
 			 host_address_to_string (sym));
@@ -590,10 +590,10 @@ cp_lookup_symbol_imports_or_template (const char *scope,
   result = cp_lookup_symbol_via_imports (scope, name, block, domain, 0, 1, 1);
   if (symbol_lookup_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "cp_lookup_symbol_imports_or_template (...) = %s\n",
-			  result.symbol != NULL
-			  ? host_address_to_string (result.symbol) : "NULL");
+      gdb_printf (gdb_stdlog,
+		  "cp_lookup_symbol_imports_or_template (...) = %s\n",
+		  result.symbol != NULL
+		  ? host_address_to_string (result.symbol) : "NULL");
     }
   return result;
 }
@@ -615,7 +615,7 @@ cp_lookup_symbol_via_all_imports (const char *scope, const char *name,
       if (sym.symbol)
 	return sym;
 
-      block = BLOCK_SUPERBLOCK (block);
+      block = block->superblock ();
     }
 
   return {};
@@ -636,10 +636,10 @@ cp_lookup_symbol_namespace (const char *scope,
 
   if (symbol_lookup_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "cp_lookup_symbol_namespace (%s, %s, %s, %s)\n",
-			  scope, name, host_address_to_string (block),
-			  domain_name (domain));
+      gdb_printf (gdb_stdlog,
+		  "cp_lookup_symbol_namespace (%s, %s, %s, %s)\n",
+		  scope, name, host_address_to_string (block),
+		  domain_name (domain));
     }
 
   /* First, try to find the symbol in the given namespace.  */
@@ -651,10 +651,10 @@ cp_lookup_symbol_namespace (const char *scope,
 
   if (symbol_lookup_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "cp_lookup_symbol_namespace (...) = %s\n",
-			  sym.symbol != NULL
-			    ? host_address_to_string (sym.symbol) : "NULL");
+      gdb_printf (gdb_stdlog,
+		  "cp_lookup_symbol_namespace (...) = %s\n",
+		  sym.symbol != NULL
+		  ? host_address_to_string (sym.symbol) : "NULL");
     }
   return sym;
 }
@@ -742,11 +742,11 @@ cp_lookup_symbol_nonlocal (const struct language_defn *langdef,
 
   if (symbol_lookup_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "cp_lookup_symbol_non_local"
-			  " (%s, %s (scope %s), %s)\n",
-			  name, host_address_to_string (block), scope,
-			  domain_name (domain));
+      gdb_printf (gdb_stdlog,
+		  "cp_lookup_symbol_non_local"
+		  " (%s, %s (scope %s), %s)\n",
+		  name, host_address_to_string (block), scope,
+		  domain_name (domain));
     }
 
   /* First, try to find the symbol in the given namespace, and all
@@ -759,11 +759,11 @@ cp_lookup_symbol_nonlocal (const struct language_defn *langdef,
 
   if (symbol_lookup_debug)
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "cp_lookup_symbol_nonlocal (...) = %s\n",
-			  (sym.symbol != NULL
-			   ? host_address_to_string (sym.symbol)
-			   : "NULL"));
+      gdb_printf (gdb_stdlog,
+		  "cp_lookup_symbol_nonlocal (...) = %s\n",
+		  (sym.symbol != NULL
+		   ? host_address_to_string (sym.symbol)
+		   : "NULL"));
     }
   return sym;
 }
@@ -920,11 +920,11 @@ cp_lookup_nested_symbol (struct type *parent_type,
     {
       const char *type_name = saved_parent_type->name ();
 
-      fprintf_unfiltered (gdb_stdlog,
-			  "cp_lookup_nested_symbol (%s, %s, %s, %s)\n",
-			  type_name != NULL ? type_name : "unnamed",
-			  nested_name, host_address_to_string (block),
-			  domain_name (domain));
+      gdb_printf (gdb_stdlog,
+		  "cp_lookup_nested_symbol (%s, %s, %s, %s)\n",
+		  type_name != NULL ? type_name : "unnamed",
+		  nested_name, host_address_to_string (block),
+		  domain_name (domain));
     }
 
   switch (parent_type->code ())
@@ -956,11 +956,11 @@ cp_lookup_nested_symbol (struct type *parent_type,
 
 	if (symbol_lookup_debug)
 	  {
-	    fprintf_unfiltered (gdb_stdlog,
-				"cp_lookup_nested_symbol (...) = %s\n",
-				(sym.symbol != NULL
-				 ? host_address_to_string (sym.symbol)
-				 : "NULL"));
+	    gdb_printf (gdb_stdlog,
+			"cp_lookup_nested_symbol (...) = %s\n",
+			(sym.symbol != NULL
+			 ? host_address_to_string (sym.symbol)
+			 : "NULL"));
 	  }
 	return sym;
       }
@@ -969,9 +969,9 @@ cp_lookup_nested_symbol (struct type *parent_type,
     case TYPE_CODE_METHOD:
       if (symbol_lookup_debug)
 	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "cp_lookup_nested_symbol (...) = NULL"
-			      " (func/method)\n");
+	  gdb_printf (gdb_stdlog,
+		      "cp_lookup_nested_symbol (...) = NULL"
+		      " (func/method)\n");
 	}
       return {};
 
@@ -1058,7 +1058,7 @@ cp_lookup_transparent_type_loop (const char *name,
 static void
 maintenance_cplus_namespace (const char *args, int from_tty)
 {
-  printf_filtered (_("The `maint namespace' command was removed.\n"));
+  gdb_printf (_("The `maint namespace' command was removed.\n"));
 }
 
 void _initialize_cp_namespace ();

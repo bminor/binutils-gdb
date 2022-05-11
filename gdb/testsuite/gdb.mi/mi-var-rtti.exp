@@ -119,7 +119,7 @@ set inline_tests {
     skip_type_update_when_not_use_rtti
 }
 
-foreach inline_test $inline_tests {
+foreach_with_prefix inline_test $inline_tests {
     if { [mi_run_inline_test $inline_test] < 0 } {
        return -1
     }

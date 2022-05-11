@@ -2536,11 +2536,23 @@ static const bfd_vma elf32_arm_nacl_plt_entry [] =
   0xea000000,		/* b	.Lplt_tail			*/
 };
 
+/* PR 28924:
+   There was a bug due to too high values of THM_MAX_FWD_BRANCH_OFFSET and
+   THM2_MAX_FWD_BRANCH_OFFSET.  The first macro concerns the case when Thumb-2
+   is not available, and second macro when Thumb-2 is available.  Among other
+   things, they affect the range of branches represented as BLX instructions
+   in Encoding T2 defined in Section A8.8.25 of the ARM Architecture
+   Reference Manual ARMv7-A and ARMv7-R edition issue C.d.  Such branches are
+   specified there to have a maximum forward offset that is a multiple of 4.
+   Previously, the respective values defined here were multiples of 2 but not
+   4 and they are included in comments for reference.  */
 #define ARM_MAX_FWD_BRANCH_OFFSET  ((((1 << 23) - 1) << 2) + 8)
-#define ARM_MAX_BWD_BRANCH_OFFSET  ((-((1 << 23) << 2)) + 8)
-#define THM_MAX_FWD_BRANCH_OFFSET  ((1 << 22) -2 + 4)
+#define ARM_MAX_BWD_BRANCH_OFFSET ((-((1 << 23) << 2)) + 8)
+#define THM_MAX_FWD_BRANCH_OFFSET   ((1 << 22) - 4 + 4)
+/* #def THM_MAX_FWD_BRANCH_OFFSET   ((1 << 22) - 2 + 4) */
 #define THM_MAX_BWD_BRANCH_OFFSET  (-(1 << 22) + 4)
-#define THM2_MAX_FWD_BRANCH_OFFSET (((1 << 24) - 2) + 4)
+#define THM2_MAX_FWD_BRANCH_OFFSET (((1 << 24) - 4) + 4)
+/* #def THM2_MAX_FWD_BRANCH_OFFSET (((1 << 24) - 2) + 4) */
 #define THM2_MAX_BWD_BRANCH_OFFSET (-(1 << 24) + 4)
 #define THM2_MAX_FWD_COND_BRANCH_OFFSET (((1 << 20) -2) + 4)
 #define THM2_MAX_BWD_COND_BRANCH_OFFSET (-(1 << 20) + 4)
@@ -14522,6 +14534,14 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, struct bfd_link_info *info)
 	  out_attr[Tag_MPextension_use_legacy].type = 0;
 	  out_attr[Tag_MPextension_use_legacy].i = 0;
 	}
+
+      /* PR 28859 and 28848:  Handle the case where the first input file,
+	 eg crti.o, has a Tag_ABI_HardFP_use of 3 but no Tag_FP_arch set.
+	 Using Tag_ABI_HardFP_use in this way is deprecated, so reset the
+	 attribute to zero.
+	 FIXME: Should we handle other non-zero values of Tag_ABI_HardFO_use ? */
+      if (out_attr[Tag_ABI_HardFP_use].i == 3 && out_attr[Tag_FP_arch].i == 0)
+	out_attr[Tag_ABI_HardFP_use].i = 0;
 
       return result;
     }

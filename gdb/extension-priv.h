@@ -257,6 +257,12 @@ struct extension_language_ops
      or an empty option.  */
   gdb::optional<std::string> (*colorize) (const std::string &name,
 					  const std::string &contents);
+
+  /* Colorize a single line of disassembler output, CONTENT.  This should
+     either return colorized (using ANSI terminal escapes) version of the
+     contents, or an empty optional.  */
+  gdb::optional<std::string> (*colorize_disasm) (const std::string &content,
+						 gdbarch *gdbarch);
 };
 
 /* State necessary to restore a signal handler to its previous value.  */

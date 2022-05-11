@@ -106,7 +106,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
     }
 
   ada_print_scalar (index_type, low_bound, stream);
-  fprintf_filtered (stream, " => ");
+  gdb_printf (stream, " => ");
   return 1;
 }
 
@@ -165,20 +165,20 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	{
 	  if (options->prettyformat_arrays)
 	    {
-	      fprintf_filtered (stream, ",\n");
-	      print_spaces_filtered (2 + 2 * recurse, stream);
+	      gdb_printf (stream, ",\n");
+	      print_spaces (2 + 2 * recurse, stream);
 	    }
 	  else
 	    {
-	      fprintf_filtered (stream, ", ");
+	      gdb_printf (stream, ", ");
 	    }
 	}
       else if (options->prettyformat_arrays)
 	{
-	  fprintf_filtered (stream, "\n");
-	  print_spaces_filtered (2 + 2 * recurse, stream);
+	  gdb_printf (stream, "\n");
+	  print_spaces (2 + 2 * recurse, stream);
 	}
-      wrap_here (n_spaces (2 + 2 * recurse));
+      stream->wrap_here (2 + 2 * recurse);
       maybe_print_array_index (index_type, i + low, stream, options);
 
       i0 = i;
@@ -211,8 +211,8 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	  opts.deref_ref = 0;
 	  common_val_print (v0, stream, recurse + 1, &opts, current_language);
 	  annotate_elt_rep (i - i0);
-	  fprintf_filtered (stream, _(" %p[<repeats %u times>%p]"),
-			    metadata_style.style ().ptr (), i - i0, nullptr);
+	  gdb_printf (stream, _(" %p[<repeats %u times>%p]"),
+		      metadata_style.style ().ptr (), i - i0, nullptr);
 	  annotate_elt_rep_end ();
 
 	}
@@ -228,14 +228,14 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 		{
 		  if (options->prettyformat_arrays)
 		    {
-		      fprintf_filtered (stream, ",\n");
-		      print_spaces_filtered (2 + 2 * recurse, stream);
+		      gdb_printf (stream, ",\n");
+		      print_spaces (2 + 2 * recurse, stream);
 		    }
 		  else
 		    {
-		      fprintf_filtered (stream, ", ");
+		      gdb_printf (stream, ", ");
 		    }
-		  wrap_here (n_spaces (2 + 2 * recurse));
+		  stream->wrap_here (2 + 2 * recurse);
 		  maybe_print_array_index (index_type, j + low,
 					   stream, options);
 		}
@@ -249,7 +249,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
   annotate_array_section_end ();
   if (i < len)
     {
-      fprintf_filtered (stream, "...");
+      gdb_printf (stream, "...");
     }
 
   value_free_to_mark (mark);
@@ -272,12 +272,16 @@ ada_emit_char (int c, struct type *type, struct ui_file *stream,
   if (c <= UCHAR_MAX && isascii (c) && isprint (c))
     {
       if (c == quoter && c == '"')
-	fprintf_filtered (stream, "\"\"");
+	gdb_printf (stream, "\"\"");
       else
-	fprintf_filtered (stream, "%c", c);
+	gdb_printf (stream, "%c", c);
     }
   else
-    fprintf_filtered (stream, "[\"%0*x\"]", type_len * 2, c);
+    {
+      /* Follow GNAT's lead here and only use 6 digits for
+	 wide_wide_character.  */
+      gdb_printf (stream, "[\"%0*x\"]", std::min (6, type_len * 2), c);
+    }
 }
 
 /* Character #I of STRING, given that TYPE_LEN is the size in bytes
@@ -307,8 +311,15 @@ ada_print_floating (const gdb_byte *valaddr, struct type *type,
 
   print_floating (valaddr, type, &tmp_stream);
 
-  std::string &s = tmp_stream.string ();
+  std::string s = tmp_stream.release ();
   size_t skip_count = 0;
+
+  /* Don't try to modify a result representing an error.  */
+  if (s[0] == '<')
+    {
+      gdb_puts (s.c_str (), stream);
+      return;
+    }
 
   /* Modify for Ada rules.  */
 
@@ -340,20 +351,20 @@ ada_print_floating (const gdb_byte *valaddr, struct type *type,
     {
       pos = s.find ('e');
       if (pos == std::string::npos)
-	fprintf_filtered (stream, "%s.0", s.c_str ());
+	gdb_printf (stream, "%s.0", s.c_str ());
       else
-	fprintf_filtered (stream, "%.*s.0%s", (int) pos, s.c_str (), &s[pos]);
+	gdb_printf (stream, "%.*s.0%s", (int) pos, s.c_str (), &s[pos]);
     }
   else
-    fprintf_filtered (stream, "%s", &s[skip_count]);
+    gdb_printf (stream, "%s", &s[skip_count]);
 }
 
 void
 ada_printchar (int c, struct type *type, struct ui_file *stream)
 {
-  fputs_filtered ("'", stream);
+  gdb_puts ("'", stream);
   ada_emit_char (c, type, stream, '\'', TYPE_LENGTH (type));
-  fputs_filtered ("'", stream);
+  gdb_puts ("'", stream);
 }
 
 /* [From print_type_scalar in typeprint.c].   Print VAL on STREAM in a
@@ -402,11 +413,11 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       break;
 
     case TYPE_CODE_CHAR:
-      LA_PRINT_CHAR (val, type, stream);
+      current_language->printchar (val, type, stream);
       break;
 
     case TYPE_CODE_BOOL:
-      fprintf_filtered (stream, val ? "true" : "false");
+      gdb_printf (stream, val ? "true" : "false");
       break;
 
     case TYPE_CODE_RANGE:
@@ -455,7 +466,7 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 
   if (length == 0)
     {
-      fputs_filtered ("\"\"", stream);
+      gdb_puts ("\"\"", stream);
       return;
     }
 
@@ -471,7 +482,7 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 
       if (need_comma)
 	{
-	  fputs_filtered (", ", stream);
+	  gdb_puts (", ", stream);
 	  need_comma = 0;
 	}
 
@@ -489,15 +500,15 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 	{
 	  if (in_quotes)
 	    {
-	      fputs_filtered ("\", ", stream);
+	      gdb_puts ("\", ", stream);
 	      in_quotes = 0;
 	    }
-	  fputs_filtered ("'", stream);
+	  gdb_puts ("'", stream);
 	  ada_emit_char (char_at (string, i, type_len, byte_order),
 			 elttype, stream, '\'', type_len);
-	  fputs_filtered ("'", stream);
-	  fprintf_filtered (stream, _(" %p[<repeats %u times>%p]"),
-			    metadata_style.style ().ptr (), reps, nullptr);
+	  gdb_puts ("'", stream);
+	  gdb_printf (stream, _(" %p[<repeats %u times>%p]"),
+		      metadata_style.style ().ptr (), reps, nullptr);
 	  i = rep1 - 1;
 	  things_printed += options->repeat_count_threshold;
 	  need_comma = 1;
@@ -506,7 +517,7 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 	{
 	  if (!in_quotes)
 	    {
-	      fputs_filtered ("\"", stream);
+	      gdb_puts ("\"", stream);
 	      in_quotes = 1;
 	    }
 	  ada_emit_char (char_at (string, i, type_len, byte_order),
@@ -517,10 +528,10 @@ printstr (struct ui_file *stream, struct type *elttype, const gdb_byte *string,
 
   /* Terminate the quotes if necessary.  */
   if (in_quotes)
-    fputs_filtered ("\"", stream);
+    gdb_puts ("\"", stream);
 
   if (force_ellipses || i < length)
-    fputs_filtered ("...", stream);
+    gdb_puts ("...", stream);
 }
 
 void
@@ -604,25 +615,25 @@ print_field_values (struct value *value, struct value *outer_value,
 	}
 
       if (comma_needed)
-	fprintf_filtered (stream, ", ");
+	gdb_printf (stream, ", ");
       comma_needed = 1;
 
       if (options->prettyformat)
 	{
-	  fprintf_filtered (stream, "\n");
-	  print_spaces_filtered (2 + 2 * recurse, stream);
+	  gdb_printf (stream, "\n");
+	  print_spaces (2 + 2 * recurse, stream);
 	}
       else
 	{
-	  wrap_here (n_spaces (2 + 2 * recurse));
+	  stream->wrap_here (2 + 2 * recurse);
 	}
 
       annotate_field_begin (type->field (i).type ());
-      fprintf_filtered (stream, "%.*s",
-			ada_name_prefix_len (type->field (i).name ()),
-			type->field (i).name ());
+      gdb_printf (stream, "%.*s",
+		  ada_name_prefix_len (type->field (i).name ()),
+		  type->field (i).name ());
       annotate_field_name_end ();
-      fputs_filtered (" => ", stream);
+      gdb_puts (" => ", stream);
       annotate_field_value ();
 
       if (TYPE_FIELD_PACKED (type, i))
@@ -723,7 +734,7 @@ ada_value_print_ptr (struct value *val,
       && TYPE_TARGET_TYPE (value_type (val))->code () == TYPE_CODE_INT
       && TYPE_LENGTH (TYPE_TARGET_TYPE (value_type (val))) == 0)
     {
-      fputs_filtered ("null", stream);
+      gdb_puts ("null", stream);
       return;
     }
 
@@ -735,7 +746,7 @@ ada_value_print_ptr (struct value *val,
       gdb::unique_xmalloc_ptr<char> name = ada_tag_name (val);
 
       if (name != NULL)
-	fprintf_filtered (stream, " (%s)", name.get ());
+	gdb_printf (stream, " (%s)", name.get ());
     }
 }
 
@@ -788,10 +799,10 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
 	  struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
 	  CORE_ADDR addr = extract_typed_address (valaddr, ptr_type);
 
-	  fprintf_filtered (stream, "(");
+	  gdb_printf (stream, "(");
 	  type_print (type, "", stream, -1);
-	  fprintf_filtered (stream, ") ");
-	  fputs_filtered (paddress (gdbarch, addr), stream);
+	  gdb_printf (stream, ") ");
+	  gdb_puts (paddress (gdbarch, addr), stream);
 	}
       else
 	{
@@ -800,7 +811,7 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
 	    {
 	      LONGEST c;
 
-	      fputs_filtered (" ", stream);
+	      gdb_puts (" ", stream);
 	      c = unpack_long (type, valaddr);
 	      ada_printchar (c, type, stream);
 	    }
@@ -844,9 +855,9 @@ ada_val_print_enum (struct value *value, struct ui_file *stream, int recurse,
       const char *name = ada_enum_name (type->field (i).name ());
 
       if (name[0] == '\'')
-	fprintf_filtered (stream, "%ld %ps", (long) val,
-			  styled_string (variable_name_style.style (),
-					 name));
+	gdb_printf (stream, "%ld %ps", (long) val,
+		    styled_string (variable_name_style.style (),
+				   name));
       else
 	fputs_styled (name, variable_name_style.style (), stream);
     }
@@ -865,21 +876,21 @@ ada_val_print_struct_union (struct value *value,
 {
   if (ada_is_bogus_array_descriptor (value_type (value)))
     {
-      fprintf_filtered (stream, "(...?)");
+      gdb_printf (stream, "(...?)");
       return;
     }
 
-  fprintf_filtered (stream, "(");
+  gdb_printf (stream, "(");
 
   if (print_field_values (value, value, stream, recurse, options,
 			  0, language_def (language_ada)) != 0
       && options->prettyformat)
     {
-      fprintf_filtered (stream, "\n");
-      print_spaces_filtered (2 * recurse, stream);
+      gdb_printf (stream, "\n");
+      print_spaces (2 * recurse, stream);
     }
 
-  fprintf_filtered (stream, ")");
+  gdb_printf (stream, ")");
 }
 
 /* Implement Ada value_print'ing for the case where TYPE is a
@@ -903,7 +914,7 @@ ada_value_print_array (struct value *val, struct ui_file *stream, int recurse,
       return;
     }
 
-  fprintf_filtered (stream, "(");
+  gdb_printf (stream, "(");
   print_optional_low_bound (stream, type, options);
 
   if (value_entirely_optimized_out (val))
@@ -917,7 +928,7 @@ ada_value_print_array (struct value *val, struct ui_file *stream, int recurse,
     }
   else
     value_print_array_elements (val, stream, recurse, options, 0);
-  fprintf_filtered (stream, ")");
+  gdb_printf (stream, ")");
 }
 
 /* Implement Ada val_print'ing for the case where TYPE is
@@ -960,7 +971,7 @@ ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
   deref_val_int = unpack_pointer (type, valaddr + offset_aligned);
   if (deref_val_int == 0)
     {
-      fputs_filtered ("(null)", stream);
+      gdb_puts ("(null)", stream);
       return;
     }
 
@@ -999,7 +1010,7 @@ ada_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
       if (val == nullptr)
 	{
 	  gdb_assert (type->code () == TYPE_CODE_TYPEDEF);
-	  fprintf_filtered (stream, "0x0");
+	  gdb_printf (stream, "0x0");
 	  return;
 	}
     }
@@ -1091,9 +1102,9 @@ ada_value_print (struct value *val0, struct ui_file *stream,
 	  || TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_INT
 	  || TYPE_TARGET_TYPE (type)->is_unsigned ())
 	{
-	  fprintf_filtered (stream, "(");
+	  gdb_printf (stream, "(");
 	  type_print (type, "", stream, -1);
-	  fprintf_filtered (stream, ") ");
+	  gdb_printf (stream, ") ");
 	}
     }
   else if (ada_is_array_descriptor_type (type))
@@ -1103,16 +1114,16 @@ ada_value_print (struct value *val0, struct ui_file *stream,
 	 a fat pointer - hence the check against TYPE_CODE_TYPEDEF).  */
       if (type->code () == TYPE_CODE_TYPEDEF)
 	{
-	  fprintf_filtered (stream, "(");
+	  gdb_printf (stream, "(");
 	  type_print (type, "", stream, -1);
-	  fprintf_filtered (stream, ") ");
+	  gdb_printf (stream, ") ");
 	}
     }
   else if (ada_is_bogus_array_descriptor (type))
     {
-      fprintf_filtered (stream, "(");
+      gdb_printf (stream, "(");
       type_print (type, "", stream, -1);
-      fprintf_filtered (stream, ") (...?)");
+      gdb_printf (stream, ") (...?)");
       return;
     }
 

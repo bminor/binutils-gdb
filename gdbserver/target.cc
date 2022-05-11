@@ -29,103 +29,67 @@
 
 process_stratum_target *the_target;
 
-int
+/* See target.h.  */
+
+bool
 set_desired_thread ()
 {
   client_state &cs = get_client_state ();
   thread_info *found = find_thread_ptid (cs.general_thread);
 
-  switch_to_thread (found);
+  if (found == nullptr)
+    {
+      process_info *proc = find_process_pid (cs.general_thread.pid ());
+      if (proc == nullptr)
+	{
+	  threads_debug_printf
+	    ("did not find thread nor process for general_thread %s",
+	     cs.general_thread.to_string ().c_str ());
+	}
+      else
+	{
+	  threads_debug_printf
+	    ("did not find thread for general_thread %s, but found process",
+	     cs.general_thread.to_string ().c_str ());
+	}
+      switch_to_process (proc);
+    }
+  else
+    switch_to_thread (found);
+
   return (current_thread != NULL);
 }
 
-/* The thread that was current before prepare_to_access_memory was
-   called.  done_accessing_memory uses this to restore the previous
-   selected thread.  */
-static ptid_t prev_general_thread;
-
 /* See target.h.  */
 
-int
-prepare_to_access_memory (void)
+bool
+set_desired_process ()
 {
   client_state &cs = get_client_state ();
 
-  /* The first thread found.  */
-  struct thread_info *first = NULL;
-  /* The first stopped thread found.  */
-  struct thread_info *stopped = NULL;
-  /* The current general thread, if found.  */
-  struct thread_info *current = NULL;
-
-  /* Save the general thread value, since prepare_to_access_memory could change
-     it.  */
-  prev_general_thread = cs.general_thread;
-
-  int res = the_target->prepare_to_access_memory ();
-  if (res != 0)
-    return res;
-
-  for_each_thread (prev_general_thread.pid (), [&] (thread_info *thread)
+  process_info *proc = find_process_pid (cs.general_thread.pid ());
+  if (proc == nullptr)
     {
-      if (mythread_alive (thread->id))
-	{
-	  if (stopped == NULL && the_target->supports_thread_stopped ()
-	      && target_thread_stopped (thread))
-	    stopped = thread;
-
-	  if (first == NULL)
-	    first = thread;
-
-	  if (current == NULL && prev_general_thread == thread->id)
-	    current = thread;
-	}
-    });
-
-  /* The thread we end up choosing.  */
-  struct thread_info *thread;
-
-  /* Prefer a stopped thread.  If none is found, try the current
-     thread.  Otherwise, take the first thread in the process.  If
-     none is found, undo the effects of
-     target->prepare_to_access_memory() and return error.  */
-  if (stopped != NULL)
-    thread = stopped;
-  else if (current != NULL)
-    thread = current;
-  else if (first != NULL)
-    thread = first;
-  else
-    {
-      done_accessing_memory ();
-      return 1;
+      threads_debug_printf
+	("did not find process for general_thread %s",
+	 cs.general_thread.to_string ().c_str ());
     }
+  switch_to_process (proc);
 
-  switch_to_thread (thread);
-  cs.general_thread = ptid_of (thread);
-
-  return 0;
-}
-
-/* See target.h.  */
-
-void
-done_accessing_memory (void)
-{
-  client_state &cs = get_client_state ();
-
-  the_target->done_accessing_memory ();
-
-  /* Restore the previous selected thread.  */
-  cs.general_thread = prev_general_thread;
-  switch_to_thread (the_target, cs.general_thread);
+  return proc != nullptr;
 }
 
 int
 read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
-  int res;
-  res = the_target->read_memory (memaddr, myaddr, len);
+  /* At the time of writing, GDB only sends write packets with LEN==0,
+     not read packets (see comment in target_write_memory), but it
+     doesn't hurt to prevent problems if it ever does, or we're
+     connected to some client other than GDB that does.  */
+  if (len == 0)
+    return 0;
+
+  int res = the_target->read_memory (memaddr, myaddr, len);
   check_mem_read (memaddr, myaddr, len);
   return res;
 }
@@ -152,6 +116,13 @@ int
 target_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr,
 		     ssize_t len)
 {
+  /* GDB may send X packets with LEN==0, for probing packet support.
+     If we let such a request go through, then buffer.data() below may
+     return NULL, which may confuse target implementations.  Handle it
+     here to avoid lower levels having to care about this case.  */
+  if (len == 0)
+    return 0;
+
   /* Make a copy of the data because check_mem_write may need to
      update it.  */
   gdb::byte_vector buffer (myaddr, myaddr + len);
@@ -356,18 +327,6 @@ target_terminal::info (const char *arg, int from_tty)
 
 void
 process_stratum_target::post_create_inferior ()
-{
-  /* Nop.  */
-}
-
-int
-process_stratum_target::prepare_to_access_memory ()
-{
-  return 0;
-}
-
-void
-process_stratum_target::done_accessing_memory ()
 {
   /* Nop.  */
 }
@@ -736,7 +695,8 @@ process_stratum_target::supports_agent ()
 }
 
 btrace_target_info *
-process_stratum_target::enable_btrace (ptid_t ptid, const btrace_config *conf)
+process_stratum_target::enable_btrace (thread_info *tp,
+				       const btrace_config *conf)
 {
   error (_("Target does not support branch tracing."));
 }

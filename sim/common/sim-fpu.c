@@ -198,11 +198,10 @@ pack_fpu (const sim_fpu *src,
       /* Force fraction to correct class.  */
       fraction = src->fraction;
       fraction >>= NR_GUARDS;
-#ifdef SIM_QUIET_NAN_NEGATED
-      fraction |= QUIET_NAN - 1;
-#else
-      fraction |= QUIET_NAN;
-#endif
+      if (sim_fpu_quiet_nan_inverted)
+	fraction |= QUIET_NAN - 1;
+      else
+	fraction |= QUIET_NAN;
       break;
     case sim_fpu_class_snan:
       sign = src->sign;
@@ -210,11 +209,10 @@ pack_fpu (const sim_fpu *src,
       /* Force fraction to correct class.  */
       fraction = src->fraction;
       fraction >>= NR_GUARDS;
-#ifdef SIM_QUIET_NAN_NEGATED
-      fraction |= QUIET_NAN;
-#else
-      fraction &= ~QUIET_NAN;
-#endif
+      if (sim_fpu_quiet_nan_inverted)
+        fraction |= QUIET_NAN;
+      else
+	fraction &= ~QUIET_NAN;
       break;
     case sim_fpu_class_infinity:
       sign = src->sign;
@@ -372,11 +370,10 @@ unpack_fpu (sim_fpu *dst, uint64_t packed, int is_double)
 	  /* Non zero fraction, means NaN.  */
 	  dst->sign = sign;
 	  dst->fraction = (fraction << NR_GUARDS);
-#ifdef SIM_QUIET_NAN_NEGATED
-	  qnan = (fraction & QUIET_NAN) == 0;
-#else
-	  qnan = fraction >= QUIET_NAN;
-#endif
+	  if (sim_fpu_quiet_nan_inverted)
+	    qnan = (fraction & QUIET_NAN) == 0;
+	  else
+	    qnan = fraction >= QUIET_NAN;
 	  if (qnan)
 	    dst->class = sim_fpu_class_qnan;
 	  else
@@ -989,7 +986,48 @@ sim_fpu_round_64 (sim_fpu *f,
   return do_round (f, 1, round, denorm);
 }
 
+/* NaN handling for binary operations.  */
 
+INLINE_SIM_FPU (int)
+sim_fpu_op_nan (sim_fpu *f, const sim_fpu *l, const sim_fpu *r)
+{
+  if (sim_fpu_is_snan (l) || sim_fpu_is_snan (r))
+    {
+      *f = sim_fpu_is_snan (l) ? *l : *r;
+      f->class = sim_fpu_class_qnan;
+      return sim_fpu_status_invalid_snan;
+    }
+   ASSERT (sim_fpu_is_nan (l) || sim_fpu_is_nan (r));
+   if (sim_fpu_is_qnan (l))
+     *f = *l;
+   else /* if (sim_fpu_is_qnan (r)) */
+     *f = *r;
+  return 0;
+}
+
+/* NaN handling specific to min/max operations.  */
+
+INLINE_SIM_FPU (int)
+sim_fpu_minmax_nan (sim_fpu *f, const sim_fpu *l, const sim_fpu *r)
+{
+  if (sim_fpu_is_snan (l)
+      || sim_fpu_is_snan (r)
+      || sim_fpu_is_ieee754_1985 ())
+    return sim_fpu_op_nan (f, l, r);
+  else
+    /* if sim_fpu_is_ieee754_2008()
+       && ((sim_fpu_is_qnan (l) || sim_fpu_is_qnan (r)))  */
+    {
+      /* In IEEE754-2008:
+	 "minNum/maxNum is ... the canonicalized number if one
+	 operand is a number and the other a quiet NaN."  */
+      if (sim_fpu_is_qnan (l))
+	*f = *r;
+      else /* if (sim_fpu_is_qnan (r))  */
+	*f = *l;
+      return 0;
+    }
+}
 
 /* Arithmetic ops */
 
@@ -998,28 +1036,8 @@ sim_fpu_add (sim_fpu *f,
 	     const sim_fpu *l,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (l))
-    {
-      *f = *l;
-      return 0;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      return 0;
-    }
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+    return sim_fpu_op_nan (f, l, r);
   if (sim_fpu_is_infinity (l))
     {
       if (sim_fpu_is_infinity (r)
@@ -1147,28 +1165,8 @@ sim_fpu_sub (sim_fpu *f,
 	     const sim_fpu *l,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (l))
-    {
-      *f = *l;
-      return 0;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      return 0;
-    }
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+    return sim_fpu_op_nan (f, l, r);
   if (sim_fpu_is_infinity (l))
     {
       if (sim_fpu_is_infinity (r)
@@ -1301,28 +1299,8 @@ sim_fpu_mul (sim_fpu *f,
 	     const sim_fpu *l,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (l))
-    {
-      *f = *l;
-      return 0;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      return 0;
-    }
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+    return sim_fpu_op_nan (f, l, r);
   if (sim_fpu_is_infinity (l))
     {
       if (sim_fpu_is_zero (r))
@@ -1426,30 +1404,8 @@ sim_fpu_div (sim_fpu *f,
 	     const sim_fpu *l,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return 0;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return 0;
-    }
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+    return sim_fpu_op_nan (f, l, r);
   if (sim_fpu_is_infinity (l))
     {
       if (sim_fpu_is_infinity (r))
@@ -1559,30 +1515,8 @@ sim_fpu_rem (sim_fpu *f,
 	     const sim_fpu *l,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return 0;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return 0;
-    }
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+    return sim_fpu_op_nan (f, l, r);
   if (sim_fpu_is_infinity (l))
     {
       *f = sim_fpu_qnan;
@@ -1642,28 +1576,8 @@ sim_fpu_max (sim_fpu *f,
 	     const sim_fpu *l,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (l))
-    {
-      *f = *l;
-      return 0;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      return 0;
-    }
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+    return sim_fpu_minmax_nan (f, l, r);
   if (sim_fpu_is_infinity (l))
     {
       if (sim_fpu_is_infinity (r)
@@ -1725,28 +1639,8 @@ sim_fpu_min (sim_fpu *f,
 	     const sim_fpu *l,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (l))
-    {
-      *f = *l;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_snan (r))
-    {
-      *f = *r;
-      f->class = sim_fpu_class_qnan;
-      return sim_fpu_status_invalid_snan;
-    }
-  if (sim_fpu_is_qnan (l))
-    {
-      *f = *l;
-      return 0;
-    }
-  if (sim_fpu_is_qnan (r))
-    {
-      *f = *r;
-      return 0;
-    }
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+    return sim_fpu_minmax_nan (f, l, r);
   if (sim_fpu_is_infinity (l))
     {
       if (sim_fpu_is_infinity (r)
@@ -1807,7 +1701,7 @@ INLINE_SIM_FPU (int)
 sim_fpu_neg (sim_fpu *f,
 	     const sim_fpu *r)
 {
-  if (sim_fpu_is_snan (r))
+  if (sim_fpu_is_ieee754_1985 () && sim_fpu_is_snan (r))
     {
       *f = *r;
       f->class = sim_fpu_class_qnan;
@@ -1830,7 +1724,7 @@ sim_fpu_abs (sim_fpu *f,
 {
   *f = *r;
   f->sign = 0;
-  if (sim_fpu_is_snan (r))
+  if (sim_fpu_is_ieee754_1985 () && sim_fpu_is_snan (r))
     {
       f->class = sim_fpu_class_qnan;
       return sim_fpu_status_invalid_snan;
@@ -2385,6 +2279,21 @@ sim_fpu_is_gt (const sim_fpu *l, const sim_fpu *r)
   return is;
 }
 
+INLINE_SIM_FPU (int)
+sim_fpu_is_un (const sim_fpu *l, const sim_fpu *r)
+{
+  int is;
+  sim_fpu_un (&is, l, r);
+  return is;
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_is_or (const sim_fpu *l, const sim_fpu *r)
+{
+  int is;
+  sim_fpu_or (&is, l, r);
+  return is;
+}
 
 /* Compare operators */
 
@@ -2508,10 +2417,59 @@ sim_fpu_gt (int *is,
   return sim_fpu_lt (is, r, l);
 }
 
+INLINE_SIM_FPU (int)
+sim_fpu_un (int *is, const sim_fpu *l, const sim_fpu *r)
+{
+  if (sim_fpu_is_nan (l) || sim_fpu_is_nan (r))
+   {
+    *is = 1;
+    return 0;
+   }
+
+  *is = 0;
+  return 0;
+}
+
+INLINE_SIM_FPU (int)
+sim_fpu_or (int *is, const sim_fpu *l, const sim_fpu *r)
+{
+  sim_fpu_un (is, l, r);
+
+  /* Invert result.  */
+  *is = !*is;
+  return 0;
+}
+
+INLINE_SIM_FPU(int)
+sim_fpu_classify (const sim_fpu *f)
+{
+  switch (f->class)
+    {
+    case sim_fpu_class_snan: return SIM_FPU_IS_SNAN;
+    case sim_fpu_class_qnan: return SIM_FPU_IS_QNAN;
+    case sim_fpu_class_infinity:
+      return f->sign ? SIM_FPU_IS_NINF : SIM_FPU_IS_PINF;
+    case sim_fpu_class_zero:
+      return f->sign ? SIM_FPU_IS_NZERO : SIM_FPU_IS_PZERO;
+    case sim_fpu_class_number:
+      return f->sign ? SIM_FPU_IS_NNUMBER : SIM_FPU_IS_PNUMBER;
+    case sim_fpu_class_denorm:
+      return f->sign ? SIM_FPU_IS_NDENORM : SIM_FPU_IS_PDENORM;
+    default:
+      fprintf (stderr, "Bad switch\n");
+      abort ();
+    }
+  return 0;
+}
 
 /* A number of useful constants */
 
 #if EXTERN_SIM_FPU_P
+sim_fpu_state _sim_fpu = {
+  .quiet_nan_inverted = false,
+  .current_mode = sim_fpu_ieee754_1985,
+};
+
 const sim_fpu sim_fpu_zero = {
   sim_fpu_class_zero, 0, 0, 0
 };
@@ -2532,6 +2490,24 @@ const sim_fpu sim_fpu_max64 = {
 };
 #endif
 
+/* Specification swapping behaviour */
+INLINE_SIM_FPU (bool)
+sim_fpu_is_ieee754_1985 (void)
+{
+  return (sim_fpu_current_mode == sim_fpu_ieee754_1985);
+}
+
+INLINE_SIM_FPU (bool)
+sim_fpu_is_ieee754_2008 (void)
+{
+  return (sim_fpu_current_mode == sim_fpu_ieee754_2008);
+}
+
+INLINE_SIM_FPU (void)
+sim_fpu_set_mode (const sim_fpu_mode m)
+{
+  sim_fpu_current_mode = m;
+}
 
 /* For debugging */
 

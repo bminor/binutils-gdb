@@ -1059,7 +1059,7 @@ convert_code_addr_to_desc_addr (CORE_ADDR code_addr, CORE_ADDR *desc_addr)
   if (fn.minsym == NULL)
     return 0;
   /* Found a descriptor.  */
-  (*desc_addr) = BMSYMBOL_VALUE_ADDRESS (fn);
+  (*desc_addr) = fn.value_address ();
   return 1;
 }
 
@@ -1761,7 +1761,8 @@ ppc64_sysv_abi_return_value_base (struct gdbarch *gdbarch, struct type *valtype,
 	      /* Fixed point type values need to be returned unscaled.  */
 	      gdb_mpz unscaled;
 
-	      unscaled.read ({writebuf, TYPE_LENGTH (valtype)},
+	      unscaled.read (gdb::make_array_view (writebuf,
+						   TYPE_LENGTH (valtype)),
 			     type_byte_order (valtype),
 			     valtype->is_unsigned ());
 	      return_val = unscaled.as_integer<LONGEST> ();

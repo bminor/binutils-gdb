@@ -1451,12 +1451,15 @@ mep_print_insn (CGEN_CPU_DESC cd, bfd_vma pc, disassemble_info *info)
   if (info->section && info->section->owner)
     {
       bfd *abfd = info->section->owner;
-      mep_config_index = abfd->tdata.elf_obj_data->elf_header->e_flags & EF_MEP_INDEX_MASK;
-      /* This instantly redefines MEP_CONFIG, MEP_OMASK, .... MEP_VLIW64 */
+      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+	{
+	  mep_config_index = abfd->tdata.elf_obj_data->elf_header->e_flags & EF_MEP_INDEX_MASK;
+	  /* This instantly redefines MEP_CONFIG, MEP_OMASK, .... MEP_VLIW64 */
 
-      cop_type = abfd->tdata.elf_obj_data->elf_header->e_flags & EF_MEP_COP_MASK;
-      if (cop_type == EF_MEP_COP_IVC2)
-	ivc2 = 1;
+	  cop_type = abfd->tdata.elf_obj_data->elf_header->e_flags & EF_MEP_COP_MASK;
+	  if (cop_type == EF_MEP_COP_IVC2)
+	    ivc2 = 1;
+	}
     }
 
   /* Picking the right ISA bitmask for the current context is tricky.  */

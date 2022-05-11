@@ -161,7 +161,7 @@ type_name_to_scope (const char *type_name, const struct block *block)
 
 	  scope.push_back (comp);
 
-	  if (SYMBOL_TYPE (bsymbol.symbol)->code () != TYPE_CODE_NAMESPACE)
+	  if (bsymbol.symbol->type ()->code () != TYPE_CODE_NAMESPACE)
 	    {
 	      /* We're done.  */
 	      break;
@@ -258,8 +258,8 @@ compile_cplus_instance::enter_scope (compile_scope &&new_scope)
     {
       if (debug_compile_cplus_scopes)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "entering new scope %s\n",
-			      host_address_to_string (&m_scopes.back ()));
+	  gdb_printf (gdb_stdlog, "entering new scope %s\n",
+		      host_address_to_string (&m_scopes.back ()));
 	}
 
       /* Push the global namespace. */
@@ -271,7 +271,7 @@ compile_cplus_instance::enter_scope (compile_scope &&new_scope)
 	(m_scopes.back ().begin (), m_scopes.back ().end () - 1,
 	 [this] (const scope_component &comp)
 	 {
-	  gdb_assert (SYMBOL_TYPE (comp.bsymbol.symbol)->code ()
+	  gdb_assert (comp.bsymbol.symbol->type ()->code ()
 		      == TYPE_CODE_NAMESPACE);
 
 	  const char *ns = (comp.name == CP_ANONYMOUS_NAMESPACE_STR ? nullptr
@@ -284,8 +284,8 @@ compile_cplus_instance::enter_scope (compile_scope &&new_scope)
     {
       if (debug_compile_cplus_scopes)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "staying in current scope -- "
-			      "scopes are identical\n");
+	  gdb_printf (gdb_stdlog, "staying in current scope -- "
+		      "scopes are identical\n");
 	}
     }
 }
@@ -305,15 +305,15 @@ compile_cplus_instance::leave_scope ()
     {
       if (debug_compile_cplus_scopes)
 	{
-	  fprintf_unfiltered (gdb_stdlog, "leaving scope %s\n",
-			      host_address_to_string (&current));
+	  gdb_printf (gdb_stdlog, "leaving scope %s\n",
+		      host_address_to_string (&current));
 	}
 
       /* Pop namespaces.  */
       std::for_each
 	(current.begin (),current.end () - 1,
 	 [this] (const scope_component &comp) {
-	  gdb_assert (SYMBOL_TYPE (comp.bsymbol.symbol)->code ()
+	  gdb_assert (comp.bsymbol.symbol->type ()->code ()
 		      == TYPE_CODE_NAMESPACE);
 	  this->plugin ().pop_binding_level (comp.name.c_str ());
 	});
@@ -324,8 +324,8 @@ compile_cplus_instance::leave_scope ()
   else
     {
       if (debug_compile_cplus_scopes)
-	fprintf_unfiltered (gdb_stdlog,
-			    "identical scopes -- not leaving scope\n");
+	gdb_printf (gdb_stdlog,
+		    "identical scopes -- not leaving scope\n");
     }
 }
 
@@ -345,14 +345,14 @@ compile_cplus_instance::new_scope (const char *type_name, struct type *type)
 	 unqualified name of the type to process.  */
       scope_component &comp = scope.back ();
 
-      if (!types_equal (type, SYMBOL_TYPE (comp.bsymbol.symbol))
+      if (!types_equal (type, comp.bsymbol.symbol->type ())
 	  && (m_scopes.empty ()
 	      || (m_scopes.back ().back ().bsymbol.symbol
 		  != comp.bsymbol.symbol)))
 	{
 	  /* The type is defined inside another class(es).  Convert that
 	     type instead of defining this type.  */
-	  convert_type (SYMBOL_TYPE (comp.bsymbol.symbol));
+	  convert_type (comp.bsymbol.symbol->type ());
 
 	  /* If the original type (passed in to us) is defined in a nested
 	     class, the previous call will give us that type's gcc_type.
@@ -625,10 +625,10 @@ compile_cplus_convert_struct_or_union_members
 		       we can do but ignore this member.  */
 		    continue;
 		  }
-		const char *filename = symbol_symtab (sym.symbol)->filename;
-		unsigned int line = SYMBOL_LINE (sym.symbol);
+		const char *filename = sym.symbol->symtab ()->filename;
+		unsigned int line = sym.symbol->line ();
 
-		physaddr = SYMBOL_VALUE_ADDRESS (sym.symbol);
+		physaddr = sym.symbol->value_address ();
 		instance->plugin ().build_decl
 		  ("field physname", field_name,
 		   (GCC_CP_SYMBOL_VARIABLE| get_field_access_flag (type, i)),
@@ -764,9 +764,9 @@ compile_cplus_convert_struct_or_union_methods (compile_cplus_instance *instance,
 	      continue;
 	    }
 
-	  const char *filename = symbol_symtab (sym.symbol)->filename;
-	  unsigned int line = SYMBOL_LINE (sym.symbol);
-	  CORE_ADDR address = BLOCK_START (SYMBOL_BLOCK_VALUE (sym.symbol));
+	  const char *filename = sym.symbol->symtab ()->filename;
+	  unsigned int line = sym.symbol->line ();
+	  CORE_ADDR address = sym.symbol->value_block()->start ();
 	  const char *kind;
 
 	  if (TYPE_FN_FIELD_STATIC_P (methods, j))
@@ -1239,16 +1239,16 @@ compile_cplus_instance::gcc_cplus_leave_scope
 static void
 compile_cplus_debug_output_1 (ULONGEST arg)
 {
-  fprintf_unfiltered (gdb_stdlog, "%s", pulongest (arg));
+  gdb_printf (gdb_stdlog, "%s", pulongest (arg));
 }
 
 static void
 compile_cplus_debug_output_1 (const char *arg)
 {
   if (arg == nullptr)
-    fputs_unfiltered ("NULL", gdb_stdlog);
+    gdb_puts ("NULL", gdb_stdlog);
   else
-    fputs_unfiltered (arg, gdb_stdlog);
+    gdb_puts (arg, gdb_stdlog);
 }
 
 static void
@@ -1267,7 +1267,7 @@ static void
 compile_cplus_debug_output (T arg, Targs... Args)
 {
   compile_cplus_debug_output_1 (arg);
-  fputc_unfiltered (' ', gdb_stdlog);
+  gdb_putc (' ', gdb_stdlog);
   compile_cplus_debug_output (Args...);
 }
 
@@ -1275,9 +1275,9 @@ compile_cplus_debug_output (T arg, Targs... Args)
 #define OUTPUT_DEBUG_RESULT(R)			  \
   if (debug_compile_cplus_types)		  \
     {						  \
-      fputs_unfiltered (": ", gdb_stdlog);	  \
+      gdb_puts (": ", gdb_stdlog);		  \
       compile_cplus_debug_output (R);		  \
-      fputc_unfiltered ('\n', gdb_stdlog);	  \
+      gdb_putc ('\n', gdb_stdlog);		  \
     }						  \
 
 #define GCC_METHOD0(R, N)			  \
@@ -1363,7 +1363,7 @@ gcc_cp_plugin::build_decl (const char *debug_decltype, const char *name,
 			   const char *filename, unsigned int line_number)
 {
   if (debug_compile_cplus_types)
-    fprintf_unfiltered (gdb_stdlog, "<%s> ", debug_decltype);
+    gdb_printf (gdb_stdlog, "<%s> ", debug_decltype);
 
   return build_decl (name, sym_kind, sym_type, substitution_name,
 		     address, filename, line_number);
@@ -1375,7 +1375,7 @@ gcc_cp_plugin::start_class_type (const char *debug_name, gcc_decl typedecl,
 				 const char *filename, unsigned int line_number)
 {
   if (debug_compile_cplus_types)
-    fprintf_unfiltered (gdb_stdlog, "<%s> ", debug_name);
+    gdb_printf (gdb_stdlog, "<%s> ", debug_name);
 
   return start_class_type (typedecl, base_classes, filename, line_number);
 }
@@ -1385,7 +1385,7 @@ gcc_cp_plugin::finish_class_type (const char *debug_name,
 				  unsigned long size_in_bytes)
 {
   if (debug_compile_cplus_types)
-    fprintf_unfiltered (gdb_stdlog, "<%s> ", debug_name);
+    gdb_printf (gdb_stdlog, "<%s> ", debug_name);
 
   return finish_class_type (size_in_bytes);
 }
@@ -1394,7 +1394,7 @@ int
 gcc_cp_plugin::pop_binding_level (const char *debug_name)
 {
   if (debug_compile_cplus_types)
-    fprintf_unfiltered (gdb_stdlog, "<%s> ", debug_name);
+    gdb_printf (gdb_stdlog, "<%s> ", debug_name);
 
   return pop_binding_level ();
 }
