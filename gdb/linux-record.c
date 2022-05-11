@@ -1046,6 +1046,12 @@ Do you want to stop the program?"),
 	return -1;
       break;
 
+    case gdb_sys_statx:
+      regcache_raw_read_unsigned (regcache, tdep->arg5, &tmpulongest);
+      if (record_full_arch_list_add_mem ((CORE_ADDR) tmpulongest, 256))
+	return -1;
+      break;
+
     case gdb_sys_uname:
       if (record_mem_at_reg (regcache, tdep->arg1,
 			     tdep->size_old_utsname))
