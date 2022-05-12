@@ -1019,7 +1019,7 @@ stub_gnu_ifunc_resolve_name (const char *function_name,
 /* See elf_gnu_ifunc_resolver_stop for its real implementation.  */
 
 static void
-stub_gnu_ifunc_resolver_stop (struct breakpoint *b)
+stub_gnu_ifunc_resolver_stop (base_breakpoint *b)
 {
   internal_error (__FILE__, __LINE__,
 		  _("elf_gnu_ifunc_resolver_stop cannot be reached."));
@@ -1028,7 +1028,7 @@ stub_gnu_ifunc_resolver_stop (struct breakpoint *b)
 /* See elf_gnu_ifunc_resolver_return_stop for its real implementation.  */
 
 static void
-stub_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
+stub_gnu_ifunc_resolver_return_stop (base_breakpoint *b)
 {
   internal_error (__FILE__, __LINE__,
 		  _("elf_gnu_ifunc_resolver_return_stop cannot be reached."));

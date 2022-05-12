@@ -927,7 +927,7 @@ elf_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* Handle inferior hit of bp_gnu_ifunc_resolver, see its definition.  */
 
 static void
-elf_gnu_ifunc_resolver_stop (struct breakpoint *b)
+elf_gnu_ifunc_resolver_stop (base_breakpoint *b)
 {
   struct breakpoint *b_return;
   struct frame_info *prev_frame = get_prev_frame (get_current_frame ());
@@ -978,7 +978,7 @@ elf_gnu_ifunc_resolver_stop (struct breakpoint *b)
 /* Handle inferior hit of bp_gnu_ifunc_resolver_return, see its definition.  */
 
 static void
-elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
+elf_gnu_ifunc_resolver_return_stop (base_breakpoint *b)
 {
   thread_info *thread = inferior_thread ();
   struct gdbarch *gdbarch = get_frame_arch (get_current_frame ());
@@ -1008,7 +1008,7 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
 			    "gnu-indirect-function breakpoint type %d"),
 			  (int) b->type);
 	}
-      b = b_next;
+      b = (base_breakpoint *) b_next;
     }
   gdb_assert (b->type == bp_gnu_ifunc_resolver);
   gdb_assert (b->loc->next == NULL);

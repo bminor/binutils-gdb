@@ -87,7 +87,7 @@
 static void map_breakpoint_numbers (const char *,
 				    gdb::function_view<void (breakpoint *)>);
 
-static void breakpoint_re_set_default (struct breakpoint *);
+static void breakpoint_re_set_default (base_breakpoint *);
 
 static void
   create_sals_from_location_default (struct event_location *location,
@@ -5860,10 +5860,10 @@ bpstat_run_callbacks (bpstat *bs_head)
 	  handle_jit_event (bs->bp_location_at->address);
 	  break;
 	case bp_gnu_ifunc_resolver:
-	  gnu_ifunc_resolver_stop (b);
+	  gnu_ifunc_resolver_stop ((base_breakpoint *) b);
 	  break;
 	case bp_gnu_ifunc_resolver_return:
-	  gnu_ifunc_resolver_return_stop (b);
+	  gnu_ifunc_resolver_return_stop ((base_breakpoint *) b);
 	  break;
 	}
     }
@@ -7867,24 +7867,6 @@ enable_breakpoints_after_startup (void)
   breakpoint_re_set ();
 }
 
-/* Create a new single-step breakpoint for thread THREAD, with no
-   locations.  */
-
-static struct breakpoint *
-new_single_step_breakpoint (int thread, struct gdbarch *gdbarch)
-{
-  std::unique_ptr<breakpoint> b (new momentary_breakpoint (gdbarch,
-							   bp_single_step));
-
-  b->disposition = disp_donttouch;
-  b->frame_id = null_frame_id;
-
-  b->thread = thread;
-  gdb_assert (b->thread != 0);
-
-  return add_to_breakpoint_chain (std::move (b));
-}
-
 /* Allocate a new momentary breakpoint.  */
 
 static momentary_breakpoint *
@@ -8057,7 +8039,7 @@ handle_automatic_hardware_breakpoints (bp_location *bl)
 }
 
 bp_location *
-breakpoint::add_location (const symtab_and_line &sal)
+base_breakpoint::add_location (const symtab_and_line &sal)
 {
   struct bp_location *new_loc, **tmp;
   CORE_ADDR adjusted_address;
@@ -12476,7 +12458,7 @@ hoist_existing_locations (struct breakpoint *b, struct program_space *pspace)
    untouched.  */
 
 void
-update_breakpoint_locations (struct breakpoint *b,
+update_breakpoint_locations (base_breakpoint *b,
 			     struct program_space *filter_pspace,
 			     gdb::array_view<const symtab_and_line> sals,
 			     gdb::array_view<const symtab_and_line> sals_end)
@@ -12684,7 +12666,7 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
    locations.  */
 
 static void
-breakpoint_re_set_default (struct breakpoint *b)
+breakpoint_re_set_default (base_breakpoint *b)
 {
   struct program_space *filter_pspace = current_program_space;
   std::vector<symtab_and_line> expanded, expanded_end;
@@ -13395,15 +13377,26 @@ insert_single_step_breakpoint (struct gdbarch *gdbarch,
 
   if (tp->control.single_step_breakpoints == NULL)
     {
+      std::unique_ptr<breakpoint> b
+	(new momentary_breakpoint (gdbarch, bp_single_step));
+
+      b->disposition = disp_donttouch;
+
+      b->thread = tp->global_num;
+      gdb_assert (b->thread != 0);
+
       tp->control.single_step_breakpoints
-	= new_single_step_breakpoint (tp->global_num, gdbarch);
+	= add_to_breakpoint_chain (std::move (b));
     }
 
   sal = find_pc_line (pc, 0);
   sal.pc = pc;
   sal.section = find_pc_overlay (pc);
   sal.explicit_pc = 1;
-  tp->control.single_step_breakpoints->add_location (sal);
+
+  auto *ss_bp
+    = static_cast<momentary_breakpoint *> (tp->control.single_step_breakpoints);
+  ss_bp->add_location (sal);
 
   update_global_location_list (UGLL_INSERT);
 }

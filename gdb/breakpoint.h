@@ -733,9 +733,6 @@ struct breakpoint
     /* Nothing to do.  */
   }
 
-  /* Add a location for SAL to this breakpoint.  */
-  bp_location *add_location (const symtab_and_line &sal);
-
   /* Return a range of this breakpoint's locations.  */
   bp_location_range locations () const;
 
@@ -873,6 +870,9 @@ struct base_breakpoint : public breakpoint
 		   int display_canonical);
 
   ~base_breakpoint () override = 0;
+
+  /* Add a location for SAL to this breakpoint.  */
+  bp_location *add_location (const symtab_and_line &sal);
 
   void re_set () override;
   int insert_location (struct bp_location *) override;
@@ -1383,7 +1383,7 @@ extern void until_break_command (const char *, int, int);
 /* Initialize a struct bp_location.  */
 
 extern void update_breakpoint_locations
-  (struct breakpoint *b,
+  (base_breakpoint *b,
    struct program_space *filter_pspace,
    gdb::array_view<const symtab_and_line> sals,
    gdb::array_view<const symtab_and_line> sals_end);
