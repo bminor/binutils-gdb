@@ -153,8 +153,9 @@ hash_insn_list (CGEN_CPU_DESC cd,
   for (ilist = insns; ilist != NULL; ilist = ilist->next, ++ hentbuf)
     {
       unsigned int hash;
-      char buf[4];
+      char buf[8];
       unsigned long value;
+      size_t size;
 
       if (! (* cd->dis_hash_p) (ilist->insn))
 	continue;
@@ -163,10 +164,9 @@ hash_insn_list (CGEN_CPU_DESC cd,
 	 to hash on, so set both up.  */
 
       value = CGEN_INSN_BASE_VALUE (ilist->insn);
-      bfd_put_bits((bfd_vma) value,
-		   buf,
-		   CGEN_INSN_MASK_BITSIZE (ilist->insn),
-		   big_p);
+      size = CGEN_INSN_MASK_BITSIZE (ilist->insn);
+      OPCODES_ASSERT (size <= sizeof (buf) * 8);
+      bfd_put_bits ((bfd_vma) value, buf, size, big_p);
       hash = (* cd->dis_hash) (buf, value);
       add_insn_to_hash_chain (hentbuf, ilist->insn, htable, hash);
     }
