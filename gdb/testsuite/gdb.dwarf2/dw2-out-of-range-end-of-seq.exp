@@ -35,10 +35,16 @@ if !$gcc_compiled {
 
 standard_testfile main.c -dw.S
 
+set func_info_vars [get_func_info main]
+
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     declare_labels Llines
     global srcdir subdir srcfile
+    global func_info_vars
+    foreach var $func_info_vars {
+	global $var
+    }
 
     cu {} {
 	compile_unit {
@@ -48,7 +54,9 @@ Dwarf::assemble $asm_file {
 	} {
 	    subprogram {
 		{external 1 flag}
-		{MACRO_AT_func {main}}
+		{name main}
+		{low_pc $main_start}
+		{high_pc $main_end addr}
 	    }
 	}
     }
@@ -58,11 +66,11 @@ Dwarf::assemble $asm_file {
 	file_name "$srcfile" 1
 
 	program {
-	    DW_LNE_set_address main_label
+	    DW_LNE_set_address $main_start
 	    line 1
 	    DW_LNS_copy
 
-	    DW_LNS_advance_pc 1
+	    DW_LNE_set_address $main_end
 	    DW_LNE_end_sequence
 
 	    DW_LNE_set_address 0
