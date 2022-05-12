@@ -17,6 +17,19 @@
 
 #include <string>
 
+#if _GLIBCXX_USE_CXX11_ABI == 1
+#if defined (__GNUC__) && (__GNUC__ >= 5) && (__GNUC__ <= 8)
+
+/* Work around missing std::string typedef before gcc commit
+   "Define std::string and related typedefs outside __cxx11 namespace".  */
+
+namespace std {
+typedef __cxx11::string string;
+}
+
+#endif
+#endif
+
 void
 f (std::string s)
 {
