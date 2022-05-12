@@ -1,3 +1,14 @@
+2022-05-12  Alan Modra  <amodra@gmail.com>
+
+	PR 29006
+	* pe-dll.c (dll_name): Delete, replacing with..
+	(dll_filename): ..this, moved earlier in file.
+	(generate_edata): Delete parameters.  Don't set up dll_name here..
+	(pe_process_import_defs): ..instead set up dll_filename and
+	dll_symname here before returning.
+	(dll_symname_len): Delete write-only variable.
+	(pe_dll_generate_implib): Don't set up dll_symname here.
+
 2022-05-03  Nick Clifton  <nickc@redhat.com>
 
 	PR 29101
