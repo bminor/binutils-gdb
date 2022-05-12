@@ -52,6 +52,16 @@ struct fix
   /* These small fields are grouped together for compactness of
      this structure, and efficiency of access on some architectures.  */
 
+  /* pc-relative offset adjust (only used by some CPU specific code).
+     A 4-bit field would be sufficient for most uses, except for ppc
+     which pokes an operand table index here.  Bits may be stolen
+     from here should that be necessary, provided PPC_OPINDEX_MAX is
+     adjusted suitably.  */
+  int fx_pcrel_adjust : 16;
+
+  /* How many bytes are involved? */
+  unsigned fx_size : 8;
+
   /* Is this a pc-relative relocation?  */
   unsigned fx_pcrel : 1;
 
@@ -73,13 +83,7 @@ struct fix
   unsigned fx_tcbit2 : 1;
 
   /* Spare bits.  */
-  unsigned fx_unused : 10;
-
-  /* pc-relative offset adjust (only used by some CPU specific code) */
-  int fx_pcrel_adjust : 8;
-
-  /* How many bytes are involved? */
-  unsigned fx_size : 8;
+  unsigned fx_unused : 2;
 
   bfd_reloc_code_real_type fx_r_type;
 

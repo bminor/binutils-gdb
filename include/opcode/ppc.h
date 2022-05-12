@@ -29,6 +29,12 @@ extern "C" {
 #endif
 
 typedef uint64_t ppc_cpu_t;
+typedef uint16_t ppc_opindex_t;
+
+/* Smaller of ppc_opindex_t and fx_pcrel_adjust maximum.  Note that
+   values extracted from fx_pcrel_adjust are masked with this constant,
+   effectively making the field unsigned.  */
+#define PPC_OPINDEX_MAX 0xffff
 
 /* The opcode table is an array of struct powerpc_opcode.  */
 
@@ -60,7 +66,7 @@ struct powerpc_opcode
   /* An array of operand codes.  Each code is an index into the
      operand table.  They appear in the order which the operands must
      appear in assembly code, and are terminated by a zero.  */
-  unsigned char operands[8];
+  ppc_opindex_t operands[8];
 };
 
 /* The table itself is sorted by major opcode number, and is otherwise

@@ -1553,7 +1553,7 @@ ppc_target_format (void)
 static bool
 insn_validate (const struct powerpc_opcode *op)
 {
-  const unsigned char *o;
+  const ppc_opindex_t *o;
   uint64_t omask = op->mask;
 
   /* The mask had better not trim off opcode bits.  */
@@ -1634,8 +1634,8 @@ ppc_setup_opcodes (void)
       unsigned int i;
 
       /* An index into powerpc_operands is stored in struct fix
-	 fx_pcrel_adjust which is 8 bits wide.  */
-      gas_assert (num_powerpc_operands < 256);
+	 fx_pcrel_adjust which is a 16 bit field.  */
+      gas_assert (num_powerpc_operands <= PPC_OPINDEX_MAX + 1);
 
       /* Check operand masks.  Code here and in the disassembler assumes
 	 all the 1's in the mask are contiguous.  */
@@ -3251,7 +3251,7 @@ md_assemble (char *str)
   char *s;
   const struct powerpc_opcode *opcode;
   uint64_t insn;
-  const unsigned char *opindex_ptr;
+  const ppc_opindex_t *opindex_ptr;
   int need_paren;
   int next_opindex;
   struct ppc_fixup fixups[MAX_INSN_FIXUPS];
@@ -3348,7 +3348,7 @@ md_assemble (char *str)
 	{
 	  if (num_optional_operands == 0)
 	    {
-	      const unsigned char *optr;
+	      const ppc_opindex_t *optr;
 	      int total = 0;
 	      int provided = 0;
 	      int omitted;
@@ -7011,7 +7011,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
   if (fixP->fx_pcrel_adjust != 0)
     {
       /* This is a fixup on an instruction.  */
-      int opindex = fixP->fx_pcrel_adjust & 0xff;
+      ppc_opindex_t opindex = fixP->fx_pcrel_adjust & PPC_OPINDEX_MAX;
 
       operand = &powerpc_operands[opindex];
 #ifdef OBJ_XCOFF
