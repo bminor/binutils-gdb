@@ -7945,7 +7945,6 @@ momentary_breakpoint_from_master (struct breakpoint *orig,
 
   copy->enable_state = bp_enabled;
   copy->disposition = disp_donttouch;
-  copy->number = internal_breakpoint_number--;
 
   breakpoint *b = add_to_breakpoint_chain (std::move (copy));
   update_global_location_list_nothrow (UGLL_DONT_INSERT);
