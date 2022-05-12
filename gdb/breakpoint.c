@@ -118,7 +118,7 @@ static breakpoint *add_to_breakpoint_chain (std::unique_ptr<breakpoint> &&b);
 static struct breakpoint *
   momentary_breakpoint_from_master (struct breakpoint *orig,
 				    enum bptype type,
-				    int loc_enabled);
+				    int loc_enabled, int thread);
 
 static void breakpoint_adjustment_warning (CORE_ADDR, CORE_ADDR, int, int);
 
@@ -305,7 +305,25 @@ struct internal_breakpoint : public base_breakpoint
    breakpoints".  */
 struct momentary_breakpoint : public base_breakpoint
 {
-  using base_breakpoint::base_breakpoint;
+  momentary_breakpoint (struct gdbarch *gdbarch_, enum bptype bptype,
+			program_space *pspace_,
+			const struct frame_id &frame_id_,
+			int thread_)
+    : base_breakpoint (gdbarch_, bptype)
+  {
+    /* If FRAME_ID is valid, it should be a real frame, not an inlined
+       or tail-called one.  */
+    gdb_assert (!frame_id_artificial_p (frame_id));
+
+    /* Momentary breakpoints are always thread-specific.  */
+    gdb_assert (thread_ > 0);
+
+    pspace = pspace_;
+    enable_state = bp_enabled;
+    disposition = disp_donttouch;
+    frame_id = frame_id_;
+    thread = thread_;
+  }
 
   void re_set () override;
   void check_status (struct bpstat *bs) override;
@@ -7293,12 +7311,9 @@ set_longjmp_breakpoint (struct thread_info *tp, struct frame_id frame)
 	    || b->type == bp_exception_master))
       {
 	enum bptype type = b->type == bp_longjmp_master ? bp_longjmp : bp_exception;
-	struct breakpoint *clone;
-
 	/* longjmp_breakpoint_ops ensures INITIATING_FRAME is cleared again
 	   after their removal.  */
-	clone = momentary_breakpoint_from_master (b, type, 1);
-	clone->thread = thread;
+	momentary_breakpoint_from_master (b, type, 1, thread);
       }
 
   tp->initiating_frame = frame;
@@ -7340,11 +7355,10 @@ set_longjmp_breakpoint_for_call_dummy (void)
   for (breakpoint *b : all_breakpoints ())
     if (b->pspace == current_program_space && b->type == bp_longjmp_master)
       {
-	struct breakpoint *new_b;
-
-	new_b = momentary_breakpoint_from_master (b, bp_longjmp_call_dummy,
-						  1);
-	new_b->thread = inferior_thread ()->global_num;
+	int thread = inferior_thread ()->global_num;
+	breakpoint *new_b
+	  = momentary_breakpoint_from_master (b, bp_longjmp_call_dummy,
+					      1, thread);
 
 	/* Link NEW_B into the chain of RETVAL breakpoints.  */
 
@@ -7473,7 +7487,8 @@ set_std_terminate_breakpoint (void)
     if (b->pspace == current_program_space
 	&& b->type == bp_std_terminate_master)
       {
-	momentary_breakpoint_from_master (b, bp_std_terminate, 1);
+	momentary_breakpoint_from_master (b, bp_std_terminate, 1,
+					  inferior_thread ()->global_num);
       }
 }
 
@@ -7877,13 +7892,17 @@ enable_breakpoints_after_startup (void)
 
 /* Allocate a new momentary breakpoint.  */
 
+template<typename... Arg>
 static momentary_breakpoint *
-new_momentary_breakpoint (struct gdbarch *gdbarch, enum bptype type)
+new_momentary_breakpoint (struct gdbarch *gdbarch, enum bptype type,
+			  Arg&&... args)
 {
   if (type == bp_longjmp || type == bp_exception)
-    return new longjmp_breakpoint (gdbarch, type);
+    return new longjmp_breakpoint (gdbarch, type,
+				   std::forward<Arg> (args)...);
   else
-    return new momentary_breakpoint (gdbarch, type);
+    return new momentary_breakpoint (gdbarch, type,
+				     std::forward<Arg> (args)...);
 }
 
 /* Set a momentary breakpoint of type TYPE at address specified by
@@ -7899,15 +7918,10 @@ set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
   gdb_assert (!frame_id_artificial_p (frame_id));
 
   std::unique_ptr<momentary_breakpoint> b
-    (new_momentary_breakpoint (gdbarch, type));
+    (new_momentary_breakpoint (gdbarch, type, sal.pspace, frame_id,
+			       inferior_thread ()->global_num));
 
   b->add_location (sal);
-  b->pspace = sal.pspace;
-  b->enable_state = bp_enabled;
-  b->disposition = disp_donttouch;
-  b->frame_id = frame_id;
-
-  b->thread = inferior_thread ()->global_num;
 
   breakpoint_up bp (add_to_breakpoint_chain (std::move (b)));
 
@@ -7923,10 +7937,12 @@ set_momentary_breakpoint (struct gdbarch *gdbarch, struct symtab_and_line sal,
 static struct breakpoint *
 momentary_breakpoint_from_master (struct breakpoint *orig,
 				  enum bptype type,
-				  int loc_enabled)
+				  int loc_enabled,
+				  int thread)
 {
   std::unique_ptr<breakpoint> copy
-    (new_momentary_breakpoint (orig->gdbarch, type));
+    (new_momentary_breakpoint (orig->gdbarch, type, orig->pspace,
+			       orig->frame_id, thread));
   copy->loc = copy->allocate_location ();
   set_breakpoint_location_function (copy->loc);
 
@@ -7939,12 +7955,6 @@ momentary_breakpoint_from_master (struct breakpoint *orig,
   copy->loc->line_number = orig->loc->line_number;
   copy->loc->symtab = orig->loc->symtab;
   copy->loc->enabled = loc_enabled;
-  copy->frame_id = orig->frame_id;
-  copy->thread = orig->thread;
-  copy->pspace = orig->pspace;
-
-  copy->enable_state = bp_enabled;
-  copy->disposition = disp_donttouch;
 
   breakpoint *b = add_to_breakpoint_chain (std::move (copy));
   update_global_location_list_nothrow (UGLL_DONT_INSERT);
@@ -7961,7 +7971,8 @@ clone_momentary_breakpoint (struct breakpoint *orig)
   if (orig == NULL)
     return NULL;
 
-  return momentary_breakpoint_from_master (orig, orig->type, 0);
+  return momentary_breakpoint_from_master (orig, orig->type, 0,
+					   orig->thread);
 }
 
 breakpoint_up
@@ -13385,12 +13396,10 @@ insert_single_step_breakpoint (struct gdbarch *gdbarch,
   if (tp->control.single_step_breakpoints == NULL)
     {
       std::unique_ptr<breakpoint> b
-	(new momentary_breakpoint (gdbarch, bp_single_step));
-
-      b->disposition = disp_donttouch;
-
-      b->thread = tp->global_num;
-      gdb_assert (b->thread != 0);
+	(new momentary_breakpoint (gdbarch, bp_single_step,
+				   current_program_space,
+				   null_frame_id,
+				   tp->global_num));
 
       tp->control.single_step_breakpoints
 	= add_to_breakpoint_chain (std::move (b));
