@@ -1831,9 +1831,15 @@ struct dwarf2_base_index_functions : public quick_symbol_functions
 
   void expand_all_symtabs (struct objfile *objfile) override;
 
+  /* A helper function that finds the per-cu object from an "adjusted"
+     PC -- a PC with the base text offset removed.  */
+  virtual dwarf2_per_cu_data *find_per_cu (dwarf2_per_bfd *per_bfd,
+					   CORE_ADDR adjusted_pc);
+
   struct compunit_symtab *find_pc_sect_compunit_symtab
     (struct objfile *objfile, struct bound_minimal_symbol msymbol,
-     CORE_ADDR pc, struct obj_section *section, int warn_if_readin) override;
+     CORE_ADDR pc, struct obj_section *section, int warn_if_readin)
+       override final;
 
   struct compunit_symtab *find_compunit_symtab_by_address
     (struct objfile *objfile, CORE_ADDR address) override
@@ -4236,6 +4242,16 @@ recursively_find_pc_sect_compunit_symtab (struct compunit_symtab *cust,
   return NULL;
 }
 
+dwarf2_per_cu_data *
+dwarf2_base_index_functions::find_per_cu (dwarf2_per_bfd *per_bfd,
+					  CORE_ADDR adjusted_pc)
+{
+  if (per_bfd->index_addrmap == nullptr)
+    return nullptr;
+  return (struct dwarf2_per_cu_data *) addrmap_find (per_bfd->index_addrmap,
+						     adjusted_pc);
+}
+
 struct compunit_symtab *
 dwarf2_base_index_functions::find_pc_sect_compunit_symtab
      (struct objfile *objfile,
@@ -4244,19 +4260,15 @@ dwarf2_base_index_functions::find_pc_sect_compunit_symtab
       struct obj_section *section,
       int warn_if_readin)
 {
-  struct dwarf2_per_cu_data *data;
   struct compunit_symtab *result;
 
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-  if (per_objfile->per_bfd->index_addrmap == nullptr)
-    return NULL;
 
   CORE_ADDR baseaddr = objfile->text_section_offset ();
-  data = ((struct dwarf2_per_cu_data *)
-	  addrmap_find (per_objfile->per_bfd->index_addrmap,
-			pc - baseaddr));
-  if (!data)
-    return NULL;
+  struct dwarf2_per_cu_data *data = find_per_cu (per_objfile->per_bfd,
+						 pc - baseaddr);
+  if (data == nullptr)
+    return nullptr;
 
   if (warn_if_readin && per_objfile->symtab_set_p (data))
     warning (_("(Internal error: pc %s in read in CU, but not in symtab.)"),
@@ -4265,7 +4277,10 @@ dwarf2_base_index_functions::find_pc_sect_compunit_symtab
   result = recursively_find_pc_sect_compunit_symtab
     (dw2_instantiate_symtab (data, per_objfile, false), pc);
 
-  gdb_assert (result != NULL);
+  if (warn_if_readin && result == nullptr)
+    warning (_("(Error: pc %s in address map, but not in symtab.)"),
+	     paddress (objfile->arch (), pc));
+
   return result;
 }
 
@@ -18427,9 +18442,8 @@ cooked_indexer::make_index (cutu_reader *reader)
 
 struct cooked_index_functions : public dwarf2_base_index_functions
 {
-  struct compunit_symtab *find_pc_sect_compunit_symtab
-    (struct objfile *objfile, struct bound_minimal_symbol msymbol,
-     CORE_ADDR pc, struct obj_section *section, int warn_if_readin) override;
+  dwarf2_per_cu_data *find_per_cu (dwarf2_per_bfd *per_bfd,
+				   CORE_ADDR adjusted_pc) override;
 
   struct compunit_symtab *find_compunit_symtab_by_address
     (struct objfile *objfile, CORE_ADDR address) override;
@@ -18468,36 +18482,16 @@ struct cooked_index_functions : public dwarf2_base_index_functions
   }
 };
 
-struct compunit_symtab *
-cooked_index_functions::find_pc_sect_compunit_symtab
-     (struct objfile *objfile,
-      struct bound_minimal_symbol msymbol,
-      CORE_ADDR pc,
-      struct obj_section *section,
-      int warn_if_readin)
+dwarf2_per_cu_data *
+cooked_index_functions::find_per_cu (dwarf2_per_bfd *per_bfd,
+				     CORE_ADDR adjusted_pc)
 {
-  dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
-  if (per_objfile->per_bfd->index_table == nullptr)
-    return nullptr;
-
-  CORE_ADDR baseaddr = objfile->text_section_offset ();
   cooked_index_vector *table
     = (static_cast<cooked_index_vector *>
-       (per_objfile->per_bfd->index_table.get ()));
-  dwarf2_per_cu_data *per_cu = table->lookup (pc - baseaddr);
-  if (per_cu == nullptr)
+       (per_bfd->index_table.get ()));
+  if (table == nullptr)
     return nullptr;
-
-  if (warn_if_readin && per_objfile->symtab_set_p (per_cu))
-    warning (_("(Internal error: pc %s in read in CU, but not in symtab.)"),
-	     paddress (objfile->arch (), pc));
-
-  compunit_symtab *result = (recursively_find_pc_sect_compunit_symtab
-			     (dw2_instantiate_symtab (per_cu, per_objfile,
-						      false),
-			      pc));
-  gdb_assert (result != nullptr);
-  return result;
+  return table->lookup (adjusted_pc);
 }
 
 struct compunit_symtab *
