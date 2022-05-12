@@ -36,25 +36,38 @@ if [ ! -f "$f" ]; then
     exit 1
 fi
 
-(
-    python gen-header.py "<sys/syscall.h>"
+year=$(date +%Y)
 
-    tmp=$(mktemp)
+(
+    cat <<EOF
+<?xml version="1.0"?>
+<!-- Copyright (C) 2009-$year Free Software Foundation, Inc.
+
+     Copying and distribution of this file, with or without modification,
+     are permitted in any medium without royalty provided the copyright
+     notice and this notice are preserved.  -->
+
+<!DOCTYPE feature SYSTEM "gdb-syscalls.dtd">
+
+<!-- This file was generated using the following file:
+
+     <sys/syscall.h>
+
+     The file mentioned above belongs to the Linux Kernel.  -->
+
+
+EOF
+
+    echo '<syscalls_info>'
 
     echo '#include <sys/syscall.h>' \
 	| gcc -E - -dD "$@" \
 	| grep -E '#define __NR_' \
-		> "$tmp"
-
-    echo '<syscalls_info>'
-
-    while read -r line; do
+	| while read -r line; do
 	name=$(echo "$line" | awk '{print $2}' | sed 's/^__NR_//')
 	nr=$(echo "$line" | awk '{print $3}')
 	echo "  <syscall name=\"$name\" number=\"$nr\"/>"
-    done < "$tmp"
+    done
 
     echo '</syscalls_info>'
-
-    rm -f "$tmp"
 ) > "$f"
