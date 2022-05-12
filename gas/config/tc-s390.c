@@ -617,8 +617,8 @@ s390_insert_operand (unsigned char *insn,
       if (val < min || val > max)
 	{
 	  const char *err =
-	    _("operand out of range (%s not between %ld and %ld)");
-	  char buf[100];
+	    _("operand out of range (%" PRId64 " not between %" PRId64
+	      " and %" PRId64 ")");
 
 	  if (operand->flags & S390_OPERAND_PCREL)
 	    {
@@ -626,11 +626,11 @@ s390_insert_operand (unsigned char *insn,
 	      min <<= 1;
 	      max <<= 1;
 	    }
-	  bfd_sprintf_vma (stdoutput, buf, val);
 	  if (file == (char *) NULL)
-	    as_bad (err, buf, (int) min, (int) max);
+	    as_bad (err, (int64_t) val, (int64_t) min, (int64_t) max);
 	  else
-	    as_bad_where (file, line, err, buf, (int) min, (int) max);
+	    as_bad_where (file, line,
+			  err, (int64_t) val, (int64_t) min, (int64_t) max);
 	  return;
 	}
       /* val is ok, now restrict it to operand->bits bits.  */
