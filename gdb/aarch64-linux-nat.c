@@ -105,6 +105,11 @@ public:
   gdb::byte_vector read_capability (CORE_ADDR addr) override;
   bool write_capability (CORE_ADDR addr,
 			 gdb::array_view<const gdb_byte> buffer) override;
+  /* Required to differentiate Morello AUXV entries, since they are 128-bit
+     in size.  */
+  int auxv_parse (gdb_byte **readptr,
+		  gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+    override;
 };
 
 static aarch64_linux_nat_target the_aarch64_linux_nat_target;
@@ -1130,6 +1135,63 @@ aarch64_linux_nat_target::write_capability (CORE_ADDR addr,
     return false;
 
   return true;
+}
+
+/* Implement the "auxv_parse" target_ops method.  */
+
+int
+aarch64_linux_nat_target::auxv_parse (gdb_byte **readptr,
+				      gdb_byte *endptr, CORE_ADDR *typep,
+				      CORE_ADDR *valp)
+{
+  /* Do some sanity checks first.  */
+  if (endptr == *readptr)
+    return 0;
+
+  if (endptr - *readptr < 16)
+    return -1;
+
+  size_t offset_to_skip = 0;
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+
+  /* We're dealing with three different AUXV layouts:
+
+     A - The regular AArch64 format: Each type entry is 64-bit and each value
+	 is 64-bit.  This is also the case for Morello Hybrid binaries.
+     B - The Morello pure capability format with libshim: This is a compability
+	 layout and it keeps the 64-bit types and 64-bit values.
+     C - The Morello pure capability format without libshim: This layout has
+	 64-bit types followed by 64-bit padding.  The value is 128-bit.
+
+     We need to determine what layout we have, so we can read the data
+     correctly.
+
+     The easiest way to tell the difference is to assume 8-byte entries and
+     look for any types outside the range [AT_NULL, AT_MINSIGSTKSZ].  If we
+     find one such type, assume that we have layout C.  Otherwise we have
+     layouts A or B.  */
+  gdb_byte *ptr = *readptr;
+  while (ptr < endptr)
+    {
+      CORE_ADDR type = extract_unsigned_integer (ptr, 8, byte_order);
+      if (type > AT_MINSIGSTKSZ)
+	{
+	  offset_to_skip = 8;
+	  break;
+	}
+      ptr += 16;
+    }
+
+  /* Now we know what the layout looks like.  Read the data.  */
+  ptr = *readptr;
+  *typep = extract_unsigned_integer (ptr, 8, byte_order);
+  ptr += 8 + offset_to_skip;
+  *valp = extract_unsigned_integer (ptr, 8, byte_order);
+  ptr += 8 + offset_to_skip;
+
+  *readptr = ptr;
+
+  return 1;
 }
 
 /* Define AArch64 maintenance commands.  */
