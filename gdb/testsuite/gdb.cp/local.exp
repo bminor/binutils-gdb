@@ -27,7 +27,7 @@ set nl "\[\r\n\]+"
 # test running programs
 #
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 standard_testfile .cc
 
@@ -44,12 +44,12 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 #
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 if ![runto 'marker1'] then {
     perror "couldn't run to marker1"
-    continue
+    return
 }
 
 gdb_test "up" ".*foobar.*" "up from marker1"

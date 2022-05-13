@@ -23,7 +23,7 @@ if {[skip_shlib_tests]} {
 
 gdb_exit
 if [mi_gdb_start] {
-    continue
+    return
 }
 
 standard_testfile solib-main.c solib-lib.c

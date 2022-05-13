@@ -37,7 +37,7 @@ proc test_async_run {} {
 
 	gdb_exit
 	if [mi_gdb_start] {
-	    continue
+	    return
 	}
 
 	mi_gdb_load ${binfile}

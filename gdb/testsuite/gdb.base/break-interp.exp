@@ -16,7 +16,7 @@
 # This test only works on GNU/Linux.
 if { ![isnative] || [is_remote host] || [use_gdb_stub]
      || ![istarget *-linux*] || [skip_shlib_tests]} {
-    continue
+    return
 }
 
 load_lib prelink-support.exp

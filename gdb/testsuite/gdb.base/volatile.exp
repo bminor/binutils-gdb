@@ -50,7 +50,7 @@ if [get_compiler_info] {
 #
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 get_debug_format

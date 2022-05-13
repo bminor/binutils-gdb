@@ -19,7 +19,7 @@
 # about the field or baseclass being ambiguous is emitted at the right
 # times.
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } {  return }
 
 standard_testfile .cc
 
@@ -43,7 +43,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile \
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 # Run to a breakpoint after the variables have been initialized so we

@@ -24,7 +24,7 @@ set MIFLAGS "-i=mi2"
 
 gdb_exit
 if [mi_gdb_start] {
-    continue
+    return
 }
 
 standard_testfile var-cmd.c

@@ -53,7 +53,7 @@ mi_gdb_test "-gdb-set mi-async 1" ".*"
 mi_detect_async
 
 if { [mi_runto_main] < 0 } {
-    continue
+    return
 }
 
 # Check that register and stack info don't end up stale after resuming

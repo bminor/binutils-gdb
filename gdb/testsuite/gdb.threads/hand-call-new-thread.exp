@@ -23,7 +23,7 @@ if [prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}]
 }
 
 if ![runto_main] {
-    continue
+    return
 }
 
 # Set a thread-specific breakpoint that the wrong thread trips on

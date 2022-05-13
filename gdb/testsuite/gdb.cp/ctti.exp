@@ -21,7 +21,7 @@
 
 # Call to template instantiations.
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 standard_testfile cttiadd.cc cttiadd1.cc cttiadd2.cc cttiadd3.cc
 
@@ -36,7 +36,7 @@ if {[prepare_for_testing "failed to prepare" $testfile \
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 gdb_breakpoint [gdb_get_line_number "marker add1"]
@@ -49,7 +49,7 @@ gdb_test "print i" "\\$\[0-9\]+ = 4"
 # TODO: this needs more work before actually deploying it.
 # So bail out here.
 
-if { [ test_compiler_info gcc-*] } then { continue }
+if { [ test_compiler_info gcc-*] } then { return }
 
 gdb_test_multiple "print add<int>(2,2)" "print add<int>(2,2)" {
     -re "\\$\[0-9\]+ = 4\r\n$gdb_prompt $" {

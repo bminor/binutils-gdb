@@ -17,7 +17,7 @@
 
 load_lib rust-support.exp
 if {[skip_rust_tests]} {
-    continue
+    return
 }
 
 standard_testfile .rs
@@ -389,7 +389,7 @@ gdb_test "print empty_enum_value.something" ""
 
 load_lib gdb-python.exp
 if {[skip_python_tests]} {
-    continue
+    return
 }
 
 gdb_test "python print(gdb.lookup_type('simple::HiBob'))" "simple::HiBob"

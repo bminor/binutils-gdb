@@ -31,7 +31,7 @@ if {[prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
 
 if {![runto [gdb_get_line_number "post_init"]]} then {
     perror "couldn't run to breakpoint post_init"
-    continue
+    return
 }
 
 # Test homogeneous derived type.

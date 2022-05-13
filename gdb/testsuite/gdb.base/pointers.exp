@@ -45,7 +45,7 @@ clean_restart ${binfile}
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 gdb_test "next " "more_code.*;" "continuing after dummy()"

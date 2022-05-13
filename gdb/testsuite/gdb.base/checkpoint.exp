@@ -17,13 +17,13 @@
 # other targets...
 #
 if {![istarget "*-*-linux*"]} then {
-    continue
+    return
 }
 
 # Checkpoint support is currently implemented in the Linux native
 # target, so only works with "target native".
 if { [target_info gdb_protocol] != "" } {
-    continue
+    return
 }
 
 # Must name the source file explicitly, otherwise when driven by

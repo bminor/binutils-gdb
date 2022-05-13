@@ -28,7 +28,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
 
 if { ![fortran_runto_main] } {
     perror "Could not run to main."
-    continue
+    return
 }
 
 # Go to foo.

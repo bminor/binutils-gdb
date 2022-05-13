@@ -18,7 +18,7 @@
 # Test that the disassembler correctly demangles C++ function names in
 # it's header line.
 
-if {[skip_cplus_tests]} { continue }
+if {[skip_cplus_tests]} { return }
 
 standard_testfile .cc
 
@@ -33,7 +33,7 @@ if {[prepare_for_testing "failed to prepare" $testfile \
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 proc check_disassembly_header { request expected } {

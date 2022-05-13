@@ -47,7 +47,7 @@ gdb_load_shlib $libfile
 
 if ![fortran_runto_main] then {
     perror "couldn't run to main"
-    continue
+    return
 }
 
 gdb_breakpoint $srclibfile:[gdb_get_line_number "i-is-2-in-lib" $srclibfile]

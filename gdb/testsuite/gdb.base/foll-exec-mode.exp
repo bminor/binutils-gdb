@@ -30,13 +30,13 @@
 # required for follow-exec-mode testing.
 if { [target_info exists gdb_protocol]
      && [target_info gdb_protocol] == "remote" } {
-    continue
+    return
 }
 
 # Until "catch exec" is implemented on other targets...
 #
 if {![istarget "*-linux*"]} then {
-     continue
+     return
 }
 
 standard_testfile foll-exec-mode.c

@@ -23,7 +23,7 @@ standard_testfile
 # test.
 if [target_info exists gdb,cannot_call_functions] {
     unsupported "this target can not call functions"
-    continue
+    return
 }
 
 # Create and source the file that provides information about the compiler
@@ -50,7 +50,7 @@ gdb_test_no_output "set width 0"
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 get_debug_format

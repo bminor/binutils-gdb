@@ -17,7 +17,7 @@
 # The referenced value is a DW_AT_const_value.
 
 if [skip_cplus_tests] {
-    continue
+    return
 }
 
 load_lib dwarf.exp

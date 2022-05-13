@@ -20,14 +20,14 @@ global inferior_spawn_id
 global gdb_spawn_id
 
 if ![istarget *-linux*] {
-    continue
+    return
 }
 
 # In remote mode we cannot use the 'set args' command, and this
 # test requires it.
 if { [target_info exists gdb_protocol] } then {
     if { [target_info gdb_protocol] == "remote" } then {
-	continue
+	return
     }
 }
 

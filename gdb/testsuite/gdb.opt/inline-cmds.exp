@@ -337,7 +337,7 @@ proc mi_cli_step {cli_output_re message} {
 # CLI output sent to MI's console.
 with_test_prefix "mi" {
     if [mi_gdb_start] {
-	continue
+	return
     }
     mi_gdb_load ${binfile}
     mi_runto_main

@@ -31,11 +31,11 @@
 
 # This test is largely based of gdb.base/callfuncs.exp.
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 if [target_info exists gdb,nosignals] {
     verbose "Skipping gdb2495.exp because of nosignals."
-    continue
+    return
 }
 
 standard_testfile .cc
@@ -50,7 +50,7 @@ if [get_compiler_info "c++"] {
 # test.
 if [target_info exists gdb,cannot_call_functions] {
     unsupported "this target can not call functions"
-    continue
+    return
 }
 
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
@@ -59,7 +59,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 
 if ![runto_main] then {
     perror "couldn't run to main"
-    continue
+    return
 }
 
 # See http://sourceware.org/gdb/bugs/2495
@@ -104,7 +104,7 @@ gdb_test "p exceptions.throw_function()" \
 # Restart the inferior back at main.
 if ![runto_main] then {
     perror "couldn't run to main"
-    continue
+    return
 }
 
 

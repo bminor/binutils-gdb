@@ -109,7 +109,7 @@ proc do_bp_tests {with_src_prefix_p with_nest_prefix_p} {
     # Break on a contained function and run to it.
     if {![runto ${src_prefix}[gdb_get_line_number "pre_init"]]} then {
 	perror "couldn't run to breakpoint pre_init"
-	continue
+	return
     }
 
     # Call a contained function.

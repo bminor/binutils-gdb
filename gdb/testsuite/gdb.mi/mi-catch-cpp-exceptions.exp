@@ -15,7 +15,7 @@
 
 # Test the -catch-throw, -catch-rethrow, and -catch-catch MI commands.
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
@@ -47,7 +47,7 @@ proc restart_for_test {} {
     global main_lineno
 
     if {[mi_gdb_start]} {
-	continue
+	return
     }
 
     mi_delete_breakpoints

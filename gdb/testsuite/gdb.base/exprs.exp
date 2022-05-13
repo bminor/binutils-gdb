@@ -38,7 +38,7 @@ clean_restart ${binfile}
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 proc test_expr { args } {

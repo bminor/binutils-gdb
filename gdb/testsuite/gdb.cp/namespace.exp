@@ -25,7 +25,7 @@
 
 
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 standard_testfile .cc namespace1.cc
 
@@ -52,12 +52,12 @@ gdb_test "show lang" "auto; currently c\\+\\+.*"
 #
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 if ![runto 'marker1'] then {
     perror "couldn't run to marker1"
-    continue
+    return
 }
 
 gdb_test "up" ".*main.*" "up from marker1"
@@ -198,7 +198,7 @@ gdb_test_multiple $test $test {
 
 if ![runto "C::D::marker2"] then {
     perror "couldn't run to marker2"
-    continue
+    return
 }
 
 gdb_test "print c" "\\$\[0-9\].* = 1"

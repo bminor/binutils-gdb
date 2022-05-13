@@ -87,7 +87,7 @@ gdb_load ${binfile}
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 gdb_test "print x = 45" "$decimal = 45" "set a global"

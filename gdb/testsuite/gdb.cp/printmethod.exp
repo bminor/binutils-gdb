@@ -19,7 +19,7 @@
 
 # This file is part of the gdb testsuite
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 #
 # test running programs
@@ -37,7 +37,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 # First, run to after we've constructed the object:

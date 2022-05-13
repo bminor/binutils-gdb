@@ -21,7 +21,7 @@
 set ws "\[\r\n\t \]*"
 set nl "\[\r\n\]+"
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 #
 # test running programs
@@ -39,7 +39,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 
 if ![runto_main] then {
     perror "couldn't run to main"
-    continue
+    return
 } 
 
 # See http://sources.redhat.com/gdb/bugs/1355

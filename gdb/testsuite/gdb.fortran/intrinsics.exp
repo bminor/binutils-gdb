@@ -17,7 +17,7 @@
 
 load_lib "fortran.exp"
 
-if { [skip_fortran_tests] } { continue }
+if { [skip_fortran_tests] } { return }
 
 standard_testfile .f90
 
@@ -27,7 +27,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile {debug f90}] } 
 
 if { ![fortran_runto_main] } {
     perror "Could not run to main."
-    continue
+    return
 }
 
 gdb_breakpoint [gdb_get_line_number "stop-here"]

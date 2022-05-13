@@ -43,7 +43,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
 #
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 # test vars and pointers

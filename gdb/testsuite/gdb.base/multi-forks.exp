@@ -17,7 +17,7 @@
 # other targets...
 #
 if { ![istarget "*-*-linux*"] } then {
-    continue
+    return
 }
 
 

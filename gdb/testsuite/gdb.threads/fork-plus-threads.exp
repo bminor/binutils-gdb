@@ -24,7 +24,7 @@
 # inferiors have terminated, and this test requires that.
 if { [target_info exists gdb_protocol]
      && [target_info gdb_protocol] == "remote" } {
-    continue
+    return
 }
 
 standard_testfile

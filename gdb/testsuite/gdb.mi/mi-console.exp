@@ -48,7 +48,7 @@ proc semihosted_string { string } {
 
 gdb_exit
 if [mi_gdb_start separate-inferior-tty] {
-    continue
+    return
 }
 
 standard_testfile

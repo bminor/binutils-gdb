@@ -16,7 +16,7 @@
 # This file is part of the gdb testsuite.
 # It tests various aspects of iostream that have caused problems for gdb.
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 standard_testfile .cc
 
@@ -26,7 +26,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 
 if ![runto_main] {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 # PR 18417

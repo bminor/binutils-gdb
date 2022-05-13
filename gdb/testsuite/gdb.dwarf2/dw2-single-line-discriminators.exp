@@ -36,7 +36,7 @@ if { [prepare_for_testing "failed to prepare" "${testfile}" $srcfile {nodebug no
 }
 
 if ![runto_main] then {
-    continue
+    return
 }
 
 set srcline [gdb_get_line_number "stepi line" $csrcfile]

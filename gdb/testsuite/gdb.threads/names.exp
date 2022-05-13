@@ -17,7 +17,7 @@
 # threads).
 
 if [target_info exists gdb,no_thread_names] {
-    continue
+    return
 }
 
 standard_testfile
@@ -27,7 +27,7 @@ if [prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads}]
 }
 
 if ![runto "all_threads_ready"] {
-    continue
+    return
 }
 
 gdb_test "info threads" \

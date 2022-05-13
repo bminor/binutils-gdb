@@ -17,7 +17,7 @@
 
 if [target_info exists gdb,nosignals] {
     verbose "Skipping branch-to-self.exp because of nosignals."
-    continue
+    return
 }
 
 standard_testfile

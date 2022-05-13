@@ -24,7 +24,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug f90 quiet
 
 if ![fortran_runto_main] then {
     perror "Couldn't run to main"
-    continue
+    return
 }
 
 # Depending on the compiler being used, the type names can be printed differently.

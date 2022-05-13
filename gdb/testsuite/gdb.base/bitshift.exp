@@ -180,7 +180,7 @@ proc test_shifts {} {
 	    "unknown" "ada" "modula-2" "pascal" "fortran"
 	}
 	if {[lsearch -exact $skip_langs $lang] >= 0} {
-	    continue
+	    return
 	}
 
 	gdb_test_no_output "set language $lang"

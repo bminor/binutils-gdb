@@ -17,7 +17,7 @@
 # Rust compiler.  This serves as a smoke test.
 
 load_lib "rust-support.exp"
-if {[skip_rust_tests]} { continue }
+if {[skip_rust_tests]} { return }
 
 gdb_start
 
@@ -25,7 +25,7 @@ gdb_test_no_output "set var \$something = 27"
 
 if {![set_lang_rust]} {
     warning "Rust expression tests suppressed."
-    continue
+    return
 }
 
 gdb_test "print 9__97" " = 997"

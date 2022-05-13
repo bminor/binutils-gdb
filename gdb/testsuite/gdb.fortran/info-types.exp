@@ -18,7 +18,7 @@
 load_lib "fortran.exp"
 load_lib "sym-info-cmds.exp"
 
-if { [skip_fortran_tests] } { continue }
+if { [skip_fortran_tests] } { return }
 
 standard_testfile info-types.f90 info-types-2.f90
 
@@ -29,7 +29,7 @@ if { [prepare_for_testing "failed to prepare" $testfile \
 
 if { ![fortran_runto_main] } {
     perror "Could not run to main."
-    continue
+    return
 }
 
 set integer4 [fortran_int4]

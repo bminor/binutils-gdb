@@ -42,7 +42,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${testcase}.c" \
 clean_restart "${testcase}"
 if ![runto_main] {
     perror "could not run to main"
-    continue
+    return
 }
 
 set bp_location [gdb_get_line_number "STOP" "${testcase}.c"]

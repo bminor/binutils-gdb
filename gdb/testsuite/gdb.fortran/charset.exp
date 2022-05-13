@@ -27,7 +27,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug addi
 
 if ![fortran_runto_main] {
     perror "Couldn't run to main"
-    continue
+    return
 }
 
 gdb_breakpoint [gdb_get_line_number "break-here"]

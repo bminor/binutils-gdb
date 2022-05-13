@@ -32,7 +32,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 clean_restart ${binfile}
 
 if ![runto abort {allow-pending}] then {
-    continue
+    return
 }
 
 # See http://sources.redhat.com/gdb/bugs/1250

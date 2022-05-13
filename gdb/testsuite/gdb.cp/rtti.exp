@@ -26,7 +26,7 @@
 # (involving templates, in particular) where this problem triggers
 # because GDB and GCC have different ideas what a class is called.
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 #
 # test running programs
@@ -45,7 +45,7 @@ if {[prepare_for_testing "failed to prepare" $testfile \
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 # First, run to after we've constructed the object:

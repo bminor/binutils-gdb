@@ -29,7 +29,7 @@ clean_restart $testfile
 
 if ![runto_main] then {
     perror "could not run to main"
-    continue
+    return
 }
 
 gdb_test "break call_me if param.e == 1" \

@@ -32,7 +32,7 @@ if [get_compiler_info] {
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 #

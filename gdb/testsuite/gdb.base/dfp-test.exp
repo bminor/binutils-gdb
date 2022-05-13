@@ -32,7 +32,7 @@ clean_restart ${binfile}
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 set sizeof_long [get_sizeof "long" 4]

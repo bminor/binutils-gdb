@@ -32,7 +32,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug nowarning
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 set is_stmt [is_stmt_addresses $srcfile]

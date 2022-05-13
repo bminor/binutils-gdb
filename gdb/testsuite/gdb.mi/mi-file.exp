@@ -20,7 +20,7 @@ set MIFLAGS "-i=mi"
 
 gdb_exit
 if [mi_gdb_start] {
-    continue
+    return
 }
 
 standard_testfile basics.c

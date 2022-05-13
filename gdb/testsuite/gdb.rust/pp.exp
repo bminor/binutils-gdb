@@ -18,7 +18,7 @@
 load_lib gdb-python.exp
 load_lib rust-support.exp
 if {[skip_rust_tests]} {
-    continue
+    return
 }
 
 standard_testfile .rs
@@ -26,7 +26,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug rust}]} {
     return -1
 }
 
-if { [skip_python_tests] } { continue }
+if { [skip_python_tests] } { return }
 
 set remote_python_file [gdb_remote_download host \
 			    ${srcdir}/${subdir}/${testfile}.py]

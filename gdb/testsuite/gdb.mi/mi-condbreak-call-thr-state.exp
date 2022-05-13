@@ -42,7 +42,7 @@ proc test { variant } {
     with_test_prefix "$variant" {
 	gdb_exit
 	if [mi_gdb_start] {
-	    continue
+	    return
 	}
 
 	set options {debug}

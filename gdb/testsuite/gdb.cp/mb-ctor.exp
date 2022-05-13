@@ -16,7 +16,7 @@
 # Test that breakpoints on C++ constructors work, despite the
 # fact that gcc generates several versions of constructor function.
 
-if { [skip_cplus_tests] } { continue }
+if { [skip_cplus_tests] } { return }
 
 
 standard_testfile .cc
@@ -31,7 +31,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 # Set a breakpoint with multiple locations

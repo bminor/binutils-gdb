@@ -26,7 +26,7 @@ if { [skip_gdbserver_tests] } {
 
 if [target_info exists gdb,nointerrupts] {
     verbose "Skipping reconnect-ctrl-c.exp because of nointerrupts."
-    continue
+    return
 }
 
 standard_testfile

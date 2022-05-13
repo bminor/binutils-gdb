@@ -59,7 +59,7 @@ set MIFLAGS "-i=mi"
 
 gdb_exit
 if [mi_gdb_start] {
-    continue
+    return
 }
 
 mi_delete_breakpoints

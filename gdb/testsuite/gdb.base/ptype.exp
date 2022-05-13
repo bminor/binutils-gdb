@@ -591,7 +591,7 @@ if [runto_main] then {
 
   if [target_info exists gdb,cannot_call_functions] {
     unsupported "this target can not call functions"
-    continue
+    return
   }
 
   # We need to up this because this can be really slow on some boards.

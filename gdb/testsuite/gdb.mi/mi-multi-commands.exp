@@ -40,7 +40,7 @@ proc run_test { args } {
 
     gdb_exit
     if [mi_gdb_start $args] {
-	continue
+	return
     }
 
     set start 1

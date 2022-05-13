@@ -16,7 +16,7 @@
 load_lib "fortran.exp"
 
 if { [skip_fortran_tests] } {
-    continue
+    return
 }
 
 standard_testfile .f90

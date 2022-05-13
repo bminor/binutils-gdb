@@ -15,7 +15,7 @@
 
 if [target_info exists gdb,nosignals] {
     verbose "Skipping catch-signal.exp because of nosignals."
-    continue
+    return
 }
 
 standard_testfile

@@ -36,7 +36,7 @@ save_vars { GDBFLAGS } {
 
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 gdb_test "break fun_three" \

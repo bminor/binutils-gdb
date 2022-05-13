@@ -64,7 +64,7 @@ if [gdb_skip_stdio_test "varargs.exp"] {
 
 if ![runto test] then {
     perror "couldn't run to breakpoint"
-    continue
+    return
 }
 
 gdb_test_stdio "print find_max1(5,1,2,3,4,5)" \

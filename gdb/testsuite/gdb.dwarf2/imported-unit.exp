@@ -23,7 +23,7 @@
 # this case -flto.
 
 if [skip_cplus_tests] {
-    continue
+    return
 }
 
 load_lib dwarf.exp

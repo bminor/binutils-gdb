@@ -19,7 +19,7 @@
 # This test only works on Linux
 if { ![isnative] || [is_remote host] || [use_gdb_stub]
      || ![istarget *-linux*] } {
-    continue
+    return
 }
 
 standard_testfile

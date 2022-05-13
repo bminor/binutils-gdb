@@ -23,7 +23,7 @@ if { [skip_fortran_tests] } { return -1 }
 
 gdb_exit
 if [mi_gdb_start] {
-    continue
+    return
 }
 
 standard_testfile array.f90
