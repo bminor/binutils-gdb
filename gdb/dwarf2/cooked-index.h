@@ -230,11 +230,6 @@ private:
   /* If we found "main" or an entry with 'is_main' set, store it
      here.  */
   cooked_index_entry *m_main = nullptr;
-  /* When constructing the index, entries are stored on a linked list.
-     This member points to the head of that list.  Later, they are
-     entered into the hash table, at which point this is no longer
-     used.  */
-  cooked_index_entry *m_start = nullptr;
   /* The addrmap.  This maps address ranges to dwarf2_per_cu_data
      objects.  */
   addrmap *m_addrmap = nullptr;
