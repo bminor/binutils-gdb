@@ -33,6 +33,7 @@
 #include "gdbsupport/thread-pool.h"
 #include "dwarf2/mapped-index.h"
 #include "dwarf2/tag.h"
+#include "gdbsupport/range-chain.h"
 
 struct dwarf2_per_cu_data;
 
@@ -190,7 +191,33 @@ public:
     m_addrmap = addrmap_create_fixed (map, &m_storage);
   }
 
+  /* Finalize the index.  This should be called a single time, when
+     the index has been fully populated.  It enters all the entries
+     into the internal table.  */
+  void finalize ();
+
+  /* Wait for this index's finalization to be complete.  */
+  void wait ()
+  {
+    m_future.wait ();
+  }
+
   friend class cooked_index_vector;
+
+  /* A simple range over part of m_entries.  */
+  typedef iterator_range<std::vector<cooked_index_entry *>::iterator> range;
+
+  /* Return a range of all the entries.  */
+  range all_entries ()
+  {
+    wait ();
+    return { m_entries.begin (), m_entries.end () };
+  }
+
+  /* Look up an entry by name.  Returns a range of all matching
+     results.  If COMPLETING is true, then a larger range, suitable
+     for completion, will be returned.  */
+  range find (gdb::string_view name, bool completing);
 
 private:
 
@@ -223,6 +250,17 @@ private:
 						per_cu);
   }
 
+  /* GNAT only emits mangled ("encoded") names in the DWARF, and does
+     not emit the module structure.  However, we need this structure
+     to do lookups.  This function recreates that structure for an
+     existing entry.  It returns the base name (last element) of the
+     full decoded name.  */
+  gdb::unique_xmalloc_ptr<char> handle_gnat_encoded_entry
+       (cooked_index_entry *entry, htab_t gnat_entries);
+
+  /* A helper method that does the work of 'finalize'.  */
+  void do_finalize ();
+
   /* Storage for the entries.  */
   auto_obstack m_storage;
   /* List of all entries.  */
@@ -233,6 +271,12 @@ private:
   /* The addrmap.  This maps address ranges to dwarf2_per_cu_data
      objects.  */
   addrmap *m_addrmap = nullptr;
+  /* Storage for canonical names.  */
+  std::vector<gdb::unique_xmalloc_ptr<char>> m_names;
+  /* A future that tracks when the 'finalize' method is done.  Note
+     that the 'get' method is never called on this future, only
+     'wait'.  */
+  gdb::future<void> m_future;
 };
 
 /* The main index of DIEs.  The parallel DIE indexers create
@@ -253,17 +297,18 @@ public:
 
   ~cooked_index_vector ()
   {
-    /* The 'finalize' method may be run in a different thread.  If
-       this object is destroyed before this completes, then the method
-       will end up writing to freed memory.  Waiting for this to
+    /* The 'finalize' methods may be run in a different thread.  If
+       this object is destroyed before these complete, then one will
+       end up writing to freed memory.  Waiting for finalization to
        complete avoids this problem; and the cost seems ignorable
        because creating and immediately destroying the debug info is a
        relatively rare thing to do.  */
-    m_future.wait ();
+    for (auto &item : m_vector)
+      item->wait ();
   }
 
-  /* A simple range over part of m_entries.  */
-  typedef iterator_range<std::vector<cooked_index_entry *>::iterator> range;
+  /* A range over a vector of subranges.  */
+  typedef range_chain<cooked_index::range> range;
 
   /* Look up an entry by name.  Returns a range of all matching
      results.  If COMPLETING is true, then a larger range, suitable
@@ -273,8 +318,11 @@ public:
   /* Return a range of all the entries.  */
   range all_entries ()
   {
-    m_future.wait ();
-    return { m_entries.begin (), m_entries.end () };
+    std::vector<cooked_index::range> result_range;
+    result_range.reserve (m_vector.size ());
+    for (auto &entry : m_vector)
+      result_range.push_back (entry->all_entries ());
+    return range (std::move (result_range));
   }
 
   /* Look up ADDR in the address map, and return either the
@@ -299,33 +347,9 @@ public:
 
 private:
 
-  /* GNAT only emits mangled ("encoded") names in the DWARF, and does
-     not emit the module structure.  However, we need this structure
-     to do lookups.  This function recreates that structure for an
-     existing entry.  It returns the base name (last element) of the
-     full decoded name.  */
-  gdb::unique_xmalloc_ptr<char> handle_gnat_encoded_entry
-       (cooked_index_entry *entry, htab_t gnat_entries);
-
-  /* Finalize the index.  This should be called a single time, when
-     the index has been fully populated.  It enters all the entries
-     into the internal hash table.  */
-  void finalize ();
-
   /* The vector of cooked_index objects.  This is stored because the
      entries are stored on the obstacks in those objects.  */
   vec_type m_vector;
-
-  /* List of all entries.  This is sorted during finalization.  */
-  std::vector<cooked_index_entry *> m_entries;
-
-  /* Storage for canonical names.  */
-  std::vector<gdb::unique_xmalloc_ptr<char>> m_names;
-
-  /* A future that tracks when the 'finalize' method is done.  Note
-     that the 'get' method is never called on this future, only
-     'wait'.  */
-  gdb::future<void> m_future;
 };
 
 #endif /* GDB_DWARF2_COOKED_INDEX_H */
