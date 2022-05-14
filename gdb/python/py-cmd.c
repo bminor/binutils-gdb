@@ -430,7 +430,6 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
   const char *name;
   int cmdtype;
   int completetype = -1;
-  char *docstring = NULL;
   struct cmd_list_element **cmd_list;
   static const char *keywords[] = { "name", "command_class", "completer_class",
 				    "prefix", NULL };
@@ -484,19 +483,20 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
       is_prefix = cmp > 0;
     }
 
+  gdb::unique_xmalloc_ptr<char> docstring = nullptr;
   if (PyObject_HasAttr (self, gdbpy_doc_cst))
     {
       gdbpy_ref<> ds_obj (PyObject_GetAttr (self, gdbpy_doc_cst));
 
       if (ds_obj != NULL && gdbpy_is_string (ds_obj.get ()))
 	{
-	  docstring = python_string_to_host_string (ds_obj.get ()).release ();
-	  if (docstring == NULL)
+	  docstring = python_string_to_host_string (ds_obj.get ());
+	  if (docstring == nullptr)
 	    return -1;
 	}
     }
-  if (! docstring)
-    docstring = xstrdup (_("This command is not documented."));
+  if (docstring == nullptr)
+    docstring = make_unique_xstrdup (_("This command is not documented."));
 
   gdbpy_ref<> self_ref = gdbpy_ref<>::new_reference (self);
 
@@ -513,12 +513,12 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 	  allow_unknown = PyObject_HasAttr (self, invoke_cst);
 	  cmd = add_prefix_cmd (cmd_name.get (),
 				(enum command_class) cmdtype,
-				NULL, docstring, &obj->sub_list,
+				NULL, docstring.release (), &obj->sub_list,
 				allow_unknown, cmd_list);
 	}
       else
 	cmd = add_cmd (cmd_name.get (), (enum command_class) cmdtype,
-		       docstring, cmd_list);
+		       docstring.release (), cmd_list);
 
       /* If successful, the above takes ownership of the name, since we set
          name_allocated, so release it.  */
@@ -540,7 +540,6 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
     }
   catch (const gdb_exception &except)
     {
-      xfree (docstring);
       gdbpy_convert_exception (except);
       return -1;
     }
