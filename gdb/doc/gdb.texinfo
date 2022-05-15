@@ -10115,7 +10115,7 @@ It examines data in memory at a specified address and prints it in a
 specified format.  @xref{Memory, ,Examining Memory}.
 
 If you are interested in information about types, or about how the
-fields of a struct or a class are declared, use the @code{ptype @var{exp}}
+fields of a struct or a class are declared, use the @code{ptype @var{expr}}
 command rather than @code{print}.  @xref{Symbols, ,Examining the Symbol
 Table}.
 
