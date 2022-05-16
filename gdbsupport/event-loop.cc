@@ -78,14 +78,12 @@ struct file_handler
   struct file_handler *next_file;
 };
 
-/* Do we use poll or select ? */
 #ifdef HAVE_POLL
-#define USE_POLL 1
-#else
-#define USE_POLL 0
-#endif /* HAVE_POLL */
-
-static unsigned char use_poll = USE_POLL;
+/* Do we use poll or select?  Some systems have poll, but then it's
+   not useable with all kinds of files.  We probe that whenever a new
+   file handler is added.  */
+static bool use_poll = true;
+#endif
 
 #ifdef USE_WIN32API
 #include <windows.h>
@@ -249,12 +247,10 @@ add_file_handler (int fd, handler_func *proc, gdb_client_data client_data,
 		  std::string &&name, bool is_ui)
 {
 #ifdef HAVE_POLL
-  struct pollfd fds;
-#endif
-
   if (use_poll)
     {
-#ifdef HAVE_POLL
+      struct pollfd fds;
+
       /* Check to see if poll () is usable.  If not, we'll switch to
 	 use select.  This can happen on systems like
 	 m68k-motorola-sys, `poll' cannot be used to wait for `stdin'.
@@ -263,23 +259,15 @@ add_file_handler (int fd, handler_func *proc, gdb_client_data client_data,
       fds.fd = fd;
       fds.events = POLLIN;
       if (poll (&fds, 1, 0) == 1 && (fds.revents & POLLNVAL))
-	use_poll = 0;
-#else
-      internal_error (__FILE__, __LINE__,
-		      _("use_poll without HAVE_POLL"));
-#endif /* HAVE_POLL */
+	use_poll = false;
     }
   if (use_poll)
     {
-#ifdef HAVE_POLL
       create_file_handler (fd, POLLIN, proc, client_data, std::move (name),
 			   is_ui);
-#else
-      internal_error (__FILE__, __LINE__,
-		      _("use_poll without HAVE_POLL"));
-#endif
     }
   else
+#endif /* HAVE_POLL */
     create_file_handler (fd, GDB_READABLE | GDB_EXCEPTION,
 			 proc, client_data, std::move (name), is_ui);
 }
@@ -321,9 +309,9 @@ create_file_handler (int fd, int mask, handler_func * proc,
       file_ptr->next_file = gdb_notifier.first_file_handler;
       gdb_notifier.first_file_handler = file_ptr;
 
+#ifdef HAVE_POLL
       if (use_poll)
 	{
-#ifdef HAVE_POLL
 	  gdb_notifier.num_fds++;
 	  if (gdb_notifier.poll_fds)
 	    gdb_notifier.poll_fds =
@@ -336,12 +324,9 @@ create_file_handler (int fd, int mask, handler_func * proc,
 	  (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->fd = fd;
 	  (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->events = mask;
 	  (gdb_notifier.poll_fds + gdb_notifier.num_fds - 1)->revents = 0;
-#else
-	  internal_error (__FILE__, __LINE__,
-			  _("use_poll without HAVE_POLL"));
-#endif /* HAVE_POLL */
 	}
       else
+#endif /* HAVE_POLL */
 	{
 	  if (mask & GDB_READABLE)
 	    FD_SET (fd, &gdb_notifier.check_masks[0]);
@@ -402,10 +387,6 @@ delete_file_handler (int fd)
 {
   file_handler *file_ptr, *prev_ptr = NULL;
   int i;
-#ifdef HAVE_POLL
-  int j;
-  struct pollfd *new_poll_fds;
-#endif
 
   /* Find the entry for the given file.  */
 
@@ -419,9 +400,12 @@ delete_file_handler (int fd)
   if (file_ptr == NULL)
     return;
 
+#ifdef HAVE_POLL
   if (use_poll)
     {
-#ifdef HAVE_POLL
+      int j;
+      struct pollfd *new_poll_fds;
+
       /* Create a new poll_fds array by copying every fd's information
 	 but the one we want to get rid of.  */
 
@@ -442,12 +426,9 @@ delete_file_handler (int fd)
       xfree (gdb_notifier.poll_fds);
       gdb_notifier.poll_fds = new_poll_fds;
       gdb_notifier.num_fds--;
-#else
-      internal_error (__FILE__, __LINE__,
-		      _("use_poll without HAVE_POLL"));
-#endif /* HAVE_POLL */
     }
   else
+#endif /* HAVE_POLL */
     {
       if (file_ptr->mask & GDB_READABLE)
 	FD_CLR (fd, &gdb_notifier.check_masks[0]);
@@ -510,9 +491,6 @@ static void
 handle_file_event (file_handler *file_ptr, int ready_mask)
 {
   int mask;
-#ifdef HAVE_POLL
-  int error_mask;
-#endif
 
     {
 	{
@@ -526,9 +504,11 @@ handle_file_event (file_handler *file_ptr, int ready_mask)
 	  /* See if the desired events (mask) match the received
 	     events (ready_mask).  */
 
+#ifdef HAVE_POLL
 	  if (use_poll)
 	    {
-#ifdef HAVE_POLL
+	      int error_mask;
+
 	      /* POLLHUP means EOF, but can be combined with POLLIN to
 		 signal more data to read.  */
 	      error_mask = POLLHUP | POLLERR | POLLNVAL;
@@ -547,12 +527,9 @@ handle_file_event (file_handler *file_ptr, int ready_mask)
 		}
 	      else
 		file_ptr->error = 0;
-#else
-	      internal_error (__FILE__, __LINE__,
-			      _("use_poll without HAVE_POLL"));
-#endif /* HAVE_POLL */
 	    }
 	  else
+#endif /* HAVE_POLL */
 	    {
 	      if (ready_mask & GDB_EXCEPTION)
 		{
@@ -599,9 +576,9 @@ gdb_wait_for_event (int block)
   if (block)
     update_wait_timeout ();
 
+#ifdef HAVE_POLL
   if (use_poll)
     {
-#ifdef HAVE_POLL
       int timeout;
 
       if (block)
@@ -616,12 +593,9 @@ gdb_wait_for_event (int block)
 	 signal.  */
       if (num_found == -1 && errno != EINTR)
 	perror_with_name (("poll"));
-#else
-      internal_error (__FILE__, __LINE__,
-		      _("use_poll without HAVE_POLL"));
-#endif /* HAVE_POLL */
     }
   else
+#endif /* HAVE_POLL */
     {
       struct timeval select_timeout;
       struct timeval *timeout_p;
@@ -670,9 +644,9 @@ gdb_wait_for_event (int block)
   /* To level the fairness across event descriptors, we handle them in
      a round-robin-like fashion.  The number and order of descriptors
      may change between invocations, but this is good enough.  */
+#ifdef HAVE_POLL
   if (use_poll)
     {
-#ifdef HAVE_POLL
       int i;
       int mask;
 
@@ -699,12 +673,9 @@ gdb_wait_for_event (int block)
       mask = (gdb_notifier.poll_fds + i)->revents;
       handle_file_event (file_ptr, mask);
       return 1;
-#else
-      internal_error (__FILE__, __LINE__,
-		      _("use_poll without HAVE_POLL"));
-#endif /* HAVE_POLL */
     }
   else
+#endif /* HAVE_POLL */
     {
       /* See comment about even source fairness above.  */
       int mask = 0;
@@ -856,16 +827,11 @@ update_wait_timeout (void)
 	}
 
       /* Update the timeout for select/ poll.  */
-      if (use_poll)
-	{
 #ifdef HAVE_POLL
-	  gdb_notifier.poll_timeout = timeout.tv_sec * 1000;
-#else
-	  internal_error (__FILE__, __LINE__,
-			  _("use_poll without HAVE_POLL"));
-#endif /* HAVE_POLL */
-	}
+      if (use_poll)
+	gdb_notifier.poll_timeout = timeout.tv_sec * 1000;
       else
+#endif /* HAVE_POLL */
 	{
 	  gdb_notifier.select_timeout.tv_sec = timeout.tv_sec;
 	  gdb_notifier.select_timeout.tv_usec = timeout.tv_usec;
