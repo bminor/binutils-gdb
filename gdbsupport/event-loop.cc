@@ -492,65 +492,61 @@ handle_file_event (file_handler *file_ptr, int ready_mask)
 {
   int mask;
 
-    {
-	{
-	  /* With poll, the ready_mask could have any of three events
-	     set to 1: POLLHUP, POLLERR, POLLNVAL.  These events
-	     cannot be used in the requested event mask (events), but
-	     they can be returned in the return mask (revents).  We
-	     need to check for those event too, and add them to the
-	     mask which will be passed to the handler.  */
-
-	  /* See if the desired events (mask) match the received
-	     events (ready_mask).  */
+  /* See if the desired events (mask) match the received events
+     (ready_mask).  */
 
 #ifdef HAVE_POLL
-	  if (use_poll)
-	    {
-	      int error_mask;
+  if (use_poll)
+    {
+      int error_mask;
 
-	      /* POLLHUP means EOF, but can be combined with POLLIN to
-		 signal more data to read.  */
-	      error_mask = POLLHUP | POLLERR | POLLNVAL;
-	      mask = ready_mask & (file_ptr->mask | error_mask);
+      /* With poll, the ready_mask could have any of three events set
+	 to 1: POLLHUP, POLLERR, POLLNVAL.  These events cannot be
+	 used in the requested event mask (events), but they can be
+	 returned in the return mask (revents).  We need to check for
+	 those event too, and add them to the mask which will be
+	 passed to the handler.  */
 
-	      if ((mask & (POLLERR | POLLNVAL)) != 0)
-		{
-		  /* Work in progress.  We may need to tell somebody
-		     what kind of error we had.  */
-		  if (mask & POLLERR)
-		    warning (_("Error detected on fd %d"), file_ptr->fd);
-		  if (mask & POLLNVAL)
-		    warning (_("Invalid or non-`poll'able fd %d"),
-			     file_ptr->fd);
-		  file_ptr->error = 1;
-		}
-	      else
-		file_ptr->error = 0;
-	    }
-	  else
-#endif /* HAVE_POLL */
-	    {
-	      if (ready_mask & GDB_EXCEPTION)
-		{
-		  warning (_("Exception condition detected on fd %d"),
-			   file_ptr->fd);
-		  file_ptr->error = 1;
-		}
-	      else
-		file_ptr->error = 0;
-	      mask = ready_mask & file_ptr->mask;
-	    }
+      /* POLLHUP means EOF, but can be combined with POLLIN to
+	 signal more data to read.  */
+      error_mask = POLLHUP | POLLERR | POLLNVAL;
+      mask = ready_mask & (file_ptr->mask | error_mask);
 
-	  /* If there was a match, then call the handler.  */
-	  if (mask != 0)
-	    {
-	      event_loop_ui_debug_printf (file_ptr->is_ui,
-					  "invoking fd file handler `%s`",
-					  file_ptr->name.c_str ());
-	      file_ptr->proc (file_ptr->error, file_ptr->client_data);
-	    }
+      if ((mask & (POLLERR | POLLNVAL)) != 0)
+	{
+	  /* Work in progress.  We may need to tell somebody
+	     what kind of error we had.  */
+	  if (mask & POLLERR)
+	    warning (_("Error detected on fd %d"), file_ptr->fd);
+	  if (mask & POLLNVAL)
+	    warning (_("Invalid or non-`poll'able fd %d"),
+		     file_ptr->fd);
+	  file_ptr->error = 1;
 	}
+      else
+	file_ptr->error = 0;
+    }
+  else
+#endif /* HAVE_POLL */
+    {
+      if (ready_mask & GDB_EXCEPTION)
+	{
+	  warning (_("Exception condition detected on fd %d"),
+		   file_ptr->fd);
+	  file_ptr->error = 1;
+	}
+      else
+	file_ptr->error = 0;
+      mask = ready_mask & file_ptr->mask;
+    }
+
+  /* If there was a match, then call the handler.  */
+  if (mask != 0)
+    {
+      event_loop_ui_debug_printf (file_ptr->is_ui,
+				  "invoking fd file handler `%s`",
+				  file_ptr->name.c_str ());
+      file_ptr->proc (file_ptr->error, file_ptr->client_data);
     }
 }
 
