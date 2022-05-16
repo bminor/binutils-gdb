@@ -26429,7 +26429,7 @@ mark the documentation parts matching @var{regexp}.
 Control the styling of data annotations added by @value{GDBN} to data
 it displays.  By default, this style's intensity is dim.  Metadata
 annotations include the @samp{repeats @var{n} times} annotation for
-suppressed display of repeated array elements (@pxref{Print Strings}),
+suppressed display of repeated array elements (@pxref{Print Settings}),
 @samp{<unavailable>} and @w{@samp{<error @var{descr}>}} annotations
 for errors and @samp{<optimized-out>} annotations for optimized-out
 values in displaying stack frame information in backtraces
