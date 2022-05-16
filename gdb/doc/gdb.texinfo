@@ -26425,6 +26425,16 @@ the user attention to some specific parts of their output.  For example,
 the command @command{apropos -v REGEXP} uses the highlight style to
 mark the documentation parts matching @var{regexp}.
 
+@item metadata
+Control the styling of data annotations added by @value{GDBN} to data
+it displays.  By default, this style's intensity is dim.  Metadata
+annotations include the @samp{repeats @var{n} times} annotation for
+suppressed display of repeated array elements (@pxref{Print Strings}),
+@samp{<unavailable>} and @w{@samp{<error @var{descr}>}} annotations
+for errors and @samp{<optimized-out>} annotations for optimized-out
+values in displaying stack frame information in backtraces
+(@pxref{Backtrace}), etc.
+
 @item tui-border
 Control the styling of the TUI border.  Note that, unlike other
 styling options, only the color of the border can be controlled via
