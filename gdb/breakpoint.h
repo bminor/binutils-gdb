@@ -616,7 +616,7 @@ using bp_location_range = next_range<bp_location>;
    useful for a hack I had to put in; I'm going to leave it in because
    I can see how there might be times when it would indeed be useful */
 
-/* This is for all kinds of breakpoints.  */
+/* Abstract base class representing all kinds of breakpoints.  */
 
 struct breakpoint
 {
@@ -846,9 +846,9 @@ protected:
   void print_recreate_thread (struct ui_file *fp) const;
 };
 
-/* The structure to be inherit by all kinds of breakpoints (real
-   breakpoints, i.e., user "break" breakpoints, internal and momentary
-   breakpoints, etc.).  */
+/* Abstract base class representing code breakpoints.  User "break"
+   breakpoints, internal and momentary breakpoints, etc.  IOW, any
+   kind of breakpoint whose locations are created from SALs.  */
 struct base_breakpoint : public breakpoint
 {
   using breakpoint::breakpoint;
@@ -887,7 +887,8 @@ struct base_breakpoint : public breakpoint
 	struct program_space *search_pspace) override;
 };
 
-/* An instance of this type is used to represent a watchpoint.  */
+/* An instance of this type is used to represent a watchpoint,
+   a.k.a. a data breakpoint.  */
 
 struct watchpoint : public breakpoint
 {
@@ -1022,7 +1023,7 @@ struct tracepoint : public base_breakpoint
   int static_trace_marker_id_idx = 0;
 };
 
-/* The base class for catchpoints.  */
+/* The abstract base class for catchpoints.  */
 
 struct catchpoint : public breakpoint
 {

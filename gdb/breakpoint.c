@@ -271,7 +271,10 @@ struct ordinary_breakpoint : public base_breakpoint
   void print_recreate (struct ui_file *fp) const override;
 };
 
-/* Internal breakpoints.  */
+/* Internal breakpoints.  These typically have a lifetime the same as
+   the program, and they end up installed on the breakpoint chain with
+   a negative breakpoint number.  They're visible in "maint info
+   breakpoints", but not "info breakpoints".  */
 struct internal_breakpoint : public base_breakpoint
 {
   internal_breakpoint (struct gdbarch *gdbarch,
@@ -294,7 +297,12 @@ struct internal_breakpoint : public base_breakpoint
   void print_mention () const override;
 };
 
-/* Momentary breakpoints.  */
+/* Momentary breakpoints.  These typically have a lifetime of some run
+   control command only, are always thread-specific, and have 0 for
+   breakpoint number.  I.e., there can be many momentary breakpoints
+   on the breakpoint chain and they all same the same number (zero).
+   They're visible in "maint info breakpoints", but not "info
+   breakpoints".  */
 struct momentary_breakpoint : public base_breakpoint
 {
   using base_breakpoint::base_breakpoint;
