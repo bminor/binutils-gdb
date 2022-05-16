@@ -849,7 +849,7 @@ protected:
 /* Abstract base class representing code breakpoints.  User "break"
    breakpoints, internal and momentary breakpoints, etc.  IOW, any
    kind of breakpoint whose locations are created from SALs.  */
-struct base_breakpoint : public breakpoint
+struct code_breakpoint : public breakpoint
 {
   using breakpoint::breakpoint;
 
@@ -857,7 +857,7 @@ struct base_breakpoint : public breakpoint
      description of the location, and COND_STRING as condition
      expression.  If LOCATION is NULL then create an "address
      location" from the address in the SAL.  */
-  base_breakpoint (struct gdbarch *gdbarch, bptype type,
+  code_breakpoint (struct gdbarch *gdbarch, bptype type,
 		   gdb::array_view<const symtab_and_line> sals,
 		   event_location_up &&location,
 		   gdb::unique_xmalloc_ptr<char> filter,
@@ -869,7 +869,7 @@ struct base_breakpoint : public breakpoint
 		   int enabled, unsigned flags,
 		   int display_canonical);
 
-  ~base_breakpoint () override = 0;
+  ~code_breakpoint () override = 0;
 
   /* Add a location for SAL to this breakpoint.  */
   bp_location *add_location (const symtab_and_line &sal);
@@ -985,9 +985,9 @@ extern bool is_exception_catchpoint (breakpoint *bp);
 /* An instance of this type is used to represent all kinds of
    tracepoints.  */
 
-struct tracepoint : public base_breakpoint
+struct tracepoint : public code_breakpoint
 {
-  using base_breakpoint::base_breakpoint;
+  using code_breakpoint::code_breakpoint;
 
   int breakpoint_hit (const struct bp_location *bl,
 		      const address_space *aspace, CORE_ADDR bp_addr,
@@ -1384,7 +1384,7 @@ extern void until_break_command (const char *, int, int);
 /* Initialize a struct bp_location.  */
 
 extern void update_breakpoint_locations
-  (base_breakpoint *b,
+  (code_breakpoint *b,
    struct program_space *filter_pspace,
    gdb::array_view<const symtab_and_line> sals,
    gdb::array_view<const symtab_and_line> sals_end);
@@ -1434,7 +1434,7 @@ extern void awatch_command_wrapper (const char *, int, bool);
 extern void rwatch_command_wrapper (const char *, int, bool);
 extern void tbreak_command (const char *, int);
 
-extern const struct breakpoint_ops base_breakpoint_ops;
+extern const struct breakpoint_ops code_breakpoint_ops;
 
 /* Arguments to pass as context to some catch command handlers.  */
 #define CATCH_PERMANENT ((void *) (uintptr_t) 0)
@@ -1463,7 +1463,7 @@ extern void install_breakpoint (int internal, std::unique_ptr<breakpoint> &&b,
 /* Returns the breakpoint ops appropriate for use with with LOCATION and
    according to IS_TRACEPOINT.  Use this to ensure, for example, that you pass
    the correct ops to create_breakpoint for probe locations.  If LOCATION is
-   NULL, returns base_breakpoint_ops.  */
+   NULL, returns code_breakpoint_ops.  */
 
 extern const struct breakpoint_ops *breakpoint_ops_for_event_location
   (const struct event_location *location, bool is_tracepoint);

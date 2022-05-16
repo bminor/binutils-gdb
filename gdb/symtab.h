@@ -55,7 +55,7 @@ struct obj_section;
 struct cmd_list_element;
 class probe;
 struct lookup_name_info;
-struct base_breakpoint;
+struct code_breakpoint;
 
 /* How to match a lookup name against a symbol search name.  */
 enum class symbol_name_match_type
@@ -2228,10 +2228,10 @@ struct gnu_ifunc_fns
 				 CORE_ADDR *function_address_p);
 
   /* See elf_gnu_ifunc_resolver_stop for its real implementation.  */
-  void (*gnu_ifunc_resolver_stop) (base_breakpoint *b);
+  void (*gnu_ifunc_resolver_stop) (code_breakpoint *b);
 
   /* See elf_gnu_ifunc_resolver_return_stop for its real implementation.  */
-  void (*gnu_ifunc_resolver_return_stop) (base_breakpoint *b);
+  void (*gnu_ifunc_resolver_return_stop) (code_breakpoint *b);
 };
 
 #define gnu_ifunc_resolve_addr gnu_ifunc_fns_p->gnu_ifunc_resolve_addr

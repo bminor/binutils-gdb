@@ -87,7 +87,7 @@
 static void map_breakpoint_numbers (const char *,
 				    gdb::function_view<void (breakpoint *)>);
 
-static void breakpoint_re_set_default (base_breakpoint *);
+static void breakpoint_re_set_default (code_breakpoint *);
 
 static void
   create_sals_from_location_default (struct event_location *location,
@@ -225,7 +225,7 @@ static void tracepoint_probe_create_sals_from_location
      (struct event_location *location,
       struct linespec_result *canonical);
 
-const struct breakpoint_ops base_breakpoint_ops =
+const struct breakpoint_ops code_breakpoint_ops =
 {
   create_sals_from_location_default,
   create_breakpoints_sal,
@@ -252,7 +252,7 @@ breakpoint::~breakpoint ()
 {
 }
 
-base_breakpoint::~base_breakpoint ()
+code_breakpoint::~code_breakpoint ()
 {
 }
 
@@ -261,9 +261,9 @@ catchpoint::~catchpoint ()
 }
 
 /* The structure to be used in regular breakpoints.  */
-struct ordinary_breakpoint : public base_breakpoint
+struct ordinary_breakpoint : public code_breakpoint
 {
-  using base_breakpoint::base_breakpoint;
+  using code_breakpoint::code_breakpoint;
 
   int resources_needed (const struct bp_location *) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
@@ -275,11 +275,11 @@ struct ordinary_breakpoint : public base_breakpoint
    the program, and they end up installed on the breakpoint chain with
    a negative breakpoint number.  They're visible in "maint info
    breakpoints", but not "info breakpoints".  */
-struct internal_breakpoint : public base_breakpoint
+struct internal_breakpoint : public code_breakpoint
 {
   internal_breakpoint (struct gdbarch *gdbarch,
 		       enum bptype type, CORE_ADDR address)
-    : base_breakpoint (gdbarch, type)
+    : code_breakpoint (gdbarch, type)
   {
     symtab_and_line sal;
     sal.pc = address;
@@ -303,13 +303,13 @@ struct internal_breakpoint : public base_breakpoint
    on the breakpoint chain and they all same the same number (zero).
    They're visible in "maint info breakpoints", but not "info
    breakpoints".  */
-struct momentary_breakpoint : public base_breakpoint
+struct momentary_breakpoint : public code_breakpoint
 {
   momentary_breakpoint (struct gdbarch *gdbarch_, enum bptype bptype,
 			program_space *pspace_,
 			const struct frame_id &frame_id_,
 			int thread_)
-    : base_breakpoint (gdbarch_, bptype)
+    : code_breakpoint (gdbarch_, bptype)
   {
     /* If FRAME_ID is valid, it should be a real frame, not an inlined
        or tail-called one.  */
@@ -1290,11 +1290,11 @@ is_tracepoint (const struct breakpoint *b)
    TYPE.  */
 
 template<typename... Arg>
-static std::unique_ptr<base_breakpoint>
+static std::unique_ptr<code_breakpoint>
 new_breakpoint_from_type (struct gdbarch *gdbarch, bptype type,
 			  Arg&&... args)
 {
-  base_breakpoint *b;
+  code_breakpoint *b;
 
   switch (type)
     {
@@ -1325,7 +1325,7 @@ new_breakpoint_from_type (struct gdbarch *gdbarch, bptype type,
       gdb_assert_not_reached ("invalid type");
     }
 
-  return std::unique_ptr<base_breakpoint> (b);
+  return std::unique_ptr<code_breakpoint> (b);
 }
 
 /* A helper function that validates that COMMANDS are valid for a
@@ -5886,10 +5886,10 @@ bpstat_run_callbacks (bpstat *bs_head)
 	  handle_jit_event (bs->bp_location_at->address);
 	  break;
 	case bp_gnu_ifunc_resolver:
-	  gnu_ifunc_resolver_stop ((base_breakpoint *) b);
+	  gnu_ifunc_resolver_stop ((code_breakpoint *) b);
 	  break;
 	case bp_gnu_ifunc_resolver_return:
-	  gnu_ifunc_resolver_return_stop ((base_breakpoint *) b);
+	  gnu_ifunc_resolver_return_stop ((code_breakpoint *) b);
 	  break;
 	}
     }
@@ -8057,7 +8057,7 @@ handle_automatic_hardware_breakpoints (bp_location *bl)
 }
 
 bp_location *
-base_breakpoint::add_location (const symtab_and_line &sal)
+code_breakpoint::add_location (const symtab_and_line &sal)
 {
   struct bp_location *new_loc, **tmp;
   CORE_ADDR adjusted_address;
@@ -8215,7 +8215,7 @@ update_dprintf_commands (const char *args, int from_tty,
 	update_dprintf_command_list (b);
 }
 
-base_breakpoint::base_breakpoint (struct gdbarch *gdbarch_,
+code_breakpoint::code_breakpoint (struct gdbarch *gdbarch_,
 				  enum bptype type_,
 				  gdb::array_view<const symtab_and_line> sals,
 				  event_location_up &&location_,
@@ -8355,7 +8355,7 @@ create_breakpoint_sal (struct gdbarch *gdbarch,
 		       int enabled, int internal, unsigned flags,
 		       int display_canonical)
 {
-  std::unique_ptr<base_breakpoint> b
+  std::unique_ptr<code_breakpoint> b
     = new_breakpoint_from_type (gdbarch,
 				type,
 				sals,
@@ -8732,14 +8732,14 @@ breakpoint_ops_for_event_location_type (enum event_location_type location_type,
       if (location_type == PROBE_LOCATION)
 	return &tracepoint_probe_breakpoint_ops;
       else
-	return &base_breakpoint_ops;
+	return &code_breakpoint_ops;
     }
   else
     {
       if (location_type == PROBE_LOCATION)
 	return &bkpt_probe_breakpoint_ops;
       else
-	return &base_breakpoint_ops;
+	return &code_breakpoint_ops;
     }
 }
 
@@ -8752,7 +8752,7 @@ breakpoint_ops_for_event_location (const struct event_location *location,
   if (location != nullptr)
     return breakpoint_ops_for_event_location_type
       (event_location_type (location), is_tracepoint);
-  return &base_breakpoint_ops;
+  return &code_breakpoint_ops;
 }
 
 /* See breakpoint.h.  */
@@ -9087,7 +9087,7 @@ dprintf_command (const char *arg, int from_tty)
 		     0, bp_dprintf,
 		     0 /* Ignore count */,
 		     pending_break_support,
-		     &base_breakpoint_ops,
+		     &code_breakpoint_ops,
 		     from_tty,
 		     1 /* enabled */,
 		     0 /* internal */,
@@ -11461,7 +11461,7 @@ breakpoint::decode_location (struct event_location *location,
 /* Default breakpoint_ops methods.  */
 
 void
-base_breakpoint::re_set ()
+code_breakpoint::re_set ()
 {
   /* FIXME: is this still reachable?  */
   if (breakpoint_event_location_empty_p (this))
@@ -11475,7 +11475,7 @@ base_breakpoint::re_set ()
 }
 
 int
-base_breakpoint::insert_location (struct bp_location *bl)
+code_breakpoint::insert_location (struct bp_location *bl)
 {
   CORE_ADDR addr = bl->target_info.reqstd_address;
 
@@ -11499,7 +11499,7 @@ base_breakpoint::insert_location (struct bp_location *bl)
 }
 
 int
-base_breakpoint::remove_location (struct bp_location *bl,
+code_breakpoint::remove_location (struct bp_location *bl,
 				  enum remove_bp_reason reason)
 {
   if (bl->probe.prob != nullptr)
@@ -11515,7 +11515,7 @@ base_breakpoint::remove_location (struct bp_location *bl,
 }
 
 int
-base_breakpoint::breakpoint_hit (const struct bp_location *bl,
+code_breakpoint::breakpoint_hit (const struct bp_location *bl,
 				 const address_space *aspace,
 				 CORE_ADDR bp_addr,
 				 const target_waitstatus &ws)
@@ -11651,7 +11651,7 @@ ordinary_breakpoint::print_recreate (struct ui_file *fp) const
 }
 
 std::vector<symtab_and_line>
-base_breakpoint::decode_location (struct event_location *location,
+code_breakpoint::decode_location (struct event_location *location,
 				  struct program_space *search_pspace)
 {
   if (event_location_type (location) == PROBE_LOCATION)
@@ -12476,7 +12476,7 @@ hoist_existing_locations (struct breakpoint *b, struct program_space *pspace)
    untouched.  */
 
 void
-update_breakpoint_locations (base_breakpoint *b,
+update_breakpoint_locations (code_breakpoint *b,
 			     struct program_space *filter_pspace,
 			     gdb::array_view<const symtab_and_line> sals,
 			     gdb::array_view<const symtab_and_line> sals_end)
@@ -12684,7 +12684,7 @@ location_to_sals (struct breakpoint *b, struct event_location *location,
    locations.  */
 
 static void
-breakpoint_re_set_default (base_breakpoint *b)
+breakpoint_re_set_default (code_breakpoint *b)
 {
   struct program_space *filter_pspace = current_program_space;
   std::vector<symtab_and_line> expanded, expanded_end;
@@ -13515,7 +13515,7 @@ ftrace_command (const char *arg, int from_tty)
 		     bp_fast_tracepoint /* type_wanted */,
 		     0 /* Ignore count */,
 		     pending_break_support,
-		     &base_breakpoint_ops,
+		     &code_breakpoint_ops,
 		     from_tty,
 		     1 /* enabled */,
 		     0 /* internal */, 0);
@@ -13540,7 +13540,7 @@ strace_command (const char *arg, int from_tty)
     }
   else
     {
-      ops = &base_breakpoint_ops;
+      ops = &code_breakpoint_ops;
       location = string_to_event_location (&arg, current_language);
       type = bp_static_tracepoint;
     }
@@ -13623,7 +13623,7 @@ create_tracepoint_from_upload (struct uploaded_tp *utp)
 			  utp->type /* type_wanted */,
 			  0 /* Ignore count */,
 			  pending_break_support,
-			  &base_breakpoint_ops,
+			  &code_breakpoint_ops,
 			  0 /* from_tty */,
 			  utp->enabled /* enabled */,
 			  0 /* internal */,

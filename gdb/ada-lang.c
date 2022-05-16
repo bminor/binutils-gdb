@@ -12104,7 +12104,7 @@ static std::string ada_exception_catchpoint_cond_string
 
 /* An instance of this type is used to represent an Ada catchpoint.  */
 
-struct ada_catchpoint : public base_breakpoint
+struct ada_catchpoint : public code_breakpoint
 {
   ada_catchpoint (struct gdbarch *gdbarch_,
 		  enum ada_exception_catchpoint_kind kind,
@@ -12113,12 +12113,12 @@ struct ada_catchpoint : public base_breakpoint
 		  bool tempflag,
 		  bool enabled,
 		  bool from_tty)
-    : base_breakpoint (gdbarch_, bp_catchpoint),
+    : code_breakpoint (gdbarch_, bp_catchpoint),
       m_kind (kind)
   {
     add_location (sal);
 
-    /* Unlike most base_breakpoint types, Ada catchpoints are
+    /* Unlike most code_breakpoint types, Ada catchpoints are
        pspace-specific.  */
     gdb_assert (sal.pspace != nullptr);
     this->pspace = sal.pspace;
@@ -12247,7 +12247,7 @@ ada_catchpoint::re_set ()
 {
   /* Call the base class's method.  This updates the catchpoint's
      locations.  */
-  this->base_breakpoint::re_set ();
+  this->code_breakpoint::re_set ();
 
   /* Reparse the exception conditional expressions.  One for each
      location.  */

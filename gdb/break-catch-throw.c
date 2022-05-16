@@ -65,15 +65,15 @@ static const struct exception_names exception_functions[] =
 
 /* The type of an exception catchpoint.  Unlike most catchpoints, this
    one is implemented with code breakpoints, so it inherits struct
-   base_breakpoint, not struct catchpoint.  */
+   code_breakpoint, not struct catchpoint.  */
 
-struct exception_catchpoint : public base_breakpoint
+struct exception_catchpoint : public code_breakpoint
 {
   exception_catchpoint (struct gdbarch *gdbarch,
 			bool temp, const char *cond_string_,
 			enum exception_event_kind kind_,
 			std::string &&except_rx)
-    : base_breakpoint (gdbarch, bp_catchpoint, temp, cond_string_),
+    : code_breakpoint (gdbarch, bp_catchpoint, temp, cond_string_),
       kind (kind_),
       exception_rx (std::move (except_rx)),
       pattern (exception_rx.empty ()
