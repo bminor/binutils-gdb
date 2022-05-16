@@ -400,3 +400,197 @@ gdbpy_handle_exception ()
   else
     error ("%s", msg.get ());
 }
+
+/* See python-internal.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+gdbpy_fix_doc_string_indentation (gdb::unique_xmalloc_ptr<char> doc)
+{
+  /* A structure used to track the white-space information on each line of
+     DOC.  */
+  struct line_whitespace
+  {
+    /* Constructor.  OFFSET is the offset from the start of DOC, WS_COUNT
+       is the number of whitespace characters starting at OFFSET.  */
+    line_whitespace (size_t offset, int ws_count)
+      : m_offset (offset),
+	m_ws_count (ws_count)
+    { /* Nothing.  */ }
+
+    /* The offset from the start of DOC.  */
+    size_t offset () const
+    { return m_offset; }
+
+    /* The number of white-space characters at the start of this line.  */
+    int ws () const
+    { return m_ws_count; }
+
+  private:
+    /* The offset from the start of DOC to the first character of this
+       line.  */
+    size_t m_offset;
+
+    /* White space count on this line, the first character of this
+       whitespace is at OFFSET.  */
+    int m_ws_count;
+  };
+
+  /* Count the number of white-space character starting at TXT.  We
+     currently only count true single space characters, things like tabs,
+     newlines, etc are not counted.  */
+  auto count_whitespace = [] (const char *txt) -> int
+  {
+    int count = 0;
+
+    while (*txt == ' ')
+      {
+	++txt;
+	++count;
+      }
+
+    return count;
+  };
+
+  /* In MIN_WHITESPACE we track the smallest number of whitespace
+     characters seen at the start of a line (that has actual content), this
+     is the number of characters that we can delete off all lines without
+     altering the relative indentation of all lines in DOC.
+
+     The first line often has no indentation, but instead starts immediates
+     after the 3-quotes marker within the Python doc string, so, if the
+     first line has zero white-space then we just ignore it, and don't set
+     MIN_WHITESPACE to zero.
+
+     Lines without any content should (ideally) have no white-space at
+     all, but if they do then they might have an artificially low number
+     (user left a single stray space at the start of an otherwise blank
+     line), we don't consider lines without content when updating the
+     MIN_WHITESPACE value.  */
+  gdb::optional<int> min_whitespace;
+
+  /* The index into WS_INFO at which the processing of DOC can be
+     considered "all done", that is, after this point there are no further
+     lines with useful content and we should just stop.  */
+  gdb::optional<size_t> all_done_idx;
+
+  /* White-space information for each line in DOC.  */
+  std::vector<line_whitespace> ws_info;
+
+  /* Now look through DOC and collect the required information.  */
+  const char *tmp = doc.get ();
+  while (*tmp != '\0')
+    {
+      /* Add an entry for the offset to the start of this line, and how
+	 much white-space there is at the start of this line.  */
+      size_t offset = tmp - doc.get ();
+      int ws_count = count_whitespace (tmp);
+      ws_info.emplace_back (offset, ws_count);
+
+      /* Skip over the white-space.  */
+      tmp += ws_count;
+
+      /* Remember where the content of this line starts, and skip forward
+	 to either the end of this line (newline) or the end of the DOC
+	 string (null character), whichever comes first.  */
+      const char *content_start = tmp;
+      while (*tmp != '\0' && *tmp != '\n')
+	++tmp;
+
+      /* If this is not the first line, and if this line has some content,
+	 then update MIN_WHITESPACE, this reflects the smallest number of
+	 whitespace characters we can delete from all lines without
+	 impacting the relative indentation of all the lines of DOC.  */
+      if (offset > 0 && tmp > content_start)
+	{
+	  if (!min_whitespace.has_value ())
+	    min_whitespace = ws_count;
+	  else
+	    min_whitespace = std::min (*min_whitespace, ws_count);
+	}
+
+      /* Each time we encounter a line that has some content we update
+	 ALL_DONE_IDX to be the index of the next line.  If the last lines
+	 of DOC don't contain any content then ALL_DONE_IDX will be left
+	 pointing at an earlier line.  When we rewrite DOC, when we reach
+	 ALL_DONE_IDX then we can stop, the allows us to trim any blank
+	 lines from the end of DOC.  */
+      if (tmp > content_start)
+	all_done_idx = ws_info.size ();
+
+      /* If we reached a newline then skip forward to the start of the next
+	 line.  The other possibility at this point is that we're at the
+	 very end of the DOC string (null terminator).  */
+      if (*tmp == '\n')
+	++tmp;
+    }
+
+  /* We found no lines with content, fail safe by just returning the
+     original documentation string.  */
+  if (!all_done_idx.has_value () || !min_whitespace.has_value ())
+    return doc;
+
+  /* Setup DST and SRC, both pointing into the DOC string.  We're going to
+     rewrite DOC in-place, as we only ever make DOC shorter (by removing
+     white-space), thus we know this will not overflow.  */
+  char *dst = doc.get ();
+  char *src = doc.get ();
+
+  /* Array indices used with DST, SRC, and WS_INFO respectively.  */
+  size_t dst_offset = 0;
+  size_t src_offset = 0;
+  size_t ws_info_offset = 0;
+
+  /* Now, walk over the source string, this is the original DOC.  */
+  while (src[src_offset] != '\0')
+    {
+      /* If we are at the start of the next line (in WS_INFO), then we may
+	 need to skip some white-space characters.  */
+      if (src_offset == ws_info[ws_info_offset].offset ())
+	{
+	  /* If a line has leading white-space then we need to skip over
+	     some number of characters now.  */
+	  if (ws_info[ws_info_offset].ws () > 0)
+	    {
+	      /* If the line is entirely white-space then we skip all of
+		 the white-space, the next character to copy will be the
+		 newline or null character.  Otherwise, we skip the just
+		 some portion of the leading white-space.  */
+	      if (src[src_offset + ws_info[ws_info_offset].ws ()] == '\n'
+		  || src[src_offset + ws_info[ws_info_offset].ws ()] == '\0')
+		src_offset += ws_info[ws_info_offset].ws ();
+	      else
+		src_offset += std::min (*min_whitespace,
+					ws_info[ws_info_offset].ws ());
+
+	      /* If we skipped white-space, and are now at the end of the
+		 input, then we're done.  */
+	      if (src[src_offset] == '\0')
+		break;
+	    }
+	  if (ws_info_offset < (ws_info.size () - 1))
+	    ++ws_info_offset;
+	  if (ws_info_offset > *all_done_idx)
+	    break;
+	}
+
+      /* Don't copy a newline to the start of the DST string, this would
+	 result in a leading blank line.  But in all other cases, copy the
+	 next character into the destination string.  */
+      if ((dst_offset > 0 || src[src_offset] != '\n'))
+	{
+	  dst[dst_offset] = src[src_offset];
+	  ++dst_offset;
+	}
+
+      /* Move to the next source character.  */
+      ++src_offset;
+    }
+
+  /* Remove the trailing newline character(s), and ensure we have a null
+     terminator in place.  */
+  while (dst_offset > 1 && dst[dst_offset - 1] == '\n')
+    --dst_offset;
+  dst[dst_offset] = '\0';
+
+  return doc;
+}

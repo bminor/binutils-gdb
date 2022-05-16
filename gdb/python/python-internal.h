@@ -822,4 +822,25 @@ extern bool gdbpy_is_architecture (PyObject *obj);
 
 extern bool gdbpy_is_progspace (PyObject *obj);
 
+/* Take DOC, the documentation string for a GDB command defined in Python,
+   and return an (possibly) modified version of that same string.
+
+   When a command is defined in Python, the documentation string will
+   usually be indented based on the indentation of the surrounding Python
+   code.  However, the documentation string is a literal string, all the
+   white-space added for indentation is included within the documentation
+   string.
+
+   This indentation is then included in the help text that GDB displays,
+   which looks odd out of the context of the original Python source code.
+
+   This function analyses DOC and tries to figure out what white-space
+   within DOC was added as part of the indentation, and then removes that
+   white-space from the copy that is returned.
+
+   If the analysis of DOC fails then DOC will be returned unmodified.  */
+
+extern gdb::unique_xmalloc_ptr<char> gdbpy_fix_doc_string_indentation
+  (gdb::unique_xmalloc_ptr<char> doc);
+
 #endif /* PYTHON_PYTHON_INTERNAL_H */

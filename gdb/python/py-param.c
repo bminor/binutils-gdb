@@ -385,6 +385,8 @@ get_doc_string (PyObject *object, enum doc_string_type doc_type,
 	  result = python_string_to_host_string (ds_obj.get ());
 	  if (result == NULL)
 	    gdbpy_print_stack ();
+	  else if (doc_type == doc_string_description)
+	    result = gdbpy_fix_doc_string_indentation (std::move (result));
 	}
     }
 

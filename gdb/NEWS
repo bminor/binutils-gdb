@@ -27,6 +27,13 @@
   emit to indicate where a breakpoint should be placed to break in a function
   past its prologue.
 
+* Python API
+
+  ** GDB will now reformat the doc string for gdb.Command and
+     gdb.Parameter sub-classes to remove unnecessary leading
+     whitespace from each line before using the string as the help
+     output.
+
 * New commands
 
 maintenance set ignore-prologue-end-flag on|off

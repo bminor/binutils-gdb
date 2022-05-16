@@ -493,6 +493,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 	  docstring = python_string_to_host_string (ds_obj.get ());
 	  if (docstring == nullptr)
 	    return -1;
+	  docstring = gdbpy_fix_doc_string_indentation (std::move (docstring));
 	}
     }
   if (docstring == nullptr)
