@@ -1083,16 +1083,13 @@ print_thread_info_1 (struct ui_out *uiout, const char *requested_threads,
 				      global_ids, pid, tp))
 	      continue;
 
-	    if (!uiout->is_mi_like_p ())
-	      {
-		/* Switch inferiors so we're looking at the right
-		   target stack.  */
-		switch_to_inferior_no_thread (tp->inf);
+	    /* Switch inferiors so we're looking at the right
+	       target stack.  */
+	    switch_to_inferior_no_thread (tp->inf);
 
-		target_id_col_width
-		  = std::max (target_id_col_width,
-			      thread_target_id_str (tp).size ());
-	      }
+	    target_id_col_width
+	      = std::max (target_id_col_width,
+			  thread_target_id_str (tp).size ());
 
 	    ++n_threads;
 	  }
