@@ -622,9 +622,9 @@ s390_insert_operand (unsigned char *insn,
 
 	  if (operand->flags & S390_OPERAND_PCREL)
 	    {
-	      val <<= 1;
-	      min <<= 1;
-	      max <<= 1;
+	      val = (offsetT) ((addressT) val << 1);
+	      min = (offsetT) ((addressT) min << 1);
+	      max = (offsetT) ((addressT) max << 1);
 	    }
 	  if (file == (char *) NULL)
 	    as_bad (err, (int64_t) val, (int64_t) min, (int64_t) max);
