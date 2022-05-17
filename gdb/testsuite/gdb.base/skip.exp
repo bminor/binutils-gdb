@@ -122,6 +122,32 @@ with_test_prefix "step after deleting 1" {
     gdb_test "step" "main \\(\\) at.*" "step 3"
 }
 
+# Test that we step into foo(), then into bar(), but not into baz().
+proc step_bar_foo_skip_baz {} {
+    gdb_test "step" "bar \\(\\) at.*" "step 1"
+    gdb_test "step" ".*" "step 2"; # Return from bar()
+
+    # With at least gcc 6.5.0 and 9.2.0, we jump once back to main
+    # before entering foo here.  If that happens try to step a second
+    # time.
+    set stepped_again 0
+    gdb_test_multiple "step" "step 3" {
+	-re -wrap "foo \\(\\) at.*" {
+	    pass $gdb_test_name
+	}
+	-re -wrap "main \\(\\) at .*" {
+	    if {!$stepped_again} {
+		set stepped_again 1
+		send_gdb "step\n"
+	    }
+	    exp_continue
+	}
+    }
+
+    gdb_test "step" ".*" "step 4"; # Return from foo()
+    gdb_test "step" "main \\(\\) at.*" "step 5"
+}
+
 # Now disable the skiplist entry for  skip1.c.  We should now
 # step into foo(), then into bar(), but not into baz().
 
@@ -136,14 +162,7 @@ with_test_prefix "step after disabling 3" {
 	return
     }
 
-    gdb_test "step" "bar \\(\\) at.*" "step 1"
-    gdb_test "step" ".*" "step 2"; # Return from bar()
-    # With gcc 9.2.0 we jump once back to main before entering foo here.
-    # If that happens try to step a second time.
-    gdb_test "step" "foo \\(\\) at.*" "step 3" \
-	"main \\(\\) at .*\r\n$gdb_prompt " "step"
-    gdb_test "step" ".*" "step 4"; # Return from foo()
-    gdb_test "step" "main \\(\\) at.*" "step 5"
+    step_bar_foo_skip_baz
 }
 
 # Enable skiplist entry 3 and make sure we step over it like before.
@@ -254,14 +273,8 @@ with_test_prefix "step using -fu for baz" {
 
     gdb_test_no_output "skip disable"
     gdb_test_no_output "skip enable 7"
-    gdb_test "step" "bar \\(\\) at.*" "step 1"
-    gdb_test "step" ".*" "step 2"; # Return from bar()
-    # With gcc 9.2.0 we jump once back to main before entering foo here.
-    # If that happens try to step a second time.
-    gdb_test "step" "foo \\(\\) at.*" "step 3" \
-	"main \\(\\) at .*\r\n$gdb_prompt " "step"
-    gdb_test "step" ".*" "step 4"; # Return from foo()
-    gdb_test "step" "main \\(\\) at.*" "step 5"
+
+    step_bar_foo_skip_baz
 }
 
 with_test_prefix "step using -rfu for baz" {
@@ -271,14 +284,8 @@ with_test_prefix "step using -rfu for baz" {
 
     gdb_test_no_output "skip disable"
     gdb_test_no_output "skip enable 8"
-    gdb_test "step" "bar \\(\\) at.*" "step 1"
-    gdb_test "step" ".*" "step 2"; # Return from bar()
-    # With gcc 9.2.0 we jump once back to main before entering foo here.
-    # If that happens try to step a second time.
-    gdb_test "step" "foo \\(\\) at.*" "step 3" \
-	"main \\(\\) at .*\r\n$gdb_prompt " "step"
-    gdb_test "step" ".*" "step 4"; # Return from foo()
-    gdb_test "step" "main \\(\\) at.*" "step 5"
+
+    step_bar_foo_skip_baz
 }
 
 # Test -fi + -fu.
