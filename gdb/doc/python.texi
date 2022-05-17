@@ -577,7 +577,8 @@ either @code{None} or another tuple that contains all the locations
 that match the expression represented as @code{gdb.Symtab_and_line}
 objects (@pxref{Symbol Tables In Python}).  If @var{expression} is
 provided, it is decoded the way that @value{GDBN}'s inbuilt
-@code{break} or @code{edit} commands do (@pxref{Specify Location}).
+@code{break} or @code{edit} commands do (@pxref{Location
+Specifications}).
 @end defun
 
 @defun gdb.prompt_hook (current_prompt)
@@ -4186,7 +4187,7 @@ This constant means that filename completion should be performed.
 @vindex COMPLETE_LOCATION
 @item gdb.COMPLETE_LOCATION
 This constant means that location completion should be done.
-@xref{Specify Location}.
+@xref{Location Specifications}.
 
 @vindex COMPLETE_COMMAND
 @item gdb.COMPLETE_COMMAND

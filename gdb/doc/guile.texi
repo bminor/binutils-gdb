@@ -1965,7 +1965,7 @@ This constant means that filename completion should be performed.
 
 @item COMPLETE_LOCATION
 This constant means that location completion should be done.
-@xref{Specify Location}.
+@xref{Location Specifications}.
 
 @item COMPLETE_COMMAND
 This constant means that completion should examine @value{GDBN}
