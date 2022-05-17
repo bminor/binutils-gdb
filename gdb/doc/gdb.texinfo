@@ -2024,7 +2024,7 @@ func<int>()    func<float>()
 (@value{GDBP}) p 'func<
 @end smallexample
 
-When setting breakpoints however (@pxref{Specify Location}), you don't
+When setting breakpoints however (@pxref{Location Specifications}), you don't
 usually need to type a quote before the function name, because
 @value{GDBN} understands that you want to set a breakpoint on a
 function:
@@ -4344,16 +4344,24 @@ convenience variables.
 
 @table @code
 @item break @var{location}
-Set a breakpoint at the given @var{location}, which can specify a
-function name, a line number, or an address of an instruction.
-(@xref{Specify Location}, for a list of all the possible ways to
-specify a @var{location}.)  The breakpoint will stop your program just
-before it executes any of the code in the specified @var{location}.
+Set a breakpoint at all the locations the given location specification
+matches.  @var{location} can specify a function name, a line number,
+an address of an instruction, and more.  @xref{Location
+Specifications}, for the various forms of @var{location}.
 
-When using source languages that permit overloading of symbols, such as
-C@t{++}, a function name may refer to more than one possible place to break.
-@xref{Ambiguous Expressions,,Ambiguous Expressions}, for a discussion of
-that situation.
+When using source languages that permit overloading of symbols, such
+as C@t{++}, a function name may refer to more than one symbol, and
+thus more than one place to break.  @xref{Ambiguous
+Expressions,,Ambiguous Expressions}, for a discussion of that
+situation.
+
+It is possible that a given function is instantiated more than once in
+the program, resulting in a breakpoint with multiple addresses, and
+thus multiple locations.  This can happen e.g., with inlined
+functions, or template functions.
+
+The breakpoint will stop your program just before it executes any of
+the instructions at its locations' addresses.
 
 It is also possible to insert a breakpoint that will stop the program
 only if a specific thread (@pxref{Thread-Specific Breakpoints})
@@ -4407,11 +4415,11 @@ command:
 @smallexample
 (@value{GDBP}) info breakpoints
 Num     Type           Disp Enb Address            What
-1       breakpoint     keep y   <MULTIPLE>
+1       breakpoint     keep y                      func
         stop only if a == 10
-1.1                         N*  0x00000000000011b6 in ...
-1.2                         y   0x00000000000011c2 in ...
-1.3                         N*  0x00000000000011ce in ...
+ 1.1                        N*  0x00000000000011b6 in ...
+ 1.2                        y   0x00000000000011c2 in ...
+ 1.3                        N*  0x00000000000011ce in ...
 (*): Breakpoint condition is invalid at this location.
 @end smallexample
 
@@ -4545,32 +4553,42 @@ optionally be surrounded by spaces.
 @cindex @code{$_} and @code{info breakpoints}
 @item info breakpoints @r{[}@var{list}@dots{}@r{]}
 @itemx info break @r{[}@var{list}@dots{}@r{]}
-Print a table of all breakpoints, watchpoints, and catchpoints set and
-not deleted.  Optional argument @var{n} means print information only
-about the specified breakpoint(s) (or watchpoint(s) or catchpoint(s)).
-For each breakpoint, following columns are printed:
+Print a table of all breakpoints, watchpoints, tracepoints, and
+catchpoints set and not deleted.  The optional argument @var{n} means
+print information only about the specified breakpoint(s) (or
+watchpoint(s) or tracepoint(s) or catchpoint(s)).
+
+For each code breakpoint and tracepoint (i.e., not for watchpoints,
+nor catchpoints), after printing a row for the breakpoint itself,
+@value{GDBN} prints one row for each of the breakpoint's locations.
+More on this further below.
+
+For each breakpoint (and watchpoint, tracepoint, catchpoint) and
+breakpoint location, the following columns are printed:
 
 @table @emph
 @item Breakpoint Numbers
 @item Type
-Breakpoint, watchpoint, or catchpoint.
+Breakpoint, watchpoint, tracepoint, or catchpoint.  This is empty for
+breakpoint location rows.
 @item Disposition
 Whether the breakpoint is marked to be disabled or deleted when hit.
+This is empty for breakpoint location rows.
 @item Enabled or Disabled
-Enabled breakpoints are marked with @samp{y}.  @samp{n} marks breakpoints
-that are not enabled.
+Enabled breakpoints and breakpoint locations are marked with @samp{y}.
+@samp{n} marks breakpoints and breakpoint locations that are not
+enabled.  Note individual locations can be enabled/disabled
+independently of their parent breakpoint.
 @item Address
-Where the breakpoint is in your program, as a memory address.  For a
-pending breakpoint whose address is not yet known, this field will
-contain @samp{<PENDING>}.  Such breakpoint won't fire until a shared
-library that has the symbol or line referred by breakpoint is loaded.
-See below for details.  A breakpoint with several locations will
-have @samp{<MULTIPLE>} in this field---see below for details.
+Where the breakpoint location is in your program, as a memory address.
+For a breakpoint with no locations, this field will contain
+@samp{<PENDING>}.
 @item What
-Where the breakpoint is in the source for your program, as a file and
-line number.  For a pending breakpoint, the original string passed to
-the breakpoint command will be listed as it cannot be resolved until
-the appropriate shared library is loaded in the future.
+For a breakpoint header row, this shows the breakpoint's location
+specification, derived from the string passed to the breakpoint
+command.  For a breakpoint location row, this shows where the
+breakpoint location is in the source for your program, as a file and
+line number.
 @end table
 
 @noindent
@@ -4583,8 +4601,7 @@ its condition evaluation mode in between parentheses.
 
 Breakpoint commands, if any, are listed after that.  A pending breakpoint is
 allowed to have a condition specified for it.  The condition is not parsed for
-validity until a shared library is loaded that allows the pending
-breakpoint to resolve to a valid location.
+validity until the pending breakpoint is resolved to a valid location.
 
 @noindent
 @code{info break} with a breakpoint
@@ -4614,46 +4631,85 @@ the breakpoints are conditional, this is even useful
 
 @cindex multiple locations, breakpoints
 @cindex breakpoints, multiple locations
-It is possible that a breakpoint corresponds to several locations
-in your program.  Examples of this situation are:
+It is possible that a breakpoint corresponds to several locations in
+your program.  @value{GDBN} will insert a breakpoint at all the
+locations its location specification resolves to.
+@xref{Location Specifications}.
 
-@itemize @bullet
-@item
-Multiple functions in the program may have the same name.
+@value{GDBN} may add new locations to existing breakpoints when new
+symbols are loaded.  For example, if you have a breakpoint in a
+C@t{++} template function, and a newly loaded shared library has an
+instantiation of that template, a new location is added to the list of
+locations for the breakpoint.  More on this further below.
 
-@item
-For a C@t{++} constructor, the @value{NGCC} compiler generates several
-instances of the function body, used in different cases.
-
-@item
-For a C@t{++} template function, a given line in the function can
-correspond to any number of instantiations.
-
-@item
-For an inlined function, a given source line can correspond to
-several places where that function is inlined.
-@end itemize
-
-In all those cases, @value{GDBN} will insert a breakpoint at all
-the relevant locations.
-
-A breakpoint with multiple locations is displayed in the breakpoint
-table using several rows---one header row, followed by one row for
-each breakpoint location.  The header row has @samp{<MULTIPLE>} in the
-address column.  The rows for individual locations contain the actual
-addresses for locations, and show the functions to which those
-locations belong.  The number column for a location is of the form
-@var{breakpoint-number}.@var{location-number}.
+As mentioned above, regular code breakpoints and tracepoints are
+displayed in the breakpoint table using several rows---one header row
+per breakpoint, followed by one row for each of the breakpoint's
+locations.  The header row has an empty address column, and the
+breakpoint's location specification in the what column.  The rows for
+individual locations contain the addresses for the locations, and show
+the functions to which those addresses belong.  The number column for
+a location is indented by one space to the right for grouping, and is
+of the form @var{breakpoint-number}.@var{location-number}.
 
 For example:
 
 @smallexample
 Num     Type           Disp Enb  Address    What
-1       breakpoint     keep y    <MULTIPLE>
+1       breakpoint     keep y               foo
         stop only if i==1
         breakpoint already hit 1 time
-1.1                         y    0x080486a2 in void foo<int>() at t.cc:8
-1.2                         y    0x080486ca in void foo<double>() at t.cc:8
+ 1.1                        y    0x080486a2 in void foo<int>() at t.cc:8
+ 1.2                        y    0x080486ca in void foo<double>() at t.cc:8
+@end smallexample
+
+Above you can tell from the what column that the breakpoint had been
+created with @code{break foo}, and that @value{GDBN} found two actual
+locations that matched that location specification, each of them a
+different instanciation of the foo function template.
+
+Breakpoints created with the @code{-qualified} option show that fact
+in the breakpoint row's what column, as part of the breakpoint's
+location specification.  For example:
+
+@smallexample
+Num     Type           Disp Enb  Address    What
+1       breakpoint     keep y               -qualified func
+ 1.1                        y    0x080486a2 in void func() at func.cc:30
+2       breakpoint     keep y               func
+ 2.1                        y    0x080486a2 in void func() at func.cc:30
+@end smallexample
+
+Note how above both breakpoints resolved to the same location, while
+they show different location specifications.  If the program
+subsequently loads a shared library that defines a C@t{++} method
+named @code{A::func()}, then breakpoint 2 will gain a new location,
+but not breakpoint 1, like so:
+
+@smallexample
+Num     Type           Disp Enb  Address        What
+1       breakpoint     keep y                   -qualified func
+ 1.1                        y    0x0000080486a2 in void func() at func.cc:30
+2       breakpoint     keep y                   func
+ 2.1                        y    0x0000080486a2 in void func() at func.cc:30
+ 2.2                        y    0x7ffff6caa000 in int A::func(int) at shlib.cc:102
+@end smallexample
+
+If you set a breakpoint by line number, @value{GDBN} may determine
+that there is no actual code at the given line number, and arm the
+breakpoint at the next line number with code instead.  This can happen
+for example if the line number you specify corresponds to a source
+location that only contains comments, or contains source code that was
+completely optimized out.  You can identify such a situation happened
+in @code{info breakpoints} output, as the location specification for
+the breakpoint as shown in the what column gives you the line you
+requested, while the breakpoint's location row shows the line the
+breakpoint was actually planted at:
+
+@smallexample
+Num     Type           Disp Enb  Address    What
+1       breakpoint     keep y               file.c:18
+ 1.1                        y    0x08028832 in void func() at path/to/file.c:20
 @end smallexample
 
 You cannot delete the individual locations from a breakpoint.  However,
@@ -4677,53 +4733,54 @@ any shared library is loaded or unloaded.  Typically, you would
 set a breakpoint in a shared library at the beginning of your
 debugging session, when the library is not loaded, and when the
 symbols from the library are not available.  When you try to set
-breakpoint, @value{GDBN} will ask you if you want to set
-a so called @dfn{pending breakpoint}---breakpoint whose address
-is not yet resolved.
+a breakpoint, @value{GDBN} will ask you for confirmation of whether
+you want to set a so called @dfn{pending breakpoint}---a breakpoint with
+no resolved locations yet.
 
 After the program is run, whenever a new shared library is loaded,
-@value{GDBN} reevaluates all the breakpoints.  When a newly loaded
-shared library contains the symbol or line referred to by some
-pending breakpoint, that breakpoint is resolved and becomes an
-ordinary breakpoint.  When a library is unloaded, all breakpoints
-that refer to its symbols or source lines become pending again.
+@value{GDBN} reevaluates all the breakpoints' location specs.  When a
+newly loaded shared library contains the symbol or line referred to by
+some pending breakpoint, a location for the breakpoint is found and
+the breakpoint becomes an ordinary breakpoint.  When a library is
+unloaded, breakpoint locations that refer to its symbols or source
+lines are not deleted -- they are instead displayed with a
+@code{<PENDING>} address.  This is so that if the shared library is
+loaded again, the location's enabled/disabled state is preserved.
 
-This logic works for breakpoints with multiple locations, too.  For
-example, if you have a breakpoint in a C@t{++} template function, and
-a newly loaded shared library has an instantiation of that template,
-a new location is added to the list of locations for the breakpoint.
-
-Except for having unresolved address, pending breakpoints do not
+Except for having no resolved locations, pending breakpoints do not
 differ from regular breakpoints.  You can set conditions or commands,
 enable and disable them and perform other breakpoint operations.
 
 @value{GDBN} provides some additional commands for controlling what
-happens when the @samp{break} command cannot resolve breakpoint
-address specification to an address:
+happens when the @samp{break} command cannot resolve its breakpoint
+location specification to any location:
 
 @kindex set breakpoint pending
 @kindex show breakpoint pending
 @table @code
 @item set breakpoint pending auto
-This is the default behavior.  When @value{GDBN} cannot find the breakpoint
-location, it queries you whether a pending breakpoint should be created.
+This is the default behavior.  When @value{GDBN} cannot find any
+location for the location specification, it queries you whether a
+pending breakpoint should be created.
 
 @item set breakpoint pending on
-This indicates that an unrecognized breakpoint location should automatically
-result in a pending breakpoint being created.
+This indicates that when @value{GDBN} cannot resolve any location for
+the location specification, it should create a pending breakpoint
+without asking for confirmation.
 
 @item set breakpoint pending off
-This indicates that pending breakpoints are not to be created.  Any
-unrecognized breakpoint location results in an error.  This setting does
-not affect any pending breakpoints previously created.
+This indicates that pending breakpoints are not to be created.  If
+@value{GDBN} cannot resolve any location for the location
+specification, it aborts the breakpoint creation with an error.  This
+setting does not affect any pending breakpoints previously created.
 
 @item show breakpoint pending
 Show the current behavior setting for creating pending breakpoints.
 @end table
 
 The settings above only affect the @code{break} command and its
-variants.  Once breakpoint is set, it will be automatically updated
-as shared libraries are loaded and unloaded.
+variants.  Once a breakpoint is created, it will be automatically
+updated as shared libraries are loaded and unloaded.
 
 @cindex automatic hardware breakpoints
 For some targets, @value{GDBN} can automatically decide if hardware or
@@ -5444,8 +5501,8 @@ breakpoint where your program just stopped.
 
 @item clear @var{location}
 Delete any breakpoints set at the specified @var{location}.
-@xref{Specify Location}, for the various forms of @var{location}; the
-most useful ones are listed below:
+@xref{Location Specifications}, for the various forms of
+@var{location}; the most useful ones are listed below:
 
 @table @code
 @item clear @var{function}
@@ -5852,12 +5909,14 @@ you could do the following:
 (gdb) set dprintf-style call
 (gdb) set dprintf-function fprintf
 (gdb) set dprintf-channel mylog
-(gdb) dprintf 25,"at line 25, glob=%d\n",glob
+(gdb) dprintf main.c:25,"at line 25, glob=%d\n",glob
 Dprintf 1 at 0x123456: file main.c, line 25.
 (gdb) info break
-1       dprintf        keep y   0x00123456 in main at main.c:25
+Num     Type           Disp Enb Address     What
+1       dprintf        keep y               main.c:25
         call (void) fprintf (mylog,"at line 25, glob=%d\n",glob)
         continue
+ 1.1                        y   0x00123456  in main at main.c:25
 (gdb)
 @end example
 
@@ -6304,7 +6363,7 @@ argument.
 @itemx u @var{location}
 Continue running your program until either the specified @var{location} is
 reached, or the current stack frame returns.  The location is any of
-the forms described in @ref{Specify Location}.
+the forms described in @ref{Location Specifications}.
 This form of the command uses temporary breakpoints, and
 hence is quicker than @code{until} without an argument.  The specified
 location is actually reached only if it is in the current frame.  This
@@ -6329,7 +6388,7 @@ invocations have returned.
 @item advance @var{location}
 Continue running the program up to the given @var{location}.  An argument is
 required, which should be of one of the forms described in
-@ref{Specify Location}.
+@ref{Location Specifications}.
 Execution will also stop upon exit from the current stack
 frame.  This command is similar to @code{until}, but @code{advance} will
 not skip over recursive function calls, and the target location doesn't
@@ -6429,7 +6488,7 @@ A more flexible solution is to execute @kbd{skip boring}.  This instructs
 @code{foo}.
 
 Functions may be skipped by providing either a function name, linespec
-(@pxref{Specify Location}), regular expression that matches the function's
+(@pxref{Location Specifications}), regular expression that matches the function's
 name, file name or a @code{glob}-style pattern that matches the file name.
 
 On Posix systems the form of the regular expression is
@@ -6466,7 +6525,7 @@ over when stepping.
 @itemx -fu @var{linespec}
 Functions named by @var{linespec} or the function containing the line
 named by @var{linespec} will be skipped over when stepping.
-@xref{Specify Location}.
+@xref{Location Specifications}.
 
 @item -rfunction @var{regexp}
 @itemx -rfu @var{regexp}
@@ -6499,7 +6558,7 @@ will be skipped.
 @item skip function @r{[}@var{linespec}@r{]}
 After running this command, the function named by @var{linespec} or the
 function containing the line named by @var{linespec} will be skipped over when
-stepping.  @xref{Specify Location}.
+stepping.  @xref{Location Specifications}.
 
 If you do not specify @var{linespec}, the function you're currently debugging
 will be skipped.
@@ -7130,9 +7189,8 @@ breakpoints on all threads, or on a particular thread.
 @kindex break @dots{} thread @var{thread-id}
 @item break @var{location} thread @var{thread-id}
 @itemx break @var{location} thread @var{thread-id} if @dots{}
-@var{location} specifies source lines; there are several ways of
-writing them (@pxref{Specify Location}), but the effect is always to
-specify some source line.
+@var{location} specifies a location or locations in your program's
+code.  @xref{Location Specifications}, for details.
 
 Use the qualifier @samp{thread @var{thread-id}} with a breakpoint command
 to specify that you only want @value{GDBN} to stop the program when a
@@ -8932,7 +8990,7 @@ prefer to use Emacs facilities to view source; see @ref{Emacs, ,Using
 
 @menu
 * List::                        Printing source lines
-* Specify Location::            How to specify code locations
+* Location Specifications::     How to specify code locations
 * Edit::                        Editing source files
 * Search::                      Searching source files
 * Source Path::                 Specifying source directories
@@ -8948,7 +9006,7 @@ prefer to use Emacs facilities to view source; see @ref{Emacs, ,Using
 To print lines from a source file, use the @code{list} command
 (abbreviated @code{l}).  By default, ten lines are printed.
 There are several ways to specify what part of the file you want to
-print; see @ref{Specify Location}, for the full list.
+print; see @ref{Location Specifications}, for the full list.
 
 Here are the forms of the @code{list} command most commonly used:
 
@@ -8997,7 +9055,7 @@ each repetition moves up in the source file.
 
 In general, the @code{list} command expects you to supply zero, one or two
 @dfn{locations}.  Locations specify source lines; there are several ways
-of writing them (@pxref{Specify Location}), but the effect is always
+of writing them (@pxref{Location Specifications}), but the effect is always
 to specify some source line.
 
 Here is a complete description of the possible arguments for @code{list}:
@@ -9028,17 +9086,41 @@ Print lines just before the lines last printed.
 As described in the preceding table.
 @end table
 
-@node Specify Location
-@section Specifying a Location
+@node Location Specifications
+@section Location Specifications
 @cindex specifying location
 @cindex location
 @cindex source location
 
 Several @value{GDBN} commands accept arguments that specify a location
 of your program's code.  Since @value{GDBN} is a source-level
-debugger, a location usually specifies some line in the source code.
-Locations may be specified using three different formats:
-linespec locations, explicit locations, or address locations.
+debugger, a location specification usually indicates some line in the
+source code, but it can also indicate a function name, an address, and
+more.
+
+A location specification serves as a blueprint, and it may match more
+than one actual location in your program.  Examples of this situation
+are:
+
+@itemize @bullet
+@item
+Multiple functions in the program may have the same name.
+
+@item
+For a C@t{++} constructor, the @value{NGCC} compiler generates several
+instances of the function body, used in different cases.
+
+@item
+For a C@t{++} template function, a given line in the function can
+correspond to any number of instantiations.
+
+@item
+For an inlined function, a given source line can correspond to several
+places where that function is inlined.
+@end itemize
+
+Locations may be specified using three different formats: linespec
+locations, explicit locations, or address locations.
 
 @menu
 * Linespec Locations::                Linespec locations
@@ -9260,9 +9342,9 @@ want to print if you want to see other parts of the program:
 @item edit @var{location}
 Edit the source file specified by @code{location}.  Editing starts at
 that @var{location}, e.g., at the specified source line of the
-specified file.  @xref{Specify Location}, for all the possible forms
-of the @var{location} argument; here are the forms of the @code{edit}
-command most commonly used:
+specified file.  @xref{Location Specifications}, for all the possible
+forms of the @var{location} argument; here are the forms of the
+@code{edit} command most commonly used:
 
 @table @code
 @item edit @var{number}
@@ -9645,8 +9727,8 @@ well as hex.
 @itemx info line @var{location}
 Print the starting and ending addresses of the compiled code for
 source line @var{location}.  You can specify source lines in any of
-the ways documented in @ref{Specify Location}.  With no @var{location}
-information about the current source line is printed.
+the ways documented in @ref{Location Specifications}.  With no
+@var{location} information about the current source line is printed.
 @end table
 
 For example, we can use @code{info line} to discover the location of
@@ -9870,10 +9952,10 @@ Dump of assembler code from 0x400281 to 0x40028b:
 End of assembler dump.
 @end smallexample
 
-Addresses cannot be specified as a location (@pxref{Specify Location}).
-So, for example, if you want to disassemble function @code{bar}
-in file @file{foo.c}, you must type @samp{disassemble 'foo.c'::bar}
-and not @samp{disassemble foo.c:bar}.
+Addresses cannot be specified as a location (@pxref{Location
+Specifications}).  So, for example, if you want to disassemble
+function @code{bar} in file @file{foo.c}, you must type
+@samp{disassemble 'foo.c'::bar} and not @samp{disassemble foo.c:bar}.
 
 Some architectures have more than one commonly-used set of instruction
 mnemonics or other syntax.
@@ -14466,8 +14548,8 @@ conditions and actions.
 @kindex trace
 @item trace @var{location}
 The @code{trace} command is very similar to the @code{break} command.
-Its argument @var{location} can be any valid location.
-@xref{Specify Location}.  The @code{trace} command defines a tracepoint,
+Its argument @var{location} can be any valid location specification.
+@xref{Location Specifications}.  The @code{trace} command defines a tracepoint,
 which is a point in the target program where the debugger will briefly stop,
 collect some data, and then allow the program to continue.  Setting a tracepoint
 or changing its actions takes effect immediately if the remote stub
@@ -14986,21 +15068,22 @@ the state about installed on target of each location
 @smallexample
 (@value{GDBP}) @b{info trace}
 Num     Type           Disp Enb Address    What
-1       tracepoint     keep y   0x0804ab57 in foo() at main.cxx:7
+1       tracepoint     keep y              foo1
         while-stepping 20
           collect globfoo, $regs
         end
         collect globfoo2
         end
         pass count 1200 
-2       tracepoint     keep y   <MULTIPLE>
+ 1.1                        y   0x0804ab57 in foo1() at main.cxx:7
+2       tracepoint     keep y              func4
         collect $eip
-2.1                         y     0x0804859c in func4 at change-loc.h:35
+ 2.1                        y   0x0804859c in func4 at change-loc.h:35
         installed on target
-2.2                         y     0xb7ffc480 in func4 at change-loc.h:35
+ 2.2                        y   0xb7ffc480 in func4 at change-loc.h:35
         installed on target
-2.3                         y     <PENDING>  set_tracepoint
-3       tracepoint     keep y   0x080485b1 in foo at change-loc.c:29
+3       tracepoint     keep y              foo2
+ 3.1                        y   0x080485b1 in foo2 at change-loc.c:29
         not installed on target
 (@value{GDBP})
 @end smallexample
@@ -16946,7 +17029,8 @@ tag.  For example:
 Breakpoint 2 at 0x40060d: file main.cc, line 10.
 (gdb) info breakpoints
 Num     Type           Disp Enb Address    What
-1       breakpoint     keep y   0x0040060d in function[abi:cxx11](int)
+1       breakpoint     keep y              function(int)
+ 1.1                        y   0x0040060d in function[abi:cxx11](int)
                                            at main.cc:10
 @end smallexample
 
@@ -17426,9 +17510,9 @@ peculiarities and holes to be aware of.
 
 @itemize @bullet
 @item
-Linespecs (@pxref{Specify Location}) are never relative to the current
-crate.  Instead, they act as if there were a global namespace of
-crates, somewhat similar to the way @code{extern crate} behaves.
+Linespecs (@pxref{Location Specifications}) are never relative to the
+current crate.  Instead, they act as if there were a global namespace
+of crates, somewhat similar to the way @code{extern crate} behaves.
 
 That is, if @value{GDBN} is stopped at a breakpoint in a function in
 crate @samp{A}, module @samp{B}, then @code{break B::f} will attempt
@@ -18757,7 +18841,7 @@ Flags @code{-c} and @code{-s} cannot be used together.
 These commands are like the @code{break @dots{} thread @dots{}}
 command (@pxref{Thread Stops}).  The
 @var{location} argument specifies source lines, as described
-in @ref{Specify Location}.
+in @ref{Location Specifications}.
 
 Use the qualifier @samp{task @var{taskno}} with a breakpoint command
 to specify that you only want @value{GDBN} to stop the program when a
@@ -19520,10 +19604,11 @@ These commands can be used to enable or disable type printers.
 @cindex local variables
 @item info scope @var{location}
 List all the variables local to a particular scope.  This command
-accepts a @var{location} argument---a function name, a source line, or
-an address preceded by a @samp{*}, and prints all the variables local
-to the scope defined by that location.  (@xref{Specify Location}, for
-details about supported forms of @var{location}.)  For example:
+accepts a location specification argument---a function name, a source
+line, or an address preceded by a @samp{*}, and prints all the
+variables local to the scope defined by that location specification.
+(@xref{Location Specifications}, for details about supported forms of
+@var{location}.)  For example:
 
 @smallexample
 (@value{GDBP}) @b{info scope command_line_handler}
@@ -20114,8 +20199,8 @@ an address of your own choosing, with the following commands:
 @item jump @var{location}
 @itemx j @var{location}
 Resume execution at @var{location}.  Execution stops again immediately
-if there is a breakpoint there.  @xref{Specify Location}, for a description
-of the different forms of @var{location}.  It is common
+if there is a breakpoint there.  @xref{Location Specifications}, for a
+description of the different forms of @var{location}.  It is common
 practice to use the @code{tbreak} command in conjunction with
 @code{jump}.  @xref{Set Breaks, ,Setting Breakpoints}.
 
@@ -25356,7 +25441,7 @@ use the @code{break-range} command.
 Set a breakpoint for an address range given by
 @var{start-location} and @var{end-location}, which can specify a function name,
 a line number, an offset of lines from the current line or from the start
-location, or an address of an instruction (see @ref{Specify Location},
+location, or an address of an instruction (see @ref{Location Specifications},
 for a list of all the possible ways to specify a @var{location}.)
 The breakpoint will stop execution of the inferior whenever it
 executes an instruction at any address within the specified range,
@@ -30544,11 +30629,10 @@ value is @samp{y}, or disabled, in which case the value is @samp{n}.
 Note that this is not the same as the field @code{enable}.
 
 @item addr
-The address of the breakpoint.  This may be a hexidecimal number,
+The address of the breakpoint.  This may be a hexadecimal number,
 giving the address; or the string @samp{<PENDING>}, for a pending
-breakpoint; or the string @samp{<MULTIPLE>}, for a breakpoint with
-multiple locations.  This field will not be present if no address can
-be determined.  For example, a watchpoint does not have an address.
+breakpoint; This field will not be present if no address can be
+determined.  For example, a watchpoint does not have an address.
 
 @item addr_flags
 Optional field containing any flags related to the address.  These flags are
@@ -30629,16 +30713,14 @@ is not.
 Some extra data, the exact contents of which are type-dependent.
 
 @item locations
-This field is present if the breakpoint has multiple locations.  It is also
-exceptionally present if the breakpoint is enabled and has a single, disabled
-location.
+This field is present for ordinary breakpoints and tracepoints.
 
 The value is a list of locations.  The format of a location is described below.
 
 @end table
 
-A location in a multi-location breakpoint is represented as a tuple with the
-following fields:
+Each location in an ordinary breakpoint or tracepoint is represented
+as a tuple with the following fields:
 
 @table @code
 
@@ -30660,7 +30742,7 @@ at this location.
 @end table
 
 @item addr
-The address of this location as an hexidecimal number.
+The address of this location as an hexadecimal number.
 
 @item addr_flags
 Optional field containing any flags related to the address.  These flags are
@@ -32542,8 +32624,8 @@ fullname="/home/foo/bar/try.c",line="13",arch="i386:x86_64"@}
 @end smallexample
 
 Resumes execution of the inferior program at the location specified by
-parameter.  @xref{Specify Location}, for a description of the
-different forms of @var{location}.
+the parameter.  @xref{Location Specifications}, for a description of
+the different forms of @var{location}.
 
 @subsubheading @value{GDBN} Command
 
@@ -34922,7 +35004,7 @@ next trace frame that corresponds to a tracepoint at an address outside
 the specified range.  Both bounds are considered to be inside the range.
 
 @item line
-Line specification is required as parameter.  @xref{Specify Location}.
+Line specification is required as parameter.  @xref{Location Specifications}.
 Finds next trace frame that corresponds to a tracepoint at
 the specified location.
 

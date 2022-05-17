@@ -6192,42 +6192,36 @@ print_one_breakpoint_location (struct breakpoint *b,
   static char bpenables[] = "nynny";
 
   struct ui_out *uiout = current_uiout;
-  int header_of_multiple = 0;
-  int part_of_multiple = (loc != NULL);
   struct value_print_options opts;
 
   get_user_print_options (&opts);
 
   gdb_assert (!loc || loc_number != 0);
-  /* See comment in print_one_breakpoint concerning treatment of
-     breakpoints with single disabled location.  */
-  if (loc == NULL 
-      && (b->loc != NULL 
-	  && (b->loc->next != NULL
-	      || !b->loc->enabled || b->loc->disabled_by_cond)))
-    header_of_multiple = 1;
-  if (loc == NULL)
-    loc = b->loc;
 
   annotate_record ();
 
   /* 1 */
   annotate_field (0);
-  if (part_of_multiple)
-    uiout->field_fmt ("number", "%d.%d", b->number, loc_number);
+  if (loc != nullptr)
+    {
+      if (uiout->is_mi_like_p ())
+	uiout->field_fmt ("number", "%d.%d", b->number, loc_number);
+      else
+	uiout->field_fmt ("number", " %d.%d", b->number, loc_number);
+    }
   else
     uiout->field_signed ("number", b->number);
 
   /* 2 */
   annotate_field (1);
-  if (part_of_multiple)
+  if (loc != nullptr)
     uiout->field_skip ("type");
   else
     uiout->field_string ("type", bptype_string (b->type));
 
   /* 3 */
   annotate_field (2);
-  if (part_of_multiple)
+  if (loc != nullptr)
     uiout->field_skip ("disp");
   else
     uiout->field_string ("disp", bpdisp_text (b->disposition));
@@ -6238,7 +6232,7 @@ print_one_breakpoint_location (struct breakpoint *b,
      display "N*" on CLI, where "*" refers to a footnote below the
      table.  For MI, simply display a "N" without a footnote.  */
   const char *N = (uiout->is_mi_like_p ()) ? "N" : "N*";
-  if (part_of_multiple)
+  if (loc != nullptr)
     uiout->field_string ("enabled", (loc->disabled_by_cond ? N
 				     : (loc->enabled ? "y" : "n")));
   else
@@ -6268,9 +6262,8 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  if (opts.addressprint)
 	    {
 	      annotate_field (4);
-	      if (header_of_multiple)
-		uiout->field_string ("addr", "<MULTIPLE>",
-				     metadata_style.style ());
+	      if (loc == nullptr)
+		uiout->field_skip ("addr");
 	      else if (b->loc == NULL || loc->shlib_disabled)
 		uiout->field_string ("addr", "<PENDING>",
 				     metadata_style.style ());
@@ -6279,14 +6272,22 @@ print_one_breakpoint_location (struct breakpoint *b,
 					loc->gdbarch, loc->address);
 	    }
 	  annotate_field (5);
-	  if (!header_of_multiple)
+	  if (loc == nullptr)
+	    {
+	      if (b->location != nullptr)
+		uiout->field_string
+		  ("what", event_location_to_string (b->location.get ()));
+	      else
+		uiout->field_skip ("what");
+	    }
+	  else
 	    print_breakpoint_location (b, loc);
 	  if (b->loc)
 	    *last_loc = b->loc;
 	}
     }
 
-  if (loc != NULL && !header_of_multiple)
+  if (loc != nullptr)
     {
       std::vector<int> inf_nums;
       int mi_only = 1;
@@ -6309,8 +6310,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	mi_only = 0;
       output_thread_groups (uiout, "thread-groups", inf_nums, mi_only);
     }
-
-  if (!part_of_multiple)
+  else
     {
       if (b->thread != -1)
 	{
@@ -6328,10 +6328,10 @@ print_one_breakpoint_location (struct breakpoint *b,
 
   uiout->text ("\n");
 
-  if (!part_of_multiple)
+  if (loc == nullptr)
     b->print_one_detail (uiout);
 
-  if (part_of_multiple && frame_id_p (b->frame_id))
+  if (loc != nullptr && frame_id_p (b->frame_id))
     {
       annotate_field (6);
       uiout->text ("\tstop only in stack frame at ");
@@ -6342,7 +6342,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       uiout->text ("\n");
     }
   
-  if (!part_of_multiple && b->cond_string)
+  if (loc == nullptr && b->cond_string)
     {
       annotate_field (7);
       if (is_tracepoint (b))
@@ -6364,7 +6364,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       uiout->text ("\n");
     }
 
-  if (!part_of_multiple && b->thread != -1)
+  if (loc == nullptr && b->thread != -1)
     {
       /* FIXME should make an annotation for this.  */
       uiout->text ("\tstop only in thread ");
@@ -6379,7 +6379,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       uiout->text ("\n");
     }
   
-  if (!part_of_multiple)
+  if (loc == nullptr)
     {
       if (b->hit_count)
 	{
@@ -6405,7 +6405,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	}
     }
 
-  if (!part_of_multiple && b->ignore_count)
+  if (loc == nullptr && b->ignore_count)
     {
       annotate_field (8);
       uiout->message ("\tignore next %pF hits\n",
@@ -6415,7 +6415,7 @@ print_one_breakpoint_location (struct breakpoint *b,
   /* Note that an enable count of 1 corresponds to "enable once"
      behavior, which is reported by the combination of enablement and
      disposition, so we don't need to mention it here.  */
-  if (!part_of_multiple && b->enable_count > 1)
+  if (loc == nullptr && b->enable_count > 1)
     {
       annotate_field (8);
       uiout->text ("\tdisable after ");
@@ -6429,7 +6429,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       uiout->text (" hits\n");
     }
 
-  if (!part_of_multiple && is_tracepoint (b))
+  if (loc == nullptr && is_tracepoint (b))
     {
       struct tracepoint *tp = (struct tracepoint *) b;
 
@@ -6442,7 +6442,7 @@ print_one_breakpoint_location (struct breakpoint *b,
     }
 
   l = b->commands ? b->commands.get () : NULL;
-  if (!part_of_multiple && l)
+  if (loc == nullptr && l)
     {
       annotate_field (9);
       ui_out_emit_tuple tuple_emitter (uiout, "script");
@@ -6453,7 +6453,7 @@ print_one_breakpoint_location (struct breakpoint *b,
     {
       struct tracepoint *t = (struct tracepoint *) b;
 
-      if (!part_of_multiple && t->pass_count)
+      if (loc == nullptr && t->pass_count)
 	{
 	  annotate_field (10);
 	  uiout->text ("\tpass count ");
@@ -6463,7 +6463,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 
       /* Don't display it when tracepoint or tracepoint location is
 	 pending.   */
-      if (!header_of_multiple && loc != NULL && !loc->shlib_disabled)
+      if (loc != nullptr && !loc->shlib_disabled)
 	{
 	  annotate_field (11);
 
@@ -6481,7 +6481,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	}
     }
 
-  if (uiout->is_mi_like_p () && !part_of_multiple)
+  if (uiout->is_mi_like_p () && loc == nullptr)
     {
       if (is_watchpoint (b))
 	{
@@ -6526,25 +6526,18 @@ print_one_breakpoint (struct breakpoint *b,
      locations, if any.  */
   if (!printed || allflag)
     {
-      /* If breakpoint has a single location that is disabled, we
-	 print it as if it had several locations, since otherwise it's
-	 hard to represent "breakpoint enabled, location disabled"
-	 situation.
-
-	 Note that while hardware watchpoints have several locations
+      /* Note that while hardware watchpoints have several locations
 	 internally, that's not a property exposed to users.
 
 	 Likewise, while catchpoints may be implemented with
 	 breakpoints (e.g., catch throw), that's not a property
 	 exposed to users.  We do however display the internal
 	 breakpoint locations with "maint info breakpoints".  */
-      if (!is_hardware_watchpoint (b)
-	  && (!is_catchpoint (b) || is_exception_catchpoint (b)
-	      || is_ada_exception_catchpoint (b))
-	  && (allflag
-	      || (b->loc && (b->loc->next
-			     || !b->loc->enabled
-			     || b->loc->disabled_by_cond))))
+      if (!is_watchpoint (b)
+	  && (!is_catchpoint (b)
+	      || ((is_exception_catchpoint (b)
+		  || is_ada_exception_catchpoint (b))
+		  && allflag)))
 	{
 	  gdb::optional<ui_out_emit_list> locations_list;
 
