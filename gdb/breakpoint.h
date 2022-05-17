@@ -679,8 +679,9 @@ struct breakpoint
 
   /* Display information about this breakpoint, for "info
      breakpoints".  Returns false if this method should use the
-     default behavior.  */
-  virtual bool print_one (bp_location **) const
+     default behavior.  PRINT_ADDRESS_COL specifies whether the "addr"
+     column should be printed.  */
+  virtual bool print_one (bp_location **, bool print_address_col) const
   {
     return false;
   }

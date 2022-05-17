@@ -335,6 +335,12 @@ extern void
   complete_on_all_options (completion_tracker &tracker,
 			   gdb::array_view<const option_def_group> options_group);
 
+/* Throw an error indicating an unrecognized option was detected at
+   AT.  Use this in conjunction with UNKNOWN_IS_OPERAND instead of
+   UNKNOWN_IS_ERROR when the operand may or may not begin with '-'
+   depending on some condition determined at run time.  */
+extern void error_unrecognized_option_at (const char *at);
+
 /* Return a string with the result of replacing %OPTIONS% in HELP_TMLP
    with an auto-generated "help" string fragment for all the options
    in OPTIONS_GROUP.  */

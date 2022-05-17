@@ -174,6 +174,14 @@ complete_on_all_options (completion_tracker &tracker,
   complete_on_options (options_group, tracker, opt + 1, opt);
 }
 
+/* See cli-option.h.  */
+
+void
+error_unrecognized_option_at (const char *at)
+{
+  error (_("Unrecognized option at: %s"), at);
+}
+
 /* Parse ARGS, guided by OPTIONS_GROUP.  HAVE_DELIMITER is true if the
    whole ARGS line included the "--" options-terminator delimiter.  */
 
@@ -189,7 +197,7 @@ parse_option (gdb::array_view<const option_def_group> options_group,
   else if (**args != '-')
     {
       if (have_delimiter)
-	error (_("Unrecognized option at: %s"), *args);
+	error_unrecognized_option_at (*args);
       return {};
     }
   else if (check_for_argument (args, "--"))
@@ -235,7 +243,7 @@ parse_option (gdb::array_view<const option_def_group> options_group,
   if (match == nullptr)
     {
       if (have_delimiter || mode != PROCESS_OPTIONS_UNKNOWN_IS_OPERAND)
-	error (_("Unrecognized option at: %s"), *args);
+	error_unrecognized_option_at (*args);
 
       return {};
     }

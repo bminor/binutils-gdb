@@ -87,7 +87,7 @@ struct exception_catchpoint : public code_breakpoint
 
   void re_set () override;
   enum print_stop_action print_it (const bpstat *bs) const override;
-  bool print_one (bp_location **) const override;
+  bool print_one (bp_location **, bool) const override;
   void print_mention () const override;
   void print_recreate (struct ui_file *fp) const override;
   void print_one_detail (struct ui_out *) const override;
@@ -271,14 +271,12 @@ exception_catchpoint::print_it (const bpstat *bs) const
 }
 
 bool
-exception_catchpoint::print_one (bp_location **last_loc) const
+exception_catchpoint::print_one (bp_location **last_loc,
+				 bool print_address_col) const
 {
-  struct value_print_options opts;
   struct ui_out *uiout = current_uiout;
 
-  get_user_print_options (&opts);
-
-  if (opts.addressprint)
+  if (print_address_col)
     uiout->field_skip ("addr");
   annotate_field (5);
 

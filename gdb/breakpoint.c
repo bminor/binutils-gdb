@@ -370,7 +370,7 @@ struct ranged_breakpoint : public ordinary_breakpoint
 		      const target_waitstatus &ws) override;
   int resources_needed (const struct bp_location *) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
-  bool print_one (bp_location **) const override;
+  bool print_one (bp_location **, bool) const override;
   void print_one_detail (struct ui_out *) const override;
   void print_mention () const override;
   void print_recreate (struct ui_file *fp) const override;
@@ -6174,6 +6174,34 @@ output_thread_groups (struct ui_out *uiout,
     }
 }
 
+/* The options for the "info breakpoints" command.  */
+
+struct info_breakpoints_opts
+{
+  /* For "-hide-locations".  */
+  bool hide_locations = 0;
+};
+
+static const gdb::option::option_def info_breakpoints_option_defs[] = {
+
+  gdb::option::flag_option_def<info_breakpoints_opts> {
+    "hide-locations",
+    [] (info_breakpoints_opts *opts) { return &opts->hide_locations; },
+    N_("Hide breakpoint locations."),
+  },
+
+};
+
+/* Create an option_def_group for the "info breakpoints" options, with
+   OPTS as context.  */
+
+static inline gdb::option::option_def_group
+make_info_breakpoints_options_def_group (info_breakpoints_opts *opts)
+{
+  return {{info_breakpoints_option_defs}, opts};
+}
+
+
 /* Print B to gdb_stdout.  If RAW_LOC, print raw breakpoint locations
    instead of going via breakpoint_ops::print_one.  This makes "maint
    info breakpoints" show the software breakpoint locations of
@@ -6186,15 +6214,13 @@ print_one_breakpoint_location (struct breakpoint *b,
 			       struct bp_location *loc,
 			       int loc_number,
 			       struct bp_location **last_loc,
-			       int allflag, bool raw_loc)
+			       int allflag, bool raw_loc,
+			       bool print_address_col)
 {
   struct command_line *l;
   static char bpenables[] = "nynny";
 
   struct ui_out *uiout = current_uiout;
-  struct value_print_options opts;
-
-  get_user_print_options (&opts);
 
   gdb_assert (!loc || loc_number != 0);
 
@@ -6240,7 +6266,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 
   /* 5 and 6 */
   bool result = false;
-  if (!raw_loc && b->print_one (last_loc))
+  if (!raw_loc && b->print_one (last_loc, print_address_col))
     result = true;
   else
     {
@@ -6251,7 +6277,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	  /* Field 4, the address, is omitted (which makes the columns
 	     not line up too nicely with the headers, but the effect
 	     is relatively readable).  */
-	  if (opts.addressprint)
+	  if (print_address_col)
 	    uiout->field_skip ("addr");
 	  annotate_field (5);
 	  uiout->field_string ("what", w->exp_string.get ());
@@ -6259,7 +6285,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       else if (!is_catchpoint (b) || is_exception_catchpoint (b)
 	       || is_ada_exception_catchpoint (b))
 	{
-	  if (opts.addressprint)
+	  if (print_address_col)
 	    {
 	      annotate_field (4);
 	      if (loc == nullptr)
@@ -6498,6 +6524,18 @@ print_one_breakpoint_location (struct breakpoint *b,
   return result;
 }
 
+/* Return whether to print the "Address" column.  The "Address" column
+   is suppressed with either "set print address off", or "info
+   breakpoints -hide-locations".  */
+
+static bool
+should_print_address_col (const info_breakpoints_opts &ib_opts)
+{
+  struct value_print_options opts;
+  get_user_print_options (&opts);
+  return opts.addressprint && !ib_opts.hide_locations;
+}
+
 /* See breakpoint.h. */
 
 bool fix_multi_location_breakpoint_output_globally = false;
@@ -6505,26 +6543,29 @@ bool fix_multi_location_breakpoint_output_globally = false;
 static void
 print_one_breakpoint (struct breakpoint *b,
 		      struct bp_location **last_loc, 
-		      int allflag)
+		      int allflag,
+		      const info_breakpoints_opts &ib_opts)
 {
   struct ui_out *uiout = current_uiout;
   bool use_fixed_output
     = (uiout->test_flags (fix_multi_location_breakpoint_output)
        || fix_multi_location_breakpoint_output_globally);
 
+  bool print_address_col = should_print_address_col (ib_opts);
+
   gdb::optional<ui_out_emit_tuple> bkpt_tuple_emitter (gdb::in_place, uiout, "bkpt");
   bool printed = print_one_breakpoint_location (b, NULL, 0, last_loc,
-						allflag, false);
+						allflag, false, print_address_col);
 
   /* The mi2 broken format: the main breakpoint tuple ends here, the locations
      are outside.  */
   if (!use_fixed_output)
     bkpt_tuple_emitter.reset ();
 
-  /* If this breakpoint has custom print function,
-     it's already printed.  Otherwise, print individual
-     locations, if any.  */
-  if (!printed || allflag)
+  /* If this breakpoint has a custom print function, it's already
+     printed.  Otherwise, print individual locations, if any, and if
+     not explicitly disabled by the user.  */
+  if (!ib_opts.hide_locations && (!printed || allflag))
     {
       /* Note that while hardware watchpoints have several locations
 	 internally, that's not a property exposed to users.
@@ -6552,7 +6593,8 @@ print_one_breakpoint (struct breakpoint *b,
 	    {
 	      ui_out_emit_tuple loc_tuple_emitter (uiout, NULL);
 	      print_one_breakpoint_location (b, loc, n, last_loc,
-					     allflag, allflag);
+					     allflag, allflag,
+					     print_address_col);
 	      n++;
 	    }
 	}
@@ -6582,8 +6624,9 @@ breakpoint_address_bits (struct breakpoint *b)
 void
 print_breakpoint (breakpoint *b)
 {
+  info_breakpoints_opts ib_opts;
   struct bp_location *dummy_loc = NULL;
-  print_one_breakpoint (b, &dummy_loc, 0);
+  print_one_breakpoint (b, &dummy_loc, 0, ib_opts);
 }
 
 /* Return true if this breakpoint was set by the user, false if it is
@@ -6605,9 +6648,9 @@ pending_breakpoint_p (struct breakpoint *b)
 
 /* Print information on breakpoints (including watchpoints and tracepoints).
 
-   If non-NULL, BP_NUM_LIST is a list of numbers and number ranges as
-   understood by number_or_range_parser.  Only breakpoints included in this
-   list are then printed.
+   If non-NULL, ARGS possibly contains options, followed by a list of
+   numbers and number ranges as understood by number_or_range_parser.
+   Only breakpoints included in this list are then printed.
 
    If SHOW_INTERNAL is true, print internal breakpoints.
 
@@ -6617,18 +6660,30 @@ pending_breakpoint_p (struct breakpoint *b)
    Return the total number of breakpoints listed.  */
 
 static int
-breakpoint_1 (const char *bp_num_list, bool show_internal,
+breakpoint_1 (const char *args, bool show_internal,
 	      bool (*filter) (const struct breakpoint *))
 {
   struct bp_location *last_loc = NULL;
   int nr_printable_breakpoints;
-  struct value_print_options opts;
   int print_address_bits = 0;
   int print_type_col_width = 14;
   struct ui_out *uiout = current_uiout;
   bool has_disabled_by_cond_location = false;
 
-  get_user_print_options (&opts);
+  info_breakpoints_opts ib_opts;
+
+  auto grp = make_info_breakpoints_options_def_group (&ib_opts);
+
+  gdb::option::process_options
+    (&args, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp);
+
+  if (args != nullptr
+      && args[0] == '-' && (!show_internal || !isdigit (args[1])))
+    gdb::option::error_unrecognized_option_at (args);
+
+  const char *bp_num_list = args;
+
+  bool print_address_col = should_print_address_col (ib_opts);
 
   /* Compute the number of rows in the table, as well as the size
      required for address fields.  */
@@ -6667,7 +6722,7 @@ breakpoint_1 (const char *bp_num_list, bool show_internal,
 
   {
     ui_out_emit_table table_emitter (uiout,
-				     opts.addressprint ? 6 : 5,
+				     print_address_col ? 6 : 5,
 				     nr_printable_breakpoints,
 				     "BreakpointTable");
 
@@ -6685,7 +6740,7 @@ breakpoint_1 (const char *bp_num_list, bool show_internal,
     if (nr_printable_breakpoints > 0)
       annotate_field (3);
     uiout->table_header (3, ui_left, "enabled", "Enb"); /* 4 */
-    if (opts.addressprint)
+    if (print_address_col)
       {
 	if (nr_printable_breakpoints > 0)
 	  annotate_field (4);
@@ -6728,7 +6783,7 @@ breakpoint_1 (const char *bp_num_list, bool show_internal,
 	   show_internal is set.  */
 	if (show_internal || user_breakpoint_p (b))
 	  {
-	    print_one_breakpoint (b, &last_loc, show_internal);
+	    print_one_breakpoint (b, &last_loc, show_internal, ib_opts);
 	    for (bp_location *loc : b->locations ())
 	      if (loc->disabled_by_cond)
 		has_disabled_by_cond_location = true;
@@ -6764,6 +6819,29 @@ breakpoint_1 (const char *bp_num_list, bool show_internal,
   annotate_breakpoints_table_end ();
 
   return nr_printable_breakpoints;
+}
+
+/* Completer for the "info breakpoints" command.  */
+
+static void
+info_breakpoints_command_completer (struct cmd_list_element *ignore,
+				    completion_tracker &tracker,
+				    const char *text, const char *word_ignored)
+{
+  const auto grp = make_info_breakpoints_options_def_group (nullptr);
+
+  if (gdb::option::complete_options
+      (tracker, &text, gdb::option::PROCESS_OPTIONS_UNKNOWN_IS_OPERAND, grp))
+    return;
+
+  /* Convenience to let the user know what the command can accept.  */
+  if (*text == '\0')
+    {
+      gdb::option::complete_on_all_options (tracker, grp);
+      /* Keep this "ID" in sync with what "help info breakpoints"
+	 says.  */
+      tracker.add_completion (make_unique_xstrdup ("ID"));
+    }
 }
 
 /* Display the value of default-collect in a way that is generally
@@ -9153,7 +9231,7 @@ ranged_breakpoint::print_it (const bpstat *bs) const
 /* Implement the "print_one" method for ranged breakpoints.  */
 
 bool
-ranged_breakpoint::print_one (bp_location **last_loc) const
+ranged_breakpoint::print_one (bp_location **last_loc, bool print_address_col) const
 {
   struct bp_location *bl = loc;
   struct value_print_options opts;
@@ -9164,7 +9242,7 @@ ranged_breakpoint::print_one (bp_location **last_loc) const
 
   get_user_print_options (&opts);
 
-  if (opts.addressprint)
+  if (print_address_col)
     /* We don't print the address range here, it will be printed later
        by print_one_detail_ranged_breakpoint.  */
     uiout->field_skip ("addr");
@@ -14369,10 +14447,13 @@ are set to the address of the last breakpoint listed unless the command\n\
 is prefixed with \"server \".\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set."));
+  set_cmd_completer_handle_brkchars (info_breakpoints_cmd,
+				     info_breakpoints_command_completer);
 
   add_info_alias ("b", info_breakpoints_cmd, 1);
 
-  add_cmd ("breakpoints", class_maintenance, maintenance_info_breakpoints, _("\
+  cmd_list_element *breakpoints_cmd
+   = add_cmd ("breakpoints", class_maintenance, maintenance_info_breakpoints, _("\
 Status of all breakpoints, or breakpoint number NUMBER.\n\
 The \"Type\" column indicates one of:\n\
 \tbreakpoint     - normal breakpoint\n\
@@ -14392,6 +14473,8 @@ is prefixed with \"server \".\n\n\
 Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set."),
 	   &maintenanceinfolist);
+  set_cmd_completer_handle_brkchars (breakpoints_cmd,
+				     info_breakpoints_command_completer);
 
   add_basic_prefix_cmd ("catch", class_breakpoint, _("\
 Set catchpoints to catch events."),

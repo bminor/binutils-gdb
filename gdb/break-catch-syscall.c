@@ -52,7 +52,7 @@ struct syscall_catchpoint : public catchpoint
 		      CORE_ADDR bp_addr,
 		      const target_waitstatus &ws) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
-  bool print_one (bp_location **) const override;
+  bool print_one (bp_location **, bool) const override;
   void print_mention () const override;
   void print_recreate (struct ui_file *fp) const override;
 
@@ -238,17 +238,16 @@ syscall_catchpoint::print_it (const bpstat *bs) const
 /* Implement the "print_one" method for syscall catchpoints.  */
 
 bool
-syscall_catchpoint::print_one (bp_location **last_loc) const
+syscall_catchpoint::print_one (bp_location **last_loc,
+			       bool print_address_col) const
 {
-  struct value_print_options opts;
   struct ui_out *uiout = current_uiout;
   struct gdbarch *gdbarch = loc->owner->gdbarch;
 
-  get_user_print_options (&opts);
   /* Field 4, the address, is omitted (which makes the columns not
      line up too nicely with the headers, but the effect is relatively
      readable).  */
-  if (opts.addressprint)
+  if (print_address_col)
     uiout->field_skip ("addr");
   annotate_field (5);
 

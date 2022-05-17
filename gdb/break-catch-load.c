@@ -56,7 +56,7 @@ struct solib_catchpoint : public catchpoint
 		      const target_waitstatus &ws) override;
   void check_status (struct bpstat *bs) override;
   enum print_stop_action print_it (const bpstat *bs) const override;
-  bool print_one (bp_location **) const override;
+  bool print_one (bp_location **, bool) const override;
   void print_mention () const override;
   void print_recreate (struct ui_file *fp) const override;
 
@@ -159,16 +159,14 @@ solib_catchpoint::print_it (const bpstat *bs) const
 }
 
 bool
-solib_catchpoint::print_one (bp_location **locs) const
+solib_catchpoint::print_one (bp_location **locs, bool print_address_col) const
 {
-  struct value_print_options opts;
   struct ui_out *uiout = current_uiout;
 
-  get_user_print_options (&opts);
   /* Field 4, the address, is omitted (which makes the columns not
      line up too nicely with the headers, but the effect is relatively
      readable).  */
-  if (opts.addressprint)
+  if (print_address_col)
     {
       annotate_field (4);
       uiout->field_skip ("addr");

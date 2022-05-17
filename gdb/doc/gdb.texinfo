@@ -4551,15 +4551,16 @@ optionally be surrounded by spaces.
 
 @kindex info breakpoints
 @cindex @code{$_} and @code{info breakpoints}
-@item info breakpoints @r{[}@var{list}@dots{}@r{]}
-@itemx info break @r{[}@var{list}@dots{}@r{]}
+@item info breakpoints [-hide-locations] @r{[}@var{list}@dots{}@r{]}
+@itemx info break [-hide-locations] @r{[}@var{list}@dots{}@r{]}
 Print a table of all breakpoints, watchpoints, tracepoints, and
 catchpoints set and not deleted.  The optional argument @var{n} means
 print information only about the specified breakpoint(s) (or
 watchpoint(s) or tracepoint(s) or catchpoint(s)).
 
-For each code breakpoint and tracepoint (i.e., not for watchpoints,
-nor catchpoints), after printing a row for the breakpoint itself,
+Unless the @code{-hide-locations} option is specified, for each code
+breakpoint and tracepoint (i.e., not for watchpoints, nor
+catchpoints), after printing a row for the breakpoint itself,
 @value{GDBN} prints one row for each of the breakpoint's locations.
 More on this further below.
 
@@ -4582,7 +4583,10 @@ independently of their parent breakpoint.
 @item Address
 Where the breakpoint location is in your program, as a memory address.
 For a breakpoint with no locations, this field will contain
-@samp{<PENDING>}.
+@samp{<PENDING>}.  This column is not printed if you specify the
+@code{-hide-locations} option, nor if you disable printing of
+addresses with @code{set print address off} (@pxref{set print
+address}).
 @item What
 For a breakpoint header row, this shows the breakpoint's location
 specification, derived from the string passed to the breakpoint
@@ -4642,7 +4646,7 @@ C@t{++} template function, and a newly loaded shared library has an
 instantiation of that template, a new location is added to the list of
 locations for the breakpoint.  More on this further below.
 
-As mentioned above, regular code breakpoints and tracepoints are
+As mentioned above, regular code breakpoints and tracepoints are normally
 displayed in the breakpoint table using several rows---one header row
 per breakpoint, followed by one row for each of the breakpoint's
 locations.  The header row has an empty address column, and the
@@ -4655,18 +4659,35 @@ of the form @var{breakpoint-number}.@var{location-number}.
 For example:
 
 @smallexample
+(@value{GDBP}) info breakpoints
 Num     Type           Disp Enb  Address    What
 1       breakpoint     keep y               foo
         stop only if i==1
         breakpoint already hit 1 time
  1.1                        y    0x080486a2 in void foo<int>() at t.cc:8
  1.2                        y    0x080486ca in void foo<double>() at t.cc:8
+2       breakpoint     keep y               bar
+ 2.1                        y    0x080646a8 in void bar() at t.cc:20
 @end smallexample
 
 Above you can tell from the what column that the breakpoint had been
 created with @code{break foo}, and that @value{GDBN} found two actual
 locations that matched that location specification, each of them a
 different instanciation of the foo function template.
+
+When the @code{-hide-locations} flag is used, @value{GDBN} doesn't
+print breakpoint locations, and doesn't print the address column
+either, since only breakpoint locations have addresses.  With the same
+breakpoints as the previous example, you'd get:
+
+@smallexample
+(@value{GDBP}) info breakpoints -hide-locations
+Num     Type           Disp Enb  What
+1       breakpoint     keep y    foo
+        stop only if i==1
+        breakpoint already hit 1 time
+2       breakpoint     keep y    bar
+@end smallexample
 
 Breakpoints created with the @code{-qualified} option show that fact
 in the breakpoint row's what column, as part of the breakpoint's
