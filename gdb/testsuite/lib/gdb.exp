@@ -1313,7 +1313,8 @@ proc gdb_test_multiline { name args } {
 }
 
 
-# gdb_test COMMAND PATTERN MESSAGE QUESTION RESPONSE
+# gdb_test [-prompt PROMPT_REGEXP] [-lbl]
+#          COMMAND [PATTERN] [MESSAGE] [QUESTION RESPONSE]
 # Send a command to gdb; test the result.
 #
 # COMMAND is the command to execute, send to GDB with send_gdb.  If
@@ -1331,61 +1332,73 @@ proc gdb_test_multiline { name args } {
 #   doesn't print the question.
 # RESPONSE is the response to send when QUESTION appears.
 #
+# -prompt PROMPT_REGEXP specifies a regexp matching the expected prompt
+#   after the command output.  If empty, defaults to "$gdb_prompt $".
+# -lbl specifies that line-by-line matching will be used.
+#
 # Returns:
 #    1 if the test failed,
 #    0 if the test passes,
 #   -1 if there was an internal error.
-#  
+#
 proc gdb_test { args } {
     global gdb_prompt
     upvar timeout timeout
 
+    parse_args {
+	{prompt ""}
+	{lbl}
+    }
+
+    lassign $args command pattern message question response
+
     # Can't have a question without a response.
-    if { [llength $args] == 4 || [llength $args] > 5 } {
+    if { $question != "" && $response == "" || [llength $args] > 5 } {
 	error "Unexpected arguments: $args"
     }
 
-    if [llength $args]>2 then {
-	set message [lindex $args 2]
-    } else {
-	set message [lindex $args 0]
+    if { $message == "" } {
+	set message $command
     }
-    set command [lindex $args 0]
-    set pattern [lindex $args 1]
 
-    set must_see_question 0
-    if { [llength $args] == 5 } {
-	set must_see_question 1
-	set saw_question 0
+    if { $prompt == "" } {
+	set prompt "$gdb_prompt $"
     }
+
+    set saw_question 0
 
     set user_code {}
     lappend user_code {
-	-re "\[\r\n\]*(?:$pattern)\[\r\n\]+$gdb_prompt $" {
+	-re "\[\r\n\]*(?:$pattern)\[\r\n\]+$prompt" {
 	    if ![string match "" $message] then {
-		if {$must_see_question} {
+		if { $question != "" } {
 		    gdb_assert $saw_question "$message"
 		} else {
 		    pass "$message"
 		}
-            }
-        }
+	    }
+	}
     }
 
-    if { [llength $args] == 5 } {
-	set question_string [lindex $args 3]
-	set response_string [lindex $args 4]
+    if { $question != "" } {
 	lappend user_code {
-	    -re "(${question_string})$" {
+	    -re "$question$" {
 		set saw_question 1
-		send_gdb "$response_string\n"
+		send_gdb "$response\n"
 		exp_continue
 	    }
 	}
-     }
+    }
 
     set user_code [join $user_code]
-    return [gdb_test_multiple $command $message $user_code]
+
+    set opts {}
+    lappend "-prompt $prompt"
+    if {$lbl} {
+	lappend opts "-lbl"
+    }
+
+    return [gdb_test_multiple $command $message {*}$opts $user_code]
 }
 
 # Return 1 if version MAJOR.MINOR is at least AT_LEAST_MAJOR.AT_LEAST_MINOR.
