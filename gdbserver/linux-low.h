@@ -32,6 +32,7 @@
 #include "tracepoint.h"
 
 #include <list>
+#include "gdbsupport/byte-vector.h"
 
 #define PTRACE_XFER_TYPE long
 
@@ -585,6 +586,14 @@ public: /* Make this public because it's used from outside.  */
      error.  */
   int attach_lwp (ptid_t ptid);
 
+  /* Given PTR, a pointer to the beginning of auxv data, and PTR_END the
+     pointer to the end of the auxv data, search for the entry with type
+     TYPE and store its value in VALUE.
+
+     Return TRUE if an entry was found.  Return FALSE in case of error or if
+     no entries have been found.  */
+  virtual bool auxv_search (CORE_ADDR type, CORE_ADDR &value);
+
 private: /* Back to private.  */
   /* Detach from LWP.  */
   void detach_one_lwp (lwp_info *lwp);
@@ -727,6 +736,11 @@ protected:
   /* Return the linkmap offsets based on IS_ELF64.  */
   virtual const struct link_map_offsets *low_fetch_linkmap_offsets (int is_elf64);
 
+  /* Fetch the entire contents of the auxv.  */
+  const gdb::byte_vector get_auxv ();
+
+  /* The auxv data.  */
+  gdb::byte_vector auxv;
 };
 
 extern linux_process_target *the_linux_target;
@@ -913,27 +927,26 @@ bool thread_db_thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len);
 
 extern int have_ptrace_getregset;
 
-/* Search for the value with type MATCH in the auxv vector with
-   entries of length WORDSIZE bytes.  If found, store the value in
-   *VALP and return 1.  If not found or if there is an error, return
-   0.  */
+/* Search for the value with type MATCH in the auxv vector.
 
-int linux_get_auxv (int wordsize, CORE_ADDR match,
-		    CORE_ADDR *valp);
+   If found, store the value in *VALP and return TRUE.  If not found or if there
+   is an error, return FALSE.  */
 
-/* Fetch the AT_ENTRY entry from the auxv vector, where entries are length
-   WORDSIZE.  If no entry was found, return zero.  */
+bool linux_get_auxv (CORE_ADDR match, CORE_ADDR &valp);
 
-CORE_ADDR linux_get_at_entry (int wordsize);
+/* Fetch the AT_ENTRY entry from the auxv vector.
+   If no entry was found, return zero.  */
 
-/* Fetch the AT_HWCAP entry from the auxv vector, where entries are length
-   WORDSIZE.  If no entry was found, return zero.  */
+CORE_ADDR linux_get_at_entry ();
 
-CORE_ADDR linux_get_hwcap (int wordsize);
+/* Fetch the AT_HWCAP entry from the auxv vector.
+   If no entry was found, return zero.  */
 
-/* Fetch the AT_HWCAP2 entry from the auxv vector, where entries are length
-   WORDSIZE.  If no entry was found, return zero.  */
+CORE_ADDR linux_get_hwcap ();
 
-CORE_ADDR linux_get_hwcap2 (int wordsize);
+/* Fetch the AT_HWCAP2 entry from the auxv vector.
+   If no entry was found, return zero.  */
+
+CORE_ADDR linux_get_hwcap2 ();
 
 #endif /* GDBSERVER_LINUX_LOW_H */

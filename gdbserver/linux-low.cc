@@ -997,6 +997,9 @@ linux_process_target::post_create_inferior ()
 {
   struct lwp_info *lwp = get_thread_lwp (current_thread);
 
+  /* Fetch the auxv.  */
+  get_auxv ();
+
   low_arch_setup ();
 
   if (lwp->must_set_ptrace_flags)
@@ -5753,6 +5756,53 @@ linux_process_target::supports_read_auxv ()
   return true;
 }
 
+const gdb::byte_vector
+linux_process_target::get_auxv ()
+{
+  /* Always update the auxv.  */
+  auxv.clear ();
+
+  char filename[PATH_MAX];
+  int fd;
+  int pid = lwpid_of (current_thread);
+
+  xsnprintf (filename, sizeof filename, "/proc/%d/auxv", pid);
+
+  fd = open (filename, O_RDONLY);
+  if (fd < 0)
+    return auxv;
+
+  size_t block_size = 1024;
+  auxv.resize (block_size);
+  gdb_byte *ptr = auxv.data ();
+  bool done = false;
+
+  while (!done)
+    {
+      int n = read (fd, ptr, block_size);
+
+      if (n < 0)
+	{
+	  auxv.clear ();
+	  done = true;
+	}
+      else if (n < block_size)
+	{
+	  /* We're done reading data.  */
+	  auxv.resize (auxv.size () - (block_size - n));
+	  done = true;
+	}
+      else
+	{
+	  auxv.resize (auxv.size () + block_size);
+	  ptr = auxv.data () + auxv.size ();
+	}
+    }
+
+  close (fd);
+  return auxv;
+}
+
 /* Copy LEN bytes from inferior's auxiliary vector starting at OFFSET
    to debugger memory starting at MYADDR.  */
 
@@ -5760,25 +5810,18 @@ int
 linux_process_target::read_auxv (CORE_ADDR offset, unsigned char *myaddr,
 				 unsigned int len)
 {
-  char filename[PATH_MAX];
-  int fd, n;
-  int pid = lwpid_of (current_thread);
-
-  xsnprintf (filename, sizeof filename, "/proc/%d/auxv", pid);
-
-  fd = open (filename, O_RDONLY);
-  if (fd < 0)
+  if (!auxv.empty ())
+    {
+      /* Don't attempt to read past the end of the auxv.  */
+      if (offset + len > auxv.size ())
+	len = auxv.size () - offset;
+      /* Copy the requested contents.  */
+      memcpy (myaddr, auxv.data () + offset, len);
+    }
+  else
     return -1;
 
-  if (offset != (CORE_ADDR) 0
-      && lseek (fd, (off_t) offset, SEEK_SET) != (off_t) offset)
-    n = -1;
-  else
-    n = read (fd, myaddr, len);
-
-  close (fd);
-
-  return n;
+  return len;
 }
 
 int
@@ -6465,62 +6508,18 @@ linux_process_target::done_accessing_memory ()
 
 static int
 get_phdr_phnum_from_proc_auxv (const int pid, const int is_elf64,
-			       CORE_ADDR *phdr_memaddr, int *num_phdr)
+			       CORE_ADDR &phdr_memaddr, int &num_phdr)
 {
-  char filename[PATH_MAX];
-  int fd;
-  const int auxv_size = is_elf64
-    ? sizeof (Elf64_auxv_t) : sizeof (Elf32_auxv_t);
-  char buf[sizeof (Elf64_auxv_t)];  /* The larger of the two.  */
+  linux_get_auxv (AT_PHDR, phdr_memaddr);
+  CORE_ADDR value = 0;
+  linux_get_auxv (AT_PHNUM, value);
+  num_phdr = (int) value;
 
-  xsnprintf (filename, sizeof filename, "/proc/%d/auxv", pid);
-
-  fd = open (filename, O_RDONLY);
-  if (fd < 0)
-    return 1;
-
-  *phdr_memaddr = 0;
-  *num_phdr = 0;
-  while (read (fd, buf, auxv_size) == auxv_size
-	 && (*phdr_memaddr == 0 || *num_phdr == 0))
-    {
-      if (is_elf64)
-	{
-	  Elf64_auxv_t *const aux = (Elf64_auxv_t *) buf;
-
-	  switch (aux->a_type)
-	    {
-	    case AT_PHDR:
-	      *phdr_memaddr = aux->a_un.a_val;
-	      break;
-	    case AT_PHNUM:
-	      *num_phdr = aux->a_un.a_val;
-	      break;
-	    }
-	}
-      else
-	{
-	  Elf32_auxv_t *const aux = (Elf32_auxv_t *) buf;
-
-	  switch (aux->a_type)
-	    {
-	    case AT_PHDR:
-	      *phdr_memaddr = aux->a_un.a_val;
-	      break;
-	    case AT_PHNUM:
-	      *num_phdr = aux->a_un.a_val;
-	      break;
-	    }
-	}
-    }
-
-  close (fd);
-
-  if (*phdr_memaddr == 0 || *num_phdr == 0)
+  if (phdr_memaddr == 0 || num_phdr == 0)
     {
       warning ("Unexpected missing AT_PHDR and/or AT_PHNUM: "
 	       "phdr_memaddr = %ld, phdr_num = %d",
-	       (long) *phdr_memaddr, *num_phdr);
+	       (long) phdr_memaddr, num_phdr);
       return 2;
     }
 
@@ -6537,7 +6536,7 @@ get_dynamic (const int pid, const int is_elf64)
   unsigned char *phdr_buf;
   const int phdr_size = is_elf64 ? sizeof (Elf64_Phdr) : sizeof (Elf32_Phdr);
 
-  if (get_phdr_phnum_from_proc_auxv (pid, is_elf64, &phdr_memaddr, &num_phdr))
+  if (get_phdr_phnum_from_proc_auxv (pid, is_elf64, phdr_memaddr, num_phdr))
     return 0;
 
   gdb_assert (num_phdr < 100);  /* Basic sanity check.  */
@@ -7129,6 +7128,57 @@ linux_process_target::thread_handle (ptid_t ptid, gdb_byte **handle,
 }
 #endif
 
+/* See linux-low.h.  */
+
+bool
+linux_process_target::auxv_search (CORE_ADDR type, CORE_ADDR &value)
+{
+  get_auxv ();
+
+  gdb_byte *ptr = auxv.data ();
+  gdb_byte *end_ptr = auxv.data () + auxv.size ();
+
+  if (ptr == end_ptr)
+    return false;
+
+  int pid = lwpid_of (current_thread);
+  unsigned int machine;
+  int elf64 = elf_64_file_p (the_target->pid_to_exec_file (pid),
+			     &machine);
+  int wordsize = elf64? 8 : 4;
+
+  gdb_assert (end_ptr - ptr >= 2 * wordsize);
+
+  gdb_byte *p = ptr;
+
+  while (p < end_ptr)
+    {
+      if (wordsize == 4)
+	{
+	  Elf32_auxv_t *auxv_entry = (Elf32_auxv_t *) p;
+
+	  if (type == auxv_entry->a_type)
+	    {
+	      value = auxv_entry->a_un.a_val;
+	      return true;
+	    }
+	}
+      else
+	{
+	  Elf64_auxv_t *auxv_entry = (Elf64_auxv_t *) p;
+
+	  if (type == auxv_entry->a_type)
+	    {
+	      value = auxv_entry->a_un.a_val;
+	      return true;
+	    }
+	}
+
+      p += 2 * wordsize;
+    }
+  return false;
+}
+
 /* Default implementation of linux_target_ops method "set_pc" for
    32-bit pc register which is literally named "pc".  */
 
@@ -7181,68 +7231,39 @@ linux_get_pc_64bit (struct regcache *regcache)
 
 /* See linux-low.h.  */
 
-int
-linux_get_auxv (int wordsize, CORE_ADDR match, CORE_ADDR *valp)
+bool
+linux_get_auxv (CORE_ADDR match, CORE_ADDR &valp)
 {
-  gdb_byte *data = (gdb_byte *) alloca (2 * wordsize);
-  int offset = 0;
-
-  gdb_assert (wordsize == 4 || wordsize == 8);
-
-  while (the_target->read_auxv (offset, data, 2 * wordsize) == 2 * wordsize)
-    {
-      if (wordsize == 4)
-	{
-	  uint32_t *data_p = (uint32_t *) data;
-	  if (data_p[0] == match)
-	    {
-	      *valp = data_p[1];
-	      return 1;
-	    }
-	}
-      else
-	{
-	  uint64_t *data_p = (uint64_t *) data;
-	  if (data_p[0] == match)
-	    {
-	      *valp = data_p[1];
-	      return 1;
-	    }
-	}
-
-      offset += 2 * wordsize;
-    }
-
-  return 0;
+  return the_linux_target->auxv_search (match, valp);
 }
 
 /* See linux-low.h.  */
 
 CORE_ADDR
-linux_get_at_entry (int wordsize)
+linux_get_at_entry ()
 {
   CORE_ADDR entry = 0;
-  linux_get_auxv (wordsize, AT_ENTRY, &entry);
+  linux_get_auxv (AT_ENTRY, entry);
   return entry;
 }
 
 /* See linux-low.h.  */
 
 CORE_ADDR
-linux_get_hwcap (int wordsize)
+linux_get_hwcap ()
 {
   CORE_ADDR hwcap = 0;
-  linux_get_auxv (wordsize, AT_HWCAP, &hwcap);
+  linux_get_auxv (AT_HWCAP, hwcap);
   return hwcap;
 }
 
 /* See linux-low.h.  */
 
 CORE_ADDR
-linux_get_hwcap2 (int wordsize)
+linux_get_hwcap2 ()
 {
   CORE_ADDR hwcap2 = 0;
-  linux_get_auxv (wordsize, AT_HWCAP2, &hwcap2);
+  linux_get_auxv (AT_HWCAP2, hwcap2);
   return hwcap2;
 }
 
