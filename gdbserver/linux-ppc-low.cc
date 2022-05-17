@@ -894,8 +894,8 @@ ppc_target::low_arch_setup ()
 
   /* The value of current_process ()->tdesc needs to be set for this
      call.  */
-  ppc_hwcap = linux_get_hwcap (features.wordsize);
-  ppc_hwcap2 = linux_get_hwcap2 (features.wordsize);
+  ppc_hwcap = linux_get_hwcap ();
+  ppc_hwcap2 = linux_get_hwcap2 ();
 
   features.isa205 = ppc_linux_has_isa205 (ppc_hwcap);
 

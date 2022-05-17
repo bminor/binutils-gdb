@@ -103,6 +103,10 @@ public:
 			unsigned const char *writebuf,
 			CORE_ADDR offset, int len) override;
 
+  /* AArch64 (Morello) implementation of auxv_search.  We need this
+     override to handle Morello 16-byte AUXV entries in the PCuABI.  */
+  bool auxv_search (CORE_ADDR type, CORE_ADDR &value) override;
+
 protected:
 
   void low_arch_setup () override;
@@ -937,12 +941,12 @@ aarch64_target::low_arch_setup ()
 
       features.vq = aarch64_sve_get_vq (tid);
       /* A-profile PAC is 64-bit only.  */
-      features.pauth = linux_get_hwcap (8) & AARCH64_HWCAP_PACA;
+      features.pauth = linux_get_hwcap () & AARCH64_HWCAP_PACA;
       /* A-profile MTE is 64-bit only.  */
-      features.mte = linux_get_hwcap2 (8) & HWCAP2_MTE;
+      features.mte = linux_get_hwcap2 () & HWCAP2_MTE;
       features.tls = true;
       /* Morello is 64-bit only.  */
-      features.capability = linux_get_hwcap2 (8) & HWCAP2_MORELLO;
+      features.capability = linux_get_hwcap2 () & HWCAP2_MORELLO;
 
       current_process ()->tdesc = aarch64_linux_read_description (features);
 
@@ -1041,7 +1045,7 @@ aarch64_target::low_fetch_linkmap_offsets (int is_elf64)
 {
   if (is_elf64)
     {
-      CORE_ADDR entry_addr = linux_get_at_entry (8);
+      CORE_ADDR entry_addr = linux_get_at_entry ();
 
       /* If the LSB of AT_ENTRY is 1, then we have a pure capability Morello
 	 ELF.  */
@@ -1050,6 +1054,73 @@ aarch64_target::low_fetch_linkmap_offsets (int is_elf64)
     }
 
   return linux_process_target::low_fetch_linkmap_offsets (is_elf64);
+}
+
+bool
+aarch64_target::auxv_search (CORE_ADDR type, CORE_ADDR &value)
+{
+  const gdb::byte_vector auxv = linux_process_target::get_auxv ();
+  const gdb_byte *ptr = auxv.data ();
+  const gdb_byte *end_ptr = auxv.data () + auxv.size ();
+
+  if (ptr == end_ptr)
+    return false;
+
+  /* There needs to be at least one auxv entry.  */
+  gdb_assert (end_ptr - ptr >= 16);
+
+  /* We're dealing with three different AUXV layouts:
+
+     A - The regular AArch64 format: Each type entry is 64-bit and each value
+	 is 64-bit.  This is also the case for Morello Hybrid binaries.
+     B - The Morello pure capability format with libshim: This is a compability
+	 layout and it keeps the 64-bit types and 64-bit values.
+     C - The Morello pure capability format without libshim: This layout has
+	 64-bit types followed by 64-bit padding.  The value is 128-bit.
+
+     We need to determine what layout we have, so we can read the data
+     correctly.
+
+     The easiest way to tell the difference is to assume 8-byte entries and
+     look for any types outside the range [AT_NULL, AT_MINSIGSTKSZ].  If we
+     find one such type, assume that we have layout C.  Otherwise we have
+     layouts A or B.  */
+
+  bool layout_c = false;
+  const gdb_byte *p = ptr;
+  while (p < end_ptr)
+    {
+      CORE_ADDR *entry_type = (CORE_ADDR *) p;
+
+      if (*entry_type > AT_MINSIGSTKSZ)
+	{
+	  layout_c = true;
+	  break;
+	}
+      p += 16;
+    }
+
+  /* Do the actual search now that we know the auxv format.  */
+  if (layout_c)
+    {
+      p = ptr;
+      while (p < end_ptr)
+	{
+	  CORE_ADDR *entry_type = (CORE_ADDR *) p;
+
+	  if (type == *entry_type)
+	    {
+	      const gdb_byte *value_ptr = p + 16;
+	      value = *((CORE_ADDR *) value_ptr);
+	      return true;
+	    }
+	  p += 32;
+	}
+      return false;
+    }
+
+  /* We have the regular layout.  Let generic code handle it.  */
+  return linux_process_target::auxv_search (type, value);
 }
 
 /* List of condition codes that we need.  */
@@ -3475,7 +3546,7 @@ aarch64_target::store_memtags (CORE_ADDR address, size_t len,
 bool
 aarch64_target::supports_qxfer_capability ()
 {
-  unsigned long hwcap2 = linux_get_hwcap2 (8);
+  unsigned long hwcap2 = linux_get_hwcap2 ();
 
   return (hwcap2 & HWCAP2_MORELLO) != 0;
 }
