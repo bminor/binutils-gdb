@@ -105,12 +105,12 @@ proc test { func testcase_nr } {
 	    }
 
 	    set pre_regs($count) [capture_command_output "info all-registers" ""]
-	    gdb_test "si" "" ""
+	    gdb_test -nopass "si"
 	}
 
 	# Registers contents after each backward single step.
 	for {set i [expr $count - 1]} {$i >= 0} {incr i -1} {
-	    gdb_test "reverse-stepi" "" ""
+	    gdb_test -nopass "reverse-stepi"
 	    set post_regs($i) [capture_command_output "info all-registers" ""]
 	}
 

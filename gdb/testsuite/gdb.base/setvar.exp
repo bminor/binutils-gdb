@@ -74,20 +74,18 @@ proc test_set { args } {
 	    set arg [lindex $args $x]
 	    if { ($x == $final) || ([string first ".*" [lindex $args [expr $x + 1]]] >= 0) } {
 		set match [lindex $args [expr $x + 1]]
-		if { $count == 1 } {
-		    set mess "$message"
-		} else {
-		    set mess "$message (#$count)"
+		set mess "$message -- $match"
+		if { $count != 1 } {
+		    append mess " (#$count)"
 		}
 		incr count
 		incr x
 	    } else {
-		set mess ""
 		set match ""
+		set mess "$message -- $match"
 	    }
 	    verbose "doing $arg $match"
-	    if [gdb_test "$arg" "$match" "$mess"] {
-		fail "$message -- $match"
+	    if [gdb_test -nopass "$arg" "$match" "$mess"] {
 		return 1
 	    }
 	}

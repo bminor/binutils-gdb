@@ -99,7 +99,7 @@ proc corefunc { threadtype executable } {
 		break
 	    }
 
-	    gdb_test "detach" "Detaching from.*" ""
+	    gdb_test -nopass "detach" "Detaching from.*"
 	}
 
 	if {$passes < 3} {

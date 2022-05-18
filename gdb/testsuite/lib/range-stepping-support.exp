@@ -19,7 +19,7 @@
 proc exec_cmd_expect_vCont_count { cmd exp_vCont_r } {
     global gdb_prompt
 
-    gdb_test_no_output "set debug remote 1" ""
+    gdb_test_no_output -nopass "set debug remote 1"
 
     set test "${cmd}: vCont;r=${exp_vCont_r}"
     set r_counter 0
@@ -49,7 +49,7 @@ proc exec_cmd_expect_vCont_count { cmd exp_vCont_r } {
 	}
     }
 
-    gdb_test_no_output "set debug remote 0" ""
+    gdb_test_no_output -nopass "set debug remote 0"
     return $ret
 }
 

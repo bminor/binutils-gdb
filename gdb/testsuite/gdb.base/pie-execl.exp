@@ -59,7 +59,7 @@ if ![runto_main] {
 delete_breakpoints
 
 gdb_breakpoint "pie_execl_marker"
-gdb_test "info breakpoints" ".*" ""
+gdb_test "info breakpoints" "" "info breakpoints first"
 
 set addr1 ""
 set test "pie_execl_marker address first"
@@ -101,7 +101,7 @@ gdb_test_multiple $test $test {
     }
 }
 
-gdb_test "info breakpoints" ".*" ""
+gdb_test "info breakpoints" "" "info breakpoints second"
 
 set addr2 ""
 set test "pie_execl_marker address second"

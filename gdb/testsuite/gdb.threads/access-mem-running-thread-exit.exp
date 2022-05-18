@@ -142,10 +142,9 @@ proc test { non_stop } {
     proc my_gdb_test {cmd pattern message} {
 	upvar inf inf
 	upvar iter iter
-	if {[gdb_test_multiple $cmd "access mem ($message, inf=$inf, iter=$iter)" {
-	    -wrap -re $pattern {
-	    }
-	}] != 0} {
+	if {[gdb_test -nopass \
+		 $cmd $pattern "access mem ($message, inf=$inf, iter=$iter)"] \
+		!= 0} {
 	    uplevel 1 {set ok 0}
 	    return -code break
 	}
@@ -161,7 +160,7 @@ proc test { non_stop } {
     while {!$::done && $ok} {
 	incr iter
 	verbose -log "xxxxx: iteration $iter"
-	gdb_test "info threads" ".*" ""
+	gdb_test -nopass "info threads"
 
 	if {$inf == 1} {
 	    set inf 2

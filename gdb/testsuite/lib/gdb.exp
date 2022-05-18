@@ -2805,11 +2805,11 @@ proc with_target_charset { target_charset body } {
 	}
     }
 
-    gdb_test_no_output "set target-charset $target_charset" ""
+    gdb_test_no_output -nopass "set target-charset $target_charset"
 
     set code [catch {uplevel 1 $body} result]
 
-    gdb_test_no_output "set target-charset $saved" ""
+    gdb_test_no_output -nopass "set target-charset $saved"
 
     if {$code == 1} {
 	global errorInfo errorCode
@@ -5597,14 +5597,14 @@ proc with_complaints { n body } {
 	perror "Did not manage to set complaints"
     } else {
 	# Set complaints.
-	gdb_test_no_output "set complaints $n" ""
+	gdb_test_no_output -nopass "set complaints $n"
     }
 
     set code [catch {uplevel 1 $body} result]
 
     # Restore saved setting of complaints.
     if { $save != "" } {
-	gdb_test_no_output "set complaints $save" ""
+	gdb_test_no_output -nopass "set complaints $save"
     }
 
     if {$code == 1} {

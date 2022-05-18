@@ -44,16 +44,18 @@ proc limited_style { str style } {
 # A wrapper around 'clean_restart' from gdb.exp, this performs the
 # normal clean_restart, but then disables the currently disabled
 # style.
-proc clean_restart_and_disable { args } {
+proc clean_restart_and_disable { prefix args } {
     global currently_disabled_style
 
-    eval "clean_restart $args"
+    with_test_prefix "$prefix" {
+	eval "clean_restart $args"
 
-    if { $currently_disabled_style != "" } {
-	set st $currently_disabled_style
-	gdb_test_no_output "set style $st background none" ""
-	gdb_test_no_output "set style $st foreground none" ""
-	gdb_test_no_output "set style $st intensity normal" ""
+	if { $currently_disabled_style != "" } {
+	    set st $currently_disabled_style
+	    gdb_test_no_output "set style $st background none"
+	    gdb_test_no_output "set style $st foreground none"
+	    gdb_test_no_output "set style $st intensity normal"
+	}
     }
 }
 
@@ -73,7 +75,7 @@ proc run_style_tests { } {
 
 	# Restart GDB with the correct TERM variable setting, this
 	# means that GDB will enable styling.
-	clean_restart_and_disable ${binfile}
+	clean_restart_and_disable "restart 1" ${binfile}
 
 	set readnow [readnow]
 
@@ -158,16 +160,15 @@ proc run_style_tests { } {
 		set re_styled $re2_styled
 	    }
 
-	    gdb_test_no_output "set width $width"
-	    gdb_test "frame" $re_styled "frame when width=$width"
-
-	    # Reset width back to 0.  Doing this in the loop rather than
-	    # after, avoids trying to do "set width 30" while width is 20,
-	    # which causes horizontal scrolling in the case that the fallback
-	    # stub-termcap.c is used:
+	    # Override width for the duration of the command, letting
+	    # GDB reset back to 0.  Doing this in the loop rather than
+	    # after, avoids trying to do "set width 30" while width is
+	    # 20, which causes horizontal scrolling in the case that
+	    # the fallback stub-termcap.c is used:
 	    # ^M<et width 30^M
 	    # (gdb) FAIL: gdb.base/style.exp: all styles enabled: set width 30
-	    gdb_test_no_output "set width 0" ""
+	    gdb_test "with width $width -- frame" $re_styled \
+		"frame when width=$width"
 	}
 
 	set macro_line [gdb_get_line_number "\#define SOME_MACRO"]
@@ -254,7 +255,7 @@ proc run_style_tests { } {
 		 "short${cut_for_thre_expr}ad apply.*" \
 		]
 
-	clean_restart_and_disable
+	clean_restart_and_disable "restart 2"
 
 	set quoted [string_to_regexp $binfile]
 	set pass_re "Reading symbols from [limited_style $quoted file]\.\.\."
@@ -311,7 +312,7 @@ proc test_disable_disassembler_styling { } {
 
 	# Restart GDB with the correct TERM variable setting, this
 	# means that GDB will enable styling.
-	clean_restart_and_disable $::binfile
+	clean_restart_and_disable "restart 3" $::binfile
 
 	set styled_hex [limited_style $::hex address]
 	set main [limited_style main function]
