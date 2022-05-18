@@ -834,6 +834,13 @@ proc gdb_internal_error_resync {} {
     return 0
 }
 
+# Fill in the default prompt if PROMPT_REGEXP is empty.
+proc fill_in_default_prompt {prompt_regexp} {
+    if { "$prompt_regexp" == "" } {
+	return "$::gdb_prompt $"
+    }
+    return $prompt_regexp
+}
 
 # gdb_test_multiple COMMAND MESSAGE [ -prompt PROMPT_REGEXP] [ -lbl ]
 #                   EXPECT_ARGUMENTS
@@ -960,9 +967,7 @@ proc gdb_test_multiple { command message args } {
 	error "Too few arguments to gdb_test_multiple"
     }
 
-    if { "$prompt_regexp" == "" } {
-	set prompt_regexp "$gdb_prompt $"
-    }
+    set prompt_regexp [fill_in_default_prompt $prompt_regexp]
 
     if { $message == "" } {
 	set message $command
@@ -1335,6 +1340,7 @@ proc gdb_test_multiline { name args } {
 # -prompt PROMPT_REGEXP specifies a regexp matching the expected prompt
 #   after the command output.  If empty, defaults to "$gdb_prompt $".
 # -lbl specifies that line-by-line matching will be used.
+# -nopass specifies that a PASS should not be issued.
 #
 # Returns:
 #    1 if the test failed,
@@ -1348,6 +1354,7 @@ proc gdb_test { args } {
     parse_args {
 	{prompt ""}
 	{lbl}
+	{nopass}
     }
 
     lassign $args command pattern message question response
@@ -1361,21 +1368,17 @@ proc gdb_test { args } {
 	set message $command
     }
 
-    if { $prompt == "" } {
-	set prompt "$gdb_prompt $"
-    }
+    set prompt [fill_in_default_prompt $prompt]
 
     set saw_question 0
 
     set user_code {}
     lappend user_code {
 	-re "\[\r\n\]*(?:$pattern)\[\r\n\]+$prompt" {
-	    if ![string match "" $message] then {
-		if { $question != "" } {
-		    gdb_assert $saw_question "$message"
-		} else {
-		    pass "$message"
-		}
+	    if { $question != "" & !$saw_question} {
+		fail $message
+	    } elseif {!$nopass} {
+		pass $message
 	    }
 	}
     }
@@ -1439,30 +1442,31 @@ if { [tcl_version_at_least 8 5] == 0 } {
     }
 }
 
-# gdb_test_no_output COMMAND MESSAGE
+# gdb_test_no_output [-prompt PROMPT_REGEXP] [-nopass] COMMAND [MESSAGE]
 # Send a command to GDB and verify that this command generated no output.
 #
-# See gdb_test_multiple for a description of the COMMAND and MESSAGE
-# parameters.  If MESSAGE is ommitted, then COMMAND will be used as
-# the message.  (If MESSAGE is the empty string, then sometimes we do not
-# call pass or fail at all; I don't understand this at all.)
+# See gdb_test for a description of the -prompt, -nopass, COMMAND, and
+# MESSAGE parameters.
 
 proc gdb_test_no_output { args } {
     global gdb_prompt
-    set command [lindex $args 0]
-    if [llength $args]>1 then {
-	set message [lindex $args 1]
-    } else {
-	set message $command
+
+    parse_args {
+	{prompt_re ""}
+	{nopass}
     }
 
+    lassign $args command message
+
+    set prompt_re [fill_in_default_prompt $prompt_re]
+
     set command_regex [string_to_regexp $command]
-    gdb_test_multiple $command $message {
-        -re "^$command_regex\r\n$gdb_prompt $" {
-	    if ![string match "" $message] then {
-		pass "$message"
-            }
-        }
+    gdb_test_multiple $command $message -prompt $prompt_re {
+	-re "^$command_regex\r\n$prompt_re" {
+	    if {!$nopass} {
+		pass $gdb_test_name
+	    }
+	}
     }
 }
 
