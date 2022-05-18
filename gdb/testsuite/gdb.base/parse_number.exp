@@ -13,6 +13,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Format hex value VAL for language LANG.
+
+proc hex_for_lang { lang val } {
+    set val [regsub ^0x $val ""]
+    if { $lang == "modula-2" } {
+       set val 0[string toupper $val]H
+    } else {
+       set val 0x$val
+    }
+    return $val
+}
+
 # Test parsing numbers.  Several language parsers had the same bug
 # around parsing large 64-bit numbers, hitting undefined behavior, and
 # thus crashing a GDB built with UBSan.  This testcase goes over all
@@ -53,11 +65,12 @@ proc test_parse_numbers {arch} {
 	gdb_test_no_output "set language $lang"
 
 	set val "0xffffffffffffffff"
+	set val [hex_for_lang $lang $val]
 	if {$lang == "fortran"} {
 	    gdb_test "p/x $val" " = $fortran_value"
 	    gdb_test "ptype $val" " = $fortran_type"
 	} elseif {$lang == "modula-2"} {
-	    gdb_test "p/x 0FFFFFFFFFFFFFFFFH" "Overflow on numeric constant\\."
+	    gdb_test "p/x $val" "Overflow on numeric constant\\."
 	} elseif {$lang == "unknown"} {
 	    gdb_test "p/x $val" \
 		"expression parsing not implemented for language \"Unknown\""
