@@ -799,7 +799,7 @@ mcleanup_wrapper (void)
 }
 
 EXTERN_C void monstartup (unsigned long, unsigned long);
-extern int main ();
+extern int main (int, char **);
 
 static void
 maintenance_set_profile_cmd (const char *args, int from_tty,
