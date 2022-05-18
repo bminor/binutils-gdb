@@ -2219,6 +2219,9 @@ aarch64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   if (reg == AARCH64_DWARF_SP)
     return AARCH64_SP_REGNUM;
 
+  if (reg == AARCH64_DWARF_PC)
+    return AARCH64_PC_REGNUM;
+
   if (reg >= AARCH64_DWARF_V0 && reg <= AARCH64_DWARF_V0 + 31)
     return AARCH64_V0_REGNUM + reg - AARCH64_DWARF_V0;
 

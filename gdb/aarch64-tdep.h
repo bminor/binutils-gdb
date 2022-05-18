@@ -34,6 +34,7 @@ struct regset;
 /* AArch64 Dwarf register numbering.  */
 #define AARCH64_DWARF_X0   0
 #define AARCH64_DWARF_SP  31
+#define AARCH64_DWARF_PC  32
 #define AARCH64_DWARF_RA_SIGN_STATE  34
 #define AARCH64_DWARF_V0  64
 #define AARCH64_DWARF_SVE_VG   46
