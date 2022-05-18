@@ -2047,6 +2047,14 @@ get_linefile_number (int *flag)
   if (*input_line_pointer < '0' || *input_line_pointer > '9')
     return false;
 
+  /* Don't mistakenly interpret octal numbers as line numbers.  */
+  if (*input_line_pointer == '0')
+    {
+      *flag = 0;
+      ++input_line_pointer;
+      return true;
+    }
+
   expression_and_evaluate (&exp);
   if (exp.X_op != O_constant)
     return false;
