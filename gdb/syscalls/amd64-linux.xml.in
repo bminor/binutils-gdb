@@ -9,7 +9,7 @@
 
 <!-- This file was generated using the following file:
 
-     <sys/syscall.h>
+     arch/x86/entry/syscalls/syscall_64.tbl
 
      The file mentioned above belongs to the Linux Kernel.  -->
 

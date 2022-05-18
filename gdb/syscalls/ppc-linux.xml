@@ -7,7 +7,7 @@
      notice and this notice are preserved.  -->
 <!-- This file was generated using the following file:
 
-     <sys/syscall.h>
+     arch/powerpc/kernel/syscalls/syscall.tbl
 
      The file mentioned above belongs to the Linux Kernel.  -->
 <syscalls_info>
@@ -439,4 +439,7 @@
   <syscall name="landlock_create_ruleset" number="444"/>
   <syscall name="landlock_add_rule" number="445"/>
   <syscall name="landlock_restrict_self" number="446"/>
+  <syscall name="process_mrelease" number="448"/>
+  <syscall name="futex_waitv" number="449"/>
+  <syscall name="set_mempolicy_home_node" number="450"/>
 </syscalls_info>
