@@ -513,17 +513,19 @@ ignore_input (void)
     }
 
   /* We cannot ignore certain pseudo ops.  */
-  if (((s[0] == 'i'
-	|| s[0] == 'I')
-       && (!strncasecmp (s, "if", 2)
-	   || !strncasecmp (s, "ifdef", 5)
-	   || !strncasecmp (s, "ifndef", 6)))
-      || ((s[0] == 'e'
-	   || s[0] == 'E')
-	  && (!strncasecmp (s, "else", 4)
-	      || !strncasecmp (s, "endif", 5)
-	      || !strncasecmp (s, "endc", 4))))
-    return 0;
+  switch (s[0])
+    {
+    case 'i': case  'I':
+      if (s[1] == 'f' || s[1] == 'F')
+	return 0;
+      break;
+    case 'e': case 'E':
+      if (!strncasecmp (s, "else", 4)
+	  || !strncasecmp (s, "endif", 5)
+	  || !strncasecmp (s, "endc", 4))
+	return 0;
+      break;
+    }
 
   return (current_cframe != NULL) && (current_cframe->ignoring);
 }
