@@ -59,7 +59,7 @@ static bfd_vma get64 (instr_info *);
 static bfd_signed_vma get32 (instr_info *);
 static bfd_signed_vma get32s (instr_info *);
 static int get16 (instr_info *);
-static void set_op (instr_info *, bfd_vma, int);
+static void set_op (instr_info *, bfd_vma, bool);
 static void OP_Skip_MODRM (instr_info *, int, int);
 static void OP_REG (instr_info *, int, int);
 static void OP_IMREG (instr_info *, int, int);
@@ -227,9 +227,9 @@ struct instr_info
 
   unsigned char op_ad;
   signed char op_index[MAX_OPERANDS];
+  bool op_riprel[MAX_OPERANDS];
   char op_out[MAX_OPERANDS][100];
   bfd_vma op_address[MAX_OPERANDS];
-  bfd_vma op_riprel[MAX_OPERANDS];
   bfd_vma start_pc;
 
   /* On the 386's of 1988, the maximum length of an instruction is 15 bytes.
@@ -9771,8 +9771,6 @@ print_insn (bfd_vma pc, instr_info *ins)
      order as the intel book; everything else is printed in reverse order.  */
   if (ins->intel_syntax || ins->two_source_ops)
     {
-      bfd_vma riprel;
-
       for (i = 0; i < MAX_OPERANDS; ++i)
 	op_txt[i] = ins->op_out[i];
 
@@ -9785,6 +9783,8 @@ print_insn (bfd_vma pc, instr_info *ins)
 
       for (i = 0; i < (MAX_OPERANDS >> 1); ++i)
 	{
+	  bool riprel;
+
 	  ins->op_ad = ins->op_index[i];
 	  ins->op_index[i] = ins->op_index[MAX_OPERANDS - 1 - i];
 	  ins->op_index[MAX_OPERANDS - 1 - i] = ins->op_ad;
@@ -11563,7 +11563,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	    oappend (ins, ins->scratchbuf);
 	    if (riprel)
 	      {
-		set_op (ins, disp, 1);
+		set_op (ins, disp, true);
 		oappend (ins, !addr32flag ? "(%rip)" : "(%eip)");
 	      }
 	  }
@@ -11581,7 +11581,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	  *ins->obufp++ = ins->open_char;
 	  if (ins->intel_syntax && riprel)
 	    {
-	      set_op (ins, disp, 1);
+	      set_op (ins, disp, true);
 	      oappend (ins, !addr32flag ? "rip" : "eip");
 	    }
 	  *ins->obufp = '\0';
@@ -11943,20 +11943,14 @@ get16 (instr_info *ins)
 }
 
 static void
-set_op (instr_info *ins, bfd_vma op, int riprel)
+set_op (instr_info *ins, bfd_vma op, bool riprel)
 {
   ins->op_index[ins->op_ad] = ins->op_ad;
   if (ins->address_mode == mode_64bit)
-    {
-      ins->op_address[ins->op_ad] = op;
-      ins->op_riprel[ins->op_ad] = riprel;
-    }
-  else
-    {
-      /* Mask to get a 32-bit address.  */
-      ins->op_address[ins->op_ad] = op & 0xffffffff;
-      ins->op_riprel[ins->op_ad] = riprel & 0xffffffff;
-    }
+    ins->op_address[ins->op_ad] = op;
+  else /* Mask to get a 32-bit address.  */
+    ins->op_address[ins->op_ad] = op & 0xffffffff;
+  ins->op_riprel[ins->op_ad] = riprel;
 }
 
 static void
@@ -12239,7 +12233,7 @@ OP_J (instr_info *ins, int bytemode, int sizeflag)
     }
   disp = ((ins->start_pc + (ins->codep - ins->start_codep) + disp) & mask)
 	 | segment;
-  set_op (ins, disp, 0);
+  set_op (ins, disp, false);
   print_operand_value (ins, ins->scratchbuf, 1, disp);
   oappend (ins, ins->scratchbuf);
 }
