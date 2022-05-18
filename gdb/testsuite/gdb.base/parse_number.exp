@@ -62,6 +62,10 @@ proc test_parse_numbers {arch} {
     }
 
     foreach_with_prefix lang $::all_languages {
+	if { $lang == "unknown" } {
+	    continue
+	}
+
 	gdb_test_no_output "set language $lang"
 
 	set val "0xffffffffffffffff"
@@ -71,9 +75,6 @@ proc test_parse_numbers {arch} {
 	    gdb_test "ptype $val" " = $fortran_type"
 	} elseif {$lang == "modula-2"} {
 	    gdb_test "p/x $val" "Overflow on numeric constant\\."
-	} elseif {$lang == "unknown"} {
-	    gdb_test "p/x $val" \
-		"expression parsing not implemented for language \"Unknown\""
 	} else {
 	    # D and Rust define their own built-in 64-bit types, and
 	    # are thus always able to parse/print 64-bit values.
@@ -101,6 +102,10 @@ proc test_parse_numbers {arch} {
 }
 
 clean_restart
+
+gdb_test_no_output "set language unknown"
+gdb_test "p/x 0" \
+	"expression parsing not implemented for language \"Unknown\""
 
 gdb_test_no_output "set max-completions unlimited"
 
