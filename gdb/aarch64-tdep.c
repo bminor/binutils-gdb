@@ -52,13 +52,14 @@
 
 #include "opcode/aarch64.h"
 #include <algorithm>
+#include <unordered_map>
 
 /* A Homogeneous Floating-Point or Short-Vector Aggregate may have at most
    four members.  */
 #define HA_MAX_NUM_FLDS		4
 
 /* All possible aarch64 target descriptors.  */
-static target_desc *tdesc_aarch64_list[AARCH64_MAX_SVE_VQ + 1][2/*pauth*/][2 /* mte */][2 /* tls */];
+static std::unordered_map <aarch64_features, target_desc *> tdesc_aarch64_map;
 
 /* The standard register names, and all the valid aliases for them.  */
 static const struct
@@ -3332,18 +3333,18 @@ aarch64_displaced_step_hw_singlestep (struct gdbarch *gdbarch)
    TLS_P indicates the presence of the Thread Local Storage feature.  */
 
 const target_desc *
-aarch64_read_description (uint64_t vq, bool pauth_p, bool mte_p, bool tls_p)
+aarch64_read_description (const aarch64_features &features)
 {
-  if (vq > AARCH64_MAX_SVE_VQ)
-    error (_("VQ is %" PRIu64 ", maximum supported value is %d"), vq,
+  if (features.vq > AARCH64_MAX_SVE_VQ)
+    error (_("VQ is %" PRIu64 ", maximum supported value is %d"), features.vq,
 	   AARCH64_MAX_SVE_VQ);
 
-  struct target_desc *tdesc = tdesc_aarch64_list[vq][pauth_p][mte_p][tls_p];
+  struct target_desc *tdesc = tdesc_aarch64_map[features];
 
   if (tdesc == NULL)
     {
-      tdesc = aarch64_create_target_description (vq, pauth_p, mte_p, tls_p);
-      tdesc_aarch64_list[vq][pauth_p][mte_p][tls_p] = tdesc;
+      tdesc = aarch64_create_target_description (features);
+      tdesc_aarch64_map[features] = tdesc;
     }
 
   return tdesc;
@@ -3450,7 +3451,11 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      value.  */
   const struct target_desc *tdesc = info.target_desc;
   if (!tdesc_has_registers (tdesc) || vq != aarch64_get_tdesc_vq (tdesc))
-    tdesc = aarch64_read_description (vq, false, false, false);
+    {
+      aarch64_features features;
+      features.vq = vq;
+      tdesc = aarch64_read_description (features);
+    }
   gdb_assert (tdesc);
 
   feature_core = tdesc_find_feature (tdesc,"org.gnu.gdb.aarch64.core");

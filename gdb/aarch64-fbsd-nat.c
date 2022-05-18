@@ -149,8 +149,9 @@ aarch64_fbsd_nat_target::store_registers (struct regcache *regcache,
 const struct target_desc *
 aarch64_fbsd_nat_target::read_description ()
 {
-  bool tls = have_regset (inferior_ptid, NT_ARM_TLS) != 0;
-  return aarch64_read_description (0, false, false, tls);
+  aarch64_features features;
+  features.tls = have_regset (inferior_ptid, NT_ARM_TLS) != 0;
+  return aarch64_read_description (features);
 }
 
 #ifdef HAVE_DBREG

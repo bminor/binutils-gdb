@@ -178,7 +178,10 @@ aarch64_fbsd_core_read_description (struct gdbarch *gdbarch,
 {
   asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
 
-  return aarch64_read_description (0, false, false, tls != nullptr);
+  aarch64_features features;
+  features.tls = tls != nullptr;
+
+  return aarch64_read_description (features);
 }
 
 /* Implement the get_thread_local_address gdbarch method.  */

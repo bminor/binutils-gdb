@@ -779,10 +779,13 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
   CORE_ADDR hwcap = linux_get_hwcap (target);
   CORE_ADDR hwcap2 = linux_get_hwcap2 (target);
 
-  bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
-  bool mte_p = hwcap2 & HWCAP2_MTE;
-  return aarch64_read_description (aarch64_linux_core_read_vq (gdbarch, abfd),
-				   pauth_p, mte_p, tls != nullptr);
+  aarch64_features features;
+  features.vq = aarch64_linux_core_read_vq (gdbarch, abfd);
+  features.pauth = hwcap & AARCH64_HWCAP_PACA;
+  features.mte = hwcap2 & HWCAP2_MTE;
+  features.tls = tls != nullptr;
+
+  return aarch64_read_description (features);
 }
 
 /* Implementation of `gdbarch_stap_is_single_operand', as defined in
