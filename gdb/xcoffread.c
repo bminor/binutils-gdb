@@ -86,7 +86,7 @@ static enum language psymtab_language = language_unknown;
 
 /* Simplified internal version of coff symbol table information.  */
 
-struct coff_symbol
+struct xcoff_symbol
   {
     char *c_name;
     int c_symnum;		/* Symbol number of this entry.  */
@@ -99,7 +99,7 @@ struct coff_symbol
 
 /* Last function's saved coff symbol `cs'.  */
 
-static struct coff_symbol fcn_cs_saved;
+static struct xcoff_symbol fcn_cs_saved;
 
 static bfd *symfile_bfd;
 
@@ -208,7 +208,7 @@ static void scan_xcoff_symtab (minimal_symbol_reader &,
 
 static const char *xcoff_next_symbol_text (struct objfile *);
 
-static void record_include_begin (struct coff_symbol *);
+static void record_include_begin (struct xcoff_symbol *);
 
 static void
 enter_line_range (struct subfile *, unsigned, unsigned,
@@ -230,7 +230,7 @@ static int read_symbol_lineno (int);
 
 static CORE_ADDR read_symbol_nvalue (int);
 
-static struct symbol *process_xcoff_symbol (struct coff_symbol *,
+static struct symbol *process_xcoff_symbol (struct xcoff_symbol *,
 					    struct objfile *);
 
 static void read_xcoff_symtab (struct objfile *, legacy_psymtab *);
@@ -239,7 +239,7 @@ static void read_xcoff_symtab (struct objfile *, legacy_psymtab *);
 static void add_stab_to_list (char *, struct pending_stabs **);
 #endif
 
-static void record_include_end (struct coff_symbol *);
+static void record_include_end (struct xcoff_symbol *);
 
 static void process_linenos (CORE_ADDR, CORE_ADDR);
 
@@ -512,7 +512,7 @@ static int inclDepth;		/* nested include depth */
 static void allocate_include_entry (void);
 
 static void
-record_include_begin (struct coff_symbol *cs)
+record_include_begin (struct xcoff_symbol *cs)
 {
   if (inclDepth)
     {
@@ -533,7 +533,7 @@ record_include_begin (struct coff_symbol *cs)
 }
 
 static void
-record_include_end (struct coff_symbol *cs)
+record_include_end (struct xcoff_symbol *cs)
 {
   InclTable *pTbl;
 
@@ -931,7 +931,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 
   struct internal_syment symbol[1];
   union internal_auxent main_aux;
-  struct coff_symbol cs[1];
+  struct xcoff_symbol cs[1];
   CORE_ADDR file_start_addr = 0;
   CORE_ADDR file_end_addr = 0;
 
@@ -942,7 +942,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
   CORE_ADDR fcn_start_addr = 0;
   enum language pst_symtab_language;
 
-  struct coff_symbol fcn_stab_saved = { 0 };
+  struct xcoff_symbol fcn_stab_saved = { 0 };
 
   /* fcn_cs_saved is global because process_xcoff_symbol needs it.  */
   union internal_auxent fcn_aux_saved = main_aux;
@@ -1457,7 +1457,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 /* process one xcoff symbol.  */
 
 static struct symbol *
-process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
+process_xcoff_symbol (struct xcoff_symbol *cs, struct objfile *objfile)
 {
   struct symbol onesymbol;
   struct symbol *sym = &onesymbol;
