@@ -109,7 +109,7 @@ struct z80_unwind_cache
   struct trad_frame_saved_reg *saved_regs;
 };
 
-enum instruction_type
+enum z80_instruction_type
 {
   insn_default,
   insn_z80,
@@ -144,7 +144,7 @@ struct insn_info
   gdb_byte code;
   gdb_byte mask;
   gdb_byte size; /* without prefix(es) */
-  enum instruction_type type;
+  enum z80_instruction_type type;
 };
 
 /* Constants */

@@ -75,7 +75,7 @@ static gdb::optional<gdb::byte_vector> ktab_buf;
 
 /* An enumeration of the different IA-64 instruction types.  */
 
-enum instruction_type
+enum ia64_instruction_type
 {
   A,			/* Integer ALU ;    I-unit or M-unit */
   I,			/* Non-ALU integer; I-unit */
@@ -470,7 +470,7 @@ replace_slotN_contents (gdb_byte *bundle, long long instr, int slotnum)
   replace_bit_field (bundle, instr, 5+41*slotnum, 41);
 }
 
-static const enum instruction_type template_encoding_table[32][3] =
+static const enum ia64_instruction_type template_encoding_table[32][3] =
 {
   { M, I, I },				/* 00 */
   { M, I, I },				/* 01 */
@@ -510,7 +510,7 @@ static const enum instruction_type template_encoding_table[32][3] =
    address of the next instruction to fetch.  */
 
 static CORE_ADDR
-fetch_instruction (CORE_ADDR addr, instruction_type *it, long long *instr)
+fetch_instruction (CORE_ADDR addr, ia64_instruction_type *it, long long *instr)
 {
   gdb_byte bundle[BUNDLE_LEN];
   int slotnum = (int) (addr & 0x0f) / SLOT_MULTIPLIER;
@@ -1363,7 +1363,7 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc,
 {
   CORE_ADDR next_pc;
   CORE_ADDR last_prologue_pc = pc;
-  instruction_type it;
+  ia64_instruction_type it;
   long long instr;
   int cfm_reg  = 0;
   int ret_reg  = 0;
