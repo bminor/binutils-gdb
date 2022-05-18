@@ -465,6 +465,8 @@ run_dump_test quoted-sym-names
 # "# <line> <file>" into .linefile (PR gas/29120).
 setup_xfail "tic30-*-*"
 run_list_test cond-2 "-al"
+setup_xfail "tic30-*-*"
+run_list_test linefile ""
 
 run_list_test macro "-alm"
 
