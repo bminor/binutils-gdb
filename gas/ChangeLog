@@ -1,3 +1,19 @@
+2022-05-18  Victor Do Nascimento  <victor.donascimento@arm.com>
+
+	* config/tc-arm.c (parse_reg_list): Add handling of mixed register
+	types.
+	(reg_names): Enumerate pseudoregister according to mapped physical
+	register number.
+	(s_arm_unwind_save_pseudo): Modify function signature.
+	(s_arm_unwind_save_core): Likewise.
+	(s_arm_unwind_save_mixed): New function.
+	(s_arm_unwind_save): Generate register list mask to pass to nested
+	functions.
+	* testsuite/gas/arm/unwind-pacbti-m.s: Expand test for mixed
+ 	register type lists.
+ 	* testsuite/gas/arm/unwind-pacbti-m.d: Likewise.
+	* testsuite/gas/arm/unwind-pacbti-m-readelf.d: Likewise.
+
 2022-04-07  Mark Harmstone  <mark@harmstone.com>
 
 	* config/tc-i386.c (pe_directive_secidx): New function.
