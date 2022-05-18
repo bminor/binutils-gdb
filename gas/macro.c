@@ -136,7 +136,10 @@ buffer_and_nest (const char *from, const char *to, sb *ptr,
       char *linefile;
 
       as_where (&line);
-      linefile = xasprintf ("\t.linefile %u .\n", line);
+      if (!flag_m68k_mri)
+	linefile = xasprintf ("\t.linefile %u .\n", line);
+      else
+	linefile = xasprintf ("\tlinefile %u .\n", line);
       sb_add_buffer (ptr, linefile, strlen (linefile));
       xfree (linefile);
     }
