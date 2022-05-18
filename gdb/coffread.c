@@ -254,7 +254,7 @@ coff_locate_sections (bfd *abfd, asection *sectp, void *csip)
 /* Return the section_offsets* that CS points to.  */
 static int cs_to_section (struct coff_symbol *, struct objfile *);
 
-struct find_targ_sec_arg
+struct coff_find_targ_sec_arg
   {
     int targ_index;
     asection **resultp;
@@ -263,7 +263,7 @@ struct find_targ_sec_arg
 static void
 find_targ_sec (bfd *abfd, asection *sect, void *obj)
 {
-  struct find_targ_sec_arg *args = (struct find_targ_sec_arg *) obj;
+  struct coff_find_targ_sec_arg *args = (struct coff_find_targ_sec_arg *) obj;
 
   if (sect->target_index == args->targ_index)
     *args->resultp = sect;
@@ -274,7 +274,7 @@ static struct bfd_section*
 cs_to_bfd_section (struct coff_symbol *cs, struct objfile *objfile)
 {
   asection *sect = NULL;
-  struct find_targ_sec_arg args;
+  struct coff_find_targ_sec_arg args;
 
   args.targ_index = cs->c_secnum;
   args.resultp = &sect;
@@ -301,7 +301,7 @@ static CORE_ADDR
 cs_section_address (struct coff_symbol *cs, bfd *abfd)
 {
   asection *sect = NULL;
-  struct find_targ_sec_arg args;
+  struct coff_find_targ_sec_arg args;
   CORE_ADDR addr = 0;
 
   args.targ_index = cs->c_secnum;

@@ -249,7 +249,7 @@ static void process_linenos (CORE_ADDR, CORE_ADDR);
 static int secnum_to_section (int, struct objfile *);
 static asection *secnum_to_bfd_section (int, struct objfile *);
 
-struct find_targ_sec_arg
+struct xcoff_find_targ_sec_arg
   {
     int targ_index;
     int *resultp;
@@ -262,7 +262,8 @@ static void find_targ_sec (bfd *, asection *, void *);
 static void
 find_targ_sec (bfd *abfd, asection *sect, void *obj)
 {
-  struct find_targ_sec_arg *args = (struct find_targ_sec_arg *) obj;
+  struct xcoff_find_targ_sec_arg *args
+    = (struct xcoff_find_targ_sec_arg *) obj;
   struct objfile *objfile = args->objfile;
 
   if (sect->target_index == args->targ_index)
@@ -290,7 +291,7 @@ static void
 xcoff_secnum_to_sections (int n_scnum, struct objfile *objfile,
 			  asection **bfd_sect, int *secnum)
 {
-  struct find_targ_sec_arg args;
+  struct xcoff_find_targ_sec_arg args;
 
   args.targ_index = n_scnum;
   args.resultp = secnum;
