@@ -10663,7 +10663,7 @@ struct arm_mem_r
    contains list of to-be-modified registers and
    memory blocks (on return from decode_insn()).  */
 
-typedef struct insn_decode_record_t
+struct arm_insn_decode_record
 {
   struct gdbarch *gdbarch;
   struct regcache *regcache;
@@ -10676,7 +10676,7 @@ typedef struct insn_decode_record_t
   uint32_t reg_rec_count;       /* No of reg records.  */
   uint32_t *arm_regs;           /* Registers to be saved for this record.  */
   struct arm_mem_r *arm_mems;   /* Memory to be saved for this record.  */
-} insn_decode_record;
+};
 
 
 /* Checks ARM SBZ and SBO mandatory fields.  */
@@ -10724,7 +10724,7 @@ enum record_type_t
 
 
 static int
-arm_record_strx (insn_decode_record *arm_insn_r, uint32_t *record_buf, 
+arm_record_strx (arm_insn_decode_record *arm_insn_r, uint32_t *record_buf, 
 		 uint32_t *record_buf_mem, arm_record_strx_t str_type)
 {
 
@@ -10892,7 +10892,7 @@ arm_record_strx (insn_decode_record *arm_insn_r, uint32_t *record_buf,
 /* Handling ARM extension space insns.  */
 
 static int
-arm_record_extension_space (insn_decode_record *arm_insn_r)
+arm_record_extension_space (arm_insn_decode_record *arm_insn_r)
 {
   int ret = 0;  /* Return value: -1:record failure ;  0:success  */
   uint32_t opcode1 = 0, opcode2 = 0, insn_op1 = 0;
@@ -11155,7 +11155,7 @@ arm_record_extension_space (insn_decode_record *arm_insn_r)
 /* Handling opcode 000 insns.  */
 
 static int
-arm_record_data_proc_misc_ld_str (insn_decode_record *arm_insn_r)
+arm_record_data_proc_misc_ld_str (arm_insn_decode_record *arm_insn_r)
 {
   struct regcache *reg_cache = arm_insn_r->regcache;
   uint32_t record_buf[8], record_buf_mem[8];
@@ -11448,7 +11448,7 @@ arm_record_data_proc_misc_ld_str (insn_decode_record *arm_insn_r)
 /* Handling opcode 001 insns.  */
 
 static int
-arm_record_data_proc_imm (insn_decode_record *arm_insn_r)
+arm_record_data_proc_imm (arm_insn_decode_record *arm_insn_r)
 {
   uint32_t record_buf[8], record_buf_mem[8];
 
@@ -11492,7 +11492,7 @@ arm_record_data_proc_imm (insn_decode_record *arm_insn_r)
 }
 
 static int
-arm_record_media (insn_decode_record *arm_insn_r)
+arm_record_media (arm_insn_decode_record *arm_insn_r)
 {
   uint32_t record_buf[8];
 
@@ -11576,7 +11576,7 @@ arm_record_media (insn_decode_record *arm_insn_r)
 /* Handle ARM mode instructions with opcode 010.  */
 
 static int
-arm_record_ld_st_imm_offset (insn_decode_record *arm_insn_r)
+arm_record_ld_st_imm_offset (arm_insn_decode_record *arm_insn_r)
 {
   struct regcache *reg_cache = arm_insn_r->regcache;
 
@@ -11667,7 +11667,7 @@ arm_record_ld_st_imm_offset (insn_decode_record *arm_insn_r)
 /* Handling opcode 011 insns.  */
 
 static int
-arm_record_ld_st_reg_offset (insn_decode_record *arm_insn_r)
+arm_record_ld_st_reg_offset (arm_insn_decode_record *arm_insn_r)
 {
   struct regcache *reg_cache = arm_insn_r->regcache;
 
@@ -11933,7 +11933,7 @@ arm_record_ld_st_reg_offset (insn_decode_record *arm_insn_r)
 /* Handle ARM mode instructions with opcode 100.  */
 
 static int
-arm_record_ld_st_multiple (insn_decode_record *arm_insn_r)
+arm_record_ld_st_multiple (arm_insn_decode_record *arm_insn_r)
 {
   struct regcache *reg_cache = arm_insn_r->regcache;
   uint32_t register_count = 0, register_bits;
@@ -12033,7 +12033,7 @@ arm_record_ld_st_multiple (insn_decode_record *arm_insn_r)
 /* Handling opcode 101 insns.  */
 
 static int
-arm_record_b_bl (insn_decode_record *arm_insn_r)
+arm_record_b_bl (arm_insn_decode_record *arm_insn_r)
 {
   uint32_t record_buf[8];
 
@@ -12053,7 +12053,7 @@ arm_record_b_bl (insn_decode_record *arm_insn_r)
 }
 
 static int
-arm_record_unsupported_insn (insn_decode_record *arm_insn_r)
+arm_record_unsupported_insn (arm_insn_decode_record *arm_insn_r)
 {
   gdb_printf (gdb_stderr,
 	      _("Process record does not support instruction "
@@ -12066,7 +12066,7 @@ arm_record_unsupported_insn (insn_decode_record *arm_insn_r)
 /* Record handler for vector data transfer instructions.  */
 
 static int
-arm_record_vdata_transfer_insn (insn_decode_record *arm_insn_r)
+arm_record_vdata_transfer_insn (arm_insn_decode_record *arm_insn_r)
 {
   uint32_t bits_a, bit_c, bit_l, reg_t, reg_v;
   uint32_t record_buf[4];
@@ -12152,7 +12152,7 @@ arm_record_vdata_transfer_insn (insn_decode_record *arm_insn_r)
 /* Record handler for extension register load/store instructions.  */
 
 static int
-arm_record_exreg_ld_st_insn (insn_decode_record *arm_insn_r)
+arm_record_exreg_ld_st_insn (arm_insn_decode_record *arm_insn_r)
 {
   uint32_t opcode, single_reg;
   uint8_t op_vldm_vstm;
@@ -12347,7 +12347,7 @@ arm_record_exreg_ld_st_insn (insn_decode_record *arm_insn_r)
 /* Record handler for arm/thumb mode VFP data processing instructions.  */
 
 static int
-arm_record_vfp_data_proc_insn (insn_decode_record *arm_insn_r)
+arm_record_vfp_data_proc_insn (arm_insn_decode_record *arm_insn_r)
 {
   uint32_t opc1, opc2, opc3, dp_op_sz, bit_d, reg_vd;
   uint32_t record_buf[4];
@@ -12559,7 +12559,7 @@ arm_record_vfp_data_proc_insn (insn_decode_record *arm_insn_r)
 /* Handling opcode 110 insns.  */
 
 static int
-arm_record_asimd_vfp_coproc (insn_decode_record *arm_insn_r)
+arm_record_asimd_vfp_coproc (arm_insn_decode_record *arm_insn_r)
 {
   uint32_t op1, op1_ebit, coproc;
 
@@ -12613,7 +12613,7 @@ arm_record_asimd_vfp_coproc (insn_decode_record *arm_insn_r)
 /* Handling opcode 111 insns.  */
 
 static int
-arm_record_coproc_data_proc (insn_decode_record *arm_insn_r)
+arm_record_coproc_data_proc (arm_insn_decode_record *arm_insn_r)
 {
   uint32_t op, op1_ebit, coproc, bits_24_25;
   arm_gdbarch_tdep *tdep
@@ -12744,7 +12744,7 @@ arm_record_coproc_data_proc (insn_decode_record *arm_insn_r)
 /* Handling opcode 000 insns.  */
 
 static int
-thumb_record_shift_add_sub (insn_decode_record *thumb_insn_r)
+thumb_record_shift_add_sub (arm_insn_decode_record *thumb_insn_r)
 {
   uint32_t record_buf[8];
   uint32_t reg_src1 = 0;
@@ -12764,7 +12764,7 @@ thumb_record_shift_add_sub (insn_decode_record *thumb_insn_r)
 /* Handling opcode 001 insns.  */
 
 static int
-thumb_record_add_sub_cmp_mov (insn_decode_record *thumb_insn_r)
+thumb_record_add_sub_cmp_mov (arm_insn_decode_record *thumb_insn_r)
 {
   uint32_t record_buf[8];
   uint32_t reg_src1 = 0;
@@ -12783,7 +12783,7 @@ thumb_record_add_sub_cmp_mov (insn_decode_record *thumb_insn_r)
 /* Handling opcode 010 insns.  */
 
 static int
-thumb_record_ld_st_reg_offset (insn_decode_record *thumb_insn_r)
+thumb_record_ld_st_reg_offset (arm_insn_decode_record *thumb_insn_r)
 {
   struct regcache *reg_cache =  thumb_insn_r->regcache;
   uint32_t record_buf[8], record_buf_mem[8];
@@ -12875,7 +12875,7 @@ thumb_record_ld_st_reg_offset (insn_decode_record *thumb_insn_r)
 /* Handling opcode 001 insns.  */
 
 static int
-thumb_record_ld_st_imm_offset (insn_decode_record *thumb_insn_r)
+thumb_record_ld_st_imm_offset (arm_insn_decode_record *thumb_insn_r)
 {
   struct regcache *reg_cache = thumb_insn_r->regcache;
   uint32_t record_buf[8], record_buf_mem[8];
@@ -12915,7 +12915,7 @@ thumb_record_ld_st_imm_offset (insn_decode_record *thumb_insn_r)
 /* Handling opcode 100 insns.  */
 
 static int
-thumb_record_ld_st_stack (insn_decode_record *thumb_insn_r)
+thumb_record_ld_st_stack (arm_insn_decode_record *thumb_insn_r)
 {
   struct regcache *reg_cache = thumb_insn_r->regcache;
   uint32_t record_buf[8], record_buf_mem[8];
@@ -12971,7 +12971,7 @@ thumb_record_ld_st_stack (insn_decode_record *thumb_insn_r)
 /* Handling opcode 101 insns.  */
 
 static int
-thumb_record_misc (insn_decode_record *thumb_insn_r)
+thumb_record_misc (arm_insn_decode_record *thumb_insn_r)
 {
   struct regcache *reg_cache = thumb_insn_r->regcache;
 
@@ -13102,7 +13102,7 @@ thumb_record_misc (insn_decode_record *thumb_insn_r)
 /* Handling opcode 110 insns.  */
 
 static int
-thumb_record_ldm_stm_swi (insn_decode_record *thumb_insn_r)
+thumb_record_ldm_stm_swi (arm_insn_decode_record *thumb_insn_r)
 {
   arm_gdbarch_tdep *tdep
     = (arm_gdbarch_tdep *) gdbarch_tdep  (thumb_insn_r->gdbarch);
@@ -13187,7 +13187,7 @@ thumb_record_ldm_stm_swi (insn_decode_record *thumb_insn_r)
 /* Handling opcode 111 insns.  */
 
 static int
-thumb_record_branch (insn_decode_record *thumb_insn_r)
+thumb_record_branch (arm_insn_decode_record *thumb_insn_r)
 {
   uint32_t record_buf[8];
   uint32_t bits_h = 0;
@@ -13219,7 +13219,7 @@ thumb_record_branch (insn_decode_record *thumb_insn_r)
 /* Handler for thumb2 load/store multiple instructions.  */
 
 static int
-thumb2_record_ld_st_multiple (insn_decode_record *thumb2_insn_r)
+thumb2_record_ld_st_multiple (arm_insn_decode_record *thumb2_insn_r)
 {
   struct regcache *reg_cache = thumb2_insn_r->regcache;
 
@@ -13314,7 +13314,7 @@ thumb2_record_ld_st_multiple (insn_decode_record *thumb2_insn_r)
    instructions.  */
 
 static int
-thumb2_record_ld_st_dual_ex_tbb (insn_decode_record *thumb2_insn_r)
+thumb2_record_ld_st_dual_ex_tbb (arm_insn_decode_record *thumb2_insn_r)
 {
   struct regcache *reg_cache = thumb2_insn_r->regcache;
 
@@ -13431,7 +13431,7 @@ thumb2_record_ld_st_dual_ex_tbb (insn_decode_record *thumb2_insn_r)
    instructions.  */
 
 static int
-thumb2_record_data_proc_sreg_mimm (insn_decode_record *thumb2_insn_r)
+thumb2_record_data_proc_sreg_mimm (arm_insn_decode_record *thumb2_insn_r)
 {
   uint32_t reg_rd, op;
   uint32_t record_buf[8];
@@ -13460,7 +13460,7 @@ thumb2_record_data_proc_sreg_mimm (insn_decode_record *thumb2_insn_r)
    registers.  */
 
 static int
-thumb2_record_ps_dest_generic (insn_decode_record *thumb2_insn_r)
+thumb2_record_ps_dest_generic (arm_insn_decode_record *thumb2_insn_r)
 {
   uint32_t reg_rd;
   uint32_t record_buf[8];
@@ -13479,7 +13479,7 @@ thumb2_record_ps_dest_generic (insn_decode_record *thumb2_insn_r)
 /* Handler for thumb2 branch and miscellaneous control instructions.  */
 
 static int
-thumb2_record_branch_misc_cntrl (insn_decode_record *thumb2_insn_r)
+thumb2_record_branch_misc_cntrl (arm_insn_decode_record *thumb2_insn_r)
 {
   uint32_t op, op1, op2;
   uint32_t record_buf[8];
@@ -13519,7 +13519,7 @@ thumb2_record_branch_misc_cntrl (insn_decode_record *thumb2_insn_r)
 /* Handler for thumb2 store single data item instructions.  */
 
 static int
-thumb2_record_str_single_data (insn_decode_record *thumb2_insn_r)
+thumb2_record_str_single_data (arm_insn_decode_record *thumb2_insn_r)
 {
   struct regcache *reg_cache = thumb2_insn_r->regcache;
 
@@ -13609,7 +13609,7 @@ thumb2_record_str_single_data (insn_decode_record *thumb2_insn_r)
 /* Handler for thumb2 load memory hints instructions.  */
 
 static int
-thumb2_record_ld_mem_hints (insn_decode_record *thumb2_insn_r)
+thumb2_record_ld_mem_hints (arm_insn_decode_record *thumb2_insn_r)
 {
   uint32_t record_buf[8];
   uint32_t reg_rt, reg_rn;
@@ -13635,7 +13635,7 @@ thumb2_record_ld_mem_hints (insn_decode_record *thumb2_insn_r)
 /* Handler for thumb2 load word instructions.  */
 
 static int
-thumb2_record_ld_word (insn_decode_record *thumb2_insn_r)
+thumb2_record_ld_word (arm_insn_decode_record *thumb2_insn_r)
 {
   uint32_t record_buf[8];
 
@@ -13652,7 +13652,7 @@ thumb2_record_ld_word (insn_decode_record *thumb2_insn_r)
    divide instructions.  */
 
 static int
-thumb2_record_lmul_lmla_div (insn_decode_record *thumb2_insn_r)
+thumb2_record_lmul_lmla_div (arm_insn_decode_record *thumb2_insn_r)
 {
   uint32_t opcode1 = 0, opcode2 = 0;
   uint32_t record_buf[8];
@@ -13688,7 +13688,7 @@ thumb2_record_lmul_lmla_div (insn_decode_record *thumb2_insn_r)
 /* Record handler for thumb32 coprocessor instructions.  */
 
 static int
-thumb2_record_coproc_insn (insn_decode_record *thumb2_insn_r)
+thumb2_record_coproc_insn (arm_insn_decode_record *thumb2_insn_r)
 {
   if (bit (thumb2_insn_r->arm_insn, 25))
     return arm_record_coproc_data_proc (thumb2_insn_r);
@@ -13699,7 +13699,7 @@ thumb2_record_coproc_insn (insn_decode_record *thumb2_insn_r)
 /* Record handler for advance SIMD structure load/store instructions.  */
 
 static int
-thumb2_record_asimd_struct_ld_st (insn_decode_record *thumb2_insn_r)
+thumb2_record_asimd_struct_ld_st (arm_insn_decode_record *thumb2_insn_r)
 {
   struct regcache *reg_cache = thumb2_insn_r->regcache;
   uint32_t l_bit, a_bit, b_bits;
@@ -13887,7 +13887,7 @@ thumb2_record_asimd_struct_ld_st (insn_decode_record *thumb2_insn_r)
 /* Decodes thumb2 instruction type and invokes its record handler.  */
 
 static unsigned int
-thumb2_record_decode_insn_handler (insn_decode_record *thumb2_insn_r)
+thumb2_record_decode_insn_handler (arm_insn_decode_record *thumb2_insn_r)
 {
   uint32_t op, op1, op2;
 
@@ -14021,7 +14021,7 @@ and positive val on failure.  */
 
 static int
 extract_arm_insn (abstract_memory_reader& reader,
-		  insn_decode_record *insn_record, uint32_t insn_size)
+		  arm_insn_decode_record *insn_record, uint32_t insn_size)
 {
   gdb_byte buf[insn_size];
 
@@ -14035,13 +14035,14 @@ extract_arm_insn (abstract_memory_reader& reader,
   return 0;
 }
 
-typedef int (*sti_arm_hdl_fp_t) (insn_decode_record*);
+typedef int (*sti_arm_hdl_fp_t) (arm_insn_decode_record*);
 
 /* Decode arm/thumb insn depending on condition cods and opcodes; and
    dispatch it.  */
 
 static int
-decode_insn (abstract_memory_reader &reader, insn_decode_record *arm_record,
+decode_insn (abstract_memory_reader &reader,
+	     arm_insn_decode_record *arm_record,
 	     record_type_t record_type, uint32_t insn_size)
 {
 
@@ -14192,9 +14193,9 @@ arm_record_test (void)
 
   /* 16-bit Thumb instructions.  */
   {
-    insn_decode_record arm_record;
+    arm_insn_decode_record arm_record;
 
-    memset (&arm_record, 0, sizeof (insn_decode_record));
+    memset (&arm_record, 0, sizeof (arm_insn_decode_record));
     arm_record.gdbarch = gdbarch;
 
     static const uint16_t insns[] = {
@@ -14226,9 +14227,9 @@ arm_record_test (void)
 
   /* 32-bit Thumb-2 instructions.  */
   {
-    insn_decode_record arm_record;
+    arm_insn_decode_record arm_record;
 
-    memset (&arm_record, 0, sizeof (insn_decode_record));
+    memset (&arm_record, 0, sizeof (arm_insn_decode_record));
     arm_record.gdbarch = gdbarch;
 
     static const uint16_t insns[] = {
@@ -14307,7 +14308,7 @@ arm_analyze_prologue_test ()
 /* Cleans up local record registers and memory allocations.  */
 
 static void 
-deallocate_reg_mem (insn_decode_record *record)
+deallocate_reg_mem (arm_insn_decode_record *record)
 {
   xfree (record->arm_regs);
   xfree (record->arm_mems);    
@@ -14329,9 +14330,9 @@ arm_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 
   ULONGEST u_regval = 0;
 
-  insn_decode_record arm_record;
+  arm_insn_decode_record arm_record;
 
-  memset (&arm_record, 0, sizeof (insn_decode_record));
+  memset (&arm_record, 0, sizeof (arm_insn_decode_record));
   arm_record.regcache = regcache;
   arm_record.this_addr = insn_addr;
   arm_record.gdbarch = gdbarch;

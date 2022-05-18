@@ -3775,7 +3775,7 @@ enum aarch64_record_result
   AARCH64_RECORD_UNKNOWN
 };
 
-typedef struct insn_decode_record_t
+struct aarch64_insn_decode_record
 {
   struct gdbarch *gdbarch;
   struct regcache *regcache;
@@ -3785,12 +3785,12 @@ typedef struct insn_decode_record_t
   uint32_t reg_rec_count;              /* Count of register records.  */
   uint32_t *aarch64_regs;              /* Registers to be recorded.  */
   struct aarch64_mem_r *aarch64_mems;  /* Memory locations to be recorded.  */
-} insn_decode_record;
+};
 
 /* Record handler for data processing - register instructions.  */
 
 static unsigned int
-aarch64_record_data_proc_reg (insn_decode_record *aarch64_insn_r)
+aarch64_record_data_proc_reg (aarch64_insn_decode_record *aarch64_insn_r)
 {
   uint8_t reg_rd, insn_bits24_27, insn_bits21_23;
   uint32_t record_buf[4];
@@ -3866,7 +3866,7 @@ aarch64_record_data_proc_reg (insn_decode_record *aarch64_insn_r)
 /* Record handler for data processing - immediate instructions.  */
 
 static unsigned int
-aarch64_record_data_proc_imm (insn_decode_record *aarch64_insn_r)
+aarch64_record_data_proc_imm (aarch64_insn_decode_record *aarch64_insn_r)
 {
   uint8_t reg_rd, insn_bit23, insn_bits24_27, setflags;
   uint32_t record_buf[4];
@@ -3911,7 +3911,7 @@ aarch64_record_data_proc_imm (insn_decode_record *aarch64_insn_r)
 /* Record handler for branch, exception generation and system instructions.  */
 
 static unsigned int
-aarch64_record_branch_except_sys (insn_decode_record *aarch64_insn_r)
+aarch64_record_branch_except_sys (aarch64_insn_decode_record *aarch64_insn_r)
 {
 
   aarch64_gdbarch_tdep *tdep
@@ -3993,7 +3993,7 @@ aarch64_record_branch_except_sys (insn_decode_record *aarch64_insn_r)
 /* Record handler for advanced SIMD load and store instructions.  */
 
 static unsigned int
-aarch64_record_asimd_load_store (insn_decode_record *aarch64_insn_r)
+aarch64_record_asimd_load_store (aarch64_insn_decode_record *aarch64_insn_r)
 {
   CORE_ADDR address;
   uint64_t addr_offset = 0;
@@ -4159,7 +4159,7 @@ aarch64_record_asimd_load_store (insn_decode_record *aarch64_insn_r)
 /* Record handler for load and store instructions.  */
 
 static unsigned int
-aarch64_record_load_store (insn_decode_record *aarch64_insn_r)
+aarch64_record_load_store (aarch64_insn_decode_record *aarch64_insn_r)
 {
   uint8_t insn_bits24_27, insn_bits28_29, insn_bits10_11;
   uint8_t insn_bit23, insn_bit21;
@@ -4447,7 +4447,7 @@ aarch64_record_load_store (insn_decode_record *aarch64_insn_r)
 /* Record handler for data processing SIMD and floating point instructions.  */
 
 static unsigned int
-aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
+aarch64_record_data_proc_simd_fp (aarch64_insn_decode_record *aarch64_insn_r)
 {
   uint8_t insn_bit21, opcode, rmode, reg_rd;
   uint8_t insn_bits24_27, insn_bits28_31, insn_bits10_11, insn_bits12_15;
@@ -4600,7 +4600,7 @@ aarch64_record_data_proc_simd_fp (insn_decode_record *aarch64_insn_r)
 /* Decodes insns type and invokes its record handler.  */
 
 static unsigned int
-aarch64_record_decode_insn_handler (insn_decode_record *aarch64_insn_r)
+aarch64_record_decode_insn_handler (aarch64_insn_decode_record *aarch64_insn_r)
 {
   uint32_t ins_bit25, ins_bit26, ins_bit27, ins_bit28;
 
@@ -4635,7 +4635,7 @@ aarch64_record_decode_insn_handler (insn_decode_record *aarch64_insn_r)
 /* Cleans up local record registers and memory allocations.  */
 
 static void
-deallocate_reg_mem (insn_decode_record *record)
+deallocate_reg_mem (aarch64_insn_decode_record *record)
 {
   xfree (record->aarch64_regs);
   xfree (record->aarch64_mems);
@@ -4655,9 +4655,9 @@ aarch64_process_record_test (void)
   struct gdbarch *gdbarch = gdbarch_find_by_info (info);
   SELF_CHECK (gdbarch != NULL);
 
-  insn_decode_record aarch64_record;
+  aarch64_insn_decode_record aarch64_record;
 
-  memset (&aarch64_record, 0, sizeof (insn_decode_record));
+  memset (&aarch64_record, 0, sizeof (aarch64_insn_decode_record));
   aarch64_record.regcache = NULL;
   aarch64_record.this_addr = 0;
   aarch64_record.gdbarch = gdbarch;
@@ -4687,10 +4687,10 @@ aarch64_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   uint8_t insn_size = 4;
   uint32_t ret = 0;
   gdb_byte buf[insn_size];
-  insn_decode_record aarch64_record;
+  aarch64_insn_decode_record aarch64_record;
 
   memset (&buf[0], 0, insn_size);
-  memset (&aarch64_record, 0, sizeof (insn_decode_record));
+  memset (&aarch64_record, 0, sizeof (aarch64_insn_decode_record));
   target_read_memory (insn_addr, &buf[0], insn_size);
   aarch64_record.aarch64_insn
     = (uint32_t) extract_unsigned_integer (&buf[0],
