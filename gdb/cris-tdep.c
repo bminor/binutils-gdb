@@ -656,17 +656,18 @@ static CORE_ADDR crisv32_scan_prologue (CORE_ADDR pc,
    order.  The below implements a FILO (stack) to do this.
    Copied from d10v-tdep.c.  */
 
-struct stack_item
+struct cris_stack_item
 {
   int len;
-  struct stack_item *prev;
+  struct cris_stack_item *prev;
   gdb_byte *data;
 };
 
-static struct stack_item *
-push_stack_item (struct stack_item *prev, const gdb_byte *contents, int len)
+static struct cris_stack_item *
+push_stack_item (struct cris_stack_item *prev, const gdb_byte *contents,
+		 int len)
 {
-  struct stack_item *si = XNEW (struct stack_item);
+  struct cris_stack_item *si = XNEW (struct cris_stack_item);
   si->data = (gdb_byte *) xmalloc (len);
   si->len = len;
   si->prev = prev;
@@ -674,10 +675,10 @@ push_stack_item (struct stack_item *prev, const gdb_byte *contents, int len)
   return si;
 }
 
-static struct stack_item *
-pop_stack_item (struct stack_item *si)
+static struct cris_stack_item *
+pop_stack_item (struct cris_stack_item *si)
 {
-  struct stack_item *dead = si;
+  struct cris_stack_item *dead = si;
   si = si->prev;
   xfree (dead->data);
   xfree (dead);
@@ -798,7 +799,7 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argreg;
   int argnum;
 
-  struct stack_item *si = NULL;
+  struct cris_stack_item *si = NULL;
 
   /* Push the return address.  */
   regcache_cooked_write_unsigned (regcache, SRP_REGNUM, bp_addr);

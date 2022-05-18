@@ -307,9 +307,9 @@ csky_register_type (struct gdbarch *gdbarch, int reg_nr)
 /* Data structure to marshall items in a dummy stack frame when
    calling a function in the inferior.  */
 
-struct stack_item
+struct csky_stack_item
 {
-  stack_item (int len_, const gdb_byte *data_)
+  csky_stack_item (int len_, const gdb_byte *data_)
   : len (len_), data (data_)
   {}
 
@@ -330,7 +330,7 @@ csky_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argreg = CSKY_ABI_A0_REGNUM;
   int last_arg_regnum = CSKY_ABI_LAST_ARG_REGNUM;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  std::vector<stack_item> stack_items;
+  std::vector<csky_stack_item> stack_items;
 
   /* Set the return address.  For CSKY, the return breakpoint is
      always at BP_ADDR.  */
@@ -406,7 +406,7 @@ csky_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     }
 
   /* Transfer the dummy stack frame to the target.  */
-  std::vector<stack_item>::reverse_iterator iter;
+  std::vector<csky_stack_item>::reverse_iterator iter;
   for (iter = stack_items.rbegin (); iter != stack_items.rend (); ++iter)
     {
       sp -= iter->len;

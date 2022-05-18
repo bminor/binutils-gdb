@@ -1199,18 +1199,19 @@ avr_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 /* When arguments must be pushed onto the stack, they go on in reverse
    order.  The below implements a FILO (stack) to do this.  */
 
-struct stack_item
+struct avr_stack_item
 {
   int len;
-  struct stack_item *prev;
+  struct avr_stack_item *prev;
   gdb_byte *data;
 };
 
-static struct stack_item *
-push_stack_item (struct stack_item *prev, const bfd_byte *contents, int len)
+static struct avr_stack_item *
+push_stack_item (struct avr_stack_item *prev, const bfd_byte *contents,
+		 int len)
 {
-  struct stack_item *si;
-  si = XNEW (struct stack_item);
+  struct avr_stack_item *si;
+  si = XNEW (struct avr_stack_item);
   si->data = (gdb_byte *) xmalloc (len);
   si->len = len;
   si->prev = prev;
@@ -1218,11 +1219,10 @@ push_stack_item (struct stack_item *prev, const bfd_byte *contents, int len)
   return si;
 }
 
-static struct stack_item *pop_stack_item (struct stack_item *si);
-static struct stack_item *
-pop_stack_item (struct stack_item *si)
+static struct avr_stack_item *
+pop_stack_item (struct avr_stack_item *si)
 {
-  struct stack_item *dead = si;
+  struct avr_stack_item *dead = si;
   si = si->prev;
   xfree (dead->data);
   xfree (dead);
@@ -1281,7 +1281,7 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int call_length = tdep->call_length;
   CORE_ADDR return_pc = avr_convert_iaddr_to_raw (bp_addr);
   int regnum = AVR_ARGN_REGNUM;
-  struct stack_item *si = NULL;
+  struct avr_stack_item *si = NULL;
 
   if (return_method == return_method_struct)
     {

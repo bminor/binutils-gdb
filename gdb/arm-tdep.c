@@ -3836,18 +3836,19 @@ arm_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* When arguments must be pushed onto the stack, they go on in reverse
    order.  The code below implements a FILO (stack) to do this.  */
 
-struct stack_item
+struct arm_stack_item
 {
   int len;
-  struct stack_item *prev;
+  struct arm_stack_item *prev;
   gdb_byte *data;
 };
 
-static struct stack_item *
-push_stack_item (struct stack_item *prev, const gdb_byte *contents, int len)
+static struct arm_stack_item *
+push_stack_item (struct arm_stack_item *prev, const gdb_byte *contents,
+		 int len)
 {
-  struct stack_item *si;
-  si = XNEW (struct stack_item);
+  struct arm_stack_item *si;
+  si = XNEW (struct arm_stack_item);
   si->data = (gdb_byte *) xmalloc (len);
   si->len = len;
   si->prev = prev;
@@ -3855,10 +3856,10 @@ push_stack_item (struct stack_item *prev, const gdb_byte *contents, int len)
   return si;
 }
 
-static struct stack_item *
-pop_stack_item (struct stack_item *si)
+static struct arm_stack_item *
+pop_stack_item (struct arm_stack_item *si)
 {
-  struct stack_item *dead = si;
+  struct arm_stack_item *dead = si;
   si = si->prev;
   xfree (dead->data);
   xfree (dead);
@@ -4176,7 +4177,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int argnum;
   int argreg;
   int nstack;
-  struct stack_item *si = NULL;
+  struct arm_stack_item *si = NULL;
   int use_vfp_abi;
   struct type *ftype;
   unsigned vfp_regs_free = (1 << 16) - 1;
