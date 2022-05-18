@@ -1,3 +1,8 @@
+2022-05-18  Nick Clifton  <nickc@redhat.com>
+
+	* int_encoding.cc (get_length_as_unsigned_LEB_128): Remove
+	current_length variable.
+
 2022-02-17  Nick Clifton  <nickc@redhat.com>
 
 	* po/sr.po: Updated Serbian translation.
