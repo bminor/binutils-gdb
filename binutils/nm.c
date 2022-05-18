@@ -176,6 +176,7 @@ static const char *print_format_string = NULL;
 static int do_demangle = 0;	/* Pretty print C++ symbol names.  */
 static int external_only = 0;	/* Print external symbols only.  */
 static int defined_only = 0;	/* Print defined symbols only.  */
+static int non_weak = 0;	/* Ignore weak symbols.  */
 static int no_sort = 0;		/* Don't sort; print syms in order found.  */
 static int print_debug_syms = 0;/* Print debugger-only symbols too.  */
 static int print_armap = 0;	/* Describe __.SYMDEF data in archive files.  */
@@ -281,6 +282,7 @@ static struct option long_options[] =
   {"undefined-only", no_argument, 0, 'u'},
   {"unicode", required_argument, NULL, OPTION_UNICODE},
   {"version", no_argument, &show_version, 1},
+  {"no-weak", no_argument, 0, 'W'},
   {"with-symbol-versions", no_argument, &with_symbol_versions, 1},
   {"without-symbol-versions", no_argument, &with_symbol_versions, 0},
   {0, no_argument, 0, 0}
@@ -364,6 +366,8 @@ usage (FILE *stream, int status)
   fprintf (stream, _("\
       --unicode={default|show|invalid|hex|escape|highlight}\n\
                          Specify how to treat UTF-8 encoded unicode characters\n"));
+  fprintf (stream, _("\
+  -W, --no-weak          Ignore weak symbols\n"));
   fprintf (stream, _("\
       --with-symbol-versions  Display version strings after symbol names\n"));
   fprintf (stream, _("\
@@ -808,6 +812,8 @@ filter_symbols (bfd *abfd, bool is_dynamic, void *minisyms,
 			       | BSF_GNU_UNIQUE)) != 0
 		|| bfd_is_und_section (sym->section)
 		|| bfd_is_com_section (sym->section));
+      else if (non_weak)
+	keep = ((sym->flags & BSF_WEAK) == 0);
       else
 	keep = 1;
 
@@ -2052,7 +2058,7 @@ main (int argc, char **argv)
     fatal (_("fatal error: libbfd ABI mismatch"));
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "aABCDef:gHhjJlnopPrSst:uU:vVvX:",
+  while ((c = getopt_long (argc, argv, "aABCDef:gHhjJlnopPrSst:uU:vVvWX:",
 			   long_options, (int *) 0)) != EOF)
     {
       switch (c)
@@ -2170,6 +2176,9 @@ main (int argc, char **argv)
 
 	case 'V':
 	  show_version = 1;
+	  break;
+	case 'W':
+	  non_weak = 1;
 	  break;
 	case 'X':
 	  /* Ignored for (partial) AIX compatibility.  On AIX, the

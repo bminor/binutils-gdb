@@ -819,6 +819,7 @@ nm [@option{-A}|@option{-o}|@option{--print-file-name}]
    [@option{-u}|@option{--undefined-only}]
    [@option{-U}|@option{--defined-only}]
    [@option{-V}|@option{--version}]
+   [@option{-W}|@option{--no-weak}]
    [@option{-X 32_64}]
    [@option{--no-demangle}]
    [@option{--no-recurse-limit}|@option{--recurse-limit}]]
@@ -1212,6 +1213,10 @@ The @option{--unicode=escape} option displays them as escape sequences
 them as escape sequences highlighted in red (if supported by the
 output device).  The colouring is intended to draw attention to the
 presence of unicode sequences where they might not be expected.
+
+@item -W
+@itemx --no-weak
+Do not display weak symbols.
 
 @item --with-symbol-versions
 @item --without-symbol-versions

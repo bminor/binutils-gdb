@@ -1,7 +1,9 @@
 -*- text -*-
+* Add --no-weak/-W option to nm to make it ignore weak symbols.
 
 * Add an option to objdump and readelf to prevent attempts to access debuginfod
   servers when following links.
+
 * objcopy --weaken, --weaken-symbol, and --weaken-symbols now make ELF
   STB_GNU_UNIQUE symbols weak.
 

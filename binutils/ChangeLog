@@ -1,3 +1,16 @@
+2022-05-18  Nick Clifton  <nickc@redhat.com>
+
+	PR 29135
+	* nm.c (non_weak): New variable.
+	(filter_symbols): When non-weak is true, ignore weak symbols.
+	(long_options): Add --no-weak.
+	(usage): Mention --no-weak.
+	(main): Handle -W/--no-weak.
+	* doc/binutils.texi: Document new feature.
+	* NEWS: Mention the new feature.
+	* testsuite/binutils-all/nm.exp: Add test of new feature.
+	* testsuite/binutils-all/no-weak.s: New test source file.
+
 2022-04-25  Nick Clifton  <nickc@redhat.com>
 
 	PR 29072
