@@ -2034,7 +2034,7 @@ tic54x_loop (int count)
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     count = get_absolute_expression ();
 
-  do_repeat ((size_t) count, "LOOP", "ENDLOOP");
+  do_repeat ((size_t) count, "LOOP", "ENDLOOP", NULL);
 }
 
 /* Normally, endloop gets eaten by the preceding loop.  */

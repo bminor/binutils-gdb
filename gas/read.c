@@ -3094,14 +3094,17 @@ s_rept (int ignore ATTRIBUTE_UNUSED)
 
   count = (size_t) get_absolute_expression ();
 
-  do_repeat (count, "REPT", "ENDR");
+  do_repeat (count, "REPT", "ENDR", NULL);
 }
 
 /* This function provides a generic repeat block implementation.   It allows
-   different directives to be used as the start/end keys.  */
+   different directives to be used as the start/end keys.  Any text matching
+   the optional EXPANDER in the block is replaced by the remaining iteration
+   count.  */
 
 void
-do_repeat (size_t count, const char *start, const char *end)
+do_repeat (size_t count, const char *start, const char *end,
+	   const char *expander)
 {
   sb one;
   sb many;
@@ -3119,46 +3122,16 @@ do_repeat (size_t count, const char *start, const char *end)
       return;
     }
 
-  sb_build (&many, count * one.len);
-  while (count-- > 0)
-    sb_add_sb (&many, &one);
-
-  sb_kill (&one);
-
-  input_scrub_include_sb (&many, input_line_pointer, expanding_repeat);
-  sb_kill (&many);
-  buffer_limit = input_scrub_next_buffer (&input_line_pointer);
-}
-
-/* Like do_repeat except that any text matching EXPANDER in the
-   block is replaced by the iteration count.  */
-
-void
-do_repeat_with_expander (size_t count,
-			 const char * start,
-			 const char * end,
-			 const char * expander)
-{
-  sb one;
-  sb many;
-
-  if (((ssize_t) count) < 0)
+  if (expander == NULL || strstr (one.ptr, expander) == NULL)
     {
-      as_bad (_("negative count for %s - ignored"), start);
-      count = 0;
+      sb_build (&many, count * one.len);
+      while (count-- > 0)
+	sb_add_sb (&many, &one);
     }
-
-  sb_new (&one);
-  if (!buffer_and_nest (start, end, &one, get_non_macro_line_sb))
+  else
     {
-      as_bad (_("%s without %s"), start, end);
-      return;
-    }
+      sb_new (&many);
 
-  sb_new (&many);
-
-  if (expander != NULL && strstr (one.ptr, expander) != NULL)
-    {
       while (count -- > 0)
 	{
 	  int len;
@@ -3177,9 +3150,6 @@ do_repeat_with_expander (size_t count,
 	  sb_kill (& processed);
 	}
     }
-  else
-    while (count-- > 0)
-      sb_add_sb (&many, &one);
 
   sb_kill (&one);
 
