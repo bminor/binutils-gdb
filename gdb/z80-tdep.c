@@ -860,9 +860,9 @@ z80_software_single_step (struct regcache *regcache)
 static unsigned (*cache_ovly_region_table)[3] = 0;
 static unsigned cache_novly_regions;
 static CORE_ADDR cache_ovly_region_table_base = 0;
-enum ovly_index
+enum z80_ovly_index
   {
-    VMA, OSIZE, MAPPED_TO_LMA
+    Z80_VMA, Z80_OSIZE, Z80_MAPPED_TO_LMA
   };
 
 static void
@@ -952,12 +952,12 @@ z80_overlay_update_1 (struct obj_section *osect)
 
   /* find region corresponding to the section VMA */
   for (i = 0; i < cache_novly_regions; i++)
-    if (cache_ovly_region_table[i][VMA] == vma)
+    if (cache_ovly_region_table[i][Z80_VMA] == vma)
 	break;
   if (i == cache_novly_regions)
     return 0; /* no such region */
 
-  lma = cache_ovly_region_table[i][MAPPED_TO_LMA];
+  lma = cache_ovly_region_table[i][Z80_MAPPED_TO_LMA];
   i = 0;
 
   /* we have interest for sections with same VMA */
@@ -995,9 +995,9 @@ z80_overlay_update (struct obj_section *osect)
 	bfd_vma vma = bfd_section_vma (bsect);
 
 	for (int i = 0; i < cache_novly_regions; ++i)
-	  if (cache_ovly_region_table[i][VMA] == vma)
+	  if (cache_ovly_region_table[i][Z80_VMA] == vma)
 	    osect->ovly_mapped =
-	      (cache_ovly_region_table[i][MAPPED_TO_LMA] == lma);
+	      (cache_ovly_region_table[i][Z80_MAPPED_TO_LMA] == lma);
       }
 }
 
