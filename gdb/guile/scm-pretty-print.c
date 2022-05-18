@@ -31,7 +31,7 @@
 
 /* Return type of print_string_repr.  */
 
-enum string_repr_result
+enum guile_string_repr_result
 {
   /* The string method returned None.  */
   STRING_REPR_NONE,
@@ -638,7 +638,7 @@ ppscm_print_exception_unless_memory_error (SCM exception,
 /* Helper for gdbscm_apply_val_pretty_printer which calls to_string and
    formats the result.  */
 
-static enum string_repr_result
+static enum guile_string_repr_result
 ppscm_print_string_repr (SCM printer, enum display_hint hint,
 			 struct ui_file *stream, int recurse,
 			 const struct value_print_options *options,
@@ -647,7 +647,7 @@ ppscm_print_string_repr (SCM printer, enum display_hint hint,
 {
   struct value *replacement = NULL;
   SCM str_scm;
-  enum string_repr_result result = STRING_REPR_ERROR;
+  enum guile_string_repr_result result = STRING_REPR_ERROR;
 
   str_scm = ppscm_pretty_print_one_value (printer, &replacement,
 					  gdbarch, language);
@@ -963,7 +963,7 @@ gdbscm_apply_val_pretty_printer (const struct extension_language_defn *extlang,
   SCM val_obj = SCM_BOOL_F;
   enum display_hint hint;
   enum ext_lang_rc result = EXT_LANG_RC_NOP;
-  enum string_repr_result print_result;
+  enum guile_string_repr_result print_result;
 
   if (value_lazy (value))
     value_fetch_lazy (value);

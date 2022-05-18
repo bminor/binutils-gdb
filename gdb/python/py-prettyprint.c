@@ -29,7 +29,7 @@
 
 /* Return type of print_string_repr.  */
 
-enum string_repr_result
+enum gdbpy_string_repr_result
   {
     /* The string method returned None.  */
     string_repr_none,
@@ -273,7 +273,7 @@ print_stack_unless_memory_error (struct ui_file *stream)
 /* Helper for gdbpy_apply_val_pretty_printer which calls to_string and
    formats the result.  */
 
-static enum string_repr_result
+static enum gdbpy_string_repr_result
 print_string_repr (PyObject *printer, const char *hint,
 		   struct ui_file *stream, int recurse,
 		   const struct value_print_options *options,
@@ -281,7 +281,7 @@ print_string_repr (PyObject *printer, const char *hint,
 		   struct gdbarch *gdbarch)
 {
   struct value *replacement = NULL;
-  enum string_repr_result result = string_repr_ok;
+  enum gdbpy_string_repr_result result = string_repr_ok;
 
   gdbpy_ref<> py_str = pretty_print_one_value (printer, &replacement);
   if (py_str != NULL)
@@ -572,7 +572,7 @@ gdbpy_apply_val_pretty_printer (const struct extension_language_defn *extlang,
 {
   struct type *type = value_type (value);
   struct gdbarch *gdbarch = type->arch ();
-  enum string_repr_result print_result;
+  enum gdbpy_string_repr_result print_result;
 
   if (value_lazy (value))
     value_fetch_lazy (value);
