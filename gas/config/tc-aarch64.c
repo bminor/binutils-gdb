@@ -3097,6 +3097,7 @@ aarch64_force_reloc (unsigned int type)
     case BFD_RELOC_AARCH64_LDST32_LO12:
     case BFD_RELOC_AARCH64_LDST64_LO12:
     case BFD_RELOC_AARCH64_LDST8_LO12:
+    case BFD_RELOC_AARCH64_LDST_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
@@ -3130,6 +3131,8 @@ aarch64_force_reloc (unsigned int type)
     case BFD_RELOC_AARCH64_TLSLD_LDST64_DTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLD_LDST8_DTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLD_LDST_DTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G0_NC:
     case BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1:
@@ -3143,6 +3146,8 @@ aarch64_force_reloc (unsigned int type)
     case BFD_RELOC_AARCH64_TLSLE_LDST64_TPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_LDST8_TPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12:
+    case BFD_RELOC_AARCH64_TLSLE_LDST_TPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -3652,7 +3657,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 
 	  /* #:<reloc_op>:  */
 	  if (! aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
-					aarch64_force_reloc (entry->add_type) == 1))
+					aarch64_force_reloc (ty) == 1))
 	    {
 	      set_syntax_error (_("invalid relocation expression"));
 	      return false;
@@ -3776,7 +3781,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	         the name in the assembler source.  Next, we parse the
 	         expression.  */
 	      if (! aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
-					    aarch64_force_reloc (entry->add_type) == 1))
+					    aarch64_force_reloc (entry->ldst_type) == 1))
 		{
 		  set_syntax_error (_("invalid relocation expression"));
 		  return false;
