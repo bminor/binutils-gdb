@@ -152,7 +152,7 @@ get_raw_reg (const unsigned char *raw_regs, int regnum)
 const struct target_desc *
 get_ipa_tdesc (int idx)
 {
-  return aarch64_linux_read_description (0, false, false, false);
+  return aarch64_linux_read_description ({});
 }
 
 /* Allocate buffer for the jump pads.  The branch instruction has a reach
@@ -205,5 +205,5 @@ void
 initialize_low_tracepoint (void)
 {
   /* SVE, pauth, MTE and TLS not yet supported.  */
-  aarch64_linux_read_description (0, false, false, false);
+  aarch64_linux_read_description ({});
 }
