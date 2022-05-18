@@ -525,6 +525,10 @@ ignore_input (void)
 	  || !strncasecmp (s, "endc", 4))
 	return 0;
       break;
+    case 'l': case 'L':
+      if (!strncasecmp (s, "linefile", 8))
+	return 0;
+      break;
     }
 
   return (current_cframe != NULL) && (current_cframe->ignoring);
