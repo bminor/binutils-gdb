@@ -6,11 +6,15 @@
 # VxWorks needs a special variant of this file.
 #skip: *-*-vxworks*
 
-Unwind section '.ARM.exidx' at offset 0x40 contains 1 entry:
+Unwind section '.ARM.exidx' at offset 0x60 contains 1 entry:
 
-0x0 <foo>: 0x80b4a8b0
-  Compact model index: 0
+0x0 <foo>: @0x0
+  Compact model index: 1
+  0x84 0x00 pop {r14}
+  0xb4      pop {ra_auth_code}
+  0x84 0x00 pop {r14}
+  0xb4      pop {ra_auth_code}
+  0xa3      pop {r4, r5, r6, r7}
   0xb4      pop {ra_auth_code}
   0xa8      pop {r4, r14}
   0xb0      finish
-

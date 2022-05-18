@@ -1942,6 +1942,22 @@ parse_reg_list (char ** strp, enum reg_list_els etype)
 		rt = REG_TYPE_PSEUDO;
 
 	      reg = arm_reg_parse (&str, rt);
+
+	      /* Skip over allowed registers of alternative types in mixed-type
+	         register lists.  */
+	      if (reg == FAIL && rt == REG_TYPE_PSEUDO
+		  && ((reg = arm_reg_parse (&str, REG_TYPE_RN)) != FAIL))
+		{
+		  cur_reg = reg;
+		  continue;
+		}
+	      else if (reg == FAIL && rt == REG_TYPE_RN
+		       && ((reg = arm_reg_parse (&str, REG_TYPE_PSEUDO)) != FAIL))
+		{
+		  cur_reg = reg;
+		  continue;
+		}
+
 	      if (etype == REGLIST_CLRM)
 		{
 		  if (reg == REG_SP || reg == REG_PC)
@@ -4281,22 +4297,11 @@ s_arm_unwind_personality (int ignored ATTRIBUTE_UNUSED)
 /* Parse a directive saving pseudo registers.  */
 
 static void
-s_arm_unwind_save_pseudo (void)
+s_arm_unwind_save_pseudo (long range)
 {
   valueT op;
-  long range;
 
-  range = parse_reg_list (&input_line_pointer, REGLIST_PSEUDO);
-  if (range == FAIL)
-    {
-      as_bad (_("expected pseudo register list"));
-      ignore_rest_of_line ();
-      return;
-    }
-
-  demand_empty_rest_of_line ();
-
-  if (range & (1 << 9))
+  if (range & (1 << 12))
     {
       /* Opcode for restoring RA_AUTH_CODE.  */
       op = 0xb4;
@@ -4308,21 +4313,10 @@ s_arm_unwind_save_pseudo (void)
 /* Parse a directive saving core registers.  */
 
 static void
-s_arm_unwind_save_core (void)
+s_arm_unwind_save_core (long range)
 {
   valueT op;
-  long range;
   int n;
-
-  range = parse_reg_list (&input_line_pointer, REGLIST_RN);
-  if (range == FAIL)
-    {
-      as_bad (_("expected register list"));
-      ignore_rest_of_line ();
-      return;
-    }
-
-  demand_empty_rest_of_line ();
 
   /* Turn .unwind_movsp ip followed by .unwind_save {..., ip, ...}
      into .unwind_save {..., sp...}.  We aren't bothered about the value of
@@ -4722,6 +4716,40 @@ s_arm_unwind_save_mmxwcg (void)
   ignore_rest_of_line ();
 }
 
+static void
+s_arm_unwind_save_mixed (long range, long mask_range)
+{
+  const long roof = ((sizeof (long) * CHAR_BIT) - 1)
+    - __builtin_clzl (mask_range);
+
+  long subrange = 0;
+  unsigned lim_lo = 0;
+  unsigned lim_hi = 0;
+
+  /* Iterate over pseudoregister to establish subrange bounds.  */
+  for (; lim_hi <= roof; lim_hi++)
+    {
+      if (mask_range & (1 << lim_hi))
+	{
+	  /* Once we know where to split our range, construct subrange.  */
+	  for (unsigned n = lim_lo; n < lim_hi; n++)
+	    {
+	      if (range & (1 << n))
+		subrange |= (1 << n);
+	    }
+
+	  s_arm_unwind_save_core (subrange);
+	  s_arm_unwind_save_pseudo (1 << lim_hi);
+
+	  subrange = 0;
+	  lim_lo = lim_hi + 1;
+	}
+    }
+
+  lim_lo = 0xffff << roof;
+  subrange = range & lim_lo;
+  s_arm_unwind_save_core (subrange);
+}
 
 /* Parse an unwind_save directive.
    If the argument is non-zero, this is a .vsave directive.  */
@@ -4729,7 +4757,8 @@ s_arm_unwind_save_mmxwcg (void)
 static void
 s_arm_unwind_save (int arch_v6)
 {
-  char *peek;
+  char *peek, *mask_peek;
+  long range, mask_range;
   struct reg_entry *reg;
   bool had_brace = false;
 
@@ -4737,7 +4766,7 @@ s_arm_unwind_save (int arch_v6)
     as_bad (MISSING_FNSTART);
 
   /* Figure out what sort of save we have.  */
-  peek = input_line_pointer;
+  peek = mask_peek = input_line_pointer;
 
   if (*peek == '{')
     {
@@ -4767,13 +4796,35 @@ s_arm_unwind_save (int arch_v6)
       s_arm_unwind_save_fpa (reg->number);
       return;
 
-    case REG_TYPE_RN:
-      s_arm_unwind_save_core ();
-      return;
-
     case REG_TYPE_PSEUDO:
-      s_arm_unwind_save_pseudo ();
-      return;
+    case REG_TYPE_RN:
+      mask_range = parse_reg_list (&mask_peek, REGLIST_PSEUDO);
+      range = parse_reg_list (&input_line_pointer, REGLIST_RN);
+
+      if (range == FAIL || mask_range == FAIL)
+	{
+	  as_bad (_("expected register list"));
+	  ignore_rest_of_line ();
+	  return;
+	}
+
+      demand_empty_rest_of_line ();
+
+      if (!mask_range)
+	{
+	  s_arm_unwind_save_core (range);
+	  return;
+	}
+      else if (!range)
+	{
+	  s_arm_unwind_save_pseudo (mask_range);
+	  return;
+	}
+      else
+	{
+	  s_arm_unwind_save_mixed (range, mask_range);
+	  return;
+	}
 
     case REG_TYPE_VFD:
       if (arch_v6)
@@ -23976,7 +24027,7 @@ static const struct reg_entry reg_names[] =
      for tc_arm_regname_to_dw2regnum to translate to DWARF reg number using
      134 + reg_number should the range 134 to 142 be used for more pseudo regs
      in the future.  This also helps fit RA_AUTH_CODE into a bitmask.  */
-  REGDEF(ra_auth_code,9,PSEUDO),
+  REGDEF(ra_auth_code,12,PSEUDO),
 };
 #undef REGDEF
 #undef REGNUM

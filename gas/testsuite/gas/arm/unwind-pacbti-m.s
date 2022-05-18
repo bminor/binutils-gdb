@@ -16,5 +16,11 @@ foo:
 	push	{r12}
 	.save {ra_auth_code}
 	pop	{r12}
+	push	{r4-r7, ip, lr}
+	.save {r4-r7, ra_auth_code, lr}
+	pop	{r4-r7, ip, lr}
+	push	{ip, lr}
+	.save {ra_auth_code, lr}
+	pop {ip, lr}
 	pop	{r4, pc}
 	.fnend
