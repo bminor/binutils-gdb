@@ -12101,8 +12101,6 @@ library2.so:
 1 printer disabled
 1 of 3 printers enabled
 (gdb) info pretty-printer library2
-library1.so:
-  foo [disabled]
 library2.so:
   bar
     bar1 [disabled]
@@ -12110,7 +12108,7 @@ library2.so:
 (gdb) disable pretty-printer library2 bar
 1 printer disabled
 0 of 3 printers enabled
-(gdb) info pretty-printer library2
+(gdb) info pretty-printer
 library1.so:
   foo [disabled]
 library2.so:
