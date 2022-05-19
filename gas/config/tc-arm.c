@@ -6565,7 +6565,13 @@ parse_sys_vldr_vstr (char **str)
     {"VPR",		0x4, 0x1},
     {"P0",		0x5, 0x1},
     {"FPCXTNS",		0x6, 0x1},
-    {"FPCXTS",		0x7, 0x1}
+    {"FPCXT_NS",	0x6, 0x1},
+    {"fpcxtns",		0x6, 0x1},
+    {"fpcxt_ns",	0x6, 0x1},
+    {"FPCXTS",		0x7, 0x1},
+    {"FPCXT_S",		0x7, 0x1},
+    {"fpcxts",		0x7, 0x1},
+    {"fpcxt_s",		0x7, 0x1}
   };
   char *op_end = strchr (*str, ',');
   size_t op_strlen = op_end - *str;
@@ -10161,8 +10167,8 @@ do_vmrs (void)
 		  _(BAD_FPU));
       break;
 
-    case 14: /* fpcxt_ns.  */
-    case 15: /* fpcxt_s.  */
+    case 14: /* fpcxt_ns, fpcxtns, FPCXT_NS, FPCXTNS.  */
+    case 15: /* fpcxt_s, fpcxts, FPCXT_S, FPCXTS.  */
       constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v8_1m_main),
 		  _("selected processor does not support instruction"));
       break;
@@ -23991,6 +23997,8 @@ static const struct reg_entry reg_names[] =
   REGDEF(vpr,12,VFC), REGDEF(VPR,12,VFC),
   REGDEF(fpcxt_ns,14,VFC), REGDEF(FPCXT_NS,14,VFC),
   REGDEF(fpcxt_s,15,VFC), REGDEF(FPCXT_S,15,VFC),
+  REGDEF(fpcxtns,14,VFC), REGDEF(FPCXTNS,14,VFC),
+  REGDEF(fpcxts,15,VFC), REGDEF(FPCXTS,15,VFC),
 
   /* Maverick DSP coprocessor registers.  */
   REGSET(mvf,MVF),  REGSET(mvd,MVD),  REGSET(mvfx,MVFX),  REGSET(mvdx,MVDX),
