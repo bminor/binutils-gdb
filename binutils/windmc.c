@@ -338,7 +338,7 @@ mc_add_node_lang (mc_node *root, const mc_keyword *lang, rc_uint_type vid)
 static char *
 convert_unicode_to_ACP (const unichar *usz)
 {
-  char *s;
+  char *s = NULL;
   rc_uint_type l;
 
   if (! usz)
@@ -607,7 +607,7 @@ mc_generate_bin_item (mc_node_lang *n, rc_uint_type *res_len)
   else
     {
       rc_uint_type txt_len, l;
-      char *cvt_txt;
+      char *cvt_txt = NULL;
 
       codepage_from_unicode( &l, n->message, &cvt_txt, n->lang->lang_info.wincp);
       if (! cvt_txt)
@@ -1105,7 +1105,7 @@ main (int argc, char **argv)
 
   /* Load the input file and do code page transformations to UTF16.  */
   {
-    unichar *u;
+    unichar *u = NULL;
     rc_uint_type ul;
     char *buff;
     bfd_size_type flen;

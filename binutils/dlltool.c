@@ -1268,7 +1268,7 @@ run (const char *what, char *args)
   int pid, wait_status;
   int i;
   const char **argv;
-  char *errmsg_fmt, *errmsg_arg;
+  char *errmsg_fmt = NULL, *errmsg_arg = NULL;
   char *temp_base = choose_temp_base ();
 
   inform (_("run: %s %s"), what, args);

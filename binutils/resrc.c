@@ -200,7 +200,7 @@ run_cmd (char *cmd, const char *redir)
   int pid, wait_status, retcode;
   int i;
   const char **argv;
-  char *errmsg_fmt, *errmsg_arg;
+  char *errmsg_fmt = NULL, *errmsg_arg = NULL;
   char *temp_base = choose_temp_base ();
   int in_quote;
   char sep;

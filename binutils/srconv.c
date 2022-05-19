@@ -316,6 +316,7 @@ wr_hd (struct coff_ofile *p)
   struct IT_hd hd;
 
   hd.spare1 = 0;
+  hd.spare2 = 0;
   if (bfd_get_file_flags (abfd) & EXEC_P)
     hd.mt = MTYPE_ABS_LM;
   else

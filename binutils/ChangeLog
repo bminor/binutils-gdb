@@ -1,3 +1,14 @@
+2022-05-19  Nick Clifton  <nickc@redhat.com>
+
+	* dlltool.c (run): Initialise errmsg_fmt.
+	* dllwrap.c (run): Likewise.
+	* resrc.c (run_cmd): Likewise.
+	* mclex.c (mc_add_keyword): Initialise usz.
+	* srconv.c (wd_hd): Initialise hd.spare2.
+	* windmc.c (mc_add_node_lang): Initialise s.
+	(mc_generate_bin_item): Initialise cvt_txt.
+	(main): Initialise u.
+
 2022-05-18  Nick Clifton  <nickc@redhat.com>
 
 	PR 29135
