@@ -1183,28 +1183,25 @@ static void
 show_mask_address (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  mips_gdbarch_tdep *tdep
-    = (mips_gdbarch_tdep *) gdbarch_tdep (target_gdbarch ());
-
-  deprecated_show_value_hack (file, from_tty, c, value);
-  switch (mask_address_var)
+  const char *additional_text = "";
+  if (mask_address_var == AUTO_BOOLEAN_AUTO)
     {
-    case AUTO_BOOLEAN_TRUE:
-      gdb_printf (file, "The 32 bit mips address mask is enabled\n");
-      break;
-    case AUTO_BOOLEAN_FALSE:
-      gdb_printf (file, "The 32 bit mips address mask is disabled\n");
-      break;
-    case AUTO_BOOLEAN_AUTO:
-      gdb_printf
-	(file,
-	 "The 32 bit address mask is set automatically.  Currently %s\n",
-	 mips_mask_address_p (tdep) ? "enabled" : "disabled");
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, _("show_mask_address: bad switch"));
-      break;
+      if (gdbarch_bfd_arch_info (target_gdbarch ())->arch != bfd_arch_mips)
+	additional_text = _(" (current architecture is not MIPS)");
+      else
+	{
+	  mips_gdbarch_tdep *tdep
+	    = (mips_gdbarch_tdep *) gdbarch_tdep (target_gdbarch ());
+
+	  if (mips_mask_address_p (tdep))
+	    additional_text = _(" (currently \"on\")");
+	  else
+	    additional_text = _(" (currently \"off\")");
+	}
     }
+
+  gdb_printf (file, _("Zeroing of upper 32 bits of 64-bit addresses is \"%s\"%s.\n"),
+	      value, additional_text);
 }
 
 /* Tell if the program counter value in MEMADDR is in a standard ISA
