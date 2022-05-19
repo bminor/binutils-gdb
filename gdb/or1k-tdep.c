@@ -248,7 +248,7 @@ or1k_return_value (struct gdbarch *gdbarch, struct value *functype,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum type_code rv_type = valtype->code ();
   unsigned int rv_size = TYPE_LENGTH (valtype);
-  or1k_gdbarch_tdep *tdep = (or1k_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  or1k_gdbarch_tdep *tdep = gdbarch_tdep<or1k_gdbarch_tdep> (gdbarch);
   int bpw = tdep->bytes_per_word;
 
   /* Deal with struct/union as addresses.  If an array won't fit in a
@@ -353,7 +353,7 @@ or1k_delay_slot_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   const CGEN_INSN *insn;
   CGEN_FIELDS tmp_fields;
-  or1k_gdbarch_tdep *tdep = (or1k_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  or1k_gdbarch_tdep *tdep = gdbarch_tdep<or1k_gdbarch_tdep> (gdbarch);
 
   insn = cgen_lookup_insn (tdep->gdb_cgen_cpu_desc,
 			   NULL,
@@ -635,7 +635,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int heap_offset = 0;
   CORE_ADDR heap_sp = sp - 128;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  or1k_gdbarch_tdep *tdep = (or1k_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  or1k_gdbarch_tdep *tdep = gdbarch_tdep<or1k_gdbarch_tdep> (gdbarch);
   int bpa = tdep->bytes_per_address;
   int bpw = tdep->bytes_per_word;
   struct type *func_type = value_type (function);
@@ -1273,7 +1273,7 @@ or1k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static void
 or1k_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  or1k_gdbarch_tdep *tdep = (or1k_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  or1k_gdbarch_tdep *tdep = gdbarch_tdep<or1k_gdbarch_tdep> (gdbarch);
 
   if (NULL == tdep)
     return; /* Nothing to report */

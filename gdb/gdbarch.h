@@ -142,8 +142,23 @@ using read_core_file_mappings_loop_ftype =
 
 #include "gdbarch-gen.h"
 
-extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
+/* An internal function that should _only_ be called from gdbarch_tdep.
+   Returns the gdbarch_tdep field held within GDBARCH.  */
 
+extern struct gdbarch_tdep *gdbarch_tdep_1 (struct gdbarch *gdbarch);
+
+/* Return the gdbarch_tdep object held within GDBARCH cast to the type
+   TDepType, which should be a sub-class of gdbarch_tdep.  There is no
+   checking done that the gdbarch_tdep within GDBARCH actually is of the
+   type TDepType, we just assume the caller knows what they are doing.  */
+
+template<typename TDepType>
+static inline TDepType *
+gdbarch_tdep (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep_1 (gdbarch);
+  return static_cast<TDepType *> (tdep);
+}
 
 /* Mechanism for co-ordinating the selection of a specific
    architecture.

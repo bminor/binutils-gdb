@@ -146,14 +146,14 @@ struct m68gc11_gdbarch_tdep : gdbarch_tdep
 static int
 stack_correction (gdbarch *arch)
 {
-  m68gc11_gdbarch_tdep *tdep = (m68gc11_gdbarch_tdep *) gdbarch_tdep (arch);
+  m68gc11_gdbarch_tdep *tdep = gdbarch_tdep<m68gc11_gdbarch_tdep> (arch);
   return tdep->stack_correction;
 }
 
 static int
 use_page_register (gdbarch *arch)
 {
-  m68gc11_gdbarch_tdep *tdep = (m68gc11_gdbarch_tdep *) gdbarch_tdep (arch);
+  m68gc11_gdbarch_tdep *tdep = gdbarch_tdep<m68gc11_gdbarch_tdep> (arch);
   return tdep->stack_correction;
 }
 
@@ -642,7 +642,7 @@ m68hc11_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
       return pc;
     }
 
-  m68gc11_gdbarch_tdep *tdep = (m68gc11_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  m68gc11_gdbarch_tdep *tdep = gdbarch_tdep<m68gc11_gdbarch_tdep> (gdbarch);
   seq_table = tdep->prologue;
   
   /* The 68hc11 stack is as follows:
@@ -1020,7 +1020,7 @@ m68hc11_print_register (struct gdbarch *gdbarch, struct ui_file *file,
   else
     {
       m68gc11_gdbarch_tdep *tdep
-	= (m68gc11_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+	= gdbarch_tdep<m68gc11_gdbarch_tdep> (gdbarch);
 
       if (regno == HARD_PC_REGNUM && tdep->use_page_register)
 	{
@@ -1125,7 +1125,7 @@ m68hc11_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
       gdb_printf (file, " Y=");
       m68hc11_print_register (gdbarch, file, frame, HARD_Y_REGNUM);
   
-      m68gc11_gdbarch_tdep *tdep = (m68gc11_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+      m68gc11_gdbarch_tdep *tdep = gdbarch_tdep<m68gc11_gdbarch_tdep> (gdbarch);
 
       if (tdep->use_page_register)
 	{
@@ -1417,7 +1417,7 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       m68gc11_gdbarch_tdep *tdep
-	= (m68gc11_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+	= gdbarch_tdep<m68gc11_gdbarch_tdep> (arches->gdbarch);
 
       if (tdep->elf_flags != elf_flags)
 	continue;

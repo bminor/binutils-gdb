@@ -310,7 +310,7 @@ static const struct floatformat *floatformats_ia64_ext[2] =
 static struct type *
 ia64_ext_type (struct gdbarch *gdbarch)
 {
-  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (gdbarch);
 
   if (!tdep->ia64_ext_type)
     tdep->ia64_ext_type
@@ -2177,7 +2177,7 @@ ia64_sigtramp_frame_init_saved_regs (struct frame_info *this_frame,
 				     struct ia64_frame_cache *cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (gdbarch);
 
   if (tdep->sigcontext_register_address)
     {
@@ -2336,7 +2336,7 @@ ia64_sigtramp_frame_sniffer (const struct frame_unwind *self,
 			     void **this_cache)
 {
   gdbarch *arch = get_frame_arch (this_frame);
-  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (arch);
+  ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (arch);
   if (tdep->pc_in_sigtramp)
     {
       CORE_ADDR pc = get_frame_pc (this_frame);
@@ -2485,7 +2485,7 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
   unw_word_t bsp, sof, cfm, psr, ip;
   struct frame_info *this_frame = (struct frame_info *) arg;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (gdbarch);
   
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);
@@ -3485,7 +3485,7 @@ ia64_find_global_pointer_from_dynamic_section (struct gdbarch *gdbarch,
 static CORE_ADDR
 ia64_find_global_pointer (struct gdbarch *gdbarch, CORE_ADDR faddr)
 {
-  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (gdbarch);
   CORE_ADDR addr = 0;
 
   if (tdep->find_global_pointer_from_solib)
@@ -3680,7 +3680,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      function_call_return_method return_method,
 		      CORE_ADDR struct_addr)
 {
-  ia64_gdbarch_tdep *tdep = (ia64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  ia64_gdbarch_tdep *tdep = gdbarch_tdep<ia64_gdbarch_tdep> (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int argno;
   struct value *arg;

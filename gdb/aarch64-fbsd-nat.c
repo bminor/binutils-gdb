@@ -90,7 +90,7 @@ aarch64_fbsd_nat_target::fetch_registers (struct regcache *regcache,
 				    &aarch64_fbsd_fpregset);
 
   gdbarch *gdbarch = regcache->arch ();
-  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
   if (tdep->has_tls ())
     {
       const struct regcache_map_entry aarch64_fbsd_tls_regmap[] =
@@ -123,7 +123,7 @@ aarch64_fbsd_nat_target::store_registers (struct regcache *regcache,
 				    PT_SETFPREGS, &aarch64_fbsd_fpregset);
 
   gdbarch *gdbarch = regcache->arch ();
-  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
   if (tdep->has_tls ())
     {
       const struct regcache_map_entry aarch64_fbsd_tls_regmap[] =

@@ -308,7 +308,7 @@ z80_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR pc_beg, CORE_ADDR pc_end,
 		   struct z80_unwind_cache *info)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  z80_gdbarch_tdep *tdep = (z80_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  z80_gdbarch_tdep *tdep = gdbarch_tdep<z80_gdbarch_tdep> (gdbarch);
   int addr_len = tdep->addr_length;
   gdb_byte prologue[32]; /* max prologue is 24 bytes: __interrupt with local array */
   int pos = 0;
@@ -564,7 +564,7 @@ z80_frame_unwind_cache (struct frame_info *this_frame,
   gdb_byte buf[sizeof(void*)];
   struct z80_unwind_cache *info;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  z80_gdbarch_tdep *tdep = (z80_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  z80_gdbarch_tdep *tdep = gdbarch_tdep<z80_gdbarch_tdep> (gdbarch);
   int addr_len = tdep->addr_length;
 
   if (*this_prologue_cache)
@@ -697,7 +697,7 @@ z80_frame_prev_register (struct frame_info *this_frame,
 	  ULONGEST pc;
 	  gdb_byte buf[3];
 	  struct gdbarch *gdbarch = get_frame_arch (this_frame);
-	  z80_gdbarch_tdep *tdep = (z80_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+	  z80_gdbarch_tdep *tdep = gdbarch_tdep<z80_gdbarch_tdep> (gdbarch);
 	  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
 	  read_memory (info->saved_regs[Z80_PC_REGNUM].addr (),
@@ -750,7 +750,7 @@ z80_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
     }
   else /* kind is non-RST address, use CALL instead, but it is dungerous */
     {
-      z80_gdbarch_tdep *tdep = (z80_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+      z80_gdbarch_tdep *tdep = gdbarch_tdep<z80_gdbarch_tdep> (gdbarch);
       gdb_byte *p = break_insn;
       *p++ = 0xcd;
       *p++ = (kind >> 0) & 0xff;

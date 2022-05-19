@@ -359,7 +359,7 @@ static void
 fetch_pauth_masks_from_thread (struct regcache *regcache)
 {
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
   int ret;
   struct iovec iovec;
   uint64_t pauth_regset[2] = {0, 0};
@@ -385,7 +385,7 @@ static void
 fetch_mteregs_from_thread (struct regcache *regcache)
 {
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
   int regno = tdep->mte_reg_base;
 
   gdb_assert (regno != -1);
@@ -410,7 +410,7 @@ static void
 store_mteregs_to_thread (struct regcache *regcache)
 {
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
   int regno = tdep->mte_reg_base;
 
   gdb_assert (regno != -1);
@@ -439,7 +439,7 @@ static void
 fetch_tlsregs_from_thread (struct regcache *regcache)
 {
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
   int regno = tdep->tls_regnum;
 
   gdb_assert (regno != -1);
@@ -464,7 +464,7 @@ static void
 store_tlsregs_to_thread (struct regcache *regcache)
 {
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
   int regno = tdep->tls_regnum;
 
   gdb_assert (regno != -1);
@@ -493,7 +493,7 @@ static void
 aarch64_fetch_registers (struct regcache *regcache, int regno)
 {
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
 
   if (regno == -1)
     {
@@ -543,7 +543,7 @@ static void
 aarch32_fetch_registers (struct regcache *regcache, int regno)
 {
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<arm_gdbarch_tdep> (regcache->arch ());
 
   if (regno == -1)
     {
@@ -579,7 +579,7 @@ static void
 aarch64_store_registers (struct regcache *regcache, int regno)
 {
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
 
   if (regno == -1)
     {
@@ -619,7 +619,7 @@ static void
 aarch32_store_registers (struct regcache *regcache, int regno)
 {
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+    = gdbarch_tdep<arm_gdbarch_tdep> (regcache->arch ());
 
   if (regno == -1)
     {
@@ -893,7 +893,7 @@ aarch64_linux_nat_target::thread_architecture (ptid_t ptid)
 
   /* Only return it if the current vector length matches the one in the tdep.  */
   aarch64_gdbarch_tdep *tdep
-    = (aarch64_gdbarch_tdep *) gdbarch_tdep (inf->gdbarch);
+    = gdbarch_tdep<aarch64_gdbarch_tdep> (inf->gdbarch);
   uint64_t vq = aarch64_sve_get_vq (ptid.lwp ());
   if (vq == tdep->vq)
     return inf->gdbarch;

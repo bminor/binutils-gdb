@@ -355,7 +355,7 @@ static void
 arm_cache_init (struct arm_prologue_cache *cache, struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   arm_cache_init (cache, gdbarch);
   cache->sp = get_frame_register_unsigned (frame, ARM_SP_REGNUM);
@@ -553,7 +553,7 @@ bool arm_unwind_secure_frames = true;
 int
 arm_psr_thumb_bit (struct gdbarch *gdbarch)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (tdep->is_m)
     return XPSR_T;
@@ -665,7 +665,7 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
   struct bound_minimal_symbol sym;
   char type;
   arm_displaced_step_copy_insn_closure *dsc = nullptr;
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (gdbarch_displaced_step_copy_insn_closure_by_addr_p (gdbarch))
     dsc = ((arm_displaced_step_copy_insn_closure * )
@@ -769,7 +769,7 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 static int
 arm_m_addr_is_magic (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
   if (tdep->have_sec_ext)
     {
       switch ((addr & 0xff000000))
@@ -811,7 +811,7 @@ arm_m_addr_is_magic (struct gdbarch *gdbarch, CORE_ADDR addr)
 static CORE_ADDR
 arm_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR val)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   /* On M-profile devices, do not strip the low bit from EXC_RETURN
      (the magic exception return address).  */
@@ -939,7 +939,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 			CORE_ADDR start, CORE_ADDR limit,
 			struct arm_prologue_cache *cache)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   int i;
@@ -1879,7 +1879,7 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
   CORE_ADDR offset, current_pc;
   pv_t regs[ARM_FPS_REGNUM];
   CORE_ADDR unrecognized_pc = 0;
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   /* Search the prologue looking for instructions that set up the
      frame pointer, adjust the stack pointer, and save registers.
@@ -2127,7 +2127,7 @@ arm_scan_prologue (struct frame_info *this_frame,
   CORE_ADDR prologue_start, prologue_end;
   CORE_ADDR prev_pc = get_frame_pc (this_frame);
   CORE_ADDR block_addr = get_frame_address_in_block (this_frame);
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   /* Assume there is no frame until proven otherwise.  */
   cache->framereg = ARM_SP_REGNUM;
@@ -2232,7 +2232,7 @@ arm_make_prologue_cache (struct frame_info *this_frame)
     return cache;
 
   arm_gdbarch_tdep *tdep =
-    (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+    gdbarch_tdep<arm_gdbarch_tdep> (get_frame_arch (this_frame));
 
   prev_sp = unwound_fp + cache->framesize;
   arm_cache_set_active_sp_value (cache, tdep, prev_sp);
@@ -2263,7 +2263,7 @@ arm_prologue_unwind_stop_reason (struct frame_info *this_frame,
   /* This is meant to halt the backtrace at "_start".  */
   pc = get_frame_pc (this_frame);
   gdbarch *arch = get_frame_arch (this_frame);
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (arch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (arch);
   if (pc <= tdep->lowest_pc)
     return UNWIND_OUTERMOST;
 
@@ -2291,7 +2291,7 @@ arm_prologue_this_id (struct frame_info *this_frame,
   cache = (struct arm_prologue_cache *) *this_cache;
 
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+    = gdbarch_tdep<arm_gdbarch_tdep> (get_frame_arch (this_frame));
 
   /* Use function start address as part of the frame ID.  If we cannot
      identify the start address (due to missing symbol information),
@@ -2318,7 +2318,7 @@ arm_prologue_prev_register (struct frame_info *this_frame,
     *this_cache = arm_make_prologue_cache (this_frame);
   cache = (struct arm_prologue_cache *) *this_cache;
 
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   /* If this frame has signed the return address, mark it as so.  */
   if (tdep->have_pacbti && cache->ra_signed_state.has_value ()
@@ -2986,7 +2986,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 
   /* We already got the previous SP.  */
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+    = gdbarch_tdep<arm_gdbarch_tdep> (get_frame_arch (this_frame));
   arm_cache_set_active_sp_value (cache, tdep, vsp);
 
   return cache;
@@ -3111,7 +3111,7 @@ arm_make_epilogue_frame_cache (struct frame_info *this_frame)
 
   /* Since we are in epilogue, the SP has been restored.  */
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+    = gdbarch_tdep<arm_gdbarch_tdep> (get_frame_arch (this_frame));
   arm_cache_set_active_sp_value (cache, tdep,
 				 get_frame_register_unsigned (this_frame,
 							      ARM_SP_REGNUM));
@@ -3150,7 +3150,7 @@ arm_epilogue_frame_this_id (struct frame_info *this_frame,
     func = pc;
 
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+    = gdbarch_tdep<arm_gdbarch_tdep> (get_frame_arch (this_frame));
   *this_id = frame_id_build (arm_cache_get_prev_sp_value (cache, tdep), pc);
 }
 
@@ -3274,7 +3274,7 @@ arm_make_stub_cache (struct frame_info *this_frame)
   arm_cache_init (cache, this_frame);
 
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+    = gdbarch_tdep<arm_gdbarch_tdep> (get_frame_arch (this_frame));
   arm_cache_set_active_sp_value (cache, tdep,
 				 get_frame_register_unsigned (this_frame,
 							      ARM_SP_REGNUM));
@@ -3296,7 +3296,7 @@ arm_stub_this_id (struct frame_info *this_frame,
   cache = (struct arm_prologue_cache *) *this_cache;
 
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+    = gdbarch_tdep<arm_gdbarch_tdep> (get_frame_arch (this_frame));
   *this_id = frame_id_build (arm_cache_get_prev_sp_value (cache, tdep),
 			     get_frame_pc (this_frame));
 }
@@ -3344,7 +3344,7 @@ static struct arm_prologue_cache *
 arm_m_exception_cache (struct frame_info *this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct arm_prologue_cache *cache;
   CORE_ADDR lr;
@@ -3655,7 +3655,7 @@ arm_m_exception_this_id (struct frame_info *this_frame,
 
   /* Our frame ID for a stub frame is the current SP and LR.  */
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+    = gdbarch_tdep<arm_gdbarch_tdep> (get_frame_arch (this_frame));
   *this_id = frame_id_build (arm_cache_get_prev_sp_value (cache, tdep),
 			     get_frame_pc (this_frame));
 }
@@ -3677,7 +3677,7 @@ arm_m_exception_prev_register (struct frame_info *this_frame,
 
   /* The value was already reconstructed into PREV_SP.  */
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+    = gdbarch_tdep<arm_gdbarch_tdep> (get_frame_arch (this_frame));
   if (prev_regnum == ARM_SP_REGNUM)
     return frame_unwind_got_constant (this_frame, prev_regnum,
 				      arm_cache_get_prev_sp_value (cache, tdep));
@@ -3765,7 +3765,7 @@ arm_normal_frame_base (struct frame_info *this_frame, void **this_cache)
   cache = (struct arm_prologue_cache *) *this_cache;
 
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
+    = gdbarch_tdep<arm_gdbarch_tdep> (get_frame_arch (this_frame));
   return arm_cache_get_prev_sp_value (cache, tdep) - cache->framesize;
 }
 
@@ -3781,7 +3781,7 @@ arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
 			  int regnum)
 {
   struct gdbarch * gdbarch = get_frame_arch (this_frame);
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
   CORE_ADDR lr;
   ULONGEST cpsr;
 
@@ -4305,7 +4305,7 @@ arm_vfp_call_candidate (struct type *t, enum arm_vfp_cprc_base_type *base_type,
 static int
 arm_vfp_abi_for_function (struct gdbarch *gdbarch, struct type *func_type)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   /* Variadic functions always use the base ABI.  Assume that functions
      without debug info are not variadic.  */
@@ -4339,7 +4339,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int use_vfp_abi;
   struct type *ftype;
   unsigned vfp_regs_free = (1 << 16) - 1;
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   /* Determine the type of this function and whether the VFP ABI
      applies.  */
@@ -4611,7 +4611,7 @@ arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 static struct type *
 arm_ext_type (struct gdbarch *gdbarch)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (!tdep->arm_ext_type)
     tdep->arm_ext_type
@@ -4624,7 +4624,7 @@ arm_ext_type (struct gdbarch *gdbarch)
 static struct type *
 arm_neon_double_type (struct gdbarch *gdbarch)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (tdep->neon_double_type == NULL)
     {
@@ -4663,7 +4663,7 @@ arm_neon_double_type (struct gdbarch *gdbarch)
 static struct type *
 arm_neon_quad_type (struct gdbarch *gdbarch)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (tdep->neon_quad_type == NULL)
     {
@@ -4701,7 +4701,7 @@ arm_neon_quad_type (struct gdbarch *gdbarch)
 static bool
 is_q_pseudo (struct gdbarch *gdbarch, int regnum)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   /* Q pseudo registers are available for both NEON (Q0~Q15) and
      MVE (Q0~Q7) features.  */
@@ -4722,7 +4722,7 @@ is_q_pseudo (struct gdbarch *gdbarch, int regnum)
 static bool
 is_s_pseudo (struct gdbarch *gdbarch, int regnum)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (tdep->have_s_pseudos
       && regnum >= tdep->s_pseudo_base
@@ -4741,7 +4741,7 @@ is_s_pseudo (struct gdbarch *gdbarch, int regnum)
 static bool
 is_mve_pseudo (struct gdbarch *gdbarch, int regnum)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (tdep->have_mve
       && regnum >= tdep->mve_pseudo_base
@@ -4760,7 +4760,7 @@ is_mve_pseudo (struct gdbarch *gdbarch, int regnum)
 static bool
 is_pacbti_pseudo (struct gdbarch *gdbarch, int regnum)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (tdep->have_pacbti
       && regnum >= tdep->pacbti_pseudo_base
@@ -4776,7 +4776,7 @@ is_pacbti_pseudo (struct gdbarch *gdbarch, int regnum)
 static struct type *
 arm_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (is_s_pseudo (gdbarch, regnum))
     return builtin_type (gdbarch)->builtin_float;
@@ -4855,7 +4855,7 @@ arm_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   /* PACBTI register containing the Pointer Authentication Code.  */
   if (reg == ARM_DWARF_RA_AUTH_CODE)
     {
-      arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+      arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
       if (tdep->have_pacbti)
 	return tdep->pacbti_pseudo_base;
@@ -5001,7 +5001,7 @@ arm_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
   int buf_len;
   enum bfd_endian order = gdbarch_byte_order_for_code (gdbarch);
   int i, any, last_it, last_it_count;
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   /* If we are using BKPT breakpoints, none of this is necessary.  */
   if (tdep->thumb2_breakpoint == NULL)
@@ -8309,7 +8309,7 @@ arm_displaced_init_closure (struct gdbarch *gdbarch, CORE_ADDR from,
 			    CORE_ADDR to,
 			    arm_displaced_step_copy_insn_closure *dsc)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
   unsigned int i, len, offset;
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   int size = dsc->is_thumb? 2 : 4;
@@ -8472,7 +8472,7 @@ static const gdb_byte arm_default_thumb_be_breakpoint[] = THUMB_BE_BREAKPOINT;
 static int
 arm_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
 
   if (arm_pc_is_thumb (gdbarch, *pcptr))
@@ -8507,7 +8507,7 @@ arm_breakpoint_kind_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr)
 static const gdb_byte *
 arm_sw_breakpoint_from_kind (struct gdbarch *gdbarch, int kind, int *size)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   switch (kind)
     {
@@ -8579,7 +8579,7 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 {
   struct gdbarch *gdbarch = regs->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (TYPE_CODE_FLT == type->code ())
     {
@@ -8690,7 +8690,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
       return (TYPE_LENGTH (type) > 16);
     }
 
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
   if (tdep->arm_abi != ARM_ABI_APCS)
     {
       /* The AAPCS says all aggregates not larger than a word are returned
@@ -8796,7 +8796,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
   if (type->code () == TYPE_CODE_FLT)
     {
       gdb_byte buf[ARM_FP_REGISTER_SIZE];
-      arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+      arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
       switch (tdep->fp_model)
 	{
@@ -8885,7 +8885,7 @@ arm_return_value (struct gdbarch *gdbarch, struct value *function,
 		  struct type *valtype, struct regcache *regcache,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
   struct type *func_type = function ? value_type (function) : NULL;
   enum arm_vfp_cprc_base_type vfp_base_type;
   int vfp_base_count;
@@ -8977,7 +8977,7 @@ static int
 arm_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR jb_addr;
   gdb_byte buf[ARM_INT_REGISTER_SIZE];
@@ -9170,7 +9170,7 @@ show_fp_model (struct ui_file *file, int from_tty,
       && gdbarch_bfd_arch_info (target_gdbarch ())->arch == bfd_arch_arm)
     {
       arm_gdbarch_tdep *tdep
-	= (arm_gdbarch_tdep *) gdbarch_tdep (target_gdbarch ());
+	= gdbarch_tdep<arm_gdbarch_tdep> (target_gdbarch ());
 
       gdb_printf (file, _("\
 The current ARM floating point model is \"auto\" (currently \"%s\").\n"),
@@ -9210,7 +9210,7 @@ arm_show_abi (struct ui_file *file, int from_tty,
       && gdbarch_bfd_arch_info (target_gdbarch ())->arch == bfd_arch_arm)
     {
       arm_gdbarch_tdep *tdep
-	= (arm_gdbarch_tdep *) gdbarch_tdep (target_gdbarch ());
+	= gdbarch_tdep<arm_gdbarch_tdep> (target_gdbarch ());
 
       gdb_printf (file, _("\
 The current ARM ABI is \"auto\" (currently \"%s\").\n"),
@@ -9289,7 +9289,7 @@ show_disassembly_style_sfunc (struct ui_file *file, int from_tty,
 static const char *
 arm_register_name (struct gdbarch *gdbarch, int i)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (is_s_pseudo (gdbarch, i))
     {
@@ -9460,7 +9460,7 @@ static enum register_status
 arm_mve_pseudo_read (struct gdbarch *gdbarch, readable_regcache *regcache,
 		     int regnum, gdb_byte *buf)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   /* P0 is the first 16 bits of VPR.  */
   return regcache->raw_read_part (tdep->mve_vpr_regnum, 0, 2, buf);
@@ -9474,7 +9474,7 @@ arm_pseudo_read (struct gdbarch *gdbarch, readable_regcache *regcache,
   char name_buf[4];
   gdb_byte reg_buf[8];
   int offset, double_regnum;
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   gdb_assert (regnum >= num_regs);
 
@@ -9546,7 +9546,7 @@ static void
 arm_mve_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 		      int regnum, const gdb_byte *buf)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   /* P0 is the first 16 bits of VPR.  */
   regcache->raw_write_part (tdep->mve_vpr_regnum, 0, 2, buf);
@@ -9560,7 +9560,7 @@ arm_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
   char name_buf[4];
   gdb_byte reg_buf[8];
   int offset, double_regnum;
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   gdb_assert (regnum >= num_regs);
 
@@ -9648,7 +9648,7 @@ arm_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 static void
 arm_register_g_packet_guesses (struct gdbarch *gdbarch)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (tdep->is_m)
     {
@@ -9691,7 +9691,7 @@ arm_register_g_packet_guesses (struct gdbarch *gdbarch)
 static int
 arm_code_of_frame_writable (struct gdbarch *gdbarch, struct frame_info *frame)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (tdep->is_m && get_frame_type (frame) == SIGTRAMP_FRAME)
     {
@@ -10250,7 +10250,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        best_arch = gdbarch_list_lookup_by_info (best_arch->next, &info))
     {
       arm_gdbarch_tdep *tdep
-	= (arm_gdbarch_tdep *) gdbarch_tdep (best_arch->gdbarch);
+	= gdbarch_tdep<arm_gdbarch_tdep> (best_arch->gdbarch);
 
       if (arm_abi != ARM_ABI_AUTO && arm_abi != tdep->arm_abi)
 	continue;
@@ -10570,7 +10570,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static void
 arm_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (tdep == NULL)
     return;
@@ -12779,7 +12779,7 @@ arm_record_coproc_data_proc (arm_insn_decode_record *arm_insn_r)
 {
   uint32_t op, op1_ebit, coproc, bits_24_25;
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (arm_insn_r->gdbarch);
+    = gdbarch_tdep<arm_gdbarch_tdep> (arm_insn_r->gdbarch);
   struct regcache *reg_cache = arm_insn_r->regcache;
 
   arm_insn_r->opcode = bits (arm_insn_r->arm_insn, 24, 27);
@@ -13267,7 +13267,7 @@ static int
 thumb_record_ldm_stm_swi (arm_insn_decode_record *thumb_insn_r)
 {
   arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep  (thumb_insn_r->gdbarch);
+    = gdbarch_tdep<arm_gdbarch_tdep>  (thumb_insn_r->gdbarch);
   struct regcache *reg_cache = thumb_insn_r->regcache;
 
   uint32_t ret = 0; /* function return value: -1:record failure ;  0:success  */

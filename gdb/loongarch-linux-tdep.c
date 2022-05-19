@@ -255,7 +255,7 @@ loongarch_linux_syscall_next_pc (struct frame_info *frame)
 static void
 loongarch_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  loongarch_gdbarch_tdep *tdep = gdbarch_tdep<loongarch_gdbarch_tdep> (gdbarch);
 
   linux_init_abi (info, gdbarch, 0);
 

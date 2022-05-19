@@ -93,7 +93,7 @@ struct frv_gdbarch_tdep : gdbarch_tdep
 enum frv_abi
 frv_abi (struct gdbarch *gdbarch)
 {
-  frv_gdbarch_tdep *tdep = (frv_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  frv_gdbarch_tdep *tdep = gdbarch_tdep<frv_gdbarch_tdep> (gdbarch);
   return tdep->frv_abi;
 }
 
@@ -275,7 +275,7 @@ frv_register_name (struct gdbarch *gdbarch, int reg)
   if (reg >= frv_num_regs + frv_num_pseudo_regs)
     return "?toolarge?";
 
-  frv_gdbarch_tdep *tdep = (frv_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  frv_gdbarch_tdep *tdep = gdbarch_tdep<frv_gdbarch_tdep> (gdbarch);
   return tdep->register_names[reg];
 }
 

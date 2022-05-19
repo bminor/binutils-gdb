@@ -1002,7 +1002,7 @@ arc_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
   arc_debug_printf ("called");
 
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arc_gdbarch_tdep *tdep = gdbarch_tdep<arc_gdbarch_tdep> (gdbarch);
   int pc_offset = tdep->jb_pc * ARC_REGISTER_SIZE;
   gdb_byte buf[ARC_REGISTER_SIZE];
   CORE_ADDR jb_addr = get_frame_register_unsigned (frame, ARC_FIRST_ARG_REGNUM);
@@ -1810,7 +1810,7 @@ arc_make_sigtramp_frame_cache (struct frame_info *this_frame)
   arc_debug_printf ("called");
 
   gdbarch *arch = get_frame_arch (this_frame);
-  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (arch);
+  arc_gdbarch_tdep *tdep = gdbarch_tdep<arc_gdbarch_tdep> (arch);
 
   /* Allocate new frame cache instance and space for saved register info.  */
   struct arc_frame_cache *cache = FRAME_OBSTACK_ZALLOC (struct arc_frame_cache);
@@ -1887,7 +1887,7 @@ arc_sigtramp_frame_sniffer (const struct frame_unwind *self,
   arc_debug_printf ("called");
 
   gdbarch *arch = get_frame_arch (this_frame);
-  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (arch);
+  arc_gdbarch_tdep *tdep = gdbarch_tdep<arc_gdbarch_tdep> (arch);
 
   /* If we have a sigcontext_addr handler, then just return 1 (same as the
      "default_frame_sniffer ()").  */
@@ -2414,7 +2414,7 @@ arc_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 static void
 arc_dump_tdep (struct gdbarch *gdbarch, struct ui_file *file)
 {
-  arc_gdbarch_tdep *tdep = (arc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arc_gdbarch_tdep *tdep = gdbarch_tdep<arc_gdbarch_tdep> (gdbarch);
 
   gdb_printf (file, "arc_dump_tdep: jb_pc = %i\n", tdep->jb_pc);
 

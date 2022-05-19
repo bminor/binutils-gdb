@@ -143,7 +143,7 @@ aarch64_fbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					   void *cb_data,
 					   const struct regcache *regcache)
 {
-  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
 
   cb (".reg", AARCH64_FBSD_SIZEOF_GREGSET, AARCH64_FBSD_SIZEOF_GREGSET,
       &aarch64_fbsd_gregset, NULL, cb_data);
@@ -190,7 +190,7 @@ static CORE_ADDR
 aarch64_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 				       CORE_ADDR lm_addr, CORE_ADDR offset)
 {
-  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
   struct regcache *regcache;
 
   regcache = get_thread_arch_regcache (current_inferior ()->process_target (),
@@ -213,7 +213,7 @@ aarch64_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
 static void
 aarch64_fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
 
   /* Generic FreeBSD support.  */
   fbsd_init_abi (info, gdbarch);

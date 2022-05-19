@@ -55,7 +55,7 @@ arm_fbsd_nat_target::fetch_registers (struct regcache *regcache, int regnum)
 #endif
 #ifdef PT_GETREGSET
   gdbarch *gdbarch = regcache->arch ();
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (tdep->tls_regnum > 0)
     {
@@ -90,7 +90,7 @@ arm_fbsd_nat_target::store_registers (struct regcache *regcache, int regnum)
 #endif
 #ifdef PT_GETREGSET
   gdbarch *gdbarch = regcache->arch ();
-  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
   if (tdep->tls_regnum > 0)
     {

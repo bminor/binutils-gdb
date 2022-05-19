@@ -84,7 +84,7 @@ struct mn10300_gdbarch_tdep : gdbarch_tdep
 static inline int
 get_am33_mode (gdbarch *arch)
 {
-  mn10300_gdbarch_tdep *tdep = (mn10300_gdbarch_tdep *) gdbarch_tdep (arch);
+  mn10300_gdbarch_tdep *tdep = gdbarch_tdep<mn10300_gdbarch_tdep> (arch);
   return tdep->am33_mode;
 }
 

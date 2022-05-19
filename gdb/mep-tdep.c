@@ -260,7 +260,7 @@ me_module_register_set (CONFIG_ATTR me_module,
        specifically excluding the generic coprocessor register sets.  */
 
   mep_gdbarch_tdep *tdep
-    = (mep_gdbarch_tdep *) gdbarch_tdep (target_gdbarch ());
+    = gdbarch_tdep<mep_gdbarch_tdep> (target_gdbarch ());
   CGEN_CPU_DESC desc = tdep->cpu_desc;
   const CGEN_HW_ENTRY *hw;
 
@@ -856,7 +856,7 @@ current_me_module (void)
   else
     {
       mep_gdbarch_tdep *tdep
-	= (mep_gdbarch_tdep *) gdbarch_tdep (target_gdbarch ());
+	= gdbarch_tdep<mep_gdbarch_tdep> (target_gdbarch ());
       return tdep->me_module;
     }
 }
@@ -2391,7 +2391,7 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       mep_gdbarch_tdep *tdep
-	= (mep_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+	= gdbarch_tdep<mep_gdbarch_tdep> (arches->gdbarch);
 
       if (tdep->me_module == me_module)
 	return arches->gdbarch;

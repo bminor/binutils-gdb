@@ -1198,11 +1198,13 @@ gdbarch_free (struct gdbarch *arch)
   xfree (obstack);
 }
 
+/* See gdbarch.h.  */
+
 struct gdbarch_tdep *
-gdbarch_tdep (struct gdbarch *gdbarch)
+gdbarch_tdep_1 (struct gdbarch *gdbarch)
 {
   if (gdbarch_debug >= 2)
-    gdb_printf (gdb_stdlog, "gdbarch_tdep called\n");
+    gdb_printf (gdb_stdlog, "gdbarch_tdep_1 called\n");
   return gdbarch->tdep;
 }
 

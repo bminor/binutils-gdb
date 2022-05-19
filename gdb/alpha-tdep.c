@@ -615,7 +615,7 @@ alpha_return_value (struct gdbarch *gdbarch, struct value *function,
 		    gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   enum type_code code = type->code ();
-  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  alpha_gdbarch_tdep *tdep = gdbarch_tdep<alpha_gdbarch_tdep> (gdbarch);
 
   if ((code == TYPE_CODE_STRUCT
        || code == TYPE_CODE_UNION
@@ -851,7 +851,7 @@ static int
 alpha_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  alpha_gdbarch_tdep *tdep = gdbarch_tdep<alpha_gdbarch_tdep> (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR jb_addr;
   gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
@@ -891,7 +891,7 @@ alpha_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   *this_prologue_cache = info;
 
   gdbarch *arch = get_frame_arch (this_frame);
-  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (arch);
+  alpha_gdbarch_tdep *tdep = gdbarch_tdep<alpha_gdbarch_tdep> (arch);
   info->sigcontext_addr = tdep->sigcontext_addr (this_frame);
 
   return info;
@@ -904,7 +904,7 @@ static CORE_ADDR
 alpha_sigtramp_register_address (struct gdbarch *gdbarch,
 				 CORE_ADDR sigcontext_addr, int regnum)
 { 
-  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  alpha_gdbarch_tdep *tdep = gdbarch_tdep<alpha_gdbarch_tdep> (gdbarch);
 
   if (regnum >= 0 && regnum < 32)
     return sigcontext_addr + tdep->sc_regs_offset + regnum * 8;
@@ -925,7 +925,7 @@ alpha_sigtramp_frame_this_id (struct frame_info *this_frame,
 			      struct frame_id *this_id)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  alpha_gdbarch_tdep *tdep = gdbarch_tdep<alpha_gdbarch_tdep> (gdbarch);
   struct alpha_sigtramp_unwind_cache *info
     = alpha_sigtramp_frame_unwind_cache (this_frame, this_prologue_cache);
   CORE_ADDR stack_addr, code_addr;
@@ -1000,7 +1000,7 @@ alpha_sigtramp_frame_sniffer (const struct frame_unwind *self,
 
   /* We shouldn't even bother to try if the OSABI didn't register a
      sigcontext_addr handler or pc_in_sigtramp handler.  */
-  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  alpha_gdbarch_tdep *tdep = gdbarch_tdep<alpha_gdbarch_tdep> (gdbarch);
   if (tdep->sigcontext_addr == NULL)
     return 0;
 
@@ -1041,7 +1041,7 @@ static int heuristic_fence_post = 0;
 static CORE_ADDR
 alpha_heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
-  alpha_gdbarch_tdep *tdep = (alpha_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  alpha_gdbarch_tdep *tdep = gdbarch_tdep<alpha_gdbarch_tdep> (gdbarch);
   CORE_ADDR last_non_nop = pc;
   CORE_ADDR fence = pc - heuristic_fence_post;
   CORE_ADDR orig_pc = pc;

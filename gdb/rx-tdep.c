@@ -964,7 +964,7 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       rx_gdbarch_tdep *tdep
-	= (rx_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+	= gdbarch_tdep<rx_gdbarch_tdep> (arches->gdbarch);
 
       if (tdep->elf_flags != elf_flags)
 	continue;

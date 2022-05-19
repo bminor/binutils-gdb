@@ -766,7 +766,7 @@ bfin_frame_align (struct gdbarch *gdbarch, CORE_ADDR address)
 enum bfin_abi
 bfin_abi (struct gdbarch *gdbarch)
 {
-  bfin_gdbarch_tdep *tdep = (bfin_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  bfin_gdbarch_tdep *tdep = gdbarch_tdep<bfin_gdbarch_tdep> (gdbarch);
   return tdep->bfin_abi;
 }
 
@@ -792,7 +792,7 @@ bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       bfin_gdbarch_tdep *tdep
-	= (bfin_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+	= gdbarch_tdep<bfin_gdbarch_tdep> (arches->gdbarch);
 
       if (tdep->bfin_abi != abi)
 	continue;

@@ -511,7 +511,7 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
 {
   int i;
   struct type *fld_type, *tgt_type;
-  v850_gdbarch_tdep *tdep = (v850_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  v850_gdbarch_tdep *tdep = gdbarch_tdep<v850_gdbarch_tdep> (gdbarch);
 
   if (tdep->abi == V850_ABI_RH850)
     {
@@ -1023,7 +1023,7 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
   int argnum;
   int arg_space = 0;
   int stack_offset;
-  v850_gdbarch_tdep *tdep = (v850_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  v850_gdbarch_tdep *tdep = gdbarch_tdep<v850_gdbarch_tdep> (gdbarch);
 
   if (tdep->abi == V850_ABI_RH850)
     stack_offset = 0;
@@ -1374,7 +1374,7 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     {
       v850_gdbarch_tdep *tdep
-	= (v850_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+	= gdbarch_tdep<v850_gdbarch_tdep> (arches->gdbarch);
 
       if (tdep->e_flags != e_flags || tdep->e_machine != e_machine)
 	continue;

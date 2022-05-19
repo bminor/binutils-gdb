@@ -1554,7 +1554,7 @@ sh_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 static struct type *
 sh_littlebyte_bigword_type (struct gdbarch *gdbarch)
 {
-  sh_gdbarch_tdep *tdep = (sh_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  sh_gdbarch_tdep *tdep = gdbarch_tdep<sh_gdbarch_tdep> (gdbarch);
 
   if (tdep->sh_littlebyte_bigword_type == NULL)
     tdep->sh_littlebyte_bigword_type
@@ -2146,7 +2146,7 @@ sh_corefile_supply_regset (const struct regset *regset,
 			   int regnum, const void *regs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  sh_gdbarch_tdep *tdep = (sh_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  sh_gdbarch_tdep *tdep = gdbarch_tdep<sh_gdbarch_tdep> (gdbarch);
   const struct sh_corefile_regmap *regmap = (regset == &sh_corefile_gregset
 					     ? tdep->core_gregmap
 					     : tdep->core_fpregmap);
@@ -2172,7 +2172,7 @@ sh_corefile_collect_regset (const struct regset *regset,
 			    int regnum, void *regs, size_t len)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  sh_gdbarch_tdep *tdep = (sh_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  sh_gdbarch_tdep *tdep = gdbarch_tdep<sh_gdbarch_tdep> (gdbarch);
   const struct sh_corefile_regmap *regmap = (regset == &sh_corefile_gregset
 					     ? tdep->core_gregmap
 					     : tdep->core_fpregmap);
@@ -2210,7 +2210,7 @@ sh_iterate_over_regset_sections (struct gdbarch *gdbarch,
 				 void *cb_data,
 				 const struct regcache *regcache)
 {
-  sh_gdbarch_tdep *tdep = (sh_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  sh_gdbarch_tdep *tdep = gdbarch_tdep<sh_gdbarch_tdep> (gdbarch);
 
   if (tdep->core_gregmap != NULL)
     cb (".reg", tdep->sizeof_gregset, tdep->sizeof_gregset,

@@ -110,7 +110,7 @@ ft32_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr == FT32_PC_REGNUM)
     {
-      ft32_gdbarch_tdep *tdep = (ft32_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+      ft32_gdbarch_tdep *tdep = gdbarch_tdep<ft32_gdbarch_tdep> (gdbarch);
       return tdep->pc_type;
     }
   else if (reg_nr == FT32_SP_REGNUM || reg_nr == FT32_FP_REGNUM)

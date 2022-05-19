@@ -225,7 +225,7 @@ static CORE_ADDR
 loongarch_next_pc (struct regcache *regcache, CORE_ADDR cur_pc)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  loongarch_gdbarch_tdep *tdep = gdbarch_tdep<loongarch_gdbarch_tdep> (gdbarch);
   insn_t insn = loongarch_fetch_instruction (cur_pc);
   size_t insn_len = loongarch_insn_length (insn);
   CORE_ADDR next_pc = cur_pc + insn_len;
@@ -1237,7 +1237,7 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	 we are looking for.  If it doesn't then we can't reuse this
 	 gdbarch.  */
       loongarch_gdbarch_tdep *candidate_tdep
-	= (loongarch_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+	= gdbarch_tdep<loongarch_gdbarch_tdep> (arches->gdbarch);
 
       if (candidate_tdep->abi_features != abi_features)
 	continue;
