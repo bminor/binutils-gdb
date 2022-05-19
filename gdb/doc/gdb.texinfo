@@ -12076,7 +12076,7 @@ another from library2.so named @code{bar} that prints two types of objects,
 
 @smallexample
 @group
-(gdb) info pretty-printer
+(@value{GDBP}) info pretty-printer
 library1.so:
   foo
 library2.so:
@@ -12085,17 +12085,17 @@ library2.so:
     bar2
 @end group
 @group
-(gdb) info pretty-printer library2
+(@value{GDBP}) info pretty-printer library2
 library2.so:
   bar
     bar1
     bar2
 @end group
 @group
-(gdb) disable pretty-printer library1
+(@value{GDBP}) disable pretty-printer library1
 1 printer disabled
 2 of 3 printers enabled
-(gdb) info pretty-printer
+(@value{GDBP}) info pretty-printer
 library1.so:
   foo [disabled]
 library2.so:
@@ -12104,20 +12104,20 @@ library2.so:
     bar2
 @end group
 @group
-(gdb) disable pretty-printer library2 bar;bar1
+(@value{GDBP}) disable pretty-printer library2 bar;bar1
 1 printer disabled
 1 of 3 printers enabled
-(gdb) info pretty-printer library2
+(@value{GDBP}) info pretty-printer library2
 library2.so:
   bar
     bar1 [disabled]
     bar2
 @end group
 @group
-(gdb) disable pretty-printer library2 bar
+(@value{GDBP}) disable pretty-printer library2 bar
 1 printer disabled
 0 of 3 printers enabled
-(gdb) info pretty-printer
+(@value{GDBP}) info pretty-printer
 library1.so:
   foo [disabled]
 library2.so:
