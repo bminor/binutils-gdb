@@ -119,7 +119,6 @@ _bfd_real_fopen (const char *filename, const char *modes)
   /* PR 25713: Handle extra long path names possibly containing '..' and '.'.  */
    wchar_t **     lpFilePart = {NULL};
    const wchar_t  prefix[] = L"\\\\?\\";
-   const wchar_t  ccs[] = L", ccs=UNICODE";
    const size_t   partPathLen = strlen (filename) + 1;
 
    /* Converting the partial path from ascii to unicode.
@@ -151,10 +150,9 @@ _bfd_real_fopen (const char *filename, const char *modes)
    free (partPath);
 
    /* It is non-standard for modes to exceed 16 characters.  */
-   wchar_t    modesW[16 + sizeof(ccs)];
+   wchar_t    modesW[16];
 
    MultiByteToWideChar (CP_UTF8, 0, modes, -1, modesW, sizeof(modesW));
-   wcscat (modesW, ccs);
 
    FILE *     file = _wfopen (fullPath, modesW);
    free (fullPath);
