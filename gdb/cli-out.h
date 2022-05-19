@@ -73,7 +73,8 @@ protected:
   virtual void do_redirect (struct ui_file *outstream) override;
 
   virtual void do_progress_start () override;
-  virtual void do_progress_notify (const std::string &, double) override;
+  virtual void do_progress_notify (const std::string &, const std::string &,
+				   double, double) override;
   virtual void do_progress_end () override;
 
   bool suppress_output ()

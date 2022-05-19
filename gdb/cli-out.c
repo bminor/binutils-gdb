@@ -293,22 +293,24 @@ cli_ui_out::do_progress_start ()
 */
 
 void
-cli_ui_out::do_progress_notify (const std::string &msg, double howmuch)
+cli_ui_out::do_progress_notify (const std::string &msg,
+				const std::string &size,
+				double cur, double total)
 {
   struct ui_file *stream = m_streams.back ();
   cli_progress_info &info (m_progress_info.back ());
 
   if (info.state == progress_update::START)
     {
-      if (!stream->isatty ())
+      if (stream->isatty ())
 	{
-	  gdb_printf (stream, "%s...\n", msg.c_str ());
-	  info.state = progress_update::WORKING;
+	  gdb_printf (stream, "%s", msg.c_str ());
+	  info.state = progress_update::BAR;
 	}
       else
 	{
-	  gdb_printf (stream, "%s\n", msg.c_str ());
-	  info.state = progress_update::BAR;
+	  gdb_printf (stream, "%s...\n", msg.c_str ());
+	  info.state = progress_update::WORKING;
 	}
     }
 
@@ -321,15 +323,25 @@ cli_ui_out::do_progress_notify (const std::string &msg, double howmuch)
       || !stream->isatty ())
     return;
 
-  if (howmuch >= 0)
+  double howmuch = cur / total;
+  if (howmuch >= 0 && howmuch <= 1.0)
     {
-      int width = chars_per_line - 3;
+      std::string progress = string_printf (" %.02f %s / %.02f %s",
+					    cur, size.c_str (),
+					    total, size.c_str ());
+      int width = chars_per_line - progress.size () - 3;
       int max = width * howmuch;
 
-      gdb_printf (stream, "\r[");
+      std::string display = "\r[";
+
       for (int i = 0; i < width; ++i)
-	gdb_printf (stream, i < max ? "#" : " ");
-      gdb_printf (stream, "]");
+	if (i < max)
+	  display += "#";
+	else
+	  display += " ";
+
+      display += "]" + progress;
+      gdb_printf (stream, "%s", display.c_str ());
       gdb_flush (stream);
     }
   else

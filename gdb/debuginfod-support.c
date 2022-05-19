@@ -110,23 +110,51 @@ struct debuginfod_client_deleter
 using debuginfod_client_up
   = std::unique_ptr<debuginfod_client, debuginfod_client_deleter>;
 
+
 /* Convert SIZE into a unit suitable for use with progress updates.
-   SIZE should in given in bytes and will be converted into KB or MB.
-   UNIT will be set to "KB" or "MB" accordingly.  */
+   SIZE should in given in bytes and will be converted into KB, MB, GB
+   or remain unchanged. UNIT will be set to "B", "KB", "MB" or "GB"
+   accordingly.  */
 
 static void
-get_size_and_unit (double *size, const char **unit)
+get_size_and_unit (double &size, std::string &unit)
 {
-  *size /= 1024;
-
-  /* If size is greater than 0.01 MB then set unit to MB.  */
-  if (*size > 10.24)
+  if (size < 10.24)
     {
-      *size /= 1024;
-      *unit = "MB";
+      /* If size is less than 0.01 KB then set unit to B.  */
+      unit = "B";
+      return;
     }
-  else
-    *unit = "KB";
+
+  size /= 1024;
+  if (size < 10.24)
+    {
+      /* If size is less than 0.01 MB then set unit to KB.  */
+      unit = "KB";
+      return;
+    }
+
+  size /= 1024;
+  if (size < 10.24)
+    {
+      /* If size is less than 0.01 GB then set unit to MB.  */
+      unit = "MB";
+      return;
+    }
+
+  size /= 1024;
+  unit = "GB";
+}
+
+static void
+convert_to_unit (double &size, const std::string &unit)
+{
+  if (unit == "KB")
+    size /= 1024;
+  else if (unit == "MB")
+    size /= 1024 * 1024;
+  else if (unit == "GB")
+    size /= 1024 * 1024 * 1024;
 }
 
 static int
@@ -141,9 +169,8 @@ progressfn (debuginfod_client *c, long cur, long total)
 
   if (check_quit_flag ())
     {
-      current_uiout->do_progress_end (); ///?
-
-      gdb_printf ("Cancelling download of %s %ps...\n",
+      //current_uiout->do_progress_end (); ///?
+      gdb_printf ("Cancelling download of %s %s...\n",
 		  data->desc, styled_fname.c_str ());
       return 1;
     }
@@ -159,21 +186,23 @@ progressfn (debuginfod_client *c, long cur, long total)
 
       if (howmuch >= 0.0 && howmuch <= 1.0)
 	{
-	  double size = (double) total;
-	  const char *unit = "";
+	  double d_total = (double) total;
+          double d_cur = (double) cur;
+	  std::string unit = "";
 
-	  get_size_and_unit (&size, &unit);
+	  get_size_and_unit (d_total, unit);
+	  convert_to_unit (d_cur, unit);
 	  std::string msg = string_printf ("Downloading %0.2f %s %s %s\n",
-					   size, unit, data->desc,
+					   d_total, unit.c_str (), data->desc,
 					   styled_fname.c_str ());
-	  current_uiout->update_progress (msg, howmuch);
+	  data->progress.update_progress (msg, unit, d_cur, d_total);
 	  return 0;
 	}
     }
 
   std::string msg = string_printf ("Downloading %s %s\n",
 				   data->desc, styled_fname.c_str ());
-  current_uiout->update_progress (msg, -1);
+  data->progress.update_progress (msg);
   return 0;
 }
 
@@ -277,10 +306,10 @@ print_outcome (user_data &data, int fd)
       if (fstat (fd, &s) == 0)
 	{
 	  double size = (double)s.st_size;
-	  const char *unit = "";
+	  std::string unit = "";
 
-	  get_size_and_unit (&size, &unit);
-	  gdb_printf (_("Retrieved %.02f %s %s %s\n"), size, unit,
+	  get_size_and_unit (size, unit);
+	  gdb_printf (_("Retrieved %.02f %s %s %s\n"), size, unit.c_str (),
 		      data.desc, styled_fname.c_str ());
 	}
       else
@@ -403,12 +432,7 @@ debuginfod_exec_query (const unsigned char *build_id,
 
   scoped_fd fd (debuginfod_find_executable (c, build_id, build_id_len, &dname));
   debuginfod_set_user_data (c, nullptr);
-
-  if (fd.get () < 0 && fd.get () != -ENOENT)
-    gdb_printf (_("Download failed: %s. " \
-		  "Continuing without executable for %ps.\n"),
-		safe_strerror (-fd.get ()),
-		styled_string (file_name_style.style (),  filename));
+  print_outcome (data, fd.get ());
 
   if (fd.get () >= 0)
     destname->reset (dname);

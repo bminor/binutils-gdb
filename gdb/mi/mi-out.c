@@ -270,7 +270,8 @@ mi_ui_out::do_progress_start ()
 /* Indicate that a task described by NAME is in progress.  */
 
 void
-mi_ui_out::do_progress_notify (const std::string &msg, double howmuch)
+mi_ui_out::do_progress_notify (const std::string &msg, const std::string &unit,
+			       double cur, double total)
 {
   mi_progress_info &info (m_progress_info.back ());
 

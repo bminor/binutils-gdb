@@ -309,24 +309,23 @@ class ui_out
     progress_update (const progress_update &) = delete;
     progress_update &operator= (const progress_update &) = delete;
 
-    /* Emit some progress for this progress meter.  HOWMUCH may range
-       from 0.0 to 1.0.  */
-    void progress (const std::string& msg, double howmuch)
+    /* Emit some progress for this progress meter.  Includes current
+       amount of progress made and total amount in the display.  */
+    void update_progress (const std::string& msg, std::string& unit,
+			  double cur, double total)
     {
-      m_uiout->do_progress_notify (msg, howmuch);
+      m_uiout->do_progress_notify (msg, unit, cur, total);
     }
 
+    /* Emit some progress for this progress meter.  */
+    void update_progress (const std::string& msg)
+    {
+      m_uiout->do_progress_notify (msg, "", -1, -1);
+    }
   private:
 
     struct ui_out *m_uiout;
   };
-
-  /* Emit some progress corresponding to the most recently created
-     progress_update object.  */
-  void update_progress (std::string &msg, double howmuch)
-  {
-    do_progress_notify (msg, howmuch);
-  }
 
   virtual void do_progress_end () = 0;
 
@@ -365,7 +364,8 @@ class ui_out
   virtual void do_redirect (struct ui_file *outstream) = 0;
 
   virtual void do_progress_start () = 0;
-  virtual void do_progress_notify (const std::string &, double) = 0;
+  virtual void do_progress_notify (const std::string &, const std::string &,
+				   double, double) = 0;
 
   /* Set as not MI-like by default.  It is overridden in subclasses if
      necessary.  */
