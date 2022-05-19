@@ -28,6 +28,7 @@
 #include "infrun.h"
 #include "osabi.h"
 #include "displaced-stepping.h"
+#include "gdbsupport/gdb-checked-static-cast.h"
 
 struct floatformat;
 struct ui_file;
@@ -58,7 +59,14 @@ struct inferior;
 
 #include "regcache.h"
 
-struct gdbarch_tdep {};
+/* The base class for every architecture's tdep sub-class.  The virtual
+   destructor ensures the class has RTTI information, which allows
+   gdb::checked_static_cast to be used, the gdbarch_tdep the function.  */
+
+struct gdbarch_tdep
+{
+  virtual ~gdbarch_tdep() = default;
+};
 
 /* The architecture associated with the inferior through the
    connection to the target.
@@ -157,7 +165,7 @@ static inline TDepType *
 gdbarch_tdep (struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep_1 (gdbarch);
-  return static_cast<TDepType *> (tdep);
+  return gdb::checked_static_cast<TDepType *> (tdep);
 }
 
 /* Mechanism for co-ordinating the selection of a specific
