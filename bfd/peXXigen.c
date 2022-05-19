@@ -736,13 +736,23 @@ _bfd_XXi_swap_aouthdr_out (bfd * abfd, void * in, void * out)
 
   H_PUT_16 (abfd, aouthdr_in->magic, aouthdr_out->standard.magic);
 
+  if (extra->MajorLinkerVersion || extra->MinorLinkerVersion)
+    {
+      H_PUT_8 (abfd, extra->MajorLinkerVersion,
+	       aouthdr_out->standard.vstamp);
+      H_PUT_8 (abfd, extra->MinorLinkerVersion,
+	       aouthdr_out->standard.vstamp + 1);
+    }
+  else
+    {
 /* e.g. 219510000 is linker version 2.19  */
 #define LINKER_VERSION ((short) (BFD_VERSION / 1000000))
 
-  /* This piece of magic sets the "linker version" field to
-     LINKER_VERSION.  */
-  H_PUT_16 (abfd, (LINKER_VERSION / 100 + (LINKER_VERSION % 100) * 256),
-	    aouthdr_out->standard.vstamp);
+      /* This piece of magic sets the "linker version" field to
+	 LINKER_VERSION.  */
+      H_PUT_16 (abfd, (LINKER_VERSION / 100 + (LINKER_VERSION % 100) * 256),
+		aouthdr_out->standard.vstamp);
+    }
 
   PUT_AOUTHDR_TSIZE (abfd, aouthdr_in->tsize, aouthdr_out->standard.tsize);
   PUT_AOUTHDR_DSIZE (abfd, aouthdr_in->dsize, aouthdr_out->standard.dsize);
