@@ -4755,6 +4755,9 @@ coff_slurp_symbol_table (bfd * abfd)
 		dst->symbol.value = src->u.syment.n_value;
 	      break;
 
+	    case C_FILE:	/* File name.  */
+	      dst->symbol.flags = BSF_FILE;
+	      /* Fall through.  */
 	    case C_MOS:		/* Member of structure.  */
 	    case C_EOS:		/* End of structure.  */
 	    case C_REGPARM:	/* Register parameter.  */
@@ -4768,11 +4771,6 @@ coff_slurp_symbol_table (bfd * abfd)
 	    case C_MOE:		/* Member of enumeration.  */
 	    case C_MOU:		/* Member of union.  */
 	    case C_UNTAG:	/* Union tag.  */
-	      dst->symbol.flags = BSF_DEBUGGING;
-	      dst->symbol.value = (src->u.syment.n_value);
-	      break;
-
-	    case C_FILE:	/* File name.  */
 	    case C_STRTAG:	/* Structure tag.  */
 #ifdef RS6000COFF_C
 	    case C_GSYM:
@@ -4790,7 +4788,7 @@ coff_slurp_symbol_table (bfd * abfd)
 	    case C_FUN:
 	    case C_ESTAT:
 #endif
-	      dst->symbol.flags = BSF_DEBUGGING;
+	      dst->symbol.flags |= BSF_DEBUGGING;
 	      dst->symbol.value = (src->u.syment.n_value);
 	      break;
 
