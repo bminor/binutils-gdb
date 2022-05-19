@@ -3080,7 +3080,7 @@ aarch64_force_reloc (unsigned int type)
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC:
       /* Pseudo relocs that need to be fixed up according to
 	 ilp32_p.  */
-      return 0;
+      return 1;
 
     case BFD_RELOC_AARCH64_ADD_LO12:
     case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
