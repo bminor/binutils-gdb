@@ -9162,14 +9162,16 @@ static void
 show_fp_model (struct ui_file *file, int from_tty,
 	       struct cmd_list_element *c, const char *value)
 {
-  arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (target_gdbarch ());
-
   if (arm_fp_model == ARM_FLOAT_AUTO
       && gdbarch_bfd_arch_info (target_gdbarch ())->arch == bfd_arch_arm)
-    gdb_printf (file, _("\
+    {
+      arm_gdbarch_tdep *tdep
+	= (arm_gdbarch_tdep *) gdbarch_tdep (target_gdbarch ());
+
+      gdb_printf (file, _("\
 The current ARM floating point model is \"auto\" (currently \"%s\").\n"),
-		fp_model_strings[tdep->fp_model]);
+		  fp_model_strings[tdep->fp_model]);
+    }
   else
     gdb_printf (file, _("\
 The current ARM floating point model is \"%s\".\n"),
@@ -9200,14 +9202,16 @@ static void
 arm_show_abi (struct ui_file *file, int from_tty,
 	     struct cmd_list_element *c, const char *value)
 {
-  arm_gdbarch_tdep *tdep
-    = (arm_gdbarch_tdep *) gdbarch_tdep (target_gdbarch ());
-
   if (arm_abi_global == ARM_ABI_AUTO
       && gdbarch_bfd_arch_info (target_gdbarch ())->arch == bfd_arch_arm)
-    gdb_printf (file, _("\
+    {
+      arm_gdbarch_tdep *tdep
+	= (arm_gdbarch_tdep *) gdbarch_tdep (target_gdbarch ());
+
+      gdb_printf (file, _("\
 The current ARM ABI is \"auto\" (currently \"%s\").\n"),
-		arm_abi_strings[tdep->arm_abi]);
+		  arm_abi_strings[tdep->arm_abi]);
+    }
   else
     gdb_printf (file, _("The current ARM ABI is \"%s\".\n"),
 		arm_abi_string);
