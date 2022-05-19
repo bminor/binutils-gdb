@@ -2747,7 +2747,14 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       /* Copy PE parameters before changing them.  */
       if (bfd_get_flavour (ibfd) == bfd_target_coff_flavour
 	  && bfd_pei_p (ibfd))
-	pe->pe_opthdr = pe_data (ibfd)->pe_opthdr;
+	{
+	  pe->pe_opthdr = pe_data (ibfd)->pe_opthdr;
+
+ 	  if (preserve_dates)
+	    pe->timestamp = pe_data (ibfd)->coff.timestamp;
+	  else
+	    pe->timestamp = -1;
+	}
 
       if (pe_file_alignment != (bfd_vma) -1)
 	pe->pe_opthdr.FileAlignment = pe_file_alignment;
@@ -2793,11 +2800,6 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
 		     file_alignment, section_alignment);
 	}
-
-      if (preserve_dates
-	  && bfd_get_flavour (ibfd) == bfd_target_coff_flavour
-	  && bfd_pei_p (ibfd))
-	pe->timestamp = pe_data (ibfd)->coff.timestamp;
     }
 
   free (isympp);
