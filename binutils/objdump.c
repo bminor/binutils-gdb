@@ -5188,6 +5188,26 @@ sign_extend_address (bfd *abfd ATTRIBUTE_UNUSED,
   return (((vma & ((mask << 1) - 1)) ^ mask) - mask);
 }
 
+static bool
+might_need_separate_debug_info (bool is_mainfile)
+{
+  /* We do not follow links from debug info files.  */
+  if (! is_mainfile)
+    return false;
+
+  /* Since do_follow_links might be enabled by default, only treat it as an
+     indication that separate files should be loaded if setting it was a
+     deliberate user action.  */
+  if (DEFAULT_FOR_FOLLOW_LINKS == 0 && do_follow_links)
+    return true;
+  
+  if (process_links || dump_symtab || dump_debugging
+      || dump_dwarf_section_info)
+    return true;
+
+  return false;  
+}
+
 /* Dump selected contents of ABFD.  */
 
 static void
@@ -5202,16 +5222,8 @@ dump_bfd (bfd *abfd, bool is_mainfile)
   else
     byte_get = NULL;
 
-  /* Load any separate debug information files.
-     We do this now and without checking do_follow_links because separate
-     debug info files may contain symbol tables that we will need when
-     displaying information about the main file.  Any memory allocated by
-     load_separate_debug_files will be released when we call
-     free_debug_memory below.
-
-     The test on is_mainfile is there because the chain of separate debug
-     info files is a global variable shared by all invocations of dump_bfd.  */
-  if (byte_get != NULL && is_mainfile)
+  /* Load any separate debug information files.  */
+  if (byte_get != NULL && might_need_separate_debug_info (is_mainfile))
     {
       load_separate_debug_files (abfd, bfd_get_filename (abfd));
 
@@ -5783,20 +5795,30 @@ main (int argc, char **argv)
 	  do_follow_links = true;
 	  break;
 	case 'W':
-	  dump_dwarf_section_info = true;
 	  seenflag = true;
 	  if (optarg)
-	    dwarf_select_sections_by_letters (optarg);
+	    {
+	      if (dwarf_select_sections_by_letters (optarg))
+		dump_dwarf_section_info = true;
+	    }
 	  else
-	    dwarf_select_sections_all ();
+	    {
+	      dump_dwarf_section_info = true;
+	      dwarf_select_sections_all ();
+	    }
 	  break;
 	case OPTION_DWARF:
-	  dump_dwarf_section_info = true;
 	  seenflag = true;
 	  if (optarg)
-	    dwarf_select_sections_by_names (optarg);
+	    {
+	      if (dwarf_select_sections_by_names (optarg))
+		dump_dwarf_section_info = true;
+	    }
 	  else
-	    dwarf_select_sections_all ();
+	    {
+	      dwarf_select_sections_all ();
+	      dump_dwarf_section_info = true;
+	    }
 	  break;
 	case OPTION_DWARF_DEPTH:
 	  {

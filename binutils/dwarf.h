@@ -250,8 +250,8 @@ extern void *open_debug_file (const char *);
 
 extern void free_debug_memory (void);
 
-extern void dwarf_select_sections_by_names (const char *);
-extern void dwarf_select_sections_by_letters (const char *);
+extern int dwarf_select_sections_by_names (const char *);
+extern int dwarf_select_sections_by_letters (const char *);
 extern void dwarf_select_sections_all (void);
 
 extern unsigned int * find_cu_tu_set (void *, unsigned int);

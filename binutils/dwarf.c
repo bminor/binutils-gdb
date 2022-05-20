@@ -12062,7 +12062,11 @@ free_debug_memory (void)
   free_dwo_info ();
 }
 
-void
+/* Enable display of specific DWARF sections as determined by the comma
+   separated strings in NAMES.  Returns non-zero if any displaying was
+   enabled.  */
+
+int
 dwarf_select_sections_by_names (const char *names)
 {
   typedef struct
@@ -12115,6 +12119,7 @@ dwarf_select_sections_by_names (const char *names)
     };
 
   const char *p;
+  int result = 0;
 
   p = names;
   while (*p)
@@ -12129,6 +12134,7 @@ dwarf_select_sections_by_names (const char *names)
 	      && (p[len] == ',' || p[len] == '\0'))
 	    {
 	      * entry->variable = entry->val;
+	      result |= entry->val;
 
 	      /* The --debug-dump=frames-interp option also
 		 enables the --debug-dump=frames option.  */
@@ -12151,48 +12157,82 @@ dwarf_select_sections_by_names (const char *names)
       if (*p == ',')
 	p++;
     }
+
+  return result;
 }
 
-void
+/* Enable display of specific DWARF sections as determined by the characters
+   in LETTERS.  Returns non-zero if any displaying was enabled.  */
+
+int
 dwarf_select_sections_by_letters (const char *letters)
 {
-  unsigned int lindex = 0;
+  typedef struct
+  {
+    const char   letter;
+    int *        variable;
+    int          val;
+    bool         cont;
+  }
+  debug_dump_letter_opts;
 
-  while (letters[lindex])
-    switch (letters[lindex++])
-      {
-      case 'A':	do_debug_addr = 1; break;
-      case 'a':	do_debug_abbrevs = 1; break;
-      case 'c':	do_debug_cu_index = 1; break;
+  static const debug_dump_letter_opts letter_table [] =
+    {
+      { 'A', & do_debug_addr, 1, false},
+      { 'a', & do_debug_abbrevs, 1, false },
+      { 'c', & do_debug_cu_index, 1, false },
 #ifdef HAVE_LIBDEBUGINFOD
-      case 'D': use_debuginfod = 1; break;
-      case 'E': use_debuginfod = 0; break;
+      { 'D', & use_debuginfod, 1, false },
+      { 'E', & use_debuginfod, 0, false },
 #endif
-      case 'F':	do_debug_frames_interp = 1; /* Fall through.  */
-      case 'f':	do_debug_frames = 1; break;
-      case 'g':	do_gdb_index = 1; break;
-      case 'i':	do_debug_info = 1; break;
-      case 'K': do_follow_links = 1; break;
-      case 'N': do_follow_links = 0; break;
-      case 'k':	do_debug_links = 1; break;
-      case 'l':	do_debug_lines |= FLAG_DEBUG_LINES_RAW;	break;
-      case 'L':	do_debug_lines |= FLAG_DEBUG_LINES_DECODED; break;
-      case 'm': do_debug_macinfo = 1; break;
-      case 'O':	do_debug_str_offsets = 1; break;
-      case 'o':	do_debug_loc = 1; break;
-      case 'p':	do_debug_pubnames = 1; break;
-      case 'R':	do_debug_ranges = 1; break;
-      case 'r':	do_debug_aranges = 1; break;
-      case 's':	do_debug_str = 1; break;
-      case 'T': do_trace_aranges = 1; break;
-      case 't': do_debug_pubtypes = 1; break;
-      case 'U': do_trace_info = 1; break;
-      case 'u': do_trace_abbrevs = 1; break;
+      { 'F', & do_debug_frames_interp, 1, true }, /* Note the fall through.  */
+      { 'f', & do_debug_frames, 1, false },
+      { 'g', & do_gdb_index, 1, false },
+      { 'i', & do_debug_info, 1, false },
+      { 'K', & do_follow_links, 1, false },
+      { 'k', & do_debug_links, 1, false },
+      { 'L', & do_debug_lines, FLAG_DEBUG_LINES_DECODED, false },
+      { 'l', & do_debug_lines, FLAG_DEBUG_LINES_RAW, false },
+      { 'm', & do_debug_macinfo, 1, false },
+      { 'N', & do_follow_links, 0, false },
+      { 'O', & do_debug_str_offsets, 1, false },
+      { 'o', & do_debug_loc, 1, false },
+      { 'p', & do_debug_pubnames, 1, false },
+      { 'R', & do_debug_ranges, 1, false },
+      { 'r', & do_debug_aranges, 1, false },
+      { 's', & do_debug_str, 1, false },
+      { 'T', & do_trace_aranges, 1, false },
+      { 't', & do_debug_pubtypes, 1, false },
+      { 'U', & do_trace_info, 1, false },
+      { 'u', & do_trace_abbrevs, 1, false },
+      { 0, NULL, 0, false }
+    };
 
-      default:
-	warn (_("Unrecognized debug option '%s'\n"), letters);
-	break;
-      }
+  int result = 0;
+
+  while (* letters)
+    {
+      const debug_dump_letter_opts * entry;
+
+      for (entry = letter_table; entry->letter; entry++)
+	{
+	  if (entry->letter == * letters)
+	    {
+	      * entry->variable |= entry->val;
+	      result |= entry->val;
+
+	      if (! entry->cont)
+		break;
+	    }
+	}
+
+      if (entry->letter == 0)
+	warn (_("Unrecognized debug letter option '%c'\n"), * letters);
+
+      letters ++;
+    }
+
+  return result;
 }
 
 void

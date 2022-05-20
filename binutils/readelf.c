@@ -5526,31 +5526,39 @@ parse_args (struct dump_data *dumpdata, int argc, char ** argv)
 	  decompress_dumps = true;
 	  break;
 	case 'w':
-	  do_dump = true;
-	  dump_any_debugging = true;
 	  if (optarg == NULL)
 	    {
 	      do_debugging = true;
+	      do_dump = true;
+	      dump_any_debugging = true;
 	      dwarf_select_sections_all ();
 	    }
 	  else
 	    {
 	      do_debugging = false;
-	      dwarf_select_sections_by_letters (optarg);
+	      if (dwarf_select_sections_by_letters (optarg))
+		{
+		  do_dump = true;
+		  dump_any_debugging = true;
+		}
 	    }
 	  break;
 	case OPTION_DEBUG_DUMP:
-	  do_dump = true;
-	  dump_any_debugging = true;
 	  if (optarg == NULL)
 	    {
+	      do_dump = true;
 	      do_debugging = true;
+	      dump_any_debugging = true;
 	      dwarf_select_sections_all ();
 	    }
 	  else
 	    {
 	      do_debugging = false;
-	      dwarf_select_sections_by_names (optarg);
+	      if (dwarf_select_sections_by_names (optarg))
+		{
+		  do_dump = true;
+		  dump_any_debugging = true;
+		}
 	    }
 	  break;
 	case OPTION_DWARF_DEPTH:
@@ -22252,6 +22260,26 @@ initialise_dump_sects (Filedata * filedata)
     }
 }
 
+static bool
+might_need_separate_debug_info (Filedata * filedata)
+{
+  /* Debuginfo files do not need further separate file loading.  */
+  if (filedata->file_header.e_shstrndx == SHN_UNDEF)
+    return false;
+
+  /* Since do_follow_links might be enabled by default, only treat it as an
+     indication that separate files should be loaded if setting it was a
+     deliberate user action.  */
+  if (DEFAULT_FOR_FOLLOW_LINKS == 0 && do_follow_links)
+    return true;
+  
+  if (process_links || do_syms || do_unwind 
+      || dump_any_debugging || do_dump || do_debugging)
+    return true;
+
+  return false;
+}
+
 /* Process one ELF object file according to the command line options.
    This file may actually be stored in an archive.  The file is
    positioned at the start of the ELF object.  Returns TRUE if no
@@ -22335,7 +22363,7 @@ process_object (Filedata * filedata)
   if (! process_version_sections (filedata))
     res = false;
 
-  if (filedata->file_header.e_shstrndx != SHN_UNDEF)
+  if (might_need_separate_debug_info (filedata))
     have_separate_files = load_separate_debug_files (filedata, filedata->file_name);
   else
     have_separate_files = false;

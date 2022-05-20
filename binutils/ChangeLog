@@ -1,3 +1,24 @@
+2022-05-20  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (dwarf_select_sections_by_names): Return zero if no
+	sections were selected.
+	(dwarf_select_sections_by_letters): Likewise.
+	* dwarf.h: (dwarf_select_sections_by_names): Update prototype.
+	(dwarf_select_sections_by_letters): Update prototype.
+	* objdump.c (might_need_separate_debug_info): New function.
+	(dump_bfd): Call new function before attempting to load separate
+	debug info files.
+	(main): Do not enable dwarf section dumping for -WK or -WN.
+	* readelf.c (parse_args): Do not enable dwarf section dumping for
+	-wK or -wN.
+	(might_need_separate_debug_info): New function.
+	(process_object): Call new function before attempting to load
+	separate debug info files.
+	* testsuite/binutils-all/debuginfo.exp: Expect -WE and -wE
+	debuginfod tests to pass.
+	* testsuite/binutils-all/objdump.Wk: Add extra regexps.
+	* testsuite/binutils-all/readelf.k: Add extra regexps.
+
 2022-05-19  Nick Clifton  <nickc@redhat.com>
 
 	* dlltool.c (run): Initialise errmsg_fmt.

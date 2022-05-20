@@ -189,7 +189,7 @@ if { [regexp ".*DEBUGINFOD.*" $conf_objdump] } {
     test_fetch_debugaltlink $OBJDUMP "-Wk"
 
     set test "disabling debuginfod access"
-    setup_xfail *-*-*
+    # setup_xfail *-*-*
     test_fetch_debuglink $OBJDUMP "-W -WE"
     set test "debuginfod"
 
@@ -202,7 +202,7 @@ if { [regexp ".*DEBUGINFOD.*" $conf_readelf] } {
     test_fetch_debugaltlink $READELF "-wk"
 
     set test "disabling debuginfod access"
-    setup_xfail *-*-*
+    # setup_xfail *-*-*
     test_fetch_debuglink $READELF "-w -wE"
     set test "debuginfod"
 
