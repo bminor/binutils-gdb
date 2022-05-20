@@ -23,19 +23,14 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
     return -1
 }
 
-if ![fortran_runto_main] {
-    return -1
-}
-
 # Depending on the compiler being used, the type names can be printed differently.
 set int [fortran_int4]
 
 # Check if not allocated VLA in type does not break
 # the debugger when accessing it.
-# break main for Flang compiler already breaks here
-if { ![test_compiler_info {flang-*} f90] } {
-    gdb_breakpoint [gdb_get_line_number "before-allocated"]
-    gdb_continue_to_breakpoint "before-allocated"
+if {![runto [gdb_get_line_number "before-allocated"]]} {
+    perror "couldn't run to breakpoint before-allocated"
+    return -1
 }
 
 gdb_test "print twov" " = \\\( ivla1 = <not allocated>, ivla2 = <not allocated> \\\)" \
