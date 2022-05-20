@@ -79,11 +79,9 @@ static windows_process_info windows_process;
 
 #undef STARTUPINFO
 #undef CreateProcess
-#undef GetModuleFileNameEx
 
 #ifndef __CYGWIN__
 # define __PMAX	(MAX_PATH + 1)
-# define GetModuleFileNameEx GetModuleFileNameExA
 # define STARTUPINFO STARTUPINFOA
 # define CreateProcess CreateProcessA
 #else
@@ -93,7 +91,6 @@ static windows_process_info windows_process;
   static CORE_ADDR cygwin_load_end;
 #   define __USEWIDE
     typedef wchar_t cygwin_buf_t;
-#   define GetModuleFileNameEx GetModuleFileNameExW
 #   define STARTUPINFO STARTUPINFOW
 #   define CreateProcess CreateProcessW
 #endif

@@ -21,8 +21,15 @@
 #include "gdbsupport/common-debug.h"
 #include "target/target.h"
 
-#ifdef __CYGWIN__
+#undef GetModuleFileNameEx
+
+#ifndef __CYGWIN__
+#define GetModuleFileNameEx GetModuleFileNameExA
+#else
+#include <sys/cygwin.h>
 #define __USEWIDE
+typedef wchar_t cygwin_buf_t;
+#define GetModuleFileNameEx GetModuleFileNameExW
 #endif
 
 namespace windows_nat
