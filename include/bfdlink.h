@@ -493,12 +493,9 @@ struct bfd_link_info
   unsigned int noexecstack: 1;
 
   /* Tri-state variable:
-     0 => warn if the linker is creating an executable stack, but
-     execstack (above) is 0.
-     1 => warn if the linker is creating an executable stack; ignores
-     the value of execstack.
-     2 => do not warn.
-     3 => not used.  */
+     0 => do not warn when creating an executable stack.
+     1 => always warn when creating an executable stack.
+     >1 => warn when creating an executable stack if execstack is 0.  */
   unsigned int warn_execstack: 2;
 
   /* TRUE if warnings should not be generated for TLS segments with eXecute

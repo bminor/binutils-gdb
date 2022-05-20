@@ -927,7 +927,7 @@ parse_args (unsigned argc, char **argv)
 	  link_info.warn_execstack = 1;
 	  break;
 	case OPTION_NO_WARN_EXECSTACK:
-	  link_info.warn_execstack = 2;
+	  link_info.warn_execstack = 0;
 	  break;
 	case OPTION_WARN_RWX_SEGMENTS:
 	  link_info.no_warn_rwx_segments = 0;
@@ -2169,14 +2169,14 @@ elf_static_list_options (FILE *file)
   -z execstack                Mark executable as requiring executable stack\n"));
   fprintf (file, _("\
   -z noexecstack              Mark executable as not requiring executable stack\n"));
-#if DEFAULT_LD_WARN_EXECSTACK > 0
+#if DEFAULT_LD_WARN_EXECSTACK == 1
   fprintf (file, _("\
   --warn-execstack            Generate a warning if the stack is executable (default)\n"));
 #else
   fprintf (file, _("\
   --warn-execstack            Generate a warning if the stack is executable\n"));
 #endif
-#if DEFAULT_LD_WARN_EXECSTACK < 0
+#if DEFAULT_LD_WARN_EXECSTACK == 0
   fprintf (file, _("\
   --no-warn-execstack         Do not generate a warning if the stack is executable (default)\n"));
 #else

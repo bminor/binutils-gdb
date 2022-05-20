@@ -204,13 +204,15 @@ AC_ARG_ENABLE(separate-code,
 esac])
 
 
-ac_default_ld_warn_execstack=unset
+# By default warn when an executable stack is created due to object files
+# requesting such, not when the user specifies -z execstack.
+ac_default_ld_warn_execstack=2
 AC_ARG_ENABLE(warn-execstack,
 	      AS_HELP_STRING([--enable-warn-execstack],
 	      [enable warnings when creating an executable stack]),
 [case "${enableval}" in
   yes) ac_default_ld_warn_execstack=1 ;;
-  no)  ac_default_ld_warn_execstack=-1 ;;
+  no)  ac_default_ld_warn_execstack=0 ;;
 esac])
 
 ac_default_ld_warn_rwx_segments=unset
@@ -531,9 +533,6 @@ AC_DEFINE_UNQUOTED(DEFAULT_LD_Z_SEPARATE_CODE,
   [Define to 1 if you want to enable -z separate-code in ELF linker by default.])
 
 
-if test "${ac_default_ld_warn_execstack}" = unset; then
-  ac_default_ld_warn_execstack=0
-fi
 AC_DEFINE_UNQUOTED(DEFAULT_LD_WARN_EXECSTACK,
   $ac_default_ld_warn_execstack,
   [Define to 1 if you want to enable --warn-execstack in ELF linker by default.])

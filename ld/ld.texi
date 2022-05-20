@@ -2654,7 +2654,7 @@ object file formats.  For formats like COFF or ELF, the linker can not
 detect the use of global constructors.
 
 @kindex --warn-execstack
-@cindex warnings, on exectuable stack
+@cindex warnings, on executable stack
 @cindex executable stack, warnings on
 @item --warn-execstack
 @itemx --no-warn-execstack
@@ -2667,7 +2667,7 @@ line option has been used, but this behaviour can be overridden by the
 On the other hand the linker will normally warn if the stack is made
 executable because one or more of the input files need an execuable
 stack and neither of the @command{-z execstack} or @command{-z
-noexecstack} comman line options have been specified.  This warning
+noexecstack} command line options have been specified.  This warning
 can be disabled via the @command{--no-warn-execstack} option.
 
 Note: ELF format input files specify that they need an executable

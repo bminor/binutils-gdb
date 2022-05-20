@@ -15438,12 +15438,14 @@ fi
 
 
 
-ac_default_ld_warn_execstack=unset
+# By default warn when an executable stack is created due to object files
+# requesting such, not when the user specifies -z execstack.
+ac_default_ld_warn_execstack=2
 # Check whether --enable-warn-execstack was given.
 if test "${enable_warn_execstack+set}" = set; then :
   enableval=$enable_warn_execstack; case "${enableval}" in
   yes) ac_default_ld_warn_execstack=1 ;;
-  no)  ac_default_ld_warn_execstack=-1 ;;
+  no)  ac_default_ld_warn_execstack=0 ;;
 esac
 fi
 
@@ -16997,9 +16999,6 @@ _ACEOF
 
 
 
-if test "${ac_default_ld_warn_execstack}" = unset; then
-  ac_default_ld_warn_execstack=0
-fi
 
 cat >>confdefs.h <<_ACEOF
 #define DEFAULT_LD_WARN_EXECSTACK $ac_default_ld_warn_execstack

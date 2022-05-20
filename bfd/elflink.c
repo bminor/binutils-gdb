@@ -7179,7 +7179,7 @@ warning: enabling an executable stack because of -z execstack command line optio
 	{
 	  if (exec)
 	    {
-	      if (info->warn_execstack != 2)
+	      if (info->warn_execstack != 0)
 		{
 		  /* PR 29072: Because an executable stack is a serious
 		     security risk, make sure that the user knows that it is
