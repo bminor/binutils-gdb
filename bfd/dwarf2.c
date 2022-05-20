@@ -82,6 +82,77 @@ struct adjusted_section
   bfd_vma adj_vma;
 };
 
+/* A trie to map quickly from address range to compilation unit.
+
+   This is a fairly standard radix-256 trie, used to quickly locate which
+   compilation unit any given address belongs to.  Given that each compilation
+   unit may register hundreds of very small and unaligned ranges (which may
+   potentially overlap, due to inlining and other concerns), and a large
+   program may end up containing hundreds of thousands of such ranges, we cannot
+   scan through them linearly without undue slowdown.
+
+   We use a hybrid trie to avoid memory explosion: There are two types of trie
+   nodes, leaves and interior nodes.  (Almost all nodes are leaves, so they
+   take up the bulk of the memory usage.) Leaves contain a simple array of
+   ranges (high/low address) and which compilation unit contains those ranges,
+   and when we get to a leaf, we scan through it linearly.  Interior nodes
+   contain pointers to 256 other nodes, keyed by the next byte of the address.
+   So for a 64-bit address like 0x1234567abcd, we would start at the root and go
+   down child[0x00]->child[0x00]->child[0x01]->child[0x23]->child[0x45] etc.,
+   until we hit a leaf.  (Nodes are, in general, leaves until they exceed the
+   default allocation of 16 elements, at which point they are converted to
+   interior node if possible.) This gives us near-constant lookup times;
+   the only thing that can be costly is if there are lots of overlapping ranges
+   within a single 256-byte segment of the binary, in which case we have to
+   scan through them all to find the best match.
+
+   For a binary with few ranges, we will in practice only have a single leaf
+   node at the root, containing a simple array.  Thus, the scheme is efficient
+   for both small and large binaries.
+ */
+
+/* Experiments have shown 16 to be a memory-efficient default leaf size.
+   The only case where a leaf will hold more memory than this, is at the
+   bottomost level (covering 256 bytes in the binary), where we'll expand
+   the leaf to be able to hold more ranges if needed.
+ */
+#define TRIE_LEAF_SIZE 16
+
+/* All trie_node pointers will really be trie_leaf or trie_interior,
+   but they have this common head.  */
+struct trie_node
+{
+  /* If zero, we are an interior node.
+     Otherwise, how many ranges we have room for in this leaf.  */
+  unsigned int num_room_in_leaf;
+};
+
+struct trie_leaf
+{
+  struct trie_node head;
+  unsigned int num_stored_in_leaf;
+  struct {
+    struct comp_unit *unit;
+    bfd_vma low_pc, high_pc;
+  } ranges[TRIE_LEAF_SIZE];
+};
+
+struct trie_interior
+{
+  struct trie_node head;
+  struct trie_node *children[256];
+};
+
+static struct trie_node *alloc_trie_leaf (bfd *abfd)
+{
+  struct trie_leaf *leaf =
+    bfd_zalloc (abfd, sizeof (struct trie_leaf));
+  if (leaf == NULL)
+    return NULL;
+  leaf->head.num_room_in_leaf = TRIE_LEAF_SIZE;
+  return &leaf->head;
+}
+
 struct dwarf2_debug_file
 {
   /* The actual bfd from which debug info was loaded.  Might be
@@ -139,6 +210,9 @@ struct dwarf2_debug_file
   /* A list of all previously read comp_units.  */
   struct comp_unit *all_comp_units;
 
+  /* A list of all previously read comp_units with no ranges (yet).  */
+  struct comp_unit *all_comp_units_without_ranges;
+
   /* Last comp unit in list above.  */
   struct comp_unit *last_comp_unit;
 
@@ -147,6 +221,9 @@ struct dwarf2_debug_file
 
   /* Hash table to map offsets to decoded abbrevs.  */
   htab_t abbrev_offsets;
+
+  /* Root of a trie to map addresses to compilation units.  */
+  struct trie_node *trie_root;
 };
 
 struct dwarf2_debug
@@ -219,6 +296,11 @@ struct comp_unit
 {
   /* Chain the previously read compilation units.  */
   struct comp_unit *next_unit;
+
+  /* Chain the previously read compilation units that have no ranges yet.
+     We scan these separately when we have a trie over the ranges.
+     Unused if arange.high != 0. */
+  struct comp_unit *next_unit_without_ranges;
 
   /* Likewise, chain the compilation unit read after this one.
      The comp units are stored in reversed reading order.  */
@@ -296,6 +378,10 @@ struct comp_unit
 
   /* TRUE if symbols are cached in hash table for faster lookup by name.  */
   bool cached;
+
+  /* Used when iterating over trie leaves to know which units we have
+     already seen in this iteration.  */
+  bool mark;
 };
 
 /* This data structure holds the information of an abbrev.  */
@@ -1767,15 +1853,208 @@ concat_filename (struct line_info_table *table, unsigned int file)
   return strdup (filename);
 }
 
+/* Number of bits in a bfd_vma.  */
+#define VMA_BITS (8 * sizeof (bfd_vma))
+
+/* Check whether [low1, high1) can be combined with [low2, high2),
+   i.e., they touch or overlap.  */
+static bool ranges_overlap (bfd_vma low1,
+			    bfd_vma high1,
+			    bfd_vma low2,
+			    bfd_vma high2)
+{
+  if (low1 == low2 || high1 == high2)
+    return true;
+
+  /* Sort so that low1 is below low2. */
+  if (low1 > low2)
+    {
+      bfd_vma tmp;
+
+      tmp = low1;
+      low1 = low2;
+      low2 = tmp;
+
+      tmp = high1;
+      high1 = high2;
+      high2 = tmp;
+    }
+
+  /* We touch iff low2 == high1.
+     We overlap iff low2 is within [low1, high1). */
+  return (low2 <= high1);
+}
+
+/* Insert an address range in the trie mapping addresses to compilation units.
+   Will return the new trie node (usually the same as is being sent in, but
+   in case of a leaf-to-interior conversion, or expansion of a leaf, it may be
+   different), or NULL on failure.
+ */
+static struct trie_node *insert_arange_in_trie(bfd *abfd,
+					       struct trie_node *trie,
+					       bfd_vma trie_pc,
+					       unsigned int trie_pc_bits,
+					       struct comp_unit *unit,
+					       bfd_vma low_pc,
+					       bfd_vma high_pc)
+{
+  bfd_vma clamped_low_pc, clamped_high_pc;
+  int ch, from_ch, to_ch;
+  bool is_full_leaf = false;
+
+  /* See if we can extend any of the existing ranges.  This merging
+     isn't perfect (if merging opens up the possibility of merging two existing
+     ranges, we won't find them), but it takes the majority of the cases.  */
+  if (trie->num_room_in_leaf > 0)
+    {
+      struct trie_leaf *leaf = (struct trie_leaf *) trie;
+      unsigned int i;
+
+      for (i = 0; i < leaf->num_stored_in_leaf; ++i)
+	{
+	  if (leaf->ranges[i].unit == unit &&
+	      ranges_overlap(low_pc, high_pc,
+			     leaf->ranges[i].low_pc, leaf->ranges[i].high_pc))
+	    {
+	      if (low_pc < leaf->ranges[i].low_pc)
+		leaf->ranges[i].low_pc = low_pc;
+	      if (high_pc > leaf->ranges[i].high_pc)
+		leaf->ranges[i].high_pc = high_pc;
+	      return trie;
+	    }
+	}
+
+      is_full_leaf = leaf->num_stored_in_leaf == trie->num_room_in_leaf;
+    }
+
+  /* If we're a leaf with no more room and we're _not_ at the bottom,
+     convert to an interior node.  */
+  if (is_full_leaf && trie_pc_bits < VMA_BITS)
+    {
+      const struct trie_leaf *leaf = (struct trie_leaf *) trie;
+      unsigned int i;
+
+      trie = bfd_zalloc (abfd, sizeof (struct trie_interior));
+      if (!trie)
+	return NULL;
+      is_full_leaf = false;
+
+      /* TODO: If we wanted to save a little more memory at the cost of
+	 complexity, we could have reused the old leaf node as one of the
+	 children of the new interior node, instead of throwing it away.  */
+      for (i = 0; i < leaf->num_stored_in_leaf; ++i)
+        {
+	  if (!insert_arange_in_trie (abfd, trie, trie_pc, trie_pc_bits,
+				      leaf->ranges[i].unit, leaf->ranges[i].low_pc,
+				      leaf->ranges[i].high_pc))
+	    return NULL;
+	}
+    }
+
+  /* If we're a leaf with no more room and we _are_ at the bottom,
+     we have no choice but to just make it larger. */
+  if (is_full_leaf)
+    {
+      const struct trie_leaf *leaf = (struct trie_leaf *) trie;
+      unsigned int new_room_in_leaf = trie->num_room_in_leaf * 2;
+      struct trie_leaf *new_leaf;
+
+      new_leaf = bfd_zalloc (abfd,
+	sizeof (struct trie_leaf) +
+	  (new_room_in_leaf - TRIE_LEAF_SIZE) * sizeof (leaf->ranges[0]));
+      new_leaf->head.num_room_in_leaf = new_room_in_leaf;
+      new_leaf->num_stored_in_leaf = leaf->num_stored_in_leaf;
+
+      memcpy (new_leaf->ranges,
+	      leaf->ranges,
+	      leaf->num_stored_in_leaf * sizeof (leaf->ranges[0]));
+      trie = &new_leaf->head;
+      is_full_leaf = false;
+
+      /* Now the insert below will go through.  */
+    }
+
+  /* If we're a leaf (now with room), we can just insert at the end.  */
+  if (trie->num_room_in_leaf > 0)
+    {
+      struct trie_leaf *leaf = (struct trie_leaf *) trie;
+
+      unsigned int i = leaf->num_stored_in_leaf++;
+      leaf->ranges[i].unit = unit;
+      leaf->ranges[i].low_pc = low_pc;
+      leaf->ranges[i].high_pc = high_pc;
+      return trie;
+    }
+
+  /* Now we are definitely an interior node, so recurse into all
+     the relevant buckets.  */
+
+  /* Clamp the range to the current trie bucket.  */
+  clamped_low_pc = low_pc;
+  clamped_high_pc = high_pc;
+  if (trie_pc_bits > 0)
+    {
+      bfd_vma bucket_high_pc =
+	trie_pc + ((bfd_vma)-1 >> trie_pc_bits);  /* Inclusive.  */
+      if (clamped_low_pc < trie_pc)
+	clamped_low_pc = trie_pc;
+      if (clamped_high_pc > bucket_high_pc)
+	clamped_high_pc = bucket_high_pc;
+    }
+
+  /* Insert the ranges in all buckets that it spans.  */
+  from_ch = (clamped_low_pc >> (VMA_BITS - trie_pc_bits - 8)) & 0xff;
+  to_ch = ((clamped_high_pc - 1) >> (VMA_BITS - trie_pc_bits - 8)) & 0xff;
+  for (ch = from_ch; ch <= to_ch; ++ch)
+    {
+      struct trie_interior *interior = (struct trie_interior *) trie;
+      struct trie_node *child = interior->children[ch];
+
+      if (child == NULL)
+        {
+	  child = alloc_trie_leaf (abfd);
+	  if (!child)
+	    return NULL;
+	}
+      child = insert_arange_in_trie (abfd,
+				     child,
+				     trie_pc + ((bfd_vma)ch << (VMA_BITS - trie_pc_bits - 8)),
+				     trie_pc_bits + 8,
+				     unit,
+				     low_pc,
+				     high_pc);
+      if (!child)
+	return NULL;
+
+      interior->children[ch] = child;
+    }
+
+    return trie;
+}
+
+
 static bool
-arange_add (const struct comp_unit *unit, struct arange *first_arange,
-	    bfd_vma low_pc, bfd_vma high_pc)
+arange_add (struct comp_unit *unit, struct arange *first_arange,
+	    struct trie_node **trie_root, bfd_vma low_pc, bfd_vma high_pc)
 {
   struct arange *arange;
 
   /* Ignore empty ranges.  */
   if (low_pc == high_pc)
     return true;
+
+  if (trie_root != NULL)
+    {
+      *trie_root = insert_arange_in_trie (unit->file->bfd_ptr,
+					  *trie_root,
+					  0,
+					  0,
+					  unit,
+					  low_pc,
+					  high_pc);
+      if (*trie_root == NULL)
+	return false;
+    }
 
   /* If the first arange is empty, use it.  */
   if (first_arange->high == 0)
@@ -2411,7 +2690,8 @@ decode_line_info (struct comp_unit *unit)
 		    low_pc = address;
 		  if (address > high_pc)
 		    high_pc = address;
-		  if (!arange_add (unit, &unit->arange, low_pc, high_pc))
+		  if (!arange_add (unit, &unit->arange, &unit->file->trie_root,
+				   low_pc, high_pc))
 		    goto line_fail;
 		  break;
 		case DW_LNE_set_address:
@@ -3134,7 +3414,7 @@ find_abstract_instance (struct comp_unit *unit,
 
 static bool
 read_ranges (struct comp_unit *unit, struct arange *arange,
-	     bfd_uint64_t offset)
+	     struct trie_node **trie_root, bfd_uint64_t offset)
 {
   bfd_byte *ranges_ptr;
   bfd_byte *ranges_end;
@@ -3169,7 +3449,7 @@ read_ranges (struct comp_unit *unit, struct arange *arange,
 	base_address = high_pc;
       else
 	{
-	  if (!arange_add (unit, arange,
+	  if (!arange_add (unit, arange, trie_root,
 			   base_address + low_pc, base_address + high_pc))
 	    return false;
 	}
@@ -3179,7 +3459,7 @@ read_ranges (struct comp_unit *unit, struct arange *arange,
 
 static bool
 read_rnglists (struct comp_unit *unit, struct arange *arange,
-	       bfd_uint64_t offset)
+	       struct trie_node **trie_root, bfd_uint64_t offset)
 {
   bfd_byte *rngs_ptr;
   bfd_byte *rngs_end;
@@ -3253,19 +3533,19 @@ read_rnglists (struct comp_unit *unit, struct arange *arange,
 	  return false;
 	}
 
-      if (!arange_add (unit, arange, low_pc, high_pc))
+      if (!arange_add (unit, arange, trie_root, low_pc, high_pc))
 	return false;
     }
 }
 
 static bool
 read_rangelist (struct comp_unit *unit, struct arange *arange,
-		bfd_uint64_t offset)
+		struct trie_node **trie_root, bfd_uint64_t offset)
 {
   if (unit->version <= 4)
-    return read_ranges (unit, arange, offset);
+    return read_ranges (unit, arange, trie_root, offset);
   else
-    return read_rnglists (unit, arange, offset);
+    return read_rnglists (unit, arange, trie_root, offset);
 }
 
 static struct funcinfo *
@@ -3617,7 +3897,8 @@ scan_unit_for_symbols (struct comp_unit *unit)
 
 		case DW_AT_ranges:
 		  if (is_int_form (&attr)
-		      && !read_rangelist (unit, &func->arange, attr.u.val))
+		      && !read_rangelist (unit, &func->arange,
+					  &unit->file->trie_root, attr.u.val))
 		    goto fail;
 		  break;
 
@@ -3733,7 +4014,8 @@ scan_unit_for_symbols (struct comp_unit *unit)
 
       if (func && high_pc != 0)
 	{
-	  if (!arange_add (unit, &func->arange, low_pc, high_pc))
+	  if (!arange_add (unit, &func->arange, &unit->file->trie_root,
+			   low_pc, high_pc))
 	    goto fail;
 	}
     }
@@ -3931,7 +4213,8 @@ parse_comp_unit (struct dwarf2_debug *stash,
 
 	case DW_AT_ranges:
 	  if (is_int_form (&attr)
-	      && !read_rangelist (unit, &unit->arange, attr.u.val))
+	      && !read_rangelist (unit, &unit->arange,
+				  &unit->file->trie_root, attr.u.val))
 	    return NULL;
 	  break;
 
@@ -3973,7 +4256,8 @@ parse_comp_unit (struct dwarf2_debug *stash,
     high_pc += low_pc;
   if (high_pc != 0)
     {
-      if (!arange_add (unit, &unit->arange, low_pc, high_pc))
+      if (!arange_add (unit, &unit->arange, &unit->file->trie_root,
+		       low_pc, high_pc))
 	return NULL;
     }
 
@@ -4772,6 +5056,14 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
   if (!stash->alt.abbrev_offsets)
     return false;
 
+  stash->f.trie_root = alloc_trie_leaf (abfd);
+  if (!stash->f.trie_root)
+    return false;
+
+  stash->alt.trie_root = alloc_trie_leaf (abfd);
+  if (!stash->alt.trie_root)
+    return false;
+
   *pinfo = stash;
 
   if (debug_bfd == NULL)
@@ -4942,6 +5234,12 @@ stash_comp_unit (struct dwarf2_debug *stash, struct dwarf2_debug_file *file)
 
 	  each->next_unit = file->all_comp_units;
 	  file->all_comp_units = each;
+
+	  if (each->arange.high == 0)
+	    {
+	      each->next_unit_without_ranges = file->all_comp_units_without_ranges;
+	      file->all_comp_units_without_ranges = each->next_unit_without_ranges;
+	    }
 
 	  file->info_ptr += length;
 	  return each;
@@ -5185,17 +5483,67 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
     }
   else
     {
-      for (each = stash->f.all_comp_units; each; each = each->next_unit)
+      struct trie_node *trie = stash->f.trie_root;
+      unsigned int bits = VMA_BITS - 8;
+      struct comp_unit **prev_each;
+
+      /* Traverse interior nodes until we get to a leaf.  */
+      while (trie && trie->num_room_in_leaf == 0)
 	{
-	  found = ((each->arange.high == 0
-		    || comp_unit_contains_address (each, addr))
-		   && comp_unit_find_nearest_line (each, addr,
+	  int ch = (addr >> bits) & 0xff;
+	  trie = ((struct trie_interior *) trie)->children[ch];
+	  bits -= 8;
+	}
+
+      if (trie)
+	{
+	  const struct trie_leaf *leaf = (struct trie_leaf *) trie;
+	  unsigned int i;
+
+	  for (i = 0; i < leaf->num_stored_in_leaf; ++i)
+	    {
+	      leaf->ranges[i].unit->mark = false;
+	    }
+
+	  for (i = 0; i < leaf->num_stored_in_leaf; ++i)
+	    {
+	      struct comp_unit *unit = leaf->ranges[i].unit;
+	      if (unit->mark ||
+	          addr < leaf->ranges[i].low_pc ||
+	          addr >= leaf->ranges[i].high_pc)
+	        continue;
+	      unit->mark = true;
+
+	      found = comp_unit_find_nearest_line (unit, addr,
 						   filename_ptr,
 						   &function,
 						   linenumber_ptr,
-						   discriminator_ptr));
+						   discriminator_ptr);
+	      if (found)
+		goto done;
+	   }
+	}
+
+      /* Also scan through all compilation units without any ranges,
+         taking them out of the list if they have acquired any since
+	 last time.  */
+      prev_each = &stash->f.all_comp_units_without_ranges;
+      for (each = *prev_each; each; each = each->next_unit_without_ranges)
+        {
+	  if (each->arange.high != 0)
+	    {
+	      *prev_each = each->next_unit_without_ranges;
+	      continue;
+	    }
+
+	  found = comp_unit_find_nearest_line (each, addr,
+					       filename_ptr,
+					       &function,
+					       linenumber_ptr,
+					       discriminator_ptr);
 	  if (found)
 	    goto done;
+	  prev_each = &each->next_unit_without_ranges;
 	}
     }
 
