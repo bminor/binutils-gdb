@@ -360,7 +360,7 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
 		gdb_printf (gdb_stdlog, " returning PDC_FAILURE\n");
 	      return PDC_FAILURE;
 	    }
-	  symbols[i].addr = ms->value_address ();
+	  symbols[i].addr = ms.value_address ();
 	}
       if (debug_aix_thread)
 	gdb_printf (gdb_stdlog, "  symbols[%d].addr = %s\n",
@@ -969,7 +969,7 @@ pd_enable (void)
   ms = lookup_minimal_symbol (stub_name, NULL, NULL);
   if (ms.minsym == NULL)
     return;
-  pd_brk_addr = ms->value_address ();
+  pd_brk_addr = ms.value_address ();
   if (!create_thread_event_breakpoint (target_gdbarch (), pd_brk_addr))
     return;
 
