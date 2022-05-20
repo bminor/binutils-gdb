@@ -19,7 +19,7 @@ contains
         subroutine lib_func
         if (var_i .ne. 1) call abort
         var_i = 2
-        var_i = var_i                 ! i-is-2-in-lib
+        var_i = 2                 ! i-is-2-in-lib
         end subroutine lib_func
 end module lib
 
