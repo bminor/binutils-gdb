@@ -181,6 +181,13 @@ proc run_tests { lang } {
 	    set g_val_pattern "\\( a = 1.5, b = 2.5 \\)"
 	}
 
+	# The last argument here in info args is compiler generated.  It
+	# contains length of the passed array e (we are in mixed_func_1b here).
+	# For gfortran and ifx the compilers conveniently named this '_e',
+	# ifort however prints .tmp.E.len_V$4a.  As is seems unreasonable to
+	# test for an artificially created name and as at the same time all
+	# 3 tested compilers emit this argument, we only check for its
+	# existence and its value (6).
 	set args_pattern [multi_line \
 			      "a = 1" \
 			      "b = 2" \
@@ -188,7 +195,7 @@ proc run_tests { lang } {
 			      "d = ${d_pattern}" \
 			      "e = ${e_pattern}" \
 			      "g = ${g_val_pattern}" \
-			      "_e = 6" ]
+			      ".* = 6" ]
 
 	gdb_test "info args" $args_pattern \
 	    "info args in frame #7"
