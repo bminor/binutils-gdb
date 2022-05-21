@@ -710,16 +710,6 @@ struct breakpoint
   /* Print to FP the CLI command that recreates this breakpoint.  */
   virtual void print_recreate (struct ui_file *fp) const;
 
-  /* Given the location spec (second parameter), this method decodes
-     it and returns the SAL locations related to it.  For ordinary
-     breakpoints, it calls `decode_line_full'.  If SEARCH_PSPACE is
-     not NULL, symbol search is restricted to just that program space.
-
-     This function is called inside `location_spec_to_sals'.  */
-  virtual std::vector<symtab_and_line> decode_location_spec
-    (location_spec *locspec,
-     struct program_space *search_pspace);
-
   /* Return true if this breakpoint explains a signal.  See
      bpstat_explains_signal.  */
   virtual bool explains_signal (enum gdb_signal)
@@ -883,11 +873,18 @@ struct code_breakpoint : public breakpoint
 		      const address_space *aspace,
 		      CORE_ADDR bp_addr,
 		      const target_waitstatus &ws) override;
-  std::vector<symtab_and_line> decode_location_spec
-       (struct location_spec *locspec,
-	struct program_space *search_pspace) override;
 
 protected:
+
+  /* Given the location spec, this method decodes it and returns the
+     SAL locations related to it.  For ordinary breakpoints, it calls
+     `decode_line_full'.  If SEARCH_PSPACE is not NULL, symbol search
+     is restricted to just that program space.
+
+     This function is called inside `location_spec_to_sals'.  */
+  virtual std::vector<symtab_and_line> decode_location_spec
+    (location_spec *locspec,
+     struct program_space *search_pspace);
 
   /* Helper method that does the basic work of re_set.  */
   void re_set_default ();

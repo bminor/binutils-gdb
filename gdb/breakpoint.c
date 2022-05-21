@@ -11493,13 +11493,6 @@ breakpoint::print_recreate (struct ui_file *fp) const
   internal_error_pure_virtual_called ();
 }
 
-std::vector<symtab_and_line>
-breakpoint::decode_location_spec (location_spec *locspec,
-				  program_space *search_pspace)
-{
-  internal_error_pure_virtual_called ();
-}
-
 /* Default breakpoint_ops methods.  */
 
 void
