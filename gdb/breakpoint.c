@@ -87,8 +87,6 @@
 static void map_breakpoint_numbers (const char *,
 				    gdb::function_view<void (breakpoint *)>);
 
-static void breakpoint_re_set_default (code_breakpoint *);
-
 static void
   create_sals_from_location_spec_default (location_spec *locspec,
 					  linespec_result *canonical);
@@ -11515,7 +11513,7 @@ code_breakpoint::re_set ()
       return;
     }
 
-  breakpoint_re_set_default (this);
+  re_set_default ();
 }
 
 int
@@ -11951,7 +11949,7 @@ tracepoint_probe_create_sals_from_location_spec
 void
 dprintf_breakpoint::re_set ()
 {
-  breakpoint_re_set_default (this);
+  re_set_default ();
 
   /* extra_string should never be non-NULL for dprintf.  */
   gdb_assert (extra_string != NULL);
@@ -12723,28 +12721,28 @@ location_spec_to_sals (struct breakpoint *b, location_spec *locspec,
    breakpoints.  Reevaluate the breakpoint and recreate its
    locations.  */
 
-static void
-breakpoint_re_set_default (code_breakpoint *b)
+void
+code_breakpoint::re_set_default ()
 {
   struct program_space *filter_pspace = current_program_space;
   std::vector<symtab_and_line> expanded, expanded_end;
 
   int found;
   std::vector<symtab_and_line> sals
-    = location_spec_to_sals (b, b->locspec.get (), filter_pspace, &found);
+    = location_spec_to_sals (this, locspec.get (), filter_pspace, &found);
   if (found)
     expanded = std::move (sals);
 
-  if (b->locspec_range_end != nullptr)
+  if (locspec_range_end != nullptr)
     {
       std::vector<symtab_and_line> sals_end
-	= location_spec_to_sals (b, b->locspec_range_end.get (),
+	= location_spec_to_sals (this, locspec_range_end.get (),
 				 filter_pspace, &found);
       if (found)
 	expanded_end = std::move (sals_end);
     }
 
-  update_breakpoint_locations (b, filter_pspace, expanded, expanded_end);
+  update_breakpoint_locations (this, filter_pspace, expanded, expanded_end);
 }
 
 /* Default method for creating SALs from an address string.  It basically

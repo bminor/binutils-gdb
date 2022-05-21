@@ -886,6 +886,11 @@ struct code_breakpoint : public breakpoint
   std::vector<symtab_and_line> decode_location_spec
        (struct location_spec *locspec,
 	struct program_space *search_pspace) override;
+
+protected:
+
+  /* Helper method that does the basic work of re_set.  */
+  void re_set_default ();
 };
 
 /* An instance of this type is used to represent a watchpoint,
