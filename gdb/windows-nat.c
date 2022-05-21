@@ -654,8 +654,8 @@ static std::vector<windows_solib> solibs;
 static windows_solib *
 windows_make_so (const char *name, LPVOID load_addr)
 {
-  char *p;
 #ifndef __CYGWIN__
+  char *p;
   char buf[__PMAX];
   char cwd[__PMAX];
   WIN32_FIND_DATA w32_fd;
@@ -738,7 +738,7 @@ windows_make_so (const char *name, LPVOID load_addr)
     {
       asection *text = NULL;
 
-      gdb_bfd_ref_ptr abfd (gdb_bfd_open (so->name, "pei-i386"));
+      gdb_bfd_ref_ptr abfd (gdb_bfd_open (so->name.c_str(), "pei-i386"));
 
       if (abfd == NULL)
 	return so;
