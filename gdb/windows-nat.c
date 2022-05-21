@@ -711,10 +711,10 @@ windows_make_so (const char *name, LPVOID load_addr)
 #else
   if (buf[0])
     {
-      char name[SO_NAME_MAX_PATH_SIZE];
-      cygwin_conv_path (CCP_WIN_W_TO_POSIX, buf, name,
+      char cname[SO_NAME_MAX_PATH_SIZE];
+      cygwin_conv_path (CCP_WIN_W_TO_POSIX, buf, cname,
 			SO_NAME_MAX_PATH_SIZE);
-      so->name = name;
+      so->name = cname;
     }
   else
     {
