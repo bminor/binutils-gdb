@@ -12636,9 +12636,10 @@ update_breakpoint_locations (code_breakpoint *b,
 /* Find the SaL locations corresponding to the given LOCSPEC.
    On return, FOUND will be 1 if any SaL was found, zero otherwise.  */
 
-static std::vector<symtab_and_line>
-location_spec_to_sals (struct breakpoint *b, location_spec *locspec,
-		       struct program_space *search_pspace, int *found)
+std::vector<symtab_and_line>
+code_breakpoint::location_spec_to_sals (location_spec *locspec,
+					struct program_space *search_pspace,
+					int *found)
 {
   struct gdb_exception exception;
 
@@ -12646,7 +12647,7 @@ location_spec_to_sals (struct breakpoint *b, location_spec *locspec,
 
   try
     {
-      sals = b->decode_location_spec (locspec, search_pspace);
+      sals = decode_location_spec (locspec, search_pspace);
     }
   catch (gdb_exception_error &e)
     {
@@ -12660,13 +12661,13 @@ location_spec_to_sals (struct breakpoint *b, location_spec *locspec,
 	 breakpoint being disabled, and don't want to see more
 	 errors.  */
       if (e.error == NOT_FOUND_ERROR
-	  && (b->condition_not_parsed
-	      || (b->loc != NULL
+	  && (condition_not_parsed
+	      || (loc != NULL
 		  && search_pspace != NULL
-		  && b->loc->pspace != search_pspace)
-	      || (b->loc && b->loc->shlib_disabled)
-	      || (b->loc && b->loc->pspace->executing_startup)
-	      || b->enable_state == bp_disabled))
+		  && loc->pspace != search_pspace)
+	      || (loc && loc->shlib_disabled)
+	      || (loc && loc->pspace->executing_startup)
+	      || enable_state == bp_disabled))
 	not_found_and_ok = 1;
 
       if (!not_found_and_ok)
@@ -12677,7 +12678,7 @@ location_spec_to_sals (struct breakpoint *b, location_spec *locspec,
 	     have separate 'warning emitted' flag.  Since this
 	     happens only when a binary has changed, I don't know
 	     which approach is better.  */
-	  b->enable_state = bp_disabled;
+	  enable_state = bp_disabled;
 	  throw;
 	}
 
@@ -12688,26 +12689,26 @@ location_spec_to_sals (struct breakpoint *b, location_spec *locspec,
     {
       for (auto &sal : sals)
 	resolve_sal_pc (&sal);
-      if (b->condition_not_parsed && b->extra_string != NULL)
+      if (condition_not_parsed && extra_string != NULL)
 	{
-	  gdb::unique_xmalloc_ptr<char> cond_string, extra_string;
-	  int thread, task;
+	  gdb::unique_xmalloc_ptr<char> local_cond, local_extra;
+	  int local_thread, local_task;
 
-	  find_condition_and_thread_for_sals (sals, b->extra_string.get (),
-					      &cond_string, &thread,
-					      &task, &extra_string);
-	  gdb_assert (b->cond_string == NULL);
-	  if (cond_string)
-	    b->cond_string = std::move (cond_string);
-	  b->thread = thread;
-	  b->task = task;
-	  if (extra_string)
-	    b->extra_string = std::move (extra_string);
-	  b->condition_not_parsed = 0;
+	  find_condition_and_thread_for_sals (sals, extra_string.get (),
+					      &local_cond, &local_thread,
+					      &local_task, &local_extra);
+	  gdb_assert (cond_string == nullptr);
+	  if (local_cond != nullptr)
+	    cond_string = std::move (local_cond);
+	  thread = local_thread;
+	  task = local_task;
+	  if (local_extra != nullptr)
+	    extra_string = std::move (local_extra);
+	  condition_not_parsed = 0;
 	}
 
-      if (b->type == bp_static_tracepoint)
-	sals[0] = update_static_tracepoint (b, sals[0]);
+      if (type == bp_static_tracepoint)
+	sals[0] = update_static_tracepoint (this, sals[0]);
 
       *found = 1;
     }
@@ -12728,15 +12729,16 @@ code_breakpoint::re_set_default ()
   std::vector<symtab_and_line> expanded, expanded_end;
 
   int found;
-  std::vector<symtab_and_line> sals
-    = location_spec_to_sals (this, locspec.get (), filter_pspace, &found);
+  std::vector<symtab_and_line> sals = location_spec_to_sals (locspec.get (),
+							     filter_pspace,
+							     &found);
   if (found)
     expanded = std::move (sals);
 
   if (locspec_range_end != nullptr)
     {
       std::vector<symtab_and_line> sals_end
-	= location_spec_to_sals (this, locspec_range_end.get (),
+	= location_spec_to_sals (locspec_range_end.get (),
 				 filter_pspace, &found);
       if (found)
 	expanded_end = std::move (sals_end);

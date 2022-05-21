@@ -891,6 +891,14 @@ protected:
 
   /* Helper method that does the basic work of re_set.  */
   void re_set_default ();
+
+  /* Find the SaL locations corresponding to the given LOCATION.
+     On return, FOUND will be 1 if any SaL was found, zero otherwise.  */
+
+  std::vector<symtab_and_line> location_spec_to_sals
+       (location_spec *locspec,
+	struct program_space *search_pspace,
+	int *found);
 };
 
 /* An instance of this type is used to represent a watchpoint,
