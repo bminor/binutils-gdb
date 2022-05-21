@@ -299,8 +299,8 @@ m32c_syscall (int id)
 
 	rv = gettimeofday (&tv, 0);
 	if (trace)
-	  printf ("gettimeofday: %ld sec %ld usec to 0x%x\n", tv.tv_sec,
-		  tv.tv_usec, tvaddr);
+	  printf ("gettimeofday: %" PRId64 " sec %" PRId64 " usec to 0x%x\n",
+		  (int64_t)tv.tv_sec, (int64_t)tv.tv_usec, tvaddr);
 	mem_put_si (tvaddr, tv.tv_sec);
 	mem_put_si (tvaddr + 4, tv.tv_usec);
 	put_reg (r0, rv);

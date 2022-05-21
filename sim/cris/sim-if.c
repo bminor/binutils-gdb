@@ -257,7 +257,8 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
 
       if (verbose)
 	sim_io_printf (sd,
-		       "Loading segment at 0x%" BFD_VMA_FMT "x, size 0x%lx\n",
+		       "Loading segment at 0x%" BFD_VMA_FMT "x, "
+		       "size 0x%" BFD_VMA_FMT "x\n",
 		       lma, phdr[i].p_filesz);
 
       if (bfd_seek (abfd, phdr[i].p_offset, SEEK_SET) != 0
@@ -265,7 +266,7 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
 	{
 	  sim_io_eprintf (sd,
 			  "%s: could not read segment at 0x%" BFD_VMA_FMT "x, "
-			  "size 0x%lx\n",
+			  "size 0x%" BFD_VMA_FMT "x\n",
 			  STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
 	  free (buf);
 	  return FALSE;
@@ -275,7 +276,7 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
 	{
 	  sim_io_eprintf (sd,
 			  "%s: could not load segment at 0x%" BFD_VMA_FMT "x, "
-			  "size 0x%lx\n",
+			  "size 0x%" BFD_VMA_FMT "x\n",
 			  STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
 	  free (buf);
 	  return FALSE;
@@ -572,7 +573,8 @@ cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
 	 memory area, so we go via a temporary area.  Luckily, the
 	 interpreter is supposed to be small, less than 0x40000
 	 bytes.  */
-      sim_do_commandf (sd, "memory region 0x%" BFD_VMA_FMT "x,0x%lx",
+      sim_do_commandf (sd, "memory region 0x%" BFD_VMA_FMT "x,"
+		       "0x%" BFD_VMA_FMT "x",
 		       interp_load_addr, interpsiz);
 
       /* Now that memory for the interpreter is defined, load it.  */
