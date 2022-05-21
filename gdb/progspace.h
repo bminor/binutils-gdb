@@ -41,9 +41,9 @@ struct program_space_data;
 struct address_space_data;
 struct so_list;
 
-typedef std::list<std::shared_ptr<objfile>> objfile_list;
+typedef std::list<std::unique_ptr<objfile>> objfile_list;
 
-/* An iterator that wraps an iterator over std::shared_ptr<objfile>,
+/* An iterator that wraps an iterator over std::unique_ptr<objfile>,
    and dereferences the returned object.  This is useful for iterating
    over a list of shared pointers and returning raw pointers -- which
    helped avoid touching a lot of code when changing how objfiles are
@@ -234,7 +234,7 @@ struct program_space
   /* Add OBJFILE to the list of objfiles, putting it just before
      BEFORE.  If BEFORE is nullptr, it will go at the end of the
      list.  */
-  void add_objfile (std::shared_ptr<objfile> &&objfile,
+  void add_objfile (std::unique_ptr<objfile> &&objfile,
 		    struct objfile *before);
 
   /* Remove OBJFILE from the list of objfiles.  */
@@ -354,7 +354,7 @@ struct program_space
   struct objfile *symfile_object_file = NULL;
 
   /* All known objfiles are kept in a linked list.  */
-  std::list<std::shared_ptr<objfile>> objfiles_list;
+  std::list<std::unique_ptr<objfile>> objfiles_list;
 
   /* List of shared objects mapped into this space.  Managed by
      solib.c.  */

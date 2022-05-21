@@ -174,7 +174,7 @@ program_space::free_all_objfiles ()
 /* See progspace.h.  */
 
 void
-program_space::add_objfile (std::shared_ptr<objfile> &&objfile,
+program_space::add_objfile (std::unique_ptr<objfile> &&objfile,
 			    struct objfile *before)
 {
   if (before == nullptr)
@@ -182,7 +182,7 @@ program_space::add_objfile (std::shared_ptr<objfile> &&objfile,
   else
     {
       auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
-				[=] (const std::shared_ptr<::objfile> &objf)
+				[=] (const std::unique_ptr<::objfile> &objf)
 				{
 				  return objf.get () == before;
 				});
@@ -203,7 +203,7 @@ program_space::remove_objfile (struct objfile *objfile)
   reinit_frame_cache ();
 
   auto iter = std::find_if (objfiles_list.begin (), objfiles_list.end (),
-			    [=] (const std::shared_ptr<::objfile> &objf)
+			    [=] (const std::unique_ptr<::objfile> &objf)
 			    {
 			      return objf.get () == objfile;
 			    });

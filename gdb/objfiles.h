@@ -409,7 +409,7 @@ public:
      remove it from the program space's list.  In some cases, you may
      need to hold a reference to an objfile that is independent of its
      existence on the program space's list; for this case, the
-     destructor must be public so that shared_ptr can reference
+     destructor must be public so that unique_ptr can reference
      it.  */
   ~objfile ();
 

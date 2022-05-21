@@ -468,9 +468,7 @@ objfile::make (bfd *bfd_, const char *name_, objfile_flags flags_,
   if (parent != nullptr)
     add_separate_debug_objfile (result, parent);
 
-  /* Using std::make_shared might be a bit nicer here, but that would
-     require making the constructor public.  */
-  current_program_space->add_objfile (std::shared_ptr<objfile> (result),
+  current_program_space->add_objfile (std::unique_ptr<objfile> (result),
 				      parent);
 
   /* Rebuild section map next time we need it.  */
