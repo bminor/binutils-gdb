@@ -11926,6 +11926,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   baseaddr = objfile->text_section_offset ();
 
   name = dwarf2_name (die, cu);
+  if (name == nullptr)
+    name = dw2_linkage_name (die, cu);
 
   /* Ignore functions with missing or empty names.  These are actually
      illegal according to the DWARF standard.  */
@@ -18320,7 +18322,14 @@ cooked_indexer::index_dies (cutu_reader *reader,
 	     but not an ordinary name.  */
 	  if (name != nullptr)
 	    flags = flags & ~IS_MAIN;
-	  m_index_storage->add (this_die, abbrev->tag, flags | IS_LINKAGE,
+	  /* Set the IS_LINKAGE on for everything except when functions
+	     have linkage name present but name is absent.  */
+	  if (name != nullptr
+	      || (abbrev->tag != DW_TAG_subprogram
+	          && abbrev->tag != DW_TAG_inlined_subroutine
+	          && abbrev->tag != DW_TAG_entry_point))
+	    flags = flags | IS_LINKAGE;
+	  m_index_storage->add (this_die, abbrev->tag, flags,
 				linkage_name, nullptr, m_per_cu);
 	}
 
@@ -20597,6 +20606,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
   baseaddr = objfile->text_section_offset ();
 
   name = dwarf2_name (die, cu);
+  if (name == nullptr && (die->tag == DW_TAG_subprogram
+                          || die->tag == DW_TAG_inlined_subroutine
+                          || die->tag == DW_TAG_entry_point))
+    name = dw2_linkage_name (die, cu);
+
   if (name)
     {
       int suppress_add = 0;
