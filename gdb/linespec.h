@@ -70,9 +70,9 @@ struct linespec_result
      object.  */
   bool pre_expanded = false;
 
-  /* If PRE_EXPANDED is non-zero, this is set to the location entered
-     by the user.  */
-  event_location_up location;
+  /* If PRE_EXPANDED is true, this is set to the location spec
+     entered by the user.  */
+  location_spec_up locspec;
 
   /* The sals.  The vector will be freed by the destructor.  */
   std::vector<linespec_sals> lsals;
@@ -81,11 +81,11 @@ struct linespec_result
 /* Decode a linespec using the provided default symtab and line.  */
 
 extern std::vector<symtab_and_line>
-	decode_line_1 (const struct event_location *location, int flags,
+	decode_line_1 (const location_spec *locspec, int flags,
 		       struct program_space *search_pspace,
 		       struct symtab *default_symtab, int default_line);
 
-/* Parse LOCATION and return results.  This is the "full"
+/* Parse LOCSPEC and return results.  This is the "full"
    interface to this module, which handles multiple results
    properly.
 
@@ -124,7 +124,7 @@ extern std::vector<symtab_and_line>
    strcmp sense) to FILTER will be returned; all others will be
    filtered out.  */
 
-extern void decode_line_full (struct event_location *location, int flags,
+extern void decode_line_full (struct location_spec *locspec, int flags,
 			      struct program_space *search_pspace,
 			      struct symtab *default_symtab, int default_line,
 			      struct linespec_result *canonical,

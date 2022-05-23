@@ -1,4 +1,4 @@
-/* Data structures and API for event locations in GDB.
+/* Data structures and API for location specs in GDB.
    Copyright (C) 2013-2022 Free Software Foundation, Inc.
 
    This file is part of GDB.
@@ -22,7 +22,7 @@
 #include "symtab.h"
 
 struct language_defn;
-struct event_location;
+struct location_spec;
 
 /* An enumeration of possible signs for a line offset.  */
 
@@ -50,22 +50,21 @@ struct line_offset
   enum offset_relative_sign sign;
 };
 
-/* An enumeration of the various ways to specify a stop event
-   location (used with create_breakpoint).  */
+/* An enumeration of the various ways to specify a location spec.  */
 
-enum event_location_type
+enum location_spec_type
 {
   /* A traditional linespec.  */
-  LINESPEC_LOCATION,
+  LINESPEC_LOCATION_SPEC,
 
-  /* An address in the inferior.  */
-  ADDRESS_LOCATION,
+  /* An address location spec.  */
+  ADDRESS_LOCATION_SPEC,
 
-  /* An explicit location.  */
-  EXPLICIT_LOCATION,
+  /* An explicit location spec.  */
+  EXPLICIT_LOCATION_SPEC,
 
-  /* A probe location.  */
-  PROBE_LOCATION
+  /* A probe location spec.  */
+  PROBE_LOCATION_SPEC
 };
 
 /* A traditional linespec.  */
@@ -79,7 +78,7 @@ struct linespec_location
   char *spec_string;
 };
 
-/* An explicit location.  This structure is used to bypass the
+/* An explicit location spec.  This structure is used to bypass the
    parsing done on linespecs.  It still has the same requirements
    as linespecs, though.  For example, source_filename requires
    at least one other field.  */
@@ -104,136 +103,137 @@ struct explicit_location
   struct line_offset line_offset;
 };
 
-/* Return the type of the given event location.  */
+/* Return the type of the given location spec.  */
 
-extern enum event_location_type
-  event_location_type (const struct event_location *);
+extern enum location_spec_type
+  location_spec_type (const location_spec *);
 
 /* Return a linespec string representation of the given explicit
-   location.  The location must already be canonicalized/valid.  */
+   location spec.  The location spec must already be
+   canonicalized/valid.  */
 
-extern std::string
-  explicit_location_to_linespec (const struct explicit_location *explicit_loc);
+extern std::string explicit_location_to_linespec
+  (const explicit_location *explicit_locspec);
 
-/* Return a string representation of the LOCATION.
+/* Return a string representation of LOCSPEC.
    This function may return NULL for unspecified linespecs,
-   e.g, LINESPEC_LOCATION and spec_string is NULL.
+   e.g, LINESPEC_LOCATION_SPEC and spec_string is NULL.
 
-   The result is cached in LOCATION.  */
+   The result is cached in LOCSPEC.  */
 
 extern const char *
-  event_location_to_string (struct event_location *location);
+  location_spec_to_string (location_spec *locspec);
 
-/* A deleter for a struct event_location.  */
+/* A deleter for a struct location_spec.  */
 
-struct event_location_deleter
+struct location_spec_deleter
 {
-  void operator() (event_location *location) const;
+  void operator() (location_spec *locspec) const;
 };
 
-/* A unique pointer for event_location.  */
-typedef std::unique_ptr<event_location, event_location_deleter>
-     event_location_up;
+/* A unique pointer for location_spec.  */
+typedef std::unique_ptr<location_spec, location_spec_deleter>
+     location_spec_up;
 
-/* Create a new linespec location.  */
+/* Create a new linespec location spec.  */
 
-extern event_location_up new_linespec_location
+extern location_spec_up new_linespec_location_spec
   (const char **linespec, symbol_name_match_type match_type);
 
-/* Return the linespec location of the given event_location (which
-   must be of type LINESPEC_LOCATION).  */
+/* Return the linespec location spec of the given location_spec (which
+   must be of type LINESPEC_LOCATION_SPEC).  */
 
 extern const linespec_location *
-  get_linespec_location (const struct event_location *location);
+  get_linespec_location (const location_spec *locspec);
 
-/* Create a new address location.
-   ADDR is the address corresponding to this event_location.
+/* Create a new address location spec.
+   ADDR is the address corresponding to this location_spec.
    ADDR_STRING, a string of ADDR_STRING_LEN characters, is
    the expression that was parsed to determine the address ADDR.  */
 
-extern event_location_up new_address_location (CORE_ADDR addr,
-					       const char *addr_string,
-					       int addr_string_len);
+extern location_spec_up new_address_location_spec (CORE_ADDR addr,
+						   const char *addr_string,
+						   int addr_string_len);
 
-/* Return the address location (a CORE_ADDR) of the given event_location
-   (which must be of type ADDRESS_LOCATION).  */
+/* Return the address (a CORE_ADDR) of the given location_spec, which
+   must be of type ADDRESS_LOCATION_SPEC.  */
 
 extern CORE_ADDR
-  get_address_location (const struct event_location *location);
+  get_address_location (const location_spec *locspec);
 
-/* Return the expression (a string) that was used to compute the address
-   of the given event_location (which must be of type ADDRESS_LOCATION).  */
+/* Return the expression (a string) that was used to compute the
+   address of the given location_spec, which must be of type
+   ADDRESS_LOCATION_SPEC.  */
 
 extern const char *
-  get_address_string_location (const struct event_location *location);
+  get_address_string_location (const location_spec *locspec);
 
 /* Create a new probe location.  */
 
-extern event_location_up new_probe_location (std::string &&probe);
+extern location_spec_up new_probe_location_spec (std::string &&probe);
 
-/* Return the probe location (a string) of the given event_location
-   (which must be of type PROBE_LOCATION).  */
+/* Return the probe location spec string of the given location_spec,
+   which must be of type PROBE_LOCATION_SPEC.  */
 
 extern const char *
-  get_probe_location (const struct event_location *location);
+  get_probe_location_spec_string (const location_spec *locspec);
 
 /* Initialize the given explicit location.  */
 
 extern void
-  initialize_explicit_location (struct explicit_location *explicit_loc);
+  initialize_explicit_location (explicit_location *locspec);
 
 /* Create a new explicit location.  If not NULL, EXPLICIT is checked for
    validity.  If invalid, an exception is thrown.  */
 
-extern event_location_up
-  new_explicit_location (const struct explicit_location *explicit_loc);
+extern location_spec_up
+  new_explicit_location_spec (const explicit_location *locspec);
 
-/* Return the explicit location of the given event_location
-   (which must be of type EXPLICIT_LOCATION).  */
+/* Return the explicit location spec of the given location_spec, which
+   must be of type EXPLICIT_LOCATION.  */
 
 extern struct explicit_location *
-  get_explicit_location (struct event_location *location);
+  get_explicit_location (location_spec *locspec);
 
 /* A const version of the above.  */
 
-extern const struct explicit_location *
-  get_explicit_location_const (const struct event_location *location);
+extern const explicit_location *
+  get_explicit_location_const (const location_spec *locspec);
 
-/* Return a copy of the given SRC location.  */
+/* Return a copy of the given SRC location spec.  */
 
-extern event_location_up
-  copy_event_location (const struct event_location *src);
+extern location_spec_up copy_location_spec (const location_spec *src);
 
-/* Attempt to convert the input string in *ARGP into an event_location.
+/* Attempt to convert the input string in *ARGP into a location_spec.
    ARGP is advanced past any processed input.  Always returns a non-nullptr
-   event_location unique pointer object.
+   location_spec unique pointer object.
 
    This function may call error() if *ARGP looks like properly formed, but
    invalid, input, e.g., if it is called with missing argument parameters
    or invalid options.
 
    This function is intended to be used by CLI commands and will parse
-   explicit locations in a CLI-centric way.  Other interfaces should use
-   string_to_event_location_basic if they want to maintain support for
-   legacy specifications of probe, address, and linespec locations.
+   explicit location specs in a CLI-centric way.  Other interfaces should use
+   string_to_location_spec_basic if they want to maintain support for
+   legacy specifications of probe, address, and linespec location specs.
 
    MATCH_TYPE should be either WILD or FULL.  If -q/--qualified is specified
    in the input string, it will take precedence over this parameter.  */
 
-extern event_location_up string_to_event_location
+extern location_spec_up string_to_location_spec
   (const char **argp, const struct language_defn *language,
    symbol_name_match_type match_type = symbol_name_match_type::WILD);
 
-/* Like string_to_event_location, but does not attempt to parse
-   explicit locations.  MATCH_TYPE indicates how function names should
-   be matched.  */
+/* Like string_to_location_spec, but does not attempt to parse
+   explicit location specs.  MATCH_TYPE indicates how function names
+   should be matched.  */
 
-extern event_location_up
-  string_to_event_location_basic (const char **argp,
-				  const struct language_defn *language,
-				  symbol_name_match_type match_type);
+extern location_spec_up
+  string_to_location_spec_basic (const char **argp,
+				 const struct language_defn *language,
+				 symbol_name_match_type match_type);
 
-/* Structure filled in by string_to_explicit_location to aid the
+/* Structure filled in by string_to_explicit_location_spec to aid the
    completer.  */
 struct explicit_completion_info
 {
@@ -249,35 +249,34 @@ struct explicit_completion_info
   const char *quoted_arg_start = NULL;
   const char *quoted_arg_end = NULL;
 
-  /* True if we saw an explicit location option, as opposed to only
-     flags that affect both explicit locations and linespecs, like
-     "-qualified".  */
-  bool saw_explicit_location_option = false;
+  /* True if we saw an explicit location spec option, as opposed to
+     only flags that affect both explicit location specs and
+     linespecs, like "-qualified".  */
+  bool saw_explicit_location_spec_option = false;
 };
 
-/* Attempt to convert the input string in *ARGP into an explicit location.
-   ARGP is advanced past any processed input.  Returns an event_location
-   (malloc'd) if an explicit location was successfully found in *ARGP,
-   NULL otherwise.
+/* Attempt to convert the input string in *ARGP into an explicit
+   location spec.  ARGP is advanced past any processed input.  Returns
+   a location_spec (malloc'd) if an explicit location spec was
+   successfully found in *ARGP, NULL otherwise.
 
    If COMPLETION_INFO is NULL, this function may call error() if *ARGP
    looks like improperly formed input, e.g., if it is called with
    missing argument parameters or invalid options.  If COMPLETION_INFO
    is not NULL, this function will not throw any exceptions.  */
 
-extern event_location_up
-  string_to_explicit_location (const char **argp,
-			       const struct language_defn *language,
-			       explicit_completion_info *completion_info);
+extern location_spec_up
+  string_to_explicit_location_spec (const char **argp,
+				    const struct language_defn *language,
+				    explicit_completion_info *completion_info);
 
-/* A convenience function for testing for unset locations.  */
+/* A convenience function for testing for unset location specs.  */
 
-extern int event_location_empty_p (const struct event_location *location);
+extern int location_spec_empty_p (const location_spec *locspec);
 
-/* Set the location's string representation.  */
+/* Set the location specs's string representation.  */
 
-extern void
-  set_event_location_string (struct event_location *location,
-			     std::string &&string);
+extern void set_location_spec_string (struct location_spec *locspec,
+				      std::string &&string);
 
 #endif /* LOCATION_H */

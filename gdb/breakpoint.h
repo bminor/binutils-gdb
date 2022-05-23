@@ -502,7 +502,7 @@ public:
   struct symtab *symtab = NULL;
 
   /* The symbol found by the location parser, if any.  This may be used to
-     ascertain when an event location was set at a different location than
+     ascertain when a location spec was set at a different location than
      the one originally selected by parsing, e.g., inlined symbols.  */
   const struct symbol *symbol = NULL;
 
@@ -562,14 +562,15 @@ enum print_stop_action
 
 struct breakpoint_ops
 {
-  /* Create SALs from location, storing the result in linespec_result.
+  /* Create SALs from location spec, storing the result in
+     linespec_result.
 
      For an explanation about the arguments, see the function
-     `create_sals_from_location_default'.
+     `create_sals_from_location_spec_default'.
 
      This function is called inside `create_breakpoint'.  */
-  void (*create_sals_from_location) (struct event_location *location,
-				     struct linespec_result *canonical);
+  void (*create_sals_from_location_spec) (location_spec *locspec,
+					  struct linespec_result *canonical);
 
   /* This method will be responsible for creating a breakpoint given its SALs.
      Usually, it just calls `create_breakpoints_sal' (for ordinary
@@ -709,14 +710,14 @@ struct breakpoint
   /* Print to FP the CLI command that recreates this breakpoint.  */
   virtual void print_recreate (struct ui_file *fp) const;
 
-  /* Given the location (second parameter), this method decodes it and
-     returns the SAL locations related to it.  For ordinary
+  /* Given the location spec (second parameter), this method decodes
+     it and returns the SAL locations related to it.  For ordinary
      breakpoints, it calls `decode_line_full'.  If SEARCH_PSPACE is
      not NULL, symbol search is restricted to just that program space.
 
-     This function is called inside `location_to_sals'.  */
-  virtual std::vector<symtab_and_line> decode_location
-    (struct event_location *location,
+     This function is called inside `location_spec_to_sals'.  */
+  virtual std::vector<symtab_and_line> decode_location_spec
+    (location_spec *locspec,
      struct program_space *search_pspace);
 
   /* Return true if this breakpoint explains a signal.  See
@@ -774,16 +775,16 @@ struct breakpoint
      non-thread-specific ordinary breakpoints this is NULL.  */
   program_space *pspace = NULL;
 
-  /* Location we used to set the breakpoint.  */
-  event_location_up location;
+  /* The location specification we used to set the breakpoint.  */
+  location_spec_up locspec;
 
   /* The filter that should be passed to decode_line_full when
      re-setting this breakpoint.  This may be NULL.  */
   gdb::unique_xmalloc_ptr<char> filter;
 
-  /* For a ranged breakpoint, the location we used to find the end of
-     the range.  */
-  event_location_up location_range_end;
+  /* For a ranged breakpoint, the location specification we used to
+     find the end of the range.  */
+  location_spec_up locspec_range_end;
 
   /* Architecture we used to set the breakpoint.  */
   struct gdbarch *gdbarch;
@@ -859,7 +860,7 @@ struct code_breakpoint : public breakpoint
      location" from the address in the SAL.  */
   code_breakpoint (struct gdbarch *gdbarch, bptype type,
 		   gdb::array_view<const symtab_and_line> sals,
-		   event_location_up &&location,
+		   location_spec_up &&locspec,
 		   gdb::unique_xmalloc_ptr<char> filter,
 		   gdb::unique_xmalloc_ptr<char> cond_string,
 		   gdb::unique_xmalloc_ptr<char> extra_string,
@@ -882,8 +883,8 @@ struct code_breakpoint : public breakpoint
 		      const address_space *aspace,
 		      CORE_ADDR bp_addr,
 		      const target_waitstatus &ws) override;
-  std::vector<symtab_and_line> decode_location
-       (struct event_location *location,
+  std::vector<symtab_and_line> decode_location_spec
+       (struct location_spec *locspec,
 	struct program_space *search_pspace) override;
 };
 
@@ -1460,13 +1461,14 @@ extern void
 extern void install_breakpoint (int internal, std::unique_ptr<breakpoint> &&b,
 				int update_gll);
 
-/* Returns the breakpoint ops appropriate for use with with LOCATION and
-   according to IS_TRACEPOINT.  Use this to ensure, for example, that you pass
-   the correct ops to create_breakpoint for probe locations.  If LOCATION is
-   NULL, returns code_breakpoint_ops.  */
+/* Returns the breakpoint ops appropriate for use with with LOCSPEC
+   and according to IS_TRACEPOINT.  Use this to ensure, for example,
+   that you pass the correct ops to create_breakpoint for probe
+   location specs.  If LOCSPEC is NULL, returns
+   code_breakpoint_ops.  */
 
-extern const struct breakpoint_ops *breakpoint_ops_for_event_location
-  (const struct event_location *location, bool is_tracepoint);
+extern const struct breakpoint_ops *breakpoint_ops_for_location_spec
+  (const location_spec *locspec, bool is_tracepoint);
 
 /* Flags that can be passed down to create_breakpoint, etc., to affect
    breakpoint creation in several ways.  */
@@ -1478,15 +1480,15 @@ enum breakpoint_create_flags
     CREATE_BREAKPOINT_FLAGS_INSERTED = 1 << 0
   };
 
-/* Set a breakpoint.  This function is shared between CLI and MI functions
-   for setting a breakpoint at LOCATION.
+/* Set a breakpoint.  This function is shared between CLI and MI
+   functions for setting a breakpoint at LOCSPEC.
 
    This function has two major modes of operations, selected by the
    PARSE_EXTRA parameter.
 
-   If PARSE_EXTRA is zero, LOCATION is just the breakpoint's location,
-   with condition, thread, and extra string specified by the COND_STRING,
-   THREAD, and EXTRA_STRING parameters.
+   If PARSE_EXTRA is zero, LOCSPEC is just the breakpoint's location
+   spec, with condition, thread, and extra string specified by the
+   COND_STRING, THREAD, and EXTRA_STRING parameters.
 
    If PARSE_EXTRA is non-zero, this function will attempt to extract
    the condition, thread, and extra string from EXTRA_STRING, ignoring
@@ -1503,7 +1505,7 @@ enum breakpoint_create_flags
    Returns true if any breakpoint was created; false otherwise.  */
 
 extern int create_breakpoint (struct gdbarch *gdbarch,
-			      struct event_location *location,
+			      struct location_spec *locspec,
 			      const char *cond_string, int thread,
 			      const char *extra_string,
 			      bool force_condition,

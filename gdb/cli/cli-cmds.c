@@ -970,13 +970,13 @@ edit_command (const char *arg, int from_tty)
 
       /* Now should only be one argument -- decode it in SAL.  */
       arg1 = arg;
-      event_location_up location = string_to_event_location (&arg1,
-							     current_language);
+      location_spec_up locspec = string_to_location_spec (&arg1,
+							  current_language);
 
       if (*arg1)
 	error (_("Junk at end of line specification."));
 
-      std::vector<symtab_and_line> sals = decode_line_1 (location.get (),
+      std::vector<symtab_and_line> sals = decode_line_1 (locspec.get (),
 							 DECODE_LINE_LIST_MODE,
 							 NULL, NULL, 0);
 
@@ -1241,18 +1241,18 @@ list_command (const char *arg, int from_tty)
     dummy_beg = 1;
   else
     {
-      event_location_up location = string_to_event_location (&arg1,
-							     current_language);
+      location_spec_up locspec
+	= string_to_location_spec (&arg1, current_language);
 
-      /* We know that the ARG string is not empty, yet the attempt to parse
-	 a location from the string consumed no characters.  This most
-	 likely means that the first thing in ARG looks like a location
-	 condition, and so the string_to_event_location call stopped
-	 parsing.  */
+      /* We know that the ARG string is not empty, yet the attempt to
+	 parse a location spec from the string consumed no characters.
+	 This most likely means that the first thing in ARG looks like
+	 a location spec condition, and so the string_to_location_spec
+	 call stopped parsing.  */
       if (arg1 == arg)
 	error (_("Junk at end of line specification."));
 
-      sals = decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
+      sals = decode_line_1 (locspec.get (), DECODE_LINE_LIST_MODE,
 			    NULL, NULL, 0);
       filter_sals (sals);
       if (sals.empty ())
@@ -1297,17 +1297,17 @@ list_command (const char *arg, int from_tty)
 	     know it was ambiguous.  */
 	  const char *end_arg = arg1;
 
-	  event_location_up location
-	    = string_to_event_location (&arg1, current_language);
+	  location_spec_up locspec
+	    = string_to_location_spec (&arg1, current_language);
 
 	  if (*arg1)
 	    error (_("Junk at end of line specification."));
 
 	  std::vector<symtab_and_line> sals_end
 	    = (dummy_beg
-	       ? decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
+	       ? decode_line_1 (locspec.get (), DECODE_LINE_LIST_MODE,
 				NULL, NULL, 0)
-	       : decode_line_1 (location.get (), DECODE_LINE_LIST_MODE,
+	       : decode_line_1 (locspec.get (), DECODE_LINE_LIST_MODE,
 				NULL, sal.symtab, sal.line));
 
 	  filter_sals (sals_end);

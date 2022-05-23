@@ -22,7 +22,7 @@
 
 #include "symtab.h"
 
-struct event_location;
+struct location_spec;
 struct linespec_result;
 
 /* Structure useful for passing the header names in the method
@@ -263,7 +263,7 @@ struct bound_probe
    throws an error.  */
 
 extern std::vector<symtab_and_line> parse_probes
-  (const struct event_location *loc,
+  (const location_spec *locspec,
    struct program_space *pspace,
    struct linespec_result *canon);
 

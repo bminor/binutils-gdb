@@ -2477,10 +2477,10 @@ info_scope_command (const char *args_in, int from_tty)
     error (_("requires an argument (function, "
 	     "line or *addr) to define a scope"));
 
-  event_location_up location = string_to_event_location (&args,
-							 current_language);
+  location_spec_up locspec = string_to_location_spec (&args,
+						      current_language);
   std::vector<symtab_and_line> sals
-    = decode_line_1 (location.get (), DECODE_LINE_FUNFIRSTLINE,
+    = decode_line_1 (locspec.get (), DECODE_LINE_FUNFIRSTLINE,
 		     NULL, NULL, 0);
   if (sals.empty ())
     {

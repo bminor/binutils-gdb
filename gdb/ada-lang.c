@@ -12144,8 +12144,8 @@ struct ada_catchpoint : public code_breakpoint
 
     enable_state = enabled ? bp_enabled : bp_disabled;
     disposition = tempflag ? disp_del : disp_donttouch;
-    location = string_to_event_location (&addr_string_,
-					 language_def (language_ada));
+    locspec = string_to_location_spec (&addr_string_,
+				       language_def (language_ada));
     language = language_ada;
   }
 

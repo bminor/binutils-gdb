@@ -215,9 +215,9 @@ exception_catchpoint::re_set ()
   /* We first try to use the probe interface.  */
   try
     {
-      event_location_up location
-	= new_probe_location (exception_functions[kind].probe);
-      sals = parse_probes (location.get (), filter_pspace, NULL);
+      location_spec_up locspec
+	= new_probe_location_spec (exception_functions[kind].probe);
+      sals = parse_probes (locspec.get (), filter_pspace, NULL);
     }
   catch (const gdb_exception_error &e)
     {
@@ -230,8 +230,8 @@ exception_catchpoint::re_set ()
 	  initialize_explicit_location (&explicit_loc);
 	  explicit_loc.function_name
 	    = ASTRDUP (exception_functions[kind].function);
-	  event_location_up location = new_explicit_location (&explicit_loc);
-	  sals = this->decode_location (location.get (), filter_pspace);
+	  location_spec_up locspec = new_explicit_location_spec (&explicit_loc);
+	  sals = this->decode_location_spec (locspec.get (), filter_pspace);
 	}
       catch (const gdb_exception_error &ex)
 	{

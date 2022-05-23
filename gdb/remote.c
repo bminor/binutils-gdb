@@ -13368,15 +13368,15 @@ remote_target::download_tracepoint (struct bp_location *loc)
 
   if (packet_support (PACKET_TracepointSource) == PACKET_ENABLE)
     {
-      if (b->location != NULL)
+      if (b->locspec != nullptr)
 	{
 	  ret = snprintf (buf.data (), buf.size (), "QTDPsrc:");
 
 	  if (ret < 0 || ret >= buf.size ())
 	    error ("%s", err_msg);
 
-	  encode_source_string (b->number, loc->address, "at",
-				event_location_to_string (b->location.get ()),
+	  const char *str = location_spec_to_string (b->locspec.get ());
+	  encode_source_string (b->number, loc->address, "at", str,
 				buf.data () + strlen (buf.data ()),
 				buf.size () - strlen (buf.data ()));
 	  putpkt (buf.data ());

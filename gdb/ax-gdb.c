@@ -2526,9 +2526,9 @@ maint_agent_command_1 (const char *exp, int eval)
     {
       struct linespec_result canonical;
 
-      event_location_up location
-	= new_linespec_location (&exp, symbol_name_match_type::WILD);
-      decode_line_full (location.get (), DECODE_LINE_FUNFIRSTLINE, NULL,
+      location_spec_up locspec
+	= new_linespec_location_spec (&exp, symbol_name_match_type::WILD);
+      decode_line_full (locspec.get (), DECODE_LINE_FUNFIRSTLINE, NULL,
 			NULL, 0, &canonical,
 			NULL, NULL);
       exp = skip_spaces (exp);

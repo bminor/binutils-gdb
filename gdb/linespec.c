@@ -1990,7 +1990,7 @@ linespec_parse_basic (linespec_parser *parser)
 static void
 canonicalize_linespec (struct linespec_state *state, const linespec *ls)
 {
-  struct event_location *canon;
+  location_spec *canon;
   struct explicit_location *explicit_loc;
 
   /* If canonicalization was not requested, no need to do anything.  */
@@ -1998,9 +1998,9 @@ canonicalize_linespec (struct linespec_state *state, const linespec *ls)
     return;
 
   /* Save everything as an explicit location.  */
-  state->canonical->location
-    = new_explicit_location (&ls->explicit_loc);
-  canon = state->canonical->location.get ();
+  state->canonical->locspec
+    = new_explicit_location_spec (&ls->explicit_loc);
+  canon = state->canonical->locspec.get ();
   explicit_loc = get_explicit_location (canon);
 
   if (explicit_loc->label_name != NULL)
@@ -2019,8 +2019,8 @@ canonicalize_linespec (struct linespec_state *state, const linespec *ls)
   /* If this location originally came from a linespec, save a string
      representation of it for display and saving to file.  */
   if (state->is_linespec)
-    set_event_location_string (canon,
-			       explicit_location_to_linespec (explicit_loc));
+    set_location_spec_string (canon,
+			      explicit_location_to_linespec (explicit_loc));
 }
 
 /* Given a line offset in LS, construct the relevant SALs.  */
@@ -3061,22 +3061,22 @@ linespec_complete (completion_tracker &tracker, const char *text,
 }
 
 /* A helper function for decode_line_full and decode_line_1 to
-   turn LOCATION into std::vector<symtab_and_line>.  */
+   turn LOCSPEC into std::vector<symtab_and_line>.  */
 
 static std::vector<symtab_and_line>
-event_location_to_sals (linespec_parser *parser,
-			const struct event_location *location)
+location_spec_to_sals (linespec_parser *parser,
+		       const location_spec *locspec)
 {
   std::vector<symtab_and_line> result;
 
-  switch (event_location_type (location))
+  switch (location_spec_type (locspec))
     {
-    case LINESPEC_LOCATION:
+    case LINESPEC_LOCATION_SPEC:
       {
 	PARSER_STATE (parser)->is_linespec = 1;
 	try
 	  {
-	    const linespec_location *ls = get_linespec_location (location);
+	    const linespec_location *ls = get_linespec_location (locspec);
 	    result = parse_linespec (parser,
 				     ls->spec_string, ls->match_type);
 	  }
@@ -3087,17 +3087,17 @@ event_location_to_sals (linespec_parser *parser,
       }
       break;
 
-    case ADDRESS_LOCATION:
+    case ADDRESS_LOCATION_SPEC:
       {
-	const char *addr_string = get_address_string_location (location);
-	CORE_ADDR addr = get_address_location (location);
+	const char *addr_string = get_address_string_location (locspec);
+	CORE_ADDR addr = get_address_location (locspec);
 
 	if (addr_string != NULL)
 	  {
 	    addr = linespec_expression_to_pc (&addr_string);
 	    if (PARSER_STATE (parser)->canonical != NULL)
-	      PARSER_STATE (parser)->canonical->location
-		= copy_event_location (location);
+	      PARSER_STATE (parser)->canonical->locspec
+		= copy_location_spec (locspec);
 	  }
 
 	result = convert_address_location_to_sals (PARSER_STATE (parser),
@@ -3105,24 +3105,24 @@ event_location_to_sals (linespec_parser *parser,
       }
       break;
 
-    case EXPLICIT_LOCATION:
+    case EXPLICIT_LOCATION_SPEC:
       {
 	const struct explicit_location *explicit_loc;
 
-	explicit_loc = get_explicit_location_const (location);
+	explicit_loc = get_explicit_location_const (locspec);
 	result = convert_explicit_location_to_sals (PARSER_STATE (parser),
 						    PARSER_RESULT (parser),
 						    explicit_loc);
       }
       break;
 
-    case PROBE_LOCATION:
+    case PROBE_LOCATION_SPEC:
       /* Probes are handled by their own decoders.  */
       gdb_assert_not_reached ("attempt to decode probe location");
       break;
 
     default:
-      gdb_assert_not_reached ("unhandled event location type");
+      gdb_assert_not_reached ("unhandled location spec type");
     }
 
   return result;
@@ -3131,7 +3131,7 @@ event_location_to_sals (linespec_parser *parser,
 /* See linespec.h.  */
 
 void
-decode_line_full (struct event_location *location, int flags,
+decode_line_full (struct location_spec *locspec, int flags,
 		  struct program_space *search_pspace,
 		  struct symtab *default_symtab,
 		  int default_line, struct linespec_result *canonical,
@@ -3156,13 +3156,13 @@ decode_line_full (struct event_location *location, int flags,
 
   scoped_restore_current_program_space restore_pspace;
 
-  std::vector<symtab_and_line> result = event_location_to_sals (&parser,
-								location);
+  std::vector<symtab_and_line> result = location_spec_to_sals (&parser,
+							       locspec);
   state = PARSER_STATE (&parser);
 
   if (result.size () == 0)
     throw_error (NOT_SUPPORTED_ERROR, _("Location %s not available"),
-		 event_location_to_string (location));
+		 location_spec_to_string (locspec));
 
   gdb_assert (result.size () == 1 || canonical->pre_expanded);
   canonical->pre_expanded = 1;
@@ -3200,7 +3200,7 @@ decode_line_full (struct event_location *location, int flags,
 /* See linespec.h.  */
 
 std::vector<symtab_and_line>
-decode_line_1 (const struct event_location *location, int flags,
+decode_line_1 (const location_spec *locspec, int flags,
 	       struct program_space *search_pspace,
 	       struct symtab *default_symtab,
 	       int default_line)
@@ -3211,7 +3211,7 @@ decode_line_1 (const struct event_location *location, int flags,
 
   scoped_restore_current_program_space restore_pspace;
 
-  return event_location_to_sals (&parser, location);
+  return location_spec_to_sals (&parser, locspec);
 }
 
 /* See linespec.h.  */
@@ -3226,10 +3226,10 @@ decode_line_with_current_source (const char *string, int flags)
      and get a default source symtab+line or it will recursively call us!  */
   symtab_and_line cursal = get_current_source_symtab_and_line ();
 
-  event_location_up location = string_to_event_location (&string,
-							 current_language);
+  location_spec_up locspec = string_to_location_spec (&string,
+						      current_language);
   std::vector<symtab_and_line> sals
-    = decode_line_1 (location.get (), flags, NULL, cursal.symtab, cursal.line);
+    = decode_line_1 (locspec.get (), flags, NULL, cursal.symtab, cursal.line);
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
@@ -3245,14 +3245,14 @@ decode_line_with_last_displayed (const char *string, int flags)
   if (string == 0)
     error (_("Empty line specification."));
 
-  event_location_up location = string_to_event_location (&string,
-							 current_language);
+  location_spec_up locspec = string_to_location_spec (&string,
+						      current_language);
   std::vector<symtab_and_line> sals
     = (last_displayed_sal_is_valid ()
-       ? decode_line_1 (location.get (), flags, NULL,
+       ? decode_line_1 (locspec.get (), flags, NULL,
 			get_last_displayed_symtab (),
 			get_last_displayed_line ())
-       : decode_line_1 (location.get (), flags, NULL, NULL, 0));
+       : decode_line_1 (locspec.get (), flags, NULL, NULL, 0));
 
   if (*string)
     error (_("Junk at end of line specification: %s"), string);
@@ -3364,8 +3364,8 @@ decode_objc (struct linespec_state *self, linespec *ls, const char *arg)
 	  else
 	    str = saved_arg;
 
-	  self->canonical->location
-	    = new_linespec_location (&str, symbol_name_match_type::FULL);
+	  self->canonical->locspec
+	    = new_linespec_location_spec (&str, symbol_name_match_type::FULL);
 	}
     }
 

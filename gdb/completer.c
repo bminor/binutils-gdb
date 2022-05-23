@@ -707,13 +707,13 @@ string_or_empty (const char *string)
 
 static void
 collect_explicit_location_matches (completion_tracker &tracker,
-				   struct event_location *location,
+				   location_spec *locspec,
 				   enum explicit_location_match_type what,
 				   const char *word,
 				   const struct language_defn *language)
 {
   const struct explicit_location *explicit_loc
-    = get_explicit_location (location);
+    = get_explicit_location (locspec);
 
   /* True if the option expects an argument.  */
   bool needs_arg = true;
@@ -846,19 +846,19 @@ skip_keyword (completion_tracker &tracker,
   return -1;
 }
 
-/* A completer function for explicit locations.  This function
+/* A completer function for explicit location specs.  This function
    completes both options ("-source", "-line", etc) and values.  If
    completing a quoted string, then QUOTED_ARG_START and
    QUOTED_ARG_END point to the quote characters.  LANGUAGE is the
    current language.  */
 
 static void
-complete_explicit_location (completion_tracker &tracker,
-			    struct event_location *location,
-			    const char *text,
-			    const language_defn *language,
-			    const char *quoted_arg_start,
-			    const char *quoted_arg_end)
+complete_explicit_location_spec (completion_tracker &tracker,
+				 location_spec *locspec,
+				 const char *text,
+				 const language_defn *language,
+				 const char *quoted_arg_start,
+				 const char *quoted_arg_end)
 {
   if (*text != '-')
     return;
@@ -916,7 +916,7 @@ complete_explicit_location (completion_tracker &tracker,
 	}
 
       /* Now gather matches  */
-      collect_explicit_location_matches (tracker, location, what, text,
+      collect_explicit_location_matches (tracker, locspec, what, text,
 					 language);
     }
 }
@@ -943,9 +943,9 @@ location_completer (struct cmd_list_element *ignore,
   const char *copy = text;
 
   explicit_completion_info completion_info;
-  event_location_up location
-    = string_to_explicit_location (&copy, current_language,
-				   &completion_info);
+  location_spec_up locspec
+    = string_to_explicit_location_spec (&copy, current_language,
+					&completion_info);
   if (completion_info.quoted_arg_start != NULL
       && completion_info.quoted_arg_end == NULL)
     {
@@ -954,7 +954,7 @@ location_completer (struct cmd_list_element *ignore,
       tracker.advance_custom_word_point_by (1);
     }
 
-  if (completion_info.saw_explicit_location_option)
+  if (completion_info.saw_explicit_location_spec_option)
     {
       if (*copy != '\0')
 	{
@@ -987,15 +987,15 @@ location_completer (struct cmd_list_element *ignore,
 						- text);
 	  text = completion_info.last_option;
 
-	  complete_explicit_location (tracker, location.get (), text,
-				      current_language,
-				      completion_info.quoted_arg_start,
-				      completion_info.quoted_arg_end);
+	  complete_explicit_location_spec (tracker, locspec.get (), text,
+					   current_language,
+					   completion_info.quoted_arg_start,
+					   completion_info.quoted_arg_end);
 
 	}
     }
   /* This is an address or linespec location.  */
-  else if (location != NULL)
+  else if (locspec != nullptr)
     {
       /* Handle non-explicit location options.  */
 
@@ -1008,7 +1008,7 @@ location_completer (struct cmd_list_element *ignore,
 	  text = copy;
 
 	  symbol_name_match_type match_type
-	    = get_explicit_location (location.get ())->func_name_match_type;
+	    = get_explicit_location (locspec.get ())->func_name_match_type;
 	  complete_address_and_linespec_locations (tracker, text, match_type);
 	}
     }

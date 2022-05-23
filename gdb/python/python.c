@@ -868,7 +868,7 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
   const char *arg = NULL;
   gdbpy_ref<> result;
   gdbpy_ref<> unparsed;
-  event_location_up location;
+  location_spec_up locspec;
 
   if (! PyArg_ParseTuple (args, "|s", &arg))
     return NULL;
@@ -883,17 +883,17 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
     }
 
   if (arg != NULL)
-    location = string_to_event_location_basic (&arg, current_language,
-					       symbol_name_match_type::WILD);
+    locspec = string_to_location_spec_basic (&arg, current_language,
+					     symbol_name_match_type::WILD);
 
   std::vector<symtab_and_line> decoded_sals;
   symtab_and_line def_sal;
   gdb::array_view<symtab_and_line> sals;
   try
     {
-      if (location != NULL)
+      if (locspec != NULL)
 	{
-	  decoded_sals = decode_line_1 (location.get (), 0, NULL, NULL, 0);
+	  decoded_sals = decode_line_1 (locspec.get (), 0, NULL, NULL, 0);
 	  sals = decoded_sals;
 	}
       else

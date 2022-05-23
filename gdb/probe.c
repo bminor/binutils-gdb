@@ -114,7 +114,7 @@ parse_probes_in_pspace (const static_probe_ops *spops,
 /* See definition in probe.h.  */
 
 std::vector<symtab_and_line>
-parse_probes (const struct event_location *location,
+parse_probes (const location_spec *locspec,
 	      struct program_space *search_pspace,
 	      struct linespec_result *canonical)
 {
@@ -122,8 +122,8 @@ parse_probes (const struct event_location *location,
   char *objfile_namestr = NULL, *provider = NULL, *name, *p;
   const char *arg_start, *cs;
 
-  gdb_assert (event_location_type (location) == PROBE_LOCATION);
-  arg_start = get_probe_location (location);
+  gdb_assert (location_spec_type (locspec) == PROBE_LOCATION_SPEC);
+  arg_start = get_probe_location_spec_string (locspec);
 
   cs = arg_start;
   const static_probe_ops *spops = probe_linespec_to_static_ops (&cs);
@@ -204,7 +204,7 @@ parse_probes (const struct event_location *location,
       std::string canon (arg_start, arg_end - arg_start);
       canonical->special_display = 1;
       canonical->pre_expanded = 1;
-      canonical->location = new_probe_location (std::move (canon));
+      canonical->locspec = new_probe_location_spec (std::move (canon));
     }
 
   return result;
