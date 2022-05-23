@@ -44,20 +44,23 @@ inline bool operator==(const aarch64_features &lhs, const aarch64_features &rhs)
     && lhs.tls == rhs.tls;
 }
 
-template<>
-struct std::hash<aarch64_features>
+namespace std
 {
-  std::size_t operator()(const aarch64_features &features) const noexcept
+  template<>
+  struct hash<aarch64_features>
   {
-    std::size_t h;
+    std::size_t operator()(const aarch64_features &features) const noexcept
+    {
+      std::size_t h;
 
-    h = features.vq;
-    h = h << 1 | features.pauth;
-    h = h << 1 | features.mte;
-    h = h << 1 | features.tls;
-    return h;
-  }
-};
+      h = features.vq;
+      h = h << 1 | features.pauth;
+      h = h << 1 | features.mte;
+      h = h << 1 | features.tls;
+      return h;
+    }
+  };
+}
 
 /* Create the aarch64 target description.  */
 
