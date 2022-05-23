@@ -278,7 +278,11 @@ int_string (LONGEST val, int radix, int is_signed, int width,
     case 10:
       {
 	if (is_signed && val < 0)
-	  return decimal2str ("-", -val, width);
+	  /* Cast to unsigned before negating, to prevent runtime error:
+	     negation of -9223372036854775808 cannot be represented in type
+	     'long int'; cast to an unsigned type to negate this value to
+	     itself.  */
+	  return decimal2str ("-", -(ULONGEST)val, width);
 	else
 	  return decimal2str ("", val, width);
       }
