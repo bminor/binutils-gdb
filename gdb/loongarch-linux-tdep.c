@@ -29,6 +29,11 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 
+/* The general-purpose regset consists of 32 R registers, plus PC,
+   and BADV registers.  */
+
+#define LOONGARCH_LINUX_NUM_GREGSET	(34)
+
 /* Unpack an elf_gregset_t into GDB's register cache.  */
 
 static void
@@ -172,8 +177,13 @@ loongarch_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					void *cb_data,
 					const struct regcache *regcache)
 {
-  cb (".reg", sizeof (elf_gregset_t), sizeof (elf_gregset_t),
-      &loongarch_gregset, NULL, cb_data);
+  loongarch_gdbarch_tdep *tdep
+    = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+  auto regs = tdep->regs;
+  int regsize = register_size (gdbarch, regs.r);
+
+  cb (".reg", LOONGARCH_LINUX_NUM_GREGSET * regsize,
+      LOONGARCH_LINUX_NUM_GREGSET * regsize, &loongarch_gregset, NULL, cb_data);
 }
 
 /* Initialize LoongArch Linux ABI info.  */
