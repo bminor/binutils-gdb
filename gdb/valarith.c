@@ -1382,7 +1382,10 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	      break;
 
 	    case BINOP_SUB:
-	      v = v1 - v2;
+	      /* Avoid runtime error: signed integer overflow: \
+		 0 - -9223372036854775808 cannot be represented in type
+		 'long int'.  */
+	      v = (ULONGEST)v1 - (ULONGEST)v2;
 	      break;
 
 	    case BINOP_MUL:
