@@ -1393,7 +1393,7 @@ proc gdb_test { args } {
     set user_code [join $user_code]
 
     set opts {}
-    lappend "-prompt $prompt"
+    lappend opts "-prompt" "$prompt"
     if {$lbl} {
 	lappend opts "-lbl"
     }
