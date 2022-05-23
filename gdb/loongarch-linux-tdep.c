@@ -20,6 +20,7 @@
 
 #include "defs.h"
 #include "glibc-tdep.h"
+#include "gregset.h"
 #include "inferior.h"
 #include "linux-tdep.h"
 #include "loongarch-tdep.h"
@@ -163,6 +164,18 @@ static const struct tramp_frame loongarch_linux_rt_sigframe =
   NULL
 };
 
+/* Implement the "iterate_over_regset_sections" gdbarch method.  */
+
+static void
+loongarch_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					iterate_over_regset_sections_cb *cb,
+					void *cb_data,
+					const struct regcache *regcache)
+{
+  cb (".reg", sizeof (elf_gregset_t), sizeof (elf_gregset_t),
+      &loongarch_gregset, NULL, cb_data);
+}
+
 /* Initialize LoongArch Linux ABI info.  */
 
 static void
@@ -186,6 +199,9 @@ loongarch_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Prepend tramp frame unwinder for signal.  */
   tramp_frame_prepend_unwinder (gdbarch, &loongarch_linux_rt_sigframe);
+
+  /* Core file support.  */
+  set_gdbarch_iterate_over_regset_sections (gdbarch, loongarch_iterate_over_regset_sections);
 }
 
 /* Initialize LoongArch Linux target support.  */
