@@ -6492,7 +6492,8 @@ ada_tag_value_at_base_address (struct value *obj)
       tem = value_cast (ptr_type, tem);
       offset_to_top = value_as_long (value_ind (tem));
     }
-  else if (offset_to_top > 0)
+
+  if (offset_to_top > 0)
     {
       /* OFFSET_TO_TOP used to be a positive value to be subtracted
 	 from the base address.  This was however incompatible with
