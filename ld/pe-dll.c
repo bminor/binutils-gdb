@@ -1632,20 +1632,20 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		    {
 #ifdef pe_use_x86_64
 		    case BITS_AND_SHIFT (64, 0):
-		      reloc_data[total_relocs].type = 10;
+		      reloc_data[total_relocs].type = IMAGE_REL_BASED_DIR64;
 		      total_relocs++;
 		      break;
 #endif
 		    case BITS_AND_SHIFT (32, 0):
-		      reloc_data[total_relocs].type = 3;
+		      reloc_data[total_relocs].type = IMAGE_REL_BASED_HIGHLOW;
 		      total_relocs++;
 		      break;
 		    case BITS_AND_SHIFT (16, 0):
-		      reloc_data[total_relocs].type = 2;
+		      reloc_data[total_relocs].type = IMAGE_REL_BASED_LOW;
 		      total_relocs++;
 		      break;
 		    case BITS_AND_SHIFT (16, 16):
-		      reloc_data[total_relocs].type = 4;
+		      reloc_data[total_relocs].type = IMAGE_REL_BASED_HIGHADJ;
 		      /* FIXME: we can't know the symbol's right value
 			 yet, but we probably can safely assume that
 			 CE will relocate us in 64k blocks, so leaving
@@ -1654,7 +1654,8 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		      total_relocs++;
 		      break;
 		    case BITS_AND_SHIFT (26, 2):
-		      reloc_data[total_relocs].type = 5;
+		      reloc_data[total_relocs].type =
+                        IMAGE_REL_BASED_ARM_MOV32;
 		      total_relocs++;
 		      break;
 		    case BITS_AND_SHIFT (24, 2):
@@ -1701,7 +1702,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
       reloc_sz += 2;
 
-      if (reloc_data[i].type == 4)
+      if (reloc_data[i].type == IMAGE_REL_BASED_HIGHADJ)
 	reloc_sz += 2;
     }
 
@@ -1736,7 +1737,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		  reloc_d + reloc_sz);
       reloc_sz += 2;
 
-      if (reloc_data[i].type == 4)
+      if (reloc_data[i].type == IMAGE_REL_BASED_HIGHADJ)
 	{
 	  bfd_put_16 (abfd, reloc_data[i].extra, reloc_d + reloc_sz);
 	  reloc_sz += 2;
