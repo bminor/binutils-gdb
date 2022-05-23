@@ -63,6 +63,10 @@ proc test_parse_numbers {arch} {
 
     foreach_with_prefix lang $::all_languages {
 	if { $lang == "unknown" } {
+	    # Tested outside $supported_archs loop.
+	    continue
+	} elseif { $lang == "auto" || $lang == "local" } {
+	    # Avoid duplicate testing.
 	    continue
 	}
 
@@ -117,6 +121,7 @@ set all_languages [get_set_option_choices "set language"]
 
 foreach_with_prefix arch $supported_archs {
     if {$arch == "auto"} {
+	# Avoid duplicate testing.
 	continue
     }
     test_parse_numbers $arch
