@@ -10406,7 +10406,7 @@ display_gdb_index (struct dwarf_section *section,
   uint32_t cu_list_offset, tu_list_offset;
   uint32_t address_table_offset, symbol_table_offset, constant_pool_offset;
   unsigned int cu_list_elements, tu_list_elements;
-  unsigned int address_table_size, symbol_table_slots;
+  unsigned int address_table_elements, symbol_table_slots;
   unsigned char *cu_list, *tu_list;
   unsigned char *address_table, *symbol_table, *constant_pool;
   unsigned int i;
@@ -10454,48 +10454,19 @@ display_gdb_index (struct dwarf_section *section,
       || tu_list_offset > section->size
       || address_table_offset > section->size
       || symbol_table_offset > section->size
-      || constant_pool_offset > section->size)
+      || constant_pool_offset > section->size
+      || tu_list_offset < cu_list_offset
+      || address_table_offset < tu_list_offset
+      || symbol_table_offset < address_table_offset
+      || constant_pool_offset < symbol_table_offset)
     {
       warn (_("Corrupt header in the %s section.\n"), section->name);
       return 0;
     }
 
-  /* PR 17531: file: 418d0a8a.  */
-  if (tu_list_offset < cu_list_offset)
-    {
-      warn (_("TU offset (%x) is less than CU offset (%x)\n"),
-	    tu_list_offset, cu_list_offset);
-      return 0;
-    }
-
-  cu_list_elements = (tu_list_offset - cu_list_offset) / 8;
-
-  if (address_table_offset < tu_list_offset)
-    {
-      warn (_("Address table offset (%x) is less than TU offset (%x)\n"),
-	    address_table_offset, tu_list_offset);
-      return 0;
-    }
-
-  tu_list_elements = (address_table_offset - tu_list_offset) / 8;
-
-  /* PR 17531: file: 18a47d3d.  */
-  if (symbol_table_offset < address_table_offset)
-    {
-      warn (_("Symbol table offset (%x) is less then Address table offset (%x)\n"),
-	    symbol_table_offset, address_table_offset);
-      return 0;
-    }
-
-  address_table_size = symbol_table_offset - address_table_offset;
-
-  if (constant_pool_offset < symbol_table_offset)
-    {
-      warn (_("Constant pool offset (%x) is less than symbol table offset (%x)\n"),
-	    constant_pool_offset, symbol_table_offset);
-      return 0;
-    }
-
+  cu_list_elements = (tu_list_offset - cu_list_offset) / 16;
+  tu_list_elements = (address_table_offset - tu_list_offset) / 24;
+  address_table_elements = (symbol_table_offset - address_table_offset) / 20;
   symbol_table_slots = (constant_pool_offset - symbol_table_offset) / 8;
 
   cu_list = start + cu_list_offset;
@@ -10504,31 +10475,25 @@ display_gdb_index (struct dwarf_section *section,
   symbol_table = start + symbol_table_offset;
   constant_pool = start + constant_pool_offset;
 
-  if (address_table_offset + address_table_size > section->size)
-    {
-      warn (_("Address table extends beyond end of section.\n"));
-      return 0;
-    }
-
   printf (_("\nCU table:\n"));
-  for (i = 0; i < cu_list_elements; i += 2)
+  for (i = 0; i < cu_list_elements; i++)
     {
-      uint64_t cu_offset = byte_get_little_endian (cu_list + i * 8, 8);
-      uint64_t cu_length = byte_get_little_endian (cu_list + i * 8 + 8, 8);
+      uint64_t cu_offset = byte_get_little_endian (cu_list + i * 16, 8);
+      uint64_t cu_length = byte_get_little_endian (cu_list + i * 16 + 8, 8);
 
-      printf (_("[%3u] 0x%lx - 0x%lx\n"), i / 2,
+      printf (_("[%3u] 0x%lx - 0x%lx\n"), i,
 	      (unsigned long) cu_offset,
 	      (unsigned long) (cu_offset + cu_length - 1));
     }
 
   printf (_("\nTU table:\n"));
-  for (i = 0; i < tu_list_elements; i += 3)
+  for (i = 0; i < tu_list_elements; i++)
     {
-      uint64_t tu_offset = byte_get_little_endian (tu_list + i * 8, 8);
-      uint64_t type_offset = byte_get_little_endian (tu_list + i * 8 + 8, 8);
-      uint64_t signature = byte_get_little_endian (tu_list + i * 8 + 16, 8);
+      uint64_t tu_offset = byte_get_little_endian (tu_list + i * 24, 8);
+      uint64_t type_offset = byte_get_little_endian (tu_list + i * 24 + 8, 8);
+      uint64_t signature = byte_get_little_endian (tu_list + i * 24 + 16, 8);
 
-      printf (_("[%3u] 0x%lx 0x%lx "), i / 3,
+      printf (_("[%3u] 0x%lx 0x%lx "), i,
 	      (unsigned long) tu_offset,
 	      (unsigned long) type_offset);
       print_dwarf_vma (signature, 8);
@@ -10536,12 +10501,11 @@ display_gdb_index (struct dwarf_section *section,
     }
 
   printf (_("\nAddress table:\n"));
-  for (i = 0; i < address_table_size && i <= address_table_size - (2 * 8 + 4);
-       i += 2 * 8 + 4)
+  for (i = 0; i < address_table_elements; i++)
     {
-      uint64_t low = byte_get_little_endian (address_table + i, 8);
-      uint64_t high = byte_get_little_endian (address_table + i + 8, 8);
-      uint32_t cu_index = byte_get_little_endian (address_table + i + 16, 4);
+      uint64_t low = byte_get_little_endian (address_table + i * 20, 8);
+      uint64_t high = byte_get_little_endian (address_table + i * 20 + 8, 8);
+      uint32_t cu_index = byte_get_little_endian (address_table + i + 20 + 16, 4);
 
       print_dwarf_vma (low, 8);
       print_dwarf_vma (high, 8);
