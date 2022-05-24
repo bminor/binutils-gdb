@@ -92,7 +92,7 @@ Disassembly of section \.text:
 .*:	(fd c0 78 35|35 78 c0 fd) 	frsqrte\. f14,f15
 .*:	(ed c0 78 34|34 78 c0 ed) 	frsqrtes f14,f15
 .*:	(ed c0 78 35|35 78 c0 ed) 	frsqrtes\. f14,f15
-.*:	(7c 43 27 1e|1e 27 43 7c) 	isel    r2,r3,r4,28
+.*:	(7c 43 27 1e|1e 27 43 7c) 	isel    r2,r3,r4,4\*cr7\+lt
 .*:	(7f 7b db 78|78 db 7b 7f) 	yield
 .*:	(7f 7b db 78|78 db 7b 7f) 	yield
 .*:	(60 42 00 00|00 00 42 60) 	ori     r2,r2,0

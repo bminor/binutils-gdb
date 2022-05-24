@@ -209,7 +209,7 @@ Disassembly of section \.text:
 .*:	(7c 20 07 8c|8c 07 20 7c) 	ici     1
 .*:	(7c 03 27 cc|cc 27 03 7c) 	icread  r3,r4
 .*:	(50 83 65 36|36 65 83 50) 	rlwimi  r3,r4,12,20,27
-.*:	(7c 43 27 1e|1e 27 43 7c) 	isel    r2,r3,r4,28
+.*:	(7c 43 27 1e|1e 27 43 7c) 	isel    r2,r3,r4,4\*cr7\+lt
 .*:	(4c 00 01 2c|2c 01 00 4c) 	isync
 .*:	(89 21 00 00|00 00 21 89) 	lbz     r9,0\(r1\)
 .*:	(8d 41 00 01|01 00 41 8d) 	lbzu    r10,1\(r1\)

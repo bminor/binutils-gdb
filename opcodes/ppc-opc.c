@@ -2770,9 +2770,12 @@ const struct powerpc_operand powerpc_operands[] =
 #define RAB VAB + 1
   { 0x1f, 16, insert_bab, extract_bab, PPC_OPERAND_GPR },
 
+#define BC RAB + 1
+  { 0x1f, 6, NULL, NULL, PPC_OPERAND_CR_BIT },
+
   /* The BD field in a B form instruction.  The lower two bits are
      forced to zero.  */
-#define BD RAB + 1
+#define BD BC + 1
   { 0xfffc, 0, NULL, NULL, PPC_OPERAND_RELATIVE | PPC_OPERAND_SIGNED },
 
   /* The BD field in a B form instruction when absolute addressing is
@@ -6895,7 +6898,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"isellt",	XISEL(31,15,0),	X_MASK,	     PPCISEL,	EXT,		{RT, RA0, RB}},
 {"iselgt",	XISEL(31,15,1),	X_MASK,	     PPCISEL,	EXT,		{RT, RA0, RB}},
 {"iseleq",	XISEL(31,15,2),	X_MASK,	     PPCISEL,	EXT,		{RT, RA0, RB}},
-{"isel",	XISEL(31,15,0), XISEL_MASK, PPCISEL|TITAN, 0,		{RT, RA0, RB, CRB}},
+{"isel",	XISEL(31,15,0), XISEL_MASK, PPCISEL|TITAN, 0,		{RT, RA0, RB, BC}},
 
 {"tlbilxlpid",	XTO(31,18,0),	XTO_MASK, E500MC|PPCA2,	0,		{0}},
 {"tlbilxpid",	XTO(31,18,1),	XTO_MASK, E500MC|PPCA2,	0,		{0}},
