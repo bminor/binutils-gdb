@@ -612,6 +612,19 @@ public:
     this->section_offsets[idx] = offset;
   }
 
+private:
+
+  /* Ensure that partial symbols have been read and return the "quick" (aka
+     partial) symbol functions for this symbol reader.  */
+  const std::forward_list<quick_symbol_functions_up> &
+  qf_require_partial_symbols ()
+  {
+    this->require_partial_symbols (true);
+    return qf;
+  }
+
+public:
+
   /* The object file's original name as specified by the user,
      made absolute, and tilde-expanded.  However, it is not canonicalized
      (i.e., it has not been passed through gdb_realpath).

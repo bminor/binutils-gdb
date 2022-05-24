@@ -109,7 +109,7 @@ objfile::has_unexpanded_symtabs ()
 		objfile_debug_name (this));
 
   bool result = false;
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     {
       if (iter->has_unexpanded_symtabs (this))
 	{
@@ -134,7 +134,7 @@ objfile::find_last_source_symtab ()
     gdb_printf (gdb_stdlog, "qf->find_last_source_symtab (%s)\n",
 		objfile_debug_name (this));
 
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     {
       retval = iter->find_last_source_symtab (this);
       if (retval != nullptr)
@@ -155,7 +155,7 @@ objfile::forget_cached_source_info ()
     gdb_printf (gdb_stdlog, "qf->forget_cached_source_info (%s)\n",
 		objfile_debug_name (this));
 
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     iter->forget_cached_source_info (this);
 }
 
@@ -202,7 +202,7 @@ objfile::map_symtabs_matching_filename
     return result;
   };
 
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     {
       if (!iter->expand_symtabs_matching (this,
 					  match_one_filename,
@@ -271,7 +271,7 @@ objfile::lookup_symbol (block_enum kind, const char *name, domain_enum domain)
     return true;
   };
 
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     {
       if (!iter->expand_symtabs_matching (this,
 					  nullptr,
@@ -302,7 +302,7 @@ objfile::print_stats (bool print_bcache)
     gdb_printf (gdb_stdlog, "qf->print_stats (%s, %d)\n",
 		objfile_debug_name (this), print_bcache);
 
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     iter->print_stats (this, print_bcache);
 }
 
@@ -328,7 +328,7 @@ objfile::expand_symtabs_for_function (const char *func_name)
   lookup_name_info base_lookup (func_name, symbol_name_match_type::FULL);
   lookup_name_info lookup_name = base_lookup.make_ignore_params ();
 
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     iter->expand_symtabs_matching (this,
 				   nullptr,
 				   &lookup_name,
@@ -347,7 +347,7 @@ objfile::expand_all_symtabs ()
     gdb_printf (gdb_stdlog, "qf->expand_all_symtabs (%s)\n",
 		objfile_debug_name (this));
 
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     iter->expand_all_symtabs (this);
 }
 
@@ -365,7 +365,7 @@ objfile::expand_symtabs_with_fullname (const char *fullname)
     return filename_cmp (basenames ? basename : fullname, filename) == 0;
   };
 
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     iter->expand_symtabs_matching (this,
 				   file_matcher,
 				   nullptr,
@@ -390,7 +390,7 @@ objfile::expand_matching_symbols
 		domain_name (domain), global,
 		host_address_to_string (ordered_compare));
 
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     iter->expand_matching_symbols (this, name, domain, global,
 				   ordered_compare);
 }
@@ -417,7 +417,7 @@ objfile::expand_symtabs_matching
 		host_address_to_string (&expansion_notify),
 		search_domain_name (kind));
 
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     if (!iter->expand_symtabs_matching (this, file_matcher, lookup_name,
 					symbol_matcher, expansion_notify,
 					search_flags, domain, kind))
@@ -442,7 +442,7 @@ objfile::find_pc_sect_compunit_symtab (struct bound_minimal_symbol msymbol,
 		host_address_to_string (section),
 		warn_if_readin);
 
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     {
       retval = iter->find_pc_sect_compunit_symtab (this, msymbol, pc, section,
 						   warn_if_readin);
@@ -470,7 +470,7 @@ objfile::map_symbol_filenames (gdb::function_view<symbol_filename_ftype> fun,
 		objfile_debug_name (this),
 		need_fullname);
 
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     iter->map_symbol_filenames (this, fun, need_fullname);
 }
 
@@ -484,7 +484,7 @@ objfile::find_compunit_symtab_by_address (CORE_ADDR address)
 		hex_string (address));
 
   struct compunit_symtab *result = NULL;
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     {
       result = iter->find_compunit_symtab_by_address (this, address);
       if (result != nullptr)
@@ -509,7 +509,7 @@ objfile::lookup_global_symbol_language (const char *name,
   enum language result = language_unknown;
   *symbol_found_p = false;
 
-  for (const auto &iter : qf)
+  for (const auto &iter : qf_require_partial_symbols ())
     {
       result = iter->lookup_global_symbol_language (this, name, domain,
 						    symbol_found_p);
