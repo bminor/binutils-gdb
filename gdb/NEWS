@@ -3,6 +3,16 @@
 
 *** Changes since GDB 12
 
+* "info breakpoints" now displays enabled breakpoint locations of
+  disabled breakpoints as in the "y-" state.  For example:
+
+   (gdb) info breakpoints
+   Num     Type           Disp Enb Address            What
+   1       breakpoint     keep n   <MULTIPLE>
+   1.1                         y-  0x00000000000011b6 in ...
+   1.2                         y-  0x00000000000011c2 in ...
+   1.3                         n   0x00000000000011ce in ...
+
 * Support for Thread Local Storage (TLS) variables on FreeBSD arm and
   aarch64 architectures.
 

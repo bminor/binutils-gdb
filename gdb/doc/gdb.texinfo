@@ -4668,6 +4668,19 @@ in which case @value{GDBN} acts on all the locations in the range (inclusive).
 Disabling or enabling the parent breakpoint (@pxref{Disabling}) affects
 all of the locations that belong to that breakpoint.
 
+Locations that are enabled while their parent breakpoint is disabled
+won't trigger a break, and are denoted by @code{y-} in the @code{Enb}
+column.  For example:
+
+@smallexample
+(@value{GDBP}) info breakpoints
+Num     Type           Disp Enb Address            What
+1       breakpoint     keep n   <MULTIPLE>
+1.1                         y-  0x00000000000011b6 in ...
+1.2                         y-  0x00000000000011c2 in ...
+1.3                         n   0x00000000000011ce in ...
+@end smallexample
+
 @cindex pending breakpoints
 It's quite common to have a breakpoint inside a shared library.
 Shared libraries can be loaded and unloaded explicitly,
