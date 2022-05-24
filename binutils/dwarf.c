@@ -10149,32 +10149,35 @@ display_debug_names (struct dwarf_section *section, void *file)
 			bucket_count),
 	      buckets_filled, (unsigned long) bucket_count);
 
-      uint32_t hash_prev = 0;
-      size_t hash_clash_count = 0;
-      size_t longest_clash = 0;
-      size_t this_length = 0;
-      size_t hashi;
-      for (hashi = 0; hashi < name_count; hashi++)
+      if (bucket_count != 0)
 	{
-	  const uint32_t hash_this = hash_table_hashes[hashi];
-
-	  if (hashi > 0)
+	  uint32_t hash_prev = 0;
+	  size_t hash_clash_count = 0;
+	  size_t longest_clash = 0;
+	  size_t this_length = 0;
+	  size_t hashi;
+	  for (hashi = 0; hashi < name_count; hashi++)
 	    {
-	      if (hash_prev % bucket_count == hash_this % bucket_count)
+	      const uint32_t hash_this = hash_table_hashes[hashi];
+
+	      if (hashi > 0)
 		{
-		  ++hash_clash_count;
-		  ++this_length;
-		  longest_clash = MAX (longest_clash, this_length);
+		  if (hash_prev % bucket_count == hash_this % bucket_count)
+		    {
+		      ++hash_clash_count;
+		      ++this_length;
+		      longest_clash = MAX (longest_clash, this_length);
+		    }
+		  else
+		    this_length = 0;
 		}
-	      else
-		this_length = 0;
+	      hash_prev = hash_this;
 	    }
-	  hash_prev = hash_this;
+	  printf (_("Out of %lu items there are %zu bucket clashes"
+		    " (longest of %zu entries).\n"),
+		  (unsigned long) name_count, hash_clash_count, longest_clash);
+	  assert (name_count == buckets_filled + hash_clash_count);
 	}
-      printf (_("Out of %lu items there are %zu bucket clashes"
-		" (longest of %zu entries).\n"),
-	      (unsigned long) name_count, hash_clash_count, longest_clash);
-      assert (name_count == buckets_filled + hash_clash_count);
 
       struct abbrev_lookup_entry
       {
