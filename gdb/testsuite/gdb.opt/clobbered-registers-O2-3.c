@@ -15,13 +15,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-extern unsigned gen_movsd (unsigned *operand0, unsigned *operand1);
-
-int main(void)
+unsigned *
+start_sequence (unsigned *x, unsigned *y)
 {
-  volatile unsigned x, y;
-
-  x = 13;
-  y = 14;
-  return (int)gen_movsd (&x, &y);
+  return (unsigned *)0xdeadbeef;
 }
