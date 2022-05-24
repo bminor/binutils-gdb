@@ -549,14 +549,12 @@ public:
 
   gdbpy_err_fetch ()
   {
-    PyErr_Fetch (&m_error_type, &m_error_value, &m_error_traceback);
-  }
+    PyObject *error_type, *error_value, *error_traceback;
 
-  ~gdbpy_err_fetch ()
-  {
-    Py_XDECREF (m_error_type);
-    Py_XDECREF (m_error_value);
-    Py_XDECREF (m_error_traceback);
+    PyErr_Fetch (&error_type, &error_value, &error_traceback);
+    m_error_type.reset (error_type);
+    m_error_value.reset (error_value);
+    m_error_traceback.reset (error_traceback);
   }
 
   /* Call PyErr_Restore using the values stashed in this object.
@@ -565,10 +563,9 @@ public:
 
   void restore ()
   {
-    PyErr_Restore (m_error_type, m_error_value, m_error_traceback);
-    m_error_type = nullptr;
-    m_error_value = nullptr;
-    m_error_traceback = nullptr;
+    PyErr_Restore (m_error_type.release (),
+		   m_error_value.release (),
+		   m_error_traceback.release ());
   }
 
   /* Return the string representation of the exception represented by
@@ -587,12 +584,12 @@ public:
 
   bool type_matches (PyObject *type) const
   {
-    return PyErr_GivenExceptionMatches (m_error_type, type);
+    return PyErr_GivenExceptionMatches (m_error_type.get (), type);
   }
 
 private:
 
-  PyObject *m_error_type, *m_error_value, *m_error_traceback;
+  gdbpy_ref<> m_error_type, m_error_value, m_error_traceback;
 };
 
 /* Called before entering the Python interpreter to install the
