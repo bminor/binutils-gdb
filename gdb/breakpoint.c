@@ -6010,6 +6010,11 @@ print_breakpoint_location (const breakpoint *b,
 {
   struct ui_out *uiout = current_uiout;
 
+  /* Indent by a space for a better grouping hint.  We can get by with
+     calling text just once, because the "what" column is the last
+     column.  Otherwise, following columns would be misaligned.  */
+  uiout->text (" ");
+
   scoped_restore_current_program_space restore_pspace;
 
   if (loc != NULL && loc->shlib_disabled)
@@ -6030,7 +6035,8 @@ print_breakpoint_location (const breakpoint *b,
 	  uiout->field_string ("func", sym->print_name (),
 			       function_name_style.style ());
 	  uiout->text (" ");
-	  uiout->wrap_hint (wrap_indent_at_field (uiout, "what"));
+	  /* +1 for the location's grouping hint indentation.  */
+	  uiout->wrap_hint (wrap_indent_at_field (uiout, "what") + 1);
 	  uiout->text ("at ");
 	}
       uiout->field_string ("file",
@@ -6254,13 +6260,25 @@ print_one_breakpoint_location (struct breakpoint *b,
 
   /* 4 */
   annotate_field (3);
-  /* For locations that are disabled because of an invalid condition,
-     display "N*" on CLI, where "*" refers to a footnote below the
-     table.  For MI, simply display a "N" without a footnote.  */
-  const char *N = (uiout->is_mi_like_p ()) ? "N" : "N*";
   if (loc != nullptr)
-    uiout->field_string ("enabled", (loc->disabled_by_cond ? N
-				     : (loc->enabled ? "y" : "n")));
+    {
+      /* For locations that are disabled because of an invalid
+	 condition, display "N*" on CLI, where "*" refers to a
+	 footnote below the table.  For MI, simply display a "N"
+	 without a footnote.  */
+      if (uiout->is_mi_like_p ())
+	{
+	  uiout->field_string ("enabled", (loc->disabled_by_cond
+					   ? "N"
+					   : (loc->enabled ? "y" : "n")));
+	}
+      else
+	{
+	  uiout->field_string ("enabled", (loc->disabled_by_cond
+					   ? " N*"
+					   : (loc->enabled ? " y" : " n")));
+	}
+    }
   else
     uiout->field_fmt ("enabled", "%c", bpenables[(int) b->enable_state]);
 
@@ -6756,6 +6774,10 @@ breakpoint_1 (const char *args, bool show_internal,
     if (nr_printable_breakpoints > 0)
       annotate_breakpoints_table ();
 
+#define EXTRA_LINE
+#ifdef EXTRA_LINE
+    bool printed_one = false;
+#endif
     for (breakpoint *b : all_breakpoints ())
       {
 	QUIT;
@@ -6783,6 +6805,12 @@ breakpoint_1 (const char *args, bool show_internal,
 	   show_internal is set.  */
 	if (show_internal || user_breakpoint_p (b))
 	  {
+#ifdef EXTRA_LINE
+	    if (printed_one && !ib_opts.hide_locations)
+	      uiout->text ("\n");
+	    printed_one = true;
+#endif
+
 	    print_one_breakpoint (b, &last_loc, show_internal, ib_opts);
 	    for (bp_location *loc : b->locations ())
 	      if (loc->disabled_by_cond)
