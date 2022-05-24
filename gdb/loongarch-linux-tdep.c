@@ -30,9 +30,9 @@
 #include "tramp-frame.h"
 
 /* The general-purpose regset consists of 32 R registers, plus PC,
-   and BADV registers.  */
+   and BADV registers.  In addition, reserved 11 for extension in glibc.  */
 
-#define LOONGARCH_LINUX_NUM_GREGSET	(34)
+#define LOONGARCH_LINUX_NUM_GREGSET	(45)
 
 /* Unpack an elf_gregset_t into GDB's register cache.  */
 
