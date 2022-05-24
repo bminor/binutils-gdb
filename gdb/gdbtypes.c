@@ -5562,7 +5562,7 @@ recursive_dump_type (struct type *type, int spaces)
 /* Trivial helpers for the libiberty hash table, for mapping one
    type to another.  */
 
-struct type_pair : public allocate_on_obstack
+struct type_pair
 {
   type_pair (struct type *old_, struct type *newobj_)
     : old (old_), newobj (newobj_)
@@ -5589,22 +5589,20 @@ type_pair_eq (const void *item_lhs, const void *item_rhs)
 }
 
 /* Allocate the hash table used by copy_type_recursive to walk
-   types without duplicates.  We use OBJFILE's obstack, because
-   OBJFILE is about to be deleted.  */
+   types without duplicates.  */
 
 htab_up
-create_copied_types_hash (struct objfile *objfile)
+create_copied_types_hash ()
 {
-  return htab_up (htab_create_alloc_ex (1, type_pair_hash, type_pair_eq,
-					NULL, &objfile->objfile_obstack,
-					hashtab_obstack_allocate,
-					dummy_obstack_deallocate));
+  return htab_up (htab_create_alloc (1, type_pair_hash, type_pair_eq,
+				     htab_delete_entry<type_pair>,
+				     xcalloc, xfree));
 }
 
 /* Recursively copy (deep copy) a dynamic attribute list of a type.  */
 
 static struct dynamic_prop_list *
-copy_dynamic_prop_list (struct obstack *objfile_obstack,
+copy_dynamic_prop_list (struct obstack *storage,
 			struct dynamic_prop_list *list)
 {
   struct dynamic_prop_list *copy = list;
@@ -5615,7 +5613,7 @@ copy_dynamic_prop_list (struct obstack *objfile_obstack,
       struct dynamic_prop_list *node_copy;
 
       node_copy = ((struct dynamic_prop_list *)
-		   obstack_copy (objfile_obstack, *node_ptr,
+		   obstack_copy (storage, *node_ptr,
 				 sizeof (struct dynamic_prop_list)));
       node_copy->prop = (*node_ptr)->prop;
       *node_ptr = node_copy;
@@ -5632,19 +5630,13 @@ copy_dynamic_prop_list (struct obstack *objfile_obstack,
    it is not associated with OBJFILE.  */
 
 struct type *
-copy_type_recursive (struct objfile *objfile, 
-		     struct type *type,
-		     htab_t copied_types)
+copy_type_recursive (struct type *type, htab_t copied_types)
 {
   void **slot;
   struct type *new_type;
 
   if (!type->is_objfile_owned ())
     return type;
-
-  /* This type shouldn't be pointing to any types in other objfiles;
-     if it did, the type might disappear unexpectedly.  */
-  gdb_assert (type->objfile_owner () == objfile);
 
   struct type_pair pair (type, nullptr);
 
@@ -5656,8 +5648,7 @@ copy_type_recursive (struct objfile *objfile,
 
   /* We must add the new type to the hash table immediately, in case
      we encounter this type again during a recursive call below.  */
-  struct type_pair *stored
-    = new (&objfile->objfile_obstack) struct type_pair (type, new_type);
+  struct type_pair *stored = new type_pair (type, new_type);
 
   *slot = stored;
 
@@ -5690,8 +5681,7 @@ copy_type_recursive (struct objfile *objfile,
 	  TYPE_FIELD_BITSIZE (new_type, i) = TYPE_FIELD_BITSIZE (type, i);
 	  if (type->field (i).type ())
 	    new_type->field (i).set_type
-	      (copy_type_recursive (objfile, type->field (i).type (),
-				    copied_types));
+	      (copy_type_recursive (type->field (i).type (), copied_types));
 	  if (type->field (i).name ())
 	    new_type->field (i).set_name (xstrdup (type->field (i).name ()));
 
@@ -5736,16 +5726,14 @@ copy_type_recursive (struct objfile *objfile,
 
   if (type->main_type->dyn_prop_list != NULL)
     new_type->main_type->dyn_prop_list
-      = copy_dynamic_prop_list (&objfile->objfile_obstack,
+      = copy_dynamic_prop_list (gdbarch_obstack (new_type->arch_owner ()),
 				type->main_type->dyn_prop_list);
 
 
   /* Copy pointers to other types.  */
   if (TYPE_TARGET_TYPE (type))
     TYPE_TARGET_TYPE (new_type) = 
-      copy_type_recursive (objfile, 
-			   TYPE_TARGET_TYPE (type),
-			   copied_types);
+      copy_type_recursive (TYPE_TARGET_TYPE (type), copied_types);
 
   /* Maybe copy the type_specific bits.
 
@@ -5774,7 +5762,7 @@ copy_type_recursive (struct objfile *objfile,
       break;
     case TYPE_SPECIFIC_SELF_TYPE:
       set_type_self_type (new_type,
-			  copy_type_recursive (objfile, TYPE_SELF_TYPE (type),
+			  copy_type_recursive (TYPE_SELF_TYPE (type),
 					       copied_types));
       break;
     case TYPE_SPECIFIC_FIXED_POINT:

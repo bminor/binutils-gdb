@@ -2875,10 +2875,9 @@ extern int class_or_union_p (const struct type *);
 
 extern void maintenance_print_type (const char *, int);
 
-extern htab_up create_copied_types_hash (struct objfile *objfile);
+extern htab_up create_copied_types_hash ();
 
-extern struct type *copy_type_recursive (struct objfile *objfile,
-					 struct type *type,
+extern struct type *copy_type_recursive (struct type *type,
 					 htab_t copied_types);
 
 extern struct type *copy_type (const struct type *type);

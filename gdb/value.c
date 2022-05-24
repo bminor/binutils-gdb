@@ -2571,11 +2571,10 @@ preserve_one_value (struct value *value, struct objfile *objfile,
 		    htab_t copied_types)
 {
   if (value->type->objfile_owner () == objfile)
-    value->type = copy_type_recursive (objfile, value->type, copied_types);
+    value->type = copy_type_recursive (value->type, copied_types);
 
   if (value->enclosing_type->objfile_owner () == objfile)
-    value->enclosing_type = copy_type_recursive (objfile,
-						 value->enclosing_type,
+    value->enclosing_type = copy_type_recursive (value->enclosing_type,
 						 copied_types);
 }
 
@@ -2591,7 +2590,7 @@ preserve_one_internalvar (struct internalvar *var, struct objfile *objfile,
       if (var->u.integer.type
 	  && var->u.integer.type->objfile_owner () == objfile)
 	var->u.integer.type
-	  = copy_type_recursive (objfile, var->u.integer.type, copied_types);
+	  = copy_type_recursive (var->u.integer.type, copied_types);
       break;
 
     case INTERNALVAR_VALUE:
@@ -2612,7 +2611,7 @@ preserve_one_varobj (struct varobj *varobj, struct objfile *objfile,
       && varobj->type->objfile_owner () == objfile)
     {
       varobj->type
-	= copy_type_recursive (objfile, varobj->type, copied_types);
+	= copy_type_recursive (varobj->type, copied_types);
     }
 
   if (varobj->value != nullptr)
@@ -2632,7 +2631,7 @@ preserve_values (struct objfile *objfile)
 
   /* Create the hash table.  We allocate on the objfile's obstack, since
      it is soon to be deleted.  */
-  htab_up copied_types = create_copied_types_hash (objfile);
+  htab_up copied_types = create_copied_types_hash ();
 
   for (const value_ref_ptr &item : value_history)
     preserve_one_value (item.get (), objfile, copied_types.get ());

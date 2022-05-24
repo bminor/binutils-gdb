@@ -1123,7 +1123,7 @@ save_objfile_types (struct objfile *objfile, void *datum)
      operating on.  */
   gdbpy_enter enter_py (objfile->arch ());
 
-  htab_up copied_types = create_copied_types_hash (objfile);
+  htab_up copied_types = create_copied_types_hash ();
 
   while (obj)
     {
@@ -1131,8 +1131,7 @@ save_objfile_types (struct objfile *objfile, void *datum)
 
       htab_empty (copied_types.get ());
 
-      obj->type = copy_type_recursive (objfile, obj->type,
-				       copied_types.get ());
+      obj->type = copy_type_recursive (obj->type, copied_types.get ());
 
       obj->next = NULL;
       obj->prev = NULL;

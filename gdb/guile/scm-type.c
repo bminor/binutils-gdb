@@ -360,7 +360,7 @@ tyscm_copy_type_recursive (void **slot, void *info)
   gdb_assert (objfile != NULL);
 
   htab_empty (copied_types);
-  t_smob->type = copy_type_recursive (objfile, t_smob->type, copied_types);
+  t_smob->type = copy_type_recursive (t_smob->type, copied_types);
 
   /* The eq?-hashtab that the type lived in is going away.
      Add the type to its new eq?-hashtab: Otherwise if/when the type is later
@@ -391,7 +391,7 @@ save_objfile_types (struct objfile *objfile, void *datum)
   if (!gdb_scheme_initialized)
     return;
 
-  htab_up copied_types = create_copied_types_hash (objfile);
+  htab_up copied_types = create_copied_types_hash ();
 
   if (htab != NULL)
     {
