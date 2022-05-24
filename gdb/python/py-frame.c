@@ -598,6 +598,29 @@ frapy_level (PyObject *self, PyObject *args)
   Py_RETURN_NONE;
 }
 
+/* The language for this frame.  */
+
+static PyObject *
+frapy_language (PyObject *self, PyObject *args)
+{
+  try
+    {
+      struct frame_info *fi;
+      FRAPY_REQUIRE_VALID (self, fi);
+
+      enum language lang = get_frame_language (fi);
+      const language_defn *lang_def = language_def (lang);
+
+      return host_string_to_python_string (lang_def->name ()).release ();
+    }
+  catch (const gdb_exception &except)
+    {
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
+
+  Py_RETURN_NONE;
+}
+
 /* Implementation of gdb.newest_frame () -> gdb.Frame.
    Returns the newest frame object.  */
 
@@ -771,6 +794,8 @@ Return the value of the variable in this frame." },
     "Select this frame as the user's current frame." },
   { "level", frapy_level, METH_NOARGS,
     "The stack level of this frame." },
+  { "language", frapy_language, METH_NOARGS,
+    "The language of this frame." },
   {NULL}  /* Sentinel */
 };
 

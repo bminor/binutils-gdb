@@ -58,6 +58,13 @@ maintenance info line-table
      This is the same format that GDB uses when printing address, symbol,
      and offset information from the disassembler.
 
+  ** New function gdb.current_language that returns the name of the
+     current language.  Unlike gdb.parameter('language'), this will
+     never return 'auto'.
+
+  ** New method gdb.Frame.language that returns the name of the
+     frame's language.
+
 *** Changes in GDB 12
 
 * DBX mode is deprecated, and will be removed in GDB 13

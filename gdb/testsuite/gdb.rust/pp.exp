@@ -40,3 +40,5 @@ if {![runto ${srcfile}:$line]} {
 
 gdb_test "print outer" " = pp::Outer \\(x\\(5\\)\\)"
 gdb_test "print outer.0" " = x\\(5\\)"
+
+gdb_test "python print(gdb.selected_frame().language())" "rust"

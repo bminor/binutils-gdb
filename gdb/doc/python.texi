@@ -668,6 +668,14 @@ Here are some examples of the possible string formats:
 @end smallexample
 @end defun
 
+@defun gdb.current_language ()
+Return the name of the current language as a string.  Unlike
+@code{gdb.parameter('language')}, this function will never return
+@samp{auto}.  If a @code{gdb.Frame} object is available (@pxref{Frames
+In Python}), the @code{language} method might be preferable in some
+cases, as that is not affected by the user's language setting.
+@end defun
+
 @node Exception Handling
 @subsubsection Exception Handling
 @cindex python exceptions
@@ -5200,6 +5208,10 @@ Stack}.
 
 @defun Frame.level ()
 Return an integer, the stack frame level for this frame.  @xref{Frames, ,Stack Frames}.
+@end defun
+
+@defun Frame.language ()
+Return a string, the source language for this frame.
 @end defun
 
 @node Blocks In Python

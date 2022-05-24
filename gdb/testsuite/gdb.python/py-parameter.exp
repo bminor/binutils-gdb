@@ -370,6 +370,19 @@ proc_with_prefix test_throwing_parameter { } {
 	"gdb.GdbError does not show Python stack"
 }
 
+proc_with_prefix test_language {} {
+    gdb_test "python print(gdb.parameter('language'))" "auto" \
+	"print language parameter"
+    gdb_test "python print(gdb.current_language())" "c" \
+	"print current language"
+    gdb_test_no_output "set lang rust"
+    gdb_test "python print(gdb.parameter('language'))" "rust" \
+	"print language parameter for rust"
+    gdb_test "python print(gdb.current_language())" "rust" \
+	"print current language for rust"
+    gdb_test_no_output "set lang auto"
+}
+
 test_directories
 test_data_directory
 test_boolean_parameter
@@ -380,6 +393,7 @@ test_really_undocumented_parameter
 test_deprecated_api_parameter
 test_integer_parameter
 test_throwing_parameter
+test_language
 
 # This caused a gdb crash.
 gdb_test "python print(gdb.parameter('endian'))" "auto" \

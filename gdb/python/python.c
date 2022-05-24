@@ -1571,6 +1571,14 @@ gdbpy_progspaces (PyObject *unused1, PyObject *unused2)
   return list.release ();
 }
 
+/* Return the name of the current language.  */
+
+static PyObject *
+gdbpy_current_language (PyObject *unused1, PyObject *unused2)
+{
+  return host_string_to_python_string (current_language->name ()).release ();
+}
+
 
 
 /* The "current" objfile.  This is set when gdb detects that a new
@@ -2533,6 +2541,10 @@ Return a list of gdb.TargetConnection objects." },
 Format ADDRESS, an address within PROG_SPACE, a gdb.Progspace, using\n\
 ARCH, a gdb.Architecture to determine the address size.  The format of\n\
 the returned string is 'ADDRESS <SYMBOL+OFFSET>' without the quotes." },
+
+  { "current_language", gdbpy_current_language, METH_NOARGS,
+    "current_language () -> string\n\
+Return the name of the currently selected language." },
 
   {NULL, NULL, 0, NULL}
 };

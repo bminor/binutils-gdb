@@ -128,3 +128,9 @@ if { $pc != "" } {
 	" = True" \
 	"test Frame.read_register($pc)"
 }
+
+# Test language.
+gdb_test "python print(gdb.selected_frame().language())" "c"
+gdb_test "set language ada"
+gdb_test "python print(gdb.selected_frame().language())" "c" \
+    "frame language is not affected by global language"
