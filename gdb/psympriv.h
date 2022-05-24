@@ -553,9 +553,8 @@ struct psymbol_functions : public quick_symbol_functions
     m_psymbol_map.clear ();
   }
 
-  /* Ensure the partial symbols for OBJFILE have been loaded.  Return
-     a range adapter for the psymtabs.  */
-  psymtab_storage::partial_symtab_range require_partial_symbols
+  /* Return a range adapter for the psymtabs.  */
+  psymtab_storage::partial_symtab_range partial_symbols
        (struct objfile *objfile);
 
   /* Return the partial symbol storage associated with this
