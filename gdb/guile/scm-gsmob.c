@@ -206,42 +206,6 @@ gdbscm_gsmob_kind (SCM self)
    smobs with references to them.  There are several smobs that reference
    objfile-based data, so we provide helpers to manage this.  */
 
-/* Add G_SMOB to the reference chain for OBJFILE specified by DATA_KEY.
-   OBJFILE may be NULL, in which case just set prev,next to NULL.  */
-
-void
-gdbscm_add_objfile_ref (struct objfile *objfile,
-			const struct objfile_data *data_key,
-			chained_gdb_smob *g_smob)
-{
-  g_smob->prev = NULL;
-  if (objfile != NULL)
-    {
-      g_smob->next = (chained_gdb_smob *) objfile_data (objfile, data_key);
-      if (g_smob->next)
-	g_smob->next->prev = g_smob;
-      set_objfile_data (objfile, data_key, g_smob);
-    }
-  else
-    g_smob->next = NULL;
-}
-
-/* Remove G_SMOB from the reference chain for OBJFILE specified
-   by DATA_KEY.  OBJFILE may be NULL.  */
-
-void
-gdbscm_remove_objfile_ref (struct objfile *objfile,
-			   const struct objfile_data *data_key,
-			   chained_gdb_smob *g_smob)
-{
-  if (g_smob->prev)
-    g_smob->prev->next = g_smob->next;
-  else if (objfile != NULL)
-    set_objfile_data (objfile, data_key, g_smob->next);
-  if (g_smob->next)
-    g_smob->next->prev = g_smob->prev;
-}
-
 /* Create a hash table for mapping a pointer to a gdb data structure to the
    gsmob that wraps it.  */
 

@@ -287,14 +287,6 @@ extern void gdbscm_init_chained_gsmob (chained_gdb_smob *base);
 extern void gdbscm_init_eqable_gsmob (eqable_gdb_smob *base,
 				      SCM containing_scm);
 
-extern void gdbscm_add_objfile_ref (struct objfile *objfile,
-				    const struct objfile_data *data_key,
-				    chained_gdb_smob *g_smob);
-
-extern void gdbscm_remove_objfile_ref (struct objfile *objfile,
-				       const struct objfile_data *data_key,
-				       chained_gdb_smob *g_smob);
-
 extern htab_t gdbscm_create_eqable_gsmob_ptr_map (htab_hash hash_fn,
 						  htab_eq eq_fn);
 
