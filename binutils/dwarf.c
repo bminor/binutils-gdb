@@ -2717,7 +2717,7 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_strx4:
       if (!do_loc)
 	{
-	  const char *suffix = strrchr (section->name, '.');
+	  const char *suffix = section ? strrchr (section->name, '.') : NULL;
 	  bool dwo = suffix && strcmp (suffix, ".dwo") == 0;
 
 	  if (do_wide)
@@ -6273,8 +6273,9 @@ display_debug_macro (struct dwarf_section *section,
 		      SAFE_BYTE_GET_AND_INC (val, desc, 1, end);
 		      curr
 			= read_and_display_attr_value (0, val, 0,
-						       start, curr, end, 0, 0, offset_size,
-						       version, NULL, 0, NULL,
+						       start, curr, end, 0, 0,
+						       offset_size, version,
+						       NULL, 0, section,
 						       NULL, ' ', -1);
 		      if (n != nargs - 1)
 			printf (",");
@@ -10310,7 +10311,7 @@ display_debug_names (struct dwarf_section *section, void *file)
 							  unit_start, entryptr, unit_end,
 							  0, 0, offset_size,
 							  dwarf_version, NULL,
-							  (tagno < 0), NULL,
+							  (tagno < 0), section,
 							  NULL, '=', -1);
 		}
 	      ++tagno;
