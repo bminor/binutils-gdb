@@ -33,7 +33,7 @@ gen_movsd (unsigned * operand0, unsigned * operand1)
 
 int main(void)
 {
-  unsigned x, y;
+  volatile unsigned x, y;
 
   x = 13;
   y = 14;
