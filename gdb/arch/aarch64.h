@@ -71,6 +71,17 @@ namespace std
 target_desc *
   aarch64_create_target_description (const aarch64_features &features);
 
+/* Given a pointer value POINTER and a MASK of non-address bits, remove the
+   non-address bits from the pointer and sign-extend the result if required.
+   The sign-extension is required so we can handle kernel addresses
+   correctly.  */
+CORE_ADDR aarch64_remove_top_bits (CORE_ADDR pointer, CORE_ADDR mask);
+
+/* Given CMASK and DMASK the two PAC mask registers, return the correct PAC
+   mask to use for removing non-address bits from a pointer.  */
+CORE_ADDR
+aarch64_mask_from_pac_registers (const CORE_ADDR cmask, const CORE_ADDR dmask);
+
 /* Register numbers of various important registers.
    Note that on SVE, the Z registers reuse the V register numbers and the V
    registers become pseudo registers.  */
@@ -103,6 +114,13 @@ enum aarch64_regnum
 /* Sizes of various AArch64 registers.  */
 #define AARCH64_TLS_REGISTER_SIZE 8
 #define V_REGISTER_SIZE	  16
+
+/* PAC-related constants.  */
+/* Bit 55 is used to select between a kernel-space and user-space address.  */
+#define VA_RANGE_SELECT_BIT_MASK  0x80000000000000ULL
+/* Mask with 1's in bits 55~63, used to remove the top byte of pointers
+   (Top Byte Ignore).  */
+#define AARCH64_TOP_BITS_MASK	  0xff80000000000000ULL
 
 /* Pseudo register base numbers.  */
 #define AARCH64_Q0_REGNUM 0

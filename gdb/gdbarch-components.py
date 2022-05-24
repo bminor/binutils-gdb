@@ -1154,15 +1154,23 @@ possible it should be in TARGET_READ_PC instead).
     invalid=False,
 )
 
-Value(
+Method(
     comment="""
-On some machines, not all bits of an address word are significant.
-For example, on AArch64, the top bits of an address known as the "tag"
-are ignored by the kernel, the hardware, etc. and can be regarded as
-additional data associated with the address.
+On some architectures, not all bits of a pointer are significant.
+On AArch64, for example, the top bits of a pointer may carry a "tag", which
+can be ignored by the kernel and the hardware.  The "tag" can be regarded as
+additional data associated with the pointer, but it is not part of the address.
+
+Given a pointer for the architecture, this hook removes all the
+non-significant bits and sign-extends things as needed.  It gets used to remove
+non-address bits from data pointers (for example, removing the AArch64 MTE tag
+bits from a pointer) and from code pointers (removing the AArch64 PAC signature
+from a pointer containing the return address).
 """,
-    type="int",
-    name="significant_addr_bit",
+    type="CORE_ADDR",
+    name="remove_non_address_bits",
+    params=[("CORE_ADDR", "pointer")],
+    predefault="default_remove_non_address_bits",
     invalid=False,
 )
 

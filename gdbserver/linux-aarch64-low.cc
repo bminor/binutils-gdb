@@ -522,21 +522,30 @@ aarch64_target::low_remove_point (raw_bkpt_type type, CORE_ADDR addr,
   return ret;
 }
 
-/* Return the address only having significant bits.  This is used to ignore
-   the top byte (TBI).  */
-
 static CORE_ADDR
-address_significant (CORE_ADDR addr)
+aarch64_remove_non_address_bits (CORE_ADDR pointer)
 {
-  /* Clear insignificant bits of a target address and sign extend resulting
-     address.  */
-  int addr_bit = 56;
+  /* By default, we assume TBI and discard the top 8 bits plus the
+     VA range select bit (55).  */
+  CORE_ADDR mask = AARCH64_TOP_BITS_MASK;
 
-  CORE_ADDR sign = (CORE_ADDR) 1 << (addr_bit - 1);
-  addr &= ((CORE_ADDR) 1 << addr_bit) - 1;
-  addr = (addr ^ sign) - sign;
+  /* Check if PAC is available for this target.  */
+  if (tdesc_contains_feature (current_process ()->tdesc,
+			      "org.gnu.gdb.aarch64.pauth"))
+    {
+      /* Fetch the PAC masks.  These masks are per-process, so we can just
+	 fetch data from whatever thread we have at the moment.
 
-  return addr;
+	 Also, we have both a code mask and a data mask.  For now they are the
+	 same, but this may change in the future.  */
+
+      struct regcache *regs = get_thread_regcache (current_thread, 1);
+      CORE_ADDR dmask = regcache_raw_get_unsigned_by_name (regs, "pauth_dmask");
+      CORE_ADDR cmask = regcache_raw_get_unsigned_by_name (regs, "pauth_cmask");
+      mask |= aarch64_mask_from_pac_registers (cmask, dmask);
+    }
+
+  return aarch64_remove_top_bits (pointer, mask);
 }
 
 /* Implementation of linux target ops method "low_stopped_data_address".  */
@@ -563,7 +572,7 @@ aarch64_target::low_stopped_data_address ()
      hardware watchpoint hit.  The stopped data addresses coming from the
      kernel can potentially be tagged addresses.  */
   const CORE_ADDR addr_trap
-    = address_significant ((CORE_ADDR) siginfo.si_addr);
+    = aarch64_remove_non_address_bits ((CORE_ADDR) siginfo.si_addr);
 
   /* Check if the address matches any watched address.  */
   state = aarch64_get_debug_reg_state (pid_of (current_thread));

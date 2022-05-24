@@ -59,3 +59,34 @@ aarch64_create_target_description (const aarch64_features &features)
 
   return tdesc.release ();
 }
+
+/* See arch/aarch64.h.  */
+
+CORE_ADDR
+aarch64_remove_top_bits (CORE_ADDR pointer, CORE_ADDR mask)
+{
+  /* The VA range select bit is 55.  This bit tells us if we have a
+     kernel-space address or a user-space address.  */
+  bool kernel_address = (pointer & VA_RANGE_SELECT_BIT_MASK) != 0;
+
+  /* Remove the top non-address bits.  */
+  pointer &= ~mask;
+
+  /* Sign-extend if we have a kernel-space address.  */
+  if (kernel_address)
+    pointer |= mask;
+
+  return pointer;
+}
+
+/* See arch/aarch64.h.  */
+
+CORE_ADDR
+aarch64_mask_from_pac_registers (const CORE_ADDR cmask, const CORE_ADDR dmask)
+{
+  /* If the masks differ, default to using the one with the most coverage.  */
+  if (dmask != cmask)
+    return dmask > cmask ? dmask : cmask;
+
+  return cmask;
+}

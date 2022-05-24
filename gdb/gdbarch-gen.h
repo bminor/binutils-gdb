@@ -626,13 +626,20 @@ typedef CORE_ADDR (gdbarch_addr_bits_remove_ftype) (struct gdbarch *gdbarch, COR
 extern CORE_ADDR gdbarch_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_bits_remove_ftype *addr_bits_remove);
 
-/* On some machines, not all bits of an address word are significant.
-   For example, on AArch64, the top bits of an address known as the "tag"
-   are ignored by the kernel, the hardware, etc. and can be regarded as
-   additional data associated with the address. */
+/* On some architectures, not all bits of a pointer are significant.
+   On AArch64, for example, the top bits of a pointer may carry a "tag", which
+   can be ignored by the kernel and the hardware.  The "tag" can be regarded as
+   additional data associated with the pointer, but it is not part of the address.
 
-extern int gdbarch_significant_addr_bit (struct gdbarch *gdbarch);
-extern void set_gdbarch_significant_addr_bit (struct gdbarch *gdbarch, int significant_addr_bit);
+   Given a pointer for the architecture, this hook removes all the
+   non-significant bits and sign-extends things as needed.  It gets used to remove
+   non-address bits from data pointers (for example, removing the AArch64 MTE tag
+   bits from a pointer) and from code pointers (removing the AArch64 PAC signature
+   from a pointer containing the return address). */
+
+typedef CORE_ADDR (gdbarch_remove_non_address_bits_ftype) (struct gdbarch *gdbarch, CORE_ADDR pointer);
+extern CORE_ADDR gdbarch_remove_non_address_bits (struct gdbarch *gdbarch, CORE_ADDR pointer);
+extern void set_gdbarch_remove_non_address_bits (struct gdbarch *gdbarch, gdbarch_remove_non_address_bits_ftype *remove_non_address_bits);
 
 /* Return a string representation of the memory tag TAG. */
 

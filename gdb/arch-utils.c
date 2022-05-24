@@ -82,6 +82,14 @@ legacy_register_sim_regno (struct gdbarch *gdbarch, int regnum)
     return LEGACY_SIM_REGNO_IGNORE;
 }
 
+/* See arch-utils.h */
+
+CORE_ADDR
+default_remove_non_address_bits (struct gdbarch *gdbarch, CORE_ADDR pointer)
+{
+  /* By default, just return the pointer value.  */
+  return pointer;
+}
 
 /* See arch-utils.h */
 
