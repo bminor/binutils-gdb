@@ -86,7 +86,8 @@ gdb_test "step 3" ".*STEP TEST 2.*" "step test 2"
 
 # step over call
 
-gdb_test "step" ".*NEXT OVER THIS CALL.*" "step up to call"
+gdb_test "step" ".*NEXT OVER THIS RECURSION.*" "step up to call"
+gdb_test "next" ".*NEXT OVER THIS CALL.*" "skip recursive call"
 gdb_test "next" ".*STEP INTO THIS CALL.*" "next over call"
 
 # step into call
@@ -280,9 +281,10 @@ gdb_test_multiple "step" "$test_message" {
     }
 }
 
-# next backward over call
+# Next backward over calls.
 
 gdb_test "next" ".*NEXT OVER THIS CALL.*" "reverse next over call"
+gdb_test "next" ".*NEXT OVER THIS RECURSION.*" "reverse next over recursive call"
 
 # step/next backward with count
 
