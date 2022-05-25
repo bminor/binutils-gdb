@@ -3917,7 +3917,7 @@ linux_proc_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
       linux_nat_debug_printf ("accessing fd %d for pid %d failed: %s (%d)",
 			      fd, inferior_ptid.pid (),
 			      safe_strerror (errno), errno);
-      return TARGET_XFER_EOF;
+      return TARGET_XFER_E_IO;
     }
   else if (ret == 0)
     {
