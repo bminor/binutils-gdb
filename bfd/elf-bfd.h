@@ -1918,6 +1918,14 @@ struct output_elf_obj_tdata
     asection *sec;
   } build_id;
 
+  /* FDO_PACKAGING_METADATA note type info.  */
+  struct
+  {
+    bool (*after_write_object_contents) (bfd *);
+    const char *json;
+    asection *sec;
+  } package_metadata;
+
   /* Records the result of `get_program_header_size'.  */
   bfd_size_type program_header_size;
 

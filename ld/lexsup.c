@@ -2144,6 +2144,8 @@ elf_static_list_options (FILE *file)
   fprintf (file, _("\
   --build-id[=STYLE]          Generate build ID note\n"));
   fprintf (file, _("\
+  --package-metadata[=JSON]   Generate package metadata note\n"));
+  fprintf (file, _("\
   --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi]\n\
                               Compress DWARF debug sections using zlib\n"));
 #ifdef DEFAULT_FLAG_COMPRESS_DEBUG

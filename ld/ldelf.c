@@ -39,6 +39,9 @@
 #include <glob.h>
 #endif
 #include "ldelf.h"
+#ifdef HAVE_JANSSON
+#include <jansson.h>
+#endif
 
 struct dt_needed
 {
@@ -48,6 +51,9 @@ struct dt_needed
 
 /* Style of .note.gnu.build-id section.  */
 const char *ldelf_emit_note_gnu_build_id;
+
+/* Content of .note.package section.  */
+const char *ldelf_emit_note_fdo_package_metadata;
 
 /* These variables are required to pass information back and forth
    between after_open and check_needed and stat_needed and vercheck.  */
@@ -1249,7 +1255,8 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
 	}
     }
 
-  if (ldelf_emit_note_gnu_build_id != NULL)
+  if (ldelf_emit_note_gnu_build_id != NULL
+      || ldelf_emit_note_fdo_package_metadata != NULL)
     {
       /* Find an ELF input.  */
       for (abfd = link_info.input_bfds;
@@ -1262,10 +1269,19 @@ ldelf_after_open (int use_libpath, int native, int is_linux, int is_freebsd,
       /* PR 10555: If there are no ELF input files do not try to
 	 create a .note.gnu-build-id section.  */
       if (abfd == NULL
-	  || !ldelf_setup_build_id (abfd))
+	  || (ldelf_emit_note_gnu_build_id != NULL
+	      && !ldelf_setup_build_id (abfd)))
 	{
 	  free ((char *) ldelf_emit_note_gnu_build_id);
 	  ldelf_emit_note_gnu_build_id = NULL;
+	}
+
+      if (abfd == NULL
+	  || (ldelf_emit_note_fdo_package_metadata != NULL
+	      && !ldelf_setup_package_metadata (abfd)))
+	{
+	  free ((char *) ldelf_emit_note_fdo_package_metadata);
+	  ldelf_emit_note_fdo_package_metadata = NULL;
 	}
     }
 
@@ -1498,6 +1514,121 @@ ldelf_setup_build_id (bfd *ibfd)
 
   einfo (_("%P: warning: cannot create .note.gnu.build-id section,"
 	   " --build-id ignored\n"));
+  return false;
+}
+
+static bool
+write_package_metadata (bfd *abfd)
+{
+  struct elf_obj_tdata *t = elf_tdata (abfd);
+  const char *json;
+  asection *asec;
+  Elf_Internal_Shdr *i_shdr;
+  unsigned char *contents, *json_bits;
+  bfd_size_type size;
+  file_ptr position;
+  Elf_External_Note *e_note;
+
+  json = t->o->package_metadata.json;
+  asec = t->o->package_metadata.sec;
+  if (bfd_is_abs_section (asec->output_section))
+    {
+      einfo (_("%P: warning: .note.package section discarded,"
+	       " --package-metadata ignored\n"));
+      return true;
+    }
+  i_shdr = &elf_section_data (asec->output_section)->this_hdr;
+
+  if (i_shdr->contents == NULL)
+    {
+      if (asec->contents == NULL)
+	asec->contents = (unsigned char *) xmalloc (asec->size);
+      contents = asec->contents;
+    }
+  else
+    contents = i_shdr->contents + asec->output_offset;
+
+  e_note = (Elf_External_Note *) contents;
+  size = offsetof (Elf_External_Note, name[sizeof "FDO"]);
+  size = (size + 3) & -(bfd_size_type) 4;
+  json_bits = contents + size;
+  size = asec->size - size;
+
+  /* Clear the package metadata field.  */
+  memset (json_bits, 0, size);
+
+  bfd_h_put_32 (abfd, sizeof "FDO", &e_note->namesz);
+  bfd_h_put_32 (abfd, size, &e_note->descsz);
+  bfd_h_put_32 (abfd, FDO_PACKAGING_METADATA, &e_note->type);
+  memcpy (e_note->name, "FDO", sizeof "FDO");
+  memcpy (json_bits, json, strlen(json));
+
+  position = i_shdr->sh_offset + asec->output_offset;
+  size = asec->size;
+  return (bfd_seek (abfd, position, SEEK_SET) == 0
+	  && bfd_bwrite (contents, size, abfd) == size);
+}
+
+/* Make .note.package section.
+   https://systemd.io/ELF_PACKAGE_METADATA/  */
+
+bool
+ldelf_setup_package_metadata (bfd *ibfd)
+{
+  asection *s;
+  bfd_size_type size;
+  size_t json_length;
+  flagword flags;
+
+  /* If the option wasn't specified, silently return. */
+  if (!ldelf_emit_note_fdo_package_metadata)
+    return false;
+
+  /* The option was specified, but it's empty, log and return. */
+  json_length = strlen (ldelf_emit_note_fdo_package_metadata);
+  if (json_length == 0)
+    {
+      einfo (_("%P: warning: --package-metadata is empty, ignoring\n"));
+      return false;
+    }
+
+#ifdef HAVE_JANSSON
+  json_error_t json_error;
+  json_t *json = json_loads (ldelf_emit_note_fdo_package_metadata,
+			     0, &json_error);
+  if (!json)
+    {
+      einfo (_("%P: warning: --package-metadata=%s does not contain valid "
+	       "JSON, ignoring: %s\n"),
+	     ldelf_emit_note_fdo_package_metadata, json_error.text);
+      return false;
+    }
+  else
+    json_decref (json);
+#endif
+
+  size = offsetof (Elf_External_Note, name[sizeof "FDO"]);
+  size += json_length + 1;
+  size = (size + 3) & -(bfd_size_type) 4;
+
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_IN_MEMORY
+	   | SEC_LINKER_CREATED | SEC_READONLY | SEC_DATA);
+  s = bfd_make_section_anyway_with_flags (ibfd, ".note.package",
+					  flags);
+  if (s != NULL && bfd_set_section_alignment (s, 2))
+    {
+      struct elf_obj_tdata *t = elf_tdata (link_info.output_bfd);
+      t->o->package_metadata.after_write_object_contents
+	= &write_package_metadata;
+      t->o->package_metadata.json = ldelf_emit_note_fdo_package_metadata;
+      t->o->package_metadata.sec = s;
+      elf_section_type (s) = SHT_NOTE;
+      s->size = size;
+      return true;
+    }
+
+  einfo (_("%P: warning: cannot create .note.package section,"
+	   " --package-metadata ignored\n"));
   return false;
 }
 

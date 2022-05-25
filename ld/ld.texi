@@ -2935,6 +2935,18 @@ string identifying the original linked file does not change.
 
 Passing @code{none} for @var{style} disables the setting from any
 @code{--build-id} options earlier on the command line.
+
+@kindex --package-metadata=@var{JSON}
+@item --package-metadata=@var{JSON}
+Request the creation of a @code{.note.package} ELF note section.  The
+contents of the note are in JSON format, as per the package metadata
+specification.  For more information see:
+https://systemd.io/ELF_PACKAGE_METADATA/
+If the JSON argument is missing/empty then this will disable the
+creation of the metadata note, if one had been enabled by an earlier
+occurrence of the --package-metdata option.
+If the linker has been built with libjansson, then the JSON string
+will be validated.
 @end table
 
 @c man end

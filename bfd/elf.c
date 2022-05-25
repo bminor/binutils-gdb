@@ -6779,8 +6779,12 @@ _bfd_elf_write_object_contents (bfd *abfd)
     return false;
 
   /* This is last since write_shdrs_and_ehdr can touch i_shdrp[0].  */
-  if (t->o->build_id.after_write_object_contents != NULL)
-    return (*t->o->build_id.after_write_object_contents) (abfd);
+  if (t->o->build_id.after_write_object_contents != NULL
+      && !(*t->o->build_id.after_write_object_contents) (abfd))
+    return false;
+  if (t->o->package_metadata.after_write_object_contents != NULL
+      && !(*t->o->package_metadata.after_write_object_contents) (abfd))
+    return false;
 
   return true;
 }

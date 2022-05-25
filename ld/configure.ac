@@ -289,6 +289,32 @@ fi
 AM_CONDITIONAL(ENABLE_LIBCTF, test "${enable_libctf}" = yes)
 AC_SUBST(enable_libctf)
 
+# Used to validate --package-metadata= input. Disabled by default.
+AC_ARG_ENABLE([jansson],
+  [AS_HELP_STRING([--enable-jansson],
+    [enable jansson [default=no]])],
+  [enable_jansson=$enableval],
+  [enable_jansson="no"])
+
+if test "x$enable_jansson" != "xno"; then
+  PKG_PROG_PKG_CONFIG
+  AS_IF([test -n "$PKG_CONFIG"],
+    [
+      PKG_CHECK_MODULES(JANSSON, [jansson],
+	[
+	  AC_DEFINE(HAVE_JANSSON, 1, [The jansson library is to be used])
+	  AC_SUBST([JANSSON_CFLAGS])
+	  AC_SUBST([JANSSON_LIBS])
+	],
+	[
+	  AC_MSG_ERROR([Cannot find jansson library])
+	])
+    ],
+    [
+      AC_MSG_ERROR([Cannot find pkg-config])
+    ])
+fi
+
 AM_BINUTILS_WARNINGS
 
 AM_LC_MESSAGES
