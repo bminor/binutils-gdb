@@ -1721,6 +1721,10 @@ decode_location_expression (unsigned char * data,
 	  printf ("DW_OP_GNU_parameter_ref: <0x%s>",
 		  dwarf_vmatoa ("x", cu_offset + uvalue));
 	  break;
+	case DW_OP_addrx:
+	  READ_ULEB (uvalue, data, end);
+	  printf ("DW_OP_addrx <0x%s>", dwarf_vmatoa ("x", uvalue));
+	  break;
 	case DW_OP_GNU_addr_index:
 	  READ_ULEB (uvalue, data, end);
 	  printf ("DW_OP_GNU_addr_index <0x%s>", dwarf_vmatoa ("x", uvalue));
@@ -2661,10 +2665,15 @@ read_and_display_attr_value (unsigned long           attribute,
 
       uvalue = check_uvalue (block_start, uvalue, end);
 
-      if (do_loc)
-	data = block_start + uvalue;
-      else
-	data = display_block (block_start, uvalue, end, delimiter);
+      data = block_start + uvalue;
+      if (!do_loc)
+	{
+	  unsigned char op;
+
+	  SAFE_BYTE_GET (op, block_start, sizeof (op), end);
+	  if (op != DW_OP_addrx)
+	    data = display_block (block_start, uvalue, end, delimiter);
+	}
       break;
 
     case DW_FORM_block1:

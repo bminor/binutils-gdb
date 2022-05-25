@@ -488,11 +488,12 @@ if {![binutils_assemble $srcdir/$subdir/z.s tmpdir/z.o]} then {
     readelf_test {--decompress --hex-dump .debug_loc} $tempfile readelf.z
 }
 
+set hpux ""
+
 # Skip the next test for the RISCV architectures because they
 # do not support .ULEB128 pseudo-ops with non-constant values.
 if ![istarget "riscv*-*-*"] then {
 
-    set hpux ""
     if [istarget "hppa*64*-*-hpux*"] {
 	set hpux "--defsym HPUX=1"
     }
@@ -595,4 +596,23 @@ if ![is_remote host] {
     } else {
 	readelf_test {--debug-dump=macro -wN} $tempfile pr26112.r
     }
+}
+
+# Check dwarf-5 support for DW_OP_addrx.
+if {![binutils_assemble_flags $srcdir/$subdir/dw5-op.S tmpdir/dw5-op.o $hpux]} then {
+    unsupported "readelf -wi dw5-op (failed to assemble)"
+} else {
+
+# Download it.
+if ![is_remote host] {
+    set tempfile tmpdir/dw5-op.o
+} else {
+    set tempfile [remote_download host tmpdir/dw5-op.o]
+}
+
+# First, determine the size, so specific output matchers can be used.
+readelf_find_size $tempfile 2
+
+# Make sure that readelf can decode the contents.
+readelf_test -wi $tempfile dw5-op.W
 }
