@@ -1344,11 +1344,8 @@ install_new_value (struct varobj *var, struct value *value, bool initial)
     {
       print_value = varobj_value_get_print_value (var->value.get (),
 						  var->format, var);
-      if ((var->print_value.empty () && !print_value.empty ())
-	  || (!var->print_value.empty () && print_value.empty ())
-	  || (!var->print_value.empty () && !print_value.empty ()
-	      && var->print_value != print_value))
-	  changed = true;
+      if (var->print_value != print_value)
+	changed = true;
     }
   var->print_value = print_value;
 
