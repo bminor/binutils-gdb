@@ -4716,39 +4716,29 @@ s_arm_unwind_save_mmxwcg (void)
   ignore_rest_of_line ();
 }
 
+/* Convert range and mask_range into a sequence of s_arm_unwind_core
+   and s_arm_unwind_pseudo operations.  We assume that mask_range will
+   not have consecutive bits set, or that one operation per bit is
+   acceptable.  */
+
 static void
 s_arm_unwind_save_mixed (long range, long mask_range)
 {
-  const long roof = ((sizeof (long) * CHAR_BIT) - 1)
-    - __builtin_clzl (mask_range);
-
-  long subrange = 0;
-  unsigned lim_lo = 0;
-  unsigned lim_hi = 0;
-
-  /* Iterate over pseudoregister to establish subrange bounds.  */
-  for (; lim_hi <= roof; lim_hi++)
+  while (mask_range)
     {
-      if (mask_range & (1 << lim_hi))
-	{
-	  /* Once we know where to split our range, construct subrange.  */
-	  for (unsigned n = lim_lo; n < lim_hi; n++)
-	    {
-	      if (range & (1 << n))
-		subrange |= (1 << n);
-	    }
+      long mask_bit = mask_range & -mask_range;
+      long subrange = range & (mask_bit - 1);
 
-	  s_arm_unwind_save_core (subrange);
-	  s_arm_unwind_save_pseudo (1 << lim_hi);
+      if (subrange)
+	s_arm_unwind_save_core (subrange);
 
-	  subrange = 0;
-	  lim_lo = lim_hi + 1;
-	}
+      s_arm_unwind_save_pseudo (mask_bit);
+      range &= ~subrange;
+      mask_range &= ~mask_bit;
     }
 
-  lim_lo = 0xffff << roof;
-  subrange = range & lim_lo;
-  s_arm_unwind_save_core (subrange);
+  if (range)
+    s_arm_unwind_save_core (range);
 }
 
 /* Parse an unwind_save directive.
@@ -4810,21 +4800,8 @@ s_arm_unwind_save (int arch_v6)
 
       demand_empty_rest_of_line ();
 
-      if (!mask_range)
-	{
-	  s_arm_unwind_save_core (range);
-	  return;
-	}
-      else if (!range)
-	{
-	  s_arm_unwind_save_pseudo (mask_range);
-	  return;
-	}
-      else
-	{
-	  s_arm_unwind_save_mixed (range, mask_range);
-	  return;
-	}
+      s_arm_unwind_save_mixed (range, mask_range);
+      return;
 
     case REG_TYPE_VFD:
       if (arch_v6)
