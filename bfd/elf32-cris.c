@@ -4112,6 +4112,8 @@ elf_cris_got_elt_size (bfd *abfd ATTRIBUTE_UNUSED,
 #define elf_backend_dtrel_excludes_plt	1
 #define elf_backend_want_dynrelro	1
 
+#define elf_backend_default_execstack	0
+
 /* Later, we my want to optimize RELA entries into REL entries for dynamic
    linking and libraries (if it's a win of any significance).  Until then,
    take the easy route.  */

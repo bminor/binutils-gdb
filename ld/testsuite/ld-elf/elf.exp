@@ -183,6 +183,7 @@ if { [check_gc_sections_available] && ![istarget "v850-*-*"] } {
 proc target_defaults_to_execstack {} {
     if {   [istarget "aarch64*-*-*"]
 	|| [istarget "arc*-*-*"]
+	|| [istarget "cris*-*-*"]
 	|| [istarget "ia64*-*-*"]
 	|| [istarget "nios2*-*-*"]
 	|| [istarget "powerpc64*-*-*"]
