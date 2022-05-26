@@ -34523,8 +34523,9 @@ reliable for a dynamic varobj.  Instead, you must examine the
 
 @item value
 The varobj's scalar value.  For a varobj whose type is some sort of
-aggregate (e.g., a @code{struct}), or for a dynamic varobj, this value
-will not be interesting.
+aggregate (e.g., a @code{struct}), this value will not be interesting.
+For a dynamic varobj, this value comes directly from the Python
+pretty-printer object's @code{to_string} method.
 
 @item type
 The varobj's type.  This is a string representation of the type, as

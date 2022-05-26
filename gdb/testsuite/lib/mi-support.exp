@@ -1426,11 +1426,11 @@ proc mi_create_varobj_checked { name expression type testname } {
 }
 
 # Same as mi_create_floating_varobj, but assumes the test is creating
-# a dynamic varobj that has children, so the value must be "{...}".
-# The "has_more" attribute is checked.
-proc mi_create_dynamic_varobj {name expression has_more testname} {
+# a dynamic varobj that has children.  The "value" and "has_more"
+# attributes are checked.
+proc mi_create_dynamic_varobj {name expression value has_more testname} {
     mi_gdb_test "-var-create $name @ $expression" \
-	"\\^done,name=\"$name\",numchild=\"0\",value=\"{\\.\\.\\.}\",type=.*,has_more=\"${has_more}\"" \
+	"\\^done,name=\"$name\",numchild=\"0\",value=\"$value\",type=.*,has_more=\"${has_more}\"" \
 	$testname
 }
 

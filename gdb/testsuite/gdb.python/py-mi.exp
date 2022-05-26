@@ -91,7 +91,7 @@ mi_gdb_test "-var-update string" \
 with_test_prefix "varobj container" {
     # The "elements" field of "c" is still empty, so the attribute
     # "has_more" is expected to be zero.
-    mi_create_dynamic_varobj container c 0 \
+    mi_create_dynamic_varobj container c "container .* with 0 elements" 0 \
 	"create container varobj"
 
     mi_list_varobj_children container {
@@ -207,7 +207,7 @@ mi_next "next over update 5"
 
 # Regression test: examine an object that has no children, then update
 # it to ensure that we don't print the children.
-mi_create_dynamic_varobj container2 c2 0 \
+mi_create_dynamic_varobj container2 c2 "container .* with 0 elements" 0 \
   "create second container varobj"
 
 mi_gdb_test "-var-update container2" \
@@ -228,7 +228,7 @@ mi_continue_to_line \
     [gdb_get_line_number {MI outer breakpoint here} ${srcfile}] \
     "step to first outer breakpoint"
 
-mi_create_dynamic_varobj outer outer 1 \
+mi_create_dynamic_varobj outer outer "x = 0" 1 \
   "create outer varobj"
 
 mi_list_varobj_children outer {
@@ -259,7 +259,7 @@ mi_continue_to_line \
     "step to second outer breakpoint"
 
 with_test_prefix "varobj nscont" {
-    mi_create_dynamic_varobj nscont nstype 1 \
+    mi_create_dynamic_varobj nscont nstype ".*" 1 \
 	"create nstype varobj"
 
     mi_list_varobj_children nscont {
@@ -284,7 +284,7 @@ set cmd "python exception_flag = True"
 set re [string_list_to_regexp & {"} $cmd \\ n {"} \r\n ^ done]
 mi_gdb_test $cmd $re
 
-mi_create_dynamic_varobj nstype2 nstype2 1 \
+mi_create_dynamic_varobj nstype2 nstype2 ".*" 1 \
   "create nstype2 varobj"
 
 mi_list_varobj_children nstype2 {
@@ -299,7 +299,8 @@ mi_gdb_test "-var-evaluate-expression me" \
 	"evaluate me varobj"
 
 # Regression test for python/14836.
-mi_create_dynamic_varobj children_as_list children_as_list 1 \
+mi_create_dynamic_varobj children_as_list children_as_list \
+    children_as_list_val 1 \
     "printer whose children are returned as a list"
 
 # Test that when a pretty-printer returns a gdb.Value in its to_string, we call
@@ -317,7 +318,7 @@ mi_continue_to_line \
     [gdb_get_line_number {breakpoint bug 14741} ${srcfile}] \
     "step to breakpoint for bug 14741"
 
-mi_create_dynamic_varobj c c 1 \
+mi_create_dynamic_varobj c c "container .* with 1 elements" 1 \
   "create varobj for c"
 
 mi_gdb_test "-var-set-visualizer c ArrayPrinter" \
@@ -330,8 +331,10 @@ mi_list_varobj_children c {
 
 mi_next "next over change of array element"
 
+# 'c' is noticed as changing here due to an artifact of the
+# -var-update implementation.  However, it seems harmless.
 mi_gdb_test "-var-update c" \
-    "\\^done,changelist=\\\[{name=\"c.\\\[0\\\]\",in_scope=\"true\",type_changed=\"false\",has_more=\"0\"}\\\]" \
+    "\\^done,changelist=\\\[{name=\"c\",in_scope=\"true\",type_changed=\"false\",displayhint=\"array\",dynamic=\"1\",has_more=\"0\"},{name=\"c.\\\[0\\\]\",in_scope=\"true\",type_changed=\"false\",has_more=\"0\"}\\\]" \
     "update varobj after element change"
 
 # C++ MI tests

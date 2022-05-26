@@ -652,21 +652,6 @@ install_dynamic_child (struct varobj *var,
     }
 }
 
-#if HAVE_PYTHON
-
-static bool
-dynamic_varobj_has_child_method (const struct varobj *var)
-{
-  PyObject *printer = var->dynamic->pretty_printer;
-
-  if (!gdb_python_initialized)
-    return false;
-
-  gdbpy_enter_varobj enter_py (var);
-  return PyObject_HasAttr (printer, gdbpy_children_cst);
-}
-#endif
-
 /* A factory for creating dynamic varobj's iterators.  Returns an
    iterator object suitable for iterating over VAR's children.  */
 
@@ -2178,11 +2163,6 @@ varobj_value_get_print_value (struct value *value,
 
       if (value_formatter)
 	{
-	  /* First check to see if we have any children at all.  If so,
-	     we simply return {...}.  */
-	  if (dynamic_varobj_has_child_method (var))
-	    return "{...}";
-
 	  if (PyObject_HasAttr (value_formatter, gdbpy_to_string_cst))
 	    {
 	      struct value *replacement;
@@ -2193,7 +2173,7 @@ varobj_value_get_print_value (struct value *value,
 								&opts);
 
 	      /* If we have string like output ...  */
-	      if (output != NULL)
+	      if (output != nullptr && output != Py_None)
 		{
 		  /* If this is a lazy string, extract it.  For lazy
 		     strings we always print as a string, so set
@@ -2244,6 +2224,13 @@ varobj_value_get_print_value (struct value *value,
 		 just use the value passed to this function.  */
 	      if (replacement)
 		value = replacement;
+	    }
+	  else
+	    {
+	      /* No to_string method, so if there is a 'children'
+		 method, return the default.  */
+	      if (PyObject_HasAttr (value_formatter, gdbpy_children_cst))
+		return "{...}";
 	    }
 	}
     }
