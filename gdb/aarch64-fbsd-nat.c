@@ -76,7 +76,6 @@ private:
 };
 
 static aarch64_fbsd_nat_target the_aarch64_fbsd_nat_target;
-bool aarch64_fbsd_nat_target::debug_regs_probed;
 
 /* Fetch register REGNUM from the inferior.  If REGNUM is -1, do this
    for all registers.  */
@@ -155,6 +154,8 @@ aarch64_fbsd_nat_target::read_description ()
 }
 
 #ifdef HAVE_DBREG
+bool aarch64_fbsd_nat_target::debug_regs_probed;
+
 /* Set of threads which need to update debug registers on next resume.  */
 
 static std::unordered_set<lwpid_t> aarch64_debug_pending_threads;
