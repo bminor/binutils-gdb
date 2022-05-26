@@ -982,7 +982,7 @@ process_vsyscall_page ()
       if (ap->a_type == AT_SYSINFO_EHDR)
 	{
 	  // newer Linuxes do not have a_ptr field, they just have a_val
-	  ehdr = (ELF_EHDR*) ap->a_un.a_val;
+	  ehdr = (ELF_EHDR*)(intptr_t) ap->a_un.a_val;
 	  if (ehdr != NULL)
 	    break;
 	}

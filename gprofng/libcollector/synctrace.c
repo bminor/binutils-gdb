@@ -707,11 +707,11 @@ __collector_jsync_end (hrtime_t reqt, void *object)
   if (grnt - reqt >= sync_threshold)
     {
       Sync_packet spacket;
-      collector_memset (&spacket, 0, sizeof ( Sync_packet));
-      spacket.comm.tsize = sizeof ( Sync_packet);
+      collector_memset (&spacket, 0, sizeof (Sync_packet));
+      spacket.comm.tsize = sizeof (Sync_packet);
       spacket.comm.tstamp = grnt;
       spacket.requested = reqt;
-      spacket.objp = (Vaddr_type) object;
+      spacket.objp = (intptr_t) object;
       spacket.comm.frinfo = collector_interface->getFrameInfo (sync_hndl, spacket.comm.tstamp, FRINFO_FROM_STACK_ARG, &spacket);
       collector_interface->writeDataRecord (sync_hndl, (Common_packet*) & spacket);
     }
@@ -740,11 +740,11 @@ pthread_mutex_lock (pthread_mutex_t *mp)
   if (grnt - reqt >= sync_threshold)
     {
       Sync_packet spacket;
-      collector_memset (&spacket, 0, sizeof ( Sync_packet));
-      spacket.comm.tsize = sizeof ( Sync_packet);
+      collector_memset (&spacket, 0, sizeof (Sync_packet));
+      spacket.comm.tsize = sizeof (Sync_packet);
       spacket.comm.tstamp = grnt;
       spacket.requested = reqt;
-      spacket.objp = (Vaddr_type) mp;
+      spacket.objp = (intptr_t) mp;
       spacket.comm.frinfo = collector_interface->getFrameInfo (sync_hndl, spacket.comm.tstamp, FRINFO_FROM_STACK, &spacket);
       collector_interface->writeDataRecord (sync_hndl, (Common_packet*) & spacket);
     }
@@ -831,11 +831,11 @@ __collector_pthread_cond_wait_symver (int(real_pthread_cond_wait) (), pthread_co
   if (grnt - reqt >= sync_threshold)
     {
       Sync_packet spacket;
-      collector_memset (&spacket, 0, sizeof ( Sync_packet));
-      spacket.comm.tsize = sizeof ( Sync_packet);
+      collector_memset (&spacket, 0, sizeof (Sync_packet));
+      spacket.comm.tsize = sizeof (Sync_packet);
       spacket.comm.tstamp = grnt;
       spacket.requested = reqt;
-      spacket.objp = (Vaddr_type) mutex;
+      spacket.objp = (intptr_t) mutex;
       spacket.comm.frinfo = collector_interface->getFrameInfo (sync_hndl, spacket.comm.tstamp, FRINFO_FROM_STACK_ARG, &spacket);
       collector_interface->writeDataRecord (sync_hndl, (Common_packet*) & spacket);
     }
@@ -938,7 +938,7 @@ __collector_pthread_cond_timedwait_symver (int(real_pthread_cond_timedwait) (),
       spacket.comm.tsize = sizeof ( Sync_packet);
       spacket.comm.tstamp = grnt;
       spacket.requested = reqt;
-      spacket.objp = (Vaddr_type) mutex;
+      spacket.objp = (intptr_t) mutex;
       spacket.comm.frinfo = collector_interface->getFrameInfo (sync_hndl, spacket.comm.tstamp, FRINFO_FROM_STACK_ARG, &spacket);
       collector_interface->writeDataRecord (sync_hndl, (Common_packet*) & spacket);
     }
@@ -1047,7 +1047,7 @@ sem_wait (sem_t *sp)
       spacket.comm.tsize = sizeof ( Sync_packet);
       spacket.comm.tstamp = grnt;
       spacket.requested = reqt;
-      spacket.objp = (Vaddr_type) sp;
+      spacket.objp = (intptr_t) sp;
 
 #if ARCH(Intel) && WSIZE(32)
       spacket.comm.frinfo = collector_interface->getFrameInfo (sync_hndl, spacket.comm.tstamp, FRINFO_FROM_STACK_ARG, &spacket);

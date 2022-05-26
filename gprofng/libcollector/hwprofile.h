@@ -72,7 +72,7 @@ typedef struct MHwcntr_packet
 #define CONTEXT_SP REG_ESP
 #endif /* WSIZE() */
 #define SETFUNCTIONCONTEXT(ucp,funcp) \
-    (ucp)->uc_mcontext.gregs[CONTEXT_PC] = (greg_t)(funcp); \
+    (ucp)->uc_mcontext.gregs[CONTEXT_PC] = (intptr_t)(funcp); \
     (ucp)->uc_mcontext.gregs[CONTEXT_SP] = 0; \
     (ucp)->uc_mcontext.gregs[CONTEXT_FP] = 0;
 

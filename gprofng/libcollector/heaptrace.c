@@ -298,8 +298,7 @@ malloc (size_t size)
   hpacket.comm.tstamp = gethrtime ();
   hpacket.mtype = MALLOC_TRACE;
   hpacket.size = (Size_type) size;
-  hpacket.vaddr = (Vaddr_type) ret;
-  hpacket.ovaddr = (Vaddr_type) 0;
+  hpacket.vaddr = (intptr_t) ret;
   hpacket.comm.frinfo = collector_interface->getFrameInfo (heap_hndl, hpacket.comm.tstamp, FRINFO_FROM_STACK, &hpacket);
   collector_interface->writeDataRecord (heap_hndl, (Common_packet*) & hpacket);
   POP_REENTRANCE (guard);
@@ -338,9 +337,7 @@ free (void *ptr)
   hpacket.comm.tsize = sizeof ( Heap_packet);
   hpacket.comm.tstamp = ts;
   hpacket.mtype = FREE_TRACE;
-  hpacket.size = (Size_type) 0;
-  hpacket.vaddr = (Vaddr_type) ptr;
-  hpacket.ovaddr = (Vaddr_type) 0;
+  hpacket.vaddr = (intptr_t) ptr;
   hpacket.comm.frinfo = collector_interface->getFrameInfo (heap_hndl, hpacket.comm.tstamp, FRINFO_FROM_STACK, &hpacket);
   collector_interface->writeDataRecord (heap_hndl, (Common_packet*) & hpacket);
   POP_REENTRANCE (guard);
@@ -378,8 +375,7 @@ realloc (void *ptr, size_t size)
   hpacket.comm.tstamp = ts;
   hpacket.mtype = REALLOC_TRACE;
   hpacket.size = (Size_type) size;
-  hpacket.vaddr = (Vaddr_type) ret;
-  hpacket.ovaddr = (Vaddr_type) ptr;
+  hpacket.vaddr = (intptr_t) ret;
   hpacket.comm.frinfo = collector_interface->getFrameInfo (heap_hndl, hpacket.comm.tstamp, FRINFO_FROM_STACK, &hpacket);
   collector_interface->writeDataRecord (heap_hndl, (Common_packet*) & hpacket);
   POP_REENTRANCE (guard);
@@ -407,8 +403,7 @@ memalign (size_t align, size_t size)
   hpacket.comm.tstamp = gethrtime ();
   hpacket.mtype = MALLOC_TRACE;
   hpacket.size = (Size_type) size;
-  hpacket.vaddr = (Vaddr_type) ret;
-  hpacket.ovaddr = (Vaddr_type) 0;
+  hpacket.vaddr = (intptr_t) ret;
   hpacket.comm.frinfo = collector_interface->getFrameInfo (heap_hndl, hpacket.comm.tstamp, FRINFO_FROM_STACK, &hpacket);
   collector_interface->writeDataRecord (heap_hndl, (Common_packet*) & hpacket);
   POP_REENTRANCE (guard);
@@ -437,8 +432,7 @@ valloc (size_t size)
   hpacket.comm.tstamp = gethrtime ();
   hpacket.mtype = MALLOC_TRACE;
   hpacket.size = (Size_type) size;
-  hpacket.vaddr = (Vaddr_type) ret;
-  hpacket.ovaddr = (Vaddr_type) 0;
+  hpacket.vaddr = (intptr_t) ret;
   hpacket.comm.frinfo = collector_interface->getFrameInfo (heap_hndl, hpacket.comm.tstamp, FRINFO_FROM_STACK, &hpacket);
   collector_interface->writeDataRecord (heap_hndl, (Common_packet*) & hpacket);
   POP_REENTRANCE (guard);
@@ -470,8 +464,7 @@ calloc (size_t size, size_t esize)
   hpacket.comm.tstamp = gethrtime ();
   hpacket.mtype = MALLOC_TRACE;
   hpacket.size = (Size_type) (size * esize);
-  hpacket.vaddr = (Vaddr_type) ret;
-  hpacket.ovaddr = (Vaddr_type) 0;
+  hpacket.vaddr = (intptr_t) ret;
   hpacket.comm.frinfo = collector_interface->getFrameInfo (heap_hndl, hpacket.comm.tstamp, FRINFO_FROM_STACK, &hpacket);
   collector_interface->writeDataRecord (heap_hndl, (Common_packet*) & hpacket);
   POP_REENTRANCE (guard);
@@ -494,8 +487,7 @@ __collector_heap_record (int mtype, size_t size, void *vaddr)
   hpacket.comm.tstamp = gethrtime ();
   hpacket.mtype = mtype;
   hpacket.size = (Size_type) size;
-  hpacket.vaddr = (Vaddr_type) vaddr;
-  hpacket.ovaddr = (Vaddr_type) 0;
+  hpacket.vaddr = (intptr_t) vaddr;
   hpacket.comm.frinfo = collector_interface->getFrameInfo (heap_hndl, hpacket.comm.tstamp, FRINFO_FROM_STACK, &hpacket);
   collector_interface->writeDataRecord (heap_hndl, (Common_packet*) & hpacket);
   POP_REENTRANCE (guard);

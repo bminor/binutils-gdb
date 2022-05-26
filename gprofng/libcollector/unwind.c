@@ -223,9 +223,9 @@ memory_error_func (int status ATTRIBUTE_UNUSED, bfd_vma addr ATTRIBUTE_UNUSED,
 	{ \
 	    context->uc_link = NULL; \
 	    void *sp = __collector_getsp(); \
-	    GET_SP(context) = (greg_t)sp; \
-	    GET_FP(context) = (greg_t)__collector_getfp(); \
-	    GET_PC(context) = (greg_t)__collector_getpc(); \
+	    GET_SP(context) = (intptr_t)sp; \
+	    GET_FP(context) = (intptr_t)__collector_getfp(); \
+	    GET_PC(context) = (intptr_t)__collector_getpc(); \
 	    context->uc_stack.ss_sp = sp; \
 	    context->uc_stack.ss_size = 0x100000; \
 	}

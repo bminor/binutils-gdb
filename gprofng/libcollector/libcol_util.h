@@ -133,6 +133,7 @@ __collector_dec_32 (volatile uint32_t *ptr)
 		       : // "=m" (*ptr)    // output
 		       : "m" (*ptr)); // input
 }
+
 /**
  * This function subtrackts the value "off" of the value stored in target
  * to occur in an atomic manner, and returns new value stored in target.
@@ -148,6 +149,7 @@ __collector_subget_32 (uint32_t *ptr, uint32_t off)
 		       );
   return (r - offset);
 }
+
 /**
  * This function returns the value of the stack pointer register
  */
@@ -155,14 +157,15 @@ static __attribute__ ((always_inline)) inline void *
 __collector_getsp ()
 {
   void *r;
-#if WSIZE(64)
-  __asm__ __volatile__("movq %%rsp, %0"
-#else
+#if WSIZE(32) || defined(__ILP32__)
   __asm__ __volatile__("movl %%esp, %0"
-#endif
+#else
+  __asm__ __volatile__("movq %%rsp, %0"
+#endif 
 	  : "=r" (r)); // output
   return r;
 }
+
 /**
  * This function returns the value of the frame pointer register
  */
@@ -170,14 +173,15 @@ static __attribute__ ((always_inline)) inline void *
 __collector_getfp ()
 {
   void *r;
-#if WSIZE(64)
-  __asm__ __volatile__("movq %%rbp, %0"
-#else
+#if WSIZE(32) || defined(__ILP32__)
   __asm__ __volatile__("movl %%ebp, %0"
+#else
+  __asm__ __volatile__("movq %%rbp, %0"
 #endif
 	  : "=r" (r)); // output
   return r;
 }
+
 /**
  * This function returns the value of the processor counter register
  */
@@ -185,15 +189,12 @@ static __attribute__ ((always_inline)) inline void *
 __collector_getpc ()
 {
   void *r;
-  __asm__ __volatile__(
-#if WSIZE(32)
-	  "	call  1f \n"
-		       "1: popl  %0 \n"
+#if defined(__x86_64)
+  __asm__ __volatile__("lea (%%rip), %0" : "=r" (r));
 #else
-	  "	call  1f \n"
-		       "1: popq  %0 \n"
+  __asm__ __volatile__("call  1f \n"
+		       "1: popl  %0" : "=r" (r));
 #endif
-	  : "=r" (r)); // output
   return r;
 }
 
@@ -258,7 +259,7 @@ static __attribute__ ((always_inline)) inline void *
 __collector_cas_ptr (void *mem, void *cmp, void *new)
 {
   void *r;
-#if WSIZE(32)
+#if WSIZE(32) || defined(__ILP32__)
   r = (void *) __collector_cas_32 ((volatile uint32_t *)mem, (uint32_t) cmp, (uint32_t)new);
 #else
   __asm__ __volatile__("lock; cmpxchgq %2, (%1)"
