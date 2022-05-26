@@ -17,8 +17,8 @@ Disassembly of section .text:
  +[a-f0-9]+:	48 c7 c0 f1 00 40 00 	mov    \$0x4000f1,%rax
 
 0+4000f0 <foo>:
- +[a-f0-9]+:	c3                   	ret *
+ +[a-f0-9]+:	c3                   	ret
 
 0+4000f1 <bar>:
- +[a-f0-9]+:	c3                   	ret *
+ +[a-f0-9]+:	c3                   	ret
 #pass

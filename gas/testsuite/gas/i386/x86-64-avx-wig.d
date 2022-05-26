@@ -271,6 +271,6 @@ Disassembly of section .text:
  +[a-f0-9]+:	c4 e1 cc 14 d4       	vunpcklps %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e1 cd 57 d4       	vxorpd %ymm4,%ymm6,%ymm2
  +[a-f0-9]+:	c4 e1 cc 57 d4       	vxorps %ymm4,%ymm6,%ymm2
- +[a-f0-9]+:	c4 e1 fc 77          	vzeroall 
- +[a-f0-9]+:	c4 e1 f8 77          	vzeroupper 
+ +[a-f0-9]+:	c4 e1 fc 77          	vzeroall
+ +[a-f0-9]+:	c4 e1 f8 77          	vzeroupper
 #pass

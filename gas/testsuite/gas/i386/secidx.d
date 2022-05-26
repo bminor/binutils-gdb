@@ -4,7 +4,7 @@
 .*: +file format pe-i386
 
 RELOCATION RECORDS FOR \[\.data\]:
-OFFSET[ 	]+TYPE[ 	]+VALUE 
+OFFSET[ 	]+TYPE[ 	]+VALUE
 0+24 secidx            \.text
 0+27 secidx            \.text
 0+2a secidx            \.text

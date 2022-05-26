@@ -31,11 +31,11 @@ Disassembly of section .text:
 [       ]*[a-f0-9]+:	67 66 0f 38 f6 42 24 	adcx   eax,DWORD PTR \[bp\+si\+0x24\]
 [       ]*[a-f0-9]+:	66 0f 38 f6 d1       	adcx   edx,ecx
 [       ]*[a-f0-9]+:	67 66 0f 38 f6 54 f4 	adcx   edx,DWORD PTR \[si-0xc\]
-[       ]*[a-f0-9]+:	f4                   	hlt *
+[       ]*[a-f0-9]+:	f4                   	hlt
 [       ]*[a-f0-9]+:	67 66 0f 38 f6 00    	adcx   eax,DWORD PTR \[bx\+si\]
 [       ]*[a-f0-9]+:	67 f3 0f 38 f6 42 24 	adox   eax,DWORD PTR \[bp\+si\+0x24\]
 [       ]*[a-f0-9]+:	f3 0f 38 f6 d1       	adox   edx,ecx
 [       ]*[a-f0-9]+:	67 f3 0f 38 f6 54 f4 	adox   edx,DWORD PTR \[si-0xc\]
-[       ]*[a-f0-9]+:	f4                   	hlt *
+[       ]*[a-f0-9]+:	f4                   	hlt
 [       ]*[a-f0-9]+:	67 f3 0f 38 f6 00    	adox   eax,DWORD PTR \[bx\+si\]
 #pass

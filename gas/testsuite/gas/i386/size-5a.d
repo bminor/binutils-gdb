@@ -24,5 +24,5 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	8d 0d bd ff ff ff    	lea    0xffffffbd,%ecx
 [ 	]*[a-f0-9]+:	8d 15 bd 00 00 00    	lea    0xbd,%edx
 [ 	]*[a-f0-9]+:	8d 15 bd 0f 00 00    	lea    0xfbd,%edx
-[ 	]*[a-f0-9]+:	c3                   	ret *
+[ 	]*[a-f0-9]+:	c3                   	ret
 #pass

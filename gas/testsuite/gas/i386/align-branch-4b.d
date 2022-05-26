@@ -20,7 +20,7 @@ Disassembly of section .text:
   17:	89 75 f4             	mov    %esi,-0xc\(%ebp\)
   1a:	89 75 f4             	mov    %esi,-0xc\(%ebp\)
   1d:	89 75 f4             	mov    %esi,-0xc\(%ebp\)
-  20:	c3                   	ret    
+  20:	c3                   	ret
   21:	3e 3e 3e 55          	ds ds ds push %ebp
   25:	55                   	push   %ebp
   26:	64 a3 01 00 00 00    	mov    %eax,%fs:0x1

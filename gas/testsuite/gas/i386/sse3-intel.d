@@ -23,21 +23,21 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:	f2 0f 7d d2[ 	]+hsubps xmm2,xmm2
 [ 	]*[0-9a-f]+:	f2 0f 7d 1c 24[ 	]+hsubps xmm3,(XMMWORD PTR )?\[esp\]
 [ 	]*[0-9a-f]+:	f2 0f f0 2e[ 	]+lddqu  xmm5,(XMMWORD PTR )?\[esi\]
-[ 	]*[0-9a-f]+:	0f 01 c8[ 	]+monitor *
-[ 	]*[0-9a-f]+:	0f 01 c8[ 	]+monitor *
+[ 	]*[0-9a-f]+:	0f 01 c8[ 	]+monitor
+[ 	]*[0-9a-f]+:	0f 01 c8[ 	]+monitor
 [ 	]*[0-9a-f]+:	f2 0f 12 f7[ 	]+movddup xmm6,xmm7
 [ 	]*[0-9a-f]+:	f2 0f 12 38[ 	]+movddup xmm7,(QWORD PTR )?\[eax\]
 [ 	]*[0-9a-f]+:	f3 0f 16 01[ 	]+movshdup xmm0,(XMMWORD PTR )?\[ecx\]
 [ 	]*[0-9a-f]+:	f3 0f 16 ca[ 	]+movshdup xmm1,xmm2
 [ 	]*[0-9a-f]+:	f3 0f 12 13[ 	]+movsldup xmm2,(XMMWORD PTR )?\[ebx\]
 [ 	]*[0-9a-f]+:	f3 0f 12 dc[ 	]+movsldup xmm3,xmm4
-[ 	]*[0-9a-f]+:	0f 01 c9[ 	]+mwait *
-[ 	]*[0-9a-f]+:	0f 01 c9[ 	]+mwait *
-[ 	]*[0-9a-f]+:	67 0f 01 c8[ 	]+addr16 monitor *
-[ 	]*[0-9a-f]+:	67 0f 01 c8[ 	]+addr16 monitor *
+[ 	]*[0-9a-f]+:	0f 01 c9[ 	]+mwait
+[ 	]*[0-9a-f]+:	0f 01 c9[ 	]+mwait
+[ 	]*[0-9a-f]+:	67 0f 01 c8[ 	]+addr16 monitor
+[ 	]*[0-9a-f]+:	67 0f 01 c8[ 	]+addr16 monitor
 [ 	]*[0-9a-f]+:	f2 0f 12 38[ 	]+movddup xmm7,(QWORD PTR )?\[eax\]
 [ 	]*[0-9a-f]+:	f2 0f 12 38[ 	]+movddup xmm7,(QWORD PTR )?\[eax\]
-[ 	]*[0-9a-f]+:	0f 01 c8[ 	]+monitor *
-[ 	]*[0-9a-f]+:	67 0f 01 c8[ 	]+addr16 monitor *
-[ 	]*[0-9a-f]+:	0f 01 c9[ 	]+mwait *
+[ 	]*[0-9a-f]+:	0f 01 c8[ 	]+monitor
+[ 	]*[0-9a-f]+:	67 0f 01 c8[ 	]+addr16 monitor
+[ 	]*[0-9a-f]+:	0f 01 c9[ 	]+mwait
 #pass

@@ -66,7 +66,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	66 ff 00             	incw   \(%rax\)
  *[a-f0-9]+:	66 6d                	insw   \(%dx\),%es:\(%rdi\)
  *[a-f0-9]+:	66 6d                	insw   \(%dx\),%es:\(%rdi\)
- *[a-f0-9]+:	66 cf                	iretw *
+ *[a-f0-9]+:	66 cf                	iretw
  *[a-f0-9]+:	66 ff 20             	jmpw   \*\(%rax\)
  *[a-f0-9]+:	66 ff 18             	lcallw \*\(%rax\)
  *[a-f0-9]+:	66 0f 01 10          	data16 lgdt \(%rax\)
@@ -76,7 +76,7 @@ Disassembly of section .text:
  *[a-f0-9]+:	66 0f 01 30          	data16 lmsw \(%rax\)
  *[a-f0-9]+:	66 ad                	lods   %ds:\(%rsi\),%ax
  *[a-f0-9]+:	66 ad                	lods   %ds:\(%rsi\),%ax
- *[a-f0-9]+:	66 cb                	lretw *
+ *[a-f0-9]+:	66 cb                	lretw
  *[a-f0-9]+:	66 ca 04 00          	lretw  \$0x4
  *[a-f0-9]+:	66 0f 00 18          	data16 ltr \(%rax\)
  *[a-f0-9]+:	66 c7 00 12 00       	movw   \$0x12,\(%rax\)
@@ -150,8 +150,8 @@ Disassembly of section .text:
  *[a-f0-9]+:	66 81 28 89 00       	subw   \$0x89,\(%rax\)
  *[a-f0-9]+:	66 81 28 34 12       	subw   \$0x1234,\(%rax\)
  *[a-f0-9]+:	66 81 28 78 56       	subw   \$0x5678,\(%rax\)
- *[a-f0-9]+:	66 0f 35             	data16 sysexitl *
- *[a-f0-9]+:	66 0f 07             	data16 sysretl *
+ *[a-f0-9]+:	66 0f 35             	data16 sysexitl
+ *[a-f0-9]+:	66 0f 07             	data16 sysretl
  *[a-f0-9]+:	66 f7 00 89 00       	testw  \$0x89,\(%rax\)
  *[a-f0-9]+:	66 f7 00 34 12       	testw  \$0x1234,\(%rax\)
  *[a-f0-9]+:	66 f7 00 78 56       	testw  \$0x5678,\(%rax\)

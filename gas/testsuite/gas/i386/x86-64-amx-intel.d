@@ -29,7 +29,7 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*c4 e2 79 4b 2c 11[ 	]*tileloaddt1 tmm5,\[rcx\+rdx\*1\]
 [ 	]*[a-f0-9]+:[ 	]*67 c4 e2 79 4b 0c 51[ 	]*tileloaddt1 tmm1,\[ecx\+edx\*2\]
 [ 	]*[a-f0-9]+:[ 	]*c4 e2 79 4b 0c 61[ 	]*tileloaddt1 tmm1,\[rcx\+riz\*2\]
-[ 	]*[a-f0-9]+:[ 	]*c4 e2 78 49 c0[ 	]*tilerelease *
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 78 49 c0[ 	]*tilerelease
 [ 	]*[a-f0-9]+:[ 	]*c4 e2 7a 4b 2c 21[ 	]*tilestored \[rcx\+riz\*1\],tmm5
 [ 	]*[a-f0-9]+:[ 	]*67 c4 e2 7a 4b 2c 21[ 	]*tilestored \[ecx\+eiz\*1\],tmm5
 [ 	]*[a-f0-9]+:[ 	]*c4 e2 7a 4b 2c 11[ 	]*tilestored \[rcx\+rdx\*1\],tmm5
@@ -59,7 +59,7 @@ Disassembly of section \.text:
 [ 	]*[a-f0-9]+:[ 	]*c4 e2 79 4b 2c 11[ 	]*tileloaddt1 tmm5,\[rcx\+rdx\*1\]
 [ 	]*[a-f0-9]+:[ 	]*67 c4 e2 79 4b 0c 51[ 	]*tileloaddt1 tmm1,\[ecx\+edx\*2\]
 [ 	]*[a-f0-9]+:[ 	]*c4 e2 79 4b 0c 61[ 	]*tileloaddt1 tmm1,\[rcx\+riz\*2\]
-[ 	]*[a-f0-9]+:[ 	]*c4 e2 78 49 c0[ 	]*tilerelease *
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 78 49 c0[ 	]*tilerelease
 [ 	]*[a-f0-9]+:[ 	]*c4 e2 7a 4b 2c 21[ 	]*tilestored \[rcx\+riz\*1\],tmm5
 [ 	]*[a-f0-9]+:[ 	]*67 c4 e2 7a 4b 2c 21[ 	]*tilestored \[ecx\+eiz\*1\],tmm5
 [ 	]*[a-f0-9]+:[ 	]*c4 e2 7a 4b 2c 11[ 	]*tilestored \[rcx\+rdx\*1\],tmm5

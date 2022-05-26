@@ -30,11 +30,11 @@ Disassembly of section .text:
 [       ]*[a-f0-9]+:	67 66 0f 38 f6 42 24 	adcx   0x24\(%bp,%si\),%eax
 [       ]*[a-f0-9]+:	66 0f 38 f6 d1       	adcx   %ecx,%edx
 [       ]*[a-f0-9]+:	67 66 0f 38 f6 54 f4 	adcx   -0xc\(%si\),%edx
-[       ]*[a-f0-9]+:	f4                   	hlt *
+[       ]*[a-f0-9]+:	f4                   	hlt
 [       ]*[a-f0-9]+:	67 66 0f 38 f6 00    	adcx   \(%bx,%si\),%eax
 [       ]*[a-f0-9]+:	67 f3 0f 38 f6 42 24 	adox   0x24\(%bp,%si\),%eax
 [       ]*[a-f0-9]+:	f3 0f 38 f6 d1       	adox   %ecx,%edx
 [       ]*[a-f0-9]+:	67 f3 0f 38 f6 54 f4 	adox   -0xc\(%si\),%edx
-[       ]*[a-f0-9]+:	f4                   	hlt *
+[       ]*[a-f0-9]+:	f4                   	hlt
 [       ]*[a-f0-9]+:	67 f3 0f 38 f6 00    	adox   \(%bx,%si\),%eax
 #pass

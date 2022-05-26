@@ -24,7 +24,7 @@ Disassembly of section .plt:
 Disassembly of section .text:
 
 0+110 <foo>:
- +[a-f0-9]+:	c3                   	ret    
+ +[a-f0-9]+:	c3                   	ret
 
 0+111 <bar>:
  +[a-f0-9]+:	e8 00 00 00 00       	call   116 <bar\+0x5>
@@ -32,5 +32,5 @@ Disassembly of section .text:
  +[a-f0-9]+:	81 c3 9e 10 00 00    	add    \$0x109e,%ebx
  +[a-f0-9]+:	e8 de ff ff ff       	call   100 <\*ABS\*@plt>
  +[a-f0-9]+:	8d 83 4c ef ff ff    	lea    -0x10b4\(%ebx\),%eax
- +[a-f0-9]+:	c3                   	ret    
+ +[a-f0-9]+:	c3                   	ret
 #pass

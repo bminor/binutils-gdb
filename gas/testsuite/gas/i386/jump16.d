@@ -80,10 +80,10 @@ Disassembly of section .text:
 [	]+117: (R_386_)?16	yyy
 [ 	]*[a-f0-9]+:	ea 00 00 00 00       	ljmp   \$0x0,\$0x0	11a: (R_386_)?16	xxx
 [	]+11c: (R_386_)?16	yyy
-[ 	]*[a-f0-9]+:	cf                   	iret   
-[ 	]*[a-f0-9]+:	cf                   	iret   
-[ 	]*[a-f0-9]+:	66 cf                	iretl  
-[ 	]*[a-f0-9]+:	cf                   	iret   
-[ 	]*[a-f0-9]+:	cf                   	iret   
-[ 	]*[a-f0-9]+:	66 cf                	iretl  
+[ 	]*[a-f0-9]+:	cf                   	iret
+[ 	]*[a-f0-9]+:	cf                   	iret
+[ 	]*[a-f0-9]+:	66 cf                	iretl
+[ 	]*[a-f0-9]+:	cf                   	iret
+[ 	]*[a-f0-9]+:	cf                   	iret
+[ 	]*[a-f0-9]+:	66 cf                	iretl
 #pass

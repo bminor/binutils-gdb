@@ -9318,6 +9318,7 @@ print_insn (bfd_vma pc, instr_info *ins)
   const char *p;
   struct dis_private priv;
   int prefix_length;
+  int op_count;
 
   ins->isa64 = 0;
   ins->intel_mnemonic = !SYSV386_COMPAT;
@@ -9762,12 +9763,28 @@ print_insn (bfd_vma pc, instr_info *ins)
       return MAX_CODE_LENGTH;
     }
 
+  /* Calculate the number of operands this instruction has.  */
+  op_count = 0;
+  for (i = 0; i < MAX_OPERANDS; ++i)
+    if (*ins->op_out[i] != '\0')
+      ++op_count;
+
+  /* Calculate the number of spaces to print after the mnemonic.  */
   ins->obufp = ins->mnemonicendp;
-  for (i = strlen (ins->obuf) + prefix_length; i < 6; i++)
-    oappend (ins, " ");
-  oappend (ins, " ");
+  if (op_count > 0)
+    {
+      i = strlen (ins->obuf) + prefix_length;
+      if (i < 7)
+	i = 7 - i;
+      else
+	i = 1;
+    }
+  else
+    i = 0;
+
+  /* Print the instruction mnemonic along with any trailing whitespace.  */
   (*ins->info->fprintf_styled_func)
-    (ins->info->stream, dis_style_mnemonic, "%s", ins->obuf);
+    (ins->info->stream, dis_style_mnemonic, "%s%*s", ins->obuf, i, "");
 
   /* The enter and bound instructions are printed with operands in the same
      order as the intel book; everything else is printed in reverse order.  */
@@ -12741,7 +12758,7 @@ static void
 NOP_Fixup (instr_info *ins, int opnd, int sizeflag)
 {
   if ((ins->prefixes & PREFIX_DATA) == 0 && (ins->rex & REX_B) == 0)
-    strcpy (ins->obuf, "nop");
+    ins->mnemonicendp = stpcpy (ins->obuf, "nop");
   else if (opnd == 0)
     OP_REG (ins, eAX_reg, sizeflag);
   else

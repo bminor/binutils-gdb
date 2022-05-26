@@ -22,10 +22,10 @@ Disassembly of section .plt:
 Disassembly of section .text:
 
 0+190 <foo>:
- +[a-f0-9]+:	c3                   	ret *
+ +[a-f0-9]+:	c3                   	ret
 
 0+191 <bar>:
  +[a-f0-9]+:	e8 ea ff ff ff       	call   180 <\*ABS\*\+0x190@plt>
  +[a-f0-9]+:	48 8d 05 e3 ff ff ff 	lea    -0x1d\(%rip\),%rax        # 180 <\*ABS\*\+0x190@plt>
- +[a-f0-9]+:	c3                   	ret *
+ +[a-f0-9]+:	c3                   	ret
 #pass

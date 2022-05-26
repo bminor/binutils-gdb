@@ -99,8 +99,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	a3 11 22 33 44 55 66 77 88 	movabs %eax,0x8877665544332211
 [ 	]*[a-f0-9]+:	48 a1 11 22 33 44 55 66 77 88 	movabs 0x8877665544332211,%rax
 [ 	]*[a-f0-9]+:	48 a3 11 22 33 44 55 66 77 88 	movabs %rax,0x8877665544332211
-[ 	]*[a-f0-9]+:	48 99                	cqto   
-[ 	]*[a-f0-9]+:	48 98                	cltq   
+[ 	]*[a-f0-9]+:	48 99                	cqto
+[ 	]*[a-f0-9]+:	48 98                	cltq
 [ 	]*[a-f0-9]+:	48 63 c0             	movslq %eax,%rax
 [ 	]*[a-f0-9]+:	48 0f bf c0          	movswq %ax,%rax
 [ 	]*[a-f0-9]+:	48 0f be c0          	movsbq %al,%rax

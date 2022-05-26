@@ -9,9 +9,9 @@
 Disassembly of section \.text:
 
 0+ <\.text>:
-[ 	]*[a-f0-9]+:[ 	]*c4 e2 d2 5c[ 	]*\(bad\)[ 	]*
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 d2 5c[ 	]*\(bad\)
 [ 	]*[a-f0-9]+:[ 	]*dc 90 90 90 90 90[ 	]*fcoml.*
-[ 	]*[a-f0-9]+:[ 	]*c4 e2 56 5c[ 	]*\(bad\)[ 	]*
+[ 	]*[a-f0-9]+:[ 	]*c4 e2 56 5c[ 	]*\(bad\)
 [ 	]*[a-f0-9]+:[ 	]*dc 90 90 90 90 90[ 	]*fcoml.*
 [ 	]*[a-f0-9]+:[ 	]*c4 62 52 5c dc[ 	]*tdpbf16ps %tmm5,%tmm4,\(bad\)
 [ 	]*[a-f0-9]+:[ 	]*c4 c2 52 5c dc[ 	]*tdpbf16ps %tmm5,\(bad\),%tmm3

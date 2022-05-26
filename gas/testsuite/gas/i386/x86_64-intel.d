@@ -100,18 +100,18 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	a3 11 22 33 44 55 66 77 88 	movabs ds:0x8877665544332211,eax
 [ 	]*[a-f0-9]+:	48 a1 11 22 33 44 55 66 77 88 	movabs rax,ds:0x8877665544332211
 [ 	]*[a-f0-9]+:	48 a3 11 22 33 44 55 66 77 88 	movabs ds:0x8877665544332211,rax
-[ 	]*[a-f0-9]+:	48 99                	cqo    
-[ 	]*[a-f0-9]+:	48 98                	cdqe   
+[ 	]*[a-f0-9]+:	48 99                	cqo
+[ 	]*[a-f0-9]+:	48 98                	cdqe
 [ 	]*[a-f0-9]+:	48 63 c0             	movsxd rax,eax
 [ 	]*[a-f0-9]+:	48 0f bf c0          	movsx  rax,ax
 [ 	]*[a-f0-9]+:	48 0f be c0          	movsx  rax,al
-[ 	]*[a-f0-9]+:	cb                   	retf *
+[ 	]*[a-f0-9]+:	cb                   	retf
 [ 	]*[a-f0-9]+:	ca 10 00             	retf   0x10
-[ 	]*[a-f0-9]+:	66 cb                	retfw *
+[ 	]*[a-f0-9]+:	66 cb                	retfw
 [ 	]*[a-f0-9]+:	66 ca 02 00          	retfw  0x2
-[ 	]*[a-f0-9]+:	cb                   	retf *
+[ 	]*[a-f0-9]+:	cb                   	retf
 [ 	]*[a-f0-9]+:	ca 04 00             	retf   0x4
-[ 	]*[a-f0-9]+:	48 cb                	retfq *
+[ 	]*[a-f0-9]+:	48 cb                	retfq
 [ 	]*[a-f0-9]+:	48 ca 08 00          	retfq  0x8
 
 [0-9a-f]+ <bar>:
