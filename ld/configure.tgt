@@ -235,6 +235,11 @@ cris-*-linux-* | crisv32-*-linux-*)
 cris-*-* | crisv32-*-*)	targ_emul=criself
 			targ_extra_emuls="crisaout crislinux"
 			targ_extra_libpath=$targ_extra_emuls
+			# The default linker script yields just one segment
+			# as intended, and then a warning is not helpful.
+			if test "${ac_default_ld_warn_rwx_segments}" = unset; then
+			  ac_default_ld_warn_rwx_segments=0
+			fi
 			;;
 crx-*-elf*)		targ_emul=elf32crx
 			;;
