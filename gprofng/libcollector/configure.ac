@@ -38,7 +38,7 @@ AC_ENABLE_SHARED
 AC_DISABLE_STATIC
 
 if test "$enable_shared" != "yes"; then
-  AC_MSG_ERROR([Cannot set --enable-shared for gprofng/libcollector.])
+  AC_MSG_WARN([Cannot set --enable-shared for gprofng/libcollector. Profiling will be unavailable.])
 fi
 
 GPROFNG_VARIANT=unknown

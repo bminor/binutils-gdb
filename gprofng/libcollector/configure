@@ -15471,7 +15471,8 @@ fi
 
 
 if test "$enable_shared" != "yes"; then
-  as_fn_error $? "Cannot set --enable-shared for gprofng/libcollector." "$LINENO" 5
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Cannot set --enable-shared for gprofng/libcollector. Profiling will be unavailable." >&5
+$as_echo "$as_me: WARNING: Cannot set --enable-shared for gprofng/libcollector. Profiling will be unavailable." >&2;}
 fi
 
 GPROFNG_VARIANT=unknown
