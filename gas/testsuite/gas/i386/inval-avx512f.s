@@ -324,4 +324,15 @@ _start:
 	vaddss {sae}, %xmm0, %xmm0, %xmm0
 	vcmpps $0, {rn-sae}, %zmm0, %zmm0, %k0
 
+	.intel_syntax noprefix
+	vaddps zmm2, zmm1, WORD BCST [eax]
+	vaddps zmm2, zmm1, DWORD BCST [eax]
+	vaddps zmm2, zmm1, QWORD BCST [eax]
+	vaddps zmm2, zmm1, ZMMWORD BCST [eax]
+
+	vaddpd zmm2, zmm1, WORD BCST [eax]
+	vaddpd zmm2, zmm1, DWORD BCST [eax]
+	vaddpd zmm2, zmm1, QWORD BCST [eax]
+	vaddpd zmm2, zmm1, ZMMWORD BCST [eax]
+
 	.p2align 4

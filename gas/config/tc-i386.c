@@ -2206,6 +2206,7 @@ match_mem_size (const insn_template *t, unsigned int wanted,
   return (match_operand_size (t, wanted, given)
 	  && !((i.types[given].bitfield.unspecified
 		&& !i.broadcast.type
+		&& !i.broadcast.bytes
 		&& !t->operand_types[wanted].bitfield.unspecified)
 	       || (i.types[given].bitfield.fword
 		   && !t->operand_types[wanted].bitfield.fword)
@@ -3798,6 +3799,78 @@ is_any_vex_encoding (const insn_template *t)
   return t->opcode_modifier.vex || is_evex_encoding (t);
 }
 
+static unsigned int
+get_broadcast_bytes (const insn_template *t, bool diag)
+{
+  unsigned int op, bytes;
+  const i386_operand_type *types;
+
+  if (i.broadcast.type)
+    return i.broadcast.bytes = ((1 << (t->opcode_modifier.broadcast - 1))
+				* i.broadcast.type);
+
+  gas_assert (intel_syntax);
+
+  for (op = 0; op < t->operands; ++op)
+    if (t->operand_types[op].bitfield.baseindex)
+      break;
+
+  gas_assert (op < t->operands);
+
+  if (t->opcode_modifier.evex
+      && t->opcode_modifier.evex != EVEXDYN)
+    switch (i.broadcast.bytes)
+      {
+      case 1:
+	if (t->operand_types[op].bitfield.word)
+	  return 2;
+      /* Fall through.  */
+      case 2:
+	if (t->operand_types[op].bitfield.dword)
+	  return 4;
+      /* Fall through.  */
+      case 4:
+	if (t->operand_types[op].bitfield.qword)
+	  return 8;
+      /* Fall through.  */
+      case 8:
+	if (t->operand_types[op].bitfield.xmmword)
+	  return 16;
+	if (t->operand_types[op].bitfield.ymmword)
+	  return 32;
+	if (t->operand_types[op].bitfield.zmmword)
+	  return 64;
+      /* Fall through.  */
+      default:
+        abort ();
+      }
+
+  gas_assert (op + 1 < t->operands);
+
+  if (t->operand_types[op + 1].bitfield.xmmword
+      + t->operand_types[op + 1].bitfield.ymmword
+      + t->operand_types[op + 1].bitfield.zmmword > 1)
+    {
+      types = &i.types[op + 1];
+      diag = false;
+    }
+  else /* Ambiguous - guess with a preference to non-AVX512VL forms.  */
+    types = &t->operand_types[op];
+
+  if (types->bitfield.zmmword)
+    bytes = 64;
+  else if (types->bitfield.ymmword)
+    bytes = 32;
+  else
+    bytes = 16;
+
+  if (diag)
+    as_warn (_("ambiguous broadcast for `%s', using %u-bit form"),
+	     t->name, bytes * 8);
+
+  return bytes;
+}
+
 /* Build the EVEX prefix.  */
 
 static void
@@ -3918,9 +3991,9 @@ build_evex_prefix (void)
 		    i.tm.opcode_modifier.evex = EVEX128;
 		    break;
 		  }
-		else if (i.broadcast.type && op == i.broadcast.operand)
+		else if (i.broadcast.bytes && op == i.broadcast.operand)
 		  {
-		    switch (i.broadcast.bytes)
+		    switch (get_broadcast_bytes (&i.tm, true))
 		      {
 			case 64:
 			  i.tm.opcode_modifier.evex = EVEX512;
@@ -3962,7 +4035,7 @@ build_evex_prefix (void)
 	}
       i.vex.bytes[3] |= vec_length;
       /* Encode the broadcast bit.  */
-      if (i.broadcast.type)
+      if (i.broadcast.bytes)
 	i.vex.bytes[3] |= 0x10;
     }
   else if (i.rounding.type != saeonly)
@@ -4433,7 +4506,7 @@ optimize_encoding (void)
 	   && !i.types[0].bitfield.zmmword
 	   && !i.types[1].bitfield.zmmword
 	   && !i.mask.reg
-	   && !i.broadcast.type
+	   && !i.broadcast.bytes
 	   && is_evex_encoding (&i.tm)
 	   && ((i.tm.base_opcode & ~Opcode_SIMD_IntD) == 0x6f
 	       || (i.tm.base_opcode & ~4) == 0xdb
@@ -5691,7 +5764,7 @@ swap_2_operands (unsigned int xchg1, unsigned int xchg2)
       else if (i.mask.operand == xchg2)
 	i.mask.operand = xchg1;
     }
-  if (i.broadcast.type)
+  if (i.broadcast.type || i.broadcast.bytes)
     {
       if (i.broadcast.operand == xchg1)
 	i.broadcast.operand = xchg2;
@@ -6132,7 +6205,7 @@ check_VecOperands (const insn_template *t)
 
   /* Check if broadcast is supported by the instruction and is applied
      to the memory operand.  */
-  if (i.broadcast.type)
+  if (i.broadcast.type || i.broadcast.bytes)
     {
       i386_operand_type type, overlap;
 
@@ -6149,10 +6222,11 @@ check_VecOperands (const insn_template *t)
 	  return 1;
 	}
 
-      i.broadcast.bytes = ((1 << (t->opcode_modifier.broadcast - 1))
-			   * i.broadcast.type);
+      if (i.broadcast.type)
+	i.broadcast.bytes = ((1 << (t->opcode_modifier.broadcast - 1))
+			     * i.broadcast.type);
       operand_type_set (&type, 0);
-      switch (i.broadcast.bytes)
+      switch (get_broadcast_bytes (t, false))
 	{
 	case 2:
 	  type.bitfield.word = 1;
@@ -6311,7 +6385,7 @@ check_VecOperands (const insn_template *t)
   if (t->opcode_modifier.disp8memshift
       && i.disp_encoding <= disp_encoding_8bit)
     {
-      if (i.broadcast.type)
+      if (i.broadcast.bytes)
 	i.memshift = t->opcode_modifier.broadcast - 1;
       else if (t->opcode_modifier.disp8memshift != DISP8_SHIFT_VL)
 	i.memshift = t->opcode_modifier.disp8memshift;
@@ -6657,7 +6731,7 @@ match_template (char mnem_suffix)
       if (t->opcode_modifier.checkregsize)
 	{
 	  check_register = (1 << t->operands) - 1;
-	  if (i.broadcast.type)
+	  if (i.broadcast.type || i.broadcast.bytes)
 	    check_register &= ~(1 << i.broadcast.operand);
 	}
       else
@@ -7227,7 +7301,8 @@ process_suffix (void)
       /* For [XYZ]MMWORD operands inspect operand sizes.  While generally
 	 also suitable for AT&T syntax mode, it was requested that this be
 	 restricted to just Intel syntax.  */
-      if (intel_syntax && is_any_vex_encoding (&i.tm) && !i.broadcast.type)
+      if (intel_syntax && is_any_vex_encoding (&i.tm)
+	  && !i.broadcast.type && !i.broadcast.bytes)
 	{
 	  unsigned int op;
 

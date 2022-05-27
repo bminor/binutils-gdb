@@ -200,6 +200,23 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
 	  return i386_types[j].op;
 	}
 
+      if (strcasecmp (pname, "bcst") == 0)
+	{
+	  /* FIXME: Again, what if c == '"' ?  */
+	  pname[-1] = *pc;
+	  *pc = c;
+	  if (intel_syntax > 0 || operands != 1
+	      || i386_types[j].sz[0] > 8
+	      || (i386_types[j].sz[0] & (i386_types[j].sz[0] - 1)))
+	    return O_illegal;
+	  if (!i.broadcast.bytes && !i.broadcast.type)
+	    {
+	      i.broadcast.bytes = i386_types[j].sz[0];
+	      i.broadcast.operand = this_operand;
+	    }
+	  return i386_types[j].op;
+	}
+
       (void) restore_line_pointer (c);
       input_line_pointer = pname - 1;
     }

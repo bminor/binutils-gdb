@@ -222,6 +222,12 @@
 .*:322: Error: .*vcmpss.*
 .*:324: Error: .*vaddss.*
 .*:325: Error: .*vcmpps.*
+.*:328: Error: .*vaddps.*
+.*:330: Error: .*vaddps.*
+.*:331: Error: .*
+.*:333: Error: .*vaddpd.*
+.*:334: Error: .*vaddpd.*
+.*:336: Error: .*
 GAS LISTING .*
 
 
@@ -581,4 +587,17 @@ GAS LISTING .*
 #...
 [ 	]*324[ 	]+vaddss \{sae\}, %xmm0, %xmm0, %xmm0
 [ 	]*325[ 	]+vcmpps \$0, \{rn-sae\}, %zmm0, %zmm0, %k0
+[ 	]*326[ 	]*
+[ 	]*327[ 	]+\.intel_syntax noprefix
+[ 	]*328[ 	]+vaddps zmm2, zmm1, WORD BCST \[eax\]
+[ 	]*329 \?\?\?\? 62F17458[ 	]+vaddps zmm2, zmm1, DWORD BCST \[eax\]
+[ 	]*329[ 	]+5810
+[ 	]*330[ 	]+vaddps zmm2, zmm1, QWORD BCST \[eax\]
+[ 	]*331[ 	].*vaddps zmm2, zmm1, ZMMWORD BCST \[eax\]
+#...
+[ 	]*333[ 	]+vaddpd zmm2, zmm1, WORD BCST \[eax\]
+[ 	]*334[ 	]+vaddpd zmm2, zmm1, DWORD BCST \[eax\]
+[ 	]*335 \?\?\?\? 62F1F558[ 	]+vaddpd zmm2, zmm1, QWORD BCST \[eax\]
+[ 	]*335[ 	]+5810
+[ 	]*336[ 	].*vaddpd zmm2, zmm1, ZMMWORD BCST \[eax\]
 #pass
