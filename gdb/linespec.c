@@ -2015,7 +2015,7 @@ canonicalize_linespec (struct linespec_state *state, const linespec *ls)
   /* If this location originally came from a linespec, save a string
      representation of it for display and saving to file.  */
   if (state->is_linespec)
-    set_location_spec_string (explicit_loc, explicit_loc->to_linespec ());
+    explicit_loc->set_string (explicit_loc->to_linespec ());
 }
 
 /* Given a line offset in LS, construct the relevant SALs.  */

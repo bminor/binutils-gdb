@@ -91,11 +91,17 @@ struct location_spec
      The result is cached in the locspec.  */
   const char *to_string () const
   {
-    if (as_string.empty ())
-      as_string = compute_string ();
-    if (as_string.empty ())
+    if (m_as_string.empty ())
+      m_as_string = compute_string ();
+    if (m_as_string.empty ())
       return nullptr;
-    return as_string.c_str ();
+    return m_as_string.c_str ();
+  }
+
+  /* Set this location spec's string representation.  */
+  void set_string (std::string &&string)
+  {
+    m_as_string = std::move (string);
   }
 
   /* Return this location spec's type.  */
@@ -103,10 +109,6 @@ struct location_spec
   {
     return m_type;
   }
-
-  /* Cached string representation of this location spec.  This is
-     used, e.g., to save location specs to file.  */
-  mutable std::string as_string;
 
 protected:
 
@@ -116,13 +118,13 @@ protected:
   }
 
   location_spec (enum location_spec_type t, std::string &&str)
-    : as_string (std::move (str)),
+    : m_as_string (std::move (str)),
       m_type (t)
   {
   }
 
   location_spec (const location_spec &other)
-    : as_string (other.as_string),
+    : m_as_string (other.m_as_string),
       m_type (other.m_type)
   {
   }
@@ -130,6 +132,10 @@ protected:
   /* Compute the string representation of this object.  This is called
      by to_string when needed.  */
   virtual std::string compute_string () const = 0;
+
+  /* Cached string representation of this location spec.  This is
+     used, e.g., to save location specs to file.  */
+  mutable std::string m_as_string;
 
 private:
   /* The type of this location specification.  */
@@ -360,10 +366,5 @@ extern location_spec_up
   string_to_explicit_location_spec (const char **argp,
 				    const struct language_defn *language,
 				    explicit_completion_info *completion_info);
-
-/* Set the location specs's string representation.  */
-
-extern void set_location_spec_string (struct location_spec *locspec,
-				      std::string &&string);
 
 #endif /* LOCATION_H */

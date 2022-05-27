@@ -60,7 +60,7 @@ probe_location_spec::empty_p () const
 
 std::string probe_location_spec::compute_string () const
 {
-  return std::move (as_string);
+  return std::move (m_as_string);
 }
 
 /* A "normal" linespec.  */
@@ -131,7 +131,7 @@ address_location_spec::address_location_spec (CORE_ADDR addr,
     address (addr)
 {
   if (addr_string != nullptr)
-    as_string = std::string (addr_string, addr_string_len);
+    m_as_string = std::string (addr_string, addr_string_len);
 }
 
 location_spec_up
@@ -856,13 +856,4 @@ string_to_location_spec (const char **stringp,
   /* Everything else is a "basic" linespec, address, or probe location
      spec.  */
   return string_to_location_spec_basic (stringp, language, match_type);
-}
-
-/* See description in location.h.  */
-
-void
-set_location_spec_string (struct location_spec *locspec,
-			  std::string &&string)
-{
-  locspec->as_string = std::move (string);
 }
