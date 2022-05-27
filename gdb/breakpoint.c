@@ -6007,8 +6007,7 @@ print_breakpoint_location (const breakpoint *b,
     set_current_program_space (loc->pspace);
 
   if (b->display_canonical)
-    uiout->field_string ("what",
-			 location_spec_to_string (b->locspec.get ()));
+    uiout->field_string ("what", b->locspec->to_string ());
   else if (loc && loc->symtab)
     {
       const struct symbol *sym = loc->symbol;
@@ -6042,8 +6041,7 @@ print_breakpoint_location (const breakpoint *b,
     }
   else
     {
-      uiout->field_string ("pending",
-			   location_spec_to_string (b->locspec.get ()));
+      uiout->field_string ("pending", b->locspec->to_string ());
       /* If extra_string is available, it could be holding a condition
 	 or dprintf arguments.  In either case, make sure it is printed,
 	 too, but only for non-MI streams.  */
@@ -6505,7 +6503,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	}
       else if (b->locspec != nullptr)
 	{
-	  const char *str = location_spec_to_string (b->locspec.get ());
+	  const char *str = b->locspec->to_string ();
 	  if (str != nullptr)
 	    uiout->field_string ("original-location", str);
 	}
@@ -8282,7 +8280,7 @@ code_breakpoint::code_breakpoint (struct gdbarch *gdbarch_,
 	{
 	  /* We already know the marker exists, otherwise, we wouldn't
 	     see a sal for it.  */
-	  const char *p = &location_spec_to_string (locspec_.get ())[3];
+	  const char *p = &locspec_->to_string ()[3];
 	  const char *endp;
 
 	  p = skip_spaces (p);
@@ -9244,8 +9242,8 @@ void
 ranged_breakpoint::print_recreate (struct ui_file *fp) const
 {
   gdb_printf (fp, "break-range %s, %s",
-	      location_spec_to_string (locspec.get ()),
-	      location_spec_to_string (locspec_range_end.get ()));
+	      locspec->to_string (),
+	      locspec_range_end->to_string ());
   print_recreate_thread (fp);
 }
 
@@ -11353,19 +11351,18 @@ say_where (const breakpoint *b)
 	 a condition or dprintf arguments.  */
       if (b->extra_string == NULL)
 	{
-	  gdb_printf (_(" (%s) pending."),
-		      location_spec_to_string (b->locspec.get ()));
+	  gdb_printf (_(" (%s) pending."), b->locspec->to_string ());
 	}
       else if (b->type == bp_dprintf)
 	{
 	  gdb_printf (_(" (%s,%s) pending."),
-		      location_spec_to_string (b->locspec.get ()),
+		      b->locspec->to_string (),
 		      b->extra_string.get ());
 	}
       else
 	{
 	  gdb_printf (_(" (%s %s) pending."),
-		      location_spec_to_string (b->locspec.get ()),
+		      b->locspec->to_string (),
 		      b->extra_string.get ());
 	}
     }
@@ -11393,8 +11390,7 @@ say_where (const breakpoint *b)
 	    /* This is not ideal, but each location may have a
 	       different file name, and this at least reflects the
 	       real situation somewhat.  */
-	    gdb_printf (": %s.",
-			location_spec_to_string (b->locspec.get ()));
+	    gdb_printf (": %s.", b->locspec->to_string ());
 	}
 
       if (b->loc->next)
@@ -11659,7 +11655,7 @@ ordinary_breakpoint::print_recreate (struct ui_file *fp) const
     internal_error (__FILE__, __LINE__,
 		    _("unhandled breakpoint type %d"), (int) type);
 
-  gdb_printf (fp, " %s", location_spec_to_string (locspec.get ()));
+  gdb_printf (fp, " %s", locspec->to_string ());
 
   /* Print out extra_string if this breakpoint is pending.  It might
      contain, for example, conditions that were set by the user.  */
@@ -11822,8 +11818,7 @@ bkpt_probe_create_sals_from_location_spec (location_spec *locspec,
   struct linespec_sals lsal;
 
   lsal.sals = parse_probes (locspec, NULL, canonical);
-  lsal.canonical
-    = xstrdup (location_spec_to_string (canonical->locspec.get ()));
+  lsal.canonical = xstrdup (canonical->locspec->to_string ());
   canonical->lsals.push_back (std::move (lsal));
 }
 
@@ -11906,7 +11901,7 @@ tracepoint::print_recreate (struct ui_file *fp) const
     internal_error (__FILE__, __LINE__,
 		    _("unhandled tracepoint type %d"), (int) type);
 
-  gdb_printf (fp, " %s", location_spec_to_string (locspec.get ()));
+  gdb_printf (fp, " %s", locspec->to_string ());
   print_recreate_thread (fp);
 
   if (pass_count)
@@ -11951,9 +11946,7 @@ dprintf_breakpoint::re_set ()
 void
 dprintf_breakpoint::print_recreate (struct ui_file *fp) const
 {
-  gdb_printf (fp, "dprintf %s,%s",
-	      location_spec_to_string (locspec.get ()),
-	      extra_string.get ());
+  gdb_printf (fp, "dprintf %s,%s", locspec->to_string (), extra_string.get ());
   print_recreate_thread (fp);
 }
 
@@ -12001,8 +11994,7 @@ strace_marker_create_sals_from_location_spec (location_spec *locspec,
   canonical->locspec
     = new_linespec_location_spec (&ptr, symbol_name_match_type::FULL);
 
-  lsal.canonical
-    = xstrdup (location_spec_to_string (canonical->locspec.get ()));
+  lsal.canonical = xstrdup (canonical->locspec->to_string ());
   canonical->lsals.push_back (std::move (lsal));
 }
 

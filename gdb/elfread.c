@@ -1026,8 +1026,7 @@ elf_gnu_ifunc_resolver_return_stop (code_breakpoint *b)
   resolved_pc = gdbarch_addr_bits_remove (gdbarch, resolved_pc);
 
   gdb_assert (current_program_space == b->pspace || b->pspace == NULL);
-  const char *locspec_str = location_spec_to_string (b->locspec.get ());
-  elf_gnu_ifunc_record_cache (locspec_str, resolved_pc);
+  elf_gnu_ifunc_record_cache (b->locspec->to_string (), resolved_pc);
 
   b->type = bp_breakpoint;
   update_breakpoint_locations (b, current_program_space,

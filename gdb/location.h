@@ -83,7 +83,12 @@ struct location_spec
   /* Return true if this location spec is empty, false otherwise.  */
   virtual bool empty_p () const = 0;
 
-  /* Return a string representation of this location.  */
+  /* Return a string representation of this location.
+
+     This function may return NULL for unspecified linespecs, e.g,
+     LINESPEC_LOCATION_SPEC and spec_string is NULL.
+
+     The result is cached in the locspec.  */
   const char *to_string () const
   {
     if (as_string.empty ())
@@ -232,15 +237,6 @@ protected:
 
   std::string compute_string () const override;
 };
-
-/* Return a string representation of LOCSPEC.
-   This function may return NULL for unspecified linespecs,
-   e.g, LINESPEC_LOCATION_SPEC and spec_string is NULL.
-
-   The result is cached in LOCSPEC.  */
-
-extern const char *
-  location_spec_to_string (location_spec *locspec);
 
 /* Create a new linespec location spec.  */
 

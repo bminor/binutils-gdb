@@ -345,14 +345,6 @@ explicit_location_spec::to_linespec () const
   return explicit_to_string_internal (true, this);
 }
 
-/* See description in location.h.  */
-
-const char *
-location_spec_to_string (struct location_spec *locspec)
-{
-  return locspec->to_string ();
-}
-
 /* Find an instance of the quote character C in the string S that is
    outside of all single- and double-quoted strings (i.e., any quoting
    other than C).  */

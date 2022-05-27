@@ -3149,7 +3149,7 @@ decode_line_full (struct location_spec *locspec, int flags,
 
   if (result.size () == 0)
     throw_error (NOT_SUPPORTED_ERROR, _("Location %s not available"),
-		 location_spec_to_string (locspec));
+		 locspec->to_string ());
 
   gdb_assert (result.size () == 1 || canonical->pre_expanded);
   canonical->pre_expanded = 1;

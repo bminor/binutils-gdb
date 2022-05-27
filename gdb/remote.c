@@ -13375,7 +13375,7 @@ remote_target::download_tracepoint (struct bp_location *loc)
 	  if (ret < 0 || ret >= buf.size ())
 	    error ("%s", err_msg);
 
-	  const char *str = location_spec_to_string (b->locspec.get ());
+	  const char *str = b->locspec->to_string ();
 	  encode_source_string (b->number, loc->address, "at", str,
 				buf.data () + strlen (buf.data ()),
 				buf.size () - strlen (buf.data ()));

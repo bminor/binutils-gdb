@@ -189,7 +189,7 @@ bpscm_print_breakpoint_smob (SCM self, SCM port, scm_print_state *pstate)
 
       if (b->locspec != nullptr)
 	{
-	  const char *str = location_spec_to_string (b->locspec.get ());
+	  const char *str = b->locspec->to_string ();
 	  if (str != nullptr)
 	    gdbscm_printf (port, " @%s", str);
 	}
@@ -859,8 +859,7 @@ gdbscm_breakpoint_location (SCM self)
   if (bp_smob->bp->type != bp_breakpoint)
     return SCM_BOOL_F;
 
-  const char *str
-    = location_spec_to_string (bp_smob->bp->locspec.get ());
+  const char *str = bp_smob->bp->locspec->to_string ();
   if (str == nullptr)
     str = "";
 

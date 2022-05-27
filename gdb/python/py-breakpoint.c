@@ -412,7 +412,7 @@ bppy_get_location (PyObject *self, void *closure)
       && obj->bp->type != bp_hardware_breakpoint)
     Py_RETURN_NONE;
 
-  const char *str = location_spec_to_string (obj->bp->locspec.get ());
+  const char *str = obj->bp->locspec->to_string ();
   if (str == nullptr)
     str = "";
   return host_string_to_python_string (str).release ();
