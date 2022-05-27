@@ -187,6 +187,7 @@ proc target_defaults_to_execstack {} {
 	|| [istarget "loongarch*-*-*"]
 	|| [istarget "nios2*-*-*"]
 	|| [istarget "powerpc64*-*-*"]
+	|| [istarget "pru*-*-*"]
 	|| [istarget "riscv*-*-*"]
 	|| [istarget "tilegx*-*-*"]
 	|| [istarget "tilepro*-*-*"] } {
