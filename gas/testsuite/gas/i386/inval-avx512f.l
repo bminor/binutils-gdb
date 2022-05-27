@@ -238,6 +238,12 @@
 .*:350: Error: .*vcvtsi2ss.*
 .*:352: Error: .*vcvtsi2ss.*
 .*:353: Error: .*vcvtsi2ss.*
+.*:356: Error: .*vaddps.*
+.*:357: Error: .*vaddps.*
+.*:360: Error: .*vcmpps.*
+.*:361: Error: .*vcmpps.*
+.*:365: Error: .*vcvtsi2ss.*
+.*:366: Error: .*vcvtsi2ss.*
 GAS LISTING .*
 
 
@@ -629,4 +635,23 @@ GAS LISTING .*
 [ 	]*351[ 	]+2AC0
 [ 	]*352[ 	]+vcvtsi2ss %eax, %xmm0, \{rn-sae\}, %xmm0
 [ 	]*353[ 	]+vcvtsi2ss %eax, %xmm0, %xmm0, \{rn-sae\}
+#...
+[ 	]*356[ 	]+vaddps zmm0\{rn-sae\}, zmm0, zmm0
+[ 	]*357[ 	]+vaddps zmm0, zmm0\{rn-sae\}, zmm0
+[ 	]*358[ 	].*vaddps zmm0, zmm0, zmm0\{rn-sae\}
+[ 	]*358[ 	]+58C0
+[ 	]*359[ 	]*
+[ 	]*360[ 	]+vcmpps k0\{sae\}, zmm0, zmm0, 0
+[ 	]*361[ 	]+vcmpps k0, zmm0\{sae\}, zmm0, 0
+[ 	]*362[ 	].*vcmpps k0, zmm0, zmm0\{sae\}, 0
+[ 	]*362[ 	]+C2C000
+[ 	]*363[ 	].*vcmpps k0, zmm0, zmm0, 0\{sae\}
+[ 	]*363[ 	]+C2C000
+[ 	]*364[ 	]*
+[ 	]*365[ 	]+vcvtsi2ss xmm0\{rn-sae\}, xmm0, eax
+[ 	]*366[ 	]+vcvtsi2ss xmm0, xmm0\{rn-sae\}, eax
+GAS LISTING .*
+#...
+[ 	]*367[ 	].*vcvtsi2ss xmm0, xmm0, eax\{rn-sae\}
+[ 	]*367[ 	]+2AC0
 #pass

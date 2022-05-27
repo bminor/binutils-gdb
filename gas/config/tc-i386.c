@@ -371,6 +371,9 @@ struct _i386_insn
 	  rz,
 	  saeonly
 	} type;
+      /* In Intel syntax the operand modifier form is supposed to be used, but
+	 we continue to accept the immediate forms as well.  */
+      bool modifier;
     } rounding;
 
     /* Broadcasting attributes.
@@ -10624,6 +10627,32 @@ pe_directive_secidx (int dummy ATTRIBUTE_UNUSED)
 }
 #endif
 
+/* Handle Rounding Control / SAE specifiers.  */
+
+static char *
+RC_SAE_specifier (const char *pstr)
+{
+  unsigned int j;
+
+  for (j = 0; j < ARRAY_SIZE (RC_NamesTable); j++)
+    {
+      if (!strncmp (pstr, RC_NamesTable[j].name, RC_NamesTable[j].len))
+	{
+	  if (i.rounding.type != rc_none)
+	    {
+	      as_bad (_("duplicated `{%s}'"), RC_NamesTable[j].name);
+	      return NULL;
+	    }
+
+	  i.rounding.type = RC_NamesTable[j].type;
+
+	  return (char *)(pstr + RC_NamesTable[j].len);
+	}
+    }
+
+  return NULL;
+}
+
 /* Handle Vector operations.  */
 
 static char *
@@ -10745,6 +10774,9 @@ check_VecOperations (char *op_string)
 
 	      op_string++;
 	    }
+	  else if (intel_syntax
+		   && (op_string = RC_SAE_specifier (op_string)) != NULL)
+	    i.rounding.modifier = true;
 	  else
 	    goto unknown_vec_op;
 
@@ -11406,32 +11438,13 @@ i386_index_check (const char *operand_string)
 static int
 RC_SAE_immediate (const char *imm_start)
 {
-  unsigned int match_found, j;
   const char *pstr = imm_start;
 
   if (*pstr != '{')
     return 0;
 
-  pstr++;
-  match_found = 0;
-  for (j = 0; j < ARRAY_SIZE (RC_NamesTable); j++)
-    {
-      if (!strncmp (pstr, RC_NamesTable[j].name, RC_NamesTable[j].len))
-	{
-	  if (i.rounding.type != rc_none)
-	    {
-	      as_bad (_("duplicated `%s'"), imm_start);
-	      return 0;
-	    }
-
-	  i.rounding.type = RC_NamesTable[j].type;
-
-	  pstr += RC_NamesTable[j].len;
-	  match_found = 1;
-	  break;
-	}
-    }
-  if (!match_found)
+  pstr = RC_SAE_specifier (pstr + 1);
+  if (pstr == NULL)
     return 0;
 
   if (*pstr++ != '}')

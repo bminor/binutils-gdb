@@ -600,6 +600,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
   segT exp_seg;
   expressionS exp, *expP;
   char suffix = 0;
+  bool rc_sae_modifier = i.rounding.type != rc_none && i.rounding.modifier;
   int ret;
 
   /* Handle vector immediates.  */
@@ -898,7 +899,9 @@ i386_intel_operand (char *operand_string, int got_a_float)
       i.types[this_operand].bitfield.unspecified = 0;
       ++i.reg_operands;
 
-      if (i.rounding.type != rc_none && temp.bitfield.class != Reg)
+      if ((i.rounding.type != rc_none && !i.rounding.modifier
+	   && temp.bitfield.class != Reg)
+	  || rc_sae_modifier)
 	{
 	  unsigned int j;
 

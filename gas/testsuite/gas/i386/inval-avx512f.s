@@ -352,4 +352,18 @@ _start:
 	vcvtsi2ss %eax, %xmm0, {rn-sae}, %xmm0
 	vcvtsi2ss %eax, %xmm0, %xmm0, {rn-sae}
 
+	.intel_syntax noprefix
+	vaddps zmm0{rn-sae}, zmm0, zmm0
+	vaddps zmm0, zmm0{rn-sae}, zmm0
+	vaddps zmm0, zmm0, zmm0{rn-sae}
+
+	vcmpps k0{sae}, zmm0, zmm0, 0
+	vcmpps k0, zmm0{sae}, zmm0, 0
+	vcmpps k0, zmm0, zmm0{sae}, 0
+	vcmpps k0, zmm0, zmm0, 0{sae}
+
+	vcvtsi2ss xmm0{rn-sae}, xmm0, eax
+	vcvtsi2ss xmm0, xmm0{rn-sae}, eax
+	vcvtsi2ss xmm0, xmm0, eax{rn-sae}
+
 	.p2align 4
