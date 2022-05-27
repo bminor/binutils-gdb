@@ -3062,7 +3062,7 @@ location_spec_to_sals (linespec_parser *parser,
 {
   std::vector<symtab_and_line> result;
 
-  switch (location_spec_type (locspec))
+  switch (locspec->type ())
     {
     case LINESPEC_LOCATION_SPEC:
       {

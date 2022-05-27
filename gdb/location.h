@@ -93,8 +93,11 @@ struct location_spec
     return as_string.c_str ();
   }
 
-  /* The type of this location specification.  */
-  enum location_spec_type type;
+  /* Return this location spec's type.  */
+  enum location_spec_type type () const
+  {
+    return m_type;
+  }
 
   /* Cached string representation of this location spec.  This is
      used, e.g., to save location specs to file.  */
@@ -103,25 +106,29 @@ struct location_spec
 protected:
 
   explicit location_spec (enum location_spec_type t)
-    : type (t)
+    : m_type (t)
   {
   }
 
   location_spec (enum location_spec_type t, std::string &&str)
-    : type (t),
-      as_string (std::move (str))
+    : as_string (std::move (str)),
+      m_type (t)
   {
   }
 
   location_spec (const location_spec &other)
-    : type (other.type),
-      as_string (other.as_string)
+    : as_string (other.as_string),
+      m_type (other.m_type)
   {
   }
 
   /* Compute the string representation of this object.  This is called
      by to_string when needed.  */
   virtual std::string compute_string () const = 0;
+
+private:
+  /* The type of this location specification.  */
+  enum location_spec_type m_type;
 };
 
 /* A "normal" linespec.  */
@@ -225,11 +232,6 @@ protected:
 
   std::string compute_string () const override;
 };
-
-/* Return the type of the given location spec.  */
-
-extern enum location_spec_type
-  location_spec_type (const location_spec *);
 
 /* Return a string representation of LOCSPEC.
    This function may return NULL for unspecified linespecs,

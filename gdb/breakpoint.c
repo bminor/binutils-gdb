@@ -8453,7 +8453,7 @@ parse_breakpoint_sals (location_spec *locspec,
 {
   struct symtab_and_line cursal;
 
-  if (location_spec_type (locspec) == LINESPEC_LOCATION_SPEC)
+  if (locspec->type () == LINESPEC_LOCATION_SPEC)
     {
       const char *spec = as_linespec_location_spec (locspec)->spec_string;
 
@@ -8505,7 +8505,7 @@ parse_breakpoint_sals (location_spec *locspec,
     {
       const char *spec = NULL;
 
-      if (location_spec_type (locspec) == LINESPEC_LOCATION_SPEC)
+      if (locspec->type () == LINESPEC_LOCATION_SPEC)
 	spec = as_linespec_location_spec (locspec)->spec_string;
 
       if (!cursal.symtab
@@ -8768,7 +8768,7 @@ breakpoint_ops_for_location_spec (const location_spec *locspec,
 {
   if (locspec != nullptr)
     return (breakpoint_ops_for_location_spec_type
-	    (location_spec_type (locspec), is_tracepoint));
+	    (locspec->type (), is_tracepoint));
   return &code_breakpoint_ops;
 }
 
@@ -11673,7 +11673,7 @@ std::vector<symtab_and_line>
 code_breakpoint::decode_location_spec (location_spec *locspec,
 				       program_space *search_pspace)
 {
-  if (location_spec_type (locspec) == PROBE_LOCATION_SPEC)
+  if (locspec->type () == PROBE_LOCATION_SPEC)
     return bkpt_probe_decode_location_spec (this, locspec, search_pspace);
 
   return decode_location_spec_default (this, locspec, search_pspace);

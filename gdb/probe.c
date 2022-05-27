@@ -122,7 +122,7 @@ parse_probes (const location_spec *locspec,
   char *objfile_namestr = NULL, *provider = NULL, *name, *p;
   const char *arg_start, *cs;
 
-  gdb_assert (location_spec_type (locspec) == PROBE_LOCATION_SPEC);
+  gdb_assert (locspec->type () == PROBE_LOCATION_SPEC);
   arg_start = locspec->to_string ();
 
   cs = arg_start;

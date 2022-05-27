@@ -206,14 +206,6 @@ explicit_location_spec::compute_string () const
 
 /* See description in location.h.  */
 
-enum location_spec_type
-location_spec_type (const location_spec *locspec)
-{
-  return locspec->type;
-}
-
-/* See description in location.h.  */
-
 location_spec_up
 new_linespec_location_spec (const char **linespec,
 			    symbol_name_match_type match_type)
@@ -227,7 +219,7 @@ new_linespec_location_spec (const char **linespec,
 const linespec_location_spec *
 as_linespec_location_spec (const location_spec *locspec)
 {
-  gdb_assert (locspec->type == LINESPEC_LOCATION_SPEC);
+  gdb_assert (locspec->type () == LINESPEC_LOCATION_SPEC);
   return static_cast<const linespec_location_spec *> (locspec);
 }
 
@@ -246,7 +238,7 @@ new_address_location_spec (CORE_ADDR addr, const char *addr_string,
 const address_location_spec *
 as_address_location_spec (const location_spec *locspec)
 {
-  gdb_assert (locspec->type == ADDRESS_LOCATION_SPEC);
+  gdb_assert (locspec->type () == ADDRESS_LOCATION_SPEC);
   return static_cast<const address_location_spec *> (locspec);
 }
 
@@ -263,7 +255,7 @@ new_probe_location_spec (std::string &&probe)
 const probe_location_spec *
 as_probe_location_spec (const location_spec *locspec)
 {
-  gdb_assert (locspec->type == PROBE_LOCATION_SPEC);
+  gdb_assert (locspec->type () == PROBE_LOCATION_SPEC);
   return static_cast<const probe_location_spec *> (locspec);
 }
 
@@ -272,7 +264,7 @@ as_probe_location_spec (const location_spec *locspec)
 const explicit_location_spec *
 as_explicit_location_spec (const location_spec *locspec)
 {
-  gdb_assert (locspec->type == EXPLICIT_LOCATION_SPEC);
+  gdb_assert (locspec->type () == EXPLICIT_LOCATION_SPEC);
   return static_cast<const explicit_location_spec *> (locspec);
 }
 
@@ -281,7 +273,7 @@ as_explicit_location_spec (const location_spec *locspec)
 explicit_location_spec *
 as_explicit_location_spec (location_spec *locspec)
 {
-  gdb_assert (locspec->type == EXPLICIT_LOCATION_SPEC);
+  gdb_assert (locspec->type () == EXPLICIT_LOCATION_SPEC);
   return static_cast<explicit_location_spec *> (locspec);
 }
 
