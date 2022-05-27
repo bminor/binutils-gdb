@@ -225,12 +225,9 @@ exception_catchpoint::re_set ()
 	 catchpoint mode.  */
       try
 	{
-	  struct explicit_location explicit_loc;
-
-	  initialize_explicit_location (&explicit_loc);
-	  explicit_loc.function_name
-	    = ASTRDUP (exception_functions[kind].function);
-	  location_spec_up locspec = new_explicit_location_spec (&explicit_loc);
+	  location_spec_up locspec
+	    = (new_explicit_location_spec_function
+	       (exception_functions[kind].function));
 	  sals = this->decode_location_spec (locspec.get (), filter_pspace);
 	}
       catch (const gdb_exception_error &ex)

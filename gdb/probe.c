@@ -123,7 +123,7 @@ parse_probes (const location_spec *locspec,
   const char *arg_start, *cs;
 
   gdb_assert (location_spec_type (locspec) == PROBE_LOCATION_SPEC);
-  arg_start = get_probe_location_spec_string (locspec);
+  arg_start = locspec->to_string ();
 
   cs = arg_start;
   const static_probe_ops *spops = probe_linespec_to_static_ops (&cs);

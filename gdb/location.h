@@ -46,8 +46,8 @@ enum offset_relative_sign
 struct line_offset
 {
   /* Line offset and any specified sign.  */
-  int offset;
-  enum offset_relative_sign sign;
+  int offset = 0;
+  enum offset_relative_sign sign = LINE_OFFSET_UNKNOWN;
 };
 
 /* An enumeration of the various ways to specify a location spec.  */
@@ -67,15 +67,104 @@ enum location_spec_type
   PROBE_LOCATION_SPEC
 };
 
-/* A traditional linespec.  */
+/* A unique pointer for location_spec.  */
+typedef std::unique_ptr<location_spec> location_spec_up;
 
-struct linespec_location
+/* The base class for all location specs used to resolve actual
+   locations in the inferior.  */
+
+struct location_spec
 {
+  virtual ~location_spec () = default;
+
+  /* Clone this object.  */
+  virtual location_spec_up clone () const = 0;
+
+  /* Return true if this location spec is empty, false otherwise.  */
+  virtual bool empty_p () const = 0;
+
+  /* Return a string representation of this location.  */
+  const char *to_string () const
+  {
+    if (as_string.empty ())
+      as_string = compute_string ();
+    if (as_string.empty ())
+      return nullptr;
+    return as_string.c_str ();
+  }
+
+  /* The type of this location specification.  */
+  enum location_spec_type type;
+
+  /* Cached string representation of this location spec.  This is
+     used, e.g., to save location specs to file.  */
+  mutable std::string as_string;
+
+protected:
+
+  explicit location_spec (enum location_spec_type t)
+    : type (t)
+  {
+  }
+
+  location_spec (enum location_spec_type t, std::string &&str)
+    : type (t),
+      as_string (std::move (str))
+  {
+  }
+
+  location_spec (const location_spec &other)
+    : type (other.type),
+      as_string (other.as_string)
+  {
+  }
+
+  /* Compute the string representation of this object.  This is called
+     by to_string when needed.  */
+  virtual std::string compute_string () const = 0;
+};
+
+/* A "normal" linespec.  */
+
+struct linespec_location_spec : public location_spec
+{
+  linespec_location_spec (const char **linespec,
+			  symbol_name_match_type match_type);
+
+  ~linespec_location_spec ();
+
+  location_spec_up clone () const override;
+
+  bool empty_p () const override;
+
   /* Whether the function name is fully-qualified or not.  */
   symbol_name_match_type match_type;
 
   /* The linespec.  */
-  char *spec_string;
+  char *spec_string = nullptr;
+
+protected:
+  linespec_location_spec (const linespec_location_spec &other);
+
+  std::string compute_string () const override;
+};
+
+/* An address in the inferior.  */
+struct address_location_spec : public location_spec
+{
+  address_location_spec (CORE_ADDR addr, const char *addr_string,
+			 int addr_string_len);
+
+  location_spec_up clone () const override;
+
+  bool empty_p () const override;
+
+  CORE_ADDR address;
+
+protected:
+  address_location_spec (const address_location_spec &other);
+
+  std::string compute_string () const override;
 };
 
 /* An explicit location spec.  This structure is used to bypass the
@@ -83,37 +172,64 @@ struct linespec_location
    as linespecs, though.  For example, source_filename requires
    at least one other field.  */
 
-struct explicit_location
+struct explicit_location_spec : public location_spec
 {
+  explicit_location_spec ();
+
+  ~explicit_location_spec ();
+
+  location_spec_up clone () const override;
+
+  bool empty_p () const override;
+
+  /* Return a linespec string representation of this explicit location
+     spec.  The explicit location spec must already be
+     canonicalized/valid.  */
+  std::string to_linespec () const;
+
   /* The source filename. Malloc'd.  */
-  char *source_filename;
+  char *source_filename = nullptr;
 
   /* The function name.  Malloc'd.  */
-  char *function_name;
+  char *function_name = nullptr;
 
   /* Whether the function name is fully-qualified or not.  */
-  symbol_name_match_type func_name_match_type;
+  symbol_name_match_type func_name_match_type
+    = symbol_name_match_type::WILD;
 
   /* The name of a label.  Malloc'd.  */
-  char *label_name;
+  char *label_name = nullptr;
 
   /* A line offset relative to the start of the symbol
      identified by the above fields or the current symtab
      if the other fields are NULL.  */
-  struct line_offset line_offset;
+  struct line_offset line_offset = {0, LINE_OFFSET_UNKNOWN};
+
+protected:
+  explicit_location_spec (const explicit_location_spec &other);
+
+  std::string compute_string () const override;
+};
+
+/* A probe.  */
+struct probe_location_spec : public location_spec
+{
+  explicit probe_location_spec (std::string &&probe);
+
+  location_spec_up clone () const override;
+
+  bool empty_p () const override;
+
+protected:
+  probe_location_spec (const probe_location_spec &other) = default;
+
+  std::string compute_string () const override;
 };
 
 /* Return the type of the given location spec.  */
 
 extern enum location_spec_type
   location_spec_type (const location_spec *);
-
-/* Return a linespec string representation of the given explicit
-   location spec.  The location spec must already be
-   canonicalized/valid.  */
-
-extern std::string explicit_location_to_linespec
-  (const explicit_location *explicit_locspec);
 
 /* Return a string representation of LOCSPEC.
    This function may return NULL for unspecified linespecs,
@@ -124,27 +240,16 @@ extern std::string explicit_location_to_linespec
 extern const char *
   location_spec_to_string (location_spec *locspec);
 
-/* A deleter for a struct location_spec.  */
-
-struct location_spec_deleter
-{
-  void operator() (location_spec *locspec) const;
-};
-
-/* A unique pointer for location_spec.  */
-typedef std::unique_ptr<location_spec, location_spec_deleter>
-     location_spec_up;
-
 /* Create a new linespec location spec.  */
 
 extern location_spec_up new_linespec_location_spec
   (const char **linespec, symbol_name_match_type match_type);
 
-/* Return the linespec location spec of the given location_spec (which
-   must be of type LINESPEC_LOCATION_SPEC).  */
+/* Return the given location_spec as a linespec_location_spec.
+   LOCSPEC must be of type LINESPEC_LOCATION_SPEC.  */
 
-extern const linespec_location *
-  get_linespec_location (const location_spec *locspec);
+extern const linespec_location_spec *
+  as_linespec_location_spec (const location_spec *locspec);
 
 /* Create a new address location spec.
    ADDR is the address corresponding to this location_spec.
@@ -155,50 +260,42 @@ extern location_spec_up new_address_location_spec (CORE_ADDR addr,
 						   const char *addr_string,
 						   int addr_string_len);
 
-/* Return the address (a CORE_ADDR) of the given location_spec, which
-   must be of type ADDRESS_LOCATION_SPEC.  */
+/* Return the given location_spec as an address_location_spec.
+   LOCSPEC must be of type ADDRESS_LOCATION_SPEC.  */
 
-extern CORE_ADDR
-  get_address_location (const location_spec *locspec);
-
-/* Return the expression (a string) that was used to compute the
-   address of the given location_spec, which must be of type
-   ADDRESS_LOCATION_SPEC.  */
-
-extern const char *
-  get_address_string_location (const location_spec *locspec);
+const address_location_spec *
+  as_address_location_spec (const location_spec *locspec);
 
 /* Create a new probe location.  */
 
 extern location_spec_up new_probe_location_spec (std::string &&probe);
 
-/* Return the probe location spec string of the given location_spec,
-   which must be of type PROBE_LOCATION_SPEC.  */
+/* Assuming LOCSPEC is of type PROBE_LOCATION_SPEC, return LOCSPEC
+   cast to probe_location_spec.  */
 
-extern const char *
-  get_probe_location_spec_string (const location_spec *locspec);
+const probe_location_spec *
+  as_probe_location_spec (const location_spec *locspec);
 
-/* Initialize the given explicit location.  */
+/* Create a new explicit location with explicit FUNCTION_NAME.  All
+   other fields are defaulted.  */
 
-extern void
-  initialize_explicit_location (explicit_location *locspec);
+static inline location_spec_up
+new_explicit_location_spec_function (const char *function_name)
+{
+  explicit_location_spec *spec
+    = new explicit_location_spec ();
+  spec->function_name
+    = (function_name != nullptr ? xstrdup (function_name) : nullptr);
+  return location_spec_up (spec);
+}
 
-/* Create a new explicit location.  If not NULL, EXPLICIT is checked for
-   validity.  If invalid, an exception is thrown.  */
+/* Assuming LOCSPEC is of type EXPLICIT_LOCATION_SPEC, return LOCSPEC
+   cast to explicit_location_spec.  */
 
-extern location_spec_up
-  new_explicit_location_spec (const explicit_location *locspec);
-
-/* Return the explicit location spec of the given location_spec, which
-   must be of type EXPLICIT_LOCATION.  */
-
-extern struct explicit_location *
-  get_explicit_location (location_spec *locspec);
-
-/* A const version of the above.  */
-
-extern const explicit_location *
-  get_explicit_location_const (const location_spec *locspec);
+const explicit_location_spec *
+  as_explicit_location_spec (const location_spec *locspec);
+explicit_location_spec *
+  as_explicit_location_spec (location_spec *locspec);
 
 /* Return a copy of the given SRC location spec.  */
 

@@ -712,8 +712,8 @@ collect_explicit_location_matches (completion_tracker &tracker,
 				   const char *word,
 				   const struct language_defn *language)
 {
-  const struct explicit_location *explicit_loc
-    = get_explicit_location (locspec);
+  const explicit_location_spec *explicit_loc
+    = as_explicit_location_spec (locspec);
 
   /* True if the option expects an argument.  */
   bool needs_arg = true;
@@ -1008,7 +1008,7 @@ location_completer (struct cmd_list_element *ignore,
 	  text = copy;
 
 	  symbol_name_match_type match_type
-	    = get_explicit_location (locspec.get ())->func_name_match_type;
+	    = as_explicit_location_spec (locspec.get ())->func_name_match_type;
 	  complete_address_and_linespec_locations (tracker, text, match_type);
 	}
     }

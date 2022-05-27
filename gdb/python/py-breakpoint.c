@@ -839,20 +839,23 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	      }
 	    else
 	      {
-		struct explicit_location explicit_loc;
+		std::unique_ptr<explicit_location_spec> explicit_loc
+		  (new explicit_location_spec ());
 
-		initialize_explicit_location (&explicit_loc);
-		explicit_loc.source_filename = source;
-		explicit_loc.function_name = function;
-		explicit_loc.label_name = label;
+		explicit_loc->source_filename
+		  = source != nullptr ? xstrdup (source) : nullptr;
+		explicit_loc->function_name
+		  = function != nullptr ? xstrdup (function) : nullptr;
+		explicit_loc->label_name
+		  = label != nullptr ? xstrdup (label) : nullptr;
 
 		if (line != NULL)
-		  explicit_loc.line_offset =
-		    linespec_parse_line_offset (line.get ());
+		  explicit_loc->line_offset
+		    = linespec_parse_line_offset (line.get ());
 
-		explicit_loc.func_name_match_type = func_name_match_type;
+		explicit_loc->func_name_match_type = func_name_match_type;
 
-		locspec = new_explicit_location_spec (&explicit_loc);
+		locspec.reset (explicit_loc.release ());
 	      }
 
 	    const struct breakpoint_ops *ops

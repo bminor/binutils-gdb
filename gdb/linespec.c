@@ -94,8 +94,8 @@ struct address_entry
 
 struct linespec
 {
-  /* An explicit location describing the SaLs.  */
-  struct explicit_location explicit_loc {};
+  /* An explicit location spec describing the SaLs.  */
+  explicit_location_spec explicit_loc;
 
   /* The list of symtabs to search to which to limit the search.
 
@@ -342,8 +342,8 @@ struct linespec_parser
   struct completion_tracker *completion_tracker = nullptr;
 };
 
-/* A convenience macro for accessing the explicit location result of
-   the parser.  */
+/* A convenience macro for accessing the explicit location spec result
+   of the parser.  */
 #define PARSER_EXPLICIT(PPTR) (&PARSER_RESULT ((PPTR))->explicit_loc)
 
 /* Prototypes for local functions.  */
@@ -1990,18 +1990,14 @@ linespec_parse_basic (linespec_parser *parser)
 static void
 canonicalize_linespec (struct linespec_state *state, const linespec *ls)
 {
-  location_spec *canon;
-  struct explicit_location *explicit_loc;
-
   /* If canonicalization was not requested, no need to do anything.  */
   if (!state->canonical)
     return;
 
   /* Save everything as an explicit location.  */
-  state->canonical->locspec
-    = new_explicit_location_spec (&ls->explicit_loc);
-  canon = state->canonical->locspec.get ();
-  explicit_loc = get_explicit_location (canon);
+  state->canonical->locspec = ls->explicit_loc.clone ();
+  explicit_location_spec *explicit_loc
+    = as_explicit_location_spec (state->canonical->locspec.get ());
 
   if (explicit_loc->label_name != NULL)
     {
@@ -2019,8 +2015,7 @@ canonicalize_linespec (struct linespec_state *state, const linespec *ls)
   /* If this location originally came from a linespec, save a string
      representation of it for display and saving to file.  */
   if (state->is_linespec)
-    set_location_spec_string (canon,
-			      explicit_location_to_linespec (explicit_loc));
+    set_location_spec_string (explicit_loc, explicit_loc->to_linespec ());
 }
 
 /* Given a line offset in LS, construct the relevant SALs.  */
@@ -2307,17 +2302,18 @@ convert_linespec_to_sals (struct linespec_state *state, linespec *ls)
   return sals;
 }
 
-/* Build RESULT from the explicit location components SOURCE_FILENAME,
-   FUNCTION_NAME, LABEL_NAME and LINE_OFFSET.  */
+/* Build RESULT from the explicit location spec components
+   SOURCE_FILENAME, FUNCTION_NAME, LABEL_NAME and LINE_OFFSET.  */
 
 static void
-convert_explicit_location_to_linespec (struct linespec_state *self,
-				       linespec *result,
-				       const char *source_filename,
-				       const char *function_name,
-				       symbol_name_match_type fname_match_type,
-				       const char *label_name,
-				       struct line_offset line_offset)
+convert_explicit_location_spec_to_linespec
+  (struct linespec_state *self,
+   linespec *result,
+   const char *source_filename,
+   const char *function_name,
+   symbol_name_match_type fname_match_type,
+   const char *label_name,
+   struct line_offset line_offset)
 {
   std::vector<bound_minimal_symbol> minimal_symbols;
 
@@ -2382,16 +2378,17 @@ convert_explicit_location_to_linespec (struct linespec_state *self,
 /* Convert the explicit location EXPLICIT_LOC into SaLs.  */
 
 static std::vector<symtab_and_line>
-convert_explicit_location_to_sals (struct linespec_state *self,
-				   linespec *result,
-				   const struct explicit_location *explicit_loc)
+convert_explicit_location_spec_to_sals
+  (struct linespec_state *self,
+   linespec *result,
+   const explicit_location_spec *explicit_spec)
 {
-  convert_explicit_location_to_linespec (self, result,
-					 explicit_loc->source_filename,
-					 explicit_loc->function_name,
-					 explicit_loc->func_name_match_type,
-					 explicit_loc->label_name,
-					 explicit_loc->line_offset);
+  convert_explicit_location_spec_to_linespec (self, result,
+					      explicit_spec->source_filename,
+					      explicit_spec->function_name,
+					      explicit_spec->func_name_match_type,
+					      explicit_spec->label_name,
+					      explicit_spec->line_offset);
   return convert_linespec_to_sals (self, result);
 }
 
@@ -2694,10 +2691,6 @@ linespec_state_destructor (struct linespec_state *self)
 
 linespec_parser::~linespec_parser ()
 {
-  xfree (PARSER_EXPLICIT (this)->source_filename);
-  xfree (PARSER_EXPLICIT (this)->label_name);
-  xfree (PARSER_EXPLICIT (this)->function_name);
-
   linespec_state_destructor (PARSER_STATE (this));
 }
 
@@ -2855,12 +2848,12 @@ linespec_complete_label (completion_tracker &tracker,
 
   try
     {
-      convert_explicit_location_to_linespec (PARSER_STATE (&parser),
-					     PARSER_RESULT (&parser),
-					     source_filename,
-					     function_name,
-					     func_name_match_type,
-					     NULL, unknown_offset);
+      convert_explicit_location_spec_to_linespec (PARSER_STATE (&parser),
+						  PARSER_RESULT (&parser),
+						  source_filename,
+						  function_name,
+						  func_name_match_type,
+						  NULL, unknown_offset);
     }
   catch (const gdb_exception_error &ex)
     {
@@ -3073,24 +3066,18 @@ location_spec_to_sals (linespec_parser *parser,
     {
     case LINESPEC_LOCATION_SPEC:
       {
+	const linespec_location_spec *ls = as_linespec_location_spec (locspec);
 	PARSER_STATE (parser)->is_linespec = 1;
-	try
-	  {
-	    const linespec_location *ls = get_linespec_location (locspec);
-	    result = parse_linespec (parser,
-				     ls->spec_string, ls->match_type);
-	  }
-	catch (const gdb_exception_error &except)
-	  {
-	    throw;
-	  }
+	result = parse_linespec (parser, ls->spec_string, ls->match_type);
       }
       break;
 
     case ADDRESS_LOCATION_SPEC:
       {
-	const char *addr_string = get_address_string_location (locspec);
-	CORE_ADDR addr = get_address_location (locspec);
+	const address_location_spec *addr_spec
+	  = as_address_location_spec (locspec);
+	const char *addr_string = addr_spec->to_string ();
+	CORE_ADDR addr;
 
 	if (addr_string != NULL)
 	  {
@@ -3099,6 +3086,8 @@ location_spec_to_sals (linespec_parser *parser,
 	      PARSER_STATE (parser)->canonical->locspec
 		= copy_location_spec (locspec);
 	  }
+	else
+	  addr = addr_spec->address;
 
 	result = convert_address_location_to_sals (PARSER_STATE (parser),
 						   addr);
@@ -3107,12 +3096,11 @@ location_spec_to_sals (linespec_parser *parser,
 
     case EXPLICIT_LOCATION_SPEC:
       {
-	const struct explicit_location *explicit_loc;
-
-	explicit_loc = get_explicit_location_const (locspec);
-	result = convert_explicit_location_to_sals (PARSER_STATE (parser),
-						    PARSER_RESULT (parser),
-						    explicit_loc);
+	const explicit_location_spec *explicit_locspec
+	  = as_explicit_location_spec (locspec);
+	result = convert_explicit_location_spec_to_sals (PARSER_STATE (parser),
+							 PARSER_RESULT (parser),
+							 explicit_locspec);
       }
       break;
 

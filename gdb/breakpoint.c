@@ -3364,7 +3364,6 @@ create_overlay_event_breakpoint (void)
       struct breakpoint *b;
       struct breakpoint_objfile_data *bp_objfile_data;
       CORE_ADDR addr;
-      struct explicit_location explicit_loc;
 
       bp_objfile_data = get_breakpoint_objfile_data (objfile);
 
@@ -3388,9 +3387,7 @@ create_overlay_event_breakpoint (void)
       addr = bp_objfile_data->overlay_msym.value_address ();
       b = create_internal_breakpoint (objfile->arch (), addr,
 				      bp_overlay_event);
-      initialize_explicit_location (&explicit_loc);
-      explicit_loc.function_name = ASTRDUP (func_name);
-      b->locspec = new_explicit_location_spec (&explicit_loc);
+      b->locspec = new_explicit_location_spec_function (func_name);
 
       if (overlay_debugging == ovly_auto)
 	{
@@ -3473,7 +3470,6 @@ create_longjmp_master_breakpoint_names (objfile *objfile)
       struct breakpoint *b;
       const char *func_name;
       CORE_ADDR addr;
-      struct explicit_location explicit_loc;
 
       if (msym_not_found_p (bp_objfile_data->longjmp_msym[i].minsym))
 	continue;
@@ -3495,9 +3491,7 @@ create_longjmp_master_breakpoint_names (objfile *objfile)
 
       addr = bp_objfile_data->longjmp_msym[i].value_address ();
       b = create_internal_breakpoint (gdbarch, addr, bp_longjmp_master);
-      initialize_explicit_location (&explicit_loc);
-      explicit_loc.function_name = ASTRDUP (func_name);
-      b->locspec = new_explicit_location_spec (&explicit_loc);
+      b->locspec = new_explicit_location_spec_function (func_name);
       b->enable_state = bp_disabled;
       installed_bp++;
     }
@@ -3553,7 +3547,6 @@ create_std_terminate_master_breakpoint (void)
 	{
 	  struct breakpoint *b;
 	  struct breakpoint_objfile_data *bp_objfile_data;
-	  struct explicit_location explicit_loc;
 
 	  bp_objfile_data = get_breakpoint_objfile_data (objfile);
 
@@ -3578,9 +3571,7 @@ create_std_terminate_master_breakpoint (void)
 	  addr = bp_objfile_data->terminate_msym.value_address ();
 	  b = create_internal_breakpoint (objfile->arch (), addr,
 					  bp_std_terminate_master);
-	  initialize_explicit_location (&explicit_loc);
-	  explicit_loc.function_name = ASTRDUP (func_name);
-	  b->locspec = new_explicit_location_spec (&explicit_loc);
+	  b->locspec = new_explicit_location_spec_function (func_name);
 	  b->enable_state = bp_disabled;
 	}
     }
@@ -3648,7 +3639,6 @@ create_exception_master_breakpoint_hook (objfile *objfile)
   struct gdbarch *gdbarch;
   struct breakpoint_objfile_data *bp_objfile_data;
   CORE_ADDR addr;
-  struct explicit_location explicit_loc;
 
   bp_objfile_data = get_breakpoint_objfile_data (objfile);
 
@@ -3675,9 +3665,7 @@ create_exception_master_breakpoint_hook (objfile *objfile)
   addr = gdbarch_convert_from_func_ptr_addr
     (gdbarch, addr, current_inferior ()->top_target ());
   b = create_internal_breakpoint (gdbarch, addr, bp_exception_master);
-  initialize_explicit_location (&explicit_loc);
-  explicit_loc.function_name = ASTRDUP (func_name);
-  b->locspec = new_explicit_location_spec (&explicit_loc);
+  b->locspec = new_explicit_location_spec_function (func_name);
   b->enable_state = bp_disabled;
 
   return true;
@@ -8467,7 +8455,7 @@ parse_breakpoint_sals (location_spec *locspec,
 
   if (location_spec_type (locspec) == LINESPEC_LOCATION_SPEC)
     {
-      const char *spec = get_linespec_location (locspec)->spec_string;
+      const char *spec = as_linespec_location_spec (locspec)->spec_string;
 
       if (spec == NULL)
 	{
@@ -8518,7 +8506,7 @@ parse_breakpoint_sals (location_spec *locspec,
       const char *spec = NULL;
 
       if (location_spec_type (locspec) == LINESPEC_LOCATION_SPEC)
-	spec = get_linespec_location (locspec)->spec_string;
+	spec = as_linespec_location_spec (locspec)->spec_string;
 
       if (!cursal.symtab
 	  || (spec != NULL
@@ -12005,7 +11993,7 @@ strace_marker_create_sals_from_location_spec (location_spec *locspec,
   struct linespec_sals lsal;
   const char *arg_start, *arg;
 
-  arg = arg_start = get_linespec_location (locspec)->spec_string;
+  arg = arg_start = as_linespec_location_spec (locspec)->spec_string;
   lsal.sals = decode_static_tracepoint_spec (&arg);
 
   std::string str (arg_start, arg - arg_start);
@@ -12073,7 +12061,7 @@ std::vector<symtab_and_line>
 static_marker_tracepoint::decode_location_spec (location_spec *locspec,
 						program_space *search_pspace)
 {
-  const char *s = get_linespec_location (locspec)->spec_string;
+  const char *s = as_linespec_location_spec (locspec)->spec_string;
 
   std::vector<symtab_and_line> sals = decode_static_tracepoint_spec (&s);
   if (sals.size () > static_trace_marker_id_idx)
@@ -12381,7 +12369,6 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 	  struct symbol *sym;
 	  struct static_tracepoint_marker *tpmarker;
 	  struct ui_out *uiout = current_uiout;
-	  struct explicit_location explicit_loc;
 
 	  tpmarker = &markers[0];
 
@@ -12418,13 +12405,14 @@ update_static_tracepoint (struct breakpoint *b, struct symtab_and_line sal)
 	  b->loc->line_number = sal2.line;
 	  b->loc->symtab = sym != NULL ? sal2.symtab : NULL;
 
-	  b->locspec.reset (nullptr);
-	  initialize_explicit_location (&explicit_loc);
-	  explicit_loc.source_filename
-	    = ASTRDUP (symtab_to_filename_for_display (sal2.symtab));
-	  explicit_loc.line_offset.offset = b->loc->line_number;
-	  explicit_loc.line_offset.sign = LINE_OFFSET_NONE;
-	  b->locspec = new_explicit_location_spec (&explicit_loc);
+	  std::unique_ptr<explicit_location_spec> els
+	    (new explicit_location_spec ());
+	  els->source_filename
+	    = xstrdup (symtab_to_filename_for_display (sal2.symtab));
+	  els->line_offset.offset = b->loc->line_number;
+	  els->line_offset.sign = LINE_OFFSET_NONE;
+
+	  b->locspec = std::move (els);
 
 	  /* Might be nice to check if function changed, and warn if
 	     so.  */

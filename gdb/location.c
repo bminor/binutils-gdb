@@ -29,263 +29,180 @@
 #include <ctype.h>
 #include <string.h>
 
-static std::string explicit_location_to_string
-     (const struct explicit_location *explicit_loc);
+static std::string
+  explicit_to_string_internal (bool as_linespec,
+			       const explicit_location_spec *explicit_loc);
 
-/* The base class for all location specs used to match actual
-   locations in the inferior.  */
+/* Return a xstrdup of STR if not NULL, otherwise return NULL.  */
 
-struct location_spec
+static char *
+maybe_xstrdup (const char *str)
 {
-  virtual ~location_spec () = default;
+  return (str != nullptr ? xstrdup (str) : nullptr);
+}
 
-  /* Clone this object.  */
-  virtual location_spec_up clone () const = 0;
-
-  /* Return true if this location spec is empty, false otherwise.  */
-  virtual bool empty_p () const = 0;
-
-  /* Return a string representation of this location.  */
-  const char *to_string () const
-  {
-    if (as_string.empty ())
-      as_string = compute_string ();
-    if (as_string.empty ())
-      return nullptr;
-    return as_string.c_str ();
-  }
-
-  DISABLE_COPY_AND_ASSIGN (location_spec);
-
-  /* The type of this location specification.  */
-  enum location_spec_type type;
-
-  /* Cached string representation of this location spec.  This is
-     used, e.g., to save location specs to file.  */
-  mutable std::string as_string;
-
-protected:
-
-  explicit location_spec (enum location_spec_type t)
-    : type (t)
-  {
-  }
-
-  location_spec (enum location_spec_type t, std::string &&str)
-    : type (t),
-      as_string (std::move (str))
-  {
-  }
-
-  explicit location_spec (const location_spec *to_clone)
-    : type (to_clone->type),
-      as_string (to_clone->as_string)
-  {
-  }
-
-  /* Compute the string representation of this object.  This is called
-     by to_string when needed.  */
-  virtual std::string compute_string () const = 0;
-};
-
-/* A probe.  */
-struct probe_location_spec : public location_spec
+probe_location_spec::probe_location_spec (std::string &&probe)
+  : location_spec (PROBE_LOCATION_SPEC, std::move (probe))
 {
-  explicit probe_location_spec (std::string &&probe)
-    : location_spec (PROBE_LOCATION_SPEC, std::move (probe))
-  {
-  }
+}
 
-  location_spec_up clone () const override
-  {
-    return location_spec_up (new probe_location_spec (this));
-  }
+location_spec_up
+probe_location_spec::clone () const
+{
+  return location_spec_up (new probe_location_spec (*this));
+}
 
-  bool empty_p () const override
-  {
-    return false;
-  }
+bool
+probe_location_spec::empty_p () const
+{
+  return false;
+}
 
-protected:
-
-  explicit probe_location_spec (const probe_location_spec *to_clone)
-    : location_spec (to_clone)
-  {
-  }
-
-  std::string compute_string () const override
-  {
-    return std::move (as_string);
-  }
-};
+std::string probe_location_spec::compute_string () const
+{
+  return std::move (as_string);
+}
 
 /* A "normal" linespec.  */
-struct linespec_location_spec : public location_spec
+linespec_location_spec::linespec_location_spec
+  (const char **linespec, symbol_name_match_type match_type_)
+  : location_spec (LINESPEC_LOCATION_SPEC),
+    match_type (match_type_)
 {
-  linespec_location_spec (const char **linespec,
-			  symbol_name_match_type match_type)
-    : location_spec (LINESPEC_LOCATION_SPEC)
-  {
-    linespec_location.match_type = match_type;
-    if (*linespec != NULL)
-      {
-	const char *p;
-	const char *orig = *linespec;
+  if (*linespec != NULL)
+    {
+      const char *p;
+      const char *orig = *linespec;
 
-	linespec_lex_to_end (linespec);
-	p = remove_trailing_whitespace (orig, *linespec);
+      linespec_lex_to_end (linespec);
+      p = remove_trailing_whitespace (orig, *linespec);
 
-	/* If there is no valid linespec then this will leave the
-	   spec_string as nullptr.  This behaviour is relied on in the
-	   breakpoint setting code, where spec_string being nullptr means
-	   to use the default breakpoint location.  */
-	if ((p - orig) > 0)
-	  linespec_location.spec_string = savestring (orig, p - orig);
-      }
-  }
+      /* If there is no valid linespec then this will leave the
+	 spec_string as nullptr.  This behaviour is relied on in the
+	 breakpoint setting code, where spec_string being nullptr means
+	 to use the default breakpoint location.  */
+      if ((p - orig) > 0)
+	spec_string = savestring (orig, p - orig);
+    }
+}
 
-  ~linespec_location_spec ()
-  {
-    xfree (linespec_location.spec_string);
-  }
-
-  location_spec_up clone () const override
-  {
-    return location_spec_up (new linespec_location_spec (this));
-  }
-
-  bool empty_p () const override
-  {
-    return false;
-  }
-
-  struct linespec_location linespec_location {};
-
-protected:
-
-  explicit linespec_location_spec (const linespec_location_spec *to_clone)
-    : location_spec (to_clone),
-      linespec_location (to_clone->linespec_location)
-  {
-    if (linespec_location.spec_string != nullptr)
-      linespec_location.spec_string = xstrdup (linespec_location.spec_string);
-  }
-
-  std::string compute_string () const override
-  {
-    if (linespec_location.spec_string != nullptr)
-      {
-	const struct linespec_location *ls = &linespec_location;
-	if (ls->match_type == symbol_name_match_type::FULL)
-	  return std::string ("-qualified ") + ls->spec_string;
-	else
-	  return ls->spec_string;
-      }
-    return {};
-  }
-};
-
-/* An address in the inferior.  */
-struct address_location_spec : public location_spec
+linespec_location_spec::~linespec_location_spec ()
 {
-  address_location_spec (CORE_ADDR addr, const char *addr_string,
-			 int addr_string_len)
-    : location_spec (ADDRESS_LOCATION_SPEC),
-      address (addr)
-  {
-    if (addr_string != nullptr)
-      as_string = std::string (addr_string, addr_string_len);
-  }
+  xfree (spec_string);
+}
 
-  location_spec_up clone () const override
-  {
-    return location_spec_up (new address_location_spec (this));
-  }
-
-  bool empty_p () const override
-  {
-    return false;
-  }
-
-  CORE_ADDR address;
-
-protected:
-
-  address_location_spec (const address_location_spec *to_clone)
-    : location_spec (to_clone),
-      address (to_clone->address)
-  {
-  }
-
-  std::string compute_string () const override
-  {
-    const char *addr_string = core_addr_to_string (address);
-    return std::string ("*") + addr_string;
-  }
-};
-
-/* An explicit location spec.  */
-struct explicit_location_spec : public location_spec
+location_spec_up
+linespec_location_spec::clone () const
 {
-  explicit explicit_location_spec (const struct explicit_location *loc)
-    : location_spec (EXPLICIT_LOCATION_SPEC)
-  {
-    copy_loc (loc);
-  }
+  return location_spec_up (new linespec_location_spec (*this));
+}
 
-  ~explicit_location_spec ()
-  {
-    xfree (explicit_loc.source_filename);
-    xfree (explicit_loc.function_name);
-    xfree (explicit_loc.label_name);
-  }
+bool
+linespec_location_spec::empty_p () const
+{
+  return false;
+}
 
-  location_spec_up clone () const override
-  {
-    return location_spec_up (new explicit_location_spec (this));
-  }
+linespec_location_spec::linespec_location_spec
+  (const linespec_location_spec &other)
+  : location_spec (other),
+    match_type (other.match_type),
+    spec_string (maybe_xstrdup (other.spec_string))
+{
+}
 
-  bool empty_p () const override
-  {
-    return (explicit_loc.source_filename == nullptr
-	    && explicit_loc.function_name == nullptr
-	    && explicit_loc.label_name == nullptr
-	    && explicit_loc.line_offset.sign == LINE_OFFSET_UNKNOWN);
-  }
+std::string
+linespec_location_spec::compute_string () const
+{
+  if (spec_string != nullptr)
+    {
+      if (match_type == symbol_name_match_type::FULL)
+	return std::string ("-qualified ") + spec_string;
+      else
+	return spec_string;
+    }
+  return {};
+}
 
-  struct explicit_location explicit_loc;
+address_location_spec::address_location_spec (CORE_ADDR addr,
+					      const char *addr_string,
+					      int addr_string_len)
+  : location_spec (ADDRESS_LOCATION_SPEC),
+    address (addr)
+{
+  if (addr_string != nullptr)
+    as_string = std::string (addr_string, addr_string_len);
+}
 
-protected:
+location_spec_up
+address_location_spec::clone () const
+{
+  return location_spec_up (new address_location_spec (*this));
+}
 
-  explicit explicit_location_spec (const explicit_location_spec *to_clone)
-    : location_spec (to_clone)
-  {
-    copy_loc (&to_clone->explicit_loc);
-  }
+bool
+address_location_spec::empty_p () const
+{
+  return false;
+}
 
-  std::string compute_string () const override
-  {
-    return explicit_location_to_string (&explicit_loc);
-  }
+address_location_spec::address_location_spec
+  (const address_location_spec &other)
+  : location_spec (other),
+    address (other.address)
+{
+}
 
-private:
+std::string
+address_location_spec::compute_string () const
+{
+  const char *addr_string = core_addr_to_string (address);
+  return std::string ("*") + addr_string;
+}
 
-  void copy_loc (const struct explicit_location *loc)
-  {
-    initialize_explicit_location (&explicit_loc);
-    if (loc != nullptr)
-      {
-	explicit_loc.func_name_match_type = loc->func_name_match_type;
-	if (loc->source_filename != nullptr)
-	  explicit_loc.source_filename = xstrdup (loc->source_filename);
-	if (loc->function_name != nullptr)
-	  explicit_loc.function_name = xstrdup (loc->function_name);
-	if (loc->label_name != nullptr)
-	  explicit_loc.label_name = xstrdup (loc->label_name);
-	explicit_loc.line_offset = loc->line_offset;
-      }
-  }
-};
+explicit_location_spec::explicit_location_spec ()
+  : location_spec (EXPLICIT_LOCATION_SPEC)
+{
+}
+
+explicit_location_spec::~explicit_location_spec ()
+{
+  xfree (source_filename);
+  xfree (function_name);
+  xfree (label_name);
+}
+
+explicit_location_spec::explicit_location_spec
+  (const explicit_location_spec &other)
+  : location_spec (other),
+    source_filename (maybe_xstrdup (other.source_filename)),
+    function_name (maybe_xstrdup (other.function_name)),
+    func_name_match_type (other.func_name_match_type),
+    label_name (maybe_xstrdup (other.label_name)),
+    line_offset (other.line_offset)
+{
+}
+
+location_spec_up
+explicit_location_spec::clone () const
+{
+  return location_spec_up (new explicit_location_spec (*this));
+}
+
+bool
+explicit_location_spec::empty_p () const
+{
+  return (source_filename == nullptr
+	  && function_name == nullptr
+	  && label_name == nullptr
+	  && line_offset.sign == LINE_OFFSET_UNKNOWN);
+}
+
+std::string
+explicit_location_spec::compute_string () const
+{
+  return explicit_to_string_internal (false, this);
+}
 
 /* See description in location.h.  */
 
@@ -293,16 +210,6 @@ enum location_spec_type
 location_spec_type (const location_spec *locspec)
 {
   return locspec->type;
-}
-
-/* See description in location.h.  */
-
-void
-initialize_explicit_location (struct explicit_location *explicit_loc)
-{
-  memset (explicit_loc, 0, sizeof (struct explicit_location));
-  explicit_loc->line_offset.sign = LINE_OFFSET_UNKNOWN;
-  explicit_loc->func_name_match_type = symbol_name_match_type::WILD;
 }
 
 /* See description in location.h.  */
@@ -317,11 +224,11 @@ new_linespec_location_spec (const char **linespec,
 
 /* See description in location.h.  */
 
-const linespec_location *
-get_linespec_location (const location_spec *locspec)
+const linespec_location_spec *
+as_linespec_location_spec (const location_spec *locspec)
 {
   gdb_assert (locspec->type == LINESPEC_LOCATION_SPEC);
-  return &((linespec_location_spec *) locspec)->linespec_location;
+  return static_cast<const linespec_location_spec *> (locspec);
 }
 
 /* See description in location.h.  */
@@ -336,20 +243,11 @@ new_address_location_spec (CORE_ADDR addr, const char *addr_string,
 
 /* See description in location.h.  */
 
-CORE_ADDR
-get_address_location (const location_spec *locspec)
+const address_location_spec *
+as_address_location_spec (const location_spec *locspec)
 {
   gdb_assert (locspec->type == ADDRESS_LOCATION_SPEC);
-  return ((address_location_spec *) locspec)->address;
-}
-
-/* See description in location.h.  */
-
-const char *
-get_address_string_location (const location_spec *locspec)
-{
-  gdb_assert (locspec->type == ADDRESS_LOCATION_SPEC);
-  return locspec->to_string ();
+  return static_cast<const address_location_spec *> (locspec);
 }
 
 /* See description in location.h.  */
@@ -362,37 +260,29 @@ new_probe_location_spec (std::string &&probe)
 
 /* See description in location.h.  */
 
-const char *
-get_probe_location_spec_string (const location_spec *locspec)
+const probe_location_spec *
+as_probe_location_spec (const location_spec *locspec)
 {
   gdb_assert (locspec->type == PROBE_LOCATION_SPEC);
-  return locspec->to_string ();
+  return static_cast<const probe_location_spec *> (locspec);
 }
 
 /* See description in location.h.  */
 
-location_spec_up
-new_explicit_location_spec (const explicit_location *explicit_loc)
-{
-  return location_spec_up (new explicit_location_spec (explicit_loc));
-}
-
-/* See description in location.h.  */
-
-struct explicit_location *
-get_explicit_location (location_spec *locspec)
+const explicit_location_spec *
+as_explicit_location_spec (const location_spec *locspec)
 {
   gdb_assert (locspec->type == EXPLICIT_LOCATION_SPEC);
-  return &((explicit_location_spec *) locspec)->explicit_loc;
+  return static_cast<const explicit_location_spec *> (locspec);
 }
 
 /* See description in location.h.  */
 
-const struct explicit_location *
-get_explicit_location_const (const location_spec *locspec)
+explicit_location_spec *
+as_explicit_location_spec (location_spec *locspec)
 {
   gdb_assert (locspec->type == EXPLICIT_LOCATION_SPEC);
-  return &((explicit_location_spec *) locspec)->explicit_loc;
+  return static_cast<explicit_location_spec *> (locspec);
 }
 
 /* Return a string representation of the explicit location spec in
@@ -403,7 +293,7 @@ get_explicit_location_const (const location_spec *locspec)
 
 static std::string
 explicit_to_string_internal (bool as_linespec,
-			     const struct explicit_location *explicit_loc)
+			     const explicit_location_spec *explicit_loc)
 {
   bool need_space = false;
   char space = as_linespec ? ':' : ' ';
@@ -457,18 +347,10 @@ explicit_to_string_internal (bool as_linespec,
 
 /* See description in location.h.  */
 
-static std::string
-explicit_location_to_string (const struct explicit_location *explicit_loc)
-{
-  return explicit_to_string_internal (false, explicit_loc);
-}
-
-/* See description in location.h.  */
-
 std::string
-explicit_location_to_linespec (const struct explicit_location *explicit_loc)
+explicit_location_spec::to_linespec () const
 {
-  return explicit_to_string_internal (true, explicit_loc);
+  return explicit_to_string_internal (true, this);
 }
 
 /* See description in location.h.  */
@@ -477,12 +359,6 @@ location_spec_up
 copy_location_spec (const location_spec *src)
 {
   return src->clone ();
-}
-
-void
-location_spec_deleter::operator() (location_spec *locspec) const
-{
-  delete locspec;
 }
 
 /* See description in location.h.  */
@@ -788,7 +664,7 @@ string_to_explicit_location_spec (const char **argp,
     return NULL;
 
   std::unique_ptr<explicit_location_spec> locspec
-    (new explicit_location_spec ((const explicit_location *) nullptr));
+    (new explicit_location_spec ());
 
   /* Process option/argument pairs.  dprintf_command
      requires that processing stop on ','.  */
@@ -857,18 +733,17 @@ string_to_explicit_location_spec (const char **argp,
 	{
 	  set_oarg (explicit_location_spec_lex_one (argp, language,
 						    completion_info));
-	  locspec->explicit_loc.source_filename = oarg.release ();
+	  locspec->source_filename = oarg.release ();
 	}
       else if (strncmp (opt.get (), "-function", len) == 0)
 	{
 	  set_oarg (explicit_location_spec_lex_one_function (argp, language,
 							     completion_info));
-	  locspec->explicit_loc.function_name = oarg.release ();
+	  locspec->function_name = oarg.release ();
 	}
       else if (strncmp (opt.get (), "-qualified", len) == 0)
 	{
-	  locspec->explicit_loc.func_name_match_type
-	    = symbol_name_match_type::FULL;
+	  locspec->func_name_match_type = symbol_name_match_type::FULL;
 	}
       else if (strncmp (opt.get (), "-line", len) == 0)
 	{
@@ -876,8 +751,7 @@ string_to_explicit_location_spec (const char **argp,
 	  *argp = skip_spaces (*argp);
 	  if (have_oarg)
 	    {
-	      locspec->explicit_loc.line_offset
-		= linespec_parse_line_offset (oarg.get ());
+	      locspec->line_offset = linespec_parse_line_offset (oarg.get ());
 	      continue;
 	    }
 	}
@@ -885,7 +759,7 @@ string_to_explicit_location_spec (const char **argp,
 	{
 	  set_oarg (explicit_location_spec_lex_one (argp, language,
 						    completion_info));
-	  locspec->explicit_loc.label_name = oarg.release ();
+	  locspec->label_name = oarg.release ();
 	}
       /* Only emit an "invalid argument" error for options
 	 that look like option strings.  */
@@ -915,10 +789,10 @@ string_to_explicit_location_spec (const char **argp,
 
   /* One special error check:  If a source filename was given
      without offset, function, or label, issue an error.  */
-  if (locspec->explicit_loc.source_filename != NULL
-      && locspec->explicit_loc.function_name == NULL
-      && locspec->explicit_loc.label_name == NULL
-      && (locspec->explicit_loc.line_offset.sign == LINE_OFFSET_UNKNOWN)
+  if (locspec->source_filename != NULL
+      && locspec->function_name == NULL
+      && locspec->label_name == NULL
+      && (locspec->line_offset.sign == LINE_OFFSET_UNKNOWN)
       && completion_info == NULL)
     {
       error (_("Source filename requires function, label, or "
@@ -1000,7 +874,7 @@ string_to_location_spec (const char **stringp,
       explicit_location_spec *xloc
 	= dynamic_cast<explicit_location_spec *> (locspec.get ());
       gdb_assert (xloc != nullptr);
-      match_type = xloc->explicit_loc.func_name_match_type;
+      match_type = xloc->func_name_match_type;
     }
 
   /* Everything else is a "basic" linespec, address, or probe location
