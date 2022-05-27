@@ -355,14 +355,6 @@ explicit_location_spec::to_linespec () const
 
 /* See description in location.h.  */
 
-location_spec_up
-copy_location_spec (const location_spec *src)
-{
-  return src->clone ();
-}
-
-/* See description in location.h.  */
-
 const char *
 location_spec_to_string (struct location_spec *locspec)
 {

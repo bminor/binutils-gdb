@@ -3083,8 +3083,7 @@ location_spec_to_sals (linespec_parser *parser,
 	  {
 	    addr = linespec_expression_to_pc (&addr_string);
 	    if (PARSER_STATE (parser)->canonical != NULL)
-	      PARSER_STATE (parser)->canonical->locspec
-		= copy_location_spec (locspec);
+	      PARSER_STATE (parser)->canonical->locspec	= locspec->clone ();
 	  }
 	else
 	  addr = addr_spec->address;

@@ -297,10 +297,6 @@ const explicit_location_spec *
 explicit_location_spec *
   as_explicit_location_spec (location_spec *locspec);
 
-/* Return a copy of the given SRC location spec.  */
-
-extern location_spec_up copy_location_spec (const location_spec *src);
-
 /* Attempt to convert the input string in *ARGP into a location_spec.
    ARGP is advanced past any processed input.  Always returns a non-nullptr
    location_spec unique pointer object.

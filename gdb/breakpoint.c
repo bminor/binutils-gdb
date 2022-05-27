@@ -8422,8 +8422,9 @@ create_breakpoints_sal (struct gdbarch *gdbarch,
       /* Note that 'location' can be NULL in the case of a plain
 	 'break', without arguments.  */
       location_spec_up locspec
-	= (canonical->locspec != NULL
-	   ? copy_location_spec (canonical->locspec.get ()) : NULL);
+	= (canonical->locspec != nullptr
+	   ? canonical->locspec->clone ()
+	   : nullptr);
       gdb::unique_xmalloc_ptr<char> filter_string
 	(lsal.canonical != NULL ? xstrdup (lsal.canonical) : NULL);
 
@@ -8924,7 +8925,7 @@ create_breakpoint (struct gdbarch *gdbarch,
     {
       std::unique_ptr <breakpoint> b = new_breakpoint_from_type (gdbarch,
 								 type_wanted);
-      b->locspec = copy_location_spec (locspec);
+      b->locspec = locspec->clone ();
 
       if (parse_extra)
 	b->cond_string = NULL;
@@ -12029,8 +12030,7 @@ strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
 
   for (size_t i = 0; i < lsal.sals.size (); i++)
     {
-      location_spec_up locspec
-	= copy_location_spec (canonical->locspec.get ());
+      location_spec_up locspec = canonical->locspec->clone ();
 
       std::unique_ptr<tracepoint> tp
 	(new tracepoint (gdbarch,
