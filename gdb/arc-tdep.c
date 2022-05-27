@@ -2474,11 +2474,11 @@ _initialize_arc_tdep ()
   /* Register ARC-specific commands with gdb.  */
 
   /* Add root prefix command for "maintenance print arc" commands.  */
-  add_show_prefix_cmd ("arc", class_maintenance,
-		       _("ARC-specific maintenance commands for printing GDB "
-			 "internal state."),
-		       &maintenance_print_arc_list,
-		       0, &maintenanceprintlist);
+  add_basic_prefix_cmd ("arc", class_maintenance,
+			_("ARC-specific maintenance commands for printing GDB "
+			  "internal state."),
+			&maintenance_print_arc_list,
+			0, &maintenanceprintlist);
 
   add_cmd ("arc-instruction", class_maintenance,
 	   dump_arc_instruction_command,
