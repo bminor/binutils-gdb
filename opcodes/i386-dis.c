@@ -9313,6 +9313,7 @@ print_insn (bfd_vma pc, instr_info *ins)
   int i;
   char *op_txt[MAX_OPERANDS];
   int needcomma;
+  bool intel_swap_2_3;
   int sizeflag, orig_sizeflag;
   const char *p;
   struct dis_private priv;
@@ -9770,6 +9771,7 @@ print_insn (bfd_vma pc, instr_info *ins)
 
   /* The enter and bound instructions are printed with operands in the same
      order as the intel book; everything else is printed in reverse order.  */
+  intel_swap_2_3 = false;
   if (ins->intel_syntax || ins->two_source_ops)
     {
       for (i = 0; i < MAX_OPERANDS; ++i)
@@ -9780,6 +9782,7 @@ print_insn (bfd_vma pc, instr_info *ins)
 	{
 	  op_txt[2] = ins->op_out[3];
 	  op_txt[3] = ins->op_out[2];
+	  intel_swap_2_3 = true;
 	}
 
       for (i = 0; i < (MAX_OPERANDS >> 1); ++i)
@@ -9804,6 +9807,20 @@ print_insn (bfd_vma pc, instr_info *ins)
   for (i = 0; i < MAX_OPERANDS; ++i)
     if (*op_txt[i])
       {
+	/* In Intel syntax embedded rounding / SAE are not separate operands.
+	   Instead they're attached to the prior register operand.  Simply
+	   suppress emission of the comma to achieve that effect.  */
+	switch (i & -(ins->intel_syntax && dp))
+	  {
+	  case 2:
+	    if (dp->op[2].rtn == OP_Rounding && !intel_swap_2_3)
+	      needcomma = 0;
+	    break;
+	  case 3:
+	    if (dp->op[3].rtn == OP_Rounding || intel_swap_2_3)
+	      needcomma = 0;
+	    break;
+	  }
 	if (needcomma)
 	  (*ins->info->fprintf_styled_func) (ins->info->stream,
 					     dis_style_text, ",");
