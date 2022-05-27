@@ -77,13 +77,6 @@ extern "C" {
 #define BFD_DEFAULT_TARGET_SIZE @bfd_default_target_size@
 
 #define BFD_HOST_64BIT_LONG @BFD_HOST_64BIT_LONG@
-#define BFD_HOST_64BIT_LONG_LONG @BFD_HOST_64BIT_LONG_LONG@
-#if @BFD_HOST_64_BIT_DEFINED@
-#define BFD_HOST_64_BIT @BFD_HOST_64_BIT@
-#define BFD_HOST_U_64_BIT @BFD_HOST_U_64_BIT@
-typedef BFD_HOST_64_BIT bfd_int64_t;
-typedef BFD_HOST_U_64_BIT bfd_uint64_t;
-#endif
 
 #include <inttypes.h>
 
@@ -92,8 +85,7 @@ typedef BFD_HOST_U_64_BIT bfd_uint64_t;
 #endif
 
 /* Declaring a type wide enough to hold a host long and a host pointer.  */
-#define BFD_HOSTPTR_T @BFD_HOSTPTR_T@
-typedef BFD_HOSTPTR_T bfd_hostptr_t;
+typedef @BFD_HOSTPTR_T@ bfd_hostptr_t;
 
 /* Forward declaration.  */
 typedef struct bfd bfd;
@@ -118,10 +110,6 @@ typedef struct bfd bfd;
 #define NPTR_ADD(P,A) ((P) != NULL ? (P) + (A) : (P))
 
 #ifdef BFD64
-
-#ifndef BFD_HOST_64_BIT
- #error No 64 bit integer type available
-#endif /* ! defined (BFD_HOST_64_BIT) */
 
 typedef uint64_t bfd_vma;
 typedef int64_t bfd_signed_vma;
@@ -167,19 +155,10 @@ typedef unsigned long bfd_size_type;
 #define HALF_BFD_SIZE_TYPE \
   (((bfd_size_type) 1) << (8 * sizeof (bfd_size_type) / 2))
 
-#ifndef BFD_HOST_64_BIT
-/* Fall back on a 32 bit type.  The idea is to make these types always
-   available for function return types, but in the case that
-   BFD_HOST_64_BIT is undefined such a function should abort or
-   otherwise signal an error.  */
-typedef bfd_signed_vma bfd_int64_t;
-typedef bfd_vma bfd_uint64_t;
-#endif
-
 /* An offset into a file.  BFD always uses the largest possible offset
    based on the build time availability of fseek, fseeko, or fseeko64.  */
 typedef @bfd_file_ptr@ file_ptr;
-typedef unsigned @bfd_file_ptr@ ufile_ptr;
+typedef @bfd_ufile_ptr@ ufile_ptr;
 
 extern void bfd_sprintf_vma (bfd *, char *, bfd_vma);
 extern void bfd_fprintf_vma (bfd *, void *, bfd_vma);

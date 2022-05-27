@@ -657,10 +657,6 @@ zlibdir
 EXEEXT_FOR_BUILD
 CC_FOR_BUILD
 BFD_HOSTPTR_T
-BFD_HOST_U_64_BIT
-BFD_HOST_64_BIT
-BFD_HOST_64_BIT_DEFINED
-BFD_HOST_64BIT_LONG_LONG
 BFD_HOST_64BIT_LONG
 HDEFINES
 MSGMERGE
@@ -11092,7 +11088,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11095 "configure"
+#line 11091 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11198,7 +11194,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11201 "configure"
+#line 11197 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12709,13 +12705,6 @@ $as_echo "found xgettext program is not GNU xgettext; ignore it" >&6; }
 
 
 
-BFD_HOST_64BIT_LONG=0
-BFD_HOST_64BIT_LONG_LONG=0
-BFD_HOST_64_BIT_DEFINED=0
-BFD_HOST_64_BIT=
-BFD_HOST_U_64_BIT=
-BFD_HOSTPTR_T="unsigned long"
-
 # The cast to long int works around a bug in the HP C Compiler
 # version HP92453-01 B.11.11.23709.GP, which incorrectly rejects
 # declarations like `int a3[[(sizeof (unsigned char)) >= 0]];'.
@@ -12853,28 +12842,15 @@ if test "x${ac_cv_sizeof_void_p}" = "x8"; then
   host64=true
 fi
 
+BFD_HOST_64BIT_LONG=0
+BFD_HOSTPTR_T="unsigned long"
 if test "x${ac_cv_sizeof_long}" = "x8"; then
   BFD_HOST_64BIT_LONG=1
-  test -n "${HOST_64BIT_TYPE}" || HOST_64BIT_TYPE="long"
-  test -n "${HOST_U_64BIT_TYPE}" || HOST_U_64BIT_TYPE="unsigned long"
 elif test "x${ac_cv_sizeof_long_long}" = "x8"; then
-  BFD_HOST_64BIT_LONG_LONG=1
-  test -n "${HOST_64BIT_TYPE}" || HOST_64BIT_TYPE="long long"
-  test -n "${HOST_U_64BIT_TYPE}" || HOST_U_64BIT_TYPE="unsigned long long"
   if test "x${ac_cv_sizeof_void_p}" = "x8"; then
     BFD_HOSTPTR_T="unsigned long long"
   fi
 fi
-
-if test -n "${HOST_64BIT_TYPE}" -a -n "${HOST_U_64BIT_TYPE}"; then
-  BFD_HOST_64_BIT_DEFINED=1
-  BFD_HOST_64_BIT="${HOST_64BIT_TYPE}"
-  BFD_HOST_U_64_BIT="${HOST_U_64BIT_TYPE}"
-fi
-
-
-
-
 
 
 
@@ -13710,12 +13686,6 @@ case ${host64}-${target64}-${want64} in
     wordsize=64
     bfd64_libs='$(BFD64_LIBS)'
     all_backends='$(BFD64_BACKENDS) $(BFD32_BACKENDS)'
-    if test $BFD_HOST_64_BIT_DEFINED = 0; then
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: You have requested a 64 bit BFD configuration, but" >&5
-$as_echo "$as_me: WARNING: You have requested a 64 bit BFD configuration, but" >&2;}
-      { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: your compiler may not have a 64 bit integral type" >&5
-$as_echo "$as_me: WARNING: your compiler may not have a 64 bit integral type" >&2;}
-    fi
     if test -n "$GCC" ; then
        bad_64bit_gcc=no;
        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gcc version with buggy 64-bit support" >&5
@@ -14870,8 +14840,8 @@ bfd_file_ptr="long"
 bfd_ufile_ptr="unsigned long"
 if test x"$ac_cv_func_ftello64" = xyes -a x"$ac_cv_func_fseeko64" = xyes \
 	-o x"${ac_cv_sizeof_off_t}" = x8; then
-    bfd_file_ptr=BFD_HOST_64_BIT
-    bfd_ufile_ptr=BFD_HOST_U_64_BIT
+    bfd_file_ptr=int64_t
+    bfd_ufile_ptr=uint64_t
 fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $bfd_file_ptr" >&5
 $as_echo "$bfd_file_ptr" >&6; }
