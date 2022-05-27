@@ -267,6 +267,7 @@ struct instr_info
 
 
 #define EVEX_b_used 1
+#define EVEX_len_used 2
 
 /* Flags stored in PREFIXES.  */
 #define PREFIX_REPZ 1
@@ -10931,14 +10932,14 @@ intel_operand_size (instr_info *ins, int bytemode, int sizeflag)
 	  case x_mode:
 	  case evex_half_bcst_xmmq_mode:
 	    if (ins->vex.w)
-	      oappend (ins, "QWORD PTR ");
+	      oappend (ins, "QWORD BCST ");
 	    else
-	      oappend (ins, "DWORD PTR ");
+	      oappend (ins, "DWORD BCST ");
 	    break;
 	  case xh_mode:
 	  case evex_half_bcst_xmmqh_mode:
 	  case evex_half_bcst_xmmqdh_mode:
-	    oappend (ins, "WORD PTR ");
+	    oappend (ins, "WORD BCST ");
 	    break;
 	  default:
 	    ins->vex.no_broadcast = true;
@@ -11768,7 +11769,8 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
       if (ins->obufp == ins->op_out[0])
 	ins->vex.no_broadcast = true;
 
-      if (!ins->vex.no_broadcast)
+      if (!ins->vex.no_broadcast
+	  && (!ins->intel_syntax || !(ins->evex_used & EVEX_len_used)))
 	{
 	  if (bytemode == xh_mode)
 	    {
@@ -12484,6 +12486,7 @@ print_vector_reg (instr_info *ins, unsigned int reg, int bytemode)
 	  break;
 	case 512:
 	  names = att_names_ymm;
+	  ins->evex_used |= EVEX_len_used;
 	  break;
 	default:
 	  abort ();
@@ -12512,6 +12515,7 @@ print_vector_reg (instr_info *ins, unsigned int reg, int bytemode)
 	   && bytemode != d_mode
 	   && bytemode != q_mode)
     {
+      ins->evex_used |= EVEX_len_used;
       switch (ins->vex.length)
 	{
 	case 128:
@@ -13237,6 +13241,7 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	{
 	case x_mode:
 	  names = att_names_xmm;
+	  ins->evex_used |= EVEX_len_used;
 	  break;
 	case dq_mode:
 	  if (ins->rex & REX_W)
@@ -13263,6 +13268,7 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
 	{
 	case x_mode:
 	  names = att_names_ymm;
+	  ins->evex_used |= EVEX_len_used;
 	  break;
 	case mask_bd_mode:
 	case mask_mode:
@@ -13281,6 +13287,7 @@ OP_VEX (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
       break;
     case 512:
       names = att_names_zmm;
+      ins->evex_used |= EVEX_len_used;
       break;
     default:
       abort ();
