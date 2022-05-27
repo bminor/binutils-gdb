@@ -469,8 +469,8 @@ struct internal_syment
     char _n_name[SYMNMLEN] ATTRIBUTE_NONSTRING;	/* old COFF version	*/
     struct
     {
-      bfd_hostptr_t _n_zeroes;	/* new == 0			*/
-      bfd_hostptr_t _n_offset;	/* offset into string table	*/
+      uintptr_t _n_zeroes;	/* new == 0			*/
+      uintptr_t _n_offset;	/* offset into string table	*/
     }      _n_n;
     char *_n_nptr[2];		/* allows for overlaying	*/
   }     _n;
@@ -595,11 +595,11 @@ union internal_auxent
       char x_fname[20];
       struct
       {
-	/* PR 28630: We use bfd_hostptr_t because these fields may be
+	/* PR 28630: We use uintptr_t because these fields may be
 	   used to hold pointers.  We assume that this type is at least
-	   as big as the long type.  */
-	bfd_hostptr_t x_zeroes;
-	bfd_hostptr_t x_offset;
+	   32 bits.  */
+	uintptr_t x_zeroes;
+	uintptr_t x_offset;
       }      x_n;
     } x_n;
 

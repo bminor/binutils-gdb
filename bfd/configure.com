@@ -66,12 +66,6 @@ $DECK
       ERASE(match_pos);
       COPY_TEXT('0');
    ENDIF;
-   match_pos := SEARCH_QUIETLY('@BFD_HOSTPTR_T@', FORWARD, EXACT, rang);
-   IF match_pos <> 0 THEN;
-      POSITION(BEGINNING_OF(match_pos));
-      ERASE(match_pos);
-      COPY_TEXT('unsigned __int64');
-   ENDIF;
    match_pos := SEARCH_QUIETLY('@bfd_file_ptr@', FORWARD, EXACT, rang);
    IF match_pos <> 0 THEN;
       POSITION(BEGINNING_OF(match_pos));

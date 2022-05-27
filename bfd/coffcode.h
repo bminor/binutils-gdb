@@ -4620,7 +4620,7 @@ coff_slurp_symbol_table (bfd * abfd)
 	  BFD_ASSERT (src->is_sym);
 	  dst->symbol.name = (char *) (src->u.syment._n._n_n._n_offset);
 	  /* We use the native name field to point to the cached field.  */
-	  src->u.syment._n._n_n._n_zeroes = (bfd_hostptr_t) dst;
+	  src->u.syment._n._n_n._n_zeroes = (uintptr_t) dst;
 	  dst->symbol.section = coff_section_from_bfd_index (abfd,
 						     src->u.syment.n_scnum);
 	  dst->symbol.flags = 0;
@@ -4829,7 +4829,7 @@ coff_slurp_symbol_table (bfd * abfd)
 		 to the symbol instead of the index.  FIXME: This
 		 should use a union.  */
 	      src->u.syment.n_value
-		= (bfd_hostptr_t) (native_symbols + src->u.syment.n_value);
+		= (uintptr_t) (native_symbols + src->u.syment.n_value);
 	      dst->symbol.value = src->u.syment.n_value;
 	      src->fix_value = 1;
 	      break;

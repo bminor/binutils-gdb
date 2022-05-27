@@ -8372,8 +8372,7 @@ elf_create_symbuf (size_t symcount, Elf_Internal_Sym *isymbuf)
       ssymhead->count++;
     }
   BFD_ASSERT ((size_t) (ssymhead - ssymbuf) == shndx_count
-	      && (((bfd_hostptr_t) ssym - (bfd_hostptr_t) ssymbuf)
-		  == total_size));
+	      && (uintptr_t) ssym - (uintptr_t) ssymbuf == total_size);
 
   free (indbuf);
   return ssymbuf;

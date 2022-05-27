@@ -77,9 +77,6 @@ extern "C" {
 #define BFD64
 #endif
 
-/* Declaring a type wide enough to hold a host long and a host pointer.  */
-typedef @BFD_HOSTPTR_T@ bfd_hostptr_t;
-
 /* Forward declaration.  */
 typedef struct bfd bfd;
 

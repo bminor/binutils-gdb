@@ -803,8 +803,8 @@ coff_mangle_symbols (bfd *bfd_ptr)
 	    {
 	      /* FIXME: We should use a union here.  */
 	      s->u.syment.n_value =
-		(bfd_hostptr_t) ((combined_entry_type *)
-			  ((bfd_hostptr_t) s->u.syment.n_value))->offset;
+		(uintptr_t) ((combined_entry_type *)
+			     (uintptr_t) s->u.syment.n_value)->offset;
 	      s->fix_value = 0;
 	    }
 	  if (s->fix_line)
@@ -1833,10 +1833,12 @@ coff_get_normalized_symtab (bfd *abfd)
 
 	      if ((bfd_size_type)(aux->u.auxent.x_file.x_n.x_n.x_offset)
 		  >= obj_coff_strings_len (abfd))
-		internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t) _("<corrupt>");
+		internal_ptr->u.syment._n._n_n._n_offset =
+		  (uintptr_t) _("<corrupt>");
 	      else
 		internal_ptr->u.syment._n._n_n._n_offset =
-		  (bfd_hostptr_t) (string_table + (aux->u.auxent.x_file.x_n.x_n.x_offset));
+		  (uintptr_t) (string_table
+			       + aux->u.auxent.x_file.x_n.x_n.x_offset);
 	    }
 	  else
 	    {
@@ -1846,13 +1848,13 @@ coff_get_normalized_symtab (bfd *abfd)
 	      if (internal_ptr->u.syment.n_numaux > 1
 		  && coff_data (abfd)->pe)
 		internal_ptr->u.syment._n._n_n._n_offset =
-		  (bfd_hostptr_t)
-		  copy_name (abfd,
-			     aux->u.auxent.x_file.x_n.x_fname,
-			     internal_ptr->u.syment.n_numaux * symesz);
+		  ((uintptr_t)
+		   copy_name (abfd,
+			      aux->u.auxent.x_file.x_n.x_fname,
+			      internal_ptr->u.syment.n_numaux * symesz));
 	      else
 		internal_ptr->u.syment._n._n_n._n_offset =
-		  ((bfd_hostptr_t)
+		  ((uintptr_t)
 		   copy_name (abfd,
 			      aux->u.auxent.x_file.x_n.x_fname,
 			      (size_t) bfd_coff_filnmlen (abfd)));
@@ -1877,14 +1879,16 @@ coff_get_normalized_symtab (bfd *abfd)
 
 		    if ((bfd_size_type)(aux->u.auxent.x_file.x_n.x_n.x_offset)
 			>= obj_coff_strings_len (abfd))
-		      aux->u.auxent.x_file.x_n.x_n.x_offset = (bfd_hostptr_t) _("<corrupt>");
+		      aux->u.auxent.x_file.x_n.x_n.x_offset =
+			(uintptr_t) _("<corrupt>");
 		    else
 		      aux->u.auxent.x_file.x_n.x_n.x_offset =
-			(bfd_hostptr_t) (string_table + (aux->u.auxent.x_file.x_n.x_n.x_offset));
+			(uintptr_t) (string_table
+				     + (aux->u.auxent.x_file.x_n.x_n.x_offset));
 		  }
 		else
 		  aux->u.auxent.x_file.x_n.x_n.x_offset =
-		    ((bfd_hostptr_t)
+		    ((uintptr_t)
 		     copy_name (abfd,
 				aux->u.auxent.x_file.x_n.x_fname,
 				(size_t) bfd_coff_filnmlen (abfd)));
@@ -1909,11 +1913,11 @@ coff_get_normalized_symtab (bfd *abfd)
 	      if (newstring == NULL)
 		return NULL;
 	      strncpy (newstring, internal_ptr->u.syment._n._n_name, i);
-	      internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t) newstring;
+	      internal_ptr->u.syment._n._n_n._n_offset = (uintptr_t) newstring;
 	      internal_ptr->u.syment._n._n_n._n_zeroes = 0;
 	    }
 	  else if (internal_ptr->u.syment._n._n_n._n_offset == 0)
-	    internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t) "";
+	    internal_ptr->u.syment._n._n_n._n_offset = (uintptr_t) "";
 	  else if (!bfd_coff_symname_in_debug (abfd, &internal_ptr->u.syment))
 	    {
 	      /* Long name already.  Point symbol at the string in the
@@ -1926,12 +1930,12 @@ coff_get_normalized_symtab (bfd *abfd)
 		}
 	      if (internal_ptr->u.syment._n._n_n._n_offset >= obj_coff_strings_len (abfd)
 		  || string_table + internal_ptr->u.syment._n._n_n._n_offset < string_table)
-		internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t) _("<corrupt>");
+		internal_ptr->u.syment._n._n_n._n_offset =
+		  (uintptr_t) _("<corrupt>");
 	      else
 		internal_ptr->u.syment._n._n_n._n_offset =
-		  ((bfd_hostptr_t)
-		   (string_table
-		    + internal_ptr->u.syment._n._n_n._n_offset));
+		  ((uintptr_t) (string_table
+				+ internal_ptr->u.syment._n._n_n._n_offset));
 	    }
 	  else
 	    {
@@ -1944,13 +1948,15 @@ coff_get_normalized_symtab (bfd *abfd)
 		  /* PR binutils/17512: Catch out of range offsets into the debug data.  */
 		  if (internal_ptr->u.syment._n._n_n._n_offset > debug_sec->size
 		      || debug_sec_data + internal_ptr->u.syment._n._n_n._n_offset < debug_sec_data)
-		    internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t) _("<corrupt>");
+		    internal_ptr->u.syment._n._n_n._n_offset =
+		      (uintptr_t) _("<corrupt>");
 		  else
-		    internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t)
-		      (debug_sec_data + internal_ptr->u.syment._n._n_n._n_offset);
+		    internal_ptr->u.syment._n._n_n._n_offset =
+		      (uintptr_t) (debug_sec_data
+				   + internal_ptr->u.syment._n._n_n._n_offset);
 		}
 	      else
-		internal_ptr->u.syment._n._n_n._n_offset = (bfd_hostptr_t) "";
+		internal_ptr->u.syment._n._n_n._n_offset = (uintptr_t) "";
 	    }
 	}
       internal_ptr += internal_ptr->u.syment.n_numaux;
@@ -2035,8 +2041,8 @@ coff_get_symbol_info (bfd *abfd, asymbol *symbol, symbol_info *ret)
       && coffsymbol (symbol)->native->fix_value
       && coffsymbol (symbol)->native->is_sym)
     ret->value
-      = (((bfd_hostptr_t) coffsymbol (symbol)->native->u.syment.n_value
-	  - (bfd_hostptr_t) obj_raw_syments (abfd))
+      = (((uintptr_t) coffsymbol (symbol)->native->u.syment.n_value
+	  - (uintptr_t) obj_raw_syments (abfd))
 	 / sizeof (combined_entry_type));
 }
 
@@ -2085,8 +2091,7 @@ coff_print_symbol (bfd *abfd,
 	  if (! combined->fix_value)
 	    val = (bfd_vma) combined->u.syment.n_value;
 	  else
-	    val = (((bfd_hostptr_t) combined->u.syment.n_value
-		    - (bfd_hostptr_t) root)
+	    val = (((uintptr_t) combined->u.syment.n_value - (uintptr_t) root)
 		   / sizeof (combined_entry_type));
 
 	  fprintf (file, "(sec %2d)(fl 0x%02x)(ty %4x)(scl %3d) (nx %d) 0x",

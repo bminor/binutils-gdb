@@ -3023,7 +3023,7 @@ print_symbol_value_1 (FILE *file, symbolS *sym)
   if (!name || !name[0])
     name = "(unnamed)";
   fprintf (file, "sym ");
-  fprintf_vma (file, (bfd_vma) ((bfd_hostptr_t) sym));
+  fprintf_vma (file, (bfd_vma) (uintptr_t) sym);
   fprintf (file, " %s", name);
 
   if (sym->flags.local_symbol)
@@ -3034,7 +3034,7 @@ print_symbol_value_1 (FILE *file, symbolS *sym)
 	  && locsym->frag != NULL)
 	{
 	  fprintf (file, " frag ");
-	  fprintf_vma (file, (bfd_vma) ((bfd_hostptr_t) locsym->frag));
+	  fprintf_vma (file, (bfd_vma) (uintptr_t) locsym->frag);
 	}
       if (locsym->flags.resolved)
 	fprintf (file, " resolved");
@@ -3045,7 +3045,7 @@ print_symbol_value_1 (FILE *file, symbolS *sym)
       if (sym->frag != &zero_address_frag)
 	{
 	  fprintf (file, " frag ");
-	  fprintf_vma (file, (bfd_vma) ((bfd_hostptr_t) sym->frag));
+	  fprintf_vma (file, (bfd_vma) (uintptr_t) sym->frag);
 	}
       if (sym->flags.written)
 	fprintf (file, " written");
@@ -3121,7 +3121,7 @@ void
 print_expr_1 (FILE *file, expressionS *exp)
 {
   fprintf (file, "expr ");
-  fprintf_vma (file, (bfd_vma) ((bfd_hostptr_t) exp));
+  fprintf_vma (file, (bfd_vma) (uintptr_t) exp);
   fprintf (file, " ");
   switch (exp->X_op)
     {

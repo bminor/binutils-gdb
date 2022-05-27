@@ -219,17 +219,11 @@ if test "x${ac_cv_sizeof_void_p}" = "x8"; then
 fi
 
 BFD_HOST_64BIT_LONG=0
-BFD_HOSTPTR_T="unsigned long"
 if test "x${ac_cv_sizeof_long}" = "x8"; then
   BFD_HOST_64BIT_LONG=1
-elif test "x${ac_cv_sizeof_long_long}" = "x8"; then
-  if test "x${ac_cv_sizeof_void_p}" = "x8"; then
-    BFD_HOSTPTR_T="unsigned long long"
-  fi
 fi
 
 AC_SUBST(BFD_HOST_64BIT_LONG)
-AC_SUBST(BFD_HOSTPTR_T)
 
 BFD_CC_FOR_BUILD
 
