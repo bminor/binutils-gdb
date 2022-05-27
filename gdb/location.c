@@ -855,7 +855,7 @@ string_to_location_spec (const char **stringp,
 
       /* If the user really specified a location spec, then we're
 	 done.  */
-      if (!location_spec_empty_p (locspec.get ()))
+      if (!locspec->empty_p ())
 	return locspec;
 
       /* Otherwise, the user _only_ specified optional flags like
@@ -872,14 +872,6 @@ string_to_location_spec (const char **stringp,
   /* Everything else is a "basic" linespec, address, or probe location
      spec.  */
   return string_to_location_spec_basic (stringp, language, match_type);
-}
-
-/* See description in location.h.  */
-
-int
-location_spec_empty_p (const location_spec *locspec)
-{
-  return locspec->empty_p ();
 }
 
 /* See description in location.h.  */

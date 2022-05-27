@@ -363,10 +363,6 @@ extern location_spec_up
 				    const struct language_defn *language,
 				    explicit_completion_info *completion_info);
 
-/* A convenience function for testing for unset location specs.  */
-
-extern int location_spec_empty_p (const location_spec *locspec);
-
 /* Set the location specs's string representation.  */
 
 extern void set_location_spec_string (struct location_spec *locspec,

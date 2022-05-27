@@ -3699,8 +3699,7 @@ create_exception_master_breakpoint (void)
 static int
 breakpoint_location_spec_empty_p (const struct breakpoint *b)
 {
-  return (b->locspec != nullptr
-	  && location_spec_empty_p (b->locspec.get ()));
+  return (b->locspec != nullptr && b->locspec->empty_p ());
 }
 
 void
