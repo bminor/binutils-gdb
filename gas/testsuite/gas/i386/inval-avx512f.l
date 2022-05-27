@@ -228,6 +228,16 @@
 .*:333: Error: .*vaddpd.*
 .*:334: Error: .*vaddpd.*
 .*:336: Error: .*
+.*:340: Error: .*vaddps.*
+.*:341: Error: .*vaddps.*
+.*:342: Error: .*vaddps.*
+.*:344: Error: .*vcmpps.*
+.*:346: Error: .*vcmpps.*
+.*:347: Error: .*vcmpps.*
+.*:348: Error: .*vcmpps.*
+.*:350: Error: .*vcvtsi2ss.*
+.*:352: Error: .*vcvtsi2ss.*
+.*:353: Error: .*vcvtsi2ss.*
 GAS LISTING .*
 
 
@@ -600,4 +610,23 @@ GAS LISTING .*
 [ 	]*335 \?\?\?\? 62F1F558[ 	]+vaddpd zmm2, zmm1, QWORD BCST \[eax\]
 [ 	]*335[ 	]+5810
 [ 	]*336[ 	].*vaddpd zmm2, zmm1, ZMMWORD BCST \[eax\]
+#...
+[ 	]*339[ 	].*vaddps \{rn-sae\}, %zmm0, %zmm0, %zmm0
+[ 	]*339[ 	]+58C0
+[ 	]*340[ 	]+vaddps %zmm0, \{rn-sae\}, %zmm0, %zmm0
+[ 	]*341[ 	]+vaddps %zmm0, %zmm0, \{rn-sae\}, %zmm0
+[ 	]*342[ 	]+vaddps %zmm0, %zmm0, %zmm0, \{rn-sae\}
+[ 	]*343[ 	]*
+[ 	]*344[ 	]+vcmpps \{sae\}, \$0, %zmm0, %zmm0, %k0
+[ 	]*345[ 	].*vcmpps \$0, \{sae\}, %zmm0, %zmm0, %k0
+[ 	]*345[ 	]+C2C000
+[ 	]*346[ 	]+vcmpps \$0, %zmm0, \{sae\}, %zmm0, %k0
+[ 	]*347[ 	]+vcmpps \$0, %zmm0, %zmm0, \{sae\}, %k0
+[ 	]*348[ 	]+vcmpps \$0, %zmm0, %zmm0, %k0, \{sae\}
+[ 	]*349[ 	]*
+[ 	]*350[ 	]+vcvtsi2ss \{rn-sae\}, %eax, %xmm0, %xmm0
+[ 	]*351[ 	].*vcvtsi2ss %eax, \{rn-sae\}, %xmm0, %xmm0
+[ 	]*351[ 	]+2AC0
+[ 	]*352[ 	]+vcvtsi2ss %eax, %xmm0, \{rn-sae\}, %xmm0
+[ 	]*353[ 	]+vcvtsi2ss %eax, %xmm0, %xmm0, \{rn-sae\}
 #pass

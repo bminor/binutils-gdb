@@ -335,4 +335,21 @@ _start:
 	vaddpd zmm2, zmm1, QWORD BCST [eax]
 	vaddpd zmm2, zmm1, ZMMWORD BCST [eax]
 
+	.att_syntax prefix
+	vaddps {rn-sae}, %zmm0, %zmm0, %zmm0
+	vaddps %zmm0, {rn-sae}, %zmm0, %zmm0
+	vaddps %zmm0, %zmm0, {rn-sae}, %zmm0
+	vaddps %zmm0, %zmm0, %zmm0, {rn-sae}
+
+	vcmpps {sae}, $0, %zmm0, %zmm0, %k0
+	vcmpps $0, {sae}, %zmm0, %zmm0, %k0
+	vcmpps $0, %zmm0, {sae}, %zmm0, %k0
+	vcmpps $0, %zmm0, %zmm0, {sae}, %k0
+	vcmpps $0, %zmm0, %zmm0, %k0, {sae}
+
+	vcvtsi2ss {rn-sae}, %eax, %xmm0, %xmm0
+	vcvtsi2ss %eax, {rn-sae}, %xmm0, %xmm0
+	vcvtsi2ss %eax, %xmm0, {rn-sae}, %xmm0
+	vcvtsi2ss %eax, %xmm0, %xmm0, {rn-sae}
+
 	.p2align 4

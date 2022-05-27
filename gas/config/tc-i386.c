@@ -255,7 +255,6 @@ enum i386_error
     mask_not_on_destination,
     no_default_mask,
     unsupported_rc_sae,
-    rc_sae_operand_not_last_imm,
     invalid_register_operand,
   };
 
@@ -372,8 +371,6 @@ struct _i386_insn
 	  rz,
 	  saeonly
 	} type;
-
-      unsigned int operand;
     } rounding;
 
     /* Broadcasting attributes.
@@ -5771,13 +5768,6 @@ swap_2_operands (unsigned int xchg1, unsigned int xchg2)
       else if (i.broadcast.operand == xchg2)
 	i.broadcast.operand = xchg1;
     }
-  if (i.rounding.type != rc_none)
-    {
-      if (i.rounding.operand == xchg1)
-	i.rounding.operand = xchg2;
-      else if (i.rounding.operand == xchg2)
-	i.rounding.operand = xchg1;
-    }
 }
 
 static void
@@ -6346,25 +6336,26 @@ check_VecOperands (const insn_template *t)
   if (i.rounding.type != rc_none)
     {
       if (!t->opcode_modifier.sae
-	  || ((i.rounding.type != saeonly) != t->opcode_modifier.staticrounding))
+	  || ((i.rounding.type != saeonly) != t->opcode_modifier.staticrounding)
+	  || i.mem_operands)
 	{
 	  i.error = unsupported_rc_sae;
 	  return 1;
 	}
-      /* If the instruction has several immediate operands and one of
-	 them is rounding, the rounding operand should be the last
-	 immediate operand.  */
-      if (i.imm_operands > 1
-	  && i.rounding.operand != i.imm_operands - 1)
+
+      /* Non-EVEX.LIG forms need to have a ZMM register as at least one
+	 operand.  */
+      if (t->opcode_modifier.evex != EVEXLIG)
 	{
-	  i.error = rc_sae_operand_not_last_imm;
-	  return 1;
+	  for (op = 0; op < t->operands; ++op)
+	    if (i.types[op].bitfield.zmmword)
+	      break;
+	  if (op >= t->operands)
+	    {
+	      i.error = operand_size_mismatch;
+	      return 1;
+	    }
 	}
-    }
-  else if (t->opcode_modifier.sae)
-    {
-	i.error = unsupported_syntax;
-	return 1;
     }
 
   /* Check the special Imm4 cases; must be the first operand.  */
@@ -7010,12 +7001,6 @@ match_template (char mnem_suffix)
 	  break;
 	case unsupported_rc_sae:
 	  err_msg = _("unsupported static rounding/sae");
-	  break;
-	case rc_sae_operand_not_last_imm:
-	  if (intel_syntax)
-	    err_msg = _("RC/SAE operand must precede immediate operands");
-	  else
-	    err_msg = _("RC/SAE operand must follow immediate operands");
 	  break;
 	case invalid_register_operand:
 	  err_msg = _("invalid register operand");
@@ -8276,8 +8261,7 @@ build_modrm_byte (void)
 		      || (i.tm.opcode_modifier.vexvvvv == VEXXDS
 			  && i.imm_operands == 1
 			  && (i.types[0].bitfield.imm8
-			      || i.types[i.operands - 1].bitfield.imm8
-			      || i.rounding.type != rc_none)));
+			      || i.types[i.operands - 1].bitfield.imm8)));
 	  if (i.imm_operands == 2)
 	    source = 2;
 	  else
@@ -8289,23 +8273,8 @@ build_modrm_byte (void)
 	    }
 	  break;
 	case 5:
-	  if (is_evex_encoding (&i.tm))
-	    {
-	      /* For EVEX instructions, when there are 5 operands, the
-		 first one must be immediate operand.  If the second one
-		 is immediate operand, the source operand is the 3th
-		 one.  If the last one is immediate operand, the source
-		 operand is the 2nd one.  */
-	      gas_assert (i.imm_operands == 2
-			  && i.tm.opcode_modifier.sae
-			  && operand_type_check (i.types[0], imm));
-	      if (operand_type_check (i.types[1], imm))
-		source = 2;
-	      else if (operand_type_check (i.types[4], imm))
-		source = 1;
-	      else
-		abort ();
-	    }
+	  gas_assert (!is_evex_encoding (&i.tm));
+	  gas_assert (i.imm_operands == 1 && vex_3_sources);
 	  break;
 	default:
 	  abort ();
@@ -8314,12 +8283,6 @@ build_modrm_byte (void)
       if (!vex_3_sources)
 	{
 	  dest = source + 1;
-
-	  /* RC/SAE operand could be between DEST and SRC.  That happens
-	     when one operand is GPR and the other one is XMM/YMM/ZMM
-	     register.  */
-	  if (i.rounding.type != rc_none && i.rounding.operand == dest)
-	    dest++;
 
 	  if (i.tm.opcode_modifier.vexvvvv == VEXXDS)
 	    {
@@ -9768,7 +9731,7 @@ output_insn (void)
 
       /* Since the VEX/EVEX prefix contains the implicit prefix, we
 	 don't need the explicit prefix.  */
-      if (!i.tm.opcode_modifier.vex && !i.tm.opcode_modifier.evex)
+      if (!is_any_vex_encoding (&i.tm))
 	{
 	  switch (i.tm.opcode_modifier.opcodeprefix)
 	    {
@@ -10225,10 +10188,6 @@ output_imm (fragS *insn_start_frag, offsetT insn_start_off)
 
   for (n = 0; n < i.operands; n++)
     {
-      /* Skip SAE/RC Imm operand in EVEX.  They are already handled.  */
-      if (i.rounding.type != rc_none && n == i.rounding.operand)
-	continue;
-
       if (operand_type_check (i.types[n], imm))
 	{
 	  int size = imm_size (n);
@@ -11449,7 +11408,6 @@ RC_SAE_immediate (const char *imm_start)
 {
   unsigned int match_found, j;
   const char *pstr = imm_start;
-  expressionS *exp;
 
   if (*pstr != '{')
     return 0;
@@ -11467,7 +11425,6 @@ RC_SAE_immediate (const char *imm_start)
 	    }
 
 	  i.rounding.type = RC_NamesTable[j].type;
-	  i.rounding.operand = this_operand;
 
 	  pstr += RC_NamesTable[j].len;
 	  match_found = 1;
@@ -11489,15 +11446,9 @@ RC_SAE_immediate (const char *imm_start)
       return 0;
     }
 
-  exp = &im_expressions[i.imm_operands++];
-  i.op[this_operand].imms = exp;
+  /* Internally this doesn't count as an operand.  */
+  --i.operands;
 
-  exp->X_op = O_constant;
-  exp->X_add_number = 0;
-  exp->X_add_symbol = (symbolS *) 0;
-  exp->X_op_symbol = (symbolS *) 0;
-
-  i.types[this_operand].bitfield.imm8 = 1;
   return 1;
 }
 
@@ -11633,6 +11584,21 @@ i386_att_operand (char *operand_string)
       i.types[this_operand].bitfield.unspecified = 0;
       i.op[this_operand].regs = r;
       i.reg_operands++;
+
+      /* A GPR may follow an RC or SAE immediate only if a (vector) register
+         operand was also present earlier on.  */
+      if (i.rounding.type != rc_none && temp.bitfield.class == Reg
+          && i.reg_operands == 1)
+	{
+	  unsigned int j;
+
+	  for (j = 0; j < ARRAY_SIZE (RC_NamesTable); ++j)
+	    if (i.rounding.type == RC_NamesTable[j].type)
+	      break;
+	  as_bad (_("`%s': misplaced `{%s}'"),
+		  current_templates->start->name, RC_NamesTable[j].name);
+	  return 0;
+	}
     }
   else if (*op_string == REGISTER_PREFIX)
     {
@@ -11649,11 +11615,25 @@ i386_att_operand (char *operand_string)
 	}
       if (!i386_immediate (op_string))
 	return 0;
+      if (i.rounding.type != rc_none)
+	{
+	  as_bad (_("`%s': RC/SAE operand must follow immediate operands"),
+		  current_templates->start->name);
+	  return 0;
+	}
     }
   else if (RC_SAE_immediate (operand_string))
     {
-      /* If it is a RC or SAE immediate, do nothing.  */
-      ;
+      /* If it is a RC or SAE immediate, do the necessary placement check:
+	 Only another immediate or a GPR may precede it.  */
+      if (i.mem_operands || i.reg_operands + i.imm_operands > 1
+	  || (i.reg_operands == 1
+	      && i.op[0].regs->reg_type.bitfield.class != Reg))
+	{
+	  as_bad (_("`%s': misplaced `%s'"),
+		  current_templates->start->name, operand_string);
+	  return 0;
+	}
     }
   else if (starts_memory_operand (*op_string))
     {

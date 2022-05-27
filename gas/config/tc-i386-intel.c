@@ -604,7 +604,16 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
   /* Handle vector immediates.  */
   if (RC_SAE_immediate (operand_string))
-    return 1;
+    {
+      if (i.imm_operands)
+	{
+	  as_bad (_("`%s': RC/SAE operand must precede immediate operands"),
+		  current_templates->start->name);
+	  return 0;
+	}
+
+      return 1;
+    }
 
   /* Initialize state structure.  */
   intel_state.op_modifier = O_absent;
@@ -888,6 +897,18 @@ i386_intel_operand (char *operand_string, int got_a_float)
 					       temp);
       i.types[this_operand].bitfield.unspecified = 0;
       ++i.reg_operands;
+
+      if (i.rounding.type != rc_none && temp.bitfield.class != Reg)
+	{
+	  unsigned int j;
+
+	  for (j = 0; j < ARRAY_SIZE (RC_NamesTable); ++j)
+	    if (i.rounding.type == RC_NamesTable[j].type)
+	      break;
+	  as_bad (_("`%s': misplaced `{%s}'"),
+		  current_templates->start->name, RC_NamesTable[j].name);
+	  return 0;
+	}
     }
   else if (intel_state.base
 	   || intel_state.index
