@@ -4773,7 +4773,7 @@ bfd_mach_o_read_source_version (bfd *abfd, bfd_mach_o_load_command *command)
 {
   bfd_mach_o_source_version_command *cmd = &command->command.source_version;
   struct mach_o_source_version_command_external raw;
-  bfd_uint64_t ver;
+  uint64_t ver;
 
   if (command->len < sizeof (raw) + 8)
     return false;

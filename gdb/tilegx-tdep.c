@@ -375,7 +375,7 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
   CORE_ADDR instbuf_start;
   unsigned int instbuf_size;
   int status;
-  bfd_uint64_t bundle;
+  uint64_t bundle;
   struct tilegx_decoded_instruction
     decoded[TILEGX_MAX_INSTRUCTIONS_PER_BUNDLE];
   int num_insns;

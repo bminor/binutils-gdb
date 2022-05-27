@@ -1890,18 +1890,12 @@ xcoff_write_armap_old (bfd *abfd, unsigned int elength ATTRIBUTE_UNUSED,
 }
 
 static char buff20[XCOFFARMAGBIG_ELEMENT_SIZE + 1];
-#if BFD_HOST_64BIT_LONG
-#define FMT20  "%-20ld"
-#elif defined (__MSVCRT__)
-#define FMT20  "%-20I64d"
-#else
-#define FMT20  "%-20lld"
-#endif
+#define FMT20  "%-20" PRId64
 #define FMT12  "%-12d"
 #define FMT12_OCTAL  "%-12o"
 #define FMT4  "%-4d"
 #define PRINT20(d, v) \
-  sprintf (buff20, FMT20, (bfd_uint64_t)(v)), \
+  sprintf (buff20, FMT20, (uint64_t) (v)), \
   memcpy ((void *) (d), buff20, 20)
 
 #define PRINT12(d, v) \

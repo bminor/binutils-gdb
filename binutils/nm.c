@@ -1557,29 +1557,15 @@ get_print_format (void)
       padding = "016";
     }
 
-  const char * length = "l";
-  if (print_width == 64)
-    {
-#if BFD_HOST_64BIT_LONG
-      ;
-#elif BFD_HOST_64BIT_LONG_LONG
-#ifndef __MSVCRT__
-      length = "ll";
-#else
-      length = "I64";
-#endif
-#endif
-    }
-
   const char * radix = NULL;
   switch (print_radix)
     {
-    case 8:  radix = "o"; break;
-    case 10: radix = "d"; break;
-    case 16: radix = "x"; break;
+    case 8:  radix = PRIo64; break;
+    case 10: radix = PRId64; break;
+    case 16: radix = PRIx64; break;
     }
 
-  return concat ("%", padding, length, radix, NULL);
+  return concat ("%", padding, radix, NULL);
 }
 
 static void
@@ -1874,33 +1860,8 @@ print_value (bfd *abfd ATTRIBUTE_UNUSED, bfd_vma val)
   switch (print_width)
     {
     case 32:
-      printf (print_format_string, (unsigned long) val);
-      break;
-
     case 64:
-#if BFD_HOST_64BIT_LONG || BFD_HOST_64BIT_LONG_LONG
-      printf (print_format_string, val);
-#else
-      /* We have a 64 bit value to print, but the host is only 32 bit.  */
-      if (print_radix == 16)
-	bfd_fprintf_vma (abfd, stdout, val);
-      else
-	{
-	  char buf[30];
-	  char *s;
-
-	  s = buf + sizeof buf;
-	  *--s = '\0';
-	  while (val > 0)
-	    {
-	      *--s = (val % print_radix) + '0';
-	      val /= print_radix;
-	    }
-	  while ((buf + sizeof buf - 1) - s < 16)
-	    *--s = '0';
-	  printf ("%s", s);
-	}
-#endif
+      printf (print_format_string, (uint64_t) val);
       break;
 
     default:

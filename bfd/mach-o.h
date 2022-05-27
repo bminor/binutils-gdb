@@ -545,8 +545,8 @@ bfd_mach_o_encryption_info_command;
 
 typedef struct bfd_mach_o_main_command
 {
-  bfd_uint64_t entryoff;
-  bfd_uint64_t stacksize;
+  uint64_t entryoff;
+  uint64_t stacksize;
 }
 bfd_mach_o_main_command;
 
@@ -563,8 +563,8 @@ bfd_mach_o_source_version_command;
 typedef struct bfd_mach_o_note_command
 {
   char data_owner[16];
-  bfd_uint64_t offset;
-  bfd_uint64_t size;
+  uint64_t offset;
+  uint64_t size;
 }
 bfd_mach_o_note_command;
 

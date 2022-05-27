@@ -49,7 +49,7 @@ struct csky_dis_info
   disassemble_info *info;
   /* Opcode information.  */
   struct csky_opcode_info const *opinfo;
-  BFD_HOST_U_64_BIT isa;
+  uint64_t isa;
   /* The value of operand to show.  */
   int value;
   /* Whether to look up/print a symbol name.  */

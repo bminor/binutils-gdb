@@ -201,7 +201,7 @@ coff_amd64_reloc (bfd *abfd,
 
 	case 4:
 	  {
-	    bfd_uint64_t x = bfd_get_64 (abfd, addr);
+	    uint64_t x = bfd_get_64 (abfd, addr);
 	    DOIT (x);
 	    bfd_put_64 (abfd, x, addr);
 	  }

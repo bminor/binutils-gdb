@@ -3565,7 +3565,7 @@ add_to_lit_pool (unsigned int nbytes)
       imm1 = inst.operands[1].imm;
       imm2 = (inst.operands[1].regisimm ? inst.operands[1].reg
 	       : inst.relocs[0].exp.X_unsigned ? 0
-	       : ((bfd_int64_t) inst.operands[1].imm) >> 32);
+	       : (int64_t) inst.operands[1].imm >> 32);
       if (target_big_endian)
 	{
 	  imm1 = imm2;
@@ -8819,15 +8819,14 @@ neon_cmode_for_move_imm (unsigned immlo, unsigned immhi, int float_p,
   return FAIL;
 }
 
-#if defined BFD_HOST_64_BIT
 /* Returns TRUE if double precision value V may be cast
    to single precision without loss of accuracy.  */
 
 static bool
-is_double_a_single (bfd_uint64_t v)
+is_double_a_single (uint64_t v)
 {
   int exp = (v >> 52) & 0x7FF;
-  bfd_uint64_t mantissa = v & 0xFFFFFFFFFFFFFULL;
+  uint64_t mantissa = v & 0xFFFFFFFFFFFFFULL;
 
   return ((exp == 0 || exp == 0x7FF
 	   || (exp >= 1023 - 126 && exp <= 1023 + 127))
@@ -8838,11 +8837,11 @@ is_double_a_single (bfd_uint64_t v)
    (ignoring the least significant bits in exponent and mantissa).  */
 
 static int
-double_to_single (bfd_uint64_t v)
+double_to_single (uint64_t v)
 {
   unsigned int sign = (v >> 63) & 1;
   int exp = (v >> 52) & 0x7FF;
-  bfd_uint64_t mantissa = v & 0xFFFFFFFFFFFFFULL;
+  uint64_t mantissa = v & 0xFFFFFFFFFFFFFULL;
 
   if (exp == 0x7FF)
     exp = 0xFF;
@@ -8865,7 +8864,6 @@ double_to_single (bfd_uint64_t v)
   mantissa >>= 29;
   return (sign << 31) | (exp << 23) | mantissa;
 }
-#endif /* BFD_HOST_64_BIT */
 
 enum lit_type
 {
@@ -8914,11 +8912,7 @@ move_or_literal_pool (int i, enum lit_type t, bool mode_3)
   if (inst.relocs[0].exp.X_op == O_constant
       || inst.relocs[0].exp.X_op == O_big)
     {
-#if defined BFD_HOST_64_BIT
-      bfd_uint64_t v;
-#else
-      valueT v;
-#endif
+      uint64_t v;
       if (inst.relocs[0].exp.X_op == O_big)
 	{
 	  LITTLENUM_TYPE w[X_PRECISION];
@@ -8933,7 +8927,6 @@ move_or_literal_pool (int i, enum lit_type t, bool mode_3)
 	  else
 	    l = generic_bignum;
 
-#if defined BFD_HOST_64_BIT
 	  v = l[3] & LITTLENUM_MASK;
 	  v <<= LITTLENUM_NUMBER_OF_BITS;
 	  v |= l[2] & LITTLENUM_MASK;
@@ -8941,11 +8934,6 @@ move_or_literal_pool (int i, enum lit_type t, bool mode_3)
 	  v |= l[1] & LITTLENUM_MASK;
 	  v <<= LITTLENUM_NUMBER_OF_BITS;
 	  v |= l[0] & LITTLENUM_MASK;
-#else
-	  v = l[1] & LITTLENUM_MASK;
-	  v <<= LITTLENUM_NUMBER_OF_BITS;
-	  v |= l[0] & LITTLENUM_MASK;
-#endif
 	}
       else
 	v = inst.relocs[0].exp.X_add_number;
@@ -9041,7 +9029,7 @@ move_or_literal_pool (int i, enum lit_type t, bool mode_3)
 		? inst.operands[1].reg
 		: inst.relocs[0].exp.X_unsigned
 		? 0
-		: ((bfd_int64_t)((int) immlo)) >> 32;
+		: (int64_t) (int) immlo >> 32;
 	      int cmode = neon_cmode_for_move_imm (immlo, immhi, false, &immbits,
 						   &op, 64, NT_invtype);
 
@@ -9090,7 +9078,6 @@ move_or_literal_pool (int i, enum lit_type t, bool mode_3)
 	     discrepancy between the output produced by an assembler built for
 	     a 32-bit-only host and the output produced from a 64-bit host, but
 	     this cannot be helped.  */
-#if defined BFD_HOST_64_BIT
 	  else if (!inst.operands[1].issingle
 		   && ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v3))
 	    {
@@ -9103,7 +9090,6 @@ move_or_literal_pool (int i, enum lit_type t, bool mode_3)
 		  return true;
 		}
 	    }
-#endif
 	}
     }
 

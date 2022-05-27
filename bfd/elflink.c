@@ -6354,15 +6354,11 @@ compute_bucket_count (struct bfd_link_info *info ATTRIBUTE_UNUSED,
   size_t best_size = 0;
   unsigned long int i;
 
-  /* We have a problem here.  The following code to optimize the table
-     size requires an integer type with more the 32 bits.  If
-     BFD_HOST_U_64_BIT is set we know about such a type.  */
-#ifdef BFD_HOST_U_64_BIT
   if (info->optimize)
     {
       size_t minsize;
       size_t maxsize;
-      BFD_HOST_U_64_BIT best_chlen = ~((BFD_HOST_U_64_BIT) 0);
+      uint64_t best_chlen = ~((uint64_t) 0);
       bfd *dynobj = elf_hash_table (info)->dynobj;
       size_t dynsymcount = elf_hash_table (info)->dynsymcount;
       const struct elf_backend_data *bed = get_elf_backend_data (dynobj);
@@ -6399,7 +6395,7 @@ compute_bucket_count (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       for (i = minsize; i < maxsize; ++i)
 	{
 	  /* Walk through the array of hashcodes and count the collisions.  */
-	  BFD_HOST_U_64_BIT max;
+	  uint64_t max;
 	  unsigned long int j;
 	  unsigned long int fact;
 
@@ -6464,11 +6460,7 @@ compute_bucket_count (struct bfd_link_info *info ATTRIBUTE_UNUSED,
       free (counts);
     }
   else
-#endif /* defined (BFD_HOST_U_64_BIT) */
     {
-      /* This is the fallback solution if no 64bit type is available or if we
-	 are not supposed to spend much time on optimizations.  We select the
-	 bucket count using a fixed set of numbers.  */
       for (i = 0; elf_buckets[i] != 0; i++)
 	{
 	  best_size = elf_buckets[i];
@@ -9354,7 +9346,6 @@ ext32b_r_offset (const void *p)
   return aval;
 }
 
-#ifdef BFD_HOST_64_BIT
 static bfd_vma
 ext64l_r_offset (const void *p)
 {
@@ -9398,7 +9389,6 @@ ext64b_r_offset (const void *p)
 		   | (uint64_t) a->c[7]);
   return aval;
 }
-#endif
 
 /* When performing a relocatable link, the input relocations are
    preserved.  But, if they reference global symbols, the indices
@@ -9502,13 +9492,11 @@ elf_link_adjust_relocs (bfd *abfd,
 	}
       else
 	{
-#ifdef BFD_HOST_64_BIT
 	  if (abfd->xvec->header_byteorder == BFD_ENDIAN_LITTLE)
 	    ext_r_off = ext64l_r_offset;
 	  else if (abfd->xvec->header_byteorder == BFD_ENDIAN_BIG)
 	    ext_r_off = ext64b_r_offset;
 	  else
-#endif
 	    abort ();
 	}
 

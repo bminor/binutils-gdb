@@ -230,14 +230,14 @@ static bfd_vma
 score3_bfd_getl48 (const void *p)
 {
   const bfd_byte *addr = p;
-  bfd_uint64_t v;
+  uint64_t v;
 
-  v = (bfd_uint64_t) addr[4];
-  v |= (bfd_uint64_t) addr[5] << 8;
-  v |= (bfd_uint64_t) addr[2] << 16;
-  v |= (bfd_uint64_t) addr[3] << 24;
-  v |= (bfd_uint64_t) addr[0] << 32;
-  v |= (bfd_uint64_t) addr[1] << 40;
+  v = (uint64_t) addr[4];
+  v |= (uint64_t) addr[5] << 8;
+  v |= (uint64_t) addr[2] << 16;
+  v |= (uint64_t) addr[3] << 24;
+  v |= (uint64_t) addr[0] << 32;
+  v |= (uint64_t) addr[1] << 40;
   return v;
 }
 

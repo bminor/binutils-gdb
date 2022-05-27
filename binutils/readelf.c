@@ -10729,7 +10729,7 @@ dynamic_section_parisc_val (Elf_Internal_Dyn * entry)
 /* Display a VMS time in a human readable format.  */
 
 static void
-print_vms_time (bfd_int64_t vmstime)
+print_vms_time (int64_t vmstime)
 {
   struct tm *tm = NULL;
   time_t unxtime;
@@ -20764,7 +20764,7 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
       /* FIXME: Generate an error if descsz > 8 ?  */
 
       printf ("0x%016" BFD_VMA_FMT "x\n",
-	      (bfd_vma) byte_get ((unsigned char *)pnote->descdata, 8));
+	      (bfd_vma) byte_get ((unsigned char *) pnote->descdata, 8));
       break;
 
     case NT_VMS_LINKTIME:
@@ -20773,8 +20773,7 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
 	goto desc_size_fail;
       /* FIXME: Generate an error if descsz > 8 ?  */
 
-      print_vms_time
-	((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata, 8));
+      print_vms_time (byte_get ((unsigned char *) pnote->descdata, 8));
       printf ("\n");
       break;
 
@@ -20784,8 +20783,7 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
 	goto desc_size_fail;
       /* FIXME: Generate an error if descsz > 8 ?  */
 
-      print_vms_time
-	((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata, 8));
+      print_vms_time (byte_get ((unsigned char *) pnote->descdata, 8));
       printf ("\n");
       break;
 
@@ -20794,16 +20792,15 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
 	goto desc_size_fail;
 
       printf (_("   Major id: %u,  minor id: %u\n"),
-              (unsigned) byte_get ((unsigned char *)pnote->descdata, 4),
-              (unsigned) byte_get ((unsigned char *)pnote->descdata + 4, 4));
+	      (unsigned) byte_get ((unsigned char *) pnote->descdata, 4),
+	      (unsigned) byte_get ((unsigned char *) pnote->descdata + 4, 4));
       printf (_("   Last modified  : "));
-      print_vms_time
-        ((bfd_int64_t) byte_get ((unsigned char *)pnote->descdata + 8, 8));
+      print_vms_time (byte_get ((unsigned char *) pnote->descdata + 8, 8));
       printf (_("\n   Link flags  : "));
       printf ("0x%016" BFD_VMA_FMT "x\n",
-              (bfd_vma) byte_get ((unsigned char *)pnote->descdata + 16, 8));
+	      (bfd_vma) byte_get ((unsigned char *) pnote->descdata + 16, 8));
       printf (_("   Header flags: 0x%08x\n"),
-              (unsigned) byte_get ((unsigned char *)pnote->descdata + 24, 4));
+	      (unsigned) byte_get ((unsigned char *) pnote->descdata + 24, 4));
       printf (_("   Image id    : %.*s\n"), maxlen - 32, pnote->descdata + 32);
       break;
 #endif

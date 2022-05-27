@@ -339,7 +339,7 @@ vms_file_stats_name (const char *dirname,
   return 0;
 }
 
-bfd_uint64_t
+uint64_t
 vms_dwarf2_file_time_name (const char *filename, const char *dirname)
 {
   long long cdt;

@@ -179,7 +179,7 @@ struct elf64_ia64_vms_obj_tdata
   struct elf_obj_tdata root;
 
   /* Ident for shared library.  */
-  bfd_uint64_t ident;
+  uint64_t ident;
 
   /* Used only during link: offset in the .fixups section for this bfd.  */
   bfd_vma fixups_off;
@@ -2791,7 +2791,7 @@ elf64_ia64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (!_bfd_elf_add_dynamic_entry (info, DT_IA_64_VMS_IDENT, 0))
 	return false;
       if (!_bfd_elf_add_dynamic_entry (info, DT_IA_64_VMS_LINKTIME,
-				       (((bfd_uint64_t)time_hi) << 32)
+				       ((uint64_t) time_hi << 32)
 				       + time_lo))
 	return false;
 
@@ -4720,7 +4720,7 @@ elf64_vms_close_and_cleanup (bfd *abfd)
       if ((isize & 7) != 0)
 	{
 	  int ishort = 8 - (isize & 7);
-	  bfd_uint64_t pad = 0;
+	  uint64_t pad = 0;
 
 	  bfd_seek (abfd, isize, SEEK_SET);
 	  bfd_bwrite (&pad, ishort, abfd);
@@ -4853,7 +4853,7 @@ elf64_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  bed->s->swap_dyn_in (abfd, extdyn, &dyn);
 	  if (dyn.d_tag == DT_IA_64_VMS_IDENT)
 	    {
-	      bfd_uint64_t tagv = dyn.d_un.d_val;
+	      uint64_t tagv = dyn.d_un.d_val;
 	      elf_ia64_vms_ident (abfd) = tagv;
 	      break;
 	    }

@@ -30,7 +30,7 @@
 /* Copied from bfd_put_bits.  */
 
 static void
-put_bits (bfd_uint64_t data, gdb::byte_vector &buf, int bits, bfd_boolean big_p)
+put_bits (uint64_t data, gdb::byte_vector &buf, int bits, bfd_boolean big_p)
 {
   int i;
   int bytes;

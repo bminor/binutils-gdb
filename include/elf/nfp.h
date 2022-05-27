@@ -102,7 +102,7 @@ extern "C"
 #define SHF_NFP_INIT		0x80000000
 #define SHF_NFP_INIT2		0x40000000
 #define SHF_NFP_SCS(shf)	(((shf) >> 32) & 0xFF)
-#define SHF_NFP_SET_SCS(v)	(((BFD_HOST_U_64_BIT)((v) & 0xFF)) << 32)
+#define SHF_NFP_SET_SCS(v)	((uint64_t) ((v) & 0xFF) << 32)
 
 /* NFP Section Info
    For PROGBITS and NOBITS sections:

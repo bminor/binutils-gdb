@@ -3910,11 +3910,11 @@ z80_tc_label_is_local (const char *name)
 #define EXP_MIN -0x10000
 #define EXP_MAX 0x10000
 static int
-str_to_broken_float (bool *signP, bfd_uint64_t *mantissaP, int *expP)
+str_to_broken_float (bool *signP, uint64_t *mantissaP, int *expP)
 {
   char *p;
   bool sign;
-  bfd_uint64_t mantissa = 0;
+  uint64_t mantissa = 0;
   int exponent = 0;
   int i;
 
@@ -4029,7 +4029,7 @@ str_to_broken_float (bool *signP, bfd_uint64_t *mantissaP, int *expP)
 static const char *
 str_to_zeda32(char *litP, int *sizeP)
 {
-  bfd_uint64_t mantissa;
+  uint64_t mantissa;
   bool sign;
   int exponent;
   unsigned i;
@@ -4088,7 +4088,7 @@ str_to_zeda32(char *litP, int *sizeP)
 static const char *
 str_to_float48(char *litP, int *sizeP)
 {
-  bfd_uint64_t mantissa;
+  uint64_t mantissa;
   bool sign;
   int exponent;
   unsigned i;

@@ -63,8 +63,8 @@ struct attribute
   {
     char *str;
     struct dwarf_block *blk;
-    bfd_uint64_t val;
-    bfd_int64_t sval;
+    uint64_t val;
+    int64_t sval;
   }
   u;
 };
@@ -632,12 +632,12 @@ lookup_info_hash_table (struct info_hash_table *hash_table, const char *key)
    the located section does not contain at least OFFSET bytes.  */
 
 static bool
-read_section (bfd *	      abfd,
+read_section (bfd *abfd,
 	      const struct dwarf_debug_section *sec,
-	      asymbol **      syms,
-	      bfd_uint64_t    offset,
-	      bfd_byte **     section_buffer,
-	      bfd_size_type * section_size)
+	      asymbol **syms,
+	      uint64_t offset,
+	      bfd_byte **section_buffer,
+	      bfd_size_type *section_size)
 {
   const char *section_name = sec->uncompressed_name;
   bfd_byte *contents = *section_buffer;
@@ -848,7 +848,7 @@ read_indirect_string (struct comp_unit *unit,
 		      bfd_byte **ptr,
 		      bfd_byte *buf_end)
 {
-  bfd_uint64_t offset;
+  uint64_t offset;
   struct dwarf2_debug *stash = unit->stash;
   struct dwarf2_debug_file *file = unit->file;
   char *str;
@@ -882,7 +882,7 @@ read_indirect_line_string (struct comp_unit *unit,
 			   bfd_byte **ptr,
 			   bfd_byte *buf_end)
 {
-  bfd_uint64_t offset;
+  uint64_t offset;
   struct dwarf2_debug *stash = unit->stash;
   struct dwarf2_debug_file *file = unit->file;
   char *str;
@@ -919,7 +919,7 @@ read_alt_indirect_string (struct comp_unit *unit,
 			  bfd_byte **ptr,
 			  bfd_byte *buf_end)
 {
-  bfd_uint64_t offset;
+  uint64_t offset;
   struct dwarf2_debug *stash = unit->stash;
   char *str;
 
@@ -975,8 +975,7 @@ read_alt_indirect_string (struct comp_unit *unit,
    or NULL upon failure.  */
 
 static bfd_byte *
-read_alt_indirect_ref (struct comp_unit * unit,
-		       bfd_uint64_t       offset)
+read_alt_indirect_ref (struct comp_unit *unit, uint64_t offset)
 {
   struct dwarf2_debug *stash = unit->stash;
 
@@ -1012,7 +1011,7 @@ read_alt_indirect_ref (struct comp_unit * unit,
   return stash->alt.dwarf_info_buffer + offset;
 }
 
-static bfd_uint64_t
+static uint64_t
 read_address (struct comp_unit *unit, bfd_byte **ptr, bfd_byte *buf_end)
 {
   bfd_byte *buf = *ptr;
@@ -1131,7 +1130,7 @@ del_abbrev (void *p)
    in a hash table.  */
 
 static struct abbrev_info**
-read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash,
+read_abbrevs (bfd *abfd, uint64_t offset, struct dwarf2_debug *stash,
 	      struct dwarf2_debug_file *file)
 {
   struct abbrev_info **abbrevs;
@@ -1356,8 +1355,7 @@ is_addrx_form (enum dwarf_form form)
 /* Returns the address in .debug_addr section using DW_AT_addr_base.
    Used to implement DW_FORM_addrx*.  */
 static bfd_vma
-read_indexed_address (bfd_uint64_t idx,
-		      struct comp_unit *unit)
+read_indexed_address (uint64_t idx, struct comp_unit *unit)
 {
   struct dwarf2_debug *stash = unit->stash;
   struct dwarf2_debug_file *file = unit->file;
@@ -1383,8 +1381,7 @@ read_indexed_address (bfd_uint64_t idx,
 /* Returns the string using DW_AT_str_offsets_base.
    Used to implement DW_FORM_strx*.  */
 static const char *
-read_indexed_string (bfd_uint64_t idx,
-		     struct comp_unit *unit)
+read_indexed_string (uint64_t idx, struct comp_unit *unit)
 {
   struct dwarf2_debug *stash = unit->stash;
   struct dwarf2_debug_file *file = unit->file;
@@ -1717,39 +1714,39 @@ struct line_info_table
 struct funcinfo
 {
   /* Pointer to previous function in list of all functions.  */
-  struct funcinfo *	prev_func;
+  struct funcinfo *prev_func;
   /* Pointer to function one scope higher.  */
-  struct funcinfo *	caller_func;
+  struct funcinfo *caller_func;
   /* Source location file name where caller_func inlines this func.  */
-  char *		caller_file;
+  char *caller_file;
   /* Source location file name.  */
-  char *		file;
+  char *file;
   /* Source location line number where caller_func inlines this func.  */
-  int			caller_line;
+  int caller_line;
   /* Source location line number.  */
-  int			line;
-  int			tag;
-  bool			is_linkage;
-  const char *		name;
-  struct arange		arange;
+  int line;
+  int tag;
+  bool is_linkage;
+  const char *name;
+  struct arange arange;
   /* Where the symbol is defined.  */
-  asection *		sec;
+  asection *sec;
   /* The offset of the funcinfo from the start of the unit.  */
-  bfd_uint64_t          unit_offset;
+  uint64_t unit_offset;
 };
 
 struct lookup_funcinfo
 {
   /* Function information corresponding to this lookup table entry.  */
-  struct funcinfo *	funcinfo;
+  struct funcinfo *funcinfo;
 
   /* The lowest address for this specific function.  */
-  bfd_vma		low_addr;
+  bfd_vma low_addr;
 
   /* The highest address of this function before the lookup table is sorted.
      The highest address of all prior functions after the lookup table is
      sorted, which is used for binary search.  */
-  bfd_vma		high_addr;
+  bfd_vma high_addr;
   /* Index of this function, used to ensure qsort is stable.  */
   unsigned int idx;
 };
@@ -1759,7 +1756,7 @@ struct varinfo
   /* Pointer to previous variable in list of all variables.  */
   struct varinfo *prev_var;
   /* The offset of the varinfo from the start of the unit.  */
-  bfd_uint64_t unit_offset;
+  uint64_t unit_offset;
   /* Source location file name.  */
   char *file;
   /* Source location line number.  */
@@ -3335,7 +3332,7 @@ find_abstract_instance (struct comp_unit *unit,
   bfd_byte *info_ptr_end;
   unsigned int abbrev_number, i;
   struct abbrev_info *abbrev;
-  bfd_uint64_t die_ref = attr_ptr->u.val;
+  uint64_t die_ref = attr_ptr->u.val;
   struct attribute attr;
   const char *name = NULL;
 
@@ -3549,7 +3546,7 @@ find_abstract_instance (struct comp_unit *unit,
 
 static bool
 read_ranges (struct comp_unit *unit, struct arange *arange,
-	     struct trie_node **trie_root, bfd_uint64_t offset)
+	     struct trie_node **trie_root, uint64_t offset)
 {
   bfd_byte *ranges_ptr;
   bfd_byte *ranges_end;
@@ -3594,7 +3591,7 @@ read_ranges (struct comp_unit *unit, struct arange *arange,
 
 static bool
 read_rnglists (struct comp_unit *unit, struct arange *arange,
-	       struct trie_node **trie_root, bfd_uint64_t offset)
+	       struct trie_node **trie_root, uint64_t offset)
 {
   bfd_byte *rngs_ptr;
   bfd_byte *rngs_end;
@@ -3675,7 +3672,7 @@ read_rnglists (struct comp_unit *unit, struct arange *arange,
 
 static bool
 read_rangelist (struct comp_unit *unit, struct arange *arange,
-		struct trie_node **trie_root, bfd_uint64_t offset)
+		struct trie_node **trie_root, uint64_t offset)
 {
   if (unit->version <= 4)
     return read_ranges (unit, arange, trie_root, offset);
@@ -3684,7 +3681,7 @@ read_rangelist (struct comp_unit *unit, struct arange *arange,
 }
 
 static struct funcinfo *
-lookup_func_by_offset (bfd_uint64_t offset, struct funcinfo * table)
+lookup_func_by_offset (uint64_t offset, struct funcinfo * table)
 {
   for (; table != NULL; table = table->prev_func)
     if (table->unit_offset == offset)
@@ -3693,7 +3690,7 @@ lookup_func_by_offset (bfd_uint64_t offset, struct funcinfo * table)
 }
 
 static struct varinfo *
-lookup_var_by_offset (bfd_uint64_t offset, struct varinfo * table)
+lookup_var_by_offset (uint64_t offset, struct varinfo * table)
 {
   while (table)
     {
@@ -3775,7 +3772,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
       struct abbrev_info *abbrev;
       struct funcinfo *func;
       struct varinfo *var;
-      bfd_uint64_t current_offset;
+      uint64_t current_offset;
 
       /* PR 17512: file: 9f405d9d.  */
       if (info_ptr >= info_ptr_end)
@@ -3909,7 +3906,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
       bfd_vma low_pc = 0;
       bfd_vma high_pc = 0;
       bool high_pc_relative = false;
-      bfd_uint64_t current_offset;
+      uint64_t current_offset;
 
       /* PR 17512: file: 9f405d9d.  */
       if (info_ptr >= info_ptr_end)
@@ -4259,7 +4256,7 @@ parse_comp_unit (struct dwarf2_debug *stash,
 {
   struct comp_unit* unit;
   unsigned int version;
-  bfd_uint64_t abbrev_offset = 0;
+  uint64_t abbrev_offset = 0;
   /* Initialize it just to avoid a GCC false warning.  */
   unsigned int addr_size = -1;
   struct abbrev_info** abbrevs;
