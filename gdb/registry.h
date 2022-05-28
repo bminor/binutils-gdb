@@ -160,7 +160,7 @@ public:
     }
 
     /* The underlying key.  */
-    const typename registry<T>::registry_data *m_key;
+    const unsigned m_key;
   };
 
   /* Clear all the data associated with this container.  This is
@@ -168,13 +168,16 @@ public:
   void clear_registry ()
   {
     /* Call all the free functions.  */
-    for (const auto &datum : get_registrations ())
+    std::vector<registry_data_callback> &registrations
+      = get_registrations ();
+    unsigned last = registrations.size ();
+    for (unsigned i = 0; i < last; ++i)
       {
-	void *elt = m_fields[datum->index];
+	void *elt = m_fields[i];
 	if (elt != nullptr)
 	  {
-	    datum->free (elt);
-	    m_fields[datum->index] = nullptr;
+	    registrations[i] (elt);
+	    m_fields[i] = nullptr;
 	  }
       }
   }
@@ -184,50 +187,40 @@ private:
   /* Registry callbacks have this type.  */
   typedef void (*registry_data_callback) (void *);
 
-  /* The type of a key.  */
-  struct registry_data
-  {
-    unsigned index;
-    registry_data_callback free;
-  };
-
   /* Get a new key for this particular registry.  FREE is a callback.
      When the container object is destroyed, all FREE functions are
      called.  The data associated with the container object is passed
      to the callback.  */
-  static const registry_data *new_key (registry_data_callback free)
+  static unsigned new_key (registry_data_callback free)
   {
-    std::unique_ptr<registry_data> result (new registry_data);
-    std::vector<std::unique_ptr<registry_data>> &registrations
+    std::vector<registry_data_callback> &registrations
       = get_registrations ();
-    result->index = registrations.size ();
-    result->free = free;
-    registrations.emplace_back (std::move (result));
-    return registrations.back ().get ();
+    unsigned result = registrations.size ();
+    registrations.push_back (free);
+    return result;
   }
 
   /* Set the datum associated with KEY in this container.  */
-  void set (const registry_data *key, void *datum)
+  void set (unsigned key, void *datum)
   {
-    m_fields[key->index] = datum;
+    m_fields[key] = datum;
   }
 
   /* Fetch the datum associated with KEY in this container.  If 'set'
      has not been called for this key, nullptr is returned.  */
-  void *get (const registry_data *key)
+  void *get (unsigned key)
   {
-    return m_fields[key->index];
+    return m_fields[key];
   }
 
   /* The data stored in this instance.  */
   std::vector<void *> m_fields;
 
   /* Return a reference to the vector of all the registrations that
-     have been made.  We do separate allocations here so that the
-     addresses are stable and can be used as keys.  */
-  static std::vector<std::unique_ptr<registry_data>> &get_registrations ()
+     have been made.  */
+  static std::vector<registry_data_callback> &get_registrations ()
   {
-    static std::vector<std::unique_ptr<registry_data>> registrations;
+    static std::vector<registry_data_callback> registrations;
     return registrations;
   }
 };
