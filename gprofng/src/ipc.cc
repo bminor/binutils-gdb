@@ -1281,7 +1281,7 @@ ipc_doWork (void *arg)
     {
       int arg1 = readInt (req);
       uint64_t arg2 = readLong (req);
-      ipc_log ("  args = %d, %ld\n", arg1, arg2);
+      ipc_log ("  args = %d, %lld\n", arg1, (long long) arg2);
       dbeSetSelObjV2 (arg1, arg2);
       writeString (NULL, req);
     }

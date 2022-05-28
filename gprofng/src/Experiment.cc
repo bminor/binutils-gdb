@@ -644,7 +644,7 @@ Experiment::ExperimentHandler::startElement (char*, char*, char *qName, Attribut
 	      exp->exp_start_time = ts;
 	      str = attrs->getValue (NTXT ("time"));
 	      if (str != NULL)
-		exp->start_sec = atol (str);
+		exp->start_sec = atoll (str);
 	      str = attrs->getValue (NTXT ("pid"));
 	      if (str != NULL)
 		exp->pid = atoi (str);
@@ -4136,7 +4136,8 @@ Experiment::write_header ()
   if (dbeSession->ipc_mode || dbeSession->rdt_mode)
     {
       // In GUI: print start time at the beginning
-      char *start_time = ctime (&start_sec);
+      time_t t = (time_t) start_sec;
+      char *start_time = ctime (&t);
       if (start_time != NULL)
 	{
 	  sb.setLength (0);
@@ -4258,7 +4259,8 @@ Experiment::write_header ()
     }
 
   // add comment for start time
-  char *p = ctime (&start_sec);
+  time_t t = (time_t) start_sec;
+  char *p = ctime (&t);
   sb.setLength (0);
   if (p != NULL)
     sb.sprintf (GTXT ("Experiment started %s"), p);
@@ -6444,9 +6446,11 @@ Experiment::dump_map (FILE *outfile)
 	load.tv_nsec += NANOSEC;
       }
     fprintf (outfile,
-	     "0x%08llx  %8lld (0x%08llx) %5ld.%09ld %5ld.%09ld  \"%s\"\n",
-	     s->base, s->size, s->size, load.tv_sec, load.tv_nsec,
-	     unload.tv_sec, unload.tv_nsec, s->obj->get_name ());
+	     "0x%08llx  %8lld (0x%08llx) %5lld.%09lld %5lld.%09lld  \"%s\"\n",
+	     (long long) s->base, (long long) s->size, (long long) s->size,
+	     (long long) load.tv_sec, (long long) load.tv_nsec,
+	     (long long) unload.tv_sec, (long long) unload.tv_nsec,
+	     s->obj->get_name ());
   }
   fprintf (outfile, NTXT ("\n"));
 }

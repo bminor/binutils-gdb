@@ -114,7 +114,7 @@ public:
 
   // Configuration Information
   char *hostname;       // Hosthame (e.g. mymachine)
-  long start_sec;       // Starting timeval secs.
+  hrtime_t start_sec;       // Starting timeval secs.
   char *username;       // name of person performing the test
   char *architecture;   // Architecture name ("sun4")
   Platform_t platform;  // Sparc,Sparcv9,Intel

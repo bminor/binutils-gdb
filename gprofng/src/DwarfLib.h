@@ -152,9 +152,9 @@ private:
   uint64_t timestamp;
   uint64_t file_size;
   uint64_t address;
-  uint32_t file;
-  uint32_t line;
-  uint32_t column;
+  int file;
+  int line;
+  int column;
   Dwarf_Half version;
   uint64_t op_index_register;
   Dwarf_Small maximum_operations_per_instruction;

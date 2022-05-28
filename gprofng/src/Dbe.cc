@@ -1944,21 +1944,19 @@ dbeGetOverviewText (int dbevindex)
 	info->append (dbe_sprintf (GTXT ("  Target        : '%s'"), field));
       field = exp->hostname;
       if (field && field[0])
-	info->append (dbe_sprintf (NTXT ("  %s %s (%s, %s)"),
-				   GTXT ("Host          :"),
+	info->append (dbe_sprintf (GTXT ("  Host          : %s (%s, %s)"),
 				   field,
 				   exp->architecture ? exp->architecture
 				   : GTXT ("<CPU architecture not recorded>"),
 				   exp->os_version ? exp->os_version
 				   : GTXT ("<OS version not recorded>")));
-      long start_sec = exp->start_sec;
-      char *p = ctime (&start_sec); // does this need to be freed? YXXX
+      time_t start_sec = (time_t) exp->start_sec;
+      char *p = ctime (&start_sec);
       hrtime_t tot_time = dbeCalcGroupDuration (grInd);
       double seconds = tot_time * 1.e-9;
-      info->append (dbe_sprintf (NTXT ("  %s %s  %s %0.3f %s"),
-				 GTXT ("Start Time    :"), p,
-				 GTXT ("Duration      :"), seconds,
-				 GTXT ("Seconds")));
+      info->append (dbe_sprintf (
+		GTXT ("  Start Time    : %s  Duration      : %0.3f Seconds"),
+		p, seconds));
       // Number of descendants/processes would be nice
       info->append (dbe_strdup (NTXT ("")));
     }
