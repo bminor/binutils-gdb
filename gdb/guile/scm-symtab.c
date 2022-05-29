@@ -98,11 +98,9 @@ struct stscm_deleter
 
   void operator() (htab_t htab)
   {
-    if (htab != NULL)
-      {
-	htab_traverse_noresize (htab, stscm_mark_symtab_invalid, NULL);
-	htab_delete (htab);
-      }
+    gdb_assert (htab != nullptr);
+    htab_traverse_noresize (htab, stscm_mark_symtab_invalid, NULL);
+    htab_delete (htab);
   }
 };
 

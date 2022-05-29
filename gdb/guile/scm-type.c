@@ -93,13 +93,10 @@ struct tyscm_deleter
     if (!gdb_scheme_initialized)
       return;
 
+    gdb_assert (htab != nullptr);
     htab_up copied_types = create_copied_types_hash ();
-
-    if (htab != NULL)
-      {
-	htab_traverse_noresize (htab, tyscm_copy_type_recursive, copied_types.get ());
-	htab_delete (htab);
-      }
+    htab_traverse_noresize (htab, tyscm_copy_type_recursive, copied_types.get ());
+    htab_delete (htab);
   }
 };
 

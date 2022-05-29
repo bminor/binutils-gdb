@@ -97,11 +97,9 @@ struct bkscm_deleter
 
   void operator() (htab_t htab)
   {
-    if (htab != NULL)
-      {
-	htab_traverse_noresize (htab, bkscm_mark_block_invalid, NULL);
-	htab_delete (htab);
-      }
+    gdb_assert (htab != nullptr);
+    htab_traverse_noresize (htab, bkscm_mark_block_invalid, NULL);
+    htab_delete (htab);
   }
 };
 

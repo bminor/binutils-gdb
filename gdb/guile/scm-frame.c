@@ -95,11 +95,9 @@ struct frscm_deleter
 
   void operator() (htab_t htab)
   {
-    if (htab != NULL)
-      {
-	htab_traverse_noresize (htab, frscm_mark_frame_invalid, NULL);
-	htab_delete (htab);
-      }
+    gdb_assert (htab != nullptr);
+    htab_traverse_noresize (htab, frscm_mark_frame_invalid, NULL);
+    htab_delete (htab);
   }
 };
 

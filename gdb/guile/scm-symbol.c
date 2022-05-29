@@ -70,11 +70,9 @@ struct syscm_deleter
 
   void operator() (htab_t htab)
   {
-    if (htab != NULL)
-      {
-	htab_traverse_noresize (htab, syscm_mark_symbol_invalid, NULL);
-	htab_delete (htab);
-      }
+    gdb_assert (htab != nullptr);
+    htab_traverse_noresize (htab, syscm_mark_symbol_invalid, NULL);
+    htab_delete (htab);
   }
 };
 
