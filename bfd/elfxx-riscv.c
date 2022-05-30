@@ -1105,6 +1105,8 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"zqinx", "zdinx",	check_implicit_always},
   {"zdinx", "zfinx",	check_implicit_always},
   {"zfinx", "zicsr",	check_implicit_always},
+  {"zhinx", "zfinx",	check_implicit_always},
+  {"zhinx", "zicsr",	check_implicit_always},
   {"zk", "zkn",		check_implicit_always},
   {"zk", "zkr",		check_implicit_always},
   {"zk", "zkt",		check_implicit_always},
@@ -1187,6 +1189,7 @@ static struct riscv_supported_ext riscv_supported_std_z_ext[] =
   {"zfinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zdinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zqinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
+  {"zhinx",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zbb",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zba",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
   {"zbc",		ISA_SPEC_CLASS_DRAFT,		1, 0,  0 },
@@ -2365,12 +2368,17 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
 	      || riscv_subset_supports (rps, "zqinx"));
     case INSN_CLASS_ZFH:
       return riscv_subset_supports (rps, "zfh");
-    case INSN_CLASS_D_AND_ZFH:
+    case INSN_CLASS_ZFH_OR_ZHINX:
+      return riscv_subset_supports (rps, "zfh")
+        || riscv_subset_supports (rps, "zhinx");
+    case INSN_CLASS_D_AND_ZFH_INX:
       return (riscv_subset_supports (rps, "d")
-	      && riscv_subset_supports (rps, "zfh") );
-    case INSN_CLASS_Q_AND_ZFH:
+	      && riscv_subset_supports (rps, "zfh"))
+           || riscv_subset_supports (rps, "zhinx");
+    case INSN_CLASS_Q_AND_ZFH_INX:
       return (riscv_subset_supports (rps, "q")
-	      && riscv_subset_supports (rps, "zfh"));
+	      && riscv_subset_supports (rps, "zfh"))
+           || riscv_subset_supports (rps, "zhinx");
     case INSN_CLASS_ZBA:
       return riscv_subset_supports (rps, "zba");
     case INSN_CLASS_ZBB:
@@ -2509,6 +2517,14 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "v' or `zve64d' or `zve64f' or `zve32f";
     case INSN_CLASS_SVINVAL:
       return "svinval";
+    case INSN_CLASS_ZFH:
+      return "zfh";
+    case INSN_CLASS_ZFH_OR_ZHINX:
+      return "zfh' or 'zhinx";
+    case INSN_CLASS_D_AND_ZFH_INX:
+      return "('d' and 'zfh') or 'zhinx";
+    case INSN_CLASS_Q_AND_ZFH_INX:
+      return "('q' and 'zfh') or 'zhinx";
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));
