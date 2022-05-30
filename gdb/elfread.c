@@ -769,32 +769,42 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
 static int
 elf_gnu_ifunc_resolve_by_cache (const char *name, CORE_ADDR *addr_p)
 {
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      htab_t htab;
-      struct elf_gnu_ifunc_cache *entry_p;
-      void **slot;
+  int found = 0;
 
-      htab = elf_objfile_gnu_ifunc_cache_data.get (objfile);
-      if (htab == NULL)
-	continue;
+  /* FIXME: we only search the initial namespace.
 
-      entry_p = ((struct elf_gnu_ifunc_cache *)
-		 alloca (sizeof (*entry_p) + strlen (name)));
-      strcpy (entry_p->name, name);
+     To search other namespaces, we would need to provide context, e.g. in
+     form of an objfile in that namespace.  */
+  gdbarch_iterate_over_objfiles_in_search_order
+    (target_gdbarch (),
+     [name, &addr_p, &found] (struct objfile *objfile)
+       {
+	 htab_t htab;
+	 elf_gnu_ifunc_cache *entry_p;
+	 void **slot;
 
-      slot = htab_find_slot (htab, entry_p, NO_INSERT);
-      if (slot == NULL)
-	continue;
-      entry_p = (struct elf_gnu_ifunc_cache *) *slot;
-      gdb_assert (entry_p != NULL);
+	 htab = elf_objfile_gnu_ifunc_cache_data.get (objfile);
+	 if (htab == NULL)
+	   return 0;
 
-      if (addr_p)
-	*addr_p = entry_p->addr;
-      return 1;
-    }
+	 entry_p = ((elf_gnu_ifunc_cache *)
+		    alloca (sizeof (*entry_p) + strlen (name)));
+	 strcpy (entry_p->name, name);
 
-  return 0;
+	 slot = htab_find_slot (htab, entry_p, NO_INSERT);
+	 if (slot == NULL)
+	   return 0;
+	 entry_p = (elf_gnu_ifunc_cache *) *slot;
+	 gdb_assert (entry_p != NULL);
+
+	 if (addr_p)
+	   *addr_p = entry_p->addr;
+
+	 found = 1;
+	 return 1;
+       }, nullptr);
+
+  return found;
 }
 
 /* Try to find the target resolved function entry address of a STT_GNU_IFUNC
@@ -810,50 +820,61 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
 {
   char *name_got_plt;
   const size_t got_suffix_len = strlen (SYMBOL_GOT_PLT_SUFFIX);
+  int found = 0;
 
   name_got_plt = (char *) alloca (strlen (name) + got_suffix_len + 1);
   sprintf (name_got_plt, "%s" SYMBOL_GOT_PLT_SUFFIX, name);
 
-  for (objfile *objfile : current_program_space->objfiles ())
-    {
-      bfd *obfd = objfile->obfd.get ();
-      struct gdbarch *gdbarch = objfile->arch ();
-      struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-      size_t ptr_size = ptr_type->length ();
-      CORE_ADDR pointer_address, addr;
-      asection *plt;
-      gdb_byte *buf = (gdb_byte *) alloca (ptr_size);
-      struct bound_minimal_symbol msym;
+  /* FIXME: we only search the initial namespace.
 
-      msym = lookup_minimal_symbol (name_got_plt, NULL, objfile);
-      if (msym.minsym == NULL)
-	continue;
-      if (msym.minsym->type () != mst_slot_got_plt)
-	continue;
-      pointer_address = msym.value_address ();
+     To search other namespaces, we would need to provide context, e.g. in
+     form of an objfile in that namespace.  */
+  gdbarch_iterate_over_objfiles_in_search_order
+    (target_gdbarch (),
+     [name, name_got_plt, &addr_p, &found] (struct objfile *objfile)
+       {
+	 bfd *obfd = objfile->obfd.get ();
+	 struct gdbarch *gdbarch = objfile->arch ();
+	 type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
+	 size_t ptr_size = ptr_type->length ();
+	 CORE_ADDR pointer_address, addr;
+	 asection *plt;
+	 gdb_byte *buf = (gdb_byte *) alloca (ptr_size);
+	 bound_minimal_symbol msym;
 
-      plt = bfd_get_section_by_name (obfd, ".plt");
-      if (plt == NULL)
-	continue;
+	 msym = lookup_minimal_symbol (name_got_plt, NULL, objfile);
+	 if (msym.minsym == NULL)
+	   return 0;
+	 if (msym.minsym->type () != mst_slot_got_plt)
+	   return 0;
+	 pointer_address = msym.value_address ();
 
-      if (msym.minsym->size () != ptr_size)
-	continue;
-      if (target_read_memory (pointer_address, buf, ptr_size) != 0)
-	continue;
-      addr = extract_typed_address (buf, ptr_type);
-      addr = gdbarch_convert_from_func_ptr_addr
-	(gdbarch, addr, current_inferior ()->top_target ());
-      addr = gdbarch_addr_bits_remove (gdbarch, addr);
+	 plt = bfd_get_section_by_name (obfd, ".plt");
+	 if (plt == NULL)
+	   return 0;
 
-      if (elf_gnu_ifunc_record_cache (name, addr))
-	{
-	  if (addr_p != NULL)
-	    *addr_p = addr;
-	  return 1;
-	}
-    }
+	 if (msym.minsym->size () != ptr_size)
+	   return 0;
+	 if (target_read_memory (pointer_address, buf, ptr_size) != 0)
+	   return 0;
+	 addr = extract_typed_address (buf, ptr_type);
+	 addr = gdbarch_convert_from_func_ptr_addr
+	   (gdbarch, addr, current_inferior ()->top_target ());
+	 addr = gdbarch_addr_bits_remove (gdbarch, addr);
 
-  return 0;
+	 if (elf_gnu_ifunc_record_cache (name, addr))
+	   {
+	     if (addr_p != NULL)
+	       *addr_p = addr;
+
+	     found = 1;
+	     return 1;
+	   }
+
+	 return 0;
+       }, nullptr);
+
+  return found;
 }
 
 /* Try to find the target resolved function entry address of a STT_GNU_IFUNC
