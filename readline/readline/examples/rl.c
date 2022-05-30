@@ -58,7 +58,7 @@ extern char *strrchr();
 static char *progname;
 static char *deftext;
 
-static int
+static void
 set_deftext ()
 {
   if (deftext)
@@ -67,7 +67,6 @@ set_deftext ()
       deftext = (char *)NULL;
       rl_startup_hook = (rl_hook_func_t *)NULL;
     }
-  return 0;
 }
 
 static void
@@ -142,7 +141,7 @@ main (argc, argv)
     }
 
   if (deftext && *deftext)
-    rl_startup_hook = set_deftext;
+    set_deftext;
 
   if (nch > 0)
     rl_num_chars_to_read = nch;
