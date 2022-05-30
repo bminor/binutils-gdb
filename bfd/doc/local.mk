@@ -82,12 +82,14 @@ TEXI2DVI = texi2dvi -I "$(srcdir)/%D%" -I %D%
 
 MKDOC = %D%/chew$(EXEEXT_FOR_BUILD)
 
+LIBIBERTY = ../libiberty/libiberty.a
+
 $(MKDOC): %D%/chew.stamp ; @true
 %D%/chew.stamp: $(srcdir)/%D%/chew.c %D%/$(am__dirstamp)
 	$(AM_V_CCLD)$(CC_FOR_BUILD) -o %D%/chw$$$$$(EXEEXT_FOR_BUILD) $(CFLAGS_FOR_BUILD) \
 	  $(LDFLAGS_FOR_BUILD) $(H_CFLAGS) \
 	  -I. -I$(srcdir) -I%D% -I$(srcdir)/../include -I$(srcdir)/../intl -I../intl \
-	  $(srcdir)/%D%/chew.c && \
+	  $(srcdir)/%D%/chew.c $(LIBIBERTY) && \
 	$(SHELL) $(srcdir)/../move-if-change \
 	  %D%/chw$$$$$(EXEEXT_FOR_BUILD) $(MKDOC) && \
 	touch $@

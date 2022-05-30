@@ -82,6 +82,7 @@
    Foo.  */
 
 #include "ansidecl.h"
+#include "libiberty.h"
 #include <assert.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -141,7 +142,7 @@ init_string_with_size (string_type *buffer, unsigned int size)
 {
   buffer->write_idx = 0;
   buffer->size = size;
-  buffer->ptr = (char *) malloc (size);
+  buffer->ptr = xmalloc (size);
 }
 
 static void
@@ -201,7 +202,7 @@ catchar (string_type *buffer, int ch)
   if (buffer->write_idx == buffer->size)
     {
       buffer->size *= 2;
-      buffer->ptr = (char *) realloc (buffer->ptr, buffer->size);
+      buffer->ptr = xrealloc (buffer->ptr, buffer->size);
     }
 
   buffer->ptr[buffer->write_idx++] = ch;
@@ -223,7 +224,7 @@ catbuf (string_type *buffer, char *buf, unsigned int len)
     {
       while (buffer->write_idx + len >= buffer->size)
 	buffer->size *= 2;
-      buffer->ptr = (char *) realloc (buffer->ptr, buffer->size);
+      buffer->ptr = xrealloc (buffer->ptr, buffer->size);
     }
   memcpy (buffer->ptr + buffer->write_idx, buf, len);
   buffer->write_idx += len;
@@ -1102,7 +1103,7 @@ nextword (char *string, char **word)
 	}
     }
 
-  *word = (char *) malloc (length + 1);
+  *word = xmalloc (length + 1);
 
   dst = *word;
   src = word_start;
@@ -1216,11 +1217,11 @@ perform (void)
 dict_type *
 newentry (char *word)
 {
-  dict_type *new_d = (dict_type *) malloc (sizeof (dict_type));
+  dict_type *new_d = xmalloc (sizeof (*new_d));
   new_d->word = word;
   new_d->next = root;
   root = new_d;
-  new_d->code = (stinst_type *) malloc (sizeof (stinst_type));
+  new_d->code = xmalloc (sizeof (*new_d->code));
   new_d->code_length = 1;
   new_d->code_end = 0;
   return new_d;
@@ -1232,9 +1233,8 @@ add_to_definition (dict_type *entry, stinst_type word)
   if (entry->code_end == entry->code_length)
     {
       entry->code_length += 2;
-      entry->code =
-	(stinst_type *) realloc ((char *) (entry->code),
-				 entry->code_length * sizeof (stinst_type));
+      entry->code = xrealloc (entry->code,
+			      entry->code_length * sizeof (*entry->code));
     }
   entry->code[entry->code_end] = word;
 
@@ -1244,7 +1244,7 @@ add_to_definition (dict_type *entry, stinst_type word)
 void
 add_intrinsic (char *name, void (*func) (void))
 {
-  dict_type *new_d = newentry (strdup (name));
+  dict_type *new_d = newentry (xstrdup (name));
   add_to_definition (new_d, func);
   add_to_definition (new_d, 0);
 }
