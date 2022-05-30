@@ -694,6 +694,8 @@ QMemTags
 
   ** GDBserver is now supported on RISC-V GNU/Linux.
 
+  ** GDBserver is now supported on LoongArch GNU/Linux.
+
   ** GDBserver no longer supports these host triplets:
 
     i[34567]86-*-lynxos*
@@ -785,6 +787,7 @@ alias [-a] [--] ALIAS = COMMAND [DEFAULT-ARGS...]
 * New targets
 
 GNU/Linux/RISC-V (gdbserver)	riscv*-*-linux*
+GNU/Linux/LoongArch (gdbserver)	loongarch*-*-linux*
 BPF				bpf-unknown-none
 Z80				z80-unknown-*
 

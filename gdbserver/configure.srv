@@ -126,6 +126,12 @@ case "${gdbserver_host}" in
 			srv_tgtobj="$srv_linux_obj linux-ia64-low.o"
 			srv_linux_usrregs=yes
 			;;
+  loongarch*-*-linux*)	srv_tgtobj="arch/loongarch.o linux-loongarch-low.o"
+			srv_tgtobj="${srv_tgtobj} ${srv_linux_obj}"
+			srv_linux_regsets=yes
+			srv_linux_usrregs=yes
+			srv_linux_thread_db=yes
+			;;
   m68*-*-linux*)	if test "$gdb_cv_m68k_is_coldfire" = yes; then
                           srv_regobj=reg-cf.o
                         else
