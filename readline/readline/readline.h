@@ -380,8 +380,8 @@ extern void rl_push_macro_input PARAMS((char *));
 extern void rl_add_undo PARAMS((enum undo_code, int, int, char *));
 extern void rl_free_undo_list PARAMS((void));
 extern int rl_do_undo PARAMS((void));
-extern int rl_begin_undo_group PARAMS((void));
-extern int rl_end_undo_group PARAMS((void));
+extern void rl_begin_undo_group PARAMS((void));
+extern void rl_end_undo_group PARAMS((void));
 extern int rl_modifying PARAMS((int, int));
 
 /* Functions for redisplay. */

@@ -290,21 +290,19 @@ _rl_fix_last_undo_of_type (int type, int start, int end)
 }
 
 /* Begin a group.  Subsequent undos are undone as an atomic operation. */
-int
+void
 rl_begin_undo_group (void)
 {
   rl_add_undo (UNDO_BEGIN, 0, 0, 0);
   _rl_undo_group_level++;
-  return 0;
 }
 
 /* End an undo group started with rl_begin_undo_group (). */
-int
+void
 rl_end_undo_group (void)
 {
   rl_add_undo (UNDO_END, 0, 0, 0);
   _rl_undo_group_level--;
-  return 0;
 }
 
 /* Save an undo entry for the text from START to END. */
