@@ -91,11 +91,6 @@
 #define DEF_SIZE 5000
 #define STACK 50
 
-int internal_wanted;
-int internal_mode;
-
-int warning;
-
 /* Here is a string type ...  */
 
 typedef struct buffer
@@ -104,6 +99,35 @@ typedef struct buffer
   unsigned long write_idx;
   unsigned long size;
 } string_type;
+
+typedef void (*stinst_type)();
+
+typedef struct dict_struct
+{
+  char *word;
+  struct dict_struct *next;
+  stinst_type *code;
+  int code_length;
+  int code_end;
+} dict_type;
+
+int internal_wanted;
+int internal_mode;
+
+int warning;
+
+string_type stack[STACK];
+string_type *tos;
+
+unsigned int idx = 0; /* Pos in input buffer */
+string_type *ptr; /* and the buffer */
+
+long istack[STACK];
+long *isp = &istack[0];
+
+dict_type *root;
+
+stinst_type *pc;
 
 #ifdef __STDC__
 static void init_string_with_size (string_type *, unsigned int);
@@ -120,6 +144,14 @@ static void cattext (string_type *, char *);
 static void catstr (string_type *, string_type *);
 static void die (char *);
 #endif
+
+static void
+die (msg)
+     char *msg;
+{
+  fprintf (stderr, "%s\n", msg);
+  exit (1);
+}
 
 static void
 init_string_with_size (buffer, size)
@@ -279,42 +311,6 @@ skip_past_newline_1 (ptr, idx)
   return idx;
 }
 
-/***********************************************************************/
-
-string_type stack[STACK];
-string_type *tos;
-
-unsigned int idx = 0; /* Pos in input buffer */
-string_type *ptr; /* and the buffer */
-typedef void (*stinst_type)();
-stinst_type *pc;
-stinst_type sstack[STACK];
-stinst_type *ssp = &sstack[0];
-long istack[STACK];
-long *isp = &istack[0];
-
-typedef int *word_type;
-
-struct dict_struct
-{
-  char *word;
-  struct dict_struct *next;
-  stinst_type *code;
-  int code_length;
-  int code_end;
-  int var;
-};
-
-typedef struct dict_struct dict_type;
-
-static void
-die (msg)
-     char *msg;
-{
-  fprintf (stderr, "%s\n", msg);
-  exit (1);
-}
-
 static void
 check_range ()
 {
@@ -356,7 +352,6 @@ static void perform (void);
 dict_type *newentry (char *);
 unsigned int add_to_definition (dict_type *, stinst_type);
 void add_intrinsic (char *, void (*)());
-void add_var (char *);
 void compile (char *);
 static void bang (void);
 static void atsign (void);
@@ -1230,8 +1225,6 @@ nextword (string, word)
     return NULL;
 }
 
-dict_type *root;
-
 dict_type *
 lookup_word (word)
      char *word;
@@ -1352,16 +1345,6 @@ add_intrinsic (name, func)
 }
 
 void
-add_var (name)
-     char *name;
-{
-  dict_type *new_d = newentry (name);
-  add_to_definition (new_d, push_number);
-  add_to_definition (new_d, (stinst_type) (&(new_d->var)));
-  add_to_definition (new_d, 0);
-}
-
-void
 compile (string)
      char *string;
 {
@@ -1371,16 +1354,7 @@ compile (string)
   string = nextword (string, &word);
   while (string && *string && word[0])
     {
-      if (strcmp (word, "var") == 0)
-	{
-	  free (word);
-	  string = nextword (string, &word);
-	  if (!string)
-	    continue;
-	  add_var (word);
-	  string = nextword (string, &word);
-	}
-      else if (word[0] == ':')
+      if (word[0] == ':')
 	{
 	  dict_type *ptr;
 
