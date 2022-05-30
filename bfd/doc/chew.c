@@ -101,13 +101,21 @@ typedef struct buffer
   unsigned long size;
 } string_type;
 
-typedef void (*stinst_type) (void);
+/* Compiled programs consist of arrays of these.  */
+
+typedef union
+{
+  void (*f) (void);
+  struct dict_struct *e;
+  char *s;
+  long l;
+} pcu;
 
 typedef struct dict_struct
 {
   char *word;
   struct dict_struct *next;
-  stinst_type *code;
+  pcu *code;
   int code_length;
   int code_end;
 } dict_type;
@@ -128,7 +136,7 @@ long *isp = &istack[0];
 
 dict_type *root;
 
-stinst_type *pc;
+pcu *pc;
 
 static void
 die (char *msg)
@@ -290,16 +298,15 @@ static void
 exec (dict_type *word)
 {
   pc = word->code;
-  while (*pc)
-    (*pc) ();
+  while (pc->f)
+    pc->f ();
 }
 
 static void
 call (void)
 {
-  stinst_type *oldpc = pc;
-  dict_type *e;
-  e = (dict_type *) (pc[1]);
+  pcu *oldpc = pc;
+  dict_type *e = pc[1].e;
   exec (e);
   pc = oldpc + 2;
 }
@@ -328,7 +335,7 @@ push_number (void)
   isp++;
   icheck_range ();
   pc++;
-  *isp = (long) (*pc);
+  *isp = pc->l;
   pc++;
 }
 
@@ -339,7 +346,7 @@ push_text (void)
   check_range ();
   init_string (tos);
   pc++;
-  cattext (tos, *((char **) pc));
+  cattext (tos, pc->s);
   pc++;
 }
 
@@ -1166,11 +1173,11 @@ free_words (void)
 	{
 	  int i;
 	  for (i = 0; i < ptr->code_end - 1; i ++)
-	    if (ptr->code[i] == push_text
-		&& ptr->code[i + 1])
+	    if (ptr->code[i].f == push_text
+		&& ptr->code[i + 1].s)
 	      {
-		free ((char *) ptr->code[i + 1] - 1);
-		++ i;
+		free (ptr->code[i + 1].s - 1);
+		++i;
 	      }
 	  free (ptr->code);
 	}
@@ -1228,7 +1235,7 @@ newentry (char *word)
 }
 
 unsigned int
-add_to_definition (dict_type *entry, stinst_type word)
+add_to_definition (dict_type *entry, pcu word)
 {
   if (entry->code_end == entry->code_length)
     {
@@ -1245,8 +1252,10 @@ void
 add_intrinsic (char *name, void (*func) (void))
 {
   dict_type *new_d = newentry (xstrdup (name));
-  add_to_definition (new_d, func);
-  add_to_definition (new_d, 0);
+  pcu p = { func };
+  add_to_definition (new_d, p);
+  p.f = 0;
+  add_to_definition (new_d, p);
 }
 
 void
@@ -1261,6 +1270,7 @@ compile (char *string)
       if (word[0] == ':')
 	{
 	  dict_type *ptr;
+	  pcu p;
 
 	  /* Compile a word and add to dictionary.  */
 	  free (word);
@@ -1283,8 +1293,10 @@ compile (char *string)
 		case '"':
 		  /* got a string, embed magic push string
 		     function */
-		  add_to_definition (ptr, push_text);
-		  add_to_definition (ptr, (stinst_type) (word + 1));
+		  p.f = push_text;
+		  add_to_definition (ptr, p);
+		  p.s = word + 1;
+		  add_to_definition (ptr, p);
 		  break;
 		case '0':
 		case '1':
@@ -1298,19 +1310,24 @@ compile (char *string)
 		case '9':
 		  /* Got a number, embedd the magic push number
 		     function */
-		  add_to_definition (ptr, push_number);
-		  add_to_definition (ptr, (stinst_type) atol (word));
+		  p.f = push_number;
+		  add_to_definition (ptr, p);
+		  p.l = atol (word);
+		  add_to_definition (ptr, p);
 		  free (word);
 		  break;
 		default:
-		  add_to_definition (ptr, call);
-		  add_to_definition (ptr, (stinst_type) lookup_word (word));
+		  p.f = call;
+		  add_to_definition (ptr, p);
+		  p.e = lookup_word (word);
+		  add_to_definition (ptr, p);
 		  free (word);
 		}
 
 	      string = nextword (string, &word);
 	    }
-	  add_to_definition (ptr, 0);
+	  p.f = 0;
+	  add_to_definition (ptr, p);
 	  free (word);
 	  string = nextword (string, &word);
 	}
