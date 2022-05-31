@@ -4416,7 +4416,10 @@ _bfd_sparc_elf_finish_dynamic_symbol (bfd *output_bfd,
 	  return true;
 	}
 
-      if (bfd_link_pic (info) && SYMBOL_REFERENCES_LOCAL (info, h))
+      if (bfd_link_pic (info)
+	  && (h->root.type == bfd_link_hash_defined
+	      || h->root.type == bfd_link_hash_defweak)
+	  && SYMBOL_REFERENCES_LOCAL (info, h))
 	{
 	  asection *sec = h->root.u.def.section;
 	  if (h->type == STT_GNU_IFUNC)
