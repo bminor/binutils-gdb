@@ -25470,7 +25470,7 @@ about the @code{mask} argument in @ref{Set Watchpoints}.
 PowerPC embedded processors support hardware accelerated
 @dfn{ranged breakpoints}.  A ranged breakpoint stops execution of
 the inferior whenever it executes an instruction at any address within
-the range it specifies.  To set a ranged breakpoint in @value{GDBN},
+the range it was set at.  To set a ranged breakpoint in @value{GDBN},
 use the @code{break-range} command.
 
 @value{GDBN} provides the following PowerPC-specific commands:
@@ -25481,12 +25481,14 @@ use the @code{break-range} command.
 Set a breakpoint for an address range given by @var{start-locspec} and
 @var{end-locspec}, which are location specs.  @xref{Location
 Specifications}, for a list of all the possible forms of location
-specs.  If either @var{start-locspec} or @var{end-locspec} resolve to
-multiple addresses in the program, then the command aborts with an
-error without creating a breakpoint.  The breakpoint will stop
-execution of the inferior whenever it executes an instruction at any
-address within the specified range, including @var{start-locspec} and
-@var{end-locspec}.
+specs.  @value{GDBN} resolves both @var{start-locspec} and
+@var{end-locspec}, and uses the addresses of the resolved code
+locations as start and end addresses of the range to break at.  The
+breakpoint will stop execution of the inferior whenever it executes an
+instruction at any address between the start and end addresses,
+inclusive.  If either @var{start-locspec} or @var{end-locspec} resolve
+to multiple code locations in the program, then the command aborts
+with an error without creating a breakpoint.
 
 @kindex set powerpc
 @item set powerpc soft-float
