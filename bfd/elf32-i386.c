@@ -1778,7 +1778,13 @@ elf_i386_scan_relocs (bfd *abfd,
 		  if (r_type == R_386_32
 		      && (sec->flags & SEC_READONLY) == 0)
 		    func_pointer_ref = true;
-		  else
+
+		  /* IFUNC symbol needs pointer equality in PDE so that
+		     function pointer reference will be resolved to its
+		     PLT entry directly.  */
+		  if (!func_pointer_ref
+		      || (bfd_link_pde (info)
+			  && h->type == STT_GNU_IFUNC))
 		    h->pointer_equality_needed = 1;
 		}
 
