@@ -129,22 +129,29 @@ proc run_tests { lang } {
 	    set f_pattern "$hex \"abcdef\""
 	}
 
+	# When value-printing pointers in GDB, GDB will try and look for any
+	# associated symbol and print it after the pointer as "<SYMBOL>". For
+	# this test Intel and LLVM compilers move g to the .bss section, thus
+	# creating a symbol, while the GNU compiler stack keeps g purely on the
+	# stack.
+	set g_pattern "$hex\( <\[^\r\n\]+>\)?"
+
 	set args_pattern [multi_line \
 			      "a = 1" \
 			      "b = 2" \
 			      "c = 3" \
 			      "d = ${d_pattern}" \
 			      "f = ${f_pattern}" \
-			      "g = $hex" ]
+			      "g = ${g_pattern}" ]
 
 	gdb_test "info args" $args_pattern \
 	    "info args in frame #6"
 	if { $lang == "fortran" } {
-	    set g_pattern " = \\( a = 1\\.5, b = 2\\.5 \\)"
+	    set g_val_pattern " = \\( a = 1\\.5, b = 2\\.5 \\)"
 	} else {
-	    set g_pattern " = \\{a = 1\\.5, b = 2\\.5\\}"
+	    set g_val_pattern " = \\{a = 1\\.5, b = 2\\.5\\}"
 	}
-	gdb_test "print *g" "${g_pattern}" \
+	gdb_test "print *g" "${g_val_pattern}" \
 	    "print object pointed to by g"
 
 	gdb_test "up" "#7\\s+$hex in mixed_func_1b .*" \
@@ -155,11 +162,11 @@ proc run_tests { lang } {
 	if { $lang == "c" || $lang == "c++" } {
 	    set d_pattern "4 \\+ 5i"
 	    set e_pattern "\"abcdef\""
-	    set g_pattern "\{a = 1.5, b = 2.5\}"
+	    set g_val_pattern "\{a = 1.5, b = 2.5\}"
 	} else {
 	    set d_pattern "\\(4,5\\)"
 	    set e_pattern "'abcdef'"
-	    set g_pattern "\\( a = 1.5, b = 2.5 \\)"
+	    set g_val_pattern "\\( a = 1.5, b = 2.5 \\)"
 	}
 
 	set args_pattern [multi_line \
@@ -168,7 +175,7 @@ proc run_tests { lang } {
 			      "c = 3" \
 			      "d = ${d_pattern}" \
 			      "e = ${e_pattern}" \
-			      "g = ${g_pattern}" \
+			      "g = ${g_val_pattern}" \
 			      "_e = 6" ]
 
 	gdb_test "info args" $args_pattern \
