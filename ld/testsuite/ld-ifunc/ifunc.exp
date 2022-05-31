@@ -714,6 +714,15 @@ run_ld_link_exec_tests [list \
 	"pr18841cn" \
 	"pr18841.out" \
     ] \
+    [list \
+	"Run pr29216" \
+	"$NOPIE_LDFLAGS" \
+	"" \
+	{ pr29216.c } \
+	"pr29216" \
+	"pass.out" \
+	"-fPIC" \
+    ] \
 ]
 
 # The pr23169 testcase is not valid.  In general, you can't call ifunc
