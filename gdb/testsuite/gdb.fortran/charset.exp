@@ -21,6 +21,11 @@ if { [skip_fortran_tests] } { return -1 }
 standard_testfile .f90
 load_lib fortran.exp
 
+# Ifx, and ifort do not support kind=4 for CHARACTER.
+if { [test_compiler_info {ifx-*} f90] || [test_compiler_info {ifort-*} f90] } {
+    return -1
+}
+
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug additional_flags=-fbackslash f90}] } {
     return -1
 }
