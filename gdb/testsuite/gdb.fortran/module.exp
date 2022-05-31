@@ -118,9 +118,10 @@ gdb_test "print var_z" " = 31" "print var_x value 31"
 gdb_test "ptype modmany" "type = module modmany"
 
 proc complete {expr list} {
+    set n_lines "\(?:\\r\\n.*\)*"
     set cmd "complete p $expr"
-    set expect [join [concat [list $cmd] $list] "\r\np "]
-    gdb_test $cmd $expect "complete $expr"
+    set expect [join [concat [list $cmd] $list] $n_lines]
+    gdb_test $cmd "$expect$n_lines" "complete $expr"
 }
 set modmany_list {modmany::var_a modmany::var_b modmany::var_c modmany::var_i}
 complete "modm" "modmany $modmany_list"
