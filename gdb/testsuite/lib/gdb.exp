@@ -4397,8 +4397,8 @@ set gdb_saved_set_unbuffered_mode_obj ""
 #   - ldflags=flag: Add FLAG to the linker flags.
 #   - incdir=path: Add PATH to the searched include directories.
 #   - libdir=path: Add PATH to the linker searched directories.
-#   - ada, c++, f77, f90, go, rust: Compile the file as Ada, C++,
-#     Fortran 77, Fortran 90, Go or Rust.
+#   - ada, c++, f90, go, rust: Compile the file as Ada, C++,
+#     Fortran 90, Go or Rust.
 #   - debug: Build with debug information.
 #   - optimize: Build with optimization.
 
@@ -4431,7 +4431,6 @@ proc gdb_compile {source dest type options} {
     if {[lsearch -exact $options getting_compiler_info] == -1
 	&& [lsearch -exact $options rust] == -1
 	&& [lsearch -exact $options ada] == -1
-	&& [lsearch -exact $options f77] == -1
 	&& [lsearch -exact $options f90] == -1
 	&& [lsearch -exact $options go] == -1
 	&& [test_compiler_info "clang-*"]} {
@@ -4460,8 +4459,7 @@ proc gdb_compile {source dest type options} {
 
     # Place (and look for) Fortran `.mod` files in the output
     # directory for this specific test.
-    if {[lsearch -exact $options f77] != -1 \
-	    || [lsearch -exact $options f90] != -1 } {
+    if { [lsearch -exact $options f90] != -1 } {
 	# Fortran compile.
 	set mod_path [standard_output_file ""]
 	if [test_compiler_info "gcc-*"] {
@@ -4702,11 +4700,7 @@ proc gdb_compile {source dest type options} {
     }
 
     if {[lsearch $options quiet] < 0} {
-	# We shall update this on a per language basis, to avoid
-	# changing the entire testsuite in one go.
-	if {[lsearch $options f77] >= 0} {
-	    gdb_compile_test $source $result
-	} elseif { $result != "" } {
+	if { $result != "" } {
 	    clone_output "gdb compile failed, $result"
 	}
     }
