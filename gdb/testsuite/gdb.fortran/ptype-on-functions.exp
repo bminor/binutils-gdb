@@ -40,7 +40,7 @@ set integer8 [fortran_int8]
 # https://gcc.gnu.org/onlinedocs/gfortran/Argument-passing-conventions.html ).
 set stringlen ($integer8|$integer4)
 
-if {[test_compiler_info {clang-*}]} {
+if { [test_compiler_info {flang-*} f90] } {
     set some_module_class_type "Type number"
     set some_module_aux_info ", $integer8 \\(10\\)"
 } else {
@@ -61,7 +61,7 @@ gdb_test "ptype say_numbers" \
     "type = void \\($integer4, $integer4, $integer4\\)"
 
 set fun_ptr_arg "$integer4"
-if {[test_compiler_info {gcc-*}]} {
+if { [test_compiler_info {gfortran-*} f90] } {
     set fun_ptr_arg "REF TO -> \\( ${fun_ptr_arg} \\)"
 }
 
@@ -72,7 +72,7 @@ gdb_test "ptype say_string" \
     "type = void \\(character\[^,\]+, $stringlen\\)"
 
 set say_array_artificial_first_arg ""
-if {[test_compiler_info {clang-*}]} {
+if { [test_compiler_info {flang-*} f90] } {
     set say_array_artificial_first_arg "$integer8, "
 }
 

@@ -21,8 +21,8 @@ standard_testfile ".f90"
 load_lib fortran.exp
 
 # Only gcc version >=11 supports assumed rank arrays.
-if { [test_compiler_info gcc*] &&
-   ![test_compiler_info {gcc-1[1-9]-*}]} {
+if { [test_compiler_info {gfortran-*} f90] &&
+     ![test_compiler_info {gfortran-1[1-9]-*} f90] } {
     untested "compiler does not support assumed rank"
     return -1
 }
@@ -59,7 +59,7 @@ while { $test_count < 500 } {
 	}
 
 	# Currently, flang does not support rank0.
-	if {$test_count == 1 && [test_compiler_info {clang-*}]} {
+	if { $test_count == 1 && [test_compiler_info {flang-*} f90] } {
 	   unsupported "compiler does not support rank 0"
 	   continue
 	}

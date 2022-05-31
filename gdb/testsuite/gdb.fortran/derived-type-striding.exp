@@ -22,7 +22,7 @@ standard_testfile ".f90"
 
 # Unfortunately recent versions of GCC broke the stride information in
 # the DEBUG so tests in this file will fail.
-set gcc_with_broken_stride [test_compiler_info {gcc-[89]-*}]
+set gcc_with_broken_stride [test_compiler_info {gfortran-[89]-*} f90]
 
 if {[prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
 	 {debug f90}]} {

@@ -4106,14 +4106,14 @@ set gcc_compiled		0
 # -- chastain 2004-01-06
 
 proc get_compiler_info {{arg ""}} {
-    # For compiler.c and compiler.cc
+    # For compiler.c, compiler.cc and compiler.F90.
     global srcdir
 
     # I am going to play with the log to keep noise out.
     global outdir
     global tool
 
-    # These come from compiler.c or compiler.cc
+    # These come from compiler.c, compiler.cc or compiler.F90.
     global compiler_info
 
     # Legacy global data symbols.
@@ -4128,6 +4128,8 @@ proc get_compiler_info {{arg ""}} {
     set ifile "${srcdir}/lib/compiler.c"
     if { $arg == "c++" } {
 	set ifile "${srcdir}/lib/compiler.cc"
+    } elseif { $arg == "f90" } {
+	set ifile "${srcdir}/lib/compiler.F90"
     }
 
     # Run $ifile through the right preprocessor.
@@ -4158,6 +4160,10 @@ proc get_compiler_info {{arg ""}} {
 	    # eval this line
 	    verbose "get_compiler_info: $cppline" 2
 	    eval "$cppline"
+	} elseif { [ regexp "flang.*warning.*'-fdiagnostics-color=never'" "$cppline"] } {
+	    # Both flang preprocessors (llvm flang and classic flang) print a
+	    # warning for the unused -fdiagnostics-color=never, so we skip this
+	    # output line here.
 	} else {
 	    # unknown line
 	    verbose -log "get_compiler_info: $cppline"
@@ -4195,9 +4201,9 @@ proc get_compiler_info {{arg ""}} {
 # Otherwise the argument is a glob-style expression to match against
 # compiler_info.
 
-proc test_compiler_info { {compiler ""} } {
+proc test_compiler_info { {compiler ""} {language ""} } {
     global compiler_info
-    get_compiler_info
+    get_compiler_info $language
 
     # If no arg, return the compiler_info string.
     if [string match "" $compiler] {
@@ -4470,10 +4476,10 @@ proc gdb_compile {source dest type options} {
     if { !$getting_compiler_info && [lsearch -exact $options f90] != -1 } {
 	# Fortran compile.
 	set mod_path [standard_output_file ""]
-	if [test_compiler_info "gcc-*"] {
+	if { [test_compiler_info {gfortran-*} f90] } {
 	    lappend new_options "additional_flags=-J${mod_path}"
-	} elseif { [test_compiler_info {icc-*}]
-		   || [test_compiler_info {intel-*}] } {
+	} elseif { [test_compiler_info {ifort-*} f90]
+		   || [test_compiler_info {ifx-*} f90] } {
 	    lappend new_options "additional_flags=-module ${mod_path}"
 	}
     }
@@ -4770,6 +4776,8 @@ proc gdb_compile_shlib_1 {sources dest options} {
     set info_options ""
     if { [lsearch -exact $options "c++"] >= 0 } {
 	set info_options "c++"
+    } elseif { [lsearch -exact $options "f90"] >= 0 } {
+	set info_options "f90"
     }
     if [get_compiler_info ${info_options}] {
        return -1
@@ -6957,6 +6965,8 @@ proc build_executable_from_specs {testname executable options args} {
     set info_options ""
     if { [lsearch -exact $options "c++"] >= 0 } {
 	set info_options "c++"
+    } elseif { [lsearch -exact $options "f90"] >= 0 } {
+	set info_options "f90"
     }
     if [get_compiler_info ${info_options}] {
         return -1

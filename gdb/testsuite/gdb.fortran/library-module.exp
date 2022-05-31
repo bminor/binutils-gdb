@@ -22,7 +22,7 @@ set srclibfile ${testfile}-lib.f90
 set libfile [standard_output_file ${testfile}-lib.so]
 
 # Required for -fPIC by gdb_compile_shlib.
-if [get_compiler_info] {
+if { [get_compiler_info f90] } {
    warning "Could not get compiler info"
    return -1
 }

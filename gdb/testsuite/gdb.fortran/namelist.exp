@@ -37,7 +37,7 @@ set int [fortran_int4]
 gdb_breakpoint [gdb_get_line_number "Display namelist"]
 gdb_continue_to_breakpoint "Display namelist"
 
-if {[test_compiler_info {gcc-*}]} {
+if { [test_compiler_info {gfortran-*} f90] } {
     gdb_test "ptype nml" \
         "type = Type nml\r\n *$int :: a\r\n *$int :: b\r\n *End Type nml"
     gdb_test "print nml" \
