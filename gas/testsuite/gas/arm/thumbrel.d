@@ -6,7 +6,7 @@
 .*:     file format.*
 
 RELOCATION RECORDS FOR \[.text\]:
-OFFSET   TYPE              VALUE 
+OFFSET +TYPE +VALUE
 00000004 R_ARM_REL32       b
 
 Contents of section .text:

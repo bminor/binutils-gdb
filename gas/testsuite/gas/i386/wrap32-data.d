@@ -6,7 +6,7 @@
 
 RELOCATION RECORDS FOR \[\.data\]:
 
-OFFSET +TYPE +VALUE *
+OFFSET +TYPE +VALUE
 0*10 (R_386_|dir)?32 *sym
 0*14 (R_386_|dir)?32 *sym
 0*18 (R_386_|dir)?32 *sym

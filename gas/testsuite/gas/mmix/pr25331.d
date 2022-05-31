@@ -8,7 +8,7 @@
 .*:     file format elf64-mmix
 
 RELOCATION RECORDS FOR \[\.text\]:
-OFFSET           TYPE              VALUE 
+OFFSET +TYPE +VALUE
 0+2a R_MMIX_BASE_PLUS_OFFSET  __stack_chk_guard
 0+13a R_MMIX_BASE_PLUS_OFFSET  \.data\+0x0+8
 0+1a2 R_MMIX_BASE_PLUS_OFFSET  \.data\+0x0+8

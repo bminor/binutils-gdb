@@ -11,7 +11,7 @@ RELOCATION RECORDS FOR \[.text.main\]:
 
 
 RELOCATION RECORDS FOR \[.debug_line\]:
-OFFSET   TYPE              VALUE 
+OFFSET +TYPE +VALUE
 00000000 R_AVR_32_PCREL    .Ldebug_line_end-0x00000004
 
 

@@ -17,7 +17,7 @@ Program Header:
   FLAGS                0x00000010
 #...
 DYNAMIC RELOCATION RECORDS
-OFFSET   TYPE              VALUE 
+OFFSET +TYPE +VALUE
 0000229c R_CRIS_32_TPREL   \*ABS\*
 000022a0 R_CRIS_DTP        \*ABS\*
 

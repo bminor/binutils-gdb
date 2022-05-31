@@ -7,5 +7,5 @@
 .*:     file format.*
 
 RELOCATION RECORDS FOR \[.text\]:
-OFFSET   TYPE              VALUE 
+OFFSET +TYPE +VALUE
 00000000 R_ARM_(CALL|PC24)        bar

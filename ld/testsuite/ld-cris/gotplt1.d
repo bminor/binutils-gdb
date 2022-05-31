@@ -18,7 +18,7 @@
 .*:     file format elf32-cris
 
 DYNAMIC RELOCATION RECORDS
-OFFSET   TYPE              VALUE 
+OFFSET +TYPE +VALUE
 00082224 R_CRIS_JUMP_SLOT  dsofn
 
 Contents of section .*

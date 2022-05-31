@@ -38,7 +38,7 @@ SYMBOL TABLE:
 #...
 
 DYNAMIC RELOCATION RECORDS
-OFFSET   TYPE              VALUE 
+OFFSET +TYPE +VALUE
 0+2240 R_CRIS_DTPMOD     \*ABS\*
 
 Contents of section \.hash:

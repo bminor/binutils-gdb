@@ -10,7 +10,7 @@
 .*:     file format elf32-cris
 
 DYNAMIC RELOCATION RECORDS
-OFFSET   TYPE              VALUE 
+OFFSET +TYPE +VALUE
 000b38a8 R_CRIS_DTP        x2814
 #...
 000b82e8 R_CRIS_DTP        x8190

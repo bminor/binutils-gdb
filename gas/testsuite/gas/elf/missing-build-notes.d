@@ -6,7 +6,7 @@
 
 #...
 RELOCATION RECORDS FOR \[.gnu.build.attributes\]:
-OFFSET[ 	]+TYPE[ 	]+VALUE 
+OFFSET +TYPE +VALUE
 0+014 .*[ 	]+.*
 0+0(18|1c) .*[ 	]+.*
 0+0(30|38) .*[ 	]+.*
