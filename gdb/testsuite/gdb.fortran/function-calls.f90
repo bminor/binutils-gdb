@@ -198,6 +198,7 @@ program function_calls
     type(cart_nd) :: c_nd
     type(nested_cart_3d) :: nested_c
     character(40) :: returned_string, returned_string_debugger
+    external no_arg_subroutine
     real8 = 3.00
     real4 = 9.3
     integer_array = 17
