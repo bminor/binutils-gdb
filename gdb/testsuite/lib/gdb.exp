@@ -4412,6 +4412,13 @@ proc gdb_compile {source dest type options} {
 
     set outdir [file dirname $dest]
 
+    # If this is set, calling test_compiler_info will cause recursion.
+    if { [lsearch -exact $options getting_compiler_info] == -1 } {
+	set getting_compiler_info false
+    } else {
+	set getting_compiler_info true
+    }
+
     # Add platform-specific options if a shared library was specified using
     # "shlib=librarypath" in OPTIONS.
     set new_options {}
@@ -4428,7 +4435,7 @@ proc gdb_compile {source dest type options} {
     # default, unless you pass -Wno-unknown-warning-option as well.
     # We do that here, so that individual testcases don't have to
     # worry about it.
-    if {[lsearch -exact $options getting_compiler_info] == -1
+    if {!$getting_compiler_info
 	&& [lsearch -exact $options rust] == -1
 	&& [lsearch -exact $options ada] == -1
 	&& [lsearch -exact $options f90] == -1
@@ -4439,7 +4446,7 @@ proc gdb_compile {source dest type options} {
 
     # Treating .c input files as C++ is deprecated in Clang, so
     # explicitly force C++ language.
-    if { [lsearch -exact $options getting_compiler_info] == -1
+    if { !$getting_compiler_info
 	 && [lsearch -exact $options c++] != -1
 	 && [string match *.c $source] != 0 } {
 
@@ -4460,7 +4467,7 @@ proc gdb_compile {source dest type options} {
     # Place (and look for) Fortran `.mod` files in the output
     # directory for this specific test.  For Intel compilers the -J
     # option is not supported so instead use the -module flag.
-    if { [lsearch -exact $options f90] != -1 } {
+    if { !$getting_compiler_info && [lsearch -exact $options f90] != -1 } {
 	# Fortran compile.
 	set mod_path [standard_output_file ""]
 	if [test_compiler_info "gcc-*"] {
@@ -4473,7 +4480,6 @@ proc gdb_compile {source dest type options} {
 
     set shlib_found 0
     set shlib_load 0
-    set getting_compiler_info 0
     foreach opt $options {
         if {[regexp {^shlib=(.*)} $opt dummy_var shlib_name]
 	    && $type == "executable"} {
@@ -4505,8 +4511,9 @@ proc gdb_compile {source dest type options} {
 	} elseif { $opt == "shlib_load" && $type == "executable" } {
 	    set shlib_load 1
 	} elseif { $opt == "getting_compiler_info" } {
-	    # If this is set, calling test_compiler_info will cause recursion.
-	    set getting_compiler_info 1
+	    # Ignore this setting here as it has been handled earlier in this
+	    # procedure.  Do not append it to new_options as this will cause
+	    # recursion.
         } elseif {[regexp "^text_segment=(.*)" $opt dummy_var addr]} {
             if { [linker_supports_Ttext_segment_flag] } {
                 # For GNU ld.
@@ -4529,7 +4536,7 @@ proc gdb_compile {source dest type options} {
     # DWARF line numbering.
     # See https://gcc.gnu.org/bugzilla/show_bug.cgi?id=88432
     # This option defaults to on for Debian/Ubuntu.
-    if { $getting_compiler_info == 0
+    if { !$getting_compiler_info
 	 && [test_compiler_info {gcc-*-*}]
 	 && !([test_compiler_info {gcc-[0-3]-*}]
 	      || [test_compiler_info {gcc-4-0-*}])
