@@ -4473,6 +4473,8 @@ proc gdb_compile {source dest type options} {
     # Place (and look for) Fortran `.mod` files in the output
     # directory for this specific test.  For Intel compilers the -J
     # option is not supported so instead use the -module flag.
+    # Additionally, Intel compilers need the -debug-parameters flag set to
+    # emit debug info for all parameters in modules.
     if { !$getting_compiler_info && [lsearch -exact $options f90] != -1 } {
 	# Fortran compile.
 	set mod_path [standard_output_file ""]
@@ -4481,6 +4483,7 @@ proc gdb_compile {source dest type options} {
 	} elseif { [test_compiler_info {ifort-*} f90]
 		   || [test_compiler_info {ifx-*} f90] } {
 	    lappend new_options "additional_flags=-module ${mod_path}"
+	    lappend new_options "additional_flags=-debug-parameters all"
 	}
     }
 
