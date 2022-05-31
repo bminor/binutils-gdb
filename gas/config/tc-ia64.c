@@ -1760,7 +1760,6 @@ static unw_rec_list *
 output_prologue (void)
 {
   unw_rec_list *ptr = alloc_record (prologue);
-  memset (&ptr->r.record.r.mask, 0, sizeof (ptr->r.record.r.mask));
   return ptr;
 }
 
@@ -1768,7 +1767,6 @@ static unw_rec_list *
 output_prologue_gr (unsigned int saved_mask, unsigned int reg)
 {
   unw_rec_list *ptr = alloc_record (prologue_gr);
-  memset (&ptr->r.record.r.mask, 0, sizeof (ptr->r.record.r.mask));
   ptr->r.record.r.grmask = saved_mask;
   ptr->r.record.r.grsave = reg;
   return ptr;
