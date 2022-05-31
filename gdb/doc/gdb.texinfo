@@ -9124,11 +9124,13 @@ spec matching no code locations in your program at all:
 @itemize @bullet
 @item
 The location spec specifies a function name, and there are no
-functions in the program with that name.
+functions in the program with that name, or they only exist in a
+yet-unloaded shared library.
 
 @item
 The location spec specifies a source file name, and there are no
-source files in the program with that name.
+source files in the program with that name, or they only exist in a
+yet-unloaded shared library.
 
 @item
 The location spec specifies both a source file name and a source line
