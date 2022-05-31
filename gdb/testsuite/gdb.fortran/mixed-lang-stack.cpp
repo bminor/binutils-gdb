@@ -26,17 +26,7 @@ class base_one
 class base_two
 {
 public:
-  base_two ()
-  {
-    string = strdup ("Something in C++");
-  }
-
-  ~base_two ()
-  {
-    free (string);
-  }
-
-  char *string = nullptr;
+  const char *string = "Something in C++";
   float val = 3.5;
 };
 
