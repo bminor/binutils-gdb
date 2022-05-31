@@ -5443,20 +5443,35 @@ the innermost frame is selected, this is a good way to delete a
 breakpoint where your program just stopped.
 
 @item clear @var{locspec}
-Delete breakpoints with code locations that match @var{locspec}.
-@xref{Location Specifications}, for the various forms of
-@var{locspec}; the most useful ones are listed below:
+Delete any breakpoint with a code location that corresponds to
+@var{locspec}.  @xref{Location Specifications}, for the various forms
+of @var{locspec}.  Which code locations correspond to @var{locspec}
+depends on the form used in the location specification @var{locspec}:
 
 @table @code
-@item clear @var{function}
-@itemx clear @var{filename}:@var{function}
-Delete any breakpoints set at entry to the named @var{function}.
+@item @var{linenum}
+@itemx @var{filename}:@var{linenum}
+@itemx -line @var{linenum}
+@itemx -source @var{filename} -line @var{linenum}
+If @var{locspec} specifies a line number, with or without a file name,
+the command deletes any breakpoint with a code location that is at or
+within the specified line @var{linenum} in files that match the
+specified @var{filename}.  If @var{filename} is omitted, it defaults
+to the current source file.
 
-@item clear @var{linenum}
-@itemx clear @var{filename}:@var{linenum}
-Delete any breakpoints set at or within the code of the specified
-@var{linenum} of the specified @var{filename}.
+@item *@var{address}
+If @var{locspec} specifies an address, the command deletes any
+breakpoint with a code location that is at the given @var{address}.
+
+@item @var{function}
+@itemx -function @var{function}
+If @var{locspec} specifies a function, the command deletes any
+breakpoint with a code location that is at the entry to any function
+whose name matches @var{function}.
 @end table
+
+Ambiguity in names of files and functions can be resolved as described
+in @ref{Location Specifications}.
 
 @cindex delete breakpoints
 @kindex delete
