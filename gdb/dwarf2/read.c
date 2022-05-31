@@ -3628,10 +3628,17 @@ static const char *test_symbols[] = {
      is "function" in PT).  */
   u8"u8função",
 
-  /* \377 (0xff) is Latin1 'ÿ'.  */
+  /* Test a symbol name that ends with a 0xff character, which is a
+     valid character in non-UTF-8 source character sets (e.g. Latin1
+     'ÿ'), and we can't rule out compilers allowing it in identifiers.
+     We test this because the completion algorithm finds the upper
+     bound of symbols by looking for the insertion point of
+     "func"-with-last-character-incremented, i.e. "fund", and adding 1
+     to 0xff should wraparound and carry to the previous character.
+     See comments in make_sort_after_prefix_name.  */
   "yfunc\377",
 
-  /* \377 (0xff) is Latin1 'ÿ'.  */
+  /* Some more symbols with \377 (0xff).  See above.  */
   "\377",
   "\377\377123",
 
@@ -3701,7 +3708,8 @@ test_mapped_index_find_name_component_bounds ()
   }
 
   /* Check that the increment-last-char in the name matching algorithm
-     for completion doesn't get confused with Ansi1 'ÿ' / 0xff.  */
+     for completion doesn't get confused with Ansi1 'ÿ' / 0xff.  See
+     make_sort_after_prefix_name.  */
   {
     static const char *expected_syms1[] = {
       "\377",
@@ -3770,7 +3778,8 @@ test_dw2_expand_symtabs_matching_symbol ()
     }
 
   /* Check that the name matching algorithm for completion doesn't get
-     confused with Latin1 'ÿ' / 0xff.  */
+     confused with Latin1 'ÿ' / 0xff.  See
+     make_sort_after_prefix_name.  */
   {
     static const char str[] = "\377";
     CHECK_MATCH (str, symbol_name_match_type::FULL, true,
