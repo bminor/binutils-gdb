@@ -35,4 +35,4 @@ Disassembly of section \.text:
 			80c0b: R_386_PLT32	\.plt
 
 00080c0f <sexternal>:
-   80c0f:	c3                   	ret    
+   80c0f:	c3                   	ret *
