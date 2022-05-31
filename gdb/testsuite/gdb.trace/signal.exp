@@ -125,7 +125,9 @@ delete_breakpoints
 gdb_breakpoint "start" qualified
 gdb_continue_to_breakpoint "continue to start"
 
-gdb_assert { 0 == [get_integer_valueof "counter" "1"] } "counter is zero"
+with_test_prefix "counter is zero" {
+    gdb_assert { 0 == [get_integer_valueof "counter" "1"] } "assert check"
+}
 
 delete_breakpoints
 
@@ -147,8 +149,10 @@ gdb_test_no_output "tstop"
 
 set iterations [get_integer_valueof "iterations" "0"]
 
-gdb_assert { $iterations == [get_integer_valueof "counter" "0"] } \
-    "iterations equals to counter"
+with_test_prefix "iterations equals to counter" {
+    gdb_assert { $iterations == [get_integer_valueof "counter" "0"] } \
+	"assert check"
+}
 
 # Record the hit times of each tracepoint in this array.
 array set tracepoint_hits { }
