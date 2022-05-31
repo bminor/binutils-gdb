@@ -101,7 +101,9 @@ gdb_test "p sum_some(1,2)" " = 3"
 
 # Paragraph 10: optional value arguments. There is insufficient DWARF
 # information to reliably make this case work.
-setup_kfail "gdb/24305" *-*-*
+if { [test_compiler_info {gfortran-*} f90] } {
+    setup_kfail "gdb/24305" *-*-*
+}
 gdb_test "p one_arg_value(10)" " = 10"
 
 # DW_AT_artificial formal parameters must be passed manually. This
