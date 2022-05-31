@@ -63,5 +63,5 @@ set total_length [string length __clang_version__]
 set version_start_index [string last "(" __clang_version__]
 set version_string [string range __clang_version__ $version_start_index+5 $total_length-2]
 set version_updated_string [string map {. -} $version_string]
-set compiler_info "intel-$version_updated_string"
+set compiler_info "icx-$version_updated_string"
 #endif
