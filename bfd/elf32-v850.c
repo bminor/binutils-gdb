@@ -2414,7 +2414,7 @@ v850_elf_create_sections (struct bfd_link_info * info)
 }
 
 bool
-v850_elf_set_note (bfd * abfd, enum v850_notes note, unsigned int val)
+v850_elf_set_note (bfd * abfd, unsigned int note, unsigned int val)
 {
   asection * notes = bfd_get_section_by_name (abfd, V850_NOTE_SECNAME);
 
