@@ -1168,7 +1168,7 @@ pstring_list (const char *const *list)
 
 obstack *gdbarch_obstack (gdbarch *arch)
 {
-  return arch->obstack;
+  return &arch->obstack;
 }
 
 /* See gdbarch.h.  */
@@ -1176,7 +1176,7 @@ obstack *gdbarch_obstack (gdbarch *arch)
 char *
 gdbarch_obstack_strdup (struct gdbarch *arch, const char *string)
 {
-  return obstack_strdup (arch->obstack, string);
+  return obstack_strdup (&arch->obstack, string);
 }
 
 
@@ -1189,13 +1189,9 @@ gdbarch_obstack_strdup (struct gdbarch *arch, const char *string)
 void
 gdbarch_free (struct gdbarch *arch)
 {
-  struct obstack *obstack;
-
   gdb_assert (arch != NULL);
   gdb_assert (!arch->initialized_p);
-  obstack = arch->obstack;
-  obstack_free (obstack, 0); /* Includes the ARCH.  */
-  xfree (obstack);
+  delete arch;
 }
 
 /* See gdbarch.h.  */
@@ -1294,7 +1290,7 @@ gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *data)
 	   the entire architecture, as that way it isn't possible for
 	   pre-init code to refer to undefined architecture
 	   fields.  */
-	gdbarch->data[data->index] = data->pre_init (gdbarch->obstack);
+	gdbarch->data[data->index] = data->pre_init (&gdbarch->obstack);
       else if (gdbarch->initialized_p
 	       && data->post_init != NULL)
 	/* Post architecture creation: pass the entire architecture
