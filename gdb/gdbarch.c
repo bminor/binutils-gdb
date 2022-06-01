@@ -30,7 +30,7 @@
 struct gdbarch
 {
   /* Has this architecture been fully initialized?  */
-  int initialized_p;
+  bool initialized_p;
 
   /* An obstack bound to the lifetime of the architecture.  */
   struct obstack *obstack;

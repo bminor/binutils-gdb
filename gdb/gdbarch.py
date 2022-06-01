@@ -257,7 +257,7 @@ with open("gdbarch.c", "w") as f:
     print("struct gdbarch", file=f)
     print("{", file=f)
     print("  /* Has this architecture been fully initialized?  */", file=f)
-    print("  int initialized_p;", file=f)
+    print("  bool initialized_p;", file=f)
     print(file=f)
     print("  /* An obstack bound to the lifetime of the architecture.  */", file=f)
     print("  struct obstack *obstack;", file=f)

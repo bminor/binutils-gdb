@@ -1542,7 +1542,7 @@ gdbarch_find_by_info (struct gdbarch_info info)
      any post init values.  */
   new_gdbarch->dump_tdep = rego->dump_tdep;
   verify_gdbarch (new_gdbarch);
-  new_gdbarch->initialized_p = 1;
+  new_gdbarch->initialized_p = true;
 
   if (gdbarch_debug)
     gdbarch_dump (new_gdbarch, gdb_stdlog);
