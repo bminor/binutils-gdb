@@ -2154,16 +2154,52 @@ static struct gdbarch *
 csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
+  /* Analyze info.abfd.  */
+  unsigned int fpu_abi = 0;
+  unsigned int vdsp_version = 0;
+  unsigned int fpu_hardfp = 0;
+
+  /* When the type of bfd file is srec(or any files are not elf),
+     the E_FLAGS will be not credible.  */
+  if (info.abfd != NULL && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+    {
+      /* Get FPU, VDSP build options.  */
+      fpu_abi = bfd_elf_get_obj_attr_int (info.abfd,
+                                          OBJ_ATTR_PROC,
+                                          Tag_CSKY_FPU_ABI);
+      vdsp_version = bfd_elf_get_obj_attr_int (info.abfd,
+                                               OBJ_ATTR_PROC,
+                                               Tag_CSKY_VDSP_VERSION);
+      fpu_hardfp = bfd_elf_get_obj_attr_int (info.abfd,
+                                             OBJ_ATTR_PROC,
+                                             Tag_CSKY_FPU_HARDFP);
+    }
 
   /* Find a candidate among the list of pre-declared architectures.  */
-  arches = gdbarch_list_lookup_by_info (arches, &info);
-  if (arches != NULL)
-    return arches->gdbarch;
+  for (arches = gdbarch_list_lookup_by_info (arches, &info);
+       arches != NULL;
+       arches = gdbarch_list_lookup_by_info (arches->next, &info))
+    {
+      csky_gdbarch_tdep *tdep
+        = (csky_gdbarch_tdep *) gdbarch_tdep (arches->gdbarch);
+      if (fpu_abi != tdep->fpu_abi)
+        continue;
+      if (vdsp_version != tdep->vdsp_version)
+        continue;
+      if (fpu_hardfp != tdep->fpu_hardfp)
+        continue;
+
+      /* Found a match.  */
+      return arches->gdbarch;
+    }
 
   /* None found, create a new architecture from the information
      provided.  */
   csky_gdbarch_tdep *tdep = new csky_gdbarch_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
+  tdep->fpu_abi = fpu_abi;
+  tdep->vdsp_version = vdsp_version;
+  tdep->fpu_hardfp = fpu_hardfp;
 
   /* Target data types.  */
   set_gdbarch_ptr_bit (gdbarch, 32);

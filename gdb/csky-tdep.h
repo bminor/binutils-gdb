@@ -33,7 +33,10 @@ enum lr_type_t
 /* Target-dependent structure in gdbarch.  */
 struct csky_gdbarch_tdep : gdbarch_tdep
 {
-  /* This is Unused.  */
+  /* Save FPU, VDSP ABI.  */
+  unsigned int fpu_abi;
+  unsigned int fpu_hardfp;
+  unsigned int vdsp_version;
 };
 
 /* Instruction sizes.  */
