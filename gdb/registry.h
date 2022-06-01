@@ -117,7 +117,7 @@ public:
     void set (T *obj, DATA *data) const
     {
       registry<T> *reg_obj = registry_accessor<T>::get (obj);
-      reg_obj->set (m_key, data);
+      reg_obj->set (m_key, (typename std::remove_const<DATA> *) data);
     }
 
     /* If this key uses the default deleter, then this method is
