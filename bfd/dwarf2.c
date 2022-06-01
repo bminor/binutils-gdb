@@ -145,8 +145,7 @@ struct trie_interior
 
 static struct trie_node *alloc_trie_leaf (bfd *abfd)
 {
-  struct trie_leaf *leaf =
-    bfd_zalloc (abfd, sizeof (struct trie_leaf));
+  struct trie_leaf *leaf = bfd_zalloc (abfd, sizeof (struct trie_leaf));
   if (leaf == NULL)
     return NULL;
   leaf->head.num_room_in_leaf = TRIE_LEAF_SIZE;
@@ -2009,7 +2008,7 @@ static bool ranges_overlap (bfd_vma low1,
 
   /* We touch iff low2 == high1.
      We overlap iff low2 is within [low1, high1). */
-  return (low2 <= high1);
+  return low2 <= high1;
 }
 
 /* Insert an address range in the trie mapping addresses to compilation units.
@@ -2039,9 +2038,10 @@ static struct trie_node *insert_arange_in_trie(bfd *abfd,
 
       for (i = 0; i < leaf->num_stored_in_leaf; ++i)
 	{
-	  if (leaf->ranges[i].unit == unit &&
-	      ranges_overlap(low_pc, high_pc,
-			     leaf->ranges[i].low_pc, leaf->ranges[i].high_pc))
+	  if (leaf->ranges[i].unit == unit
+	      && ranges_overlap (low_pc, high_pc,
+				 leaf->ranges[i].low_pc,
+				 leaf->ranges[i].high_pc))
 	    {
 	      if (low_pc < leaf->ranges[i].low_pc)
 		leaf->ranges[i].low_pc = low_pc;
@@ -2085,10 +2085,10 @@ static struct trie_node *insert_arange_in_trie(bfd *abfd,
       const struct trie_leaf *leaf = (struct trie_leaf *) trie;
       unsigned int new_room_in_leaf = trie->num_room_in_leaf * 2;
       struct trie_leaf *new_leaf;
-
-      new_leaf = bfd_zalloc (abfd,
-	sizeof (struct trie_leaf) +
-	  (new_room_in_leaf - TRIE_LEAF_SIZE) * sizeof (leaf->ranges[0]));
+      size_t amt = (sizeof (struct trie_leaf)
+		    + ((new_room_in_leaf - TRIE_LEAF_SIZE)
+		       * sizeof (leaf->ranges[0])));
+      new_leaf = bfd_zalloc (abfd, amt);
       new_leaf->head.num_room_in_leaf = new_room_in_leaf;
       new_leaf->num_stored_in_leaf = leaf->num_stored_in_leaf;
 
@@ -2122,7 +2122,7 @@ static struct trie_node *insert_arange_in_trie(bfd *abfd,
   if (trie_pc_bits > 0)
     {
       bfd_vma bucket_high_pc =
-	trie_pc + ((bfd_vma)-1 >> trie_pc_bits);  /* Inclusive.  */
+	trie_pc + ((bfd_vma) -1 >> trie_pc_bits);  /* Inclusive.  */
       if (clamped_low_pc < trie_pc)
 	clamped_low_pc = trie_pc;
       if (clamped_high_pc > bucket_high_pc)
@@ -2143,9 +2143,10 @@ static struct trie_node *insert_arange_in_trie(bfd *abfd,
 	  if (!child)
 	    return NULL;
 	}
+      bfd_vma bucket = (bfd_vma) ch << (VMA_BITS - trie_pc_bits - 8);
       child = insert_arange_in_trie (abfd,
 				     child,
-				     trie_pc + ((bfd_vma)ch << (VMA_BITS - trie_pc_bits - 8)),
+				     trie_pc + bucket,
 				     trie_pc_bits + 8,
 				     unit,
 				     low_pc,
@@ -2843,9 +2844,8 @@ decode_line_info (struct comp_unit *unit)
 		    goto line_fail;
 		  break;
 		case DW_LNE_set_discriminator:
-		  discriminator =
-		    _bfd_safe_read_leb128 (abfd, &line_ptr,
-					   false, line_end);
+		  discriminator = _bfd_safe_read_leb128 (abfd, &line_ptr,
+							 false, line_end);
 		  break;
 		case DW_LNE_HP_source_file_correlation:
 		  line_ptr += exop_len - 1;
@@ -4512,6 +4512,7 @@ parse_comp_unit (struct dwarf2_debug *stash,
   return unit;
 
  err_exit:
+  unit->error = 1;
   free (str_addrp);
   return NULL;
 }
@@ -5565,14 +5566,14 @@ _bfd_dwarf2_find_symbol_bias (asymbol ** symbols, void ** pinfo)
 	  {
 	    asymbol search, *sym;
 
-	    /* FIXME: Do we need to scan the aranges looking for the lowest pc value ?  */
+	    /* FIXME: Do we need to scan the aranges looking for the
+	       lowest pc value?  */
 
 	    search.name = func->name;
 	    sym = htab_find (sym_hash, &search);
 	    if (sym != NULL)
 	      {
-		result = ((bfd_signed_vma) func->arange.low) -
-		  ((bfd_signed_vma) (sym->value + sym->section->vma));
+		result = func->arange.low - (sym->value + sym->section->vma);
 		goto done;
 	      }
 	  }
@@ -5752,16 +5753,14 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 	  unsigned int i;
 
 	  for (i = 0; i < leaf->num_stored_in_leaf; ++i)
-	    {
-	      leaf->ranges[i].unit->mark = false;
-	    }
+	    leaf->ranges[i].unit->mark = false;
 
 	  for (i = 0; i < leaf->num_stored_in_leaf; ++i)
 	    {
 	      struct comp_unit *unit = leaf->ranges[i].unit;
-	      if (unit->mark ||
-	          addr < leaf->ranges[i].low_pc ||
-	          addr >= leaf->ranges[i].high_pc)
+	      if (unit->mark
+		  || addr < leaf->ranges[i].low_pc
+		  || addr >= leaf->ranges[i].high_pc)
 	        continue;
 	      unit->mark = true;
 
