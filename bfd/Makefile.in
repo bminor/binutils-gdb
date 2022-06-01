@@ -1301,7 +1301,6 @@ doc_bfd_TEXINFOS = $(DOCFILES) doc/bfdsumm.texi
 AM_MAKEINFOFLAGS = --no-split -I "$(srcdir)/doc" -I doc
 TEXI2DVI = texi2dvi -I "$(srcdir)/doc" -I doc
 MKDOC = doc/chew$(EXEEXT_FOR_BUILD)
-LIBIBERTY = ../libiberty/libiberty.a
 
 # We can't replace these rules with an implicit rule, because
 # makes without VPATH support couldn't find the .h files in `..'.
@@ -2488,7 +2487,7 @@ doc/chew.stamp: $(srcdir)/doc/chew.c doc/$(am__dirstamp)
 	$(AM_V_CCLD)$(CC_FOR_BUILD) -o doc/chw$$$$$(EXEEXT_FOR_BUILD) $(CFLAGS_FOR_BUILD) \
 	  $(LDFLAGS_FOR_BUILD) $(H_CFLAGS) \
 	  -I. -I$(srcdir) -Idoc -I$(srcdir)/../include -I$(srcdir)/../intl -I../intl \
-	  $(srcdir)/doc/chew.c $(LIBIBERTY) && \
+	  $(srcdir)/doc/chew.c && \
 	$(SHELL) $(srcdir)/../move-if-change \
 	  doc/chw$$$$$(EXEEXT_FOR_BUILD) $(MKDOC) && \
 	touch $@

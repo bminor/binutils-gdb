@@ -81,8 +81,6 @@
 
    Foo.  */
 
-#include "ansidecl.h"
-#include "libiberty.h"
 #include <assert.h>
 #include <stdio.h>
 #include <ctype.h>
@@ -143,6 +141,45 @@ die (char *msg)
 {
   fprintf (stderr, "%s\n", msg);
   exit (1);
+}
+
+void *
+xmalloc (size_t size)
+{
+  void *newmem;
+
+  if (size == 0)
+    size = 1;
+  newmem = malloc (size);
+  if (!newmem)
+    die ("out of memory");
+
+  return newmem;
+}
+
+void *
+xrealloc (void *oldmem, size_t size)
+{
+  void *newmem;
+
+  if (size == 0)
+    size = 1;
+  if (!oldmem)
+    newmem = malloc (size);
+  else
+    newmem = realloc (oldmem, size);
+  if (!newmem)
+    die ("out of memory");
+
+  return newmem;
+}
+
+char *
+xstrdup (const char *s)
+{
+  size_t len = strlen (s) + 1;
+  char *ret = xmalloc (len);
+  return memcpy (ret, s, len);
 }
 
 static void
