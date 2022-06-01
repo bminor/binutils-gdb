@@ -986,7 +986,7 @@ preferred_obj_section (struct obj_section *a, struct obj_section *b)
 }
 
 /* Return 1 if SECTION should be inserted into the section map.
-   We want to insert only non-overlay and non-TLS section.  */
+   We want to insert only non-overlay non-TLS non-empty sections.  */
 
 static int
 insert_section_p (const struct bfd *abfd,
@@ -1003,6 +1003,12 @@ insert_section_p (const struct bfd *abfd,
   if ((bfd_section_flags (section) & SEC_THREAD_LOCAL) != 0)
     /* This is a TLS section.  */
     return 0;
+  if (bfd_section_size (section) == 0)
+    {
+      /* This is an empty section.  It has no PCs for find_pc_section (), so
+	 there is no reason to insert it into the section map.  */
+      return 0;
+    }
 
   return 1;
 }
