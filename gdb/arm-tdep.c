@@ -1437,7 +1437,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
       cache->framesize = -regs[ARM_SP_REGNUM].k;
     }
 
-  for (i = 0; i < 16; i++)
+  for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
     if (stack.find_reg (gdbarch, i, &offset))
       cache->saved_regs[i].set_addr (offset);
 
