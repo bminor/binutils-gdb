@@ -3559,15 +3559,6 @@ arm_m_exception_prev_register (struct frame_info *this_frame,
       return frame_unwind_got_constant (this_frame, prev_regnum, sp_value);
     }
 
-  if (prev_regnum == ARM_PC_REGNUM)
-    {
-      CORE_ADDR lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
-      struct gdbarch *gdbarch = get_frame_arch (this_frame);
-
-      return frame_unwind_got_constant (this_frame, prev_regnum,
-					arm_addr_bits_remove (gdbarch, lr));
-    }
-
   return trad_frame_get_prev_register (this_frame, cache->saved_regs,
 				       prev_regnum);
 }
