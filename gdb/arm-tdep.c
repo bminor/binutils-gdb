@@ -3464,10 +3464,10 @@ arm_m_exception_cache (struct frame_info *this_frame)
 
       /* Extended stack frame type used.  */
       fpu_regs_stack_offset = unwound_sp + sp_r0_offset + 0x20;
-      for (i = 0; i < 16; i++)
+      for (i = 0; i < 8; i++)
 	{
 	  cache->saved_regs[ARM_D0_REGNUM + i].set_addr (fpu_regs_stack_offset);
-	  fpu_regs_stack_offset += 4;
+	  fpu_regs_stack_offset += 8;
 	}
       cache->saved_regs[ARM_FPSCR_REGNUM].set_addr (unwound_sp + sp_r0_offset + 0x60);
       fpu_regs_stack_offset += 4;
@@ -3476,10 +3476,10 @@ arm_m_exception_cache (struct frame_info *this_frame)
 	{
 	  /* Handle floating-point callee saved registers.  */
 	  fpu_regs_stack_offset = 0x90;
-	  for (i = 16; i < 32; i++)
+	  for (i = 8; i < 16; i++)
 	    {
 	      cache->saved_regs[ARM_D0_REGNUM + i].set_addr (fpu_regs_stack_offset);
-	      fpu_regs_stack_offset += 4;
+	      fpu_regs_stack_offset += 8;
 	    }
 
 	  arm_cache_set_active_sp_value (cache, tdep, unwound_sp + sp_r0_offset + 0xD0);
