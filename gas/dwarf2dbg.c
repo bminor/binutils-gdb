@@ -679,7 +679,7 @@ get_directory_table_entry (const char *dirname,
 }
 
 static bool
-assign_file_to_slot (unsigned long i, const char *file, unsigned int dir)
+assign_file_to_slot (unsigned int i, const char *file, unsigned int dir)
 {
   if (i >= files_allocated)
     {
@@ -687,9 +687,11 @@ assign_file_to_slot (unsigned long i, const char *file, unsigned int dir)
 
       files_allocated = i + 32;
       /* Catch wraparound.  */
-      if (files_allocated <= old)
+      if (files_allocated < old
+	  || files_allocated < i
+	  || files_allocated > UINT_MAX / sizeof (struct file_entry))
 	{
-	  as_bad (_("file number %lu is too big"), (unsigned long) i);
+	  as_bad (_("file number %u is too big"), i);
 	  return false;
 	}
 
