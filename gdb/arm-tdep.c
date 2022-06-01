@@ -3438,13 +3438,13 @@ arm_m_exception_cache (struct frame_info *this_frame)
      "B1.5.6 Exception entry behavior" in
      "ARMv7-M Architecture Reference Manual".  */
   cache->saved_regs[0].set_addr (unwound_sp + sp_r0_offset);
-  cache->saved_regs[1].set_addr (unwound_sp + sp_r0_offset + 4);
-  cache->saved_regs[2].set_addr (unwound_sp + sp_r0_offset + 8);
-  cache->saved_regs[3].set_addr (unwound_sp + sp_r0_offset + 12);
-  cache->saved_regs[ARM_IP_REGNUM].set_addr (unwound_sp + sp_r0_offset + 16);
-  cache->saved_regs[ARM_LR_REGNUM].set_addr (unwound_sp + sp_r0_offset + 20);
-  cache->saved_regs[ARM_PC_REGNUM].set_addr (unwound_sp + sp_r0_offset + 24);
-  cache->saved_regs[ARM_PS_REGNUM].set_addr (unwound_sp + sp_r0_offset + 28);
+  cache->saved_regs[1].set_addr (unwound_sp + sp_r0_offset + 0x04);
+  cache->saved_regs[2].set_addr (unwound_sp + sp_r0_offset + 0x08);
+  cache->saved_regs[3].set_addr (unwound_sp + sp_r0_offset + 0x0C);
+  cache->saved_regs[ARM_IP_REGNUM].set_addr (unwound_sp + sp_r0_offset + 0x10);
+  cache->saved_regs[ARM_LR_REGNUM].set_addr (unwound_sp + sp_r0_offset + 0x14);
+  cache->saved_regs[ARM_PC_REGNUM].set_addr (unwound_sp + sp_r0_offset + 0x18);
+  cache->saved_regs[ARM_PS_REGNUM].set_addr (unwound_sp + sp_r0_offset + 0x1C);
 
   /* Check EXC_RETURN bit FTYPE if extended stack frame (FPU regs stored)
      type used.  */
@@ -3499,7 +3499,8 @@ arm_m_exception_cache (struct frame_info *this_frame)
   /* If bit 9 of the saved xPSR is set, then there is a four-byte
      aligner between the top of the 32-byte stack frame and the
      previous context's stack pointer.  */
-  if (safe_read_memory_integer (unwound_sp + sp_r0_offset + 28, 4, byte_order, &xpsr)
+  if (safe_read_memory_integer (unwound_sp + sp_r0_offset + 0x1C, 4,
+				byte_order, &xpsr)
       && (xpsr & (1 << 9)) != 0)
     arm_cache_set_active_sp_value (cache, tdep,
 				   arm_cache_get_prev_sp_value (cache, tdep) + 4);
