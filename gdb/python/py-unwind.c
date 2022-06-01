@@ -117,8 +117,6 @@ extern PyTypeObject pending_frame_object_type
 extern PyTypeObject unwind_info_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("unwind_info_object");
 
-static struct gdbarch_data *pyuw_gdbarch_data;
-
 /* Convert gdb.Value instance to inferior's pointer.  Return 1 on success,
    0 on failure.  */
 
@@ -657,14 +655,10 @@ pyuw_dealloc_cache (struct frame_info *this_frame, void *cache)
 struct pyuw_gdbarch_data_type
 {
   /* Has the unwinder shim been prepended? */
-  int unwinder_registered;
+  int unwinder_registered = 0;
 };
 
-static void *
-pyuw_gdbarch_data_init (struct gdbarch *gdbarch)
-{
-  return GDBARCH_OBSTACK_ZALLOC (gdbarch, struct pyuw_gdbarch_data_type);
-}
+static const registry<gdbarch>::key<pyuw_gdbarch_data_type> pyuw_gdbarch_data;
 
 /* New inferior architecture callback: register the Python unwinders
    intermediary.  */
@@ -672,9 +666,9 @@ pyuw_gdbarch_data_init (struct gdbarch *gdbarch)
 static void
 pyuw_on_new_gdbarch (struct gdbarch *newarch)
 {
-  struct pyuw_gdbarch_data_type *data
-    = (struct pyuw_gdbarch_data_type *) gdbarch_data (newarch,
-						      pyuw_gdbarch_data);
+  struct pyuw_gdbarch_data_type *data = pyuw_gdbarch_data.get (newarch);
+  if (data == nullptr)
+    data= pyuw_gdbarch_data.emplace (newarch);
 
   if (!data->unwinder_registered)
     {
@@ -706,8 +700,6 @@ _initialize_py_unwind ()
 	NULL,
 	show_pyuw_debug,
 	&setdebuglist, &showdebuglist);
-  pyuw_gdbarch_data
-    = gdbarch_data_register_post_init (pyuw_gdbarch_data_init);
 }
 
 /* Initialize unwind machinery.  */

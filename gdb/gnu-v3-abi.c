@@ -38,7 +38,7 @@ static struct cp_abi_ops gnu_v3_abi_ops;
 /* A gdbarch key for std::type_info, in the event that it can't be
    found in the debug info.  */
 
-static struct gdbarch_data *std_type_info_gdbarch_data;
+static const registry<gdbarch>::key<struct type> std_type_info_gdbarch_data;
 
 
 static int
@@ -91,7 +91,7 @@ gnuv3_is_operator_name (const char *name)
    vtable_type_gdbarch_data is a gdbarch per-architecture data pointer
    which refers to the struct type * for this structure, laid out
    appropriately for the architecture.  */
-static struct gdbarch_data *vtable_type_gdbarch_data;
+static const registry<gdbarch>::key<struct type> vtable_type_gdbarch_data;
 
 
 /* Human-readable names for the numbers of the fields above.  */
@@ -108,12 +108,16 @@ enum {
 
    We use this function as the gdbarch per-architecture data
    initialization function.  */
-static void *
-build_gdb_vtable_type (struct gdbarch *arch)
+static struct type *
+get_gdb_vtable_type (struct gdbarch *arch)
 {
   struct type *t;
   struct field *field_list, *field;
   int offset;
+
+  struct type *result = vtable_type_gdbarch_data.get (arch);
+  if (result != nullptr)
+    return result;
 
   struct type *void_ptr_type
     = builtin_type (arch)->builtin_data_ptr;
@@ -171,7 +175,9 @@ build_gdb_vtable_type (struct gdbarch *arch)
   t->set_name ("gdb_gnu_v3_abi_vtable");
   INIT_CPLUS_SPECIFIC (t);
 
-  return make_type_with_address_space (t, TYPE_INSTANCE_FLAG_CODE_SPACE);
+  result = make_type_with_address_space (t, TYPE_INSTANCE_FLAG_CODE_SPACE);
+  vtable_type_gdbarch_data.set (arch, result);
+  return result;
 }
 
 
@@ -179,8 +185,7 @@ build_gdb_vtable_type (struct gdbarch *arch)
 static struct type *
 vtable_ptrdiff_type (struct gdbarch *gdbarch)
 {
-  struct type *vtable_type
-    = (struct type *) gdbarch_data (gdbarch, vtable_type_gdbarch_data);
+  struct type *vtable_type = get_gdb_vtable_type (gdbarch);
 
   /* The "offset_to_top" field has the appropriate (ptrdiff_t) type.  */
   return vtable_type->field (vtable_field_offset_to_top).type ();
@@ -192,8 +197,7 @@ vtable_ptrdiff_type (struct gdbarch *gdbarch)
 static int
 vtable_address_point_offset (struct gdbarch *gdbarch)
 {
-  struct type *vtable_type
-    = (struct type *) gdbarch_data (gdbarch, vtable_type_gdbarch_data);
+  struct type *vtable_type = get_gdb_vtable_type (gdbarch);
 
   return (vtable_type->field (vtable_field_virtual_functions).loc_bitpos ()
 	  / TARGET_CHAR_BIT);
@@ -253,8 +257,7 @@ static struct value *
 gnuv3_get_vtable (struct gdbarch *gdbarch,
 		  struct type *container_type, CORE_ADDR container_addr)
 {
-  struct type *vtable_type
-    = (struct type *) gdbarch_data (gdbarch, vtable_type_gdbarch_data);
+  struct type *vtable_type = get_gdb_vtable_type (gdbarch);
   struct type *vtable_pointer_type;
   struct value *vtable_pointer;
   CORE_ADDR vtable_address;
@@ -1016,7 +1019,7 @@ gnuv3_print_vtable (struct value *value)
    We use this function as the gdbarch per-architecture data
    initialization function.  */
 
-static void *
+static struct type *
 build_std_type_info_type (struct gdbarch *arch)
 {
   struct type *t;
@@ -1069,8 +1072,14 @@ gnuv3_get_typeid_type (struct gdbarch *gdbarch)
   typeinfo = lookup_symbol ("std::type_info", NULL, STRUCT_DOMAIN,
 			    NULL).symbol;
   if (typeinfo == NULL)
-    typeinfo_type
-      = (struct type *) gdbarch_data (gdbarch, std_type_info_gdbarch_data);
+    {
+      typeinfo_type = std_type_info_gdbarch_data.get (gdbarch);
+      if (typeinfo_type == nullptr)
+	{
+	  typeinfo_type = build_std_type_info_type (gdbarch);
+	  std_type_info_gdbarch_data.set (gdbarch, typeinfo_type);
+	}
+    }
   else
     typeinfo_type = typeinfo->type ();
 
@@ -1560,11 +1569,6 @@ gnuv3_pass_by_reference (struct type *type)
 static void
 init_gnuv3_ops (void)
 {
-  vtable_type_gdbarch_data
-    = gdbarch_data_register_post_init (build_gdb_vtable_type);
-  std_type_info_gdbarch_data
-    = gdbarch_data_register_post_init (build_std_type_info_type);
-
   gnu_v3_abi_ops.shortname = "gnu-v3";
   gnu_v3_abi_ops.longname = "GNU G++ Version 3 ABI";
   gnu_v3_abi_ops.doc = "G++ Version 3 ABI";

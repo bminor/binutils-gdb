@@ -193,25 +193,22 @@ enum
     LINUX_SIGRTMAX = 64,
   };
 
-static struct gdbarch_data *linux_gdbarch_data_handle;
-
 struct linux_gdbarch_data
 {
-  struct type *siginfo_type;
-  int num_disp_step_buffers;
+  struct type *siginfo_type = nullptr;
+  int num_disp_step_buffers = 0;
 };
 
-static void *
-init_linux_gdbarch_data (struct obstack *obstack)
-{
-  return obstack_zalloc<linux_gdbarch_data> (obstack);
-}
+static const registry<gdbarch>::key<linux_gdbarch_data>
+     linux_gdbarch_data_handle;
 
 static struct linux_gdbarch_data *
 get_linux_gdbarch_data (struct gdbarch *gdbarch)
 {
-  return ((struct linux_gdbarch_data *)
-	  gdbarch_data (gdbarch, linux_gdbarch_data_handle));
+  struct linux_gdbarch_data *result = linux_gdbarch_data_handle.get (gdbarch);
+  if (result == nullptr)
+    result = linux_gdbarch_data_handle.emplace (gdbarch);
+  return result;
 }
 
 /* Linux-specific cached data.  This is used by GDB for caching
@@ -2752,9 +2749,6 @@ void _initialize_linux_tdep ();
 void
 _initialize_linux_tdep ()
 {
-  linux_gdbarch_data_handle =
-    gdbarch_data_register_pre_init (init_linux_gdbarch_data);
-
   /* Observers used to invalidate the cache when needed.  */
   gdb::observers::inferior_exit.attach (invalidate_linux_cache_inf,
 					"linux-tdep");

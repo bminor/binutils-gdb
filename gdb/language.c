@@ -918,24 +918,28 @@ static unknown_language unknown_language_defn;
 
 /* Per-architecture language information.  */
 
-static struct gdbarch_data *language_gdbarch_data;
-
 struct language_gdbarch
 {
   /* A vector of per-language per-architecture info.  Indexed by "enum
      language".  */
-  struct language_arch_info arch_info[nr_languages];
+  struct language_arch_info arch_info[nr_languages] {};
 };
 
-static void *
-language_gdbarch_post_init (struct gdbarch *gdbarch)
+static const registry<gdbarch>::key<language_gdbarch> language_gdbarch_data;
+
+static language_gdbarch *
+get_language_gdbarch (struct gdbarch *gdbarch)
 {
-  struct language_gdbarch *l
-    = obstack_new<struct language_gdbarch> (gdbarch_obstack (gdbarch));
-  for (const auto &lang : language_defn::languages)
+  struct language_gdbarch *l = language_gdbarch_data.get (gdbarch);
+  if (l == nullptr)
     {
-      gdb_assert (lang != nullptr);
-      lang->language_arch_info (gdbarch, &l->arch_info[lang->la_language]);
+      l = new struct language_gdbarch;
+      for (const auto &lang : language_defn::languages)
+	{
+	  gdb_assert (lang != nullptr);
+	  lang->language_arch_info (gdbarch, &l->arch_info[lang->la_language]);
+	}
+      language_gdbarch_data.set (gdbarch, l);
     }
 
   return l;
@@ -947,8 +951,7 @@ struct type *
 language_string_char_type (const struct language_defn *la,
 			   struct gdbarch *gdbarch)
 {
-  struct language_gdbarch *ld
-    = (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
+  struct language_gdbarch *ld = get_language_gdbarch (gdbarch);
   return ld->arch_info[la->la_language].string_char_type ();
 }
 
@@ -958,8 +961,7 @@ struct type *
 language_bool_type (const struct language_defn *la,
 		    struct gdbarch *gdbarch)
 {
-  struct language_gdbarch *ld
-    = (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
+  struct language_gdbarch *ld = get_language_gdbarch (gdbarch);
   return ld->arch_info[la->la_language].bool_type ();
 }
 
@@ -1067,8 +1069,7 @@ language_lookup_primitive_type_1 (const struct language_defn *la,
 				  struct gdbarch *gdbarch,
 				  T arg)
 {
-  struct language_gdbarch *ld =
-    (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
+  struct language_gdbarch *ld = get_language_gdbarch (gdbarch);
   return ld->arch_info[la->la_language].lookup_primitive_type (arg);
 }
 
@@ -1099,8 +1100,7 @@ language_lookup_primitive_type_as_symbol (const struct language_defn *la,
 					  struct gdbarch *gdbarch,
 					  const char *name)
 {
-  struct language_gdbarch *ld
-    = (struct language_gdbarch *) gdbarch_data (gdbarch, language_gdbarch_data);
+  struct language_gdbarch *ld = get_language_gdbarch (gdbarch);
   struct language_arch_info *lai = &ld->arch_info[la->la_language];
 
   if (symbol_lookup_debug)
@@ -1134,9 +1134,6 @@ _initialize_language ()
 
   static const char *const case_sensitive_names[]
     = { "on", "off", "auto", NULL };
-
-  language_gdbarch_data
-    = gdbarch_data_register_post_init (language_gdbarch_post_init);
 
   /* GDB commands for language specific stuff.  */
 

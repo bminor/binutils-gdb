@@ -56,7 +56,7 @@
 #endif
 
 static int libunwind_initialized;
-static struct gdbarch_data *libunwind_descr_handle;
+static const registry<gdbarch>::key<libunwind_descr> libunwind_descr_handle;
 
 /* Required function pointers from libunwind.  */
 typedef int (unw_get_reg_p_ftype) (unw_cursor_t *, unw_regnum_t, unw_word_t *);
@@ -127,17 +127,10 @@ static const char *find_dyn_list_name = STRINGIFY(UNW_OBJ(find_dyn_list));
 static struct libunwind_descr *
 libunwind_descr (struct gdbarch *gdbarch)
 {
-  return ((struct libunwind_descr *)
-	  gdbarch_data (gdbarch, libunwind_descr_handle));
-}
-
-static void *
-libunwind_descr_init (struct obstack *obstack)
-{
-  struct libunwind_descr *descr
-    = OBSTACK_ZALLOC (obstack, struct libunwind_descr);
-
-  return descr;
+  struct libunwind_descr *result = libunwind_descr_handle.get (gdbarch);
+  if (result == nullptr)
+    result = libunwind_descr_handle.emplace (gdbarch);
+  return result;
 }
 
 void
@@ -148,8 +141,7 @@ libunwind_frame_set_descr (struct gdbarch *gdbarch,
 
   gdb_assert (gdbarch != NULL);
 
-  arch_descr = ((struct libunwind_descr *)
-		gdbarch_data (gdbarch, libunwind_descr_handle));
+  arch_descr = libunwind_descr (gdbarch);
   gdb_assert (arch_descr != NULL);
 
   /* Copy new descriptor info into arch descriptor.  */
@@ -587,8 +579,5 @@ void _initialize_libunwind_frame ();
 void
 _initialize_libunwind_frame ()
 {
-  libunwind_descr_handle
-    = gdbarch_data_register_pre_init (libunwind_descr_init);
-
   libunwind_initialized = libunwind_load ();
 }

@@ -53,8 +53,6 @@ const struct frame_base default_frame_base = {
   default_frame_args_address
 };
 
-static struct gdbarch_data *frame_base_data;
-
 struct frame_base_table_entry
 {
   frame_base_sniffer_ftype *sniffer;
@@ -63,19 +61,19 @@ struct frame_base_table_entry
 
 struct frame_base_table
 {
-  struct frame_base_table_entry *head;
-  struct frame_base_table_entry **tail;
-  const struct frame_base *default_base;
+  struct frame_base_table_entry *head = nullptr;
+  struct frame_base_table_entry **tail = &head;
+  const struct frame_base *default_base = &default_frame_base;
 };
 
-static void *
-frame_base_init (struct obstack *obstack)
-{
-  struct frame_base_table *table
-    = OBSTACK_ZALLOC (obstack, struct frame_base_table);
+static const registry<gdbarch>::key<struct frame_base_table> frame_base_data;
 
-  table->tail = &table->head;
-  table->default_base = &default_frame_base;
+static struct frame_base_table *
+get_frame_base_table (struct gdbarch *gdbarch)
+{
+  struct frame_base_table *table = frame_base_data.get (gdbarch);
+  if (table == nullptr)
+    table = frame_base_data.emplace (gdbarch);
   return table;
 }
 
@@ -83,8 +81,7 @@ void
 frame_base_append_sniffer (struct gdbarch *gdbarch,
 			   frame_base_sniffer_ftype *sniffer)
 {
-  struct frame_base_table *table
-    = (struct frame_base_table *) gdbarch_data (gdbarch, frame_base_data);
+  struct frame_base_table *table = get_frame_base_table (gdbarch);
 
   (*table->tail)
     = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct frame_base_table_entry);
@@ -96,8 +93,7 @@ void
 frame_base_set_default (struct gdbarch *gdbarch,
 			const struct frame_base *default_base)
 {
-  struct frame_base_table *table
-    = (struct frame_base_table *) gdbarch_data (gdbarch, frame_base_data);
+  struct frame_base_table *table = get_frame_base_table (gdbarch);
 
   table->default_base = default_base;
 }
@@ -106,8 +102,7 @@ const struct frame_base *
 frame_base_find_by_frame (struct frame_info *this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct frame_base_table *table
-    = (struct frame_base_table *) gdbarch_data (gdbarch, frame_base_data);
+  struct frame_base_table *table = get_frame_base_table (gdbarch);
   struct frame_base_table_entry *entry;
 
   for (entry = table->head; entry != NULL; entry = entry->next)
@@ -119,11 +114,4 @@ frame_base_find_by_frame (struct frame_info *this_frame)
 	return desc;
     }
   return table->default_base;
-}
-
-void _initialize_frame_base ();
-void
-_initialize_frame_base ()
-{
-  frame_base_data = gdbarch_data_register_pre_init (frame_base_init);
 }

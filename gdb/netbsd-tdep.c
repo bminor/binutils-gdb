@@ -373,24 +373,21 @@ nbsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
     return find_solib_trampoline_target (get_current_frame (), pc);
 }
 
-static struct gdbarch_data *nbsd_gdbarch_data_handle;
-
 struct nbsd_gdbarch_data
 {
-  struct type *siginfo_type;
+  struct type *siginfo_type = nullptr;
 };
 
-static void *
-init_nbsd_gdbarch_data (struct gdbarch *gdbarch)
-{
-  return GDBARCH_OBSTACK_ZALLOC (gdbarch, struct nbsd_gdbarch_data);
-}
+static const registry<gdbarch>::key<nbsd_gdbarch_data>
+     nbsd_gdbarch_data_handle;
 
 static struct nbsd_gdbarch_data *
 get_nbsd_gdbarch_data (struct gdbarch *gdbarch)
 {
-  return ((struct nbsd_gdbarch_data *)
-	  gdbarch_data (gdbarch, nbsd_gdbarch_data_handle));
+  struct nbsd_gdbarch_data *result = nbsd_gdbarch_data_handle.get (gdbarch);
+  if (result == nullptr)
+    result = nbsd_gdbarch_data_handle.emplace (gdbarch);
+  return result;
 }
 
 /* Implement the "get_siginfo_type" gdbarch method.  */
@@ -621,12 +618,4 @@ nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* `catch syscall' */
   set_xml_syscall_file_name (gdbarch, "syscalls/netbsd.xml");
   set_gdbarch_get_syscall_number (gdbarch, nbsd_get_syscall_number);
-}
-
-void _initialize_nbsd_tdep ();
-void
-_initialize_nbsd_tdep ()
-{
-  nbsd_gdbarch_data_handle
-    = gdbarch_data_register_post_init (init_nbsd_gdbarch_data);
 }

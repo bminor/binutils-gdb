@@ -11989,26 +11989,29 @@ struct remote_g_packet_guess
   const struct target_desc *tdesc;
 };
 
-struct remote_g_packet_data : public allocate_on_obstack
+struct remote_g_packet_data
 {
   std::vector<remote_g_packet_guess> guesses;
 };
 
-static struct gdbarch_data *remote_g_packet_data_handle;
+static const registry<gdbarch>::key<struct remote_g_packet_data>
+     remote_g_packet_data_handle;
 
-static void *
-remote_g_packet_data_init (struct obstack *obstack)
+static struct remote_g_packet_data *
+get_g_packet_data (struct gdbarch *gdbarch)
 {
-  return new (obstack) remote_g_packet_data;
+  struct remote_g_packet_data *data
+    = remote_g_packet_data_handle.get (gdbarch);
+  if (data == nullptr)
+    data = remote_g_packet_data_handle.emplace (gdbarch);
+  return data;
 }
 
 void
 register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
 				const struct target_desc *tdesc)
 {
-  struct remote_g_packet_data *data
-    = ((struct remote_g_packet_data *)
-       gdbarch_data (gdbarch, remote_g_packet_data_handle));
+  struct remote_g_packet_data *data = get_g_packet_data (gdbarch);
 
   gdb_assert (tdesc != NULL);
 
@@ -12027,9 +12030,7 @@ register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
 static bool
 remote_read_description_p (struct target_ops *target)
 {
-  struct remote_g_packet_data *data
-    = ((struct remote_g_packet_data *)
-       gdbarch_data (target_gdbarch (), remote_g_packet_data_handle));
+  struct remote_g_packet_data *data = get_g_packet_data (target_gdbarch ());
 
   return !data->guesses.empty ();
 }
@@ -12037,9 +12038,7 @@ remote_read_description_p (struct target_ops *target)
 const struct target_desc *
 remote_target::read_description ()
 {
-  struct remote_g_packet_data *data
-    = ((struct remote_g_packet_data *)
-       gdbarch_data (target_gdbarch (), remote_g_packet_data_handle));
+  struct remote_g_packet_data *data = get_g_packet_data (target_gdbarch ());
 
   /* Do not try this during initial connection, when we do not know
      whether there is a running but stopped thread.  */
@@ -14955,10 +14954,6 @@ void _initialize_remote ();
 void
 _initialize_remote ()
 {
-  /* architecture specific data */
-  remote_g_packet_data_handle =
-    gdbarch_data_register_pre_init (remote_g_packet_data_init);
-
   add_target (remote_target_info, remote_target::open);
   add_target (extended_remote_target_info, extended_remote_target::open);
 

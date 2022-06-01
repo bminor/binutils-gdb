@@ -484,24 +484,21 @@ const struct kinfo_proc_layout kinfo_proc_layout_64 =
     .ru_majflt = 0x48,
   };
 
-static struct gdbarch_data *fbsd_gdbarch_data_handle;
-
 struct fbsd_gdbarch_data
   {
-    struct type *siginfo_type;
+    struct type *siginfo_type = nullptr;
   };
 
-static void *
-init_fbsd_gdbarch_data (struct gdbarch *gdbarch)
-{
-  return GDBARCH_OBSTACK_ZALLOC (gdbarch, struct fbsd_gdbarch_data);
-}
+static const registry<gdbarch>::key<fbsd_gdbarch_data>
+     fbsd_gdbarch_data_handle;
 
 static struct fbsd_gdbarch_data *
 get_fbsd_gdbarch_data (struct gdbarch *gdbarch)
 {
-  return ((struct fbsd_gdbarch_data *)
-	  gdbarch_data (gdbarch, fbsd_gdbarch_data_handle));
+  struct fbsd_gdbarch_data *result = fbsd_gdbarch_data_handle.get (gdbarch);
+  if (result == nullptr)
+    result = fbsd_gdbarch_data_handle.emplace (gdbarch);
+  return result;
 }
 
 struct fbsd_pspace_data
@@ -2391,12 +2388,4 @@ fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* `catch syscall' */
   set_xml_syscall_file_name (gdbarch, "syscalls/freebsd.xml");
   set_gdbarch_get_syscall_number (gdbarch, fbsd_get_syscall_number);
-}
-
-void _initialize_fbsd_tdep ();
-void
-_initialize_fbsd_tdep ()
-{
-  fbsd_gdbarch_data_handle =
-    gdbarch_data_register_post_init (init_fbsd_gdbarch_data);
 }

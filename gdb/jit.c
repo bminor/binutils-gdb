@@ -52,12 +52,6 @@ static const char jit_descriptor_name[] = "__jit_debug_descriptor";
 static void jit_inferior_created_hook (inferior *inf);
 static void jit_inferior_exit_hook (struct inferior *inf);
 
-/* An unwinder is registered for every gdbarch.  This key is used to
-   remember if the unwinder has been registered for a particular
-   gdbarch.  */
-
-static struct gdbarch_data *jit_gdbarch_data;
-
 /* True if we want to see trace of jit level stuff.  */
 
 static bool jit_debug = false;
@@ -1127,19 +1121,25 @@ static const struct frame_unwind jit_frame_unwind =
 
 struct jit_gdbarch_data_type
 {
-  /* Has the (pseudo) unwinder been prepended? */
-  int unwinder_registered;
+  /* Has the (pseudo) unwinder been pretended? */
+  int unwinder_registered = 0;
 };
+
+/* An unwinder is registered for every gdbarch.  This key is used to
+   remember if the unwinder has been registered for a particular
+   gdbarch.  */
+
+static const registry<gdbarch>::key<jit_gdbarch_data_type> jit_gdbarch_data;
 
 /* Check GDBARCH and prepend the pseudo JIT unwinder if needed.  */
 
 static void
 jit_prepend_unwinder (struct gdbarch *gdbarch)
 {
-  struct jit_gdbarch_data_type *data;
+  struct jit_gdbarch_data_type *data = jit_gdbarch_data.get (gdbarch);
+  if (data == nullptr)
+    data = jit_gdbarch_data.emplace (gdbarch);
 
-  data
-    = (struct jit_gdbarch_data_type *) gdbarch_data (gdbarch, jit_gdbarch_data);
   if (!data->unwinder_registered)
     {
       frame_unwind_prepend_unwinder (gdbarch, &jit_frame_unwind);
@@ -1285,20 +1285,6 @@ jit_event_handler (gdbarch *gdbarch, objfile *jiter)
     }
 }
 
-/* Initialize the jit_gdbarch_data slot with an instance of struct
-   jit_gdbarch_data_type */
-
-static void *
-jit_gdbarch_data_init (struct obstack *obstack)
-{
-  struct jit_gdbarch_data_type *data =
-    XOBNEW (obstack, struct jit_gdbarch_data_type);
-
-  data->unwinder_registered = 0;
-
-  return data;
-}
-
 void _initialize_jit ();
 void
 _initialize_jit ()
@@ -1322,7 +1308,6 @@ _initialize_jit ()
   gdb::observers::inferior_exit.attach (jit_inferior_exit_hook, "jit");
   gdb::observers::breakpoint_deleted.attach (jit_breakpoint_deleted, "jit");
 
-  jit_gdbarch_data = gdbarch_data_register_pre_init (jit_gdbarch_data_init);
   if (is_dl_available ())
     {
       struct cmd_list_element *c;

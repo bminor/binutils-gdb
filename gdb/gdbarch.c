@@ -34,6 +34,8 @@ struct gdbarch
 
   /* An obstack bound to the lifetime of the architecture.  */
   auto_obstack obstack;
+  /* Registry.  */
+  registry<gdbarch> registry_fields;
 
   /* basic architectural information.  */
   const struct bfd_arch_info * bfd_arch_info;
@@ -263,8 +265,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   struct gdbarch *gdbarch;
 
   gdbarch = new struct gdbarch;
-
-  alloc_gdbarch_data (gdbarch);
 
   gdbarch->tdep = tdep;
 

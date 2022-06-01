@@ -29,6 +29,7 @@
 #include "osabi.h"
 #include "displaced-stepping.h"
 #include "gdbsupport/gdb-checked-static-cast.h"
+#include "registry.h"
 
 struct floatformat;
 struct ui_file;
@@ -351,32 +352,13 @@ extern struct gdbarch *gdbarch_find_by_info (struct gdbarch_info info);
 extern void set_target_gdbarch (struct gdbarch *gdbarch);
 
 
-/* Register per-architecture data-pointer.
-
-   Reserve space for a per-architecture data-pointer.  An identifier
-   for the reserved data-pointer is returned.  That identifer should
-   be saved in a local static variable.
-
-   Memory for the per-architecture data shall be allocated using
-   gdbarch_obstack_zalloc.  That memory will be deleted when the
-   corresponding architecture object is deleted.
-
-   When a previously created architecture is re-selected, the
-   per-architecture data-pointer for that previous architecture is
-   restored.  INIT() is not re-called.
-
-   Multiple registrarants for any architecture are allowed (and
-   strongly encouraged).  */
-
-struct gdbarch_data;
-
-typedef void *(gdbarch_data_pre_init_ftype) (struct obstack *obstack);
-extern struct gdbarch_data *gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *init);
-typedef void *(gdbarch_data_post_init_ftype) (struct gdbarch *gdbarch);
-extern struct gdbarch_data *gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *init);
-
-extern void *gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *);
-
+/* A registry adaptor for gdbarch.  This arranges to store the
+   registry in the gdbarch.  */
+template<>
+struct registry_accessor<gdbarch>
+{
+  static registry<gdbarch> *get (gdbarch *arch);
+};
 
 /* Set the dynamic target-system-dependent parameters (architecture,
    byte-order, ...) using information found in the BFD.  */

@@ -29,8 +29,6 @@
 #include "gdbarch.h"
 #include "dwarf2/frame-tailcall.h"
 
-static struct gdbarch_data *frame_unwind_data;
-
 struct frame_unwind_table_entry
 {
   const struct frame_unwind *unwinder;
@@ -39,10 +37,13 @@ struct frame_unwind_table_entry
 
 struct frame_unwind_table
 {
-  struct frame_unwind_table_entry *list;
+  struct frame_unwind_table_entry *list = nullptr;
   /* The head of the OSABI part of the search list.  */
-  struct frame_unwind_table_entry **osabi_head;
+  struct frame_unwind_table_entry **osabi_head = nullptr;
 };
+
+static const registry<gdbarch>::key<struct frame_unwind_table>
+     frame_unwind_data;
 
 /* A helper function to add an unwinder to a list.  LINK says where to
    install the new unwinder.  The new link is returned.  */
@@ -56,16 +57,20 @@ add_unwinder (struct obstack *obstack, const struct frame_unwind *unwinder,
   return &(*link)->next;
 }
 
-static void *
-frame_unwind_init (struct obstack *obstack)
+static struct frame_unwind_table *
+get_frame_unwind_table (struct gdbarch *gdbarch)
 {
-  struct frame_unwind_table *table
-    = OBSTACK_ZALLOC (obstack, struct frame_unwind_table);
+  struct frame_unwind_table *table = frame_unwind_data.get (gdbarch);
+  if (table != nullptr)
+    return table;
+
+  table = new frame_unwind_table;
 
   /* Start the table out with a few default sniffers.  OSABI code
      can't override this.  */
   struct frame_unwind_table_entry **link = &table->list;
 
+  struct obstack *obstack = gdbarch_obstack (gdbarch);
   link = add_unwinder (obstack, &dummy_frame_unwind, link);
   /* The DWARF tailcall sniffer must come before the inline sniffer.
      Otherwise, we can end up in a situation where a DWARF frame finds
@@ -79,6 +84,8 @@ frame_unwind_init (struct obstack *obstack)
 
   /* The insertion point for OSABI sniffers.  */
   table->osabi_head = link;
+  frame_unwind_data.set (gdbarch, table);
+
   return table;
 }
 
@@ -86,8 +93,7 @@ void
 frame_unwind_prepend_unwinder (struct gdbarch *gdbarch,
 				const struct frame_unwind *unwinder)
 {
-  struct frame_unwind_table *table
-    = (struct frame_unwind_table *) gdbarch_data (gdbarch, frame_unwind_data);
+  struct frame_unwind_table *table = get_frame_unwind_table (gdbarch);
   struct frame_unwind_table_entry *entry;
 
   /* Insert the new entry at the start of the list.  */
@@ -101,8 +107,7 @@ void
 frame_unwind_append_unwinder (struct gdbarch *gdbarch,
 			      const struct frame_unwind *unwinder)
 {
-  struct frame_unwind_table *table
-    = (struct frame_unwind_table *) gdbarch_data (gdbarch, frame_unwind_data);
+  struct frame_unwind_table *table = get_frame_unwind_table (gdbarch);
   struct frame_unwind_table_entry **ip;
 
   /* Find the end of the list and insert the new entry there.  */
@@ -182,8 +187,7 @@ frame_unwind_find_by_frame (struct frame_info *this_frame, void **this_cache)
   frame_debug_printf ("this_frame=%d", frame_relative_level (this_frame));
 
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  struct frame_unwind_table *table
-    = (struct frame_unwind_table *) gdbarch_data (gdbarch, frame_unwind_data);
+  struct frame_unwind_table *table = get_frame_unwind_table (gdbarch);
   struct frame_unwind_table_entry *entry;
   const struct frame_unwind *unwinder_from_target;
 
@@ -332,11 +336,4 @@ frame_unwind_got_address (struct frame_info *frame, int regnum,
   pack_long (value_contents_writeable (reg_val).data (),
 	     register_type (gdbarch, regnum), addr);
   return reg_val;
-}
-
-void _initialize_frame_unwind ();
-void
-_initialize_frame_unwind ()
-{
-  frame_unwind_data = gdbarch_data_register_pre_init (frame_unwind_init);
 }

@@ -1720,11 +1720,10 @@ f_language::get_symbol_name_matcher_inner
 
 static f_language f_language_defn;
 
-static void *
+static struct builtin_f_type *
 build_fortran_types (struct gdbarch *gdbarch)
 {
-  struct builtin_f_type *builtin_f_type
-    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_f_type);
+  struct builtin_f_type *builtin_f_type = new struct builtin_f_type;
 
   builtin_f_type->builtin_void
     = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
@@ -1794,12 +1793,19 @@ build_fortran_types (struct gdbarch *gdbarch)
   return builtin_f_type;
 }
 
-static struct gdbarch_data *f_type_data;
+static const registry<gdbarch>::key<struct builtin_f_type> f_type_data;
 
 const struct builtin_f_type *
 builtin_f_type (struct gdbarch *gdbarch)
 {
-  return (const struct builtin_f_type *) gdbarch_data (gdbarch, f_type_data);
+  struct builtin_f_type *result = f_type_data.get (gdbarch);
+  if (result == nullptr)
+    {
+      result = build_fortran_types (gdbarch);
+      f_type_data.set (gdbarch, result);
+    }
+
+  return result;
 }
 
 /* Command-list for the "set/show fortran" prefix command.  */
@@ -1810,8 +1816,6 @@ void _initialize_f_language ();
 void
 _initialize_f_language ()
 {
-  f_type_data = gdbarch_data_register_post_init (build_fortran_types);
-
   add_setshow_prefix_cmd
     ("fortran", no_class,
      _("Prefix command for changing Fortran-specific settings."),

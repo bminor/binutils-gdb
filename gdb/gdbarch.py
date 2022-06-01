@@ -261,6 +261,8 @@ with open("gdbarch.c", "w") as f:
     print(file=f)
     print("  /* An obstack bound to the lifetime of the architecture.  */", file=f)
     print("  auto_obstack obstack;", file=f)
+    print("  /* Registry.  */", file=f)
+    print("  registry<gdbarch> registry_fields;", file=f)
     print(file=f)
     print("  /* basic architectural information.  */", file=f)
     for c in filter(info, components):
@@ -295,8 +297,6 @@ with open("gdbarch.c", "w") as f:
     print("  struct gdbarch *gdbarch;", file=f)
     print("", file=f)
     print("  gdbarch = new struct gdbarch;", file=f)
-    print(file=f)
-    print("  alloc_gdbarch_data (gdbarch);", file=f)
     print(file=f)
     print("  gdbarch->tdep = tdep;", file=f)
     print(file=f)

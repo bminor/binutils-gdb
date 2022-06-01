@@ -481,11 +481,10 @@ go_language::language_arch_info (struct gdbarch *gdbarch,
 
 static go_language go_language_defn;
 
-static void *
+static struct builtin_go_type *
 build_go_types (struct gdbarch *gdbarch)
 {
-  struct builtin_go_type *builtin_go_type
-    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_go_type);
+  struct builtin_go_type *builtin_go_type = new struct builtin_go_type;
 
   builtin_go_type->builtin_void
     = arch_type (gdbarch, TYPE_CODE_VOID, TARGET_CHAR_BIT, "void");
@@ -527,17 +526,17 @@ build_go_types (struct gdbarch *gdbarch)
   return builtin_go_type;
 }
 
-static struct gdbarch_data *go_type_data;
+static const registry<gdbarch>::key<struct builtin_go_type> go_type_data;
 
 const struct builtin_go_type *
 builtin_go_type (struct gdbarch *gdbarch)
 {
-  return (const struct builtin_go_type *) gdbarch_data (gdbarch, go_type_data);
-}
+  struct builtin_go_type *result = go_type_data.get (gdbarch);
+  if (result == nullptr)
+    {
+      result = build_go_types (gdbarch);
+      go_type_data.set (gdbarch, result);
+    }
 
-void _initialize_go_language ();
-void
-_initialize_go_language ()
-{
-  go_type_data = gdbarch_data_register_post_init (build_go_types);
+  return result;
 }

@@ -1092,10 +1092,6 @@ default_read_core_file_mappings
 {
 }
 
-/* Static function declarations */
-
-static void alloc_gdbarch_data (struct gdbarch *);
-
 /* Non-zero if we want to trace architecture code.  */
 
 #ifndef GDBARCH_DEBUG
@@ -1204,113 +1200,11 @@ gdbarch_tdep_1 (struct gdbarch *gdbarch)
   return gdbarch->tdep;
 }
 
-/* Keep a registry of per-architecture data-pointers required by GDB
-   modules.  */
-
-struct gdbarch_data
+registry<gdbarch> *
+registry_accessor<gdbarch>::get (gdbarch *arch)
 {
-  unsigned index;
-  int init_p;
-  gdbarch_data_pre_init_ftype *pre_init;
-  gdbarch_data_post_init_ftype *post_init;
-};
-
-struct gdbarch_data_registration
-{
-  struct gdbarch_data *data;
-  struct gdbarch_data_registration *next;
-};
-
-struct gdbarch_data_registry
-{
-  unsigned nr;
-  struct gdbarch_data_registration *registrations;
-};
-
-static struct gdbarch_data_registry gdbarch_data_registry =
-{
-  0, NULL,
-};
-
-static struct gdbarch_data *
-gdbarch_data_register (gdbarch_data_pre_init_ftype *pre_init,
-		       gdbarch_data_post_init_ftype *post_init)
-{
-  struct gdbarch_data_registration **curr;
-
-  /* Append the new registration.  */
-  for (curr = &gdbarch_data_registry.registrations;
-       (*curr) != NULL;
-       curr = &(*curr)->next);
-  (*curr) = XNEW (struct gdbarch_data_registration);
-  (*curr)->next = NULL;
-  (*curr)->data = XNEW (struct gdbarch_data);
-  (*curr)->data->index = gdbarch_data_registry.nr++;
-  (*curr)->data->pre_init = pre_init;
-  (*curr)->data->post_init = post_init;
-  (*curr)->data->init_p = 1;
-  return (*curr)->data;
+  return &arch->registry_fields;
 }
-
-struct gdbarch_data *
-gdbarch_data_register_pre_init (gdbarch_data_pre_init_ftype *pre_init)
-{
-  return gdbarch_data_register (pre_init, NULL);
-}
-
-struct gdbarch_data *
-gdbarch_data_register_post_init (gdbarch_data_post_init_ftype *post_init)
-{
-  return gdbarch_data_register (NULL, post_init);
-}
-
-/* Create/delete the gdbarch data vector.  */
-
-static void
-alloc_gdbarch_data (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch->data == NULL);
-  gdbarch->nr_data = gdbarch_data_registry.nr;
-  gdbarch->data = GDBARCH_OBSTACK_CALLOC (gdbarch, gdbarch->nr_data, void *);
-}
-
-/* Return the current value of the specified per-architecture
-   data-pointer.  */
-
-void *
-gdbarch_data (struct gdbarch *gdbarch, struct gdbarch_data *data)
-{
-  gdb_assert (data->index < gdbarch->nr_data);
-  if (gdbarch->data[data->index] == NULL)
-    {
-      /* The data-pointer isn't initialized, call init() to get a
-	 value.  */
-      if (data->pre_init != NULL)
-	/* Mid architecture creation: pass just the obstack, and not
-	   the entire architecture, as that way it isn't possible for
-	   pre-init code to refer to undefined architecture
-	   fields.  */
-	gdbarch->data[data->index] = data->pre_init (&gdbarch->obstack);
-      else if (gdbarch->initialized_p
-	       && data->post_init != NULL)
-	/* Post architecture creation: pass the entire architecture
-	   (as all fields are valid), but be careful to also detect
-	   recursive references.  */
-	{
-	  gdb_assert (data->init_p);
-	  data->init_p = 0;
-	  gdbarch->data[data->index] = data->post_init (gdbarch);
-	  data->init_p = 1;
-	}
-      else
-	internal_error (__FILE__, __LINE__,
-			_("gdbarch post-init data field can only be used "
-			  "after gdbarch is fully initialised"));
-      gdb_assert (gdbarch->data[data->index] != NULL);
-    }
-  return gdbarch->data[data->index];
-}
-
 
 /* Keep a registry of the architectures known by GDB.  */
 

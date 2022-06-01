@@ -155,7 +155,7 @@ static const char *powerpc_vector_abi_string = "auto";
 
 /* PowerPC-related per-inferior data.  */
 
-static registry<inferior>::key<ppc_inferior_data> ppc_inferior_data_key;
+static const registry<inferior>::key<ppc_inferior_data> ppc_inferior_data_key;
 
 /* Get the per-inferior PowerPC data for INF.  */
 

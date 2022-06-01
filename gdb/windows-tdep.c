@@ -175,29 +175,25 @@ static const int FULL_TIB_SIZE = 0x1000;
 
 static bool maint_display_all_tib = false;
 
-static struct gdbarch_data *windows_gdbarch_data_handle;
-
 struct windows_gdbarch_data
 {
-  struct type *siginfo_type;
-  struct type *tib_ptr_type; /* Type of thread information block */
+  struct type *siginfo_type = nullptr;
+  /* Type of thread information block.  */
+  struct type *tib_ptr_type = nullptr;
 };
 
-/* Allocate windows_gdbarch_data for an arch.  */
-
-static void *
-init_windows_gdbarch_data (struct gdbarch *gdbarch)
-{
-  return GDBARCH_OBSTACK_ZALLOC (gdbarch, struct windows_gdbarch_data);
-}
+static const registry<gdbarch>::key<windows_gdbarch_data>
+     windows_gdbarch_data_handle;
 
 /* Get windows_gdbarch_data of an arch.  */
 
 static struct windows_gdbarch_data *
 get_windows_gdbarch_data (struct gdbarch *gdbarch)
 {
-  return ((struct windows_gdbarch_data *)
-	  gdbarch_data (gdbarch, windows_gdbarch_data_handle));
+  windows_gdbarch_data *result = windows_gdbarch_data_handle.get (gdbarch);
+  if (result == nullptr)
+    result = windows_gdbarch_data_handle.emplace (gdbarch);
+  return result;
 }
 
 /* Define Thread Local Base pointer type.  */
@@ -1195,9 +1191,6 @@ void _initialize_windows_tdep ();
 void
 _initialize_windows_tdep ()
 {
-  windows_gdbarch_data_handle
-    = gdbarch_data_register_post_init (init_windows_gdbarch_data);
-
   init_w32_command_list ();
   cmd_list_element *info_w32_thread_information_block_cmd
     = add_cmd ("thread-information-block", class_info, display_tib,

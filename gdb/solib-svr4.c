@@ -2995,24 +2995,23 @@ svr4_relocate_section_addresses (struct so_list *so,
 
 /* Architecture-specific operations.  */
 
-/* Per-architecture data key.  */
-static struct gdbarch_data *solib_svr4_data;
-
 struct solib_svr4_ops
 {
   /* Return a description of the layout of `struct link_map'.  */
-  struct link_map_offsets *(*fetch_link_map_offsets)(void);
+  struct link_map_offsets *(*fetch_link_map_offsets)(void) = nullptr;
 };
+
+/* Per-architecture data key.  */
+static const registry<gdbarch>::key<struct solib_svr4_ops> solib_svr4_data;
 
 /* Return a default for the architecture-specific operations.  */
 
-static void *
-solib_svr4_init (struct obstack *obstack)
+static struct solib_svr4_ops *
+get_ops (struct gdbarch *gdbarch)
 {
-  struct solib_svr4_ops *ops;
-
-  ops = OBSTACK_ZALLOC (obstack, struct solib_svr4_ops);
-  ops->fetch_link_map_offsets = NULL;
+  struct solib_svr4_ops *ops = solib_svr4_data.get (gdbarch);
+  if (ops == nullptr)
+    ops = solib_svr4_data.emplace (gdbarch);
   return ops;
 }
 
@@ -3023,8 +3022,7 @@ void
 set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
 				       struct link_map_offsets *(*flmo) (void))
 {
-  struct solib_svr4_ops *ops
-    = (struct solib_svr4_ops *) gdbarch_data (gdbarch, solib_svr4_data);
+  struct solib_svr4_ops *ops = get_ops (gdbarch);
 
   ops->fetch_link_map_offsets = flmo;
 
@@ -3039,9 +3037,7 @@ set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
 static struct link_map_offsets *
 svr4_fetch_link_map_offsets (void)
 {
-  struct solib_svr4_ops *ops
-    = (struct solib_svr4_ops *) gdbarch_data (target_gdbarch (),
-					      solib_svr4_data);
+  struct solib_svr4_ops *ops = get_ops (target_gdbarch ());
 
   gdb_assert (ops->fetch_link_map_offsets);
   return ops->fetch_link_map_offsets ();
@@ -3052,9 +3048,7 @@ svr4_fetch_link_map_offsets (void)
 static int
 svr4_have_link_map_offsets (void)
 {
-  struct solib_svr4_ops *ops
-    = (struct solib_svr4_ops *) gdbarch_data (target_gdbarch (),
-					      solib_svr4_data);
+  struct solib_svr4_ops *ops = get_ops (target_gdbarch ());
 
   return (ops->fetch_link_map_offsets != NULL);
 }
@@ -3173,8 +3167,6 @@ void _initialize_svr4_solib ();
 void
 _initialize_svr4_solib ()
 {
-  solib_svr4_data = gdbarch_data_register_pre_init (solib_svr4_init);
-
   svr4_so_ops.relocate_section_addresses = svr4_relocate_section_addresses;
   svr4_so_ops.free_so = svr4_free_so;
   svr4_so_ops.clear_so = svr4_clear_so;

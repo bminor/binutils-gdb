@@ -25,8 +25,12 @@
 #include "user-regs.h"
 #include <unordered_map>
 
+/* Per-gdbarch data type.  */
+typedef std::vector<gdbpy_ref<>> gdbpy_register_type;
+
 /* Token to access per-gdbarch data related to register descriptors.  */
-static struct gdbarch_data *gdbpy_register_object_data = NULL;
+static const registry<gdbarch>::key<gdbpy_register_type>
+     gdbpy_register_object_data;
 
 /* Structure for iterator over register descriptors.  */
 struct register_descriptor_iterator_object {
@@ -84,16 +88,6 @@ struct reggroup_object {
 
 extern PyTypeObject reggroup_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("reggroup_object");
-
-/* Associates a vector of gdb.RegisterDescriptor objects with GDBARCH as
-   gdbarch_data via the gdbarch post init registration mechanism
-   (gdbarch_data_register_post_init).  */
-
-static void *
-gdbpy_register_object_data_init (struct gdbarch *gdbarch)
-{
-  return new std::vector<gdbpy_ref<>>;
-}
 
 /* Return a gdb.RegisterGroup object wrapping REGGROUP.  The register
    group objects are cached, and the same Python object will always be
@@ -156,9 +150,10 @@ static gdbpy_ref<>
 gdbpy_get_register_descriptor (struct gdbarch *gdbarch,
 			       int regnum)
 {
-  auto &vec
-    = *(std::vector<gdbpy_ref<>> *) gdbarch_data (gdbarch,
-						  gdbpy_register_object_data);
+  gdbpy_register_type *vecp = gdbpy_register_object_data.get (gdbarch);
+  if (vecp == nullptr)
+    vecp = gdbpy_register_object_data.emplace (gdbarch);
+  gdbpy_register_type &vec = *vecp;
 
   /* Ensure that we have enough entries in the vector.  */
   if (vec.size () <= regnum)
@@ -420,14 +415,6 @@ gdbpy_parse_register_id (struct gdbarch *gdbarch, PyObject *pyo_reg_id,
 
   gdb_assert (PyErr_Occurred ());
   return false;
-}
-
-void _initialize_py_registers ();
-void
-_initialize_py_registers ()
-{
-  gdbpy_register_object_data
-    = gdbarch_data_register_post_init (gdbpy_register_object_data_init);
 }
 
 /* Initializes the new Python classes from this file in the gdb module.  */

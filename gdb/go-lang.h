@@ -30,24 +30,24 @@ struct parser_state;
 
 struct builtin_go_type
 {
-  struct type *builtin_void;
-  struct type *builtin_char;
-  struct type *builtin_bool;
-  struct type *builtin_int;
-  struct type *builtin_uint;
-  struct type *builtin_uintptr;
-  struct type *builtin_int8;
-  struct type *builtin_int16;
-  struct type *builtin_int32;
-  struct type *builtin_int64;
-  struct type *builtin_uint8;
-  struct type *builtin_uint16;
-  struct type *builtin_uint32;
-  struct type *builtin_uint64;
-  struct type *builtin_float32;
-  struct type *builtin_float64;
-  struct type *builtin_complex64;
-  struct type *builtin_complex128;
+  struct type *builtin_void = nullptr;
+  struct type *builtin_char = nullptr;
+  struct type *builtin_bool = nullptr;
+  struct type *builtin_int = nullptr;
+  struct type *builtin_uint = nullptr;
+  struct type *builtin_uintptr = nullptr;
+  struct type *builtin_int8 = nullptr;
+  struct type *builtin_int16 = nullptr;
+  struct type *builtin_int32 = nullptr;
+  struct type *builtin_int64 = nullptr;
+  struct type *builtin_uint8 = nullptr;
+  struct type *builtin_uint16 = nullptr;
+  struct type *builtin_uint32 = nullptr;
+  struct type *builtin_uint64 = nullptr;
+  struct type *builtin_float32 = nullptr;
+  struct type *builtin_float64 = nullptr;
+  struct type *builtin_complex64 = nullptr;
+  struct type *builtin_complex128 = nullptr;
 };
 
 enum go_type

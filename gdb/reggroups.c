@@ -52,6 +52,20 @@ reggroup_gdbarch_new (struct gdbarch *gdbarch, const char *name,
 
 struct reggroups
 {
+  reggroups ()
+  {
+    /* Add the default groups.  */
+    add (general_reggroup);
+    add (float_reggroup);
+    add (system_reggroup);
+    add (vector_reggroup);
+    add (all_reggroup);
+    add (save_reggroup);
+    add (restore_reggroup);
+  }
+
+  DISABLE_COPY_AND_ASSIGN (reggroups);
+
   /* Add GROUP to the list of register groups.  */
 
   void add (const reggroup *group)
@@ -86,15 +100,25 @@ private:
 
 /* Key used to lookup register group data from a gdbarch.  */
 
-static struct gdbarch_data *reggroups_data;
+static const registry<gdbarch>::key<reggroups> reggroups_data;
+
+/* Get the reggroups for the architecture, creating if necessary.  */
+
+static reggroups *
+get_reggroups (struct gdbarch *gdbarch)
+{
+  struct reggroups *groups = reggroups_data.get (gdbarch);
+  if (groups == nullptr)
+    groups = reggroups_data.emplace (gdbarch);
+  return groups;
+}
 
 /* See reggroups.h.  */
 
 void
 reggroup_add (struct gdbarch *gdbarch, const reggroup *group)
 {
-  struct reggroups *groups
-    = (struct reggroups *) gdbarch_data (gdbarch, reggroups_data);
+  struct reggroups *groups = get_reggroups (gdbarch);
 
   gdb_assert (groups != nullptr);
   gdb_assert (group != nullptr);
@@ -102,31 +126,11 @@ reggroup_add (struct gdbarch *gdbarch, const reggroup *group)
   groups->add (group);
 }
 
-/* Called to initialize the per-gdbarch register group information.  */
-
-static void *
-reggroups_init (struct obstack *obstack)
-{
-  struct reggroups *groups = obstack_new<struct reggroups> (obstack);
-
-  /* Add the default groups.  */
-  groups->add (general_reggroup);
-  groups->add (float_reggroup);
-  groups->add (system_reggroup);
-  groups->add (vector_reggroup);
-  groups->add (all_reggroup);
-  groups->add (save_reggroup);
-  groups->add (restore_reggroup);
-
-  return groups;
-}
-
 /* See reggroups.h.  */
 const std::vector<const reggroup *> &
 gdbarch_reggroups (struct gdbarch *gdbarch)
 {
-  struct reggroups *groups
-    = (struct reggroups *) gdbarch_data (gdbarch, reggroups_data);
+  struct reggroups *groups = get_reggroups (gdbarch);
   gdb_assert (groups != nullptr);
   gdb_assert (groups->size () > 0);
   return groups->groups ();
@@ -252,8 +256,6 @@ void _initialize_reggroup ();
 void
 _initialize_reggroup ()
 {
-  reggroups_data = gdbarch_data_register_pre_init (reggroups_init);
-
   add_cmd ("reggroups", class_maintenance,
 	   maintenance_print_reggroups, _("\
 Print the internal register group names.\n\

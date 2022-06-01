@@ -2310,65 +2310,65 @@ struct builtin_type
   /* Integral types.  */
 
   /* Implicit size/sign (based on the architecture's ABI).  */
-  struct type *builtin_void;
-  struct type *builtin_char;
-  struct type *builtin_short;
-  struct type *builtin_int;
-  struct type *builtin_long;
-  struct type *builtin_signed_char;
-  struct type *builtin_unsigned_char;
-  struct type *builtin_unsigned_short;
-  struct type *builtin_unsigned_int;
-  struct type *builtin_unsigned_long;
-  struct type *builtin_bfloat16;
-  struct type *builtin_half;
-  struct type *builtin_float;
-  struct type *builtin_double;
-  struct type *builtin_long_double;
-  struct type *builtin_complex;
-  struct type *builtin_double_complex;
-  struct type *builtin_string;
-  struct type *builtin_bool;
-  struct type *builtin_long_long;
-  struct type *builtin_unsigned_long_long;
-  struct type *builtin_decfloat;
-  struct type *builtin_decdouble;
-  struct type *builtin_declong;
+  struct type *builtin_void = nullptr;
+  struct type *builtin_char = nullptr;
+  struct type *builtin_short = nullptr;
+  struct type *builtin_int = nullptr;
+  struct type *builtin_long = nullptr;
+  struct type *builtin_signed_char = nullptr;
+  struct type *builtin_unsigned_char = nullptr;
+  struct type *builtin_unsigned_short = nullptr;
+  struct type *builtin_unsigned_int = nullptr;
+  struct type *builtin_unsigned_long = nullptr;
+  struct type *builtin_bfloat16 = nullptr;
+  struct type *builtin_half = nullptr;
+  struct type *builtin_float = nullptr;
+  struct type *builtin_double = nullptr;
+  struct type *builtin_long_double = nullptr;
+  struct type *builtin_complex = nullptr;
+  struct type *builtin_double_complex = nullptr;
+  struct type *builtin_string = nullptr;
+  struct type *builtin_bool = nullptr;
+  struct type *builtin_long_long = nullptr;
+  struct type *builtin_unsigned_long_long = nullptr;
+  struct type *builtin_decfloat = nullptr;
+  struct type *builtin_decdouble = nullptr;
+  struct type *builtin_declong = nullptr;
 
   /* "True" character types.
       We use these for the '/c' print format, because c_char is just a
       one-byte integral type, which languages less laid back than C
       will print as ... well, a one-byte integral type.  */
-  struct type *builtin_true_char;
-  struct type *builtin_true_unsigned_char;
+  struct type *builtin_true_char = nullptr;
+  struct type *builtin_true_unsigned_char = nullptr;
 
   /* Explicit sizes - see C9X <intypes.h> for naming scheme.  The "int0"
      is for when an architecture needs to describe a register that has
      no size.  */
-  struct type *builtin_int0;
-  struct type *builtin_int8;
-  struct type *builtin_uint8;
-  struct type *builtin_int16;
-  struct type *builtin_uint16;
-  struct type *builtin_int24;
-  struct type *builtin_uint24;
-  struct type *builtin_int32;
-  struct type *builtin_uint32;
-  struct type *builtin_int64;
-  struct type *builtin_uint64;
-  struct type *builtin_int128;
-  struct type *builtin_uint128;
+  struct type *builtin_int0 = nullptr;
+  struct type *builtin_int8 = nullptr;
+  struct type *builtin_uint8 = nullptr;
+  struct type *builtin_int16 = nullptr;
+  struct type *builtin_uint16 = nullptr;
+  struct type *builtin_int24 = nullptr;
+  struct type *builtin_uint24 = nullptr;
+  struct type *builtin_int32 = nullptr;
+  struct type *builtin_uint32 = nullptr;
+  struct type *builtin_int64 = nullptr;
+  struct type *builtin_uint64 = nullptr;
+  struct type *builtin_int128 = nullptr;
+  struct type *builtin_uint128 = nullptr;
 
   /* Wide character types.  */
-  struct type *builtin_char16;
-  struct type *builtin_char32;
-  struct type *builtin_wchar;
+  struct type *builtin_char16 = nullptr;
+  struct type *builtin_char32 = nullptr;
+  struct type *builtin_wchar = nullptr;
 
   /* Pointer types.  */
 
   /* * `pointer to data' type.  Some target platforms use an implicitly
      {sign,zero} -extended 32-bit ABI pointer on a 64-bit ISA.  */
-  struct type *builtin_data_ptr;
+  struct type *builtin_data_ptr = nullptr;
 
   /* * `pointer to function (returning void)' type.  Harvard
      architectures mean that ABI function and code pointers are not
@@ -2379,21 +2379,21 @@ struct builtin_type
      However, all function pointer types are interconvertible, so void
      (*) () can server as a generic function pointer.  */
 
-  struct type *builtin_func_ptr;
+  struct type *builtin_func_ptr = nullptr;
 
   /* * `function returning pointer to function (returning void)' type.
      The final void return type is not significant for it.  */
 
-  struct type *builtin_func_func;
+  struct type *builtin_func_func = nullptr;
 
   /* Special-purpose types.  */
 
   /* * This type is used to represent a GDB internal function.  */
 
-  struct type *internal_fn;
+  struct type *internal_fn = nullptr;
 
   /* * This type is used to represent an xmethod.  */
-  struct type *xmethod;
+  struct type *xmethod = nullptr;
 };
 
 /* * Return the type table for the specified architecture.  */

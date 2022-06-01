@@ -37,11 +37,11 @@ extern int get_long_set_bounds (struct type *type, LONGEST *low,
 
 struct builtin_m2_type
 {
-  struct type *builtin_char;
-  struct type *builtin_int;
-  struct type *builtin_card;
-  struct type *builtin_real;
-  struct type *builtin_bool;
+  struct type *builtin_char = nullptr;
+  struct type *builtin_int = nullptr;
+  struct type *builtin_card = nullptr;
+  struct type *builtin_real = nullptr;
+  struct type *builtin_bool = nullptr;
 };
 
 /* Return the Modula-2 type table for the specified architecture.  */

@@ -57,25 +57,14 @@
 /* Architecture-specific operations.  */
 
 /* Per-architecture data key.  */
-static struct gdbarch_data *solib_data;
-
-static void *
-solib_init (struct obstack *obstack)
-{
-  struct target_so_ops **ops;
-
-  ops = OBSTACK_ZALLOC (obstack, struct target_so_ops *);
-  *ops = current_target_so_ops;
-  return ops;
-}
+static const registry<gdbarch>::key<const struct target_so_ops,
+			      gdb::noop_deleter<const struct target_so_ops>>
+     solib_data;
 
 static const struct target_so_ops *
 solib_ops (struct gdbarch *gdbarch)
 {
-  const struct target_so_ops **ops
-    = (const struct target_so_ops **) gdbarch_data (gdbarch, solib_data);
-
-  return *ops;
+  return solib_data.get (gdbarch);
 }
 
 /* Set the solib operations for GDBARCH to NEW_OPS.  */
@@ -83,10 +72,7 @@ solib_ops (struct gdbarch *gdbarch)
 void
 set_solib_ops (struct gdbarch *gdbarch, const struct target_so_ops *new_ops)
 {
-  const struct target_so_ops **ops
-    = (const struct target_so_ops **) gdbarch_data (gdbarch, solib_data);
-
-  *ops = new_ops;
+  solib_data.set (gdbarch, new_ops);
 }
 
 
@@ -1786,8 +1772,6 @@ void _initialize_solib ();
 void
 _initialize_solib ()
 {
-  solib_data = gdbarch_data_register_pre_init (solib_init);
-
   gdb::observers::free_objfile.attach (remove_user_added_objfile,
 				       "solib");
   gdb::observers::inferior_execd.attach ([] (inferior *inf)

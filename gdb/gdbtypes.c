@@ -6147,19 +6147,12 @@ type::fixed_point_scaling_factor ()
 
 
 
-static struct gdbarch_data *gdbtypes_data;
+static const registry<gdbarch>::key<struct builtin_type> gdbtypes_data;
 
-const struct builtin_type *
-builtin_type (struct gdbarch *gdbarch)
+static struct builtin_type *
+create_gdbtypes_data (struct gdbarch *gdbarch)
 {
-  return (const struct builtin_type *) gdbarch_data (gdbarch, gdbtypes_data);
-}
-
-static void *
-gdbtypes_post_init (struct gdbarch *gdbarch)
-{
-  struct builtin_type *builtin_type
-    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct builtin_type);
+  struct builtin_type *builtin_type = new struct builtin_type;
 
   /* Basic types.  */
   builtin_type->builtin_void
@@ -6302,6 +6295,18 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
   return builtin_type;
 }
 
+const struct builtin_type *
+builtin_type (struct gdbarch *gdbarch)
+{
+  struct builtin_type *result = gdbtypes_data.get (gdbarch);
+  if (result == nullptr)
+    {
+      result = create_gdbtypes_data (gdbarch);
+      gdbtypes_data.set (gdbarch, result);
+    }
+  return result;
+}
+
 /* This set of objfile-based types is intended to be used by symbol
    readers as basic types.  */
 
@@ -6439,8 +6444,6 @@ void _initialize_gdbtypes ();
 void
 _initialize_gdbtypes ()
 {
-  gdbtypes_data = gdbarch_data_register_post_init (gdbtypes_post_init);
-
   add_setshow_zuinteger_cmd ("overload", no_class, &overload_debug,
 			     _("Set debugging of C++ overloading."),
 			     _("Show debugging of C++ overloading."),

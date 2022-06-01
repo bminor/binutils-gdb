@@ -78,13 +78,14 @@ struct syscm_deleter
 
 static const registry<objfile>::key<htab, syscm_deleter>
      syscm_objfile_data_key;
-static struct gdbarch_data *syscm_gdbarch_data_key;
 
 struct syscm_gdbarch_data
 {
   /* Hash table to implement eqable gdbarch symbols.  */
   htab_t htab;
 };
+
+static const registry<gdbarch>::key<syscm_gdbarch_data> syscm_gdbarch_data_key;
 
 /* Administrivia for symbol smobs.  */
 
@@ -110,17 +111,6 @@ syscm_eq_symbol_smob (const void *ap, const void *bp)
 	  && a->symbol != NULL);
 }
 
-static void *
-syscm_init_arch_symbols (struct gdbarch *gdbarch)
-{
-  struct syscm_gdbarch_data *data
-    = GDBARCH_OBSTACK_ZALLOC (gdbarch, struct syscm_gdbarch_data);
-
-  data->htab = gdbscm_create_eqable_gsmob_ptr_map (syscm_hash_symbol_smob,
-						   syscm_eq_symbol_smob);
-  return data;
-}
-
 /* Return the struct symbol pointer -> SCM mapping table.
    It is created if necessary.  */
 
@@ -144,9 +134,14 @@ syscm_get_symbol_map (struct symbol *symbol)
   else
     {
       struct gdbarch *gdbarch = symbol->arch ();
-      struct syscm_gdbarch_data *data
-	= (struct syscm_gdbarch_data *) gdbarch_data (gdbarch,
-						      syscm_gdbarch_data_key);
+      struct syscm_gdbarch_data *data = syscm_gdbarch_data_key.get (gdbarch);
+      if (data == nullptr)
+	{
+	  data = syscm_gdbarch_data_key.emplace (gdbarch);
+	  data->htab
+	    = gdbscm_create_eqable_gsmob_ptr_map (syscm_hash_symbol_smob,
+						  syscm_eq_symbol_smob);
+	}
 
       htab = data->htab;
     }
@@ -816,13 +811,4 @@ gdbscm_initialize_symbols (void)
   block_keyword = scm_from_latin1_keyword ("block");
   domain_keyword = scm_from_latin1_keyword ("domain");
   frame_keyword = scm_from_latin1_keyword ("frame");
-}
-
-void _initialize_scm_symbol ();
-void
-_initialize_scm_symbol ()
-{
-  /* Arch-specific symbol data.  */
-  syscm_gdbarch_data_key
-    = gdbarch_data_register_post_init (syscm_init_arch_symbols);
 }

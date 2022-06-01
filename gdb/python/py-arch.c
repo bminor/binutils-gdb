@@ -28,7 +28,8 @@ struct arch_object {
   struct gdbarch *gdbarch;
 };
 
-static struct gdbarch_data *arch_object_data = NULL;
+static const registry<gdbarch>::key<PyObject, gdb::noop_deleter<PyObject>>
+     arch_object_data;
 
 /* Require a valid Architecture.  */
 #define ARCHPY_REQUIRE_VALID(arch_obj, arch)			\
@@ -48,7 +49,7 @@ extern PyTypeObject arch_object_type
 /* Associates an arch_object with GDBARCH as gdbarch_data via the gdbarch
    post init registration mechanism (gdbarch_data_register_post_init).  */
 
-static void *
+static PyObject *
 arch_object_data_init (struct gdbarch *gdbarch)
 {
   arch_object *arch_obj = PyObject_New (arch_object, &arch_object_type);
@@ -58,7 +59,7 @@ arch_object_data_init (struct gdbarch *gdbarch)
 
   arch_obj->gdbarch = gdbarch;
 
-  return (void *) arch_obj;
+  return (PyObject *) arch_obj;
 }
 
 /* Returns the struct gdbarch value corresponding to the given Python
@@ -88,10 +89,14 @@ gdbpy_is_architecture (PyObject *obj)
 PyObject *
 gdbarch_to_arch_object (struct gdbarch *gdbarch)
 {
-  PyObject *new_ref = (PyObject *) gdbarch_data (gdbarch, arch_object_data);
+  PyObject *new_ref = arch_object_data.get (gdbarch);
+  if (new_ref == nullptr)
+    {
+      new_ref = arch_object_data_init (gdbarch);
+      arch_object_data.set (gdbarch, new_ref);
+    }
 
-  /* new_ref could be NULL if registration of arch_object with GDBARCH failed
-     in arch_object_data_init.  */
+  /* new_ref could be NULL if creation failed.  */
   Py_XINCREF (new_ref);
 
   return new_ref;
@@ -335,13 +340,6 @@ gdbpy_all_architecture_names (PyObject *self, PyObject *args)
     }
 
  return list.release ();
-}
-
-void _initialize_py_arch ();
-void
-_initialize_py_arch ()
-{
-  arch_object_data = gdbarch_data_register_post_init (arch_object_data_init);
 }
 
 /* Initializes the Architecture class in the gdb module.  */

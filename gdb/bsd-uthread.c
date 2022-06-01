@@ -70,24 +70,24 @@ static bsd_uthread_target bsd_uthread_ops;
 
 /* Architecture-specific operations.  */
 
-/* Per-architecture data key.  */
-static struct gdbarch_data *bsd_uthread_data;
-
 struct bsd_uthread_ops
 {
   /* Supply registers for an inactive thread to a register cache.  */
-  void (*supply_uthread)(struct regcache *, int, CORE_ADDR);
+  void (*supply_uthread)(struct regcache *, int, CORE_ADDR) = nullptr;
 
   /* Collect registers for an inactive thread from a register cache.  */
-  void (*collect_uthread)(const struct regcache *, int, CORE_ADDR);
+  void (*collect_uthread)(const struct regcache *, int, CORE_ADDR) = nullptr;
 };
 
-static void *
-bsd_uthread_init (struct obstack *obstack)
-{
-  struct bsd_uthread_ops *ops;
+/* Per-architecture data key.  */
+static const registry<gdbarch>::key<struct bsd_uthread_ops> bsd_uthread_data;
 
-  ops = OBSTACK_ZALLOC (obstack, struct bsd_uthread_ops);
+static struct bsd_uthread_ops *
+get_bsd_uthread (struct gdbarch *gdbarch)
+{
+  struct bsd_uthread_ops *ops = bsd_uthread_data.get (gdbarch);
+  if (ops == nullptr)
+    ops = bsd_uthread_data.emplace (gdbarch);
   return ops;
 }
 
@@ -99,8 +99,7 @@ bsd_uthread_set_supply_uthread (struct gdbarch *gdbarch,
 				void (*supply_uthread) (struct regcache *,
 							int, CORE_ADDR))
 {
-  struct bsd_uthread_ops *ops
-    = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
+  struct bsd_uthread_ops *ops = get_bsd_uthread (gdbarch);
 
   ops->supply_uthread = supply_uthread;
 }
@@ -113,8 +112,7 @@ bsd_uthread_set_collect_uthread (struct gdbarch *gdbarch,
 			 void (*collect_uthread) (const struct regcache *,
 						  int, CORE_ADDR))
 {
-  struct bsd_uthread_ops *ops
-    = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
+  struct bsd_uthread_ops *ops = get_bsd_uthread (gdbarch);
 
   ops->collect_uthread = collect_uthread;
 }
@@ -196,8 +194,7 @@ static int
 bsd_uthread_activate (struct objfile *objfile)
 {
   struct gdbarch *gdbarch = target_gdbarch ();
-  struct bsd_uthread_ops *ops
-    = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
+  struct bsd_uthread_ops *ops = get_bsd_uthread (gdbarch);
 
   /* Skip if the thread stratum has already been activated.  */
   if (bsd_uthread_active)
@@ -317,8 +314,7 @@ void
 bsd_uthread_target::fetch_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct bsd_uthread_ops *uthread_ops
-    = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
+  struct bsd_uthread_ops *uthread_ops = get_bsd_uthread (gdbarch);
   ptid_t ptid = regcache->ptid ();
   CORE_ADDR addr = ptid.tid ();
   CORE_ADDR active_addr;
@@ -349,8 +345,7 @@ void
 bsd_uthread_target::store_registers (struct regcache *regcache, int regnum)
 {
   struct gdbarch *gdbarch = regcache->arch ();
-  struct bsd_uthread_ops *uthread_ops
-    = (struct bsd_uthread_ops *) gdbarch_data (gdbarch, bsd_uthread_data);
+  struct bsd_uthread_ops *uthread_ops = get_bsd_uthread (gdbarch);
   ptid_t ptid = regcache->ptid ();
   CORE_ADDR addr = ptid.tid ();
   CORE_ADDR active_addr;
@@ -549,8 +544,6 @@ void _initialize_bsd_uthread ();
 void
 _initialize_bsd_uthread ()
 {
-  bsd_uthread_data = gdbarch_data_register_pre_init (bsd_uthread_init);
-
   gdb::observers::inferior_created.attach (bsd_uthread_inferior_created,
 					   "bsd-uthread");
   gdb::observers::solib_loaded.attach (bsd_uthread_solib_loaded,

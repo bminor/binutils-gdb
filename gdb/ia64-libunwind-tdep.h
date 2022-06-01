@@ -40,11 +40,11 @@ struct frame_unwind;
 
 struct libunwind_descr
 {
-  int (*gdb2uw) (int);
-  int (*uw2gdb) (int);
-  int (*is_fpreg) (int);
-  void *accessors;
-  void *special_accessors;
+  int (*gdb2uw) (int) = nullptr;
+  int (*uw2gdb) (int) = nullptr;
+  int (*is_fpreg) (int) = nullptr;
+  void *accessors = nullptr;
+  void *special_accessors = nullptr;
 };
 
 int libunwind_frame_sniffer (const struct frame_unwind *self,
