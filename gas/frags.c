@@ -367,7 +367,7 @@ frag_align_pattern (int alignment, const char *fill_pattern,
 # ifndef HANDLE_ALIGN
 #  define MAX_MEM_FOR_RS_ALIGN_CODE  1
 # else
-#  define MAX_MEM_FOR_RS_ALIGN_CODE  ((1 << alignment) - 1)
+#  define MAX_MEM_FOR_RS_ALIGN_CODE  (((size_t) 1 << alignment) - 1)
 # endif
 #endif
 
