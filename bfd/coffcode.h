@@ -2690,9 +2690,11 @@ coff_write_relocs (bfd * abfd, int first_undef)
 
 #ifdef SELECT_RELOC
 	  /* Work out reloc type from what is required.  */
-	  SELECT_RELOC (n, q->howto);
+	  if (q->howto)
+	    SELECT_RELOC (n, q->howto);
 #else
-	  n.r_type = q->howto->type;
+	  if (q->howto)
+	    n.r_type = q->howto->type;
 #endif
 	  coff_swap_reloc_out (abfd, &n, &dst);
 
