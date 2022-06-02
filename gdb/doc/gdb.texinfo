@@ -9056,73 +9056,68 @@ As described in the preceding table.
 @node Location Specifications
 @section Location Specifications
 @cindex specifying location
-@cindex location spec
 @cindex locspec
 @cindex source location
 @cindex code location
 
+@cindex location spec
 Several @value{GDBN} commands accept arguments that specify a location
-or locations of your program's code.  Since @value{GDBN} is a
-source-level debugger, a location specification usually indicates some
-line in the source code, but it can also indicate a function name, an
-address, a label, and more.
+or locations of your program's code.  Many times locations are
+specified using a source line number, but they can also be specified
+by a function name, an address, a label, etc.  The different
+forms of specifying a location that @value{GDBN} recognizes are
+collectively known as forms of @dfn{location specification}, or
+@dfn{location spec}.  This section documents the forms of specifying
+locations that @value{GDBN} recognizes.
+
+@cindex location resolution
+@cindex resolution of location spec
+When you specify a location, @value{GDBN} needs to find the place in
+your program, known as @dfn{code location}, that corresponds to the
+given location spec.  We call this process of finding actual code
+locations corresponding to a location spec @dfn{location resolution}.
 
 A concrete code location in your program is uniquely identifiable by a
-set of logical attributes.  A line number, the source file the line
-belongs to, the fully-qualified and prototyped function it is defined
-in, and an instruction address.  Because each inferior has its own
-address space, also an inferior number.  The source file attribute has
-as many directory components as possible, retrieved from the debug
-information, and in absolute form if possible, but it may also be in
-relative form.
+set of several attributes: its source line number, the name of its
+source file, the fully-qualified and prototyped function in which it
+is defined, and an instruction address.  Because each inferior has its
+own address space, the inferior number is also a necessary part of
+these attributes.
 
-On the other hand, a @dfn{location specification} (a.k.a.@:
-@dfn{location spec}) is a way to find or refer to the concrete code
-locations in the program.  A location spec serves as a blueprint, and
-@value{GDBN} resolves the spec to actual code locations in your
-program by using the source and debug information.
+By contrast, location specs you type will many times omit some of
+these attributes.  For example, it is customary to specify just the
+source line number to mean a line in the current source file, or
+specify just the basename of the file, omitting its directories.  In
+other words, a location spec is usually incomplete, a kind of
+blueprint, and @value{GDBN} needs to complete the missing attributes
+by using the implied defaults, and by considering the source code and
+the debug information available to it.  This is what location
+resolution is about.
 
-The location spec may be incomplete, and @value{GDBN} will do its best
-to find all the locations in the program that match it.
-
-For example, a location spec may just indicate a line number and a
-source filename with no directory components, or even not specify a
-filename at all, just a line number.  To differentiate between files
-with the same base name, the spec may prepend as many directories as
-is necessary to uniquely identify the desired file.
-
-Or, the spec may indicate a simple function name instead of a
-fully-qualified and prototyped function name (e.g., @code{func}
-instead of @code{A::func(int)}).  To differentiate between functions
-with the same name, the spec may prepend as many class and namespace
-names as is necessary to uniquely identify the desired function,
-and/or it may specify the function parameters as well.  In addition,
-the spec may indicate that the specified function name should be
-interpreted as a fully-qualified name.
-
-You may not have debug info for some of the instructions in the
-program, so a resolved code location that itself points to such code
-will be incomplete and be missing some attributes, such as the source
-file and line number, and sometimes even function names.  Such an
-incomplete code location is only usable in contexts that work with
-addresses and/or function names.  Some commands can only work with
-complete code locations.
-
-Here are examples of typical situations that result in a location spec
-matching multiple concrete code locations in your program:
+The resolution of an incomplete location spec can produce more than a
+single code location, if the spec doesn't allow distinguishing between
+them.  Here are some examples of situations that result in a location
+spec matching multiple code locations in your program:
 
 @itemize @bullet
 @item
-The location spec specifies a function name, and multiple functions in
-the program may have the same name.
+The location spec specifies a function name, and there are several
+functions in the program which have that name.  (To distinguish
+between them, you can specify a fully-qualified and prototyped
+function name, such as @code{A::func(int)} instead of just
+@code{func}.)
 
 @item
-The location spec specifies a source file name, and multiple source
-files in the program share the same name.
+The location spec specifies a source file name, and there are several
+source files in the program that share the same name, for example
+several files with the same basename in different subdirectories.  (To
+distinguish between them, specify enough leading directories with the
+file name.)
 
 @item
 For a C@t{++} constructor, the @value{NGCC} compiler generates several
-instances of the function body, used in different cases.
+instances of the function body, used in different cases, but their
+source-level names are identical.
 
 @item
 For a C@t{++} template function, a given line in the function can
@@ -9130,21 +9125,30 @@ correspond to any number of instantiations.
 
 @item
 For an inlined function, a given source line can correspond to several
-places where that function is inlined.
+actual code locations with that function's inlined code.
 @end itemize
 
-And here are examples of typical situations that result in a location
-spec matching no code locations in your program at all:
+Resolution of a location spec can also fail to produce a complete code
+location, or even fail to produce any code location.  Here are some
+examples of such situations:
 
 @itemize @bullet
 @item
+Some parts of the program lack detailed enough debug info, so the
+resolved code location lacks some attributes, like source file name
+and line number, leaving just the instruction address and perhaps also
+a function name.  Such an incomplete code location is only usable in
+contexts that work with addresses and/or function names.  Some
+commands can only work with complete code locations.
+
+@item
 The location spec specifies a function name, and there are no
-functions in the program with that name, or they only exist in a
+functions in the program by that name, or they only exist in a
 yet-unloaded shared library.
 
 @item
 The location spec specifies a source file name, and there are no
-source files in the program with that name, or they only exist in a
+source files in the program by that name, or they only exist in a
 yet-unloaded shared library.
 
 @item
@@ -9154,16 +9158,9 @@ match the file name, none of those files has the specified line
 number.
 @end itemize
 
-The act of finding all the actual code locations that match the user
-input is called @dfn{resolving the location spec}.  The code locations
-that @value{GDBN} finds are the @dfn{resolved code locations}.
-
-If @value{GDBN} cannot find any code location that matches the user
-input, it is said that @value{GDBN} could not resolve the location
-spec.
-
 Locations may be specified using three different formats: linespec
-locations, explicit locations, or address locations.
+locations, explicit locations, or address locations.  The following
+subsections describe these formats.
 
 @menu
 * Linespec Locations::                Linespec locations
