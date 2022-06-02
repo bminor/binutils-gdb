@@ -2632,7 +2632,7 @@ _bfd_ecoff_write_object_contents (bfd *abfd)
 	    continue;
 
 	  amt = current->reloc_count * external_reloc_size;
-	  reloc_buff = bfd_alloc (abfd, amt);
+	  reloc_buff = bfd_zalloc (abfd, amt);
 	  if (reloc_buff == NULL)
 	    goto error_return;
 
