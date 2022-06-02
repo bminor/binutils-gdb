@@ -623,25 +623,6 @@ pobegin (void)
       continue;								\
     }
 
-/* This function is used when scrubbing the characters between #APP
-   and #NO_APP.  */
-
-static char *scrub_string;
-static char *scrub_string_end;
-
-static size_t
-scrub_from_string (char *buf, size_t buflen)
-{
-  size_t copy;
-
-  copy = scrub_string_end - scrub_string;
-  if (copy > buflen)
-    copy = buflen;
-  memcpy (buf, scrub_string, copy);
-  scrub_string += copy;
-  return copy;
-}
-
 /* Helper function of read_a_source_file, which tries to expand a macro.  */
 static int
 try_macro (char term, const char *line)
@@ -927,7 +908,7 @@ read_a_source_file (const char *name)
 		  if (s != last_eol)
 		    {
 		      char *copy;
-		      int len;
+		      size_t len;
 
 		      last_eol = s;
 		      /* Copy it for safe keeping.  Also give an indication of
@@ -1312,10 +1293,7 @@ read_a_source_file (const char *name)
 	    {			/* Its a comment.  Better say APP or NO_APP.  */
 	      sb sbuf;
 	      char *ends;
-	      char *new_buf;
-	      char *new_tmp;
-	      unsigned int new_length;
-	      char *tmp_buf = 0;
+	      size_t len;
 
 	      s = input_line_pointer;
 	      if (!startswith (s, "APP\n"))
@@ -1328,91 +1306,32 @@ read_a_source_file (const char *name)
 	      s += 4;
 
 	      ends = strstr (s, "#NO_APP\n");
+	      len = ends ? ends - s : buffer_limit - s;
 
+	      sb_build (&sbuf, len + 100);
+	      sb_add_buffer (&sbuf, s, len);
 	      if (!ends)
 		{
-		  unsigned int tmp_len;
-		  unsigned int num;
-
 		  /* The end of the #APP wasn't in this buffer.  We
 		     keep reading in buffers until we find the #NO_APP
 		     that goes with this #APP  There is one.  The specs
 		     guarantee it...  */
-		  tmp_len = buffer_limit - s;
-		  tmp_buf = XNEWVEC (char, tmp_len + 1);
-		  memcpy (tmp_buf, s, tmp_len);
 		  do
 		    {
-		      new_tmp = input_scrub_next_buffer (&buffer);
-		      if (!new_tmp)
+		      buffer_limit = input_scrub_next_buffer (&buffer);
+		      if (!buffer_limit)
 			break;
-		      else
-			buffer_limit = new_tmp;
-		      input_line_pointer = buffer;
 		      ends = strstr (buffer, "#NO_APP\n");
-		      if (ends)
-			num = ends - buffer;
-		      else
-			num = buffer_limit - buffer;
-
-		      tmp_buf = XRESIZEVEC (char, tmp_buf, tmp_len + num);
-		      memcpy (tmp_buf + tmp_len, buffer, num);
-		      tmp_len += num;
+		      len = ends ? ends - buffer : buffer_limit - buffer;
+		      sb_add_buffer (&sbuf, buffer, len);
 		    }
 		  while (!ends);
-
-		  input_line_pointer = ends ? ends + 8 : NULL;
-
-		  s = tmp_buf;
-		  ends = s + tmp_len;
-
-		}
-	      else
-		{
-		  input_line_pointer = ends + 8;
 		}
 
-	      scrub_string = s;
-	      scrub_string_end = ends;
-
-	      new_length = ends - s;
-	      new_buf = XNEWVEC (char, new_length);
-	      new_tmp = new_buf;
-	      for (;;)
-		{
-		  size_t space;
-		  size_t size;
-
-		  space = (new_buf + new_length) - new_tmp;
-		  size = do_scrub_chars (scrub_from_string, new_tmp, space);
-
-		  if (size < space)
-		    {
-		      new_tmp[size] = 0;
-		      new_length = new_tmp + size - new_buf;
-		      break;
-		    }
-
-		  new_buf = XRESIZEVEC (char, new_buf, new_length + 100);
-		  new_tmp = new_buf + new_length;
-		  new_length += 100;
-		}
-
-	      free (tmp_buf);
-
-	      /* We've "scrubbed" input to the preferred format.  In the
-		 process we may have consumed the whole of the remaining
-		 file (and included files).  We handle this formatted
-		 input similar to that of macro expansion, letting
-		 actual macro expansion (possibly nested) and other
-		 input expansion work.  Beware that in messages, line
-		 numbers and possibly file names will be incorrect.  */
-	      sb_build (&sbuf, new_length);
-	      sb_add_buffer (&sbuf, new_buf, new_length);
+	      input_line_pointer = ends ? ends + 8 : NULL;
 	      input_scrub_include_sb (&sbuf, input_line_pointer, expanding_none);
 	      sb_kill (&sbuf);
 	      buffer_limit = input_scrub_next_buffer (&input_line_pointer);
-	      free (new_buf);
 	      continue;
 	    }
 
