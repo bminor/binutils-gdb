@@ -178,6 +178,110 @@ loongarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   return loongarch_scan_prologue (gdbarch, pc, limit_pc, nullptr, nullptr);
 }
 
+/* Decode the current instruction and determine the address of the
+   next instruction.  */
+
+static CORE_ADDR
+loongarch_next_pc (struct regcache *regcache, CORE_ADDR cur_pc, insn_t insn)
+{
+  size_t insn_len = loongarch_insn_length (insn);
+  CORE_ADDR next_pc = cur_pc + insn_len;
+
+  if ((insn & 0xfc000000) == 0x4c000000)		/* jirl rd, rj, offs16  */
+    {
+      LONGEST rj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:5", insn, 0));
+      next_pc = rj + loongarch_decode_imm ("10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x50000000		/* b    offs26  */
+	   || (insn & 0xfc000000) == 0x54000000)	/* bl	offs26  */
+    {
+      next_pc = cur_pc + loongarch_decode_imm ("0:10|10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x58000000)		/* beq	rj, rd, offs16  */
+    {
+      LONGEST rj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rd = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("0:5", insn, 0));
+      if (rj == rd)
+	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x5c000000)		/* bne	rj, rd, offs16  */
+    {
+      LONGEST rj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rd = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("0:5", insn, 0));
+      if (rj != rd)
+	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x60000000)		/* blt	rj, rd, offs16  */
+    {
+      LONGEST rj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rd = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("0:5", insn, 0));
+      if (rj < rd)
+	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x64000000)		/* bge	rj, rd, offs16  */
+    {
+      LONGEST rj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:5", insn, 0));
+      LONGEST rd = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("0:5", insn, 0));
+      if (rj >= rd)
+	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x68000000)		/* bltu	rj, rd, offs16  */
+    {
+      ULONGEST rj = regcache_raw_get_unsigned (regcache,
+		      loongarch_decode_imm ("5:5", insn, 0));
+      ULONGEST rd = regcache_raw_get_unsigned (regcache,
+		      loongarch_decode_imm ("0:5", insn, 0));
+      if (rj < rd)
+	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x6c000000)		/* bgeu	rj, rd, offs16  */
+    {
+      ULONGEST rj = regcache_raw_get_unsigned (regcache,
+		      loongarch_decode_imm ("5:5", insn, 0));
+      ULONGEST rd = regcache_raw_get_unsigned (regcache,
+		      loongarch_decode_imm ("0:5", insn, 0));
+      if (rj >= rd)
+	next_pc = cur_pc + loongarch_decode_imm ("10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x40000000)		/* beqz	rj, offs21  */
+    {
+      LONGEST rj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:5", insn, 0));
+      if (rj == 0)
+	next_pc = cur_pc + loongarch_decode_imm ("0:5|10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xfc000000) == 0x44000000)		/* bnez	rj, offs21  */
+    {
+      LONGEST rj = regcache_raw_get_signed (regcache,
+		     loongarch_decode_imm ("5:5", insn, 0));
+      if (rj != 0)
+	next_pc = cur_pc + loongarch_decode_imm ("0:5|10:16<<2", insn, 1);
+    }
+
+  return next_pc;
+}
+
+/* Implement the "software_single_step" gdbarch method  */
+
+static std::vector<CORE_ADDR>
+loongarch_software_single_step (struct regcache *regcache)
+{
+  CORE_ADDR cur_pc = regcache_read_pc (regcache);
+  insn_t insn = loongarch_fetch_instruction (cur_pc);
+  CORE_ADDR next_pc = loongarch_next_pc (regcache, cur_pc, insn);
+
+  return {next_pc};
+}
+
 /* Adjust the address downward (direction of stack growth) so that it
    is correctly aligned for a new stack frame.  */
 
@@ -461,6 +565,7 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_align (gdbarch, loongarch_frame_align);
 
   /* Breakpoint manipulation.  */
+  set_gdbarch_software_single_step (gdbarch, loongarch_software_single_step);
   set_gdbarch_breakpoint_kind_from_pc (gdbarch, loongarch_breakpoint::kind_from_pc);
   set_gdbarch_sw_breakpoint_from_kind (gdbarch, loongarch_breakpoint::bp_from_kind);
 
