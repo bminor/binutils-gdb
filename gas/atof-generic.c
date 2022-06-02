@@ -20,6 +20,7 @@
 
 #include "as.h"
 #include "safe-ctype.h"
+#include <limits.h>
 
 #ifdef TRACE
 static void flonum_print (const FLONUM_TYPE *);
