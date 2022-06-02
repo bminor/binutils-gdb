@@ -207,7 +207,8 @@ subroutine1 (int i, long *l)
 void
 do_block_tests ()
 {
-  int cb = 12;
+  int cb = 0;
+  cb = 12;
 
   {
     int foo;

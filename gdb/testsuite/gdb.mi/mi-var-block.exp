@@ -40,6 +40,11 @@ mi_gdb_load ${binfile}
 
 mi_runto do_block_tests
 
+# step to "cb = 12;"
+mi_step_to "do_block_tests" "" "var-cmd.c" \
+    [gdb_get_line_number "cb = 12;"] \
+    "step at do_block_test 0"
+
 # Test: c_variable-3.2
 # Desc: create cb and foo
 mi_create_varobj "cb" "cb" "create local variable cb"
