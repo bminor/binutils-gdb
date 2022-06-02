@@ -157,7 +157,6 @@ static windows_per_inferior windows_process;
 #else
 # define __PMAX	PATH_MAX
 #   define __USEWIDE
-    typedef wchar_t cygwin_buf_t;
 #   define STARTUPINFO STARTUPINFOW
 #endif
 
@@ -689,7 +688,7 @@ windows_make_so (const char *name, LPVOID load_addr)
       strcat (buf, "\\ntdll.dll");
     }
 #else
-  cygwin_buf_t buf[__PMAX];
+  wchar_t buf[__PMAX];
 
   buf[0] = 0;
   if (access (name, F_OK) != 0)
@@ -2351,13 +2350,13 @@ windows_nat_target::create_inferior (const char *exec_file,
 {
   STARTUPINFO si;
 #ifdef __CYGWIN__
-  cygwin_buf_t real_path[__PMAX];
-  cygwin_buf_t shell[__PMAX]; /* Path to shell */
-  cygwin_buf_t infcwd[__PMAX];
+  wchar_t real_path[__PMAX];
+  wchar_t shell[__PMAX]; /* Path to shell */
+  wchar_t infcwd[__PMAX];
   const char *sh;
-  cygwin_buf_t *toexec;
-  cygwin_buf_t *cygallargs;
-  cygwin_buf_t *args;
+  wchar_t *toexec;
+  wchar_t *cygallargs;
+  wchar_t *args;
   char **old_env = NULL;
   PWCHAR w32_env;
   size_t len;
@@ -2414,7 +2413,7 @@ windows_nat_target::create_inferior (const char *exec_file,
     {
       flags |= DEBUG_ONLY_THIS_PROCESS;
       if (cygwin_conv_path (CCP_POSIX_TO_WIN_W, exec_file, real_path,
-			    __PMAX * sizeof (cygwin_buf_t)) < 0)
+			    __PMAX * sizeof (wchar_t)) < 0)
 	error (_("Error starting executable: %d"), errno);
       toexec = real_path;
 #ifdef __USEWIDE
@@ -2453,13 +2452,13 @@ windows_nat_target::create_inferior (const char *exec_file,
     error (_("Error converting inferior cwd: %d"), errno);
 
 #ifdef __USEWIDE
-  args = (cygwin_buf_t *) alloca ((wcslen (toexec) + wcslen (cygallargs) + 2)
-				  * sizeof (wchar_t));
+  args = (wchar_t *) alloca ((wcslen (toexec) + wcslen (cygallargs) + 2)
+			     * sizeof (wchar_t));
   wcscpy (args, toexec);
   wcscat (args, L" ");
   wcscat (args, cygallargs);
 #else  /* !__USEWIDE */
-  args = (cygwin_buf_t *) alloca (strlen (toexec) + strlen (cygallargs) + 2);
+  args = (char *) alloca (strlen (toexec) + strlen (cygallargs) + 2);
   strcpy (args, toexec);
   strcat (args, " ");
   strcat (args, cygallargs);
