@@ -962,6 +962,11 @@ If @value{GDBN} has not been configured to included core file support,
 such as for most embedded targets, then it will complain about a second
 argument and ignore it.
 
+For the @samp{-s}, @samp{-e}, and @samp{-se} options, and their long
+form equivalents, the method used to search the file system for the
+symbol and/or executable file is the same as that used by the
+@code{file} command.  @xref{Files, ,file}.
+
 Many options have both long and short forms; both are shown in the
 following list.  @value{GDBN} also recognizes the long forms if you truncate
 them, so long as enough of the option is present to be unambiguous.
