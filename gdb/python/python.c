@@ -2005,10 +2005,19 @@ do_start_initialization ()
      remain alive for the duration of the program's execution, so
      it is not freed after this call.  */
   Py_SetProgramName (progname_copy);
-
-  /* Define _gdb as a built-in module.  */
-  PyImport_AppendInittab ("_gdb", init__gdb_module);
 #endif
+
+  /* Define all internal modules.  These are all imported (and thus
+     created) during initialization.  */
+  struct _inittab mods[3] =
+  {
+    { "_gdb", init__gdb_module },
+    { "_gdbevents", gdbpy_events_mod_func },
+    { nullptr, nullptr }
+  };
+
+  if (PyImport_ExtendInittab (mods) < 0)
+    return false;
 
   Py_Initialize ();
 #if PY_VERSION_HEX < 0x03090000
@@ -2077,7 +2086,6 @@ do_start_initialization ()
       || gdbpy_initialize_thread () < 0
       || gdbpy_initialize_inferior () < 0
       || gdbpy_initialize_eventregistry () < 0
-      || gdbpy_initialize_py_events () < 0
       || gdbpy_initialize_event () < 0
       || gdbpy_initialize_arch () < 0
       || gdbpy_initialize_registers () < 0

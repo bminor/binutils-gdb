@@ -27,6 +27,11 @@ else:
 
 from _gdb import *
 
+# Historically, gdb.events was always available, so ensure it's
+# still available without an explicit import.
+import _gdbevents as events
+sys.modules['gdb.events'] = events
+
 
 class _GdbFile(object):
     # These two are needed in Python 3

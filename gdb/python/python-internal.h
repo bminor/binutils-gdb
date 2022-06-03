@@ -521,8 +521,6 @@ int gdbpy_initialize_eventregistry (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_event (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_py_events (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_arch (void)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 int gdbpy_initialize_registers ()
@@ -542,6 +540,8 @@ int gdbpy_initialize_micommands (void)
 void gdbpy_finalize_micommands ();
 int gdbpy_initialize_disasm ()
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+
+PyMODINIT_FUNC gdbpy_events_mod_func ();
 
 /* A wrapper for PyErr_Fetch that handles reference counting for the
    caller.  */
