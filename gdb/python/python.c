@@ -1938,6 +1938,9 @@ init__gdb_module (void)
 static int
 emit_exiting_event (int exit_code)
 {
+  if (evregpy_no_listeners_p (gdb_py_events.gdb_exiting))
+    return 0;
+
   gdbpy_ref<> event_obj = create_event_object (&gdb_exiting_event_object_type);
   if (event_obj == nullptr)
     return -1;
