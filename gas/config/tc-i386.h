@@ -207,7 +207,8 @@ if ((n)									\
     goto around;							\
   }
 
-#define MAX_MEM_FOR_RS_ALIGN_CODE  (alignment ? ((1 << alignment) - 1) : 1)
+#define MAX_MEM_FOR_RS_ALIGN_CODE \
+  (alignment ? ((size_t) 1 << alignment) - 1 : (size_t) 1)
 
 extern void i386_cons_align (int);
 #define md_cons_align(nbytes) i386_cons_align (nbytes)
