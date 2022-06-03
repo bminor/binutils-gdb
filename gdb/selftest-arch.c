@@ -68,6 +68,7 @@ foreach_arch_test_generator (const std::string &name,
 	   {
 	     struct gdbarch_info info;
 	     info.bfd_arch_info = bfd_scan_arch (arch);
+	     info.osabi = GDB_OSABI_NONE;
 	     struct gdbarch *gdbarch = gdbarch_find_by_info (info);
 	     SELF_CHECK (gdbarch != NULL);
 	     function (gdbarch);

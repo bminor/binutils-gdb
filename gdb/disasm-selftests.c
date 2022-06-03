@@ -101,12 +101,52 @@ print_one_insn_test (struct gdbarch *gdbarch)
       {
 	/* Test disassemble breakpoint instruction.  */
 	CORE_ADDR pc = 0;
-	int kind = gdbarch_breakpoint_kind_from_pc (gdbarch, &pc);
+	int kind;
 	int bplen;
 
-	insn = gdbarch_sw_breakpoint_from_kind (gdbarch, kind, &bplen);
-	len = bplen;
+	struct gdbarch_info info;
+	info.bfd_arch_info = gdbarch_bfd_arch_info (gdbarch);
 
+	enum gdb_osabi it;
+	bool found = false;
+	for (it = GDB_OSABI_UNKNOWN; it != GDB_OSABI_INVALID;
+	     it = static_cast<enum gdb_osabi>(static_cast<int>(it) + 1))
+	  {
+	    if (it == GDB_OSABI_UNKNOWN)
+	      continue;
+
+	    info.osabi = it;
+
+	    if (it != GDB_OSABI_NONE)
+	      {
+		if (!has_gdb_osabi_handler (info))
+		  /* Unsupported.  Skip to prevent warnings like:
+		     A handler for the OS ABI <x> is not built into this
+		     configuration of GDB.  Attempting to continue with the
+		     default <y> settings.  */
+		  continue;
+	      }
+
+	    gdbarch = gdbarch_find_by_info (info);
+	    SELF_CHECK (gdbarch != NULL);
+
+	    try
+	      {
+		kind = gdbarch_breakpoint_kind_from_pc (gdbarch, &pc);
+		insn = gdbarch_sw_breakpoint_from_kind (gdbarch, kind, &bplen);
+	      }
+	    catch (...)
+	      {
+		continue;
+	      }
+	    found = true;
+	    break;
+	  }
+
+	/* Assert that we have found an instruction to disassemble.  */
+	SELF_CHECK (found);
+
+	len = bplen;
 	break;
       }
     }
