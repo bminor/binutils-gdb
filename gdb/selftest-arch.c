@@ -66,28 +66,12 @@ foreach_arch_test_generator (const std::string &name,
       auto test_fn
 	= ([=] ()
 	   {
-	     /* Prevent warnings when setting architecture with current osabi
-		settings, like:
-		  A handler for the OS ABI "GNU/Linux" is not built into this
-		  configuration of GDB.  Attempting to continue with the
-		  default aarch64:ilp32 settings.  */
-	     enum gdb_osabi_mode mode;
-	     enum gdb_osabi osabi;
-	     get_osabi (mode, osabi);
-
-	     set_osabi (osabi_user, GDB_OSABI_NONE);
-	     SCOPE_EXIT
-	       {
-		 reset ();
-		 set_osabi (mode, osabi);
-	       };
-
 	     struct gdbarch_info info;
 	     info.bfd_arch_info = bfd_scan_arch (arch);
 	     struct gdbarch *gdbarch = gdbarch_find_by_info (info);
 	     SELF_CHECK (gdbarch != NULL);
-
 	     function (gdbarch);
+	     reset ();
 	   });
 
       tests.emplace_back (string_printf ("%s::%s", name.c_str (), arch),

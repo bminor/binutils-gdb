@@ -32,7 +32,7 @@
 #endif
 
 /* State for the "set osabi" command.  */
-static enum gdb_osabi_mode user_osabi_state;
+static enum { osabi_auto, osabi_default, osabi_user } user_osabi_state;
 static enum gdb_osabi user_selected_osabi;
 static const char *gdb_osabi_available_names[GDB_OSABI_INVALID + 3] = {
   "auto",
@@ -595,48 +595,15 @@ generic_elf_osabi_sniffer (bfd *abfd)
   return osabi;
 }
 
-/* See osabi.h.  */
-
-void
-set_osabi (enum gdb_osabi_mode mode, enum gdb_osabi osabi)
-{
-  if (mode == osabi_auto)
-    user_osabi_state = osabi_auto;
-  else if (mode == osabi_default)
-    {
-      user_selected_osabi = GDB_OSABI_DEFAULT;
-      user_osabi_state = osabi_user;
-    }
-  else
-    {
-      user_selected_osabi = osabi;
-      user_osabi_state = osabi_user;
-    }
-
-  /* NOTE: At some point (true multiple architectures) we'll need to be more
-     graceful here.  */
-  gdbarch_info info;
-  if (! gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__, _("Updating OS ABI failed."));
-}
-
-/* See osabi.h.  */
-
-void
-get_osabi (enum gdb_osabi_mode &mode, enum gdb_osabi &osabi)
-{
-  mode = user_osabi_state;
-  osabi = user_selected_osabi;
-}
-
 static void
 set_osabi (const char *args, int from_tty, struct cmd_list_element *c)
 {
   if (strcmp (set_osabi_string, "auto") == 0)
-    set_osabi (osabi_auto, GDB_OSABI_INVALID);
+    user_osabi_state = osabi_auto;
   else if (strcmp (set_osabi_string, "default") == 0)
     {
-      set_osabi (osabi_default, GDB_OSABI_INVALID);
+      user_selected_osabi = GDB_OSABI_DEFAULT;
+      user_osabi_state = osabi_user;
     }
   else
     {
@@ -648,7 +615,8 @@ set_osabi (const char *args, int from_tty, struct cmd_list_element *c)
 
 	  if (strcmp (set_osabi_string, gdbarch_osabi_name (osabi)) == 0)
 	    {
-	      set_osabi (osabi_user, osabi);
+	      user_selected_osabi = osabi;
+	      user_osabi_state = osabi_user;
 	      break;
 	    }
 	}
@@ -657,6 +625,12 @@ set_osabi (const char *args, int from_tty, struct cmd_list_element *c)
 			_("Invalid OS ABI \"%s\" passed to command handler."),
 			set_osabi_string);
     }
+
+  /* NOTE: At some point (true multiple architectures) we'll need to be more
+     graceful here.  */
+  gdbarch_info info;
+  if (! gdbarch_update_p (info))
+    internal_error (__FILE__, __LINE__, _("Updating OS ABI failed."));
 }
 
 static void

@@ -50,13 +50,6 @@ enum gdb_osabi
   GDB_OSABI_INVALID		/* keep this last */
 };
 
-enum gdb_osabi_mode
-{
-  osabi_auto,
-  osabi_default,
-  osabi_user
-};
-
 /* Register an OS ABI sniffer.  Each arch/flavour may have more than
    one sniffer.  This is used to e.g. differentiate one OS's a.out from
    another.  The first sniffer to return something other than
@@ -95,11 +88,5 @@ const char *osabi_triplet_regexp (enum gdb_osabi osabi);
    sections to determine the OS ABI from the note.  */
 void generic_elf_osabi_sniff_abi_tag_sections (bfd *, asection *,
 					       enum gdb_osabi *);
-
-/* Set osabi to MODE/OSABI.  */
-extern void set_osabi (enum gdb_osabi_mode mode, enum gdb_osabi osabi);
-
-/* Return current osabi setting in MODE/OSABI.  */
-extern void get_osabi (enum gdb_osabi_mode &mode, enum gdb_osabi &osabi);
 
 #endif /* OSABI_H */
