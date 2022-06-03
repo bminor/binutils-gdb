@@ -9579,12 +9579,14 @@ output_insn (void)
 	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V2;
       if (i.tm.cpu_flags.bitfield.cpuavx
 	  || i.tm.cpu_flags.bitfield.cpuavx2
-	  /* Any VEX encoded insns execpt for CpuAVX512F, CpuAVX512BW,
-	     CpuAVX512DQ, LPW, TBM and AMX.  */
+	  /* Any VEX encoded insns execpt for AVX512F, AVX512BW, AVX512DQ,
+	     XOP, FMA4, LPW, TBM, and AMX.  */
 	  || (i.tm.opcode_modifier.vex
 	      && !i.tm.cpu_flags.bitfield.cpuavx512f
 	      && !i.tm.cpu_flags.bitfield.cpuavx512bw
 	      && !i.tm.cpu_flags.bitfield.cpuavx512dq
+	      && !i.tm.cpu_flags.bitfield.cpuxop
+	      && !i.tm.cpu_flags.bitfield.cpufma4
 	      && !i.tm.cpu_flags.bitfield.cpulwp
 	      && !i.tm.cpu_flags.bitfield.cputbm
 	      && !(x86_feature_2_used & GNU_PROPERTY_X86_FEATURE_2_TMM))
@@ -9602,11 +9604,12 @@ output_insn (void)
 	  || i.tm.cpu_flags.bitfield.cpuavx512bw
 	  || i.tm.cpu_flags.bitfield.cpuavx512dq
 	  || i.tm.cpu_flags.bitfield.cpuavx512vl
-	  /* Any EVEX encoded insns except for AVX512ER, AVX512PF and
-	     VNNIW.  */
+	  /* Any EVEX encoded insns except for AVX512ER, AVX512PF,
+	     AVX512-4FMAPS, and AVX512-4VNNIW.  */
 	  || (i.tm.opcode_modifier.evex
 	      && !i.tm.cpu_flags.bitfield.cpuavx512er
 	      && !i.tm.cpu_flags.bitfield.cpuavx512pf
+	      && !i.tm.cpu_flags.bitfield.cpuavx512_4fmaps
 	      && !i.tm.cpu_flags.bitfield.cpuavx512_4vnniw))
 	x86_isa_1_used |= GNU_PROPERTY_X86_ISA_1_V4;
     }
