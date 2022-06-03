@@ -3254,8 +3254,7 @@ static bfd_reloc_status_type
 mips_elf_final_gp (bfd *output_bfd, asymbol *symbol, bool relocatable,
 		   char **error_message, bfd_vma *pgp)
 {
-  if (bfd_is_und_section (symbol->section)
-      && ! relocatable)
+  if (output_bfd == NULL)
     {
       *pgp = 0;
       return bfd_reloc_undefined;
