@@ -593,10 +593,9 @@ mips_gprel_reloc (bfd *abfd ATTRIBUTE_UNUSED,
     {
       relocatable = false;
       output_bfd = symbol->section->output_section->owner;
+      if (output_bfd == NULL)
+	return bfd_reloc_undefined;
     }
-
-  if (bfd_is_und_section (symbol->section) && ! relocatable)
-    return bfd_reloc_undefined;
 
   /* We have to figure out the gp value, so that we can adjust the
      symbol value correctly.  We look up the symbol _gp in the output
