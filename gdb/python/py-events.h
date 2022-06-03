@@ -52,6 +52,6 @@ struct events_object
 extern events_object gdb_py_events;
 
 extern eventregistry_object *create_eventregistry_object (void);
-extern int evregpy_no_listeners_p (eventregistry_object *registry);
+extern bool evregpy_no_listeners_p (eventregistry_object *registry);
 
 #endif /* PYTHON_PY_EVENTS_H */

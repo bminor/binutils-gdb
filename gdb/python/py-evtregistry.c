@@ -115,7 +115,7 @@ gdbpy_initialize_eventregistry (void)
 /* Return the number of listeners currently connected to this
    registry.  */
 
-int
+bool
 evregpy_no_listeners_p (eventregistry_object *registry)
 {
   return PyList_Size (registry->callbacks) == 0;
