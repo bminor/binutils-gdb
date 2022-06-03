@@ -20,7 +20,6 @@
 
 #include "defs.h"
 #include "glibc-tdep.h"
-#include "gregset.h"
 #include "inferior.h"
 #include "linux-tdep.h"
 #include "loongarch-tdep.h"
