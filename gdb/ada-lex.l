@@ -466,12 +466,16 @@ processInt (struct parser_state *par_state, const char *base0,
   if (mpz_cmp (result.val, maxval.val) > 0)
     error (_("Integer literal out of range"));
 
+  int int_bits = gdbarch_int_bit (par_state->gdbarch ());
+  int long_bits = gdbarch_long_bit (par_state->gdbarch ());
+  int long_long_bits = gdbarch_long_long_bit (par_state->gdbarch ());
+
   ULONGEST value = result.as_integer<ULONGEST> ();
-  if ((value >> (gdbarch_int_bit (par_state->gdbarch ())-1)) == 0)
+  if (fits_in_type (1, value, int_bits, true))
     yylval.typed_val.type = type_int (par_state);
-  else if ((value >> (gdbarch_long_bit (par_state->gdbarch ())-1)) == 0)
+  else if (fits_in_type (1, value, long_bits, true))
     yylval.typed_val.type = type_long (par_state);
-  else if (((value >> (gdbarch_long_bit (par_state->gdbarch ())-1)) >> 1) == 0)
+  else if (fits_in_type (1, value, long_bits, false))
     {
       /* We have a number representable as an unsigned integer quantity.
          For consistency with the C treatment, we will treat it as an
@@ -490,8 +494,23 @@ processInt (struct parser_state *par_state, const char *base0,
 	yylval.typed_val.val = (LONGEST) value;
       return INT;
     }
-  else
+  else if (fits_in_type (1, value, long_long_bits, true))
     yylval.typed_val.type = type_long_long (par_state);
+  else if (fits_in_type (1, value, long_long_bits, false))
+    {
+      /* Note: Interprets ULLONG_MAX as -1.  */
+      yylval.typed_val.type = type_long_long (par_state);
+      /* See unsigned long case above.  */
+      if (value & LONGEST_SIGN)
+	yylval.typed_val.val =
+	  (LONGEST) (value & ~LONGEST_SIGN)
+	  - (LONGEST_SIGN>>1) - (LONGEST_SIGN>>1);
+      else
+	yylval.typed_val.val = (LONGEST) value;
+      return INT;
+    }
+  else
+    error (_("Integer literal out of range"));
 
   yylval.typed_val.val = value;
   return INT;
