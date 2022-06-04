@@ -68,6 +68,22 @@ proc fits_in_type { n type_bits type_signedness } {
     }
 }
 
+# Return 1 if LANG is a c-like language, in the sense that it uses the same
+# parser.
+
+proc c_like { lang } {
+    set res 0
+    switch $lang {
+	c
+	- c++
+	- asm
+	- objective-c
+	- opencl
+	- minimal {set res 1}
+    }
+    return $res
+}
+
 # Parse number N for LANG, and return a list of expected type and value.
 
 proc parse_number { lang n } {
@@ -165,26 +181,48 @@ proc parse_number { lang n } {
 			($any|$re_overflow)]
 	}
     } else {
-	# This is wrong for c-like languages.  For the decimal case, we
-	# shouldn't use unsigned.
-	# See PR 16377.
+	if { [c_like $lang] } {
+	    if { $hex_p } {
+		# C Hex.
+		set have_unsigned 1
+	    } else {
+		# C Decimal.  Unsigned not allowed according.
+		if { [fits_in_type $n $long_long_bits s] } {
+		    # Fits in largest signed type.
+		    set have_unsigned 0
+		} else {
+		    # Doesn't fit in largest signed type, so ill-formed, but
+		    # allow unsigned as a convenience, as compilers do (though
+		    # with a warning).
+		    set have_unsigned 1
+		}
+	    }
+	} else {
+	    # Non-C.
+	    set have_unsigned 1
+	}
+
 	if { [fits_in_type $n $int_bits s] } {
 	    return [list int $n]
-	} elseif { [fits_in_type $n $int_bits u] } {
+	} elseif { $have_unsigned && [fits_in_type $n $int_bits u] } {
 	    return [list "unsigned int" $n]
 	} elseif { [fits_in_type $n $long_bits s] } {
 	    return [list long $n]
-	} elseif { [fits_in_type $n $long_bits u] } {
+	} elseif { $have_unsigned && [fits_in_type $n $long_bits u] } {
 	    return [list "unsigned long" $n]
 	} elseif { [fits_in_type $n $long_long_bits s] } {
 	    return [list "long long" $n]
-	} elseif { [fits_in_type $n $long_long_bits u] } {
+	} elseif { $have_unsigned && [fits_in_type $n $long_long_bits u] } {
 	    return [list "unsigned long long" $n]
 	} else {
 	    # Overflow.
-	    # Some truncated value or re_overflow, should be re_overflow.
-	    return [list "((unsigned )?(int|long)|$re_overflow)" \
-			($any|$re_overflow)]
+	    if { [c_like $lang] } {
+		return [list $re_overflow $re_overflow]
+	    } else {
+		# Some truncated value or re_overflow, should be re_overflow.
+		return [list "((unsigned )?(int|long)|$re_overflow)" \
+			    ($any|$re_overflow)]
+	    }
 	}
     }
 

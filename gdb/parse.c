@@ -611,6 +611,43 @@ parse_float (const char *p, int len,
 {
   return target_float_from_string (data, type, std::string (p, len));
 }
+
+/* Return true if the number N_SIGN * N fits in a type with TYPE_BITS and
+   TYPE_SIGNED_P.  N_SIGNED is either 1 or -1.  */
+
+bool
+fits_in_type (int n_sign, ULONGEST n, int type_bits, bool type_signed_p)
+{
+  /* Normalize -0.  */
+  if (n == 0 && n_sign == -1)
+    n_sign = 1;
+
+  if (n_sign == -1 && !type_signed_p)
+    /* Can't fit a negative number in an unsigned type.  */
+    return false;
+
+  if (type_bits > sizeof (ULONGEST) * 8)
+    return true;
+
+  ULONGEST smax = (ULONGEST)1 << (type_bits - 1);
+  if (n_sign == -1)
+    {
+      /* Negative number, signed type.  */
+      return (n <= smax);
+    }
+  else if (n_sign == 1 && type_signed_p)
+    {
+      /* Positive number, signed type.  */
+      return (n < smax);
+    }
+  else if (n_sign == 1 && !type_signed_p)
+    {
+      /* Positive number, unsigned type.  */
+      return ((n >> 1) >> (type_bits - 1)) == 0;
+    }
+  else
+    gdb_assert_not_reached ("");
+}
 
 /* This function avoids direct calls to fprintf 
    in the parser generated debug code.  */
