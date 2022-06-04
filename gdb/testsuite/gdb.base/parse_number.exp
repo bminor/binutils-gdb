@@ -113,8 +113,7 @@ proc parse_number { lang n } {
 	    return [list "i64" $n]
 	} else {
 	    # Overflow.
-	    # Some truncated value, should be re_overflow.
-	    return [list i64 $any]
+	    return [list $re_overflow $re_overflow]
 	}
     } elseif { $lang == "d" } {
 	if { [fits_in_type $n 32 s] } {
@@ -274,6 +273,8 @@ proc test_parse_numbers {arch} {
 	    set re_overflow "Overflow on numeric constant\\."
 	} elseif { $lang == "ada" } {
 	    set re_overflow "Integer literal out of range"
+	} elseif { $lang == "rust" } {
+	    set re_overflow "Integer literal is too large"
 	} else {
 	    set re_overflow "Numeric constant too large\\."
 	}
