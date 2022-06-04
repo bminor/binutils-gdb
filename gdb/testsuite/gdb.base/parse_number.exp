@@ -161,8 +161,7 @@ proc parse_number { lang n } {
 	    return [list "CARDINAL" $n]
 	} else {
 	    # Overflow.
-	    # Some truncated value or re_overflow, should be re_overflow.
-	    return [list ($re_overflow|CARDINAL|INTEGER) ($re_overflow|$any)]
+	    return [list $re_overflow $re_overflow]
 	}
     } elseif { $lang == "fortran" } {
 	if { [fits_in_type $n $int_bits s] } {

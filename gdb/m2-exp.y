@@ -582,12 +582,11 @@ static int
 parse_number (int olen)
 {
   const char *p = pstate->lexptr;
-  LONGEST n = 0;
-  LONGEST prevn = 0;
+  ULONGEST n = 0;
+  ULONGEST prevn = 0;
   int c,i,ischar=0;
   int base = input_radix;
   int len = olen;
-  int unsigned_p = number_sign == 1 ? 1 : 0;
 
   if(p[len-1] == 'H')
   {
@@ -639,16 +638,11 @@ parse_number (int olen)
       n+=i;
       if(i >= base)
 	 return ERROR;
-      if(!unsigned_p && number_sign == 1 && (prevn >= n))
-	 unsigned_p=1;		/* Try something unsigned */
-      /* Don't do the range check if n==i and i==0, since that special
-	 case will give an overflow error.  */
-      if(RANGE_CHECK && n!=i && i)
-      {
-	 if((unsigned_p && (unsigned)prevn >= (unsigned)n) ||
-	    ((!unsigned_p && number_sign==-1) && -prevn <= -n))
-	    range_error (_("Overflow on numeric constant."));
-      }
+      if (n == 0 && prevn == 0)
+	;
+      else if (RANGE_CHECK && prevn >= n)
+	range_error (_("Overflow on numeric constant."));
+
 	 prevn=n;
     }
 
@@ -661,17 +655,22 @@ parse_number (int olen)
      yylval.ulval = n;
      return CHAR;
   }
-  else if ( unsigned_p && number_sign == 1)
-  {
-     yylval.ulval = n;
-     return UINT;
-  }
-  else if((unsigned_p && (n<0))) {
-     range_error (_("Overflow on numeric constant -- number too large."));
-     /* But, this can return if range_check == range_warn.  */
-  }
-  yylval.lval = n;
-  return INT;
+
+  int int_bits = gdbarch_int_bit (pstate->gdbarch ());
+  bool have_signed = number_sign == -1;
+  bool have_unsigned = number_sign == 1;
+  if (have_signed && fits_in_type (number_sign, n, int_bits, true))
+    {
+      yylval.lval = n;
+      return INT;
+    }
+  else if (have_unsigned && fits_in_type (number_sign, n, int_bits, false))
+    {
+      yylval.ulval = n;
+      return UINT;
+    }
+  else
+    error (_("Overflow on numeric constant."));
 }
 
 
