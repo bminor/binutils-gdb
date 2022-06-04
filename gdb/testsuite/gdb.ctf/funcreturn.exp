@@ -106,14 +106,13 @@ if ![target_info exists no_long_long] {
 
 # Sun /bin/cc calls this a function returning double.
 if {!$gcc_compiled} then {setup_xfail "*-sun-sunos4*"}
-	gdb_test "print v_float_func" \
-	    "$decimal = \{float \\(\\)\} 0x\[0-9a-z\]+.*" \
-	    "print float function"
+gdb_test "print v_float_func" \
+    "$decimal = \{float \\(\\)\} 0x\[0-9a-z\]+.*" \
+    "print float function"
 
-	gdb_test "print v_double_func" \
-	    "$decimal = \{double \\(\\)\} 0x\[0-9a-z\]+.*" \
-	    "print double function" \
-}
+gdb_test "print v_double_func" \
+    "$decimal = \{double \\(\\)\} 0x\[0-9a-z\]+.*" \
+    "print double function"
 
 # test whatis command with functions return type
 gdb_test "whatis v_char_func" \
@@ -180,11 +179,10 @@ if ![target_info exists no_long_long] {
 
 # Sun /bin/cc calls this a function returning double.
 if {!$gcc_compiled} then {setup_xfail "*-sun-sunos4*"}
-	gdb_test "whatis v_float_func" \
-	    "type = float \\($void\\)" \
-	    "whatis float function"
+gdb_test "whatis v_float_func" \
+    "type = float \\($void\\)" \
+    "whatis float function"
 
-	gdb_test "whatis v_double_func" \
-	    "type = double \\($void\\)" \
-	    "whatis double function" \
-}
+gdb_test "whatis v_double_func" \
+    "type = double \\($void\\)" \
+    "whatis double function"
