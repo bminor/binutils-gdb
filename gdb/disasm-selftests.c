@@ -86,6 +86,13 @@ print_one_insn_test (struct gdbarch *gdbarch)
       if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_arc_arc601)
 	return;
       goto generic_case;
+    case bfd_arch_z80:
+      {
+	int bplen;
+	insn = gdbarch_sw_breakpoint_from_kind (gdbarch, 0x0008, &bplen);
+	len = bplen;
+      }
+      break;
     case bfd_arch_i386:
       {
 	const struct bfd_arch_info *info = gdbarch_bfd_arch_info (gdbarch);
