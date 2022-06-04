@@ -595,7 +595,8 @@ coff_count_linenumbers (bfd *abfd)
     {
       asymbol *q_maybe = *p;
 
-      if (bfd_family_coff (bfd_asymbol_bfd (q_maybe)))
+      if (bfd_asymbol_bfd (q_maybe) != NULL
+	  && bfd_family_coff (bfd_asymbol_bfd (q_maybe)))
 	{
 	  coff_symbol_type *q = coffsymbol (q_maybe);
 
