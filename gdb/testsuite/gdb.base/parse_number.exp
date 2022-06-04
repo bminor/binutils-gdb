@@ -16,13 +16,179 @@
 # Format hex value VAL for language LANG.
 
 proc hex_for_lang { lang val } {
-    set val [regsub ^0x $val ""]
+    set neg_p [regexp ^- $val]
+    set val [regsub ^-?0x $val ""]
     if { $lang == "modula-2" } {
        set val 0[string toupper $val]H
     } else {
        set val 0x$val
     }
-    return $val
+    if { $neg_p } {
+	return -$val
+    } else {
+	return $val
+    }
+}
+
+# Determine whether N fits in type with TYPE_BITS and TYPE_SIGNEDNESS.
+
+proc fits_in_type { n type_bits type_signedness } {
+    if { $type_signedness == "s" } {
+	set type_signed_p 1
+    } elseif { $type_signedness == "u" } {
+	set type_signed_p 0
+    } else {
+	error "unreachable"
+    }
+
+    if { $n < 0 && !$type_signed_p } {
+	# Can't fit a negative number in an unsigned type.
+	return 0
+    }
+
+    if { $n < 0} {
+	set n_sign -1
+	set n [expr -$n]
+    } else {
+	set n_sign 1
+    }
+
+    set smax [expr 1 << ($type_bits - 1)];
+    if  { $n_sign == -1 } {
+	# Negative number, signed type.
+	return [expr ($n <= $smax)]
+    } elseif { $n_sign == 1 && $type_signed_p } {
+	# Positive number, signed type.
+	return [expr ($n < $smax)]
+    } elseif { $n_sign == 1 && !$type_signed_p } {
+	# Positive number, unsigned type.
+	return [expr ($n >> $type_bits) == 0]
+    } else {
+	error "unreachable"
+    }
+}
+
+# Parse number N for LANG, and return a list of expected type and value.
+
+proc parse_number { lang n } {
+    global re_overflow
+
+    set hex_p [regexp ^-?0x $n]
+
+    global hex decimal
+    if { $hex_p } {
+	set any $hex
+    } else {
+	set any $decimal
+    }
+
+    global sizeof_long_long sizeof_long sizeof_int
+    set long_long_bits [expr $sizeof_long_long * 8]
+    set long_bits [expr $sizeof_long * 8]
+    set int_bits [expr $sizeof_int * 8]
+
+    if { $lang == "rust" } {
+	if { [fits_in_type $n 32 s] } {
+	    return [list "i32" $n]
+	} elseif { [fits_in_type $n 64 s] } {
+	    return [list "i64" $n]
+	} elseif { [fits_in_type $n 64 u] } {
+	    # Note: Interprets MAX_U64 as -1.
+	    return [list "i64" $n]
+	} else {
+	    # Overflow.
+	    # Some truncated value, should be re_overflow.
+	    return [list i64 $any]
+	}
+    } elseif { $lang == "d" } {
+	if { [fits_in_type $n 32 s] } {
+	    return [list int $n]
+	} elseif { [fits_in_type $n 32 u] } {
+	    if { $hex_p } {
+		return [list uint $n]
+	    } else {
+		return [list long $n]
+	    }
+	} elseif { [fits_in_type $n 64 s] } {
+	    return [list long $n]
+	} elseif { [fits_in_type $n 64 u] } {
+	    return [list ulong $n]
+	} else {
+	    # Overflow.
+	    return [list $re_overflow $re_overflow]
+	}
+    } elseif { $lang == "ada" } {
+	if { [fits_in_type $n $int_bits s] } {
+	    return [list "<$sizeof_int-byte integer>" $n]
+	} elseif { [fits_in_type $n $long_bits s] } {
+	    return [list "<$sizeof_long-byte integer>" $n]
+	} elseif { [fits_in_type $n $long_bits u] } {
+	    return [list "<$sizeof_long-byte integer>" $n]
+	} elseif { [fits_in_type $n $long_long_bits s] } {
+	    return [list "<$sizeof_long_long-byte integer>" $n]
+	} elseif { [fits_in_type $n $long_long_bits u] } {
+	    # Note: Interprets ULLONG_MAX as -1.
+	    return [list "<$sizeof_long_long-byte integer>" $n]
+	} else {
+	    # Overflow.
+	    # Some truncated value or re_overflow, should be re_overflow.
+	    return [list "($re_overflow|<$decimal-byte integer>)" \
+			($re_overflow|$any)]
+	}
+    } elseif { $lang == "modula-2" } {
+	if { [string equal $n -0] } {
+	    # Note: 0 is CARDINAL, but -0 is an INTEGER.
+	    return [list "INTEGER" 0]
+	}
+	if { $n < 0 && [fits_in_type $n $int_bits s] } {
+	    return [list "INTEGER" $n]
+	} elseif { [fits_in_type $n $int_bits u] } {
+	    return [list "CARDINAL" $n]
+	} else {
+	    # Overflow.
+	    # Some truncated value or re_overflow, should be re_overflow.
+	    return [list ($re_overflow|CARDINAL|INTEGER) ($re_overflow|$any)]
+	}
+    } elseif { $lang == "fortran" } {
+	if { [fits_in_type $n $int_bits s] } {
+	    return [list int $n]
+	} elseif { [fits_in_type $n $int_bits u] } {
+	    return [list "unsigned int" $n]
+	} elseif { [fits_in_type $n $long_bits s] } {
+	    return [list long $n]
+	} elseif { [fits_in_type $n $long_bits u] } {
+	    return [list "unsigned long" $n]
+	} else {
+	    # Overflow.
+	    # Some truncated value or re_overflow, should be re_overflow.
+	    return [list "((unsigned )?(int|long)|$re_overflow)" \
+			($any|$re_overflow)]
+	}
+    } else {
+	# This is wrong for c-like languages.  For the decimal case, we
+	# shouldn't use unsigned.
+	# See PR 16377.
+	if { [fits_in_type $n $int_bits s] } {
+	    return [list int $n]
+	} elseif { [fits_in_type $n $int_bits u] } {
+	    return [list "unsigned int" $n]
+	} elseif { [fits_in_type $n $long_bits s] } {
+	    return [list long $n]
+	} elseif { [fits_in_type $n $long_bits u] } {
+	    return [list "unsigned long" $n]
+	} elseif { [fits_in_type $n $long_long_bits s] } {
+	    return [list "long long" $n]
+	} elseif { [fits_in_type $n $long_long_bits u] } {
+	    return [list "unsigned long long" $n]
+	} else {
+	    # Overflow.
+	    # Some truncated value or re_overflow, should be re_overflow.
+	    return [list "((unsigned )?(int|long)|$re_overflow)" \
+			($any|$re_overflow)]
+	}
+    }
+
+    error "unreachable"
 }
 
 # Test parsing numbers.  Several language parsers had the same bug
@@ -32,6 +198,10 @@ proc hex_for_lang { lang val } {
 # that GDB doesn't crash.  ARCH is the architecture to test with.
 
 proc test_parse_numbers {arch} {
+    global full_arch_testing
+    global tested_archs
+    global verbose
+
     set arch_re [string_to_regexp $arch]
     gdb_test "set architecture $arch" "The target architecture is set to \"$arch_re\"."
 
@@ -41,24 +211,21 @@ proc test_parse_numbers {arch} {
     # Figure out type sizes before matching patterns in the upcoming
     # tests.
 
+    global sizeof_long_long sizeof_long sizeof_int sizeof_short
     set sizeof_long_long [get_sizeof "long long" -1]
     set sizeof_long [get_sizeof "long" -1]
     set sizeof_int [get_sizeof "int" -1]
+    set sizeof_short [get_sizeof "short" -1]
 
-    if {$sizeof_long_long == 8 && $sizeof_long == 8} {
-	set 8B_type "unsigned long"
-	set fortran_type "unsigned long"
-	set fortran_value "0xffffffffffffffff"
-    } elseif {$sizeof_long_long == 8 && $sizeof_long == 4 && $sizeof_int == 4} {
-	set 8B_type "unsigned long long"
-	set fortran_type "unsigned int"
-	set fortran_value "0xffffffff"
-    } elseif {$sizeof_long == 4 && $sizeof_int == 2} {
-	set 8B_type "unsigned long long"
-	set fortran_type "unsigned long"
-	set fortran_value "0xffffffff"
-    } else {
-	error "missing case for long long = $sizeof_long_long, long = $sizeof_long, int = $sizeof_int"
+    if { ! $full_arch_testing } {
+	set arch_id \
+	    [list $sizeof_long_long $sizeof_long $sizeof_long $sizeof_int \
+		 $sizeof_short]
+	if { [lsearch $tested_archs $arch_id] == -1 } {
+	    lappend tested_archs $arch_id
+	} else {
+	    return
+	}
     }
 
     foreach_with_prefix lang $::all_languages {
@@ -72,34 +239,78 @@ proc test_parse_numbers {arch} {
 
 	gdb_test_no_output "set language $lang"
 
-	set val "0xffffffffffffffff"
-	set val [hex_for_lang $lang $val]
-	if {$lang == "fortran"} {
-	    gdb_test "p/x $val" " = $fortran_value"
-	    gdb_test "ptype $val" " = $fortran_type"
-	} elseif {$lang == "modula-2"} {
-	    gdb_test "p/x $val" "Overflow on numeric constant\\."
+	global re_overflow
+	if { $lang == "modula-2" || $lang == "fortran" } {
+	    set re_overflow "Overflow on numeric constant\\."
+	} elseif { $lang == "ada" } {
+	    set re_overflow "Integer literal out of range"
 	} else {
-	    # D and Rust define their own built-in 64-bit types, and
-	    # are thus always able to parse/print 64-bit values.
-	    if {$sizeof_long_long == 4 && $lang != "d" && $lang != "rust"} {
-		set out "0xffffffff"
-	    } else {
-		set out $val
-	    }
-	    gdb_test "p/x $val" " = $out"
-	    if {$lang == "ada"} {
-		if {$sizeof_long_long == 4} {
-		    gdb_test "ptype $val" " = <4-byte integer>"
-		} else {
-		    gdb_test "ptype $val" " = <8-byte integer>"
+	    set re_overflow "Numeric constant too large\\."
+	}
+
+	set basevals {
+	    0xffffffffffffffff
+	    0x7fffffffffffffff
+	    0xffffffff
+	    0x7fffffff
+	    0xffff
+	    0x7fff
+	    0xff
+	    0x7f
+	    0x0
+	}
+
+	if { $lang == "modula-2" } {
+	    # Modula-2 is the only language that changes the type of an
+	    # integral literal based on whether it's prefixed with "-",
+	    # so test both scenarios.
+	    set prefixes { "" "-" }
+	} else {
+	    # For all the other languages, we'd just be testing the
+	    # parsing twice, so just test the basic scenario of no prefix.
+	    set prefixes { "" }
+	}
+
+	foreach_with_prefix prefix $prefixes {
+	    foreach baseval $basevals {
+		foreach offset { -2 -1 0 1 2 } {
+		    set dec_val [expr $baseval + $offset]
+		    set hex_val [format "0x%llx" $dec_val]
+		    if { $dec_val < 0 } {
+			continue
+		    }
+
+		    set dec_val $prefix$dec_val
+		    lassign [parse_number $lang $dec_val] type out
+		    if { $verbose >= 1 } { verbose -log "EXPECTED: $out" 2 }
+		    if { $prefix == "" } {
+			gdb_test "p/u $dec_val" "$out"
+		    } else {
+			gdb_test "p/d $dec_val" "$out"
+		    }
+		    if { $verbose >= 1 } { verbose -log "EXPECTED: $type" 2 }
+		    gdb_test "ptype $dec_val" "$type"
+
+		    if { $prefix == "-" } {
+			# Printing with /x below means negative numbers are
+			# converted to unsigned representation.  We could
+			# support this by updating the expected patterns.
+			# Possibly, we could print with /u and /d instead of
+			# /x here as well (which would also require updating
+			# expected patterns).
+			# For now, this doesn't seem worth the trouble,
+			# so skip.
+			continue
+		    }
+
+		    set hex_val $prefix$hex_val
+		    lassign [parse_number $lang $hex_val] type out
+		    set hex_val [hex_for_lang $lang $hex_val]
+		    if { $verbose >= 1 } { verbose -log "EXPECTED: $out" 2 }
+		    gdb_test "p/x $hex_val" "$out"
+		    if { $verbose >= 1 } { verbose -log "EXPECTED: $type" 2 }
+		    gdb_test "ptype $hex_val" "$type"
 		}
-	    } elseif {$lang == "d"} {
-		gdb_test "ptype $val" " = ulong"
-	    } elseif {$lang == "rust"} {
-		gdb_test "ptype $val" " = i64"
-	    } else {
-		gdb_test "ptype $val" " = $8B_type"
 	    }
 	}
     }
@@ -119,6 +330,13 @@ gdb_assert {[llength $supported_archs] > 1} "at least one architecture"
 
 set all_languages [get_set_option_choices "set language"]
 
+# If 1, test each arch.  If 0, test one arch for each sizeof
+# short/int/long/longlong configuration.
+# For a build with --enable-targets=all, full_arch_testing == 0 takes 15s,
+# while full_arch_testing == 1 takes 9m20s.
+set full_arch_testing 0
+
+set tested_archs {}
 foreach_with_prefix arch $supported_archs {
     if {$arch == "auto"} {
 	# Avoid duplicate testing.
