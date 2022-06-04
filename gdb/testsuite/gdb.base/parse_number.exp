@@ -214,13 +214,7 @@ proc parse_number { lang n } {
 	    return [list "unsigned long long" $n]
 	} else {
 	    # Overflow.
-	    if { [c_like $lang] || $lang == "go" } {
-		return [list $re_overflow $re_overflow]
-	    } else {
-		# Some truncated value or re_overflow, should be re_overflow.
-		return [list "((unsigned )?(int|long)|$re_overflow)" \
-			    ($any|$re_overflow)]
-	    }
+	    return [list $re_overflow $re_overflow]
 	}
     }
 

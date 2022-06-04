@@ -804,7 +804,6 @@ parse_number (struct parser_state *par_state,
 {
   ULONGEST n = 0;
   ULONGEST prevn = 0;
-  ULONGEST un;
 
   int i = 0;
   int c;
@@ -816,10 +815,6 @@ parse_number (struct parser_state *par_state,
 
   /* We have found a "L" or "U" suffix.  */
   int found_suffix = 0;
-
-  ULONGEST high_bit;
-  struct type *signed_type;
-  struct type *unsigned_type;
 
   if (parsed_float)
     {
@@ -919,18 +914,12 @@ parse_number (struct parser_state *par_state,
       if (i >= base)
 	return ERROR;		/* Invalid digit in this base.  */
 
-      /* Portably test for overflow (only works for nonzero values, so make
-	 a second check for zero).  FIXME: Can't we just make n and prevn
-	 unsigned and avoid this?  */
-      if (c != 'l' && c != 'u' && (prevn >= n) && n != 0)
-	unsigned_p = 1;		/* Try something unsigned.  */
-
-      /* Portably test for unsigned overflow.
-	 FIXME: This check is wrong; for example it doesn't find overflow
-	 on 0x123456789 when LONGEST is 32 bits.  */
-      if (c != 'l' && c != 'u' && n != 0)
+      if (c != 'l' && c != 'u')
 	{
-	  if (unsigned_p && prevn >= n)
+	  /* Test for overflow.  */
+	  if (prevn == 0 && n == 0)
+	    ;
+	  else if (prevn >= n)
 	    error (_("Numeric constant too large."));
 	}
       prevn = n;
@@ -948,57 +937,31 @@ parse_number (struct parser_state *par_state,
      the case where it is we just always shift the value more than
      once, with fewer bits each time.  */
 
-  un = n >> 2;
-  if (long_p == 0
-      && (un >> (gdbarch_int_bit (par_state->gdbarch ()) - 2)) == 0)
-    {
-      high_bit
-	= ((ULONGEST)1) << (gdbarch_int_bit (par_state->gdbarch ()) - 1);
-
-      /* A large decimal (not hex or octal) constant (between INT_MAX
-	 and UINT_MAX) is a long or unsigned long, according to ANSI,
-	 never an unsigned int, but this code treats it as unsigned
-	 int.  This probably should be fixed.  GCC gives a warning on
-	 such constants.  */
-
-      unsigned_type = parse_type (par_state)->builtin_unsigned_int;
-      signed_type = parse_type (par_state)->builtin_int;
-    }
-  else if (long_p <= 1
-	   && (un >> (gdbarch_long_bit (par_state->gdbarch ()) - 2)) == 0)
-    {
-      high_bit
-	= ((ULONGEST)1) << (gdbarch_long_bit (par_state->gdbarch ()) - 1);
-      unsigned_type = parse_type (par_state)->builtin_unsigned_long;
-      signed_type = parse_type (par_state)->builtin_long;
-    }
+  int int_bits = gdbarch_int_bit (par_state->gdbarch ());
+  int long_bits = gdbarch_long_bit (par_state->gdbarch ());
+  int long_long_bits = gdbarch_long_long_bit (par_state->gdbarch ());
+  bool have_signed = !unsigned_p;
+  bool have_int = long_p == 0;
+  bool have_long = long_p <= 1;
+  if (have_int && have_signed && fits_in_type (1, n, int_bits, true))
+    putithere->typed_val_int.type = parse_type (par_state)->builtin_int;
+  else if (have_int && fits_in_type (1, n, int_bits, false))
+    putithere->typed_val_int.type
+      = parse_type (par_state)->builtin_unsigned_int;
+  else if (have_long && have_signed && fits_in_type (1, n, long_bits, true))
+    putithere->typed_val_int.type = parse_type (par_state)->builtin_long;
+  else if (have_long && fits_in_type (1, n, long_bits, false))
+    putithere->typed_val_int.type
+      = parse_type (par_state)->builtin_unsigned_long;
+  else if (have_signed && fits_in_type (1, n, long_long_bits, true))
+    putithere->typed_val_int.type
+      = parse_type (par_state)->builtin_long_long;
+  else if (fits_in_type (1, n, long_long_bits, false))
+    putithere->typed_val_int.type
+      = parse_type (par_state)->builtin_unsigned_long_long;
   else
-    {
-      int shift;
-      if (sizeof (ULONGEST) * HOST_CHAR_BIT
-	  < gdbarch_long_long_bit (par_state->gdbarch ()))
-	/* A long long does not fit in a LONGEST.  */
-	shift = (sizeof (ULONGEST) * HOST_CHAR_BIT - 1);
-      else
-	shift = (gdbarch_long_long_bit (par_state->gdbarch ()) - 1);
-      high_bit = (ULONGEST) 1 << shift;
-      unsigned_type = parse_type (par_state)->builtin_unsigned_long_long;
-      signed_type = parse_type (par_state)->builtin_long_long;
-    }
-
-   putithere->typed_val_int.val = n;
-
-   /* If the high bit of the worked out type is set then this number
-      has to be unsigned.  */
-
-   if (unsigned_p || (n & high_bit))
-     {
-       putithere->typed_val_int.type = unsigned_type;
-     }
-   else
-     {
-       putithere->typed_val_int.type = signed_type;
-     }
+    error (_("Numeric constant too large."));
+  putithere->typed_val_int.val = n;
 
    return INT;
 }
