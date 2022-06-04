@@ -1076,16 +1076,11 @@ parse_number (struct parser_state *par_state,
 	  n *= base;
 	  n += i;
 	}
-      /* Portably test for overflow (only works for nonzero values, so make
-	 a second check for zero).  */
-      if ((prevn >= n) && n != 0)
-	unsigned_p=1;		/* Try something unsigned */
-      /* If range checking enabled, portably test for unsigned overflow.  */
-      if (RANGE_CHECK && n != 0)
-	{
-	  if ((unsigned_p && prevn >= n))
-	    range_error (_("Overflow on numeric constant."));
-	}
+      /* Test for overflow.  */
+      if (prevn == 0 && n == 0)
+	;
+      else if (RANGE_CHECK && prevn >= n)
+	range_error (_("Overflow on numeric constant."));
       prevn = n;
     }
   
@@ -1100,7 +1095,8 @@ parse_number (struct parser_state *par_state,
      but too many compilers warn about that, when ints and longs
      are the same size.  So we shift it twice, with fewer bits
      each time, for the same result.  */
-  
+
+  int bits_available;
   if ((gdbarch_int_bit (par_state->gdbarch ())
        != gdbarch_long_bit (par_state->gdbarch ())
        && ((n >> 2)
@@ -1108,19 +1104,22 @@ parse_number (struct parser_state *par_state,
 							    shift warning */
       || long_p)
     {
-      high_bit = ((ULONGEST)1)
-      << (gdbarch_long_bit (par_state->gdbarch ())-1);
+      bits_available = gdbarch_long_bit (par_state->gdbarch ());
       unsigned_type = parse_type (par_state)->builtin_unsigned_long;
       signed_type = parse_type (par_state)->builtin_long;
-    }
+  }
   else 
     {
-      high_bit =
-	((ULONGEST)1) << (gdbarch_int_bit (par_state->gdbarch ()) - 1);
+      bits_available = gdbarch_int_bit (par_state->gdbarch ());
       unsigned_type = parse_type (par_state)->builtin_unsigned_int;
       signed_type = parse_type (par_state)->builtin_int;
     }    
+  high_bit = ((ULONGEST)1) << (bits_available - 1);
   
+  if (RANGE_CHECK
+      && ((n >> 2) >> (bits_available - 2)))
+    range_error (_("Overflow on numeric constant."));
+
   putithere->typed_val.val = n;
   
   /* If the high bit of the worked out type is set then this number

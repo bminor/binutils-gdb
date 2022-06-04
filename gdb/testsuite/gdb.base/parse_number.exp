@@ -176,9 +176,7 @@ proc parse_number { lang n } {
 	    return [list "unsigned long" $n]
 	} else {
 	    # Overflow.
-	    # Some truncated value or re_overflow, should be re_overflow.
-	    return [list "((unsigned )?(int|long)|$re_overflow)" \
-			($any|$re_overflow)]
+	    return [list $re_overflow $re_overflow]
 	}
     } else {
 	if { [c_like $lang] } {
