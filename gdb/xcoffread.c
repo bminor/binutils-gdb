@@ -945,7 +945,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
   struct xcoff_symbol fcn_stab_saved = { 0 };
 
   /* fcn_cs_saved is global because process_xcoff_symbol needs it.  */
-  union internal_auxent fcn_aux_saved = main_aux;
+  union internal_auxent fcn_aux_saved {};
   struct context_stack *newobj;
 
   const char *filestring = pst->filename;	/* Name of the current file.  */
