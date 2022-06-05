@@ -5796,27 +5796,24 @@ copy_type_recursive (struct objfile *objfile,
 }
 
 /* Make a copy of the given TYPE, except that the pointer & reference
-   types are not preserved.
-   
-   This function assumes that the given type has an associated objfile.
-   This objfile is used to allocate the new type.  */
+   types are not preserved.  */
 
 struct type *
 copy_type (const struct type *type)
 {
-  struct type *new_type;
-
-  gdb_assert (type->is_objfile_owned ());
-
-  new_type = alloc_type_copy (type);
+  struct type *new_type = alloc_type_copy (type);
   new_type->set_instance_flags (type->instance_flags ());
   TYPE_LENGTH (new_type) = TYPE_LENGTH (type);
   memcpy (TYPE_MAIN_TYPE (new_type), TYPE_MAIN_TYPE (type),
 	  sizeof (struct main_type));
   if (type->main_type->dyn_prop_list != NULL)
-    new_type->main_type->dyn_prop_list
-      = copy_dynamic_prop_list (&type->objfile_owner ()->objfile_obstack,
-				type->main_type->dyn_prop_list);
+    {
+      struct obstack *storage = (type->is_objfile_owned ()
+				 ? &type->objfile_owner ()->objfile_obstack
+				 : gdbarch_obstack (type->arch_owner ()));
+      new_type->main_type->dyn_prop_list
+	= copy_dynamic_prop_list (storage, type->main_type->dyn_prop_list);
+    }
 
   return new_type;
 }
