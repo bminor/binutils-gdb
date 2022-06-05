@@ -205,12 +205,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 				 "be set on a dummy frame."));
 	    }
 	  else
-	    {
-	      frame_id = get_frame_id (prev_frame);
-	      if (frame_id == null_frame_id)
-		PyErr_SetString (PyExc_ValueError,
-				 _("Invalid ID for the `frame' object."));
-	    }
+	    frame_id = get_frame_id (prev_frame);
 	}
     }
   catch (const gdb_exception &except)
