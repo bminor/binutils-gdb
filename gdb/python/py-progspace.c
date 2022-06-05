@@ -351,13 +351,17 @@ pspy_get_objfiles (PyObject *self_, PyObject *args)
 static PyObject *
 pspy_solib_name (PyObject *o, PyObject *args)
 {
-  gdb_py_ulongest pc;
+  CORE_ADDR pc;
+  PyObject *pc_obj;
+
   pspace_object *self = (pspace_object *) o;
 
   PSPY_REQUIRE_VALID (self);
 
-  if (!PyArg_ParseTuple (args, GDB_PY_LLU_ARG, &pc))
+  if (!PyArg_ParseTuple (args, "O", &pc_obj))
     return NULL;
+  if (get_addr_from_python (pc_obj, &pc) < 0)
+    return nullptr;
 
   const char *soname = solib_name_from_address (self->pspace, pc);
   if (soname == nullptr)
@@ -371,14 +375,17 @@ static PyObject *
 pspy_block_for_pc (PyObject *o, PyObject *args)
 {
   pspace_object *self = (pspace_object *) o;
-  gdb_py_ulongest pc;
+  CORE_ADDR pc;
+  PyObject *pc_obj;
   const struct block *block = NULL;
   struct compunit_symtab *cust = NULL;
 
   PSPY_REQUIRE_VALID (self);
 
-  if (!PyArg_ParseTuple (args, GDB_PY_LLU_ARG, &pc))
+  if (!PyArg_ParseTuple (args, "O", &pc_obj))
     return NULL;
+  if (get_addr_from_python (pc_obj, &pc) < 0)
+    return nullptr;
 
   try
     {
@@ -410,24 +417,25 @@ pspy_block_for_pc (PyObject *o, PyObject *args)
 static PyObject *
 pspy_find_pc_line (PyObject *o, PyObject *args)
 {
-  gdb_py_ulongest pc_llu;
+  CORE_ADDR pc;
   PyObject *result = NULL; /* init for gcc -Wall */
+  PyObject *pc_obj;
   pspace_object *self = (pspace_object *) o;
 
   PSPY_REQUIRE_VALID (self);
 
-  if (!PyArg_ParseTuple (args, GDB_PY_LLU_ARG, &pc_llu))
+  if (!PyArg_ParseTuple (args, "O", &pc_obj))
     return NULL;
+  if (get_addr_from_python (pc_obj, &pc) < 0)
+    return nullptr;
 
   try
     {
       struct symtab_and_line sal;
-      CORE_ADDR pc;
       scoped_restore_current_program_space saver;
 
       set_current_program_space (self->pspace);
 
-      pc = (CORE_ADDR) pc_llu;
       sal = find_pc_line (pc, 0);
       result = symtab_and_line_to_sal_object (sal);
     }

@@ -514,6 +514,9 @@ gdb_test "python print (pc_rtn > pc_call)" "True" \
 
 gdb_test "python print (gdb.find_pc_line(pc_rtn).line >= line)" "True" \
     "test find_pc_line with resume address"
+gdb_test "python print (gdb.find_pc_line(pc_rtn).line == gdb.find_pc_line(gdb.Value(pc_rtn)).line)" \
+    "True" \
+    "test find_pc_line using Value"
 
 gdb_test_no_output "set variable \$cvar1 = 23" "set convenience variable"
 gdb_test "python print(gdb.convenience_variable('cvar1'))" "23"

@@ -122,39 +122,26 @@ static PyObject *
 archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 {
   static const char *keywords[] = { "start_pc", "end_pc", "count", NULL };
-  CORE_ADDR start, end = 0;
+  CORE_ADDR start = 0, end = 0;
   CORE_ADDR pc;
-  gdb_py_ulongest start_temp;
   long count = 0, i;
-  PyObject *end_obj = NULL, *count_obj = NULL;
+  PyObject *start_obj = nullptr, *end_obj = nullptr, *count_obj = nullptr;
   struct gdbarch *gdbarch = NULL;
 
   ARCHPY_REQUIRE_VALID (self, gdbarch);
 
-  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, GDB_PY_LLU_ARG "|OO",
-					keywords, &start_temp, &end_obj,
+  if (!gdb_PyArg_ParseTupleAndKeywords (args, kw, "O|OO",
+					keywords, &start_obj, &end_obj,
 					&count_obj))
     return NULL;
 
-  start = start_temp;
-  if (end_obj)
-    {
-      /* Make a long logic check first.  In Python 3.x, internally,
-	 all integers are represented as longs.  In Python 2.x, there
-	 is still a differentiation internally between a PyInt and a
-	 PyLong.  Explicitly do this long check conversion first. In
-	 GDB, for Python 3.x, we #ifdef PyInt = PyLong.  This check has
-	 to be done first to ensure we do not lose information in the
-	 conversion process.  */
-      if (PyLong_Check (end_obj))
-	end = PyLong_AsUnsignedLongLong (end_obj);
-      else
-	{
-	  PyErr_SetString (PyExc_TypeError,
-			   _("Argument 'end_pc' should be a (long) integer."));
+  if (get_addr_from_python (start_obj, &start) < 0)
+    return nullptr;
 
-	  return NULL;
-	}
+  if (end_obj != nullptr)
+    {
+      if (get_addr_from_python (end_obj, &end) < 0)
+	return nullptr;
 
       if (end < start)
 	{

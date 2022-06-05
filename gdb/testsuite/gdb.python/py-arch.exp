@@ -43,7 +43,7 @@ gdb_py_test_silent_cmd "python insn_list2 = arch.disassemble(pc, pc)" \
   "disassemble no count" 0
 gdb_py_test_silent_cmd "python insn_list3 = arch.disassemble(pc, count=1)" \
   "disassemble no end" 0
-gdb_py_test_silent_cmd "python insn_list4 = arch.disassemble(pc)" \
+gdb_py_test_silent_cmd "python insn_list4 = arch.disassemble(gdb.Value(pc))" \
   "disassemble no end no count" 0
 
 gdb_test "python print (len(insn_list1))" "1" "test number of instructions 1"
