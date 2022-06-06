@@ -171,7 +171,7 @@ print_one_insn_test (struct gdbarch *gdbarch)
 				    const gdb_byte *insn,
 				    size_t len)
       : gdb_disassembler (gdbarch,
-			  (run_verbose () ? gdb_stdout : &null_stream),
+			  (run_verbose () ? gdb_stdlog : &null_stream),
 			  gdb_disassembler_test::read_memory),
 	m_insn (insn), m_len (len)
     {
@@ -180,16 +180,10 @@ print_one_insn_test (struct gdbarch *gdbarch)
     int
     print_insn (CORE_ADDR memaddr)
     {
-      if (run_verbose ())
-	{
-	  gdb_printf (stream (), "%s ",
-		      gdbarch_bfd_arch_info (arch ())->arch_name);
-	}
-
       int len = gdb_disassembler::print_insn (memaddr);
 
       if (run_verbose ())
-	gdb_printf (stream (), "\n");
+	debug_printf ("\n");
 
       return len;
     }
