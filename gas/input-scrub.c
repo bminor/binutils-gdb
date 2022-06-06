@@ -139,6 +139,7 @@ input_scrub_reinit (void)
   input_file_begin ();		/* Reinitialize! */
   logical_input_line = -1u;
   logical_input_file = NULL;
+  sb_index = -1;
 
   buffer_length = input_file_buffer_size () * 2;
   buffer_start = XNEWVEC (char, BEFORE_SIZE + AFTER_SIZE + 1 + buffer_length);
@@ -171,8 +172,6 @@ input_scrub_push (char *saved_position)
   memcpy (saved->save_source, save_source, sizeof (save_source));
   saved->next_saved_file = next_saved_file;
   saved->input_file_save = input_file_push ();
-
-  sb_index = -1;
 
   input_scrub_reinit ();
 
