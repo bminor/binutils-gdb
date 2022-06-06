@@ -98,6 +98,11 @@ enum stop_stack_kind stop_stack_dummy;
 
 int stopped_by_random_signal;
 
+
+/* Whether "finish" should print the value.  */
+
+static bool finish_print = true;
+
 
 
 static void
@@ -1524,17 +1529,17 @@ print_return_value_1 (struct ui_out *uiout, struct return_value_info *rv)
 {
   if (rv->value != NULL)
     {
-      struct value_print_options opts;
-
       /* Print it.  */
       uiout->text ("Value returned is ");
       uiout->field_fmt ("gdb-result-var", "$%d",
 			 rv->value_history_index);
       uiout->text (" = ");
-      get_user_print_options (&opts);
 
-      if (opts.finish_print)
+      if (finish_print)
 	{
+	  struct value_print_options opts;
+	  get_user_print_options (&opts);
+
 	  string_file stb;
 	  value_print (rv->value, &stb, &opts);
 	  uiout->field_stream ("return-value", stb);
@@ -3351,7 +3356,7 @@ List all available info about the specified process."),
 	   &info_proc_cmdlist);
 
   add_setshow_boolean_cmd ("finish", class_support,
-			   &user_print_options.finish_print, _("\
+			   &finish_print, _("\
 Set whether `finish' prints the return value."), _("\
 Show whether `finish' prints the return value."), NULL,
 			   NULL,
