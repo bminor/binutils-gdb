@@ -50,11 +50,29 @@ print_one_insn_test (struct gdbarch *gdbarch)
       len = sizeof (arm_insn);
       break;
     case bfd_arch_ia64:
-    case bfd_arch_mep:
-    case bfd_arch_mips:
-    case bfd_arch_tic6x:
-    case bfd_arch_xtensa:
+      /* We get:
+	 internal-error: gdbarch_sw_breakpoint_from_kind:
+	 Assertion `gdbarch->sw_breakpoint_from_kind != NULL' failed.  */
       return;
+    case bfd_arch_mep:
+      /* Disassembles as '*unknown*' insn, then len self-check fails.  */
+      return;
+    case bfd_arch_mips:
+      if (gdbarch_bfd_arch_info (gdbarch)->mach == bfd_mach_mips16)
+	/* Disassembles insn, but len self-check fails.  */
+	return;
+      goto generic_case;
+    case bfd_arch_tic6x:
+      /* Disassembles as '<undefined instruction 0x56454314>' insn, but len
+	 self-check passes, so let's allow it.  */
+      goto generic_case;
+    case bfd_arch_xtensa:
+      /* Disassembles insn, but len self-check fails.  */
+      return;
+    case bfd_arch_or1k:
+      /* Disassembles as '*unknown*' insn, but len self-check passes, so let's
+	 allow it.  */
+      goto generic_case;
     case bfd_arch_s390:
       /* nopr %r7 */
       static const gdb_byte s390_insn[] = {0x07, 0x07};
