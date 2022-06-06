@@ -65,8 +65,8 @@ static reloc_howto_type elf_pru_howto_table_rel[] = {
   /* No relocation.  */
   HOWTO (R_PRU_NONE,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
-	 3,			/* bitsize */
+	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_dont,/* complain_on_overflow */

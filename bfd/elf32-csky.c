@@ -84,7 +84,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 0 */
   HOWTO (R_CKCORE_NONE,               /* type */
 	 0,                           /* rightshift */
-	 0,                           /* size */
+	 3,                           /* size */
 	 0,                           /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */

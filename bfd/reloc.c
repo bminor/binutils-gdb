@@ -8540,7 +8540,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	    {
 	      bfd_vma off;
 	      static reloc_howto_type none_howto
-		= HOWTO (0, 0, 0, 0, false, 0, complain_overflow_dont, NULL,
+		= HOWTO (0, 0, 3, 0, false, 0, complain_overflow_dont, NULL,
 			 "unused", false, 0, 0, false);
 
 	      off = ((*parent)->address

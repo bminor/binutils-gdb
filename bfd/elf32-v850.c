@@ -1761,7 +1761,7 @@ static const struct v850_elf_reloc_map v850_elf_reloc_map[] =
 
 static reloc_howto_type v800_elf_howto_table[] =
 {
-  V800_RELOC (R_V810_NONE,      0,  0, 0, dont,     false, generic),	/* Type = 0x30 */
+  V800_RELOC (R_V810_NONE,      3,  0, 0, dont,     false, generic),	/* Type = 0x30 */
   V800_RELOC (R_V810_BYTE,      0,  8, 0, dont,     false, generic),
   V800_RELOC (R_V810_HWORD,     1, 16, 0, dont,     false, generic),
   V800_RELOC (R_V810_WORD,      2, 32, 0, dont,     false, generic),
