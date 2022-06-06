@@ -673,7 +673,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
     }
 
   struct value_print_options opts;
-  get_user_print_options (&opts);
+  gdbpy_get_print_options (&opts);
   opts.deref_ref = 0;
 
   /* We need objects for booleans as the "p" flag for bools is new in
@@ -1163,7 +1163,7 @@ valpy_str (PyObject *self)
 {
   struct value_print_options opts;
 
-  get_user_print_options (&opts);
+  gdbpy_get_print_options (&opts);
   opts.deref_ref = 0;
 
   string_file stb;

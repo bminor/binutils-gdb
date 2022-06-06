@@ -1742,6 +1742,24 @@ pretty-printer for this value exists, then it is returned.  If no such
 printer exists, then this returns @code{None}.
 @end defun
 
+Normally, a pretty-printer can respect the user's print settings
+(including temporarily applied settings, such as @samp{/x}) simply by
+calling @code{Value.format_string} (@pxref{Values From Inferior}).
+However, these settings can also be queried directly:
+
+@findex gdb.print_options
+@defun gdb.print_options ()
+Return a dictionary whose keys are the valid keywords that can be
+given to @code{Value.format_string}, and whose values are the user's
+settings.  During a @code{print} or other operation, the values will
+reflect any flags that are temporarily in effect.
+
+@smallexample
+(gdb) python print (gdb.print_options ()['max_elements'])
+200
+@end smallexample
+@end defun
+
 @node Selecting Pretty-Printers
 @subsubsection Selecting Pretty-Printers
 @cindex selecting python pretty-printers

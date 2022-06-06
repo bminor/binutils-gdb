@@ -746,10 +746,15 @@ int gdbpy_is_value_object (PyObject *obj);
    other pretty-printer functions, because they refer to PyObject.  */
 gdbpy_ref<> apply_varobj_pretty_printer (PyObject *print_obj,
 					 struct value **replacement,
-					 struct ui_file *stream);
+					 struct ui_file *stream,
+					 const value_print_options *opts);
 gdbpy_ref<> gdbpy_get_varobj_pretty_printer (struct value *value);
 gdb::unique_xmalloc_ptr<char> gdbpy_get_display_hint (PyObject *printer);
 PyObject *gdbpy_default_visualizer (PyObject *self, PyObject *args);
+
+PyObject *gdbpy_print_options (PyObject *self, PyObject *args);
+void gdbpy_get_print_options (value_print_options *opts);
+extern const struct value_print_options *gdbpy_current_print_options;
 
 void bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj);
 void bpfinishpy_post_stop_hook (struct gdbpy_breakpoint_object *bp_obj);
@@ -784,8 +789,10 @@ int gdb_pymodule_addobject (PyObject *module, const char *name,
 
 struct varobj_iter;
 struct varobj;
-std::unique_ptr<varobj_iter> py_varobj_get_iterator (struct varobj *var,
-						     PyObject *printer);
+std::unique_ptr<varobj_iter> py_varobj_get_iterator
+     (struct varobj *var,
+      PyObject *printer,
+      const value_print_options *opts);
 
 /* Deleter for Py_buffer unique_ptr specialization.  */
 

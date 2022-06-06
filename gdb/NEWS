@@ -149,6 +149,13 @@ GNU/Linux/LoongArch (gdbserver)	loongarch*-*-linux*
   ** gdb.Objfile now has an attribute named "is_file".  This is True
      if the objfile comes from a file, and False otherwise.
 
+  ** New function gdb.print_options that returns a dictionary of the
+     prevailing print options, in the form accepted by
+     gdb.Value.format_string.
+
+  ** gdb.Value.format_string now uses the format provided by 'print',
+     if it is called during a 'print' or other similar operation.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on LoongArch GNU/Linux.

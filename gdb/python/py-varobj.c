@@ -17,13 +17,15 @@
 #include "python-internal.h"
 #include "varobj.h"
 #include "varobj-iter.h"
+#include "valprint.h"
 
 /* A dynamic varobj iterator "class" for python pretty-printed
    varobjs.  This inherits struct varobj_iter.  */
 
 struct py_varobj_iter : public varobj_iter
 {
-  py_varobj_iter (struct varobj *var, gdbpy_ref<> &&pyiter);
+  py_varobj_iter (struct varobj *var, gdbpy_ref<> &&pyiter,
+		  const value_print_options *opts);
   ~py_varobj_iter () override;
 
   std::unique_ptr<varobj_item> next () override;
@@ -41,6 +43,9 @@ private:
   /* The python iterator returned by the printer's 'children' method,
      or NULL if not available.  */
   PyObject *m_iter;
+
+  /* The print options to use.  */
+  value_print_options m_opts;
 };
 
 /* Implementation of the 'dtor' method of pretty-printed varobj
@@ -66,6 +71,9 @@ py_varobj_iter::next ()
     return NULL;
 
   gdbpy_enter_varobj enter_py (m_var);
+
+  scoped_restore set_options = make_scoped_restore (&gdbpy_current_print_options,
+						    &m_opts);
 
   gdbpy_ref<> item (PyIter_Next (m_iter));
 
@@ -124,9 +132,11 @@ py_varobj_iter::next ()
    whose children the iterator will be iterating over.  PYITER is the
    python iterator actually responsible for the iteration.  */
 
-py_varobj_iter::py_varobj_iter (struct varobj *var, gdbpy_ref<> &&pyiter)
+py_varobj_iter::py_varobj_iter (struct varobj *var, gdbpy_ref<> &&pyiter,
+				const value_print_options *opts)
   : m_var (var),
-    m_iter (pyiter.release ())
+    m_iter (pyiter.release ()),
+    m_opts (*opts)
 {
 }
 
@@ -134,12 +144,16 @@ py_varobj_iter::py_varobj_iter (struct varobj *var, gdbpy_ref<> &&pyiter)
    over VAR's children.  */
 
 std::unique_ptr<varobj_iter>
-py_varobj_get_iterator (struct varobj *var, PyObject *printer)
+py_varobj_get_iterator (struct varobj *var, PyObject *printer,
+			const value_print_options *opts)
 {
   gdbpy_enter_varobj enter_py (var);
 
   if (!PyObject_HasAttr (printer, gdbpy_children_cst))
     return NULL;
+
+  scoped_restore set_options = make_scoped_restore (&gdbpy_current_print_options,
+						    opts);
 
   gdbpy_ref<> children (PyObject_CallMethodObjArgs (printer, gdbpy_children_cst,
 						    NULL));
@@ -157,5 +171,6 @@ py_varobj_get_iterator (struct varobj *var, PyObject *printer)
     }
 
   return std::unique_ptr<varobj_iter> (new py_varobj_iter (var,
-							   std::move (iter)));
+							   std::move (iter),
+							   opts));
 }

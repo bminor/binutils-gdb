@@ -658,7 +658,11 @@ varobj_get_iterator (struct varobj *var)
 {
 #if HAVE_PYTHON
   if (var->dynamic->pretty_printer)
-    return py_varobj_get_iterator (var, var->dynamic->pretty_printer);
+    {
+      value_print_options opts;
+      varobj_formatted_print_options (&opts, var->format);
+      return py_varobj_get_iterator (var, var->dynamic->pretty_printer, &opts);
+    }
 #endif
 
   gdb_assert_not_reached ("requested an iterator from a non-dynamic varobj");
@@ -2146,6 +2150,8 @@ varobj_value_get_print_value (struct value *value,
   string_file stb;
   std::string thevalue;
 
+  varobj_formatted_print_options (&opts, format);
+
 #if HAVE_PYTHON
   if (gdb_python_initialized)
     {
@@ -2166,7 +2172,8 @@ varobj_value_get_print_value (struct value *value,
 
 	      gdbpy_ref<> output = apply_varobj_pretty_printer (value_formatter,
 								&replacement,
-								&stb);
+								&stb,
+								&opts);
 
 	      /* If we have string like output ...  */
 	      if (output != NULL)
@@ -2224,8 +2231,6 @@ varobj_value_get_print_value (struct value *value,
 	}
     }
 #endif
-
-  varobj_formatted_print_options (&opts, format);
 
   /* If the THEVALUE has contents, it is a regular string.  */
   if (!thevalue.empty ())

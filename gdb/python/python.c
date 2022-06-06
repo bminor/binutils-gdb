@@ -2560,6 +2560,10 @@ the returned string is 'ADDRESS <SYMBOL+OFFSET>' without the quotes." },
     "current_language () -> string\n\
 Return the name of the currently selected language." },
 
+  { "print_options", gdbpy_print_options, METH_NOARGS,
+    "print_options () -> dict\n\
+Return the current print options." },
+
   {NULL, NULL, 0, NULL}
 };
 
