@@ -1225,7 +1225,7 @@ solib_contains_address_p (const struct so_list *const solib,
    breakpoints which are in shared libraries that are not currently
    mapped in.  */
 
-char *
+const char *
 solib_name_from_address (struct program_space *pspace, CORE_ADDR address)
 {
   struct so_list *so = NULL;

@@ -48,7 +48,7 @@ extern void solib_create_inferior_hook (int from_tty);
 
 /* If ADDR lies in a shared library, return its name.  */
 
-extern char *solib_name_from_address (struct program_space *, CORE_ADDR);
+extern const char *solib_name_from_address (struct program_space *, CORE_ADDR);
 
 /* Return true if ADDR lies within SOLIB.  */
 

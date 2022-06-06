@@ -1427,8 +1427,9 @@ print_frame (const frame_print_options &fp_opts,
     if (print_what != SHORT_LOCATION
 	&& pc_p && (funname == NULL || sal.symtab == NULL))
       {
-	char *lib = solib_name_from_address (get_frame_program_space (frame),
-					     get_frame_pc (frame));
+	const char *lib
+	  = solib_name_from_address (get_frame_program_space (frame),
+				     get_frame_pc (frame));
 
 	if (lib)
 	  {

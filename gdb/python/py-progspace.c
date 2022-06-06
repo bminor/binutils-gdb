@@ -351,7 +351,6 @@ pspy_get_objfiles (PyObject *self_, PyObject *args)
 static PyObject *
 pspy_solib_name (PyObject *o, PyObject *args)
 {
-  char *soname;
   gdb_py_ulongest pc;
   pspace_object *self = (pspace_object *) o;
 
@@ -360,7 +359,7 @@ pspy_solib_name (PyObject *o, PyObject *args)
   if (!PyArg_ParseTuple (args, GDB_PY_LLU_ARG, &pc))
     return NULL;
 
-  soname = solib_name_from_address (self->pspace, pc);
+  const char *soname = solib_name_from_address (self->pspace, pc);
   if (soname == nullptr)
     Py_RETURN_NONE;
   return host_string_to_python_string (soname).release ();
