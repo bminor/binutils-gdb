@@ -4218,12 +4218,11 @@ proc test_compiler_info { {compiler ""} {language ""} } {
 # For gcc 7.5.0, the major version 7.
 
 proc gcc_major_version { } {
-    global compiler_info
     global decimal
     if { ![test_compiler_info "gcc-*"] } {
 	return -1
     }
-    set res [regexp gcc-($decimal)-($decimal)- $compiler_info \
+    set res [regexp gcc-($decimal)-($decimal)- [test_compiler_info] \
 		 dummy_var major minor]
     if { $res != 1 } {
 	return -1
