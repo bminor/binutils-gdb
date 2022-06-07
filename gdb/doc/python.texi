@@ -1160,6 +1160,12 @@ Additionally, @value{GDBN} only styles some value contents, so not
 every output string will contain escape sequences.
 
 When @code{False}, which is the default, no output styling is applied.
+
+@item summary
+@code{True} when just a summary should be printed.  In this mode,
+scalar values are printed in their entirety, but aggregates such as
+structures or unions are omitted.  This mode is used by @code{set
+print frame-arguments scalars} (@pxref{Print Settings}).
 @end table
 @end defun
 

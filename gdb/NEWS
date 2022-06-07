@@ -156,6 +156,10 @@ GNU/Linux/LoongArch (gdbserver)	loongarch*-*-linux*
   ** gdb.Value.format_string now uses the format provided by 'print',
      if it is called during a 'print' or other similar operation.
 
+  ** gdb.Value.format_string now accepts the 'summary' keyword.  This
+     can be used to request a shorter representation of a value, the
+     way that 'set print frame-arguments scalars' does.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on LoongArch GNU/Linux.

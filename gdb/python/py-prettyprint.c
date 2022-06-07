@@ -753,6 +753,8 @@ gdbpy_print_options (PyObject *unused1, PyObject *unused2)
 		      opts.static_field_print) < 0
       || set_boolean (result.get (), "deref_refs",
 		      opts.deref_ref) < 0
+      || set_boolean (result.get (), "summary",
+		      opts.summary) < 0
       || set_unsigned (result.get (), "max_elements",
 		       opts.print_max) < 0
       || set_unsigned (result.get (), "max_depth",

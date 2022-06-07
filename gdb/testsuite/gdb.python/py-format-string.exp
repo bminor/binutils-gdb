@@ -1127,6 +1127,12 @@ proc test_print_options {} {
 	"print in binary to fetch options"
     gdb_test "python print(saved_options\['format'\] == 't')" "True" \
 	"format was set"
+
+    check_format_string "a_point_t" "summary=True" \
+	"No Data" \
+	"print in summary mode"
+    gdb_test "python print(saved_options\['summary'\])" "True" \
+	"summary was set"
 }
 
 # Run all the tests in common for both C and C++.

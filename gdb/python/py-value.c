@@ -641,6 +641,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
       "address",		/* See set print address on|off.  */
       "styling",		/* Should we apply styling.  */
       "nibbles",		/* See set print nibbles on|off.  */
+      "summary",		/* Summary mode for non-scalars.  */
       /* C++ options.  */
       "deref_refs",		/* No corresponding setting.  */
       "actual_objects",		/* See set print object on|off.  */
@@ -690,10 +691,11 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
   PyObject *deref_refs_obj = NULL;
   PyObject *actual_objects_obj = NULL;
   PyObject *static_members_obj = NULL;
+  PyObject *summary_obj = NULL;
   char *format = NULL;
   if (!gdb_PyArg_ParseTupleAndKeywords (args,
 					kw,
-					"|O!O!O!O!O!O!O!O!O!O!O!O!IIIs",
+					"|O!O!O!O!O!O!O!O!O!O!O!O!O!IIIs",
 					keywords,
 					&PyBool_Type, &raw_obj,
 					&PyBool_Type, &pretty_arrays_obj,
@@ -704,6 +706,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 					&PyBool_Type, &address_obj,
 					&PyBool_Type, &styling_obj,
 					&PyBool_Type, &nibbles_obj,
+					&PyBool_Type, &summary_obj,
 					&PyBool_Type, &deref_refs_obj,
 					&PyBool_Type, &actual_objects_obj,
 					&PyBool_Type, &static_members_obj,
@@ -736,6 +739,8 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
     return NULL;
   if (!copy_py_bool_obj (&opts.static_field_print, static_members_obj))
     return NULL;
+  if (!copy_py_bool_obj (&opts.summary, summary_obj))
+    return nullptr;
 
   /* Numeric arguments for which 0 means unlimited (which we represent as
      UINT_MAX).  Note that the max-depth numeric argument uses -1 as

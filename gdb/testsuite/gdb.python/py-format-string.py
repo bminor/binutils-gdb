@@ -28,6 +28,8 @@ class PointPrinter(object):
     def to_string(self):
         global saved_options
         saved_options = gdb.print_options()
+        if saved_options["summary"]:
+            return "No Data"
         return "Pretty Point (%s, %s)" % (self.val["x"], self.val["y"])
 
 
