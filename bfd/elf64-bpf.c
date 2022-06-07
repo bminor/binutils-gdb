@@ -40,7 +40,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
   /* This reloc does nothing.  */
   HOWTO (R_BPF_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -55,7 +55,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
   /* 64-immediate in LDDW instruction.  */
   HOWTO (R_BPF_INSN_64,		/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 32,			/* bitpos */
@@ -70,7 +70,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
   /* 32-immediate in many instructions.  */
   HOWTO (R_BPF_INSN_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 32,			/* bitpos */
@@ -85,7 +85,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
   /* 16-bit offsets in instructions.  */
   HOWTO (R_BPF_INSN_16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 16,			/* bitpos */
@@ -100,7 +100,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
   /* 16-bit PC-relative address in jump instructions.  */
   HOWTO (R_BPF_INSN_DISP16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 16,			/* bitpos */
@@ -114,7 +114,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
 
   HOWTO (R_BPF_DATA_8_PCREL,
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -128,7 +128,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
 
   HOWTO (R_BPF_DATA_16_PCREL,
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -142,7 +142,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
 
   HOWTO (R_BPF_DATA_32_PCREL,
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -156,7 +156,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
 
   HOWTO (R_BPF_DATA_8,
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -170,7 +170,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
 
   HOWTO (R_BPF_DATA_16,
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -185,7 +185,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
   /* 32-bit PC-relative address in call instructions.  */
   HOWTO (R_BPF_INSN_DISP32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 32,			/* bitpos */
@@ -200,7 +200,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
   /* 32-bit data.  */
   HOWTO (R_BPF_DATA_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -215,7 +215,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
   /* 64-bit data.  */
   HOWTO (R_BPF_DATA_64,		/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -229,7 +229,7 @@ static reloc_howto_type bpf_elf_howto_table [] =
 
   HOWTO (R_BPF_DATA_64_PCREL,
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */

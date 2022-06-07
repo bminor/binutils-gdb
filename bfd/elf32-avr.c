@@ -121,7 +121,7 @@ static reloc_howto_type elf_avr_howto_table[] =
 {
   HOWTO (R_AVR_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -135,7 +135,7 @@ static reloc_howto_type elf_avr_howto_table[] =
 
   HOWTO (R_AVR_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -150,7 +150,7 @@ static reloc_howto_type elf_avr_howto_table[] =
   /* A 7 bit PC relative relocation.  */
   HOWTO (R_AVR_7_PCREL,		/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 7,			/* bitsize */
 	 true,			/* pc_relative */
 	 3,			/* bitpos */
@@ -165,7 +165,7 @@ static reloc_howto_type elf_avr_howto_table[] =
   /* A 13 bit PC relative relocation.  */
   HOWTO (R_AVR_13_PCREL,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 13,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -180,7 +180,7 @@ static reloc_howto_type elf_avr_howto_table[] =
   /* A 16 bit absolute relocation.  */
   HOWTO (R_AVR_16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -196,7 +196,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      Will be changed when linker stubs are needed.  */
   HOWTO (R_AVR_16_PM,		/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -211,7 +211,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For LDI command.  */
   HOWTO (R_AVR_LO8_LDI,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -226,7 +226,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For LDI command.  */
   HOWTO (R_AVR_HI8_LDI,		/* type */
 	 8,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -242,7 +242,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      a 32 bit link-time constant.  */
   HOWTO (R_AVR_HH8_LDI,		/* type */
 	 16,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -257,7 +257,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For LDI command.  */
   HOWTO (R_AVR_LO8_LDI_NEG,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -272,7 +272,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For LDI command.  */
   HOWTO (R_AVR_HI8_LDI_NEG,	/* type */
 	 8,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -287,7 +287,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For LDI command.  */
   HOWTO (R_AVR_HH8_LDI_NEG,	/* type */
 	 16,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -302,7 +302,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For LDI command.  Will not be changed when linker stubs are needed. */
   HOWTO (R_AVR_LO8_LDI_PM,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -317,7 +317,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For LDI command.  Will not be changed when linker stubs are needed. */
   HOWTO (R_AVR_HI8_LDI_PM,	/* type */
 	 9,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -332,7 +332,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For LDI command.  Will not be changed when linker stubs are needed. */
   HOWTO (R_AVR_HH8_LDI_PM,	/* type */
 	 17,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -347,7 +347,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For LDI command.  Will not be changed when linker stubs are needed. */
   HOWTO (R_AVR_LO8_LDI_PM_NEG,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -362,7 +362,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For LDI command.  Will not be changed when linker stubs are needed. */
   HOWTO (R_AVR_HI8_LDI_PM_NEG,	/* type */
 	 9,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -377,7 +377,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For LDI command.  Will not be changed when linker stubs are needed. */
   HOWTO (R_AVR_HH8_LDI_PM_NEG,	/* type */
 	 17,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -391,7 +391,7 @@ static reloc_howto_type elf_avr_howto_table[] =
   /* Relocation for CALL command in ATmega.  */
   HOWTO (R_AVR_CALL,		/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 23,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -406,7 +406,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For LDI command.  */
   HOWTO (R_AVR_LDI,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -421,7 +421,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For ldd/sdd command.  */
   HOWTO (R_AVR_6,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 6,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -436,7 +436,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For sbiw/adiw command.  */
   HOWTO (R_AVR_6_ADIW,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 6,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -450,7 +450,7 @@ static reloc_howto_type elf_avr_howto_table[] =
   /* Most significant 8 bit value of a 32 bit link-time constant.  */
   HOWTO (R_AVR_MS8_LDI,		/* type */
 	 24,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -464,7 +464,7 @@ static reloc_howto_type elf_avr_howto_table[] =
   /* Negative most significant 8 bit value of a 32 bit link-time constant.  */
   HOWTO (R_AVR_MS8_LDI_NEG,	/* type */
 	 24,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -479,7 +479,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For LDI command.  Will be changed when linker stubs are needed.  */
   HOWTO (R_AVR_LO8_LDI_GS,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -494,7 +494,7 @@ static reloc_howto_type elf_avr_howto_table[] =
      For LDI command.  Will be changed when linker stubs are needed.  */
   HOWTO (R_AVR_HI8_LDI_GS,	/* type */
 	 9,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -508,7 +508,7 @@ static reloc_howto_type elf_avr_howto_table[] =
   /* 8 bit offset.  */
   HOWTO (R_AVR_8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -522,7 +522,7 @@ static reloc_howto_type elf_avr_howto_table[] =
   /* lo8-part to use in  .byte lo8(sym).  */
   HOWTO (R_AVR_8_LO8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -536,7 +536,7 @@ static reloc_howto_type elf_avr_howto_table[] =
   /* hi8-part to use in  .byte hi8(sym).  */
   HOWTO (R_AVR_8_HI8,		/* type */
 	 8,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -550,7 +550,7 @@ static reloc_howto_type elf_avr_howto_table[] =
   /* hlo8-part to use in  .byte hlo8(sym).  */
   HOWTO (R_AVR_8_HLO8,		/* type */
 	 16,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -563,7 +563,7 @@ static reloc_howto_type elf_avr_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_AVR_DIFF8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -576,7 +576,7 @@ static reloc_howto_type elf_avr_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_AVR_DIFF16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -589,7 +589,7 @@ static reloc_howto_type elf_avr_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_AVR_DIFF32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -603,7 +603,7 @@ static reloc_howto_type elf_avr_howto_table[] =
   /* 7 bit immediate for LDS/STS in Tiny core.  */
   HOWTO (R_AVR_LDS_STS_16,  /* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 7,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -617,7 +617,7 @@ static reloc_howto_type elf_avr_howto_table[] =
 
   HOWTO (R_AVR_PORT6,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 6,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -630,7 +630,7 @@ static reloc_howto_type elf_avr_howto_table[] =
 	 false),		/* pcrel_offset */
   HOWTO (R_AVR_PORT5,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 5,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -645,7 +645,7 @@ static reloc_howto_type elf_avr_howto_table[] =
   /* A 32 bit PC relative relocation.  */
   HOWTO (R_AVR_32_PCREL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */

@@ -428,7 +428,7 @@ static reloc_howto_type bfin_howto_table [] =
   /* This reloc does nothing. .  */
   HOWTO (R_BFIN_UNUSED0,	/* type.  */
 	 0,			/* rightshift.  */
-	 3,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* size.  */
 	 0,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -442,7 +442,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_PCREL5M2,	/* type.  */
 	 1,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)..  */
+	 2,			/* size.  */
 	 4,			/* bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -456,7 +456,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_UNUSED1,	/* type.  */
 	 0,			/* rightshift.  */
-	 3,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* size.  */
 	 0,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -470,7 +470,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_PCREL10,	/* type.  */
 	 1,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 10,			/* bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -488,7 +488,7 @@ static reloc_howto_type bfin_howto_table [] =
 				   aligned on a word boundary so
 				   only 12 bits have to be used.
 				   Right shift the rightmost bit..  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 12,			/* bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -502,7 +502,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_RIMM16,		/* type.  */
 	 0,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 16,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -516,7 +516,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_LUIMM16,	/* type.  */
 	 0,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 16,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -530,7 +530,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_HUIMM16,	/* type.  */
 	 16,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 16,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -544,7 +544,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_PCREL12_JUMP_S,	/* type.  */
 	 1,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 12,			/* bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -558,7 +558,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_PCREL24_JUMP_X,	/* type.  */
 	 1,			/* rightshift.  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* size.  */
 	 24,			/* bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -572,7 +572,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_PCREL24,	/* type.  */
 	 1,			/* rightshift.  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* size.  */
 	 24,			/* bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -586,7 +586,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_UNUSEDB,	/* type.  */
 	 0,			/* rightshift.  */
-	 3,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* size.  */
 	 0,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -600,7 +600,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_UNUSEDC,	/* type.  */
 	 0,			/* rightshift.  */
-	 3,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* size.  */
 	 0,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -614,7 +614,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_PCREL24_JUMP_L,	/* type.  */
 	 1,			/* rightshift.  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* size.  */
 	 24,			/* bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -628,7 +628,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_PCREL24_CALL_X,	/* type.  */
 	 1,			/* rightshift.  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* size.  */
 	 24,			/* bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -642,7 +642,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_VAR_EQ_SYMB,	/* type.  */
 	 0,			/* rightshift.  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* size.  */
 	 32,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -656,7 +656,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_BYTE_DATA,	/* type.  */
 	 0,			/* rightshift.  */
-	 0,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 1,			/* size.  */
 	 8,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -670,7 +670,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_BYTE2_DATA,	/* type.  */
 	 0,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 16,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -684,7 +684,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_BYTE4_DATA,	/* type.  */
 	 0,			/* rightshift.  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* size.  */
 	 32,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -698,7 +698,7 @@ static reloc_howto_type bfin_howto_table [] =
 
   HOWTO (R_BFIN_PCREL11,	/* type.  */
 	 1,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 10,			/* bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -715,7 +715,7 @@ static reloc_howto_type bfin_howto_table [] =
      the symbol.  */
   HOWTO (R_BFIN_GOT17M4,	/* type */
 	 2,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -731,7 +731,7 @@ static reloc_howto_type bfin_howto_table [] =
      symbol.  */
   HOWTO (R_BFIN_GOTHI,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -747,7 +747,7 @@ static reloc_howto_type bfin_howto_table [] =
      symbol.  */
   HOWTO (R_BFIN_GOTLO,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -762,7 +762,7 @@ static reloc_howto_type bfin_howto_table [] =
   /* The 32-bit address of the canonical descriptor of a function.  */
   HOWTO (R_BFIN_FUNCDESC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -778,7 +778,7 @@ static reloc_howto_type bfin_howto_table [] =
      canonical descriptor of a function.  */
   HOWTO (R_BFIN_FUNCDESC_GOT17M4,	/* type */
 	 2,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -794,7 +794,7 @@ static reloc_howto_type bfin_howto_table [] =
      canonical descriptor of a function.  */
   HOWTO (R_BFIN_FUNCDESC_GOTHI,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -810,7 +810,7 @@ static reloc_howto_type bfin_howto_table [] =
      canonical descriptor of a function.  */
   HOWTO (R_BFIN_FUNCDESC_GOTLO,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -825,7 +825,7 @@ static reloc_howto_type bfin_howto_table [] =
   /* The 32-bit address of the canonical descriptor of a function.  */
   HOWTO (R_BFIN_FUNCDESC_VALUE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -841,7 +841,7 @@ static reloc_howto_type bfin_howto_table [] =
      canonical descriptor of a function.  */
   HOWTO (R_BFIN_FUNCDESC_GOTOFF17M4, /* type */
 	 2,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -857,7 +857,7 @@ static reloc_howto_type bfin_howto_table [] =
      canonical descriptor of a function.  */
   HOWTO (R_BFIN_FUNCDESC_GOTOFFHI, /* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -873,7 +873,7 @@ static reloc_howto_type bfin_howto_table [] =
      canonical descriptor of a function.  */
   HOWTO (R_BFIN_FUNCDESC_GOTOFFLO, /* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -889,7 +889,7 @@ static reloc_howto_type bfin_howto_table [] =
      the symbol.  */
   HOWTO (R_BFIN_GOTOFF17M4,	/* type */
 	 2,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -905,7 +905,7 @@ static reloc_howto_type bfin_howto_table [] =
      symbol.  */
   HOWTO (R_BFIN_GOTOFFHI,	 /* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -921,7 +921,7 @@ static reloc_howto_type bfin_howto_table [] =
      symbol.  */
   HOWTO (R_BFIN_GOTOFFLO,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -938,7 +938,7 @@ static reloc_howto_type bfin_gnuext_howto_table [] =
 {
   HOWTO (R_BFIN_PLTPC,		/* type.  */
 	 0,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 16,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -952,7 +952,7 @@ static reloc_howto_type bfin_gnuext_howto_table [] =
 
   HOWTO (R_BFIN_GOT,		/* type.  */
 	 0,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 16,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -967,7 +967,7 @@ static reloc_howto_type bfin_gnuext_howto_table [] =
 /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_BFIN_GNU_VTINHERIT,	/* type.  */
 	 0,			/* rightshift.  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* size.  */
 	 0,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */
@@ -982,7 +982,7 @@ static reloc_howto_type bfin_gnuext_howto_table [] =
 /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_BFIN_GNU_VTENTRY,	/* type.  */
 	 0,			/* rightshift.  */
-	 2,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* size.  */
 	 0,			/* bitsize.  */
 	 false,			/* pc_relative.  */
 	 0,			/* bitpos.  */

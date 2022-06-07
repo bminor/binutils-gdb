@@ -100,7 +100,7 @@ static reloc_howto_type elf_s12z_howto_table[] =
   /* This reloc does nothing.  */
   HOWTO (R_S12Z_NONE,	/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -115,7 +115,7 @@ static reloc_howto_type elf_s12z_howto_table[] =
   /* A 24 bit absolute relocation emitted by the OPR mode operands  */
   HOWTO (R_S12Z_OPR,        /* type */
 	 0,			/* rightshift */
-	 5,			/* size (0 = byte, 1 = short, 2 = long) */
+	 3,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -130,7 +130,7 @@ static reloc_howto_type elf_s12z_howto_table[] =
   /* The purpose of this reloc is not known */
   HOWTO (R_S12Z_UKNWN_2,	/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -145,7 +145,7 @@ static reloc_howto_type elf_s12z_howto_table[] =
   /* A 15 bit PC-rel relocation */
   HOWTO (R_S12Z_PCREL_7_15,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 15,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -160,7 +160,7 @@ static reloc_howto_type elf_s12z_howto_table[] =
   /* A 24 bit absolute relocation emitted by EXT24 mode operands */
   HOWTO (R_S12Z_EXT24,        /* type */
 	 0,			/* rightshift */
-	 5,			/* size (0 = byte, 1 = short, 2 = long) */
+	 3,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -175,7 +175,7 @@ static reloc_howto_type elf_s12z_howto_table[] =
   /* An 18 bit absolute relocation */
   HOWTO (R_S12Z_EXT18,        /* type */
 	 0,			/* rightshift */
-	 5,			/* size (0 = byte, 1 = short, 2 = long) */
+	 3,			/* size */
 	 18,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -198,7 +198,7 @@ static reloc_howto_type elf_s12z_howto_table[] =
 
   HOWTO (R_S12Z_CW32,        /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -213,7 +213,7 @@ static reloc_howto_type elf_s12z_howto_table[] =
   /* A 32 bit absolute relocation  */
   HOWTO (R_S12Z_EXT32,        /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

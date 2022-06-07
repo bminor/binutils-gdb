@@ -32,7 +32,7 @@ static reloc_howto_type xc16x_elf_howto_table [] =
   /* This reloc does nothing.  */
   HOWTO (R_XC16X_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -47,7 +47,7 @@ static reloc_howto_type xc16x_elf_howto_table [] =
   /* An 8 bit absolute relocation.  */
   HOWTO (R_XC16X_ABS_8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 8,			/* bitpos */
@@ -62,7 +62,7 @@ static reloc_howto_type xc16x_elf_howto_table [] =
   /* A 16 bit absolute relocation.  */
   HOWTO (R_XC16X_ABS_16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -76,7 +76,7 @@ static reloc_howto_type xc16x_elf_howto_table [] =
 
   HOWTO (R_XC16X_ABS_32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -92,7 +92,7 @@ static reloc_howto_type xc16x_elf_howto_table [] =
   /* A PC relative 8 bit relocation.  */
   HOWTO (R_XC16X_8_PCREL,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 8,			/* bitpos */
@@ -107,7 +107,7 @@ static reloc_howto_type xc16x_elf_howto_table [] =
   /* Relocation regarding page number.  */
     HOWTO (R_XC16X_PAG,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -123,7 +123,7 @@ static reloc_howto_type xc16x_elf_howto_table [] =
   /* Relocation regarding page number.  */
       HOWTO (R_XC16X_POF,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos  */
@@ -139,7 +139,7 @@ static reloc_howto_type xc16x_elf_howto_table [] =
   /* Relocation regarding segment number.   */
       HOWTO (R_XC16X_SEG,	/* type  */
 	 0,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 16,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */
@@ -154,7 +154,7 @@ static reloc_howto_type xc16x_elf_howto_table [] =
   /* Relocation regarding segment offset.  */
       HOWTO (R_XC16X_SOF,	/* type  */
 	 0,			/* rightshift  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long)  */
+	 2,			/* size  */
 	 16,			/* bitsize  */
 	 false,			/* pc_relative  */
 	 0,			/* bitpos  */

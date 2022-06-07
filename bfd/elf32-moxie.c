@@ -34,7 +34,7 @@ static reloc_howto_type moxie_elf_howto_table [] =
   /* This reloc does nothing.  */
   HOWTO (R_MOXIE_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -49,7 +49,7 @@ static reloc_howto_type moxie_elf_howto_table [] =
   /* A 32 bit absolute relocation.  */
   HOWTO (R_MOXIE_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -64,7 +64,7 @@ static reloc_howto_type moxie_elf_howto_table [] =
   /* A 10 bit PC-relative relocation.  */
   HOWTO (R_MOXIE_PCREL10,	/* type.  */
 	 1,			/* rightshift.  */
-	 1,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* size.  */
 	 10,			/* bitsize.  */
 	 true,			/* pc_relative.  */
 	 0,			/* bitpos.  */

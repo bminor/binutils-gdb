@@ -906,7 +906,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x00: Standard 64 bit relocation.  */
   HOWTO (R_POS,			/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -921,7 +921,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x01: 64 bit relocation, but store negative value.  */
   HOWTO (R_NEG,			/* type */
 	 0,			/* rightshift */
-	 -4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 -8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -936,7 +936,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x02: 64 bit PC relative relocation.  */
   HOWTO (R_REL,			/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -951,7 +951,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x03: 16 bit TOC relative relocation.  */
   HOWTO (R_TOC,			/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -966,7 +966,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x04: Same as R_TOC.  */
   HOWTO (R_TRL,			/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -981,7 +981,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x05: External TOC relative symbol.  */
   HOWTO (R_GL,			/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -996,7 +996,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x06: Local TOC relative symbol.	 */
   HOWTO (R_TCL,			/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1013,7 +1013,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x08: Same as R_RBA.  */
   HOWTO (R_BA,			/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1030,7 +1030,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x0a: Same as R_RBR.  */
   HOWTO (R_BR,			/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1047,7 +1047,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x0c: Same as R_POS.  */
   HOWTO (R_RL,			/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1062,7 +1062,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x0d: Same as R_POS.  */
   HOWTO (R_RLA,			/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1079,7 +1079,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x0f: Non-relocating reference.  Bitsize is 1 so that r_rsize is 0.  */
   HOWTO (R_REF,			/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 1,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1098,7 +1098,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x13: Same as R_TOC  */
   HOWTO (R_TRLA,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1113,7 +1113,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x14: Modifiable relative branch.  */
   HOWTO (R_RRTBI,		/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1128,7 +1128,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x15: Modifiable absolute branch.  */
   HOWTO (R_RRTBA,		/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1143,7 +1143,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x16: Modifiable call absolute indirect.  */
   HOWTO (R_CAI,			/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1158,7 +1158,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x17: Modifiable call relative.  */
   HOWTO (R_CREL,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1173,7 +1173,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x18: Modifiable branch absolute.  */
   HOWTO (R_RBA,			/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1188,7 +1188,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x19: Modifiable branch absolute.  */
   HOWTO (R_RBAC,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1203,7 +1203,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x1a: Modifiable branch relative.  */
   HOWTO (R_RBR,			/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1218,7 +1218,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x1b: Modifiable branch absolute.  */
   HOWTO (R_RBRC,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1233,7 +1233,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x1c: Standard 32 bit relocation.  */
   HOWTO (R_POS,			/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1248,7 +1248,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x1d: 16 bit Non modifiable absolute branch.  */
   HOWTO (R_BA,			/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1263,7 +1263,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x1e: Modifiable branch relative.  */
   HOWTO (R_RBR,			/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1278,7 +1278,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x1f: Modifiable branch absolute.  */
   HOWTO (R_RBA,			/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1293,7 +1293,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x20: General-dynamic TLS relocation.  */
   HOWTO (R_TLS,			/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1308,7 +1308,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x21: Initial-exec TLS relocation.  */
   HOWTO (R_TLS_IE,		/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1323,7 +1323,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x22: Local-dynamic TLS relocation.  */
   HOWTO (R_TLS_LD,		/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1338,7 +1338,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x23: Local-exec TLS relocation.  */
   HOWTO (R_TLS_LE,		/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1353,7 +1353,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x24: TLS relocation.  */
   HOWTO (R_TLSM,		/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1368,7 +1368,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x25: TLS module relocation.  */
   HOWTO (R_TLSML,		/* type */
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1383,7 +1383,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x26: 32 bit relocation, but store negative value.  */
   HOWTO (R_NEG,			/* type */
 	 0,			/* rightshift */
-	 -2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 -4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1407,7 +1407,7 @@ reloc_howto_type xcoff64_howto_table[] =
 
   HOWTO (R_TOCU,		/* type */
 	 16,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1422,7 +1422,7 @@ reloc_howto_type xcoff64_howto_table[] =
   /* 0x31: Low-order 16 bit TOC relative relocation.  */
   HOWTO (R_TOCL,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -2398,7 +2398,7 @@ xcoff64_generate_rtinit (bfd *abfd, const char *init, const char *fini,
 static reloc_howto_type xcoff64_dynamic_reloc =
 HOWTO (0,			/* type */
        0,			/* rightshift */
-       4,			/* size (0 = byte, 1 = short, 2 = long) */
+       8,			/* size */
        64,			/* bitsize */
        false,			/* pc_relative */
        0,			/* bitpos */

@@ -375,7 +375,7 @@ DESCRIPTION
 	The HOWTO macro fills in a reloc_howto_type (a typedef for
 	const struct reloc_howto_struct).
 
-.#define HOWTO_RSIZE(sz) (sz < 0 ? -sz : sz)
+.#define HOWTO_RSIZE(sz) (sz == 1 || sz == -1 ? 0 : sz == 2 || sz == -2 ? 1 : sz == 4 || sz == -4 ? 2 : sz == 0 ? 3 : sz == 8 || sz == -8 ? 4 : sz == 3 || sz == -3 ? 5 : 0x777)
 .#define HOWTO(type, right, size, bits, pcrel, left, ovf, func, name,	\
 .              inplace, src_mask, dst_mask, pcrel_off)			\
 .  { (unsigned) type, HOWTO_RSIZE (size), bits, right, left, ovf,	\
@@ -385,7 +385,7 @@ DESCRIPTION
 	This is used to fill in an empty howto entry in an array.
 
 .#define EMPTY_HOWTO(C) \
-.  HOWTO ((C), 0, 0, 0, false, 0, complain_overflow_dont, NULL, \
+.  HOWTO ((C), 0, 1, 0, false, 0, complain_overflow_dont, NULL, \
 .	  NULL, false, 0, 0, false)
 .
 */
@@ -8303,7 +8303,7 @@ bfd_reloc_name_lookup (bfd *abfd, const char *reloc_name)
 }
 
 static reloc_howto_type bfd_howto_32 =
-HOWTO (0, 00, 2, 32, false, 0, complain_overflow_dont, 0, "VRT32", false, 0xffffffff, 0xffffffff, true);
+HOWTO (0, 00, 4, 32, false, 0, complain_overflow_dont, 0, "VRT32", false, 0xffffffff, 0xffffffff, true);
 
 /*
 INTERNAL_FUNCTION
@@ -8541,7 +8541,7 @@ bfd_generic_get_relocated_section_contents (bfd *abfd,
 	    {
 	      bfd_vma off;
 	      static reloc_howto_type none_howto
-		= HOWTO (0, 0, 3, 0, false, 0, complain_overflow_dont, NULL,
+		= HOWTO (0, 0, 0, 0, false, 0, complain_overflow_dont, NULL,
 			 "unused", false, 0, 0, false);
 
 	      off = ((*parent)->address

@@ -141,34 +141,34 @@ static reloc_howto_type ip2k_elf_howto_table [] =
 	  pr)			/* pcrel_offset */
 
   /* This reloc does nothing.  */
-  IP2K_HOWTO (R_IP2K_NONE, 0,3,0, false, 0, "R_IP2K_NONE", 0, 0),
+  IP2K_HOWTO (R_IP2K_NONE, 0,0,0, false, 0, "R_IP2K_NONE", 0, 0),
   /* A 16 bit absolute relocation.  */
-  IP2K_HOWTO (R_IP2K_16, 0,1,16, false, 0, "R_IP2K_16", 0, 0xffff),
+  IP2K_HOWTO (R_IP2K_16, 0,2,16, false, 0, "R_IP2K_16", 0, 0xffff),
   /* A 32 bit absolute relocation.  */
-  IP2K_HOWTO (R_IP2K_32, 0,2,32, false, 0, "R_IP2K_32", 0, 0xffffffff),
+  IP2K_HOWTO (R_IP2K_32, 0,4,32, false, 0, "R_IP2K_32", 0, 0xffffffff),
   /* A 8-bit data relocation for the FR9 field.  Ninth bit is computed specially.  */
-  IP2K_HOWTO (R_IP2K_FR9, 0,1,9, false, 0, "R_IP2K_FR9", 0, 0x00ff),
+  IP2K_HOWTO (R_IP2K_FR9, 0,2,9, false, 0, "R_IP2K_FR9", 0, 0x00ff),
   /* A 4-bit data relocation.  */
-  IP2K_HOWTO (R_IP2K_BANK, 8,1,4, false, 0, "R_IP2K_BANK", 0, 0x000f),
+  IP2K_HOWTO (R_IP2K_BANK, 8,2,4, false, 0, "R_IP2K_BANK", 0, 0x000f),
   /* A 13-bit insn relocation - word address => right-shift 1 bit extra.  */
-  IP2K_HOWTO (R_IP2K_ADDR16CJP, 1,1,13, false, 0, "R_IP2K_ADDR16CJP", 0, 0x1fff),
+  IP2K_HOWTO (R_IP2K_ADDR16CJP, 1,2,13, false, 0, "R_IP2K_ADDR16CJP", 0, 0x1fff),
   /* A 3-bit insn relocation - word address => right-shift 1 bit extra.  */
-  IP2K_HOWTO (R_IP2K_PAGE3, 14,1,3, false, 0, "R_IP2K_PAGE3", 0, 0x0007),
+  IP2K_HOWTO (R_IP2K_PAGE3, 14,2,3, false, 0, "R_IP2K_PAGE3", 0, 0x0007),
   /* Two 8-bit data relocations.  */
-  IP2K_HOWTO (R_IP2K_LO8DATA, 0,1,8, false, 0, "R_IP2K_LO8DATA", 0, 0x00ff),
-  IP2K_HOWTO (R_IP2K_HI8DATA, 8,1,8, false, 0, "R_IP2K_HI8DATA", 0, 0x00ff),
+  IP2K_HOWTO (R_IP2K_LO8DATA, 0,2,8, false, 0, "R_IP2K_LO8DATA", 0, 0x00ff),
+  IP2K_HOWTO (R_IP2K_HI8DATA, 8,2,8, false, 0, "R_IP2K_HI8DATA", 0, 0x00ff),
   /* Two 8-bit insn relocations.  word address => right-shift 1 bit extra.  */
-  IP2K_HOWTO (R_IP2K_LO8INSN, 1,1,8, false, 0, "R_IP2K_LO8INSN", 0, 0x00ff),
-  IP2K_HOWTO (R_IP2K_HI8INSN, 9,1,8, false, 0, "R_IP2K_HI8INSN", 0, 0x00ff),
+  IP2K_HOWTO (R_IP2K_LO8INSN, 1,2,8, false, 0, "R_IP2K_LO8INSN", 0, 0x00ff),
+  IP2K_HOWTO (R_IP2K_HI8INSN, 9,2,8, false, 0, "R_IP2K_HI8INSN", 0, 0x00ff),
 
   /* Special 1 bit relocation for SKIP instructions.  */
-  IP2K_HOWTO (R_IP2K_PC_SKIP, 1,1,1, false, 12, "R_IP2K_PC_SKIP", 0xfffe, 0x1000),
+  IP2K_HOWTO (R_IP2K_PC_SKIP, 1,2,1, false, 12, "R_IP2K_PC_SKIP", 0xfffe, 0x1000),
   /* 16 bit word address.  */
-  IP2K_HOWTO (R_IP2K_TEXT, 1,1,16, false, 0, "R_IP2K_TEXT", 0, 0xffff),
+  IP2K_HOWTO (R_IP2K_TEXT, 1,2,16, false, 0, "R_IP2K_TEXT", 0, 0xffff),
   /* A 7-bit offset relocation for the FR9 field.  Eigth and ninth bit comes from insn.  */
-  IP2K_HOWTO (R_IP2K_FR_OFFSET, 0,1,9, false, 0, "R_IP2K_FR_OFFSET", 0x180, 0x007f),
+  IP2K_HOWTO (R_IP2K_FR_OFFSET, 0,2,9, false, 0, "R_IP2K_FR_OFFSET", 0x180, 0x007f),
   /* Bits 23:16 of an address.  */
-  IP2K_HOWTO (R_IP2K_EX8DATA, 16,1,8, false, 0, "R_IP2K_EX8DATA", 0, 0x00ff),
+  IP2K_HOWTO (R_IP2K_EX8DATA, 16,2,8, false, 0, "R_IP2K_EX8DATA", 0, 0x00ff),
 };
 
 

@@ -42,7 +42,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* This reloc does nothing.  */
    HOWTO (R_MICROBLAZE_NONE,	/* Type.  */
 	  0,			/* Rightshift.  */
-	  3,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  0,			/* Size.  */
 	  0,			/* Bitsize.  */
 	  false,		/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -57,7 +57,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* A standard 32 bit relocation.  */
    HOWTO (R_MICROBLAZE_32,	/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  32,			/* Bitsize.  */
 	  false,		/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -72,7 +72,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* A standard PCREL 32 bit relocation.  */
    HOWTO (R_MICROBLAZE_32_PCREL,/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  32,			/* Bitsize.  */
 	  true,			/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -87,7 +87,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* A 64 bit PCREL relocation.  Table-entry not really used.  */
    HOWTO (R_MICROBLAZE_64_PCREL,/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  true,			/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -102,7 +102,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* The low half of a PCREL 32 bit relocation.  */
    HOWTO (R_MICROBLAZE_32_PCREL_LO,	/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  true,			/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -117,7 +117,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* A 64 bit relocation.  Table entry not really used.  */
    HOWTO (R_MICROBLAZE_64,	/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  false,		/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -132,7 +132,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* The low half of a 32 bit relocation.  */
    HOWTO (R_MICROBLAZE_32_LO,	/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  false,		/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -147,7 +147,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* Read-only small data section relocation.  */
    HOWTO (R_MICROBLAZE_SRO32,	/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  false,		/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -162,7 +162,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* Read-write small data area relocation.  */
    HOWTO (R_MICROBLAZE_SRW32,	/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  false,		/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -177,7 +177,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* This reloc does nothing.	Used for relaxation.  */
    HOWTO (R_MICROBLAZE_64_NONE,	/* Type.  */
 	  0,			/* Rightshift.  */
-	  3,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  0,			/* Size.  */
 	  0,			/* Bitsize.  */
 	  true,			/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -192,7 +192,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* Symbol Op Symbol relocation.  */
    HOWTO (R_MICROBLAZE_32_SYM_OP_SYM,		/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  32,			/* Bitsize.  */
 	  false,		/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -207,7 +207,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* GNU extension to record C++ vtable hierarchy.  */
    HOWTO (R_MICROBLAZE_GNU_VTINHERIT, /* Type.  */
 	  0,			 /* Rightshift.  */
-	  2,			 /* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			 /* Size.  */
 	  0,			 /* Bitsize.  */
 	  false,		 /* PC_relative.  */
 	  0,			 /* Bitpos.  */
@@ -222,7 +222,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* GNU extension to record C++ vtable member usage.  */
    HOWTO (R_MICROBLAZE_GNU_VTENTRY,   /* Type.  */
 	  0,			 /* Rightshift.  */
-	  2,			 /* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			 /* Size.  */
 	  0,			 /* Bitsize.  */
 	  false,		 /* PC_relative.  */
 	  0,			 /* Bitpos.  */
@@ -237,7 +237,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* A 64 bit GOTPC relocation.  Table-entry not really used.  */
    HOWTO (R_MICROBLAZE_GOTPC_64,	/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  true,			/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -252,7 +252,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
      /* A 64 bit TEXTPCREL relocation.  Table-entry not really used.  */
    HOWTO (R_MICROBLAZE_TEXTPCREL_64,	/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  true,			/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -267,7 +267,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* A 64 bit GOT relocation.  Table-entry not really used.  */
    HOWTO (R_MICROBLAZE_GOT_64,  /* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  false,		/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -282,7 +282,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
     /* A 64 bit TEXTREL relocation.  Table-entry not really used.  */
    HOWTO (R_MICROBLAZE_TEXTREL_64,  /* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  false,		/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -297,7 +297,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* A 64 bit PLT relocation.  Table-entry not really used.  */
    HOWTO (R_MICROBLAZE_PLT_64,  /* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  true,			/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -312,7 +312,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /*  Table-entry not really used.  */
    HOWTO (R_MICROBLAZE_REL,	/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  true,			/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -327,7 +327,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /*  Table-entry not really used.  */
    HOWTO (R_MICROBLAZE_JUMP_SLOT,/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  true,			/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -342,7 +342,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /*  Table-entry not really used.  */
    HOWTO (R_MICROBLAZE_GLOB_DAT,/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  true,			/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -357,7 +357,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* A 64 bit GOT relative relocation.  Table-entry not really used.  */
    HOWTO (R_MICROBLAZE_GOTOFF_64,	/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  false,		/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -372,7 +372,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* A 32 bit GOT relative relocation.  Table-entry not really used.  */
    HOWTO (R_MICROBLAZE_GOTOFF_32,	/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  false,		/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -387,7 +387,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* COPY relocation.  Table-entry not really used.  */
    HOWTO (R_MICROBLAZE_COPY,	/* Type.  */
 	  0,			/* Rightshift.  */
-	  2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	  4,			/* Size.  */
 	  16,			/* Bitsize.  */
 	  false,		/* PC_relative.  */
 	  0,			/* Bitpos.  */
@@ -402,7 +402,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
    /* Marker relocs for TLS.  */
    HOWTO (R_MICROBLAZE_TLS,
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -416,7 +416,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
 
    HOWTO (R_MICROBLAZE_TLSGD,
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -430,7 +430,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
 
    HOWTO (R_MICROBLAZE_TLSLD,
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -446,7 +446,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
       definition of its TLS sym.  */
    HOWTO (R_MICROBLAZE_TLSDTPMOD32,
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -463,7 +463,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
       contains the definition of sym, minus 0x8000.  Used for initializing GOT */
    HOWTO (R_MICROBLAZE_TLSDTPREL32,
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -480,7 +480,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
       contains the definition of sym, minus 0x8000.  */
    HOWTO (R_MICROBLAZE_TLSDTPREL64,
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -496,7 +496,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
       sym+add and the value of the thread pointer (r13).  */
    HOWTO (R_MICROBLAZE_TLSGOTTPREL32,
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -512,7 +512,7 @@ static reloc_howto_type microblaze_elf_howto_raw[] =
       sym+add and the value of the thread pointer (r13).  */
    HOWTO (R_MICROBLAZE_TLSTPREL32,
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

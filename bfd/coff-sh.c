@@ -103,7 +103,7 @@ static reloc_howto_type sh_coff_howtos[] =
   /* Windows CE */
   HOWTO (R_SH_IMM32CE,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -127,7 +127,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_PCDISP8BY2,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -143,7 +143,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_PCDISP,		/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 12,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -159,7 +159,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_IMM32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -175,7 +175,7 @@ static reloc_howto_type sh_coff_howtos[] =
 #ifdef COFF_WITH_PE
   HOWTO (R_SH_IMAGEBASE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -197,7 +197,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_PCRELIMM8BY2,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -211,7 +211,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_PCRELIMM8BY4,	/* type */
 	 2,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -225,7 +225,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_IMM16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -239,7 +239,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_SWITCH16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -253,7 +253,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_SWITCH32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -267,7 +267,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_USES,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -281,7 +281,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_COUNT,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -295,7 +295,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_ALIGN,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -309,7 +309,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_CODE,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -323,7 +323,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_DATA,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -337,7 +337,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_LABEL,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -351,7 +351,7 @@ static reloc_howto_type sh_coff_howtos[] =
 
   HOWTO (R_SH_SWITCH8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

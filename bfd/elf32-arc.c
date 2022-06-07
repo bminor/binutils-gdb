@@ -249,7 +249,7 @@ static struct reloc_howto_struct elf_arc_howto_table[] =
    example.
  HOWTO (R_ARC_NONE, // Type.
     0, // Rightshift.
-    2, // Size (0 = byte, 1 = short, 2 = long).
+    4, // Size.
     32, // Bitsize.
     false, // PC_relative.
     0, // Bitpos.
@@ -274,7 +274,7 @@ arc_elf_howto_init (void)
   /* Only 32 bit data relocations should be marked as ME.  */		\
   if (strstr (#FORMULA, " ME ") != NULL)				\
     {									\
-      BFD_ASSERT (SIZE == 2);						\
+      BFD_ASSERT (SIZE == 4);						\
     }
 
 #include "elf/arc-reloc.def"

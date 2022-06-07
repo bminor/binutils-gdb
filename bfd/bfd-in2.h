@@ -2135,13 +2135,13 @@ struct reloc_howto_struct
   const char *name;
 };
 
-#define HOWTO_RSIZE(sz) (sz < 0 ? -sz : sz)
+#define HOWTO_RSIZE(sz) (sz == 1 || sz == -1 ? 0 : sz == 2 || sz == -2 ? 1 : sz == 4 || sz == -4 ? 2 : sz == 0 ? 3 : sz == 8 || sz == -8 ? 4 : sz == 3 || sz == -3 ? 5 : 0x777)
 #define HOWTO(type, right, size, bits, pcrel, left, ovf, func, name,   \
               inplace, src_mask, dst_mask, pcrel_off)                  \
   { (unsigned) type, HOWTO_RSIZE (size), bits, right, left, ovf,       \
     size < 0, pcrel, inplace, pcrel_off, src_mask, dst_mask, func, name }
 #define EMPTY_HOWTO(C) \
-  HOWTO ((C), 0, 0, 0, false, 0, complain_overflow_dont, NULL, \
+  HOWTO ((C), 0, 1, 0, false, 0, complain_overflow_dont, NULL, \
          NULL, false, 0, 0, false)
 
 unsigned int bfd_get_reloc_size (reloc_howto_type *);

@@ -636,7 +636,7 @@ static const int comp3_opcodes[] =
 #endif
 
 #define SOM_HOWTO(TYPE, NAME)	\
-  HOWTO(TYPE, 0, 0, 32, false, 0, 0, hppa_som_reloc, NAME, false, 0, 0, false)
+  HOWTO(TYPE, 0, 1, 32, false, 0, 0, hppa_som_reloc, NAME, false, 0, 0, false)
 
 static reloc_howto_type som_hppa_howto_table[] =
 {

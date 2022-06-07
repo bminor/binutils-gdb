@@ -65,7 +65,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* This reloc does nothing.  */
   HOWTO (R_M68HC11_NONE,	/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -80,7 +80,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* A 8 bit absolute relocation */
   HOWTO (R_M68HC11_8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -95,7 +95,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* A 8 bit absolute relocation (upper address) */
   HOWTO (R_M68HC11_HI8,		/* type */
 	 8,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -110,7 +110,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* A 8 bit absolute relocation (upper address) */
   HOWTO (R_M68HC11_LO8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -125,7 +125,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* A 8 bit PC-rel relocation */
   HOWTO (R_M68HC11_PCREL_8,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -140,7 +140,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* A 16 bit absolute relocation */
   HOWTO (R_M68HC11_16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -156,7 +156,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
      code relocation.  It's used by gas for -gstabs generation.  */
   HOWTO (R_M68HC11_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -171,7 +171,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* A 3 bit absolute relocation */
   HOWTO (R_M68HC11_3B,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 3,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -186,7 +186,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* A 16 bit PC-rel relocation */
   HOWTO (R_M68HC11_PCREL_16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -201,7 +201,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_M68HC11_GNU_VTINHERIT,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -216,7 +216,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_M68HC11_GNU_VTENTRY,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -231,7 +231,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* A 24 bit relocation */
   HOWTO (R_M68HC11_24,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 24,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -246,7 +246,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* A 16-bit low relocation */
   HOWTO (R_M68HC11_LO16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -261,7 +261,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* A page relocation */
   HOWTO (R_M68HC11_PAGE,	/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -283,7 +283,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* Mark beginning of a jump instruction (any form).  */
   HOWTO (R_M68HC11_RL_JUMP,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -298,7 +298,7 @@ static reloc_howto_type elf_m68hc11_howto_table[] = {
   /* Mark beginning of Gcc relaxation group instruction.  */
   HOWTO (R_M68HC11_RL_GROUP,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

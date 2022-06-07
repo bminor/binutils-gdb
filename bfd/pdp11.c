@@ -280,9 +280,9 @@ static bool separate_i_d = false;
 reloc_howto_type howto_table_pdp11[] =
 {
   /* type	       rs size bsz  pcrel bitpos ovrf			  sf name     part_inpl readmask  setmask    pcdone */
-HOWTO( 0,	       0,  1,  16,  false, 0, complain_overflow_signed,0,"16",	true, 0x0000ffff,0x0000ffff, false),
-HOWTO( 1,	       0,  1,  16,  true,  0, complain_overflow_signed,0,"DISP16",	true, 0x0000ffff,0x0000ffff, false),
-HOWTO( 2,	       0,  2,  32,  false, 0, complain_overflow_signed,0,"32",	true, 0x0000ffff,0x0000ffff, false),
+HOWTO( 0,	       0,  2,  16,  false, 0, complain_overflow_signed,0,"16",	true, 0x0000ffff,0x0000ffff, false),
+HOWTO( 1,	       0,  2,  16,  true,  0, complain_overflow_signed,0,"DISP16",	true, 0x0000ffff,0x0000ffff, false),
+HOWTO( 2,	       0,  4,  32,  false, 0, complain_overflow_signed,0,"32",	true, 0x0000ffff,0x0000ffff, false),
 };
 
 #define TABLE_SIZE(TABLE)	(sizeof(TABLE)/sizeof(TABLE[0]))

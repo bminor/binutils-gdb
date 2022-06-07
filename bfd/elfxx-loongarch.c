@@ -38,7 +38,7 @@ typedef struct loongarch_reloc_howto_type_struct
 }loongarch_reloc_howto_type;
 
 #define LOONGARCH_DEFAULT_HOWTO(r_name)					    \
-  { HOWTO (R_LARCH_##r_name, 0, 2, 32, false, 0, complain_overflow_signed,  \
+  { HOWTO (R_LARCH_##r_name, 0, 4, 32, false, 0, complain_overflow_signed,  \
 	bfd_elf_generic_reloc, "R_LARCH_" #r_name, false, 0, ALL_ONES,	    \
 	false), BFD_RELOC_LARCH_##r_name, NULL }
 
@@ -64,7 +64,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
   /* No relocation.  */
     LOONGARCH_HOWTO (R_LARCH_NONE,	  /* type (0).  */
 	 0,				  /* rightshift */
-	 3,				  /* size */
+	 0,				  /* size */
 	 0,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
@@ -81,7 +81,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
   /* 32 bit relocation.  */
   LOONGARCH_HOWTO (R_LARCH_32,		  /* type (1).  */
 	 0,				  /* rightshift */
-	 2,				  /* size */
+	 4,				  /* size */
 	 32,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
@@ -98,7 +98,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
   /* 64 bit relocation.  */
   LOONGARCH_HOWTO (R_LARCH_64,		  /* type (2).  */
 	 0,				  /* rightshift */
-	 4,				  /* size */
+	 8,				  /* size */
 	 64,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
@@ -114,7 +114,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_RELATIVE,	  /* type (3).  */
 	 0,				  /* rightshift */
-	 2,				  /* size */
+	 4,				  /* size */
 	 32,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
@@ -130,7 +130,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_COPY,	  /* type (4).  */
 	 0,				  /* rightshift */
-	 0,				  /* this one is variable size */
+	 1,				  /* this one is variable size */
 	 0,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
@@ -146,7 +146,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_JUMP_SLOT,	  /* type (5).  */
 	 0,				  /* rightshift */
-	 4,				  /* size */
+	 8,				  /* size */
 	 64,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
@@ -163,7 +163,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
   /* Dynamic TLS relocations.  */
   LOONGARCH_HOWTO (R_LARCH_TLS_DTPMOD32,  /* type (6).  */
 	 0,				  /* rightshift */
-	 2,				  /* size */
+	 4,				  /* size */
 	 32,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
@@ -179,7 +179,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_TLS_DTPMOD64,  /* type (7).  */
 	 0,				  /* rightshift */
-	 4,				  /* size */
+	 8,				  /* size */
 	 64,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
@@ -195,7 +195,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_TLS_DTPREL32,  /* type (8). */
 	 0,				  /* rightshift */
-	 2,				  /* size */
+	 4,				  /* size */
 	 32,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
@@ -211,7 +211,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_TLS_DTPREL64,  /* type (9).  */
 	 0,				  /* rightshift */
-	 4,				  /* size */
+	 8,				  /* size */
 	 64,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
@@ -227,7 +227,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_TLS_TPREL32,	  /* type (10).  */
 	 0,				  /* rightshift */
-	 2,				  /* size */
+	 4,				  /* size */
 	 32,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
@@ -243,7 +243,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_TLS_TPREL64,	  /* type (11).  */
 	 0,				  /* rightshift */
-	 4,				  /* size */
+	 8,				  /* size */
 	 64,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
@@ -259,7 +259,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_IRELATIVE,	  /* type (12).  */
 	 0,				  /* rightshift */
-	 2,				  /* size */
+	 4,				  /* size */
 	 32,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
@@ -283,7 +283,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_MARK_LA,		/* type (20).  */
 	 0,				   	/* rightshift.  */
-	 3,				   	/* size.  */
+	 0,				   	/* size.  */
 	 0,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -299,7 +299,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_MARK_PCREL,		/* type (21).  */
 	 0,				   	/* rightshift.  */
-	 3,				   	/* size.  */
+	 0,				   	/* size.  */
 	 0,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -315,7 +315,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_SOP_PUSH_PCREL,	/* type (22).  */
 	 2,				   	/* rightshift.  */
-	 2,				   	/* size.  */
+	 4,				   	/* size.  */
 	 32,				  	/* bitsize.  */
 	 true /* FIXME: somewhat use this.  */,	/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -348,7 +348,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_SOP_POP_32_S_10_5,	  /* type (38).  */
 	 0,				   	  /* rightshift.  */
-	 2,				   	  /* size.  */
+	 4,				   	  /* size.  */
 	 5,				  	  /* bitsize.  */
 	 false,					  /* pc_relative.  */
 	 10,				   	  /* bitpos.  */
@@ -364,7 +364,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_SOP_POP_32_U_10_12,	  /* type (39).  */
 	 0,				   	  /* rightshift.  */
-	 2,				   	  /* size.  */
+	 4,				   	  /* size.  */
 	 12,				  	  /* bitsize.  */
 	 false,					  /* pc_relative.  */
 	 10,				   	  /* bitpos.  */
@@ -380,7 +380,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_SOP_POP_32_S_10_12,	  /* type (40).  */
 	 0,				   	  /* rightshift.  */
-	 2,				   	  /* size.  */
+	 4,				   	  /* size.  */
 	 12,				  	  /* bitsize.  */
 	 false,					  /* pc_relative.  */
 	 10,				   	  /* bitpos.  */
@@ -396,7 +396,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_SOP_POP_32_S_10_16,	  /* type (41).  */
 	 0,				   	  /* rightshift.  */
-	 2,				   	  /* size.  */
+	 4,				   	  /* size.  */
 	 16,				  	  /* bitsize.  */
 	 false,					  /* pc_relative.  */
 	 10,				   	  /* bitpos.  */
@@ -412,7 +412,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_SOP_POP_32_S_10_16_S2, /* type (42).  */
 	 2,					  /* rightshift.  */
-	 2,				   	  /* size.  */
+	 4,				   	  /* size.  */
 	 16,				  	  /* bitsize.  */
 	 false,					  /* pc_relative.  */
 	 10,				   	  /* bitpos.  */
@@ -428,7 +428,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_SOP_POP_32_S_5_20,	  /* type (43).  */
 	 0,				   	  /* rightshift.  */
-	 2,				   	  /* size.  */
+	 4,				   	  /* size.  */
 	 20,				  	  /* bitsize.  */
 	 false,					  /* pc_relative.  */
 	 5,				   	  /* bitpos.  */
@@ -445,7 +445,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
   LOONGARCH_HOWTO (R_LARCH_SOP_POP_32_S_0_5_10_16_S2,
 						  /* type (44).  */
 	 2,					  /* rightshift.  */
-	 2,					  /* size.  */
+	 4,					  /* size.  */
 	 21,				  	  /* bitsize.  */
 	 false,					  /* pc_relative.  */
 	 0,				   	  /* bitpos.  */
@@ -462,7 +462,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_SOP_POP_32_S_0_10_10_16_S2,	/* type (45).  */
 	 2,				   	/* rightshift.  */
-	 2,				   	/* size.  */
+	 4,				   	/* size.  */
 	 26,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -479,7 +479,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_SOP_POP_32_U,	/* type (46).  */
 	 0,				   	/* rightshift.  */
-	 2,				   	/* size.  */
+	 4,				   	/* size.  */
 	 32,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -495,7 +495,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_ADD8,	      	/* type (47).  */
 	 0,				   	/* rightshift.  */
-	 2,				   	/* size.  */
+	 4,				   	/* size.  */
 	 8,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -511,7 +511,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_ADD16,	      	/* type (48).  */
 	 0,				   	/* rightshift.  */
-	 2,				   	/* size.  */
+	 4,				   	/* size.  */
 	 16,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -527,7 +527,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_ADD24,	      	/* type (49).  */
 	 0,				   	/* rightshift.  */
-	 2,				   	/* size.  */
+	 4,				   	/* size.  */
 	 24,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -543,7 +543,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_ADD32,	      	/* type (50).  */
 	 0,				   	/* rightshift.  */
-	 2,				   	/* size.  */
+	 4,				   	/* size.  */
 	 32,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -559,7 +559,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_ADD64,	      	/* type (51).  */
 	 0,				   	/* rightshift.  */
-	 4,				   	/* size.  */
+	 8,				   	/* size.  */
 	 64,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -575,7 +575,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_SUB8,	      	/* type (52).  */
 	 0,				   	/* rightshift.  */
-	 2,				   	/* size.  */
+	 4,				   	/* size.  */
 	 8,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -591,7 +591,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_SUB16,	      	/* type (53).  */
 	 0,				   	/* rightshift.  */
-	 2,				   	/* size.  */
+	 4,				   	/* size.  */
 	 16,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -607,7 +607,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_SUB24,	      	/* type (54).  */
 	 0,				   	/* rightshift.  */
-	 2,				   	/* size.  */
+	 4,				   	/* size.  */
 	 24,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -623,7 +623,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_SUB32,	      	/* type (55).  */
 	 0,				   	/* rightshift.  */
-	 2,				   	/* size.  */
+	 4,				   	/* size.  */
 	 32,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -639,7 +639,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_SUB64,	      	/* type (56).  */
 	 0,				   	/* rightshift.  */
-	 4,				   	/* size.  */
+	 8,				   	/* size.  */
 	 64,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -655,7 +655,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_GNU_VTINHERIT,      	/* type (57).  */
 	 0,				   	/* rightshift.  */
-	 0,				   	/* size.  */
+	 1,				   	/* size.  */
 	 0,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -671,7 +671,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_GNU_VTENTRY,      	/* type (58).  */
 	 0,				   	/* rightshift.  */
-	 0,				   	/* size.  */
+	 1,				   	/* size.  */
 	 0,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */

@@ -31,15 +31,15 @@
 
 reloc_howto_type tic30_coff_howto_table[] =
   {
-    HOWTO (R_TIC30_ABS16, 2, 1, 16, false, 0, 0, NULL,
+    HOWTO (R_TIC30_ABS16, 2, 2, 16, false, 0, 0, NULL,
 	   "16", false, 0x0000FFFF, 0x0000FFFF, false),
-    HOWTO (R_TIC30_ABS24, 2, 2, 24, false, 8, complain_overflow_bitfield, NULL,
+    HOWTO (R_TIC30_ABS24, 2, 4, 24, false, 8, complain_overflow_bitfield, NULL,
 	   "24", false, 0xFFFFFF00, 0xFFFFFF00, false),
-    HOWTO (R_TIC30_LDP, 18, 0, 24, false, 0, complain_overflow_bitfield, NULL,
+    HOWTO (R_TIC30_LDP, 18, 1, 24, false, 0, complain_overflow_bitfield, NULL,
 	   "LDP", false, 0x00FF0000, 0x000000FF, false),
-    HOWTO (R_TIC30_ABS32, 2, 2, 32, false, 0, complain_overflow_bitfield, NULL,
+    HOWTO (R_TIC30_ABS32, 2, 4, 32, false, 0, complain_overflow_bitfield, NULL,
 	   "32", false, 0xFFFFFFFF, 0xFFFFFFFF, false),
-    HOWTO (R_TIC30_PC16, 2, 1, 16, true, 0, complain_overflow_signed, NULL,
+    HOWTO (R_TIC30_PC16, 2, 2, 16, true, 0, complain_overflow_signed, NULL,
 	   "PCREL", false, 0x0000FFFF, 0x0000FFFF, false),
     EMPTY_HOWTO (-1)
   };

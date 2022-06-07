@@ -74,7 +74,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
 {
   HOWTO (R_MSP430_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -88,7 +88,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
 
   HOWTO (R_MSP430_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -103,7 +103,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
   /* A 10 bit PC relative relocation.  */
   HOWTO (R_MSP430_10_PCREL,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 10,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -118,7 +118,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
   /* A 16 bit absolute relocation.  */
   HOWTO (R_MSP430_16,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -133,7 +133,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
   /* A 16 bit PC relative relocation for command address.  */
   HOWTO (R_MSP430_16_PCREL,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -148,7 +148,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
   /* A 16 bit absolute relocation, byte operations.  */
   HOWTO (R_MSP430_16_BYTE,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -163,7 +163,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
   /* A 16 bit absolute relocation for command address.  */
   HOWTO (R_MSP430_16_PCREL_BYTE,/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -178,7 +178,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
   /* A 10 bit PC relative relocation for complicated polymorphs.  */
   HOWTO (R_MSP430_2X_PCREL,	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 10,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -193,7 +193,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
   /* A 16 bit relaxable relocation for command address.  */
   HOWTO (R_MSP430_RL_PCREL,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -208,7 +208,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
   /* A 8-bit absolute relocation.  */
   , HOWTO (R_MSP430_8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -224,7 +224,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
      between two symbols to be the real addend of the second reloc.  */
   HOWTO (R_MSP430_SYM_DIFF,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -240,7 +240,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
      size is one byte here.  */
   HOWTO (R_MSP430_GNU_SET_ULEB128,	/* type */
 	 0,				/* rightshift */
-	 0,				/* size */
+	 1,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -256,7 +256,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
      size is one byte here.  */
   HOWTO (R_MSP430_GNU_SUB_ULEB128,	/* type */
 	 0,				/* rightshift */
-	 0,				/* size */
+	 1,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -274,7 +274,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 {
   HOWTO (R_MSP430_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -288,7 +288,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430_ABS32,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -302,7 +302,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430_ABS16,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -316,7 +316,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430_ABS8,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -330,7 +330,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430_PCR16,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -344,7 +344,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430X_PCR20_EXT_SRC,/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -358,7 +358,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430X_PCR20_EXT_DST,/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -372,7 +372,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430X_PCR20_EXT_ODST,/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -386,7 +386,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430X_ABS20_EXT_SRC,/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -400,7 +400,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430X_ABS20_EXT_DST,/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -414,7 +414,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430X_ABS20_EXT_ODST,/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -428,7 +428,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430X_ABS20_ADR_SRC,/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -442,7 +442,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430X_ABS20_ADR_DST,/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -456,7 +456,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430X_PCR16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -470,7 +470,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430X_PCR20_CALL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -484,7 +484,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430X_ABS16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -498,7 +498,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430_ABS_HI16,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -512,7 +512,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   HOWTO (R_MSP430_PREL31,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -529,7 +529,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
   /* A 10 bit PC relative relocation.  */
   HOWTO (R_MSP430X_10_PCREL,	/* type */
 	 1,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 10,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -544,7 +544,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
   /* A 10 bit PC relative relocation for complicated polymorphs.  */
   HOWTO (R_MSP430X_2X_PCREL,	/* type */
 	 1,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 10,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -560,7 +560,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
      between two symbols to be the real addend of the second reloc.  */
   HOWTO (R_MSP430X_SYM_DIFF,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -576,7 +576,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
      size is one byte here.  */
   HOWTO (R_MSP430X_GNU_SET_ULEB128,	/* type */
 	 0,				/* rightshift */
-	 0,				/* size */
+	 1,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -592,7 +592,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
      size is one byte here.  */
   HOWTO (R_MSP430X_GNU_SUB_ULEB128,	/* type */
 	 0,				/* rightshift */
-	 0,				/* size */
+	 1,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */

@@ -316,98 +316,98 @@ static reloc_howto_type *ppc64_elf_howto_table[(int) R_PPC64_max];
 static reloc_howto_type ppc64_elf_howto_raw[] =
 {
   /* This reloc does nothing.  */
-  HOW (R_PPC64_NONE, 3, 0, 0, 0, false, dont,
+  HOW (R_PPC64_NONE, 0, 0, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* A standard 32 bit relocation.  */
-  HOW (R_PPC64_ADDR32, 2, 32, 0xffffffff, 0, false, bitfield,
+  HOW (R_PPC64_ADDR32, 4, 32, 0xffffffff, 0, false, bitfield,
        bfd_elf_generic_reloc),
 
   /* An absolute 26 bit branch; the lower two bits must be zero.
      FIXME: we don't check that, we just clear them.  */
-  HOW (R_PPC64_ADDR24, 2, 26, 0x03fffffc, 0, false, bitfield,
+  HOW (R_PPC64_ADDR24, 4, 26, 0x03fffffc, 0, false, bitfield,
        bfd_elf_generic_reloc),
 
   /* A standard 16 bit relocation.  */
-  HOW (R_PPC64_ADDR16, 1, 16, 0xffff, 0, false, bitfield,
+  HOW (R_PPC64_ADDR16, 2, 16, 0xffff, 0, false, bitfield,
        bfd_elf_generic_reloc),
 
   /* A 16 bit relocation without overflow.  */
-  HOW (R_PPC64_ADDR16_LO, 1, 16, 0xffff, 0, false, dont,
+  HOW (R_PPC64_ADDR16_LO, 2, 16, 0xffff, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* Bits 16-31 of an address.  */
-  HOW (R_PPC64_ADDR16_HI, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_ADDR16_HI, 2, 16, 0xffff, 16, false, signed,
        bfd_elf_generic_reloc),
 
   /* Bits 16-31 of an address, plus 1 if the contents of the low 16
      bits, treated as a signed number, is negative.  */
-  HOW (R_PPC64_ADDR16_HA, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_ADDR16_HA, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_ha_reloc),
 
   /* An absolute 16 bit branch; the lower two bits must be zero.
      FIXME: we don't check that, we just clear them.  */
-  HOW (R_PPC64_ADDR14, 2, 16, 0x0000fffc, 0, false, signed,
+  HOW (R_PPC64_ADDR14, 4, 16, 0x0000fffc, 0, false, signed,
        ppc64_elf_branch_reloc),
 
   /* An absolute 16 bit branch, for which bit 10 should be set to
      indicate that the branch is expected to be taken.  The lower two
      bits must be zero.  */
-  HOW (R_PPC64_ADDR14_BRTAKEN, 2, 16, 0x0000fffc, 0, false, signed,
+  HOW (R_PPC64_ADDR14_BRTAKEN, 4, 16, 0x0000fffc, 0, false, signed,
        ppc64_elf_brtaken_reloc),
 
   /* An absolute 16 bit branch, for which bit 10 should be set to
      indicate that the branch is not expected to be taken.  The lower
      two bits must be zero.  */
-  HOW (R_PPC64_ADDR14_BRNTAKEN, 2, 16, 0x0000fffc, 0, false, signed,
+  HOW (R_PPC64_ADDR14_BRNTAKEN, 4, 16, 0x0000fffc, 0, false, signed,
        ppc64_elf_brtaken_reloc),
 
   /* A relative 26 bit branch; the lower two bits must be zero.  */
-  HOW (R_PPC64_REL24, 2, 26, 0x03fffffc, 0, true, signed,
+  HOW (R_PPC64_REL24, 4, 26, 0x03fffffc, 0, true, signed,
        ppc64_elf_branch_reloc),
 
   /* A variant of R_PPC64_REL24, used when r2 is not the toc pointer.  */
-  HOW (R_PPC64_REL24_NOTOC, 2, 26, 0x03fffffc, 0, true, signed,
+  HOW (R_PPC64_REL24_NOTOC, 4, 26, 0x03fffffc, 0, true, signed,
        ppc64_elf_branch_reloc),
 
   /* Another variant, when p10 insns can't be used on stubs.  */
-  HOW (R_PPC64_REL24_P9NOTOC, 2, 26, 0x03fffffc, 0, true, signed,
+  HOW (R_PPC64_REL24_P9NOTOC, 4, 26, 0x03fffffc, 0, true, signed,
        ppc64_elf_branch_reloc),
 
   /* A relative 16 bit branch; the lower two bits must be zero.  */
-  HOW (R_PPC64_REL14, 2, 16, 0x0000fffc, 0, true, signed,
+  HOW (R_PPC64_REL14, 4, 16, 0x0000fffc, 0, true, signed,
        ppc64_elf_branch_reloc),
 
   /* A relative 16 bit branch.  Bit 10 should be set to indicate that
      the branch is expected to be taken.  The lower two bits must be
      zero.  */
-  HOW (R_PPC64_REL14_BRTAKEN, 2, 16, 0x0000fffc, 0, true, signed,
+  HOW (R_PPC64_REL14_BRTAKEN, 4, 16, 0x0000fffc, 0, true, signed,
        ppc64_elf_brtaken_reloc),
 
   /* A relative 16 bit branch.  Bit 10 should be set to indicate that
      the branch is not expected to be taken.  The lower two bits must
      be zero.  */
-  HOW (R_PPC64_REL14_BRNTAKEN, 2, 16, 0x0000fffc, 0, true, signed,
+  HOW (R_PPC64_REL14_BRNTAKEN, 4, 16, 0x0000fffc, 0, true, signed,
        ppc64_elf_brtaken_reloc),
 
   /* Like R_PPC64_ADDR16, but referring to the GOT table entry for the
      symbol.  */
-  HOW (R_PPC64_GOT16, 1, 16, 0xffff, 0, false, signed,
+  HOW (R_PPC64_GOT16, 2, 16, 0xffff, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR16_LO, but referring to the GOT table entry for
      the symbol.  */
-  HOW (R_PPC64_GOT16_LO, 1, 16, 0xffff, 0, false, dont,
+  HOW (R_PPC64_GOT16_LO, 2, 16, 0xffff, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR16_HI, but referring to the GOT table entry for
      the symbol.  */
-  HOW (R_PPC64_GOT16_HI, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_GOT16_HI, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR16_HA, but referring to the GOT table entry for
      the symbol.  */
-  HOW (R_PPC64_GOT16_HA, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_GOT16_HA, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* This is used only by the dynamic linker.  The symbol should exist
@@ -415,148 +415,148 @@ static reloc_howto_type ppc64_elf_howto_raw[] =
      dynamic linker copies the data addressed by the symbol from the
      shared library into the object, because the object being
      run has to have the data at some particular address.  */
-  HOW (R_PPC64_COPY, 0, 0, 0, 0, false, dont,
+  HOW (R_PPC64_COPY, 1, 0, 0, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR64, but used when setting global offset table
      entries.  */
-  HOW (R_PPC64_GLOB_DAT, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
+  HOW (R_PPC64_GLOB_DAT, 8, 64, 0xffffffffffffffffULL, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Created by the link editor.  Marks a procedure linkage table
      entry for a symbol.  */
-  HOW (R_PPC64_JMP_SLOT, 0, 0, 0, 0, false, dont,
+  HOW (R_PPC64_JMP_SLOT, 1, 0, 0, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Used only by the dynamic linker.  When the object is run, this
      doubleword64 is set to the load address of the object, plus the
      addend.  */
-  HOW (R_PPC64_RELATIVE, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
+  HOW (R_PPC64_RELATIVE, 8, 64, 0xffffffffffffffffULL, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* Like R_PPC64_ADDR32, but may be unaligned.  */
-  HOW (R_PPC64_UADDR32, 2, 32, 0xffffffff, 0, false, bitfield,
+  HOW (R_PPC64_UADDR32, 4, 32, 0xffffffff, 0, false, bitfield,
        bfd_elf_generic_reloc),
 
   /* Like R_PPC64_ADDR16, but may be unaligned.  */
-  HOW (R_PPC64_UADDR16, 1, 16, 0xffff, 0, false, bitfield,
+  HOW (R_PPC64_UADDR16, 2, 16, 0xffff, 0, false, bitfield,
        bfd_elf_generic_reloc),
 
   /* 32-bit PC relative.  */
-  HOW (R_PPC64_REL32, 2, 32, 0xffffffff, 0, true, signed,
+  HOW (R_PPC64_REL32, 4, 32, 0xffffffff, 0, true, signed,
        bfd_elf_generic_reloc),
 
   /* 32-bit relocation to the symbol's procedure linkage table.  */
-  HOW (R_PPC64_PLT32, 2, 32, 0xffffffff, 0, false, bitfield,
+  HOW (R_PPC64_PLT32, 4, 32, 0xffffffff, 0, false, bitfield,
        ppc64_elf_unhandled_reloc),
 
   /* 32-bit PC relative relocation to the symbol's procedure linkage table.
      FIXME: R_PPC64_PLTREL32 not supported.  */
-  HOW (R_PPC64_PLTREL32, 2, 32, 0xffffffff, 0, true, signed,
+  HOW (R_PPC64_PLTREL32, 4, 32, 0xffffffff, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR16_LO, but referring to the PLT table entry for
      the symbol.  */
-  HOW (R_PPC64_PLT16_LO, 1, 16, 0xffff, 0, false, dont,
+  HOW (R_PPC64_PLT16_LO, 2, 16, 0xffff, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR16_HI, but referring to the PLT table entry for
      the symbol.  */
-  HOW (R_PPC64_PLT16_HI, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_PLT16_HI, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR16_HA, but referring to the PLT table entry for
      the symbol.  */
-  HOW (R_PPC64_PLT16_HA, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_PLT16_HA, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* 16-bit section relative relocation.  */
-  HOW (R_PPC64_SECTOFF, 1, 16, 0xffff, 0, false, signed,
+  HOW (R_PPC64_SECTOFF, 2, 16, 0xffff, 0, false, signed,
        ppc64_elf_sectoff_reloc),
 
   /* Like R_PPC64_SECTOFF, but no overflow warning.  */
-  HOW (R_PPC64_SECTOFF_LO, 1, 16, 0xffff, 0, false, dont,
+  HOW (R_PPC64_SECTOFF_LO, 2, 16, 0xffff, 0, false, dont,
        ppc64_elf_sectoff_reloc),
 
   /* 16-bit upper half section relative relocation.  */
-  HOW (R_PPC64_SECTOFF_HI, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_SECTOFF_HI, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_sectoff_reloc),
 
   /* 16-bit upper half adjusted section relative relocation.  */
-  HOW (R_PPC64_SECTOFF_HA, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_SECTOFF_HA, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_sectoff_ha_reloc),
 
   /* Like R_PPC64_REL24 without touching the two least significant bits.  */
-  HOW (R_PPC64_REL30, 2, 30, 0xfffffffc, 2, true, dont,
+  HOW (R_PPC64_REL30, 4, 30, 0xfffffffc, 2, true, dont,
        bfd_elf_generic_reloc),
 
   /* Relocs in the 64-bit PowerPC ELF ABI, not in the 32-bit ABI.  */
 
   /* A standard 64-bit relocation.  */
-  HOW (R_PPC64_ADDR64, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
+  HOW (R_PPC64_ADDR64, 8, 64, 0xffffffffffffffffULL, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* The bits 32-47 of an address.  */
-  HOW (R_PPC64_ADDR16_HIGHER, 1, 16, 0xffff, 32, false, dont,
+  HOW (R_PPC64_ADDR16_HIGHER, 2, 16, 0xffff, 32, false, dont,
        bfd_elf_generic_reloc),
 
   /* The bits 32-47 of an address, plus 1 if the contents of the low
      16 bits, treated as a signed number, is negative.  */
-  HOW (R_PPC64_ADDR16_HIGHERA, 1, 16, 0xffff, 32, false, dont,
+  HOW (R_PPC64_ADDR16_HIGHERA, 2, 16, 0xffff, 32, false, dont,
        ppc64_elf_ha_reloc),
 
   /* The bits 48-63 of an address.  */
-  HOW (R_PPC64_ADDR16_HIGHEST, 1, 16, 0xffff, 48, false, dont,
+  HOW (R_PPC64_ADDR16_HIGHEST, 2, 16, 0xffff, 48, false, dont,
        bfd_elf_generic_reloc),
 
   /* The bits 48-63 of an address, plus 1 if the contents of the low
      16 bits, treated as a signed number, is negative.  */
-  HOW (R_PPC64_ADDR16_HIGHESTA, 1, 16, 0xffff, 48, false, dont,
+  HOW (R_PPC64_ADDR16_HIGHESTA, 2, 16, 0xffff, 48, false, dont,
        ppc64_elf_ha_reloc),
 
   /* Like ADDR64, but may be unaligned.  */
-  HOW (R_PPC64_UADDR64, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
+  HOW (R_PPC64_UADDR64, 8, 64, 0xffffffffffffffffULL, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* 64-bit relative relocation.  */
-  HOW (R_PPC64_REL64, 4, 64, 0xffffffffffffffffULL, 0, true, dont,
+  HOW (R_PPC64_REL64, 8, 64, 0xffffffffffffffffULL, 0, true, dont,
        bfd_elf_generic_reloc),
 
   /* 64-bit relocation to the symbol's procedure linkage table.  */
-  HOW (R_PPC64_PLT64, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
+  HOW (R_PPC64_PLT64, 8, 64, 0xffffffffffffffffULL, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* 64-bit PC relative relocation to the symbol's procedure linkage
      table.  */
   /* FIXME: R_PPC64_PLTREL64 not supported.  */
-  HOW (R_PPC64_PLTREL64, 4, 64, 0xffffffffffffffffULL, 0, true, dont,
+  HOW (R_PPC64_PLTREL64, 8, 64, 0xffffffffffffffffULL, 0, true, dont,
        ppc64_elf_unhandled_reloc),
 
   /* 16 bit TOC-relative relocation.  */
   /* R_PPC64_TOC16	  47	   half16*	S + A - .TOC.  */
-  HOW (R_PPC64_TOC16, 1, 16, 0xffff, 0, false, signed,
+  HOW (R_PPC64_TOC16, 2, 16, 0xffff, 0, false, signed,
        ppc64_elf_toc_reloc),
 
   /* 16 bit TOC-relative relocation without overflow.  */
   /* R_PPC64_TOC16_LO	  48	   half16	 #lo (S + A - .TOC.)  */
-  HOW (R_PPC64_TOC16_LO, 1, 16, 0xffff, 0, false, dont,
+  HOW (R_PPC64_TOC16_LO, 2, 16, 0xffff, 0, false, dont,
        ppc64_elf_toc_reloc),
 
   /* 16 bit TOC-relative relocation, high 16 bits.  */
   /* R_PPC64_TOC16_HI	  49	   half16	 #hi (S + A - .TOC.)  */
-  HOW (R_PPC64_TOC16_HI, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_TOC16_HI, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_toc_reloc),
 
   /* 16 bit TOC-relative relocation, high 16 bits, plus 1 if the
      contents of the low 16 bits, treated as a signed number, is
      negative.  */
   /* R_PPC64_TOC16_HA	  50	   half16	 #ha (S + A - .TOC.)  */
-  HOW (R_PPC64_TOC16_HA, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_TOC16_HA, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_toc_ha_reloc),
 
   /* 64-bit relocation; insert value of TOC base (.TOC.).  */
   /* R_PPC64_TOC		  51	   doubleword64	 .TOC.  */
-  HOW (R_PPC64_TOC, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
+  HOW (R_PPC64_TOC, 8, 64, 0xffffffffffffffffULL, 0, false, dont,
        ppc64_elf_toc64_reloc),
 
   /* Like R_PPC64_GOT16, but also informs the link editor that the
@@ -568,428 +568,428 @@ static reloc_howto_type ppc64_elf_howto_raw[] =
      The link editor may also skip all of this and just (c) emit a
      R_PPC64_GLOB_DAT to tie the symbol to the GOT entry.  */
   /* FIXME: R_PPC64_PLTGOT16 not implemented.  */
-    HOW (R_PPC64_PLTGOT16, 1, 16, 0xffff, 0, false,signed,
+    HOW (R_PPC64_PLTGOT16, 2, 16, 0xffff, 0, false,signed,
 	  ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_PLTGOT16, but without overflow.  */
   /* FIXME: R_PPC64_PLTGOT16_LO not implemented.  */
-  HOW (R_PPC64_PLTGOT16_LO, 1, 16, 0xffff, 0, false, dont,
+  HOW (R_PPC64_PLTGOT16_LO, 2, 16, 0xffff, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_PLT_GOT16, but using bits 16-31 of the address.  */
   /* FIXME: R_PPC64_PLTGOT16_HI not implemented.  */
-  HOW (R_PPC64_PLTGOT16_HI, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_PLTGOT16_HI, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_PLT_GOT16, but using bits 16-31 of the address, plus
      1 if the contents of the low 16 bits, treated as a signed number,
      is negative.  */
   /* FIXME: R_PPC64_PLTGOT16_HA not implemented.  */
-  HOW (R_PPC64_PLTGOT16_HA, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_PLTGOT16_HA, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR16, but for instructions with a DS field.  */
-  HOW (R_PPC64_ADDR16_DS, 1, 16, 0xfffc, 0, false, signed,
+  HOW (R_PPC64_ADDR16_DS, 2, 16, 0xfffc, 0, false, signed,
        bfd_elf_generic_reloc),
 
   /* Like R_PPC64_ADDR16_LO, but for instructions with a DS field.  */
-  HOW (R_PPC64_ADDR16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
+  HOW (R_PPC64_ADDR16_LO_DS, 2, 16, 0xfffc, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* Like R_PPC64_GOT16, but for instructions with a DS field.  */
-  HOW (R_PPC64_GOT16_DS, 1, 16, 0xfffc, 0, false, signed,
+  HOW (R_PPC64_GOT16_DS, 2, 16, 0xfffc, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_GOT16_LO, but for instructions with a DS field.  */
-  HOW (R_PPC64_GOT16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
+  HOW (R_PPC64_GOT16_LO_DS, 2, 16, 0xfffc, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_PLT16_LO, but for instructions with a DS field.  */
-  HOW (R_PPC64_PLT16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
+  HOW (R_PPC64_PLT16_LO_DS, 2, 16, 0xfffc, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_SECTOFF, but for instructions with a DS field.  */
-  HOW (R_PPC64_SECTOFF_DS, 1, 16, 0xfffc, 0, false, signed,
+  HOW (R_PPC64_SECTOFF_DS, 2, 16, 0xfffc, 0, false, signed,
        ppc64_elf_sectoff_reloc),
 
   /* Like R_PPC64_SECTOFF_LO, but for instructions with a DS field.  */
-  HOW (R_PPC64_SECTOFF_LO_DS, 1, 16, 0xfffc, 0, false, dont,
+  HOW (R_PPC64_SECTOFF_LO_DS, 2, 16, 0xfffc, 0, false, dont,
        ppc64_elf_sectoff_reloc),
 
   /* Like R_PPC64_TOC16, but for instructions with a DS field.  */
-  HOW (R_PPC64_TOC16_DS, 1, 16, 0xfffc, 0, false, signed,
+  HOW (R_PPC64_TOC16_DS, 2, 16, 0xfffc, 0, false, signed,
        ppc64_elf_toc_reloc),
 
   /* Like R_PPC64_TOC16_LO, but for instructions with a DS field.  */
-  HOW (R_PPC64_TOC16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
+  HOW (R_PPC64_TOC16_LO_DS, 2, 16, 0xfffc, 0, false, dont,
        ppc64_elf_toc_reloc),
 
   /* Like R_PPC64_PLTGOT16, but for instructions with a DS field.  */
   /* FIXME: R_PPC64_PLTGOT16_DS not implemented.  */
-  HOW (R_PPC64_PLTGOT16_DS, 1, 16, 0xfffc, 0, false, signed,
+  HOW (R_PPC64_PLTGOT16_DS, 2, 16, 0xfffc, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_PLTGOT16_LO, but for instructions with a DS field.  */
   /* FIXME: R_PPC64_PLTGOT16_LO not implemented.  */
-  HOW (R_PPC64_PLTGOT16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
+  HOW (R_PPC64_PLTGOT16_LO_DS, 2, 16, 0xfffc, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Marker relocs for TLS.  */
-  HOW (R_PPC64_TLS, 2, 32, 0, 0, false, dont,
+  HOW (R_PPC64_TLS, 4, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_TLSGD, 2, 32, 0, 0, false, dont,
+  HOW (R_PPC64_TLSGD, 4, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_TLSLD, 2, 32, 0, 0, false, dont,
+  HOW (R_PPC64_TLSLD, 4, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* Marker reloc for optimizing r2 save in prologue rather than on
      each plt call stub.  */
-  HOW (R_PPC64_TOCSAVE, 2, 32, 0, 0, false, dont,
+  HOW (R_PPC64_TOCSAVE, 4, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* Marker relocs on inline plt call instructions.  */
-  HOW (R_PPC64_PLTSEQ, 2, 32, 0, 0, false, dont,
+  HOW (R_PPC64_PLTSEQ, 4, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_PLTCALL, 2, 32, 0, 0, false, dont,
+  HOW (R_PPC64_PLTCALL, 4, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* Computes the load module index of the load module that contains the
      definition of its TLS sym.  */
-  HOW (R_PPC64_DTPMOD64, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
+  HOW (R_PPC64_DTPMOD64, 8, 64, 0xffffffffffffffffULL, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Computes a dtv-relative displacement, the difference between the value
      of sym+add and the base address of the thread-local storage block that
      contains the definition of sym, minus 0x8000.  */
-  HOW (R_PPC64_DTPREL64, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
+  HOW (R_PPC64_DTPREL64, 8, 64, 0xffffffffffffffffULL, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* A 16 bit dtprel reloc.  */
-  HOW (R_PPC64_DTPREL16, 1, 16, 0xffff, 0, false, signed,
+  HOW (R_PPC64_DTPREL16, 2, 16, 0xffff, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16, but no overflow.  */
-  HOW (R_PPC64_DTPREL16_LO, 1, 16, 0xffff, 0, false, dont,
+  HOW (R_PPC64_DTPREL16_LO, 2, 16, 0xffff, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16_LO, but next higher group of 16 bits.  */
-  HOW (R_PPC64_DTPREL16_HI, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_DTPREL16_HI, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16_HI, but adjust for low 16 bits.  */
-  HOW (R_PPC64_DTPREL16_HA, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_DTPREL16_HA, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16_HI, but next higher group of 16 bits.  */
-  HOW (R_PPC64_DTPREL16_HIGHER, 1, 16, 0xffff, 32, false, dont,
+  HOW (R_PPC64_DTPREL16_HIGHER, 2, 16, 0xffff, 32, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16_HIGHER, but adjust for low 16 bits.  */
-  HOW (R_PPC64_DTPREL16_HIGHERA, 1, 16, 0xffff, 32, false, dont,
+  HOW (R_PPC64_DTPREL16_HIGHERA, 2, 16, 0xffff, 32, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16_HIGHER, but next higher group of 16 bits.  */
-  HOW (R_PPC64_DTPREL16_HIGHEST, 1, 16, 0xffff, 48, false, dont,
+  HOW (R_PPC64_DTPREL16_HIGHEST, 2, 16, 0xffff, 48, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16_HIGHEST, but adjust for low 16 bits.  */
-  HOW (R_PPC64_DTPREL16_HIGHESTA, 1, 16, 0xffff, 48, false, dont,
+  HOW (R_PPC64_DTPREL16_HIGHESTA, 2, 16, 0xffff, 48, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16, but for insns with a DS field.  */
-  HOW (R_PPC64_DTPREL16_DS, 1, 16, 0xfffc, 0, false, signed,
+  HOW (R_PPC64_DTPREL16_DS, 2, 16, 0xfffc, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like DTPREL16_DS, but no overflow.  */
-  HOW (R_PPC64_DTPREL16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
+  HOW (R_PPC64_DTPREL16_LO_DS, 2, 16, 0xfffc, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Computes a tp-relative displacement, the difference between the value of
      sym+add and the value of the thread pointer (r13).  */
-  HOW (R_PPC64_TPREL64, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
+  HOW (R_PPC64_TPREL64, 8, 64, 0xffffffffffffffffULL, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* A 16 bit tprel reloc.  */
-  HOW (R_PPC64_TPREL16, 1, 16, 0xffff, 0, false, signed,
+  HOW (R_PPC64_TPREL16, 2, 16, 0xffff, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16, but no overflow.  */
-  HOW (R_PPC64_TPREL16_LO, 1, 16, 0xffff, 0, false, dont,
+  HOW (R_PPC64_TPREL16_LO, 2, 16, 0xffff, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16_LO, but next higher group of 16 bits.  */
-  HOW (R_PPC64_TPREL16_HI, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_TPREL16_HI, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16_HI, but adjust for low 16 bits.  */
-  HOW (R_PPC64_TPREL16_HA, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_TPREL16_HA, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16_HI, but next higher group of 16 bits.  */
-  HOW (R_PPC64_TPREL16_HIGHER, 1, 16, 0xffff, 32, false, dont,
+  HOW (R_PPC64_TPREL16_HIGHER, 2, 16, 0xffff, 32, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16_HIGHER, but adjust for low 16 bits.  */
-  HOW (R_PPC64_TPREL16_HIGHERA, 1, 16, 0xffff, 32, false, dont,
+  HOW (R_PPC64_TPREL16_HIGHERA, 2, 16, 0xffff, 32, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16_HIGHER, but next higher group of 16 bits.  */
-  HOW (R_PPC64_TPREL16_HIGHEST, 1, 16, 0xffff, 48, false, dont,
+  HOW (R_PPC64_TPREL16_HIGHEST, 2, 16, 0xffff, 48, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16_HIGHEST, but adjust for low 16 bits.  */
-  HOW (R_PPC64_TPREL16_HIGHESTA, 1, 16, 0xffff, 48, false, dont,
+  HOW (R_PPC64_TPREL16_HIGHESTA, 2, 16, 0xffff, 48, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16, but for insns with a DS field.  */
-  HOW (R_PPC64_TPREL16_DS, 1, 16, 0xfffc, 0, false, signed,
+  HOW (R_PPC64_TPREL16_DS, 2, 16, 0xfffc, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like TPREL16_DS, but no overflow.  */
-  HOW (R_PPC64_TPREL16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
+  HOW (R_PPC64_TPREL16_LO_DS, 2, 16, 0xfffc, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Allocates two contiguous entries in the GOT to hold a tls_index structure,
      with values (sym+add)@dtpmod and (sym+add)@dtprel, and computes the offset
      to the first entry relative to the TOC base (r2).  */
-  HOW (R_PPC64_GOT_TLSGD16, 1, 16, 0xffff, 0, false, signed,
+  HOW (R_PPC64_GOT_TLSGD16, 2, 16, 0xffff, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TLSGD16, but no overflow.  */
-  HOW (R_PPC64_GOT_TLSGD16_LO, 1, 16, 0xffff, 0, false, dont,
+  HOW (R_PPC64_GOT_TLSGD16_LO, 2, 16, 0xffff, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TLSGD16_LO, but next higher group of 16 bits.  */
-  HOW (R_PPC64_GOT_TLSGD16_HI, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_GOT_TLSGD16_HI, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TLSGD16_HI, but adjust for low 16 bits.  */
-  HOW (R_PPC64_GOT_TLSGD16_HA, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_GOT_TLSGD16_HA, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Allocates two contiguous entries in the GOT to hold a tls_index structure,
      with values (sym+add)@dtpmod and zero, and computes the offset to the
      first entry relative to the TOC base (r2).  */
-  HOW (R_PPC64_GOT_TLSLD16, 1, 16, 0xffff, 0, false, signed,
+  HOW (R_PPC64_GOT_TLSLD16, 2, 16, 0xffff, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TLSLD16, but no overflow.  */
-  HOW (R_PPC64_GOT_TLSLD16_LO, 1, 16, 0xffff, 0, false, dont,
+  HOW (R_PPC64_GOT_TLSLD16_LO, 2, 16, 0xffff, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TLSLD16_LO, but next higher group of 16 bits.  */
-  HOW (R_PPC64_GOT_TLSLD16_HI, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_GOT_TLSLD16_HI, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TLSLD16_HI, but adjust for low 16 bits.  */
-  HOW (R_PPC64_GOT_TLSLD16_HA, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_GOT_TLSLD16_HA, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Allocates an entry in the GOT with value (sym+add)@dtprel, and computes
      the offset to the entry relative to the TOC base (r2).  */
-  HOW (R_PPC64_GOT_DTPREL16_DS, 1, 16, 0xfffc, 0, false, signed,
+  HOW (R_PPC64_GOT_DTPREL16_DS, 2, 16, 0xfffc, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_DTPREL16_DS, but no overflow.  */
-  HOW (R_PPC64_GOT_DTPREL16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
+  HOW (R_PPC64_GOT_DTPREL16_LO_DS, 2, 16, 0xfffc, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_DTPREL16_LO_DS, but next higher group of 16 bits.  */
-  HOW (R_PPC64_GOT_DTPREL16_HI, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_GOT_DTPREL16_HI, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_DTPREL16_HI, but adjust for low 16 bits.  */
-  HOW (R_PPC64_GOT_DTPREL16_HA, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_GOT_DTPREL16_HA, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Allocates an entry in the GOT with value (sym+add)@tprel, and computes the
      offset to the entry relative to the TOC base (r2).  */
-  HOW (R_PPC64_GOT_TPREL16_DS, 1, 16, 0xfffc, 0, false, signed,
+  HOW (R_PPC64_GOT_TPREL16_DS, 2, 16, 0xfffc, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TPREL16_DS, but no overflow.  */
-  HOW (R_PPC64_GOT_TPREL16_LO_DS, 1, 16, 0xfffc, 0, false, dont,
+  HOW (R_PPC64_GOT_TPREL16_LO_DS, 2, 16, 0xfffc, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TPREL16_LO_DS, but next higher group of 16 bits.  */
-  HOW (R_PPC64_GOT_TPREL16_HI, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_GOT_TPREL16_HI, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
   /* Like GOT_TPREL16_HI, but adjust for low 16 bits.  */
-  HOW (R_PPC64_GOT_TPREL16_HA, 1, 16, 0xffff, 16, false, signed,
+  HOW (R_PPC64_GOT_TPREL16_HA, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_JMP_IREL, 0, 0, 0, 0, false, dont,
+  HOW (R_PPC64_JMP_IREL, 1, 0, 0, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_IRELATIVE, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
+  HOW (R_PPC64_IRELATIVE, 8, 64, 0xffffffffffffffffULL, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* A 16 bit relative relocation.  */
-  HOW (R_PPC64_REL16, 1, 16, 0xffff, 0, true, signed,
+  HOW (R_PPC64_REL16, 2, 16, 0xffff, 0, true, signed,
        bfd_elf_generic_reloc),
 
   /* A 16 bit relative relocation without overflow.  */
-  HOW (R_PPC64_REL16_LO, 1, 16, 0xffff, 0, true, dont,
+  HOW (R_PPC64_REL16_LO, 2, 16, 0xffff, 0, true, dont,
        bfd_elf_generic_reloc),
 
   /* The high order 16 bits of a relative address.  */
-  HOW (R_PPC64_REL16_HI, 1, 16, 0xffff, 16, true, signed,
+  HOW (R_PPC64_REL16_HI, 2, 16, 0xffff, 16, true, signed,
        bfd_elf_generic_reloc),
 
   /* The high order 16 bits of a relative address, plus 1 if the contents of
      the low 16 bits, treated as a signed number, is negative.  */
-  HOW (R_PPC64_REL16_HA, 1, 16, 0xffff, 16, true, signed,
+  HOW (R_PPC64_REL16_HA, 2, 16, 0xffff, 16, true, signed,
        ppc64_elf_ha_reloc),
 
-  HOW (R_PPC64_REL16_HIGH, 1, 16, 0xffff, 16, true, dont,
+  HOW (R_PPC64_REL16_HIGH, 2, 16, 0xffff, 16, true, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_REL16_HIGHA, 1, 16, 0xffff, 16, true, dont,
+  HOW (R_PPC64_REL16_HIGHA, 2, 16, 0xffff, 16, true, dont,
        ppc64_elf_ha_reloc),
 
-  HOW (R_PPC64_REL16_HIGHER, 1, 16, 0xffff, 32, true, dont,
+  HOW (R_PPC64_REL16_HIGHER, 2, 16, 0xffff, 32, true, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_REL16_HIGHERA, 1, 16, 0xffff, 32, true, dont,
+  HOW (R_PPC64_REL16_HIGHERA, 2, 16, 0xffff, 32, true, dont,
        ppc64_elf_ha_reloc),
 
-  HOW (R_PPC64_REL16_HIGHEST, 1, 16, 0xffff, 48, true, dont,
+  HOW (R_PPC64_REL16_HIGHEST, 2, 16, 0xffff, 48, true, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_REL16_HIGHESTA, 1, 16, 0xffff, 48, true, dont,
+  HOW (R_PPC64_REL16_HIGHESTA, 2, 16, 0xffff, 48, true, dont,
        ppc64_elf_ha_reloc),
 
   /* Like R_PPC64_REL16_HA but for split field in addpcis.  */
-  HOW (R_PPC64_REL16DX_HA, 2, 16, 0x1fffc1, 16, true, signed,
+  HOW (R_PPC64_REL16DX_HA, 4, 16, 0x1fffc1, 16, true, signed,
        ppc64_elf_ha_reloc),
 
   /* A split-field reloc for addpcis, non-relative (gas internal use only).  */
-  HOW (R_PPC64_16DX_HA, 2, 16, 0x1fffc1, 16, false, signed,
+  HOW (R_PPC64_16DX_HA, 4, 16, 0x1fffc1, 16, false, signed,
        ppc64_elf_ha_reloc),
 
   /* Like R_PPC64_ADDR16_HI, but no overflow.  */
-  HOW (R_PPC64_ADDR16_HIGH, 1, 16, 0xffff, 16, false, dont,
+  HOW (R_PPC64_ADDR16_HIGH, 2, 16, 0xffff, 16, false, dont,
        bfd_elf_generic_reloc),
 
   /* Like R_PPC64_ADDR16_HA, but no overflow.  */
-  HOW (R_PPC64_ADDR16_HIGHA, 1, 16, 0xffff, 16, false, dont,
+  HOW (R_PPC64_ADDR16_HIGHA, 2, 16, 0xffff, 16, false, dont,
        ppc64_elf_ha_reloc),
 
   /* Like R_PPC64_DTPREL16_HI, but no overflow.  */
-  HOW (R_PPC64_DTPREL16_HIGH, 1, 16, 0xffff, 16, false, dont,
+  HOW (R_PPC64_DTPREL16_HIGH, 2, 16, 0xffff, 16, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_DTPREL16_HA, but no overflow.  */
-  HOW (R_PPC64_DTPREL16_HIGHA, 1, 16, 0xffff, 16, false, dont,
+  HOW (R_PPC64_DTPREL16_HIGHA, 2, 16, 0xffff, 16, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_TPREL16_HI, but no overflow.  */
-  HOW (R_PPC64_TPREL16_HIGH, 1, 16, 0xffff, 16, false, dont,
+  HOW (R_PPC64_TPREL16_HIGH, 2, 16, 0xffff, 16, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_TPREL16_HA, but no overflow.  */
-  HOW (R_PPC64_TPREL16_HIGHA, 1, 16, 0xffff, 16, false, dont,
+  HOW (R_PPC64_TPREL16_HIGHA, 2, 16, 0xffff, 16, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Marker reloc on ELFv2 large-model function entry.  */
-  HOW (R_PPC64_ENTRY, 2, 32, 0, 0, false, dont,
+  HOW (R_PPC64_ENTRY, 4, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
   /* Like ADDR64, but use local entry point of function.  */
-  HOW (R_PPC64_ADDR64_LOCAL, 4, 64, 0xffffffffffffffffULL, 0, false, dont,
+  HOW (R_PPC64_ADDR64_LOCAL, 8, 64, 0xffffffffffffffffULL, 0, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_PLTSEQ_NOTOC, 2, 32, 0, 0, false, dont,
+  HOW (R_PPC64_PLTSEQ_NOTOC, 4, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_PLTCALL_NOTOC, 2, 32, 0, 0, false, dont,
+  HOW (R_PPC64_PLTCALL_NOTOC, 4, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_PCREL_OPT, 2, 32, 0, 0, false, dont,
+  HOW (R_PPC64_PCREL_OPT, 4, 32, 0, 0, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_D34, 4, 34, 0x3ffff0000ffffULL, 0, false, signed,
+  HOW (R_PPC64_D34, 8, 34, 0x3ffff0000ffffULL, 0, false, signed,
        ppc64_elf_prefix_reloc),
 
-  HOW (R_PPC64_D34_LO, 4, 34, 0x3ffff0000ffffULL, 0, false, dont,
+  HOW (R_PPC64_D34_LO, 8, 34, 0x3ffff0000ffffULL, 0, false, dont,
        ppc64_elf_prefix_reloc),
 
-  HOW (R_PPC64_D34_HI30, 4, 34, 0x3ffff0000ffffULL, 34, false, dont,
+  HOW (R_PPC64_D34_HI30, 8, 34, 0x3ffff0000ffffULL, 34, false, dont,
        ppc64_elf_prefix_reloc),
 
-  HOW (R_PPC64_D34_HA30, 4, 34, 0x3ffff0000ffffULL, 34, false, dont,
+  HOW (R_PPC64_D34_HA30, 8, 34, 0x3ffff0000ffffULL, 34, false, dont,
        ppc64_elf_prefix_reloc),
 
-  HOW (R_PPC64_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
+  HOW (R_PPC64_PCREL34, 8, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_prefix_reloc),
 
-  HOW (R_PPC64_GOT_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
+  HOW (R_PPC64_GOT_PCREL34, 8, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_PLT_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
+  HOW (R_PPC64_PLT_PCREL34, 8, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_PLT_PCREL34_NOTOC, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
+  HOW (R_PPC64_PLT_PCREL34_NOTOC, 8, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_TPREL34, 4, 34, 0x3ffff0000ffffULL, 0, false, signed,
+  HOW (R_PPC64_TPREL34, 8, 34, 0x3ffff0000ffffULL, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_DTPREL34, 4, 34, 0x3ffff0000ffffULL, 0, false, signed,
+  HOW (R_PPC64_DTPREL34, 8, 34, 0x3ffff0000ffffULL, 0, false, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_GOT_TLSGD_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
+  HOW (R_PPC64_GOT_TLSGD_PCREL34, 8, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_GOT_TLSLD_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
+  HOW (R_PPC64_GOT_TLSLD_PCREL34, 8, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_GOT_TPREL_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
+  HOW (R_PPC64_GOT_TPREL_PCREL34, 8, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_GOT_DTPREL_PCREL34, 4, 34, 0x3ffff0000ffffULL, 0, true, signed,
+  HOW (R_PPC64_GOT_DTPREL_PCREL34, 8, 34, 0x3ffff0000ffffULL, 0, true, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_ADDR16_HIGHER34, 1, 16, 0xffff, 34, false, dont,
+  HOW (R_PPC64_ADDR16_HIGHER34, 2, 16, 0xffff, 34, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_ADDR16_HIGHERA34, 1, 16, 0xffff, 34, false, dont,
+  HOW (R_PPC64_ADDR16_HIGHERA34, 2, 16, 0xffff, 34, false, dont,
        ppc64_elf_ha_reloc),
 
-  HOW (R_PPC64_ADDR16_HIGHEST34, 1, 16, 0xffff, 50, false, dont,
+  HOW (R_PPC64_ADDR16_HIGHEST34, 2, 16, 0xffff, 50, false, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_ADDR16_HIGHESTA34, 1, 16, 0xffff, 50, false, dont,
+  HOW (R_PPC64_ADDR16_HIGHESTA34, 2, 16, 0xffff, 50, false, dont,
        ppc64_elf_ha_reloc),
 
-  HOW (R_PPC64_REL16_HIGHER34, 1, 16, 0xffff, 34, true, dont,
+  HOW (R_PPC64_REL16_HIGHER34, 2, 16, 0xffff, 34, true, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_REL16_HIGHERA34, 1, 16, 0xffff, 34, true, dont,
+  HOW (R_PPC64_REL16_HIGHERA34, 2, 16, 0xffff, 34, true, dont,
        ppc64_elf_ha_reloc),
 
-  HOW (R_PPC64_REL16_HIGHEST34, 1, 16, 0xffff, 50, true, dont,
+  HOW (R_PPC64_REL16_HIGHEST34, 2, 16, 0xffff, 50, true, dont,
        bfd_elf_generic_reloc),
 
-  HOW (R_PPC64_REL16_HIGHESTA34, 1, 16, 0xffff, 50, true, dont,
+  HOW (R_PPC64_REL16_HIGHESTA34, 2, 16, 0xffff, 50, true, dont,
        ppc64_elf_ha_reloc),
 
-  HOW (R_PPC64_D28, 4, 28, 0xfff0000ffffULL, 0, false, signed,
+  HOW (R_PPC64_D28, 8, 28, 0xfff0000ffffULL, 0, false, signed,
        ppc64_elf_prefix_reloc),
 
-  HOW (R_PPC64_PCREL28, 4, 28, 0xfff0000ffffULL, 0, true, signed,
+  HOW (R_PPC64_PCREL28, 8, 28, 0xfff0000ffffULL, 0, true, signed,
        ppc64_elf_prefix_reloc),
 
   /* GNU extension to record C++ vtable hierarchy.  */
-  HOW (R_PPC64_GNU_VTINHERIT, 0, 0, 0, 0, false, dont,
+  HOW (R_PPC64_GNU_VTINHERIT, 1, 0, 0, 0, false, dont,
        NULL),
 
   /* GNU extension to record C++ vtable member usage.  */
-  HOW (R_PPC64_GNU_VTENTRY, 0, 0, 0, 0, false, dont,
+  HOW (R_PPC64_GNU_VTENTRY, 1, 0, 0, 0, false, dont,
        NULL),
 };
 

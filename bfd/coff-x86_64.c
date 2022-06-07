@@ -240,7 +240,7 @@ static reloc_howto_type howto_table[] =
   EMPTY_HOWTO (0),
   HOWTO (R_AMD64_DIR64,		/* type  1*/
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long, 4 = long long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -253,7 +253,7 @@ static reloc_howto_type howto_table[] =
 	 true),			/* pcrel_offset */
   HOWTO (R_AMD64_DIR32,		/* type 2 */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -267,7 +267,7 @@ static reloc_howto_type howto_table[] =
   /* PE IMAGE_REL_AMD64_ADDR32NB relocation (3).	*/
   HOWTO (R_AMD64_IMAGEBASE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -281,7 +281,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit longword PC relative relocation (4).  */
   HOWTO (R_AMD64_PCRLONG,	/* type 4 */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -295,7 +295,7 @@ static reloc_howto_type howto_table[] =
 
  HOWTO (R_AMD64_PCRLONG_1,	/* type 5 */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -308,7 +308,7 @@ static reloc_howto_type howto_table[] =
 	 PCRELOFFSET),		/* pcrel_offset */
  HOWTO (R_AMD64_PCRLONG_2,	/* type 6 */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -321,7 +321,7 @@ static reloc_howto_type howto_table[] =
 	 PCRELOFFSET),		/* pcrel_offset */
  HOWTO (R_AMD64_PCRLONG_3,	/* type 7 */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -334,7 +334,7 @@ static reloc_howto_type howto_table[] =
 	 PCRELOFFSET),		/* pcrel_offset */
  HOWTO (R_AMD64_PCRLONG_4,	/* type 8 */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -347,7 +347,7 @@ static reloc_howto_type howto_table[] =
 	 PCRELOFFSET),		/* pcrel_offset */
  HOWTO (R_AMD64_PCRLONG_5,	/* type 9 */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -362,7 +362,7 @@ static reloc_howto_type howto_table[] =
   /* 16-bit word section relocation (10).  */
   HOWTO (R_AMD64_SECTION,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -376,7 +376,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit longword section relative relocation (11).  */
   HOWTO (R_AMD64_SECREL,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -396,7 +396,7 @@ static reloc_howto_type howto_table[] =
 #ifndef DONT_EXTEND_AMD64
   HOWTO (R_AMD64_PCRQUAD,
 	 0,			/* rightshift */
-	 4,			/* size (0 = byte, 1 = short, 2 = long) */
+	 8,			/* size */
 	 64,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -413,7 +413,7 @@ static reloc_howto_type howto_table[] =
   /* Byte relocation (15).  */
   HOWTO (R_RELBYTE,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -427,7 +427,7 @@ static reloc_howto_type howto_table[] =
   /* 16-bit word relocation (16).  */
   HOWTO (R_RELWORD,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -441,7 +441,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit longword relocation (17).	*/
   HOWTO (R_RELLONG,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -455,7 +455,7 @@ static reloc_howto_type howto_table[] =
   /* Byte PC relative relocation (18).	 */
   HOWTO (R_PCRBYTE,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -469,7 +469,7 @@ static reloc_howto_type howto_table[] =
   /* 16-bit word PC relative relocation (19).	*/
   HOWTO (R_PCRWORD,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -483,7 +483,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit longword PC relative relocation (20).  */
   HOWTO (R_PCRLONG,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */

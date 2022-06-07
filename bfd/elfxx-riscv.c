@@ -46,7 +46,7 @@ static reloc_howto_type howto_table[] =
   /* No relocation.  */
   HOWTO (R_RISCV_NONE,			/* type */
 	 0,				/* rightshift */
-	 3,				/* size */
+	 0,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -61,7 +61,7 @@ static reloc_howto_type howto_table[] =
   /* 32 bit relocation.  */
   HOWTO (R_RISCV_32,			/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -76,7 +76,7 @@ static reloc_howto_type howto_table[] =
   /* 64 bit relocation.  */
   HOWTO (R_RISCV_64,			/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -91,7 +91,7 @@ static reloc_howto_type howto_table[] =
   /* Relocation against a local symbol in a shared object.  */
   HOWTO (R_RISCV_RELATIVE,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -105,7 +105,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_COPY,			/* type */
 	 0,				/* rightshift */
-	 0,				/* this one is variable size */
+	 1,				/* this one is variable size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -119,7 +119,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_JUMP_SLOT,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -134,7 +134,7 @@ static reloc_howto_type howto_table[] =
   /* Dynamic TLS relocations.  */
   HOWTO (R_RISCV_TLS_DTPMOD32,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -148,7 +148,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_TLS_DTPMOD64,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -162,7 +162,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_TLS_DTPREL32,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -176,7 +176,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_TLS_DTPREL64,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -190,7 +190,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_TLS_TPREL32,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -204,7 +204,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_TLS_TPREL64,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -225,7 +225,7 @@ static reloc_howto_type howto_table[] =
   /* 12-bit PC-relative branch offset.  */
   HOWTO (R_RISCV_BRANCH,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -240,7 +240,7 @@ static reloc_howto_type howto_table[] =
   /* 20-bit PC-relative jump offset.  */
   HOWTO (R_RISCV_JAL,			/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -255,7 +255,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit PC-relative function call (AUIPC/JALR).  */
   HOWTO (R_RISCV_CALL,			/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -271,7 +271,7 @@ static reloc_howto_type howto_table[] =
   /* Like R_RISCV_CALL, but not locally binding.  */
   HOWTO (R_RISCV_CALL_PLT,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -287,7 +287,7 @@ static reloc_howto_type howto_table[] =
   /* High 20 bits of 32-bit PC-relative GOT access.  */
   HOWTO (R_RISCV_GOT_HI20,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -302,7 +302,7 @@ static reloc_howto_type howto_table[] =
   /* High 20 bits of 32-bit PC-relative TLS IE GOT access.  */
   HOWTO (R_RISCV_TLS_GOT_HI20,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -317,7 +317,7 @@ static reloc_howto_type howto_table[] =
   /* High 20 bits of 32-bit PC-relative TLS GD GOT reference.  */
   HOWTO (R_RISCV_TLS_GD_HI20,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -332,7 +332,7 @@ static reloc_howto_type howto_table[] =
   /* High 20 bits of 32-bit PC-relative reference.  */
   HOWTO (R_RISCV_PCREL_HI20,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -347,7 +347,7 @@ static reloc_howto_type howto_table[] =
   /* Low 12 bits of a 32-bit PC-relative load or add.  */
   HOWTO (R_RISCV_PCREL_LO12_I,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -362,7 +362,7 @@ static reloc_howto_type howto_table[] =
   /* Low 12 bits of a 32-bit PC-relative store.  */
   HOWTO (R_RISCV_PCREL_LO12_S,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -377,7 +377,7 @@ static reloc_howto_type howto_table[] =
   /* High 20 bits of 32-bit absolute address.  */
   HOWTO (R_RISCV_HI20,			/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -392,7 +392,7 @@ static reloc_howto_type howto_table[] =
   /* High 12 bits of 32-bit load or add.  */
   HOWTO (R_RISCV_LO12_I,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -407,7 +407,7 @@ static reloc_howto_type howto_table[] =
   /* High 12 bits of 32-bit store.  */
   HOWTO (R_RISCV_LO12_S,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -422,7 +422,7 @@ static reloc_howto_type howto_table[] =
   /* High 20 bits of TLS LE thread pointer offset.  */
   HOWTO (R_RISCV_TPREL_HI20,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -437,7 +437,7 @@ static reloc_howto_type howto_table[] =
   /* Low 12 bits of TLS LE thread pointer offset for loads and adds.  */
   HOWTO (R_RISCV_TPREL_LO12_I,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -452,7 +452,7 @@ static reloc_howto_type howto_table[] =
   /* Low 12 bits of TLS LE thread pointer offset for stores.  */
   HOWTO (R_RISCV_TPREL_LO12_S,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -467,7 +467,7 @@ static reloc_howto_type howto_table[] =
   /* TLS LE thread pointer usage.  May be relaxed.  */
   HOWTO (R_RISCV_TPREL_ADD,		/* type */
 	 0,				/* rightshift */
-	 3,				/* size */
+	 0,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -482,7 +482,7 @@ static reloc_howto_type howto_table[] =
   /* 8-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_ADD8,			/* type */
 	 0,				/* rightshift */
-	 0,				/* size */
+	 1,				/* size */
 	 8,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -497,7 +497,7 @@ static reloc_howto_type howto_table[] =
   /* 16-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_ADD16,			/* type */
 	 0,				/* rightshift */
-	 1,				/* size */
+	 2,				/* size */
 	 16,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -512,7 +512,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_ADD32,			/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -527,7 +527,7 @@ static reloc_howto_type howto_table[] =
   /* 64-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_ADD64,			/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -542,7 +542,7 @@ static reloc_howto_type howto_table[] =
   /* 8-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB8,			/* type */
 	 0,				/* rightshift */
-	 0,				/* size */
+	 1,				/* size */
 	 8,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -557,7 +557,7 @@ static reloc_howto_type howto_table[] =
   /* 16-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB16,			/* type */
 	 0,				/* rightshift */
-	 1,				/* size */
+	 2,				/* size */
 	 16,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -572,7 +572,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB32,			/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -587,7 +587,7 @@ static reloc_howto_type howto_table[] =
   /* 64-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB64,			/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 64,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -602,7 +602,7 @@ static reloc_howto_type howto_table[] =
   /* GNU extension to record C++ vtable hierarchy */
   HOWTO (R_RISCV_GNU_VTINHERIT,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -617,7 +617,7 @@ static reloc_howto_type howto_table[] =
   /* GNU extension to record C++ vtable member usage */
   HOWTO (R_RISCV_GNU_VTENTRY,		/* type */
 	 0,				/* rightshift */
-	 4,				/* size */
+	 8,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -634,7 +634,7 @@ static reloc_howto_type howto_table[] =
      addend rounded up to the next power of two.  */
   HOWTO (R_RISCV_ALIGN,			/* type */
 	 0,				/* rightshift */
-	 3,				/* size */
+	 0,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -649,7 +649,7 @@ static reloc_howto_type howto_table[] =
   /* 8-bit PC-relative branch offset.  */
   HOWTO (R_RISCV_RVC_BRANCH,		/* type */
 	 0,				/* rightshift */
-	 1,				/* size */
+	 2,				/* size */
 	 16,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -664,7 +664,7 @@ static reloc_howto_type howto_table[] =
   /* 11-bit PC-relative jump offset.  */
   HOWTO (R_RISCV_RVC_JUMP,		/* type */
 	 0,				/* rightshift */
-	 1,				/* size */
+	 2,				/* size */
 	 16,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -679,7 +679,7 @@ static reloc_howto_type howto_table[] =
   /* High 6 bits of 18-bit absolute address.  */
   HOWTO (R_RISCV_RVC_LUI,		/* type */
 	 0,				/* rightshift */
-	 1,				/* size */
+	 2,				/* size */
 	 16,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -694,7 +694,7 @@ static reloc_howto_type howto_table[] =
   /* GP-relative load.  */
   HOWTO (R_RISCV_GPREL_I,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -709,7 +709,7 @@ static reloc_howto_type howto_table[] =
   /* GP-relative store.  */
   HOWTO (R_RISCV_GPREL_S,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -724,7 +724,7 @@ static reloc_howto_type howto_table[] =
   /* TP-relative TLS LE load.  */
   HOWTO (R_RISCV_TPREL_I,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -739,7 +739,7 @@ static reloc_howto_type howto_table[] =
   /* TP-relative TLS LE store.  */
   HOWTO (R_RISCV_TPREL_S,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -754,7 +754,7 @@ static reloc_howto_type howto_table[] =
   /* The paired relocation may be relaxed.  */
   HOWTO (R_RISCV_RELAX,			/* type */
 	 0,				/* rightshift */
-	 3,				/* size */
+	 0,				/* size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -769,7 +769,7 @@ static reloc_howto_type howto_table[] =
   /* 6-bit in-place addition, for local label subtraction.  */
   HOWTO (R_RISCV_SUB6,			/* type */
 	 0,				/* rightshift */
-	 0,				/* size */
+	 1,				/* size */
 	 8,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -784,7 +784,7 @@ static reloc_howto_type howto_table[] =
   /* 6-bit in-place setting, for local label subtraction.  */
   HOWTO (R_RISCV_SET6,			/* type */
 	 0,				/* rightshift */
-	 0,				/* size */
+	 1,				/* size */
 	 8,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -799,7 +799,7 @@ static reloc_howto_type howto_table[] =
   /* 8-bit in-place setting, for local label subtraction.  */
   HOWTO (R_RISCV_SET8,			/* type */
 	 0,				/* rightshift */
-	 0,				/* size */
+	 1,				/* size */
 	 8,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -814,7 +814,7 @@ static reloc_howto_type howto_table[] =
   /* 16-bit in-place setting, for local label subtraction.  */
   HOWTO (R_RISCV_SET16,			/* type */
 	 0,				/* rightshift */
-	 1,				/* size */
+	 2,				/* size */
 	 16,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -829,7 +829,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit in-place setting, for local label subtraction.  */
   HOWTO (R_RISCV_SET32,			/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */
@@ -844,7 +844,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit PC relative.  */
   HOWTO (R_RISCV_32_PCREL,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 true,				/* pc_relative */
 	 0,				/* bitpos */
@@ -859,7 +859,7 @@ static reloc_howto_type howto_table[] =
   /* Relocation against a local ifunc symbol in a shared object.  */
   HOWTO (R_RISCV_IRELATIVE,		/* type */
 	 0,				/* rightshift */
-	 2,				/* size */
+	 4,				/* size */
 	 32,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */

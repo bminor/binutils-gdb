@@ -46,7 +46,7 @@ static reloc_howto_type elf_mn10200_howto_table[] =
   /* Dummy relocation.  Does nothing.  */
   HOWTO (R_MN10200_NONE,
 	 0,
-	 3,
+	 0,
 	 0,
 	 false,
 	 0,
@@ -60,7 +60,7 @@ static reloc_howto_type elf_mn10200_howto_table[] =
   /* Standard 32 bit reloc.  */
   HOWTO (R_MN10200_32,
 	 0,
-	 2,
+	 4,
 	 32,
 	 false,
 	 0,
@@ -74,7 +74,7 @@ static reloc_howto_type elf_mn10200_howto_table[] =
   /* Standard 16 bit reloc.  */
   HOWTO (R_MN10200_16,
 	 0,
-	 1,
+	 2,
 	 16,
 	 false,
 	 0,
@@ -88,7 +88,7 @@ static reloc_howto_type elf_mn10200_howto_table[] =
   /* Standard 8 bit reloc.  */
   HOWTO (R_MN10200_8,
 	 0,
-	 0,
+	 1,
 	 8,
 	 false,
 	 0,
@@ -102,7 +102,7 @@ static reloc_howto_type elf_mn10200_howto_table[] =
   /* Standard 24 bit reloc.  */
   HOWTO (R_MN10200_24,
 	 0,
-	 2,
+	 4,
 	 24,
 	 false,
 	 0,
@@ -116,7 +116,7 @@ static reloc_howto_type elf_mn10200_howto_table[] =
   /* Simple 8 pc-relative reloc.  */
   HOWTO (R_MN10200_PCREL8,
 	 0,
-	 0,
+	 1,
 	 8,
 	 true,
 	 0,
@@ -130,7 +130,7 @@ static reloc_howto_type elf_mn10200_howto_table[] =
   /* Simple 16 pc-relative reloc.  */
   HOWTO (R_MN10200_PCREL16,
 	 0,
-	 1,
+	 2,
 	 16,
 	 true,
 	 0,
@@ -145,7 +145,7 @@ static reloc_howto_type elf_mn10200_howto_table[] =
      to get the pc-relative offset correct.  */
   HOWTO (R_MN10200_PCREL24,
 	 0,
-	 2,
+	 4,
 	 24,
 	 true,
 	 0,

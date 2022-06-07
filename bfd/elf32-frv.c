@@ -35,7 +35,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
   /* This reloc does nothing.  */
   HOWTO (R_FRV_NONE,		/* type */
 	 0,			/* rightshift */
-	 3,			/* size (0 = byte, 1 = short, 2 = long) */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -50,7 +50,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
   /* A 32 bit absolute relocation.  */
   HOWTO (R_FRV_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -65,7 +65,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
   /* A 16 bit pc-relative relocation.  */
   HOWTO (R_FRV_LABEL16,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -80,7 +80,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
   /* A 24-bit pc-relative relocation.  */
   HOWTO (R_FRV_LABEL24,		/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -94,7 +94,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 
   HOWTO (R_FRV_LO16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -108,7 +108,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 
   HOWTO (R_FRV_HI16,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -122,7 +122,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 
   HOWTO (R_FRV_GPREL12,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -136,7 +136,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 
   HOWTO (R_FRV_GPRELU12,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -150,7 +150,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 
   HOWTO (R_FRV_GPREL32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -164,7 +164,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 
   HOWTO (R_FRV_GPRELHI,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -178,7 +178,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 
   HOWTO (R_FRV_GPRELLO,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -194,7 +194,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      the symbol.  */
   HOWTO (R_FRV_GOT12,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -210,7 +210,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      symbol.  */
   HOWTO (R_FRV_GOTHI,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -226,7 +226,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      symbol.  */
   HOWTO (R_FRV_GOTLO,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -241,7 +241,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
   /* The 32-bit address of the canonical descriptor of a function.  */
   HOWTO (R_FRV_FUNCDESC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -257,7 +257,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      canonical descriptor of a function.  */
   HOWTO (R_FRV_FUNCDESC_GOT12,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -273,7 +273,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      canonical descriptor of a function.  */
   HOWTO (R_FRV_FUNCDESC_GOTHI,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -289,7 +289,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      canonical descriptor of a function.  */
   HOWTO (R_FRV_FUNCDESC_GOTLO,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -304,7 +304,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
   /* The 64-bit descriptor of a function.  */
   HOWTO (R_FRV_FUNCDESC_VALUE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -320,7 +320,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      canonical descriptor of a function.  */
   HOWTO (R_FRV_FUNCDESC_GOTOFF12, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -336,7 +336,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      canonical descriptor of a function.  */
   HOWTO (R_FRV_FUNCDESC_GOTOFFHI, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -352,7 +352,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      canonical descriptor of a function.  */
   HOWTO (R_FRV_FUNCDESC_GOTOFFLO, /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -368,7 +368,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      the symbol.  */
   HOWTO (R_FRV_GOTOFF12,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -384,7 +384,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      symbol.  */
   HOWTO (R_FRV_GOTOFFHI,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -400,7 +400,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      symbol.  */
   HOWTO (R_FRV_GOTOFFLO,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -417,7 +417,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      the module.  */
   HOWTO (R_FRV_GETTLSOFF,	/* type */
 	 2,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 26,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -433,7 +433,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      valid as a REL, dynamic relocation.  */
   HOWTO (R_FRV_TLSDESC_VALUE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -449,7 +449,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      descriptor of the symbol.  */
   HOWTO (R_FRV_GOTTLSDESC12,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -465,7 +465,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      symbol.  */
   HOWTO (R_FRV_GOTTLSDESCHI,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -481,7 +481,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      symbol.  */
   HOWTO (R_FRV_GOTTLSDESCLO,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -497,7 +497,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      address to the thread-local symbol address.  */
   HOWTO (R_FRV_TLSMOFF12,	 /* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -513,7 +513,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      the thread-local symbol address.  */
   HOWTO (R_FRV_TLSMOFFHI,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -529,7 +529,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      the thread-local symbol address.  */
   HOWTO (R_FRV_TLSMOFFLO,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -545,7 +545,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      for a symbol.  */
   HOWTO (R_FRV_GOTTLSOFF12,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 12,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -561,7 +561,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      symbol.  */
   HOWTO (R_FRV_GOTTLSOFFHI,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -577,7 +577,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      symbol.  */
   HOWTO (R_FRV_GOTTLSOFFLO,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -593,7 +593,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      address) to a thread-local symbol.  */
   HOWTO (R_FRV_TLSOFF,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -610,7 +610,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      the two input registers of an ldd instruction.  */
   HOWTO (R_FRV_TLSDESC_RELAX,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -627,7 +627,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      of the two register operands of an calll instruction.  */
   HOWTO (R_FRV_GETTLSOFF_RELAX,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -644,7 +644,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      the two input registers of an ld instruction.  */
   HOWTO (R_FRV_TLSOFF_RELAX,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -660,7 +660,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
      the thread-local symbol address.  */
   HOWTO (R_FRV_TLSMOFF,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -677,7 +677,7 @@ static reloc_howto_type elf32_frv_howto_table [] =
 static reloc_howto_type elf32_frv_vtinherit_howto =
   HOWTO (R_FRV_GNU_VTINHERIT,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -693,7 +693,7 @@ static reloc_howto_type elf32_frv_vtinherit_howto =
 static reloc_howto_type elf32_frv_vtentry_howto =
   HOWTO (R_FRV_GNU_VTENTRY,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -710,7 +710,7 @@ static reloc_howto_type elf32_frv_vtentry_howto =
 static reloc_howto_type elf32_frv_rel_32_howto =
   HOWTO (R_FRV_32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -725,7 +725,7 @@ static reloc_howto_type elf32_frv_rel_32_howto =
 static reloc_howto_type elf32_frv_rel_funcdesc_howto =
   HOWTO (R_FRV_FUNCDESC,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -740,7 +740,7 @@ static reloc_howto_type elf32_frv_rel_funcdesc_howto =
 static reloc_howto_type elf32_frv_rel_funcdesc_value_howto =
   HOWTO (R_FRV_FUNCDESC_VALUE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -766,7 +766,7 @@ static reloc_howto_type elf32_frv_rel_tlsdesc_value_howto =
      thread.  */
   HOWTO (R_FRV_TLSDESC_VALUE,	/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 64,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -783,7 +783,7 @@ static reloc_howto_type elf32_frv_rel_tlsoff_howto =
      address) to a thread-local symbol.  */
   HOWTO (R_FRV_TLSOFF,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

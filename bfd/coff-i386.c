@@ -211,7 +211,7 @@ static reloc_howto_type howto_table[] =
   EMPTY_HOWTO (5),
   HOWTO (R_DIR32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -225,7 +225,7 @@ static reloc_howto_type howto_table[] =
   /* PE IMAGE_REL_I386_DIR32NB relocation (7).	*/
   HOWTO (R_IMAGEBASE,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -242,7 +242,7 @@ static reloc_howto_type howto_table[] =
   /* 16-bit word section relocation (012).  */
   HOWTO (R_SECTION,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -256,7 +256,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit longword section relative relocation (013).  */
   HOWTO (R_SECREL32,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -277,7 +277,7 @@ static reloc_howto_type howto_table[] =
   /* Byte relocation (017).  */
   HOWTO (R_RELBYTE,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -291,7 +291,7 @@ static reloc_howto_type howto_table[] =
   /* 16-bit word relocation (020).  */
   HOWTO (R_RELWORD,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -305,7 +305,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit longword relocation (021).	*/
   HOWTO (R_RELLONG,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -319,7 +319,7 @@ static reloc_howto_type howto_table[] =
   /* Byte PC relative relocation (022).	 */
   HOWTO (R_PCRBYTE,		/* type */
 	 0,			/* rightshift */
-	 0,			/* size (0 = byte, 1 = short, 2 = long) */
+	 1,			/* size */
 	 8,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -333,7 +333,7 @@ static reloc_howto_type howto_table[] =
   /* 16-bit word PC relative relocation (023).	*/
   HOWTO (R_PCRWORD,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 2,			/* size */
 	 16,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */
@@ -347,7 +347,7 @@ static reloc_howto_type howto_table[] =
   /* 32-bit longword PC relative relocation (024).  */
   HOWTO (R_PCRLONG,		/* type */
 	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 4,			/* size */
 	 32,			/* bitsize */
 	 true,			/* pc_relative */
 	 0,			/* bitpos */

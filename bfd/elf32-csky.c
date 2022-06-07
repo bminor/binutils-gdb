@@ -84,7 +84,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 0 */
   HOWTO (R_CKCORE_NONE,               /* type */
 	 0,                           /* rightshift */
-	 3,                           /* size */
+	 0,                           /* size */
 	 0,                           /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -99,7 +99,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 1.  */
   HOWTO (R_CKCORE_ADDR32,             /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 32,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -114,7 +114,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 2: Only for csky v1.  */
   HOWTO (R_CKCORE_PCREL_IMM8BY4,      /* type */
 	 2,                           /* rightshift */
-	 1,                           /* size */
+	 2,                           /* size */
 	 8,                           /* bitsize */
 	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
@@ -129,7 +129,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 3: Only for csky v1.  */
   HOWTO (R_CKCORE_PCREL_IMM11BY2,     /* type */
 	 1,                           /* rightshift */
-	 1,                           /* size */
+	 2,                           /* size */
 	 11,                          /* bitsize */
 	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
@@ -142,12 +142,12 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 true),                       /* pcrel_offset */
 
   /* 4: DELETED.  */
-  HOWTO (R_CKCORE_PCREL_IMM4BY2,0,0,0,0,0,0,0,"R_CKCORE_PCREL_IMM4BY2",0,0,0,0),
+  HOWTO (R_CKCORE_PCREL_IMM4BY2,0,1,0,0,0,0,0,"R_CKCORE_PCREL_IMM4BY2",0,0,0,0),
 
   /* 5.  */
   HOWTO (R_CKCORE_PCREL32,            /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 32,                          /* bitsize */
 	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
@@ -162,7 +162,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 6: Only for csky v1.  */
   HOWTO (R_CKCORE_PCREL_JSR_IMM11BY2, /* type */
 	 1,                           /* rightshift */
-	 1,                           /* size */
+	 2,                           /* size */
 	 11,                          /* bitsize */
 	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
@@ -177,7 +177,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 7: GNU extension to record C++ vtable member usage.  */
   HOWTO (R_CKCORE_GNU_VTENTRY,        /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 0,                           /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -192,7 +192,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 8: GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_CKCORE_GNU_VTINHERIT,      /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 0,                           /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -207,7 +207,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 9.  */
   HOWTO (R_CKCORE_RELATIVE,           /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 32,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -223,7 +223,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* FIXME:  It is a bug that copy relocations are not implemented.  */
   HOWTO (R_CKCORE_COPY,               /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 32,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -236,15 +236,15 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 false),                      /* pcrel_offset */
 
   /* 11: None.  */
-  HOWTO (R_CKCORE_GLOB_DAT,0,0,0,0,0,0,0,"R_CKCORE_GLOB_DAT",0,0,0,0),
+  HOWTO (R_CKCORE_GLOB_DAT,0,1,0,0,0,0,0,"R_CKCORE_GLOB_DAT",0,0,0,0),
 
   /* 12: None.  */
-  HOWTO (R_CKCORE_JUMP_SLOT,0,0,0,0,0,0,0,"R_CKCORE_JUMP_SLOT",0,0,0,0),
+  HOWTO (R_CKCORE_JUMP_SLOT,0,1,0,0,0,0,0,"R_CKCORE_JUMP_SLOT",0,0,0,0),
 
   /* 13.  */
   HOWTO (R_CKCORE_GOTOFF,             /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 32,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -259,7 +259,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 14.  */
   HOWTO (R_CKCORE_GOTPC,              /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 32,                          /* bitsize */
 	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
@@ -274,7 +274,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 15.  */
   HOWTO (R_CKCORE_GOT32,              /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 32,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -289,7 +289,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 16.  */
   HOWTO (R_CKCORE_PLT32,              /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 32,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -302,15 +302,15 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 true),                       /* pcrel_offset */
 
   /* 17: None.  */
-  HOWTO (R_CKCORE_ADDRGOT,0,0,0,0,0,0,0,"R_CKCORE_ADDRGOT",0,0,0,0),
+  HOWTO (R_CKCORE_ADDRGOT,0,1,0,0,0,0,0,"R_CKCORE_ADDRGOT",0,0,0,0),
 
   /* 18: None.  */
-  HOWTO (R_CKCORE_ADDRPLT,0,0,0,0,0,0,0,"R_CKCORE_ADDRPLT",0,0,0,0),
+  HOWTO (R_CKCORE_ADDRPLT,0,1,0,0,0,0,0,"R_CKCORE_ADDRPLT",0,0,0,0),
 
   /* 19: Only for csky v2.  */
   HOWTO (R_CKCORE_PCREL_IMM26BY2,     /* type */
 	 1,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 26,                          /* bitsize */
 	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
@@ -325,7 +325,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 20: Only for csky v2.  */
   HOWTO (R_CKCORE_PCREL_IMM16BY2,     /* type */
          1,                           /* rightshift */
-         2,                           /* size */
+         4,                           /* size */
          16,                          /* bitsize */
          true,                        /* pc_relative */
          0,                           /* bitpos */
@@ -340,7 +340,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 21: Only for csky v2.  */
   HOWTO (R_CKCORE_PCREL_IMM16BY4,     /* type */
          2,                           /* rightshift */
-         2,                           /* size */
+         4,                           /* size */
          16,                          /* bitsize */
          true,                        /* pc_relative */
          0,                           /* bitpos */
@@ -355,7 +355,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 22: Only for csky v2.  */
   HOWTO (R_CKCORE_PCREL_IMM10BY2,     /* type */
 	 1,                           /* rightshift */
-	 1,                           /* size */
+	 2,                           /* size */
 	 10,                          /* bitsize */
 	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
@@ -370,7 +370,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 23: Only for csky v2.  */
   HOWTO (R_CKCORE_PCREL_IMM10BY4,     /* type */
          2,                           /* rightshift */
-         2,                           /* size */
+         4,                           /* size */
          10,                          /* bitsize */
          true,                        /* pc_relative */
          0,                           /* bitpos */
@@ -385,7 +385,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 24: Only for csky v2.  */
   HOWTO (R_CKCORE_ADDR_HI16,          /* type */
 	 16,                          /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 16,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -400,7 +400,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 25.  */
   HOWTO (R_CKCORE_ADDR_LO16,          /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 16,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -415,7 +415,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 26.  */
   HOWTO (R_CKCORE_GOTPC_HI16,         /* type */
 	 16,                          /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 16,                          /* bitsize */
 	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
@@ -430,7 +430,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 27.  */
   HOWTO (R_CKCORE_GOTPC_LO16,         /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 16,                          /* bitsize */
 	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
@@ -445,7 +445,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 28.  */
   HOWTO (R_CKCORE_GOTOFF_HI16,        /* type */
 	 16,                          /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 16,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -460,7 +460,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 29.  */
   HOWTO (R_CKCORE_GOTOFF_LO16,        /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 16,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -475,7 +475,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 30.  */
   HOWTO (R_CKCORE_GOT12,              /* type */
 	 2,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 12,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -490,7 +490,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 31.  */
   HOWTO (R_CKCORE_GOT_HI16,           /* type */
 	 16,                          /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 16,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -505,7 +505,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 32.  */
   HOWTO (R_CKCORE_GOT_LO16,           /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 16,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -520,7 +520,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 33.  */
   HOWTO (R_CKCORE_PLT12,              /* type */
 	 2,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 12,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -535,7 +535,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 34.  */
   HOWTO (R_CKCORE_PLT_HI16,           /* type */
 	 16,                          /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 16,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -550,7 +550,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 35.  */
   HOWTO (R_CKCORE_PLT_LO16,           /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 16,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -563,21 +563,21 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 false),                      /* pcrel_offset */
 
   /* 36: None.  */
-  HOWTO (R_CKCORE_ADDRGOT_HI16,0,0,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
+  HOWTO (R_CKCORE_ADDRGOT_HI16,0,1,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
 
   /* 37: None.  */
-  HOWTO (R_CKCORE_ADDRGOT_LO16,0,0,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
+  HOWTO (R_CKCORE_ADDRGOT_LO16,0,1,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
 
   /* 38: None.  */
-  HOWTO (R_CKCORE_ADDRPLT_HI16,0,0,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
+  HOWTO (R_CKCORE_ADDRPLT_HI16,0,1,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
 
   /* 39: None.  */
-  HOWTO (R_CKCORE_ADDRPLT_LO16,0,0,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
+  HOWTO (R_CKCORE_ADDRPLT_LO16,0,1,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
 
   /* 40.  */
   HOWTO (R_CKCORE_PCREL_JSR_IMM26BY2, /* type */
 	 1,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 26,                          /* bitsize */
 	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
@@ -592,7 +592,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 41.  */
   HOWTO (R_CKCORE_TOFFSET_LO16,       /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 16,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -607,7 +607,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 42.  */
   HOWTO (R_CKCORE_DOFFSET_LO16,       /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 16,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -622,7 +622,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 43.  */
   HOWTO (R_CKCORE_PCREL_IMM18BY2,     /* type */
          1,                           /* rightshift */
-         2,                           /* size */
+         4,                           /* size */
          18,                          /* bitsize */
          true,                        /* pc_relative */
          0,                           /* bitpos */
@@ -637,7 +637,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 44.  */
   HOWTO (R_CKCORE_DOFFSET_IMM18,      /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 18,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -652,7 +652,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 45.  */
   HOWTO (R_CKCORE_DOFFSET_IMM18BY2,   /* type */
 	 1,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 18,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -667,7 +667,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 46.  */
   HOWTO (R_CKCORE_DOFFSET_IMM18BY4,   /* type */
 	 2,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 18,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -682,7 +682,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 47.  */
   HOWTO (R_CKCORE_GOTOFF_IMM18,       /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 18,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -697,7 +697,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 48.  */
   HOWTO (R_CKCORE_GOT_IMM18BY4,       /* type */
 	 2,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 18,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -712,7 +712,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 49.  */
   HOWTO (R_CKCORE_PLT_IMM18BY4,       /* type */
 	 2,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 18,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -727,7 +727,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 50: for lrw16.  */
   HOWTO (R_CKCORE_PCREL_IMM7BY4,      /* type */
 	 2,                           /* rightshift */
-	 1,                           /* size */
+	 2,                           /* size */
 	 7,                           /* bitsize */
 	 true,                        /* pc_relative */
 	 0,                           /* bitpos */
@@ -742,7 +742,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 51: for static nptl.  */
   HOWTO (R_CKCORE_TLS_LE32,           /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 32,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -757,7 +757,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 52: for static nptl.  */
   HOWTO (R_CKCORE_TLS_IE32,           /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 32,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -772,7 +772,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 53: for pic nptl.  */
   HOWTO (R_CKCORE_TLS_GD32,           /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 32,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -787,7 +787,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 54: for pic nptl.  */
   HOWTO (R_CKCORE_TLS_LDM32,          /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 32,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -802,7 +802,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 55: for pic nptl.  */
   HOWTO (R_CKCORE_TLS_LDO32,          /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 32,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -815,18 +815,18 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 true),                       /* pcrel_offset */
 
   /* 56: for linker.  */
-  HOWTO (R_CKCORE_TLS_DTPMOD32,0,0,0,0,0,0,0,"R_CKCORE_TLS_DTPMOD32",0,0,0,0),
+  HOWTO (R_CKCORE_TLS_DTPMOD32,0,1,0,0,0,0,0,"R_CKCORE_TLS_DTPMOD32",0,0,0,0),
 
   /* 57: for linker.  */
-  HOWTO (R_CKCORE_TLS_DTPOFF32,0,0,0,0,0,0,0,"R_CKCORE_TLS_DTPOFF32",0,0,0,0),
+  HOWTO (R_CKCORE_TLS_DTPOFF32,0,1,0,0,0,0,0,"R_CKCORE_TLS_DTPOFF32",0,0,0,0),
 
   /* 58: for linker.  */
-  HOWTO (R_CKCORE_TLS_TPOFF32,0,0,0,0,0,0,0,"R_CKCORE_TLS_TPOFF32",0,0,0,0),
+  HOWTO (R_CKCORE_TLS_TPOFF32,0,1,0,0,0,0,0,"R_CKCORE_TLS_TPOFF32",0,0,0,0),
 
   /* 59: for ck807f.  */
   HOWTO (R_CKCORE_PCREL_FLRW_IMM8BY4, /* type */
          2,                           /* rightshift */
-         2,                           /* size */
+         4,                           /* size */
          8,                           /* bitsize */
          true,                        /* pc_relative */
          0,                           /* bitpos */
@@ -841,7 +841,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 60: for 810 not to generate jsri.  */
   HOWTO (R_CKCORE_NOJSRI,             /* type */
 	 0,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 32,                          /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -856,7 +856,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 61: for callgraph.  */
   HOWTO (R_CKCORE_CALLGRAPH,          /* type */
 	 0,                           /* rightshift */
-	 0,                           /* size */
+	 1,                           /* size */
 	 0,                           /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -869,12 +869,12 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 true),                       /* pcrel_offset */
 
   /* 62: IRELATIVE*/
-  HOWTO (R_CKCORE_IRELATIVE,0,0,0,0,0,0,0,"R_CKCORE_IRELATIVE",0,0,0,0),
+  HOWTO (R_CKCORE_IRELATIVE,0,1,0,0,0,0,0,"R_CKCORE_IRELATIVE",0,0,0,0),
 
   /* 63: for bloop instruction */
   HOWTO (R_CKCORE_PCREL_BLOOP_IMM4BY4, /* type */
 	 1,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 4,                           /* bitsize */
 	 1,                           /* pc_relative */
 	 0,                           /* bitpos */
@@ -888,7 +888,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 64: for bloop instruction */
   HOWTO (R_CKCORE_PCREL_BLOOP_IMM12BY4, /* type */
 	 1,                           /* rightshift */
-	 2,                           /* size */
+	 4,                           /* size */
 	 12,                          /* bitsize */
 	 1,                           /* pc_relative */
 	 0,                           /* bitpos */

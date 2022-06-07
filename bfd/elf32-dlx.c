@@ -238,7 +238,7 @@ static reloc_howto_type dlx_elf_howto_table[]=
   /* No relocation.  */
   HOWTO (R_DLX_NONE,		/* Type. */
 	 0,			/* Rightshift.  */
-	 3,			/* size (0 = byte, 1 = short, 2 = long).  */
+	 0,			/* size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -253,7 +253,7 @@ static reloc_howto_type dlx_elf_howto_table[]=
   /* 8 bit relocation.  */
   HOWTO (R_DLX_RELOC_8,		/* Type. */
 	 0,			/* Rightshift.  */
-	 0,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 1,			/* Size.  */
 	 8,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -268,7 +268,7 @@ static reloc_howto_type dlx_elf_howto_table[]=
   /* 16 bit relocation.  */
   HOWTO (R_DLX_RELOC_16,	/* Type. */
 	 0,			/* Rightshift.  */
-	 1,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* Size.  */
 	 16,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -283,7 +283,7 @@ static reloc_howto_type dlx_elf_howto_table[]=
   /* 32 bit relocation.  */
   HOWTO (R_DLX_RELOC_32,	/* Type. */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 32,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -298,7 +298,7 @@ static reloc_howto_type dlx_elf_howto_table[]=
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_DLX_GNU_VTINHERIT,	/* Type. */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -313,7 +313,7 @@ static reloc_howto_type dlx_elf_howto_table[]=
   /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_DLX_GNU_VTENTRY,	/* Type. */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 0,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -330,7 +330,7 @@ static reloc_howto_type dlx_elf_howto_table[]=
 static reloc_howto_type elf_dlx_gnu_rel16_s2 =
   HOWTO (R_DLX_RELOC_16_PCREL,	/* Type. */
 	 0,			/* Rightshift.  */
-	 1,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* Size.  */
 	 16,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -346,7 +346,7 @@ static reloc_howto_type elf_dlx_gnu_rel16_s2 =
 static reloc_howto_type elf_dlx_gnu_rel26_s2 =
   HOWTO (R_DLX_RELOC_26_PCREL,	/* Type. */
 	 0,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 26,			/* Bitsize.  */
 	 true,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -362,7 +362,7 @@ static reloc_howto_type elf_dlx_gnu_rel26_s2 =
 static reloc_howto_type elf_dlx_reloc_16_hi =
   HOWTO (R_DLX_RELOC_16_HI,	/* Type. */
 	 16,			/* Rightshift.  */
-	 2,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 4,			/* Size.  */
 	 32,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
@@ -378,7 +378,7 @@ static reloc_howto_type elf_dlx_reloc_16_hi =
 static reloc_howto_type elf_dlx_reloc_16_lo =
   HOWTO (R_DLX_RELOC_16_LO,	/* Type. */
 	 0,			/* Rightshift.  */
-	 1,			/* Size (0 = byte, 1 = short, 2 = long).  */
+	 2,			/* Size.  */
 	 16,			/* Bitsize.  */
 	 false,			/* PC_relative.  */
 	 0,			/* Bitpos.  */
