@@ -2596,7 +2596,28 @@ resume_1 (enum gdb_signal sig)
       step = false;
     }
 
-  CORE_ADDR pc = regcache_read_pc (regcache);
+  CORE_ADDR pc = 0;
+  try
+    {
+      pc = regcache_read_pc (regcache);
+    }
+  catch (const gdb_exception_error &err)
+    {
+      /* Swallow errors as it may be that the current thread exited
+	 and we've haven't seen its exit status yet.  Let the
+	 resumption continue and we'll collect the exit event
+	 shortly.  */
+      if (err.error == TARGET_CLOSE_ERROR)
+	throw;
+
+      if (debug_infrun)
+	{
+	  string_file buf;
+	  exception_print (&buf, err);
+	  infrun_debug_printf ("resume: swallowing error: %s",
+			       buf.string ().c_str ());
+	}
+    }
 
   infrun_debug_printf ("step=%d, signal=%s, trap_expected=%d, "
 		       "current thread [%s] at %s",
