@@ -1895,4 +1895,9 @@ extern void describe_other_breakpoints (struct gdbarch *,
 					struct program_space *, CORE_ADDR,
 					struct obj_section *, int);
 
+/* Enable or disable a breakpoint location LOC.  ENABLE
+   specifies whether to enable or disable.  */
+
+extern void enable_disable_bp_location (bp_location *loc, bool enable);
+
 #endif /* !defined (BREAKPOINT_H) */

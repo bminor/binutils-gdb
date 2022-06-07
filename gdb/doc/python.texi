@@ -6120,6 +6120,15 @@ the user.  It is a string.  If the breakpoint does not have a location
 attribute is not writable.
 @end defvar
 
+@defvar Breakpoint.locations
+Get the most current list of breakpoint locations that are inserted for this
+breakpoint, with elements of type @code{gdb.BreakpointLocation}
+(described below).  This functionality matches that of the
+@code{info breakpoint} command (@pxref{Set Breaks}), in that it only retrieves
+the most current list of locations, thus the list itself when returned is
+not updated behind the scenes.  This attribute is not writable.
+@end defvar
+
 @defvar Breakpoint.expression
 This attribute holds a breakpoint expression, as specified by
 the user.  It is a string.  If the breakpoint does not have an
@@ -6138,6 +6147,68 @@ This attribute holds the commands attached to the breakpoint.  If
 there are commands, this attribute's value is a string holding all the
 commands, separated by newlines.  If there are no commands, this
 attribute is @code{None}.  This attribute is writable.
+@end defvar
+
+@subheading Breakpoint Locations
+
+A breakpoint location is one of the actual places where a breakpoint has been
+set, represented in the Python API by the @code{gdb.BreakpointLocation}
+type.  This type is never instantiated by the user directly, but is retrieved
+from @code{Breakpoint.locations} which returns a list of breakpoint
+locations where it is currently set.  Breakpoint locations can become
+invalid if new symbol files are loaded or dynamically loaded libraries are
+closed.  Accessing the attributes of an invalidated breakpoint location will
+throw a @code{RuntimeError} exception.  Access the @code{Breakpoint.locations}
+attribute again to retrieve the new and valid breakpoints location list.
+
+@defvar BreakpointLocation.source
+This attribute returns the source file path and line number where this location
+was set. The type of the attribute is a tuple of @var{string} and
+@var{long}.  If the breakpoint location doesn't have a source location,
+it returns None, which is the case for watchpoints and catchpoints.
+This will throw a @code{RuntimeError} exception if the location
+has been invalidated. This attribute is not writable.
+@end defvar
+
+@defvar BreakpointLocation.address
+This attribute returns the address where this location was set.
+This attribute is of type long.  This will throw a @code{RuntimeError}
+exception if the location has been invalidated.  This attribute is
+not writable.
+@end defvar
+
+@defvar BreakpointLocation.enabled
+This attribute holds the value for whether or not this location is enabled.
+This attribute is writable (boolean).  This will throw a @code{RuntimeError}
+exception if the location has been invalidated.
+@end defvar
+
+@defvar BreakpointLocation.owner
+This attribute holds a reference to the @code{gdb.Breakpoint} owner object,
+from which this @code{gdb.BreakpointLocation} was retrieved from.
+This will throw a @code{RuntimeError} exception if the location has been
+invalidated.  This attribute is not writable.
+@end defvar
+
+@defvar BreakpointLocation.function
+This attribute gets the name of the function where this location was set.
+If no function could be found this attribute returns @code{None}.
+This will throw a @code{RuntimeError} exception if the location has
+been invalidated.  This attribute is not writable.
+@end defvar
+
+@defvar BreakpointLocation.fullname
+This attribute gets the full name of where this location was set.  If no
+full name could be found, this attribute returns @code{None}.
+This will throw a @code{RuntimeError} exception if the location has
+been invalidated.  This attribute is not writable.
+@end defvar
+
+@defvar BreakpointLocation.thread_groups
+This attribute gets the thread groups it was set in.  It returns a @code{List}
+of the thread group ID's.  This will throw a @code{RuntimeError}
+exception if the location has been invalidated.  This attribute
+is not writable.
 @end defvar
 
 @node Finish Breakpoints in Python

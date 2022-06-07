@@ -2141,6 +2141,7 @@ init_done:
       || gdbpy_initialize_pspace () < 0
       || gdbpy_initialize_objfile () < 0
       || gdbpy_initialize_breakpoints () < 0
+      || gdbpy_initialize_breakpoint_locations () < 0
       || gdbpy_initialize_finishbreakpoints () < 0
       || gdbpy_initialize_lazy_string () < 0
       || gdbpy_initialize_linetable () < 0

@@ -170,6 +170,11 @@ GNU/Linux/LoongArch (gdbserver)	loongarch*-*-linux*
      can be used to request a shorter representation of a value, the
      way that 'set print frame-arguments scalars' does.
 
+  ** New Python type gdb.BreakpointLocation.
+     The new attribute 'locations' of gdb.Breakpoint returns a list of
+     gdb.BreakpointLocation objects specifying the locations where the
+     breakpoint is inserted into the debuggee.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on LoongArch GNU/Linux.
