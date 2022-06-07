@@ -1027,7 +1027,7 @@ rust_parser::lex_number ()
       const char *trailer;
       value = strtoulst (number.c_str () + offset, &trailer, radix);
       if (*trailer != '\0')
-	error ("Integer literal is too large");
+	error (_("Integer literal is too large"));
       if (implicit_i32 && value >= ((uint64_t) 1) << 31)
 	type = get_type ("i64");
 
