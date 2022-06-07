@@ -426,8 +426,7 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
     }
   PyTuple_SET_ITEM (ret_tuple.get (), 0, sym_obj);
 
-  bool_obj = (is_a_field_of_this.type != NULL) ? Py_True : Py_False;
-  Py_INCREF (bool_obj);
+  bool_obj = PyBool_FromLong (is_a_field_of_this.type != NULL);
   PyTuple_SET_ITEM (ret_tuple.get (), 1, bool_obj);
 
   return ret_tuple.release ();

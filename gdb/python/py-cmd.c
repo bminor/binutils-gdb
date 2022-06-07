@@ -128,8 +128,7 @@ cmdpy_function (const char *args, int from_tty, cmd_list_element *command)
       error (_("Could not convert arguments to Python string."));
     }
 
-  gdbpy_ref<> ttyobj
-    = gdbpy_ref<>::new_reference (from_tty ? Py_True : Py_False);
+  gdbpy_ref<> ttyobj (PyBool_FromLong (from_tty));
   gdbpy_ref<> result (PyObject_CallMethodObjArgs ((PyObject *) obj, invoke_cst,
 						  argobj.get (), ttyobj.get (),
 						  NULL));

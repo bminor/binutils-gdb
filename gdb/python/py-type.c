@@ -220,14 +220,12 @@ convert_field (struct type *type, int field)
   if (PyObject_SetAttrString (result.get (), "name", arg.get ()) < 0)
     return NULL;
 
-  arg = gdbpy_ref<>::new_reference (TYPE_FIELD_ARTIFICIAL (type, field)
-				    ? Py_True : Py_False);
+  arg.reset (PyBool_FromLong (TYPE_FIELD_ARTIFICIAL (type, field)));
   if (PyObject_SetAttrString (result.get (), "artificial", arg.get ()) < 0)
     return NULL;
 
   if (type->code () == TYPE_CODE_STRUCT)
-    arg = gdbpy_ref<>::new_reference (field < TYPE_N_BASECLASSES (type)
-				      ? Py_True : Py_False);
+    arg.reset (PyBool_FromLong (field < TYPE_N_BASECLASSES (type)));
   else
     arg = gdbpy_ref<>::new_reference (Py_False);
   if (PyObject_SetAttrString (result.get (), "is_base_class", arg.get ()) < 0)
