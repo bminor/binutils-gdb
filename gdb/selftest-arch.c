@@ -28,12 +28,6 @@ namespace selftests {
 
 static bool skip_arch (const char *arch)
 {
-  if (strcmp ("fr300", arch) == 0)
-    {
-      /* PR 20946 */
-      return true;
-    }
-
   if (strcmp ("powerpc:EC603e", arch) == 0
       || strcmp ("powerpc:e500mc", arch) == 0
       || strcmp ("powerpc:e500mc64", arch) == 0
