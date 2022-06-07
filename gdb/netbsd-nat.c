@@ -221,7 +221,7 @@ nbsd_nat_target::find_memory_regions (find_memory_region_ftype func,
   gdb::unique_xmalloc_ptr<struct kinfo_vmentry[]> vmentl
     = nbsd_kinfo_get_vmmap (pid, &nitems);
   if (vmentl == NULL)
-    perror_with_name (_("Couldn't fetch VM map entries."));
+    perror_with_name (_("Couldn't fetch VM map entries"));
 
   for (size_t i = 0; i < nitems; i++)
     {

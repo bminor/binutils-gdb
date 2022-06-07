@@ -2704,7 +2704,7 @@ procfs_set_exec_trap (void)
 
   pi = create_procinfo (getpid (), 0);
   if (pi == NULL)
-    perror_with_name (_("procfs: create_procinfo failed in child."));
+    perror_with_name (_("procfs: create_procinfo failed in child"));
 
   if (open_procinfo_files (pi, FD_CTL) == 0)
     {

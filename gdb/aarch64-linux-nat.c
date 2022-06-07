@@ -145,7 +145,7 @@ fetch_gregs_from_thread (struct regcache *regcache)
 
   ret = ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iovec);
   if (ret < 0)
-    perror_with_name (_("Unable to fetch general registers."));
+    perror_with_name (_("Unable to fetch general registers"));
 
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
     aarch32_gp_regcache_supply (regcache, (uint32_t *) regs, 1);
@@ -182,7 +182,7 @@ store_gregs_to_thread (const struct regcache *regcache)
 
   ret = ptrace (PTRACE_GETREGSET, tid, NT_PRSTATUS, &iovec);
   if (ret < 0)
-    perror_with_name (_("Unable to fetch general registers."));
+    perror_with_name (_("Unable to fetch general registers"));
 
   if (gdbarch_bfd_arch_info (gdbarch)->bits_per_word == 32)
     aarch32_gp_regcache_collect (regcache, (uint32_t *) regs, 1);
@@ -197,7 +197,7 @@ store_gregs_to_thread (const struct regcache *regcache)
 
   ret = ptrace (PTRACE_SETREGSET, tid, NT_PRSTATUS, &iovec);
   if (ret < 0)
-    perror_with_name (_("Unable to store general registers."));
+    perror_with_name (_("Unable to store general registers"));
 }
 
 /* Fill GDB's register array with the fp/simd register values
@@ -225,7 +225,7 @@ fetch_fpregs_from_thread (struct regcache *regcache)
 
       ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iovec);
       if (ret < 0)
-	perror_with_name (_("Unable to fetch VFP registers."));
+	perror_with_name (_("Unable to fetch VFP registers"));
 
       aarch32_vfp_regcache_supply (regcache, (gdb_byte *) &regs, 32);
     }
@@ -237,7 +237,7 @@ fetch_fpregs_from_thread (struct regcache *regcache)
 
       ret = ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iovec);
       if (ret < 0)
-	perror_with_name (_("Unable to fetch vFP/SIMD registers."));
+	perror_with_name (_("Unable to fetch vFP/SIMD registers"));
 
       for (regno = AARCH64_V0_REGNUM; regno <= AARCH64_V31_REGNUM; regno++)
 	regcache->raw_supply (regno, &regs.vregs[regno - AARCH64_V0_REGNUM]);
@@ -271,7 +271,7 @@ store_fpregs_to_thread (const struct regcache *regcache)
 
       ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_VFP, &iovec);
       if (ret < 0)
-	perror_with_name (_("Unable to fetch VFP registers."));
+	perror_with_name (_("Unable to fetch VFP registers"));
 
       aarch32_vfp_regcache_collect (regcache, (gdb_byte *) &regs, 32);
     }
@@ -283,7 +283,7 @@ store_fpregs_to_thread (const struct regcache *regcache)
 
       ret = ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, &iovec);
       if (ret < 0)
-	perror_with_name (_("Unable to fetch FP/SIMD registers."));
+	perror_with_name (_("Unable to fetch FP/SIMD registers"));
 
       for (regno = AARCH64_V0_REGNUM; regno <= AARCH64_V31_REGNUM; regno++)
 	if (REG_VALID == regcache->get_register_status (regno))
@@ -300,13 +300,13 @@ store_fpregs_to_thread (const struct regcache *regcache)
     {
       ret = ptrace (PTRACE_SETREGSET, tid, NT_ARM_VFP, &iovec);
       if (ret < 0)
-	perror_with_name (_("Unable to store VFP registers."));
+	perror_with_name (_("Unable to store VFP registers"));
     }
   else
     {
       ret = ptrace (PTRACE_SETREGSET, tid, NT_FPREGSET, &iovec);
       if (ret < 0)
-	perror_with_name (_("Unable to store FP/SIMD registers."));
+	perror_with_name (_("Unable to store FP/SIMD registers"));
     }
 }
 
@@ -334,7 +334,7 @@ store_sveregs_to_thread (struct regcache *regcache)
   /* First store vector length to the thread.  This is done first to ensure the
      ptrace buffers read from the kernel are the correct size.  */
   if (!aarch64_sve_set_vq (tid, regcache))
-    perror_with_name (_("Unable to set VG register."));
+    perror_with_name (_("Unable to set VG register"));
 
   /* Obtain a dump of SVE registers from ptrace.  */
   std::unique_ptr<gdb_byte[]> base = aarch64_sve_get_sveregs (tid);
@@ -369,7 +369,7 @@ fetch_pauth_masks_from_thread (struct regcache *regcache)
 
   ret = ptrace (PTRACE_GETREGSET, tid, NT_ARM_PAC_MASK, &iovec);
   if (ret != 0)
-    perror_with_name (_("unable to fetch pauth registers."));
+    perror_with_name (_("unable to fetch pauth registers"));
 
   regcache->raw_supply (AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base),
 			&pauth_regset[0]);
@@ -397,7 +397,7 @@ fetch_mteregs_from_thread (struct regcache *regcache)
 
   int tid = get_ptrace_pid (regcache->ptid ());
   if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_TAGGED_ADDR_CTRL, &iovec) != 0)
-      perror_with_name (_("unable to fetch MTE registers."));
+      perror_with_name (_("unable to fetch MTE registers"));
 
   regcache->raw_supply (regno, &tag_ctl);
 }
@@ -428,7 +428,7 @@ store_mteregs_to_thread (struct regcache *regcache)
 
   int tid = get_ptrace_pid (regcache->ptid ());
   if (ptrace (PTRACE_SETREGSET, tid, NT_ARM_TAGGED_ADDR_CTRL, &iovec) != 0)
-    perror_with_name (_("unable to store MTE registers."));
+    perror_with_name (_("unable to store MTE registers"));
 }
 
 /* Fill GDB's register array with the TLS register values from
@@ -451,7 +451,7 @@ fetch_tlsregs_from_thread (struct regcache *regcache)
 
   int tid = get_ptrace_pid (regcache->ptid ());
   if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_TLS, &iovec) != 0)
-      perror_with_name (_("unable to fetch TLS register."));
+      perror_with_name (_("unable to fetch TLS register"));
 
   regcache->raw_supply (regno, &tpidr);
 }
@@ -482,7 +482,7 @@ store_tlsregs_to_thread (struct regcache *regcache)
 
   int tid = get_ptrace_pid (regcache->ptid ());
   if (ptrace (PTRACE_SETREGSET, tid, NT_ARM_TLS, &iovec) != 0)
-    perror_with_name (_("unable to store TLS register."));
+    perror_with_name (_("unable to store TLS register"));
 }
 
 /* Implement the "fetch_registers" target_ops method.  */

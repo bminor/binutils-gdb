@@ -135,7 +135,7 @@ fetch_fpregs (struct regcache *regcache)
     ret = ptrace (PT_GETFPREGS, tid, 0, fp);
 
   if (ret < 0)
-    perror_with_name (_("Unable to fetch the floating point registers."));
+    perror_with_name (_("Unable to fetch the floating point registers"));
 
   /* Fetch fpsr.  */
   regcache->raw_supply (ARM_FPS_REGNUM, fp + NWFPE_FPSR_OFFSET);
@@ -172,7 +172,7 @@ store_fpregs (const struct regcache *regcache)
     ret = ptrace (PT_GETFPREGS, tid, 0, fp);
 
   if (ret < 0)
-    perror_with_name (_("Unable to fetch the floating point registers."));
+    perror_with_name (_("Unable to fetch the floating point registers"));
 
   /* Store fpsr.  */
   if (REG_VALID == regcache->get_register_status (ARM_FPS_REGNUM))
@@ -196,7 +196,7 @@ store_fpregs (const struct regcache *regcache)
     ret = ptrace (PTRACE_SETFPREGS, tid, 0, fp);
 
   if (ret < 0)
-    perror_with_name (_("Unable to store floating point registers."));
+    perror_with_name (_("Unable to store floating point registers"));
 }
 
 /* Fetch all general registers of the process and store into
@@ -224,7 +224,7 @@ fetch_regs (struct regcache *regcache)
     ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
 
   if (ret < 0)
-    perror_with_name (_("Unable to fetch general registers."));
+    perror_with_name (_("Unable to fetch general registers"));
 
   aarch32_gp_regcache_supply (regcache, (uint32_t *) regs, arm_apcs_32);
 }
@@ -252,7 +252,7 @@ store_regs (const struct regcache *regcache)
     ret = ptrace (PTRACE_GETREGS, tid, 0, &regs);
 
   if (ret < 0)
-    perror_with_name (_("Unable to fetch general registers."));
+    perror_with_name (_("Unable to fetch general registers"));
 
   aarch32_gp_regcache_collect (regcache, (uint32_t *) regs, arm_apcs_32);
 
@@ -269,7 +269,7 @@ store_regs (const struct regcache *regcache)
     ret = ptrace (PTRACE_SETREGS, tid, 0, &regs);
 
   if (ret < 0)
-    perror_with_name (_("Unable to store general registers."));
+    perror_with_name (_("Unable to store general registers"));
 }
 
 /* Fetch all WMMX registers of the process and store into
@@ -286,7 +286,7 @@ fetch_wmmx_regs (struct regcache *regcache)
 
   ret = ptrace (PTRACE_GETWMMXREGS, tid, 0, regbuf);
   if (ret < 0)
-    perror_with_name (_("Unable to fetch WMMX registers."));
+    perror_with_name (_("Unable to fetch WMMX registers"));
 
   for (regno = 0; regno < 16; regno++)
     regcache->raw_supply (regno + ARM_WR0_REGNUM, &regbuf[regno * 8]);
@@ -311,7 +311,7 @@ store_wmmx_regs (const struct regcache *regcache)
 
   ret = ptrace (PTRACE_GETWMMXREGS, tid, 0, regbuf);
   if (ret < 0)
-    perror_with_name (_("Unable to fetch WMMX registers."));
+    perror_with_name (_("Unable to fetch WMMX registers"));
 
   for (regno = 0; regno < 16; regno++)
     if (REG_VALID == regcache->get_register_status (regno + ARM_WR0_REGNUM))
@@ -330,7 +330,7 @@ store_wmmx_regs (const struct regcache *regcache)
   ret = ptrace (PTRACE_SETWMMXREGS, tid, 0, regbuf);
 
   if (ret < 0)
-    perror_with_name (_("Unable to store WMMX registers."));
+    perror_with_name (_("Unable to store WMMX registers"));
 }
 
 static void
@@ -356,7 +356,7 @@ fetch_vfp_regs (struct regcache *regcache)
     ret = ptrace (PTRACE_GETVFPREGS, tid, 0, regbuf);
 
   if (ret < 0)
-    perror_with_name (_("Unable to fetch VFP registers."));
+    perror_with_name (_("Unable to fetch VFP registers"));
 
   aarch32_vfp_regcache_supply (regcache, regbuf,
 			       tdep->vfp_register_count);
@@ -385,7 +385,7 @@ store_vfp_regs (const struct regcache *regcache)
     ret = ptrace (PTRACE_GETVFPREGS, tid, 0, regbuf);
 
   if (ret < 0)
-    perror_with_name (_("Unable to fetch VFP registers (for update)."));
+    perror_with_name (_("Unable to fetch VFP registers (for update)"));
 
   aarch32_vfp_regcache_collect (regcache, regbuf,
 				tdep->vfp_register_count);
@@ -402,7 +402,7 @@ store_vfp_regs (const struct regcache *regcache)
     ret = ptrace (PTRACE_SETVFPREGS, tid, 0, regbuf);
 
   if (ret < 0)
-    perror_with_name (_("Unable to store VFP registers."));
+    perror_with_name (_("Unable to store VFP registers"));
 }
 
 /* Fetch registers from the child process.  Fetch all registers if
