@@ -60,8 +60,8 @@ if { [build_executable "failed to prepare" ${exec1} "${srcfile1}" \
 set options [list debug]
 
 if [istarget "aarch64*-*-*"] {
-    if {[info exists ARM_CC_FOR_TARGET]} {
-	lappend options "compiler=${ARM_CC_FOR_TARGET}"
+    if {[arm_cc_for_target] != ""} {
+	lappend options "compiler=[arm_cc_for_target]"
     } else {
 	unsupported "ARM compiler is not known"
 	return -1

@@ -8666,5 +8666,60 @@ proc get_set_option_choices {set_cmd} {
     return $values
 }
 
+# Return the compiler that can generate 32-bit ARM executables.  Used
+# when testing biarch support on Aarch64.  If ARM_CC_FOR_TARGET is
+# set, use that.  If not, try a few common compiler names, making sure
+# that the executable they produce can run.
+
+gdb_caching_proc arm_cc_for_target {
+    if {[info exists ARM_CC_FOR_TARGET]} {
+	# If the user specified the compiler explicitly, then don't
+	# check whether the resulting binary runs outside GDB.  Assume
+	# that it does, and if it turns out it doesn't, then the user
+	# should get loud FAILs, instead of UNSUPPORTED.
+	return $ARM_CC_FOR_TARGET
+    }
+
+    # Fallback to a few common compiler names.  Also confirm the
+    # produced binary actually runs on the system before declaring
+    # we've found the right compiler.
+
+    if [istarget "*-linux*-*"] {
+	set compilers {
+	    arm-linux-gnueabi-gcc
+	    arm-none-linux-gnueabi-gcc
+	    arm-linux-gnueabihf-gcc
+	}
+    } else {
+	set compilers {}
+    }
+
+    foreach compiler $compilers {
+	if {![is_remote host] && [which $compiler] == 0} {
+	    # Avoid "default_target_compile: Can't find
+	    # $compiler." warning issued from gdb_compile.
+	    continue
+	}
+
+	set src { int main() { return 0; } }
+	if {[gdb_simple_compile aarch64-32bit \
+		 $src \
+		 executable [list compiler=$compiler]]} {
+
+	    set result [remote_exec target $obj]
+	    set status [lindex $result 0]
+	    set output [lindex $result 1]
+
+	    file delete $obj
+
+	    if { $output == "" && $status == 0} {
+		return $compiler
+	    }
+	}
+    }
+
+    return ""
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
