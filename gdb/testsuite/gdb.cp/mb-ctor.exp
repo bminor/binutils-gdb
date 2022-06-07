@@ -56,6 +56,24 @@ gdb_test "continue" \
 gdb_continue_to_breakpoint "set breakpoint here, second time" ".* breakpoint here"
 
 gdb_test "continue" \
+    ".*Breakpoint.*Derived.*i=24.*" \
+    "run to breakpoint 1 dynamic v1"
+
+gdb_continue_to_breakpoint "set breakpoint here, first dynamic time"\
+    ".* breakpoint here"
+
+gdb_test "continue" \
+    ".*Breakpoint.*Derived.*i=42.*" \
+    "run to breakpoint 1 dynamic v2"
+
+gdb_continue_to_breakpoint "set breakpoint here, second dynamic time"\
+    ".* breakpoint here"
+
+gdb_test "continue" ".*Breakpoint.*~Derived.*" "Run to dynamic destructor v1"
+
+gdb_test "continue" ".*Breakpoint.*~Derived.*" "Run to dynamic destructor v2"
+
+gdb_test "continue" \
     ".*Breakpoint.*~Derived.*" \
     "run to breakpoint 3 v1"
 
