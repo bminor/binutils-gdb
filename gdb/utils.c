@@ -623,7 +623,7 @@ perror_string (const char *prefix)
    as the file name for which the error was encountered.  Use ERRCODE
    for the thrown exception.  Then return to command level.  */
 
-void
+static void ATTRIBUTE_NORETURN
 throw_perror_with_name (enum errors errcode, const char *string)
 {
   std::string combined = perror_string (string);

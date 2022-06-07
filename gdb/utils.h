@@ -296,9 +296,6 @@ extern CORE_ADDR string_to_core_addr (const char *my_string);
 extern void fprintf_symbol (struct ui_file *, const char *,
 			    enum language, int);
 
-extern void throw_perror_with_name (enum errors errcode, const char *string)
-  ATTRIBUTE_NORETURN;
-
 extern void perror_warning_with_name (const char *string);
 
 extern void print_sys_errmsg (const char *, int);
