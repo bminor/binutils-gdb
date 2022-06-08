@@ -467,9 +467,6 @@ public:
 		     gdb::hash_enum<sect_offset>>
     abstract_to_concrete;
 
-  /* CUs that are queued to be read.  */
-  gdb::optional<std::queue<dwarf2_queue_item>> queue;
-
   /* The address map that is used by the DWARF index code.  */
   struct addrmap *index_addrmap = nullptr;
 };
@@ -577,6 +574,9 @@ struct dwarf2_per_objfile
 
   /* The CU containing the m_builder in scope.  */
   dwarf2_cu *sym_cu = nullptr;
+
+  /* CUs that are queued to be read.  */
+  gdb::optional<std::queue<dwarf2_queue_item>> queue;
 
 private:
   /* Hold the corresponding compunit_symtab for each CU or TU.  This

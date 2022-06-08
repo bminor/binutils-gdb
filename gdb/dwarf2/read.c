@@ -1231,18 +1231,18 @@ public:
   explicit dwarf2_queue_guard (dwarf2_per_objfile *per_objfile)
     : m_per_objfile (per_objfile)
   {
-    gdb_assert (!m_per_objfile->per_bfd->queue.has_value ());
+    gdb_assert (!m_per_objfile->queue.has_value ());
 
-    m_per_objfile->per_bfd->queue.emplace ();
+    m_per_objfile->queue.emplace ();
   }
 
   /* Free any entries remaining on the queue.  There should only be
      entries left if we hit an error while processing the dwarf.  */
   ~dwarf2_queue_guard ()
   {
-    gdb_assert (m_per_objfile->per_bfd->queue.has_value ());
+    gdb_assert (m_per_objfile->queue.has_value ());
 
-    m_per_objfile->per_bfd->queue.reset ();
+    m_per_objfile->queue.reset ();
   }
 
   DISABLE_COPY_AND_ASSIGN (dwarf2_queue_guard);
@@ -1474,7 +1474,7 @@ dwarf2_per_bfd::~dwarf2_per_bfd ()
 void
 dwarf2_per_objfile::remove_all_cus ()
 {
-  gdb_assert (!this->per_bfd->queue.has_value ());
+  gdb_assert (!queue.has_value ());
 
   m_dwarf2_cus.clear ();
 }
@@ -7491,8 +7491,8 @@ queue_comp_unit (dwarf2_per_cu_data *per_cu,
 {
   per_cu->queued = 1;
 
-  gdb_assert (per_objfile->per_bfd->queue.has_value ());
-  per_cu->per_bfd->queue->emplace (per_cu, per_objfile, pretend_language);
+  gdb_assert (per_objfile->queue.has_value ());
+  per_objfile->queue->emplace (per_cu, per_objfile, pretend_language);
 }
 
 /* If PER_CU is not yet expanded of queued for expansion, add it to the queue.
@@ -7575,9 +7575,9 @@ process_queue (dwarf2_per_objfile *per_objfile)
 
   /* The queue starts out with one item, but following a DIE reference
      may load a new CU, adding it to the end of the queue.  */
-  while (!per_objfile->per_bfd->queue->empty ())
+  while (!per_objfile->queue->empty ())
     {
-      dwarf2_queue_item &item = per_objfile->per_bfd->queue->front ();
+      dwarf2_queue_item &item = per_objfile->queue->front ();
       dwarf2_per_cu_data *per_cu = item.per_cu;
 
       if (!per_objfile->symtab_set_p (per_cu))
@@ -7623,7 +7623,7 @@ process_queue (dwarf2_per_objfile *per_objfile)
 	}
 
       per_cu->queued = 0;
-      per_objfile->per_bfd->queue->pop ();
+      per_objfile->queue->pop ();
     }
 
   dwarf_read_debug_printf ("Done expanding symtabs of %s.",
@@ -23558,7 +23558,7 @@ dwarf2_per_objfile::age_comp_units ()
      loaded in memory.  Calling age_comp_units while the queue is in use could
      make us free the DIEs for a CU that is in the queue and therefore break
      that invariant.  */
-  gdb_assert (!this->per_bfd->queue.has_value ());
+  gdb_assert (!queue.has_value ());
 
   /* Start by clearing all marks.  */
   for (const auto &pair : m_dwarf2_cus)
