@@ -60,7 +60,7 @@ static bfd_howto_type howto_table[] =
   BFD_HOWTO (BFD_RELOC_24,
      R_IMM24,		/* type */
      0,			/* rightshift */
-     1,			/* size (0 = byte, 1 = short, 2 = long) */
+     5,			/* size (0 = byte, 1 = short, 2 = long) */
      24,		/* bitsize */
      false,		/* pc_relative */
      0,			/* bitpos */
@@ -195,7 +195,7 @@ static bfd_howto_type howto_table[] =
   BFD_HOWTO (BFD_RELOC_Z80_WORD0,
      R_WORD0,		/* type */
      0,			/* rightshift */
-     0,			/* size (0 = byte, 1 = short, 2 = long) */
+     1,			/* size (0 = byte, 1 = short, 2 = long) */
      16,		/* bitsize */
      false,		/* pc_relative */
      0,			/* bitpos */
@@ -210,7 +210,7 @@ static bfd_howto_type howto_table[] =
   BFD_HOWTO (BFD_RELOC_Z80_WORD1,
      R_WORD1,		/* type */
      16,		/* rightshift */
-     0,			/* size (0 = byte, 1 = short, 2 = long) */
+     1,			/* size (0 = byte, 1 = short, 2 = long) */
      16,		/* bitsize */
      false,		/* pc_relative */
      0,			/* bitpos */
@@ -405,11 +405,9 @@ extra_case (bfd *in_abfd,
 
     case R_IMM24:
       if (reloc->howto->partial_inplace)
-        val += (bfd_get_16 ( in_abfd, data+*src_ptr)
-            + (bfd_get_8 ( in_abfd, data+*src_ptr+2) << 16))
-            & reloc->howto->src_mask;
-      bfd_put_16 (in_abfd, val, data + *dst_ptr);
-      bfd_put_8 (in_abfd, val >> 16, data + *dst_ptr+2);
+	val += (bfd_get_24 (in_abfd, data + *src_ptr)
+		& reloc->howto->src_mask);
+      bfd_put_24 (in_abfd, val, data + *dst_ptr);
       (*dst_ptr) += 3;
       (*src_ptr) += 3;
       break;
