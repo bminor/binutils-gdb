@@ -82,7 +82,7 @@ static reloc_howto_type elf_nfp_howto_table[] =
   HOWTO (R_NFP_IMMED_LO16_I_B, 0, 3, 0, false, 0,
 	 complain_overflow_dont, elf64_nfp_reloc,
 	 "R_NFP_IMMED_LO16_I_B",
-	 true, 0, 0, false),
+	 false, 0, 0, false),
   HOWTO (R_NFP_SRC7_B, 0, 3, 0, false, 0,
 	 complain_overflow_dont, elf64_nfp_reloc,
 	 "R_NFP_SRC7_B",
