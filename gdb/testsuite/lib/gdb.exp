@@ -4097,7 +4097,7 @@ set gcc_compiled		0
 #
 # -- chastain 2004-01-06
 
-proc get_compiler_info {{arg ""}} {
+proc get_compiler_info {{language "c"}} {
     # For compiler.c, compiler.cc and compiler.F90.
     global srcdir
 
@@ -4117,11 +4117,15 @@ proc get_compiler_info {{arg ""}} {
     }
 
     # Choose which file to preprocess.
-    set ifile "${srcdir}/lib/compiler.c"
-    if { $arg == "c++" } {
+    if { $language == "c++" } {
 	set ifile "${srcdir}/lib/compiler.cc"
-    } elseif { $arg == "f90" } {
+    } elseif { $language == "f90" } {
 	set ifile "${srcdir}/lib/compiler.F90"
+    } elseif { $language == "c" } {
+	set ifile "${srcdir}/lib/compiler.c"
+    } else {
+	perror "Unable to fetch compiler version for language: $language"
+	return -1
     }
 
     # Run $ifile through the right preprocessor.
@@ -4132,12 +4136,12 @@ proc get_compiler_info {{arg ""}} {
 	# We have to use -E and -o together, despite the comments
 	# above, because of how DejaGnu handles remote host testing.
 	set ppout "$outdir/compiler.i"
-	gdb_compile "${ifile}" "$ppout" preprocess [list "$arg" quiet getting_compiler_info]
+	gdb_compile "${ifile}" "$ppout" preprocess [list "$language" quiet getting_compiler_info]
 	set file [open $ppout r]
 	set cppout [read $file]
 	close $file
     } else {
-	set cppout [ gdb_compile "${ifile}" "" preprocess [list "$arg" quiet getting_compiler_info] ]
+	set cppout [ gdb_compile "${ifile}" "" preprocess [list "$language" quiet getting_compiler_info] ]
     }
     eval log_file $saved_log
 
@@ -4193,7 +4197,7 @@ proc get_compiler_info {{arg ""}} {
 # Otherwise the argument is a glob-style expression to match against
 # compiler_info.
 
-proc test_compiler_info { {compiler ""} {language ""} } {
+proc test_compiler_info { {compiler ""} {language "c"} } {
     global compiler_info
     get_compiler_info $language
 
@@ -4767,11 +4771,12 @@ proc gdb_compile_shlib_1 {sources dest options} {
 	set ada 1
     }
 
-    set info_options ""
     if { [lsearch -exact $options "c++"] >= 0 } {
 	set info_options "c++"
     } elseif { [lsearch -exact $options "f90"] >= 0 } {
 	set info_options "f90"
+    } else {
+	set info_options "c"
     }
 
     switch -glob [test_compiler_info "" ${info_options}] {
