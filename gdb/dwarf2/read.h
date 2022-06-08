@@ -28,6 +28,7 @@
 #include "dwarf2/index-cache.h"
 #include "dwarf2/mapped-index.h"
 #include "dwarf2/section.h"
+#include "dwarf2/cu.h"
 #include "filename-seen-cache.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/hash_enum.h"
@@ -547,7 +548,7 @@ struct dwarf2_per_objfile
   dwarf2_cu *get_cu (dwarf2_per_cu_data *per_cu);
 
   /* Set the dwarf2_cu matching PER_CU for this objfile.  */
-  void set_cu (dwarf2_per_cu_data *per_cu, dwarf2_cu *cu);
+  void set_cu (dwarf2_per_cu_data *per_cu, std::unique_ptr<dwarf2_cu> cu);
 
   /* Remove/free the dwarf2_cu matching PER_CU for this objfile.  */
   void remove_cu (dwarf2_per_cu_data *per_cu);
@@ -596,7 +597,8 @@ private:
 
   /* Map from the objfile-independent dwarf2_per_cu_data instances to the
      corresponding objfile-dependent dwarf2_cu instances.  */
-  std::unordered_map<dwarf2_per_cu_data *, dwarf2_cu *> m_dwarf2_cus;
+  std::unordered_map<dwarf2_per_cu_data *,
+		     std::unique_ptr<dwarf2_cu>> m_dwarf2_cus;
 };
 
 /* Get the dwarf2_per_objfile associated to OBJFILE.  */

@@ -1476,9 +1476,6 @@ dwarf2_per_objfile::remove_all_cus ()
 {
   gdb_assert (!this->per_bfd->queue.has_value ());
 
-  for (auto pair : m_dwarf2_cus)
-    delete pair.second;
-
   m_dwarf2_cus.clear ();
 }
 
@@ -6350,7 +6347,7 @@ cutu_reader::keep ()
       /* Save this dwarf2_cu in the per_objfile.  The per_objfile owns it
 	 now.  */
       dwarf2_per_objfile *per_objfile = m_new_cu->per_objfile;
-      per_objfile->set_cu (m_this_cu, m_new_cu.release ());
+      per_objfile->set_cu (m_this_cu, std::move (m_new_cu));
     }
 }
 
@@ -23535,17 +23532,18 @@ dwarf2_per_objfile::get_cu (dwarf2_per_cu_data *per_cu)
   if (it == m_dwarf2_cus.end ())
     return nullptr;
 
-  return it->second;
+  return it->second.get ();
 }
 
 /* See read.h.  */
 
 void
-dwarf2_per_objfile::set_cu (dwarf2_per_cu_data *per_cu, dwarf2_cu *cu)
+dwarf2_per_objfile::set_cu (dwarf2_per_cu_data *per_cu,
+			    std::unique_ptr<dwarf2_cu> cu)
 {
   gdb_assert (this->get_cu (per_cu) == nullptr);
 
-  m_dwarf2_cus[per_cu] = cu;
+  m_dwarf2_cus[per_cu] = std::move (cu);
 }
 
 /* See read.h.  */
@@ -23563,14 +23561,14 @@ dwarf2_per_objfile::age_comp_units ()
   gdb_assert (!this->per_bfd->queue.has_value ());
 
   /* Start by clearing all marks.  */
-  for (auto pair : m_dwarf2_cus)
+  for (const auto &pair : m_dwarf2_cus)
     pair.second->clear_mark ();
 
   /* Traverse all CUs, mark them and their dependencies if used recently
      enough.  */
-  for (auto pair : m_dwarf2_cus)
+  for (const auto &pair : m_dwarf2_cus)
     {
-      dwarf2_cu *cu = pair.second;
+      dwarf2_cu *cu = pair.second.get ();
 
       cu->last_used++;
       if (cu->last_used <= dwarf_max_cache_age)
@@ -23580,13 +23578,12 @@ dwarf2_per_objfile::age_comp_units ()
   /* Delete all CUs still not marked.  */
   for (auto it = m_dwarf2_cus.begin (); it != m_dwarf2_cus.end ();)
     {
-      dwarf2_cu *cu = it->second;
+      dwarf2_cu *cu = it->second.get ();
 
       if (!cu->is_marked ())
 	{
 	  dwarf_read_debug_printf_v ("deleting old CU %s",
 				     sect_offset_str (cu->per_cu->sect_off));
-	  delete cu;
 	  it = m_dwarf2_cus.erase (it);
 	}
       else
@@ -23602,8 +23599,6 @@ dwarf2_per_objfile::remove_cu (dwarf2_per_cu_data *per_cu)
   auto it = m_dwarf2_cus.find (per_cu);
   if (it == m_dwarf2_cus.end ())
     return;
-
-  delete it->second;
 
   m_dwarf2_cus.erase (it);
 }
