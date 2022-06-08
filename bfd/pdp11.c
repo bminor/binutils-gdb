@@ -3261,7 +3261,7 @@ aout_link_reloc_link_order (struct aout_final_link_info *flaginfo,
     r_baserel = (howto->type & 8) != 0;
     r_jmptable = (howto->type & 16) != 0;
     r_relative = (howto->type & 32) != 0;
-    r_length = howto->size;
+    r_length = bfd_log2 (bfd_get_reloc_size (howto));
 
     PUT_WORD (flaginfo->output_bfd, p->offset, srel.r_address);
     if (bfd_header_big_endian (flaginfo->output_bfd))

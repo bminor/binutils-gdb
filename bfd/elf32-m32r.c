@@ -221,16 +221,16 @@ m32r_elf_generic_reloc (bfd *input_bfd,
   (((x & reloc_entry->howto->src_mask) +  relocation) &	\
   reloc_entry->howto->dst_mask))
 
-  switch (reloc_entry->howto->size)
+  switch (bfd_get_reloc_size (reloc_entry->howto))
     {
-    case 1:
+    case 2:
       {
 	short x = bfd_get_16 (input_bfd, inplace_address);
 	DOIT (x);
 	bfd_put_16 (input_bfd, (bfd_vma) x, inplace_address);
       }
       break;
-    case 2:
+    case 4:
       {
 	unsigned long x = bfd_get_32 (input_bfd, inplace_address);
 	DOIT (x);

@@ -530,9 +530,9 @@ crx_elf_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
   /* Apply dst_mask to select only relocatable part of the insn.  */
   Rvalue &= howto->dst_mask;
 
-  switch (howto->size)
+  switch (bfd_get_reloc_size (howto))
     {
-     case 0:
+     case 1:
        if (r_type == R_CRX_REL4)
 	 {
 	   Rvalue <<= 4;
@@ -542,14 +542,14 @@ crx_elf_final_link_relocate (reloc_howto_type *howto, bfd *input_bfd,
        bfd_put_8 (input_bfd, (unsigned char) Rvalue, hit_data);
        break;
 
-     case 1:
+     case 2:
        if (r_type == R_CRX_REGREL12)
 	 Rvalue |= (bfd_get_16 (input_bfd, hit_data) & 0xf000);
 
        bfd_put_16 (input_bfd, Rvalue, hit_data);
        break;
 
-     case 2:
+     case 4:
        if (r_type == R_CRX_REL24
 	   || r_type == R_CRX_REGREL22
 	   || r_type == R_CRX_REGREL28)

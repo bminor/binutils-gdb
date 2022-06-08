@@ -5146,7 +5146,7 @@ csky_elf_relocate_section (bfd *                  output_bfd,
 	 does no change with the data read. But we may need this mechanism in
 	 the future.  */
 
-      if (howto->size == 2
+      if (bfd_get_reloc_size (howto) == 4
 	  && (howto->type == R_CKCORE_ADDR32
 	      || howto->type == R_CKCORE_PCREL32
 	      || howto->type == R_CKCORE_GOT32

@@ -2986,9 +2986,9 @@ nds32_elf_generic_reloc (bfd *input_bfd, arelent *reloc_entry,
   (((x & reloc_entry->howto->src_mask) +  relocation) &	\
   reloc_entry->howto->dst_mask))
 
-  switch (reloc_entry->howto->size)
+  switch (bfd_get_reloc_size (reloc_entry->howto))
     {
-    case 1:
+    case 2:
       {
 	short x = bfd_getb16 (inplace_address);
 
@@ -2996,7 +2996,7 @@ nds32_elf_generic_reloc (bfd *input_bfd, arelent *reloc_entry,
 	bfd_putb16 ((bfd_vma) x, inplace_address);
       }
       break;
-    case 2:
+    case 4:
       {
 	unsigned long x = bfd_getb32 (inplace_address);
 

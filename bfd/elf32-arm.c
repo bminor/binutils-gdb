@@ -10357,11 +10357,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *	    howto,
     {
       bfd_vma sign;
 
-      switch (howto->size)
+      switch (bfd_get_reloc_size (howto))
 	{
-	case 0: addend = bfd_get_8 (input_bfd, hit_data); break;
-	case 1: addend = bfd_get_16 (input_bfd, hit_data); break;
-	case 2: addend = bfd_get_32 (input_bfd, hit_data); break;
+	case 1: addend = bfd_get_8 (input_bfd, hit_data); break;
+	case 2: addend = bfd_get_16 (input_bfd, hit_data); break;
+	case 4: addend = bfd_get_32 (input_bfd, hit_data); break;
 	default: addend = 0; break;
 	}
       /* Note: the addend and signed_addend calculated here are
@@ -13059,7 +13059,7 @@ arm_add_to_rel (bfd *		   abfd,
 	case R_ARM_PLT32:
 	case R_ARM_CALL:
 	case R_ARM_JUMP24:
-	  addend <<= howto->size;
+	  addend *= bfd_get_reloc_size (howto);
 	  addend += increment;
 
 	  /* Should we check for overflow here ?  */

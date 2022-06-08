@@ -324,15 +324,15 @@ extract_rel_addend (bfd *abfd,
 {
   bfd_vma insn, val;
 
-  switch (howto->size)
+  switch (bfd_get_reloc_size (howto))
     {
-    case 0:
+    case 1:
       insn = bfd_get_8 (abfd, where);
       break;
-    case 1:
+    case 2:
       insn = bfd_get_16 (abfd, where);
       break;
-    case 2:
+    case 4:
       insn = bfd_get_32 (abfd, where);
       break;
     default:
@@ -362,19 +362,19 @@ insert_rel_addend (bfd *abfd,
 
   addend = (addend >> howto->rightshift << howto->bitpos) & howto->dst_mask;
   insn = ~howto->dst_mask;
-  switch (howto->size)
+  switch (bfd_get_reloc_size (howto))
     {
-    case 0:
+    case 1:
       insn &= bfd_get_8 (abfd, where);
       insn |= addend;
       bfd_put_8 (abfd, insn, where);
       break;
-    case 1:
+    case 2:
       insn &= bfd_get_16 (abfd, where);
       insn |= addend;
       bfd_put_16 (abfd, insn, where);
       break;
-    case 2:
+    case 4:
       insn &= bfd_get_32 (abfd, where);
       insn |= addend;
       bfd_put_32 (abfd, insn, where);

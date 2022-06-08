@@ -1311,19 +1311,19 @@ arc_do_relocation (bfd_byte * contents,
   if (!reloc_data.should_relocate)
     return bfd_reloc_ok;
 
-  switch (reloc_data.howto->size)
+  switch (bfd_get_reloc_size (reloc_data.howto))
     {
-    case 2:
+    case 4:
       insn = arc_bfd_get_32 (abfd,
 			     contents + reloc_data.reloc_offset,
 			     reloc_data.input_section);
       break;
-    case 1:
+    case 2:
       insn = arc_bfd_get_16 (abfd,
 			     contents + reloc_data.reloc_offset,
 			     reloc_data.input_section);
       break;
-    case 0:
+    case 1:
       insn = arc_bfd_get_8 (abfd,
 			    contents + reloc_data.reloc_offset,
 			    reloc_data.input_section);
@@ -1367,19 +1367,19 @@ arc_do_relocation (bfd_byte * contents,
     }
 
   /* Write updated instruction back to memory.  */
-  switch (reloc_data.howto->size)
+  switch (bfd_get_reloc_size (reloc_data.howto))
     {
-    case 2:
+    case 4:
       arc_bfd_put_32 (abfd, insn,
 		      contents + reloc_data.reloc_offset,
 		      reloc_data.input_section);
       break;
-    case 1:
+    case 2:
 	arc_bfd_put_16 (abfd, insn,
 			contents + reloc_data.reloc_offset,
 			reloc_data.input_section);
 	break;
-    case 0:
+    case 1:
       arc_bfd_put_8 (abfd, insn,
 		     contents + reloc_data.reloc_offset,
 		     reloc_data.input_section);

@@ -124,9 +124,9 @@ coff_arm_reloc (bfd *abfd,
       if (!bfd_reloc_offset_in_range (howto, abfd, input_section, octets))
 	return bfd_reloc_outofrange;
 
-      switch (howto->size)
+      switch (bfd_get_reloc_size (howto))
 	{
-	case 0:
+	case 1:
 	  {
 	    char x = bfd_get_8 (abfd, addr);
 	    DOIT (x);
@@ -134,7 +134,7 @@ coff_arm_reloc (bfd *abfd,
 	  }
 	  break;
 
-	case 1:
+	case 2:
 	  {
 	    short x = bfd_get_16 (abfd, addr);
 	    DOIT (x);
@@ -142,7 +142,7 @@ coff_arm_reloc (bfd *abfd,
 	  }
 	  break;
 
-	case 2:
+	case 4:
 	  {
 	    long x = bfd_get_32 (abfd, addr);
 	    DOIT (x);

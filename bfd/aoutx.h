@@ -1947,7 +1947,7 @@ NAME (aout, swap_std_reloc_out) (bfd *abfd,
   int r_index;
   asymbol *sym = *(g->sym_ptr_ptr);
   int r_extern;
-  unsigned int r_length;
+  unsigned int r_length, r_size;
   int r_pcrel;
   int r_baserel, r_jmptable, r_relative;
   asection *output_section = sym->section->output_section;
@@ -1956,21 +1956,14 @@ NAME (aout, swap_std_reloc_out) (bfd *abfd,
 
   BFD_ASSERT (g->howto != NULL);
 
-  switch (bfd_get_reloc_size (g->howto))
+  r_size = bfd_get_reloc_size (g->howto);
+  r_length = bfd_log2 (r_size);
+  if (1u << r_length != r_size)
     {
-    default:
       _bfd_error_handler (_("%pB: unsupported AOUT relocation size: %d"),
-			  abfd, bfd_get_reloc_size (g->howto));
+			  abfd, r_size);
       bfd_set_error (bfd_error_bad_value);
       return;
-    case 1:
-    case 2:
-    case 4:
-      r_length = g->howto->size;	/* Size as a power of two.  */
-      break;
-    case 8:
-      r_length = 3;
-      break;
     }
 
   r_pcrel  = (int) g->howto->pc_relative; /* Relative to PC?  */
@@ -3835,10 +3828,7 @@ aout_link_reloc_link_order (struct aout_final_link_info *flaginfo,
 	r_baserel = (howto->type & 8) != 0;
 	r_jmptable = (howto->type & 16) != 0;
 	r_relative = (howto->type & 32) != 0;
-	if (bfd_get_reloc_size (howto) != 8)
-	  r_length = howto->size;	/* Size as a power of two.  */
-	else
-	  r_length = 3;
+	r_length = bfd_log2 (bfd_get_reloc_size (howto));
 
 	PUT_WORD (flaginfo->output_bfd, p->offset, srel.r_address);
 	if (bfd_header_big_endian (flaginfo->output_bfd))

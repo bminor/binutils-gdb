@@ -109,14 +109,14 @@ coff_i386_reloc (bfd *abfd,
 	  reloc_howto_type *howto = reloc_entry->howto;
 
 	  /* Although PC relative relocations are very similar between
-	     PE and non-PE formats, but they are off by 1 << howto->size
+	     PE and non-PE formats, but they are off by howto->size
 	     bytes. For the external relocation, PE is very different
 	     from others. See md_apply_fix3 () in gas/config/tc-i386.c.
 	     When we link PE and non-PE object files together to
 	     generate a non-PE executable, we have to compensate it
 	     here.  */
 	  if (howto->pc_relative && howto->pcrel_offset)
-	    diff = -(1 << howto->size);
+	    diff = -bfd_get_reloc_size (howto);
 	  else if (symbol->flags & BSF_WEAK)
 	    diff = reloc_entry->addend - symbol->value;
 	  else
@@ -148,9 +148,9 @@ coff_i386_reloc (bfd *abfd,
       if (!bfd_reloc_offset_in_range (howto, abfd, input_section, octets))
 	return bfd_reloc_outofrange;
 
-      switch (howto->size)
+      switch (bfd_get_reloc_size (howto))
 	{
-	case 0:
+	case 1:
 	  {
 	    char x = bfd_get_8 (abfd, addr);
 	    DOIT (x);
@@ -158,7 +158,7 @@ coff_i386_reloc (bfd *abfd,
 	  }
 	  break;
 
-	case 1:
+	case 2:
 	  {
 	    short x = bfd_get_16 (abfd, addr);
 	    DOIT (x);
@@ -166,7 +166,7 @@ coff_i386_reloc (bfd *abfd,
 	  }
 	  break;
 
-	case 2:
+	case 4:
 	  {
 	    long x = bfd_get_32 (abfd, addr);
 	    DOIT (x);

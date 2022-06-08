@@ -492,7 +492,7 @@ cris_elf_pcrel_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 
      Only adjust when doing a final link.  */
   if (output_bfd == (bfd *) NULL)
-    reloc_entry->addend -= 1 << reloc_entry->howto->size;
+    reloc_entry->addend -= bfd_get_reloc_size (reloc_entry->howto);
 
   return
     bfd_elf_generic_reloc (abfd, reloc_entry, symbol, data,

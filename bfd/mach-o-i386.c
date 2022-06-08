@@ -218,7 +218,7 @@ bfd_mach_o_i386_swap_reloc_out (arelent *rel, bfd_mach_o_reloc_info *rinfo)
       rinfo->r_scattered = 0;
       rinfo->r_type = BFD_MACH_O_GENERIC_RELOC_VANILLA;
       rinfo->r_pcrel = rel->howto->pc_relative;
-      rinfo->r_length = rel->howto->size; /* Correct in practice.  */
+      rinfo->r_length = bfd_log2 (bfd_get_reloc_size (rel->howto));
       if ((*rel->sym_ptr_ptr)->flags & BSF_SECTION_SYM)
 	{
 	  rinfo->r_extern = 0;
@@ -235,7 +235,7 @@ bfd_mach_o_i386_swap_reloc_out (arelent *rel, bfd_mach_o_reloc_info *rinfo)
       rinfo->r_scattered = 1;
       rinfo->r_type = BFD_MACH_O_GENERIC_RELOC_SECTDIFF;
       rinfo->r_pcrel = 0;
-      rinfo->r_length = rel->howto->size;
+      rinfo->r_length = bfd_log2 (bfd_get_reloc_size (rel->howto));
       rinfo->r_extern = 0;
       rinfo->r_value = rel->addend;
       break;
@@ -243,7 +243,7 @@ bfd_mach_o_i386_swap_reloc_out (arelent *rel, bfd_mach_o_reloc_info *rinfo)
       rinfo->r_scattered = 1;
       rinfo->r_type = BFD_MACH_O_GENERIC_RELOC_LOCAL_SECTDIFF;
       rinfo->r_pcrel = 0;
-      rinfo->r_length = rel->howto->size;
+      rinfo->r_length = bfd_log2 (bfd_get_reloc_size (rel->howto));
       rinfo->r_extern = 0;
       rinfo->r_value = rel->addend;
       break;
@@ -252,7 +252,7 @@ bfd_mach_o_i386_swap_reloc_out (arelent *rel, bfd_mach_o_reloc_info *rinfo)
       rinfo->r_scattered = 1;
       rinfo->r_type = BFD_MACH_O_GENERIC_RELOC_PAIR;
       rinfo->r_pcrel = 0;
-      rinfo->r_length = rel->howto->size;
+      rinfo->r_length = bfd_log2 (bfd_get_reloc_size (rel->howto));
       rinfo->r_extern = 0;
       rinfo->r_value = rel->addend;
       break;

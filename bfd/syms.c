@@ -1081,7 +1081,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 
 	      octets = r->address * bfd_octets_per_byte (abfd, NULL);
 	      if (r->howto->rightshift != 0
-		  || r->howto->size != 2
+		  || bfd_get_reloc_size (r->howto) != 4
 		  || r->howto->bitsize != 32
 		  || r->howto->pc_relative
 		  || r->howto->bitpos != 0

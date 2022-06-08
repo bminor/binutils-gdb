@@ -2058,10 +2058,8 @@ struct reloc_howto_struct
      an external reloc number is stored in this field.  */
   unsigned int type;
 
-  /* The encoded size of the item to be relocated.  This is *not* a
-     power-of-two measure.  Use bfd_get_reloc_size to find the size
-     of the item in bytes.  */
-  unsigned int size:3;
+  /* The size of the item to be relocated in bytes.  */
+  unsigned int size:4;
 
   /* The number of bits in the field to be relocated.  This is used
      when doing overflow checking.  */
@@ -2135,7 +2133,7 @@ struct reloc_howto_struct
   const char *name;
 };
 
-#define HOWTO_RSIZE(sz) (sz == 1 || sz == -1 ? 0 : sz == 2 || sz == -2 ? 1 : sz == 4 || sz == -4 ? 2 : sz == 0 ? 3 : sz == 8 || sz == -8 ? 4 : sz == 3 || sz == -3 ? 5 : 0x777)
+#define HOWTO_RSIZE(sz) ((sz) < 0 ? -(sz) : (sz))
 #define HOWTO(type, right, size, bits, pcrel, left, ovf, func, name,   \
               inplace, src_mask, dst_mask, pcrel_off)                  \
   { (unsigned) type, HOWTO_RSIZE (size), bits, right, left, ovf,       \
@@ -2144,7 +2142,11 @@ struct reloc_howto_struct
   HOWTO ((C), 0, 1, 0, false, 0, complain_overflow_dont, NULL, \
          NULL, false, 0, 0, false)
 
-unsigned int bfd_get_reloc_size (reloc_howto_type *);
+static inline unsigned int
+bfd_get_reloc_size (reloc_howto_type *howto)
+{
+  return howto->size;
+}
 
 typedef struct relent_chain
 {

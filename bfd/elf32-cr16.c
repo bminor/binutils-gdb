@@ -952,9 +952,9 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
       Rvalue &= howto->dst_mask;
     }
 
-  switch (howto->size)
+  switch (bfd_get_reloc_size (howto))
     {
-    case 0:
+    case 1:
       if (r_type == R_CR16_DISP8)
 	{
 	  Rvalue1 = bfd_get_16 (input_bfd, hit_data);
@@ -981,7 +981,7 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
 	}
       break;
 
-    case 1:
+    case 2:
       if (r_type == R_CR16_DISP16)
 	{
 	  Rvalue |= (bfd_get_16 (input_bfd, hit_data));
@@ -1002,7 +1002,7 @@ cr16_elf_final_link_relocate (reloc_howto_type *howto,
       bfd_put_16 (input_bfd, Rvalue, hit_data);
       break;
 
-    case 2:
+    case 4:
       if ((r_type == R_CR16_ABS20) || (r_type == R_CR16_IMM20))
 	{
 	  Rvalue1 = (bfd_get_16 (input_bfd, hit_data + 2)

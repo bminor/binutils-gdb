@@ -2110,9 +2110,9 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      bfd_vma addend;
 	      bfd_byte *where = contents + rel->r_offset;
 
-	      switch (howto->size)
+	      switch (bfd_get_reloc_size (howto))
 		{
-		case 0:
+		case 1:
 		  addend = bfd_get_8 (input_bfd, where);
 		  if (howto->pc_relative)
 		    {
@@ -2120,7 +2120,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		      addend += 1;
 		    }
 		  break;
-		case 1:
+		case 2:
 		  addend = bfd_get_16 (input_bfd, where);
 		  if (howto->pc_relative)
 		    {
@@ -2128,7 +2128,7 @@ elf_i386_relocate_section (bfd *output_bfd,
 		      addend += 2;
 		    }
 		  break;
-		case 2:
+		case 4:
 		  addend = bfd_get_32 (input_bfd, where);
 		  if (howto->pc_relative)
 		    {
@@ -2151,20 +2151,20 @@ elf_i386_relocate_section (bfd *output_bfd,
 		  addend += msec->output_section->vma + msec->output_offset;
 		}
 
-	      switch (howto->size)
+	      switch (bfd_get_reloc_size (howto))
 		{
-		case 0:
+		case 1:
 		  /* FIXME: overflow checks.  */
 		  if (howto->pc_relative)
 		    addend -= 1;
 		  bfd_put_8 (input_bfd, addend, where);
 		  break;
-		case 1:
+		case 2:
 		  if (howto->pc_relative)
 		    addend -= 2;
 		  bfd_put_16 (input_bfd, addend, where);
 		  break;
-		case 2:
+		case 4:
 		  if (howto->pc_relative)
 		    addend -= 4;
 		  bfd_put_32 (input_bfd, addend, where);

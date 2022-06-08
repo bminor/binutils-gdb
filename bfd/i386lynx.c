@@ -120,7 +120,7 @@ NAME(lynx,swap_std_reloc_out) (bfd *abfd,
 
   PUT_WORD (abfd, g->address, natptr->r_address);
 
-  r_length = g->howto->size;	/* Size as a power of two */
+  r_length = bfd_log2 (bfd_get_reloc_size (g->howto));
   r_pcrel = (int) g->howto->pc_relative;	/* Relative to PC? */
   /* r_baserel, r_jmptable, r_relative???  FIXME-soon */
   r_baserel = 0;

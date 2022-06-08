@@ -508,9 +508,12 @@ do_ns32k_reloc (bfd *      abfd,
   x = ( (x & ~howto->dst_mask) | (((x & howto->src_mask) +  relocation) & howto->dst_mask))
 
   location = (bfd_byte *) data + addr;
-  switch (howto->size)
+  switch (bfd_get_reloc_size (howto))
     {
     case 0:
+      break;
+
+    case 1:
       {
 	bfd_vma x = get_data (location, 1);
 	DOIT (x);
@@ -518,7 +521,7 @@ do_ns32k_reloc (bfd *      abfd,
       }
       break;
 
-    case 1:
+    case 2:
       if (relocation)
 	{
 	  bfd_vma x = get_data (location, 2);
@@ -526,7 +529,7 @@ do_ns32k_reloc (bfd *      abfd,
 	  put_data ((bfd_vma) x, location, 2);
 	}
       break;
-    case 2:
+    case 4:
       if (relocation)
 	{
 	  bfd_vma x = get_data (location, 4);
@@ -535,11 +538,7 @@ do_ns32k_reloc (bfd *      abfd,
 	}
       break;
 
-    case 3:
-      /* Do nothing.  */
-      break;
-
-    case 4:
+    case 8:
 #ifdef BFD64
       if (relocation)
 	{

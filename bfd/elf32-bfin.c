@@ -375,9 +375,9 @@ bfin_bfd_reloc (bfd *abfd,
   x = ( (x & ~howto->dst_mask) | (relocation & howto->dst_mask))
 
   /* handle 8 and 16 bit relocations here. */
-  switch (howto->size)
+  switch (bfd_get_reloc_size (howto))
     {
-    case 0:
+    case 1:
       {
 	char x = bfd_get_8 (abfd, (char *) data + addr);
 	DOIT (x);
@@ -385,7 +385,7 @@ bfin_bfd_reloc (bfd *abfd,
       }
       break;
 
-    case 1:
+    case 2:
       {
 	unsigned short x = bfd_get_16 (abfd, (bfd_byte *) data + addr);
 	DOIT (x);

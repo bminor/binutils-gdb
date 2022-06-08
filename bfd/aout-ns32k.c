@@ -21,6 +21,7 @@
 
 #include "sysdep.h"
 #include "bfd.h"
+#include "libbfd.h"
 #include "aout/aout64.h"
 #include "ns32k.h"
 
@@ -180,7 +181,7 @@ MY (put_reloc) (bfd *abfd,
   int r_ns32k_type;
 
   PUT_WORD (abfd, value, reloc->r_address);
-  r_length = howto->size ;	/* Size as a power of two.  */
+  r_length = bfd_log2 (bfd_get_reloc_size (howto));
   r_pcrel  = (int) howto->pc_relative; /* Relative to PC?  */
   r_ns32k_type = (howto - MY (howto_table) )/6;
 

@@ -1587,7 +1587,9 @@ xcoff64_ppc_relocate_section (bfd *output_bfd,
 	    case R_POS:
 	    case R_NEG:
 	      howto.bitsize = (rel->r_size & 0x3f) + 1;
-	      howto.size = howto.bitsize > 16 ? (howto.bitsize > 32 ? 4 : 2) : 1;
+	      howto.size = HOWTO_RSIZE (howto.bitsize <= 16
+					? 2 : howto.bitsize <= 32
+					? 4 : 8);
 	      howto.src_mask = howto.dst_mask = N_ONES (howto.bitsize);
 	      break;
 
@@ -1680,12 +1682,18 @@ xcoff64_ppc_relocate_section (bfd *output_bfd,
 	abort ();
 
       /* Get the value we are going to relocate.  */
-      if (1 == howto.size)
-	value_to_relocate = bfd_get_16 (input_bfd, location);
-      else if (2 == howto.size)
-	value_to_relocate = bfd_get_32 (input_bfd, location);
-      else
-	value_to_relocate = bfd_get_64 (input_bfd, location);
+      switch (bfd_get_reloc_size (&howto))
+	{
+	case 2:
+	  value_to_relocate = bfd_get_16 (input_bfd, location);
+	  break;
+	case 4:
+	  value_to_relocate = bfd_get_32 (input_bfd, location);
+	  break;
+	default:
+	  value_to_relocate = bfd_get_64 (input_bfd, location);
+	  break;
+	}
 
       /* overflow.
 
@@ -1729,13 +1737,18 @@ xcoff64_ppc_relocate_section (bfd *output_bfd,
 			       + relocation) & howto.dst_mask));
 
       /* Put the value back in the object file.  */
-      if (1 == howto.size)
-	bfd_put_16 (input_bfd, value_to_relocate, location);
-      else if (2 == howto.size)
-	bfd_put_32 (input_bfd, value_to_relocate, location);
-      else
-	bfd_put_64 (input_bfd, value_to_relocate, location);
-
+      switch (bfd_get_reloc_size (&howto))
+	{
+	case 2:
+	  bfd_put_16 (input_bfd, value_to_relocate, location);
+	  break;
+	case 4:
+	  bfd_put_32 (input_bfd, value_to_relocate, location);
+	  break;
+	default:
+	  bfd_put_64 (input_bfd, value_to_relocate, location);
+	  break;
+	}
     }
   return true;
 }
