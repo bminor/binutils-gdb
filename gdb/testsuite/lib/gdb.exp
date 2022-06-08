@@ -4199,7 +4199,17 @@ proc get_compiler_info {{language "c"}} {
 
 proc test_compiler_info { {compiler ""} {language "c"} } {
     global compiler_info
-    get_compiler_info $language
+
+    if [get_compiler_info $language] {
+	# An error will already have been printed in this case.  Just
+	# return a suitable result depending on how the user called
+	# this function.
+	if [string match "" $compiler] {
+	    return ""
+	} else {
+	    return false
+	}
+    }
 
     # If no arg, return the compiler_info string.
     if [string match "" $compiler] {
