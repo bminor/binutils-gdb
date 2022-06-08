@@ -40,7 +40,7 @@ static reloc_howto_type mep_elf_howto_table [] =
 {
   /* type, size, bits, leftshift, rightshift, pcrel, OD/OS/OU, mask.  */
   MEPREL (R_MEP_NONE,	  0,  0, 0, 0, 0, N, 0),
-  MEPREL (R_RELC,	  1,  0, 0, 0, 0, N, 0),
+  MEPREL (R_RELC,	  0,  0, 0, 0, 0, N, 0),
   /* MEPRELOC:HOWTO */
     /* This section generated from bfd/mep-relocs.pl from include/elf/mep.h.  */
   MEPREL (R_MEP_8,        1,  8, 0, 0, 0, U, 0xff),

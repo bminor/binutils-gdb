@@ -192,7 +192,7 @@ static reloc_howto_type howto_table[] = {
 
   HOWTO (R_VAX_COPY,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

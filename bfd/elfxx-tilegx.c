@@ -311,7 +311,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 
   HOWTO (R_TILEGX_COPY,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -325,7 +325,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 
   HOWTO (R_TILEGX_GLOB_DAT,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -339,7 +339,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 
   HOWTO (R_TILEGX_JMP_SLOT,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -353,7 +353,7 @@ static reloc_howto_type tilegx_elf_howto_table [] =
 
   HOWTO (R_TILEGX_RELATIVE,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -550,23 +550,23 @@ static reloc_howto_type tilegx_elf_howto_table [] =
   EMPTY_HOWTO (104),
   EMPTY_HOWTO (105),
 
-  HOWTO(R_TILEGX_TLS_DTPMOD64, 0, 1, 0, false, 0, complain_overflow_dont,
+  HOWTO(R_TILEGX_TLS_DTPMOD64, 0, 0, 0, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_TILEGX_TLS_DTPMOD64",
 	false, 0, 0, true),
   HOWTO(R_TILEGX_TLS_DTPOFF64, 0, 8, 64, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_TILEGX_TLS_DTPOFF64",
 	false, 0, -1, true),
-  HOWTO(R_TILEGX_TLS_TPOFF64, 0, 1, 0, false, 0, complain_overflow_dont,
+  HOWTO(R_TILEGX_TLS_TPOFF64, 0, 0, 0, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_TILEGX_TLS_TPOFF64",
 	false, 0, 0, true),
 
-  HOWTO(R_TILEGX_TLS_DTPMOD32, 0, 1, 0, false, 0, complain_overflow_dont,
+  HOWTO(R_TILEGX_TLS_DTPMOD32, 0, 0, 0, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_TILEGX_TLS_DTPMOD32",
 	false, 0, 0, true),
   HOWTO(R_TILEGX_TLS_DTPOFF32, 0, 8, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_TILEGX_TLS_DTPOFF32",
 	false, 0, -1, true),
-  HOWTO(R_TILEGX_TLS_TPOFF32, 0, 1, 0, false, 0, complain_overflow_dont,
+  HOWTO(R_TILEGX_TLS_TPOFF32, 0, 0, 0, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_TILEGX_TLS_TPOFF32",
 	false, 0, 0, true),
 

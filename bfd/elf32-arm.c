@@ -282,7 +282,7 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 
   HOWTO (R_ARM_THM_SWI8,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1900,7 +1900,7 @@ static reloc_howto_type elf32_arm_howto_table_3[4] =
 {
   HOWTO (R_ARM_RREL32,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1914,7 +1914,7 @@ static reloc_howto_type elf32_arm_howto_table_3[4] =
 
   HOWTO (R_ARM_RABS32,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1928,7 +1928,7 @@ static reloc_howto_type elf32_arm_howto_table_3[4] =
 
   HOWTO (R_ARM_RPC24,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -1942,7 +1942,7 @@ static reloc_howto_type elf32_arm_howto_table_3[4] =
 
   HOWTO (R_ARM_RBASE,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

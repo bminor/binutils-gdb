@@ -52,7 +52,7 @@ static reloc_howto_type howto_table[] =
   HOWTO(R_68K_PLT32O,	  0, 4,32, false,0, complain_overflow_bitfield, bfd_elf_generic_reloc, "R_68K_PLT32O",	  false, 0, 0xffffffff,false),
   HOWTO(R_68K_PLT16O,	  0, 2,16, false,0, complain_overflow_signed,	bfd_elf_generic_reloc, "R_68K_PLT16O",	  false, 0, 0x0000ffff,false),
   HOWTO(R_68K_PLT8O,	  0, 1, 8, false,0, complain_overflow_signed,	bfd_elf_generic_reloc, "R_68K_PLT8O",	  false, 0, 0x000000ff,false),
-  HOWTO(R_68K_COPY,	  0, 1, 0, false,0, complain_overflow_dont,	bfd_elf_generic_reloc, "R_68K_COPY",	  false, 0, 0xffffffff,false),
+  HOWTO(R_68K_COPY,	  0, 0, 0, false,0, complain_overflow_dont,	bfd_elf_generic_reloc, "R_68K_COPY",	  false, 0, 0xffffffff,false),
   HOWTO(R_68K_GLOB_DAT,	  0, 4,32, false,0, complain_overflow_dont,	bfd_elf_generic_reloc, "R_68K_GLOB_DAT",  false, 0, 0xffffffff,false),
   HOWTO(R_68K_JMP_SLOT,	  0, 4,32, false,0, complain_overflow_dont,	bfd_elf_generic_reloc, "R_68K_JMP_SLOT",  false, 0, 0xffffffff,false),
   HOWTO(R_68K_RELATIVE,	  0, 4,32, false,0, complain_overflow_dont,	bfd_elf_generic_reloc, "R_68K_RELATIVE",  false, 0, 0xffffffff,false),

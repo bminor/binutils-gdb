@@ -482,7 +482,7 @@ elf64_alpha_reloc_gpdisp (bfd *abfd, arelent *reloc_entry,
 
 
 #define SKIP_HOWTO(N) \
-  HOWTO(N, 0, 1, 0, 0, 0, complain_overflow_dont, elf64_alpha_reloc_bad, 0, 0, 0, 0, 0)
+  HOWTO(N, 0, 0, 0, 0, 0, complain_overflow_dont, elf64_alpha_reloc_bad, 0, 0, 0, 0, 0)
 
 static reloc_howto_type elf64_alpha_howto_table[] =
 {
@@ -754,7 +754,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
      because .dynbss is an ugly thing.  */
   HOWTO (R_ALPHA_COPY,
 	 0,
-	 1,
+	 0,
 	 0,
 	 false,
 	 0,
@@ -769,7 +769,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A dynamic relocation for a .got entry.  */
   HOWTO (R_ALPHA_GLOB_DAT,
 	 0,
-	 1,
+	 0,
 	 0,
 	 false,
 	 0,
@@ -784,7 +784,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A dynamic relocation for a .plt entry.  */
   HOWTO (R_ALPHA_JMP_SLOT,
 	 0,
-	 1,
+	 0,
 	 0,
 	 false,
 	 0,
@@ -799,7 +799,7 @@ static reloc_howto_type elf64_alpha_howto_table[] =
   /* A dynamic relocation to add the base of the DSO to a 64-bit field.  */
   HOWTO (R_ALPHA_RELATIVE,
 	 0,
-	 1,
+	 0,
 	 0,
 	 false,
 	 0,

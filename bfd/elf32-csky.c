@@ -142,7 +142,7 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 true),                       /* pcrel_offset */
 
   /* 4: DELETED.  */
-  HOWTO (R_CKCORE_PCREL_IMM4BY2,0,1,0,0,0,0,0,"R_CKCORE_PCREL_IMM4BY2",0,0,0,0),
+  HOWTO (R_CKCORE_PCREL_IMM4BY2,0,0,0,0,0,0,0,"R_CKCORE_PCREL_IMM4BY2",0,0,0,0),
 
   /* 5.  */
   HOWTO (R_CKCORE_PCREL32,            /* type */
@@ -236,10 +236,10 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 false),                      /* pcrel_offset */
 
   /* 11: None.  */
-  HOWTO (R_CKCORE_GLOB_DAT,0,1,0,0,0,0,0,"R_CKCORE_GLOB_DAT",0,0,0,0),
+  HOWTO (R_CKCORE_GLOB_DAT,0,0,0,0,0,0,0,"R_CKCORE_GLOB_DAT",0,0,0,0),
 
   /* 12: None.  */
-  HOWTO (R_CKCORE_JUMP_SLOT,0,1,0,0,0,0,0,"R_CKCORE_JUMP_SLOT",0,0,0,0),
+  HOWTO (R_CKCORE_JUMP_SLOT,0,0,0,0,0,0,0,"R_CKCORE_JUMP_SLOT",0,0,0,0),
 
   /* 13.  */
   HOWTO (R_CKCORE_GOTOFF,             /* type */
@@ -302,10 +302,10 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 true),                       /* pcrel_offset */
 
   /* 17: None.  */
-  HOWTO (R_CKCORE_ADDRGOT,0,1,0,0,0,0,0,"R_CKCORE_ADDRGOT",0,0,0,0),
+  HOWTO (R_CKCORE_ADDRGOT,0,0,0,0,0,0,0,"R_CKCORE_ADDRGOT",0,0,0,0),
 
   /* 18: None.  */
-  HOWTO (R_CKCORE_ADDRPLT,0,1,0,0,0,0,0,"R_CKCORE_ADDRPLT",0,0,0,0),
+  HOWTO (R_CKCORE_ADDRPLT,0,0,0,0,0,0,0,"R_CKCORE_ADDRPLT",0,0,0,0),
 
   /* 19: Only for csky v2.  */
   HOWTO (R_CKCORE_PCREL_IMM26BY2,     /* type */
@@ -563,16 +563,16 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 false),                      /* pcrel_offset */
 
   /* 36: None.  */
-  HOWTO (R_CKCORE_ADDRGOT_HI16,0,1,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
+  HOWTO (R_CKCORE_ADDRGOT_HI16,0,0,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
 
   /* 37: None.  */
-  HOWTO (R_CKCORE_ADDRGOT_LO16,0,1,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
+  HOWTO (R_CKCORE_ADDRGOT_LO16,0,0,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
 
   /* 38: None.  */
-  HOWTO (R_CKCORE_ADDRPLT_HI16,0,1,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
+  HOWTO (R_CKCORE_ADDRPLT_HI16,0,0,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
 
   /* 39: None.  */
-  HOWTO (R_CKCORE_ADDRPLT_LO16,0,1,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
+  HOWTO (R_CKCORE_ADDRPLT_LO16,0,0,0,0,0,0,0,"R_CKCORE_",0,0,0,0),
 
   /* 40.  */
   HOWTO (R_CKCORE_PCREL_JSR_IMM26BY2, /* type */
@@ -815,13 +815,13 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 true),                       /* pcrel_offset */
 
   /* 56: for linker.  */
-  HOWTO (R_CKCORE_TLS_DTPMOD32,0,1,0,0,0,0,0,"R_CKCORE_TLS_DTPMOD32",0,0,0,0),
+  HOWTO (R_CKCORE_TLS_DTPMOD32,0,0,0,0,0,0,0,"R_CKCORE_TLS_DTPMOD32",0,0,0,0),
 
   /* 57: for linker.  */
-  HOWTO (R_CKCORE_TLS_DTPOFF32,0,1,0,0,0,0,0,"R_CKCORE_TLS_DTPOFF32",0,0,0,0),
+  HOWTO (R_CKCORE_TLS_DTPOFF32,0,0,0,0,0,0,0,"R_CKCORE_TLS_DTPOFF32",0,0,0,0),
 
   /* 58: for linker.  */
-  HOWTO (R_CKCORE_TLS_TPOFF32,0,1,0,0,0,0,0,"R_CKCORE_TLS_TPOFF32",0,0,0,0),
+  HOWTO (R_CKCORE_TLS_TPOFF32,0,0,0,0,0,0,0,"R_CKCORE_TLS_TPOFF32",0,0,0,0),
 
   /* 59: for ck807f.  */
   HOWTO (R_CKCORE_PCREL_FLRW_IMM8BY4, /* type */
@@ -856,7 +856,7 @@ static reloc_howto_type csky_elf_howto_table[] =
   /* 61: for callgraph.  */
   HOWTO (R_CKCORE_CALLGRAPH,          /* type */
 	 0,                           /* rightshift */
-	 1,                           /* size */
+	 0,                           /* size */
 	 0,                           /* bitsize */
 	 false,                       /* pc_relative */
 	 0,                           /* bitpos */
@@ -869,7 +869,7 @@ static reloc_howto_type csky_elf_howto_table[] =
 	 true),                       /* pcrel_offset */
 
   /* 62: IRELATIVE*/
-  HOWTO (R_CKCORE_IRELATIVE,0,1,0,0,0,0,0,"R_CKCORE_IRELATIVE",0,0,0,0),
+  HOWTO (R_CKCORE_IRELATIVE,0,0,0,0,0,0,0,"R_CKCORE_IRELATIVE",0,0,0,0),
 
   /* 63: for bloop instruction */
   HOWTO (R_CKCORE_PCREL_BLOOP_IMM4BY4, /* type */

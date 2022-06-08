@@ -3170,7 +3170,7 @@ static reloc_howto_type elf_mips_gnu_pcrel32 =
 static reloc_howto_type elf_mips_copy_howto =
   HOWTO (R_MIPS_COPY,		/* type */
 	 0,			/* rightshift */
-	 1,			/* this one is variable size */
+	 0,			/* this one is variable size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

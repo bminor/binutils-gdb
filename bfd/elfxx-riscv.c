@@ -105,7 +105,7 @@ static reloc_howto_type howto_table[] =
 
   HOWTO (R_RISCV_COPY,			/* type */
 	 0,				/* rightshift */
-	 1,				/* this one is variable size */
+	 0,				/* this one is variable size */
 	 0,				/* bitsize */
 	 false,				/* pc_relative */
 	 0,				/* bitpos */

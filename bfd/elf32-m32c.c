@@ -193,7 +193,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 
   HOWTO (R_M32C_RL_JUMP,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -207,7 +207,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 
   HOWTO (R_M32C_RL_1ADDR,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -221,7 +221,7 @@ static reloc_howto_type m32c_elf_howto_table [] =
 
   HOWTO (R_M32C_RL_2ADDR,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

@@ -184,7 +184,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_COPY,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -198,7 +198,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_GLOB_DAT,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -212,7 +212,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_JMP_SLOT,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -226,7 +226,7 @@ static reloc_howto_type tilepro_elf_howto_table [] =
 
   HOWTO (R_TILEPRO_RELATIVE,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -476,13 +476,13 @@ static reloc_howto_type tilepro_elf_howto_table [] =
   TILEPRO_IMM16_HOWTO (R_TILEPRO_IMM16_X1_TLS_IE_HA, 16),
 
   /* These are common with the Solaris TLS implementation. */
-  HOWTO(R_TILEPRO_TLS_DTPMOD32, 0, 1, 0, false, 0, complain_overflow_dont,
+  HOWTO(R_TILEPRO_TLS_DTPMOD32, 0, 0, 0, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_TILEPRO_TLS_DTPMOD32",
 	false, 0, 0, true),
   HOWTO(R_TILEPRO_TLS_DTPOFF32, 0, 4, 32, false, 0, complain_overflow_bitfield,
 	bfd_elf_generic_reloc, "R_TILEPRO_TLS_DTPOFF32",
 	false, 0, 0xFFFFFFFF, true),
-  HOWTO(R_TILEPRO_TLS_TPOFF32, 0, 1, 0, false, 0, complain_overflow_dont,
+  HOWTO(R_TILEPRO_TLS_TPOFF32, 0, 0, 0, false, 0, complain_overflow_dont,
 	bfd_elf_generic_reloc, "R_TILEPRO_TLS_TPOFF32",
 	false, 0, 0, true),
 

@@ -96,7 +96,7 @@ static reloc_howto_type rx_elf_howto_table [] =
   RXREL (RH_GPRELB,  2, 16, 0, unsigned, false),
   RXREL (RH_GPRELW,  2, 16, 0, unsigned, false),
   RXREL (RH_GPRELL,  2, 16, 0, unsigned, false),
-  RXREL (RH_RELAX,   1,	 0, 0, dont,	 false),
+  RXREL (RH_RELAX,   0,	 0, 0, dont,	 false),
 
   EMPTY_HOWTO (0x2e),
   EMPTY_HOWTO (0x2f),
@@ -181,25 +181,25 @@ static reloc_howto_type rx_elf_howto_table [] =
   /* A 5-bit unsigned displacement to a B/W/L address, at bit position 8/12.  */
   /* ---- ----   4--- 3210.  */
 #define R_RX_RH_ABS5p8B 0x78
-  RXREL (RH_ABS5p8B,   1,  0, 0, dont,	   false),
+  RXREL (RH_ABS5p8B,   0,  0, 0, dont,	   false),
 #define R_RX_RH_ABS5p8W 0x79
-  RXREL (RH_ABS5p8W,   1,  0, 0, dont,	   false),
+  RXREL (RH_ABS5p8W,   0,  0, 0, dont,	   false),
 #define R_RX_RH_ABS5p8L 0x7a
-  RXREL (RH_ABS5p8L,   1,  0, 0, dont,	   false),
+  RXREL (RH_ABS5p8L,   0,  0, 0, dont,	   false),
   /* A 5-bit unsigned displacement to a B/W/L address, at bit position 5/12.  */
   /* ---- -432   1--- 0---.  */
 #define R_RX_RH_ABS5p5B 0x7b
-  RXREL (RH_ABS5p5B,   1,  0, 0, dont,	   false),
+  RXREL (RH_ABS5p5B,   0,  0, 0, dont,	   false),
 #define R_RX_RH_ABS5p5W 0x7c
-  RXREL (RH_ABS5p5W,   1,  0, 0, dont,	   false),
+  RXREL (RH_ABS5p5W,   0,  0, 0, dont,	   false),
 #define R_RX_RH_ABS5p5L 0x7d
-  RXREL (RH_ABS5p5L,   1,  0, 0, dont,	   false),
+  RXREL (RH_ABS5p5L,   0,  0, 0, dont,	   false),
   /* A 4-bit unsigned immediate at bit position 8.  */
 #define R_RX_RH_UIMM4p8 0x7e
-  RXREL (RH_UIMM4p8,   1,  0, 0, dont,	   false),
+  RXREL (RH_UIMM4p8,   0,  0, 0, dont,	   false),
   /* A 4-bit negative unsigned immediate at bit position 8.  */
 #define R_RX_RH_UNEG4p8 0x7f
-  RXREL (RH_UNEG4p8,   1,  0, 0, dont,	   false),
+  RXREL (RH_UNEG4p8,   0,  0, 0, dont,	   false),
   /* End of internal relocs.  */
 
   RXREL (SYM,	    4, 32, 0, dont, false),

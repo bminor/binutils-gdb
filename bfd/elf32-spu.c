@@ -91,7 +91,7 @@ static reloc_howto_type elf_howto_table[] = {
   HOWTO (R_SPU_PPU64,	   0, 8, 64, false,  0, complain_overflow_dont,
 	 bfd_elf_generic_reloc, "SPU_PPU64",
 	 false, 0, -1, false),
-  HOWTO (R_SPU_ADD_PIC,	   0, 1,  0, false,  0, complain_overflow_dont,
+  HOWTO (R_SPU_ADD_PIC,	   0, 0,  0, false,  0, complain_overflow_dont,
 	 bfd_elf_generic_reloc, "SPU_ADD_PIC",
 	 false, 0, 0x00000000, false),
 };

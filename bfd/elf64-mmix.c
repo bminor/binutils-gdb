@@ -357,7 +357,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_MMIX_GNU_VTINHERIT, /* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -372,7 +372,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
   /* GNU extension to record C++ vtable member usage.  */
   HOWTO (R_MMIX_GNU_VTENTRY,	/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */
@@ -727,7 +727,7 @@ static reloc_howto_type elf_mmix_howto_table[] =
      section to discard *after* relocation.  */
   HOWTO (R_MMIX_LOCAL,		/* type */
 	 0,			/* rightshift */
-	 1,			/* size */
+	 0,			/* size */
 	 0,			/* bitsize */
 	 false,			/* pc_relative */
 	 0,			/* bitpos */

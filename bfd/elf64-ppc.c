@@ -415,7 +415,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] =
      dynamic linker copies the data addressed by the symbol from the
      shared library into the object, because the object being
      run has to have the data at some particular address.  */
-  HOW (R_PPC64_COPY, 1, 0, 0, 0, false, dont,
+  HOW (R_PPC64_COPY, 0, 0, 0, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Like R_PPC64_ADDR64, but used when setting global offset table
@@ -425,7 +425,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] =
 
   /* Created by the link editor.  Marks a procedure linkage table
      entry for a symbol.  */
-  HOW (R_PPC64_JMP_SLOT, 1, 0, 0, 0, false, dont,
+  HOW (R_PPC64_JMP_SLOT, 0, 0, 0, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   /* Used only by the dynamic linker.  When the object is run, this
@@ -822,7 +822,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] =
   HOW (R_PPC64_GOT_TPREL16_HA, 2, 16, 0xffff, 16, false, signed,
        ppc64_elf_unhandled_reloc),
 
-  HOW (R_PPC64_JMP_IREL, 1, 0, 0, 0, false, dont,
+  HOW (R_PPC64_JMP_IREL, 0, 0, 0, 0, false, dont,
        ppc64_elf_unhandled_reloc),
 
   HOW (R_PPC64_IRELATIVE, 8, 64, 0xffffffffffffffffULL, 0, false, dont,
@@ -985,11 +985,11 @@ static reloc_howto_type ppc64_elf_howto_raw[] =
        ppc64_elf_prefix_reloc),
 
   /* GNU extension to record C++ vtable hierarchy.  */
-  HOW (R_PPC64_GNU_VTINHERIT, 1, 0, 0, 0, false, dont,
+  HOW (R_PPC64_GNU_VTINHERIT, 0, 0, 0, 0, false, dont,
        NULL),
 
   /* GNU extension to record C++ vtable member usage.  */
-  HOW (R_PPC64_GNU_VTENTRY, 1, 0, 0, 0, false, dont,
+  HOW (R_PPC64_GNU_VTENTRY, 0, 0, 0, 0, false, dont,
        NULL),
 };
 

@@ -61,7 +61,7 @@ static reloc_howto_type mcore_coff_howto_table[] =
   /* Unused: */
   HOWTO (IMAGE_REL_MCORE_ABSOLUTE,/* type */
 	 0,			 /* rightshift */
-	 1,			 /* size */
+	 0,			 /* size */
 	 0,			 /* bitsize */
 	 false,			 /* pc_relative */
 	 0,			 /* bitpos */

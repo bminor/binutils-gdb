@@ -130,7 +130,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_COPY,	  /* type (4).  */
 	 0,				  /* rightshift */
-	 1,				  /* this one is variable size */
+	 0,				  /* this one is variable size */
 	 0,				  /* bitsize */
 	 false,				  /* pc_relative */
 	 0,				  /* bitpos */
@@ -655,7 +655,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_GNU_VTINHERIT,      	/* type (57).  */
 	 0,				   	/* rightshift.  */
-	 1,				   	/* size.  */
+	 0,				   	/* size.  */
 	 0,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */
@@ -671,7 +671,7 @@ static loongarch_reloc_howto_type loongarch_howto_table[] =
 
   LOONGARCH_HOWTO (R_LARCH_GNU_VTENTRY,      	/* type (58).  */
 	 0,				   	/* rightshift.  */
-	 1,				   	/* size.  */
+	 0,				   	/* size.  */
 	 0,				  	/* bitsize.  */
 	 false,					/* pc_relative.  */
 	 0,				   	/* bitpos.  */

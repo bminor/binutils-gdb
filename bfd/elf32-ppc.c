@@ -683,11 +683,11 @@ static reloc_howto_type ppc_elf_howto_raw[] = {
        ppc_elf_addr16_ha_reloc),
 
   /* GNU extension to record C++ vtable hierarchy.  */
-  HOW (R_PPC_GNU_VTINHERIT, 1, 0, 0, 0, false, dont,
+  HOW (R_PPC_GNU_VTINHERIT, 0, 0, 0, 0, false, dont,
        NULL),
 
   /* GNU extension to record C++ vtable member usage.  */
-  HOW (R_PPC_GNU_VTENTRY, 1, 0, 0, 0, false, dont,
+  HOW (R_PPC_GNU_VTENTRY, 0, 0, 0, 0, false, dont,
        NULL),
 
   /* Phony reloc to handle AIX style TOC entries.  */
