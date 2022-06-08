@@ -3238,10 +3238,6 @@ gdb_caching_proc skip_altivec_tests {
     }
 
     # Make sure we have a compiler that understands altivec.
-    if [get_compiler_info] {
-       warning "Could not get compiler info"
-       return 1
-    }
     if [test_compiler_info gcc*] {
         set compile_flags "additional_flags=-maltivec"
     } elseif [test_compiler_info xlc*] {
@@ -3357,10 +3353,6 @@ gdb_caching_proc skip_vsx_tests {
     }
 
     # Make sure we have a compiler that understands altivec.
-    if [get_compiler_info] {
-       warning "Could not get compiler info"
-       return 1
-    }
     if [test_compiler_info gcc*] {
         set compile_flags "additional_flags=-mvsx"
     } elseif [test_compiler_info xlc*] {
@@ -4781,11 +4773,8 @@ proc gdb_compile_shlib_1 {sources dest options} {
     } elseif { [lsearch -exact $options "f90"] >= 0 } {
 	set info_options "f90"
     }
-    if [get_compiler_info ${info_options}] {
-       return -1
-    }
 
-    switch -glob [test_compiler_info] {
+    switch -glob [test_compiler_info "" ${info_options}] {
         "xlc-*" {
             lappend obj_options "additional_flags=-qpic"
         }
@@ -6963,16 +6952,6 @@ proc build_executable_from_specs {testname executable options args} {
     global srcdir
 
     set binfile [standard_output_file $executable]
-
-    set info_options ""
-    if { [lsearch -exact $options "c++"] >= 0 } {
-	set info_options "c++"
-    } elseif { [lsearch -exact $options "f90"] >= 0 } {
-	set info_options "f90"
-    }
-    if [get_compiler_info ${info_options}] {
-        return -1
-    }
 
     set func gdb_compile
     set func_index [lsearch -regexp $options {^(pthreads|shlib|shlib_pthreads|openmp)$}]

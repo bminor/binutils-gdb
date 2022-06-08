@@ -110,14 +110,6 @@ proc build_executable_and_dwo_files { testname executable options args } {
 	set binfile $executable
     }
 
-    set info_options ""
-    if { [lsearch -exact $options "c++"] >= 0 } {
-	set info_options "c++"
-    }
-    if [get_compiler_info ${info_options}] {
-        return -1
-    }
-
     set func gdb_compile
     if {[lsearch -regexp $options \
 	     {^(pthreads|shlib|shlib_pthreads|openmp)$}] != -1} {
