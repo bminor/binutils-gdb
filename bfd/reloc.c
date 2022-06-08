@@ -375,9 +375,10 @@ DESCRIPTION
 	The HOWTO macro fills in a reloc_howto_type (a typedef for
 	const struct reloc_howto_struct).
 
+.#define HOWTO_RSIZE(sz) (sz < 0 ? -sz : sz)
 .#define HOWTO(type, right, size, bits, pcrel, left, ovf, func, name,	\
 .              inplace, src_mask, dst_mask, pcrel_off)			\
-.  { (unsigned) type, size < 0 ? -size : size, bits, right, left, ovf,	\
+.  { (unsigned) type, HOWTO_RSIZE (size), bits, right, left, ovf,	\
 .    size < 0, pcrel, inplace, pcrel_off, src_mask, dst_mask, func, name }
 
 DESCRIPTION

@@ -2135,9 +2135,10 @@ struct reloc_howto_struct
   const char *name;
 };
 
+#define HOWTO_RSIZE(sz) (sz < 0 ? -sz : sz)
 #define HOWTO(type, right, size, bits, pcrel, left, ovf, func, name,   \
               inplace, src_mask, dst_mask, pcrel_off)                  \
-  { (unsigned) type, size < 0 ? -size : size, bits, right, left, ovf,  \
+  { (unsigned) type, HOWTO_RSIZE (size), bits, right, left, ovf,       \
     size < 0, pcrel, inplace, pcrel_off, src_mask, dst_mask, func, name }
 #define EMPTY_HOWTO(C) \
   HOWTO ((C), 0, 0, 0, false, 0, complain_overflow_dont, NULL, \
