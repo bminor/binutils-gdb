@@ -2874,9 +2874,6 @@ interrupt_command (const char *args, int from_tty)
 	  && startswith (args, "-a"))
 	all_threads = 1;
 
-      if (!non_stop && all_threads)
-	error (_("-a is meaningless in all-stop mode."));
-
       interrupt_target_1 (all_threads);
     }
 }
