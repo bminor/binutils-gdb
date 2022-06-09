@@ -2495,7 +2495,7 @@ obj_elf_ident (int ignore ATTRIBUTE_UNUSED)
 void
 obj_elf_init_stab_section (segT seg)
 {
-  const char *file;
+  char *file;
   char *p;
   char *stabstr_name;
   unsigned int stroff;
@@ -2514,7 +2514,7 @@ obj_elf_init_stab_section (segT seg)
   know (stroff == 1 || (stroff == 0 && file[0] == '\0'));
   md_number_to_chars (p, stroff, 4);
   seg_info (seg)->stabu.p = p;
-  xfree ((char *) file);
+  free (file);
 }
 
 #endif

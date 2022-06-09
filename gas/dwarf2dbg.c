@@ -209,9 +209,9 @@ static unsigned int files_in_use;
 static unsigned int files_allocated;
 
 /* Table of directories used by .debug_line.  */
-static char **       dirs = NULL;
-static unsigned int  dirs_in_use = 0;
-static unsigned int  dirs_allocated = 0;
+static char **       dirs;
+static unsigned int  dirs_in_use;
+static unsigned int  dirs_allocated;
 
 /* TRUE when we've seen a .loc directive recently.  Used to avoid
    doing work when there's nothing to do.  Will be reset by
@@ -228,12 +228,7 @@ static bool dwarf2_any_loc_directive_seen;
 bool dwarf2_loc_mark_labels;
 
 /* Current location as indicated by the most recent .loc directive.  */
-static struct dwarf2_line_info current =
-{
-  1, 1, 0, 0,
-  DWARF2_LINE_DEFAULT_IS_STMT ? DWARF2_FLAG_IS_STMT : 0,
-  0, { NULL }
-};
+static struct dwarf2_line_info current;
 
 /* This symbol is used to recognize view number forced resets in loc
    lists.  */
@@ -683,20 +678,21 @@ assign_file_to_slot (unsigned int i, const char *file, unsigned int dir)
 {
   if (i >= files_allocated)
     {
-      unsigned int old = files_allocated;
+      unsigned int want = i + 32;
 
-      files_allocated = i + 32;
       /* Catch wraparound.  */
-      if (files_allocated < old
-	  || files_allocated < i
-	  || files_allocated > UINT_MAX / sizeof (struct file_entry))
+      if (want < files_allocated
+	  || want < i
+	  || want > UINT_MAX / sizeof (struct file_entry))
 	{
 	  as_bad (_("file number %u is too big"), i);
 	  return false;
 	}
 
-      files = XRESIZEVEC (struct file_entry, files, files_allocated);
-      memset (files + old, 0, (i + 32 - old) * sizeof (struct file_entry));
+      files = XRESIZEVEC (struct file_entry, files, want);
+      memset (files + files_allocated, 0,
+	      (want - files_allocated) * sizeof (struct file_entry));
+      files_allocated = want;
     }
 
   files[i].filename = file;
@@ -792,24 +788,26 @@ do_allocate_filenum (struct line_entry *e)
 }
 
 /* Remove any generated line entries.  These don't live comfortably
-   with compiler generated line info.  */
+   with compiler generated line info.  If THELOT then remove
+   everything, freeing all list entries we have created.  */
 
 static void
-purge_generated_debug (void)
+purge_generated_debug (bool thelot)
 {
-  struct line_seg *s;
+  struct line_seg *s, *nexts;
 
-  for (s = all_segs; s; s = s->next)
+  for (s = all_segs; s; s = nexts)
     {
-      struct line_subseg *lss;
+      struct line_subseg *lss, *nextlss;
 
-      for (lss = s->head; lss; lss = lss->next)
+      for (lss = s->head; lss; lss = nextlss)
 	{
 	  struct line_entry *e, *next;
 
 	  for (e = lss->head; e; e = next)
 	    {
-	      know (e->loc.filenum == -1u);
+	      if (!thelot)
+		know (e->loc.filenum == -1u);
 	      next = e->next;
 	      free (e);
 	    }
@@ -817,6 +815,15 @@ purge_generated_debug (void)
 	  lss->head = NULL;
 	  lss->ptail = &lss->head;
 	  lss->pmove_tail = &lss->head;
+	  nextlss = lss->next;
+	  if (thelot)
+	    free (lss);
+	}
+      nexts = s->next;
+      if (thelot)
+	{
+	  seg_info (s->seg)->dwarf2_line_seg = NULL;
+	  free (s);
 	}
     }
 }
@@ -1206,7 +1213,7 @@ dwarf2_directive_filename (void)
   /* A .file directive implies compiler generated debug information is
      being supplied.  Turn off gas generated debug info.  */
   if (debug_type == DEBUG_DWARF2)
-    purge_generated_debug ();
+    purge_generated_debug (false);
   debug_type = DEBUG_NONE;
 
   if (num != (unsigned int) num
@@ -1396,13 +1403,15 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	      if (!name)
 		return;
 	      sym = symbol_find_or_make (name);
+	      free (name);
 	      if (S_IS_DEFINED (sym) || symbol_equated_p (sym))
 		{
 		  if (S_IS_VOLATILE (sym))
 		    sym = symbol_clone (sym, 1);
 		  else if (!S_CAN_BE_REDEFINED (sym))
 		    {
-		      as_bad (_("symbol `%s' is already defined"), name);
+		      as_bad (_("symbol `%s' is already defined"),
+			      S_GET_NAME (sym));
 		      return;
 		    }
 		}
@@ -1970,7 +1979,6 @@ process_entries (segT seg, struct line_entry *e)
   fragS *last_frag = NULL, *frag;
   addressT last_frag_ofs = 0, frag_ofs;
   symbolS *last_lab = NULL, *lab;
-  struct line_entry *next;
 
   if (flag_dwarf_sections)
     {
@@ -2086,9 +2094,7 @@ process_entries (segT seg, struct line_entry *e)
       last_frag = frag;
       last_frag_ofs = frag_ofs;
 
-      next = e->next;
-      free (e);
-      e = next;
+      e = e->next;
     }
   while (e);
 
@@ -2132,7 +2138,7 @@ static void
 out_dir_and_file_list (segT line_seg, int sizeof_offset)
 {
   size_t size;
-  const char *dir;
+  char *dir;
   char *cp;
   unsigned int i, j;
   bool emit_md5 = false;
@@ -2180,6 +2186,7 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
 	dir = remap_debug_filename (getpwd ());
 
       line_strp = add_line_strp (line_str_seg, dir);
+      free (dir);
       subseg_set (line_seg, 0);
       TC_DWARF2_EMIT_OFFSET (line_strp, sizeof_offset);
     }
@@ -2198,6 +2205,7 @@ out_dir_and_file_list (segT line_seg, int sizeof_offset)
 	  subseg_set (line_seg, 0);
 	  TC_DWARF2_EMIT_OFFSET (line_strp, sizeof_offset);
 	}
+      free (dir);
     }
 
   if (DWARF2_LINE_VERSION < 5)
@@ -2951,8 +2959,6 @@ out_debug_str (segT str_seg, symbolS **name_sym, symbolS **comp_dir_sym,
 	       symbolS **producer_sym)
 {
   char producer[128];
-  const char *comp_dir;
-  const char *dirname;
   char *p;
   int len;
   int first_file = DWARF2_LINE_VERSION > 4 ? 0 : 1;
@@ -2968,7 +2974,7 @@ out_debug_str (segT str_seg, symbolS **name_sym, symbolS **comp_dir_sym,
     abort ();
   if (files[first_file].dir)
     {
-      dirname = remap_debug_filename (dirs[files[first_file].dir]);
+      char *dirname = remap_debug_filename (dirs[files[first_file].dir]);
       len = strlen (dirname);
 #ifdef TE_VMS
       /* Already has trailing slash.  */
@@ -2979,6 +2985,7 @@ out_debug_str (segT str_seg, symbolS **name_sym, symbolS **comp_dir_sym,
       memcpy (p, dirname, len);
       INSERT_DIR_SEPARATOR (p, len);
 #endif
+      free (dirname);
     }
   len = strlen (files[first_file].filename) + 1;
   p = frag_more (len);
@@ -2986,10 +2993,11 @@ out_debug_str (segT str_seg, symbolS **name_sym, symbolS **comp_dir_sym,
 
   /* DW_AT_comp_dir */
   *comp_dir_sym = symbol_temp_new_now_octets ();
-  comp_dir = remap_debug_filename (getpwd ());
+  char *comp_dir = remap_debug_filename (getpwd ());
   len = strlen (comp_dir) + 1;
   p = frag_more (len);
   memcpy (p, comp_dir, len);
+  free (comp_dir);
 
   /* DW_AT_producer */
   *producer_sym = symbol_temp_new_now_octets ();
@@ -3002,7 +3010,26 @@ out_debug_str (segT str_seg, symbolS **name_sym, symbolS **comp_dir_sym,
 void
 dwarf2_init (void)
 {
+  all_segs = NULL;
   last_seg_ptr = &all_segs;
+  files = NULL;
+  files_in_use = 0;
+  files_allocated = 0;
+  dirs = NULL;
+  dirs_in_use = 0;
+  dirs_allocated = 0;
+  dwarf2_loc_directive_seen = false;
+  dwarf2_any_loc_directive_seen = false;
+  dwarf2_loc_mark_labels = false;
+  current.filenum = 1;
+  current.line = 1;
+  current.column = 0;
+  current.isa = 0;
+  current.flags = DWARF2_LINE_DEFAULT_IS_STMT ? DWARF2_FLAG_IS_STMT : 0;
+  current.discriminator = 0;
+  current.u.view = NULL;
+  force_reset_view = NULL;
+  view_assert_failed = NULL;
 
   /* Select the default CIE version to produce here.  The global
      starts with a value of -1 and will be modified to a valid value
@@ -3014,6 +3041,14 @@ dwarf2_init (void)
      reason to change it yet.  */
   if (flag_dwarf_cie_version == -1)
     flag_dwarf_cie_version = 1;
+}
+
+static void
+dwarf2_cleanup (void)
+{
+  purge_generated_debug (true);
+  free (files);
+  free (dirs);
 }
 
 /* Finish the dwarf2 debug sections.  We emit .debug.line if there
@@ -3052,7 +3087,10 @@ dwarf2_finish (void)
     /* If there is no line information and no non-empty .debug_info
        section, or if there is both a non-empty .debug_info and a non-empty
        .debug_line, then we do nothing.  */
-    return;
+    {
+      dwarf2_cleanup ();
+      return;
+    }
 
   /* Calculate the size of an address for the target machine.  */
   sizeof_address = DWARF2_ADDR_SIZE (stdoutput);
@@ -3094,6 +3132,7 @@ dwarf2_finish (void)
 			       !s->head ? NULL : (struct line_entry *)ptail,
 			       s->head ? s->head->head : NULL);
 	  *ptail = lss->head;
+	  lss->head = NULL;
 	  ptail = lss->ptail;
 	}
     }
@@ -3162,6 +3201,7 @@ dwarf2_finish (void)
 		      ranges_sym, name_sym, comp_dir_sym, producer_sym,
 		      func_form);
     }
+  dwarf2_cleanup ();
 }
 
 /* Perform any deferred checks pertaining to debug information.  */

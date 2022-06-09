@@ -69,7 +69,7 @@ add_debug_prefix_map (const char *arg)
    a newly allocated buffer containing the name corresponding to FILENAME.
    It is the caller's responsibility to free the buffer.  */
 
-const char *
+char *
 remap_debug_filename (const char *filename)
 {
   debug_prefix_map *map;

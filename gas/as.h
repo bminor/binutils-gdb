@@ -487,7 +487,7 @@ void   register_dependency (const char *);
 void   print_dependencies (void);
 segT   subseg_get (const char *, int);
 
-const char *remap_debug_filename (const char *);
+char *remap_debug_filename (const char *);
 void add_debug_prefix_map (const char *);
 
 static inline char *
