@@ -2177,7 +2177,7 @@ arm_make_prologue_cache (struct frame_info *this_frame)
 {
   int reg;
   struct arm_prologue_cache *cache;
-  CORE_ADDR unwound_fp;
+  CORE_ADDR unwound_fp, prev_sp;
 
   cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
   arm_cache_init (cache, this_frame);
@@ -2191,14 +2191,15 @@ arm_make_prologue_cache (struct frame_info *this_frame)
   arm_gdbarch_tdep *tdep =
     (arm_gdbarch_tdep *) gdbarch_tdep (get_frame_arch (this_frame));
 
-  arm_cache_set_active_sp_value (cache, tdep, unwound_fp + cache->framesize);
+  prev_sp = unwound_fp + cache->framesize;
+  arm_cache_set_active_sp_value (cache, tdep, prev_sp);
 
   /* Calculate actual addresses of saved registers using offsets
      determined by arm_scan_prologue.  */
   for (reg = 0; reg < gdbarch_num_regs (get_frame_arch (this_frame)); reg++)
     if (cache->saved_regs[reg].is_addr ())
-      cache->saved_regs[reg].set_addr (cache->saved_regs[reg].addr ()
-				       + arm_cache_get_prev_sp_value (cache, tdep));
+      cache->saved_regs[reg].set_addr (cache->saved_regs[reg].addr () +
+				       prev_sp);
 
   return cache;
 }
