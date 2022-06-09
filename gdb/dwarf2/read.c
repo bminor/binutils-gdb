@@ -18283,7 +18283,9 @@ cooked_indexer::index_dies (cutu_reader *reader,
 			    const cooked_index_entry *parent_entry,
 			    bool fully)
 {
-  const gdb_byte *end_ptr = info_ptr + reader->cu->header.get_length ();
+  const gdb_byte *end_ptr = (reader->buffer
+			     + to_underlying (reader->cu->header.sect_off)
+			     + reader->cu->header.get_length ());
 
   while (info_ptr < end_ptr)
     {
