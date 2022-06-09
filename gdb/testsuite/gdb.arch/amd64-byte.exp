@@ -26,10 +26,6 @@ if { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
 
 standard_testfile amd64-pseudo.c
 
-if [get_compiler_info] {
-    return -1
-}
-
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug]] != "" } {
     untested "failed to compile"
     return

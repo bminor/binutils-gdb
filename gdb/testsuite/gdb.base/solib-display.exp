@@ -61,10 +61,6 @@ set executable ${testfile}
 set binfile [standard_output_file ${executable}]
 set bin_flags [list debug shlib=${binfile_lib}]
 
-if [get_compiler_info] {
-    return -1
-}
-
 # SEP must be last for the possible `unsupported' error path.
 foreach libsepdebug {NO IN SEP} { with_test_prefix "$libsepdebug" {
 

@@ -30,11 +30,6 @@ if {![istarget "powerpc*"] || [skip_altivec_tests]} then {
 standard_testfile
 
 set compile_flags {debug nowarnings}
-if [get_compiler_info] {
-    warning "get_compiler failed"
-    return -1
-}
-
 if [test_compiler_info gcc*] {
     set compile_flags "$compile_flags additional_flags=-maltivec additional_flags=-mabi=altivec"
 } elseif [test_compiler_info xlc*] {

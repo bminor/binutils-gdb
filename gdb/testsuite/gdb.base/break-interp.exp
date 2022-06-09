@@ -30,10 +30,6 @@ set binfile_lib ${binprefix}.so
 set srcfile "${test}-main.c"
 set srcfile_lib "${test}-lib.c"
 
-if [get_compiler_info] {
-    return -1
-}
-
 # Use -soname so that the new library gets copied by build_executable_own_libs.
 
 if {[gdb_compile_shlib ${srcdir}/${subdir}/${srcfile_lib} ${binfile_lib} [list debug ldflags=-Wl,-soname,${test}.so]] != ""} {

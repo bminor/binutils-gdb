@@ -49,10 +49,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile3}" "${binfile3}" executable {d
     return -1
 }
 
-if [get_compiler_info] {
-    return -1
-}
-
 # This is a test of the error cases for gdb's ability to attach to a
 # running process.
 

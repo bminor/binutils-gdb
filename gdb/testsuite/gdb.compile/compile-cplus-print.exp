@@ -17,7 +17,6 @@ load_lib compile-support.exp
 
 standard_testfile
 
-get_compiler_info
 set options {}
 if [test_compiler_info gcc*] {
     lappend options additional_flags=-g3

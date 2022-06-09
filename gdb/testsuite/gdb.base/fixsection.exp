@@ -27,10 +27,6 @@ set lib_sl [standard_output_file ${libfile}.sl]
 set lib_opts [list debug nowarnings]
 set exec_opts [list debug nowarnings shlib=$lib_sl]
 
-if [get_compiler_info] {
-    return -1
-}
-
 if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
      || [gdb_compile $srcdir/$subdir/$srcfile $binfile \
 	     executable $exec_opts] != ""} {

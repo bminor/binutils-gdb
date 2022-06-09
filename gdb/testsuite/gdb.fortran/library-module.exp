@@ -21,12 +21,6 @@ standard_testfile library-module-main.f90
 set srclibfile ${testfile}-lib.f90
 set libfile [standard_output_file ${testfile}-lib.so]
 
-# Required for -fPIC by gdb_compile_shlib.
-if { [get_compiler_info f90] } {
-   warning "Could not get compiler info"
-   return -1
-}
-
 if  { [gdb_compile_shlib "${srcdir}/${subdir}/${srclibfile}" $libfile {debug f90}] != "" } {
     untested "failed to compile shared library"
     return -1

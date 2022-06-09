@@ -31,8 +31,7 @@ standard_testfile solib-list-main.c
 set srclibfile ${testfile}-lib.c
 set binlibfile [standard_output_file ${testfile}.so]
 
-if { [get_compiler_info]
-     || [gdb_compile_shlib "${srcdir}/${subdir}/${srclibfile}" "${binlibfile}" {debug}] != ""
+if { [gdb_compile_shlib "${srcdir}/${subdir}/${srclibfile}" "${binlibfile}" {debug}] != ""
      || [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "shlib=${binlibfile}"] != "" } {
     untested "failed to compile"
     return -1

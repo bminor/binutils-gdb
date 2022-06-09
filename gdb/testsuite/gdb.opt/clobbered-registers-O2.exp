@@ -20,12 +20,6 @@
 
 standard_testfile .c -2.c -3.c
 
-# What compiler are we using?
-#
-if [get_compiler_info] {
-    return -1
-}
-
 if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2 $srcfile3] \
 	 {debug optimize=-O2 nowarnings}]} {

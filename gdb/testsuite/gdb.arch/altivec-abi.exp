@@ -28,11 +28,6 @@ if {![istarget "powerpc*"] || [skip_altivec_tests]} then {
 
 standard_testfile
 
-if [get_compiler_info] {
-    warning "get_compiler failed"
-    return -1
-}
-
 proc altivec_abi_tests { extra_flags force_abi } {
     global testfile binfile srcfile srcdir subdir
     global gdb_prompt

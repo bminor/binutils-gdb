@@ -18,10 +18,6 @@
 
 standard_testfile .c
 
-if [get_compiler_info] {
-    return -1
-}
-
 if [test_compiler_info "xlc-*"] {
     # By default, IBM'x xlc compiler doesn't add static variables into the symtab.
     # Use "-qstatsym" to do so. 

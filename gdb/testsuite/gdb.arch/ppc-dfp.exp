@@ -23,11 +23,6 @@ if ![istarget "powerpc*"] then {
 
 standard_testfile
 
-if [get_compiler_info] {
-    warning "get_compiler failed"
-    return -1
-}
-
 if ![test_compiler_info gcc*] {
     # We use GCC's extended asm syntax
     warning "unknown compiler"

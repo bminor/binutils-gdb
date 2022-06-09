@@ -31,10 +31,6 @@
 
 standard_testfile .c
 
-if [get_compiler_info] {
-    return -1
-}
-
 set skip_float_test [gdb_skip_float_test]
 
 set additional_flags {debug}

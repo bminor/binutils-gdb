@@ -686,10 +686,6 @@ if {[skip_cplus_tests]} { continue }
 
 standard_testfile cpexprs.cc
 
-if {[get_compiler_info "c++"]} {
-    return -1
-}
-
 # Include required flags.
 set flags "$flags debug c++"
 

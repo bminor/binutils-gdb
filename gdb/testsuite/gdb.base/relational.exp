@@ -29,10 +29,6 @@ if { [prepare_for_testing "failed to prepare" relational int-type.c {debug nowar
     return -1
 }
 
-if [get_compiler_info] {
-    return -1
-}
-
 #
 # set it up at a breakpoint so we can play with the variable values
 #

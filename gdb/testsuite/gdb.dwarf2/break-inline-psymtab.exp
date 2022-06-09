@@ -24,7 +24,6 @@ if ![runto_main] {
     return -1
 }
 
-get_compiler_info
 get_debug_format
 if { [skip_inline_frame_tests] } {
     return -1

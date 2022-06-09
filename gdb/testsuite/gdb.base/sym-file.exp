@@ -60,10 +60,6 @@ set lib_dlopen [shlib_target_file ${lib_basename}.so]
 set exec_opts [list debug "additional_flags= -I$srcdir/../../include/ -D$target_size\
  -DSHLIB_NAME\\=\"$lib_dlopen\""]
 
-if [get_compiler_info] {
-    return -1
-}
-
 if {[gdb_compile_shlib $libsrc $lib_so {debug}] != ""} {
     untested "failed to compile shared library"
     return

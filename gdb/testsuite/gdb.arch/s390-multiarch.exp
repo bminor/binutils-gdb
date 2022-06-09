@@ -33,10 +33,6 @@ set binprefix $binfile
 
 gdb_exit
 
-if { [get_compiler_info] } {
-    return -1
-}
-
 proc compile_and_dump {variant ccopts binfile} {
     global srcdir subdir srcfile
     set compile_flags {debug}

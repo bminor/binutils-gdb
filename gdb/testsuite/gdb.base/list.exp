@@ -26,12 +26,6 @@ if {[build_executable "failed to prepare" $testfile [list $srcfile $srcfile2] \
     return -1
 }
 
-# Create and source the file that provides information about the compiler
-# used to compile the test case.
-if [get_compiler_info] {
-    return -1
-}
-
 # The last line in the file.
 set last_line [gdb_get_line_number "last line" "list0.c"]
 

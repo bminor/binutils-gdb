@@ -38,10 +38,6 @@ proc corefunc { threadtype executable } {
 	set binfile [standard_output_file $executable]
 	set escapedbinfile [string_to_regexp ${binfile}]
 
-	if [get_compiler_info] {
-	    return -1
-	}
-
 	gdb_test "handle SIGALRM stop print pass" "Yes.*Yes.*Yes.*"
 
 	set test_spawn_id [spawn_wait_for_attach $binfile]

@@ -29,10 +29,6 @@ if { [skip_cplus_tests] } { return }
 
 standard_testfile .cc namespace1.cc
 
-if [get_compiler_info c++] {
-    return -1
-}
-
 set xfail_class_types 0
 if {[test_compiler_info {gcc-[0-3]-*}]
     || [test_compiler_info {gcc-4-[0-4]-*}]} {

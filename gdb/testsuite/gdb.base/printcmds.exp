@@ -27,8 +27,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
      return -1
 }
 
-get_compiler_info
-
 proc test_integer_literals_accepted {} {
     global gdb_prompt
 

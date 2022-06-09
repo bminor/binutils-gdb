@@ -52,10 +52,6 @@
 
 standard_testfile break.c break1.c
 
-if [get_compiler_info] {
-    return -1
-}
-
 if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2] {debug nowarnings}]} {
     return -1

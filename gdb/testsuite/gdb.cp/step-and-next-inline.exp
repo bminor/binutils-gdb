@@ -15,11 +15,6 @@
 
 standard_testfile .cc
 
-if [get_compiler_info "c++"] {
-    unsupported "couldn't find a valid c++ compiler"
-    return -1
-}
-
 if {[test_compiler_info gcc*] && ![supports_statement_frontiers] } {
     return -1
 }

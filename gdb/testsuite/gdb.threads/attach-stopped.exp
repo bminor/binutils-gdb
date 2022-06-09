@@ -40,10 +40,6 @@ proc corefunc { threadtype } {
     global subdir
     global gdb_prompt
 
-    if [get_compiler_info] {
-	return -1
-    }
-
     set test_spawn_id [spawn_wait_for_attach $binfile]
     set testpid [spawn_id_get_pid $test_spawn_id]
 

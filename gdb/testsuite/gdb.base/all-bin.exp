@@ -29,10 +29,6 @@
 
 standard_testfile all-types.c
 
-if [get_compiler_info] {
-    return -1
-}
-
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }

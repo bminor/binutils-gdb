@@ -36,13 +36,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
     return -1
 }
 
-# Create and source the file that provides information about the compiler
-# used to compile the test case.
-
-if [get_compiler_info] {
-    return -1
-}
-
 set dir2 [standard_output_file dir2.fileio.test]
 if {[file exists $dir2] && ![file writable $dir2]} {
     system "chmod +w $dir2"

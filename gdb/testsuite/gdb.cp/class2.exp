@@ -18,12 +18,6 @@ if { [skip_cplus_tests] } { return }
 
 standard_testfile .cc
 
-# Create and source the file that provides information about the compiler
-# used to compile the test case.
-if [get_compiler_info "c++"] {
-    return -1
-}
-
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
     return -1
 }

@@ -27,10 +27,6 @@ if { [skip_cplus_tests] } { return }
 
 standard_testfile .cc m-static1.cc
 
-if [get_compiler_info] {
-    return -1
-}
-
 set flags [list debug c++]
 if { [test_compiler_info gcc-*] && [gcc_major_version] >= 10 } {
     # Work around PR gcc/101452.

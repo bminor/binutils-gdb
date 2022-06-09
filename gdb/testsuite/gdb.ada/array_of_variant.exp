@@ -20,9 +20,6 @@ if { [skip_ada_tests] } { return -1 }
 
 standard_ada_testfile p
 
-if [get_compiler_info] {
-    return -1
-}
 set old_gcc [expr [test_compiler_info {gcc-[0-7]-*}]]
 
 proc gdb_test_with_xfail { cmd re re_xfail msg } {

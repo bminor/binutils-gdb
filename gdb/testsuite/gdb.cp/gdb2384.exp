@@ -28,12 +28,6 @@ standard_testfile .cc gdb2384-base.cc
 
 set sofile [standard_output_file gdb2384-base.so]
 
-# Create and source the file that provides information about the compiler
-# used to compile the test case.
-if [get_compiler_info "c++"] {
-    return -1
-}
-
 if { [gdb_compile_shlib $srcdir/$subdir/$srcfile2 $sofile {debug c++}] != ""
      || [gdb_compile $srcdir/$subdir/$srcfile $binfile executable [list debug "c++" shlib=${sofile}]] != ""} {
     untested "failed to compile"

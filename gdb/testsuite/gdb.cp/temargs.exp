@@ -32,8 +32,6 @@ if {![runto_main]} {
     return -1
 }
 
-# NOTE: prepare_for_testing calls get_compiler_info, which we need
-# for the test_compiler_info calls.
 # gcc 4.4 and earlier don't emit enough info for some of our template tests.
 set have_older_template_gcc 0
 set have_pr_41736_fixed 1

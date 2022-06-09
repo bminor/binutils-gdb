@@ -26,10 +26,6 @@ if { ![istarget i?86-*-*] && ![istarget x86_64-*-* ] } {
 
 standard_testfile .c
 
-if [get_compiler_info] {
-    return -1
-}
-
 set flags { debug }
 
 # C11 for _Alignas, gnu for asm.

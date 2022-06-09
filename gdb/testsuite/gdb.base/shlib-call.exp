@@ -43,10 +43,6 @@ set lib2     [standard_output_file shr2.sl]
 set lib_opts "debug"
 set exec_opts [list debug shlib=${lib1} shlib=${lib2}]
 
-if [get_compiler_info] {
-    return -1
-}
-
 if { [gdb_compile_shlib ${lib1src} ${lib1} $lib_opts] != ""
      || [gdb_compile_shlib ${lib2src} ${lib2} $lib_opts] != ""
      || [gdb_compile ${srcfile} ${binfile} executable $exec_opts] != ""} {

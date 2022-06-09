@@ -33,10 +33,6 @@ set lib_sl  [standard_output_file $libname]
 set lib_dlopen [shlib_target_file ${libname}]
 set lib_syms [shlib_symbol_file ${libname}]
 
-if [get_compiler_info] {
-    return -1
-}
-
 set lib_opts debug
 set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME=\"${lib_dlopen}\"]
 

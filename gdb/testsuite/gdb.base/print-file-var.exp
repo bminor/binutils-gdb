@@ -139,7 +139,7 @@ proc test {hidden dlopen version_id_main lang} {
 }
 
 # Only test C++ if we are able.  Always use C.
-if { [skip_cplus_tests] || [get_compiler_info "c++"] } {
+if { [skip_cplus_tests] } {
     set lang_list {c}
 } else {
     set lang_list {c c++}

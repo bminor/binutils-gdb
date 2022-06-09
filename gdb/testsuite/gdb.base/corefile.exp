@@ -23,12 +23,6 @@ if ![isnative] then {
 
 standard_testfile coremaker.c
 
-# Create and source the file that provides information about the compiler
-# used to compile the test case.
-if [get_compiler_info] {
-    return -1
-}
-
 if {[build_executable $testfile.exp $testfile $srcfile debug] == -1} {
     untested "failed to compile"
     return -1

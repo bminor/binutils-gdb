@@ -27,7 +27,6 @@ gdb_test_no_output "set listsize 1"
 
 runto_main
 
-get_compiler_info
 get_debug_format
 if { [skip_inline_frame_tests] } {
     untested "skipping inline frame tests"

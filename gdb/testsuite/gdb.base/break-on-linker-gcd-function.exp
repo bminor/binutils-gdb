@@ -27,10 +27,6 @@ if { [skip_cplus_tests] } { continue }
 
 standard_testfile .cc
 
-if [get_compiler_info "c++"] {
-    return -1
-}
-
 if {[build_executable_from_specs $testfile.exp $testfile \
        {c++ additional_flags=-Wl,--gc-sections} \
        $srcfile {debug c++ additional_flags=-ffunction-sections}]} {

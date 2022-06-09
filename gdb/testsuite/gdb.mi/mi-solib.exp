@@ -36,10 +36,6 @@ set lib_flags [list debug]
 set srcfile_main ${srcdir}/${subdir}/$srcfile
 set bin_flags [list debug shlib=${binfile_lib}]
 
-if [get_compiler_info] {
-    return -1
-}
-
 if { [gdb_compile_shlib ${srcfile_lib} ${binfile_lib} $lib_flags] != ""
      || [gdb_compile ${srcfile_main} ${binfile} executable $bin_flags] != "" } {
   untested "failed to compile"

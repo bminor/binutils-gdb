@@ -30,12 +30,6 @@ if { [prepare_for_testing "failed to prepare" ${testfile} \
     return 0
 }
 
-# Create and source the file that provides information about the compiler
-# used to compile the test case.
-if [get_compiler_info] {
-    return -1
-}
-
 # Same thing with struct and union.
 gdb_test "ptype struct A" "type = struct A \{\[\r\n\]+\[ \t\]+struct B \\*b;\[\r\n\]+\[ \t\]+struct A \\*next;\[\r\n\]+\}.*" "ptype structure A"
 gdb_test "ptype struct B" "type = struct B \{\[\r\n\]+\[ \t\]+struct C \\*c;\[\r\n\]+\[ \t\]+int \\wombat;\[\r\n\]+\}.*" "ptype structure B"

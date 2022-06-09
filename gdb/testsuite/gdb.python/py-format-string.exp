@@ -20,10 +20,6 @@ load_lib gdb-python.exp
 
 standard_testfile
 
-if [get_compiler_info c++] {
-    return -1
-}
-
 # Skip all tests if Python scripting is not enabled.
 gdb_exit
 gdb_start

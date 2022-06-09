@@ -31,10 +31,6 @@ set lib2file "shr2"
 set lib2src  ${lib2file}.c
 set library2 [standard_output_file ${lib2file}.sl]
 
-if [get_compiler_info] {
-    return -1
-}
-
 # Compile the first without debug info so that
 # stepping and reverse stepping doesn't end up inside them.
 if { [gdb_compile_shlib ${srcdir}/${subdir}/${lib1src} ${library1} ""] != "" } {

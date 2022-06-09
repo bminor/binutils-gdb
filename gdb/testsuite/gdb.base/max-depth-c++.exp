@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # Only test C++ if we are able.
-if { [skip_cplus_tests] || [get_compiler_info "c++"] } {
+if { [skip_cplus_tests] } {
     return -1
 }
 set lang c++

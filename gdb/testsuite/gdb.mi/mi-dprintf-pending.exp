@@ -31,10 +31,6 @@ set lib_sl1  [standard_output_file $libfile1.sl]
 set lib_opts debug
 set exec_opts [list debug shlib=$lib_sl1 shlib_load]
 
-if {[get_compiler_info]} {
-    return -1
-}
-
 if {[gdb_compile_shlib $libsrc1 $lib_sl1 $lib_opts] != ""} {
     untested "failed to compile shared library"
     return -1

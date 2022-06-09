@@ -21,13 +21,6 @@ if {[is_remote target] || [skip_shlib_tests]} {
     return -1
 }
 
-# This is required by gdb_compile_shlib.
-if {[get_compiler_info]} {
-    warning "Could not get compiler info"
-    untested "no compiler info"
-    return 1
-}
-
 # Build "wrong" and "right" versions of the libraries in separate directories.
 set wrong_lib_subdir "solib-search-wrong"
 set right_lib_subdir "solib-search-right"

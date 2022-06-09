@@ -20,10 +20,6 @@ load_lib gdb-python.exp
 
 standard_testfile
 
-if [get_compiler_info c++] {
-    return -1
-}
-
 # Build inferior to language specification.
 proc build_inferior {exefile lang} {
   global srcdir subdir srcfile testfile hex

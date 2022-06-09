@@ -23,11 +23,6 @@ if { [skip_cplus_tests] } {  return }
 
 standard_testfile .cc
 
-if [get_compiler_info "c++"] {
-    unsupported "couldn't find a valid c++ compiler"
-    return -1
-}
-
 set additional_flags ""
 if {[test_compiler_info {gcc-[0-9]-*}]} {
     # GCCs prior to 10.1 do not support -Wno-inaccessible-base.

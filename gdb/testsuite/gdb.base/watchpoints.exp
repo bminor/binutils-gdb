@@ -20,10 +20,6 @@ standard_testfile
 
 set wp_set 1
 
-if [get_compiler_info] {
-    return -1
-}
-
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
