@@ -51,6 +51,9 @@ if ![runto_main] then {
     return
 }
 
+# This is used as an expected result value.
+set false 0
+
 gdb_test_no_output "set variable x=14" "set variable x=14"
 gdb_test_no_output "set variable y=2" "set variable y=2"
 gdb_test_no_output "set variable z=2" "set variable z=2"

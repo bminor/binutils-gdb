@@ -4191,11 +4191,6 @@ proc get_compiler_info {{language "c"}} {
     # Log what happened.
     verbose -log "get_compiler_info: $compiler_info"
 
-    # Most compilers will evaluate comparisons and other boolean
-    # operations to 0 or 1.
-    uplevel \#0 { set true 1 }
-    uplevel \#0 { set false 0 }
-
     return 0
 }
 

@@ -48,6 +48,10 @@ if ![runto_main] then {
     return
 }
 
+# These are used as expected result values.
+set false 0
+set true 1
+
 gdb_test "next " "more_code.*;" "continuing after dummy()"
 
 

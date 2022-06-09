@@ -42,6 +42,10 @@ if ![runto_main] then {
     return
 }
 
+# These are used as expected result values.
+set false 0
+set true 1
+
 #
 # test expressions with "int" types
 #

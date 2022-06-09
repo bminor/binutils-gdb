@@ -46,6 +46,10 @@ if ![runto_main] then {
     return
 }
 
+# These are used as expected result values.
+set false 0
+set true 1
+
 gdb_test "next" "return 0;" "continuing after dummy()"
 
 gdb_test "print v_int+v_char" " = 71" "print value of v_int+v_char"

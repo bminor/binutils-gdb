@@ -59,6 +59,9 @@ if ![runto_main] then {
     return
 }
 
+# This is used as an expected result value.
+set false 0
+
 gdb_test "break marker1" ".*" ""
 
 gdb_test "cont" \

@@ -41,6 +41,10 @@ if ![runto_main] then {
     return
 }
 
+# These are used as expected result values.
+set false 0
+set true 1
+
 proc test_expr { args } {
     if { [llength $args] % 2 } {
 	warning "an even # of arguments should be passed to test_expr"
