@@ -700,8 +700,7 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
   dwarf_vma index_offset;
   dwarf_vma str_offset;
   const char * ret;
-  unsigned char *curr = index_section->start;
-  unsigned char *end = curr + index_section->size;
+  unsigned char *curr, *end;
   dwarf_vma length;
 
   if (index_section->start == NULL)
@@ -712,6 +711,8 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
     return (dwo ? _("<no .debug_str.dwo section>")
 		: _("<no .debug_str section>"));
 
+  curr = index_section->start;
+  end = curr + index_section->size;
   /* FIXME: We should cache the length...  */
   SAFE_BYTE_GET_AND_INC (length, curr, 4, end);
   if (length == 0xffffffff)
