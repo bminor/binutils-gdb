@@ -3429,6 +3429,60 @@ arm_m_exception_cache (struct frame_info *this_frame)
   /* Fetch the SP to use for this frame.  */
   unwound_sp = arm_cache_get_prev_sp_value (cache, tdep);
 
+  /* Exception entry context stacking are described in ARMv8-M (section B3.19)
+     and ARMv7-M (sections B1.5.6 and B1.5.7) Architecture Reference Manuals.
+
+     The following figure shows the structure of the stack frame when Security
+     and Floating-point extensions are present.
+
+                          SP Offsets
+            Without                         With
+          Callee Regs                    Callee Regs
+                                    (Secure -> Non-Secure)
+                    +-------------------+
+             0xA8   |                   |   0xD0
+                    +===================+         --+  <-- Original SP
+             0xA4   |        S31        |   0xCC    |
+                    +-------------------+           |
+                             ...                    |  Additional FP context
+                    +-------------------+           |
+             0x68   |        S16        |   0x90    |
+                    +===================+         --+
+             0x64   |      Reserved     |   0x8C    |
+                    +-------------------+           |
+             0x60   |       FPSCR       |   0x88    |
+                    +-------------------+           |
+             0x5C   |        S15        |   0x84    |  FP context
+                    +-------------------+           |
+                             ...                    |
+                    +-------------------+           |
+             0x20   |         S0        |   0x48    |
+                    +===================+         --+
+             0x1C   |       xPSR        |   0x44    |
+                    +-------------------+           |
+             0x18   |  Return address   |   0x40    |
+                    +-------------------+           |
+             0x14   |      LR(R14)      |   0x3C    |
+                    +-------------------+           |
+             0x10   |        R12        |   0x38    |  State context
+                    +-------------------+           |
+             0x0C   |         R3        |   0x34    |
+                    +-------------------+           |
+                             ...                    |
+                    +-------------------+           |
+             0x00   |         R0        |   0x28    |
+                    +===================+         --+
+                    |        R11        |   0x24    |
+                    +-------------------+           |
+                             ...                    |
+                    +-------------------+           |  Additional state context
+                    |         R4        |   0x08    |  when transitioning from
+                    +-------------------+           |  Secure to Non-Secure
+                    |      Reserved     |   0x04    |
+                    +-------------------+           |
+                    |  Magic signature  |   0x00    |
+                    +===================+         --+  <-- New SP  */
+
   /* With the Security extension, the hardware saves R4..R11 too.  */
   if (exc_return && tdep->have_sec_ext && secure_stack_used
       && (!default_callee_register_stacking || exception_domain_is_secure))
@@ -3487,25 +3541,28 @@ arm_m_exception_cache (struct frame_info *this_frame)
       if (tdep->have_sec_ext && !default_callee_register_stacking)
 	{
 	  /* Handle floating-point callee saved registers.  */
-	  fpu_regs_stack_offset = 0x90;
+	  fpu_regs_stack_offset = unwound_sp + sp_r0_offset + 0x68;
 	  for (i = 8; i < 16; i++)
 	    {
 	      cache->saved_regs[ARM_D0_REGNUM + i].set_addr (fpu_regs_stack_offset);
 	      fpu_regs_stack_offset += 8;
 	    }
 
-	  arm_cache_set_active_sp_value (cache, tdep, unwound_sp + sp_r0_offset + 0xD0);
+	  arm_cache_set_active_sp_value (cache, tdep,
+					 unwound_sp + sp_r0_offset + 0xA8);
 	}
       else
 	{
 	  /* Offset 0x64 is reserved.  */
-	  arm_cache_set_active_sp_value (cache, tdep, unwound_sp + sp_r0_offset + 0x68);
+	  arm_cache_set_active_sp_value (cache, tdep,
+					 unwound_sp + sp_r0_offset + 0x68);
 	}
     }
   else
     {
       /* Standard stack frame type used.  */
-      arm_cache_set_active_sp_value (cache, tdep, unwound_sp + sp_r0_offset + 0x20);
+      arm_cache_set_active_sp_value (cache, tdep,
+				     unwound_sp + sp_r0_offset + 0x20);
     }
 
   /* If bit 9 of the saved xPSR is set, then there is a four-byte
