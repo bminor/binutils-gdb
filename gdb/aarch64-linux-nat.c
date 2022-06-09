@@ -46,6 +46,7 @@
 
 #include "gregset.h"
 #include "linux-tdep.h"
+#include "arm-tdep.h"
 
 /* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
@@ -485,11 +486,11 @@ store_tlsregs_to_thread (struct regcache *regcache)
     perror_with_name (_("unable to store TLS register"));
 }
 
-/* Implement the "fetch_registers" target_ops method.  */
+/* The AArch64 version of the "fetch_registers" target_ops method.  Fetch
+   REGNO from the target and place the result into REGCACHE.  */
 
-void
-aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
-					   int regno)
+static void
+aarch64_fetch_registers (struct regcache *regcache, int regno)
 {
   aarch64_gdbarch_tdep *tdep
     = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
@@ -534,11 +535,48 @@ aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
     fetch_tlsregs_from_thread (regcache);
 }
 
-/* Implement the "store_registers" target_ops method.  */
+/* A version of the "fetch_registers" target_ops method used when running
+   32-bit ARM code on an AArch64 target.  Fetch REGNO from the target and
+   place the result into REGCACHE.  */
+
+static void
+aarch32_fetch_registers (struct regcache *regcache, int regno)
+{
+  arm_gdbarch_tdep *tdep
+    = (arm_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+
+  if (regno == -1)
+    {
+      fetch_gregs_from_thread (regcache);
+      if (tdep->vfp_register_count > 0)
+	fetch_fpregs_from_thread (regcache);
+    }
+  else if (regno < ARM_F0_REGNUM || regno == ARM_PS_REGNUM)
+    fetch_gregs_from_thread (regcache);
+  else if (tdep->vfp_register_count > 0
+	   && regno >= ARM_D0_REGNUM
+	   && (regno < ARM_D0_REGNUM + tdep->vfp_register_count
+	       || regno == ARM_FPSCR_REGNUM))
+    fetch_fpregs_from_thread (regcache);
+}
+
+/* Implement the "fetch_registers" target_ops method.  */
 
 void
-aarch64_linux_nat_target::store_registers (struct regcache *regcache,
+aarch64_linux_nat_target::fetch_registers (struct regcache *regcache,
 					   int regno)
+{
+  if (gdbarch_bfd_arch_info (regcache->arch ())->bits_per_word == 32)
+    aarch32_fetch_registers (regcache, regno);
+  else
+    aarch64_fetch_registers (regcache, regno);
+}
+
+/* The AArch64 version of the "store_registers" target_ops method.  Copy
+   the value of register REGNO from REGCACHE into the the target.  */
+
+static void
+aarch64_store_registers (struct regcache *regcache, int regno)
 {
   aarch64_gdbarch_tdep *tdep
     = (aarch64_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
@@ -571,6 +609,43 @@ aarch64_linux_nat_target::store_registers (struct regcache *regcache,
 
   if (tdep->has_tls () && regno == tdep->tls_regnum)
     store_tlsregs_to_thread (regcache);
+}
+
+/* A version of the "store_registers" target_ops method used when running
+   32-bit ARM code on an AArch64 target.  Copy the value of register REGNO
+   from REGCACHE into the the target.  */
+
+static void
+aarch32_store_registers (struct regcache *regcache, int regno)
+{
+  arm_gdbarch_tdep *tdep
+    = (arm_gdbarch_tdep *) gdbarch_tdep (regcache->arch ());
+
+  if (regno == -1)
+    {
+      store_gregs_to_thread (regcache);
+      if (tdep->vfp_register_count > 0)
+	store_fpregs_to_thread (regcache);
+    }
+  else if (regno < ARM_F0_REGNUM || regno == ARM_PS_REGNUM)
+    store_gregs_to_thread (regcache);
+  else if (tdep->vfp_register_count > 0
+	   && regno >= ARM_D0_REGNUM
+	   && (regno < ARM_D0_REGNUM + tdep->vfp_register_count
+	       || regno == ARM_FPSCR_REGNUM))
+    store_fpregs_to_thread (regcache);
+}
+
+/* Implement the "store_registers" target_ops method.  */
+
+void
+aarch64_linux_nat_target::store_registers (struct regcache *regcache,
+					   int regno)
+{
+  if (gdbarch_bfd_arch_info (regcache->arch ())->bits_per_word == 32)
+    aarch32_store_registers (regcache, regno);
+  else
+    aarch64_store_registers (regcache, regno);
 }
 
 /* Fill register REGNO (if it is a general-purpose register) in
@@ -793,22 +868,33 @@ aarch64_linux_nat_target::can_do_single_step ()
   return 1;
 }
 
-/* Implement the "thread_architecture" target_ops method.  */
+/* Implement the "thread_architecture" target_ops method.
+
+   Returns the gdbarch for the thread identified by PTID.  If the thread in
+   question is a 32-bit ARM thread, then the architecture returned will be
+   that of the process itself.
+
+   If the thread is an AArch64 thread then we need to check the current
+   vector length; if the vector length has changed then we need to lookup a
+   new gdbarch that matches the new vector length.  */
 
 struct gdbarch *
 aarch64_linux_nat_target::thread_architecture (ptid_t ptid)
 {
-  /* Return the gdbarch for the current thread.  If the vector length has
-     changed since the last time this was called, then do a further lookup.  */
-
-  uint64_t vq = aarch64_sve_get_vq (ptid.lwp ());
-
-  /* Find the current gdbarch the same way as process_stratum_target.  Only
-     return it if the current vector length matches the one in the tdep.  */
+  /* Find the current gdbarch the same way as process_stratum_target.  */
   inferior *inf = find_inferior_ptid (this, ptid);
   gdb_assert (inf != NULL);
+
+  /* If this is a 32-bit architecture, then this is ARM, not AArch64.
+     There's no SVE vectors here, so just return the inferior
+     architecture.  */
+  if (gdbarch_bfd_arch_info (inf->gdbarch)->bits_per_word == 32)
+    return inf->gdbarch;
+
+  /* Only return it if the current vector length matches the one in the tdep.  */
   aarch64_gdbarch_tdep *tdep
     = (aarch64_gdbarch_tdep *) gdbarch_tdep (inf->gdbarch);
+  uint64_t vq = aarch64_sve_get_vq (ptid.lwp ());
   if (vq == tdep->vq)
     return inf->gdbarch;
 
