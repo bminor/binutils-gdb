@@ -8671,12 +8671,12 @@ proc get_set_option_choices {set_cmd} {
 # that the executable they produce can run.
 
 gdb_caching_proc arm_cc_for_target {
-    if {[info exists ARM_CC_FOR_TARGET]} {
+    if {[info exists ::ARM_CC_FOR_TARGET]} {
 	# If the user specified the compiler explicitly, then don't
 	# check whether the resulting binary runs outside GDB.  Assume
 	# that it does, and if it turns out it doesn't, then the user
 	# should get loud FAILs, instead of UNSUPPORTED.
-	return $ARM_CC_FOR_TARGET
+	return $::ARM_CC_FOR_TARGET
     }
 
     # Fallback to a few common compiler names.  Also confirm the
