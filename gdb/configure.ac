@@ -2113,7 +2113,7 @@ AC_ARG_ENABLE([libbacktrace],
 esac],
 enable_libbacktrace=yes)
 
-if test "${enable_libbacktrace}" == "yes"; then
+if test "${enable_libbacktrace}" = "yes"; then
   LIBBACKTRACE_INC="-I$srcdir/../libbacktrace/ -I../libbacktrace/"
   LIBBACKTRACE_LIB=../libbacktrace/.libs/libbacktrace.a
   AC_DEFINE(HAVE_LIBBACKTRACE, 1, [Define if libbacktrace is being used.])
