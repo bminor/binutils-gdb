@@ -3330,6 +3330,17 @@ arm_m_exception_cache (struct frame_info *this_frame)
   lr = get_frame_register_unsigned (this_frame, ARM_LR_REGNUM);
   sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
 
+  /* ARMv7-M Architecture Reference "A2.3.1 Arm core registers"
+     states that LR is set to 0xffffffff on reset.  ARMv8-M Architecture
+     Reference "B3.3 Registers" states that LR is set to 0xffffffff on warm
+     reset if Main Extension is implemented, otherwise the value is unknown.  */
+  if (lr == 0xffffffff)
+    {
+      /* Terminate any further stack unwinding by referring to self.  */
+      arm_cache_set_active_sp_value (cache, tdep, sp);
+      return cache;
+    }
+
   fnc_return = ((lr & 0xfffffffe) == 0xfefffffe);
   if (tdep->have_sec_ext && fnc_return)
     {
