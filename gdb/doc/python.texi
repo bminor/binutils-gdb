@@ -3448,9 +3448,9 @@ A sequence containing references to all the breakpoints (type
 @end defvar
 
 @defvar BreakpointEvent.breakpoint
-A reference to the first breakpoint that was hit.
-This function is maintained for backward compatibility and is now deprecated 
-in favor of the @code{gdb.BreakpointEvent.breakpoints} attribute.
+A reference to the first breakpoint that was hit.  This attribute is
+maintained for backward compatibility and is now deprecated in favor
+of the @code{gdb.BreakpointEvent.breakpoints} attribute.
 @end defvar
 
 @item events.new_objfile
