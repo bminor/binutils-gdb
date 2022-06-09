@@ -53,10 +53,7 @@ if {![dwarf2_support]} {
 }
 
 # The .c files use __attribute__.
-if [get_compiler_info] {
-    return -1
-}
-if !$gcc_compiled {
+if ![is_c_compiler_gcc] {
     return 0
 }
 

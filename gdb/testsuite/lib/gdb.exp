@@ -4043,8 +4043,6 @@ if [info exists compiler_info] {
     unset compiler_info
 }
 
-set gcc_compiled		0
-
 # Figure out what compiler I am using.
 # The result is cached so only the first invocation runs the compiler.
 #
@@ -4178,16 +4176,6 @@ proc get_compiler_info {{language "c"}} {
 
     set compiler_info_cache($language) $compiler_info
 
-    # Set the legacy symbol gcc_compiled.
-    if { $language == "c" } {
-	# Legacy global data symbols.
-	gdb_persistent_global gcc_compiled
-
-	set gcc_compiled 0
-
-	regexp "^gcc-(\[0-9\]+)-" "$compiler_info" matchall gcc_compiled
-    }
-
     # Log what happened.
     verbose -log "get_compiler_info: $compiler_info"
 
@@ -4218,6 +4206,15 @@ proc test_compiler_info { {compiler ""} {language "c"} } {
     }
 
     return [string match $compiler $compiler_info_cache($language)]
+}
+
+# Return true if the C compiler is GCC, otherwise, return false.
+
+proc is_c_compiler_gcc {} {
+    set compiler_info [test_compiler_info]
+    set gcc_compiled false
+    regexp "^gcc-(\[0-9\]+)-" "$compiler_info" matchall gcc_compiled
+    return $gcc_compiled
 }
 
 # Return the gcc major version, or -1.

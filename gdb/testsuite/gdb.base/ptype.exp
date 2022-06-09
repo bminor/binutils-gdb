@@ -26,11 +26,8 @@ if {[prepare_for_testing "failed to prepare" ${testfile} \
     return -1
 }
 
-# Create and source the file that provides information about the compiler
-# used to compile the test case.
-if [get_compiler_info] {
-    return -1
-}
+# Some tests require GCC.
+set gcc_compiled [is_c_compiler_gcc]
 
 # Test ptype of unnamed enumeration members before any action causes
 # the partial symbol table to be expanded to full symbols.  This fails

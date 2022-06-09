@@ -24,6 +24,9 @@ if [target_info exists no_long_long] {
     set exec_opts [list debug]
 }
 
+# Some tests require GCC.
+set gcc_compiled [is_c_compiler_gcc]
+
 standard_testfile whatis.c
 
 # Using `-gctf` generates full-fledged CTF debug information.
@@ -32,12 +35,6 @@ set opts "additional_flags=-gctf -Wl,--export-dynamic"
 if { [prepare_for_testing "failed to prepare" ${testfile} \
 	  [list $srcfile] [list $opts nowarnings]] } {
     return 0
-}
-
-# Create and source the file that provides information about the compiler
-# used to compile the test case.
-if [get_compiler_info] {
-    return -1
 }
 
 # test print command with functions return type

@@ -23,10 +23,7 @@ if {![dwarf2_support]} {
     return 0
 }
 
-if [get_compiler_info] {
-    return -1
-}
-if !$gcc_compiled {
+if ![is_c_compiler_gcc] {
     unsupported "gcc required for this test"
     return 0
 }

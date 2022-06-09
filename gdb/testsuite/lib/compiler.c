@@ -27,9 +27,6 @@
    TODO: make compiler_info a local variable for get_compiler_info and
    test_compiler_info.
 
-   TODO: all clients should use test_compiler_info and should not
-   use gcc_compiled.
-
    */
 
 set compiler_info "unknown"

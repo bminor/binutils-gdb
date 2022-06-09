@@ -15,14 +15,10 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
-
-# Create and source the file that provides information about the compiler
-# used to compile the test case.
-if [get_compiler_info] {
-    return -1
-}
-
 standard_testfile opaque0.c opaque1.c
+
+# Some tests require GCC.
+set gcc_compiled [is_c_compiler_gcc]
 
 if {[prepare_for_testing "failed to prepare" $testfile \
 	 [list $srcfile $srcfile2] debug]} {

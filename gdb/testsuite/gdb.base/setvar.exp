@@ -26,12 +26,6 @@
 
 standard_testfile
 
-# Create and source the file that provides information about the compiler
-# used to compile the test case.
-if [get_compiler_info] {
-    return -1
-}
-
 if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
@@ -395,7 +389,7 @@ set timeout $prev_timeout
 # Test printing of enumeration bitfields.
 # GNU C supports them, some other compilers don't.
 
-if {$gcc_compiled} then {
+if {[is_c_compiler_gcc]} then {
     gdb_test "print sef.field=sm1" ".*.\[0-9\]* = sm1"
     gdb_test "print sef.field" ".*.\[0-9\]* = sm1" "print sef.field (sm1)"
     gdb_test "print sef.field=s1" ".*.\[0-9\]* = s1"

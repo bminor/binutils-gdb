@@ -30,11 +30,6 @@ set execsrc "${srcdir}/${subdir}/${srcfile}"
 
 remote_exec build "rm -f ${binfile}"
 
-# get the value of gcc_compiled
-if [get_compiler_info] {
-    return -1
-}
-
 if { [gdb_compile_shlib $libsrc $libobj {debug}] != ""
      || [gdb_compile $execsrc ${binfile} executable \
 	     [list debug shlib=${libobj}]] != "" } {
