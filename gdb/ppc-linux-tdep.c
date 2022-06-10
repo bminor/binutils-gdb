@@ -1738,6 +1738,11 @@ static void
 ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
 			    int wordsize)
 {
+  /* The values for TCGETS, TCSETS, TCSETSW, TCSETSF are based on the
+     size of struct termios in the kernel source.
+     include/uapi/asm-generic/termbits.h  */
+#define SIZE_OF_STRUCT_TERMIOS  0x2c
+
   /* Simply return if it had been initialized.  */
   if (record_tdep->size_pointer != 0)
     return;
@@ -1899,14 +1904,15 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
   /* These values are the second argument of system call "sys_ioctl".
      They are obtained from Linux Kernel source.
      See arch/powerpc/include/uapi/asm/ioctls.h.  */
-  record_tdep->ioctl_TCGETS = 0x403c7413;
-  record_tdep->ioctl_TCSETS = 0x803c7414;
-  record_tdep->ioctl_TCSETSW = 0x803c7415;
-  record_tdep->ioctl_TCSETSF = 0x803c7416;
   record_tdep->ioctl_TCGETA = 0x40147417;
   record_tdep->ioctl_TCSETA = 0x80147418;
   record_tdep->ioctl_TCSETAW = 0x80147419;
   record_tdep->ioctl_TCSETAF = 0x8014741c;
+  record_tdep->ioctl_TCGETS = 0x40007413 | (SIZE_OF_STRUCT_TERMIOS << 16);
+  record_tdep->ioctl_TCSETS = 0x80007414 | (SIZE_OF_STRUCT_TERMIOS << 16);
+  record_tdep->ioctl_TCSETSW = 0x80007415 | (SIZE_OF_STRUCT_TERMIOS << 16);
+  record_tdep->ioctl_TCSETSF = 0x80007416 | (SIZE_OF_STRUCT_TERMIOS << 16);
+
   record_tdep->ioctl_TCSBRK = 0x2000741d;
   record_tdep->ioctl_TCXONC = 0x2000741e;
   record_tdep->ioctl_TCFLSH = 0x2000741f;
