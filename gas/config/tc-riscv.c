@@ -2582,7 +2582,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 			    || imm_expr->X_add_number >= 64)
 			  {
 			    as_bad (_("bad value for compressed funct6 "
-				      "field, value must be 0...64"));
+				      "field, value must be 0...63"));
 			    break;
 			  }
 			INSERT_OPERAND (CFUNCT6, *ip, imm_expr->X_add_number);
