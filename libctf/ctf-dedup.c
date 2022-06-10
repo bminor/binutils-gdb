@@ -2652,6 +2652,8 @@ ctf_dedup_emit_type (const char *hval, ctf_dict_t *output, ctf_dict_t **inputs,
 	  ctf_parent_name_set (target, _CTF_SECTION);
 
 	  input->ctf_dedup.cd_output = target;
+	  input->ctf_link_in_out = target;
+	  target->ctf_link_in_out = input;
 	}
       output_num = input_num;
     }

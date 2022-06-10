@@ -72,7 +72,7 @@ ctf_unnamed_cuname (ctf_dict_t *fp)
    never gets explicitly freed in the ctf_link_input.  */
 typedef struct ctf_link_input
 {
-  const char *clin_filename;
+  char *clin_filename;
   ctf_archive_t *clin_arc;
   ctf_dict_t *clin_fp;
   int n;
@@ -84,6 +84,7 @@ ctf_link_input_close (void *input)
   ctf_link_input_t *i = (ctf_link_input_t *) input;
   if (i->clin_arc)
     ctf_arc_close (i->clin_arc);
+  free (i->clin_filename);
   free (i);
 }
 
@@ -93,27 +94,50 @@ static int
 ctf_link_add_ctf_internal (ctf_dict_t *fp, ctf_archive_t *ctf,
 			   ctf_dict_t *fp_input, const char *name)
 {
-  ctf_link_input_t *input = NULL;
-  char *dupname = NULL;
+  int existing = 0;
+  ctf_link_input_t *input;
+  char *filename, *keyname;
+
+  /* Existing: return it, or (if a different dict with the same name
+     is already there) make up a new unique name.  Always use the actual name
+     for the filename, because that needs to be ctf_open()ed.  */
+
+  if ((input = ctf_dynhash_lookup (fp->ctf_link_inputs, name)) != NULL)
+    {
+      if ((fp_input != NULL && (input->clin_fp == fp_input))
+	  || (ctf != NULL && (input->clin_arc == ctf)))
+	return 0;
+      existing = 1;
+    }
+
+  if ((filename = strdup (name)) == NULL)
+    goto oom;
 
   if ((input = calloc (1, sizeof (ctf_link_input_t))) == NULL)
     goto oom;
 
-  if ((dupname = strdup (name)) == NULL)
-    goto oom;
-
   input->clin_arc = ctf;
   input->clin_fp = fp_input;
-  input->clin_filename = dupname;
+  input->clin_filename = filename;
   input->n = ctf_dynhash_elements (fp->ctf_link_inputs);
 
-  if (ctf_dynhash_insert (fp->ctf_link_inputs, dupname, input) < 0)
+  if (existing)
+    {
+      if (asprintf (&keyname, "%s#%li", name, (long int)
+		    ctf_dynhash_elements (fp->ctf_link_inputs)) < 0)
+	goto oom;
+    }
+  else if ((keyname = strdup (name)) == NULL)
+    goto oom;
+
+  if (ctf_dynhash_insert (fp->ctf_link_inputs, keyname, input) < 0)
     goto oom;
 
   return 0;
  oom:
   free (input);
-  free (dupname);
+  free (filename);
+  free (keyname);
   return ctf_set_errno (fp, ENOMEM);
 }
 
@@ -132,6 +156,10 @@ ctf_link_add_ctf_internal (ctf_dict_t *fp, ctf_archive_t *ctf,
 
     The order of calls to this function influences the order of types in the
     final link output, but otherwise is not important.
+
+    Repeated additions of the same NAME have no effect; repeated additions of
+    different dicts with the same NAME add all the dicts with unique NAMEs
+    derived from NAME.
 
     Private for now, but may in time become public once support for BUF is
     implemented.  */
@@ -235,19 +263,49 @@ ctf_link_lazy_open (ctf_dict_t *fp, ctf_link_input_t *input)
   return (ssize_t) count;
 }
 
-/* Return a per-CU output CTF dictionary suitable for the given CU, creating and
-   interning it if need be.  */
+/* Find a non-clashing unique name for a per-CU output dict, to prevent distinct
+   members corresponding to inputs with identical cunames from overwriting each
+   other.  The name should be something like NAME.  */
 
-_libctf_nonnull_((1,2))
+static char *
+ctf_new_per_cu_name (ctf_dict_t *fp, const char *name)
+{
+  char *dynname;
+  long int i = 0;
+
+  if ((dynname = strdup (name)) == NULL)
+    return NULL;
+
+  while ((ctf_dynhash_lookup (fp->ctf_link_outputs, dynname)) != NULL)
+    {
+      free (dynname);
+      if (asprintf (&dynname, "%s#%li", name, i++) < 0)
+	return NULL;
+    }
+
+  return dynname;
+}
+
+/* Return a per-CU output CTF dictionary suitable for the given INPUT or CU,
+   creating and interning it if need be.  */
+
 static ctf_dict_t *
-ctf_create_per_cu (ctf_dict_t *fp, const char *cu_name)
+ctf_create_per_cu (ctf_dict_t *fp, ctf_dict_t *input, const char *cu_name)
 {
   ctf_dict_t *cu_fp;
   const char *ctf_name = NULL;
   char *dynname = NULL;
 
-  /* First, check the mapping table and translate the per-CU name we use
+  /* Already has a per-CU mapping?  Just return it.  */
+
+  if (input && input->ctf_link_in_out)
+    return input->ctf_link_in_out;
+
+  /* Check the mapping table and translate the per-CU name we use
      accordingly.  */
+
+  if (cu_name == NULL)
+    cu_name = ctf_unnamed_cuname (input);
 
   if (fp->ctf_link_in_cu_mapping)
     {
@@ -259,7 +317,12 @@ ctf_create_per_cu (ctf_dict_t *fp, const char *cu_name)
   if (ctf_name == NULL)
     ctf_name = cu_name;
 
-  if ((cu_fp = ctf_dynhash_lookup (fp->ctf_link_outputs, ctf_name)) == NULL)
+  /* Look up the per-CU dict.  If we don't know of one, or it is for
+     a different input CU which just happens to have the same name,
+     create a new one.  */
+
+  if ((cu_fp = ctf_dynhash_lookup (fp->ctf_link_outputs, ctf_name)) == NULL
+      || cu_fp->ctf_link_in_out != fp)
     {
       int err;
 
@@ -271,14 +334,19 @@ ctf_create_per_cu (ctf_dict_t *fp, const char *cu_name)
 	  return NULL;
 	}
 
-      if ((dynname = strdup (ctf_name)) == NULL)
-	goto oom;
-      if (ctf_dynhash_insert (fp->ctf_link_outputs, dynname, cu_fp) < 0)
+      ctf_import_unref (cu_fp, fp);
+
+      if ((dynname = ctf_new_per_cu_name (fp, ctf_name)) == NULL)
 	goto oom;
 
-      ctf_import_unref (cu_fp, fp);
       ctf_cuname_set (cu_fp, cu_name);
+
       ctf_parent_name_set (cu_fp, _CTF_SECTION);
+      cu_fp->ctf_link_in_out = fp;
+      fp->ctf_link_in_out = cu_fp;
+
+      if (ctf_dynhash_insert (fp->ctf_link_outputs, dynname, cu_fp) < 0)
+	goto oom;
     }
   return cu_fp;
 
@@ -303,6 +371,10 @@ ctf_link_add_cu_mapping (ctf_dict_t *fp, const char *from, const char *to)
   int err;
   char *f = NULL, *t = NULL;
   ctf_dynhash_t *one_out;
+
+  /* Mappings cannot be set up if per-CU output dicts already exist.  */
+  if (fp->ctf_link_outputs && ctf_dynhash_elements (fp->ctf_link_outputs) != 0)
+      return (ctf_set_errno (fp, ECTF_LINKADDEDLATE));
 
   if (fp->ctf_link_in_cu_mapping == NULL)
     fp->ctf_link_in_cu_mapping = ctf_dynhash_create (ctf_hash_string,
@@ -481,7 +553,7 @@ ctf_link_one_variable (ctf_dict_t *fp, ctf_dict_t *in_fp, const char *name,
       return 0;
     }
 
-  if ((per_cu_out_fp = ctf_create_per_cu (fp, ctf_unnamed_cuname (in_fp))) == NULL)
+  if ((per_cu_out_fp = ctf_create_per_cu (fp, in_fp, NULL)) == NULL)
     return -1;					/* errno is set for us.  */
 
   /* If the type was not found, check for it in the child too.  */
@@ -917,7 +989,7 @@ ctf_link_deduplicating_one_symtypetab (ctf_dict_t *fp, ctf_dict_t *input,
 	  continue;
 	}
 
-      if ((per_cu_out_fp = ctf_create_per_cu (fp, ctf_unnamed_cuname (input))) == NULL)
+      if ((per_cu_out_fp = ctf_create_per_cu (fp, input, NULL)) == NULL)
 	return -1;				/* errno is set for us.  */
 
       /* If the type was not found, check for it in the child too.  */
@@ -1222,6 +1294,31 @@ ctf_link_deduplicating_per_cu (ctf_dict_t *fp)
   return 0;
 }
 
+/* Empty all the ctf_link_outputs.  */
+static int
+ctf_link_empty_outputs (ctf_dict_t *fp)
+{
+  ctf_next_t *i = NULL;
+  void *v;
+  int err;
+
+  ctf_dynhash_empty (fp->ctf_link_outputs);
+
+  while ((err = ctf_dynhash_next (fp->ctf_link_inputs, &i, NULL, &v)) == 0)
+    {
+      ctf_dict_t *in = (ctf_dict_t *) v;
+      in->ctf_link_in_out = NULL;
+    }
+  if (err != ECTF_NEXT_END)
+    {
+      fp->ctf_flags &= ~LCTF_LINKING;
+      ctf_err_warn (fp, 1, err, _("iteration error removing old outputs"));
+      ctf_set_errno (fp, err);
+      return -1;
+    }
+  return 0;
+}
+
 /* Do a deduplicating link using the ctf-dedup machinery.  */
 static void
 ctf_link_deduplicating (ctf_dict_t *fp)
@@ -1285,7 +1382,7 @@ ctf_link_deduplicating (ctf_dict_t *fp)
 	  continue;
 	}
 
-      if ((dynname = strdup (ctf_cuname (outputs[i]))) == NULL)
+      if ((dynname = ctf_new_per_cu_name (fp, ctf_cuname (outputs[i]))) == NULL)
 	goto oom_one_output;
 
       if (ctf_dynhash_insert (fp->ctf_link_outputs, dynname, outputs[i]) < 0)
@@ -1339,20 +1436,15 @@ ctf_link_deduplicating (ctf_dict_t *fp)
   return;
 
  err_clean_outputs:
-  for (i = 1; i < noutputs; i++)
-    {
-      ctf_dynhash_remove (fp->ctf_link_outputs, ctf_cuname (outputs[i]));
-      ctf_dict_close (outputs[i]);
-    }
+  ctf_link_empty_outputs (fp);
   goto err;
 }
 
 /* Merge types and variable sections in all dicts added to the link together.
-   All the added dicts are closed.  */
+   The result of any previous link is discarded.  */
 int
 ctf_link (ctf_dict_t *fp, int flags)
 {
-  ctf_next_t *i = NULL;
   int err;
 
   fp->ctf_link_flags = flags;
@@ -1360,7 +1452,9 @@ ctf_link (ctf_dict_t *fp, int flags)
   if (fp->ctf_link_inputs == NULL)
     return 0;					/* Nothing to do. */
 
-  if (fp->ctf_link_outputs == NULL)
+  if (fp->ctf_link_outputs != NULL)
+    ctf_link_empty_outputs (fp);
+  else
     fp->ctf_link_outputs = ctf_dynhash_create (ctf_hash_string,
 					       ctf_hash_eq_string, free,
 					       (ctf_hash_free_fun)
@@ -1376,13 +1470,14 @@ ctf_link (ctf_dict_t *fp, int flags)
   fp->ctf_flags |= LCTF_LINKING;
   if (fp->ctf_link_out_cu_mapping && (flags & CTF_LINK_EMPTY_CU_MAPPINGS))
     {
-      void *v;
+      ctf_next_t *i = NULL;
+      void *k;
 
-      while ((err = ctf_dynhash_next (fp->ctf_link_out_cu_mapping, &i, &v,
+      while ((err = ctf_dynhash_next (fp->ctf_link_out_cu_mapping, &i, &k,
 				      NULL)) == 0)
 	{
-	  const char *to = (const char *) v;
-	  if (ctf_create_per_cu (fp, to) == NULL)
+	  const char *to = (const char *) k;
+	  if (ctf_create_per_cu (fp, NULL, to) == NULL)
 	    {
 	      fp->ctf_flags &= ~LCTF_LINKING;
 	      ctf_next_destroy (i);
