@@ -32,6 +32,6 @@ if ![runto "main.adb:$bp_location" ] then {
   return
 }
 
-gdb_test "print value" " = 64 '@'"
-gdb_test "print ghost_value" " = 64 '@'"
-gdb_test "print value2" " = 33 '!'"
+gdb_test "print pck.value" " = 64 '@'"
+gdb_test "print pck.ghost_value" " = 64 '@'"
+gdb_test "print gpck.value2" " = 33 '!'"
