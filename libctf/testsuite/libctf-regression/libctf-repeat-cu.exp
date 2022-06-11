@@ -52,12 +52,12 @@ proc one_lib_compile { src flags obj archive } {
 	set src [file join $subsrcdir $src]
     }
 
-    set comp_output [run_host_cmd "$CC_FOR_TARGET" "$CFLAGS_FOR_TARGET $flags -gctf -fPIC -c -o $obj $src"]
+    set comp_output [prune_warnings [run_host_cmd "$CC_FOR_TARGET" "$CFLAGS_FOR_TARGET $flags -gctf -fPIC -c -o $obj $src"]]
     if { $comp_output != "" } {
 	return $comp_output
     }
 
-    set ar_output [run_host_cmd "$AR" "rc $archive $obj"]
+    set ar_output [prune_warnings [run_host_cmd "$AR" "rc $archive $obj"]]
     return $comp_output
 }
 
@@ -94,7 +94,7 @@ if [is_remote host] {
     set src [file join $subsrcdir libctf-repeat-cu-main.c]
 }
 
-set comp_output [run_host_cmd "$CC_FOR_TARGET" "$CFLAGS_FOR_TARGET -gctf -fPIC -shared -o tmpdir/libctf-repeat-cu-main.so $src tmpdir/a.a tmpdir/b.a tmpdir/c.a"]
+set comp_output [prune_warnings [run_host_cmd "$CC_FOR_TARGET" "$CFLAGS_FOR_TARGET -gctf -fPIC -shared -o tmpdir/libctf-repeat-cu-main.so $src tmpdir/a.a tmpdir/b.a tmpdir/c.a"]]
 if { $comp_output != "" } {
     send_log "compilation of tmpdir/libctf-repeat-cu-main.so failed"
     perror "compilation of tmpdir/libctf-repeat-cu-main.so failed"
@@ -102,7 +102,7 @@ if { $comp_output != "" } {
     return $comp_output
 }
 
-set comp_output [run_host_cmd "$OBJDUMP" "--ctf tmpdir/libctf-repeat-cu-main.so > tmpdir/dump.out"]
+set comp_output [prune_warnings [run_host_cmd "$OBJDUMP" "--ctf tmpdir/libctf-repeat-cu-main.so > tmpdir/dump.out"]]
 
 if { [regexp_diff "tmpdir/dump.out"  [file join $subsrcdir libctf-repeat-cu.d] ] } {
     fail $testname
