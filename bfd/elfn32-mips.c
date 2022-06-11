@@ -901,7 +901,7 @@ static reloc_howto_type elf_mips_howto_table_rela[] =
 	 "R_MIPS_16",		/* name */
 	 false,			/* partial_inplace */
 	 0,			/* src_mask */
-	 0x0000,		/* dst_mask */
+	 0x0000ffff,		/* dst_mask */
 	 false),		/* pcrel_offset */
 
   /* 32 bit relocation.  */
