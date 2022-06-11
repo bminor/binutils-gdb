@@ -789,7 +789,7 @@ linux_read_bts (struct btrace_data_bts *btrace,
   struct perf_event_buffer *pevent;
   const uint8_t *begin, *end, *start;
   size_t buffer_size, size;
-  __u64 data_head, data_tail;
+  __u64 data_head = 0, data_tail;
   unsigned int retries = 5;
 
   pevent = &tinfo->variant.bts.bts;
