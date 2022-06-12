@@ -126,6 +126,10 @@ proc_with_prefix test_boolean_parameter { } {
 	"The state of the Test Parameter is off.*" "show parameter off"
     gdb_test "python print (test_param.value)" "False" \
 	"test boolean parameter value is False"
+    gdb_test_no_output "python gdb.set_parameter('print test-param', True)" \
+	"set boolean parameter using set_parameter"
+    gdb_test "python print(gdb.parameter('print test-param'))" "True" \
+	"get boolean parameter using gdb.parameter"
     gdb_test "help show print test-param" \
 	[multi_line \
 	     "Show the state of the boolean test-param" \

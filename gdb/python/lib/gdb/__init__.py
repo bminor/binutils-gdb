@@ -239,6 +239,13 @@ def find_pc_line(pc):
 
 def set_parameter(name, value):
     """Set the GDB parameter NAME to VALUE."""
+    # Handle the specific case of booleans here, because gdb.parameter
+    # can return them, but they can't be passed to 'set' this way.
+    if isinstance(value, bool):
+        if value:
+            value = 'on'
+        else:
+            value = 'off'
     execute("set " + name + " " + str(value), to_string=True)
 
 
