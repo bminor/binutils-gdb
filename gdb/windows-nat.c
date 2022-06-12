@@ -726,15 +726,15 @@ windows_nat_target::fetch_registers (struct regcache *regcache, int r)
   if (th->reload_context)
     {
 #ifdef __CYGWIN__
-      if (have_saved_context)
+      if (windows_process.have_saved_context)
 	{
 	  /* Lie about where the program actually is stopped since
 	     cygwin has informed us that we should consider the signal
 	     to have occurred at another location which is stored in
 	     "saved_context.  */
-	  memcpy (&th->context, &saved_context,
+	  memcpy (&th->context, &windows_process.saved_context,
 		  __COPY_CONTEXT_SIZE);
-	  have_saved_context = 0;
+	  windows_process.have_saved_context = 0;
 	}
       else
 #endif
@@ -922,9 +922,10 @@ windows_make_so (const char *name, LPVOID load_addr)
       /* The symbols in a dll are offset by 0x1000, which is the
 	 offset from 0 of the first byte in an image - because of the
 	 file header and the section alignment.  */
-      cygwin_load_start = (CORE_ADDR) (uintptr_t) ((char *)
-						   load_addr + 0x1000);
-      cygwin_load_end = cygwin_load_start + bfd_section_size (text);
+      windows_process.cygwin_load_start = (CORE_ADDR) (uintptr_t) ((char *)
+								   load_addr + 0x1000);
+      windows_process.cygwin_load_end = windows_process.cygwin_load_start +
+	bfd_section_size (text);
     }
 #endif
 
@@ -1919,7 +1920,8 @@ windows_nat_target::do_initial_windows_stuff (DWORD pid, bool attaching)
        i++)
     windows_process.dr[i] = 0;
 #ifdef __CYGWIN__
-  cygwin_load_start = cygwin_load_end = 0;
+  windows_process.cygwin_load_start = 0;
+  windows_process.cygwin_load_end = 0;
 #endif
   windows_process.current_event.dwProcessId = pid;
   memset (&windows_process.current_event, 0,
