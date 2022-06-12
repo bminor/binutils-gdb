@@ -71,6 +71,11 @@ public:
 
   /* See language.h.  */
 
+  const char *get_digit_separator () const override
+  { return "_"; }
+
+  /* See language.h.  */
+
   const std::vector<const char *> &filename_extensions () const override
   {
     static const std::vector<const char *> extensions = { ".rs" };

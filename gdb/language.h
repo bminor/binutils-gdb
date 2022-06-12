@@ -282,6 +282,13 @@ struct language_defn
 
   virtual const char *natural_name () const = 0;
 
+  /* Digit separator of the language.  */
+
+  virtual const char *get_digit_separator () const
+  {
+    return " ";
+  }
+
   /* Return a vector of file extensions for this language.  The extension
      must include the ".", like ".c".  If this language doesn't need to
      provide any filename extensions, this may be an empty vector (which is

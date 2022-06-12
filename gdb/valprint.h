@@ -44,6 +44,9 @@ struct value_print_options
   /* Controls printing of addresses.  */
   bool addressprint;
 
+  /* Controls printing of nibbles.  */
+  bool nibblesprint;
+
   /* Controls looking up an object's derived type using what we find
      in its vtables.  */
   bool objectprint;
@@ -149,7 +152,8 @@ extern void value_print_scalar_formatted
    int size, struct ui_file *stream);
 
 extern void print_binary_chars (struct ui_file *, const gdb_byte *,
-				unsigned int, enum bfd_endian, bool);
+				unsigned int, enum bfd_endian, bool,
+				const struct value_print_options *options);
 
 extern void print_octal_chars (struct ui_file *, const gdb_byte *,
 			       unsigned int, enum bfd_endian);

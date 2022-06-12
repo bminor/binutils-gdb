@@ -857,6 +857,10 @@ public:
   const char *natural_name () const override
   { return "C++"; }
 
+  /* See language.h  */
+  const char *get_digit_separator () const override
+  { return "\'"; }
+
   /* See language.h.  */
 
   const std::vector<const char *> &filename_extensions () const override

@@ -105,6 +105,7 @@ struct value_print_options user_print_options =
   0,				/* vtblprint */
   1,				/* unionprint */
   1,				/* addressprint */
+  false,			/* nibblesprint */
   0,				/* objectprint */
   PRINT_MAX_DEFAULT,		/* print_max */
   10,				/* repeat_count_threshold */
@@ -254,6 +255,17 @@ show_unionprint (struct ui_file *file, int from_tty,
 {
   gdb_printf (file,
 	      _("Printing of unions interior to structures is %s.\n"),
+	      value);
+}
+
+/* Controls the format of printing binary values.  */
+
+static void
+show_nibbles (struct ui_file *file, int from_tty,
+		       struct cmd_list_element *c, const char *value)
+{
+  gdb_printf (file,
+	      _("Printing binary values in groups is %s.\n"),
 	      value);
 }
 
@@ -1357,17 +1369,22 @@ print_floating (const gdb_byte *valaddr, struct type *type,
 
 void
 print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
-		    unsigned len, enum bfd_endian byte_order, bool zero_pad)
+		    unsigned len, enum bfd_endian byte_order, bool zero_pad,
+		    const struct value_print_options *options)
 {
   const gdb_byte *p;
   unsigned int i;
   int b;
   bool seen_a_one = false;
+  const char *digit_separator = nullptr;
 
   /* Declared "int" so it will be signed.
      This ensures that right shift will shift in zeros.  */
 
   const int mask = 0x080;
+
+  if (options->nibblesprint)
+    digit_separator = current_language->get_digit_separator();
 
   if (byte_order == BFD_ENDIAN_BIG)
     {
@@ -1380,6 +1397,9 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
 
 	  for (i = 0; i < (HOST_CHAR_BIT * sizeof (*p)); i++)
 	    {
+	      if (options->nibblesprint && seen_a_one && i % 4 == 0)
+		gdb_putc (*digit_separator, stream);
+
 	      if (*p & (mask >> i))
 		b = '1';
 	      else
@@ -1387,6 +1407,13 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
 
 	      if (zero_pad || seen_a_one || b == '1')
 		gdb_putc (b, stream);
+	      else if (options->nibblesprint)
+		{
+		  if ((0xf0 & (mask >> i) && (*p & 0xf0))
+		      || (0x0f & (mask >> i) && (*p & 0x0f)))
+		    gdb_putc (b, stream);
+		}
+
 	      if (b == '1')
 		seen_a_one = true;
 	    }
@@ -1400,6 +1427,9 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
 	{
 	  for (i = 0; i < (HOST_CHAR_BIT * sizeof (*p)); i++)
 	    {
+	      if (options->nibblesprint && seen_a_one && i % 4 == 0)
+		gdb_putc (*digit_separator, stream);
+
 	      if (*p & (mask >> i))
 		b = '1';
 	      else
@@ -1407,6 +1437,13 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
 
 	      if (zero_pad || seen_a_one || b == '1')
 		gdb_putc (b, stream);
+	      else if (options->nibblesprint)
+		{
+		  if ((0xf0 & (mask >> i) && (*p & 0xf0))
+		      || (0x0f & (mask >> i) && (*p & 0x0f)))
+		    gdb_putc (b, stream);
+		}
+
 	      if (b == '1')
 		seen_a_one = true;
 	    }
@@ -2834,6 +2871,15 @@ static const gdb::option::option_def value_print_option_defs[] = {
     show_print_array_indexes, /* show_cmd_cb */
     N_("Set printing of array indexes."),
     N_("Show printing of array indexes."),
+    NULL, /* help_doc */
+  },
+
+  boolean_option_def {
+    "nibbles",
+    [] (value_print_options *opt) { return &opt->nibblesprint; },
+    show_nibbles, /* show_cmd_cb */
+    N_("Set whether to print binary values in groups of four bits."),
+    N_("Show whether to print binary values in groups of four bits."),
     NULL, /* help_doc */
   },
 
