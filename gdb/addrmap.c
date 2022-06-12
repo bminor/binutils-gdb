@@ -429,9 +429,8 @@ test_addrmap ()
   void *val2 = &array[2];
 
   /* Create mutable addrmap.  */
-  struct obstack temp_obstack;
-  obstack_init (&temp_obstack);
-  struct addrmap_mutable *map = new (&temp_obstack) addrmap_mutable;
+  auto_obstack temp_obstack;
+  std::unique_ptr<struct addrmap_mutable> map (new addrmap_mutable);
   SELF_CHECK (map != nullptr);
 
   /* Check initial state.  */
@@ -445,7 +444,7 @@ test_addrmap ()
 
   /* Create corresponding fixed addrmap.  */
   struct addrmap *map2
-    = new (&temp_obstack) addrmap_fixed (&temp_obstack, map);
+    = new (&temp_obstack) addrmap_fixed (&temp_obstack, map.get ());
   SELF_CHECK (map2 != nullptr);
   CHECK_ADDRMAP_FIND (map2, array, 0, 9, nullptr);
   CHECK_ADDRMAP_FIND (map2, array, 10, 12, val1);
@@ -479,9 +478,6 @@ test_addrmap ()
   CHECK_ADDRMAP_FIND (map, array, 10, 12, val1);
   CHECK_ADDRMAP_FIND (map, array, 13, 13, val2);
   CHECK_ADDRMAP_FIND (map, array, 14, 19, nullptr);
-
-  /* Cleanup.  */
-  obstack_free (&temp_obstack, NULL);
 }
 
 } // namespace selftests
