@@ -877,7 +877,7 @@ create_process (const wchar_t *image, wchar_t *command_line, DWORD flags,
 		void *environment, const wchar_t *cur_dir,
 		bool no_randomization,
 		STARTUPINFOW *startup_info,
-		PROCESS_INFORMATION *process_info);
+		PROCESS_INFORMATION *process_info)
 {
   return create_process_wrapper (CreateProcessW, image, command_line, flags,
 				 environment, cur_dir, no_randomization,

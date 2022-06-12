@@ -2478,7 +2478,7 @@ windows_nat_target::create_inferior (const char *exec_file,
     }
 
   windows_init_thread_list ();
-  ret = create_process (args, flags, w32_env,
+  ret = create_process (nullptr, args, flags, w32_env,
 			inferior_cwd != nullptr ? infcwd : nullptr,
 			disable_randomization,
 			&si, &pi);
