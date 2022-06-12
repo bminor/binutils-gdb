@@ -408,7 +408,7 @@ pascal_language::value_print (struct value *val, struct ui_file *stream,
   struct type *type = value_type (val);
   struct value_print_options opts = *options;
 
-  opts.deref_ref = 1;
+  opts.deref_ref = true;
 
   /* If it is a pointer, indicate what it points to.
 
@@ -619,7 +619,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 
 		  v = value_field_bitfield (type, i, valaddr, 0, val);
 
-		  opts.deref_ref = 0;
+		  opts.deref_ref = false;
 		  common_val_print (v, stream, recurse + 1, &opts,
 				    current_language);
 		}
@@ -649,7 +649,7 @@ pascal_object_print_value_fields (struct value *val, struct ui_file *stream,
 		{
 		  struct value_print_options opts = *options;
 
-		  opts.deref_ref = 0;
+		  opts.deref_ref = false;
 
 		  struct value *v = value_primitive_field (val, 0, i,
 							   value_type (val));
@@ -853,7 +853,7 @@ pascal_object_print_static_field (struct value *val,
     }
 
   opts = *options;
-  opts.deref_ref = 0;
+  opts.deref_ref = false;
   common_val_print (val, stream, recurse, &opts, current_language);
 }
 

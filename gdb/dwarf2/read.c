@@ -9045,7 +9045,7 @@ dwarf2_compute_name (const char *name,
 		      /* Specify decimal so that we do not depend on
 			 the radix.  */
 		      get_formatted_print_options (&opts, 'd');
-		      opts.raw = 1;
+		      opts.raw = true;
 		      value_print (v, &buf, &opts);
 		      release_value (v);
 		    }

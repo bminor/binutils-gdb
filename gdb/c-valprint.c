@@ -476,7 +476,7 @@ c_value_print (struct value *val, struct ui_file *stream,
   LONGEST top;
   struct value_print_options opts = *options;
 
-  opts.deref_ref = 1;
+  opts.deref_ref = true;
 
   /* If it is a pointer, indicate what it points to.
 

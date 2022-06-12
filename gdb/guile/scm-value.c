@@ -148,7 +148,7 @@ vlscm_print_value_smob (SCM self, SCM port, scm_print_state *pstate)
     gdbscm_printf (port, "#<%s ", value_smob_name);
 
   get_user_print_options (&opts);
-  opts.deref_ref = 0;
+  opts.deref_ref = false;
 
   /* pstate->writingp = zero if invoked by display/~A, and nonzero if
      invoked by write/~S.  What to do here may need to evolve.
@@ -1264,7 +1264,7 @@ gdbscm_value_print (SCM self)
   struct value_print_options opts;
 
   get_user_print_options (&opts);
-  opts.deref_ref = 0;
+  opts.deref_ref = false;
 
   string_file stb;
 

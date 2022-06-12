@@ -660,7 +660,7 @@ ppscm_print_string_repr (SCM printer, enum display_hint hint,
       struct value_print_options opts = *options;
 
       gdb_assert (replacement != NULL);
-      opts.addressprint = 0;
+      opts.addressprint = false;
       common_val_print (replacement, stream, recurse, &opts, language);
       result = STRING_REPR_OK;
     }
@@ -698,7 +698,7 @@ ppscm_print_string_repr (SCM printer, enum display_hint hint,
     {
       struct value_print_options local_opts = *options;
 
-      local_opts.addressprint = 0;
+      local_opts.addressprint = false;
       lsscm_val_print_lazy_string (str_scm, stream, &local_opts);
       result = STRING_REPR_OK;
     }
@@ -883,7 +883,7 @@ ppscm_print_children (SCM printer, enum display_hint hint,
 	{
 	  struct value_print_options local_opts = *options;
 
-	  local_opts.addressprint = 0;
+	  local_opts.addressprint = false;
 	  lsscm_val_print_lazy_string (v_scm, stream, &local_opts);
 	}
       else if (scm_is_string (v_scm))

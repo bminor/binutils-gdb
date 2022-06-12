@@ -428,10 +428,10 @@ enumerate_args (PyObject *iter,
   if (args_type == CLI_SCALAR_VALUES)
     {
       /* True in "summary" mode, false otherwise.  */
-      opts.summary = 1;
+      opts.summary = true;
     }
 
-  opts.deref_ref = 1;
+  opts.deref_ref = true;
 
   annotate_frame_args ();
 
@@ -555,7 +555,7 @@ enumerate_locals (PyObject *iter,
   struct value_print_options opts;
 
   get_user_print_options (&opts);
-  opts.deref_ref = 1;
+  opts.deref_ref = true;
 
   while (true)
     {

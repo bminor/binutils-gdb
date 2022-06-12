@@ -545,7 +545,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 	      struct value_print_options opts;
 
 	      get_no_prettyformat_print_options (&opts);
-	      opts.deref_ref = 1;
+	      opts.deref_ref = true;
 	      common_val_print (arg->val, &stb, 0, &opts,
 				language_def (arg->sym->language ()));
 	    }

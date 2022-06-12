@@ -303,7 +303,7 @@ print_string_repr (PyObject *printer, const char *hint,
 	  gdbpy_extract_lazy_string (py_str.get (), &addr, &type,
 				     &length, &encoding);
 
-	  local_opts.addressprint = 0;
+	  local_opts.addressprint = false;
 	  val_print_string (type, encoding.get (), addr, (int) length,
 			    stream, &local_opts);
 	}
@@ -338,7 +338,7 @@ print_string_repr (PyObject *printer, const char *hint,
     {
       struct value_print_options opts = *options;
 
-      opts.addressprint = 0;
+      opts.addressprint = false;
       common_val_print (replacement, stream, recurse, &opts, language);
     }
   else
@@ -506,7 +506,7 @@ print_children (PyObject *printer, const char *hint,
 
 	  gdbpy_extract_lazy_string (py_v, &addr, &type, &length, &encoding);
 
-	  local_opts.addressprint = 0;
+	  local_opts.addressprint = false;
 	  val_print_string (type, encoding.get (), addr, (int) length, stream,
 			    &local_opts);
 	}

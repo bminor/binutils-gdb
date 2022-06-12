@@ -479,7 +479,7 @@ print_frame_arg (const frame_print_options &fp_opts,
 		language = current_language;
 
 	      get_no_prettyformat_print_options (&vp_opts);
-	      vp_opts.deref_ref = 1;
+	      vp_opts.deref_ref = true;
 	      vp_opts.raw = fp_opts.print_raw_frame_arguments;
 
 	      /* True in "summary" mode, false otherwise.  */

@@ -100,26 +100,26 @@ static void val_print_type_code_flags (struct type *type,
 struct value_print_options user_print_options =
 {
   Val_prettyformat_default,	/* prettyformat */
-  0,				/* prettyformat_arrays */
-  0,				/* prettyformat_structs */
-  0,				/* vtblprint */
-  1,				/* unionprint */
-  1,				/* addressprint */
+  false,			/* prettyformat_arrays */
+  false,			/* prettyformat_structs */
+  false,			/* vtblprint */
+  true,				/* unionprint */
+  true,				/* addressprint */
   false,			/* nibblesprint */
-  0,				/* objectprint */
+  false,			/* objectprint */
   PRINT_MAX_DEFAULT,		/* print_max */
   10,				/* repeat_count_threshold */
   0,				/* output_format */
   0,				/* format */
-  1,				/* memory_tag_violations */
-  0,				/* stop_print_at_null */
-  0,				/* print_array_indexes */
-  0,				/* deref_ref */
-  1,				/* static_field_print */
-  1,				/* pascal_static_field_print */
-  0,				/* raw */
-  0,				/* summary */
-  1,				/* symbol_print */
+  true,				/* memory_tag_violations */
+  false,			/* stop_print_at_null */
+  false,			/* print_array_indexes */
+  false,			/* deref_ref */
+  true,				/* static_field_print */
+  true,				/* pascal_static_field_print */
+  false,			/* raw */
+  false,			/* summary */
+  true,				/* symbol_print */
   PRINT_MAX_DEPTH_DEFAULT,	/* max_depth */
 };
 
@@ -1272,7 +1272,7 @@ value_print_scalar_formatted (struct value *val,
     {
       struct value_print_options opts = *options;
       opts.format = 0;
-      opts.deref_ref = 0;
+      opts.deref_ref = false;
       common_val_print (val, stream, 0, &opts, current_language);
       return;
     }

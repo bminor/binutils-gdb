@@ -2400,7 +2400,7 @@ print_variable_and_value (const char *name, struct symbol *var,
 	 a block to it.  */
       val = read_var_value (var, NULL, frame);
       get_user_print_options (&opts);
-      opts.deref_ref = 1;
+      opts.deref_ref = true;
       common_val_print_checked (val, stream, indent, &opts, current_language);
 
       /* common_val_print invalidates FRAME when a pretty printer calls inferior

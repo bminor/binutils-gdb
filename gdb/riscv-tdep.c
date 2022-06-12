@@ -1146,7 +1146,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
       enum bfd_endian byte_order = type_byte_order (regtype);
 
       get_user_print_options (&opts);
-      opts.deref_ref = 1;
+      opts.deref_ref = true;
 
       common_val_print (val, file, 0, &opts, current_language);
 
@@ -1165,7 +1165,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 
       /* Print the register in hex.  */
       get_formatted_print_options (&opts, 'x');
-      opts.deref_ref = 1;
+      opts.deref_ref = true;
       common_val_print (val, file, 0, &opts, current_language);
 
       if (print_raw_format)
@@ -1298,7 +1298,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 	      if (regtype->is_vector () == 0)
 		{
 		  get_user_print_options (&opts);
-		  opts.deref_ref = 1;
+		  opts.deref_ref = true;
 		  gdb_printf (file, "\t");
 		  common_val_print (val, file, 0, &opts, current_language);
 		}

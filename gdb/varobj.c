@@ -2144,7 +2144,7 @@ varobj_formatted_print_options (struct value_print_options *opts,
 				enum varobj_display_formats format)
 {
   get_formatted_print_options (opts, format_code[(int) format]);
-  opts->deref_ref = 0;
+  opts->deref_ref = false;
   opts->raw = !pretty_printing;
 }
 
