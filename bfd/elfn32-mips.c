@@ -3513,7 +3513,7 @@ struct elf_reloc_map {
 static const struct elf_reloc_map mips_reloc_map[] =
 {
   { BFD_RELOC_NONE, R_MIPS_NONE },
-  { BFD_RELOC_16, R_MIPS_16 },
+  { BFD_RELOC_MIPS_16, R_MIPS_16 },
   { BFD_RELOC_32, R_MIPS_32 },
   /* There is no BFD reloc for R_MIPS_REL32.  */
   { BFD_RELOC_CTOR, R_MIPS_32 },
@@ -3543,7 +3543,6 @@ static const struct elf_reloc_map mips_reloc_map[] =
   { BFD_RELOC_MIPS_CALL_HI16, R_MIPS_CALL_HI16 },
   { BFD_RELOC_MIPS_CALL_LO16, R_MIPS_CALL_LO16 },
   { BFD_RELOC_MIPS_SCN_DISP, R_MIPS_SCN_DISP },
-  { BFD_RELOC_MIPS_REL16, R_MIPS_REL16 },
   /* Use of R_MIPS_ADD_IMMEDIATE and R_MIPS_PJUMP is deprecated.  */
   { BFD_RELOC_MIPS_RELGOT, R_MIPS_RELGOT },
   { BFD_RELOC_MIPS_JALR, R_MIPS_JALR },
