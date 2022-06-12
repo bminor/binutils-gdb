@@ -36,6 +36,11 @@ maintenance show ignore-prologue-end-flag
   used to force GDB to use prologue analyzers if the line-table is constructed
   from erroneous debug information.
 
+set print nibbles [on|off]
+show print nibbles
+  This controls whether the 'print/t' command will display binary values
+  in groups of four bits, known as "nibbles".  The default is 'off'.
+
 * Changed commands
 
 maintenance info line-table

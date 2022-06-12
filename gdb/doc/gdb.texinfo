@@ -2142,10 +2142,10 @@ on @code{-} after the command name.  For example:
 
 @smallexample
 (@value{GDBP}) print -@key{TAB}@key{TAB}
--address         -max-depth               -pretty          -symbol
--array           -memory-tag-violations   -raw-values      -union
--array-indexes   -null-stop               -repeats         -vtbl
--elements        -object                  -static-members
+-address         -max-depth               -object          -static-members
+-array           -memory-tag-violations   -pretty          -symbol
+-array-indexes   -nibbles                 -raw-values      -union
+-elements        -null-stop               -repeats         -vtbl
 @end smallexample
 
 Completion will in some cases guide you with a suggestion of what kind
@@ -10154,6 +10154,10 @@ Set limit on string chars or array elements to print.  The value
 Set the threshold after which nested structures are replaced with
 ellipsis.  Related setting: @ref{set print max-depth}.
 
+@item -nibbles [@code{on}|@code{off}]
+Set whether to print binary values in groups of four bits, known
+as ``nibbles''.  @xref{set print nibbles}.
+
 @item -memory-tag-violations [@code{on}|@code{off}]
 Set printing of additional information about memory tag violations.
 @xref{set print memory-tag-violations}.
@@ -11517,6 +11521,29 @@ Stop printing element indexes when displaying arrays.
 @item show print array-indexes
 Show whether the index of each element is printed when displaying
 arrays.
+
+@anchor{set print nibbles}
+@item set print nibbles
+@itemx set print nibbles on
+@cindex print binary values in groups of four bits
+Print binary values in groups of four bits, known as @dfn{nibbles},
+when using the print command of @value{GDBN} with the option @samp{/t}.
+For example, this is what it looks like with @code{set print nibbles on}:
+
+@smallexample
+@group
+(@value{GDBP}) print val_flags
+$1 = 1230
+(@value{GDBP}) print/t val_flags
+$2 = 0100 1100 1110
+@end group
+@end smallexample
+
+@item set print nibbles off
+Don't printing binary values in groups.  This is the default.
+
+@item show print nibbles
+Show whether to print binary values in groups of four bits.
 
 @anchor{set print elements}
 @item set print elements @var{number-of-elements}
