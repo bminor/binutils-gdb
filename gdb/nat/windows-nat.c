@@ -831,7 +831,7 @@ create_process_wrapper (FUNC *do_create_process, const CHAR *image,
 						| EXTENDED_STARTUPINFO_PRESENT),
 					       environment,
 					       cur_dir,
-					       (STARTUPINFO *) &info_ex,
+					       &info_ex.StartupInfo,
 					       process_info);
 	      if (result)
 		return_value = result;
