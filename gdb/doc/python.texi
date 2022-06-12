@@ -1105,6 +1105,11 @@ union} in @ref{Print Settings}).
 address, @code{False} if it shouldn't (see @code{set print address} in
 @ref{Print Settings}).
 
+@item nibbles
+@code{True} if binary values should be displayed in groups of four bits,
+known as nibbles.  @code{False} if it shouldn't (@pxref{Print Settings,
+set print nibbles}).
+
 @item deref_refs
 @code{True} if C@t{++} references should be resolved to the value they
 refer to, @code{False} (the default) if they shouldn't.  Note that, unlike

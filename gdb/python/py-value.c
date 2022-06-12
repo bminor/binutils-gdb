@@ -640,6 +640,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
       "unions",			/* See set print union on|off.  */
       "address",		/* See set print address on|off.  */
       "styling",		/* Should we apply styling.  */
+      "nibbles",		/* See set print nibbles on|off.  */
       /* C++ options.  */
       "deref_refs",		/* No corresponding setting.  */
       "actual_objects",		/* See set print object on|off.  */
@@ -685,13 +686,14 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
   PyObject *unions_obj = NULL;
   PyObject *address_obj = NULL;
   PyObject *styling_obj = Py_False;
+  PyObject *nibbles_obj = NULL;
   PyObject *deref_refs_obj = NULL;
   PyObject *actual_objects_obj = NULL;
   PyObject *static_members_obj = NULL;
   char *format = NULL;
   if (!gdb_PyArg_ParseTupleAndKeywords (args,
 					kw,
-					"|O!O!O!O!O!O!O!O!O!O!O!IIIs",
+					"|O!O!O!O!O!O!O!O!O!O!O!O!IIIs",
 					keywords,
 					&PyBool_Type, &raw_obj,
 					&PyBool_Type, &pretty_arrays_obj,
@@ -701,6 +703,7 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
 					&PyBool_Type, &unions_obj,
 					&PyBool_Type, &address_obj,
 					&PyBool_Type, &styling_obj,
+					&PyBool_Type, &nibbles_obj,
 					&PyBool_Type, &deref_refs_obj,
 					&PyBool_Type, &actual_objects_obj,
 					&PyBool_Type, &static_members_obj,
@@ -724,6 +727,8 @@ valpy_format_string (PyObject *self, PyObject *args, PyObject *kw)
   if (!copy_py_bool_obj (&opts.unionprint, unions_obj))
     return NULL;
   if (!copy_py_bool_obj (&opts.addressprint, address_obj))
+    return NULL;
+  if (!copy_py_bool_obj (&opts.nibblesprint, nibbles_obj))
     return NULL;
   if (!copy_py_bool_obj (&opts.deref_ref, deref_refs_obj))
     return NULL;
