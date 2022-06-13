@@ -574,20 +574,24 @@ arm_is_thumb (struct regcache *regcache)
   return (cpsr & t_bit) != 0;
 }
 
-/* Determine if FRAME is executing in Thumb mode.  */
+/* Determine if FRAME is executing in Thumb mode.  FRAME must be an ARM
+   frame.  */
 
 int
 arm_frame_is_thumb (struct frame_info *frame)
 {
-  CORE_ADDR cpsr;
-  ULONGEST t_bit = arm_psr_thumb_bit (get_frame_arch (frame));
+  /* Check the architecture of FRAME.  */
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  gdb_assert (gdbarch_bfd_arch_info (gdbarch)->arch == bfd_arch_arm);
 
   /* Every ARM frame unwinder can unwind the T bit of the CPSR, either
      directly (from a signal frame or dummy frame) or by interpreting
      the saved LR (from a prologue or DWARF frame).  So consult it and
      trust the unwinders.  */
-  cpsr = get_frame_register_unsigned (frame, ARM_PS_REGNUM);
+  CORE_ADDR cpsr = get_frame_register_unsigned (frame, ARM_PS_REGNUM);
 
+  /* Find and extract the thumb bit.  */
+  ULONGEST t_bit = arm_psr_thumb_bit (gdbarch);
   return (cpsr & t_bit) != 0;
 }
 

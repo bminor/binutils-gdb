@@ -124,7 +124,8 @@ static void breakpoint_adjustment_warning (CORE_ADDR, CORE_ADDR, int, int);
 
 static CORE_ADDR adjust_breakpoint_address (struct gdbarch *gdbarch,
 					    CORE_ADDR bpaddr,
-					    enum bptype bptype);
+					    enum bptype bptype,
+					    struct program_space *pspace);
 
 static int watchpoint_locations_match (struct bp_location *loc1,
 				       struct bp_location *loc2);
@@ -7103,8 +7104,11 @@ breakpoint_adjustment_warning (CORE_ADDR from_addr, CORE_ADDR to_addr,
 
 static CORE_ADDR
 adjust_breakpoint_address (struct gdbarch *gdbarch,
-			   CORE_ADDR bpaddr, enum bptype bptype)
+			   CORE_ADDR bpaddr, enum bptype bptype,
+			   struct program_space *pspace)
 {
+  gdb_assert (pspace != nullptr);
+
   if (bptype == bp_watchpoint
       || bptype == bp_hardware_watchpoint
       || bptype == bp_read_watchpoint
@@ -7129,11 +7133,18 @@ adjust_breakpoint_address (struct gdbarch *gdbarch,
     {
       CORE_ADDR adjusted_bpaddr = bpaddr;
 
+      /* Some targets have architectural constraints on the placement
+	 of breakpoint instructions.  Obtain the adjusted address.  */
       if (gdbarch_adjust_breakpoint_address_p (gdbarch))
 	{
-	  /* Some targets have architectural constraints on the placement
-	     of breakpoint instructions.  Obtain the adjusted address.  */
-	  adjusted_bpaddr = gdbarch_adjust_breakpoint_address (gdbarch, bpaddr);
+	  /* Targets that implement this adjustment function will likely
+	     inspect either the symbol table, target memory at BPADDR, or
+	     even state registers, so ensure a suitable thread (and its
+	     associated program space) are currently selected.  */
+	  scoped_restore_current_pspace_and_thread restore_pspace_thread;
+	  switch_to_program_space_and_thread (pspace);
+	  adjusted_bpaddr
+	    = gdbarch_adjust_breakpoint_address (gdbarch, bpaddr);
 	}
 
       adjusted_bpaddr = address_significant (gdbarch, adjusted_bpaddr);
@@ -8087,7 +8098,8 @@ code_breakpoint::add_location (const symtab_and_line &sal)
      not want its scan of the location chain to find a breakpoint and
      location that's only been partially initialized.  */
   adjusted_address = adjust_breakpoint_address (loc_gdbarch,
-						sal.pc, type);
+						sal.pc, type,
+						sal.pspace);
 
   /* Sort the locations by their ADDRESS.  */
   new_loc = allocate_location ();
@@ -10077,7 +10089,8 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	  scope_breakpoint->loc->address
 	    = adjust_breakpoint_address (scope_breakpoint->loc->gdbarch,
 					 scope_breakpoint->loc->requested_address,
-					 scope_breakpoint->type);
+					 scope_breakpoint->type,
+					 current_program_space);
 	}
     }
 
