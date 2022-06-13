@@ -42,7 +42,6 @@
 #include <setjmp.h>
 typedef struct instr_info instr_info;
 
-static int print_insn (bfd_vma, instr_info *);
 static void dofloat (instr_info *, int);
 static void OP_ST (instr_info *, int, int);
 static void OP_STi (instr_info *, int, int);
@@ -234,7 +233,7 @@ struct instr_info
   unsigned char op_ad;
   signed char op_index[MAX_OPERANDS];
   bool op_riprel[MAX_OPERANDS];
-  char op_out[MAX_OPERANDS][100];
+  char *op_out[MAX_OPERANDS];
   bfd_vma op_address[MAX_OPERANDS];
   bfd_vma start_pc;
 
@@ -8545,22 +8544,7 @@ static int
 ckprefix (instr_info *ins)
 {
   int newrex, i, length;
-  ins->rex = 0;
-  ins->prefixes = 0;
-  ins->used_prefixes = 0;
-  ins->rex_used = 0;
-  ins->evex_used = 0;
-  ins->last_lock_prefix = -1;
-  ins->last_repz_prefix = -1;
-  ins->last_repnz_prefix = -1;
-  ins->last_data_prefix = -1;
-  ins->last_addr_prefix = -1;
-  ins->last_rex_prefix = -1;
-  ins->last_seg_prefix = -1;
-  ins->fwait_prefix = -1;
-  ins->active_seg_prefix = 0;
-  for (i = 0; i < (int) ARRAY_SIZE (ins->all_prefixes); i++)
-    ins->all_prefixes[i] = 0;
+
   i = 0;
   length = 0;
   /* The maximum instruction length is 15bytes.  */
@@ -8767,39 +8751,6 @@ prefix_name (instr_info *ins, int pref, int sizeflag)
     default:
       return NULL;
     }
-}
-
-/* Here for backwards compatibility.  When gdb stops using
-   print_insn_i386_att and print_insn_i386_intel these functions can
-   disappear, and print_insn_i386 be merged into print_insn.  */
-int
-print_insn_i386_att (bfd_vma pc, disassemble_info *info)
-{
-  instr_info ins;
-  ins.info = info;
-  ins.intel_syntax = 0;
-
-  return print_insn (pc, &ins);
-}
-
-int
-print_insn_i386_intel (bfd_vma pc, disassemble_info *info)
-{
-  instr_info ins;
-  ins.info = info;
-  ins.intel_syntax = 1;
-
-  return print_insn (pc, &ins);
-}
-
-int
-print_insn_i386 (bfd_vma pc, disassemble_info *info)
-{
-  instr_info ins;
-  ins.info = info;
-  ins.intel_syntax = -1;
-
-  return print_insn (pc, &ins);
 }
 
 void
@@ -9421,7 +9372,7 @@ i386_dis_printf (instr_info *ins, enum disassembler_style style,
 }
 
 static int
-print_insn (bfd_vma pc, instr_info *ins)
+print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 {
   const struct dis386 *dp;
   int i;
@@ -9433,60 +9384,75 @@ print_insn (bfd_vma pc, instr_info *ins)
   struct dis_private priv;
   int prefix_length;
   int op_count;
+  instr_info ins = {
+    .info = info,
+    .intel_syntax = intel_syntax >= 0
+		    ? intel_syntax
+		    : (info->mach & bfd_mach_i386_intel_syntax) != 0,
+    .intel_mnemonic = !SYSV386_COMPAT,
+    .op_index[0 ... MAX_OPERANDS - 1] = -1,
+    .start_pc = pc,
+    .start_codep = priv.the_buffer,
+    .codep = priv.the_buffer,
+    .obufp = ins.obuf,
+    .last_lock_prefix = -1,
+    .last_repz_prefix = -1,
+    .last_repnz_prefix = -1,
+    .last_data_prefix = -1,
+    .last_addr_prefix = -1,
+    .last_rex_prefix = -1,
+    .last_seg_prefix = -1,
+    .fwait_prefix = -1,
+  };
+  char op_out[MAX_OPERANDS][100];
 
-  ins->isa64 = 0;
-  ins->intel_mnemonic = !SYSV386_COMPAT;
-  ins->op_is_jump = false;
   priv.orig_sizeflag = AFLAG | DFLAG;
-  if ((ins->info->mach & bfd_mach_i386_i386) != 0)
-    ins->address_mode = mode_32bit;
-  else if (ins->info->mach == bfd_mach_i386_i8086)
+  if ((info->mach & bfd_mach_i386_i386) != 0)
+    ins.address_mode = mode_32bit;
+  else if (info->mach == bfd_mach_i386_i8086)
     {
-      ins->address_mode = mode_16bit;
+      ins.address_mode = mode_16bit;
       priv.orig_sizeflag = 0;
     }
   else
-    ins->address_mode = mode_64bit;
+    ins.address_mode = mode_64bit;
 
-  if (ins->intel_syntax == (char) -1)
-    ins->intel_syntax = (ins->info->mach & bfd_mach_i386_intel_syntax) != 0;
-
-  for (p = ins->info->disassembler_options; p != NULL;)
+  for (p = info->disassembler_options; p != NULL;)
     {
       if (startswith (p, "amd64"))
-	ins->isa64 = amd64;
+	ins.isa64 = amd64;
       else if (startswith (p, "intel64"))
-	ins->isa64 = intel64;
+	ins.isa64 = intel64;
       else if (startswith (p, "x86-64"))
 	{
-	  ins->address_mode = mode_64bit;
+	  ins.address_mode = mode_64bit;
 	  priv.orig_sizeflag |= AFLAG | DFLAG;
 	}
       else if (startswith (p, "i386"))
 	{
-	  ins->address_mode = mode_32bit;
+	  ins.address_mode = mode_32bit;
 	  priv.orig_sizeflag |= AFLAG | DFLAG;
 	}
       else if (startswith (p, "i8086"))
 	{
-	  ins->address_mode = mode_16bit;
+	  ins.address_mode = mode_16bit;
 	  priv.orig_sizeflag &= ~(AFLAG | DFLAG);
 	}
       else if (startswith (p, "intel"))
 	{
-	  ins->intel_syntax = 1;
+	  ins.intel_syntax = 1;
 	  if (startswith (p + 5, "-mnemonic"))
-	    ins->intel_mnemonic = true;
+	    ins.intel_mnemonic = true;
 	}
       else if (startswith (p, "att"))
 	{
-	  ins->intel_syntax = 0;
+	  ins.intel_syntax = 0;
 	  if (startswith (p + 3, "-mnemonic"))
-	    ins->intel_mnemonic = false;
+	    ins.intel_mnemonic = false;
 	}
       else if (startswith (p, "addr"))
 	{
-	  if (ins->address_mode == mode_64bit)
+	  if (ins.address_mode == mode_64bit)
 	    {
 	      if (p[4] == '3' && p[5] == '2')
 		priv.orig_sizeflag &= ~AFLAG;
@@ -9516,45 +9482,40 @@ print_insn (bfd_vma pc, instr_info *ins)
 	p++;
     }
 
-  if (ins->address_mode == mode_64bit && sizeof (bfd_vma) < 8)
+  if (ins.address_mode == mode_64bit && sizeof (bfd_vma) < 8)
     {
-      i386_dis_printf (ins, dis_style_text, _("64-bit address is disabled"));
+      i386_dis_printf (&ins, dis_style_text, _("64-bit address is disabled"));
       return -1;
     }
 
-  if (ins->intel_syntax)
+  if (ins.intel_syntax)
     {
-      ins->open_char = '[';
-      ins->close_char = ']';
-      ins->separator_char = '+';
-      ins->scale_char = '*';
+      ins.open_char = '[';
+      ins.close_char = ']';
+      ins.separator_char = '+';
+      ins.scale_char = '*';
     }
   else
     {
-      ins->open_char = '(';
-      ins->close_char =  ')';
-      ins->separator_char = ',';
-      ins->scale_char = ',';
+      ins.open_char = '(';
+      ins.close_char =  ')';
+      ins.separator_char = ',';
+      ins.scale_char = ',';
     }
 
   /* The output looks better if we put 7 bytes on a line, since that
      puts most long word instructions on a single line.  */
-  ins->info->bytes_per_line = 7;
+  info->bytes_per_line = 7;
 
-  ins->info->private_data = &priv;
+  info->private_data = &priv;
   priv.max_fetched = priv.the_buffer;
   priv.insn_start = pc;
 
-  ins->obuf[0] = 0;
   for (i = 0; i < MAX_OPERANDS; ++i)
     {
-      ins->op_out[i][0] = 0;
-      ins->op_index[i] = -1;
+      op_out[i][0] = 0;
+      ins.op_out[i] = op_out[i];
     }
-
-  ins->start_pc = pc;
-  ins->start_codep = priv.the_buffer;
-  ins->codep = priv.the_buffer;
 
   if (OPCODES_SIGSETJMP (priv.bailout) != 0)
     {
@@ -9563,17 +9524,17 @@ print_insn (bfd_vma pc, instr_info *ins)
       /* Getting here means we tried for data but didn't get it.  That
 	 means we have an incomplete instruction of some sort.  Just
 	 print the first byte as a prefix or a .byte pseudo-op.  */
-      if (ins->codep > priv.the_buffer)
+      if (ins.codep > priv.the_buffer)
 	{
-	  name = prefix_name (ins, priv.the_buffer[0], priv.orig_sizeflag);
+	  name = prefix_name (&ins, priv.the_buffer[0], priv.orig_sizeflag);
 	  if (name != NULL)
-	    i386_dis_printf (ins, dis_style_mnemonic, "%s", name);
+	    i386_dis_printf (&ins, dis_style_mnemonic, "%s", name);
 	  else
 	    {
 	      /* Just print the first byte as a .byte instruction.  */
-	      i386_dis_printf (ins, dis_style_assembler_directive,
+	      i386_dis_printf (&ins, dis_style_assembler_directive,
 			       ".byte ");
-	      i386_dis_printf (ins, dis_style_immediate, "0x%x",
+	      i386_dis_printf (&ins, dis_style_immediate, "0x%x",
 			       (unsigned int) priv.the_buffer[0]);
 	    }
 
@@ -9583,134 +9544,129 @@ print_insn (bfd_vma pc, instr_info *ins)
       return -1;
     }
 
-  ins->obufp = ins->obuf;
   sizeflag = priv.orig_sizeflag;
 
-  if (!ckprefix (ins) || ins->rex_used)
+  if (!ckprefix (&ins) || ins.rex_used)
     {
-      /* Too many ins->prefixes or unused REX ins->prefixes.  */
+      /* Too many prefixes or unused REX prefixes.  */
       for (i = 0;
-	   i < (int) ARRAY_SIZE (ins->all_prefixes) && ins->all_prefixes[i];
+	   i < (int) ARRAY_SIZE (ins.all_prefixes) && ins.all_prefixes[i];
 	   i++)
-	i386_dis_printf (ins, dis_style_mnemonic, "%s%s",
+	i386_dis_printf (&ins, dis_style_mnemonic, "%s%s",
 			 (i == 0 ? "" : " "),
-			 prefix_name (ins, ins->all_prefixes[i], sizeflag));
+			 prefix_name (&ins, ins.all_prefixes[i], sizeflag));
       return i;
     }
 
-  ins->insn_codep = ins->codep;
+  ins.insn_codep = ins.codep;
 
-  FETCH_DATA (ins->info, ins->codep + 1);
-  ins->two_source_ops = (*ins->codep == 0x62) || (*ins->codep == 0xc8);
+  FETCH_DATA (info, ins.codep + 1);
+  ins.two_source_ops = (*ins.codep == 0x62) || (*ins.codep == 0xc8);
 
-  if (((ins->prefixes & PREFIX_FWAIT)
-       && ((*ins->codep < 0xd8) || (*ins->codep > 0xdf))))
+  if (((ins.prefixes & PREFIX_FWAIT)
+       && ((*ins.codep < 0xd8) || (*ins.codep > 0xdf))))
     {
-      /* Handle ins->prefixes before fwait.  */
-      for (i = 0; i < ins->fwait_prefix && ins->all_prefixes[i];
+      /* Handle ins.prefixes before fwait.  */
+      for (i = 0; i < ins.fwait_prefix && ins.all_prefixes[i];
 	   i++)
-	i386_dis_printf (ins, dis_style_mnemonic, "%s ",
-			 prefix_name (ins, ins->all_prefixes[i], sizeflag));
-      i386_dis_printf (ins, dis_style_mnemonic, "fwait");
+	i386_dis_printf (&ins, dis_style_mnemonic, "%s ",
+			 prefix_name (&ins, ins.all_prefixes[i], sizeflag));
+      i386_dis_printf (&ins, dis_style_mnemonic, "fwait");
       return i + 1;
     }
 
-  if (*ins->codep == 0x0f)
+  if (*ins.codep == 0x0f)
     {
       unsigned char threebyte;
 
-      ins->codep++;
-      FETCH_DATA (ins->info, ins->codep + 1);
-      threebyte = *ins->codep;
+      ins.codep++;
+      FETCH_DATA (info, ins.codep + 1);
+      threebyte = *ins.codep;
       dp = &dis386_twobyte[threebyte];
-      ins->need_modrm = twobyte_has_modrm[threebyte];
-      ins->codep++;
+      ins.need_modrm = twobyte_has_modrm[threebyte];
+      ins.codep++;
     }
   else
     {
-      dp = &dis386[*ins->codep];
-      ins->need_modrm = onebyte_has_modrm[*ins->codep];
-      ins->codep++;
+      dp = &dis386[*ins.codep];
+      ins.need_modrm = onebyte_has_modrm[*ins.codep];
+      ins.codep++;
     }
 
-  /* Save sizeflag for printing the extra ins->prefixes later before updating
+  /* Save sizeflag for printing the extra ins.prefixes later before updating
      it for mnemonic and operand processing.  The prefix names depend
      only on the address mode.  */
   orig_sizeflag = sizeflag;
-  if (ins->prefixes & PREFIX_ADDR)
+  if (ins.prefixes & PREFIX_ADDR)
     sizeflag ^= AFLAG;
-  if ((ins->prefixes & PREFIX_DATA))
+  if ((ins.prefixes & PREFIX_DATA))
     sizeflag ^= DFLAG;
 
-  ins->end_codep = ins->codep;
-  if (ins->need_modrm)
+  ins.end_codep = ins.codep;
+  if (ins.need_modrm)
     {
-      FETCH_DATA (ins->info, ins->codep + 1);
-      ins->modrm.mod = (*ins->codep >> 6) & 3;
-      ins->modrm.reg = (*ins->codep >> 3) & 7;
-      ins->modrm.rm = *ins->codep & 7;
+      FETCH_DATA (info, ins.codep + 1);
+      ins.modrm.mod = (*ins.codep >> 6) & 3;
+      ins.modrm.reg = (*ins.codep >> 3) & 7;
+      ins.modrm.rm = *ins.codep & 7;
     }
-  else
-    memset (&ins->modrm, 0, sizeof (ins->modrm));
-
-  ins->need_vex = false;
-  memset (&ins->vex, 0, sizeof (ins->vex));
 
   if (dp->name == NULL && dp->op[0].bytemode == FLOATCODE)
     {
-      get_sib (ins, sizeflag);
-      dofloat (ins, sizeflag);
+      get_sib (&ins, sizeflag);
+      dofloat (&ins, sizeflag);
     }
   else
     {
-      dp = get_valid_dis386 (dp, ins);
-      if (dp != NULL && putop (ins, dp->name, sizeflag) == 0)
+      dp = get_valid_dis386 (dp, &ins);
+      if (dp != NULL && putop (&ins, dp->name, sizeflag) == 0)
 	{
-	  get_sib (ins, sizeflag);
+	  get_sib (&ins, sizeflag);
 	  for (i = 0; i < MAX_OPERANDS; ++i)
 	    {
-	      ins->obufp = ins->op_out[i];
-	      ins->op_ad = MAX_OPERANDS - 1 - i;
+	      ins.obufp = ins.op_out[i];
+	      ins.op_ad = MAX_OPERANDS - 1 - i;
 	      if (dp->op[i].rtn)
-		(*dp->op[i].rtn) (ins, dp->op[i].bytemode, sizeflag);
+		(*dp->op[i].rtn) (&ins, dp->op[i].bytemode, sizeflag);
 	      /* For EVEX instruction after the last operand masking
 		 should be printed.  */
-	      if (i == 0 && ins->vex.evex)
+	      if (i == 0 && ins.vex.evex)
 		{
 		  /* Don't print {%k0}.  */
-		  if (ins->vex.mask_register_specifier)
+		  if (ins.vex.mask_register_specifier)
 		    {
 		      const char *reg_name
-			= att_names_mask[ins->vex.mask_register_specifier];
-		      oappend (ins, "{");
-		      oappend_register (ins, reg_name);
-		      oappend (ins, "}");
+			= att_names_mask[ins.vex.mask_register_specifier];
+
+		      oappend (&ins, "{");
+		      oappend_register (&ins, reg_name);
+		      oappend (&ins, "}");
 		    }
-		  if (ins->vex.zeroing)
-		    oappend (ins, "{z}");
+		  if (ins.vex.zeroing)
+		    oappend (&ins, "{z}");
 
 		  /* S/G insns require a mask and don't allow
 		     zeroing-masking.  */
 		  if ((dp->op[0].bytemode == vex_vsib_d_w_dq_mode
 		       || dp->op[0].bytemode == vex_vsib_q_w_dq_mode)
-		      && (ins->vex.mask_register_specifier == 0
-			  || ins->vex.zeroing))
-		    oappend (ins, "/(bad)");
+		      && (ins.vex.mask_register_specifier == 0
+			  || ins.vex.zeroing))
+		    oappend (&ins, "/(bad)");
 		}
 	    }
 
 	  /* Check whether rounding control was enabled for an insn not
 	     supporting it.  */
-	  if (ins->modrm.mod == 3 && ins->vex.b
-	      && !(ins->evex_used & EVEX_b_used))
+	  if (ins.modrm.mod == 3 && ins.vex.b
+	      && !(ins.evex_used & EVEX_b_used))
 	    {
 	      for (i = 0; i < MAX_OPERANDS; ++i)
 		{
-		  ins->obufp = ins->op_out[i];
-		  if (*ins->obufp)
+		  ins.obufp = ins.op_out[i];
+		  if (*ins.obufp)
 		    continue;
-		  oappend (ins, names_rounding[ins->vex.ll]);
-		  oappend (ins, "bad}");
+		  oappend (&ins, names_rounding[ins.vex.ll]);
+		  oappend (&ins, "bad}");
 		  break;
 		}
 	    }
@@ -9718,15 +9674,15 @@ print_insn (bfd_vma pc, instr_info *ins)
     }
 
   /* Clear instruction information.  */
-  ins->info->insn_info_valid = 0;
-  ins->info->branch_delay_insns = 0;
-  ins->info->data_size = 0;
-  ins->info->insn_type = dis_noninsn;
-  ins->info->target = 0;
-  ins->info->target2 = 0;
+  info->insn_info_valid = 0;
+  info->branch_delay_insns = 0;
+  info->data_size = 0;
+  info->insn_type = dis_noninsn;
+  info->target = 0;
+  info->target2 = 0;
 
   /* Reset jump operation indicator.  */
-  ins->op_is_jump = false;
+  ins.op_is_jump = false;
   {
     int jump_detection = 0;
 
@@ -9747,28 +9703,28 @@ print_insn (bfd_vma pc, instr_info *ins)
     /* Determine if this is a jump or branch.  */
     if ((jump_detection & 0x3) == 0x3)
       {
-	ins->op_is_jump = true;
+	ins.op_is_jump = true;
 	if (jump_detection & 0x4)
-	  ins->info->insn_type = dis_condbranch;
+	  info->insn_type = dis_condbranch;
 	else
-	  ins->info->insn_type = (dp->name && !strncmp (dp->name, "call", 4))
+	  info->insn_type = (dp->name && !strncmp (dp->name, "call", 4))
 	    ? dis_jsr : dis_branch;
       }
   }
 
   /* If VEX.vvvv and EVEX.vvvv are unused, they must be all 1s, which
      are all 0s in inverted form.  */
-  if (ins->need_vex && ins->vex.register_specifier != 0)
+  if (ins.need_vex && ins.vex.register_specifier != 0)
     {
-      i386_dis_printf (ins, dis_style_text, "(bad)");
-      return ins->end_codep - priv.the_buffer;
+      i386_dis_printf (&ins, dis_style_text, "(bad)");
+      return ins.end_codep - priv.the_buffer;
     }
 
   /* If EVEX.z is set, there must be an actual mask register in use.  */
-  if (ins->vex.zeroing && ins->vex.mask_register_specifier == 0)
+  if (ins.vex.zeroing && ins.vex.mask_register_specifier == 0)
     {
-      i386_dis_printf (ins, dis_style_text, "(bad)");
-      return ins->end_codep - priv.the_buffer;
+      i386_dis_printf (&ins, dis_style_text, "(bad)");
+      return ins.end_codep - priv.the_buffer;
     }
 
   switch (dp->prefix_requirement)
@@ -9776,12 +9732,12 @@ print_insn (bfd_vma pc, instr_info *ins)
     case PREFIX_DATA:
       /* If only the data prefix is marked as mandatory, its absence renders
 	 the encoding invalid.  Most other PREFIX_OPCODE rules still apply.  */
-      if (ins->need_vex ? !ins->vex.prefix : !(ins->prefixes & PREFIX_DATA))
+      if (ins.need_vex ? !ins.vex.prefix : !(ins.prefixes & PREFIX_DATA))
 	{
-	  i386_dis_printf (ins, dis_style_text, "(bad)");
-	  return ins->end_codep - priv.the_buffer;
+	  i386_dis_printf (&ins, dis_style_text, "(bad)");
+	  return ins.end_codep - priv.the_buffer;
 	}
-      ins->used_prefixes |= PREFIX_DATA;
+      ins.used_prefixes |= PREFIX_DATA;
       /* Fall through.  */
     case PREFIX_OPCODE:
       /* If the mandatory PREFIX_REPZ/PREFIX_REPNZ/PREFIX_DATA prefix is
@@ -9789,79 +9745,79 @@ print_insn (bfd_vma pc, instr_info *ins)
 	 used by putop and MMX/SSE operand and may be overridden by the
 	 PREFIX_REPZ/PREFIX_REPNZ fix, we check the PREFIX_DATA prefix
 	 separately.  */
-      if (((ins->need_vex
-	    ? ins->vex.prefix == REPE_PREFIX_OPCODE
-	      || ins->vex.prefix == REPNE_PREFIX_OPCODE
-	    : (ins->prefixes
+      if (((ins.need_vex
+	    ? ins.vex.prefix == REPE_PREFIX_OPCODE
+	      || ins.vex.prefix == REPNE_PREFIX_OPCODE
+	    : (ins.prefixes
 	       & (PREFIX_REPZ | PREFIX_REPNZ)) != 0)
-	   && (ins->used_prefixes
+	   && (ins.used_prefixes
 	       & (PREFIX_REPZ | PREFIX_REPNZ)) == 0)
-	  || (((ins->need_vex
-		? ins->vex.prefix == DATA_PREFIX_OPCODE
-		: ((ins->prefixes
+	  || (((ins.need_vex
+		? ins.vex.prefix == DATA_PREFIX_OPCODE
+		: ((ins.prefixes
 		    & (PREFIX_REPZ | PREFIX_REPNZ | PREFIX_DATA))
 		   == PREFIX_DATA))
-	       && (ins->used_prefixes & PREFIX_DATA) == 0))
-	  || (ins->vex.evex && dp->prefix_requirement != PREFIX_DATA
-	      && !ins->vex.w != !(ins->used_prefixes & PREFIX_DATA)))
+	       && (ins.used_prefixes & PREFIX_DATA) == 0))
+	  || (ins.vex.evex && dp->prefix_requirement != PREFIX_DATA
+	      && !ins.vex.w != !(ins.used_prefixes & PREFIX_DATA)))
 	{
-	  i386_dis_printf (ins, dis_style_text, "(bad)");
-	  return ins->end_codep - priv.the_buffer;
+	  i386_dis_printf (&ins, dis_style_text, "(bad)");
+	  return ins.end_codep - priv.the_buffer;
 	}
       break;
 
     case PREFIX_IGNORED:
       /* Zap data size and rep prefixes from used_prefixes and reinstate their
 	 origins in all_prefixes.  */
-      ins->used_prefixes &= ~PREFIX_OPCODE;
-      if (ins->last_data_prefix >= 0)
-	ins->all_prefixes[ins->last_data_prefix] = 0x66;
-      if (ins->last_repz_prefix >= 0)
-	ins->all_prefixes[ins->last_repz_prefix] = 0xf3;
-      if (ins->last_repnz_prefix >= 0)
-	ins->all_prefixes[ins->last_repnz_prefix] = 0xf2;
+      ins.used_prefixes &= ~PREFIX_OPCODE;
+      if (ins.last_data_prefix >= 0)
+	ins.all_prefixes[ins.last_data_prefix] = 0x66;
+      if (ins.last_repz_prefix >= 0)
+	ins.all_prefixes[ins.last_repz_prefix] = 0xf3;
+      if (ins.last_repnz_prefix >= 0)
+	ins.all_prefixes[ins.last_repnz_prefix] = 0xf2;
       break;
     }
 
   /* Check if the REX prefix is used.  */
-  if ((ins->rex ^ ins->rex_used) == 0
-      && !ins->need_vex && ins->last_rex_prefix >= 0)
-    ins->all_prefixes[ins->last_rex_prefix] = 0;
+  if ((ins.rex ^ ins.rex_used) == 0
+      && !ins.need_vex && ins.last_rex_prefix >= 0)
+    ins.all_prefixes[ins.last_rex_prefix] = 0;
 
   /* Check if the SEG prefix is used.  */
-  if ((ins->prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS | PREFIX_ES
-		   | PREFIX_FS | PREFIX_GS)) != 0
-      && (ins->used_prefixes & ins->active_seg_prefix) != 0)
-    ins->all_prefixes[ins->last_seg_prefix] = 0;
+  if ((ins.prefixes & (PREFIX_CS | PREFIX_SS | PREFIX_DS | PREFIX_ES
+		       | PREFIX_FS | PREFIX_GS)) != 0
+      && (ins.used_prefixes & ins.active_seg_prefix) != 0)
+    ins.all_prefixes[ins.last_seg_prefix] = 0;
 
   /* Check if the ADDR prefix is used.  */
-  if ((ins->prefixes & PREFIX_ADDR) != 0
-      && (ins->used_prefixes & PREFIX_ADDR) != 0)
-    ins->all_prefixes[ins->last_addr_prefix] = 0;
+  if ((ins.prefixes & PREFIX_ADDR) != 0
+      && (ins.used_prefixes & PREFIX_ADDR) != 0)
+    ins.all_prefixes[ins.last_addr_prefix] = 0;
 
   /* Check if the DATA prefix is used.  */
-  if ((ins->prefixes & PREFIX_DATA) != 0
-      && (ins->used_prefixes & PREFIX_DATA) != 0
-      && !ins->need_vex)
-    ins->all_prefixes[ins->last_data_prefix] = 0;
+  if ((ins.prefixes & PREFIX_DATA) != 0
+      && (ins.used_prefixes & PREFIX_DATA) != 0
+      && !ins.need_vex)
+    ins.all_prefixes[ins.last_data_prefix] = 0;
 
-  /* Print the extra ins->prefixes.  */
+  /* Print the extra ins.prefixes.  */
   prefix_length = 0;
-  for (i = 0; i < (int) ARRAY_SIZE (ins->all_prefixes); i++)
-    if (ins->all_prefixes[i])
+  for (i = 0; i < (int) ARRAY_SIZE (ins.all_prefixes); i++)
+    if (ins.all_prefixes[i])
       {
 	const char *name;
-	name = prefix_name (ins, ins->all_prefixes[i], orig_sizeflag);
+	name = prefix_name (&ins, ins.all_prefixes[i], orig_sizeflag);
 	if (name == NULL)
 	  abort ();
 	prefix_length += strlen (name) + 1;
-	i386_dis_printf (ins, dis_style_mnemonic, "%s ", name);
+	i386_dis_printf (&ins, dis_style_mnemonic, "%s ", name);
       }
 
   /* Check maximum code length.  */
-  if ((ins->codep - ins->start_codep) > MAX_CODE_LENGTH)
+  if ((ins.codep - ins.start_codep) > MAX_CODE_LENGTH)
     {
-      i386_dis_printf (ins, dis_style_text, "(bad)");
+      i386_dis_printf (&ins, dis_style_text, "(bad)");
       return MAX_CODE_LENGTH;
     }
 
@@ -9872,10 +9828,10 @@ print_insn (bfd_vma pc, instr_info *ins)
       ++op_count;
 
   /* Calculate the number of spaces to print after the mnemonic.  */
-  ins->obufp = ins->mnemonicendp;
+  ins.obufp = ins.mnemonicendp;
   if (op_count > 0)
     {
-      i = strlen (ins->obuf) + prefix_length;
+      i = strlen (ins.obuf) + prefix_length;
       if (i < 7)
 	i = 7 - i;
       else
@@ -9885,21 +9841,21 @@ print_insn (bfd_vma pc, instr_info *ins)
     i = 0;
 
   /* Print the instruction mnemonic along with any trailing whitespace.  */
-  i386_dis_printf (ins, dis_style_mnemonic, "%s%*s", ins->obuf, i, "");
+  i386_dis_printf (&ins, dis_style_mnemonic, "%s%*s", ins.obuf, i, "");
 
   /* The enter and bound instructions are printed with operands in the same
      order as the intel book; everything else is printed in reverse order.  */
   intel_swap_2_3 = false;
-  if (ins->intel_syntax || ins->two_source_ops)
+  if (ins.intel_syntax || ins.two_source_ops)
     {
       for (i = 0; i < MAX_OPERANDS; ++i)
-	op_txt[i] = ins->op_out[i];
+	op_txt[i] = ins.op_out[i];
 
-      if (ins->intel_syntax && dp && dp->op[2].rtn == OP_Rounding
+      if (ins.intel_syntax && dp && dp->op[2].rtn == OP_Rounding
           && dp->op[3].rtn == OP_E && dp->op[4].rtn == NULL)
 	{
-	  op_txt[2] = ins->op_out[3];
-	  op_txt[3] = ins->op_out[2];
+	  op_txt[2] = ins.op_out[3];
+	  op_txt[3] = ins.op_out[2];
 	  intel_swap_2_3 = true;
 	}
 
@@ -9907,18 +9863,18 @@ print_insn (bfd_vma pc, instr_info *ins)
 	{
 	  bool riprel;
 
-	  ins->op_ad = ins->op_index[i];
-	  ins->op_index[i] = ins->op_index[MAX_OPERANDS - 1 - i];
-	  ins->op_index[MAX_OPERANDS - 1 - i] = ins->op_ad;
-	  riprel = ins->op_riprel[i];
-	  ins->op_riprel[i] = ins->op_riprel[MAX_OPERANDS - 1 - i];
-	  ins->op_riprel[MAX_OPERANDS - 1 - i] = riprel;
+	  ins.op_ad = ins.op_index[i];
+	  ins.op_index[i] = ins.op_index[MAX_OPERANDS - 1 - i];
+	  ins.op_index[MAX_OPERANDS - 1 - i] = ins.op_ad;
+	  riprel = ins.op_riprel[i];
+	  ins.op_riprel[i] = ins.op_riprel[MAX_OPERANDS - 1 - i];
+	  ins.op_riprel[MAX_OPERANDS - 1 - i] = riprel;
 	}
     }
   else
     {
       for (i = 0; i < MAX_OPERANDS; ++i)
-	op_txt[MAX_OPERANDS - 1 - i] = ins->op_out[i];
+	op_txt[MAX_OPERANDS - 1 - i] = ins.op_out[i];
     }
 
   needcomma = 0;
@@ -9928,7 +9884,7 @@ print_insn (bfd_vma pc, instr_info *ins)
 	/* In Intel syntax embedded rounding / SAE are not separate operands.
 	   Instead they're attached to the prior register operand.  Simply
 	   suppress emission of the comma to achieve that effect.  */
-	switch (i & -(ins->intel_syntax && dp))
+	switch (i & -(ins.intel_syntax && dp))
 	  {
 	  case 2:
 	    if (dp->op[2].rtn == OP_Rounding && !intel_swap_2_3)
@@ -9940,36 +9896,58 @@ print_insn (bfd_vma pc, instr_info *ins)
 	    break;
 	  }
 	if (needcomma)
-	  i386_dis_printf (ins, dis_style_text, ",");
-	if (ins->op_index[i] != -1 && !ins->op_riprel[i])
+	  i386_dis_printf (&ins, dis_style_text, ",");
+	if (ins.op_index[i] != -1 && !ins.op_riprel[i])
 	  {
-	    bfd_vma target = (bfd_vma) ins->op_address[ins->op_index[i]];
+	    bfd_vma target = (bfd_vma) ins.op_address[ins.op_index[i]];
 
-	    if (ins->op_is_jump)
+	    if (ins.op_is_jump)
 	      {
-		ins->info->insn_info_valid = 1;
-		ins->info->branch_delay_insns = 0;
-		ins->info->data_size = 0;
-		ins->info->target = target;
-		ins->info->target2 = 0;
+		info->insn_info_valid = 1;
+		info->branch_delay_insns = 0;
+		info->data_size = 0;
+		info->target = target;
+		info->target2 = 0;
 	      }
-	    (*ins->info->print_address_func) (target, ins->info);
+	    (*info->print_address_func) (target, info);
 	  }
 	else
-	  i386_dis_printf (ins, dis_style_text, "%s", op_txt[i]);
+	  i386_dis_printf (&ins, dis_style_text, "%s", op_txt[i]);
 	needcomma = 1;
       }
 
   for (i = 0; i < MAX_OPERANDS; i++)
-    if (ins->op_index[i] != -1 && ins->op_riprel[i])
+    if (ins.op_index[i] != -1 && ins.op_riprel[i])
       {
-	i386_dis_printf (ins, dis_style_comment_start, "        # ");
-	(*ins->info->print_address_func) ((bfd_vma)
-			(ins->start_pc + (ins->codep - ins->start_codep)
-			 + ins->op_address[ins->op_index[i]]), ins->info);
+	i386_dis_printf (&ins, dis_style_comment_start, "        # ");
+	(*info->print_address_func)
+	  ((bfd_vma)(ins.start_pc + (ins.codep - ins.start_codep)
+		     + ins.op_address[ins.op_index[i]]),
+	  info);
 	break;
       }
-  return ins->codep - priv.the_buffer;
+  return ins.codep - priv.the_buffer;
+}
+
+/* Here for backwards compatibility.  When gdb stops using
+   print_insn_i386_att and print_insn_i386_intel these functions can
+   disappear, and print_insn_i386 be merged into print_insn.  */
+int
+print_insn_i386_att (bfd_vma pc, disassemble_info *info)
+{
+  return print_insn (pc, info, 0);
+}
+
+int
+print_insn_i386_intel (bfd_vma pc, disassemble_info *info)
+{
+  return print_insn (pc, info, 1);
+}
+
+int
+print_insn_i386 (bfd_vma pc, disassemble_info *info)
+{
+  return print_insn (pc, info, -1);
 }
 
 static const char *float_mem[] = {
