@@ -160,6 +160,10 @@ set style tui-current-position [on|off]
   Whether to style the source and assembly code highlighted by the
   TUI's current position indicator.  The default is off.
 
+set remote thread-options-packet
+show remote thread-options-packet
+  Set/show the use of the thread options packet.
+
 * Changed commands
 
 document user-defined
@@ -284,6 +288,22 @@ GNU/Linux/CSKY (gdbserver) csky*-*linux*
 * LoongArch floating-point support
 
 GDB now supports floating-point on LoongArch GNU/Linux.
+
+* New remote packets
+
+New stop reason: clone
+  Indicates that a clone system call was executed.
+
+QThreadOptions
+  Enable/disable optional event reporting, on a per-thread basis.
+  Currently supported options are GDB_THREAD_OPTION_CLONE, to enable
+  clone event reporting, and GDB_THREAD_OPTION_EXIT to enable thread
+  exit event reporting.
+
+QThreadOptions in qSupported
+  The qSupported packet allows GDB to inform the stub it supports the
+  QThreadOptions packet, and the qSupported response can contain the
+  set of thread options the remote stub supports.
 
 *** Changes in GDB 12
 
