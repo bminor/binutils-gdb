@@ -175,21 +175,21 @@ struct instr_info
   unsigned char *insn_codep;
   unsigned char *codep;
   unsigned char *end_codep;
-  int last_lock_prefix;
-  int last_repz_prefix;
-  int last_repnz_prefix;
-  int last_data_prefix;
-  int last_addr_prefix;
-  int last_rex_prefix;
-  int last_seg_prefix;
-  int fwait_prefix;
+  signed char last_lock_prefix;
+  signed char last_repz_prefix;
+  signed char last_repnz_prefix;
+  signed char last_data_prefix;
+  signed char last_addr_prefix;
+  signed char last_rex_prefix;
+  signed char last_seg_prefix;
+  signed char fwait_prefix;
   /* The active segment register prefix.  */
-  int active_seg_prefix;
+  unsigned char active_seg_prefix;
 
 #define MAX_CODE_LENGTH 15
   /* We can up to 14 ins->prefixes since the maximum instruction length is
      15bytes.  */
-  int all_prefixes[MAX_CODE_LENGTH - 1];
+  unsigned char all_prefixes[MAX_CODE_LENGTH - 1];
   disassemble_info *info;
 
   struct
@@ -276,13 +276,13 @@ struct instr_info
 /* Flags stored in PREFIXES.  */
 #define PREFIX_REPZ 1
 #define PREFIX_REPNZ 2
-#define PREFIX_LOCK 4
-#define PREFIX_CS 8
-#define PREFIX_SS 0x10
-#define PREFIX_DS 0x20
-#define PREFIX_ES 0x40
-#define PREFIX_FS 0x80
-#define PREFIX_GS 0x100
+#define PREFIX_CS 4
+#define PREFIX_SS 8
+#define PREFIX_DS 0x10
+#define PREFIX_ES 0x20
+#define PREFIX_FS 0x40
+#define PREFIX_GS 0x80
+#define PREFIX_LOCK 0x100
 #define PREFIX_DATA 0x200
 #define PREFIX_ADDR 0x400
 #define PREFIX_FWAIT 0x800
@@ -8532,13 +8532,13 @@ static const struct dis386 rm_table[][8] = {
 
 #define INTERNAL_DISASSEMBLER_ERROR _("<internal disassembler error>")
 
-/* We use the high bit to indicate different name for the same
-   prefix.  */
-#define REP_PREFIX	(0xf3 | 0x100)
-#define XACQUIRE_PREFIX	(0xf2 | 0x200)
-#define XRELEASE_PREFIX	(0xf3 | 0x400)
-#define BND_PREFIX	(0xf2 | 0x400)
-#define NOTRACK_PREFIX	(0x3e | 0x100)
+/* The values used here must be non-zero, fit in 'unsigned char', and not be
+   in conflict with actual prefix opcodes.  */
+#define REP_PREFIX	0x01
+#define XACQUIRE_PREFIX	0x02
+#define XRELEASE_PREFIX	0x03
+#define BND_PREFIX	0x04
+#define NOTRACK_PREFIX	0x05
 
 static int
 ckprefix (instr_info *ins)
@@ -9519,14 +9519,15 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
 
   if (OPCODES_SIGSETJMP (priv.bailout) != 0)
     {
-      const char *name;
-
       /* Getting here means we tried for data but didn't get it.  That
 	 means we have an incomplete instruction of some sort.  Just
 	 print the first byte as a prefix or a .byte pseudo-op.  */
       if (ins.codep > priv.the_buffer)
 	{
-	  name = prefix_name (&ins, priv.the_buffer[0], priv.orig_sizeflag);
+	  const char *name = NULL;
+
+	  if (ins.prefixes || ins.fwait_prefix >= 0 || (ins.rex & REX_OPCODE))
+	    name = prefix_name (&ins, priv.the_buffer[0], priv.orig_sizeflag);
 	  if (name != NULL)
 	    i386_dis_printf (&ins, dis_style_mnemonic, "%s", name);
 	  else
