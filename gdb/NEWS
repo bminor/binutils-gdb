@@ -81,6 +81,10 @@ show always-read-ctf
   When off, CTF is only read if DWARF is not present.  When on, CTF is
   read regardless of whether DWARF is present.  Off by default.
 
+set remote thread-options-packet
+show remote thread-options-packet
+  Set/show the use of the thread options packet.
+
 * New convenience function "$_shell", to execute a shell command and
   return the result.  This lets you run shell commands in expressions.
   Some examples:
@@ -103,6 +107,22 @@ show always-read-ctf
    for thread-specific breakpoints, or not at all for breakpoints
    without a thread restriction.  The same is also true for the 'task'
    field of an Ada task-specific breakpoint.
+
+* New remote packets
+
+New stop reason: clone
+  Indicates that a clone system call was executed.
+
+QThreadOptions
+  Enable/disable optional event reporting, on a per-thread basis.
+  Currently supported options are GDB_THREAD_OPTION_CLONE, to enable
+  clone event reporting, and GDB_THREAD_OPTION_EXIT to enable thread
+  exit event reporting.
+
+QThreadOptions in qSupported
+  The qSupported packet allows GDB to inform the stub it supports the
+  QThreadOptions packet, and the qSupported response can contain the
+  set of thread options the remote stub supports.
 
 *** Changes in GDB 13
 

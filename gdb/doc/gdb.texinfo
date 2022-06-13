@@ -24206,6 +24206,10 @@ future connections is shown.  The available settings are:
 @tab @code{QThreadEvents}
 @tab Tracking thread lifetime.
 
+@item @code{thread-options}
+@tab @code{QThreadOptions}
+@tab Set thread event reporting options.
+
 @item @code{no-resumed-stop-reply}
 @tab @code{no resumed thread left stop reply}
 @tab Tracking thread lifetime.
@@ -42631,6 +42635,17 @@ appropriate @samp{qSupported} feature (@pxref{qSupported}).  The
 remote stub must also supply the appropriate @samp{qSupported} feature
 indicating support.
 
+@cindex thread clone events, remote reply
+@anchor{thread clone event}
+@item clone
+The packet indicates that @code{clone} was called, and @var{r} is the
+thread ID of the new child thread, as specified in @ref{thread-id
+syntax}.  This packet is only applicable to targets that support clone
+events.
+
+This packet should not be sent by default; @value{GDBN} requests it
+with the @ref{QThreadOptions} packet.
+
 @cindex thread create event, remote reply
 @anchor{thread create event}
 @item create
@@ -42669,9 +42684,10 @@ hex strings.
 @item w @var{AA} ; @var{tid}
 
 The thread exited, and @var{AA} is the exit status.  This response
-should not be sent by default; @value{GDBN} requests it with the
-@ref{QThreadEvents} packet.  See also @ref{thread create event} above.
-@var{AA} is formatted as a big-endian hex string.
+should not be sent by default; @value{GDBN} requests it with either
+the @ref{QThreadEvents} or @ref{QThreadOptions} packets.  See also
+@ref{thread create event} above.  @var{AA} is formatted as a
+big-endian hex string.
 
 @item N
 There are no resumed threads left in the target.  In other words, even
@@ -43396,6 +43412,11 @@ same thread.  @value{GDBN} does not enable this feature unless the
 stub reports that it supports it by including @samp{QThreadEvents+} in
 its @samp{qSupported} reply.
 
+This packet always enables/disables event reporting for all threads of
+all processes under control of the remote stub.  For per-thread
+control of optional event reporting, see the @ref{QThreadOptions}
+packet.
+
 Reply:
 @table @samp
 @item OK
@@ -43411,6 +43432,94 @@ the stub.
 
 Use of this packet is controlled by the @code{set remote thread-events}
 command (@pxref{Remote Configuration, set remote thread-events}).
+
+@anchor{QThreadOptions}
+@item QThreadOptions@r{[};@var{options}@r{[}:@var{thread-id}@r{]]}@dots{}
+@cindex thread options, remote request
+@cindex @samp{QThreadOptions} packet
+
+For each inferior thread, the last @var{options} in the list with a
+matching @var{thread-id} are applied.  Any options previously set on a
+thread are discarded and replaced by the new options specified.
+Threads that do not match any @var{thread-id} retain their
+previously-set options.  Thread IDs are specified using the syntax
+described in @ref{thread-id syntax}.  If multiprocess extensions
+(@pxref{multiprocess extensions}) are supported, options can be
+specified to apply to all threads of a process by using the
+@samp{p@var{pid}.-1} form of @var{thread-id}.  Options with no
+@var{thread-id} apply to all threads.  Specifying no options is an
+error.
+
+@var{options} is the bitwise @code{OR} of the following values.  All
+values are given in hexadecimal representation.
+
+@table @code
+@item GDB_THREAD_OPTION_CLONE (0x1)
+Report thread clone events (@pxref{thread clone event}).  This is only
+meaningful for targets that support clone events (e.g., GNU/Linux
+systems).
+
+@item GDB_THREAD_OPTION_EXIT (0x2)
+Report thread exit events (@pxref{thread exit event}).
+@end table
+
+@noindent
+
+For example, @value{GDBN} enables the @code{GDB_THREAD_OPTION_EXIT}
+and @code{GDB_THREAD_OPTION_CLONE} options when single-stepping a
+thread past a breakpoint, for the following reasons:
+
+@itemize @bullet
+@item
+If the single-stepped thread exits (e.g., it executes a thread exit
+system call), enabling @code{GDB_THREAD_OPTION_EXIT} prevents
+@value{GDBN} from waiting forever, not knowing that it should no
+longer expect a stop for that same thread, and blocking other threads
+from progressing.
+
+@item
+If the single-stepped thread spawns a new clone child (i.e., it
+executes a clone system call), enabling @code{GDB_THREAD_OPTION_CLONE}
+halts the cloned thread before it executes any instructions, and thus
+prevents the following problematic situations:
+
+@itemize @minus
+@item
+If the breakpoint is stepped-over in-line, the spawned thread would
+incorrectly run free while the breakpoint being stepped over is not
+inserted, and thus the cloned thread may potentially run past the
+breakpoint without stopping for it;
+
+@item
+If displaced (out-of-line) stepping is used, the cloned thread starts
+running at the out-of-line PC, leading to undefined behavior, usually
+crashing or corrupting data.
+@end itemize
+
+@end itemize
+
+New threads start with thread options cleared.
+
+@value{GDBN} does not enable this feature unless the stub reports that
+it supports it by including
+@samp{QThreadOptions=@var{supported_options}} in its @samp{qSupported}
+reply.
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+
+@item E @var{nn}
+An error occurred.  The error number @var{nn} is given as hex digits.
+
+@item @w{}
+An empty reply indicates that @samp{QThreadOptions} is not supported by
+the stub.
+@end table
+
+Use of this packet is controlled by the @code{set remote thread-options}
+command (@pxref{Remote Configuration, set remote thread-options}).
 
 @item qRcmd,@var{command}
 @cindex execute remote command, remote request
@@ -43857,6 +43966,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{QThreadOptions}
+@tab Yes
+@tab @samp{-}
+@tab No
+
 @item @samp{no-resumed}
 @tab No
 @tab @samp{-}
@@ -44077,6 +44191,13 @@ The remote stub reports the supported actions in the reply to
 
 @item QThreadEvents
 The remote stub understands the @samp{QThreadEvents} packet.
+
+@item QThreadOptions=@var{supported_options}
+The remote stub understands the @samp{QThreadOptions} packet.
+@var{supported_options} indicates the set of thread options the remote
+stub supports.  @var{supported_options} has the same format as the
+@var{options} parameter of the @code{QThreadOptions} packet, described
+at @ref{QThreadOptions}.
 
 @item no-resumed
 The remote stub reports the @samp{N} stop reply.
