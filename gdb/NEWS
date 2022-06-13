@@ -29,6 +29,26 @@ disassemble
 maintenance info linux-lwps
   List all LWPs under control of the linux-nat target.
 
+set remote thread-options-packet
+show remote thread-options-packet
+  Set/show the use of the thread options packet.
+
+* New remote packets
+
+New stop reason: clone
+  Indicates that a clone system call was executed.
+
+QThreadOptions
+  Enable/disable optional event reporting, on a per-thread basis.
+  Currently supported options are GDB_THREAD_OPTION_CLONE, to enable
+  clone event reporting, and GDB_THREAD_OPTION_EXIT to enable thread
+  exit event reporting.
+
+QThreadOptions in qSupported
+  The qSupported packet allows GDB to inform the stub it supports the
+  QThreadOptions packet, and the qSupported response can contain the
+  set of thread options the remote stub supports.
+
 *** Changes in GDB 14
 
 * GDB now supports the AArch64 Scalable Matrix Extension 2 (SME2), which
