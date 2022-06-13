@@ -51,9 +51,7 @@ static void oappend_with_style (instr_info *, const char *,
 static void oappend (instr_info *, const char *);
 static void append_seg (instr_info *);
 static void OP_indirE (instr_info *, int, int);
-static void print_operand_value (instr_info *, char *, int, bfd_vma);
 static void OP_E_memory (instr_info *, int, int);
-static void print_displacement (instr_info *, char *, bfd_vma);
 static void OP_E (instr_info *, int, int);
 static void OP_G (instr_info *, int, int);
 static bfd_vma get64 (instr_info *);
@@ -170,7 +168,6 @@ struct instr_info
   char obuf[100];
   char *obufp;
   char *mnemonicendp;
-  char scratchbuf[100];
   unsigned char *start_codep;
   unsigned char *insn_codep;
   unsigned char *codep;
@@ -9254,37 +9251,13 @@ get_sib (instr_info *ins, int sizeflag)
     ins->has_sib = false;
 }
 
-/* Like oappend (below), but S is a string starting with '%' or '$'.  In
-   Intel syntax, the '%' or '$' is elided.  STYLE is used when displaying
-   this part of the output in the disassembler.
-
-   This function should not be used directly from the general disassembler
-   code, instead the helpers oappend_register and oappend_immediate should
-   be called as appropriate.  */
-
-static void
-oappend_maybe_intel_with_style (instr_info *ins, const char *s,
-				enum disassembler_style style)
-{
-  oappend_with_style (ins, s + ins->intel_syntax, style);
-}
-
-/* Like oappend_maybe_intel_with_style above, but called when S is the
-   name of a register.  */
+/* Like oappend (below), but S is a string starting with '%'.  In
+   Intel syntax, the '%' is elided.  */
 
 static void
 oappend_register (instr_info *ins, const char *s)
 {
-  oappend_maybe_intel_with_style (ins, s, dis_style_register);
-}
-
-/* Like oappend_maybe_intel_with_style above, but called when S represents
-   an immediate.  */
-
-static void
-oappend_immediate (instr_info *ins, const char *s)
-{
-  oappend_maybe_intel_with_style (ins, s, dis_style_immediate);
+  oappend_with_style (ins, s + ins->intel_syntax, dis_style_register);
 }
 
 /* Wrap around a call to INS->info->fprintf_styled_func, printing FMT.
@@ -10334,8 +10307,12 @@ static void
 OP_STi (instr_info *ins, int bytemode ATTRIBUTE_UNUSED,
 	int sizeflag ATTRIBUTE_UNUSED)
 {
-  sprintf (ins->scratchbuf, "%%st(%d)", ins->modrm.rm);
-  oappend_register (ins, ins->scratchbuf);
+  char scratch[8];
+  int res = snprintf (scratch, ARRAY_SIZE (scratch), "%%st(%d)", ins->modrm.rm);
+
+  if (res < 0 || (size_t) res >= ARRAY_SIZE (scratch))
+    abort ();
+  oappend_register (ins, scratch);
 }
 
 /* Capital letters in template are macros.  */
@@ -10992,39 +10969,39 @@ OP_indirE (instr_info *ins, int bytemode, int sizeflag)
 }
 
 static void
-print_operand_value (instr_info *ins, char *buf, int hex, bfd_vma disp)
+print_operand_value (instr_info *ins, bool hex, bfd_vma disp,
+		     enum disassembler_style style)
 {
+  char tmp[30];
+
   if (ins->address_mode == mode_64bit)
     {
       if (hex)
 	{
-	  char tmp[30];
 	  int i;
-	  buf[0] = '0';
-	  buf[1] = 'x';
+	  oappend_with_style (ins, "0x", style);
 	  sprintf_vma (tmp, disp);
 	  for (i = 0; tmp[i] == '0' && tmp[i + 1]; i++);
-	  strcpy (buf + 2, tmp + i);
+	  oappend_with_style (ins, tmp + i, style);
 	}
       else
 	{
 	  bfd_signed_vma v = disp;
-	  char tmp[30];
 	  int i;
 	  if (v < 0)
 	    {
-	      *(buf++) = '-';
+	      oappend_char_with_style (ins, '-', style);
 	      v = -disp;
 	      /* Check for possible overflow on 0x8000000000000000.  */
 	      if (v < 0)
 		{
-		  strcpy (buf, "9223372036854775808");
+		  oappend_with_style (ins, "9223372036854775808", style);
 		  return;
 		}
 	    }
 	  if (!v)
 	    {
-	      strcpy (buf, "0");
+	      oappend_char_with_style (ins, '0', style);
 	      return;
 	    }
 
@@ -11036,30 +11013,41 @@ print_operand_value (instr_info *ins, char *buf, int hex, bfd_vma disp)
 	      v /= 10;
 	      i++;
 	    }
-	  strcpy (buf, tmp + 29 - i);
+	  oappend_with_style (ins, tmp + 29 - i, style);
 	}
     }
   else
     {
       if (hex)
-	sprintf (buf, "0x%x", (unsigned int) disp);
+	sprintf (tmp, "0x%x", (unsigned int) disp);
       else
-	sprintf (buf, "%d", (int) disp);
+	sprintf (tmp, "%d", (int) disp);
+      oappend_with_style (ins, tmp, style);
     }
+}
+
+/* Like oappend, but called for immediate operands.  */
+
+static void
+oappend_immediate (instr_info *ins, bfd_vma imm)
+{
+  if (!ins->intel_syntax)
+    oappend_char_with_style (ins, '$', dis_style_immediate);
+  print_operand_value (ins, true, imm, dis_style_immediate);
 }
 
 /* Put DISP in BUF as signed hex number.  */
 
 static void
-print_displacement (instr_info *ins, char *buf, bfd_vma disp)
+print_displacement (instr_info *ins, bfd_vma disp)
 {
   bfd_signed_vma val = disp;
   char tmp[30];
-  int i, j = 0;
+  unsigned int i;
 
   if (val < 0)
     {
-      buf[j++] = '-';
+      oappend_char_with_style (ins, '-', dis_style_address_offset);
       val = -disp;
 
       /* Check for possible overflow.  */
@@ -11068,28 +11056,30 @@ print_displacement (instr_info *ins, char *buf, bfd_vma disp)
 	  switch (ins->address_mode)
 	    {
 	    case mode_64bit:
-	      strcpy (buf + j, "0x8000000000000000");
+	      oappend_with_style (ins, "0x8000000000000000",
+				  dis_style_address_offset);
 	      break;
 	    case mode_32bit:
-	      strcpy (buf + j, "0x80000000");
+	      oappend_with_style (ins, "0x80000000",
+				  dis_style_address_offset);
 	      break;
 	    case mode_16bit:
-	      strcpy (buf + j, "0x8000");
+	      oappend_with_style (ins, "0x8000",
+				  dis_style_address_offset);
 	      break;
 	    }
 	  return;
 	}
     }
 
-  buf[j++] = '0';
-  buf[j++] = 'x';
+  oappend_with_style (ins, "0x", dis_style_address_offset);
 
   sprintf_vma (tmp, (bfd_vma) val);
   for (i = 0; tmp[i] == '0'; i++)
     continue;
   if (tmp[i] == '\0')
     i--;
-  strcpy (buf + j, tmp + i);
+  oappend_with_style (ins, tmp + i, dis_style_address_offset);
 }
 
 static void
@@ -11729,11 +11719,9 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	if (ins->modrm.mod != 0 || base == 5)
 	  {
 	    if (havedisp || riprel)
-	      print_displacement (ins, ins->scratchbuf, disp);
+	      print_displacement (ins, disp);
 	    else
-	      print_operand_value (ins, ins->scratchbuf, 1, disp);
-	    oappend_with_style (ins, ins->scratchbuf,
-				dis_style_address_offset);
+	      print_operand_value (ins, true, disp, dis_style_address_offset);
 	    if (riprel)
 	      {
 		set_op (ins, disp, true);
@@ -11792,9 +11780,8 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 				      : att_index32);
 
 		  oappend_char (ins, ins->scale_char);
-		  sprintf (ins->scratchbuf, "%d", 1 << scale);
-		  oappend_with_style (ins, ins->scratchbuf,
-				      dis_style_immediate);
+		  oappend_char_with_style (ins, '0' + (1 << scale),
+					   dis_style_immediate);
 		}
 	    }
 	  if (ins->intel_syntax
@@ -11809,10 +11796,9 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 		}
 
 	      if (havedisp)
-		print_displacement (ins, ins->scratchbuf, disp);
+		print_displacement (ins, disp);
 	      else
-		print_operand_value (ins, ins->scratchbuf, 1, disp);
-	      oappend (ins, ins->scratchbuf);
+		print_operand_value (ins, true, disp, dis_style_address_offset);
 	    }
 
 	  oappend_char (ins, ins->close_char);
@@ -11839,8 +11825,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 		  oappend_register (ins, att_names_seg[ds_reg - es_reg]);
 		  oappend (ins, ":");
 		}
-	      print_operand_value (ins, ins->scratchbuf, 1, disp);
-	      oappend (ins, ins->scratchbuf);
+	      print_operand_value (ins, true, disp, dis_style_text);
 	    }
 	}
     }
@@ -11885,10 +11870,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 
       if (!ins->intel_syntax)
 	if (ins->modrm.mod != 0 || ins->modrm.rm == 6)
-	  {
-	    print_displacement (ins, ins->scratchbuf, disp);
-	    oappend (ins, ins->scratchbuf);
-	  }
+	  print_displacement (ins, disp);
 
       if (ins->modrm.mod != 0 || ins->modrm.rm != 6)
 	{
@@ -11906,8 +11888,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 		  disp = -disp;
 		}
 
-	      print_displacement (ins, ins->scratchbuf, disp);
-	      oappend (ins, ins->scratchbuf);
+	      print_displacement (ins, disp);
 	    }
 
 	  oappend_char (ins, ins->close_char);
@@ -11919,8 +11900,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	      oappend_register (ins, att_names_seg[ds_reg - es_reg]);
 	      oappend (ins, ":");
 	    }
-	  print_operand_value (ins, ins->scratchbuf, 1, disp & 0xffff);
-	  oappend (ins, ins->scratchbuf);
+	  print_operand_value (ins, true, disp & 0xffff, dis_style_text);
 	}
     }
   if (ins->vex.b)
@@ -12274,10 +12254,7 @@ OP_I (instr_info *ins, int bytemode, int sizeflag)
     }
 
   op &= mask;
-  ins->scratchbuf[0] = '$';
-  print_operand_value (ins, ins->scratchbuf + 1, 1, op);
-  oappend_immediate (ins, ins->scratchbuf);
-  ins->scratchbuf[0] = '\0';
+  oappend_immediate (ins, op);
 }
 
 static void
@@ -12292,10 +12269,7 @@ OP_I64 (instr_info *ins, int bytemode, int sizeflag)
 
   USED_REX (REX_W);
 
-  ins->scratchbuf[0] = '$';
-  print_operand_value (ins, ins->scratchbuf + 1, 1, get64 (ins));
-  oappend_immediate (ins, ins->scratchbuf);
-  ins->scratchbuf[0] = '\0';
+  oappend_immediate (ins, get64 (ins));
 }
 
 static void
@@ -12346,9 +12320,7 @@ OP_sI (instr_info *ins, int bytemode, int sizeflag)
       return;
     }
 
-  ins->scratchbuf[0] = '$';
-  print_operand_value (ins, ins->scratchbuf + 1, 1, op);
-  oappend_immediate (ins, ins->scratchbuf);
+  oappend_immediate (ins, op);
 }
 
 static void
@@ -12398,8 +12370,7 @@ OP_J (instr_info *ins, int bytemode, int sizeflag)
   disp = ((ins->start_pc + (ins->codep - ins->start_codep) + disp) & mask)
 	 | segment;
   set_op (ins, disp, false);
-  print_operand_value (ins, ins->scratchbuf, 1, disp);
-  oappend (ins, ins->scratchbuf);
+  print_operand_value (ins, true, disp, dis_style_text);
 }
 
 static void
@@ -12414,7 +12385,8 @@ OP_SEG (instr_info *ins, int bytemode, int sizeflag)
 static void
 OP_DIR (instr_info *ins, int dummy ATTRIBUTE_UNUSED, int sizeflag)
 {
-  int seg, offset;
+  int seg, offset, res;
+  char scratch[24];
 
   if (sizeflag & DFLAG)
     {
@@ -12427,11 +12399,13 @@ OP_DIR (instr_info *ins, int dummy ATTRIBUTE_UNUSED, int sizeflag)
       seg = get16 (ins);
     }
   ins->used_prefixes |= (ins->prefixes & PREFIX_DATA);
-  if (ins->intel_syntax)
-    sprintf (ins->scratchbuf, "0x%x:0x%x", seg, offset);
-  else
-    sprintf (ins->scratchbuf, "$0x%x,$0x%x", seg, offset);
-  oappend (ins, ins->scratchbuf);
+
+  res = snprintf (scratch, ARRAY_SIZE (scratch),
+		  ins->intel_syntax ? "0x%x:0x%x" : "$0x%x,$0x%x",
+		  seg, offset);
+  if (res < 0 || (size_t) res >= ARRAY_SIZE (scratch))
+    abort ();
+  oappend (ins, scratch);
 }
 
 static void
@@ -12456,8 +12430,7 @@ OP_OFF (instr_info *ins, int bytemode, int sizeflag)
 	  oappend (ins, ":");
 	}
     }
-  print_operand_value (ins, ins->scratchbuf, 1, off);
-  oappend_with_style (ins, ins->scratchbuf, dis_style_address_offset);
+  print_operand_value (ins, true, off, dis_style_address_offset);
 }
 
 static void
@@ -12486,8 +12459,7 @@ OP_OFF64 (instr_info *ins, int bytemode, int sizeflag)
 	  oappend (ins, ":");
 	}
     }
-  print_operand_value (ins, ins->scratchbuf, 1, off);
-  oappend_with_style (ins, ins->scratchbuf, dis_style_address_offset);
+  print_operand_value (ins, true, off, dis_style_address_offset);
 }
 
 static void
@@ -12568,7 +12540,9 @@ static void
 OP_C (instr_info *ins, int dummy ATTRIBUTE_UNUSED,
       int sizeflag ATTRIBUTE_UNUSED)
 {
-  int add;
+  int add, res;
+  char scratch[8];
+
   if (ins->rex & REX_R)
     {
       USED_REX (REX_R);
@@ -12582,33 +12556,44 @@ OP_C (instr_info *ins, int dummy ATTRIBUTE_UNUSED,
     }
   else
     add = 0;
-  sprintf (ins->scratchbuf, "%%cr%d", ins->modrm.reg + add);
-  oappend_register (ins, ins->scratchbuf);
+  res = snprintf (scratch, ARRAY_SIZE (scratch), "%%cr%d",
+		  ins->modrm.reg + add);
+  if (res < 0 || (size_t) res >= ARRAY_SIZE (scratch))
+    abort ();
+  oappend_register (ins, scratch);
 }
 
 static void
 OP_D (instr_info *ins, int dummy ATTRIBUTE_UNUSED,
       int sizeflag ATTRIBUTE_UNUSED)
 {
-  int add;
+  int add, res;
+  char scratch[8];
+
   USED_REX (REX_R);
   if (ins->rex & REX_R)
     add = 8;
   else
     add = 0;
-  if (ins->intel_syntax)
-    sprintf (ins->scratchbuf, "dr%d", ins->modrm.reg + add);
-  else
-    sprintf (ins->scratchbuf, "%%db%d", ins->modrm.reg + add);
-  oappend (ins, ins->scratchbuf);
+  res = snprintf (scratch, ARRAY_SIZE (scratch),
+		  ins->intel_syntax ? "dr%d" : "%%db%d",
+		  ins->modrm.reg + add);
+  if (res < 0 || (size_t) res >= ARRAY_SIZE (scratch))
+    abort ();
+  oappend (ins, scratch);
 }
 
 static void
 OP_T (instr_info *ins, int dummy ATTRIBUTE_UNUSED,
       int sizeflag ATTRIBUTE_UNUSED)
 {
-  sprintf (ins->scratchbuf, "%%tr%d", ins->modrm.reg);
-  oappend_register (ins, ins->scratchbuf);
+  int res;
+  char scratch[8];
+
+  res = snprintf (scratch, ARRAY_SIZE (scratch), "%%tr%d", ins->modrm.reg);
+  if (res < 0 || (size_t) res >= ARRAY_SIZE (scratch))
+    abort ();
+  oappend_register (ins, scratch);
 }
 
 static void
@@ -13060,10 +13045,7 @@ CMP_Fixup (instr_info *ins, int bytemode ATTRIBUTE_UNUSED,
   else
     {
       /* We have a reserved extension byte.  Output it directly.  */
-      ins->scratchbuf[0] = '$';
-      print_operand_value (ins, ins->scratchbuf + 1, 1, cmp_type);
-      oappend_immediate (ins, ins->scratchbuf);
-      ins->scratchbuf[0] = '\0';
+      oappend_immediate (ins, cmp_type);
     }
 }
 
@@ -13515,9 +13497,7 @@ static void
 OP_VexI4 (instr_info *ins, int bytemode ATTRIBUTE_UNUSED,
 	  int sizeflag ATTRIBUTE_UNUSED)
 {
-  ins->scratchbuf[0] = '$';
-  print_operand_value (ins, ins->scratchbuf + 1, 1, ins->codep[-1] & 0xf);
-  oappend_immediate (ins, ins->scratchbuf);
+  oappend_immediate (ins, ins->codep[-1] & 0xf);
 }
 
 static void
@@ -13560,10 +13540,7 @@ VPCMP_Fixup (instr_info *ins, int bytemode ATTRIBUTE_UNUSED,
   else
     {
       /* We have a reserved extension byte.  Output it directly.  */
-      ins->scratchbuf[0] = '$';
-      print_operand_value (ins, ins->scratchbuf + 1, 1, cmp_type);
-      oappend_immediate (ins, ins->scratchbuf);
-      ins->scratchbuf[0] = '\0';
+      oappend_immediate (ins, cmp_type);
     }
 }
 
@@ -13612,10 +13589,7 @@ VPCOM_Fixup (instr_info *ins, int bytemode ATTRIBUTE_UNUSED,
   else
     {
       /* We have a reserved extension byte.  Output it directly.  */
-      ins->scratchbuf[0] = '$';
-      print_operand_value (ins, ins->scratchbuf + 1, 1, cmp_type);
-      oappend_immediate (ins, ins->scratchbuf);
-      ins->scratchbuf[0] = '\0';
+      oappend_immediate (ins, cmp_type);
     }
 }
 
@@ -13660,10 +13634,7 @@ PCLMUL_Fixup (instr_info *ins, int bytemode ATTRIBUTE_UNUSED,
   else
     {
       /* We have a reserved extension byte.  Output it directly.  */
-      ins->scratchbuf[0] = '$';
-      print_operand_value (ins, ins->scratchbuf + 1, 1, pclmul_type);
-      oappend_immediate (ins, ins->scratchbuf);
-      ins->scratchbuf[0] = '\0';
+      oappend_immediate (ins, pclmul_type);
     }
 }
 
