@@ -13473,9 +13473,10 @@ OP_VexW (instr_info *ins, int bytemode, int sizeflag)
   if (ins->vex.w)
     {
       /* Swap 2nd and 3rd operands.  */
-      strcpy (ins->scratchbuf, ins->op_out[2]);
-      strcpy (ins->op_out[2], ins->op_out[1]);
-      strcpy (ins->op_out[1], ins->scratchbuf);
+      char *tmp = ins->op_out[2];
+
+      ins->op_out[2] = ins->op_out[1];
+      ins->op_out[1] = tmp;
     }
 }
 
@@ -13503,9 +13504,10 @@ OP_REG_VexI4 (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
   if (ins->vex.w)
     {
       /* Swap 3rd and 4th operands.  */
-      strcpy (ins->scratchbuf, ins->op_out[3]);
-      strcpy (ins->op_out[3], ins->op_out[2]);
-      strcpy (ins->op_out[2], ins->scratchbuf);
+      char *tmp = ins->op_out[3];
+
+      ins->op_out[3] = ins->op_out[2];
+      ins->op_out[2] = tmp;
     }
 }
 
