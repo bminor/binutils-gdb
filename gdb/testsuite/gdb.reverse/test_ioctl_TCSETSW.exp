@@ -35,7 +35,7 @@ gdb_test "break $stop" ".*Breakpoint .*" "stop at TCSETSW"
 gdb_test "continue"  ".*Breakpoint .*" "at TCSETSW call"
 
 set test "handle TCSETSW"
-gdb_test_multiple "step"  $test {
+gdb_test_multiple "next"  $test {
     -re "Process record and replay target doesn't support ioctl request 0x.*$gdb_prompt $" {
 	fail $test
     }
