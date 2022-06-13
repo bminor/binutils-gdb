@@ -9798,7 +9798,7 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
   /* Calculate the number of operands this instruction has.  */
   op_count = 0;
   for (i = 0; i < MAX_OPERANDS; ++i)
-    if (*ins->op_out[i] != '\0')
+    if (*ins.op_out[i] != '\0')
       ++op_count;
 
   /* Calculate the number of spaces to print after the mnemonic.  */
