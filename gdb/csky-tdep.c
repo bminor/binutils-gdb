@@ -67,6 +67,423 @@ static const reggroup *vr_reggroup;
 static const reggroup *mmu_reggroup;
 static const reggroup *prof_reggroup;
 
+static const char *csky_supported_tdesc_feature_names[] = {
+  (const char *)"org.gnu.csky.abiv2.gpr",
+  (const char *)"org.gnu.csky.abiv2.fpu",
+  (const char *)"org.gnu.csky.abiv2.cr",
+  (const char *)"org.gnu.csky.abiv2.fvcr",
+  (const char *)"org.gnu.csky.abiv2.mmu",
+  (const char *)"org.gnu.csky.abiv2.tee",
+  (const char *)"org.gnu.csky.abiv2.fpu2",
+  (const char *)"org.gnu.csky.abiv2.bank0",
+  (const char *)"org.gnu.csky.abiv2.bank1",
+  (const char *)"org.gnu.csky.abiv2.bank2",
+  (const char *)"org.gnu.csky.abiv2.bank3",
+  (const char *)"org.gnu.csky.abiv2.bank4",
+  (const char *)"org.gnu.csky.abiv2.bank5",
+  (const char *)"org.gnu.csky.abiv2.bank6",
+  (const char *)"org.gnu.csky.abiv2.bank7",
+  (const char *)"org.gnu.csky.abiv2.bank8",
+  (const char *)"org.gnu.csky.abiv2.bank9",
+  (const char *)"org.gnu.csky.abiv2.bank10",
+  (const char *)"org.gnu.csky.abiv2.bank11",
+  (const char *)"org.gnu.csky.abiv2.bank12",
+  (const char *)"org.gnu.csky.abiv2.bank13",
+  (const char *)"org.gnu.csky.abiv2.bank14",
+  (const char *)"org.gnu.csky.abiv2.bank15",
+  (const char *)"org.gnu.csky.abiv2.bank16",
+  (const char *)"org.gnu.csky.abiv2.bank17",
+  (const char *)"org.gnu.csky.abiv2.bank18",
+  (const char *)"org.gnu.csky.abiv2.bank19",
+  (const char *)"org.gnu.csky.abiv2.bank20",
+  (const char *)"org.gnu.csky.abiv2.bank21",
+  (const char *)"org.gnu.csky.abiv2.bank22",
+  (const char *)"org.gnu.csky.abiv2.bank23",
+  (const char *)"org.gnu.csky.abiv2.bank24",
+  (const char *)"org.gnu.csky.abiv2.bank25",
+  (const char *)"org.gnu.csky.abiv2.bank26",
+  (const char *)"org.gnu.csky.abiv2.bank27",
+  (const char *)"org.gnu.csky.abiv2.bank28",
+  (const char *)"org.gnu.csky.abiv2.bank29",
+  (const char *)"org.gnu.csky.abiv2.bank30",
+  (const char *)"org.gnu.csky.abiv2.bank31"
+};
+
+struct csky_supported_tdesc_register
+{
+  char name[16];
+  int num;
+};
+
+static const struct csky_supported_tdesc_register csky_supported_gpr_regs[] = {
+  {"r0", 0},
+  {"r1", 1},
+  {"r2", 2},
+  {"r3", 3},
+  {"r4", 4},
+  {"r5", 5},
+  {"r6", 6},
+  {"r7", 7},
+  {"r8", 8},
+  {"r9", 9},
+  {"r10", 10},
+  {"r11", 11},
+  {"r12", 12},
+  {"r13", 13},
+  {"r14", 14},
+  {"r15", 15},
+  {"r16", 16},
+  {"r17", 17},
+  {"r18", 18},
+  {"r19", 19},
+  {"r20", 20},
+  {"r21", 21},
+  {"r22", 22},
+  {"r23", 23},
+  {"r24", 24},
+  {"r25", 25},
+  {"r26", 26},
+  {"r27", 27},
+  {"r28", 28},
+  {"r28", 28},
+  {"r29", 29},
+  {"r30", 30},
+  {"r31", 31},
+  {"hi", CSKY_HI_REGNUM},
+  {"lo", CSKY_LO_REGNUM},
+  {"pc", CSKY_PC_REGNUM}
+};
+
+static const struct csky_supported_tdesc_register csky_supported_fpu_regs[] = {
+  /* fr0~fr15.  */
+  {"fr0",  CSKY_FR0_REGNUM + 0},
+  {"fr1",  CSKY_FR0_REGNUM + 1},
+  {"fr2",  CSKY_FR0_REGNUM + 2},
+  {"fr3",  CSKY_FR0_REGNUM + 3},
+  {"fr4",  CSKY_FR0_REGNUM + 4},
+  {"fr5",  CSKY_FR0_REGNUM + 5},
+  {"fr6",  CSKY_FR0_REGNUM + 6},
+  {"fr7",  CSKY_FR0_REGNUM + 7},
+  {"fr8",  CSKY_FR0_REGNUM + 8},
+  {"fr9",  CSKY_FR0_REGNUM + 9},
+  {"fr10", CSKY_FR0_REGNUM + 10},
+  {"fr11", CSKY_FR0_REGNUM + 11},
+  {"fr12", CSKY_FR0_REGNUM + 12},
+  {"fr13", CSKY_FR0_REGNUM + 13},
+  {"fr14", CSKY_FR0_REGNUM + 14},
+  {"fr15", CSKY_FR0_REGNUM + 15},
+  /* fr16~fr31.  */
+  {"fr16", CSKY_FR16_REGNUM + 0},
+  {"fr17", CSKY_FR16_REGNUM + 1},
+  {"fr18", CSKY_FR16_REGNUM + 2},
+  {"fr19", CSKY_FR16_REGNUM + 3},
+  {"fr20", CSKY_FR16_REGNUM + 4},
+  {"fr21", CSKY_FR16_REGNUM + 5},
+  {"fr22", CSKY_FR16_REGNUM + 6},
+  {"fr23", CSKY_FR16_REGNUM + 7},
+  {"fr24", CSKY_FR16_REGNUM + 8},
+  {"fr25", CSKY_FR16_REGNUM + 9},
+  {"fr26", CSKY_FR16_REGNUM + 10},
+  {"fr27", CSKY_FR16_REGNUM + 11},
+  {"fr28", CSKY_FR16_REGNUM + 12},
+  {"fr29", CSKY_FR16_REGNUM + 13},
+  {"fr30", CSKY_FR16_REGNUM + 14},
+  {"fr31", CSKY_FR16_REGNUM + 15},
+  /* vr0~vr15.  */
+  {"vr0",  CSKY_VR0_REGNUM + 0},
+  {"vr1",  CSKY_VR0_REGNUM + 1},
+  {"vr2",  CSKY_VR0_REGNUM + 2},
+  {"vr3",  CSKY_VR0_REGNUM + 3},
+  {"vr4",  CSKY_VR0_REGNUM + 4},
+  {"vr5",  CSKY_VR0_REGNUM + 5},
+  {"vr6",  CSKY_VR0_REGNUM + 6},
+  {"vr7",  CSKY_VR0_REGNUM + 7},
+  {"vr8",  CSKY_VR0_REGNUM + 8},
+  {"vr9",  CSKY_VR0_REGNUM + 9},
+  {"vr10", CSKY_VR0_REGNUM + 10},
+  {"vr11", CSKY_VR0_REGNUM + 11},
+  {"vr12", CSKY_VR0_REGNUM + 12},
+  {"vr13", CSKY_VR0_REGNUM + 13},
+  {"vr14", CSKY_VR0_REGNUM + 14},
+  {"vr15", CSKY_VR0_REGNUM + 15},
+  /* fpu control registers.  */
+  {"fcr",  CSKY_FCR_REGNUM + 0},
+  {"fid",  CSKY_FCR_REGNUM + 1},
+  {"fesr", CSKY_FCR_REGNUM + 2},
+};
+
+static const struct csky_supported_tdesc_register csky_supported_ar_regs[] = {
+  {"ar0",  CSKY_AR0_REGNUM + 0},
+  {"ar1",  CSKY_AR0_REGNUM + 1},
+  {"ar2",  CSKY_AR0_REGNUM + 2},
+  {"ar3",  CSKY_AR0_REGNUM + 3},
+  {"ar4",  CSKY_AR0_REGNUM + 4},
+  {"ar5",  CSKY_AR0_REGNUM + 5},
+  {"ar6",  CSKY_AR0_REGNUM + 6},
+  {"ar7",  CSKY_AR0_REGNUM + 7},
+  {"ar8",  CSKY_AR0_REGNUM + 8},
+  {"ar9",  CSKY_AR0_REGNUM + 9},
+  {"ar10", CSKY_AR0_REGNUM + 10},
+  {"ar11", CSKY_AR0_REGNUM + 11},
+  {"ar12", CSKY_AR0_REGNUM + 12},
+  {"ar13", CSKY_AR0_REGNUM + 13},
+  {"ar14", CSKY_AR0_REGNUM + 14},
+  {"ar15", CSKY_AR0_REGNUM + 15},
+};
+
+static const struct csky_supported_tdesc_register csky_supported_bank0_regs[] = {
+  {"cr0",  CSKY_CR0_REGNUM + 0},
+  {"cr1",  CSKY_CR0_REGNUM + 1},
+  {"cr2",  CSKY_CR0_REGNUM + 2},
+  {"cr3",  CSKY_CR0_REGNUM + 3},
+  {"cr4",  CSKY_CR0_REGNUM + 4},
+  {"cr5",  CSKY_CR0_REGNUM + 5},
+  {"cr6",  CSKY_CR0_REGNUM + 6},
+  {"cr7",  CSKY_CR0_REGNUM + 7},
+  {"cr8",  CSKY_CR0_REGNUM + 8},
+  {"cr9",  CSKY_CR0_REGNUM + 9},
+  {"cr10", CSKY_CR0_REGNUM + 10},
+  {"cr11", CSKY_CR0_REGNUM + 11},
+  {"cr12", CSKY_CR0_REGNUM + 12},
+  {"cr13", CSKY_CR0_REGNUM + 13},
+  {"cr14", CSKY_CR0_REGNUM + 14},
+  {"cr15", CSKY_CR0_REGNUM + 15},
+  {"cr16", CSKY_CR0_REGNUM + 16},
+  {"cr17", CSKY_CR0_REGNUM + 17},
+  {"cr18", CSKY_CR0_REGNUM + 18},
+  {"cr19", CSKY_CR0_REGNUM + 19},
+  {"cr20", CSKY_CR0_REGNUM + 20},
+  {"cr21", CSKY_CR0_REGNUM + 21},
+  {"cr22", CSKY_CR0_REGNUM + 22},
+  {"cr23", CSKY_CR0_REGNUM + 23},
+  {"cr24", CSKY_CR0_REGNUM + 24},
+  {"cr25", CSKY_CR0_REGNUM + 25},
+  {"cr26", CSKY_CR0_REGNUM + 26},
+  {"cr27", CSKY_CR0_REGNUM + 27},
+  {"cr28", CSKY_CR0_REGNUM + 28},
+  {"cr29", CSKY_CR0_REGNUM + 29},
+  {"cr30", CSKY_CR0_REGNUM + 30},
+  {"cr31", CSKY_CR0_REGNUM + 31}
+};
+
+static const struct csky_supported_tdesc_register csky_supported_mmu_regs[] = {
+  {"mcr0",  128},
+  {"mcr2",  129},
+  {"mcr3",  130},
+  {"mcr4",  131},
+  {"mcr6",  132},
+  {"mcr8",  133},
+  {"mcr29", 134},
+  {"mcr30", 135},
+  {"mcr31", 136}
+};
+
+static const struct csky_supported_tdesc_register csky_supported_bank15_regs[] = {
+  {"cp15cp1",   253},
+  {"cp15cp5",   254},
+  {"cp15cp7",   255},
+  {"cp15cp9",   256},
+  {"cp15cp10",  257},
+  {"cp15cp11",  258},
+  {"cp15cp12",  259},
+  {"cp15cp13",  260},
+  {"cp15cp14",  261},
+  {"cp15cp15",  262},
+  {"cp15cp16",  263},
+  {"cp15cp17",  264},
+  {"cp15cp18",  265},
+  {"cp15cp19",  266},
+  {"cp15cp20",  267},
+  {"cp15cp21",  268},
+  {"cp15cp22",  269},
+  {"cp15cp23",  270},
+  {"cp15cp24",  271},
+  {"cp15cp25",  272},
+  {"cp15cp26",  273},
+  {"cp15cp27",  274},
+  {"cp15cp28",  275},
+};
+
+static const struct csky_supported_tdesc_register csky_supported_alias_regs[] = {
+  /* Alias register names for Bank0.  */
+  {"psr",   CSKY_CR0_REGNUM + 0},
+  {"vbr",   CSKY_CR0_REGNUM + 1},
+  {"epsr",  CSKY_CR0_REGNUM + 2},
+  {"fpsr",  CSKY_CR0_REGNUM + 3},
+  {"epc",   CSKY_CR0_REGNUM + 4},
+  {"fpc",   CSKY_CR0_REGNUM + 5},
+  {"ss0",   CSKY_CR0_REGNUM + 6},
+  {"ss1",   CSKY_CR0_REGNUM + 7},
+  {"ss2",   CSKY_CR0_REGNUM + 8},
+  {"ss3",   CSKY_CR0_REGNUM + 9},
+  {"ss4",   CSKY_CR0_REGNUM + 10},
+  {"gcr",   CSKY_CR0_REGNUM + 11},
+  {"gsr",   CSKY_CR0_REGNUM + 12},
+  {"cpuid", CSKY_CR0_REGNUM + 13},
+  {"ccr",   CSKY_CR0_REGNUM + 18},
+  {"capr",  CSKY_CR0_REGNUM + 19},
+  {"pacr",  CSKY_CR0_REGNUM + 20},
+  {"prsr",  CSKY_CR0_REGNUM + 21},
+  {"chr",   CSKY_CR0_REGNUM + 31},
+  /* Alias register names for MMU.  */
+  {"mir",   128},
+  {"mel0",  129},
+  {"mel1",  130},
+  {"meh",   131},
+  {"mpr",   132},
+  {"mcir",  133},
+  {"mpgd",  134},
+  {"msa0",  135},
+  {"msa1",  136},
+  /* Alias register names for Bank1.  */
+  {"ebr",     190},
+  {"errlc",   195},
+  {"erraddr", 196},
+  {"errsts",  197},
+  {"errinj",  198},
+  {"usp",     203},
+  {"int_sp",  204},
+  {"itcmcr",  211},
+  {"dtcmcr",  212},
+  {"cindex",  215},
+  {"cdata0",  216},
+  {"cdata1",  217},
+  {"cdata2",  218},
+  {"cins",    220},
+  /* Alias register names for Bank3.  */
+  {"sepsr",   221},
+  {"t_wssr",  221},
+  {"sevbr",   222},
+  {"t_wrcr",  222},
+  {"seepsr",  223},
+  {"seepc",   225},
+  {"nsssp",   227},
+  {"t_usp",   228},
+  {"dcr",     229},
+  {"t_pcr",   230},
+};
+
+/* Get csky supported registers's count for tdesc xml.  */
+static int
+csky_get_supported_tdesc_registers_count()
+{
+  int count = 0;
+  count += ARRAY_SIZE (csky_supported_gpr_regs);
+  count += ARRAY_SIZE (csky_supported_fpu_regs);
+  count += ARRAY_SIZE (csky_supported_ar_regs);
+  count += ARRAY_SIZE (csky_supported_bank0_regs);
+  count += ARRAY_SIZE (csky_supported_mmu_regs);
+  count += ARRAY_SIZE (csky_supported_bank15_regs);
+  count += ARRAY_SIZE (csky_supported_alias_regs);
+  /* Bank1~Bank14, Bank16~Bank31. */
+  count += 32 * (14 + 16);
+  return count;
+}
+
+/* Return a supported register according to index.  */
+static const struct csky_supported_tdesc_register *
+csky_get_supported_register_by_index (int index)
+{
+  static struct csky_supported_tdesc_register tdesc_reg;
+  int count = 0;
+  int multi, remain;
+  int count_gpr = ARRAY_SIZE (csky_supported_gpr_regs);
+  int count_fpu = ARRAY_SIZE (csky_supported_fpu_regs);
+  int count_ar = ARRAY_SIZE (csky_supported_ar_regs);
+  int count_bank0 = ARRAY_SIZE (csky_supported_bank0_regs);
+  int count_mmu = ARRAY_SIZE (csky_supported_mmu_regs);
+  int count_bank15 = ARRAY_SIZE (csky_supported_bank15_regs);
+  int count_alias = ARRAY_SIZE (csky_supported_alias_regs);
+
+  count = count_gpr;
+  if (index < count)
+    return &csky_supported_gpr_regs[index];
+  if (index < (count + count_fpu))
+    return &csky_supported_fpu_regs[index - count];
+  count += count_fpu;
+  if (index < (count + count_ar))
+    return &csky_supported_ar_regs[index - count];
+  count += count_ar;
+  if (index < (count + count_bank0))
+    return &csky_supported_bank0_regs[index - count];
+  count += count_bank0;
+  if (index < (count + count_mmu))
+    return &csky_supported_mmu_regs[index - count];
+  count += count_mmu;
+  if (index < (count + count_bank15))
+    return &csky_supported_bank15_regs[index - count];
+  count += count_bank15;
+  if (index < (count + count_alias))
+    return &csky_supported_alias_regs[index - count];
+  count += count_alias;
+  index -= count;
+  multi = index / 32;
+  remain = index % 32;
+  switch (multi)
+    {
+      case 0: /* Bank1.  */
+        {
+          sprintf (tdesc_reg.name, "cp1cr%d", remain);
+          tdesc_reg.num = 189 + remain;
+        }
+        break;
+      case 1: /* Bank2.  */
+        {
+          sprintf (tdesc_reg.name, "cp2cr%d", remain);
+          tdesc_reg.num = 276 + remain;
+        }
+        break;
+      case 2: /* Bank3.  */
+        {
+          sprintf (tdesc_reg.name, "cp3cr%d", remain);
+          tdesc_reg.num = 221 + remain;
+        }
+        break;
+      case 3:  /* Bank4.  */
+      case 4:  /* Bank5.  */
+      case 5:  /* Bank6.  */
+      case 6:  /* Bank7.  */
+      case 7:  /* Bank8.  */
+      case 8:  /* Bank9.  */
+      case 9:  /* Bank10.  */
+      case 10: /* Bank11.  */
+      case 11: /* Bank12.  */
+      case 12: /* Bank13.  */
+      case 13: /* Bank14.  */
+        {
+          /* Regitsers in Bank4~14 have continuous regno with start 308.  */
+          sprintf (tdesc_reg.name, "cp%dcr%d", (multi + 1), remain);
+          tdesc_reg.num = 308 + ((multi - 3) * 32) + remain;
+        }
+        break;
+      case 14: /* Bank16.  */
+      case 15: /* Bank17.  */
+      case 16: /* Bank18.  */
+      case 17: /* Bank19.  */
+      case 18: /* Bank20.  */
+      case 19: /* Bank21.  */
+      case 20: /* Bank22.  */
+      case 21: /* Bank23.  */
+      case 22: /* Bank24.  */
+      case 23: /* Bank25.  */
+      case 24: /* Bank26.  */
+      case 25: /* Bank27.  */
+      case 26: /* Bank28.  */
+      case 27: /* Bank29.  */
+      case 28: /* Bank30.  */
+      case 29: /* Bank31.  */
+        {
+          /* Regitsers in Bank16~31 have continuous regno with start 660.  */
+          sprintf (tdesc_reg.name, "cp%dcr%d", (multi + 2), remain);
+          tdesc_reg.num = 660 + ((multi - 14) * 32) + remain;
+        }
+        break;
+      default:
+        return NULL;
+    }
+  return &tdesc_reg;
+}
+
 /* Convenience function to print debug messages in prologue analysis.  */
 
 static void
@@ -275,6 +692,14 @@ csky_vector_type (struct gdbarch *gdbarch)
 static struct type *
 csky_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
+  /* If type has been described in tdesc-xml, use it.  */
+  if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
+    {
+      struct type *tdesc_t = tdesc_register_type (gdbarch, reg_nr);
+      if (tdesc_t)
+        return tdesc_t;
+    }
+
   /* PC, EPC, FPC is a text pointer.  */
   if ((reg_nr == CSKY_PC_REGNUM)  || (reg_nr == CSKY_EPC_REGNUM)
       || (reg_nr == CSKY_FPC_REGNUM))
@@ -2087,8 +2512,8 @@ csky_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return 2;
 
   if ((((regnum >= CSKY_VR0_REGNUM) && (regnum <= CSKY_VR0_REGNUM + 15))
-       || ((regnum >= CSKY_VCR0_REGNUM)
-	   && (regnum <= CSKY_VCR0_REGNUM + 2)))
+       || ((regnum >= CSKY_FCR_REGNUM)
+	   && (regnum <= CSKY_FCR_REGNUM + 2)))
       && (reggroup == vr_reggroup))
     return 3;
 
@@ -2102,7 +2527,7 @@ csky_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
     return 5;
 
   if ((((regnum >= CSKY_FR0_REGNUM) && (regnum <= CSKY_FR0_REGNUM + 15))
-       || ((regnum >= CSKY_VCR0_REGNUM) && (regnum <= CSKY_VCR0_REGNUM + 2)))
+       || ((regnum >= CSKY_FCR_REGNUM) && (regnum <= CSKY_FCR_REGNUM + 2)))
       && (reggroup == fr_reggroup))
     return 6;
 
@@ -2143,6 +2568,23 @@ csky_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
   return;
 }
 
+/* Check whether xml has discribled the essential regs.  */
+static int
+csky_essential_reg_check (const struct csky_supported_tdesc_register *reg)
+{
+  if ((strcmp (reg->name , "pc") == 0)
+      && (reg->num == CSKY_PC_REGNUM))
+    return CSKY_TDESC_REGS_PC_NUMBERED;
+  else if ((strcmp (reg->name , "r14") == 0)
+      && (reg->num == CSKY_SP_REGNUM))
+    return CSKY_TDESC_REGS_SP_NUMBERED;
+  else if ((strcmp (reg->name , "r15") == 0)
+      && (reg->num == CSKY_LR_REGNUM))
+    return CSKY_TDESC_REGS_LR_NUMBERED;
+  else
+    return 0;
+}
+
 /* Initialize the current architecture based on INFO.  If possible,
    re-use an architecture from ARCHES, which is a list of
    architectures already created during this debugging session.
@@ -2158,6 +2600,48 @@ csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   unsigned int fpu_abi = 0;
   unsigned int vdsp_version = 0;
   unsigned int fpu_hardfp = 0;
+  /* Analyze info.target_desc */
+  int num_regs = 0;
+  tdesc_arch_data_up tdesc_data;
+
+  if (tdesc_has_registers (info.target_desc))
+    {
+      int valid_p = 0;
+      int numbered = 0;
+      int index = 0;
+      int i = 0;
+      int feature_names_count = ARRAY_SIZE (csky_supported_tdesc_feature_names);
+      int support_tdesc_regs_count
+            = csky_get_supported_tdesc_registers_count();
+      const struct csky_supported_tdesc_register *tdesc_reg;
+      const struct tdesc_feature *feature;
+
+      tdesc_data = tdesc_data_alloc ();
+      for (index = 0; index < feature_names_count; index ++)
+        {
+          feature = tdesc_find_feature (info.target_desc,
+                      csky_supported_tdesc_feature_names[index]);
+          if (feature != NULL)
+            {
+              for (i = 0; i < support_tdesc_regs_count; i++)
+                {
+                  tdesc_reg = csky_get_supported_register_by_index (i);
+                  if (!tdesc_reg)
+                    break;
+                  numbered = tdesc_numbered_register (feature, tdesc_data.get(),
+                                                      tdesc_reg->num,
+                                                      tdesc_reg->name);
+                  if (numbered) {
+                    valid_p |= csky_essential_reg_check (tdesc_reg);
+                    if (num_regs < tdesc_reg->num)
+                      num_regs = tdesc_reg->num;
+                  }
+                }
+            }
+        }
+      if (valid_p != CSKY_TDESC_REGS_ESSENTIAL_VALUE)
+        return NULL;
+    }
 
   /* When the type of bfd file is srec(or any files are not elf),
      the E_FLAGS will be not credible.  */
@@ -2261,6 +2745,14 @@ csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Support simple overlay manager.  */
   set_gdbarch_overlay_update (gdbarch, simple_overlay_update);
   set_gdbarch_char_signed (gdbarch, 0);
+
+  if (tdesc_data != nullptr)
+    {
+      set_gdbarch_num_regs (gdbarch, (num_regs + 1));
+      tdesc_use_registers (gdbarch, info.target_desc, std::move (tdesc_data));
+      set_gdbarch_register_type (gdbarch, csky_register_type);
+    }
+
   return gdbarch;
 }
 
