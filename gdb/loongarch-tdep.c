@@ -45,22 +45,64 @@ loongarch_fetch_instruction (CORE_ADDR pc)
   return extract_unsigned_integer (buf, insn_len, BFD_ENDIAN_LITTLE);
 }
 
+/* Return TRUE if INSN is a unconditional branch instruction, otherwise return FALSE.  */
+
+static bool
+loongarch_insn_is_uncond_branch (insn_t insn)
+{
+  if ((insn & 0xfc000000) == 0x4c000000		/* jirl  */
+      || (insn & 0xfc000000) == 0x50000000	/* b     */
+      || (insn & 0xfc000000) == 0x54000000)	/* bl    */
+    return true;
+  return false;
+}
+
+/* Return TRUE if INSN is a conditional branch instruction, otherwise return FALSE.  */
+
+static bool
+loongarch_insn_is_cond_branch (insn_t insn)
+{
+  if ((insn & 0xfc000000) == 0x58000000		/* beq   */
+      || (insn & 0xfc000000) == 0x5c000000	/* bne   */
+      || (insn & 0xfc000000) == 0x60000000	/* blt   */
+      || (insn & 0xfc000000) == 0x64000000	/* bge	 */
+      || (insn & 0xfc000000) == 0x68000000	/* bltu  */
+      || (insn & 0xfc000000) == 0x6c000000	/* bgeu  */
+      || (insn & 0xfc000000) == 0x40000000	/* beqz  */
+      || (insn & 0xfc000000) == 0x44000000)	/* bnez  */
+    return true;
+  return false;
+}
+
 /* Return TRUE if INSN is a branch instruction, otherwise return FALSE.  */
 
 static bool
 loongarch_insn_is_branch (insn_t insn)
 {
-  if ((insn & 0xfc000000) == 0x4c000000       /* jirl	rd, rj, offs16  */
-      || (insn & 0xfc000000) == 0x50000000    /* b	offs26  */
-      || (insn & 0xfc000000) == 0x54000000    /* bl	offs26  */
-      || (insn & 0xfc000000) == 0x58000000    /* beq	rj, rd, offs16  */
-      || (insn & 0xfc000000) == 0x5c000000    /* bne	rj, rd, offs16  */
-      || (insn & 0xfc000000) == 0x60000000    /* blt	rj, rd, offs16  */
-      || (insn & 0xfc000000) == 0x64000000    /* bge	rj, rd, offs16  */
-      || (insn & 0xfc000000) == 0x68000000    /* bltu	rj, rd, offs16  */
-      || (insn & 0xfc000000) == 0x6c000000    /* bgeu	rj, rd, offs16  */
-      || (insn & 0xfc000000) == 0x40000000    /* beqz	rj, offs21  */
-      || (insn & 0xfc000000) == 0x44000000)   /* bnez	rj, offs21  */
+  bool is_uncond = loongarch_insn_is_uncond_branch (insn);
+  bool is_cond = loongarch_insn_is_cond_branch (insn);
+
+  return (is_uncond || is_cond);
+}
+
+/* Return TRUE if INSN is a Load Linked instruction, otherwise return FALSE.  */
+
+static bool
+loongarch_insn_is_ll (insn_t insn)
+{
+  if ((insn & 0xff000000) == 0x20000000		/* ll.w  */
+      || (insn & 0xff000000) == 0x22000000)	/* ll.d  */
+    return true;
+  return false;
+}
+
+/* Return TRUE if INSN is a Store Conditional instruction, otherwise return FALSE.  */
+
+static bool
+loongarch_insn_is_sc (insn_t insn)
+{
+  if ((insn & 0xff000000) == 0x21000000		/* sc.w  */
+      || (insn & 0xff000000) == 0x23000000)	/* sc.d  */
     return true;
   return false;
 }
@@ -182,8 +224,9 @@ loongarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
    next instruction.  */
 
 static CORE_ADDR
-loongarch_next_pc (struct regcache *regcache, CORE_ADDR cur_pc, insn_t insn)
+loongarch_next_pc (struct regcache *regcache, CORE_ADDR cur_pc)
 {
+  insn_t insn = loongarch_fetch_instruction (cur_pc);
   size_t insn_len = loongarch_insn_length (insn);
   CORE_ADDR next_pc = cur_pc + insn_len;
 
@@ -270,14 +313,70 @@ loongarch_next_pc (struct regcache *regcache, CORE_ADDR cur_pc, insn_t insn)
   return next_pc;
 }
 
+/* We can't put a breakpoint in the middle of a ll/sc atomic sequence,
+   so look for the end of the sequence and put the breakpoint there.  */
+
+static std::vector<CORE_ADDR>
+loongarch_deal_with_atomic_sequence (struct regcache *regcache, CORE_ADDR cur_pc)
+{
+  CORE_ADDR next_pc;
+  std::vector<CORE_ADDR> next_pcs;
+  insn_t insn = loongarch_fetch_instruction (cur_pc);
+  size_t insn_len = loongarch_insn_length (insn);
+  const int atomic_sequence_length = 16;
+  bool found_atomic_sequence_endpoint = false;
+
+  /* Look for a Load Linked instruction which begins the atomic sequence.  */
+  if (!loongarch_insn_is_ll (insn))
+    return {};
+
+  /* Assume that no atomic sequence is longer than "atomic_sequence_length" instructions.  */
+  for (int insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
+    {
+      cur_pc += insn_len;
+      insn = loongarch_fetch_instruction (cur_pc);
+
+      /* Look for a unconditional branch instruction, fallback to the standard code.  */
+      if (loongarch_insn_is_uncond_branch (insn))
+	{
+	  return {};
+	}
+      /* Look for a conditional branch instruction, put a breakpoint in its destination address.  */
+      else if (loongarch_insn_is_cond_branch (insn))
+	{
+	  next_pc = loongarch_next_pc (regcache, cur_pc);
+	  next_pcs.push_back (next_pc);
+	}
+      /* Look for a Store Conditional instruction which closes the atomic sequence.  */
+      else if (loongarch_insn_is_sc (insn))
+	{
+	  found_atomic_sequence_endpoint = true;
+	  next_pc = cur_pc + insn_len;
+	  next_pcs.push_back (next_pc);
+	  break;
+	}
+    }
+
+  /* We didn't find a closing Store Conditional instruction, fallback to the standard code.  */
+  if (!found_atomic_sequence_endpoint)
+    return {};
+
+  return next_pcs;
+}
+
 /* Implement the "software_single_step" gdbarch method  */
 
 static std::vector<CORE_ADDR>
 loongarch_software_single_step (struct regcache *regcache)
 {
   CORE_ADDR cur_pc = regcache_read_pc (regcache);
-  insn_t insn = loongarch_fetch_instruction (cur_pc);
-  CORE_ADDR next_pc = loongarch_next_pc (regcache, cur_pc, insn);
+  std::vector<CORE_ADDR> next_pcs
+    = loongarch_deal_with_atomic_sequence (regcache, cur_pc);
+
+  if (!next_pcs.empty ())
+    return next_pcs;
+
+  CORE_ADDR next_pc = loongarch_next_pc (regcache, cur_pc);
 
   return {next_pc};
 }
