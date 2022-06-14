@@ -72,6 +72,26 @@ Getting started
   To start using gprofng, see the tutorial available by saying:
       info gprofng
 
+HTML and PDF documentation
+
+   You may want to generate an HTML or PDF version of the manual in addition
+   to the above info pages.  These versions may be easier to read and easier
+   to search.  To generate HTML:
+
+      cd build        # the same build directory you created above
+      cd gprofng/doc
+      make html
+      sudo make install-html
+
+   If you would like PDF documentation, you will need the texi2dvi utility.
+   If it is not already included in the texinfo package mentioned above, try
+   installing package texinfo-tex.  To generate PDF:
+
+      cd build        # the same build directory you created above
+      cd gprofng/doc
+      make pdf
+      sudo make install-pdf
+
 Hints and tips for building binutils
 
   - Use the script(1) command to write a log of your build.
