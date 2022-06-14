@@ -54,8 +54,10 @@ mi_gdb_test "-pycmd ary" \
     "\\^done,result=\\\[\"Hello\",\"42\"\\\]" \
     "-pycmd ary"
 
+set re_order1 "\\^done,result={hello=\"world\",times=\"42\"}"
+set re_order2 "\\^done,result={times=\"42\",hello=\"world\"}"
 mi_gdb_test "-pycmd dct" \
-    "\\^done,result={hello=\"world\",times=\"42\"}" \
+    "($re_order1|$re_order2)" \
     "-pycmd dct"
 
 mi_gdb_test "-pycmd bk1" \
