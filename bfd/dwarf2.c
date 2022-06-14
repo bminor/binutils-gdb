@@ -1353,13 +1353,13 @@ is_addrx_form (enum dwarf_form form)
 
 /* Returns the address in .debug_addr section using DW_AT_addr_base.
    Used to implement DW_FORM_addrx*.  */
-static bfd_vma
+static uint64_t
 read_indexed_address (uint64_t idx, struct comp_unit *unit)
 {
   struct dwarf2_debug *stash = unit->stash;
   struct dwarf2_debug_file *file = unit->file;
-  size_t addr_base = unit->dwarf_addr_offset;
   bfd_byte *info_ptr;
+  size_t offset;
 
   if (stash == NULL)
     return 0;
@@ -1369,12 +1369,23 @@ read_indexed_address (uint64_t idx, struct comp_unit *unit)
 		     &file->dwarf_addr_buffer, &file->dwarf_addr_size))
     return 0;
 
-  info_ptr = file->dwarf_addr_buffer + addr_base + idx * unit->offset_size;
+  if (_bfd_mul_overflow (idx, unit->offset_size, &offset))
+    return 0;
+
+  offset += unit->dwarf_addr_offset;
+  if (offset < unit->dwarf_addr_offset
+      || offset > file->dwarf_addr_size
+      || file->dwarf_addr_size - offset < unit->offset_size)
+    return 0;
+
+  info_ptr = file->dwarf_addr_buffer + offset;
 
   if (unit->offset_size == 4)
     return bfd_get_32 (unit->abfd, info_ptr);
-  else
+  else if (unit->offset_size == 8)
     return bfd_get_64 (unit->abfd, info_ptr);
+  else
+    return 0;
 }
 
 /* Returns the string using DW_AT_str_offsets_base.
@@ -1385,7 +1396,8 @@ read_indexed_string (uint64_t idx, struct comp_unit *unit)
   struct dwarf2_debug *stash = unit->stash;
   struct dwarf2_debug_file *file = unit->file;
   bfd_byte *info_ptr;
-  unsigned long str_offset;
+  uint64_t str_offset;
+  size_t offset;
 
   if (stash == NULL)
     return NULL;
@@ -1401,15 +1413,26 @@ read_indexed_string (uint64_t idx, struct comp_unit *unit)
 		     &file->dwarf_str_offsets_size))
     return NULL;
 
-  info_ptr = (file->dwarf_str_offsets_buffer
-	      + unit->dwarf_str_offset
-	      + idx * unit->offset_size);
+  if (_bfd_mul_overflow (idx, unit->offset_size, &offset))
+    return NULL;
+
+  offset += unit->dwarf_str_offset;
+  if (offset < unit->dwarf_str_offset
+      || offset > file->dwarf_str_offsets_size
+      || file->dwarf_str_offsets_size - offset < unit->offset_size)
+    return NULL;
+
+  info_ptr = file->dwarf_str_offsets_buffer + offset;
 
   if (unit->offset_size == 4)
     str_offset = bfd_get_32 (unit->abfd, info_ptr);
-  else
+  else if (unit->offset_size == 8)
     str_offset = bfd_get_64 (unit->abfd, info_ptr);
+  else
+    return NULL;
 
+  if (str_offset >= file->dwarf_str_size)
+    return NULL;
   return (const char *) file->dwarf_str_buffer + str_offset;
 }
 
@@ -1534,27 +1557,37 @@ read_attribute_value (struct attribute *  attr,
 	 is not yet read.  */
       if (unit->dwarf_str_offset != 0)
 	attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      else
+	attr->u.str = NULL;
       break;
     case DW_FORM_strx2:
       attr->u.val = read_2_bytes (abfd, &info_ptr, info_ptr_end);
       if (unit->dwarf_str_offset != 0)
 	attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      else
+	attr->u.str = NULL;
       break;
     case DW_FORM_strx3:
       attr->u.val = read_3_bytes (abfd, &info_ptr, info_ptr_end);
       if (unit->dwarf_str_offset != 0)
 	attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      else
+	attr->u.str = NULL;
       break;
     case DW_FORM_strx4:
       attr->u.val = read_4_bytes (abfd, &info_ptr, info_ptr_end);
       if (unit->dwarf_str_offset != 0)
 	attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      else
+	attr->u.str = NULL;
       break;
     case DW_FORM_strx:
       attr->u.val = _bfd_safe_read_leb128 (abfd, &info_ptr,
 					   false, info_ptr_end);
       if (unit->dwarf_str_offset != 0)
 	attr->u.str = (char *) read_indexed_string (attr->u.val, unit);
+      else
+	attr->u.str = NULL;
       break;
     case DW_FORM_exprloc:
     case DW_FORM_block:
