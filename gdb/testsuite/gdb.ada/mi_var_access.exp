@@ -40,8 +40,10 @@ mi_continue_to_line \
     "stop at start of mi_access"
 
 # The bug was that creating a varobj for A_String_Access would crash.
+set re_ok "\\^done,name=\"A_String_Access\",numchild=\"1\",.*"
+set re_error "\\^error,msg=\"Value out of range\.\".*"
 mi_gdb_test "-var-create A_String_Access * A_String_Access" \
-    "\\^done,name=\"A_String_Access\",numchild=\"1\",.*" \
+    "($re_ok|$re_error)" \
     "Create varobj"
 
 set bp_location [gdb_get_line_number "STOP2" ${testdir}/mi_access.adb]
