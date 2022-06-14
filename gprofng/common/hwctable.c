@@ -5091,8 +5091,24 @@ hwc_usage_internal (int forKernel, FILE *f_usage, const char *cmd, const char *d
       fprintf (f_usage, GTXT ("           `lo'     per-thread maximum rate of ~10 samples/second\n"));
       fprintf (f_usage, GTXT ("           `on'     per-thread maximum rate of ~100 samples/second\n"));
       fprintf (f_usage, GTXT ("           `hi'     per-thread maximum rate of ~1000 samples/second\n\n"));
-      fprintf (f_usage, GTXT ("        <rate> == <interval>\n"));
-      fprintf (f_usage, GTXT ("           event interval; see collect (1) for details\n\n"));
+      fprintf (f_usage, GTXT ("        <rate> == <interval>\n"
+			      "           Fixed event interval value to trigger a sample.\n"
+			      "           Smaller intervals imply more frequent samples.\n"
+			      "           Example: when counting cycles on a 2 GHz processor,\n"
+			      "           an interval of 2,000,003 implies ~1000 samples/sec\n"
+			      "\n"
+			      "           Use this feature with caution, because:\n"
+			      "             (1) Frequent sampling increases overhead and may disturb \n"
+			      "                 other applications on your system.\n"
+			      "             (2) Event counts vary dramatically depending on the event \n"
+			      "                 and depending on the application.\n"
+			      "             (3) A fixed event interval disables any other gprofng\n"
+			      "                 internal mechanisms that may limit event rates.\n"
+			      "\n"
+			      "           Guidelines:  Aim at <1000 events per second.  Start by \n"
+			      "           collecting with the 'hi' option; in the experiment overview,\n"
+			      "           notice how many events are recorded per second; divide by\n"
+			      "           1000, and use that as your starting point.\n\n"));
 
       fprintf (f_usage, GTXT ("        A comma ',' followed immediately by white space may be omitted.\n\n"));
     }
