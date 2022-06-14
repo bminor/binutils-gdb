@@ -23,6 +23,8 @@ struct S
 
 struct S g_var_s = { 1, 2 };
 
+static int g_var = 1;
+
 #ifdef __cplusplus
 /* So that the alias attribute below work without having to figure out
    this function's mangled name.  */
@@ -38,3 +40,13 @@ func (void)
 struct S *func_alias (void) __attribute__ ((alias ("func")));
 
 extern struct S g_var_s_alias __attribute__ ((alias ("g_var_s")));
+
+extern struct S g_var_s_alias2 __attribute__ ((alias ("g_var_s_alias")));
+
+extern int g_var_alias __attribute__ ((alias ("g_var")));
+
+extern int g_def_var_alias __attribute__ ((alias ("g_def_var")));
+
+int g_def_var = 2;
+
+extern int g_def_var_alias2 __attribute__ ((alias ("g_def_var_alias")));

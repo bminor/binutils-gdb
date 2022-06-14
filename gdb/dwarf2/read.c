@@ -894,6 +894,10 @@ static void build_type_psymtabs_reader (cutu_reader *reader,
 
 static void dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile);
 
+static void var_decode_location (struct attribute *attr,
+				 struct symbol *sym,
+				 struct dwarf2_cu *cu);
+
 static unsigned int peek_abbrev_code (bfd *, const gdb_byte *);
 
 static const gdb_byte *read_attribute (const struct die_reader_specs *,
@@ -1071,7 +1075,7 @@ static struct using_direct **using_directives (struct dwarf2_cu *cu);
 
 static void read_import_statement (struct die_info *die, struct dwarf2_cu *);
 
-static int read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu);
+static bool read_alias (struct die_info *die, struct dwarf2_cu *cu);
 
 static struct type *read_module_type (struct die_info *die,
 				      struct dwarf2_cu *cu);
@@ -8664,9 +8668,10 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       break;
     case DW_TAG_imported_declaration:
       cu->processing_has_namespace_info = true;
-      if (read_namespace_alias (die, cu))
+      if (read_alias (die, cu))
 	break;
-      /* The declaration is not a global namespace alias.  */
+      /* The declaration is neither a global namespace nor a variable
+	 alias.  */
       /* Fall through.  */
     case DW_TAG_imported_module:
       cu->processing_has_namespace_info = true;
@@ -9134,18 +9139,18 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
   return retval;
 }
 
-/* Inspect DIE in CU for a namespace alias.  If one exists, record
-   a new symbol for it.
+/* Inspect DIE in CU for a namespace alias or a variable with alias
+   attribute.  If one exists, record a new symbol for it.
 
-   Returns 1 if a namespace alias was recorded, 0 otherwise.  */
+   Returns true if an alias was recorded, false otherwise.  */
 
-static int
-read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu)
+static bool
+read_alias (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct attribute *attr;
 
-  /* If the die does not have a name, this is not a namespace
-     alias.  */
+  /* If the die does not have a name, this is neither a namespace
+     alias nor a variable alias.  */
   attr = dwarf2_attr (die, DW_AT_name, cu);
   if (attr != NULL)
     {
@@ -9171,26 +9176,42 @@ read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  complaint (_("DIE at %s has too many recursively imported "
 		       "declarations"), sect_offset_str (d->sect_off));
-	  return 0;
+	  return false;
 	}
 
       if (attr != NULL)
 	{
 	  struct type *type;
-	  sect_offset sect_off = attr->get_ref_die_offset ();
-
-	  type = get_die_type_at_offset (sect_off, cu->per_cu, cu->per_objfile);
-	  if (type != NULL && type->code () == TYPE_CODE_NAMESPACE)
+	  if (d->tag == DW_TAG_variable)
 	    {
-	      /* This declaration is a global namespace alias.  Add
-		 a symbol for it whose type is the aliased namespace.  */
-	      new_symbol (die, type, cu);
-	      return 1;
+	      /* This declaration is a C/C++ global variable alias.
+		 Add a symbol for it whose type is the same as the
+		 aliased variable's.  */
+	      type = die_type (d, imported_cu);
+	      struct symbol *sym = new_symbol (die, type, cu);
+	      attr = dwarf2_attr (d, DW_AT_location, imported_cu);
+	      sym->set_aclass_index (LOC_UNRESOLVED);
+	      if (attr != nullptr)
+		var_decode_location (attr, sym, cu);
+	      return true;
+	    }
+	  else
+	    {
+	      sect_offset sect_off = attr->get_ref_die_offset ();
+	      type = get_die_type_at_offset (sect_off, cu->per_cu,
+					     cu->per_objfile);
+	      if (type != nullptr && type->code () == TYPE_CODE_NAMESPACE)
+		{
+		  /* This declaration is a global namespace alias. Add
+		     a symbol for it whose type is the aliased
+		     namespace.  */
+		  new_symbol (die, type, cu);
+		  return true;
+		}
 	    }
 	}
     }
-
-  return 0;
+  return false;
 }
 
 /* Return the using directives repository (global or local?) to use in the
