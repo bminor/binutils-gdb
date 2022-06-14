@@ -149,37 +149,14 @@ elf_core_file_p (bfd *abfd)
       && (ebd->elf_machine_alt1 == 0
 	  || i_ehdrp->e_machine != ebd->elf_machine_alt1)
       && (ebd->elf_machine_alt2 == 0
-	  || i_ehdrp->e_machine != ebd->elf_machine_alt2))
-    {
-      const bfd_target * const *target_ptr;
+	  || i_ehdrp->e_machine != ebd->elf_machine_alt2)
+      && ebd->elf_machine_code != EM_NONE)
+    goto wrong;
 
-      if (ebd->elf_machine_code != EM_NONE)
-	goto wrong;
-
-      /* This is the generic ELF target.  Let it match any ELF target
-	 for which we do not have a specific backend.  */
-
-      for (target_ptr = bfd_target_vector; *target_ptr != NULL; target_ptr++)
-	{
-	  const struct elf_backend_data *back;
-
-	  if ((*target_ptr)->flavour != bfd_target_elf_flavour)
-	    continue;
-	  back = xvec_get_elf_backend_data (*target_ptr);
-	  if (back->s->arch_size != ARCH_SIZE)
-	    continue;
-	  if (back->elf_machine_code == i_ehdrp->e_machine
-	      || (back->elf_machine_alt1 != 0
-		  && i_ehdrp->e_machine == back->elf_machine_alt1)
-	      || (back->elf_machine_alt2 != 0
-		  && i_ehdrp->e_machine == back->elf_machine_alt2))
-	    {
-	      /* target_ptr is an ELF backend which matches this
-		 object file, so reject the generic ELF target.  */
-	      goto wrong;
-	    }
-	}
-    }
+  if (ebd->elf_machine_code != EM_NONE
+      && i_ehdrp->e_ident[EI_OSABI] != ebd->elf_osabi
+      && ebd->elf_osabi != ELFOSABI_NONE)
+    goto wrong;
 
   /* If there is no program header, or the type is not a core file, then
      we are hosed.  */
@@ -198,6 +175,9 @@ elf_core_file_p (bfd *abfd)
       Elf_External_Shdr x_shdr;
       Elf_Internal_Shdr i_shdr;
       file_ptr where = (file_ptr) i_ehdrp->e_shoff;
+
+      if (i_ehdrp->e_shoff < sizeof (x_ehdr))
+	goto wrong;
 
       /* Seek to the section header table in the file.  */
       if (bfd_seek (abfd, where, SEEK_SET) != 0)
