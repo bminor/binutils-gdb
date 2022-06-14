@@ -156,9 +156,6 @@ private:
   Histable *sobj;
   MetricList *mlist;
   Metric::HistMetric *hist_metric;
-  char **fmt_int;
-  char **fmt_real0;
-  char **fmt_real1;
   int limit;
   int print_row;
 };
@@ -225,15 +222,13 @@ public:
   void data_dump ();
 
 private:
-  char fmt1[32], fmt2[32], fmt3[32], fmt4[32];
-  // buffers shared by the following functions
+  int max_len1, max_len2, max_len3;
   void overview_sum (int &maxlen);
   void overview_dump (int exp_idx, int &maxlen);
   void overview_summary (Ovw_data *ovw_data, int &maxlen);
   void overview_item (Ovw_data::Ovw_item *ovw_item,
 		      Ovw_data::Ovw_item *ovw_item_labels);
-  void overview_value (Value *value, ValueTag value_tag,
-		       double total_value);
+  void overview_value (Value *value, ValueTag value_tag, double total_value);
   void statistics_sum (int &maxlen);
   void statistics_dump (int exp_idx, int &maxlen);
   void statistics_item (Stats_data *stats_data);
@@ -252,11 +247,6 @@ void print_load_object (FILE *out_file);
 void print_header (Experiment *exp, FILE *out_file);
 
 // Print Function metrics
-void get_width (Hist_data *data, MetricList *metrics_list,
-		Metric::HistMetric *hist_metric);
-void get_format (char **fmt_int, char **fmt_real0, char **fmt_real1,
-		 MetricList *metrics_list, Metric::HistMetric *hist_metric,
-		 int nspace);
 int print_label (FILE *out_file, MetricList *metrics_list,
 		 Metric::HistMetric *hist_metric, int space);
 void print_anno_file (char *name, const char *sel, const char *srcFile,

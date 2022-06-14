@@ -789,6 +789,12 @@ Experiment::process_seg_unmap_cmd (char */*cmd*/, hrtime_t ts, Vaddr vaddr)
   return 0;
 }
 
+static bool
+strstarts (const char *var, const char *x)
+{
+  return strncmp (var, x, strlen (x)) == 0;
+}
+
 int
 Experiment::process_Linux_kernel_cmd (hrtime_t ts)
 {
@@ -815,10 +821,6 @@ Experiment::process_Linux_kernel_cmd (hrtime_t ts)
    *            but again Analyzer handles the case of not finding the file or not reading DWARF from it.
    */
   mod->set_file_name (dbe_strdup ("LinuxKernel"));
-  char last_mod_name[256];
-  last_mod_name[0] = '\0';
-  size_t line_n = 0;
-  char *line = NULL;
   char kallmodsyms_copy[MAXPATHLEN];
   snprintf (kallmodsyms_copy, sizeof (kallmodsyms_copy), "%s/kallmodsyms",
 	    expt_name);
@@ -834,6 +836,8 @@ Experiment::process_Linux_kernel_cmd (hrtime_t ts)
     }
   else
     {
+      size_t line_n = 0;
+      char *line = NULL;
       while (getline (&line, &line_n, fd) > 0)
 	{
 	  long long unsigned sym_addr;
@@ -851,9 +855,6 @@ Experiment::process_Linux_kernel_cmd (hrtime_t ts)
 	  if (strcmp (mod_name, "ctf") == 0)
 	    strcpy (mod_name, "shared_ctf");
 
-	  char *mod_name_ptr;
-	  int skip;
-#define strstarts(var, x) (strncmp(var, x, strlen (x)) == 0)
 	  if (strcmp (sym_name, "__per_cpu_start") == 0
 	      || strcmp (sym_name, "__per_cpu_end") == 0
 	      || strstarts (sym_name, "__crc_")
@@ -878,24 +879,14 @@ Experiment::process_Linux_kernel_cmd (hrtime_t ts)
 	      || strstarts (sym_name, "__dtrace_probe_")
 	      || (strstr (sym_name, ".") != NULL
 		  &&  strstr (sym_name, ".clone.") == NULL))
-	    {
-	      mod_name_ptr = last_mod_name;
-	      skip = 1;
-	    }
-	  else
-	    {
-	      mod_name_ptr = mod_name;
-	      skip = 0;
-	    }
-#undef strstarts
+	    continue;
 
-	  if (sym_text && skip == 0)
+	  if (sym_text)
 	    {
 	      char fname[128];
-	      snprintf (fname, sizeof (fname), "%s`%s", mod_name_ptr, sym_name);
+	      snprintf (fname, sizeof (fname), "%s`%s", mod_name, sym_name);
 	      Function *func = dbeSession->createFunction ();
 	      func->set_name (fname);
-	      // func->flags |= FUNC_FLAG_???;  // XXX
 	      func->size = sym_size;
 	      func->img_offset = sym_addr;
 	      func->module = mod;
@@ -906,11 +897,10 @@ Experiment::process_Linux_kernel_cmd (hrtime_t ts)
 	      if (lo_max < sym_addr + sym_size)
 		lo_max = sym_addr + sym_size;
 	    }
-	  sprintf (last_mod_name, mod_name_ptr);
 	}
       fclose (fd);
+      free (line);
     }
-  free (line);
   lo->size = lo_max;
   lo->functions->sort (func_cmp);
   mod->functions->sort (func_cmp);

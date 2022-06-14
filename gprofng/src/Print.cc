@@ -25,7 +25,6 @@
 #include <math.h>
 #include <assert.h>
 #include <libintl.h>
-//#include <libgen.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -251,231 +250,6 @@ print_header (Experiment *exp, FILE *out_file)
   free (msg);
 }
 
-void
-get_width (Hist_data *data,
-	   MetricList *metrics_list, Metric::HistMetric *hist_metric)
-{
-  Metric *mitem;
-  Metric::HistMetric *hitem;
-  int last_column;
-  int index;
-
-  // find the last visible column.
-  last_column = 0;
-  Vec_loop (Metric*, metrics_list->get_items (), index, mitem)
-  {
-    if (mitem->is_visible () || mitem->is_tvisible () || mitem->is_pvisible ())
-      last_column = index;
-  }
-
-  // find the width for each column.
-
-  Vec_loop (Metric*, metrics_list->get_items (), index, mitem)
-  {
-    hitem = &hist_metric[index];
-
-    if (mitem->is_visible ())
-      {
-	if (mitem->get_vtype () == VT_LABEL)
-	  {
-	    if (index == last_column)
-	      hitem->maxvalue_width = 0;
-	    else
-	      hitem->maxvalue_width = data->name_maxlen ();
-	    // truncate names which will be too long
-	    if (hitem->maxvalue_width > MAX_LEN - 3)
-	      hitem->maxvalue_width = MAX_LEN - 3;
-	  }
-	else if (mitem->get_vtype () == VT_ADDRESS)
-	  {
-	    hitem->maxvalue_width = data->value_maxlen (index);
-	    if (hitem->maxvalue_width < 13)
-	      hitem->maxvalue_width = 13;
-	  }
-	else
-	  hitem->maxvalue_width = data->value_maxlen (index);
-      }
-    else
-      hitem->maxvalue_width = 0;
-
-    if (mitem->is_tvisible ())
-      {
-	if (mitem->get_visbits () & VAL_RATIO)
-	  hitem->maxtime_width = data->value_maxlen (index);
-	else
-	  hitem->maxtime_width = data->time_maxlen (index,
-						    dbeSession->get_clock (-1));
-      }
-    else
-      {
-	hitem->maxtime_width = 0;
-      }
-  }
-}
-
-void
-get_format (char **fmt_int, char **fmt_real0, char **fmt_real1,
-	    MetricList *metrics_list, Metric::HistMetric *hist_metric,
-	    int nspace)
-{
-  Metric *mitem;
-  Metric::HistMetric *hitem;
-  int index;
-  int visible, tvisible, pvisible;
-  size_t maxlen;
-  bool prev;
-  char numstr[MAX_LEN], pstr_int[MAX_LEN],
-	  pstr_real0[MAX_LEN], pstr_real1[MAX_LEN];
-
-  // find the width for each column.
-  Vec_loop (Metric*, metrics_list->get_items (), index, mitem)
-  {
-    hitem = &hist_metric[index];
-    visible = mitem->is_visible ();
-    tvisible = mitem->is_tvisible ();
-    pvisible = mitem->is_pvisible ();
-    *pstr_int = *pstr_real0 = *pstr_real1 = '\0';
-
-    // Get 'Show Value' format
-    const char *sign = (mitem->get_visbits () & VAL_DELTA) ? "+" : "";
-    if (visible)
-      {
-	maxlen = hitem->maxvalue_width;
-	switch (mitem->get_vtype2 ())
-	  {
-	  case VT_DOUBLE:
-	    if (mitem->get_visbits () & VAL_RATIO)
-	      {
-		snprintf (numstr, sizeof (numstr), "x %%#%d.0lf    ",
-			  (int) (maxlen - 3));
-		snprintf (pstr_real0, sizeof (pstr_real0), numstr, 0.0);
-		snprintf (pstr_real1, sizeof (pstr_real1), "x%%s%%%d.3lf ",
-			  (int) maxlen);
-	      }
-	    else
-	      {
-		snprintf (numstr, sizeof (numstr), "%%#%s%d.0lf    ", sign,
-			  (int) (maxlen - 3));
-		snprintf (pstr_real0, sizeof (pstr_real0), numstr, 0.0);
-		snprintf (pstr_real1, sizeof (pstr_real1), "%%s%%%s%d.3lf ",
-			  sign, (int) maxlen);
-	      }
-	    break;
-	  case VT_INT:
-	    snprintf (pstr_int, sizeof (pstr_int), "%%%s%dd ", sign,
-		      (int) maxlen);
-	    break;
-	  case VT_LLONG:
-	    snprintf (pstr_int, sizeof (pstr_int), "%%%s%dlld ", sign,
-		      (int) maxlen);
-	    break;
-	  case VT_ULLONG:
-	    snprintf (pstr_int, sizeof (pstr_int), "%%%s%dllu ", sign,
-		      (int) maxlen);
-	    break;
-	  case VT_ADDRESS:
-	    if (maxlen <= 13)
-	      {
-		snprintf (pstr_int, sizeof (pstr_int), "%%%dd:0x%%08x", 2);
-	      }
-	    else
-	      {
-		snprintf (pstr_int, sizeof (pstr_int), "%%%dd:0x%%08x",
-			  (int) (maxlen - 13));
-	      }
-	    break;
-	  case VT_FLOAT:
-	    snprintf (numstr, sizeof (numstr), "%%#%d.0f    ",
-		      (int) (maxlen - 3));
-	    snprintf (pstr_real0, sizeof (pstr_real0), numstr, 0.0);
-	    snprintf (pstr_real1, sizeof (pstr_real1), "%%%d.3f ",
-		      (int) maxlen);
-	    break;
-	  case VT_SHORT:
-	    snprintf (pstr_int, sizeof (pstr_int), "%%%dhu ", (int) maxlen);
-	    break;
-	  case VT_LABEL:
-	    if (maxlen == 0) // last column
-	      snprintf (pstr_int, sizeof (pstr_int), NTXT ("%%s%%s"));
-	    else if (maxlen + nspace >= MAX_LEN - 3)
-	      snprintf (pstr_int, sizeof (pstr_int), NTXT ("%%s%%-%d.%ds "),
-			MAX_LEN - 7, MAX_LEN - 7);
-	    else
-	      snprintf (pstr_int, sizeof (pstr_int), NTXT ("%%s%%-%ds "),
-			(int) (maxlen + nspace));
-	    break;
-	  default:
-	    break;
-	  }
-      }
-
-    // Get 'Show Time' format
-    if (tvisible)
-      {
-	maxlen = hitem->maxtime_width;
-	if (mitem->get_visbits () & VAL_RATIO)
-	  {
-	    snprintf (numstr, sizeof (numstr), " %%%s#%d.0lf    ",
-		      sign, (int) (maxlen - 3));
-	    snprintf (pstr_real0, sizeof (pstr_real0), numstr, 0.0);
-	    snprintf (pstr_real1, sizeof (pstr_real1), "%%s%%%s%d.3lf ",
-		      sign, (int) maxlen);
-	  }
-	else
-	  {
-	    snprintf (numstr, sizeof (numstr), "%%%s#%d.0lf    ",
-		      sign, (int) (maxlen - 3));
-	    snprintf (pstr_real0, sizeof (pstr_real0), numstr, 0.0);
-	    snprintf (pstr_real1, sizeof (pstr_real1), "%%s%%%s%d.3lf ",
-		      sign, (int) maxlen);
-	  }
-      }
-
-    // Copy format
-    if (*pstr_int)
-      fmt_int[index] = dbe_strdup (pstr_int);
-    else
-      fmt_int[index] = NULL;
-
-    if (*pstr_real0)
-      fmt_real0[index] = dbe_strdup (pstr_real0);
-    else
-      fmt_real0[index] = NULL;
-
-    if (*pstr_real1)
-      fmt_real1[index] = dbe_strdup (pstr_real1);
-    else
-      fmt_real1[index] = NULL;
-
-    // Set total width
-    hitem->width = 0;
-    if (hitem->maxvalue_width > 0)
-      {
-	hitem->width += hitem->maxvalue_width;
-	prev = true;
-      }
-    else
-      prev = false;
-
-    if (hitem->maxtime_width > 0)
-      {
-	if (prev)
-	  hitem->width++;
-	hitem->width += hitem->maxtime_width;
-	prev = true;
-      }
-
-    if (pvisible)
-      {
-	if (prev)
-	  hitem->width++;
-	hitem->width += 6; // adjust to change format from xx.yy%
-      }
-    if (visible || tvisible || pvisible)
-      mitem->legend_width (hitem, 2);
-  }
-}
-
 static char *
 delTrailingBlanks (char *s)
 {
@@ -503,26 +277,26 @@ print_label (FILE *out_file, MetricList *metrics_list,
       if (mitem->is_visible () || mitem->is_tvisible () || mitem->is_pvisible ())
 	{
 	  Metric::HistMetric *hitem = hist_metric + index;
-	  char *fmt;
+	  const char *s;
 	  if (index > 0 && mitem->get_type () == Metric::ONAME)
 	    {
-	      fmt = NTXT (" %-*s");
+	      s = " ";
 	      name_offset = strlen (line1);
 	    }
 	  else
-	    fmt = NTXT ("%-*s");
+	    s = "";
 	  int width = (int) hitem->width;
 	  size_t len = strlen (line1);
-	  snprintf (line1 + len, sizeof (line1) - len, fmt, width,
+	  snprintf (line1 + len, sizeof (line1) - len, "%s%-*s", s, width,
 		    hitem->legend1);
 	  len = strlen (line2);
-	  snprintf (line2 + len, sizeof (line2) - len, fmt, width,
+	  snprintf (line2 + len, sizeof (line2) - len, "%s%-*s", s, width,
 		    hitem->legend2);
 	  len = strlen (line3);
-	  snprintf (line3 + len, sizeof (line3) - len, fmt, width,
+	  snprintf (line3 + len, sizeof (line3) - len, "%s%-*s", s, width,
 		    hitem->legend3);
 	  len = strlen (line0);
-	  snprintf (line0 + len, sizeof (line0) - len, fmt, width,
+	  snprintf (line0 + len, sizeof (line0) - len, "%s%-*s", s, width,
 		    mitem->legend ? mitem->legend : NTXT (""));
 	}
     }
@@ -533,198 +307,6 @@ print_label (FILE *out_file, MetricList *metrics_list,
   fprintf (out_file, NTXT ("%*s%s\n"), space, NTXT (""), delTrailingBlanks (line2));
   fprintf (out_file, NTXT ("%*s%s\n"), space, NTXT (""), delTrailingBlanks (line3));
   return name_offset;
-}
-
-static int
-print_one_visible (FILE *out_file, char *fmt_int, char *fmt_real0, char *fmt_real1,
-		   TValue *value, int visbits)
-{
-  int nc = 0;
-  switch (value->tag)
-    {
-    case VT_DOUBLE:
-      if (value->d == 0.0)
-	nc = fprintf (out_file, fmt_real0);
-      else
-	{
-	  if (visbits & VAL_RATIO)
-	    {
-	      if (value->d > 99.999)
-		nc = fprintf (out_file, fmt_real1, NTXT (">"), 99.999);
-	      else
-		nc = fprintf (out_file, fmt_real1, NTXT (" "), value->d);
-	    }
-	  else
-	    nc = fprintf (out_file, fmt_real1, NTXT (""), value->d);
-	}
-      break;
-    case VT_INT:
-      nc = fprintf (out_file, fmt_int, value->i);
-      break;
-    case VT_LLONG:
-    case VT_ULLONG:
-      nc = fprintf (out_file, fmt_int, value->ll);
-      break;
-    case VT_ADDRESS:
-      nc = fprintf (out_file, fmt_int, ADDRESS_SEG (value->ll),
-		    ADDRESS_OFF (value->ll));
-      break;
-    case VT_FLOAT:
-      if (value->f == 0.0)
-	nc = fprintf (out_file, fmt_real0);
-      else
-	nc = fprintf (out_file, fmt_real1, value->f);
-      break;
-    case VT_SHORT:
-      nc = fprintf (out_file, fmt_int, value->s);
-      break;
-      // ignoring the following cases (why?)
-    case VT_HRTIME:
-    case VT_LABEL:
-    case VT_OFFSET:
-      break;
-    }
-  return nc;
-}
-
-static int
-print_one_tvisible (FILE *out_file, char *fmt_real0, char *fmt_real1,
-		    TValue *value, int visbits, int clock)
-{
-  int nc;
-  if (value->ll == 0LL)
-    nc = fprintf (out_file, fmt_real0);
-  else
-    {
-      if (visbits & VAL_RATIO)
-	{
-	  if (value->d > 99.999)
-	    nc = fprintf (out_file, fmt_real1, NTXT (">"), 99.999);
-	  else
-	    nc = fprintf (out_file, fmt_real1, NTXT (" "), value->d);
-	}
-      else
-	nc = fprintf (out_file, fmt_real1, "", 1.e-6 * value->ll / clock);
-    }
-  return nc;
-}
-
-static void
-print_one (FILE *out_file, Hist_data *data, Hist_data::HistItem *item,
-	   char **fmt_int, char **fmt_real0, char **fmt_real1,
-	   MetricList *metrics_list, Metric::HistMetric *hist_metric,
-	   char *mark, Histable::NameFormat nfmt)
-{
-  Metric *mitem;
-  Metric::HistMetric *hitem;
-  int index, nc, np, i;
-  int visible, tvisible, pvisible;
-  TValue *value;
-  double percent;
-
-  if (item->type == Module::AT_EMPTY)
-    {
-      fprintf (out_file, nl);
-      return;
-    }
-
-  // set name_is_Total
-  int name_is_Total = 0;
-
-  Vec_loop (Metric*, metrics_list->get_items (), index, mitem)
-  {
-    if (mitem->get_type () != Metric::ONAME)
-      continue;
-    name_is_Total = strcmp (item->obj->get_name (), GTXT ("<Total>")) == 0;
-    break;
-  }
-
-  np = 0;
-  Vec_loop (Metric*, metrics_list->get_items (), index, mitem)
-  {
-    visible = mitem->is_visible ();
-    tvisible = mitem->is_tvisible ();
-    pvisible = mitem->is_pvisible ();
-
-    // alignment
-    for (i = 0; i < np; i++)
-      fputc (' ', out_file);
-
-    hitem = &hist_metric[index];
-    nc = 0;
-    if (tvisible)
-      {
-	value = &(item->value[index]);
-	nc = print_one_tvisible (out_file, fmt_real0[index], fmt_real1[index],
-				 value, mitem->get_visbits (),
-				 dbeSession->get_clock (-1));
-      }
-    else
-      nc = 0;
-
-    if (visible)
-      {
-	if (mitem->get_vtype () == VT_LABEL)
-	  {
-	    value = &(item->value[index]);
-	    if (value->tag == VT_OFFSET)
-	      nc += fprintf (out_file, fmt_int[index], mark,
-			     ((DataObject*) (item->obj))->get_offset_name ());
-	    else
-	      nc += fprintf (out_file, fmt_int[index], mark,
-			     item->obj->get_name (nfmt));
-	  }
-	else if (name_is_Total &&
-		 (strcmp (mitem->get_username (), "Block Covered %") == 0
-		  || strcmp (mitem->get_username (), "Instr Covered %") == 0))
-	  {
-	    char stmp[128];
-	    snprintf (stmp, sizeof (stmp), fmt_int[index], 0);
-
-	    /* and now blank that '0' out */
-	    for (int ii = 0; ii < 128; ii++)
-	      {
-		if (stmp[ii] != '0')
-		  continue;
-		stmp[ii] = ' ';
-		break;
-	      }
-	    nc += fprintf (out_file, stmp);
-	  }
-	else
-	  nc += print_one_visible (out_file, fmt_int[index], fmt_real0[index],
-				   fmt_real1[index], &(item->value[index]),
-				   mitem->get_visbits ());
-      }
-
-    if (pvisible)
-      {
-	percent = data->get_percentage (item->value[index].to_double (), index);
-	if (percent == 0.0)
-	  // adjust to change format from xx.yy%
-	  nc += fprintf (out_file, NTXT ("%#4.0f   "), 0.);
-	else
-	  // adjust format below to change format from xx.yy%
-	  nc += fprintf (out_file, NTXT ("%6.2f "), (100.0 * percent));
-      }
-    np = (int) (hitem->width - nc);
-  }
-  fprintf (out_file, nl);
-}
-
-void
-print_content (FILE *out_file, Hist_data *data,
-	       char **fmt_int, char **fmt_real0, char **fmt_real1,
-	       MetricList *metrics_list, Metric::HistMetric *hist_metric,
-	       int limit, Histable::NameFormat nfmt)
-{
-  // printing contents.
-  for (int i = 0; i < limit; i++)
-    {
-      Hist_data::HistItem *item = data->fetch (i);
-      print_one (out_file, data, item, fmt_int, fmt_real0, fmt_real1,
-		 metrics_list, hist_metric, NTXT (" "), nfmt);
-    }
 }
 
 er_print_histogram::er_print_histogram (DbeView *_dbev, Hist_data *data,
@@ -806,56 +388,38 @@ void
 er_print_histogram::dump_annotated_dataobjects (Vector<int> *marks,
 						int ithreshold)
 {
-  Metric::HistMetric *hist_metric;
-  char **fmt_int, **fmt_real0, **fmt_real1;
-  int no_metrics = mlist->get_items ()->size ();
-  int name_index = -1;
-  Histable::NameFormat nfmt = dbev->get_name_format ();
   if (!dbeSession->is_datamode_available ())
     fprintf (out_file,
-	     GTXT ("No dataspace information recorded in experiments\n\n"));
+                    GTXT ("No dataspace information recorded in experiments\n\n"));
 
   Hist_data *layout_data = dbev->get_data_space ()->get_layout_data (hist_data, marks, ithreshold);
+  Metric::HistMetric *hist_metric = layout_data->get_histmetrics ();
 
-  for (int mind = 0; mind < no_metrics; mind++)
-    if (mlist->get_items ()->fetch (mind)->get_type () == Metric::ONAME)
-      name_index = mind;
-
-  fmt_int = new char*[no_metrics];
-  fmt_real0 = new char*[no_metrics];
-  fmt_real1 = new char*[no_metrics];
-  hist_metric = new Metric::HistMetric[no_metrics];
-
-  // use new layout_data to set metric format
-  get_width (hist_data, mlist, hist_metric);
-  get_format (fmt_int, fmt_real0, fmt_real1, mlist, hist_metric, 0);
-  snprintf (hist_metric[name_index].legend2, MAX_LEN, GTXT ("* +offset .element"));
-  print_label (out_file, mlist, hist_metric, 3);
+//  snprintf (hist_metric[name_index].legend2, MAX_LEN, GTXT ("* +offset .element"));
+  layout_data->print_label (out_file, hist_metric, 3);
   fprintf (out_file, nl);
+  StringBuilder sb;
+
   for (long i = 0; i < layout_data->size (); i++)
     {
-      Hist_data::HistItem* item = layout_data->fetch (i);
+      sb.setLength (0);
       if (marks->find (i) != -1)
-	fprintf (out_file, NTXT ("## "));
+	sb.append ("## ");
       else
-	fprintf (out_file, NTXT ("   "));
-      print_one (out_file, layout_data, item, fmt_int, fmt_real0, fmt_real1,
-		 mlist, hist_metric, NTXT (" "), nfmt);
+	sb.append ("   ");
+      layout_data->print_row (&sb, i, hist_metric, " ");
+      sb.toFileLn (out_file);
     }
   fprintf (out_file, nl);
-
-  // free format strings.
-  for (int i = 0; i < no_metrics; i++)
-    {
-      free (fmt_int[i]);
-      free (fmt_real0[i]);
-      free (fmt_real1[i]);
-    }
-  delete[] fmt_int;
-  delete[] fmt_real0;
-  delete[] fmt_real1;
-  delete[] hist_metric;
   delete layout_data;
+}
+
+static int
+max_length(size_t len, size_t str_len)
+{
+  if (str_len > len)
+    return str_len;
+  return len;
 }
 
 void
@@ -869,24 +433,14 @@ er_print_histogram::dump_detail (int limit)
   MetricList *prop_mlist = new MetricList (mlist);
   Metric *mitem;
   int index, i;
-  size_t max_len, len, smax_len, slen;
-  Vaddr pc;
   Module *module;
   LoadObject *loadobject;
   char *sname, *oname, *lname, *alias, *mangle;
-  char fmt_name[MAX_LEN];
-  char fmt_elem[MAX_LEN];
-  char fmt_real1[MAX_LEN], fmt_real2[MAX_LEN];
-  char fmt_int1[MAX_LEN], fmt_int2[MAX_LEN];
-  char fmt_long1[MAX_LEN], fmt_long2[MAX_LEN], fmt_long3[MAX_LEN];
-  char fmt_int0[MAX_LEN], fmt_long0[MAX_LEN];
-  char numstr[MAX_LEN];
 
   Histable::NameFormat nfmt = dbev->get_name_format ();
 
   // Check max. length of metrics names
-  max_len = smax_len = 0;
-
+  size_t len = 0, slen = 0;
   Vec_loop (Metric*, prop_mlist->get_items (), index, mitem)
   {
     mitem->set_vvisible (true);
@@ -896,79 +450,37 @@ er_print_histogram::dump_detail (int limit)
     if (mitem->get_subtype () != Metric::STATIC)
       {
 	mitem->set_pvisible (true);
-	len = hist_data->value_maxlen (index);
-	if (max_len < len)
-	  max_len = len;
-	slen = strlen (mitem->get_name ());
-	if (smax_len < slen)
-	  smax_len = slen;
+	len = max_length (len, hist_data->value_maxlen (index));
+	slen = max_length (slen, strlen (mitem->get_name ()));
       }
   }
 
   // now get the length of the other (non-performance-data) messages
   if (hist_data->type == Histable::FUNCTION)
     {
-      slen = strlen (GTXT ("Source File"));
-      if (smax_len < slen)
-	smax_len = slen;
-      slen = strlen (GTXT ("Object File"));
-      if (smax_len < slen)
-	smax_len = slen;
-      slen = strlen (GTXT ("Load Object"));
-      if (smax_len < slen)
-	smax_len = slen;
-      slen = strlen (GTXT ("Mangled Name"));
-      if (smax_len < slen)
-	smax_len = slen;
-      slen = strlen (GTXT ("Aliases"));
-      if (smax_len < slen)
-	smax_len = slen;
+      slen = max_length (slen, strlen (GTXT ("Source File")));
+      slen = max_length (slen, strlen (GTXT ("Object File")));
+      slen = max_length (slen, strlen (GTXT ("Load Object")));
+      slen = max_length (slen, strlen (GTXT ("Mangled Name")));
+      slen = max_length (slen, strlen (GTXT ("Aliases")));
     }
   else if (hist_data->type == Histable::DOBJECT)
     {
-      slen = strlen (GTXT ("Scope"));
-      if (smax_len < slen)
-	smax_len = slen;
-      slen = strlen (GTXT ("Type"));
-      if (smax_len < slen)
-	smax_len = slen;
-      slen = strlen (GTXT ("Member of"));
-      if (smax_len < slen)
-	smax_len = slen;
-      slen = strlen (GTXT ("Offset (bytes)"));
-      if (smax_len < slen)
-	smax_len = slen;
-      slen = strlen (GTXT ("Size (bytes)"));
-      if (smax_len < slen)
-	smax_len = slen;
-      slen = strlen (GTXT ("Elements"));
-      if (smax_len < slen)
-	smax_len = slen;
+      slen = max_length (slen, strlen (GTXT ("Scope")));
+      slen = max_length (slen, strlen (GTXT ("Type")));
+      slen = max_length (slen, strlen (GTXT ("Member of")));
+      slen = max_length (slen, strlen (GTXT ("Offset (bytes)")));
+      slen = max_length (slen, strlen (GTXT ("Size (bytes)")));
+      slen = max_length (slen, strlen (GTXT ("Elements")));
     }
-  snprintf (fmt_name, sizeof (fmt_name), NTXT ("\t%%%ds: "), (int) smax_len);
-  snprintf (fmt_elem, sizeof (fmt_elem), NTXT ("\t%%%ds  "), (int) smax_len);
-  snprintf (numstr, sizeof (numstr), "%%#%d.0lf    (  %#1.0f %%%%%%%%)\n",
-	    (int) (max_len - 3), 0.);
-  snprintf (fmt_real1, sizeof (fmt_real1), numstr, 0.0);
-  snprintf (fmt_real2, sizeof (fmt_real2), NTXT ("%%%d.3lf (%%5.1f%%%%)\n"),
-	    (int) max_len);
-  snprintf (fmt_int0, sizeof (fmt_int0), NTXT ("%%%dd\n"), (int) max_len);
-  snprintf (numstr, sizeof (numstr), NTXT ("%%%dd (  %#1.0f %%%%%%%%)\n"),
-	    (int) max_len, 0.);
-  snprintf (fmt_int1, sizeof (fmt_int1), numstr, 0);
-  snprintf (fmt_int2, sizeof (fmt_int2), NTXT ("%%%dd (%%5.1f%%%%)\n"),
-	    (int) max_len);
-  snprintf (fmt_long0, sizeof (fmt_long0), NTXT ("%%%dllu\n"), (int) max_len);
-  snprintf (numstr, sizeof (numstr), NTXT ("%%%dd (  %#1.0f %%%%%%%%)\n"),
-	    (int) max_len, 0.);
-  snprintf (fmt_long1, sizeof (fmt_long1), numstr, 0);
-  snprintf (fmt_long2, sizeof (fmt_long2), "%%%dllu (%%5.1f%%%%)\n",
-	    (int) max_len);
-  snprintf (numstr, sizeof (numstr), NTXT ("\t%%%ds %%%%%dllu\n"),
-	    (int) (smax_len + 1), (int) max_len);
-  snprintf (fmt_long3, sizeof (fmt_long3), numstr, GTXT ("Count:"));
-  snprintf (numstr, sizeof (numstr), "%%%dd (  %#1.0f %%%%%%%%) %%#%d.0lf\n",
-	    (int) max_len, 0., (int) (max_len - 6));
+  int max_len = (int) len;
+  int smax_len = (int) slen;
+
+#define PR_TITLE(t)   fprintf (out_file, "\t%*s:", smax_len, t)
+#define PR(title, nm) PR_TITLE(title); \
+		      if (nm) \
+		        fprintf (out_file, " %s", nm); \
+		      fprintf (out_file, "\n")
 
   // now loop over the objects
   int num_printed_items = 0;
@@ -1032,84 +544,45 @@ er_print_histogram::dump_detail (int limit)
 	if (mitem->get_subtype () == Metric::STATIC
 	    && htype == Histable::DOBJECT)
 	  continue;
-	fprintf (out_file, fmt_name, mitem->get_name ());
+	PR_TITLE (mitem->get_name ());
 
+	char buf[128];
+	char *s = values[index].to_str (buf, sizeof (buf));
 	if (mitem->get_value_styles () & VAL_PERCENT)
 	  {
 	    dvalue = values[index].to_double ();
-	    switch (mitem->get_vtype ())
+	    percent = 100.0 * current_data->get_percentage (dvalue, index);
+	    if (!mitem->is_time_val ())
 	      {
-	      case VT_DOUBLE:
-		if (dvalue == 0.0)
-		  fprintf (out_file, fmt_real1);
+		fprintf (out_file, " %*s", max_len, s);
+		if (dvalue == 0.)
+		  fprintf (out_file, " (  0. %%)\n");
 		else
-		  fprintf (out_file, fmt_real2, dvalue, 100.0
-			  * current_data->get_percentage (dvalue, index));
-		break;
-	      case VT_INT:
-		if (dvalue == 0.0)
-		  fprintf (out_file, fmt_int1);
-		else
-		  fprintf (out_file, fmt_int2, (int) dvalue, 100.0
-			  * current_data->get_percentage (dvalue, index));
-		break;
-	      case VT_LLONG:
-	      case VT_ULLONG:
-		if (values[index].ll == 0LL)
-		  {
-		    if (mitem->is_time_val ())
-		      {
-			fprintf (out_file, fmt_real1);
-			fprintf (out_file, fmt_long3, 0LL);
-		      }
-		    else
-		      fprintf (out_file, fmt_long1);
-		  }
-		else
-		  {
-		    percent = 100.0 *
-			    current_data->get_percentage (dvalue, index);
-		    if (mitem->is_time_val ())
-		      {
-			dvalue /= 1.e+6 * dbeSession->get_clock (-1);
-			fprintf (out_file, fmt_real2, dvalue, percent);
-			fprintf (out_file, fmt_long3, values[index].ll);
-		      }
-		    else
-		      fprintf (out_file, fmt_long2, values[index].ll,
-			       percent);
-		  }
-		break;
-	      default:
-		break;
+		  fprintf (out_file, " (%5.1f%%)\n", percent);
+		continue;
 	      }
+
+	    TValue v;
+	    v.tag = VT_DOUBLE;
+	    v.sign = false;
+	    v.d = dvalue / (1.e+6 * dbeSession->get_clock (-1));
+	    char buf1[128];
+	    char *s1 = v.to_str (buf1, sizeof (buf1));
+	    fprintf (out_file, " %*s", max_len, s1);
+	    if (dvalue == 0.)
+	      fprintf (out_file, " (  0. %%)\n");
+	    else
+	      fprintf (out_file, " (%5.1f%%)\n", percent);
+	    PR_TITLE (GTXT ("Count"));
 	  }
-	else
+
+	int max_len1 = max_len;
+	for (int j = (int) strlen (s) - 1; j >= 0 && s[j] == ' '; j--)
 	  {
-	    switch (mitem->get_vtype ())
-	      {
-	      case VT_INT:
-		fprintf (out_file, fmt_int0, values[index].i);
-		break;
-	      case VT_LLONG:
-	      case VT_ULLONG:
-		fprintf (out_file, fmt_long0, values[index].ll);
-		break;
-	      case VT_ADDRESS:
-		pc = values[index].ll;
-		fprintf (out_file, NTXT ("%u:0x%08x\n"), ADDRESS_SEG (pc),
-			 ADDRESS_OFF (pc));
-		break;
-	      case VT_DOUBLE:
-		if (values[index].d == 0.0)
-		  fprintf (out_file, fmt_real1);
-		else
-		  fprintf (out_file, "\t%*.3lf\n", (int) (max_len - 5), values[index].d);
-		break;
-	      default:
-		break;
-	      }
+	    s[j] = 0;
+	    max_len1--;
 	  }
+	fprintf (out_file, " %*s\n", max_len1, s);
       }
 
       // now add the descriptive information about the object
@@ -1139,29 +612,11 @@ er_print_histogram::dump_detail (int limit)
 	      if (htype == Histable::INSTR && dbeSession->is_datamode_available ())
 		alias = ((DbeInstr*) obj)->get_descriptor ();
 
-	      fprintf (out_file, fmt_name, GTXT ("Source File"));
-	      if (sname)
-		fprintf (out_file, NTXT ("%s"), sname);
-	      fprintf (out_file, NTXT ("\n"));
-
-	      fprintf (out_file, fmt_name, GTXT ("Object File"));
-	      if (oname)
-		fprintf (out_file, NTXT ("%s"), oname);
-	      fprintf (out_file, NTXT ("\n"));
-
-	      fprintf (out_file, fmt_name, GTXT ("Load Object"));
-	      if (lname)
-		fprintf (out_file, NTXT ("%s"), lname);
-	      fprintf (out_file, NTXT ("\n"));
-
-	      fprintf (out_file, fmt_name, GTXT ("Mangled Name"));
-	      if (mangle)
-		fprintf (out_file, NTXT ("%s"), mangle);
-	      fprintf (out_file, NTXT ("\n"));
-	      fprintf (out_file, fmt_name, GTXT ("Aliases"));
-	      if (alias)
-		fprintf (out_file, NTXT ("%s"), alias);
-	      fprintf (out_file, NTXT ("\n"));
+	      PR (GTXT ("Source File"), sname);
+	      PR (GTXT ("Object File"), oname);
+	      PR (GTXT ("Load Object"), lname);
+	      PR (GTXT ("Mangled Name"), mangle);
+	      PR (GTXT ("Aliases"), alias);
 	    }
 	}
       else
@@ -1171,7 +626,7 @@ er_print_histogram::dump_detail (int limit)
 	  Histable *scope = dobj->get_scope ();
 
 	  // print the scope
-	  fprintf (out_file, fmt_name, GTXT ("Scope"));
+	  PR_TITLE (GTXT ("Scope"));
 	  if (!scope)
 	    fprintf (out_file, GTXT ("(Global)\n"));
 	  else switch (scope->get_type ())
@@ -1188,7 +643,7 @@ er_print_histogram::dump_detail (int limit)
 	      }
 
 	  // print the type name
-	  fprintf (out_file, fmt_name, GTXT ("Type"));
+	  PR_TITLE (GTXT ("Type"));
 	  if (dobj->get_typename ())
 	    fprintf (out_file, NTXT ("%s\n"), dobj->get_typename ());
 	  else
@@ -1199,16 +654,16 @@ er_print_histogram::dump_detail (int limit)
 	    {
 	      if (dobj->get_parent ())
 		{
-		  fprintf (out_file, fmt_name, GTXT ("Member of"));
+		  PR_TITLE (GTXT ("Member of"));
 		  fprintf (out_file, NTXT ("%s\n"), dobj->get_parent ()->get_name ());
 		}
-	      fprintf (out_file, fmt_name, GTXT ("Offset (bytes)"));
+	      PR_TITLE (GTXT ("Offset (bytes)"));
 	      fprintf (out_file, NTXT ("%lld\n"), (long long) dobj->get_offset ());
 	    }
 	  // print the size
 	  if (dobj->get_size ())
 	    {
-	      fprintf (out_file, fmt_name, GTXT ("Size (bytes)"));
+	      PR_TITLE (GTXT ("Size (bytes)"));
 	      fprintf (out_file, NTXT ("%lld\n"), (long long) dobj->get_size ());
 	    }
 	}
@@ -1284,11 +739,9 @@ dump_anno_file (FILE *fp, Histable::Type type, Module *module, DbeView *dbev,
 		Function *func, Vector<int> *marks, int threshold, int vis_bits,
 		int src_visible, bool hex_visible, bool src_only)
 {
-  int no_metrics, lspace, mspace, tspace,
-	  remain, mindex, next_mark, hidx,
-	  index;
+  int lspace, mspace, tspace, remain, mindex, next_mark, hidx, index;
   Metric *mitem;
-  char **fmt_int, **fmt_real0, **fmt_real1, buf[MAX_LEN];
+  char buf[MAX_LEN];
   Hist_data::HistItem *item;
 
   SourceFile *srcContext = NULL;
@@ -1327,10 +780,6 @@ dump_anno_file (FILE *fp, Histable::Type type, Module *module, DbeView *dbev,
   // force the name metric to be invisible
   MetricList *nmlist = hdata->get_metric_list ();
   nmlist->find_metric (GTXT ("name"), Metric::STATIC)->clear_all_visbits ();
-  no_metrics = nmlist->get_items ()->size ();
-  fmt_int = new char*[no_metrics];
-  fmt_real0 = new char*[no_metrics];
-  fmt_real1 = new char*[no_metrics];
   Metric::HistMetric *hist_metric = hdata->get_histmetrics ();
 
   // lspace is for max line number that's inserted; use to set width
@@ -1455,9 +904,6 @@ dump_anno_file (FILE *fp, Histable::Type type, Module *module, DbeView *dbev,
       item->value[lind].l = dbe_strdup (GTXT ("INTERNAL ERROR: missing line text"));
     fprintf (fp, NTXT ("%s\n"), item->value[lind].l);
   }
-  delete[] fmt_int;
-  delete[] fmt_real0;
-  delete[] fmt_real1;
   delete hdata;
 }
 
@@ -2405,7 +1851,7 @@ er_print_experiment::data_dump ()
 
   if (stat)
     {
-      snprintf (fmt1, sizeof (fmt1), NTXT ("%%50s"));
+      max_len1 = 50;
       if (exp_idx2 > exp_idx1)
 	{
 	  statistics_sum (maxlen);
@@ -2417,7 +1863,7 @@ er_print_experiment::data_dump ()
     }
   else if (over)
     {
-      snprintf (fmt1, sizeof (fmt1), NTXT ("%%30s"));
+      max_len1 = 50;
       if (exp_idx2 > exp_idx1)
 	{
 	  overview_sum (maxlen);
@@ -2484,9 +1930,7 @@ er_print_experiment::overview_dump (int exp_idx, int &maxlen)
     }
 
   //Get the collection params for the sample selection and display them.
-  fprintf (out_file, NTXT ("\n\n"));
-  fprintf (out_file, fmt1, GTXT ("Individual samples"));
-  fprintf (out_file, NTXT ("\n\n"));
+  fprintf (out_file, "\n\n%*s\n\n", max_len1, GTXT ("Individual samples"));
 
   size = ovw_data->size ();
   ovw_item_labels = ovw_data->get_labels ();
@@ -2494,8 +1938,8 @@ er_print_experiment::overview_dump (int exp_idx, int &maxlen)
   for (index = 0; index < size; index++)
     {
       ovw_item = ovw_data->fetch (index);
-      fprintf (out_file, fmt1, GTXT ("Sample Number"));
-      fprintf (out_file, NTXT (": %d\n\n"), ovw_item.number);
+      fprintf (out_file, "%*s: %d\n\n", max_len1, GTXT ("Sample Number"),
+	       ovw_item.number);
       overview_item (&ovw_item, &ovw_item_labels);
       fprintf (out_file, nl);
     }
@@ -2514,13 +1958,10 @@ er_print_experiment::overview_summary (Ovw_data *ovw_data, int &maxlen)
   len = snprintf (buf, sizeof (buf), "%.3lf", tstodouble (totals.total.t));
   if (maxlen < len)
     maxlen = len;
-  snprintf (buf, sizeof (buf), NTXT ("%%#%d.0lf    (  %#1.0f %%%%%%%%)"),
-	    maxlen - 3, 0.);
-  snprintf (fmt2, sizeof (fmt2), NTXT ("%%%d.3lf"), maxlen);
-  snprintf (fmt3, sizeof (fmt3), buf, 0.0);
-  snprintf (fmt4, sizeof (fmt4), NTXT ("%%%d.3lf (%%5.1f%%%%)"), maxlen);
-  fprintf (out_file, fmt1, GTXT ("Aggregated statistics for selected samples"));
-  fprintf (out_file, NTXT ("\n\n"));
+  max_len2 = maxlen;
+  max_len3 = maxlen;
+  fprintf (out_file, "%*s\n\n", max_len1,
+	   GTXT ("Aggregated statistics for selected samples"));
 
   ovw_item_labels = ovw_data->get_labels ();
   overview_item (&totals, &ovw_item_labels);
@@ -2537,30 +1978,25 @@ er_print_experiment::overview_item (Ovw_data::Ovw_item *ovw_item,
   start = tstodouble (ovw_item->start);
   end = tstodouble (ovw_item->end);
 
-  fprintf (out_file, fmt1, GTXT ("Start Label"));
-  fprintf (out_file, NTXT (": "));
-  fprintf (out_file, NTXT ("%s"), ovw_item->start_label);
-  fprintf (out_file, nl);
-  fprintf (out_file, fmt1, GTXT ("End Label"));
-  fprintf (out_file, NTXT (": %s\n"), ovw_item->end_label);
+  fprintf (out_file, "%*s: %s\n", max_len1, GTXT ("Start Label"),
+	   ovw_item->start_label);
+  fprintf (out_file, "%*s: %s\n", max_len1, GTXT ("End Label"),
+	   ovw_item->end_label);
 
-  fprintf (out_file, fmt1, GTXT ("Start Time (sec.)"));
-  fprintf (out_file, NTXT (": "));
+  fprintf (out_file, "%*s: ", max_len1, GTXT ("Start Time (sec.)"));
   if (start == -1.0)
     fprintf (out_file, GTXT ("N/A"));
   else
-    fprintf (out_file, fmt2, start);
+    fprintf (out_file, "%*.3f", max_len2, start);
   fprintf (out_file, nl);
-  fprintf (out_file, fmt1, GTXT ("End Time (sec.)"));
-  fprintf (out_file, NTXT (": "));
+  fprintf (out_file, "%*s: ", max_len1, GTXT ("End Time (sec.)"));
   if (end == -1.0)
     fprintf (out_file, GTXT ("N/A"));
   else
-    fprintf (out_file, fmt2, end);
+    fprintf (out_file, "%*.3f", max_len2, end);
   fprintf (out_file, nl);
-  fprintf (out_file, fmt1, GTXT ("Duration (sec.)"));
-  fprintf (out_file, NTXT (": "));
-  fprintf (out_file, fmt2, tstodouble (ovw_item->duration));
+  fprintf (out_file, "%*s: ", max_len1, GTXT ("Duration (sec.)"));
+  fprintf (out_file, "%*.3f", max_len2, tstodouble (ovw_item->duration));
   fprintf (out_file, NTXT ("\n"));
 
   size = ovw_item->size;
@@ -2568,19 +2004,16 @@ er_print_experiment::overview_item (Ovw_data::Ovw_item *ovw_item,
     tsadd (&total_time, &ovw_item->values[index].t);
 
   total_value = tstodouble (total_time);
-  fprintf (out_file, fmt1, GTXT ("Total Thread Time (sec.)"));
-  fprintf (out_file, NTXT (": "));
-  fprintf (out_file, fmt2, tstodouble (ovw_item->tlwp));
+  fprintf (out_file, "%*s: %*.3f", max_len1, GTXT ("Total Thread Time (sec.)"),
+	   max_len2, tstodouble (ovw_item->tlwp));
   fprintf (out_file, NTXT ("\n"));
-  fprintf (out_file, fmt1, GTXT ("Average number of Threads"));
-  fprintf (out_file, NTXT (": "));
+  fprintf (out_file, "%*s: ", max_len1, GTXT ("Average number of Threads"));
   if (tstodouble (ovw_item->duration) != 0)
-    fprintf (out_file, fmt2, ovw_item->nlwp);
+    fprintf (out_file, "%*.3f", max_len2, ovw_item->nlwp);
   else
     fprintf (out_file, GTXT ("N/A"));
   fprintf (out_file, NTXT ("\n\n"));
-  fprintf (out_file, fmt1, GTXT ("Process Times (sec.)"));
-  fprintf (out_file, NTXT (":\n"));
+  fprintf (out_file, "%*s:\n", max_len1, GTXT ("Process Times (sec.)"));
   for (index = 1; index < size; index++)
     {
       overview_value (&ovw_item_labels->values[index], ovw_item_labels->type,
@@ -2599,21 +2032,21 @@ er_print_experiment::overview_value (Value *value, ValueTag value_tag,
   switch (value_tag)
     {
     case VT_LABEL:
-      fprintf (out_file, fmt1, value->l);
-      fprintf (out_file, NTXT (": "));
+      fprintf (out_file, "%*s: ", max_len1, value->l);
       break;
     case VT_HRTIME:
       dvalue = tstodouble (value->t);
       if (dvalue == 0.0)
-	fprintf (out_file, fmt3, 0., 0.);
+	fprintf (out_file, "%*s (  0. %%)", max_len3, "0.   ");
       else
-	fprintf (out_file, fmt4, dvalue, 100.0 * dvalue / total_value);
+	fprintf (out_file, "%*.3f (%5.1f%%)", max_len3, dvalue,
+		 100.0 * dvalue / total_value);
       break;
     case VT_INT:
       fprintf (out_file, NTXT ("%d"), value->i);
       break;
     default:
-      fprintf (out_file, fmt3);
+      fprintf (out_file, "%*.3f", max_len3, total_value);
     }
 }
 
@@ -2645,7 +2078,7 @@ er_print_experiment::statistics_sum (int &maxlen)
   overview_sum (maxlen);
 
   // print statistics data
-  snprintf (fmt2, sizeof (fmt2), NTXT (": %%%ds\n"), maxlen);
+  max_len2 = maxlen;
   statistics_item (sum_data);
   delete sum_data;
 }
@@ -2682,7 +2115,7 @@ er_print_experiment::statistics_dump (int exp_idx, int &maxlen)
   fprintf (out_file, nl);
 
   // print statistics data
-  snprintf (fmt2, sizeof (fmt2), NTXT (": %%%ds\n"), maxlen);
+  max_len2 = maxlen;
   statistics_item (stats_data);
   delete stats_data;
 }
@@ -2697,8 +2130,8 @@ er_print_experiment::statistics_item (Stats_data *stats_data)
   for (index = 0; index < size; index++)
     {
       stats_item = stats_data->fetch (index);
-      fprintf (out_file, fmt1, stats_item.label);
-      fprintf (out_file, fmt2, stats_item.value.to_str (buf, sizeof (buf)));
+      fprintf (out_file, "%*s: %*s\n", max_len1, stats_item.label,
+	       max_len2, stats_item.value.to_str (buf, sizeof (buf)));
     }
   fprintf (out_file, nl);
 }
