@@ -341,6 +341,7 @@ arm_cache_init (struct arm_prologue_cache *cache, struct frame_info *frame)
   arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   arm_cache_init (cache, gdbarch);
+  cache->sp = get_frame_register_unsigned (frame, ARM_SP_REGNUM);
 
   if (tdep->have_sec_ext)
     {
