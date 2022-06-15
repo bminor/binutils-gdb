@@ -279,7 +279,8 @@ int using_threads = 1;
 static int stabilizing_threads;
 
 static void unsuspend_all_lwps (struct lwp_info *except);
-static void mark_lwp_dead (struct lwp_info *lwp, int wstat);
+static void mark_lwp_dead (struct lwp_info *lwp, int wstat,
+			   bool thread_event);
 static int lwp_is_marked_dead (struct lwp_info *lwp);
 static int kill_lwp (unsigned long lwpid, int signo);
 static void enqueue_pending_signal (struct lwp_info *lwp, int signal, siginfo_t *info);
@@ -1800,10 +1801,12 @@ iterate_over_lwps (ptid_t filter,
   return get_thread_lwp (thread);
 }
 
-void
+bool
 linux_process_target::check_zombie_leaders ()
 {
-  for_each_process ([this] (process_info *proc)
+  bool new_pending_event = false;
+
+  for_each_process ([&] (process_info *proc)
     {
       pid_t leader_pid = pid_of (proc);
       lwp_info *leader_lp = find_lwp_pid (ptid_t (leader_pid));
@@ -1872,9 +1875,19 @@ linux_process_target::check_zombie_leaders ()
 				"(it exited, or another thread execd), "
 				"deleting it.",
 				leader_pid);
-	  delete_lwp (leader_lp);
+
+	  thread_info *leader_thread = get_lwp_thread (leader_lp);
+	  if (report_exit_events_for (leader_thread))
+	    {
+	      mark_lwp_dead (leader_lp, W_EXITCODE (0, 0), true);
+	      new_pending_event = true;
+	    }
+	  else
+	    delete_lwp (leader_lp);
 	}
     });
+
+  return new_pending_event;
 }
 
 /* Callback for `find_thread'.  Returns the first LWP that is not
@@ -2333,7 +2346,7 @@ linux_process_target::filter_event (int lwpid, int wstat)
 	  /* Since events are serialized to GDB core, and we can't
 	     report this one right now.  Leave the status pending for
 	     the next time we're able to report it.  */
-	  mark_lwp_dead (child, wstat);
+	  mark_lwp_dead (child, wstat, false);
 	  return;
 	}
       else
@@ -2646,7 +2659,8 @@ linux_process_target::wait_for_event_filtered (ptid_t wait_ptid,
 
       /* Check for zombie thread group leaders.  Those can't be reaped
 	 until all other threads in the thread group are.  */
-      check_zombie_leaders ();
+      if (check_zombie_leaders ())
+	goto retry;
 
       auto not_stopped = [&] (thread_info *thread)
 	{
@@ -2893,6 +2907,17 @@ linux_process_target::filter_exit_event (lwp_info *event_child,
   struct thread_info *thread = get_lwp_thread (event_child);
   ptid_t ptid = ptid_of (thread);
 
+  if (ourstatus->kind () == TARGET_WAITKIND_THREAD_EXITED)
+    {
+      /* We're reporting a thread exit for the leader.  The exit was
+	 detected by check_zombie_leaders.  */
+      gdb_assert (is_leader (thread));
+      gdb_assert (report_exit_events_for (thread));
+
+      delete_lwp (event_child);
+      return ptid;
+    }
+
   /* Note we must filter TARGET_WAITKIND_SIGNALLED as well, otherwise
      if a non-leader thread exits with a signal, we'd report it to the
      core which would interpret it as the whole-process exiting.
@@ -3012,7 +3037,20 @@ linux_process_target::wait_1 (ptid_t ptid, target_waitstatus *ourstatus,
     {
       if (WIFEXITED (w))
 	{
-	  ourstatus->set_exited (WEXITSTATUS (w));
+	  /* If we already have the exit recorded in waitstatus, use
+	     it.  This will happen when we detect a zombie leader,
+	     when we had GDB_THREAD_OPTION_EXIT enabled for it.  We
+	     want to report its exit as TARGET_WAITKIND_THREAD_EXITED,
+	     as the whole process hasn't exited yet.  */
+	  const target_waitstatus &ws = event_child->waitstatus;
+	  if (ws.kind () != TARGET_WAITKIND_IGNORE)
+	    {
+	      gdb_assert (ws.kind () == TARGET_WAITKIND_EXITED
+			  || ws.kind () == TARGET_WAITKIND_THREAD_EXITED);
+	      *ourstatus = ws;
+	    }
+	  else
+	    ourstatus->set_exited (WEXITSTATUS (w));
 
 	  threads_debug_printf
 	    ("ret = %s, exited with retcode %d",
@@ -3720,8 +3758,15 @@ suspend_and_send_sigstop (thread_info *thread, lwp_info *except)
   send_sigstop (thread, except);
 }
 
+/* Mark LWP dead, with WSTAT as exit status pending to report later.
+   If THREAD_EVENT is true, interpret WSTAT as a thread exit event
+   instead of a process exit event.  This is meaningful for the leader
+   thread, as we normally report a process-wide exit event when we see
+   the leader exit, and a thread exit event when we see any other
+   thread exit.  */
+
 static void
-mark_lwp_dead (struct lwp_info *lwp, int wstat)
+mark_lwp_dead (struct lwp_info *lwp, int wstat, bool thread_event)
 {
   /* Store the exit status for later.  */
   lwp->status_pending_p = 1;
@@ -3730,9 +3775,19 @@ mark_lwp_dead (struct lwp_info *lwp, int wstat)
   /* Store in waitstatus as well, as there's nothing else to process
      for this event.  */
   if (WIFEXITED (wstat))
-    lwp->waitstatus.set_exited (WEXITSTATUS (wstat));
+    {
+      if (thread_event)
+	lwp->waitstatus.set_thread_exited (WEXITSTATUS (wstat));
+      else
+	lwp->waitstatus.set_exited (WEXITSTATUS (wstat));
+    }
   else if (WIFSIGNALED (wstat))
-    lwp->waitstatus.set_signalled (gdb_signal_from_host (WTERMSIG (wstat)));
+    {
+      gdb_assert (!thread_event);
+      lwp->waitstatus.set_signalled (gdb_signal_from_host (WTERMSIG (wstat)));
+    }
+  else
+    gdb_assert_not_reached ("unknown status kind");
 
   /* Prevent trying to stop it.  */
   lwp->stopped = 1;
