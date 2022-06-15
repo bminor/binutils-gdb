@@ -1339,7 +1339,7 @@ if [gas_64_check] then {
 	if {[istarget "*-*-linux*"]} then {
 	    run_dump_test "x86-64-align-branch-3"
 	}
-
+	run_dump_test ehinterp
     }
     run_dump_test pr27198
 
