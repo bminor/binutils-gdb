@@ -76,8 +76,10 @@
 # define DIAGNOSTIC_IGNORE_STRINGOP_TRUNCATION \
   DIAGNOSTIC_IGNORE ("-Wstringop-truncation")
 
+# if __GNUC__ >= 11
 # define DIAGNOSTIC_IGNORE_STRINGOP_OVERREAD \
   DIAGNOSTIC_IGNORE ("-Wstringop-overread")
+#endif
 
 # define DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL \
   DIAGNOSTIC_IGNORE ("-Wformat-nonliteral")
