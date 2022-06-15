@@ -385,9 +385,6 @@ static CORE_ADDR
 arm_cache_get_sp_register (struct arm_prologue_cache *cache,
 			   arm_gdbarch_tdep *tdep, int regnum)
 {
-  if (regnum == ARM_SP_REGNUM)
-    return cache->sp;
-
   if (tdep->have_sec_ext)
     {
       if (regnum == tdep->m_profile_msp_s_regnum)
@@ -402,6 +399,8 @@ arm_cache_get_sp_register (struct arm_prologue_cache *cache,
 	return arm_cache_get_sp_register (cache, tdep, cache->active_msp_regnum);
       if (regnum == tdep->m_profile_psp_regnum)
 	return arm_cache_get_sp_register (cache, tdep, cache->active_psp_regnum);
+      if (regnum == ARM_SP_REGNUM)
+	return arm_cache_get_sp_register (cache, tdep, cache->active_sp_regnum);
     }
   else if (tdep->is_m)
     {
@@ -409,7 +408,11 @@ arm_cache_get_sp_register (struct arm_prologue_cache *cache,
 	return cache->msp_s;
       if (regnum == tdep->m_profile_psp_regnum)
 	return cache->psp_s;
+      if (regnum == ARM_SP_REGNUM)
+	return arm_cache_get_sp_register (cache, tdep, cache->active_sp_regnum);
     }
+  else if (regnum == ARM_SP_REGNUM)
+    return cache->sp;
 
   gdb_assert_not_reached ("Invalid SP selection");
 }
@@ -430,12 +433,6 @@ static void
 arm_cache_set_active_sp_value (struct arm_prologue_cache *cache,
 			       arm_gdbarch_tdep *tdep, CORE_ADDR val)
 {
-  if (cache->active_sp_regnum == ARM_SP_REGNUM)
-    {
-      cache->sp = val;
-      return;
-    }
-
   if (tdep->have_sec_ext)
     {
       if (cache->active_sp_regnum == tdep->m_profile_msp_s_regnum)
@@ -456,6 +453,11 @@ arm_cache_set_active_sp_value (struct arm_prologue_cache *cache,
       else if (cache->active_sp_regnum == tdep->m_profile_psp_regnum)
 	cache->psp_s = val;
 
+      return;
+    }
+  else if (cache->active_sp_regnum == ARM_SP_REGNUM)
+    {
+      cache->sp = val;
       return;
     }
 
