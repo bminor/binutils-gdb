@@ -288,6 +288,8 @@ struct arm_prologue_cache
 
   /* Active stack pointer.  */
   int active_sp_regnum;
+  int active_msp_regnum;
+  int active_psp_regnum;
 
   /* The frame base for this frame is just prev_sp - frame size.
      FRAMESIZE is the distance from the frame pointer to the
@@ -345,10 +347,22 @@ arm_cache_init (struct arm_prologue_cache *cache, struct frame_info *frame)
 
   if (tdep->have_sec_ext)
     {
+      CORE_ADDR msp_val = get_frame_register_unsigned (frame, tdep->m_profile_msp_regnum);
+      CORE_ADDR psp_val = get_frame_register_unsigned (frame, tdep->m_profile_psp_regnum);
+
       arm_cache_init_sp (tdep->m_profile_msp_s_regnum, &cache->msp_s, cache, frame);
       arm_cache_init_sp (tdep->m_profile_psp_s_regnum, &cache->psp_s, cache, frame);
       arm_cache_init_sp (tdep->m_profile_msp_ns_regnum, &cache->msp_ns, cache, frame);
       arm_cache_init_sp (tdep->m_profile_psp_ns_regnum, &cache->psp_ns, cache, frame);
+
+      if (msp_val == cache->msp_s)
+	cache->active_msp_regnum = tdep->m_profile_msp_s_regnum;
+      else if (msp_val == cache->msp_ns)
+	cache->active_msp_regnum = tdep->m_profile_msp_ns_regnum;
+      if (psp_val == cache->psp_s)
+	cache->active_psp_regnum = tdep->m_profile_psp_s_regnum;
+      else if (psp_val == cache->psp_ns)
+	cache->active_psp_regnum = tdep->m_profile_psp_ns_regnum;
 
       /* Use MSP_S as default stack pointer.  */
       if (cache->active_sp_regnum == ARM_SP_REGNUM)
@@ -384,6 +398,10 @@ arm_cache_get_sp_register (struct arm_prologue_cache *cache,
 	return cache->psp_s;
       if (regnum == tdep->m_profile_psp_ns_regnum)
 	return cache->psp_ns;
+      if (regnum == tdep->m_profile_msp_regnum)
+	return arm_cache_get_sp_register (cache, tdep, cache->active_msp_regnum);
+      if (regnum == tdep->m_profile_psp_regnum)
+	return arm_cache_get_sp_register (cache, tdep, cache->active_psp_regnum);
     }
   else if (tdep->is_m)
     {
