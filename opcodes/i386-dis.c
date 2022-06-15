@@ -10969,61 +10969,22 @@ OP_indirE (instr_info *ins, int bytemode, int sizeflag)
 }
 
 static void
-print_operand_value (instr_info *ins, bool hex, bfd_vma disp,
+print_operand_value (instr_info *ins, bfd_vma disp,
 		     enum disassembler_style style)
 {
   char tmp[30];
+  unsigned int i = 0;
 
   if (ins->address_mode == mode_64bit)
     {
-      if (hex)
-	{
-	  int i;
-	  oappend_with_style (ins, "0x", style);
-	  sprintf_vma (tmp, disp);
-	  for (i = 0; tmp[i] == '0' && tmp[i + 1]; i++);
-	  oappend_with_style (ins, tmp + i, style);
-	}
-      else
-	{
-	  bfd_signed_vma v = disp;
-	  int i;
-	  if (v < 0)
-	    {
-	      oappend_char_with_style (ins, '-', style);
-	      v = -disp;
-	      /* Check for possible overflow on 0x8000000000000000.  */
-	      if (v < 0)
-		{
-		  oappend_with_style (ins, "9223372036854775808", style);
-		  return;
-		}
-	    }
-	  if (!v)
-	    {
-	      oappend_char_with_style (ins, '0', style);
-	      return;
-	    }
-
-	  i = 0;
-	  tmp[29] = 0;
-	  while (v)
-	    {
-	      tmp[28 - i] = (v % 10) + '0';
-	      v /= 10;
-	      i++;
-	    }
-	  oappend_with_style (ins, tmp + 29 - i, style);
-	}
+      oappend_with_style (ins, "0x", style);
+      sprintf_vma (tmp, disp);
+      while (tmp[i] == '0' && tmp[i + 1])
+	++i;
     }
   else
-    {
-      if (hex)
-	sprintf (tmp, "0x%x", (unsigned int) disp);
-      else
-	sprintf (tmp, "%d", (int) disp);
-      oappend_with_style (ins, tmp, style);
-    }
+    sprintf (tmp, "0x%x", (unsigned int) disp);
+  oappend_with_style (ins, tmp + i, style);
 }
 
 /* Like oappend, but called for immediate operands.  */
@@ -11033,7 +10994,7 @@ oappend_immediate (instr_info *ins, bfd_vma imm)
 {
   if (!ins->intel_syntax)
     oappend_char_with_style (ins, '$', dis_style_immediate);
-  print_operand_value (ins, true, imm, dis_style_immediate);
+  print_operand_value (ins, imm, dis_style_immediate);
 }
 
 /* Put DISP in BUF as signed hex number.  */
@@ -11721,7 +11682,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	    if (havedisp || riprel)
 	      print_displacement (ins, disp);
 	    else
-	      print_operand_value (ins, true, disp, dis_style_address_offset);
+	      print_operand_value (ins, disp, dis_style_address_offset);
 	    if (riprel)
 	      {
 		set_op (ins, disp, true);
@@ -11798,7 +11759,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	      if (havedisp)
 		print_displacement (ins, disp);
 	      else
-		print_operand_value (ins, true, disp, dis_style_address_offset);
+		print_operand_value (ins, disp, dis_style_address_offset);
 	    }
 
 	  oappend_char (ins, ins->close_char);
@@ -11825,7 +11786,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 		  oappend_register (ins, att_names_seg[ds_reg - es_reg]);
 		  oappend (ins, ":");
 		}
-	      print_operand_value (ins, true, disp, dis_style_text);
+	      print_operand_value (ins, disp, dis_style_text);
 	    }
 	}
     }
@@ -11900,7 +11861,7 @@ OP_E_memory (instr_info *ins, int bytemode, int sizeflag)
 	      oappend_register (ins, att_names_seg[ds_reg - es_reg]);
 	      oappend (ins, ":");
 	    }
-	  print_operand_value (ins, true, disp & 0xffff, dis_style_text);
+	  print_operand_value (ins, disp & 0xffff, dis_style_text);
 	}
     }
   if (ins->vex.b)
@@ -12370,7 +12331,7 @@ OP_J (instr_info *ins, int bytemode, int sizeflag)
   disp = ((ins->start_pc + (ins->codep - ins->start_codep) + disp) & mask)
 	 | segment;
   set_op (ins, disp, false);
-  print_operand_value (ins, true, disp, dis_style_text);
+  print_operand_value (ins, disp, dis_style_text);
 }
 
 static void
@@ -12430,7 +12391,7 @@ OP_OFF (instr_info *ins, int bytemode, int sizeflag)
 	  oappend (ins, ":");
 	}
     }
-  print_operand_value (ins, true, off, dis_style_address_offset);
+  print_operand_value (ins, off, dis_style_address_offset);
 }
 
 static void
@@ -12459,7 +12420,7 @@ OP_OFF64 (instr_info *ins, int bytemode, int sizeflag)
 	  oappend (ins, ":");
 	}
     }
-  print_operand_value (ins, true, off, dis_style_address_offset);
+  print_operand_value (ins, off, dis_style_address_offset);
 }
 
 static void
