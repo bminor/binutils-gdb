@@ -574,8 +574,9 @@ private: /* Back to private.  */
 
   /* Detect zombie thread group leaders, and "exit" them.  We can't
      reap their exits until all other threads in the group have
-     exited.  */
-  void check_zombie_leaders ();
+     exited.  Returns true if we left any new event pending, false
+     otherwise.  */
+  bool check_zombie_leaders ();
 
   /* Convenience function that is called when we're about to return an
      event to the core.  If the event is an exit or signalled event,
