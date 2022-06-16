@@ -1,4 +1,4 @@
-#readelf: --debug-dump=frames-interp
+#readelf: -wF
 
 Contents of the \.eh_frame section:
 
