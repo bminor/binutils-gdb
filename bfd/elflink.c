@@ -9548,12 +9548,20 @@ elf_link_adjust_relocs (bfd *abfd,
 	      size_t sortlen = p - loc;
 	      bfd_vma r_off2 = (*ext_r_off) (loc);
 	      size_t runlen = elt_size;
+	      bfd_vma r_off_runend = r_off;
+	      bfd_vma r_off_runend_next;
 	      size_t buf_size = 96 * 1024;
 	      while (p + runlen < end
 		     && (sortlen <= buf_size
 			 || runlen + elt_size <= buf_size)
-		     && r_off2 > (*ext_r_off) (p + runlen))
-		runlen += elt_size;
+		     /* run must not break the ordering of base..loc+1 */
+		     && r_off2 > (r_off_runend_next = (*ext_r_off) (p + runlen))
+		     /* run must be already sorted */
+		     && r_off_runend_next >= r_off_runend)
+		{
+		  runlen += elt_size;
+		  r_off_runend = r_off_runend_next;
+		}
 	      if (buf == NULL)
 		{
 		  buf = bfd_malloc (buf_size);
