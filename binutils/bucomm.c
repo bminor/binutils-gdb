@@ -537,8 +537,9 @@ make_tempname (const char *filename, int *ofd)
 #else
   tmpname = mktemp (tmpname);
   if (tmpname == NULL)
-    return NULL;
-  fd = open (tmpname, O_RDWR | O_CREAT | O_EXCL, 0600);
+    fd = -1;
+  else
+    fd = open (tmpname, O_RDWR | O_CREAT | O_EXCL, 0600);
 #endif
   if (fd == -1)
     {
@@ -556,22 +557,23 @@ char *
 make_tempdir (const char *filename)
 {
   char *tmpname = template_in_dir (filename);
+  char *ret;
 
 #ifdef HAVE_MKDTEMP
-  return mkdtemp (tmpname);
+  ret = mkdtemp (tmpname);
 #else
-  tmpname = mktemp (tmpname);
-  if (tmpname == NULL)
-    return NULL;
+  ret = mktemp (tmpname);
 #if defined (_WIN32) && !defined (__CYGWIN32__)
   if (mkdir (tmpname) != 0)
-    return NULL;
+    ret = NULL;
 #else
   if (mkdir (tmpname, 0700) != 0)
-    return NULL;
+    ret = NULL;
 #endif
-  return tmpname;
 #endif
+  if (ret == NULL)
+    free (tmpname);
+  return ret;
 }
 
 /* Parse a string into a VMA, with a fatal error if it can't be
