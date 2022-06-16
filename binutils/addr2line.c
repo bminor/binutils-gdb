@@ -452,10 +452,7 @@ process_file (const char *file_name, const char *section_name,
     {
       bfd_nonfatal (bfd_get_filename (abfd));
       if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-	{
-	  list_matching_formats (matching);
-	  free (matching);
-	}
+	list_matching_formats (matching);
       xexit (1);
     }
 

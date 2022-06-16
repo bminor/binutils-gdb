@@ -541,10 +541,7 @@ main (int ac, char **av)
       bfd_nonfatal (input_file);
 
       if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-	{
-	  list_matching_formats (matching);
-	  free (matching);
-	}
+	list_matching_formats (matching);
       exit (1);
     }
 

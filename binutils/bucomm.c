@@ -160,15 +160,17 @@ set_default_bfd_target (void)
 
 /* After a FALSE return from bfd_check_format_matches with
    bfd_get_error () == bfd_error_file_ambiguously_recognized, print
-   the possible matching targets.  */
+   the possible matching targets and free the list of targets.  */
 
 void
-list_matching_formats (char **p)
+list_matching_formats (char **matching)
 {
   fflush (stdout);
   fprintf (stderr, _("%s: Matching formats:"), program_name);
+  char **p = matching;
   while (*p)
     fprintf (stderr, " %s", *p++);
+  free (matching);
   fputc ('\n', stderr);
 }
 

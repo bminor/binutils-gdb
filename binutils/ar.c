@@ -1037,10 +1037,7 @@ open_inarch (const char *archive_filename, const char *file)
     {
       bfd_nonfatal (archive_filename);
       if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-	{
-	  list_matching_formats (matching);
-	  free (matching);
-	}
+	list_matching_formats (matching);
       xexit (1);
     }
 
@@ -1615,10 +1612,7 @@ ranlib_touch (const char *archname)
     {
       bfd_nonfatal (archname);
       if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-	{
-	  list_matching_formats (matching);
-	  free (matching);
-	}
+	list_matching_formats (matching);
       xexit (1);
     }
 

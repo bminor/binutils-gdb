@@ -3056,7 +3056,11 @@ load_symbols (lang_input_statement_type *entry,
 
       /* See if the emulation has some special knowledge.  */
       if (ldemul_unrecognized_file (entry))
-	return true;
+	{
+	  if (err == bfd_error_file_ambiguously_recognized)
+	    free (matching);
+	  return true;
+	}
 
       if (err == bfd_error_file_ambiguously_recognized)
 	{
@@ -3066,6 +3070,7 @@ load_symbols (lang_input_statement_type *entry,
 		   " matching formats:"), entry->the_bfd);
 	  for (p = matching; *p != NULL; p++)
 	    einfo (" %s", *p);
+	  free (matching);
 	  einfo ("%F\n");
 	}
       else if (err != bfd_error_file_not_recognized

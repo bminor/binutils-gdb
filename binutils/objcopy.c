@@ -3925,15 +3925,9 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
       bfd_nonfatal_message (input_filename, NULL, NULL, NULL);
 
       if (obj_error == bfd_error_file_ambiguously_recognized)
-	{
-	  list_matching_formats (obj_matching);
-	  free (obj_matching);
-	}
+	list_matching_formats (obj_matching);
       if (core_error == bfd_error_file_ambiguously_recognized)
-	{
-	  list_matching_formats (core_matching);
-	  free (core_matching);
-	}
+	list_matching_formats (core_matching);
 
       status = 1;
     }

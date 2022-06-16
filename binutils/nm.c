@@ -1626,10 +1626,7 @@ display_archive (bfd *file)
 	{
 	  bfd_nonfatal (bfd_get_filename (arfile));
 	  if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-	    {
-	      list_matching_formats (matching);
-	      free (matching);
-	    }
+	    list_matching_formats (matching);
 	}
 
       if (last_arfile != NULL)
@@ -1686,10 +1683,7 @@ display_file (char *filename)
     {
       bfd_nonfatal (filename);
       if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-	{
-	  list_matching_formats (matching);
-	  free (matching);
-	}
+	list_matching_formats (matching);
       retval = false;
     }
 

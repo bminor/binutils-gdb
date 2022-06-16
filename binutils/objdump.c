@@ -5426,7 +5426,6 @@ display_object_bfd (bfd *abfd)
     {
       nonfatal (bfd_get_filename (abfd));
       list_matching_formats (matching);
-      free (matching);
       return;
     }
 
@@ -5445,10 +5444,7 @@ display_object_bfd (bfd *abfd)
   nonfatal (bfd_get_filename (abfd));
 
   if (bfd_get_error () == bfd_error_file_ambiguously_recognized)
-    {
-      list_matching_formats (matching);
-      free (matching);
-    }
+    list_matching_formats (matching);
 }
 
 static void
