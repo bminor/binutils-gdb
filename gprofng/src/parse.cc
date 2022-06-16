@@ -33,6 +33,7 @@
 #include "PRBTree.h"
 #include "Sample.h"
 #include "Elf.h"
+#include "StringBuilder.h"
 
 void
 Experiment::mrec_insert (MapRecord *mrec)
@@ -883,10 +884,12 @@ Experiment::process_Linux_kernel_cmd (hrtime_t ts)
 
 	  if (sym_text)
 	    {
-	      char fname[128];
-	      snprintf (fname, sizeof (fname), "%s`%s", mod_name, sym_name);
+	      StringBuilder sb;
+	      sb.appendf ("%s`%s", mod_name, sym_name);
+	      char *fname = sb.toString ();
 	      Function *func = dbeSession->createFunction ();
 	      func->set_name (fname);
+	      free (fname);
 	      func->size = sym_size;
 	      func->img_offset = sym_addr;
 	      func->module = mod;

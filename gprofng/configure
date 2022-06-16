@@ -636,6 +636,7 @@ LIBOBJS
 BUILD_SUBDIRS
 CLOCK_GETTIME_LINK
 GPROFNG_CPPFLAGS
+GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS
 GPROFNG_CFLAGS
 LD_NO_AS_NEEDED
 BUILD_MAN_FALSE
@@ -662,7 +663,6 @@ BUILD_SRC_TRUE
 BUILD_COLLECTOR_FALSE
 BUILD_COLLECTOR_TRUE
 GPROFNG_NO_SWITCH_CFLAGS
-GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS
 gprofng_cflags
 WERROR
 GPROFNG_LIBADD
@@ -15652,63 +15652,6 @@ eval ac_res=\$$as_acx_Woption
 $as_echo "$ac_res" >&6; }
   if test `eval 'as_val=${'$as_acx_Woption'};$as_echo "$as_val"'` = yes; then :
   gprofng_cflags="$gprofng_cflags${gprofng_cflags:+ }$real_option"
-fi
-  done
-CFLAGS="$save_CFLAGS"
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS=
-save_CFLAGS="$CFLAGS"
-for real_option in -Wno-format-truncation; do
-  # Do the check with the no- prefix removed since gcc silently
-  # accepts any -Wno-* option on purpose
-  case $real_option in
-    -Wno-*) option=-W`expr x$real_option : 'x-Wno-\(.*\)'` ;;
-    *) option=$real_option ;;
-  esac
-  as_acx_Woption=`$as_echo "acx_cv_prog_cc_warning_$option" | $as_tr_sh`
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC supports $option" >&5
-$as_echo_n "checking whether $CC supports $option... " >&6; }
-if eval \${$as_acx_Woption+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  CFLAGS="$option"
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  eval "$as_acx_Woption=yes"
-else
-  eval "$as_acx_Woption=no"
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-
-fi
-eval ac_res=\$$as_acx_Woption
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-  if test `eval 'as_val=${'$as_acx_Woption'};$as_echo "$as_val"'` = yes; then :
-  GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS="$GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS${GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS:+ }$real_option"
 fi
   done
 CFLAGS="$save_CFLAGS"

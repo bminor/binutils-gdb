@@ -4520,29 +4520,23 @@ static char *
 hwc_hwcentry_string_internal (char *buf, size_t buflen, const Hwcentry *ctr,
 			      int show_short_desc)
 {
-  char stderrbuf[1024];
   char regnolist[256];
   if (!buf || !buflen)
     return buf;
-  buf[0] = 0;
   if (ctr == NULL)
     {
-      snprintf (stderrbuf, sizeof (stderrbuf), GTXT ("HW counter not available"));
-      goto hwc_hwcentry_string_done;
+      snprintf (buf, buflen, GTXT ("HW counter not available"));
+      return buf;
     }
   char *desc = NULL;
   if (show_short_desc)
     desc = ctr->short_desc;
   if (desc == NULL)
     desc = ctr->metric ? hwc_i18n_metric (ctr) : NULL;
-  format_columns (stderrbuf, sizeof (stderrbuf), ctr->name, ctr->int_name,
+  format_columns (buf, buflen, ctr->name, ctr->int_name,
 		  hwc_memop_string (ctr->memop), timecvt_string (ctr->timecvt),
 		  get_regnolist (regnolist, sizeof (regnolist), ctr->reg_list, 2),
 		  desc);
-
-hwc_hwcentry_string_done:
-  strncpy (buf, stderrbuf, buflen - 1);
-  buf[buflen - 1] = 0;
   return buf;
 }
 
@@ -4557,16 +4551,14 @@ hwc_hwcentry_string (char *buf, size_t buflen, const Hwcentry *ctr)
 extern char *
 hwc_hwcentry_specd_string (char *buf, size_t buflen, const Hwcentry *ctr)
 {
-  char stderrbuf[1024];
   const char *memop, *timecvt;
   char descstr[1024];
   if (!buf || !buflen)
     return buf;
-  buf[0] = 0;
   if (ctr == NULL)
     {
-      snprintf (stderrbuf, sizeof (stderrbuf), GTXT ("HW counter not available"));
-      goto hwc_hwcentry_specd_string_done;
+      snprintf (buf, buflen, GTXT ("HW counter not available"));
+      return buf;
     }
   timecvt = timecvt_string (ctr->timecvt);
   if (ctr->memop)
@@ -4574,19 +4566,15 @@ hwc_hwcentry_specd_string (char *buf, size_t buflen, const Hwcentry *ctr)
   else
     memop = "";
   if (ctr->metric != NULL)  /* a standard counter for a specific register */
-    snprintf (descstr, sizeof (descstr), GTXT (" (`%s'; %s%s)"),
+    snprintf (descstr, sizeof (descstr), " (`%s'; %s%s)",
 	      hwc_i18n_metric (ctr), memop, timecvt);
   else  /* raw counter */
-    snprintf (descstr, sizeof (descstr), GTXT (" (%s%s)"), memop, timecvt);
+    snprintf (descstr, sizeof (descstr), " (%s%s)", memop, timecvt);
 
   char *rateString = hwc_rate_string (ctr, 1);
-  snprintf (stderrbuf, sizeof (stderrbuf), NTXT ("%s,%s%s"), ctr->name,
+  snprintf (buf, buflen, "%s,%s%s", ctr->name,
 	    rateString ? rateString : "", descstr);
   free (rateString);
-
-hwc_hwcentry_specd_string_done:
-  strncpy (buf, stderrbuf, buflen - 1);
-  buf[buflen - 1] = 0;
   return buf;
 }
 

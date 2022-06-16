@@ -48,7 +48,6 @@ AC_SUBST(GPROFNG_LIBADD)
 
 ACX_PROG_CC_WARNINGS_ARE_ERRORS([manual])
 ACX_PROG_CC_WARNING_OPTS([-Wall], [gprofng_cflags])
-ACX_PROG_CC_WARNING_OPTS([-Wno-format-truncation], [GPROFNG_NO_FORMAT_TRUNCATION_CFLAGS])
 ACX_PROG_CC_WARNING_OPTS([-Wno-switch], [GPROFNG_NO_SWITCH_CFLAGS])
 gprofng_cppflags="-U_ASM"
 build_collector=
