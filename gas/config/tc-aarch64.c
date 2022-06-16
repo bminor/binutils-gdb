@@ -5358,6 +5358,7 @@ print_operands (char *buf, const aarch64_opcode *opcode,
   for (i = 0; i < AARCH64_MAX_OPND_NUM; ++i)
     {
       char str[128];
+      char cmt[128];
 
       /* We regard the opcode operand info more, however we also look into
 	 the inst->operands to support the disassembling of the optional
@@ -5370,7 +5371,7 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 
       /* Generate the operand string in STR.  */
       aarch64_print_operand (str, sizeof (str), 0, opcode, opnds, i, NULL, NULL,
-			     NULL, cpu_variant);
+			     NULL, cmt, sizeof (cmt), cpu_variant);
 
       /* Delimiter.  */
       if (str[0] != '\0')
@@ -5378,6 +5379,15 @@ print_operands (char *buf, const aarch64_opcode *opcode,
 
       /* Append the operand string.  */
       strcat (buf, str);
+
+      /* Append a comment.  This works because only the last operand ever
+	 adds a comment.  If that ever changes then we'll need to be
+	 smarter here.  */
+      if (cmt[0] != '\0')
+	{
+	  strcat (buf, "\t// ");
+	  strcat (buf, cmt);
+	}
     }
 }
 

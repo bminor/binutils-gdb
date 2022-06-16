@@ -1371,7 +1371,7 @@ aarch64_get_opcode (enum aarch64_op);
 extern void
 aarch64_print_operand (char *, size_t, bfd_vma, const aarch64_opcode *,
 		       const aarch64_opnd_info *, int, int *, bfd_vma *,
-		       char **,
+		       char **, char *, size_t,
 		       aarch64_feature_set features);
 
 /* Miscellaneous interface.  */
