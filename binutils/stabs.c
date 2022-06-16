@@ -5467,7 +5467,10 @@ stab_demangle_v3_arg (void *dhandle, struct stab_handle *info,
 					  dc->u.s_binary.right,
 					  &varargs);
 	if (pargs == NULL)
-	  return NULL;
+	  {
+	    free (dt);
+	    return NULL;
+	  }
 
 	return debug_make_function_type (dhandle, dt, pargs, varargs);
       }
