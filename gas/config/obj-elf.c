@@ -1055,27 +1055,31 @@ obj_elf_section_name (void)
 	  return NULL;
 	}
 
-      name = xmemdup0 (input_line_pointer, end - input_line_pointer);
+      obstack_grow0 (&notes, input_line_pointer, end - input_line_pointer);
+      name = obstack_base (&notes);
 
       while (flag_sectname_subst)
         {
 	  char *subst = strchr (name, '%');
 	  if (subst && subst[1] == 'S')
 	    {
-	      int oldlen = strlen (name);
-	      int substlen = strlen (now_seg->name);
-	      int newlen = oldlen - 2 + substlen;
-	      char *newname = XNEWVEC (char, newlen + 1);
-	      int headlen = subst - name;
-	      memcpy (newname, name, headlen);
-	      strcpy (newname + headlen, now_seg->name);
-	      strcat (newname + headlen, subst + 2);
-	      xfree (name);
-	      name = newname;
+	      size_t head = subst - name;
+	      size_t tail = strlen (subst + 2) + 1;
+	      size_t slen = strlen (now_seg->name);
+
+	      if (slen > 2)
+		{
+		  obstack_blank (&notes, slen - 2);
+		  name = obstack_base (&notes);
+		}
+	      memmove (name + head + slen, name + head + 2, tail);
+	      memcpy (name + head, now_seg->name, slen);
 	    }
 	  else
 	    break;
 	}
+
+      obstack_finish (&notes);
 
 #ifdef tc_canonicalize_section_name
       name = tc_canonicalize_section_name (name);
@@ -1104,7 +1108,7 @@ obj_elf_attach_to_group (int dummy ATTRIBUTE_UNUSED)
       return;
     }
 
-  elf_group_name (now_seg) = xstrdup (gname);
+  elf_group_name (now_seg) = gname;
   elf_section_flags (now_seg) |= SHF_GROUP;
 }
 
@@ -1315,7 +1319,7 @@ obj_elf_section (int push)
 	      const char *now_group = elf_group_name (now_seg);
 	      if (now_group != NULL)
 		{
-		  match.group_name = xstrdup (now_group);
+		  match.group_name = now_group;
 		  linkonce = (now_seg->flags & SEC_LINK_ONCE) != 0;
 		}
 	    }
@@ -2019,7 +2023,7 @@ obj_elf_vendor_attribute (int vendor)
       if (i == 0)
 	goto bad;
 
-      name = xstrndup (s, i);
+      name = xmemdup0 (s, i);
 
 #ifndef CONVERT_SYMBOLIC_ATTRIBUTE
 #define CONVERT_SYMBOLIC_ATTRIBUTE(a) -1
