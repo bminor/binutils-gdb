@@ -40,7 +40,7 @@
 #include "regcache.h"
 #include "frame.h"
 #include "mi-main.h"
-#include "mi-common.h"
+#include "mi-interp.h"
 #include "language.h"
 #include "valprint.h"
 #include "osdata.h"
