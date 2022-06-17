@@ -377,8 +377,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
       bitsize = 0;
       if (range_desc_type == NULL)
 	{
-	  for (arr_type = type; arr_type->code () == TYPE_CODE_ARRAY;
-	       arr_type = TYPE_TARGET_TYPE (arr_type))
+	  for (arr_type = type; arr_type->code () == TYPE_CODE_ARRAY; )
 	    {
 	      if (arr_type != type)
 		gdb_printf (stream, ", ");
@@ -386,6 +385,14 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 			   0 /* bounds_prefered_p */);
 	      if (TYPE_FIELD_BITSIZE (arr_type, 0) > 0)
 		bitsize = TYPE_FIELD_BITSIZE (arr_type, 0);
+	      /* A multi-dimensional array is represented using a
+		 sequence of array types.  If one of these types has a
+		 name, then it is not another dimension of the outer
+		 array, but rather the element type of the outermost
+		 array.  */
+	      arr_type = TYPE_TARGET_TYPE (arr_type);
+	      if (arr_type->name () != nullptr)
+		break;
 	    }
 	}
       else

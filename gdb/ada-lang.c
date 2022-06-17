@@ -3208,6 +3208,12 @@ ada_array_element_type (struct type *type, int nindices)
       while (nindices != 0 && type->code () == TYPE_CODE_ARRAY)
 	{
 	  type = TYPE_TARGET_TYPE (type);
+	  /* A multi-dimensional array is represented using a sequence
+	     of array types.  If one of these types has a name, then
+	     it is not another dimension of the outer array, but
+	     rather the element type of the outermost array.  */
+	  if (type->name () != nullptr)
+	    break;
 	  nindices -= 1;
 	}
       return type;
