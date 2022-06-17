@@ -343,14 +343,11 @@ _initialize_tui_interp ()
 {
   interp_factory_register (INTERP_TUI, tui_interp_factory);
 
-  if (interpreter_p && strcmp (interpreter_p, INTERP_TUI) == 0)
+  if (interpreter_p == INTERP_TUI)
     tui_start_enabled = true;
 
-  if (interpreter_p && strcmp (interpreter_p, INTERP_CONSOLE) == 0)
-    {
-      xfree (interpreter_p);
-      interpreter_p = xstrdup (INTERP_TUI);
-    }
+  if (interpreter_p == INTERP_CONSOLE)
+    interpreter_p = INTERP_TUI;
 
   /* If changing this, remember to update cli-interp.c as well.  */
   gdb::observers::normal_stop.attach (tui_on_normal_stop, "tui-interp");

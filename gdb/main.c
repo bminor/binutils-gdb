@@ -56,10 +56,8 @@
 #include "observable.h"
 #include "serial.h"
 
-/* The selected interpreter.  This will be used as a set command
-   variable, so it should always be malloc'ed - since
-   do_setshow_command will free it.  */
-char *interpreter_p;
+/* The selected interpreter.  */
+std::string interpreter_p;
 
 /* System root path, used to find libraries etc.  */
 std::string gdb_sysroot;
@@ -729,7 +727,7 @@ captured_main_1 (struct captured_main_args *context)
      this captured main, or one specified by the user at start up, or
      the console.  Initialize the interpreter to the one requested by 
      the application.  */
-  interpreter_p = xstrdup (context->interpreter_p);
+  interpreter_p = context->interpreter_p;
 
   /* Parse arguments and options.  */
   {
@@ -866,8 +864,7 @@ captured_main_1 (struct captured_main_args *context)
 	  case OPT_TUI:
 	    /* --tui is equivalent to -i=tui.  */
 #ifdef TUI
-	    xfree (interpreter_p);
-	    interpreter_p = xstrdup (INTERP_TUI);
+	    interpreter_p = INTERP_TUI;
 #else
 	    error (_("%s: TUI mode is not supported"), gdb_program_name);
 #endif
@@ -877,14 +874,12 @@ captured_main_1 (struct captured_main_args *context)
 	       actually useful, and if it is, what it should do.  */
 #ifdef GDBTK
 	    /* --windows is equivalent to -i=insight.  */
-	    xfree (interpreter_p);
-	    interpreter_p = xstrdup (INTERP_INSIGHT);
+	    interpreter_p = INTERP_INSIGHT;
 #endif
 	    break;
 	  case OPT_NOWINDOWS:
 	    /* -nw is equivalent to -i=console.  */
-	    xfree (interpreter_p);
-	    interpreter_p = xstrdup (INTERP_CONSOLE);
+	    interpreter_p = INTERP_CONSOLE;
 	    break;
 	  case 'f':
 	    annotation_level = 1;
@@ -950,8 +945,7 @@ captured_main_1 (struct captured_main_args *context)
 	    }
 #endif /* GDBTK */
 	  case 'i':
-	    xfree (interpreter_p);
-	    interpreter_p = xstrdup (optarg);
+	    interpreter_p = optarg;
 	    break;
 	  case 'd':
 	    dirarg.push_back (optarg);
@@ -1133,7 +1127,7 @@ captured_main_1 (struct captured_main_args *context)
      GDB retain the old MI1 interpreter startup behavior.  Output the
      copyright message before the interpreter is installed.  That way
      it isn't encapsulated in MI output.  */
-  if (!quiet && strcmp (interpreter_p, INTERP_MI1) == 0)
+  if (!quiet && interpreter_p == INTERP_MI1)
     {
       /* Print all the junk at the top, with trailing "..." if we are
 	 about to read a symbol file (possibly slowly).  */
@@ -1147,7 +1141,7 @@ captured_main_1 (struct captured_main_args *context)
 
   /* Install the default UI.  All the interpreters should have had a
      look at things by now.  Initialize the default interpreter.  */
-  set_top_level_interpreter (interpreter_p);
+  set_top_level_interpreter (interpreter_p.c_str ());
 
   /* FIXME: cagney/2003-02-03: The big hack (part 2 of 2) that lets
      GDB retain the old MI1 interpreter startup behavior.  Output the
