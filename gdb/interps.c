@@ -79,14 +79,12 @@ static struct interp *interp_lookup_existing (struct ui *ui,
 					      const char *name);
 
 interp::interp (const char *name)
-  : m_name (xstrdup (name))
+  : m_name (make_unique_xstrdup (name))
 {
-  this->inited = false;
 }
 
 interp::~interp ()
 {
-  xfree (m_name);
 }
 
 /* An interpreter factory.  Maps an interpreter name to the factory
