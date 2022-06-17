@@ -1662,7 +1662,7 @@ struct line_offset
 linespec_parse_line_offset (const char *string)
 {
   const char *start = string;
-  struct line_offset line_offset = {0, LINE_OFFSET_NONE};
+  struct line_offset line_offset;
 
   if (*string == '+')
     {
@@ -1674,6 +1674,8 @@ linespec_parse_line_offset (const char *string)
       line_offset.sign = LINE_OFFSET_MINUS;
       ++string;
     }
+  else
+    line_offset.sign = LINE_OFFSET_NONE;
 
   if (*string != '\0' && !isdigit (*string))
     error (_("malformed line offset: \"%s\""), start);
@@ -2844,7 +2846,7 @@ linespec_complete_label (completion_tracker &tracker,
 {
   linespec_parser parser (0, language, NULL, NULL, 0, NULL);
 
-  line_offset unknown_offset = { 0, LINE_OFFSET_UNKNOWN };
+  line_offset unknown_offset;
 
   try
     {
@@ -4062,7 +4064,7 @@ linespec_parse_variable (struct linespec_state *self, const char *variable)
 {
   int index = 0;
   const char *p;
-  struct line_offset offset = {0, LINE_OFFSET_NONE};
+  line_offset offset;
 
   p = (variable[1] == '$') ? variable + 2 : variable + 1;
   if (*p == '$')
@@ -4081,6 +4083,7 @@ linespec_parse_variable (struct linespec_state *self, const char *variable)
 	error (_("History values used in line "
 		 "specs must have integer values."));
       offset.offset = value_as_long (val_history);
+      offset.sign = LINE_OFFSET_NONE;
     }
   else
     {
@@ -4092,11 +4095,10 @@ linespec_parse_variable (struct linespec_state *self, const char *variable)
       /* Try it as a convenience variable.  If it is not a convenience
 	 variable, return and allow normal symbol lookup to occur.  */
       ivar = lookup_only_internalvar (variable + 1);
-      if (ivar == NULL)
-	/* No internal variable with that name.  Mark the offset
-	   as unknown to allow the name to be looked up as a symbol.  */
-	offset.sign = LINE_OFFSET_UNKNOWN;
-      else
+	/* If there's no internal variable with that name, let the
+	   offset remain as unknown to allow the name to be looked up
+	   as a symbol.  */
+      if (ivar != nullptr)
 	{
 	  /* We found a valid variable name.  If it is not an integer,
 	     throw an error.  */
@@ -4104,7 +4106,10 @@ linespec_parse_variable (struct linespec_state *self, const char *variable)
 	    error (_("Convenience variables used in line "
 		     "specs must have integer values."));
 	  else
-	    offset.offset = valx;
+	    {
+	      offset.offset = valx;
+	      offset.sign = LINE_OFFSET_NONE;
+	    }
 	}
     }
 

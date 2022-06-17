@@ -221,7 +221,7 @@ struct explicit_location_spec : public location_spec
   /* A line offset relative to the start of the symbol
      identified by the above fields or the current symtab
      if the other fields are NULL.  */
-  struct line_offset line_offset = {0, LINE_OFFSET_UNKNOWN};
+  struct line_offset line_offset;
 
 protected:
   explicit_location_spec (const explicit_location_spec &other);
