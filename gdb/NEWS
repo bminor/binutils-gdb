@@ -43,6 +43,10 @@ maintenance info line-table
   entry corresponds to an address where a breakpoint should be placed
   to be at the first instruction past a function's prologue.
 
+* New targets
+
+GNU/Linux/LoongArch (gdbserver)	loongarch*-*-linux*
+
 * Python API
 
   ** GDB will now reformat the doc string for gdb.Command and
@@ -96,6 +100,10 @@ maintenance info line-table
      - gdb.disassembler.DisassemblerResult is a class that can be used
        to wrap the result of a call to a Disassembler.  It has
        read-only attributes 'length' and 'string'.
+
+* New features in the GDB remote stub, GDBserver
+
+  ** GDBserver is now supported on LoongArch GNU/Linux.
 
 *** Changes in GDB 12
 
@@ -728,8 +736,6 @@ QMemTags
 
   ** GDBserver is now supported on RISC-V GNU/Linux.
 
-  ** GDBserver is now supported on LoongArch GNU/Linux.
-
   ** GDBserver no longer supports these host triplets:
 
     i[34567]86-*-lynxos*
@@ -821,7 +827,6 @@ alias [-a] [--] ALIAS = COMMAND [DEFAULT-ARGS...]
 * New targets
 
 GNU/Linux/RISC-V (gdbserver)	riscv*-*-linux*
-GNU/Linux/LoongArch (gdbserver)	loongarch*-*-linux*
 BPF				bpf-unknown-none
 Z80				z80-unknown-*
 
