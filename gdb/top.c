@@ -2232,17 +2232,6 @@ show_startup_quiet (struct ui_file *file, int from_tty,
 }
 
 static void
-init_gdb_version_vars (void)
-{
-  struct internalvar *major_version_var = create_internalvar ("_gdb_major");
-  struct internalvar *minor_version_var = create_internalvar ("_gdb_minor");
-  int vmajor = 0, vminor = 0, vrevision = 0;
-  sscanf (version, "%d.%d.%d", &vmajor, &vminor, &vrevision);
-  set_internalvar_integer (major_version_var, vmajor);
-  set_internalvar_integer (minor_version_var, vminor + (vrevision > 0));
-}
-
-static void
 init_main (void)
 {
   struct cmd_list_element *c;
@@ -2405,6 +2394,13 @@ Usage: new-ui INTERPRETER TTY\n\
 The first argument is the name of the interpreter to run.\n\
 The second argument is the terminal the UI runs on."), &cmdlist);
   set_cmd_completer (c, interpreter_completer);
+
+  struct internalvar *major_version_var = create_internalvar ("_gdb_major");
+  struct internalvar *minor_version_var = create_internalvar ("_gdb_minor");
+  int vmajor = 0, vminor = 0, vrevision = 0;
+  sscanf (version, "%d.%d.%d", &vmajor, &vminor, &vrevision);
+  set_internalvar_integer (major_version_var, vmajor);
+  set_internalvar_integer (minor_version_var, vminor + (vrevision > 0));
 }
 
 /* See top.h.  */
@@ -2422,8 +2418,6 @@ gdb_init ()
      what may, since the OS doesn't do that for us.  */
   make_final_cleanup (do_chdir_cleanup, xstrdup (current_directory));
 #endif
-
-  init_cmd_lists ();	    /* This needs to be done first.  */
 
   init_page_info ();
 
@@ -2454,9 +2448,6 @@ gdb_init ()
      during startup.  */
   set_language (language_c);
   expected_language = current_language;	/* Don't warn about the change.  */
-
-  /* Create $_gdb_major and $_gdb_minor convenience variables.  */
-  init_gdb_version_vars ();
 }
 
 void _initialize_top ();

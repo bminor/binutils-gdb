@@ -76,7 +76,7 @@ static void filter_sals (std::vector<symtab_and_line> &);
 
 
 /* See cli-cmds.h. */
-unsigned int max_user_call_depth;
+unsigned int max_user_call_depth = 1024;
 
 /* Define all cmd_list_elements.  */
 
@@ -2103,12 +2103,6 @@ filter_sals (std::vector<symtab_and_line> &sals)
     { return cmp_symtabs (sala, salb) == 0; });
 
   sals.erase (from, sals.end ());
-}
-
-void
-init_cmd_lists (void)
-{
-  max_user_call_depth = 1024;
 }
 
 static void
