@@ -2367,7 +2367,10 @@ parse_stab_struct_fields (void *dhandle,
 
       if (! parse_stab_one_struct_field (dhandle, info, pp, p, fields + c,
 					 staticsp, p_end))
-	return false;
+	{
+	  free (fields);
+	  return false;
+	}
 
       ++c;
     }
