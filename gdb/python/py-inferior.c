@@ -197,6 +197,20 @@ python_new_objfile (struct objfile *objfile)
     }
 }
 
+/* Emit a Python event when an objfile is about to be removed.  */
+
+static void
+python_free_objfile (struct objfile *objfile)
+{
+  if (!gdb_python_initialized)
+    return;
+
+  gdbpy_enter enter_py (objfile->arch ());
+
+  if (emit_free_objfile_event (objfile) < 0)
+    gdbpy_print_stack ();
+}
+
 /* Return a reference to the Python object of type Inferior
    representing INFERIOR.  If the object has already been created,
    return it and increment the reference count,  otherwise, create it.
@@ -853,6 +867,7 @@ gdbpy_initialize_inferior (void)
   gdb::observers::new_objfile.attach
     (python_new_objfile, "py-inferior",
      { &auto_load_new_objfile_observer_token });
+  gdb::observers::free_objfile.attach (python_free_objfile, "py-inferior");
   gdb::observers::inferior_added.attach (python_new_inferior, "py-inferior");
   gdb::observers::inferior_removed.attach (python_inferior_deleted,
 					   "py-inferior");

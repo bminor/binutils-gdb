@@ -53,6 +53,42 @@ emit_new_objfile_event (struct objfile *objfile)
   return -1;
 }
 
+/* Create an event object representing a to-be-freed objfile.  Return
+   nullptr, with the Python exception set, on error.  */
+
+static gdbpy_ref<>
+create_free_objfile_event_object (struct objfile *objfile)
+{
+  gdbpy_ref<> objfile_event
+    = create_event_object (&free_objfile_event_object_type);
+  if (objfile_event == nullptr)
+    return nullptr;
+
+  gdbpy_ref<> py_objfile = objfile_to_objfile_object (objfile);
+  if (py_objfile == nullptr
+      || evpy_add_attribute (objfile_event.get (), "objfile",
+			     py_objfile.get ()) < 0)
+    return nullptr;
+
+  return objfile_event;
+}
+
+/* Callback function which notifies observers when a free objfile
+   event occurs.  This function will create a new Python event object.
+   Return -1 if emit fails.  */
+
+int
+emit_free_objfile_event (struct objfile *objfile)
+{
+  if (evregpy_no_listeners_p (gdb_py_events.free_objfile))
+    return 0;
+
+  gdbpy_ref<> event = create_free_objfile_event_object (objfile);
+  if (event == nullptr)
+    return -1;
+  return evpy_emit_event (event.get (), gdb_py_events.free_objfile);
+}
+
 
 /* Subroutine of emit_clear_objfiles_event to simplify it.  */
 
