@@ -118,6 +118,9 @@ GNU/Linux/LoongArch (gdbserver)	loongarch*-*-linux*
        to wrap the result of a call to a Disassembler.  It has
        read-only attributes 'length' and 'string'.
 
+  ** gdb.Objfile now has an attribute named "is_file".  This is True
+     if the objfile comes from a file, and False otherwise.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on LoongArch GNU/Linux.

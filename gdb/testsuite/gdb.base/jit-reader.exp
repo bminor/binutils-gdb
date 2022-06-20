@@ -13,6 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Optionally test a Python API here as well.
+load_lib gdb-python.exp
+
 standard_testfile jit-reader-host.c
 
 if { (![istarget x86_64-*-*] && ![istarget i?86-*-*]) || ![is_lp64_target] } {
@@ -264,6 +267,15 @@ proc jit_reader_test {} {
 		 "#0 ${any} in jit_function_stack_mangle ${any}" \
 		 "#1 ${any} in main ${any}" \
 		]
+    }
+
+    if {![skip_python_tests]} {
+	gdb_test "python print(any(\[not x.is_file for x in gdb.objfiles()\]))" \
+	    "True" \
+	    "at least one non-file objfile"
+	gdb_test "python print(any(\[x.is_file for x in gdb.objfiles()\]))" \
+	    "True" \
+	    "at least one file-based objfile"
     }
 }
 

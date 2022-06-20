@@ -101,6 +101,18 @@ objfpy_get_username (PyObject *self, void *closure)
   Py_RETURN_NONE;
 }
 
+/* Get the 'is_file' attribute.  */
+
+static PyObject *
+objfpy_get_is_file (PyObject *o, void *ignore)
+{
+  objfile_object *self = (objfile_object *) o;
+
+  if (self->objfile != nullptr)
+    return PyBool_FromLong ((self->objfile->flags & OBJF_NOT_FILENAME) == 0);
+  Py_RETURN_NONE;
+}
+
 /* If SELF is a separate debug-info file, return the "backlink" field.
    Otherwise return None.  */
 
@@ -762,6 +774,8 @@ static gdb_PyGetSetDef objfile_getset[] =
     "Type printers.", NULL },
   { "xmethods", objfpy_get_xmethods, NULL,
     "Debug methods.", NULL },
+  { "is_file", objfpy_get_is_file, nullptr,
+    "Whether this objfile came from a file.", nullptr },
   { NULL }
 };
 

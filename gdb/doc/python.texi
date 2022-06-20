@@ -4891,6 +4891,13 @@ The value is @code{None} if the objfile is no longer valid.
 See the @code{gdb.Objfile.is_valid} method, described below.
 @end defvar
 
+@defvar Objfile.is_file
+An objfile often comes from an ordinary file, but in some cases it may
+be constructed from the contents of memory.  This attribute is
+@code{True} for file-backed objfiles, and @code{False} for other
+kinds.
+@end defvar
+
 @defvar Objfile.owner
 For separate debug info objfiles this is the corresponding @code{gdb.Objfile}
 object that debug info is being provided for.
