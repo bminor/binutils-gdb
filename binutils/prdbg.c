@@ -742,12 +742,9 @@ pr_function_type (void *p, int argcount, bool varargs)
 
   strcat (s, ")");
 
-  if (! substitute_type (info, s))
-    return false;
-
+  bool ret = substitute_type (info, s);
   free (s);
-
-  return true;
+  return ret;
 }
 
 /* Turn the top type on the stack into a reference to that type.  */
