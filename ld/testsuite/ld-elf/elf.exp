@@ -236,10 +236,19 @@ if {   [istarget *-*-*linux*]
     proc prune_warnings_extra { text } {
 	return $text
     }
-    
+
+    # The HPPA target disables the warnings by default since it needs an
+    # executable stack to support older kernels and an RWX segment to
+    # support its PLT.
+    if { [istarget "hppa*-*-*"] } {
+        set extra_link_opts "--warn-execstack --warn-rwx-segments"
+    } else {
+        set extra_link_opts ""
+    }
+
     run_ld_link_tests [list \
 	[list "PR ld/29072 (warn about an executable .note.GNU-stack)" \
-	    "-e 0" \
+	    "-e 0 $extra_link_opts" \
 	    "" \
 	    "" \
 	    {pr29072-a.s} \

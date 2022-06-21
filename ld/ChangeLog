@@ -1,3 +1,14 @@
+2022-06-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 29263
+	* configure.ac (ac_default_ld_warn_execstack): Default to 'no' for
+	HPPA targets.
+	(ac_default_ld_warn_rwx_segments): Likewise.
+	* configure: Regenerate.
+	* testsuite/ld-elf/elf.exp: Add the --warn-execstack command line
+	option to the command line when running execstack tests for the
+	HPPA target.
+
 2022-05-12  Alan Modra  <amodra@gmail.com>
 
 	PR 29006
