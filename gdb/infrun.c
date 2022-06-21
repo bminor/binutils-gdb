@@ -3703,7 +3703,9 @@ infrun_thread_stop_requested (ptid_t ptid)
 }
 
 static void
-infrun_thread_thread_exit (struct thread_info *tp, int silent)
+infrun_thread_thread_exit (thread_info *tp,
+			   gdb::optional<ULONGEST> /* exit_code */,
+			   bool /* silent */)
 {
   if (target_last_proc_target == tp->inf->process_target ()
       && target_last_wait_ptid == tp->ptid)

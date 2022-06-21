@@ -340,7 +340,9 @@ add_thread_object (struct thread_info *tp)
 }
 
 static void
-delete_thread_object (struct thread_info *tp, int ignore)
+delete_thread_object (thread_info *tp,
+		      gdb::optional<ULONGEST> /* exit_code */,
+		      bool /* silent */)
 {
   struct threadlist_entry **entry, *tmp;
 
