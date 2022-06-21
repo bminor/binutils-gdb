@@ -68,7 +68,9 @@ static void mi_on_normal_stop (struct bpstat *bs, int print_frame);
 static void mi_on_no_history (void);
 
 static void mi_new_thread (struct thread_info *t);
-static void mi_thread_exit (struct thread_info *t, int silent);
+static void mi_thread_exit (thread_info *t,
+			    gdb::optional<ULONGEST> exit_code,
+			    bool silent);
 static void mi_record_changed (struct inferior*, int, const char *,
 			       const char *);
 static void mi_inferior_added (struct inferior *inf);
@@ -345,8 +347,10 @@ mi_new_thread (struct thread_info *t)
     }
 }
 
+/* Observer for the thread_exit notification.  */
+
 static void
-mi_thread_exit (struct thread_info *t, int silent)
+mi_thread_exit (thread_info *t, gdb::optional<ULONGEST> exit_code, bool silent)
 {
   SWITCH_THRU_ALL_UIS ()
     {

@@ -3243,7 +3243,9 @@ remove_breakpoints (void)
    that thread.  */
 
 static void
-remove_threaded_breakpoints (struct thread_info *tp, int silent)
+remove_threaded_breakpoints (thread_info *tp,
+			     gdb::optional<ULONGEST> exit_code,
+			     bool /* silent */)
 {
   for (breakpoint *b : all_breakpoints_safe ())
     {

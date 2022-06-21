@@ -697,6 +697,8 @@ extern void detach_inferior (inferior *inf);
 
 extern void exit_inferior (inferior *inf);
 
+/* Like exit_inferior, but be quiet -- don't announce the exit of the
+   inferior's threads to the CLI.  */
 extern void exit_inferior_silent (inferior *inf);
 
 extern void exit_inferior_num_silent (int num);

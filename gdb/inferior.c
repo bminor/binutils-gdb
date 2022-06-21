@@ -223,7 +223,7 @@ inferior::clear_thread_list ()
     {
       threads_debug_printf ("deleting thread %s",
 			    thr->ptid.to_string ().c_str ());
-      set_thread_exited (thr, true);
+      set_thread_exited (thr, {}, true);
       if (thr->deletable ())
 	delete thr;
     });

@@ -155,17 +155,7 @@ if {$is_remote} {
 		exp_continue
 	    }
 
-	    # When PR gdb/30129 is fixed then this can all be collapsed down
-	    # into a single gdb_assert call.  This is split out like this
-	    # because the SAW_BP_DELETED part is working, and we want to
-	    # spot if that stops working.
-	    if { $saw_thread_exited && $saw_bp_deleted } {
-		kpass "gdb/30129" $gdb_test_name
-	    } elseif {!$saw_thread_exited && $saw_bp_deleted} {
-		kfail "gdb/30129" $gdb_test_name
-	    } else {
-		fail $gdb_test_name
-	    }
+	    gdb_assert { $saw_thread_exited && $saw_bp_deleted } $gdb_test_name
 	}
     }
 } else {
