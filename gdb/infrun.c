@@ -1956,6 +1956,22 @@ displaced_step_prepare (thread_info *thread)
   return status;
 }
 
+/* True if any thread of TARGET that matches RESUME_PTID requires
+   target_thread_events enabled.  This assumes TARGET does not support
+   target thread options.  */
+
+static bool
+any_thread_needs_target_thread_events (process_stratum_target *target,
+				       ptid_t resume_ptid)
+{
+  for (thread_info *tp : all_non_exited_threads (target, resume_ptid))
+    if (displaced_step_in_progress_thread (tp)
+	|| schedlock_applies (tp)
+	|| tp->thread_fsm () != nullptr)
+      return true;
+  return false;
+}
+
 /* Maybe disable thread-{cloned,created,exited} event reporting after
    a step-over (either in-line or displaced) finishes.  */
 
@@ -1979,9 +1995,10 @@ update_thread_events_after_step_over (thread_info *event_thread,
   else
     {
       /* We can only control the target-wide target_thread_events
-	 setting.  Disable it, but only if other threads don't need it
-	 enabled.  */
-      if (!displaced_step_in_progress_any_thread ())
+	 setting.  Disable it, but only if other threads in the target
+	 don't need it enabled.  */
+      process_stratum_target *target = event_thread->inf->process_target ();
+      if (!any_thread_needs_target_thread_events (target, minus_one_ptid))
 	target_thread_events (false);
     }
 }
@@ -2559,12 +2576,25 @@ do_target_resume (ptid_t resume_ptid, bool step, enum gdb_signal sig)
       else
 	target_thread_events (true);
     }
+  else if (tp->thread_fsm () != nullptr)
+    {
+      gdb_thread_options options = GDB_THREAD_OPTION_EXIT;
+      if (target_supports_set_thread_options (options))
+	tp->set_thread_options (options);
+      else
+	target_thread_events (true);
+    }
   else
     {
       if (target_supports_set_thread_options (0))
 	tp->set_thread_options (0);
-      else if (!displaced_step_in_progress_any_thread ())
-	target_thread_events (false);
+      else
+	{
+	  process_stratum_target *resume_target = tp->inf->process_target ();
+	  if (!any_thread_needs_target_thread_events (resume_target,
+						      resume_ptid))
+	    target_thread_events (false);
+	}
     }
 
   /* If we're resuming more than one thread simultaneously, then any
@@ -5842,6 +5872,13 @@ handle_thread_exited (execution_control_state *ecs)
   ecs->event_thread->stepping_over_breakpoint = 0;
   ecs->event_thread->stepping_over_watchpoint = 0;
 
+  /* If the thread had an FSM, then abort the command.  But only after
+     finishing the step over, as in non-stop mode, aborting this
+     thread's command should not interfere with other threads.  We
+     must check this before finish_step over, however, which may
+     update the thread list and delete the event thread.  */
+  bool abort_cmd = (ecs->event_thread->thread_fsm () != nullptr);
+
   /* Maybe the thread was doing a step-over, if so release
      resources and start any further pending step-overs.
 
@@ -5854,6 +5891,13 @@ handle_thread_exited (execution_control_state *ecs)
      event before this one.  But we know it never does that if
      the event thread has exited.  */
   gdb_assert (ret == 0);
+
+  if (abort_cmd)
+    {
+      delete_thread (ecs->event_thread);
+      ecs->event_thread = nullptr;
+      return false;
+    }
 
   /* If finish_step_over started a new in-line step-over, don't
      try to restart anything else.  */
@@ -9287,7 +9331,8 @@ normal_stop ()
       if (inferior_ptid != null_ptid)
 	finish_ptid = ptid_t (inferior_ptid.pid ());
     }
-  else if (last.kind () != TARGET_WAITKIND_NO_RESUMED)
+  else if (last.kind () != TARGET_WAITKIND_NO_RESUMED
+	   && last.kind () != TARGET_WAITKIND_THREAD_EXITED)
     finish_ptid = inferior_ptid;
 
   gdb::optional<scoped_finish_thread_state> maybe_finish_thread_state;
@@ -9330,7 +9375,8 @@ normal_stop ()
     {
       if ((last.kind () != TARGET_WAITKIND_SIGNALLED
 	   && last.kind () != TARGET_WAITKIND_EXITED
-	   && last.kind () != TARGET_WAITKIND_NO_RESUMED)
+	   && last.kind () != TARGET_WAITKIND_NO_RESUMED
+	   && last.kind () != TARGET_WAITKIND_THREAD_EXITED)
 	  && target_has_execution ()
 	  && previous_thread != inferior_thread ())
 	{
@@ -9346,7 +9392,8 @@ normal_stop ()
       update_previous_thread ();
     }
 
-  if (last.kind () == TARGET_WAITKIND_NO_RESUMED)
+  if (last.kind () == TARGET_WAITKIND_NO_RESUMED
+      || last.kind () == TARGET_WAITKIND_THREAD_EXITED)
     {
       stop_print_frame = false;
 
@@ -9354,7 +9401,12 @@ normal_stop ()
 	if (current_ui->prompt_state == PROMPT_BLOCKED)
 	  {
 	    target_terminal::ours_for_output ();
-	    gdb_printf (_("No unwaited-for children left.\n"));
+	    if (last.kind () == TARGET_WAITKIND_NO_RESUMED)
+	      gdb_printf (_("No unwaited-for children left.\n"));
+	    else if (last.kind () == TARGET_WAITKIND_THREAD_EXITED)
+	      gdb_printf (_("Command aborted, thread exited.\n"));
+	    else
+	      gdb_assert_not_reached ("unhandled");
 	  }
     }
 
@@ -9437,7 +9489,8 @@ normal_stop ()
     {
       if (last.kind () != TARGET_WAITKIND_SIGNALLED
 	  && last.kind () != TARGET_WAITKIND_EXITED
-	  && last.kind () != TARGET_WAITKIND_NO_RESUMED)
+	  && last.kind () != TARGET_WAITKIND_NO_RESUMED
+	  && last.kind () != TARGET_WAITKIND_THREAD_EXITED)
 	/* Delete the breakpoint we stopped at, if it wants to be deleted.
 	   Delete any breakpoint that is to be deleted at the next stop.  */
 	breakpoint_auto_delete (inferior_thread ()->control.stop_bpstat);

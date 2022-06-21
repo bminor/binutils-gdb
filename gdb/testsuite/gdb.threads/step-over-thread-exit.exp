@@ -29,7 +29,7 @@ if { [build_executable "failed to prepare" $testfile \
 # NS_STOP_ALL is only used if testing "set non-stop on", and indicates
 # whether to have GDB explicitly stop all threads before continuing to
 # thread exit.
-proc test {displaced-stepping non-stop target-non-stop schedlock ns_stop_all} {
+proc test {displaced-stepping non-stop target-non-stop schedlock cmd ns_stop_all} {
     if {${non-stop} == "off" && $ns_stop_all} {
 	error "invalid arguments"
     }
@@ -72,31 +72,58 @@ proc test {displaced-stepping non-stop target-non-stop schedlock ns_stop_all} {
 
 	gdb_test_no_output "set scheduler-locking ${schedlock}"
 
-	gdb_test "continue" \
-	    "No unwaited-for children left." \
-	    "continue stops when thread exits"
+	if {$cmd == "continue"} {
+	    gdb_test "continue" \
+		"No unwaited-for children left." \
+		"continue stops when thread exits"
+	} else {
+	    gdb_test_multiple $cmd "command aborts when thread exits" {
+		-re "Command aborted, thread exited\\.\r\n$::gdb_prompt " {
+		    pass $gdb_test_name
+		}
+	    }
+	}
     } else {
 	gdb_test_no_output "set scheduler-locking ${schedlock}"
 
-	for { set i 0 } { $i < 100 } { incr i } {
-	    with_test_prefix "iter $i" {
-		set ok 0
-		set thread "<unknown>"
-		gdb_test_multiple "continue" "" {
-		    -re -wrap "Thread ($::decimal) .*hit Breakpoint $::decimal.* my_exit_syscall .*" {
-			set thread $expect_out(1,string)
-			set ok 1
-		    }
+	if {$cmd != "continue"} {
+	    set thread "<unknown>"
+	    gdb_test_multiple "continue" "" {
+		-re -wrap "Thread ($::decimal) .*hit Breakpoint $::decimal.* my_exit_syscall .*" {
+		    set thread $expect_out(1,string)
 		}
-		if {!${ok}} {
-		    # Exit if there's a failure to avoid lengthy
-		    # timeouts.
-		    break
-		}
+	    }
+	    if {${non-stop}} {
+		gdb_test -nopass "thread $thread" "Switching to thread .*" \
+		    "switch to event thread"
+	    }
 
-		if {${non-stop}} {
-		    gdb_test "thread $thread" "Switching to thread .*" \
-			"switch to event thread"
+	    gdb_test_multiple $cmd "command aborts when thread exits" {
+		-re "Command aborted, thread exited\\.\r\n$::gdb_prompt " {
+		    pass $gdb_test_name
+		}
+	    }
+	} else {
+	    for { set i 0 } { $i < 100 } { incr i } {
+		with_test_prefix "iter $i" {
+		    set ok 0
+		    set thread "<unknown>"
+		    gdb_test_multiple "continue" "" {
+			-re -wrap "Thread ($::decimal) .*hit Breakpoint $::decimal.* my_exit_syscall .*" {
+			    set thread $expect_out(1,string)
+			    set ok 1
+			}
+		    }
+		    if {!${ok}} {
+			# Exit if there's a failure to avoid lengthy
+			# timeouts.
+			break
+		    }
+
+		    if {${non-stop}} {
+			gdb_test -nopass "thread $thread" "Switching to thread .*" \
+			    "switch to event thread"
+		    }
 		}
 	    }
 	}
@@ -112,13 +139,15 @@ foreach_with_prefix displaced-stepping {off auto} {
 	    }
 
 	    foreach_with_prefix schedlock {off on} {
-		if {${non-stop} == "on"} {
-		    foreach_with_prefix ns_stop_all {0 1} {
-			test ${displaced-stepping} ${non-stop} ${target-non-stop} \
-			    ${schedlock} ${ns_stop_all}
+		foreach_with_prefix cmd {"next" "continue"} {
+		    if {${non-stop} == "on"} {
+			foreach_with_prefix ns_stop_all {0 1} {
+			    test ${displaced-stepping} ${non-stop} ${target-non-stop} \
+				${schedlock} ${cmd} ${ns_stop_all}
+			}
+		    } else {
+			test ${displaced-stepping} ${non-stop} ${target-non-stop} ${schedlock} ${cmd} 0
 		    }
-		} else {
-		    test ${displaced-stepping} ${non-stop} ${target-non-stop} ${schedlock} 0
 		}
 	    }
 	}
