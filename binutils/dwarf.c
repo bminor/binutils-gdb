@@ -2615,9 +2615,13 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_data1:
     case DW_FORM_data2:
     case DW_FORM_sdata:
-    case DW_FORM_udata:
       if (!do_loc)
 	printf ("%c%s", delimiter, dwarf_vmatoa ("d", uvalue));
+      break;
+
+    case DW_FORM_udata:
+      if (!do_loc)
+	printf ("%c%s", delimiter, dwarf_vmatoa ("u", uvalue));
       break;
 
     case DW_FORM_implicit_const:
