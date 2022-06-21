@@ -165,16 +165,16 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
       disasm_flags |= DISASSEMBLY_SOURCE_DEPRECATED;
       break;
     case 2:
-      disasm_flags |= DISASSEMBLY_RAW_INSN;
+      disasm_flags |= DISASSEMBLY_RAW_BYTES;
       break;
     case 3:
-      disasm_flags |= DISASSEMBLY_SOURCE_DEPRECATED | DISASSEMBLY_RAW_INSN;
+      disasm_flags |= DISASSEMBLY_SOURCE_DEPRECATED | DISASSEMBLY_RAW_BYTES;
       break;
     case 4:
       disasm_flags |= DISASSEMBLY_SOURCE;
       break;
     case 5:
-      disasm_flags |= DISASSEMBLY_SOURCE | DISASSEMBLY_RAW_INSN;
+      disasm_flags |= DISASSEMBLY_SOURCE | DISASSEMBLY_RAW_BYTES;
       break;
     default:
       gdb_assert_not_reached ("bad disassembly mode");

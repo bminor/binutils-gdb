@@ -245,12 +245,12 @@ proc test_disassembly_opcode_format {} {
     # then disassemble using the MI command.
     set longest_insn_bytes ""
     set longest_insn_addr ""
-    gdb_test_multiple "disassemble /r main" "" {
-	-re "^disassemble /r main\r\n" {
+    gdb_test_multiple "disassemble /b main" "" {
+	-re "^disassemble /b main\r\n" {
 	    exp_continue
 	}
 
-	-re "^&\"disassemble /r main.n\"\r\n" {
+	-re "^&\"disassemble /b main.n\"\r\n" {
 	    exp_continue
 	}
 

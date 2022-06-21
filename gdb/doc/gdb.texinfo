@@ -7945,7 +7945,10 @@ are printed in execution order.
 
 It can also print mixed source+disassembly if you specify the the
 @code{/m} or @code{/s} modifier, and print the raw instructions in hex
-as well as in symbolic form by specifying the @code{/r} modifier.
+as well as in symbolic form by specifying the @code{/r} or @code{/b}
+modifier.  The behaviour of the @code{/m}, @code{/s}, @code{/r}, and
+@code{/b} modifiers are the same as for the @kbd{disassemble} command
+(@pxref{disassemble,,@kbd{disassemble}}).
 
 The current position marker is printed for the instruction at the
 current program counter value.  This instruction can appear multiple
@@ -9859,6 +9862,7 @@ After @code{info line}, using @code{info line} again without
 specifying a location will display information about the next source
 line.
 
+@anchor{disassemble}
 @table @code
 @kindex disassemble
 @cindex assembly instructions
@@ -9869,16 +9873,17 @@ line.
 @itemx disassemble /m
 @itemx disassemble /s
 @itemx disassemble /r
+@itemx disassemble /b
 This specialized command dumps a range of memory as machine
 instructions.  It can also print mixed source+disassembly by specifying
-the @code{/m} or @code{/s} modifier and print the raw instructions in hex
-as well as in symbolic form by specifying the @code{/r} modifier.
-The default memory range is the function surrounding the
+the @code{/m} or @code{/s} modifier and print the raw instructions in
+hex as well as in symbolic form by specifying the @code{/r} or @code{/b}
+modifier.  The default memory range is the function surrounding the
 program counter of the selected frame.  A single argument to this
 command is a program counter value; @value{GDBN} dumps the function
-surrounding this value.  When two arguments are given, they should
-be separated by a comma, possibly surrounded by whitespace.  The
-arguments specify a range of addresses to dump, in one of two forms:
+surrounding this value.  When two arguments are given, they should be
+separated by a comma, possibly surrounded by whitespace.  The arguments
+specify a range of addresses to dump, in one of two forms:
 
 @table @code
 @item @var{start},@var{end}
@@ -9913,6 +9918,35 @@ Dump of assembler code from 0x32c4 to 0x32e4:
    0x32d8 <main+224>:      addil -0x800,dp
    0x32dc <main+228>:      ldo 0x588(r1),r26
    0x32e0 <main+232>:      ldil 0x3000,r31
+End of assembler dump.
+@end smallexample
+
+The following two examples are for RISC-V, and demonstrates the
+difference between the @code{/r} and @code{/b} modifiers.  First with
+@code{/b}, the bytes of the instruction are printed, in hex, in memory
+order:
+
+@smallexample
+(@value{GDBP}) disassemble /b 0x00010150,0x0001015c
+Dump of assembler code from 0x10150 to 0x1015c:
+   0x00010150 <call_me+4>:      22 dc                 	sw	s0,56(sp)
+   0x00010152 <call_me+6>:      80 00                 	addi	s0,sp,64
+   0x00010154 <call_me+8>:      23 26 a4 fe           	sw	a0,-20(s0)
+   0x00010158 <call_me+12>:     23 24 b4 fe           	sw	a1,-24(s0)
+End of assembler dump.
+@end smallexample
+
+In contrast, with @code{/r} the bytes of the instruction are displayed
+in the instruction order, for RISC-V this means that the bytes have been
+swapped to little-endian order:
+
+@smallexample
+(@value{GDBP}) disassemble /r 0x00010150,0x0001015c
+Dump of assembler code from 0x10150 to 0x1015c:
+   0x00010150 <call_me+4>:      dc22              	sw	s0,56(sp)
+   0x00010152 <call_me+6>:      0080              	addi	s0,sp,64
+   0x00010154 <call_me+8>:      fea42623        	sw	a0,-20(s0)
+   0x00010158 <call_me+12>:     feb42423        	sw	a1,-24(s0)
 End of assembler dump.
 @end smallexample
 

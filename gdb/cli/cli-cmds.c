@@ -1508,6 +1508,9 @@ disassemble_current_function (gdb_disassembly_flags flags)
 
    A /r modifier will include raw instructions in hex with the assembly.
 
+   A /b modifier is similar to /r except the instruction bytes are printed
+   as separate bytes with no grouping, or endian switching.
+
    A /s modifier will include source code with the assembly, like /m, with
    two important differences:
    1) The output is still in pc address order.
@@ -1545,6 +1548,9 @@ disassemble_command (const char *arg, int from_tty)
 	      break;
 	    case 'r':
 	      flags |= DISASSEMBLY_RAW_INSN;
+	      break;
+	    case 'b':
+	      flags |= DISASSEMBLY_RAW_BYTES;
 	      break;
 	    case 's':
 	      flags |= DISASSEMBLY_SOURCE;

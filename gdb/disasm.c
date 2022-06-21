@@ -457,7 +457,7 @@ gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn
 	throw ex;
       }
 
-    if (flags & DISASSEMBLY_RAW_INSN)
+    if ((flags & (DISASSEMBLY_RAW_INSN | DISASSEMBLY_RAW_BYTES)) != 0)
       {
 	/* Build the opcodes using a temporary stream so we can
 	   write them out in a single go for the MI.  */
@@ -467,14 +467,51 @@ gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn
 	m_opcode_data.resize (size);
 	read_code (pc, m_opcode_data.data (), size);
 
-	for (int i = 0; i < size; ++i)
+	/* The disassembler provides information about the best way to
+	   display the instruction bytes to the user.  We provide some sane
+	   defaults in case the disassembler gets it wrong.  */
+	const struct disassemble_info *di = m_di.disasm_info ();
+	int bytes_per_line = std::max (di->bytes_per_line, size);
+	int bytes_per_chunk = std::max (di->bytes_per_chunk, 1);
+
+	/* If the user has requested the instruction bytes be displayed
+	   byte at a time, then handle that here.  Also, if the instruction
+	   is not a multiple of the chunk size (which probably indicates a
+	   disassembler problem) then avoid that causing display problems
+	   by switching to byte at a time mode.  */
+	if ((flags & DISASSEMBLY_RAW_BYTES) != 0
+	    || (size % bytes_per_chunk) != 0)
+	  bytes_per_chunk = 1;
+
+	/* Print the instruction opcodes bytes, grouped into chunks.  */
+	for (int i = 0; i < size; i += bytes_per_chunk)
 	  {
 	    if (i > 0)
 	      m_opcode_stb.puts (" ");
-	    m_opcode_stb.printf ("%02x", (unsigned) m_opcode_data[i]);
+
+	    if (di->display_endian == BFD_ENDIAN_LITTLE)
+	      {
+		for (int k = bytes_per_chunk; k-- != 0; )
+		  m_opcode_stb.printf ("%02x", (unsigned) m_opcode_data[i + k]);
+	      }
+	    else
+	      {
+		for (int k = 0; k < bytes_per_chunk; k++)
+		  m_opcode_stb.printf ("%02x", (unsigned) m_opcode_data[i + k]);
+	      }
+	  }
+
+	/* Calculate required padding.  */
+	int nspaces = 0;
+	for (int i = size; i < bytes_per_line; i += bytes_per_chunk)
+	  {
+	    if (i > size)
+	      nspaces++;
+	    nspaces += bytes_per_chunk * 2;
 	  }
 
 	m_uiout->field_stream ("opcodes", m_opcode_stb);
+	m_uiout->spaces (nspaces);
 	m_uiout->text ("\t");
       }
 

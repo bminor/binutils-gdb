@@ -59,6 +59,18 @@
 
 * gdb now supports zstd compressed debug sections (ELFCOMPRESS_ZSTD) for ELF.
 
+* The format of 'disassemble /r' and 'record instruction-history /r'
+  has changed.  The instruction bytes could now be grouped together,
+  and displayed in the endianness of the instruction.  This is the
+  same layout as used by GNU objdump when disassembling.
+
+  There is now 'disassemble /b' and 'record instruction-history /b'
+  which will always display the instructions bytes one at a time in
+  memory order, that is, the byte at the lowest address first.
+
+  For both /r and /b GDB is now better at using whitespace in order to
+  align the disassembled instruction text.
+
 * New commands
 
 maintenance set ignore-prologue-end-flag on|off
