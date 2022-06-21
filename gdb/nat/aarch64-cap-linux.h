@@ -18,15 +18,10 @@
 #ifndef NAT_AARCH64_CAP_LINUX_H
 #define NAT_AARCH64_CAP_LINUX_H
 
-/* Morello-specific requests.  */
-#ifndef PTRACE_PEEKCAP
-#define PTRACE_PEEKCAP 12
-#endif
-
-#ifndef PTRACE_POKECAP
-#define PTRACE_POKECAP 13
-#endif
-
+/* If we don't find PTRACE_POKECAP and PTRACE_PEEKCAP, we need to define
+   our own structures for reading capability registers and capabilities, as we
+   may be building GDB without the Morello kernel headers.  */
+#if !defined(PTRACE_POKECAP) && !defined(PTRACE_PEEKCAP)
 /* Struct defining the layout of the capability register set.  */
 struct user_morello_state {
 	/* General capability registers.  */
@@ -57,6 +52,11 @@ struct user_cap {
   uint8_t tag;
   uint8_t __reserved[15];
 };
+
+/* Morello-specific requests.  */
+#define PTRACE_PEEKCAP 12
+#define PTRACE_POKECAP 13
+#endif
 
 /* From thread TID, read a capability from memory at ADDRESS and store
    it into CAP.
