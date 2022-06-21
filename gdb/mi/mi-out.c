@@ -278,7 +278,7 @@ mi_ui_out::do_progress_notify (const std::string &msg, const std::string &unit,
   if (info.state == progress_update::START)
     {
       struct ui_file *stream = gdb_stdout;
-      gdb_printf (stream, "%s\n", msg.c_str ());
+      gdb_printf (stream, "%s", msg.c_str ());
       info.state = progress_update::WORKING;
     }
 }

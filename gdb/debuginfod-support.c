@@ -119,42 +119,31 @@ using debuginfod_client_up
 static void
 get_size_and_unit (double &size, std::string &unit)
 {
-  if (size < 10.24)
+  if (size < 1024)
     {
-      /* If size is less than 0.01 KB then set unit to B.  */
+      /* If size is less than 1 KB then set unit to B.  */
       unit = "B";
       return;
     }
 
   size /= 1024;
-  if (size < 10.24)
+  if (size < 1024)
     {
-      /* If size is less than 0.01 MB then set unit to KB.  */
+      /* If size is less than 1 MB then set unit to KB.  */
       unit = "KB";
       return;
     }
 
   size /= 1024;
-  if (size < 10.24)
+  if (size < 1024)
     {
-      /* If size is less than 0.01 GB then set unit to MB.  */
+      /* If size is less than 1 GB then set unit to MB.  */
       unit = "MB";
       return;
     }
 
   size /= 1024;
   unit = "GB";
-}
-
-static void
-convert_to_unit (double &size, const std::string &unit)
-{
-  if (unit == "KB")
-    size /= 1024;
-  else if (unit == "MB")
-    size /= 1024 * 1024;
-  else if (unit == "GB")
-    size /= 1024 * 1024 * 1024;
 }
 
 static int
@@ -169,7 +158,6 @@ progressfn (debuginfod_client *c, long cur, long total)
 
   if (check_quit_flag ())
     {
-      //current_uiout->do_progress_end (); ///?
       gdb_printf ("Cancelling download of %s %s...\n",
 		  data->desc, styled_fname.c_str ());
       return 1;
@@ -187,15 +175,13 @@ progressfn (debuginfod_client *c, long cur, long total)
       if (howmuch >= 0.0 && howmuch <= 1.0)
 	{
 	  double d_total = (double) total;
-          double d_cur = (double) cur;
 	  std::string unit = "";
 
 	  get_size_and_unit (d_total, unit);
-	  convert_to_unit (d_cur, unit);
 	  std::string msg = string_printf ("Downloading %0.2f %s %s %s\n",
 					   d_total, unit.c_str (), data->desc,
 					   styled_fname.c_str ());
-	  data->progress.update_progress (msg, unit, d_cur, d_total);
+	  data->progress.update_progress (msg, unit, howmuch, d_total);
 	  return 0;
 	}
     }
@@ -299,29 +285,9 @@ print_outcome (user_data &data, int fd)
   fprintf_styled (&styled_fname, file_name_style.style (), "%s",
 		  data.fname);
 
-  if (debuginfod_verbose > 1 && fd >= 0)
-    {
-      struct stat s;
-
-      if (fstat (fd, &s) == 0)
-	{
-	  double size = (double)s.st_size;
-	  std::string unit = "";
-
-	  get_size_and_unit (size, unit);
-	  gdb_printf (_("Retrieved %.02f %s %s %s\n"), size, unit.c_str (),
-		      data.desc, styled_fname.c_str ());
-	}
-      else
-	warning (_("Retrieved %s %s but size cannot be read: %s\n"),
-		 data.desc, styled_fname.c_str (),
-		 safe_strerror (errno));
-    }
-  else if (fd < 0 && fd != -ENOENT)
-    gdb_printf (_("Download failed: %s. " \
-		"Continuing without %s %s.\n"),
-		safe_strerror (-fd), data.desc,
-		styled_fname.c_str ());
+  if (fd < 0 && fd != -ENOENT)
+    gdb_printf (_("Download failed: %s. Continuing without %s %s.\n"),
+		safe_strerror (-fd), data.desc, styled_fname.c_str ());
 }
 
 /* See debuginfod-support.h  */
