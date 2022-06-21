@@ -1,3 +1,13 @@
+2022-06-21  Kumar N, Bhuvanendra via Binutils  <Kavitha.Natarajan@amd.com>
+
+	* dwarf.h (struct debug_info): Add rnglists_base field.
+	* dwarf.c (read_and_display_attr_value): Read attribute DW_AT_rnglists_base.
+	(display_debug_rnglists_list): While handling DW_RLE_base_addressx,
+  	DW_RLE_startx_endx, DW_RLE_startx_length items, pass the proper parameter
+	value to fetch_indexed_addr(), i.e. fetch the proper entry in .debug_addr section.
+	(display_debug_ranges): Add rnglists_base to the .debug_rnglists base address.
+	(load_separate_debug_files): Load .debug_addr section, if exists.
+
 2022-05-20  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (dwarf_select_sections_by_names): Return zero if no

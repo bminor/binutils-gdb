@@ -2825,7 +2825,12 @@ read_and_display_attr_value (unsigned long           attribute,
 		  dwarf_vmatoa ("x", debug_info_p->cu_offset));
 	  debug_info_p->loclists_base = uvalue;
 	  break;
-
+	case DW_AT_rnglists_base:
+	  if (debug_info_p->rnglists_base)
+	    warn (_("CU @ 0x%s has multiple rnglists_base values"),
+	          dwarf_vmatoa ("x", debug_info_p->cu_offset));
+	  debug_info_p->rnglists_base = uvalue;
+	  break;
 	case DW_AT_frame_base:
 	  have_frame_base = 1;
 	  /* Fall through.  */
@@ -3316,6 +3321,7 @@ read_and_display_attr_value (unsigned long           attribute,
       /* Fall through.  */
     case DW_AT_location:
     case DW_AT_loclists_base:
+    case DW_AT_rnglists_base:
     case DW_AT_string_length:
     case DW_AT_return_addr:
     case DW_AT_data_member_location:
@@ -3335,7 +3341,10 @@ read_and_display_attr_value (unsigned long           attribute,
 	   && (form == DW_FORM_data4 || form == DW_FORM_data8))
 	  || form == DW_FORM_sec_offset
 	  || form == DW_FORM_loclistx)
-	printf (_(" (location list)"));
+	{
+	  if (attribute != DW_AT_rnglists_base)
+	    printf (_(" (location list)"));
+	}
       /* Fall through.  */
     case DW_AT_allocated:
     case DW_AT_associated:
@@ -3822,6 +3831,7 @@ process_debug_info (struct dwarf_section * section,
 	  debug_information [unit].range_lists = NULL;
 	  debug_information [unit].max_range_lists= 0;
 	  debug_information [unit].num_range_lists = 0;
+	  debug_information [unit].rnglists_base = 0;
 	}
 
       if (!do_loc && dwarf_start_die == 0)
@@ -7946,9 +7956,16 @@ display_debug_rnglists_list (unsigned char * start,
 			     unsigned char * finish,
 			     unsigned int    pointer_size,
 			     dwarf_vma       offset,
-			     dwarf_vma       base_address)
+			     dwarf_vma       base_address,
+			     unsigned int    offset_size)
 {
   unsigned char *next = start;
+  unsigned int debug_addr_section_hdr_len;
+
+  if (offset_size == 4)
+    debug_addr_section_hdr_len = 8;
+  else
+    debug_addr_section_hdr_len = 16;
 
   while (1)
     {
@@ -7978,20 +7995,24 @@ display_debug_rnglists_list (unsigned char * start,
 	  READ_ULEB (base_address, start, finish);
 	  print_dwarf_vma (base_address, pointer_size);
 	  printf (_("(base address index) "));
-	  base_address = fetch_indexed_addr (base_address, pointer_size);
+	  base_address = fetch_indexed_addr ((base_address * pointer_size)
+			                     + debug_addr_section_hdr_len, pointer_size);
 	  print_dwarf_vma (base_address, pointer_size);
 	  printf (_("(base address)\n"));
 	  break;
 	case DW_RLE_startx_endx:
 	  READ_ULEB (begin, start, finish);
 	  READ_ULEB (end, start, finish);
-	  begin = fetch_indexed_addr (begin, pointer_size);
-	  end   = fetch_indexed_addr (begin, pointer_size);
+	  begin = fetch_indexed_addr ((begin * pointer_size)
+			              + debug_addr_section_hdr_len, pointer_size);
+	  end   = fetch_indexed_addr ((begin * pointer_size)
+			              + debug_addr_section_hdr_len, pointer_size);
 	  break;
 	case DW_RLE_startx_length:
 	  READ_ULEB (begin, start, finish);
 	  READ_ULEB (length, start, finish);
-	  begin = fetch_indexed_addr (begin, pointer_size);
+	  begin = fetch_indexed_addr ((begin * pointer_size)
+			              + debug_addr_section_hdr_len, pointer_size);
 	  end = begin + length;
 	  break;
 	case DW_RLE_offset_pair:
@@ -8017,6 +8038,7 @@ display_debug_rnglists_list (unsigned char * start,
 	  rlet = DW_RLE_end_of_list;
 	  break;
 	}
+
       if (rlet == DW_RLE_end_of_list)
 	break;
       if (rlet == DW_RLE_base_address || rlet == DW_RLE_base_addressx)
@@ -8057,6 +8079,7 @@ display_debug_ranges (struct dwarf_section *section,
   /* Initialize it due to a false compiler warning.  */
   unsigned char         address_size = 0;
   dwarf_vma             last_offset = 0;
+  unsigned int          offset_size = 0;
 
   if (bytes == 0)
     {
@@ -8068,10 +8091,10 @@ display_debug_ranges (struct dwarf_section *section,
 
   if (is_rnglists)
     {
-      dwarf_vma initial_length;
-      unsigned char segment_selector_size;
-      unsigned int offset_size, offset_entry_count;
-      unsigned short version;
+      dwarf_vma       initial_length;
+      unsigned char   segment_selector_size;
+      unsigned int    offset_entry_count;
+      unsigned short  version;
 
       /* Get and check the length of the block.  */
       SAFE_BYTE_GET_AND_INC (initial_length, start, 4, finish);
@@ -8244,7 +8267,8 @@ display_debug_ranges (struct dwarf_section *section,
 		(unsigned long) offset, i);
 	  continue;
 	}
-      next = section_begin + offset;
+
+      next = section_begin + offset + debug_info_p->rnglists_base;
 
       /* If multiple DWARF entities reference the same range then we will
          have multiple entries in the `range_entries' list for the same
@@ -8276,7 +8300,7 @@ display_debug_ranges (struct dwarf_section *section,
 
       if (is_rnglists)
 	display_debug_rnglists_list
-	  (start, finish, pointer_size, offset, base_address);
+	  (start, finish, pointer_size, offset, base_address, offset_size);
       else
 	display_debug_ranges_list
 	  (start, finish, pointer_size, offset, base_address);
@@ -11884,6 +11908,9 @@ load_separate_debug_files (void * file, const char * filename)
       && load_debug_section (abbrev, file)
       && load_debug_section (info, file))
     {
+      /* Load the .debug_addr section, if it exists.  */
+      load_debug_section (debug_addr, file);
+
       free_dwo_info ();
 
       if (process_debug_info (& debug_displays[info].section, file, abbrev,

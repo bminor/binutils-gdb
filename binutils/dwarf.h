@@ -192,6 +192,7 @@ typedef struct
   dwarf_vma *    range_lists;
   unsigned int   num_range_lists;
   unsigned int   max_range_lists;
+  dwarf_vma      rnglists_base;
 }
 debug_info;
 
