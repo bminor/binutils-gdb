@@ -950,6 +950,10 @@ const struct riscv_opcode riscv_opcodes[] =
 {"cbo.inval",  0, INSN_CLASS_ZICBOM, "0(s)", MATCH_CBO_INVAL, MASK_CBO_INVAL, match_opcode, 0 },
 {"cbo.zero",   0, INSN_CLASS_ZICBOZ, "0(s)", MATCH_CBO_ZERO, MASK_CBO_ZERO, match_opcode, 0 },
 
+/* Zawrs instructions.  */
+{"wrs.nto",    0, INSN_CLASS_ZAWRS, "", MATCH_WRS_NTO, MASK_WRS_NTO, match_opcode, 0 },
+{"wrs.sto",    0, INSN_CLASS_ZAWRS, "", MATCH_WRS_STO, MASK_WRS_STO, match_opcode, 0 },
+
 /* Zbb or zbkb instructions.  */
 {"clz",        0, INSN_CLASS_ZBB,  "d,s",   MATCH_CLZ, MASK_CLZ, match_opcode, 0 },
 {"ctz",        0, INSN_CLASS_ZBB,  "d,s",   MATCH_CTZ, MASK_CTZ, match_opcode, 0 },

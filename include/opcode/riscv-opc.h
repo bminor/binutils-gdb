@@ -2113,6 +2113,11 @@
 #define MASK_CBO_INVAL 0xfff07fff
 #define MATCH_CBO_ZERO 0x40200f
 #define MASK_CBO_ZERO 0xfff07fff
+/* Zawrs intructions.  */
+#define MATCH_WRS_NTO 0x00d00073
+#define MASK_WRS_NTO 0xffffffff
+#define MATCH_WRS_STO 0x01d00073
+#define MASK_WRS_STO 0xffffffff
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 #define MATCH_TH_ADDSL 0x0000100b
 #define MASK_TH_ADDSL 0xf800707f
@@ -3066,6 +3071,9 @@ DECLARE_INSN(cbo_clean, MATCH_CBO_CLEAN, MASK_CBO_CLEAN);
 DECLARE_INSN(cbo_flush, MATCH_CBO_FLUSH, MASK_CBO_FLUSH);
 DECLARE_INSN(cbo_inval, MATCH_CBO_INVAL, MASK_CBO_INVAL);
 DECLARE_INSN(cbo_zero, MATCH_CBO_ZERO, MASK_CBO_ZERO);
+/* Zawrs instructions.  */
+DECLARE_INSN(wrs_nto, MATCH_WRS_NTO, MASK_WRS_NTO)
+DECLARE_INSN(wrs_sto, MATCH_WRS_STO, MASK_WRS_STO)
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 DECLARE_INSN(th_addsl, MATCH_TH_ADDSL, MASK_TH_ADDSL)
 /* Vendor-specific (T-Head) XTheadBb instructions.  */
