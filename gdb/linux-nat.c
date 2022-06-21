@@ -916,15 +916,10 @@ linux_nat_switch_fork (ptid_t new_ptid)
 static void
 exit_lwp (struct lwp_info *lp, bool del_thread = true)
 {
-  struct thread_info *th = find_thread_ptid (linux_target, lp->ptid);
-
-  if (th)
+  if (del_thread)
     {
-      if (print_thread_events)
-	gdb_printf (_("[%s exited]\n"),
-		    target_pid_to_str (lp->ptid).c_str ());
-
-      if (del_thread)
+      thread_info *th = find_thread_ptid (linux_target, lp->ptid);
+      if (th != nullptr)
 	delete_thread (th);
     }
 
