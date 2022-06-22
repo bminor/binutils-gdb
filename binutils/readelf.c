@@ -1401,7 +1401,7 @@ slurp_relr_relocs (Filedata * filedata,
 	    size++;
     }
 
-  *relrsp = (bfd_vma *) xmalloc (size * sizeof (bfd_vma));
+  *relrsp = (bfd_vma *) malloc (size * sizeof (bfd_vma));
   if (*relrsp == NULL)
     {
       free (relrs);
