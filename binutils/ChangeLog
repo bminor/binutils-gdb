@@ -1,9 +1,20 @@
+2022-06-22  Kumar N, Bhuvanendra  <Kavitha.Natarajan@amd.com>
+
+	* dwarf.c (fetch_indexed_string): Added new parameter
+	str_offsets_base to calculate the string offset.
+	(read_and_display_attr_value): Read DW_AT_str_offsets_base
+	attribute.
+	(process_debug_info): While allocating memory and initializing
+	debug_information, do it for do_debug_info also, if its true.
+	(load_separate_debug_files): Load .debug_str_offsets if exists.
+	* dwarf.h (struct debug_info): Add str_offsets_base field.
+
 2022-06-22  Marcus Nilsson <brainbomb@gmail.com>
 
 	* readelf.c: (slurp_relr_relocs) Use malloc instead of xmalloc
         when allocating space for relocations.
 
-2022-06-21  Kumar N, Bhuvanendra via Binutils  <Kavitha.Natarajan@amd.com>
+2022-06-21  Kumar N, Bhuvanendra  <Kavitha.Natarajan@amd.com>
 
 	* dwarf.h (struct debug_info): Add rnglists_base field.
 	* dwarf.c (read_and_display_attr_value): Read attribute DW_AT_rnglists_base.

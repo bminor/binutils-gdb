@@ -690,8 +690,11 @@ fetch_indirect_line_string (dwarf_vma offset)
 }
 
 static const char *
-fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
-		      dwarf_vma offset_size, bool dwo)
+fetch_indexed_string (dwarf_vma           idx,
+		      struct cu_tu_set *  this_set,
+		      dwarf_vma           offset_size,
+		      bool                dwo,
+		      dwarf_vma           str_offsets_base)
 {
   enum dwarf_section_display_enum str_sec_idx = dwo ? str_dwo : str;
   enum dwarf_section_display_enum idx_sec_idx = dwo ? str_index_dwo : str_index;
@@ -780,7 +783,15 @@ fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
       return _("<index offset is too big>");
     }
 
-  str_offset = byte_get (curr + index_offset, offset_size);
+  if (str_offsets_base > 0)
+    {
+      if (offset_size == 8)
+        str_offsets_base -= 16;
+      else
+        str_offsets_base -= 8;
+    }
+
+  str_offset = byte_get (curr + index_offset + str_offsets_base, offset_size);
   str_offset -= str_section->address;
   if (str_offset >= str_section->size)
     {
@@ -2738,11 +2749,13 @@ read_and_display_attr_value (unsigned long           attribute,
 	    /* We have already displayed the form name.  */
 	    printf (_("%c(offset: 0x%s): %s"), delimiter,
 		    dwarf_vmatoa ("x", uvalue),
-		    fetch_indexed_string (uvalue, this_set, offset_size, dwo));
+		    fetch_indexed_string (uvalue, this_set, offset_size, dwo,
+	                                  debug_info_p->str_offsets_base));
 	  else
 	    printf (_("%c(indexed string: 0x%s): %s"), delimiter,
 		    dwarf_vmatoa ("x", uvalue),
-		    fetch_indexed_string (uvalue, this_set, offset_size, dwo));
+		    fetch_indexed_string (uvalue, this_set, offset_size, dwo,
+	                                  debug_info_p->str_offsets_base));
 	}
       break;
 
@@ -2817,7 +2830,7 @@ read_and_display_attr_value (unsigned long           attribute,
       break;
     }
 
-  if ((do_loc || do_debug_loc || do_debug_ranges)
+  if ((do_loc || do_debug_loc || do_debug_ranges || do_debug_info)
       && num_debug_info_entries == 0
       && debug_info_p != NULL)
     {
@@ -2835,6 +2848,13 @@ read_and_display_attr_value (unsigned long           attribute,
 	          dwarf_vmatoa ("x", debug_info_p->cu_offset));
 	  debug_info_p->rnglists_base = uvalue;
 	  break;
+	case DW_AT_str_offsets_base:
+	  if (debug_info_p->str_offsets_base)
+	    warn (_("CU @ 0x%s has multiple str_offsets_base values"),
+		  dwarf_vmatoa ("x", debug_info_p->cu_offset));
+	  debug_info_p->str_offsets_base = uvalue;
+	  break;
+
 	case DW_AT_frame_base:
 	  have_frame_base = 1;
 	  /* Fall through.  */
@@ -2973,7 +2993,9 @@ read_and_display_attr_value (unsigned long           attribute,
 	      case DW_FORM_strx2:
 	      case DW_FORM_strx3:
 	      case DW_FORM_strx4:
-		add_dwo_name (fetch_indexed_string (uvalue, this_set, offset_size, false), cu_offset);
+		add_dwo_name (fetch_indexed_string (uvalue, this_set, offset_size, false,
+		                                    debug_info_p->str_offsets_base),
+			      cu_offset);
 		break;
 	      case DW_FORM_string:
 		add_dwo_name ((const char *) orig_data, cu_offset);
@@ -3005,7 +3027,9 @@ read_and_display_attr_value (unsigned long           attribute,
 	      case DW_FORM_strx2:
 	      case DW_FORM_strx3:
 	      case DW_FORM_strx4:
-		add_dwo_dir (fetch_indexed_string (uvalue, this_set, offset_size, false), cu_offset);
+		add_dwo_dir (fetch_indexed_string (uvalue, this_set, offset_size, false,
+		                                   debug_info_p->str_offsets_base),
+			     cu_offset);
 		break;
 	      case DW_FORM_string:
 		add_dwo_dir ((const char *) orig_data, cu_offset);
@@ -3326,6 +3350,7 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_AT_location:
     case DW_AT_loclists_base:
     case DW_AT_rnglists_base:
+    case DW_AT_str_offsets_base:
     case DW_AT_string_length:
     case DW_AT_return_addr:
     case DW_AT_data_member_location:
@@ -3346,7 +3371,8 @@ read_and_display_attr_value (unsigned long           attribute,
 	  || form == DW_FORM_sec_offset
 	  || form == DW_FORM_loclistx)
 	{
-	  if (attribute != DW_AT_rnglists_base)
+	  if (attribute != DW_AT_rnglists_base
+	      && attribute != DW_AT_str_offsets_base)
 	    printf (_(" (location list)"));
 	}
       /* Fall through.  */
@@ -3579,7 +3605,7 @@ process_debug_info (struct dwarf_section * section,
       return false;
     }
 
-  if ((do_loc || do_debug_loc || do_debug_ranges)
+  if ((do_loc || do_debug_loc || do_debug_ranges || do_debug_info)
       && num_debug_info_entries == 0
       && ! do_types)
     {
@@ -3814,7 +3840,7 @@ process_debug_info (struct dwarf_section * section,
 	  continue;
 	}
 
-      if ((do_loc || do_debug_loc || do_debug_ranges)
+      if ((do_loc || do_debug_loc || do_debug_ranges || do_debug_info)
 	  && num_debug_info_entries == 0
 	  && alloc_num_debug_info_entries > unit
 	  && ! do_types)
@@ -3836,6 +3862,7 @@ process_debug_info (struct dwarf_section * section,
 	  debug_information [unit].max_range_lists= 0;
 	  debug_information [unit].num_range_lists = 0;
 	  debug_information [unit].rnglists_base = 0;
+	  debug_information [unit].str_offsets_base = 0;
 	}
 
       if (!do_loc && dwarf_start_die == 0)
@@ -4106,7 +4133,7 @@ process_debug_info (struct dwarf_section * section,
 
   /* Set num_debug_info_entries here so that it can be used to check if
      we need to process .debug_loc and .debug_ranges sections.  */
-  if ((do_loc || do_debug_loc || do_debug_ranges)
+  if ((do_loc || do_debug_loc || do_debug_ranges || do_debug_info)
       && num_debug_info_entries == 0
       && ! do_types)
     {
@@ -6254,7 +6281,7 @@ display_debug_macro (struct dwarf_section *section,
 	      READ_ULEB (lineno, curr, end);
 	      READ_ULEB (offset, curr, end);
 	      string = (const unsigned char *)
-		fetch_indexed_string (offset, NULL, offset_size, false);
+		fetch_indexed_string (offset, NULL, offset_size, false, 0);
 	      if (op == DW_MACRO_define_strx)
 		printf (" DW_MACRO_define_strx ");
 	      else
@@ -7869,7 +7896,7 @@ display_debug_str_offsets (struct dwarf_section *section,
 	  SAFE_BYTE_GET_AND_INC (offset, curr, entry_length, entries_end);
 	  if (dwo)
 	    string = (const unsigned char *)
-	      fetch_indexed_string (idx, NULL, entry_length, dwo);
+	      fetch_indexed_string (idx, NULL, entry_length, dwo, 0);
 	  else
 	    string = fetch_indirect_string (offset);
 
@@ -11914,6 +11941,8 @@ load_separate_debug_files (void * file, const char * filename)
     {
       /* Load the .debug_addr section, if it exists.  */
       load_debug_section (debug_addr, file);
+      /* Load the .debug_str_offsets section, if it exists.  */
+      load_debug_section (str_index, file);
 
       free_dwo_info ();
 

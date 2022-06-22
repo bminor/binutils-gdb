@@ -193,6 +193,7 @@ typedef struct
   unsigned int   num_range_lists;
   unsigned int   max_range_lists;
   dwarf_vma      rnglists_base;
+  dwarf_vma      str_offsets_base;
 }
 debug_info;
 
