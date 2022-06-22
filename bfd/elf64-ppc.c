@@ -1996,7 +1996,8 @@ static const struct bfd_elf_special_section ppc64_elf_special_sections[] =
 enum _ppc64_sec_type {
   sec_normal = 0,
   sec_opd = 1,
-  sec_toc = 2
+  sec_toc = 2,
+  sec_stub = 3
 };
 
 struct _ppc64_elf_section_data
@@ -2026,6 +2027,9 @@ struct _ppc64_elf_section_data
       /* And the relocation addend.  */
       bfd_vma *add;
     } toc;
+
+    /* Stub debugging.  */
+    struct ppc_stub_hash_entry *last_ent;
   } u;
 
   enum _ppc64_sec_type sec_type:2;
@@ -11636,6 +11640,47 @@ get_r2off (struct bfd_link_info *info,
   return r2off;
 }
 
+/* Debug dump.  */
+
+static void
+dump_previous_stub (struct ppc_stub_hash_entry *stub_entry)
+{
+  asection *stub_sec = stub_entry->group->stub_sec;
+  struct _ppc64_elf_section_data *esd = ppc64_elf_section_data (stub_sec);
+  if (esd->sec_type == sec_stub)
+    {
+      fprintf (stderr, "Previous stub: type = ");
+      switch (esd->u.last_ent->type.main)
+	{
+	case ppc_stub_none: fprintf (stderr, "none"); break;
+	case ppc_stub_long_branch: fprintf (stderr, "long_branch"); break;
+	case ppc_stub_plt_branch: fprintf (stderr, "plt_branch"); break;
+	case ppc_stub_plt_call: fprintf (stderr, "plt_call"); break;
+	case ppc_stub_global_entry: fprintf (stderr, "global_entry"); break;
+	case ppc_stub_save_res: fprintf (stderr, "save_res"); break;
+	default: fprintf (stderr, "???"); break;
+	}
+      switch (esd->u.last_ent->type.sub)
+	{
+	case ppc_stub_toc: fprintf (stderr, ":toc"); break;
+	case ppc_stub_notoc: fprintf (stderr, ":notoc"); break;
+	case ppc_stub_p9notoc: fprintf (stderr, ":p9notoc"); break;
+	default: fprintf (stderr, ":???"); break;
+	}
+      if (esd->u.last_ent->type.r2save)
+	fprintf (stderr, ":r2save");
+      fprintf (stderr, "\nname = %s", esd->u.last_ent->root.string);
+      fprintf (stderr, "\noffset = %#lx:", esd->u.last_ent->stub_offset);
+      for (size_t i = esd->u.last_ent->stub_offset;
+	   i < stub_entry->stub_offset; i += 4)
+	{
+	  uint32_t *p = (uint32_t *) (stub_sec->contents + i);
+	  fprintf (stderr, " %08x", *p);
+	}
+      fprintf (stderr, "\n");
+    }
+}
+
 static bool
 ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 {
@@ -11680,7 +11725,11 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   if (htab == NULL)
     return false;
 
-  BFD_ASSERT (stub_entry->stub_offset >= stub_entry->group->stub_sec->size);
+  if (stub_entry->stub_offset < stub_entry->group->stub_sec->size)
+    {
+      BFD_ASSERT (0);
+      dump_previous_stub (stub_entry);
+    }
   loc = stub_entry->group->stub_sec->contents + stub_entry->stub_offset;
 
   htab->stub_count[stub_entry->type.main - 1] += 1;
@@ -12122,6 +12171,12 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
     }
 
   stub_entry->group->stub_sec->size = stub_entry->stub_offset + (p - loc);
+  struct _ppc64_elf_section_data *esd
+    = ppc64_elf_section_data (stub_entry->group->stub_sec);
+  if (esd->sec_type == sec_normal)
+    esd->sec_type = sec_stub;
+  if (esd->sec_type == sec_stub)
+    esd->u.last_ent = stub_entry;
 
   if (htab->params->emit_stub_syms)
     {
