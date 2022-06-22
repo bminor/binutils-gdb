@@ -65,7 +65,9 @@ enum riscv_csr_class
   CSR_CLASS_F,		/* f-ext only */
   CSR_CLASS_ZKR,	/* zkr only */
   CSR_CLASS_V,		/* rvv only */
-  CSR_CLASS_DEBUG	/* debug CSR */
+  CSR_CLASS_DEBUG,	/* debug CSR */
+  CSR_CLASS_H,		/* hypervisor */
+  CSR_CLASS_H_32,	/* hypervisor, rv32 only */
 };
 
 /* This structure holds all restricted conditions for a CSR.  */
@@ -908,6 +910,12 @@ riscv_csr_address (const char *csr_name,
     case CSR_CLASS_I:
       need_check_version = true;
       extension = "i";
+      break;
+    case CSR_CLASS_H_32:
+      rv32_only = (xlen == 32);
+      /* Fall through.  */
+    case CSR_CLASS_H:
+      extension = "h";
       break;
     case CSR_CLASS_F:
       extension = "f";

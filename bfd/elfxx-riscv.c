@@ -1172,6 +1172,7 @@ static struct riscv_supported_ext riscv_supported_std_ext[] =
   {"c",		ISA_SPEC_CLASS_20190608,	2, 0, 0 },
   {"c",		ISA_SPEC_CLASS_2P2,		2, 0, 0 },
   {"v",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"h",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {NULL, 0, 0, 0, 0}
 };
 
@@ -1234,11 +1235,6 @@ static struct riscv_supported_ext riscv_supported_std_s_ext[] =
   {NULL, 0, 0, 0, 0}
 };
 
-static struct riscv_supported_ext riscv_supported_std_h_ext[] =
-{
-  {NULL, 0, 0, 0, 0}
-};
-
 static struct riscv_supported_ext riscv_supported_std_zxm_ext[] =
 {
   {NULL, 0, 0, 0, 0}
@@ -1249,7 +1245,6 @@ const struct riscv_supported_ext *riscv_all_supported_ext[] =
   riscv_supported_std_ext,
   riscv_supported_std_z_ext,
   riscv_supported_std_s_ext,
-  riscv_supported_std_h_ext,
   riscv_supported_std_zxm_ext,
   NULL
 };
@@ -1259,7 +1254,6 @@ enum riscv_prefix_ext_class
 {
   RV_ISA_CLASS_Z = 1,
   RV_ISA_CLASS_S,
-  RV_ISA_CLASS_H,
   RV_ISA_CLASS_ZXM,
   RV_ISA_CLASS_X,
   RV_ISA_CLASS_UNKNOWN
@@ -1282,7 +1276,6 @@ static const struct riscv_parse_prefix_config parse_config[] =
   {RV_ISA_CLASS_ZXM, "zxm"},
   {RV_ISA_CLASS_Z, "z"},
   {RV_ISA_CLASS_S, "s"},
-  {RV_ISA_CLASS_H, "h"},
   {RV_ISA_CLASS_X, "x"},
   {RV_ISA_CLASS_UNKNOWN, NULL}
 };
@@ -1332,8 +1325,6 @@ riscv_recognized_prefixed_ext (const char *ext)
     return riscv_known_prefixed_ext (ext, riscv_supported_std_zxm_ext);
   case RV_ISA_CLASS_S:
     return riscv_known_prefixed_ext (ext, riscv_supported_std_s_ext);
-  case RV_ISA_CLASS_H:
-    return riscv_known_prefixed_ext (ext, riscv_supported_std_h_ext);
   case RV_ISA_CLASS_X:
     /* Only the single x is unrecognized.  */
     if (strcmp (ext, "x") != 0)
@@ -1510,7 +1501,6 @@ riscv_get_default_ext_version (enum riscv_spec_class *default_isa_spec,
     case RV_ISA_CLASS_ZXM: table = riscv_supported_std_zxm_ext; break;
     case RV_ISA_CLASS_Z: table = riscv_supported_std_z_ext; break;
     case RV_ISA_CLASS_S: table = riscv_supported_std_s_ext; break;
-    case RV_ISA_CLASS_H: table = riscv_supported_std_h_ext; break;
     case RV_ISA_CLASS_X:
       break;
     default:
@@ -2423,6 +2413,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
 	      || riscv_subset_supports (rps, "zve32f"));
     case INSN_CLASS_SVINVAL:
       return riscv_subset_supports (rps, "svinval");
+    case INSN_CLASS_H:
+      return riscv_subset_supports (rps, "h");
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));
@@ -2526,6 +2518,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return _("('d' and 'zfh') or 'zhinx");
     case INSN_CLASS_Q_AND_ZFH_INX:
       return _("('q' and 'zfh') or 'zhinx");
+    case INSN_CLASS_H:
+      return _("h");
     default:
       rps->error_handler
         (_("internal: unreachable INSN_CLASS_*"));

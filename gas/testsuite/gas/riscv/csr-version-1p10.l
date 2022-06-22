@@ -356,61 +356,61 @@
 .*Warning: invalid CSR `mhpmcounter31h', needs rv32i extension
 .*Warning: invalid CSR `mcountinhibit' for the privileged spec `1.10'
 .*Warning: invalid CSR `mcountinhibit' for the privileged spec `1.10'
-.*Warning: invalid CSR `hstatus' for the privileged spec `1.10'
-.*Warning: invalid CSR `hstatus' for the privileged spec `1.10'
-.*Warning: invalid CSR `hedeleg' for the privileged spec `1.10'
-.*Warning: invalid CSR `hedeleg' for the privileged spec `1.10'
-.*Warning: invalid CSR `hideleg' for the privileged spec `1.10'
-.*Warning: invalid CSR `hideleg' for the privileged spec `1.10'
-.*Warning: invalid CSR `hie' for the privileged spec `1.10'
-.*Warning: invalid CSR `hie' for the privileged spec `1.10'
-.*Warning: invalid CSR `hcounteren' for the privileged spec `1.10'
-.*Warning: invalid CSR `hcounteren' for the privileged spec `1.10'
-.*Warning: invalid CSR `hgeie' for the privileged spec `1.10'
-.*Warning: invalid CSR `hgeie' for the privileged spec `1.10'
-.*Warning: invalid CSR `htval' for the privileged spec `1.10'
-.*Warning: invalid CSR `htval' for the privileged spec `1.10'
-.*Warning: invalid CSR `hip' for the privileged spec `1.10'
-.*Warning: invalid CSR `hip' for the privileged spec `1.10'
-.*Warning: invalid CSR `hvip' for the privileged spec `1.10'
-.*Warning: invalid CSR `hvip' for the privileged spec `1.10'
-.*Warning: invalid CSR `htinst' for the privileged spec `1.10'
-.*Warning: invalid CSR `htinst' for the privileged spec `1.10'
-.*Warning: invalid CSR `hgeip' for the privileged spec `1.10'
-.*Warning: invalid CSR `hgeip' for the privileged spec `1.10'
+.*Warning: invalid CSR `hstatus', needs `h' extension
+.*Warning: invalid CSR `hstatus', needs `h' extension
+.*Warning: invalid CSR `hedeleg', needs `h' extension
+.*Warning: invalid CSR `hedeleg', needs `h' extension
+.*Warning: invalid CSR `hideleg', needs `h' extension
+.*Warning: invalid CSR `hideleg', needs `h' extension
+.*Warning: invalid CSR `hie', needs `h' extension
+.*Warning: invalid CSR `hie', needs `h' extension
+.*Warning: invalid CSR `hcounteren', needs `h' extension
+.*Warning: invalid CSR `hcounteren', needs `h' extension
+.*Warning: invalid CSR `hgeie', needs `h' extension
+.*Warning: invalid CSR `hgeie', needs `h' extension
+.*Warning: invalid CSR `htval', needs `h' extension
+.*Warning: invalid CSR `htval', needs `h' extension
+.*Warning: invalid CSR `hip', needs `h' extension
+.*Warning: invalid CSR `hip', needs `h' extension
+.*Warning: invalid CSR `hvip', needs `h' extension
+.*Warning: invalid CSR `hvip', needs `h' extension
+.*Warning: invalid CSR `htinst', needs `h' extension
+.*Warning: invalid CSR `htinst', needs `h' extension
+.*Warning: invalid CSR `hgeip', needs `h' extension
+.*Warning: invalid CSR `hgeip', needs `h' extension
 .*Warning: read-only CSR is written `csrw hgeip,a1'
-.*Warning: invalid CSR `henvcfg' for the privileged spec `1.10'
-.*Warning: invalid CSR `henvcfg' for the privileged spec `1.10'
+.*Warning: invalid CSR `henvcfg', needs `h' extension
+.*Warning: invalid CSR `henvcfg', needs `h' extension
 .*Warning: invalid CSR `henvcfgh', needs rv32i extension
-.*Warning: invalid CSR `henvcfgh' for the privileged spec `1.10'
+.*Warning: invalid CSR `henvcfgh', needs `h' extension
 .*Warning: invalid CSR `henvcfgh', needs rv32i extension
-.*Warning: invalid CSR `henvcfgh' for the privileged spec `1.10'
-.*Warning: invalid CSR `hgatp' for the privileged spec `1.10'
-.*Warning: invalid CSR `hgatp' for the privileged spec `1.10'
-.*Warning: invalid CSR `htimedelta' for the privileged spec `1.10'
-.*Warning: invalid CSR `htimedelta' for the privileged spec `1.10'
+.*Warning: invalid CSR `henvcfgh', needs `h' extension
+.*Warning: invalid CSR `hgatp', needs `h' extension
+.*Warning: invalid CSR `hgatp', needs `h' extension
+.*Warning: invalid CSR `htimedelta', needs `h' extension
+.*Warning: invalid CSR `htimedelta', needs `h' extension
 .*Warning: invalid CSR `htimedeltah', needs rv32i extension
-.*Warning: invalid CSR `htimedeltah' for the privileged spec `1.10'
+.*Warning: invalid CSR `htimedeltah', needs `h' extension
 .*Warning: invalid CSR `htimedeltah', needs rv32i extension
-.*Warning: invalid CSR `htimedeltah' for the privileged spec `1.10'
-.*Warning: invalid CSR `vsstatus' for the privileged spec `1.10'
-.*Warning: invalid CSR `vsstatus' for the privileged spec `1.10'
-.*Warning: invalid CSR `vsie' for the privileged spec `1.10'
-.*Warning: invalid CSR `vsie' for the privileged spec `1.10'
-.*Warning: invalid CSR `vstvec' for the privileged spec `1.10'
-.*Warning: invalid CSR `vstvec' for the privileged spec `1.10'
-.*Warning: invalid CSR `vsscratch' for the privileged spec `1.10'
-.*Warning: invalid CSR `vsscratch' for the privileged spec `1.10'
-.*Warning: invalid CSR `vsepc' for the privileged spec `1.10'
-.*Warning: invalid CSR `vsepc' for the privileged spec `1.10'
-.*Warning: invalid CSR `vscause' for the privileged spec `1.10'
-.*Warning: invalid CSR `vscause' for the privileged spec `1.10'
-.*Warning: invalid CSR `vstval' for the privileged spec `1.10'
-.*Warning: invalid CSR `vstval' for the privileged spec `1.10'
-.*Warning: invalid CSR `vsip' for the privileged spec `1.10'
-.*Warning: invalid CSR `vsip' for the privileged spec `1.10'
-.*Warning: invalid CSR `vsatp' for the privileged spec `1.10'
-.*Warning: invalid CSR `vsatp' for the privileged spec `1.10'
+.*Warning: invalid CSR `htimedeltah', needs `h' extension
+.*Warning: invalid CSR `vsstatus', needs `h' extension
+.*Warning: invalid CSR `vsstatus', needs `h' extension
+.*Warning: invalid CSR `vsie', needs `h' extension
+.*Warning: invalid CSR `vsie', needs `h' extension
+.*Warning: invalid CSR `vstvec', needs `h' extension
+.*Warning: invalid CSR `vstvec', needs `h' extension
+.*Warning: invalid CSR `vsscratch', needs `h' extension
+.*Warning: invalid CSR `vsscratch', needs `h' extension
+.*Warning: invalid CSR `vsepc', needs `h' extension
+.*Warning: invalid CSR `vsepc', needs `h' extension
+.*Warning: invalid CSR `vscause', needs `h' extension
+.*Warning: invalid CSR `vscause', needs `h' extension
+.*Warning: invalid CSR `vstval', needs `h' extension
+.*Warning: invalid CSR `vstval', needs `h' extension
+.*Warning: invalid CSR `vsip', needs `h' extension
+.*Warning: invalid CSR `vsip', needs `h' extension
+.*Warning: invalid CSR `vsatp', needs `h' extension
+.*Warning: invalid CSR `vsatp', needs `h' extension
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.10'
 .*Warning: invalid CSR `ubadaddr' for the privileged spec `1.10'
 .*Warning: invalid CSR `sbadaddr' for the privileged spec `1.10'

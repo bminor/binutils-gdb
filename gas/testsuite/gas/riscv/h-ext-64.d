@@ -1,4 +1,4 @@
-#as: -march=rv64i
+#as: -march=rv64ih
 #source: h-ext-64.s
 #objdump: -d
 
