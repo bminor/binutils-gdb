@@ -225,22 +225,19 @@ static void
 tfile_write_uploaded_tsv (struct trace_file_writer *self,
 			  struct uploaded_tsv *utsv)
 {
-  char *buf = NULL;
+  gdb::unique_xmalloc_ptr<char> buf;
   struct tfile_trace_file_writer *writer
     = (struct tfile_trace_file_writer *) self;
 
   if (utsv->name)
     {
-      buf = (char *) xmalloc (strlen (utsv->name) * 2 + 1);
-      bin2hex ((gdb_byte *) (utsv->name), buf, strlen (utsv->name));
+      buf.reset ((char *) xmalloc (strlen (utsv->name) * 2 + 1));
+      bin2hex ((gdb_byte *) (utsv->name), buf.get (), strlen (utsv->name));
     }
 
   fprintf (writer->fp, "tsv %x:%s:%x:%s\n",
 	   utsv->number, phex_nz (utsv->initial_value, 8),
-	   utsv->builtin, buf != NULL ? buf : "");
-
-  if (utsv->name)
-    xfree (buf);
+	   utsv->builtin, buf != NULL ? buf.get () : "");
 }
 
 #define MAX_TRACE_UPLOAD 2000
