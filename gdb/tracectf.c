@@ -1358,10 +1358,9 @@ ctf_target::xfer_partial (enum target_object object,
 	    {
 	      const struct bt_definition *array
 		= bt_ctf_get_field (event, scope, "contents");
-	      gdb_byte *contents;
 	      int k;
 
-	      contents = (gdb_byte *) xmalloc (mlen);
+	      gdb::byte_vector contents (mlen);
 
 	      for (k = 0; k < mlen; k++)
 		{
@@ -1376,8 +1375,6 @@ ctf_target::xfer_partial (enum target_object object,
 		amt = len;
 
 	      memcpy (readbuf, &contents[offset - maddr], amt);
-
-	      xfree (contents);
 
 	      /* Restore the position.  */
 	      bt_iter_set_pos (bt_ctf_get_iter (ctf_iter), pos);
