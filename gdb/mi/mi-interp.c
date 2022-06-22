@@ -358,9 +358,6 @@ mi_new_thread (struct thread_info *t)
 static void
 mi_thread_exit (struct thread_info *t, int silent)
 {
-  if (silent)
-    return;
-
   SWITCH_THRU_ALL_UIS ()
     {
       struct mi_interp *mi = as_mi_interp (top_level_interpreter ());
