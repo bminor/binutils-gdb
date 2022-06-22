@@ -208,7 +208,12 @@ check-gdb.%:
 	$(MAKE) check TESTS="gdb.$*/*.exp"
 
 check-single:
-	$(DO_RUNTEST) $(RUNTESTFLAGS) $(expanded_tests_or_none) $(TIMESTAMP)
+	-rm -f *core*
+	$(DO_RUNTEST) $(RUNTESTFLAGS) $(expanded_tests_or_none) $(TIMESTAMP); \
+	result=$$?; \
+	$(SHELL) $(srcdir)/lib/dg-add-core-file-count.sh; \
+	sed -n '/=== gdb Summary ===/,$$ p' gdb.sum; \
+	exit $$result
 
 check-single-racy:
 	-rm -rf cache racy_outputs temp
@@ -231,6 +236,7 @@ check-single-racy:
 	sed -n '/=== gdb Summary ===/,$$ p' racy.sum
 
 check-parallel:
+	-rm -f *core*
 	-rm -rf cache outputs temp
 	$(MAKE) -k do-check-parallel; \
 	result=$$?; \
@@ -238,6 +244,7 @@ check-parallel:
 	  `find outputs -name gdb.sum -print` > gdb.sum; \
 	$(SHELL) $(srcdir)/../../contrib/dg-extract-results.sh -L \
 	  `find outputs -name gdb.log -print` > gdb.log; \
+	$(SHELL) $(srcdir)/lib/dg-add-core-file-count.sh; \
 	sed -n '/=== gdb Summary ===/,$$ p' gdb.sum; \
 	exit $$result
 
