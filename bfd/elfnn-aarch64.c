@@ -2579,6 +2579,9 @@ struct elf_aarch64_link_hash_entry
      this symbol.  */
   unsigned int got_type;
 
+  /* TRUE if symbol is defined as a protected symbol.  */
+  unsigned int def_protected : 1;
+
   /* A pointer to the most recently used stub hash entry against this
      symbol.  */
   struct elf_aarch64_stub_hash_entry *stub_cache;
@@ -2855,9 +2858,16 @@ elfNN_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
 static void
 elfNN_aarch64_merge_symbol_attribute (struct elf_link_hash_entry *h,
 				      unsigned int st_other,
-				      bool definition ATTRIBUTE_UNUSED,
+				      bool definition,
 				      bool dynamic ATTRIBUTE_UNUSED)
 {
+  if (definition)
+    {
+      struct elf_aarch64_link_hash_entry *eh
+	  = (struct elf_aarch64_link_hash_entry *)h;
+      eh->def_protected = ELF_ST_VISIBILITY (st_other) == STV_PROTECTED;
+    }
+
   unsigned int isym_sto = st_other & ~ELF_ST_VISIBILITY (-1);
   unsigned int h_sto = h->other & ~ELF_ST_VISIBILITY (-1);
 
@@ -8700,6 +8710,22 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   if (h->dyn_relocs == NULL)
     return true;
+
+  for (p = h->dyn_relocs; p != NULL; p = p->next)
+    if (eh->def_protected)
+      {
+	/* Disallow copy relocations against protected symbol.  */
+	asection *s = p->sec->output_section;
+	if (s != NULL && (s->flags & SEC_READONLY) != 0)
+	  {
+	    info->callbacks->einfo
+		/* xgettext:c-format */
+		(_ ("%F%P: %pB: copy relocation against non-copyable "
+		    "protected symbol `%s'\n"),
+		 p->sec->owner, h->root.root.string);
+	    return false;
+	  }
+      }
 
   /* In the shared -Bsymbolic case, discard space allocated for
      dynamic pc-relative relocs against symbols which turn out to be
