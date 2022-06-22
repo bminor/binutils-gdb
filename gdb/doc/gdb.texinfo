@@ -34454,8 +34454,10 @@ The decimal offset in bytes from the start of @samp{func-name}.
 The text disassembly for this @samp{address}.
 
 @item opcodes
-This field is only present for modes 2, 3 and 5.  This contains the raw opcode
-bytes for the @samp{inst} field.
+This field is only present for modes 2, 3 and 5.  This contains the
+raw opcode bytes for the @samp{inst} field.  The bytes are formatted
+as single bytes, in hex, in ascending address order, with a single
+space between each byte.
 
 @end table
 
