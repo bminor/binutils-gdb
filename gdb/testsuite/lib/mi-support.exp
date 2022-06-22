@@ -2833,3 +2833,30 @@ proc mi_is_target_remote {} {
 
     return [gdb_is_target_remote_prompt "$mi_gdb_prompt"]
 }
+
+# Retrieve the value of EXP in the inferior, represented in format
+# specified in FMT (using "printFMT").  DEFAULT is used as fallback if
+# print fails.  TEST is the test message to use.  It can be omitted,
+# in which case a test message is built from EXP.
+#
+# This is an MI version of gdb_valueof.
+
+proc mi_get_valueof { fmt exp default {test ""} } {
+    global mi_gdb_prompt
+
+    if {$test == "" } {
+	set test "get valueof \"${exp}\""
+    }
+
+    set val ${default}
+    gdb_test_multiple "print${fmt} ${exp}" "$test" {
+	-re "~\"\\$\[0-9\]* = (\[^\r\n\]*)\\\\n\"\r\n\\^done\r\n$mi_gdb_prompt$" {
+	    set val $expect_out(1,string)
+	    pass "$test"
+	}
+	timeout {
+	    fail "$test (timeout)"
+	}
+    }
+    return ${val}
+}
