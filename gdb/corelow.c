@@ -122,6 +122,9 @@ public:
 
 private: /* per-core data */
 
+  /* Get rid of the core inferior.  */
+  void clear_core ();
+
   /* The core's section table.  Note that these target sections are
      *not* mapped in the current address spaces' set of target
      sections --- those should come only from pure executable or
@@ -308,10 +311,8 @@ core_target::build_file_mappings ()
 /* An arbitrary identifier for the core inferior.  */
 #define CORELOW_PID 1
 
-/* Close the core target.  */
-
 void
-core_target::close ()
+core_target::clear_core ()
 {
   if (core_bfd)
     {
@@ -325,6 +326,14 @@ core_target::close ()
 
       current_program_space->cbfd.reset (nullptr);
     }
+}
+
+/* Close the core target.  */
+
+void
+core_target::close ()
+{
+  clear_core ();
 
   /* Core targets are heap-allocated (see core_target_open), so here
      we delete ourselves.  */
@@ -631,9 +640,15 @@ core_target_open (const char *arg, int from_tty)
 void
 core_target::detach (inferior *inf, int from_tty)
 {
-  /* Note that 'this' is dangling after this call.  unpush_target
-     closes the target, and our close implementation deletes
-     'this'.  */
+  /* Get rid of the core.  Don't rely on core_target::close doing it,
+     because target_detach may be called with core_target's refcount > 1,
+     meaning core_target::close may not be called yet by the
+     unpush_target call below.  */
+  clear_core ();
+
+  /* Note that 'this' may be dangling after this call.  unpush_target
+     closes the target if the refcount reaches 0, and our close
+     implementation deletes 'this'.  */
   inf->unpush_target (this);
 
   /* Clear the register cache and the frame cache.  */
