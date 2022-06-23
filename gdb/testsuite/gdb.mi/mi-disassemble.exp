@@ -47,21 +47,27 @@ proc test_disassembly_only {} {
 
 
     mi_gdb_test "print/x \$pc" "" ""
-    mi_gdb_test "111-data-disassemble -s \$pc -e \"\$pc + 12\" -- 0" \
-	    "111\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\},\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}.*\]" \
-             "data-disassemble from pc to pc+12 assembly only"
 
-    mi_gdb_test "112-data-disassemble -a \$pc -- 0" \
-	    "112\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\},\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}.*\]" \
-             "data-disassemble function around pc assembly only"
+    foreach { test_name option_string } [list "mode 0" "-- 0" \
+					     "default mode" "" ] {
+	with_test_prefix $test_name {
+	    mi_gdb_test "111-data-disassemble -s \$pc -e \"\$pc + 12\" ${option_string}" \
+		"111\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\},\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}.*\]" \
+		"data-disassemble from pc to pc+12 assembly only"
 
-    mi_gdb_test "113-data-disassemble -a callee4 -- 0" \
-	    "113\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"callee4\",offset=\"$decimal\",inst=\".*\"\},\{address=\"$hex\",func-name=\"callee4\",offset=\"$decimal\",inst=\".*\"\}.*\]" \
-             "data-disassemble function callee4 assembly only"
+	    mi_gdb_test "112-data-disassemble -a \$pc ${option_string}" \
+		"112\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\},\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}.*\]" \
+		"data-disassemble function around pc assembly only"
 
-    mi_gdb_test "222-data-disassemble  -f basics.c -l $line_main_body -- 0" \
-	    "222\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}\\\]" \
-              "data-disassemble file & line, assembly only"
+	    mi_gdb_test "113-data-disassemble -a callee4 ${option_string}" \
+		"113\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"callee4\",offset=\"$decimal\",inst=\".*\"\},\{address=\"$hex\",func-name=\"callee4\",offset=\"$decimal\",inst=\".*\"\}.*\]" \
+		"data-disassemble function callee4 assembly only"
+
+	    mi_gdb_test "222-data-disassemble  -f basics.c -l $line_main_body ${option_string}" \
+		"222\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"0\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",inst=\".*\"\}\\\]" \
+		"data-disassemble file & line, assembly only"
+	}
+    }
 }
 
 proc test_disassembly_with_opcodes {} {
@@ -78,13 +84,20 @@ proc test_disassembly_with_opcodes {} {
     # -data-disassembly -f basics.c -l $line_main_body -- 2
 
     mi_gdb_test "print/x \$pc" "" ""
-    mi_gdb_test "111-data-disassemble -s \$pc -e \"\$pc + 12\" -- 2" \
-           "111\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",opcodes=\".*\",inst=\".*\"\},\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",opcodes=\".*\",inst=\".*\"\}.*\]" \
-             "data-disassemble from pc to pc+12 assembly with opcodes"
 
-    mi_gdb_test "222-data-disassemble  -f basics.c -l $line_main_body -- 2" \
-           "222\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"0\",opcodes=\".*\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",opcodes=\".*\",inst=\".*\"\}\\\]" \
-              "data-disassemble file & line, assembly with opcodes"
+    foreach { test_name option_string} [list "mode 2" "-- 2" \
+					    "mode 0 and --opcodes bytes" "--opcodes bytes -- 0" \
+					    "default mode and --opcodes bytes" "--opcodes bytes"] {
+	with_test_prefix $test_name {
+	    mi_gdb_test "111-data-disassemble -s \$pc -e \"\$pc + 12\" ${option_string}" \
+		"111\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",opcodes=\".*\",inst=\".*\"\},\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",opcodes=\".*\",inst=\".*\"\}.*\]" \
+		"data-disassemble from pc to pc+12 assembly"
+
+	    mi_gdb_test "222-data-disassemble  -f basics.c -l $line_main_body ${option_string}" \
+		"222\\^done,asm_insns=\\\[\{address=\"$hex\",func-name=\"main\",offset=\"0\",opcodes=\".*\",inst=\".*\"\},.*,\{address=\"$hex\",func-name=\"main\",offset=\"$decimal\",opcodes=\".*\",inst=\".*\"\}\\\]" \
+		"data-disassemble file & line, assembly"
+	}
+    }
 }
 
 proc test_disassembly_lines_limit {} {
@@ -230,13 +243,24 @@ proc test_disassembly_bogus_args {} {
              "data-disassemble bogus address, -a"
 
     mi_gdb_test "456-data-disassemble -s \$pc -f basics.c -- 0" \
-             "456\\^error,msg=\"-data-disassemble: Usage: \\( .-f filename -l linenum .-n howmany.. \\| .-s startaddr -e endaddr. \\| .-a addr. \\) .--. mode.\"" \
-             "data-disassemble mix different args"
+	"456\\^error,msg=\"-data-disassemble: Usage: \\( -f filename -l linenum .-n howmany. \\| -s startaddr -e endaddr \\| -a addr \\) . --opcodes mode . . --source . . .--. mode .\\.\"" \
+	"data-disassemble mix different args"
 
     mi_gdb_test "789-data-disassemble -f basics.c -l $line_main_body -- 9" \
              "789\\^error,msg=\"-data-disassemble: Mode argument must be in the range 0-5.\"" \
-             "data-disassemble wrong mode arg"
+	"data-disassemble wrong mode arg"
 
+    foreach mode { 1 2 3 4 5 } {
+	foreach opcode_arg { none bytes display } {
+	    mi_gdb_test "801-data-disassemble -s \$pc -e \"\$pc + 12\" --opcodes ${opcode_arg} -- ${mode}" \
+		"801\\^error,msg=\"-data-disassemble: --opcodes and --source can only be used with mode 0\"" \
+		"data-disassemble use --opcode ${opcode_arg} with mode ${mode}"
+	}
+
+	mi_gdb_test "802-data-disassemble -s \$pc -e \"\$pc + 12\" --source -- ${mode}" \
+	    "802\\^error,msg=\"-data-disassemble: --opcodes and --source can only be used with mode 0\"" \
+	    "data-disassemble use --source with mode ${mode}"
+    }
 }
 
 # Check the format of the opcode bytes.

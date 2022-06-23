@@ -68,6 +68,8 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
   bool start_seen = false;
   bool end_seen = false;
   bool addr_seen = false;
+  bool opcodes_seen = false;
+  bool source_seen = false;
 
   /* ... and their corresponding value. */
   char *file_string = NULL;
@@ -77,12 +79,23 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
   CORE_ADDR high = 0;
   CORE_ADDR addr = 0;
 
+  /* Flags to handle the --opcodes option.  */
+  enum opcodes_mode
+  {
+    OPCODES_DEFAULT, OPCODES_NONE, OPCODES_DISPLAY, OPCODES_BYTES
+  };
+  enum opcodes_mode opcodes_mode = OPCODES_DEFAULT;
+
+  /* Handle the -source option.  */
+  bool show_source = false;
+
   /* Options processing stuff.  */
   int oind = 0;
   char *oarg;
   enum opt
   {
-    FILE_OPT, LINE_OPT, NUM_OPT, START_OPT, END_OPT, ADDR_OPT
+    FILE_OPT, LINE_OPT, NUM_OPT, START_OPT, END_OPT, ADDR_OPT, OPCODES_OPT,
+    SHOW_SRC_OPT
   };
   static const struct mi_opt opts[] =
     {
@@ -92,6 +105,8 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
       {"s", START_OPT, 1},
       {"e", END_OPT, 1},
       {"a", ADDR_OPT, 1},
+      {"-opcodes", OPCODES_OPT, 1},
+      {"-source", SHOW_SRC_OPT, 0},
       { 0, 0, 0 }
     };
 
@@ -129,6 +144,21 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
 	  addr = parse_and_eval_address (oarg);
 	  addr_seen = true;
 	  break;
+	case OPCODES_OPT:
+	  opcodes_seen = true;
+	  if (strcmp (oarg, "none") == 0)
+	    opcodes_mode = OPCODES_NONE;
+	  else if (strcmp (oarg, "display") == 0)
+	    opcodes_mode = OPCODES_DISPLAY;
+	  else if (strcmp (oarg, "bytes") == 0)
+	    opcodes_mode = OPCODES_BYTES;
+	  else
+	    error (_("-data-disassemble: unknown value for -opcodes argument"));
+	  break;
+	case SHOW_SRC_OPT:
+	  source_seen = true;
+	  show_source = true;
+	  break;
 	}
     }
   argv += oind;
@@ -146,13 +176,23 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
 
        || (!line_seen && !file_seen && !num_seen && !start_seen && !end_seen
 								&&  addr_seen))
-      || argc != 1)
-    error (_("-data-disassemble: Usage: ( [-f filename -l linenum "
-	     "[-n howmany]] | [-s startaddr -e endaddr] | [-a addr] ) [--] mode."));
+      || argc > 1)
+    error (_("-data-disassemble: Usage: "
+	     "( -f filename -l linenum [-n howmany] |"
+	     " -s startaddr -e endaddr | -a addr ) "
+	     "[ --opcodes mode ] [ --source ] [ [--] mode ]."));
 
-  mode = atoi (argv[0]);
-  if (mode < 0 || mode > 5)
-    error (_("-data-disassemble: Mode argument must be in the range 0-5."));
+  if (argc == 1)
+    {
+      mode = atoi (argv[0]);
+      if (mode < 0 || mode > 5)
+	error (_("-data-disassemble: Mode argument must be in the range 0-5."));
+    }
+  else
+    mode = 0;
+
+  if (mode != 0 && (source_seen || opcodes_seen))
+    error (_("-data-disassemble: --opcodes and --source can only be used with mode 0"));
 
   /* Convert the mode into a set of disassembly flags.  */
 
@@ -178,6 +218,27 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
       break;
     default:
       gdb_assert_not_reached ("bad disassembly mode");
+    }
+
+  /* Now handle the (optional) --opcodes argument.  This partially
+     overrides the mode value.  */
+  if (opcodes_mode != OPCODES_DEFAULT)
+    {
+      /* Remove any existing flags related to opcodes display.  */
+      disasm_flags &= ~(DISASSEMBLY_RAW_BYTES | DISASSEMBLY_RAW_INSN);
+
+      /* Add back any required flags.  */
+      if (opcodes_mode == OPCODES_DISPLAY)
+	disasm_flags |= DISASSEMBLY_RAW_INSN;
+      else if (opcodes_mode == OPCODES_BYTES)
+	disasm_flags |= DISASSEMBLY_RAW_BYTES;
+    }
+
+  /* Handle the optional --source argument.  */
+  if (show_source)
+    {
+      disasm_flags &= ~DISASSEMBLY_SOURCE_DEPRECATED;
+      disasm_flags |= DISASSEMBLY_SOURCE;
     }
 
   /* We must get the function beginning and end where line_num is
