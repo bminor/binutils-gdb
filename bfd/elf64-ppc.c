@@ -11735,7 +11735,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
     = ppc64_elf_section_data (stub_entry->group->stub_sec);
   ++htab->stub_id;
   if (stub_entry->id != htab->stub_id
-      || stub_entry->stub_offset < stub_entry->group->stub_sec->size)
+      || (stub_entry->type.main != ppc_stub_save_res
+	  && stub_entry->stub_offset < stub_entry->group->stub_sec->size))
     {
       BFD_ASSERT (0);
       if (stub_entry->id != htab->stub_id)
