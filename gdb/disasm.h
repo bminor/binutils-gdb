@@ -344,6 +344,9 @@ private:
 
   /* The buffer used to build the raw opcodes string.  */
   string_file m_opcode_stb;
+
+  /* The buffer used to hold the opcode bytes (if required).  */
+  gdb::byte_vector m_opcode_data;
 };
 
 /* Return the length in bytes of the instruction at address MEMADDR in

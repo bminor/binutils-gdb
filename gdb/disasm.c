@@ -459,21 +459,19 @@ gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn
 
     if (flags & DISASSEMBLY_RAW_INSN)
       {
-	CORE_ADDR end_pc;
-	bfd_byte data;
-	const char *spacer = "";
-
 	/* Build the opcodes using a temporary stream so we can
 	   write them out in a single go for the MI.  */
 	m_opcode_stb.clear ();
 
-	end_pc = pc + size;
+	/* Read the instruction opcode data.  */
+	m_opcode_data.resize (size);
+	read_code (pc, m_opcode_data.data (), size);
 
-	for (;pc < end_pc; ++pc)
+	for (int i = 0; i < size; ++i)
 	  {
-	    read_code (pc, &data, 1);
-	    m_opcode_stb.printf ("%s%02x", spacer, (unsigned) data);
-	    spacer = " ";
+	    if (i > 0)
+	      m_opcode_stb.puts (" ");
+	    m_opcode_stb.printf ("%02x", (unsigned) m_opcode_data[i]);
 	  }
 
 	m_uiout->field_stream ("opcodes", m_opcode_stb);
