@@ -4096,7 +4096,7 @@ check_curr_ui_sync_execution_done (void)
     {
       target_terminal::ours ();
       gdb::observers::sync_execution_done.notify ();
-      ui_register_input_event_handler (ui);
+      ui->register_file_handler ();
     }
 }
 

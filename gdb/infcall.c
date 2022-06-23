@@ -581,7 +581,7 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
   ptid_t call_thread_ptid = call_thread->ptid;
   int was_running = call_thread->state == THREAD_RUNNING;
 
-  delete_file_handler (current_ui->input_fd);
+  current_ui->unregister_file_handler ();
 
   scoped_restore restore_in_infcall
     = make_scoped_restore (&call_thread->control.in_infcall, 1);
@@ -624,9 +624,9 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
      state again here.  In other cases, stdin will be re-enabled by
      inferior_event_handler, when an exception is thrown.  */
   if (current_ui->prompt_state == PROMPT_BLOCKED)
-    delete_file_handler (current_ui->input_fd);
+    current_ui->unregister_file_handler ();
   else
-    ui_register_input_event_handler (current_ui);
+    current_ui->register_file_handler ();
 
   /* If the infcall does NOT succeed, normal_stop will have already
      finished the thread states.  However, on success, normal_stop

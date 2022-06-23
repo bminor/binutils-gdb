@@ -491,7 +491,7 @@ stdin_event_handler (int error, gdb_client_data client_data)
       /* Switch to the main UI, so diagnostics always go there.  */
       current_ui = main_ui;
 
-      delete_file_handler (ui->input_fd);
+      ui->unregister_file_handler ();
       if (main_ui == ui)
 	{
 	  /* If stdin died, we may as well kill gdb.  */
@@ -531,18 +531,18 @@ stdin_event_handler (int error, gdb_client_data client_data)
 /* See top.h.  */
 
 void
-ui_register_input_event_handler (struct ui *ui)
+ui::register_file_handler ()
 {
-  add_file_handler (ui->input_fd, stdin_event_handler, ui,
-		    string_printf ("ui-%d", ui->num), true);
+  add_file_handler (input_fd, stdin_event_handler, this,
+		    string_printf ("ui-%d", num), true);
 }
 
 /* See top.h.  */
 
 void
-ui_unregister_input_event_handler (struct ui *ui)
+ui::unregister_file_handler ()
 {
-  delete_file_handler (ui->input_fd);
+  delete_file_handler (input_fd);
 }
 
 /* Re-enable stdin after the end of an execution command in
@@ -557,7 +557,7 @@ async_enable_stdin (void)
   if (ui->prompt_state == PROMPT_BLOCKED)
     {
       target_terminal::ours ();
-      ui_register_input_event_handler (ui);
+      ui->register_file_handler ();
       ui->prompt_state = PROMPT_NEEDED;
     }
 }
@@ -571,7 +571,7 @@ async_disable_stdin (void)
   struct ui *ui = current_ui;
 
   ui->prompt_state = PROMPT_BLOCKED;
-  delete_file_handler (ui->input_fd);
+  ui->unregister_file_handler ();
 }
 
 
@@ -1366,7 +1366,7 @@ gdb_setup_readline (int editing)
      Another source is going to be the target program (inferior), but
      that must be registered only when it actually exists (I.e. after
      we say 'run' or after we connect to a remote target.  */
-  ui_register_input_event_handler (ui);
+  ui->register_file_handler ();
 }
 
 /* Disable command input through the standard CLI channels.  Used in
@@ -1393,7 +1393,7 @@ gdb_disable_readline (void)
 
   if (ui->command_editing)
     gdb_rl_callback_handler_remove ();
-  delete_file_handler (ui->input_fd);
+  ui->unregister_file_handler ();
 }
 
 scoped_segv_handler_restore::scoped_segv_handler_restore (segv_handler_t new_handler)

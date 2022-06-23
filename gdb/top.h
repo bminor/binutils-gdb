@@ -148,6 +148,12 @@ struct ui
 
   /* The current ui_out.  */
   struct ui_out *m_current_uiout;
+
+  /* Register the UI's input file descriptor in the event loop.  */
+  void register_file_handler ();
+
+  /* Unregister the UI's input file descriptor from the event loop.  */
+  void unregister_file_handler ();
 };
 
 /* The main UI.  This is the UI that is bound to stdin/stdout/stderr.
@@ -210,12 +216,6 @@ ui_range all_uis ()
 {
   return ui_range (ui_list);
 }
-
-/* Register the UI's input file descriptor in the event loop.  */
-extern void ui_register_input_event_handler (struct ui *ui);
-
-/* Unregister the UI's input file descriptor from the event loop.  */
-extern void ui_unregister_input_event_handler (struct ui *ui);
 
 /* From top.c.  */
 extern bool confirm;

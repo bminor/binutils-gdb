@@ -799,7 +799,7 @@ public:
       m_ui (NULL)
   {
     target_terminal::ours ();
-    ui_register_input_event_handler (current_ui);
+    current_ui->register_file_handler ();
     if (current_ui->prompt_state == PROMPT_BLOCKED)
       m_ui = current_ui;
   }
@@ -807,7 +807,7 @@ public:
   ~scoped_input_handler ()
   {
     if (m_ui != NULL)
-      ui_unregister_input_event_handler (m_ui);
+      m_ui->unregister_file_handler ();
   }
 
   DISABLE_COPY_AND_ASSIGN (scoped_input_handler);
