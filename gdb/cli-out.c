@@ -386,14 +386,6 @@ cli_ui_out::~cli_ui_out ()
 {
 }
 
-/* Initialize private members at startup.  */
-
-cli_ui_out *
-cli_out_new (struct ui_file *stream)
-{
-  return new cli_ui_out (stream, ui_source_list);
-}
-
 ui_file *
 cli_ui_out::set_stream (struct ui_file *stream)
 {

@@ -141,7 +141,7 @@ mi_interp::init (bool top_level)
   mi->event_channel = new mi_console_file (mi->raw_stdout, "=", 0);
   mi->mi_uiout = mi_out_new (name ());
   gdb_assert (mi->mi_uiout != nullptr);
-  mi->cli_uiout = cli_out_new (mi->out);
+  mi->cli_uiout = new cli_ui_out (mi->out);
 
   if (top_level)
     {

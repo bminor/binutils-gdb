@@ -910,7 +910,7 @@ tui_initialize_io (void)
   tui_out = tui_out_new (tui_stdout);
 
   /* Create the default UI.  */
-  tui_old_uiout = cli_out_new (gdb_stdout);
+  tui_old_uiout = new cli_ui_out (gdb_stdout);
 
 #ifdef TUI_USE_PIPE_FOR_READLINE
   /* Temporary solution for readline writing to stdout: redirect

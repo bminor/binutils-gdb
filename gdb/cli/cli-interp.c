@@ -59,7 +59,7 @@ cli_interp::cli_interp (const char *name)
   : cli_interp_base (name)
 {
   /* Create a default uiout builder for the CLI.  */
-  this->cli_uiout = cli_out_new (gdb_stdout);
+  this->cli_uiout = new cli_ui_out (gdb_stdout);
 }
 
 cli_interp::~cli_interp ()
