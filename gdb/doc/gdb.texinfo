@@ -29911,6 +29911,10 @@ may repeat zero or more times.
 may repeat one or more times.
 
 @item
+@code{( @var{group} )} means that @var{group} inside the parentheses
+occurs exactly once.
+
+@item
 @code{"@var{string}"} means a literal @var{string}.
 @end itemize
 
@@ -34580,9 +34584,9 @@ For details about what an addressable memory unit is,
 
 @smallexample
  -data-disassemble
-    [ -s @var{start-addr} -e @var{end-addr} ]
-  | [ -a @var{addr} ]
-  | [ -f @var{filename} -l @var{linenum} [ -n @var{lines} ] ]
+  ( -s @var{start-addr} -e @var{end-addr}
+  | -a @var{addr}
+  | -f @var{filename} -l @var{linenum} [ -n @var{lines} ] )
   -- @var{mode}
 @end smallexample
 
