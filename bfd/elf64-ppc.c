@@ -11700,7 +11700,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   if (htab == NULL)
     return false;
 
-  BFD_ASSERT (stub_entry->stub_offset >= stub_entry->group->stub_sec->size);
+  BFD_ASSERT (stub_entry->stub_offset >= stub_entry->group->stub_sec->size
+	      || stub_entry->type.main == ppc_stub_save_res);
   loc = stub_entry->group->stub_sec->contents + stub_entry->stub_offset;
 
   htab->stub_count[stub_entry->type.main - 1] += 1;
