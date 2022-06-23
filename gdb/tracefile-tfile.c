@@ -415,7 +415,7 @@ static tfile_target tfile_ops;
 
 #define TFILE_PID (1)
 
-static char *trace_filename;
+static gdb::unique_xmalloc_ptr<char> trace_filename;
 static int trace_fd = -1;
 static off_t trace_frames_offset;
 static off_t cur_offset;
@@ -441,7 +441,7 @@ tfile_read (gdb_byte *readbuf, int size)
 
   gotten = read (trace_fd, readbuf, size);
   if (gotten < 0)
-    perror_with_name (trace_filename);
+    perror_with_name (trace_filename.get ());
   else if (gotten < size)
     error (_("Premature end of file while reading trace file"));
 }
@@ -479,7 +479,7 @@ tfile_target_open (const char *arg, int from_tty)
 
   current_inferior ()->unpush_target (&tfile_ops);
 
-  trace_filename = filename.release ();
+  trace_filename = std::move (filename);
   trace_fd = scratch_chan;
 
   /* Make sure this is clear.  */
@@ -499,7 +499,7 @@ tfile_target_open (const char *arg, int from_tty)
   trace_regblock_size = 0;
   ts = current_trace_status ();
   /* We know we're working with a file.  Record its name.  */
-  ts->filename = trace_filename;
+  ts->filename = trace_filename.get ();
   /* Set defaults in case there is no status line.  */
   ts->running_known = 0;
   ts->stop_reason = trace_stop_reason_unknown;
@@ -620,8 +620,7 @@ tfile_target::close ()
 
   ::close (trace_fd);
   trace_fd = -1;
-  xfree (trace_filename);
-  trace_filename = NULL;
+  trace_filename.reset ();
   trace_tdesc.clear ();
 
   trace_reset_local_state ();
@@ -630,7 +629,7 @@ tfile_target::close ()
 void
 tfile_target::files_info ()
 {
-  gdb_printf ("\t`%s'\n", trace_filename);
+  gdb_printf ("\t`%s'\n", trace_filename.get ());
 }
 
 void
