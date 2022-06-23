@@ -24,7 +24,7 @@
 
 /* Flags used to control how GDB's disassembler behaves.  */
 
-enum gdb_disassembly_flag
+enum gdb_disassembly_flag : unsigned
   {
     DISASSEMBLY_SOURCE_DEPRECATED = (0x1 << 0),
     DISASSEMBLY_RAW_INSN = (0x1 << 1),
