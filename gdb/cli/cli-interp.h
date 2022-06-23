@@ -34,11 +34,6 @@ public:
   bool supports_command_editing () override;
 };
 
-/* The CLI interpreter's set_logging_proc method.  Exported so other
-   interpreters can reuse it.  */
-extern void cli_set_logging (struct interp *interp,
-			     ui_file_up logfile, bool logging_redirect);
-
 extern int cli_interpreter_supports_command_editing (struct interp *interp);
 
 extern void cli_interpreter_pre_command_loop (struct interp *self);
