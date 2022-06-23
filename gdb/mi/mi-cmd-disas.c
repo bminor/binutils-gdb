@@ -62,12 +62,12 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
   struct symtab *s;
 
   /* Which options have we processed ... */
-  int file_seen = 0;
-  int line_seen = 0;
-  int num_seen = 0;
-  int start_seen = 0;
-  int end_seen = 0;
-  int addr_seen = 0;
+  bool file_seen = false;
+  bool line_seen = false;
+  bool num_seen = false;
+  bool start_seen = false;
+  bool end_seen = false;
+  bool addr_seen = false;
 
   /* ... and their corresponding value. */
   char *file_string = NULL;
@@ -107,27 +107,27 @@ mi_cmd_disassemble (const char *command, char **argv, int argc)
 	{
 	case FILE_OPT:
 	  file_string = oarg;
-	  file_seen = 1;
+	  file_seen = true;
 	  break;
 	case LINE_OPT:
 	  line_num = atoi (oarg);
-	  line_seen = 1;
+	  line_seen = true;
 	  break;
 	case NUM_OPT:
 	  how_many = atoi (oarg);
-	  num_seen = 1;
+	  num_seen = true;
 	  break;
 	case START_OPT:
 	  low = parse_and_eval_address (oarg);
-	  start_seen = 1;
+	  start_seen = true;
 	  break;
 	case END_OPT:
 	  high = parse_and_eval_address (oarg);
-	  end_seen = 1;
+	  end_seen = true;
 	  break;
 	case ADDR_OPT:
 	  addr = parse_and_eval_address (oarg);
-	  addr_seen = 1;
+	  addr_seen = true;
 	  break;
 	}
     }
