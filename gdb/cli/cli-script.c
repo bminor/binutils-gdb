@@ -1176,7 +1176,7 @@ counted_command_line
 read_command_lines (const char *prompt_arg, int from_tty, int parse_commands,
 		    gdb::function_view<void (const char *)> validator)
 {
-  if (from_tty && input_interactive_p (current_ui))
+  if (from_tty && current_ui->input_interactive_p ())
     {
       if (deprecated_readline_begin_hook)
 	{
@@ -1203,7 +1203,7 @@ read_command_lines (const char *prompt_arg, int from_tty, int parse_commands,
 				   validator);
     }
 
-  if (from_tty && input_interactive_p (current_ui)
+  if (from_tty && current_ui->input_interactive_p ()
       && deprecated_readline_end_hook)
     {
       (*deprecated_readline_end_hook) ();

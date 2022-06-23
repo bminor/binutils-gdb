@@ -322,8 +322,6 @@ extern void print_prompt (void);
 
 struct ui;
 
-extern int input_interactive_p (struct ui *);
-
 extern bool info_verbose;
 
 /* From printcmd.c */

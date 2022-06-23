@@ -308,7 +308,7 @@ ui::ui (FILE *instream_, FILE *outstream_, FILE *errstream_)
     outstream (outstream_),
     errstream (errstream_),
     input_fd (fileno (instream)),
-    input_interactive_p (ISATTY (instream)),
+    m_input_interactive_p (ISATTY (instream)),
     prompt_state (PROMPT_NEEDED),
     m_gdb_stdout (new pager_file (new stdio_file (outstream))),
     m_gdb_stdin (new stdio_file (instream)),
@@ -1405,13 +1405,13 @@ command_line_input (const char *prompt_arg, const char *annotation_suffix)
       /* Don't use fancy stuff if not talking to stdin.  */
       if (deprecated_readline_hook
 	  && from_tty
-	  && input_interactive_p (current_ui))
+	  && current_ui->input_interactive_p ())
 	{
 	  rl.reset ((*deprecated_readline_hook) (prompt));
 	}
       else if (command_editing_p
 	       && from_tty
-	       && input_interactive_p (current_ui))
+	       && current_ui->input_interactive_p ())
 	{
 	  rl.reset (gdb_readline_wrapper (prompt));
 	}
@@ -1875,7 +1875,7 @@ quit_force (int *exit_arg, int from_tty)
 	     any UI with a terminal, save history.  */
 	  for (ui *ui : all_uis ())
 	    {
-	      if (input_interactive_p (ui))
+	      if (ui->input_interactive_p ())
 		{
 		  save = 1;
 		  break;
@@ -1923,23 +1923,23 @@ show_interactive_mode (struct ui_file *file, int from_tty,
   if (interactive_mode == AUTO_BOOLEAN_AUTO)
     gdb_printf (file, "Debugger's interactive mode "
 		"is %s (currently %s).\n",
-		value, input_interactive_p (current_ui) ? "on" : "off");
+		value, current_ui->input_interactive_p () ? "on" : "off");
   else
     gdb_printf (file, "Debugger's interactive mode is %s.\n", value);
 }
 
 /* Returns whether GDB is running on an interactive terminal.  */
 
-int
-input_interactive_p (struct ui *ui)
+bool
+ui::input_interactive_p () const
 {
   if (batch_flag)
-    return 0;
+    return false;
 
   if (interactive_mode != AUTO_BOOLEAN_AUTO)
     return interactive_mode == AUTO_BOOLEAN_TRUE;
 
-  return ui->input_interactive_p;
+  return m_input_interactive_p;
 }
 
 static void

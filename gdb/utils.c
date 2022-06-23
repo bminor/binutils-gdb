@@ -880,7 +880,7 @@ defaulted_query (const char *ctlstr, const char defchar, va_list args)
      way, important error messages don't get lost when talking to GDB
      over a pipe.  */
   if (current_ui->instream != current_ui->stdin_stream
-      || !input_interactive_p (current_ui)
+      || !current_ui->input_interactive_p ()
       /* Restrict queries to the main UI.  */
       || current_ui != main_ui)
     {

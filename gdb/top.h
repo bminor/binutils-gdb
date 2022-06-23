@@ -124,7 +124,7 @@ struct ui
   /* Whether ISATTY returns true on input_fd.  Cached here because
      quit_force needs to know this _after_ input_fd might be
      closed.  */
-  int input_interactive_p;
+  bool m_input_interactive_p;
 
   /* See enum prompt_state's description.  */
   enum prompt_state prompt_state;
@@ -154,6 +154,9 @@ struct ui
 
   /* Unregister the UI's input file descriptor from the event loop.  */
   void unregister_file_handler ();
+
+  /* Return true if this UI's input fd is a tty.  */
+  bool input_interactive_p () const;
 };
 
 /* The main UI.  This is the UI that is bound to stdin/stdout/stderr.
