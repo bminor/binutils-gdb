@@ -7368,6 +7368,88 @@ if {[info exists GDB_PARALLEL]} {
     }
 }
 
+# Set the inferior's cwd to the output directory, in order to have it
+# dump core there.  This must be called before the inferior is
+# started.
+
+proc set_inferior_cwd_to_output_dir {} {
+    # Note this sets the inferior's cwd ("set cwd"), not GDB's ("cd").
+    # If GDB crashes, we want its core dump in gdb/testsuite/, not in
+    # the testcase's dir, so we can detect the unexpected core at the
+    # end of the test run.
+    if {![is_remote host]} {
+	set output_dir [standard_output_file ""]
+	gdb_test_no_output "set cwd $output_dir" \
+	    "set inferior cwd to test directory"
+    }
+}
+
+# Get the inferior's PID.
+
+proc get_inferior_pid {} {
+    set pid -1
+    gdb_test_multiple "inferior" "get inferior pid" {
+	-re "process (\[0-9\]*).*$::gdb_prompt $" {
+	    set pid $expect_out(1,string)
+	    pass $gdb_test_name
+	}
+    }
+    return $pid
+}
+
+# Find the kernel-produced core file dumped for the current testfile
+# program.  PID was the inferior's pid, saved before the inferior
+# exited with a signal, or -1 if not known.  If not on a remote host,
+# this assumes the core was generated in the output directory.
+# Returns the name of the core dump, or empty string if not found.
+
+proc find_core_file {pid} {
+    # For non-remote hosts, since cores are assumed to be in the
+    # output dir, which we control, we use a laxer "core.*" glob.  For
+    # remote hosts, as we don't know whether the dir is being reused
+    # for parallel runs, we use stricter names with no globs.  It is
+    # not clear whether this is really important, but it preserves
+    # status quo ante.
+    set files {}
+    if {![is_remote host]} {
+	lappend files core.*
+    } elseif {$pid != -1} {
+	lappend files core.$pid
+    }
+    lappend files [list ${::testfile}.core core]
+
+    foreach file $files {
+	if {![is_remote host]} {
+	    set names [glob -nocomplain [standard_output_file $file]]
+	    if {[llength $names] == 1} {
+		return [lindex $names 0]
+	    }
+	} else {
+	    if {[remote_file host exists $file]} {
+		return $file
+	    }
+	}
+    }
+    return ""
+}
+
+# Check for production of a core file and remove it.  PID is the
+# inferior's pid or -1 if not known.  TEST is the test's message.
+
+proc remove_core {pid {test ""}} {
+    if {$test == ""} {
+	set test "cleanup core file"
+    }
+
+    set file [find_core_file $pid]
+    if {$file != ""} {
+	remote_file host delete $file
+	pass "$test (removed)"
+    } else {
+	pass "$test (not found)"
+    }
+}
+
 proc core_find {binfile {deletefiles {}} {arg ""}} {
     global objdir subdir
 
@@ -7398,7 +7480,9 @@ proc core_find {binfile {deletefiles {}} {arg ""}} {
 	    set found 1
 	}
     }
-    # Check for "core.PID".
+    # Check for "core.PID", "core.EXEC.PID.HOST.TIME", etc.  It's fine
+    # to use a glob here as we're looking inside a directory we
+    # created.  Also, this procedure only works on non-remote hosts.
     if { $found == 0 } {
 	set names [glob -nocomplain -directory $coredir core.*]
 	if {[llength $names] == 1} {

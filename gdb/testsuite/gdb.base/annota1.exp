@@ -385,6 +385,12 @@ gdb_test_multiple "display value" "set up display" {
     }
 }
 
+# Get the core into the output directory.
+if {![is_remote host]} {
+    gdb_test -prompt "$gdb_prompt$" \
+	"set cwd [file dirname $binfile]" "" \
+	"set inferior cwd to test directory"
+}
 
 # should ask query. Test annotate-query.
 # we don't care about anything else here, only the query.
@@ -479,17 +485,7 @@ if [target_info exists gdb,nosignals] {
 }
 
 # Check for production of a core file and remove it!
-
-set test "cleanup core file"
-if { [remote_file host exists core] } {
-    remote_file host delete core
-    pass "$test (removed)"
-} elseif { $pid != -1 && [remote_file host exists core.$pid] } {
-    remote_file host delete core.$pid
-    pass "$test (removed)"
-} else {
-    pass "$test (not dumped)"
-}
+remove_core $pid
 
 proc thread_test {} {
     global subdir srcdir testfile srcfile binfile
