@@ -1,0 +1,343 @@
+# Copyright 2022 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# The JSON parser.
+load_lib ton.tcl
+
+# The sequence number for the next DAP request.  This is used by the
+# automatic sequence-counting code below.  It is reset each time GDB
+# is restarted.
+set dap_seq 1
+
+# Start gdb using the DAP interpreter.
+proc dap_gdb_start {} {
+    # Keep track of the number of times GDB has been launched.
+    global gdb_instances
+    incr gdb_instances
+
+    gdb_stdin_log_init
+
+    global GDBFLAGS stty_init
+    save_vars { GDBFLAGS stty_init } {
+	set stty_init "-echo raw"
+	set logfile [standard_output_file "dap.log.$gdb_instances"]
+	append GDBFLAGS " -iex \"set debug dap-log-file $logfile\" -q -i=dap"
+	set res [gdb_spawn]
+	if {$res != 0} {
+	    return $res
+	}
+    }
+
+    # Reset the counter.
+    set ::dap_seq 1
+
+    return 0
+}
+
+# A helper for dap_to_ton that decides if the list L is a JSON object
+# or if it is an array.
+proc _dap_is_obj {l} {
+    if {[llength $l] % 2 != 0} {
+	return 0
+    }
+    foreach {key value} $l {
+	if {![string is alpha $key]} {
+	    return 0
+	}
+    }
+    return 1
+}
+
+# The "TON" format is a bit of a pain to write by hand, so this proc
+# can be used to convert an ordinary Tcl list into TON by guessing at
+# the correct forms to use.  This can't be used in all cases, because
+# Tcl can't really differentiate between literal forms.  For example,
+# there's no way to decide if "true" should be a string or the literal
+# true.
+#
+# JSON objects must be passed in a particular form here -- as a list
+# with an even number of elements, alternating keys and values.  Each
+# key must consist only of letters, no digits or other non-letter
+# characters.  Note that this is compatible with the Tcl 'dict'
+# representation.
+proc dap_to_ton {obj} {
+    if {[string is list $obj] && [llength $obj] > 1} {
+	if {[_dap_is_obj $obj]} {
+	    set result o
+	    foreach {key value} $obj {
+		lappend result $key \[[dap_to_ton $value]\]
+	    }
+	} else {
+	    set result a
+	    foreach val $obj {
+		lappend result \[[dap_to_ton $val]\]
+	    }
+	}
+    } elseif {[string is entier $obj]} {
+	set result [list i $obj]
+    } elseif {[string is double $obj]} {
+	set result [list d $obj]
+    } elseif {$obj == "true" || $obj == "false" || $obj == "null"} {
+	set result [list l $obj]
+    } else {
+	set result [list s $obj]
+    }
+    return $result
+}
+
+# Format the object OBJ, in TON format, as JSON and send it to gdb.
+proc dap_send_ton {obj} {
+    set json [namespace eval ton::2json $obj]
+    # FIXME this is wrong for non-ASCII characters.
+    set len [string length $json]
+    verbose ">>> $json"
+    send_gdb "Content-Length: $len\r\n\r\n$json"
+}
+
+# Send a DAP request to gdb.  COMMAND is the request's "command"
+# field, and OBJ is the "arguments" field.  If OBJ is empty, it is
+# omitted.  The sequence number of the request is automatically added,
+# and this is also the return value.  OBJ is assumed to already be in
+# TON form.
+proc dap_send_request {command {obj {}}} {
+    # We can construct this directly as a TON object.
+    set result $::dap_seq
+    incr ::dap_seq
+    set req [format {o seq [i %d] type [s request] command [%s]} \
+		 $result [list s $command]]
+    if {$obj != ""} {
+	append req " arguments \[$obj\]"
+    }
+    dap_send_ton $req
+    return $result
+}
+
+# Read a JSON response from gdb.  This will return a TON object on
+# success, or throw an exception on error.
+proc dap_read_json {} {
+    set length ""
+    gdb_expect {
+	-re "^Content-Length: (\[0-9\]+)\r\n" {
+	    set length $expect_out(1,string)
+	    exp_continue
+	}
+	-re "^(\[^\r\n\]+)\r\n" {
+	    # Any other header field.
+	    exp_continue
+	}
+	-re "^\r\n" {
+	    # Done.
+	}
+	timeout {
+	    error "timeout reading json header"
+	}
+	eof {
+	    error "eof reading json header"
+	}
+    }
+
+    if {$length == ""} {
+	error "didn't find content-length"
+    }
+
+    set json ""
+    while {$length > 0} {
+	# Tcl only allows up to 255 characters in a {} expression in a
+	# regexp, so we may need to read in chunks.
+	set this_len [expr {min ($length, 255)}]
+	gdb_expect {
+	    -re "^.{$this_len}" {
+		append json $expect_out(0,string)
+	    }
+	    timeout {
+		error "timeout reading json body"
+	    }
+	    eof {
+		error "eof reading json body"
+	    }
+	}
+	incr length -$this_len
+    }
+
+    return [ton::json2ton $json]
+}
+
+# Read a sequence of JSON objects from gdb, until a response object is
+# seen.  If the response object has the request sequence number NUM,
+# and is for command CMD, return a list of two elements: the response
+# object and a list of any preceding events, in the order they were
+# emitted.  The objects are in TON format.  If a response object is
+# seen but has the wrong sequence number or command, throw an
+# exception
+proc dap_read_response {cmd num} {
+    set result {}
+    while 1 {
+	set obj [dap_read_json]
+	set d [namespace eval ton::2dict $obj]
+	if {[dict get $d type] == "response"} {
+	    if {[dict get $d request_seq] != $num} {
+		error "saw wrong request_seq in $obj"
+	    } elseif {[dict get $d command] != $cmd} {
+		error "saw wrong command in $obj"
+	    } else {
+		return [list $obj $result]
+	    }
+	} else {
+	    lappend result $obj
+	}
+    }
+}
+
+# A wrapper for dap_send_request and dap_read_response.  This sends a
+# request to gdb and returns the result.  NAME is used to issue a pass
+# or fail; on failure, this always returns an empty string.
+proc dap_request_and_response {name command {obj {}}} {
+    set result {}
+    if {[catch {
+	set seq [dap_send_request $command $obj]
+	set result [dap_read_response $command $seq]
+    } text]} {
+	verbose "reason: $text"
+	fail $name
+    } else {
+	pass $name
+    }
+    return $result
+}
+
+# Like dap_request_and_response, but also checks that the response
+# indicates success.
+proc dap_check_request_and_response {name command {obj {}}} {
+    set result [dap_request_and_response $name $command $obj]
+    if {$result == ""} {
+	return ""
+    }
+    set d [namespace eval ton::2dict [lindex $result 0]]
+    if {[dict get $d success] != "true"} {
+	verbose "request failure: $result"
+	fail "$name success"
+	return ""
+    }
+    pass "$name success"
+    return $result
+}
+
+# Start gdb, send a DAP initialization request and return the
+# response.  This approach lets the caller check the feature list, if
+# desired.  Callers not caring about this should probably use
+# dap_launch.  Returns the empty string on failure.  NAME is used as
+# the test name.
+proc dap_initialize {name} {
+    if {[dap_gdb_start]} {
+	return ""
+    }
+    return [dap_check_request_and_response $name initialize]
+}
+
+# Start gdb, send a DAP initialize request, and then a launch request
+# specifying FILE as the program to use for the inferior.  Returns the
+# empty string on failure, or the response object from the launch
+# request.  After this is called, gdb will be ready to accept
+# breakpoint requests.  NAME is used as the test name.  It has a
+# reasonable default but can be overridden in case a test needs to
+# launch gdb more than once.
+proc dap_launch {file {name startup}} {
+    if {[dap_initialize "$name - initialize"] == ""} {
+	return ""
+    }
+    return [dap_check_request_and_response "$name - launch" launch \
+		[format {o program [%s]} \
+		     [list s [standard_output_file $file]]]]
+}
+
+# Cleanly shut down gdb.  NAME is used as the test name.
+proc dap_shutdown {{name shutdown}} {
+    dap_check_request_and_response $name disconnect
+}
+
+# Search the event list EVENTS for an output event matching the regexp
+# RX.  Pass the test NAME if found, fail if not.
+proc dap_search_output {name rx events} {
+    foreach event $events {
+	set d [namespace eval ton::2dict $event]
+	if {[dict get $d type] != "event"
+	    || [dict get $d event] != "output"} {
+	    continue
+	}
+	if {[regexp $rx [dict get $d body output]]} {
+	    pass $name
+	    return
+	}
+    }
+    fail $name
+}
+
+# Check that OBJ (a single TON object) has values that match the
+# key/value pairs given in ARGS.  NAME is used as the test name.
+proc dap_match_values {name obj args} {
+    set d [namespace eval ton::2dict $obj]
+    foreach {key value} $args {
+	if {[eval dict get [list $d] $key] != $value} {
+	    fail "$name (checking $key)"
+	    return ""
+	}
+    }
+    pass $name
+}
+
+# A helper for dap_read_event that reads events, looking for one
+# matching TYPE.
+proc _dap_read_event {type} {
+    while 1 {
+	# We don't do any extra error checking here for the time
+	# being; we'll just get a timeout thrown instead.
+	set obj [dap_read_json]
+	set d [namespace eval ton::2dict $obj]
+	if {[dict get $d type] == "event"
+	    && [dict get $d event] == $type} {
+	    return $obj
+	}
+    }
+}
+
+# Read JSON objects looking for an event whose "event" field is TYPE.
+# NAME is used as the test name; it defaults to TYPE.  Extra arguments
+# are used to check fields of the event; the arguments alternate
+# between a field name (in "dict get" form) and its expected value.
+# Returns the TON object for the chosen event, or empty string on
+# error.
+proc dap_read_event {name type args} {
+    if {$name == ""} {
+	set name $type
+    }
+
+    if {[catch {_dap_read_event $type} result]} {
+	fail $name
+	return ""
+    }
+
+    eval dap_match_values [list $name $result] $args
+
+    return $result
+}
+
+# A convenience function to extract the breakpoint number when a new
+# breakpoint is created.  OBJ is an object as returned by
+# dap_check_request_and_response.
+proc dap_get_breakpoint_number {obj} {
+    set d [namespace eval ton::2dict [lindex $obj 0]]
+    set bplist [dict get $d body breakpoints]
+    return [dict get [lindex $bplist 0] id]
+}

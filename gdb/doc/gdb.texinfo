@@ -29136,6 +29136,15 @@ The traditional console or command-line interpreter.  This is the most often
 used interpreter with @value{GDBN}. With no interpreter specified at runtime,
 @value{GDBN} will use this interpreter.
 
+@item dap
+@cindex DAP
+@cindex Debugger Adapter Protocol
+When @value{GDBN} has been built with Python support, it also supports
+the Debugger Adapter Protocol.  This protocol can be used by a
+debugger GUI or an IDE to communicate with @value{GDBN}.  This
+protocol is documented at
+@url{https://microsoft.github.io/debug-adapter-protocol/}.
+
 @item mi
 @cindex mi interpreter
 The newest @sc{gdb/mi} interface (currently @code{mi3}).  Used primarily

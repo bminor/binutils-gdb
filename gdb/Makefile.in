@@ -396,6 +396,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-cmd.c \
 	python/py-connection.c \
 	python/py-continueevent.c \
+	python/py-dap.c \
 	python/py-disasm.c \
 	python/py-event.c \
 	python/py-evtregistry.c \

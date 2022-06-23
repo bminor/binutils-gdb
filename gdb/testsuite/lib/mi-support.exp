@@ -238,8 +238,6 @@ proc default_mi_gdb_start { { flags {} } } {
 	return [mi_gdb_start_separate_mi_tty $flags]
     }
 
-    set inferior_pty no-tty
-
     # Set the default value, it may be overriden later by specific testfile.
     set use_gdb_stub [target_info exists use_gdb_stub]
 

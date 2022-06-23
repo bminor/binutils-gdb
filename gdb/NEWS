@@ -5,6 +5,10 @@
 
 * MI version 1 has been removed.
 
+* GDB has initial built-in support for the Debugger Adapter Protocol.
+  This support requires that GDB be built with Python scripting
+  enabled.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.
