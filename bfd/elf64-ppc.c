@@ -3083,6 +3083,9 @@ struct ppc_stub_hash_entry
 
   /* Symbol st_other.  */
   unsigned char other;
+
+  /* Debug: Track hash table traversal.  */
+  unsigned int id;
 };
 
 struct ppc_branch_hash_entry
@@ -3321,6 +3324,9 @@ struct ppc_link_hash_table
   /* Whether any code linked seems to be Power10.  */
   unsigned int has_power10_relocs:1;
 
+  /* Incremented once for each stub sized.  */
+  unsigned int stub_id;
+
   /* Incremented every time we size stubs.  */
   unsigned int stub_iteration;
 
@@ -3401,7 +3407,9 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
       eh->target_section = NULL;
       eh->h = NULL;
       eh->plt_ent = NULL;
+      eh->symtype = 0;
       eh->other = 0;
+      eh->id = 0;
     }
 
   return entry;
@@ -11643,42 +11651,40 @@ get_r2off (struct bfd_link_info *info,
 /* Debug dump.  */
 
 static void
-dump_previous_stub (struct ppc_stub_hash_entry *stub_entry)
+dump_stub (const char *header,
+	   struct ppc_stub_hash_entry *stub_entry,
+	   size_t end_offset)
 {
-  asection *stub_sec = stub_entry->group->stub_sec;
-  struct _ppc64_elf_section_data *esd = ppc64_elf_section_data (stub_sec);
-  if (esd->sec_type == sec_stub)
+  const char *t1, *t2, *t3;
+  switch (stub_entry->type.main)
     {
-      fprintf (stderr, "Previous stub: type = ");
-      switch (esd->u.last_ent->type.main)
-	{
-	case ppc_stub_none: fprintf (stderr, "none"); break;
-	case ppc_stub_long_branch: fprintf (stderr, "long_branch"); break;
-	case ppc_stub_plt_branch: fprintf (stderr, "plt_branch"); break;
-	case ppc_stub_plt_call: fprintf (stderr, "plt_call"); break;
-	case ppc_stub_global_entry: fprintf (stderr, "global_entry"); break;
-	case ppc_stub_save_res: fprintf (stderr, "save_res"); break;
-	default: fprintf (stderr, "???"); break;
-	}
-      switch (esd->u.last_ent->type.sub)
-	{
-	case ppc_stub_toc: fprintf (stderr, ":toc"); break;
-	case ppc_stub_notoc: fprintf (stderr, ":notoc"); break;
-	case ppc_stub_p9notoc: fprintf (stderr, ":p9notoc"); break;
-	default: fprintf (stderr, ":???"); break;
-	}
-      if (esd->u.last_ent->type.r2save)
-	fprintf (stderr, ":r2save");
-      fprintf (stderr, "\nname = %s", esd->u.last_ent->root.string);
-      fprintf (stderr, "\noffset = %#lx:", esd->u.last_ent->stub_offset);
-      for (size_t i = esd->u.last_ent->stub_offset;
-	   i < stub_entry->stub_offset; i += 4)
-	{
-	  uint32_t *p = (uint32_t *) (stub_sec->contents + i);
-	  fprintf (stderr, " %08x", *p);
-	}
-      fprintf (stderr, "\n");
+    case ppc_stub_none:		t1 = "none";		break;
+    case ppc_stub_long_branch:	t1 = "long_branch";	break;
+    case ppc_stub_plt_branch:	t1 = "plt_branch";	break;
+    case ppc_stub_plt_call:	t1 = "plt_call";	break;
+    case ppc_stub_global_entry:	t1 = "global_entry";	break;
+    case ppc_stub_save_res:	t1 = "save_res";	break;
+    default:			t1 = "???";		break;
     }
+  switch (stub_entry->type.sub)
+    {
+    case ppc_stub_toc:		t2 = "toc";		break;
+    case ppc_stub_notoc:	t2 = "notoc";		break;
+    case ppc_stub_p9notoc:	t2 = "p9notoc";		break;
+    default:			t2 = "???";		break;
+    }
+  t3 = stub_entry->type.r2save ? "r2save" : "";
+  fprintf (stderr, "%s id = %u type = %s:%s:%s\n",
+	   header, stub_entry->id, t1, t2, t3);
+  fprintf (stderr, "name = %s\n", stub_entry->root.string);
+  fprintf (stderr, "offset = %#lx:", stub_entry->stub_offset);
+  for (size_t i = stub_entry->stub_offset; i < end_offset; i += 4)
+    {
+      asection *stub_sec = stub_entry->group->stub_sec;
+      uint32_t *p = (uint32_t *) (stub_sec->contents + i);
+      fprintf (stderr, " %08x", (uint32_t) bfd_get_32 (stub_sec->owner, p));
+    }
+  fprintf (stderr, "\n");
 }
 
 static bool
@@ -11725,11 +11731,28 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   if (htab == NULL)
     return false;
 
-  if (stub_entry->stub_offset < stub_entry->group->stub_sec->size)
+  struct _ppc64_elf_section_data *esd
+    = ppc64_elf_section_data (stub_entry->group->stub_sec);
+  ++htab->stub_id;
+  if (stub_entry->id != htab->stub_id
+      || stub_entry->stub_offset < stub_entry->group->stub_sec->size)
     {
       BFD_ASSERT (0);
-      dump_previous_stub (stub_entry);
+      if (stub_entry->id != htab->stub_id)
+	fprintf (stderr, "Expected id %u, got %u\n",
+		 htab->stub_id, stub_entry->id);
+      if (stub_entry->stub_offset < stub_entry->group->stub_sec->size)
+	fprintf (stderr, "Expected offset >= %" BFD_VMA_FMT "x, got %"
+		 BFD_VMA_FMT "x\n", stub_entry->group->stub_sec->size,
+		 stub_entry->stub_offset);
+      if (esd->sec_type == sec_stub)
+	dump_stub ("Previous:", esd->u.last_ent, stub_entry->stub_offset);
+      dump_stub ("Current:", stub_entry, 0);
     }
+  if (esd->sec_type == sec_normal)
+    esd->sec_type = sec_stub;
+  if (esd->sec_type == sec_stub)
+    esd->u.last_ent = stub_entry;
   loc = stub_entry->group->stub_sec->contents + stub_entry->stub_offset;
 
   htab->stub_count[stub_entry->type.main - 1] += 1;
@@ -12171,12 +12194,6 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
     }
 
   stub_entry->group->stub_sec->size = stub_entry->stub_offset + (p - loc);
-  struct _ppc64_elf_section_data *esd
-    = ppc64_elf_section_data (stub_entry->group->stub_sec);
-  if (esd->sec_type == sec_normal)
-    esd->sec_type = sec_stub;
-  if (esd->sec_type == sec_stub)
-    esd->u.last_ent = stub_entry;
 
   if (htab->params->emit_stub_syms)
     {
@@ -12262,6 +12279,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   if (htab->stub_iteration > STUB_SHRINK_ITER
       && stub_entry->stub_offset > stub_offset)
     stub_offset = stub_entry->stub_offset;
+  stub_entry->id = ++htab->stub_id;
 
   if (stub_entry->h != NULL
       && stub_entry->h->save_res
@@ -14218,6 +14236,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info)
 	}
 
       htab->stub_changed = false;
+      htab->stub_id = 0;
       bfd_hash_traverse (&htab->stub_hash_table, ppc_size_one_stub, info);
 
       for (group = htab->group; group != NULL; group = group->next)
@@ -15153,6 +15172,7 @@ ppc64_elf_build_stubs (struct bfd_link_info *info,
     }
 
   /* Build the stubs as directed by the stub hash table.  */
+  htab->stub_id = 0;
   bfd_hash_traverse (&htab->stub_hash_table, ppc_build_one_stub, info);
 
   for (group = htab->group; group != NULL; group = group->next)
