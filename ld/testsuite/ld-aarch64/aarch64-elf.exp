@@ -248,6 +248,7 @@ run_dump_test_lp64 "local-addend-r"
 # test error handling on pcrel relocation for shared libraries.
 run_dump_test_lp64 "pcrel_pic_undefined"
 run_dump_test_lp64 "pcrel_pic_defined"
+run_dump_test_lp64 "pcrel_pic_protected"
 
 run_dump_test "limit-b"
 run_dump_test "limit-bl"

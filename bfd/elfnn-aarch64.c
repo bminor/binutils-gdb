@@ -5888,7 +5888,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       if (bfd_link_pic (info)
 	  && (input_section->flags & SEC_ALLOC) != 0
 	  && (input_section->flags & SEC_READONLY) != 0
-	  && !SYMBOL_REFERENCES_LOCAL (info, h))
+	  && !_bfd_elf_symbol_refs_local_p (h, info, 1))
 	{
 	  int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
 
