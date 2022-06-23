@@ -30306,7 +30306,7 @@ The following table gives a summary of the released versions of the MI
 interface: the version number, the version of GDB in which it first appeared
 and the breaking changes compared to the previous version.
 
-@multitable @columnfractions .05 .05 .9
+@multitable @columnfractions .1 .1 .8
 @headitem MI version @tab GDB version @tab Breaking changes
 
 @item
