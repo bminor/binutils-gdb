@@ -328,6 +328,37 @@ _start:
 	.cfi_offset hstateen1h, 6260
 	.cfi_offset hstateen2h, 6264
 	.cfi_offset hstateen3h, 6268
+	# Sscofpmf extension
+	.cfi_offset scountovf, 13952
+	.cfi_offset mhpmevent3h, 7308
+	.cfi_offset mhpmevent4h, 7312
+	.cfi_offset mhpmevent5h, 7316
+	.cfi_offset mhpmevent6h, 7320
+	.cfi_offset mhpmevent7h, 7324
+	.cfi_offset mhpmevent8h, 7328
+	.cfi_offset mhpmevent9h, 7332
+	.cfi_offset mhpmevent10h, 7336
+	.cfi_offset mhpmevent11h, 7340
+	.cfi_offset mhpmevent12h, 7344
+	.cfi_offset mhpmevent13h, 7348
+	.cfi_offset mhpmevent14h, 7352
+	.cfi_offset mhpmevent15h, 7356
+	.cfi_offset mhpmevent16h, 7360
+	.cfi_offset mhpmevent17h, 7364
+	.cfi_offset mhpmevent18h, 7368
+	.cfi_offset mhpmevent19h, 7372
+	.cfi_offset mhpmevent20h, 7376
+	.cfi_offset mhpmevent21h, 7380
+	.cfi_offset mhpmevent22h, 7384
+	.cfi_offset mhpmevent23h, 7388
+	.cfi_offset mhpmevent24h, 7392
+	.cfi_offset mhpmevent25h, 7396
+	.cfi_offset mhpmevent26h, 7400
+	.cfi_offset mhpmevent27h, 7404
+	.cfi_offset mhpmevent28h, 7408
+	.cfi_offset mhpmevent29h, 7412
+	.cfi_offset mhpmevent30h, 7416
+	.cfi_offset mhpmevent31h, 7420
 	# dropped
 	.cfi_offset ubadaddr, 268	# aliases
 	.cfi_offset sbadaddr, 1292	# aliases

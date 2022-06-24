@@ -333,6 +333,36 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r5661 \(hstateen1h\) at cfa\+6260
   DW_CFA_offset_extended_sf: r5662 \(hstateen2h\) at cfa\+6264
   DW_CFA_offset_extended_sf: r5663 \(hstateen3h\) at cfa\+6268
+  DW_CFA_offset_extended_sf: r7584 \(scountovf\) at cfa\+13952
+  DW_CFA_offset_extended_sf: r5923 \(mhpmevent3h\) at cfa\+7308
+  DW_CFA_offset_extended_sf: r5924 \(mhpmevent4h\) at cfa\+7312
+  DW_CFA_offset_extended_sf: r5925 \(mhpmevent5h\) at cfa\+7316
+  DW_CFA_offset_extended_sf: r5926 \(mhpmevent6h\) at cfa\+7320
+  DW_CFA_offset_extended_sf: r5927 \(mhpmevent7h\) at cfa\+7324
+  DW_CFA_offset_extended_sf: r5928 \(mhpmevent8h\) at cfa\+7328
+  DW_CFA_offset_extended_sf: r5929 \(mhpmevent9h\) at cfa\+7332
+  DW_CFA_offset_extended_sf: r5930 \(mhpmevent10h\) at cfa\+7336
+  DW_CFA_offset_extended_sf: r5931 \(mhpmevent11h\) at cfa\+7340
+  DW_CFA_offset_extended_sf: r5932 \(mhpmevent12h\) at cfa\+7344
+  DW_CFA_offset_extended_sf: r5933 \(mhpmevent13h\) at cfa\+7348
+  DW_CFA_offset_extended_sf: r5934 \(mhpmevent14h\) at cfa\+7352
+  DW_CFA_offset_extended_sf: r5935 \(mhpmevent15h\) at cfa\+7356
+  DW_CFA_offset_extended_sf: r5936 \(mhpmevent16h\) at cfa\+7360
+  DW_CFA_offset_extended_sf: r5937 \(mhpmevent17h\) at cfa\+7364
+  DW_CFA_offset_extended_sf: r5938 \(mhpmevent18h\) at cfa\+7368
+  DW_CFA_offset_extended_sf: r5939 \(mhpmevent19h\) at cfa\+7372
+  DW_CFA_offset_extended_sf: r5940 \(mhpmevent20h\) at cfa\+7376
+  DW_CFA_offset_extended_sf: r5941 \(mhpmevent21h\) at cfa\+7380
+  DW_CFA_offset_extended_sf: r5942 \(mhpmevent22h\) at cfa\+7384
+  DW_CFA_offset_extended_sf: r5943 \(mhpmevent23h\) at cfa\+7388
+  DW_CFA_offset_extended_sf: r5944 \(mhpmevent24h\) at cfa\+7392
+  DW_CFA_offset_extended_sf: r5945 \(mhpmevent25h\) at cfa\+7396
+  DW_CFA_offset_extended_sf: r5946 \(mhpmevent26h\) at cfa\+7400
+  DW_CFA_offset_extended_sf: r5947 \(mhpmevent27h\) at cfa\+7404
+  DW_CFA_offset_extended_sf: r5948 \(mhpmevent28h\) at cfa\+7408
+  DW_CFA_offset_extended_sf: r5949 \(mhpmevent29h\) at cfa\+7412
+  DW_CFA_offset_extended_sf: r5950 \(mhpmevent30h\) at cfa\+7416
+  DW_CFA_offset_extended_sf: r5951 \(mhpmevent31h\) at cfa\+7420
   DW_CFA_offset_extended_sf: r4163 \(utval\) at cfa\+268
   DW_CFA_offset_extended_sf: r4419 \(stval\) at cfa\+1292
   DW_CFA_offset_extended_sf: r4480 \(satp\) at cfa\+1536
