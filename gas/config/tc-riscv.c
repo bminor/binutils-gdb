@@ -68,6 +68,10 @@ enum riscv_csr_class
   CSR_CLASS_DEBUG,	/* debug CSR */
   CSR_CLASS_H,		/* hypervisor */
   CSR_CLASS_H_32,	/* hypervisor, rv32 only */
+  CSR_CLASS_SMSTATEEN,		/* Smstateen only */
+  CSR_CLASS_SMSTATEEN_AND_H,	/* Smstateen only (with H) */
+  CSR_CLASS_SMSTATEEN_32,	/* Smstateen RV32 only */
+  CSR_CLASS_SMSTATEEN_AND_H_32,	/* Smstateen RV32 only (with H) */
 };
 
 /* This structure holds all restricted conditions for a CSR.  */
@@ -926,6 +930,16 @@ riscv_csr_address (const char *csr_name,
       break;
     case CSR_CLASS_V:
       extension = "v";
+      break;
+    case CSR_CLASS_SMSTATEEN:
+    case CSR_CLASS_SMSTATEEN_AND_H:
+    case CSR_CLASS_SMSTATEEN_32:
+    case CSR_CLASS_SMSTATEEN_AND_H_32:
+      is_rv32_only = (csr_class == CSR_CLASS_SMSTATEEN_32
+		      || csr_class == CSR_CLASS_SMSTATEEN_AND_H_32);
+      is_h_required = (csr_class == CSR_CLASS_SMSTATEEN_AND_H
+		      || csr_class == CSR_CLASS_SMSTATEEN_AND_H_32);
+      extension = "smstateen";
       break;
     case CSR_CLASS_DEBUG:
       break;

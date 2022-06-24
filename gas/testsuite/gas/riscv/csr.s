@@ -337,6 +337,28 @@
 	csr vsip
 	csr vsatp
 
+	# Smstateen extension
+	csr mstateen0
+	csr mstateen1
+	csr mstateen2
+	csr mstateen3
+	csr sstateen0
+	csr sstateen1
+	csr sstateen2
+	csr sstateen3
+	csr hstateen0
+	csr hstateen1
+	csr hstateen2
+	csr hstateen3
+	csr mstateen0h
+	csr mstateen1h
+	csr mstateen2h
+	csr mstateen3h
+	csr hstateen0h
+	csr hstateen1h
+	csr hstateen2h
+	csr hstateen3h
+
 	# Supported in previous priv spec, but dropped now
 
 	csr ubadaddr		# 0x043 in 1.9.1, but the value is utval since 1.10

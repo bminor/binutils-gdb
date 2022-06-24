@@ -307,6 +307,27 @@ _start:
 	.cfi_offset vstval, 2316
 	.cfi_offset vsip, 2320
 	.cfi_offset vsatp, 2560
+	# Smstateen extension
+	.cfi_offset mstateen0, 3120
+	.cfi_offset mstateen1, 3124
+	.cfi_offset mstateen2, 3128
+	.cfi_offset mstateen3, 3132
+	.cfi_offset sstateen0, 1072
+	.cfi_offset sstateen1, 1076
+	.cfi_offset sstateen2, 1080
+	.cfi_offset sstateen3, 1084
+	.cfi_offset hstateen0, 6192
+	.cfi_offset hstateen1, 6196
+	.cfi_offset hstateen2, 6200
+	.cfi_offset hstateen3, 6204
+	.cfi_offset mstateen0h, 3184
+	.cfi_offset mstateen1h, 3188
+	.cfi_offset mstateen2h, 3192
+	.cfi_offset mstateen3h, 3196
+	.cfi_offset hstateen0h, 6256
+	.cfi_offset hstateen1h, 6260
+	.cfi_offset hstateen2h, 6264
+	.cfi_offset hstateen3h, 6268
 	# dropped
 	.cfi_offset ubadaddr, 268	# aliases
 	.cfi_offset sbadaddr, 1292	# aliases

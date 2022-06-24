@@ -313,6 +313,26 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r4675 \(vstval\) at cfa\+2316
   DW_CFA_offset_extended_sf: r4676 \(vsip\) at cfa\+2320
   DW_CFA_offset_extended_sf: r4736 \(vsatp\) at cfa\+2560
+  DW_CFA_offset_extended_sf: r4876 \(mstateen0\) at cfa\+3120
+  DW_CFA_offset_extended_sf: r4877 \(mstateen1\) at cfa\+3124
+  DW_CFA_offset_extended_sf: r4878 \(mstateen2\) at cfa\+3128
+  DW_CFA_offset_extended_sf: r4879 \(mstateen3\) at cfa\+3132
+  DW_CFA_offset_extended_sf: r4364 \(sstateen0\) at cfa\+1072
+  DW_CFA_offset_extended_sf: r4365 \(sstateen1\) at cfa\+1076
+  DW_CFA_offset_extended_sf: r4366 \(sstateen2\) at cfa\+1080
+  DW_CFA_offset_extended_sf: r4367 \(sstateen3\) at cfa\+1084
+  DW_CFA_offset_extended_sf: r5644 \(hstateen0\) at cfa\+6192
+  DW_CFA_offset_extended_sf: r5645 \(hstateen1\) at cfa\+6196
+  DW_CFA_offset_extended_sf: r5646 \(hstateen2\) at cfa\+6200
+  DW_CFA_offset_extended_sf: r5647 \(hstateen3\) at cfa\+6204
+  DW_CFA_offset_extended_sf: r4892 \(mstateen0h\) at cfa\+3184
+  DW_CFA_offset_extended_sf: r4893 \(mstateen1h\) at cfa\+3188
+  DW_CFA_offset_extended_sf: r4894 \(mstateen2h\) at cfa\+3192
+  DW_CFA_offset_extended_sf: r4895 \(mstateen3h\) at cfa\+3196
+  DW_CFA_offset_extended_sf: r5660 \(hstateen0h\) at cfa\+6256
+  DW_CFA_offset_extended_sf: r5661 \(hstateen1h\) at cfa\+6260
+  DW_CFA_offset_extended_sf: r5662 \(hstateen2h\) at cfa\+6264
+  DW_CFA_offset_extended_sf: r5663 \(hstateen3h\) at cfa\+6268
   DW_CFA_offset_extended_sf: r4163 \(utval\) at cfa\+268
   DW_CFA_offset_extended_sf: r4419 \(stval\) at cfa\+1292
   DW_CFA_offset_extended_sf: r4480 \(satp\) at cfa\+1536
