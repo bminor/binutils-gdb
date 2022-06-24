@@ -49,8 +49,8 @@ Contents of the .eh_frame section:
 Disassembly of section .plt:
 
 0+1b0 <.plt>:
- +[a-f0-9]+:	ff 35 52 fe 3f 00    	push   0x3ffe52\(%rip\)        # 400008 <_GLOBAL_OFFSET_TABLE_\+0x8>
- +[a-f0-9]+:	f2 ff 25 53 fe 3f 00 	bnd jmp \*0x3ffe53\(%rip\)        # 400010 <_GLOBAL_OFFSET_TABLE_\+0x10>
+ +[a-f0-9]+:	ff 35 3a fe 3f 00    	push   0x3ffe3a\(%rip\)        # 3ffff0 <_GLOBAL_OFFSET_TABLE_\+0x8>
+ +[a-f0-9]+:	f2 ff 25 3b fe 3f 00 	bnd jmp \*0x3ffe3b\(%rip\)        # 3ffff8 <_GLOBAL_OFFSET_TABLE_\+0x10>
  +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
  +[a-f0-9]+:	68 00 00 00 00       	push   \$0x0
  +[a-f0-9]+:	f2 e9 e5 ff ff ff    	bnd jmp 1b0 <func@plt-0x20>
@@ -59,7 +59,7 @@ Disassembly of section .plt:
 Disassembly of section .plt.sec:
 
 0+1d0 <func@plt>:
- +[a-f0-9]+:	f2 ff 25 41 fe 3f 00 	bnd jmp \*0x3ffe41\(%rip\)        # 400018 <func>
+ +[a-f0-9]+:	f2 ff 25 29 fe 3f 00 	bnd jmp \*0x3ffe29\(%rip\)        # 400000 <func>
  +[a-f0-9]+:	90                   	nop
 
 Disassembly of section .text:

@@ -49,19 +49,19 @@ Contents of the .eh_frame section:
 Disassembly of section .plt:
 
 0+1b0 <.plt>:
- +[a-f0-9]+:	ff 35 52 fe 3f 00    	push   0x3ffe52\(%rip\)        # 400008 <_GLOBAL_OFFSET_TABLE_\+0x8>
- +[a-f0-9]+:	f2 ff 25 53 fe 3f 00 	bnd jmp \*0x3ffe53\(%rip\)        # 400010 <_GLOBAL_OFFSET_TABLE_\+0x10>
+ +[a-f0-9]+:	ff 35 3a fe 3f 00    	push   0x3ffe3a\(%rip\)        # 3ffff0 <_GLOBAL_OFFSET_TABLE_\+0x8>
+ +[a-f0-9]+:	f2 ff 25 3b fe 3f 00 	bnd jmp \*0x3ffe3b\(%rip\)        # 3ffff8 <_GLOBAL_OFFSET_TABLE_\+0x10>
  +[a-f0-9]+:	0f 1f 00             	nopl   \(%rax\)
 
 Disassembly of section .plt.got:
 
 0+1c0 <func@plt>:
- +[a-f0-9]+:	f2 ff 25 31 fe 3f 00 	bnd jmp \*0x3ffe31\(%rip\)        # 3ffff8 <func>
+ +[a-f0-9]+:	f2 ff 25 19 fe 3f 00 	bnd jmp \*0x3ffe19\(%rip\)        # 3fffe0 <func>
  +[a-f0-9]+:	90                   	nop
 
 Disassembly of section .text:
 
 0+1c8 <foo>:
  +[a-f0-9]+:	e8 f3 ff ff ff       	call   1c0 <func@plt>
- +[a-f0-9]+:	48 8b 05 24 fe 3f 00 	mov    0x3ffe24\(%rip\),%rax        # 3ffff8 <func>
+ +[a-f0-9]+:	48 8b 05 0c fe 3f 00 	mov    0x3ffe0c\(%rip\),%rax        # 3fffe0 <func>
 #pass
