@@ -623,6 +623,10 @@ extern struct thread_info *add_thread_with_info (process_stratum_target *targ,
    as exited and do the notification.  */
 extern void delete_thread (struct thread_info *thread);
 
+/* Like delete_thread, but be quiet about it.  Used when the process
+   this thread belonged to has already exited, for example.  */
+extern void delete_thread_silent (struct thread_info *thread);
+
 /* Mark the thread exited, but don't delete it or remove it from the
    inferior thread list.  */
 extern void set_thread_exited (thread_info *tp, bool silent);

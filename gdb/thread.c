@@ -450,16 +450,20 @@ global_thread_step_over_chain_remove (struct thread_info *tp)
   global_thread_step_over_list.erase (it);
 }
 
-/* See gdbthread.h.  */
+/* Delete the thread referenced by THR.  If SILENT, don't notify
+   the observer of this exit.
+   
+   THR must not be NULL or a failed assertion will be raised.  */
 
-void
-delete_thread (thread_info *thr)
+static void
+delete_thread_1 (thread_info *thr, bool silent)
 {
   gdb_assert (thr != nullptr);
 
-  threads_debug_printf ("deleting thread %s", thr->ptid.to_string ().c_str ());
+  threads_debug_printf ("deleting thread %s, silent = %d",
+			thr->ptid.to_string ().c_str (), silent);
 
-  set_thread_exited (thr, false);
+  set_thread_exited (thr, silent);
 
   if (!thr->deletable ())
     {
@@ -471,6 +475,20 @@ delete_thread (thread_info *thr)
   thr->inf->thread_list.erase (it);
 
   delete thr;
+}
+
+/* See gdbthread.h.  */
+
+void
+delete_thread (thread_info *thread)
+{
+  delete_thread_1 (thread, false /* not silent */);
+}
+
+void
+delete_thread_silent (thread_info *thread)
+{
+  delete_thread_1 (thread, true /* silent */);
 }
 
 struct thread_info *
