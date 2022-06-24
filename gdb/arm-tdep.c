@@ -923,6 +923,7 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 			CORE_ADDR start, CORE_ADDR limit,
 			struct arm_prologue_cache *cache)
 {
+  arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   int i;
@@ -1398,9 +1399,6 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 	      unrecognized_pc = start;
 	    }
 
-	  arm_gdbarch_tdep *tdep
-	    = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-
 	  /* Make sure we are dealing with a target that supports ARMv8.1-m
 	     PACBTI.  */
 	  if (cache != nullptr && tdep->have_pacbti
@@ -1460,7 +1458,11 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 
   for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
     if (stack.find_reg (gdbarch, i, &offset))
-      cache->saved_regs[i].set_addr (offset);
+      {
+	cache->saved_regs[i].set_addr (offset);
+	if (i == ARM_SP_REGNUM)
+	  arm_cache_set_active_sp_value(cache, tdep, offset);
+      }
 
   return unrecognized_pc;
 }
@@ -2087,7 +2089,11 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 
       for (regno = 0; regno < ARM_FPS_REGNUM; regno++)
 	if (stack.find_reg (gdbarch, regno, &offset))
-	  cache->saved_regs[regno].set_addr (offset);
+	  {
+	    cache->saved_regs[regno].set_addr (offset);
+	    if (regno == ARM_SP_REGNUM)
+	      arm_cache_set_active_sp_value(cache, tdep, offset);
+	  }
     }
 
   arm_debug_printf ("Prologue scan stopped at %s",
