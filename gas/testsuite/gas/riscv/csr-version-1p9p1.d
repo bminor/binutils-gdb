@@ -701,6 +701,14 @@ Disassembly of section .text:
 [ 	]+[0-9a-f]+:[ 	]+73e59073[ 	]+csrw[ 	]+mhpmevent30h,a1
 [ 	]+[0-9a-f]+:[ 	]+73f02573[ 	]+csrr[ 	]+a0,mhpmevent31h
 [ 	]+[0-9a-f]+:[ 	]+73f59073[ 	]+csrw[ 	]+mhpmevent31h,a1
+[ 	]+[0-9a-f]+:[ 	]+14d02573[ 	]+csrr[ 	]+a0,stimecmp
+[ 	]+[0-9a-f]+:[ 	]+14d59073[ 	]+csrw[ 	]+stimecmp,a1
+[ 	]+[0-9a-f]+:[ 	]+15d02573[ 	]+csrr[ 	]+a0,stimecmph
+[ 	]+[0-9a-f]+:[ 	]+15d59073[ 	]+csrw[ 	]+stimecmph,a1
+[ 	]+[0-9a-f]+:[ 	]+24d02573[ 	]+csrr[ 	]+a0,vstimecmp
+[ 	]+[0-9a-f]+:[ 	]+24d59073[ 	]+csrw[ 	]+vstimecmp,a1
+[ 	]+[0-9a-f]+:[ 	]+25d02573[ 	]+csrr[ 	]+a0,vstimecmph
+[ 	]+[0-9a-f]+:[ 	]+25d59073[ 	]+csrw[ 	]+vstimecmph,a1
 [ 	]+[0-9a-f]+:[ 	]+04302573[ 	]+csrr[ 	]+a0,ubadaddr
 [ 	]+[0-9a-f]+:[ 	]+04359073[ 	]+csrw[ 	]+ubadaddr,a1
 [ 	]+[0-9a-f]+:[ 	]+14302573[ 	]+csrr[ 	]+a0,sbadaddr

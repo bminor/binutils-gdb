@@ -391,6 +391,12 @@
 	csr mhpmevent30h
 	csr mhpmevent31h
 
+	# Sstc extension
+	csr stimecmp
+	csr stimecmph
+	csr vstimecmp
+	csr vstimecmph
+
 	# Supported in previous priv spec, but dropped now
 
 	csr ubadaddr		# 0x043 in 1.9.1, but the value is utval since 1.10

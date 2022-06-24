@@ -359,6 +359,11 @@ _start:
 	.cfi_offset mhpmevent29h, 7412
 	.cfi_offset mhpmevent30h, 7416
 	.cfi_offset mhpmevent31h, 7420
+	# Sstc extension
+	.cfi_offset stimecmp, 1332
+	.cfi_offset stimecmph, 1396
+	.cfi_offset vstimecmp, 2356
+	.cfi_offset vstimecmph, 2420
 	# dropped
 	.cfi_offset ubadaddr, 268	# aliases
 	.cfi_offset sbadaddr, 1292	# aliases

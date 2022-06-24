@@ -74,6 +74,10 @@ enum riscv_csr_class
   CSR_CLASS_SMSTATEEN_AND_H_32,	/* Smstateen RV32 only (with H) */
   CSR_CLASS_SSCOFPMF,		/* Sscofpmf only */
   CSR_CLASS_SSCOFPMF_32,	/* Sscofpmf RV32 only */
+  CSR_CLASS_SSTC,		/* Sstc only */
+  CSR_CLASS_SSTC_AND_H,		/* Sstc only (with H) */
+  CSR_CLASS_SSTC_32,		/* Sstc RV32 only */
+  CSR_CLASS_SSTC_AND_H_32,	/* Sstc RV32 only (with H) */
 };
 
 /* This structure holds all restricted conditions for a CSR.  */
@@ -948,6 +952,16 @@ riscv_csr_address (const char *csr_name,
       /* Fall through.  */
     case CSR_CLASS_SSCOFPMF:
       extension = "sscofpmf";
+      break;
+    case CSR_CLASS_SSTC:
+    case CSR_CLASS_SSTC_AND_H:
+    case CSR_CLASS_SSTC_32:
+    case CSR_CLASS_SSTC_AND_H_32:
+      is_rv32_only = (csr_class == CSR_CLASS_SSTC_32
+		      || csr_class == CSR_CLASS_SSTC_AND_H_32);
+      is_h_required = (csr_class == CSR_CLASS_SSTC_AND_H
+		      || csr_class == CSR_CLASS_SSTC_AND_H_32);
+      extension = "sstc";
       break;
     case CSR_CLASS_DEBUG:
       break;

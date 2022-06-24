@@ -652,6 +652,22 @@
 .*Warning: invalid CSR `mhpmevent31h', needs `sscofpmf' extension
 .*Warning: invalid CSR `mhpmevent31h', needs rv32i extension
 .*Warning: invalid CSR `mhpmevent31h', needs `sscofpmf' extension
+.*Warning: invalid CSR `stimecmp', needs `sstc' extension
+.*Warning: invalid CSR `stimecmp', needs `sstc' extension
+.*Warning: invalid CSR `stimecmph', needs rv32i extension
+.*Warning: invalid CSR `stimecmph', needs `sstc' extension
+.*Warning: invalid CSR `stimecmph', needs rv32i extension
+.*Warning: invalid CSR `stimecmph', needs `sstc' extension
+.*Warning: invalid CSR `vstimecmp', needs `h' extension
+.*Warning: invalid CSR `vstimecmp', needs `sstc' extension
+.*Warning: invalid CSR `vstimecmp', needs `h' extension
+.*Warning: invalid CSR `vstimecmp', needs `sstc' extension
+.*Warning: invalid CSR `vstimecmph', needs rv32i extension
+.*Warning: invalid CSR `vstimecmph', needs `h' extension
+.*Warning: invalid CSR `vstimecmph', needs `sstc' extension
+.*Warning: invalid CSR `vstimecmph', needs rv32i extension
+.*Warning: invalid CSR `vstimecmph', needs `h' extension
+.*Warning: invalid CSR `vstimecmph', needs `sstc' extension
 .*Warning: invalid CSR `utval' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `utval' for the privileged spec `1.9.1'
 .*Warning: invalid CSR `fflags', needs `f' extension
