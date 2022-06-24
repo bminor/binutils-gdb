@@ -72,3 +72,31 @@ proc style {str style} {
     }
     return "\033\\\[${style}m${str}\033\\\[m"
 }
+
+# gdb_get_bp_addr num
+#
+# Purpose:
+#    Get address of a particular breakpoint.
+#
+# Parameter:
+#    The parameter "num" indicates the number of the breakpoint to get.
+#    Note that *currently* this parameter must be an integer value.
+#    E.g., -1 means that we're gonna get the first internal breakpoint;
+#    2 means to get the second user-defined breakpoint.
+#
+# Return:
+#    First address for a particular breakpoint.
+#
+# TODO:
+#    It would be nice if this procedure could accept floating point value.
+#    E.g., 'gdb_get_bp_addr 1.2' means to get the address of the second
+#    location of breakpoint #1.
+#
+proc gdb_get_bp_addr { num } {
+    gdb_test_multiple "maint info break $num" "find address of specified bp $num" {
+	-re -wrap ".*(0x\[0-9a-f\]+).*" {
+	    return $expect_out(1,string)
+	}
+    }
+    return ""
+}
