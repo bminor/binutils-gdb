@@ -624,6 +624,7 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+CONFIG_STATUS_DEPENDENCIES
 WERROR_CFLAGS
 WARN_CFLAGS
 HAVE_PIPE_OR_PIPE2_FALSE
@@ -10452,6 +10453,15 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
 
+# Set the 'development' global.
+. $srcdir/../bfd/development.sh
+
+if test "$development" = true ; then
+
+$as_echo "#define DEVELOPMENT 1" >>confdefs.h
+
+fi
+
 case ${host} in
   *mingw32*)
 
@@ -10459,6 +10469,9 @@ $as_echo "#define USE_WIN32API 1" >>confdefs.h
 
     ;;
 esac
+
+CONFIG_STATUS_DEPENDENCIES='$srcdir/../bfd/development.sh'
+
 
 ac_config_files="$ac_config_files Makefile"
 
