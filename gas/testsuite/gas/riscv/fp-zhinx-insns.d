@@ -1,4 +1,4 @@
-#as: -march=rv64ima_zhinx
+#as: -march=rv64ima_zqinx_zhinx
 #source: fp-zhinx-insns.s
 #objdump: -dr
 

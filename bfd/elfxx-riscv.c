@@ -2340,15 +2340,17 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "zfh");
     case INSN_CLASS_ZFH_OR_ZHINX:
       return riscv_subset_supports (rps, "zfh")
-        || riscv_subset_supports (rps, "zhinx");
+	     || riscv_subset_supports (rps, "zhinx");
     case INSN_CLASS_D_AND_ZFH_INX:
       return (riscv_subset_supports (rps, "d")
 	      && riscv_subset_supports (rps, "zfh"))
-           || riscv_subset_supports (rps, "zhinx");
+	     || (riscv_subset_supports (rps, "zdinx")
+		 && riscv_subset_supports (rps, "zhinx"));
     case INSN_CLASS_Q_AND_ZFH_INX:
       return (riscv_subset_supports (rps, "q")
 	      && riscv_subset_supports (rps, "zfh"))
-           || riscv_subset_supports (rps, "zhinx");
+	     || (riscv_subset_supports (rps, "zqinx")
+		 && riscv_subset_supports (rps, "zhinx"));
     case INSN_CLASS_ZBA:
       return riscv_subset_supports (rps, "zba");
     case INSN_CLASS_ZBB:
@@ -2495,9 +2497,27 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
     case INSN_CLASS_ZFH_OR_ZHINX:
       return _("zfh' or 'zhinx");
     case INSN_CLASS_D_AND_ZFH_INX:
-      return _("('d' and 'zfh') or 'zhinx");
+      if (riscv_subset_supports (rps, "zfh"))
+	return "d";
+      else if (riscv_subset_supports (rps, "d"))
+	return "zfh";
+      else if (riscv_subset_supports (rps, "zhinx"))
+	return "zdinx";
+      else if (riscv_subset_supports (rps, "zdinx"))
+	return "zhinx";
+      else
+	return _("zfh' and `d', or `zhinx' and `zdinx");
     case INSN_CLASS_Q_AND_ZFH_INX:
-      return _("('q' and 'zfh') or 'zhinx");
+      if (riscv_subset_supports (rps, "zfh"))
+	return "q";
+      else if (riscv_subset_supports (rps, "q"))
+	return "zfh";
+      else if (riscv_subset_supports (rps, "zhinx"))
+	return "zqinx";
+      else if (riscv_subset_supports (rps, "zqinx"))
+	return "zhinx";
+      else
+	return _("zfh' and `q', or `zhinx' and `zqinx");
     case INSN_CLASS_H:
       return _("h");
     default:
