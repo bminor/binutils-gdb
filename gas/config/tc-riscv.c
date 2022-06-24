@@ -899,20 +899,21 @@ riscv_csr_address (const char *csr_name,
   struct riscv_csr_extra *saved_entry = entry;
   enum riscv_csr_class csr_class = entry->csr_class;
   bool need_check_version = false;
-  bool rv32_only = true;
+  bool is_rv32_only = false;
+  bool is_h_required = false;
   const char* extension = NULL;
 
   switch (csr_class)
     {
     case CSR_CLASS_I_32:
-      rv32_only = (xlen == 32);
+      is_rv32_only = true;
       /* Fall through.  */
     case CSR_CLASS_I:
       need_check_version = true;
       extension = "i";
       break;
     case CSR_CLASS_H_32:
-      rv32_only = (xlen == 32);
+      is_rv32_only = true;
       /* Fall through.  */
     case CSR_CLASS_H:
       extension = "h";
@@ -934,8 +935,10 @@ riscv_csr_address (const char *csr_name,
 
   if (riscv_opts.csr_check)
     {
-      if (!rv32_only)
+      if (is_rv32_only && xlen != 32)
 	as_warn (_("invalid CSR `%s', needs rv32i extension"), csr_name);
+      if (is_h_required && !riscv_subset_supports (&riscv_rps_as, "h"))
+	as_warn (_("invalid CSR `%s', needs `h' extension"), csr_name);
 
       if (extension != NULL
 	  && !riscv_subset_supports (&riscv_rps_as, extension))
