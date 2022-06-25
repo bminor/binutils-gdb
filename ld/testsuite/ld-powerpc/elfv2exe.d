@@ -9,13 +9,13 @@ Disassembly of section \.text:
 
 0+100000c0 <.*\.plt_branch\.f4>:
 .*:	(3d 82 ff ff|ff ff 82 3d) 	addis   r12,r2,-1
-.*:	(e9 8c 7f 58|58 7f 8c e9) 	ld      r12,32600\(r12\)
+.*:	(e9 8c 7f f0|f0 7f 8c e9) 	ld      r12,32752\(r12\)
 .*:	(7d 89 03 a6|a6 03 89 7d) 	mtctr   r12
 .*:	(4e 80 04 20|20 04 80 4e) 	bctr
 
 0+100000d0 <.*\.plt_branch\.f2>:
 .*:	(3d 82 ff ff|ff ff 82 3d) 	addis   r12,r2,-1
-.*:	(e9 8c 7f 60|60 7f 8c e9) 	ld      r12,32608\(r12\)
+.*:	(e9 8c 7f f8|f8 7f 8c e9) 	ld      r12,32760\(r12\)
 .*:	(7d 89 03 a6|a6 03 89 7d) 	mtctr   r12
 .*:	(4e 80 04 20|20 04 80 4e) 	bctr
 
