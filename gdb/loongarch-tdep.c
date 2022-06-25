@@ -116,10 +116,8 @@ loongarch_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc,
 			 struct trad_frame_cache *this_cache)
 {
   CORE_ADDR cur_pc = start_pc, prologue_end = 0;
-  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-  auto regs = tdep->regs;
-  int32_t sp = regs.r + 3;
-  int32_t fp = regs.r + 22;
+  int32_t sp = LOONGARCH_SP_REGNUM;
+  int32_t fp = LOONGARCH_FP_REGNUM;
   int32_t reg_value[32] = {0};
   int32_t reg_used[32] = {1, 0};
 
@@ -364,7 +362,7 @@ loongarch_deal_with_atomic_sequence (struct regcache *regcache, CORE_ADDR cur_pc
   return next_pcs;
 }
 
-/* Implement the "software_single_step" gdbarch method  */
+/* Implement the software_single_step gdbarch method  */
 
 static std::vector<CORE_ADDR>
 loongarch_software_single_step (struct regcache *regcache)
@@ -381,8 +379,7 @@ loongarch_software_single_step (struct regcache *regcache)
   return {next_pc};
 }
 
-/* Adjust the address downward (direction of stack growth) so that it
-   is correctly aligned for a new stack frame.  */
+/* Implement the frame_align gdbarch method.  */
 
 static CORE_ADDR
 loongarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
@@ -390,12 +387,11 @@ loongarch_frame_align (struct gdbarch *gdbarch, CORE_ADDR addr)
   return align_down (addr, 16);
 }
 
-/* Generate, or return the cached frame cache for LoongArch frame unwinder.  */
+/* Generate, or return the cached frame cache for frame unwinder.  */
 
 static struct trad_frame_cache *
 loongarch_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct trad_frame_cache *cache;
   CORE_ADDR pc;
 
@@ -405,8 +401,7 @@ loongarch_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache = trad_frame_cache_zalloc (this_frame);
   *this_cache = cache;
 
-  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-  trad_frame_set_reg_realreg (cache, gdbarch_pc_regnum (gdbarch), tdep->regs.ra);
+  trad_frame_set_reg_realreg (cache, LOONGARCH_PC_REGNUM, LOONGARCH_RA_REGNUM);
 
   pc = get_frame_address_in_block (this_frame);
   trad_frame_set_id (cache, frame_id_build_unavailable_stack (pc));
@@ -414,7 +409,7 @@ loongarch_frame_cache (struct frame_info *this_frame, void **this_cache)
   return cache;
 }
 
-/* Implement the this_id callback for LoongArch frame unwinder.  */
+/* Implement the this_id callback for frame unwinder.  */
 
 static void
 loongarch_frame_this_id (struct frame_info *this_frame, void **prologue_cache,
@@ -426,7 +421,7 @@ loongarch_frame_this_id (struct frame_info *this_frame, void **prologue_cache,
   trad_frame_get_id (info, this_id);
 }
 
-/* Implement the prev_register callback for LoongArch frame unwinder.  */
+/* Implement the prev_register callback for frame unwinder.  */
 
 static struct value *
 loongarch_frame_prev_register (struct frame_info *this_frame,
@@ -450,15 +445,13 @@ static const struct frame_unwind loongarch_frame_unwind = {
   /*.prev_arch	   =*/nullptr,
 };
 
-/* Implement the return_value gdbarch method for LoongArch.  */
+/* Implement the return_value gdbarch method.  */
 
 static enum return_value_convention
 loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 			struct type *type, struct regcache *regcache,
 			gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-  auto regs = tdep->regs;
   int len = TYPE_LENGTH (type);
   int regnum = -1;
 
@@ -467,7 +460,7 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
   switch (type->code ())
     {
       case TYPE_CODE_INT:
-	regnum = regs.r + 4;
+	regnum = LOONGARCH_A0_REGNUM;
 	break;
     }
 
@@ -480,16 +473,13 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-/* Implement the "dwarf2_reg_to_regnum" gdbarch method.  */
+/* Implement the dwarf2_reg_to_regnum gdbarch method.  */
 
 static int
-loongarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int num)
+loongarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int regnum)
 {
-  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-  auto regs = tdep->regs;
-
-  if (0 <= num && num < 32)
-    return regs.r + num;
+  if (regnum >= 0 && regnum < 32)
+    return regnum;
   else
     return -1;
 }
@@ -572,7 +562,6 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   size_t regnum = 0;
   tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
   loongarch_gdbarch_tdep *tdep = new loongarch_gdbarch_tdep;
-  tdep->regs.r = regnum;
 
   /* Validate the description provides the mandatory base registers
      and allocate their numbers.  */
@@ -580,10 +569,8 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   for (int i = 0; i < 32; i++)
     valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++,
 					loongarch_r_normal_name[i] + 1);
-  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (),
-				      tdep->regs.pc = regnum++, "pc");
-  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (),
-				      tdep->regs.badv = regnum++, "badv");
+  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++, "pc");
+  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++, "badv");
   if (!valid_p)
     return nullptr;
 
@@ -642,11 +629,9 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   info.tdesc_data = tdesc_data.get ();
 
   /* Information about registers.  */
-  tdep->regs.ra = tdep->regs.r + 1;
-  tdep->regs.sp = tdep->regs.r + 3;
   set_gdbarch_num_regs (gdbarch, regnum);
-  set_gdbarch_sp_regnum (gdbarch, tdep->regs.sp);
-  set_gdbarch_pc_regnum (gdbarch, tdep->regs.pc);
+  set_gdbarch_sp_regnum (gdbarch, LOONGARCH_SP_REGNUM);
+  set_gdbarch_pc_regnum (gdbarch, LOONGARCH_PC_REGNUM);
 
   /* Finalise the target description registers.  */
   tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
