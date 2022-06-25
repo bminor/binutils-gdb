@@ -20315,7 +20315,7 @@ elf32_arm_backend_symbol_processing (bfd *abfd, asymbol *sym)
 #define elf_backend_dtrel_excludes_plt 1
 
 #define elf_backend_got_header_size	12
-#define elf_backend_extern_protected_data 1
+#define elf_backend_extern_protected_data 0
 
 #undef	elf_backend_obj_attrs_vendor
 #define elf_backend_obj_attrs_vendor		"aeabi"
