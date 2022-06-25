@@ -4431,7 +4431,6 @@ elf_i386_link_setup_gnu_properties (struct bfd_link_info *info)
 #define elf_backend_got_header_size	12
 #define elf_backend_plt_alignment	4
 #define elf_backend_dtrel_excludes_plt	1
-#define elf_backend_extern_protected_data 1
 #define elf_backend_caches_rawsize	1
 #define elf_backend_want_dynrelro	1
 
