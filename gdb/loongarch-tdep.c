@@ -224,6 +224,8 @@ loongarch_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 static CORE_ADDR
 loongarch_next_pc (struct regcache *regcache, CORE_ADDR cur_pc)
 {
+  struct gdbarch *gdbarch = regcache->arch ();
+  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
   insn_t insn = loongarch_fetch_instruction (cur_pc);
   size_t insn_len = loongarch_insn_length (insn);
   CORE_ADDR next_pc = cur_pc + insn_len;
@@ -306,6 +308,11 @@ loongarch_next_pc (struct regcache *regcache, CORE_ADDR cur_pc)
 		     loongarch_decode_imm ("5:5", insn, 0));
       if (rj != 0)
 	next_pc = cur_pc + loongarch_decode_imm ("0:5|10:16<<2", insn, 1);
+    }
+  else if ((insn & 0xffff8000) == 0x002b0000)		/* syscall  */
+    {
+      if (tdep->syscall_next_pc != nullptr)
+	next_pc = tdep->syscall_next_pc (get_current_frame ());
     }
 
   return next_pc;

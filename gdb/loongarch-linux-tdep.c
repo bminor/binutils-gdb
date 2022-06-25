@@ -161,11 +161,35 @@ loongarch_iterate_over_regset_sections (struct gdbarch *gdbarch,
       LOONGARCH_LINUX_NUM_GREGSET * regsize, &loongarch_gregset, NULL, cb_data);
 }
 
+/* The following value is derived from __NR_rt_sigreturn in
+   <include/uapi/asm-generic/unistd.h> from the Linux source tree.  */
+
+#define LOONGARCH_NR_rt_sigreturn	139
+
+/* When FRAME is at a syscall instruction, return the PC of the next
+   instruction to be executed.  */
+
+static CORE_ADDR
+loongarch_linux_syscall_next_pc (struct frame_info *frame)
+{
+  const CORE_ADDR pc = get_frame_pc (frame);
+  ULONGEST a7 = get_frame_register_unsigned (frame, LOONGARCH_A7_REGNUM);
+
+  /* If we are about to make a sigreturn syscall, use the unwinder to
+     decode the signal frame.  */
+  if (a7 == LOONGARCH_NR_rt_sigreturn)
+    return frame_unwind_caller_pc (frame);
+
+  return pc + 4;
+}
+
 /* Initialize LoongArch Linux ABI info.  */
 
 static void
 loongarch_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
+  loongarch_gdbarch_tdep *tdep = (loongarch_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
   linux_init_abi (info, gdbarch, 0);
 
   set_solib_svr4_fetch_link_map_offsets (gdbarch,
@@ -187,6 +211,8 @@ loongarch_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Core file support.  */
   set_gdbarch_iterate_over_regset_sections (gdbarch, loongarch_iterate_over_regset_sections);
+
+  tdep->syscall_next_pc = loongarch_linux_syscall_next_pc;
 }
 
 /* Initialize LoongArch Linux target support.  */
