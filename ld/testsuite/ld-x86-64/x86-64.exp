@@ -1833,15 +1833,6 @@ if { [isnative] && [check_compiler_available] } {
 	    "pass.out" \
 	] \
 	[list \
-	    "Run protected-func-1 without PIE" \
-	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-func-1.so" \
-	    "-Wa,-mx86-used-note=yes" \
-	    { protected-func-1b.c } \
-	    "protected-func-1a" \
-	    "pass.out" \
-	    "$NOPIE_CFLAGS" \
-	] \
-	[list \
 	    "Run protected-func-1 with PIE" \
 	    "-Wl,--no-as-needed -pie tmpdir/libprotected-func-1.so" \
 	    "-Wa,-mx86-used-note=yes" \
@@ -1901,24 +1892,6 @@ if { [isnative] && [check_compiler_available] } {
 	    "-Wa,-mx86-used-note=yes" \
 	    { protected-func-3.c } \
 	    "protected-func-2b" \
-	    "pass.out" \
-	    "-fPIE" \
-	] \
-	[list \
-	    "Run protected-data-1a without PIE" \
-	    "$NOPIE_LDFLAGS -Wl,--no-as-needed tmpdir/libprotected-data-1a.so" \
-	    "-Wa,-mx86-used-note=yes" \
-	    { protected-data-1b.c } \
-	    "protected-data-1a" \
-	    "pass.out" \
-	    "$NOPIE_CFLAGS" \
-	] \
-	[list \
-	    "Run protected-data-1b with PIE" \
-	    "-Wl,--no-as-needed -pie tmpdir/libprotected-data-1a.so" \
-	    "-Wa,-mx86-used-note=yes" \
-	    { protected-data-1b.c } \
-	    "protected-data-1b" \
 	    "pass.out" \
 	    "-fPIE" \
 	] \

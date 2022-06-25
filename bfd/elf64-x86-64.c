@@ -5277,7 +5277,6 @@ elf_x86_64_special_sections[]=
 #define elf_backend_got_header_size	    (GOT_ENTRY_SIZE*3)
 #define elf_backend_rela_normal		    1
 #define elf_backend_plt_alignment	    4
-#define elf_backend_extern_protected_data   1
 #define elf_backend_caches_rawsize	    1
 #define elf_backend_dtrel_excludes_plt	    1
 #define elf_backend_want_dynrelro	    1
