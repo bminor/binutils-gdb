@@ -34,36 +34,6 @@
 #include "gdbsupport/filestuff.h"
 #include "gdbarch.h"
 
-/* The CTF target.  */
-
-static const target_info ctf_target_info = {
-  "ctf",
-  N_("CTF file"),
-  N_("(Use a CTF directory as a target.\n\
-Specify the filename of the CTF directory.")
-};
-
-class ctf_target final : public tracefile_target
-{
-public:
-  const target_info &info () const override
-  { return ctf_target_info; }
-
-  void close () override;
-  void fetch_registers (struct regcache *, int) override;
-  enum target_xfer_status xfer_partial (enum target_object object,
-						const char *annex,
-						gdb_byte *readbuf,
-						const gdb_byte *writebuf,
-						ULONGEST offset, ULONGEST len,
-						ULONGEST *xfered_len) override;
-  void files_info () override;
-  int trace_find (enum trace_find_type type, int num,
-			  CORE_ADDR addr1, CORE_ADDR addr2, int *tpp) override;
-  bool get_trace_state_variable_value (int tsv, LONGEST *val) override;
-  traceframe_info_up traceframe_info () override;
-};
-
 /* GDB saves trace buffers and other information (such as trace
    status) got from the remote target into Common Trace Format (CTF).
    The following types of information are expected to save in CTF:
@@ -853,6 +823,36 @@ ctf_trace_file_writer_new (void)
 #include <babeltrace/babeltrace.h>
 #include <babeltrace/ctf/events.h>
 #include <babeltrace/ctf/iterator.h>
+
+/* The CTF target.  */
+
+static const target_info ctf_target_info = {
+  "ctf",
+  N_("CTF file"),
+  N_("(Use a CTF directory as a target.\n\
+Specify the filename of the CTF directory.")
+};
+
+class ctf_target final : public tracefile_target
+{
+public:
+  const target_info &info () const override
+  { return ctf_target_info; }
+
+  void close () override;
+  void fetch_registers (struct regcache *, int) override;
+  enum target_xfer_status xfer_partial (enum target_object object,
+						const char *annex,
+						gdb_byte *readbuf,
+						const gdb_byte *writebuf,
+						ULONGEST offset, ULONGEST len,
+						ULONGEST *xfered_len) override;
+  void files_info () override;
+  int trace_find (enum trace_find_type type, int num,
+			  CORE_ADDR addr1, CORE_ADDR addr2, int *tpp) override;
+  bool get_trace_state_variable_value (int tsv, LONGEST *val) override;
+  traceframe_info_up traceframe_info () override;
+};
 
 /* The struct pointer for current CTF directory.  */
 static int handle_id = -1;
