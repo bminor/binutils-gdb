@@ -855,7 +855,6 @@ public:
 };
 
 /* The struct pointer for current CTF directory.  */
-static int handle_id = -1;
 static struct bt_context *ctx = NULL;
 static struct bt_ctf_iter *ctf_iter = NULL;
 /* The position of the first packet containing trace frame.  */
@@ -895,7 +894,7 @@ ctf_open_dir (const char *dirname)
   ctx = bt_context_create ();
   if (ctx == NULL)
     error (_("Unable to create bt_context"));
-  handle_id = bt_context_add_trace (ctx, dirname, "ctf", NULL, NULL, NULL);
+  int handle_id = bt_context_add_trace (ctx, dirname, "ctf", NULL, NULL, NULL);
   if (handle_id < 0)
     {
       ctf_destroy ();
