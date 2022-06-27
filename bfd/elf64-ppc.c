@@ -12393,6 +12393,8 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      if (PPC_LO (r2off) != 0)
 		size += 4;
 	    }
+	  pad = plt_stub_pad (htab->params->plt_stub_align, stub_offset, size);
+	  stub_offset += pad;
 	}
       else if (info->emitrelocations)
 	{
@@ -12415,6 +12417,38 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       odd = off & 4;
       off = targ - off;
 
+      if (stub_entry->type.sub == ppc_stub_notoc)
+	extra = size_power10_offset (off, odd);
+      else
+	extra = size_offset (off - 8);
+      /* Include branch insn plus those in the offset sequence.  */
+      size += 4 + extra;
+
+      /* If the branch can't reach, use a plt_branch.
+	 The branch insn is at the end, or "extra" bytes along.  So
+	 its offset will be "extra" bytes less that that already
+	 calculated.  */
+      if (off - extra + (1 << 25) >= (bfd_vma) (1 << 26))
+	{
+	  stub_entry->type.main = ppc_stub_plt_branch;
+	  size += 4;
+	  pad = plt_stub_pad (htab->params->plt_stub_align, stub_offset, size);
+	  if (pad != 0)
+	    {
+	      stub_offset += pad;
+	      off -= pad;
+	      odd ^= pad & 4;
+	      size -= extra;
+	      if (stub_entry->type.sub == ppc_stub_notoc)
+		extra = size_power10_offset (off, odd);
+	      else
+		extra = size_offset (off - 8);
+	      size += extra;
+	    }
+	}
+      else if (info->emitrelocations)
+	stub_entry->group->stub_sec->reloc_count +=1;
+
       if (info->emitrelocations)
 	{
 	  unsigned int num_rel;
@@ -12425,17 +12459,6 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  stub_entry->group->stub_sec->reloc_count += num_rel;
 	  stub_entry->group->stub_sec->flags |= SEC_RELOC;
 	}
-
-      if (stub_entry->type.sub == ppc_stub_notoc)
-	extra = size_power10_offset (off, odd);
-      else
-	extra = size_offset (off - 8);
-      /* Include branch insn plus those in the offset sequence.  */
-      size += 4 + extra;
-      /* The branch insn is at the end, or "extra" bytes along.  So
-	 its offset will be "extra" bytes less that that already
-	 calculated.  */
-      off -= extra;
 
       if (stub_entry->type.sub != ppc_stub_notoc)
 	{
@@ -12451,15 +12474,6 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  stub_entry->group->eh_size += eh_advance_size (delta) + 6;
 	  stub_entry->group->lr_restore = lr_used + 8;
 	}
-
-      /* If the branch can't reach, use a plt_branch.  */
-      if (off + (1 << 25) >= (bfd_vma) (1 << 26))
-	{
-	  stub_entry->type.main = ppc_stub_plt_branch;
-	  size += 4;
-	}
-      else if (info->emitrelocations)
-	stub_entry->group->stub_sec->reloc_count +=1;
     }
   else if (stub_entry->type.sub >= ppc_stub_notoc)
     {
