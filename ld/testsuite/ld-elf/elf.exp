@@ -99,7 +99,6 @@ if [is_elf64 tmpdir/symbol3w.a] {
 	 || [istarget h8300-*-*]
 	 || [istarget ip2k-*-*]
 	 || [istarget m68hc11-*]
-	 || [istarget "xc16x-*"]
 	 || [istarget "z80-*-*"] } {
 	set pr25490_2_exp "pr25490-2-16.rd"
 	set pr25490_3_exp "pr25490-3-16.rd"

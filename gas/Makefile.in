@@ -678,7 +678,6 @@ TARGET_CPU_CFILES = \
 	config/tc-visium.c \
 	config/tc-wasm32.c \
 	config/tc-xstormy16.c \
-	config/tc-xc16x.c \
 	config/tc-xgate.c \
 	config/tc-xtensa.c \
 	config/tc-z80.c \
@@ -752,7 +751,6 @@ TARGET_CPU_HFILES = \
 	config/tc-visium.h \
 	config/tc-wasm32.h \
 	config/tc-xstormy16.h \
-	config/tc-xc16x.h \
 	config/tc-xgate.h \
 	config/tc-xtensa.h \
 	config/tc-z80.h \
@@ -1203,8 +1201,6 @@ config/tc-wasm32.$(OBJEXT): config/$(am__dirstamp) \
 	config/$(DEPDIR)/$(am__dirstamp)
 config/tc-xstormy16.$(OBJEXT): config/$(am__dirstamp) \
 	config/$(DEPDIR)/$(am__dirstamp)
-config/tc-xc16x.$(OBJEXT): config/$(am__dirstamp) \
-	config/$(DEPDIR)/$(am__dirstamp)
 config/tc-xgate.$(OBJEXT): config/$(am__dirstamp) \
 	config/$(DEPDIR)/$(am__dirstamp)
 config/tc-xtensa.$(OBJEXT): config/$(am__dirstamp) \
@@ -1410,7 +1406,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@config/$(DEPDIR)/tc-vax.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@config/$(DEPDIR)/tc-visium.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@config/$(DEPDIR)/tc-wasm32.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@config/$(DEPDIR)/tc-xc16x.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@config/$(DEPDIR)/tc-xgate.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@config/$(DEPDIR)/tc-xstormy16.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@config/$(DEPDIR)/tc-xtensa.Po@am__quote@

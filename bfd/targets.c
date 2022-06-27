@@ -933,7 +933,6 @@ extern const bfd_target x86_64_mach_o_vec;
 extern const bfd_target x86_64_pe_vec;
 extern const bfd_target x86_64_pe_big_vec;
 extern const bfd_target x86_64_pei_vec;
-extern const bfd_target xc16x_elf32_vec;
 extern const bfd_target xgate_elf32_vec;
 extern const bfd_target xstormy16_elf32_vec;
 extern const bfd_target xtensa_elf32_be_vec;
@@ -1343,8 +1342,6 @@ static const bfd_target * const _bfd_target_vector[] =
 	&x86_64_pe_big_vec,
 	&x86_64_pei_vec,
 #endif
-
-	&xc16x_elf32_vec,
 
 	&xgate_elf32_vec,
 

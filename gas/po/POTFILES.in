@@ -171,8 +171,6 @@ config/tc-visium.c
 config/tc-visium.h
 config/tc-wasm32.c
 config/tc-wasm32.h
-config/tc-xc16x.c
-config/tc-xc16x.h
 config/tc-xgate.c
 config/tc-xgate.h
 config/tc-xstormy16.c

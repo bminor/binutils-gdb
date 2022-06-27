@@ -163,7 +163,6 @@
 #include "elf/visium.h"
 #include "elf/wasm32.h"
 #include "elf/x86-64.h"
-#include "elf/xc16x.h"
 #include "elf/xgate.h"
 #include "elf/xstormy16.h"
 #include "elf/xtensa.h"
@@ -1880,11 +1879,6 @@ dump_relocations (Filedata *          filedata,
 
 	case EM_METAG:
 	  rtype = elf_metag_reloc_type (type);
-	  break;
-
-	case EM_XC16X:
-	case EM_C166:
-	  rtype = elf_xc16x_reloc_type (type);
 	  break;
 
 	case EM_TI_C6000:
@@ -14343,9 +14337,6 @@ is_32bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_L1OM:
     case EM_K1OM:
       return reloc_type == 10; /* R_X86_64_32.  */
-    case EM_XC16X:
-    case EM_C166:
-      return reloc_type == 3; /* R_XC16C_ABS_32.  */
     case EM_XGATE:
       return reloc_type == 4; /* R_XGATE_32.  */
     case EM_XSTORMY16:
@@ -14607,9 +14598,6 @@ is_16bit_abs_reloc (Filedata * filedata, unsigned int reloc_type)
       return reloc_type == 2; /* R_C6000_ABS16.  */
     case EM_VISIUM:
       return reloc_type == 2; /* R_VISIUM_16. */
-    case EM_XC16X:
-    case EM_C166:
-      return reloc_type == 2; /* R_XC16C_ABS_16.  */
     case EM_XGATE:
       return reloc_type == 3; /* R_XGATE_16.  */
     case EM_Z80:
@@ -14811,7 +14799,6 @@ is_none_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_ARC_COMPACT2: /* R_ARC_NONE.  */
     case EM_ARC_COMPACT: /* R_ARC_NONE.  */
     case EM_ARM:     /* R_ARM_NONE.  */
-    case EM_C166:    /* R_XC16X_NONE.  */
     case EM_CRIS:    /* R_CRIS_NONE.  */
     case EM_FT32:    /* R_FT32_NONE.  */
     case EM_IA_64:   /* R_IA64_NONE.  */
@@ -14837,7 +14824,6 @@ is_none_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_TILEPRO: /* R_TILEPRO_NONE.  */
     case EM_TI_C6000:/* R_C6000_NONE.  */
     case EM_X86_64:  /* R_X86_64_NONE.  */
-    case EM_XC16X:
     case EM_Z80:     /* R_Z80_NONE. */
     case EM_WEBASSEMBLY: /* R_WASM32_NONE.  */
       return reloc_type == 0;

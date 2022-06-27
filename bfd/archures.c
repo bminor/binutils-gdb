@@ -487,10 +487,6 @@ DESCRIPTION
 .#define bfd_mach_msp46		46
 .#define bfd_mach_msp47		47
 .#define bfd_mach_msp54		54
-.  bfd_arch_xc16x,     {* Infineon's XC16X Series.  *}
-.#define bfd_mach_xc16x		1
-.#define bfd_mach_xc16xl	2
-.#define bfd_mach_xc16xs	3
 .  bfd_arch_xgate,     {* Freescale XGATE.  *}
 .#define bfd_mach_xgate		1
 .  bfd_arch_xtensa,    {* Tensilica's Xtensa cores.  *}
@@ -698,7 +694,6 @@ extern const bfd_arch_info_type bfd_visium_arch;
 extern const bfd_arch_info_type bfd_wasm32_arch;
 extern const bfd_arch_info_type bfd_xstormy16_arch;
 extern const bfd_arch_info_type bfd_xtensa_arch;
-extern const bfd_arch_info_type bfd_xc16x_arch;
 extern const bfd_arch_info_type bfd_xgate_arch;
 extern const bfd_arch_info_type bfd_z80_arch;
 extern const bfd_arch_info_type bfd_z8k_arch;
@@ -785,7 +780,6 @@ static const bfd_arch_info_type * const bfd_archures_list[] =
     &bfd_wasm32_arch,
     &bfd_xstormy16_arch,
     &bfd_xtensa_arch,
-    &bfd_xc16x_arch,
     &bfd_xgate_arch,
     &bfd_z80_arch,
     &bfd_z8k_arch,

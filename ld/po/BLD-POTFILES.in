@@ -160,9 +160,6 @@ eelf32tilegx_be.c
 eelf32tilepro.c
 eelf32vax.c
 eelf32visium.c
-eelf32xc16x.c
-eelf32xc16xl.c
-eelf32xc16xs.c
 eelf32xstormy16.c
 eelf32xtensa.c
 eelf32z80.c

@@ -1824,10 +1824,6 @@ enum bfd_architecture
 #define bfd_mach_msp46         46
 #define bfd_mach_msp47         47
 #define bfd_mach_msp54         54
-  bfd_arch_xc16x,     /* Infineon's XC16X Series.  */
-#define bfd_mach_xc16x         1
-#define bfd_mach_xc16xl        2
-#define bfd_mach_xc16xs        3
   bfd_arch_xgate,     /* Freescale XGATE.  */
 #define bfd_mach_xgate         1
   bfd_arch_xtensa,    /* Tensilica's Xtensa cores.  */
@@ -5027,12 +5023,6 @@ then it may be truncated to 8 bits.  */
 /* Self-describing complex relocations.  */
   BFD_RELOC_RELC,
 
-
-/* Infineon Relocations.  */
-  BFD_RELOC_XC16X_PAG,
-  BFD_RELOC_XC16X_POF,
-  BFD_RELOC_XC16X_SEG,
-  BFD_RELOC_XC16X_SOF,
 
 /* Relocations used by VAX ELF.  */
   BFD_RELOC_VAX_GLOB_DAT,

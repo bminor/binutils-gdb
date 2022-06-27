@@ -221,13 +221,6 @@ vax-dis.c
 visium-dis.c
 visium-opc.c
 wasm32-dis.c
-xc16x-asm.c
-xc16x-desc.c
-xc16x-desc.h
-xc16x-dis.c
-xc16x-ibld.c
-xc16x-opc.c
-xc16x-opc.h
 xgate-dis.c
 xgate-opc.c
 xstormy16-asm.c

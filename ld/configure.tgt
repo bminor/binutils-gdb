@@ -1021,9 +1021,6 @@ x86_64-*-mingw*)	targ_emul=i386pep ;
 			targ_extra_emuls=i386pe
 			targ_extra_ofiles="deffilep.o pep-dll.o pe-dll.o"
 			;;
-xc16x-*-elf)		targ_emul=elf32xc16x
-			targ_extra_emuls="elf32xc16xl elf32xc16xs"
-			;;
 xgate-*-*)		targ_emul=xgateelf
 			targ_extra_ofiles=ldelfgen.o
 			;;

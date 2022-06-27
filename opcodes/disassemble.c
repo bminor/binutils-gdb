@@ -98,7 +98,6 @@
 #define ARCH_visium
 #define ARCH_wasm32
 #define ARCH_xstormy16
-#define ARCH_xc16x
 #define ARCH_xgate
 #define ARCH_xtensa
 #define ARCH_z80
@@ -488,11 +487,6 @@ disassembler (enum bfd_architecture a,
 #ifdef ARCH_xstormy16
     case bfd_arch_xstormy16:
       disassemble = print_insn_xstormy16;
-      break;
-#endif
-#ifdef ARCH_xc16x
-    case bfd_arch_xc16x:
-      disassemble = print_insn_xc16x;
       break;
 #endif
 #ifdef ARCH_xtensa
