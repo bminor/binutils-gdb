@@ -309,6 +309,21 @@ struct arm_prologue_cache
   arm_prologue_cache() = default;
 };
 
+
+/* Reconstruct T bit in program status register from LR value.  */
+
+static inline ULONGEST
+reconstruct_t_bit(struct gdbarch *gdbarch, CORE_ADDR lr, ULONGEST psr)
+{
+  ULONGEST t_bit = arm_psr_thumb_bit (gdbarch);
+  if (IS_THUMB_ADDR (lr))
+    psr |= t_bit;
+  else
+    psr &= ~t_bit;
+
+  return psr;
+}
+
 /* Initialize stack pointers, and flag the active one.  */
 
 static inline void
@@ -2348,15 +2363,10 @@ arm_prologue_prev_register (struct frame_info *this_frame,
      but the processor status is likely valid.  */
   if (prev_regnum == ARM_PS_REGNUM)
     {
-      CORE_ADDR lr, cpsr;
-      ULONGEST t_bit = arm_psr_thumb_bit (gdbarch);
+      ULONGEST cpsr = get_frame_register_unsigned (this_frame, prev_regnum);
+      CORE_ADDR lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
 
-      cpsr = get_frame_register_unsigned (this_frame, prev_regnum);
-      lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
-      if (IS_THUMB_ADDR (lr))
-	cpsr |= t_bit;
-      else
-	cpsr &= ~t_bit;
+      cpsr = reconstruct_t_bit (gdbarch, lr, cpsr);
       return frame_unwind_got_constant (this_frame, prev_regnum, cpsr);
     }
 
@@ -3369,24 +3379,46 @@ arm_m_exception_cache (struct frame_info *this_frame)
       return cache;
     }
 
-  fnc_return = ((lr & 0xfffffffe) == 0xfefffffe);
+  fnc_return = (((lr >> 24) & 0xff) == 0xfe);
   if (tdep->have_sec_ext && fnc_return)
     {
-      int actual_sp;
+      if (!arm_unwind_secure_frames)
+	{
+	  warning (_("Non-secure to secure stack unwinding disabled."));
 
-      arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_msp_ns_regnum);
-      arm_cache_set_active_sp_value (cache, tdep, sp);
-      if (lr & 1)
-	actual_sp = tdep->m_profile_msp_s_regnum;
+	  /* Terminate any further stack unwinding by referring to self.  */
+	  arm_cache_set_active_sp_value (cache, tdep, sp);
+	  return cache;
+	}
+
+      xpsr = get_frame_register_unsigned (this_frame, ARM_PS_REGNUM);
+      if ((xpsr & 0xff) != 0)
+	/* Handler mode: This is the mode that exceptions are handled in.  */
+	arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_msp_s_regnum);
       else
-	actual_sp = tdep->m_profile_msp_ns_regnum;
+	/* Thread mode: This is the normal mode that programs run in.  */
+	arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_psp_s_regnum);
 
-      arm_cache_switch_prev_sp (cache, tdep, actual_sp);
-      sp = get_frame_register_unsigned (this_frame, actual_sp);
+      unwound_sp = arm_cache_get_prev_sp_value (cache, tdep);
 
-      cache->saved_regs[ARM_LR_REGNUM].set_addr (sp);
+      /* Stack layout for a function call from Secure to Non-Secure state
+	 (ARMv8-M section B3.16):
 
-      arm_cache_set_active_sp_value (cache, tdep, sp + 8);
+	    SP Offset
+
+		    +-------------------+
+	     0x08   |                   |
+		    +-------------------+   <-- Original SP
+	     0x04   |    Partial xPSR   |
+		    +-------------------+
+	     0x00   |   Return Address  |
+		    +===================+   <-- New SP  */
+
+      cache->saved_regs[ARM_PC_REGNUM].set_addr (unwound_sp + 0x00);
+      cache->saved_regs[ARM_LR_REGNUM].set_addr (unwound_sp + 0x00);
+      cache->saved_regs[ARM_PS_REGNUM].set_addr (unwound_sp + 0x04);
+
+      arm_cache_set_active_sp_value (cache, tdep, unwound_sp + 0x08);
 
       return cache;
     }
@@ -3446,11 +3478,6 @@ arm_m_exception_cache (struct frame_info *this_frame)
 	    /* Main stack used, use MSP as SP.  */
 	    arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_msp_regnum);
 	}
-    }
-  else
-    {
-      /* Main stack used, use MSP as SP.  */
-      arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_msp_regnum);
     }
 
   /* Fetch the SP to use for this frame.  */
@@ -3647,12 +3674,42 @@ arm_m_exception_prev_register (struct frame_info *this_frame,
     return frame_unwind_got_constant (this_frame, prev_regnum,
 				      arm_cache_get_prev_sp_value (cache, tdep));
 
+  /* If we are asked to unwind the PC, strip the saved T bit.  */
+  if (prev_regnum == ARM_PC_REGNUM)
+    {
+      struct value *value = trad_frame_get_prev_register (this_frame,
+							  cache->saved_regs,
+							  prev_regnum);
+      CORE_ADDR pc = value_as_address (value);
+      return frame_unwind_got_constant (this_frame, prev_regnum,
+				        UNMAKE_THUMB_ADDR (pc));
+    }
+
   /* The value might be one of the alternative SP, if so, use the
      value already constructed.  */
   if (arm_cache_is_sp_register (cache, tdep, prev_regnum))
     {
       sp_value = arm_cache_get_sp_register (cache, tdep, prev_regnum);
       return frame_unwind_got_constant (this_frame, prev_regnum, sp_value);
+    }
+
+  /* If we are asked to unwind the xPSR, set T bit if PC is in thumb mode.
+     LR register is unreliable as it contains FNC_RETURN or EXC_RETURN
+     pattern.  */
+  if (prev_regnum == ARM_PS_REGNUM)
+    {
+      struct gdbarch *gdbarch = get_frame_arch (this_frame);
+      struct value *value = trad_frame_get_prev_register (this_frame,
+							  cache->saved_regs,
+							  ARM_PC_REGNUM);
+      CORE_ADDR pc = value_as_address (value);
+      value = trad_frame_get_prev_register (this_frame, cache->saved_regs,
+					    ARM_PS_REGNUM);
+      ULONGEST xpsr = value_as_long (value);
+
+      /* Reconstruct the T bit; see arm_prologue_prev_register for details.  */
+      xpsr = reconstruct_t_bit (gdbarch, pc, xpsr);
+      return frame_unwind_got_constant (this_frame, ARM_PS_REGNUM, xpsr);
     }
 
   return trad_frame_get_prev_register (this_frame, cache->saved_regs,
@@ -3717,8 +3774,8 @@ arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
 {
   struct gdbarch * gdbarch = get_frame_arch (this_frame);
   arm_gdbarch_tdep *tdep = (arm_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-  CORE_ADDR lr, cpsr;
-  ULONGEST t_bit = arm_psr_thumb_bit (gdbarch);
+  CORE_ADDR lr;
+  ULONGEST cpsr;
 
   switch (regnum)
     {
@@ -3747,10 +3804,7 @@ arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
       /* Reconstruct the T bit; see arm_prologue_prev_register for details.  */
       cpsr = get_frame_register_unsigned (this_frame, regnum);
       lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
-      if (IS_THUMB_ADDR (lr))
-	cpsr |= t_bit;
-      else
-	cpsr &= ~t_bit;
+      cpsr = reconstruct_t_bit (gdbarch, lr, cpsr);
       return frame_unwind_got_constant (this_frame, regnum, cpsr);
 
     default:
