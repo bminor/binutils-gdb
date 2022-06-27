@@ -100,7 +100,7 @@ gdb_test_multiple "info break" "breakpoint info" {
 	pass $gdb_test_name
     }
     -re "\r\n\032\032post-prompt\r\n\r\n\032\032breakpoints-headers\r\n\r\n\032\032field 0\r\nNum     \r\n\032\032field 1\r\nType           \r\n\032\032field 2\r\nDisp \r\n\032\032field 3\r\nEnb \r\n\032\032field 4\r\nAddress    +\r\n\032\032field 5\r\nWhat\r\n\r\n\032\032breakpoints-table\r\n\r\n\032\032record\r\n\r\n\032\032field 0\r\n1       \r\n\032\032field 1\r\nbreakpoint     \r\n\032\032field 2\r\nkeep \r\n\032\032field 3\r\ny   \r\n\032\032field 4\r\n$hex +\r\n\032\032field 5\r\nin main at .*${srcfile}:$main_line\r\n\r\n\032\032breakpoints-table-end\r\n$gdb_prompt$" {
-	setup_xfail "*-*-*" 1270
+	setup_xfail "*-*-*" 8375
 	fail $gdb_test_name
     }
 }
@@ -295,7 +295,7 @@ gdb_test_multiple "backtrace" "backtrace from shlibrary" {
 	pass $gdb_test_name
     }
     -re "$pat_begin.*$srcfile$pat_end" {
-	setup_xfail "*-*-*" 1270
+	setup_xfail "*-*-*" 8375
 	fail $gdb_test_name
     }
 }
@@ -318,7 +318,7 @@ if [target_info exists gdb,nosignals] {
 	    pass $gdb_test_name
 	}
 	-re "\r\n\032\032post-prompt\r\nContinuing with signal SIGUSR1.\r\n\r\n\032\032starting\(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)+\r\n\r\n\032\032breakpoint 2\r\n\r\nBreakpoint 2, \r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nhandle_USR1\r\n\032\032frame-args\r\n \\(\r\n\032\032arg-begin\r\nsig\r\n\032\032arg-name-end\r\n=\r\n\032\032arg-value -\r\n$decimal\r\n\032\032arg-end\r\n\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*${srcfile}\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n.*\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source.*annota1.c:.*:.*:beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$" {
-	    setup_xfail "*-*-*" 1270
+	    setup_xfail "*-*-*" 8375
 	    fail $gdb_test_name
 	}
     }
@@ -364,7 +364,7 @@ gdb_test_multiple "break ${srcfile}:${main_line}" "break in main" {
 	pass $gdb_test_name
     }
     -re "post-prompt.*Breakpoint 4 at $hex: file .*${srcfile}, line $main_line.*\032\032breakpoints-invalid.*$gdb_prompt$" {
-	setup_xfail "*-*-*" 1270
+	setup_xfail "*-*-*" 8375
 	fail $gdb_test_name
     }
 }

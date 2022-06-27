@@ -233,8 +233,8 @@ switch -exact -- [info_macro WHERE] {
         pass "info macro WHERE after `list macscp_4_2_from_macscp2'"
     }
     {macscp4.h macscp3.h macscp1.c {before macscp4_2_..., from macscp3.h}} {
-        setup_kfail "gdb/555" *-*-* 
-        fail "info macro WHERE after `list macscp_4_2_from_macscp2' (gdb/555)"
+        setup_kfail "gdb/7660" *-*-* 
+        fail "info macro WHERE after `list macscp_4_2_from_macscp2' (gdb/7660)"
     }
     timeout { 
         fail "info macro WHERE after `list macscp_4_2_from_macscp2' (timeout)"
@@ -248,8 +248,8 @@ switch -exact -- [info_macro WHERE] {
         pass "info macro WHERE after `list macscp_4_2_from_macscp3'"
     }
     {macscp4.h macscp2.h macscp1.c {before macscp4_2_..., from macscp2.h}} {
-        setup_kfail "gdb/555" *-*-* 
-        fail "info macro WHERE after `list macscp_4_2_from_macscp3' (gdb/555)"
+        setup_kfail "gdb/7660" *-*-* 
+        fail "info macro WHERE after `list macscp_4_2_from_macscp3' (gdb/7660)"
     }
     timeout {
         fail "info macro WHERE after `list macscp_4_2_from_macscp3' (timeout)"
@@ -326,7 +326,7 @@ proc maybe_kfail { func test_name } {
     # We can't get the right scope info when we're stopped in
     # the macro4_ functions.
     if {[string match macscp4_* $func]} {
-	kfail gdb/555 "$test_name"
+	kfail gdb/7660 "$test_name"
     } else {
 	fail "$test_name"
     }
@@ -359,8 +359,8 @@ for {set i 0} {$i < [llength $funcs]} {incr i} {
     if {[string compare $result $expected] == 0} {
         pass "info macro WHERE stopped in $func"
     } elseif {[string compare $result $kfail_expected] == 0} {
-        setup_kfail "gdb/555" *-*-* 
-        fail "info macro WHERE stopped in $func (gdb/555)"
+        setup_kfail "gdb/7660" *-*-* 
+        fail "info macro WHERE stopped in $func (gdb/7660)"
     } elseif {[string compare $result timeout] == 0} {
         fail "info macro WHERE stopped in $func (timeout)"
     } else {
