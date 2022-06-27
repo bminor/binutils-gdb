@@ -10194,7 +10194,12 @@ display_debug_names (struct dwarf_section *section, void *file)
 	  printf (_("Out of %lu items there are %zu bucket clashes"
 		    " (longest of %zu entries).\n"),
 		  (unsigned long) name_count, hash_clash_count, longest_clash);
-	  assert (name_count == buckets_filled + hash_clash_count);
+	  
+	  if (name_count != buckets_filled + hash_clash_count)
+	    warn (_("The name_count (%lu) is not the same as the used bucket_count (%lu) + the hash clash count (%lu)"),
+		  (unsigned long) name_count,
+		  (unsigned long) buckets_filled,
+		  (unsigned long) hash_clash_count);
 	}
 
       struct abbrev_lookup_entry

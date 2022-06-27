@@ -1,5 +1,11 @@
 2022-06-27  Nick Clifton  <nickc@redhat.com>
 
+	PR 29289
+	* dwarf.c (display_debug_names): Replace assert with a warning
+	message.
+
+2022-06-27  Nick Clifton  <nickc@redhat.com>
+
 	PR 29290
 	* dwarf.c (read_and_display_attr_value): Check that debug_info_p
 	is set before dereferencing it.
