@@ -1,3 +1,9 @@
+2022-06-27  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (fetch_indexed_string): Do not use length of first table
+	in string section as the length of every table in the section.
+	* testsuite/binutils-all/pr26112.r: Update expected output.
+
 2022-06-22  Kumar N, Bhuvanendra  <Kavitha.Natarajan@amd.com>
 
 	* dwarf.c (fetch_indexed_string): Added new parameter

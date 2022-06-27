@@ -703,8 +703,6 @@ fetch_indexed_string (dwarf_vma           idx,
   dwarf_vma index_offset;
   dwarf_vma str_offset;
   const char * ret;
-  unsigned char *curr, *end;
-  dwarf_vma length;
 
   if (index_section->start == NULL)
     return (dwo ? _("<no .debug_str_offsets.dwo section>")
@@ -714,99 +712,46 @@ fetch_indexed_string (dwarf_vma           idx,
     return (dwo ? _("<no .debug_str.dwo section>")
 		: _("<no .debug_str section>"));
 
-  curr = index_section->start;
-  end = curr + index_section->size;
-  /* FIXME: We should cache the length...  */
-  SAFE_BYTE_GET_AND_INC (length, curr, 4, end);
-  if (length == 0xffffffff)
-    {
-      if (offset_size != 8)
-	warn (_("Expected offset size of 8 but given %s"), dwarf_vmatoa ("x", offset_size));
-      SAFE_BYTE_GET_AND_INC (length, curr, 8, end);
-    }
-  else if (offset_size != 4)
-    {
-      warn (_("Expected offset size of 4 but given %s"), dwarf_vmatoa ("x", offset_size));
-    }
-
-  if (length == 0)
-    {
-      /* This is probably an old style .debug_str_offset section which
-	 just contains offsets and no header (and the first offset is 0).  */
-      curr = index_section->start;
-      length = index_section->size;
-    }
-  else
-    {
-      /* Skip the version and padding bytes.
-	 We assume that they are correct.  */
-      if (end - curr >= 4)
-	curr += 4;
-      else
-	curr = end;
-      if (length >= 4)
-	length -= 4;
-      else
-	length = 0;
-
-      if (this_set != NULL
-	  && this_set->section_sizes[DW_SECT_STR_OFFSETS] < length)
-	length = this_set->section_sizes[DW_SECT_STR_OFFSETS];
-
-      if (length > (dwarf_vma) (end - curr))
-	{
-	  warn (_("index table size too large for section %s vs %s\n"),
-		dwarf_vmatoa ("x", length),
-		dwarf_vmatoa ("x", index_section->size));
-	  length = end - curr;
-	}
-
-      if (length < offset_size)
-	{
-	  warn (_("index table size %s is too small\n"),
-		dwarf_vmatoa ("x", length));
-	  return _("<table too small>");
-	}
-    }
-
   index_offset = idx * offset_size;
 
   if (this_set != NULL)
     index_offset += this_set->section_offsets [DW_SECT_STR_OFFSETS];
 
-  if (index_offset >= length
-      || length - index_offset < offset_size)
+  index_offset += str_offsets_base;
+
+  if (index_offset + offset_size > index_section->size)
     {
-      warn (_("DW_FORM_GNU_str_index offset too big: 0x%s vs 0x%s\n"),
+      warn (_("string index of %s converts to an offset of 0x%s which is too big for section %s"),
+	    dwarf_vmatoa ("d", idx),
 	    dwarf_vmatoa ("x", index_offset),
-	    dwarf_vmatoa ("x", length));
-      return _("<index offset is too big>");
+	    str_section->name);
+
+      return _("<string index too big>");
     }
 
-  if (str_offsets_base > 0)
-    {
-      if (offset_size == 8)
-        str_offsets_base -= 16;
-      else
-        str_offsets_base -= 8;
-    }
+  /* FIXME: If we are being paranoid then we should also check to see if
+     IDX references an entry beyond the end of the string table pointed to
+     by STR_OFFSETS_BASE.  (Since there can be more than one string table
+     in a DWARF string section).  */
 
-  str_offset = byte_get (curr + index_offset + str_offsets_base, offset_size);
+  str_offset = byte_get (index_section->start + index_offset, offset_size);
+
   str_offset -= str_section->address;
   if (str_offset >= str_section->size)
     {
-      warn (_("DW_FORM_GNU_str_index indirect offset too big: 0x%s\n"),
+      warn (_("indirect offset too big: 0x%s\n"),
 	    dwarf_vmatoa ("x", str_offset));
       return _("<indirect index offset is too big>");
     }
 
   ret = (const char *) str_section->start + str_offset;
+
   /* Unfortunately we cannot rely upon str_section ending with a NUL byte.
      Since our caller is expecting to receive a well formed C string we test
      for the lack of a terminating byte here.  */
   if (strnlen (ret, str_section->size - str_offset)
       == str_section->size - str_offset)
-    ret = (const char *) _("<no NUL byte at end of section>");
+    return _("<no NUL byte at end of section>");
 
   return ret;
 }
