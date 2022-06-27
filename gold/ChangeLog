@@ -1,3 +1,9 @@
+2022-06-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 23765
+	* fileread.cc (File_read::do_read): Check start parameter before
+	computing number of bytes to read.
+
 2022-05-18  Nick Clifton  <nickc@redhat.com>
 
 	* int_encoding.cc (get_length_as_unsigned_LEB_128): Remove
