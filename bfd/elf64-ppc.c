@@ -11183,29 +11183,22 @@ plt_stub_size (struct ppc_link_hash_table *htab,
    boundaries if we align, then return the padding needed to do so.  */
 
 static inline unsigned int
-plt_stub_pad (struct ppc_link_hash_table *htab,
-	      struct ppc_stub_hash_entry *stub_entry,
+plt_stub_pad (int plt_stub_align,
 	      bfd_vma stub_off,
-	      bfd_vma plt_off,
-	      unsigned int odd)
+	      unsigned int stub_size)
 {
-  int stub_align;
-  unsigned stub_size;
+  unsigned int stub_align;
 
-  if (htab->params->plt_stub_align >= 0)
+  if (plt_stub_align >= 0)
+    stub_align = 1u << plt_stub_align;
+  else
     {
-      stub_align = 1 << htab->params->plt_stub_align;
-      if ((stub_off & (stub_align - 1)) != 0)
-	return stub_align - (stub_off & (stub_align - 1));
-      return 0;
+      stub_align = 1u << -plt_stub_align;
+      if (((stub_off + stub_size - 1) & -stub_align) - (stub_off & -stub_align)
+	  <= ((stub_size - 1) & -stub_align))
+	return 0;
     }
-
-  stub_align = 1 << -htab->params->plt_stub_align;
-  stub_size = plt_stub_size (htab, stub_entry, plt_off, odd);
-  if (((stub_off + stub_size - 1) & -stub_align) - (stub_off & -stub_align)
-      > ((stub_size - 1) & -stub_align))
-    return stub_align - (stub_off & (stub_align - 1));
-  return 0;
+  return stub_align - 1 - ((stub_off - 1) & (stub_align - 1));
 }
 
 /* Build a toc using .plt call stub.  */
@@ -12245,7 +12238,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   struct ppc_link_hash_table *htab;
   asection *plt;
   bfd_vma targ, off, r2off;
-  unsigned int size, extra, lr_used, delta, odd;
+  unsigned int size, pad, extra, lr_used, delta, odd;
   bfd_vma stub_offset;
 
   /* Massage our args to the form they really have.  */
@@ -12504,13 +12497,14 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       odd = off & 4;
       off = targ - off;
 
-      if (htab->params->plt_stub_align != 0)
+      size = plt_stub_size (htab, stub_entry, off, odd);
+      pad = plt_stub_pad (htab->params->plt_stub_align, stub_offset, size);
+      if (pad != 0)
 	{
-	  unsigned pad = plt_stub_pad (htab, stub_entry, stub_offset, off, odd);
-
 	  stub_offset += pad;
 	  off -= pad;
 	  odd ^= pad & 4;
+	  size = plt_stub_size (htab, stub_entry, off, odd);
 	}
 
       if (info->emitrelocations)
@@ -12523,8 +12517,6 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  stub_entry->group->stub_sec->reloc_count += num_rel;
 	  stub_entry->group->stub_sec->flags |= SEC_RELOC;
 	}
-
-      size = plt_stub_size (htab, stub_entry, off, odd);
 
       if (stub_entry->type.sub != ppc_stub_notoc)
 	{
@@ -12578,12 +12570,9 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	     + htab->sec_info[stub_entry->group->link_sec->id].toc_off);
       off = targ - off;
 
-      if (htab->params->plt_stub_align != 0)
-	{
-	  unsigned pad = plt_stub_pad (htab, stub_entry, stub_offset, off, 0);
-
-	  stub_offset += pad;
-	}
+      size = plt_stub_size (htab, stub_entry, off, 0);
+      pad = plt_stub_pad (htab->params->plt_stub_align, stub_offset, size);
+      stub_offset += pad;
 
       if (info->emitrelocations)
 	{
@@ -12595,8 +12584,6 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 		   : 1));
 	  stub_entry->group->stub_sec->flags |= SEC_RELOC;
 	}
-
-      size = plt_stub_size (htab, stub_entry, off, 0);
 
       if (stub_entry->h != NULL
 	  && is_tls_get_addr (&stub_entry->h->elf, htab)
