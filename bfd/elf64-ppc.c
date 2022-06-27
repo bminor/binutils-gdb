@@ -3969,7 +3969,7 @@ ppc_merge_stub (struct ppc_link_hash_table *htab,
 
   old_type = stub_entry->type;
   if (old_type.main == ppc_stub_plt_branch)
-    old_type.main += ppc_stub_long_branch - ppc_stub_plt_branch;
+    old_type.main = ppc_stub_long_branch;
 
   if (old_type.main != stub_type.main
       || (old_type.sub != stub_type.sub
@@ -12300,7 +12300,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
     {
       /* Reset the stub type from the plt branch variant in case we now
 	 can reach with a shorter stub.  */
-      stub_entry->type.main += ppc_stub_long_branch - ppc_stub_plt_branch;
+      stub_entry->type.main = ppc_stub_long_branch;
     }
 
   if (stub_entry->type.main == ppc_stub_long_branch
@@ -12382,7 +12382,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      stub_entry->group->stub_sec->flags |= SEC_RELOC;
 	    }
 
-	  stub_entry->type.main += ppc_stub_plt_branch - ppc_stub_long_branch;
+	  stub_entry->type.main = ppc_stub_plt_branch;
 	  if (!stub_entry->type.r2save)
 	    {
 	      size = 12;
@@ -12462,7 +12462,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       /* If the branch can't reach, use a plt_branch.  */
       if (off + (1 << 25) >= (bfd_vma) (1 << 26))
 	{
-	  stub_entry->type.main += ppc_stub_plt_branch - ppc_stub_long_branch;
+	  stub_entry->type.main = ppc_stub_plt_branch;
 	  size += 4;
 	}
       else if (info->emitrelocations)
