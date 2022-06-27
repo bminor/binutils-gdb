@@ -114,6 +114,10 @@ def check_global_var(expected_val):
     if val != expected_val:
         raise gdb.GdbError("global_var is 0x%x, expected 0x%x" % (val, expected_val))
 
+# Return a bytes object representing an 'X' packet header with
+# address ADDR.
+def xpacket_header (addr):
+    return ("X%x,4:" % addr).encode('ascii')
 
 # Set the 'X' packet to the remote target to set a global variable.
 # Checks that we can send byte values.
@@ -125,7 +129,7 @@ def run_set_global_var_test():
     res = conn.send_packet("X%x,4:\x01\x01\x01\x01" % addr)
     assert isinstance(res, bytes)
     check_global_var(0x01010101)
-    res = conn.send_packet(b"X%x,4:\x02\x02\x02\x02" % addr)
+    res = conn.send_packet(xpacket_header(addr) + b"\x02\x02\x02\x02")
     assert isinstance(res, bytes)
     check_global_var(0x02020202)
 
@@ -142,7 +146,7 @@ def run_set_global_var_test():
     assert saw_error
     check_global_var(0x02020202)
     # Now we pass a bytes object, which will work.
-    res = conn.send_packet(b"X%x,4:\xff\xff\xff\xff" % addr)
+    res = conn.send_packet(xpacket_header(addr) + b"\xff\xff\xff\xff")
     check_global_var(0xFFFFFFFF)
 
     print("set global_var test passed")
