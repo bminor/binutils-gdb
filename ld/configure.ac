@@ -564,7 +564,7 @@ AC_DEFINE_UNQUOTED(DEFAULT_LD_WARN_EXECSTACK,
   [Define to 1 if you want to enable --warn-execstack in ELF linker by default.])
 
 if test "${ac_default_ld_warn_rwx_segments}" = unset; then
-  ac_default_ld_warn_rwx_segments=1 ;;
+  ac_default_ld_warn_rwx_segments=1
 fi
 AC_DEFINE_UNQUOTED(DEFAULT_LD_WARN_RWX_SEGMENTS,
   $ac_default_ld_warn_rwx_segments,
