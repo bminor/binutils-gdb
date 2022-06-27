@@ -2694,18 +2694,17 @@ read_and_display_attr_value (unsigned long           attribute,
 	{
 	  const char *suffix = section ? strrchr (section->name, '.') : NULL;
 	  bool dwo = suffix && strcmp (suffix, ".dwo") == 0;
+	  const char *strng;
 
+	  strng = fetch_indexed_string (uvalue, this_set, offset_size, dwo,
+					debug_info_p ? debug_info_p->str_offsets_base : 0);
 	  if (do_wide)
 	    /* We have already displayed the form name.  */
 	    printf (_("%c(offset: 0x%s): %s"), delimiter,
-		    dwarf_vmatoa ("x", uvalue),
-		    fetch_indexed_string (uvalue, this_set, offset_size, dwo,
-	                                  debug_info_p->str_offsets_base));
+		    dwarf_vmatoa ("x", uvalue), strng);
 	  else
 	    printf (_("%c(indexed string: 0x%s): %s"), delimiter,
-		    dwarf_vmatoa ("x", uvalue),
-		    fetch_indexed_string (uvalue, this_set, offset_size, dwo,
-	                                  debug_info_p->str_offsets_base));
+		    dwarf_vmatoa ("x", uvalue), strng);
 	}
       break;
 
