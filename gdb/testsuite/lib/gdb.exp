@@ -4220,13 +4220,17 @@ proc is_c_compiler_gcc {} {
 # Return the gcc major version, or -1.
 # For gcc 4.8.5, the major version is 4.8.
 # For gcc 7.5.0, the major version 7.
+# The COMPILER and LANGUAGE arguments are as for test_compiler_info.
 
-proc gcc_major_version { } {
+proc gcc_major_version { {compiler "gcc-*"} {language "c"} } {
     global decimal
-    if { ![test_compiler_info "gcc-*"] } {
+    if { ![test_compiler_info $compiler $language] } {
 	return -1
     }
-    set res [regexp gcc-($decimal)-($decimal)- [test_compiler_info] \
+    # Strip "gcc-*" to "gcc".
+    regsub -- {-.*} $compiler "" compiler
+    set res [regexp $compiler-($decimal)-($decimal)- \
+		 [test_compiler_info "" $language] \
 		 dummy_var major minor]
     if { $res != 1 } {
 	return -1
