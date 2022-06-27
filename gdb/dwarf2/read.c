@@ -19384,7 +19384,8 @@ static const char *
 read_str_index (struct dwarf2_cu *cu,
 		struct dwarf2_section_info *str_section,
 		struct dwarf2_section_info *str_offsets_section,
-		ULONGEST str_offsets_base, ULONGEST str_index)
+		ULONGEST str_offsets_base, ULONGEST str_index,
+		unsigned offset_size)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
@@ -19408,8 +19409,8 @@ read_str_index (struct dwarf2_cu *cu,
 	   sect_offset_str (cu->header.sect_off), objf_name);
   info_ptr = (str_offsets_section->buffer
 	      + str_offsets_base
-	      + str_index * cu->header.offset_size);
-  if (cu->header.offset_size == 4)
+	      + str_index * offset_size);
+  if (offset_size == 4)
     str_offset = bfd_get_32 (abfd, info_ptr);
   else
     str_offset = bfd_get_64 (abfd, info_ptr);
@@ -19425,12 +19426,60 @@ read_str_index (struct dwarf2_cu *cu,
 static const char *
 read_dwo_str_index (const struct die_reader_specs *reader, ULONGEST str_index)
 {
-  ULONGEST str_offsets_base = reader->cu->header.version >= 5
-			      ? reader->cu->header.addr_size : 0;
+  unsigned offset_size;
+  ULONGEST str_offsets_base;
+  if (reader->cu->header.version >= 5)
+    {
+      /* We have a DWARF5 CU with a reference to a .debug_str_offsets section,
+         so assume the .debug_str_offsets section is DWARF5 as well, and
+	 parse the header.  FIXME: Parse the header only once.  */
+      unsigned int bytes_read = 0;
+      bfd *abfd = reader->dwo_file->sections.str_offsets.get_bfd_owner ();
+      const gdb_byte *p = reader->dwo_file->sections.str_offsets.buffer;
+
+      /* Header: Initial length.  */
+      read_initial_length (abfd, p + bytes_read, &bytes_read);
+
+      /* Determine offset_size based on the .debug_str_offsets header.  */
+      const bool dwarf5_is_dwarf64 = bytes_read != 4;
+      offset_size = dwarf5_is_dwarf64 ? 8 : 4;
+
+      /* Header: Version.  */
+      unsigned version = read_2_bytes (abfd, p + bytes_read);
+      bytes_read += 2;
+
+      if (version <= 4)
+	{
+	  /* We'd like one warning here about ignoring the section, but
+	     because we parse the header more than once (see FIXME above)
+	     we'd have many warnings, so use a complaint instead, which at
+	     least has a limit. */
+	  complaint (_("Section .debug_str_offsets in %s has unsupported"
+		       " version %d, use empty string."),
+		   reader->dwo_file->dwo_name, version);
+	  return "";
+	}
+
+      /* Header: Padding.  */
+      bytes_read += 2;
+
+      str_offsets_base = bytes_read;
+    }
+  else
+    {
+      /* We have a pre-DWARF5 CU with a reference to a .debug_str_offsets
+	 section, assume the .debug_str_offsets section is pre-DWARF5 as
+	 well, which doesn't have a header.  */
+      str_offsets_base = 0;
+
+      /* Determine offset_size based on the .debug_info header.  */
+      offset_size = reader->cu->header.offset_size;
+  }
+
   return read_str_index (reader->cu,
 			 &reader->dwo_file->sections.str,
 			 &reader->dwo_file->sections.str_offsets,
-			 str_offsets_base, str_index);
+			 str_offsets_base, str_index, offset_size);
 }
 
 /* Given a DW_FORM_GNU_str_index from a Fission stub, fetch the string.  */
@@ -19452,7 +19501,8 @@ read_stub_str_index (struct dwarf2_cu *cu, ULONGEST str_index)
   return read_str_index (cu,
 			 &cu->per_objfile->per_bfd->str,
 			 &cu->per_objfile->per_bfd->str_offsets,
-			 *cu->str_offsets_base, str_index);
+			 *cu->str_offsets_base, str_index,
+			 cu->header.offset_size);
 }
 
 /* Return the length of an LEB128 number in BUF.  */
