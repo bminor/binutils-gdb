@@ -15461,12 +15461,7 @@ fi
 
 # By default warn when an executable stack is created due to object files
 # requesting such, not when the user specifies -z execstack.
-case "${target}" in
-  # The HPPA port needs to support older kernels that use executable stacks
-  # for signals and syscalls.
-  hppa*-*-*) ac_default_ld_warn_execstack=0 ;;
-  *) ac_default_ld_warn_execstack=2 ;;
-  esac
+ac_default_ld_warn_execstack=2
 # Check whether --enable-warn-execstack was given.
 if test "${enable_warn_execstack+set}" = set; then :
   enableval=$enable_warn_execstack; case "${enableval}" in
@@ -17277,12 +17272,7 @@ _ACEOF
 
 
 if test "${ac_default_ld_warn_rwx_segments}" = unset; then
-  case "${target}" in
-  # The HPPA's PLT section uses a constructed trampoline, hence it needs to
-  # have a RWX segment.
-  hppa*-*-*) ac_default_ld_warn_rwx_segments=0 ;;
-  *) ac_default_ld_warn_rwx_segments=1 ;;
-  esac
+  ac_default_ld_warn_rwx_segments=1
 fi
 
 cat >>confdefs.h <<_ACEOF

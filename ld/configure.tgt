@@ -40,6 +40,42 @@ targ_extra_ofiles="ldelf.o ldelfgen.o"
 targ64_extra_emuls=
 targ64_extra_libpath=
 
+# By default the linker will generate warnings if it is creating an
+# executable stack or a segment with all three of read, write and
+# execute permissions.  These settings are not appropriate for all
+# targets however, so we can change them here:
+
+if test "${ac_default_ld_warn_rwx_segments}" = unset; then
+  case "${targ}" in
+      # The CRIS default linker script yields just one segment
+      # as intended, so a rwx segment warning is not helpful.
+      # The HPPA's PLT section uses a constructed trampoline
+      # hence it needs to have a RWX segment.
+      # Many MIPS targets use executable segments.
+    cris-*-* | crisv32-*-* | \
+    hppa*-*-* | \
+    mips*-*-*)
+      ac_default_ld_warn_rwx_segments=0
+      ;;
+    *)
+      ;;
+  esac
+fi
+
+if test "${ac_default_ld_warn_execstack}" = 2; then
+  case "${targ}" in
+      # The HPPA port needs to support older kernels that
+      # use executable stacks for signals and syscalls.
+      # Many MIPS targets use executable stacks.
+    hppa*-*-* | \
+    mips*-*-*)
+      ac_default_ld_warn_execstack=0
+      ;;
+    *)
+      ;;
+  esac
+fi
+
 # Please try to keep this table more or less in alphabetic order - it
 # makes it much easier to lookup a specific archictecture.
 case "${targ}" in
@@ -235,11 +271,6 @@ cris-*-linux-* | crisv32-*-linux-*)
 cris-*-* | crisv32-*-*)	targ_emul=criself
 			targ_extra_emuls="crisaout crislinux"
 			targ_extra_libpath=$targ_extra_emuls
-			# The default linker script yields just one segment
-			# as intended, and then a warning is not helpful.
-			if test "${ac_default_ld_warn_rwx_segments}" = unset; then
-			  ac_default_ld_warn_rwx_segments=0
-			fi
 			;;
 crx-*-elf*)		targ_emul=elf32crx
 			;;

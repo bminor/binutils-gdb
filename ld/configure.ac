@@ -206,12 +206,7 @@ esac])
 
 # By default warn when an executable stack is created due to object files
 # requesting such, not when the user specifies -z execstack.
-[case "${target}" in
-  # The HPPA port needs to support older kernels that use executable stacks
-  # for signals and syscalls.
-  hppa*-*-*) ac_default_ld_warn_execstack=0 ;;
-  *) ac_default_ld_warn_execstack=2 ;;
-  esac]
+ac_default_ld_warn_execstack=2
 AC_ARG_ENABLE(warn-execstack,
 	      AS_HELP_STRING([--enable-warn-execstack],
 	      [enable warnings when creating an executable stack]),
@@ -569,12 +564,7 @@ AC_DEFINE_UNQUOTED(DEFAULT_LD_WARN_EXECSTACK,
   [Define to 1 if you want to enable --warn-execstack in ELF linker by default.])
 
 if test "${ac_default_ld_warn_rwx_segments}" = unset; then
-  [case "${target}" in
-  # The HPPA's PLT section uses a constructed trampoline, hence it needs to
-  # have a RWX segment.
-  hppa*-*-*) ac_default_ld_warn_rwx_segments=0 ;;
-  *) ac_default_ld_warn_rwx_segments=1 ;;
-  esac]
+  ac_default_ld_warn_rwx_segments=1 ;;
 fi
 AC_DEFINE_UNQUOTED(DEFAULT_LD_WARN_RWX_SEGMENTS,
   $ac_default_ld_warn_rwx_segments,
