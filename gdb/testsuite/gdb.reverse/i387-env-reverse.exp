@@ -64,7 +64,7 @@ with_test_prefix "forward" {
     gdb_test "n" "asm.*fstsw.*"               "store status word in EAX"
     gdb_test "n" "asm.*fld1.*"                "push st0"
 
-    gdb_test "info register eax" "eax *0x8040000.*\[ \t\]+.*"  "verify eax == 0x8040000"
+    gdb_test "info register ax" "ax *0x0.*\[ \t\]+.*"  "verify eax == 0x0"
     gdb_test "info register fstat" "fstat *0.*\[ \t\]+.*"      "verify fstat == 0"
     gdb_test "info register ftag" "ftag *0xffff.*\[ \t\]+.*"   "verify ftag == 0xffff"
 
