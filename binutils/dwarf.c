@@ -838,7 +838,8 @@ fetch_indexed_addr (dwarf_vma offset, uint32_t num_bytes)
 
 static dwarf_vma
 fetch_indexed_value (dwarf_vma idx,
-		     enum dwarf_section_display_enum sec_enum)
+		     enum dwarf_section_display_enum sec_enum,
+		     dwarf_vma base_address)
 {
   struct dwarf_section *section = &debug_displays [sec_enum].section;
 
@@ -863,8 +864,12 @@ fetch_indexed_value (dwarf_vma idx,
  
   dwarf_vma offset = idx * pointer_size;
 
-  /* Offsets are biased by the size of the section header.  */
-  offset += bias;
+  /* Offsets are biased by the size of the section header
+     or base address.  */
+  if (sec_enum == loclists)
+    offset += base_address;
+  else
+    offset += bias;
 
   if (offset + pointer_size > section->size)
     {
@@ -2808,13 +2813,23 @@ read_and_display_attr_value (unsigned long           attribute,
 
 	  if (do_wide)
 	    /* We have already displayed the form name.  */
-	    printf (_("%c(index: 0x%s): %s"), delimiter,
-		    dwarf_vmatoa ("x", uvalue),
-		    dwarf_vmatoa ("x", fetch_indexed_addr (offset, pointer_size)));
+	    if (form == DW_FORM_loclistx)
+	      printf (_("%c(index: 0x%s): %s"), delimiter,
+	              dwarf_vmatoa ("x", uvalue),
+	              dwarf_vmatoa ("x", debug_info_p->loc_offsets [uvalue]));
+	    else
+	      printf (_("%c(index: 0x%s): %s"), delimiter,
+	              dwarf_vmatoa ("x", uvalue),
+	              dwarf_vmatoa ("x", fetch_indexed_addr (offset, pointer_size)));
 	  else
-	    printf (_("%c(addr_index: 0x%s): %s"), delimiter,
-		    dwarf_vmatoa ("x", uvalue),
-		    dwarf_vmatoa ("x", fetch_indexed_addr (offset, pointer_size)));
+	    if (form == DW_FORM_loclistx)
+	      printf (_("%c(addr_index: 0x%s): %s"), delimiter,
+	              dwarf_vmatoa ("x", uvalue),
+	              dwarf_vmatoa ("x", debug_info_p->loc_offsets [uvalue]));
+	    else
+	      printf (_("%c(addr_index: 0x%s): %s"), delimiter,
+	              dwarf_vmatoa ("x", uvalue),
+	              dwarf_vmatoa ("x", fetch_indexed_addr (offset, pointer_size)));
 	}
       break;
 
@@ -2898,9 +2913,8 @@ read_and_display_attr_value (unsigned long           attribute,
 			       lmax, sizeof (*debug_info_p->have_frame_base));
 		  debug_info_p->max_loc_offsets = lmax;
 		}
-
 	      if (form == DW_FORM_loclistx)
-		uvalue = fetch_indexed_value (uvalue, loclists);
+		uvalue = fetch_indexed_value (num, loclists, debug_info_p->loclists_base);
 	      else if (this_set != NULL)
 		uvalue += this_set->section_offsets [DW_SECT_LOC];
 
@@ -2969,7 +2983,7 @@ read_and_display_attr_value (unsigned long           attribute,
 		}
 
 	      if (form == DW_FORM_rnglistx)
-		uvalue = fetch_indexed_value (uvalue, rnglists);
+		uvalue = fetch_indexed_value (uvalue, rnglists, 0);
 
 	      debug_info_p->range_lists [num] = uvalue;
 	      debug_info_p->num_range_lists++;
