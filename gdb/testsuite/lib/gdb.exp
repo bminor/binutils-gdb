@@ -4137,6 +4137,12 @@ proc get_compiler_info {{language "c"}} {
 	set cppout [read $file]
 	close $file
     } else {
+	# Copy $ifile to temp dir, to work around PR gcc/60447.  This will leave the
+	# superfluous .s file in the temp dir instead of in the source dir.
+	set tofile [file tail $ifile]
+	set tofile [standard_temp_file $tofile]
+	file copy -force $ifile $tofile
+	set ifile $tofile
 	set cppout [ gdb_compile "${ifile}" "" preprocess [list "$language" quiet getting_compiler_info] ]
     }
     eval log_file $saved_log
