@@ -18,6 +18,7 @@
 
 #include "server.h"
 #include "gdbsupport/job-control.h"
+#include "gdbsupport/scoped_restore.h"
 #include "nat/fork-inferior.h"
 #ifdef HAVE_SIGNAL_H
 #include <signal.h>
@@ -102,6 +103,10 @@ post_fork_inferior (int pid, const char *program)
   tcsetpgrp (terminal_fd, pid);
   atexit (restore_old_foreground_pgrp);
 #endif
+
+  process_info *proc = find_process_pid (pid);
+  scoped_restore save_starting_up
+    = make_scoped_restore (&proc->starting_up, true);
 
   startup_inferior (the_target, pid,
 		    START_INFERIOR_TRAPS_EXPECTED,

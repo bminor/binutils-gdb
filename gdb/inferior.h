@@ -551,6 +551,13 @@ public:
      architecture/description.  */
   bool needs_setup = false;
 
+  /* True if the inferior is starting up (inside startup_inferior),
+     and we're nursing it along (through the shell) until it is ready
+     to execute its first instruction.  Until that is done, we must
+     not access inferior memory or registers, as we haven't determined
+     the target architecture/description.  */
+  bool starting_up = false;
+
   /* True when we are reading the library list of the inferior during an
      attach or handling a fork child.  */
   bool in_initial_library_scan = false;

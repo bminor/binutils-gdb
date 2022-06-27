@@ -747,8 +747,8 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
 CORE_ADDR
 linux_process_target::get_pc (lwp_info *lwp)
 {
-  struct regcache *regcache;
-  CORE_ADDR pc;
+  process_info *proc = get_thread_process (get_lwp_thread (lwp));
+  gdb_assert (!proc->starting_up);
 
   if (!low_supports_breakpoints ())
     return 0;
@@ -756,8 +756,8 @@ linux_process_target::get_pc (lwp_info *lwp)
   scoped_restore_current_thread restore_thread;
   switch_to_thread (get_lwp_thread (lwp));
 
-  regcache = get_thread_regcache (current_thread, 1);
-  pc = low_get_pc (regcache);
+  struct regcache *regcache = get_thread_regcache (current_thread, 1);
+  CORE_ADDR pc = low_get_pc (regcache);
 
   threads_debug_printf ("pc is 0x%lx", (long) pc);
 
@@ -796,6 +796,14 @@ linux_process_target::save_stop_reason (lwp_info *lwp)
 
   if (!low_supports_breakpoints ())
     return false;
+
+  process_info *proc = get_thread_process (get_lwp_thread (lwp));
+  if (proc->starting_up)
+    {
+      /* Claim we have the stop PC so that the caller doesn't try to
+	 fetch it itself.  */
+      return true;
+    }
 
   pc = get_pc (lwp);
   sw_breakpoint_pc = pc - low_decr_pc_after_break ();

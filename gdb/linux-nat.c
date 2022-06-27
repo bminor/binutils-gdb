@@ -2539,6 +2539,10 @@ save_stop_reason (struct lwp_info *lp)
   if (!linux_target->low_status_is_event (lp->status))
     return;
 
+  inferior *inf = find_inferior_ptid (linux_target, lp->ptid);
+  if (inf->starting_up)
+    return;
+
   regcache = get_thread_regcache (linux_target, lp->ptid);
   gdbarch = regcache->arch ();
 
