@@ -1398,8 +1398,8 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
   if (used_bits != required_bits)
     {
       as_bad (_("internal: bad RISC-V opcode "
-		"(bits 0x%lx undefined): %s %s"),
-	      ~(unsigned long)(used_bits & required_bits),
+		"(bits %#llx undefined or invalid): %s %s"),
+	      (unsigned long long)(used_bits ^ required_bits),
 	      opc->name, opc->args);
       return false;
     }
