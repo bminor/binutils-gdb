@@ -704,5 +704,9 @@ extensions supported and provides the location of their
 publicly-released documentation:
 
 @table @r
+@item XTheadCmo
+The XTheadCmo extension provides instructions for cache management.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
 
 @end table

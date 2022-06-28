@@ -1825,6 +1825,31 @@ const struct riscv_opcode riscv_opcodes[] =
 {"hsv.w",       0, INSN_CLASS_H, "t,0(s)", MATCH_HSV_W, MASK_HSV_W, match_opcode, INSN_DREF|INSN_4_BYTE },
 {"hsv.d",      64, INSN_CLASS_H, "t,0(s)", MATCH_HSV_D, MASK_HSV_D, match_opcode, INSN_DREF|INSN_8_BYTE },
 
+/* Vendor-specific (T-Head) XTheadCmo instructions.  */
+{"th.dcache.call",   0, INSN_CLASS_XTHEADCMO,   "",   MATCH_TH_DCACHE_CALL,   MASK_TH_DCACHE_CALL,   match_opcode, 0},
+{"th.dcache.ciall",  0, INSN_CLASS_XTHEADCMO,   "",   MATCH_TH_DCACHE_CIALL,  MASK_TH_DCACHE_CIALL,  match_opcode, 0},
+{"th.dcache.iall",   0, INSN_CLASS_XTHEADCMO,   "",   MATCH_TH_DCACHE_IALL,   MASK_TH_DCACHE_IALL,   match_opcode, 0},
+{"th.dcache.cpa",    0, INSN_CLASS_XTHEADCMO,   "s",  MATCH_TH_DCACHE_CPA,    MASK_TH_DCACHE_CPA,    match_opcode, 0},
+{"th.dcache.cipa",   0, INSN_CLASS_XTHEADCMO,   "s",  MATCH_TH_DCACHE_CIPA,   MASK_TH_DCACHE_CIPA,   match_opcode, 0},
+{"th.dcache.ipa",    0, INSN_CLASS_XTHEADCMO,   "s",  MATCH_TH_DCACHE_IPA,    MASK_TH_DCACHE_IPA,    match_opcode, 0},
+{"th.dcache.cva",    0, INSN_CLASS_XTHEADCMO,   "s",  MATCH_TH_DCACHE_CVA,    MASK_TH_DCACHE_CVA,    match_opcode, 0},
+{"th.dcache.civa",   0, INSN_CLASS_XTHEADCMO,   "s",  MATCH_TH_DCACHE_CIVA,   MASK_TH_DCACHE_CIVA,   match_opcode, 0},
+{"th.dcache.iva",    0, INSN_CLASS_XTHEADCMO,   "s",  MATCH_TH_DCACHE_IVA,    MASK_TH_DCACHE_IVA,    match_opcode, 0},
+{"th.dcache.csw",    0, INSN_CLASS_XTHEADCMO,   "s",  MATCH_TH_DCACHE_CSW,    MASK_TH_DCACHE_CSW,    match_opcode, 0},
+{"th.dcache.cisw",   0, INSN_CLASS_XTHEADCMO,   "s",  MATCH_TH_DCACHE_CISW,   MASK_TH_DCACHE_CISW,   match_opcode, 0},
+{"th.dcache.isw",    0, INSN_CLASS_XTHEADCMO,   "s",  MATCH_TH_DCACHE_ISW,    MASK_TH_DCACHE_ISW,    match_opcode, 0},
+{"th.dcache.cpal1",  0, INSN_CLASS_XTHEADCMO,   "s",  MATCH_TH_DCACHE_CPAL1,  MASK_TH_DCACHE_CPAL1,  match_opcode, 0},
+{"th.dcache.cval1",  0, INSN_CLASS_XTHEADCMO,   "s",  MATCH_TH_DCACHE_CVAL1,  MASK_TH_DCACHE_CVAL1,  match_opcode, 0},
+
+{"th.icache.iall",   0, INSN_CLASS_XTHEADCMO,   "",   MATCH_TH_ICACHE_IALL,   MASK_TH_ICACHE_IALL,   match_opcode, 0},
+{"th.icache.ialls",  0, INSN_CLASS_XTHEADCMO,   "",   MATCH_TH_ICACHE_IALLS,  MASK_TH_ICACHE_IALLS,  match_opcode, 0},
+{"th.icache.ipa",    0, INSN_CLASS_XTHEADCMO,   "s",  MATCH_TH_ICACHE_IPA,    MASK_TH_ICACHE_IPA,    match_opcode, 0},
+{"th.icache.iva",    0, INSN_CLASS_XTHEADCMO,   "s",  MATCH_TH_ICACHE_IVA,    MASK_TH_ICACHE_IVA,    match_opcode, 0},
+
+{"th.l2cache.call",  0, INSN_CLASS_XTHEADCMO,   "",   MATCH_TH_L2CACHE_CALL,  MASK_TH_L2CACHE_CALL,  match_opcode, 0},
+{"th.l2cache.ciall", 0, INSN_CLASS_XTHEADCMO,   "",   MATCH_TH_L2CACHE_CIALL, MASK_TH_L2CACHE_CIALL, match_opcode, 0},
+{"th.l2cache.iall",  0, INSN_CLASS_XTHEADCMO,   "",   MATCH_TH_L2CACHE_IALL,  MASK_TH_L2CACHE_IALL,  match_opcode, 0},
+
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
 };
