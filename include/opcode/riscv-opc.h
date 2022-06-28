@@ -2186,6 +2186,23 @@
 #define MASK_TH_MVEQZ 0xfe00707f
 #define MATCH_TH_MVNEZ 0x4200100b
 #define MASK_TH_MVNEZ 0xfe00707f
+/* Vendor-specific (T-Head) XTheadFMemIdx instructions. */
+#define MATCH_TH_FLRD 0x6000600b
+#define MASK_TH_FLRD 0xf800707f
+#define MATCH_TH_FLRW 0x4000600b
+#define MASK_TH_FLRW 0xf800707f
+#define MATCH_TH_FLURD 0x7000600b
+#define MASK_TH_FLURD 0xf800707f
+#define MATCH_TH_FLURW 0x5000600b
+#define MASK_TH_FLURW 0xf800707f
+#define MATCH_TH_FSRD 0x6000700b
+#define MASK_TH_FSRD 0xf800707f
+#define MATCH_TH_FSRW 0x4000700b
+#define MASK_TH_FSRW 0xf800707f
+#define MATCH_TH_FSURD 0x7000700b
+#define MASK_TH_FSURD 0xf800707f
+#define MATCH_TH_FSURW 0x5000700b
+#define MASK_TH_FSURW 0xf800707f
 /* Vendor-specific (T-Head) XTheadMac instructions.  */
 #define MATCH_TH_MULA 0x2000100b
 #define MASK_TH_MULA 0xfe00707f
@@ -2988,6 +3005,15 @@ DECLARE_INSN(th_l2cache_iall, MATCH_TH_L2CACHE_IALL, MASK_TH_L2CACHE_IALL)
 /* Vendor-specific (T-Head) XTheadCondMov instructions.  */
 DECLARE_INSN(th_mveqz, MATCH_TH_MVEQZ, MASK_TH_MVEQZ)
 DECLARE_INSN(th_mvnez, MATCH_TH_MVNEZ, MASK_TH_MVNEZ)
+/* Vendor-specific (T-Head) XTheadFMemIdx instructions. */
+DECLARE_INSN(th_flrd, MATCH_TH_FLRD, MASK_TH_FLRD)
+DECLARE_INSN(th_flrw, MATCH_TH_FLRW, MASK_TH_FLRW)
+DECLARE_INSN(th_flurd, MATCH_TH_FLURD, MASK_TH_FLURD)
+DECLARE_INSN(th_flurw, MATCH_TH_FLURW, MASK_TH_FLURW)
+DECLARE_INSN(th_fsrd, MATCH_TH_FSRD, MASK_TH_FSRD)
+DECLARE_INSN(th_fsrw, MATCH_TH_FSRW, MASK_TH_FSRW)
+DECLARE_INSN(th_fsurd, MATCH_TH_FSURD, MASK_TH_FSURD)
+DECLARE_INSN(th_fsurw, MATCH_TH_FSURW, MASK_TH_FSURW)
 /* Vendor-specific (T-Head) XTheadMac instructions.  */
 DECLARE_INSN(th_mula, MATCH_TH_MULA, MASK_TH_MULA)
 DECLARE_INSN(th_mulah, MATCH_TH_MULAH, MASK_TH_MULAH)

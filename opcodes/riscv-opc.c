@@ -1871,6 +1871,16 @@ const struct riscv_opcode riscv_opcodes[] =
 {"th.mveqz",         0, INSN_CLASS_XTHEADCONDMOV, "d,s,t", MATCH_TH_MVEQZ, MASK_TH_MVEQZ, match_opcode, 0},
 {"th.mvnez",         0, INSN_CLASS_XTHEADCONDMOV, "d,s,t", MATCH_TH_MVNEZ, MASK_TH_MVNEZ, match_opcode, 0},
 
+/* Vendor-specific (T-Head) XTheadFMemIdx instructions.  */
+{"th.flrd",    0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FLRD,  MASK_TH_FLRD,  match_opcode, 0},
+{"th.flrw",    0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FLRW,  MASK_TH_FLRW,  match_opcode, 0},
+{"th.flurd",   0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FLURD, MASK_TH_FLURD, match_opcode, 0},
+{"th.flurw",   0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FLURW, MASK_TH_FLURW, match_opcode, 0},
+{"th.fsrd",    0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FSRD,  MASK_TH_FSRD,  match_opcode, 0},
+{"th.fsrw",    0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FSRW,  MASK_TH_FSRW,  match_opcode, 0},
+{"th.fsurd",   0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FSURD, MASK_TH_FSURD, match_opcode, 0},
+{"th.fsurw",   0, INSN_CLASS_XTHEADFMEMIDX, "d,s,t,Xu2@25", MATCH_TH_FSURW, MASK_TH_FSURW, match_opcode, 0},
+
 /* Vendor-specific (T-Head) XTheadMac instructions.  */
 {"th.mula",          0, INSN_CLASS_XTHEADMAC, "d,s,t", MATCH_TH_MULA,  MASK_TH_MULA,  match_opcode, 0},
 {"th.mulah",         0, INSN_CLASS_XTHEADMAC, "d,s,t", MATCH_TH_MULAH, MASK_TH_MULAH, match_opcode, 0},
