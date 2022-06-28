@@ -1871,6 +1871,14 @@ const struct riscv_opcode riscv_opcodes[] =
 {"th.mveqz",         0, INSN_CLASS_XTHEADCONDMOV, "d,s,t", MATCH_TH_MVEQZ, MASK_TH_MVEQZ, match_opcode, 0},
 {"th.mvnez",         0, INSN_CLASS_XTHEADCONDMOV, "d,s,t", MATCH_TH_MVNEZ, MASK_TH_MVNEZ, match_opcode, 0},
 
+/* Vendor-specific (T-Head) XTheadMac instructions.  */
+{"th.mula",          0, INSN_CLASS_XTHEADMAC, "d,s,t", MATCH_TH_MULA,  MASK_TH_MULA,  match_opcode, 0},
+{"th.mulah",         0, INSN_CLASS_XTHEADMAC, "d,s,t", MATCH_TH_MULAH, MASK_TH_MULAH, match_opcode, 0},
+{"th.mulaw",        64, INSN_CLASS_XTHEADMAC, "d,s,t", MATCH_TH_MULAW, MASK_TH_MULAW, match_opcode, 0},
+{"th.muls",          0, INSN_CLASS_XTHEADMAC, "d,s,t", MATCH_TH_MULS,  MASK_TH_MULS,  match_opcode, 0},
+{"th.mulsh",         0, INSN_CLASS_XTHEADMAC, "d,s,t", MATCH_TH_MULSH, MASK_TH_MULSH, match_opcode, 0},
+{"th.mulsw",        64, INSN_CLASS_XTHEADMAC, "d,s,t", MATCH_TH_MULSW, MASK_TH_MULSW, match_opcode, 0},
+
 /* Vendor-specific (T-Head) XTheadSync instructions.  */
 {"th.sfence.vmas",   0, INSN_CLASS_XTHEADSYNC,  "s,t",MATCH_TH_SFENCE_VMAS,   MASK_TH_SFENCE_VMAS,   match_opcode, 0},
 {"th.sync",          0, INSN_CLASS_XTHEADSYNC,  "",   MATCH_TH_SYNC,          MASK_TH_SYNC,          match_opcode, 0},
