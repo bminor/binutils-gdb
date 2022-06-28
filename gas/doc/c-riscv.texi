@@ -739,6 +739,11 @@ The XTheadMac extension provides multiply-accumulate instructions.
 
 It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
 
+@item XTheadMemIdx
+The XTheadMemIdx extension provides GPR memory operations.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
+
 @item XTheadSync
 The XTheadSync extension provides instructions for multi-processor synchronization.
 
