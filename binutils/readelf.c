@@ -4493,6 +4493,7 @@ get_aarch64_segment_type (unsigned long type)
   switch (type)
     {
     case PT_AARCH64_ARCHEXT:  return "AARCH64_ARCHEXT";
+    case PT_AARCH64_MEMTAG_MTE:	return "AARCH64_MEMTAG_MTE";
     default:                  return NULL;
     }
 }

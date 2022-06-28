@@ -8169,6 +8169,89 @@ elfNN_aarch64_section_from_shdr (bfd *abfd,
   return true;
 }
 
+/* Process any AArch64-specific program segment types.  */
+
+static bool
+elfNN_aarch64_section_from_phdr (bfd *abfd ATTRIBUTE_UNUSED,
+				 Elf_Internal_Phdr *hdr,
+				 int hdr_index ATTRIBUTE_UNUSED,
+				 const char *name ATTRIBUTE_UNUSED)
+{
+  /* Right now we only handle the PT_AARCH64_MEMTAG_MTE segment type.  */
+  if (hdr == NULL || hdr->p_type != PT_AARCH64_MEMTAG_MTE)
+    return false;
+
+  if (hdr->p_filesz > 0)
+    {
+      /* Sections created from memory tag p_type's are always named
+	 "memtag".  This makes it easier for tools (for example, GDB)
+	 to find them.  */
+      asection *newsect = bfd_make_section_anyway (abfd, "memtag");
+
+      if (newsect == NULL)
+	return false;
+
+      unsigned int opb = bfd_octets_per_byte (abfd, NULL);
+
+      /* p_vaddr holds the original start address of the tagged memory
+	 range.  */
+      newsect->vma = hdr->p_vaddr / opb;
+
+      /* p_filesz holds the storage size of the packed tags.  */
+      newsect->size = hdr->p_filesz;
+      newsect->filepos = hdr->p_offset;
+
+      /* p_memsz holds the size of the memory range that contains tags.  The
+	 section's rawsize field is reused for this purpose.  */
+      newsect->rawsize = hdr->p_memsz;
+
+      /* Make sure the section's flags has SEC_HAS_CONTENTS set, otherwise
+	 BFD will return all zeroes when attempting to get contents from this
+	 section.  */
+      newsect->flags |= SEC_HAS_CONTENTS;
+    }
+
+  return true;
+}
+
+/* Implements the bfd_elf_modify_headers hook for aarch64.  */
+
+static bool
+elfNN_aarch64_modify_headers (bfd *abfd,
+			      struct bfd_link_info *info)
+{
+  struct elf_segment_map *m;
+  unsigned int segment_count = 0;
+  Elf_Internal_Phdr *p;
+
+  for (m = elf_seg_map (abfd); m != NULL; m = m->next, segment_count++)
+    {
+      /* We are only interested in the memory tag segment that will be dumped
+	 to a core file.  If we have no memory tags or this isn't a core file we
+	 are dealing with, just skip this segment.  */
+      if (m->p_type != PT_AARCH64_MEMTAG_MTE
+	  || bfd_get_format (abfd) != bfd_core)
+	continue;
+
+      /* For memory tag segments in core files, the size of the file contents
+	 is smaller than the size of the memory range.  Adjust the memory size
+	 accordingly.  The real memory size is held in the section's rawsize
+	 field.  */
+      if (m->count > 0)
+	{
+	  p = elf_tdata (abfd)->phdr;
+	  p += m->idx;
+	  p->p_memsz = m->sections[0]->rawsize;
+	  p->p_flags = 0;
+	  p->p_paddr = 0;
+	  p->p_align = 0;
+	}
+    }
+
+  /* Give the generic code a chance to handle the headers.  */
+  return _bfd_elf_modify_headers (abfd, info);
+}
+
 /* A structure used to record a list of sections, independently
    of the next and prev fields in the asection structure.  */
 typedef struct section_list
@@ -10085,6 +10168,12 @@ const struct elf_size_info elfNN_aarch64_size_info =
 
 #define elf_backend_section_from_shdr		\
   elfNN_aarch64_section_from_shdr
+
+#define elf_backend_section_from_phdr		\
+  elfNN_aarch64_section_from_phdr
+
+#define elf_backend_modify_headers		\
+  elfNN_aarch64_modify_headers
 
 #define elf_backend_size_dynamic_sections	\
   elfNN_aarch64_size_dynamic_sections
