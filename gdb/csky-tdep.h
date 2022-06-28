@@ -37,6 +37,10 @@ struct csky_gdbarch_tdep : gdbarch_tdep
   unsigned int fpu_abi;
   unsigned int fpu_hardfp;
   unsigned int vdsp_version;
+
+  /* Save fv_pseudo_registers_count.  */
+  unsigned int has_vr0;
+  unsigned int fv_pseudo_registers_count;
 };
 
 /* Instruction sizes.  */
@@ -100,6 +104,9 @@ enum csky_regnum
 #define CSKY_TDESC_REGS_SP_NUMBERED             (1 << 1)
 #define CSKY_TDESC_REGS_LR_NUMBERED             (1 << 2)
 #define CSKY_TDESC_REGS_ESSENTIAL_VALUE         (7)
+
+/* For fr0~fr15, fr16~fr31, vr0~vr15 check.  */
+#define CSKY_FULL16_ONEHOT_VALUE   0xffff
 
 /* Number of processor registers w/o ICE registers.  */
 #define CSKY_NUM_REGS (CSKY_MAX_REGS - CSKY_CRBANK_NUM_REGS)

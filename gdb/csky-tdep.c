@@ -59,6 +59,7 @@
 #include <vector>
 
 /* Control debugging information emitted in this file.  */
+
 static bool csky_debug = false;
 
 static const reggroup *cr_reggroup;
@@ -363,7 +364,13 @@ static const struct csky_supported_tdesc_register csky_supported_alias_regs[] = 
   {"t_pcr",   230},
 };
 
+/* Functions declaration.  */
+
+static const char *
+csky_pseudo_register_name (struct gdbarch *gdbarch, int regno);
+
 /* Get csky supported registers's count for tdesc xml.  */
+
 static int
 csky_get_supported_tdesc_registers_count()
 {
@@ -381,6 +388,7 @@ csky_get_supported_tdesc_registers_count()
 }
 
 /* Return a supported register according to index.  */
+
 static const struct csky_supported_tdesc_register *
 csky_get_supported_register_by_index (int index)
 {
@@ -652,6 +660,15 @@ static const char * const csky_register_names[] =
 static const char *
 csky_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
+  int num_regs = gdbarch_num_regs (gdbarch);
+  int num_pseudo_regs =  gdbarch_num_pseudo_regs (gdbarch);
+
+  if ((reg_nr >= num_regs) && (reg_nr < (num_regs + num_pseudo_regs)))
+    return csky_pseudo_register_name (gdbarch, reg_nr);
+
+  if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
+    return tdesc_register_name (gdbarch, reg_nr);
+
   if (reg_nr < 0)
     return NULL;
 
@@ -2569,6 +2586,7 @@ csky_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
 }
 
 /* Check whether xml has discribled the essential regs.  */
+
 static int
 csky_essential_reg_check (const struct csky_supported_tdesc_register *reg)
 {
@@ -2583,6 +2601,200 @@ csky_essential_reg_check (const struct csky_supported_tdesc_register *reg)
     return CSKY_TDESC_REGS_LR_NUMBERED;
   else
     return 0;
+}
+
+/* Check whether xml has discribled the fr0~fr15 regs.  */
+
+static int
+csky_fr0_fr15_reg_check (const struct csky_supported_tdesc_register *reg) {
+  int i = 0;
+  for (i = 0; i < 16; i++)
+    {
+      if ((strcmp (reg->name, csky_supported_fpu_regs[i].name) == 0)
+          && (csky_supported_fpu_regs[i].num == reg->num))
+        return (1 << i);
+    }
+
+  return 0;
+};
+
+/* Check whether xml has discribled the fr16~fr31 regs.  */
+
+static int
+csky_fr16_fr31_reg_check (const struct csky_supported_tdesc_register *reg) {
+  int i = 0;
+  for (i = 0; i < 16; i++)
+    {
+      if ((strcmp (reg->name, csky_supported_fpu_regs[i + 16].name) == 0)
+          && (csky_supported_fpu_regs[i + 16].num == reg->num))
+        return (1 << i);
+    }
+
+  return 0;
+};
+
+/* Check whether xml has discribled the vr0~vr15 regs.  */
+
+static int
+csky_vr0_vr15_reg_check (const struct csky_supported_tdesc_register *reg) {
+  int i = 0;
+  for (i = 0; i < 16; i++)
+    {
+      if ((strcmp (reg->name, csky_supported_fpu_regs[i + 32].name) == 0)
+          && (csky_supported_fpu_regs[i + 32].num == reg->num))
+        return (1 << i);
+    }
+
+  return 0;
+};
+
+/* Return pseudo reg's name.  */
+
+static const char *
+csky_pseudo_register_name (struct gdbarch *gdbarch, int regno)
+{
+  int num_regs = gdbarch_num_regs (gdbarch);
+  csky_gdbarch_tdep *tdep
+        = (csky_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  regno -= num_regs;
+
+  if (tdep->fv_pseudo_registers_count)
+    {
+      static const char *const fv_pseudo_names[] = {
+        "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7",
+        "s8", "s9", "s10", "s11", "s12", "s13", "s14", "s15",
+        "s16", "s17", "s18", "s19", "s20", "s21", "s22", "s23",
+        "s24", "s25", "s26", "s27", "s28", "s29", "s30", "s31",
+        "s32", "s33", "s34", "s35", "s36", "s37", "s38", "s39",
+        "s40", "s41", "s42", "s43", "s44", "s45", "s46", "s47",
+        "s48", "s49", "s50", "s51", "s52", "s53", "s54", "s55",
+        "s56", "s57", "s58", "s59", "s60", "s61", "s62", "s63",
+        "s64", "s65", "s66", "s67", "s68", "s69", "s70", "s71",
+        "s72", "s73", "s74", "s75", "s76", "s77", "s78", "s79",
+        "s80", "s81", "s82", "s83", "s84", "s85", "s86", "s87",
+        "s88", "s89", "s90", "s91", "s92", "s93", "s94", "s95",
+        "s96", "s97", "s98", "s99", "s100", "s101", "s102", "s103",
+        "s104", "s105", "s106", "s107", "s108", "s109", "s110", "s111",
+        "s112", "s113", "s114", "s115", "s116", "s117", "s118", "s119",
+        "s120", "s121", "s122", "s123", "s124", "s125", "s126", "s127",
+      };
+
+      if (regno < tdep->fv_pseudo_registers_count)
+        {
+          if ((regno < 64) && ((regno % 4) >= 2) && !tdep->has_vr0)
+            return NULL;
+          else if ((regno >= 64) && ((regno % 4) >= 2))
+            return NULL;
+          else
+            return fv_pseudo_names[regno];
+        }
+    }
+
+  return NULL;
+}
+
+/* Read for csky pseudo regs.  */
+
+static enum register_status
+csky_pseudo_register_read (struct gdbarch *gdbarch,
+                           struct readable_regcache *regcache,
+                           int regnum, gdb_byte *buf)
+{
+  int num_regs = gdbarch_num_regs (gdbarch);
+  csky_gdbarch_tdep *tdep
+        = (csky_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  regnum -= num_regs;
+
+  if (regnum < tdep->fv_pseudo_registers_count)
+    {
+      enum register_status status;
+      int gdb_regnum = 0;
+      int offset = 0;
+      gdb_byte reg_buf[16];
+
+      /* Ensure getting s0~s63 from vrx if tdep->has_vr0 is ture.  */
+      if (tdep->has_vr0)
+        {
+          if (regnum < 64)
+            {
+              gdb_regnum = CSKY_VR0_REGNUM + (regnum / 4);
+              offset = (regnum % 4) * 4;
+            }
+          else
+            {
+              gdb_regnum = CSKY_FR16_REGNUM + ((regnum - 64) / 4);
+              if ((regnum % 4) >= 2)
+                 return REG_UNAVAILABLE;
+              offset = (regnum % 2) * 4;
+            }
+        }
+      else
+        {
+           gdb_regnum = CSKY_FR0_REGNUM + (regnum / 4);
+           if ((regnum % 4) >= 2)
+              return REG_UNAVAILABLE;
+           offset = (regnum % 2) * 4;
+        }
+
+      status = regcache->raw_read (gdb_regnum, reg_buf);
+      if (status == REG_VALID)
+        memcpy (buf, reg_buf + offset, 4);
+      return status;
+    }
+
+  return REG_UNKNOWN;
+}
+
+/* Write for csky pseudo regs.  */
+
+static void
+csky_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
+                            int regnum, const gdb_byte *buf)
+{
+  int num_regs = gdbarch_num_regs (gdbarch);
+  csky_gdbarch_tdep *tdep
+        = (csky_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  regnum -= num_regs;
+
+  if (regnum < tdep->fv_pseudo_registers_count)
+    {
+      gdb_byte reg_buf[16];
+      int gdb_regnum = 0;
+      int offset = 0;
+
+      if (tdep->has_vr0)
+        {
+          if (regnum < 64)
+            {
+              gdb_regnum = CSKY_VR0_REGNUM + (regnum / 4);
+              offset = (regnum % 4) * 4;
+            }
+          else
+            {
+              gdb_regnum = CSKY_FR16_REGNUM + ((regnum - 64) / 4);
+              if ((regnum % 4) >= 2)
+                return;
+              offset = (regnum % 2) * 4;
+            }
+        }
+      else
+        {
+           gdb_regnum = CSKY_FR0_REGNUM + (regnum / 4);
+           if ((regnum % 4) >= 2)
+             return;
+           offset = (regnum % 2) * 4;
+        }
+
+      regcache->raw_read (gdb_regnum, reg_buf);
+      memcpy (reg_buf + offset, buf, 4);
+      regcache->raw_write (gdb_regnum, reg_buf);
+      return;
+    }
+
+  return;
 }
 
 /* Initialize the current architecture based on INFO.  If possible,
@@ -2602,6 +2814,9 @@ csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   unsigned int fpu_hardfp = 0;
   /* Analyze info.target_desc */
   int num_regs = 0;
+  int has_fr0 = 0;
+  int has_fr16 = 0;
+  int has_vr0 = 0;
   tdesc_arch_data_up tdesc_data;
 
   if (tdesc_has_registers (info.target_desc))
@@ -2633,6 +2848,9 @@ csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
                                                       tdesc_reg->name);
                   if (numbered) {
                     valid_p |= csky_essential_reg_check (tdesc_reg);
+                    has_fr0 |= csky_fr0_fr15_reg_check (tdesc_reg);
+                    has_fr16 |= csky_fr16_fr31_reg_check (tdesc_reg);
+                    has_vr0 |= csky_vr0_vr15_reg_check (tdesc_reg);
                     if (num_regs < tdesc_reg->num)
                       num_regs = tdesc_reg->num;
                   }
@@ -2684,6 +2902,38 @@ csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->fpu_abi = fpu_abi;
   tdep->vdsp_version = vdsp_version;
   tdep->fpu_hardfp = fpu_hardfp;
+
+  if (tdesc_data != NULL)
+    {
+      if ((has_vr0 == CSKY_FULL16_ONEHOT_VALUE)
+          && (has_fr16 == CSKY_FULL16_ONEHOT_VALUE))
+        {
+          tdep->has_vr0 = 1;
+          tdep->fv_pseudo_registers_count = 128;
+        }
+      else if ((has_vr0 == CSKY_FULL16_ONEHOT_VALUE)
+               && (has_fr16 != CSKY_FULL16_ONEHOT_VALUE))
+        {
+          tdep->has_vr0 = 1;
+          tdep->fv_pseudo_registers_count = 64;
+        }
+      else if ((has_fr0 == CSKY_FULL16_ONEHOT_VALUE)
+               && (has_vr0 != CSKY_FULL16_ONEHOT_VALUE))
+        {
+          tdep->has_vr0 = 0;
+          tdep->fv_pseudo_registers_count = 64;
+        }
+      else
+        {
+          tdep->has_vr0 = 0;
+          tdep->fv_pseudo_registers_count = 0;
+        }
+    }
+  else
+    {
+      tdep->has_vr0 = 1;
+      tdep->fv_pseudo_registers_count = 64;
+    }
 
   /* Target data types.  */
   set_gdbarch_ptr_bit (gdbarch, 32);
@@ -2751,6 +3001,17 @@ csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_regs (gdbarch, (num_regs + 1));
       tdesc_use_registers (gdbarch, info.target_desc, std::move (tdesc_data));
       set_gdbarch_register_type (gdbarch, csky_register_type);
+    }
+
+  if (tdep->fv_pseudo_registers_count)
+    {
+      set_gdbarch_num_pseudo_regs (gdbarch,
+                                   tdep->fv_pseudo_registers_count);
+      set_gdbarch_pseudo_register_read (gdbarch,
+                                        csky_pseudo_register_read);
+      set_gdbarch_pseudo_register_write (gdbarch,
+                                         csky_pseudo_register_write);
+      set_tdesc_pseudo_register_name (gdbarch, csky_pseudo_register_name);
     }
 
   return gdbarch;
