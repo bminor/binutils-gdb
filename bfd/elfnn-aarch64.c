@@ -2715,6 +2715,7 @@ elfNN_aarch64_link_hash_newfunc (struct bfd_hash_entry *entry,
   if (ret != NULL)
     {
       ret->got_type = GOT_UNKNOWN;
+      ret->def_protected = 0;
       ret->plt_got_offset = (bfd_vma) - 1;
       ret->stub_cache = NULL;
       ret->tlsdesc_got_jump_table_offset = (bfd_vma) - 1;
