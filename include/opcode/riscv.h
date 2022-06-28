@@ -399,6 +399,7 @@ enum riscv_insn_class
   INSN_CLASS_ZICBOZ,
   INSN_CLASS_H,
   INSN_CLASS_XTHEADCMO,
+  INSN_CLASS_XTHEADSYNC,
 };
 
 /* This structure holds information for a particular instruction.  */

@@ -1850,6 +1850,13 @@ const struct riscv_opcode riscv_opcodes[] =
 {"th.l2cache.ciall", 0, INSN_CLASS_XTHEADCMO,   "",   MATCH_TH_L2CACHE_CIALL, MASK_TH_L2CACHE_CIALL, match_opcode, 0},
 {"th.l2cache.iall",  0, INSN_CLASS_XTHEADCMO,   "",   MATCH_TH_L2CACHE_IALL,  MASK_TH_L2CACHE_IALL,  match_opcode, 0},
 
+/* Vendor-specific (T-Head) XTheadSync instructions.  */
+{"th.sfence.vmas",   0, INSN_CLASS_XTHEADSYNC,  "s,t",MATCH_TH_SFENCE_VMAS,   MASK_TH_SFENCE_VMAS,   match_opcode, 0},
+{"th.sync",          0, INSN_CLASS_XTHEADSYNC,  "",   MATCH_TH_SYNC,          MASK_TH_SYNC,          match_opcode, 0},
+{"th.sync.i",        0, INSN_CLASS_XTHEADSYNC,  "",   MATCH_TH_SYNC_I,        MASK_TH_SYNC_I,        match_opcode, 0},
+{"th.sync.is",       0, INSN_CLASS_XTHEADSYNC,  "",   MATCH_TH_SYNC_IS,       MASK_TH_SYNC_IS,       match_opcode, 0},
+{"th.sync.s",        0, INSN_CLASS_XTHEADSYNC,  "",   MATCH_TH_SYNC_S,        MASK_TH_SYNC_S,        match_opcode, 0},
+
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
 };

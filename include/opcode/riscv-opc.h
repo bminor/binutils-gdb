@@ -2156,6 +2156,17 @@
 #define MASK_TH_L2CACHE_CIALL 0xffffffff
 #define MATCH_TH_L2CACHE_IALL 0x0160000b
 #define MASK_TH_L2CACHE_IALL 0xffffffff
+/* Vendor-specific (T-Head) XTheadSync instructions.  */
+#define MATCH_TH_SFENCE_VMAS 0x0400000b
+#define MASK_TH_SFENCE_VMAS 0xfe007fff
+#define MATCH_TH_SYNC 0x0180000b
+#define MASK_TH_SYNC 0xffffffff
+#define MATCH_TH_SYNC_I 0x01a0000b
+#define MASK_TH_SYNC_I 0xffffffff
+#define MATCH_TH_SYNC_IS 0x01b0000b
+#define MASK_TH_SYNC_IS 0xffffffff
+#define MATCH_TH_SYNC_S 0x0190000b
+#define MASK_TH_SYNC_S 0xffffffff
 /* Unprivileged Counter/Timers CSR addresses.  */
 #define CSR_CYCLE 0xc00
 #define CSR_TIME 0xc01
@@ -2917,6 +2928,12 @@ DECLARE_INSN(th_icache_iva, MATCH_TH_ICACHE_IVA, MASK_TH_ICACHE_IVA)
 DECLARE_INSN(th_l2cache_call, MATCH_TH_L2CACHE_CALL, MASK_TH_L2CACHE_CALL)
 DECLARE_INSN(th_l2cache_ciall, MATCH_TH_L2CACHE_CIALL, MASK_TH_L2CACHE_CIALL)
 DECLARE_INSN(th_l2cache_iall, MATCH_TH_L2CACHE_IALL, MASK_TH_L2CACHE_IALL)
+/* Vendor-specific (T-Head) XTheadSync instructions.  */
+DECLARE_INSN(th_sfence_vmas, MATCH_TH_SFENCE_VMAS, MASK_TH_SFENCE_VMAS)
+DECLARE_INSN(th_sync, MATCH_TH_SYNC, MASK_TH_SYNC)
+DECLARE_INSN(th_sync_i, MATCH_TH_SYNC_I, MASK_TH_SYNC_I)
+DECLARE_INSN(th_sync_is, MATCH_TH_SYNC_IS, MASK_TH_SYNC_IS)
+DECLARE_INSN(th_sync_s, MATCH_TH_SYNC_S, MASK_TH_SYNC_S)
 #endif /* DECLARE_INSN */
 #ifdef DECLARE_CSR
 /* Unprivileged Counter/Timers CSRs.  */
