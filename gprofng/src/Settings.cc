@@ -407,7 +407,7 @@ Settings::read_rc (bool ipc_or_rdt_mode)
   free (rc_path);
 
   // Read system-wide file
-  rc_path = dbe_sprintf (NTXT ("%s/../etc/gprofng.rc"), app->get_run_dir ());
+  rc_path = dbe_sprintf (NTXT ("%s/gprofng.rc"), SYSCONFDIR);
   if (access (rc_path, R_OK | F_OK) != 0)
     {
       StringBuilder sb;

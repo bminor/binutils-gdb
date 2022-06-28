@@ -104,7 +104,12 @@ LIBGPROFNG = libgprofng.la
 ZLIB = @zlibdir@ -lz
 ZLIBINC = @zlibinc@
 
-AM_CPPFLAGS = $(GPROFNG_CPPFLAGS) -DLOCALEDIR=\"@localedir@\" -I.. -I$(srcdir) \
+LOCALEDIR = @localedir@
+SYSCONFDIR = @sysconfdir@
+
+AM_CPPFLAGS = $(GPROFNG_CPPFLAGS) -DLOCALEDIR=\"$(LOCALEDIR)\" \
+	-DSYSCONFDIR=\"$(SYSCONFDIR)\" \
+	-I.. -I$(srcdir) \
 	-I$(srcdir)/../common \
 	-I$(srcdir)/../../include -I$(srcdir)/../../opcodes \
 	-I../../bfd -I$(srcdir)/../../bfd $(ZLIBINC)
@@ -135,7 +140,7 @@ libgprofng_la_LIBADD = $(top_builddir)/../opcodes/libopcodes.la \
 	$(GPROFNG_LIBADD) \
 	$(PTHREAD_LIBS) -ldl
 
-dbedir = $(prefix)/etc
+dbedir = $(SYSCONFDIR)
 dbe_DATA = $(srcdir)/gprofng.rc
 
 
