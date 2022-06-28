@@ -20,6 +20,7 @@
 * RISC-V-Modifiers::      RISC-V Assembler Modifiers
 * RISC-V-Formats::        RISC-V Instruction Formats
 * RISC-V-ATTRIBUTE::      RISC-V Object Attribute
+* RISC-V-CustomExts::     RISC-V Custom (Vendor-Defined) Extensions
 @end menu
 
 @node RISC-V-Options
@@ -690,5 +691,18 @@ memory accesses, and 1 for files that do allow unaligned memory accesses.
 Tag_RISCV_priv_spec contains the major/minor/revision version information of
 the privileged specification.  It will report errors if object files of
 different privileged specification versions are merged.
+
+@end table
+
+@node RISC-V-CustomExts
+@section RISC-V Custom (Vendor-Defined) Extensions
+@cindex custom (vendor-defined) extensions, RISC-V
+@cindex RISC-V custom (vendor-defined) extensions
+
+The following table lists the custom (vendor-defined) RISC-V
+extensions supported and provides the location of their
+publicly-released documentation:
+
+@table @r
 
 @end table
