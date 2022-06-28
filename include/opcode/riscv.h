@@ -60,6 +60,7 @@ static const char * const riscv_pred_succ[16] =
 
 #define RV_X(x, s, n)  (((x) >> (s)) & ((1 << (n)) - 1))
 #define RV_IMM_SIGN(x) (-(((x) >> 31) & 1))
+#define RV_X_SIGNED(x, s, n) (RV_X(x, s, n) | ((-(RV_X(x, (s + n - 1), 1))) << (n)))
 
 #define EXTRACT_ITYPE_IMM(x) \
   (RV_X(x, 20, 12) | (RV_IMM_SIGN(x) << 12))
@@ -346,6 +347,22 @@ static const char * const riscv_pred_succ[16] =
 /* Extract the operand given by FIELD from integer INSN.  */
 #define EXTRACT_OPERAND(FIELD, INSN) \
   EXTRACT_BITS ((INSN), OP_MASK_##FIELD, OP_SH_##FIELD)
+
+/* Extract an unsigned immediate operand on position s with n bits.  */
+#define EXTRACT_U_IMM(n, s, l) \
+  RV_X (l, s, n)
+
+/* Extract an signed immediate operand on position s with n bits.  */
+#define EXTRACT_S_IMM(n, s, l) \
+  RV_X_SIGNED (l, s, n)
+
+/* Validate that unsigned n-bit immediate is within bounds.  */
+#define VALIDATE_U_IMM(v, n) \
+  ((unsigned long) v < (1UL << n))
+
+/* Validate that signed n-bit immediate is within bounds.  */
+#define VALIDATE_S_IMM(v, n) \
+  (v < (long) (1UL << (n-1)) && v >= -(offsetT) (1UL << (n-1)))
 
 /* The maximal number of subset can be required.  */
 #define MAX_SUBSET_NUM 4

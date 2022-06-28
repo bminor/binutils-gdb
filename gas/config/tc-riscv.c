@@ -452,6 +452,9 @@ static char *expr_end;
 #define INSERT_OPERAND(FIELD, INSN, VALUE) \
   INSERT_BITS ((INSN).insn_opcode, VALUE, OP_MASK_##FIELD, OP_SH_##FIELD)
 
+#define INSERT_IMM(n, s, INSN, VALUE) \
+  INSERT_BITS ((INSN).insn_opcode, VALUE, (1ULL<<n) - 1, s)
+
 /* Determine if an instruction matches an opcode.  */
 #define OPCODE_MATCHES(OPCODE, OP) \
   (((OPCODE) & MASK_##OP) == MATCH_##OP)
@@ -1103,6 +1106,8 @@ arg_lookup (char **s, const char *const *array, size_t size, unsigned *regnop)
 }
 
 #define USE_BITS(mask,shift) (used_bits |= ((insn_t)(mask) << (shift)))
+#define USE_IMM(n, s) \
+  (used_bits |= ((insn_t)((1ull<<n)-1) << (s)))
 
 /* For consistency checking, verify that all bits are specified either
    by the match/mask part of the instruction definition, or by the
@@ -1266,6 +1271,31 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	      default:
 		goto unknown_validate_operand;
 	    }
+	  break;
+	case 'X': /* Integer immediate.  */
+	  {
+	    size_t n;
+	    size_t s;
+
+	    switch (*++oparg)
+	      {
+		case 's': /* 'XsN@S' ... N-bit signed immediate at bit S.  */
+		  goto use_imm;
+		case 'u': /* 'XuN@S' ... N-bit unsigned immediate at bit S.  */
+		  goto use_imm;
+		use_imm:
+		  n = strtol (++oparg, (char **)&oparg, 10);
+		  if (*oparg != '@')
+		    goto unknown_validate_operand;
+		  s = strtol (++oparg, (char **)&oparg, 10);
+		  oparg--;
+
+		  USE_IMM (n, s);
+		  break;
+		default:
+		  goto unknown_validate_operand;
+	      }
+	  }
 	  break;
 	default:
 	unknown_validate_operand:
@@ -3272,6 +3302,50 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      asarg = expr_end;
 	      continue;
 
+	    case 'X': /* Integer immediate.  */
+	      {
+		size_t n;
+		size_t s;
+		bool sign;
+
+		switch (*++oparg)
+		  {
+		    case 's': /* 'XsN@S' ... N-bit signed immediate at bit S.  */
+		      sign = true;
+		      goto parse_imm;
+		    case 'u': /* 'XuN@S' ... N-bit unsigned immediate at bit S.  */
+		      sign = false;
+		      goto parse_imm;
+		    parse_imm:
+		      n = strtol (++oparg, (char **)&oparg, 10);
+		      if (*oparg != '@')
+			goto unknown_riscv_ip_operand;
+		      s = strtol (++oparg, (char **)&oparg, 10);
+		      oparg--;
+
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, false);
+		      if (!sign)
+			{
+			  if (!VALIDATE_U_IMM (imm_expr->X_add_number, n))
+			    as_bad (_("improper immediate value (%lu)"),
+				    (unsigned long) imm_expr->X_add_number);
+			}
+		      else
+			{
+			  if (!VALIDATE_S_IMM (imm_expr->X_add_number, n))
+			    as_bad (_("improper immediate value (%li)"),
+				    (long) imm_expr->X_add_number);
+			}
+		      INSERT_IMM (n, s, *ip, imm_expr->X_add_number);
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_end;
+		      continue;
+		    default:
+		      goto unknown_riscv_ip_operand;
+		  }
+	      }
+	      break;
 	    default:
 	    unknown_riscv_ip_operand:
 	      as_fatal (_("internal: unknown argument type `%s'"),
