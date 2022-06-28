@@ -120,14 +120,6 @@ AM_CXXFLAGS = $(AM_CFLAGS)
 QLParser.tab.cc QLParser.tab.hh: QLParser.yy
 	$(BISON) $^
 
-man_MANS = gprofng.1 \
-	gp-archive.1 \
-	gp-collect-app.1 \
-	gp-display-src.1 \
-	gp-display-text.1
-
-MAINTAINERCLEANFILES = $(man_MANS)
-
 BUILT_SOURCES = QLParser.tab.hh
 EXTRA_DIST = QLParser.yy $(man_MANS)
 
@@ -163,6 +155,14 @@ gp_display_text_LDADD = $(LIBGPROFNG) $(CLOCK_GETTIME_LINK) $(ZLIB)
 
 
 if BUILD_MAN
+
+man_MANS = gprofng.1 \
+	gp-archive.1 \
+	gp-collect-app.1 \
+	gp-display-src.1 \
+	gp-display-text.1
+
+MAINTAINERCLEANFILES = $(man_MANS)
 
 # The man pages depend on the version number and on a help2man include file.
 common_mandeps = $(top_srcdir)/../bfd/version.m4

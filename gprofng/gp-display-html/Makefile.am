@@ -19,10 +19,8 @@
 AUTOMAKE_OPTIONS = foreign
 ACLOCAL_AMFLAGS = -I . -I .. -I ../.. 
 
-dist_man_MANS = gp-display-html.1
 bin_SCRIPTS   = gp-display-html
 CLEANFILES    = $(bin_SCRIPTS)
-MAINTAINERCLEANFILES = $(dist_man_MANS)
 
 do_subst = sed -e 's/BINUTILS_VERSION/$(VERSION)/'
 
@@ -31,6 +29,9 @@ gp-display-html: gp-display-html.in Makefile
 	chmod +x $@
 
 if BUILD_MAN
+
+man_MANS = gp-display-html.1
+MAINTAINERCLEANFILES = $(man_MANS)
 
 # Use this if the man pages depend on the version number. 
 # common_mandeps = $(top_srcdir)/../bfd/version.m4
