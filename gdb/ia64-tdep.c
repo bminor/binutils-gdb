@@ -3356,9 +3356,10 @@ is_float_or_hfa_type_recurse (struct type *t, struct type **etp)
       }
       break;
     default:
-      return 0;
       break;
     }
+
+  return 0;
 }
 
 /* Determine if the given type is one of the floating point types or
