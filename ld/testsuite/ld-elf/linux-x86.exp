@@ -185,43 +185,53 @@ run_ld_link_exec_tests [list \
 	"" \
 	"tmpdir/indirect-extern-access-2.so" \
     ] \
-    [list \
-	"Run p_align-1a without PIE" \
-	"$NOPIE_LDFLAGS" \
-	"" \
-	{ p_align-1.c } \
-	"p_align-1a" \
-	"pass.out" \
-	"$NOPIE_CFLAGS" \
-    ] \
-    [list \
-	"Run p_align-1b with PIE" \
-	"-pie" \
-	"" \
-	{ p_align-1.c } \
-	"p_align-1b" \
-	"pass.out" \
-	"-fpie" \
-    ] \
-    [list \
-	"Run p_align-1c with -Wl,-z,max-page-size=0x1000 without PIE" \
-	"$NOPIE_LDFLAGS -Wl,-z,max-page-size=0x1000" \
-	"" \
-	{ p_align-1.c } \
-	"p_align-1c" \
-	"pass.out" \
-	"$NOPIE_CFLAGS" \
-    ] \
-    [list \
-	"Run p_align-1d with -Wl,-z,max-page-size=0x1000 with PIE" \
-	"-pie -Wl,-z,max-page-size=0x1000" \
-	"" \
-	{ p_align-1.c } \
-	"p_align-1d" \
-	"pass.out" \
-	"-fpie" \
-    ] \
 ]
+
+# Old gcc silently ignores __attribute__ ((aligned())) with too big alignment.
+ld_compile $CC_FOR_TARGET $srcdir/$subdir/p_align-1.c tmpdir/p_align-1.o
+set output [run_host_cmd "$READELF" "-SW tmpdir/p_align-1.o"]
+if { [regexp { [.]data *PROGBITS .* 8388608[\n]} $output] } then {
+    run_ld_link_exec_tests [list \
+	[list \
+	    "Run p_align-1a without PIE" \
+	    "$NOPIE_LDFLAGS" \
+	    "" \
+	    { p_align-1.c } \
+	    "p_align-1a" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run p_align-1b with PIE" \
+	    "-pie" \
+	    "" \
+	    { p_align-1.c } \
+	    "p_align-1b" \
+	    "pass.out" \
+	    "-fpie" \
+	] \
+	[list \
+	    "Run p_align-1c with -Wl,-z,max-page-size=0x1000 without PIE" \
+	    "$NOPIE_LDFLAGS -Wl,-z,max-page-size=0x1000" \
+	    "" \
+	    { p_align-1.c } \
+	    "p_align-1c" \
+	    "pass.out" \
+	    "$NOPIE_CFLAGS" \
+	] \
+	[list \
+	    "Run p_align-1d with -Wl,-z,max-page-size=0x1000 with PIE" \
+	    "-pie -Wl,-z,max-page-size=0x1000" \
+	    "" \
+	    { p_align-1.c } \
+	    "p_align-1d" \
+	    "pass.out" \
+	    "-fpie" \
+	] \
+    ]
+} else {
+    unsupported "p_align-1"
+}
 
 proc elfedit_test { options test output } {
     global ELFEDIT
