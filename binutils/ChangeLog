@@ -1,3 +1,13 @@
+2022-06-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 29267
+	* dwarf.c (display_debug_rnglists): New function, broken out of..
+	(display_debug_ranges): ... here.
+	(read_and_display_attr_value): Correct calculation of index
+	displayed for DW_FORM_loclistx and DW_FORM_rnglistx.
+	* testsuite/binutils-all/x86-64/pr26808.dump: Update expected
+	output.
+
 2022-06-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 29289
