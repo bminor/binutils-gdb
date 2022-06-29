@@ -109,6 +109,15 @@ enum arm_m_profile_type {
    ARM_M_TYPE_INVALID
 };
 
+/* System control registers accessible through an addresses.  */
+enum system_register_address : CORE_ADDR
+{
+  /* M-profile Floating-Point Context Control Register address, defined in
+     ARMv7-M (Section B3.2.2) and ARMv8-M (Section D1.2.99) reference
+     manuals.  */
+  FPCCR = 0xe000ef34
+};
+
 /* Instruction condition field values.  */
 #define INST_EQ		0x0
 #define INST_NE		0x1

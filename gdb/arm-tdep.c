@@ -3573,6 +3573,13 @@ arm_m_exception_cache (struct frame_info *this_frame)
     {
       int i;
       int fpu_regs_stack_offset;
+      ULONGEST fpccr;
+
+      /* Read FPCCR register.  */
+      gdb_assert (safe_read_memory_unsigned_integer (FPCCR,
+                                                     ARM_INT_REGISTER_SIZE,
+                                                     byte_order, &fpccr));
+      bool fpccr_ts = bit (fpccr,26);
 
       /* This code does not take into account the lazy stacking, see "Lazy
 	 context save of FP state", in B1.5.7, also ARM AN298, supported
@@ -3592,7 +3599,7 @@ arm_m_exception_cache (struct frame_info *this_frame)
       cache->saved_regs[ARM_FPSCR_REGNUM].set_addr (unwound_sp + sp_r0_offset + 0x60);
       fpu_regs_stack_offset += 4;
 
-      if (tdep->have_sec_ext && !default_callee_register_stacking)
+      if (tdep->have_sec_ext && !default_callee_register_stacking && fpccr_ts)
 	{
 	  /* Handle floating-point callee saved registers.  */
 	  fpu_regs_stack_offset = unwound_sp + sp_r0_offset + 0x68;
