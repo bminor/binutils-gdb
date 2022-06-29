@@ -188,9 +188,17 @@ run_ld_link_exec_tests [list \
 ]
 
 # Old gcc silently ignores __attribute__ ((aligned())) with too big alignment.
-ld_compile $CC_FOR_TARGET $srcdir/$subdir/p_align-1.c tmpdir/p_align-1.o
-set output [run_host_cmd "$READELF" "-SW tmpdir/p_align-1.o"]
-if { [regexp { [.]data *PROGBITS .* 8388608[\n]} $output] } then {
+proc compiler_honours_aligned { } {
+    global CC_FOR_TARGET READELF srcdir subdir
+    ld_compile $CC_FOR_TARGET $srcdir/$subdir/p_align-1.c tmpdir/p_align-1.o
+    set output [run_host_cmd "$READELF" "-SW tmpdir/p_align-1.o"]
+    if { [regexp { [.]data *PROGBITS .* 8388608[\n]} $output] } {
+	return 1
+    }
+    return 0
+}
+
+if { [check_compiler_available] && [compiler_honours_aligned] } {
     run_ld_link_exec_tests [list \
 	[list \
 	    "Run p_align-1a without PIE" \
