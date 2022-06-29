@@ -1911,7 +1911,7 @@ xrelease, 0xf3, None, CpuHLE, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|I
 
 // RTM instructions
 xabort, 0xc6f8, None, CpuRTM, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8 }
-xbegin, 0xc7f8, None, CpuRTM,  JumpDword|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Disp16|Disp32|Disp32S }
+xbegin, 0xc7f8, None, CpuRTM,  JumpDword|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp16|Disp32|Disp32S }
 xend, 0xf01d5, None, CpuRTM, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 xtest, 0xf01d6, None, CpuHLE|CpuRTM, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 
