@@ -105,12 +105,21 @@ post_fork_inferior (int pid, const char *program)
 #endif
 
   process_info *proc = find_process_pid (pid);
-  scoped_restore save_starting_up
-    = make_scoped_restore (&proc->starting_up, true);
+
+  /* If the inferior fails to start, startup_inferior mourns the
+     process (which deletes it), and then throws an error.  This means
+     that on exception return, we don't need or want to clear this
+     flag back, as PROC won't exist anymore.  Thus, we don't use a
+     scoped_restore.  */
+  proc->starting_up = true;
 
   startup_inferior (the_target, pid,
 		    START_INFERIOR_TRAPS_EXPECTED,
 		    &cs.last_status, &cs.last_ptid);
+
+  /* If we get here, the process was successfully started.  */
+  proc->starting_up = false;
+
   current_thread->last_resume_kind = resume_stop;
   current_thread->last_status = cs.last_status;
   signal_pid = pid;
