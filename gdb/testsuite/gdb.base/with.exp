@@ -99,14 +99,14 @@ with_test_prefix "maint" {
     test_with_error "boolean" "2" "\"on\" or \"off\" expected\\."
     test_with_error "uinteger" "-1" "integer -1 out of range"
     test_with_error "uinteger" "" \
-	"Argument required \\(integer to set it to, or \"unlimited\"\\.\\)\\."
+	"Argument required \\(integer to set it to, or \"unlimited\"\\)\\."
     test_with_error "zuinteger" "-1" "integer -1 out of range"
     test_with_error "zuinteger" "" \
-	"Argument required \\(integer to set it to\\.\\)\\."
+	"Argument required \\(integer to set it to\\)\\."
     test_with_error "zuinteger-unlimited" "-2" \
 	"only -1 is allowed to set as unlimited"
     test_with_error "zuinteger-unlimited" "" \
-	"Argument required \\(integer to set it to, or \"unlimited\"\\.\\)\\."
+	"Argument required \\(integer to set it to, or \"unlimited\"\\)\\."
     test_with_error "filename" "" \
 	"Argument required \\(filename to set it to\\.\\)\\."
     test_with_error "enum" "" \
@@ -243,7 +243,7 @@ with_test_prefix "errors" {
 	"Cannot use this setting with the \"with\" command"
 
     gdb_test "with print elements -- p 1" \
-	"Argument required \\(integer to set it to, or \"unlimited\"\\.\\)\\."
+	"Argument required \\(integer to set it to, or \"unlimited\"\\)\\."
 
     gdb_test "with -- p 1" \
 	"Missing setting before '--' delimiter"

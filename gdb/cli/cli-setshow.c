@@ -195,9 +195,9 @@ parse_cli_var_uinteger (var_types var_type, const char **arg,
   if (*arg == nullptr || **arg == '\0')
     {
       if (var_type == var_uinteger)
-	error_no_arg (_("integer to set it to, or \"unlimited\"."));
+	error_no_arg (_("integer to set it to, or \"unlimited\""));
       else
-	error_no_arg (_("integer to set it to."));
+	error_no_arg (_("integer to set it to"));
     }
 
   if (var_type == var_uinteger && is_unlimited_literal (arg, expression))
@@ -228,7 +228,7 @@ parse_cli_var_zuinteger_unlimited (const char **arg, bool expression)
   LONGEST val;
 
   if (*arg == nullptr || **arg == '\0')
-    error_no_arg (_("integer to set it to, or \"unlimited\"."));
+    error_no_arg (_("integer to set it to, or \"unlimited\""));
 
   if (is_unlimited_literal (arg, expression))
     val = -1;
@@ -418,9 +418,9 @@ do_set_command (const char *arg, int from_tty, struct cmd_list_element *c)
 	if (*arg == '\0')
 	  {
 	    if (c->var->type () == var_integer)
-	      error_no_arg (_("integer to set it to, or \"unlimited\"."));
+	      error_no_arg (_("integer to set it to, or \"unlimited\""));
 	    else
-	      error_no_arg (_("integer to set it to."));
+	      error_no_arg (_("integer to set it to"));
 	  }
 
 	if (c->var->type () == var_integer && is_unlimited_literal (&arg, true))
