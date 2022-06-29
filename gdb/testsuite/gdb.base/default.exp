@@ -525,7 +525,8 @@ gdb_test_no_output "set print asm-demangle" "set print asm-demangle"
 #test set print demangle
 gdb_test_no_output "set print demangle" "set print demangle"
 #test set print elements
-gdb_test "set print elements" "Argument required .integer to set it to.*"
+gdb_test "set print elements" \
+	 "Argument required \\(integer to set it to, or \"unlimited\"\\)\\."
 #test set print object
 gdb_test_no_output "set print object" "set print object"
 #test set print pretty
