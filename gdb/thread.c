@@ -236,7 +236,7 @@ init_thread_list (void)
   highest_thread_num = 0;
 
   for (inferior *inf : all_inferiors ())
-    inf->clear_thread_list (true);
+    inf->clear_thread_list ();
 }
 
 /* Allocate a new thread of inferior INF with target id PTID and add
