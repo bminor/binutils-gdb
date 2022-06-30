@@ -479,14 +479,12 @@ arm_cache_set_active_sp_value (struct arm_prologue_cache *cache,
   gdb_assert_not_reached ("Invalid SP selection");
 }
 
-/* Return true if REGNUM is one of the stack pointers.  */
+/* Return true if REGNUM is one of the alternative stack pointers.  */
 
 static bool
-arm_cache_is_sp_register (struct arm_prologue_cache *cache,
-			  arm_gdbarch_tdep *tdep, int regnum)
+arm_is_alternative_sp_register (arm_gdbarch_tdep *tdep, int regnum)
 {
-  if ((regnum == ARM_SP_REGNUM)
-      || (regnum == tdep->m_profile_msp_regnum)
+  if ((regnum == tdep->m_profile_msp_regnum)
       || (regnum == tdep->m_profile_msp_s_regnum)
       || (regnum == tdep->m_profile_msp_ns_regnum)
       || (regnum == tdep->m_profile_psp_regnum)
@@ -503,8 +501,7 @@ static void
 arm_cache_switch_prev_sp (struct arm_prologue_cache *cache,
 			  arm_gdbarch_tdep *tdep, int sp_regnum)
 {
-  gdb_assert (sp_regnum != ARM_SP_REGNUM);
-  gdb_assert (arm_cache_is_sp_register (cache, tdep, sp_regnum));
+  gdb_assert (arm_is_alternative_sp_register (tdep, sp_regnum));
 
   if (tdep->have_sec_ext)
     gdb_assert (sp_regnum != tdep->m_profile_msp_regnum
@@ -2347,7 +2344,7 @@ arm_prologue_prev_register (struct frame_info *this_frame,
 
   /* The value might be one of the alternative SP, if so, use the
      value already constructed.  */
-  if (arm_cache_is_sp_register (cache, tdep, prev_regnum))
+  if (arm_is_alternative_sp_register (tdep, prev_regnum))
     {
       sp_value = arm_cache_get_sp_register (cache, tdep, prev_regnum);
       return frame_unwind_got_constant (this_frame, prev_regnum, sp_value);
@@ -3694,7 +3691,7 @@ arm_m_exception_prev_register (struct frame_info *this_frame,
 
   /* The value might be one of the alternative SP, if so, use the
      value already constructed.  */
-  if (arm_cache_is_sp_register (cache, tdep, prev_regnum))
+  if (arm_is_alternative_sp_register (tdep, prev_regnum))
     {
       sp_value = arm_cache_get_sp_register (cache, tdep, prev_regnum);
       return frame_unwind_got_constant (this_frame, prev_regnum, sp_value);
