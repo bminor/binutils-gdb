@@ -177,6 +177,10 @@ gdb_PySys_GetObject (const char *name)
 
 #define PySys_GetObject gdb_PySys_GetObject
 
+/* PySys_SetPath was deprecated in Python 3.11.  Disable the deprecated
+   code for Python 3.10 and newer.  */
+#if PY_VERSION_HEX < 0x030a0000
+
 /* PySys_SetPath's 'path' parameter was missing the 'const' qualifier
    before Python 3.6.  Hence, we wrap it in a function to avoid errors
    when compiled with -Werror.  */
@@ -190,6 +194,7 @@ gdb_PySys_SetPath (const GDB_PYSYS_SETPATH_CHAR *path)
 }
 
 #define PySys_SetPath gdb_PySys_SetPath
+#endif
 
 /* Wrap PyGetSetDef to allow convenient construction with string
    literals.  Unfortunately, PyGetSetDef's 'name' and 'doc' members

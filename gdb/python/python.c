@@ -1820,7 +1820,13 @@ set_python_ignore_environment (const char *args, int from_tty,
 			       struct cmd_list_element *c)
 {
 #ifdef HAVE_PYTHON
+  /* Py_IgnoreEnvironmentFlag is deprecated in Python 3.12.  Disable
+     its usage in Python 3.10 and above since the PyConfig mechanism
+     is now (also) used in 3.10 and higher.  See do_start_initialization()
+     in this file.  */
+#if PY_VERSION_HEX < 0x030a0000
   Py_IgnoreEnvironmentFlag = python_ignore_environment ? 1 : 0;
+#endif
 #endif
 }
 
@@ -1849,6 +1855,24 @@ show_python_dont_write_bytecode (struct ui_file *file, int from_tty,
 		value);
 }
 
+/* Return value to assign to PyConfig.write_bytecode or, when
+   negated (via !), Py_DontWriteBytecodeFlag.  Py_DontWriteBytecodeFlag
+   is deprecated in Python 3.12.  */
+
+static int
+python_write_bytecode ()
+{
+  int wbc = 0;
+
+  if (python_dont_write_bytecode == AUTO_BOOLEAN_AUTO)
+    wbc = (!python_ignore_environment
+	    && getenv ("PYTHONDONTWRITEBYTECODE") != nullptr) ? 0 : 1;
+  else
+    wbc = python_dont_write_bytecode == AUTO_BOOLEAN_TRUE ? 0 : 1;
+
+  return wbc;
+}
+
 /* Implement 'set python dont-write-bytecode'.  This sets Python's internal
    flag no matter when the command is issued, however, if this is used
    after Py_Initialize has been called then many modules could already
@@ -1859,13 +1883,13 @@ set_python_dont_write_bytecode (const char *args, int from_tty,
 				struct cmd_list_element *c)
 {
 #ifdef HAVE_PYTHON
-  if (python_dont_write_bytecode == AUTO_BOOLEAN_AUTO)
-    Py_DontWriteBytecodeFlag
-      = (!python_ignore_environment
-	 && getenv ("PYTHONDONTWRITEBYTECODE") != nullptr) ? 1 : 0;
-  else
-    Py_DontWriteBytecodeFlag
-      = python_dont_write_bytecode == AUTO_BOOLEAN_TRUE ? 1 : 0;
+  /* Py_DontWriteBytecodeFlag is deprecated in Python 3.12.  Disable
+     its usage in Python 3.10 and above since the PyConfig mechanism
+     is now (also) used in 3.10 and higher.  See do_start_initialization()
+     in this file.  */
+#if PY_VERSION_HEX < 0x030a0000
+  Py_DontWriteBytecodeFlag = !python_write_bytecode ();
+#endif
 #endif /* HAVE_PYTHON */
 }
 
@@ -1970,6 +1994,18 @@ gdbpy_gdb_exiting (int exit_code)
 static bool
 do_start_initialization ()
 {
+  /* Define all internal modules.  These are all imported (and thus
+     created) during initialization.  */
+  struct _inittab mods[] =
+  {
+    { "_gdb", init__gdb_module },
+    { "_gdbevents", gdbpy_events_mod_func },
+    { nullptr, nullptr }
+  };
+
+  if (PyImport_ExtendInittab (mods) < 0)
+    return false;
+
 #ifdef WITH_PYTHON_PATH
   /* Work around problem where python gets confused about where it is,
      and then can't find its libraries, etc.
@@ -2001,25 +2037,41 @@ do_start_initialization ()
     }
   setlocale (LC_ALL, oldloc.c_str ());
 
+  /* Py_SetProgramName was deprecated in Python 3.11.  Use PyConfig
+     mechanisms for Python 3.10 and newer.  */
+#if PY_VERSION_HEX < 0x030a0000
   /* Note that Py_SetProgramName expects the string it is passed to
      remain alive for the duration of the program's execution, so
      it is not freed after this call.  */
   Py_SetProgramName (progname_copy);
+  Py_Initialize ();
+#else
+  PyConfig config;
+
+  PyConfig_InitPythonConfig (&config);
+  PyStatus status = PyConfig_SetString (&config, &config.program_name,
+                                        progname_copy);
+  if (PyStatus_Exception (status))
+    goto init_done;
+
+  config.write_bytecode = python_write_bytecode ();
+  config.use_environment = !python_ignore_environment;
+
+  status = PyConfig_Read (&config);
+  if (PyStatus_Exception (status))
+    goto init_done;
+
+  status = Py_InitializeFromConfig (&config);
+
+init_done:
+  PyConfig_Clear (&config);
+  if (PyStatus_Exception (status))
+    return false;
+#endif
+#else
+  Py_Initialize ();
 #endif
 
-  /* Define all internal modules.  These are all imported (and thus
-     created) during initialization.  */
-  struct _inittab mods[3] =
-  {
-    { "_gdb", init__gdb_module },
-    { "_gdbevents", gdbpy_events_mod_func },
-    { nullptr, nullptr }
-  };
-
-  if (PyImport_ExtendInittab (mods) < 0)
-    return false;
-
-  Py_Initialize ();
 #if PY_VERSION_HEX < 0x03090000
   /* PyEval_InitThreads became deprecated in Python 3.9 and will
      be removed in Python 3.11.  Prior to Python 3.7, this call was
@@ -2325,12 +2377,23 @@ do_initialize (const struct extension_language_defn *extlang)
 
   sys_path = PySys_GetObject ("path");
 
+  /* PySys_SetPath was deprecated in Python 3.11.  Disable this
+     deprecated code for Python 3.10 and newer.  Also note that this
+     ifdef eliminates potential initialization of sys.path via
+     PySys_SetPath.  My (kevinb's) understanding of PEP 587 suggests
+     that it's not necessary due to module_search_paths being
+     initialized to an empty list following any of the PyConfig
+     initialization functions.  If it does turn out that some kind of
+     initialization is still needed, it should be added to the
+     PyConfig-based initialization in do_start_initialize().  */
+#if PY_VERSION_HEX < 0x030a0000
   /* If sys.path is not defined yet, define it first.  */
   if (!(sys_path && PyList_Check (sys_path)))
     {
       PySys_SetPath (L"");
       sys_path = PySys_GetObject ("path");
     }
+#endif
   if (sys_path && PyList_Check (sys_path))
     {
       gdbpy_ref<> pythondir (PyUnicode_FromString (gdb_pythondir.c_str ()));
