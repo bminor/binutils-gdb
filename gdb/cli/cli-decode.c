@@ -989,6 +989,8 @@ integer_unlimited_completer (struct cmd_list_element *ignore,
       NULL,
     };
 
+  if (*text == '\0')
+    tracker.add_completion (make_unique_xstrdup ("NUMBER"));
   complete_on_enum (tracker, keywords, text, word);
 }
 

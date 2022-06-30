@@ -215,8 +215,14 @@ proc test-integer {variant} {
 	test_gdb_complete_none \
 	    "$set_cmd "
     } else {
+	test_gdb_complete_multiple "$set_cmd " "" "" {
+	    "NUMBER"
+	    "unlimited"
+	}
+	test_gdb_complete_none \
+	    "$set_cmd 1"
 	test_gdb_complete_unique \
-	    "$set_cmd " \
+	    "$set_cmd u" \
 	    "$set_cmd unlimited"
     }
 

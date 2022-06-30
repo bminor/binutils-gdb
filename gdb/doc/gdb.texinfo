@@ -1960,6 +1960,21 @@ After displaying the available possibilities, @value{GDBN} copies your
 partial input (@samp{b make_} in the example) so you can finish the
 command.
 
+If the command you are trying to complete expects either a keyword or a
+number to follow, then @samp{NUMBER} will be shown among the available
+completions, for example:
+
+@smallexample
+(@value{GDBP}) print -elements @key{TAB}@key{TAB}
+NUMBER     unlimited
+(@value{GDBP}) print -elements@tie{}
+@end smallexample
+
+@noindent
+Here, the option expects a number (e.g., @code{100}), not literal
+@code{NUMBER}.  Such metasyntactical arguments are always presented in
+uppercase.
+
 If you just want to see the list of alternatives in the first place, you
 can press @kbd{M-?} rather than pressing @key{TAB} twice.  @kbd{M-?}
 means @kbd{@key{META} ?}.  You can type this either by holding down a

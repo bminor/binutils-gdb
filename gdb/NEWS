@@ -27,6 +27,18 @@
   emit to indicate where a breakpoint should be placed to break in a function
   past its prologue.
 
+* Completion now also offers "NUMBER" for "set" commands that accept
+  a numeric argument and the "unlimited" keyword.  For example:
+
+   (gdb) set width <TAB>
+   NUMBER     unlimited
+
+  and consequently:
+
+   (gdb) complete set width
+   set width NUMBER
+   set width unlimited
+
 * New commands
 
 maintenance set ignore-prologue-end-flag on|off
