@@ -7614,36 +7614,53 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  if (outrel.r_offset & 0xf)
 	    return bfd_reloc_overflow;
 
-	  bfd_reloc_status_type ret;
-
-	  ret = c64_fixup_frag (input_bfd, info, bfd_r_type, sym, h, sym_sec,
-				input_section, hit_data + 8, value,
-				signed_addend, rel->r_offset);
-
-	  if (ret != bfd_reloc_continue)
-	    return ret;
-
 	  outrel.r_addend = signed_addend;
-	  value |= (h != NULL ? h->target_internal : sym->st_target_internal);
 
-	  /* Emit a dynamic relocation if we are building PIC.  */
+	  /* Emit a dynamic relocation if we are handling a symbol which the
+	     dynamic linker will be told about.  */
 	  if (h != NULL
 	      && h->dynindx != -1
-	      && bfd_link_pic (info)
+	      && globals->root.dynamic_sections_created
 	      && !SYMBOL_REFERENCES_LOCAL (info, h))
-	    outrel.r_info = ELFNN_R_INFO (h->dynindx, r_type);
-	  else
-	    outrel.r_info = ELFNN_R_INFO (0, MORELLO_R (RELATIVE));
-
-	  /* Symbols without size information get bounds to the
-	     whole section: adjust the base of the capability to the
-	     start of the section and set the addend to obtain the
-	     correct address for the symbol.  */
-	  bfd_vma new_value;
-	  if (c64_symbol_adjust (h, value, sym_sec, info, &new_value))
 	    {
-	      outrel.r_addend += (value - new_value);
-	      value = new_value;
+	      outrel.r_info = ELFNN_R_INFO (h->dynindx, r_type);
+	      /* Dynamic symbols will be handled by the dynamic loader.  Hence
+		 there is no need to fill a fragment with a value even if there
+		 is a value that we would use assuming no interception.  */
+	      value = 0;
+	    }
+	  else
+	    {
+	      /* This relocation will point into the object we are building
+		 (either because this is a statically linked executable and
+		 hence there is only one object it could point at, or because
+		 we know it will resolve locally even though this is
+		 dynamically linked).
+
+		 Hence we want to emit a RELATIVE relocation rather than a
+		 CAPINIT one.  */
+	      bfd_reloc_status_type ret;
+
+	      value |= (h != NULL ? h->target_internal : sym->st_target_internal);
+	      ret = c64_fixup_frag (input_bfd, info, bfd_r_type, sym, h, sym_sec,
+				    input_section, hit_data + 8, value,
+				    signed_addend, rel->r_offset);
+
+	      if (ret != bfd_reloc_continue)
+		return ret;
+
+	      outrel.r_info = ELFNN_R_INFO (0, MORELLO_R (RELATIVE));
+
+	      /* Symbols without size information get bounds to the
+		 whole section: adjust the base of the capability to the
+		 start of the section and set the addend to obtain the
+		 correct address for the symbol.  */
+	      bfd_vma new_value;
+	      if (c64_symbol_adjust (h, value, sym_sec, info, &new_value))
+		{
+		  outrel.r_addend += (value - new_value);
+		  value = new_value;
+		}
 	    }
 
 	  asection *s = globals->srelcaps;

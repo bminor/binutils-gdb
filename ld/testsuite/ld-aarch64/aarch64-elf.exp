@@ -91,6 +91,15 @@ proc aarch64_required_func_addend { base result } {
   return [format %x [expr "0x$result + 1 - 0x$base"]];
 }
 
+# Return the hexadecimal addition of the two given values.  Values should be
+# provided in hexadecimal without the leading 0x prefix.
+#
+# Used in a testsuite to check that the combination of some ADRP/ADD constants
+# do indeed point at a variable later on in the dump.
+proc aarch64_page_plus_offset { page offset } {
+  return [format %x [expr "0x$page + 0x$offset"] ];
+}
+
 set eh-frame-merge-lp64 [list [list "EH Frame merge" \
 			      [concat "-m " [aarch64_choose_lp64_emul] \
 				      " -Ttext 0x8000"] \
@@ -282,6 +291,14 @@ if { [ld_assemble_flags $as -march=morello+c64 $srcdir/$subdir/morello-dynamic-r
   run_dump_test_lp64 "morello-dynamic-link-rela-dyn"
   run_dump_test_lp64 "morello-dynamic-link-rela-dyn2"
   run_dump_test_lp64 "morello-dynamic-local-got"
+  run_dump_test_lp64 "morello-funcptr-in-code"
+  run_dump_test_lp64 "morello-funcptr-through-data"
+  run_dump_test_lp64 "morello-funcptr-through-data-pie"
+  run_dump_test_lp64 "morello-funcptr-code-and-data"
+  run_dump_test_lp64 "morello-dataptr-in-code"
+  run_dump_test_lp64 "morello-dataptr-through-data"
+  run_dump_test_lp64 "morello-dataptr-through-data-pie"
+  run_dump_test_lp64 "morello-dataptr-code-and-data"
 }
 
 run_dump_test_lp64 "morello-static-got"
