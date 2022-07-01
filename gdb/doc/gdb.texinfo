@@ -2176,6 +2176,7 @@ of argument an option expects.  For example:
 NUMBER     unlimited
 @end smallexample
 
+@noindent
 Here, the option expects a number (e.g., @code{100}), not literal
 @code{NUMBER}.  Such metasyntactical arguments are always presented in
 uppercase.
