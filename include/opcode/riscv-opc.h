@@ -2216,6 +2216,17 @@
 #define MASK_TH_MULSH 0xfe00707f
 #define MATCH_TH_MULSW 0x2600100b
 #define MASK_TH_MULSW 0xfe00707f
+/* Vendor-specific (T-Head) XTheadMemPair instructions. */
+#define MATCH_TH_LDD 0xf800400b
+#define MASK_TH_LDD 0xf800707f
+#define MATCH_TH_LWD 0xe000400b
+#define MASK_TH_LWD 0xf800707f
+#define MATCH_TH_LWUD 0xf000400b
+#define MASK_TH_LWUD 0xf800707f
+#define MATCH_TH_SDD 0xf800500b
+#define MASK_TH_SDD 0xf800707f
+#define MATCH_TH_SWD 0xe000500b
+#define MASK_TH_SWD 0xf800707f
 /* Vendor-specific (T-Head) XTheadMemIdx instructions. */
 #define MATCH_TH_LDIA 0x7800400b
 #define MASK_TH_LDIA 0xf800707f
@@ -3155,6 +3166,12 @@ DECLARE_INSN(th_surd, MATCH_TH_SURD, MASK_TH_SURD)
 DECLARE_INSN(th_surw, MATCH_TH_SURW, MASK_TH_SURW)
 DECLARE_INSN(th_surh, MATCH_TH_SURH, MASK_TH_SURH)
 DECLARE_INSN(th_surb, MATCH_TH_SURB, MASK_TH_SURB)
+/* Vendor-specific (T-Head) XTheadMemPair instructions. */
+DECLARE_INSN(th_ldd, MATCH_TH_LDD, MASK_TH_LDD)
+DECLARE_INSN(th_lwd, MATCH_TH_LWD, MASK_TH_LWD)
+DECLARE_INSN(th_lwud, MATCH_TH_LWUD, MASK_TH_LWUD)
+DECLARE_INSN(th_sdd, MATCH_TH_SDD, MASK_TH_SDD)
+DECLARE_INSN(th_swd, MATCH_TH_SWD, MASK_TH_SWD)
 /* Vendor-specific (T-Head) XTheadSync instructions.  */
 DECLARE_INSN(th_sfence_vmas, MATCH_TH_SFENCE_VMAS, MASK_TH_SFENCE_VMAS)
 DECLARE_INSN(th_sync, MATCH_TH_SYNC, MASK_TH_SYNC)

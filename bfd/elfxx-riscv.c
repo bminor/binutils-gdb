@@ -1232,6 +1232,7 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {"xtheadfmemidx",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadmac",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadmemidx",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
+  {"xtheadmempair",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadsync",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {NULL, 0, 0, 0, 0}
 };
@@ -2411,6 +2412,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "xtheadmac");
     case INSN_CLASS_XTHEADMEMIDX:
       return riscv_subset_supports (rps, "xtheadmemidx");
+    case INSN_CLASS_XTHEADMEMPAIR:
+      return riscv_subset_supports (rps, "xtheadmempair");
     case INSN_CLASS_XTHEADSYNC:
       return riscv_subset_supports (rps, "xtheadsync");
     default:
@@ -2556,6 +2559,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "xtheadmac";
     case INSN_CLASS_XTHEADMEMIDX:
       return "xtheadmemidx";
+    case INSN_CLASS_XTHEADMEMPAIR:
+      return "xtheadmempair";
     case INSN_CLASS_XTHEADSYNC:
       return "xtheadsync";
     default:

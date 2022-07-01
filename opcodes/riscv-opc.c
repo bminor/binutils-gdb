@@ -278,6 +278,23 @@ match_th_load_inc(const struct riscv_opcode *op,
   return rd != rs1 && match_opcode (op, insn);
 }
 
+static int
+match_th_load_pair(const struct riscv_opcode *op,
+		     insn_t insn)
+{
+  /* Load pair instructions use the following encoding:
+   * - rd1 = RD (insn[11:7])
+   * - rd2 = RS2 (insn[24:20])
+   * - rs = RS1 ([19:15])
+   * This function matches if the following restriction is met:
+   * The values of rd1, rd2, and rs1 must not be the same.  */
+  int rd1 = (insn & MASK_RD) >> OP_SH_RD;
+  int rd2 = (insn & MASK_RS2) >> OP_SH_RS2;
+  int rs = (insn & MASK_RS1) >> OP_SH_RS1;
+
+  return rd1 != rd2 && rd1 != rs && rd2 != rs && match_opcode (op, insn);
+}
+
 const struct riscv_opcode riscv_opcodes[] =
 {
 /* name, xlen, isa, operands, match, mask, match_func, pinfo.  */
@@ -1940,6 +1957,13 @@ const struct riscv_opcode riscv_opcodes[] =
 {"th.surw",   0, INSN_CLASS_XTHEADMEMIDX, "d,s,t,Xu2@25", MATCH_TH_SURW,  MASK_TH_SURW, match_opcode, 0},
 {"th.surh",   0, INSN_CLASS_XTHEADMEMIDX, "d,s,t,Xu2@25", MATCH_TH_SURH,  MASK_TH_SURH, match_opcode, 0},
 {"th.surb",   0, INSN_CLASS_XTHEADMEMIDX, "d,s,t,Xu2@25", MATCH_TH_SURB,  MASK_TH_SURB, match_opcode, 0},
+
+/* Vendor-specific (T-Head) XTheadMemPair instructions.  */
+{"th.ldd", 64, INSN_CLASS_XTHEADMEMPAIR, "d,t,(s),Xu2@25,Xl4", MATCH_TH_LDD,  MASK_TH_LDD,  match_th_load_pair, 0},
+{"th.lwd",  0, INSN_CLASS_XTHEADMEMPAIR, "d,t,(s),Xu2@25,Xl3", MATCH_TH_LWD,  MASK_TH_LWD,  match_th_load_pair, 0},
+{"th.lwud", 0, INSN_CLASS_XTHEADMEMPAIR, "d,t,(s),Xu2@25,Xl3", MATCH_TH_LWUD, MASK_TH_LWUD, match_th_load_pair, 0},
+{"th.sdd", 64, INSN_CLASS_XTHEADMEMPAIR, "d,t,(s),Xu2@25,Xl4", MATCH_TH_SDD,  MASK_TH_SDD,  match_opcode, 0},
+{"th.swd",  0, INSN_CLASS_XTHEADMEMPAIR, "d,t,(s),Xu2@25,Xl3", MATCH_TH_SWD,  MASK_TH_SWD,  match_opcode, 0},
 
 /* Vendor-specific (T-Head) XTheadMac instructions.  */
 {"th.mula",          0, INSN_CLASS_XTHEADMAC, "d,s,t", MATCH_TH_MULA,  MASK_TH_MULA,  match_opcode, 0},
