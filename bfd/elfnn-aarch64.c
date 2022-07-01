@@ -7223,9 +7223,6 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
       base_got = globals->root.sgot;
 
       bool is_dynamic = elf_hash_table (info)->dynamic_sections_created;
-      bool c64_reloc =
-	(bfd_r_type == BFD_RELOC_MORELLO_LD128_GOT_LO12_NC
-	 || bfd_r_type == BFD_RELOC_MORELLO_ADR_GOT_PAGE);
 
       if (signed_addend != 0)
 	{
@@ -7270,9 +7267,9 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	      BFD_ASSERT (!WILL_CALL_FINISH_DYNAMIC_SYMBOL
 			    (is_dynamic, bfd_link_pic (info), h));
 	      relative_reloc = true;
-	      c64_needs_frag_fixup = c64_reloc ? true : false;
+	      c64_needs_frag_fixup = globals->c64_rel ? true : false;
 	    }
-	  else if (!c64_reloc || !c64_needs_relocation (info, h))
+	  else if (!globals->c64_rel || !c64_needs_relocation (info, h))
 	    {
 	      /* Symbol references via GOT in C64 should always have
 		 relocations of some kind unless they are undefined weak
@@ -7311,7 +7308,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	      c64_needs_frag_fixup = true;
 	    }
 
-	  if (c64_reloc
+	  if (globals->c64_rel
 	      && c64_symbol_adjust (h, value, sym_sec, info, &frag_value))
 	    signed_addend = (value | h->target_internal) - frag_value;
 	  else
@@ -7357,7 +7354,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  {
 	    bfd_vma frag_value;
 
-	    if (c64_reloc
+	    if (globals->c64_rel
 		&& c64_symbol_adjust (h, value, sym_sec, info, &frag_value))
 	      signed_addend = (value | sym->st_target_internal) - frag_value;
 	    else
@@ -7378,7 +7375,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	       dynamic relocations).  */
 	    if (bfd_link_pic (info)
 		|| (!bfd_link_pic (info) && bfd_link_executable (info)
-		    && c64_reloc))
+		    && globals->c64_rel))
 	      {
 		/* We have not handled the case for weak undefined symbols in
 		   this clause.  That is because we believe there can not be
@@ -7393,7 +7390,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		   would not see it in this clause.  */
 		BFD_ASSERT (!weak_undef_p);
 		relative_reloc = true;
-		c64_needs_frag_fixup = c64_reloc ? true : false;
+		c64_needs_frag_fixup = globals->c64_rel ? true : false;
 	      }
 
 	    symbol_got_offset_mark (input_bfd, h, r_symndx);
@@ -7413,7 +7410,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
       if (c64_needs_frag_fixup)
 	{
-	  BFD_ASSERT (c64_reloc);
+	  BFD_ASSERT (globals->c64_rel);
 	  /* For a C64 relative relocation, also add size and permissions into
 	     the frag.  */
 	  bfd_reloc_status_type ret;
@@ -7436,7 +7433,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	  s = globals->root.srelgot;
 
-	  if (c64_reloc)
+	  if (globals->c64_rel)
 	    {
 	      rtype = MORELLO_R (RELATIVE);
 
