@@ -1915,7 +1915,7 @@ enter it).  For example, if you type
 @c If texinfo enhancements make it unnecessary, it would be nice to
 @c replace " @key" by "@key" in the following...
 @smallexample
-(@value{GDBP}) info bre @key{TAB}
+(@value{GDBP}) info bre@key{TAB}
 @end smallexample
 
 @noindent
@@ -1945,7 +1945,7 @@ function names in your program that begin with those characters, for
 example:
 
 @smallexample
-(@value{GDBP}) b make_ @key{TAB}
+(@value{GDBP}) b make_@key{TAB}
 @exdent @value{GDBN} sounds bell; press @key{TAB} again, to see:
 make_a_section_from_file     make_environ
 make_abs_section             make_function_type
@@ -2039,7 +2039,7 @@ the word-completion facilities in this situation, type a single quote
 when you press @key{TAB} or @kbd{M-?} to request word completion:
 
 @smallexample
-(@value{GDBP}) p 'func< @kbd{M-?}
+(@value{GDBP}) p 'func<@kbd{M-?}
 func<int>()    func<float>()
 (@value{GDBP}) p 'func<
 @end smallexample
@@ -2050,7 +2050,7 @@ usually need to type a quote before the function name, because
 function:
 
 @smallexample
-(@value{GDBP}) b func< @kbd{M-?}
+(@value{GDBP}) b func<@kbd{M-?}
 func<int>()    func<float>()
 (@value{GDBP}) b func<
 @end smallexample
@@ -2063,9 +2063,9 @@ that takes an @code{int} parameter, @code{name(int)}, or the version
 that takes a @code{float} parameter, @code{name(float)}.
 
 @smallexample
-(@value{GDBP}) b bubble( @kbd{M-?}
+(@value{GDBP}) b bubble(@kbd{M-?}
 bubble(int)    bubble(double)
-(@value{GDBP}) b bubble(dou @kbd{M-?}
+(@value{GDBP}) b bubble(dou@kbd{M-?}
 bubble(double)
 @end smallexample
 
