@@ -1,3 +1,7 @@
+2022-07-01  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (display_debug_rnglists): Add newline at end of listing.
+
 2022-06-30  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (dwarf_select_sections_by_name): If the entry's value is

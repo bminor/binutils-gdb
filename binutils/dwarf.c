@@ -8202,6 +8202,7 @@ display_debug_rnglists (struct dwarf_section *section)
 	putchar ('\n');
     }
 
+  putchar ('\n');
   return 1;
 }
 
