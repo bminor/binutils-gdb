@@ -292,6 +292,16 @@
   (((htab)->root.srelplt == NULL) ? 0			\
    : (htab)->root.srelplt->reloc_count * GOT_ENTRY_SIZE (htab))
 
+/* The only time that we want the value of a symbol but do not want a
+   relocation for it in Morello is when that symbol is undefined weak.  In this
+   case we just need the zero capability and there's no point emitting a
+   relocation for it when we can get an untagged zero capability by just
+   loading some zeros.  */
+#define c64_needs_relocation(info, h) \
+    (!((h)->root.type == bfd_link_hash_undefweak \
+       && (UNDEFWEAK_NO_DYNAMIC_RELOC ((info), (h)) \
+	   || !elf_hash_table ((info))->dynamic_sections_created)))
+
 /* The first entry in a procedure linkage table looks like this
    if the distance between the PLTGOT and the PLT is < 4GB use
    these PLT entries. Note that the dynamic linker gets &PLTGOT[2]
@@ -7240,58 +7250,61 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	     NOTE: one symbol may be referenced by several relocations, we
 	     should only generate one RELATIVE relocation for that symbol.
-	     Therefore, check GOT offset mark first.
-
-	     NOTE2: Symbol references via GOT in C64 should always have
-	     relocations of some kind.  Here we try to catch any such GOT
-	     reference which would not otherwise be caught by
-	     finish_dynamic_symbol.  */
-	  if (((h->dynindx == -1
-		&& !h->forced_local
-		&& h->root.type != bfd_link_hash_undefweak
-		&& bfd_link_pic (info))
-	       || (!bfd_link_pic (info)
-		   && !WILL_CALL_FINISH_DYNAMIC_SYMBOL
-		      (is_dynamic, bfd_link_pic (info), h)
-		   && bfd_link_executable (info) && c64_reloc))
+	     Therefore, check GOT offset mark first.  */
+	  if (h->dynindx == -1
+	      && !h->forced_local
+	      && h->root.type != bfd_link_hash_undefweak
+	      && bfd_link_pic (info)
 	      && !symbol_got_offset_mark_p (input_bfd, h, r_symndx))
 	    {
-	      /* If we would call finish_dynamic_symbol for this symbol then we
-		 should not be introducing a relocation for the GOT entry
-		 (that function handles creating relocations for the GOT entry
-		 in the usual case, this bit of code is to handle special
-		 cases where the relocation would not otherwise be generated).
-		 */
+	      /* Here we look for symbols which are not going to have their
+		 relocations added by finish_dynamic_symbol, but which still
+		 need a dynamic relocation because we're compiling for PIC.
+
+		 Action on this clause and the one below is the same.
+	         Written that way to make the three different cases and their
+		 interpretation clear.  */
 	      BFD_ASSERT (!WILL_CALL_FINISH_DYNAMIC_SYMBOL
 			    (is_dynamic, bfd_link_pic (info), h));
 	      relative_reloc = TRUE;
 	      c64_needs_frag_fixup = c64_reloc ? TRUE : FALSE;
 	    }
-	  /* If this is a dynamic symbol that binds locally then the generic
-	     code and elfNN_aarch64_finish_dynamic_symbol will already handle
-	     creating the RELATIVE reloc pointing into the GOT for this symbol.
-	     That means that this function does not need to handle *creating*
-	     such a relocation.  This function does already handle setting the
-	     base value as the fragment for that relocation, hence we should
-	     ensure that we set the fragment correctly for C64 code (i.e.
-	     including the required permissions and bounds).  */
-	  else if (c64_reloc
-		   && WILL_CALL_FINISH_DYNAMIC_SYMBOL (is_dynamic,
-						       bfd_link_pic (info), h)
+	  else if (!c64_reloc || !c64_needs_relocation (info, h))
+	    {
+	      /* Symbol references via GOT in C64 should always have
+		 relocations of some kind unless they are undefined weak
+		 symbols which cannot be provided at runtime.  In those cases
+		 we need a plain zero.
+
+		 This clause catches the case when we're not relocating for
+		 GOT, or when we're relocating an undefined weak symbol.  */
+	    }
+	  else if (!bfd_link_pic (info)
+		   && !WILL_CALL_FINISH_DYNAMIC_SYMBOL (is_dynamic,
+							bfd_link_pic (info), h)
+		   && bfd_link_executable (info)
+		   && !symbol_got_offset_mark_p (input_bfd, h, r_symndx))
+	    {
+	      /* This clause is here to catch any c64 entries in the GOT which
+		 need a relocation, but whose relocation will not be provided
+		 by finish_dynamic_symbol.  */
+	      relative_reloc = TRUE;
+	      c64_needs_frag_fixup = TRUE;
+	    }
+	  else if (WILL_CALL_FINISH_DYNAMIC_SYMBOL (is_dynamic,
+						    bfd_link_pic (info), h)
 		   && bfd_link_pic (info)
 		   && SYMBOL_REFERENCES_LOCAL (info, h))
 	    {
-	      /* We believe that if `h` were undefined weak it would not have
-		 SYMBOL_REFERENCES_LOCAL return true.  However this is not 100%
-		 clear based purely on the members that we check in the code.
-		 The reason it matters is if we could have a
-		 SYMBOL_REFERENCES_LOCAL symbol which is also
-		 !UNDEFWEAK_NO_DYNAMIC_RELOC then the check above would
-		 determine that we need to fix up the fragment for the RELATIVE
-		 relocation that elfNN_aarch64_finish_dynamic_symbol will
-		 create, but in actual fact elfNN_aarch64_finish_dynamic_symbol
-		 would not create that relocation.  */
-	      BFD_ASSERT (!UNDEFWEAK_NO_DYNAMIC_RELOC (info, h));
+	      /* If this is a dynamic symbol that binds locally then the
+		 generic code and elfNN_aarch64_finish_dynamic_symbol will
+		 already handle creating the RELATIVE reloc pointing into the
+		 GOT for this symbol.  That means that this function does not
+		 need to handle *creating* such a relocation.  We already
+		 handle setting the base value in the fragment for that
+		 relocation below, but we also need to make sure we set the
+		 rest of the fragment correctly for C64 code (i.e. including
+		 the required permissions and bounds).  */
 	      c64_needs_frag_fixup = TRUE;
 	    }
 
@@ -7364,6 +7377,18 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		|| (!bfd_link_pic (info) && bfd_link_executable (info)
 		    && c64_reloc))
 	      {
+		/* We have not handled the case for weak undefined symbols in
+		   this clause.  That is because we believe there can not be
+		   weak undefined symbols as we reach this clause.  We believe
+		   that any symbol with WEAK binding in an object file would be
+		   put into the hash table (and hence go into the `h != NULL`
+		   clause above).  The only time that `weak_undef_p` should be
+		   set for something not in the hash table is when we have
+		   removed a relocation by marking it as against the undefined
+		   symbol (e.g. during TLS relaxation).  We only ever do that
+		   while also setting the relocation to R_AARCH64_NONE, so we
+		   would not see it in this clause.  */
+		BFD_ASSERT (!weak_undef_p);
 		relative_reloc = TRUE;
 		c64_needs_frag_fixup = c64_reloc ? TRUE : FALSE;
 	      }
@@ -7613,12 +7638,25 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	  outrel.r_addend = signed_addend;
 
+	  if (h && !c64_needs_relocation (info, h))
+	    {
+	      /* If we know this symbol does not need a C64 dynamic relocation
+		 then it must be because this is an undefined weak symbol which
+		 can not find a definition at runtime.
+
+		 To handle that we just ensure that we've put a zero into the
+		 binary file at this point and mark the relocation as resolved.
+		 */
+	      value = 0;
+	      *unresolved_reloc_p = FALSE;
+	      break;
+	    }
 	  /* Emit a dynamic relocation if we are handling a symbol which the
 	     dynamic linker will be told about.  */
-	  if (h != NULL
-	      && h->dynindx != -1
-	      && globals->root.dynamic_sections_created
-	      && !SYMBOL_REFERENCES_LOCAL (info, h))
+	  else if (h != NULL
+		   && h->dynindx != -1
+		   && globals->root.dynamic_sections_created
+		   && !SYMBOL_REFERENCES_LOCAL (info, h))
 	    {
 	      outrel.r_info = ELFNN_R_INFO (h->dynindx, r_type);
 	      /* Dynamic symbols will be handled by the dynamic loader.  Hence
@@ -9674,6 +9712,10 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case BFD_RELOC_MORELLO_CAPINIT:
+	  if (h && !c64_needs_relocation (info, h))
+	    /* If this symbol does not need a relocation, then there's no
+	       reason to increase the srelcaps size for a relocation.  */
+	    break;
 	  if (htab->srelcaps == NULL)
 	    {
 	      if (htab->root.dynobj == NULL)
@@ -10232,23 +10274,37 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	{
 	  h->got.offset = htab->root.sgot->size;
 	  htab->root.sgot->size += GOT_ENTRY_SIZE (htab);
-	  if (((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-		|| h->root.type != bfd_link_hash_undefweak)
-	       && (bfd_link_pic (info)
-		   || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
-	       /* Undefined weak symbol in static PIE resolves to 0 without
-		  any dynamic relocations.  */
-	       && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
-	      /* Any capability relocations required in a dynamic binary
-		 should go in the srelgot.  */
-	      || (htab->c64_rel && dyn))
+
+	  if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	       || h->root.type != bfd_link_hash_undefweak)
+	      && (bfd_link_pic (info)
+		  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
+	      /* Undefined weak symbol in static PIE resolves to 0 without
+		 any dynamic relocations.  */
+	      && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	    {
 	      htab->root.srelgot->size += RELOC_SIZE (htab);
 	    }
-	  else if (bfd_link_executable (info) && htab->c64_rel)
+	  else if (!htab->c64_rel || !c64_needs_relocation (info, h))
+	    {
+	      /* Either not relocating for C64, and hence all problematic
+		 relocations are handled above, or this is an undefined weak
+		 symbol that we know will not be resolved to anything by the
+		 runtime do not need a relocation.  */
+	    }
+	  else if (dyn)
+	    {
+	      /* Any capability relocations required in a dynamic binary
+		 should go in the srelgot.  N.b. many capability relocations
+		 would be caught by the first clause in this if chain.  */
+	      htab->root.srelgot->size += RELOC_SIZE (htab);
+	    }
+	  else if (bfd_link_executable (info))
 	    {
 	      /* If we have a capability relocation that is not handled by the
-		 case above then this must be a statically linked executable.  */
+		 case above then this must be a statically linked executable.
+		 We want capability relocations in a statically linked
+		 executable to go in the srelcaps section.  */
 	      BFD_ASSERT (!bfd_link_pic (info) && !dyn);
 	      htab->srelcaps->size += RELOC_SIZE (htab);
 	    }

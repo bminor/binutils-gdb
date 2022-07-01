@@ -301,6 +301,15 @@ if { [ld_assemble_flags $as -march=morello+c64 $srcdir/$subdir/morello-dynamic-r
   run_dump_test_lp64 "morello-dataptr-code-and-data"
 }
 
+if { [ld_assemble_flags $as -march=morello+c64 $srcdir/$subdir/morello-weakdefinitions.s tmpdir/morello-weakdefinitions.o]
+     && [ld_link $ld tmpdir/morello-weakdefinitions.so "--shared tmpdir/morello-weakdefinitions.o"] } {
+     run_dump_test_lp64 "morello-undefweak-relocs-PDE"
+}
+run_dump_test_lp64 "morello-undefweak-relocs-no-dyn-linker"
+run_dump_test_lp64 "morello-undefweak-relocs-PIE"
+run_dump_test_lp64 "morello-undefweak-relocs-static"
+run_dump_test_lp64 "morello-undefweak-relocs-static-relocs"
+
 run_dump_test_lp64 "morello-static-got"
 run_dump_test_lp64 "morello-dynamic-got"
 run_dump_test_lp64 "morello-dt-init-fini"
