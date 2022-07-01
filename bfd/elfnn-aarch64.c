@@ -3000,7 +3000,6 @@ elfNN_aarch64_mkobject (bfd *abfd)
 #define GOT_TLS_GD     2
 #define GOT_TLS_IE     4
 #define GOT_TLSDESC_GD 8
-#define GOT_CAP        16
 
 #define GOT_TLS_GD_ANY_P(type)	((type & GOT_TLS_GD) || (type & GOT_TLSDESC_GD))
 
@@ -5915,7 +5914,7 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
 
     case BFD_RELOC_MORELLO_ADR_GOT_PAGE:
     case BFD_RELOC_MORELLO_LD128_GOT_LO12_NC:
-      return GOT_CAP;
+      return GOT_NORMAL;
 
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
@@ -5930,7 +5929,7 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
     case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
     case BFD_RELOC_MORELLO_TLSDESC_CALL:
     case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
-      return GOT_TLSDESC_GD | GOT_CAP;
+      return GOT_TLSDESC_GD | GOT_NORMAL;
 
     case BFD_RELOC_AARCH64_TLSDESC_ADD:
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
@@ -6778,8 +6777,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		  || bfd_link_executable (info))
 		{
 		  /* This symbol is resolved locally.  */
-		  outrel.r_info = (elf_aarch64_hash_entry (h)->got_type
-				   == GOT_CAP
+		  outrel.r_info = (globals->c64_rel
 				   ? ELFNN_R_INFO (0, MORELLO_R (IRELATIVE))
 				   : ELFNN_R_INFO (0, AARCH64_R (IRELATIVE)));
 		  outrel.r_addend = (h->root.u.def.value
@@ -8830,6 +8828,15 @@ elfNN_aarch64_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
 	return true;
 
       elf_elfheader (obfd)->e_flags = in_flags;
+      /* Determine if we are linking purecap or not based on the flags of the
+         input binaries.  Among other things this decides the size of GOT
+	 entries.  */
+      if (in_flags & EF_AARCH64_CHERI_PURECAP)
+	{
+	  struct elf_aarch64_link_hash_table *globals;
+	  globals = elf_aarch64_hash_table (info);
+	  globals->c64_rel = 1;
+	}
 
       if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
 	  && bfd_get_arch_info (obfd)->the_default)
@@ -9298,12 +9305,6 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	    case BFD_RELOC_MORELLO_CALL26:
 	    case BFD_RELOC_MORELLO_JUMP26:
-	      /* For dynamic symbols record caller information so that we can
-		 decide what kind of PLT stubs to emit.  */
-	      if (h != NULL)
-		elf_aarch64_hash_entry (h)->got_type = GOT_CAP;
-	      /* Fall through.  */
-
 	    case BFD_RELOC_AARCH64_ADD_LO12:
 	    case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
 	    case BFD_RELOC_MORELLO_ADR_GOT_PAGE:
@@ -9584,9 +9585,8 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    /* We will already have issued an error message if there
 	       is a TLS/non-TLS mismatch, based on the symbol type.
 	       So just combine any TLS types needed.  */
-	    if (old_got_type != GOT_UNKNOWN && old_got_type != GOT_NORMAL
-		&& got_type != GOT_NORMAL && old_got_type != GOT_CAP
-		&& got_type != GOT_CAP)
+	    if (old_got_type != GOT_UNKNOWN && old_got_type != GOT_NORMAL &&
+		got_type != GOT_NORMAL)
 	      got_type |= old_got_type;
 
 	    /* If the symbol is accessed by both IE and GD methods, we
@@ -9595,13 +9595,6 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	       involved.  */
 	    if ((got_type & GOT_TLS_IE) && GOT_TLS_GD_ANY_P (got_type))
 	      got_type &= ~ (GOT_TLSDESC_GD | GOT_TLS_GD);
-
-	    /* Prefer the capability reference.  */
-	    if ((old_got_type & GOT_CAP) && (got_type & GOT_NORMAL))
-	      {
-		got_type &= ~GOT_NORMAL;
-		got_type |= GOT_CAP;
-	      }
 
 	    if (old_got_type != got_type)
 	      {
@@ -9626,9 +9619,6 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case BFD_RELOC_MORELLO_CALL26:
 	case BFD_RELOC_MORELLO_JUMP26:
 	  htab->c64_rel = 1;
-	  if (h != NULL)
-	    elf_aarch64_hash_entry (h)->got_type = GOT_CAP;
-
 	  /* Fall through.  */
 	case BFD_RELOC_AARCH64_CALL26:
 	case BFD_RELOC_AARCH64_JUMP26:
@@ -10315,8 +10305,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       if (got_type == GOT_UNKNOWN)
 	{
 	}
-      else if (got_type == GOT_NORMAL
-	       || got_type == GOT_CAP)
+      else if (got_type == GOT_NORMAL)
 	{
 	  h->got.offset = htab->root.sgot->size;
 	  htab->root.sgot->size += GOT_ENTRY_SIZE (htab);
@@ -10329,11 +10318,11 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	       && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
 	      /* Any capability relocations required in a dynamic binary
 		 should go in the srelgot.  */
-	      || ((got_type == GOT_CAP) && dyn))
+	      || (htab->c64_rel && dyn))
 	    {
 	      htab->root.srelgot->size += RELOC_SIZE (htab);
 	    }
-	  else if (bfd_link_executable (info) && (got_type == GOT_CAP))
+	  else if (bfd_link_executable (info) && htab->c64_rel)
 	    {
 	      /* If we have a capability relocation that is not handled by the
 		 case above then this must be a statically linked executable.  */
@@ -10373,7 +10362,7 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)
 		  /* On Morello support only TLSDESC_GD to TLSLE relaxation;
 		     for everything else we must emit a dynamic relocation.  */
-		  || got_type & GOT_CAP))
+		  || htab->c64_rel))
 	    {
 	      if (got_type & GOT_TLSDESC_GD)
 		{
@@ -10656,8 +10645,7 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd,
 		}
 
 	      if (got_type & GOT_TLS_IE
-		  || got_type & GOT_NORMAL
-		  || got_type & GOT_CAP)
+		  || got_type & GOT_NORMAL)
 		{
 		  locals[i].got_offset = htab->root.sgot->size;
 		  htab->root.sgot->size += GOT_ENTRY_SIZE (htab);
@@ -10680,17 +10668,16 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd,
 		    htab->root.srelgot->size += RELOC_SIZE (htab) * 2;
 
 		  if (got_type & GOT_TLS_IE
-		      || got_type & GOT_NORMAL
-		      || got_type & GOT_CAP)
+		      || got_type & GOT_NORMAL)
 		    htab->root.srelgot->size += RELOC_SIZE (htab);
 		}
 	      /* Static binary; put relocs into srelcaps.  */
 	      else if (bfd_link_executable (info)
 		       && !htab->root.dynamic_sections_created
-		       && (got_type & GOT_CAP))
+		       && htab->c64_rel)
 		htab->srelcaps->size += RELOC_SIZE (htab);
 	      /* Else capability relocation needs to go into srelgot.  */
-	      else if (got_type & GOT_CAP)
+	      else if (htab->c64_rel)
 		htab->root.srelgot->size += RELOC_SIZE (htab);
 	    }
 	  else
@@ -11011,7 +10998,7 @@ elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
     {
       /* If an STT_GNU_IFUNC symbol is locally defined, generate
 	 R_AARCH64_IRELATIVE instead of R_AARCH64_JUMP_SLOT.  */
-      rela.r_info = (elf_aarch64_hash_entry (h)->got_type == GOT_CAP
+      rela.r_info = (htab->c64_rel
 		     ? ELFNN_R_INFO (0, MORELLO_R (IRELATIVE))
 		     : ELFNN_R_INFO (0, AARCH64_R (IRELATIVE)));
       rela.r_addend = (h->root.u.def.value
@@ -11021,7 +11008,7 @@ elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
   else
     {
       /* Fill in the entry in the .rela.plt section.  */
-      rela.r_info = (elf_aarch64_hash_entry (h)->got_type == GOT_CAP
+      rela.r_info = (htab->c64_rel
 		     ? ELFNN_R_INFO (h->dynindx, MORELLO_R (JUMP_SLOT))
 		     : ELFNN_R_INFO (h->dynindx, AARCH64_R (JUMP_SLOT)));
       rela.r_addend = 0;
@@ -11141,11 +11128,8 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 	}
     }
 
-  bool is_c64 = elf_aarch64_hash_entry (h)->got_type == GOT_CAP;
-
   if (h->got.offset != (bfd_vma) - 1
-      && (elf_aarch64_hash_entry (h)->got_type == GOT_NORMAL
-	  || elf_aarch64_hash_entry (h)->got_type == GOT_CAP)
+      && elf_aarch64_hash_entry (h)->got_type == GOT_NORMAL
       /* Undefined weak symbol in static PIE resolves to 0 without
 	 any dynamic relocations.  */
       && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h))
@@ -11198,7 +11182,7 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 	  bfd_vma value = h->root.u.def.value
 	    + h->root.u.def.section->output_section->vma
 	    + h->root.u.def.section->output_offset;
-	  if (is_c64)
+	  if (htab->c64_rel)
 	    {
 	      rela.r_info = ELFNN_R_INFO (0, MORELLO_R (RELATIVE));
 	      bfd_vma base_value = 0;
@@ -11221,7 +11205,8 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 	  bfd_put_NN (output_bfd, (bfd_vma) 0,
 		      htab->root.sgot->contents + h->got.offset);
 	  rela.r_info = ELFNN_R_INFO (h->dynindx,
-				      (is_c64 ? MORELLO_R (GLOB_DAT)
+				      (htab->c64_rel
+				       ? MORELLO_R (GLOB_DAT)
 				       : AARCH64_R (GLOB_DAT)));
 	  rela.r_addend = 0;
 	}

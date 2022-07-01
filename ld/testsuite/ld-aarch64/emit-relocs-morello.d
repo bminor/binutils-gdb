@@ -21,7 +21,7 @@ Disassembly of section .got:
 
 .* <.got>:
 .*:	[0-9a-f]+ 	.*
-.*:	00000000 	.*
+	\.\.\.
 
 Disassembly of section .data:
 
