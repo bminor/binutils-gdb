@@ -7276,10 +7276,9 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		 This clause catches the case when we're not relocating for
 		 GOT, or when we're relocating an undefined weak symbol.  */
 	    }
-	  else if (!bfd_link_pic (info)
+	  else if (!bfd_link_relocatable (info)
 		   && !WILL_CALL_FINISH_DYNAMIC_SYMBOL (is_dynamic,
 							bfd_link_pic (info), h)
-		   && bfd_link_executable (info)
 		   && !symbol_got_offset_mark_p (input_bfd, h, r_symndx))
 	    {
 	      /* This clause is here to catch any c64 entries in the GOT which
