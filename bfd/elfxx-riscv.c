@@ -1224,6 +1224,9 @@ static struct riscv_supported_ext riscv_supported_std_zxm_ext[] =
 
 static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
 {
+  {"xtheadba",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
+  {"xtheadbb",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
+  {"xtheadbs",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadcmo",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadsync",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {NULL, 0, 0, 0, 0}
@@ -2388,6 +2391,12 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "svinval");
     case INSN_CLASS_H:
       return riscv_subset_supports (rps, "h");
+    case INSN_CLASS_XTHEADBA:
+      return riscv_subset_supports (rps, "xtheadba");
+    case INSN_CLASS_XTHEADBB:
+      return riscv_subset_supports (rps, "xtheadbb");
+    case INSN_CLASS_XTHEADBS:
+      return riscv_subset_supports (rps, "xtheadbs");
     case INSN_CLASS_XTHEADCMO:
       return riscv_subset_supports (rps, "xtheadcmo");
     case INSN_CLASS_XTHEADSYNC:
@@ -2519,6 +2528,12 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "svinval";
     case INSN_CLASS_H:
       return _("h");
+    case INSN_CLASS_XTHEADBA:
+      return "xtheadba";
+    case INSN_CLASS_XTHEADBB:
+      return "xtheadbb";
+    case INSN_CLASS_XTHEADBS:
+      return "xtheadbs";
     case INSN_CLASS_XTHEADCMO:
       return "xtheadcmo";
     case INSN_CLASS_XTHEADSYNC:

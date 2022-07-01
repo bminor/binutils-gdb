@@ -2113,6 +2113,31 @@
 #define MASK_CBO_INVAL 0xfff07fff
 #define MATCH_CBO_ZERO 0x40200f
 #define MASK_CBO_ZERO 0xfff07fff
+/* Vendor-specific (T-Head) XTheadBa instructions.  */
+#define MATCH_TH_ADDSL 0x0000100b
+#define MASK_TH_ADDSL 0xf800707f
+/* Vendor-specific (T-Head) XTheadBb instructions.  */
+#define MATCH_TH_SRRI 0x1000100b
+#define MASK_TH_SRRI 0xfc00707f
+#define MATCH_TH_SRRIW 0x1400100b
+#define MASK_TH_SRRIW 0xfe00707f
+#define MATCH_TH_EXT 0x0000200b
+#define MASK_TH_EXT 0x0000707f
+#define MATCH_TH_EXTU 0x0000300b
+#define MASK_TH_EXTU 0x0000707f
+#define MATCH_TH_FF0 0x8400100b
+#define MASK_TH_FF0 0xfff0707f
+#define MATCH_TH_FF1 0x8600100b
+#define MASK_TH_FF1 0xfff0707f
+#define MATCH_TH_REV 0x8200100b
+#define MASK_TH_REV 0xfff0707f
+#define MATCH_TH_REVW 0x9000100b
+#define MASK_TH_REVW 0xfff0707f
+#define MATCH_TH_TSTNBZ 0x8000100b
+#define MASK_TH_TSTNBZ 0xfff0707f
+/* Vendor-specific (T-Head) XTheadBs instructions.  */
+#define MATCH_TH_TST 0x8800100b
+#define MASK_TH_TST 0xfc00707f
 /* Vendor-specific (T-Head) XTheadCmo instructions.  */
 #define MATCH_TH_DCACHE_CALL 0x0010000b
 #define MASK_TH_DCACHE_CALL 0xffffffff
@@ -2906,6 +2931,20 @@ DECLARE_INSN(cbo_clean, MATCH_CBO_CLEAN, MASK_CBO_CLEAN);
 DECLARE_INSN(cbo_flush, MATCH_CBO_FLUSH, MASK_CBO_FLUSH);
 DECLARE_INSN(cbo_inval, MATCH_CBO_INVAL, MASK_CBO_INVAL);
 DECLARE_INSN(cbo_zero, MATCH_CBO_ZERO, MASK_CBO_ZERO);
+/* Vendor-specific (T-Head) XTheadBa instructions.  */
+DECLARE_INSN(th_addsl, MATCH_TH_ADDSL, MASK_TH_ADDSL)
+/* Vendor-specific (T-Head) XTheadBb instructions.  */
+DECLARE_INSN(th_srri, MATCH_TH_SRRI, MASK_TH_SRRI)
+DECLARE_INSN(th_srriw, MATCH_TH_SRRIW, MASK_TH_SRRIW)
+DECLARE_INSN(th_ext, MATCH_TH_EXT, MASK_TH_EXT)
+DECLARE_INSN(th_extu, MATCH_TH_EXTU, MASK_TH_EXTU)
+DECLARE_INSN(th_ff0, MATCH_TH_FF0, MASK_TH_FF0)
+DECLARE_INSN(th_ff1, MATCH_TH_FF1, MASK_TH_FF1)
+DECLARE_INSN(th_rev, MATCH_TH_REV, MASK_TH_REV)
+DECLARE_INSN(th_revw, MATCH_TH_REVW, MASK_TH_REVW)
+DECLARE_INSN(th_tstbnz, MATCH_TH_TSTNBZ, MASK_TH_TSTNBZ)
+/* Vendor-specific (T-Head) XTheadBs instructions.  */
+DECLARE_INSN(th_tst, MATCH_TH_TST, MASK_TH_TST)
 /* Vendor-specific (T-Head) XTheadCmo instructions.  */
 DECLARE_INSN(th_dcache_call, MATCH_TH_DCACHE_CALL, MASK_TH_DCACHE_CALL)
 DECLARE_INSN(th_dcache_ciall, MATCH_TH_DCACHE_CIALL, MASK_TH_DCACHE_CIALL)

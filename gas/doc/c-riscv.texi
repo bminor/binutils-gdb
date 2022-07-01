@@ -704,6 +704,21 @@ extensions supported and provides the location of their
 publicly-released documentation:
 
 @table @r
+@item XTheadBa
+The XTheadBa extension provides instructions for address calculations.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
+
+@item XTheadBb
+The XTheadBb extension provides instructions for basic bit-manipulation
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
+
+@item XTheadBs
+The XTheadBs extension provides single-bit instructions.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
+
 @item XTheadCmo
 The XTheadCmo extension provides instructions for cache management.
 

@@ -1825,6 +1825,23 @@ const struct riscv_opcode riscv_opcodes[] =
 {"hsv.w",       0, INSN_CLASS_H, "t,0(s)", MATCH_HSV_W, MASK_HSV_W, match_opcode, INSN_DREF|INSN_4_BYTE },
 {"hsv.d",      64, INSN_CLASS_H, "t,0(s)", MATCH_HSV_D, MASK_HSV_D, match_opcode, INSN_DREF|INSN_8_BYTE },
 
+/* Vendor-specific (T-Head) XTheadBa instructions.  */
+{"th.addsl",    0, INSN_CLASS_XTHEADBA,    "d,s,t,Xu2@25",   MATCH_TH_ADDSL,    MASK_TH_ADDSL,    match_opcode, 0},
+
+/* Vendor-specific (T-Head) XTheadBb instructions.  */
+{"th.srri",     0, INSN_CLASS_XTHEADBB,    "d,s,Xu6@20",   MATCH_TH_SRRI,    MASK_TH_SRRI,     match_opcode, 0},
+{"th.srriw",   64, INSN_CLASS_XTHEADBB,    "d,s,Xu5@20",   MATCH_TH_SRRIW,   MASK_TH_SRRIW,    match_opcode, 0},
+{"th.ext",      0, INSN_CLASS_XTHEADBB,    "d,s,Xu6@26,Xu6@20",   MATCH_TH_EXT,     MASK_TH_EXT,      match_opcode, 0},
+{"th.extu",     0, INSN_CLASS_XTHEADBB,    "d,s,Xu6@26,Xu6@20",   MATCH_TH_EXTU,    MASK_TH_EXTU,     match_opcode, 0},
+{"th.ff0",      0, INSN_CLASS_XTHEADBB,    "d,s",   MATCH_TH_FF0,     MASK_TH_FF0,      match_opcode, 0},
+{"th.ff1",      0, INSN_CLASS_XTHEADBB,    "d,s",   MATCH_TH_FF1,     MASK_TH_FF1,      match_opcode, 0},
+{"th.rev",      0, INSN_CLASS_XTHEADBB,    "d,s",   MATCH_TH_REV,     MASK_TH_REV,      match_opcode, 0},
+{"th.revw",    64, INSN_CLASS_XTHEADBB,    "d,s",   MATCH_TH_REVW,    MASK_TH_REVW,     match_opcode, 0},
+{"th.tstnbz",   0, INSN_CLASS_XTHEADBB,    "d,s",   MATCH_TH_TSTNBZ,  MASK_TH_TSTNBZ,   match_opcode, 0},
+
+/* Vendor-specific (T-Head) XTheadBs instructions.  */
+{"th.tst",      0, INSN_CLASS_XTHEADBS,    "d,s,Xu6@20",   MATCH_TH_TST,     MASK_TH_TST,      match_opcode, 0},
+
 /* Vendor-specific (T-Head) XTheadCmo instructions.  */
 {"th.dcache.call",   0, INSN_CLASS_XTHEADCMO,   "",   MATCH_TH_DCACHE_CALL,   MASK_TH_DCACHE_CALL,   match_opcode, 0},
 {"th.dcache.ciall",  0, INSN_CLASS_XTHEADCMO,   "",   MATCH_TH_DCACHE_CIALL,  MASK_TH_DCACHE_CIALL,  match_opcode, 0},
