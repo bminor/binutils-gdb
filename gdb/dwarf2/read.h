@@ -122,9 +122,11 @@ struct dwarf2_per_cu_data
   sect_offset sect_off {};
   unsigned int length = 0;
 
+private:
   /* DWARF standard version this data has been read from (such as 4 or 5).  */
-  unsigned char dwarf_version = 0;
+  unsigned char m_dwarf_version = 0;
 
+public:
   /* Flag indicating this compilation unit will be read in before
      any of the current compilation units are processed.  */
   unsigned int queued : 1;
@@ -287,7 +289,19 @@ struct dwarf2_per_cu_data
   /* Return DWARF version number of this CU.  */
   short version () const
   {
-    return dwarf_version;
+    /* Make sure it's set already.  */
+    gdb_assert (m_dwarf_version != 0);
+    return m_dwarf_version;
+  }
+
+  void set_version (short version)
+  {
+    if (m_dwarf_version == 0)
+      /* Set if not set already.  */
+      m_dwarf_version = version;
+    else
+      /* If already set, verify that it's the same value.  */
+      gdb_assert (m_dwarf_version == version);
   }
 
   /* Free any cached file names.  */
