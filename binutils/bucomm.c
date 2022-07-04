@@ -142,6 +142,19 @@ non_fatal (const char *format, ...)
   va_end (args);
 }
 
+/* Like xmalloc except that ABFD's objalloc memory is returned.
+   Use objalloc_free_block to free this memory and all more recently
+   allocated, or more usually, leave it to bfd_close to free.  */
+
+void *
+bfd_xalloc (bfd *abfd, size_t size)
+{
+  void *ret = bfd_alloc (abfd, size);
+  if (ret == NULL)
+    bfd_fatal (NULL);
+  return ret;
+}
+
 /* Set the default BFD target based on the configured target.  Doing
    this permits the binutils to be configured for a particular target,
    and linked against a shared BFD library which was configured for a

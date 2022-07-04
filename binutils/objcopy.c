@@ -4336,14 +4336,13 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	}
       else
 	{
-	  relpp = (arelent **) xmalloc (relsize);
+	  relpp = bfd_xalloc (obfd, relsize);
 	  relcount = bfd_canonicalize_reloc (ibfd, isection, relpp, isympp);
 	  if (relcount < 0)
 	    {
 	      status = 1;
 	      bfd_nonfatal_message (NULL, ibfd, isection,
 				    _("relocation count is negative"));
-	      free (relpp);
 	      return;
 	    }
 	}
@@ -4352,34 +4351,24 @@ copy_relocations_in_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	{
 	  /* Remove relocations which are not in
 	     keep_strip_specific_list.  */
-	  arelent **temp_relpp;
-	  long temp_relcount = 0;
+	  arelent **w_relpp;
 	  long i;
 
-	  temp_relpp = (arelent **) xmalloc (relsize);
-	  for (i = 0; i < relcount; i++)
-	    {
-	      /* PR 17512: file: 9e907e0c.  */
-	      if (relpp[i]->sym_ptr_ptr
-		  /* PR 20096 */
-		  && * relpp[i]->sym_ptr_ptr)
-		if (is_specified_symbol (bfd_asymbol_name (*relpp[i]->sym_ptr_ptr),
-					 keep_specific_htab))
-		  temp_relpp [temp_relcount++] = relpp [i];
-	    }
-	  relcount = temp_relcount;
-	  if (relpp != isection->orelocation)
-	    free (relpp);
-	  relpp = temp_relpp;
+	  for (w_relpp = relpp, i = 0; i < relcount; i++)
+	    /* PR 17512: file: 9e907e0c.  */
+	    if (relpp[i]->sym_ptr_ptr
+		/* PR 20096 */
+		&& *relpp[i]->sym_ptr_ptr
+		&& is_specified_symbol (bfd_asymbol_name (*relpp[i]->sym_ptr_ptr),
+					keep_specific_htab))
+	      *w_relpp++ = relpp[i];
+	  relcount = w_relpp - relpp;
+	  *w_relpp = 0;
 	}
 
       bfd_set_reloc (obfd, osection, relcount == 0 ? NULL : relpp, relcount);
       if (relcount == 0)
-	{
-	  osection->flags &= ~SEC_RELOC;
-	  if (relpp != isection->orelocation)
-	    free (relpp);
-	}
+	osection->flags &= ~SEC_RELOC;
     }
 }
 
