@@ -811,7 +811,8 @@ else
     case "${with_python}" in
     yes | auto)
       if test "${build}" = "${host}"; then
-        AC_PATH_PROG(python_prog_path, python, missing)
+        # Look first for 'python', then 'python3'.
+        AC_PATH_PROGS(python_prog_path, [python python3], missing)
         if test "${python_prog_path}" = missing; then
           python_prog=missing
         else
