@@ -62,6 +62,13 @@ enum disassembler_style
      instructions.  */
   dis_style_mnemonic,
 
+  /* Some architectures include additional mnemonic like fields within the
+     instruction operands, e.g. on aarch64 'add w16, w7, w1, lsl #2' where
+     the 'lsl' is an additional piece of text that describes how the
+     instruction should behave.  This sub-mnemonic style can be used for
+     these pieces of text.  */
+  dis_style_sub_mnemonic,
+
   /* For things that aren't real machine instructions, but rather
      assembler directives, e.g. .byte, etc.  */
   dis_style_assembler_directive,

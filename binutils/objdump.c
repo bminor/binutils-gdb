@@ -2167,6 +2167,7 @@ objdump_color_for_disassembler_style (enum disassembler_style style)
 	{
 	case dis_style_symbol: color = 32; break;
         case dis_style_assembler_directive:
+	case dis_style_sub_mnemonic:
 	case dis_style_mnemonic: color = 33; break;
 	case dis_style_register: color = 34; break;
 	case dis_style_address:
@@ -2185,6 +2186,7 @@ objdump_color_for_disassembler_style (enum disassembler_style style)
 	{
 	case dis_style_symbol: color = 40; break;
         case dis_style_assembler_directive:
+	case dis_style_sub_mnemonic:
 	case dis_style_mnemonic: color = 142; break;
 	case dis_style_register: color = 27; break;
 	case dis_style_address:
