@@ -10380,7 +10380,7 @@ lex_got (enum bfd_reloc_code_real *rel,
       OPERAND_TYPE_IMM64, true },
     { STRING_COMMA_LEN ("PLT"),      { BFD_RELOC_386_PLT32,
 				       BFD_RELOC_X86_64_PLT32    },
-      OPERAND_TYPE_IMM32_32S_DISP32, false },
+      OPERAND_TYPE_IMM32_32S_DISP32S, false },
     { STRING_COMMA_LEN ("GOTPLT"),   { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_GOTPLT64 },
       OPERAND_TYPE_IMM64_DISP64, true },
@@ -10389,28 +10389,28 @@ lex_got (enum bfd_reloc_code_real *rel,
       OPERAND_TYPE_IMM64_DISP64, true },
     { STRING_COMMA_LEN ("GOTPCREL"), { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_GOTPCREL },
-      OPERAND_TYPE_IMM32_32S_DISP32, true },
+      OPERAND_TYPE_IMM32_32S_DISP32S, true },
     { STRING_COMMA_LEN ("TLSGD"),    { BFD_RELOC_386_TLS_GD,
 				       BFD_RELOC_X86_64_TLSGD    },
-      OPERAND_TYPE_IMM32_32S_DISP32, true },
+      OPERAND_TYPE_IMM32_32S_DISP32S, true },
     { STRING_COMMA_LEN ("TLSLDM"),   { BFD_RELOC_386_TLS_LDM,
 				       _dummy_first_bfd_reloc_code_real },
       OPERAND_TYPE_NONE, true },
     { STRING_COMMA_LEN ("TLSLD"),    { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_TLSLD    },
-      OPERAND_TYPE_IMM32_32S_DISP32, true },
+      OPERAND_TYPE_IMM32_32S_DISP32S, true },
     { STRING_COMMA_LEN ("GOTTPOFF"), { BFD_RELOC_386_TLS_IE_32,
 				       BFD_RELOC_X86_64_GOTTPOFF },
-      OPERAND_TYPE_IMM32_32S_DISP32, true },
+      OPERAND_TYPE_IMM32_32S_DISP32S, true },
     { STRING_COMMA_LEN ("TPOFF"),    { BFD_RELOC_386_TLS_LE_32,
 				       BFD_RELOC_X86_64_TPOFF32  },
-      OPERAND_TYPE_IMM32_32S_64_DISP32_64, true },
+      OPERAND_TYPE_IMM32_32S_64_DISP32S_64, true },
     { STRING_COMMA_LEN ("NTPOFF"),   { BFD_RELOC_386_TLS_LE,
 				       _dummy_first_bfd_reloc_code_real },
       OPERAND_TYPE_NONE, true },
     { STRING_COMMA_LEN ("DTPOFF"),   { BFD_RELOC_386_TLS_LDO_32,
 				       BFD_RELOC_X86_64_DTPOFF32 },
-      OPERAND_TYPE_IMM32_32S_64_DISP32_64, true },
+      OPERAND_TYPE_IMM32_32S_64_DISP32S_64, true },
     { STRING_COMMA_LEN ("GOTNTPOFF"),{ BFD_RELOC_386_TLS_GOTIE,
 				       _dummy_first_bfd_reloc_code_real },
       OPERAND_TYPE_NONE, true },
@@ -10419,17 +10419,17 @@ lex_got (enum bfd_reloc_code_real *rel,
       OPERAND_TYPE_NONE, true },
     { STRING_COMMA_LEN ("GOT"),      { BFD_RELOC_386_GOT32,
 				       BFD_RELOC_X86_64_GOT32    },
-      OPERAND_TYPE_IMM32_32S_64_DISP32, true },
+      OPERAND_TYPE_IMM32_32S_64_DISP32S, true },
     { STRING_COMMA_LEN ("TLSDESC"),  { BFD_RELOC_386_TLS_GOTDESC,
 				       BFD_RELOC_X86_64_GOTPC32_TLSDESC },
-      OPERAND_TYPE_IMM32_32S_DISP32, true },
+      OPERAND_TYPE_IMM32_32S_DISP32S, true },
     { STRING_COMMA_LEN ("TLSCALL"),  { BFD_RELOC_386_TLS_DESC_CALL,
 				       BFD_RELOC_X86_64_TLSDESC_CALL },
-      OPERAND_TYPE_IMM32_32S_DISP32, true },
+      OPERAND_TYPE_IMM32_32S_DISP32S, true },
 #else /* TE_PE */
     { STRING_COMMA_LEN ("SECREL32"), { BFD_RELOC_32_SECREL,
 				       BFD_RELOC_32_SECREL },
-      OPERAND_TYPE_IMM32_32S_64_DISP32_64, false },
+      OPERAND_TYPE_IMM32_32S_64_DISP32S_64, false },
 #endif
   };
   char *cp;
@@ -11143,7 +11143,6 @@ static int
 i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
 			    i386_operand_type types, const char *disp_start)
 {
-  i386_operand_type bigdisp;
   int ret = 1;
 
   /* We do this to make sure that the section symbol is in
@@ -11208,10 +11207,10 @@ i386_finalize_displacement (segT exp_seg ATTRIBUTE_UNUSED, expressionS *exp,
     i.types[this_operand].bitfield.disp8 = 1;
 
   /* Check if this is a displacement only operand.  */
-  bigdisp = operand_type_and_not (i.types[this_operand], anydisp);
-  if (operand_type_all_zero (&bigdisp))
-    i.types[this_operand] = operand_type_and (i.types[this_operand],
-					      types);
+  if (!i.types[this_operand].bitfield.baseindex)
+    i.types[this_operand] =
+      operand_type_or (operand_type_and_not (i.types[this_operand], anydisp),
+		       operand_type_and (i.types[this_operand], types));
 
   return ret;
 }
