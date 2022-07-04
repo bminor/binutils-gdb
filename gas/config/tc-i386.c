@@ -4975,7 +4975,9 @@ md_assemble (char *line)
   if (i.imm_operands)
     optimize_imm ();
 
-  if (i.disp_operands && !want_disp32 (current_templates->start))
+  if (i.disp_operands && !want_disp32 (current_templates->start)
+      && (!current_templates->start->opcode_modifier.jump
+	  || i.jumpabsolute || i.types[0].bitfield.baseindex))
     {
       for (j = 0; j < i.operands; ++j)
 	{
@@ -5985,7 +5987,9 @@ optimize_disp (void)
 	    /* Optimize 64-bit displacement to 32-bit for 64-bit BFD.  */
 	    if ((i.types[op].bitfield.disp32
 		 || (flag_code == CODE_64BIT
-		     && want_disp32 (current_templates->start)))
+		     && want_disp32 (current_templates->start)
+		     && (!current_templates->start->opcode_modifier.jump
+			 || i.jumpabsolute || i.types[op].bitfield.baseindex)))
 		&& fits_in_unsigned_long (op_disp))
 	      {
 		/* If this operand is at most 32 bits, convert

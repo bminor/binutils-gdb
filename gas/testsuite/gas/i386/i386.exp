@@ -1314,6 +1314,7 @@ if [gas_64_check] then {
 	run_dump_test "x86-64-branch-3"
 	run_list_test "x86-64-branch-4" "-al -mintel64"
 	run_list_test "x86-64-branch-5" "-al"
+	run_dump_test "x86-64-branch-6"
 
 	run_dump_test "x86-64-rip-2"
 
