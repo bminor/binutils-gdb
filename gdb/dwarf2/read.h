@@ -108,8 +108,8 @@ struct dwarf2_per_cu_data
       addresses_seen (false),
       mark (false),
       files_read (false),
-      unit_type {},
-      lang (language_unknown),
+      m_unit_type {},
+      m_lang (language_unknown),
       scanned (false)
   {
   }
@@ -173,12 +173,14 @@ public:
      point in trying to read it again next time.  */
   bool files_read : 1;
 
+private:
   /* The unit type of this CU.  */
-  ENUM_BITFIELD (dwarf_unit_type) unit_type : 8;
+  ENUM_BITFIELD (dwarf_unit_type) m_unit_type : 8;
 
   /* The language of this CU.  */
-  ENUM_BITFIELD (language) lang : LANGUAGE_BITS;
+  ENUM_BITFIELD (language) m_lang : LANGUAGE_BITS;
 
+public:
   /* True if this CU has been scanned by the indexer; false if
      not.  */
   std::atomic<bool> scanned;
@@ -302,6 +304,37 @@ public:
     else
       /* If already set, verify that it's the same value.  */
       gdb_assert (m_dwarf_version == version);
+  }
+
+  dwarf_unit_type unit_type () const
+  {
+    gdb_assert (m_unit_type != 0);
+    return m_unit_type;
+  }
+
+  void set_unit_type (dwarf_unit_type unit_type)
+  {
+    if (m_unit_type == 0)
+      /* Set if not set already.  */
+      m_unit_type = unit_type;
+    else
+      /* If already set, verify that it's the same value.  */
+      gdb_assert (m_unit_type == unit_type);
+  }
+
+  enum language lang () const
+  {
+    gdb_assert (m_lang != language_unknown);
+    return m_lang;
+  }
+
+  void set_lang (enum language lang)
+  {
+    /* We'd like to be more strict here, similar to what is done in
+       set_unit_type,  but currently a partial unit can go from unknown to
+       minimal to ada to c.  */
+    if (m_lang != lang)
+      m_lang = lang;
   }
 
   /* Free any cached file names.  */

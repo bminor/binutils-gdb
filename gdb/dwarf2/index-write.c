@@ -583,7 +583,7 @@ public:
 
     insert (tag, name, it->second, (entry->flags & IS_STATIC) != 0,
 	    entry->per_cu->is_debug_types ? unit_kind::tu : unit_kind::cu,
-	    entry->per_cu->lang);
+	    entry->per_cu->lang ());
   }
 
   /* Build all the tables.  All symbols must be already inserted.

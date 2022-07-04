@@ -54,7 +54,7 @@ cooked_index_entry::full_name (struct obstack *storage) const
     return canonical;
 
   const char *sep = nullptr;
-  switch (per_cu->lang)
+  switch (per_cu->lang ())
     {
     case language_cplus:
     case language_rust:
@@ -104,7 +104,7 @@ cooked_index::add (sect_offset die_offset, enum dwarf_tag tag,
      implicit "main" discovery.  */
   if ((flags & IS_MAIN) != 0)
     m_main = result;
-  else if (per_cu->lang != language_ada
+  else if (per_cu->lang () != language_ada
 	   && m_main == nullptr
 	   && strcmp (name, "main") == 0)
     m_main = result;
@@ -196,13 +196,13 @@ cooked_index::do_finalize ()
   for (cooked_index_entry *entry : m_entries)
     {
       gdb_assert (entry->canonical == nullptr);
-      if ((entry->per_cu->lang != language_cplus
-	   && entry->per_cu->lang != language_ada)
+      if ((entry->per_cu->lang () != language_cplus
+	   && entry->per_cu->lang () != language_ada)
 	  || (entry->flags & IS_LINKAGE) != 0)
 	entry->canonical = entry->name;
       else
 	{
-	  if (entry->per_cu->lang == language_ada)
+	  if (entry->per_cu->lang () == language_ada)
 	    {
 	      gdb::unique_xmalloc_ptr<char> canon_name
 		= handle_gnat_encoded_entry (entry, gnat_entries.get ());
