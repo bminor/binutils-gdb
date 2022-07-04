@@ -17,8 +17,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef ARCH_AARCH64_LINUX_H
-#define ARCH_AARCH64_LINUX_H
+#ifndef ARCH_AARCH64_MTE_LINUX_H
+#define ARCH_AARCH64_MTE_LINUX_H
 
 #include "gdbsupport/common-defs.h"
 
@@ -71,4 +71,4 @@ extern CORE_ADDR aarch64_mte_set_ltag (CORE_ADDR address, CORE_ADDR tag);
    It is always possible to get the logical tag.  */
 extern CORE_ADDR aarch64_mte_get_ltag (CORE_ADDR address);
 
-#endif /* ARCH_AARCH64_LINUX_H */
+#endif /* ARCH_AARCH64_MTE_LINUX_H */
