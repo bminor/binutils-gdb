@@ -489,6 +489,10 @@ public: /* data */
      the target know about program signals list changes.  */
   char *last_program_signals_packet = nullptr;
 
+  /* Similarly, the last QThreadEvents state we sent to the
+     target.  */
+  bool last_thread_events = false;
+
   gdb_signal last_sent_signal = GDB_SIGNAL_0;
 
   bool last_sent_step = false;
@@ -14680,6 +14684,9 @@ remote_target::thread_events (int enable)
   if (m_features.packet_support (PACKET_QThreadEvents) == PACKET_DISABLE)
     return;
 
+  if (rs->last_thread_events == enable)
+    return;
+
   xsnprintf (rs->buf.data (), size, "QThreadEvents:%x", enable ? 1 : 0);
   putpkt (rs->buf);
   getpkt (&rs->buf, 0);
@@ -14689,6 +14696,7 @@ remote_target::thread_events (int enable)
     case PACKET_OK:
       if (strcmp (rs->buf.data (), "OK") != 0)
 	error (_("Remote refused setting thread events: %s"), rs->buf.data ());
+      rs->last_thread_events = enable;
       break;
     case PACKET_ERROR:
       warning (_("Remote failure reply: %s"), rs->buf.data ());
