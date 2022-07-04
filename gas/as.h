@@ -476,6 +476,7 @@ void   input_scrub_end (void);
 void   new_logical_line (const char *, int);
 void   new_logical_line_flags (const char *, int, int);
 void   subsegs_begin (void);
+void   subsegs_end (struct obstack **);
 void   subseg_change (segT, int);
 segT   subseg_new (const char *, subsegT);
 segT   subseg_force_new (const char *, subsegT);

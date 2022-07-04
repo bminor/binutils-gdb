@@ -43,7 +43,27 @@ subsegs_begin (void)
   frchain_now = NULL;		/* Warn new_subseg() that we are booting.  */
   frag_now = &dummy_frag;
 }
+
+void
+subsegs_end (struct obstack **obs)
+{
+  for (; *obs; obs++)
+    _obstack_free (*obs, NULL);
+  _obstack_free (&frchains, NULL);
+  _obstack_free (&cond_obstack, NULL);
+  _obstack_free (&notes, NULL);
+}
 
+static void
+alloc_seginfo (segT seg)
+{
+  segment_info_type *seginfo;
+
+  seginfo = obstack_alloc (&notes, sizeof (*seginfo));
+  memset (seginfo, 0, sizeof (*seginfo));
+  seginfo->bfd_section = seg;
+  bfd_set_section_userdata (seg, seginfo);
+}
 /*
  *			subseg_change()
  *
@@ -57,16 +77,11 @@ subsegs_begin (void)
 void
 subseg_change (segT seg, int subseg)
 {
-  segment_info_type *seginfo = seg_info (seg);
   now_seg = seg;
   now_subseg = subseg;
 
-  if (! seginfo)
-    {
-      seginfo = XCNEW (segment_info_type);
-      seginfo->bfd_section = seg;
-      bfd_set_section_userdata (seg, seginfo);
-    }
+  if (!seg_info (seg))
+    alloc_seginfo (seg);
 }
 
 static void
@@ -149,7 +164,6 @@ segT
 subseg_get (const char *segname, int force_new)
 {
   segT secptr;
-  segment_info_type *seginfo;
   const char *now_seg_name = now_seg ? bfd_section_name (now_seg) : 0;
 
   if (!force_new
@@ -163,13 +177,10 @@ subseg_get (const char *segname, int force_new)
   else
     secptr = bfd_make_section_anyway (stdoutput, segname);
 
-  seginfo = seg_info (secptr);
-  if (! seginfo)
+  if (!seg_info (secptr))
     {
       secptr->output_section = secptr;
-      seginfo = XCNEW (segment_info_type);
-      seginfo->bfd_section = secptr;
-      bfd_set_section_userdata (secptr, seginfo);
+      alloc_seginfo (secptr);
     }
   return secptr;
 }
