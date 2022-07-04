@@ -832,10 +832,8 @@ enum
   Disp8,
   /* 16 bit displacement */
   Disp16,
-  /* 32 bit displacement */
+  /* 32 bit displacement (64-bit: sign-extended) */
   Disp32,
-  /* 32 bit signed displacement */
-  Disp32S,
   /* 64 bit displacement */
   Disp64,
   /* Register which can be used for base or index in memory operand.  */
@@ -892,7 +890,6 @@ typedef union i386_operand_type
       unsigned int disp8:1;
       unsigned int disp16:1;
       unsigned int disp32:1;
-      unsigned int disp32s:1;
       unsigned int disp64:1;
       unsigned int baseindex:1;
       unsigned int byte:1;

@@ -475,8 +475,6 @@ static initializer operand_type_init[] =
     "Disp16" },
   { "OPERAND_TYPE_DISP32",
     "Disp32" },
-  { "OPERAND_TYPE_DISP32S",
-    "Disp32S" },
   { "OPERAND_TYPE_DISP64",
     "Disp64" },
   { "OPERAND_TYPE_INOUTPORTREG",
@@ -520,7 +518,7 @@ static initializer operand_type_init[] =
   { "OPERAND_TYPE_DISP16_32",
     "Disp16|Disp32" },
   { "OPERAND_TYPE_ANYDISP",
-    "Disp8|Disp16|Disp32|Disp32S|Disp64" },
+    "Disp8|Disp16|Disp32|Disp64" },
   { "OPERAND_TYPE_IMM16_32",
     "Imm16|Imm32" },
   { "OPERAND_TYPE_IMM16_32S",
@@ -529,14 +527,14 @@ static initializer operand_type_init[] =
     "Imm16|Imm32|Imm32S" },
   { "OPERAND_TYPE_IMM32_64",
     "Imm32|Imm64" },
-  { "OPERAND_TYPE_IMM32_32S_DISP32S",
-    "Imm32|Imm32S|Disp32S" },
+  { "OPERAND_TYPE_IMM32_32S_DISP32",
+    "Imm32|Imm32S|Disp32" },
   { "OPERAND_TYPE_IMM64_DISP64",
     "Imm64|Disp64" },
-  { "OPERAND_TYPE_IMM32_32S_64_DISP32S",
-    "Imm32|Imm32S|Imm64|Disp32S" },
-  { "OPERAND_TYPE_IMM32_32S_64_DISP32S_64",
-    "Imm32|Imm32S|Imm64|Disp32S|Disp64" },
+  { "OPERAND_TYPE_IMM32_32S_64_DISP32",
+    "Imm32|Imm32S|Imm64|Disp32" },
+  { "OPERAND_TYPE_IMM32_32S_64_DISP32_64",
+    "Imm32|Imm32S|Imm64|Disp32|Disp64" },
   { "OPERAND_TYPE_ANYIMM",
     "Imm1|Imm8|Imm8S|Imm16|Imm32|Imm32S|Imm64" },
 };
@@ -786,7 +784,6 @@ static bitfield operand_types[] =
   BITFIELD (Disp8),
   BITFIELD (Disp16),
   BITFIELD (Disp32),
-  BITFIELD (Disp32S),
   BITFIELD (Disp64),
   BITFIELD (Byte),
   BITFIELD (Word),
@@ -1343,10 +1340,7 @@ process_i386_operand_type (FILE *table, char *op, enum stage stage,
 	  if (!active_cpu_flags.bitfield.cpu64
 	      && !active_cpu_flags.bitfield.cpumpx)
 	    set_bitfield("Disp16", types, 1, ARRAY_SIZE (types), lineno);
-	  if (!active_cpu_flags.bitfield.cpu64)
-	    set_bitfield("Disp32", types, 1, ARRAY_SIZE (types), lineno);
-	  if (!active_cpu_flags.bitfield.cpuno64)
-	    set_bitfield("Disp32S", types, 1, ARRAY_SIZE (types), lineno);
+	  set_bitfield("Disp32", types, 1, ARRAY_SIZE (types), lineno);
 	}
     }
   output_operand_type (table, class, instance, types, ARRAY_SIZE (types),

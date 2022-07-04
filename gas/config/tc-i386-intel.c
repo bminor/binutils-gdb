@@ -963,7 +963,6 @@ i386_intel_operand (char *operand_string, int got_a_float)
 		      i.flags[0] &= ~Operand_Mem;
 		      i.types[0].bitfield.disp16 = 0;
 		      i.types[0].bitfield.disp32 = 0;
-		      i.types[0].bitfield.disp32s = 0;
 		      return 1;
 		    }
 		}
@@ -1011,13 +1010,9 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
 	  if (flag_code == CODE_64BIT)
 	    {
+	      i.types[this_operand].bitfield.disp32 = 1;
 	      if (!i.prefix[ADDR_PREFIX])
-		{
-		  i.types[this_operand].bitfield.disp64 = 1;
-		  i.types[this_operand].bitfield.disp32s = 1;
-		}
-	      else
-		i.types[this_operand].bitfield.disp32 = 1;
+		i.types[this_operand].bitfield.disp64 = 1;
 	    }
 	  else if (!i.prefix[ADDR_PREFIX] ^ (flag_code == CODE_16BIT))
 	    i.types[this_operand].bitfield.disp32 = 1;

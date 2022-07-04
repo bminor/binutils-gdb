@@ -2142,14 +2142,12 @@ operand_type_check (i386_operand_type t, enum operand_type c)
       return (t.bitfield.disp8
 	      || t.bitfield.disp16
 	      || t.bitfield.disp32
-	      || t.bitfield.disp32s
 	      || t.bitfield.disp64);
 
     case anymem:
       return (t.bitfield.disp8
 	      || t.bitfield.disp16
 	      || t.bitfield.disp32
-	      || t.bitfield.disp32s
 	      || t.bitfield.disp64
 	      || t.bitfield.baseindex);
 
@@ -2414,8 +2412,7 @@ mode_from_disp_size (i386_operand_type t)
   if (t.bitfield.disp8)
     return 1;
   else if (t.bitfield.disp16
-	   || t.bitfield.disp32
-	   || t.bitfield.disp32s)
+	   || t.bitfield.disp32)
     return 2;
   else
     return 0;
@@ -3326,7 +3323,6 @@ const type_names[] =
   { OPERAND_TYPE_DISP8, "d8" },
   { OPERAND_TYPE_DISP16, "d16" },
   { OPERAND_TYPE_DISP32, "d32" },
-  { OPERAND_TYPE_DISP32S, "d32s" },
   { OPERAND_TYPE_DISP64, "d64" },
   { OPERAND_TYPE_INOUTPORTREG, "InOutPortReg" },
   { OPERAND_TYPE_SHIFTCOUNT, "ShiftCount" },
@@ -4990,12 +4986,11 @@ md_assemble (char *line)
 	    continue;
 
 	  /* Since displacement is signed extended to 64bit, don't allow
-	     disp32 and turn off disp32s if they are out of range.  */
-	  i.types[j].bitfield.disp32 = 0;
+	     disp32 if it is out of range.  */
 	  if (fits_in_signed_long (exp->X_add_number))
 	    continue;
 
-	  i.types[j].bitfield.disp32s = 0;
+	  i.types[j].bitfield.disp32 = 0;
 	  if (i.types[j].bitfield.baseindex)
 	    {
 	      char number_buf[128];
@@ -5985,11 +5980,11 @@ optimize_disp (void)
 
 #ifdef BFD64
 	    /* Optimize 64-bit displacement to 32-bit for 64-bit BFD.  */
-	    if ((i.types[op].bitfield.disp32
-		 || (flag_code == CODE_64BIT
-		     && want_disp32 (current_templates->start)
-		     && (!current_templates->start->opcode_modifier.jump
-			 || i.jumpabsolute || i.types[op].bitfield.baseindex)))
+	    if ((flag_code != CODE_64BIT
+		 ? i.types[op].bitfield.disp32
+		 : want_disp32 (current_templates->start)
+		   && (!current_templates->start->opcode_modifier.jump
+		       || i.jumpabsolute || i.types[op].bitfield.baseindex))
 		&& fits_in_unsigned_long (op_disp))
 	      {
 		/* If this operand is at most 32 bits, convert
@@ -6003,11 +5998,10 @@ optimize_disp (void)
 	    if (flag_code == CODE_64BIT && fits_in_signed_long (op_disp))
 	      {
 		i.types[op].bitfield.disp64 = 0;
-		i.types[op].bitfield.disp32s = 1;
+		i.types[op].bitfield.disp32 = 1;
 	      }
 #endif
 	    if ((i.types[op].bitfield.disp32
-		 || i.types[op].bitfield.disp32s
 		 || i.types[op].bitfield.disp16)
 		&& fits_in_disp8 (op_disp))
 	      i.types[op].bitfield.disp8 = 1;
@@ -6673,8 +6667,8 @@ match_template (char mnem_suffix)
 
 	      addr_prefix_disp = j;
 
-	      /* Address size prefix will turn Disp64/Disp32S/Disp32/Disp16
-		 operand into Disp32/Disp32/Disp16/Disp32 operand.  */
+	      /* Address size prefix will turn Disp64 operand into Disp32 and
+		 Disp32/Disp16 one into Disp16/Disp32 respectively.  */
 	      switch (flag_code)
 		{
 		case CODE_16BIT:
@@ -6687,17 +6681,15 @@ match_template (char mnem_suffix)
 		      operand_types[j].bitfield.disp16 = override;
 		      operand_types[j].bitfield.disp32 = !override;
 		    }
-		  operand_types[j].bitfield.disp32s = 0;
-		  operand_types[j].bitfield.disp64 = 0;
+		  gas_assert (!operand_types[j].bitfield.disp64);
 		  break;
 
 		case CODE_64BIT:
-		  if (operand_types[j].bitfield.disp32s
-		      || operand_types[j].bitfield.disp64)
+		  if (operand_types[j].bitfield.disp64)
 		    {
-		      operand_types[j].bitfield.disp64 &= !override;
-		      operand_types[j].bitfield.disp32s &= !override;
+		      gas_assert (!operand_types[j].bitfield.disp32);
 		      operand_types[j].bitfield.disp32 = override;
+		      operand_types[j].bitfield.disp64 = !override;
 		    }
 		  operand_types[j].bitfield.disp16 = 0;
 		  break;
@@ -8378,10 +8370,7 @@ build_modrm_byte (void)
 		  i.sib.base = NO_BASE_REGISTER;
 		  i.sib.scale = i.log2_scale_factor;
 		  i.types[op] = operand_type_and_not (i.types[op], anydisp);
-		  if (want_disp32 (&i.tm))
-		    i.types[op].bitfield.disp32 = 1;
-		  else
-		    i.types[op].bitfield.disp32s = 1;
+		  i.types[op].bitfield.disp32 = 1;
 		}
 
 	      /* Since the mandatory SIB always has index register, so
@@ -8421,10 +8410,7 @@ build_modrm_byte (void)
 		      i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
 		      i.sib.base = NO_BASE_REGISTER;
 		      i.sib.index = NO_INDEX_REGISTER;
-		      if (want_disp32 (&i.tm))
-			i.types[op].bitfield.disp32 = 1;
-		      else
-			i.types[op].bitfield.disp32s = 1;
+		      i.types[op].bitfield.disp32 = 1;
 		    }
 		  else if ((flag_code == CODE_16BIT)
 			   ^ (i.prefix[ADDR_PREFIX] != 0))
@@ -8449,10 +8435,7 @@ build_modrm_byte (void)
 		  i.sib.scale = i.log2_scale_factor;
 		  i.rm.regmem = ESCAPE_TO_TWO_BYTE_ADDRESSING;
 		  i.types[op] = operand_type_and_not (i.types[op], anydisp);
-		  if (want_disp32 (&i.tm))
-		    i.types[op].bitfield.disp32 = 1;
-		  else
-		    i.types[op].bitfield.disp32s = 1;
+		  i.types[op].bitfield.disp32 = 1;
 		  if ((i.index_reg->reg_flags & RegRex) != 0)
 		    i.rex |= REX_X;
 		}
@@ -8464,8 +8447,7 @@ build_modrm_byte (void)
 	      i.rm.regmem = NO_BASE_REGISTER;
 	      i.types[op].bitfield.disp8 = 0;
 	      i.types[op].bitfield.disp16 = 0;
-	      i.types[op].bitfield.disp32 = 0;
-	      i.types[op].bitfield.disp32s = 1;
+	      i.types[op].bitfield.disp32 = 1;
 	      i.types[op].bitfield.disp64 = 0;
 	      i.flags[op] |= Operand_PCrel;
 	      if (! i.disp_operands)
@@ -8521,16 +8503,7 @@ build_modrm_byte (void)
 		{
 		  i.types[op].bitfield.disp16 = 0;
 		  i.types[op].bitfield.disp64 = 0;
-		  if (!want_disp32 (&i.tm))
-		    {
-		      i.types[op].bitfield.disp32 = 0;
-		      i.types[op].bitfield.disp32s = 1;
-		    }
-		  else
-		    {
-		      i.types[op].bitfield.disp32 = 1;
-		      i.types[op].bitfield.disp32s = 0;
-		    }
+		  i.types[op].bitfield.disp32 = 1;
 		}
 
 	      if (!i.tm.opcode_modifier.sib)
@@ -8799,7 +8772,6 @@ flip_code16 (unsigned int code16)
 
   return !(i.prefix[REX_PREFIX] & REX_W)
 	 && (code16 ? i.tm.operand_types[0].bitfield.disp32
-		      || i.tm.operand_types[0].bitfield.disp32s
 		    : i.tm.operand_types[0].bitfield.disp16)
 	 ? CODE16 : 0;
 }
@@ -10067,8 +10039,12 @@ output_disp (fragS *insn_start_frag, offsetT insn_start_off)
 	  else
 	    {
 	      enum bfd_reloc_code_real reloc_type;
-	      int sign = i.types[n].bitfield.disp32s;
-	      int pcrel = (i.flags[n] & Operand_PCrel) != 0;
+	      bool pcrel = (i.flags[n] & Operand_PCrel) != 0;
+	      bool sign = (flag_code == CODE_64BIT && size == 4
+			   && (!want_disp32 (&i.tm)
+			       || (i.tm.opcode_modifier.jump && !i.jumpabsolute
+				   && !i.types[n].bitfield.baseindex)))
+			  || pcrel;
 	      fixS *fixP;
 
 	      /* We can't have 8 bit displacement here.  */
@@ -10380,7 +10356,7 @@ lex_got (enum bfd_reloc_code_real *rel,
       OPERAND_TYPE_IMM64, true },
     { STRING_COMMA_LEN ("PLT"),      { BFD_RELOC_386_PLT32,
 				       BFD_RELOC_X86_64_PLT32    },
-      OPERAND_TYPE_IMM32_32S_DISP32S, false },
+      OPERAND_TYPE_IMM32_32S_DISP32, false },
     { STRING_COMMA_LEN ("GOTPLT"),   { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_GOTPLT64 },
       OPERAND_TYPE_IMM64_DISP64, true },
@@ -10389,28 +10365,28 @@ lex_got (enum bfd_reloc_code_real *rel,
       OPERAND_TYPE_IMM64_DISP64, true },
     { STRING_COMMA_LEN ("GOTPCREL"), { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_GOTPCREL },
-      OPERAND_TYPE_IMM32_32S_DISP32S, true },
+      OPERAND_TYPE_IMM32_32S_DISP32, true },
     { STRING_COMMA_LEN ("TLSGD"),    { BFD_RELOC_386_TLS_GD,
 				       BFD_RELOC_X86_64_TLSGD    },
-      OPERAND_TYPE_IMM32_32S_DISP32S, true },
+      OPERAND_TYPE_IMM32_32S_DISP32, true },
     { STRING_COMMA_LEN ("TLSLDM"),   { BFD_RELOC_386_TLS_LDM,
 				       _dummy_first_bfd_reloc_code_real },
       OPERAND_TYPE_NONE, true },
     { STRING_COMMA_LEN ("TLSLD"),    { _dummy_first_bfd_reloc_code_real,
 				       BFD_RELOC_X86_64_TLSLD    },
-      OPERAND_TYPE_IMM32_32S_DISP32S, true },
+      OPERAND_TYPE_IMM32_32S_DISP32, true },
     { STRING_COMMA_LEN ("GOTTPOFF"), { BFD_RELOC_386_TLS_IE_32,
 				       BFD_RELOC_X86_64_GOTTPOFF },
-      OPERAND_TYPE_IMM32_32S_DISP32S, true },
+      OPERAND_TYPE_IMM32_32S_DISP32, true },
     { STRING_COMMA_LEN ("TPOFF"),    { BFD_RELOC_386_TLS_LE_32,
 				       BFD_RELOC_X86_64_TPOFF32  },
-      OPERAND_TYPE_IMM32_32S_64_DISP32S_64, true },
+      OPERAND_TYPE_IMM32_32S_64_DISP32_64, true },
     { STRING_COMMA_LEN ("NTPOFF"),   { BFD_RELOC_386_TLS_LE,
 				       _dummy_first_bfd_reloc_code_real },
       OPERAND_TYPE_NONE, true },
     { STRING_COMMA_LEN ("DTPOFF"),   { BFD_RELOC_386_TLS_LDO_32,
 				       BFD_RELOC_X86_64_DTPOFF32 },
-      OPERAND_TYPE_IMM32_32S_64_DISP32S_64, true },
+      OPERAND_TYPE_IMM32_32S_64_DISP32_64, true },
     { STRING_COMMA_LEN ("GOTNTPOFF"),{ BFD_RELOC_386_TLS_GOTIE,
 				       _dummy_first_bfd_reloc_code_real },
       OPERAND_TYPE_NONE, true },
@@ -10419,17 +10395,17 @@ lex_got (enum bfd_reloc_code_real *rel,
       OPERAND_TYPE_NONE, true },
     { STRING_COMMA_LEN ("GOT"),      { BFD_RELOC_386_GOT32,
 				       BFD_RELOC_X86_64_GOT32    },
-      OPERAND_TYPE_IMM32_32S_64_DISP32S, true },
+      OPERAND_TYPE_IMM32_32S_64_DISP32, true },
     { STRING_COMMA_LEN ("TLSDESC"),  { BFD_RELOC_386_TLS_GOTDESC,
 				       BFD_RELOC_X86_64_GOTPC32_TLSDESC },
-      OPERAND_TYPE_IMM32_32S_DISP32S, true },
+      OPERAND_TYPE_IMM32_32S_DISP32, true },
     { STRING_COMMA_LEN ("TLSCALL"),  { BFD_RELOC_386_TLS_DESC_CALL,
 				       BFD_RELOC_X86_64_TLSDESC_CALL },
-      OPERAND_TYPE_IMM32_32S_DISP32S, true },
+      OPERAND_TYPE_IMM32_32S_DISP32, true },
 #else /* TE_PE */
     { STRING_COMMA_LEN ("SECREL32"), { BFD_RELOC_32_SECREL,
 				       BFD_RELOC_32_SECREL },
-      OPERAND_TYPE_IMM32_32S_64_DISP32S_64, false },
+      OPERAND_TYPE_IMM32_32S_64_DISP32_64, false },
 #endif
   };
   char *cp;
@@ -10996,13 +10972,9 @@ i386_displacement (char *disp_start, char *disp_end)
       override = (i.prefix[ADDR_PREFIX] != 0);
       if (flag_code == CODE_64BIT)
 	{
+	  bigdisp.bitfield.disp32 = 1;
 	  if (!override)
-	    {
-	      bigdisp.bitfield.disp32s = 1;
-	      bigdisp.bitfield.disp64 = 1;
-	    }
-	  else
-	    bigdisp.bitfield.disp32 = 1;
+	    bigdisp.bitfield.disp64 = 1;
 	}
       else if ((flag_code == CODE_16BIT) ^ override)
 	  bigdisp.bitfield.disp16 = 1;
@@ -11041,7 +11013,7 @@ i386_displacement (char *disp_start, char *disp_end)
 	      && (!intel64 || !has_intel64))
 	    bigdisp.bitfield.disp16 = 1;
 	  else
-	    bigdisp.bitfield.disp32s = 1;
+	    bigdisp.bitfield.disp32 = 1;
 	}
       else
 	{

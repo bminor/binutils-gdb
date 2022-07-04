@@ -127,7 +127,8 @@
 ### MARKER ###
 
 // Move instructions.
-mov, 0xa0, None, 0, D|W|No_sSuf|No_qSuf|No_ldSuf, { Disp16|Disp32|Disp64|Unspecified|Byte|Word|Dword|Qword, Acc|Byte|Word|Dword|Qword }
+mov, 0xa0, None, CpuNo64, D|W|No_sSuf|No_qSuf|No_ldSuf, { Disp16|Disp32|Unspecified|Byte|Word|Dword, Acc|Byte|Word|Dword }
+mov, 0xa0, None, Cpu64, D|W|No_sSuf|No_ldSuf, { Disp64|Unspecified|Byte|Word|Dword|Qword, Acc|Byte|Word|Dword|Qword }
 movabs, 0xa0, None, Cpu64, D|W|No_sSuf|No_ldSuf, { Disp64|Unspecified|Byte|Word|Dword|Qword, Acc|Byte|Word|Dword|Qword }
 movq, 0xa1, None, Cpu64, D|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp64|Unspecified|Qword, Acc|Qword }
 mov, 0x88, None, 0, D|W|CheckRegSize|Modrm|No_sSuf|No_ldSuf|HLEPrefixRelease, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex }
@@ -412,8 +413,8 @@ shrd, 0xfad, None, Cpu386, Modrm|CheckRegSize|No_bSuf|No_sSuf|No_ldSuf, { Reg16|
 
 // Control transfer instructions.
 call, 0xe8, None, CpuNo64, JumpDword|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp16|Disp32 }
-call, 0xe8, None, Cpu64, Amd64|JumpDword|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk, { Disp16|Disp32S }
-call, 0xe8, None, Cpu64, Intel64|JumpDword|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk, { Disp32S }
+call, 0xe8, None, Cpu64, Amd64|JumpDword|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk, { Disp16|Disp32 }
+call, 0xe8, None, Cpu64, Intel64|JumpDword|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk, { Disp32 }
 call, 0xff, 2, CpuNo64, Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg32|Unspecified|BaseIndex }
 call, 0xff, 2, Cpu64, Amd64|Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg64|Unspecified|BaseIndex }
 call, 0xff, 2, Cpu64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg64|Unspecified|BaseIndex }
@@ -425,8 +426,8 @@ lcall, 0x9a, None, CpuNo64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|No_qSuf
 lcall, 0xff, 3, 0, Amd64|Modrm|JumpAbsolute|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
 lcall, 0xff, 3, Cpu64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex }
 
-jmp, 0xeb, None, 0, Amd64|Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp8|Disp16|Disp32|Disp32S }
-jmp, 0xeb, None, Cpu64, Intel64|Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp8|Disp32S }
+jmp, 0xeb, None, 0, Amd64|Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp8|Disp16|Disp32 }
+jmp, 0xeb, None, Cpu64, Intel64|Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp8|Disp32 }
 jmp, 0xff, 4, CpuNo64, Modrm|JumpAbsolute|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg32|Unspecified|BaseIndex }
 jmp, 0xff, 4, Cpu64, Amd64|Modrm|JumpAbsolute|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg16|Reg64|Unspecified|BaseIndex }
 jmp, 0xff, 4, Cpu64, Intel64|Modrm|JumpAbsolute|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64|BNDPrefixOk|NoTrackPrefixOk, { Reg64|Unspecified|BaseIndex }
@@ -459,7 +460,7 @@ leave, 0xc9, None, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, 
          s:8, ns:9, p:a, pe:a, np:b, po:b, l:c, nge:c, nl:d, ge:d, le:e, ng:e, nle:f, g:f>
 
 // Conditional jumps.
-j<cc>, 0x7<cc:opc>, None, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp8|Disp16|Disp32|Disp32S }
+j<cc>, 0x7<cc:opc>, None, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|BNDPrefixOk, { Disp8|Disp16|Disp32 }
 
 // jcxz vs. jecxz is chosen on the basis of the address size prefix.
 jcxz, 0xe3, None, CpuNo64, JumpByte|Size16|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8 }
@@ -1911,7 +1912,7 @@ xrelease, 0xf3, None, CpuHLE, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|I
 
 // RTM instructions
 xabort, 0xc6f8, None, CpuRTM, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8 }
-xbegin, 0xc7f8, None, CpuRTM,  JumpDword|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp16|Disp32|Disp32S }
+xbegin, 0xc7f8, None, CpuRTM,  JumpDword|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp16|Disp32 }
 xend, 0xf01d5, None, CpuRTM, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 xtest, 0xf01d6, None, CpuHLE|CpuRTM, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 
