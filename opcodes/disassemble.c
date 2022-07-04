@@ -618,6 +618,11 @@ disassemble_init_for_target (struct disassemble_info * info)
       info->disassembler_needs_relocs = true;
       break;
 #endif
+#ifdef ARCH_avr
+    case bfd_arch_avr:
+      info->created_styled_output = true;
+      break;
+#endif
 #ifdef ARCH_csky
     case bfd_arch_csky:
       info->symbol_is_valid = csky_symbol_is_valid;

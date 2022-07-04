@@ -1,3 +1,12 @@
+2022-07-04  Marcus Nilsson  <brainbomb@gmail.com>
+
+	* disassemble.c: (disassemble_init_for_target): Set
+	created_styled_output for AVR based targets.
+	* avr-dis.c: (print_insn_avr): Use fprintf_styled_ftype
+	instead of fprintf_ftype throughout.
+	(avr_operand): Pass in and fill disassembler_style when
+	parsing operands.
+
 2022-04-07  Andreas Krebbel  <krebbel@linux.ibm.com>
 
 	* s390-mkopc.c (main): Enable z16 as CPU string in the opcode
