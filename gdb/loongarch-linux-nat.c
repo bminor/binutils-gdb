@@ -53,6 +53,7 @@ fetch_gregs_from_thread (struct regcache *regcache, int regnum, pid_t tid)
   elf_gregset_t regset;
 
   if (regnum == -1 || (regnum >= 0 && regnum < 32)
+      || regnum == LOONGARCH_ORIG_A0_REGNUM
       || regnum == LOONGARCH_PC_REGNUM
       || regnum == LOONGARCH_BADV_REGNUM)
   {
@@ -78,6 +79,7 @@ store_gregs_to_thread (struct regcache *regcache, int regnum, pid_t tid)
   elf_gregset_t regset;
 
   if (regnum == -1 || (regnum >= 0 && regnum < 32)
+      || regnum == LOONGARCH_ORIG_A0_REGNUM
       || regnum == LOONGARCH_PC_REGNUM
       || regnum == LOONGARCH_BADV_REGNUM)
   {

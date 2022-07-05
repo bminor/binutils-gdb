@@ -576,6 +576,7 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   for (int i = 0; i < 32; i++)
     valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++,
 					loongarch_r_normal_name[i] + 1);
+  valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++, "orig_a0");
   valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++, "pc");
   valid_p &= tdesc_numbered_register (feature_cpu, tdesc_data.get (), regnum++, "badv");
   if (!valid_p)

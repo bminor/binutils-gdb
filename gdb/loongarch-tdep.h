@@ -35,9 +35,10 @@ enum
   LOONGARCH_A0_REGNUM = 4,		/* First Argument/Return Value.  */
   LOONGARCH_A7_REGNUM = 11,		/* Seventh Argument/Syscall Number.  */
   LOONGARCH_FP_REGNUM = 22,		/* Frame Pointer.  */
-  LOONGARCH_PC_REGNUM = 32,		/* Program Counter.  */
-  LOONGARCH_BADV_REGNUM = 33,		/* Bad Vaddr for Addressing Exception.  */
-  LOONGARCH_LINUX_NUM_GREGSET = 45,	/* 32 GPR, PC, BADV, RESERVED 11.  */
+  LOONGARCH_ORIG_A0_REGNUM = 32,	/* Syscall's original arg0.  */
+  LOONGARCH_PC_REGNUM = 33,		/* Program Counter.  */
+  LOONGARCH_BADV_REGNUM = 34,		/* Bad Vaddr for Addressing Exception.  */
+  LOONGARCH_LINUX_NUM_GREGSET = 45,	/* 32 GPR, ORIG_A0, PC, BADV, RESERVED 10.  */
 };
 
 /* Register set definitions.  */

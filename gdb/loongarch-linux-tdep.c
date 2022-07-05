@@ -48,6 +48,9 @@ loongarch_supply_gregset (const struct regset *regset,
 	  regcache->raw_supply (i, (const void *) buf);
 	}
 
+      buf = (const gdb_byte*) gprs + regsize * LOONGARCH_ORIG_A0_REGNUM;
+      regcache->raw_supply (LOONGARCH_ORIG_A0_REGNUM, (const void *) buf);
+
       buf = (const gdb_byte*) gprs + regsize * LOONGARCH_PC_REGNUM;
       regcache->raw_supply (LOONGARCH_PC_REGNUM, (const void *) buf);
 
@@ -57,6 +60,7 @@ loongarch_supply_gregset (const struct regset *regset,
   else if (regnum == 0)
     regcache->raw_supply_zeroed (0);
   else if ((regnum > 0 && regnum < 32)
+	   || regnum == LOONGARCH_ORIG_A0_REGNUM
 	   || regnum == LOONGARCH_PC_REGNUM
 	   || regnum == LOONGARCH_BADV_REGNUM)
     {
@@ -83,6 +87,9 @@ loongarch_fill_gregset (const struct regset *regset,
 	  regcache->raw_collect (i, (void *) buf);
 	}
 
+      buf = (gdb_byte *) gprs + regsize * LOONGARCH_ORIG_A0_REGNUM;
+      regcache->raw_collect (LOONGARCH_ORIG_A0_REGNUM, (void *) buf);
+
       buf = (gdb_byte *) gprs + regsize * LOONGARCH_PC_REGNUM;
       regcache->raw_collect (LOONGARCH_PC_REGNUM, (void *) buf);
 
@@ -90,6 +97,7 @@ loongarch_fill_gregset (const struct regset *regset,
       regcache->raw_collect (LOONGARCH_BADV_REGNUM, (void *) buf);
     }
   else if ((regnum >= 0 && regnum < 32)
+	   || regnum == LOONGARCH_ORIG_A0_REGNUM
 	   || regnum == LOONGARCH_PC_REGNUM
 	   || regnum == LOONGARCH_BADV_REGNUM)
     {
