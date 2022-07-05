@@ -85,5 +85,5 @@ extern long v850_pcrel_from_section (struct fix *, asection *);
 #define TC_FIX_TYPE             void *
 #define TC_INIT_FIX_DATA(fixP)  (fixP)->tc_fix_data = NULL
 
-#define md_end v850_md_end
-extern void    v850_md_end (void);
+#define md_finish v850_md_finish
+extern void    v850_md_finish (void);

@@ -1787,7 +1787,7 @@ md_pcrel_from (fixS *fixP ATTRIBUTE_UNUSED)
 
 /* Called just before the assembler exits.  */
 void
-md_end (void)
+pru_md_end (void)
 {
   htab_delete (pru_opcode_hash);
   htab_delete (pru_reg_hash);

@@ -105,6 +105,9 @@ output_file_close (void)
   if (!keep_it && filename)
     unlink_if_ordinary (filename);
 
+#ifdef md_end
+  md_end ();
+#endif
   macro_end ();
   read_end ();
   symbol_end ();

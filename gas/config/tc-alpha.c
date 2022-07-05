@@ -4030,7 +4030,7 @@ s_alpha_coff_wrapper (int which)
    unless the compiler has done it for us.  */
 
 void
-alpha_elf_md_end (void)
+alpha_elf_md_finish (void)
 {
   struct alpha_elf_frame_data *p;
 

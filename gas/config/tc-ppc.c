@@ -2534,7 +2534,7 @@ ppc_elf_gnu_attribute (int ignored ATTRIBUTE_UNUSED)
 
 /* Set ABI version in output file.  */
 void
-ppc_elf_end (void)
+ppc_elf_md_finish (void)
 {
   if (ppc_obj64 && ppc_abiversion != 0)
     {
@@ -5666,7 +5666,7 @@ ppc_vbyte (int dummy ATTRIBUTE_UNUSED)
 }
 
 void
-ppc_xcoff_end (void)
+ppc_xcoff_md_finish (void)
 {
   int i;
 

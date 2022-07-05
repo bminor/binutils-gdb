@@ -538,7 +538,7 @@ md_begin (void)
 }
 
 void
-z80_md_end (void)
+z80_md_finish (void)
 {
   int mach_type;
 

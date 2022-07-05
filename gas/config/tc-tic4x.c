@@ -1371,7 +1371,7 @@ md_begin (void)
 }
 
 void
-tic4x_end (void)
+tic4x_md_finish (void)
 {
   bfd_set_arch_mach (stdoutput, bfd_arch_tic4x,
 		     IS_CPU_TIC4X (tic4x_cpu) ? bfd_mach_tic4x : bfd_mach_tic3x);

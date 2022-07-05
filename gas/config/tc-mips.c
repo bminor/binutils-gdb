@@ -20573,7 +20573,7 @@ mips_convert_symbolic_attribute (const char *name)
 }
 
 void
-md_mips_end (void)
+mips_md_finish (void)
 {
   int fpabi = Val_GNU_MIPS_ABI_FP_ANY;
 

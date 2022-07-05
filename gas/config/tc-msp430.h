@@ -135,8 +135,8 @@ extern bool msp430_fix_adjustable (struct fix *);
    is A5A5h...  */
 #define NUMBERS_WITH_SUFFIX 1
 
-#define md_end msp430_md_end
-extern void    msp430_md_end (void);
+#define md_finish msp430_md_finish
+extern void    msp430_md_finish (void);
 
 /* Do not allow call frame debug info optimization as otherwise we could
    generate the DWARF directives without the relocs necessary to patch

@@ -4462,7 +4462,7 @@ riscv_set_public_attributes (void)
 /* Called after all assembly has been done.  */
 
 void
-riscv_md_end (void)
+riscv_md_finish (void)
 {
   riscv_set_public_attributes ();
 }

@@ -1037,7 +1037,7 @@ bool
 tic6x_do_align (int n, char *fill, int len ATTRIBUTE_UNUSED, int max)
 {
   /* Given code alignments of 4, 8, 16 or 32 bytes, we try to handle
-     them in the md_end pass by inserting NOPs in parallel with
+     them in the md_finish pass by inserting NOPs in parallel with
      previous instructions.  We only do this in sections containing
      nothing but instructions.  Code alignments of 1 or 2 bytes have
      no effect in such sections (but we record them with
@@ -4078,7 +4078,7 @@ md_atof (int type, char *litP, int *sizeP)
   return ieee_md_atof (type, litP, sizeP, target_big_endian);
 }
 
-/* Adjust the frags in SECTION (see tic6x_end).  */
+/* Adjust the frags in SECTION (see tic6x_md_finish).  */
 
 static void
 tic6x_adjust_section (bfd *abfd ATTRIBUTE_UNUSED, segT section,
@@ -4403,7 +4403,7 @@ tic6x_set_attributes (void)
    relaxing.  */
 
 void
-tic6x_end (void)
+tic6x_md_finish (void)
 {
   /* Set object attributes at this point if not explicitly set.  */
   tic6x_set_attributes ();
@@ -4419,7 +4419,7 @@ tic6x_end (void)
 }
 
 /* No machine-dependent frags at this stage; all converted in
-   tic6x_end.  */
+   tic6x_md_finish.  */
 
 void
 md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec ATTRIBUTE_UNUSED,
@@ -4429,7 +4429,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec ATTRIBUTE_UNUSED,
 }
 
 /* No machine-dependent frags at this stage; all converted in
-   tic6x_end.  */
+   tic6x_md_finish.  */
 
 int
 md_estimate_size_before_relax (fragS *fragp ATTRIBUTE_UNUSED,

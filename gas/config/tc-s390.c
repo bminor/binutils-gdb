@@ -584,7 +584,7 @@ md_begin (void)
 
 /* Called after all assembly has been done.  */
 void
-s390_md_end (void)
+s390_md_finish (void)
 {
   if (s390_arch_size == 64)
     bfd_set_arch_mach (stdoutput, bfd_arch_s390, bfd_mach_s390_64);

@@ -5216,7 +5216,7 @@ md_section_align (segT segment ATTRIBUTE_UNUSED,
 
 /* MD interface: Symbol and relocation handling.  */
 
-void md_csky_end (void)
+void csky_md_finish (void)
 {
   dump_literals (0);
 }

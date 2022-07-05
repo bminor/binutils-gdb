@@ -88,6 +88,6 @@ extern void tic4x_start_line (void);
 extern void tic4x_cleanup (void);
 #define md_cleanup() tic4x_cleanup()
 
-extern void tic4x_end (void);
-#define md_end() tic4x_end()
+extern void tic4x_md_finish (void);
+#define md_finish() tic4x_md_finish()
 

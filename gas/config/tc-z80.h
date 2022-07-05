@@ -55,11 +55,11 @@
   (as_fatal (_("estimate_size_before_relax called")), 1)
 
 /* Define some functions to be called by generic code.  */
-#define md_end               z80_md_end
+#define md_finish               z80_md_finish
 #define md_start_line_hook() { if (z80_start_line_hook ()) continue; }
 #define TC_CONS_FIX_NEW(f,w,s,e,r)  z80_cons_fix_new ((f), (w), (s), (e))
 
-extern void z80_md_end (void);
+extern void z80_md_finish (void);
 extern int z80_start_line_hook (void);
 extern void z80_cons_fix_new (fragS *, int, int, expressionS *);
 

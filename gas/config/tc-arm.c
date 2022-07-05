@@ -33317,7 +33317,7 @@ arm_md_post_relax (void)
 /* Add the default contents for the .ARM.attributes section.  */
 
 void
-arm_md_end (void)
+arm_md_finish (void)
 {
   if (EF_ARM_EABI_VERSION (meabi_flags) < EF_ARM_EABI_VER4)
     return;

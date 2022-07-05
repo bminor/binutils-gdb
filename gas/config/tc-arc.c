@@ -5055,7 +5055,7 @@ arc_set_public_attributes (void)
 /* Add the default contents for the .ARC.attributes section.  */
 
 void
-arc_md_end (void)
+arc_md_finish (void)
 {
   arc_set_public_attributes ();
 

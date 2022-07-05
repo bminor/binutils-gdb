@@ -1398,8 +1398,8 @@ main (int argc, char ** argv)
 
   cond_finish_check (-1);
 
-#ifdef md_end
-  md_end ();
+#ifdef md_finish
+  md_finish ();
 #endif
 
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF

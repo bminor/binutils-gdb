@@ -125,8 +125,8 @@ extern void sparc_elf_final_processing (void);
 
 #define md_operand(x)
 
-extern void sparc_md_end (void);
-#define md_end() sparc_md_end ()
+extern void sparc_md_finish (void);
+#define md_finish() sparc_md_finish ()
 
 #define TC_PARSE_CONS_RETURN_TYPE const char *
 #define TC_PARSE_CONS_RETURN_NONE NULL

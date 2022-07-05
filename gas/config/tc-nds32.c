@@ -7519,7 +7519,7 @@ nds32_elf_insert_final_frag (void)
 }
 
 void
-md_end (void)
+md_finish (void)
 {
   nds32_elf_insert_final_frag ();
   nds32_elf_analysis_relax_hint ();

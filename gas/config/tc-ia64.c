@@ -7566,7 +7566,7 @@ ia64_target_format (void)
 }
 
 void
-ia64_end_of_source (void)
+ia64_md_finish (void)
 {
   /* terminate insn group upon reaching end of file:  */
   insn_group_break (1, 0, 0);
