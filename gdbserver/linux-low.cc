@@ -3643,7 +3643,6 @@ linux_process_target::wait (ptid_t ptid,
       event_ptid = wait_1 (ptid, ourstatus, target_options);
     }
   while ((target_options & TARGET_WNOHANG) == 0
-	 && event_ptid == null_ptid
 	 && ourstatus->kind () == TARGET_WAITKIND_IGNORE);
 
   /* If at least one stop was reported, there may be more.  A single
