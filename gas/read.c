@@ -295,53 +295,7 @@ address_bytes (void)
 
 /* Set up pseudo-op tables.  */
 
-struct po_entry
-{
-  const char *poc_name;
-
-  const pseudo_typeS *pop;
-};
-
-typedef struct po_entry po_entry_t;
-
-/* Hash function for a po_entry.  */
-
-static hashval_t
-hash_po_entry (const void *e)
-{
-  const po_entry_t *entry = (const po_entry_t *) e;
-  return htab_hash_string (entry->poc_name);
-}
-
-/* Equality function for a po_entry.  */
-
-static int
-eq_po_entry (const void *a, const void *b)
-{
-  const po_entry_t *ea = (const po_entry_t *) a;
-  const po_entry_t *eb = (const po_entry_t *) b;
-
-  return strcmp (ea->poc_name, eb->poc_name) == 0;
-}
-
-static po_entry_t *
-po_entry_alloc (const char *poc_name, const pseudo_typeS *pop)
-{
-  po_entry_t *entry = XNEW (po_entry_t);
-  entry->poc_name = poc_name;
-  entry->pop = pop;
-  return entry;
-}
-
-static const pseudo_typeS *
-po_entry_find (htab_t table, const char *poc_name)
-{
-  po_entry_t needle = { poc_name, NULL };
-  po_entry_t *entry = htab_find (table, &needle);
-  return entry != NULL ? entry->pop : NULL;
-}
-
-static struct htab *po_hash;
+static htab_t po_hash;
 
 static const pseudo_typeS potable[] = {
   {"abort", s_abort, 0},
@@ -563,10 +517,8 @@ pop_insert (const pseudo_typeS *table)
   const pseudo_typeS *pop;
   for (pop = table; pop->poc_name; pop++)
     {
-      po_entry_t *elt = po_entry_alloc (pop->poc_name, pop);
-      if (htab_insert (po_hash, elt, 0) != NULL)
+      if (str_hash_insert (po_hash, pop->poc_name, pop, 0) != NULL)
 	{
-	  free (elt);
 	  if (!pop_override_ok)
 	    as_fatal (_("error constructing %s pseudo-op table"),
 		      pop_table_name);
@@ -589,8 +541,7 @@ pop_insert (const pseudo_typeS *table)
 static void
 pobegin (void)
 {
-  po_hash = htab_create_alloc (16, hash_po_entry, eq_po_entry, NULL,
-			       xcalloc, xfree);
+  po_hash = str_htab_create ();
 
   /* Do the target-specific pseudo ops.  */
   pop_table_name = "md";
@@ -1099,7 +1050,7 @@ read_a_source_file (const char *name)
 		    {
 		      /* The MRI assembler uses pseudo-ops without
 			 a period.  */
-		      pop = po_entry_find (po_hash, s);
+		      pop = str_hash_find (po_hash, s);
 		      if (pop != NULL && pop->poc_handler == NULL)
 			pop = NULL;
 		    }
@@ -1114,7 +1065,7 @@ read_a_source_file (const char *name)
 			 already know that the pseudo-op begins with a '.'.  */
 
 		      if (pop == NULL)
-			pop = po_entry_find (po_hash, s + 1);
+			pop = str_hash_find (po_hash, s + 1);
 		      if (pop && !pop->poc_handler)
 			pop = NULL;
 
@@ -2717,10 +2668,10 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
 	}
 
       if (((NO_PSEUDO_DOT || flag_m68k_mri)
-	   && po_entry_find (po_hash, name) != NULL)
+	   && str_hash_find (po_hash, name) != NULL)
 	  || (!flag_m68k_mri
 	      && *name == '.'
-	      && po_entry_find (po_hash, name + 1) != NULL))
+	      && str_hash_find (po_hash, name + 1) != NULL))
 	as_warn_where (file,
 		 line,
 		 _("attempt to redefine pseudo-op `%s' ignored"),
