@@ -2848,6 +2848,16 @@ check_cpu_arch_compatible (const char *name ATTRIBUTE_UNUSED,
 }
 
 static void
+extend_cpu_sub_arch_name (const char *name)
+{
+  if (cpu_sub_arch_name)
+    cpu_sub_arch_name = reconcat (cpu_sub_arch_name, cpu_sub_arch_name,
+				  name, (const char *) NULL);
+  else
+    cpu_sub_arch_name = xstrdup (name);
+}
+
+static void
 set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 {
   SKIP_WHITESPACE ();
@@ -2895,16 +2905,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 
 	      if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		{
-		  if (cpu_sub_arch_name)
-		    {
-		      char *name = cpu_sub_arch_name;
-		      cpu_sub_arch_name = concat (name,
-						  cpu_arch[j].name,
-						  (const char *) NULL);
-		      free (name);
-		    }
-		  else
-		    cpu_sub_arch_name = xstrdup (cpu_arch[j].name);
+		  extend_cpu_sub_arch_name (string);
 		  cpu_arch_flags = flags;
 		  cpu_arch_isa_flags = flags;
 		}
@@ -2928,15 +2929,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 					   cpu_noarch[j].flags);
 		if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		  {
-		    if (cpu_sub_arch_name)
-		      {
-			char *name = cpu_sub_arch_name;
-			cpu_sub_arch_name = concat (name, string,
-						    (const char *) NULL);
-			free (name);
-		      }
-		    else
-		      cpu_sub_arch_name = xstrdup (string);
+		    extend_cpu_sub_arch_name (string);
 		    cpu_arch_flags = flags;
 		    cpu_arch_isa_flags = flags;
 		  }
@@ -13403,16 +13396,7 @@ md_parse_option (int c, const char *arg)
 
 		  if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		    {
-		      if (cpu_sub_arch_name)
-			{
-			  char *name = cpu_sub_arch_name;
-			  cpu_sub_arch_name = concat (name,
-						      cpu_arch[j].name,
-						      (const char *) NULL);
-			  free (name);
-			}
-		      else
-			cpu_sub_arch_name = xstrdup (cpu_arch[j].name);
+		      extend_cpu_sub_arch_name (cpu_arch[j].name);
 		      cpu_arch_flags = flags;
 		      cpu_arch_isa_flags = flags;
 		    }
@@ -13436,15 +13420,7 @@ md_parse_option (int c, const char *arg)
 					       cpu_noarch[j].flags);
 		    if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		      {
-			if (cpu_sub_arch_name)
-			  {
-			    char *name = cpu_sub_arch_name;
-			    cpu_sub_arch_name = concat (arch,
-							(const char *) NULL);
-			    free (name);
-			  }
-			else
-			  cpu_sub_arch_name = xstrdup (arch);
+			extend_cpu_sub_arch_name (arch);
 			cpu_arch_flags = flags;
 			cpu_arch_isa_flags = flags;
 		      }
