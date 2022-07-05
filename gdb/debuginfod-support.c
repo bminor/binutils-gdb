@@ -368,7 +368,9 @@ set_debuginfod_enabled (const char *value)
 #if defined(HAVE_LIBDEBUGINFOD)
   debuginfod_enabled = value;
 #else
-  error (NO_IMPL);
+  /* Disabling debuginfod when gdb is not built with it is a no-op.  */
+  if (value != debuginfod_off)
+    error (NO_IMPL);
 #endif
 }
 
