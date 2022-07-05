@@ -721,6 +721,7 @@ disassemble_init_for_target (struct disassemble_info * info)
 #ifdef ARCH_s390
     case bfd_arch_s390:
       disassemble_init_s390 (info);
+      info->created_styled_output = true;
       break;
 #endif
 #ifdef ARCH_nds32
