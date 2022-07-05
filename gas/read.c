@@ -5879,8 +5879,7 @@ s_include (int arg ATTRIBUTE_UNUSED)
     }
 
   demand_empty_rest_of_line ();
-  path = XNEWVEC (char, (unsigned long) i
-		  + include_dir_maxlen + 5 /* slop */ );
+  path = notes_alloc ((size_t) i + include_dir_maxlen + 5);
 
   for (i = 0; i < include_dir_count; i++)
     {
@@ -5894,10 +5893,9 @@ s_include (int arg ATTRIBUTE_UNUSED)
 	}
     }
 
-  free (path);
+  notes_free (path);
   path = filename;
  gotit:
-  /* malloc Storage leak when file is found on path.  FIXME-SOMEDAY.  */
   register_dependency (path);
   input_scrub_insert_file (path);
 }
