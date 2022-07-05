@@ -934,7 +934,7 @@ const relax_typeS md_relax_table[] =
 #define ARCH(n, t, f, s) \
   { STRING_COMMA_LEN (#n), s, PROCESSOR_ ## t, CPU_ ## f ## _FLAGS }
 #define SUBARCH(n, e, s) \
-  { STRING_COMMA_LEN ("." #n), s, PROCESSOR_UNKNOWN, CPU_ ## e ## _FLAGS }
+  { STRING_COMMA_LEN ("." #n), s, PROCESSOR_NONE, CPU_ ## e ## _FLAGS }
 
 static const arch_entry cpu_arch[] =
 {
@@ -1471,6 +1471,8 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	    case PROCESSOR_GENERIC32:
 	      patt = f32_patt;
 	      break;
+	    case PROCESSOR_NONE:
+	      abort ();
 	    }
 	}
       else
@@ -1516,6 +1518,8 @@ i386_generate_nops (fragS *fragP, char *where, offsetT count, int limit)
 	    case PROCESSOR_GENERIC64:
 	      patt = alt_patt;
 	      break;
+	    case PROCESSOR_NONE:
+	      abort ();
 	    }
 	}
 
