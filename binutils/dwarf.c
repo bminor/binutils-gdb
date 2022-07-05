@@ -2744,10 +2744,17 @@ read_and_display_attr_value (unsigned long           attribute,
       if (!do_loc)
 	{
 	  dwarf_vma base, index;
+	  const char *suffix = strrchr (section->name, '.');
+	  bool dwo = suffix && strcmp (suffix, ".dwo") == 0;
 
 	  if (form == DW_FORM_loclistx)
 	    {
-	      if (debug_info_p == NULL)
+	      if (dwo)
+	        {
+	          index = fetch_indexed_value (uvalue, loclists_dwo, 0);
+	          index += (offset_size == 8) ? 20 : 12;
+	        }
+	      else if (debug_info_p == NULL)
 		{
 		  index = fetch_indexed_value (uvalue, loclists, 0);
 		}
@@ -2763,14 +2770,22 @@ read_and_display_attr_value (unsigned long           attribute,
 	    }
 	  else if (form == DW_FORM_rnglistx)
 	    {
-	      if (debug_info_p == NULL)
-		base = 0;
+	      if (dwo)
+	        {
+	          index = fetch_indexed_value (uvalue, rnglists_dwo, 0);
+	          index += (offset_size == 8) ? 20 : 12;
+	        }
 	      else
-		base = debug_info_p->rnglists_base;
-	      /* We do not have a cached value this time, so we perform the
-		 computation manually.  */
-	      index = fetch_indexed_value (uvalue, rnglists, base);
-	      index += base;
+	        {
+	          if (debug_info_p == NULL)
+	            base = 0;
+	          else
+	            base = debug_info_p->rnglists_base;
+	          /* We do not have a cached value this time, so we perform the
+	             computation manually.  */
+	          index = fetch_indexed_value (uvalue, rnglists, base);
+	          index += base;
+	        }
 	    }
 	  else
 	    {
@@ -3623,7 +3638,9 @@ process_debug_info (struct dwarf_section * section,
   load_debug_section_with_follow (abbrev_sec, file);
   load_debug_section_with_follow (loclists, file);
   load_debug_section_with_follow (rnglists, file);
-  
+  load_debug_section_with_follow (loclists_dwo, file);
+  load_debug_section_with_follow (rnglists_dwo, file);
+
   if (debug_displays [abbrev_sec].section.start == NULL)
     {
       warn (_("Unable to locate %s section!\n"),
@@ -11959,6 +11976,10 @@ load_separate_debug_files (void * file, const char * filename)
       load_debug_section (debug_addr, file);
       /* Load the .debug_str_offsets section, if it exists.  */
       load_debug_section (str_index, file);
+      /* Load the .debug_loclists section, if it exists.  */
+      load_debug_section (loclists, file);
+      /* Load the .debug_rnglists section, if it exists.  */
+      load_debug_section (rnglists, file);
 
       free_dwo_info ();
 
@@ -12292,10 +12313,12 @@ struct dwarf_section_display debug_displays[] =
   { { ".debug_line_str",    ".zdebug_line_str",	     "",	 NO_ABBREVS },	    display_debug_str,	    &do_debug_str,	false },
   { { ".debug_loc",	    ".zdebug_loc",	     ".dwloc",	 NO_ABBREVS },	    display_debug_loc,	    &do_debug_loc,	true },
   { { ".debug_loclists",    ".zdebug_loclists",	     "",	 NO_ABBREVS },	    display_debug_loc,	    &do_debug_loc,	true },
+  { { ".debug_loclists.dwo", ".zdebug_loclists.dwo", "",         NO_ABBREVS },      display_debug_loc,      &do_debug_loc,      true },
   { { ".debug_pubtypes",    ".zdebug_pubtypes",	     ".dwpbtyp", NO_ABBREVS },	    display_debug_pubnames, &do_debug_pubtypes, false },
   { { ".debug_gnu_pubtypes", ".zdebug_gnu_pubtypes", "",	 NO_ABBREVS },	    display_debug_gnu_pubnames, &do_debug_pubtypes, false },
   { { ".debug_ranges",	    ".zdebug_ranges",	     ".dwrnges", NO_ABBREVS },	    display_debug_ranges,   &do_debug_ranges,	true },
   { { ".debug_rnglists",    ".zdebug_rnglists",	     "",	 NO_ABBREVS },	    display_debug_ranges,   &do_debug_ranges,	true },
+  { { ".debug_rnglists.dwo", ".zdebug_rnglists.dwo", "",         NO_ABBREVS },      display_debug_ranges,   &do_debug_ranges,   true },
   { { ".debug_static_func", ".zdebug_static_func",   "",	 NO_ABBREVS },	    display_debug_not_supported, NULL,		false },
   { { ".debug_static_vars", ".zdebug_static_vars",   "",	 NO_ABBREVS },	    display_debug_not_supported, NULL,		false },
   { { ".debug_types",	    ".zdebug_types",	     "",	 ABBREV (abbrev) }, display_debug_types,    &do_debug_info,	true },
