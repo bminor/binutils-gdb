@@ -84,6 +84,12 @@ macro_init (int alternate, int mri, int strip_at,
   macro_expr = exp;
 }
 
+void
+macro_end (void)
+{
+  htab_delete (macro_hash);
+}
+
 /* Switch in and out of alternate mode on the fly.  */
 
 void

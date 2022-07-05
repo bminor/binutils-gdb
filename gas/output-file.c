@@ -20,6 +20,8 @@
 
 #include "as.h"
 #include "subsegs.h"
+#include "sb.h"
+#include "macro.h"
 #include "output-file.h"
 
 #ifndef TARGET_MACH
@@ -103,6 +105,9 @@ output_file_close (void)
   if (!keep_it && filename)
     unlink_if_ordinary (filename);
 
+  macro_end ();
+  read_end ();
+  symbol_end ();
   subsegs_end (obs);
 
   if (!res)

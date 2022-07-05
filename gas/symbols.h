@@ -67,6 +67,7 @@ symbolS *symbol_temp_make (void);
 symbolS *colon (const char *sym_name);
 void local_colon (int n);
 void symbol_begin (void);
+void symbol_end (void);
 void dot_symbol_init (void);
 void symbol_print_statistics (FILE *);
 void symbol_table_insert (symbolS * symbolP);

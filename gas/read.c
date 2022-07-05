@@ -248,6 +248,7 @@ static void s_reloc (int);
 static int hex_float (int, char *);
 static segT get_known_segmented_expression (expressionS * expP);
 static void pobegin (void);
+static void poend (void);
 static size_t get_non_macro_line_sb (sb *);
 static void generate_file_debug (void);
 static char *_find_end_of_line (char *, int, int, int);
@@ -275,6 +276,12 @@ read_begin (void)
 
   if (flag_mri)
     lex_type['?'] = 3;
+}
+
+void
+read_end (void)
+{
+  poend ();
 }
 
 #ifndef TC_ADDRESS_BYTES
@@ -560,6 +567,12 @@ pobegin (void)
   pop_table_name = "cfi";
   pop_override_ok = 1;
   cfi_pop_insert ();
+}
+
+static void
+poend (void)
+{
+  htab_delete (po_hash);
 }
 
 #define HANDLE_CONDITIONAL_ASSEMBLY(num_read)				\

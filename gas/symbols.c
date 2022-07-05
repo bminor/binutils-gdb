@@ -3063,6 +3063,12 @@ symbol_begin (void)
 }
 
 void
+symbol_end (void)
+{
+  htab_delete (sy_hash);
+}
+
+void
 dot_symbol_init (void)
 {
   dot_symbol.name = ".";
