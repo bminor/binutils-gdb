@@ -7685,7 +7685,9 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       map->p_paddr = segment->p_paddr;
       map->p_paddr_valid = p_paddr_valid;
       map->p_align = segment->p_align;
-      map->p_align_valid = p_palign_valid;
+      /* Keep p_align of PT_GNU_STACK for stack alignment.  */
+      map->p_align_valid = (map->p_type == PT_GNU_STACK
+			    || p_palign_valid);
       map->p_vaddr_offset = 0;
 
       if (map->p_type == PT_GNU_RELRO
