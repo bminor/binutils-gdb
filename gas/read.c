@@ -1699,6 +1699,7 @@ read_symbol_name (void)
     {
       as_bad (_("expected symbol name"));
       ignore_rest_of_line ();
+      free (start);
       return NULL;
     }
 

@@ -4231,6 +4231,7 @@ static void ppc_GNU_visibility (int visibility) {
       if ((name = read_symbol_name ()) == NULL)
 	break;
       symbolP = symbol_find_or_make (name);
+      free (name);
       coffsym = coffsymbol (symbol_get_bfdsym (symbolP));
 
       coffsym->native->u.syment.n_type &= ~SYM_V_MASK;
@@ -4837,6 +4838,7 @@ ppc_extern (int ignore ATTRIBUTE_UNUSED)
     return;
 
   sym = symbol_find_or_make (name);
+  free (name);
 
   if (*input_line_pointer == ',')
     {
@@ -4872,6 +4874,7 @@ ppc_globl (int ignore ATTRIBUTE_UNUSED)
     return;
 
   sym = symbol_find_or_make (name);
+  free (name);
   S_SET_EXTERNAL (sym);
 
   if (*input_line_pointer == ',')
@@ -4908,6 +4911,7 @@ ppc_weak (int ignore ATTRIBUTE_UNUSED)
     return;
 
   sym = symbol_find_or_make (name);
+  free (name);
   S_SET_WEAK (sym);
 
   if (*input_line_pointer == ',')
