@@ -636,7 +636,10 @@ cp_find_class_member (struct type **self_p, int *fieldno,
 
   for (i = TYPE_N_BASECLASSES (self); i < len; i++)
     {
-      LONGEST bitpos = self->field (i).loc_bitpos ();
+      field &f = self->field (i);
+      if (field_is_static (&f))
+	continue;
+      LONGEST bitpos = f.loc_bitpos ();
 
       QUIT;
       if (offset == bitpos)
