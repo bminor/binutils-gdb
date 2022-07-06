@@ -559,23 +559,29 @@ static const struct regcache_map_entry aarch64_linux_fpregmap[] =
     { 0 }
   };
 
-/* Since the C register numbers are determined dynamically, we leave
-   placeholders so we can update the numbers later.  */
-static struct regcache_map_entry aarch64_linux_cregmap[] =
+/* The register numbers are relative to the first capability register
+   number.  Please note the PCC/CSP position in GDB's target
+   description is the inverse of the position in the Linux Kernel's
+   user_morello_state data structure.  This can cause some
+   confusion.  */
+
+static const struct regcache_map_entry aarch64_linux_cregmap[] =
   {
-    { 31, -1, 16 }, /* c0 ... c30 */
-    { 1, -1, 16 }, /* pcc */
-    { 1, -1, 16 }, /* csp */
-    { 1, -1, 16 }, /* ddc */
-    { 1, -1, 16 }, /* ctpidr */
-    { 1, -1, 16 }, /* rcsp */
-    { 1, -1, 16 }, /* rddc */
-    { 1, -1, 16 }, /* rctpidr */
-    { 1, -1, 16 }, /* cid */
-    { 1, -1, 8 },  /* tag_map */
-    { 1, -1, 8 },  /* cctlr */
+    { 31, 0, 16 }, /* c0 ... c30 */
+    { 1, 32, 16 }, /* pcc */
+    { 1, 31, 16 }, /* csp */
+    { 1, 33, 16 }, /* ddc */
+    { 1, 34, 16 }, /* ctpidr */
+    { 1, 35, 16 }, /* rcsp */
+    { 1, 36, 16 }, /* rddc */
+    { 1, 37, 16 }, /* rctpidr */
+    { 1, 38, 16 }, /* cid */
+    { 1, REGCACHE_MAP_SKIP, 8 },  /* tag_map */
+    { 1, 39, 8 },  /* cctlr */
     { 0 }
   };
+
+#define TAG_MAP_OFFSET		(16 * 39)
 
 /* Register set definitions.  */
 
@@ -591,11 +597,81 @@ const struct regset aarch64_linux_fpregset =
     regcache_supply_regset, regcache_collect_regset
   };
 
+static int
+tag_map_regno(aarch64_gdbarch_tdep *tdep, int idx)
+{
+  switch (idx)
+    {
+    case 31:
+      return (tdep->cap_reg_csp);
+    case 32:
+      return (tdep->cap_reg_pcc);
+    default:
+      return (tdep->cap_reg_base + idx);
+    }
+}
+
 /* The capability register set.  */
+static void
+aarch64_linux_supply_cregset (const struct regset *regset,
+			      struct regcache *regcache,
+			      int regnum, const void *buf, size_t size)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  regcache->supply_regset (regset, tdep->cap_reg_base, regnum, buf, size);
+
+  uint64_t tag_map = extract_unsigned_integer ((const gdb_byte *)buf
+					       + TAG_MAP_OFFSET, 8,
+					       gdbarch_byte_order (gdbarch));
+  for (unsigned i = 0; i < 39; i++)
+    {
+      int regno;
+
+      regno = tag_map_regno(tdep, i);
+      if (regnum == -1 || regno == regnum)
+	regcache->raw_supply_tag (tag_map_regno(tdep, i), tag_map & 1);
+      tag_map >>= 1;
+    }
+}
+
+static void
+aarch64_linux_collect_cregset (const struct regset *regset,
+			     const struct regcache *regcache,
+			     int regnum, void *buf, size_t size)
+{
+  struct gdbarch *gdbarch = regcache->arch ();
+  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
+
+  regcache->collect_regset (regset, tdep->cap_reg_base, regnum, buf, size);
+
+  uint64_t tag_map = extract_unsigned_integer ((const gdb_byte *)buf
+					       + TAG_MAP_OFFSET, 8,
+					       gdbarch_byte_order (gdbarch));
+  for (unsigned i = 0; i < 39; i++)
+    {
+      uint64_t mask;
+      int regno;
+
+      regno = tag_map_regno(tdep, i);
+      if (regnum == -1 || regno == regnum)
+	{
+	  mask = (uint64_t)1 << i;
+	  if (regcache->raw_collect_tag (tag_map_regno(tdep, i)))
+	    tag_map |= mask;
+	  else
+	    tag_map &= ~mask;
+	}
+    }
+  store_unsigned_integer ((gdb_byte *)buf + TAG_MAP_OFFSET, 8,
+			  gdbarch_byte_order (gdbarch), tag_map);
+}
+
 const struct regset aarch64_linux_cregset =
   {
     aarch64_linux_cregmap,
-    regcache_supply_regset, regcache_collect_regset
+    aarch64_linux_supply_cregset, aarch64_linux_collect_cregset
   };
 
 /* The fields in an SVE header at the start of a SVE regset.  */
@@ -2579,22 +2655,6 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
       if (tdep->abi == AARCH64_ABI_AAPCS64_CAP)
 	set_solib_svr4_fetch_link_map_offsets (gdbarch,
 					svr4_lp64_cheri_fetch_link_map_offsets);
-
-      /* Initialize the register numbers for the core file register set.
-	 Please note the PCC/CSP position in GDB's target description is
-	 the inverse of the position in the Linux Kernel's user_morello_state
-	 data structure.  This can cause some confusion.  */
-      aarch64_linux_cregmap[0].regno = tdep->cap_reg_base;
-      aarch64_linux_cregmap[1].regno = tdep->cap_reg_pcc;
-      aarch64_linux_cregmap[2].regno = tdep->cap_reg_csp;
-
-      /* Set the rest of the registers.  */
-      int next_regnum = tdep->cap_reg_base + 33;
-      for (int i = 3; i <= 10; i++)
-	{
-	  aarch64_linux_cregmap[i].regno = next_regnum;
-	  next_regnum++;
-	}
 
       set_gdbarch_report_signal_info (gdbarch,
 				      aarch64_linux_report_signal_info);
