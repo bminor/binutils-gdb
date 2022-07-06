@@ -925,6 +925,9 @@ typedef struct insn_template
 #define Opcode_FloatD 0x400 /* Direction bit for float insns. */
 #define Opcode_SIMD_FloatD 0x1 /* Direction bit for SIMD fp insns. */
 #define Opcode_SIMD_IntD 0x10 /* Direction bit for SIMD int insns. */
+/* The next value is arbitrary, as long as it's non-zero and distinct
+   from all other values above.  */
+#define Opcode_VexW	0xf /* Operand order controlled by VEX.W. */
 
 /* (Fake) base opcode value for pseudo prefixes.  */
 #define PSEUDO_PREFIX 0
