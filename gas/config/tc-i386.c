@@ -6763,22 +6763,7 @@ match_template (char mnem_suffix)
 	      switch (t->operands)
 		{
 		case 5:
-		  overlap4 = operand_type_and (i.types[4],
-					       operand_types[4]);
-		  /* Fall through.  */
-		case 4:
-		  overlap3 = operand_type_and (i.types[3],
-					       operand_types[3]);
-		  /* Fall through.  */
-		case 3:
-		  overlap2 = operand_type_and (i.types[2],
-					       operand_types[2]);
-		  break;
-		}
-
-	      switch (t->operands)
-		{
-		case 5:
+		  overlap4 = operand_type_and (i.types[4], operand_types[4]);
 		  if (!operand_type_match (overlap4, i.types[4])
 		      || !operand_type_register_match (i.types[3],
 						       operand_types[3],
@@ -6787,6 +6772,7 @@ match_template (char mnem_suffix)
 		    continue;
 		  /* Fall through.  */
 		case 4:
+		  overlap3 = operand_type_and (i.types[3], operand_types[3]);
 		  if (!operand_type_match (overlap3, i.types[3])
 		      || ((check_register & 0xa) == 0xa
 			  && !operand_type_register_match (i.types[1],
@@ -6801,6 +6787,7 @@ match_template (char mnem_suffix)
 		    continue;
 		  /* Fall through.  */
 		case 3:
+		  overlap2 = operand_type_and (i.types[2], operand_types[2]);
 		  if (!operand_type_match (overlap2, i.types[2])
 		      || ((check_register & 5) == 5
 			  && !operand_type_register_match (i.types[0],
