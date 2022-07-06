@@ -1786,7 +1786,7 @@ resolve_local_symbol (void **slot, void *arg ATTRIBUTE_UNUSED)
 void
 resolve_local_symbol_values (void)
 {
-  htab_traverse (sy_hash, resolve_local_symbol, NULL);
+  htab_traverse_noresize (sy_hash, resolve_local_symbol, NULL);
 }
 
 /* Obtain the current value of a symbol without changing any

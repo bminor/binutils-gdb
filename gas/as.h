@@ -541,10 +541,10 @@ int generic_force_reloc (struct fix *);
 
 #include "write.h"
 #include "frags.h"
-#include "hashtab.h"
-#include "hash.h"
 #include "read.h"
 #include "symbols.h"
+#include "hashtab.h"
+#include "hash.h"
 
 #include "tc.h"
 #include "obj.h"

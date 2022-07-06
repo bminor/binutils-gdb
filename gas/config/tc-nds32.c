@@ -7480,7 +7480,8 @@ nds32_insert_relax_entry (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
 static void
 nds32_elf_analysis_relax_hint (void)
 {
-  htab_traverse (nds32_hint_hash, nds32_elf_append_relax_relocs_traverse, NULL);
+  htab_traverse_noresize (nds32_hint_hash,
+			  nds32_elf_append_relax_relocs_traverse, NULL);
 }
 
 static void

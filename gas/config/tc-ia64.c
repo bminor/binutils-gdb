@@ -11853,7 +11853,7 @@ do_alias (void **slot, void *arg ATTRIBUTE_UNUSED)
 void
 ia64_adjust_symtab (void)
 {
-  htab_traverse (alias_hash, do_alias, NULL);
+  htab_traverse_noresize (alias_hash, do_alias, NULL);
 }
 
 /* It renames the original section name to its alias.  */
@@ -11878,7 +11878,7 @@ do_secalias (void **slot, void *arg ATTRIBUTE_UNUSED)
 void
 ia64_frob_file (void)
 {
-  htab_traverse (secalias_hash, do_secalias, NULL);
+  htab_traverse_noresize (secalias_hash, do_secalias, NULL);
 }
 
 #ifdef TE_VMS
