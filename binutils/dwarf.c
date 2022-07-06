@@ -3376,6 +3376,7 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_AT_stride:
     case DW_AT_upper_bound:
     case DW_AT_lower_bound:
+    case DW_AT_rank:
       if (block_start)
 	{
 	  int need_frame_base;
