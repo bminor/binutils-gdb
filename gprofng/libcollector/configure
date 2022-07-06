@@ -15476,17 +15476,20 @@ $as_echo "$as_me: WARNING: Cannot set --enable-shared for gprofng/libcollector. 
 fi
 
 GPROFNG_VARIANT=unknown
-case "${host}" in
-  x86_64-*-linux*)
-    GPROFNG_VARIANT=amd64-Linux
-    ;;
-  i?86-*-linux*)
+x=`echo | $CC $CFLAGS -dM -E - | grep -w __x86_64`
+if test -n "$x"; then
+  GPROFNG_VARIANT=amd64-Linux
+else
+  x=`echo | $CC $CFLAGS -dM -E - | grep -w __i386__`
+  if test -n "$x"; then
     GPROFNG_VARIANT=intel-Linux
-    ;;
-  aarch64-*-linux*)
-    GPROFNG_VARIANT=aarch64-Linux
-    ;;
-esac
+  else
+    x=`echo | $CC $CFLAGS -dM -E - | grep -w __aarch64__`
+    if test -n "$x"; then
+      GPROFNG_VARIANT=aarch64-Linux
+    fi
+  fi
+fi
 
 
 ac_ext=c

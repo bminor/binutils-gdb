@@ -42,17 +42,20 @@ if test "$enable_shared" != "yes"; then
 fi
 
 GPROFNG_VARIANT=unknown
-case "${host}" in
-  x86_64-*-linux*)
-    GPROFNG_VARIANT=amd64-Linux
-    ;;
-  i?86-*-linux*)
+x=`echo | $CC $CFLAGS -dM -E - | grep -w __x86_64`
+if test -n "$x"; then
+  GPROFNG_VARIANT=amd64-Linux
+else
+  x=`echo | $CC $CFLAGS -dM -E - | grep -w __i386__`
+  if test -n "$x"; then
     GPROFNG_VARIANT=intel-Linux
-    ;;
-  aarch64-*-linux*)
-    GPROFNG_VARIANT=aarch64-Linux
-    ;;
-esac
+  else
+    x=`echo | $CC $CFLAGS -dM -E - | grep -w __aarch64__`
+    if test -n "$x"; then
+      GPROFNG_VARIANT=aarch64-Linux
+    fi
+  fi
+fi
 AC_SUBST(GPROFNG_VARIANT)
 
 ACX_PROG_CC_WARNING_OPTS([-Wno-nonnull-compare], [GPROFNG_NO_NONNULL_COMPARE_CFLAGS])
