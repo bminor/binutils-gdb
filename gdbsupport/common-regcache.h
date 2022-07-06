@@ -78,8 +78,14 @@ struct reg_buffer_common
   /* Supply register REGNUM, whose contents are stored in BUF, to REGCACHE.  */
   virtual void raw_supply (int regnum, const void *buf) = 0;
 
+  /* Supply tag for register REGNUM.  Only valid for tagged registers.  */
+  virtual void raw_supply_tag (int regnum, bool tag) = 0;
+
   /* Collect register REGNUM from REGCACHE and store its contents in BUF.  */
   virtual void raw_collect (int regnum, void *buf) const = 0;
+
+  /* Return tag for register REGNUM.  Only valid for tagged registers.  */
+  virtual bool raw_collect_tag (int regnum) const = 0;
 
   /* Compare the contents of the register stored in the regcache (ignoring the
      first OFFSET bytes) to the contents of BUF (without any offset).  Returns
