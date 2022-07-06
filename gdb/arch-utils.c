@@ -1093,33 +1093,6 @@ default_read_core_file_mappings
 }
 
 /* See arch-utils.h.  */
-bool
-default_register_has_tag (struct gdbarch *gdbarch,
-			  readable_regcache *regcache,
-			  int cookednum)
-{
-  return false;
-}
-
-/* See arch-utils.h.  */
-bool
-default_register_tag (struct gdbarch *gdbarch,
-		      readable_regcache *regcache,
-		      int cookednum)
-{
-  return false;
-}
-
-/* See arch-utils.h.  */
-void
-default_register_set_tag (struct gdbarch *gdbarch,
-			  regcache *regcache,
-			  int cookednum, bool tag)
-{
-  return;
-}
-
-/* See arch-utils.h.  */
 bool default_get_cap_tag_from_address (struct gdbarch *gdbarch,
 				       CORE_ADDR addr)
 {

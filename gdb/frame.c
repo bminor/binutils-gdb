@@ -1413,8 +1413,8 @@ put_frame_register (struct frame_info *frame, int regnum,
 		&& TYPE_CAPABILITY (val_type)))
 	    && value_tagged (fromval))
 	  {
-	    gdbarch_register_set_tag (gdbarch, get_current_regcache (),
-				      regnum, value_tag (fromval));
+	    get_current_regcache ()->raw_supply_tag (realnum,
+						     value_tag (fromval));
 	  }
       }
       break;
