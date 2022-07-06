@@ -2019,56 +2019,6 @@ struct aarch64_call_info
   std::vector<stack_item_t> si;
 };
 
-/* Helper function. Returns true if REGNUM is a tagged register, otherwise
-   returns false.  */
-
-static bool
-morello_is_tagged_register (struct gdbarch *gdbarch, int regnum)
-{
-  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-
-  /* Only Morello's registers have tags.  */
-  if (!tdep->has_capability ())
-    return false;
-
-  /* The last two registers of the C register set don't have tags.  */
-  if (regnum < tdep->cap_reg_base ||
-      regnum > tdep->cap_reg_last - 2)
-    return false;
-
-  return true;
-}
-
-/* Implementation of the gdbarch_register_set_tag hook.  */
-
-static void
-aarch64_register_set_tag (struct gdbarch *gdbarch, struct regcache *regcache,
-			  int regnum, bool tag)
-{
-  if (!morello_is_tagged_register (gdbarch, regnum))
-    return;
-
-  CORE_ADDR tag_map = 0;
-  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-
-  /* Read the tag register, adjust and write back.  */
-  regcache->cooked_read (tdep->cap_reg_last - 1, (gdb_byte *) &tag_map);
-
-  /* The CSP/PCC tags are swapped in the tag_map because the ordering of CSP/PCC
-     in struct user_morello_state is different from GDB's register description.
-
-     Make sure we account for that when setting the tag from those
-     registers.  */
-  if (regnum == tdep->cap_reg_pcc)
-    regnum = tdep->cap_reg_csp;
-  else if (regnum == tdep->cap_reg_csp)
-    regnum = tdep->cap_reg_pcc;
-
-  int shift = regnum - tdep->cap_reg_base;
-  tag_map = _set_bit (tag_map, shift, tag ? 1 : 0);
-  regcache->cooked_write (tdep->cap_reg_last - 1, (gdb_byte *) &tag_map);
-}
-
 /* Pass a value in a sequence of consecutive C registers.  The caller
    is responsible for ensuring sufficient registers are available.  */
 
@@ -2127,7 +2077,7 @@ pass_in_c (struct gdbarch *gdbarch, struct regcache *regcache,
 	  /* We need to read the tags from memory.  */
 	  gdb::byte_vector cap = target_read_capability (address);
 	  bool tag = cap[0] == 0 ? false : true;
-	  aarch64_register_set_tag (gdbarch, regcache, regnum, tag);
+	  regcache->raw_supply_tag (regnum, tag);
 
 	  if (aarch64_debug)
 	    debug_printf ("aarch64: %s Read tag %s from address %s\n",
@@ -2620,7 +2570,7 @@ morello_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	 capability.  */
       struct value *clr = regcache->cooked_read_value (regnum);
       regcache->cooked_write (regnum, value_contents (clr).data ());
-      aarch64_register_set_tag (gdbarch, regcache, regnum, value_tag (clr));
+      regcache->raw_supply_tag (regnum, value_tag (clr));
     }
 
   if (aarch64_debug)
@@ -2651,7 +2601,7 @@ morello_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	     capability.  */
 	  struct value *csp = regcache->cooked_read_value (regnum);
 	  regcache->cooked_write (regnum, value_contents (csp).data ());
-	  aarch64_register_set_tag (gdbarch, regcache, regnum, value_tag (csp));
+	  regcache->raw_supply_tag (regnum, value_tag (csp));
 	}
 
       if (aarch64_debug)
@@ -2849,7 +2799,7 @@ morello_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       struct value *csp = regcache->cooked_read_value (regnum);
       regcache->cooked_write (regnum, value_contents (csp).data ());
-      aarch64_register_set_tag (gdbarch, regcache, regnum, value_tag (csp));
+      regcache->raw_supply_tag (regnum, value_tag (csp));
     }
 
     if (aarch64_debug)
@@ -3793,7 +3743,7 @@ morello_store_return_value (struct value *value, struct regcache *regs,
 
       /* Also store the tag if we are dealing with a capability.  */
       if (aapcs64_cap || type->code () == TYPE_CODE_CAPABILITY)
-	aarch64_register_set_tag (gdbarch, regs, regno, value_tag (value));
+	regs->raw_supply_tag (regno, value_tag (value));
     }
   else if (type->code () == TYPE_CODE_INT
 	   || type->code () == TYPE_CODE_CHAR
@@ -3871,7 +3821,7 @@ morello_store_return_value (struct value *value, struct regcache *regs,
 	      /* We need to read the tags from memory.  */
 	      gdb::byte_vector cap = target_read_capability (address);
 	      bool tag = cap[0] == 0 ? false : true;
-	      aarch64_register_set_tag (gdbarch, regs, regno, tag);
+	      regs->raw_supply_tag (regno, tag);
 
 	      if (aarch64_debug)
 		debug_printf ("aarch64: %s Read tag %s from address %s\n",
@@ -4366,7 +4316,7 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch, readable_regcache *regcache,
       else
 	memcpy (value_contents_raw (result_value).data () + 8, upper_bytes, 8);
 
-      bool tag = gdbarch_register_tag (gdbarch, regcache, c_real_regnum);
+      bool tag = regcache->raw_collect_tag (c_real_regnum);
       memcpy (value_contents_raw (result_value).data () + 16, &tag, 1);
 
       /* If we are dealing with the tag pseudo register, we need to isolate the
@@ -4460,7 +4410,7 @@ aarch64_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
       regcache->raw_write_part (c_real_regnum, 0, 8, lower_bytes);
       regcache->raw_write_part (c_real_regnum, 8, 8, upper_bytes);
 
-      aarch64_register_set_tag (gdbarch, regcache, c_real_regnum,
+      regcache->raw_supply_tag (c_real_regnum,
 				(tag != 0)? true : false);
       return;
     }
@@ -5303,68 +5253,6 @@ aarch64_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
 		  name);
 }
 
-/* Implements the gdbarch_register_has_tag hook.  */
-
-static bool
-aarch64_register_has_tag (struct gdbarch *gdbarch,
-			  readable_regcache *regcache,
-			  int regnum)
-{
-  if (aarch64_debug)
-    debug_printf ("%s: Entering\n", __func__);
-
-  if (!morello_is_tagged_register (gdbarch, regnum))
-    return false;
-
-  if (aarch64_debug)
-    debug_printf ("%s: regnum %d\n", __func__, regnum);
-
-  return true;
-}
-
-/* Implements the gdbarch_register_tag hook.  */
-
-static bool
-aarch64_register_tag (struct gdbarch *gdbarch,
-		      readable_regcache *regcache,
-		      int regnum)
-{
-  if (aarch64_debug)
-    debug_printf ("%s: Entering\n", __func__);
-
-  if (!morello_is_tagged_register (gdbarch, regnum))
-    return false;
-
-  aarch64_gdbarch_tdep *tdep = (aarch64_gdbarch_tdep *) gdbarch_tdep (gdbarch);
-
-  /* The CSP/PCC tags are swapped in the tag_map because the ordering of CSP/PCC
-     in struct user_morello_state is different from GDB's register description.
-
-     Make sure we account for that when extracting the tag from those
-     registers.  */
-  if (regnum == tdep->cap_reg_pcc)
-    regnum = tdep->cap_reg_csp;
-  else if (regnum == tdep->cap_reg_csp)
-    regnum = tdep->cap_reg_pcc;
-
-  /* Find the proper bit within the tag_map.  */
-  int shift = regnum - tdep->cap_reg_base;
-  ULONGEST tag_map = 0;
-
-  /* Fetch the tag_map register.  */
-  regcache->cooked_read (tdep->cap_reg_last - 1, &tag_map);
-
-  if (aarch64_debug)
-    debug_printf ("%s: regnum %d, shift %d, tag bit %ld, tag_map %lx\n",
-		  __func__, regnum, shift,
-		  (tag_map >> shift) & 1, tag_map);
-
-  if (((tag_map >> shift) & 1) == 0)
-    return false;
-
-  return true;
-}
-
 /* Morello-specific hook to write the PC.  This is mostly used when calling
    a function by hand.  Different DSO's have different bounds for PCC, so GDB
    would need to figure out those bounds.
@@ -5778,11 +5666,6 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       /* For recording mapping symbols.  */
       set_gdbarch_record_special_symbol (gdbarch,
 					 aarch64_record_special_symbol);
-
-      /* For fetching register tag information.  */
-      set_gdbarch_register_has_tag (gdbarch, aarch64_register_has_tag);
-      set_gdbarch_register_tag (gdbarch, aarch64_register_tag);
-      set_gdbarch_register_set_tag (gdbarch, aarch64_register_set_tag);
 
       /* Create the Morello register aliases.  */
       /* cip0 and cip1 */
