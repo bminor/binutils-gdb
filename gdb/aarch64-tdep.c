@@ -271,7 +271,7 @@ static const char *const aarch64_c_register_names[] =
   "c16", "c17", "c18", "c19", "c20", "c21", "c22", "c23",
   "c24", "c25", "c26", "c27", "c28", "c29", "c30", "csp",
   "pcc", "ddc", "ctpidr", "rcsp", "rddc", "rctpidr", "cid",
-  "tag_map", "cctlr"
+  "cctlr"
 };
 
 /* The required core 'R' registers.  */

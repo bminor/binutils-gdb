@@ -46,6 +46,5 @@
   <reg name="rddc" bitsize="128" type="data_capability" group="general"/>
   <reg name="rctpidr" bitsize="128" type="data_capability" group="system"/>
   <reg name="cid" bitsize="128" type="data_capability" group="system"/>
-  <reg name="tag_map" bitsize="64" type="uint64" group="system"/>
   <reg name="cctlr" bitsize="64" type="uint64" group="system"/>
 </feature>

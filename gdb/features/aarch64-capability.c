@@ -9,7 +9,6 @@ create_feature_aarch64_capability (struct target_desc *result, long regnum)
   struct tdesc_feature *feature;
 
   feature = tdesc_create_feature (result, "org.gnu.gdb.aarch64.capability");
-
   tdesc_create_reg (feature, "c0", regnum++, 1, "general", 128, "data_capability");
   tdesc_create_reg (feature, "c1", regnum++, 1, "general", 128, "data_capability");
   tdesc_create_reg (feature, "c2", regnum++, 1, "general", 128, "data_capability");
@@ -45,11 +44,10 @@ create_feature_aarch64_capability (struct target_desc *result, long regnum)
   tdesc_create_reg (feature, "pcc", regnum++, 1, "general", 128, "code_capability");
   tdesc_create_reg (feature, "ddc", regnum++, 1, "system", 128, "data_capability");
   tdesc_create_reg (feature, "ctpidr", regnum++, 1, "system", 128, "data_capability");
-  tdesc_create_reg (feature, "rcsp", regnum++, 1, "system", 128, "data_capability");
-  tdesc_create_reg (feature, "rddc", regnum++, 1, "system", 128, "data_capability");
+  tdesc_create_reg (feature, "rcsp", regnum++, 1, "general", 128, "data_capability");
+  tdesc_create_reg (feature, "rddc", regnum++, 1, "general", 128, "data_capability");
   tdesc_create_reg (feature, "rctpidr", regnum++, 1, "system", 128, "data_capability");
   tdesc_create_reg (feature, "cid", regnum++, 1, "system", 128, "data_capability");
-  tdesc_create_reg (feature, "tag_map", regnum++, 1, "system", 64, "uint64");
   tdesc_create_reg (feature, "cctlr", regnum++, 1, "system", 64, "uint64");
   return regnum;
 }
