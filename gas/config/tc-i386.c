@@ -938,8 +938,8 @@ const relax_typeS md_relax_table[] =
 
 static const arch_entry cpu_arch[] =
 {
-  /* Do not replace the first two entries - i386_target_format()
-     relies on them being there in this order.  */
+  /* Do not replace the first two entries - i386_target_format() and
+     set_cpu_arch() rely on them being there in this order.  */
   ARCH (generic32, GENERIC32, GENERIC32, false),
   ARCH (generic64, GENERIC64, GENERIC64, false),
   ARCH (i8086, UNKNOWN, NONE, false),
@@ -2724,12 +2724,47 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
-      char *string;
-      int e = get_symbol_name (&string);
-      unsigned int j;
+      char *s;
+      int e = get_symbol_name (&s);
+      const char *string = s;
+      unsigned int j = 0;
       i386_cpu_flags flags;
 
-      for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
+      if (strcmp (string, "default") == 0)
+	{
+	  if (strcmp (default_arch, "iamcu") == 0)
+	    string = default_arch;
+	  else
+	    {
+	      static const i386_cpu_flags cpu_unknown_flags = CPU_UNKNOWN_FLAGS;
+
+	      cpu_arch_name = NULL;
+	      free (cpu_sub_arch_name);
+	      cpu_sub_arch_name = NULL;
+	      cpu_arch_flags = cpu_unknown_flags;
+	      if (flag_code == CODE_64BIT)
+		{
+		  cpu_arch_flags.bitfield.cpu64 = 1;
+		  cpu_arch_flags.bitfield.cpuno64 = 0;
+		}
+	      else
+		{
+		  cpu_arch_flags.bitfield.cpu64 = 0;
+		  cpu_arch_flags.bitfield.cpuno64 = 1;
+		}
+	      cpu_arch_isa = PROCESSOR_UNKNOWN;
+	      cpu_arch_isa_flags = cpu_arch[flag_code == CODE_64BIT].flags;
+	      if (!cpu_arch_tune_set)
+		{
+		  cpu_arch_tune = cpu_arch_isa;
+		  cpu_arch_tune_flags = cpu_arch_isa_flags;
+		}
+
+	      j = ARRAY_SIZE (cpu_arch) + 1;
+	    }
+	}
+
+      for (; j < ARRAY_SIZE (cpu_arch); j++)
 	{
 	  if (strcmp (string, cpu_arch[j].name) == 0)
 	    {
@@ -2802,7 +2837,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 	  j = ARRAY_SIZE (cpu_arch);
 	}
 
-      if (j >= ARRAY_SIZE (cpu_arch))
+      if (j == ARRAY_SIZE (cpu_arch))
 	as_bad (_("no such architecture: `%s'"), string);
 
       *input_line_pointer = e;
@@ -13676,6 +13711,13 @@ show_arch (FILE *stream, int ext, int check)
 
   p = start;
   left = size - (start - message);
+
+  if (!ext && check)
+    {
+      p = output_message (stream, p, message, start, &left,
+			  STRING_COMMA_LEN ("default"));
+    }
+
   for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
     {
       /* Should it be skipped?  */
