@@ -5085,20 +5085,17 @@ static void
 s7_build_score_ops_hsh (void)
 {
   unsigned int i;
-  static struct obstack insn_obstack;
 
-  obstack_begin (&insn_obstack, 4000);
   for (i = 0; i < sizeof (s7_score_insns) / sizeof (struct s7_asm_opcode); i++)
     {
       const struct s7_asm_opcode *insn = s7_score_insns + i;
-      size_t len = strlen (insn->template_name);
+      size_t len = strlen (insn->template_name) + 1;
       struct s7_asm_opcode *new_opcode;
       char *template_name;
-      new_opcode = (struct s7_asm_opcode *)
-          obstack_alloc (&insn_obstack, sizeof (struct s7_asm_opcode));
-      template_name = (char *) obstack_alloc (&insn_obstack, len + 1);
 
-      strcpy (template_name, insn->template_name);
+      new_opcode = notes_alloc (sizeof (*new_opcode));
+      template_name = notes_memdup (insn->template_name, len, len);
+
       new_opcode->template_name = template_name;
       new_opcode->parms = insn->parms;
       new_opcode->value = insn->value;
@@ -5114,22 +5111,17 @@ static void
 s7_build_dependency_insn_hsh (void)
 {
   unsigned int i;
-  static struct obstack dependency_obstack;
 
-  obstack_begin (&dependency_obstack, 4000);
   for (i = 0; i < ARRAY_SIZE (s7_insn_to_dependency_table); i++)
     {
       const struct s7_insn_to_dependency *tmp = s7_insn_to_dependency_table + i;
-      size_t len = strlen (tmp->insn_name);
+      size_t len = strlen (tmp->insn_name) + 1;
       struct s7_insn_to_dependency *new_i2d;
       char *insn_name;
 
-      new_i2d = (struct s7_insn_to_dependency *)
-          obstack_alloc (&dependency_obstack,
-                         sizeof (struct s7_insn_to_dependency));
-      insn_name = (char *) obstack_alloc (&dependency_obstack, len + 1);
+      new_i2d = notes_alloc (sizeof (*new_i2d));
+      insn_name = notes_memdup (tmp->insn_name, len, len);
 
-      strcpy (insn_name, tmp->insn_name);
       new_i2d->insn_name = insn_name;
       new_i2d->type = tmp->type;
       str_hash_insert (s7_dependency_insn_hsh, new_i2d->insn_name, new_i2d, 0);

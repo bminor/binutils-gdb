@@ -879,7 +879,7 @@ riscv_init_csr_hash (const char *name,
   if (!need_enrty)
     return;
 
-  entry = XNEW (struct riscv_csr_extra);
+  entry = notes_alloc (sizeof (*entry));
   entry->csr_class = class;
   entry->address = address;
   entry->define_version = define_version;

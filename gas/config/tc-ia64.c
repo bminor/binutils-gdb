@@ -4663,14 +4663,9 @@ dot_rot (int type)
 	}
 
       if (!*drpp)
-	{
-	  *drpp = XOBNEW (&notes, struct dynreg);
-	  memset (*drpp, 0, sizeof (*dr));
-	}
+	*drpp = notes_calloc (1, sizeof (**drpp));
 
-      name = XOBNEWVEC (&notes, char, len + 1);
-      memcpy (name, start, len);
-      name[len] = '\0';
+      name = notes_memdup (start, len, len + 1);
 
       dr = *drpp;
       dr->name = name;
@@ -4682,7 +4677,6 @@ dot_rot (int type)
       if (str_hash_insert (md.dynreg_hash, name, dr, 0) != NULL)
 	{
 	  as_bad (_("Attempt to redefine register set `%s'"), name);
-	  obstack_free (&notes, name);
 	  goto err;
 	}
 
@@ -5007,7 +5001,7 @@ dot_pred_rel (int type)
 	    type = 'c';
 	  else if (strcmp (form, "imply") == 0)
 	    type = 'i';
-	  obstack_free (&notes, form);
+	  notes_free (form);
 	}
       else if (*input_line_pointer == '@')
 	{
@@ -11781,9 +11775,7 @@ dot_alias (int section)
     }
 
   /* Make a copy of name string.  */
-  len = strlen (name) + 1;
-  obstack_grow (&notes, name, len);
-  name = obstack_finish (&notes);
+  name = notes_strdup (name);
 
   if (section)
     {
@@ -11806,8 +11798,7 @@ dot_alias (int section)
       if (strcmp (h->name, name))
 	as_bad (_("`%s' is already the alias of %s `%s'"),
 		alias, kind, h->name);
-      obstack_free (&notes, name);
-      obstack_free (&notes, alias);
+      notes_free (alias);
       goto out;
     }
 
@@ -11817,12 +11808,11 @@ dot_alias (int section)
     {
       if (strcmp (a, alias))
 	as_bad (_("%s `%s' already has an alias `%s'"), kind, name, a);
-      obstack_free (&notes, name);
-      obstack_free (&notes, alias);
+      notes_free (alias);
       goto out;
     }
 
-  h = XNEW (struct alias);
+  h = notes_alloc (sizeof (*h));
   h->file = as_where (&h->line);
   h->name = name;
 
