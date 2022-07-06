@@ -788,7 +788,7 @@ i386_cpu_flags cpu_arch_isa_flags;
 
 /* If set, conditional jumps are not automatically promoted to handle
    larger than a byte offset.  */
-static unsigned int no_cond_jump_promotion = 0;
+static bool no_cond_jump_promotion = false;
 
 /* Encode SSE instructions with VEX prefix.  */
 static unsigned int sse2avx;
@@ -2660,6 +2660,20 @@ extend_cpu_sub_arch_name (const char *name)
 static void
 set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 {
+  typedef struct arch_stack_entry
+  {
+    const struct arch_stack_entry *prev;
+    const char *name;
+    char *sub_name;
+    i386_cpu_flags flags;
+    i386_cpu_flags isa_flags;
+    enum processor_type isa;
+    enum flag_code flag_code;
+    char stackop_size;
+    bool no_cond_jump_promotion;
+  } arch_stack_entry;
+  static const arch_stack_entry *arch_stack_top;
+
   SKIP_WHITESPACE ();
 
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
@@ -2702,6 +2716,67 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 
 	      j = ARRAY_SIZE (cpu_arch) + 1;
 	    }
+	}
+      else if (strcmp (string, "push") == 0)
+	{
+	  arch_stack_entry *top = XNEW (arch_stack_entry);
+
+	  top->name = cpu_arch_name;
+	  if (cpu_sub_arch_name)
+	    top->sub_name = xstrdup (cpu_sub_arch_name);
+	  else
+	    top->sub_name = NULL;
+	  top->flags = cpu_arch_flags;
+	  top->isa = cpu_arch_isa;
+	  top->isa_flags = cpu_arch_isa_flags;
+	  top->flag_code = flag_code;
+	  top->stackop_size = stackop_size;
+	  top->no_cond_jump_promotion = no_cond_jump_promotion;
+
+	  top->prev = arch_stack_top;
+	  arch_stack_top = top;
+
+	  (void) restore_line_pointer (e);
+	  demand_empty_rest_of_line ();
+	  return;
+	}
+      else if (strcmp (string, "pop") == 0)
+	{
+	  const arch_stack_entry *top = arch_stack_top;
+
+	  if (!top)
+	    as_bad (_(".arch stack is empty"));
+	  else if (top->flag_code != flag_code
+		   || top->stackop_size != stackop_size)
+	    {
+	      static const unsigned int bits[] = {
+	        [CODE_16BIT] = 16,
+	        [CODE_32BIT] = 32,
+	        [CODE_64BIT] = 64,
+	      };
+
+	      as_bad (_("this `.arch pop' requires `.code%u%s' to be in effect"),
+		      bits[top->flag_code],
+		      top->stackop_size == LONG_MNEM_SUFFIX ? "gcc" : "");
+	    }
+	  else
+	    {
+	      arch_stack_top = top->prev;
+
+	      cpu_arch_name = top->name;
+	      free (cpu_sub_arch_name);
+	      cpu_sub_arch_name = top->sub_name;
+	      cpu_arch_flags = top->flags;
+	      cpu_arch_isa = top->isa;
+	      cpu_arch_isa_flags = top->isa_flags;
+	      no_cond_jump_promotion = top->no_cond_jump_promotion;
+
+	      XDELETE (top);
+	    }
+
+	  (void) restore_line_pointer (e);
+	  demand_empty_rest_of_line ();
+	  return;
 	}
 
       for (; j < ARRAY_SIZE (cpu_arch); j++)
@@ -13660,6 +13735,10 @@ show_arch (FILE *stream, int ext, int check)
     {
       p = output_message (stream, p, message, start, &left,
 			  STRING_COMMA_LEN ("default"));
+      p = output_message (stream, p, message, start, &left,
+			  STRING_COMMA_LEN ("push"));
+      p = output_message (stream, p, message, start, &left,
+			  STRING_COMMA_LEN ("pop"));
     }
 
   for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)

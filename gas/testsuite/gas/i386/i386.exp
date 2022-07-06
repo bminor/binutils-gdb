@@ -206,6 +206,7 @@ if [gas_32_check] then {
     run_dump_test "arch-13"
     run_dump_test "arch-14"
     run_list_test "arch-dflt" "-march=generic32 -al"
+    run_list_test "arch-stk" "-march=generic32 -al"
     run_dump_test "8087"
     run_dump_test "287"
     run_dump_test "387"
