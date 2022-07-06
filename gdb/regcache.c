@@ -1253,7 +1253,7 @@ regcache::transfer_regset_register (struct regcache *out_regcache, int regnum,
 /* See regcache.h.  */
 
 void
-regcache::transfer_regset (const struct regset *regset,
+regcache::transfer_regset (const struct regset *regset, int regbase,
 			   struct regcache *out_regcache,
 			   int regnum, const gdb_byte *in_buf,
 			   gdb_byte *out_buf, size_t size) const
@@ -1267,6 +1267,9 @@ regcache::transfer_regset (const struct regset *regset,
     {
       int regno = map->regno;
       int slot_size = map->size;
+
+      if (regno != REGCACHE_MAP_SKIP)
+	regno += regbase;
 
       if (slot_size == 0 && regno != REGCACHE_MAP_SKIP)
 	slot_size = m_descr->sizeof_register[regno];
@@ -1315,7 +1318,18 @@ void
 regcache::supply_regset (const struct regset *regset,
 			 int regnum, const void *buf, size_t size)
 {
-  transfer_regset (regset, this, regnum, (const gdb_byte *) buf, nullptr, size);
+  transfer_regset (regset, 0, this, regnum, (const gdb_byte *) buf, nullptr,
+		   size);
+}
+
+/* See regcache.h.  */
+
+void
+regcache::supply_regset (const struct regset *regset, int regbase,
+			 int regnum, const void *buf, size_t size)
+{
+  transfer_regset (regset, regbase, this, regnum, (const gdb_byte *) buf,
+		   nullptr, size);
 }
 
 /* Collect register REGNUM from REGCACHE to BUF, using the register
@@ -1334,10 +1348,18 @@ void
 regcache::collect_regset (const struct regset *regset,
 			 int regnum, void *buf, size_t size) const
 {
-  transfer_regset (regset, nullptr, regnum, nullptr, (gdb_byte *) buf, size);
+  transfer_regset (regset, 0, nullptr, regnum, nullptr, (gdb_byte *) buf, size);
 }
 
 /* See regcache.h  */
+
+void
+regcache::collect_regset (const struct regset *regset, int regbase,
+			 int regnum, void *buf, size_t size) const
+{
+  transfer_regset (regset, regbase, nullptr, regnum, nullptr, (gdb_byte *) buf,
+		   size);
+}
 
 bool
 regcache_map_supplies (const struct regcache_map_entry *map, int regnum,
