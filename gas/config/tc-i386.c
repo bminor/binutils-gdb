@@ -6724,8 +6724,12 @@ match_template (char mnem_suffix)
 	      /* Try reversing direction of operands.  */
 	      overlap0 = operand_type_and (i.types[0], operand_types[i.operands - 1]);
 	      overlap1 = operand_type_and (i.types[i.operands - 1], operand_types[0]);
+	      overlap2 = operand_type_and (i.types[1], operand_types[1]);
+	      gas_assert (t->operands != 3 || !check_register);
 	      if (!operand_type_match (overlap0, i.types[0])
 		  || !operand_type_match (overlap1, i.types[i.operands - 1])
+		  || (t->operands == 3
+		      && !operand_type_match (overlap2, i.types[1]))
 		  || (check_register
 		      && !operand_type_register_match (i.types[0],
 						       operand_types[i.operands - 1],
@@ -6797,8 +6801,6 @@ match_template (char mnem_suffix)
 		    continue;
 		  /* Fall through.  */
 		case 3:
-		  /* Here we make use of the fact that there are no
-		     reverse match 3 operand instructions.  */
 		  if (!operand_type_match (overlap2, i.types[2])
 		      || ((check_register & 5) == 5
 			  && !operand_type_register_match (i.types[0],
