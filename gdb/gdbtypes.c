@@ -772,8 +772,7 @@ make_capability_type (struct type *type)
 			        | TYPE_INSTANCE_FLAG_CAPABILITY),
 			       NULL);
 
-  /* Capability pointers are 128-bit.  */
-  TYPE_LENGTH (ntype) = 16;
+  TYPE_LENGTH (ntype) = gdbarch_capability_bit (type->arch ()) / TARGET_CHAR_BIT;
 
   return ntype;
 }
