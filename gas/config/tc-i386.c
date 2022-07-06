@@ -2738,6 +2738,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		  check_cpu_arch_compatible (string, cpu_arch[j].flags);
 
 		  cpu_arch_name = cpu_arch[j].name;
+		  free (cpu_sub_arch_name);
 		  cpu_sub_arch_name = NULL;
 		  cpu_arch_flags = cpu_arch[j].flags;
 		  if (flag_code == CODE_64BIT)
@@ -13234,6 +13235,7 @@ md_parse_option (int c, const char *arg)
 		    continue;
 
 		  cpu_arch_name = cpu_arch[j].name;
+		  free (cpu_sub_arch_name);
 		  cpu_sub_arch_name = NULL;
 		  cpu_arch_flags = cpu_arch[j].flags;
 		  cpu_arch_isa = cpu_arch[j].type;
@@ -13897,6 +13899,7 @@ i386_target_format (void)
 	{
 	  static const i386_cpu_flags iamcu_flags = CPU_IAMCU_FLAGS;
 	  cpu_arch_name = "iamcu";
+	  free (cpu_sub_arch_name);
 	  cpu_sub_arch_name = NULL;
 	  cpu_arch_flags = iamcu_flags;
 	  cpu_arch_isa = PROCESSOR_IAMCU;
