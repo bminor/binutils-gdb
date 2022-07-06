@@ -122,6 +122,14 @@ void *mempcpy(void *, const void *, size_t);
 
 #define xfree free
 
+#if GCC_VERSION >= 7000
+#define gas_mul_overflow(a, b, res) __builtin_mul_overflow (a, b, res)
+#else
+/* Assumes unsigned values.  Careful!  Args evaluated multiple times.  */
+#define gas_mul_overflow(a, b, res) \
+  ((*res) = (a), (*res) *= (b), (b) != 0 && (*res) / (b) != (a))
+#endif
+
 #include "asintl.h"
 
 #define BAD_CASE(val)							    \

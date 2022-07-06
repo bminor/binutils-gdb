@@ -242,6 +242,75 @@ struct xsymbol dot_symbol_x;
 #endif
 
 struct obstack notes;
+
+/* Utility functions to allocate and duplicate memory on the notes
+   obstack, each like the corresponding function without "notes_"
+   prefix.  All of these exit on an allocation failure.  */
+
+void *
+notes_alloc (size_t size)
+{
+  return obstack_alloc (&notes, size);
+}
+
+void *
+notes_calloc (size_t n, size_t size)
+{
+  size_t amt;
+  void *ret;
+  if (gas_mul_overflow (n, size, &amt))
+    {
+      obstack_alloc_failed_handler ();
+      abort ();
+    }
+  ret = notes_alloc (amt);
+  memset (ret, 0, amt);
+  return ret;
+}
+
+void *
+notes_memdup (const void *src, size_t copy_size, size_t alloc_size)
+{
+  void *ret = obstack_alloc (&notes, alloc_size);
+  memcpy (ret, src, copy_size);
+  if (alloc_size > copy_size)
+    memset ((char *) ret + copy_size, 0, alloc_size - copy_size);
+  return ret;
+}
+
+char *
+notes_strdup (const char *str)
+{
+  size_t len = strlen (str) + 1;
+  return notes_memdup (str, len, len);
+}
+
+char *
+notes_concat (const char *first, ...)
+{
+  va_list args;
+  const char *str;
+
+  va_start (args, first);
+  for (str = first; str; str = va_arg (args, const char *))
+    {
+      size_t size = strlen (str);
+      obstack_grow (&notes, str, size);
+    }
+  va_end (args);
+  obstack_1grow (&notes, 0);
+  return obstack_finish (&notes);
+}
+
+/* Use with caution!  Frees PTR and all more recently allocated memory
+   on the notes obstack.  */
+
+void
+notes_free (void *ptr)
+{
+  obstack_free (&notes, ptr);
+}
+
 #ifdef TE_PE
 /* The name of an external symbol which is
    used to make weak PE symbol names unique.  */
@@ -274,13 +343,10 @@ symbol_new (const char *name, segT segment, fragS *frag, valueT valu)
 static const char *
 save_symbol_name (const char *name)
 {
-  size_t name_length;
   char *ret;
 
   gas_assert (name != NULL);
-  name_length = strlen (name) + 1;	/* +1 for \0.  */
-  obstack_grow (&notes, name, name_length);
-  ret = (char *) obstack_finish (&notes);
+  ret = notes_strdup (name);
 
 #ifdef tc_canonicalize_symbol_name
   ret = tc_canonicalize_symbol_name (ret);
@@ -343,7 +409,7 @@ symbol_create (const char *name, segT segment, fragS *frag, valueT valu)
   preserved_copy_of_name = save_symbol_name (name);
 
   size = sizeof (symbolS) + sizeof (struct xsymbol);
-  symbolP = (symbolS *) obstack_alloc (&notes, size);
+  symbolP = notes_alloc (size);
 
   /* symbol must be born in some fixed state.  This seems as good as any.  */
   memset (symbolP, 0, size);
@@ -377,7 +443,7 @@ local_symbol_make (const char *name, segT section, fragS *frag, valueT val)
 
   name_copy = save_symbol_name (name);
 
-  ret = (struct local_symbol *) obstack_alloc (&notes, sizeof *ret);
+  ret = notes_alloc (sizeof *ret);
   ret->flags = flags;
   ret->hash = 0;
   ret->name = name_copy;
@@ -403,7 +469,7 @@ local_symbol_convert (void *sym)
 
   ++local_symbol_conversion_count;
 
-  xtra = (struct xsymbol *) obstack_alloc (&notes, sizeof (*xtra));
+  xtra = notes_alloc (sizeof (*xtra));
   memset (xtra, 0, sizeof (*xtra));
   val = ent->lsy.value;
   ent->sy.x = xtra;
@@ -717,8 +783,7 @@ symbol_clone (symbolS *orgsymP, int replace)
     orgsymP = local_symbol_convert (orgsymP);
   bsymorg = orgsymP->bsym;
 
-  newsymP = (symbolS *) obstack_alloc (&notes, (sizeof (symbolS)
-						+ sizeof (struct xsymbol)));
+  newsymP = notes_alloc (sizeof (symbolS) + sizeof (struct xsymbol));
   *newsymP = *orgsymP;
   newsymP->x = (struct xsymbol *) (newsymP + 1);
   *newsymP->x = *orgsymP->x;
@@ -2104,7 +2169,7 @@ decode_local_label_name (char *s)
     instance_number = (10 * instance_number) + *p - '0';
 
   message_format = _("\"%d\" (instance number %d of a %s label)");
-  symbol_decode = (char *) obstack_alloc (&notes, strlen (message_format) + 30);
+  symbol_decode = notes_alloc (strlen (message_format) + 30);
   sprintf (symbol_decode, message_format, label_number, instance_number, type);
 
   return symbol_decode;
