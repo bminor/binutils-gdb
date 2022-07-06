@@ -922,6 +922,7 @@ struct main_type
   unsigned int m_flag_objfile_owned : 1;
   unsigned int m_flag_endianity_not_default : 1;
   unsigned int m_flag_contains_capability : 1;
+  unsigned int m_flag_tagged : 1;
 
   /* * True if this type was declared with "class" rather than
      "struct".  */
@@ -1366,6 +1367,17 @@ struct type
      factor.  */
 
   const gdb_mpq &fixed_point_scaling_factor ();
+
+  /* Indicates whether this type is tagged.  */
+  bool is_tagged () const
+  {
+    return this->main_type->m_flag_tagged;
+  }
+
+  void set_tagged (bool tagged)
+  {
+    this->main_type->m_flag_tagged = tagged;
+  }
 
   /* Indicates whether this type contains a capability.  */
 
