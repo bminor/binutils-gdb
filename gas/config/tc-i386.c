@@ -129,18 +129,10 @@ typedef struct
   unsigned int len:8;		/* arch string length */
   bool skip:1;			/* show_arch should skip this. */
   enum processor_type type;	/* arch type */
-  i386_cpu_flags flags;		/* cpu feature flags */
+  i386_cpu_flags enable;		/* cpu feature enable flags */
+  i386_cpu_flags disable;	/* cpu feature disable flags */
 }
 arch_entry;
-
-/* Used to turn off indicated flags.  */
-typedef struct
-{
-  const char *name;		/* arch name */
-  unsigned int len;		/* arch string length */
-  i386_cpu_flags flags;		/* cpu feature flags */
-}
-noarch_entry;
 
 static void update_code_flag (int, int);
 static void set_code_flag (int);
@@ -932,9 +924,11 @@ const relax_typeS md_relax_table[] =
 };
 
 #define ARCH(n, t, f, s) \
-  { STRING_COMMA_LEN (#n), s, PROCESSOR_ ## t, CPU_ ## f ## _FLAGS }
-#define SUBARCH(n, e, s) \
-  { STRING_COMMA_LEN ("." #n), s, PROCESSOR_NONE, CPU_ ## e ## _FLAGS }
+  { STRING_COMMA_LEN (#n), s, PROCESSOR_ ## t, CPU_ ## f ## _FLAGS, \
+    CPU_NONE_FLAGS }
+#define SUBARCH(n, e, d, s) \
+  { STRING_COMMA_LEN (#n), s, PROCESSOR_NONE, CPU_ ## e ## _FLAGS, \
+    CPU_ ## d ## _FLAGS }
 
 static const arch_entry cpu_arch[] =
 {
@@ -979,181 +973,127 @@ static const arch_entry cpu_arch[] =
   ARCH (btver1, BT, BTVER1, false),
   ARCH (btver2, BT, BTVER2, false),
 
-  SUBARCH (8087, 8087, false),
-  SUBARCH (287, 287, false),
-  SUBARCH (387, 387, false),
-  SUBARCH (687, 687, false),
-  SUBARCH (cmov, CMOV, false),
-  SUBARCH (fxsr, FXSR, false),
-  SUBARCH (mmx, MMX, false),
-  SUBARCH (sse, SSE, false),
-  SUBARCH (sse2, SSE2, false),
-  SUBARCH (sse3, SSE3, false),
-  SUBARCH (sse4a, SSE4A, false),
-  SUBARCH (ssse3, SSSE3, false),
-  SUBARCH (sse4.1, SSE4_1, false),
-  SUBARCH (sse4.2, SSE4_2, false),
-  SUBARCH (sse4, SSE4_2, false),
-  SUBARCH (avx, AVX, false),
-  SUBARCH (avx2, AVX2, false),
-  SUBARCH (avx512f, AVX512F, false),
-  SUBARCH (avx512cd, AVX512CD, false),
-  SUBARCH (avx512er, AVX512ER, false),
-  SUBARCH (avx512pf, AVX512PF, false),
-  SUBARCH (avx512dq, AVX512DQ, false),
-  SUBARCH (avx512bw, AVX512BW, false),
-  SUBARCH (avx512vl, AVX512VL, false),
-  SUBARCH (vmx, VMX, false),
-  SUBARCH (vmfunc, VMFUNC, false),
-  SUBARCH (smx, SMX, false),
-  SUBARCH (xsave, XSAVE, false),
-  SUBARCH (xsaveopt, XSAVEOPT, false),
-  SUBARCH (xsavec, XSAVEC, false),
-  SUBARCH (xsaves, XSAVES, false),
-  SUBARCH (aes, AES, false),
-  SUBARCH (pclmul, PCLMUL, false),
-  SUBARCH (clmul, PCLMUL, true),
-  SUBARCH (fsgsbase, FSGSBASE, false),
-  SUBARCH (rdrnd, RDRND, false),
-  SUBARCH (f16c, F16C, false),
-  SUBARCH (bmi2, BMI2, false),
-  SUBARCH (fma, FMA, false),
-  SUBARCH (fma4, FMA4, false),
-  SUBARCH (xop, XOP, false),
-  SUBARCH (lwp, LWP, false),
-  SUBARCH (movbe, MOVBE, false),
-  SUBARCH (cx16, CX16, false),
-  SUBARCH (ept, EPT, false),
-  SUBARCH (lzcnt, LZCNT, false),
-  SUBARCH (popcnt, POPCNT, false),
-  SUBARCH (hle, HLE, false),
-  SUBARCH (rtm, RTM, false),
-  SUBARCH (invpcid, INVPCID, false),
-  SUBARCH (clflush, CLFLUSH, false),
-  SUBARCH (nop, NOP, false),
-  SUBARCH (syscall, SYSCALL, false),
-  SUBARCH (rdtscp, RDTSCP, false),
-  SUBARCH (3dnow, 3DNOW, false),
-  SUBARCH (3dnowa, 3DNOWA, false),
-  SUBARCH (padlock, PADLOCK, false),
-  SUBARCH (pacifica, SVME, true),
-  SUBARCH (svme, SVME, false),
-  SUBARCH (sse4a, SSE4A, false),
-  SUBARCH (abm, ABM, false),
-  SUBARCH (bmi, BMI, false),
-  SUBARCH (tbm, TBM, false),
-  SUBARCH (adx, ADX, false),
-  SUBARCH (rdseed, RDSEED, false),
-  SUBARCH (prfchw, PRFCHW, false),
-  SUBARCH (smap, SMAP, false),
-  SUBARCH (mpx, MPX, false),
-  SUBARCH (sha, SHA, false),
-  SUBARCH (clflushopt, CLFLUSHOPT, false),
-  SUBARCH (prefetchwt1, PREFETCHWT1, false),
-  SUBARCH (se1, SE1, false),
-  SUBARCH (clwb, CLWB, false),
-  SUBARCH (avx512ifma, AVX512IFMA, false),
-  SUBARCH (avx512vbmi, AVX512VBMI, false),
-  SUBARCH (avx512_4fmaps, AVX512_4FMAPS, false),
-  SUBARCH (avx512_4vnniw, AVX512_4VNNIW, false),
-  SUBARCH (avx512_vpopcntdq, AVX512_VPOPCNTDQ, false),
-  SUBARCH (avx512_vbmi2, AVX512_VBMI2, false),
-  SUBARCH (avx512_vnni, AVX512_VNNI, false),
-  SUBARCH (avx512_bitalg, AVX512_BITALG, false),
-  SUBARCH (avx_vnni, AVX_VNNI, false),
-  SUBARCH (clzero, CLZERO, false),
-  SUBARCH (mwaitx, MWAITX, false),
-  SUBARCH (ospke, OSPKE, false),
-  SUBARCH (rdpid, RDPID, false),
-  SUBARCH (ptwrite, PTWRITE, false),
-  SUBARCH (ibt, IBT, false),
-  SUBARCH (shstk, SHSTK, false),
-  SUBARCH (gfni, GFNI, false),
-  SUBARCH (vaes, VAES, false),
-  SUBARCH (vpclmulqdq, VPCLMULQDQ, false),
-  SUBARCH (wbnoinvd, WBNOINVD, false),
-  SUBARCH (pconfig, PCONFIG, false),
-  SUBARCH (waitpkg, WAITPKG, false),
-  SUBARCH (cldemote, CLDEMOTE, false),
-  SUBARCH (amx_int8, AMX_INT8, false),
-  SUBARCH (amx_bf16, AMX_BF16, false),
-  SUBARCH (amx_tile, AMX_TILE, false),
-  SUBARCH (movdiri, MOVDIRI, false),
-  SUBARCH (movdir64b, MOVDIR64B, false),
-  SUBARCH (avx512_bf16, AVX512_BF16, false),
-  SUBARCH (avx512_vp2intersect, AVX512_VP2INTERSECT, false),
-  SUBARCH (tdx, TDX, false),
-  SUBARCH (enqcmd, ENQCMD, false),
-  SUBARCH (serialize, SERIALIZE, false),
-  SUBARCH (rdpru, RDPRU, false),
-  SUBARCH (mcommit, MCOMMIT, false),
-  SUBARCH (sev_es, SEV_ES, false),
-  SUBARCH (tsxldtrk, TSXLDTRK, false),
-  SUBARCH (kl, KL, false),
-  SUBARCH (widekl, WIDEKL, false),
-  SUBARCH (uintr, UINTR, false),
-  SUBARCH (hreset, HRESET, false),
-  SUBARCH (avx512_fp16, AVX512_FP16, false),
+  SUBARCH (8087, 8087, ANY_X87, false),
+  SUBARCH (87, NONE, ANY_X87, false), /* Disable only!  */
+  SUBARCH (287, 287, ANY_287, false),
+  SUBARCH (387, 387, ANY_387, false),
+  SUBARCH (687, 687, ANY_687, false),
+  SUBARCH (cmov, CMOV, ANY_CMOV, false),
+  SUBARCH (fxsr, FXSR, ANY_FXSR, false),
+  SUBARCH (mmx, MMX, ANY_MMX, false),
+  SUBARCH (sse, SSE, ANY_SSE, false),
+  SUBARCH (sse2, SSE2, ANY_SSE2, false),
+  SUBARCH (sse3, SSE3, ANY_SSE3, false),
+  SUBARCH (sse4a, SSE4A, ANY_SSE4A, false),
+  SUBARCH (ssse3, SSSE3, ANY_SSSE3, false),
+  SUBARCH (sse4.1, SSE4_1, ANY_SSE4_1, false),
+  SUBARCH (sse4.2, SSE4_2, ANY_SSE4_2, false),
+  SUBARCH (sse4, SSE4_2, ANY_SSE4_1, false),
+  SUBARCH (avx, AVX, ANY_AVX, false),
+  SUBARCH (avx2, AVX2, ANY_AVX2, false),
+  SUBARCH (avx512f, AVX512F, ANY_AVX512F, false),
+  SUBARCH (avx512cd, AVX512CD, ANY_AVX512CD, false),
+  SUBARCH (avx512er, AVX512ER, ANY_AVX512ER, false),
+  SUBARCH (avx512pf, AVX512PF, ANY_AVX512PF, false),
+  SUBARCH (avx512dq, AVX512DQ, ANY_AVX512DQ, false),
+  SUBARCH (avx512bw, AVX512BW, ANY_AVX512BW, false),
+  SUBARCH (avx512vl, AVX512VL, ANY_AVX512VL, false),
+  SUBARCH (vmx, VMX, VMX, false),
+  SUBARCH (vmfunc, VMFUNC, VMFUNC, false),
+  SUBARCH (smx, SMX, SMX, false),
+  SUBARCH (xsave, XSAVE, XSAVE, false),
+  SUBARCH (xsaveopt, XSAVEOPT, XSAVEOPT, false),
+  SUBARCH (xsavec, XSAVEC, XSAVEC, false),
+  SUBARCH (xsaves, XSAVES, XSAVES, false),
+  SUBARCH (aes, AES, AES, false),
+  SUBARCH (pclmul, PCLMUL, PCLMUL, false),
+  SUBARCH (clmul, PCLMUL, PCLMUL, true),
+  SUBARCH (fsgsbase, FSGSBASE, FSGSBASE, false),
+  SUBARCH (rdrnd, RDRND, RDRND, false),
+  SUBARCH (f16c, F16C, F16C, false),
+  SUBARCH (bmi2, BMI2, BMI2, false),
+  SUBARCH (fma, FMA, FMA, false),
+  SUBARCH (fma4, FMA4, FMA4, false),
+  SUBARCH (xop, XOP, XOP, false),
+  SUBARCH (lwp, LWP, LWP, false),
+  SUBARCH (movbe, MOVBE, MOVBE, false),
+  SUBARCH (cx16, CX16, CX16, false),
+  SUBARCH (ept, EPT, EPT, false),
+  SUBARCH (lzcnt, LZCNT, LZCNT, false),
+  SUBARCH (popcnt, POPCNT, POPCNT, false),
+  SUBARCH (hle, HLE, HLE, false),
+  SUBARCH (rtm, RTM, RTM, false),
+  SUBARCH (invpcid, INVPCID, INVPCID, false),
+  SUBARCH (clflush, CLFLUSH, CLFLUSH, false),
+  SUBARCH (nop, NOP, NOP, false),
+  SUBARCH (syscall, SYSCALL, SYSCALL, false),
+  SUBARCH (rdtscp, RDTSCP, RDTSCP, false),
+  SUBARCH (3dnow, 3DNOW, 3DNOW, false),
+  SUBARCH (3dnowa, 3DNOWA, 3DNOWA, false),
+  SUBARCH (padlock, PADLOCK, PADLOCK, false),
+  SUBARCH (pacifica, SVME, SVME, true),
+  SUBARCH (svme, SVME, SVME, false),
+  SUBARCH (sse4a, SSE4A, SSE4A, false),
+  SUBARCH (abm, ABM, ABM, false),
+  SUBARCH (bmi, BMI, BMI, false),
+  SUBARCH (tbm, TBM, TBM, false),
+  SUBARCH (adx, ADX, ADX, false),
+  SUBARCH (rdseed, RDSEED, RDSEED, false),
+  SUBARCH (prfchw, PRFCHW, PRFCHW, false),
+  SUBARCH (smap, SMAP, SMAP, false),
+  SUBARCH (mpx, MPX, MPX, false),
+  SUBARCH (sha, SHA, SHA, false),
+  SUBARCH (clflushopt, CLFLUSHOPT, CLFLUSHOPT, false),
+  SUBARCH (prefetchwt1, PREFETCHWT1, PREFETCHWT1, false),
+  SUBARCH (se1, SE1, SE1, false),
+  SUBARCH (clwb, CLWB, CLWB, false),
+  SUBARCH (avx512ifma, AVX512IFMA, ANY_AVX512IFMA, false),
+  SUBARCH (avx512vbmi, AVX512VBMI, ANY_AVX512VBMI, false),
+  SUBARCH (avx512_4fmaps, AVX512_4FMAPS, ANY_AVX512_4FMAPS, false),
+  SUBARCH (avx512_4vnniw, AVX512_4VNNIW, ANY_AVX512_4VNNIW, false),
+  SUBARCH (avx512_vpopcntdq, AVX512_VPOPCNTDQ, ANY_AVX512_VPOPCNTDQ, false),
+  SUBARCH (avx512_vbmi2, AVX512_VBMI2, ANY_AVX512_VBMI2, false),
+  SUBARCH (avx512_vnni, AVX512_VNNI, ANY_AVX512_VNNI, false),
+  SUBARCH (avx512_bitalg, AVX512_BITALG, ANY_AVX512_BITALG, false),
+  SUBARCH (avx_vnni, AVX_VNNI, ANY_AVX_VNNI, false),
+  SUBARCH (clzero, CLZERO, CLZERO, false),
+  SUBARCH (mwaitx, MWAITX, MWAITX, false),
+  SUBARCH (ospke, OSPKE, OSPKE, false),
+  SUBARCH (rdpid, RDPID, RDPID, false),
+  SUBARCH (ptwrite, PTWRITE, PTWRITE, false),
+  SUBARCH (ibt, IBT, ANY_IBT, false),
+  SUBARCH (shstk, SHSTK, ANY_SHSTK, false),
+  SUBARCH (gfni, GFNI, GFNI, false),
+  SUBARCH (vaes, VAES, VAES, false),
+  SUBARCH (vpclmulqdq, VPCLMULQDQ, VPCLMULQDQ, false),
+  SUBARCH (wbnoinvd, WBNOINVD, WBNOINVD, false),
+  SUBARCH (pconfig, PCONFIG, PCONFIG, false),
+  SUBARCH (waitpkg, WAITPKG, WAITPKG, false),
+  SUBARCH (cldemote, CLDEMOTE, CLDEMOTE, false),
+  SUBARCH (amx_int8, AMX_INT8, ANY_AMX_INT8, false),
+  SUBARCH (amx_bf16, AMX_BF16, ANY_AMX_BF16, false),
+  SUBARCH (amx_tile, AMX_TILE, ANY_AMX_TILE, false),
+  SUBARCH (movdiri, MOVDIRI, ANY_MOVDIRI, false),
+  SUBARCH (movdir64b, MOVDIR64B, ANY_MOVDIR64B, false),
+  SUBARCH (avx512_bf16, AVX512_BF16, ANY_AVX512_BF16, false),
+  SUBARCH (avx512_vp2intersect, AVX512_VP2INTERSECT,
+	   ANY_AVX512_VP2INTERSECT, false),
+  SUBARCH (tdx, TDX, ANY_TDX, false),
+  SUBARCH (enqcmd, ENQCMD, ANY_ENQCMD, false),
+  SUBARCH (serialize, SERIALIZE, ANY_SERIALIZE, false),
+  SUBARCH (rdpru, RDPRU, RDPRU, false),
+  SUBARCH (mcommit, MCOMMIT, MCOMMIT, false),
+  SUBARCH (sev_es, SEV_ES, SEV_ES, false),
+  SUBARCH (tsxldtrk, TSXLDTRK, ANY_TSXLDTRK, false),
+  SUBARCH (kl, KL, ANY_KL, false),
+  SUBARCH (widekl, WIDEKL, ANY_WIDEKL, false),
+  SUBARCH (uintr, UINTR, ANY_UINTR, false),
+  SUBARCH (hreset, HRESET, ANY_HRESET, false),
+  SUBARCH (avx512_fp16, AVX512_FP16, ANY_AVX512_FP16, false),
 };
 
 #undef SUBARCH
 #undef ARCH
-
-static const noarch_entry cpu_noarch[] =
-{
-  { STRING_COMMA_LEN ("no87"),  CPU_ANY_X87_FLAGS },
-  { STRING_COMMA_LEN ("no287"),  CPU_ANY_287_FLAGS },
-  { STRING_COMMA_LEN ("no387"),  CPU_ANY_387_FLAGS },
-  { STRING_COMMA_LEN ("no687"),  CPU_ANY_687_FLAGS },
-  { STRING_COMMA_LEN ("nocmov"),  CPU_ANY_CMOV_FLAGS },
-  { STRING_COMMA_LEN ("nofxsr"),  CPU_ANY_FXSR_FLAGS },
-  { STRING_COMMA_LEN ("nommx"),  CPU_ANY_MMX_FLAGS },
-  { STRING_COMMA_LEN ("nosse"),  CPU_ANY_SSE_FLAGS },
-  { STRING_COMMA_LEN ("nosse2"),  CPU_ANY_SSE2_FLAGS },
-  { STRING_COMMA_LEN ("nosse3"),  CPU_ANY_SSE3_FLAGS },
-  { STRING_COMMA_LEN ("nosse4a"),  CPU_ANY_SSE4A_FLAGS },
-  { STRING_COMMA_LEN ("nossse3"),  CPU_ANY_SSSE3_FLAGS },
-  { STRING_COMMA_LEN ("nosse4.1"),  CPU_ANY_SSE4_1_FLAGS },
-  { STRING_COMMA_LEN ("nosse4.2"),  CPU_ANY_SSE4_2_FLAGS },
-  { STRING_COMMA_LEN ("nosse4"),  CPU_ANY_SSE4_1_FLAGS },
-  { STRING_COMMA_LEN ("noavx"),  CPU_ANY_AVX_FLAGS },
-  { STRING_COMMA_LEN ("noavx2"),  CPU_ANY_AVX2_FLAGS },
-  { STRING_COMMA_LEN ("noavx512f"), CPU_ANY_AVX512F_FLAGS },
-  { STRING_COMMA_LEN ("noavx512cd"), CPU_ANY_AVX512CD_FLAGS },
-  { STRING_COMMA_LEN ("noavx512er"), CPU_ANY_AVX512ER_FLAGS },
-  { STRING_COMMA_LEN ("noavx512pf"), CPU_ANY_AVX512PF_FLAGS },
-  { STRING_COMMA_LEN ("noavx512dq"), CPU_ANY_AVX512DQ_FLAGS },
-  { STRING_COMMA_LEN ("noavx512bw"), CPU_ANY_AVX512BW_FLAGS },
-  { STRING_COMMA_LEN ("noavx512vl"), CPU_ANY_AVX512VL_FLAGS },
-  { STRING_COMMA_LEN ("noavx512ifma"), CPU_ANY_AVX512IFMA_FLAGS },
-  { STRING_COMMA_LEN ("noavx512vbmi"), CPU_ANY_AVX512VBMI_FLAGS },
-  { STRING_COMMA_LEN ("noavx512_4fmaps"), CPU_ANY_AVX512_4FMAPS_FLAGS },
-  { STRING_COMMA_LEN ("noavx512_4vnniw"), CPU_ANY_AVX512_4VNNIW_FLAGS },
-  { STRING_COMMA_LEN ("noavx512_vpopcntdq"), CPU_ANY_AVX512_VPOPCNTDQ_FLAGS },
-  { STRING_COMMA_LEN ("noavx512_vbmi2"), CPU_ANY_AVX512_VBMI2_FLAGS },
-  { STRING_COMMA_LEN ("noavx512_vnni"), CPU_ANY_AVX512_VNNI_FLAGS },
-  { STRING_COMMA_LEN ("noavx512_bitalg"), CPU_ANY_AVX512_BITALG_FLAGS },
-  { STRING_COMMA_LEN ("noavx_vnni"), CPU_ANY_AVX_VNNI_FLAGS },
-  { STRING_COMMA_LEN ("noibt"), CPU_ANY_IBT_FLAGS },
-  { STRING_COMMA_LEN ("noshstk"), CPU_ANY_SHSTK_FLAGS },
-  { STRING_COMMA_LEN ("noamx_int8"), CPU_ANY_AMX_INT8_FLAGS },
-  { STRING_COMMA_LEN ("noamx_bf16"), CPU_ANY_AMX_BF16_FLAGS },
-  { STRING_COMMA_LEN ("noamx_tile"), CPU_ANY_AMX_TILE_FLAGS },
-  { STRING_COMMA_LEN ("nomovdiri"), CPU_ANY_MOVDIRI_FLAGS },
-  { STRING_COMMA_LEN ("nomovdir64b"), CPU_ANY_MOVDIR64B_FLAGS },
-  { STRING_COMMA_LEN ("noavx512_bf16"), CPU_ANY_AVX512_BF16_FLAGS },
-  { STRING_COMMA_LEN ("noavx512_vp2intersect"),
-    CPU_ANY_AVX512_VP2INTERSECT_FLAGS },
-  { STRING_COMMA_LEN ("notdx"), CPU_ANY_TDX_FLAGS },
-  { STRING_COMMA_LEN ("noenqcmd"), CPU_ANY_ENQCMD_FLAGS },
-  { STRING_COMMA_LEN ("noserialize"), CPU_ANY_SERIALIZE_FLAGS },
-  { STRING_COMMA_LEN ("notsxldtrk"), CPU_ANY_TSXLDTRK_FLAGS },
-  { STRING_COMMA_LEN ("nokl"), CPU_ANY_KL_FLAGS },
-  { STRING_COMMA_LEN ("nowidekl"), CPU_ANY_WIDEKL_FLAGS },
-  { STRING_COMMA_LEN ("nouintr"), CPU_ANY_UINTR_FLAGS },
-  { STRING_COMMA_LEN ("nohreset"), CPU_ANY_HRESET_FLAGS },
-  { STRING_COMMA_LEN ("noavx512_fp16"), CPU_ANY_AVX512_FP16_FLAGS },
-};
 
 #ifdef I386COFF
 /* Like s_lcomm_internal in gas/read.c but the alignment string
@@ -2712,9 +2652,9 @@ extend_cpu_sub_arch_name (const char *name)
 {
   if (cpu_sub_arch_name)
     cpu_sub_arch_name = reconcat (cpu_sub_arch_name, cpu_sub_arch_name,
-				  name, (const char *) NULL);
+				  ".", name, (const char *) NULL);
   else
-    cpu_sub_arch_name = xstrdup (name);
+    cpu_sub_arch_name = concat (".", name, (const char *) NULL);
 }
 
 static void
@@ -2753,7 +2693,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		  cpu_arch_flags.bitfield.cpuno64 = 1;
 		}
 	      cpu_arch_isa = PROCESSOR_UNKNOWN;
-	      cpu_arch_isa_flags = cpu_arch[flag_code == CODE_64BIT].flags;
+	      cpu_arch_isa_flags = cpu_arch[flag_code == CODE_64BIT].enable;
 	      if (!cpu_arch_tune_set)
 		{
 		  cpu_arch_tune = cpu_arch_isa;
@@ -2766,16 +2706,17 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 
       for (; j < ARRAY_SIZE (cpu_arch); j++)
 	{
-	  if (strcmp (string, cpu_arch[j].name) == 0)
+	  if (strcmp (string + (*string == '.'), cpu_arch[j].name) == 0
+	     && (*string == '.') == (cpu_arch[j].type == PROCESSOR_NONE))
 	    {
 	      if (*string != '.')
 		{
-		  check_cpu_arch_compatible (string, cpu_arch[j].flags);
+		  check_cpu_arch_compatible (string, cpu_arch[j].enable);
 
 		  cpu_arch_name = cpu_arch[j].name;
 		  free (cpu_sub_arch_name);
 		  cpu_sub_arch_name = NULL;
-		  cpu_arch_flags = cpu_arch[j].flags;
+		  cpu_arch_flags = cpu_arch[j].enable;
 		  if (flag_code == CODE_64BIT)
 		    {
 		      cpu_arch_flags.bitfield.cpu64 = 1;
@@ -2787,7 +2728,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		      cpu_arch_flags.bitfield.cpuno64 = 1;
 		    }
 		  cpu_arch_isa = cpu_arch[j].type;
-		  cpu_arch_isa_flags = cpu_arch[j].flags;
+		  cpu_arch_isa_flags = cpu_arch[j].enable;
 		  if (!cpu_arch_tune_set)
 		    {
 		      cpu_arch_tune = cpu_arch_isa;
@@ -2796,36 +2737,40 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		  break;
 		}
 
+	      if (cpu_flags_all_zero (&cpu_arch[j].enable))
+	        continue;
+
 	      flags = cpu_flags_or (cpu_arch_flags,
-				    cpu_arch[j].flags);
+				    cpu_arch[j].enable);
 
 	      if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		{
-		  extend_cpu_sub_arch_name (string);
+		  extend_cpu_sub_arch_name (string + 1);
 		  cpu_arch_flags = flags;
 		  cpu_arch_isa_flags = flags;
 		}
 	      else
 		cpu_arch_isa_flags
 		  = cpu_flags_or (cpu_arch_isa_flags,
-				  cpu_arch[j].flags);
+				  cpu_arch[j].enable);
 	      (void) restore_line_pointer (e);
 	      demand_empty_rest_of_line ();
 	      return;
 	    }
 	}
 
-      if (*string == '.' && j >= ARRAY_SIZE (cpu_arch))
+      if (startswith (string, ".no") && j >= ARRAY_SIZE (cpu_arch))
 	{
 	  /* Disable an ISA extension.  */
-	  for (j = 0; j < ARRAY_SIZE (cpu_noarch); j++)
-	    if (strcmp (string + 1, cpu_noarch [j].name) == 0)
+	  for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
+	    if (cpu_arch[j].type == PROCESSOR_NONE
+	        && strcmp (string + 3, cpu_arch[j].name) == 0)
 	      {
 		flags = cpu_flags_and_not (cpu_arch_flags,
-					   cpu_noarch[j].flags);
+					   cpu_arch[j].disable);
 		if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		  {
-		    extend_cpu_sub_arch_name (string);
+		    extend_cpu_sub_arch_name (string + 1);
 		    cpu_arch_flags = flags;
 		    cpu_arch_isa_flags = flags;
 		  }
@@ -2833,8 +2778,6 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		demand_empty_rest_of_line ();
 		return;
 	      }
-
-	  j = ARRAY_SIZE (cpu_arch);
 	}
 
       if (j == ARRAY_SIZE (cpu_arch))
@@ -13263,18 +13206,19 @@ md_parse_option (int c, const char *arg)
 	    *next++ = '\0';
 	  for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
 	    {
-	      if (arch == saved && strcmp (arch, cpu_arch [j].name) == 0)
+	      if (arch == saved && cpu_arch[j].type != PROCESSOR_NONE
+	          && strcmp (arch, cpu_arch[j].name) == 0)
 		{
 		  /* Processor.  */
-		  if (! cpu_arch[j].flags.bitfield.cpui386)
+		  if (! cpu_arch[j].enable.bitfield.cpui386)
 		    continue;
 
 		  cpu_arch_name = cpu_arch[j].name;
 		  free (cpu_sub_arch_name);
 		  cpu_sub_arch_name = NULL;
-		  cpu_arch_flags = cpu_arch[j].flags;
+		  cpu_arch_flags = cpu_arch[j].enable;
 		  cpu_arch_isa = cpu_arch[j].type;
-		  cpu_arch_isa_flags = cpu_arch[j].flags;
+		  cpu_arch_isa_flags = cpu_arch[j].enable;
 		  if (!cpu_arch_tune_set)
 		    {
 		      cpu_arch_tune = cpu_arch_isa;
@@ -13282,39 +13226,41 @@ md_parse_option (int c, const char *arg)
 		    }
 		  break;
 		}
-	      else if (*cpu_arch [j].name == '.'
-		       && strcmp (arch, cpu_arch [j].name + 1) == 0)
+	      else if (cpu_arch[j].type == PROCESSOR_NONE
+		       && strcmp (arch, cpu_arch[j].name) == 0
+		       && !cpu_flags_all_zero (&cpu_arch[j].enable))
 		{
 		  /* ISA extension.  */
 		  i386_cpu_flags flags;
 
 		  flags = cpu_flags_or (cpu_arch_flags,
-					cpu_arch[j].flags);
+					cpu_arch[j].enable);
 
 		  if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		    {
-		      extend_cpu_sub_arch_name (cpu_arch[j].name);
+		      extend_cpu_sub_arch_name (arch);
 		      cpu_arch_flags = flags;
 		      cpu_arch_isa_flags = flags;
 		    }
 		  else
 		    cpu_arch_isa_flags
 		      = cpu_flags_or (cpu_arch_isa_flags,
-				      cpu_arch[j].flags);
+				      cpu_arch[j].enable);
 		  break;
 		}
 	    }
 
-	  if (j >= ARRAY_SIZE (cpu_arch))
+	  if (j >= ARRAY_SIZE (cpu_arch) && startswith (arch, "no"))
 	    {
 	      /* Disable an ISA extension.  */
-	      for (j = 0; j < ARRAY_SIZE (cpu_noarch); j++)
-		if (strcmp (arch, cpu_noarch [j].name) == 0)
+	      for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
+		if (cpu_arch[j].type == PROCESSOR_NONE
+		    && strcmp (arch + 2, cpu_arch[j].name) == 0)
 		  {
 		    i386_cpu_flags flags;
 
 		    flags = cpu_flags_and_not (cpu_arch_flags,
-					       cpu_noarch[j].flags);
+					       cpu_arch[j].disable);
 		    if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		      {
 			extend_cpu_sub_arch_name (arch);
@@ -13323,9 +13269,6 @@ md_parse_option (int c, const char *arg)
 		      }
 		    break;
 		  }
-
-	      if (j >= ARRAY_SIZE (cpu_noarch))
-		j = ARRAY_SIZE (cpu_arch);
 	    }
 
 	  if (j >= ARRAY_SIZE (cpu_arch))
@@ -13342,11 +13285,12 @@ md_parse_option (int c, const char *arg)
 	as_fatal (_("invalid -mtune= option: `%s'"), arg);
       for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
 	{
-	  if (strcmp (arg, cpu_arch [j].name) == 0)
+	  if (cpu_arch[j].type != PROCESSOR_NONE
+	      && strcmp (arg, cpu_arch[j].name) == 0)
 	    {
 	      cpu_arch_tune_set = 1;
 	      cpu_arch_tune = cpu_arch [j].type;
-	      cpu_arch_tune_flags = cpu_arch[j].flags;
+	      cpu_arch_tune_flags = cpu_arch[j].enable;
 	      break;
 	    }
 	}
@@ -13726,15 +13670,10 @@ show_arch (FILE *stream, int ext, int check)
 
       name = cpu_arch [j].name;
       len = cpu_arch [j].len;
-      if (*name == '.')
+      if (cpu_arch[j].type == PROCESSOR_NONE)
 	{
 	  /* It is an extension.  Skip if we aren't asked to show it.  */
-	  if (ext)
-	    {
-	      name++;
-	      len--;
-	    }
-	  else
+	  if (!ext || cpu_flags_all_zero (&cpu_arch[j].enable))
 	    continue;
 	}
       else if (ext)
@@ -13742,7 +13681,7 @@ show_arch (FILE *stream, int ext, int check)
 	  /* It is an processor.  Skip if we show only extension.  */
 	  continue;
 	}
-      else if (check && ! cpu_arch[j].flags.bitfield.cpui386)
+      else if (check && ! cpu_arch[j].enable.bitfield.cpui386)
 	{
 	  /* It is an impossible processor - skip.  */
 	  continue;
@@ -13753,12 +13692,17 @@ show_arch (FILE *stream, int ext, int check)
 
   /* Display disabled extensions.  */
   if (ext)
-    for (j = 0; j < ARRAY_SIZE (cpu_noarch); j++)
+    for (j = 0; j < ARRAY_SIZE (cpu_arch); j++)
       {
-	name = cpu_noarch [j].name;
-	len = cpu_noarch [j].len;
-	p = output_message (stream, p, message, start, &left, name,
-			    len);
+	char *str;
+
+	if (cpu_arch[j].type != PROCESSOR_NONE
+	    || !cpu_flags_all_zero (&cpu_arch[j].enable))
+	  continue;
+	str = xasprintf ("no%s", cpu_arch[j].name);
+	p = output_message (stream, p, message, start, &left, str,
+			    strlen (str));
+	free (str);
       }
 
   *p = '\0';
@@ -13802,7 +13746,7 @@ md_show_usage (FILE *stream)
                           generate code for CPU and EXTENSION, CPU is one of:\n"));
   show_arch (stream, 0, 1);
   fprintf (stream, _("\
-                          EXTENSION is combination of:\n"));
+                          EXTENSION is combination of (possibly \"no\"-prefixed):\n"));
   show_arch (stream, 1, 0);
   fprintf (stream, _("\
   -mtune=CPU              optimize for CPU, CPU is one of:\n"));
@@ -13960,9 +13904,9 @@ i386_target_format (void)
     as_fatal (_("unknown architecture"));
 
   if (cpu_flags_all_zero (&cpu_arch_isa_flags))
-    cpu_arch_isa_flags = cpu_arch[flag_code == CODE_64BIT].flags;
+    cpu_arch_isa_flags = cpu_arch[flag_code == CODE_64BIT].enable;
   if (cpu_flags_all_zero (&cpu_arch_tune_flags))
-    cpu_arch_tune_flags = cpu_arch[flag_code == CODE_64BIT].flags;
+    cpu_arch_tune_flags = cpu_arch[flag_code == CODE_64BIT].enable;
 
   switch (OUTPUT_FLAVOR)
     {
