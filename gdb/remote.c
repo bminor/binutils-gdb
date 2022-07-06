@@ -194,8 +194,7 @@ struct packet_reg
   long regnum; /* GDB's internal register number.  */
   LONGEST pnum; /* Remote protocol register number.  */
   int in_g_packet; /* Always part of G packet.  */
-  /* long size in bytes;  == register_size (target_gdbarch (), regnum);
-     at present.  */
+  long size; /* Size in bytes.  */
   /* char *name; == gdbarch_register_name (target_gdbarch (), regnum);
      at present.  */
 };
@@ -1435,7 +1434,11 @@ map_regcache_remote_table (struct gdbarch *gdbarch, struct packet_reg *regs)
     {
       remote_regs[regnum]->in_g_packet = 1;
       remote_regs[regnum]->offset = offset;
-      offset += register_size (gdbarch, remote_regs[regnum]->regnum);
+      remote_regs[regnum]->size = register_size (gdbarch,
+						 remote_regs[regnum]->regnum);
+      if (register_has_tag (gdbarch, remote_regs[regnum]->regnum))
+	remote_regs[regnum]->size++;
+      offset += remote_regs[regnum]->size;
     }
 
   return offset;
@@ -7733,14 +7736,12 @@ Packet: '%s'\n"),
 			   hex_string (pnum), p, buf);
 
 		  cached_reg.num = reg->regnum;
-		  cached_reg.data = (gdb_byte *)
-		    xmalloc (register_size (event->arch, reg->regnum));
+		  cached_reg.data = (gdb_byte *) xmalloc (reg->size);
 
 		  p = p1 + 1;
-		  fieldsize = hex2bin (p, cached_reg.data,
-				       register_size (event->arch, reg->regnum));
+		  fieldsize = hex2bin (p, cached_reg.data, reg->size);
 		  p += 2 * fieldsize;
-		  if (fieldsize < register_size (event->arch, reg->regnum))
+		  if (fieldsize < reg->size)
 		    warning (_("Remote reply is too short: %s"), buf);
 
 		  event->regcache.push_back (cached_reg);
@@ -8039,6 +8040,32 @@ remote_target::select_thread_for_ambiguous_stop_reply
     return first_resumed_thread->ptid;
 }
 
+/* Supply a single register's value.  */
+
+static void
+register_raw_supply(struct regcache *regcache, int regnum, const gdb_byte *buf)
+{
+  if (register_has_tag (regcache->arch (), regnum))
+    {
+      regcache->raw_supply_tag (regnum, *buf != 0);
+      buf++;
+    }
+  regcache->raw_supply (regnum, buf);
+}
+
+/* Collect a single register's value.  */
+
+static void
+register_raw_collect(const struct regcache *regcache, int regnum, gdb_byte *buf)
+{
+  if (register_has_tag (regcache->arch (), regnum))
+    {
+      *buf = regcache->raw_collect_tag (regnum);
+      buf++;
+    }
+  regcache->raw_collect (regnum, buf);
+}
+
 /* Called when it is decided that STOP_REPLY holds the info of the
    event that is to be returned to the core.  This function always
    destroys STOP_REPLY.  */
@@ -8068,7 +8095,7 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
 
 	  for (cached_reg_t &reg : stop_reply->regcache)
 	    {
-	      regcache->raw_supply (reg.num, reg.data);
+	      register_raw_supply (regcache, reg.num, reg.data);
 	      xfree (reg.data);
 	    }
 
@@ -8368,7 +8395,7 @@ remote_target::fetch_register_using_p (struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   struct remote_state *rs = get_remote_state ();
   char *buf, *p;
-  gdb_byte *regp = (gdb_byte *) alloca (register_size (gdbarch, reg->regnum));
+  gdb_byte *regp = (gdb_byte *) alloca (reg->size);
   int i;
 
   if (packet_support (PACKET_p) == PACKET_DISABLE)
@@ -8417,7 +8444,7 @@ remote_target::fetch_register_using_p (struct regcache *regcache,
       regp[i++] = fromhex (p[0]) * 16 + fromhex (p[1]);
       p += 2;
     }
-  regcache->raw_supply (reg->regnum, regp);
+  register_raw_supply (regcache, reg->regnum, regp);
   return 1;
 }
 
@@ -8493,7 +8520,7 @@ remote_target::process_g_packet (struct regcache *regcache)
       for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
 	{
 	  long offset = rsa->regs[i].offset;
-	  long reg_size = register_size (gdbarch, i);
+	  long reg_size = rsa->regs[i].size;
 
 	  if (rsa->regs[i].pnum == -1)
 	    continue;
@@ -8542,7 +8569,7 @@ remote_target::process_g_packet (struct regcache *regcache)
   for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
     {
       struct packet_reg *r = &rsa->regs[i];
-      long reg_size = register_size (gdbarch, i);
+      long reg_size = r->size;
 
       if (r->in_g_packet)
 	{
@@ -8558,7 +8585,8 @@ remote_target::process_g_packet (struct regcache *regcache)
 	      regcache->raw_supply (r->regnum, NULL);
 	    }
 	  else
-	    regcache->raw_supply (r->regnum, regs + r->offset);
+	    register_raw_supply (regcache, r->regnum,
+				 (gdb_byte *) regs + r->offset);
 	}
     }
 }
@@ -8678,7 +8706,7 @@ remote_target::store_register_using_P (const struct regcache *regcache,
   struct remote_state *rs = get_remote_state ();
   /* Try storing a single register.  */
   char *buf = rs->buf.data ();
-  gdb_byte *regp = (gdb_byte *) alloca (register_size (gdbarch, reg->regnum));
+  gdb_byte *regp = (gdb_byte *) alloca (reg->size);
   char *p;
 
   if (packet_support (PACKET_P) == PACKET_DISABLE)
@@ -8689,8 +8717,8 @@ remote_target::store_register_using_P (const struct regcache *regcache,
 
   xsnprintf (buf, get_remote_packet_size (), "P%s=", phex_nz (reg->pnum, 0));
   p = buf + strlen (buf);
-  regcache->raw_collect (reg->regnum, regp);
-  bin2hex (regp, p, register_size (gdbarch, reg->regnum));
+  register_raw_collect (regcache, reg->regnum, regp);
+  bin2hex (regp, p, reg->size);
   putpkt (rs->buf);
   getpkt (&rs->buf, 0);
 
@@ -8731,7 +8759,7 @@ remote_target::store_registers_using_G (const struct regcache *regcache)
 	struct packet_reg *r = &rsa->regs[i];
 
 	if (r->in_g_packet)
-	  regcache->raw_collect (r->regnum, regs + r->offset);
+	  register_raw_collect (regcache, r->regnum, regs + r->offset);
       }
   }
 
