@@ -45,7 +45,7 @@ Dwarf::assemble $asm_file {
 		{name s}
 		{byte_size 3 DW_FORM_sdata}
 		{decl_file 0 DW_FORM_udata}
-		{decl_line 1 DW_FORM_sdata}
+		{decl_line 1 DW_FORM_udata}
 	    } {
 		DW_TAG_member {
 		    {name a}
@@ -74,7 +74,7 @@ Dwarf::assemble $asm_file {
 		{name t}
 		{byte_size 3 DW_FORM_sdata}
 		{decl_file 0 DW_FORM_udata}
-		{decl_line 1 DW_FORM_sdata}
+		{decl_line 1 DW_FORM_udata}
 	    } {
 		DW_TAG_member {
 		    {name a}
