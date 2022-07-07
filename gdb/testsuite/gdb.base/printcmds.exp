@@ -536,6 +536,15 @@ proc test_print_strings {} {
     gdb_test "p teststring" \
 	" = (.unsigned char .. )?\"teststring contents\"" "p teststring with elements set to 20"
 
+    gdb_test "p -elements 1 -- teststring" \
+	" = (.unsigned char .. )?\"t\"\\.\\.\\."
+    gdb_test "p -elements 5 -- teststring" \
+	" = (.unsigned char .. )?\"tests\"\\.\\.\\."
+    gdb_test "p -elements 19 -- teststring" \
+	" = (.unsigned char .. )?\"teststring contents\""
+    gdb_test "p -elements 20 -- teststring" \
+	" = (.unsigned char .. )?\"teststring contents\""
+
     gdb_test "print teststring2" \
 	" = \\(charptr\\) \"more contents\""
 
