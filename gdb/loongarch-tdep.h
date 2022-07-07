@@ -39,6 +39,8 @@ enum
   LOONGARCH_PC_REGNUM = 33,		/* Program Counter.  */
   LOONGARCH_BADV_REGNUM = 34,		/* Bad Vaddr for Addressing Exception.  */
   LOONGARCH_LINUX_NUM_GREGSET = 45,	/* 32 GPR, ORIG_A0, PC, BADV, RESERVED 10.  */
+  LOONGARCH_ARG_REGNUM = 8,            /* r4-r11: general-purpose argument registers.
+					  f0-f7: floating-point argument registers.  */
 };
 
 /* Register set definitions.  */

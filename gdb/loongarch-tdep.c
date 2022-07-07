@@ -452,6 +452,599 @@ static const struct frame_unwind loongarch_frame_unwind = {
   /*.prev_arch	   =*/nullptr,
 };
 
+static void
+pass_in_gar (struct regcache *regcache, unsigned int gar, const gdb_byte *val)
+{
+  unsigned int regnum = LOONGARCH_ARG_REGNUM - gar + LOONGARCH_A0_REGNUM;
+  regcache->cooked_write (regnum, val);
+}
+
+static void
+pass_in_far (struct regcache *regcache, unsigned int far, const gdb_byte *val)
+{
+  unsigned int regnum = LOONGARCH_ARG_REGNUM - far + LOONGARCH_BADV_REGNUM + 1;
+  regcache->cooked_write (regnum, val);
+}
+
+static __attribute__((aligned(16))) gdb_byte buf[1024] = { 0 };
+static gdb_byte *addr = buf;
+
+static void
+pass_on_stack (struct regcache *regcache, const gdb_byte *val, size_t len, int align)
+{
+  align = align_up (align, 8);
+  if (align > 16)
+    align = 16;
+
+  CORE_ADDR align_addr = (CORE_ADDR) addr;
+  align_addr = align_up (align_addr, align);
+  addr = (gdb_byte *) align_addr;
+  memcpy (addr, val, len);
+  addr += len;
+}
+
+static unsigned int fixed_point_members = 0;
+static unsigned int floating_point_members = 0;
+static bool first_member_is_fixed_point = false;
+
+static void
+compute_struct_member (struct type *type)
+{
+  for (int i = 0; i < type->num_fields (); i++)
+    {
+      struct type *field_type = check_typedef (type->field (i).type ());
+
+      if (field_type->code () == TYPE_CODE_INT
+	  || field_type->code () == TYPE_CODE_BOOL
+	  || field_type->code () == TYPE_CODE_CHAR
+	  || field_type->code () == TYPE_CODE_RANGE
+	  || field_type->code () == TYPE_CODE_ENUM
+	  || field_type->code () == TYPE_CODE_PTR)
+      {
+	fixed_point_members++;
+
+	if (floating_point_members == 0)
+	  first_member_is_fixed_point = true;
+      }
+      else if (field_type->code () == TYPE_CODE_FLT)
+	floating_point_members++;
+      else if (field_type->code () == TYPE_CODE_STRUCT)
+	compute_struct_member (field_type);
+      else if (field_type->code () == TYPE_CODE_COMPLEX)
+	floating_point_members += 2;
+    }
+}
+
+/* Implement the push_dummy_call gdbarch method.  */
+
+static CORE_ADDR
+loongarch_push_dummy_call (struct gdbarch *gdbarch,
+			   struct value *function,
+			   struct regcache *regcache,
+			   CORE_ADDR bp_addr,
+			   int nargs,
+			   struct value **args,
+			   CORE_ADDR sp,
+			   function_call_return_method return_method,
+			   CORE_ADDR struct_addr)
+{
+  int regsize = register_size (gdbarch, 0);
+  unsigned int gar = LOONGARCH_ARG_REGNUM;
+  unsigned int far = LOONGARCH_ARG_REGNUM;
+
+  if (return_method != return_method_normal)
+    pass_in_gar (regcache, gar--, (gdb_byte *) &struct_addr);
+
+  addr = buf;
+  for (int i = 0; i < nargs; i++)
+    {
+      struct value *arg = args[i];
+      const gdb_byte *val = value_contents (arg).data ();
+      struct type *type = check_typedef (value_type (arg));
+      size_t len = TYPE_LENGTH (type);
+      int align = type_align (type);
+      enum type_code code = type->code ();
+
+      switch (code)
+	{
+	case TYPE_CODE_INT:
+	case TYPE_CODE_BOOL:
+	case TYPE_CODE_CHAR:
+	case TYPE_CODE_RANGE:
+	case TYPE_CODE_ENUM:
+	case TYPE_CODE_PTR:
+	  {
+	    /* integer or pointer type is passed in GAR.
+	     * If no GAR is available, it’s passed on the stack.
+	     * When passed in registers or on the stack,
+	     * the unsigned integer scalars are zero-extended to GRLEN bits,
+	     * and the signed integer scalars are sign-extended.  */
+	  if (type->is_unsigned ())
+	    {
+              ULONGEST data = extract_unsigned_integer (val, len, BFD_ENDIAN_LITTLE);
+	      if (gar > 0)
+		pass_in_gar (regcache, gar--, (gdb_byte *) &data);
+	      else
+		pass_on_stack (regcache, (gdb_byte *) &data, len, align);
+            }
+	  else
+	    {
+	      LONGEST data = extract_signed_integer (val, len, BFD_ENDIAN_LITTLE);
+	      if (gar > 0)
+		pass_in_gar (regcache, gar--, (gdb_byte *) &data);
+	      else
+		pass_on_stack (regcache, (gdb_byte *) &data, len, align);
+            }
+	  }
+	  break;
+	case TYPE_CODE_FLT:
+	  if (len == 2 * regsize)
+	    {
+	      /* long double type is passed in a pair of GAR,
+	       * with the low-order GRLEN bits in the lower-numbered register
+	       * and the high-order GRLEN bits in the higher-numbered register.
+	       * If exactly one register is available,
+	       * the low-order GRLEN bits are passed in the register
+	       * and the high-order GRLEN bits are passed on the stack.
+	       * If no GAR is available, it’s passed on the stack.  */
+	      if (gar >= 2)
+		{
+		  pass_in_gar (regcache, gar--, val);
+		  pass_in_gar (regcache, gar--, val + regsize);
+		}
+	      else if (gar == 1)
+		{
+		  pass_in_gar (regcache, gar--, val);
+		  pass_on_stack (regcache, val + regsize, len - regsize, align);
+		}
+	      else
+		{
+		  pass_on_stack (regcache, val, len, align);
+		}
+	    }
+	  else
+	    {
+	      /* The other floating-point type is passed in FAR.
+	       * If no FAR is available, it’s passed in GAR.
+	       * If no GAR is available, it’s passed on the stack.  */
+	      if (far > 0)
+		  pass_in_far (regcache, far--, val);
+	      else if (gar > 0)
+		  pass_in_gar (regcache, gar--, val);
+	      else
+		  pass_on_stack (regcache, val, len, align);
+	    }
+	  break;
+	case TYPE_CODE_STRUCT:
+	  {
+	    fixed_point_members = 0;
+	    floating_point_members = 0;
+	    first_member_is_fixed_point = false;
+	    compute_struct_member (type);
+
+	    if (len > 0 && len <= regsize)
+	      {
+		/* The structure has only fixed-point members.  */
+		if (fixed_point_members > 0 && floating_point_members == 0)
+		  {
+		    /* If there is an available GAR,
+		     * the structure is passed through the GAR by value passing;
+		     * If no GAR is available, it’s passed on the stack.  */
+		    if (gar > 0)
+		      pass_in_gar (regcache, gar--, val);
+		    else
+		      pass_on_stack (regcache, val, len, align);
+		  }
+		/* The structure has only floating-point members.  */
+		else if (fixed_point_members == 0 && floating_point_members > 0)
+		  {
+		    /* One floating-point member.
+		     * The argument is passed in a FAR.
+		     * If no FAR is available, the value is passed in a GAR.
+		     * if no GAR is available, the value is passed on the stack.  */
+		    if (floating_point_members == 1)
+		      {
+			if (far > 0)
+			  pass_in_far (regcache, far--, val);
+			else if (gar > 0)
+			  pass_in_gar (regcache, gar--, val);
+			else
+			  pass_on_stack (regcache, val, len, align);
+		      }
+		    /* Two floating-point members.
+		     * The argument is passed in a pair of available FAR,
+		     * with the low-order float member bits in the lower-numbered FAR
+		     * and the high-order float member bits in the higher-numbered FAR.
+		     * If the number of available FAR is less than 2, it’s passed in a GAR,
+		     * and passed on the stack if no GAR is available.  */
+		    else if (floating_point_members == 2)
+		      {
+			if (far >= 2)
+			  {
+			    pass_in_far (regcache, far--, val);
+			    pass_in_far (regcache, far--, val + align);
+			  }
+			else if (gar > 0)
+			  {
+			    pass_in_gar (regcache, gar--, val);
+			  }
+			else
+			  {
+			    pass_on_stack (regcache, val, len, align);
+			  }
+		      }
+		  }
+		/* The structure has both fixed-point and floating-point members.  */
+		else if (fixed_point_members > 0 && floating_point_members > 0)
+		  {
+		    /* One float member and multiple fixed-point members.
+		     * If there are available GAR, the structure is passed in a GAR,
+		     * and passed on the stack if no GAR is available.  */
+		    if (floating_point_members == 1 && fixed_point_members > 1)
+		      {
+			if (gar > 0)
+			  pass_in_gar (regcache, gar--, val);
+			else
+			  pass_on_stack (regcache, val, len, align);
+		      }
+		    /* One float member and only one fixed-point member.
+		     * If one FAR and one GAR are available,
+		     * the floating-point member of the structure is passed in the FAR,
+		     * and the fixed-point member of the structure is passed in the GAR.
+		     * If no floating-point register but one GAR is available, it’s passed in GAR;
+		     * If no GAR is available, it’s passed on the stack.  */
+		    else if (floating_point_members == 1 && fixed_point_members == 1)
+		      {
+			if (far > 0 && gar > 0)
+			  {
+			    if (first_member_is_fixed_point == false)
+			      {
+				pass_in_far (regcache, far--, val);
+				pass_in_gar (regcache, gar--, val + align);
+			      }
+			    else
+			      {
+				pass_in_gar (regcache, gar--, val);
+				pass_in_far (regcache, far--, val + align);
+			      }
+			  }
+			else
+			  {
+			    if (gar > 0)
+			      pass_in_gar (regcache, gar--, val);
+			    else
+			      pass_on_stack (regcache, val, len, align);
+			  }
+		      }
+		  }
+	      }
+	    else if (len > regsize && len <= 2 * regsize)
+	      {
+		/* Only fixed-point members.  */
+		if (fixed_point_members > 0 && floating_point_members == 0)
+		  {
+		    /* The argument is passed in a pair of available GAR,
+		     * with the low-order bits in the lower-numbered GAR
+		     * and the high-order bits in the higher-numbered GAR.
+		     * If only one GAR is available,
+		     * the low-order bits are in the GAR
+		     * and the high-order bits are on the stack,
+		     * and passed on the stack if no GAR is available.  */
+		    if (gar >= 2)
+		      {
+			pass_in_gar (regcache, gar--, val);
+			pass_in_gar (regcache, gar--, val + regsize);
+		      }
+		    else if (gar == 1)
+		      {
+			pass_in_gar (regcache, gar--, val);
+			pass_on_stack (regcache, val + regsize, len - regsize, align);
+		      }
+		    else
+		      {
+			pass_on_stack (regcache, val, len, align);
+		      }
+		  }
+		/* Only floating-point members.  */
+		else if (fixed_point_members == 0 && floating_point_members > 0)
+		  {
+		    /* The structure has one long double member
+		     * or one double member and two adjacent float members
+		     * or 3-4 float members.
+		     * The argument is passed in a pair of available GAR,
+		     * with the low-order bits in the lower-numbered GAR
+		     * and the high-order bits in the higher-numbered GAR.
+		     * If only one GAR is available,
+		     * the low-order bits are in the GAR
+		     * and the high-order bits are on the stack,
+		     * and passed on the stack if no GAR is available.  */
+		    if ((len == 16 && floating_point_members == 1)
+			 || (len == 16 && floating_point_members == 3)
+			 || (len == 12 && floating_point_members == 3)
+			 || (len == 16 && floating_point_members == 4))
+		      {
+			if (gar >= 2)
+			  {
+			    pass_in_gar (regcache, gar--, val);
+			    pass_in_gar (regcache, gar--, val + regsize);
+			  }
+			else if (gar == 1)
+			  {
+			    pass_in_gar (regcache, gar--, val);
+			    pass_on_stack (regcache, val + regsize, len - regsize, align);
+			  }
+			else
+			  {
+			    pass_on_stack (regcache, val, len, align);
+			  }
+		      }
+		    /* The structure with two double members
+		     * is passed in a pair of available FAR,
+		     * with the low-order bits in the lower-numbered FAR
+		     * and the high-order bits in the higher-numbered FAR.
+		     * If no a pair of available FAR,
+		     * it’s passed in a pair of available GAR,
+		     * with the low-order bits in the lower-numbered GAR
+		     * and the high-order bits in the higher-numbered GAR.
+		     * If only one GAR is available,
+		     * the low-order bits are in the GAR
+		     * and the high-order bits are on stack,
+		     * and passed on the stack if no GAR is available.
+		     * A structure with one double member and one float member is same.  */
+		    else if ((len == 16 && floating_point_members == 2)
+			     || (len == 12 && floating_point_members == 2))
+		      {
+			if (far >= 2)
+			  {
+			    pass_in_far (regcache, far--, val);
+			    pass_in_far (regcache, far--, val + regsize);
+			  }
+			else if (gar >= 2)
+			  {
+			    pass_in_gar (regcache, gar--, val);
+			    pass_in_gar (regcache, gar--, val + regsize);
+			  }
+			else if (gar == 1)
+			  {
+			    pass_in_gar (regcache, gar--, val);
+			    pass_on_stack (regcache, val + regsize, len - regsize, align);
+			  }
+			else
+			  {
+			    pass_on_stack (regcache, val, len, align);
+			  }
+		      }
+		  }
+		/* Both fixed-point and floating-point members.  */
+		else if (fixed_point_members > 0 && floating_point_members > 0)
+		  {
+		    /* The structure has one floating-point member and only one fixed-point member.  */
+		    if (floating_point_members == 1 && fixed_point_members == 1)
+		      {
+			/* If one FAR and one GAR are available,
+			 * the floating-point member of the structure is passed in the FAR,
+			 * and the fixed-point member of the structure is passed in the GAR;
+			 * If no floating-point registers but two GARs are available,
+			 * it’s passed in the two GARs;
+			 * If only one GAR is available,
+			 * the low-order bits are in the GAR
+			 * and the high-order bits are on the stack;
+			 * And it’s passed on the stack if no GAR is available.  */
+			if (far > 0 && gar > 0)
+			  {
+			    if (first_member_is_fixed_point == false)
+			      {
+				pass_in_far (regcache, far--, val);
+				pass_in_gar (regcache, gar--, val + regsize);
+			      }
+			    else
+			      {
+				pass_in_gar (regcache, gar--, val);
+				pass_in_far (regcache, far--, val + regsize);
+			      }
+			  }
+			else if (far == 0 && gar >= 2)
+			  {
+			    pass_in_gar (regcache, gar--, val);
+			    pass_in_gar (regcache, gar--, val + regsize);
+			  }
+			else if (far == 0 && gar == 1)
+			  {
+			    pass_in_gar (regcache, gar--, val);
+			    pass_on_stack (regcache, val + regsize, len - regsize, align);
+			  }
+			else if (far == 0 && gar == 0)
+			  {
+			    pass_on_stack (regcache, val, len, align);
+			  }
+		      }
+		    else
+		      {
+			/* The argument is passed in a pair of available GAR,
+			 * with the low-order bits in the lower-numbered GAR
+			 * and the high-order bits in the higher-numbered GAR.
+			 * If only one GAR is available,
+			 * the low-order bits are in the GAR
+			 * and the high-order bits are on the stack,
+			 * and passed on the stack if no GAR is available.  */
+			if (gar >= 2)
+			  {
+			    pass_in_gar (regcache, gar--, val);
+			    pass_in_gar (regcache, gar--, val + regsize);
+			  }
+			else if (gar == 1)
+			  {
+			    pass_in_gar (regcache, gar--, val);
+			    pass_on_stack (regcache, val + regsize, len - regsize, align);
+			  }
+			else
+			  {
+			    pass_on_stack (regcache, val, len, align);
+			  }
+		      }
+		  }
+	      }
+	    else if (len > 2 * regsize)
+	      {
+	        /* It’s passed by reference and are replaced in the argument list with the address.
+		 * If there is an available GAR, the reference is passed in the GAR,
+		 * and passed on the stack if no GAR is available.  */
+		sp = align_down (sp - len, 16);
+		write_memory (sp, val, len);
+
+		if (gar > 0)
+		  pass_in_gar (regcache, gar--, (const gdb_byte *) &sp);
+		else
+		  pass_on_stack (regcache, (const gdb_byte*) &sp, len, regsize);
+	      }
+	  }
+	  break;
+	case TYPE_CODE_UNION:
+	  /* Union is passed in GAR or stack.  */
+	  if (len > 0 && len <= regsize)
+	    {
+	      /* The argument is passed in a GAR,
+	       * or on the stack by value if no GAR is available.  */
+	      if (gar > 0)
+		pass_in_gar (regcache, gar--, val);
+	      else
+		pass_on_stack (regcache, val, len, align);
+	    }
+	  else if (len > regsize && len <= 2 * regsize)
+	    {
+	      /* The argument is passed in a pair of available GAR,
+	       * with the low-order bits in the lower-numbered GAR
+	       * and the high-order bits in the higher-numbered GAR.
+	       * If only one GAR is available,
+	       * the low-order bits are in the GAR
+	       * and the high-order bits are on the stack.
+	       * The arguments are passed on the stack when no GAR is available.  */
+	      if (gar >= 2)
+		{
+		  pass_in_gar (regcache, gar--, val);
+		  pass_in_gar (regcache, gar--, val + regsize);
+		}
+	      else if (gar == 1)
+		{
+		  pass_in_gar (regcache, gar--, val);
+		  pass_on_stack (regcache, val + regsize, len - regsize, align);
+		}
+	      else
+		{
+		  pass_on_stack (regcache, val, len, align);
+		}
+	    }
+	  else if (len > 2 * regsize)
+	    {
+	      /* It’s passed by reference and are replaced in the argument list with the address.
+	       * If there is an available GAR, the reference is passed in the GAR,
+	       * and passed on the stack if no GAR is available.  */
+	      sp = align_down (sp - len, 16);
+	      write_memory (sp, val, len);
+
+	      if (gar > 0)
+		pass_in_gar (regcache, gar--, (const gdb_byte *) &sp);
+	      else
+		pass_on_stack (regcache, (const gdb_byte*) &sp, len, regsize);
+	    }
+	  break;
+	case TYPE_CODE_COMPLEX:
+	  {
+	    struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
+	    size_t target_len = TYPE_LENGTH (target_type);
+
+	    if (target_len < regsize)
+	      {
+		/* The complex with two float members
+		 * is passed in a pair of available FAR,
+		 * with the low-order float member bits in the lower-numbered FAR
+		 * and the high-order float member bits in the higher-numbered FAR.
+		 * If the number of available FAR is less than 2, it’s passed in a GAR,
+		 * and passed on the stack if no GAR is available.  */
+		if (far >= 2)
+		  {
+		    pass_in_far (regcache, far--, val);
+		    pass_in_far (regcache, far--, val + align);
+		  }
+		else if (gar > 0)
+		  {
+		    pass_in_gar (regcache, gar--, val);
+		  }
+		else
+		  {
+		    pass_on_stack (regcache, val, len, align);
+		  }
+	      }
+	    else if (target_len == regsize)
+	      {
+		/* The complex with two double members
+		 * is passed in a pair of available FAR,
+		 * with the low-order bits in the lower-numbered FAR
+		 * and the high-order bits in the higher-numbered FAR.
+		 * If no a pair of available FAR,
+		 * it’s passed in a pair of available GAR,
+		 * with the low-order bits in the lower-numbered GAR
+		 * and the high-order bits in the higher-numbered GAR.
+		 * If only one GAR is available,
+		 * the low-order bits are in the GAR
+		 * and the high-order bits are on stack,
+		 * and passed on the stack if no GAR is available.  */
+		{
+		  if (far >= 2)
+		    {
+		      pass_in_far (regcache, far--, val);
+		      pass_in_far (regcache, far--, val + align);
+		    }
+		  else if (gar >= 2)
+		    {
+		      pass_in_gar (regcache, gar--, val);
+		      pass_in_gar (regcache, gar--, val + align);
+		    }
+		  else if (gar == 1)
+		    {
+		      pass_in_gar (regcache, gar--, val);
+		      pass_on_stack (regcache, val + align, len - align, align);
+		    }
+		  else
+		    {
+		      pass_on_stack (regcache, val, len, align);
+		    }
+		}
+	      }
+	    else if (target_len == 2 * regsize)
+	      {
+		/* The complex with two long double members
+		 * is passed by reference and are replaced in the argument list with the address.
+	         * If there is an available GAR, the reference is passed in the GAR,
+	         * and passed on the stack if no GAR is available.  */
+		sp = align_down (sp - len, 16);
+		write_memory (sp, val, len);
+
+		if (gar > 0)
+		  pass_in_gar (regcache, gar--, (const gdb_byte *) &sp);
+		else
+		  pass_on_stack (regcache, (const gdb_byte*) &sp, regsize, regsize);
+	      }
+	  }
+	  break;
+	default:
+	  break;
+	}
+    }
+
+  if (addr > buf)
+    {
+      sp -= addr - buf;
+      sp = align_down (sp, 16);
+      write_memory (sp, buf, addr - buf);
+    }
+
+  regcache_cooked_write_unsigned (regcache, LOONGARCH_RA_REGNUM, bp_addr);
+  regcache_cooked_write_unsigned (regcache, LOONGARCH_SP_REGNUM, sp);
+
+  return sp;
+}
+
 /* Implement the return_value gdbarch method.  */
 
 static enum return_value_convention
@@ -643,6 +1236,9 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Finalise the target description registers.  */
   tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
+
+  /* Functions handling dummy frames.  */
+  set_gdbarch_push_dummy_call (gdbarch, loongarch_push_dummy_call);
 
   /* Return value info  */
   set_gdbarch_return_value (gdbarch, loongarch_return_value);
