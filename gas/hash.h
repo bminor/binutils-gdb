@@ -99,7 +99,7 @@ static inline htab_t
 str_htab_create (void)
 {
   return htab_create_alloc (16, hash_string_tuple, eq_string_tuple,
-			    NULL, xcalloc, free);
+			    free, xcalloc, free);
 }
 
 #endif /* HASH_H */

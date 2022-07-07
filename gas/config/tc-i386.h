@@ -216,6 +216,9 @@ extern void i386_cons_align (int);
 void i386_print_statistics (FILE *);
 #define tc_print_statistics i386_print_statistics
 
+void i386_md_end (void);
+#define md_end i386_md_end
+
 extern unsigned int i386_frag_max_var (fragS *);
 #define md_frag_max_var i386_frag_max_var
 

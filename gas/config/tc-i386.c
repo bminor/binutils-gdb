@@ -2947,7 +2947,7 @@ md_begin (void)
 
     /* Setup for loop.  */
     optab = i386_optab;
-    core_optab = XNEW (templates);
+    core_optab = notes_alloc (sizeof (*core_optab));
     core_optab->start = optab;
 
     while (1)
@@ -2964,7 +2964,7 @@ md_begin (void)
 
 	    if (optab->name == NULL)
 	      break;
-	    core_optab = XNEW (templates);
+	    core_optab = notes_alloc (sizeof (*core_optab));
 	    core_optab->start = optab;
 	  }
       }
@@ -3098,6 +3098,13 @@ i386_print_statistics (FILE *file)
 {
   htab_print_statistics (file, "i386 opcode", op_hash);
   htab_print_statistics (file, "i386 register", reg_hash);
+}
+
+void
+i386_md_end (void)
+{
+  htab_delete (op_hash);
+  htab_delete (reg_hash);
 }
 
 #ifdef DEBUG386
