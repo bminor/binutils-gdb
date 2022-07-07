@@ -122,16 +122,6 @@ static char *listing_filename = NULL;
 
 static struct defsym_list *defsyms;
 
-#ifdef HAVE_ITBL_CPU
-/* Keep a record of the itbl files we read in.  */
-struct itbl_file_list
-{
-  struct itbl_file_list *next;
-  char *name;
-};
-static struct itbl_file_list *itbl_files;
-#endif
-
 static long start_time;
 
 static int flag_macro_alternate;
@@ -791,27 +781,19 @@ This program has absolutely no warranty.\n"));
 	  {
 	    /* optarg is the name of the file containing the instruction
 	       formats, opcodes, register names, etc.  */
-	    struct itbl_file_list *n;
-
 	    if (optarg == NULL)
 	      {
 		as_warn (_("no file name following -t option"));
 		break;
 	      }
 
-	    n = XNEW (struct itbl_file_list);
-	    n->next = itbl_files;
-	    n->name = optarg;
-	    itbl_files = n;
-
 	    /* Parse the file and add the new instructions to our internal
 	       table.  If multiple instruction tables are specified, the
 	       information from this table gets appended onto the existing
 	       internal table.  */
-	    itbl_files->name = xstrdup (optarg);
-	    if (itbl_parse (itbl_files->name) != 0)
+	    if (itbl_parse (optarg) != 0)
 	      as_fatal (_("failed to read instruction table %s\n"),
-			itbl_files->name);
+			optarg);
 	  }
 	  break;
 #endif
