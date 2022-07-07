@@ -340,6 +340,9 @@ COMMON int flag_noexecstack;
 /* name of emitted object file */
 COMMON const char *out_file_name;
 
+/* Keep the output file.  */
+COMMON int keep_it;
+
 /* name of file defining extensions to the basic instruction set */
 COMMON char *insttbl_file_name;
 

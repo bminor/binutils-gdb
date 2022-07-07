@@ -111,9 +111,6 @@ int flag_use_elf_stt_common = DEFAULT_GENERATE_ELF_STT_COMMON;
 bool flag_generate_build_notes = DEFAULT_GENERATE_BUILD_NOTES;
 #endif
 
-/* Keep the output file.  */
-static int keep_it = 0;
-
 segT reg_section;
 segT expr_section;
 segT text_section;
@@ -1155,14 +1152,6 @@ dump_statistics (void)
 #endif
 }
 
-static void
-close_output_file (void)
-{
-  output_file_close (out_file_name);
-  if (!keep_it)
-    unlink_if_ordinary (out_file_name);
-}
-
 /* The interface between the macro code and gas expression handling.  */
 
 static size_t
@@ -1361,7 +1350,7 @@ main (int argc, char ** argv)
   expr_begin ();
 
   /* It has to be called after dump_statistics ().  */
-  xatexit (close_output_file);
+  xatexit (output_file_close);
 
   if (flag_print_statistics)
     xatexit (dump_statistics);
