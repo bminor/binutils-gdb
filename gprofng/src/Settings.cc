@@ -407,7 +407,10 @@ Settings::read_rc (bool ipc_or_rdt_mode)
   free (rc_path);
 
   // Read system-wide file
-  rc_path = dbe_sprintf (NTXT ("%s/gprofng.rc"), SYSCONFDIR);
+  const char *sysconfdir = getenv("GPROFNG_SYSCONFDIR");
+  if (sysconfdir == NULL)
+    sysconfdir = SYSCONFDIR;
+  rc_path = dbe_sprintf (NTXT ("%s/gprofng.rc"), sysconfdir);
   if (access (rc_path, R_OK | F_OK) != 0)
     {
       StringBuilder sb;

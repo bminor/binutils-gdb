@@ -42,6 +42,9 @@ DISPLAY_LOG = display.log
 gprofng_dir := $(shell dirname $$(find ../root -name libgprofng.so.0 | head -1))
 export LD_LIBRARY_PATH := $(gprofng_dir):$(gprofng_dir)/..
 
+# Set GPROFNG_SYSCONFDIR to find out gprofng.rc:
+export GPROFNG_SYSCONFDIR := $(srcdir)/../../../src
+
 .PHONY: all collect compare clobber clean
 
 all: compare
