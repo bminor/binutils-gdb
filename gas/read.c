@@ -261,9 +261,6 @@ read_begin (void)
   pobegin ();
   obj_read_begin_hook ();
 
-  /* Something close -- but not too close -- to a multiple of 1024.
-     The debugging malloc I'm using has 24 bytes of overhead.  */
-  obstack_begin (&notes, chunksize);
   obstack_begin (&cond_obstack, chunksize);
 
 #ifndef tc_line_separator_chars
@@ -282,6 +279,7 @@ void
 read_end (void)
 {
   poend ();
+  _obstack_free (&cond_obstack, NULL);
 }
 
 #ifndef TC_ADDRESS_BYTES

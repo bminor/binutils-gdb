@@ -50,8 +50,6 @@ subsegs_end (struct obstack **obs)
   for (; *obs; obs++)
     _obstack_free (*obs, NULL);
   _obstack_free (&frchains, NULL);
-  _obstack_free (&cond_obstack, NULL);
-  _obstack_free (&notes, NULL);
 }
 
 static void

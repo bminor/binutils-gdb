@@ -588,7 +588,7 @@ parse_args (int * pargc, char *** pargv)
   old_argv = *pargv;
 
   /* Initialize a new argv that contains no options.  */
-  new_argv = XNEWVEC (char *, old_argc + 1);
+  new_argv = notes_alloc (sizeof (char *) * (old_argc + 1));
   new_argv[0] = old_argv[0];
   new_argc = 1;
   new_argv[new_argc] = NULL;
@@ -996,7 +996,7 @@ This program has absolutely no warranty.\n"));
  	case OPTION_AL:
 	  listing |= LISTING_LISTING;
 	  if (optarg)
-	    listing_filename = xstrdup (optarg);
+	    listing_filename = notes_strdup (optarg);
 	  break;
 
  	case OPTION_ALTERNATE:
@@ -1050,7 +1050,7 @@ This program has absolutely no warranty.\n"));
 		      listing |= LISTING_SYMBOLS;
 		      break;
 		    case '=':
-		      listing_filename = xstrdup (optarg + 1);
+		      listing_filename = notes_strdup (optarg + 1);
 		      optarg += strlen (listing_filename);
 		      break;
 		    default:
@@ -1076,14 +1076,14 @@ This program has absolutely no warranty.\n"));
 
 	case 'I':
 	  {			/* Include file directory.  */
-	    char *temp = xstrdup (optarg);
+	    char *temp = notes_strdup (optarg);
 
 	    add_include_dir (temp);
 	    break;
 	  }
 
 	case 'o':
-	  out_file_name = xstrdup (optarg);
+	  out_file_name = notes_strdup (optarg);
 	  break;
 
 	case 'w':
@@ -1231,7 +1231,12 @@ perform_an_assembly_pass (int argc, char ** argv)
   if (!saw_a_file)
     read_a_source_file ("");
 }
-
+
+static void
+free_notes (void)
+{
+  _obstack_free (&notes, NULL);
+}
 
 int
 main (int argc, char ** argv)
@@ -1279,6 +1284,9 @@ main (int argc, char ** argv)
 #ifdef USE_EMULATIONS
   select_emulation_mode (argc, argv);
 #endif
+
+  obstack_begin (&notes, chunksize);
+  xatexit (free_notes);
 
   PROGRESS (1);
   /* Call parse_args before any of the init/begin functions
