@@ -555,7 +555,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	case TYPE_CODE_PTR:
 	  {
 	    /* integer or pointer type is passed in GAR.
-	     * If no GAR is available, it’s passed on the stack.
+	     * If no GAR is available, it's passed on the stack.
 	     * When passed in registers or on the stack,
 	     * the unsigned integer scalars are zero-extended to GRLEN bits,
 	     * and the signed integer scalars are sign-extended.  */
@@ -586,7 +586,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	       * If exactly one register is available,
 	       * the low-order GRLEN bits are passed in the register
 	       * and the high-order GRLEN bits are passed on the stack.
-	       * If no GAR is available, it’s passed on the stack.  */
+	       * If no GAR is available, it's passed on the stack.  */
 	      if (gar >= 2)
 		{
 		  pass_in_gar (regcache, gar--, val);
@@ -605,8 +605,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	  else
 	    {
 	      /* The other floating-point type is passed in FAR.
-	       * If no FAR is available, it’s passed in GAR.
-	       * If no GAR is available, it’s passed on the stack.  */
+	       * If no FAR is available, it's passed in GAR.
+	       * If no GAR is available, it's passed on the stack.  */
 	      if (far > 0)
 		  pass_in_far (regcache, far--, val);
 	      else if (gar > 0)
@@ -629,7 +629,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		  {
 		    /* If there is an available GAR,
 		     * the structure is passed through the GAR by value passing;
-		     * If no GAR is available, it’s passed on the stack.  */
+		     * If no GAR is available, it's passed on the stack.  */
 		    if (gar > 0)
 		      pass_in_gar (regcache, gar--, val);
 		    else
@@ -655,7 +655,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		     * The argument is passed in a pair of available FAR,
 		     * with the low-order float member bits in the lower-numbered FAR
 		     * and the high-order float member bits in the higher-numbered FAR.
-		     * If the number of available FAR is less than 2, it’s passed in a GAR,
+		     * If the number of available FAR is less than 2, it's passed in a GAR,
 		     * and passed on the stack if no GAR is available.  */
 		    else if (floating_point_members == 2)
 		      {
@@ -691,8 +691,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		     * If one FAR and one GAR are available,
 		     * the floating-point member of the structure is passed in the FAR,
 		     * and the fixed-point member of the structure is passed in the GAR.
-		     * If no floating-point register but one GAR is available, it’s passed in GAR;
-		     * If no GAR is available, it’s passed on the stack.  */
+		     * If no floating-point register but one GAR is available, it's passed in GAR;
+		     * If no GAR is available, it's passed on the stack.  */
 		    else if (floating_point_members == 1 && fixed_point_members == 1)
 		      {
 			if (far > 0 && gar > 0)
@@ -783,7 +783,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		     * with the low-order bits in the lower-numbered FAR
 		     * and the high-order bits in the higher-numbered FAR.
 		     * If no a pair of available FAR,
-		     * it’s passed in a pair of available GAR,
+		     * it's passed in a pair of available GAR,
 		     * with the low-order bits in the lower-numbered GAR
 		     * and the high-order bits in the higher-numbered GAR.
 		     * If only one GAR is available,
@@ -825,11 +825,11 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 			 * the floating-point member of the structure is passed in the FAR,
 			 * and the fixed-point member of the structure is passed in the GAR;
 			 * If no floating-point registers but two GARs are available,
-			 * it’s passed in the two GARs;
+			 * it's passed in the two GARs;
 			 * If only one GAR is available,
 			 * the low-order bits are in the GAR
 			 * and the high-order bits are on the stack;
-			 * And it’s passed on the stack if no GAR is available.  */
+			 * And it's passed on the stack if no GAR is available.  */
 			if (far > 0 && gar > 0)
 			  {
 			    if (first_member_is_fixed_point == false)
@@ -886,7 +886,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	      }
 	    else if (len > 2 * regsize)
 	      {
-	        /* It’s passed by reference and are replaced in the argument list with the address.
+	        /* It's passed by reference and are replaced in the argument list with the address.
 		 * If there is an available GAR, the reference is passed in the GAR,
 		 * and passed on the stack if no GAR is available.  */
 		sp = align_down (sp - len, 16);
@@ -936,7 +936,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	    }
 	  else if (len > 2 * regsize)
 	    {
-	      /* It’s passed by reference and are replaced in the argument list with the address.
+	      /* It's passed by reference and are replaced in the argument list with the address.
 	       * If there is an available GAR, the reference is passed in the GAR,
 	       * and passed on the stack if no GAR is available.  */
 	      sp = align_down (sp - len, 16);
@@ -959,7 +959,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		 * is passed in a pair of available FAR,
 		 * with the low-order float member bits in the lower-numbered FAR
 		 * and the high-order float member bits in the higher-numbered FAR.
-		 * If the number of available FAR is less than 2, it’s passed in a GAR,
+		 * If the number of available FAR is less than 2, it's passed in a GAR,
 		 * and passed on the stack if no GAR is available.  */
 		if (far >= 2)
 		  {
@@ -982,7 +982,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		 * with the low-order bits in the lower-numbered FAR
 		 * and the high-order bits in the higher-numbered FAR.
 		 * If no a pair of available FAR,
-		 * it’s passed in a pair of available GAR,
+		 * it's passed in a pair of available GAR,
 		 * with the low-order bits in the lower-numbered GAR
 		 * and the high-order bits in the higher-numbered GAR.
 		 * If only one GAR is available,
