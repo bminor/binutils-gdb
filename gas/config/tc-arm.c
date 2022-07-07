@@ -28120,11 +28120,8 @@ arm_tc_equal_in_insn (int c ATTRIBUTE_UNUSED, char * name)
 	    already_warned = str_htab_create ();
 	  /* Only warn about the symbol once.  To keep the code
 	     simple we let str_hash_insert do the lookup for us.  */
-	  if (str_hash_find (already_warned, nbuf) == NULL)
-	    {
-	      as_warn (_("[-mwarn-syms]: Assignment makes a symbol match an ARM instruction: %s"), name);
-	      str_hash_insert (already_warned, nbuf, NULL, 0);
-	    }
+	  if (str_hash_insert (already_warned, nbuf, NULL, 0) == NULL)
+	    as_warn (_("[-mwarn-syms]: Assignment makes a symbol match an ARM instruction: %s"), name);
 	}
       else
 	free (nbuf);
