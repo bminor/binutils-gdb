@@ -774,6 +774,15 @@ arc_insert_opcode (const struct arc_opcode *opcode)
   entry->count++;
 }
 
+static void
+arc_opcode_free (void *elt)
+{
+  string_tuple_t *tuple = (string_tuple_t *) elt;
+  struct arc_opcode_hash_entry *entry = (void *) tuple->value;
+  free (entry->opcode);
+  free (entry);
+  free (tuple);
+}
 
 /* Like md_number_to_chars but for middle-endian values.  The 4-byte limm
    value, is encoded as 'middle-endian' for a little-endian target.  This
@@ -2605,7 +2614,8 @@ md_begin (void)
   bfd_set_private_flags (stdoutput, selected_cpu.eflags);
 
   /* Set up a hash table for the instructions.  */
-  arc_opcode_hash = str_htab_create ();
+  arc_opcode_hash = htab_create_alloc (16, hash_string_tuple, eq_string_tuple,
+				       arc_opcode_free, xcalloc, free);
 
   /* Initialize the hash table with the insns.  */
   do
@@ -2708,6 +2718,15 @@ md_begin (void)
   declare_addrtype ("csd", ARC_NPS400_ADDRTYPE_CSD);
   declare_addrtype ("cxa", ARC_NPS400_ADDRTYPE_CXA);
   declare_addrtype ("cxd", ARC_NPS400_ADDRTYPE_CXD);
+}
+
+void
+arc_md_end (void)
+{
+  htab_delete (arc_opcode_hash);
+  htab_delete (arc_reg_hash);
+  htab_delete (arc_aux_hash);
+  htab_delete (arc_addrtype_hash);
 }
 
 /* Write a value out to the object file, using the appropriate
