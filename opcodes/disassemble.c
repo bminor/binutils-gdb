@@ -622,6 +622,7 @@ disassemble_init_for_target (struct disassemble_info * info)
     case bfd_arch_arm:
       info->symbol_is_valid = arm_symbol_is_valid;
       info->disassembler_needs_relocs = true;
+      info->created_styled_output = true;
       break;
 #endif
 #ifdef ARCH_avr
