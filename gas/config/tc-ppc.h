@@ -256,6 +256,9 @@ extern void ppc_elf_md_finish (void);
 
 #endif /* OBJ_ELF */
 
+extern void ppc_md_end (void);
+#define md_end ppc_md_end
+
 #if defined (OBJ_ELF) || defined (OBJ_XCOFF)
 #define TC_FORCE_RELOCATION(FIX) ppc_force_relocation (FIX)
 extern int ppc_force_relocation (struct fix *);

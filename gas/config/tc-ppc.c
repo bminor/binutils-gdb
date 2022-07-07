@@ -976,6 +976,10 @@ ppc_optimize_expr (expressionS *left, operatorT op, expressionS *right)
 /* Whether to target xcoff64/elf64.  */
 static unsigned int ppc_obj64 = BFD_DEFAULT_TARGET_SIZE == 64;
 
+/* A separate obstack for use by ppc_hash, so that we can quickly
+   throw away hash table memory .  */
+struct obstack insn_obstack;
+
 /* Opcode hash table.  */
 static htab_t ppc_hash;
 
@@ -1613,6 +1617,21 @@ insn_validate (const struct powerpc_opcode *op)
   return false;
 }
 
+static void *
+insn_calloc (size_t n, size_t size)
+{
+  size_t amt;
+  void *ret;
+  if (gas_mul_overflow (n, size, &amt))
+    {
+      obstack_alloc_failed_handler ();
+      abort ();
+    }
+  ret = obstack_alloc (&insn_obstack, amt);
+  memset (ret, 0, amt);
+  return ret;
+}
+
 /* Insert opcodes into hash tables.  Called at startup and for
    .machine pseudo.  */
 
@@ -1624,10 +1643,16 @@ ppc_setup_opcodes (void)
   bool bad_insn = false;
 
   if (ppc_hash != NULL)
-    htab_delete (ppc_hash);
+    {
+      htab_delete (ppc_hash);
+      _obstack_free (&insn_obstack, NULL);
+    }
+
+  obstack_begin (&insn_obstack, chunksize);
 
   /* Insert the opcodes into a hash table.  */
-  ppc_hash = str_htab_create ();
+  ppc_hash = htab_create_alloc (5000, hash_string_tuple, eq_string_tuple,
+				NULL, insn_calloc, NULL);
 
   if (ENABLE_CHECKING)
     {
@@ -1873,6 +1898,13 @@ md_begin (void)
   ppc_init_xcoff_section (&ppc_xcoff_data_section, data_section);
   ppc_init_xcoff_section (&ppc_xcoff_bss_section, bss_section);
 #endif
+}
+
+void
+ppc_md_end (void)
+{
+  htab_delete (ppc_hash);
+  _obstack_free (&insn_obstack, NULL);
 }
 
 void
