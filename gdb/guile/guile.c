@@ -677,7 +677,17 @@ gdbscm_initialize (const struct extension_language_defn *extlang)
        "double free or corruption (out)" error.
        Work around the libguile bug by disabling the installation of the
        libgmp memory functions by guile initialization.  */
+
+    /* The scm_install_gmp_memory_functions variable should be removed after
+       version 3.0, so limit usage to 3.0 and before.  */
+#if SCM_MAJOR_VERSION < 3 || (SCM_MAJOR_VERSION == 3 && SCM_MINOR_VERSION == 0)
+    /* This variable is deprecated in Guile 3.0.8 and later but remains
+       available in the whole 3.0 series.  */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     scm_install_gmp_memory_functions = 0;
+#pragma GCC diagnostic pop
+#endif
 
     /* scm_with_guile is the most portable way to initialize Guile.  Plus
        we need to initialize the Guile support while in Guile mode (e.g.,
