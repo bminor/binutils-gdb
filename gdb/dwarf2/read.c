@@ -4991,7 +4991,11 @@ dw2_debug_names_iterator::next ()
 			 objfile_name (objfile));
 	      continue;
 	    }
-	  per_cu = per_bfd->get_cu (ull + per_bfd->tu_stats.nr_tus);
+	  {
+	    int nr_cus = (per_bfd->all_comp_units.size ()
+			  - per_bfd->tu_stats.nr_tus);
+	    per_cu = per_bfd->get_cu (nr_cus + ull);
+	  }
 	  break;
 	case DW_IDX_die_offset:
 	  /* In a per-CU index (as opposed to a per-module index), index
