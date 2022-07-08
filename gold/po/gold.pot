@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2022-01-22 12:23+0000\n"
+"POT-Creation-Date: 2022-07-08 11:02+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -861,64 +861,69 @@ msgstr ""
 msgid "could not reopen file %s"
 msgstr ""
 
-#: fileread.cc:406
+#: fileread.cc:390
+#, c-format
+msgid "%s: read failed, starting offset (%#llx) less than zero"
+msgstr ""
+
+#: fileread.cc:412
 #, c-format
 msgid "%s: pread failed: %s"
 msgstr ""
 
-#: fileread.cc:420
+#: fileread.cc:426
 #, c-format
 msgid "%s: file too short: read only %lld of %lld bytes at %lld"
 msgstr ""
 
-#: fileread.cc:543
+#: fileread.cc:549
 #, c-format
 msgid ""
 "%s: attempt to map %lld bytes at offset %lld exceeds size of file; the file "
 "may be corrupt"
 msgstr ""
 
-#: fileread.cc:683
+#: fileread.cc:689
 #, c-format
 msgid "%s: lseek failed: %s"
 msgstr ""
 
-#: fileread.cc:689
+#: fileread.cc:695
 #, c-format
 msgid "%s: readv failed: %s"
 msgstr ""
 
-#: fileread.cc:692
+#: fileread.cc:698
 #, c-format
 msgid "%s: file too short: read only %zd of %zd bytes at %lld"
 msgstr ""
 
-#: fileread.cc:859
+#: fileread.cc:865
 #, c-format
 msgid "%s: total bytes mapped for read: %llu\n"
 msgstr ""
 
-#: fileread.cc:861
+#: fileread.cc:867
 #, c-format
 msgid "%s: maximum bytes mapped for read at one time: %llu\n"
 msgstr ""
 
-#: fileread.cc:954
+#: fileread.cc:960
 #, c-format
 msgid "%s: stat failed: %s"
 msgstr ""
 
-#: fileread.cc:1051
+#: fileread.cc:1057
 #, c-format
 msgid "cannot find %s%s"
 msgstr ""
 
-#: fileread.cc:1076
+#: fileread.cc:1082
 #, c-format
 msgid "cannot find %s"
 msgstr ""
 
-#: fileread.cc:1115
+#: fileread.cc:1121
 #, c-format
 msgid "cannot open %s: %s"
 msgstr ""

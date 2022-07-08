@@ -44,8 +44,8 @@ Approx time to complete from here: 2 hours ....
 
   4. Create the release branch using:
 
-	git branch binutils-2_39-branch
-        git push origin binutils-2_39-branch
+	git branch binutils-2_40-branch
+        git push origin binutils-2_40-branch
 
      If you get a message like:
      
@@ -55,7 +55,7 @@ Approx time to complete from here: 2 hours ....
 
   5. Make sure that the branch is there.  IE check out the branch sources:
   
-        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_39-branch 2.39
+        git clone ssh://sourceware.org/git/binutils-gdb.git -b binutils-2_40-branch 2.40
 
      If you get a message about being in a "detached head" state, something
      has gone wrong...
@@ -83,18 +83,21 @@ Approx time to complete from here: 2 hours ....
         https://sourceware.org/bugzilla/editversions.cgi?product=binutils
 
   8. Update bfd/version.m4 on HEAD to indicate that is now a snapshot
-     of the next release.  Note if the release is going to be 2.39 then
-     the version number on the branch is set to 2.38.90 - ie almost, but
-     not quite at 2.39, and the version number on the mainline is set to
-     2.39.50 - ie half way to the next release after 2.39.
+     of the next release and the BRANCH to indicated that it is almost
+     ready for the release.
+
+     So if the release is going to be 2.40 then the version number on
+     the BRANCH should be set to 2.39.90 - ie almost, but not quite 2.40,
+     and the version number on the MAINLINE should be set to 2.40.50 -
+     ie half way to 2.41 release.
 
      So the branch bfd/version.m4 has:
      
-       m4_define([BFD_VERSION], [2.38.90])
+       m4_define([BFD_VERSION], [2.39.90])
        
      and the mainline has:
 
-       m4_define([BFD_VERSION], [2.39.50])
+       m4_define([BFD_VERSION], [2.40.50])
 
      Regenerate various files on both branch and HEAD by configuring
      with "--enable-maintainer-mode --enable-gold --enable-shared" and then building
