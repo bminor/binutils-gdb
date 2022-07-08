@@ -683,6 +683,9 @@ AM_BACKSLASH
 AM_DEFAULT_VERBOSITY
 AM_DEFAULT_V
 AM_V
+CSCOPE
+ETAGS
+CTAGS
 am__untar
 am__tar
 AMTAR
@@ -2590,12 +2593,7 @@ program_transform_name=`$as_echo "$program_transform_name" | sed "$ac_script"`
 am_aux_dir=`cd "$ac_aux_dir" && pwd`
 
 if test x"${MISSING+set}" != xset; then
-  case $am_aux_dir in
-  *\ * | *\	*)
-    MISSING="\${SHELL} \"$am_aux_dir/missing\"" ;;
-  *)
-    MISSING="\${SHELL} $am_aux_dir/missing" ;;
-  esac
+  MISSING="\${SHELL} '$am_aux_dir/missing'"
 fi
 # Use eval to expand $SHELL
 if eval "$MISSING --is-lightweight"; then
@@ -2948,6 +2946,20 @@ am__tar='$${TAR-tar} chof - "$$tardir"' am__untar='$${TAR-tar} xf -'
 
 
 
+
+
+# Variables for tags utilities; see am/tags.am
+if test -z "$CTAGS"; then
+  CTAGS=ctags
+fi
+
+if test -z "$ETAGS"; then
+  ETAGS=etags
+fi
+
+if test -z "$CSCOPE"; then
+  CSCOPE=cscope
+fi
 
 
 
@@ -10711,7 +10723,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10714 "configure"
+#line 10726 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10817,7 +10829,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10820 "configure"
+#line 10832 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
