@@ -121,12 +121,12 @@ Approx time to complete from here: 2 hours ....
 
      c. Build a test target using this tarball.
 
-           cp binutils-2.38.90.tar.xz /dev/shm
+           cp binutils-2.39.90.tar.xz /dev/shm
 	   pushd /dev/shm
-	   tar xvf binutils-2.38.90.tar.xz
+	   tar xvf binutils-2.39.90.tar.xz
 	   mkdir build
 	   cd build
-	   ../binutils-2.38.90/configure --quiet --enable-gold
+	   ../binutils-2.39.90/configure --quiet --enable-gold
 	   make
 	   popd
 
@@ -134,8 +134,8 @@ Approx time to complete from here: 2 hours ....
 
      d. Upload the pre-release snapshot to the sourceware FTP site:
 
-          scp binutils-2.38.90.tar.xz sourceware.org:~ftp/pub/binutils/snapshots
-          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.38.90.tar.xz
+          scp binutils-2.39.90.tar.xz sourceware.org:/var/ftp/pub/binutils/snapshots
+          ssh sourceware.org sha256sum ~ftp/pub/binutils/snapshots/binutils-2.39.90.tar.xz
 
      e. Clean up the source directory again.
 
@@ -148,11 +148,11 @@ Approx time to complete from here: 2 hours ....
 ------------------------------------------------------------------------
 Dear Translation Project
 
-  The 2.39 release branch has been created for the GNU Binutils project.
+  The 2.40 release branch has been created for the GNU Binutils project.
 
   A snapshot of the branch sources can be found here:
 
-    https://sourceware.org/pub/binutils/snapshots/binutils-2.38.90.tar.xz
+    https://sourceware.org/pub/binutils/snapshots/binutils-2.39.90.tar.xz
 
   We hope to make the official release of the sources on the <DATE>
   although that could change if there are important bugs that need to
