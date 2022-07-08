@@ -306,9 +306,10 @@ public:
       gdb_assert (m_dwarf_version == version);
   }
 
-  dwarf_unit_type unit_type () const
+  dwarf_unit_type unit_type (bool strict_p = true) const
   {
-    gdb_assert (m_unit_type != 0);
+    if (strict_p)
+      gdb_assert (m_unit_type != 0);
     return m_unit_type;
   }
 
@@ -322,9 +323,10 @@ public:
       gdb_assert (m_unit_type == unit_type);
   }
 
-  enum language lang () const
+  enum language lang (bool strict_p = true) const
   {
-    gdb_assert (m_lang != language_unknown);
+    if (strict_p)
+      gdb_assert (m_lang != language_unknown);
     return m_lang;
   }
 

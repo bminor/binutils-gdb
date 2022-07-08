@@ -8538,10 +8538,11 @@ process_imported_unit_die (struct die_info *die, struct dwarf2_cu *cu)
 
       /* We're importing a C++ compilation unit with tag DW_TAG_compile_unit
 	 into another compilation unit, at root level.  Regard this as a hint,
-	 and ignore it.  */
+	 and ignore it.  This is a best effort, it only works if unit_type and
+	 lang are already set.  */
       if (die->parent && die->parent->parent == NULL
-	  && per_cu->unit_type () == DW_UT_compile
-	  && per_cu->lang () == language_cplus)
+	  && per_cu->unit_type (false) == DW_UT_compile
+	  && per_cu->lang (false) == language_cplus)
 	return;
 
       /* If necessary, add it to the queue and load its DIEs.  */
