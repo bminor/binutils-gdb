@@ -829,12 +829,24 @@ print_got_plt (struct sec_buf *sb, uint64_t vma, struct disassemble_info *info)
 		    sym = (*info->symbol_at_address_func) (ent, info);
 		}
 	    }
+	  (*info->fprintf_styled_func) (info->stream, dis_style_text, " [");
 	  if (sym != NULL)
-	    (*info->fprintf_func) (info->stream, " [%s@%s]",
-				   bfd_asymbol_name (sym), sb->name + 1);
+	    {
+	      (*info->fprintf_styled_func) (info->stream, dis_style_symbol,
+					    "%s", bfd_asymbol_name (sym));
+	      (*info->fprintf_styled_func) (info->stream, dis_style_text, "@");
+	      (*info->fprintf_styled_func) (info->stream, dis_style_symbol,
+					    "%s", sb->name + 1);
+	    }
 	  else
-	    (*info->fprintf_func) (info->stream, " [%" PRIx64 "@%s]",
-				   ent, sb->name + 1);
+	    {
+	      (*info->fprintf_styled_func) (info->stream, dis_style_address,
+					    "%" PRIx64, ent);
+	      (*info->fprintf_styled_func) (info->stream, dis_style_text, "@");
+	      (*info->fprintf_styled_func) (info->stream, dis_style_symbol,
+					    "%s", sb->name + 1);
+	    }
+	  (*info->fprintf_styled_func) (info->stream, dis_style_text, "]");
 	  return true;
 	}
     }
@@ -943,8 +955,9 @@ print_insn_powerpc (bfd_vma memaddr,
       uint64_t d34;
       int blanks;
 
-      (*info->fprintf_func) (info->stream, "%s", opcode->name);
-      /* gdb fprintf_func doesn't return count printed.  */
+      (*info->fprintf_styled_func) (info->stream, dis_style_mnemonic,
+				    "%s", opcode->name);
+      /* gdb fprintf_styled_func doesn't return count printed.  */
       blanks = 8 - strlen (opcode->name);
       if (blanks <= 0)
 	blanks = 1;
@@ -976,39 +989,49 @@ print_insn_powerpc (bfd_vma memaddr,
 	  value = operand_value_powerpc (operand, insn, dialect);
 
 	  if (op_separator == need_comma)
-	    (*info->fprintf_func) (info->stream, ",");
+	    (*info->fprintf_styled_func) (info->stream, dis_style_text, ",");
 	  else if (op_separator == need_paren)
-	    (*info->fprintf_func) (info->stream, "(");
+	    (*info->fprintf_styled_func) (info->stream, dis_style_text, "(");
 	  else
-	    (*info->fprintf_func) (info->stream, "%*s", op_separator, " ");
+	    (*info->fprintf_styled_func) (info->stream, dis_style_text, "%*s",
+					  op_separator, " ");
 
 	  /* Print the operand as directed by the flags.  */
 	  if ((operand->flags & PPC_OPERAND_GPR) != 0
 	      || ((operand->flags & PPC_OPERAND_GPR_0) != 0 && value != 0))
-	    (*info->fprintf_func) (info->stream, "r%" PRId64, value);
+	    (*info->fprintf_styled_func) (info->stream, dis_style_register,
+					  "r%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_FPR) != 0)
-	    (*info->fprintf_func) (info->stream, "f%" PRId64, value);
+	    (*info->fprintf_styled_func) (info->stream, dis_style_register,
+					  "f%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_VR) != 0)
-	    (*info->fprintf_func) (info->stream, "v%" PRId64, value);
+	    (*info->fprintf_styled_func) (info->stream, dis_style_register,
+					  "v%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_VSR) != 0)
-	    (*info->fprintf_func) (info->stream, "vs%" PRId64, value);
+	    (*info->fprintf_styled_func) (info->stream, dis_style_register,
+					  "vs%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_ACC) != 0)
-	    (*info->fprintf_func) (info->stream, "a%" PRId64, value);
+	    (*info->fprintf_styled_func) (info->stream, dis_style_register,
+					  "a%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0)
 	    (*info->print_address_func) (memaddr + value, info);
 	  else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)
 	    (*info->print_address_func) ((bfd_vma) value & 0xffffffff, info);
 	  else if ((operand->flags & PPC_OPERAND_FSL) != 0)
-	    (*info->fprintf_func) (info->stream, "fsl%" PRId64, value);
+	    (*info->fprintf_styled_func) (info->stream, dis_style_register,
+					  "fsl%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_FCR) != 0)
-	    (*info->fprintf_func) (info->stream, "fcr%" PRId64, value);
+	    (*info->fprintf_styled_func) (info->stream, dis_style_register,
+					  "fcr%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_UDI) != 0)
-	    (*info->fprintf_func) (info->stream, "%" PRId64, value);
+	    (*info->fprintf_styled_func) (info->stream, dis_style_register,
+					  "%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_CR_REG) != 0
 		   && (operand->flags & PPC_OPERAND_CR_BIT) == 0
 		   && (((dialect & PPC_OPCODE_PPC) != 0)
 		       || ((dialect & PPC_OPCODE_VLE) != 0)))
-	    (*info->fprintf_func) (info->stream, "cr%" PRId64, value);
+	    (*info->fprintf_styled_func) (info->stream, dis_style_register,
+					  "cr%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_CR_BIT) != 0
 		   && (operand->flags & PPC_OPERAND_CR_REG) == 0
 		   && (((dialect & PPC_OPCODE_PPC) != 0)
@@ -1019,13 +1042,35 @@ print_insn_powerpc (bfd_vma memaddr,
 	      int cc;
 
 	      cr = value >> 2;
-	      if (cr != 0)
-		(*info->fprintf_func) (info->stream, "4*cr%d+", cr);
 	      cc = value & 3;
-	      (*info->fprintf_func) (info->stream, "%s", cbnames[cc]);
+	      if (cr != 0)
+		{
+		  (*info->fprintf_styled_func) (info->stream, dis_style_text,
+						"4*");
+		  (*info->fprintf_styled_func) (info->stream,
+						dis_style_register,
+						"cr%d", cr);
+		  (*info->fprintf_styled_func) (info->stream, dis_style_text,
+						"+");
+		}
+
+	      (*info->fprintf_styled_func) (info->stream,
+					    dis_style_sub_mnemonic,
+					    "%s", cbnames[cc]);
 	    }
 	  else
-	    (*info->fprintf_func) (info->stream, "%" PRId64, value);
+	    {
+	      /* An immediate, but what style?  */
+	      enum disassembler_style style;
+
+	      if ((operand->flags & PPC_OPERAND_PARENS) != 0)
+		style = dis_style_address_offset;
+	      else
+		style = dis_style_immediate;
+
+	      (*info->fprintf_styled_func) (info->stream, style,
+					    "%" PRId64, value);
+	    }
 
 	  if (operand->shift == 52)
 	    is_pcrel = value != 0;
@@ -1033,7 +1078,7 @@ print_insn_powerpc (bfd_vma memaddr,
 	    d34 = value;
 
 	  if (op_separator == need_paren)
-	    (*info->fprintf_func) (info->stream, ")");
+	    (*info->fprintf_styled_func) (info->stream, dis_style_text, ")");
 
 	  op_separator = need_comma;
 	  if ((operand->flags & PPC_OPERAND_PARENS) != 0)
@@ -1043,11 +1088,13 @@ print_insn_powerpc (bfd_vma memaddr,
       if (is_pcrel)
 	{
 	  d34 += memaddr;
-	  (*info->fprintf_func) (info->stream, "\t# %" PRIx64, d34);
+	  (*info->fprintf_styled_func) (info->stream,
+					dis_style_comment_start,
+					"\t# %" PRIx64, d34);
 	  asymbol *sym = (*info->symbol_at_address_func) (d34, info);
 	  if (sym)
-	    (*info->fprintf_func) (info->stream, " <%s>",
-				   bfd_asymbol_name (sym));
+	    (*info->fprintf_styled_func) (info->stream, dis_style_text,
+					  " <%s>", bfd_asymbol_name (sym));
 
 	  if (info->private_data != NULL
 	      && info->section != NULL
@@ -1069,11 +1116,19 @@ print_insn_powerpc (bfd_vma memaddr,
 
   /* We could not find a match.  */
   if (insn_length == 4)
-    (*info->fprintf_func) (info->stream, ".long 0x%x",
-			   (unsigned int) insn);
+    (*info->fprintf_styled_func) (info->stream,
+				  dis_style_assembler_directive, ".long");
   else
-    (*info->fprintf_func) (info->stream, ".word 0x%x",
-			   (unsigned int) insn >> 16);
+    {
+      (*info->fprintf_styled_func) (info->stream,
+				    dis_style_assembler_directive, ".word");
+      insn >>= 16;
+    }
+  (*info->fprintf_styled_func) (info->stream, dis_style_text, " ");
+  (*info->fprintf_styled_func) (info->stream, dis_style_immediate, "0x%x",
+				(unsigned int) insn);
+
+
   return insn_length;
 }
 
