@@ -2359,22 +2359,28 @@ static void
 varobj_invalidate_iter (struct varobj *var)
 {
   /* global and floating var must be re-evaluated.  */
-  if (var->root->floating || var->root->valid_block == NULL)
+  if (var->root->floating || var->root->valid_block == nullptr)
     {
       struct varobj *tmp_var;
 
       /* Try to create a varobj with same expression.  If we succeed
 	 replace the old varobj, otherwise invalidate it.  */
-      tmp_var = varobj_create (NULL, var->name.c_str (), (CORE_ADDR) 0,
-			       USE_CURRENT_FRAME);
-      if (tmp_var != NULL) 
-	{ 
+      tmp_var = varobj_create (nullptr, var->name.c_str (), (CORE_ADDR) 0,
+			       var->root->floating
+			       ? USE_SELECTED_FRAME : USE_CURRENT_FRAME);
+      if (tmp_var != nullptr)
+	{
+	  gdb_assert (var->root->floating == tmp_var->root->floating);
 	  tmp_var->obj_name = var->obj_name;
 	  varobj_delete (var, 0);
 	  install_variable (tmp_var);
 	}
-      else
-	var->root->is_valid = false;
+      else if (!var->root->floating)
+	{
+	  /* Only invalidate globals as floating vars might still be valid in
+	     some other frame.  */
+	  var->root->is_valid = false;
+	}
     }
   else /* locals must be invalidated.  */
     var->root->is_valid = false;

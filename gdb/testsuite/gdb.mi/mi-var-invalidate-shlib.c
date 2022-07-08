@@ -17,6 +17,8 @@
 
 #include <dlfcn.h>
 
+int global_var = 5;
+
 static void
 no_varobj_in_scope (void)
 {
