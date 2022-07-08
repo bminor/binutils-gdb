@@ -1,3 +1,7 @@
+2022-07-08  Nick Clifton  <nickc@redhat.com>
+
+	* 2.39 branch created.
+
 2022-04-20  Clément Chigot  <clement.chigot@atos.net>
 
 	* coff/xcoff.h (struct xcoff_loader_info): Add ldrel_count and

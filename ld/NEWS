@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.39:
+
 * The ELF linker will now generate a warning message if the stack is made
   executable.  By default this warning is not issued if the user has
   specifically requested an executable stack via the "-z execstack"

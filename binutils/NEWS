@@ -1,4 +1,7 @@
 -*- text -*-
+
+Changes in 2.39:
+
 * Add --no-weak/-W option to nm to make it ignore weak symbols.
 
 * Add an option to objdump and readelf to prevent attempts to access debuginfod

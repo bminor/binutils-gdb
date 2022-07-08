@@ -35,7 +35,7 @@ Approx time to complete from here: 2 hours ....
      in the gold directory - it has its own release numbering.
 
      Likewise for the ChangeLog files in: bfd, binutils, config, cpu,
-     elfcpp, gas, gold, gprof, gprofng, include, ld, libctf, libiberty, opcodes
+     elfcpp, gas, gold, gprof, include, ld, libctf, libiberty, opcodes
      and toplevel.
 
      Add a note of the name of the new branch to binutils/BRANCHES.
