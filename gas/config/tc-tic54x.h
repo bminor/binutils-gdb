@@ -131,4 +131,7 @@ extern void tic54x_convert_frag(bfd *, segT, fragS *);
 
 extern void tic54x_global (int);
 
+extern void tic54x_md_end (void);
+#define md_end tic54x_md_end
+
 #endif
