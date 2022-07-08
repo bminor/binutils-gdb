@@ -49,6 +49,7 @@
 #include "cli/cli-style.h"
 #include "expop.h"
 #include "inferior.h"
+#include "varobj.h"
 
 /* Definition of a user function.  */
 struct internal_function
@@ -2599,6 +2600,25 @@ preserve_one_internalvar (struct internalvar *var, struct objfile *objfile,
     }
 }
 
+/* Make sure that all types and values referenced by VAROBJ are updated before
+   OBJFILE is discarded.  COPIED_TYPES is used to prevent cycles and
+   duplicates.  */
+
+static void
+preserve_one_varobj (struct varobj *varobj, struct objfile *objfile,
+		     htab_t copied_types)
+{
+  if (varobj->type->is_objfile_owned ()
+      && varobj->type->objfile_owner () == objfile)
+    {
+      varobj->type
+	= copy_type_recursive (objfile, varobj->type, copied_types);
+    }
+
+  if (varobj->value != nullptr)
+    preserve_one_value (varobj->value.get (), objfile, copied_types);
+}
+
 /* Update the internal variables and value history when OBJFILE is
    discarded; we must copy the types out of the objfile.  New global types
    will be created for every convenience variable which currently points to
@@ -2619,6 +2639,13 @@ preserve_values (struct objfile *objfile)
 
   for (var = internalvars; var; var = var->next)
     preserve_one_internalvar (var, objfile, copied_types.get ());
+
+  /* For the remaining varobj, check that none has type owned by OBJFILE.  */
+  all_root_varobjs ([&copied_types, objfile] (struct varobj *varobj)
+    {
+      preserve_one_varobj (varobj, objfile,
+			   copied_types.get ());
+    });
 
   preserve_ext_lang_values (objfile, copied_types.get ());
 }
