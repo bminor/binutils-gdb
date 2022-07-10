@@ -94,15 +94,13 @@ loongarch_target::low_arch_setup ()
 static void
 loongarch_fill_gregset (struct regcache *regcache, void *buf)
 {
-  const struct target_desc *tdesc = regcache->tdesc;
   elf_gregset_t *regset = (elf_gregset_t *) buf;
-  int regno = find_regno (tdesc, "r0");
   int i;
 
   for (i = 1; i < 32; i++)
-    collect_register (regcache, regno + i, *regset + i);
-  collect_register_by_name (regcache, "pc", *regset + 32);
-  collect_register_by_name (regcache, "badv", *regset + 33);
+    collect_register (regcache, i, *regset + i);
+  collect_register (regcache, LOONGARCH_PC_REGNUM, *regset + LOONGARCH_PC_REGNUM);
+  collect_register (regcache, LOONGARCH_BADV_REGNUM, *regset + LOONGARCH_BADV_REGNUM);
 }
 
 /* Supply GPRs from BUF into REGCACHE.  */
@@ -110,16 +108,14 @@ loongarch_fill_gregset (struct regcache *regcache, void *buf)
 static void
 loongarch_store_gregset (struct regcache *regcache, const void *buf)
 {
-  const struct target_desc *tdesc = regcache->tdesc;
   const elf_gregset_t *regset = (const elf_gregset_t *) buf;
-  int regno = find_regno (tdesc, "r0");
   int i;
 
-  supply_register_zeroed (regcache, regno);
+  supply_register_zeroed (regcache, 0);
   for (i = 1; i < 32; i++)
-    supply_register (regcache, regno + i, *regset + i);
-  supply_register_by_name (regcache, "pc", *regset + 32);
-  supply_register_by_name (regcache, "badv", *regset + 33);
+    supply_register (regcache, i, *regset + i);
+  supply_register (regcache, LOONGARCH_PC_REGNUM, *regset + LOONGARCH_PC_REGNUM);
+  supply_register (regcache, LOONGARCH_BADV_REGNUM, *regset + LOONGARCH_BADV_REGNUM);
 }
 
 /* LoongArch/Linux regsets.  */
@@ -158,11 +154,9 @@ loongarch_target::get_regs_info ()
 bool
 loongarch_target::low_fetch_register (regcache *regcache, int regno)
 {
-  const struct target_desc *tdesc = regcache->tdesc;
-
-  if (regno != find_regno (tdesc, "r0"))
+  if (regno != 0)
     return false;
-  supply_register_zeroed (regcache, regno);
+  supply_register_zeroed (regcache, 0);
   return true;
 }
 
