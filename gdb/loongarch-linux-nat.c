@@ -44,7 +44,7 @@ protected:
 			       int store_p) override;
 };
 
-/* Fill GDB's register array with the general-purpose, pc and badv
+/* Fill GDB's register array with the general-purpose, orig_a0, pc and badv
    register values from the current thread.  */
 
 static void
@@ -70,7 +70,7 @@ fetch_gregs_from_thread (struct regcache *regcache, int regnum, pid_t tid)
   }
 }
 
-/* Store to the current thread the valid general-purpose, pc and badv
+/* Store to the current thread the valid general-purpose, orig_a0, pc and badv
    register values in the GDB's register array.  */
 
 static void

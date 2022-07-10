@@ -99,6 +99,7 @@ loongarch_fill_gregset (struct regcache *regcache, void *buf)
 
   for (i = 1; i < 32; i++)
     collect_register (regcache, i, *regset + i);
+  collect_register (regcache, LOONGARCH_ORIG_A0_REGNUM, *regset + LOONGARCH_ORIG_A0_REGNUM);
   collect_register (regcache, LOONGARCH_PC_REGNUM, *regset + LOONGARCH_PC_REGNUM);
   collect_register (regcache, LOONGARCH_BADV_REGNUM, *regset + LOONGARCH_BADV_REGNUM);
 }
@@ -114,6 +115,7 @@ loongarch_store_gregset (struct regcache *regcache, const void *buf)
   supply_register_zeroed (regcache, 0);
   for (i = 1; i < 32; i++)
     supply_register (regcache, i, *regset + i);
+  supply_register (regcache, LOONGARCH_ORIG_A0_REGNUM, *regset + LOONGARCH_ORIG_A0_REGNUM);
   supply_register (regcache, LOONGARCH_PC_REGNUM, *regset + LOONGARCH_PC_REGNUM);
   supply_register (regcache, LOONGARCH_BADV_REGNUM, *regset + LOONGARCH_BADV_REGNUM);
 }
