@@ -90,6 +90,142 @@ RELOC_NUMBER (R_LARCH_SUB64, 56)
 RELOC_NUMBER (R_LARCH_GNU_VTINHERIT, 57)
 RELOC_NUMBER (R_LARCH_GNU_VTENTRY, 58)
 
+
+/* B16:
+   beq/bne/blt/bge/bltu/bgeu/jirl
+   %b16 (sym).  */
+RELOC_NUMBER (R_LARCH_B16, 64)
+/* B21:
+   beqz/bnez
+   %b16 (sym).  */
+RELOC_NUMBER (R_LARCH_B21, 65)
+/* B26:
+   b/bl
+   %b26 (sym) or %plt (sym).  */
+RELOC_NUMBER (R_LARCH_B26, 66)
+
+/* ABS: 32/64
+   lu12i.w
+   %abs_hi20 (sym).  */
+RELOC_NUMBER (R_LARCH_ABS_HI20, 67)
+/* ABS: 32/64
+   ori
+   %abs_lo12 (sym).  */
+RELOC_NUMBER (R_LARCH_ABS_LO12, 68)
+
+/* ABS: 64
+   lu32i.d
+   %abs64_lo20 (sym).  */
+RELOC_NUMBER (R_LARCH_ABS64_LO20, 69)
+/* ABS: 64
+   lu52i.d
+   %abs64_hi12 (sym).  */
+RELOC_NUMBER (R_LARCH_ABS64_HI12, 70)
+
+/* PCREL: 32/64
+   pcalau12i
+   %pc_hi20 (sym).  */
+RELOC_NUMBER (R_LARCH_PCALA_HI20, 71)
+/* PCREL: 32/64
+   addi.w/addi.d
+   %pc_lo12 (sym).  */
+RELOC_NUMBER (R_LARCH_PCALA_LO12, 72)
+/* PCREL: 64
+   lu32i.d
+   %pc64_lo20 (sym).  */
+RELOC_NUMBER (R_LARCH_PCALA64_LO20, 73)
+/* PCREL: 64
+   lu52i.d
+   %pc64_hi12 (sym).  */
+RELOC_NUMBER (R_LARCH_PCALA64_HI12, 74)
+
+/* GOT: 32/64
+   pcalau12i
+   %got_pc_hi20 (got).  */
+RELOC_NUMBER (R_LARCH_GOT_PC_HI20, 75)
+/* GOT: 32/64
+   ld.w/ld.d
+   %got_pc_lo12 (got).  */
+RELOC_NUMBER (R_LARCH_GOT_PC_LO12, 76)
+/* GOT: 32/64
+   lu32i.d
+   %got_pc_lo12 (got).  */
+RELOC_NUMBER (R_LARCH_GOT64_PC_LO20, 77)
+/* GOT64: PCREL
+   lu52i.d
+   %got64_pc_hi12 (got).  */
+RELOC_NUMBER (R_LARCH_GOT64_PC_HI12, 78)
+/* GOT32/64: ABS
+   lu12i.w
+   %got_hi20 (got).  */
+RELOC_NUMBER (R_LARCH_GOT_HI20, 79)
+/* GOT: 32/64: ABS
+   ori
+   %got_lo12 (got).  */
+RELOC_NUMBER (R_LARCH_GOT_LO12, 80)
+/* GOT64: ABS
+   lu32i.d
+   %got64_lo20 (got).  */
+RELOC_NUMBER (R_LARCH_GOT64_LO20, 81)
+/* GOT64: ABS
+   lu52i.d
+   %got64_hi12 (got).  */
+RELOC_NUMBER (R_LARCH_GOT64_HI12, 82)
+
+/* TLS-LE: 32/64
+   lu12i.w
+   %le_hi20 (sym).  */
+RELOC_NUMBER (R_LARCH_TLS_LE_HI20, 83)
+/* TLS-LE: 32/64
+   ori
+   %le_lo12 (sym).  */
+RELOC_NUMBER (R_LARCH_TLS_LE_LO12, 84)
+/* TLS-LE: 64
+   lu32i.d
+   %le64_lo20 (sym).  */
+RELOC_NUMBER (R_LARCH_TLS_LE64_LO20, 85)
+/* TLS-LE: 64
+   lu52i.d
+   %le64_hi12 (sym).  */
+RELOC_NUMBER (R_LARCH_TLS_LE64_HI12, 86)
+
+/* TLS-IE: 32/64
+   pcalau12i
+   %ie_pc_hi20 (sym).  */
+RELOC_NUMBER (R_LARCH_TLS_IE_PC_HI20, 87)
+RELOC_NUMBER (R_LARCH_TLS_IE_PC_LO12, 88)
+RELOC_NUMBER (R_LARCH_TLS_IE64_PC_LO20, 89)
+RELOC_NUMBER (R_LARCH_TLS_IE64_PC_HI12, 90)
+
+/* TLS-IE: 32/64: ABS
+   lu12i.w
+   %ie_hi20 (sym).  */
+RELOC_NUMBER (R_LARCH_TLS_IE_HI20, 91)
+RELOC_NUMBER (R_LARCH_TLS_IE_LO12, 92)
+RELOC_NUMBER (R_LARCH_TLS_IE64_LO20, 93)
+RELOC_NUMBER (R_LARCH_TLS_IE64_HI12, 94)
+
+/* TLS-LD: 32/64
+   pcalau12i
+   %ld_pc_hi20 (sym).  */
+RELOC_NUMBER (R_LARCH_TLS_LD_PC_HI20, 95)
+/* TLS-LD: 32/64: ABS
+   lu12i.w
+   %ld_hi20 (sym).  */
+RELOC_NUMBER (R_LARCH_TLS_LD_HI20, 96)
+
+/* TLS-GD: 32/64
+   pcalau12i
+   %gd_pc_hi20 (sym).  */
+RELOC_NUMBER (R_LARCH_TLS_GD_PC_HI20, 97)
+/* TLS-GD: 32/64: ABS
+   lu12i.w
+   %gd_hi20 (sym).  */
+RELOC_NUMBER (R_LARCH_TLS_GD_HI20, 98)
+
+/* RELAX.  */
+RELOC_NUMBER (R_LARCH_RELAX, 99)
+
 END_RELOC_NUMBERS (R_LARCH_count)
 
 /* Processor specific flags for the ELF header e_flags field.  */
