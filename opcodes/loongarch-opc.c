@@ -103,158 +103,230 @@ const char *const loongarch_x_normal_name[32] =
   "$xr24", "$xr25", "$xr26", "$xr27", "$xr28", "$xr29", "$xr30", "$xr31",
 };
 
+/* Can not use xx_pa for abs.  */
+
+/* For LoongArch32 abs.  */
+#define INSN_LA_ABS32		    \
+  "lu12i.w %1,%%abs_hi20(%2);"	    \
+  "ori %1,%1,%%abs_lo12(%2);",	    \
+  &LARCH_opts.ase_ilp32,	    \
+  &LARCH_opts.ase_lp64
+#define INSN_LA_ABS64			\
+  "lu12i.w %1,%%abs_hi20(%2);"		\
+  "ori %1,%1,%%abs_lo12(%2);"		\
+  "lu32i.d %1,%%abs64_lo20(%2);"	\
+  "lu52i.d %1,%1,%%abs64_hi12(%2);",	\
+  &LARCH_opts.ase_lp64, 0
+
+#define INSN_LA_PCREL32		    \
+  "pcalau12i %1,%%pc_hi20(%2);"	    \
+  "addi.w %1,%1,%%pc_lo12(%2);",    \
+  &LARCH_opts.ase_ilp32,	    \
+  &LARCH_opts.ase_lp64
+#define INSN_LA_PCREL64		    \
+  "pcalau12i %1,%%pc_hi20(%2);"	    \
+  "addi.d %1,%1,%%pc_lo12(%2);",    \
+  &LARCH_opts.ase_lp64, 0
+#define INSN_LA_PCREL64_LARGE	    \
+  "pcalau12i %1,%%pc_hi20(%3);"	    \
+  "addi.d %2,$r0,%%pc_lo12(%3);"    \
+  "lu32i.d %2,%%pc64_lo20(%3);"	    \
+  "lu52i.d %2,%2,%%pc64_hi12(%3);"  \
+  "add.d %1,%1,%2;",		    \
+  &LARCH_opts.ase_lp64, 0
+
+#define INSN_LA_GOT32		    \
+  "pcalau12i %1,%%got_pc_hi20(%2);" \
+  "ld.w %1,%1,%%got_pc_lo12(%2);",  \
+  &LARCH_opts.ase_ilp32,	    \
+  &LARCH_opts.ase_lp64
+/* got32 abs.  */
+#define INSN_LA_GOT32_ABS	    \
+  "lu12i.w %1,%%got_hi20(%2);"      \
+  "ori %1,%1,%%got_lo12(%2);"	    \
+  "ld.w %1,%1,0;",  		    \
+  &LARCH_opts.ase_gabs,       	    \
+  &LARCH_opts.ase_lp64
+#define INSN_LA_GOT64		    \
+  "pcalau12i %1,%%got_pc_hi20(%2);" \
+  "ld.d %1,%1,%%got_pc_lo12(%2);",  \
+  &LARCH_opts.ase_lp64, 0
+/* got64 abs.  */
+#define INSN_LA_GOT64_LARGE_ABS	    \
+  "lu12i.w %1,%%got_hi20(%2);"      \
+  "ori %1,%1,%%got_lo12(%2);"	    \
+  "lu32i.d %1,%%got64_lo20(%2);"    \
+  "lu52i.d %1,%1,%%got64_hi12(%2);" \
+  "ld.d %1,%1,0",		    \
+  &LARCH_opts.ase_lp64,		    \
+  &LARCH_opts.ase_gpcr
+/* got64 pic.  */
+#define INSN_LA_GOT64_LARGE_PCREL     \
+  "pcalau12i %1,%%got_pc_hi20(%3);"   \
+  "addi.d %2,$r0,%%got_pc_lo12(%3);"  \
+  "lu32i.d %2,%%got64_pc_lo20(%3);"   \
+  "lu52i.d %2,%2,%%got64_pc_hi12(%3);"\
+  "ldx.d %1,%1,%2;",		      \
+  &LARCH_opts.ase_lp64,		      \
+  &LARCH_opts.ase_gabs
+
+/* For LoongArch32/64 cmode=normal.  */
+#define INSN_LA_TLS_LE		    \
+  "lu12i.w %1,%%le_hi20(%2);"	    \
+  "ori %1,%1,%%le_lo12(%2);",	    \
+  &LARCH_opts.ase_ilp32, 0
+
+/* For LoongArch64 cmode=large.  */
+#define INSN_LA_TLS_LE64_LARGE	    \
+  "lu12i.w %1,%%le_hi20(%2);"	    \
+  "ori %1,%1,%%le_lo12(%2);"	    \
+  "lu32i.d %1,%%le64_lo20(%2);"	    \
+  "lu52i.d %1,%1,%%le64_hi12(%2);", \
+  &LARCH_opts.ase_lp64, 0
+
+#define INSN_LA_TLS_IE32	    \
+  "pcalau12i %1,%%ie_pc_hi20(%2);"  \
+  "ld.w %1,%1,%%ie_pc_lo12(%2);",  \
+  &LARCH_opts.ase_ilp32,	    \
+  &LARCH_opts.ase_lp64
+/* For ie32 abs.  */
+#define INSN_LA_TLS_IE32_ABS  \
+  "lu12i.w %1,%%ie_hi20(%2);"	    \
+  "ori %1,%1,%%ie_lo12(%2);"	    \
+  "ld.w %1,%1,0",		    \
+  &LARCH_opts.ase_gabs,		    \
+  &LARCH_opts.ase_lp64
+#define INSN_LA_TLS_IE64	    \
+  "pcalau12i %1,%%ie_pc_hi20(%2);"  \
+  "ld.d %1,%1,%%ie_pc_lo12(%2);",  \
+  &LARCH_opts.ase_lp64, 0
+/* For ie64 pic.  */
+#define INSN_LA_TLS_IE64_LARGE_PCREL  \
+  "pcalau12i %1,%%ie_pc_hi20(%3);"    \
+  "addi.d %2,$r0,%%ie_pc_lo12(%3);"  \
+  "lu32i.d %2,%%ie64_pc_lo20(%3);"   \
+  "lu52i.d %2,%2,%%ie64_pc_hi12(%3);"\
+  "ldx.d %1,%1,%2;",		      \
+  &LARCH_opts.ase_lp64,		      \
+  &LARCH_opts.ase_gabs
+/* For ie64 abs.  */
+#define INSN_LA_TLS_IE64_LARGE_ABS  \
+  "lu12i.w %1,%%ie_hi20(%2);"	    \
+  "ori %1,%1,%%ie_lo12(%2);"	    \
+  "lu32i.d %1,%%ie64_lo20(%2);"    \
+  "lu52i.d %1,%1,%%ie64_hi12(%2);" \
+  "ld.d %1,%1,0",		    \
+  &LARCH_opts.ase_lp64,		    \
+  &LARCH_opts.ase_gpcr
+
+/* For LoongArch32/64 cmode=normal.  */
+#define INSN_LA_TLS_LD32	      \
+  "pcalau12i %1,%%ld_pc_hi20(%2);"    \
+  "addi.w %1,%1,%%got_pc_lo12(%2);",  \
+  &LARCH_opts.ase_ilp32,	      \
+  &LARCH_opts.ase_lp64
+#define INSN_LA_TLS_LD32_ABS	      \
+  "lu12i.w %1,%%ld_hi20(%2);"	      \
+  "ori %1,%1,%%got_lo12(%2);",	      \
+  &LARCH_opts.ase_gabs,		      \
+  &LARCH_opts.ase_lp64
+#define INSN_LA_TLS_LD64	      \
+  "pcalau12i %1,%%ld_pc_hi20(%2);"    \
+  "addi.d %1,%1,%%got_pc_lo12(%2);",  \
+  &LARCH_opts.ase_lp64, 0
+#define INSN_LA_TLS_LD64_LARGE_PCREL  \
+  "pcalau12i %1,%%ld_pc_hi20(%3);"    \
+  "addi.d %2,$r0,%%got_pc_lo12(%3);"  \
+  "lu32i.d %2,%%got64_pc_lo20(%3);"   \
+  "lu52i.d %2,%2,%%got64_pc_hi12(%3);"\
+  "add.d %1,%1,%2;",		      \
+  &LARCH_opts.ase_lp64,		      \
+  &LARCH_opts.ase_gabs
+#define INSN_LA_TLS_LD64_LARGE_ABS    \
+  "lu12i.w %1,%%ld_hi20(%2);"	      \
+  "ori %1,%1,%%got_lo12(%2);"	      \
+  "lu32i.d %1,%%got64_lo20(%2);"      \
+  "lu52i.d %1,%1,%%got64_hi12(%2);",  \
+  &LARCH_opts.ase_lp64,		      \
+  &LARCH_opts.ase_gpcr
+
+#define INSN_LA_TLS_GD32	      \
+  "pcalau12i %1,%%gd_pc_hi20(%2);"    \
+  "addi.w %1,%1,%%got_pc_lo12(%2);",  \
+  &LARCH_opts.ase_ilp32,	      \
+  &LARCH_opts.ase_lp64
+#define INSN_LA_TLS_GD32_ABS	      \
+  "lu12i.w %1,%%gd_hi20(%2);"	      \
+  "ori %1,%1,%%got_lo12(%2);",	      \
+  &LARCH_opts.ase_gabs,		      \
+  &LARCH_opts.ase_lp64
+#define INSN_LA_TLS_GD64	      \
+  "pcalau12i %1,%%gd_pc_hi20(%2);"    \
+  "addi.d %1,%1,%%got_pc_lo12(%2);",  \
+  &LARCH_opts.ase_lp64, 0
+#define INSN_LA_TLS_GD64_LARGE_PCREL  \
+  "pcalau12i %1,%%gd_pc_hi20(%3);"    \
+  "addi.d %2,$r0,%%got_pc_lo12(%3);"  \
+  "lu32i.d %2,%%got64_pc_lo20(%3);"   \
+  "lu52i.d %2,%2,%%got64_pc_hi12(%3);"\
+  "add.d %1,%1,%2;",		      \
+  &LARCH_opts.ase_lp64,		      \
+  &LARCH_opts.ase_gabs
+#define INSN_LA_TLS_GD64_LARGE_ABS    \
+  "lu12i.w %1,%%gd_hi20(%2);"	      \
+  "ori %1,%1,%%got_lo12(%2);"	      \
+  "lu32i.d %1,%%got64_lo20(%2);"      \
+  "lu52i.d %1,%1,%%got64_hi12(%2);",  \
+  &LARCH_opts.ase_lp64,		      \
+  &LARCH_opts.ase_gpcr
+
+
 static struct loongarch_opcode loongarch_macro_opcodes[] =
 {
-  /* match,    mask,       name, format, macro, include, exclude, pinfo.  */
-  { 0, 0, "li.w", "r,sc", "%f", 0, 0, 0},
-  { 0, 0, "li.d", "r,sc", "%f", 0, 0, 0},
-  { 0, 0, "la", "r,la", "la.global %1,%2", 0, 0, 0 },
+  /* match,    mask,	   name, format, macro, include, exclude, pinfo.  */
+  { 0, 0, "li.w", "r,sc", "%f",	0, 0, 0 },
+  { 0, 0, "li.d", "r,sc", "%f",	0, 0, 0 },
 
-  { 0, 0, "la.global", "r,la", "la.pcrel %1,%2",
-    &LARCH_opts.ase_gpcr, 0, 0 },
-  { 0, 0, "la.global", "r,r,la", "la.pcrel %1,%2,%3",
-    &LARCH_opts.ase_gpcr, 0, 0 },
-  { 0, 0, "la.global", "r,la", "la.abs %1,%2",
-    &LARCH_opts.ase_gabs, 0, 0 },
-  { 0, 0, "la.global", "r,r,la", "la.abs %1,%3",
-    &LARCH_opts.ase_gabs, 0, 0 },
-  { 0, 0, "la.global", "r,l", "la.got %1,%2", 0, 0, 0 },
-  { 0, 0, "la.global", "r,r,l", "la.got %1,%2,%3", 0, 0, 0 },
+  { 0, 0, "la",		"r,la",	  "la.global %1,%2",	0,			0, 0 },
+  { 0, 0, "la.global",	"r,la",	  "la.pcrel %1,%2",	&LARCH_opts.ase_gpcr,	0, 0 },
+  { 0, 0, "la.global",	"r,r,la", "la.pcrel %1,%2,%3",	&LARCH_opts.ase_gpcr,	0, 0 },
+  { 0, 0, "la.global",	"r,la",	  "la.abs %1,%2",	&LARCH_opts.ase_gabs,	0, 0 },
+  { 0, 0, "la.global",	"r,r,la", "la.abs %1,%3",	&LARCH_opts.ase_gabs,	0, 0 },
+  { 0, 0, "la.global",	"r,la",	  "la.got %1,%2",	0,			0, 0 },
+  { 0, 0, "la.global",	"r,r,la", "la.got %1,%2,%3",	&LARCH_opts.ase_lp64,	0, 0 },
 
-  { 0, 0, "la.local", "r,la", "la.abs %1,%2",
-    &LARCH_opts.ase_labs, 0, 0 },
-  { 0, 0, "la.local", "r,r,la", "la.abs %1,%3",
-    &LARCH_opts.ase_labs, 0, 0 },
-  { 0, 0, "la.local", "r,la", "la.pcrel %1,%2", 0, 0, 0 },
-  { 0, 0, "la.local", "r,r,la", "la.pcrel %1,%2,%3", 0, 0, 0 },
+  { 0, 0, "la.local",	"r,la",	  "la.abs %1,%2",	&LARCH_opts.ase_labs,	0, 0 },
+  { 0, 0, "la.local",	"r,r,la", "la.abs %1,%3",	&LARCH_opts.ase_labs,	0, 0 },
+  { 0, 0, "la.local",	"r,la",	  "la.pcrel %1,%2",	0,			0, 0 },
+  { 0, 0, "la.local",	"r,r,la", "la.pcrel %1,%2,%3",	&LARCH_opts.ase_lp64,	0, 0 },
 
-  { 0, 0, "la.abs", "r,la",
-    "lu12i.w %1,%%abs(%2)>>12;"
-    "ori %1,%1,%%abs(%2)&0xfff;",
-    &LARCH_opts.ase_ilp32, &LARCH_opts.ase_lp64, 0 },
-  { 0, 0, "la.abs", "r,la",
-    "lu12i.w %1,%%abs(%2)<<32>>44;"
-    "ori %1,%1,%%abs(%2)&0xfff;"
-    "lu32i.d %1,%%abs(%2)<<12>>44;"
-    "lu52i.d %1,%1,%%abs(%2)>>52;",
-    &LARCH_opts.ase_lp64, 0, 0 },
-
-  { 0, 0, "la.pcrel", "r,la",
-    "pcaddu12i %1,%%pcrel(%2+0x800)<<32>>44;"
-    "addi.w %1,%1,%%pcrel(%2+4)-(%%pcrel(%2+4+0x800)>>12<<12);",
-    &LARCH_opts.ase_ilp32, &LARCH_opts.ase_lp64, 0 },
-
-  { 0, 0, "la.pcrel", "r,la",
-    "pcaddu12i %1,%%pcrel(%2+0x800)>>12;"
-    "addi.d %1,%1,%%pcrel(%2+4)-(%%pcrel(%2+4+0x800)>>12<<12);",
-    &LARCH_opts.ase_lp64, 0, 0 },
-  { 0, 0, "la.pcrel", "r,r,la",
-    "pcaddu12i %1,(%%pcrel(%3)-(%%pcrel(%3+0x80000000)>>32<<32))<<32>>44;"
-    "ori %2,$r0,(%%pcrel(%3+4)-(%%pcrel(%3+4+0x80000000)>>32<<32))&0xfff;"
-    "lu32i.d %2,%%pcrel(%3+8+0x80000000)<<12>>44;"
-    "lu52i.d %2,%2,%%pcrel(%3+12+0x80000000)>>52;"
-    "add.d %1,%1,%2;",
-    &LARCH_opts.ase_lp64, 0, 0 },
-
-  { 0, 0, "la.got", "r,l",
-    "pcaddu12i %1,(%%pcrel(_GLOBAL_OFFSET_TABLE_+0x800)+%%gprel(%2))<<32>>44;"
-    "ld.w "
-    "%1,%1,%%pcrel(_GLOBAL_OFFSET_TABLE_+4)+%%gprel(%2)-((%%pcrel(_GLOBAL_"
-    "OFFSET_TABLE_+4+0x800)+%%gprel(%2))>>12<<12);",
-    &LARCH_opts.ase_ilp32, &LARCH_opts.ase_lp64, 0 },
-
-  { 0, 0, "la.got", "r,l",
-    "pcaddu12i %1,(%%pcrel(_GLOBAL_OFFSET_TABLE_+0x800)+%%gprel(%2))>>12;"
-    "ld.d "
-    "%1,%1,%%pcrel(_GLOBAL_OFFSET_TABLE_+4)+%%gprel(%2)-((%%pcrel(_GLOBAL_"
-    "OFFSET_TABLE_+4+0x800)+%%gprel(%2))>>12<<12);",
-    &LARCH_opts.ase_lp64, 0, 0 },
-  { 0, 0, "la.got", "r,r,l",
-    "pcaddu12i "
-    "%1,(%%pcrel(_GLOBAL_OFFSET_TABLE_)+%%gprel(%3)-((%%pcrel(_GLOBAL_OFFSET_"
-    "TABLE_+0x80000000)+%%gprel(%3))>>32<<32))<<32>>44;"
-    "ori "
-    "%2,$r0,(%%pcrel(_GLOBAL_OFFSET_TABLE_+4)+%%gprel(%3)-((%%pcrel(_GLOBAL_"
-    "OFFSET_TABLE_+4+0x80000000)+%%gprel(%3))>>32<<32))&0xfff;"
-    "lu32i.d "
-    "%2,(%%pcrel(_GLOBAL_OFFSET_TABLE_+8+0x80000000)+%%gprel(%3))<<12>>44;"
-    "lu52i.d "
-    "%2,%2,(%%pcrel(_GLOBAL_OFFSET_TABLE_+12+0x80000000)+%%gprel(%3))>>52;"
-    "ldx.d %1,%1,%2;",
-    &LARCH_opts.ase_lp64, 0, 0 },
-
-  { 0, 0, "la.tls.le", "r,la",
-    "lu12i.w %1,%%tprel(%2)>>12;"
-    "ori %1,%1,%%tprel(%2)&0xfff",
-    &LARCH_opts.ase_ilp32, &LARCH_opts.ase_lp64, 0 },
-  /* { 0, 0, "la.tls.le", "r,la",
-  * "lu12i.w %1,%%tprel(%2)>>12;"
-  * "ori %1,%1,%%tprel(%2)&0xfff"
-  * , &LARCH_opts.addrwidth_is_64, 0, 0}, */
-  { 0, 0, "la.tls.le", "r,la",
-    "lu12i.w %1,%%tprel(%2)<<32>>44;"
-    "ori %1,%1,%%tprel(%2)&0xfff;"
-    "lu32i.d %1,%%tprel(%2)<<12>>44;"
-    "lu52i.d %1,%1,%%tprel(%2)>>52;",
-    &LARCH_opts.ase_lp64, 0, 0 },
-
-  { 0, 0, "la.tls.ie", "r,l",
-    "pcaddu12i %1,(%%pcrel(_GLOBAL_OFFSET_TABLE_+0x800)+%%tlsgot(%2))<<32>>44;"
-    "ld.w "
-    "%1,%1,%%pcrel(_GLOBAL_OFFSET_TABLE_+4)+%%tlsgot(%2)-((%%pcrel(_GLOBAL_"
-    "OFFSET_TABLE_+4+0x800)+%%tlsgot(%2))>>12<<12);",
-    &LARCH_opts.ase_ilp32, &LARCH_opts.ase_lp64, 0 },
-
-  { 0, 0, "la.tls.ie", "r,l",
-    "pcaddu12i %1,(%%pcrel(_GLOBAL_OFFSET_TABLE_+0x800)+%%tlsgot(%2))>>12;"
-    "ld.d "
-    "%1,%1,%%pcrel(_GLOBAL_OFFSET_TABLE_+4)+%%tlsgot(%2)-((%%pcrel(_GLOBAL_"
-    "OFFSET_TABLE_+4+0x800)+%%tlsgot(%2))>>12<<12);",
-    &LARCH_opts.ase_lp64, 0, 0 },
-  { 0, 0, "la.tls.ie", "r,r,l",
-    "pcaddu12i "
-    "%1,(%%pcrel(_GLOBAL_OFFSET_TABLE_)+%%tlsgot(%3)-((%%pcrel(_GLOBAL_OFFSET_"
-    "TABLE_+0x80000000)+%%tlsgot(%3))>>32<<32))<<32>>44;"
-    "ori "
-    "%2,$r0,(%%pcrel(_GLOBAL_OFFSET_TABLE_+4)+%%tlsgot(%3)-((%%pcrel(_GLOBAL_"
-    "OFFSET_TABLE_+4+0x80000000)+%%tlsgot(%3))>>32<<32))&0xfff;"
-    "lu32i.d "
-    "%2,(%%pcrel(_GLOBAL_OFFSET_TABLE_+8+0x80000000)+%%tlsgot(%3))<<12>>44;"
-    "lu52i.d "
-    "%2,%2,(%%pcrel(_GLOBAL_OFFSET_TABLE_+12+0x80000000)+%%tlsgot(%3))>>52;"
-    "ldx.d %1,%1,%2;",
-    &LARCH_opts.ase_lp64, 0, 0 },
-
-  { 0, 0, "la.tls.ld", "r,l", "la.tls.gd %1,%2", 0, 0, 0 },
-  { 0, 0, "la.tls.ld", "r,r,l", "la.tls.gd %1,%2,%3",
-    &LARCH_opts.ase_lp64, 0, 0 },
-
-  { 0, 0, "la.tls.gd", "r,l",
-    "pcaddu12i %1,(%%pcrel(_GLOBAL_OFFSET_TABLE_+0x800)+%%tlsgd(%2))<<32>>44;"
-    "addi.w "
-    "%1,%1,%%pcrel(_GLOBAL_OFFSET_TABLE_+4)+%%tlsgd(%2)-((%%pcrel(_GLOBAL_"
-    "OFFSET_TABLE_+4+0x800)+%%tlsgd(%2))>>12<<12);",
-    &LARCH_opts.ase_ilp32, &LARCH_opts.ase_lp64, 0 },
-
-  { 0, 0, "la.tls.gd", "r,l",
-    "pcaddu12i %1,(%%pcrel(_GLOBAL_OFFSET_TABLE_+0x800)+%%tlsgd(%2))>>12;"
-    "addi.d "
-    "%1,%1,%%pcrel(_GLOBAL_OFFSET_TABLE_+4)+%%tlsgd(%2)-((%%pcrel(_GLOBAL_"
-    "OFFSET_TABLE_+4+0x800)+%%tlsgd(%2))>>12<<12);",
-    &LARCH_opts.ase_lp64, 0, 0 },
-  { 0, 0, "la.tls.gd", "r,r,l",
-    "pcaddu12i "
-    "%1,(%%pcrel(_GLOBAL_OFFSET_TABLE_)+%%tlsgd(%3)-((%%pcrel(_GLOBAL_OFFSET_"
-    "TABLE_+0x80000000)+%%tlsgd(%3))>>32<<32))<<32>>44;"
-    "ori "
-    "%2,$r0,(%%pcrel(_GLOBAL_OFFSET_TABLE_+4)+%%tlsgd(%3)-((%%pcrel(_GLOBAL_"
-    "OFFSET_TABLE_+4+0x80000000)+%%tlsgd(%3))>>32<<32))&0xfff;"
-    "lu32i.d "
-    "%2,(%%pcrel(_GLOBAL_OFFSET_TABLE_+8+0x80000000)+%%tlsgd(%3))<<12>>44;"
-    "lu52i.d "
-    "%2,%2,(%%pcrel(_GLOBAL_OFFSET_TABLE_+12+0x80000000)+%%tlsgd(%3))>>52;"
-    "add.d %1,%1,%2;",
-    &LARCH_opts.ase_lp64, 0, 0 },
+  { 0, 0, "la.abs",	"r,la",	  INSN_LA_ABS32,		0 },
+  { 0, 0, "la.abs",	"r,la",	  INSN_LA_ABS64,		0 },
+  { 0, 0, "la.pcrel",	"r,la",	  INSN_LA_PCREL32,		0 },
+  { 0, 0, "la.pcrel",	"r,la",	  INSN_LA_PCREL64,		0 },
+  { 0, 0, "la.pcrel",	"r,r,la", INSN_LA_PCREL64_LARGE,	0 },
+  { 0, 0, "la.got",	"r,la",	  INSN_LA_GOT32,		0 },
+  { 0, 0, "la.got",	"r,la",	  INSN_LA_GOT32_ABS,		0 },
+  { 0, 0, "la.got",	"r,la",	  INSN_LA_GOT64,		0 },
+  { 0, 0, "la.got",	"r,la",	  INSN_LA_GOT64_LARGE_ABS,	0 },
+  { 0, 0, "la.got",	"r,r,la", INSN_LA_GOT64_LARGE_PCREL,	0 },
+  { 0, 0, "la.tls.le",	"r,l",	  INSN_LA_TLS_LE,		0 },
+  { 0, 0, "la.tls.le",	"r,l",	  INSN_LA_TLS_LE64_LARGE,	0 },
+  { 0, 0, "la.tls.ie",	"r,l",	  INSN_LA_TLS_IE32,		0 },
+  { 0, 0, "la.tls.ie",	"r,l",	  INSN_LA_TLS_IE32_ABS,		0 },
+  { 0, 0, "la.tls.ie",	"r,l",	  INSN_LA_TLS_IE64,		0 },
+  { 0, 0, "la.tls.ie",	"r,l",	  INSN_LA_TLS_IE64_LARGE_ABS,	0 },
+  { 0, 0, "la.tls.ie",	"r,r,l",  INSN_LA_TLS_IE64_LARGE_PCREL,	0 },
+  { 0, 0, "la.tls.ld",	"r,l",	  INSN_LA_TLS_LD32,		0 },
+  { 0, 0, "la.tls.ld",	"r,l",	  INSN_LA_TLS_LD32_ABS,		0 },
+  { 0, 0, "la.tls.ld",	"r,l",	  INSN_LA_TLS_LD64,		0 },
+  { 0, 0, "la.tls.ld",	"r,l",	  INSN_LA_TLS_LD64_LARGE_ABS,	0 },
+  { 0, 0, "la.tls.ld",	"r,r,l",  INSN_LA_TLS_LD64_LARGE_PCREL,	0 },
+  { 0, 0, "la.tls.gd",	"r,l",	  INSN_LA_TLS_GD32,		0 },
+  { 0, 0, "la.tls.gd",	"r,l",	  INSN_LA_TLS_GD32_ABS,		0 },
+  { 0, 0, "la.tls.gd",	"r,l",	  INSN_LA_TLS_GD64,		0 },
+  { 0, 0, "la.tls.gd",	"r,l",	  INSN_LA_TLS_GD64_LARGE_ABS,	0 },
+  { 0, 0, "la.tls.gd",	"r,r,l",  INSN_LA_TLS_GD64_LARGE_PCREL,	0 },
 
   { 0 } /* Terminate the list.  */
 };
@@ -728,9 +800,9 @@ static struct loongarch_opcode loongarch_double_float_load_store_opcodes[] =
 
 static struct loongarch_opcode loongarch_float_jmp_opcodes[] =
 {
-  { 0x0,	0x0,		"bceqz",	"c,la",				"bceqz %1,%%pcrel(%2)",		0, 0, 0 },
+  { 0x0,	0x0,		"bceqz",	"c,la",				"bceqz %1,%%b21(%2)",		0, 0, 0 },
   { 0x48000000, 0xfc000300,	"bceqz",	"c5:3,sb0:5|10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"bcnez",	"c,la",				"bcnez %1,%%pcrel(%2)",		0, 0, 0 },
+  { 0x0,	0x0,		"bcnez",	"c,la",				"bcnez %1,%%b21(%2)",		0, 0, 0 },
   { 0x48000100, 0xfc000300,	"bcnez",	"c5:3,sb0:5|10:16<<2",		0,				0, 0, 0 },
   { 0 } /* Terminate the list.  */
 };
@@ -738,43 +810,43 @@ static struct loongarch_opcode loongarch_float_jmp_opcodes[] =
 static struct loongarch_opcode loongarch_jmp_opcodes[] =
 {
   /* match,	mask,		name,		format,				macro,			include, exclude, pinfo.  */
-  { 0x0,	0x0,		"bltz",		"r,la",				"bltz %1,%%pcrel(%2)",		0, 0, 0 },
+  { 0x0,	0x0,		"bltz",		"r,la",				"bltz %1,%%b16(%2)",		0, 0, 0 },
   { 0x60000000, 0xfc00001f,	"bltz",		"r5:5,sb10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"bgtz",		"r,la",				"bgtz %1,%%pcrel(%2)",		0, 0, 0 },
+  { 0x0,	0x0,		"bgtz",		"r,la",				"bgtz %1,%%b16(%2)",		0, 0, 0 },
   { 0x60000000, 0xfc0003e0,	"bgtz",		"r0:5,sb10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"bgez",		"r,la",				"bgez %1,%%pcrel(%2)",		0, 0, 0 },
+  { 0x0,	0x0,		"bgez",		"r,la",				"bgez %1,%%b16(%2)",		0, 0, 0 },
   { 0x64000000, 0xfc00001f,	"bgez",		"r5:5,sb10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"blez",		"r,la",				"blez %1,%%pcrel(%2)",		0, 0, 0 },
+  { 0x0,	0x0,		"blez",		"r,la",				"blez %1,%%b16(%2)",		0, 0, 0 },
   { 0x64000000, 0xfc0003e0,	"blez",		"r0:5,sb10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"beqz",		"r,la",				"beqz %1,%%pcrel(%2)",		0, 0, 0 },
+  { 0x0,	0x0,		"beqz",		"r,la",				"beqz %1,%%b21(%2)",		0, 0, 0 },
   { 0x40000000, 0xfc000000,	"beqz",		"r5:5,sb0:5|10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"bnez",		"r,la",				"bnez %1,%%pcrel(%2)",		0, 0, 0 },
+  { 0x0,	0x0,		"bnez",		"r,la",				"bnez %1,%%b21(%2)",		0, 0, 0 },
   { 0x44000000, 0xfc000000,	"bnez",		"r5:5,sb0:5|10:16<<2",		0,				0, 0, 0 },
   { 0x0,	0x0,		"jr",		"r",				"jirl $r0,%1,0",		0, 0, 0 },
   { 0x50000000, 0xfc000000,	"b",		"sb0:10|10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"b",		"la",				"b %%pcrel(%1)",		0, 0, 0 },
+  { 0x0,	0x0,		"b",		"la",				"b %%b26(%1)",			0, 0, 0 },
   { 0x4c000000, 0xfc000000,	"jirl",		"r0:5,r5:5,s10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"bl",		"la",				"bl %%pcrel(%1)",		0, 0, 0 },
+  { 0x0,	0x0,		"bl",		"la",				"bl %%b26(%1)",			0, 0, 0 },
   { 0x54000000, 0xfc000000,	"bl",		"sb0:10|10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"beq",		"r,r,la",			"beq %1,%2,%%pcrel(%3)",	0, 0, 0 },
+  { 0x0,	0x0,		"beq",		"r,r,la",			"beq %1,%2,%%b16(%3)",		0, 0, 0 },
   { 0x58000000, 0xfc000000,	"beq",		"r5:5,r0:5,sb10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"bne",		"r,r,la",			"bne %1,%2,%%pcrel(%3)",	0, 0, 0 },
+  { 0x0,	0x0,		"bne",		"r,r,la",			"bne %1,%2,%%b16(%3)",		0, 0, 0 },
   { 0x5c000000, 0xfc000000,	"bne",		"r5:5,r0:5,sb10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"blt",		"r,r,la",			"blt %1,%2,%%pcrel(%3)",	0, 0, 0 },
+  { 0x0,	0x0,		"blt",		"r,r,la",			"blt %1,%2,%%b16(%3)",		0, 0, 0 },
   { 0x60000000, 0xfc000000,	"blt",		"r5:5,r0:5,sb10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"bgt",		"r,r,la",			"bgt %1,%2,%%pcrel(%3)",	0, 0, 0 },
+  { 0x0,	0x0,		"bgt",		"r,r,la",			"bgt %1,%2,%%b16(%3)",		0, 0, 0 },
   { 0x60000000, 0xfc000000,	"bgt",		"r0:5,r5:5,sb10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"bge",		"r,r,la",			"bge %1,%2,%%pcrel(%3)",	0, 0, 0 },
+  { 0x0,	0x0,		"bge",		"r,r,la",			"bge %1,%2,%%b16(%3)",		0, 0, 0 },
   { 0x64000000, 0xfc000000,	"bge",		"r5:5,r0:5,sb10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"ble",		"r,r,la",			"ble %1,%2,%%pcrel(%3)",	0, 0, 0 },
+  { 0x0,	0x0,		"ble",		"r,r,la",			"ble %1,%2,%%b16(%3)",		0, 0, 0 },
   { 0x64000000, 0xfc000000,	"ble",		"r0:5,r5:5,sb10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"bltu",		"r,r,la",			"bltu %1,%2,%%pcrel(%3)",	0, 0, 0 },
+  { 0x0,	0x0,		"bltu",		"r,r,la",			"bltu %1,%2,%%b16(%3)",		0, 0, 0 },
   { 0x68000000, 0xfc000000,	"bltu",		"r5:5,r0:5,sb10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"bgtu",		"r,r,la",			"bgtu %1,%2,%%pcrel(%3)",	0, 0, 0 },
+  { 0x0,	0x0,		"bgtu",		"r,r,la",			"bgtu %1,%2,%%b16(%3)",		0, 0, 0 },
   { 0x68000000, 0xfc000000,	"bgtu",		"r0:5,r5:5,sb10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"bgeu",		"r,r,la",			"bgeu %1,%2,%%pcrel(%3)",	0, 0, 0 },
+  { 0x0,	0x0,		"bgeu",		"r,r,la",			"bgeu %1,%2,%%b16(%3)",		0, 0, 0 },
   { 0x6c000000, 0xfc000000,	"bgeu",		"r5:5,r0:5,sb10:16<<2",		0,				0, 0, 0 },
-  { 0x0,	0x0,		"bleu",		"r,r,la",			"bleu %1,%2,%%pcrel(%3)",	0, 0, 0 },
+  { 0x0,	0x0,		"bleu",		"r,r,la",			"bleu %1,%2,%%b16(%3)",		0, 0, 0 },
   { 0x6c000000, 0xfc000000,	"bleu",		"r0:5,r5:5,sb10:16<<2",		0,				0, 0, 0 },
   { 0 } /* Terminate the list.  */
 };
