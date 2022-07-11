@@ -346,6 +346,7 @@ if { [check_gc_sections_available] } {
 	mips*-*-* { }
 	tic6x-*-* { }
 	xtensa-*-* { }
+	loongarch*-*-* { }
 	default {
 	    run_ld_link_tests [list \
 		[list \
@@ -465,7 +466,7 @@ run_ld_link_tests [list \
 ]
 
 # These targets don't copy dynamic variables into .bss.
-setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*"
+setup_xfail "alpha-*-*" "bfin-*-*" "ia64-*-*" "xtensa-*-*" *loongarch*-*-*
 # or don't have .data.rel.ro
 setup_xfail "hppa*64*-*-hpux*" "tic6x-*-*"
 # or complain about relocs in read-only sections
@@ -485,7 +486,8 @@ run_ld_link_tests [list \
 	{pr20995c.s} {{readelf {-l --wide} pr20995-2so.r}} "pr20995-2.so"] \
 ] {![check_relro_support]}
 
-setup_xfail alpha-*-* xtensa-*-*
+# LoongArch: Read-only sections, merged into text segment in normal exe.
+setup_xfail alpha-*-* xtensa-*-* loongarch*-*-*
 run_ld_link_tests [list \
     [list \
 	"pr20995-2" \
