@@ -2982,14 +2982,10 @@ handle_v_run (char *own_buf)
   char *p, *next_p;
   std::vector<char *> new_argv;
   char *new_program_name = NULL;
-  int i, new_argc;
+  int i;
 
-  new_argc = 0;
   for (p = own_buf + strlen ("vRun;"); p && *p; p = strchr (p, ';'))
-    {
-      p++;
-      new_argc++;
-    }
+    p++;
 
   for (i = 0, p = own_buf + strlen ("vRun;"); *p; p = next_p, ++i)
     {
