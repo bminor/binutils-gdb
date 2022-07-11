@@ -1214,7 +1214,7 @@ write_gdbindex (dwarf2_per_objfile *per_objfile,
 			       sig_type->signature);
 	}
       else
-	cu_list.append_uint (8, BFD_ENDIAN_LITTLE, per_cu->length);
+	cu_list.append_uint (8, BFD_ENDIAN_LITTLE, per_cu->length ());
 
       ++this_counter;
     }

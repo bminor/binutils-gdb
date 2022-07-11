@@ -120,9 +120,10 @@ struct dwarf2_per_cu_data
      If the DIE refers to a DWO file, this is always of the original die,
      not the DWO file.  */
   sect_offset sect_off {};
-  unsigned int length = 0;
 
 private:
+  unsigned int m_length = 0;
+
   /* DWARF standard version this data has been read from (such as 4 or 5).  */
   unsigned char m_dwarf_version = 0;
 
@@ -287,6 +288,24 @@ public:
   /* Return the DW_FORM_ref_addr size given in the compilation unit
      header for this CU.  */
   int ref_addr_size () const;
+
+  /* Return length of this CU.  */
+  unsigned int length () const
+  {
+    /* Make sure it's set already.  */
+    gdb_assert (m_length != 0);
+    return m_length;
+  }
+
+  void set_length (unsigned int length, bool strict_p = true)
+  {
+    if (m_length == 0)
+      /* Set if not set already.  */
+      m_length = length;
+    else if (strict_p)
+      /* If already set, verify that it's the same value.  */
+      gdb_assert (m_length == length);
+  }
 
   /* Return DWARF version number of this CU.  */
   short version () const

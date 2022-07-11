@@ -2120,7 +2120,7 @@ create_cu_from_index_list (dwarf2_per_bfd *per_bfd,
 {
   dwarf2_per_cu_data_up the_cu = per_bfd->allocate_per_cu ();
   the_cu->sect_off = sect_off;
-  the_cu->length = length;
+  the_cu->set_length (length);
   the_cu->section = section;
   the_cu->is_dwz = is_dwz;
   return the_cu;
@@ -5655,7 +5655,7 @@ fill_in_sig_entry_from_dwo_entry (dwarf2_per_objfile *per_objfile,
 
   sig_entry->section = dwo_entry->section;
   sig_entry->sect_off = dwo_entry->sect_off;
-  sig_entry->length = dwo_entry->length;
+  sig_entry->set_length (dwo_entry->length, false);
   sig_entry->reading_dwo_directly = 1;
   sig_entry->per_bfd = per_bfd;
   sig_entry->type_offset_in_tu = dwo_entry->type_offset_in_tu;
@@ -6233,7 +6233,7 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
 
 	  /* LENGTH has not been set yet for type units if we're
 	     using .gdb_index.  */
-	  this_cu->length = cu->header.get_length ();
+	  this_cu->set_length (cu->header.get_length ());
 
 	  /* Establish the type offset that can be used to lookup the type.  */
 	  sig_type->type_offset_in_section =
@@ -6249,16 +6249,13 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
 						    rcuh_kind::COMPILE);
 
 	  gdb_assert (this_cu->sect_off == cu->header.sect_off);
-	  if (this_cu->length == 0)
-	    this_cu->length = cu->header.get_length ();
-	  else
-	    gdb_assert (this_cu->length == cu->header.get_length ());
+	  this_cu->set_length (cu->header.get_length ());
 	  this_cu->set_version (cu->header.version);
 	}
     }
 
   /* Skip dummy compilation units.  */
-  if (info_ptr >= begin_info_ptr + this_cu->length
+  if (info_ptr >= begin_info_ptr + this_cu->length ()
       || peek_abbrev_code (abfd, info_ptr) == 0)
     {
       dummy_p = true;
@@ -6412,10 +6409,10 @@ cutu_reader::cutu_reader (dwarf2_per_cu_data *this_cu,
       m_new_cu->str_offsets_base = parent_cu->str_offsets_base;
       m_new_cu->addr_base = parent_cu->addr_base;
     }
-  this_cu->length = m_new_cu->header.get_length ();
+  this_cu->set_length (m_new_cu->header.get_length ());
 
   /* Skip dummy compilation units.  */
-  if (info_ptr >= begin_info_ptr + this_cu->length
+  if (info_ptr >= begin_info_ptr + this_cu->length ()
       || peek_abbrev_code (abfd, info_ptr) == 0)
     {
       dummy_p = true;
@@ -7207,7 +7204,7 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 	  *slot = sig_ptr;
 	}
       this_cu->sect_off = sect_off;
-      this_cu->length = cu_header.get_length ();
+      this_cu->set_length (cu_header.get_length ());
       this_cu->is_dwz = is_dwz;
       this_cu->section = section;
       /* Init this asap, to avoid a data race in the set_version in
@@ -7215,7 +7212,7 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
 	 index case).  */
       this_cu->set_version (cu_header.version);
 
-      info_ptr = info_ptr + this_cu->length;
+      info_ptr = info_ptr + this_cu->length ();
       per_objfile->per_bfd->all_comp_units.push_back (std::move (this_cu));
     }
 }
@@ -9904,7 +9901,7 @@ create_dwo_cu_reader (const struct die_reader_specs *reader,
   dwo_unit->signature = *signature;
   dwo_unit->section = section;
   dwo_unit->sect_off = sect_off;
-  dwo_unit->length = cu->per_cu->length;
+  dwo_unit->length = cu->per_cu->length ();
 
   dwarf_read_debug_printf ("  offset %s, dwo_id %s",
 			   sect_offset_str (sect_off),
@@ -9951,7 +9948,7 @@ create_cus_hash_table (dwarf2_per_objfile *per_objfile,
       if (!reader.dummy_p)
 	create_dwo_cu_reader (&reader, reader.info_ptr, reader.comp_unit_die,
 			      &dwo_file, &read_unit);
-      info_ptr += per_cu.length;
+      info_ptr += per_cu.length ();
 
       // If the unit could not be parsed, skip it.
       if (read_unit.dwo_file == NULL)
@@ -23459,7 +23456,7 @@ dwarf2_find_containing_comp_unit
       mid_cu = all_comp_units[mid].get ();
       if (mid_cu->is_dwz > offset_in_dwz
 	  || (mid_cu->is_dwz == offset_in_dwz
-	      && mid_cu->sect_off + mid_cu->length > sect_off))
+	      && mid_cu->sect_off + mid_cu->length () > sect_off))
 	high = mid;
       else
 	low = mid + 1;
@@ -23495,9 +23492,9 @@ dwarf2_find_containing_comp_unit (sect_offset sect_off,
   else
     {
       if (low == per_bfd->all_comp_units.size () - 1
-	  && sect_off >= this_cu->sect_off + this_cu->length)
+	  && sect_off >= this_cu->sect_off + this_cu->length ())
 	error (_("invalid dwarf2 offset %s"), sect_offset_str (sect_off));
-      gdb_assert (sect_off < this_cu->sect_off + this_cu->length);
+      gdb_assert (sect_off < this_cu->sect_off + this_cu->length ());
       return this_cu;
     }
 }
@@ -23519,14 +23516,14 @@ run_test ()
   dwarf2_per_cu_data_up four (new dwarf2_per_cu_data);
   dwarf2_per_cu_data *four_ptr = four.get ();
 
-  one->length = 5;
-  two->sect_off = sect_offset (one->length);
-  two->length = 7;
+  one->set_length (5);
+  two->sect_off = sect_offset (one->length ());
+  two->set_length (7);
 
-  three->length = 5;
+  three->set_length (5);
   three->is_dwz = 1;
-  four->sect_off = sect_offset (three->length);
-  four->length = 7;
+  four->sect_off = sect_offset (three->length ());
+  four->set_length (7);
   four->is_dwz = 1;
 
   std::vector<dwarf2_per_cu_data_up> units;
