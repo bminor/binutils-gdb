@@ -41672,7 +41672,7 @@ series of bytes in target byte order, with each byte given by a
 two-digit hex number.
 
 @item
-If @var{n} is @samp{thread}, then @var{r} is the @var{thread-id} of
+If @var{n} is @samp{thread}, then @var{r} is the thread ID of
 the stopped thread, as specified in @ref{thread-id syntax}.
 
 @item
@@ -41749,11 +41749,10 @@ apply.
 
 @cindex fork events, remote reply
 @item fork
-The packet indicates that @code{fork} was called, and @var{r}
-is the thread ID of the new child process.  Refer to
-@ref{thread-id syntax} for the format of the @var{thread-id}
-field.  This packet is only applicable to targets that support
-fork events.
+The packet indicates that @code{fork} was called, and @var{r} is the
+thread ID of the new child process, as specified in @ref{thread-id
+syntax}.  This packet is only applicable to targets that support fork
+events.
 
 This packet should not be sent by default; older @value{GDBN} versions
 did not support it.  @value{GDBN} requests it, by supplying an
@@ -41763,11 +41762,10 @@ indicating support.
 
 @cindex vfork events, remote reply
 @item vfork
-The packet indicates that @code{vfork} was called, and @var{r}
-is the thread ID of the new child process. Refer to
-@ref{thread-id syntax} for the format of the @var{thread-id}
-field.  This packet is only applicable to targets that support
-vfork events.
+The packet indicates that @code{vfork} was called, and @var{r} is the
+thread ID of the new child process, as specified in @ref{thread-id
+syntax}.  This packet is only applicable to targets that support vfork
+events.
 
 This packet should not be sent by default; older @value{GDBN} versions
 did not support it.  @value{GDBN} requests it, by supplying an
