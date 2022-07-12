@@ -10489,7 +10489,7 @@ until_break_command (const char *arg, int from_tty, int anywhere)
 				    caller_frame_id, bp_until);
       breakpoints.emplace_back (std::move (caller_breakpoint));
 
-      set_longjmp_breakpoint (tp, caller_frame_id);
+      set_longjmp_breakpoint (tp, stack_frame_id);
       lj_deleter.emplace (thread);
     }
 
