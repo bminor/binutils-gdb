@@ -2556,9 +2556,28 @@ csky_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 static int
 csky_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int dw_reg)
 {
-  if (dw_reg < 0 || dw_reg >= CSKY_NUM_REGS)
-    return -1;
-  return dw_reg;
+  /* For GPRs.  */
+  if (dw_reg >= CSKY_R0_REGNUM && dw_reg <= (CSKY_R0_REGNUM + 31))
+    return dw_reg;
+
+  /* For Hi, Lo, PC.  */
+  if ((dw_reg == CSKY_HI_REGNUM) || (dw_reg == CSKY_LO_REGNUM)
+       || (dw_reg == CSKY_PC_REGNUM))
+    return dw_reg;
+
+  /* For Float and Vector pseudo registers.  */
+  if ((dw_reg >= FV_PSEUDO_REGNO_FIRST)  && (dw_reg <= FV_PSEUDO_REGNO_LAST))
+    {
+      char name_buf[4];
+
+      xsnprintf (name_buf, sizeof (name_buf), "s%d",
+                 dw_reg - FV_PSEUDO_REGNO_FIRST);
+      return user_reg_map_name_to_regnum (gdbarch, name_buf,
+                                          strlen (name_buf));
+    }
+
+  /* Others, unknown.  */
+  return -1;
 }
 
 /* Override interface for command: info register.  */

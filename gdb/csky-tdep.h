@@ -108,6 +108,10 @@ enum csky_regnum
 /* For fr0~fr15, fr16~fr31, vr0~vr15 check.  */
 #define CSKY_FULL16_ONEHOT_VALUE   0xffff
 
+/* Define for CSKY FV pseudo regs for dwarf regs. */
+#define FV_PSEUDO_REGNO_FIRST  74
+#define FV_PSEUDO_REGNO_LAST   201
+
 /* Number of processor registers w/o ICE registers.  */
 #define CSKY_NUM_REGS (CSKY_MAX_REGS - CSKY_CRBANK_NUM_REGS)
 
