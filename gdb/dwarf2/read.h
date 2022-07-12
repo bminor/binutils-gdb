@@ -33,6 +33,7 @@
 #include "gdbsupport/gdb_obstack.h"
 #include "gdbsupport/hash_enum.h"
 #include "gdbsupport/function-view.h"
+#include "gdbsupport/packed.h"
 
 /* Hold 'maintenance (set|show) dwarf' commands.  */
 extern struct cmd_list_element *set_dwarf_cmdlist;
@@ -105,11 +106,8 @@ struct dwarf2_per_cu_data
       reading_dwo_directly (false),
       tu_read (false),
       m_header_read_in (false),
-      addresses_seen (false),
       mark (false),
       files_read (false),
-      m_unit_type {},
-      m_lang (language_unknown),
       scanned (false)
   {
   }
@@ -162,10 +160,6 @@ public:
      it private at the moment.  */
   mutable bool m_header_read_in : 1;
 
-  /* If addresses have been read for this CU (usually from
-     .debug_aranges), then this flag is set.  */
-  bool addresses_seen : 1;
-
   /* A temporary mark bit used when iterating over all CUs in
      expand_symtabs_matching.  */
   unsigned int mark : 1;
@@ -174,12 +168,20 @@ public:
      point in trying to read it again next time.  */
   bool files_read : 1;
 
+  /* Wrap the following in struct packed instead of bitfields to avoid
+     data races when the bitfields end up on the same memory location
+     (per C++ memory model).  */
+
+  /* If addresses have been read for this CU (usually from
+     .debug_aranges), then this flag is set.  */
+  packed<bool, 1> addresses_seen = false;
+
 private:
   /* The unit type of this CU.  */
-  ENUM_BITFIELD (dwarf_unit_type) m_unit_type : 8;
+  packed<dwarf_unit_type, 1> m_unit_type = (dwarf_unit_type) 0;
 
   /* The language of this CU.  */
-  ENUM_BITFIELD (language) m_lang : LANGUAGE_BITS;
+  packed<language, LANGUAGE_BYTES> m_lang = language_unknown;
 
 public:
   /* True if this CU has been scanned by the indexer; false if
