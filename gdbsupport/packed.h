@@ -18,6 +18,8 @@
 #ifndef PACKED_H
 #define PACKED_H
 
+#include "traits.h"
+
 /* Each instantiation and full specialization of the packed template
    defines a type that behaves like a given scalar type, but that has
    byte alignment, and, may optionally have a smaller size than the
@@ -38,7 +40,9 @@ public:
     gdb_static_assert (alignof (packed) == 1);
 
     /* Make sure packed can be wrapped with std::atomic.  */
+#if HAVE_IS_TRIVIALLY_COPYABLE
     gdb_static_assert (std::is_trivially_copyable<packed>::value);
+#endif
     gdb_static_assert (std::is_copy_constructible<packed>::value);
     gdb_static_assert (std::is_move_constructible<packed>::value);
     gdb_static_assert (std::is_copy_assignable<packed>::value);
