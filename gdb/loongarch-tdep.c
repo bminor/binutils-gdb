@@ -462,7 +462,7 @@ pass_in_gar (struct regcache *regcache, unsigned int gar, const gdb_byte *val)
 static void
 pass_in_far (struct regcache *regcache, unsigned int far, const gdb_byte *val)
 {
-  unsigned int regnum = LOONGARCH_ARG_REGNUM - far + LOONGARCH_BADV_REGNUM + 1;
+  unsigned int regnum = LOONGARCH_ARG_REGNUM - far + LOONGARCH_FIRST_FP_REGNUM;
   regcache->cooked_write (regnum, val);
 }
 
@@ -1080,6 +1080,8 @@ loongarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= 0 && regnum < 32)
     return regnum;
+  else if (regnum >= 32 && regnum < 66)
+    return LOONGARCH_FIRST_FP_REGNUM + regnum - 32;
   else
     return -1;
 }
@@ -1104,6 +1106,7 @@ loongarch_features_from_bfd (const bfd *abfd)
   if (abfd != nullptr && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
     {
       unsigned char eclass = elf_elfheader (abfd)->e_ident[EI_CLASS];
+      int e_flags = elf_elfheader (abfd)->e_flags;
 
       if (eclass == ELFCLASS32)
 	features.xlen = 4;
@@ -1112,6 +1115,11 @@ loongarch_features_from_bfd (const bfd *abfd)
       else
 	internal_error (__FILE__, __LINE__,
 			_("unknown ELF header class %d"), eclass);
+
+      if (EF_LOONGARCH_IS_SINGLE_FLOAT (e_flags))
+	features.fputype = SINGLE_FLOAT;
+      else if (EF_LOONGARCH_IS_DOUBLE_FLOAT (e_flags))
+	features.fputype = DOUBLE_FLOAT;
     }
 
   return features;
@@ -1130,10 +1138,16 @@ loongarch_find_default_target_description (const struct gdbarch_info info)
 
   /* If the XLEN field is still 0 then we got nothing useful from INFO.BFD,
      maybe there was no bfd object.  In this case we fall back to a minimal
-     useful target with no floating point, the x-register size is selected
-     based on the architecture from INFO.  */
+     useful target, the x-register size is selected based on the architecture
+     from INFO.  */
   if (features.xlen == 0)
     features.xlen = info.bfd_arch_info->bits_per_address == 32 ? 4 : 8;
+
+  /* If the FPUTYPE field is still 0 then we got nothing useful from INFO.BFD,
+     maybe there was no bfd object.  In this case we fall back to a usual useful
+     target with double float.  */
+  if (features.fputype == 0)
+    features.fputype = DOUBLE_FLOAT;
 
   /* Now build a target description based on the feature set.  */
   return loongarch_lookup_target_description (features);
@@ -1144,6 +1158,10 @@ loongarch_find_default_target_description (const struct gdbarch_info info)
 static struct gdbarch *
 loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
+  size_t regnum = 0;
+  struct loongarch_gdbarch_features features;
+  tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
+  loongarch_gdbarch_tdep *tdep = new loongarch_gdbarch_tdep;
   const struct target_desc *tdesc = info.target_desc;
 
   /* Ensure we always have a target description.  */
@@ -1155,13 +1173,6 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (feature_cpu == nullptr)
     return nullptr;
 
-  int xlen_bitsize = tdesc_register_bitsize (feature_cpu, "pc");
-  struct loongarch_gdbarch_features features;
-  features.xlen = (xlen_bitsize / 8);
-
-  size_t regnum = 0;
-  tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
-  loongarch_gdbarch_tdep *tdep = new loongarch_gdbarch_tdep;
 
   /* Validate the description provides the mandatory base registers
      and allocate their numbers.  */
@@ -1175,6 +1186,22 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (!valid_p)
     return nullptr;
 
+  const struct tdesc_feature *feature_fpu
+    = tdesc_find_feature (tdesc, "org.gnu.gdb.loongarch.fpu");
+  if (feature_fpu == nullptr)
+    return nullptr;
+
+  /* Validate the description provides the fpu registers and
+     allocate their numbers.  */
+  regnum = LOONGARCH_FIRST_FP_REGNUM;
+  for (int i = 0; i < 32; i++)
+    valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++,
+					loongarch_f_normal_name[i] + 1);
+  valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++, "fcc");
+  valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++, "fcsr");
+  if (!valid_p)
+    return nullptr;
+
   /* LoongArch code is always little-endian.  */
   info.byte_order_for_code = BFD_ENDIAN_LITTLE;
 
@@ -1184,11 +1211,22 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   struct loongarch_gdbarch_features abi_features
     = loongarch_features_from_bfd (info.abfd);
 
-  /* If the ABI_FEATURES xlen is 0 then this indicates we got no useful abi
-     features from the INFO object.  In this case we just treat the
-     hardware features as defining the abi.  */
+  /* If the ABI_FEATURES xlen or fputype is 0 then this indicates we got
+     no useful abi features from the INFO object.  In this case we just
+     treat the hardware features as defining the abi.  */
   if (abi_features.xlen == 0)
-    abi_features = features;
+    {
+      int xlen_bitsize = tdesc_register_bitsize (feature_cpu, "pc");
+      features.xlen = (xlen_bitsize / 8);
+      features.fputype = abi_features.fputype;
+      abi_features = features;
+    }
+  if (abi_features.fputype == 0)
+    {
+      features.xlen = abi_features.xlen;
+      features.fputype = DOUBLE_FLOAT;
+      abi_features = features;
+    }
 
   /* Find a candidate among the list of pre-declared architectures.  */
   for (arches = gdbarch_list_lookup_by_info (arches, &info);

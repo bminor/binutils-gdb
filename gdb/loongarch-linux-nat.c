@@ -100,6 +100,52 @@ store_gregs_to_thread (struct regcache *regcache, int regnum, pid_t tid)
   }
 }
 
+/* Fill GDB's register array with the fp, fcc and fcsr
+   register values from the current thread.  */
+
+static void
+fetch_fpregs_from_thread (struct regcache *regcache, int regnum, pid_t tid)
+{
+  elf_fpregset_t regset;
+
+  if ((regnum == -1)
+      || (regnum >= LOONGARCH_FIRST_FP_REGNUM && regnum <= LOONGARCH_FCSR_REGNUM))
+    {
+      struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
+
+      if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, (long) &iovec) < 0)
+	perror_with_name (_("Couldn't get NT_FPREGSET registers"));
+      else
+	loongarch_fpregset.supply_regset (nullptr, regcache, regnum,
+					  &regset, sizeof (regset));
+    }
+}
+
+/* Store to the current thread the valid fp, fcc and fcsr
+   register values in the GDB's register array.  */
+
+static void
+store_fpregs_to_thread (struct regcache *regcache, int regnum, pid_t tid)
+{
+  elf_fpregset_t regset;
+
+  if ((regnum == -1)
+      || (regnum >= LOONGARCH_FIRST_FP_REGNUM && regnum <= LOONGARCH_FCSR_REGNUM))
+    {
+      struct iovec iovec = { .iov_base = &regset, .iov_len = sizeof (regset) };
+
+      if (ptrace (PTRACE_GETREGSET, tid, NT_FPREGSET, (long) &iovec) < 0)
+	perror_with_name (_("Couldn't get NT_FPREGSET registers"));
+      else
+	{
+	  loongarch_fpregset.collect_regset (nullptr, regcache, regnum,
+					     &regset, sizeof (regset));
+	  if (ptrace (PTRACE_SETREGSET, tid, NT_FPREGSET, (long) &iovec) < 0)
+	    perror_with_name (_("Couldn't set NT_FPREGSET registers"));
+	}
+    }
+}
+
 /* Implement the "fetch_registers" target_ops method.  */
 
 void
@@ -109,6 +155,7 @@ loongarch_linux_nat_target::fetch_registers (struct regcache *regcache,
   pid_t tid = get_ptrace_pid (regcache->ptid ());
 
   fetch_gregs_from_thread(regcache, regnum, tid);
+  fetch_fpregs_from_thread(regcache, regnum, tid);
 }
 
 /* Implement the "store_registers" target_ops method.  */
@@ -120,6 +167,7 @@ loongarch_linux_nat_target::store_registers (struct regcache *regcache,
   pid_t tid = get_ptrace_pid (regcache->ptid ());
 
   store_gregs_to_thread (regcache, regnum, tid);
+  store_fpregs_to_thread(regcache, regnum, tid);
 }
 
 /* Return the address in the core dump or inferior of register REGNO.  */
@@ -158,12 +206,16 @@ fill_gregset (const struct regcache *regcache, gdb_gregset_t *gregset,
 void
 supply_fpregset (struct regcache *regcache, const gdb_fpregset_t *fpregset)
 {
+  loongarch_fpregset.supply_regset (nullptr, regcache, -1, fpregset,
+				    sizeof (gdb_fpregset_t));
 }
 
 void
 fill_fpregset (const struct regcache *regcache, gdb_fpregset_t *fpregset,
 	       int regnum)
 {
+  loongarch_fpregset.collect_regset (nullptr, regcache, regnum, fpregset,
+				     sizeof (gdb_fpregset_t));
 }
 
 /* Initialize LoongArch Linux native support.  */

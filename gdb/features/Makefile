@@ -231,6 +231,7 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	i386/x32-core.xml \
 	loongarch/base32.xml \
 	loongarch/base64.xml \
+	loongarch/fpu.xml \
 	riscv/rv32e-xregs.xml \
 	riscv/32bit-cpu.xml \
 	riscv/32bit-fpu.xml \

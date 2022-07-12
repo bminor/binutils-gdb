@@ -23,7 +23,7 @@
 #include "gdbsupport/tdesc.h"
 
 /* Register numbers of various important registers.  */
-enum
+enum loongarch_regnum
 {
   LOONGARCH_RA_REGNUM = 1,		/* Return Address.  */
   LOONGARCH_SP_REGNUM = 3,		/* Stack Pointer.  */
@@ -36,6 +36,16 @@ enum
   LOONGARCH_LINUX_NUM_GREGSET = 45,	/* 32 GPR, ORIG_A0, PC, BADV, RESERVED 10.  */
   LOONGARCH_ARG_REGNUM = 8,            /* r4-r11: general-purpose argument registers.
 					  f0-f7: floating-point argument registers.  */
+  LOONGARCH_FIRST_FP_REGNUM = LOONGARCH_LINUX_NUM_GREGSET,
+  LOONGARCH_FCC_REGNUM = LOONGARCH_FIRST_FP_REGNUM + 32,
+  LOONGARCH_FCSR_REGNUM = LOONGARCH_FCC_REGNUM + 1,
+  LOONGARCH_LINUX_NUM_FPREGSET = 34,
+};
+
+enum loongarch_fputype
+{
+  SINGLE_FLOAT = 1,
+  DOUBLE_FLOAT = 2,
 };
 
 /* The set of LoongArch architectural features that we track that impact how
@@ -55,6 +65,11 @@ struct loongarch_gdbarch_features
      or 8 (loongarch64).  No other value is valid.  Initialise to the invalid
      0 value so we can spot if one of these is used uninitialised.  */
   int xlen = 0;
+
+  /* The type of floating-point.  This is either 1 (single float) or 2
+     (double float).  No other value is valid.  Initialise to the invalid
+     0 value so we can spot if one of these is used uninitialised.  */
+  int fputype = 0;
 
   /* Equality operator.  */
   bool operator== (const struct loongarch_gdbarch_features &rhs) const

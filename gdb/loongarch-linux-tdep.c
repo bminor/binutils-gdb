@@ -106,13 +106,69 @@ loongarch_fill_gregset (const struct regset *regset,
     }
 }
 
-/* Register set definitions.  */
+/* Define the general register regset.  */
 
 const struct regset loongarch_gregset =
 {
   nullptr,
   loongarch_supply_gregset,
   loongarch_fill_gregset,
+};
+
+/* Unpack an elf_fpregset_t into GDB's register cache.  */
+static void
+loongarch_supply_fpregset (const struct regset *r,
+			   struct regcache *regcache, int regnum,
+			   const void *fprs, size_t len)
+{
+  const gdb_byte *buf = nullptr;
+  int fprsize = register_size (regcache->arch (), LOONGARCH_FIRST_FP_REGNUM);
+
+  if (regnum == -1)
+    {
+      for (int i = 0; i < LOONGARCH_LINUX_NUM_FPREGSET; i++)
+	{
+	  buf = (const gdb_byte *)fprs + fprsize * i;
+	  regcache->raw_supply (LOONGARCH_FIRST_FP_REGNUM + i, (const void *)buf);
+	}
+    }
+  else if (regnum >= LOONGARCH_FIRST_FP_REGNUM && regnum <= LOONGARCH_FCSR_REGNUM)
+    {
+      buf = (const gdb_byte *)fprs + fprsize * (regnum - LOONGARCH_FIRST_FP_REGNUM);
+      regcache->raw_supply (regnum, (const void *)buf);
+    }
+}
+
+/* Pack the GDB's register cache value into an elf_fpregset_t.  */
+static void
+loongarch_fill_fpregset (const struct regset *r,
+			 const struct regcache *regcache, int regnum,
+			 void *fprs, size_t len)
+{
+  gdb_byte *buf = nullptr;
+  int fprsize = register_size (regcache->arch (), LOONGARCH_FIRST_FP_REGNUM);
+
+  if (regnum == -1)
+    {
+      for (int i = 0; i < LOONGARCH_LINUX_NUM_FPREGSET; i++)
+	{
+	  buf = (gdb_byte *)fprs + fprsize * i;
+	  regcache->raw_collect (LOONGARCH_FIRST_FP_REGNUM + i, (void *)buf);
+	}
+    }
+  else if (regnum >= LOONGARCH_FIRST_FP_REGNUM && regnum <= LOONGARCH_FCSR_REGNUM)
+    {
+      buf = (gdb_byte *)fprs + fprsize * (regnum - LOONGARCH_FIRST_FP_REGNUM);
+      regcache->raw_collect (regnum, (void *)buf);
+    }
+}
+
+/* Define the FP register regset.  */
+const struct regset loongarch_fpregset =
+{
+  nullptr,
+  loongarch_supply_fpregset,
+  loongarch_fill_fpregset,
 };
 
 /* Implement the "init" method of struct tramp_frame.  */
@@ -152,7 +208,7 @@ static const struct tramp_frame loongarch_linux_rt_sigframe =
     { TRAMP_SENTINEL_INSN, ULONGEST_MAX }
   },
   loongarch_linux_rt_sigframe_init,
-  NULL
+  nullptr
 };
 
 /* Implement the "iterate_over_regset_sections" gdbarch method.  */
@@ -163,10 +219,13 @@ loongarch_iterate_over_regset_sections (struct gdbarch *gdbarch,
 					void *cb_data,
 					const struct regcache *regcache)
 {
-  int regsize = register_size (gdbarch, 0);
+  int gprsize = register_size (gdbarch, 0);
+  int fprsize = register_size (gdbarch, LOONGARCH_FIRST_FP_REGNUM);
 
-  cb (".reg", LOONGARCH_LINUX_NUM_GREGSET * regsize,
-      LOONGARCH_LINUX_NUM_GREGSET * regsize, &loongarch_gregset, NULL, cb_data);
+  cb (".reg", LOONGARCH_LINUX_NUM_GREGSET * gprsize,
+      LOONGARCH_LINUX_NUM_GREGSET * gprsize, &loongarch_gregset, nullptr, cb_data);
+  cb (".reg2", LOONGARCH_LINUX_NUM_FPREGSET * fprsize,
+      LOONGARCH_LINUX_NUM_FPREGSET * fprsize, &loongarch_fpregset, nullptr, cb_data);
 }
 
 /* The following value is derived from __NR_rt_sigreturn in

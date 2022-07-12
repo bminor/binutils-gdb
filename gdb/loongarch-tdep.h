@@ -29,6 +29,7 @@
 
 /* Register set definitions.  */
 extern const struct regset loongarch_gregset;
+extern const struct regset loongarch_fpregset;
 
 /* Target-dependent structure in gdbarch.  */
 struct loongarch_gdbarch_tdep : gdbarch_tdep
