@@ -1406,6 +1406,8 @@ ppc_canonicalize_syscall (int syscall, int wordsize)
     result = gdb_sys_recvfrom;
   else if (syscall == 342)
     result = gdb_sys_recvmsg;
+  else if (syscall == 359)
+    result = gdb_sys_getrandom;
 
   return (enum gdb_syscall) result;
 }

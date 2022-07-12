@@ -787,6 +787,8 @@ s390_canonicalize_syscall (int syscall, enum s390_abi_kind abi)
 	/* ioprio_set .. epoll_pwait */
 	else if (syscall >= 282 && syscall <= 312)
 	  ret = syscall + 7;
+	else if (syscall == 349)
+	  ret = gdb_sys_getrandom;
 	else
 	  ret = gdb_sys_no_syscall;
 

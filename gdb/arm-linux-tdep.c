@@ -1610,6 +1610,7 @@ arm_canonicalize_syscall (int syscall)
     case 378: return gdb_sys_kcmp;
     case 379: return gdb_sys_finit_module;
       */
+    case 384: return gdb_sys_getrandom;
     case 983041: /* ARM_breakpoint */ return gdb_sys_no_syscall;
     case 983042: /* ARM_cacheflush */ return gdb_sys_no_syscall;
     case 983043: /* ARM_usr26 */ return gdb_sys_no_syscall;

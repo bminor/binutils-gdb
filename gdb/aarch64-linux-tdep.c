@@ -1159,6 +1159,7 @@ enum aarch64_syscall {
   aarch64_sys_finit_module = 273,
   aarch64_sys_sched_setattr = 274,
   aarch64_sys_sched_getattr = 275,
+  aarch64_sys_getrandom = 278
 };
 
 /* aarch64_canonicalize_syscall maps syscall ids from the native AArch64
@@ -1441,6 +1442,7 @@ aarch64_canonicalize_syscall (enum aarch64_syscall syscall_number)
       UNSUPPORTED_SYSCALL_MAP (finit_module);
       UNSUPPORTED_SYSCALL_MAP (sched_setattr);
       UNSUPPORTED_SYSCALL_MAP (sched_getattr);
+      SYSCALL_MAP (getrandom);
   default:
     return gdb_sys_no_syscall;
   }

@@ -463,6 +463,9 @@ amd64_canonicalize_syscall (enum amd64_syscall syscall_number)
   case amd64_sys_pipe2:
     return gdb_sys_pipe2;
 
+  case amd64_sys_getrandom:
+    return gdb_sys_getrandom;
+
   case amd64_sys_select:
   case amd64_x32_sys_select:
     return gdb_sys_select;

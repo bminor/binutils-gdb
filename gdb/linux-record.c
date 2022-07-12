@@ -356,6 +356,12 @@ record_linux_system_call (enum gdb_syscall syscall,
 	return -1;
       break;
 
+    case gdb_sys_getrandom:
+      regcache_raw_read_unsigned (regcache, tdep->arg2, &tmpulongest);
+      if (record_mem_at_reg (regcache, tdep->arg1, tmpulongest))
+	return -1;
+      break;
+
     case gdb_sys_times:
       if (record_mem_at_reg (regcache, tdep->arg1, tdep->size_tms))
 	return -1;
