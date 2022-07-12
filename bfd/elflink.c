@@ -12413,8 +12413,10 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		      && elf_symtab_shndx_list (sec->owner) != NULL)
 		    max_sym_shndx_count = sym_count;
 
-		  if (esdo->this_hdr.sh_type == SHT_REL
-		      || esdo->this_hdr.sh_type == SHT_RELA)
+		  esdi = elf_section_data (sec);
+
+		  if (esdi->this_hdr.sh_type == SHT_REL
+		      || esdi->this_hdr.sh_type == SHT_RELA)
 		    /* Some backends use reloc_count in relocation sections
 		       to count particular types of relocs.  Of course,
 		       reloc sections themselves can't have relocations.  */
@@ -12431,8 +12433,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		    }
 		  else if (bed->elf_backend_count_relocs)
 		    reloc_count = (*bed->elf_backend_count_relocs) (info, sec);
-
-		  esdi = elf_section_data (sec);
 
 		  if ((sec->flags & SEC_RELOC) != 0)
 		    {
