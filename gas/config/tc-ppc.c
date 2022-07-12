@@ -785,8 +785,6 @@ static const struct pd_reg pre_defined_registers[] =
   { "xer", 1, PPC_OPERAND_SPR }
 };
 
-#define REG_NAME_CNT	(sizeof (pre_defined_registers) / sizeof (struct pd_reg))
-
 /* Given NAME, find the register number associated with that name, return
    the integer value associated with the given name or -1 on failure.  */
 
@@ -815,76 +813,43 @@ reg_name_search (const struct pd_reg *regs, int regcount, const char *name)
   return NULL;
 }
 
-/*
- * Summary of register_name.
- *
- * in:	Input_line_pointer points to 1st char of operand.
- *
- * out:	A expressionS.
- *      The operand may have been a register: in this case, X_op == O_register,
- *      X_add_number is set to the register number, and truth is returned.
- *	Input_line_pointer->(next non-blank) char after operand, or is in its
- *      original state.
- */
+/* Called for a non-symbol, non-number operand.  Handles %reg.  */
 
-static bool
-register_name (expressionS *expressionP)
+void
+md_operand (expressionS *expressionP)
 {
   const struct pd_reg *reg;
   char *name;
   char *start;
   char c;
 
-  /* Find the spelling of the operand.  */
-  start = name = input_line_pointer;
-  if (name[0] == '%' && ISALPHA (name[1]))
-    name = ++input_line_pointer;
+  if (input_line_pointer[0] != '%' || !ISALPHA (input_line_pointer[1]))
+    return;
 
-  else if (!reg_names_p || !ISALPHA (name[0]))
-    return false;
+  start = input_line_pointer;
+  ++input_line_pointer;
 
   c = get_symbol_name (&name);
-  reg = reg_name_search (pre_defined_registers, REG_NAME_CNT, name);
-
-  /* Put back the delimiting char.  */
+  reg = reg_name_search (pre_defined_registers,
+			 ARRAY_SIZE (pre_defined_registers), name);
   *input_line_pointer = c;
 
-  /* Look to see if it's in the register table.  */
   if (reg != NULL)
     {
       expressionP->X_op = O_register;
       expressionP->X_add_number = reg->value;
       expressionP->X_md = reg->flags;
-
-      /* Make the rest nice.  */
-      expressionP->X_add_symbol = NULL;
-      expressionP->X_op_symbol = NULL;
-      return true;
     }
-
-  /* Reset the line as if we had not done anything.  */
-  input_line_pointer = start;
-  return false;
+  else
+    input_line_pointer = start;
 }
-
-/* This function is called for each symbol seen in an expression.  It
-   handles the special parsing which PowerPC assemblers are supposed
-   to use for condition codes.  */
 
 /* Whether to do the special parsing.  */
 static bool cr_operand;
 
-/* Names to recognize in a condition code.  This table is sorted.  */
-static const struct pd_reg cr_names[] =
+/* Extra names to recognise in a condition code.  This table is sorted.  */
+static const struct pd_reg cr_cond[] =
 {
-  { "cr0", 0, PPC_OPERAND_CR_REG },
-  { "cr1", 1, PPC_OPERAND_CR_REG },
-  { "cr2", 2, PPC_OPERAND_CR_REG },
-  { "cr3", 3, PPC_OPERAND_CR_REG },
-  { "cr4", 4, PPC_OPERAND_CR_REG },
-  { "cr5", 5, PPC_OPERAND_CR_REG },
-  { "cr6", 6, PPC_OPERAND_CR_REG },
-  { "cr7", 7, PPC_OPERAND_CR_REG },
   { "eq", 2, PPC_OPERAND_CR_BIT },
   { "gt", 1, PPC_OPERAND_CR_BIT },
   { "lt", 0, PPC_OPERAND_CR_BIT },
@@ -892,29 +857,60 @@ static const struct pd_reg cr_names[] =
   { "un", 3, PPC_OPERAND_CR_BIT }
 };
 
-/* Parsing function.  This returns non-zero if it recognized an
-   expression.  */
+/* This function is called for each symbol seen in an expression.  It
+   handles the special parsing which PowerPC assemblers are supposed
+   to use for condition codes, and recognises other registers when
+   -mregnames.  */
 
 int
-ppc_parse_name (const char *name, expressionS *exp)
+ppc_parse_name (const char *name, expressionS *exp, enum expr_mode mode)
 {
-  const struct pd_reg *reg;
+  const struct pd_reg *reg = NULL;
 
-  if (! cr_operand)
-    return 0;
+  if (cr_operand)
+    reg = reg_name_search (cr_cond, ARRAY_SIZE (cr_cond), name);
+  if (reg == NULL && (cr_operand || reg_names_p))
+    reg = reg_name_search (pre_defined_registers,
+			   ARRAY_SIZE (pre_defined_registers), name);
+  if (reg != NULL)
+    {
+      exp->X_op = O_register;
+      exp->X_add_number = reg->value;
+      exp->X_md = reg->flags;
+      return true;
+    }
 
-  if (*name == '%')
-    ++name;
-  reg = reg_name_search (cr_names, sizeof cr_names / sizeof cr_names[0],
-			 name);
-  if (reg == NULL)
-    return 0;
+  /* The following replaces code in expr.c operand() after the
+     md_parse_name call.  There is too much difference between targets
+     in the way X_md is used to move this code into expr.c.  If you
+     do, you'll get failures on x86 due to uninitialised X_md fields,
+     failures on alpha and other targets due to creating register
+     symbols as O_constant rather than O_register, and failures on arc
+     and others due to expecting expr() to leave X_md alone.  */
+  symbolS *sym = symbol_find_or_make (name);
 
-  exp->X_op = O_register;
-  exp->X_add_number = reg->value;
-  exp->X_md = reg->flags;
+  /* If we have an absolute symbol or a reg, then we know its value
+     now.  Copy the symbol value expression to propagate X_md.  */
+  bool done = false;
+  if (mode != expr_defer
+      && !S_FORCE_RELOC (sym, 0))
+    {
+      segT segment = S_GET_SEGMENT (sym);
+      if (segment == absolute_section || segment == reg_section)
+	{
+	  resolve_symbol_value (sym);
+	  *exp = *symbol_get_value_expression (sym);
+	  done = true;
+	}
+    }
+  if (!done)
+    {
+      exp->X_op = O_symbol;
+      exp->X_add_symbol = sym;
+      exp->X_add_number = 0;
+    }
 
-  return 1;
+  return true;
 }
 
 /* Propagate X_md and check register expressions.  This is to support
@@ -3437,25 +3433,10 @@ md_assemble (char *str)
       /* Gather the operand.  */
       hold = input_line_pointer;
       input_line_pointer = str;
-
-      if ((reg_names_p
-	   && (((operand->flags & PPC_OPERAND_CR_BIT) != 0)
-	       || ((operand->flags & PPC_OPERAND_CR_REG) != 0)))
-	  || !register_name (&ex))
-	{
-	  char save_lex = lex_type['%'];
-
-	  if (((operand->flags & PPC_OPERAND_CR_REG) != 0)
-	      || (operand->flags & PPC_OPERAND_CR_BIT) != 0)
-	    {
-	      cr_operand = true;
-	      lex_type['%'] |= LEX_BEGIN_NAME;
-	    }
-	  expression (&ex);
-	  cr_operand = false;
-	  lex_type['%'] = save_lex;
-	}
-
+      cr_operand = ((operand->flags & PPC_OPERAND_CR_BIT) != 0
+		    || (operand->flags & PPC_OPERAND_CR_REG) != 0);
+      expression (&ex);
+      cr_operand = false;
       str = input_line_pointer;
       input_line_pointer = hold;
 

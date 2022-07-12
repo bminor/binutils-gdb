@@ -3934,10 +3934,9 @@ pseudo_set (symbolS *symbolP)
 	  return;
 	}
 #endif
+      symbol_set_value_expression (symbolP, &exp);
       S_SET_SEGMENT (symbolP, reg_section);
-      S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
       set_zero_frag (symbolP);
-      symbol_get_value_expression (symbolP)->X_op = O_register;
       break;
 
     case O_symbol:
