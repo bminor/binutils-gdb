@@ -120,10 +120,42 @@ loongarch_store_gregset (struct regcache *regcache, const void *buf)
   supply_register (regcache, LOONGARCH_BADV_REGNUM, *regset + LOONGARCH_BADV_REGNUM);
 }
 
+/* Collect FPRs from REGCACHE into BUF.  */
+
+static void
+loongarch_fill_fpregset (struct regcache *regcache, void *buf)
+{
+  gdb_byte *regbuf = nullptr;
+  int fprsize = register_size (regcache->tdesc, LOONGARCH_FIRST_FP_REGNUM);
+
+  for (int i = 0; i < LOONGARCH_LINUX_NUM_FPREGSET; i++)
+    {
+      regbuf = (gdb_byte *)buf + fprsize * i;
+      collect_register (regcache, LOONGARCH_FIRST_FP_REGNUM + i, regbuf);
+    }
+}
+
+/* Supply FPRs from BUF into REGCACHE.  */
+
+static void
+loongarch_store_fpregset (struct regcache *regcache, const void *buf)
+{
+  const gdb_byte *regbuf = nullptr;
+  int fprsize = register_size (regcache->tdesc, LOONGARCH_FIRST_FP_REGNUM);
+
+  for (int i = 0; i < LOONGARCH_LINUX_NUM_FPREGSET; i++)
+    {
+      regbuf = (const gdb_byte *)buf + fprsize * i;
+      supply_register (regcache, LOONGARCH_FIRST_FP_REGNUM + i, regbuf);
+    }
+}
+
 /* LoongArch/Linux regsets.  */
 static struct regset_info loongarch_regsets[] = {
   { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_PRSTATUS, sizeof (elf_gregset_t),
     GENERAL_REGS, loongarch_fill_gregset, loongarch_store_gregset },
+  { PTRACE_GETREGSET, PTRACE_SETREGSET, NT_FPREGSET, sizeof (elf_fpregset_t),
+    FP_REGS, loongarch_fill_fpregset, loongarch_store_fpregset },
   NULL_REGSET
 };
 
