@@ -32,6 +32,32 @@ if {$tool == ""} {
 # (which will affect any spawned sub-process) to avoid this.
 append ::env(ASAN_OPTIONS) ",detect_leaks=0"
 
+# Add VAR_ID=VAL to ENV_VAR, unless ENV_VAR already contains a VAR_ID setting.
+
+proc set_sanitizer_default { env_var var_id val } {
+    global env
+
+    if { ![info exists env($env_var) ]
+	 || $env($env_var) == "" } {
+	# Set var_id (env_var non-existing / empty case).
+	append env($env_var) $var_id=$val
+	return
+    }
+
+    if { [regexp $var_id= $env($env_var)] } {
+	# Don't set var_id.  It's already set by the user, leave as is.
+	# Note that we could probably get the same result by unconditionally
+	# prepending it, but this way is less likely to cause confusion.
+	return
+    }
+
+    # Set var_id (env_var not empty case).
+    append env($env_var) : $var_id=$val
+}
+
+set_sanitizer_default TSAN_OPTIONS suppressions \
+    $srcdir/../tsan-suppressions.txt
+
 # List of procs to run in gdb_finish.
 set gdb_finish_hooks [list]
 
