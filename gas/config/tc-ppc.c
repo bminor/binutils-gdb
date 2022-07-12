@@ -1620,14 +1620,8 @@ insn_validate (const struct powerpc_opcode *op)
 static void *
 insn_calloc (size_t n, size_t size)
 {
-  size_t amt;
-  void *ret;
-  if (gas_mul_overflow (n, size, &amt))
-    {
-      obstack_alloc_failed_handler ();
-      abort ();
-    }
-  ret = obstack_alloc (&insn_obstack, amt);
+  size_t amt = n * size;
+  void *ret = obstack_alloc (&insn_obstack, amt);
   memset (ret, 0, amt);
   return ret;
 }
@@ -1903,8 +1897,12 @@ md_begin (void)
 void
 ppc_md_end (void)
 {
-  htab_delete (ppc_hash);
-  _obstack_free (&insn_obstack, NULL);
+  if (ppc_hash)
+    {
+      htab_delete (ppc_hash);
+      _obstack_free (&insn_obstack, NULL);
+    }
+  ppc_hash = NULL;
 }
 
 void
