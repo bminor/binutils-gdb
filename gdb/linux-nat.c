@@ -2001,6 +2001,21 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	 thread execs, it changes its tid to the tgid, and the old
 	 tgid thread might have not been resumed.  */
       lp->resumed = 1;
+
+      /* All other LWPs are gone now.  We'll have received a thread
+	 exit notification for all threads other the execing one.
+	 That one, if it wasn't the leader, just silently changes its
+	 tid to the tgid, and the previous leader vanishes.  Since
+	 Linux 3.0, the former thread ID can be retrieved with
+	 PTRACE_GETEVENTMSG, but since we support older kernels, don't
+	 bother with it, and just walk the LWP list.  Even with
+	 PTRACE_GETEVENTMSG, we'd still need to lookup the
+	 corresponding LWP object, and it would be an extra ptrace
+	 syscall, so this way may even be more efficient.  */
+      for (lwp_info *other_lp : all_lwps_safe ())
+	if (other_lp != lp && other_lp->ptid.pid () == lp->ptid.pid ())
+	  exit_lwp (other_lp);
+
       return 0;
     }
 

@@ -1245,13 +1245,11 @@ follow_exec (ptid_t ptid, const char *exec_file_target)
      some other thread does the exec, and even if the main thread was
      stopped or already gone.  We may still have non-leader threads of
      the process on our list.  E.g., on targets that don't have thread
-     exit events (like remote); or on native Linux in non-stop mode if
-     there were only two threads in the inferior and the non-leader
-     one is the one that execs (and nothing forces an update of the
-     thread list up to here).  When debugging remotely, it's best to
+     exit events (like remote) and nothing forces an update of the
+     thread list up to here.  When debugging remotely, it's best to
      avoid extra traffic, when possible, so avoid syncing the thread
      list with the target, and instead go ahead and delete all threads
-     of the process but one that reported the event.  Note this must
+     of the process but the one that reported the event.  Note this must
      be done before calling update_breakpoints_after_exec, as
      otherwise clearing the threads' resources would reference stale
      thread breakpoints -- it may have been one of these threads that
