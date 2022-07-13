@@ -292,15 +292,15 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	      break;
 	    case 'u':
 	      print (info->stream, dis_style_immediate, "0x%x",
-		     (int)(EXTRACT_CITYPE_IMM (l) & (RISCV_BIGIMM_REACH-1)));
+		     (unsigned)(EXTRACT_CITYPE_IMM (l) & (RISCV_BIGIMM_REACH-1)));
 	      break;
 	    case '>':
 	      print (info->stream, dis_style_immediate, "0x%x",
-		     (int)EXTRACT_CITYPE_IMM (l) & 0x3f);
+		     (unsigned)EXTRACT_CITYPE_IMM (l) & 0x3f);
 	      break;
 	    case '<':
 	      print (info->stream, dis_style_immediate, "0x%x",
-		     (int)EXTRACT_CITYPE_IMM (l) & 0x1f);
+		     (unsigned)EXTRACT_CITYPE_IMM (l) & 0x1f);
 	      break;
 	    case 'T': /* Floating-point RS2.  */
 	      print (info->stream, dis_style_register, "%s",
@@ -481,7 +481,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 
 	case 'y':
 	  print (info->stream, dis_style_immediate, "0x%x",
-		 (int)EXTRACT_OPERAND (BS, l));
+		 (unsigned)EXTRACT_OPERAND (BS, l));
 	  break;
 
 	case 'z':
@@ -490,12 +490,12 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 
 	case '>':
 	  print (info->stream, dis_style_immediate, "0x%x",
-		 (int)EXTRACT_OPERAND (SHAMT, l));
+		 (unsigned)EXTRACT_OPERAND (SHAMT, l));
 	  break;
 
 	case '<':
 	  print (info->stream, dis_style_immediate, "0x%x",
-		 (int)EXTRACT_OPERAND (SHAMTW, l));
+		 (unsigned)EXTRACT_OPERAND (SHAMTW, l));
 	  break;
 
 	case 'S':
@@ -556,7 +556,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 
 	case 'Y':
 	  print (info->stream, dis_style_immediate, "0x%x",
-		 (int) EXTRACT_OPERAND (RNUM, l));
+		 (unsigned) EXTRACT_OPERAND (RNUM, l));
 	  break;
 
 	case 'Z':
