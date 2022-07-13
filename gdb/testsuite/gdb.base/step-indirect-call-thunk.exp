@@ -15,7 +15,11 @@
 
 standard_testfile
 
-set cflags "-mindirect-branch=thunk -mfunction-return=thunk"
+if { ![istarget "x86*"] } {
+    return
+}
+
+set cflags "-mindirect-branch=thunk -mfunction-return=thunk -fcf-protection=none"
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
         [list debug "additional_flags=$cflags"]] } {
     return -1
