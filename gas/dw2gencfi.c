@@ -75,7 +75,8 @@
 # define tc_cfi_endproc(fde) ((void) (fde))
 #endif
 
-#define EH_FRAME_LINKONCE (SUPPORT_FRAME_LINKONCE || compact_eh)
+#define EH_FRAME_LINKONCE (SUPPORT_FRAME_LINKONCE || compact_eh \
+			   || TARGET_MULTIPLE_EH_FRAME_SECTIONS)
 
 #ifndef DWARF2_FORMAT
 #define DWARF2_FORMAT(SEC) dwarf2_format_32bit
@@ -275,6 +276,9 @@ static segT
 is_now_linkonce_segment (void)
 {
   if (compact_eh)
+    return now_seg;
+
+  if (TARGET_MULTIPLE_EH_FRAME_SECTIONS)
     return now_seg;
 
   if ((bfd_section_flags (now_seg)
@@ -1333,14 +1337,33 @@ static segT
 get_cfi_seg (segT cseg, const char *base, flagword flags, int align)
 {
   /* Exclude .debug_frame sections for Compact EH.  */
-  if (SUPPORT_FRAME_LINKONCE || ((flags & SEC_DEBUGGING) == 0 && compact_eh))
+  if (SUPPORT_FRAME_LINKONCE || ((flags & SEC_DEBUGGING) == 0 && compact_eh)
+      || ((flags & SEC_DEBUGGING) == 0 && TARGET_MULTIPLE_EH_FRAME_SECTIONS))
     {
+      segT iseg = cseg;
       struct dwcfi_seg_list *l;
 
       l = dwcfi_hash_find_or_make (cseg, base, flags);
 
       cseg = l->seg;
       subseg_set (cseg, l->subseg);
+
+      if (TARGET_MULTIPLE_EH_FRAME_SECTIONS
+	  && (flags & DWARF2_EH_FRAME_READ_ONLY))
+	{
+	  const frchainS *ifrch = seg_info (iseg)->frchainP;
+	  const frchainS *frch = seg_info (cseg)->frchainP;
+	  expressionS exp;
+
+	  exp.X_op = O_symbol;
+	  exp.X_add_symbol = (symbolS *) local_symbol_make (cseg->name, cseg, frch->frch_root, 0);
+	  exp.X_add_number = 0;
+	  subseg_set (iseg, ifrch->frch_subseg);
+	  fix_new_exp (ifrch->frch_root, 0, 0, &exp, 0, BFD_RELOC_NONE);
+
+	  /* Restore the original segment info.  */
+	  subseg_set (cseg, l->subseg);
+	}
     }
   else
     {

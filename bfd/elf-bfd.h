@@ -1432,6 +1432,9 @@ struct elf_backend_data
   bool (*elf_backend_can_make_lsda_relative_eh_frame)
      (bfd *, struct bfd_link_info *, asection *);
 
+  /* Tell linker to support multiple eh_frame sections.  */
+  bool elf_backend_can_make_multiple_eh_frame;
+
   /* This function returns an encoding after computing the encoded
      value (and storing it in ENCODED) for the given OFFSET into OSEC,
      to be stored in at LOC_OFFSET into the LOC_SEC input section.

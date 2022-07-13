@@ -10924,10 +10924,17 @@ elf_section_ignore_discarded_relocs (asection *sec)
 unsigned int
 _bfd_elf_default_action_discarded (asection *sec)
 {
+  const struct elf_backend_data *bed;
+  bed = get_elf_backend_data (sec->owner);
+
   if (sec->flags & SEC_DEBUGGING)
     return PRETEND;
 
   if (strcmp (".eh_frame", sec->name) == 0)
+    return 0;
+
+  if (bed->elf_backend_can_make_multiple_eh_frame
+      && strncmp (sec->name, ".eh_frame.", 10) == 0)
     return 0;
 
   if (strcmp (".gcc_except_table", sec->name) == 0)
