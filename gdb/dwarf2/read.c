@@ -6777,24 +6777,6 @@ process_psymtab_comp_unit (dwarf2_per_cu_data *this_cu,
   if (reader.comp_unit_die == nullptr)
     return;
 
-  switch (reader.comp_unit_die->tag)
-    {
-    case DW_TAG_compile_unit:
-      this_cu->set_unit_type (DW_UT_compile);
-      break;
-    case DW_TAG_partial_unit:
-      this_cu->set_unit_type (DW_UT_partial);
-      break;
-    case DW_TAG_type_unit:
-      this_cu->set_unit_type (DW_UT_type);
-      break;
-    default:
-      error (_("Dwarf Error: unexpected tag '%s' at offset %s [in module %s]"),
-	     dwarf_tag_name (reader.comp_unit_die->tag),
-	     sect_offset_str (reader.cu->per_cu->sect_off),
-	     objfile_name (per_objfile->objfile));
-    }
-
   if (reader.dummy_p)
     {
       /* Nothing.  */
@@ -23587,8 +23569,26 @@ prepare_one_comp_unit (struct dwarf2_cu *cu, struct die_info *comp_unit_die,
   else
     lang = pretend_language;
 
-  cu->per_cu->set_lang (lang);
   cu->language_defn = language_def (lang);
+
+  switch (comp_unit_die->tag)
+    {
+    case DW_TAG_compile_unit:
+      cu->per_cu->set_unit_type (DW_UT_compile);
+      break;
+    case DW_TAG_partial_unit:
+      cu->per_cu->set_unit_type (DW_UT_partial);
+      break;
+    case DW_TAG_type_unit:
+      cu->per_cu->set_unit_type (DW_UT_type);
+      break;
+    default:
+      error (_("Dwarf Error: unexpected tag '%s' at offset %s"),
+	     dwarf_tag_name (comp_unit_die->tag),
+	     sect_offset_str (cu->per_cu->sect_off));
+    }
+
+  cu->per_cu->set_lang (lang);
 }
 
 /* See read.h.  */

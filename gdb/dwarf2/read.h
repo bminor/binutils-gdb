@@ -353,11 +353,14 @@ public:
 
   void set_lang (enum language lang)
   {
-    /* We'd like to be more strict here, similar to what is done in
-       set_unit_type,  but currently a partial unit can go from unknown to
-       minimal to ada to c.  */
-    if (m_lang != lang)
+    if (unit_type () == DW_UT_partial)
+      return;
+    if (m_lang == language_unknown)
+      /* Set if not set already.  */
       m_lang = lang;
+    else
+      /* If already set, verify that it's the same value.  */
+      gdb_assert (m_lang == lang);
   }
 
   /* Free any cached file names.  */
