@@ -11092,6 +11092,7 @@ dwarf2_get_pc_bounds (struct die_info *die, unrelocated_addr *lowpc,
       && !per_objfile->per_bfd->has_section_at_zero)
     return PC_BOUNDS_INVALID;
 
+  gdb_assert (lowpc != nullptr);
   *lowpc = low;
   if (highpc != nullptr)
     *highpc = high;
