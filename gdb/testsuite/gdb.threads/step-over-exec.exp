@@ -102,6 +102,12 @@ proc do_test { execr_thread different_text_segments displaced_stepping } {
     gdb_breakpoint foo
     gdb_test "continue" "Breakpoint $decimal, foo .*" \
 	"continue to foo"
+
+    # Test that GDB is able to kill the inferior.  This may fail if
+    # e.g., GDB does not dispose of the pre-exec threads properly.
+    gdb_test "with confirm off -- kill" \
+	"\\\[Inferior 1 (.*) killed\\\]" \
+	"kill inferior"
 }
 
 foreach_with_prefix displaced_stepping {auto off} {
