@@ -295,6 +295,14 @@ public:
   explicit cooked_index_vector (vec_type &&vec);
   DISABLE_COPY_AND_ASSIGN (cooked_index_vector);
 
+  /* Wait until the finalization of the entire cooked_index_vector is
+     done.  */
+  void wait ()
+  {
+    for (auto &item : m_vector)
+      item->wait ();
+  }
+
   ~cooked_index_vector ()
   {
     /* The 'finalize' methods may be run in a different thread.  If
@@ -303,8 +311,7 @@ public:
        complete avoids this problem; and the cost seems ignorable
        because creating and immediately destroying the debug info is a
        relatively rare thing to do.  */
-    for (auto &item : m_vector)
-      item->wait ();
+    wait ();
   }
 
   /* A range over a vector of subranges.  */

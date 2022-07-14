@@ -18569,6 +18569,11 @@ cooked_index_functions::expand_symtabs_matching
   if (per_objfile->per_bfd->index_table == nullptr)
     return true;
 
+  cooked_index_vector *table
+    = (static_cast<cooked_index_vector *>
+       (per_objfile->per_bfd->index_table.get ()));
+  table->wait ();
+
   dw_expand_symtabs_matching_file_matcher (per_objfile, file_matcher);
 
   /* This invariant is documented in quick-functions.h.  */
@@ -18604,9 +18609,6 @@ cooked_index_functions::expand_symtabs_matching
     language_ada
   };
 
-  cooked_index_vector *table
-    = (static_cast<cooked_index_vector *>
-       (per_objfile->per_bfd->index_table.get ()));
   for (enum language lang : unique_styles)
     {
       std::vector<gdb::string_view> name_vec
