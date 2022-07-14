@@ -4039,6 +4039,9 @@ value_fetch_lazy_register (struct value *val)
   value_contents_copy (val, value_embedded_offset (val),
 		       new_val, value_embedded_offset (new_val),
 		       type_length_units (type));
+  set_value_tagged (val, value_tagged (new_val));
+  if (value_tagged (val))
+    set_value_tag (val, value_tag (new_val));
 
   if (frame_debug)
     {
