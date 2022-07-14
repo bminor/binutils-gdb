@@ -178,7 +178,7 @@ public:
 
 private:
   /* The unit type of this CU.  */
-  packed<dwarf_unit_type, 1> m_unit_type = (dwarf_unit_type) 0;
+  std::atomic<packed<dwarf_unit_type, 1>> m_unit_type {(dwarf_unit_type)0};
 
   /* The language of this CU.  */
   packed<language, LANGUAGE_BYTES> m_lang = language_unknown;
@@ -329,19 +329,24 @@ public:
 
   dwarf_unit_type unit_type (bool strict_p = true) const
   {
+    dwarf_unit_type ut = m_unit_type.load ();
     if (strict_p)
-      gdb_assert (m_unit_type != 0);
-    return m_unit_type;
+      gdb_assert (ut != 0);
+    return ut;
   }
 
   void set_unit_type (dwarf_unit_type unit_type)
   {
-    if (m_unit_type == 0)
-      /* Set if not set already.  */
-      m_unit_type = unit_type;
-    else
-      /* If already set, verify that it's the same value.  */
-      gdb_assert (m_unit_type == unit_type);
+    /* Set if not set already.  */
+    packed<dwarf_unit_type, 1> nope = (dwarf_unit_type)0;
+    if (m_unit_type.compare_exchange_strong (nope, unit_type))
+      return;
+
+    /* If already set, verify that it's the same value.  */
+    nope = unit_type;
+    if (m_unit_type.compare_exchange_strong (nope, unit_type))
+      return;
+    gdb_assert_not_reached ();
   }
 
   enum language lang (bool strict_p = true) const
