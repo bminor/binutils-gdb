@@ -862,7 +862,7 @@ static const struct pd_reg cr_cond[] =
    to use for condition codes, and recognises other registers when
    -mregnames.  */
 
-int
+void
 ppc_parse_name (const char *name, expressionS *exp, enum expr_mode mode)
 {
   const struct pd_reg *reg = NULL;
@@ -877,7 +877,7 @@ ppc_parse_name (const char *name, expressionS *exp, enum expr_mode mode)
       exp->X_op = O_register;
       exp->X_add_number = reg->value;
       exp->X_md = reg->flags;
-      return true;
+      return;
     }
 
   /* The following replaces code in expr.c operand() after the
@@ -909,8 +909,6 @@ ppc_parse_name (const char *name, expressionS *exp, enum expr_mode mode)
       exp->X_add_symbol = sym;
       exp->X_add_number = 0;
     }
-
-  return true;
 }
 
 /* Propagate X_md and check register expressions.  This is to support
