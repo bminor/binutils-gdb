@@ -31,6 +31,8 @@ template<typename T, size_t Bytes = sizeof (T)>
 struct packed
 {
 public:
+  packed () noexcept = default;
+
   packed (T val)
   {
     m_val = val;
