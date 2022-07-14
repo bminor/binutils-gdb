@@ -112,6 +112,18 @@ enum aarch64_regnum
 #define AARCH64_B0_REGNUM (AARCH64_H0_REGNUM + 32)
 #define AARCH64_SVE_V0_REGNUM (AARCH64_B0_REGNUM + 32)
 
+#define AARCH64_C0_REGNUM(cap_reg_base)      (cap_reg_base)
+#define AARCH64_CLR_REGNUM(cap_reg_base)     (cap_reg_base + 30)
+#define AARCH64_CSP_REGNUM(cap_reg_base)     (cap_reg_base + 31)
+#define AARCH64_PCC_REGNUM(cap_reg_base)     (cap_reg_base + 32)
+#define AARCH64_DDC_REGNUM(cap_reg_base)     (cap_reg_base + 33)
+#define AARCH64_CTPIDR_REGNUM(cap_reg_base)  (cap_reg_base + 34)
+#define AARCH64_RCSP_REGNUM(cap_reg_base)    (cap_reg_base + 35)
+#define AARCH64_RDDC_REGNUM(cap_reg_base)    (cap_reg_base + 36)
+#define AARCH64_RCTPIDR_REGNUM(cap_reg_base) (cap_reg_base + 37)
+#define AARCH64_CID_REGNUM(cap_reg_base)     (cap_reg_base + 38)
+#define AARCH64_CCTLR_REGNUM(cap_reg_base)   (cap_reg_base + 39)
+
 #define AARCH64_PAUTH_DMASK_REGNUM(pauth_reg_base) (pauth_reg_base)
 #define AARCH64_PAUTH_CMASK_REGNUM(pauth_reg_base) (pauth_reg_base + 1)
 #define AARCH64_PAUTH_REGS_SIZE (16)
