@@ -31,18 +31,6 @@
 /* Total number of registers for GNU/Linux.  */
 #define AMD64_LINUX_NUM_REGS (AMD64_LINUX_ORIG_RAX_REGNUM + 1)
 
-/* Linux target description.  */
-extern struct target_desc *tdesc_amd64_linux;
-extern struct target_desc *tdesc_amd64_avx_linux;
-extern struct target_desc *tdesc_amd64_mpx_linux;
-extern struct target_desc *tdesc_amd64_avx_mpx_linux;
-extern struct target_desc *tdesc_amd64_avx_avx512_linux;
-extern struct target_desc *tdesc_amd64_avx_mpx_avx512_pku_linux;
-
-extern struct target_desc *tdesc_x32_linux;
-extern struct target_desc *tdesc_x32_avx_linux;
-extern struct target_desc *tdesc_x32_avx_avx512_linux;
-
 /* Return the right amd64-linux target descriptions according to
    XCR0_FEATURES_BIT and IS_X32.  */
 
