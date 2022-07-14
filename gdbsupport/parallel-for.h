@@ -172,6 +172,29 @@ parallel_for_each (unsigned n, RandomIt first, RandomIt last,
     });
 }
 
+/* A sequential drop-in replacement of parallel_for_each.  This can be useful
+   when debugging multi-threading behaviour, and you want to limit
+   multi-threading in a fine-grained way.  */
+
+template<class RandomIt, class RangeFunction>
+typename gdb::detail::par_for_accumulator<
+    typename std::result_of<RangeFunction (RandomIt, RandomIt)>::type
+  >::result_type
+sequential_for_each (unsigned n, RandomIt first, RandomIt last,
+		   RangeFunction callback)
+{
+  using result_type
+    = typename std::result_of<RangeFunction (RandomIt, RandomIt)>::type;
+
+  gdb::detail::par_for_accumulator<result_type> results (0);
+
+  /* Process all the remaining elements in the main thread.  */
+  return results.finish ([=] ()
+    {
+      return callback (first, last);
+    });
+}
+
 }
 
 #endif /* GDBSUPPORT_PARALLEL_FOR_H */
