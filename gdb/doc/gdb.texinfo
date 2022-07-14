@@ -47174,6 +47174,10 @@ targets.  It should contain the registers @samp{r0} through @samp{r31},
 @samp{pc}, and @samp{badv}.  Either the architectural names (@samp{r0},
 @samp{r1}, etc) can be used, or the ABI names (@samp{zero}, @samp{ra}, etc).
 
+The @samp{org.gnu.gdb.loongarch.fpu} feature is optional.  If present,
+it should contain registers @samp{f0} through @samp{f31}, @samp{fcc},
+and @samp{fcsr}.
+
 @node MicroBlaze Features
 @subsection MicroBlaze Features
 @cindex target descriptions, MicroBlaze features

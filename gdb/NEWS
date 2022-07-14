@@ -153,6 +153,10 @@ GNU/Linux/LoongArch (gdbserver)	loongarch*-*-linux*
 
   ** GDBserver is now supported on LoongArch GNU/Linux.
 
+* LoongArch floating-point support
+
+GDB now supports floating-point on LoongArch GNU/Linux.
+
 *** Changes in GDB 12
 
 * DBX mode is deprecated, and will be removed in GDB 13
