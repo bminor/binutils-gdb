@@ -567,17 +567,17 @@ static const struct regcache_map_entry aarch64_linux_fpregmap[] =
 
 static const struct regcache_map_entry aarch64_linux_cregmap[] =
   {
-    { 31, 0, 16 }, /* c0 ... c30 */
-    { 1, 32, 16 }, /* pcc */
-    { 1, 31, 16 }, /* csp */
-    { 1, 33, 16 }, /* ddc */
-    { 1, 34, 16 }, /* ctpidr */
-    { 1, 35, 16 }, /* rcsp */
-    { 1, 36, 16 }, /* rddc */
-    { 1, 37, 16 }, /* rctpidr */
-    { 1, 38, 16 }, /* cid */
+    { 31, AARCH64_C0_REGNUM(0), 16 }, /* c0 ... c30 */
+    { 1, AARCH64_PCC_REGNUM(0), 16 },
+    { 1, AARCH64_CSP_REGNUM(0), 16 },
+    { 1, AARCH64_DDC_REGNUM(0), 16 },
+    { 1, AARCH64_CTPIDR_REGNUM(0), 16 },
+    { 1, AARCH64_RCSP_REGNUM(0), 16 },
+    { 1, AARCH64_RDDC_REGNUM(0), 16 },
+    { 1, AARCH64_RCTPIDR_REGNUM(0), 16 },
+    { 1, AARCH64_CID_REGNUM(0), 16 },
     { 1, REGCACHE_MAP_SKIP, 8 },  /* tag_map */
-    { 1, 39, 8 },  /* cctlr */
+    { 1, AARCH64_CCTLR_REGNUM(0), 8 },
     { 0 }
   };
 
