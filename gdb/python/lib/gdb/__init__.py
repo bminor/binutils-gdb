@@ -30,7 +30,8 @@ from _gdb import *
 # Historically, gdb.events was always available, so ensure it's
 # still available without an explicit import.
 import _gdbevents as events
-sys.modules['gdb.events'] = events
+
+sys.modules["gdb.events"] = events
 
 
 class _GdbFile(object):
@@ -243,9 +244,9 @@ def set_parameter(name, value):
     # can return them, but they can't be passed to 'set' this way.
     if isinstance(value, bool):
         if value:
-            value = 'on'
+            value = "on"
         else:
-            value = 'off'
+            value = "off"
     execute("set " + name + " " + str(value), to_string=True)
 
 
