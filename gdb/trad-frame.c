@@ -116,7 +116,7 @@ trad_frame_set_reg_addr (struct trad_frame_cache *this_trad_cache,
 void
 trad_frame_set_reg_regmap (struct trad_frame_cache *this_trad_cache,
 			   const struct regcache_map_entry *regmap,
-			   CORE_ADDR addr, size_t size)
+			   CORE_ADDR addr, size_t size, int regbase)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_trad_cache->this_frame);
   int offs = 0, count;
@@ -125,6 +125,9 @@ trad_frame_set_reg_regmap (struct trad_frame_cache *this_trad_cache,
     {
       int regno = regmap->regno;
       int slot_size = regmap->size;
+
+      if (regno != REGCACHE_MAP_SKIP)
+	regno += regbase;
 
       if (slot_size == 0 && regno != REGCACHE_MAP_SKIP)
 	slot_size = register_size (gdbarch, regno);

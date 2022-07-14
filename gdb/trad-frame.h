@@ -48,7 +48,7 @@ void trad_frame_set_reg_addr (struct trad_frame_cache *this_trad_cache,
 			      int regnum, CORE_ADDR addr);
 void trad_frame_set_reg_regmap (struct trad_frame_cache *this_trad_cache,
 				const struct regcache_map_entry *regmap,
-				CORE_ADDR addr, size_t size);
+				CORE_ADDR addr, size_t size, int regbase = 0);
 void trad_frame_set_reg_value (struct trad_frame_cache *this_cache,
 			       int regnum, LONGEST val);
 
