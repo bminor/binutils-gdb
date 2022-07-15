@@ -8463,8 +8463,14 @@ process_full_comp_unit (dwarf2_cu *cu, enum language pretend_language)
 
   per_objfile->set_symtab (cu->per_cu, cust);
 
-  /* Push it for inclusion processing later.  */
-  per_objfile->per_bfd->just_read_cus.push_back (cu->per_cu);
+#if CXX_STD_THREAD
+  {
+    static std::mutex just_read_cus_lock;
+    std::lock_guard<std::mutex> guard (just_read_cus_lock);
+#endif
+    /* Push it for inclusion processing later.  */
+    per_objfile->per_bfd->just_read_cus.push_back (cu->per_cu);
+  }
 
   /* Not needed any more.  */
   cu->reset_builder ();
