@@ -185,8 +185,8 @@ alloc_type (struct objfile *objfile)
   gdb_assert (objfile != NULL);
 
   /* Alloc the structure and start off with all fields zeroed.  */
-  type = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct type);
-  TYPE_MAIN_TYPE (type) = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+  type = OBSTACK_ZALLOC (objfile->objfile_obstack (), struct type);
+  TYPE_MAIN_TYPE (type) = OBSTACK_ZALLOC (objfile->objfile_obstack (),
 					  struct main_type);
   OBJSTAT (objfile, n_types++);
 
@@ -298,7 +298,7 @@ alloc_type_instance (struct type *oldtype)
   if (!oldtype->is_objfile_owned ())
     type = GDBARCH_OBSTACK_ZALLOC (oldtype->arch_owner (), struct type);
   else
-    type = OBSTACK_ZALLOC (&oldtype->objfile_owner ()->objfile_obstack,
+    type = OBSTACK_ZALLOC (oldtype->objfile_owner ()->objfile_obstack (),
 			   struct type);
 
   TYPE_MAIN_TYPE (type) = TYPE_MAIN_TYPE (oldtype);
@@ -2411,7 +2411,7 @@ resolve_dynamic_array_or_string (struct type *type,
 	  if (prop_list != nullptr)
 	    {
 	      struct obstack *obstack
-		= &type->objfile_owner ()->objfile_obstack;
+		= type->objfile_owner ()->objfile_obstack ();
 	      TYPE_MAIN_TYPE (type)->dyn_prop_list
 		= copy_dynamic_prop_list (obstack, prop_list);
 	    }
@@ -2933,7 +2933,7 @@ type::add_dyn_prop (dynamic_prop_node_kind prop_kind, dynamic_prop prop)
 
   gdb_assert (this->is_objfile_owned ());
 
-  temp = XOBNEW (&this->objfile_owner ()->objfile_obstack,
+  temp = XOBNEW (this->objfile_owner ()->objfile_obstack (),
 		 struct dynamic_prop_list);
   temp->prop_kind = prop_kind;
   temp->prop = prop;
@@ -5596,7 +5596,7 @@ htab_up
 create_copied_types_hash (struct objfile *objfile)
 {
   return htab_up (htab_create_alloc_ex (1, type_pair_hash, type_pair_eq,
-					NULL, &objfile->objfile_obstack,
+					NULL, objfile->objfile_obstack (),
 					hashtab_obstack_allocate,
 					dummy_obstack_deallocate));
 }
@@ -5657,7 +5657,7 @@ copy_type_recursive (struct objfile *objfile,
   /* We must add the new type to the hash table immediately, in case
      we encounter this type again during a recursive call below.  */
   struct type_pair *stored
-    = new (&objfile->objfile_obstack) struct type_pair (type, new_type);
+    = new (objfile->objfile_obstack ()) struct type_pair (type, new_type);
 
   *slot = stored;
 
@@ -5736,7 +5736,7 @@ copy_type_recursive (struct objfile *objfile,
 
   if (type->main_type->dyn_prop_list != NULL)
     new_type->main_type->dyn_prop_list
-      = copy_dynamic_prop_list (&objfile->objfile_obstack,
+      = copy_dynamic_prop_list (objfile->objfile_obstack (),
 				type->main_type->dyn_prop_list);
 
 
@@ -5809,7 +5809,7 @@ copy_type (const struct type *type)
   if (type->main_type->dyn_prop_list != NULL)
     {
       struct obstack *storage = (type->is_objfile_owned ()
-				 ? &type->objfile_owner ()->objfile_obstack
+				 ? type->objfile_owner ()->objfile_obstack ()
 				 : gdbarch_obstack (type->arch_owner ()));
       new_type->main_type->dyn_prop_list
 	= copy_dynamic_prop_list (storage, type->main_type->dyn_prop_list);
@@ -6330,7 +6330,7 @@ objfile_type (struct objfile *objfile)
   if (objfile_type)
     return objfile_type;
 
-  objfile_type = OBSTACK_CALLOC (&objfile->objfile_obstack,
+  objfile_type = OBSTACK_CALLOC (objfile->objfile_obstack (),
 				 1, struct objfile_type);
 
   /* Use the objfile architecture to determine basic type properties.  */

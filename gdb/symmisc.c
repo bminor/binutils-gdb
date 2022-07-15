@@ -95,8 +95,8 @@ print_objfile_statistics (void)
 	  gdb_printf (_("  Space used by string tables: %d\n"),
 		      OBJSTAT (objfile, sz_strtab));
 	gdb_printf (_("  Total memory used for objfile obstack: %s\n"),
-		    pulongest (obstack_memory_used (&objfile
-						    ->objfile_obstack)));
+		    pulongest (obstack_memory_used (objfile
+						    ->objfile_obstack ())));
 	gdb_printf (_("  Total memory used for BFD obstack: %s\n"),
 		    pulongest (obstack_memory_used (&objfile->per_bfd
 						    ->storage_obstack)));

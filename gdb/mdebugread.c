@@ -350,7 +350,7 @@ mdebug_build_psymtabs (minimal_symbol_reader &reader,
       char *fdr_end;
       FDR *fdr_ptr;
 
-      info->fdr = (FDR *) XOBNEWVEC (&objfile->objfile_obstack, FDR,
+      info->fdr = (FDR *) XOBNEWVEC (objfile->objfile_obstack (), FDR,
 				     info->symbolic_header.ifdMax);
       fdr_src = (char *) info->external_fdr;
       fdr_end = (fdr_src
@@ -503,7 +503,7 @@ add_pending (FDR *fh, char *sh, struct type *t)
   /* Make sure we do not make duplicates.  */
   if (!p)
     {
-      p = XOBNEW (&mdebugread_objfile->objfile_obstack, mdebug_pending);
+      p = XOBNEW (mdebugread_objfile->objfile_obstack (), mdebug_pending);
       p->s = sh;
       p->t = t;
       p->next = pending_list[f_idx];
@@ -1018,7 +1018,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	if (sh->iss == 0 || name[0] == '.' || name[0] == '\0')
 	  t->set_name (NULL);
 	else
-	  t->set_name (obconcat (&mdebugread_objfile->objfile_obstack,
+	  t->set_name (obconcat (mdebugread_objfile->objfile_obstack (),
 				 name, (char *) NULL));
 
 	t->set_code (type_code);
@@ -1061,9 +1061,9 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		f->set_name (debug_info->ss + cur_fdr->issBase + tsym.iss);
 		FIELD_BITSIZE (*f) = 0;
 
-		enum_sym = new (&mdebugread_objfile->objfile_obstack) symbol;
+		enum_sym = new (mdebugread_objfile->objfile_obstack ()) symbol;
 		enum_sym->set_linkage_name
-		  (obstack_strdup (&mdebugread_objfile->objfile_obstack,
+		  (obstack_strdup (mdebugread_objfile->objfile_obstack (),
 				   f->name ()));
 		enum_sym->set_aclass_index (LOC_CONST);
 		enum_sym->set_type (t);
@@ -1157,7 +1157,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  s->set_domain (LABEL_DOMAIN);
 	  s->set_aclass_index (LOC_CONST);
 	  s->set_type (objfile_type (mdebugread_objfile)->builtin_void);
-	  e = OBSTACK_ZALLOC (&mdebugread_objfile->objfile_obstack,
+	  e = OBSTACK_ZALLOC (mdebugread_objfile->objfile_obstack (),
 			      mdebug_extra_func_info);
 	  s->set_value_bytes ((gdb_byte *) e);
 	  e->numargs = top_stack->numargs;
@@ -1370,7 +1370,7 @@ basic_type (int bt, struct objfile *objfile)
 
   if (!map_bt)
     {
-      map_bt = OBSTACK_CALLOC (&objfile->objfile_obstack,
+      map_bt = OBSTACK_CALLOC (objfile->objfile_obstack (),
 			       btMax, struct type *);
       basic_type_data.set (objfile, map_bt);
     }
@@ -1681,7 +1681,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	    tp->set_name (NULL);
 	  else if (tp->name () == NULL
 		   || strcmp (tp->name (), name) != 0)
-	    tp->set_name (obstack_strdup (&mdebugread_objfile->objfile_obstack,
+	    tp->set_name (obstack_strdup (mdebugread_objfile->objfile_obstack (),
 					  name));
 	}
     }
@@ -1717,7 +1717,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	    }
 	  if (tp->name () == NULL
 	      || strcmp (tp->name (), name) != 0)
-	    tp->set_name (obstack_strdup (&mdebugread_objfile->objfile_obstack,
+	    tp->set_name (obstack_strdup (mdebugread_objfile->objfile_obstack (),
 					  name));
 	}
     }
@@ -2331,7 +2331,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
       && (bfd_section_flags (text_sect) & SEC_RELOC))
     relocatable = 1;
 
-  extern_tab = XOBNEWVEC (&objfile->objfile_obstack, EXTR, hdr->iextMax);
+  extern_tab = XOBNEWVEC (objfile->objfile_obstack (), EXTR, hdr->iextMax);
 
   includes_allocated = 30;
   includes_used = 0;
@@ -2373,7 +2373,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
   }
 
   /* Allocate the global pending list.  */
-  pending_list = XOBNEWVEC (&objfile->objfile_obstack, mdebug_pending *,
+  pending_list = XOBNEWVEC (objfile->objfile_obstack (), mdebug_pending *,
 			    hdr->ifdMax);
   memset (pending_list, 0,
 	  hdr->ifdMax * sizeof (struct mdebug_pending *));
@@ -2604,7 +2604,7 @@ parse_partial_symbols (minimal_symbol_reader &reader,
 	textlow = 0;
       pst = new legacy_psymtab (fdr_name (fh), partial_symtabs,
 				objfile->per_bfd, textlow);
-      pst->read_symtab_private = XOBNEW (&objfile->objfile_obstack, md_symloc);
+      pst->read_symtab_private = XOBNEW (objfile->objfile_obstack (), md_symloc);
       memset (pst->read_symtab_private, 0, sizeof (struct md_symloc));
 
       save_pst = pst;
@@ -3980,7 +3980,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 		  /* Make up special symbol to contain
 		     procedure specific info.  */
 		  mdebug_extra_func_info *e
-		    = OBSTACK_ZALLOC (&mdebugread_objfile->objfile_obstack,
+		    = OBSTACK_ZALLOC (mdebugread_objfile->objfile_obstack (),
 				      mdebug_extra_func_info);
 		  struct symbol *s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 
@@ -4173,7 +4173,7 @@ mdebug_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
 	--size;
       cust->primary_filetab ()->set_linetable
 	((struct linetable *)
-	 obstack_copy (&mdebugread_objfile->objfile_obstack,
+	 obstack_copy (mdebugread_objfile->objfile_obstack (),
 		       lines, (sizeof (struct linetable)
 			       + size * sizeof (lines->item))));
       xfree (lines);
@@ -4649,7 +4649,7 @@ new_psymtab (const char *name, psymtab_storage *partial_symtabs,
   /* Keep a backpointer to the file's symbols.  */
 
   psymtab->read_symtab_private
-    = OBSTACK_ZALLOC (&objfile->objfile_obstack, md_symloc);
+    = OBSTACK_ZALLOC (objfile->objfile_obstack (), md_symloc);
   CUR_BFD (psymtab) = cur_bfd;
   DEBUG_SWAP (psymtab) = debug_swap;
   DEBUG_INFO (psymtab) = debug_info;
@@ -4735,9 +4735,9 @@ new_block (enum block_type type, enum language language)
 static struct symbol *
 new_symbol (const char *name)
 {
-  struct symbol *s = new (&mdebugread_objfile->objfile_obstack) symbol;
+  struct symbol *s = new (mdebugread_objfile->objfile_obstack ()) symbol;
 
-  s->set_language (psymtab_language, &mdebugread_objfile->objfile_obstack);
+  s->set_language (psymtab_language, mdebugread_objfile->objfile_obstack ());
   s->compute_and_set_names (name, true, mdebugread_objfile->per_bfd);
   return s;
 }
@@ -4773,7 +4773,7 @@ elfmdebug_build_psymtabs (struct objfile *objfile,
 
   minimal_symbol_reader reader (objfile);
 
-  info = XOBNEW (&objfile->objfile_obstack, ecoff_debug_info);
+  info = XOBNEW (objfile->objfile_obstack (), ecoff_debug_info);
 
   if (!(*swap->read_debug_info) (abfd, sec, info))
     error (_("Error reading ECOFF debugging information: %s"),

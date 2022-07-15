@@ -693,7 +693,7 @@ compile_object_load (const compile_file_names &file_names,
   /* The memory may be later needed
      by bfd_generic_get_relocated_section_contents
      called from default_symfile_relocate.  */
-  symbol_table = (asymbol **) obstack_alloc (&objfile->objfile_obstack,
+  symbol_table = (asymbol **) obstack_alloc (objfile->objfile_obstack (),
 					     storage_needed);
   number_of_symbols = bfd_canonicalize_symtab (abfd.get (), symbol_table);
   if (number_of_symbols < 0)

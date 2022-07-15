@@ -881,7 +881,7 @@ make_blockranges (struct objfile *objfile,
   size_t n = rangevec.size();
 
   blr = (struct blockranges *)
-    obstack_alloc (&objfile->objfile_obstack,
+    obstack_alloc (objfile->objfile_obstack (),
 		   sizeof (struct blockranges)
 		   + (n - 1) * sizeof (struct blockrange));
 

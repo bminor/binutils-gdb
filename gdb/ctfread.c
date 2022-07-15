@@ -257,7 +257,7 @@ set_tid_type (struct objfile *of, ctf_id_t tid, struct type *typ)
   ids.type = typ;
   slot = (struct ctf_tid_and_type **) htab_find_slot (htab, &ids, INSERT);
   if (*slot == nullptr)
-    *slot = XOBNEW (&of->objfile_obstack, struct ctf_tid_and_type);
+    *slot = XOBNEW (of->objfile_obstack (), struct ctf_tid_and_type);
   **slot = ids;
   return typ;
 }
@@ -445,10 +445,10 @@ ctf_add_enum_member_cb (const char *name, int enum_value, void *arg)
 
   if (name != nullptr)
     {
-      struct symbol *sym = new (&ccp->of->objfile_obstack) symbol;
+      struct symbol *sym = new (ccp->of->objfile_obstack ()) symbol;
       OBJSTAT (ccp->of, n_syms++);
 
-      sym->set_language (language_c, &ccp->of->objfile_obstack);
+      sym->set_language (language_c, ccp->of->objfile_obstack ());
       sym->compute_and_set_names (name, false, ccp->of->per_bfd);
       sym->set_aclass_index (LOC_CONST);
       sym->set_domain (VAR_DOMAIN);
@@ -474,10 +474,10 @@ new_symbol (struct ctf_context *ccp, struct type *type, ctf_id_t tid)
   const char *name = ctf_type_name_raw (fp, tid);
   if (name != nullptr)
     {
-      sym = new (&objfile->objfile_obstack) symbol;
+      sym = new (objfile->objfile_obstack ()) symbol;
       OBJSTAT (objfile, n_syms++);
 
-      sym->set_language (language_c, &objfile->objfile_obstack);
+      sym->set_language (language_c, objfile->objfile_obstack ());
       sym->compute_and_set_names (name, false, objfile->per_bfd);
       sym->set_domain (VAR_DOMAIN);
       sym->set_aclass_index (LOC_OPTIMIZED_OUT);
@@ -928,7 +928,7 @@ read_typedef_type (struct ctf_context *ccp, ctf_id_t tid,
   struct objfile *objfile = ccp->of;
   struct type *this_type, *target_type;
 
-  char *aname = obstack_strdup (&objfile->objfile_obstack, name);
+  char *aname = obstack_strdup (objfile->objfile_obstack (), name);
   this_type = init_type (objfile, TYPE_CODE_TYPEDEF, 0, aname);
   set_tid_type (objfile, tid, this_type);
   target_type = fetch_tid_type (ccp, btid);
@@ -1167,7 +1167,7 @@ ctf_add_var_cb (const char *name, ctf_id_t id, void *arg)
 	    complaint (_("ctf_add_var_cb: %s has NO type (%ld)"), name, id);
 	    type = objfile_type (ccp->of)->builtin_error;
 	  }
-	sym = new (&ccp->of->objfile_obstack) symbol;
+	sym = new (ccp->of->objfile_obstack ()) symbol;
 	OBJSTAT (ccp->of, n_syms++);
 	sym->set_type (type);
 	sym->set_domain (VAR_DOMAIN);
@@ -1203,7 +1203,7 @@ add_stt_entries (struct ctf_context *ccp, int functions)
       type = get_tid_type (ccp->of, tid);
       if (type == nullptr)
 	continue;
-      sym = new (&ccp->of->objfile_obstack) symbol;
+      sym = new (ccp->of->objfile_obstack ()) symbol;
       OBJSTAT (ccp->of, n_syms++);
       sym->set_type (type);
       sym->set_domain (VAR_DOMAIN);

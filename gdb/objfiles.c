@@ -225,7 +225,7 @@ objfile_register_static_link (struct objfile *objfile,
   slot = htab_find_slot (objfile->static_links.get (), &lookup_entry, INSERT);
   gdb_assert (*slot == NULL);
 
-  entry = XOBNEW (&objfile->objfile_obstack, static_link_htab_entry);
+  entry = XOBNEW (objfile->objfile_obstack (), static_link_htab_entry);
   entry->block = block;
   entry->static_link = static_link;
   *slot = (void *) entry;
@@ -291,7 +291,7 @@ build_objfile_section_table (struct objfile *objfile)
 {
   int count = gdb_bfd_count_sections (objfile->obfd);
 
-  objfile->sections = OBSTACK_CALLOC (&objfile->objfile_obstack,
+  objfile->sections = OBSTACK_CALLOC (objfile->objfile_obstack (),
 				      count,
 				      struct obj_section);
   objfile->sections_end = (objfile->sections + count);
@@ -327,7 +327,7 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
 
   /* We could use obstack_specify_allocation here instead, but
      gdb_obstack.h specifies the alloc/dealloc functions.  */
-  obstack_init (&objfile_obstack);
+  obstack_init (objfile_obstack ());
 
   objfile_alloc_data (this);
 
@@ -346,7 +346,7 @@ objfile::objfile (bfd *abfd, const char *name, objfile_flags flags_)
       name_holder = gdb_abspath (name);
       expanded_name = name_holder.c_str ();
     }
-  original_name = obstack_strdup (&objfile_obstack, expanded_name);
+  original_name = obstack_strdup (objfile_obstack (), expanded_name);
 
   /* Update the per-objfile information that comes from the bfd, ensuring
      that any data that is reference is saved in the per-objfile data
@@ -594,7 +594,7 @@ objfile::~objfile ()
   }
 
   /* Free the obstacks for non-reusable objfiles.  */
-  obstack_free (&objfile_obstack, 0);
+  obstack_free (objfile_obstack (), 0);
 
   /* Rebuild section map next time we need it.  */
   get_objfile_pspace_data (pspace)->section_map_dirty = 1;

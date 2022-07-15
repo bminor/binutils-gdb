@@ -423,11 +423,11 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 	      /* On xcoff, if a global is defined and never referenced,
 		 ld will remove it from the executable.  There is then
 		 a N_GSYM stab for it, but no regular (C_EXT) symbol.  */
-	      sym = new (&objfile->objfile_obstack) symbol;
+	      sym = new (objfile->objfile_obstack ()) symbol;
 	      sym->set_domain (VAR_DOMAIN);
 	      sym->set_aclass_index (LOC_OPTIMIZED_OUT);
 	      sym->set_linkage_name
-		(obstack_strndup (&objfile->objfile_obstack, name, pp - name));
+		(obstack_strndup (objfile->objfile_obstack (), name, pp - name));
 	      pp += 2;
 	      if (*(pp - 1) == 'F' || *(pp - 1) == 'f')
 		{
@@ -687,7 +687,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
      e.g. ":t10=*2" or a nameless enum like " :T16=ered:0,green:1,blue:2,;" */
   nameless = (p == string || ((string[0] == ' ') && (string[1] == ':')));
 
-  current_symbol = sym = new (&objfile->objfile_obstack) symbol;
+  current_symbol = sym = new (objfile->objfile_obstack ()) symbol;
 
   if (processing_gcc_compilation)
     {
@@ -701,7 +701,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
     }
 
   sym->set_language (get_current_subfile ()->language,
-		     &objfile->objfile_obstack);
+		     objfile->objfile_obstack ());
 
   if (is_cplus_marker (string[0]))
     {
@@ -799,7 +799,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 
 	    dbl_type = objfile_type (objfile)->builtin_double;
 	    dbl_valu
-	      = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack,
+	      = (gdb_byte *) obstack_alloc (objfile->objfile_obstack (),
 					    TYPE_LENGTH (dbl_type));
 
 	    target_float_from_string (dbl_valu, dbl_type, std::string (p));
@@ -884,7 +884,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	      (create_array_type (NULL, objfile_type (objfile)->builtin_char,
 				  range_type));
 	    string_value
-	      = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack, ind + 1);
+	      = (gdb_byte *) obstack_alloc (objfile->objfile_obstack (), ind + 1);
 	    memcpy (string_value, string_local, ind + 1);
 	    p++;
 
@@ -1283,7 +1283,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       if (synonym)
 	{
 	  /* Create the STRUCT_DOMAIN clone.  */
-	  struct symbol *struct_sym = new (&objfile->objfile_obstack) symbol;
+	  struct symbol *struct_sym = new (objfile->objfile_obstack ()) symbol;
 
 	  *struct_sym = *sym;
 	  struct_sym->set_aclass_index (LOC_TYPEDEF);
@@ -1291,7 +1291,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  struct_sym->set_domain (STRUCT_DOMAIN);
 	  if (sym->type ()->name () == 0)
 	    sym->type ()->set_name
-	      (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
+	      (obconcat (objfile->objfile_obstack (), sym->linkage_name (),
 			 (char *) NULL));
 	  add_symbol_to_list (struct_sym, get_file_symbols ());
 	}
@@ -1318,14 +1318,14 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
       sym->set_domain (STRUCT_DOMAIN);
       if (sym->type ()->name () == 0)
 	sym->type ()->set_name
-	  (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
+	  (obconcat (objfile->objfile_obstack (), sym->linkage_name (),
 		     (char *) NULL));
       add_symbol_to_list (sym, get_file_symbols ());
 
       if (synonym)
 	{
 	  /* Clone the sym and then modify it.  */
-	  struct symbol *typedef_sym = new (&objfile->objfile_obstack) symbol;
+	  struct symbol *typedef_sym = new (objfile->objfile_obstack ()) symbol;
 
 	  *typedef_sym = *sym;
 	  typedef_sym->set_aclass_index (LOC_TYPEDEF);
@@ -1333,7 +1333,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	  typedef_sym->set_domain (VAR_DOMAIN);
 	  if (sym->type ()->name () == 0)
 	    sym->type ()->set_name
-	      (obconcat (&objfile->objfile_obstack, sym->linkage_name (),
+	      (obconcat (objfile->objfile_obstack (), sym->linkage_name (),
 			 (char *) NULL));
 	  add_symbol_to_list (typedef_sym, get_file_symbols ());
 	}
@@ -1599,13 +1599,13 @@ again:
 
 	      gdb::unique_xmalloc_ptr<char> new_name = cp_canonicalize_string (name);
 	      if (new_name != nullptr)
-		type_name = obstack_strdup (&objfile->objfile_obstack,
+		type_name = obstack_strdup (objfile->objfile_obstack (),
 					    new_name.get ());
 	    }
 	  if (type_name == NULL)
 	    {
 	      char *to = type_name = (char *)
-		obstack_alloc (&objfile->objfile_obstack, p - *pp + 1);
+		obstack_alloc (objfile->objfile_obstack (), p - *pp + 1);
 
 	      /* Copy the name.  */
 	      from = *pp + 1;
@@ -1633,7 +1633,7 @@ again:
 		  && (sym->type ()->code () == code)
 		  && strcmp (sym->linkage_name (), type_name) == 0)
 		{
-		  obstack_free (&objfile->objfile_obstack, type_name);
+		  obstack_free (objfile->objfile_obstack (), type_name);
 		  type = sym->type ();
 		  if (typenums[0] != -1)
 		    *dbx_lookup_type (typenums, objfile) = type;
@@ -2038,7 +2038,7 @@ rs6000_builtin_type (int typenum, struct objfile *objfile)
   if (!negative_types)
     {
       /* This includes an empty slot for type number -0.  */
-      negative_types = OBSTACK_CALLOC (&objfile->objfile_obstack,
+      negative_types = OBSTACK_CALLOC (objfile->objfile_obstack (),
 				       NUMBER_RECOGNIZED + 1, struct type *);
       rs6000_builtin_type_data.set (objfile, negative_types);
     }
@@ -2584,11 +2584,11 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
 					     struct next_fnfieldlist);
 
 	      destr_fnlist->fn_fieldlist.name
-		= obconcat (&objfile->objfile_obstack, "~",
+		= obconcat (objfile->objfile_obstack (), "~",
 			    new_fnlist->fn_fieldlist.name, (char *) NULL);
 
 	      destr_fnlist->fn_fieldlist.fn_fields =
-		XOBNEWVEC (&objfile->objfile_obstack,
+		XOBNEWVEC (objfile->objfile_obstack (),
 			   struct fn_field, has_destructor);
 	      memset (destr_fnlist->fn_fieldlist.fn_fields, 0,
 		  sizeof (struct fn_field) * has_destructor);
@@ -2643,13 +2643,13 @@ read_member_functions (struct stab_field_info *fip, const char **pp,
 	  else if (has_destructor && new_fnlist->fn_fieldlist.name[0] != '~')
 	    {
 	      new_fnlist->fn_fieldlist.name =
-		obconcat (&objfile->objfile_obstack,
+		obconcat (objfile->objfile_obstack (),
 			  "~", main_fn_name, (char *)NULL);
 	      xfree (main_fn_name);
 	    }
 
 	  new_fnlist->fn_fieldlist.fn_fields
-	    = OBSTACK_CALLOC (&objfile->objfile_obstack, length, fn_field);
+	    = OBSTACK_CALLOC (objfile->objfile_obstack (), length, fn_field);
 	  for (i = length; (i--, sublist); sublist = sublist->next)
 	    {
 	      new_fnlist->fn_fieldlist.fn_fields[i] = sublist->fn_field;
@@ -2712,7 +2712,7 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
 	    {
 	      name = "";
 	    }
-	  fip->list->field.set_name (obconcat (&objfile->objfile_obstack,
+	  fip->list->field.set_name (obconcat (objfile->objfile_obstack (),
 					       vptr_name, name, (char *) NULL));
 	  break;
 
@@ -2725,13 +2725,13 @@ read_cpp_abbrev (struct stab_field_info *fip, const char **pp,
 			 symnum);
 	      name = "FOO";
 	    }
-	  fip->list->field.set_name (obconcat (&objfile->objfile_obstack,
+	  fip->list->field.set_name (obconcat (objfile->objfile_obstack (),
 					       vb_name, name, (char *) NULL));
 	  break;
 
 	default:
 	  invalid_cpp_abbrev_complaint (*pp);
-	  fip->list->field.set_name (obconcat (&objfile->objfile_obstack,
+	  fip->list->field.set_name (obconcat (objfile->objfile_obstack (),
 					       "INVALID_CPLUSPLUS_ABBREV",
 					       (char *) NULL));
 	  break;
@@ -2782,7 +2782,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
   struct gdbarch *gdbarch = objfile->arch ();
 
   fip->list->field.set_name
-    (obstack_strndup (&objfile->objfile_obstack, *pp, p - *pp));
+    (obstack_strndup (objfile->objfile_obstack (), *pp, p - *pp));
   *pp = p + 1;
 
   /* This means we have a visibility for a field coming.  */
@@ -3582,16 +3582,16 @@ read_enum_type (const char **pp, struct type *type,
       p = *pp;
       while (*p != ':')
 	p++;
-      name = obstack_strndup (&objfile->objfile_obstack, *pp, p - *pp);
+      name = obstack_strndup (objfile->objfile_obstack (), *pp, p - *pp);
       *pp = p + 1;
       n = read_huge_number (pp, ',', &nbits, 0);
       if (nbits != 0)
 	return error_type (pp, objfile);
 
-      sym = new (&objfile->objfile_obstack) symbol;
+      sym = new (objfile->objfile_obstack ()) symbol;
       sym->set_linkage_name (name);
       sym->set_language (get_current_subfile ()->language,
-			 &objfile->objfile_obstack);
+			 objfile->objfile_obstack ());
       sym->set_aclass_index (LOC_CONST);
       sym->set_domain (VAR_DOMAIN);
       sym->set_value_longest (n);
@@ -4232,7 +4232,7 @@ common_block_start (const char *name, struct objfile *objfile)
     }
   common_block = *get_local_symbols ();
   common_block_i = common_block ? common_block->nsyms : 0;
-  common_block_name = obstack_strdup (&objfile->objfile_obstack, name);
+  common_block_name = obstack_strdup (objfile->objfile_obstack (), name);
 }
 
 /* Process a N_ECOMM symbol.  */
@@ -4257,7 +4257,7 @@ common_block_end (struct objfile *objfile)
       return;
     }
 
-  sym = new (&objfile->objfile_obstack) symbol;
+  sym = new (objfile->objfile_obstack ()) symbol;
   /* Note: common_block_name already saved on objfile_obstack.  */
   sym->set_linkage_name (common_block_name);
   sym->set_aclass_index (LOC_BLOCK);

@@ -347,7 +347,7 @@ read_unwind_info (struct objfile *objfile)
   struct hppa_objfile_private *obj_private;
 
   text_offset = objfile->text_section_offset ();
-  ui = (struct hppa_unwind_info *) obstack_alloc (&objfile->objfile_obstack,
+  ui = (struct hppa_unwind_info *) obstack_alloc (objfile->objfile_obstack (),
 					   sizeof (struct hppa_unwind_info));
 
   ui->table = NULL;
@@ -397,7 +397,7 @@ read_unwind_info (struct objfile *objfile)
 
   /* Allocate memory for the unwind table.  */
   ui->table = (struct unwind_table_entry *)
-    obstack_alloc (&objfile->objfile_obstack, total_size);
+    obstack_alloc (objfile->objfile_obstack (), total_size);
   ui->last = total_entries - 1;
 
   /* Now read in each unwind section and internalize the standard unwind

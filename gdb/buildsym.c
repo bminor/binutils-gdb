@@ -211,13 +211,13 @@ buildsym_compunit::finish_block_internal
   struct pending_block *opblock;
 
   block = (is_global
-	   ? allocate_global_block (&m_objfile->objfile_obstack)
-	   : allocate_block (&m_objfile->objfile_obstack));
+	   ? allocate_global_block (m_objfile->objfile_obstack ())
+	   : allocate_block (m_objfile->objfile_obstack ()));
 
   if (symbol)
     {
       block->set_multidict
-	(mdict_create_linear (&m_objfile->objfile_obstack, *listhead));
+	(mdict_create_linear (m_objfile->objfile_obstack (), *listhead));
     }
   else
     {
@@ -230,7 +230,7 @@ buildsym_compunit::finish_block_internal
       else
 	{
 	  block->set_multidict
-	    (mdict_create_hashed (&m_objfile->objfile_obstack, *listhead));
+	    (mdict_create_hashed (m_objfile->objfile_obstack (), *listhead));
 	}
     }
 
@@ -374,7 +374,7 @@ buildsym_compunit::finish_block_internal
 		   (is_global
 		    ? m_global_using_directives
 		    : m_local_using_directives),
-		   &m_objfile->objfile_obstack);
+		   m_objfile->objfile_obstack ());
   if (is_global)
     m_global_using_directives = NULL;
   else
@@ -434,7 +434,7 @@ buildsym_compunit::make_blockvector ()
     }
 
   blockvector = (struct blockvector *)
-    obstack_alloc (&m_objfile->objfile_obstack,
+    obstack_alloc (m_objfile->objfile_obstack (),
 		   (sizeof (struct blockvector)
 		    + (i - 1) * sizeof (struct block *)));
 
@@ -454,8 +454,8 @@ buildsym_compunit::make_blockvector ()
      blockvector.  */
   if (m_pending_addrmap_interesting)
     blockvector->set_map
-      (new (&m_objfile->objfile_obstack) addrmap_fixed
-       (&m_objfile->objfile_obstack, &m_pending_addrmap));
+      (new (m_objfile->objfile_obstack ()) addrmap_fixed
+       (m_objfile->objfile_obstack (), &m_pending_addrmap));
   else
     blockvector->set_map (nullptr);
 
@@ -939,7 +939,7 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
 	  int linetablesize = sizeof (struct linetable) + entry_array_size;
 
 	  symtab->set_linetable
-	    (XOBNEWVAR (&m_objfile->objfile_obstack, struct linetable,
+	    (XOBNEWVAR (m_objfile->objfile_obstack (), struct linetable,
 			linetablesize));
 
 	  symtab->linetable ()->nitems = n_entries;
@@ -966,7 +966,7 @@ buildsym_compunit::end_compunit_symtab_with_blockvector
   if (!m_comp_dir.empty ())
     {
       /* Reallocate the dirname on the symbol obstack.  */
-      cu->set_dirname (obstack_strdup (&m_objfile->objfile_obstack,
+      cu->set_dirname (obstack_strdup (m_objfile->objfile_obstack (),
 				       m_comp_dir.c_str ()));
     }
 

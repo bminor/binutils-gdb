@@ -1005,7 +1005,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 	      {
 		char *p;
 
-		p = (char *) obstack_alloc (&objfile->objfile_obstack,
+		p = (char *) obstack_alloc (objfile->objfile_obstack (),
 					    E_SYMNMLEN + 1);
 		strncpy (p, cs->c_name, E_SYMNMLEN);
 		p[E_SYMNMLEN] = '\0';
@@ -1450,7 +1450,7 @@ read_xcoff_symtab (struct objfile *objfile, legacy_psymtab *pst)
 }
 
 #define	SYMNAME_ALLOC(NAME, ALLOCED)	\
-  ((ALLOCED) ? (NAME) : obstack_strdup (&objfile->objfile_obstack, \
+  ((ALLOCED) ? (NAME) : obstack_strdup (objfile->objfile_obstack (), \
 					(NAME)))
 
 
@@ -1499,7 +1499,7 @@ process_xcoff_symbol (struct xcoff_symbol *cs, struct objfile *objfile)
       sym->set_type (objfile_type (objfile)->nodebug_text_symbol);
 
       sym->set_aclass_index (LOC_BLOCK);
-      sym2 = new (&objfile->objfile_obstack) symbol (*sym);
+      sym2 = new (objfile->objfile_obstack ()) symbol (*sym);
 
       if (cs->c_sclass == C_EXT || C_WEAKEXT)
 	add_symbol_to_list (sym2, get_global_symbols ());
@@ -1850,7 +1850,7 @@ init_stringtab (bfd *abfd, file_ptr offset, struct objfile *objfile)
   /* Allocate string table from objfile_obstack.  We will need this table
      as long as we have its symbol table around.  */
 
-  strtbl = (char *) obstack_alloc (&objfile->objfile_obstack, length);
+  strtbl = (char *) obstack_alloc (objfile->objfile_obstack (), length);
   xcoff->strtbl = strtbl;
 
   /* Copy length buffer, the first byte is usually zero and is
@@ -1893,7 +1893,7 @@ xcoff_start_psymtab (psymtab_storage *partial_symtabs,
 					       objfile->per_bfd, 0);
 
   result->read_symtab_private =
-    XOBNEW (&objfile->objfile_obstack, struct xcoff_symloc);
+    XOBNEW (objfile->objfile_obstack (), struct xcoff_symloc);
   ((struct xcoff_symloc *) result->read_symtab_private)->first_symnum = first_symnum;
   result->legacy_read_symtab = xcoff_read_symtab;
   result->legacy_expand_psymtab = xcoff_expand_psymtab;
@@ -1948,7 +1948,7 @@ xcoff_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
       legacy_psymtab *subpst =
 	new legacy_psymtab (include_list[i], partial_symtabs, objfile->per_bfd);
 
-      subpst->read_symtab_private = XOBNEW (&objfile->objfile_obstack, xcoff_symloc);
+      subpst->read_symtab_private = XOBNEW (objfile->objfile_obstack (), xcoff_symloc);
       ((struct xcoff_symloc *) subpst->read_symtab_private)->first_symnum = 0;
       ((struct xcoff_symloc *) subpst->read_symtab_private)->numsyms = 0;
 
@@ -1999,7 +1999,7 @@ swap_sym (struct internal_syment *symbol, union internal_auxent *aux,
 	     into the minimal symbols.  */
 	  char *p;
 
-	  p = (char *) obstack_alloc (&objfile->objfile_obstack,
+	  p = (char *) obstack_alloc (objfile->objfile_obstack (),
 				      E_SYMNMLEN + 1);
 	  strncpy (p, symbol->n_name, E_SYMNMLEN);
 	  p[E_SYMNMLEN] = '\0';
@@ -2826,7 +2826,7 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
 	      if (length)
 		{
 		  debugsec
-		    = (bfd_byte *) obstack_alloc (&objfile->objfile_obstack,
+		    = (bfd_byte *) obstack_alloc (objfile->objfile_obstack (),
 						  length);
 
 		  if (!bfd_get_full_section_contents (abfd, secp, &debugsec))
@@ -2847,7 +2847,7 @@ xcoff_initial_scan (struct objfile *objfile, symfile_add_flags symfile_flags)
     error (_("Error reading symbols from %s: %s"),
 	   name, bfd_errmsg (bfd_get_error ()));
   size = coff_data (abfd)->local_symesz * num_symbols;
-  info->symtbl = (char *) obstack_alloc (&objfile->objfile_obstack, size);
+  info->symtbl = (char *) obstack_alloc (objfile->objfile_obstack (), size);
   info->symtbl_num_syms = num_symbols;
 
   val = bfd_bread (info->symtbl, size, abfd);

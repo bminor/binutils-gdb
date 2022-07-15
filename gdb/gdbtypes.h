@@ -2473,7 +2473,7 @@ extern const struct floatformat *floatformats_bfloat16[BFD_ENDIAN_UNKNOWN];
 
 #define TYPE_ALLOC(t,size)                                              \
   (obstack_alloc (((t)->is_objfile_owned ()                             \
-		   ? &((t)->objfile_owner ()->objfile_obstack)          \
+		   ? ((t)->objfile_owner ()->objfile_obstack ())          \
 		   : gdbarch_obstack ((t)->arch_owner ())),             \
 		  size))
 

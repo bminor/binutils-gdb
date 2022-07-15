@@ -7850,8 +7850,8 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 				     saved_package_name);
       struct symbol *sym;
 
-      sym = new (&objfile->objfile_obstack) symbol;
-      sym->set_language (language_go, &objfile->objfile_obstack);
+      sym = new (objfile->objfile_obstack ()) symbol;
+      sym->set_language (language_go, objfile->objfile_obstack ());
       sym->compute_and_set_names (saved_package_name, false, objfile->per_bfd);
       /* This is not VAR_DOMAIN because we want a way to ensure a lookup of,
 	 e.g., "main" finds the "main" module and not C's main().  */
@@ -8028,11 +8028,11 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       type->field (1).set_name
 	(rust_last_path_segment (type->field (1).type ()->name ()));
       type->field (1).type ()->set_name
-	(rust_fully_qualify (&objfile->objfile_obstack, type->name (),
+	(rust_fully_qualify (objfile->objfile_obstack (), type->name (),
 			     type->field (1).name ()));
 
       const char *dataless_name
-	= rust_fully_qualify (&objfile->objfile_obstack, type->name (),
+	= rust_fully_qualify (objfile->objfile_obstack (), type->name (),
 			      name);
       struct type *dataless_type = init_type (objfile, TYPE_CODE_VOID, 0,
 					      dataless_name);
@@ -8044,7 +8044,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 
       /* Indicate that this is a variant type.  */
       static discriminant_range ranges[1] = { { 0, 0 } };
-      alloc_rust_variant (&objfile->objfile_obstack, type, 0, 1, ranges);
+      alloc_rust_variant (objfile->objfile_obstack (), type, 0, 1, ranges);
     }
   /* A union with a single anonymous field is probably an old-style
      univariant enum.  */
@@ -8059,10 +8059,10 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	= rust_last_path_segment (field_type->name ());
       type->field (0).set_name (variant_name);
       field_type->set_name
-	(rust_fully_qualify (&objfile->objfile_obstack,
+	(rust_fully_qualify (objfile->objfile_obstack (),
 			     type->name (), variant_name));
 
-      alloc_rust_variant (&objfile->objfile_obstack, type, -1, 0, {});
+      alloc_rust_variant (objfile->objfile_obstack (), type, -1, 0, {});
     }
   else
     {
@@ -8136,7 +8136,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
       /* We don't need a range entry for the discriminant, but we do
 	 need one for every other field, as there is no default
 	 variant.  */
-      discriminant_range *ranges = XOBNEWVEC (&objfile->objfile_obstack,
+      discriminant_range *ranges = XOBNEWVEC (objfile->objfile_obstack (),
 					      discriminant_range,
 					      n_fields - 1);
       /* Skip the discriminant here.  */
@@ -8168,12 +8168,12 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 	    }
 	  type->field (i).set_name (variant_name);
 	  sub_type->set_name
-	    (rust_fully_qualify (&objfile->objfile_obstack,
+	    (rust_fully_qualify (objfile->objfile_obstack (),
 				 type->name (), variant_name));
 	}
 
       /* Indicate that this is a variant type.  */
-      alloc_rust_variant (&objfile->objfile_obstack, type, 0, -1,
+      alloc_rust_variant (objfile->objfile_obstack (), type, 0, -1,
 			  gdb::array_view<discriminant_range> (ranges,
 							       n_fields - 1));
     }
@@ -8314,7 +8314,7 @@ compute_compunit_symtab_includes (dwarf2_per_cu_data *per_cu,
       /* Now we have a transitive closure of all the included symtabs.  */
       len = result_symtabs.size ();
       cust->includes
-	= XOBNEWVEC (&per_objfile->objfile->objfile_obstack,
+	= XOBNEWVEC (per_objfile->objfile->objfile_obstack (),
 		     struct compunit_symtab *, len + 1);
       memcpy (cust->includes, result_symtabs.data (),
 	      len * sizeof (compunit_symtab *));
@@ -9330,7 +9330,7 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
       canonical_name = imported_name_prefix;
     }
   else if (strlen (imported_name_prefix) > 0)
-    canonical_name = obconcat (&objfile->objfile_obstack,
+    canonical_name = obconcat (objfile->objfile_obstack (),
 			       imported_name_prefix,
 			       (cu->lang () == language_d
 				? "."
@@ -9391,7 +9391,7 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
 		       imported_declaration,
 		       excludes,
 		       0,
-		       &objfile->objfile_obstack);
+		       objfile->objfile_obstack ());
 }
 
 /* ICC<14 does not output the required DW_AT_declaration on incomplete
@@ -9702,7 +9702,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 	 time.  */
 
       tug_unshare->symtabs
-	= XOBNEWVEC (&cust->objfile ()->objfile_obstack,
+	= XOBNEWVEC (cust->objfile ()->objfile_obstack (),
 		     struct symtab *, line_header->file_names_size ());
 
       auto &file_names = line_header->file_names ();
@@ -12005,7 +12005,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
       if (child_die->tag == DW_TAG_template_type_param
 	  || child_die->tag == DW_TAG_template_value_param)
 	{
-	  templ_func = new (&objfile->objfile_obstack) template_symbol;
+	  templ_func = new (objfile->objfile_obstack ()) template_symbol;
 	  templ_func->subclass = SYMBOL_TEMPLATE;
 	  break;
 	}
@@ -12032,7 +12032,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (attr != nullptr)
     {
       newobj->static_link
-	= XOBNEW (&objfile->objfile_obstack, struct dynamic_prop);
+	= XOBNEW (objfile->objfile_obstack (), struct dynamic_prop);
       attr_to_dynamic_prop (attr, die, cu, newobj->static_link,
 			    cu->addr_type ());
     }
@@ -12097,7 +12097,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
        || cu->lang () == language_rust)
       && cu->processing_has_namespace_info)
     block_set_scope (block, determine_prefix (die, cu),
-		     &objfile->objfile_obstack);
+		     objfile->objfile_obstack ());
 
   /* If we have address ranges, record them.  */
   dwarf2_record_block_ranges (die, block, baseaddr, cu);
@@ -12111,7 +12111,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       templ_func->n_template_arguments = template_args.size ();
       templ_func->template_arguments
-	= XOBNEWVEC (&objfile->objfile_obstack, struct symbol *,
+	= XOBNEWVEC (objfile->objfile_obstack (), struct symbol *,
 		     templ_func->n_template_arguments);
       memcpy (templ_func->template_arguments,
 	      template_args.data (),
@@ -12261,7 +12261,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (cu->call_site_htab == NULL)
     cu->call_site_htab = htab_create_alloc_ex (16, call_site::hash,
 					       call_site::eq, NULL,
-					       &objfile->objfile_obstack,
+					       objfile->objfile_obstack (),
 					       hashtab_obstack_allocate, NULL);
   struct call_site call_site_local (pc, nullptr, nullptr);
   slot = htab_find_slot (cu->call_site_htab, &call_site_local, INSERT);
@@ -12294,7 +12294,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
     }
 
   struct call_site *call_site
-    = new (XOBNEWVAR (&objfile->objfile_obstack,
+    = new (XOBNEWVAR (objfile->objfile_obstack (),
 		      struct call_site,
 		      sizeof (*call_site) + sizeof (call_site->parameter[0]) * nparams))
     struct call_site (pc, cu->per_cu, per_objfile);
@@ -12372,7 +12372,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       struct dwarf2_locexpr_baton *dlbaton;
       struct dwarf_block *block = attr->as_block ();
 
-      dlbaton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
+      dlbaton = XOBNEW (objfile->objfile_obstack (), struct dwarf2_locexpr_baton);
       dlbaton->data = block->data;
       dlbaton->size = block->size;
       dlbaton->per_objfile = per_objfile;
@@ -12413,7 +12413,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  std::vector<CORE_ADDR> addresses;
 	  dwarf2_ranges_read_low_addrs (ranges_offset, target_cu,
 					target_die->tag, addresses);
-	  CORE_ADDR *saved = XOBNEWVAR (&objfile->objfile_obstack, CORE_ADDR,
+	  CORE_ADDR *saved = XOBNEWVAR (objfile->objfile_obstack (), CORE_ADDR,
 					addresses.size ());
 	  std::copy (addresses.begin (), addresses.end (), saved);
 	  call_site->target.set_loc_array (addresses.size (), saved);
@@ -12602,7 +12602,7 @@ read_variable (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  struct objfile *objfile = cu->per_objfile->objfile;
 
-	  storage = new (&objfile->objfile_obstack) rust_vtable_symbol;
+	  storage = new (objfile->objfile_obstack ()) rust_vtable_symbol;
 	  storage->concrete_type = containing_type;
 	  storage->subclass = SYMBOL_RUST_VTABLE;
 	}
@@ -13439,7 +13439,7 @@ handle_member_location (struct die_info *die, struct dwarf2_cu *cu,
 	      dwarf2_per_objfile *per_objfile = cu->per_objfile;
 	      struct objfile *objfile = per_objfile->objfile;
 	      struct dwarf2_locexpr_baton *dlbaton
-		= XOBNEW (&objfile->objfile_obstack,
+		= XOBNEW (objfile->objfile_obstack (),
 			  struct dwarf2_locexpr_baton);
 	      dlbaton->data = attr->as_block ()->data;
 	      dlbaton->size = attr->as_block ()->size;
@@ -13888,12 +13888,12 @@ add_variant_property (struct field_info *fip, struct type *type,
 
   struct objfile *objfile = cu->per_objfile->objfile;
   gdb::array_view<const variant_part> parts
-    = create_variant_parts (&objfile->objfile_obstack, offset_map, fip,
+    = create_variant_parts (objfile->objfile_obstack (), offset_map, fip,
 			    fip->variant_parts);
 
   struct dynamic_prop prop;
   prop.set_variant_parts ((gdb::array_view<variant_part> *)
-			  obstack_copy (&objfile->objfile_obstack, &parts,
+			  obstack_copy (objfile->objfile_obstack (), &parts,
 					sizeof (parts)));
 
   type->add_dyn_prop (DYN_PROP_VARIANT_PARTS, prop);
@@ -14861,7 +14861,7 @@ process_structure_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  ALLOCATE_CPLUS_STRUCT_TYPE (type);
 	  TYPE_N_TEMPLATE_ARGUMENTS (type) = template_args.size ();
 	  TYPE_TEMPLATE_ARGUMENTS (type)
-	    = XOBNEWVEC (&objfile->objfile_obstack,
+	    = XOBNEWVEC (objfile->objfile_obstack (),
 			 struct symbol *,
 			 TYPE_N_TEMPLATE_ARGUMENTS (type));
 	  memcpy (TYPE_TEMPLATE_ARGUMENTS (type),
@@ -15790,7 +15790,7 @@ mark_common_block_symbol_computed (struct symbol *sym,
   gdb_assert (member_loc->form_is_block ()
 	      || member_loc->form_is_constant ());
 
-  baton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
+  baton = XOBNEW (objfile->objfile_obstack (), struct dwarf2_locexpr_baton);
   baton->per_objfile = per_objfile;
   baton->per_cu = cu->per_cu;
   gdb_assert (baton->per_cu);
@@ -15805,7 +15805,7 @@ mark_common_block_symbol_computed (struct symbol *sym,
   else
     baton->size += member_loc->as_block ()->size;
 
-  ptr = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack, baton->size);
+  ptr = (gdb_byte *) obstack_alloc (objfile->objfile_obstack (), baton->size);
   baton->data = ptr;
 
   *ptr++ = DW_OP_call4;
@@ -15883,7 +15883,7 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
       size = (sizeof (struct common_block)
 	      + (n_entries - 1) * sizeof (struct symbol *));
       common_block
-	= (struct common_block *) obstack_alloc (&objfile->objfile_obstack,
+	= (struct common_block *) obstack_alloc (objfile->objfile_obstack (),
 						 size);
       memset (common_block->contents, 0, n_entries * sizeof (struct symbol *));
       common_block->n_entries = 0;
@@ -15965,7 +15965,7 @@ read_namespace_type (struct die_info *die, struct dwarf2_cu *cu)
 
   previous_prefix = determine_prefix (die, cu);
   if (previous_prefix[0] != '\0')
-    name = typename_concat (&objfile->objfile_obstack,
+    name = typename_concat (objfile->objfile_obstack (),
 			    previous_prefix, name, 0, cu);
 
   /* Create the type.  */
@@ -16001,7 +16001,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
 	  std::vector<const char *> excludes;
 	  add_using_directive (using_directives (cu),
 			       previous_prefix, type->name (), NULL,
-			       NULL, excludes, 0, &objfile->objfile_obstack);
+			       NULL, excludes, 0, objfile->objfile_obstack ());
 	}
     }
 
@@ -17140,7 +17140,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  gdb_assert (startswith (gnat_encoding_suffix,
 				  GNAT_FIXED_POINT_SUFFIX));
-	  name = obstack_strndup (&cu->per_objfile->objfile->objfile_obstack,
+	  name = obstack_strndup (cu->per_objfile->objfile->objfile_obstack (),
 				  name, gnat_encoding_suffix - name);
 	  /* Use -1 here so that SUFFIX points at the "_" after the
 	     "XF".  */
@@ -17170,7 +17170,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 	    if (name == nullptr)
 	      {
 		struct obstack *obstack
-		  = &cu->per_objfile->objfile->objfile_obstack;
+		  = cu->per_objfile->objfile->objfile_obstack ();
 		name = obconcat (obstack, "_Complex ", type->name (),
 				 nullptr);
 	      }
@@ -17301,7 +17301,7 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
   struct dwarf2_property_baton *baton;
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
-  struct obstack *obstack = &objfile->objfile_obstack;
+  struct obstack *obstack = objfile->objfile_obstack ();
 
   gdb_assert (default_type != NULL);
 
@@ -20694,11 +20694,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       if (space)
 	sym = space;
       else
-	sym = new (&objfile->objfile_obstack) symbol;
+	sym = new (objfile->objfile_obstack ()) symbol;
       OBJSTAT (objfile, n_syms++);
 
       /* Cache this symbol's name and the name's demangled form (if any).  */
-      sym->set_language (cu->lang (), &objfile->objfile_obstack);
+      sym->set_language (cu->lang (), objfile->objfile_obstack ());
       /* Fortran does not have mangling standard and the mangling does differ
 	 between gfortran, iFort etc.  */
       const char *physname
@@ -20711,7 +20711,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	sym->set_linkage_name (physname);
       else
 	{
-	  sym->set_demangled_name (physname, &objfile->objfile_obstack);
+	  sym->set_demangled_name (physname, objfile->objfile_obstack ());
 	  sym->set_linkage_name (linkagename);
 	}
 
@@ -21246,7 +21246,7 @@ dwarf2_const_value (const struct attribute *attr, struct symbol *sym,
 
   dwarf2_const_value_attr (attr, sym->type (),
 			   sym->print_name (),
-			   &objfile->objfile_obstack, cu,
+			   objfile->objfile_obstack (), cu,
 			   &value, &bytes, &baton);
 
   if (baton != NULL)
@@ -21359,7 +21359,7 @@ build_error_marker_type (struct dwarf2_cu *cu, struct die_info *die)
 		     objfile_name (objfile),
 		     sect_offset_str (cu->header.sect_off),
 		     sect_offset_str (die->sect_off));
-  saved = obstack_strdup (&objfile->objfile_obstack, message);
+  saved = obstack_strdup (objfile->objfile_obstack (), message);
 
   return init_type (objfile, TYPE_CODE_ERROR, 0, saved);
 }
@@ -23346,7 +23346,7 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
     {
       struct dwarf2_loclist_baton *baton;
 
-      baton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_loclist_baton);
+      baton = XOBNEW (objfile->objfile_obstack (), struct dwarf2_loclist_baton);
 
       fill_in_loclist_baton (cu, baton, attr);
 
@@ -23363,7 +23363,7 @@ dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
     {
       struct dwarf2_locexpr_baton *baton;
 
-      baton = XOBNEW (&objfile->objfile_obstack, struct dwarf2_locexpr_baton);
+      baton = XOBNEW (objfile->objfile_obstack (), struct dwarf2_locexpr_baton);
       baton->per_objfile = per_objfile;
       baton->per_cu = cu->per_cu;
       gdb_assert (baton->per_cu);
@@ -23846,7 +23846,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
   if (*slot)
     complaint (_("A problem internal to GDB: DIE %s has type already set"),
 	       sect_offset_str (die->sect_off));
-  *slot = XOBNEW (&objfile->objfile_obstack,
+  *slot = XOBNEW (objfile->objfile_obstack (),
 		  struct dwarf2_per_cu_offset_and_type);
   **slot = ofs;
   return type;

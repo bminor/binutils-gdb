@@ -550,13 +550,13 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 		     * sizeof (struct linetable_entry)
 		     + sizeof (struct linetable));
       filetab->set_linetable ((struct linetable *)
-			      obstack_alloc (&objfile->objfile_obstack, size));
+			      obstack_alloc (objfile->objfile_obstack (), size));
       memcpy (filetab->linetable (), stab->linetable.get (), size);
     }
 
   blockvector_size = (sizeof (struct blockvector)
 		      + (actual_nblocks - 1) * sizeof (struct block *));
-  bv = (struct blockvector *) obstack_alloc (&objfile->objfile_obstack,
+  bv = (struct blockvector *) obstack_alloc (objfile->objfile_obstack (),
 					     blockvector_size);
   cust->set_blockvector (bv);
 
@@ -573,15 +573,15 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
   int block_idx = FIRST_LOCAL_BLOCK;
   for (gdb_block &gdb_block_iter : stab->blocks)
     {
-      struct block *new_block = allocate_block (&objfile->objfile_obstack);
-      struct symbol *block_name = new (&objfile->objfile_obstack) symbol;
+      struct block *new_block = allocate_block (objfile->objfile_obstack ());
+      struct symbol *block_name = new (objfile->objfile_obstack ()) symbol;
       struct type *block_type = arch_type (objfile->arch (),
 					   TYPE_CODE_VOID,
 					   TARGET_CHAR_BIT,
 					   "void");
 
       new_block->set_multidict
-	(mdict_create_linear (&objfile->objfile_obstack, NULL));
+	(mdict_create_linear (objfile->objfile_obstack (), NULL));
       /* The address range.  */
       new_block->set_start (gdb_block_iter.begin);
       new_block->set_end (gdb_block_iter.end);
@@ -593,7 +593,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       block_name->set_type (lookup_function_type (block_type));
       block_name->set_value_block (new_block);
 
-      block_name->m_name = obstack_strdup (&objfile->objfile_obstack,
+      block_name->m_name = obstack_strdup (objfile->objfile_obstack (),
 					   gdb_block_iter.name.get ());
 
       new_block->set_function (block_name);
@@ -616,10 +616,10 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       struct block *new_block;
 
       new_block = (i == GLOBAL_BLOCK
-		   ? allocate_global_block (&objfile->objfile_obstack)
-		   : allocate_block (&objfile->objfile_obstack));
+		   ? allocate_global_block (objfile->objfile_obstack ())
+		   : allocate_block (objfile->objfile_obstack ()));
       new_block->set_multidict
-	(mdict_create_linear (&objfile->objfile_obstack, NULL));
+	(mdict_create_linear (objfile->objfile_obstack (), NULL));
       new_block->set_superblock (block_iter);
       block_iter = new_block;
 

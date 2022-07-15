@@ -2525,7 +2525,7 @@ reread_symbols (int from_tty)
 
 	  /* NB: after this call to obstack_free, objfiles_changed
 	     will need to be called (see discussion below).  */
-	  obstack_free (&objfile->objfile_obstack, 0);
+	  obstack_free (objfile->objfile_obstack (), 0);
 	  objfile->sections = NULL;
 	  objfile->section_offsets.clear ();
 	  objfile->sect_index_bss = -1;
@@ -2539,7 +2539,7 @@ reread_symbols (int from_tty)
 	  /* obstack_init also initializes the obstack so it is
 	     empty.  We could use obstack_specify_allocation but
 	     gdb_obstack.h specifies the alloc/dealloc functions.  */
-	  obstack_init (&objfile->objfile_obstack);
+	  obstack_init (objfile->objfile_obstack ());
 
 	  /* set_objfile_per_bfd potentially allocates the per-bfd
 	     data on the objfile's obstack (if sharing data across
@@ -2548,7 +2548,7 @@ reread_symbols (int from_tty)
 	  set_objfile_per_bfd (objfile);
 
 	  objfile->original_name
-	    = obstack_strdup (&objfile->objfile_obstack, original_name);
+	    = obstack_strdup (objfile->objfile_obstack (), original_name);
 
 	  /* Reset the sym_fns pointer.  The ELF reader can change it
 	     based on whether .gdb_index is present, and we need it to
@@ -2776,7 +2776,7 @@ allocate_symtab (struct compunit_symtab *cust, const char *filename)
 {
   struct objfile *objfile = cust->objfile ();
   struct symtab *symtab
-    = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symtab);
+    = OBSTACK_ZALLOC (objfile->objfile_obstack (), struct symtab);
 
   symtab->filename = objfile->intern (filename);
   symtab->fullname = NULL;
@@ -2819,7 +2819,7 @@ allocate_symtab (struct compunit_symtab *cust, const char *filename)
 struct compunit_symtab *
 allocate_compunit_symtab (struct objfile *objfile, const char *name)
 {
-  struct compunit_symtab *cu = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+  struct compunit_symtab *cu = OBSTACK_ZALLOC (objfile->objfile_obstack (),
 					       struct compunit_symtab);
   const char *saved_name;
 
@@ -2829,7 +2829,7 @@ allocate_compunit_symtab (struct objfile *objfile, const char *name)
      Just save the basename to avoid path issues (too long for display,
      relative vs absolute, etc.).  */
   saved_name = lbasename (name);
-  cu->name = obstack_strdup (&objfile->objfile_obstack, saved_name);
+  cu->name = obstack_strdup (objfile->objfile_obstack (), saved_name);
 
   cu->set_debugformat ("unknown");
 

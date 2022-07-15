@@ -164,7 +164,7 @@ dwarf2_section_info::read (struct objfile *objfile)
       return;
     }
 
-  buf = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack, size);
+  buf = (gdb_byte *) obstack_alloc (objfile->objfile_obstack (), size);
   buffer = buf;
 
   /* When debugging .o files, we may need to apply relocations; see

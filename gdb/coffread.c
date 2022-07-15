@@ -1561,13 +1561,13 @@ process_coff_symbol (struct coff_symbol *cs,
 		     union internal_auxent *aux,
 		     struct objfile *objfile)
 {
-  struct symbol *sym = new (&objfile->objfile_obstack) symbol;
+  struct symbol *sym = new (objfile->objfile_obstack ()) symbol;
   char *name;
 
   name = cs->c_name;
   name = EXTERNAL_NAME (name, objfile->obfd);
   sym->set_language (get_current_subfile ()->language,
-		     &objfile->objfile_obstack);
+		     objfile->objfile_obstack ());
   sym->compute_and_set_names (name, true, objfile->per_bfd);
 
   /* default assumptions */
@@ -2014,7 +2014,7 @@ coff_read_struct_type (int index, int length, int lastsym,
 	  list = newobj;
 
 	  /* Save the data.  */
-	  list->field.set_name (obstack_strdup (&objfile->objfile_obstack,
+	  list->field.set_name (obstack_strdup (objfile->objfile_obstack (),
 						name));
 	  list->field.set_type (decode_type (ms, ms->c_type, &sub_aux,
 					     objfile));
@@ -2031,7 +2031,7 @@ coff_read_struct_type (int index, int length, int lastsym,
 	  list = newobj;
 
 	  /* Save the data.  */
-	  list->field.set_name (obstack_strdup (&objfile->objfile_obstack,
+	  list->field.set_name (obstack_strdup (objfile->objfile_obstack (),
 						name));
 	  list->field.set_type (decode_type (ms, ms->c_type, &sub_aux,
 					     objfile));
@@ -2100,9 +2100,9 @@ coff_read_enum_type (int index, int length, int lastsym,
       switch (ms->c_sclass)
 	{
 	case C_MOE:
-	  sym = new (&objfile->objfile_obstack) symbol;
+	  sym = new (objfile->objfile_obstack ()) symbol;
 
-	  name = obstack_strdup (&objfile->objfile_obstack, name);
+	  name = obstack_strdup (objfile->objfile_obstack (), name);
 	  sym->set_linkage_name (name);
 	  sym->set_aclass_index (LOC_CONST);
 	  sym->set_domain (VAR_DOMAIN);

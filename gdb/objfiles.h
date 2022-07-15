@@ -666,7 +666,11 @@ public:
   /* Obstack to hold objects that should be freed when we load a new symbol
      table from this object file.  */
 
-  struct obstack objfile_obstack {};
+  struct obstack m_objfile_obstack {};
+  struct obstack *objfile_obstack ()
+  {
+    return &m_objfile_obstack;
+  }
 
   /* Structure which keeps track of functions that manipulate objfile's
      of the same type as this objfile.  I.e. the function to read partial

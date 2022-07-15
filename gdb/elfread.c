@@ -728,11 +728,11 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
     }
 
   entry_local.addr = addr;
-  obstack_grow (&objfile->objfile_obstack, &entry_local,
+  obstack_grow (objfile->objfile_obstack (), &entry_local,
 		offsetof (struct elf_gnu_ifunc_cache, name));
-  obstack_grow_str0 (&objfile->objfile_obstack, name);
+  obstack_grow_str0 (objfile->objfile_obstack (), name);
   entry_p
-    = (struct elf_gnu_ifunc_cache *) obstack_finish (&objfile->objfile_obstack);
+    = (struct elf_gnu_ifunc_cache *) obstack_finish (objfile->objfile_obstack ());
 
   slot = htab_find_slot (htab, entry_p, INSERT);
   if (*slot != NULL)

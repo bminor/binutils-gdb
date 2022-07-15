@@ -669,7 +669,7 @@ dbx_symfile_init (struct objfile *objfile)
 		   DBX_STRINGTAB_SIZE (objfile));
 
 	  DBX_STRINGTAB (objfile) =
-	    (char *) obstack_alloc (&objfile->objfile_obstack,
+	    (char *) obstack_alloc (objfile->objfile_obstack (),
 				    DBX_STRINGTAB_SIZE (objfile));
 	  OBJSTAT (objfile, sz_strtab += DBX_STRINGTAB_SIZE (objfile));
 
@@ -1440,7 +1440,7 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 	      if (new_name != nullptr)
 		{
 		  sym_len = strlen (new_name.get ());
-		  sym_name = obstack_strdup (&objfile->objfile_obstack,
+		  sym_name = obstack_strdup (objfile->objfile_obstack (),
 					     new_name.get ());
 		}
 	    }
@@ -1945,7 +1945,7 @@ start_psymtab (psymtab_storage *partial_symtabs, struct objfile *objfile,
 					       objfile->per_bfd, textlow);
 
   result->read_symtab_private =
-    XOBNEW (&objfile->objfile_obstack, struct symloc);
+    XOBNEW (objfile->objfile_obstack (), struct symloc);
   LDSYMOFF (result) = ldsymoff;
   result->legacy_read_symtab = dbx_read_symtab;
   result->legacy_expand_psymtab = dbx_expand_psymtab;
@@ -2068,7 +2068,7 @@ dbx_end_psymtab (struct objfile *objfile, psymtab_storage *partial_symtabs,
 	new legacy_psymtab (include_list[i], partial_symtabs, objfile->per_bfd);
 
       subpst->read_symtab_private =
-	XOBNEW (&objfile->objfile_obstack, struct symloc);
+	XOBNEW (objfile->objfile_obstack (), struct symloc);
       LDSYMOFF (subpst) =
 	LDSYMLEN (subpst) = 0;
 
@@ -2452,7 +2452,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 
 	  /* For C++, set the block's scope.  */
 	  if (cstk.name->language () == language_cplus)
-	    cp_set_block_scope (cstk.name, block, &objfile->objfile_obstack);
+	    cp_set_block_scope (cstk.name, block, objfile->objfile_obstack ());
 
 	  /* May be switching to an assembler file which may not be using
 	     block relative stabs, so reset the offset.  */
@@ -2819,7 +2819,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, const char *name,
 		  /* For C++, set the block's scope.  */
 		  if (cstk.name->language () == language_cplus)
 		    cp_set_block_scope (cstk.name, block,
-					&objfile->objfile_obstack);
+					objfile->objfile_obstack ());
 		}
 
 	      newobj = push_context (0, valu);
@@ -2949,7 +2949,7 @@ coffstab_build_psymtabs (struct objfile *objfile,
   if (stabstrsize > bfd_get_size (sym_bfd))
     error (_("ridiculous string table size: %d bytes"), stabstrsize);
   DBX_STRINGTAB (objfile) = (char *)
-    obstack_alloc (&objfile->objfile_obstack, stabstrsize + 1);
+    obstack_alloc (objfile->objfile_obstack (), stabstrsize + 1);
   OBJSTAT (objfile, sz_strtab += stabstrsize + 1);
 
   /* Now read in the string table in one big gulp.  */
@@ -3042,7 +3042,7 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
   if (stabstrsize > bfd_get_size (sym_bfd))
     error (_("ridiculous string table size: %d bytes"), stabstrsize);
   DBX_STRINGTAB (objfile) = (char *)
-    obstack_alloc (&objfile->objfile_obstack, stabstrsize + 1);
+    obstack_alloc (objfile->objfile_obstack (), stabstrsize + 1);
   OBJSTAT (objfile, sz_strtab += stabstrsize + 1);
 
   /* Now read in the string table in one big gulp.  */
@@ -3137,7 +3137,7 @@ stabsect_build_psymtabs (struct objfile *objfile, char *stab_name,
     error (_("ridiculous string table size: %d bytes"),
 	   DBX_STRINGTAB_SIZE (objfile));
   DBX_STRINGTAB (objfile) = (char *)
-    obstack_alloc (&objfile->objfile_obstack,
+    obstack_alloc (objfile->objfile_obstack (),
 		   DBX_STRINGTAB_SIZE (objfile) + 1);
   OBJSTAT (objfile, sz_strtab += DBX_STRINGTAB_SIZE (objfile) + 1);
 
