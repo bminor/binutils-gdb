@@ -29,12 +29,7 @@
 char *
 get_print_cell (void)
 {
-  static char buf[NUMCELLS][PRINT_CELL_SIZE];
-  static int cell = 0;
-
-  if (++cell >= NUMCELLS)
-    cell = 0;
-  return buf[cell];
+  return (char *)malloc (PRINT_CELL_SIZE);
 }
 
 static char *
