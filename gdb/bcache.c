@@ -24,6 +24,11 @@
 #include "bcache.h"
 
 #include <algorithm>
+#include <mutex>
+
+#if CXX_STD_THREAD
+static std::mutex bcache_lock;
+#endif
 
 namespace gdb {
 
@@ -63,6 +68,9 @@ struct bstring
 void
 bcache::expand_hash_table ()
 {
+#if CXX_STD_THREAD
+  //std::lock_guard<std::mutex> guard (bcache_lock);
+#endif
   /* A table of good hash table sizes.  Whenever we grow, we pick the
      next larger size from this table.  sizes[i] is close to 1 << (i+10),
      so we roughly double the table size each time.  After we fall off 
@@ -142,6 +150,9 @@ bcache::expand_hash_table ()
 const void *
 bcache::insert (const void *addr, int length, bool *added)
 {
+#if CXX_STD_THREAD
+  std::lock_guard<std::mutex> guard (bcache_lock);
+#endif
   unsigned long full_hash;
   unsigned short half_hash;
   int hash_index;
