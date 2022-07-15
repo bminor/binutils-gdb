@@ -7621,15 +7621,36 @@ process_queue (dwarf2_per_objfile *per_objfile)
   dwarf_read_debug_printf ("Expanding one or more symtabs of objfile %s ...",
 			   objfile_name (per_objfile->objfile));
 
+  using iter_type = decltype (per_objfile->queue->begin ());
+  using result_type = int;
+
   /* The queue starts out with one item, but following a DIE reference
      may load a new CU, adding it to the end of the queue.  */
   while (!per_objfile->queue->empty ())
     {
-      dwarf2_queue_item &item = per_objfile->queue->front ();
-      process_queue_item (per_objfile, item);
-      dwarf2_per_cu_data *per_cu = item.per_cu;
-      per_cu->queued = 0;
-      per_objfile->queue->pop_front ();
+      size_t nr_to_be_processed = per_objfile->queue->size ();
+
+      std::vector<result_type> results
+	= gdb::parallel_for_each (1, per_objfile->queue->begin (),
+				  per_objfile->queue->end (),
+				  [=] (iter_type iter, iter_type end)
+	{
+	  for (; iter != end; ++iter)
+	    {
+	      dwarf2_queue_item &item = *iter;
+	      process_queue_item (per_objfile, item);
+	    }
+
+	  return result_type (1);
+	});
+
+      for (int i = 0; i < nr_to_be_processed; ++i)
+	{
+	  dwarf2_queue_item &item = per_objfile->queue->front ();
+	  dwarf2_per_cu_data *per_cu = item.per_cu;
+	  per_cu->queued = 0;
+	  per_objfile->queue->pop_front ();
+	}
     }
 
   dwarf_read_debug_printf ("Done expanding symtabs of %s.",
