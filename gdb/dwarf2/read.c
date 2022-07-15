@@ -21098,6 +21098,10 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 
       if (suppress_add)
 	{
+#if CXX_STD_THREAD
+	  static std::mutex template_symbols_lock;
+	  std::lock_guard<std::mutex> guard (template_symbols_lock);
+#endif
 	  sym->hash_next = objfile->template_symbols;
 	  objfile->template_symbols = sym;
 	  list_to_add = NULL;
