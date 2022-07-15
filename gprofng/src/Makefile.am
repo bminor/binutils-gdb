@@ -127,10 +127,14 @@ EXTRA_DIST = QLParser.yy $(man_MANS)
 pkglib_LTLIBRARIES = $(LIBGPROFNG)
 libgprofng_la_SOURCES = $(CCSOURCES) $(CSOURCES)
 libgprofng_la_LDFLAGS = -version-info 0:0:0
+
+# Pass -lpthread instead of $(PTHREAD_LIBS) due to $(PTHREAD_LIBS) being empty
+# when -nostdlib is passed to libtool.
+# See bug 29364 - libgprofng.so: needs to link against -pthread
 libgprofng_la_LIBADD = $(top_builddir)/../opcodes/libopcodes.la \
 	$(top_builddir)/../bfd/libbfd.la \
 	$(GPROFNG_LIBADD) \
-	$(PTHREAD_LIBS) -ldl
+	-lpthread -ldl
 
 dbedir = $(SYSCONFDIR)
 dbe_DATA = $(srcdir)/gprofng.rc
