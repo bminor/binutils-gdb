@@ -1122,11 +1122,13 @@ proc test_print_options {} {
     gdb_test "python print('format' in gdb.print_options())" "False" \
 	"examine format"
 
-    check_format_string "a_point_t" "format='t'" \
-	"Pretty Point \\(101010, 1100\\)" \
+    check_format_string "a_point_t" "format='t', nibbles=True" \
+	"Pretty Point \\(0010.1010, 1100\\)" \
 	"print in binary to fetch options"
     gdb_test "python print(saved_options\['format'\] == 't')" "True" \
 	"format was set"
+    gdb_test "python print(saved_options\['nibbles'\])" "True" \
+	"nibbles was set"
 
     check_format_string "a_point_t" "summary=True" \
 	"No Data" \
