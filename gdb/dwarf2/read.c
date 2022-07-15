@@ -9603,9 +9603,9 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   cu->start_compunit_symtab (fnd.get_name (), fnd.intern_comp_dir (objfile),
 			     lowpc);
 
-  gdb_assert (per_objfile->sym_cu == nullptr);
+  gdb_assert (per_objfile->sym_cu[gdb::thread_pool::id()] == nullptr);
   scoped_restore restore_sym_cu
-    = make_scoped_restore (&per_objfile->sym_cu, cu);
+    = make_scoped_restore (&per_objfile->sym_cu[gdb::thread_pool::id()], cu);
 
   /* Decode line number information if present.  We do this before
      processing child DIEs, so that the line header table is available
@@ -9627,7 +9627,8 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 	  child_die = child_die->sibling;
 	}
     }
-  per_objfile->sym_cu = nullptr;
+
+  per_objfile->sym_cu[gdb::thread_pool::id()] = nullptr;
 
   /* Decode macro information, if present.  Dwarf 2 macro information
      refers to information in the line number info statement program

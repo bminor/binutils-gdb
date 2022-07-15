@@ -21,6 +21,7 @@
 #include "dwarf2/cu.h"
 #include "dwarf2/read.h"
 #include "objfiles.h"
+#include "gdbsupport/thread-pool.h"
 
 /* Initialize dwarf2_cu to read PER_CU, in the context of PER_OBJFILE.  */
 
@@ -161,8 +162,8 @@ dwarf2_cu::get_builder ()
   if (m_builder != nullptr)
     return m_builder.get ();
 
-  if (per_objfile->sym_cu != nullptr)
-    return per_objfile->sym_cu->m_builder.get ();
+  if (per_objfile->sym_cu[gdb::thread_pool::id()] != nullptr)
+    return per_objfile->sym_cu[gdb::thread_pool::id()]->m_builder.get ();
 
   gdb_assert_not_reached ("");
 }
