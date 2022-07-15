@@ -23773,6 +23773,10 @@ per_cu_offset_and_type_eq (const void *item_lhs, const void *item_rhs)
 	  && ofs_lhs->sect_off == ofs_rhs->sect_off);
 }
 
+#if CXX_STD_THREAD
+  static std::mutex die_type_hash_lock;
+#endif
+
 /* Set the type associated with DIE to TYPE.  Save it in CU's hash
    table if necessary.  For convenience, return TYPE.
 
@@ -23853,25 +23857,30 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	type->add_dyn_prop (DYN_PROP_DATA_LOCATION, prop);
     }
 
-  if (per_objfile->die_type_hash == NULL)
-    per_objfile->die_type_hash
-      = htab_up (htab_create_alloc (127,
-				    per_cu_offset_and_type_hash,
-				    per_cu_offset_and_type_eq,
-				    NULL, xcalloc, xfree));
+  {
+#if CXX_STD_THREAD
+    std::lock_guard<std::mutex> guard (die_type_hash_lock);
+#endif
+    if (per_objfile->die_type_hash == NULL)
+      per_objfile->die_type_hash
+	= htab_up (htab_create_alloc (127,
+				      per_cu_offset_and_type_hash,
+				      per_cu_offset_and_type_eq,
+				      NULL, xcalloc, xfree));
 
-  ofs.per_cu = cu->per_cu;
-  ofs.sect_off = die->sect_off;
-  ofs.type = type;
-  slot = (struct dwarf2_per_cu_offset_and_type **)
-    htab_find_slot (per_objfile->die_type_hash.get (), &ofs, INSERT);
-  if (*slot)
-    complaint (_("A problem internal to GDB: DIE %s has type already set"),
-	       sect_offset_str (die->sect_off));
-  *slot = XOBNEW (objfile->objfile_obstack (),
-		  struct dwarf2_per_cu_offset_and_type);
-  **slot = ofs;
-  return type;
+    ofs.per_cu = cu->per_cu;
+    ofs.sect_off = die->sect_off;
+    ofs.type = type;
+    slot = (struct dwarf2_per_cu_offset_and_type **)
+      htab_find_slot (per_objfile->die_type_hash.get (), &ofs, INSERT);
+    if (*slot)
+      complaint (_("A problem internal to GDB: DIE %s has type already set"),
+		 sect_offset_str (die->sect_off));
+    *slot = XOBNEW (objfile->objfile_obstack (),
+		    struct dwarf2_per_cu_offset_and_type);
+    **slot = ofs;
+    return type;
+  }
 }
 
 /* Look up the type for the die at SECT_OFF in PER_CU in die_type_hash,
@@ -23882,6 +23891,10 @@ get_die_type_at_offset (sect_offset sect_off,
 			dwarf2_per_cu_data *per_cu,
 			dwarf2_per_objfile *per_objfile)
 {
+#if CXX_STD_THREAD
+  std::lock_guard<std::mutex> guard (die_type_hash_lock);
+#endif
+
   struct dwarf2_per_cu_offset_and_type *slot, ofs;
 
   if (per_objfile->die_type_hash == NULL)
