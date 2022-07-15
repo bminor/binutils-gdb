@@ -33,6 +33,8 @@
 #include <sys/types.h>
 #include "gdbsupport/gdb_sys_time.h"
 #include "gdbsupport/gdb_select.h"
+#include "gdbsupport/gdb_optional.h"
+#include "gdbsupport/scope-exit.h"
 
 /* See event-loop.h.  */
 
@@ -175,12 +177,17 @@ static int update_wait_timeout (void);
 static int poll_timers (void);
 
 /* Process one high level event.  If nothing is ready at this time,
-   wait for something to happen (via gdb_wait_for_event), then process
-   it.  Returns >0 if something was done otherwise returns <0 (this
-   can happen if there are no event sources to wait for).  */
+   wait at most MSTIMEOUT milliseconds for something to happen (via
+   gdb_wait_for_event), then process it.  Returns >0 if something was
+   done, <0 if there are no event sources to wait for, =0 if timeout occurred.
+   A timeout of 0 allows to serve an already pending event, but does not
+   wait if none found.
+   Setting the timeout to a negative value disables it.
+   The timeout is never used by gdb itself, it is however needed to
+   integrate gdb event handling within Insight's GUI event loop. */
 
 int
-gdb_do_one_event (void)
+gdb_do_one_event (int mstimeout)
 {
   static int event_source_head = 0;
   const int number_of_sources = 3;
@@ -227,17 +234,35 @@ gdb_do_one_event (void)
 	return 1;
     }
 
+  if (!mstimeout)
+    return 0;	/* Null timeout: do not wait for an event. */
+
   /* Block waiting for a new event.  If gdb_wait_for_event returns -1,
      we should get out because this means that there are no event
      sources left.  This will make the event loop stop, and the
-     application exit.  */
+     application exit.
+     If a timeout has been given, a new timer is set accordingly
+     to abort event wait.  It is deleted upon gdb_wait_for_event
+     termination and thus should never be triggered.
+     When the timeout is reached, events are not monitored again:
+     they already have been checked in the loop above. */
 
-  if (gdb_wait_for_event (1) < 0)
-    return -1;
+  gdb::optional<int> timer_id;
 
-  /* If gdb_wait_for_event has returned 1, it means that one event has
-     been handled.  We break out of the loop.  */
-  return 1;
+  SCOPE_EXIT 
+    {
+      if (timer_id.has_value ())
+	delete_timer (*timer_id);
+    };
+
+  if (mstimeout > 0)
+    timer_id = create_timer (mstimeout,
+			     [] (gdb_client_data arg)
+			     {
+			       ((gdb::optional<int> *) arg)->reset ();
+			     },
+			     &timer_id);
+  return gdb_wait_for_event (1);
 }
 
 /* See event-loop.h  */
