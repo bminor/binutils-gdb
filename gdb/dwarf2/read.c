@@ -7564,6 +7564,9 @@ maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
 static void
 process_queue (dwarf2_per_objfile *per_objfile)
 {
+  if (per_objfile->queue->empty ())
+    return;
+
   dwarf_read_debug_printf ("Expanding one or more symtabs of objfile %s ...",
 			   objfile_name (per_objfile->objfile));
 
