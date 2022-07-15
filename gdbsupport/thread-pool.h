@@ -22,6 +22,7 @@
 
 #include <queue>
 #include <vector>
+#include <unordered_map>
 #include <functional>
 #if CXX_STD_THREAD
 #include <thread>
@@ -119,6 +120,8 @@ public:
 #endif
   }
 
+  static unsigned id ();
+
   /* Post a task to the thread pool.  A future is returned, which can
      be used to wait for the result.  */
   future<void> post_task (std::function<void ()> &&func)
@@ -177,6 +180,8 @@ private:
      between the main thread and the worker threads.  */
   std::condition_variable m_tasks_cv;
   std::mutex m_tasks_mutex;
+  std::unordered_map<std::thread::id, unsigned> m_thread_ids;
+  std::unordered_map<unsigned, std::thread::id> m_thread_ids_reverse;
 #endif /* CXX_STD_THREAD */
 };
 
