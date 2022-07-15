@@ -1207,6 +1207,259 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   return true;
 }
 
+/* A modified version of _bfd_elf_allocate_ifunc_dyn_relocs.
+   For local def and ref ifunc,
+   dynamic relocations are stored in
+   1.  rela.srelgot section in dynamic object (dll or exec).
+   2.  rela.irelplt section in static executable.
+   Unlike _bfd_elf_allocate_ifunc_dyn_relocs, rela.srelgot is used
+   instead of rela.srelplt.  Glibc ELF loader will not support
+   R_LARCH_IRELATIVE relocation in rela.plt.  */
+
+static bool
+local_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
+				    struct elf_link_hash_entry *h,
+				    struct elf_dyn_relocs **head,
+				    unsigned int plt_entry_size,
+				    unsigned int plt_header_size,
+				    unsigned int got_entry_size,
+				    bool avoid_plt)
+{
+  asection *plt, *gotplt, *relplt;
+  struct elf_dyn_relocs *p;
+  unsigned int sizeof_reloc;
+  const struct elf_backend_data *bed;
+  struct elf_link_hash_table *htab;
+  /* If AVOID_PLT is TRUE, don't use PLT if possible.  */
+  bool use_plt = !avoid_plt || h->plt.refcount > 0;
+  bool need_dynreloc = !use_plt || bfd_link_pic (info);
+
+  /* When a PIC object references a STT_GNU_IFUNC symbol defined
+     in executable or it isn't referenced via PLT, the address of
+     the resolved function may be used.  But in non-PIC executable,
+     the address of its plt slot may be used.  Pointer equality may
+     not work correctly.  PIE or non-PLT reference should be used if
+     pointer equality is required here.
+
+     If STT_GNU_IFUNC symbol is defined in position-dependent executable,
+     backend should change it to the normal function and set its address
+     to its PLT entry which should be resolved by R_*_IRELATIVE at
+     run-time.  All external references should be resolved to its PLT in
+     executable.  */
+  if (!need_dynreloc
+      && !(bfd_link_pde (info) && h->def_regular)
+      && (h->dynindx != -1
+	  || info->export_dynamic)
+      && h->pointer_equality_needed)
+    {
+      info->callbacks->einfo
+	/* xgettext:c-format.  */
+	(_("%F%P: dynamic STT_GNU_IFUNC symbol `%s' with pointer "
+	   "equality in `%pB' can not be used when making an "
+	   "executable; recompile with -fPIE and relink with -pie\n"),
+	 h->root.root.string,
+	 h->root.u.def.section->owner);
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
+
+  htab = elf_hash_table (info);
+
+  /* When the symbol is marked with regular reference, if PLT isn't used
+     or we are building a PIC object, we must keep dynamic relocation
+     if there is non-GOT reference and use PLT if there is PC-relative
+     reference.  */
+  if (need_dynreloc && h->ref_regular)
+    {
+      bool keep = false;
+      for (p = *head; p != NULL; p = p->next)
+	if (p->count)
+	  {
+	    h->non_got_ref = 1;
+	    /* Need dynamic relocations for non-GOT reference.  */
+	    keep = true;
+	    if (p->pc_count)
+	      {
+		/* Must use PLT for PC-relative reference.  */
+		use_plt = true;
+		need_dynreloc = bfd_link_pic (info);
+		break;
+	      }
+	  }
+      if (keep)
+	goto keep;
+    }
+
+  /* Support garbage collection against STT_GNU_IFUNC symbols.  */
+  if (h->plt.refcount <= 0 && h->got.refcount <= 0)
+    {
+      h->got = htab->init_got_offset;
+      h->plt = htab->init_plt_offset;
+      *head = NULL;
+      return true;
+    }
+
+  /* Return and discard space for dynamic relocations against it if
+     it is never referenced.  */
+  if (!h->ref_regular)
+    {
+      if (h->plt.refcount > 0
+	  || h->got.refcount > 0)
+	abort ();
+      h->got = htab->init_got_offset;
+      h->plt = htab->init_plt_offset;
+      *head = NULL;
+      return true;
+    }
+
+ keep:
+  bed = get_elf_backend_data (info->output_bfd);
+  if (bed->rela_plts_and_copies_p)
+    sizeof_reloc = bed->s->sizeof_rela;
+  else
+    sizeof_reloc = bed->s->sizeof_rel;
+
+  /* When building a static executable, use iplt, igot.plt and
+     rela.iplt sections for STT_GNU_IFUNC symbols.  */
+  if (htab->splt != NULL)
+    {
+      plt = htab->splt;
+      gotplt = htab->sgotplt;
+      /* Change dynamic info of ifunc gotplt from srelplt to srelgot.  */
+      relplt = htab->srelgot;
+
+      /* If this is the first plt entry and PLT is used, make room for
+	 the special first entry.  */
+      if (plt->size == 0 && use_plt)
+	plt->size += plt_header_size;
+    }
+  else
+    {
+      plt = htab->iplt;
+      gotplt = htab->igotplt;
+      relplt = htab->irelplt;
+    }
+
+  if (use_plt)
+    {
+      /* Don't update value of STT_GNU_IFUNC symbol to PLT.  We need
+	 the original value for R_*_IRELATIVE.  */
+      h->plt.offset = plt->size;
+
+      /* Make room for this entry in the plt/iplt section.  */
+      plt->size += plt_entry_size;
+
+      /* We also need to make an entry in the got.plt/got.iplt section,
+	 which will be placed in the got section by the linker script.  */
+      gotplt->size += got_entry_size;
+    }
+
+  /* We also need to make an entry in the rela.plt/.rela.iplt
+     section for GOTPLT relocation if PLT is used.  */
+  if (use_plt)
+    {
+      relplt->size += sizeof_reloc;
+      relplt->reloc_count++;
+    }
+
+  /* We need dynamic relocation for STT_GNU_IFUNC symbol only when
+     there is a non-GOT reference in a PIC object or PLT isn't used.  */
+  if (!need_dynreloc || !h->non_got_ref)
+    *head = NULL;
+
+  /* Finally, allocate space.  */
+  p = *head;
+  if (p != NULL)
+    {
+      bfd_size_type count = 0;
+      do
+	{
+	  count += p->count;
+	  p = p->next;
+	}
+      while (p != NULL);
+
+      htab->ifunc_resolvers = count != 0;
+
+      /* Dynamic relocations are stored in
+	 1.  rela.srelgot section in PIC object.
+	 2.  rela.srelgot section in dynamic executable.
+	 3.  rela.irelplt section in static executable.  */
+      if (htab->splt != NULL)
+	htab->srelgot->size += count * sizeof_reloc;
+      else
+	{
+	  relplt->size += count * sizeof_reloc;
+	  relplt->reloc_count += count;
+	}
+    }
+
+  /* For STT_GNU_IFUNC symbol, got.plt has the real function address
+     and got has the PLT entry adddress.  We will load the GOT entry
+     with the PLT entry in finish_dynamic_symbol if it is used.  For
+     branch, it uses got.plt.  For symbol value, if PLT is used,
+     1.  Use got.plt in a PIC object if it is forced local or not
+     dynamic.
+     2.  Use got.plt in a non-PIC object if pointer equality isn't
+     needed.
+     3.  Use got.plt in PIE.
+     4.  Use got.plt if got isn't used.
+     5.  Otherwise use got so that it can be shared among different
+     objects at run-time.
+     If PLT isn't used, always use got for symbol value.
+     We only need to relocate got entry in PIC object or in dynamic
+     executable without PLT.  */
+  if (use_plt
+      && (h->got.refcount <= 0
+	  || (bfd_link_pic (info)
+	      && (h->dynindx == -1
+		  || h->forced_local))
+	  || (
+	      !h->pointer_equality_needed)
+	  || htab->sgot == NULL))
+    {
+      /* Use got.plt.  */
+      h->got.offset = (bfd_vma) -1;
+    }
+  else
+    {
+      if (!use_plt)
+	{
+	  /* PLT isn't used.  */
+	  h->plt.offset = (bfd_vma) -1;
+	}
+      if (h->got.refcount <= 0)
+	{
+	  /* GOT isn't need when there are only relocations for static
+	     pointers.  */
+	  h->got.offset = (bfd_vma) -1;
+	}
+      else
+	{
+	  h->got.offset = htab->sgot->size;
+	  htab->sgot->size += got_entry_size;
+	  /* Need to relocate the GOT entry in a PIC object or PLT isn't
+	     used.  Otherwise, the GOT entry will be filled with the PLT
+	     entry and dynamic GOT relocation isn't needed.  */
+	  if (need_dynreloc)
+	    {
+	      /* For non-static executable, dynamic GOT relocation is in
+		 rela.got section, but for static executable, it is
+		 in rela.iplt section.  */
+	      if (htab->splt != NULL)
+		htab->srelgot->size += sizeof_reloc;
+	      else
+		{
+		  relplt->size += sizeof_reloc;
+		  relplt->reloc_count++;
+		}
+	    }
+	}
+    }
+
+  return true;
+}
+
 /* Allocate space in .plt, .got and associated reloc sections for
    ifunc dynamic relocs.  */
 
@@ -1234,12 +1487,22 @@ elfNN_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   /* Since STT_GNU_IFUNC symbol must go through PLT, we handle it
      here if it is defined and referenced in a non-shared object.  */
   if (h->type == STT_GNU_IFUNC && h->def_regular)
-    return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
-					       &h->dyn_relocs,
-					       PLT_ENTRY_SIZE,
-					       PLT_HEADER_SIZE,
-					       GOT_ENTRY_SIZE,
-					       false);
+    {
+      if (SYMBOL_REFERENCES_LOCAL (info, h))
+	return local_allocate_ifunc_dyn_relocs (info, h,
+						&h->dyn_relocs,
+						PLT_ENTRY_SIZE,
+						PLT_HEADER_SIZE,
+						GOT_ENTRY_SIZE,
+						false);
+      else
+	return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
+						   &h->dyn_relocs,
+						   PLT_ENTRY_SIZE,
+						   PLT_HEADER_SIZE,
+						   GOT_ENTRY_SIZE,
+						   false);
+    }
 
   return true;
 }
@@ -2162,22 +2425,40 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	      outrel.r_offset += sec_addr (input_section);
 
-	      /* A pointer point to a local ifunc symbol.  */
-	      if(h
-		 && h->type == STT_GNU_IFUNC
-		 && (h->dynindx == -1
-		     || h->forced_local
-		     || bfd_link_executable(info)))
+	      /* A pointer point to a ifunc symbol.  */
+	      if (h && h->type == STT_GNU_IFUNC)
 		{
-		  outrel.r_info = ELFNN_R_INFO (0, R_LARCH_IRELATIVE);
-		  outrel.r_addend = (h->root.u.def.value
-				     + h->root.u.def.section->output_section->vma
-				     + h->root.u.def.section->output_offset);
-
-		  if (htab->elf.splt != NULL)
-		    sreloc = htab->elf.srelplt;
+		  if (h->dynindx == -1)
+		    {
+		      outrel.r_info = ELFNN_R_INFO (0, R_LARCH_IRELATIVE);
+		      outrel.r_addend = (h->root.u.def.value
+				  + h->root.u.def.section->output_section->vma
+				  + h->root.u.def.section->output_offset);
+		    }
 		  else
-		    sreloc = htab->elf.irelplt;
+		    {
+		      outrel.r_info = ELFNN_R_INFO (h->dynindx, R_LARCH_NN);
+		      outrel.r_addend = 0;
+		    }
+
+		  if (SYMBOL_REFERENCES_LOCAL (info, h))
+		    {
+
+		      if (htab->elf.splt != NULL)
+			sreloc = htab->elf.srelgot;
+		      else
+			sreloc = htab->elf.irelplt;
+		    }
+		  else
+		    {
+
+		      if (bfd_link_pic (info))
+			sreloc = htab->elf.irelifunc;
+		      else if (htab->elf.splt != NULL)
+			sreloc = htab->elf.srelgot;
+		      else
+			sreloc = htab->elf.irelplt;
+		    }
 		}
 	      else if (resolved_dynly)
 		{
@@ -2816,10 +3097,7 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_LARCH_PCALA64_LO20:
 	case R_LARCH_PCALA64_HI12:
 	  if (h && h->plt.offset != MINUS_ONE)
-	    {
-	      BFD_ASSERT (rel->r_addend == 0);
-	      relocation = sec_addr (plt) + h->plt.offset;
-	    }
+	    relocation = sec_addr (plt) + h->plt.offset;
 	  else
 	    relocation += rel->r_addend;
 
@@ -3237,7 +3515,10 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
 
 	  plt = htab->elf.splt;
 	  gotplt = htab->elf.sgotplt;
-	  relplt = htab->elf.srelplt;
+	  if (h->type == STT_GNU_IFUNC && SYMBOL_REFERENCES_LOCAL (info, h))
+	    relplt = htab->elf.srelgot;
+	  else
+	    relplt = htab->elf.srelplt;
 	  plt_idx = (h->plt.offset - PLT_HEADER_SIZE) / PLT_ENTRY_SIZE;
 	  got_address =
 	    sec_addr (gotplt) + GOTPLT_HEADER_SIZE + plt_idx * GOT_ENTRY_SIZE;
@@ -3272,11 +3553,45 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       rela.r_offset = got_address;
 
-      /* Fill in the entry in the rela.plt section.  */
-      rela.r_info = ELFNN_R_INFO (h->dynindx, R_LARCH_JUMP_SLOT);
-      rela.r_addend = 0;
-      loc = relplt->contents + plt_idx * sizeof (ElfNN_External_Rela);
-      bed->s->swap_reloca_out (output_bfd, &rela, loc);
+      /* TRUE if this is a PLT reference to a local IFUNC.  */
+      if (PLT_LOCAL_IFUNC_P (info, h)
+	  && (relplt == htab->elf.srelgot
+	      || relplt == htab->elf.irelplt))
+	{
+	    {
+	      rela.r_info = ELFNN_R_INFO (0, R_LARCH_IRELATIVE);
+	      rela.r_addend = (h->root.u.def.value
+			       + h->root.u.def.section->output_section->vma
+			       + h->root.u.def.section->output_offset);
+	    }
+
+	    /* Find the space after dyn sort.  */
+	    {
+	      Elf_Internal_Rela *dyn = (Elf_Internal_Rela *)relplt->contents;
+	      bool fill = false;
+	      for (;dyn < dyn + relplt->size / sizeof (*dyn); dyn++)
+		{
+		  if (0 == dyn->r_offset)
+		    {
+		      bed->s->swap_reloca_out (output_bfd, &rela,
+					       (bfd_byte *)dyn);
+		      relplt->reloc_count++;
+		      fill = true;
+		      break;
+		    }
+		}
+	      BFD_ASSERT (fill);
+	    }
+
+	}
+      else
+	{
+	  /* Fill in the entry in the rela.plt section.  */
+	  rela.r_info = ELFNN_R_INFO (h->dynindx, R_LARCH_JUMP_SLOT);
+	  rela.r_addend = 0;
+	  loc = relplt->contents + plt_idx * sizeof (ElfNN_External_Rela);
+	  bed->s->swap_reloca_out (output_bfd, &rela, loc);
+	}
 
       if (!h->def_regular)
 	{
