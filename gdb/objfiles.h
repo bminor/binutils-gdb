@@ -39,6 +39,7 @@
 #include "jit.h"
 #include "quick-symbol.h"
 #include <forward_list>
+#include "gdbsupport/thread-pool.h"
 
 struct htab;
 struct objfile_data;
@@ -666,10 +667,23 @@ public:
   /* Obstack to hold objects that should be freed when we load a new symbol
      table from this object file.  */
 
-  struct obstack m_objfile_obstack {};
+  std::vector<struct obstack *> m_objfile_obstack;
   struct obstack *objfile_obstack ()
   {
-    return &m_objfile_obstack;
+    unsigned id = gdb::thread_pool::id ();
+    size_t count = gdb::thread_pool::g_thread_pool->thread_count () + 1;
+    if (m_objfile_obstack.empty ())
+      for (size_t i = 0; i < count; ++i)
+	{
+	  struct obstack *p
+	    = (struct obstack *)malloc (sizeof (struct obstack));
+	  m_objfile_obstack.push_back (p);
+	  if (i == 0)
+	    /* Main thread initializes it.  */
+	    continue;
+	  obstack_init (m_objfile_obstack[i]);
+	}
+    return m_objfile_obstack[id];
   }
 
   /* Structure which keeps track of functions that manipulate objfile's
