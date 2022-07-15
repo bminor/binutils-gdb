@@ -20,7 +20,7 @@
 #ifndef DWARF2READ_H
 #define DWARF2READ_H
 
-#include <queue>
+#include <deque>
 #include <unordered_map>
 #include "dwarf2/comp-unit-head.h"
 #include "dwarf2/cooked-index.h"
@@ -658,7 +658,7 @@ struct dwarf2_per_objfile
   dwarf2_cu *sym_cu = nullptr;
 
   /* CUs that are queued to be read.  */
-  gdb::optional<std::queue<dwarf2_queue_item>> queue;
+  gdb::optional<std::deque<dwarf2_queue_item>> queue;
 
 private:
   /* Hold the corresponding compunit_symtab for each CU or TU.  This

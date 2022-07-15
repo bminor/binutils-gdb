@@ -7486,7 +7486,7 @@ queue_comp_unit (dwarf2_per_cu_data *per_cu,
   per_cu->queued = 1;
 
   gdb_assert (per_objfile->queue.has_value ());
-  per_objfile->queue->emplace (per_cu, per_objfile, pretend_language);
+  per_objfile->queue->emplace_back (per_cu, per_objfile, pretend_language);
 }
 
 /* If PER_CU is not yet expanded of queued for expansion, add it to the queue.
@@ -7617,7 +7617,7 @@ process_queue (dwarf2_per_objfile *per_objfile)
 	}
 
       per_cu->queued = 0;
-      per_objfile->queue->pop ();
+      per_objfile->queue->pop_front ();
     }
 
   dwarf_read_debug_printf ("Done expanding symtabs of %s.",
