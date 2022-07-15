@@ -167,13 +167,13 @@ struct entry_info
 struct objstats
 {
   /* Number of full symbols read.  */
-  int n_syms = 0;
+  std::atomic<int> n_syms {0};
 
   /* Number of ".stabs" read (if applicable).  */
   int n_stabs = 0;
 
   /* Number of types.  */
-  int n_types = 0;
+  std::atomic<int> n_types {0};
 
   /* Size of stringtable, (if applicable).  */
   int sz_strtab = 0;

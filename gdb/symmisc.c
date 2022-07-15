@@ -66,10 +66,10 @@ print_objfile_statistics (void)
 		      objfile->per_bfd->n_minsyms);
 	if (OBJSTAT (objfile, n_syms) > 0)
 	  gdb_printf (_("  Number of \"full\" symbols read: %d\n"),
-		      OBJSTAT (objfile, n_syms));
+		      OBJSTAT (objfile, n_syms).load ());
 	if (OBJSTAT (objfile, n_types) > 0)
 	  gdb_printf (_("  Number of \"types\" defined: %d\n"),
-		      OBJSTAT (objfile, n_types));
+		      OBJSTAT (objfile, n_types).load ());
 
 	i = linetables = 0;
 	for (compunit_symtab *cu : objfile->compunits ())
