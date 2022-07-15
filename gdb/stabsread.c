@@ -4497,6 +4497,11 @@ cleanup_undefined_types_1 (void)
 void
 cleanup_undefined_stabs_types (struct objfile *objfile)
 {
+#if CXX_STD_THREAD
+  static std::mutex cleanup_undefined_stabs_types_lock;
+  std::lock_guard<std::mutex> guard (cleanup_undefined_stabs_types_lock);
+#endif
+
   cleanup_undefined_types_1 ();
   cleanup_undefined_types_noname (objfile);
 }
