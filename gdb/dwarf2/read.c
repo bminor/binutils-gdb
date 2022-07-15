@@ -21396,6 +21396,10 @@ build_error_marker_type (struct dwarf2_cu *cu, struct die_info *die)
   return init_type (objfile, TYPE_CODE_ERROR, 0, saved);
 }
 
+#if CXX_STD_THREAD
+static std::recursive_mutex lookup_die_type_lock;
+#endif
+
 /* Look up the type of DIE in CU using its type attribute ATTR.
    ATTR must be one of: DW_AT_type, DW_AT_GNAT_descriptive_type,
    DW_AT_containing_type.
@@ -21405,6 +21409,9 @@ static struct type *
 lookup_die_type (struct die_info *die, const struct attribute *attr,
 		 struct dwarf2_cu *cu)
 {
+#if CXX_STD_THREAD
+  std::lock_guard<std::recursive_mutex> guard (lookup_die_type_lock);
+#endif
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
   struct type *this_type;
@@ -21481,6 +21488,9 @@ lookup_die_type (struct die_info *die, const struct attribute *attr,
 static struct type *
 read_type_die (struct die_info *die, struct dwarf2_cu *cu)
 {
+#if CXX_STD_THREAD
+  std::lock_guard<std::recursive_mutex> guard (lookup_die_type_lock);
+#endif
   struct type *this_type;
 
   this_type = get_die_type (die, cu);
@@ -23809,6 +23819,9 @@ static struct type *
 set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	      bool skip_data_location)
 {
+#if CXX_STD_THREAD
+  std::lock_guard<std::recursive_mutex> guard (lookup_die_type_lock);
+#endif
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct dwarf2_per_cu_offset_and_type **slot, ofs;
   struct objfile *objfile = per_objfile->objfile;
@@ -23869,7 +23882,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 
   {
 #if CXX_STD_THREAD
-    std::lock_guard<std::mutex> guard (die_type_hash_lock);
+    std::lock_guard<std::mutex> guard2 (die_type_hash_lock);
 #endif
     if (per_objfile->die_type_hash == NULL)
       per_objfile->die_type_hash
