@@ -2849,6 +2849,10 @@ allocate_compunit_symtab (struct objfile *objfile, const char *name)
 void
 add_compunit_symtab_to_objfile (struct compunit_symtab *cu)
 {
+#if CXX_STD_THREAD
+  static std::mutex add_compunit_symtab_to_objfile_lock;
+  std::lock_guard<std::mutex> guard (add_compunit_symtab_to_objfile_lock);
+#endif
   cu->next = cu->objfile ()->compunit_symtabs;
   cu->objfile ()->compunit_symtabs = cu;
 }
