@@ -450,12 +450,17 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		}
 	    }
 	  else if (len == 16
-		   && type->code () == TYPE_CODE_ARRAY
-		   && type->is_vector ()
-		   && tdep->vector_abi == POWERPC_VEC_ALTIVEC)
+		   && ((type->code () == TYPE_CODE_ARRAY
+			&& type->is_vector ()
+			&& tdep->vector_abi == POWERPC_VEC_ALTIVEC)
+		   || (type->code () == TYPE_CODE_FLT
+		       && (gdbarch_long_double_format (gdbarch)
+			   == floatformats_ieee_quad))))
 	    {
 	      /* Vector parameter passed in an Altivec register, or
-		 when that runs out, 16 byte aligned stack location.  */
+		 when that runs out, 16 byte aligned stack location.
+		 IEEE FLOAT 128-bit also passes parameters in vector
+		 registers.  */
 	      if (vreg <= 13)
 		{
 		  if (write_pass)
@@ -1180,7 +1185,8 @@ ppc64_aggregate_candidate (struct type *type,
 
 static int
 ppc64_elfv2_abi_homogeneous_aggregate (struct type *type,
-				       struct type **elt_type, int *n_elts)
+				       struct type **elt_type, int *n_elts,
+				       struct gdbarch *gdbarch)
 {
   /* Complex types at the top level are treated separately.  However,
      complex types can be elements of homogeneous aggregates.  */
@@ -1193,9 +1199,20 @@ ppc64_elfv2_abi_homogeneous_aggregate (struct type *type,
 
       if (field_count > 0)
 	{
-	  int n_regs = ((field_type->code () == TYPE_CODE_FLT
-			 || field_type->code () == TYPE_CODE_DECFLOAT)?
-			(TYPE_LENGTH (field_type) + 7) >> 3 : 1);
+	  int n_regs;
+
+	  if (field_type->code () == TYPE_CODE_FLT
+	      && (gdbarch_long_double_format (gdbarch)
+		  == floatformats_ieee_quad))
+	    /* IEEE Float 128-bit uses one vector register.  */
+	    n_regs = 1;
+
+	  else if (field_type->code () == TYPE_CODE_FLT
+		   || field_type->code () == TYPE_CODE_DECFLOAT)
+	    n_regs = (TYPE_LENGTH (field_type) + 7) >> 3;
+
+	  else
+	    n_regs = 1;
 
 	  /* The ELFv2 ABI allows homogeneous aggregates to occupy
 	     up to 8 registers.  */
@@ -1422,7 +1439,16 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
   ppc_gdbarch_tdep *tdep = (ppc_gdbarch_tdep *) gdbarch_tdep (gdbarch);
 
   if (type->code () == TYPE_CODE_FLT
-      || type->code () == TYPE_CODE_DECFLOAT)
+      && TYPE_LENGTH (type) == 16
+      && (gdbarch_long_double_format (gdbarch)
+	  == floatformats_ieee_quad))
+    {
+      /* IEEE FLOAT128, args in vector registers.  */
+      ppc64_sysv_abi_push_val (gdbarch, val, TYPE_LENGTH (type), 0, argpos);
+      ppc64_sysv_abi_push_vreg (gdbarch, val, argpos);
+    }
+  else if (type->code () == TYPE_CODE_FLT
+	   || type->code () == TYPE_CODE_DECFLOAT)
     {
       /* Floating-point scalars are passed in floating-point registers.  */
       ppc64_sysv_abi_push_val (gdbarch, val, TYPE_LENGTH (type), 0, argpos);
@@ -1494,14 +1520,22 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 	 single floating-point value, at any level of nesting of
 	 single-member structs, are passed in floating-point registers.  */
       if (type->code () == TYPE_CODE_STRUCT
-	  && type->num_fields () == 1)
+	  && type->num_fields () == 1 && tdep->elf_abi == POWERPC_ELF_V1)
 	{
 	  while (type->code () == TYPE_CODE_STRUCT
 		 && type->num_fields () == 1)
 	    type = check_typedef (type->field (0).type ());
 
-	  if (type->code () == TYPE_CODE_FLT)
-	    ppc64_sysv_abi_push_freg (gdbarch, type, val, argpos);
+	  if (type->code () == TYPE_CODE_FLT) {
+	    /* Handle the case of 128-bit floats for both IEEE and IBM long double
+	       formats.  */
+	    if (TYPE_LENGTH (type) == 16
+		&& (gdbarch_long_double_format (gdbarch)
+		    == floatformats_ieee_quad))
+	      ppc64_sysv_abi_push_vreg (gdbarch, val, argpos);
+	    else
+	      ppc64_sysv_abi_push_freg (gdbarch, type, val, argpos);
+	  }
 	}
 
       /* In the ELFv2 ABI, homogeneous floating-point or vector
@@ -1511,13 +1545,23 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 	  struct type *eltype;
 	  int i, nelt;
 
-	  if (ppc64_elfv2_abi_homogeneous_aggregate (type, &eltype, &nelt))
+	  if (ppc64_elfv2_abi_homogeneous_aggregate (type, &eltype, &nelt,
+						     gdbarch))
 	    for (i = 0; i < nelt; i++)
 	      {
 		const gdb_byte *elval = val + i * TYPE_LENGTH (eltype);
 
 		if (eltype->code () == TYPE_CODE_FLT
-		    || eltype->code () == TYPE_CODE_DECFLOAT)
+		    && TYPE_LENGTH (eltype) == 16
+		    && (gdbarch_long_double_format (gdbarch)
+			== floatformats_ieee_quad))
+                 /* IEEE FLOAT128, args in vector registers.  */
+                 ppc64_sysv_abi_push_vreg (gdbarch, elval, argpos);
+
+		else if (eltype->code () == TYPE_CODE_FLT
+                          || eltype->code () == TYPE_CODE_DECFLOAT)
+		    /* IBM long double and all other floats and decfloats, args
+		       are in a pair of floating point registers.  */
 		  ppc64_sysv_abi_push_freg (gdbarch, eltype, elval, argpos);
 		else if (eltype->code () == TYPE_CODE_ARRAY
 			 && eltype->is_vector ()
@@ -1871,10 +1915,16 @@ ppc64_sysv_abi_return_value_base (struct gdbarch *gdbarch, struct type *valtype,
       return 1;
     }
 
-  /* AltiVec vectors are returned in VRs starting at v2.  */
+  /* AltiVec vectors are returned in VRs starting at v2.
+     IEEE FLOAT 128-bit are stored in vector register.  */
+
   if (TYPE_LENGTH (valtype) == 16
-      && valtype->code () == TYPE_CODE_ARRAY && valtype->is_vector ()
-      && tdep->vector_abi == POWERPC_VEC_ALTIVEC)
+      && ((valtype->code () == TYPE_CODE_ARRAY
+	   && valtype->is_vector ()
+	   && tdep->vector_abi == POWERPC_VEC_ALTIVEC)
+	  || (valtype->code () == TYPE_CODE_FLT
+	      && (gdbarch_long_double_format (gdbarch)
+		  == floatformats_ieee_quad))))
     {
       int regnum = tdep->ppc_vr0_regnum + 2 + index;
 
@@ -2012,7 +2062,8 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
   /* In the ELFv2 ABI, homogeneous floating-point or vector
      aggregates are returned in registers.  */
   if (tdep->elf_abi == POWERPC_ELF_V2
-      && ppc64_elfv2_abi_homogeneous_aggregate (valtype, &eltype, &nelt)
+      && ppc64_elfv2_abi_homogeneous_aggregate (valtype, &eltype, &nelt,
+						gdbarch)
       && (eltype->code () == TYPE_CODE_FLT
 	  || eltype->code () == TYPE_CODE_DECFLOAT
 	  || (eltype->code () == TYPE_CODE_ARRAY
