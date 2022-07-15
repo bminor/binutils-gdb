@@ -1488,7 +1488,9 @@ struct type
      value of 1 means the alignment is 1, and a value of 9 means the
      alignment is 256.  */
 
-  unsigned align_log2 : TYPE_ALIGN_BITS;
+  struct {
+    unsigned align_log2 : TYPE_ALIGN_BITS;
+  };
 
   /* * Flags specific to this instance of the type, indicating where
      on the ring we are.
@@ -1500,7 +1502,9 @@ struct type
      instance flags are completely inherited from the target type.  No
      qualifiers can be cleared by the typedef.  See also
      check_typedef.  */
-  unsigned m_instance_flags : 9;
+  struct {
+    unsigned m_instance_flags : 9;
+  };
 
   /* * Length of storage for a value of this type.  The value is the
      expression in host bytes of what sizeof(type) would return.  This
