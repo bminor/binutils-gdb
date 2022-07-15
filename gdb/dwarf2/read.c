@@ -7559,6 +7559,57 @@ maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
   return queued && cu == nullptr;
 }
 
+/* Process a queue item ITEM, helper function of process_queue.  */
+
+static void
+process_queue_item (dwarf2_per_objfile *per_objfile, dwarf2_queue_item &item)
+{
+  dwarf2_per_cu_data *per_cu = item.per_cu;
+
+  if (per_objfile->symtab_set_p (per_cu))
+    /* Nothing to do.  */
+    return;
+
+  dwarf2_cu *cu = per_objfile->get_cu (per_cu);
+
+  if (cu == nullptr)
+    /* Skip dummy CUs.  */
+    return;
+
+  unsigned int debug_print_threshold;
+  char buf[100];
+
+  if (per_cu->is_debug_types)
+    {
+      struct signatured_type *sig_type =
+	(struct signatured_type *) per_cu;
+
+      sprintf (buf, "TU %s at offset %s",
+	       hex_string (sig_type->signature),
+	       sect_offset_str (per_cu->sect_off));
+      /* There can be 100s of TUs.
+	 Only print them in verbose mode.  */
+      debug_print_threshold = 2;
+    }
+  else
+    {
+      sprintf (buf, "CU at offset %s",
+	       sect_offset_str (per_cu->sect_off));
+      debug_print_threshold = 1;
+    }
+
+  if (dwarf_read_debug >= debug_print_threshold)
+    dwarf_read_debug_printf ("Expanding symtab of %s", buf);
+
+  if (per_cu->is_debug_types)
+    process_full_type_unit (cu, item.pretend_language);
+  else
+    process_full_comp_unit (cu, item.pretend_language);
+
+  if (dwarf_read_debug >= debug_print_threshold)
+    dwarf_read_debug_printf ("Done expanding %s", buf);
+}
+
 /* Process the queue.  */
 
 static void
@@ -7575,50 +7626,8 @@ process_queue (dwarf2_per_objfile *per_objfile)
   while (!per_objfile->queue->empty ())
     {
       dwarf2_queue_item &item = per_objfile->queue->front ();
+      process_queue_item (per_objfile, item);
       dwarf2_per_cu_data *per_cu = item.per_cu;
-
-      if (!per_objfile->symtab_set_p (per_cu))
-	{
-	  dwarf2_cu *cu = per_objfile->get_cu (per_cu);
-
-	  /* Skip dummy CUs.  */
-	  if (cu != nullptr)
-	    {
-	      unsigned int debug_print_threshold;
-	      char buf[100];
-
-	      if (per_cu->is_debug_types)
-		{
-		  struct signatured_type *sig_type =
-		    (struct signatured_type *) per_cu;
-
-		  sprintf (buf, "TU %s at offset %s",
-			   hex_string (sig_type->signature),
-			   sect_offset_str (per_cu->sect_off));
-		  /* There can be 100s of TUs.
-		     Only print them in verbose mode.  */
-		  debug_print_threshold = 2;
-		}
-	      else
-		{
-		  sprintf (buf, "CU at offset %s",
-			   sect_offset_str (per_cu->sect_off));
-		  debug_print_threshold = 1;
-		}
-
-	      if (dwarf_read_debug >= debug_print_threshold)
-		dwarf_read_debug_printf ("Expanding symtab of %s", buf);
-
-	      if (per_cu->is_debug_types)
-		process_full_type_unit (cu, item.pretend_language);
-	      else
-		process_full_comp_unit (cu, item.pretend_language);
-
-	      if (dwarf_read_debug >= debug_print_threshold)
-		dwarf_read_debug_printf ("Done expanding %s", buf);
-	    }
-	}
-
       per_cu->queued = 0;
       per_objfile->queue->pop_front ();
     }
