@@ -23580,8 +23580,6 @@ dwarf2_per_cu_data::get_header () const
       const gdb_byte *info_ptr
 	= this->section->buffer + to_underlying (this->sect_off);
 
-      memset (&m_header, 0, sizeof (m_header));
-
       read_comp_unit_head (&m_header, info_ptr, this->section,
 			   rcuh_kind::COMPILE);
 

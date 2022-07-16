@@ -98,7 +98,7 @@ struct dwarf2_cu
   void add_dependence (struct dwarf2_per_cu_data *ref_per_cu);
 
   /* The header of the compilation unit.  */
-  struct comp_unit_head header {};
+  struct comp_unit_head header;
 
   /* Base address of this compilation unit.  */
   gdb::optional<CORE_ADDR> base_address;
