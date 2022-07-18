@@ -1444,8 +1444,8 @@ output_i386_opcode (FILE *table, const char *name, char *str,
     fail (_("%s:%d: %s: residual opcode (0x%0*llx) too large\n"),
 	  filename, lineno, name, 2 * length, opcode);
 
-  fprintf (table, "  { \"%s\", 0x%0*llx%s, %s, %lu,\n",
-	   name, 2 * (int)length, opcode, end, extension_opcode, i);
+  fprintf (table, "  { \"%s\", 0x%0*llx%s, %lu, %s,\n",
+	   name, 2 * (int)length, opcode, end, i, extension_opcode);
 
   process_i386_opcode_modifier (table, opcode_modifier, space, prefix,
 				operand_types, lineno);
