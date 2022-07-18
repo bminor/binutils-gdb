@@ -62,6 +62,7 @@ ACX_PROG_CC_WARNING_OPTS([-Wno-nonnull-compare], [GPROFNG_NO_NONNULL_COMPARE_CFL
 AC_SUBST(GPROFNG_NO_NONNULL_COMPARE_CFLAGS)
 
 AC_CONFIG_FILES([Makefile])
-AC_CONFIG_HEADERS([lib-config.h:../common/config.h.in])
+AC_CONFIG_HEADERS([lib-config.h:../common/lib-config.h.in])
+
 AC_OUTPUT
 
