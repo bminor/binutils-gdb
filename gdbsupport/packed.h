@@ -28,9 +28,27 @@
    bit-fields (and ENUM_BITFIELD), when the fields must have separate
    memory locations to avoid data races.  */
 
-/* We need gcc_struct on Windows GCC, as otherwise the size of e.g.,
-   "packed<int, 1>" will be larger than what we want.  */
-#if defined _WIN32
+/* There are two implementations here -- one standard compliant, using
+   a byte array for internal representation, and another that relies
+   on bitfields and attribute packed (and attribute gcc_struct on
+   Windows).  The latter is preferable, as it is more convenient when
+   debugging GDB -- printing a struct packed variable prints its field
+   using its natural type, which is particularly useful if the type is
+   an enum -- but may not work on all compilers.  */
+
+/* Clang targeting Windows does not support attribute gcc_struct, so
+   we use the alternative byte array implemention there. */
+#if defined _WIN32 && defined __clang__
+# define PACKED_USE_ARRAY 1
+#else
+# define PACKED_USE_ARRAY 0
+#endif
+
+/* For the preferred implementation, we need gcc_struct on Windows, as
+   otherwise the size of e.g., "packed<int, 1>" will be larger than
+   what we want.  Clang targeting Windows does not support attribute
+   gcc_struct.  */
+#if !PACKED_USE_ARRAY && defined _WIN32 && !defined __clang__
 # define ATTRIBUTE_GCC_STRUCT __attribute__((__gcc_struct__))
 #else
 # define ATTRIBUTE_GCC_STRUCT
@@ -44,7 +62,18 @@ public:
 
   packed (T val)
   {
+    gdb_static_assert (sizeof (ULONGEST) >= sizeof (T));
+
+#if PACKED_USE_ARRAY
+    ULONGEST tmp = val;
+    for (int i = (Bytes - 1); i >= 0; --i)
+      {
+	m_bytes[i] = (gdb_byte) tmp;
+	tmp >>= HOST_CHAR_BIT;
+      }
+#else
     m_val = val;
+#endif
 
     /* Ensure size and aligment are what we expect.  */
     gdb_static_assert (sizeof (packed) == Bytes);
@@ -62,11 +91,27 @@ public:
 
   operator T () const noexcept
   {
+#if PACKED_USE_ARRAY
+    ULONGEST tmp = 0;
+    for (int i = 0;;)
+      {
+	tmp |= m_bytes[i];
+	if (++i == Bytes)
+	  break;
+	tmp <<= HOST_CHAR_BIT;
+      }
+    return (T) tmp;
+#else
     return m_val;
+#endif
   }
 
 private:
+#if PACKED_USE_ARRAY
+  gdb_byte m_bytes[Bytes];
+#else
   T m_val : (Bytes * HOST_CHAR_BIT) ATTRIBUTE_PACKED;
+#endif
 };
 
 /* Add some comparisons between std::atomic<packed<T>> and packed<T>
