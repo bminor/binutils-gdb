@@ -147,6 +147,8 @@ parallel_for_each (unsigned n, RandomIt first, RandomIt last,
   size_t n_threads = n_worker_threads;
   size_t n_elements = last - first;
   size_t elts_per_thread = 0;
+  size_t elts_left_over = 0;
+
   if (n_threads > 1)
     {
       /* Require that there should be at least N elements in a
@@ -155,6 +157,8 @@ parallel_for_each (unsigned n, RandomIt first, RandomIt last,
       if (n_elements / n_threads < n)
 	n_threads = std::max (n_elements / n, (size_t) 1);
       elts_per_thread = n_elements / n_threads;
+      elts_left_over = n_elements % n_threads;
+      /* n_elements == n_threads * elts_per_thread + elts_left_over. */
     }
 
   size_t count = n_threads == 0 ? 0 : n_threads - 1;
@@ -170,6 +174,10 @@ parallel_for_each (unsigned n, RandomIt first, RandomIt last,
   for (int i = 0; i < count; ++i)
     {
       RandomIt end = first + elts_per_thread;
+      if (i < elts_left_over)
+	/* Distribute the leftovers over the worker threads, to avoid having
+	   to handle all of them in a single thread.  */
+	end++;
       if (parallel_for_each_debug)
 	debug_printf (_("Parallel for: elements on worker thread %i\t: %zu\n"),
 		      i, (size_t)(end - first));
