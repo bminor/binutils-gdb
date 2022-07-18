@@ -1408,6 +1408,45 @@ resolve_symbol_value (symbolS *symp)
 	  BAD_CASE (op);
 	  break;
 
+	case O_md1:
+	case O_md2:
+	case O_md3:
+	case O_md4:
+	case O_md5:
+	case O_md6:
+	case O_md7:
+	case O_md8:
+	case O_md9:
+	case O_md10:
+	case O_md11:
+	case O_md12:
+	case O_md13:
+	case O_md14:
+	case O_md15:
+	case O_md16:
+	case O_md17:
+	case O_md18:
+	case O_md19:
+	case O_md20:
+	case O_md21:
+	case O_md22:
+	case O_md23:
+	case O_md24:
+	case O_md25:
+	case O_md26:
+	case O_md27:
+	case O_md28:
+	case O_md29:
+	case O_md30:
+	case O_md31:
+	case O_md32:
+#ifdef md_resolve_symbol
+	  resolved = md_resolve_symbol (symp, &final_val, &final_seg);
+	  if (resolved)
+	    break;
+#endif
+	  goto exit_dont_set_value;
+
 	case O_absent:
 	  final_val = 0;
 	  /* Fall through.  */
