@@ -19,7 +19,11 @@ if { ![istarget "x86*"] } {
     return
 }
 
-set cflags "-mindirect-branch=thunk -mfunction-return=thunk -fcf-protection=none"
+set cflags "-mindirect-branch=thunk -mfunction-return=thunk"
+
+if { [gcc_major_version] >= 8 } {
+    append cflags " -fcf-protection=none"
+}
 if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
         [list debug "additional_flags=$cflags"]] } {
     return -1
