@@ -19,6 +19,7 @@
 #define PACKED_H
 
 #include "traits.h"
+#include <atomic>
 
 /* Each instantiation and full specialization of the packed template
    defines a type that behaves like a given scalar type, but that has
@@ -68,37 +69,55 @@ private:
   T m_val : (Bytes * HOST_CHAR_BIT) ATTRIBUTE_PACKED;
 };
 
-/* Add some comparisons between std::atomic<packed<T>> and T.  We need
-   this because the regular comparisons would require two implicit
-   conversions to go from T to std::atomic<packed<T>>:
+/* Add some comparisons between std::atomic<packed<T>> and packed<T>
+   and T.  We need this because even though std::atomic<T> doesn't
+   define these operators, the relational expressions still work via
+   implicit conversions.  Those wouldn't work when wrapped in packed
+   without these operators, because they'd require two implicit
+   conversions to go from T to packed<T> to std::atomic<packed<T>>
+   (and back), and C++ only does one.  */
 
-     T         -> packed<T>
-     packed<T> -> std::atomic<packed<T>>
+#define PACKED_ATOMIC_OP(OP)						\
+  template<typename T, size_t Bytes>					\
+  bool operator OP (const std::atomic<packed<T, Bytes>> &lhs,		\
+		    const std::atomic<packed<T, Bytes>> &rhs)		\
+  {									\
+    return lhs.load () OP rhs.load ();					\
+  }									\
+									\
+  template<typename T, size_t Bytes>					\
+  bool operator OP (T lhs, const std::atomic<packed<T, Bytes>> &rhs)	\
+  {									\
+    return lhs OP rhs.load ();						\
+  }									\
+									\
+  template<typename T, size_t Bytes>					\
+  bool operator OP (const std::atomic<packed<T, Bytes>> &lhs, T rhs)	\
+  {									\
+    return lhs.load () OP rhs;						\
+  }									\
+									\
+  template<typename T, size_t Bytes>					\
+  bool operator OP (const std::atomic<packed<T, Bytes>> &lhs,		\
+		    packed<T, Bytes> rhs)				\
+  {									\
+    return lhs.load () OP rhs;						\
+  }									\
+									\
+  template<typename T, size_t Bytes>					\
+  bool operator OP (packed<T, Bytes> lhs,				\
+		    const std::atomic<packed<T, Bytes>> &rhs)		\
+  {									\
+    return lhs OP rhs.load ();						\
+  }
 
-   and C++ only does one.  */
+PACKED_ATOMIC_OP (==)
+PACKED_ATOMIC_OP (!=)
+PACKED_ATOMIC_OP (>)
+PACKED_ATOMIC_OP (<)
+PACKED_ATOMIC_OP (>=)
+PACKED_ATOMIC_OP (<=)
 
-template<typename T, size_t Bytes>
-bool operator== (T lhs, const std::atomic<packed<T, Bytes>> &rhs)
-{
-  return lhs == rhs.load ();
-}
-
-template<typename T, size_t Bytes>
-bool operator== (const std::atomic<packed<T, Bytes>> &lhs, T rhs)
-{
-  return lhs.load () == rhs;
-}
-
-template<typename T, size_t Bytes>
-bool operator!= (T lhs, const std::atomic<packed<T, Bytes>> &rhs)
-{
-  return !(lhs == rhs);
-}
-
-template<typename T, size_t Bytes>
-bool operator!= (const std::atomic<packed<T, Bytes>> &lhs, T rhs)
-{
-  return !(lhs == rhs);
-}
+#undef PACKED_ATOMIC_OP
 
 #endif
