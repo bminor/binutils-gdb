@@ -139,7 +139,12 @@ parallel_for_each (unsigned n, RandomIt first, RandomIt last,
   using result_type
     = typename std::result_of<RangeFunction (RandomIt, RandomIt)>::type;
 
-  size_t n_threads = thread_pool::g_thread_pool->thread_count ();
+  /* If enabled, print debug info about how the work is distributed across
+     the threads.  */
+  const int parallel_for_each_debug = false;
+
+  size_t n_worker_threads = thread_pool::g_thread_pool->thread_count ();
+  size_t n_threads = n_worker_threads;
   size_t n_elements = last - first;
   size_t elts_per_thread = 0;
   if (n_threads > 1)
@@ -155,9 +160,19 @@ parallel_for_each (unsigned n, RandomIt first, RandomIt last,
   size_t count = n_threads == 0 ? 0 : n_threads - 1;
   gdb::detail::par_for_accumulator<result_type> results (count);
 
+  if (parallel_for_each_debug)
+    {
+      debug_printf (_("Parallel for: n_elements: %zu\n"), n_elements);
+      debug_printf (_("Parallel for: minimum elements per thread: %u\n"), n);
+      debug_printf (_("Parallel for: elts_per_thread: %zu\n"), elts_per_thread);
+    }
+
   for (int i = 0; i < count; ++i)
     {
       RandomIt end = first + elts_per_thread;
+      if (parallel_for_each_debug)
+	debug_printf (_("Parallel for: elements on worker thread %i\t: %zu\n"),
+		      i, (size_t)(end - first));
       results.post (i, [=] ()
         {
 	  return callback (first, end);
@@ -165,7 +180,14 @@ parallel_for_each (unsigned n, RandomIt first, RandomIt last,
       first = end;
     }
 
+  for (int i = count; i < n_worker_threads; ++i)
+    if (parallel_for_each_debug)
+      debug_printf (_("Parallel for: elements on worker thread %i\t: 0\n"), i);
+
   /* Process all the remaining elements in the main thread.  */
+  if (parallel_for_each_debug)
+    debug_printf (_("Parallel for: elements on main thread\t\t: %zu\n"),
+		  (size_t)(last - first));
   return results.finish ([=] ()
     {
       return callback (first, last);
