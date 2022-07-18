@@ -7067,6 +7067,13 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
 
     using iter_type = decltype (per_bfd->all_comp_units.begin ());
 
+    std::function<unsigned int (iter_type)> task_size
+      = [=] (iter_type iter)
+      {
+	dwarf2_per_cu_data *per_cu = iter->get ();
+	return per_cu->length ();
+      };
+
     /* Each thread returns a pair holding a cooked index, and a vector
        of errors that should be printed.  The latter is done because
        GDB's I/O system is not thread-safe.  run_on_main_thread could be
@@ -7095,7 +7102,7 @@ dwarf2_build_psymtabs_hard (dwarf2_per_objfile *per_objfile)
 	      }
 	  }
 	return result_type (thread_storage.release (), std::move (errors));
-      });
+      }, &task_size);
 
     /* Only show a given exception a single time.  */
     std::unordered_set<gdb_exception> seen_exceptions;
