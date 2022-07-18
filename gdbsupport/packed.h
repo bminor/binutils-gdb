@@ -27,6 +27,26 @@
    bit-fields (and ENUM_BITFIELD), when the fields must have separate
    memory locations to avoid data races.  */
 
+/* There are two implementations here -- one standard compliant, using
+   a byte array for internal representation, and another that relies on
+   bitfields and attribute packed (and attribute gcc_struct on
+   Windows).  The latter is preferable, as it is more convenient to
+   debug -- an enum wrapped in struct packed is printed by GDB as an
+   enum -- but may not work on all compilers.  */
+
+/* Clang does not support attribute gcc_struct.  */
+#if defined _WIN32 && defined __clang__
+# define PACKED_USE_ARRAY 1
+#else
+# define PACKED_USE_ARRAY 0
+#endif
+
+#if !PACKED_USE_ARRAY && defined _WIN32
+# define ATTRIBUTE_GCC_STRUCT  __attribute__((__gcc_struct__))
+#else
+# define ATTRIBUTE_GCC_STRUCT
+#endif
+
 template<typename T, size_t Bytes = sizeof (T)>
 struct packed
 {
@@ -35,7 +55,18 @@ public:
 
   packed (T val)
   {
+    gdb_static_assert (sizeof (size_t) >= sizeof (T));
+
+#if PACKED_USE_ARRAY
+    size_t tmp = val;
+    for (int i = (Bytes - 1); i >= 0; --i)
+      {
+	m_bytes[i] = tmp & 0xff;
+	tmp >>= 8;
+      }
+#else
     m_val = val;
+#endif
 
     /* Ensure size and aligment are what we expect.  */
     gdb_static_assert (sizeof (packed) == Bytes);
@@ -53,44 +84,78 @@ public:
 
   operator T () const noexcept
   {
+#if PACKED_USE_ARRAY
+    size_t tmp = 0;
+    for (int i = 0;;)
+      {
+	tmp |= m_bytes[i];
+	if (++i == Bytes)
+	  break;
+	tmp <<= 8;
+      }
+    return (T) tmp;
+#else
     return m_val;
+#endif
   }
 
 private:
+#if PACKED_USE_ARRAY
+  gdb_byte m_bytes[Bytes];
+#else
   T m_val : (Bytes * HOST_CHAR_BIT) ATTRIBUTE_PACKED;
-};
+#endif
+} ATTRIBUTE_GCC_STRUCT;
 
-/* Add some comparisons between std::atomic<packed<T>> and T.  We need
-   this because the regular comparisons would require two implicit
-   conversions to go from T to std::atomic<packed<T>>:
+/* Add some (non-atomic) comparisons between std::atomic<packed<T>>
+   and packed<T> and T.  We need this because even though
+   std::atomic<T> doesn't define these operators, the relational
+   expressions still work via implicit conversions.  Thos wouldn't
+   work when wrapped in packed without these operators, because we'd
+   require two implicit conversions to go from T to packed<T> to
+   std::atomic<packed<T>> (and back), and C++ only does one.  */
 
-     T         -> packed<T>
-     packed<T> -> std::atomic<packed<T>>
+#define PACKED_ATOMIC_OP(OP)						\
+  template<typename T, size_t Bytes>					\
+  bool operator OP (const std::atomic<packed<T, Bytes>> &lhs,		\
+		    const std::atomic<packed<T, Bytes>> &rhs)		\
+  {									\
+    return lhs.load () OP rhs.load ();					\
+  }									\
+									\
+  template<typename T, size_t Bytes>					\
+  bool operator OP (T lhs, const std::atomic<packed<T, Bytes>> &rhs)	\
+  {									\
+    return lhs OP rhs.load ();						\
+  }									\
+									\
+  template<typename T, size_t Bytes>					\
+  bool operator OP (const std::atomic<packed<T, Bytes>> &lhs, T rhs)	\
+  {									\
+    return lhs.load () OP rhs;						\
+  }									\
+									\
+  template<typename T, size_t Bytes>					\
+  bool operator OP (const std::atomic<packed<T, Bytes>> &lhs,		\
+		    packed<T, Bytes> rhs)				\
+  {									\
+    return lhs.load () OP rhs;						\
+  }									\
+									\
+  template<typename T, size_t Bytes>					\
+  bool operator OP (packed<T, Bytes> lhs,				\
+		    const std::atomic<packed<T, Bytes>> &rhs)		\
+  {									\
+    return lhs OP rhs.load ();						\
+  }
 
-   and C++ only does one.  */
+PACKED_ATOMIC_OP (==)
+PACKED_ATOMIC_OP (!=)
+PACKED_ATOMIC_OP (>)
+PACKED_ATOMIC_OP (<)
+PACKED_ATOMIC_OP (>=)
+PACKED_ATOMIC_OP (<=)
 
-template<typename T, size_t Bytes>
-bool operator== (T lhs, const std::atomic<packed<T, Bytes>> &rhs)
-{
-  return lhs == rhs.load ();
-}
-
-template<typename T, size_t Bytes>
-bool operator== (const std::atomic<packed<T, Bytes>> &lhs, T rhs)
-{
-  return lhs.load () == rhs;
-}
-
-template<typename T, size_t Bytes>
-bool operator!= (T lhs, const std::atomic<packed<T, Bytes>> &rhs)
-{
-  return !(lhs == rhs);
-}
-
-template<typename T, size_t Bytes>
-bool operator!= (const std::atomic<packed<T, Bytes>> &lhs, T rhs)
-{
-  return !(lhs == rhs);
-}
+#undef PACKED_ATOMIC_OP
 
 #endif

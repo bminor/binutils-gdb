@@ -464,6 +464,7 @@ SELFTESTS_SRCS = \
 	unittests/offset-type-selftests.c \
 	unittests/observable-selftests.c \
 	unittests/optional-selftests.c \
+	unittests/packed-selftests.c \
 	unittests/parallel-for-selftests.c \
 	unittests/parse-connection-spec-selftests.c \
 	unittests/path-join-selftests.c \
