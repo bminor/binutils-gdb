@@ -8529,17 +8529,6 @@ gdb_caching_proc supports_gnuc {
     return [gdb_simple_compile $me $src object ""]
 }
 
-# Return 1 if compiler supports __GNUC__, otherwise return 0.
-gdb_caching_proc supports_gnuc {
-    set me "supports_gnuc"
-    set src {
-	#ifndef __GNUC__
-	#error "No gnuc"
-	#endif
-    }
-    return [gdb_simple_compile $me $src object ""]
-}
-
 # Return 1 if target supports mpx, otherwise return 0.
 gdb_caching_proc have_mpx {
     global srcdir
