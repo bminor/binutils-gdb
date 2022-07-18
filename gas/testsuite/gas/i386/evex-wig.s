@@ -62,6 +62,18 @@ _start:
 	{evex} vpinsrw $0, %eax, %xmm0, %xmm0
 	{evex} vpinsrw $0, 2(%eax), %xmm0, %xmm0
 
+	vmovss %xmm0, %xmm0, %xmm0{%k7}
+	vmovss (%eax), %xmm0{%k7}
+	vmovss %xmm0, (%eax){%k7}
+
+	vmovsd %xmm0, %xmm0, %xmm0{%k7}
+	vmovsd (%eax), %xmm0{%k7}
+	vmovsd %xmm0, (%eax){%k7}
+
+	vmovsh %xmm0, %xmm0, %xmm0{%k7}
+	vmovsh (%eax), %xmm0{%k7}
+	vmovsh %xmm0, (%eax){%k7}
+
 	vpmovsxbd	%xmm5, %zmm6{%k7}	 # AVX512
 	vpmovsxbd	%xmm5, %zmm6{%k7}{z}	 # AVX512
 	vpmovsxbd	(%ecx), %zmm6{%k7}	 # AVX512

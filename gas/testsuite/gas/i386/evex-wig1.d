@@ -45,6 +45,15 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	62 f3 fd 08 22 40 01 00 	vpinsrd \$0x0,0x4\(%eax\),%xmm0,%xmm0
 [ 	]*[a-f0-9]+:	62 f1 fd 08 c4 c0 00 	vpinsrw \$0x0,%eax,%xmm0,%xmm0
 [ 	]*[a-f0-9]+:	62 f1 fd 08 c4 40 01 00 	vpinsrw \$0x0,0x2\(%eax\),%xmm0,%xmm0
+[ 	]*[a-f0-9]+:	62 f1 7e 0f 10 c0    	vmovss %xmm0,%xmm0,%xmm0\{%k7\}
+[ 	]*[a-f0-9]+:	62 f1 7e 0f 10 00    	vmovss \(%eax\),%xmm0\{%k7\}
+[ 	]*[a-f0-9]+:	62 f1 7e 0f 11 00    	vmovss %xmm0,\(%eax\)\{%k7\}
+[ 	]*[a-f0-9]+:	62 f1 ff 0f 10 c0    	vmovsd %xmm0,%xmm0,%xmm0\{%k7\}
+[ 	]*[a-f0-9]+:	62 f1 ff 0f 10 00    	vmovsd \(%eax\),%xmm0\{%k7\}
+[ 	]*[a-f0-9]+:	62 f1 ff 0f 11 00    	vmovsd %xmm0,\(%eax\)\{%k7\}
+[ 	]*[a-f0-9]+:	62 f5 7e 0f 10 c0    	vmovsh %xmm0,%xmm0,%xmm0\{%k7\}
+[ 	]*[a-f0-9]+:	62 f5 7e 0f 10 00    	vmovsh \(%eax\),%xmm0\{%k7\}
+[ 	]*[a-f0-9]+:	62 f5 7e 0f 11 00    	vmovsh %xmm0,\(%eax\)\{%k7\}
 [ 	]*[a-f0-9]+:	62 f2 fd 4f 21 f5    	vpmovsxbd %xmm5,%zmm6\{%k7\}
 [ 	]*[a-f0-9]+:	62 f2 fd cf 21 f5    	vpmovsxbd %xmm5,%zmm6\{%k7\}\{z\}
 [ 	]*[a-f0-9]+:	62 f2 fd 4f 21 31    	vpmovsxbd \(%ecx\),%zmm6\{%k7\}
