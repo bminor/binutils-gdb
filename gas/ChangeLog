@@ -1,3 +1,8 @@
+2022-07-18  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* config/tc-arc.c (md_assembly): Update strspn string with the
+	missing ciphers.
+
 2022-07-08  Nick Clifton  <nickc@redhat.com>
 
 	* 2.39 branch created.

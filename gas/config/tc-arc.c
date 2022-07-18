@@ -2517,7 +2517,7 @@ md_assemble (char *str)
   struct arc_flags flags[MAX_INSN_FLGS];
 
   /* Split off the opcode.  */
-  opnamelen = strspn (str, "abcdefghijklmnopqrstuvwxyz_0123468");
+  opnamelen = strspn (str, "abcdefghijklmnopqrstuvwxyz_0123456789");
   opname = xmemdup0 (str, opnamelen);
 
   /* Signalize we are assembling the instructions.  */
