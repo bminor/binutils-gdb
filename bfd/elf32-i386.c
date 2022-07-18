@@ -1811,6 +1811,8 @@ elf_i386_scan_relocs (bfd *abfd,
 		  if (h->pointer_equality_needed
 		      && h->type == STT_FUNC
 		      && eh->def_protected
+		      && !SYMBOL_DEFINED_NON_SHARED_P (h)
+		      && h->def_dynamic
 		      && elf_has_indirect_extern_access (h->root.u.def.section->owner))
 		    {
 		      /* Disallow non-canonical reference to canonical
