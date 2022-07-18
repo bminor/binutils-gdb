@@ -2254,6 +2254,8 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 		  if (h->pointer_equality_needed
 		      && h->type == STT_FUNC
 		      && eh->def_protected
+		      && !SYMBOL_DEFINED_NON_SHARED_P (h)
+		      && h->def_dynamic
 		      && elf_has_indirect_extern_access (h->root.u.def.section->owner))
 		    {
 		      /* Disallow non-canonical reference to canonical
