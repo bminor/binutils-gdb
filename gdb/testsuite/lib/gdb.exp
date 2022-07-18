@@ -4489,9 +4489,13 @@ proc gdb_compile {source dest type options} {
 	&& [lsearch -exact $options rust] == -1
 	&& [lsearch -exact $options ada] == -1
 	&& [lsearch -exact $options f90] == -1
-	&& [lsearch -exact $options go] == -1
-	&& [test_compiler_info "clang-*"]} {
-	lappend new_options "additional_flags=-Wno-unknown-warning-option"
+	&& [lsearch -exact $options go] == -1} {
+	if {[test_compiler_info "clang-*"] || [test_compiler_info "icx-*"]} {
+	    lappend new_options "additional_flags=-Wno-unknown-warning-option"
+	} elseif {[test_compiler_info "icc-*"]} {
+	    # This is the equivalent for the icc compiler.
+	    lappend new_options "additional_flags=-diag-disable=10148"
+	}
     }
 
     # Treating .c input files as C++ is deprecated in Clang, so
