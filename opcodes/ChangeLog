@@ -1,3 +1,13 @@
+2022-07-18  Claudiu Zissulescu  <claziss@synopsys.com>
+
+	* disassemble.c (disassemble_init_for_target): Set
+	created_styled_output for ARC based targets.
+	* arc-dis.c (find_format_from_table): Use fprintf_styled_ftype
+	instead of fprintf_ftype throughout.
+	(find_format): Likewise.
+	(print_flags): Likewise.
+	(print_insn_arc): Likewise.
+
 2022-07-08  Nick Clifton  <nickc@redhat.com>
 
 	* 2.39 branch created.
