@@ -7624,6 +7624,14 @@ process_queue (dwarf2_per_objfile *per_objfile)
   using iter_type = decltype (per_objfile->queue->begin ());
   using result_type = int;
 
+    std::function<unsigned int (iter_type)> task_size
+      = [=] (iter_type iter)
+      {
+	dwarf2_queue_item &item = *iter;
+	dwarf2_per_cu_data *per_cu = item.per_cu;
+	return per_cu->length ();
+      };
+
   /* The queue starts out with one item, but following a DIE reference
      may load a new CU, adding it to the end of the queue.  */
   while (!per_objfile->queue->empty ())
@@ -7642,7 +7650,7 @@ process_queue (dwarf2_per_objfile *per_objfile)
 	    }
 
 	  return result_type (1);
-	});
+	}, &task_size);
 
       for (int i = 0; i < nr_to_be_processed; ++i)
 	{
