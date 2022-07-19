@@ -224,7 +224,7 @@ set i386tests {
      "--32 -mx86-used-note=yes" {pr17709a.s} {} "libpr17709.so"}
     {"PR ld/17709 (2)" "-melf_i386 tmpdir/libpr17709.so" ""
      "--32 -mx86-used-note=yes"
-     {pr17709b.s} {{readelf -r pr17709.rd}} "pr17709"}
+     {pr17709b.s} {{ld "pr17709.err"}} "pr17709"}
     {"Build pr19827a.o" "" ""
      "--32 -mx86-used-note=yes" { pr19827a.S }}
     {"Build pr19827b.so" "-melf_i386 -shared" ""
