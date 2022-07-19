@@ -1552,7 +1552,12 @@ If no tags were found, return an empty vector.
 """,
     type="gdb::byte_vector",
     name="decode_memtag_section",
-    params=[("bfd_section *", "section"), ("int", "type"), ("CORE_ADDR", "address"), ("size_t", "length")],
+    params=[
+        ("bfd_section *", "section"),
+        ("int", "type"),
+        ("CORE_ADDR", "address"),
+        ("size_t", "length"),
+    ],
     predicate=True,
     invalid=True,
 )
