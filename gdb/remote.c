@@ -12072,6 +12072,9 @@ remote_target::rcmd (const char *command, struct ui_file *outbuf)
   if (command == NULL)
     command = "";
 
+  /* It might be important for this command to know the current thread.  */
+  set_general_thread (inferior_ptid);
+
   /* The query prefix.  */
   strcpy (rs->buf.data (), "qRcmd,");
   p = strchr (rs->buf.data (), '\0');
