@@ -43,6 +43,7 @@
 #endif
 #include <algorithm>
 #include <vector>
+#include <queue>
 
 #include "filenames.h"
 #include "symfile.h"
@@ -244,6 +245,8 @@ static const struct xlate_exception xlate[] =
 
 struct windows_nat_target final : public x86_nat_target<inf_child_target>
 {
+  windows_nat_target ();
+
   void close () override;
 
   void attach (const char *, int) override;
@@ -302,7 +305,8 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
 
   const char *thread_name (struct thread_info *) override;
 
-  int get_windows_debug_event (int pid, struct target_waitstatus *ourstatus);
+  ptid_t get_windows_debug_event (int pid, struct target_waitstatus *ourstatus,
+				  target_wait_flags options);
 
   void do_initial_windows_stuff (DWORD pid, bool attaching);
 
@@ -317,6 +321,34 @@ private:
 				   bool main_thread_p);
   void delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p);
   DWORD fake_create_process ();
+
+  BOOL windows_continue (DWORD continue_status, int id, int killed);
+
+  /* This function implements the background thread that starts
+     inferiors and waits for events.  */
+  void process_thread ();
+
+  /* Push FUNC onto the queue of requests for process_thread, and wait
+     until it has been called.  On Windows, certain debugging
+     functions can only be called by the thread that started (or
+     attached to) the inferior.  These are all done in the worker
+     thread, via calls to this method.  */
+  void do_synchronously (gdb::function_view<void ()> func);
+
+  /* This waits for a debug event, dispatching to the worker thread as
+     needed.  */
+  void wait_for_debug_event_main_thread (DEBUG_EVENT *event);
+
+  /* Queue used to send requests to process_thread.  This is
+     implicitly locked.  */
+  std::queue<gdb::function_view<void ()>> m_queue;
+
+  /* Event used to signal process_thread that an item has been
+     pushed.  */
+  HANDLE m_pushed_event;
+  /* Event used by process_thread to indicate that it has processed a
+     single function call.  */
+  HANDLE m_response_event;
 };
 
 static windows_nat_target the_windows_nat_target;
@@ -330,6 +362,74 @@ check (BOOL ok, const char *file, int line)
       gdb_printf ("error return %s:%d was %u: %s\n", file, line,
 		  err, strwinerror (err));
     }
+}
+
+windows_nat_target::windows_nat_target ()
+  : m_pushed_event (CreateEvent (nullptr, false, false, nullptr)),
+    m_response_event (CreateEvent (nullptr, false, false, nullptr))
+{
+  auto fn = [] (LPVOID self) -> DWORD
+    {
+      ((windows_nat_target *) self)->process_thread ();
+      return 0;
+    };
+
+  HANDLE bg_thread = CreateThread (nullptr, 64 * 1024, fn, this, 0, nullptr);
+  CloseHandle (bg_thread);
+}
+
+/* A wrapper for WaitForSingleObject that issues a warning if
+   something unusual happens.  */
+static void
+wait_for_single (HANDLE handle, DWORD howlong)
+{
+  while (true)
+    {
+      DWORD r = WaitForSingleObject (handle, howlong);
+      if (r == WAIT_OBJECT_0)
+	return;
+      if (r == WAIT_FAILED)
+	{
+	  unsigned err = (unsigned) GetLastError ();
+	  warning ("WaitForSingleObject failed (code %u): %s",
+		   err, strwinerror (err));
+	}
+      else
+	warning ("unexpected result from WaitForSingleObject: %u",
+		 (unsigned) r);
+    }
+}
+
+void
+windows_nat_target::process_thread ()
+{
+  while (true)
+    {
+      wait_for_single (m_pushed_event, INFINITE);
+
+      gdb::function_view<void ()> func = std::move (m_queue.front ());
+      m_queue.pop ();
+
+      func ();
+      SetEvent (m_response_event);
+   }
+}
+
+void
+windows_nat_target::do_synchronously (gdb::function_view<void ()> func)
+{
+  m_queue.emplace (std::move (func));
+  SetEvent (m_pushed_event);
+  wait_for_single (m_response_event, INFINITE);
+}
+
+void
+windows_nat_target::wait_for_debug_event_main_thread (DEBUG_EVENT *event)
+{
+  do_synchronously ([&] ()
+    {
+      wait_for_debug_event (event, INFINITE);
+    });
 }
 
 /* See nat/windows-nat.h.  */
@@ -1079,11 +1179,9 @@ windows_per_inferior::handle_access_violation
    threads, if we are continuing execution.  KILLED non-zero means we
    have killed the inferior, so we should ignore weird errors due to
    threads shutting down.  */
-static BOOL
-windows_continue (DWORD continue_status, int id, int killed)
+BOOL
+windows_nat_target::windows_continue (DWORD continue_status, int id, int killed)
 {
-  BOOL res;
-
   windows_process.desired_stop_thread_id = id;
 
   if (windows_process.matching_pending_stop (debug_events))
@@ -1160,17 +1258,19 @@ windows_continue (DWORD continue_status, int id, int killed)
 	th->suspend ();
       }
 
-  res = continue_last_debug_event (continue_status, debug_events);
-
-  if (!res)
+  gdb::optional<unsigned> err;
+  do_synchronously ([&] ()
     {
-      unsigned err = (unsigned) GetLastError ();
-      error (_("Failed to resume program execution"
-	       " (ContinueDebugEvent failed, error %u: %s)"),
-	     err, strwinerror (err));
-    }
+      if (!continue_last_debug_event (continue_status, debug_events))
+	err = (unsigned) GetLastError ();
+    });
 
-  return res;
+  if (err.has_value ())
+    error (_("Failed to resume program execution"
+	     " (ContinueDebugEvent failed, error %u: %s)"),
+	   *err, strwinerror (*err));
+
+  return TRUE;
 }
 
 /* Called in pathological case where Windows fails to send a
@@ -1376,14 +1476,12 @@ ctrl_c_handler (DWORD event_type)
   return TRUE;
 }
 
-/* Get the next event from the child.  Returns a non-zero thread id if the event
-   requires handling by WFI (or whatever).  */
+/* Get the next event from the child.  Returns the thread ptid.  */
 
-int
-windows_nat_target::get_windows_debug_event (int pid,
-					     struct target_waitstatus *ourstatus)
+ptid_t
+windows_nat_target::get_windows_debug_event
+     (int pid, struct target_waitstatus *ourstatus, target_wait_flags options)
 {
-  BOOL debug_event;
   DWORD continue_status, event_code;
   DWORD thread_id = 0;
 
@@ -1402,15 +1500,13 @@ windows_nat_target::get_windows_debug_event (int pid,
 	= windows_process.thread_rec (ptid, INVALIDATE_CONTEXT);
       th->reload_context = true;
 
-      return thread_id;
+      return ptid;
     }
 
   windows_process.last_sig = GDB_SIGNAL_0;
   DEBUG_EVENT *current_event = &windows_process.current_event;
 
-  if (!(debug_event = wait_for_debug_event (&windows_process.current_event,
-					    1000)))
-    goto out;
+  wait_for_debug_event_main_thread (&windows_process.current_event);
 
   continue_status = DBG_CONTINUE;
 
@@ -1632,7 +1728,9 @@ windows_nat_target::get_windows_debug_event (int pid,
     }
 
 out:
-  return thread_id;
+  if (thread_id == 0)
+    return null_ptid;
+  return ptid_t (windows_process.current_event.dwProcessId, thread_id, 0);
 }
 
 /* Wait for interesting events to occur in the target process.  */
@@ -1650,8 +1748,6 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 
   while (1)
     {
-      int retval;
-
       /* If the user presses Ctrl-c while the debugger is waiting
 	 for an event, he expects the debugger to interrupt his program
 	 and to get the prompt back.  There are two possible situations:
@@ -1679,14 +1775,11 @@ windows_nat_target::wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 	     the user tries to resume the execution in the inferior.
 	     This is a classic race that we should try to fix one day.  */
       SetConsoleCtrlHandler (&ctrl_c_handler, TRUE);
-      retval = get_windows_debug_event (pid, ourstatus);
+      ptid_t result = get_windows_debug_event (pid, ourstatus, options);
       SetConsoleCtrlHandler (&ctrl_c_handler, FALSE);
 
-      if (retval)
+      if (result != null_ptid)
 	{
-	  ptid_t result = ptid_t (windows_process.current_event.dwProcessId,
-				  retval, 0);
-
 	  if (ourstatus->kind () != TARGET_WAITKIND_EXITED
 	      && ourstatus->kind () !=  TARGET_WAITKIND_SIGNALLED)
 	    {
@@ -1869,7 +1962,6 @@ out:
 void
 windows_nat_target::attach (const char *args, int from_tty)
 {
-  BOOL ok;
   DWORD pid;
 
   pid = parse_pid_to_attach (args);
@@ -1879,26 +1971,31 @@ windows_nat_target::attach (const char *args, int from_tty)
 	     "This can cause attach to fail on Windows NT/2K/XP");
 
   windows_init_thread_list ();
-  ok = DebugActiveProcess (pid);
   windows_process.saw_create = 0;
 
-#ifdef __CYGWIN__
-  if (!ok)
+  gdb::optional<unsigned> err;
+  do_synchronously ([&] ()
     {
-      /* Try fall back to Cygwin pid.  */
-      pid = cygwin_internal (CW_CYGWIN_PID_TO_WINPID, pid);
+      BOOL ok = DebugActiveProcess (pid);
 
-      if (pid > 0)
-	ok = DebugActiveProcess (pid);
-  }
+#ifdef __CYGWIN__
+      if (!ok)
+	{
+	  /* Try fall back to Cygwin pid.  */
+	  pid = cygwin_internal (CW_CYGWIN_PID_TO_WINPID, pid);
+
+	  if (pid > 0)
+	    ok = DebugActiveProcess (pid);
+	}
 #endif
 
-  if (!ok)
-    {
-      unsigned err = (unsigned) GetLastError ();
-      error (_("Can't attach to process %u (error %u: %s)"),
-	     (unsigned) pid, err, strwinerror (err));
-    }
+      if (!ok)
+	err = (unsigned) GetLastError ();
+    });
+
+  if (err.has_value ())
+    error (_("Can't attach to process %u (error %u: %s)"),
+	   (unsigned) pid, *err, strwinerror (*err));
 
   DebugSetProcessKillOnExit (FALSE);
 
@@ -1925,14 +2022,19 @@ windows_nat_target::detach (inferior *inf, int from_tty)
   ptid_t ptid = minus_one_ptid;
   resume (ptid, 0, GDB_SIGNAL_0);
 
-  if (!DebugActiveProcessStop (windows_process.current_event.dwProcessId))
+  gdb::optional<unsigned> err;
+  do_synchronously ([&] ()
     {
-      unsigned err = (unsigned) GetLastError ();
-      error (_("Can't detach process %u (error %u: %s)"),
-	     (unsigned) windows_process.current_event.dwProcessId,
-	     err, strwinerror (err));
-    }
-  DebugSetProcessKillOnExit (FALSE);
+      if (!DebugActiveProcessStop (windows_process.current_event.dwProcessId))
+	err = (unsigned) GetLastError ();
+      else
+	DebugSetProcessKillOnExit (FALSE);
+    });
+
+  if (err.has_value ())
+    error (_("Can't detach process %u (error %u: %s)"),
+	   (unsigned) windows_process.current_event.dwProcessId,
+	   *err, strwinerror (*err));
 
   target_announce_detach (from_tty);
 
@@ -2378,7 +2480,7 @@ windows_nat_target::create_inferior (const char *exec_file,
 #endif	/* !__CYGWIN__ */
   const char *allargs = origallargs.c_str ();
   PROCESS_INFORMATION pi;
-  BOOL ret;
+  gdb::optional<unsigned> ret;
   DWORD flags = 0;
   const std::string &inferior_tty = current_inferior ()->tty ();
 
@@ -2485,10 +2587,15 @@ windows_nat_target::create_inferior (const char *exec_file,
     }
 
   windows_init_thread_list ();
-  ret = create_process (nullptr, args, flags, w32_env,
-			inferior_cwd != nullptr ? infcwd : nullptr,
-			disable_randomization,
-			&si, &pi);
+  do_synchronously ([&] ()
+    {
+      if (!create_process (nullptr, args, flags, w32_env,
+			   inferior_cwd != nullptr ? infcwd : nullptr,
+			   disable_randomization,
+			   &si, &pi))
+	ret = (unsigned) GetLastError ();
+    });
+
   if (w32_env)
     /* Just free the Win32 environment, if it could be created. */
     free (w32_env);
@@ -2605,14 +2712,18 @@ windows_nat_target::create_inferior (const char *exec_file,
   *temp = 0;
 
   windows_init_thread_list ();
-  ret = create_process (nullptr, /* image */
-			args,	/* command line */
-			flags,	/* start flags */
-			w32env,	/* environment */
-			inferior_cwd, /* current directory */
-			disable_randomization,
-			&si,
-			&pi);
+  do_synchronously ([&] ()
+    {
+      if (!create_process (nullptr, /* image */
+			   args,	/* command line */
+			   flags,	/* start flags */
+			   w32env,	/* environment */
+			   inferior_cwd, /* current directory */
+			   disable_randomization,
+			   &si,
+			   &pi))
+	ret = (unsigned) GetLastError ();
+    });
   if (tty != INVALID_HANDLE_VALUE)
     CloseHandle (tty);
   if (fd_inp >= 0)
@@ -2623,12 +2734,9 @@ windows_nat_target::create_inferior (const char *exec_file,
     _close (fd_err);
 #endif	/* !__CYGWIN__ */
 
-  if (!ret)
-    {
-      unsigned err = (unsigned) GetLastError ();
-      error (_("Error creating process %s, (error %u: %s)"),
-	     exec_file, err, strwinerror (err));
-    }
+  if (ret.has_value ())
+    error (_("Error creating process %s, (error %u: %s)"),
+	   exec_file, *ret, strwinerror (*ret));
 
 #ifdef __x86_64__
   BOOL wow64;
@@ -2724,8 +2832,7 @@ windows_nat_target::kill ()
     {
       if (!windows_continue (DBG_CONTINUE, -1, 1))
 	break;
-      if (!wait_for_debug_event (&windows_process.current_event, INFINITE))
-	break;
+      wait_for_debug_event_main_thread (&windows_process.current_event);
       if (windows_process.current_event.dwDebugEventCode
 	  == EXIT_PROCESS_DEBUG_EVENT)
 	break;
