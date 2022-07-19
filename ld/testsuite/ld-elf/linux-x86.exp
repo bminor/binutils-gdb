@@ -136,7 +136,7 @@ run_cc_link_tests [list \
     ] \
     [list \
 	"Build pr29377.o" \
-	"-r -Wl,-z,noexecstack" \
+	"-r -nostdlib -Wl,-z,noexecstack" \
 	"" \
 	{pr29377a.c indirect-extern-access.S} \
 	{} \
