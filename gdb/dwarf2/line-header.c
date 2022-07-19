@@ -69,13 +69,13 @@ line_header::file_file_name (const file_entry &fe) const
 
   const char *dir = fe.include_dir (this);
   if (dir != nullptr)
-    ret = path_join (dir, ret);
+    ret = path_join (dir, ret.c_str ());
 
   if (IS_ABSOLUTE_PATH (ret))
     return ret;
 
   if (m_comp_dir != nullptr)
-    ret = path_join (m_comp_dir, ret);
+    ret = path_join (m_comp_dir, ret.c_str ());
 
   return ret;
 }

@@ -191,21 +191,21 @@ child_path (const char *parent, const char *child)
 /* See gdbsupport/pathstuff.h.  */
 
 std::string
-path_join (gdb::array_view<const gdb::string_view> paths)
+path_join (gdb::array_view<const char *> paths)
 {
   std::string ret;
 
   for (int i = 0; i < paths.size (); ++i)
     {
-      const gdb::string_view path = paths[i];
+      const char *path = paths[i];
 
       if (i > 0)
-	gdb_assert (path.empty () || !IS_ABSOLUTE_PATH (path));
+	gdb_assert (strlen (path) == 0 || !IS_ABSOLUTE_PATH (path));
 
       if (!ret.empty () && !IS_DIR_SEPARATOR (ret.back ()))
 	  ret += '/';
 
-      ret.append (path.begin (), path.end ());
+      ret.append (path);
     }
 
   return ret;
