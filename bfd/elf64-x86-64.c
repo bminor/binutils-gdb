@@ -2255,8 +2255,7 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 		      && h->type == STT_FUNC
 		      && eh->def_protected
 		      && !SYMBOL_DEFINED_NON_SHARED_P (h)
-		      && h->def_dynamic
-		      && elf_has_indirect_extern_access (h->root.u.def.section->owner))
+		      && h->def_dynamic)
 		    {
 		      /* Disallow non-canonical reference to canonical
 			 protected function.  */
@@ -3156,8 +3155,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	       || (h != NULL
 		   && !h->root.linker_def
 		   && !h->root.ldscript_def
-		   && eh->def_protected
-		   && elf_has_no_copy_on_protected (h->root.u.def.section->owner)));
+		   && eh->def_protected));
 
 	  if ((input_section->flags & SEC_ALLOC) != 0
 	      && (input_section->flags & SEC_READONLY) != 0
@@ -4097,9 +4095,7 @@ elf_x86_64_relocate_section (bfd *output_bfd,
 	    {
 	    case R_X86_64_32S:
 	      sec = h->root.u.def.section;
-	      if ((info->nocopyreloc
-		   || (eh->def_protected
-		       && elf_has_no_copy_on_protected (h->root.u.def.section->owner)))
+	      if ((info->nocopyreloc || eh->def_protected)
 		  && !(h->root.u.def.section->flags & SEC_CODE))
 		return elf_x86_64_need_pic (info, input_bfd, input_section,
 					    h, NULL, NULL, howto);

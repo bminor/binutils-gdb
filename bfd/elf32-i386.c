@@ -1812,8 +1812,7 @@ elf_i386_scan_relocs (bfd *abfd,
 		      && h->type == STT_FUNC
 		      && eh->def_protected
 		      && !SYMBOL_DEFINED_NON_SHARED_P (h)
-		      && h->def_dynamic
-		      && elf_has_indirect_extern_access (h->root.u.def.section->owner))
+		      && h->def_dynamic)
 		    {
 		      /* Disallow non-canonical reference to canonical
 			 protected function.  */
