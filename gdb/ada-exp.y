@@ -1698,9 +1698,6 @@ write_var_or_type (struct parser_state *par_state,
 	    }
 	  else if (syms.empty ())
 	    {
-	      if (block == nullptr)
-		block = get_selected_block (nullptr);
-
 	      struct objfile *objfile = nullptr;
 	      if (block != nullptr)
 		objfile = block_objfile (block);
