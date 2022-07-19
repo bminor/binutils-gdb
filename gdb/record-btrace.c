@@ -62,7 +62,7 @@ public:
   strata stratum () const override { return record_stratum; }
 
   void close () override;
-  void async (int) override;
+  void async (bool) override;
 
   void detach (inferior *inf, int from_tty) override
   { record_detach (this, inf, from_tty); }
@@ -456,7 +456,7 @@ record_btrace_target::close ()
 /* The async method of target record-btrace.  */
 
 void
-record_btrace_target::async (int enable)
+record_btrace_target::async (bool enable)
 {
   if (enable)
     mark_async_event_handler (record_btrace_async_inferior_event_handler);
@@ -2187,7 +2187,7 @@ record_btrace_target::resume (ptid_t ptid, int step, enum gdb_signal signal)
   /* Async support.  */
   if (target_can_async_p ())
     {
-      target_async (1);
+      target_async (true);
       mark_async_event_handler (record_btrace_async_inferior_event_handler);
     }
 }

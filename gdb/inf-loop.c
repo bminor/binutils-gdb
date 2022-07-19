@@ -48,7 +48,7 @@ inferior_event_handler (enum inferior_event_type event_type)
 	     so that when the inferior is not running we don't get
 	     distracted by spurious inferior output.  */
 	  if (target_has_execution () && target_can_async_p ())
-	    target_async (0);
+	    target_async (false);
 	}
 
       /* Do all continuations associated with the whole inferior (not

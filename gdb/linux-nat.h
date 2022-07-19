@@ -87,7 +87,7 @@ public:
   bool supports_non_stop () override;
   bool always_non_stop_p () override;
 
-  void async (int) override;
+  void async (bool) override;
 
   void stop (ptid_t) override;
 

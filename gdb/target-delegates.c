@@ -101,7 +101,7 @@ struct dummy_target : public target_ops
   bool attach_no_wait () override;
   bool can_async_p () override;
   bool is_async_p () override;
-  void async (int arg0) override;
+  void async (bool arg0) override;
   int async_wait_fd () override;
   bool has_pending_events () override;
   void thread_events (int arg0) override;
@@ -275,7 +275,7 @@ struct debug_target : public target_ops
   bool attach_no_wait () override;
   bool can_async_p () override;
   bool is_async_p () override;
-  void async (int arg0) override;
+  void async (bool arg0) override;
   int async_wait_fd () override;
   bool has_pending_events () override;
   void thread_events (int arg0) override;
@@ -2156,24 +2156,24 @@ debug_target::is_async_p ()
 }
 
 void
-target_ops::async (int arg0)
+target_ops::async (bool arg0)
 {
   this->beneath ()->async (arg0);
 }
 
 void
-dummy_target::async (int arg0)
+dummy_target::async (bool arg0)
 {
   tcomplain ();
 }
 
 void
-debug_target::async (int arg0)
+debug_target::async (bool arg0)
 {
   gdb_printf (gdb_stdlog, "-> %s->async (...)\n", this->beneath ()->shortname ());
   this->beneath ()->async (arg0);
   gdb_printf (gdb_stdlog, "<- %s->async (", this->beneath ()->shortname ());
-  target_debug_print_int (arg0);
+  target_debug_print_bool (arg0);
   gdb_puts (")\n", gdb_stdlog);
 }
 

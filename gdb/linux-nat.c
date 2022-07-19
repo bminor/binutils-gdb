@@ -1652,7 +1652,7 @@ linux_nat_target::resume (ptid_t scope_ptid, int step, enum gdb_signal signo)
 
       if (target_can_async_p ())
 	{
-	  target_async (1);
+	  target_async (true);
 	  /* Tell the event loop we have something to process.  */
 	  async_file_mark ();
 	}
@@ -4143,9 +4143,9 @@ handle_target_event (int error, gdb_client_data client_data)
 /* target_async implementation.  */
 
 void
-linux_nat_target::async (int enable)
+linux_nat_target::async (bool enable)
 {
-  if ((enable != 0) == is_async_p ())
+  if (enable == is_async_p ())
     return;
 
   /* Block child signals while we create/destroy the pipe, as their

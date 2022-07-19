@@ -68,7 +68,7 @@ public:
 
   bool can_async_p () override;
 
-  void async (int) override;
+  void async (bool) override;
 
   thread_control_capabilities get_thread_control_capabilities () override
   { return tc_schedlock; }

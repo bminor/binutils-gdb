@@ -713,7 +713,7 @@ struct target_ops
       TARGET_DEFAULT_RETURN (false);
     virtual bool is_async_p ()
       TARGET_DEFAULT_RETURN (false);
-    virtual void async (int)
+    virtual void async (bool)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     virtual int async_wait_fd ()
       TARGET_DEFAULT_NORETURN (noprocess ());
@@ -1886,7 +1886,7 @@ extern bool target_can_async_p (struct target_ops *target);
 extern bool target_is_async_p ();
 
 /* Enables/disabled async target events.  */
-extern void target_async (int enable);
+extern void target_async (bool enable);
 
 /* Enables/disables thread create and exit events.  */
 extern void target_thread_events (int enable);

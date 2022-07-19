@@ -971,9 +971,9 @@ handle_target_event (int error, gdb_client_data client_data)
 /* Implement the "async" target method.  */
 
 void
-fbsd_nat_target::async (int enable)
+fbsd_nat_target::async (bool enable)
 {
-  if ((enable != 0) == is_async_p ())
+  if (enable == is_async_p ())
     return;
 
   /* Block SIGCHILD while we create/destroy the pipe, as the handler

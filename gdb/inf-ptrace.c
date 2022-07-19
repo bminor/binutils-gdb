@@ -538,7 +538,7 @@ inf_ptrace_target::close ()
 {
   /* Unregister from the event loop.  */
   if (is_async_p ())
-    async (0);
+    async (false);
 
   inf_child_target::close ();
 }

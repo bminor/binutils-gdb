@@ -2675,7 +2675,7 @@ target_resume (ptid_t scope_ptid, int step, enum gdb_signal signal)
   clear_inline_frame_state (curr_target, scope_ptid);
 
   if (target_can_async_p ())
-    target_async (1);
+    target_async (true);
 }
 
 /* See target.h.  */
@@ -4352,7 +4352,7 @@ maintenance_print_target_stack (const char *cmd, int from_tty)
 /* See target.h.  */
 
 void
-target_async (int enable)
+target_async (bool enable)
 {
   /* If we are trying to enable async mode then it must be the case that
      async mode is possible for this target.  */

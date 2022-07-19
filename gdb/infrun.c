@@ -2353,7 +2353,7 @@ resume_1 (enum gdb_signal sig)
 
       if (target_can_async_p ())
 	{
-	  target_async (1);
+	  target_async (true);
 	  /* Tell the event loop we have an event to process. */
 	  mark_async_event_handler (infrun_async_inferior_event_token);
 	}
@@ -4781,7 +4781,7 @@ wait_one ()
 	    {
 	      /* If nothing is resumed, remove the target from the
 		 event loop.  */
-	      target_async (0);
+	      target_async (false);
 	    }
 	  else if (event.ws.kind () != TARGET_WAITKIND_IGNORE)
 	    return event;

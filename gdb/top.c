@@ -1109,7 +1109,7 @@ public:
     current_ui->secondary_prompt_depth++;
 
     if (m_target_is_async_orig)
-      target_async (0);
+      target_async (false);
   }
 
   ~gdb_readline_wrapper_cleanup ()
@@ -1138,7 +1138,7 @@ public:
     saved_after_char_processing_hook = NULL;
 
     if (m_target_is_async_orig)
-      target_async (1);
+      target_async (true);
   }
 
   DISABLE_COPY_AND_ASSIGN (gdb_readline_wrapper_cleanup);

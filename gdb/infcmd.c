@@ -2605,7 +2605,7 @@ attach_command (const char *args, int from_tty)
 
   /* Enable async mode if it is supported by the target.  */
   if (target_can_async_p ())
-    target_async (1);
+    target_async (true);
 
   /* Set up the "saved terminal modes" of the inferior
      based on what modes we are starting it with.  */
