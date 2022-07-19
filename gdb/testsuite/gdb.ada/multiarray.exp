@@ -22,11 +22,11 @@ standard_ada_testfile p
 foreach_with_prefix scenario {all minimal} {
     set flags [list debug additional_flags=-fgnat-encodings=$scenario]
 
-    if {[gdb_compile_ada "${srcfile}" "${binfile}" executable {debug}] != ""} {
+    if {[gdb_compile_ada "${srcfile}" "${binfile}-${scenario}" executable {debug}] != ""} {
 	return -1
     }
 
-    clean_restart ${testfile}
+    clean_restart ${testfile}-${scenario}
 
     set bp_location [gdb_get_line_number "START" ${testdir}/p.adb]
     runto "p.adb:$bp_location"

@@ -24,11 +24,11 @@ foreach_with_prefix scenario {all minimal} {
 		   optimize=-O2 \
 		   additional_flags=-fgnat-encodings=$scenario]
 
-    if {[gdb_compile_ada "${srcfile}" "${binfile}" executable $flags] != ""} {
+    if {[gdb_compile_ada "${srcfile}" "${binfile}-${scenario}" executable $flags] != ""} {
 	return -1
     }
 
-    clean_restart ${testfile}
+    clean_restart ${testfile}-${scenario}
 
     runto "increment"
 
