@@ -61,6 +61,11 @@ typedef struct def_file_aligncomm {
   unsigned int alignment;	/* log-2 alignment.        */
 } def_file_aligncomm;
 
+typedef struct def_file_exclude_symbol {
+  struct def_file_exclude_symbol *next;	/* Chain pointer.  */
+  char *symbol_name;		/* Name of excluded symbol.  */
+} def_file_exclude_symbol;
+
 typedef struct def_file {
   /* From the NAME or LIBRARY command.  */
   char *name;
@@ -94,6 +99,7 @@ typedef struct def_file {
 
   /* Only expected from .drectve sections, not .DEF files.  */
   def_file_aligncomm *aligncomms;
+  def_file_exclude_symbol *exclude_symbols;
 
 } def_file;
 

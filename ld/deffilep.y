@@ -101,6 +101,7 @@ static void def_stacksize (int, int);
 static void def_version (int, int);
 static void def_directive (char *);
 static void def_aligncomm (char *str, int align);
+static void def_exclude_symbols (char *str);
 static int def_parse (void);
 static void def_error (const char *);
 static int def_lex (void);
@@ -121,7 +122,7 @@ static const char *lex_parse_string_end = 0;
 
 %token NAME LIBRARY DESCRIPTION STACKSIZE_K HEAPSIZE CODE DATAU DATAL
 %token SECTIONS EXPORTS IMPORTS VERSIONK BASE CONSTANTU CONSTANTL
-%token PRIVATEU PRIVATEL ALIGNCOMM
+%token PRIVATEU PRIVATEL ALIGNCOMM EXCLUDE_SYMBOLS
 %token READ WRITE EXECUTE SHARED_K NONAMEU NONAMEL DIRECTIVE EQUAL
 %token <id> ID
 %token <digits> DIGITS
@@ -131,7 +132,7 @@ static const char *lex_parse_string_end = 0;
 %type  <number> opt_ordinal
 %type  <number> attr attr_list opt_number exp_opt_list exp_opt
 %type  <id> opt_name opt_name2 opt_equal_name anylang_id opt_id
-%type  <id> opt_equalequal_name
+%type  <id> opt_equalequal_name symbol_list
 %type  <id_const> keyword_as_name
 
 %%
@@ -155,6 +156,7 @@ command:
 	|	VERSIONK NUMBER '.' NUMBER { def_version ($2, $4);}
 	|	DIRECTIVE ID { def_directive ($2);}
 	|	ALIGNCOMM anylang_id ',' NUMBER { def_aligncomm ($2, $4);}
+	|	EXCLUDE_SYMBOLS symbol_list
 	;
 
 
@@ -333,6 +335,11 @@ anylang_id: ID		{ $$ = $1; }
 	  }
 	;
 
+symbol_list:
+	anylang_id { def_exclude_symbols ($1); }
+	|	symbol_list ',' anylang_id { def_exclude_symbols ($3); }
+	;
+
 opt_digits: DIGITS	{ $$ = $1; }
 	|		{ $$ = ""; }
 	;
@@ -486,6 +493,15 @@ def_file_free (def_file *fdef)
       fdef->aligncomms = fdef->aligncomms->next;
       free (c->symbol_name);
       free (c);
+    }
+
+  while (fdef->exclude_symbols)
+    {
+      def_file_exclude_symbol *e = fdef->exclude_symbols;
+
+      fdef->exclude_symbols = fdef->exclude_symbols->next;
+      free (e->symbol_name);
+      free (e);
     }
 
   free (fdef);
@@ -943,6 +959,7 @@ diropts[] =
   { "-attr", SECTIONS },
   { "-export", EXPORTS },
   { "-aligncomm", ALIGNCOMM },
+  { "-exclude-symbols", EXCLUDE_SYMBOLS },
   { 0, 0 }
 };
 
@@ -1250,6 +1267,35 @@ def_aligncomm (char *str, int align)
     {
       c->next = def->aligncomms;
       def->aligncomms = c;
+    }
+  else
+    {
+      c->next = p->next;
+      p->next = c;
+    }
+}
+
+static void
+def_exclude_symbols (char *str)
+{
+  def_file_exclude_symbol *c, *p;
+
+  p = NULL;
+  c = def->exclude_symbols;
+  while (c != NULL)
+    {
+      int e = strcmp (c->symbol_name, str);
+      if (!e)
+        return;
+      c = (p = c)->next;
+    }
+
+  c = xmalloc (sizeof (def_file_exclude_symbol));
+  c->symbol_name = xstrdup (str);
+  if (!p)
+    {
+      c->next = def->exclude_symbols;
+      def->exclude_symbols = c;
     }
   else
     {
