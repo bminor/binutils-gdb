@@ -8842,5 +8842,35 @@ gdb_caching_proc arm_cc_for_target {
     return ""
 }
 
+# Step until the pattern REGEXP is found.  Step at most
+# MAX_STEPS times, but stop stepping once REGEXP is found.
+#
+# If REGEXP is found then a single pass is emitted, otherwise, after
+# MAX_STEPS steps, a single fail is emitted.
+#
+# TEST_NAME is the name used in the pass/fail calls.
+
+proc gdb_step_until { regexp {test_name ""} {max_steps 10} } {
+    if { $test_name == "" } {
+	set test_name "stepping until regexp"
+    }
+
+    set count 0
+    gdb_test_multiple "step" "$test_name" {
+	-re "$regexp\r\n$::gdb_prompt $" {
+	    pass $test_name
+	}
+	-re ".*$::gdb_prompt $" {
+	    if {$count < $max_steps} {
+		incr count
+		send_gdb "step\n"
+		exp_continue
+	    } else {
+		fail $test_name
+	    }
+	}
+    }
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
