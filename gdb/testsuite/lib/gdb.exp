@@ -8872,5 +8872,37 @@ proc gdb_step_until { regexp {test_name ""} {max_steps 10} } {
     }
 }
 
+# Check if the compiler emits epilogue information associated
+# with the closing brace or with the last statement line.
+#
+# This proc restarts GDB
+#
+# Returns True if it is associated with the closing brace,
+# False if it is the last statement
+gdb_caching_proc have_epilogue_line_info {
+
+    set main {
+	int
+	main ()
+	{
+	    return 0;
+	}
+    }
+    if {![gdb_simple_compile "simple_program" $main]} {
+	 return False
+    }
+
+    clean_restart $obj
+
+    gdb_test_multiple "info line 6" "epilogue test" {
+	-re -wrap ".*starts at address.*and ends at.*" {
+	    return True
+	}
+	-re -wrap ".*" {
+	    return False
+	}
+    }
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
