@@ -1408,7 +1408,7 @@ print_insn_arc (bfd_vma memaddr,
 					      "%s", rname);
 	      else
 		(*info->fprintf_styled_func) (info->stream, dis_style_immediate,
-					      "%" PRIx32, value);
+					      "%#x", value);
 	    }
 	}
 
