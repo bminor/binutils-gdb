@@ -193,6 +193,8 @@ AM_CONDITIONAL(GENINSRC_NEVER, false)
 AM_INSTALL_LIBBFD
 AC_EXEEXT
 
+AC_C_BIGENDIAN
+
 host64=false
 target64=false
 bfd_default_target_size=32

@@ -11361,6 +11361,13 @@ elf_link_input_bfd (struct elf_final_link_info *flinfo, bfd *input_bfd)
 	      contents = flinfo->contents;
 	    }
 	}
+      else if (!(o->flags & SEC_RELOC)
+	       && !bed->elf_backend_write_section
+	       && o->sec_info_type == SEC_INFO_TYPE_MERGE)
+	/* A MERGE section that has no relocations doesn't need the
+	   contents anymore, they have been recorded earlier.  Except
+	   if the backend has special provisions for writing sections.  */
+	contents = NULL;
       else
 	{
 	  contents = flinfo->contents;
