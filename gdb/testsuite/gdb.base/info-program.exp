@@ -26,9 +26,9 @@ if { ![runto_main] } {
 gdb_test "info program" "Program stopped at $hex\.\r\nIt stopped at breakpoint $decimal\.\r\nType \"info stack\" or \"info registers\" for more information\." \
     "info program after run to main"
 
-# We don't really care where this step lands, so long as it gets
-# the inferior pushed off the breakpoint it's currently on...
-gdb_test "next" "$decimal\t.*" "step before info program"
+# We don't really care where this step lands, so long as GDB reports
+# that the inferior stopped  due to a step in the subsequent test.
+gdb_test "next" ".*" "step before info program"
 
 gdb_test "info program" "Program stopped at $hex\.\r\nIt stopped after being stepped\.\r\nType \"info stack\" or \"info registers\" for more information\." \
     "info program after next"
