@@ -1279,6 +1279,9 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 
 	    switch (*++oparg)
 	      {
+		case 'l': /* Literal.  */
+		  oparg += strcspn(oparg, ",") - 1;
+		  break;
 		case 's': /* 'XsN@S' ... N-bit signed immediate at bit S.  */
 		  goto use_imm;
 		case 'u': /* 'XuN@S' ... N-bit unsigned immediate at bit S.  */
@@ -3310,6 +3313,13 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 
 		switch (*++oparg)
 		  {
+		    case 'l': /* Literal.  */
+		      n = strcspn (++oparg, ",");
+		      if (strncmp (oparg, asarg, n))
+			as_bad (_("unexpected literal (%s)"), asarg);
+		      oparg += n - 1;
+		      asarg += n;
+		      continue;
 		    case 's': /* 'XsN@S' ... N-bit signed immediate at bit S.  */
 		      sign = true;
 		      goto parse_imm;

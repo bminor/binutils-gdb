@@ -570,6 +570,15 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 
 	    switch (*++oparg)
 	      {
+		case 'l': /* Literal.  */
+		  oparg++;
+		  while (*oparg && *oparg != ',')
+		    {
+		      print (info->stream, dis_style_text, "%c", *oparg);
+		      oparg++;
+		    }
+		  oparg--;
+		  break;
 		case 's': /* 'XsN@S' ... N-bit signed immediate at bit S.  */
 		  sign = true;
 		  goto print_imm;
