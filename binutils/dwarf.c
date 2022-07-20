@@ -882,8 +882,15 @@ static unsigned long  next_free_abbrev_map_entry = 0;
 #define ABBREV_MAP_ENTRIES_INCREMENT   8
 
 static void
-record_abbrev_list_for_cu (dwarf_vma start, dwarf_vma end, abbrev_list * list)
+record_abbrev_list_for_cu (dwarf_vma start, dwarf_vma end,
+			   abbrev_list *list, abbrev_list *free_list)
 {
+  if (free_list != NULL)
+    {
+      list->next = abbrev_lists;
+      abbrev_lists = list;
+    }
+
   if (cu_abbrev_map == NULL)
     {
       num_abbrev_map_entries = INITIAL_NUM_ABBREV_MAP_ENTRIES;
@@ -939,20 +946,6 @@ free_all_abbrevs (void)
 }
 
 static abbrev_list *
-new_abbrev_list (dwarf_vma abbrev_base, dwarf_vma abbrev_offset)
-{
-  abbrev_list * list = (abbrev_list *) xcalloc (sizeof * list, 1);
-
-  list->abbrev_base = abbrev_base;
-  list->abbrev_offset = abbrev_offset;
-
-  list->next = abbrev_lists;
-  abbrev_lists = list;
-
-  return list;
-}
-
-static abbrev_list *
 find_abbrev_list_by_abbrev_offset (dwarf_vma abbrev_base,
 				   dwarf_vma abbrev_offset)
 {
@@ -969,7 +962,7 @@ find_abbrev_list_by_abbrev_offset (dwarf_vma abbrev_base,
 /* Find the abbreviation map for the CU that includes OFFSET.
    OFFSET is an absolute offset from the start of the .debug_info section.  */
 /* FIXME: This function is going to slow down readelf & objdump.
-   Consider using a better algorithm to mitigate this effect.  */
+   Not caching abbrevs is likely the answer.  */
 
 static  abbrev_map *
 find_abbrev_map_by_offset (dwarf_vma offset)
@@ -1036,40 +1029,18 @@ add_abbrev_attr (unsigned long    attribute,
   list->last_abbrev->last_attr = attr;
 }
 
-/* Processes the (partial) contents of a .debug_abbrev section.
-   Returns NULL if the end of the section was encountered.
-   Returns the address after the last byte read if the end of
-   an abbreviation set was found.  */
+/* Return processed (partial) contents of a .debug_abbrev section.
+   Returns NULL on errors.  */
 
-static unsigned char *
+static abbrev_list *
 process_abbrev_set (struct dwarf_section *section,
-		    dwarf_vma abbrev_base,
-		    dwarf_vma abbrev_size,
-		    dwarf_vma abbrev_offset,
-		    abbrev_list *list)
+		    unsigned char *start,
+		    unsigned char *end)
 {
-  if (abbrev_base >= section->size
-      || abbrev_size > section->size - abbrev_base)
-    {
-      /* PR 17531: file:4bcd9ce9.  */
-      warn (_("Debug info is corrupted, abbrev size (%lx) is larger than "
-	      "abbrev section size (%lx)\n"),
-	      (unsigned long) (abbrev_base + abbrev_size),
-	      (unsigned long) section->size);
-      return NULL;
-    }
-  if (abbrev_offset >= abbrev_size)
-    {
-      warn (_("Debug info is corrupted, abbrev offset (%lx) is larger than "
-	      "abbrev section size (%lx)\n"),
-	    (unsigned long) abbrev_offset,
-	    (unsigned long) abbrev_size);
-      return NULL;
-    }
+  abbrev_list *list = xmalloc (sizeof (*list));
+  list->first_abbrev = NULL;
+  list->last_abbrev = NULL;
 
-  unsigned char *start = section->start + abbrev_base;
-  unsigned char *end = start + abbrev_size;
-  start += abbrev_offset;
   while (start < end)
     {
       unsigned long entry;
@@ -1082,14 +1053,18 @@ process_abbrev_set (struct dwarf_section *section,
       /* A single zero is supposed to end the set according
 	 to the standard.  If there's more, then signal that to
 	 the caller.  */
-      if (start == end)
-	return NULL;
-      if (entry == 0)
-	return start;
+      if (start == end || entry == 0)
+	{
+	  list->start_of_next_abbrevs = start != end ? start : NULL;
+	  return list;
+	}
 
       READ_ULEB (tag, start, end);
       if (start == end)
-	return NULL;
+	{
+	  free (list);
+	  return NULL;
+	}
 
       children = *start++;
 
@@ -1124,7 +1099,65 @@ process_abbrev_set (struct dwarf_section *section,
   /* Report the missing single zero which ends the section.  */
   error (_("%s section not zero terminated\n"), section->name);
 
+  free (list);
   return NULL;
+}
+
+/* Return a sequence of abbrevs in SECTION starting at ABBREV_BASE
+   plus ABBREV_OFFSET and finishing at ABBREV_BASE + ABBREV_SIZE.
+   If FREE_LIST is non-NULL search the already decoded abbrevs on
+   abbrev_lists first and if found set *FREE_LIST to NULL.  If
+   searching doesn't find a matching abbrev, set *FREE_LIST to the
+   newly allocated list.  If FREE_LIST is NULL, no search is done and
+   the returned abbrev_list is always newly allocated.  */
+
+static abbrev_list *
+find_and_process_abbrev_set (struct dwarf_section *section,
+			     dwarf_vma abbrev_base,
+			     dwarf_vma abbrev_size,
+			     dwarf_vma abbrev_offset,
+			     abbrev_list **free_list)
+{
+  if (free_list)
+    *free_list = NULL;
+
+  if (abbrev_base >= section->size
+      || abbrev_size > section->size - abbrev_base)
+    {
+      /* PR 17531: file:4bcd9ce9.  */
+      warn (_("Debug info is corrupted, abbrev size (%lx) is larger than "
+	      "abbrev section size (%lx)\n"),
+	      (unsigned long) (abbrev_base + abbrev_size),
+	      (unsigned long) section->size);
+      return NULL;
+    }
+  if (abbrev_offset >= abbrev_size)
+    {
+      warn (_("Debug info is corrupted, abbrev offset (%lx) is larger than "
+	      "abbrev section size (%lx)\n"),
+	    (unsigned long) abbrev_offset,
+	    (unsigned long) abbrev_size);
+      return NULL;
+    }
+
+  unsigned char *start = section->start + abbrev_base + abbrev_offset;
+  unsigned char *end = section->start + abbrev_base + abbrev_size;
+  abbrev_list *list = NULL;
+  if (free_list)
+    list = find_abbrev_list_by_abbrev_offset (abbrev_base, abbrev_offset);
+  if (list == NULL)
+    {
+      list = process_abbrev_set (section, start, end);
+      if (list)
+	{
+	  list->abbrev_base = abbrev_base;
+	  list->abbrev_offset = abbrev_offset;
+	  list->next = NULL;
+	}
+      if (free_list)
+	*free_list = list;
+    }
+  return list;
 }
 
 static const char *
@@ -3671,7 +3704,6 @@ process_debug_info (struct dwarf_section * section,
       dwarf_vma                 cu_offset;
       unsigned int              offset_size;
       struct cu_tu_set *        this_set;
-      abbrev_list *             list;
       unsigned char *end_cu;
 
       hdrptr = start;
@@ -3727,22 +3759,18 @@ process_debug_info (struct dwarf_section * section,
 	  abbrev_size = this_set->section_sizes [DW_SECT_ABBREV];
 	}
 
-      list = find_abbrev_list_by_abbrev_offset (abbrev_base,
-						compunit.cu_abbrev_offset);
-      if (list == NULL)
-	{
-	  unsigned char *  next;
-
-	  list = new_abbrev_list (abbrev_base,
-				  compunit.cu_abbrev_offset);
-	  next = process_abbrev_set (&debug_displays[abbrev_sec].section,
-				     abbrev_base, abbrev_size,
-				     compunit.cu_abbrev_offset, list);
-	  list->start_of_next_abbrevs = next;
-	}
-
+      abbrev_list *list;
+      abbrev_list *free_list;
+      list = find_and_process_abbrev_set (&debug_displays[abbrev_sec].section,
+					  abbrev_base, abbrev_size,
+					  compunit.cu_abbrev_offset,
+					  &free_list);
       start = end_cu;
-      record_abbrev_list_for_cu (cu_offset, start - section_begin, list);
+      if (list != NULL && list->first_abbrev != NULL)
+	record_abbrev_list_for_cu (cu_offset, start - section_begin,
+				   list, free_list);
+      else if (free_list != NULL)
+	free_abbrev_list (free_list);
     }
 
   for (start = section_begin, unit = 0; start < end; unit++)
@@ -3758,7 +3786,6 @@ process_debug_info (struct dwarf_section * section,
       struct cu_tu_set *this_set;
       dwarf_vma abbrev_base;
       size_t abbrev_size;
-      abbrev_list * list = NULL;
       unsigned char *end_cu;
 
       hdrptr = start;
@@ -3937,20 +3964,10 @@ process_debug_info (struct dwarf_section * section,
 	}
 
       /* Process the abbrevs used by this compilation unit.  */
-      list = find_abbrev_list_by_abbrev_offset (abbrev_base,
-						compunit.cu_abbrev_offset);
-      if (list == NULL)
-	{
-	  unsigned char *next;
-
-	  list = new_abbrev_list (abbrev_base,
-				  compunit.cu_abbrev_offset);
-	  next = process_abbrev_set (&debug_displays[abbrev_sec].section,
-				     abbrev_base, abbrev_size,
-				     compunit.cu_abbrev_offset, list);
-	  list->start_of_next_abbrevs = next;
-	}
-
+      abbrev_list *list;
+      list = find_and_process_abbrev_set (&debug_displays[abbrev_sec].section,
+					  abbrev_base, abbrev_size,
+					  compunit.cu_abbrev_offset, NULL);
       level = 0;
       last_level = level;
       saved_level = -1;
@@ -4128,6 +4145,8 @@ process_debug_info (struct dwarf_section * section,
 	  if (entry->children)
 	    ++level;
 	}
+      if (list != NULL)
+	free_abbrev_list (list);
     }
 
   /* Set num_debug_info_entries here so that it can be used to check if
@@ -6353,24 +6372,15 @@ display_debug_abbrev (struct dwarf_section *section,
 
   do
     {
-      abbrev_list *    list;
-      dwarf_vma        offset;
-
-      offset = start - section->start;
-      list = find_abbrev_list_by_abbrev_offset (0, offset);
+      dwarf_vma offset = start - section->start;
+      abbrev_list *list = find_and_process_abbrev_set (section, 0,
+						       section->size, offset,
+						       NULL);
       if (list == NULL)
-	{
-	  list = new_abbrev_list (0, offset);
-	  start = process_abbrev_set (section, 0, section->size, offset, list);
-	  list->start_of_next_abbrevs = start;
-	}
-      else
-	start = list->start_of_next_abbrevs;
+	break;
 
-      if (list->first_abbrev == NULL)
-	continue;
-
-      printf (_("  Number TAG (0x%lx)\n"), (long) offset);
+      if (list->first_abbrev)
+	printf (_("  Number TAG (0x%lx)\n"), (long) offset);
 
       for (entry = list->first_abbrev; entry; entry = entry->next)
 	{
@@ -6391,6 +6401,8 @@ display_debug_abbrev (struct dwarf_section *section,
 	      putchar ('\n');
 	    }
 	}
+      start = list->start_of_next_abbrevs;
+      free_abbrev_list (list);
     }
   while (start);
 
