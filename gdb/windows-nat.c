@@ -325,8 +325,11 @@ static void
 check (BOOL ok, const char *file, int line)
 {
   if (!ok)
-    gdb_printf ("error return %s:%d was %u\n", file, line,
-		(unsigned) GetLastError ());
+    {
+      unsigned err = (unsigned) GetLastError ();
+      gdb_printf ("error return %s:%d was %u: %s\n", file, line,
+		  err, strwinerror (err));
+    }
 }
 
 /* See nat/windows-nat.h.  */
@@ -1160,9 +1163,12 @@ windows_continue (DWORD continue_status, int id, int killed)
   res = continue_last_debug_event (continue_status, debug_events);
 
   if (!res)
-    error (_("Failed to resume program execution"
-	     " (ContinueDebugEvent failed, error %u)"),
-	   (unsigned int) GetLastError ());
+    {
+      unsigned err = (unsigned) GetLastError ();
+      error (_("Failed to resume program execution"
+	       " (ContinueDebugEvent failed, error %u: %s)"),
+	     err, strwinerror (err));
+    }
 
   return res;
 }
@@ -1179,8 +1185,9 @@ windows_nat_target::fake_create_process ()
     windows_process.open_process_used = 1;
   else
     {
-      error (_("OpenProcess call failed, GetLastError = %u"),
-       (unsigned) GetLastError ());
+      unsigned err = (unsigned) GetLastError ();
+      error (_("OpenProcess call failed, GetLastError = %u: %s"),
+	     err, strwinerror (err));
       /*  We can not debug anything in that case.  */
     }
   add_thread (ptid_t (windows_process.current_event.dwProcessId, 0,
@@ -1887,8 +1894,11 @@ windows_nat_target::attach (const char *args, int from_tty)
 #endif
 
   if (!ok)
-    error (_("Can't attach to process %u (error %u)"),
-	   (unsigned) pid, (unsigned) GetLastError ());
+    {
+      unsigned err = (unsigned) GetLastError ();
+      error (_("Can't attach to process %u (error %u: %s)"),
+	     (unsigned) pid, err, strwinerror (err));
+    }
 
   DebugSetProcessKillOnExit (FALSE);
 
@@ -1916,9 +1926,12 @@ windows_nat_target::detach (inferior *inf, int from_tty)
   resume (ptid, 0, GDB_SIGNAL_0);
 
   if (!DebugActiveProcessStop (windows_process.current_event.dwProcessId))
-    error (_("Can't detach process %u (error %u)"),
-	   (unsigned) windows_process.current_event.dwProcessId,
-	   (unsigned) GetLastError ());
+    {
+      unsigned err = (unsigned) GetLastError ();
+      error (_("Can't detach process %u (error %u: %s)"),
+	     (unsigned) windows_process.current_event.dwProcessId,
+	     err, strwinerror (err));
+    }
   DebugSetProcessKillOnExit (FALSE);
 
   target_announce_detach (from_tty);
@@ -2526,8 +2539,11 @@ windows_nat_target::create_inferior (const char *exec_file,
       tty = CreateFileA (inferior_tty.c_str (), GENERIC_READ | GENERIC_WRITE,
 			 0, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
       if (tty == INVALID_HANDLE_VALUE)
-	warning (_("Warning: Failed to open TTY %s, error %#x."),
-		 inferior_tty.c_str (), (unsigned) GetLastError ());
+	{
+	  unsigned err = (unsigned) GetLastError ();
+	  warning (_("Warning: Failed to open TTY %s, error %#x: %s"),
+		   inferior_tty.c_str (), err, strwinerror (err));
+	}
     }
   if (redirected || tty != INVALID_HANDLE_VALUE)
     {
@@ -2608,8 +2624,11 @@ windows_nat_target::create_inferior (const char *exec_file,
 #endif	/* !__CYGWIN__ */
 
   if (!ret)
-    error (_("Error creating process %s, (error %u)."),
-	   exec_file, (unsigned) GetLastError ());
+    {
+      unsigned err = (unsigned) GetLastError ();
+      error (_("Error creating process %s, (error %u: %s)"),
+	     exec_file, err, strwinerror (err));
+    }
 
 #ifdef __x86_64__
   BOOL wow64;

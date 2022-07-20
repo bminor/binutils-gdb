@@ -91,4 +91,20 @@ extern void malloc_failure (long size) ATTRIBUTE_NORETURN;
 
 extern void flush_streams ();
 
+#ifdef USE_WIN32API
+
+/* Map the Windows error number in ERROR to a locale-dependent error
+   message string and return a pointer to it.  Typically, the values
+   for ERROR come from GetLastError.
+
+   The string pointed to shall not be modified by the application,
+   but may be overwritten by a subsequent call to strwinerror
+
+   The strwinerror function does not change the current setting
+   of GetLastError.  */
+
+extern const char *strwinerror (ULONGEST error);
+
+#endif /* USE_WIN32API */
+
 #endif /* COMMON_ERRORS_H */

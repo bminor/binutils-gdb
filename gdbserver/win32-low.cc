@@ -61,10 +61,6 @@ gdbserver_windows_process windows_process;
 #define _T(x) TEXT (x)
 #endif
 
-#ifndef COUNTOF
-#define COUNTOF(STR) (sizeof (STR) / sizeof ((STR)[0]))
-#endif
-
 int using_threads = 1;
 
 const struct target_desc *win32_tdesc;
@@ -481,61 +477,6 @@ child_store_inferior_registers (struct regcache *regcache, int r)
   else
     for (regno = 0; regno < r; regno++)
       (*the_low_target.store_inferior_register) (regcache, th, regno);
-}
-
-/* Map the Windows error number in ERROR to a locale-dependent error
-   message string and return a pointer to it.  Typically, the values
-   for ERROR come from GetLastError.
-
-   The string pointed to shall not be modified by the application,
-   but may be overwritten by a subsequent call to strwinerror
-
-   The strwinerror function does not change the current setting
-   of GetLastError.  */
-
-char *
-strwinerror (DWORD error)
-{
-  static char buf[1024];
-  TCHAR *msgbuf;
-  DWORD lasterr = GetLastError ();
-  DWORD chars = FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM
-			       | FORMAT_MESSAGE_ALLOCATE_BUFFER,
-			       NULL,
-			       error,
-			       0, /* Default language */
-			       (LPTSTR) &msgbuf,
-			       0,
-			       NULL);
-  if (chars != 0)
-    {
-      /* If there is an \r\n appended, zap it.  */
-      if (chars >= 2
-	  && msgbuf[chars - 2] == '\r'
-	  && msgbuf[chars - 1] == '\n')
-	{
-	  chars -= 2;
-	  msgbuf[chars] = 0;
-	}
-
-      if (chars > ((COUNTOF (buf)) - 1))
-	{
-	  chars = COUNTOF (buf) - 1;
-	  msgbuf [chars] = 0;
-	}
-
-#ifdef UNICODE
-      wcstombs (buf, msgbuf, chars + 1);
-#else
-      strncpy (buf, msgbuf, chars + 1);
-#endif
-      LocalFree (msgbuf);
-    }
-  else
-    sprintf (buf, "unknown win32 error (%u)", (unsigned) error);
-
-  SetLastError (lasterr);
-  return buf;
 }
 
 static BOOL
