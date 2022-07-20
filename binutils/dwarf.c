@@ -806,7 +806,7 @@ fetch_indexed_value (dwarf_vma idx,
       pointer_size = 4;
       bias = 12;
     }
- 
+
   dwarf_vma offset = idx * pointer_size;
 
   /* Offsets are biased by the size of the section header
@@ -901,38 +901,41 @@ record_abbrev_list_for_cu (dwarf_vma start, dwarf_vma end, abbrev_list * list)
   next_free_abbrev_map_entry ++;
 }
 
+static abbrev_list *
+free_abbrev_list (abbrev_list *list)
+{
+  abbrev_entry *abbrv = list->first_abbrev;
+
+  while (abbrv)
+    {
+      abbrev_attr *attr = abbrv->first_attr;
+
+      while (attr)
+	{
+	  abbrev_attr *next_attr = attr->next;
+	  free (attr);
+	  attr = next_attr;
+	}
+
+      abbrev_entry *next_abbrev = abbrv->next;
+      free (abbrv);
+      abbrv = next_abbrev;
+    }
+
+  abbrev_list *next = list->next;
+  free (list);
+  return next;
+}
+
 static void
 free_all_abbrevs (void)
 {
-  abbrev_list *  list;
+  while (abbrev_lists)
+    abbrev_lists = free_abbrev_list (abbrev_lists);
 
-  for (list = abbrev_lists; list != NULL;)
-    {
-      abbrev_list *   next = list->next;
-      abbrev_entry *  abbrv;
-
-      for (abbrv = list->first_abbrev; abbrv != NULL;)
-	{
-	  abbrev_entry *  next_abbrev = abbrv->next;
-	  abbrev_attr *   attr;
-
-	  for (attr = abbrv->first_attr; attr;)
-	    {
-	      abbrev_attr *next_attr = attr->next;
-
-	      free (attr);
-	      attr = next_attr;
-	    }
-
-	  free (abbrv);
-	  abbrv = next_abbrev;
-	}
-
-      free (list);
-      list = next;
-    }
-
-  abbrev_lists = NULL;
+  free (cu_abbrev_map);
+  cu_abbrev_map = NULL;
+  next_free_abbrev_map_entry = 0;
 }
 
 static abbrev_list *
@@ -978,7 +981,7 @@ find_abbrev_map_by_offset (dwarf_vma offset)
 	&& cu_abbrev_map[i].end > offset)
       return cu_abbrev_map + i;
 
-  return NULL;	
+  return NULL;
 }
 
 static void
@@ -1119,7 +1122,7 @@ process_abbrev_set (struct dwarf_section *section,
     }
 
   /* Report the missing single zero which ends the section.  */
-  error (_(".debug_abbrev section not zero terminated\n"));
+  error (_("%s section not zero terminated\n"), section->name);
 
   return NULL;
 }
@@ -1842,7 +1845,7 @@ fetch_alt_indirect_string (dwarf_vma offset)
 	dwarf_vmatoa ("x", offset));
   return _("<offset is too big>");
 }
-	
+
 static const char *
 get_AT_name (unsigned long attribute)
 {
@@ -2124,7 +2127,8 @@ get_type_abbrev_from_form (unsigned long form,
     case DW_FORM_ref4:
     case DW_FORM_ref8:
     case DW_FORM_ref_udata:
-      if (uvalue + cu_offset > (size_t) (cu_end - section->start))
+      if (uvalue + cu_offset < uvalue
+	  || uvalue + cu_offset > (size_t) (cu_end - section->start))
 	{
 	  warn (_("Unable to resolve ref form: uvalue %lx + cu_offset %lx > CU size %lx\n"),
 		uvalue, (long) cu_offset, (long) (cu_end - section->start));
@@ -2161,7 +2165,7 @@ get_type_abbrev_from_form (unsigned long form,
       else
 	*map_return = NULL;
     }
-	
+
   READ_ULEB (abbrev_number, data, section->start + section->size);
 
   for (entry = map->list->first_abbrev; entry != NULL; entry = entry->next)
@@ -2750,10 +2754,10 @@ read_and_display_attr_value (unsigned long           attribute,
 	  if (form == DW_FORM_loclistx)
 	    {
 	      if (dwo)
-	        {
-	          index = fetch_indexed_value (uvalue, loclists_dwo, 0);
-	          index += (offset_size == 8) ? 20 : 12;
-	        }
+		{
+		  index = fetch_indexed_value (uvalue, loclists_dwo, 0);
+		  index += (offset_size == 8) ? 20 : 12;
+		}
 	      else if (debug_info_p == NULL)
 		{
 		  index = fetch_indexed_value (uvalue, loclists, 0);
@@ -2771,21 +2775,21 @@ read_and_display_attr_value (unsigned long           attribute,
 	  else if (form == DW_FORM_rnglistx)
 	    {
 	      if (dwo)
-	        {
-	          index = fetch_indexed_value (uvalue, rnglists_dwo, 0);
-	          index += (offset_size == 8) ? 20 : 12;
-	        }
+		{
+		  index = fetch_indexed_value (uvalue, rnglists_dwo, 0);
+		  index += (offset_size == 8) ? 20 : 12;
+		}
 	      else
-	        {
-	          if (debug_info_p == NULL)
-	            base = 0;
-	          else
-	            base = debug_info_p->rnglists_base;
-	          /* We do not have a cached value this time, so we perform the
-	             computation manually.  */
-	          index = fetch_indexed_value (uvalue, rnglists, base);
-	          index += base;
-	        }
+		{
+		  if (debug_info_p == NULL)
+		    base = 0;
+		  else
+		    base = debug_info_p->rnglists_base;
+		  /* We do not have a cached value this time, so we perform the
+		     computation manually.  */
+		  index = fetch_indexed_value (uvalue, rnglists, base);
+		  index += base;
+		}
 	    }
 	  else
 	    {
@@ -2811,7 +2815,7 @@ read_and_display_attr_value (unsigned long           attribute,
       if (!do_loc)
 	printf ("%c<0x%s>", delimiter, dwarf_vmatoa ("x", uvalue + cu_offset));
       break;
-      
+
     default:
       warn (_("Unrecognized form: 0x%lx\n"), form);
       /* What to do?  Consume a byte maybe?  */
@@ -2836,9 +2840,9 @@ read_and_display_attr_value (unsigned long           attribute,
 	case DW_AT_rnglists_base:
 	  if (debug_info_p->rnglists_base)
 	    warn (_("CU @ 0x%s has multiple rnglists_base values (0x%s and 0x%s)"),
-	          dwarf_vmatoa ("x", debug_info_p->cu_offset),
-	          dwarf_vmatoa ("x", debug_info_p->rnglists_base),
-	          dwarf_vmatoa ("x", uvalue));
+		  dwarf_vmatoa ("x", debug_info_p->cu_offset),
+		  dwarf_vmatoa ("x", debug_info_p->rnglists_base),
+		  dwarf_vmatoa ("x", uvalue));
 	  debug_info_p->rnglists_base = uvalue;
 	  break;
 	case DW_AT_str_offsets_base:
@@ -2988,7 +2992,7 @@ read_and_display_attr_value (unsigned long           attribute,
 	      case DW_FORM_strx3:
 	      case DW_FORM_strx4:
 		add_dwo_name (fetch_indexed_string (uvalue, this_set, offset_size, false,
-		                                    debug_info_p->str_offsets_base),
+						    debug_info_p->str_offsets_base),
 			      cu_offset);
 		break;
 	      case DW_FORM_string:
@@ -3022,7 +3026,7 @@ read_and_display_attr_value (unsigned long           attribute,
 	      case DW_FORM_strx3:
 	      case DW_FORM_strx4:
 		add_dwo_dir (fetch_indexed_string (uvalue, this_set, offset_size, false,
-		                                   debug_info_p->str_offsets_base),
+						   debug_info_p->str_offsets_base),
 			     cu_offset);
 		break;
 	      case DW_FORM_string:
@@ -3653,11 +3657,8 @@ process_debug_info (struct dwarf_section * section,
     introduce (section, false);
 
   free_all_abbrevs ();
-  free (cu_abbrev_map);
-  cu_abbrev_map = NULL;
-  next_free_abbrev_map_entry = 0;
 
-  /* In order to be able to resolve DW_FORM_ref_attr forms we need
+  /* In order to be able to resolve DW_FORM_ref_addr forms we need
      to load *all* of the abbrevs for all CUs in this .debug_info
      section.  This does effectively mean that we (partially) read
      every CU header twice.  */
@@ -4028,12 +4029,11 @@ process_debug_info (struct dwarf_section * section,
 
 	  /* Scan through the abbreviation list until we reach the
 	     correct entry.  */
-	  if (list == NULL)
-	    continue;
-
-	  for (entry = list->first_abbrev; entry != NULL; entry = entry->next)
-	    if (entry->number == abbrev_number)
-	      break;
+	  entry = NULL;
+	  if (list != NULL)
+	    for (entry = list->first_abbrev; entry != NULL; entry = entry->next)
+	      if (entry->number == abbrev_number)
+		break;
 
 	  if (entry == NULL)
 	    {
@@ -4057,7 +4057,7 @@ process_debug_info (struct dwarf_section * section,
 	      break;
 	    case DW_TAG_compile_unit:
 	    case DW_TAG_skeleton_unit:
-	      need_base_address = 1;	
+	      need_base_address = 1;
 	      need_dwo_info = do_loc;
 	      break;
 	    case DW_TAG_entry_point:
@@ -4440,7 +4440,7 @@ display_debug_sup (struct dwarf_section *  section,
 
   SAFE_BYTE_GET_AND_INC (is_supplementary, start, 1, end);
   if (is_supplementary != 0 && is_supplementary != 1)
-    warn (_("corrupt .debug_sup section: is_supplementary not 0 or 1\n"));    
+    warn (_("corrupt .debug_sup section: is_supplementary not 0 or 1\n"));
 
   sup_filename = start;
   if (is_supplementary && sup_filename[0] != 0)
@@ -5619,7 +5619,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 			printf ("%s  %11d  %#18" DWARF_VMA_FMT "x",
 				newFileName, state_machine_regs.line,
 				state_machine_regs.address);
-		    }			
+		    }
 		  else
 		    {
 		      if (xop == -DW_LNE_end_sequence)
@@ -6073,7 +6073,7 @@ display_debug_macro (struct dwarf_section *section,
   load_debug_section_with_follow (str, file);
   load_debug_section_with_follow (line, file);
   load_debug_section_with_follow (str_index, file);
-  
+
   introduce (section, false);
 
   while (curr < end)
@@ -6525,7 +6525,7 @@ display_loc_list (struct dwarf_section *section,
 
       /* Check base address specifiers.  */
       if (is_max_address (begin, pointer_size)
-          && !is_max_address (end, pointer_size))
+	  && !is_max_address (end, pointer_size))
 	{
 	  base_address = end;
 	  print_dwarf_vma (begin, pointer_size);
@@ -6703,7 +6703,7 @@ display_loclists_list (struct dwarf_section *  section,
 	case DW_LLE_default_location:
 	  begin = end = 0;
 	  break;
-	  
+
 	case DW_LLE_offset_pair:
 	  READ_ULEB (begin, start, section_end);
 	  begin += base_address;
@@ -6999,7 +6999,7 @@ display_offset_entry_loclists (struct dwarf_section *section)
   unsigned char *  start = section->start;
   unsigned char * const end = start + section->size;
 
-  introduce (section, false);  
+  introduce (section, false);
 
   do
     {
@@ -7048,14 +7048,14 @@ display_offset_entry_loclists (struct dwarf_section *section)
 		section->name, segment_selector_size);
 	  return 0;
 	}
-      
+
       if (offset_entry_count == 0)
 	{
 	  warn (_("The %s section contains a table without offset\n"),
 		section->name);
 	  return 0;
 	}
-  
+
       printf (_("\n   Offset Entries starting at 0x%lx:\n"),
 	      (long)(start - section->start));
 
@@ -8217,7 +8217,7 @@ display_debug_rnglists (struct dwarf_section *section)
 	  start = display_debug_rnglists_list
 	    (start, end, address_size, offset, 0, offset_size);
 	  if (start >= end)
-	    break;	  
+	    break;
 	}
 
       start = end;
@@ -8335,12 +8335,12 @@ display_debug_ranges (struct dwarf_section *section,
       next = section_begin + offset + debug_info_p->rnglists_base;
 
       /* If multiple DWARF entities reference the same range then we will
-         have multiple entries in the `range_entries' list for the same
-         offset.  Thanks to the sort above these will all be consecutive in
-         the `range_entries' list, so we can easily ignore duplicates
-         here.  */
+	 have multiple entries in the `range_entries' list for the same
+	 offset.  Thanks to the sort above these will all be consecutive in
+	 the `range_entries' list, so we can easily ignore duplicates
+	 here.  */
       if (i > 0 && last_offset == offset)
-        continue;
+	continue;
       last_offset = offset;
 
       if (dwarf_check != 0 && i > 0)
@@ -10265,7 +10265,7 @@ display_debug_names (struct dwarf_section *section, void *file)
 	  printf (_("Out of %lu items there are %zu bucket clashes"
 		    " (longest of %zu entries).\n"),
 		  (unsigned long) name_count, hash_clash_count, longest_clash);
-	  
+
 	  if (name_count != buckets_filled + hash_clash_count)
 	    warn (_("The name_count (%lu) is not the same as the used bucket_count (%lu) + the hash clash count (%lu)"),
 		  (unsigned long) name_count,
@@ -10369,7 +10369,7 @@ display_debug_names (struct dwarf_section *section, void *file)
 		break;
 	      if (tagno >= 0)
 		printf ("%s<%lu>",
-		        (tagno == 0 && second_abbrev_tag == 0 ? " " : "\n\t"),
+			(tagno == 0 && second_abbrev_tag == 0 ? " " : "\n\t"),
 			(unsigned long) abbrev_tag);
 
 	      for (entry = abbrev_lookup;
@@ -10898,7 +10898,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 	 Check for integer overflow (can occur when size_t is 32-bit)
 	 with overlarge ncols or nused values.  */
       if (nused == -1u
-	  || _mul_overflow ((size_t) ncols, 4, &temp)	  
+	  || _mul_overflow ((size_t) ncols, 4, &temp)
 	  || _mul_overflow ((size_t) nused + 1, temp, &total)
 	  || total > (size_t) (limit - ppool))
 	{
@@ -10906,7 +10906,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 		section->name);
 	  return 0;
 	}
-      
+
       if (do_display)
 	{
 	  printf (_("  Offset table\n"));
@@ -11410,8 +11410,8 @@ add_separate_debug_file (const char * filename, void * handle)
 
 static bool
 debuginfod_fetch_separate_debug_info (struct dwarf_section * section,
-                                      char ** filename,
-                                      void * file)
+				      char ** filename,
+				      void * file)
 {
   size_t build_id_len;
   unsigned char * build_id;
@@ -11429,14 +11429,14 @@ debuginfod_fetch_separate_debug_info (struct dwarf_section * section,
 
       filelen = strnlen ((const char *)section->start, section->size);
       if (filelen == section->size)
-        /* Corrupt debugaltlink.  */
-        return false;
+	/* Corrupt debugaltlink.  */
+	return false;
 
       build_id = section->start + filelen + 1;
       build_id_len = section->size - (filelen + 1);
 
       if (build_id_len == 0)
-        return false;
+	return false;
     }
   else
     return false;
@@ -11448,25 +11448,25 @@ debuginfod_fetch_separate_debug_info (struct dwarf_section * section,
 
       client = debuginfod_begin ();
       if (client == NULL)
-        return false;
+	return false;
 
       /* Query debuginfod servers for the target file. If found its path
-         will be stored in filename.  */
+	 will be stored in filename.  */
       fd = debuginfod_find_debuginfo (client, build_id, build_id_len, filename);
       debuginfod_end (client);
 
       /* Only free build_id if we allocated space for a hex string
-         in get_build_id ().  */
+	 in get_build_id ().  */
       if (build_id_len == 0)
-        free (build_id);
+	free (build_id);
 
       if (fd >= 0)
-        {
-          /* File successfully retrieved. Close fd since we want to
-             use open_debug_file () on filename instead.  */
-          close (fd);
-          return true;
-        }
+	{
+	  /* File successfully retrieved. Close fd since we want to
+	     use open_debug_file () on filename instead.  */
+	  close (fd);
+	  return true;
+	}
     }
 
   return false;
@@ -11479,7 +11479,7 @@ load_separate_debug_info (const char *            main_filename,
 			  parse_func_type         parse_func,
 			  check_func_type         check_func,
 			  void *                  func_data,
-                          void *                  file ATTRIBUTE_UNUSED)
+			  void *                  file ATTRIBUTE_UNUSED)
 {
   const char *   separate_filename;
   char *         debug_filename;
@@ -11595,11 +11595,11 @@ load_separate_debug_info (const char *            main_filename,
 						 & tmp_filename,
 						 file))
       {
-        /* File successfully downloaded from server, replace
-           debug_filename with the file's path.  */
-        free (debug_filename);
-        debug_filename = tmp_filename;
-        goto found;
+	/* File successfully downloaded from server, replace
+	   debug_filename with the file's path.  */
+	free (debug_filename);
+	debug_filename = tmp_filename;
+	goto found;
       }
   }
 #endif
@@ -11766,12 +11766,12 @@ load_build_id_debug_file (const char * main_filename ATTRIBUTE_UNUSED, void * ma
   /* In theory we should extract the contents of the section into
      a note structure and then check the fields.  For now though
      just use hard coded offsets instead:
-     
+
        Field  Bytes    Contents
 	NSize  0...3   4
 	DSize  4...7   8+
 	Type   8..11   3  (NT_GNU_BUILD_ID)
-        Name   12.15   GNU\0
+	Name   12.15   GNU\0
 	Data   16....   */
 
   /* FIXME: Check the name size, name and type fields.  */
@@ -11783,7 +11783,7 @@ load_build_id_debug_file (const char * main_filename ATTRIBUTE_UNUSED, void * ma
       warn (_(".note.gnu.build-id data size is too small\n"));
       return;
     }
-  
+
   if (build_id_size > (section->size - 16))
     {
       warn (_(".note.gnu.build-id data size is too bug\n"));
@@ -12078,10 +12078,6 @@ free_debug_memory (void)
   unsigned int i;
 
   free_all_abbrevs ();
-
-  free (cu_abbrev_map);
-  cu_abbrev_map = NULL;
-  next_free_abbrev_map_entry = 0;
 
   free (shndx_pool);
   shndx_pool = NULL;
