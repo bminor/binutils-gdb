@@ -166,7 +166,7 @@ private:
      uses styled output and emits a start of comment character.  It is up
      to the code that uses this disassembler class to reset this flag back
      to false at a suitable time (e.g. at the end of every line).  */
-  bool m_in_comment;
+  bool m_in_comment = false;
 };
 
 /* A basic disassembler that doesn't actually print anything.  */
