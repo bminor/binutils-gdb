@@ -40,6 +40,9 @@
 #include "cp-abi.h"
 #include "user-regs.h"
 #include <algorithm>
+#include <iterator>
+#include <utility>
+#include <vector>
 #include "completer.h"
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/array-view.h"
