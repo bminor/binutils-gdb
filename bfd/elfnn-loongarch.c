@@ -2010,6 +2010,17 @@ perform_relocation (const Elf_Internal_Rela *rel, asection *input_section,
       bfd_put (bits, input_bfd, opr1 - value, contents + rel->r_offset);
       break;
 
+    /* For eh_frame and debug info.  */
+    case R_LARCH_32_PCREL:
+      value -= sec_addr (input_section) + rel->r_offset;
+      value += rel->r_addend;
+      bfd_vma word = bfd_get (howto->bitsize, input_bfd,
+			      contents + rel->r_offset);
+      word = (word & ~howto->dst_mask) | (value & howto->dst_mask);
+      bfd_put (howto->bitsize, input_bfd, word, contents + rel->r_offset);
+      r = bfd_reloc_ok;
+      break;
+
     /* New reloc type.
        R_LARCH_B16 ~ R_LARCH_TLS_GD_HI20.  */
     case R_LARCH_B16:

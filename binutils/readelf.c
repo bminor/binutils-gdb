@@ -14389,6 +14389,8 @@ is_32bit_pcrel_reloc (Filedata * filedata, unsigned int reloc_type)
     case EM_AVR_OLD:
     case EM_AVR:
       return reloc_type == 36; /* R_AVR_32_PCREL.  */
+    case EM_LOONGARCH:
+      return reloc_type == 99;  /* R_LARCH_32_PCREL.  */
     case EM_MICROBLAZE:
       return reloc_type == 2;  /* R_MICROBLAZE_32_PCREL.  */
     case EM_OR1K:
