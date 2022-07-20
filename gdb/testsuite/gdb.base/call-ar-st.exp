@@ -147,10 +147,21 @@ if {!$skip_float_test && \
     gdb_test "continue" ".*" ""
 }
 
+# Return a regexp that matches the linkage name of SYM, assuming SYM
+# is a local static variable inside the main function.
+proc main_static_local_re {sym} {
+    # Clang prepends the function name + '.'.
+    return "(main\\.)?${sym}"
+}
+
 #step
 set stop_line [gdb_get_line_number "-step1-"]
 gdb_test "step" \
-    "print_all_arrays \\(array_i=<integer_array.*>, array_c=<char_array.*> .ZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZa., array_f=<float_array.*>, array_d=<double_array.*>\\) at .*$srcfile:$stop_line\[ \t\r\n\]+$stop_line.*print_int_array\\(array_i\\);.*" \
+    "print_all_arrays \\(array_i=<[main_static_local_re integer_array]>,\
+			 array_c=<[main_static_local_re char_array]> .ZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZaZa.,\
+			 array_f=<[main_static_local_re float_array]>,\
+			 array_d=<[main_static_local_re double_array]>\\)\
+			 at .*$srcfile:$stop_line\[ \t\r\n\]+$stop_line.*print_int_array\\(array_i\\);.*" \
     "step inside print_all_arrays"
 
 #step -over
