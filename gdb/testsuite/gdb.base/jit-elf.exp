@@ -54,7 +54,7 @@ proc clean_reattach {} {
     clean_restart ${main_binfile}
 
     if { ![gdb_attach $testpid \
-	      -pattern "main.*at .*$::main_srcfile:.*"] } {
+	      -pattern "main.*at .*$::main_basename.c:.*"] } {
 	return 0
     }
 
