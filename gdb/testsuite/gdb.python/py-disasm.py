@@ -584,7 +584,6 @@ class AnalyzingDisassembler(Disassembler):
         if self._nop_index is None and result.string == "nop":
             self._nop_index = len(self._pass_1_length)
             # The offset in the following read_memory call defaults to 0.
-            print("APB: Reading nop bytes")
             self._nop_bytes = info.read_memory(result.length)
 
         # Record information about each instruction that is disassembled.
@@ -661,8 +660,6 @@ class AnalyzingDisassembler(Disassembler):
     def check(self):
         """Call this after the second disassembler pass to validate the output."""
         if self._check != self._pass_2_insn:
-            print("APB, Check : %s" % self._check)
-            print("APB, Result: %s" % self._pass_2_insn)
             raise gdb.GdbError("mismatch")
         print("PASS")
 

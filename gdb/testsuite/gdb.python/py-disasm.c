@@ -16,10 +16,16 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 int
-main ()
+test ()
 {
   asm ("nop");
   asm ("nop");	/* Break here.  */
   asm ("nop");
   return 0;
+}
+
+int
+main ()
+{
+  return test ();
 }
