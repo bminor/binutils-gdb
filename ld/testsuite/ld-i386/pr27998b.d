@@ -1,7 +1,3 @@
 #as: --32
 #ld: -shared -melf_i386
-#readelf: -r --wide
-
-Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 1 entry:
- Offset     Info    Type                Sym. Value  Symbol's Name
-[0-9a-f]+ +[0-9a-f]+ +R_386_IRELATIVE +
+#error: relocation R_386_GOTOFF against STT_GNU_IFUNC symbol `foo' isn't supported

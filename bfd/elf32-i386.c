@@ -2460,6 +2460,11 @@ elf_i386_relocate_section (bfd *output_bfd,
 	      goto do_relocation;
 
 	    case R_386_GOTOFF:
+	      /* NB: We can't use the PLT entry as the function address
+		 for PIC since the PIC register may not be set up
+		 properly for indirect call. */
+	      if (bfd_link_pic (info))
+		goto bad_ifunc_reloc;
 	      relocation -= (gotplt->output_section->vma
 			     + gotplt->output_offset);
 	      goto do_relocation;
