@@ -1855,6 +1855,7 @@ show_python_dont_write_bytecode (struct ui_file *file, int from_tty,
 		value);
 }
 
+#ifdef HAVE_PYTHON
 /* Return value to assign to PyConfig.write_bytecode or, when
    negated (via !), Py_DontWriteBytecodeFlag.  Py_DontWriteBytecodeFlag
    is deprecated in Python 3.12.  */
@@ -1872,6 +1873,7 @@ python_write_bytecode ()
 
   return wbc;
 }
+#endif /* HAVE_PYTHON */
 
 /* Implement 'set python dont-write-bytecode'.  This sets Python's internal
    flag no matter when the command is issued, however, if this is used
