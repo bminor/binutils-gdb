@@ -8399,7 +8399,7 @@ typedef const char *(*dwarf_regname_lookup_ftype) (unsigned int);
 static dwarf_regname_lookup_ftype dwarf_regnames_lookup_func;
 static const char *const *dwarf_regnames;
 static unsigned int dwarf_regnames_count;
-
+static bool is_aarch64;
 
 /* A marker for a col_type that means this column was never referenced
    in the frame info.  */
@@ -8518,6 +8518,12 @@ init_dwarf_regnames_iamcu (void)
   dwarf_regnames_lookup_func = regname_internal_by_table_only;
 }
 
+static const char *const DW_CFA_GNU_window_save_name[] =
+{
+  "DW_CFA_GNU_window_save",
+  "DW_CFA_AARCH64_negate_ra_state"
+};
+
 static const char *const dwarf_regnames_x86_64[] =
 {
   "rax", "rdx", "rcx", "rbx",
@@ -8584,6 +8590,7 @@ init_dwarf_regnames_aarch64 (void)
   dwarf_regnames = dwarf_regnames_aarch64;
   dwarf_regnames_count = ARRAY_SIZE (dwarf_regnames_aarch64);
   dwarf_regnames_lookup_func = regname_internal_by_table_only;
+  is_aarch64 = true;
 }
 
 static const char *const dwarf_regnames_s390[] =
@@ -8673,6 +8680,7 @@ void
 init_dwarf_regnames_by_elf_machine_code (unsigned int e_machine)
 {
   dwarf_regnames_lookup_func = NULL;
+  is_aarch64 = false;
 
   switch (e_machine)
     {
@@ -8715,6 +8723,7 @@ init_dwarf_regnames_by_bfd_arch_and_mach (enum bfd_architecture arch,
 					  unsigned long mach)
 {
   dwarf_regnames_lookup_func = NULL;
+  is_aarch64 = false;
 
   switch (arch)
     {
@@ -9950,7 +9959,7 @@ display_debug_frames (struct dwarf_section *section,
 
 	    case DW_CFA_GNU_window_save:
 	      if (! do_debug_frames_interp)
-		printf ("  DW_CFA_GNU_window_save\n");
+		printf ("  %s\n", DW_CFA_GNU_window_save_name[is_aarch64]);
 	      break;
 
 	    case DW_CFA_GNU_args_size:

@@ -15,7 +15,7 @@ Contents of the .eh_frame section:
 
 0+14 0+18 0+18 FDE cie=0+ pc=0+\.\.0+8
   DW_CFA_advance_loc: 4 to 0+4
-  DW_CFA_GNU_window_save
+  DW_CFA_AARCH64_negate_ra_state
   DW_CFA_advance_loc: 4 to 0+8
   DW_CFA_def_cfa_offset: 16
   DW_CFA_offset: r29 \(x29\) at cfa-16
