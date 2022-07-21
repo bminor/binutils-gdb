@@ -1,3 +1,13 @@
+2022-07-21  Peter Bergner  <bergner@linux.ibm.com>
+
+	* ppc-opc.c (XACC_MASK, XX3ACC_MASK): New defines.
+	(P_GER_MASK, xxmfacc, xxmtacc, xxsetaccz, xvi8ger4pp, xvi8ger4,
+	xvf16ger2pp, xvf16ger2, xvf32gerpp, xvf32ger, xvi4ger8pp, xvi4ger8,
+	xvi16ger2spp, xvi16ger2s, xvbf16ger2pp, xvbf16ger2, xvf64gerpp,
+	xvf64ger, xvi16ger2, xvf16ger2np, xvf32gernp, xvi8ger4spp, xvi16ger2pp,
+	xvbf16ger2np, xvf64gernp, xvf16ger2pn, xvf32gerpn, xvbf16ger2pn,
+	xvf64gerpn, xvf16ger2nn, xvf32gernn, xvbf16ger2nn, xvf64gernn: Use them.
+
 2022-07-18  Claudiu Zissulescu  <claziss@synopsys.com>
 
 	* disassemble.c (disassemble_init_for_target): Set
