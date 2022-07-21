@@ -2242,7 +2242,7 @@ test_python ()
     SELF_CHECK (saw_exception);
     std::string ref_output_0 ("Traceback (most recent call last):\n"
 			      "  File \"<string>\", line 0, in <module>\n"
-			      " KeyboardInterrupt\n");
+			      "KeyboardInterrupt\n");
     std::string ref_output_1 ("Traceback (most recent call last):\n"
 			      "  File \"<string>\", line 1, in <module>\n"
 			      "KeyboardInterrupt\n");
