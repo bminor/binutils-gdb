@@ -856,8 +856,7 @@ typedef struct abbrev_list
 {
   abbrev_entry *        first_abbrev;
   abbrev_entry *        last_abbrev;
-  dwarf_vma             abbrev_base;
-  dwarf_vma             abbrev_offset;
+  unsigned char *       raw;
   struct abbrev_list *  next;
   unsigned char *       start_of_next_abbrevs;
 }
@@ -946,14 +945,12 @@ free_all_abbrevs (void)
 }
 
 static abbrev_list *
-find_abbrev_list_by_abbrev_offset (dwarf_vma abbrev_base,
-				   dwarf_vma abbrev_offset)
+find_abbrev_list_by_raw_abbrev (unsigned char *raw)
 {
   abbrev_list * list;
 
   for (list = abbrev_lists; list != NULL; list = list->next)
-    if (list->abbrev_base == abbrev_base
-	&& list->abbrev_offset == abbrev_offset)
+    if (list->raw == raw)
       return list;
 
   return NULL;
@@ -1040,6 +1037,7 @@ process_abbrev_set (struct dwarf_section *section,
   abbrev_list *list = xmalloc (sizeof (*list));
   list->first_abbrev = NULL;
   list->last_abbrev = NULL;
+  list->raw = start;
 
   while (start < end)
     {
@@ -1055,6 +1053,7 @@ process_abbrev_set (struct dwarf_section *section,
 	 the caller.  */
       if (start == end || entry == 0)
 	{
+	  list->next = NULL;
 	  list->start_of_next_abbrevs = start != end ? start : NULL;
 	  return list;
 	}
@@ -1144,16 +1143,10 @@ find_and_process_abbrev_set (struct dwarf_section *section,
   unsigned char *end = section->start + abbrev_base + abbrev_size;
   abbrev_list *list = NULL;
   if (free_list)
-    list = find_abbrev_list_by_abbrev_offset (abbrev_base, abbrev_offset);
+    list = find_abbrev_list_by_raw_abbrev (start);
   if (list == NULL)
     {
       list = process_abbrev_set (section, start, end);
-      if (list)
-	{
-	  list->abbrev_base = abbrev_base;
-	  list->abbrev_offset = abbrev_offset;
-	  list->next = NULL;
-	}
       if (free_list)
 	*free_list = list;
     }
