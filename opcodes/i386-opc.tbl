@@ -2278,10 +2278,10 @@ vcompressps, 0x668A, None, CpuAVX512F, Modrm|MaskingMorZ|Space0F38|VexW=1|Disp8M
 vpcompressq, 0x668B, None, CpuAVX512F, Modrm|MaskingMorZ|Space0F38|VexW=2|Disp8MemShift=3|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex }
 vpcompressd, 0x668B, None, CpuAVX512F, Modrm|MaskingMorZ|Space0F38|VexW=1|Disp8MemShift=2|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM|Unspecified|BaseIndex }
 
-vpscatterdq, 0x66A0, None, CpuAVX512F, Modrm|EVex=1|Masking=2|NoDefMask|Space0F38|VexW1|Disp8MemShift=3|VecSIB256|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegZMM, Dword|Unspecified|BaseIndex }
-vpscatterqq, 0x66A1, None, CpuAVX512F, Modrm|EVex=1|Masking=2|NoDefMask|Space0F38|VexW1|Disp8MemShift=3|VecSIB512|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegZMM, Dword|Unspecified|BaseIndex }
-vscatterdpd, 0x66A2, None, CpuAVX512F, Modrm|EVex=1|Masking=2|NoDefMask|Space0F38|VexW1|Disp8MemShift=3|VecSIB256|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegZMM, Dword|Unspecified|BaseIndex }
-vscatterqpd, 0x66A3, None, CpuAVX512F, Modrm|EVex=1|Masking=2|NoDefMask|Space0F38|VexW1|Disp8MemShift=3|VecSIB512|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegZMM, Dword|Unspecified|BaseIndex }
+vpscatterdq, 0x66A0, None, CpuAVX512F, Modrm|EVex=1|Masking=2|NoDefMask|Space0F38|VexW1|Disp8MemShift=3|VecSIB256|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegZMM, Qword|Unspecified|BaseIndex }
+vpscatterqq, 0x66A1, None, CpuAVX512F, Modrm|EVex=1|Masking=2|NoDefMask|Space0F38|VexW1|Disp8MemShift=3|VecSIB512|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegZMM, Qword|Unspecified|BaseIndex }
+vscatterdpd, 0x66A2, None, CpuAVX512F, Modrm|EVex=1|Masking=2|NoDefMask|Space0F38|VexW1|Disp8MemShift=3|VecSIB256|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegZMM, Qword|Unspecified|BaseIndex }
+vscatterqpd, 0x66A3, None, CpuAVX512F, Modrm|EVex=1|Masking=2|NoDefMask|Space0F38|VexW1|Disp8MemShift=3|VecSIB512|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegZMM, Qword|Unspecified|BaseIndex }
 
 vpscatterdd, 0x66A0, None, CpuAVX512F, Modrm|EVex=1|Masking=2|NoDefMask|Space0F38|VexW0|Disp8MemShift=2|VecSIB512|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegZMM, Dword|Unspecified|BaseIndex }
 vscatterdps, 0x66A2, None, CpuAVX512F, Modrm|EVex=1|Masking=2|NoDefMask|Space0F38|VexW0|Disp8MemShift=2|VecSIB512|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegZMM, Dword|Unspecified|BaseIndex }
