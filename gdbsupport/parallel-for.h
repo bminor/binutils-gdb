@@ -141,7 +141,7 @@ parallel_for_each (unsigned n, RandomIt first, RandomIt last,
 
   /* If enabled, print debug info about how the work is distributed across
      the threads.  */
-  const int parallel_for_each_debug = false;
+  const bool parallel_for_each_debug = false;
 
   size_t n_worker_threads = thread_pool::g_thread_pool->thread_count ();
   size_t n_threads = n_worker_threads;
