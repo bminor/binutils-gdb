@@ -31,6 +31,6 @@ Disassembly of section .text:
  +[a-f0-9]+:	5b                   	pop    %ebx
  +[a-f0-9]+:	81 c3 9e 10 00 00    	add    \$0x109e,%ebx
  +[a-f0-9]+:	e8 de ff ff ff       	call   f0 <\*ABS\*@plt>
- +[a-f0-9]+:	8d 83 4c ef ff ff    	lea    -0x10b4\(%ebx\),%eax
+ +[a-f0-9]+:	8b 83 0c 00 00 00    	mov    0xc\(%ebx\),%eax
  +[a-f0-9]+:	c3                   	ret    
 #pass

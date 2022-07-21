@@ -1,5 +1,5 @@
 #as: --32
-#ld: -shared -melf_i386
+#ld: -e bar -melf_i386
 #readelf: -r --wide
 
 Relocation section '.rel.plt' at offset 0x[0-9a-f]+ contains 1 entry:
