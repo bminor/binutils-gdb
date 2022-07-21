@@ -244,6 +244,7 @@ static int lwp_status_pending_p (struct lwp_info *lp);
 
 static void save_stop_reason (struct lwp_info *lp);
 
+static bool proc_mem_file_is_writable ();
 static void close_proc_mem_file (pid_t pid);
 static void open_proc_mem_file (ptid_t ptid);
 
@@ -3882,24 +3883,18 @@ open_proc_mem_file (ptid_t ptid)
 			  fd, ptid.pid (), ptid.lwp ());
 }
 
-/* Implement the to_xfer_partial target method using /proc/PID/mem.
-   Because we can use a single read/write call, this can be much more
-   efficient than banging away at PTRACE_PEEKTEXT.  Also, unlike
-   PTRACE_PEEKTEXT/PTRACE_POKETEXT, this works with running
-   threads.  */
+/* Helper for linux_proc_xfer_memory_partial and
+   proc_mem_file_is_writable.  FD is the already opened /proc/pid/mem
+   file, and PID is the pid of the corresponding process.  The rest of
+   the arguments are like linux_proc_xfer_memory_partial's.  */
 
 static enum target_xfer_status
-linux_proc_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
-				ULONGEST offset, LONGEST len,
-				ULONGEST *xfered_len)
+linux_proc_xfer_memory_partial_fd (int fd, int pid,
+				   gdb_byte *readbuf, const gdb_byte *writebuf,
+				   ULONGEST offset, LONGEST len,
+				   ULONGEST *xfered_len)
 {
   ssize_t ret;
-
-  auto iter = proc_mem_file_map.find (inferior_ptid.pid ());
-  if (iter == proc_mem_file_map.end ())
-    return TARGET_XFER_EOF;
-
-  int fd = iter->second.fd ();
 
   gdb_assert (fd != -1);
 
@@ -3919,8 +3914,7 @@ linux_proc_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
   if (ret == -1)
     {
       linux_nat_debug_printf ("accessing fd %d for pid %d failed: %s (%d)",
-			      fd, inferior_ptid.pid (),
-			      safe_strerror (errno), errno);
+			      fd, pid, safe_strerror (errno), errno);
       return TARGET_XFER_E_IO;
     }
   else if (ret == 0)
@@ -3928,7 +3922,7 @@ linux_proc_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
       /* EOF means the address space is gone, the whole process exited
 	 or execed.  */
       linux_nat_debug_printf ("accessing fd %d for pid %d got EOF",
-			      fd, inferior_ptid.pid ());
+			      fd, pid);
       return TARGET_XFER_EOF;
     }
   else
@@ -3936,6 +3930,81 @@ linux_proc_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
       *xfered_len = ret;
       return TARGET_XFER_OK;
     }
+}
+
+/* Implement the to_xfer_partial target method using /proc/PID/mem.
+   Because we can use a single read/write call, this can be much more
+   efficient than banging away at PTRACE_PEEKTEXT.  Also, unlike
+   PTRACE_PEEKTEXT/PTRACE_POKETEXT, this works with running
+   threads.  */
+
+static enum target_xfer_status
+linux_proc_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
+				ULONGEST offset, LONGEST len,
+				ULONGEST *xfered_len)
+{
+  int pid = inferior_ptid.pid ();
+
+  auto iter = proc_mem_file_map.find (pid);
+  if (iter == proc_mem_file_map.end ())
+    return TARGET_XFER_EOF;
+
+  int fd = iter->second.fd ();
+
+  return linux_proc_xfer_memory_partial_fd (fd, pid, readbuf, writebuf, offset,
+					    len, xfered_len);
+}
+
+/* Check whether /proc/pid/mem is writable in the current kernel, and
+   return true if so.  It wasn't writable before Linux 2.6.39, but
+   there's no way to know whether the feature was backported to older
+   kernels.  So we check to see if it works.  The result is cached,
+   and this is garanteed to be called once early at startup.  */
+
+static bool
+proc_mem_file_is_writable ()
+{
+  static gdb::optional<bool> writable;
+
+  if (writable.has_value ())
+    return *writable;
+
+  writable.emplace (false);
+
+  /* We check whether /proc/pid/mem is writable by trying to write to
+     one of our variables via /proc/self/mem.  */
+
+  int fd = gdb_open_cloexec ("/proc/self/mem", O_RDWR | O_LARGEFILE, 0).release ();
+
+  if (fd == -1)
+    {
+      warning (_("opening /proc/self/mem file failed: %s (%d)"),
+	       safe_strerror (errno), errno);
+      return *writable;
+    }
+
+  SCOPE_EXIT { close (fd); };
+
+  /* This is the variable we try to write to.  Note OFFSET below.  */
+  volatile gdb_byte test_var = 0;
+
+  gdb_byte writebuf[] = {0x55};
+  ULONGEST offset = (uintptr_t) &test_var;
+  ULONGEST xfered_len;
+
+  enum target_xfer_status res
+    = linux_proc_xfer_memory_partial_fd (fd, getpid (), nullptr, writebuf,
+					 offset, 1, &xfered_len);
+
+  if (res == TARGET_XFER_OK)
+    {
+      gdb_assert (xfered_len == 1);
+      gdb_assert (test_var == 0x55);
+      /* Success.  */
+      *writable = true;
+    }
+
+  return *writable;
 }
 
 /* Parse LINE as a signal set and add its set bits to SIGS.  */
@@ -4437,6 +4506,8 @@ Enables printf debugging output."),
   sigemptyset (&blocked_mask);
 
   lwp_lwpid_htab_create ();
+
+  proc_mem_file_is_writable ();
 }
 
 
