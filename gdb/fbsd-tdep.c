@@ -104,6 +104,8 @@ enum
 #define	FBSD_SEGV_MAPERR	1
 #define	FBSD_SEGV_ACCERR	2
 #define	FBSD_SEGV_PKUERR	100
+#define	FBSD_SEGV_LOADTAG	101
+#define	FBSD_SEGV_STORETAG	102
 
 #define	FBSD_FPE_INTOVF		1
 #define	FBSD_FPE_INTDIV		2
@@ -132,6 +134,17 @@ enum
 #define	FBSD_POLL_ERR		4
 #define	FBSD_POLL_PRI		5
 #define	FBSD_POLL_HUP		6
+
+#define	FBSD_PROT_CHERI_BOUNDS	1
+#define	FBSD_PROT_CHERI_TAG	2
+#define	FBSD_PROT_CHERI_SEALED	3
+#define	FBSD_PROT_CHERI_TYPE	4
+#define	FBSD_PROT_CHERI_PERM	5
+#define	FBSD_PROT_CHERI_IMPRECISE	7
+#define	FBSD_PROT_CHERI_STORELOCAL	8
+#define	FBSD_PROT_CHERI_CINVOKE	9
+#define	FBSD_PROT_CHERI_SYSREG	11
+#define	FBSD_PROT_CHERI_UNALIGNED_BASE	12
 
 /* FreeBSD kernels 12.0 and later include a copy of the
    'ptrace_lwpinfo' structure returned by the PT_LWPINFO ptrace
@@ -2139,6 +2152,10 @@ fbsd_signal_cause (enum gdb_signal siggnal, int code)
 	  return _("Invalid permissions for mapped object");
 	case FBSD_SEGV_PKUERR:
 	  return _("PKU violation");
+	case FBSD_SEGV_LOADTAG:
+	  return _("Tag-load page fault");
+	case FBSD_SEGV_STORETAG:
+	  return _("Tag-store page fault");
 	}
       break;
     case GDB_SIGNAL_FPE:
@@ -2207,6 +2224,30 @@ fbsd_signal_cause (enum gdb_signal siggnal, int code)
 	  return _("High priority input available");
 	case FBSD_POLL_HUP:
 	  return _("Device disconnected");
+	}
+    case GDB_SIGNAL_PROT:
+      switch (code)
+	{
+	case FBSD_PROT_CHERI_BOUNDS:
+	  return _("Capability bounds fault");
+	case FBSD_PROT_CHERI_TAG:
+	  return _("Capability tag fault");
+	case FBSD_PROT_CHERI_SEALED:
+	  return _("Capability sealed fault");
+	case FBSD_PROT_CHERI_TYPE:
+	  return _("Type mismatch fault");
+	case FBSD_PROT_CHERI_PERM:
+	  return _("Capability permission fault");
+	case FBSD_PROT_CHERI_IMPRECISE:
+	  return _("Imprecise bounds fault");
+	case FBSD_PROT_CHERI_STORELOCAL:
+	  return _("Store-local fault");
+	case FBSD_PROT_CHERI_CINVOKE:
+	  return _("CInvoke fault");
+	case FBSD_PROT_CHERI_SYSREG:
+	  return _("Capability system register fault");
+	case FBSD_PROT_CHERI_UNALIGNED_BASE:
+	  return _("Unaligned base address");
 	}
       break;
     }
