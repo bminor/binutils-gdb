@@ -11670,7 +11670,7 @@ dump_stub (const char *header,
   fprintf (stderr, "%s id = %u type = %s:%s:%s\n",
 	   header, stub_entry->id, t1, t2, t3);
   fprintf (stderr, "name = %s\n", stub_entry->root.string);
-  fprintf (stderr, "offset = %#lx:", stub_entry->stub_offset);
+  fprintf (stderr, "offset = 0x%" BFD_VMA_FMT "x:", stub_entry->stub_offset);
   for (size_t i = stub_entry->stub_offset; i < end_offset; i += 4)
     {
       asection *stub_sec = stub_entry->group->stub_sec;
