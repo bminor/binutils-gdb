@@ -4970,15 +4970,19 @@ dw2_debug_names_iterator::next ()
       switch (attr.dw_idx)
 	{
 	case DW_IDX_compile_unit:
-	  /* Don't crash on bad data.  */
-	  if (ull >= per_bfd->all_comp_units.size ())
-	    {
-	      complaint (_(".debug_names entry has bad CU index %s"
-			   " [in module %s]"),
-			 pulongest (ull),
-			 objfile_name (objfile));
-	      continue;
-	    }
+	  {
+	    /* Don't crash on bad data.  */
+	    int nr_cus = (per_bfd->all_comp_units.size ()
+			  - per_bfd->tu_stats.nr_tus);
+	    if (ull >= nr_cus)
+	      {
+		complaint (_(".debug_names entry has bad CU index %s"
+			     " [in module %s]"),
+			   pulongest (ull),
+			   objfile_name (objfile));
+		continue;
+	      }
+	  }
 	  per_cu = per_bfd->get_cu (ull);
 	  break;
 	case DW_IDX_type_unit:
@@ -5015,6 +5019,10 @@ dw2_debug_names_iterator::next ()
 	  break;
 	}
     }
+
+  /* Skip if we couldn't find a valid CU/TU index.  */
+  if (per_cu == nullptr)
+    goto again;
 
   /* Skip if already read in.  */
   if (m_per_objfile->symtab_set_p (per_cu))
