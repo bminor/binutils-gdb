@@ -10671,9 +10671,9 @@ display_gdb_index (struct dwarf_section *section,
 	      kind = GDB_INDEX_SYMBOL_KIND_VALUE (cu);
 	      cu = GDB_INDEX_CU_VALUE (cu);
 	      /* Convert to TU number if it's for a type unit.  */
-	      if (cu >= cu_list_elements / 2)
+	      if (cu >= cu_list_elements)
 		printf ("%cT%lu", num_cus > 1 ? '\t' : ' ',
-			(unsigned long) (cu - cu_list_elements / 2));
+			(unsigned long) (cu - cu_list_elements));
 	      else
 		printf ("%c%lu", num_cus > 1 ? '\t' : ' ', (unsigned long) cu);
 
