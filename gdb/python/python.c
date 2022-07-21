@@ -2240,10 +2240,13 @@ test_python ()
 	SELF_CHECK (*e.message == "Error while executing Python code.");
       }
     SELF_CHECK (saw_exception);
-    std::string ref_output("Traceback (most recent call last):\n"
-			   "  File \"<string>\", line 1, in <module>\n"
-			   "KeyboardInterrupt\n");
-    SELF_CHECK (output == ref_output);
+    std::string ref_output_0 ("Traceback (most recent call last):\n"
+			      "  File \"<string>\", line 0, in <module>\n"
+			      " KeyboardInterrupt\n");
+    std::string ref_output_1 ("Traceback (most recent call last):\n"
+			      "  File \"<string>\", line 1, in <module>\n"
+			      "KeyboardInterrupt\n");
+    SELF_CHECK (output == ref_output_0 || output == ref_output_1);
   }
 
 #undef CMD
