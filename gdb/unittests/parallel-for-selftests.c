@@ -60,6 +60,14 @@ test (int n_threads)
 
   SELF_CHECK (counter == NUMBER);
 
+  counter = 0;
+  gdb::parallel_for_each (1, 0, 0,
+			  [&] (int start, int end)
+			  {
+			    counter += end - start;
+			  });
+  SELF_CHECK (counter == 0);
+
 #undef NUMBER
 }
 
