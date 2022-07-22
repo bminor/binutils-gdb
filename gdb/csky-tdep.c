@@ -2518,7 +2518,11 @@ csky_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   if (reggroup == save_reggroup || reggroup == restore_reggroup)
     return raw_p;
 
-  if (((regnum >= CSKY_R0_REGNUM) && (regnum <= CSKY_R0_REGNUM + 31))
+  if ((((regnum >= CSKY_R0_REGNUM) && (regnum <= CSKY_R0_REGNUM + 31))
+       || (regnum == CSKY_PC_REGNUM)
+       || (regnum == CSKY_EPC_REGNUM)
+       || (regnum == CSKY_CR0_REGNUM)
+       || (regnum == CSKY_EPSR_REGNUM))
       && (reggroup == general_reggroup))
     return 1;
 
@@ -2548,6 +2552,12 @@ csky_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
       && (reggroup == fr_reggroup))
     return 6;
 
+  if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
+    {
+      if (tdesc_register_in_reggroup_p (gdbarch, regnum, reggroup) > 0)
+        return 7;
+    }
+
   return 0;
 }
 
@@ -2557,16 +2567,16 @@ static int
 csky_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int dw_reg)
 {
   /* For GPRs.  */
-  if (dw_reg >= CSKY_R0_REGNUM && dw_reg <= (CSKY_R0_REGNUM + 31))
+  if (dw_reg >= CSKY_R0_REGNUM && dw_reg <= CSKY_R0_REGNUM + 31)
     return dw_reg;
 
   /* For Hi, Lo, PC.  */
-  if ((dw_reg == CSKY_HI_REGNUM) || (dw_reg == CSKY_LO_REGNUM)
-       || (dw_reg == CSKY_PC_REGNUM))
+  if (dw_reg == CSKY_HI_REGNUM || dw_reg == CSKY_LO_REGNUM
+      || dw_reg == CSKY_PC_REGNUM)
     return dw_reg;
 
   /* For Float and Vector pseudo registers.  */
-  if ((dw_reg >= FV_PSEUDO_REGNO_FIRST)  && (dw_reg <= FV_PSEUDO_REGNO_LAST))
+  if (dw_reg >= FV_PSEUDO_REGNO_FIRST && dw_reg <= FV_PSEUDO_REGNO_LAST)
     {
       char name_buf[4];
 
@@ -3020,6 +3030,8 @@ csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_num_regs (gdbarch, (num_regs + 1));
       tdesc_use_registers (gdbarch, info.target_desc, std::move (tdesc_data));
       set_gdbarch_register_type (gdbarch, csky_register_type);
+      set_gdbarch_register_reggroup_p (gdbarch,
+                                       csky_register_reggroup_p);
     }
 
   if (tdep->fv_pseudo_registers_count)
