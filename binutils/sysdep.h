@@ -58,12 +58,6 @@
 extern char *stpcpy (char *, const char *);
 #endif
 
-#ifdef HAVE_SBRK
-#if !HAVE_DECL_SBRK
-extern char *sbrk ();
-#endif
-#endif
-
 #if !HAVE_DECL_ENVIRON
 extern char **environ;
 #endif

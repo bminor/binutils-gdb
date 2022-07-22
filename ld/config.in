@@ -75,10 +75,6 @@
 /* Is the prototype for getopt in <unistd.h> in the expected format? */
 #undef HAVE_DECL_GETOPT
 
-/* Define to 1 if you have the declaration of `sbrk', and to 0 if you don't.
-   */
-#undef HAVE_DECL_SBRK
-
 /* Define to 1 if you have the <dlfcn.h> header file. */
 #undef HAVE_DLFCN_H
 
@@ -126,9 +122,6 @@
 
 /* Define to 1 if you have the `realpath' function. */
 #undef HAVE_REALPATH
-
-/* Define to 1 if you have the `sbrk' function. */
-#undef HAVE_SBRK
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H

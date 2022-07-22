@@ -13352,7 +13352,7 @@ $as_echo "#define HAVE_MMAP 1" >>confdefs.h
 fi
 rm -f conftest.mmap conftest.txt
 
-for ac_func in getc_unlocked mkdtemp mkstemp sbrk utimensat utimes
+for ac_func in getc_unlocked mkdtemp mkstemp utimensat utimes
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -13677,16 +13677,6 @@ fi
 
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_GETC_UNLOCKED $ac_have_decl
-_ACEOF
-ac_fn_c_check_decl "$LINENO" "sbrk" "ac_cv_have_decl_sbrk" "$ac_includes_default"
-if test "x$ac_cv_have_decl_sbrk" = xyes; then :
-  ac_have_decl=1
-else
-  ac_have_decl=0
-fi
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DECL_SBRK $ac_have_decl
 _ACEOF
 ac_fn_c_check_decl "$LINENO" "stpcpy" "ac_cv_have_decl_stpcpy" "$ac_includes_default"
 if test "x$ac_cv_have_decl_stpcpy" = xyes; then :
