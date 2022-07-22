@@ -959,7 +959,7 @@ display_selector (HANDLE thread, DWORD sel)
       gdb_puts (")\n");
       if ((info.HighWord.Bits.Type & 0x10) == 0)
 	gdb_puts("System selector ");
-      gdb_printf ("Priviledge level = %ld. ",
+      gdb_printf ("Privilege level = %ld. ",
 		  (unsigned long) info.HighWord.Bits.Dpl);
       if (info.HighWord.Bits.Granularity)
 	gdb_puts ("Page granular.\n");
