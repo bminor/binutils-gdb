@@ -54,7 +54,15 @@ INIT
 my $TRUE    = 1;
 my $FALSE   = 0;
 
+#------------------------------------------------------------------------------
+# Used to ensure correct alignment of columns.
+#------------------------------------------------------------------------------
 my $g_max_length_first_metric;
+
+#------------------------------------------------------------------------------
+# This variable contains the path used to execute $GP_DISPAY_TEXT.
+#------------------------------------------------------------------------------
+my $g_path_to_tools;
 
 #-------------------------------------------------------------------------------
 # Code debugging flag
@@ -282,9 +290,16 @@ sub main
 #------------------------------------------------------------------------------
 # OS commands executed and search paths.
 #------------------------------------------------------------------------------
-  my @selected_os_cmds = qw (rm mv cat hostname locale which printenv ls 
+  my @selected_os_cmds = qw (rm mv cat hostname locale which printenv ls
                              uname readelf mkdir);
-  my @search_paths_os_cmds = qw (/usr/bin /bin);
+  my @search_paths_os_cmds = qw (
+    /usr/bin
+    /bin
+    /usr/local/bin
+    /usr/local/sbin
+    /usr/sbin
+    /sbin
+  );
 
 #------------------------------------------------------------------------------
 # TBD: Eliminate these.
@@ -409,6 +424,11 @@ sub main
 # This part is like a preamble.  Before we continue we need to figure out some 
 # things that are needed later on.
 #------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# Store the absolute path of the command executed.
+#------------------------------------------------------------------------------
+  my $location_gp_command = $0;
 
 #------------------------------------------------------------------------------
 # The very first thing to do is to quickly determine if the user has enabled 
@@ -695,10 +715,30 @@ sub main
   gp_message ("debug", $subr_name, "base_va_executable = $base_va_executable");
 
 #------------------------------------------------------------------------------
-# The gp-display-text tool is critical and has to be available in order to proceed.
+# The $GP_DISPLAY_TEXT tool is critical and has to be available in order 
+# to proceed.
+# This subroutine only returns a value if the tool can be found."
 #------------------------------------------------------------------------------
-  $ignore_value = check_availability_tool ();
+  $g_path_to_tools = ${ check_availability_tool (\$location_gp_command)};
 
+  $GP_DISPLAY_TEXT = $g_path_to_tools . $GP_DISPLAY_TEXT;
+
+  gp_message ("debug", $subr_name, "updated GP_DISPLAY_TEXT = $GP_DISPLAY_TEXT");
+
+#------------------------------------------------------------------------------
+# Check if $GP_DISPLAY_TEXT is executable for user, group, and other.
+# If not, print a warning only, since this may not be fatal but could
+# potentially lead to issues later on.
+#------------------------------------------------------------------------------
+  if (not is_file_executable ($GP_DISPLAY_TEXT))
+    {
+      my $msg = "file $GP_DISPLAY_TEXT is not executable for user, group, and other";
+      gp_message ("warning", $subr_name, $msg);
+    }
+
+#------------------------------------------------------------------------------
+# Find out what the decimal separator is, as set by the user.
+#------------------------------------------------------------------------------
   ($return_code, $decimal_separator, $convert_to_dot) = 
                                                 determine_decimal_separator ();
 
@@ -711,7 +751,7 @@ sub main
     }
   else
     {
-      my $msg = "the decimal separator can not be determined - set to $decimal_separator";
+      my $msg = "the decimal separator cannot be determined - set to $decimal_separator";
       gp_message ("warning", $subr_name, $msg);
     }
 
@@ -1275,10 +1315,11 @@ sub calculate_target_hex_address
 } #-- End of subroutine calculate_target_hex_address
 
 #------------------------------------------------------------------------------
-# This subroutine sets the absolute path to all commands in array @cmds.  The
-# commands and their respective paths are stored in hash "g_mapped_cmds".
+# Sets the absolute path to all commands in array @cmds.  The commands and 
+# their respective paths are stored in hash "g_mapped_cmds".
 #
-# It is a fatal error if such a path can't be found.
+# If no such mapping is found, a warning is issued, but execution continues.
+# The warning(s) may help with troubleshooting, should a failure occur later.
 #------------------------------------------------------------------------------
 sub check_and_define_cmds
 {
@@ -1311,7 +1352,7 @@ sub check_and_define_cmds
       $found_match = $FALSE;
       for my $path (@search_path)
         {
-          $target_cmd = $path."/".$cmd; 
+          $target_cmd = $path . "/" . $cmd; 
           if (-x $target_cmd)
             {
               $found_match = $TRUE;
@@ -1335,9 +1376,12 @@ sub check_and_define_cmds
     {
       if ($mapped eq "road_to_nowhere")
         {
-          gp_message ("error", $subr_name, "cannot find a path for command $cmd");
+          my $msg = "cannot find a path for command $cmd - " .
+                    "assume this will still work without a path";
+          gp_message ("warning", $subr_name, $msg);
           $no_of_failed_mappings++; 
           $failed_cmds .= $cmd; 
+          $g_mapped_cmds{$cmd} = $cmd;
         }
       else
        {
@@ -1346,8 +1390,8 @@ sub check_and_define_cmds
     }
   if ($no_of_failed_mappings != 0)
     {
-      gp_message ("error", $subr_name, "failed to find a mapping for $failed_cmds");
-      gp_message ("error", $subr_name, "a total of $no_of_failed_mappings mapping failures");
+      gp_message ("debug", $subr_name, "failed to find a mapping for $failed_cmds");
+      gp_message ("debug", $subr_name, "a total of $no_of_failed_mappings mapping failures");
     }
 
   return ($no_of_failed_mappings);
@@ -1552,29 +1596,93 @@ sub check_and_proc_dis_func_call
 # Check for the $GP_DISPLAY_TEXT tool to be available.  This is a critical tool 
 # needed to provide the information.  If it can not be found, execution is 
 # terminated.
+#
+# We first search foe this tool in the current execution directory.  If it
+# cannot be found there, use $PATH to try to locate it.
 #------------------------------------------------------------------------------
 sub check_availability_tool
 {
   my $subr_name = get_my_name ();
 
-  my $target_cmd;
-  my $output_which_gp_display_text;
+  my ($location_gp_command_ref) = @_;
+
   my $error_code;
+  my $error_occurred;
+  my $msg;
+  my $output_which_gp_display_text;
+  my $return_value;
+  my $target_cmd;
 
-  $target_cmd = $g_mapped_cmds{"which"} . " $GP_DISPLAY_TEXT 2>&1";
+#------------------------------------------------------------------------------
+# Get the path to gp-display-text.
+#------------------------------------------------------------------------------
+  my ($error_occurred_ref, $return_value_ref) = find_path_to_gp_display_text (
+                                                       $location_gp_command_ref
+                                                        );
+  $error_occurred = ${ $error_occurred_ref};   
+  $return_value   = ${ $return_value_ref};
 
-  ($error_code, $output_which_gp_display_text) = execute_system_cmd ($target_cmd);
-   
-  if ($error_code == 0)
+  $msg = "error_occurred = $error_occurred return_value = $return_value";
+  gp_message ("debugXL", $subr_name, $msg);
+
+  if (not $error_occurred) 
+#------------------------------------------------------------------------------
+# All is well and gp-display-text has been located.
+#------------------------------------------------------------------------------
     {
-      gp_message ("debug", $subr_name, "tool $GP_DISPLAY_TEXT is in the search path");
-    } 
-  else
-    {
-      gp_message ("abort", $subr_name, "fatal error executing command $target_cmd");
+      $g_path_to_tools = $return_value;
+
+      $msg = "located $GP_DISPLAY_TEXT in execution directory";
+      gp_message ("debug", $subr_name, $msg);
+      $msg = "g_path_to_tools = $g_path_to_tools";
+      gp_message ("debug", $subr_name, $msg);
     }
+  else
+#------------------------------------------------------------------------------
+# Something went wrong, but perhaps we can still continue.  Try to find
+# $GP_DISPLAY_TEXT through the search path.
+#------------------------------------------------------------------------------
+    {
+      $msg = "error accessing $GP_DISPLAY_TEXT: $return_value - " .
+             "run time behaviour may be undefined";
+      gp_message ("warning", $subr_name, $msg);
+  
+#------------------------------------------------------------------------------
+# Check if we can find $GP_DISPLAY_TEXT in the search path.
+#------------------------------------------------------------------------------
+      $msg = "check for $GP_DISPLAY_TEXT in search path";
+      gp_message ("debug", $subr_name, $msg);
 
-  return (0);
+      $target_cmd = $g_mapped_cmds{"which"} . " $GP_DISPLAY_TEXT 2>&1";
+
+      ($error_code, $output_which_gp_display_text) = 
+                                               execute_system_cmd ($target_cmd);
+   
+      if ($error_code == 0)
+        {
+          my ($gp_file_name, $gp_path, $suffix_not_used) = 
+                                     fileparse ($output_which_gp_display_text);
+          $g_path_to_tools = $gp_path;
+
+          $msg = "using $GP_DISPLAY_TEXT in $g_path_to_tools instead";
+          gp_message ("warning", $subr_name, $msg);
+
+          $msg = "the $GP_DISPLAY_TEXT tool is in the search path";
+          gp_message ("debug", $subr_name, $msg);
+          $msg = "g_path_to_tools = $g_path_to_tools";
+          gp_message ("debug", $subr_name, $msg);
+        } 
+      else
+        {
+          $msg = "failure to find $GP_DISPLAY_TEXT in the search path";
+          gp_message ("debug", $subr_name, $msg);
+
+          $msg = "fatal error executing command $target_cmd";
+          gp_message ("abort", $subr_name, $msg);
+        }
+     }
+
+  return (\$g_path_to_tools);
 
 } #-- End of subroutine check_availability_tool
 
@@ -3873,6 +3981,58 @@ sub find_keyword_in_string
   return (\$foundit, \@index_values);
 
 } #-- End of subroutine find_keyword_in_string
+
+#------------------------------------------------------------------------------
+# Retrieve the absolute path that was used to execute the command.  This path
+# is used to execute gp-display-text later on.
+#------------------------------------------------------------------------------
+sub find_path_to_gp_display_text
+{
+  my $subr_name = get_my_name ();
+
+  my ($full_command_ref) = @_;
+
+  my $full_command = ${ $full_command_ref };
+
+  my $error_occurred = $TRUE;
+  my $return_value;
+
+#------------------------------------------------------------------------------
+# Get the path name.
+#------------------------------------------------------------------------------
+  my ($gp_file_name, $gp_path, $suffix_not_used) = fileparse ($full_command);
+
+  gp_message ("debug", $subr_name, "full_command = $full_command");
+  gp_message ("debug", $subr_name, "gp_path  = $gp_path");
+
+  my $gp_display_text_instance = $gp_path . $GP_DISPLAY_TEXT;
+
+#------------------------------------------------------------------------------
+# Check if $GP_DISPLAY_TEXT exists, is not empty, and executable.
+#------------------------------------------------------------------------------
+  if (not -e $gp_display_text_instance)
+    {
+      $return_value = "file not found";
+    }
+  else
+    {
+      if (is_file_empty ($gp_display_text_instance))
+        {
+          $return_value = "file is empty";
+        }
+      else
+        {
+#------------------------------------------------------------------------------
+# All is well.  Capture the path.
+#------------------------------------------------------------------------------
+          $error_occurred = $FALSE;
+          $return_value = $gp_path;
+        }
+    }
+
+  return (\$error_occurred, \$return_value);
+
+} #-- End of subroutine find_path_to_gp_display_text
 
 #------------------------------------------------------------------------------
 # Scan the command line to see if the specified option is present.
@@ -9271,6 +9431,107 @@ sub is_file_empty
   return ($is_empty);
 
 } #-- End of subroutine is_file_empty
+
+#------------------------------------------------------------------------------
+# Check if a file is executable and return $TRUE or $FALSE.
+#------------------------------------------------------------------------------
+sub is_file_executable
+{
+  my $subr_name = get_my_name ();
+
+  my ($filename) = @_;
+
+  my $file_permissions;
+  my $index_offset;
+  my $is_executable;
+  my $mode;
+  my $number_of_bytes; 
+  my @permission_settings = ();
+  my %permission_values = ();
+
+  chomp ($filename);
+
+  gp_message ("debug", $subr_name, "check if filename = $filename is executable");
+
+  if (not -e $filename)
+    {
+#------------------------------------------------------------------------------
+# The return value is used in the caller.  This is why we return the empty
+# string in case the file does not exist.
+#------------------------------------------------------------------------------
+      gp_message ("debug", $subr_name, "filename = $filename not found");
+      $is_executable = $FALSE;
+    }
+  else
+    {
+      $mode = stat ($filename)->mode;
+
+      gp_message ("debugXL", $subr_name, "mode = $mode");
+#------------------------------------------------------------------------------
+# Get username.  We currently do not do anything with this though and the
+# code is commented out.
+#
+#      my $my_name = getlogin () || getpwuid($<) || "Kilroy";;
+#      gp_message ("debug", $subr_name, "my_name = $my_name");
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# Convert file permissions to octal, split the individual numbers and store
+# the values for the respective users.
+#------------------------------------------------------------------------------
+      $file_permissions = sprintf("%o", $mode & 07777);
+
+      @permission_settings = split (//, $file_permissions);
+
+      $number_of_bytes = scalar (@permission_settings);
+
+      gp_message ("debugXL", $subr_name, "file_permissions = $file_permissions");
+      gp_message ("debugXL", $subr_name, "permission_settings = @permission_settings");
+      gp_message ("debugXL", $subr_name, "number_of_settings = $number_of_bytes");
+
+      if ($number_of_bytes == 4)
+        {
+          $index_offset = 1;
+        }
+      elsif ($number_of_bytes == 3)
+        {
+          $index_offset = 0;
+        }
+      else
+        {
+          my $msg = "unexpected number of $number_of_bytes bytes " .
+                    "in permission settings: @permission_settings";
+          gp_message ("assertion", $subr_name, $msg);
+        }
+
+      $permission_values{user}  = $permission_settings[$index_offset++];
+      $permission_values{group} = $permission_settings[$index_offset++];
+      $permission_values{other} = $permission_settings[$index_offset];
+
+#------------------------------------------------------------------------------
+# The executable bit should be set for user, group and other.  If this fails
+# we mark the file as not executable.  Note that this is gprofng specific.
+#------------------------------------------------------------------------------
+      $is_executable = $TRUE;
+      for my $k (keys %permission_values)
+        {
+          my $msg = "permission_values{" . $k . "} = " .
+                    $permission_values{$k};
+          gp_message ("debugXL", $subr_name, $msg);
+    
+          if ($permission_values{$k} % 2 == 0)
+            {
+              $is_executable = $FALSE;
+              last;
+            }
+        }
+    }
+
+  gp_message ("debug", $subr_name, "is_executable = $is_executable");
+
+  return ($is_executable);
+
+} #-- End of subroutine is_file_executable
 
 #-------------------------------------------------------------------------------
 # TBD.
