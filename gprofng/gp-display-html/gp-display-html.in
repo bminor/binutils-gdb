@@ -8852,6 +8852,8 @@ sub handle_module_availability
 {
   my $subr_name = get_my_name ();
 
+  gp_message ("verbose", $subr_name, "Handling module requirements");
+
 #------------------------------------------------------------------------------
 # This is clunky at best, but there is a chicken egg problem here.  For the
 # man page to be generated, the --help and --version options need to work,
@@ -8868,7 +8870,9 @@ sub handle_module_availability
                       "List::Util", 
                       "Cwd", 
                       "File::Basename", 
+                      "File::stat", 
                       "POSIX", 
+                      "bigint", 
                       "bignum");
 
   my @missing_modules = ();
@@ -8895,12 +8899,17 @@ sub handle_module_availability
             {
               $cmd = $m . "->import ( qw (min max))";
             }
+          elsif ($m eq "bigint")
+            {
+              $cmd = $m . "->import ( qw (hex))";
+            }
           else
             {
               $cmd = $m . "->import";
             }
           $cmd .= ";";
           $result = eval ("$cmd");
+          gp_message ("debugM", $subr_name, "cmd = $cmd");
         }
       else
         {
