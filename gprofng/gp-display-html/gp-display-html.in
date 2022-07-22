@@ -1246,8 +1246,8 @@ sub calculate_target_hex_address
   
   $length_of_string = length ($instruction_offset); 
   $first_char       = lcfirst (substr ($instruction_offset,0,1));
-  $d1               = hex ($instruction_offset);
-  $d2               = hex ($mask);
+  $d1               = bigint::hex ($instruction_offset);
+  $d2               = bigint::hex ($mask);
 #          if ($first_char eq "f")
   if (($first_char =~ /[89a-f]/) and ($length_of_string == $number_of_fields))
     {
@@ -1258,12 +1258,12 @@ sub calculate_target_hex_address
 # XOR the decimal representation and add 1 to the result.
 #------------------------------------------------------------------------------
       $result = ($d1 ^ $d2) + 1;
-      $dec_branch_target = hex ($instruction_address) - $result;
+      $dec_branch_target = bigint::hex ($instruction_address) - $result;
     }
   else
     {
       $result = $d1;
-      $dec_branch_target = hex ($instruction_address) + $result;
+      $dec_branch_target = bigint::hex ($instruction_address) + $result;
     }
 #------------------------------------------------------------------------------
 # Convert to hexadecimal.
@@ -1765,7 +1765,7 @@ sub check_loadobjects_are_elf
           gp_message ("debug", $subr_name, "extracted name_path = $name_path name = $name");
 #              $error_extracting_information = $TRUE;
           $executable_name  = $name;
-          my $result_VA = hex ($vaddr) - hex ($foffset);
+          my $result_VA = bigint::hex ($vaddr) - bigint::hex ($foffset);
           my $hex_VA = sprintf ("0x%016x", $result_VA);
           $va_executable_in_hex = $hex_VA;
           gp_message ("debug", $subr_name, "set executable_name  = $executable_name");
@@ -2728,7 +2728,7 @@ sub determine_base_va_address
       $base_va_address = "0x0";
     }
    
-  my $decimal_address = hex ($base_va_address);
+  my $decimal_address = bigint::hex ($base_va_address);
   gp_message ("debugXL", $subr_name, "return base_va_address = $base_va_address (decimal: $decimal_address)");
 
   return ($base_va_address);
@@ -3602,7 +3602,7 @@ sub extract_info_from_map_xml
 #------------------------------------------------------------------------------
           $full_path_exec       = $name_path;
           $executable_name      = $name;
-          my $result_VA         = hex ($vaddr) - hex ($foffset);
+          my $result_VA         = bigint::hex ($vaddr) - bigint::hex ($foffset);
           $va_executable_in_hex = sprintf ("0x%016x", $result_VA);
 
 ##          $ARCHIVES_MAP_NAME  = $name;
@@ -4364,7 +4364,7 @@ sub function_info
               my ($segment,$offset);
               $segment = $1;
               $offset = $2;
-              $address_decimal = hex ($offset); # decimal
+              $address_decimal = bigint::hex ($offset); # decimal
               $full_address_field = '@'.$segment.":".$offset; # e.g. @2:0x0003f280
               $order[$index_val]{"addressobj"} = $address_decimal;
               $order[$index_val]{"addressobjtext"} = $full_address_field;
@@ -5481,7 +5481,7 @@ sub generate_dis_html
               $hot_line      = $1;
               $metric_values = $2;
               $src_line      = $3;
-              $dec_instr_address = hex ($4);
+              $dec_instr_address = bigint::hex ($4);
               $instruction   = $5;
               $operands      = $6;
 
@@ -5556,7 +5556,7 @@ sub generate_dis_html
               $hot_line      = $1;
               $metric_values = $2;
               $src_line      = $3;
-              $dec_instr_address = hex ($4);
+              $dec_instr_address = bigint::hex ($4);
               $instruction   = $5;
               $operands      = $6;
 
@@ -5711,7 +5711,7 @@ sub generate_dis_html
                 {
                   $branch_address = $extended_branch_target{$hex_instr_address};
 
-                  $dec_branch_address = hex ($branch_address);
+                  $dec_branch_address = bigint::hex ($branch_address);
 
                   if ( ($dec_branch_address >= $dec_instruction_start) and
                        ($dec_branch_address <= $dec_instruction_end) )
@@ -7707,7 +7707,7 @@ sub get_function_info
 #------------------------------------------------------------------------------
 # Convert to a base 10 number
 #------------------------------------------------------------------------------
-              $address_decimal = hex ($offset); # decimal
+              $address_decimal = bigint::hex ($offset); # decimal
 #------------------------------------------------------------------------------
 # Construct the address field.  Note that we use the hex address here.
 #------------------------------------------------------------------------------
@@ -11139,7 +11139,7 @@ sub process_function_files
 ###############################################################################
           gp_message ("debugXL", $subr_name, "before function_info[$routine_index]{addressobj} = $function_info[$routine_index]{'addressobj'}");
 
-          $function_info[$routine_index]{"addressobj"} += hex (
+          $function_info[$routine_index]{"addressobj"} += bigint::hex (
                                                 determine_base_va_address (
                                                   $executable_name, 
                                                   $base_va_executable, 
