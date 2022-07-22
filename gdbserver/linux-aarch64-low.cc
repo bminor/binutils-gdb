@@ -21,9 +21,6 @@
 
 #include "server.h"
 #include "linux-low.h"
-#include "nat/aarch64-cap-linux.h" /* For Morello  */
-#include "nat/aarch64-linux.h"
-#include "nat/aarch64-linux-hw-point.h"
 #include "arch/aarch64-cap-linux.h"
 #include "arch/aarch64-insn.h"
 #include "linux-aarch32-low.h"
@@ -47,6 +44,10 @@
 #include "linux-aarch64-tdesc.h"
 #include "nat/aarch64-mte-linux-ptrace.h"
 #include "nat/aarch64-sve-linux-ptrace.h"
+#include "nat/aarch64-cap-linux.h" /* For Morello  */
+#include "nat/aarch64-linux.h"
+#include "nat/aarch64-linux-hw-point.h"
+
 #include "tdesc.h"
 
 #ifdef HAVE_SYS_REG_H

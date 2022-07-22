@@ -34,10 +34,6 @@
 #include "aarch32-tdep.h"
 #include "arch/arm.h"
 #include "arch/aarch64-cap-linux.h"
-#include "nat/aarch64-cap-linux.h"  /* For Morello */
-#include "nat/aarch64-linux.h"
-#include "nat/aarch64-linux-hw-point.h"
-#include "nat/aarch64-sve-linux-ptrace.h"
 
 #include "elf/external.h"
 #include "elf/common.h"
@@ -56,6 +52,11 @@
 #include "arch/aarch64-mte-linux.h"
 
 #include "nat/aarch64-mte-linux-ptrace.h"
+
+#include "nat/aarch64-cap-linux.h"  /* For Morello */
+#include "nat/aarch64-linux.h"
+#include "nat/aarch64-linux-hw-point.h"
+#include "nat/aarch64-sve-linux-ptrace.h"
 
 #ifndef TRAP_HWBKPT
 #define TRAP_HWBKPT 0x0004
