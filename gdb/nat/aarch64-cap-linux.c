@@ -16,8 +16,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "gdbsupport/common-defs.h"
-#include "aarch64-cap-linux.h"
 #include "gdb_ptrace.h"
+#include "aarch64-cap-linux.h"
 
 /* Helper function to display various possible errors when reading
    Morello capabilities from memory.  */
