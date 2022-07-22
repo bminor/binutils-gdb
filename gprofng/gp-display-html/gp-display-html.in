@@ -5406,7 +5406,8 @@ sub generate_dis_html
 
   $dis_regex  = '^(#{2}|\s{2})\s+';
   $dis_regex .= '(.*)';
-  $dis_regex .= '\[\s*([0-9?]+)\]\s+([0-9a-fA-F]+):\s+([a-z0-9]+)\s+(.*)';
+##  $dis_regex .= '\[\s*([0-9?]+)\]\s+([0-9a-fA-F]+):\s+([a-z0-9]+)\s+(.*)';
+  $dis_regex .= '\[\s*([0-9?]+)\]\s+([0-9a-fA-F]+):\s+([a-z0-9]+)(.*)';
 
   gp_message ("debugXL", $subr_name, "metric_regex = $metric_regex");
   gp_message ("debugXL", $subr_name, "dis_regex    = $dis_regex");
@@ -5475,15 +5476,22 @@ sub generate_dis_html
 
       if ( $input_line =~ /$dis_regex/ )
         {
+##          if ( defined ($1) and defined ($2) and defined ($3) and
+##               defined ($4) and defined ($5) and defined ($6) )
           if ( defined ($1) and defined ($2) and defined ($3) and
-               defined ($4) and defined ($5) and defined ($6) )
+               defined ($4) and defined ($5) )
             {
               $hot_line      = $1;
               $metric_values = $2;
               $src_line      = $3;
               $dec_instr_address = bigint::hex ($4);
               $instruction   = $5;
-              $operands      = $6;
+              if (defined ($6))
+                {
+                  my $white_space_regex = '\s*';
+                  $operands = $6;
+                  $operands =~ s/$white_space_regex//;
+                }
 
               if ($hot_line eq "##")
                 {
@@ -5550,15 +5558,23 @@ sub generate_dis_html
       my $input_line = $disassembly_file[$line_no];
       if ( $input_line =~ /$dis_regex/ )
         {
+#          if ( defined ($1) and defined ($2) and defined ($3) and
+##               defined ($4) and defined ($5) and defined ($6) )
           if ( defined ($1) and defined ($2) and defined ($3) and
-               defined ($4) and defined ($5) and defined ($6) )
+               defined ($4) and defined ($5) )
             {
               $hot_line      = $1;
               $metric_values = $2;
               $src_line      = $3;
               $dec_instr_address = bigint::hex ($4);
               $instruction   = $5;
-              $operands      = $6;
+##              $operands      = $6;
+              if (defined ($6))
+                {
+                  my $white_space_regex = '\s*';
+                  $operands = $6;
+                  $operands =~ s/$white_space_regex//;
+                }
 
               if (defined ($dec_instruction_start))
                 {
@@ -5610,8 +5626,9 @@ sub generate_dis_html
       if ( $input_line =~ /$dis_regex/ )
         {
           gp_message ("debugXL", $subr_name, "found a disassembly line: $input_line");
+
           if ( defined ($1) and defined ($2) and defined ($3) and
-               defined ($4) and defined ($5) and defined ($6) )
+               defined ($4) and defined ($5) )
             {
 #                      $branch_target{$hex_branch_target} = 1;
 #                      $extended_branch_target{$instruction_address} = $raw_hex_branch_target;
@@ -5620,9 +5637,17 @@ sub generate_dis_html
               $src_line      = $3;
               $orig_hex_instr_address = $4;
               $instruction   = $5;
-              $operands      = $6;
+##              $operands      = $6;
 
-              gp_message ("debugXL", $subr_name, "disassembly line: $1 $2 $3 $4 $5 \$6 = $6");
+              my $msg = "disassembly line: $1 $2 $3 $4 $5";
+              if (defined ($6))
+                {
+                  $msg .= " \$6 = $6";
+                  my $white_space_regex = '\s*';
+                  $operands = $6;
+                  $operands =~ s/$white_space_regex//;
+                }
+              gp_message ("debugXL", $subr_name, $msg);
 
 #------------------------------------------------------------------------------
 # Pad the line with the metrics to ensure correct alignment.
