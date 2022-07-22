@@ -7494,11 +7494,16 @@ sub get_function_info
 
   my ($FSUMMARY_FILE) = @_;
 
-  my @function_info               = ();
-  my %functions_address_and_index = ();
-  my %LINUX_vDSO                  = ();
-  my %function_view_structure     = ();
-  my %addressobjtextm             = ();
+#------------------------------------------------------------------------------
+# The regex section.
+#------------------------------------------------------------------------------
+  my $white_space_regex = '\s*';
+
+  my @function_info              = ();
+  my %function_address_and_index = ();
+  my %LINUX_vDSO                 = ();
+  my %function_view_structure    = ();
+  my %addressobjtextm            = ();
 #------------------------------------------------------------------------------
 # TBD: This structure is no longer used and most likely can be removed.
 #------------------------------------------------------------------------------
@@ -7697,14 +7702,53 @@ sub get_function_info
 # or:
 #   Source File: <absolute_path>/name_of_source_file
 #------------------------------------------------------------------------------
-      if ( not ($line =~ /^(\s*)(.*):(\s+)([^\s]+|(.*))/))
+      $line =~ s/^\s+//;
+
+      my @input_fields   = split (":", $line);
+      my $no_of_elements = scalar (@input_fields);
+
+      gp_message ("debugXL", $subr_name, "#input_fields = $#input_fields");
+      gp_message ("debugXL", $subr_name, "no_of_elements = $no_of_elements");
+      gp_message ("debugXL", $subr_name, "input_fields[0] = $input_fields[0]");
+
+      if ($no_of_elements == 1)
         {
-          my $msg = "unexpected line format in summary file $FSUMMARY_FILE line  = $line";
+          $whatever = $input_fields[0];
+          $value    = "";
+        }
+      elsif ($no_of_elements == 2)
+        {
+#------------------------------------------------------------------------------
+# Note that value may consist of multiple fields (e.g. 1.651 ( 95.4%)).
+#------------------------------------------------------------------------------
+          $whatever = $input_fields[0];
+          $value    = $input_fields[1];
+        }
+      elsif ($no_of_elements == 3)
+        {
+#------------------------------------------------------------------------------
+# Assumption: must be an address field.  Restore the second colon.
+#------------------------------------------------------------------------------
+          $whatever = $input_fields[0];
+          $value    = $input_fields[1] . ":" . $input_fields[2];
+        }
+      else
+        {
+          my $msg = "unexpected: number of fields = " . $no_of_elements; 
           gp_message ("assertion", $subr_name, $msg);
         }
-      $whatever = $2;
-      $value    = $4;
+#------------------------------------------------------------------------------
+# Remove any leading whitespace characters.
+#------------------------------------------------------------------------------
+      $value =~ s/$white_space_regex//;
+
+      gp_message ("debugXL", $subr_name, "whatever = $whatever value = $value");
+
       $function_info[$i]{$whatever} = $value;
+
+#------------------------------------------------------------------------------
+# TBD: Seems to be not used anymore and can most likely be removed. Check this.
+#------------------------------------------------------------------------------
       if ($whatever =~ /Source File/)
         {
           if (!exists ($source_files{$value}))
@@ -7742,9 +7786,13 @@ sub get_function_info
               $function_info[$i]{"addressobjtext"} = $full_address_field;
               $addressobjtextm{$full_address_field} = $i; # $RI
             }
-          if (not exists ($functions_address_and_index{$routine}{$value}))
+          if (not exists ($function_address_and_index{$routine}{$value}))
             {
-              $functions_address_and_index{$routine}{$value} = $i;
+              $function_address_and_index{$routine}{$value} = $i;
+
+              my $msg = "function_address_and_index{$routine}{$value} = " .
+                        $function_address_and_index{$routine}{$value};
+              gp_message ("debugXL", $subr_name, $msg);
             } 
           else 
             {
@@ -7973,13 +8021,13 @@ sub get_function_info
         }
     }
 #------------------------------------------------------------------------------
-# Print the data structure %functions_address_and_index. This is a nested hash.
+# Print the data structure %function_address_and_index. This is a nested hash.
 #------------------------------------------------------------------------------
-  for my $F (keys %functions_address_and_index)
+  for my $F (keys %function_address_and_index)
     {
-      for my $fields (sort keys %{ $functions_address_and_index{$F} })
+      for my $fields (sort keys %{ $function_address_and_index{$F} })
         {
-           gp_message ("debug", $subr_name, "on return: functions_address_and_index{$F}{$fields} = $functions_address_and_index{$F}{$fields}");
+           gp_message ("debug", $subr_name, "on return: function_address_and_index{$F}{$fields} = $function_address_and_index{$F}{$fields}");
         }
     }
 #------------------------------------------------------------------------------
@@ -8050,10 +8098,10 @@ sub get_function_info
          $multi_occurrences; 
   gp_message ("debug", $subr_name, $msg);
 
-  return (\@function_info, \%functions_address_and_index, \%addressobjtextm, \%LINUX_vDSO, \%function_view_structure);
+  return (\@function_info, \%function_address_and_index, \%addressobjtextm, 
+          \%LINUX_vDSO, \%function_view_structure);
 
 } #-- End of subroutine get_function_info
-
 #------------------------------------------------------------------------------
 # TBD
 #------------------------------------------------------------------------------
@@ -9881,12 +9929,12 @@ sub parse_dis_files
   my $subr_name = get_my_name ();
 
   my ($number_of_metrics_ref, $function_info_ref, 
-      $functions_address_and_index_ref, $input_string_ref, 
+      $function_address_and_index_ref, $input_string_ref, 
       $addressobj_index_ref) = @_;
 
 #------------------------------------------------------------------------------
-# Note that $functions_address_and_index_ref are is not used,
-# but we need to pass in the address into generate_dis_html.
+# Note that $function_address_and_index_ref is not used, but we need to pass 
+# in the address into generate_dis_html.
 #------------------------------------------------------------------------------
   my $number_of_metrics = ${ $number_of_metrics_ref };
   my @function_info     = @{ $function_info_ref };
@@ -9950,7 +9998,7 @@ sub parse_dis_files
                                           \$target_function,
                                           \$number_of_metrics, 
                                           $function_info_ref, 
-                                          $functions_address_and_index_ref, 
+                                          $function_address_and_index_ref, 
                                           \$outputdir, 
                                           \$filename, 
                                           \@source_line, 
@@ -11038,6 +11086,15 @@ sub process_function_files
                $process_all_functions) 
             {
               $PCA = $function_address_info{$metric}[$INDEX]{"PC Address"};
+
+              if (not exists ($functions_per_metric_first_index{$metric}{$routine}{$PCA}))
+                {
+                  gp_message ("debugXL", $subr_name, "not exists: functions_per_metric_first_index{$metric}{$routine}{$PCA}");
+                }
+              if (not exists ($function_address_and_index{$routine}{$PCA}))
+                {
+                  gp_message ("debugXL", $subr_name, "not exists: function_address_and_index{$routine}{$PCA}");
+                }
 
               if (exists ($functions_per_metric_first_index{$metric}{$routine}{$PCA}) and 
                   exists ($function_address_and_index{$routine}{$PCA}))
