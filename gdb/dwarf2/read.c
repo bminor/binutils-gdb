@@ -2696,7 +2696,10 @@ dwarf2_read_gdb_index
       /* We can only handle a single .debug_types when we have an
 	 index.  */
       if (per_bfd->types.size () != 1)
-	return 0;
+	{
+	  per_bfd->all_comp_units.clear ();
+	  return 0;
+	}
 
       dwarf2_section_info *section = &per_bfd->types[0];
 
@@ -4701,7 +4704,10 @@ dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
       /* We can only handle a single .debug_types when we have an
 	 index.  */
       if (per_bfd->types.size () != 1)
-	return false;
+	{
+	  per_bfd->all_comp_units.clear ();
+	  return false;
+	}
 
       dwarf2_section_info *section = &per_bfd->types[0];
 
@@ -7214,6 +7220,7 @@ static void
 create_all_comp_units (dwarf2_per_objfile *per_objfile)
 {
   htab_up types_htab;
+  gdb_assert (per_objfile->per_bfd->all_comp_units.empty ());
 
   read_comp_units_from_section (per_objfile, &per_objfile->per_bfd->info,
 				&per_objfile->per_bfd->abbrev, 0,
