@@ -99,6 +99,8 @@ typedef struct def_file {
 
   /* Only expected from .drectve sections, not .DEF files.  */
   def_file_aligncomm *aligncomms;
+
+  /* From EXCLUDE_SYMBOLS or embedded directives. */
   def_file_exclude_symbol *exclude_symbols;
 
 } def_file;

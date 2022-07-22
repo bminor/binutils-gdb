@@ -249,6 +249,7 @@ keyword_as_name: BASE { $$ = "BASE"; }
 	 | DATAL { $$ = "data"; }
 	 | DESCRIPTION { $$ = "DESCRIPTION"; }
 	 | DIRECTIVE { $$ = "DIRECTIVE"; }
+	 | EXCLUDE_SYMBOLS { $$ = "EXCLUDE_SYMBOLS"; }
 	 | EXECUTE { $$ = "EXECUTE"; }
 	 | EXPORTS { $$ = "EXPORTS"; }
 	 | HEAPSIZE { $$ = "HEAPSIZE"; }
@@ -337,6 +338,7 @@ anylang_id: ID		{ $$ = $1; }
 
 symbol_list:
 	anylang_id { def_exclude_symbols ($1); }
+	|	symbol_list anylang_id { def_exclude_symbols ($2); }
 	|	symbol_list ',' anylang_id { def_exclude_symbols ($3); }
 	;
 
@@ -1352,6 +1354,7 @@ tokens[] =
   { "data", DATAL },
   { "DESCRIPTION", DESCRIPTION },
   { "DIRECTIVE", DIRECTIVE },
+  { "EXCLUDE_SYMBOLS", EXCLUDE_SYMBOLS },
   { "EXECUTE", EXECUTE },
   { "EXPORTS", EXPORTS },
   { "HEAPSIZE", HEAPSIZE },
