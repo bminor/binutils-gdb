@@ -1912,22 +1912,16 @@ windows_nat_target::attach (const char *args, int from_tty)
 void
 windows_nat_target::detach (inferior *inf, int from_tty)
 {
-  int detached = 1;
-
   ptid_t ptid = minus_one_ptid;
   resume (ptid, 0, GDB_SIGNAL_0);
 
   if (!DebugActiveProcessStop (windows_process.current_event.dwProcessId))
-    {
-      error (_("Can't detach process %u (error %u)"),
-	     (unsigned) windows_process.current_event.dwProcessId,
-	     (unsigned) GetLastError ());
-      detached = 0;
-    }
+    error (_("Can't detach process %u (error %u)"),
+	   (unsigned) windows_process.current_event.dwProcessId,
+	   (unsigned) GetLastError ());
   DebugSetProcessKillOnExit (FALSE);
 
-  if (detached)
-    target_announce_detach (from_tty);
+  target_announce_detach (from_tty);
 
   x86_cleanup_dregs ();
   switch_to_no_thread ();
