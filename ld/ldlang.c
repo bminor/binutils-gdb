@@ -2458,7 +2458,6 @@ exp_init_os (etree_type *exp)
 	{
 	case ADDR:
 	case LOADADDR:
-	case SIZEOF:
 	  {
 	    lang_output_section_statement_type *os;
 
