@@ -25,6 +25,7 @@
 #include "netbsd-tdep.h"
 #include "inferior.h"
 #include "gdbarch.h"
+#include "gdbsupport/buildargv.h"
 
 #include <sys/types.h>
 #include <sys/ptrace.h>
