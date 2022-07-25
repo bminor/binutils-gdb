@@ -3837,6 +3837,21 @@ const struct powerpc_operand powerpc_operands[] =
 
 #define ms vs + 1
   { 0x1, 8, NULL, NULL, 0 },
+
+#define SVLcr ms + 1
+  { 0x1, 5, NULL, NULL, 0 },
+
+#define SVxd SVLcr + 1
+  { 0x1f, 21, NULL, NULL, PPC_OPERAND_NONZERO },
+
+#define SVyd SVxd + 1
+  { 0x1f, 16, NULL, NULL, PPC_OPERAND_NONZERO },
+
+#define SVzd SVyd + 1
+  { 0x1f, 11, NULL, NULL, PPC_OPERAND_NONZERO },
+
+#define SVrm SVzd + 1
+  { 0xf, 7, NULL, NULL, 0 },
 };
 
 const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
@@ -4718,6 +4733,12 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
    | ((((uint64_t)(xop)) & 0x1f) << 1)		\
    | (((uint64_t)(rc)) & 1))
 #define SVL_MASK	SVL (0x3f, 0x1f, 1)
+
+/* An SVM form instruction. */
+#define SVM(op, xop)				\
+  (OP (op)					\
+   | (((uint64_t)(xop)) & 0x3f))
+#define SVM_MASK	SVM (0x3f, 0x3f)
 
 /* The BO encodings used in extended conditional branch mnemonics.  */
 #define BODNZF	(0x0)
@@ -6790,6 +6811,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"svstep",	SVL(22,19,0),	SVL_MASK,	SVP64,	PPCVLE,	{RT, SVi, vf}},
 {"svstep.",	SVL(22,19,1),	SVL_MASK,	SVP64,	PPCVLE,	{RT, SVi, vf}},
+
+{"svshape",	SVM(22,25),	SVM_MASK,	SVP64,	PPCVLE,	{SVxd, SVyd, SVzd, SVrm, vf}},
 
 {"setvl",	SVL(22,27,0),	SVL_MASK,	SVP64,	PPCVLE,	{RT, RA, SVi, vf, vs, ms}},
 {"setvl.",	SVL(22,27,1),	SVL_MASK,	SVP64,	PPCVLE,	{RT, RA, SVi, vf, vs, ms}},

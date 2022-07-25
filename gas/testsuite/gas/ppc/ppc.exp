@@ -157,3 +157,4 @@ run_dump_test "raw"
 
 run_dump_test "setvl"
 run_dump_test "svstep"
+run_dump_test "svshape"
