@@ -3509,6 +3509,7 @@ const struct powerpc_operand powerpc_operands[] =
 #define TO TBR + 1
 #define DUI TO
 #define SVme TO
+#define SVG TO
 #define TO_MASK (0x1f << 21)
   { 0x1f, 21, NULL, NULL, 0 },
 
@@ -3556,6 +3557,7 @@ const struct powerpc_operand powerpc_operands[] =
   /* The UIMM field in a VX form instruction.  */
 #define UIMM SIMM + 1
 #define DCTL UIMM
+#define rmm UIMM
   { 0x1f, 16, NULL, NULL, 0 },
 
   /* The 3-bit UIMM field in a VX form instruction.  */
@@ -3648,6 +3650,7 @@ const struct powerpc_operand powerpc_operands[] =
   /* The RMC or CY field in a Z23 form instruction.  */
 #define RMC A_L + 1
 #define CY RMC
+#define ew RMC
   { 0x3, 9, NULL, NULL, 0 },
 
 #define R RMC + 1
@@ -3836,12 +3839,15 @@ const struct powerpc_operand powerpc_operands[] =
   { 0x3f, 9, NULL, NULL, PPC_OPERAND_NONZERO },
 
 #define vf SVi + 1
+#define sk vf
   { 0x1, 6, NULL, NULL, 0 },
 
 #define vs vf + 1
+#define mm vs
   { 0x1, 7, NULL, NULL, 0 },
 
 #define ms vs + 1
+#define yx ms
   { 0x1, 8, NULL, NULL, 0 },
 
 #define SVLcr ms + 1
@@ -3854,6 +3860,7 @@ const struct powerpc_operand powerpc_operands[] =
   { 0x1f, 16, NULL, NULL, PPC_OPERAND_NONZERO },
 
 #define SVzd SVyd + 1
+#define SVd SVzd
   { 0x1f, 11, NULL, NULL, PPC_OPERAND_NONZERO },
 
 #define SVrm SVzd + 1
@@ -4757,6 +4764,12 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
   (OP (op)					\
    | (((uint64_t)(xop)) & 0x3f))
 #define SVRM_MASK	SVRM (0x3f, 0x3f)
+
+/* An SVI form instruction. */
+#define SVI(op, xop)				\
+  (OP (op)					\
+   | (((uint64_t)(xop)) & 0x3f))
+#define SVI_MASK	SVI (0x3f, 0x3f)
 
 /* The BO encodings used in extended conditional branch mnemonics.  */
 #define BODNZF	(0x0)
@@ -6834,6 +6847,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"setvl",	SVL(22,27,0),	SVL_MASK,	SVP64,	PPCVLE,	{RT, RA, SVi, vf, vs, ms}},
 {"setvl.",	SVL(22,27,1),	SVL_MASK,	SVP64,	PPCVLE,	{RT, RA, SVi, vf, vs, ms}},
+
+{"svindex",	SVI(22,41),	SVI_MASK,	SVP64,	PPCVLE,	{SVG, rmm, SVd, ew, yx, mm, sk}},
 
 {"svremap",	SVRM(22,57),	SVRM_MASK,	SVP64,	PPCVLE,	{SVme, mi0, mi1, mi2, mo0, mo1, pst}},
 
