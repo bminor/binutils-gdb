@@ -56,6 +56,9 @@ static struct frame_info *sentinel_frame;
 /* Number of calls to reinit_frame_cache.  */
 static unsigned int frame_cache_generation = 0;
 
+/* See frame-info.h.  */
+intrusive_list<frame_info_ptr> frame_info_ptr::frame_list;
+
 /* See frame.h.  */
 
 unsigned int
@@ -2005,6 +2008,9 @@ reinit_frame_cache (void)
   sentinel_frame = NULL;		/* Invalidate cache */
   select_frame (NULL);
   frame_stash_invalidate ();
+
+  for (frame_info_ptr &iter : frame_info_ptr::frame_list)
+    iter.invalidate ();
 
   frame_debug_printf ("generation=%d", frame_cache_generation);
 }

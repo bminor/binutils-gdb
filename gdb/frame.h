@@ -20,6 +20,8 @@
 #if !defined (FRAME_H)
 #define FRAME_H 1
 
+#include "frame-info.h"
+
 /* The following is the intended naming schema for frame functions.
    It isn't 100% consistent, but it is approaching that.  Frame naming
    schema:
