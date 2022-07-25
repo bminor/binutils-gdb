@@ -3825,6 +3825,18 @@ const struct powerpc_operand powerpc_operands[] =
 
 #define HH DDD + 1
   { 0x3, 13, NULL, NULL, 0 },
+
+#define SVi HH + 1
+  { 0x3f, 9, NULL, NULL, PPC_OPERAND_NONZERO },
+
+#define vf SVi + 1
+  { 0x1, 6, NULL, NULL, 0 },
+
+#define vs vf + 1
+  { 0x1, 7, NULL, NULL, 0 },
+
+#define ms vs + 1
+  { 0x1, 8, NULL, NULL, 0 },
 };
 
 const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
@@ -4699,6 +4711,13 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define APU_MASK APU (0x3f, 0x3ff, 1)
 #define APU_RT_MASK (APU_MASK | RT_MASK)
 #define APU_RA_MASK (APU_MASK | RA_MASK)
+
+/* An SVL form instruction. */
+#define SVL(op, xop, rc)			\
+  (OP (op)					\
+   | ((((uint64_t)(xop)) & 0x1f) << 1)		\
+   | (((uint64_t)(rc)) & 1))
+#define SVL_MASK	SVL (0x3f, 0x1f, 1)
 
 /* The BO encodings used in extended conditional branch mnemonics.  */
 #define BODNZF	(0x0)
@@ -6768,6 +6787,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"rlmi",	M(22,0),	M_MASK,	     M601,	PPCVLE,		{RA, RS, RB, MBE, ME}},
 {"rlmi.",	M(22,1),	M_MASK,	     M601,	PPCVLE,		{RA, RS, RB, MBE, ME}},
+
+{"setvl",	SVL(22,27,0),	SVL_MASK,	SVP64,	PPCVLE,	{RT, RA, SVi, vf, vs, ms}},
+{"setvl.",	SVL(22,27,1),	SVL_MASK,	SVP64,	PPCVLE,	{RT, RA, SVi, vf, vs, ms}},
 
 {"rotlw",	MME(23,31,0),	MMBME_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, RB}},
 {"rlwnm",	M(23,0),	M_MASK,	     PPCCOM,	PPCVLE,		{RA, RS, RB, MBE, ME}},
