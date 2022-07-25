@@ -5325,7 +5325,7 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
      breakpoint or a single step breakpoint.  */
 
   if (frame_id_p (b->frame_id)
-      && !frame_id_eq (b->frame_id, get_stack_frame_id (get_current_frame ())))
+      && b->frame_id != get_stack_frame_id (get_current_frame ()))
     {
       infrun_debug_printf ("incorrect frame %s not %s, not stopping",
 			   get_stack_frame_id (get_current_frame ()).to_string ().c_str (),

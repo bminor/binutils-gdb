@@ -2901,7 +2901,7 @@ ia64_libunwind_frame_this_id (struct frame_info *this_frame, void **this_cache,
   CORE_ADDR bsp;
 
   libunwind_frame_this_id (this_frame, this_cache, &id);
-  if (frame_id_eq (id, outer_frame_id))
+  if (id == outer_frame_id)
     {
       (*this_id) = outer_frame_id;
       return;
@@ -3032,7 +3032,7 @@ ia64_libunwind_sigtramp_frame_this_id (struct frame_info *this_frame,
   struct frame_id id = outer_frame_id;
 
   libunwind_frame_this_id (this_frame, this_cache, &id);
-  if (frame_id_eq (id, outer_frame_id))
+  if (id == outer_frame_id)
     {
       (*this_id) = outer_frame_id;
       return;

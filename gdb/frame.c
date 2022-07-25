@@ -244,7 +244,7 @@ frame_addr_hash (const void *ap)
 }
 
 /* Internal equality function for the hash table.  This function
-   defers equality operations to frame_id_eq.  */
+   defers equality operations to frame_id::operator==.  */
 
 static int
 frame_addr_hash_eq (const void *a, const void *b)
@@ -252,8 +252,7 @@ frame_addr_hash_eq (const void *a, const void *b)
   const struct frame_info *f_entry = (const struct frame_info *) a;
   const struct frame_info *f_element = (const struct frame_info *) b;
 
-  return frame_id_eq (f_entry->this_id.value,
-		      f_element->this_id.value);
+  return f_entry->this_id.value == f_element->this_id.value;
 }
 
 /* Internal function to create the frame_stash hash table.  100 seems
@@ -752,28 +751,28 @@ frame_id_artificial_p (frame_id l)
 }
 
 bool
-frame_id_eq (frame_id l, frame_id r)
+frame_id::operator== (const frame_id &r) const
 {
   bool eq;
 
-  if (l.stack_status == FID_STACK_INVALID
+  if (stack_status == FID_STACK_INVALID
       || r.stack_status == FID_STACK_INVALID)
     /* Like a NaN, if either ID is invalid, the result is false.
        Note that a frame ID is invalid iff it is the null frame ID.  */
     eq = false;
-  else if (l.stack_status != r.stack_status || l.stack_addr != r.stack_addr)
+  else if (stack_status != r.stack_status || stack_addr != r.stack_addr)
     /* If .stack addresses are different, the frames are different.  */
     eq = false;
-  else if (l.code_addr_p && r.code_addr_p && l.code_addr != r.code_addr)
+  else if (code_addr_p && r.code_addr_p && code_addr != r.code_addr)
     /* An invalid code addr is a wild card.  If .code addresses are
        different, the frames are different.  */
     eq = false;
-  else if (l.special_addr_p && r.special_addr_p
-	   && l.special_addr != r.special_addr)
+  else if (special_addr_p && r.special_addr_p
+	   && special_addr != r.special_addr)
     /* An invalid special addr is a wild card (or unused).  Otherwise
        if special addresses are different, the frames are different.  */
     eq = false;
-  else if (l.artificial_depth != r.artificial_depth)
+  else if (artificial_depth != r.artificial_depth)
     /* If artificial depths are different, the frames must be different.  */
     eq = false;
   else
@@ -781,7 +780,7 @@ frame_id_eq (frame_id l, frame_id r)
     eq = true;
 
   frame_debug_printf ("l=%s, r=%s -> %d",
-		      l.to_string ().c_str (), r.to_string ().c_str (), eq);
+		      to_string ().c_str (), r.to_string ().c_str (), eq);
 
   return eq;
 }
@@ -875,7 +874,7 @@ frame_find_by_id (struct frame_id id)
     return NULL;
 
   /* Check for the sentinel frame.  */
-  if (frame_id_eq (id, sentinel_frame_id))
+  if (id == sentinel_frame_id)
     return sentinel_frame;
 
   /* Try using the frame stash first.  Finding it there removes the need
@@ -894,7 +893,7 @@ frame_find_by_id (struct frame_id id)
     {
       struct frame_id self = get_frame_id (frame);
 
-      if (frame_id_eq (id, self))
+      if (id == self)
 	/* An exact match.  */
 	return frame;
 
@@ -1738,7 +1737,7 @@ lookup_selected_frame (struct frame_id a_frame_id, int frame_level)
 	 it's highly unlikely the search by level finds the wrong
 	 frame, it's 99.9(9)% of the time (for all practical purposes)
 	 safe.  */
-      && frame_id_eq (get_frame_id (frame), a_frame_id))
+      && get_frame_id (frame) == a_frame_id)
     {
       /* Cool, all is fine.  */
       select_frame (frame);

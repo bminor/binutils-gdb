@@ -946,7 +946,7 @@ elf_gnu_ifunc_resolver_stop (code_breakpoint *b)
 
       if (b_return->thread == thread_id
 	  && b_return->loc->requested_address == prev_pc
-	  && frame_id_eq (b_return->frame_id, prev_frame_id))
+	  && b_return->frame_id == prev_frame_id)
 	break;
     }
 

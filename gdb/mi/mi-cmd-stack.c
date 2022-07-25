@@ -729,7 +729,7 @@ parse_frame_specification (const char *frame_exp)
        fid != NULL;
        fid = get_prev_frame (fid))
     {
-      if (frame_id_eq (id, get_frame_id (fid)))
+      if (id == get_frame_id (fid))
 	{
 	  struct frame_info *prev_frame;
 
@@ -737,7 +737,7 @@ parse_frame_specification (const char *frame_exp)
 	    {
 	      prev_frame = get_prev_frame (fid);
 	      if (!prev_frame
-		  || !frame_id_eq (id, get_frame_id (prev_frame)))
+		  || id != get_frame_id (prev_frame))
 		break;
 	      fid = prev_frame;
 	    }

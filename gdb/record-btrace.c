@@ -2033,10 +2033,8 @@ record_btrace_start_replaying (struct thread_info *tp)
       frame_id = get_thread_current_frame_id (tp);
 
       /* Check if we need to update any stepping-related frame id's.  */
-      upd_step_frame_id = frame_id_eq (frame_id,
-				       tp->control.step_frame_id);
-      upd_step_stack_frame_id = frame_id_eq (frame_id,
-					     tp->control.step_stack_frame_id);
+      upd_step_frame_id = (frame_id == tp->control.step_frame_id);
+      upd_step_stack_frame_id = (frame_id == tp->control.step_stack_frame_id);
 
       /* We start replaying at the end of the branch trace.  This corresponds
 	 to the current instruction.  */

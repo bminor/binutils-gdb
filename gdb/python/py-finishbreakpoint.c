@@ -207,7 +207,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	  else
 	    {
 	      frame_id = get_frame_id (prev_frame);
-	      if (frame_id_eq (frame_id, null_frame_id))
+	      if (frame_id == null_frame_id)
 		PyErr_SetString (PyExc_ValueError,
 				 _("Invalid ID for the `frame' object."));
 	    }

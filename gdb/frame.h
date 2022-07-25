@@ -173,6 +173,16 @@ struct frame_id
 
   /* Return a string representation of this frame id.  */
   std::string to_string () const;
+
+  /* Returns true when this frame_id and R identify the same
+     frame.  */
+  bool operator== (const frame_id &r) const;
+
+  /* Inverse of ==.  */
+  bool operator!= (const frame_id &r) const
+  {
+    return !(*this == r);
+  }
 };
 
 /* Save and restore the currently selected frame.  */
@@ -268,9 +278,6 @@ extern bool frame_id_p (frame_id l);
    without stack data representation in inferior, such as INLINE_FRAME or
    TAILCALL_FRAME.  */
 extern bool frame_id_artificial_p (frame_id l);
-
-/* Returns true when L and R identify the same frame.  */
-extern bool frame_id_eq (frame_id l, frame_id r);
 
 /* Frame types.  Some are real, some are signal trampolines, and some
    are completely artificial (dummy).  */
@@ -498,22 +505,7 @@ extern CORE_ADDR get_frame_base (struct frame_info *);
 
 /* Return the per-frame unique identifer.  Can be used to relocate a
    frame after a frame cache flush (and other similar operations).  If
-   FI is NULL, return the null_frame_id.
-
-   NOTE: kettenis/20040508: These functions return a structure.  On
-   platforms where structures are returned in static storage (vax,
-   m68k), this may trigger compiler bugs in code like:
-
-   if (frame_id_eq (get_frame_id (l), get_frame_id (r)))
-
-   where the return value from the first get_frame_id (l) gets
-   overwritten by the second get_frame_id (r).  Please avoid writing
-   code like this.  Use code like:
-
-   struct frame_id id = get_frame_id (l);
-   if (frame_id_eq (id, get_frame_id (r)))
-
-   instead, since that avoids the bug.  */
+   FI is NULL, return the null_frame_id.  */
 extern struct frame_id get_frame_id (struct frame_info *fi);
 extern struct frame_id get_stack_frame_id (struct frame_info *fi);
 extern struct frame_id frame_unwind_caller_id (struct frame_info *next_frame);

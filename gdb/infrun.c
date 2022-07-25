@@ -4565,7 +4565,7 @@ stepped_in_from (struct frame_info *frame, struct frame_id step_frame_id)
        frame != NULL;
        frame = get_prev_frame (frame))
     {
-      if (frame_id_eq (get_frame_id (frame), step_frame_id))
+      if (get_frame_id (frame) == step_frame_id)
 	return true;
 
       if (get_frame_type (frame) != INLINE_FRAME)
@@ -4595,7 +4595,7 @@ inline_frame_is_marked_for_skip (bool prev_frame, struct thread_info *tp)
       symtab_and_line sal;
       struct symbol *sym;
 
-      if (frame_id_eq (get_frame_id (frame), tp->control.step_frame_id))
+      if (get_frame_id (frame) == tp->control.step_frame_id)
 	break;
       if (get_frame_type (frame) != INLINE_FRAME)
 	break;
@@ -6576,8 +6576,8 @@ handle_signal_stop (struct execution_control_state *ecs)
 	  && (pc_in_thread_step_range (ecs->event_thread->stop_pc (),
 				       ecs->event_thread)
 	      || ecs->event_thread->control.step_range_end == 1)
-	  && frame_id_eq (get_stack_frame_id (frame),
-			  ecs->event_thread->control.step_stack_frame_id)
+	  && (get_stack_frame_id (frame)
+	      == ecs->event_thread->control.step_stack_frame_id)
 	  && ecs->event_thread->control.step_resume_breakpoint == NULL)
 	{
 	  /* The inferior is about to take a signal that will take it
@@ -6744,8 +6744,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  {
 	    struct frame_id current_id
 	      = get_frame_id (get_current_frame ());
-	    if (frame_id_eq (current_id,
-			     ecs->event_thread->initiating_frame))
+	    if (current_id == ecs->event_thread->initiating_frame)
 	      {
 		/* Case 2.  Fall through.  */
 	      }
@@ -6918,8 +6917,7 @@ process_event_stop_test (struct execution_control_state *ecs)
   if (pc_in_thread_step_range (ecs->event_thread->stop_pc (),
 			       ecs->event_thread)
       && (execution_direction != EXEC_REVERSE
-	  || frame_id_eq (get_frame_id (frame),
-			  ecs->event_thread->control.step_frame_id)))
+	  || get_frame_id (frame) == ecs->event_thread->control.step_frame_id))
     {
       infrun_debug_printf
 	("stepping inside range [%s-%s]",
@@ -7053,7 +7051,7 @@ process_event_stop_test (struct execution_control_state *ecs)
      previous frame's ID is sufficient - but it is a common case and
      cheaper than checking the previous frame's ID.
 
-     NOTE: frame_id_eq will never report two invalid frame IDs as
+     NOTE: frame_id::operator== will never report two invalid frame IDs as
      being equal, so to get into this block, both the current and
      previous frame must have valid frame IDs.  */
   /* The outer_frame_id check is a heuristic to detect stepping
@@ -7063,14 +7061,14 @@ process_event_stop_test (struct execution_control_state *ecs)
      "outermost" function.  This could be fixed by marking
      outermost frames as !stack_p,code_p,special_p.  Then the
      initial outermost frame, before sp was valid, would
-     have code_addr == &_start.  See the comment in frame_id_eq
+     have code_addr == &_start.  See the comment in frame_id::operator==
      for more.  */
-  if (!frame_id_eq (get_stack_frame_id (frame),
-		    ecs->event_thread->control.step_stack_frame_id)
-      && (frame_id_eq (frame_unwind_caller_id (get_current_frame ()),
-		       ecs->event_thread->control.step_stack_frame_id)
-	  && (!frame_id_eq (ecs->event_thread->control.step_stack_frame_id,
-			    outer_frame_id)
+  if ((get_stack_frame_id (frame)
+       != ecs->event_thread->control.step_stack_frame_id)
+      && ((frame_unwind_caller_id (get_current_frame ())
+	   == ecs->event_thread->control.step_stack_frame_id)
+	  && ((ecs->event_thread->control.step_stack_frame_id
+	       != outer_frame_id)
 	      || (ecs->event_thread->control.step_start_function
 		  != find_pc_function (ecs->event_thread->stop_pc ())))))
     {
@@ -7327,8 +7325,8 @@ process_event_stop_test (struct execution_control_state *ecs)
      frame machinery detected some skipped call sites, we have entered
      a new inline function.  */
 
-  if (frame_id_eq (get_frame_id (get_current_frame ()),
-		   ecs->event_thread->control.step_frame_id)
+  if ((get_frame_id (get_current_frame ())
+       == ecs->event_thread->control.step_frame_id)
       && inline_skipped_frames (ecs->event_thread))
     {
       infrun_debug_printf ("stepped into inlined function");
@@ -7376,8 +7374,8 @@ process_event_stop_test (struct execution_control_state *ecs)
      through a more inlined call beyond its call site.  */
 
   if (get_frame_type (get_current_frame ()) == INLINE_FRAME
-      && !frame_id_eq (get_frame_id (get_current_frame ()),
-		       ecs->event_thread->control.step_frame_id)
+      && (get_frame_id (get_current_frame ())
+	  != ecs->event_thread->control.step_frame_id)
       && stepped_in_from (get_current_frame (),
 			  ecs->event_thread->control.step_frame_id))
     {
@@ -7409,8 +7407,8 @@ process_event_stop_test (struct execution_control_state *ecs)
 	  end_stepping_range (ecs);
 	  return;
 	}
-      else if (frame_id_eq (get_frame_id (get_current_frame ()),
-                           ecs->event_thread->control.step_frame_id))
+      else if (get_frame_id (get_current_frame ())
+               == ecs->event_thread->control.step_frame_id)
 	{
 	  /* We are not at the start of a statement, and we have not changed
 	     frame.
@@ -8467,8 +8465,8 @@ print_stop_location (const target_waitstatus &ws)
 	 should) carry around the function and does (or should) use
 	 that when doing a frame comparison.  */
       if (tp->control.stop_step
-	  && frame_id_eq (tp->control.step_frame_id,
-			  get_frame_id (get_current_frame ()))
+	  && (tp->control.step_frame_id
+	      == get_frame_id (get_current_frame ()))
 	  && (tp->control.step_start_function
 	      == find_pc_function (tp->stop_pc ())))
 	{

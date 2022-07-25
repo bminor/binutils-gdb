@@ -47,7 +47,7 @@ static int
 dummy_frame_id_eq (struct dummy_frame_id *id1,
 		   struct dummy_frame_id *id2)
 {
-  return frame_id_eq (id1->id, id2->id) && id1->thread == id2->thread;
+  return id1->id == id2->id && id1->thread == id2->thread;
 }
 
 /* List of dummy_frame destructors.  */
@@ -130,7 +130,7 @@ static bool
 pop_dummy_frame_bpt (struct breakpoint *b, struct dummy_frame *dummy)
 {
   if (b->thread == dummy->id.thread->global_num
-      && b->disposition == disp_del && frame_id_eq (b->frame_id, dummy->id.id))
+      && b->disposition == disp_del && b->frame_id == dummy->id.id)
     {
       while (b->related_breakpoint != b)
 	delete_breakpoint (b->related_breakpoint);

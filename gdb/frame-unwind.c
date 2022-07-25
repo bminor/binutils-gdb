@@ -229,7 +229,7 @@ default_frame_unwind_stop_reason (struct frame_info *this_frame,
 {
   struct frame_id this_id = get_frame_id (this_frame);
 
-  if (frame_id_eq (this_id, outer_frame_id))
+  if (this_id == outer_frame_id)
     return UNWIND_OUTERMOST;
   else
     return UNWIND_NO_REASON;

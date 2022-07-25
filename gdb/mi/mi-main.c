@@ -1997,7 +1997,7 @@ struct user_selected_context
        reports not-equal, we only do the equality test if we have something
        other than the innermost frame selected.  */
     if (current_frame_level != -1
-	&& !frame_id_eq (current_frame_id, m_previous_frame_id))
+	&& current_frame_id != m_previous_frame_id)
       return true;
 
     /* Nothing changed!  */

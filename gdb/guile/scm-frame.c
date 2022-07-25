@@ -134,7 +134,7 @@ frscm_eq_frame_smob (const void *ap, const void *bp)
   const frame_smob *a = (const frame_smob *) ap;
   const frame_smob *b = (const frame_smob *) bp;
 
-  return (frame_id_eq (a->frame_id, b->frame_id)
+  return (a->frame_id == b->frame_id
 	  && a->inferior == b->inferior
 	  && a->inferior != NULL);
 }

@@ -4004,7 +4004,7 @@ value_fetch_lazy_register (struct value *val)
 	 in this situation.  */
       if (VALUE_LVAL (new_val) == lval_register
 	  && value_lazy (new_val)
-	  && frame_id_eq (VALUE_NEXT_FRAME_ID (new_val), next_frame_id))
+	  && VALUE_NEXT_FRAME_ID (new_val) == next_frame_id)
 	internal_error (__FILE__, __LINE__,
 			_("infinite loop while fetching a register"));
     }
