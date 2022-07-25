@@ -132,6 +132,7 @@ struct loongarch_elf_link_hash_table
 
 #define elf_backend_want_dynrelro 1
 #define elf_backend_rela_normal 1
+#define elf_backend_default_execstack 0
 
 /* Generate a PLT header.  */
 
