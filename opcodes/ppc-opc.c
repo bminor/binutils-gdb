@@ -2849,6 +2849,7 @@ const struct powerpc_operand powerpc_operands[] =
   /* The RM field in an X form instruction.  */
 #define RM BOP + 1
 #define DD RM
+#define mo1 RM
   { 0x3, 11, NULL, NULL, 0 },
 
 #define BH RM + 1
@@ -3507,6 +3508,7 @@ const struct powerpc_operand powerpc_operands[] =
   /* The TO field in a D or X form instruction.  */
 #define TO TBR + 1
 #define DUI TO
+#define SVme TO
 #define TO_MASK (0x1f << 21)
   { 0x1f, 21, NULL, NULL, 0 },
 
@@ -3620,6 +3622,8 @@ const struct powerpc_operand powerpc_operands[] =
 #define PSWM WS + 1
   /* The BO16 field in a BD8 form instruction.  */
 #define BO16 PSWM
+  /* The pst field in a SVRM form instruction.  */
+#define pst PSWM
   {  0x1, 10, 0, 0, 0 },
 
   /* IDX bits for quantization in the pair singles instructions.  */
@@ -3657,6 +3661,7 @@ const struct powerpc_operand powerpc_operands[] =
   { 0x1, 17, NULL, NULL, PPC_OPERAND_OPTIONAL },
 
 #define SP PRS + 1
+#define mi0 SP
   { 0x3, 19, NULL, NULL, 0 },
 
 #define S SP + 1
@@ -3824,6 +3829,7 @@ const struct powerpc_operand powerpc_operands[] =
   { 0x7, PPC_OPSHIFT_INV, insert_Ddd, extract_Ddd, 0 },
 
 #define HH DDD + 1
+#define mo0 HH
   { 0x3, 13, NULL, NULL, 0 },
 
 #define SVi HH + 1
@@ -3852,6 +3858,12 @@ const struct powerpc_operand powerpc_operands[] =
 
 #define SVrm SVzd + 1
   { 0xf, 7, NULL, NULL, 0 },
+
+#define mi1 SVrm + 1
+  { 0x3, 17, NULL, NULL, 0 },
+
+#define mi2 mi1 + 1
+  { 0x3, 15, NULL, NULL, 0 },
 };
 
 const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
@@ -4739,6 +4751,12 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
   (OP (op)					\
    | (((uint64_t)(xop)) & 0x3f))
 #define SVM_MASK	SVM (0x3f, 0x3f)
+
+/* An SVRM form instruction. */
+#define SVRM(op, xop)				\
+  (OP (op)					\
+   | (((uint64_t)(xop)) & 0x3f))
+#define SVRM_MASK	SVRM (0x3f, 0x3f)
 
 /* The BO encodings used in extended conditional branch mnemonics.  */
 #define BODNZF	(0x0)
@@ -6816,6 +6834,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"setvl",	SVL(22,27,0),	SVL_MASK,	SVP64,	PPCVLE,	{RT, RA, SVi, vf, vs, ms}},
 {"setvl.",	SVL(22,27,1),	SVL_MASK,	SVP64,	PPCVLE,	{RT, RA, SVi, vf, vs, ms}},
+
+{"svremap",	SVRM(22,57),	SVRM_MASK,	SVP64,	PPCVLE,	{SVme, mi0, mi1, mi2, mo0, mo1, pst}},
 
 {"rotlw",	MME(23,31,0),	MMBME_MASK,  PPCCOM,	PPCVLE|EXT,	{RA, RS, RB}},
 {"rlwnm",	M(23,0),	M_MASK,	     PPCCOM,	PPCVLE,		{RA, RS, RB, MBE, ME}},
