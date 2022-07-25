@@ -545,6 +545,9 @@ operand_value_powerpc (const struct powerpc_operand *operand,
 	}
     }
 
+  if ((operand->flags & PPC_OPERAND_NONZERO) != 0)
+    ++value;
+
   return value;
 }
 

@@ -463,6 +463,11 @@ extern const unsigned int num_powerpc_operands;
 #define PPC_OPERAND_FCR (0x1000000)
 #define PPC_OPERAND_UDI (0x2000000)
 
+/* Valid range of operand is 1..n rather than 0..n-1.
+   Before encoding, the operand value is decremented.
+   After decoding, the operand value is incremented.  */
+#define PPC_OPERAND_NONZERO (0x4000000)
+
 extern ppc_cpu_t ppc_parse_cpu (ppc_cpu_t, ppc_cpu_t *, const char *);
 
 static inline int64_t

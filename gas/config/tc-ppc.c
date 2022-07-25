@@ -1657,8 +1657,13 @@ ppc_setup_opcodes (void)
       for (i = 0; i < num_powerpc_operands; ++i)
 	{
 	  uint64_t mask = powerpc_operands[i].bitm;
+	  unsigned long flags = powerpc_operands[i].flags;
 	  uint64_t right_bit;
 	  unsigned int j;
+
+	  if ((flags & PPC_OPERAND_PLUS1) != 0
+	       && (flags & PPC_OPERAND_NONZERO) != 0)
+	    as_bad ("mutually exclusive operand flags");
 
 	  right_bit = mask & -mask;
 	  mask += right_bit;
@@ -1992,6 +1997,11 @@ ppc_insert_operand (uint64_t insn,
       max = (max >> 1) & -right;
       min = ~max & -right;
     }
+  else if ((operand->flags & PPC_OPERAND_NONZERO) != 0)
+    {
+      ++min;
+      ++max;
+    }
 
   if ((operand->flags & PPC_OPERAND_PLUS1) != 0)
     max++;
@@ -2042,10 +2052,15 @@ ppc_insert_operand (uint64_t insn,
       if (errmsg != (const char *) NULL)
 	as_bad_where (file, line, "%s", errmsg);
     }
-  else if (operand->shift >= 0)
-    insn |= (val & operand->bitm) << operand->shift;
   else
-    insn |= (val & operand->bitm) >> -operand->shift;
+    {
+      if ((operand->flags & PPC_OPERAND_NONZERO) != 0)
+	--val;
+      if (operand->shift >= 0)
+	insn |= (val & operand->bitm) << operand->shift;
+      else
+	insn |= (val & operand->bitm) >> -operand->shift;
+    }
 
   return insn;
 }
