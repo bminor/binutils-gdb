@@ -296,6 +296,7 @@ gdb_printing_disassembler::fprintf_styled_func (void *dis_info,
   switch (style)
     {
     case dis_style_mnemonic:
+    case dis_style_sub_mnemonic:
     case dis_style_assembler_directive:
       fputs_styled (txt, disasm_mnemonic_style.style (), stream);
       break;
