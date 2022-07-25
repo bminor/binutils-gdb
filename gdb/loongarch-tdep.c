@@ -1074,6 +1074,19 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
   return sp;
 }
 
+/* Partial transfer of a cooked register.  */
+
+static void
+loongarch_xfer_reg (struct regcache *regcache,
+		    int regnum, int len, gdb_byte *readbuf,
+		    const gdb_byte *writebuf, size_t offset)
+{
+  if (readbuf)
+    regcache->cooked_read_part (regnum, 0, len, readbuf + offset);
+  if (writebuf)
+    regcache->cooked_write_part (regnum, 0, len, writebuf + offset);
+}
+
 /* Implement the return_value gdbarch method.  */
 
 static enum return_value_convention
@@ -1081,23 +1094,215 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 			struct type *type, struct regcache *regcache,
 			gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  int len = TYPE_LENGTH (type);
-  int regnum = -1;
+  int regsize = register_size (gdbarch, 0);
+  enum type_code code = type->code ();
+  size_t len = TYPE_LENGTH (type);
+  unsigned int fixed_point_members;
+  unsigned int floating_point_members;
+  bool first_member_is_fixed_point;
+  int a0 = LOONGARCH_A0_REGNUM;
+  int a1 = LOONGARCH_A0_REGNUM + 1;
+  int f0 = LOONGARCH_FIRST_FP_REGNUM;
+  int f1 = LOONGARCH_FIRST_FP_REGNUM + 1;
 
-  /* See if our value is returned through a register.  If it is, then
-     store the associated register number in REGNUM.  */
-  switch (type->code ())
+  if (len > 2 * regsize)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+
+  switch (code)
     {
-      case TYPE_CODE_INT:
-	regnum = LOONGARCH_A0_REGNUM;
-	break;
-    }
+    case TYPE_CODE_INT:
+    case TYPE_CODE_BOOL:
+    case TYPE_CODE_CHAR:
+    case TYPE_CODE_RANGE:
+    case TYPE_CODE_ENUM:
+    case TYPE_CODE_PTR:
+      {
+	/* integer or pointer type.
+	   The return value is passed in a0,
+	   the unsigned integer scalars are zero-extended to GRLEN bits,
+	   and the signed integer scalars are sign-extended.  */
+	if (writebuf)
+	  {
+	    gdb_byte buf[regsize];
+	    if (type->is_unsigned ())
+	      {
+		ULONGEST data = extract_unsigned_integer (writebuf, len, BFD_ENDIAN_LITTLE);
+		store_unsigned_integer (buf, regsize, BFD_ENDIAN_LITTLE, data);
+	      }
+	    else
+	      {
+		LONGEST data = extract_signed_integer (writebuf, len, BFD_ENDIAN_LITTLE);
+		store_signed_integer (buf, regsize, BFD_ENDIAN_LITTLE, data);
+	      }
+	    loongarch_xfer_reg (regcache, a0, regsize, nullptr, buf, 0);
+	  }
+	else
+	  loongarch_xfer_reg (regcache, a0, len, readbuf, nullptr, 0);
+      }
+      break;
+    case TYPE_CODE_FLT:
+      /* long double type.
+	 The return value is passed in a0 and a1.  */
+      if (len == 2 * regsize)
+	{
+	  loongarch_xfer_reg (regcache, a0, regsize, readbuf, writebuf, 0);
+	  loongarch_xfer_reg (regcache, a1, len - regsize, readbuf, writebuf, regsize);
+	}
+      /* float or double type.
+	 The return value is passed in f0.  */
+      else
+	{
+	  loongarch_xfer_reg (regcache, f0, len, readbuf, writebuf, 0);
+	}
+      break;
+    case TYPE_CODE_STRUCT:
+      {
+	fixed_point_members = 0;
+	floating_point_members = 0;
+	first_member_is_fixed_point = false;
+	compute_struct_member (type,
+			       &fixed_point_members,
+			       &floating_point_members,
+			       &first_member_is_fixed_point);
 
-  /* Extract the return value from the register where it was stored.  */
-  if (readbuf != nullptr)
-    regcache->raw_read_part (regnum, 0, len, readbuf);
-  if (writebuf != nullptr)
-    regcache->raw_write_part (regnum, 0, len, writebuf);
+	if (len > 0 && len <= regsize)
+	  {
+	    /* The structure has only fixed-point members.  */
+	    if (fixed_point_members > 0 && floating_point_members == 0)
+	      {
+		/* The return value is passed in a0.  */
+		loongarch_xfer_reg (regcache, a0, len, readbuf, writebuf, 0);
+	      }
+	    /* The structure has only floating-point members.  */
+	    else if (fixed_point_members == 0 && floating_point_members > 0)
+	      {
+		/* The structure has one floating-point member.
+		   The return value is passed in f0.  */
+		if (floating_point_members == 1)
+		  {
+		    loongarch_xfer_reg (regcache, f0, len, readbuf, writebuf, 0);
+		  }
+		/* The structure has two floating-point members.
+		   The return value is passed in f0 and f1.  */
+		else if (floating_point_members == 2)
+		  {
+		    loongarch_xfer_reg (regcache, f0, len / 2, readbuf, writebuf, 0);
+		    loongarch_xfer_reg (regcache, f1, len / 2, readbuf, writebuf, len / 2);
+		  }
+	      }
+	    /* The structure has both fixed-point and floating-point members.  */
+	    else if (fixed_point_members > 0 && floating_point_members > 0)
+	      {
+		/* The structure has one float member and multiple fixed-point members.
+		   The return value is passed in a0.  */
+		if (floating_point_members == 1 && fixed_point_members > 1)
+		  {
+		    loongarch_xfer_reg (regcache, a0, len, readbuf, writebuf, 0);
+		  }
+		/* The structure has one float member and one fixed-point member.  */
+		else if (floating_point_members == 1 && fixed_point_members == 1)
+		  {
+		    /* The return value is passed in f0 and a0 if the first member is floating-point.  */
+		    if (first_member_is_fixed_point == false)
+		      {
+			loongarch_xfer_reg (regcache, f0, regsize / 2, readbuf, writebuf, 0);
+			loongarch_xfer_reg (regcache, a0, regsize / 2, readbuf, writebuf, regsize / 2);
+		      }
+		    /* The return value is passed in a0 and f0 if the first member is fixed-point.  */
+		    else
+		      {
+			loongarch_xfer_reg (regcache, a0, regsize / 2, readbuf, writebuf, 0);
+			loongarch_xfer_reg (regcache, f0, regsize / 2, readbuf, writebuf, regsize / 2);
+		      }
+		  }
+	      }
+	  }
+	else if (len > regsize && len <= 2 * regsize)
+	  {
+	    /* The structure has only fixed-point members.  */
+	    if (fixed_point_members > 0 && floating_point_members == 0)
+	      {
+		/* The return value is passed in a0 and a1.  */
+		loongarch_xfer_reg (regcache, a0, regsize, readbuf, writebuf, 0);
+		loongarch_xfer_reg (regcache, a1, len - regsize, readbuf, writebuf, regsize);
+	      }
+	    /* The structure has only floating-point members.  */
+	    else if (fixed_point_members == 0 && floating_point_members > 0)
+	      {
+		/* The structure has one long double member
+		   or one double member and two adjacent float members
+		   or 3-4 float members.
+		   The return value is passed in a0 and a1.  */
+		if ((len == 16 && floating_point_members == 1)
+		    || (len == 16 && floating_point_members == 3)
+		    || (len == 12 && floating_point_members == 3)
+		    || (len == 16 && floating_point_members == 4))
+		  {
+		    loongarch_xfer_reg (regcache, a0, regsize, readbuf, writebuf, 0);
+		    loongarch_xfer_reg (regcache, a1, len - regsize, readbuf, writebuf, regsize);
+		  }
+		/* The structure has two double members
+		   or one double member and one float member.
+		   The return value is passed in f0 and f1.  */
+		else if ((len == 16 && floating_point_members == 2)
+			 || (len == 12 && floating_point_members == 2))
+		  {
+		    loongarch_xfer_reg (regcache, f0, regsize, readbuf, writebuf, 0);
+		    loongarch_xfer_reg (regcache, f1, len - regsize, readbuf, writebuf, regsize);
+		  }
+	      }
+	    /* The structure has both fixed-point and floating-point members.  */
+	    else if (fixed_point_members > 0 && floating_point_members > 0)
+	      {
+		/* The structure has one floating-point member and one fixed-point member.  */
+		if (floating_point_members == 1 && fixed_point_members == 1)
+		  {
+		    /* The return value is passed in f0 and a0 if the first member is floating-point.  */
+		    if (first_member_is_fixed_point == false)
+		      {
+			loongarch_xfer_reg (regcache, f0, regsize, readbuf, writebuf, 0);
+			loongarch_xfer_reg (regcache, a0, len - regsize, readbuf, writebuf, regsize);
+		      }
+		    /* The return value is passed in a0 and f0 if the first member is fixed-point.  */
+		    else
+		      {
+			loongarch_xfer_reg (regcache, a0, regsize, readbuf, writebuf, 0);
+			loongarch_xfer_reg (regcache, f0, len - regsize, readbuf, writebuf, regsize);
+		      }
+		  }
+		else
+		  {
+		    /* The return value is passed in a0 and a1.  */
+		    loongarch_xfer_reg (regcache, a0, regsize, readbuf, writebuf, 0);
+		    loongarch_xfer_reg (regcache, a1, len - regsize, readbuf, writebuf, regsize);
+		  }
+	      }
+	  }
+      }
+      break;
+    case TYPE_CODE_UNION:
+      if (len > 0 && len <= regsize)
+	{
+	  /* The return value is passed in a0.  */
+	  loongarch_xfer_reg (regcache, a0, len, readbuf, writebuf, 0);
+	}
+      else if (len > regsize && len <= 2 * regsize)
+	{
+	  /* The return value is passed in a0 and a1.  */
+	  loongarch_xfer_reg (regcache, a0, regsize, readbuf, writebuf, 0);
+	  loongarch_xfer_reg (regcache, a1, len - regsize, readbuf, writebuf, regsize);
+	}
+      break;
+    case TYPE_CODE_COMPLEX:
+      {
+	/* The return value is passed in f0 and f1.  */
+	loongarch_xfer_reg (regcache, f0, len / 2, readbuf, writebuf, 0);
+	loongarch_xfer_reg (regcache, f1, len / 2, readbuf, writebuf, len / 2);
+      }
+      break;
+    default:
+      break;
+    }
 
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
