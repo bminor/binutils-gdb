@@ -749,7 +749,7 @@ set_step_frame (thread_info *tp)
      inferior_ptid value.  */
   gdb_assert (inferior_ptid == tp->ptid);
 
-  frame_info *frame = get_current_frame ();
+  frame_info_ptr frame = get_current_frame ();
 
   symtab_and_line sal = find_frame_sal (frame);
   set_step_info (tp, frame, sal);
@@ -939,7 +939,7 @@ prepare_one_step (thread_info *tp, struct step_command_fsm *sm)
 
   if (sm->count > 0)
     {
-      struct frame_info *frame = get_current_frame ();
+      frame_info_ptr frame = get_current_frame ();
 
       set_step_frame (tp);
 
@@ -1320,7 +1320,7 @@ until_next_fsm::do_async_reply_reason ()
 static void
 until_next_command (int from_tty)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
   CORE_ADDR pc;
   struct symbol *func;
   struct symtab_and_line sal;
@@ -1711,7 +1711,7 @@ finish_backward (struct finish_command_fsm *sm)
 
   if (sal.pc != pc)
     {
-      struct frame_info *frame = get_selected_frame (NULL);
+      frame_info_ptr frame = get_selected_frame (NULL);
       struct gdbarch *gdbarch = get_frame_arch (frame);
 
       /* Set a step-resume at the function's entry point.  Once that's
@@ -1737,7 +1737,7 @@ finish_backward (struct finish_command_fsm *sm)
    frame that called the function we're about to step out of.  */
 
 static void
-finish_forward (struct finish_command_fsm *sm, struct frame_info *frame)
+finish_forward (struct finish_command_fsm *sm, frame_info_ptr frame)
 {
   struct frame_id frame_id = get_frame_id (frame);
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -1764,10 +1764,10 @@ finish_forward (struct finish_command_fsm *sm, struct frame_info *frame)
 
 /* Skip frames for "finish".  */
 
-static struct frame_info *
-skip_finish_frames (struct frame_info *frame)
+static frame_info_ptr
+skip_finish_frames (frame_info_ptr frame)
 {
-  struct frame_info *start;
+  frame_info_ptr start;
 
   do
     {
@@ -1792,7 +1792,7 @@ skip_finish_frames (struct frame_info *frame)
 static void
 finish_command (const char *arg, int from_tty)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
   int async_exec;
   struct finish_command_fsm *sm;
   struct thread_info *tp;
@@ -2193,7 +2193,7 @@ default_print_one_register_info (struct ui_file *file,
 void
 default_print_registers_info (struct gdbarch *gdbarch,
 			      struct ui_file *file,
-			      struct frame_info *frame,
+			      frame_info_ptr frame,
 			      int regnum, int print_all)
 {
   int i;
@@ -2236,7 +2236,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 void
 registers_info (const char *addr_exp, int fpregs)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
   struct gdbarch *gdbarch;
 
   if (!target_has_registers ())
@@ -2353,7 +2353,7 @@ info_registers_command (const char *addr_exp, int from_tty)
 
 static void
 print_vector_info (struct ui_file *file,
-		   struct frame_info *frame, const char *args)
+		   frame_info_ptr frame, const char *args)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
@@ -2886,7 +2886,7 @@ interrupt_command (const char *args, int from_tty)
 
 void
 default_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
-			  struct frame_info *frame, const char *args)
+			  frame_info_ptr frame, const char *args)
 {
   int regnum;
   int printed_something = 0;
@@ -2907,7 +2907,7 @@ default_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 static void
 info_float_command (const char *args, int from_tty)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
 
   if (!target_has_registers ())
     error (_("The program has no registers now."));

@@ -143,7 +143,7 @@ public:
      corresponding to it.  The argument number is represented N.
      This function can throw an exception.  */
   virtual struct value *evaluate_argument (unsigned n,
-					   struct frame_info *frame) = 0;
+					   frame_info_ptr frame) = 0;
 
   /* Compile the Nth argument of the probe to an agent expression.
      The argument number is represented by N.  */
@@ -301,7 +301,7 @@ extern struct cmd_list_element **info_probes_cmdlist_get (void);
    probe at that location, or if the probe does not have enough arguments,
    this returns NULL.  */
 
-extern struct value *probe_safe_evaluate_at_pc (struct frame_info *frame,
+extern struct value *probe_safe_evaluate_at_pc (frame_info_ptr frame,
 						unsigned n);
 
 #endif /* !defined (PROBE_H) */

@@ -660,7 +660,7 @@ info_common_command_for_block (const struct block *block, const char *comname,
 static void
 info_common_command (const char *comname, int from_tty)
 {
-  struct frame_info *fi;
+  frame_info_ptr fi;
   const struct block *block;
   int values_printed = 0;
 

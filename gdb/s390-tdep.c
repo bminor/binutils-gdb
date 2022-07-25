@@ -1982,7 +1982,7 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
    breakpoint.  */
 
 static struct frame_id
-s390_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
+s390_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
 {
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   CORE_ADDR sp = get_frame_register_unsigned (this_frame, S390_SP_REGNUM);
@@ -2166,7 +2166,7 @@ s390_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* Implement unwind_pc gdbarch method.  */
 
 static CORE_ADDR
-s390_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+s390_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
 {
   s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
   ULONGEST pc;
@@ -2177,7 +2177,7 @@ s390_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 /* Implement unwind_sp gdbarch method.  */
 
 static CORE_ADDR
-s390_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
+s390_unwind_sp (struct gdbarch *gdbarch, frame_info_ptr next_frame)
 {
   ULONGEST sp;
   sp = frame_unwind_register_unsigned (next_frame, S390_SP_REGNUM);
@@ -2187,7 +2187,7 @@ s390_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 /* Helper routine to unwind pseudo registers.  */
 
 static struct value *
-s390_unwind_pseudo_register (struct frame_info *this_frame, int regnum)
+s390_unwind_pseudo_register (frame_info_ptr this_frame, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
@@ -2258,7 +2258,7 @@ s390_adjust_frame_regnum (struct gdbarch *gdbarch, int num, int eh_frame_p)
    s390_dwarf2_frame_init_reg.  */
 
 static struct value *
-s390_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
+s390_dwarf2_prev_register (frame_info_ptr this_frame, void **this_cache,
 			   int regnum)
 {
   return s390_unwind_pseudo_register (this_frame, regnum);
@@ -2269,7 +2269,7 @@ s390_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
 static void
 s390_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			    struct dwarf2_frame_state_reg *reg,
-			    struct frame_info *this_frame)
+			    frame_info_ptr this_frame)
 {
   /* The condition code (and thus PSW mask) is call-clobbered.  */
   if (regnum == S390_PSWM_REGNUM)
@@ -2303,7 +2303,7 @@ s390_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
    register translation.  */
 
 struct value *
-s390_trad_frame_prev_register (struct frame_info *this_frame,
+s390_trad_frame_prev_register (frame_info_ptr this_frame,
 			       trad_frame_saved_reg saved_regs[],
 			       int regnum)
 {
@@ -2328,7 +2328,7 @@ struct s390_unwind_cache {
    prologue analysis.  Helper for s390_frame_unwind_cache.  */
 
 static int
-s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
+s390_prologue_frame_unwind_cache (frame_info_ptr this_frame,
 				  struct s390_unwind_cache *info)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -2344,7 +2344,7 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
   CORE_ADDR prev_sp;
   int frame_pointer;
   int size;
-  struct frame_info *next_frame;
+  frame_info_ptr next_frame;
 
   /* Try to find the function start address.  If we can't find it, we don't
      bother searching for it -- with modern compilers this would be mostly
@@ -2515,7 +2515,7 @@ s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
    back chain unwinding.  Helper for s390_frame_unwind_cache.  */
 
 static void
-s390_backchain_frame_unwind_cache (struct frame_info *this_frame,
+s390_backchain_frame_unwind_cache (frame_info_ptr this_frame,
 				   struct s390_unwind_cache *info)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -2572,7 +2572,7 @@ s390_backchain_frame_unwind_cache (struct frame_info *this_frame,
    s390_frame_unwind and s390_frame_base.  */
 
 static struct s390_unwind_cache *
-s390_frame_unwind_cache (struct frame_info *this_frame,
+s390_frame_unwind_cache (frame_info_ptr this_frame,
 			 void **this_prologue_cache)
 {
   struct s390_unwind_cache *info;
@@ -2606,7 +2606,7 @@ s390_frame_unwind_cache (struct frame_info *this_frame,
 /* Implement this_id frame_unwind method for s390_frame_unwind.  */
 
 static void
-s390_frame_this_id (struct frame_info *this_frame,
+s390_frame_this_id (frame_info_ptr this_frame,
 		    void **this_prologue_cache,
 		    struct frame_id *this_id)
 {
@@ -2626,7 +2626,7 @@ s390_frame_this_id (struct frame_info *this_frame,
 /* Implement prev_register frame_unwind method for s390_frame_unwind.  */
 
 static struct value *
-s390_frame_prev_register (struct frame_info *this_frame,
+s390_frame_prev_register (frame_info_ptr this_frame,
 			  void **this_prologue_cache, int regnum)
 {
   struct s390_unwind_cache *info
@@ -2661,7 +2661,7 @@ struct s390_stub_unwind_cache
    s390_stub_frame_unwind.  */
 
 static struct s390_stub_unwind_cache *
-s390_stub_frame_unwind_cache (struct frame_info *this_frame,
+s390_stub_frame_unwind_cache (frame_info_ptr this_frame,
 			      void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -2689,7 +2689,7 @@ s390_stub_frame_unwind_cache (struct frame_info *this_frame,
 /* Implement this_id frame_unwind method for s390_stub_frame_unwind.  */
 
 static void
-s390_stub_frame_this_id (struct frame_info *this_frame,
+s390_stub_frame_this_id (frame_info_ptr this_frame,
 			 void **this_prologue_cache,
 			 struct frame_id *this_id)
 {
@@ -2701,7 +2701,7 @@ s390_stub_frame_this_id (struct frame_info *this_frame,
 /* Implement prev_register frame_unwind method for s390_stub_frame_unwind.  */
 
 static struct value *
-s390_stub_frame_prev_register (struct frame_info *this_frame,
+s390_stub_frame_prev_register (frame_info_ptr this_frame,
 			       void **this_prologue_cache, int regnum)
 {
   struct s390_stub_unwind_cache *info
@@ -2713,7 +2713,7 @@ s390_stub_frame_prev_register (struct frame_info *this_frame,
 
 static int
 s390_stub_frame_sniffer (const struct frame_unwind *self,
-			 struct frame_info *this_frame,
+			 frame_info_ptr this_frame,
 			 void **this_prologue_cache)
 {
   CORE_ADDR addr_in_block;
@@ -2744,7 +2744,7 @@ static const struct frame_unwind s390_stub_frame_unwind = {
 /* Frame base handling.  */
 
 static CORE_ADDR
-s390_frame_base_address (struct frame_info *this_frame, void **this_cache)
+s390_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct s390_unwind_cache *info
     = s390_frame_unwind_cache (this_frame, this_cache);
@@ -2752,7 +2752,7 @@ s390_frame_base_address (struct frame_info *this_frame, void **this_cache)
 }
 
 static CORE_ADDR
-s390_local_base_address (struct frame_info *this_frame, void **this_cache)
+s390_local_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct s390_unwind_cache *info
     = s390_frame_unwind_cache (this_frame, this_cache);

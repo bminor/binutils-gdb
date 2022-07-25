@@ -1910,7 +1910,7 @@ typedef BP_MANIPULATION (mep_break_insn) mep_breakpoint;
 
 
 static struct mep_prologue *
-mep_analyze_frame_prologue (struct frame_info *this_frame,
+mep_analyze_frame_prologue (frame_info_ptr this_frame,
 			    void **this_prologue_cache)
 {
   if (! *this_prologue_cache)
@@ -1940,7 +1940,7 @@ mep_analyze_frame_prologue (struct frame_info *this_frame,
 /* Given the next frame and a prologue cache, return this frame's
    base.  */
 static CORE_ADDR
-mep_frame_base (struct frame_info *this_frame,
+mep_frame_base (frame_info_ptr this_frame,
 		void **this_prologue_cache)
 {
   struct mep_prologue *p
@@ -1968,7 +1968,7 @@ mep_frame_base (struct frame_info *this_frame,
 
 
 static void
-mep_frame_this_id (struct frame_info *this_frame,
+mep_frame_this_id (frame_info_ptr this_frame,
 		   void **this_prologue_cache,
 		   struct frame_id *this_id)
 {
@@ -1978,7 +1978,7 @@ mep_frame_this_id (struct frame_info *this_frame,
 
 
 static struct value *
-mep_frame_prev_register (struct frame_info *this_frame,
+mep_frame_prev_register (frame_info_ptr this_frame,
 			 void **this_prologue_cache, int regnum)
 {
   struct mep_prologue *p

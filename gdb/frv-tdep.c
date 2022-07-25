@@ -504,7 +504,7 @@ is_argument_reg (int reg)
    prologue analysis.  */
 static CORE_ADDR
 frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
-		      struct frame_info *this_frame,
+		      frame_info_ptr this_frame,
 		      struct frv_unwind_cache *info)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1078,7 +1078,7 @@ frv_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 
 static struct frv_unwind_cache *
-frv_frame_unwind_cache (struct frame_info *this_frame,
+frv_frame_unwind_cache (frame_info_ptr this_frame,
 			 void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -1363,7 +1363,7 @@ frv_return_value (struct gdbarch *gdbarch, struct value *function,
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-frv_frame_this_id (struct frame_info *this_frame,
+frv_frame_this_id (frame_info_ptr this_frame,
 		    void **this_prologue_cache, struct frame_id *this_id)
 {
   struct frv_unwind_cache *info
@@ -1393,7 +1393,7 @@ frv_frame_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-frv_frame_prev_register (struct frame_info *this_frame,
+frv_frame_prev_register (frame_info_ptr this_frame,
 			 void **this_prologue_cache, int regnum)
 {
   struct frv_unwind_cache *info
@@ -1412,7 +1412,7 @@ static const struct frame_unwind frv_frame_unwind = {
 };
 
 static CORE_ADDR
-frv_frame_base_address (struct frame_info *this_frame, void **this_cache)
+frv_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct frv_unwind_cache *info
     = frv_frame_unwind_cache (this_frame, this_cache);

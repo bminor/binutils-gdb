@@ -20,7 +20,7 @@
 #if !defined (ADA_LANG_H)
 #define ADA_LANG_H 1
 
-struct frame_info;
+class frame_info_ptr;
 struct inferior;
 struct type_print_options;
 struct parser_state;
@@ -334,7 +334,7 @@ extern enum ada_renaming_category ada_parse_renaming (struct symbol *,
 						      const char **,
 						      int *, const char **);
 
-extern void ada_find_printable_frame (struct frame_info *fi);
+extern void ada_find_printable_frame (frame_info_ptr fi);
 
 extern char *ada_breakpoint_rewrite (char *, int *);
 

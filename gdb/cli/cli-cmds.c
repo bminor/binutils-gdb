@@ -1466,7 +1466,7 @@ print_disassembly (struct gdbarch *gdbarch, const char *name,
 static void
 disassemble_current_function (gdb_disassembly_flags flags)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
   struct gdbarch *gdbarch;
   CORE_ADDR low, high, pc;
   const char *name;

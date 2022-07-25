@@ -1064,13 +1064,13 @@ sparc64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 /* Normal frames.  */
 
 static struct sparc_frame_cache *
-sparc64_frame_cache (struct frame_info *this_frame, void **this_cache)
+sparc64_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   return sparc_frame_cache (this_frame, this_cache);
 }
 
 static void
-sparc64_frame_this_id (struct frame_info *this_frame, void **this_cache,
+sparc64_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		       struct frame_id *this_id)
 {
   struct sparc_frame_cache *cache =
@@ -1084,7 +1084,7 @@ sparc64_frame_this_id (struct frame_info *this_frame, void **this_cache,
 }
 
 static struct value *
-sparc64_frame_prev_register (struct frame_info *this_frame, void **this_cache,
+sparc64_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
 			     int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -1148,7 +1148,7 @@ static const struct frame_unwind sparc64_frame_unwind =
 
 
 static CORE_ADDR
-sparc64_frame_base_address (struct frame_info *this_frame, void **this_cache)
+sparc64_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct sparc_frame_cache *cache =
     sparc64_frame_cache (this_frame, this_cache);
@@ -1767,7 +1767,7 @@ sparc64_return_value (struct gdbarch *gdbarch, struct value *function,
 static void
 sparc64_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			       struct dwarf2_frame_state_reg *reg,
-			       struct frame_info *this_frame)
+			       frame_info_ptr this_frame)
 {
   switch (regnum)
     {

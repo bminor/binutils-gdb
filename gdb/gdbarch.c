@@ -2269,7 +2269,7 @@ set_gdbarch_register_type (struct gdbarch *gdbarch,
 }
 
 struct frame_id
-gdbarch_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
+gdbarch_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->dummy_id != NULL);
@@ -2368,7 +2368,7 @@ set_gdbarch_push_dummy_code (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_code_of_frame_writable (struct gdbarch *gdbarch, struct frame_info *frame)
+gdbarch_code_of_frame_writable (struct gdbarch *gdbarch, frame_info_ptr frame)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->code_of_frame_writable != NULL);
@@ -2385,7 +2385,7 @@ set_gdbarch_code_of_frame_writable (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame, int regnum, int all)
+gdbarch_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file, frame_info_ptr frame, int regnum, int all)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->print_registers_info != NULL);
@@ -2402,7 +2402,7 @@ set_gdbarch_print_registers_info (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_print_float_info (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame, const char *args)
+gdbarch_print_float_info (struct gdbarch *gdbarch, struct ui_file *file, frame_info_ptr frame, const char *args)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->print_float_info != NULL);
@@ -2426,7 +2426,7 @@ gdbarch_print_vector_info_p (struct gdbarch *gdbarch)
 }
 
 void
-gdbarch_print_vector_info (struct gdbarch *gdbarch, struct ui_file *file, struct frame_info *frame, const char *args)
+gdbarch_print_vector_info (struct gdbarch *gdbarch, struct ui_file *file, frame_info_ptr frame, const char *args)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->print_vector_info != NULL);
@@ -2501,7 +2501,7 @@ gdbarch_get_longjmp_target_p (struct gdbarch *gdbarch)
 }
 
 int
-gdbarch_get_longjmp_target (struct gdbarch *gdbarch, struct frame_info *frame, CORE_ADDR *pc)
+gdbarch_get_longjmp_target (struct gdbarch *gdbarch, frame_info_ptr frame, CORE_ADDR *pc)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->get_longjmp_target != NULL);
@@ -2552,7 +2552,7 @@ set_gdbarch_convert_register_p (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_register_to_value (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, gdb_byte *buf, int *optimizedp, int *unavailablep)
+gdbarch_register_to_value (struct gdbarch *gdbarch, frame_info_ptr frame, int regnum, struct type *type, gdb_byte *buf, int *optimizedp, int *unavailablep)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->register_to_value != NULL);
@@ -2569,7 +2569,7 @@ set_gdbarch_register_to_value (struct gdbarch *gdbarch,
 }
 
 void
-gdbarch_value_to_register (struct gdbarch *gdbarch, struct frame_info *frame, int regnum, struct type *type, const gdb_byte *buf)
+gdbarch_value_to_register (struct gdbarch *gdbarch, frame_info_ptr frame, int regnum, struct type *type, const gdb_byte *buf)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->value_to_register != NULL);
@@ -3026,7 +3026,7 @@ set_gdbarch_frame_args_skip (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
-gdbarch_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+gdbarch_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->unwind_pc != NULL);
@@ -3043,7 +3043,7 @@ set_gdbarch_unwind_pc (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
-gdbarch_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
+gdbarch_unwind_sp (struct gdbarch *gdbarch, frame_info_ptr next_frame)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->unwind_sp != NULL);
@@ -3067,7 +3067,7 @@ gdbarch_frame_num_args_p (struct gdbarch *gdbarch)
 }
 
 int
-gdbarch_frame_num_args (struct gdbarch *gdbarch, struct frame_info *frame)
+gdbarch_frame_num_args (struct gdbarch *gdbarch, frame_info_ptr frame)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->frame_num_args != NULL);
@@ -3326,7 +3326,7 @@ gdbarch_single_step_through_delay_p (struct gdbarch *gdbarch)
 }
 
 int
-gdbarch_single_step_through_delay (struct gdbarch *gdbarch, struct frame_info *frame)
+gdbarch_single_step_through_delay (struct gdbarch *gdbarch, frame_info_ptr frame)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->single_step_through_delay != NULL);
@@ -3360,7 +3360,7 @@ set_gdbarch_print_insn (struct gdbarch *gdbarch,
 }
 
 CORE_ADDR
-gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, struct frame_info *frame, CORE_ADDR pc)
+gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, frame_info_ptr frame, CORE_ADDR pc)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->skip_trampoline_code != NULL);
@@ -3700,7 +3700,7 @@ gdbarch_fetch_pointer_argument_p (struct gdbarch *gdbarch)
 }
 
 CORE_ADDR
-gdbarch_fetch_pointer_argument (struct gdbarch *gdbarch, struct frame_info *frame, int argi, struct type *type)
+gdbarch_fetch_pointer_argument (struct gdbarch *gdbarch, frame_info_ptr frame, int argi, struct type *type)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->fetch_pointer_argument != NULL);
@@ -5357,7 +5357,7 @@ set_gdbarch_type_align (struct gdbarch *gdbarch,
 }
 
 std::string
-gdbarch_get_pc_address_flags (struct gdbarch *gdbarch, frame_info *frame, CORE_ADDR pc)
+gdbarch_get_pc_address_flags (struct gdbarch *gdbarch, frame_info_ptr frame, CORE_ADDR pc)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->get_pc_address_flags != NULL);

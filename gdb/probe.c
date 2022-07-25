@@ -683,7 +683,7 @@ disable_probes_command (const char *arg, int from_tty)
 /* See comments in probe.h.  */
 
 struct value *
-probe_safe_evaluate_at_pc (struct frame_info *frame, unsigned n)
+probe_safe_evaluate_at_pc (frame_info_ptr frame, unsigned n)
 {
   struct bound_probe probe;
   unsigned n_args;
@@ -801,7 +801,7 @@ static struct value *
 compute_probe_arg (struct gdbarch *arch, struct internalvar *ivar,
 		   void *data)
 {
-  struct frame_info *frame = get_selected_frame (_("No frame selected"));
+  frame_info_ptr frame = get_selected_frame (_("No frame selected"));
   CORE_ADDR pc = get_frame_pc (frame);
   int sel = (int) (uintptr_t) data;
   struct bound_probe pc_probe;

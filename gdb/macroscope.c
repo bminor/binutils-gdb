@@ -100,7 +100,7 @@ default_macro_scope (void)
 {
   struct symtab_and_line sal;
   gdb::unique_xmalloc_ptr<struct macro_scope> ms;
-  struct frame_info *frame;
+  frame_info_ptr frame;
   CORE_ADDR pc;
 
   /* If there's a selected frame, use its PC.  */

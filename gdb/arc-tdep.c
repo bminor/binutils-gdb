@@ -997,7 +997,7 @@ arc_store_return_value (struct gdbarch *gdbarch, struct type *type,
 /* Implement the "get_longjmp_target" gdbarch method.  */
 
 static int
-arc_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
+arc_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
 {
   arc_debug_printf ("called");
 
@@ -1061,7 +1061,7 @@ arc_return_value (struct gdbarch *gdbarch, struct value *function,
    frame pointer.  */
 
 static CORE_ADDR
-arc_frame_base_address (struct frame_info *this_frame, void **prologue_cache)
+arc_frame_base_address (frame_info_ptr this_frame, void **prologue_cache)
 {
   return (CORE_ADDR) get_frame_register_unsigned (this_frame, ARC_FP_REGNUM);
 }
@@ -1642,7 +1642,7 @@ arc_print_frame_cache (struct gdbarch *gdbarch, const char *message,
 /* Frame unwinder for normal frames.  */
 
 static struct arc_frame_cache *
-arc_make_frame_cache (struct frame_info *this_frame)
+arc_make_frame_cache (frame_info_ptr this_frame)
 {
   arc_debug_printf ("called");
 
@@ -1709,7 +1709,7 @@ arc_make_frame_cache (struct frame_info *this_frame)
 /* Implement the "this_id" frame_unwind method.  */
 
 static void
-arc_frame_this_id (struct frame_info *this_frame, void **this_cache,
+arc_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		   struct frame_id *this_id)
 {
   arc_debug_printf ("called");
@@ -1754,7 +1754,7 @@ arc_frame_this_id (struct frame_info *this_frame, void **this_cache,
 /* Implement the "prev_register" frame_unwind method.  */
 
 static struct value *
-arc_frame_prev_register (struct frame_info *this_frame,
+arc_frame_prev_register (frame_info_ptr this_frame,
 			 void **this_cache, int regnum)
 {
   if (*this_cache == NULL)
@@ -1791,7 +1791,7 @@ arc_frame_prev_register (struct frame_info *this_frame,
 static void
 arc_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			   struct dwarf2_frame_state_reg *reg,
-			   struct frame_info *info)
+			   frame_info_ptr info)
 {
   if (regnum == gdbarch_pc_regnum (gdbarch))
     /* The return address column.  */
@@ -1805,7 +1805,7 @@ arc_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
     from within signal handlers.  */
 
 static struct arc_frame_cache *
-arc_make_sigtramp_frame_cache (struct frame_info *this_frame)
+arc_make_sigtramp_frame_cache (frame_info_ptr this_frame)
 {
   arc_debug_printf ("called");
 
@@ -1844,7 +1844,7 @@ arc_make_sigtramp_frame_cache (struct frame_info *this_frame)
    frames.  */
 
 static void
-arc_sigtramp_frame_this_id (struct frame_info *this_frame,
+arc_sigtramp_frame_this_id (frame_info_ptr this_frame,
 			    void **this_cache, struct frame_id *this_id)
 {
   arc_debug_printf ("called");
@@ -1863,7 +1863,7 @@ arc_sigtramp_frame_this_id (struct frame_info *this_frame,
 /* Get a register from a signal handler frame.  */
 
 static struct value *
-arc_sigtramp_frame_prev_register (struct frame_info *this_frame,
+arc_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 				  void **this_cache, int regnum)
 {
   arc_debug_printf ("regnum = %d", regnum);
@@ -1881,7 +1881,7 @@ arc_sigtramp_frame_prev_register (struct frame_info *this_frame,
 
 static int
 arc_sigtramp_frame_sniffer (const struct frame_unwind *self,
-			    struct frame_info *this_frame,
+			    frame_info_ptr this_frame,
 			    void **this_cache)
 {
   arc_debug_printf ("called");

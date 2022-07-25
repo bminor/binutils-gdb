@@ -30,7 +30,7 @@
 /* Forward decls for prototypes.  */
 struct value;
 struct objfile;
-struct frame_info;
+class frame_info_ptr;
 struct ui_file;
 struct value_print_options;
 struct type_print_options;
@@ -321,7 +321,7 @@ struct language_defn
 
   virtual struct value *read_var_value (struct symbol *var,
 					const struct block *var_block,
-					struct frame_info *frame) const;
+					frame_info_ptr frame) const;
 
   /* Return information about whether TYPE should be passed
      (and returned) by reference at the language level.  The default
@@ -464,7 +464,7 @@ struct language_defn
      If that PC falls in a trampoline belonging to this language, return
      the address of the first pc in the real function, or 0 if it isn't a
      language tramp for this language.  */
-  virtual CORE_ADDR skip_trampoline (struct frame_info *fi, CORE_ADDR pc) const
+  virtual CORE_ADDR skip_trampoline (frame_info_ptr fi, CORE_ADDR pc) const
   {
     return (CORE_ADDR) 0;
   }
@@ -782,7 +782,7 @@ extern const char *language_str (enum language);
 
 /* Check for a language-specific trampoline.  */
 
-extern CORE_ADDR skip_language_trampoline (struct frame_info *, CORE_ADDR pc);
+extern CORE_ADDR skip_language_trampoline (frame_info_ptr , CORE_ADDR pc);
 
 /* Return demangled language symbol, or NULL.  */
 extern gdb::unique_xmalloc_ptr<char> language_demangle

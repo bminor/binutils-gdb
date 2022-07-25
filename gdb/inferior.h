@@ -25,7 +25,7 @@
 #include <list>
 
 struct target_waitstatus;
-struct frame_info;
+class frame_info_ptr;
 struct ui_file;
 struct type;
 struct gdbarch;
@@ -156,7 +156,7 @@ extern void reopen_exec_file (void);
 
 extern void default_print_registers_info (struct gdbarch *gdbarch,
 					  struct ui_file *file,
-					  struct frame_info *frame,
+					  frame_info_ptr frame,
 					  int regnum, int all);
 
 /* Default implementation of gdbarch_print_float_info.  Print
@@ -164,7 +164,7 @@ extern void default_print_registers_info (struct gdbarch *gdbarch,
 
 extern void default_print_float_info (struct gdbarch *gdbarch,
 				      struct ui_file *file,
-				      struct frame_info *frame,
+				      frame_info_ptr frame,
 				      const char *args);
 
 extern void child_terminal_info (struct target_ops *self, const char *, int);

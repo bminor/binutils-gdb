@@ -2567,7 +2567,7 @@ maint_agent_eval_command (const char *exp, int from_tty)
 static void
 maint_agent_printf_command (const char *cmdrest, int from_tty)
 {
-  struct frame_info *fi = get_current_frame ();	/* need current scope */
+  frame_info_ptr fi = get_current_frame ();	/* need current scope */
   const char *format_start, *format_end;
 
   /* We don't deal with overlay debugging at the moment.  We need to

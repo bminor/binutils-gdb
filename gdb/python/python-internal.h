@@ -366,7 +366,7 @@ extern enum ext_lang_rc gdbpy_apply_val_pretty_printer
    const struct language_defn *language);
 extern enum ext_lang_bt_status gdbpy_apply_frame_filter
   (const struct extension_language_defn *,
-   struct frame_info *frame, frame_filter_flags flags,
+   frame_info_ptr frame, frame_filter_flags flags,
    enum ext_lang_frame_args args_type,
    struct ui_out *out, int frame_low, int frame_high);
 extern void gdbpy_preserve_values (const struct extension_language_defn *,
@@ -427,7 +427,7 @@ PyObject *block_to_block_object (const struct block *block,
 PyObject *value_to_value_object (struct value *v);
 PyObject *value_to_value_object_no_release (struct value *v);
 PyObject *type_to_type_object (struct type *);
-PyObject *frame_info_to_frame_object (struct frame_info *frame);
+PyObject *frame_info_to_frame_object (frame_info_ptr frame);
 PyObject *symtab_to_linetable_object (PyObject *symtab);
 gdbpy_ref<> pspace_to_pspace_object (struct program_space *);
 PyObject *pspy_get_printers (PyObject *, void *);
@@ -467,7 +467,7 @@ struct value *convert_value_from_python (PyObject *obj);
 struct type *type_object_to_type (PyObject *obj);
 struct symtab *symtab_object_to_symtab (PyObject *obj);
 struct symtab_and_line *sal_object_to_symtab_and_line (PyObject *obj);
-struct frame_info *frame_object_to_frame_info (PyObject *frame_obj);
+frame_info_ptr frame_object_to_frame_info (PyObject *frame_obj);
 struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
 
 /* Convert Python object OBJ to a program_space pointer.  OBJ must be a

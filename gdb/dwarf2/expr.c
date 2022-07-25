@@ -49,7 +49,7 @@ static const registry<gdbarch>::key<dwarf_gdbarch_types> dwarf_arch_cookie;
 /* Ensure that a FRAME is defined, throw an exception otherwise.  */
 
 static void
-ensure_have_frame (frame_info *frame, const char *op_name)
+ensure_have_frame (frame_info_ptr frame, const char *op_name)
 {
   if (frame == nullptr)
     throw_error (GENERIC_ERROR,
@@ -78,7 +78,7 @@ bits_to_bytes (ULONGEST start, ULONGEST n_bits)
 /* See expr.h.  */
 
 CORE_ADDR
-read_addr_from_reg (frame_info *frame, int reg)
+read_addr_from_reg (frame_info_ptr frame, int reg)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   int regnum = dwarf_reg_to_regnum_or_error (gdbarch, reg);
@@ -112,7 +112,7 @@ static piece_closure *
 allocate_piece_closure (dwarf2_per_cu_data *per_cu,
 			dwarf2_per_objfile *per_objfile,
 			std::vector<dwarf_expr_piece> &&pieces,
-			frame_info *frame)
+			frame_info_ptr frame)
 {
   piece_closure *c = new piece_closure;
 
@@ -208,7 +208,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 	{
 	case DWARF_VALUE_REGISTER:
 	  {
-	    frame_info *frame = frame_find_by_id (c->frame_id);
+	    frame_info_ptr frame = frame_find_by_id (c->frame_id);
 	    gdbarch *arch = get_frame_arch (frame);
 	    int gdb_regnum = dwarf_reg_to_regnum_or_error (arch, p->v.regno);
 	    ULONGEST reg_bits = 8 * register_size (arch, gdb_regnum);
@@ -550,7 +550,7 @@ indirect_pieced_value (value *value)
     }
 
   gdb_assert (piece != NULL && c->per_cu != nullptr);
-  frame_info *frame = get_selected_frame (_("No frame selected."));
+  frame_info_ptr frame = get_selected_frame (_("No frame selected."));
 
   /* This is an offset requested by GDB, such as value subscripts.
      However, due to how synthetic pointers are implemented, this is
@@ -585,7 +585,7 @@ coerce_pieced_ref (const value *value)
     {
       const piece_closure *closure
 	= (piece_closure *) value_computed_closure (value);
-      frame_info *frame
+      frame_info_ptr frame
 	= get_selected_frame (_("No frame selected."));
 
       /* gdb represents synthetic pointers as pieced values with a single
@@ -675,7 +675,7 @@ sect_variable_value (sect_offset sect_off,
     }
 
   struct type *type = lookup_pointer_type (die_type);
-  frame_info *frame = get_selected_frame (_("No frame selected."));
+  frame_info_ptr frame = get_selected_frame (_("No frame selected."));
   return indirect_synthetic_pointer (sect_off, 0, per_cu, per_objfile, frame,
 				     type, true);
 }
@@ -811,7 +811,7 @@ dwarf_expr_context::dwarf_call (cu_offset die_cu_off)
 {
   ensure_have_per_cu (this->m_per_cu, "DW_OP_call");
 
-  frame_info *frame = this->m_frame;
+  frame_info_ptr frame = this->m_frame;
 
   auto get_pc_from_frame = [frame] ()
     {
@@ -866,7 +866,7 @@ dwarf_expr_context::push_dwarf_reg_entry_value (call_site_parameter_kind kind,
 
   dwarf2_per_cu_data *caller_per_cu;
   dwarf2_per_objfile *caller_per_objfile;
-  frame_info *caller_frame = get_prev_frame (this->m_frame);
+  frame_info_ptr caller_frame = get_prev_frame (this->m_frame);
   call_site_parameter *parameter
     = dwarf_expr_reg_to_entry_parameter (this->m_frame, kind, kind_u,
 					 &caller_per_cu,
@@ -1070,7 +1070,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 
 value *
 dwarf_expr_context::evaluate (const gdb_byte *addr, size_t len, bool as_lval,
-			      dwarf2_per_cu_data *per_cu, frame_info *frame,
+			      dwarf2_per_cu_data *per_cu, frame_info_ptr frame,
 			      const struct property_addr_info *addr_info,
 			      struct type *type, struct type *subobj_type,
 			      LONGEST subobj_offset)

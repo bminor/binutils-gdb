@@ -22,7 +22,7 @@
 
 #include "gdbarch.h"
 
-struct frame_info;
+class frame_info_ptr;
 
 /* Register numbers of various important registers.  */
 

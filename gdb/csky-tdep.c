@@ -941,7 +941,7 @@ csky_analyze_prologue (struct gdbarch *gdbarch,
 		       CORE_ADDR start_pc,
 		       CORE_ADDR limit_pc,
 		       CORE_ADDR end_pc,
-		       struct frame_info *this_frame,
+		       frame_info_ptr this_frame,
 		       struct csky_unwind_cache *this_cache,
 		       lr_type_t lr_type)
 {
@@ -2046,7 +2046,7 @@ csky_analyze_lr_type (struct gdbarch *gdbarch,
 /* Heuristic unwinder.  */
 
 static struct csky_unwind_cache *
-csky_frame_unwind_cache (struct frame_info *this_frame)
+csky_frame_unwind_cache (frame_info_ptr this_frame)
 {
   CORE_ADDR prologue_start, prologue_end, func_end, prev_pc, block_addr;
   struct csky_unwind_cache *cache;
@@ -2105,7 +2105,7 @@ csky_frame_unwind_cache (struct frame_info *this_frame)
 /* Implement the this_id function for the normal unwinder.  */
 
 static void
-csky_frame_this_id (struct frame_info *this_frame,
+csky_frame_this_id (frame_info_ptr this_frame,
 		    void **this_prologue_cache, struct frame_id *this_id)
 {
   struct csky_unwind_cache *cache;
@@ -2126,7 +2126,7 @@ csky_frame_this_id (struct frame_info *this_frame,
 /* Implement the prev_register function for the normal unwinder.  */
 
 static struct value *
-csky_frame_prev_register (struct frame_info *this_frame,
+csky_frame_prev_register (frame_info_ptr this_frame,
 			  void **this_prologue_cache, int regnum)
 {
   struct csky_unwind_cache *cache;
@@ -2155,7 +2155,7 @@ static const struct frame_unwind csky_unwind_cache = {
 };
 
 static CORE_ADDR
-csky_check_long_branch (struct frame_info *frame, CORE_ADDR pc)
+csky_check_long_branch (frame_info_ptr frame, CORE_ADDR pc)
 {
   gdb_byte buf[8];
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -2192,7 +2192,7 @@ csky_check_long_branch (struct frame_info *frame, CORE_ADDR pc)
 
 static int
 csky_stub_unwind_sniffer (const struct frame_unwind *self,
-			  struct frame_info *this_frame,
+			  frame_info_ptr this_frame,
 			  void **this_prologue_cache)
 {
   CORE_ADDR addr_in_block, pc;
@@ -2223,7 +2223,7 @@ csky_stub_unwind_sniffer (const struct frame_unwind *self,
 }
 
 static struct csky_unwind_cache *
-csky_make_stub_cache (struct frame_info *this_frame)
+csky_make_stub_cache (frame_info_ptr this_frame)
 {
   struct csky_unwind_cache *cache;
 
@@ -2235,7 +2235,7 @@ csky_make_stub_cache (struct frame_info *this_frame)
 }
 
 static void
-csky_stub_this_id (struct frame_info *this_frame,
+csky_stub_this_id (frame_info_ptr this_frame,
 		  void **this_cache,
 		  struct frame_id *this_id)
 {
@@ -2250,7 +2250,7 @@ csky_stub_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-csky_stub_prev_register (struct frame_info *this_frame,
+csky_stub_prev_register (frame_info_ptr this_frame,
 			    void **this_cache,
 			    int prev_regnum)
 {
@@ -2290,7 +2290,7 @@ static frame_unwind csky_stub_unwind = {
    for the normal unwinder.  */
 
 static CORE_ADDR
-csky_frame_base_address (struct frame_info *this_frame, void **this_cache)
+csky_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct csky_unwind_cache *cache;
 
@@ -2313,7 +2313,7 @@ static const struct frame_base csky_frame_base = {
 static void
 csky_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			    struct dwarf2_frame_state_reg *reg,
-			    struct frame_info *this_frame)
+			    frame_info_ptr this_frame)
 {
   if (regnum == gdbarch_pc_regnum (gdbarch))
     reg->how = DWARF2_FRAME_REG_RA;

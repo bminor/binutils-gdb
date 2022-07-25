@@ -265,7 +265,7 @@ static const struct
    register.  */
 
 static struct value *
-value_of_nds32_reg (struct frame_info *frame, const void *baton)
+value_of_nds32_reg (frame_info_ptr frame, const void *baton)
 {
   return value_of_register ((int) (intptr_t) baton, frame);
 }
@@ -898,7 +898,7 @@ nds32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
    a pointer to the current nds32_frame_cache in *THIS_CACHE.  */
 
 static struct nds32_frame_cache *
-nds32_frame_cache (struct frame_info *this_frame, void **this_cache)
+nds32_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct nds32_frame_cache *cache;
@@ -949,7 +949,7 @@ nds32_frame_cache (struct frame_info *this_frame, void **this_cache)
    PC and the caller's SP when we were called.  */
 
 static void
-nds32_frame_this_id (struct frame_info *this_frame,
+nds32_frame_this_id (frame_info_ptr this_frame,
 		     void **this_cache, struct frame_id *this_id)
 {
   struct nds32_frame_cache *cache = nds32_frame_cache (this_frame, this_cache);
@@ -964,7 +964,7 @@ nds32_frame_this_id (struct frame_info *this_frame,
 /* Implement the "prev_register" frame_unwind method.  */
 
 static struct value *
-nds32_frame_prev_register (struct frame_info *this_frame, void **this_cache,
+nds32_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
 			   int regnum)
 {
   struct nds32_frame_cache *cache = nds32_frame_cache (this_frame, this_cache);
@@ -998,7 +998,7 @@ static const struct frame_unwind nds32_frame_unwind =
 /* Return the frame base address of *THIS_FRAME.  */
 
 static CORE_ADDR
-nds32_frame_base_address (struct frame_info *this_frame, void **this_cache)
+nds32_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct nds32_frame_cache *cache = nds32_frame_cache (this_frame, this_cache);
 
@@ -1284,7 +1284,7 @@ nds32_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR addr)
 
 static int
 nds32_epilogue_frame_sniffer (const struct frame_unwind *self,
-			      struct frame_info *this_frame, void **this_cache)
+			      frame_info_ptr this_frame, void **this_cache)
 {
   if (frame_relative_level (this_frame) == 0)
     return nds32_stack_frame_destroyed_p (get_frame_arch (this_frame),
@@ -1299,7 +1299,7 @@ nds32_epilogue_frame_sniffer (const struct frame_unwind *self,
    *THIS_CACHE.  */
 
 static struct nds32_frame_cache *
-nds32_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
+nds32_epilogue_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct nds32_frame_cache *cache;
@@ -1331,7 +1331,7 @@ nds32_epilogue_frame_cache (struct frame_info *this_frame, void **this_cache)
 /* Implement the "this_id" frame_unwind method.  */
 
 static void
-nds32_epilogue_frame_this_id (struct frame_info *this_frame,
+nds32_epilogue_frame_this_id (frame_info_ptr this_frame,
 			      void **this_cache, struct frame_id *this_id)
 {
   struct nds32_frame_cache *cache
@@ -1347,7 +1347,7 @@ nds32_epilogue_frame_this_id (struct frame_info *this_frame,
 /* Implement the "prev_register" frame_unwind method.  */
 
 static struct value *
-nds32_epilogue_frame_prev_register (struct frame_info *this_frame,
+nds32_epilogue_frame_prev_register (frame_info_ptr this_frame,
 				    void **this_cache, int regnum)
 {
   struct nds32_frame_cache *cache
@@ -1824,7 +1824,7 @@ nds32_return_value (struct gdbarch *gdbarch, struct value *func_type,
 /* Implement the "get_longjmp_target" gdbarch method.  */
 
 static int
-nds32_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
+nds32_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
 {
   gdb_byte buf[4];
   CORE_ADDR jb_addr;

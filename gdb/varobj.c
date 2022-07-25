@@ -225,10 +225,10 @@ gdbpy_enter_varobj::gdbpy_enter_varobj (const struct varobj *var)
 /* Return the full FRAME which corresponds to the given CORE_ADDR
    or NULL if no FRAME on the chain corresponds to CORE_ADDR.  */
 
-static struct frame_info *
+static frame_info_ptr
 find_frame_addr_in_frame_chain (CORE_ADDR frame_addr)
 {
-  struct frame_info *frame = NULL;
+  frame_info_ptr frame = NULL;
 
   if (frame_addr == (CORE_ADDR) 0)
     return NULL;
@@ -265,7 +265,7 @@ varobj_create (const char *objname,
 
   if (expression != NULL)
     {
-      struct frame_info *fi;
+      frame_info_ptr fi;
       struct frame_id old_id = null_frame_id;
       const struct block *block;
       const char *p;
@@ -1947,7 +1947,7 @@ name_of_child (struct varobj *var, int index)
 static bool
 check_scope (const struct varobj *var)
 {
-  struct frame_info *fi;
+  frame_info_ptr fi;
   bool scope;
 
   fi = frame_find_by_id (var->root->frame);

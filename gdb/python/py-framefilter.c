@@ -419,7 +419,7 @@ enumerate_args (PyObject *iter,
 		struct ui_out *out,
 		enum ext_lang_frame_args args_type,
 		int print_args_field,
-		struct frame_info *frame)
+		frame_info_ptr frame)
 {
   struct value_print_options opts;
 
@@ -550,7 +550,7 @@ enumerate_locals (PyObject *iter,
 		  int indent,
 		  enum ext_lang_frame_args args_type,
 		  int print_args_field,
-		  struct frame_info *frame)
+		  frame_info_ptr frame)
 {
   struct value_print_options opts;
 
@@ -638,7 +638,7 @@ static enum ext_lang_bt_status
 py_mi_print_variables (PyObject *filter, struct ui_out *out,
 		       struct value_print_options *opts,
 		       enum ext_lang_frame_args args_type,
-		       struct frame_info *frame)
+		       frame_info_ptr frame)
 {
   gdbpy_ref<> args_iter (get_py_iter_from_func (filter, "frame_args"));
   if (args_iter == NULL)
@@ -672,7 +672,7 @@ py_print_locals (PyObject *filter,
 		 struct ui_out *out,
 		 enum ext_lang_frame_args args_type,
 		 int indent,
-		 struct frame_info *frame)
+		 frame_info_ptr frame)
 {
   gdbpy_ref<> locals_iter (get_py_iter_from_func (filter, "frame_locals"));
   if (locals_iter == NULL)
@@ -697,7 +697,7 @@ static enum ext_lang_bt_status
 py_print_args (PyObject *filter,
 	       struct ui_out *out,
 	       enum ext_lang_frame_args args_type,
-	       struct frame_info *frame)
+	       frame_info_ptr frame)
 {
   gdbpy_ref<> args_iter (get_py_iter_from_func (filter, "frame_args"));
   if (args_iter == NULL)
@@ -754,7 +754,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
   int has_addr = 0;
   CORE_ADDR address = 0;
   struct gdbarch *gdbarch = NULL;
-  struct frame_info *frame = NULL;
+  frame_info_ptr frame = NULL;
   struct value_print_options opts;
 
   int print_level, print_frame_info, print_args, print_locals;
@@ -862,8 +862,8 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
       struct frame_info **slot;
       int level;
 
-      slot = (struct frame_info **) htab_find_slot (levels_printed,
-						    frame, INSERT);
+      slot = (frame_info **) htab_find_slot (levels_printed,
+						   frame.get(), INSERT);
 
       level = frame_relative_level (frame);
 
@@ -875,7 +875,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
 	out->field_skip ("level");
       else
 	{
-	  *slot = frame;
+	  *slot = frame.get ();
 	  annotate_frame_begin (print_level ? level : 0,
 				gdbarch, address);
 	  out->text ("#");
@@ -1078,7 +1078,7 @@ py_print_frame (PyObject *filter, frame_filter_flags flags,
    frame FRAME.  */
 
 static PyObject *
-bootstrap_python_frame_filters (struct frame_info *frame,
+bootstrap_python_frame_filters (frame_info_ptr frame,
 				int frame_low, int frame_high)
 {
   gdbpy_ref<> frame_obj (frame_info_to_frame_object (frame));
@@ -1133,7 +1133,7 @@ bootstrap_python_frame_filters (struct frame_info *frame,
 
 enum ext_lang_bt_status
 gdbpy_apply_frame_filter (const struct extension_language_defn *extlang,
-			  struct frame_info *frame, frame_filter_flags flags,
+			  frame_info_ptr frame, frame_filter_flags flags,
 			  enum ext_lang_frame_args args_type,
 			  struct ui_out *out, int frame_low, int frame_high)
 {

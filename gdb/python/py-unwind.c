@@ -57,7 +57,7 @@ struct pending_frame_object
   PyObject_HEAD
 
   /* Frame we are unwinding.  */
-  struct frame_info *frame_info;
+  frame_info_ptr frame_info;
 
   /* Its architecture, passed by the sniffer caller.  */
   struct gdbarch *gdbarch;
@@ -339,7 +339,7 @@ unwind_infopy_dealloc (PyObject *self)
 static PyObject *
 pending_framepy_str (PyObject *self)
 {
-  struct frame_info *frame = ((pending_frame_object *) self)->frame_info;
+  frame_info_ptr frame = ((pending_frame_object *) self)->frame_info;
   const char *sp_str = NULL;
   const char *pc_str = NULL;
 
@@ -475,7 +475,7 @@ pending_framepy_level (PyObject *self, PyObject *args)
 /* frame_unwind.this_id method.  */
 
 static void
-pyuw_this_id (struct frame_info *this_frame, void **cache_ptr,
+pyuw_this_id (frame_info_ptr this_frame, void **cache_ptr,
 	      struct frame_id *this_id)
 {
   *this_id = ((cached_frame_info *) *cache_ptr)->frame_id;
@@ -485,7 +485,7 @@ pyuw_this_id (struct frame_info *this_frame, void **cache_ptr,
 /* frame_unwind.prev_register.  */
 
 static struct value *
-pyuw_prev_register (struct frame_info *this_frame, void **cache_ptr,
+pyuw_prev_register (frame_info_ptr this_frame, void **cache_ptr,
 		    int regnum)
 {
   PYUW_SCOPED_DEBUG_ENTER_EXIT;
@@ -508,7 +508,7 @@ pyuw_prev_register (struct frame_info *this_frame, void **cache_ptr,
 /* Frame sniffer dispatch.  */
 
 static int
-pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
+pyuw_sniffer (const struct frame_unwind *self, frame_info_ptr this_frame,
 	      void **cache_ptr)
 {
   PYUW_SCOPED_DEBUG_ENTER_EXIT;
@@ -635,7 +635,7 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
 /* Frame cache release shim.  */
 
 static void
-pyuw_dealloc_cache (struct frame_info *this_frame, void *cache)
+pyuw_dealloc_cache (frame_info *this_frame, void *cache)
 {
   PYUW_SCOPED_DEBUG_ENTER_EXIT;
   cached_frame_info *cached_frame = (cached_frame_info *) cache;

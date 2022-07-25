@@ -69,7 +69,7 @@ alphaobsd_pc_in_sigtramp (struct gdbarch *gdbarch,
 }
 
 static CORE_ADDR
-alphaobsd_sigcontext_addr (struct frame_info *this_frame)
+alphaobsd_sigcontext_addr (frame_info_ptr this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR pc = get_frame_pc (this_frame);

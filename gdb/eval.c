@@ -1099,7 +1099,7 @@ eval_op_var_entry_value (struct type *expect_type, struct expression *exp,
     error (_("Symbol \"%s\" does not have any specific entry value"),
 	   sym->print_name ());
 
-  struct frame_info *frame = get_selected_frame (NULL);
+  frame_info_ptr frame = get_selected_frame (NULL);
   return SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry (sym, frame);
 }
 

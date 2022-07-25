@@ -749,7 +749,7 @@ pc_prefix (CORE_ADDR addr)
 {
   if (has_stack_frames ())
     {
-      struct frame_info *frame;
+      frame_info_ptr frame;
       CORE_ADDR pc;
 
       frame = get_selected_frame (NULL);
@@ -2380,7 +2380,7 @@ clear_dangling_display_expressions (struct objfile *objfile)
 
 void
 print_variable_and_value (const char *name, struct symbol *var,
-			  struct frame_info *frame,
+			  frame_info_ptr frame,
 			  struct ui_file *stream, int indent)
 {
 

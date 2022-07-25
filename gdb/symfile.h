@@ -37,7 +37,7 @@ struct obj_section;
 struct obstack;
 struct block;
 struct value;
-struct frame_info;
+class frame_info_ptr;
 struct agent_expr;
 struct axs_value;
 class probe;

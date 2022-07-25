@@ -449,7 +449,7 @@ ft32_alloc_frame_cache (void)
 /* Populate a ft32_frame_cache object for this_frame.  */
 
 static struct ft32_frame_cache *
-ft32_frame_cache (struct frame_info *this_frame, void **this_cache)
+ft32_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct ft32_frame_cache *cache;
   CORE_ADDR current_pc;
@@ -489,7 +489,7 @@ ft32_frame_cache (struct frame_info *this_frame, void **this_cache)
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-ft32_frame_this_id (struct frame_info *this_frame,
+ft32_frame_this_id (frame_info_ptr this_frame,
 		    void **this_prologue_cache, struct frame_id *this_id)
 {
   struct ft32_frame_cache *cache = ft32_frame_cache (this_frame,
@@ -505,7 +505,7 @@ ft32_frame_this_id (struct frame_info *this_frame,
 /* Get the value of register regnum in the previous stack frame.  */
 
 static struct value *
-ft32_frame_prev_register (struct frame_info *this_frame,
+ft32_frame_prev_register (frame_info_ptr this_frame,
 			  void **this_prologue_cache, int regnum)
 {
   struct ft32_frame_cache *cache = ft32_frame_cache (this_frame,
@@ -537,7 +537,7 @@ static const struct frame_unwind ft32_frame_unwind =
 /* Return the base address of this_frame.  */
 
 static CORE_ADDR
-ft32_frame_base_address (struct frame_info *this_frame, void **this_cache)
+ft32_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct ft32_frame_cache *cache = ft32_frame_cache (this_frame,
 						     this_cache);

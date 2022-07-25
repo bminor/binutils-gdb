@@ -329,7 +329,7 @@ tui_source_window_base::rerender ()
     {
       struct symtab_and_line cursal
 	= get_current_source_symtab_and_line ();
-      struct frame_info *frame = deprecated_safe_get_selected_frame ();
+      frame_info_ptr frame = deprecated_safe_get_selected_frame ();
       struct gdbarch *gdbarch = get_frame_arch (frame);
 
       struct symtab *s = find_pc_line_symtab (get_frame_pc (frame));
@@ -353,7 +353,7 @@ tui_source_window_base::refill ()
       sal = get_current_source_symtab_and_line ();
       if (sal.symtab == NULL)
 	{
-	  struct frame_info *fi = deprecated_safe_get_selected_frame ();
+	  frame_info_ptr fi = deprecated_safe_get_selected_frame ();
 	  if (fi != nullptr)
 	    sal = find_pc_line (get_frame_pc (fi), 0);
 	}

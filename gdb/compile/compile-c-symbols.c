@@ -144,7 +144,7 @@ convert_one_symbol (compile_c_instance *context,
 	     by their name.  */
 	  {
 	    struct value *val;
-	    struct frame_info *frame = NULL;
+	    frame_info_ptr frame = NULL;
 
 	    if (symbol_read_needs_frame (sym.symbol))
 	      {

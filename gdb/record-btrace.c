@@ -1605,7 +1605,7 @@ struct btrace_frame_cache
   struct thread_info *tp;
 
   /* The frame info.  */
-  struct frame_info *frame;
+  frame_info *frame;
 
   /* The branch trace function segment.  */
   const struct btrace_function *bfun;
@@ -1642,13 +1642,13 @@ bfcache_eq (const void *arg1, const void *arg2)
 /* Create a new btrace frame cache.  */
 
 static struct btrace_frame_cache *
-bfcache_new (struct frame_info *frame)
+bfcache_new (frame_info_ptr frame)
 {
   struct btrace_frame_cache *cache;
   void **slot;
 
   cache = FRAME_OBSTACK_ZALLOC (struct btrace_frame_cache);
-  cache->frame = frame;
+  cache->frame = frame.get ();
 
   slot = htab_find_slot (bfcache, cache, INSERT);
   gdb_assert (*slot == NULL);
@@ -1660,13 +1660,13 @@ bfcache_new (struct frame_info *frame)
 /* Extract the branch trace function from a branch trace frame.  */
 
 static const struct btrace_function *
-btrace_get_frame_function (struct frame_info *frame)
+btrace_get_frame_function (frame_info_ptr frame)
 {
   const struct btrace_frame_cache *cache;
   struct btrace_frame_cache pattern;
   void **slot;
 
-  pattern.frame = frame;
+  pattern.frame = frame.get ();
 
   slot = htab_find_slot (bfcache, &pattern, NO_INSERT);
   if (slot == NULL)
@@ -1679,7 +1679,7 @@ btrace_get_frame_function (struct frame_info *frame)
 /* Implement stop_reason method for record_btrace_frame_unwind.  */
 
 static enum unwind_stop_reason
-record_btrace_frame_unwind_stop_reason (struct frame_info *this_frame,
+record_btrace_frame_unwind_stop_reason (frame_info_ptr this_frame,
 					void **this_cache)
 {
   const struct btrace_frame_cache *cache;
@@ -1698,7 +1698,7 @@ record_btrace_frame_unwind_stop_reason (struct frame_info *this_frame,
 /* Implement this_id method for record_btrace_frame_unwind.  */
 
 static void
-record_btrace_frame_this_id (struct frame_info *this_frame, void **this_cache,
+record_btrace_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 			     struct frame_id *this_id)
 {
   const struct btrace_frame_cache *cache;
@@ -1728,7 +1728,7 @@ record_btrace_frame_this_id (struct frame_info *this_frame, void **this_cache,
 /* Implement prev_register method for record_btrace_frame_unwind.  */
 
 static struct value *
-record_btrace_frame_prev_register (struct frame_info *this_frame,
+record_btrace_frame_prev_register (frame_info_ptr this_frame,
 				   void **this_cache,
 				   int regnum)
 {
@@ -1774,13 +1774,13 @@ record_btrace_frame_prev_register (struct frame_info *this_frame,
 
 static int
 record_btrace_frame_sniffer (const struct frame_unwind *self,
-			     struct frame_info *this_frame,
+			     frame_info_ptr this_frame,
 			     void **this_cache)
 {
   const struct btrace_function *bfun;
   struct btrace_frame_cache *cache;
   struct thread_info *tp;
-  struct frame_info *next;
+  frame_info_ptr next;
 
   /* THIS_FRAME does not contain a reference to its thread.  */
   tp = inferior_thread ();
@@ -1829,13 +1829,13 @@ record_btrace_frame_sniffer (const struct frame_unwind *self,
 
 static int
 record_btrace_tailcall_frame_sniffer (const struct frame_unwind *self,
-				      struct frame_info *this_frame,
+				      frame_info_ptr this_frame,
 				      void **this_cache)
 {
   const struct btrace_function *bfun, *callee;
   struct btrace_frame_cache *cache;
   struct btrace_call_iterator it;
-  struct frame_info *next;
+  frame_info_ptr next;
   struct thread_info *tinfo;
 
   next = get_next_frame (this_frame);
@@ -1868,7 +1868,7 @@ record_btrace_tailcall_frame_sniffer (const struct frame_unwind *self,
 }
 
 static void
-record_btrace_frame_dealloc_cache (struct frame_info *self, void *this_cache)
+record_btrace_frame_dealloc_cache (frame_info *self, void *this_cache)
 {
   struct btrace_frame_cache *cache;
   void **slot;

@@ -174,7 +174,7 @@ python_on_memory_change (struct inferior *inferior, CORE_ADDR addr, ssize_t len,
    command). */
 
 static void
-python_on_register_change (struct frame_info *frame, int regnum)
+python_on_register_change (frame_info_ptr frame, int regnum)
 {
   gdbpy_enter enter_py (target_gdbarch ());
 

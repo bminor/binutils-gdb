@@ -40,7 +40,7 @@
 
 /* Opaque declarations.  */
 struct ui_file;
-struct frame_info;
+class frame_info_ptr;
 struct symbol;
 struct obstack;
 struct objfile;
@@ -1069,13 +1069,13 @@ struct symbol_computed_ops
      FRAME may be zero.  */
 
   struct value *(*read_variable) (struct symbol * symbol,
-				  struct frame_info * frame);
+				  frame_info_ptr  frame);
 
   /* Read variable SYMBOL like read_variable at (callee) FRAME's function
      entry.  SYMBOL should be a function parameter, otherwise
      NO_ENTRY_VALUE_ERROR will be thrown.  */
   struct value *(*read_variable_at_entry) (struct symbol *symbol,
-					   struct frame_info *frame);
+					   frame_info_ptr frame);
 
   /* Find the "symbol_needs_kind" value for the given symbol.  This
      value determines whether reading the symbol needs memory (e.g., a
@@ -1147,7 +1147,7 @@ struct symbol_block_ops
      computed with DW_AT_static_link and this method must be used to compute
      the corresponding DW_AT_frame_base attribute.  */
   CORE_ADDR (*get_frame_base) (struct symbol *framefunc,
-			       struct frame_info *frame);
+			       frame_info_ptr frame);
 };
 
 /* Functions used with LOC_REGISTER and LOC_REGPARM_ADDR.  */
@@ -2254,7 +2254,7 @@ struct gnu_ifunc_fns
 
 extern const struct gnu_ifunc_fns *gnu_ifunc_fns_p;
 
-extern CORE_ADDR find_solib_trampoline_target (struct frame_info *, CORE_ADDR);
+extern CORE_ADDR find_solib_trampoline_target (frame_info_ptr , CORE_ADDR);
 
 struct symtab_and_line
 {

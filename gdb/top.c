@@ -491,7 +491,7 @@ void
 check_frame_language_change (void)
 {
   static int warned = 0;
-  struct frame_info *frame;
+  frame_info_ptr frame;
 
   /* First make sure that a new frame has been selected, in case the
      command or the hooks changed the program state.  */

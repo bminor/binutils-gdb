@@ -621,7 +621,7 @@ struct value *value_vector_widen (struct value *scalar_value,
 #include "gdbtypes.h"
 #include "expression.h"
 
-struct frame_info;
+class frame_info_ptr;
 struct fn_field;
 
 extern int print_address_demangle (const struct value_print_options *,
@@ -703,13 +703,13 @@ extern struct value *default_value_from_register (struct gdbarch *gdbarch,
 						  struct frame_id frame_id);
 
 extern void read_frame_register_value (struct value *value,
-				       struct frame_info *frame);
+				       frame_info_ptr frame);
 
 extern struct value *value_from_register (struct type *type, int regnum,
-					  struct frame_info *frame);
+					  frame_info_ptr frame);
 
 extern CORE_ADDR address_from_register (int regnum,
-					struct frame_info *frame);
+					frame_info_ptr frame);
 
 extern struct value *value_of_variable (struct symbol *var,
 					const struct block *b);
@@ -717,9 +717,9 @@ extern struct value *value_of_variable (struct symbol *var,
 extern struct value *address_of_variable (struct symbol *var,
 					  const struct block *b);
 
-extern struct value *value_of_register (int regnum, struct frame_info *frame);
+extern struct value *value_of_register (int regnum, frame_info_ptr frame);
 
-struct value *value_of_register_lazy (struct frame_info *frame, int regnum);
+struct value *value_of_register_lazy (frame_info_ptr frame, int regnum);
 
 /* Return the symbol's reading requirement.  */
 
@@ -732,7 +732,7 @@ extern int symbol_read_needs_frame (struct symbol *);
 
 extern struct value *read_var_value (struct symbol *var,
 				     const struct block *var_block,
-				     struct frame_info *frame);
+				     frame_info_ptr frame);
 
 extern struct value *allocate_value (struct type *type);
 extern struct value *allocate_value_lazy (struct type *type);
@@ -1110,7 +1110,7 @@ extern int val_print_string (struct type *elttype, const char *encoding,
 
 extern void print_variable_and_value (const char *name,
 				      struct symbol *var,
-				      struct frame_info *frame,
+				      frame_info_ptr frame,
 				      struct ui_file *stream,
 				      int indent);
 

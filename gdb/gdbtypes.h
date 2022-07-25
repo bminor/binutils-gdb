@@ -56,6 +56,7 @@
 #include "dwarf2.h"
 #include "gdbsupport/gdb_obstack.h"
 #include "gmp-utils.h"
+#include "frame-info.h"
 
 /* Forward declarations for prototypes.  */
 struct field;
@@ -1901,7 +1902,7 @@ struct call_site_target
 
   void iterate_over_addresses (struct gdbarch *call_site_gdbarch,
 			       const struct call_site *call_site,
-			       struct frame_info *caller_frame,
+			       frame_info_ptr caller_frame,
 			       iterate_ftype callback) const;
 
 private:
@@ -2008,7 +2009,7 @@ struct call_site
        throw NO_ENTRY_VALUE_ERROR.  */
 
     void iterate_over_addresses (struct gdbarch *call_site_gdbarch,
-				 struct frame_info *caller_frame,
+				 frame_info_ptr caller_frame,
 				 call_site_target::iterate_ftype callback)
       const
     {

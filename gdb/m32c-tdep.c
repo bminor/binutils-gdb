@@ -1851,7 +1851,7 @@ m32c_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR ip)
 /* Stack unwinding.  */
 
 static struct m32c_prologue *
-m32c_analyze_frame_prologue (struct frame_info *this_frame,
+m32c_analyze_frame_prologue (frame_info_ptr this_frame,
 			     void **this_prologue_cache)
 {
   if (! *this_prologue_cache)
@@ -1875,7 +1875,7 @@ m32c_analyze_frame_prologue (struct frame_info *this_frame,
 
 
 static CORE_ADDR
-m32c_frame_base (struct frame_info *this_frame,
+m32c_frame_base (frame_info_ptr this_frame,
 		void **this_prologue_cache)
 {
   struct m32c_prologue *p
@@ -1915,7 +1915,7 @@ m32c_frame_base (struct frame_info *this_frame,
 
 
 static void
-m32c_this_id (struct frame_info *this_frame,
+m32c_this_id (frame_info_ptr this_frame,
 	      void **this_prologue_cache,
 	      struct frame_id *this_id)
 {
@@ -1928,7 +1928,7 @@ m32c_this_id (struct frame_info *this_frame,
 
 
 static struct value *
-m32c_prev_register (struct frame_info *this_frame,
+m32c_prev_register (frame_info_ptr this_frame,
 		    void **this_prologue_cache, int regnum)
 {
   gdbarch *arch = get_frame_arch (this_frame);
@@ -2306,7 +2306,7 @@ m32c_return_value (struct gdbarch *gdbarch,
    code sequence seems more fragile.  */
 
 static CORE_ADDR
-m32c_skip_trampoline_code (struct frame_info *frame, CORE_ADDR stop_pc)
+m32c_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR stop_pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   m32c_gdbarch_tdep *tdep = gdbarch_tdep<m32c_gdbarch_tdep> (gdbarch);

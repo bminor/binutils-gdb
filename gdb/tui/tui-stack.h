@@ -24,7 +24,7 @@
 
 #include "tui/tui-data.h"
 
-struct frame_info;
+class frame_info_ptr;
 
 /* Locator window class.  */
 
@@ -79,6 +79,6 @@ private:
 };
 
 extern void tui_show_locator_content (void);
-extern bool tui_show_frame_info (struct frame_info *);
+extern bool tui_show_frame_info (frame_info_ptr );
 
 #endif /* TUI_TUI_STACK_H */

@@ -329,7 +329,7 @@ reconstruct_t_bit(struct gdbarch *gdbarch, CORE_ADDR lr, ULONGEST psr)
 static inline void
 arm_cache_init_sp (int regnum, CORE_ADDR* member,
 				      struct arm_prologue_cache *cache,
-				      struct frame_info *frame)
+				      frame_info_ptr frame)
 {
   CORE_ADDR val = get_frame_register_unsigned (frame, regnum);
   if (val == cache->sp)
@@ -352,7 +352,7 @@ arm_cache_init (struct arm_prologue_cache *cache, struct gdbarch *gdbarch)
 /* Similar to the previous function, but extracts GDBARCH from FRAME.  */
 
 static void
-arm_cache_init (struct arm_prologue_cache *cache, struct frame_info *frame)
+arm_cache_init (struct arm_prologue_cache *cache, frame_info_ptr frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
@@ -578,7 +578,7 @@ arm_is_thumb (struct regcache *regcache)
    frame.  */
 
 int
-arm_frame_is_thumb (struct frame_info *frame)
+arm_frame_is_thumb (frame_info_ptr frame)
 {
   /* Check the architecture of FRAME.  */
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -2119,7 +2119,7 @@ arm_analyze_prologue (struct gdbarch *gdbarch,
 }
 
 static void
-arm_scan_prologue (struct frame_info *this_frame,
+arm_scan_prologue (frame_info_ptr this_frame,
 		   struct arm_prologue_cache *cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -2216,7 +2216,7 @@ arm_scan_prologue (struct frame_info *this_frame,
 }
 
 static struct arm_prologue_cache *
-arm_make_prologue_cache (struct frame_info *this_frame)
+arm_make_prologue_cache (frame_info_ptr this_frame)
 {
   int reg;
   struct arm_prologue_cache *cache;
@@ -2250,7 +2250,7 @@ arm_make_prologue_cache (struct frame_info *this_frame)
 /* Implementation of the stop_reason hook for arm_prologue frames.  */
 
 static enum unwind_stop_reason
-arm_prologue_unwind_stop_reason (struct frame_info *this_frame,
+arm_prologue_unwind_stop_reason (frame_info_ptr this_frame,
 				 void **this_cache)
 {
   struct arm_prologue_cache *cache;
@@ -2278,7 +2278,7 @@ arm_prologue_unwind_stop_reason (struct frame_info *this_frame,
    and the caller's SP when we were called.  */
 
 static void
-arm_prologue_this_id (struct frame_info *this_frame,
+arm_prologue_this_id (frame_info_ptr this_frame,
 		      void **this_cache,
 		      struct frame_id *this_id)
 {
@@ -2306,7 +2306,7 @@ arm_prologue_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-arm_prologue_prev_register (struct frame_info *this_frame,
+arm_prologue_prev_register (frame_info_ptr this_frame,
 			    void **this_cache,
 			    int prev_regnum)
 {
@@ -2702,7 +2702,7 @@ arm_find_exidx_entry (CORE_ADDR memaddr, CORE_ADDR *start)
    for the ARM Architecture" document.  */
 
 static struct arm_prologue_cache *
-arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
+arm_exidx_fill_cache (frame_info_ptr this_frame, gdb_byte *entry)
 {
   CORE_ADDR vsp = 0;
   int vsp_valid = 0;
@@ -3000,7 +3000,7 @@ arm_exidx_fill_cache (struct frame_info *this_frame, gdb_byte *entry)
 
 static int
 arm_exidx_unwind_sniffer (const struct frame_unwind *self,
-			  struct frame_info *this_frame,
+			  frame_info_ptr this_frame,
 			  void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -3099,7 +3099,7 @@ struct frame_unwind arm_exidx_unwind = {
 };
 
 static struct arm_prologue_cache *
-arm_make_epilogue_frame_cache (struct frame_info *this_frame)
+arm_make_epilogue_frame_cache (frame_info_ptr this_frame)
 {
   struct arm_prologue_cache *cache;
   int reg;
@@ -3131,7 +3131,7 @@ arm_make_epilogue_frame_cache (struct frame_info *this_frame)
    'struct frame_uwnind' for epilogue unwinder.  */
 
 static void
-arm_epilogue_frame_this_id (struct frame_info *this_frame,
+arm_epilogue_frame_this_id (frame_info_ptr this_frame,
 			    void **this_cache,
 			    struct frame_id *this_id)
 {
@@ -3159,7 +3159,7 @@ arm_epilogue_frame_this_id (struct frame_info *this_frame,
    'struct frame_uwnind' for epilogue unwinder.  */
 
 static struct value *
-arm_epilogue_frame_prev_register (struct frame_info *this_frame,
+arm_epilogue_frame_prev_register (frame_info_ptr this_frame,
 				  void **this_cache, int regnum)
 {
   if (*this_cache == NULL)
@@ -3178,7 +3178,7 @@ static int thumb_stack_frame_destroyed_p (struct gdbarch *gdbarch,
 
 static int
 arm_epilogue_frame_sniffer (const struct frame_unwind *self,
-			    struct frame_info *this_frame,
+			    frame_info_ptr this_frame,
 			    void **this_prologue_cache)
 {
   if (frame_relative_level (this_frame) == 0)
@@ -3235,7 +3235,7 @@ static const struct frame_unwind arm_epilogue_frame_unwind =
    The trampoline 'bx r2' doesn't belong to main.  */
 
 static CORE_ADDR
-arm_skip_bx_reg (struct frame_info *frame, CORE_ADDR pc)
+arm_skip_bx_reg (frame_info_ptr frame, CORE_ADDR pc)
 {
   /* The heuristics of recognizing such trampoline is that FRAME is
      executing in Thumb mode and the instruction on PC is 'bx Rm'.  */
@@ -3267,7 +3267,7 @@ arm_skip_bx_reg (struct frame_info *frame, CORE_ADDR pc)
 }
 
 static struct arm_prologue_cache *
-arm_make_stub_cache (struct frame_info *this_frame)
+arm_make_stub_cache (frame_info_ptr this_frame)
 {
   struct arm_prologue_cache *cache;
 
@@ -3286,7 +3286,7 @@ arm_make_stub_cache (struct frame_info *this_frame)
 /* Our frame ID for a stub frame is the current SP and LR.  */
 
 static void
-arm_stub_this_id (struct frame_info *this_frame,
+arm_stub_this_id (frame_info_ptr this_frame,
 		  void **this_cache,
 		  struct frame_id *this_id)
 {
@@ -3304,7 +3304,7 @@ arm_stub_this_id (struct frame_info *this_frame,
 
 static int
 arm_stub_unwind_sniffer (const struct frame_unwind *self,
-			 struct frame_info *this_frame,
+			 frame_info_ptr this_frame,
 			 void **this_prologue_cache)
 {
   CORE_ADDR addr_in_block;
@@ -3342,7 +3342,7 @@ struct frame_unwind arm_stub_unwind = {
    returned.  */
 
 static struct arm_prologue_cache *
-arm_m_exception_cache (struct frame_info *this_frame)
+arm_m_exception_cache (frame_info_ptr this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
@@ -3693,7 +3693,7 @@ arm_m_exception_cache (struct frame_info *this_frame)
    'struct frame_uwnind'.  */
 
 static void
-arm_m_exception_this_id (struct frame_info *this_frame,
+arm_m_exception_this_id (frame_info_ptr this_frame,
 			 void **this_cache,
 			 struct frame_id *this_id)
 {
@@ -3714,7 +3714,7 @@ arm_m_exception_this_id (struct frame_info *this_frame,
    'struct frame_uwnind'.  */
 
 static struct value *
-arm_m_exception_prev_register (struct frame_info *this_frame,
+arm_m_exception_prev_register (frame_info_ptr this_frame,
 			       void **this_cache,
 			       int prev_regnum)
 {
@@ -3779,7 +3779,7 @@ arm_m_exception_prev_register (struct frame_info *this_frame,
 
 static int
 arm_m_exception_unwind_sniffer (const struct frame_unwind *self,
-				struct frame_info *this_frame,
+				frame_info_ptr this_frame,
 				void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -3806,7 +3806,7 @@ struct frame_unwind arm_m_exception_unwind =
 };
 
 static CORE_ADDR
-arm_normal_frame_base (struct frame_info *this_frame, void **this_cache)
+arm_normal_frame_base (frame_info_ptr this_frame, void **this_cache)
 {
   struct arm_prologue_cache *cache;
 
@@ -3827,7 +3827,7 @@ struct frame_base arm_normal_base = {
 };
 
 static struct value *
-arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
+arm_dwarf2_prev_register (frame_info_ptr this_frame, void **this_cache,
 			  int regnum)
 {
   struct gdbarch * gdbarch = get_frame_arch (this_frame);
@@ -3925,7 +3925,7 @@ arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
       if (override_with_sp_value)
 	{
 	  /* Use value of SP from previous frame.  */
-	  struct frame_info *prev_frame = get_prev_frame (this_frame);
+	  frame_info_ptr prev_frame = get_prev_frame (this_frame);
 	  if (prev_frame)
 	    val = get_frame_register_unsigned (prev_frame, ARM_SP_REGNUM);
 	  else
@@ -4710,7 +4710,7 @@ print_fpu_flags (struct ui_file *file, int flags)
    (if present) or emulator.  */
 static void
 arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
-		      struct frame_info *frame, const char *args)
+		      frame_info_ptr frame, const char *args)
 {
   unsigned long status = get_frame_register_unsigned (frame, ARM_FPS_REGNUM);
   int type;
@@ -5054,7 +5054,7 @@ static const unsigned char op_lit0 = DW_OP_lit0;
 static void
 arm_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			   struct dwarf2_frame_state_reg *reg,
-			   struct frame_info *this_frame)
+			   frame_info_ptr this_frame)
 {
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
@@ -9099,7 +9099,7 @@ arm_return_value (struct gdbarch *gdbarch, struct value *function,
 
 
 static int
-arm_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
+arm_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
@@ -9171,7 +9171,7 @@ arm_is_sgstubs_section (struct obj_section *sec)
    return the target PC.  Otherwise return 0.  */
 
 CORE_ADDR
-arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
+arm_skip_stub (frame_info_ptr frame, CORE_ADDR pc)
 {
   const char *name;
   int namelen;
@@ -9720,7 +9720,7 @@ arm_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 }
 
 static struct value *
-value_of_arm_user_reg (struct frame_info *frame, const void *baton)
+value_of_arm_user_reg (frame_info_ptr frame, const void *baton)
 {
   const int *reg_p = (const int *) baton;
   return value_of_register (*reg_p, frame);
@@ -9814,7 +9814,7 @@ arm_register_g_packet_guesses (struct gdbarch *gdbarch)
 /* Implement the code_of_frame_writable gdbarch method.  */
 
 static int
-arm_code_of_frame_writable (struct gdbarch *gdbarch, struct frame_info *frame)
+arm_code_of_frame_writable (struct gdbarch *gdbarch, frame_info_ptr frame)
 {
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
 
@@ -9842,7 +9842,7 @@ arm_gnu_triplet_regexp (struct gdbarch *gdbarch)
 /* Implement the "get_pc_address_flags" gdbarch method.  */
 
 static std::string
-arm_get_pc_address_flags (frame_info *frame, CORE_ADDR pc)
+arm_get_pc_address_flags (frame_info_ptr frame, CORE_ADDR pc)
 {
   if (get_frame_pc_masked (frame))
     return "PAC";

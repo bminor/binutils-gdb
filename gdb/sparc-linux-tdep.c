@@ -42,7 +42,7 @@
 /* Signal trampoline support.  */
 
 static void sparc32_linux_sigframe_init (const struct tramp_frame *self,
-					 struct frame_info *this_frame,
+					 frame_info_ptr this_frame,
 					 struct trad_frame_cache *this_cache,
 					 CORE_ADDR func);
 
@@ -117,7 +117,7 @@ enum
 
 static void
 sparc32_linux_sigframe_init (const struct tramp_frame *self,
-			     struct frame_info *this_frame,
+			     frame_info_ptr this_frame,
 			     struct trad_frame_cache *this_cache,
 			     CORE_ADDR func)
 {
@@ -159,7 +159,7 @@ sparc32_linux_sigframe_init (const struct tramp_frame *self,
    address.  */
 
 static CORE_ADDR
-sparc32_linux_step_trap (struct frame_info *frame, unsigned long insn)
+sparc32_linux_step_trap (frame_info_ptr frame, unsigned long insn)
 {
   if (insn == 0x91d02010)
     {

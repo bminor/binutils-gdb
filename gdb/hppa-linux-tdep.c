@@ -193,7 +193,7 @@ struct hppa_linux_sigtramp_unwind_cache
 };
 
 static struct hppa_linux_sigtramp_unwind_cache *
-hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
+hppa_linux_sigtramp_frame_unwind_cache (frame_info_ptr this_frame,
 					void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -268,7 +268,7 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 }
 
 static void
-hppa_linux_sigtramp_frame_this_id (struct frame_info *this_frame,
+hppa_linux_sigtramp_frame_this_id (frame_info_ptr this_frame,
 				   void **this_prologue_cache,
 				   struct frame_id *this_id)
 {
@@ -278,7 +278,7 @@ hppa_linux_sigtramp_frame_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-hppa_linux_sigtramp_frame_prev_register (struct frame_info *this_frame,
+hppa_linux_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 					 void **this_prologue_cache,
 					 int regnum)
 {
@@ -296,7 +296,7 @@ hppa_linux_sigtramp_frame_prev_register (struct frame_info *this_frame,
    we can find the beginning of the struct rt_sigframe.  */
 static int
 hppa_linux_sigtramp_frame_sniffer (const struct frame_unwind *self,
-				   struct frame_info *this_frame,
+				   frame_info_ptr this_frame,
 				   void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);

@@ -283,7 +283,7 @@ aarch64_linux_restore_vreg (struct trad_frame_cache *cache, int num_regs,
 
 static void
 aarch64_linux_sigframe_init (const struct tramp_frame *self,
-			     struct frame_info *this_frame,
+			     frame_info_ptr this_frame,
 			     struct trad_frame_cache *this_cache,
 			     CORE_ADDR func)
 {

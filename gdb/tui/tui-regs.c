@@ -85,7 +85,7 @@ tab_expansion_file::write (const char *buf, long length_buf)
    representation of it.  */
 
 static std::string
-tui_register_format (struct frame_info *frame, int regnum)
+tui_register_format (frame_info_ptr frame, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
 
@@ -111,7 +111,7 @@ tui_register_format (struct frame_info *frame, int regnum)
    display.  When changep is set, check if the new register value has
    changed with respect to the previous call.  */
 static void
-tui_get_register (struct frame_info *frame,
+tui_get_register (frame_info_ptr frame,
 		  struct tui_data_item_window *data, 
 		  int regnum, bool *changedp)
 {
@@ -208,7 +208,7 @@ tui_data_window::show_registers (const reggroup *group)
 
 void
 tui_data_window::show_register_group (const reggroup *group,
-				      struct frame_info *frame, 
+				      frame_info_ptr frame, 
 				      bool refresh_values_only)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
@@ -462,7 +462,7 @@ tui_data_window::do_scroll_vertical (int num_to_scroll)
    given a particular frame.  If the values have changed, they are
    updated with the new value and highlighted.  */
 void
-tui_data_window::check_register_values (struct frame_info *frame)
+tui_data_window::check_register_values (frame_info_ptr frame)
 {
   if (m_regs_content.empty ())
     show_registers (m_current_group);

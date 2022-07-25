@@ -1830,7 +1830,7 @@ hppa_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* Return an unwind entry that falls within the frame's code block.  */
 
 static struct unwind_table_entry *
-hppa_find_unwind_entry_in_block (struct frame_info *this_frame)
+hppa_find_unwind_entry_in_block (frame_info_ptr this_frame)
 {
   CORE_ADDR pc = get_frame_address_in_block (this_frame);
 
@@ -1851,7 +1851,7 @@ struct hppa_frame_cache
 };
 
 static struct hppa_frame_cache *
-hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
+hppa_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -2252,7 +2252,7 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 }
 
 static void
-hppa_frame_this_id (struct frame_info *this_frame, void **this_cache,
+hppa_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		    struct frame_id *this_id)
 {
   struct hppa_frame_cache *info;
@@ -2265,7 +2265,7 @@ hppa_frame_this_id (struct frame_info *this_frame, void **this_cache,
 }
 
 static struct value *
-hppa_frame_prev_register (struct frame_info *this_frame,
+hppa_frame_prev_register (frame_info_ptr this_frame,
 			  void **this_cache, int regnum)
 {
   struct hppa_frame_cache *info = hppa_frame_cache (this_frame, this_cache);
@@ -2276,7 +2276,7 @@ hppa_frame_prev_register (struct frame_info *this_frame,
 
 static int
 hppa_frame_unwind_sniffer (const struct frame_unwind *self,
-			   struct frame_info *this_frame, void **this_cache)
+			   frame_info_ptr this_frame, void **this_cache)
 {
   if (hppa_find_unwind_entry_in_block (this_frame))
     return 1;
@@ -2304,7 +2304,7 @@ static const struct frame_unwind hppa_frame_unwind =
    identify the stack and pc for the frame.  */
 
 static struct hppa_frame_cache *
-hppa_fallback_frame_cache (struct frame_info *this_frame, void **this_cache)
+hppa_fallback_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -2377,7 +2377,7 @@ hppa_fallback_frame_cache (struct frame_info *this_frame, void **this_cache)
 }
 
 static void
-hppa_fallback_frame_this_id (struct frame_info *this_frame, void **this_cache,
+hppa_fallback_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 			     struct frame_id *this_id)
 {
   struct hppa_frame_cache *info = 
@@ -2387,7 +2387,7 @@ hppa_fallback_frame_this_id (struct frame_info *this_frame, void **this_cache,
 }
 
 static struct value *
-hppa_fallback_frame_prev_register (struct frame_info *this_frame,
+hppa_fallback_frame_prev_register (frame_info_ptr this_frame,
 				   void **this_cache, int regnum)
 {
   struct hppa_frame_cache *info
@@ -2416,7 +2416,7 @@ struct hppa_stub_unwind_cache
 };
 
 static struct hppa_stub_unwind_cache *
-hppa_stub_frame_unwind_cache (struct frame_info *this_frame,
+hppa_stub_frame_unwind_cache (frame_info_ptr this_frame,
 			      void **this_cache)
 {
   struct hppa_stub_unwind_cache *info;
@@ -2437,7 +2437,7 @@ hppa_stub_frame_unwind_cache (struct frame_info *this_frame,
 }
 
 static void
-hppa_stub_frame_this_id (struct frame_info *this_frame,
+hppa_stub_frame_this_id (frame_info_ptr this_frame,
 			 void **this_prologue_cache,
 			 struct frame_id *this_id)
 {
@@ -2449,7 +2449,7 @@ hppa_stub_frame_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-hppa_stub_frame_prev_register (struct frame_info *this_frame,
+hppa_stub_frame_prev_register (frame_info_ptr this_frame,
 			       void **this_prologue_cache, int regnum)
 {
   struct hppa_stub_unwind_cache *info
@@ -2464,7 +2464,7 @@ hppa_stub_frame_prev_register (struct frame_info *this_frame,
 
 static int
 hppa_stub_unwind_sniffer (const struct frame_unwind *self,
-			  struct frame_info *this_frame,
+			  frame_info_ptr this_frame,
 			  void **this_cache)
 {
   CORE_ADDR pc = get_frame_address_in_block (this_frame);
@@ -2490,7 +2490,7 @@ static const struct frame_unwind hppa_stub_frame_unwind = {
 };
 
 CORE_ADDR
-hppa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+hppa_unwind_pc (struct gdbarch *gdbarch, frame_info_ptr next_frame)
 {
   ULONGEST ipsw;
   CORE_ADDR pc;
@@ -2707,7 +2707,7 @@ hppa_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
 /* Get the ARGIth function argument for the current function.  */
 
 static CORE_ADDR
-hppa_fetch_pointer_argument (struct frame_info *frame, int argi, 
+hppa_fetch_pointer_argument (frame_info_ptr frame, int argi, 
 			     struct type *type)
 {
   return get_frame_register_unsigned (frame, HPPA_R0_REGNUM + 26 - argi);
@@ -2738,7 +2738,7 @@ hppa_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 }
 
 struct value *
-hppa_frame_prev_register_helper (struct frame_info *this_frame,
+hppa_frame_prev_register_helper (frame_info_ptr this_frame,
 				 trad_frame_saved_reg saved_regs[],
 				 int regnum)
 {
@@ -2916,7 +2916,7 @@ hppa_in_solib_call_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc)
    systems: $$dyncall, import stubs and PLT stubs.  */
 
 CORE_ADDR
-hppa_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
+hppa_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct type *func_ptr_type = builtin_type (gdbarch)->builtin_func_ptr;

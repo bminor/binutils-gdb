@@ -265,7 +265,7 @@ static PyObject *
 sympy_value (PyObject *self, PyObject *args)
 {
   struct symbol *symbol = NULL;
-  struct frame_info *frame_info = NULL;
+  frame_info_ptr frame_info = NULL;
   PyObject *frame_obj = NULL;
   struct value *value = NULL;
 
@@ -401,7 +401,7 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
     block = block_object_to_block (block_obj);
   else
     {
-      struct frame_info *selected_frame;
+      frame_info_ptr selected_frame;
 
       try
 	{
@@ -511,7 +511,7 @@ gdbpy_lookup_static_symbol (PyObject *self, PyObject *args, PyObject *kw)
   const struct block *block = NULL;
   try
     {
-      struct frame_info *selected_frame
+      frame_info_ptr selected_frame
 	= get_selected_frame (_("No frame selected."));
       block = get_frame_block (selected_frame, NULL);
     }

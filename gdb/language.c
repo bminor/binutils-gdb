@@ -125,7 +125,7 @@ show_language_command (struct ui_file *file, int from_tty,
 
   if (has_stack_frames ())
     {
-      struct frame_info *frame;
+      frame_info_ptr frame;
 
       frame = get_selected_frame (NULL);
       flang = get_frame_language (frame);
@@ -160,7 +160,7 @@ set_language_command (const char *ignore,
 	      language_mode = language_mode_auto;
 	      try
 		{
-		  struct frame_info *frame;
+		  frame_info_ptr frame;
 
 		  frame = get_selected_frame (NULL);
 		  flang = get_frame_language (frame);
@@ -533,7 +533,7 @@ add_set_language_command ()
    Return the result from the first that returns non-zero, or 0 if all
    `fail'.  */
 CORE_ADDR 
-skip_language_trampoline (struct frame_info *frame, CORE_ADDR pc)
+skip_language_trampoline (frame_info_ptr frame, CORE_ADDR pc)
 {
   for (const auto &lang : language_defn::languages)
     {

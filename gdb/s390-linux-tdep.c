@@ -386,7 +386,7 @@ struct s390_sigtramp_unwind_cache {
    s390_sigtramp_frame_unwind.  */
 
 static struct s390_sigtramp_unwind_cache *
-s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
+s390_sigtramp_frame_unwind_cache (frame_info_ptr this_frame,
 				  void **this_prologue_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -496,7 +496,7 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 /* Implement this_id frame_unwind method for s390_sigtramp_frame_unwind.  */
 
 static void
-s390_sigtramp_frame_this_id (struct frame_info *this_frame,
+s390_sigtramp_frame_this_id (frame_info_ptr this_frame,
 			     void **this_prologue_cache,
 			     struct frame_id *this_id)
 {
@@ -508,7 +508,7 @@ s390_sigtramp_frame_this_id (struct frame_info *this_frame,
 /* Implement prev_register frame_unwind method for sigtramp frames.  */
 
 static struct value *
-s390_sigtramp_frame_prev_register (struct frame_info *this_frame,
+s390_sigtramp_frame_prev_register (frame_info_ptr this_frame,
 				   void **this_prologue_cache, int regnum)
 {
   struct s390_sigtramp_unwind_cache *info
@@ -520,7 +520,7 @@ s390_sigtramp_frame_prev_register (struct frame_info *this_frame,
 
 static int
 s390_sigtramp_frame_sniffer (const struct frame_unwind *self,
-			     struct frame_info *this_frame,
+			     frame_info_ptr this_frame,
 			     void **this_prologue_cache)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);

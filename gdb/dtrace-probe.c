@@ -129,7 +129,7 @@ public:
 
   /* See probe.h.  */
   struct value *evaluate_argument (unsigned n,
-				   struct frame_info *frame) override;
+				   frame_info_ptr frame) override;
 
   /* See probe.h.  */
   void compile_to_ax (struct agent_expr *aexpr,
@@ -709,7 +709,7 @@ dtrace_probe::can_evaluate_arguments () const
 
 struct value *
 dtrace_probe::evaluate_argument (unsigned n,
-				 struct frame_info *frame)
+				 frame_info_ptr frame)
 {
   struct gdbarch *gdbarch = this->get_gdbarch ();
   struct dtrace_probe_arg *arg;

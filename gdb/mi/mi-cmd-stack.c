@@ -44,7 +44,7 @@ enum what_to_list { locals, arguments, all };
 static void list_args_or_locals (const frame_print_options &fp_opts,
 				 enum what_to_list what,
 				 enum print_values values,
-				 struct frame_info *fi,
+				 frame_info_ptr fi,
 				 int skip_unavailable);
 
 /* True if we want to allow Python-based frame filters.  */
@@ -61,7 +61,7 @@ mi_cmd_enable_frame_filters (const char *command, char **argv, int argc)
 /* Like apply_ext_lang_frame_filter, but take a print_values */
 
 static enum ext_lang_bt_status
-mi_apply_ext_lang_frame_filter (struct frame_info *frame,
+mi_apply_ext_lang_frame_filter (frame_info_ptr frame,
 				frame_filter_flags flags,
 				enum print_values print_values,
 				struct ui_out *out,
@@ -87,7 +87,7 @@ mi_cmd_stack_list_frames (const char *command, char **argv, int argc)
   int frame_low;
   int frame_high;
   int i;
-  struct frame_info *fi;
+  frame_info_ptr fi;
   enum ext_lang_bt_status result = EXT_LANG_BT_ERROR;
   int raw_arg = 0;
   int oind = 0;
@@ -189,7 +189,7 @@ mi_cmd_stack_info_depth (const char *command, char **argv, int argc)
 {
   int frame_high;
   int i;
-  struct frame_info *fi;
+  frame_info_ptr fi;
 
   if (argc > 1)
     error (_("-stack-info-depth: Usage: [MAX_DEPTH]"));
@@ -216,7 +216,7 @@ mi_cmd_stack_info_depth (const char *command, char **argv, int argc)
 void
 mi_cmd_stack_list_locals (const char *command, char **argv, int argc)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
   int raw_arg = 0;
   enum ext_lang_bt_status result = EXT_LANG_BT_ERROR;
   enum print_values print_value;
@@ -295,7 +295,7 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
   int frame_low;
   int frame_high;
   int i;
-  struct frame_info *fi;
+  frame_info_ptr fi;
   enum print_values print_values;
   struct ui_out *uiout = current_uiout;
   int raw_arg = 0;
@@ -408,7 +408,7 @@ mi_cmd_stack_list_args (const char *command, char **argv, int argc)
 void
 mi_cmd_stack_list_variables (const char *command, char **argv, int argc)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
   int raw_arg = 0;
   enum ext_lang_bt_status result = EXT_LANG_BT_ERROR;
   enum print_values print_value;
@@ -566,7 +566,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 static void
 list_args_or_locals (const frame_print_options &fp_opts,
 		     enum what_to_list what, enum print_values values,
-		     struct frame_info *fi, int skip_unavailable)
+		     frame_info_ptr fi, int skip_unavailable)
 {
   const struct block *block;
   struct symbol *sym;
@@ -692,7 +692,7 @@ list_args_or_locals (const frame_print_options &fp_opts,
    manual, this feature is supported here purely for backward
    compatibility.  */
 
-static struct frame_info *
+static frame_info_ptr
 parse_frame_specification (const char *frame_exp)
 {
   gdb_assert (frame_exp != NULL);
@@ -706,7 +706,7 @@ parse_frame_specification (const char *frame_exp)
   struct value *arg = parse_and_eval (frame_exp);
 
   /* Assume ARG is an integer, and try using that to select a frame.  */
-  struct frame_info *fid;
+  frame_info_ptr fid;
   int level = value_as_long (arg);
 
   fid = find_relative_frame (get_current_frame (), &level);
@@ -731,7 +731,7 @@ parse_frame_specification (const char *frame_exp)
     {
       if (id == get_frame_id (fid))
 	{
-	  struct frame_info *prev_frame;
+	  frame_info_ptr prev_frame;
 
 	  while (1)
 	    {

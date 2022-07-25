@@ -198,7 +198,7 @@ default_gcore_target (void)
 static int
 derive_stack_segment (bfd_vma *bottom, bfd_vma *top)
 {
-  struct frame_info *fi, *tmp_fi;
+  frame_info_ptr fi, tmp_fi;
 
   gdb_assert (bottom);
   gdb_assert (top);

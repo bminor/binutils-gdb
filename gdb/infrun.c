@@ -84,9 +84,9 @@ static void follow_inferior_reset_breakpoints (void);
 
 static bool currently_stepping (struct thread_info *tp);
 
-static void insert_hp_step_resume_breakpoint_at_frame (struct frame_info *);
+static void insert_hp_step_resume_breakpoint_at_frame (frame_info_ptr );
 
-static void insert_step_resume_breakpoint_at_caller (struct frame_info *);
+static void insert_step_resume_breakpoint_at_caller (frame_info_ptr );
 
 static void insert_longjmp_resume_breakpoint (struct gdbarch *, CORE_ADDR);
 
@@ -3475,7 +3475,7 @@ static void handle_step_into_function_backward (struct gdbarch *gdbarch,
 						struct execution_control_state *ecs);
 static void handle_signal_stop (struct execution_control_state *ecs);
 static void check_exception_resume (struct execution_control_state *,
-				    struct frame_info *);
+				    frame_info_ptr );
 
 static void end_stepping_range (struct execution_control_state *ecs);
 static void stop_waiting (struct execution_control_state *ecs);
@@ -4327,7 +4327,7 @@ fetch_inferior_event ()
 /* See infrun.h.  */
 
 void
-set_step_info (thread_info *tp, struct frame_info *frame,
+set_step_info (thread_info *tp, frame_info_ptr frame,
 	       struct symtab_and_line sal)
 {
   /* This can be removed once this function no longer implicitly relies on the
@@ -4559,7 +4559,7 @@ adjust_pc_after_break (struct thread_info *thread,
 }
 
 static bool
-stepped_in_from (struct frame_info *frame, struct frame_id step_frame_id)
+stepped_in_from (frame_info_ptr frame, struct frame_id step_frame_id)
 {
   for (frame = get_prev_frame (frame);
        frame != NULL;
@@ -4584,7 +4584,7 @@ stepped_in_from (struct frame_info *frame, struct frame_id step_frame_id)
 static bool
 inline_frame_is_marked_for_skip (bool prev_frame, struct thread_info *tp)
 {
-  struct frame_info *frame = get_current_frame ();
+  frame_info_ptr frame = get_current_frame ();
 
   if (prev_frame)
     frame = get_prev_frame (frame);
@@ -6118,7 +6118,7 @@ finish_step_over (struct execution_control_state *ecs)
 static void
 handle_signal_stop (struct execution_control_state *ecs)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
   struct gdbarch *gdbarch;
   int stopped_by_watchpoint;
   enum stop_kind stop_soon;
@@ -6629,7 +6629,7 @@ static void
 process_event_stop_test (struct execution_control_state *ecs)
 {
   struct symtab_and_line stop_pc_sal;
-  struct frame_info *frame;
+  frame_info_ptr frame;
   struct gdbarch *gdbarch;
   CORE_ADDR jmp_buf_pc;
   struct bpstat_what what;
@@ -6700,7 +6700,7 @@ process_event_stop_test (struct execution_control_state *ecs)
 
     case BPSTAT_WHAT_CLEAR_LONGJMP_RESUME:
       {
-	struct frame_info *init_frame;
+	frame_info_ptr init_frame;
 
 	/* There are several cases to consider.
 
@@ -7675,7 +7675,7 @@ restart_after_all_stop_detach (process_stratum_target *proc_target)
 static bool
 keep_going_stepped_thread (struct thread_info *tp)
 {
-  struct frame_info *frame;
+  frame_info_ptr frame;
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
 
@@ -7932,7 +7932,7 @@ insert_step_resume_breakpoint_at_sal (struct gdbarch *gdbarch,
    RETURN_FRAME.pc.  */
 
 static void
-insert_hp_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
+insert_hp_step_resume_breakpoint_at_frame (frame_info_ptr return_frame)
 {
   gdb_assert (return_frame != NULL);
 
@@ -7963,7 +7963,7 @@ insert_hp_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
    of frame_unwind_caller_id for an example).  */
 
 static void
-insert_step_resume_breakpoint_at_caller (struct frame_info *next_frame)
+insert_step_resume_breakpoint_at_caller (frame_info_ptr next_frame)
 {
   /* We shouldn't have gotten here if we don't know where the call site
      is.  */
@@ -8010,7 +8010,7 @@ insert_longjmp_resume_breakpoint (struct gdbarch *gdbarch, CORE_ADDR pc)
 static void
 insert_exception_resume_breakpoint (struct thread_info *tp,
 				    const struct block *b,
-				    struct frame_info *frame,
+				    frame_info_ptr frame,
 				    struct symbol *sym)
 {
   try
@@ -8054,7 +8054,7 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 static void
 insert_exception_resume_from_probe (struct thread_info *tp,
 				    const struct bound_probe *probe,
-				    struct frame_info *frame)
+				    frame_info_ptr frame)
 {
   struct value *arg_value;
   CORE_ADDR handler;
@@ -8081,7 +8081,7 @@ insert_exception_resume_from_probe (struct thread_info *tp,
 
 static void
 check_exception_resume (struct execution_control_state *ecs,
-			struct frame_info *frame)
+			frame_info_ptr frame)
 {
   struct bound_probe probe;
   struct symbol *func;
@@ -8740,7 +8740,7 @@ normal_stop (void)
 	  /* Pop the empty frame that contains the stack dummy.  This
 	     also restores inferior state prior to the call (struct
 	     infcall_suspend_state).  */
-	  struct frame_info *frame = get_current_frame ();
+	  frame_info_ptr frame = get_current_frame ();
 
 	  gdb_assert (get_frame_type (frame) == DUMMY_FRAME);
 	  frame_pop (frame);

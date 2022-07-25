@@ -1183,7 +1183,7 @@ sparc32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 /* Normal frames.  */
 
 struct sparc_frame_cache *
-sparc_frame_cache (struct frame_info *this_frame, void **this_cache)
+sparc_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct sparc_frame_cache *cache;
 
@@ -1240,7 +1240,7 @@ sparc32_struct_return_from_sym (struct symbol *sym)
 }
 
 struct sparc_frame_cache *
-sparc32_frame_cache (struct frame_info *this_frame, void **this_cache)
+sparc32_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct sparc_frame_cache *cache;
   struct symbol *sym;
@@ -1276,7 +1276,7 @@ sparc32_frame_cache (struct frame_info *this_frame, void **this_cache)
 }
 
 static void
-sparc32_frame_this_id (struct frame_info *this_frame, void **this_cache,
+sparc32_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		       struct frame_id *this_id)
 {
   struct sparc_frame_cache *cache =
@@ -1290,7 +1290,7 @@ sparc32_frame_this_id (struct frame_info *this_frame, void **this_cache,
 }
 
 static struct value *
-sparc32_frame_prev_register (struct frame_info *this_frame,
+sparc32_frame_prev_register (frame_info_ptr this_frame,
 			     void **this_cache, int regnum)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -1360,7 +1360,7 @@ static const struct frame_unwind sparc32_frame_unwind =
 
 
 static CORE_ADDR
-sparc32_frame_base_address (struct frame_info *this_frame, void **this_cache)
+sparc32_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct sparc_frame_cache *cache =
     sparc32_frame_cache (this_frame, this_cache);
@@ -1377,7 +1377,7 @@ static const struct frame_base sparc32_frame_base =
 };
 
 static struct frame_id
-sparc_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
+sparc_dummy_id (struct gdbarch *gdbarch, frame_info_ptr this_frame)
 {
   CORE_ADDR sp;
 
@@ -1546,7 +1546,7 @@ sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
 }
 
 static int
-sparc32_dwarf2_struct_return_p (struct frame_info *this_frame)
+sparc32_dwarf2_struct_return_p (frame_info_ptr this_frame)
 {
   CORE_ADDR pc = get_frame_address_in_block (this_frame);
   struct symbol *sym = find_pc_function (pc);
@@ -1559,7 +1559,7 @@ sparc32_dwarf2_struct_return_p (struct frame_info *this_frame)
 static void
 sparc32_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			       struct dwarf2_frame_state_reg *reg,
-			       struct frame_info *this_frame)
+			       frame_info_ptr this_frame)
 {
   int off;
 
@@ -1672,7 +1672,7 @@ sparc_analyze_control_transfer (struct regcache *regcache,
     }
   else if (X_OP (insn) == 2 && X_OP3 (insn) == 0x3a)
     {
-      struct frame_info *frame = get_current_frame ();
+      frame_info_ptr frame = get_current_frame ();
 
       /* Trap instruction (TRAP).  */
       gdbarch *arch = regcache->arch ();
@@ -1718,7 +1718,7 @@ sparc_analyze_control_transfer (struct regcache *regcache,
 }
 
 static CORE_ADDR
-sparc_step_trap (struct frame_info *frame, unsigned long insn)
+sparc_step_trap (frame_info_ptr frame, unsigned long insn)
 {
   return 0;
 }

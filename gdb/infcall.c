@@ -673,7 +673,7 @@ run_inferior_call (std::unique_ptr<call_thread_fsm> sm,
 static CORE_ADDR
 reserve_stack_space (const type *values_type, CORE_ADDR &sp)
 {
-  struct frame_info *frame = get_current_frame ();
+  frame_info_ptr frame = get_current_frame ();
   struct gdbarch *gdbarch = get_frame_arch (frame);
   CORE_ADDR addr = 0;
 
@@ -771,7 +771,7 @@ call_function_by_hand_dummy (struct value *function,
   CORE_ADDR real_pc;
   CORE_ADDR bp_addr;
   struct frame_id dummy_id;
-  struct frame_info *frame;
+  frame_info_ptr frame;
   struct gdbarch *gdbarch;
   ptid_t call_thread_ptid;
   struct gdb_exception e;

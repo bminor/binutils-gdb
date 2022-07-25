@@ -20,7 +20,7 @@
 #if !defined (INLINE_FRAME_H)
 #define INLINE_FRAME_H 1
 
-struct frame_info;
+class frame_info_ptr;
 struct frame_unwind;
 struct bpstat;
 struct process_stratum_target;
@@ -68,6 +68,6 @@ struct symbol *inline_skipped_symbol (thread_info *thread);
    the callees may not have associated frames (see
    skip_inline_frames).  */
 
-int frame_inlined_callees (struct frame_info *this_frame);
+int frame_inlined_callees (frame_info_ptr this_frame);
 
 #endif /* !defined (INLINE_FRAME_H) */

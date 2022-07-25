@@ -52,7 +52,7 @@
    slot instruction.  */
 
 const struct block *
-get_frame_block (struct frame_info *frame, CORE_ADDR *addr_in_block)
+get_frame_block (frame_info_ptr frame, CORE_ADDR *addr_in_block)
 {
   CORE_ADDR pc;
   const struct block *bl;
@@ -115,7 +115,7 @@ get_pc_function_start (CORE_ADDR pc)
 /* Return the symbol for the function executing in frame FRAME.  */
 
 struct symbol *
-get_frame_function (struct frame_info *frame)
+get_frame_function (frame_info_ptr frame)
 {
   const struct block *bl = get_frame_block (frame, 0);
 
@@ -460,13 +460,13 @@ find_gnu_ifunc_target_type (CORE_ADDR resolver_funaddr)
    at least as old as the selected frame. Return NULL if there is no
    such frame.  If BLOCK is NULL, just return NULL.  */
 
-struct frame_info *
+frame_info_ptr
 block_innermost_frame (const struct block *block)
 {
   if (block == NULL)
     return NULL;
 
-  frame_info *frame = get_selected_frame ();
+  frame_info_ptr frame = get_selected_frame ();
   while (frame != NULL)
     {
       const struct block *frame_block = get_frame_block (frame, NULL);

@@ -930,7 +930,7 @@ struct jit_unwind_private
   std::unique_ptr<detached_regcache> regcache;
 
   /* The frame being unwound.  */
-  struct frame_info *this_frame;
+  frame_info_ptr this_frame;
 };
 
 /* Sets the value of a particular register in this frame.  */
@@ -991,7 +991,7 @@ jit_unwind_reg_get_impl (struct gdb_unwind_callbacks *cb, int regnum)
    saved register value.  */
 
 static void
-jit_dealloc_cache (struct frame_info *this_frame, void *cache)
+jit_dealloc_cache (frame_info *this_frame, void *cache)
 {
   struct jit_unwind_private *priv_data = (struct jit_unwind_private *) cache;
   delete priv_data;
@@ -1007,7 +1007,7 @@ jit_dealloc_cache (struct frame_info *this_frame, void *cache)
 
 static int
 jit_frame_sniffer (const struct frame_unwind *self,
-		   struct frame_info *this_frame, void **cache)
+		   frame_info_ptr this_frame, void **cache)
 {
   struct jit_unwind_private *priv_data;
   struct gdb_unwind_callbacks callbacks;
@@ -1042,7 +1042,7 @@ jit_frame_sniffer (const struct frame_unwind *self,
 
   jit_debug_printf ("Could not unwind frame using JIT reader.");
 
-  jit_dealloc_cache (this_frame, *cache);
+  jit_dealloc_cache (this_frame.get (), *cache);
   *cache = NULL;
 
   return 0;
@@ -1053,7 +1053,7 @@ jit_frame_sniffer (const struct frame_unwind *self,
    the loaded plugin.  */
 
 static void
-jit_frame_this_id (struct frame_info *this_frame, void **cache,
+jit_frame_this_id (frame_info_ptr this_frame, void **cache,
 		   struct frame_id *this_id)
 {
   struct jit_unwind_private priv;
@@ -1082,7 +1082,7 @@ jit_frame_this_id (struct frame_info *this_frame, void **cache,
    the register from the cache.  */
 
 static struct value *
-jit_frame_prev_register (struct frame_info *this_frame, void **cache, int reg)
+jit_frame_prev_register (frame_info_ptr this_frame, void **cache, int reg)
 {
   struct jit_unwind_private *priv = (struct jit_unwind_private *) *cache;
   struct gdbarch *gdbarch;

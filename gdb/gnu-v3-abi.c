@@ -1215,7 +1215,7 @@ gnuv3_get_type_from_type_info (struct value *type_info_ptr)
    of the routine we are thunking to and continue to there instead.  */
 
 static CORE_ADDR 
-gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
+gnuv3_skip_trampoline (frame_info_ptr frame, CORE_ADDR stop_pc)
 {
   CORE_ADDR real_stop_pc, method_stop_pc, func_addr;
   struct gdbarch *gdbarch = get_frame_arch (frame);

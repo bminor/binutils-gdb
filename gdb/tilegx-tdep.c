@@ -362,7 +362,7 @@ static CORE_ADDR
 tilegx_analyze_prologue (struct gdbarch* gdbarch,
 			 CORE_ADDR start_addr, CORE_ADDR end_addr,
 			 struct tilegx_frame_cache *cache,
-			 struct frame_info *next_frame)
+			 frame_info_ptr next_frame)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR next_addr;
@@ -774,7 +774,7 @@ tilegx_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* This is the implementation of gdbarch method get_longjmp_target.  */
 
 static int
-tilegx_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
+tilegx_get_longjmp_target (frame_info_ptr frame, CORE_ADDR *pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -833,7 +833,7 @@ typedef BP_MANIPULATION (tilegx_break_insn) tilegx_breakpoint;
 /* Normal frames.  */
 
 static struct tilegx_frame_cache *
-tilegx_frame_cache (struct frame_info *this_frame, void **this_cache)
+tilegx_frame_cache (frame_info_ptr this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct tilegx_frame_cache *cache;
@@ -864,7 +864,7 @@ tilegx_frame_cache (struct frame_info *this_frame, void **this_cache)
 /* Retrieve the value of REGNUM in FRAME.  */
 
 static struct value*
-tilegx_frame_prev_register (struct frame_info *this_frame,
+tilegx_frame_prev_register (frame_info_ptr this_frame,
 			    void **this_cache,
 			    int regnum)
 {
@@ -878,7 +878,7 @@ tilegx_frame_prev_register (struct frame_info *this_frame,
 /* Build frame id.  */
 
 static void
-tilegx_frame_this_id (struct frame_info *this_frame, void **this_cache,
+tilegx_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		      struct frame_id *this_id)
 {
   struct tilegx_frame_cache *info =
@@ -892,7 +892,7 @@ tilegx_frame_this_id (struct frame_info *this_frame, void **this_cache,
 }
 
 static CORE_ADDR
-tilegx_frame_base_address (struct frame_info *this_frame, void **this_cache)
+tilegx_frame_base_address (frame_info_ptr this_frame, void **this_cache)
 {
   struct tilegx_frame_cache *cache =
     tilegx_frame_cache (this_frame, this_cache);

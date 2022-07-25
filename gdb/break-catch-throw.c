@@ -133,7 +133,7 @@ is_exception_catchpoint (breakpoint *bp)
 static void
 fetch_probe_arguments (struct value **arg0, struct value **arg1)
 {
-  struct frame_info *frame = get_selected_frame (_("No frame selected"));
+  frame_info_ptr frame = get_selected_frame (_("No frame selected"));
   CORE_ADDR pc = get_frame_pc (frame);
   struct bound_probe pc_probe;
   unsigned n_args;

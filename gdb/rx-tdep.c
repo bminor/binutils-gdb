@@ -382,7 +382,7 @@ rx_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
    return that struct as the value of this function.  */
 
 static struct rx_prologue *
-rx_analyze_frame_prologue (struct frame_info *this_frame,
+rx_analyze_frame_prologue (frame_info_ptr this_frame,
 			   enum rx_frame_type frame_type,
 			   void **this_prologue_cache)
 {
@@ -411,7 +411,7 @@ rx_analyze_frame_prologue (struct frame_info *this_frame,
    instruction.  */
 
 static enum rx_frame_type
-rx_frame_type (struct frame_info *this_frame, void **this_cache)
+rx_frame_type (frame_info_ptr this_frame, void **this_cache)
 {
   const char *name;
   CORE_ADDR pc, start_pc, lim_pc;
@@ -465,7 +465,7 @@ rx_frame_type (struct frame_info *this_frame, void **this_cache)
    base.  */
 
 static CORE_ADDR
-rx_frame_base (struct frame_info *this_frame, void **this_cache)
+rx_frame_base (frame_info_ptr this_frame, void **this_cache)
 {
   enum rx_frame_type frame_type = rx_frame_type (this_frame, this_cache);
   struct rx_prologue *p
@@ -492,7 +492,7 @@ rx_frame_base (struct frame_info *this_frame, void **this_cache)
 /* Implement the "frame_this_id" method for unwinding frames.  */
 
 static void
-rx_frame_this_id (struct frame_info *this_frame, void **this_cache,
+rx_frame_this_id (frame_info_ptr this_frame, void **this_cache,
 		  struct frame_id *this_id)
 {
   *this_id = frame_id_build (rx_frame_base (this_frame, this_cache),
@@ -502,7 +502,7 @@ rx_frame_this_id (struct frame_info *this_frame, void **this_cache,
 /* Implement the "frame_prev_register" method for unwinding frames.  */
 
 static struct value *
-rx_frame_prev_register (struct frame_info *this_frame, void **this_cache,
+rx_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
 			int regnum)
 {
   enum rx_frame_type frame_type = rx_frame_type (this_frame, this_cache);
@@ -576,7 +576,7 @@ exception_frame_p (enum rx_frame_type frame_type)
 
 static int
 rx_frame_sniffer_common (const struct frame_unwind *self,
-			 struct frame_info *this_frame,
+			 frame_info_ptr this_frame,
 			 void **this_cache,
 			 int (*sniff_p)(enum rx_frame_type) )
 {
@@ -609,7 +609,7 @@ rx_frame_sniffer_common (const struct frame_unwind *self,
 
 static int
 rx_frame_sniffer (const struct frame_unwind *self,
-		  struct frame_info *this_frame,
+		  frame_info_ptr this_frame,
 		  void **this_cache)
 {
   return rx_frame_sniffer_common (self, this_frame, this_cache,
@@ -620,7 +620,7 @@ rx_frame_sniffer (const struct frame_unwind *self,
 
 static int
 rx_exception_sniffer (const struct frame_unwind *self,
-			     struct frame_info *this_frame,
+			     frame_info_ptr this_frame,
 			     void **this_cache)
 {
   return rx_frame_sniffer_common (self, this_frame, this_cache,

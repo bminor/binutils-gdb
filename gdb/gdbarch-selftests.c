@@ -73,7 +73,7 @@ register_to_value_test (struct gdbarch *gdbarch)
 
   scoped_mock_context<test_target_ops> mockctx (gdbarch);
 
-  struct frame_info *frame = get_current_frame ();
+  frame_info_ptr frame = get_current_frame ();
   const int num_regs = gdbarch_num_cooked_regs (gdbarch);
 
   /* Test gdbarch methods register_to_value and value_to_register with

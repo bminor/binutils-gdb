@@ -69,7 +69,7 @@
 #define AIX_TEXT_SEGMENT_BASE 0x10000000
 
 static struct trad_frame_cache *
-aix_sighandle_frame_cache (struct frame_info *this_frame,
+aix_sighandle_frame_cache (frame_info_ptr this_frame,
 			   void **this_cache)
 {
   LONGEST backchain;
@@ -125,7 +125,7 @@ aix_sighandle_frame_cache (struct frame_info *this_frame,
 }
 
 static void
-aix_sighandle_frame_this_id (struct frame_info *this_frame,
+aix_sighandle_frame_this_id (frame_info_ptr this_frame,
 			     void **this_prologue_cache,
 			     struct frame_id *this_id)
 {
@@ -135,7 +135,7 @@ aix_sighandle_frame_this_id (struct frame_info *this_frame,
 }
 
 static struct value *
-aix_sighandle_frame_prev_register (struct frame_info *this_frame,
+aix_sighandle_frame_prev_register (frame_info_ptr this_frame,
 				   void **this_prologue_cache, int regnum)
 {
   struct trad_frame_cache *this_trad_cache
@@ -145,7 +145,7 @@ aix_sighandle_frame_prev_register (struct frame_info *this_frame,
 
 static int
 aix_sighandle_frame_sniffer (const struct frame_unwind *self,
-			     struct frame_info *this_frame,
+			     frame_info_ptr this_frame,
 			     void **this_prologue_cache)
 {
   CORE_ADDR pc = get_frame_pc (this_frame);
@@ -744,7 +744,7 @@ branch_dest (struct regcache *regcache, int opcode, int instr,
 	     execution will return to the saved PC in the frame.  */
 	  if (dest < AIX_TEXT_SEGMENT_BASE)
 	    {
-	      struct frame_info *frame = get_current_frame ();
+	      frame_info_ptr frame = get_current_frame ();
 
 	      dest = read_memory_unsigned_integer
 		(get_frame_base (frame) + SIG_FRAME_PC_OFFSET,

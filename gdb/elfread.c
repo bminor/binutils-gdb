@@ -930,7 +930,7 @@ static void
 elf_gnu_ifunc_resolver_stop (code_breakpoint *b)
 {
   struct breakpoint *b_return;
-  struct frame_info *prev_frame = get_prev_frame (get_current_frame ());
+  frame_info_ptr prev_frame = get_prev_frame (get_current_frame ());
   struct frame_id prev_frame_id = get_stack_frame_id (prev_frame);
   CORE_ADDR prev_pc = get_frame_pc (prev_frame);
   int thread_id = inferior_thread ()->global_num;

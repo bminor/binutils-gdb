@@ -1645,7 +1645,7 @@ solib_event_probe_action (struct probe_and_action *pa)
 {
   enum probe_action action;
   unsigned probe_argc = 0;
-  struct frame_info *frame = get_current_frame ();
+  frame_info_ptr frame = get_current_frame ();
 
   action = pa->action;
   if (action == DO_NOTHING || action == PROBES_INTERFACE_FAILED)
@@ -1780,7 +1780,7 @@ svr4_handle_solib_event (void)
   enum probe_action action;
   struct value *val = NULL;
   CORE_ADDR pc, debug_base, lm = 0;
-  struct frame_info *frame = get_current_frame ();
+  frame_info_ptr frame = get_current_frame ();
 
   /* Do nothing if not using the probes interface.  */
   if (info->probes_table == NULL)

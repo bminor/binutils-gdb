@@ -80,7 +80,7 @@ static const struct regcache_map_entry aarch64_fbsd_fpregmap[] =
 
 static void
 aarch64_fbsd_sigframe_init (const struct tramp_frame *self,
-			     struct frame_info *this_frame,
+			     frame_info_ptr this_frame,
 			     struct trad_frame_cache *this_cache,
 			     CORE_ADDR func)
 {
