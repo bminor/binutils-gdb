@@ -1814,6 +1814,7 @@ finish_command (const char *arg, int from_tty)
   frame = get_prev_frame (get_selected_frame (_("No selected frame.")));
   if (frame == 0)
     error (_("\"finish\" not meaningful in the outermost frame."));
+  frame.prepare_reinflate ();
 
   clear_proceed_status (0);
 
@@ -1872,6 +1873,7 @@ finish_command (const char *arg, int from_tty)
 
       print_stack_frame (get_selected_frame (NULL), 1, LOCATION, 0);
     }
+  frame.reinflate ();
 
   if (execution_direction == EXEC_REVERSE)
     finish_backward (sm);
