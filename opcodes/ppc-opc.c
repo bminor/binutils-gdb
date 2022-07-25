@@ -6788,6 +6788,9 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"rlmi",	M(22,0),	M_MASK,	     M601,	PPCVLE,		{RA, RS, RB, MBE, ME}},
 {"rlmi.",	M(22,1),	M_MASK,	     M601,	PPCVLE,		{RA, RS, RB, MBE, ME}},
 
+{"svstep",	SVL(22,19,0),	SVL_MASK,	SVP64,	PPCVLE,	{RT, SVi, vf}},
+{"svstep.",	SVL(22,19,1),	SVL_MASK,	SVP64,	PPCVLE,	{RT, SVi, vf}},
+
 {"setvl",	SVL(22,27,0),	SVL_MASK,	SVP64,	PPCVLE,	{RT, RA, SVi, vf, vs, ms}},
 {"setvl.",	SVL(22,27,1),	SVL_MASK,	SVP64,	PPCVLE,	{RT, RA, SVi, vf, vs, ms}},
 

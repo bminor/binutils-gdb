@@ -156,3 +156,4 @@ run_dump_test "pr27676"
 run_dump_test "raw"
 
 run_dump_test "setvl"
+run_dump_test "svstep"
