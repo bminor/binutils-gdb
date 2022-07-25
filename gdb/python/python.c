@@ -1866,8 +1866,15 @@ python_write_bytecode ()
   int wbc = 0;
 
   if (python_dont_write_bytecode == AUTO_BOOLEAN_AUTO)
-    wbc = (!python_ignore_environment
-	    && getenv ("PYTHONDONTWRITEBYTECODE") != nullptr) ? 0 : 1;
+    {
+      if (python_ignore_environment)
+	wbc = 1;
+      else
+	{
+	  const char *pdwbc = getenv ("PYTHONDONTWRITEBYTECODE");
+	  wbc = (pdwbc == nullptr || pdwbc[0] == '\0') ? 1 : 0;
+	}
+    }
   else
     wbc = python_dont_write_bytecode == AUTO_BOOLEAN_TRUE ? 0 : 1;
 
@@ -2346,11 +2353,22 @@ python executable."),
 
   add_setshow_auto_boolean_cmd ("dont-write-bytecode", no_class,
 				&python_dont_write_bytecode, _("\
-Set whether the Python interpreter should ignore environment variables."), _(" \
-Show whether the Python interpreter showlist ignore environment variables."), _(" \
-When enabled GDB's Python interpreter will ignore any Python related\n	\
-flags in the environment.  This is equivalent to passing `-E' to a\n	\
-python executable."),
+Set whether the Python interpreter should avoid byte-compiling python modules."), _("\
+Show whether the Python interpreter should avoid byte-compiling python modules."), _("\
+When enabled, GDB's embedded Python interpreter won't byte-compile python\n\
+modules.  In order to take effect, this setting must be enabled in an early\n\
+initialization file, i.e. those run via the --early-init-eval-command or\n\
+-eix command line options.  A 'set python dont-write-bytecode on' command\n\
+can also be issued directly from the GDB command line via the\n\
+--early-init-eval-command or -eiex command line options.\n\
+\n\
+This setting defaults to 'auto'.  In this mode, provided the 'python\n\
+ignore-environment' setting is 'off', the environment variable\n\
+PYTHONDONTWRITEBYTECODE is examined to determine whether or not to\n\
+byte-compile python modules.  PYTHONDONTWRITEBYTECODE is considered to be\n\
+off/disabled either when set to the empty string or when the\n\
+environment variable doesn't exist.  All other settings, including those\n\
+which don't seem to make sense, indicate that it's on/enabled."),
 				set_python_dont_write_bytecode,
 				show_python_dont_write_bytecode,
 				&user_set_python_list,

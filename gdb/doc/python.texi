@@ -134,9 +134,14 @@ initialized early during @value{GDBN}'s startup process, then this
 option must be placed into the early initialization file
 (@pxref{Initialization Files}) to have the desired effect.
 
-By default this option is set to @samp{auto}, in this mode Python will
-check the environment variable @env{PYTHONDONTWRITEBYTECODE} to see
+By default this option is set to @samp{auto}.  In this mode, provided
+the @code{python ignore-environment} setting is @samp{off}, the
+environment variable @env{PYTHONDONTWRITEBYTECODE} is examined to see
 if it should write out byte-code or not.
+@env{PYTHONDONTWRITEBYTECODE} is considered to be off/disabled either
+when set to the empty string or when the environment variable doesn't
+exist.  All other settings, including those which don't seem to make
+sense, indicate that it's on/enabled.
 
 This option is equivalent to passing @option{-B} to the real
 @command{python} executable.
