@@ -3785,9 +3785,8 @@ arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
   CORE_ADDR lr;
   ULONGEST cpsr;
 
-  switch (regnum)
+  if (regnum == ARM_PC_REGNUM)
     {
-    case ARM_PC_REGNUM:
       /* The PC is normally copied from the return column, which
 	 describes saves of LR.  However, that version may have an
 	 extra bit set to indicate Thumb state.  The bit is not
@@ -3807,18 +3806,18 @@ arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
       lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
       return frame_unwind_got_constant (this_frame, regnum,
 					arm_addr_bits_remove (gdbarch, lr));
-
-    case ARM_PS_REGNUM:
+    }
+  else if (regnum == ARM_PS_REGNUM)
+    {
       /* Reconstruct the T bit; see arm_prologue_prev_register for details.  */
       cpsr = get_frame_register_unsigned (this_frame, regnum);
       lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
       cpsr = reconstruct_t_bit (gdbarch, lr, cpsr);
       return frame_unwind_got_constant (this_frame, regnum, cpsr);
-
-    default:
-      internal_error (__FILE__, __LINE__,
-		      _("Unexpected register %d"), regnum);
     }
+
+  internal_error (__FILE__, __LINE__,
+		  _("Unexpected register %d"), regnum);
 }
 
 /* Implement the stack_frame_destroyed_p gdbarch method.  */
@@ -4944,17 +4943,13 @@ arm_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
       return;
     }
 
-  switch (regnum)
+  if (regnum == ARM_PC_REGNUM || regnum == ARM_PS_REGNUM)
     {
-    case ARM_PC_REGNUM:
-    case ARM_PS_REGNUM:
       reg->how = DWARF2_FRAME_REG_FN;
       reg->loc.fn = arm_dwarf2_prev_register;
-      break;
-    case ARM_SP_REGNUM:
-      reg->how = DWARF2_FRAME_REG_CFA;
-      break;
     }
+  else if (regnum == ARM_SP_REGNUM)
+    reg->how = DWARF2_FRAME_REG_CFA;
 }
 
 /* Given BUF, which is OLD_LEN bytes ending at ENDADDR, expand
