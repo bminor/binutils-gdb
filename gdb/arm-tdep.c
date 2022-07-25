@@ -3815,6 +3815,78 @@ arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
       cpsr = reconstruct_t_bit (gdbarch, lr, cpsr);
       return frame_unwind_got_constant (this_frame, regnum, cpsr);
     }
+  else if (arm_is_alternative_sp_register (tdep, regnum))
+    {
+      /* Handle the alternative SP registers on Cortex-M.  */
+      bool override_with_sp_value = false;
+      CORE_ADDR val;
+
+      if (tdep->have_sec_ext)
+	{
+	  CORE_ADDR sp
+	    = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
+	  CORE_ADDR msp_s
+	    = get_frame_register_unsigned (this_frame,
+					   tdep->m_profile_msp_s_regnum);
+	  CORE_ADDR msp_ns
+	    = get_frame_register_unsigned (this_frame,
+					   tdep->m_profile_msp_ns_regnum);
+	  CORE_ADDR psp_s
+	    = get_frame_register_unsigned (this_frame,
+					   tdep->m_profile_psp_s_regnum);
+	  CORE_ADDR psp_ns
+	    = get_frame_register_unsigned (this_frame,
+					   tdep->m_profile_psp_ns_regnum);
+
+	  bool is_msp = (regnum == tdep->m_profile_msp_regnum)
+	    && (msp_s == sp || msp_ns == sp);
+	  bool is_msp_s = (regnum == tdep->m_profile_msp_s_regnum)
+	    && (msp_s == sp);
+	  bool is_msp_ns = (regnum == tdep->m_profile_msp_ns_regnum)
+	    && (msp_ns == sp);
+	  bool is_psp = (regnum == tdep->m_profile_psp_regnum)
+	    && (psp_s == sp || psp_ns == sp);
+	  bool is_psp_s = (regnum == tdep->m_profile_psp_s_regnum)
+	    && (psp_s == sp);
+	  bool is_psp_ns = (regnum == tdep->m_profile_psp_ns_regnum)
+	    && (psp_ns == sp);
+
+	  override_with_sp_value = is_msp || is_msp_s || is_msp_ns
+	    || is_psp || is_psp_s || is_psp_ns;
+
+	}
+      else if (tdep->is_m)
+	{
+	  CORE_ADDR sp
+	    = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
+	  CORE_ADDR msp
+	    = get_frame_register_unsigned (this_frame,
+					   tdep->m_profile_msp_regnum);
+	  CORE_ADDR psp
+	    = get_frame_register_unsigned (this_frame,
+					   tdep->m_profile_psp_regnum);
+
+	  bool is_msp = (regnum == tdep->m_profile_msp_regnum) && (sp == msp);
+	  bool is_psp = (regnum == tdep->m_profile_psp_regnum) && (sp == psp);
+
+	  override_with_sp_value = is_msp || is_psp;
+	}
+
+      if (override_with_sp_value)
+	{
+	  /* Use value of SP from previous frame.  */
+	  struct frame_info *prev_frame = get_prev_frame (this_frame);
+	  if (prev_frame)
+	    val = get_frame_register_unsigned (prev_frame, ARM_SP_REGNUM);
+	  else
+	    val = get_frame_base (this_frame);
+	}
+      else
+	/* Use value for the register from previous frame.  */
+	val = get_frame_register_unsigned (this_frame, regnum);
+
+      return frame_unwind_got_constant (this_frame, regnum, val);
+    }
 
   internal_error (__FILE__, __LINE__,
 		  _("Unexpected register %d"), regnum);
@@ -4934,6 +5006,8 @@ arm_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			   struct dwarf2_frame_state_reg *reg,
 			   struct frame_info *this_frame)
 {
+  arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
+
   if (is_pacbti_pseudo (gdbarch, regnum))
     {
       /* Initialize RA_AUTH_CODE to zero.  */
@@ -4950,6 +5024,12 @@ arm_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
     }
   else if (regnum == ARM_SP_REGNUM)
     reg->how = DWARF2_FRAME_REG_CFA;
+  else if (arm_is_alternative_sp_register (tdep, regnum))
+    {
+      /* Handle the alternative SP registers on Cortex-M.  */
+      reg->how = DWARF2_FRAME_REG_FN;
+      reg->loc.fn = arm_dwarf2_prev_register;
+    }
 }
 
 /* Given BUF, which is OLD_LEN bytes ending at ENDADDR, expand
