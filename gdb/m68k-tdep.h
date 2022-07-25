@@ -69,7 +69,7 @@ enum m68k_flavour
 
 /* Target-dependent structure in gdbarch.  */
 
-struct m68k_gdbarch_tdep : gdbarch_tdep
+struct m68k_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Offset to PC value in the jump buffer.  If this is negative,
      longjmp support will be disabled.  */

@@ -167,7 +167,7 @@ struct ctype_cache
 
 /*  Xtensa-specific target dependencies.  */
 
-struct xtensa_gdbarch_tdep : gdbarch_tdep
+struct xtensa_gdbarch_tdep : gdbarch_tdep_base
 {
   xtensa_gdbarch_tdep (xtensa_register_t *regmap)
     : regmap (regmap)

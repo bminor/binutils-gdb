@@ -87,7 +87,7 @@ enum struct_return
 };
 
 /* Target-dependent structure in gdbarch.  */
-struct arm_gdbarch_tdep : gdbarch_tdep
+struct arm_gdbarch_tdep : gdbarch_tdep_base
 {
   /* The ABI for this architecture.  It should never be set to
      ARM_ABI_AUTO.  */

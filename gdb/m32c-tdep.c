@@ -96,7 +96,7 @@ struct m32c_reg
 #define M32C_MAX_DWARF_REGNUM (40)
 
 
-struct m32c_gdbarch_tdep : gdbarch_tdep
+struct m32c_gdbarch_tdep : gdbarch_tdep_base
 {
   /* All the registers for this variant, indexed by GDB register
      number, and the number of registers present.  */

@@ -189,7 +189,7 @@ struct avr_unwind_cache
   trad_frame_saved_reg *saved_regs;
 };
 
-struct avr_gdbarch_tdep : gdbarch_tdep
+struct avr_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Number of bytes stored to the stack by call instructions.
      2 bytes for avr1-5 and avrxmega1-5, 3 bytes for avr6 and avrxmega6-7.  */

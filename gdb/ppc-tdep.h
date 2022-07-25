@@ -205,7 +205,7 @@ enum powerpc_long_double_abi
   POWERPC_LONG_DOUBLE_LAST
 };
 
-struct ppc_gdbarch_tdep : gdbarch_tdep
+struct ppc_gdbarch_tdep : gdbarch_tdep_base
   {
     int wordsize = 0;		/* Size in bytes of fixed-point word.  */
     int soft_float = 0;		/* Avoid FP registers for arguments?  */

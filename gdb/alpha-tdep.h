@@ -70,7 +70,7 @@ struct regcache;
 #define ALPHA_NUM_ARG_REGS   6
 
 /* Target-dependent structure in gdbarch.  */
-struct alpha_gdbarch_tdep : gdbarch_tdep
+struct alpha_gdbarch_tdep : gdbarch_tdep_base
 {
   CORE_ADDR vm_min_address = 0;	/* Used by alpha_heuristic_proc_start.  */
 

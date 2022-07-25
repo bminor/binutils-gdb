@@ -32,7 +32,7 @@ extern const struct regset loongarch_gregset;
 extern const struct regset loongarch_fpregset;
 
 /* Target-dependent structure in gdbarch.  */
-struct loongarch_gdbarch_tdep : gdbarch_tdep
+struct loongarch_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Features about the abi that impact how the gdbarch is configured.  */
   struct loongarch_gdbarch_features abi_features;

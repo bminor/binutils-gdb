@@ -69,7 +69,7 @@ enum rx_frame_type {
 };
 
 /* Architecture specific data.  */
-struct rx_gdbarch_tdep : gdbarch_tdep
+struct rx_gdbarch_tdep : gdbarch_tdep_base
 {
   /* The ELF header flags specify the multilib used.  */
   int elf_flags = 0;

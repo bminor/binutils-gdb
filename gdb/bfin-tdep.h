@@ -96,7 +96,7 @@ enum bfin_abi
 };
 
 /* Target-dependent structure in gdbarch.  */
-struct bfin_gdbarch_tdep : gdbarch_tdep
+struct bfin_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Which ABI is in use?  */
   enum bfin_abi bfin_abi {};

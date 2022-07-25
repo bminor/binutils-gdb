@@ -265,7 +265,7 @@ enum v850_abi
 
 /* Architecture specific data.  */
 
-struct v850_gdbarch_tdep : gdbarch_tdep
+struct v850_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Fields from the ELF header.  */
   int e_flags = 0;

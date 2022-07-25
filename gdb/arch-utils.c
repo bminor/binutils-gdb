@@ -1200,7 +1200,7 @@ gdbarch_free (struct gdbarch *arch)
 
 /* See gdbarch.h.  */
 
-struct gdbarch_tdep *
+struct gdbarch_tdep_base *
 gdbarch_tdep_1 (struct gdbarch *gdbarch)
 {
   if (gdbarch_debug >= 2)

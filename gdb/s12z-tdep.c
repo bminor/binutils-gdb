@@ -458,7 +458,7 @@ constexpr gdb_byte s12z_break_insn[] = {0x00};
 
 typedef BP_MANIPULATION (s12z_break_insn) s12z_breakpoint;
 
-struct s12z_gdbarch_tdep : gdbarch_tdep
+struct s12z_gdbarch_tdep : gdbarch_tdep_base
 {
 };
 

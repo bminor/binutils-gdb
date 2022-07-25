@@ -69,7 +69,7 @@
 #define NIOS2_CDX_OPCODE_SIZE 2
 
 /* Target-dependent structure in gdbarch.  */
-struct nios2_gdbarch_tdep : gdbarch_tdep
+struct nios2_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Assumes FRAME is stopped at a syscall (trap) instruction; returns
      the expected next PC.  */

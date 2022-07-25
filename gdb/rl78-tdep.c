@@ -210,7 +210,7 @@ enum
 
 /* Architecture specific data.  */
 
-struct rl78_gdbarch_tdep : gdbarch_tdep
+struct rl78_gdbarch_tdep : gdbarch_tdep_base
 {
   /* The ELF header flags specify the multilib used.  */
   int elf_flags = 0;

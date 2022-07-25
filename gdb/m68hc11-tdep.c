@@ -124,7 +124,7 @@ enum insn_return_kind {
 #define M68HC12_HARD_PC_REGNUM  (SOFT_D32_REGNUM+1)
 
 struct insn_sequence;
-struct m68gc11_gdbarch_tdep : gdbarch_tdep
+struct m68gc11_gdbarch_tdep : gdbarch_tdep_base
   {
     /* Stack pointer correction value.  For 68hc11, the stack pointer points
        to the next push location.  An offset of 1 must be applied to obtain

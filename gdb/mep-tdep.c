@@ -116,7 +116,7 @@
      options are present on the current processor.  */
 
 
-struct mep_gdbarch_tdep : gdbarch_tdep
+struct mep_gdbarch_tdep : gdbarch_tdep_base
 {
   /* A CGEN cpu descriptor for this BFD architecture and machine.
 

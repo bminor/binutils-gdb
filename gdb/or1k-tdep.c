@@ -63,7 +63,7 @@ show_or1k_debug (struct ui_file *file, int from_tty,
 
 /* The target-dependent structure for gdbarch.  */
 
-struct or1k_gdbarch_tdep : gdbarch_tdep
+struct or1k_gdbarch_tdep : gdbarch_tdep_base
 {
   int bytes_per_word = 0;
   int bytes_per_address = 0;

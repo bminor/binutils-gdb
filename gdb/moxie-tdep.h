@@ -22,7 +22,7 @@
 
 #include "gdbarch.h"
 
-struct moxie_gdbarch_tdep : gdbarch_tdep
+struct moxie_gdbarch_tdep : gdbarch_tdep_base
 {
   /* gdbarch target dependent data here.  Currently unused for MOXIE.  */
 };

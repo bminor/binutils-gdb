@@ -68,7 +68,7 @@ struct frv_unwind_cache		/* was struct frame_extra_info */
    of structures, each of which gives all the necessary info for one
    register.  Don't stick parallel arrays in here --- that's so
    Fortran.  */
-struct frv_gdbarch_tdep : gdbarch_tdep
+struct frv_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Which ABI is in use?  */
   enum frv_abi frv_abi {};

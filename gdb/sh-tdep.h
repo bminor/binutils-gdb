@@ -91,7 +91,7 @@ struct sh_corefile_regmap
   unsigned int offset;
 };
 
-struct sh_gdbarch_tdep : gdbarch_tdep
+struct sh_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Non-NULL when debugging from a core file.  Provides the offset
      where each general-purpose register is stored inside the associated

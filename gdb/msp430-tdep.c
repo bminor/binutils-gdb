@@ -105,7 +105,7 @@ enum
 
 /* Architecture specific data.  */
 
-struct msp430_gdbarch_tdep : gdbarch_tdep
+struct msp430_gdbarch_tdep : gdbarch_tdep_base
 {
   /* The ELF header flags specify the multilib used.  */
   int elf_flags = 0;

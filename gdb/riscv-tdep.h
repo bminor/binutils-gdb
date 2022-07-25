@@ -76,7 +76,7 @@ enum
 };
 
 /* RISC-V specific per-architecture information.  */
-struct riscv_gdbarch_tdep : gdbarch_tdep
+struct riscv_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Features about the target hardware that impact how the gdbarch is
      configured.  Two gdbarch instances are compatible only if this field

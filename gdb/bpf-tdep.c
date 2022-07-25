@@ -58,7 +58,7 @@ enum bpf_regnum
 #define BPF_NUM_REGS	(BPF_PC_REGNUM + 1)
 
 /* Target-dependent structure in gdbarch.  */
-struct bpf_gdbarch_tdep : gdbarch_tdep
+struct bpf_gdbarch_tdep : gdbarch_tdep_base
 {
 };
 

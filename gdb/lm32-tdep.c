@@ -43,7 +43,7 @@
 #define LM32_REG2(insn)         ((insn >> 11) & 0x1f)
 #define LM32_IMM16(insn)        ((((long)insn & 0xffff) << 16) >> 16)
 
-struct lm32_gdbarch_tdep : gdbarch_tdep
+struct lm32_gdbarch_tdep : gdbarch_tdep_base
 {
   /* gdbarch target dependent data here.  Currently unused for LM32.  */
 };

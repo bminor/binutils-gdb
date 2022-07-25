@@ -43,7 +43,7 @@ struct gdbarch
   const struct target_desc * target_desc;
 
   /* target specific vector.  */
-  struct gdbarch_tdep *tdep;
+  struct gdbarch_tdep_base *tdep;
   gdbarch_dump_tdep_ftype *dump_tdep;
 
   /* per-architecture data-pointers.  */
@@ -258,7 +258,7 @@ struct gdbarch
 
 struct gdbarch *
 gdbarch_alloc (const struct gdbarch_info *info,
-	       struct gdbarch_tdep *tdep)
+	       struct gdbarch_tdep_base *tdep)
 {
   struct gdbarch *gdbarch;
 

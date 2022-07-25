@@ -31,7 +31,7 @@ enum lr_type_t
 };
 
 /* Target-dependent structure in gdbarch.  */
-struct csky_gdbarch_tdep : gdbarch_tdep
+struct csky_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Save FPU, VDSP ABI.  */
   unsigned int fpu_abi;

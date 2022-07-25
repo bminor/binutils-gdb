@@ -42,7 +42,7 @@ enum nds32_regnum
   NDS32_FD0_REGNUM = NDS32_NUM_REGS,
 };
 
-struct nds32_gdbarch_tdep : gdbarch_tdep
+struct nds32_gdbarch_tdep : gdbarch_tdep_base
 {
   /* The guessed FPU configuration.  */
   int fpu_freg = 0;

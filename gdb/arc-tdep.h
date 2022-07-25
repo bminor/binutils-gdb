@@ -121,7 +121,7 @@ extern bool arc_debug;
 
 /* Target-dependent information.  */
 
-struct arc_gdbarch_tdep : gdbarch_tdep
+struct arc_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Offset to PC value in jump buffer.  If this is negative, longjmp
      support will be disabled.  */

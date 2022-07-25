@@ -55,7 +55,7 @@ __gdb_break_handler:
      next frame - frame of caller, which has called current function
 */
 
-struct z80_gdbarch_tdep : gdbarch_tdep
+struct z80_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Number of bytes used for address:
       2 bytes for all Z80 family

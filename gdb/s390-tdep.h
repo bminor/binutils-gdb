@@ -38,7 +38,7 @@ enum s390_vector_abi_kind
 
 /* The tdep structure.  */
 
-struct s390_gdbarch_tdep : gdbarch_tdep
+struct s390_gdbarch_tdep : gdbarch_tdep_base
 {
   /* Target description.  */
   const struct target_desc *tdesc = nullptr;

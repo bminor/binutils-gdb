@@ -76,7 +76,7 @@ enum frame_kind {
 };
 
 /* mn10300 private data.  */
-struct mn10300_gdbarch_tdep : gdbarch_tdep
+struct mn10300_gdbarch_tdep : gdbarch_tdep_base
 {
   int am33_mode;
 };
