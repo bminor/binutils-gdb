@@ -34,6 +34,7 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>
+#include <winsock2.h>
 #include <windows.h>
 #include <imagehlp.h>
 #ifdef __CYGWIN__
@@ -72,6 +73,8 @@
 #include "gdbsupport/gdb_wait.h"
 #include "nat/windows-nat.h"
 #include "gdbsupport/symbol.h"
+#include "ser-event.h"
+#include "inf-loop.h"
 
 using namespace windows_nat;
 
@@ -315,6 +318,23 @@ struct windows_nat_target final : public x86_nat_target<inf_child_target>
     return disable_randomization_available ();
   }
 
+  bool can_async_p () override
+  {
+    return true;
+  }
+
+  bool is_async_p () override
+  {
+    return m_is_async;
+  }
+
+  void async (bool enable) override;
+
+  int async_wait_fd () override
+  {
+    return serial_event_fd (m_wait_event);
+  }
+
 private:
 
   windows_thread_info *add_thread (ptid_t ptid, HANDLE h, void *tlb,
@@ -322,7 +342,8 @@ private:
   void delete_thread (ptid_t ptid, DWORD exit_code, bool main_thread_p);
   DWORD fake_create_process ();
 
-  BOOL windows_continue (DWORD continue_status, int id, int killed);
+  BOOL windows_continue (DWORD continue_status, int id, int killed,
+			 bool last_call = false);
 
   /* This function implements the background thread that starts
      inferiors and waits for events.  */
@@ -332,8 +353,9 @@ private:
      until it has been called.  On Windows, certain debugging
      functions can only be called by the thread that started (or
      attached to) the inferior.  These are all done in the worker
-     thread, via calls to this method.  */
-  void do_synchronously (gdb::function_view<void ()> func);
+     thread, via calls to this method.  If FUNC returns true,
+     process_thread will wait for debug events when FUNC returns.  */
+  void do_synchronously (gdb::function_view<bool ()> func);
 
   /* This waits for a debug event, dispatching to the worker thread as
      needed.  */
@@ -341,7 +363,7 @@ private:
 
   /* Queue used to send requests to process_thread.  This is
      implicitly locked.  */
-  std::queue<gdb::function_view<void ()>> m_queue;
+  std::queue<gdb::function_view<bool ()>> m_queue;
 
   /* Event used to signal process_thread that an item has been
      pushed.  */
@@ -349,6 +371,18 @@ private:
   /* Event used by process_thread to indicate that it has processed a
      single function call.  */
   HANDLE m_response_event;
+
+  /* Serial event used to communicate wait event availability to the
+     main loop.  */
+  serial_event *m_wait_event;
+
+  /* The last debug event, when M_WAIT_EVENT has been set.  */
+  DEBUG_EVENT m_last_debug_event {};
+  /* True if a debug event is pending.  */
+  std::atomic<bool> m_debug_event_pending { false };
+
+  /* True if currently in async mode.  */
+  bool m_is_async = false;
 };
 
 static windows_nat_target the_windows_nat_target;
@@ -366,7 +400,8 @@ check (BOOL ok, const char *file, int line)
 
 windows_nat_target::windows_nat_target ()
   : m_pushed_event (CreateEvent (nullptr, false, false, nullptr)),
-    m_response_event (CreateEvent (nullptr, false, false, nullptr))
+    m_response_event (CreateEvent (nullptr, false, false, nullptr)),
+    m_wait_event (make_serial_event ())
 {
   auto fn = [] (LPVOID self) -> DWORD
     {
@@ -376,6 +411,23 @@ windows_nat_target::windows_nat_target ()
 
   HANDLE bg_thread = CreateThread (nullptr, 64 * 1024, fn, this, 0, nullptr);
   CloseHandle (bg_thread);
+}
+
+void
+windows_nat_target::async (bool enable)
+{
+  if (enable == is_async_p ())
+    return;
+
+  if (enable)
+    add_file_handler (async_wait_fd (),
+		      [] (int, gdb_client_data)
+		      {
+			inferior_event_handler (INF_REG_EVENT);
+		      },
+		      nullptr, "windows_nat_target");
+  else
+    delete_file_handler (async_wait_fd ());
 }
 
 /* A wrapper for WaitForSingleObject that issues a warning if
@@ -407,16 +459,26 @@ windows_nat_target::process_thread ()
     {
       wait_for_single (m_pushed_event, INFINITE);
 
-      gdb::function_view<void ()> func = std::move (m_queue.front ());
+      gdb::function_view<bool ()> func = std::move (m_queue.front ());
       m_queue.pop ();
 
-      func ();
+      bool should_wait = func ();
       SetEvent (m_response_event);
+
+      if (should_wait)
+	{
+	  if (!m_debug_event_pending)
+	    {
+	      wait_for_debug_event (&m_last_debug_event, INFINITE);
+	      m_debug_event_pending = true;
+	    }
+	  serial_event_set (m_wait_event);
+	}
    }
 }
 
 void
-windows_nat_target::do_synchronously (gdb::function_view<void ()> func)
+windows_nat_target::do_synchronously (gdb::function_view<bool ()> func)
 {
   m_queue.emplace (std::move (func));
   SetEvent (m_pushed_event);
@@ -428,7 +490,15 @@ windows_nat_target::wait_for_debug_event_main_thread (DEBUG_EVENT *event)
 {
   do_synchronously ([&] ()
     {
-      wait_for_debug_event (event, INFINITE);
+      if (m_debug_event_pending)
+	{
+	  *event = m_last_debug_event;
+	  m_debug_event_pending = false;
+	  serial_event_clear (m_wait_event);
+	}
+      else
+	wait_for_debug_event (event, INFINITE);
+      return false;
     });
 }
 
@@ -1178,14 +1248,23 @@ windows_per_inferior::handle_access_violation
 /* Resume thread specified by ID, or all artificially suspended
    threads, if we are continuing execution.  KILLED non-zero means we
    have killed the inferior, so we should ignore weird errors due to
-   threads shutting down.  */
+   threads shutting down.  LAST_CALL is true if we expect this to be
+   the last call to continue the inferior -- we are either mourning it
+   or detaching.  */
 BOOL
-windows_nat_target::windows_continue (DWORD continue_status, int id, int killed)
+windows_nat_target::windows_continue (DWORD continue_status, int id,
+				      int killed, bool last_call)
 {
   windows_process.desired_stop_thread_id = id;
 
   if (windows_process.matching_pending_stop (debug_events))
-    return TRUE;
+    {
+      /* There's no need to really continue, because there's already
+	 another event pending.  However, we do need to inform the
+	 event loop of this.  */
+      serial_event_set (m_wait_event);
+      return TRUE;
+    }
 
   for (auto &th : windows_process.thread_list)
     if (id == -1 || id == (int) th->tid)
@@ -1263,6 +1342,9 @@ windows_nat_target::windows_continue (DWORD continue_status, int id, int killed)
     {
       if (!continue_last_debug_event (continue_status, debug_events))
 	err = (unsigned) GetLastError ();
+      /* On the last call, do not block waiting for an event that will
+	 never come.  */
+      return !last_call;
     });
 
   if (err.has_value ())
@@ -1505,6 +1587,12 @@ windows_nat_target::get_windows_debug_event
 
   windows_process.last_sig = GDB_SIGNAL_0;
   DEBUG_EVENT *current_event = &windows_process.current_event;
+
+  if ((options & TARGET_WNOHANG) != 0 && !m_debug_event_pending)
+    {
+      ourstatus->set_ignore ();
+      return minus_one_ptid;
+    }
 
   wait_for_debug_event_main_thread (&windows_process.current_event);
 
@@ -1991,6 +2079,8 @@ windows_nat_target::attach (const char *args, int from_tty)
 
       if (!ok)
 	err = (unsigned) GetLastError ();
+
+      return true;
     });
 
   if (err.has_value ())
@@ -2019,8 +2109,7 @@ windows_nat_target::attach (const char *args, int from_tty)
 void
 windows_nat_target::detach (inferior *inf, int from_tty)
 {
-  ptid_t ptid = minus_one_ptid;
-  resume (ptid, 0, GDB_SIGNAL_0);
+  windows_continue (DBG_CONTINUE, -1, 0, true);
 
   gdb::optional<unsigned> err;
   do_synchronously ([&] ()
@@ -2029,6 +2118,7 @@ windows_nat_target::detach (inferior *inf, int from_tty)
 	err = (unsigned) GetLastError ();
       else
 	DebugSetProcessKillOnExit (FALSE);
+      return false;
     });
 
   if (err.has_value ())
@@ -2594,6 +2684,7 @@ windows_nat_target::create_inferior (const char *exec_file,
 			   disable_randomization,
 			   &si, &pi))
 	ret = (unsigned) GetLastError ();
+      return true;
     });
 
   if (w32_env)
@@ -2723,6 +2814,7 @@ windows_nat_target::create_inferior (const char *exec_file,
 			   &si,
 			   &pi))
 	ret = (unsigned) GetLastError ();
+      return true;
     });
   if (tty != INVALID_HANDLE_VALUE)
     CloseHandle (tty);
@@ -2760,7 +2852,7 @@ windows_nat_target::create_inferior (const char *exec_file,
 void
 windows_nat_target::mourn_inferior ()
 {
-  (void) windows_continue (DBG_CONTINUE, -1, 0);
+  (void) windows_continue (DBG_CONTINUE, -1, 0, true);
   x86_cleanup_dregs();
   if (windows_process.open_process_used)
     {
@@ -2845,6 +2937,7 @@ void
 windows_nat_target::close ()
 {
   DEBUG_EVENTS ("inferior_ptid=%d\n", inferior_ptid.pid ());
+  async (false);
 }
 
 /* Convert pid to printable format.  */

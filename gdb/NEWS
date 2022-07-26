@@ -55,6 +55,8 @@
   Python Pygments is still used.  For supported targets, libopcodes
   styling is used by default.
 
+* The Windows native target now supports target async.
+
 * New commands
 
 maintenance set ignore-prologue-end-flag on|off
