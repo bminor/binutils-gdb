@@ -22,9 +22,6 @@ Section Headers:
  +\[[ 0-9]+\] \.dynamic +DYNAMIC +[0-9a-f]+ [0-9a-f]+ [0-9a-f]+ 08 +WA +4 +0 +4
  +\[[ 0-9]+\] \.got +PROGBITS +[0-9a-f]+ [0-9a-f]+ 000018 04 +WA +0 +0 +4
  +\[[ 0-9]+\] \.plt +PROGBITS +[0-9a-f]+ [0-9a-f]+ 000004 00 +WA +0 +0 +4
- +\[[ 0-9]+\] \.symtab +SYMTAB +.*
- +\[[ 0-9]+\] \.strtab +STRTAB +.*
- +\[[ 0-9]+\] \.shstrtab +STRTAB +.*
 #...
 
 Elf file type is EXEC \(Executable file\)
@@ -81,6 +78,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* SECTION +LOCAL +DEFAULT +10 \.dynamic
 .* SECTION +LOCAL +DEFAULT +11 \.got
 .* SECTION +LOCAL +DEFAULT +12 \.plt
+#...
 .* FILE +LOCAL +DEFAULT +ABS .*
 .* NOTYPE +LOCAL +DEFAULT +ABS TLSMARK
 .* TLS +LOCAL +DEFAULT +8 gd4
@@ -99,12 +97,12 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* TLS +GLOBAL +DEFAULT +9 le1
 .* TLS +GLOBAL +DEFAULT +UND ld
 .* NOTYPE +GLOBAL +DEFAULT +7 _start
-.* NOTYPE +GLOBAL +DEFAULT +12 __end
+.* NOTYPE +GLOBAL +DEFAULT +1[23] __end
 .* TLS +GLOBAL +DEFAULT +9 ld2
 .* TLS +GLOBAL +DEFAULT +9 ld1
-.* NOTYPE +GLOBAL +DEFAULT +12 __bss_start
+.* NOTYPE +GLOBAL +DEFAULT +1[23] __bss_start
 .* FUNC +GLOBAL +DEFAULT +UND __tls_get_addr_opt
-.* NOTYPE +GLOBAL +DEFAULT +12 _edata
-.* NOTYPE +GLOBAL +DEFAULT +12 _end
+.* NOTYPE +GLOBAL +DEFAULT +1[23] _edata
+.* NOTYPE +GLOBAL +DEFAULT +1[23] _end
 .* TLS +GLOBAL +DEFAULT +9 gd0
 .* TLS +GLOBAL +DEFAULT +9 ie0
