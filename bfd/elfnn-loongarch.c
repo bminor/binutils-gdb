@@ -3089,19 +3089,17 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  else
 	    relocation += rel->r_addend;
 
-	    {
-	      relocation &= 0xfff;
-	      /* Signed extend.  */
-	      relocation = (relocation ^ 0x800) - 0x800;
+	  relocation &= 0xfff;
+	  /* Signed extend.  */
+	  relocation = (relocation ^ 0x800) - 0x800;
 
-	      /* For 2G jump, generate pcalau12i, jirl.  */
-	      /* If use jirl, turns to R_LARCH_B16.  */
-	      uint32_t insn = bfd_get (32, input_bfd, contents + rel->r_offset);
-	      if ((insn & 0x4c000000) == 0x4c000000)
-		{
-		  rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_B16);
-		  howto = loongarch_elf_rtype_to_howto (input_bfd, R_LARCH_B16);
-		}
+	  /* For 2G jump, generate pcalau12i, jirl.  */
+	  /* If use jirl, turns to R_LARCH_B16.  */
+	  uint32_t insn = bfd_get (32, input_bfd, contents + rel->r_offset);
+	  if ((insn & 0x4c000000) == 0x4c000000)
+	    {
+	      rel->r_info = ELFNN_R_INFO (r_symndx, R_LARCH_B16);
+	      howto = loongarch_elf_rtype_to_howto (input_bfd, R_LARCH_B16);
 	    }
 	  break;
 

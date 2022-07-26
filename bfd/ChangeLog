@@ -1,3 +1,8 @@
+2022-07-26  Nick Clifton  <nickc@redhat.com>
+
+	* elfnn-loongarch.c (loongarch_elf_relocate_section): Fix
+	indentation.
+
 2022-07-08  Nick Clifton  <nickc@redhat.com>
 
 	* 2.39 branch created.
