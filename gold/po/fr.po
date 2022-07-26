@@ -9,10 +9,10 @@
 # relocation => relocalisation
 msgid ""
 msgstr ""
-"Project-Id-Version: gold 2.37.90\n"
+"Project-Id-Version: gold 2.38.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2022-01-22 12:25+0000\n"
-"PO-Revision-Date: 2022-02-02 09:07+0800\n"
+"POT-Creation-Date: 2022-07-08 10:58+0100\n"
+"PO-Revision-Date: 2022-07-25 20:41+0800\n"
 "Last-Translator: Grégoire Scano <gregoire.scano@malloc.fr>\n"
 "Language-Team: French <traduc@traduc.org>\n"
 "Language: fr\n"
@@ -850,62 +850,67 @@ msgstr "%s : échec de fstat() : %s"
 msgid "could not reopen file %s"
 msgstr "impossible de rouvrir le fichier %s"
 
-#: fileread.cc:406
+#: fileread.cc:390
+#, c-format
+msgid "%s: read failed, starting offset (%#llx) less than zero"
+msgstr "%s : erreur de lecture, le décalage de début (%#llx) est plus petit que zéro"
+
+#: fileread.cc:412
 #, c-format
 msgid "%s: pread failed: %s"
 msgstr "%s : échec de pread() : %s"
 
-#: fileread.cc:420
+#: fileread.cc:426
 #, c-format
 msgid "%s: file too short: read only %lld of %lld bytes at %lld"
 msgstr "%s : fichier trop court : seulement %lld octets lus sur %lld à la position %lld"
 
-#: fileread.cc:543
+#: fileread.cc:549
 #, c-format
 msgid "%s: attempt to map %lld bytes at offset %lld exceeds size of file; the file may be corrupt"
 msgstr "%s : taille du fichier dépassée lors de la tentative de mappage (map) de %lld octets à la position (offset) %lld ; le fichier est peut être corrompu"
 
-#: fileread.cc:683
+#: fileread.cc:689
 #, c-format
 msgid "%s: lseek failed: %s"
 msgstr "%s : échec de lseek() : %s"
 
-#: fileread.cc:689
+#: fileread.cc:695
 #, c-format
 msgid "%s: readv failed: %s"
 msgstr "%s : échec de readv() : %s"
 
-#: fileread.cc:692
+#: fileread.cc:698
 #, c-format
 msgid "%s: file too short: read only %zd of %zd bytes at %lld"
 msgstr "%s : fichier trop court : seulement %zd octets sur %zd lus à la position %lld"
 
-#: fileread.cc:859
+#: fileread.cc:865
 #, c-format
 msgid "%s: total bytes mapped for read: %llu\n"
 msgstr "%s : nombre d'octets mappés par read() : %llu\n"
 
-#: fileread.cc:861
+#: fileread.cc:867
 #, c-format
 msgid "%s: maximum bytes mapped for read at one time: %llu\n"
 msgstr "%s : nombre maximum d'octets mappés par read() pour une lecture seule : %llu\n"
 
-#: fileread.cc:954
+#: fileread.cc:960
 #, c-format
 msgid "%s: stat failed: %s"
 msgstr "%s : échec de stat() : %s"
 
-#: fileread.cc:1051
+#: fileread.cc:1057
 #, c-format
 msgid "cannot find %s%s"
 msgstr "%s%s introuvable"
 
-#: fileread.cc:1076
+#: fileread.cc:1082
 #, c-format
 msgid "cannot find %s"
 msgstr "%s introuvable"
 
-#: fileread.cc:1115
+#: fileread.cc:1121
 #, c-format
 msgid "cannot open %s: %s"
 msgstr "impossible d'ouvrir %s : %s"
@@ -1099,7 +1104,7 @@ msgstr "la relocalisation %u n'est pas prise en charge dans le fichier objet"
 #: i386.cc:4036 powerpc.cc:9840 s390.cc:4886 x86_64.cc:6113
 #, c-format
 msgid "failed to match split-stack sequence at section %u offset %0zx"
-msgstr "l'association de séquence de la pile scindée (split-stack) à l'offset %2$0zx de la section %1$u a échoué"
+msgstr "l'association de séquence de la pile scindée (split-stack) à la position %2$0zx de la section %1$u a échoué"
 
 #: icf.cc:1027
 #, c-format
@@ -1627,7 +1632,7 @@ msgstr "l'information %u du groupe de section %u est hors limite"
 #: object.cc:1016
 #, c-format
 msgid "symbol %u name offset %u out of range"
-msgstr "l'offset %u du nom de symbole %u est hors de portée"
+msgstr "le décalage %u du nom de symbole %u est hors de portée"
 
 #: object.cc:1034
 #, c-format
@@ -3541,7 +3546,7 @@ msgstr "%s : code -mbss-plt non pris en charge"
 #: powerpc.cc:9806
 #, c-format
 msgid "split-stack stack size overflow at section %u offset %0zx"
-msgstr "dépassement de la taille de pile de la pile scindée à l'offset %2$0zx de la section %1$u a échoué"
+msgstr "dépassement de la taille de pile de la pile scindée à la position %2$0zx de la section %1$u a échoué"
 
 #: powerpc.cc:9877
 msgid "--plt-localentry is especially dangerous without ld.so support to detect ABI violations"
@@ -4068,7 +4073,7 @@ msgstr "%s : %s : définition précédante de %s@@%s ici"
 #: symtab.cc:1206
 #, c-format
 msgid "bad global symbol name offset %u at %zu"
-msgstr "l'offset %u du nom de symbole global à la position %zu est incorrect"
+msgstr "le décalage %u du nom de symbole global à la position %zu est incorrect"
 
 #: symtab.cc:1473
 msgid "--just-symbols does not make sense with a shared object"
@@ -4081,7 +4086,7 @@ msgstr "pas assez de versions de symboles"
 #: symtab.cc:1539
 #, c-format
 msgid "bad symbol name offset %u at %zu"
-msgstr "l'offset %u du nom de symbole à la position %zu est incorrect"
+msgstr "le décalage %u du nom de symbole à la position %zu est incorrect"
 
 #: symtab.cc:1602
 #, c-format
@@ -4167,7 +4172,7 @@ msgstr "  la définition prévalante vient de %s"
 #: target-reloc.h:456
 #, c-format
 msgid "reloc has bad offset %zu"
-msgstr "la relocalisation a un mauvais offset %zu"
+msgstr "la relocalisation a un mauvais décalage %zu"
 
 #: target.cc:172
 #, c-format
