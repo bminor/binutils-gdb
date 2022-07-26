@@ -3711,8 +3711,15 @@ linux_nat_target::xfer_partial (enum target_object object,
       if (addr_bit < (sizeof (ULONGEST) * HOST_CHAR_BIT))
 	offset &= ((ULONGEST) 1 << addr_bit) - 1;
 
-      return linux_proc_xfer_memory_partial (readbuf, writebuf,
-					     offset, len, xfered_len);
+      /* If /proc/pid/mem is writable, don't fallback to ptrace.  If
+	 the write via /proc/pid/mem fails because the inferior execed
+	 (and we haven't seen the exec event yet), a subsequent ptrace
+	 poke would incorrectly write memory to the post-exec address
+	 space, while the core was trying to write to the pre-exec
+	 address space.  */
+      if (proc_mem_file_is_writable ())
+	return linux_proc_xfer_memory_partial (readbuf, writebuf,
+					       offset, len, xfered_len);
     }
 
   return inf_ptrace_target::xfer_partial (object, annex, readbuf, writebuf,
