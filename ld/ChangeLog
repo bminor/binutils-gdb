@@ -1,3 +1,9 @@
+2022-07-26  Nick Clifton  <nickc@redhat.com>
+
+	PR 29411
+	* configure.tgt (ac_default_ld_warn_rwx_segments): Disable for
+	sparc-solaris configurations.
+
 2022-07-08  Nick Clifton  <nickc@redhat.com>
 
 	* 2.39 branch created.

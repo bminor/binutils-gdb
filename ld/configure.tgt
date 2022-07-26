@@ -54,6 +54,7 @@ if test "${ac_default_ld_warn_rwx_segments}" = unset; then
       # Many MIPS targets use executable segments.
     cris-*-* | crisv32-*-* | \
     hppa*-*-* | \
+    sparc*-*-solaris2* | \
     mips*-*-*)
       ac_default_ld_warn_rwx_segments=0
       ;;
