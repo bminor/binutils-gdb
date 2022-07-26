@@ -13,9 +13,15 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifdef __GNUC__
+#define ATTR __attribute__((always_inline))
+#else
+#define ATTR
+#endif
+
 int counter = 42;
 
-inline void
+inline ATTR void
 callee () {
   counter = 0;	/* callee: body.  */
 }
