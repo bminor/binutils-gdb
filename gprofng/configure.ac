@@ -184,11 +184,27 @@ AM_CONDITIONAL(TCL_TRY, test "${ac_cv_libctf_tcl_try}" = yes)
 AM_ZLIB
 
 # Generate manpages, if possible.
+build_man=false
 if test $cross_compiling = no; then
   AM_MISSING_PROG(HELP2MAN, help2man)
-  build_man=true
-else
-  build_man=false
+  AC_CHECK_PROGS([MAKEINFO], makeinfo, ["@echo makeinfo missing; true"])
+  case "$MAKEINFO" in
+    *true)
+      AC_MSG_WARN([gprofng: makeinfo is missing. Info documentation will not be built.])
+      ;;
+    *)
+      case x"`$MAKEINFO --version | grep 'GNU texinfo'`" in
+	x*\ [[1-5]].*|x*\ 6.[[0-4]].* )
+	  AC_MSG_WARN([gprofng: $MAKEINFO is too old. Info documentation will not be built.])
+	  MAKEINFO="@echo $MAKEINFO is too old, 6.5 or newer required; true"
+	  ;;
+	x* )
+	  build_man=true
+	  ;;
+	esac
+      ;;
+    esac
+  AC_SUBST(MAKEINFO)
 fi
 AM_CONDITIONAL([BUILD_MAN], [test x$build_man = xtrue])
 
