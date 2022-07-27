@@ -28,3 +28,4 @@ Disassembly of section .text:
 [ 	]+48:[ 	]+6bffb8a4[ 	]+[ 	]+bltu[ 	]+\$a1, \$a0, -72\(0x3ffb8\)[ 	]+# 0x0
 [ 	]+4c:[ 	]+6fffb485[ 	]+[ 	]+bgeu[ 	]+\$a0, \$a1, -76\(0x3ffb4\)[ 	]+# 0x0
 [ 	]+50:[ 	]+6fffb0a4[ 	]+[ 	]+bgeu[ 	]+\$a1, \$a0, -80\(0x3ffb0\)[ 	]+# 0x0
+[ 	]+54:[ 	]+4c000020[ 	]+[ 	]+jirl[ 	]+\$zero, \$ra, 0

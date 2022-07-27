@@ -20,3 +20,4 @@ bltu  $r4,$r5,.L1
 bgtu  $r4,$r5,.L1
 bgeu  $r4,$r5,.L1
 bleu  $r4,$r5,.L1
+ret
