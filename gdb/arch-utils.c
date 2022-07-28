@@ -1107,6 +1107,24 @@ default_set_cap_tag_from_address (struct gdbarch *gdbarch,
   return;
 }
 
+/* See arch-utils.h.  */
+
+void
+default_print_cap (struct gdbarch *gdbarch, const gdb_byte *contents, bool tag,
+		   bool compact, struct ui_file *stream)
+{
+  return;
+}
+
+/* See arch-utils.h.  */
+
+void
+default_print_cap_attributes (struct gdbarch *gdbarch, const gdb_byte *contents,
+			      bool tag, struct ui_file *stream)
+{
+  return;
+}
+
 /* Static function declarations */
 
 static void alloc_gdbarch_data (struct gdbarch *);

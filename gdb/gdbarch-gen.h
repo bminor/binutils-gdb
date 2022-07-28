@@ -559,6 +559,19 @@ typedef void (gdbarch_set_cap_tag_from_address_ftype) (struct gdbarch *gdbarch, 
 extern void gdbarch_set_cap_tag_from_address (struct gdbarch *gdbarch, CORE_ADDR addr, bool tag);
 extern void set_gdbarch_set_cap_tag_from_address (struct gdbarch *gdbarch, gdbarch_set_cap_tag_from_address_ftype *set_cap_tag_from_address);
 
+/* Print value of a capability containing CONTENTS and TAG to STREAM. */
+
+typedef void (gdbarch_print_cap_ftype) (struct gdbarch *gdbarch, const gdb_byte *contents, bool tag, bool compact, struct ui_file *stream);
+extern void gdbarch_print_cap (struct gdbarch *gdbarch, const gdb_byte *contents, bool tag, bool compact, struct ui_file *stream);
+extern void set_gdbarch_print_cap (struct gdbarch *gdbarch, gdbarch_print_cap_ftype *print_cap);
+
+/* Print additional attributes for a capability containing CONTENTS and
+   TAG to STREAM. */
+
+typedef void (gdbarch_print_cap_attributes_ftype) (struct gdbarch *gdbarch, const gdb_byte *contents, bool tag, struct ui_file *stream);
+extern void gdbarch_print_cap_attributes (struct gdbarch *gdbarch, const gdb_byte *contents, bool tag, struct ui_file *stream);
+extern void set_gdbarch_print_cap_attributes (struct gdbarch *gdbarch, gdbarch_print_cap_attributes_ftype *print_cap_attributes);
+
 /* Fetch the target specific address used to represent a load module. */
 
 extern bool gdbarch_fetch_tls_load_module_address_p (struct gdbarch *gdbarch);

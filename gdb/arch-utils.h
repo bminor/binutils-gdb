@@ -308,4 +308,15 @@ extern bool default_get_cap_tag_from_address (struct gdbarch *gdbarch,
 /* Default implementation of gdbarch_set_cap_tag_from_address.  */
 extern void default_set_cap_tag_from_address (struct gdbarch *gdbarch,
 					      CORE_ADDR addr, bool tag);
+
+/* Default implementation of gdbarch_print_cap_attributes.  */
+extern void default_print_cap (struct gdbarch *gdbarch,
+			       const gdb_byte *contents, bool tag, bool compact,
+			       struct ui_file *stream);
+
+/* Default implementation of gdbarch_print_cap_attributes.  */
+extern void default_print_cap_attributes (struct gdbarch *gdbarch,
+					  const gdb_byte *contents, bool tag,
+					  struct ui_file *stream);
+
 #endif /* ARCH_UTILS_H */

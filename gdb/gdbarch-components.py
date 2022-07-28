@@ -1045,6 +1045,38 @@ Set the tag from a capability stored at address ADDR to TAG.
     invalid=False,
 )
 
+Method(
+    comment="""
+Print value of a capability containing CONTENTS and TAG to STREAM.
+""",
+    type="void",
+    name="print_cap",
+    params=[
+        ("const gdb_byte *", "contents"),
+        ("bool", "tag"),
+        ("bool", "compact"),
+        ("struct ui_file *", "stream"),
+    ],
+    predefault="default_print_cap",
+    invalid=False,
+)
+
+Method(
+    comment="""
+Print additional attributes for a capability containing CONTENTS and
+TAG to STREAM.
+""",
+    type="void",
+    name="print_cap_attributes",
+    params=[
+        ("const gdb_byte *", "contents"),
+        ("bool", "tag"),
+        ("struct ui_file *", "stream"),
+    ],
+    predefault="default_print_cap_attributes",
+    invalid=False,
+)
+
 Function(
     comment="""
 Fetch the target specific address used to represent a load module.
