@@ -1713,7 +1713,10 @@ value_equal_contents (struct value *arg1, struct value *arg2)
 	  && TYPE_LENGTH (type1) == TYPE_LENGTH (type2)
 	  && memcmp (value_contents (arg1).data (),
 		     value_contents (arg2).data (),
-		     TYPE_LENGTH (type1)) == 0);
+		     TYPE_LENGTH (type1)) == 0
+	  && ((!value_tagged (arg1) && !value_tagged (arg2))
+	      || (value_tagged (arg1) && value_tagged (arg2)
+		  && value_tag (arg1) == value_tag (arg2))));
 }
 
 /* Simulate the C operator < by returning 1
