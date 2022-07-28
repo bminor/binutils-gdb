@@ -1320,6 +1320,7 @@ frame_unwind_register_unsigned (frame_info *next_frame, int regnum)
 {
   struct gdbarch *gdbarch = frame_unwind_arch (next_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  struct type *type = register_type (gdbarch, regnum);
   int size = register_size (gdbarch, regnum);
   struct value *value = frame_unwind_register_value (next_frame, regnum);
 
@@ -1336,8 +1337,14 @@ frame_unwind_register_unsigned (frame_info *next_frame, int regnum)
 		   _("Register %d is not available"), regnum);
     }
 
-  ULONGEST r = extract_unsigned_integer (value_contents_all (value).data (),
-					 size, byte_order);
+  ULONGEST r;
+
+  if (type->code () == TYPE_CODE_CAPABILITY || TYPE_CAPABILITY (type))
+    r = gdbarch_pointer_to_address (gdbarch, type,
+				      value_contents_all (value).data ());
+  else
+    r = extract_unsigned_integer (value_contents_all (value).data (),
+				  size, byte_order);
 
   release_value (value);
   return r;
