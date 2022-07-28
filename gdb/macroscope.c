@@ -51,7 +51,7 @@ sal_macro_scope (struct symtab_and_line sal)
   gdb::unique_xmalloc_ptr<struct macro_scope> ms (XNEW (struct macro_scope));
 
   main_file = macro_main (cust->macro_table ());
-  inclusion = macro_lookup_inclusion (main_file, sal.symtab->filename);
+  inclusion = macro_lookup_inclusion (main_file, sal.symtab->filename_for_id);
 
   if (inclusion)
     {

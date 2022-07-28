@@ -956,8 +956,8 @@ static void dwarf_decode_lines (struct line_header *,
 				struct dwarf2_cu *,
 				CORE_ADDR, int decode_mapping);
 
-static void dwarf2_start_subfile (struct dwarf2_cu *, const char *,
-				  const char *);
+static void dwarf2_start_subfile (dwarf2_cu *cu, const file_entry &fe,
+				  const line_header &lh);
 
 static struct symbol *new_symbol (struct die_info *, struct type *,
 				  struct dwarf2_cu *, struct symbol * = NULL);
@@ -9439,7 +9439,10 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu)
       && producer_is_gcc_lt_4_3 (cu)
       && res.get_name () != nullptr
       && IS_ABSOLUTE_PATH (res.get_name ()))
-    res.set_comp_dir (ldirname (res.get_name ()));
+    {
+      res.set_comp_dir (ldirname (res.get_name ()));
+      res.set_name (make_unique_xstrdup (lbasename (res.get_name ())));
+    }
 
   cu->per_cu->fnd.reset (new file_and_directory (std::move (res)));
   return *cu->per_cu->fnd;
@@ -9700,18 +9703,20 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
       for (i = 0; i < file_names.size (); ++i)
 	{
 	  file_entry &fe = file_names[i];
-	  dwarf2_start_subfile (this, fe.name,
-				fe.include_dir (line_header));
+	  dwarf2_start_subfile (this, fe, *line_header);
 	  buildsym_compunit *b = get_builder ();
-	  if (b->get_current_subfile ()->symtab == NULL)
+	  subfile *sf = b->get_current_subfile ();
+
+	  if (sf->symtab == nullptr)
 	    {
 	      /* NOTE: start_subfile will recognize when it's been
 		 passed a file it has already seen.  So we can't
 		 assume there's a simple mapping from
 		 cu->line_header->file_names to subfiles, plus
 		 cu->line_header->file_names may contain dups.  */
-	      const char *name = b->get_current_subfile ()->name.c_str ();
-	      b->get_current_subfile ()->symtab = allocate_symtab (cust, name);
+	      const char *name = sf->name.c_str ();
+	      const char *name_for_id = sf->name_for_id.c_str ();
+	      sf->symtab = allocate_symtab (cust, name, name_for_id);
 	    }
 
 	  fe.symtab = b->get_current_subfile ()->symtab;
@@ -20021,11 +20026,9 @@ lnp_state_machine::handle_set_file (file_name_index file)
     dwarf2_debug_line_missing_file_complaint ();
   else
     {
-      const char *dir = fe->include_dir (m_line_header);
-
       m_last_subfile = m_cu->get_builder ()->get_current_subfile ();
       m_line_has_non_zero_discriminator = m_discriminator != 0;
-      dwarf2_start_subfile (m_cu, fe->name, dir);
+      dwarf2_start_subfile (m_cu, *fe, *m_line_header);
     }
 }
 
@@ -20308,7 +20311,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
       const file_entry *fe = state_machine.current_file ();
 
       if (fe != NULL)
-	dwarf2_start_subfile (cu, fe->name, fe->include_dir (lh));
+	dwarf2_start_subfile (cu, *fe, *lh);
 
       /* Decode the table.  */
       while (line_ptr < line_end && !end_sequence)
@@ -20520,14 +20523,14 @@ dwarf_decode_lines (struct line_header *lh, struct dwarf2_cu *cu,
 
   for (auto &fe : lh->file_names ())
     {
-      dwarf2_start_subfile (cu, fe.name, fe.include_dir (lh));
-      if (builder->get_current_subfile ()->symtab == NULL)
-	{
-	  builder->get_current_subfile ()->symtab
-	    = allocate_symtab (cust,
-			       builder->get_current_subfile ()->name.c_str ());
-	}
-      fe.symtab = builder->get_current_subfile ()->symtab;
+      dwarf2_start_subfile (cu, fe, *lh);
+      subfile *sf = builder->get_current_subfile ();
+
+      if (sf->symtab == nullptr)
+	sf->symtab = allocate_symtab (cust, sf->name.c_str (),
+				      sf->name_for_id.c_str ());
+
+      fe.symtab = sf->symtab;
     }
 }
 
@@ -20555,10 +20558,12 @@ dwarf_decode_lines (struct line_header *lh, struct dwarf2_cu *cu,
    subfile's name.  */
 
 static void
-dwarf2_start_subfile (struct dwarf2_cu *cu, const char *filename,
-		      const char *dirname)
+dwarf2_start_subfile (dwarf2_cu *cu, const file_entry &fe,
+		      const line_header &lh)
 {
-  std::string copy;
+  std::string filename_holder;
+  const char *filename = fe.name;
+  const char *dirname = lh.include_dir_at (fe.d_index);
 
   /* In order not to lose the line information directory,
      we concatenate it to the filename when it makes sense.
@@ -20569,11 +20574,12 @@ dwarf2_start_subfile (struct dwarf2_cu *cu, const char *filename,
 
   if (!IS_ABSOLUTE_PATH (filename) && dirname != NULL)
     {
-      copy = path_join (dirname, filename);
-      filename = copy.c_str ();
+      filename_holder = path_join (dirname, filename);
+      filename = filename_holder.c_str ();
     }
 
-  cu->get_builder ()->start_subfile (filename);
+  std::string filename_for_id = lh.file_file_name (fe);
+  cu->get_builder ()->start_subfile (filename, filename_for_id.c_str ());
 }
 
 static void

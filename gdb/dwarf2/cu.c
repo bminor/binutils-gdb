@@ -21,6 +21,8 @@
 #include "dwarf2/cu.h"
 #include "dwarf2/read.h"
 #include "objfiles.h"
+#include "filenames.h"
+#include "gdbsupport/pathstuff.h"
 
 /* Initialize dwarf2_cu to read PER_CU, in the context of PER_OBJFILE.  */
 
@@ -60,9 +62,22 @@ dwarf2_cu::start_compunit_symtab (const char *name, const char *comp_dir,
 {
   gdb_assert (m_builder == nullptr);
 
+  std::string name_for_id_holder;
+  const char *name_for_id = name;
+
+  /* Prepend the compilation directory to the filename if needed (if not
+     absolute already) to get the "name for id" for our main symtab.  The name
+     for the main file coming from the line table header will be generated using
+     the same logic, so will hopefully match what we pass here.  */
+  if (!IS_ABSOLUTE_PATH (name) && comp_dir != nullptr)
+    {
+      name_for_id_holder = path_join (comp_dir, name);
+      name_for_id = name_for_id_holder.c_str ();
+    }
+
   m_builder.reset (new struct buildsym_compunit
 		   (this->per_objfile->objfile,
-		    name, comp_dir, lang (), low_pc));
+		    name, comp_dir, name_for_id, lang (), low_pc));
 
   list_in_scope = get_builder ()->get_file_symbols ();
 

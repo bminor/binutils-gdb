@@ -201,8 +201,17 @@ extern symfile_segment_data_up default_symfile_segments (bfd *abfd);
 extern bfd_byte *default_symfile_relocate (struct objfile *objfile,
 					   asection *sectp, bfd_byte *buf);
 
-extern struct symtab *allocate_symtab (struct compunit_symtab *, const char *)
+extern struct symtab *allocate_symtab
+  (struct compunit_symtab *cust, const char *filename, const char *id)
   ATTRIBUTE_NONNULL (1);
+
+/* Same as the above, but passes FILENAME for ID.  */
+
+static inline struct symtab *
+allocate_symtab (struct compunit_symtab *cust, const char *filename)
+{
+  return allocate_symtab (cust, filename, filename);
+}
 
 extern struct compunit_symtab *allocate_compunit_symtab (struct objfile *,
 							 const char *)

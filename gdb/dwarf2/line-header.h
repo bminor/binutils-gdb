@@ -171,8 +171,10 @@ struct line_header
      header.  These point into dwarf2_per_objfile->line_buffer.  */
   const gdb_byte *statement_program_start {}, *statement_program_end {};
 
-  /* Return file name relative to the compilation directory of file
-     FE in this object's file name table.  */
+  /* Return the most "complete" file name for FILE possible.
+
+     This means prepending the directory and compilation directory, as needed,
+     until we get an absolute path.  */
   std::string file_file_name (const file_entry &fe) const;
 
   /* Return the compilation directory of the compilation unit in the context of

@@ -55,6 +55,12 @@ struct subfile
 
   struct subfile *next = nullptr;
   std::string name;
+
+  /* This field is analoguous in function to symtab::filename_for_id.
+
+     It is used to look up existing subfiles in calls to start_subfile.  */
+  std::string name_for_id;
+
   std::vector<linetable_entry> line_vector_entries;
   enum language language = language_unknown;
   struct symtab *symtab = nullptr;
@@ -135,12 +141,24 @@ struct buildsym_compunit
 {
   /* Start recording information about a primary source file (IOW, not an
      included source file).
+
      COMP_DIR is the directory in which the compilation unit was compiled
-     (or NULL if not known).  */
+     (or NULL if not known).
+
+     NAME and NAME_FOR_ID have the same purpose as for the start_subfile
+     method.  */
+
+  buildsym_compunit (struct objfile *objfile_, const char *name,
+		     const char *comp_dir_, const char *name_for_id,
+		     enum language language_, CORE_ADDR last_addr);
+
+  /* Same as above, but passes NAME for NAME_FOR_ID.  */
 
   buildsym_compunit (struct objfile *objfile_, const char *name,
 		     const char *comp_dir_, enum language language_,
-		     CORE_ADDR last_addr);
+		     CORE_ADDR last_addr)
+    : buildsym_compunit (objfile_, name, comp_dir_, name, language_, last_addr)
+  {}
 
   /* Reopen an existing compunit_symtab so that additional symbols can
      be added to it.  Arguments are as for the main constructor.  CUST
@@ -198,7 +216,22 @@ struct buildsym_compunit
   void record_block_range (struct block *block,
 			   CORE_ADDR start, CORE_ADDR end_inclusive);
 
-  void start_subfile (const char *name);
+  /* Start recording information about source code that comes from a source
+     file.  This sets the current subfile, creating it if necessary.
+
+     NAME is the user-visible name of the subfile.
+
+     NAME_FOR_ID is a name that must be stable between the different calls to
+     start_subfile referring to the same file (it is used for looking up
+     existing subfiles).  It can be equal to NAME if NAME follows that rule.  */
+  void start_subfile (const char *name, const char *name_for_id);
+
+  /* Same as above, but passes NAME for NAME_FOR_ID.  */
+
+  void start_subfile (const char *name)
+  {
+    return start_subfile (name, name);
+  }
 
   void patch_subfile_names (struct subfile *subfile, const char *name);
 

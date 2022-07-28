@@ -62,14 +62,22 @@ line_header::file_file_name (const file_entry &fe) const
 {
   gdb_assert (is_valid_file_index (fe.index));
 
-  if (IS_ABSOLUTE_PATH (fe.name))
-    return fe.name;
+  std::string ret = fe.name;
+
+  if (IS_ABSOLUTE_PATH (ret))
+    return ret;
 
   const char *dir = fe.include_dir (this);
-  if (dir == nullptr)
-    return fe.name;
+  if (dir != nullptr)
+    ret = path_join (dir, ret);
 
-  return path_join (dir, fe.name);
+  if (IS_ABSOLUTE_PATH (ret))
+    return ret;
+
+  if (m_comp_dir != nullptr)
+    ret = path_join (m_comp_dir, ret);
+
+  return ret;
 }
 
 static void

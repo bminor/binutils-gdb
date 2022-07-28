@@ -714,6 +714,7 @@ process_linenos (CORE_ADDR start, CORE_ADDR end)
 	  }
 	  struct subfile *current_subfile = get_current_subfile ();
 	  current_subfile->name = inclTable[ii].name;
+	  current_subfile->name_for_id = inclTable[ii].name;
 #endif
 
 	  start_subfile (pop_subfile ());

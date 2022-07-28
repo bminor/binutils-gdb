@@ -1644,9 +1644,21 @@ struct symtab
 
   struct linetable *m_linetable;
 
-  /* Name of this source file.  This pointer is never NULL.  */
+  /* Name of this source file, in a form appropriate to print to the user.
+
+     This pointer is never nullptr.  */
 
   const char *filename;
+
+  /* Filename for this source file, used as an identifier to link with
+     related objects such as associated macro_source_file objects.  It must
+     therefore match the name of any macro_source_file object created for this
+     source file.  The value can be the same as FILENAME if it is known to
+     follow that rule, or another form of the same file name, this is up to
+     the specific debug info reader.
+
+     This pointer is never nullptr.*/
+  const char *filename_for_id;
 
   /* Language of this source file.  */
 
