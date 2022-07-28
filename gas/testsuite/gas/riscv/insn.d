@@ -1,4 +1,4 @@
-#as: -march=rv32ifc
+#as: -march=rv32ifcv
 #objdump: -dr
 
 .*:[ 	]+file format .*
@@ -69,6 +69,7 @@ Disassembly of section .text:
 [^:]+:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
 [^:]+:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
 [^:]+:[ 	]+00c58533[ 	]+add[ 	]+a0,a1,a2
+[^:]+:[ 	]+022180d7[ 	]+vadd\.vv[ 	]+v1,v2,v3
 [^:]+:[ 	]+0001[ 	]+nop
 [^:]+:[ 	]+00000013[ 	]+nop
 [^:]+:[ 	]+001f 0000 0000[ 	].*

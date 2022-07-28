@@ -749,7 +749,7 @@ static const struct opcode_name_t opcode_name_list[] =
   {"NMADD",     0x4f},
   {"NMSUB",     0x4b},
   {"OP_FP",     0x53},
-  /*reserved    0x57.  */
+  {"OP_V",      0x57},
   {"CUSTOM_2",  0x5b},
   /* 48b        0x5f.  */
 
