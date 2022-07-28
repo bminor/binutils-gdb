@@ -917,6 +917,11 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
   if (subobj_type == nullptr)
     subobj_type = type;
 
+  /* Ensure that, if TYPE or SUBOBJ_TYPE are typedefs, their length is filled
+     in instead of being zero.  */
+  check_typedef (type);
+  check_typedef (subobj_type);
+
   if (this->m_pieces.size () > 0)
     {
       ULONGEST bit_size = 0;
