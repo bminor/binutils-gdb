@@ -829,7 +829,8 @@ aarch64_linux_nat_target::read_description ()
   features.pauth = hwcap & AARCH64_HWCAP_PACA;
   features.mte = hwcap2 & HWCAP2_MTE;
   features.tls = true;
-  features.capacity = hwcap2 & HWCAP2_MORELLO;
+  /* We cannot use HWCAP2_MORELLO to check for Morello support.  */
+  features.capability = aarch64_supports_morello (tid);
 
   return aarch64_read_description (features);
 }

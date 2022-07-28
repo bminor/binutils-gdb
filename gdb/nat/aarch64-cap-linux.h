@@ -72,4 +72,14 @@ extern bool aarch64_linux_read_capability (int tid, CORE_ADDR address,
 
 extern bool aarch64_linux_write_capability (int tid, CORE_ADDR address,
 					    const user_cap &cap);
+
+/* Return true if the target supports Morello features (NT_ARM_MORELLO register
+   set, PTRACE_PEEKCAP and PTRACE_POKECAP).  If it does, it means we are
+   dealing with a Morello Linux Kernel.  This is needed because we can't
+   rely on the HWCAP2_MORELLO value anymore, given it has changed.
+
+   Return false otherwise.  */
+
+extern bool aarch64_supports_morello (int tid);
+
 #endif /* NAT_AARCH64_CAP_LINUX_H */

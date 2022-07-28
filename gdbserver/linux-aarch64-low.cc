@@ -946,8 +946,8 @@ aarch64_target::low_arch_setup ()
       /* A-profile MTE is 64-bit only.  */
       features.mte = linux_get_hwcap2 () & HWCAP2_MTE;
       features.tls = true;
-      /* Morello is 64-bit only.  */
-      features.capability = linux_get_hwcap2 () & HWCAP2_MORELLO;
+      /* We cannot use HWCAP2_MORELLO to check for Morello support.  */
+      features.capability = aarch64_supports_morello (tid);
 
       current_process ()->tdesc = aarch64_linux_read_description (features);
 
@@ -3542,14 +3542,24 @@ aarch64_target::store_memtags (CORE_ADDR address, size_t len,
   return false;
 }
 
+static bool
+aarch64_supports_morello_features ()
+{
+  /* Spawn a child for testing.  */
+  int child_pid = linux_create_child_for_ptrace_testing ();
+  bool ret = aarch64_supports_morello (child_pid);
+  /* Kill child_pid.  */
+  linux_kill_child (child_pid, "aarch64_check_ptrace_features");
+  return ret;
+}
+
 /* Implementation of targets ops method "supports_qxfer_capability.  */
 
 bool
 aarch64_target::supports_qxfer_capability ()
 {
-  unsigned long hwcap2 = linux_get_hwcap2 ();
-
-  return (hwcap2 & HWCAP2_MORELLO) != 0;
+  /* Do a live ptrace feature check instead of using HWCAP bits.  */
+  return aarch64_supports_morello_features ();
 }
 
 /* Implementation of targets ops method "qxfer_capability.  */
