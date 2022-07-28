@@ -765,9 +765,9 @@ aarch64_linux_nat_target::read_description ()
     return aarch32_read_description ();
 
   CORE_ADDR hwcap = linux_get_hwcap (this);
-  CORE_ADDR hwcap2 = linux_get_hwcap2 (this);
   bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
-  bool capability_p = hwcap2 & HWCAP2_MORELLO;
+  /* We cannot use HWCAP2_MORELLO to check for Morello support.  */
+  bool capability_p = aarch64_supports_morello (tid);
 
   return aarch64_read_description (aarch64_sve_get_vq (tid),
 				   pauth_p, capability_p);

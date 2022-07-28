@@ -830,9 +830,9 @@ aarch64_target::low_arch_setup ()
     {
       uint64_t vq = aarch64_sve_get_vq (tid);
       unsigned long hwcap = linux_get_hwcap ();
-      unsigned long hwcap2 = linux_get_hwcap2 ();
       bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
-      bool capability_p = hwcap2 & HWCAP2_MORELLO;
+      /* We cannot use HWCAP2_MORELLO to check for Morello support.  */
+      bool capability_p = aarch64_supports_morello (tid);
 
       current_process ()->tdesc = aarch64_linux_read_description (vq, pauth_p,
 								  capability_p);
@@ -3385,14 +3385,24 @@ aarch64_target::breakpoint_kind_from_current_state (CORE_ADDR *pcptr)
     return arm_breakpoint_kind_from_current_state (pcptr);
 }
 
+static bool
+aarch64_supports_morello_features ()
+{
+  /* Spawn a child for testing.  */
+  int child_pid = linux_create_child_for_ptrace_testing ();
+  bool ret = aarch64_supports_morello (child_pid);
+  /* Kill child_pid.  */
+  linux_kill_child (child_pid, "aarch64_check_ptrace_features");
+  return ret;
+}
+
 /* Implementation of targets ops method "supports_qxfer_capability.  */
 
 bool
 aarch64_target::supports_qxfer_capability ()
 {
-  unsigned long hwcap2 = linux_get_hwcap2 ();
-
-  return (hwcap2 & HWCAP2_MORELLO) != 0;
+  /* Do a live ptrace feature check instead of using HWCAP bits.  */
+  return aarch64_supports_morello_features ();
 }
 
 /* Implementation of targets ops method "qxfer_capability.  */

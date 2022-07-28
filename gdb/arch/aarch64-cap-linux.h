@@ -20,8 +20,15 @@
 #ifndef ARCH_AARCH64_CAP_LINUX_H
 #define ARCH_AARCH64_CAP_LINUX_H
 
-/* Morello HWCAP bit.  */
-#define HWCAP2_MORELLO (1 << 19)
+#include "gdbsupport/common-defs.h"
+#include "gdbsupport/byte-vector.h"
+
+/* The HWCAP values are not being used to identify Morello anymore, but are
+   kept here for reference in case someone has a need for them.  */
+/* Morello HWCAP bit V1, before Linux Kernel 5.18.  */
+#define HWCAP2_MORELLO_V1 (1 << 19)
+/* Morello HWCAP bit V2, after Linux Kernel 5.18.  */
+#define HWCAP2_MORELLO_V2 (1UL << 31)
 
 /* Size of the Capability register set.  */
 #define AARCH64_LINUX_CREGS_SIZE ((39 * 16) + (2 * 8))

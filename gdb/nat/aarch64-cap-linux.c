@@ -18,6 +18,8 @@
 #include "gdbsupport/common-defs.h"
 #include "gdb_ptrace.h"
 #include "aarch64-cap-linux.h"
+#include <sys/uio.h>
+#include "elf/common.h"
 
 /* Helper function to display various possible errors when reading
    Morello capabilities from memory.  */
@@ -95,6 +97,25 @@ aarch64_linux_write_capability (int tid, CORE_ADDR address,
       morello_linux_pokecap_error (errno);
       return false;
     }
+
+  return true;
+}
+
+/* See aach64-cap-linux.h */
+
+bool
+aarch64_supports_morello (int tid)
+{
+  struct user_morello_state cregset;
+  struct iovec iovec;
+  iovec.iov_base = &cregset;
+  iovec.iov_len = sizeof (cregset);
+
+  /* Attempt to fetch NT_ARM_MORELLO.  If it is supported, that means Morello
+     features are supported and that PTRACE_PEEKCAP and PTRACE_POKECAP are
+     also supported.  */
+  if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_MORELLO, &iovec) < 0)
+    return false;
 
   return true;
 }

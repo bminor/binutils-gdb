@@ -767,9 +767,11 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
 				     struct target_ops *target, bfd *abfd)
 {
   CORE_ADDR hwcap = linux_get_hwcap (target);
-  CORE_ADDR hwcap2 = linux_get_hwcap2 (target);
   bool pauth_p = hwcap & AARCH64_HWCAP_PACA;
-  bool capability_p = hwcap2 & HWCAP2_MORELLO;
+  /* We cannot use HWCAP2_MORELLO to check for Morello support.  Check if
+     we have a NT_ARM_MORELLO register set dump instead.  */
+  bool capability_p =
+    (bfd_get_section_by_name (abfd, ".reg-aarch-morello") != nullptr);
 
   return aarch64_read_description (aarch64_linux_core_read_vq (gdbarch, abfd),
 				   pauth_p, capability_p);

@@ -195,5 +195,6 @@ extern int linux_supports_tracesysgood (void);
 extern int linux_ptrace_get_extended_event (int wstat);
 extern int linux_is_extended_waitstatus (int wstat);
 extern int linux_wstatus_maybe_breakpoint (int wstat);
-
+extern void linux_kill_child (pid_t child, const char *who);
+extern int linux_create_child_for_ptrace_testing ();
 #endif /* NAT_LINUX_PTRACE_H */

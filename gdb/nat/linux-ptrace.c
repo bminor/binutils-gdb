@@ -81,8 +81,8 @@ EXTERN_C void linux_ptrace_test_ret_to_nx_instr (void);
 
 /* Kill CHILD.  WHO is used to report warnings.  */
 
-static void
-kill_child (pid_t child, const char *who)
+void
+linux_kill_child (pid_t child, const char *who)
 {
   pid_t got_pid;
   int kill_status;
@@ -202,7 +202,7 @@ linux_ptrace_test_ret_to_nx (void)
     {
       warning (_("linux_ptrace_test_ret_to_nx: status %d is not WIFSTOPPED!"),
 	       status);
-      kill_child (child, "linux_ptrace_test_ret_to_nx");
+      linux_kill_child (child, "linux_ptrace_test_ret_to_nx");
       return;
     }
 
@@ -212,7 +212,7 @@ linux_ptrace_test_ret_to_nx (void)
       warning (_("linux_ptrace_test_ret_to_nx: "
 		 "WSTOPSIG %d is neither SIGTRAP nor SIGSEGV!"),
 	       (int) WSTOPSIG (status));
-      kill_child (child, "linux_ptrace_test_ret_to_nx");
+      linux_kill_child (child, "linux_ptrace_test_ret_to_nx");
       return;
     }
 
@@ -230,7 +230,7 @@ linux_ptrace_test_ret_to_nx (void)
 # error "!__i386__ && !__x86_64__"
 #endif
 
-  kill_child (child, "linux_ptrace_test_ret_to_nx");
+  linux_kill_child (child, "linux_ptrace_test_ret_to_nx");
 
   /* + 1 is there as x86* stops after the 'int3' instruction.  */
   if (WSTOPSIG (status) == SIGTRAP && pc == return_address + 1)
@@ -336,10 +336,10 @@ static void linux_test_for_tracesysgood (int child_pid);
 static void linux_test_for_tracefork (int child_pid);
 static void linux_test_for_exitkill (int child_pid);
 
-/* Determine ptrace features available on this target.  */
+/* Create a child for testing ptrace features and return its pid.  */
 
-void
-linux_check_ptrace_features (void)
+int
+linux_create_child_for_ptrace_testing ()
 {
   int child_pid, ret, status;
 
@@ -362,6 +362,17 @@ linux_check_ptrace_features (void)
     error (_("linux_check_ptrace_features: waitpid: unexpected status %d."),
 	   status);
 
+  return child_pid;
+}
+
+
+/* Determine ptrace features available on this target.  */
+
+void
+linux_check_ptrace_features (void)
+{
+  int child_pid = linux_create_child_for_ptrace_testing ();
+
   linux_test_for_tracesysgood (child_pid);
 
   linux_test_for_tracefork (child_pid);
@@ -369,7 +380,7 @@ linux_check_ptrace_features (void)
   linux_test_for_exitkill (child_pid);
 
   /* Kill child_pid.  */
-  kill_child (child_pid, "linux_check_ptrace_features");
+  linux_kill_child (child_pid, "linux_check_ptrace_features");
 }
 
 /* Determine if PTRACE_O_TRACESYSGOOD can be used to catch
@@ -452,7 +463,7 @@ linux_test_for_tracefork (int child_pid)
 
 	  /* Do some cleanup and kill the grandchild.  */
 	  my_waitpid (second_pid, &second_status, 0);
-	  kill_child (second_pid, "linux_test_for_tracefork");
+	  linux_kill_child (second_pid, "linux_test_for_tracefork");
 	}
     }
   else
