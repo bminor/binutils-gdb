@@ -514,8 +514,14 @@ generic_value_print_capability (struct value *val, struct ui_file *stream,
 	break;
       case lval_memory:
 	{
-	  struct gdbarch *gdbarch = get_type_arch (type);
-	  tag = gdbarch_get_cap_tag_from_address (gdbarch, value_address (val));
+	  if (!value_lazy (val) && value_tagged (val))
+	    tag = value_tag (val);
+	  else
+	    {
+	      struct gdbarch *gdbarch = get_type_arch (type);
+	      tag = gdbarch_get_cap_tag_from_address (gdbarch,
+						      value_address (val));
+	    }
 	}
 	break;
       default:
