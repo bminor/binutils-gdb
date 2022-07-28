@@ -6817,12 +6817,15 @@ fi
 # Enable MI.
 # Check whether --enable-gdbmi was given.
 if test "${enable_gdbmi+set}" = set; then :
-  enableval=$enable_gdbmi; case $enableval in
-    yes | no)
-      ;;
-    *)
-      as_fn_error $? "bad value $enableval for --enable-gdbmi" "$LINENO" 5 ;;
-  esac
+  enableval=$enable_gdbmi;
+	   case $enableval in
+	     yes | no)
+	       ;;
+	     *)
+	       as_fn_error $? "bad value $enableval for --enable-gdbmi" "$LINENO" 5
+	       ;;
+	   esac
+
 else
   enable_gdbmi=yes
 fi
@@ -6839,12 +6842,15 @@ fi
 # Enable TUI.
 # Check whether --enable-tui was given.
 if test "${enable_tui+set}" = set; then :
-  enableval=$enable_tui; case $enableval in
-    yes | no | auto)
-      ;;
-    *)
-      as_fn_error $? "bad value $enableval for --enable-tui" "$LINENO" 5 ;;
-  esac
+  enableval=$enable_tui;
+	   case $enableval in
+	     yes | no | auto)
+	       ;;
+	     *)
+	       as_fn_error $? "bad value $enableval for --enable-tui" "$LINENO" 5
+	       ;;
+	   esac
+
 else
   enable_tui=auto
 fi
@@ -6853,18 +6859,21 @@ fi
 # Enable gdbtk.
 # Check whether --enable-gdbtk was given.
 if test "${enable_gdbtk+set}" = set; then :
-  enableval=$enable_gdbtk; case $enableval in
-    yes | no)
-      ;;
-    *)
-      as_fn_error $? "bad value $enableval for --enable-gdbtk" "$LINENO" 5 ;;
-  esac
+  enableval=$enable_gdbtk;
+	   case $enableval in
+	     yes | no)
+	       ;;
+	     *)
+	       as_fn_error $? "bad value $enableval for --enable-gdbtk" "$LINENO" 5
+	       ;;
+	   esac
+
 else
   if test -d "$srcdir/gdbtk"; then
-    enable_gdbtk=yes
-  else
-    enable_gdbtk=no
-  fi
+		 enable_gdbtk=yes
+	       else
+		 enable_gdbtk=no
+	       fi
 fi
 
 # We unconditionally disable gdbtk tests on selected platforms.
@@ -7205,12 +7214,15 @@ fi
 # Profiling support.
 # Check whether --enable-profiling was given.
 if test "${enable_profiling+set}" = set; then :
-  enableval=$enable_profiling; case $enableval in
-    yes | no)
-      ;;
-    *)
-      as_fn_error $? "bad value $enableval for --enable-profile" "$LINENO" 5 ;;
-  esac
+  enableval=$enable_profiling;
+	   case $enableval in
+	     yes | no)
+	       ;;
+	     *)
+	       as_fn_error $? "bad value $enableval for --enable-profiling" "$LINENO" 5
+	       ;;
+	   esac
+
 else
   enable_profiling=no
 fi
@@ -12039,11 +12051,15 @@ SRCHIGH_CFLAGS=
 
 # Check whether --enable-source-highlight was given.
 if test "${enable_source_highlight+set}" = set; then :
-  enableval=$enable_source_highlight; case "${enableval}" in
-  yes)  enable_source_highlight=yes ;;
-  no)   enable_source_highlight=no  ;;
-  *)    as_fn_error $? "bad value ${enableval} for source-highlight option" "$LINENO" 5 ;;
-esac
+  enableval=$enable_source_highlight;
+	   case $enableval in
+	     yes | no | auto)
+	       ;;
+	     *)
+	       as_fn_error $? "bad value $enableval for --enable-source-highlight" "$LINENO" 5
+	       ;;
+	   esac
+
 else
   enable_source_highlight=auto
 fi
@@ -18756,11 +18772,15 @@ fi
 # Setup possible use of libbacktrace.
 # Check whether --enable-libbacktrace was given.
 if test "${enable_libbacktrace+set}" = set; then :
-  enableval=$enable_libbacktrace; case "${enableval}" in
-  yes)  enable_libbacktrace=yes ;;
-  no)   enable_libbacktrace=no  ;;
-  *)    as_fn_error $? "bad value ${enableval} for --enable-libbacktrace option" "$LINENO" 5 ;;
-esac
+  enableval=$enable_libbacktrace;
+	   case $enableval in
+	     yes | no)
+	       ;;
+	     *)
+	       as_fn_error $? "bad value $enableval for --enable-libbacktrace" "$LINENO" 5
+	       ;;
+	   esac
+
 else
   enable_libbacktrace=yes
 fi
