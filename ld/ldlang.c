@@ -1077,8 +1077,27 @@ walk_wild_file (lang_wild_statement_type *s,
     }
 }
 
+static lang_statement_union_type *
+new_statement (enum statement_enum type,
+	       size_t size,
+	       lang_statement_list_type *list);
 static void
-walk_wild (lang_wild_statement_type *s, callback_t callback, void *data)
+add_matching_callback (lang_wild_statement_type *ptr,
+		       struct wildcard_list *sec,
+		       asection *section,
+		       lang_input_statement_type *file,
+		       void *data ATTRIBUTE_UNUSED)
+{
+  lang_input_matcher_type *new_section;
+  /* Add a section reference to the list.  */
+  new_section = new_stat (lang_input_matcher, &ptr->matching_sections);
+  new_section->section = section;
+  new_section->pattern = sec;
+  new_section->input_stmt = file;
+}
+
+static void
+walk_wild_resolve (lang_wild_statement_type *s)
 {
   const char *file_spec = s->filename;
   char *p;
@@ -1088,6 +1107,66 @@ walk_wild (lang_wild_statement_type *s, callback_t callback, void *data)
       /* Perform the iteration over all files in the list.  */
       LANG_FOR_EACH_INPUT_STATEMENT (f)
 	{
+	  //printf("XXX   %s\n", f->filename);
+	  walk_wild_file (s, f, add_matching_callback, NULL);
+	}
+    }
+  else if ((p = archive_path (file_spec)) != NULL)
+    {
+      LANG_FOR_EACH_INPUT_STATEMENT (f)
+	{
+	  if (input_statement_is_archive_path (file_spec, p, f))
+	    walk_wild_file (s, f, add_matching_callback, NULL);
+	}
+    }
+  else if (wildcardp (file_spec))
+    {
+      LANG_FOR_EACH_INPUT_STATEMENT (f)
+	{
+	  if (fnmatch (file_spec, f->filename, 0) == 0)
+	    walk_wild_file (s, f, add_matching_callback, NULL);
+	}
+    }
+  else
+    {
+      lang_input_statement_type *f;
+
+      /* Perform the iteration over a single file.  */
+      f = lookup_name (file_spec);
+      if (f)
+	walk_wild_file (s, f, add_matching_callback, NULL);
+    }
+}
+
+static void
+walk_wild (lang_wild_statement_type *s, callback_t callback, void *data)
+{
+  const char *file_spec = s->filename;
+  //char *p;
+
+  if (!s->resolved)
+    {
+      //printf("XXX %s\n", file_spec ? file_spec : "<null>");
+      walk_wild_resolve (s);
+      s->resolved = true;
+    }
+
+    {
+      lang_statement_union_type *l;
+      for (l = s->matching_sections.head; l; l = l->header.next)
+	{
+	  (*callback) (s, l->input_matcher.pattern, l->input_matcher.section, l->input_matcher.input_stmt, data);
+	}
+      return;
+    }
+
+#if 0
+  if (file_spec == NULL)
+    {
+      /* Perform the iteration over all files in the list.  */
+      LANG_FOR_EACH_INPUT_STATEMENT (f)
+	{
+	  printf("XXX   %s\n", f->filename);
 	  walk_wild_file (s, f, callback, data);
 	}
     }
@@ -1116,6 +1195,7 @@ walk_wild (lang_wild_statement_type *s, callback_t callback, void *data)
       if (f)
 	walk_wild_file (s, f, callback, data);
     }
+#endif
 }
 
 /* lang_for_each_statement walks the parse tree and calls the provided
@@ -1987,6 +2067,8 @@ insert_os_after (lang_output_section_statement_type *after)
 	case lang_group_statement_enum:
 	case lang_insert_statement_enum:
 	  continue;
+	case lang_input_matcher_enum:
+	  FAIL ();
 	}
       break;
     }
@@ -4352,6 +4434,8 @@ map_input_to_output_sections
 	  break;
 	case lang_insert_statement_enum:
 	  break;
+	case lang_input_matcher_enum:
+	  FAIL ();
 	}
     }
 }
@@ -8348,6 +8432,8 @@ lang_add_wild (struct wildcard_spec *filespec,
   new_stmt->section_list = section_list;
   new_stmt->keep_sections = keep_sections;
   lang_list_init (&new_stmt->children);
+  new_stmt->resolved = false;
+  lang_list_init (&new_stmt->matching_sections);
   analyze_walk_wild_section_handler (new_stmt);
 }
 

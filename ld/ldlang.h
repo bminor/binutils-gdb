@@ -76,6 +76,7 @@ enum statement_enum
   lang_fill_statement_enum,
   lang_group_statement_enum,
   lang_input_section_enum,
+  lang_input_matcher_enum,
   lang_input_statement_enum,
   lang_insert_statement_enum,
   lang_output_section_statement_enum,
@@ -335,6 +336,14 @@ typedef struct
   void *pattern;
 } lang_input_section_type;
 
+typedef struct
+{
+  lang_statement_header_type header;
+  asection *section;
+  void *pattern;
+  lang_input_statement_type *input_stmt;
+} lang_input_matcher_type;
+
 struct map_symbol_def {
   struct bfd_link_hash_entry *entry;
   struct map_symbol_def *next;
@@ -389,6 +398,8 @@ struct lang_wild_statement_struct
   bool keep_sections;
   lang_statement_list_type children;
   struct name_list *exclude_name_list;
+  lang_statement_list_type matching_sections;
+  bool resolved;
 
   walk_wild_section_handler_t walk_wild_section_handler;
   struct wildcard_list *handler_data[4];
@@ -440,6 +451,7 @@ typedef union lang_statement_union
   lang_fill_statement_type fill_statement;
   lang_group_statement_type group_statement;
   lang_input_section_type input_section;
+  lang_input_matcher_type input_matcher;
   lang_input_statement_type input_statement;
   lang_insert_statement_type insert_statement;
   lang_output_section_statement_type output_section_statement;
