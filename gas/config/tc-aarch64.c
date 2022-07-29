@@ -565,25 +565,18 @@ static bool in_aarch64_get_expression = false;
 #define ALLOW_ABSENT  false
 #define REJECT_ABSENT true
 
-/* Fifth argument to aarch64_get_expression.  */
-#define NORMAL_RESOLUTION false
-
 /* Return TRUE if the string pointed by *STR is successfully parsed
    as an valid expression; *EP will be filled with the information of
    such an expression.  Otherwise return FALSE.
 
    If ALLOW_IMMEDIATE_PREFIX is true then skip a '#' at the start.
-   If REJECT_ABSENT is true then trat missing expressions as an error.
-   If DEFER_RESOLUTION is true, then do not resolve expressions against
-   constant symbols.  Necessary if the expression is part of a fixup
-   that uses a reloc that must be emitted.  */
+   If REJECT_ABSENT is true then trat missing expressions as an error.  */
 
 static bool
 aarch64_get_expression (expressionS *  ep,
 			char **        str,
 			bool           allow_immediate_prefix,
-			bool           reject_absent,
-			bool           defer_resolution)
+			bool           reject_absent)
 {
   char *save_in;
   segT seg;
@@ -603,10 +596,7 @@ aarch64_get_expression (expressionS *  ep,
   save_in = input_line_pointer;
   input_line_pointer = *str;
   in_aarch64_get_expression = true;
-  if (defer_resolution)
-    seg = deferred_expression (ep);
-  else
-    seg = expression (ep);
+  seg = expression (ep);
   in_aarch64_get_expression = false;
 
   if (ep->X_op == O_illegal || (reject_absent && ep->X_op == O_absent))
@@ -1035,8 +1025,7 @@ parse_typed_reg (char **ccp, aarch64_reg_type type, aarch64_reg_type *rtype,
 
       atype.defined |= NTA_HASINDEX;
 
-      aarch64_get_expression (&exp, &str, GE_NO_PREFIX, REJECT_ABSENT,
-			      NORMAL_RESOLUTION);
+      aarch64_get_expression (&exp, &str, GE_NO_PREFIX, REJECT_ABSENT);
 
       if (exp.X_op != O_constant)
 	{
@@ -1239,8 +1228,7 @@ parse_vector_reg_list (char **ccp, aarch64_reg_type type,
 	{
 	  expressionS exp;
 
-	  aarch64_get_expression (&exp, &str, GE_NO_PREFIX, REJECT_ABSENT,
-				  NORMAL_RESOLUTION);
+	  aarch64_get_expression (&exp, &str, GE_NO_PREFIX, REJECT_ABSENT);
 	  if (exp.X_op != O_constant)
 	    {
 	      set_first_syntax_error (_("constant expression required."));
@@ -2187,8 +2175,7 @@ parse_immediate_expression (char **str, expressionS *exp,
       return false;
     }
 
-  aarch64_get_expression (exp, str, GE_OPT_PREFIX, REJECT_ABSENT,
-			  NORMAL_RESOLUTION);
+  aarch64_get_expression (exp, str, GE_OPT_PREFIX, REJECT_ABSENT);
 
   if (exp->X_op == O_absent)
     {
@@ -2422,8 +2409,7 @@ parse_big_immediate (char **str, int64_t *imm, aarch64_reg_type reg_type)
       return false;
     }
 
-  aarch64_get_expression (&inst.reloc.exp, &ptr, GE_OPT_PREFIX, REJECT_ABSENT,
-			  NORMAL_RESOLUTION);
+  aarch64_get_expression (&inst.reloc.exp, &ptr, GE_OPT_PREFIX, REJECT_ABSENT);
 
   if (inst.reloc.exp.X_op == O_constant)
     *imm = inst.reloc.exp.X_add_number;
@@ -3320,8 +3306,7 @@ parse_shift (char **str, aarch64_opnd_info *operand, enum parse_shift_mode mode)
 	  p++;
 	  exp_has_prefix = 1;
 	}
-      (void) aarch64_get_expression (&exp, &p, GE_NO_PREFIX, ALLOW_ABSENT,
-				     NORMAL_RESOLUTION);
+      aarch64_get_expression (&exp, &p, GE_NO_PREFIX, ALLOW_ABSENT);
     }
   if (kind == AARCH64_MOD_MUL_VL)
     /* For consistency, give MUL VL the same shift amount as an implicit
@@ -3385,7 +3370,7 @@ parse_shifter_operand_imm (char **str, aarch64_opnd_info *operand,
 
   /* Accept an immediate expression.  */
   if (! aarch64_get_expression (&inst.reloc.exp, &p, GE_OPT_PREFIX,
-				REJECT_ABSENT, NORMAL_RESOLUTION))
+				REJECT_ABSENT))
     return false;
 
   /* Accept optional LSL for arithmetic immediate values.  */
@@ -3509,8 +3494,7 @@ parse_shifter_operand_reloc (char **str, aarch64_opnd_info *operand,
 
       /* Next, we parse the expression.  */
       if (! aarch64_get_expression (&inst.reloc.exp, str, GE_NO_PREFIX,
-				    REJECT_ABSENT,
-				    aarch64_force_reloc (entry->add_type) == 1))
+				    REJECT_ABSENT))
 	return false;
       
       /* Record the relocation type (use the ADD variant here).  */
@@ -3656,8 +3640,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	    }
 
 	  /* #:<reloc_op>:  */
-	  if (! aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
-					aarch64_force_reloc (ty) == 1))
+	  if (! aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT))
 	    {
 	      set_syntax_error (_("invalid relocation expression"));
 	      return false;
@@ -3673,8 +3656,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	    /* =immediate; need to generate the literal in the literal pool. */
 	    inst.gen_lit_pool = 1;
 
-	  if (!aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
-				       NORMAL_RESOLUTION))
+	  if (!aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT))
 	    {
 	      set_syntax_error (_("invalid address"));
 	      return false;
@@ -3780,8 +3762,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	      /* We now have the group relocation table entry corresponding to
 	         the name in the assembler source.  Next, we parse the
 	         expression.  */
-	      if (! aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
-					    aarch64_force_reloc (entry->ldst_type) == 1))
+	      if (! aarch64_get_expression (exp, &p, GE_NO_PREFIX, REJECT_ABSENT))
 		{
 		  set_syntax_error (_("invalid relocation expression"));
 		  return false;
@@ -3794,8 +3775,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	    }
 	  else
 	    {
-	      if (! aarch64_get_expression (exp, &p, GE_OPT_PREFIX, REJECT_ABSENT,
-					    NORMAL_RESOLUTION))
+	      if (! aarch64_get_expression (exp, &p, GE_OPT_PREFIX, REJECT_ABSENT))
 		{
 		  set_syntax_error (_("invalid expression in the address"));
 		  return false;
@@ -3851,8 +3831,7 @@ parse_address_main (char **str, aarch64_opnd_info *operand,
 	  operand->addr.offset.regno = reg->number;
 	  operand->addr.offset.is_reg = 1;
 	}
-      else if (! aarch64_get_expression (exp, &p, GE_OPT_PREFIX, REJECT_ABSENT,
-					 NORMAL_RESOLUTION))
+      else if (! aarch64_get_expression (exp, &p, GE_OPT_PREFIX, REJECT_ABSENT))
 	{
 	  /* [Xn],#expr */
 	  set_syntax_error (_("invalid expression in the address"));
@@ -3980,8 +3959,7 @@ parse_half (char **str, int *internal_fixup_p)
   else
     *internal_fixup_p = 1;
 
-  if (! aarch64_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
-				aarch64_force_reloc (inst.reloc.type) == 1))
+  if (! aarch64_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX, REJECT_ABSENT))
     return false;
 
   *str = p;
@@ -4023,8 +4001,7 @@ parse_adrp (char **str)
     inst.reloc.type = BFD_RELOC_AARCH64_ADR_HI21_PCREL;
 
   inst.reloc.pc_rel = 1;
-  if (! aarch64_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX, REJECT_ABSENT,
-				aarch64_force_reloc (inst.reloc.type) == 1))
+  if (! aarch64_get_expression (&inst.reloc.exp, &p, GE_NO_PREFIX, REJECT_ABSENT))
     return false;
   *str = p;
   return true;
@@ -6706,8 +6683,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	      goto failure;
 	    str = saved;
 	    po_misc_or_fail (aarch64_get_expression (&inst.reloc.exp, &str,
-						     GE_OPT_PREFIX, REJECT_ABSENT,
-						     NORMAL_RESOLUTION));
+						     GE_OPT_PREFIX, REJECT_ABSENT));
 	    /* The MOV immediate alias will be fixed up by fix_mov_imm_insn
 	       later.  fix_mov_imm_insn will try to determine a machine
 	       instruction (MOVZ, MOVN or ORR) for it and will issue an error
@@ -8834,7 +8810,8 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 
   /* Note whether this will delete the relocation.  */
 
-  if (fixP->fx_addsy == 0 && !fixP->fx_pcrel)
+  if (fixP->fx_addsy == 0 && !fixP->fx_pcrel
+      && aarch64_force_reloc (fixP->fx_r_type) <= 0)
     fixP->fx_done = 1;
 
   /* Process the relocations.  */
