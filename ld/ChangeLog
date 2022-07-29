@@ -1,3 +1,9 @@
+2022-07-29  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+
+	PR ld/29411
+	* configure.tgt (ac_default_ld_warn_rwx_segments): Extend to all
+	sparc targets.  Expand comment.
+
 2022-07-26  Nick Clifton  <nickc@redhat.com>
 
 	PR 29411
