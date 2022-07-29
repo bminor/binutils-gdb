@@ -23,6 +23,7 @@
 #include "gdbtypes.h"
 #include "expression.h"
 #include "value.h"
+#include "gdbarch.h"
 #include "gdbcore.h"
 #include "target.h"
 #include "language.h"
@@ -529,7 +530,9 @@ c_type_print_modifier (struct type *type, struct ui_file *stream,
       did_print_modifier = 1;
     }
 
-  if (TYPE_CAPABILITY (type))
+  gdbarch *gdbarch = type->arch ();
+  if (TYPE_CAPABILITY (type)
+      && gdbarch_ptr_bit (gdbarch) != gdbarch_capability_bit (gdbarch))
     {
       if (did_print_modifier || need_pre_space)
 	fprintf_filtered (stream, " ");
