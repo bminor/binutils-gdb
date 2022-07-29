@@ -1927,6 +1927,9 @@ elf32_avr_relax_delete_bytes (bfd *abfd,
   symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   sec_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
   contents = elf_section_data (sec)->this_hdr.contents;
+  if (contents == NULL
+      && !bfd_malloc_and_get_section (abfd, sec, &contents))
+    return false;
   relax_info = get_avr_relax_info (sec);
 
   toaddr = sec->size;
