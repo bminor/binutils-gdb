@@ -5143,6 +5143,31 @@ aarch64_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR val)
   return (val & ~1);
 }
 
+/* Print a capability.  */
+
+static void
+morello_print_cap (struct gdbarch *gdbarch, const gdb_byte *contents, bool tag,
+		   bool compact, struct ui_file *stream)
+{
+  uint128_t dummy_cap;
+  memcpy (&dummy_cap, contents, sizeof(dummy_cap));
+  capability cap (dummy_cap, tag);
+  fprintf_filtered (stream, "%s ",
+		    cap.to_str (compact).c_str ());
+}
+
+/* Print attributes of a capability.  */
+
+static void
+morello_print_cap_attributes (struct gdbarch *gdbarch, const gdb_byte *contents,
+			      bool tag, struct ui_file *stream)
+{
+  uint128_t dummy_cap;
+  memcpy (&dummy_cap, contents, sizeof(dummy_cap));
+  capability cap (dummy_cap, tag);
+  fprintf_filtered (stream, "%s", cap.metadata_str ().c_str ());
+}
+
 /* Given ABFD, try to determine if we are dealing with a symbol file
    that uses capabilities.
 
@@ -5662,6 +5687,10 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_pointer_to_address (gdbarch, aarch64_pointer_to_address);
       set_gdbarch_address_to_pointer (gdbarch, aarch64_address_to_pointer);
       set_gdbarch_integer_to_address (gdbarch, aarch64_integer_to_address);
+
+      /* Printing capabilities.  */
+      set_gdbarch_print_cap (gdbarch, morello_print_cap);
+      set_gdbarch_print_cap_attributes (gdbarch, morello_print_cap_attributes);
 
       /* For marking special symbols indicating a C64 region.  */
       set_gdbarch_elf_make_msymbol_special (gdbarch,
