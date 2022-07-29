@@ -531,6 +531,61 @@ bool capability::is_null_derived (void)
   return _bits (m_cap, 127, 64) == 0;
 }
 
+/* Returns a string representation of capability metadata.  */
+
+std::string
+capability::metadata_str (void)
+{
+  if (is_null_derived ())
+    return {};
+
+  std::string cap_str (" [");
+
+  /* Handle compact permissions output.  */
+  if (check_permissions (1 << cap_perms_load))
+    cap_str += "r";
+  if (check_permissions (1 << cap_perms_store))
+    cap_str += "w";
+  if (check_permissions (1 << cap_perms_execute))
+    cap_str += "x";
+  if (check_permissions (1 << cap_perms_load_cap))
+    cap_str += "R";
+  if (check_permissions (1 << cap_perms_store_cap))
+    cap_str += "W";
+  if (check_permissions (1 << cap_perms_executive))
+    cap_str += "E";
+
+  /* Handle capability range.  */
+  cap_str += ",";
+  cap_str += core_addr_to_string_nz (get_base ());
+  cap_str += "-";
+  cap_str += core_addr_to_string_nz (get_limit ());
+  cap_str += "]";
+
+  std::string attr_str ("");
+
+  /* Handle attributes.  */
+  if (get_tag () == false)
+    attr_str += "invalid";
+  if (get_otype () == CAP_SEAL_TYPE_RB)
+    {
+      if (!attr_str.empty ())
+	attr_str += ",";
+      attr_str += "sentry";
+    }
+  if (is_sealed ())
+    {
+      if (!attr_str.empty ())
+	attr_str += ",";
+      attr_str += "sealed";
+    }
+
+  if (!attr_str.empty ())
+    cap_str += " (" + attr_str + ")";
+
+  return cap_str;
+}
+
 /* Returns a string representation of the capability.
 
    If COMPACT is true, use a less verbose form.  Otherwise print
@@ -565,61 +620,14 @@ capability::to_str (bool compact)
   if (is_null_derived ())
     return val_str;
 
+  /* Format 2.  */
+  if (compact)
+    return val_str + metadata_str ();
+
+  /* Format 3.  */
   std::string cap_str ("");
   std::string perm_str ("");
   std::string range_str ("");
-
-  /* Format 2.  */
-  if (compact)
-    {
-      /* Handle compact permissions output.  */
-      if (check_permissions (1 << cap_perms_load))
-	perm_str += "r";
-      if (check_permissions (1 << cap_perms_store))
-	perm_str += "w";
-      if (check_permissions (1 << cap_perms_execute))
-	perm_str += "x";
-      if (check_permissions (1 << cap_perms_load_cap))
-	perm_str += "R";
-      if (check_permissions (1 << cap_perms_store_cap))
-	perm_str += "W";
-      if (check_permissions (1 << cap_perms_executive))
-	perm_str += "E";
-
-      /* Handle capability range.  */
-      range_str += core_addr_to_string_nz (get_base ());
-      range_str += "-";
-      range_str += core_addr_to_string_nz (get_limit ());
-
-      std::string attr1_str ("");
-      std::string attr2_str ("");
-      std::string attr3_str ("");
-
-      /* Handle attributes.  */
-      if (get_tag () == false)
-	attr1_str = "invalid";
-      if (get_otype () == CAP_SEAL_TYPE_RB)
-	{
-	  if (!attr1_str.empty ())
-	    attr2_str += ",";
-	  attr2_str += "sentry";
-	}
-      if (is_sealed ())
-	{
-	  if (!attr1_str.empty () || !attr2_str.empty ())
-	    attr3_str += ",";
-	  attr3_str += "sealed";
-	}
-
-      cap_str += val_str + " [" + perm_str + "," + range_str + "]";
-
-      if (!attr1_str.empty () || !attr2_str.empty () || !attr3_str.empty ())
-	cap_str += " (" + attr1_str + attr2_str + attr3_str + ")";
-
-      return cap_str;
-    }
-
-  /* Format 3.  */
 
   /* Permissions.  */
   perm_str += "[";

@@ -552,6 +552,10 @@ public:
 
   /* Printing functions.  */
 
+  /* Returns a string representation of capability metadata.  */
+
+  std::string metadata_str (void);
+
   /* Returns a string representation of the capability.
 
      If COMPACT is true, use a less verbose form.  Otherwise print
