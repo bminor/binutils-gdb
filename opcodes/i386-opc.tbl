@@ -3493,9 +3493,9 @@ tilezero, 0xf249, None, CpuAMX_TILE|Cpu64, Modrm|Vex128|Space0F38|VexW0|No_bSuf|
 
 // KEYLOCKER instructions.
 
-loadiwkey, 0xf30f38dc, None, CpuKL, Load|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { RegXMM, RegXMM }
-encodekey128, 0xf30f38fa, None, CpuKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg32, Reg32 }
-encodekey256, 0xf30f38fb, None, CpuKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg32, Reg32 }
+loadiwkey, 0xf30f38dc, None, CpuKL, Load|Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM, RegXMM }
+encodekey128, 0xf30f38fa, None, CpuKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32, Reg32 }
+encodekey256, 0xf30f38fb, None, CpuKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32, Reg32 }
 aesenc128kl, 0xf30f38dc, None, CpuKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex, RegXMM }
 aesdec128kl, 0xf30f38dd, None, CpuKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex, RegXMM }
 aesenc256kl, 0xf30f38de, None, CpuKL, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex, RegXMM }
