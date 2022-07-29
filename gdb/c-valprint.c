@@ -139,7 +139,8 @@ static const struct generic_val_print_decorations c_decorations =
 static void
 print_unpacked_pointer (struct type *type, struct type *elttype,
 			struct type *unresolved_elttype,
-			const gdb_byte *valaddr, int embedded_offset,
+			const gdb_byte *valaddr, bool valtag,
+			int embedded_offset,
 			CORE_ADDR address, struct ui_file *stream, int recurse,
 			const struct value_print_options *options)
 {
@@ -150,6 +151,8 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
     {
       /* Try to print what function it points to.  */
       print_function_pointer_address (options, gdbarch, address, stream);
+      if (TYPE_CAPABILITY (type))
+	gdbarch_print_cap_attributes (type->arch (), valaddr, valtag, stream);
       return;
     }
 
@@ -161,6 +164,9 @@ print_unpacked_pointer (struct type *type, struct type *elttype,
       fputs_filtered (paddress (gdbarch, address), stream);
       want_space = 1;
     }
+
+  if (TYPE_CAPABILITY (type))
+    gdbarch_print_cap_attributes (type->arch (), valaddr, valtag, stream);
 
   /* For a pointer to a textual type, also print the string
      pointed to, unless pointer is null.  */
@@ -316,6 +322,7 @@ c_value_print_array (struct value *val,
     {
       /* Array of unspecified length: treat like pointer to first elt.  */
       print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr,
+			      value_tag (val),
 			      0, address, stream, recurse, options);
     }
 }
@@ -327,11 +334,6 @@ c_value_print_ptr (struct value *val, struct ui_file *stream, int recurse,
 		   const struct value_print_options *options)
 {
   struct type *type = check_typedef (value_type (val));
-
-  /* If we have a pointer to a capability, handle it as a capability.  */
-  if (options->format == 0 && (type->code () == TYPE_CODE_PTR
-			      && TYPE_CAPABILITY (type)))
-    generic_value_print_capability (val, stream, options);
 
   if (options->format && options->format != 's')
     {
@@ -350,6 +352,9 @@ c_value_print_ptr (struct value *val, struct ui_file *stream, int recurse,
       CORE_ADDR addr = extract_typed_address (valaddr, type);
 
       print_function_pointer_address (options, type->arch (), addr, stream);
+      if (TYPE_CAPABILITY (type))
+	gdbarch_print_cap_attributes (type->arch (), valaddr,
+				      value_tag (val), stream);
     }
   else
     {
@@ -358,6 +363,7 @@ c_value_print_ptr (struct value *val, struct ui_file *stream, int recurse,
       CORE_ADDR addr = unpack_pointer (type, valaddr);
 
       print_unpacked_pointer (type, elttype, unresolved_elttype, valaddr,
+			      value_tag (val),
 			      0, addr, stream, recurse, options);
     }
 }
@@ -384,6 +390,9 @@ c_value_print_struct (struct value *val, struct ui_file *stream, int recurse,
       CORE_ADDR addr = extract_typed_address (valaddr + offset, field_type);
 
       print_function_pointer_address (options, type->arch (), addr, stream);
+      if (TYPE_CAPABILITY (type))
+	gdbarch_print_cap_attributes (type->arch (), valaddr,
+				      value_tag (val), stream);
     }
   else
     cp_print_value_fields (val, stream, recurse, options, NULL, 0);

@@ -46,8 +46,6 @@
 #include "gdbsupport/selftest.h"
 #include "selftest-arch.h"
 
-#include "gdbsupport/capability.h"
-
 /* Maximum number of wchars returned from wchar_iterate.  */
 #define MAX_WCHARS 4
 
@@ -482,6 +480,13 @@ generic_val_print_array (struct value *val,
       /* Array of unspecified length: treat like pointer to first elt.  */
       print_unpacked_pointer (type, elttype, value_address (val),
 			      stream, options);
+      if (TYPE_CAPABILITY (type))
+	{
+	  const gdb_byte *valaddr = value_contents_for_printing (val).data ();
+
+	  gdbarch_print_cap_attributes (type->arch (), valaddr,
+					value_tag (val), stream);
+	}
     }
 
 }
@@ -503,6 +508,9 @@ generic_value_print_ptr (struct value *val, struct ui_file *stream,
       CORE_ADDR addr = unpack_pointer (type, valaddr);
 
       print_unpacked_pointer (type, elttype, addr, stream, options);
+      if (TYPE_CAPABILITY (type))
+	gdbarch_print_cap_attributes (type->arch (), valaddr, value_tag (val),
+				      stream);
     }
 }
 
@@ -516,45 +524,14 @@ generic_value_print_capability (struct value *val, struct ui_file *stream,
   /* Account for the tag bit in the length.  */
   int length = TYPE_LENGTH (type);
   const gdb_byte *contents = value_contents_for_printing (val).data ();
+  bool tag = value_tag (val);
   enum bfd_endian byte_order = type_byte_order (type);
-  bool tag = false;
-
-  switch (VALUE_LVAL (val))
-    {
-      case not_lval:
-      case lval_register:
-      case lval_internalvar:
-	if (value_tagged (val))
-	  tag = value_tag (val);
-	break;
-      case lval_memory:
-	{
-	  if (!value_lazy (val) && value_tagged (val))
-	    tag = value_tag (val);
-	  else
-	    {
-	      struct gdbarch *gdbarch = type->arch ();
-	      tag = gdbarch_get_cap_tag_from_address (gdbarch,
-						      value_address (val));
-	    }
-	}
-	break;
-      default:
-	break;
-    }
 
   if (options->format && options->format == 'x')
     print_hex_chars (stream, contents, length, byte_order, 0);
   else
-    {
-      uint128_t dummy_cap;
-      memcpy (&dummy_cap, contents, length);
-      capability cap (dummy_cap, tag);
-      fprintf_filtered (stream, "%s ",
-			cap.to_str (options->compact_capabilities).c_str ());
-    }
-
-  return;
+    gdbarch_print_cap (type->arch (), contents, tag,
+		       options->compact_capabilities, stream);
 }
 
 /* Print '@' followed by the address contained in ADDRESS_BUFFER.  */
