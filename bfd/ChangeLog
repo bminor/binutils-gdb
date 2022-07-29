@@ -1,3 +1,9 @@
+2022-07-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 29424
+	* dwarf2.c (read_attribute_value): Handle DW_FORM_rnglistx and
+	DW_FORM_loclistx.
+
 2022-07-08  Nick Clifton  <nickc@redhat.com>
 
 	* 2.39 branch created.
