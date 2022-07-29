@@ -573,7 +573,7 @@ capability::metadata_str (void)
 	attr_str += ",";
       attr_str += "sentry";
     }
-  if (is_sealed ())
+  else if (is_sealed ())
     {
       if (!attr_str.empty ())
 	attr_str += ",";
