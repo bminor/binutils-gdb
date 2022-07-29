@@ -1,3 +1,9 @@
+2022-07-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 29424
+	* dwarf2.c (read_attribute_value): Handle DW_FORM_rnglistx and
+	DW_FORM_loclistx.
+
 2022-07-26  Nick Clifton  <nickc@redhat.com>
 
 	* elfnn-loongarch.c (loongarch_elf_relocate_section): Fix

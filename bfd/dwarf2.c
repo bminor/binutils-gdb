@@ -1607,6 +1607,11 @@ read_attribute_value (struct attribute *  attr,
       attr->u.sval = _bfd_safe_read_leb128 (abfd, &info_ptr,
 					    true, info_ptr_end);
       break;
+
+    case DW_FORM_rnglistx:
+    case DW_FORM_loclistx:
+      /* FIXME: Add support for these forms!  */
+      /* Fall through.  */
     case DW_FORM_ref_udata:
     case DW_FORM_udata:
       attr->u.val = _bfd_safe_read_leb128 (abfd, &info_ptr,
