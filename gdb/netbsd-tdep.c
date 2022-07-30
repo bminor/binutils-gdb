@@ -416,23 +416,23 @@ nbsd_get_siginfo_type (struct gdbarch *gdbarch)
   /* pid_t */
   type *pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
 			      TYPE_LENGTH (int32_type) * char_bits, "pid_t");
-  TYPE_TARGET_TYPE (pid_type) = int32_type;
+  pid_type->set_target_type (int32_type);
 
   /* uid_t */
   type *uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
 			      TYPE_LENGTH (uint32_type) * char_bits, "uid_t");
-  TYPE_TARGET_TYPE (uid_type) = uint32_type;
+  uid_type->set_target_type (uint32_type);
 
   /* clock_t */
   type *clock_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
 				TYPE_LENGTH (int_type) * char_bits, "clock_t");
-  TYPE_TARGET_TYPE (clock_type) = int_type;
+  clock_type->set_target_type (int_type);
 
   /* lwpid_t */
   type *lwpid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
 				TYPE_LENGTH (int32_type) * char_bits,
 				"lwpid_t");
-  TYPE_TARGET_TYPE (lwpid_type) = int32_type;
+  lwpid_type->set_target_type (int32_type);
 
   /* union sigval */
   type *sigval_type = arch_composite_type (gdbarch, NULL, TYPE_CODE_UNION);

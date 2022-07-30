@@ -698,7 +698,7 @@ read_func_kind_type (struct ctf_context *ccp, ctf_id_t tid)
 	     fname == nullptr ? "noname" : fname);
     }
   rettype = fetch_tid_type (ccp, cfi.ctc_return);
-  TYPE_TARGET_TYPE (type) = rettype;
+  type->set_target_type (rettype);
   set_type_align (type, ctf_type_align (fp, tid));
 
   /* Set up function's arguments.  */
@@ -749,7 +749,7 @@ read_enum_type (struct ctf_context *ccp, ctf_id_t tid)
   type->set_code (TYPE_CODE_ENUM);
   TYPE_LENGTH (type) = ctf_type_size (fp, tid);
   /* Set the underlying type based on its ctf_type_size bits.  */
-  TYPE_TARGET_TYPE (type) = objfile_int_type (of, TYPE_LENGTH (type), false);
+  type->set_target_type (objfile_int_type (of, TYPE_LENGTH (type), false));
   set_type_align (type, ctf_type_align (fp, tid));
 
   return set_tid_type (of, tid, type);
@@ -791,15 +791,14 @@ add_array_cv_type (struct ctf_context *ccp,
 
   while (TYPE_TARGET_TYPE (inner_array)->code () == TYPE_CODE_ARRAY)
     {
-      TYPE_TARGET_TYPE (inner_array)
-	= copy_type (TYPE_TARGET_TYPE (inner_array));
+      inner_array->set_target_type (copy_type (TYPE_TARGET_TYPE (inner_array)));
       inner_array = TYPE_TARGET_TYPE (inner_array);
     }
 
   el_type = TYPE_TARGET_TYPE (inner_array);
   cnst |= TYPE_CONST (el_type);
   voltl |= TYPE_VOLATILE (el_type);
-  TYPE_TARGET_TYPE (inner_array) = make_cv_type (cnst, voltl, el_type, nullptr);
+  inner_array->set_target_type (make_cv_type (cnst, voltl, el_type, nullptr));
 
   return set_tid_type (ccp->of, tid, base_type);
 }
@@ -933,9 +932,9 @@ read_typedef_type (struct ctf_context *ccp, ctf_id_t tid,
   set_tid_type (objfile, tid, this_type);
   target_type = fetch_tid_type (ccp, btid);
   if (target_type != this_type)
-    TYPE_TARGET_TYPE (this_type) = target_type;
+    this_type->set_target_type (target_type);
   else
-    TYPE_TARGET_TYPE (this_type) = nullptr;
+    this_type->set_target_type (nullptr);
 
   this_type->set_target_is_stub (TYPE_TARGET_TYPE (this_type) != nullptr);
 

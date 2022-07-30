@@ -968,7 +968,7 @@ struct main_type
      the type.
      - Unused otherwise.  */
 
-  struct type *target_type;
+  struct type *m_target_type;
 
   /* * For structure and union types, a description of each field.
      For set and pascal array types, there is one "field",
@@ -1079,6 +1079,16 @@ struct type
   type *index_type () const
   {
     return this->field (0).type ();
+  }
+
+  struct type *target_type () const
+  {
+    return this->main_type->m_target_type;
+  }
+
+  void set_target_type (struct type *target_type)
+  {
+    this->main_type->m_target_type = target_type;
   }
 
   void set_index_type (type *index_type)
@@ -2087,7 +2097,7 @@ extern void allocate_gnat_aux_type (struct type *);
    allocate_fixed_point_type_info (type))
 
 #define TYPE_MAIN_TYPE(thistype) (thistype)->main_type
-#define TYPE_TARGET_TYPE(thistype) TYPE_MAIN_TYPE(thistype)->target_type
+#define TYPE_TARGET_TYPE(thistype) ((thistype)->target_type ())
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
 #define TYPE_RVALUE_REFERENCE_TYPE(thistype) (thistype)->rvalue_reference_type

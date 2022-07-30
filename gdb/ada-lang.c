@@ -8114,7 +8114,7 @@ template_to_static_fixed_type (struct type *type0)
 
   /* Whether or not we cloned TYPE0, cache the result so that we don't do
      recompute all over next time.  */
-  TYPE_TARGET_TYPE (type0) = type;
+  type0->set_target_type (type);
 
   for (f = 0; f < nfields; f += 1)
     {
@@ -8134,7 +8134,8 @@ template_to_static_fixed_type (struct type *type0)
 	  /* Clone TYPE0 only the first time we get a new field type.  */
 	  if (type == type0)
 	    {
-	      TYPE_TARGET_TYPE (type0) = type = alloc_type_copy (type0);
+	      type = alloc_type_copy (type0);
+	      type0->set_target_type (type);
 	      type->set_code (type0->code ());
 	      INIT_NONE_SPECIFIC (type);
 	      type->set_num_fields (nfields);
@@ -10278,8 +10279,8 @@ ada_ternop_slice (struct expression *exp,
      the aligners.  */
   if (value_type (array)->code () == TYPE_CODE_REF
       && ada_is_aligner_type (TYPE_TARGET_TYPE (value_type (array))))
-    TYPE_TARGET_TYPE (value_type (array)) =
-      ada_aligned_type (TYPE_TARGET_TYPE (value_type (array)));
+    value_type (array)->set_target_type
+      (ada_aligned_type (TYPE_TARGET_TYPE (value_type (array))));
 
   if (ada_is_any_packed_array_type (value_type (array)))
     error (_("cannot slice a packed array"));

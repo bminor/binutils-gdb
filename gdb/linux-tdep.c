@@ -294,20 +294,20 @@ linux_get_siginfo_type_with_fields (struct gdbarch *gdbarch,
   /* __pid_t */
   pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
 			TYPE_LENGTH (int_type) * TARGET_CHAR_BIT, "__pid_t");
-  TYPE_TARGET_TYPE (pid_type) = int_type;
+  pid_type->set_target_type (int_type);
   pid_type->set_target_is_stub (true);
 
   /* __uid_t */
   uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
 			TYPE_LENGTH (uint_type) * TARGET_CHAR_BIT, "__uid_t");
-  TYPE_TARGET_TYPE (uid_type) = uint_type;
+  uid_type->set_target_type (uint_type);
   uid_type->set_target_is_stub (true);
 
   /* __clock_t */
   clock_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
 			  TYPE_LENGTH (long_type) * TARGET_CHAR_BIT,
 			  "__clock_t");
-  TYPE_TARGET_TYPE (clock_type) = long_type;
+  clock_type->set_target_type (long_type);
   clock_type->set_target_is_stub (true);
 
   /* _sifields */

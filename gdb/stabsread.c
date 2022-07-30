@@ -1717,7 +1717,7 @@ again:
 	else
 	  {
 	    type->set_target_is_stub (true);
-	    TYPE_TARGET_TYPE (type) = xtype;
+	    type->set_target_type (xtype);
 	  }
       }
       break;

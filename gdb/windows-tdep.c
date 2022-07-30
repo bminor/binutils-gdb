@@ -246,7 +246,7 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   seh_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
 			    TYPE_LENGTH (void_ptr_type) * TARGET_CHAR_BIT,
 			    NULL);
-  TYPE_TARGET_TYPE (seh_ptr_type) = seh_type;
+  seh_ptr_type->set_target_type (seh_type);
 
   append_composite_type_field (seh_type, "next_seh", seh_ptr_type);
   append_composite_type_field (seh_type, "handler",
@@ -267,7 +267,7 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   peb_ldr_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
 				TYPE_LENGTH (void_ptr_type) * TARGET_CHAR_BIT,
 				NULL);
-  TYPE_TARGET_TYPE (peb_ldr_ptr_type) = peb_ldr_type;
+  peb_ldr_ptr_type->set_target_type (peb_ldr_type);
 
   /* struct UNICODE_STRING */
   uni_str_type = arch_composite_type (gdbarch, "unicode_string",
@@ -337,7 +337,7 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   peb_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
 			    TYPE_LENGTH (void_ptr_type) * TARGET_CHAR_BIT,
 			    NULL);
-  TYPE_TARGET_TYPE (peb_ptr_type) = peb_type;
+  peb_ptr_type->set_target_type (peb_type);
 
 
   /* struct thread information block */
@@ -381,7 +381,7 @@ windows_get_tlb_type (struct gdbarch *gdbarch)
   tib_ptr_type = arch_type (gdbarch, TYPE_CODE_PTR,
 			    TYPE_LENGTH (void_ptr_type) * TARGET_CHAR_BIT,
 			    NULL);
-  TYPE_TARGET_TYPE (tib_ptr_type) = tib_type;
+  tib_ptr_type->set_target_type (tib_type);
 
   windows_gdbarch_data->tib_ptr_type = tib_ptr_type;
 

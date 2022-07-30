@@ -14380,7 +14380,7 @@ rewrite_array_type (struct type *type)
   memcpy (new_fields, copy->fields (), nfields * sizeof (struct field));
   copy->set_fields (new_fields);
   if (new_target != nullptr)
-    TYPE_TARGET_TYPE (copy) = new_target;
+    copy->set_target_type (new_target);
 
   struct type *index_copy = copy_type (index_type);
   range_bounds *bounds
@@ -15196,7 +15196,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       struct type *underlying_type = die_type (die, cu);
 
-      TYPE_TARGET_TYPE (type) = underlying_type;
+      type->set_target_type (underlying_type);
     }
 
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
@@ -16286,15 +16286,14 @@ add_array_cv_type (struct die_info *die, struct dwarf2_cu *cu,
 
   while (TYPE_TARGET_TYPE (inner_array)->code () == TYPE_CODE_ARRAY)
     {
-      TYPE_TARGET_TYPE (inner_array) =
-	copy_type (TYPE_TARGET_TYPE (inner_array));
+      inner_array->set_target_type (copy_type (TYPE_TARGET_TYPE (inner_array)));
       inner_array = TYPE_TARGET_TYPE (inner_array);
     }
 
   el_type = TYPE_TARGET_TYPE (inner_array);
   cnst |= TYPE_CONST (el_type);
   voltl |= TYPE_VOLATILE (el_type);
-  TYPE_TARGET_TYPE (inner_array) = make_cv_type (cnst, voltl, el_type, NULL);
+  inner_array->set_target_type (make_cv_type (cnst, voltl, el_type, NULL));
 
   return set_die_type (die, base_type, cu);
 }
@@ -16675,7 +16674,7 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
   set_die_type (die, this_type, cu);
   target_type = die_type (die, cu);
   if (target_type != this_type)
-    TYPE_TARGET_TYPE (this_type) = target_type;
+    this_type->set_target_type (target_type);
   else
     {
       /* Self-referential typedefs are, it seems, not allowed by the DWARF
@@ -16683,7 +16682,7 @@ read_typedef (struct die_info *die, struct dwarf2_cu *cu)
       complaint (_("Self-referential DW_TAG_typedef "
 		   "- DIE at %s [in module %s]"),
 		 sect_offset_str (die->sect_off), objfile_name (objfile));
-      TYPE_TARGET_TYPE (this_type) = NULL;
+      this_type->set_target_type (nullptr);
     }
   if (name == NULL)
     {
