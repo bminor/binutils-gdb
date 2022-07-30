@@ -91,10 +91,8 @@ f77_get_dynamic_length_of_aggregate (struct type *type)
   upper_bound = f77_get_upperbound (type);
 
   /* Patch in a valid length value.  */
-
-  TYPE_LENGTH (type) =
-    (upper_bound - lower_bound + 1)
-    * TYPE_LENGTH (check_typedef (type->target_type ()));
+  type->set_length ((upper_bound - lower_bound + 1)
+		    * TYPE_LENGTH (check_typedef (type->target_type ())));
 }
 
 /* Per-dimension statistics.  */

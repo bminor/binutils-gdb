@@ -729,7 +729,7 @@ test_print_fields (gdbarch *arch)
   type *uint8_type = builtin_type (arch)->builtin_uint8;
   type *bool_type = builtin_type (arch)->builtin_bool;
   type *the_struct = arch_composite_type (arch, NULL, TYPE_CODE_STRUCT);
-  TYPE_LENGTH (the_struct) = 4;
+  the_struct->set_length (4);
 
   /* Value:  1110 1001
      Fields: C-BB B-A- */

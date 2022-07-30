@@ -899,7 +899,7 @@ public:
 	tmp->set_name (OCL_STRING(TYPE ## 2));			\
 	tmp = add (init_vector_type (ELEMENT_TYPE, 3));		\
 	tmp->set_name (OCL_STRING(TYPE ## 3));			\
-	TYPE_LENGTH (tmp) = 4 * TYPE_LENGTH (ELEMENT_TYPE);	\
+	tmp->set_length (4 * TYPE_LENGTH (ELEMENT_TYPE));	\
 	tmp = add (init_vector_type (ELEMENT_TYPE, 4));		\
 	tmp->set_name (OCL_STRING(TYPE ## 4));			\
 	tmp = add (init_vector_type (ELEMENT_TYPE, 8));		\

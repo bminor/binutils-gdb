@@ -246,7 +246,7 @@ make_gdb_type (struct gdbarch *gdbarch, struct tdesc_type *ttype)
 	}
 
       if (e->size != 0)
-	TYPE_LENGTH (m_type) = e->size;
+	m_type->set_length (e->size);
     }
 
     void make_gdb_type_union (const tdesc_type_with_fields *e)

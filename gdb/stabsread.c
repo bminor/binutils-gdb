@@ -1684,7 +1684,7 @@ again:
 	  {
 	    /* It's being defined as itself.  That means it is "void".  */
 	    type->set_code (TYPE_CODE_VOID);
-	    TYPE_LENGTH (type) = 1;
+	    type->set_length (1);
 	  }
 	else if (type_size >= 0 || is_string)
 	  {
@@ -2008,7 +2008,7 @@ again:
 
   /* Size specified in a type attribute overrides any other size.  */
   if (type_size != -1)
-    TYPE_LENGTH (type) = (type_size + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT;
+    type->set_length ((type_size + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT);
 
   return type;
 }
@@ -3385,7 +3385,7 @@ set_length_in_type_chain (struct type *type)
   while (ntype != type)
     {
       if (TYPE_LENGTH(ntype) == 0)
-	TYPE_LENGTH (ntype) = TYPE_LENGTH (type);
+	ntype->set_length (TYPE_LENGTH (type));
       else
 	complain_about_struct_wipeout (ntype);
       ntype = TYPE_CHAIN (ntype);
@@ -3441,7 +3441,7 @@ read_struct_type (const char **pp, struct type *type, enum type_code type_code,
   {
     int nbits;
 
-    TYPE_LENGTH (type) = read_huge_number (pp, 0, &nbits, 0);
+    type->set_length (read_huge_number (pp, 0, &nbits, 0));
     if (nbits != 0)
       return error_type (pp, objfile);
     set_length_in_type_chain (type);
@@ -3606,7 +3606,7 @@ read_enum_type (const char **pp, struct type *type,
 
   /* Now fill in the fields of the type-structure.  */
 
-  TYPE_LENGTH (type) = gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT;
+  type->set_length (gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT);
   set_length_in_type_chain (type);
   type->set_code (TYPE_CODE_ENUM);
   type->set_is_stub (false);

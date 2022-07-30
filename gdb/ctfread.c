@@ -641,7 +641,7 @@ read_structure_type (struct ctf_context *ccp, ctf_id_t tid)
   else
     type->set_code (TYPE_CODE_STRUCT);
 
-  TYPE_LENGTH (type) = ctf_type_size (fp, tid);
+  type->set_length (ctf_type_size (fp, tid));
   set_type_align (type, ctf_type_align (fp, tid));
 
   return set_tid_type (ccp->of, tid, type);
@@ -747,7 +747,7 @@ read_enum_type (struct ctf_context *ccp, ctf_id_t tid)
     type->set_name (name);
 
   type->set_code (TYPE_CODE_ENUM);
-  TYPE_LENGTH (type) = ctf_type_size (fp, tid);
+  type->set_length (ctf_type_size (fp, tid));
   /* Set the underlying type based on its ctf_type_size bits.  */
   type->set_target_type (objfile_int_type (of, TYPE_LENGTH (type), false));
   set_type_align (type, ctf_type_align (fp, tid));
@@ -834,11 +834,11 @@ read_array_type (struct ctf_context *ccp, ctf_id_t tid)
   if (ar.ctr_nelems <= 1)	/* Check if undefined upper bound.  */
     {
       range_type->bounds ()->high.set_undefined ();
-      TYPE_LENGTH (type) = 0;
+      type->set_length (0);
       type->set_target_is_stub (true);
     }
   else
-    TYPE_LENGTH (type) = ctf_type_size (fp, tid);
+    type->set_length (ctf_type_size (fp, tid));
 
   set_type_align (type, ctf_type_align (fp, tid));
 
@@ -988,7 +988,7 @@ read_forward_type (struct ctf_context *ccp, ctf_id_t tid)
   else
     type->set_code (TYPE_CODE_STRUCT);
 
-  TYPE_LENGTH (type) = 0;
+  type->set_length (0);
   type->set_is_stub (true);
 
   return set_tid_type (of, tid, type);

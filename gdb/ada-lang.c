@@ -2165,7 +2165,7 @@ ada_type_of_array (struct value *arr, int bounds)
 		  int array_bitsize =
 			(hi - lo + 1) * TYPE_FIELD_BITSIZE (elt_type, 0);
 
-		  TYPE_LENGTH (array_type) = (array_bitsize + 7) / 8;
+		  array_type->set_length ((array_bitsize + 7) / 8);
 		}
 	    }
 	}
@@ -2392,12 +2392,14 @@ constrained_packed_array_type (struct type *type, long *elt_bits)
       || !get_discrete_bounds (index_type, &low_bound, &high_bound))
     low_bound = high_bound = 0;
   if (high_bound < low_bound)
-    *elt_bits = TYPE_LENGTH (new_type) = 0;
+    {
+      *elt_bits = 0;
+      new_type->set_length (0);
+    }
   else
     {
       *elt_bits *= (high_bound - low_bound + 1);
-      TYPE_LENGTH (new_type) =
-	(*elt_bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
+      new_type->set_length ((*elt_bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT);
     }
 
   new_type->set_is_fixed_instance (true);
@@ -2471,8 +2473,8 @@ recursively_update_array_bitsize (struct type *type)
       LONGEST elt_bitsize = elt_len * TYPE_FIELD_BITSIZE (elt_type, 0);
       TYPE_FIELD_BITSIZE (type, 0) = elt_bitsize;
 
-      TYPE_LENGTH (type) = ((our_len * elt_bitsize + HOST_CHAR_BIT - 1)
-			    / HOST_CHAR_BIT);
+      type->set_length (((our_len * elt_bitsize + HOST_CHAR_BIT - 1)
+			 / HOST_CHAR_BIT));
     }
 
   return our_len;
@@ -7826,7 +7828,7 @@ empty_record (struct type *templ)
   type->set_code (TYPE_CODE_STRUCT);
   INIT_NONE_SPECIFIC (type);
   type->set_name ("<empty>");
-  TYPE_LENGTH (type) = 0;
+  type->set_length (0);
   return type;
 }
 
@@ -7996,8 +7998,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
       if (off + fld_bit_len > bit_len)
 	bit_len = off + fld_bit_len;
       off += fld_bit_len;
-      TYPE_LENGTH (rtype) =
-	align_up (bit_len, TARGET_CHAR_BIT) / TARGET_CHAR_BIT;
+      rtype->set_length (align_up (bit_len, TARGET_CHAR_BIT) / TARGET_CHAR_BIT);
     }
 
   /* We handle the variant part, if any, at the end because of certain
@@ -8042,8 +8043,9 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	    TARGET_CHAR_BIT;
 	  if (off + fld_bit_len > bit_len)
 	    bit_len = off + fld_bit_len;
-	  TYPE_LENGTH (rtype) =
-	    align_up (bit_len, TARGET_CHAR_BIT) / TARGET_CHAR_BIT;
+
+	  rtype->set_length
+	    (align_up (bit_len, TARGET_CHAR_BIT) / TARGET_CHAR_BIT);
 	}
     }
 
@@ -8063,10 +8065,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 		 pulongest (TYPE_LENGTH (type)));
     }
   else
-    {
-      TYPE_LENGTH (rtype) = align_up (TYPE_LENGTH (rtype),
-				      TYPE_LENGTH (type));
-    }
+    rtype->set_length (align_up (TYPE_LENGTH (rtype), TYPE_LENGTH (type)));
 
   value_free_to_mark (mark);
   return rtype;
@@ -8148,7 +8147,7 @@ template_to_static_fixed_type (struct type *type0)
 
 	      type->set_name (ada_type_name (type0));
 	      type->set_is_fixed_instance (true);
-	      TYPE_LENGTH (type) = 0;
+	      type->set_length (0);
 	    }
 	  type->field (f).set_type (new_type);
 	  type->field (f).set_name (type0->field (f).name ());
@@ -8199,7 +8198,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
 
   rtype->set_name (ada_type_name (type));
   rtype->set_is_fixed_instance (true);
-  TYPE_LENGTH (rtype) = TYPE_LENGTH (type);
+  rtype->set_length (TYPE_LENGTH (type));
 
   branch_type = to_fixed_variant_branch_type
     (type->field (variant_field).type (),
@@ -8222,9 +8221,11 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
       rtype->field (variant_field).set_type (branch_type);
       rtype->field (variant_field).set_name ("S");
       TYPE_FIELD_BITSIZE (rtype, variant_field) = 0;
-      TYPE_LENGTH (rtype) += TYPE_LENGTH (branch_type);
+      rtype->set_length (TYPE_LENGTH (rtype) + TYPE_LENGTH (branch_type));
     }
-  TYPE_LENGTH (rtype) -= TYPE_LENGTH (type->field (variant_field).type ());
+
+  rtype->set_length (TYPE_LENGTH (rtype)
+		     - TYPE_LENGTH (type->field (variant_field).type ()));
 
   value_free_to_mark (mark);
   return rtype;
@@ -8532,9 +8533,9 @@ to_fixed_array_type (struct type *type0, struct value *dval,
       int elt_bitsize = TYPE_FIELD_BITSIZE (type0, 0);
 
       TYPE_FIELD_BITSIZE (result, 0) = TYPE_FIELD_BITSIZE (type0, 0);
-      TYPE_LENGTH (result) = len * elt_bitsize / HOST_CHAR_BIT;
+      result->set_length (len * elt_bitsize / HOST_CHAR_BIT);
       if (TYPE_LENGTH (result) * HOST_CHAR_BIT < len * elt_bitsize)
-	TYPE_LENGTH (result)++;
+	result->set_length (TYPE_LENGTH (result) + 1);
     }
 
   result->set_is_fixed_instance (true);
@@ -8630,7 +8631,7 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
 	    if (xvz_found && TYPE_LENGTH (fixed_record_type) != size)
 	      {
 		fixed_record_type = copy_type (fixed_record_type);
-		TYPE_LENGTH (fixed_record_type) = size;
+		fixed_record_type->set_length (size);
 
 		/* The FIXED_RECORD_TYPE may have be a stub.  We have
 		   observed this when the debugging info is STABS, and
@@ -11528,7 +11529,7 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
       /* create_static_range_type alters the resulting type's length
 	 to match the size of the base_type, which is not what we want.
 	 Set it back to the original range type's length.  */
-      TYPE_LENGTH (type) = TYPE_LENGTH (raw_type);
+      type->set_length (TYPE_LENGTH (raw_type));
       type->set_name (name);
       return type;
     }
