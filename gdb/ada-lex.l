@@ -498,8 +498,8 @@ processInt (struct parser_state *par_state, const char *base0,
     yylval.typed_val.type = type_long_long (par_state);
   else if (fits_in_type (1, value, long_long_bits, false))
     {
-      /* Note: Interprets ULLONG_MAX as -1.  */
-      yylval.typed_val.type = type_long_long (par_state);
+      yylval.typed_val.type
+	= builtin_type (par_state->gdbarch ())->builtin_unsigned_long_long;
       /* See unsigned long case above.  */
       if (value & LONGEST_SIGN)
 	yylval.typed_val.val =
