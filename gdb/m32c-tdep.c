@@ -2033,7 +2033,7 @@ m32c_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
     /* Dereference function pointer types.  */
     if (func_type->code () == TYPE_CODE_PTR)
-      func_type = TYPE_TARGET_TYPE (func_type);
+      func_type = func_type->target_type ();
 
     gdb_assert (func_type->code () == TYPE_CODE_FUNC ||
 		func_type->code () == TYPE_CODE_METHOD);
@@ -2412,7 +2412,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
   enum type_code target_code;
   gdb_assert (type->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type));
 
-  target_code = TYPE_TARGET_TYPE (type)->code ();
+  target_code = type->target_type ()->code ();
 
   if (target_code == TYPE_CODE_FUNC || target_code == TYPE_CODE_METHOD)
     {
@@ -2493,7 +2493,7 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
 
   ptr = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
 
-  target_code = TYPE_TARGET_TYPE (type)->code ();
+  target_code = type->target_type ()->code ();
 
   if (target_code == TYPE_CODE_FUNC || target_code == TYPE_CODE_METHOD)
     {

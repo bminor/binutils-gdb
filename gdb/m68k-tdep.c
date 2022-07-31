@@ -404,7 +404,7 @@ m68k_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
   const bool is_vector = code == TYPE_CODE_ARRAY && type->is_vector ();
 
   if (is_vector
-      && check_typedef (TYPE_TARGET_TYPE (type))->code () == TYPE_CODE_FLT)
+      && check_typedef (type->target_type ())->code () == TYPE_CODE_FLT)
     return 0;
 
   /* According to m68k_return_in_memory in the m68k GCC back-end,

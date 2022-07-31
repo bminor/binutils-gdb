@@ -983,7 +983,7 @@ elf_gnu_ifunc_resolver_return_stop (code_breakpoint *b)
   thread_info *thread = inferior_thread ();
   struct gdbarch *gdbarch = get_frame_arch (get_current_frame ());
   struct type *func_func_type = builtin_type (gdbarch)->builtin_func_func;
-  struct type *value_type = TYPE_TARGET_TYPE (func_func_type);
+  struct type *value_type = func_func_type->target_type ();
   struct regcache *regcache = get_thread_regcache (thread);
   struct value *func_func;
   struct value *value;

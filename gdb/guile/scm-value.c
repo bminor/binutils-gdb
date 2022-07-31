@@ -576,7 +576,7 @@ gdbscm_value_dynamic_type (SCM self)
 
       if (((type->code () == TYPE_CODE_PTR)
 	   || (type->code () == TYPE_CODE_REF))
-	  && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_STRUCT))
+	  && (type->target_type ()->code () == TYPE_CODE_STRUCT))
 	{
 	  struct value *target;
 	  int was_pointer = type->code () == TYPE_CODE_PTR;
@@ -1181,7 +1181,7 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
 	      length = array_length;
 	    else if (array_length == -1)
 	      {
-		type = lookup_array_range_type (TYPE_TARGET_TYPE (realtype),
+		type = lookup_array_range_type (realtype->target_type (),
 						0, length - 1);
 	      }
 	    else if (length != array_length)
@@ -1190,7 +1190,7 @@ gdbscm_value_to_lazy_string (SCM self, SCM rest)
 		   specified length.  */
 		if (length > array_length)
 		  error (_("length is larger than array size"));
-		type = lookup_array_range_type (TYPE_TARGET_TYPE (type),
+		type = lookup_array_range_type (type->target_type (),
 						low_bound,
 						low_bound + length - 1);
 	      }

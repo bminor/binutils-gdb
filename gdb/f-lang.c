@@ -162,7 +162,7 @@ fortran_bounds_all_dims (bool lbound_p,
       value_contents_copy (result, dst_offset, v, 0, elm_len);
 
       /* Peel another dimension of the array.  */
-      array_type = TYPE_TARGET_TYPE (array_type);
+      array_type = array_type->target_type ();
     }
 
   return result;
@@ -208,7 +208,7 @@ fortran_bounds_for_dimension (bool lbound_p, value *array, value *dim_val,
 	}
 
       /* Peel off another dimension of the array.  */
-      array_type = TYPE_TARGET_TYPE (array_type);
+      array_type = array_type->target_type ();
     }
 
   gdb_assert_not_reached ("failed to find matching dimension");
@@ -230,7 +230,7 @@ calc_f77_array_dims (struct type *array_type)
 
   tmp_type = array_type;
 
-  while ((tmp_type = TYPE_TARGET_TYPE (tmp_type)))
+  while ((tmp_type = tmp_type->target_type ()))
     {
       if (tmp_type->code () == TYPE_CODE_ARRAY)
 	++ndimen;
@@ -435,13 +435,13 @@ fortran_associated (struct gdbarch *gdbarch, const language_defn *lang,
 
   struct type *pointer_target_type;
   if (pointer_type->code () == TYPE_CODE_PTR)
-    pointer_target_type = TYPE_TARGET_TYPE (pointer_type);
+    pointer_target_type = pointer_type->target_type ();
   else
     pointer_target_type = pointer_type;
 
   struct type *target_target_type;
   if (target_type->code () == TYPE_CODE_PTR)
-    target_target_type = TYPE_TARGET_TYPE (target_type);
+    target_target_type = target_type->target_type ();
   else
     target_target_type = target_type;
 
@@ -530,12 +530,12 @@ fortran_associated (struct gdbarch *gdbarch, const language_defn *lang,
 	  if (pointer_stride == 0)
 	    pointer_stride
 	      = type_length_units (check_typedef
-				     (TYPE_TARGET_TYPE (pointer_type))) * 8;
+				     (pointer_type->target_type ())) * 8;
 	  target_stride = target_range->bounds ()->bit_stride ();
 	  if (target_stride == 0)
 	    target_stride
 	      = type_length_units (check_typedef
-				     (TYPE_TARGET_TYPE (target_type))) * 8;
+				     (target_type->target_type ())) * 8;
 	  if (pointer_stride != target_stride)
 	    break;
 
@@ -634,7 +634,7 @@ fortran_array_size (value *array, value *dim_val, type *result_type)
 	}
 
       /* Peel off another dimension of the array.  */
-      array_type = TYPE_TARGET_TYPE (array_type);
+      array_type = array_type->target_type ();
     }
 
   return value_from_longest (result_type, result);
@@ -747,7 +747,7 @@ fortran_array_shape (struct gdbarch *gdbarch, const language_defn *lang,
       value_contents_copy (result, dst_offset, v, 0, elm_len);
 
       /* Peel another dimension of the array.  */
-      val_type = TYPE_TARGET_TYPE (val_type);
+      val_type = val_type->target_type ();
     }
 
   return result;
@@ -1016,11 +1016,11 @@ eval_op_f_kind (struct type *expect_type, struct expression *exp,
       error (_("argument to kind must be an intrinsic type"));
     }
 
-  if (!TYPE_TARGET_TYPE (type))
+  if (!type->target_type ())
     return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
 			       TYPE_LENGTH (type));
   return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
-			     TYPE_LENGTH (TYPE_TARGET_TYPE (type)));
+			     TYPE_LENGTH (type->target_type ()));
 }
 
 /* A helper function for UNOP_FORTRAN_ALLOCATED.  */
@@ -1139,7 +1139,7 @@ fortran_undetermined::value_subarray (value *array,
     for (int i = 0; i < ndimensions; ++i)
       {
 	dim_types.push_back (type);
-	type = TYPE_TARGET_TYPE (type);
+	type = type->target_type ();
       }
     /* TYPE is now the inner element type of the array, we start the new
        array slice off as this type, then as we process the requested slice
@@ -1228,7 +1228,7 @@ fortran_undetermined::value_subarray (value *array,
 	    error (_("stride must not be 0"));
 
 	  /* Get information about this dimension in the original ARRAY.  */
-	  struct type *target_type = TYPE_TARGET_TYPE (dim_type);
+	  struct type *target_type = dim_type->target_type ();
 	  struct type *index_type = dim_type->index_type ();
 	  LONGEST lb = f77_get_lowerbound (dim_type);
 	  LONGEST ub = f77_get_upperbound (dim_type);
@@ -1330,7 +1330,7 @@ fortran_undetermined::value_subarray (value *array,
 	    = value_as_long (ops[i]->evaluate_with_coercion (exp, noside));
 
 	  /* Get information about this dimension in the original ARRAY.  */
-	  struct type *target_type = TYPE_TARGET_TYPE (dim_type);
+	  struct type *target_type = dim_type->target_type ();
 	  struct type *index_type = dim_type->index_type ();
 	  LONGEST lb = f77_get_lowerbound (dim_type);
 	  LONGEST ub = f77_get_upperbound (dim_type);
@@ -1395,7 +1395,7 @@ fortran_undetermined::value_subarray (value *array,
 
       struct type *new_range
 	= create_range_type_with_stride ((struct type *) NULL,
-					 TYPE_TARGET_TYPE (d.index),
+					 d.index->target_type (),
 					 &p_low, &p_high, 0, &p_stride,
 					 true);
       array_slice_type
@@ -1431,7 +1431,7 @@ fortran_undetermined::value_subarray (value *array,
 
 	  struct type *new_range
 	    = create_range_type_with_stride ((struct type *) NULL,
-					     TYPE_TARGET_TYPE (d.index),
+					     d.index->target_type (),
 					     &p_low, &p_high, 0, &p_stride,
 					     true);
 	  repacked_array_type
@@ -1503,7 +1503,7 @@ fortran_undetermined::evaluate (struct type *expect_type,
 	 So we need to look into its target type to see if it is
 	 array, string or function.  If it is, we need to switch
 	 to the target value the original one points to.  */
-      struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
+      struct type *target_type = check_typedef (type->target_type ());
 
       if (target_type->code () == TYPE_CODE_ARRAY
 	  || target_type->code () == TYPE_CODE_STRING
@@ -1989,7 +1989,7 @@ fortran_adjust_dynamic_array_base_address_hack (struct type *type,
 	error ("failed to get range bounds");
 
       /* Figure out the stride for this dimension.  */
-      struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (tmp_type));
+      struct type *elt_type = check_typedef (tmp_type->target_type ());
       stride = tmp_type->index_type ()->bounds ()->bit_stride ();
       if (stride == 0)
 	stride = type_length_units (elt_type);
@@ -2007,7 +2007,7 @@ fortran_adjust_dynamic_array_base_address_hack (struct type *type,
       if (stride < 0 && lowerbound < upperbound)
 	offset = (upperbound - lowerbound) * stride;
       total_offset += offset;
-      tmp_type = TYPE_TARGET_TYPE (tmp_type);
+      tmp_type = tmp_type->target_type ();
     }
 
   /* Adjust the address of this object and return it.  */

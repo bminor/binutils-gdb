@@ -298,7 +298,7 @@ val_print_scalar_type_p (struct type *type)
   type = check_typedef (type);
   while (TYPE_IS_REFERENCE (type))
     {
-      type = TYPE_TARGET_TYPE (type);
+      type = type->target_type ();
       type = check_typedef (type);
     }
   switch (type->code ())
@@ -456,7 +456,7 @@ generic_val_print_array (struct value *val,
 			     generic_val_print_decorations *decorations)
 {
   struct type *type = check_typedef (value_type (val));
-  struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
+  struct type *unresolved_elttype = type->target_type ();
   struct type *elttype = check_typedef (unresolved_elttype);
 
   if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (unresolved_elttype) > 0)
@@ -491,7 +491,7 @@ generic_value_print_ptr (struct value *val, struct ui_file *stream,
   else
     {
       struct type *type = check_typedef (value_type (val));
-      struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+      struct type *elttype = check_typedef (type->target_type ());
       const gdb_byte *valaddr = value_contents_for_printing (val).data ();
       CORE_ADDR addr = unpack_pointer (type, valaddr);
 
@@ -544,7 +544,7 @@ generic_val_print_ref (struct type *type,
 		       struct value *original_value,
 		       const struct value_print_options *options)
 {
-  struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+  struct type *elttype = check_typedef (type->target_type ());
   struct value *deref_val = NULL;
   const int value_is_synthetic
     = value_bits_synthetic_pointer (original_value,
@@ -565,7 +565,7 @@ generic_val_print_ref (struct type *type,
 	  gdb_assert (embedded_offset == 0);
 	}
       else
-	deref_val = value_at (TYPE_TARGET_TYPE (type),
+	deref_val = value_at (type->target_type (),
 			      unpack_pointer (type, valaddr + embedded_offset));
     }
   /* Else, original_value isn't a synthetic reference or we don't have to print
@@ -900,7 +900,7 @@ generic_value_print (struct value *val, struct ui_file *stream, int recurse,
      printer.  */
   while (type->code () == TYPE_CODE_RANGE)
     {
-      type = check_typedef (TYPE_TARGET_TYPE (type));
+      type = check_typedef (type->target_type ());
       val = value_cast (type, val);
     }
 
@@ -1938,11 +1938,11 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
 
   struct type *type = check_typedef (value_type (val));
 
-  elttype = TYPE_TARGET_TYPE (type);
+  elttype = type->target_type ();
   eltlen = type_length_units (check_typedef (elttype));
   index_type = type->index_type ();
   if (index_type->code () == TYPE_CODE_RANGE)
-    index_type = TYPE_TARGET_TYPE (index_type);
+    index_type = index_type->target_type ();
 
   if (get_array_bounds (type, &low_bound, &high_bound))
     {

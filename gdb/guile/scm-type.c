@@ -683,7 +683,7 @@ tyscm_get_composite (struct type *type)
       if (type->code () != TYPE_CODE_PTR
 	  && type->code () != TYPE_CODE_REF)
 	break;
-      type = TYPE_TARGET_TYPE (type);
+      type = type->target_type ();
     }
 
   /* If this is not a struct, union, or enum type, raise TypeError
@@ -874,9 +874,9 @@ gdbscm_type_target (SCM self)
     = tyscm_get_type_smob_arg_unsafe (self, SCM_ARG1, FUNC_NAME);
   struct type *type = t_smob->type;
 
-  SCM_ASSERT (TYPE_TARGET_TYPE (type), self, SCM_ARG1, FUNC_NAME);
+  SCM_ASSERT (type->target_type (), self, SCM_ARG1, FUNC_NAME);
 
-  return tyscm_scm_from_type (TYPE_TARGET_TYPE (type));
+  return tyscm_scm_from_type (type->target_type ());
 }
 
 /* (type-const <gdb:type>) -> <gdb:type>

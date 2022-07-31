@@ -297,8 +297,8 @@ value_cast_pointers (struct type *type, struct value *arg2,
 {
   struct type *type1 = check_typedef (type);
   struct type *type2 = check_typedef (value_type (arg2));
-  struct type *t1 = check_typedef (TYPE_TARGET_TYPE (type1));
-  struct type *t2 = check_typedef (TYPE_TARGET_TYPE (type2));
+  struct type *t1 = check_typedef (type1->target_type ());
+  struct type *t2 = check_typedef (type2->target_type ());
 
   if (t1->code () == TYPE_CODE_STRUCT
       && t2->code () == TYPE_CODE_STRUCT
@@ -443,7 +443,7 @@ value_cast (struct type *type, struct value *arg2)
 	 we generate value of the given reference.  Nothing wrong with 
 	 that.  */
       struct type *t1 = check_typedef (type);
-      struct type *dereftype = check_typedef (TYPE_TARGET_TYPE (t1));
+      struct type *dereftype = check_typedef (t1->target_type ());
       struct value *val = value_cast (dereftype, arg2);
 
       return value_ref (val, t1->code ());
@@ -472,7 +472,7 @@ value_cast (struct type *type, struct value *arg2)
      where N is sizeof(OBJECT)/sizeof(TYPE).  */
   if (code1 == TYPE_CODE_ARRAY)
     {
-      struct type *element_type = TYPE_TARGET_TYPE (type);
+      struct type *element_type = type->target_type ();
       unsigned element_length = TYPE_LENGTH (check_typedef (element_type));
 
       if (element_length > 0 && type->bounds ()->high.kind () == PROP_UNDEFINED)
@@ -490,7 +490,7 @@ value_cast (struct type *type, struct value *arg2)
 	  /* FIXME-type-allocation: need a way to free this type when
 	     we are done with it.  */
 	  range_type = create_static_range_type (NULL,
-						 TYPE_TARGET_TYPE (range_type),
+						 range_type->target_type (),
 						 low_bound,
 						 new_length + low_bound - 1);
 	  deprecated_set_value_type (arg2, 
@@ -686,7 +686,7 @@ value_reinterpret_cast (struct type *type, struct value *arg)
     {
       is_ref = 1;
       arg = value_addr (arg);
-      dest_type = lookup_pointer_type (TYPE_TARGET_TYPE (dest_type));
+      dest_type = lookup_pointer_type (dest_type->target_type ());
       real_type = lookup_pointer_type (real_type);
     }
 
@@ -827,11 +827,11 @@ value_dynamic_cast (struct type *type, struct value *arg)
   if (resolved_type->code () != TYPE_CODE_PTR
       && !TYPE_IS_REFERENCE (resolved_type))
     error (_("Argument to dynamic_cast must be a pointer or reference type"));
-  if (TYPE_TARGET_TYPE (resolved_type)->code () != TYPE_CODE_VOID
-      && TYPE_TARGET_TYPE (resolved_type)->code () != TYPE_CODE_STRUCT)
+  if (resolved_type->target_type ()->code () != TYPE_CODE_VOID
+      && resolved_type->target_type ()->code () != TYPE_CODE_STRUCT)
     error (_("Argument to dynamic_cast must be pointer to class or `void *'"));
 
-  class_type = check_typedef (TYPE_TARGET_TYPE (resolved_type));
+  class_type = check_typedef (resolved_type->target_type ());
   if (resolved_type->code () == TYPE_CODE_PTR)
     {
       if (arg_type->code () != TYPE_CODE_PTR
@@ -840,7 +840,7 @@ value_dynamic_cast (struct type *type, struct value *arg)
 	error (_("Argument to dynamic_cast does not have pointer type"));
       if (arg_type->code () == TYPE_CODE_PTR)
 	{
-	  arg_type = check_typedef (TYPE_TARGET_TYPE (arg_type));
+	  arg_type = check_typedef (arg_type->target_type ());
 	  if (arg_type->code () != TYPE_CODE_STRUCT)
 	    error (_("Argument to dynamic_cast does "
 		     "not have pointer to class type"));
@@ -889,19 +889,19 @@ value_dynamic_cast (struct type *type, struct value *arg)
   /* dynamic_cast<void *> means to return a pointer to the
      most-derived object.  */
   if (resolved_type->code () == TYPE_CODE_PTR
-      && TYPE_TARGET_TYPE (resolved_type)->code () == TYPE_CODE_VOID)
+      && resolved_type->target_type ()->code () == TYPE_CODE_VOID)
     return value_at_lazy (type, addr);
 
   tem = value_at (type, addr);
   type = value_type (tem);
 
   /* The first dynamic check specified in 5.2.7.  */
-  if (is_public_ancestor (arg_type, TYPE_TARGET_TYPE (resolved_type)))
+  if (is_public_ancestor (arg_type, resolved_type->target_type ()))
     {
-      if (class_types_same_p (rtti_type, TYPE_TARGET_TYPE (resolved_type)))
+      if (class_types_same_p (rtti_type, resolved_type->target_type ()))
 	return tem;
       result = NULL;
-      if (dynamic_cast_check_1 (TYPE_TARGET_TYPE (resolved_type),
+      if (dynamic_cast_check_1 (resolved_type->target_type (),
 				value_contents_for_printing (tem).data (),
 				value_embedded_offset (tem),
 				value_address (tem), tem,
@@ -917,7 +917,7 @@ value_dynamic_cast (struct type *type, struct value *arg)
   /* The second dynamic check specified in 5.2.7.  */
   result = NULL;
   if (is_public_ancestor (arg_type, rtti_type)
-      && dynamic_cast_check_2 (TYPE_TARGET_TYPE (resolved_type),
+      && dynamic_cast_check_2 (resolved_type->target_type (),
 			       value_contents_for_printing (tem).data (),
 			       value_embedded_offset (tem),
 			       value_address (tem), tem,
@@ -947,7 +947,7 @@ value_one (struct type *type)
     }
   else if (type1->code () == TYPE_CODE_ARRAY && type1->is_vector ())
     {
-      struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type1));
+      struct type *eltype = check_typedef (type1->target_type ());
       int i;
       LONGEST low_bound, high_bound;
 
@@ -1515,7 +1515,7 @@ value_coerce_array (struct value *arg1)
   if (VALUE_LVAL (arg1) != lval_memory)
     error (_("Attempt to take address of value not located in memory."));
 
-  return value_from_pointer (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
+  return value_from_pointer (lookup_pointer_type (type->target_type ()),
 			     value_address (arg1));
 }
 
@@ -1556,11 +1556,11 @@ value_addr (struct value *arg1)
 	     allows &(&X) to get the location containing the reference.
 	     Do the same to its enclosing type for consistency.  */
 	  struct type *type_ptr
-	    = lookup_pointer_type (TYPE_TARGET_TYPE (type));
+	    = lookup_pointer_type (type->target_type ());
 	  struct type *enclosing_type
 	    = check_typedef (value_enclosing_type (arg1));
 	  struct type *enclosing_type_ptr
-	    = lookup_pointer_type (TYPE_TARGET_TYPE (enclosing_type));
+	    = lookup_pointer_type (enclosing_type->target_type ());
 
 	  arg2 = value_copy (arg1);
 	  deprecated_set_value_type (arg2, type_ptr);
@@ -1648,7 +1648,7 @@ value_ind (struct value *arg1)
       /* We may be pointing to something embedded in a larger object.
 	 Get the real type of the enclosing object.  */
       enc_type = check_typedef (value_enclosing_type (arg1));
-      enc_type = TYPE_TARGET_TYPE (enc_type);
+      enc_type = enc_type->target_type ();
 
       CORE_ADDR base_addr;
       if (check_typedef (enc_type)->code () == TYPE_CODE_FUNC
@@ -1811,7 +1811,7 @@ typecmp (bool staticp, bool varargs, int nargs,
 
       if (TYPE_IS_REFERENCE (tt1)
 	  /* We should be doing hairy argument matching, as below.  */
-	  && (check_typedef (TYPE_TARGET_TYPE (tt1))->code ()
+	  && (check_typedef (tt1->target_type ())->code ()
 	      == tt2->code ()))
 	{
 	  if (tt2->code () == TYPE_CODE_ARRAY)
@@ -1829,13 +1829,13 @@ typecmp (bool staticp, bool varargs, int nargs,
 	 and the argument will be a pointer to a char.  */
       while (TYPE_IS_REFERENCE (tt1) || tt1->code () == TYPE_CODE_PTR)
 	{
-	  tt1 = check_typedef ( TYPE_TARGET_TYPE (tt1) );
+	  tt1 = check_typedef ( tt1->target_type () );
 	}
       while (tt2->code () == TYPE_CODE_ARRAY
 	     || tt2->code () == TYPE_CODE_PTR
 	     || TYPE_IS_REFERENCE (tt2))
 	{
-	  tt2 = check_typedef (TYPE_TARGET_TYPE (tt2));
+	  tt2 = check_typedef (tt2->target_type ());
 	}
       if (tt1->code () == tt2->code ())
 	continue;
@@ -3580,13 +3580,13 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 		      else
 			{
 			  struct type *p = check_typedef (value_type (this_v));
-			  p = check_typedef (TYPE_TARGET_TYPE (p));
+			  p = check_typedef (p->target_type ());
 			  if (get_baseclass_offset (p, curtype, this_v,
 						    &boff, &isvirt))
 			    mem_offset += boff;
 			}
 		    }
-		  tmp = lookup_pointer_type (TYPE_TARGET_TYPE (type));
+		  tmp = lookup_pointer_type (type->target_type ());
 		  result = value_from_pointer (tmp,
 					       value_as_long (v) + mem_offset);
 		  return value_ind (result);
@@ -3602,7 +3602,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
   /* Perform all necessary dereferencing.  */
   while (intype && intype->code () == TYPE_CODE_PTR)
-    intype = TYPE_TARGET_TYPE (intype);
+    intype = intype->target_type ();
 
   for (i = TYPE_NFN_FIELDS (t) - 1; i >= 0; --i)
     {
@@ -4014,12 +4014,12 @@ value_slice (struct value *array, int lowbound, int length)
   /* FIXME-type-allocation: need a way to free this type when we are
      done with it.  */
   slice_range_type = create_static_range_type (NULL,
-					       TYPE_TARGET_TYPE (range_type),
+					       range_type->target_type (),
 					       lowbound,
 					       lowbound + length - 1);
 
   {
-    struct type *element_type = TYPE_TARGET_TYPE (array_type);
+    struct type *element_type = array_type->target_type ();
     LONGEST offset
       = (lowbound - lowerbound) * TYPE_LENGTH (check_typedef (element_type));
 
@@ -4052,7 +4052,7 @@ value_literal_complex (struct value *arg1,
 		       struct type *type)
 {
   struct value *val;
-  struct type *real_type = TYPE_TARGET_TYPE (type);
+  struct type *real_type = type->target_type ();
 
   val = allocate_value (type);
   arg1 = value_cast (real_type, arg1);
@@ -4074,7 +4074,7 @@ struct value *
 value_real_part (struct value *value)
 {
   struct type *type = check_typedef (value_type (value));
-  struct type *ttype = TYPE_TARGET_TYPE (type);
+  struct type *ttype = type->target_type ();
 
   gdb_assert (type->code () == TYPE_CODE_COMPLEX);
   return value_from_component (value, ttype, 0);
@@ -4086,7 +4086,7 @@ struct value *
 value_imaginary_part (struct value *value)
 {
   struct type *type = check_typedef (value_type (value));
-  struct type *ttype = TYPE_TARGET_TYPE (type);
+  struct type *ttype = type->target_type ();
 
   gdb_assert (type->code () == TYPE_CODE_COMPLEX);
   return value_from_component (value, ttype,
@@ -4098,11 +4098,11 @@ value_imaginary_part (struct value *value)
 static struct value *
 cast_into_complex (struct type *type, struct value *val)
 {
-  struct type *real_type = TYPE_TARGET_TYPE (type);
+  struct type *real_type = type->target_type ();
 
   if (value_type (val)->code () == TYPE_CODE_COMPLEX)
     {
-      struct type *val_real_type = TYPE_TARGET_TYPE (value_type (val));
+      struct type *val_real_type = value_type (val)->target_type ();
       struct value *re_val = allocate_value (val_real_type);
       struct value *im_val = allocate_value (val_real_type);
       int len = TYPE_LENGTH (val_real_type);

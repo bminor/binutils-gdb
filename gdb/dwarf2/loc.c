@@ -1338,7 +1338,7 @@ value_of_dwarf_reg_entry (struct type *type, struct frame_info *frame,
 			  union call_site_parameter_u kind_u)
 {
   struct type *checked_type = check_typedef (type);
-  struct type *target_type = TYPE_TARGET_TYPE (checked_type);
+  struct type *target_type = checked_type->target_type ();
   struct frame_info *caller_frame = get_prev_frame (frame);
   struct value *outer_val, *target_val, *val;
   struct call_site_parameter *parameter;
@@ -1360,7 +1360,7 @@ value_of_dwarf_reg_entry (struct type *type, struct frame_info *frame,
      entry value.  */
 
   if (!TYPE_IS_REFERENCE (checked_type)
-      || TYPE_TARGET_TYPE (checked_type) == NULL)
+      || checked_type->target_type () == NULL)
     return outer_val;
 
   target_val = dwarf_entry_parameter_to_value (parameter,
@@ -1430,16 +1430,16 @@ fetch_const_value_from_synthetic_pointer (sect_offset die, LONGEST byte_offset,
   if (bytes != NULL)
     {
       if (byte_offset >= 0
-	  && byte_offset + TYPE_LENGTH (TYPE_TARGET_TYPE (type)) <= len)
+	  && byte_offset + TYPE_LENGTH (type->target_type ()) <= len)
 	{
 	  bytes += byte_offset;
-	  result = value_from_contents (TYPE_TARGET_TYPE (type), bytes);
+	  result = value_from_contents (type->target_type (), bytes);
 	}
       else
 	invalid_synthetic_pointer ();
     }
   else
-    result = allocate_optimized_out_value (TYPE_TARGET_TYPE (type));
+    result = allocate_optimized_out_value (type->target_type ());
 
   return result;
 }
@@ -1476,7 +1476,7 @@ indirect_synthetic_pointer (sect_offset die, LONGEST byte_offset,
     return dwarf2_evaluate_loc_desc_full (orig_type, frame, baton.data,
 					  baton.size, baton.per_cu,
 					  baton.per_objfile,
-					  TYPE_TARGET_TYPE (type),
+					  type->target_type (),
 					  byte_offset);
   else
     return fetch_const_value_from_synthetic_pointer (die, byte_offset, per_cu,

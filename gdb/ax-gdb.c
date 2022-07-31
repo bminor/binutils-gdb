@@ -255,7 +255,7 @@ gen_traced_pop (struct agent_expr *ax, struct axs_value *value)
   int string_trace = 0;
   if (ax->trace_string
       && value->type->code () == TYPE_CODE_PTR
-      && c_textual_element_type (check_typedef (TYPE_TARGET_TYPE (value->type)),
+      && c_textual_element_type (check_typedef (value->type->target_type ()),
 				 's'))
     string_trace = 1;
 
@@ -367,7 +367,7 @@ gen_fetch (struct agent_expr *ax, struct type *type)
     }
 
   if (type->code () == TYPE_CODE_RANGE)
-    type = TYPE_TARGET_TYPE (type);
+    type = type->target_type ();
 
   switch (type->code ())
     {
@@ -735,7 +735,7 @@ gen_usual_unary (struct agent_expr *ax, struct axs_value *value)
 	 are no longer an lvalue.  */
     case TYPE_CODE_ARRAY:
       {
-	struct type *elements = TYPE_TARGET_TYPE (value->type);
+	struct type *elements = value->type->target_type ();
 
 	value->type = lookup_pointer_type (elements);
 	value->kind = axs_rvalue;
@@ -946,7 +946,7 @@ gen_cast (struct agent_expr *ax, struct axs_value *value, struct type *type)
 static void
 gen_scale (struct agent_expr *ax, enum agent_op op, struct type *type)
 {
-  struct type *element = TYPE_TARGET_TYPE (type);
+  struct type *element = type->target_type ();
 
   if (TYPE_LENGTH (element) != 1)
     {
@@ -997,8 +997,8 @@ gen_ptrdiff (struct agent_expr *ax, struct axs_value *value,
   gdb_assert (value1->type->is_pointer_or_reference ());
   gdb_assert (value2->type->is_pointer_or_reference ());
 
-  if (TYPE_LENGTH (TYPE_TARGET_TYPE (value1->type))
-      != TYPE_LENGTH (TYPE_TARGET_TYPE (value2->type)))
+  if (TYPE_LENGTH (value1->type->target_type ())
+      != TYPE_LENGTH (value2->type->target_type ()))
     error (_("\
 First argument of `-' is a pointer, but second argument is neither\n\
 an integer nor a pointer of the same type."));
@@ -1104,7 +1104,7 @@ gen_deref (struct axs_value *value)
      actually emit any code; we just change the type from "Pointer to
      T" to "T", and mark the value as an lvalue in memory.  Leave it
      to the consumer to actually dereference it.  */
-  value->type = check_typedef (TYPE_TARGET_TYPE (value->type));
+  value->type = check_typedef (value->type->target_type ());
   if (value->type->code () == TYPE_CODE_VOID)
     error (_("Attempt to dereference a generic pointer."));
   value->kind = ((value->type->code () == TYPE_CODE_FUNC)

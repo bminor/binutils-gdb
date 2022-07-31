@@ -319,8 +319,8 @@ avr_address_to_pointer (struct gdbarch *gdbarch,
 			      avr_convert_iaddr_to_raw (addr));
     }
   /* Is it a code address?  */
-  else if (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_FUNC
-	   || TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_METHOD)
+  else if (type->target_type ()->code () == TYPE_CODE_FUNC
+	   || type->target_type ()->code () == TYPE_CODE_METHOD)
     {
       /* A code pointer is word (16 bits) addressed.  We shift the address down
 	 by 1 bit to convert it to a pointer.  */
@@ -350,9 +350,9 @@ avr_pointer_to_address (struct gdbarch *gdbarch,
       return avr_make_iaddr (addr);
     }
   /* Is it a code address?  */
-  else if (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_FUNC
-	   || TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_METHOD
-	   || TYPE_CODE_SPACE (TYPE_TARGET_TYPE (type)))
+  else if (type->target_type ()->code () == TYPE_CODE_FUNC
+	   || type->target_type ()->code () == TYPE_CODE_METHOD
+	   || TYPE_CODE_SPACE (type->target_type ()))
     {
       /* A code pointer is word (16 bits) addressed so we shift it up
 	 by 1 bit to convert it to an address.  */

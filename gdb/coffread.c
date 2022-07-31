@@ -1468,8 +1468,8 @@ enter_linenos (file_ptr file_offset, int first_line,
 static void
 patch_type (struct type *type, struct type *real_type)
 {
-  struct type *target = TYPE_TARGET_TYPE (type);
-  struct type *real_target = TYPE_TARGET_TYPE (real_type);
+  struct type *target = type->target_type ();
+  struct type *real_target = real_type->target_type ();
   int field_size = real_target->num_fields () * sizeof (struct field);
 
   TYPE_LENGTH (target) = TYPE_LENGTH (real_target);
@@ -1509,7 +1509,7 @@ patch_opaque_types (struct symtab *s)
       if (real_sym->aclass () == LOC_TYPEDEF
 	  && real_sym->domain () == VAR_DOMAIN
 	  && real_sym->type ()->code () == TYPE_CODE_PTR
-	  && TYPE_LENGTH (TYPE_TARGET_TYPE (real_sym->type ())) != 0)
+	  && TYPE_LENGTH (real_sym->type ()->target_type ()) != 0)
 	{
 	  const char *name = real_sym->linkage_name ();
 	  int hash = hashname (name);
@@ -1699,8 +1699,8 @@ process_coff_symbol (struct coff_symbol *cs,
 	     references work themselves out via the magic of
 	     coff_lookup_type.  */
 	  if (sym->type ()->code () == TYPE_CODE_PTR
-	      && TYPE_LENGTH (TYPE_TARGET_TYPE (sym->type ())) == 0
-	      && TYPE_TARGET_TYPE (sym->type ())->code ()
+	      && TYPE_LENGTH (sym->type ()->target_type ()) == 0
+	      && sym->type ()->target_type ()->code ()
 	      != TYPE_CODE_UNDEF)
 	    {
 	      int i = hashname (sym->linkage_name ());

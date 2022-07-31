@@ -80,7 +80,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type,
 	 of an enumerated type, where the underlying value of the
 	 first element is typically 0, we might test the low bound
 	 against the wrong value.  */
-      index_type = TYPE_TARGET_TYPE (index_type);
+      index_type = index_type->target_type ();
     }
 
   /* Don't print the lower bound if it's the default one.  */
@@ -130,7 +130,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
   struct value *mark = value_mark ();
   LONGEST low = 0;
 
-  elttype = TYPE_TARGET_TYPE (type);
+  elttype = type->target_type ();
   index_type = type->index_type ();
 
   {
@@ -151,7 +151,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
   }
 
   if (index_type->code () == TYPE_CODE_RANGE)
-    index_type = TYPE_TARGET_TYPE (index_type);
+    index_type = index_type->target_type ();
 
   i = 0;
   annotate_array_section_begin (i, elttype);
@@ -421,7 +421,7 @@ ada_print_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       break;
 
     case TYPE_CODE_RANGE:
-      ada_print_scalar (TYPE_TARGET_TYPE (type), val, stream);
+      ada_print_scalar (type->target_type (), val, stream);
       return;
 
     case TYPE_CODE_UNDEF:
@@ -688,7 +688,7 @@ ada_val_print_string (struct type *type, const gdb_byte *valaddr,
 		      const struct value_print_options *options)
 {
   enum bfd_endian byte_order = type_byte_order (type);
-  struct type *elttype = TYPE_TARGET_TYPE (type);
+  struct type *elttype = type->target_type ();
   unsigned int eltlen;
   unsigned int len;
 
@@ -731,8 +731,8 @@ ada_value_print_ptr (struct value *val,
 		     const struct value_print_options *options)
 {
   if (!options->format
-      && TYPE_TARGET_TYPE (value_type (val))->code () == TYPE_CODE_INT
-      && TYPE_LENGTH (TYPE_TARGET_TYPE (value_type (val))) == 0)
+      && value_type (val)->target_type ()->code () == TYPE_CODE_INT
+      && TYPE_LENGTH (value_type (val)->target_type ()) == 0)
     {
       gdb_puts ("null", stream);
       return;
@@ -761,15 +761,15 @@ ada_value_print_num (struct value *val, struct ui_file *stream, int recurse,
   const gdb_byte *valaddr = value_contents_for_printing (val).data ();
 
   if (type->code () == TYPE_CODE_RANGE
-      && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ENUM
-	  || TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_BOOL
-	  || TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_CHAR))
+      && (type->target_type ()->code () == TYPE_CODE_ENUM
+	  || type->target_type ()->code () == TYPE_CODE_BOOL
+	  || type->target_type ()->code () == TYPE_CODE_CHAR))
     {
       /* For enum-valued ranges, we want to recurse, because we'll end
 	 up printing the constant's name rather than its numeric
 	 value.  Character and fixed-point types are also printed
 	 differently, so recuse for those as well.  */
-      struct type *target_type = TYPE_TARGET_TYPE (type);
+      struct type *target_type = type->target_type ();
       val = value_cast (target_type, val);
       common_val_print (val, stream, recurse + 1, options,
 			language_def (language_ada));
@@ -946,7 +946,7 @@ ada_val_print_ref (struct type *type, const gdb_byte *valaddr,
      of the object value would be confusing to an Ada programmer.
      So, for Ada values, we print the actual dereferenced value
      regardless.  */
-  struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+  struct type *elttype = check_typedef (type->target_type ());
   struct value *deref_val;
   CORE_ADDR deref_val_int;
 
@@ -1093,14 +1093,14 @@ ada_value_print (struct value *val0, struct ui_file *stream,
   /* If it is a pointer, indicate what it points to; but not for
      "void *" pointers.  */
   if (type->code () == TYPE_CODE_PTR
-      && !(TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_INT
-	   && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) == 0))
+      && !(type->target_type ()->code () == TYPE_CODE_INT
+	   && TYPE_LENGTH (type->target_type ()) == 0))
     {
       /* Hack:  don't print (char *) for char strings.  Their
 	 type is indicated by the quoted string anyway.  */
-      if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) != sizeof (char)
-	  || TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_INT
-	  || TYPE_TARGET_TYPE (type)->is_unsigned ())
+      if (TYPE_LENGTH (type->target_type ()) != sizeof (char)
+	  || type->target_type ()->code () != TYPE_CODE_INT
+	  || type->target_type ()->is_unsigned ())
 	{
 	  gdb_printf (stream, "(");
 	  type_print (type, "", stream, -1);

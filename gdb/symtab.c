@@ -2145,7 +2145,7 @@ lookup_symbol_aux (const char *name, symbol_name_match_type match_type,
 	     be typedefed; just be safe.  */
 	  t = check_typedef (t);
 	  if (t->is_pointer_or_reference ())
-	    t = TYPE_TARGET_TYPE (t);
+	    t = t->target_type ();
 
 	  if (t->code () != TYPE_CODE_STRUCT
 	      && t->code () != TYPE_CODE_UNION)

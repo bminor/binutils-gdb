@@ -1508,7 +1508,7 @@ public:
 		   enum noside noside) override
   {
     if (expect_type != nullptr && expect_type->code () == TYPE_CODE_PTR)
-      expect_type = TYPE_TARGET_TYPE (check_typedef (expect_type));
+      expect_type = check_typedef (expect_type)->target_type ();
     value *val = std::get<0> (m_storage)->evaluate (expect_type, exp, noside);
     return eval_op_ind (expect_type, exp, noside, val);
   }

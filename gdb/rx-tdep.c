@@ -672,7 +672,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Dereference function pointer types.  */
   while (func_type->code () == TYPE_CODE_PTR)
-    func_type = TYPE_TARGET_TYPE (func_type);
+    func_type = func_type->target_type ();
 
   /* The end result had better be a function or a method.  */
   gdb_assert (func_type->code () == TYPE_CODE_FUNC
@@ -707,7 +707,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       if (return_method == return_method_struct)
 	{
-	  struct type *return_type = TYPE_TARGET_TYPE (func_type);
+	  struct type *return_type = func_type->target_type ();
 
 	  gdb_assert (return_type->code () == TYPE_CODE_STRUCT
 		      || func_type->code () == TYPE_CODE_UNION);

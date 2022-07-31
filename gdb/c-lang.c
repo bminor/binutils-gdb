@@ -118,8 +118,8 @@ classify_type (struct type *elttype, struct gdbarch *gdbarch,
       /* Call for side effects.  */
       check_typedef (elttype);
 
-      if (TYPE_TARGET_TYPE (elttype))
-	elttype = TYPE_TARGET_TYPE (elttype);
+      if (elttype->target_type ())
+	elttype = elttype->target_type ();
       else
 	{
 	  /* Perhaps check_typedef did not update the target type.  In
@@ -247,7 +247,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
   int err, width;
   unsigned int fetchlimit;
   struct type *type = check_typedef (value_type (value));
-  struct type *element_type = TYPE_TARGET_TYPE (type);
+  struct type *element_type = type->target_type ();
   int req_length = *length;
   enum bfd_endian byte_order
     = type_byte_order (type);
@@ -625,7 +625,7 @@ c_string_operation::evaluate (struct type *expect_type,
   if (expect_type && expect_type->code () == TYPE_CODE_ARRAY)
     {
       struct type *element_type
-	= check_typedef (TYPE_TARGET_TYPE (expect_type));
+	= check_typedef (expect_type->target_type ());
 
       if (element_type->code () == TYPE_CODE_INT
 	  || element_type->code () == TYPE_CODE_CHAR)
@@ -697,7 +697,7 @@ c_is_string_type_p (struct type *type)
   type = check_typedef (type);
   while (type->code () == TYPE_CODE_REF)
     {
-      type = TYPE_TARGET_TYPE (type);
+      type = type->target_type ();
       type = check_typedef (type);
     }
 
@@ -706,7 +706,7 @@ c_is_string_type_p (struct type *type)
     case TYPE_CODE_ARRAY:
       {
 	/* See if target type looks like a string.  */
-	struct type *array_target_type = TYPE_TARGET_TYPE (type);
+	struct type *array_target_type = type->target_type ();
 	return (TYPE_LENGTH (type) > 0
 		&& TYPE_LENGTH (array_target_type) > 0
 		&& c_textual_element_type (array_target_type, 0));
@@ -715,7 +715,7 @@ c_is_string_type_p (struct type *type)
       return true;
     case TYPE_CODE_PTR:
       {
-	struct type *element_type = TYPE_TARGET_TYPE (type);
+	struct type *element_type = type->target_type ();
 	return c_textual_element_type (element_type, 0);
       }
     default:

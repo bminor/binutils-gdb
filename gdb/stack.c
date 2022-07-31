@@ -2747,7 +2747,7 @@ return_command (const char *retval_exp, int from_tty)
       /* Cast return value to the return type of the function.  Should
 	 the cast fail, this call throws an error.  */
       if (thisfun != NULL)
-	return_type = TYPE_TARGET_TYPE (thisfun->type ());
+	return_type = thisfun->type ()->target_type ();
       if (return_type == NULL)
 	{
 	  if (retval_expr->first_opcode () != UNOP_CAST

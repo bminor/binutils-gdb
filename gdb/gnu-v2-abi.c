@@ -108,7 +108,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
     fcontext = TYPE_VPTR_BASETYPE (type);
   context = lookup_pointer_type (fcontext);
   /* Now context is a pointer to the basetype containing the vtbl.  */
-  if (TYPE_TARGET_TYPE (context) != type1)
+  if (context->target_type () != type1)
     {
       struct value *tmp = value_cast (context, value_addr (arg1));
 
@@ -133,7 +133,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
   /* With older versions of g++, the vtbl field pointed to an array
      of structures.  Nowadays it points directly to the structure.  */
   if (value_type (vtbl)->code () == TYPE_CODE_PTR
-      && TYPE_TARGET_TYPE (value_type (vtbl))->code () == TYPE_CODE_ARRAY)
+      && value_type (vtbl)->target_type ()->code () == TYPE_CODE_ARRAY)
     {
       /* Handle the case where the vtbl field points to an
 	 array of structures.  */
@@ -323,13 +323,13 @@ vb_match (struct type *type, int index, struct type *basetype)
      nameless types) or have the same name.  This is ugly, and a more
      elegant solution should be devised (which would probably just push
      the ugliness into symbol reading unless we change the stabs format).  */
-  if (TYPE_TARGET_TYPE (fieldtype) == basetype)
+  if (fieldtype->target_type () == basetype)
     return 1;
 
   if (basetype->name () != NULL
-      && TYPE_TARGET_TYPE (fieldtype)->name () != NULL
+      && fieldtype->target_type ()->name () != NULL
       && strcmp (basetype->name (),
-		 TYPE_TARGET_TYPE (fieldtype)->name ()) == 0)
+		 fieldtype->target_type ()->name ()) == 0)
     return 1;
   return 0;
 }

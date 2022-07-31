@@ -46,7 +46,7 @@ public:
       error ("unable to read array bounds");
 
     /* Figure out the stride for this array.  */
-    struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (type));
+    struct type *elt_type = check_typedef (type->target_type ());
     m_stride = type->index_type ()->bounds ()->bit_stride ();
     if (m_stride == 0)
       m_stride = type_length_units (elt_type);
@@ -230,13 +230,13 @@ private:
 
     m_nss++;
     gdb_assert (range_type->code () == TYPE_CODE_RANGE);
-    m_impl.start_dimension (TYPE_TARGET_TYPE (range_type),
+    m_impl.start_dimension (range_type->target_type (),
 			    upperbound - lowerbound + 1,
 			    m_nss == m_ndimensions);
 
     if (m_nss != m_ndimensions)
       {
-	struct type *subarray_type = TYPE_TARGET_TYPE (check_typedef (type));
+	struct type *subarray_type = check_typedef (type)->target_type ();
 
 	/* For dimensions other than the inner most, walk each element and
 	   recurse while peeling off one more dimension of the array.  */
@@ -258,7 +258,7 @@ private:
       }
     else
       {
-	struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (type));
+	struct type *elt_type = check_typedef (type)->target_type ();
 
 	/* For the inner most dimension of the array, process each element
 	   within this dimension.  */

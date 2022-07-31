@@ -601,7 +601,7 @@ language_defn::watch_location_expression (struct type *type,
 					  CORE_ADDR addr) const
 {
   /* Generates an expression that assumes a C like syntax is valid.  */
-  type = check_typedef (TYPE_TARGET_TYPE (check_typedef (type)));
+  type = check_typedef (check_typedef (type)->target_type ());
   std::string name = type_to_string (type);
   return xstrprintf ("* (%s *) %s", name.c_str (), core_addr_to_string (addr));
 }
@@ -850,7 +850,7 @@ public:
     type = check_typedef (type);
     while (type->code () == TYPE_CODE_REF)
       {
-	type = TYPE_TARGET_TYPE (type);
+	type = type->target_type ();
 	type = check_typedef (type);
       }
     return (type->code () == TYPE_CODE_STRING);

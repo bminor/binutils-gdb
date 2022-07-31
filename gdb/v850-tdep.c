@@ -542,7 +542,7 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
 
       if (fld_type->code () == TYPE_CODE_ARRAY)
 	{
-	  tgt_type = TYPE_TARGET_TYPE (fld_type);
+	  tgt_type = fld_type->target_type ();
 	  if (v850_type_is_scalar (tgt_type) && TYPE_LENGTH (tgt_type) >= 4)
 	    return 0;
 	}
@@ -560,7 +560,7 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
 	  fld_type = type->field (0).type ();
 	  if (fld_type->code () == TYPE_CODE_ARRAY)
 	    {
-	      tgt_type = TYPE_TARGET_TYPE (fld_type);
+	      tgt_type = fld_type->target_type ();
 	      if (TYPE_LENGTH (tgt_type) > 0
 		  && TYPE_LENGTH (fld_type) / TYPE_LENGTH (tgt_type) > 2)
 		return 1;

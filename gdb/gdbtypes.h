@@ -105,7 +105,7 @@ enum type_code
        Regardless of the language, GDB represents multidimensional
        array types the way C does: as arrays of arrays.  So an
        instance of a GDB array type T can always be seen as a series
-       of instances of TYPE_TARGET_TYPE (T) laid out sequentially in
+       of instances of T->target_type () laid out sequentially in
        memory.
 
        Row-major languages like C lay out multi-dimensional arrays so
@@ -1256,7 +1256,7 @@ struct type
   }
 
   /* Used only for TYPE_CODE_FUNC where it specifies the real function
-     address is returned by this function call.  TYPE_TARGET_TYPE
+     address is returned by this function call.  The target_type method
      determines the final returned function type to be presented to
      user.  */
 
@@ -2097,7 +2097,6 @@ extern void allocate_gnat_aux_type (struct type *);
    allocate_fixed_point_type_info (type))
 
 #define TYPE_MAIN_TYPE(thistype) (thistype)->main_type
-#define TYPE_TARGET_TYPE(thistype) ((thistype)->target_type ())
 #define TYPE_POINTER_TYPE(thistype) (thistype)->pointer_type
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
 #define TYPE_RVALUE_REFERENCE_TYPE(thistype) (thistype)->rvalue_reference_type

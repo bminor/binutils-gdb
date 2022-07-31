@@ -469,7 +469,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
   gdb_ptr_type = check_typedef (gdb_ptr_type);
   if (gdb_ptr_type->code () != TYPE_CODE_PTR)
     error (_("Type of \"%s\" is not a pointer"), COMPILE_I_EXPR_PTR_TYPE);
-  gdb_type_from_ptr = check_typedef (TYPE_TARGET_TYPE (gdb_ptr_type));
+  gdb_type_from_ptr = check_typedef (gdb_ptr_type->target_type ());
 
   if (types_deeply_equal (gdb_type, gdb_type_from_ptr))
     {
@@ -489,7 +489,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
   switch (gdb_type_from_ptr->code ())
     {
     case TYPE_CODE_ARRAY:
-      gdb_type_from_ptr = TYPE_TARGET_TYPE (gdb_type_from_ptr);
+      gdb_type_from_ptr = gdb_type_from_ptr->target_type ();
       break;
     case TYPE_CODE_FUNC:
       break;
@@ -500,7 +500,7 @@ get_out_value_type (struct symbol *func_sym, struct objfile *objfile,
 	     objfile_name (objfile));
     }
   if (!types_deeply_equal (gdb_type_from_ptr,
-			   TYPE_TARGET_TYPE (gdb_type)))
+			   gdb_type->target_type ()))
     error (_("Referenced types do not match for symbols \"%s\" and \"%s\" "
 	     "in compiled module \"%s\"."),
 	   COMPILE_I_EXPR_PTR_TYPE, COMPILE_I_EXPR_VAL,
@@ -530,7 +530,7 @@ get_regs_type (struct symbol *func_sym, struct objfile *objfile)
 	   regsp_type->code (), GCC_FE_WRAPPER_FUNCTION,
 	   objfile_name (objfile));
 
-  regs_type = check_typedef (TYPE_TARGET_TYPE (regsp_type));
+  regs_type = check_typedef (regsp_type->target_type ());
   if (regs_type->code () != TYPE_CODE_STRUCT)
     error (_("Invalid type code %d of dereferenced first parameter "
 	     "of function \"%s\" in compiled module \"%s\"."),
@@ -685,7 +685,7 @@ compile_object_load (const compile_file_names &file_names,
 	     "module \"%s\"."),
 	   func_type->num_fields (), GCC_FE_WRAPPER_FUNCTION,
 	   objfile_name (objfile));
-  if (!types_deeply_equal (expect_return_type, TYPE_TARGET_TYPE (func_type)))
+  if (!types_deeply_equal (expect_return_type, func_type->target_type ()))
     error (_("Invalid return type of function \"%s\" in compiled "
 	     "module \"%s\"."),
 	   GCC_FE_WRAPPER_FUNCTION, objfile_name (objfile));

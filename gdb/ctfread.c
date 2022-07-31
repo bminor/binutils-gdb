@@ -789,13 +789,13 @@ add_array_cv_type (struct ctf_context *ccp,
   base_type = copy_type (base_type);
   inner_array = base_type;
 
-  while (TYPE_TARGET_TYPE (inner_array)->code () == TYPE_CODE_ARRAY)
+  while (inner_array->target_type ()->code () == TYPE_CODE_ARRAY)
     {
-      inner_array->set_target_type (copy_type (TYPE_TARGET_TYPE (inner_array)));
-      inner_array = TYPE_TARGET_TYPE (inner_array);
+      inner_array->set_target_type (copy_type (inner_array->target_type ()));
+      inner_array = inner_array->target_type ();
     }
 
-  el_type = TYPE_TARGET_TYPE (inner_array);
+  el_type = inner_array->target_type ();
   cnst |= TYPE_CONST (el_type);
   voltl |= TYPE_VOLATILE (el_type);
   inner_array->set_target_type (make_cv_type (cnst, voltl, el_type, nullptr));
@@ -936,7 +936,7 @@ read_typedef_type (struct ctf_context *ccp, ctf_id_t tid,
   else
     this_type->set_target_type (nullptr);
 
-  this_type->set_target_is_stub (TYPE_TARGET_TYPE (this_type) != nullptr);
+  this_type->set_target_is_stub (this_type->target_type () != nullptr);
 
   return set_tid_type (objfile, tid, this_type);
 }

@@ -3341,7 +3341,7 @@ is_float_or_hfa_type_recurse (struct type *t, struct type **etp)
       break;
     case TYPE_CODE_ARRAY:
       return
-	is_float_or_hfa_type_recurse (check_typedef (TYPE_TARGET_TYPE (t)),
+	is_float_or_hfa_type_recurse (check_typedef (t->target_type ()),
 				      etp);
       break;
     case TYPE_CODE_STRUCT:
@@ -3393,7 +3393,7 @@ slot_alignment_is_next_even (struct type *t)
 	return 0;
     case TYPE_CODE_ARRAY:
       return
-	slot_alignment_is_next_even (check_typedef (TYPE_TARGET_TYPE (t)));
+	slot_alignment_is_next_even (check_typedef (t->target_type ()));
     case TYPE_CODE_STRUCT:
       {
 	int i;
@@ -3747,7 +3747,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       /* Special handling for function parameters.  */
       if (len == 8
 	  && type->code () == TYPE_CODE_PTR
-	  && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_FUNC)
+	  && type->target_type ()->code () == TYPE_CODE_FUNC)
 	{
 	  gdb_byte val_buf[8];
 	  ULONGEST faddr = extract_unsigned_integer

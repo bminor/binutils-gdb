@@ -29,7 +29,7 @@
 static gcc_type
 convert_pointer (compile_c_instance *context, struct type *type)
 {
-  gcc_type target = context->convert_type (TYPE_TARGET_TYPE (type));
+  gcc_type target = context->convert_type (type->target_type ());
 
   return context->plugin ().build_pointer_type (target);
 }
@@ -42,7 +42,7 @@ convert_array (compile_c_instance *context, struct type *type)
   gcc_type element_type;
   struct type *range = type->index_type ();
 
-  element_type = context->convert_type (TYPE_TARGET_TYPE (type));
+  element_type = context->convert_type (type->target_type ());
 
   if (range->bounds ()->low.kind () != PROP_CONST)
     return context->plugin ().error (_("array type with non-constant"
@@ -155,7 +155,7 @@ convert_func (compile_c_instance *context, struct type *type)
   struct gcc_type_array array;
   int is_varargs = type->has_varargs () || !type->is_prototyped ();
 
-  struct type *target_type = TYPE_TARGET_TYPE (type);
+  struct type *target_type = type->target_type ();
 
   /* Functions with no debug info have no return type.  Ideally we'd
      want to fallback to the type of the cast just before the
@@ -263,7 +263,7 @@ convert_qualified (compile_c_instance *context, struct type *type)
 static gcc_type
 convert_complex (compile_c_instance *context, struct type *type)
 {
-  gcc_type base = context->convert_type (TYPE_TARGET_TYPE (type));
+  gcc_type base = context->convert_type (type->target_type ());
 
   return context->plugin ().build_complex_type (base);
 }

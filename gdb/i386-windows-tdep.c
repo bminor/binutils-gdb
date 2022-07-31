@@ -116,7 +116,7 @@ i386_windows_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   struct type *type = check_typedef (value_type (function));
   if (type->code () == TYPE_CODE_PTR)
-    type = check_typedef (TYPE_TARGET_TYPE (type));
+    type = check_typedef (type->target_type ());
 
   /* read_subroutine_type sets for non-static member functions the
      artificial flag of the first parameter ('this' pointer).  */

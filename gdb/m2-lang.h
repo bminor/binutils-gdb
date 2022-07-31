@@ -119,9 +119,9 @@ public:
     type = check_typedef (type);
     if (type->code () == TYPE_CODE_ARRAY
 	&& TYPE_LENGTH (type) > 0
-	&& TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
+	&& TYPE_LENGTH (type->target_type ()) > 0)
       {
-	struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+	struct type *elttype = check_typedef (type->target_type ());
 
 	if (TYPE_LENGTH (elttype) == 1
 	    && (elttype->code () == TYPE_CODE_INT

@@ -87,8 +87,8 @@ c_textual_element_type (struct type *type, char format)
       /* Peel a single typedef.  If the typedef doesn't have a target
 	 type, we use check_typedef and hope the result is ok -- it
 	 might be for C++, where wchar_t is a built-in type.  */
-      if (TYPE_TARGET_TYPE (iter_type))
-	iter_type = TYPE_TARGET_TYPE (iter_type);
+      if (iter_type->target_type ())
+	iter_type = iter_type->target_type ();
       else
 	iter_type = check_typedef (iter_type);
     }
@@ -238,7 +238,7 @@ c_value_print_array (struct value *val,
   struct type *type = check_typedef (value_type (val));
   CORE_ADDR address = value_address (val);
   const gdb_byte *valaddr = value_contents_for_printing (val).data ();
-  struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
+  struct type *unresolved_elttype = type->target_type ();
   struct type *elttype = check_typedef (unresolved_elttype);
 
   if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (unresolved_elttype) > 0)
@@ -347,7 +347,7 @@ c_value_print_ptr (struct value *val, struct ui_file *stream, int recurse,
     }
   else
     {
-      struct type *unresolved_elttype = TYPE_TARGET_TYPE (type);
+      struct type *unresolved_elttype = type->target_type ();
       struct type *elttype = check_typedef (unresolved_elttype);
       CORE_ADDR addr = unpack_pointer (type, valaddr);
 
@@ -497,15 +497,15 @@ c_value_print (struct value *val, struct ui_file *stream,
 	 are always exactly (char *), (wchar_t *), or the like.  */
       if (original_type->code () == TYPE_CODE_PTR
 	  && original_type->name () == NULL
-	  && TYPE_TARGET_TYPE (original_type)->name () != NULL
-	  && (strcmp (TYPE_TARGET_TYPE (original_type)->name (),
+	  && original_type->target_type ()->name () != NULL
+	  && (strcmp (original_type->target_type ()->name (),
 		      "char") == 0
-	      || textual_name (TYPE_TARGET_TYPE (original_type)->name ())))
+	      || textual_name (original_type->target_type ()->name ())))
 	{
 	  /* Print nothing.  */
 	}
       else if (options->objectprint
-	       && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_STRUCT))
+	       && (type->target_type ()->code () == TYPE_CODE_STRUCT))
 	{
 	  int is_ref = TYPE_IS_REFERENCE (type);
 	  enum type_code refcode = TYPE_CODE_UNDEF;

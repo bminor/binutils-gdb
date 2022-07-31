@@ -65,7 +65,7 @@ enum valscm_binary_opcode
 
 /* If TYPE is a reference, return the target; otherwise return TYPE.  */
 #define STRIP_REFERENCE(TYPE) \
-  ((TYPE->code () == TYPE_CODE_REF) ? (TYPE_TARGET_TYPE (TYPE)) : (TYPE))
+  ((TYPE->code () == TYPE_CODE_REF) ? ((TYPE)->target_type ()) : (TYPE))
 
 /* Helper for vlscm_unop.  Contains all the code that may throw a GDB
    exception.  */

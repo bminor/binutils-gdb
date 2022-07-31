@@ -4296,7 +4296,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	    int count;
 	    unsigned unitlen;
 
-	    count = arm_vfp_cprc_sub_candidate (TYPE_TARGET_TYPE (t),
+	    count = arm_vfp_cprc_sub_candidate (t->target_type (),
 						base_type);
 	    if (count == -1)
 	      return -1;
@@ -4442,7 +4442,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      applies.  */
   ftype = check_typedef (value_type (function));
   if (ftype->code () == TYPE_CODE_PTR)
-    ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
+    ftype = check_typedef (ftype->target_type ());
   use_vfp_abi = arm_vfp_abi_for_function (gdbarch, ftype);
 
   /* Set the return address.  For the ARM, the return breakpoint is
@@ -4485,7 +4485,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       arg_type = check_typedef (value_type (args[argnum]));
       len = TYPE_LENGTH (arg_type);
-      target_type = TYPE_TARGET_TYPE (arg_type);
+      target_type = arg_type->target_type ();
       typecode = arg_type->code ();
       val = value_contents (args[argnum]).data ();
 

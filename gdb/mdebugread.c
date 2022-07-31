@@ -1645,7 +1645,7 @@ parse_type (int fd, union aux_ext *ax, unsigned int aux_index, int *bs,
 	 dereference them.  */
       while (tp->code () == TYPE_CODE_PTR
 	     || tp->code () == TYPE_CODE_ARRAY)
-	tp = TYPE_TARGET_TYPE (tp);
+	tp = tp->target_type ();
 
       /* Make sure that TYPE_CODE(tp) has an expected type code.
 	 Any type may be returned from cross_ref if file indirect entries
@@ -2041,7 +2041,7 @@ parse_procedure (PDR *pr, struct compunit_symtab *search_symtab,
 
   if (processing_gcc_compilation == 0
       && found_ecoff_debugging_info == 0
-      && TYPE_TARGET_TYPE (s->type ())->code () == TYPE_CODE_VOID)
+      && s->type ()->target_type ()->code () == TYPE_CODE_VOID)
     s->set_type (objfile_type (mdebugread_objfile)->nodebug_text_symbol);
 }
 

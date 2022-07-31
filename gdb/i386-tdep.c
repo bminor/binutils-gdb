@@ -2647,7 +2647,7 @@ i386_16_byte_align_p (struct type *type)
       && TYPE_LENGTH (type) == 16)
     return 1;
   if (type->code () == TYPE_CODE_ARRAY)
-    return i386_16_byte_align_p (TYPE_TARGET_TYPE (type));
+    return i386_16_byte_align_p (type->target_type ());
   if (type->code () == TYPE_CODE_STRUCT
       || type->code () == TYPE_CODE_UNION)
     {

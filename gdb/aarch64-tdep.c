@@ -1496,7 +1496,7 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 
     case TYPE_CODE_COMPLEX:
       {
-	struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
+	struct type *target_type = check_typedef (type->target_type ());
 	if (TYPE_LENGTH (target_type) > 16)
 	  return -1;
 
@@ -1526,7 +1526,7 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 	  }
 	else
 	  {
-	    struct type *target_type = TYPE_TARGET_TYPE (type);
+	    struct type *target_type = type->target_type ();
 	    int count = aapcs_is_vfp_call_or_return_candidate_1
 			  (target_type, fundamental_type);
 
@@ -1801,7 +1801,7 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
     case TYPE_CODE_COMPLEX:
       {
 	const bfd_byte *buf = value_contents (arg).data ();
-	struct type *target_type = check_typedef (TYPE_TARGET_TYPE (arg_type));
+	struct type *target_type = check_typedef (arg_type->target_type ());
 
 	if (!pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (target_type),
 			buf))

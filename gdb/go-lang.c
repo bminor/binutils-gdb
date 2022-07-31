@@ -86,7 +86,7 @@ gccgo_string_p (struct type *type)
 	  && type1->code () == TYPE_CODE_INT
 	  && strcmp (type->field (1).name (), "__length") == 0)
 	{
-	  struct type *target_type = TYPE_TARGET_TYPE (type0);
+	  struct type *target_type = type0->target_type ();
 
 	  target_type = check_typedef (target_type);
 

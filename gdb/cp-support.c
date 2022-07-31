@@ -212,10 +212,10 @@ inspect_type (struct demangle_parse_info *info,
 	      struct type *last = otype;
 
 	      /* Find the last typedef for the type.  */
-	      while (TYPE_TARGET_TYPE (last) != NULL
-		     && (TYPE_TARGET_TYPE (last)->code ()
+	      while (last->target_type () != NULL
+		     && (last->target_type ()->code ()
 			 == TYPE_CODE_TYPEDEF))
-		last = TYPE_TARGET_TYPE (last);
+		last = last->target_type ();
 
 	      /* If there is only one typedef for this anonymous type,
 		 do not substitute it.  */
@@ -1336,7 +1336,7 @@ add_symbol_overload_list_adl_namespace (struct type *type,
       if (type->code () == TYPE_CODE_TYPEDEF)
 	type = check_typedef (type);
       else
-	type = TYPE_TARGET_TYPE (type);
+	type = type->target_type ();
     }
 
   type_name = type->name ();

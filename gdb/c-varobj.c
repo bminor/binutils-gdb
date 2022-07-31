@@ -403,7 +403,7 @@ c_describe_child (const struct varobj *parent, int index,
 	 check_typedef and here, we want to show the true
 	 declared type of the variable.  */
       if (ctype)
-	*ctype = TYPE_TARGET_TYPE (type);
+	*ctype = type->target_type ();
 
       if (cfull_expression)
 	*cfull_expression = string_printf ("*(%s)", parent_expression.c_str ());
@@ -482,7 +482,7 @@ c_value_of_variable (const struct varobj *var,
 
   /* Strip top-level references.  */
   while (TYPE_IS_REFERENCE (type))
-    type = check_typedef (TYPE_TARGET_TYPE (type));
+    type = check_typedef (type->target_type ());
 
   switch (type->code ())
     {

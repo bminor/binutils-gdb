@@ -78,10 +78,10 @@ cp_is_vtbl_member (struct type *type)
      structures.  Nowadays it points directly to the structure.  */
   if (type->code () == TYPE_CODE_PTR)
     {
-      type = TYPE_TARGET_TYPE (type);
+      type = type->target_type ();
       if (type->code () == TYPE_CODE_ARRAY)
 	{
-	  type = TYPE_TARGET_TYPE (type);
+	  type = type->target_type ();
 	  if (type->code () == TYPE_CODE_STRUCT    /* if not using thunks */
 	      || type->code () == TYPE_CODE_PTR)   /* if using thunks */
 	    {
@@ -589,7 +589,7 @@ cp_print_static_field (struct type *type,
     {
       struct type **first_dont_print;
       int i;
-      struct type *target_type = TYPE_TARGET_TYPE (type);
+      struct type *target_type = type->target_type ();
 
       first_dont_print
 	= (struct type **) obstack_base (&dont_print_stat_array_obstack);

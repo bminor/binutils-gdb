@@ -885,7 +885,7 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Determine the type of this function.  */
   func_type = check_typedef (func_type);
   if (func_type->code () == TYPE_CODE_PTR)
-    func_type = check_typedef (TYPE_TARGET_TYPE (func_type));
+    func_type = check_typedef (func_type->target_type ());
 
   gdb_assert (func_type->code () == TYPE_CODE_FUNC
 	      || func_type->code () == TYPE_CODE_METHOD);

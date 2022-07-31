@@ -528,7 +528,7 @@ whatis_exp (const char *exp, int show)
 	     because we do not want to dig past all typedefs.  */
 	  check_typedef (type);
 	  if (type->code () == TYPE_CODE_TYPEDEF)
-	    type = TYPE_TARGET_TYPE (type);
+	    type = type->target_type ();
 
 	  /* If the expression is actually a type, then there's no
 	     value to fetch the dynamic type from.  */
@@ -545,7 +545,7 @@ whatis_exp (const char *exp, int show)
   if (val != NULL && opts.objectprint)
     {
       if (type->is_pointer_or_reference ()
-	  && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_STRUCT))
+	  && (type->target_type ()->code () == TYPE_CODE_STRUCT))
 	real_type = value_rtti_indirect_type (val, &full, &top, &using_enc);
       else if (type->code () == TYPE_CODE_STRUCT)
 	real_type = value_rtti_type (val, &full, &top, &using_enc);
@@ -654,7 +654,7 @@ print_type_scalar (struct type *type, LONGEST val, struct ui_file *stream)
       break;
 
     case TYPE_CODE_RANGE:
-      print_type_scalar (TYPE_TARGET_TYPE (type), val, stream);
+      print_type_scalar (type->target_type (), val, stream);
       return;
 
     case TYPE_CODE_FIXED_POINT:

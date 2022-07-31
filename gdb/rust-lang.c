@@ -331,7 +331,7 @@ rust_val_print_slice (struct value *val, struct ui_file *stream, int recurse,
 
   struct type *type = check_typedef (value_type (val));
   if (strcmp (type->name (), "&str") == 0)
-    val_print_string (TYPE_TARGET_TYPE (value_type (base)), "UTF-8",
+    val_print_string (value_type (base)->target_type (), "UTF-8",
 		      value_as_address (base), value_as_long (len), stream,
 		      options);
   else
@@ -345,7 +345,7 @@ rust_val_print_slice (struct value *val, struct ui_file *stream, int recurse,
 	gdb_printf (stream, "[]");
       else
 	{
-	  struct type *elt_type = TYPE_TARGET_TYPE (value_type (base));
+	  struct type *elt_type = value_type (base)->target_type ();
 	  struct type *array_type = lookup_array_range_type (elt_type, 0,
 							     llen - 1);
 	  struct value *array = allocate_value_lazy (array_type);
@@ -536,14 +536,14 @@ rust_language::value_print_inner
       {
 	LONGEST low_bound, high_bound;
 	
-	if (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ARRAY
-	    && rust_u8_type_p (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (type)))
-	    && get_array_bounds (TYPE_TARGET_TYPE (type), &low_bound,
+	if (type->target_type ()->code () == TYPE_CODE_ARRAY
+	    && rust_u8_type_p (type->target_type ()->target_type ())
+	    && get_array_bounds (type->target_type (), &low_bound,
 				 &high_bound))
 	  {
 	    /* We have a pointer to a byte string, so just print
 	       that.  */
-	    struct type *elttype = check_typedef (TYPE_TARGET_TYPE (type));
+	    struct type *elttype = check_typedef (type->target_type ());
 	    CORE_ADDR addr = value_as_address (val);
 	    struct gdbarch *arch = type->arch ();
 
@@ -554,7 +554,7 @@ rust_language::value_print_inner
 	      }
 
 	    gdb_puts ("b", stream);
-	    val_print_string (TYPE_TARGET_TYPE (elttype), "ASCII", addr,
+	    val_print_string (elttype->target_type (), "ASCII", addr,
 			      high_bound - low_bound + 1, stream,
 			      &opts);
 	    break;
@@ -583,7 +583,7 @@ rust_language::value_print_inner
 	   byte string, hence the choice of "ASCII" as the
 	   encoding.  */
 	gdb_puts ("b", stream);
-	printstr (stream, TYPE_TARGET_TYPE (type),
+	printstr (stream, type->target_type (),
 		  value_contents_for_printing (val).data (),
 		  high_bound - low_bound + 1, "ASCII", 0, &opts);
       }
@@ -839,10 +839,10 @@ rust_internal_print_type (struct type *type, const char *varstring,
 	}
       gdb_puts (")", stream);
       /* If it returns unit, we can omit the return type.  */
-      if (TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
+      if (type->target_type ()->code () != TYPE_CODE_VOID)
 	{
 	  gdb_puts (" -> ", stream);
-	  rust_internal_print_type (TYPE_TARGET_TYPE (type), "", stream,
+	  rust_internal_print_type (type->target_type (), "", stream,
 				    -1, 0, flags, false, podata);
 	}
       break;
@@ -852,7 +852,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
 	LONGEST low_bound, high_bound;
 
 	gdb_puts ("[", stream);
-	rust_internal_print_type (TYPE_TARGET_TYPE (type), NULL,
+	rust_internal_print_type (type->target_type (), NULL,
 				  stream, show - 1, level, flags, false,
 				  podata);
 
@@ -915,7 +915,7 @@ rust_internal_print_type (struct type *type, const char *varstring,
 	    /* We currently can't distinguish between pointers and
 	       references.  */
 	    gdb_puts ("*mut ", stream);
-	    type_print (TYPE_TARGET_TYPE (type), "", stream, 0);
+	    type_print (type->target_type (), "", stream, 0);
 	  }
       }
       break;
@@ -1168,14 +1168,14 @@ rust_subscript (struct type *expect_type, struct expression *exp,
     {
       struct type *base_type = nullptr;
       if (type->code () == TYPE_CODE_ARRAY)
-	base_type = TYPE_TARGET_TYPE (type);
+	base_type = type->target_type ();
       else if (rust_slice_type_p (type))
 	{
 	  for (int i = 0; i < type->num_fields (); ++i)
 	    {
 	      if (strcmp (type->field (i).name (), "data_ptr") == 0)
 		{
-		  base_type = TYPE_TARGET_TYPE (type->field (i).type ());
+		  base_type = type->field (i).type ()->target_type ();
 		  break;
 		}
 	    }
@@ -1183,7 +1183,7 @@ rust_subscript (struct type *expect_type, struct expression *exp,
 	    error (_("Could not find 'data_ptr' in slice type"));
 	}
       else if (type->code () == TYPE_CODE_PTR)
-	base_type = TYPE_TARGET_TYPE (type);
+	base_type = type->target_type ();
       else
 	error (_("Cannot subscript non-array type"));
 
@@ -1571,7 +1571,7 @@ rust_structop::evaluate_funcall (struct type *expect_type,
     args[i + 1] = ops[i]->evaluate (nullptr, exp, noside);
 
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
-    return value_zero (TYPE_TARGET_TYPE (fn_type), not_lval);
+    return value_zero (fn_type->target_type (), not_lval);
   return call_function_by_hand (function, NULL, args);
 }
 
@@ -1672,9 +1672,9 @@ rust_language::is_string_type_p (struct type *type) const
   type = check_typedef (type);
   return ((type->code () == TYPE_CODE_STRING)
 	  || (type->code () == TYPE_CODE_PTR
-	      && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ARRAY
-		  && rust_u8_type_p (TYPE_TARGET_TYPE (TYPE_TARGET_TYPE (type)))
-		  && get_array_bounds (TYPE_TARGET_TYPE (type), &low_bound,
+	      && (type->target_type ()->code () == TYPE_CODE_ARRAY
+		  && rust_u8_type_p (type->target_type ()->target_type ())
+		  && get_array_bounds (type->target_type (), &low_bound,
 				       &high_bound)))
 	  || (type->code () == TYPE_CODE_STRUCT
 	      && !rust_enum_p (type)

@@ -205,7 +205,7 @@ lsscm_elt_type (lazy_string_smob *ls_smob)
     {
     case TYPE_CODE_PTR:
     case TYPE_CODE_ARRAY:
-      return TYPE_TARGET_TYPE (realtype);
+      return realtype->target_type ();
     default:
       /* This is done to preserve existing behaviour.  PR 20769.
 	 E.g., gdb.parse_and_eval("my_int_variable").lazy_string().type.  */
@@ -324,7 +324,7 @@ lsscm_safe_lazy_string_to_value (SCM string, int arg_pos,
 	      /* PR 20786: There's no way to specify an array of length zero.
 		 Record a length of [0,-1] which is how Ada does it.  Anything
 		 we do is broken, but this one possible solution.  */
-	      type = lookup_array_range_type (TYPE_TARGET_TYPE (realtype),
+	      type = lookup_array_range_type (realtype->target_type (),
 					      0, ls_smob->length - 1);
 	      value = value_at_lazy (type, ls_smob->address);
 	    }

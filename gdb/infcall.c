@@ -183,7 +183,7 @@ value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
 	   convert it back to a reference.  This will issue an error
 	   if the value was not previously in memory - in some cases
 	   we should clearly be allowing this, but how?  */
-	new_value = value_cast (TYPE_TARGET_TYPE (type), arg);
+	new_value = value_cast (type->target_type (), arg);
 	new_value = value_ref (new_value, type->code ());
 	return new_value;
       }
@@ -221,7 +221,7 @@ value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
 	 because they are passed by value.  */
       if (current_language->c_style_arrays_p ())
 	if (!type->is_vector ())
-	  type = lookup_pointer_type (TYPE_TARGET_TYPE (type));
+	  type = lookup_pointer_type (type->target_type ());
       break;
     case TYPE_CODE_UNDEF:
     case TYPE_CODE_PTR:
@@ -266,7 +266,7 @@ find_function_addr (struct value *function,
   else if (ftype->code () == TYPE_CODE_PTR)
     {
       funaddr = value_as_address (function);
-      ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
+      ftype = check_typedef (ftype->target_type ());
       if (ftype->code () == TYPE_CODE_FUNC
 	  || ftype->code () == TYPE_CODE_METHOD)
 	funaddr = gdbarch_convert_from_func_ptr_addr
@@ -295,13 +295,13 @@ find_function_addr (struct value *function,
 		target_ftype = find_gnu_ifunc_target_type (resolver_addr);
 	      if (target_ftype != NULL)
 		{
-		  value_type = TYPE_TARGET_TYPE (check_typedef (target_ftype));
+		  value_type = check_typedef (target_ftype)->target_type ();
 		  ftype = target_ftype;
 		}
 	    }
 	}
       else
-	value_type = TYPE_TARGET_TYPE (ftype);
+	value_type = ftype->target_type ();
     }
   else if (ftype->code () == TYPE_CODE_INT)
     {
@@ -1027,7 +1027,7 @@ call_function_by_hand_dummy (struct value *function,
 	 prototyped.  Can we respect TYPE_VARARGS?  Probably not.  */
       if (ftype->code () == TYPE_CODE_METHOD)
 	prototyped = 1;
-      else if (TYPE_TARGET_TYPE (ftype) == NULL && ftype->num_fields () == 0
+      else if (ftype->target_type () == NULL && ftype->num_fields () == 0
 	       && default_return_type != NULL)
 	{
 	  /* Calling a no-debug function with the return type

@@ -1026,7 +1026,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	  break;
 	case TYPE_CODE_COMPLEX:
 	  {
-	    struct type *target_type = check_typedef (TYPE_TARGET_TYPE (type));
+	    struct type *target_type = check_typedef (type->target_type ());
 	    size_t target_len = TYPE_LENGTH (target_type);
 
 	    if (target_len < regsize)

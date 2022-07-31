@@ -53,9 +53,9 @@ lookup_opencl_vector_type (struct gdbarch *gdbarch, enum type_code code,
 
     return (type->code () == TYPE_CODE_ARRAY && type->is_vector ()
 	    && get_array_bounds (type, &lowb, &highb)
-	    && TYPE_TARGET_TYPE (type)->code () == code
-	    && TYPE_TARGET_TYPE (type)->is_unsigned () == flag_unsigned
-	    && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) == el_length
+	    && type->target_type ()->code () == code
+	    && type->target_type ()->is_unsigned () == flag_unsigned
+	    && TYPE_LENGTH (type->target_type ()) == el_length
 	    && TYPE_LENGTH (type) == length
 	    && highb - lowb + 1 == n);
   };
@@ -121,7 +121,7 @@ lval_func_read (struct value *v)
 {
   struct lval_closure *c = (struct lval_closure *) value_computed_closure (v);
   struct type *type = check_typedef (value_type (v));
-  struct type *eltype = TYPE_TARGET_TYPE (check_typedef (value_type (c->val)));
+  struct type *eltype = check_typedef (value_type (c->val))->target_type ();
   LONGEST offset = value_offset (v);
   LONGEST elsize = TYPE_LENGTH (eltype);
   int n, i, j = 0;
@@ -150,7 +150,7 @@ lval_func_write (struct value *v, struct value *fromval)
   struct value *mark = value_mark ();
   struct lval_closure *c = (struct lval_closure *) value_computed_closure (v);
   struct type *type = check_typedef (value_type (v));
-  struct type *eltype = TYPE_TARGET_TYPE (check_typedef (value_type (c->val)));
+  struct type *eltype = check_typedef (value_type (c->val))->target_type ();
   LONGEST offset = value_offset (v);
   LONGEST elsize = TYPE_LENGTH (eltype);
   int n, i, j = 0;
@@ -198,7 +198,7 @@ lval_func_check_synthetic_pointer (const struct value *v,
   struct lval_closure *c = (struct lval_closure *) value_computed_closure (v);
   /* Size of the target type in bits.  */
   int elsize =
-      TYPE_LENGTH (TYPE_TARGET_TYPE (check_typedef (value_type (c->val)))) * 8;
+      TYPE_LENGTH (check_typedef (value_type (c->val))->target_type ()) * 8;
   int startrest = offset % elsize;
   int start = offset / elsize;
   int endrest = (offset + length) % elsize;
@@ -271,7 +271,7 @@ create_value (struct gdbarch *gdbarch, struct value *val, enum noside noside,
 	      int *indices, int n)
 {
   struct type *type = check_typedef (value_type (val));
-  struct type *elm_type = TYPE_TARGET_TYPE (type);
+  struct type *elm_type = type->target_type ();
   struct value *ret;
 
   /* Check if a single component of a vector is requested which means
@@ -453,7 +453,7 @@ opencl_logical_not (struct type *expect_type, struct expression *exp,
 
   if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
-      struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
+      struct type *eltype = check_typedef (type->target_type ());
       LONGEST lowb, highb;
       int i;
 
@@ -547,8 +547,8 @@ vector_relop (struct expression *exp, struct value *val1, struct value *val2,
   if (!t1_is_vec || !t2_is_vec)
     error (_("Vector operations are not supported on scalar types"));
 
-  eltype1 = check_typedef (TYPE_TARGET_TYPE (type1));
-  eltype2 = check_typedef (TYPE_TARGET_TYPE (type2));
+  eltype1 = check_typedef (type1->target_type ());
+  eltype2 = check_typedef (type2->target_type ());
 
   if (!get_array_bounds (type1,&lowb1, &highb1)
       || !get_array_bounds (type2, &lowb2, &highb2))
@@ -622,7 +622,7 @@ opencl_value_cast (struct type *type, struct value *arg)
 	     value_vector_widen will error if the scalar value is
 	     truncated by the cast.  To avoid the error, cast (and
 	     possibly truncate) here.  */
-	  eltype = check_typedef (TYPE_TARGET_TYPE (to_type));
+	  eltype = check_typedef (to_type->target_type ());
 	  arg = value_cast (eltype, arg);
 
 	  return value_vector_widen (arg, type);
@@ -810,8 +810,8 @@ opencl_ternop_cond_operation::evaluate (struct type *expect_type,
 Cannot perform conditional operation on incompatible types"));
 	}
 
-      eltype2 = check_typedef (TYPE_TARGET_TYPE (type2));
-      eltype3 = check_typedef (TYPE_TARGET_TYPE (type3));
+      eltype2 = check_typedef (type2->target_type ());
+      eltype3 = check_typedef (type3->target_type ());
 
       if (!get_array_bounds (type1, &lowb1, &highb1)
 	  || !get_array_bounds (type2, &lowb2, &highb2)

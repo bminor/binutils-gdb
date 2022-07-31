@@ -91,7 +91,7 @@ pascal_language::value_print_inner (struct value *val,
 	if (get_array_bounds (type, &low_bound, &high_bound))
 	  {
 	    len = high_bound - low_bound + 1;
-	    elttype = check_typedef (TYPE_TARGET_TYPE (type));
+	    elttype = check_typedef (type->target_type ());
 	    eltlen = TYPE_LENGTH (elttype);
 	    /* If 's' format is used, try to print out as string.
 	       If no format is given, print as string if element type
@@ -116,7 +116,7 @@ pascal_language::value_print_inner (struct value *val,
 		    len = temp_len;
 		  }
 
-		printstr (stream, TYPE_TARGET_TYPE (type), valaddr, len,
+		printstr (stream, type->target_type (), valaddr, len,
 			  NULL, 0, options);
 		i = len;
 	      }
@@ -161,11 +161,11 @@ pascal_language::value_print_inner (struct value *val,
 	  print_address_demangle (options, gdbarch, addr, stream, demangle);
 	  break;
 	}
-      check_typedef (TYPE_TARGET_TYPE (type));
+      check_typedef (type->target_type ());
 
       addr = unpack_pointer (type, valaddr);
     print_unpacked_pointer:
-      elttype = check_typedef (TYPE_TARGET_TYPE (type));
+      elttype = check_typedef (type->target_type ());
 
       if (elttype->code () == TYPE_CODE_FUNC)
 	{
@@ -259,7 +259,7 @@ pascal_language::value_print_inner (struct value *val,
 		}
 	      else
 		{
-		  wtype = TYPE_TARGET_TYPE (type);
+		  wtype = type->target_type ();
 		}
 	      vt_val = value_at (wtype, vt_address);
 	      common_val_print (vt_val, stream, recurse + 1, options,
@@ -423,8 +423,8 @@ pascal_language::value_print (struct value *val, struct ui_file *stream,
 	 type is indicated by the quoted string anyway.  */
       if (type->code () == TYPE_CODE_PTR
 	  && type->name () == NULL
-	  && TYPE_TARGET_TYPE (type)->name () != NULL
-	  && strcmp (TYPE_TARGET_TYPE (type)->name (), "char") == 0)
+	  && type->target_type ()->name () != NULL
+	  && strcmp (type->target_type ()->name (), "char") == 0)
 	{
 	  /* Print nothing.  */
 	}
@@ -482,10 +482,10 @@ pascal_object_is_vtbl_member (struct type *type)
 {
   if (type->code () == TYPE_CODE_PTR)
     {
-      type = TYPE_TARGET_TYPE (type);
+      type = type->target_type ();
       if (type->code () == TYPE_CODE_ARRAY)
 	{
-	  type = TYPE_TARGET_TYPE (type);
+	  type = type->target_type ();
 	  if (type->code () == TYPE_CODE_STRUCT	/* If not using
 							   thunks.  */
 	      || type->code () == TYPE_CODE_PTR)	/* If using thunks.  */

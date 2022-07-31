@@ -41,7 +41,7 @@ ppc_sysv_use_opencl_abi (struct type *ftype)
   ftype = check_typedef (ftype);
 
   if (ftype->code () == TYPE_CODE_PTR)
-    ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
+    ftype = check_typedef (ftype->target_type ());
 
   return (ftype->code () == TYPE_CODE_FUNC
 	  && TYPE_CALLING_CONVENTION (ftype) == DW_CC_GDB_IBM_OpenCL);
@@ -340,7 +340,7 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    {
 	      /* OpenCL vectors shorter than 16 bytes are passed as if
 		 a series of independent scalars.  */
-	      struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
+	      struct type *eltype = check_typedef (type->target_type ());
 	      int i, nelt = TYPE_LENGTH (type) / TYPE_LENGTH (eltype);
 
 	      for (i = 0; i < nelt; i++)
@@ -813,7 +813,7 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *func_type,
       && TYPE_LENGTH (type) < 16
       && opencl_abi)
     {
-      struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
+      struct type *eltype = check_typedef (type->target_type ());
       int i, nelt = TYPE_LENGTH (type) / TYPE_LENGTH (eltype);
 
       for (i = 0; i < nelt; i++)
@@ -1093,7 +1093,7 @@ ppc64_aggregate_candidate (struct type *type,
       break;
 
     case TYPE_CODE_COMPLEX:
-      type = TYPE_TARGET_TYPE (type);
+      type = type->target_type ();
       if (type->code () == TYPE_CODE_FLT
 	  || type->code () == TYPE_CODE_DECFLOAT)
 	{
@@ -1119,7 +1119,7 @@ ppc64_aggregate_candidate (struct type *type,
 	  LONGEST count, low_bound, high_bound;
 
 	  count = ppc64_aggregate_candidate
-		   (TYPE_TARGET_TYPE (type), field_type);
+		   (type->target_type (), field_type);
 	  if (count == -1)
 	    return -1;
 
@@ -1497,7 +1497,7 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 		  || type->code () == TYPE_CODE_REF))
 	    {
 	      struct type *target_type
-		= check_typedef (TYPE_TARGET_TYPE (type));
+		= check_typedef (type->target_type ());
 
 	      if (target_type->code () == TYPE_CODE_FUNC
 		  || target_type->code () == TYPE_CODE_METHOD)
@@ -1695,7 +1695,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 	  if (type->code () == TYPE_CODE_COMPLEX)
 	    {
 	      /* Complex types are passed as if two independent scalars.  */
-	      struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
+	      struct type *eltype = check_typedef (type->target_type ());
 
 	      ppc64_sysv_abi_push_param (gdbarch, eltype, val, &argpos);
 	      ppc64_sysv_abi_push_param (gdbarch, eltype,
@@ -1711,7 +1711,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 	      int i, nelt;
 
 	      if (TYPE_LENGTH (type) < 16)
-		eltype = check_typedef (TYPE_TARGET_TYPE (type));
+		eltype = check_typedef (type->target_type ());
 	      else
 		eltype = register_type (gdbarch, tdep->ppc_vr0_regnum);
 
@@ -1999,7 +1999,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
   /* Complex types are returned as if two independent scalars.  */
   if (valtype->code () == TYPE_CODE_COMPLEX)
     {
-      eltype = check_typedef (TYPE_TARGET_TYPE (valtype));
+      eltype = check_typedef (valtype->target_type ());
 
       for (int i = 0; i < 2; i++)
 	{
@@ -2022,7 +2022,7 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
       && opencl_abi)
     {
       if (TYPE_LENGTH (valtype) < 16)
-	eltype = check_typedef (TYPE_TARGET_TYPE (valtype));
+	eltype = check_typedef (valtype->target_type ());
       else
 	eltype = register_type (gdbarch, tdep->ppc_vr0_regnum);
 
@@ -2057,8 +2057,8 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
   if (valtype->code () == TYPE_CODE_ARRAY
       && !valtype->is_vector ()
       && TYPE_LENGTH (valtype) <= 8
-      && TYPE_TARGET_TYPE (valtype)->code () == TYPE_CODE_INT
-      && TYPE_LENGTH (TYPE_TARGET_TYPE (valtype)) == 1)
+      && valtype->target_type ()->code () == TYPE_CODE_INT
+      && TYPE_LENGTH (valtype->target_type ()) == 1)
     {
       int regnum = tdep->ppc_gp0_regnum + 3;
       int offset = (register_size (gdbarch, regnum) - TYPE_LENGTH (valtype));

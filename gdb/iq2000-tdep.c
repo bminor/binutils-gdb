@@ -89,13 +89,13 @@ iq2000_pointer_to_address (struct gdbarch *gdbarch,
 			   struct type * type, const gdb_byte * buf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  enum type_code target = TYPE_TARGET_TYPE (type)->code ();
+  enum type_code target = type->target_type ()->code ();
   CORE_ADDR addr
     = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
 
   if (target == TYPE_CODE_FUNC
       || target == TYPE_CODE_METHOD
-      || TYPE_CODE_SPACE (TYPE_TARGET_TYPE (type)))
+      || TYPE_CODE_SPACE (type->target_type ()))
     addr = insn_addr_from_ptr (addr);
 
   return addr;
@@ -109,7 +109,7 @@ iq2000_address_to_pointer (struct gdbarch *gdbarch,
 			   struct type *type, gdb_byte *buf, CORE_ADDR addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  enum type_code target = TYPE_TARGET_TYPE (type)->code ();
+  enum type_code target = type->target_type ()->code ();
 
   if (target == TYPE_CODE_FUNC || target == TYPE_CODE_METHOD)
     addr = insn_ptr_from_addr (addr);
@@ -599,7 +599,7 @@ iq2000_pass_8bytetype_by_address (struct type *type)
 
   /* Skip typedefs.  */
   while (type->code () == TYPE_CODE_TYPEDEF)
-    type = TYPE_TARGET_TYPE (type);
+    type = type->target_type ();
   /* Non-struct and non-union types are always passed by value.  */
   if (type->code () != TYPE_CODE_STRUCT
       && type->code () != TYPE_CODE_UNION)
@@ -614,7 +614,7 @@ iq2000_pass_8bytetype_by_address (struct type *type)
     return 1;
   /* Skip typedefs of field type.  */
   while (ftype->code () == TYPE_CODE_TYPEDEF)
-    ftype = TYPE_TARGET_TYPE (ftype);
+    ftype = ftype->target_type ();
   /* If field is int or float, pass by value.  */
   if (ftype->code () == TYPE_CODE_FLT
       || ftype->code () == TYPE_CODE_INT)

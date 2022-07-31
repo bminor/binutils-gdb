@@ -873,7 +873,7 @@ primary :	primary TICK_ACCESS
 			  if (!ada_is_modular_type (type_arg))
 			    error (_("'modulus must be applied to modular type"));
 			  write_int (pstate, ada_modulus (type_arg),
-				     TYPE_TARGET_TYPE (type_arg));
+				     type_arg->target_type ());
 			}
 	;
 

@@ -439,7 +439,7 @@ ptrmath_type_p (const struct language_defn *lang, struct type *type)
 {
   type = check_typedef (type);
   if (TYPE_IS_REFERENCE (type))
-    type = TYPE_TARGET_TYPE (type);
+    type = type->target_type ();
 
   switch (type->code ())
     {
@@ -649,7 +649,7 @@ evaluate_subexp_do_call (expression *exp, enum noside noside,
 		ftype = resolved_type;
 	    }
 
-	  type *return_type = TYPE_TARGET_TYPE (ftype);
+	  type *return_type = ftype->target_type ();
 
 	  if (return_type == NULL)
 	    return_type = default_return_type;
@@ -690,7 +690,7 @@ operation::evaluate_funcall (struct type *expect_type,
   value *callee = evaluate_with_coercion (exp, noside);
   struct type *type = value_type (callee);
   if (type->code () == TYPE_CODE_PTR)
-    type = TYPE_TARGET_TYPE (type);
+    type = type->target_type ();
   for (int i = 0; i < args.size (); ++i)
     {
       if (i < type->num_fields ())
@@ -831,7 +831,7 @@ structop_member_base::evaluate_funcall (struct type *expect_type,
   if (a1_type->code () == TYPE_CODE_METHODPTR)
     {
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	callee = value_zero (TYPE_TARGET_TYPE (a1_type), not_lval);
+	callee = value_zero (a1_type->target_type (), not_lval);
       else
 	callee = cplus_method_ptr_to_value (&lhs, rhs);
 
@@ -842,7 +842,7 @@ structop_member_base::evaluate_funcall (struct type *expect_type,
       struct type *type_ptr
 	= lookup_pointer_type (TYPE_SELF_TYPE (a1_type));
       struct type *target_type_ptr
-	= lookup_pointer_type (TYPE_TARGET_TYPE (a1_type));
+	= lookup_pointer_type (a1_type->target_type ());
 
       /* Now, convert this value to an address.  */
       lhs = value_cast (type_ptr, lhs);
@@ -1038,7 +1038,7 @@ structop_base_operation::complete (struct expression *exp,
       type = check_typedef (type);
       if (!type->is_pointer_or_reference ())
 	break;
-      type = TYPE_TARGET_TYPE (type);
+      type = type->target_type ();
     }
 
   if (type->code () == TYPE_CODE_UNION
@@ -1068,7 +1068,7 @@ is_integral_or_integral_reference (struct type *type)
   type = check_typedef (type);
   return (type != nullptr
 	  && TYPE_IS_REFERENCE (type)
-	  && is_integral_type (TYPE_TARGET_TYPE (type)));
+	  && is_integral_type (type->target_type ()));
 }
 
 /* Helper function that implements the body of OP_SCOPE.  */
@@ -1258,8 +1258,8 @@ eval_op_structop_ptr (struct type *expect_type, struct expression *exp,
     struct value_print_options opts;
 
     get_user_print_options (&opts);
-    if (opts.objectprint && TYPE_TARGET_TYPE (arg_type)
-	&& (TYPE_TARGET_TYPE (arg_type)->code () == TYPE_CODE_STRUCT))
+    if (opts.objectprint && arg_type->target_type ()
+	&& (arg_type->target_type ()->code () == TYPE_CODE_STRUCT))
       {
 	real_type = value_rtti_indirect_type (arg1, &full, &top,
 					      &using_enc);
@@ -1290,7 +1290,7 @@ eval_op_member (struct type *expect_type, struct expression *exp,
     {
     case TYPE_CODE_METHODPTR:
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (TYPE_TARGET_TYPE (type), not_lval);
+	return value_zero (type->target_type (), not_lval);
       else
 	{
 	  arg2 = cplus_method_ptr_to_value (&arg1, arg2);
@@ -1305,7 +1305,7 @@ eval_op_member (struct type *expect_type, struct expression *exp,
 
       mem_offset = value_as_long (arg2);
 
-      arg3 = value_from_pointer (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
+      arg3 = value_from_pointer (lookup_pointer_type (type->target_type ()),
 				 value_as_long (arg1) + mem_offset);
       return value_ind (arg3);
 
@@ -1436,7 +1436,7 @@ eval_op_subscript (struct type *expect_type, struct expression *exp,
 	}
 
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	return value_zero (TYPE_TARGET_TYPE (type), VALUE_LVAL (arg1));
+	return value_zero (type->target_type (), VALUE_LVAL (arg1));
       else
 	return value_subscript (arg1, value_as_long (arg2));
     }
@@ -1677,12 +1677,12 @@ eval_op_ind (struct type *expect_type, struct expression *exp,
 	 in the inferior, but being able to print accurate type
 	 information seems worth the risk. */
       if (!type->is_pointer_or_reference ()
-	  || !is_dynamic_type (TYPE_TARGET_TYPE (type)))
+	  || !is_dynamic_type (type->target_type ()))
 	{
 	  if (type->is_pointer_or_reference ()
 	      /* In C you can dereference an array to get the 1st elt.  */
 	      || type->code () == TYPE_CODE_ARRAY)
-	    return value_zero (TYPE_TARGET_TYPE (type),
+	    return value_zero (type->target_type (),
 			       lval_memory);
 	  else if (type->code () == TYPE_CODE_INT)
 	    /* GDB allows dereferencing an int.  */
@@ -2145,8 +2145,8 @@ eval_op_objc_msgcall (struct type *expect_type, struct expression *exp,
       struct type *callee_type = value_type (called_method);
 
       if (callee_type && callee_type->code () == TYPE_CODE_PTR)
-	callee_type = TYPE_TARGET_TYPE (callee_type);
-      callee_type = TYPE_TARGET_TYPE (callee_type);
+	callee_type = callee_type->target_type ();
+      callee_type = callee_type->target_type ();
 
       if (callee_type)
 	{
@@ -2439,7 +2439,7 @@ array_operation::evaluate (struct type *expect_type,
       && type->code () == TYPE_CODE_ARRAY)
     {
       struct type *range_type = type->index_type ();
-      struct type *element_type = TYPE_TARGET_TYPE (type);
+      struct type *element_type = type->target_type ();
       struct value *array = allocate_value (expect_type);
       int element_size = TYPE_LENGTH (check_typedef (element_type));
       LONGEST low_bound, high_bound, index;
@@ -2483,7 +2483,7 @@ array_operation::evaluate (struct type *expect_type,
       /* Get targettype of elementtype.  */
       while (check_type->code () == TYPE_CODE_RANGE
 	     || check_type->code () == TYPE_CODE_TYPEDEF)
-	check_type = TYPE_TARGET_TYPE (check_type);
+	check_type = check_type->target_type ();
 
       if (!get_discrete_bounds (element_type, &low_bound, &high_bound))
 	error (_("(power)set type with unknown size"));
@@ -2503,9 +2503,9 @@ array_operation::evaluate (struct type *expect_type,
 	     different types. Also check if type of element is "compatible"
 	     with element type of powerset.  */
 	  if (range_low_type->code () == TYPE_CODE_RANGE)
-	    range_low_type = TYPE_TARGET_TYPE (range_low_type);
+	    range_low_type = range_low_type->target_type ();
 	  if (range_high_type->code () == TYPE_CODE_RANGE)
-	    range_high_type = TYPE_TARGET_TYPE (range_high_type);
+	    range_high_type = range_high_type->target_type ();
 	  if ((range_low_type->code () != range_high_type->code ())
 	      || (range_low_type->code () == TYPE_CODE_ENUM
 		  && (range_low_type != range_high_type)))
@@ -2577,7 +2577,7 @@ evaluate_subexp_for_address_base (struct expression *exp, enum noside noside,
       struct type *type = check_typedef (value_type (x));
 
       if (TYPE_IS_REFERENCE (type))
-	return value_zero (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
+	return value_zero (lookup_pointer_type (type->target_type ()),
 			   not_lval);
       else if (VALUE_LVAL (x) == lval_memory || value_must_coerce_to_target (x))
 	return value_zero (lookup_pointer_type (value_type (x)),
@@ -2709,7 +2709,7 @@ var_value_operation::evaluate_with_coercion (struct expression *exp,
     {
       struct value *val = address_of_variable (var,
 					       std::get<0> (m_storage).block);
-      return value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (type)), val);
+      return value_cast (lookup_pointer_type (type->target_type ()), val);
     }
   return evaluate (nullptr, exp, noside);
 }
@@ -2729,7 +2729,7 @@ evaluate_subexp_for_sizeof_base (struct expression *exp, struct type *type)
   type = check_typedef (type);
   if (exp->language_defn->la_language == language_cplus
       && (TYPE_IS_REFERENCE (type)))
-    type = check_typedef (TYPE_TARGET_TYPE (type));
+    type = check_typedef (type->target_type ());
   return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
 }
 
@@ -2771,7 +2771,7 @@ subscript_operation::evaluate_for_sizeof (struct expression *exp,
       struct type *type = check_typedef (value_type (val));
       if (type->code () == TYPE_CODE_ARRAY)
 	{
-	  type = check_typedef (TYPE_TARGET_TYPE (type));
+	  type = check_typedef (type->target_type ());
 	  if (type->code () == TYPE_CODE_ARRAY)
 	    {
 	      type = type->index_type ();
@@ -2803,7 +2803,7 @@ unop_ind_base_operation::evaluate_for_sizeof (struct expression *exp,
   if (!type->is_pointer_or_reference ()
       && type->code () != TYPE_CODE_ARRAY)
     error (_("Attempt to take contents of a non-pointer value."));
-  type = TYPE_TARGET_TYPE (type);
+  type = type->target_type ();
   if (is_dynamic_type (type))
     type = value_type (value_ind (val));
   /* FIXME: This should be size_t.  */

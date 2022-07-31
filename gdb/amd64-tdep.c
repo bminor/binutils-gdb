@@ -684,7 +684,7 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class theclass[2])
 
   if (type->code () == TYPE_CODE_ARRAY)
     {
-      struct type *subtype = check_typedef (TYPE_TARGET_TYPE (type));
+      struct type *subtype = check_typedef (type->target_type ());
 
       /* All fields in an array have the same type.  */
       amd64_classify (subtype, theclass);

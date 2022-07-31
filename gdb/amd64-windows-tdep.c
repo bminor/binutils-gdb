@@ -373,7 +373,7 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
 	/* __m128, __m128i and __m128d are returned via XMM0.  */
 	if (type->is_vector () && len == 16)
 	  {
-	    enum type_code code = TYPE_TARGET_TYPE (type)->code ();
+	    enum type_code code = type->target_type ()->code ();
 	    if (code == TYPE_CODE_INT || code == TYPE_CODE_FLT)
 	      {
 		regnum = AMD64_XMM0_REGNUM;

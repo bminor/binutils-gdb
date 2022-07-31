@@ -658,7 +658,7 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Dereference function pointer types.  */
   while (func_type->code () == TYPE_CODE_PTR)
-    func_type = TYPE_TARGET_TYPE (func_type);
+    func_type = func_type->target_type ();
 
   /* The end result had better be a function or a method.  */
   gdb_assert (func_type->code () == TYPE_CODE_FUNC

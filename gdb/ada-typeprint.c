@@ -104,7 +104,7 @@ type_is_full_subrange_of_target_type (struct type *type)
   if (type->code () != TYPE_CODE_RANGE)
     return 0;
 
-  subtype = TYPE_TARGET_TYPE (type);
+  subtype = type->target_type ();
   if (subtype == NULL)
     return 0;
 
@@ -143,7 +143,7 @@ print_range (struct type *type, struct ui_file *stream,
 
 	     array ('["00"]' .. '["ff"]') of ...  */
       while (type_is_full_subrange_of_target_type (type))
-	type = TYPE_TARGET_TYPE (type);
+	type = type->target_type ();
     }
 
   switch (type->code ())
@@ -271,7 +271,7 @@ print_range_type (struct type *raw_type, struct ui_file *stream,
   gdb_assert (name != NULL);
 
   if (raw_type->code () == TYPE_CODE_RANGE)
-    base_type = TYPE_TARGET_TYPE (raw_type);
+    base_type = raw_type->target_type ();
   else
     base_type = raw_type;
 
@@ -390,7 +390,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 		 name, then it is not another dimension of the outer
 		 array, but rather the element type of the outermost
 		 array.  */
-	      arr_type = TYPE_TARGET_TYPE (arr_type);
+	      arr_type = arr_type->target_type ();
 	      if (arr_type->name () != nullptr)
 		break;
 	    }
@@ -402,7 +402,7 @@ print_array_type (struct type *type, struct ui_file *stream, int show,
 	  n_indices = range_desc_type->num_fields ();
 	  for (k = 0, arr_type = type;
 	       k < n_indices;
-	       k += 1, arr_type = TYPE_TARGET_TYPE (arr_type))
+	       k += 1, arr_type = arr_type->target_type ())
 	    {
 	      if (k > 0)
 		gdb_printf (stream, ", ");
@@ -564,7 +564,7 @@ print_variant_clauses (struct type *type, int field_num,
 
   if (var_type->code () == TYPE_CODE_PTR)
     {
-      var_type = TYPE_TARGET_TYPE (var_type);
+      var_type = var_type->target_type ();
       if (var_type == NULL || var_type->code () != TYPE_CODE_UNION)
 	return;
     }
@@ -884,8 +884,8 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
 {
   int i, len = type->num_fields ();
 
-  if (TYPE_TARGET_TYPE (type) != NULL
-      && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_VOID)
+  if (type->target_type () != NULL
+      && type->target_type ()->code () == TYPE_CODE_VOID)
     gdb_printf (stream, "procedure");
   else
     gdb_printf (stream, "function");
@@ -913,12 +913,12 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
       gdb_printf (stream, ")");
     }
 
-  if (TYPE_TARGET_TYPE (type) == NULL)
+  if (type->target_type () == NULL)
     gdb_printf (stream, " return <unknown return type>");
-  else if (TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_VOID)
+  else if (type->target_type ()->code () != TYPE_CODE_VOID)
     {
       gdb_printf (stream, " return ");
-      ada_print_type (TYPE_TARGET_TYPE (type), "", stream, 0, 0, flags);
+      ada_print_type (type->target_type (), "", stream, 0, 0, flags);
     }
 }
 
@@ -998,12 +998,12 @@ ada_print_type (struct type *type0, const char *varstring,
 	if (type->code () != TYPE_CODE_PTR
 	    || strstr (varstring, "___XVL") == nullptr)
 	  gdb_printf (stream, "access ");
-	ada_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level,
+	ada_print_type (type->target_type (), "", stream, show, level,
 			flags);
 	break;
       case TYPE_CODE_REF:
 	gdb_printf (stream, "<ref> ");
-	ada_print_type (TYPE_TARGET_TYPE (type), "", stream, show, level,
+	ada_print_type (type->target_type (), "", stream, show, level,
 			flags);
 	break;
       case TYPE_CODE_ARRAY:

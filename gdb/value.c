@@ -1199,7 +1199,7 @@ value_actual_type (struct value *value, int resolve_simple_types,
       /* If result's target type is TYPE_CODE_STRUCT, proceed to
 	 fetch its rtti type.  */
       if (result->is_pointer_or_reference ()
-	  && (check_typedef (TYPE_TARGET_TYPE (result))->code ()
+	  && (check_typedef (result->target_type ())->code ()
 	      == TYPE_CODE_STRUCT)
 	  && !value_optimized_out (value))
 	{
@@ -3802,7 +3802,7 @@ readjust_indirect_value_type (struct value *value, struct type *enc_type,
 {
   gdb_assert (original_type->is_pointer_or_reference ());
 
-  struct type *original_target_type = TYPE_TARGET_TYPE (original_type);
+  struct type *original_target_type = original_type->target_type ();
   gdb::array_view<const gdb_byte> view;
   struct type *resolved_original_target_type
     = resolve_dynamic_type (original_target_type, view,
@@ -3834,7 +3834,7 @@ coerce_ref (struct value *arg)
     return arg;
 
   enc_type = check_typedef (value_enclosing_type (arg));
-  enc_type = TYPE_TARGET_TYPE (enc_type);
+  enc_type = enc_type->target_type ();
 
   CORE_ADDR addr = unpack_pointer (value_type (arg), value_contents (arg).data ());
   retval = value_at_lazy (enc_type, addr);

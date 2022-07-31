@@ -54,7 +54,7 @@ find_size_for_pointer_math (struct type *ptr_type)
   struct type *ptr_target;
 
   gdb_assert (ptr_type->code () == TYPE_CODE_PTR);
-  ptr_target = check_typedef (TYPE_TARGET_TYPE (ptr_type));
+  ptr_target = check_typedef (ptr_type->target_type ());
 
   sz = type_length_units (ptr_target);
   if (sz == 0)
@@ -115,13 +115,13 @@ value_ptrdiff (struct value *arg1, struct value *arg2)
   gdb_assert (type1->code () == TYPE_CODE_PTR);
   gdb_assert (type2->code () == TYPE_CODE_PTR);
 
-  if (TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)))
-      != TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type2))))
+  if (TYPE_LENGTH (check_typedef (type1->target_type ()))
+      != TYPE_LENGTH (check_typedef (type2->target_type ())))
     error (_("First argument of `-' is a pointer and "
 	     "second argument is neither\n"
 	     "an integer nor a pointer of the same type."));
 
-  sz = type_length_units (check_typedef (TYPE_TARGET_TYPE (type1)));
+  sz = type_length_units (check_typedef (type1->target_type ()));
   if (sz == 0) 
     {
       warning (_("Type size unknown, assuming 1. "
@@ -200,7 +200,7 @@ value_subscripted_rvalue (struct value *array, LONGEST index,
 			  LONGEST lowerbound)
 {
   struct type *array_type = check_typedef (value_type (array));
-  struct type *elt_type = TYPE_TARGET_TYPE (array_type);
+  struct type *elt_type = array_type->target_type ();
   LONGEST elt_size = type_length_units (elt_type);
 
   /* Fetch the bit stride and convert it to a byte stride, assuming 8 bits
@@ -257,11 +257,11 @@ binop_types_user_defined_p (enum exp_opcode op,
 
   type1 = check_typedef (type1);
   if (TYPE_IS_REFERENCE (type1))
-    type1 = check_typedef (TYPE_TARGET_TYPE (type1));
+    type1 = check_typedef (type1->target_type ());
 
   type2 = check_typedef (type2);
   if (TYPE_IS_REFERENCE (type2))
-    type2 = check_typedef (TYPE_TARGET_TYPE (type2));
+    type2 = check_typedef (type2->target_type ());
 
   return (type1->code () == TYPE_CODE_STRUCT
 	  || type2->code () == TYPE_CODE_STRUCT);
@@ -295,7 +295,7 @@ unop_user_defined_p (enum exp_opcode op, struct value *arg1)
     return 0;
   type1 = check_typedef (value_type (arg1));
   if (TYPE_IS_REFERENCE (type1))
-    type1 = check_typedef (TYPE_TARGET_TYPE (type1));
+    type1 = check_typedef (type1->target_type ());
   return type1->code () == TYPE_CODE_STRUCT;
 }
 
@@ -525,8 +525,7 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 	{
 	  struct type *return_type;
 
-	  return_type
-	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
+	  return_type = check_typedef (value_type (argvec[0]))->target_type ();
 	  return value_zero (return_type, VALUE_LVAL (arg1));
 	}
       return call_function_by_hand (argvec[0], NULL,
@@ -639,8 +638,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 	{
 	  struct type *return_type;
 
-	  return_type
-	    = TYPE_TARGET_TYPE (check_typedef (value_type (argvec[0])));
+	  return_type = check_typedef (value_type (argvec[0]))->target_type ();
 	  return value_zero (return_type, VALUE_LVAL (arg1));
 	}
       return call_function_by_hand (argvec[0], NULL,
@@ -668,7 +666,7 @@ value_concat (struct value *arg1, struct value *arg2)
   struct type *elttype1 = type1;
   if (elttype1->code () == TYPE_CODE_ARRAY)
     {
-      elttype1 = TYPE_TARGET_TYPE (elttype1);
+      elttype1 = elttype1->target_type ();
       if (!get_array_bounds (type1, &low1, &high1))
 	error (_("could not determine array bounds on left-hand-side of "
 		 "array concatenation"));
@@ -683,7 +681,7 @@ value_concat (struct value *arg1, struct value *arg2)
   struct type *elttype2 = type2;
   if (elttype2->code () == TYPE_CODE_ARRAY)
     {
-      elttype2 = TYPE_TARGET_TYPE (elttype2);
+      elttype2 = elttype2->target_type ();
       if (!get_array_bounds (type2, &low2, &high2))
 	error (_("could not determine array bounds on right-hand-side of "
 		 "array concatenation"));
@@ -1557,7 +1555,7 @@ value_vector_widen (struct value *scalar_value, struct type *vector_type)
   if (!get_array_bounds (vector_type, &low_bound, &high_bound))
     error (_("Could not determine the vector bounds"));
 
-  eltype = check_typedef (TYPE_TARGET_TYPE (vector_type));
+  eltype = check_typedef (vector_type->target_type ());
   elval = value_cast (eltype, scalar_value);
 
   scalar_type = check_typedef (value_type (scalar_value));
@@ -1605,8 +1603,8 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
       || !get_array_bounds (type2, &low_bound2, &high_bound2))
     error (_("Could not determine the vector bounds"));
 
-  eltype1 = check_typedef (TYPE_TARGET_TYPE (type1));
-  eltype2 = check_typedef (TYPE_TARGET_TYPE (type2));
+  eltype1 = check_typedef (type1->target_type ());
+  eltype2 = check_typedef (type2->target_type ());
   elsize = TYPE_LENGTH (eltype1);
 
   if (eltype1->code () != eltype2->code ()
@@ -1905,7 +1903,7 @@ value_neg (struct value *arg1)
   else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
       struct value *val = allocate_value (type);
-      struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
+      struct type *eltype = check_typedef (type->target_type ());
       int i;
       LONGEST low_bound, high_bound;
 
@@ -1949,7 +1947,7 @@ value_complement (struct value *arg1)
     val = value_from_longest (type, ~value_as_long (arg1));
   else if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
-      struct type *eltype = check_typedef (TYPE_TARGET_TYPE (type));
+      struct type *eltype = check_typedef (type->target_type ());
       int i;
       LONGEST low_bound, high_bound;
 
@@ -2017,7 +2015,7 @@ value_in (struct value *element, struct value *set)
   struct type *eltype = check_typedef (value_type (element));
 
   if (eltype->code () == TYPE_CODE_RANGE)
-    eltype = TYPE_TARGET_TYPE (eltype);
+    eltype = eltype->target_type ();
   if (settype->code () != TYPE_CODE_SET)
     error (_("Second argument of 'IN' has wrong type"));
   if (eltype->code () != TYPE_CODE_INT

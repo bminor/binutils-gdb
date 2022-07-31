@@ -1175,7 +1175,7 @@ sparc64_16_byte_align_p (struct type *type)
 {
   if (type->code () == TYPE_CODE_ARRAY)
     {
-      struct type *t = check_typedef (TYPE_TARGET_TYPE (type));
+      struct type *t = check_typedef (type->target_type ());
 
       if (sparc64_floating_p (t))
 	return 1;

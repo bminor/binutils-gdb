@@ -1051,7 +1051,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       /* If we are passing a function pointer, make sure we pass a function
 	 descriptor instead of the function entry address.  */
       if (type->code () == TYPE_CODE_PTR
-	  && TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_FUNC)
+	  && type->target_type ()->code () == TYPE_CODE_FUNC)
 	{
 	  ULONGEST codeptr, fptr;
 

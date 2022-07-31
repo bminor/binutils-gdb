@@ -1251,7 +1251,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       else if (abi == FRV_ABI_FDPIC
 	       && len == 4
 	       && typecode == TYPE_CODE_PTR
-	       && TYPE_TARGET_TYPE (arg_type)->code () == TYPE_CODE_FUNC)
+	       && arg_type->target_type ()->code () == TYPE_CODE_FUNC)
 	{
 	  /* The FDPIC ABI requires function descriptors to be passed instead
 	     of entry points.  */

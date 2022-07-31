@@ -302,7 +302,7 @@ sparc_structure_return_p (const struct type *type)
   if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
       /* Float vectors are always returned by memory.  */
-      if (sparc_floating_p (check_typedef (TYPE_TARGET_TYPE (type))))
+      if (sparc_floating_p (check_typedef (type->target_type ())))
 	return true;
       /* Integer vectors are returned by memory if the vector size
 	 is greater than 8 bytes long.  */
@@ -330,7 +330,7 @@ sparc_arg_by_memory_p (const struct type *type)
   if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
     {
       /* Float vectors are always passed by memory.  */
-      if (sparc_floating_p (check_typedef (TYPE_TARGET_TYPE (type))))
+      if (sparc_floating_p (check_typedef (type->target_type ())))
 	return true;
       /* Integer vectors are passed by memory if the vector size
 	 is greater than 8 bytes long.  */
@@ -1234,7 +1234,7 @@ sparc32_struct_return_from_sym (struct symbol *sym)
 
   if (code == TYPE_CODE_FUNC || code == TYPE_CODE_METHOD)
     {
-      type = check_typedef (TYPE_TARGET_TYPE (type));
+      type = check_typedef (type->target_type ());
       if (sparc_structure_or_union_p (type)
 	  || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
 	return 1;

@@ -742,7 +742,7 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
   self_type = TYPE_SELF_TYPE (check_typedef (value_type (method_ptr)));
   final_type = lookup_pointer_type (self_type);
 
-  method_type = TYPE_TARGET_TYPE (check_typedef (value_type (method_ptr)));
+  method_type = check_typedef (value_type (method_ptr))->target_type ();
 
   /* Extract the pointer to member.  */
   gdbarch = self_type->arch ();
@@ -1109,7 +1109,7 @@ gnuv3_get_typeid (struct value *value)
   /* In the non_lvalue case, a reference might have slipped through
      here.  */
   if (type->code () == TYPE_CODE_REF)
-    type = check_typedef (TYPE_TARGET_TYPE (type));
+    type = check_typedef (type->target_type ());
 
   /* Ignore top-level cv-qualifiers.  */
   type = make_cv_type (0, 0, type, NULL);
@@ -1341,7 +1341,7 @@ is_copy_or_move_constructor_type (struct type *class_type,
   if (arg_type->code () != expected)
     return false;
 
-  struct type *target = check_typedef (TYPE_TARGET_TYPE (arg_type));
+  struct type *target = check_typedef (arg_type->target_type ());
   if (!(class_types_same_p (target, class_type)))
     return false;
 
@@ -1538,7 +1538,7 @@ gnuv3_pass_by_reference (struct type *type)
 
 	/* For arrays, make the decision based on the element type.  */
 	if (field_type->code () == TYPE_CODE_ARRAY)
-	  field_type = check_typedef (TYPE_TARGET_TYPE (field_type));
+	  field_type = check_typedef (field_type->target_type ());
 
 	struct language_pass_by_ref_info field_info
 	  = gnuv3_pass_by_reference (field_type);

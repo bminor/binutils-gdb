@@ -64,10 +64,10 @@ f_language::print_type (struct type *type, const char *varstring,
 	      || code == TYPE_CODE_ARRAY
 	      || ((code == TYPE_CODE_PTR
 		   || code == TYPE_CODE_REF)
-		  && (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_FUNC
-		      || (TYPE_TARGET_TYPE (type)->code ()
+		  && (type->target_type ()->code () == TYPE_CODE_FUNC
+		      || (type->target_type ()->code ()
 			  == TYPE_CODE_METHOD)
-		      || (TYPE_TARGET_TYPE (type)->code ()
+		      || (type->target_type ()->code ()
 			  == TYPE_CODE_ARRAY))))))
     gdb_puts (" ", stream);
   f_type_print_varspec_prefix (type, stream, show, 0);
@@ -105,17 +105,17 @@ f_language::f_type_print_varspec_prefix (struct type *type,
   switch (type->code ())
     {
     case TYPE_CODE_PTR:
-      f_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 1);
+      f_type_print_varspec_prefix (type->target_type (), stream, 0, 1);
       break;
 
     case TYPE_CODE_FUNC:
-      f_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      f_type_print_varspec_prefix (type->target_type (), stream, 0, 0);
       if (passed_a_ptr)
 	gdb_printf (stream, "(");
       break;
 
     case TYPE_CODE_ARRAY:
-      f_type_print_varspec_prefix (TYPE_TARGET_TYPE (type), stream, 0, 0);
+      f_type_print_varspec_prefix (type->target_type (), stream, 0, 0);
       break;
 
     case TYPE_CODE_UNDEF:
@@ -187,8 +187,8 @@ f_language::f_type_print_varspec_suffix (struct type *type,
 	  print_rank_only = true;
 	}
 
-      if (TYPE_TARGET_TYPE (type)->code () == TYPE_CODE_ARRAY)
-	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+      if (type->target_type ()->code () == TYPE_CODE_ARRAY)
+	f_type_print_varspec_suffix (type->target_type (), stream, 0,
 				     0, 0, arrayprint_recurse_level,
 				     print_rank_only);
 
@@ -213,8 +213,8 @@ f_language::f_type_print_varspec_suffix (struct type *type,
 	    }
 	}
 
-      if (TYPE_TARGET_TYPE (type)->code () != TYPE_CODE_ARRAY)
-	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+      if (type->target_type ()->code () != TYPE_CODE_ARRAY)
+	f_type_print_varspec_suffix (type->target_type (), stream, 0,
 				     0, 0, arrayprint_recurse_level,
 				     print_rank_only);
 
@@ -227,7 +227,7 @@ f_language::f_type_print_varspec_suffix (struct type *type,
 
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
-      f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 1, 0,
+      f_type_print_varspec_suffix (type->target_type (), stream, 0, 1, 0,
 				   arrayprint_recurse_level, false);
       gdb_printf (stream, " )");
       break;
@@ -236,7 +236,7 @@ f_language::f_type_print_varspec_suffix (struct type *type,
       {
 	int i, nfields = type->num_fields ();
 
-	f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0,
+	f_type_print_varspec_suffix (type->target_type (), stream, 0,
 				     passed_a_ptr, 0,
 				     arrayprint_recurse_level, false);
 	if (passed_a_ptr)
@@ -333,27 +333,27 @@ f_language::f_type_print_base (struct type *type, struct ui_file *stream,
   switch (type->code ())
     {
     case TYPE_CODE_TYPEDEF:
-      f_type_print_base (TYPE_TARGET_TYPE (type), stream, 0, level);
+      f_type_print_base (type->target_type (), stream, 0, level);
       break;
 
     case TYPE_CODE_ARRAY:
-      f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+      f_type_print_base (type->target_type (), stream, show, level);
       break;
     case TYPE_CODE_FUNC:
-      if (TYPE_TARGET_TYPE (type) == NULL)
+      if (type->target_type () == NULL)
 	type_print_unknown_return_type (stream);
       else
-	f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+	f_type_print_base (type->target_type (), stream, show, level);
       break;
 
     case TYPE_CODE_PTR:
       gdb_printf (stream, "%*sPTR TO -> ( ", level, "");
-      f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, 0);
+      f_type_print_base (type->target_type (), stream, show, 0);
       break;
 
     case TYPE_CODE_REF:
       gdb_printf (stream, "%*sREF TO -> ( ", level, "");
-      f_type_print_base (TYPE_TARGET_TYPE (type), stream, show, 0);
+      f_type_print_base (type->target_type (), stream, show, 0);
       break;
 
     case TYPE_CODE_VOID:

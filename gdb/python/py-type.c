@@ -503,7 +503,7 @@ typy_get_composite (struct type *type)
 
       if (!type->is_pointer_or_reference ())
 	break;
-      type = TYPE_TARGET_TYPE (type);
+      type = type->target_type ();
     }
 
   /* If this is not a struct, union, or enum type, raise TypeError
@@ -686,14 +686,14 @@ typy_target (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
 
-  if (!TYPE_TARGET_TYPE (type))
+  if (!type->target_type ())
     {
       PyErr_SetString (PyExc_RuntimeError,
 		       _("Type does not have a target."));
       return NULL;
     }
 
-  return type_to_type_object (TYPE_TARGET_TYPE (type));
+  return type_to_type_object (type->target_type ());
 }
 
 /* Return a const-qualified type variant.  */
@@ -1007,7 +1007,7 @@ typy_template_argument (PyObject *self, PyObject *args)
     {
       type = check_typedef (type);
       if (TYPE_IS_REFERENCE (type))
-	type = check_typedef (TYPE_TARGET_TYPE (type));
+	type = check_typedef (type->target_type ());
     }
   catch (const gdb_exception &except)
     {

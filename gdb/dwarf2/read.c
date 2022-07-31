@@ -9060,7 +9060,7 @@ dwarf2_compute_name (const char *name,
 		  if (type->num_fields () > 0
 		      && TYPE_FIELD_ARTIFICIAL (type, 0)
 		      && type->field (0).type ()->code () == TYPE_CODE_PTR
-		      && TYPE_CONST (TYPE_TARGET_TYPE (type->field (0).type ())))
+		      && TYPE_CONST (type->field (0).type ()->target_type ()))
 		    buf.puts (" const");
 		}
 	    }
@@ -14125,7 +14125,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
       /* TYPE is the domain of this method, and THIS_TYPE is the type
 	   of the method itself (TYPE_CODE_METHOD).  */
       smash_to_method_type (fnp->type, type,
-			    TYPE_TARGET_TYPE (this_type),
+			    this_type->target_type (),
 			    this_type->fields (),
 			    this_type->num_fields (),
 			    this_type->has_varargs ());
@@ -14226,8 +14226,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
 		}
 	      else
 		{
-		  fnp->fcontext
-		    = TYPE_TARGET_TYPE (this_type->field (0).type ());
+		  fnp->fcontext = this_type->field (0).type ()->target_type ();
 		}
 	    }
 	}
@@ -14328,19 +14327,19 @@ quirk_gcc_member_function_pointer (struct type *type, struct objfile *objfile)
   pfn_type = type->field (0).type ();
   if (pfn_type == NULL
       || pfn_type->code () != TYPE_CODE_PTR
-      || TYPE_TARGET_TYPE (pfn_type)->code () != TYPE_CODE_FUNC)
+      || pfn_type->target_type ()->code () != TYPE_CODE_FUNC)
     return;
 
   /* Look for the "this" argument.  */
-  pfn_type = TYPE_TARGET_TYPE (pfn_type);
+  pfn_type = pfn_type->target_type ();
   if (pfn_type->num_fields () == 0
       /* || pfn_type->field (0).type () == NULL */
       || pfn_type->field (0).type ()->code () != TYPE_CODE_PTR)
     return;
 
-  self_type = TYPE_TARGET_TYPE (pfn_type->field (0).type ());
+  self_type = pfn_type->field (0).type ()->target_type ();
   new_type = alloc_type (objfile);
-  smash_to_method_type (new_type, self_type, TYPE_TARGET_TYPE (pfn_type),
+  smash_to_method_type (new_type, self_type, pfn_type->target_type (),
 			pfn_type->fields (), pfn_type->num_fields (),
 			pfn_type->has_varargs ());
   smash_to_methodptr_type (type, new_type);
@@ -14360,7 +14359,7 @@ rewrite_array_type (struct type *type)
   range_bounds *current_bounds = index_type->bounds ();
 
   /* Handle multi-dimensional arrays.  */
-  struct type *new_target = rewrite_array_type (TYPE_TARGET_TYPE (type));
+  struct type *new_target = rewrite_array_type (type->target_type ());
   if (new_target == nullptr)
     {
       /* Maybe we don't need to rewrite this array.  */
@@ -14428,7 +14427,7 @@ quirk_ada_thick_pointer_struct (struct die_info *die, struct dwarf2_cu *cu,
      because those may be referenced in other contexts where this
      rewriting is undesirable.  */
   struct type *new_ary_type
-    = rewrite_array_type (TYPE_TARGET_TYPE (type->field (0).type ()));
+    = rewrite_array_type (type->field (0).type ()->target_type ());
   if (new_ary_type != nullptr)
     type->field (0).set_type (lookup_pointer_type (new_ary_type));
 }
@@ -15226,9 +15225,9 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
      can tell us the reality.  However, we defer to a local size
      attribute if one exists, because this lets the compiler override
      the underlying type if needed.  */
-  if (TYPE_TARGET_TYPE (type) != NULL && !TYPE_TARGET_TYPE (type)->is_stub ())
+  if (type->target_type () != NULL && !type->target_type ()->is_stub ())
     {
-      struct type *underlying_type = TYPE_TARGET_TYPE (type);
+      struct type *underlying_type = type->target_type ();
       underlying_type = check_typedef (underlying_type);
 
       type->set_is_unsigned (underlying_type->is_unsigned ());
@@ -15543,7 +15542,7 @@ quirk_ada_thick_pointer (struct die_info *die, struct dwarf2_cu *cu,
       iter->main_type->dyn_prop_list = nullptr;
       iter->set_index_type
 	(create_static_range_type (NULL, bounds->field (i).type (), 1, 0));
-      iter = TYPE_TARGET_TYPE (iter);
+      iter = iter->target_type ();
     }
 
   struct type *result = alloc_type (objfile);
@@ -16224,7 +16223,7 @@ read_tag_ptr_to_member_type (struct die_info *die, struct dwarf2_cu *cu)
     {
       struct type *new_type = alloc_type (cu->per_objfile->objfile);
 
-      smash_to_method_type (new_type, domain, TYPE_TARGET_TYPE (to_type),
+      smash_to_method_type (new_type, domain, to_type->target_type (),
 			    to_type->fields (), to_type->num_fields (),
 			    to_type->has_varargs ());
       type = lookup_methodptr_type (new_type);
@@ -16284,13 +16283,13 @@ add_array_cv_type (struct die_info *die, struct dwarf2_cu *cu,
   base_type = copy_type (base_type);
   inner_array = base_type;
 
-  while (TYPE_TARGET_TYPE (inner_array)->code () == TYPE_CODE_ARRAY)
+  while (inner_array->target_type ()->code () == TYPE_CODE_ARRAY)
     {
-      inner_array->set_target_type (copy_type (TYPE_TARGET_TYPE (inner_array)));
-      inner_array = TYPE_TARGET_TYPE (inner_array);
+      inner_array->set_target_type (copy_type (inner_array->target_type ()));
+      inner_array = inner_array->target_type ();
     }
 
-  el_type = TYPE_TARGET_TYPE (inner_array);
+  el_type = inner_array->target_type ();
   cnst |= TYPE_CONST (el_type);
   voltl |= TYPE_VOLATILE (el_type);
   inner_array->set_target_type (make_cv_type (cnst, voltl, el_type, NULL));

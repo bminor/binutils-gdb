@@ -93,7 +93,7 @@ sh_is_renesas_calling_convention (struct type *func_type)
       func_type = check_typedef (func_type);
 
       if (func_type->code () == TYPE_CODE_PTR)
-	func_type = check_typedef (TYPE_TARGET_TYPE (func_type));
+	func_type = check_typedef (func_type->target_type ());
 
       if (func_type->code () == TYPE_CODE_FUNC
 	  && TYPE_CALLING_CONVENTION (func_type) == DW_CC_GNU_renesas_sh)

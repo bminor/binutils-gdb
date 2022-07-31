@@ -3049,7 +3049,7 @@ riscv_push_dummy_call (struct gdbarch *gdbarch,
   struct type *ftype = check_typedef (value_type (function));
 
   if (ftype->code () == TYPE_CODE_PTR)
-    ftype = check_typedef (TYPE_TARGET_TYPE (ftype));
+    ftype = check_typedef (ftype->target_type ());
 
   /* We'll use register $a0 if we're returning a struct.  */
   if (return_method == return_method_struct)
