@@ -114,7 +114,7 @@ ctf_link_add_ctf_internal (ctf_dict_t *fp, ctf_archive_t *ctf,
     goto oom;
 
   if ((input = calloc (1, sizeof (ctf_link_input_t))) == NULL)
-    goto oom;
+    goto oom1;
 
   input->clin_arc = ctf;
   input->clin_fp = fp_input;
@@ -125,19 +125,23 @@ ctf_link_add_ctf_internal (ctf_dict_t *fp, ctf_archive_t *ctf,
     {
       if (asprintf (&keyname, "%s#%li", name, (long int)
 		    ctf_dynhash_elements (fp->ctf_link_inputs)) < 0)
-	goto oom;
+	goto oom2;
     }
   else if ((keyname = strdup (name)) == NULL)
-    goto oom;
+    goto oom2;
 
   if (ctf_dynhash_insert (fp->ctf_link_inputs, keyname, input) < 0)
-    goto oom;
+    goto oom3;
 
   return 0;
- oom:
-  free (input);
-  free (filename);
+
+ oom3:
   free (keyname);
+ oom2:
+  free (input);
+ oom1:
+  free (filename);
+ oom:
   return ctf_set_errno (fp, ENOMEM);
 }
 
