@@ -844,5 +844,5 @@ void _initialize_iq2000_tdep ();
 void
 _initialize_iq2000_tdep ()
 {
-  register_gdbarch_init (bfd_arch_iq2000, iq2000_gdbarch_init);
+  gdbarch_register (bfd_arch_iq2000, iq2000_gdbarch_init);
 }

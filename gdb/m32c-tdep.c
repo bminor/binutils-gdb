@@ -2658,7 +2658,7 @@ void _initialize_m32c_tdep ();
 void
 _initialize_m32c_tdep ()
 {
-  register_gdbarch_init (bfd_arch_m32c, m32c_gdbarch_init);
+  gdbarch_register (bfd_arch_m32c, m32c_gdbarch_init);
 
   m32c_dma_reggroup = reggroup_new ("dma", USER_REGGROUP);
 }

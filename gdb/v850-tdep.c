@@ -1465,6 +1465,6 @@ void _initialize_v850_tdep ();
 void
 _initialize_v850_tdep ()
 {
-  register_gdbarch_init (bfd_arch_v850, v850_gdbarch_init);
-  register_gdbarch_init (bfd_arch_v850_rh850, v850_gdbarch_init);
+  gdbarch_register (bfd_arch_v850, v850_gdbarch_init);
+  gdbarch_register (bfd_arch_v850_rh850, v850_gdbarch_init);
 }

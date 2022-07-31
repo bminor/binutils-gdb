@@ -9071,7 +9071,7 @@ void _initialize_i386_tdep ();
 void
 _initialize_i386_tdep ()
 {
-  register_gdbarch_init (bfd_arch_i386, i386_gdbarch_init);
+  gdbarch_register (bfd_arch_i386, i386_gdbarch_init);
 
   /* Add the variable that controls the disassembly flavor.  */
   add_setshow_enum_cmd ("disassembly-flavor", no_class, valid_flavors,

@@ -996,5 +996,5 @@ void _initialize_msp430_tdep ();
 void
 _initialize_msp430_tdep ()
 {
-  register_gdbarch_init (bfd_arch_msp430, msp430_gdbarch_init);
+  gdbarch_register (bfd_arch_msp430, msp430_gdbarch_init);
 }

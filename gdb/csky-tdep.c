@@ -3053,7 +3053,7 @@ void
 _initialize_csky_tdep ()
 {
 
-  register_gdbarch_init (bfd_arch_csky, csky_gdbarch_init);
+  gdbarch_register (bfd_arch_csky, csky_gdbarch_init);
 
   csky_init_reggroup ();
 

@@ -7229,7 +7229,7 @@ void
 _initialize_s390_tdep ()
 {
   /* Hook us into the gdbarch mechanism.  */
-  register_gdbarch_init (bfd_arch_s390, s390_gdbarch_init);
+  gdbarch_register (bfd_arch_s390, s390_gdbarch_init);
 
   initialize_tdesc_s390_linux32 ();
   initialize_tdesc_s390x_linux64 ();

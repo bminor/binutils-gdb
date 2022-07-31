@@ -1063,6 +1063,6 @@ void _initialize_rx_tdep ();
 void
 _initialize_rx_tdep ()
 {
-  register_gdbarch_init (bfd_arch_rx, rx_gdbarch_init);
+  gdbarch_register (bfd_arch_rx, rx_gdbarch_init);
   initialize_tdesc_rx ();
 }

@@ -842,5 +842,5 @@ void _initialize_bfin_tdep ();
 void
 _initialize_bfin_tdep ()
 {
-  register_gdbarch_init (bfd_arch_bfin, bfin_gdbarch_init);
+  gdbarch_register (bfd_arch_bfin, bfin_gdbarch_init);
 }

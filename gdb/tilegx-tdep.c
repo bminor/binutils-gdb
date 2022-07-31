@@ -1028,5 +1028,5 @@ void _initialize_tilegx_tdep ();
 void
 _initialize_tilegx_tdep ()
 {
-  register_gdbarch_init (bfd_arch_tilegx, tilegx_gdbarch_init);
+  gdbarch_register (bfd_arch_tilegx, tilegx_gdbarch_init);
 }

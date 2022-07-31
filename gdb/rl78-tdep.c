@@ -1489,5 +1489,5 @@ void _initialize_rl78_tdep ();
 void
 _initialize_rl78_tdep ()
 {
-  register_gdbarch_init (bfd_arch_rl78, rl78_gdbarch_init);
+  gdbarch_register (bfd_arch_rl78, rl78_gdbarch_init);
 }

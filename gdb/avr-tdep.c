@@ -1633,7 +1633,7 @@ void _initialize_avr_tdep ();
 void
 _initialize_avr_tdep ()
 {
-  register_gdbarch_init (bfd_arch_avr, avr_gdbarch_init);
+  gdbarch_register (bfd_arch_avr, avr_gdbarch_init);
 
   /* Add a new command to allow the user to query the avr remote target for
      the values of the io space registers in a saner way than just using

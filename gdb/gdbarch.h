@@ -271,12 +271,9 @@ struct gdbarch_info
 typedef struct gdbarch *(gdbarch_init_ftype) (struct gdbarch_info info, struct gdbarch_list *arches);
 typedef void (gdbarch_dump_tdep_ftype) (struct gdbarch *gdbarch, struct ui_file *file);
 
-/* DEPRECATED - use gdbarch_register() */
-extern void register_gdbarch_init (enum bfd_architecture architecture, gdbarch_init_ftype *);
-
 extern void gdbarch_register (enum bfd_architecture architecture,
-			      gdbarch_init_ftype *,
-			      gdbarch_dump_tdep_ftype *);
+			      gdbarch_init_ftype *init,
+			      gdbarch_dump_tdep_ftype *dump_tdep = nullptr);
 
 
 /* Return a vector of the valid architecture names.  Since architectures are

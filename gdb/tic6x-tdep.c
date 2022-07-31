@@ -1302,5 +1302,5 @@ void _initialize_tic6x_tdep ();
 void
 _initialize_tic6x_tdep ()
 {
-  register_gdbarch_init (bfd_arch_tic6x, tic6x_gdbarch_init);
+  gdbarch_register (bfd_arch_tic6x, tic6x_gdbarch_init);
 }

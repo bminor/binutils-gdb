@@ -2463,7 +2463,7 @@ _initialize_mep_tdep ()
   mep_cr_reggroup  = reggroup_new ("cr", USER_REGGROUP); 
   mep_ccr_reggroup = reggroup_new ("ccr", USER_REGGROUP);
 
-  register_gdbarch_init (bfd_arch_mep, mep_gdbarch_init);
+  gdbarch_register (bfd_arch_mep, mep_gdbarch_init);
 
   mep_init_pseudoregister_maps ();
 }

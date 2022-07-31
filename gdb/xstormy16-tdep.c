@@ -838,5 +838,5 @@ void _initialize_xstormy16_tdep ();
 void
 _initialize_xstormy16_tdep ()
 {
-  register_gdbarch_init (bfd_arch_xstormy16, xstormy16_gdbarch_init);
+  gdbarch_register (bfd_arch_xstormy16, xstormy16_gdbarch_init);
 }

@@ -1575,5 +1575,5 @@ void _initialize_frv_tdep ();
 void
 _initialize_frv_tdep ()
 {
-  register_gdbarch_init (bfd_arch_frv, frv_gdbarch_init);
+  gdbarch_register (bfd_arch_frv, frv_gdbarch_init);
 }

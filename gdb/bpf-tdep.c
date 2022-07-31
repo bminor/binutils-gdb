@@ -374,7 +374,7 @@ void _initialize_bpf_tdep ();
 void
 _initialize_bpf_tdep ()
 {
-  register_gdbarch_init (bfd_arch_bpf, bpf_gdbarch_init);
+  gdbarch_register (bfd_arch_bpf, bpf_gdbarch_init);
 
   /* Add commands 'set/show debug bpf'.  */
   add_setshow_zuinteger_cmd ("bpf", class_maintenance,

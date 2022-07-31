@@ -2093,7 +2093,7 @@ void
 _initialize_nds32_tdep ()
 {
   /* Initialize gdbarch.  */
-  register_gdbarch_init (bfd_arch_nds32, nds32_gdbarch_init);
+  gdbarch_register (bfd_arch_nds32, nds32_gdbarch_init);
 
   initialize_tdesc_nds32 ();
   nds32_init_reggroups ();

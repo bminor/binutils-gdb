@@ -742,7 +742,7 @@ void _initialize_microblaze_tdep ();
 void
 _initialize_microblaze_tdep ()
 {
-  register_gdbarch_init (bfd_arch_microblaze, microblaze_gdbarch_init);
+  gdbarch_register (bfd_arch_microblaze, microblaze_gdbarch_init);
 
   initialize_tdesc_microblaze_with_stack_protect ();
   initialize_tdesc_microblaze ();

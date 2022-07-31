@@ -1460,6 +1460,6 @@ extern initialize_file_ftype _initialize_z80_tdep;
 void
 _initialize_z80_tdep ()
 {
-  register_gdbarch_init (bfd_arch_z80, z80_gdbarch_init);
+  gdbarch_register (bfd_arch_z80, z80_gdbarch_init);
   initialize_tdesc_z80 ();
 }

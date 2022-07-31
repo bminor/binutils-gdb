@@ -1533,8 +1533,8 @@ void _initialize_m68hc11_tdep ();
 void
 _initialize_m68hc11_tdep ()
 {
-  register_gdbarch_init (bfd_arch_m68hc11, m68hc11_gdbarch_init);
-  register_gdbarch_init (bfd_arch_m68hc12, m68hc11_gdbarch_init);
+  gdbarch_register (bfd_arch_m68hc11, m68hc11_gdbarch_init);
+  gdbarch_register (bfd_arch_m68hc12, m68hc11_gdbarch_init);
   m68hc11_init_reggroups ();
 } 
 
