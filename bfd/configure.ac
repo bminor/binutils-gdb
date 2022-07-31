@@ -218,13 +218,6 @@ if test "x${ac_cv_sizeof_void_p}" = "x8"; then
   host64=true
 fi
 
-BFD_HOST_64BIT_LONG=0
-if test "x${ac_cv_sizeof_long}" = "x8"; then
-  BFD_HOST_64BIT_LONG=1
-fi
-
-AC_SUBST(BFD_HOST_64BIT_LONG)
-
 BFD_CC_FOR_BUILD
 
 AC_CHECK_HEADERS(fcntl.h sys/file.h sys/resource.h sys/stat.h sys/types.h \
@@ -254,6 +247,18 @@ if test $bfd_cv_hidden = yes; then
   AC_DEFINE(HAVE_HIDDEN, 1,
 	    [Define if your compiler supports hidden visibility.])
 fi
+
+AC_CACHE_CHECK([printf int64_t format], [bfd_cv_int64_fmt],
+  for style in I64 ll l; do
+    [AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+       #define __STDC_FORMAT_MACROS 1
+       #include <stdio.h>
+       #include <inttypes.h>
+       extern char PRId64_probe[sizeof PRId64 == sizeof "${style}d" ? 1 : -1];
+      ]])], [bfd_cv_int64_fmt=${style}], [])]
+  done)
+BFD_INT64_FMT=\"$bfd_cv_int64_fmt\"
+AC_SUBST(BFD_INT64_FMT)
 
 # Check if linker supports --as-needed and --no-as-needed options
 AC_CACHE_CHECK(linker --as-needed support, bfd_cv_ld_as_needed,

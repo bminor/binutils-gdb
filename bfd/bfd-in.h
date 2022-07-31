@@ -69,8 +69,6 @@ extern "C" {
 /* The word size of the default bfd target.  */
 #define BFD_DEFAULT_TARGET_SIZE @bfd_default_target_size@
 
-#define BFD_HOST_64BIT_LONG @BFD_HOST_64BIT_LONG@
-
 #include <inttypes.h>
 
 #if BFD_ARCH_SIZE >= 64
@@ -101,42 +99,34 @@ typedef struct bfd bfd;
 
 #ifdef BFD64
 
-typedef uint64_t bfd_vma;
-typedef int64_t bfd_signed_vma;
-typedef uint64_t bfd_size_type;
-typedef uint64_t symvalue;
-
-#if BFD_HOST_64BIT_LONG
-#define BFD_VMA_FMT "l"
-#elif defined (__MSVCRT__)
-#define BFD_VMA_FMT "I64"
-#else
-#define BFD_VMA_FMT "ll"
-#endif
-
-#ifndef fprintf_vma
-#define sprintf_vma(s,x) sprintf (s, "%016" BFD_VMA_FMT "x", x)
-#define fprintf_vma(f,x) fprintf (f, "%016" BFD_VMA_FMT "x", x)
-#endif
-
-#else /* not BFD64  */
-
 /* Represent a target address.  Also used as a generic unsigned type
    which is guaranteed to be big enough to hold any arithmetic types
    we need to deal with.  */
-typedef unsigned long bfd_vma;
+typedef uint64_t bfd_vma;
 
 /* A generic signed type which is guaranteed to be big enough to hold any
    arithmetic types we need to deal with.  Can be assumed to be compatible
    with bfd_vma in the same way that signed and unsigned ints are compatible
    (as parameters, in assignment, etc).  */
-typedef long bfd_signed_vma;
+typedef int64_t bfd_signed_vma;
 
+typedef uint64_t bfd_size_type;
+typedef uint64_t symvalue;
+
+#define BFD_VMA_FMT @BFD_INT64_FMT@
+
+#define fprintf_vma(f,x) fprintf (f, "%016" BFD_VMA_FMT "x", x)
+#define sprintf_vma(s,x) sprintf (s, "%016" BFD_VMA_FMT "x", x)
+
+#else /* not BFD64  */
+
+typedef unsigned long bfd_vma;
+typedef long bfd_signed_vma;
 typedef unsigned long symvalue;
 typedef unsigned long bfd_size_type;
 
-/* Print a bfd_vma x on stream s.  */
 #define BFD_VMA_FMT "l"
+
 #define fprintf_vma(s,x) fprintf (s, "%08" BFD_VMA_FMT "x", x)
 #define sprintf_vma(s,x) sprintf (s, "%08" BFD_VMA_FMT "x", x)
 
