@@ -5438,8 +5438,6 @@ assign_file_positions_for_load_sections (bfd *abfd,
   Elf_Internal_Phdr *p;
   file_ptr off;  /* Octets.  */
   bfd_size_type maxpagesize;
-  bfd_size_type p_align;
-  bool p_align_p = false;
   unsigned int alloc, actual;
   unsigned int i, j;
   struct elf_segment_map **sorted_seg_map;
@@ -5524,7 +5522,6 @@ assign_file_positions_for_load_sections (bfd *abfd,
     qsort (sorted_seg_map, alloc, sizeof (*sorted_seg_map),
 	   elf_sort_segments);
 
-  p_align = bed->p_align;
   maxpagesize = 1;
   if ((abfd->flags & D_PAGED) != 0)
     {
@@ -5559,6 +5556,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
       asection **secpp;
       bfd_vma off_adjust;  /* Octets.  */
       bool no_contents;
+      bfd_size_type p_align;
+      bool p_align_p;
 
       /* An ELF segment (described by Elf_Internal_Phdr) may contain a
 	 number of sections with contents contributing to both p_filesz
@@ -5569,6 +5568,8 @@ assign_file_positions_for_load_sections (bfd *abfd,
       p = phdrs + m->idx;
       p->p_type = m->p_type;
       p->p_flags = m->p_flags;
+      p_align = bed->p_align;
+      p_align_p = false;
 
       if (m->count == 0)
 	p->p_vaddr = m->p_vaddr_offset * opb;
