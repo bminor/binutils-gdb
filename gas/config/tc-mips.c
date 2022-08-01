@@ -9501,10 +9501,8 @@ load_register (int reg, expressionS *ep, int dbl)
 
   if (!dbl || GPR_SIZE == 32)
     {
-      char value[32];
-
-      sprintf_vma (value, ep->X_add_number);
-      as_bad (_("number (0x%s) larger than 32 bits"), value);
+      as_bad (_("number (0x%" PRIx64 ") larger than 32 bits"),
+	      ep->X_add_number);
       macro_build (ep, "addiu", "t,r,j", reg, 0, BFD_RELOC_LO16);
       return;
     }
@@ -12318,10 +12316,8 @@ macro (struct mips_cl_insn *ip, char *str)
       if (HAVE_32BIT_ADDRESSES
 	  && !IS_SEXT_32BIT_NUM (offset_expr.X_add_number))
 	{
-	  char value [32];
-
-	  sprintf_vma (value, offset_expr.X_add_number);
-	  as_bad (_("number (0x%s) larger than 32 bits"), value);
+	  as_bad (_("number (0x%" PRIx64 ") larger than 32 bits"),
+		  offset_expr.X_add_number);
 	}
 
       /* A constant expression in PIC code can be handled just as it
@@ -13001,10 +12997,8 @@ macro (struct mips_cl_insn *ip, char *str)
       if (HAVE_32BIT_ADDRESSES
 	  && !IS_SEXT_32BIT_NUM (offset_expr.X_add_number))
 	{
-	  char value [32];
-
-	  sprintf_vma (value, offset_expr.X_add_number);
-	  as_bad (_("number (0x%s) larger than 32 bits"), value);
+	  as_bad (_("number (0x%" PRIx64 ") larger than 32 bits"),
+		  offset_expr.X_add_number);
 	}
 
       if (mips_pic == NO_PIC || offset_expr.X_op == O_constant)

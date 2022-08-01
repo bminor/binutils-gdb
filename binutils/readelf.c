@@ -566,11 +566,10 @@ print_vma (bfd_vma vma, print_mode mode)
       /* Fall through.  */
     case LONG_HEX:
 #ifdef BFD64
-      if (is_32bit_elf)
-	return nc + printf ("%8.8" BFD_VMA_FMT "x", vma);
+      if (!is_32bit_elf)
+	return nc + printf ("%16.16" PRIx64, (uint64_t) vma);
 #endif
-      printf_vma (vma);
-      return nc + 16;
+      return nc + printf ("%8.8" PRIx64, (uint64_t) vma);
 
     case DEC_5:
       if (vma <= 99999)
@@ -7193,13 +7192,10 @@ process_section_headers (Filedata * filedata)
       bfd_size_type expected_entsize = is_32bit_elf ? size32 : size64;	\
       if (section->sh_entsize != expected_entsize)			\
 	{								\
-	  char buf[40];							\
-	  sprintf_vma (buf, section->sh_entsize);			\
-	  /* Note: coded this way so that there is a single string for  \
-	     translation.  */ \
-	  error (_("Section %d has invalid sh_entsize of %s\n"), i, buf); \
-	  error (_("(Using the expected size of %u for the rest of this dump)\n"), \
-		   (unsigned) expected_entsize);			\
+	  error (_("Section %d has invalid sh_entsize of %" PRIx64 "\n"), \
+		 i, (uint64_t) section->sh_entsize);			\
+	  error (_("(Using the expected size of %" PRIx64 " for the rest of this dump)\n"), \
+		 (uint64_t) expected_entsize);				\
 	  section->sh_entsize = expected_entsize;			\
 	}								\
     }									\
@@ -8184,13 +8180,13 @@ dump_ia64_vms_dynamic_fixups (Filedata *                  filedata,
       const char *rtype;
 
       printf ("%3u ", (unsigned) BYTE_GET (imfs [i].fixup_seg));
-      printf_vma ((bfd_vma) BYTE_GET (imfs [i].fixup_offset));
+      printf ("%016" PRIx64 " ", (uint64_t) BYTE_GET (imfs [i].fixup_offset));
       type = BYTE_GET (imfs [i].type);
       rtype = elf_ia64_reloc_type (type);
       if (rtype == NULL)
-        printf (" 0x%08x                       ", type);
+	printf ("0x%08x                       ", type);
       else
-        printf (" %-32s ", rtype);
+	printf ("%-32s ", rtype);
       printf ("%6u ", (unsigned) BYTE_GET (imfs [i].symvec_index));
       printf ("0x%08x\n", (unsigned) BYTE_GET (imfs [i].data_type));
     }
@@ -10596,12 +10592,8 @@ dynamic_section_mips_val (Filedata * filedata, Elf_Internal_Dyn * entry)
 	printf (_("Interface Version: %s"),
 		get_dynamic_name (filedata, entry->d_un.d_val));
       else
-	{
-	  char buf[40];
-	  sprintf_vma (buf, entry->d_un.d_ptr);
-	  /* Note: coded this way so that there is a single string for translation.  */
-	  printf (_("<corrupt: %s>"), buf);
-	}
+	printf (_("Interface Version: <corrupt: %" PRIx64 ">"),
+		(uint64_t) entry->d_un.d_ptr);
       break;
 
     case DT_MIPS_TIME_STAMP:
@@ -12087,8 +12079,7 @@ process_version_sections (Filedata * filedata)
 		      printable_section_name (filedata, section),
 		      section->sh_info);
 
-	    printf (_(" Addr: 0x"));
-	    printf_vma (section->sh_addr);
+	    printf (_(" Addr: 0x%016" PRIx64), (uint64_t) section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    printable_section_name_from_index (filedata, section->sh_link));
@@ -12234,8 +12225,7 @@ process_version_sections (Filedata * filedata)
 		      printable_section_name (filedata, section),
 		      section->sh_info);
 
-	    printf (_(" Addr: 0x"));
-	    printf_vma (section->sh_addr);
+	    printf (_(" Addr: 0x%016" PRIx64), (uint64_t) section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    printable_section_name_from_index (filedata, section->sh_link));
@@ -12400,8 +12390,7 @@ process_version_sections (Filedata * filedata)
 		      printable_section_name (filedata, section),
 		      (unsigned long) total);
 
-	    printf (_(" Addr: 0x"));
-	    printf_vma (section->sh_addr);
+	    printf (_(" Addr: 0x%016" PRIx64), (uint64_t) section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    printable_section_name (filedata, link_section));

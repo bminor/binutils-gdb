@@ -5054,12 +5054,9 @@ print_r_reloc (FILE *fp, const r_reloc *r_rel)
   else
     fprintf (fp, " ?? + ");
 
-  fprintf_vma (fp, r_rel->target_offset);
+  fprintf (fp, "%" PRIx64, (uint64_t) r_rel->target_offset);
   if (r_rel->virtual_offset)
-    {
-      fprintf (fp, " + ");
-      fprintf_vma (fp, r_rel->virtual_offset);
-    }
+    fprintf (fp, " + %" PRIx64, (uint64_t) r_rel->virtual_offset);
 
   fprintf (fp, ")");
 }

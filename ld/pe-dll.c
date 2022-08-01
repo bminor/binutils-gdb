@@ -1812,10 +1812,8 @@ pe_dll_generate_def_file (const char *pe_out_def_filename)
 	  quoteput (pe_def_file->name, out, 1);
 
 	  if (pe_data (link_info.output_bfd)->pe_opthdr.ImageBase)
-	    {
-	      fprintf (out, " BASE=0x");
-	      fprintf_vma (out, ((bfd_vma) pe_data (link_info.output_bfd)->pe_opthdr.ImageBase));
-	    }
+	    fprintf (out, " BASE=0x%" PRIx64,
+		     (uint64_t) pe_data (link_info.output_bfd)->pe_opthdr.ImageBase);
 	  fprintf (out, "\n");
 	}
 

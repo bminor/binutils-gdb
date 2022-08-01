@@ -606,7 +606,7 @@ print_insn_arg (int d,
 	  /* Memory space disp(PC).  */
 	  disp1 = get_displacement (buffer, aoffsetp);
 	  *result++ = NEXT_IS_ADDR;
-	  sprintf_vma (result, addr + disp1);
+	  sprintf (result, "%" PRIx64, (uint64_t) (addr + disp1));
 	  result += strlen (result);
 	  *result++ = NEXT_IS_ADDR;
 	  *result = '\0';
@@ -665,7 +665,8 @@ print_insn_arg (int d,
       break;
     case 'p':
       *result++ = NEXT_IS_ADDR;
-      sprintf_vma (result, addr + get_displacement (buffer, aoffsetp));
+      sprintf (result, "%" PRIx64,
+	       (uint64_t) (addr + get_displacement (buffer, aoffsetp)));
       result += strlen (result);
       *result++ = NEXT_IS_ADDR;
       *result = '\0';

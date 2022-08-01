@@ -9954,11 +9954,8 @@ note_register_values (struct ia64_opcode *idesc)
 	  gr_values[regno].value = CURR_SLOT.opnd[1].X_add_number;
 	  gr_values[regno].path = md.path;
 	  if (md.debug_dv)
-	    {
-	      fprintf (stderr, "  Know gr%d = ", regno);
-	      fprintf_vma (stderr, gr_values[regno].value);
-	      fputs ("\n", stderr);
-	    }
+	    fprintf (stderr, "  Know gr%d = %" PRIx64 "\n",
+		     regno, gr_values[regno].value);
 	}
     }
   /* Look for dep.z imm insns.  */
@@ -9978,11 +9975,8 @@ note_register_values (struct ia64_opcode *idesc)
 	  gr_values[regno].value = value;
 	  gr_values[regno].path = md.path;
 	  if (md.debug_dv)
-	    {
-	      fprintf (stderr, "  Know gr%d = ", regno);
-	      fprintf_vma (stderr, gr_values[regno].value);
-	      fputs ("\n", stderr);
-	    }
+	    fprintf (stderr, "  Know gr%d = %" PRIx64 "\n",
+		     regno, gr_values[regno].value);
 	}
     }
   else
@@ -10196,12 +10190,9 @@ print_dependency (const char *action, int depind)
       if (regdeps[depind].specific && regdeps[depind].index >= 0)
 	fprintf (stderr, " (%d)", regdeps[depind].index);
       if (regdeps[depind].mem_offset.hint)
-	{
-	  fputs (" ", stderr);
-	  fprintf_vma (stderr, regdeps[depind].mem_offset.base);
-	  fputs ("+", stderr);
-	  fprintf_vma (stderr, regdeps[depind].mem_offset.offset);
-	}
+	fprintf (stderr, " %" PRIx64 "+%" PRIx64,
+		 regdeps[depind].mem_offset.base,
+		 regdeps[depind].mem_offset.offset);
       fprintf (stderr, "\n");
     }
 }

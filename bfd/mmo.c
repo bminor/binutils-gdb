@@ -3010,18 +3010,13 @@ mmo_write_symbols_and_terminator (bfd *abfd)
 	  {
 	    /* Arbitrary buffer to hold the printable representation of a
 	       vma.  */
-	    char vmas_main[40];
-	    char vmas_start[40];
 	    bfd_vma vma_start = bfd_get_start_address (abfd);
-
-	    sprintf_vma (vmas_main, mainvalue);
-	    sprintf_vma (vmas_start, vma_start);
 
 	    _bfd_error_handler
 	      /* xgettext:c-format */
-	      (_("%pB: bad symbol definition: `Main' set to %s rather"
-		 " than the start address %s\n"),
-	       abfd, vmas_main, vmas_start);
+	      (_("%pB: bad symbol definition: `Main' set to %" PRIx64 " rather"
+		 " than the start address %" PRIx64 "\n"),
+	       abfd, mainvalue, vma_start);
 	    bfd_set_error (bfd_error_bad_value);
 	    return false;
 	  }

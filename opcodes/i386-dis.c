@@ -10973,18 +10973,12 @@ print_operand_value (instr_info *ins, bfd_vma disp,
 		     enum disassembler_style style)
 {
   char tmp[30];
-  unsigned int i = 0;
 
   if (ins->address_mode == mode_64bit)
-    {
-      oappend_with_style (ins, "0x", style);
-      sprintf_vma (tmp, disp);
-      while (tmp[i] == '0' && tmp[i + 1])
-	++i;
-    }
+    sprintf (tmp, "0x%" PRIx64, (uint64_t) disp);
   else
     sprintf (tmp, "0x%x", (unsigned int) disp);
-  oappend_with_style (ins, tmp + i, style);
+  oappend_with_style (ins, tmp, style);
 }
 
 /* Like oappend, but called for immediate operands.  */
@@ -11004,7 +10998,6 @@ print_displacement (instr_info *ins, bfd_vma disp)
 {
   bfd_signed_vma val = disp;
   char tmp[30];
-  unsigned int i;
 
   if (val < 0)
     {
@@ -11033,14 +11026,8 @@ print_displacement (instr_info *ins, bfd_vma disp)
 	}
     }
 
-  oappend_with_style (ins, "0x", dis_style_address_offset);
-
-  sprintf_vma (tmp, (bfd_vma) val);
-  for (i = 0; tmp[i] == '0'; i++)
-    continue;
-  if (tmp[i] == '\0')
-    i--;
-  oappend_with_style (ins, tmp + i, dis_style_address_offset);
+  sprintf (tmp, "0x%" PRIx64, (int64_t) val);
+  oappend_with_style (ins, tmp, dis_style_address_offset);
 }
 
 static void

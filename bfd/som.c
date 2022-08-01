@@ -4897,9 +4897,8 @@ som_print_symbol (bfd *abfd,
       fprintf (file, "%s", symbol->name);
       break;
     case bfd_print_symbol_more:
-      fprintf (file, "som ");
-      fprintf_vma (file, symbol->value);
-      fprintf (file, " %lx", (long) symbol->flags);
+      fprintf (file, "som %08" PRIx64 " %x",
+	       (uint64_t) symbol->value, symbol->flags);
       break;
     case bfd_print_symbol_all:
       {

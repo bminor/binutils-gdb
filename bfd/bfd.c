@@ -2236,26 +2236,26 @@ void
 bfd_sprintf_vma (bfd *abfd ATTRIBUTE_UNUSED, char *buf, bfd_vma value)
 {
 #ifdef BFD64
-  if (is32bit (abfd))
+  if (!is32bit (abfd))
     {
-      sprintf (buf, "%08lx", (unsigned long) value & 0xffffffff);
+      sprintf (buf, "%016" PRIx64, (uint64_t) value);
       return;
     }
 #endif
-  sprintf_vma (buf, value);
+  sprintf (buf, "%08lx", (unsigned long) value & 0xffffffff);
 }
 
 void
 bfd_fprintf_vma (bfd *abfd ATTRIBUTE_UNUSED, void *stream, bfd_vma value)
 {
 #ifdef BFD64
-  if (is32bit (abfd))
+  if (!is32bit (abfd))
     {
-      fprintf ((FILE *) stream, "%08lx", (unsigned long) value & 0xffffffff);
+      fprintf ((FILE *) stream, "%016" PRIx64, (uint64_t) value);
       return;
     }
 #endif
-  fprintf_vma ((FILE *) stream, value);
+  fprintf ((FILE *) stream, "%08lx", (unsigned long) value & 0xffffffff);
 }
 
 /*

@@ -241,25 +241,18 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 	    case 'V':
 	      /* hex bfd_vma */
 	      {
-		bfd_vma value = args[arg_no].v;
+		uint64_t value = args[arg_no].v;
 		++arg_count;
-		fprintf_vma (fp, value);
+		fprintf (fp, "%016" PRIx64, value);
 	      }
 	      break;
 
 	    case 'v':
 	      /* hex bfd_vma, no leading zeros */
 	      {
-		char buf[100];
-		char *p = buf;
-		bfd_vma value = args[arg_no].v;
+		uint64_t value = args[arg_no].v;
 		++arg_count;
-		sprintf_vma (p, value);
-		while (*p == '0')
-		  p++;
-		if (!*p)
-		  p--;
-		fputs (p, fp);
+		fprintf (fp, "%" PRIx64, value);
 	      }
 	      break;
 
@@ -268,24 +261,19 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
 		 8 spaces.  */
 	      {
 		char buf[100];
-		bfd_vma value;
-		char *p;
+		uint64_t value;
 		int len;
 
 		value = args[arg_no].v;
 		++arg_count;
-		sprintf_vma (buf, value);
-		for (p = buf; *p == '0'; ++p)
-		  ;
-		if (*p == '\0')
-		  --p;
-		len = strlen (p);
+		sprintf (buf, "%" PRIx64, value);
+		len = strlen (buf);
 		while (len < 8)
 		  {
 		    putc (' ', fp);
 		    ++len;
 		  }
-		fprintf (fp, "0x%s", p);
+		fprintf (fp, "0x%s", buf);
 	      }
 	      break;
 

@@ -3280,12 +3280,9 @@ xcoff_reloc_type_tls (bfd *input_bfd ATTRIBUTE_UNUSED,
   /* TLS relocations must target a TLS symbol.  */
   if (h->smclas != XMC_TL && h->smclas != XMC_UL)
     {
-      char vaddr_buf[128];
-
-      sprintf_vma (vaddr_buf, rel->r_vaddr);
       _bfd_error_handler
-	(_("%pB: TLS relocation at 0x%s over non-TLS symbol %s (0x%x)\n"),
-	 input_bfd, vaddr_buf, h->root.root.string, h->smclas);
+	(_("%pB: TLS relocation at 0x%" PRIx64 " over non-TLS symbol %s (0x%x)\n"),
+	 input_bfd, (uint64_t) rel->r_vaddr, h->root.root.string, h->smclas);
       return false;
     }
 
@@ -3296,12 +3293,9 @@ xcoff_reloc_type_tls (bfd *input_bfd ATTRIBUTE_UNUSED,
        && (h->flags & XCOFF_DEF_DYNAMIC) != 0)
 	  || (h->flags & XCOFF_IMPORT) != 0))
     {
-      char vaddr_buf[128];
-
-      sprintf_vma (vaddr_buf, rel->r_vaddr);
       _bfd_error_handler
-	(_("%pB: TLS local relocation at 0x%s over imported symbol %s\n"),
-	 input_bfd, vaddr_buf, h->root.root.string);
+	(_("%pB: TLS local relocation at 0x%" PRIx64 " over imported symbol %s\n"),
+	 input_bfd, (uint64_t) rel->r_vaddr, h->root.root.string);
       return false;
     }
 
@@ -3705,15 +3699,10 @@ xcoff_ppc_relocate_section (bfd *output_bfd,
 	      break;
 
 	    default:
-	      {
-		char vaddr_buf[128];
-
-		sprintf_vma (vaddr_buf, rel->r_vaddr);
-		_bfd_error_handler
-		  (_("%pB: relocation (%d) at 0x%s has wrong r_rsize (0x%x)\n"),
-		   input_bfd, rel->r_type, vaddr_buf, rel->r_size);
-		return false;
-	      }
+	      _bfd_error_handler
+		(_("%pB: relocation (%d) at 0x%" PRIx64 " has wrong r_rsize (0x%x)\n"),
+		 input_bfd, rel->r_type, (uint64_t) rel->r_vaddr, rel->r_size);
+	      return false;
 	    }
 	}
 

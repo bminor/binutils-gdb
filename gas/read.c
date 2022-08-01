@@ -4495,14 +4495,9 @@ emit_expr_with_reloc (expressionS *exp,
       use = get & unmask;
       if ((get & mask) != 0 && (-get & mask) != 0)
 	{
-	  char get_buf[128];
-	  char use_buf[128];
-
-	  /* These buffers help to ease the translation of the warning message.  */
-	  sprintf_vma (get_buf, get);
-	  sprintf_vma (use_buf, use);
 	  /* Leading bits contain both 0s & 1s.  */
-	  as_warn (_("value 0x%s truncated to 0x%s"), get_buf, use_buf);
+	  as_warn (_("value 0x%" PRIx64 " truncated to 0x%" PRIx64),
+		   (uint64_t) get, (uint64_t) use);
 	}
       /* Put bytes in right order.  */
       md_number_to_chars (p, use, (int) nbytes);

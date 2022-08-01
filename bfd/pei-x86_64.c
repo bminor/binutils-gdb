@@ -498,19 +498,14 @@ pex64_dump_xdata (FILE *file, bfd *abfd,
     case UNW_FLAG_EHANDLER:
     case UNW_FLAG_UHANDLER:
     case UNW_FLAG_FHANDLER:
-      fprintf (file, "\tHandler: ");
-      fprintf_vma (file, (ui.rva_ExceptionHandler
-			  + pe_data (abfd)->pe_opthdr.ImageBase));
-      fprintf (file, ".\n");
+      fprintf (file, "\tHandler: %016" PRIx64 ".\n",
+	       ui.rva_ExceptionHandler + pe_data (abfd)->pe_opthdr.ImageBase);
       break;
     case UNW_FLAG_CHAININFO:
-      fprintf (file, "\tChain: start: ");
-      fprintf_vma (file, ui.rva_BeginAddress);
-      fprintf (file, ", end: ");
-      fprintf_vma (file, ui.rva_EndAddress);
-      fprintf (file, "\n\t unwind data: ");
-      fprintf_vma (file, ui.rva_UnwindData);
-      fprintf (file, ".\n");
+      fprintf (file, "\tChain: start: %016" PRIx64 ", end: %016" PRIx64,
+	       ui.rva_BeginAddress, ui.rva_EndAddress);
+      fprintf (file, "\n\t unwind data: %016" PRIx64 ".\n",
+	       ui.rva_UnwindData);
       break;
     }
 
@@ -640,15 +635,10 @@ pex64_bfd_print_pdata_section (bfd *abfd, void *vfile, asection *pdata_section)
 	  && rf.rva_UnwindData == 0)
 	/* We are probably into the padding of the section now.  */
 	break;
-      fputc (' ', file);
-      fprintf_vma (file, i + pdata_section->vma);
-      fprintf (file, ":\t");
-      fprintf_vma (file, imagebase + rf.rva_BeginAddress);
-      fprintf (file, " ");
-      fprintf_vma (file, imagebase + rf.rva_EndAddress);
-      fprintf (file, " ");
-      fprintf_vma (file, imagebase + rf.rva_UnwindData);
-      fprintf (file, "\n");
+      fprintf (file, " %016" PRIx64, i + pdata_section->vma);
+      fprintf (file, ":\t%016" PRIx64, imagebase + rf.rva_BeginAddress);
+      fprintf (file, " %016" PRIx64, imagebase + rf.rva_EndAddress);
+      fprintf (file, " %016" PRIx64 "\n", imagebase + rf.rva_UnwindData);
       if (i != 0 && rf.rva_BeginAddress <= prev_beginaddress)
 	{
 	  seen_error = 1;
@@ -744,26 +734,22 @@ pex64_bfd_print_pdata_section (bfd *abfd, void *vfile, asection *pdata_section)
       if (i == 0)
 	fprintf (file, _("\nDump of %s\n"), xdata_section->name);
 
-      fputc (' ', file);
-      fprintf_vma (file, rf.rva_UnwindData + imagebase);
+      fprintf (file, " %016" PRIx64, rf.rva_UnwindData + imagebase);
 
       if (prev_unwinddata_rva == rf.rva_UnwindData)
 	{
 	  /* Do not dump again the xdata for the same entry.  */
-	  fprintf (file, " also used for function at ");
-	  fprintf_vma (file, rf.rva_BeginAddress + imagebase);
-	  fputc ('\n', file);
+	  fprintf (file, " also used for function at %016" PRIx64 "\n",
+		   rf.rva_BeginAddress + imagebase);
 	  continue;
 	}
       else
 	prev_unwinddata_rva = rf.rva_UnwindData;
 
-      fprintf (file, " (rva: %08x): ",
-	       (unsigned int) rf.rva_UnwindData);
-      fprintf_vma (file, rf.rva_BeginAddress + imagebase);
-      fprintf (file, " - ");
-      fprintf_vma (file, rf.rva_EndAddress + imagebase);
-      fputc ('\n', file);
+      fprintf (file, " (rva: %08x): %016" PRIx64 " - %016" PRIx64 "\n",
+	       (unsigned int) rf.rva_UnwindData,
+	       rf.rva_BeginAddress + imagebase,
+	       rf.rva_EndAddress + imagebase);
 
       if (rf.rva_UnwindData != 0 || virt_size_is_zero)
 	{
@@ -781,8 +767,8 @@ pex64_bfd_print_pdata_section (bfd *abfd, void *vfile, asection *pdata_section)
 		{
 		  pex64_get_runtime_function
 		    (abfd, &arf, &pdata[altent - pdata_vma]);
-		  fprintf (file, "pdata element at 0x");
-		  fprintf_vma (file, arf.rva_UnwindData);
+		  fprintf (file, "pdata element at 0x%016" PRIx64,
+			   arf.rva_UnwindData);
 		}
 	      else
 		fprintf (file, "unknown pdata element");

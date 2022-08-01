@@ -1096,26 +1096,19 @@ srec_write_symbols (bfd *abfd)
 	      && s->section->output_section != NULL)
 	    {
 	      /* Just dump out non debug symbols.  */
-	      char buf[43], *p;
+	      char buf[43];
 
 	      len = strlen (s->name);
 	      if (bfd_bwrite ("  ", (bfd_size_type) 2, abfd) != 2
 		  || bfd_bwrite (s->name, len, abfd) != len)
 		return false;
 
-	      sprintf_vma (buf + 2, (s->value
-				     + s->section->output_section->lma
-				     + s->section->output_offset));
-	      p = buf + 2;
-	      while (p[0] == '0' && p[1] != 0)
-		p++;
-	      len = strlen (p);
-	      p[len] = '\r';
-	      p[len + 1] = '\n';
-	      *--p = '$';
-	      *--p = ' ';
-	      len += 4;
-	      if (bfd_bwrite (p, len, abfd) != len)
+	      sprintf (buf, " $%" PRIx64 "\r\n",
+		       (uint64_t) (s->value
+				   + s->section->output_section->lma
+				   + s->section->output_offset));
+	      len = strlen (buf);
+	      if (bfd_bwrite (buf, len, abfd) != len)
 		return false;
 	    }
 	}

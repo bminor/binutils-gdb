@@ -503,11 +503,8 @@ def_file_print (FILE *file, def_file *fdef)
   if (fdef->is_dll != -1)
     fprintf (file, "  is dll: %s\n", fdef->is_dll ? "yes" : "no");
   if (fdef->base_address != (bfd_vma) -1)
-    {
-      fprintf (file, "  base address: 0x");
-      fprintf_vma (file, fdef->base_address);
-      fprintf (file, "\n");
-    }
+    fprintf (file, "  base address: 0x%" PRIx64 "\n",
+	     (uint64_t) fdef->base_address);
   if (fdef->description)
     fprintf (file, "  description: `%s'\n", fdef->description);
   if (fdef->stack_reserve != -1)

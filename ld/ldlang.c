@@ -2297,21 +2297,9 @@ lang_map (void)
 
   for (m = lang_memory_region_list; m != NULL; m = m->next)
     {
-      char buf[100];
-      int len;
-
       fprintf (config.map_file, "%-16s ", m->name_list.name);
 
-      sprintf_vma (buf, m->origin);
-      minfo ("0x%s ", buf);
-      len = strlen (buf);
-      while (len < 16)
-	{
-	  print_space ();
-	  ++len;
-	}
-
-      minfo ("0x%V", m->length);
+      minfo ("0x%V 0x%V", m->origin, m->length);
       if (m->flags || m->not_flags)
 	{
 #ifndef BFD64
@@ -7317,10 +7305,7 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
 	}
 
       minfo ("0x");
-      if (size <= 0xffffffff)
-	sprintf (buf, "%lx", (unsigned long) size);
-      else
-	sprintf_vma (buf, size);
+      sprintf (buf, "%" PRIx64, (uint64_t) size);
       minfo ("%s", buf);
       len = strlen (buf);
 

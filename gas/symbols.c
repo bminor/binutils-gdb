@@ -3132,9 +3132,7 @@ print_symbol_value_1 (FILE *file, symbolS *sym)
   const char *name = S_GET_NAME (sym);
   if (!name || !name[0])
     name = "(unnamed)";
-  fprintf (file, "sym ");
-  fprintf_vma (file, (bfd_vma) (uintptr_t) sym);
-  fprintf (file, " %s", name);
+  fprintf (file, "sym %p %s", sym, name);
 
   if (sym->flags.local_symbol)
     {
@@ -3142,10 +3140,7 @@ print_symbol_value_1 (FILE *file, symbolS *sym)
 
       if (locsym->frag != &zero_address_frag
 	  && locsym->frag != NULL)
-	{
-	  fprintf (file, " frag ");
-	  fprintf_vma (file, (bfd_vma) (uintptr_t) locsym->frag);
-	}
+	fprintf (file, " frag %p", locsym->frag);
       if (locsym->flags.resolved)
 	fprintf (file, " resolved");
       fprintf (file, " local");
@@ -3153,10 +3148,7 @@ print_symbol_value_1 (FILE *file, symbolS *sym)
   else
     {
       if (sym->frag != &zero_address_frag)
-	{
-	  fprintf (file, " frag ");
-	  fprintf_vma (file, (bfd_vma) (uintptr_t) sym->frag);
-	}
+	fprintf (file, " frag %p", sym->frag);
       if (sym->flags.written)
 	fprintf (file, " written");
       if (sym->flags.resolved)
@@ -3230,9 +3222,7 @@ print_binary (FILE *file, const char *name, expressionS *exp)
 void
 print_expr_1 (FILE *file, expressionS *exp)
 {
-  fprintf (file, "expr ");
-  fprintf_vma (file, (bfd_vma) (uintptr_t) exp);
-  fprintf (file, " ");
+  fprintf (file, "expr %p ", exp);
   switch (exp->X_op)
     {
     case O_illegal:
@@ -3242,7 +3232,7 @@ print_expr_1 (FILE *file, expressionS *exp)
       fprintf (file, "absent");
       break;
     case O_constant:
-      fprintf (file, "constant %lx", (unsigned long) exp->X_add_number);
+      fprintf (file, "constant %" PRIx64, (uint64_t) exp->X_add_number);
       break;
     case O_symbol:
       indent_level++;
@@ -3251,8 +3241,8 @@ print_expr_1 (FILE *file, expressionS *exp)
       fprintf (file, ">");
     maybe_print_addnum:
       if (exp->X_add_number)
-	fprintf (file, "\n%*s%lx", indent_level * 4, "",
-		 (unsigned long) exp->X_add_number);
+	fprintf (file, "\n%*s%" PRIx64, indent_level * 4, "",
+		 (uint64_t) exp->X_add_number);
       indent_level--;
       break;
     case O_register:

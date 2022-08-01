@@ -3211,9 +3211,7 @@ void
 print_fixup (fixS *fixp)
 {
   indent_level = 1;
-  fprintf (stderr, "fix ");
-  fprintf_vma (stderr, (bfd_vma) (uintptr_t) fixp);
-  fprintf (stderr, " %s:%d",fixp->fx_file, fixp->fx_line);
+  fprintf (stderr, "fix %p %s:%d", fixp, fixp->fx_file, fixp->fx_line);
   if (fixp->fx_pcrel)
     fprintf (stderr, " pcrel");
   if (fixp->fx_pcrel_adjust)
@@ -3222,12 +3220,10 @@ print_fixup (fixS *fixp)
     fprintf (stderr, " tcbit");
   if (fixp->fx_done)
     fprintf (stderr, " done");
-  fprintf (stderr, "\n    size=%d frag=", fixp->fx_size);
-  fprintf_vma (stderr, (bfd_vma) (uintptr_t) fixp->fx_frag);
-  fprintf (stderr, " where=%ld offset=%lx addnumber=%lx",
-	   (long) fixp->fx_where,
-	   (unsigned long) fixp->fx_offset,
-	   (unsigned long) fixp->fx_addnumber);
+  fprintf (stderr, "\n    size=%d frag=%p", fixp->fx_size, fixp->fx_frag);
+  fprintf (stderr, " where=%ld offset=%" PRIx64 " addnumber=%" PRIx64,
+	   fixp->fx_where, (uint64_t) fixp->fx_offset,
+	   (uint64_t) fixp->fx_addnumber);
   fprintf (stderr, "\n    %s (%d)", bfd_get_reloc_code_name (fixp->fx_r_type),
 	   fixp->fx_r_type);
   if (fixp->fx_addsy)

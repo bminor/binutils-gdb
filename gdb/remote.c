@@ -13496,29 +13496,30 @@ remote_target::trace_set_readonly_regions ()
   bfd_vma vma;
   int anysecs = 0;
   int offset = 0;
+  bfd *abfd = current_program_space->exec_bfd ();
 
-  if (!current_program_space->exec_bfd ())
+  if (!abfd)
     return;			/* No information to give.  */
 
   struct remote_state *rs = get_remote_state ();
 
   strcpy (rs->buf.data (), "QTro");
   offset = strlen (rs->buf.data ());
-  for (s = current_program_space->exec_bfd ()->sections; s; s = s->next)
+  for (s = abfd->sections; s; s = s->next)
     {
       char tmp1[40], tmp2[40];
       int sec_length;
 
-      if ((s->flags & SEC_LOAD) == 0 ||
-      /*  (s->flags & SEC_CODE) == 0 || */
-	  (s->flags & SEC_READONLY) == 0)
+      if ((s->flags & SEC_LOAD) == 0
+	  /* || (s->flags & SEC_CODE) == 0 */
+	  || (s->flags & SEC_READONLY) == 0)
 	continue;
 
       anysecs = 1;
       vma = bfd_section_vma (s);
       size = bfd_section_size (s);
-      sprintf_vma (tmp1, vma);
-      sprintf_vma (tmp2, vma + size);
+      bfd_sprintf_vma (abfd, tmp1, vma);
+      bfd_sprintf_vma (abfd, tmp2, vma + size);
       sec_length = 1 + strlen (tmp1) + 1 + strlen (tmp2);
       if (offset + sec_length + 1 > rs->buf.size ())
 	{
