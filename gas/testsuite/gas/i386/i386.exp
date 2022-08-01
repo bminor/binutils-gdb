@@ -109,6 +109,7 @@ if [gas_32_check] then {
     run_list_test "cr-err" ""
     run_dump_test "cdr"
     run_dump_test "svme"
+    run_dump_test "svme16"
     run_dump_test "amdfam10"
     run_dump_test "ssse3"
     run_dump_test "rep"

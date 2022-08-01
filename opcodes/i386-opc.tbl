@@ -2068,7 +2068,7 @@ clgi, 0xf01dd, None, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, 
 invlpga, 0xf01df, None, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 invlpga, 0xf01df, None, CpuSVME, AddrPrefixOpReg, { Acc|Word|Dword|Qword, RegC|Dword }
 skinit, 0xf01de, None, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
-skinit, 0xf01de, None, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Acc|Dword }
+skinit, 0xf01de, None, CpuSVME, No_bSuf|IgnoreSize|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Acc|Dword }
 stgi, 0xf01dc, None, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 vmgexit, 0xf30f01d9, None, CpuSEV_ES, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 vmload, 0xf01da, None, CpuSVME, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
