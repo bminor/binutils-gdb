@@ -1407,14 +1407,10 @@ fixup_riprel (struct gdbarch *gdbarch,
 {
   const struct amd64_insn *insn_details = &dsc->insn_details;
   int modrm_offset = insn_details->modrm_offset;
-  gdb_byte *insn = insn_details->raw_insn + modrm_offset;
   CORE_ADDR rip_base;
   int insn_length;
   int arch_tmp_regno, tmp_regno;
   ULONGEST orig_value;
-
-  /* %rip+disp32 addressing mode, displacement follows ModRM byte.  */
-  ++insn;
 
   /* Compute the rip-relative address.	*/
   insn_length = gdb_buffered_insn_length (gdbarch, dsc->insn_buf.data (),
