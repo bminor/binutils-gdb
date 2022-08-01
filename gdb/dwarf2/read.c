@@ -2347,14 +2347,12 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
       const auto insertpair
 	= debug_info_offset_to_per_cu.emplace (per_cu->sect_off,
 					       per_cu.get ());
-      if (!insertpair.second)
-	{
-	  warning (_("Section .debug_aranges in %s has duplicate "
-		     "debug_info_offset %s, ignoring .debug_aranges."),
-		   objfile_name (objfile), sect_offset_str (per_cu->sect_off));
-	  return false;
-	}
+
+      /* Assume no duplicate offsets in all_comp_units.  */
+      gdb_assert (insertpair.second);
     }
+
+  std::set<sect_offset> debug_info_offset_seen;
 
   section->read (objfile);
 
@@ -2411,6 +2409,16 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 		   objfile_name (objfile),
 		   plongest (entry_addr - section->buffer),
 		   pulongest (debug_info_offset));
+	  return false;
+	}
+      const auto insertpair
+	= debug_info_offset_seen.insert (sect_offset (debug_info_offset));
+      if (!insertpair.second)
+	{
+	  warning (_("Section .debug_aranges in %s has duplicate "
+		     "debug_info_offset %s, ignoring .debug_aranges."),
+		   objfile_name (objfile),
+		   sect_offset_str (sect_offset (debug_info_offset)));
 	  return false;
 	}
       dwarf2_per_cu_data *const per_cu = per_cu_it->second;
