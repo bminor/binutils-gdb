@@ -1779,7 +1779,7 @@ fbsd_nat_target::store_register_set (struct regcache *regcache, int regnum,
 
 /* See fbsd-nat.h.  */
 
-bool
+size_t
 fbsd_nat_target::have_regset (ptid_t ptid, int note)
 {
   pid_t pid = get_ptrace_pid (ptid);

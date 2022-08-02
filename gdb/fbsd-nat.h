@@ -190,7 +190,7 @@ protected:
      the size of the register set is returned.  If the register set is
      not present, zero is returned.  */
 
-  bool have_regset (ptid_t ptid, int note);
+  size_t have_regset (ptid_t ptid, int note);
 
   /* Wrapper versions of the PT_GETREGSET and PT_REGSET helpers which
      accept a register set type.  */
