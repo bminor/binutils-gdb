@@ -4898,60 +4898,62 @@ aarch64_calculate_got_entry_vma (struct elf_link_hash_entry *h,
 
 static bfd_reloc_code_real_type
 aarch64_tls_transition_without_check (bfd_reloc_code_real_type r_type,
-				      struct elf_link_hash_entry *h)
+				      struct elf_link_hash_entry *h,
+				      struct bfd_link_info *info)
 {
-  bool is_local = h == NULL;
+  bool local_exec = bfd_link_executable (info)
+    && SYMBOL_REFERENCES_LOCAL (info, h);
 
   switch (r_type)
     {
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
-      return (is_local
+      return (local_exec
 	      ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1
 	      : BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21);
 
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21:
-      return (is_local
+      return (local_exec
 	      ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC
 	      : r_type);
 
     case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
-      return (is_local
+      return (local_exec
 	      ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1
 	      : BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19);
 
     case BFD_RELOC_AARCH64_TLSDESC_LDR:
-      return (is_local
+      return (local_exec
 	      ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC
 	      : BFD_RELOC_AARCH64_NONE);
 
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC:
-      return (is_local
+      return (local_exec
 	      ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC
 	      : BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC);
 
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
-      return (is_local
+      return (local_exec
 	      ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2
 	      : BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1);
 
     case BFD_RELOC_AARCH64_TLSDESC_LDNN_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
-      return (is_local
+      return (local_exec
 	      ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC
 	      : BFD_RELOC_AARCH64_TLSIE_LDNN_GOTTPREL_LO12_NC);
 
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
-      return is_local ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1 : r_type;
+      return local_exec ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1 : r_type;
 
     case BFD_RELOC_AARCH64_TLSIE_LDNN_GOTTPREL_LO12_NC:
-      return is_local ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC : r_type;
+      return local_exec ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC : r_type;
 
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
       return r_type;
 
     case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
-      return (is_local
+      return (local_exec
 	      ? BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12
 	      : BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19);
 
@@ -4964,16 +4966,16 @@ aarch64_tls_transition_without_check (bfd_reloc_code_real_type r_type,
     case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSLD_ADR_PREL21:
-      return is_local ? BFD_RELOC_AARCH64_NONE : r_type;
+      return local_exec ? BFD_RELOC_AARCH64_NONE : r_type;
 
 #if ARCH_SIZE == 64
     case BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC:
-      return is_local
+      return local_exec
 	? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC
 	: BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC;
 
     case BFD_RELOC_AARCH64_TLSGD_MOVW_G1:
-      return is_local
+      return local_exec
 	? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2
 	: BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1;
 #endif
@@ -5082,7 +5084,7 @@ aarch64_tls_transition (bfd *input_bfd,
   if (! aarch64_can_relax_tls (input_bfd, info, bfd_r_type, h, r_symndx))
     return bfd_r_type;
 
-  return aarch64_tls_transition_without_check (bfd_r_type, h);
+  return aarch64_tls_transition_without_check (bfd_r_type, h, info);
 }
 
 /* Return the base VMA address which should be subtracted from real addresses
@@ -6321,9 +6323,11 @@ static bfd_reloc_status_type
 elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 			 bfd *input_bfd, asection *input_section,
 			 bfd_byte *contents, Elf_Internal_Rela *rel,
-			 struct elf_link_hash_entry *h)
+			 struct elf_link_hash_entry *h,
+			 struct bfd_link_info *info)
 {
-  bool is_local = h == NULL;
+  bool local_exec = bfd_link_executable (info)
+    && SYMBOL_REFERENCES_LOCAL (info, h);
   unsigned int r_type = ELFNN_R_TYPE (rel->r_info);
   unsigned long insn;
 
@@ -6333,7 +6337,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
     {
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
-      if (is_local)
+      if (local_exec)
 	{
 	  /* GD->LE relaxation:
 	     adrp x0, :tlsgd:var     =>   movz R0, :tprel_g1:var
@@ -6362,7 +6366,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
       break;
 
     case BFD_RELOC_AARCH64_TLSDESC_LD_PREL19:
-      if (is_local)
+      if (local_exec)
 	{
 	  /* Tiny TLSDESC->LE relaxation:
 	     ldr   x1, :tlsdesc:var	 =>  movz  R0, #:tprel_g1:var
@@ -6404,7 +6408,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	}
 
     case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
-      if (is_local)
+      if (local_exec)
 	{
 	  /* Tiny GD->LE relaxation:
 	     adr x0, :tlsgd:var	     =>	  mrs  x1, tpidr_el0
@@ -6456,7 +6460,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
       BFD_ASSERT (rel->r_offset + 12 == rel[2].r_offset);
       BFD_ASSERT (ELFNN_R_TYPE (rel[2].r_info) == AARCH64_R (CALL26));
 
-      if (is_local)
+      if (local_exec)
 	{
 	  /* Large GD->LE relaxation:
 	     movz x0, #:tlsgd_g1:var	=> movz x0, #:tprel_g2:var, lsl #32
@@ -6500,7 +6504,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
       return bfd_reloc_continue;
 
     case BFD_RELOC_AARCH64_TLSDESC_LDNN_LO12_NC:
-      if (is_local)
+      if (local_exec)
 	{
 	  /* GD->LE relaxation:
 	     ldr xd, [x0, #:tlsdesc_lo12:var]   =>   movk x0, :tprel_g0_nc:var
@@ -6521,7 +6525,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	}
 
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
-      if (is_local)
+      if (local_exec)
 	{
 	  /* GD->LE relaxation
 	     add  x0, #:tlsgd_lo12:var	=> movk R0, :tprel_g0_nc:var
@@ -6574,7 +6578,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
       return bfd_reloc_ok;
 
     case BFD_RELOC_AARCH64_TLSDESC_LDR:
-      if (is_local)
+      if (local_exec)
 	{
 	  /* GD->LE relaxation:
 	     ldr xd, [gp, xn]   =>   movk R0, #:tprel_g0_nc:var
@@ -6601,12 +6605,12 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	 movk xd, #:tlsdesc_off_g0_nc:var => movk Rd, #:gottprel_g0_nc:var
 
 	 Where R is x for lp64 mode, and w for ILP32 mode.  */
-      if (is_local)
+      if (local_exec)
 	bfd_putl32 (ldr_hw_R0, contents + rel->r_offset);
       return bfd_reloc_continue;
 
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
-      if (is_local)
+      if (local_exec)
 	{
 	  /* GD->LE relaxation:
 	     movz xd, #:tlsdesc_off_g1:var => movz R0, #:tprel_g2:var, lsl #32
@@ -6631,7 +6635,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	 adrp xd, :gottprel:var   =>   movz Rd, :tprel_g1:var
 
 	 Where R is x for lp64 mode, and w for ILP32 mode.  */
-      if (is_local)
+      if (local_exec)
 	{
 	  insn = bfd_getl32 (contents + rel->r_offset);
 	  bfd_putl32 (movz_R0 | (insn & 0x1f), contents + rel->r_offset);
@@ -6646,7 +6650,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	 ldr  xd, [xm, #:gottprel_lo12:var]   =>   movk Rd, :tprel_g0_nc:var
 
 	 Where R is x for lp64 mode, and w for ILP32 mode.  */
-      if (is_local)
+      if (local_exec)
 	{
 	  insn = bfd_getl32 (contents + rel->r_offset);
 	  bfd_putl32 (movk_R0 | (insn & 0x1f), contents + rel->r_offset);
@@ -6659,7 +6663,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	 bl   __tls_get_addr => add R0, R0, TCB_SIZE
 
 	 Where R is x for lp64 mode, and w for ilp32 mode.  */
-      if (is_local)
+      if (local_exec)
 	{
 	  BFD_ASSERT (rel->r_offset + 4 == rel[1].r_offset);
 	  BFD_ASSERT (ELFNN_R_TYPE (rel[1].r_info) == AARCH64_R (CALL26));
@@ -6676,7 +6680,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
       /* LD->LE relaxation (small):
 	 adrp  x0, :tlsldm:x       => mrs x0, tpidr_el0
        */
-      if (is_local)
+      if (local_exec)
 	{
 	  bfd_putl32 (0xd53bd040, contents + rel->r_offset);
 	  return bfd_reloc_ok;
@@ -6689,7 +6693,7 @@ elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 	 bl   __tls_get_addr       => nop
 
 	 Where R is x for lp64 mode, and w for ilp32 mode.  */
-      if (is_local)
+      if (local_exec)
 	{
 	  BFD_ASSERT (rel->r_offset + 4 == rel[1].r_offset);
 	  BFD_ASSERT (ELFNN_R_TYPE (rel[1].r_info) == AARCH64_R (CALL26));
@@ -6863,7 +6867,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	  BFD_ASSERT (howto != NULL);
 	  r_type = howto->type;
 	  r = elfNN_aarch64_tls_relax (globals, input_bfd, input_section,
-				       contents, rel, h);
+				       contents, rel, h, info);
 	  unresolved_reloc = 0;
 	}
       else
