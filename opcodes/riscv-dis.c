@@ -382,9 +382,12 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		     (int)EXTRACT_RVV_OFFSET (l));
 	      break;
 	    case 'm':
-	      if (! EXTRACT_OPERAND (VMASK, l))
-		print (info->stream, dis_style_register, ",%s",
-		       riscv_vecm_names_numeric[0]);
+	      if (!EXTRACT_OPERAND (VMASK, l))
+		{
+		  print (info->stream, dis_style_text, ",");
+		  print (info->stream, dis_style_register, "%s",
+			 riscv_vecm_names_numeric[0]);
+		}
 	      break;
 	    }
 	  break;
@@ -766,7 +769,8 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
     case 4:
     case 8:
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_assembler_directive, ".%dbyte\t", insnlen);
+	(info->stream, dis_style_assembler_directive, ".%dbyte", insnlen);
+      (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
       (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
 				    "0x%llx", (unsigned long long) word);
       break;
@@ -774,7 +778,8 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
       {
         int i;
 	(*info->fprintf_styled_func)
-	  (info->stream, dis_style_assembler_directive, ".byte\t");
+	  (info->stream, dis_style_assembler_directive, ".byte");
+	(*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
         for (i = 0; i < insnlen; ++i)
           {
             if (i > 0)
@@ -962,21 +967,24 @@ riscv_disassemble_data (bfd_vma memaddr ATTRIBUTE_UNUSED,
     case 1:
       info->bytes_per_line = 6;
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_assembler_directive, ".byte\t");
-      (*info->fprintf_styled_func)
-	(info->stream, dis_style_immediate, "0x%02x", (unsigned) data);
+	(info->stream, dis_style_assembler_directive, ".byte");
+      (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
+      (*info->fprintf_styled_func) (info->stream, dis_style_immediate,
+				    "0x%02x", (unsigned)data);
       break;
     case 2:
       info->bytes_per_line = 8;
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_assembler_directive, ".short\t");
+	(info->stream, dis_style_assembler_directive, ".short");
+      (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
       (*info->fprintf_styled_func)
 	(info->stream, dis_style_immediate, "0x%04x", (unsigned) data);
       break;
     case 4:
       info->bytes_per_line = 8;
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_assembler_directive, ".word\t");
+	(info->stream, dis_style_assembler_directive, ".word");
+      (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
       (*info->fprintf_styled_func)
 	(info->stream, dis_style_immediate, "0x%08lx",
 	 (unsigned long) data);
@@ -984,7 +992,8 @@ riscv_disassemble_data (bfd_vma memaddr ATTRIBUTE_UNUSED,
     case 8:
       info->bytes_per_line = 8;
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_assembler_directive, ".dword\t");
+	(info->stream, dis_style_assembler_directive, ".dword");
+      (*info->fprintf_styled_func) (info->stream, dis_style_text, "\t");
       (*info->fprintf_styled_func)
 	(info->stream, dis_style_immediate, "0x%016llx",
 	 (unsigned long long) data);
