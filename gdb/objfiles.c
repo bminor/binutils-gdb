@@ -324,10 +324,6 @@ objfile::objfile (gdb_bfd_ref_ptr bfd_, const char *name, objfile_flags flags_)
 {
   const char *expanded_name;
 
-  /* We could use obstack_specify_allocation here instead, but
-     gdb_obstack.h specifies the alloc/dealloc functions.  */
-  obstack_init (&objfile_obstack);
-
   std::string name_holder;
   if (name == NULL)
     {
@@ -582,9 +578,6 @@ objfile::~objfile ()
     if (cursal.symtab && cursal.symtab->compunit ()->objfile () == this)
       clear_current_source_symtab_and_line ();
   }
-
-  /* Free the obstacks for non-reusable objfiles.  */
-  obstack_free (&objfile_obstack, 0);
 
   /* Rebuild section map next time we need it.  */
   get_objfile_pspace_data (pspace)->section_map_dirty = 1;
