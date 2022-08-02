@@ -6020,6 +6020,12 @@ sub generate_dis_html
                       my $current_value; 
                       my $max_value;
                       $current_value = $current_metrics[$metric];
+#------------------------------------------------------------------------------
+# As part of the padding process, non-breaking spaces may have been inserted
+# in an earlier phase.  Temporarily remove these to make sure that the maximum
+# metric values can be computed.
+#------------------------------------------------------------------------------
+                      $current_value =~ s/&nbsp;//g;
                       if (exists ($max_metric_values[$metric]))
                         {
                           $max_value     = $max_metric_values[$metric];
