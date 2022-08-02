@@ -1954,6 +1954,16 @@ fbsd_nat_target::supports_disable_randomization ()
 }
 
 /* See fbsd-nat.h.  */
+bool
+fbsd_nat_target::have_register_set (ptid_t ptid, int fetch_op, void *regs,
+				    size_t size)
+{
+  pid_t pid = get_ptrace_pid (ptid);
+
+  return ptrace (fetch_op, pid, (PTRACE_TYPE_ARG3) regs, 0) == 0;
+}
+
+/* See fbsd-nat.h.  */
 
 bool
 fbsd_nat_target::fetch_register_set (struct regcache *regcache, int regnum,

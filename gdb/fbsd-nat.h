@@ -130,6 +130,13 @@ protected:
 private:
   ptid_t wait_1 (ptid_t, struct target_waitstatus *, target_wait_flags);
 
+  /* Helper routine for use in read_description in subclasses.  This
+     routine checks if the register set fetched via FETCH_OP is
+     present for a given PTID and returns a bool indicating success or
+     failure.  */
+
+  bool have_register_set (ptid_t ptid, int fetch_op, void *regs, size_t size);
+
   /* Helper routines for use in fetch_registers and store_registers in
      subclasses.  These routines fetch and store a single set of
      registers described by REGSET.  The REGSET's 'regmap' field must
@@ -169,6 +176,13 @@ private:
 protected:
   /* Wrapper versions of the above helpers which accept a register set
      type such as 'struct reg' or 'struct fpreg'.  */
+
+  template <class Regset>
+  bool have_register_set (ptid_t ptid, int fetch_op)
+  {
+    Regset regs;
+    return have_register_set (ptid, fetch_op, &regs, sizeof (regs));
+  }
 
   template <class Regset>
   bool fetch_register_set (struct regcache *regcache, int regnum, int fetch_op,
