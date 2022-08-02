@@ -102,6 +102,9 @@ struct varobj_root
      to symbols that do not exist anymore.  */
   bool is_valid = true;
 
+  /* Set to true if the varobj was created as tracking a global.  */
+  bool global = false;
+
   /* Language-related operations for this variable and its
      children.  */
   const struct lang_varobj_ops *lang_ops = NULL;
@@ -336,6 +339,8 @@ varobj_create (const char *objname,
       var->format = variable_default_display (var.get ());
       var->root->valid_block =
 	var->root->floating ? NULL : tracker.block ();
+      var->root->global
+	= var->root->floating ? false : var->root->valid_block == nullptr;
       var->name = expression;
       /* For a root var, the name and the expr are the same.  */
       var->path_expr = expression;
@@ -2359,7 +2364,7 @@ static void
 varobj_invalidate_iter (struct varobj *var)
 {
   /* global and floating var must be re-evaluated.  */
-  if (var->root->floating || var->root->valid_block == nullptr)
+  if (var->root->floating || var->root->global)
     {
       struct varobj *tmp_var;
 
@@ -2375,7 +2380,7 @@ varobj_invalidate_iter (struct varobj *var)
 	  varobj_delete (var, 0);
 	  install_variable (tmp_var);
 	}
-      else if (!var->root->floating)
+      else if (var->root->global)
 	{
 	  /* Only invalidate globals as floating vars might still be valid in
 	     some other frame.  */
