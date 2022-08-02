@@ -119,7 +119,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr,
   if (from_tty)
     add_flags |= SYMFILE_VERBOSE;
 
-  objf = symbol_file_add_from_bfd (nbfd, bfd_get_filename (nbfd),
+  objf = symbol_file_add_from_bfd (nbfd_holder, bfd_get_filename (nbfd),
 				   add_flags, &sai, OBJF_SHARED, NULL);
 
   current_program_space->add_target_sections (objf);
@@ -144,7 +144,7 @@ add_symbol_file_from_memory_command (const char *args, int from_tty)
 
   /* We need some representative bfd to know the target we are looking at.  */
   if (current_program_space->symfile_object_file != NULL)
-    templ = current_program_space->symfile_object_file->obfd;
+    templ = current_program_space->symfile_object_file->obfd.get ();
   else
     templ = current_program_space->exec_bfd ();
   if (templ == NULL)

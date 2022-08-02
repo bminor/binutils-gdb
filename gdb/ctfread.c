@@ -1235,7 +1235,7 @@ add_stt_func (struct ctf_context *ccp)
 static CORE_ADDR
 get_objfile_text_range (struct objfile *of, int *tsize)
 {
-  bfd *abfd = of->obfd;
+  bfd *abfd = of->obfd.get ();
   const asection *codes;
 
   codes = bfd_get_section_by_name (abfd, ".text");
@@ -1543,7 +1543,7 @@ scan_partial_symbols (ctf_dict_t *cfp, psymtab_storage *partial_symtabs,
 
   if (strcmp (fname, ".ctf") == 0)
     {
-      fname = bfd_get_filename (of->obfd);
+      fname = bfd_get_filename (of->obfd.get ());
       isparent = true;
     }
 
@@ -1602,7 +1602,7 @@ void
 elfctf_build_psymtabs (struct objfile *of)
 {
   struct ctf_per_tu_data pcu;
-  bfd *abfd = of->obfd;
+  bfd *abfd = of->obfd.get ();
   int err;
 
   ctf_archive_t *arc = ctf_bfdopen (abfd, &err);

@@ -399,7 +399,7 @@ static section_offsets
 solib_aix_get_section_offsets (struct objfile *objfile,
 			       lm_info_aix *info)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
 
   section_offsets offsets (objfile->section_offsets.size ());
 

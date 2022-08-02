@@ -407,7 +407,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
       for (objfile *objfile : current_program_space->objfiles ())
 	ALL_OBJFILE_OSECTIONS (objfile, objsec)
 	  {
-	    bfd *abfd = objfile->obfd;
+	    bfd *abfd = objfile->obfd.get ();
 	    asection *asec = objsec->the_bfd_section;
 	    bfd_vma align = (bfd_vma) 1 << bfd_section_alignment (asec);
 	    bfd_vma start = objsec->addr () & -align;

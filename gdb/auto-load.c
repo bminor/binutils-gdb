@@ -858,7 +858,7 @@ auto_load_objfile_script (struct objfile *objfile,
     {
       unsigned long crc32;
       gdb::unique_xmalloc_ptr<char> debuglink
-	(bfd_get_debug_link_info (parent->obfd, &crc32));
+	(bfd_get_debug_link_info (parent->obfd.get (), &crc32));
 
       if (debuglink.get () != nullptr
 	  && strcmp (debuglink.get (), lbasename (realname.get ())) != 0)
@@ -1119,7 +1119,7 @@ source_section_scripts (struct objfile *objfile, const char *section_name,
 static void
 auto_load_section_scripts (struct objfile *objfile, const char *section_name)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   asection *scripts_sect;
   bfd_byte *data = NULL;
 

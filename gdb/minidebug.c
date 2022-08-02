@@ -268,12 +268,12 @@ find_separate_debug_file_in_section (struct objfile *objfile)
   if (objfile->obfd == NULL)
     return NULL;
 
-  section = bfd_get_section_by_name (objfile->obfd, ".gnu_debugdata");
+  section = bfd_get_section_by_name (objfile->obfd.get (), ".gnu_debugdata");
   if (section == NULL)
     return NULL;
 
 #ifdef HAVE_LIBLZMA
-  gdb_bfd_ref_ptr *shared = gnu_debug_key.get (objfile->obfd);
+  gdb_bfd_ref_ptr *shared = gnu_debug_key.get (objfile->obfd.get ());
   if (shared != nullptr)
     return *shared;
 
@@ -291,7 +291,7 @@ find_separate_debug_file_in_section (struct objfile *objfile)
       return NULL;
     }
 
-  gnu_debug_key.emplace (objfile->obfd, abfd);
+  gnu_debug_key.emplace (objfile->obfd.get (), abfd);
 
 #else
   warning (_("Cannot parse .gnu_debugdata section; LZMA support was "

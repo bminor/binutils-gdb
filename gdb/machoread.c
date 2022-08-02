@@ -139,7 +139,7 @@ macho_symtab_add_minsym (minimal_symbol_reader &reader,
 	return;	/* Skip this symbol.  */
 
       reader.record_with_info (sym->name, symaddr, ms_type,
-			       gdb_bfd_section_index (objfile->obfd,
+			       gdb_bfd_section_index (objfile->obfd.get (),
 						      sym->section));
     }
 }
@@ -395,7 +395,7 @@ macho_resolve_oso_sym_with_minsym (struct objfile *main_objfile, asymbol *sym)
   struct bound_minimal_symbol msym;
   const char *name = sym->name;
 
-  if (name[0] == bfd_get_symbol_leading_char (main_objfile->obfd))
+  if (name[0] == bfd_get_symbol_leading_char (main_objfile->obfd.get ()))
     ++name;
   msym = lookup_minimal_symbol (name, NULL, main_objfile);
   if (msym.minsym == NULL)
@@ -584,7 +584,7 @@ macho_add_oso_symfile (oso_el *oso, const gdb_bfd_ref_ptr &abfd,
   /* We need to clear SYMFILE_MAINLINE to avoid interactive question
      from symfile.c:symbol_file_add_with_addrs_or_offsets.  */
   symbol_file_add_from_bfd
-    (abfd.get (), name, symfile_flags & ~(SYMFILE_MAINLINE | SYMFILE_VERBOSE),
+    (abfd, name, symfile_flags & ~(SYMFILE_MAINLINE | SYMFILE_VERBOSE),
      NULL,
      main_objfile->flags & (OBJF_REORDERED | OBJF_SHARED
 			    | OBJF_READNOW | OBJF_USERLOADED),
@@ -742,7 +742,7 @@ macho_check_dsym (struct objfile *objfile, std::string *filenamep)
   if (access (dsym_filename, R_OK) != 0)
     return NULL;
 
-  if (bfd_mach_o_lookup_command (objfile->obfd,
+  if (bfd_mach_o_lookup_command (objfile->obfd.get (),
 				 BFD_MACH_O_LC_UUID, &main_uuid) == 0)
     {
       warning (_("can't find UUID in %s"), objfile_name (objfile));
@@ -781,7 +781,7 @@ macho_check_dsym (struct objfile *objfile, std::string *filenamep)
 static void
 macho_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   long storage_needed;
   std::vector<oso_el> oso_vector;
   /* We have to hold on to the symbol table until the call to
@@ -796,10 +796,10 @@ macho_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
       std::string dsym_filename;
 
       /* Process the normal symbol table first.  */
-      storage_needed = bfd_get_symtab_upper_bound (objfile->obfd);
+      storage_needed = bfd_get_symtab_upper_bound (objfile->obfd.get ());
       if (storage_needed < 0)
 	error (_("Can't read symbols from %s: %s"),
-	       bfd_get_filename (objfile->obfd),
+	       bfd_get_filename (objfile->obfd.get ()),
 	       bfd_errmsg (bfd_get_error ()));
 
       if (storage_needed > 0)
@@ -810,12 +810,12 @@ macho_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 
 	  minimal_symbol_reader reader (objfile);
 
-	  symcount = bfd_canonicalize_symtab (objfile->obfd,
+	  symcount = bfd_canonicalize_symtab (objfile->obfd.get (),
 					      symbol_table.data ());
 
 	  if (symcount < 0)
 	    error (_("Can't read symbols from %s: %s"),
-		   bfd_get_filename (objfile->obfd),
+		   bfd_get_filename (objfile->obfd.get ()),
 		   bfd_errmsg (bfd_get_error ()));
 
 	  macho_symtab_read (reader, objfile, symcount, symbol_table.data (),
@@ -849,7 +849,7 @@ macho_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	    }
 
 	  /* Add the dsym file as a separate file.  */
-	  symbol_file_add_separate (dsym_bfd.get (), dsym_filename.c_str (),
+	  symbol_file_add_separate (dsym_bfd, dsym_filename.c_str (),
 				    symfile_flags, objfile);
 
 	  /* Don't try to read dwarf2 from main file or shared libraries.  */
@@ -872,7 +872,7 @@ static bfd_byte *
 macho_symfile_relocate (struct objfile *objfile, asection *sectp,
 			bfd_byte *buf)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
 
   /* We're only interested in sections with relocation
      information.  */
@@ -898,7 +898,7 @@ macho_symfile_offsets (struct objfile *objfile,
   struct obj_section *osect;
 
   /* Allocate section_offsets.  */
-  objfile->section_offsets.assign (gdb_bfd_count_sections (objfile->obfd), 0);
+  objfile->section_offsets.assign (gdb_bfd_count_sections (objfile->obfd.get ()), 0);
 
   /* This code is run when we first add the objfile with
      symfile_add_with_addrs_or_offsets, when "addrs" not "offsets" are

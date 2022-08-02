@@ -1203,7 +1203,8 @@ open_source_file (struct symtab *s)
 	      srcpath += s->filename;
 	    }
 
-	  const struct bfd_build_id *build_id = build_id_bfd_get (ofp->obfd);
+	  const struct bfd_build_id *build_id
+	    = build_id_bfd_get (ofp->obfd.get ());
 
 	  /* Query debuginfod for the source file.  */
 	  if (build_id != nullptr && !srcpath.empty ())

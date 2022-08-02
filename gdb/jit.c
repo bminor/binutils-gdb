@@ -798,7 +798,7 @@ JITed symbol file is not an object file, ignoring it.\n"));
       }
 
   /* This call does not take ownership of SAI.  */
-  objfile = symbol_file_add_from_bfd (nbfd.get (),
+  objfile = symbol_file_add_from_bfd (nbfd,
 				      bfd_get_filename (nbfd.get ()), 0,
 				      &sai,
 				      OBJF_SHARED | OBJF_NOT_FILENAME, NULL);

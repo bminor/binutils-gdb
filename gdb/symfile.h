@@ -233,12 +233,13 @@ extern void add_filename_language (const char *ext, enum language lang);
 extern struct objfile *symbol_file_add (const char *, symfile_add_flags,
 					section_addr_info *, objfile_flags);
 
-extern struct objfile *symbol_file_add_from_bfd (bfd *, const char *, symfile_add_flags,
+extern struct objfile *symbol_file_add_from_bfd (const gdb_bfd_ref_ptr &,
+						 const char *, symfile_add_flags,
 						 section_addr_info *,
 						 objfile_flags, struct objfile *parent);
 
-extern void symbol_file_add_separate (bfd *, const char *, symfile_add_flags,
-				      struct objfile *);
+extern void symbol_file_add_separate (const gdb_bfd_ref_ptr &, const char *,
+				      symfile_add_flags, struct objfile *);
 
 extern std::string find_separate_debug_file_by_debuglink (struct objfile *);
 

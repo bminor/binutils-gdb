@@ -2799,14 +2799,15 @@ i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       if (objf != nullptr)
 	{
 	  /* Get corresponding .got.plt or .got section.  */
-	  asect = bfd_get_section_by_name (objf->obfd, ".got.plt");
+	  asect = bfd_get_section_by_name (objf->obfd.get (), ".got.plt");
 	  if (asect == nullptr)
-	    asect = bfd_get_section_by_name (objf->obfd, ".got");
+	    asect = bfd_get_section_by_name (objf->obfd.get (), ".got");
 	}
 
       if (asect != nullptr)
 	/* Translate asection to obj_section.  */
-	osect = maint_obj_section_from_bfd_section (objf->obfd, asect, objf);
+	osect = maint_obj_section_from_bfd_section (objf->obfd.get (),
+						    asect, objf);
 
       if (osect != nullptr)
 	{

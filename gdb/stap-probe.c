@@ -1566,7 +1566,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
 		   std::vector<std::unique_ptr<probe>> *probesp,
 		   CORE_ADDR base)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   int size = bfd_get_arch_size (abfd) / 8;
   struct gdbarch *gdbarch = objfile->arch ();
   struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
@@ -1678,7 +1678,7 @@ stap_static_probe_ops::get_probes
      SystemTap probe's information.  We basically have to count how many
      probes the objfile has, and then fill in the necessary information
      for each one.  */
-  bfd *obfd = objfile->obfd;
+  bfd *obfd = objfile->obfd.get ();
   bfd_vma base;
   struct sdt_note *iter;
   unsigned save_probesp_len = probesp->size ();

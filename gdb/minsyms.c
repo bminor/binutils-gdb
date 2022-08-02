@@ -1062,7 +1062,7 @@ get_symbol_leading_char (bfd *abfd)
     {
       objfile *objf = current_program_space->symfile_object_file;
       if (objf->obfd != NULL)
-	return bfd_get_symbol_leading_char (objf->obfd);
+	return bfd_get_symbol_leading_char (objf->obfd.get ());
     }
   return 0;
 }
@@ -1178,7 +1178,7 @@ minimal_symbol_reader::record_full (gdb::string_view name,
 
   /* It's safe to strip the leading char here once, since the name
      is also stored stripped in the minimal symbol table.  */
-  if (name[0] == get_symbol_leading_char (m_objfile->obfd))
+  if (name[0] == get_symbol_leading_char (m_objfile->obfd.get ()))
     name = name.substr (1);
 
   if (ms_type == mst_file_text && startswith (name, "__gnu_compiled"))

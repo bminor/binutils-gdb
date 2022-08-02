@@ -2170,7 +2170,7 @@ enable_break (struct svr4_info *info, int from_tty)
 	  bfd *tmp_bfd;
 	  CORE_ADDR load_addr;
 
-	  tmp_bfd = os->objfile->obfd;
+	  tmp_bfd = os->objfile->obfd.get ();
 	  load_addr = os->objfile->text_section_offset ();
 
 	  interp_sect = bfd_get_section_by_name (tmp_bfd, ".text");
@@ -3149,7 +3149,7 @@ svr4_iterate_over_objfiles_in_search_order
       if (current_objfile == current_program_space->symfile_object_file)
 	abfd = current_program_space->exec_bfd ();
       else
-	abfd = current_objfile->obfd;
+	abfd = current_objfile->obfd.get ();
 
       if (abfd != nullptr
 	  && gdb_bfd_scan_elf_dyntag (DT_SYMBOLIC, abfd, nullptr, nullptr) == 1)

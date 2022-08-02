@@ -764,7 +764,9 @@ solib_read_symbols (struct so_list *so, symfile_add_flags flags)
 	    {
 	      section_addr_info sap
 		= build_section_addr_info_from_section_table (*so->sections);
-	      so->objfile = symbol_file_add_from_bfd (so->abfd, so->so_name,
+	      gdb_bfd_ref_ptr tmp_bfd
+		(gdb_bfd_ref_ptr::new_reference (so->abfd));
+	      so->objfile = symbol_file_add_from_bfd (tmp_bfd, so->so_name,
 						      flags, &sap,
 						      OBJF_SHARED, NULL);
 	      so->objfile->addr_low = so->addr_low;

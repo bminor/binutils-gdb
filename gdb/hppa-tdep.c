@@ -264,7 +264,7 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
 	{
 	  low_text_segment_address = -1;
 
-	  bfd_map_over_sections (objfile->obfd,
+	  bfd_map_over_sections (objfile->obfd.get (),
 				 record_text_segment_lowaddr, 
 				 &low_text_segment_address);
 
@@ -275,7 +275,7 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
 	  text_offset = tdep->solib_get_text_base (objfile);
 	}
 
-      bfd_get_section_contents (objfile->obfd, section, buf, 0, size);
+      bfd_get_section_contents (objfile->obfd.get (), section, buf, 0, size);
 
       /* Now internalize the information being careful to handle host/target
 	 endian issues.  */
@@ -379,7 +379,8 @@ read_unwind_info (struct objfile *objfile)
 
   /* Now compute the size of the stub unwinds.  Note the ELF tools do not
      use stub unwinds at the current time.  */
-  stub_unwind_sec = bfd_get_section_by_name (objfile->obfd, "$UNWIND_END$");
+  stub_unwind_sec = bfd_get_section_by_name (objfile->obfd.get (),
+					     "$UNWIND_END$");
 
   if (stub_unwind_sec)
     {
@@ -427,7 +428,7 @@ read_unwind_info (struct objfile *objfile)
       char *buf = (char *) alloca (stub_unwind_size);
 
       /* Read in the stub unwind entries.  */
-      bfd_get_section_contents (objfile->obfd, stub_unwind_sec, buf,
+      bfd_get_section_contents (objfile->obfd.get (), stub_unwind_sec, buf,
 				0, stub_unwind_size);
 
       /* Now convert them into regular unwind entries.  */

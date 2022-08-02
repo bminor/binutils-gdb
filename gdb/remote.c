@@ -4321,7 +4321,7 @@ remote_target::get_offsets ()
   objfile *objf = current_program_space->symfile_object_file;
   section_offsets offs = objf->section_offsets;
 
-  symfile_segment_data_up data = get_symfile_segment_data (objf->obfd);
+  symfile_segment_data_up data = get_symfile_segment_data (objf->obfd.get ());
   do_segments = (data != NULL);
   do_sections = num_segments == 0;
 
@@ -4356,7 +4356,7 @@ remote_target::get_offsets ()
 
   if (do_segments)
     {
-      int ret = symfile_map_offsets_to_segments (objf->obfd,
+      int ret = symfile_map_offsets_to_segments (objf->obfd.get (),
 						 data.get (), offs,
 						 num_segments, segments);
 

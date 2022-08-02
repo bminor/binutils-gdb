@@ -485,7 +485,7 @@ record_minimal_symbol (minimal_symbol_reader &reader,
       {
 	const char *tempstring = name;
 
-	if (tempstring[0] == bfd_get_symbol_leading_char (objfile->obfd))
+	if (tempstring[0] == bfd_get_symbol_leading_char (objfile->obfd.get ()))
 	  ++tempstring;
 	if (is_vtable_name (tempstring))
 	  ms_type = mst_data;
@@ -520,7 +520,7 @@ dbx_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
   bfd *sym_bfd;
   int val;
 
-  sym_bfd = objfile->obfd;
+  sym_bfd = objfile->obfd.get ();
 
   /* .o and .nlm files are relocatables with text, data and bss segs based at
      0.  This flag disables special (Solaris stabs-in-elf only) fixups for
@@ -583,7 +583,7 @@ static void
 dbx_symfile_init (struct objfile *objfile)
 {
   int val;
-  bfd *sym_bfd = objfile->obfd;
+  bfd *sym_bfd = objfile->obfd.get ();
   const char *name = bfd_get_filename (sym_bfd);
   asection *text_sect;
   unsigned char size_temp[DBX_STRINGTAB_SIZE_SIZE];
@@ -1010,8 +1010,8 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 
   lowest_text_address = (CORE_ADDR) -1;
 
-  symfile_bfd = objfile->obfd;	/* For next_text_symbol.  */
-  abfd = objfile->obfd;
+  symfile_bfd = objfile->obfd.get ();	/* For next_text_symbol.  */
+  abfd = objfile->obfd.get ();
   symbuf_end = symbuf_idx = 0;
   next_symbol_text_func = dbx_next_symbol_text;
   textlow_not_set = 1;
@@ -2120,7 +2120,7 @@ dbx_expand_psymtab (legacy_psymtab *pst, struct objfile *objfile)
       symbol_size = SYMBOL_SIZE (pst);
 
       /* Read in this file's symbols.  */
-      bfd_seek (objfile->obfd, SYMBOL_OFFSET (pst), SEEK_SET);
+      bfd_seek (objfile->obfd.get (), SYMBOL_OFFSET (pst), SEEK_SET);
       read_ofile_symtab (objfile, pst);
     }
 
@@ -2187,8 +2187,8 @@ read_ofile_symtab (struct objfile *objfile, legacy_psymtab *pst)
   stringtab_global = DBX_STRINGTAB (objfile);
   set_last_source_file (NULL);
 
-  abfd = objfile->obfd;
-  symfile_bfd = objfile->obfd;	/* Implicit param to next_text_symbol.  */
+  abfd = objfile->obfd.get ();
+  symfile_bfd = objfile->obfd.get ();	/* Implicit param to next_text_symbol.  */
   symbuf_end = symbuf_idx = 0;
   symbuf_read = 0;
   symbuf_left = sym_offset + sym_size;
@@ -2932,7 +2932,7 @@ coffstab_build_psymtabs (struct objfile *objfile,
 			 file_ptr stabstroffset, unsigned int stabstrsize)
 {
   int val;
-  bfd *sym_bfd = objfile->obfd;
+  bfd *sym_bfd = objfile->obfd.get ();
   const char *name = bfd_get_filename (sym_bfd);
   unsigned int stabsize;
 
@@ -3019,7 +3019,7 @@ elfstab_build_psymtabs (struct objfile *objfile, asection *stabsect,
 			file_ptr stabstroffset, unsigned int stabstrsize)
 {
   int val;
-  bfd *sym_bfd = objfile->obfd;
+  bfd *sym_bfd = objfile->obfd.get ();
   const char *name = bfd_get_filename (sym_bfd);
 
   stabsread_new_init ();
@@ -3100,7 +3100,7 @@ stabsect_build_psymtabs (struct objfile *objfile, char *stab_name,
 			 char *stabstr_name, char *text_name)
 {
   int val;
-  bfd *sym_bfd = objfile->obfd;
+  bfd *sym_bfd = objfile->obfd.get ();
   const char *name = bfd_get_filename (sym_bfd);
   asection *stabsect;
   asection *stabstrsect;

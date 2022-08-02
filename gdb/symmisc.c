@@ -116,7 +116,7 @@ dump_objfile (struct objfile *objfile)
   gdb_printf ("\nObject file %s:  ", objfile_name (objfile));
   gdb_printf ("Objfile at %s, bfd at %s, %d minsyms\n\n",
 	      host_address_to_string (objfile),
-	      host_address_to_string (objfile->obfd),
+	      host_address_to_string (objfile->obfd.get ()),
 	      objfile->per_bfd->minimal_symbol_count);
 
   objfile->dump ();

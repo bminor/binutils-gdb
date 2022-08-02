@@ -300,7 +300,7 @@ void
 read_pe_exported_syms (minimal_symbol_reader &reader,
 		       struct objfile *objfile)
 {
-  bfd *dll = objfile->obfd;
+  bfd *dll = objfile->obfd.get ();
   unsigned long nbnormal, nbforward;
   unsigned long pe_header_offset, opthdr_ofs, num_entries, i;
   unsigned long export_opthdrrva, export_opthdrsize;
@@ -312,7 +312,7 @@ read_pe_exported_syms (minimal_symbol_reader &reader,
   int is_pe64 = 0;
   int is_pe32 = 0;
 
-  char const *target = bfd_get_target (objfile->obfd);
+  char const *target = bfd_get_target (objfile->obfd.get ());
 
   std::vector<struct read_pe_section_data> section_data
     (PE_SECTION_TABLE_SIZE);

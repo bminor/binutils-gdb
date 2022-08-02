@@ -830,7 +830,7 @@ dtrace_static_probe_ops::get_probes
   (std::vector<std::unique_ptr<probe>> *probesp,
    struct objfile *objfile) const
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   asection *sect = NULL;
 
   /* Do nothing in case this is a .debug file, instead of the objfile

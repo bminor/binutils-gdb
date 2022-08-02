@@ -211,7 +211,7 @@ record_minimal_symbol (minimal_symbol_reader &reader,
      create an msymbol that references an uninitialised section object.  */
   int section_index = 0;
   if ((bfd_section_flags (bfd_section) & SEC_ALLOC) == SEC_ALLOC)
-    section_index = gdb_bfd_section_index (objfile->obfd, bfd_section);
+    section_index = gdb_bfd_section_index (objfile->obfd.get (), bfd_section);
 
   struct minimal_symbol *result
     = reader.record_full (name, copy_name, address, ms_type, section_index);
@@ -252,7 +252,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
   /* Name of the last file symbol.  This is either a constant string or is
      saved on the objfile's filename cache.  */
   const char *filesymname = "";
-  int stripped = (bfd_get_symcount (objfile->obfd) == 0);
+  int stripped = (bfd_get_symcount (objfile->obfd.get ()) == 0);
   int elf_make_msymbol_special_p
     = gdbarch_elf_make_msymbol_special_p (gdbarch);
 
@@ -271,7 +271,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
       /* Skip "special" symbols, e.g. ARM mapping symbols.  These are
 	 symbols which do not correspond to objects in the symbol table,
 	 but have some other target-specific meaning.  */
-      if (bfd_is_target_special_symbol (objfile->obfd, sym))
+      if (bfd_is_target_special_symbol (objfile->obfd.get (), sym))
 	{
 	  if (gdbarch_record_special_symbol_p (gdbarch))
 	    gdbarch_record_special_symbol (gdbarch, objfile, sym);
@@ -283,7 +283,7 @@ elf_symtab_read (minimal_symbol_reader &reader,
 	  && (sym->flags & BSF_FUNCTION))
 	{
 	  struct minimal_symbol *msym;
-	  bfd *abfd = objfile->obfd;
+	  bfd *abfd = objfile->obfd.get ();
 	  asection *sect;
 
 	  /* Symbol is a reference to a function defined in
@@ -547,7 +547,7 @@ static void
 elf_rel_plt_read (minimal_symbol_reader &reader,
 		  struct objfile *objfile, asymbol **dyn_symbol_table)
 {
-  bfd *obfd = objfile->obfd;
+  bfd *obfd = objfile->obfd.get ();
   const struct elf_backend_data *bed = get_elf_backend_data (obfd);
   asection *relplt, *got_plt;
   bfd_size_type reloc_count, reloc;
@@ -816,7 +816,7 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
 
   for (objfile *objfile : current_program_space->objfiles ())
     {
-      bfd *obfd = objfile->obfd;
+      bfd *obfd = objfile->obfd.get ();
       struct gdbarch *gdbarch = objfile->arch ();
       struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
       size_t ptr_size = TYPE_LENGTH (ptr_type);
@@ -1041,7 +1041,7 @@ static void
 elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 			  const struct elfinfo *ei)
 {
-  bfd *synth_abfd, *abfd = objfile->obfd;
+  bfd *synth_abfd, *abfd = objfile->obfd.get ();
   long symcount = 0, dynsymcount = 0, synthcount, storage_needed;
   asymbol **symbol_table = NULL, **dyn_symbol_table = NULL;
   asymbol *synthsyms;
@@ -1067,10 +1067,10 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 
   /* Process the normal ELF symbol table first.  */
 
-  storage_needed = bfd_get_symtab_upper_bound (objfile->obfd);
+  storage_needed = bfd_get_symtab_upper_bound (objfile->obfd.get ());
   if (storage_needed < 0)
     error (_("Can't read symbols from %s: %s"),
-	   bfd_get_filename (objfile->obfd),
+	   bfd_get_filename (objfile->obfd.get ()),
 	   bfd_errmsg (bfd_get_error ()));
 
   if (storage_needed > 0)
@@ -1079,11 +1079,11 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 	 bfd_canonicalize_symtab so it must not get freed before ABFD gets.  */
 
       symbol_table = (asymbol **) bfd_alloc (abfd, storage_needed);
-      symcount = bfd_canonicalize_symtab (objfile->obfd, symbol_table);
+      symcount = bfd_canonicalize_symtab (objfile->obfd.get (), symbol_table);
 
       if (symcount < 0)
 	error (_("Can't read symbols from %s: %s"),
-	       bfd_get_filename (objfile->obfd),
+	       bfd_get_filename (objfile->obfd.get ()),
 	       bfd_errmsg (bfd_get_error ()));
 
       elf_symtab_read (reader, objfile, ST_REGULAR, symcount, symbol_table,
@@ -1092,7 +1092,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 
   /* Add the dynamic symbols.  */
 
-  storage_needed = bfd_get_dynamic_symtab_upper_bound (objfile->obfd);
+  storage_needed = bfd_get_dynamic_symtab_upper_bound (objfile->obfd.get ());
 
   if (storage_needed > 0)
     {
@@ -1104,12 +1104,12 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 	 implementation detail, though.  */
 
       dyn_symbol_table = (asymbol **) bfd_alloc (abfd, storage_needed);
-      dynsymcount = bfd_canonicalize_dynamic_symtab (objfile->obfd,
+      dynsymcount = bfd_canonicalize_dynamic_symtab (objfile->obfd.get (),
 						     dyn_symbol_table);
 
       if (dynsymcount < 0)
 	error (_("Can't read symbols from %s: %s"),
-	       bfd_get_filename (objfile->obfd),
+	       bfd_get_filename (objfile->obfd.get ()),
 	       bfd_errmsg (bfd_get_error ()));
 
       elf_symtab_read (reader, objfile, ST_DYNAMIC, dynsymcount,
@@ -1131,7 +1131,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
      backlinked binary where it is valid.  */
 
   if (objfile->separate_debug_objfile_backlink)
-    synth_abfd = objfile->separate_debug_objfile_backlink->obfd;
+    synth_abfd = objfile->separate_debug_objfile_backlink->obfd.get ();
   else
     synth_abfd = abfd;
 
@@ -1193,7 +1193,7 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
 static void
 elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   struct elfinfo ei;
   bool has_dwarf2 = true;
 
@@ -1271,13 +1271,14 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	{
 	  gdb_bfd_ref_ptr debug_bfd (symfile_bfd_open (debugfile.c_str ()));
 
-	  symbol_file_add_separate (debug_bfd.get (), debugfile.c_str (),
+	  symbol_file_add_separate (debug_bfd, debugfile.c_str (),
 				    symfile_flags, objfile);
 	}
       else
 	{
 	  has_dwarf2 = false;
-	  const struct bfd_build_id *build_id = build_id_bfd_get (objfile->obfd);
+	  const struct bfd_build_id *build_id
+	    = build_id_bfd_get (objfile->obfd.get ());
 
 	  if (build_id != nullptr)
 	    {
@@ -1297,7 +1298,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 			     objfile->original_name);
 		  else if (build_id_verify (debug_bfd.get (), build_id->size, build_id->data))
 		    {
-		      symbol_file_add_separate (debug_bfd.get (), symfile_path.get (),
+		      symbol_file_add_separate (debug_bfd, symfile_path.get (),
 						symfile_flags, objfile);
 		      has_dwarf2 = true;
 		    }
@@ -1348,11 +1349,11 @@ elf_symfile_init (struct objfile *objfile)
 static const elfread_data &
 elf_get_probes (struct objfile *objfile)
 {
-  elfread_data *probes_per_bfd = probe_key.get (objfile->obfd);
+  elfread_data *probes_per_bfd = probe_key.get (objfile->obfd.get ());
 
   if (probes_per_bfd == NULL)
     {
-      probes_per_bfd = probe_key.emplace (objfile->obfd);
+      probes_per_bfd = probe_key.emplace (objfile->obfd.get ());
 
       /* Here we try to gather information about all types of probes from the
 	 objfile.  */

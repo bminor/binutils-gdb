@@ -765,7 +765,7 @@ private:
     /* Object constructor to be called for current DWARF2_PER_OBJFILE.
        All .debug_str section strings are automatically stored.  */
     debug_str_lookup (dwarf2_per_objfile *per_objfile)
-      : m_abfd (per_objfile->objfile->obfd),
+      : m_abfd (per_objfile->objfile->obfd.get ()),
 	m_per_objfile (per_objfile)
     {
       per_objfile->per_bfd->str.read (per_objfile->objfile);

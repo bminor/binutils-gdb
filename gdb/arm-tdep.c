@@ -608,7 +608,7 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
   sec = find_pc_section (memaddr);
   if (sec != NULL)
     {
-      arm_per_bfd *data = arm_bfd_data_key.get (sec->objfile->obfd);
+      arm_per_bfd *data = arm_bfd_data_key.get (sec->objfile->obfd.get ());
       if (data != NULL)
 	{
 	  unsigned int section_idx = sec->the_bfd_section->index;
@@ -2451,38 +2451,39 @@ arm_exidx_new_objfile (struct objfile *objfile)
   LONGEST i;
 
   /* If we've already touched this file, do nothing.  */
-  if (!objfile || arm_exidx_data_key.get (objfile->obfd) != NULL)
+  if (!objfile || arm_exidx_data_key.get (objfile->obfd.get ()) != NULL)
     return;
 
   /* Read contents of exception table and index.  */
-  exidx = bfd_get_section_by_name (objfile->obfd, ELF_STRING_ARM_unwind);
+  exidx = bfd_get_section_by_name (objfile->obfd.get (),
+				   ELF_STRING_ARM_unwind);
   gdb::byte_vector exidx_data;
   if (exidx)
     {
       exidx_vma = bfd_section_vma (exidx);
       exidx_data.resize (bfd_section_size (exidx));
 
-      if (!bfd_get_section_contents (objfile->obfd, exidx,
+      if (!bfd_get_section_contents (objfile->obfd.get (), exidx,
 				     exidx_data.data (), 0,
 				     exidx_data.size ()))
 	return;
     }
 
-  extab = bfd_get_section_by_name (objfile->obfd, ".ARM.extab");
+  extab = bfd_get_section_by_name (objfile->obfd.get (), ".ARM.extab");
   gdb::byte_vector extab_data;
   if (extab)
     {
       extab_vma = bfd_section_vma (extab);
       extab_data.resize (bfd_section_size (extab));
 
-      if (!bfd_get_section_contents (objfile->obfd, extab,
+      if (!bfd_get_section_contents (objfile->obfd.get (), extab,
 				     extab_data.data (), 0,
 				     extab_data.size ()))
 	return;
     }
 
   /* Allocate exception table data structure.  */
-  data = arm_exidx_data_key.emplace (objfile->obfd);
+  data = arm_exidx_data_key.emplace (objfile->obfd.get ());
   data->section_maps.resize (objfile->obfd->section_count);
 
   /* Fill in exception table.  */
@@ -2654,7 +2655,7 @@ arm_find_exidx_entry (CORE_ADDR memaddr, CORE_ADDR *start)
       struct arm_exidx_data *data;
       struct arm_exidx_entry map_key = { memaddr - sec->addr (), 0 };
 
-      data = arm_exidx_data_key.get (sec->objfile->obfd);
+      data = arm_exidx_data_key.get (sec->objfile->obfd.get ());
       if (data != NULL)
 	{
 	  std::vector<arm_exidx_entry> &map
@@ -9453,9 +9454,9 @@ arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
   if (name[1] != 'a' && name[1] != 't' && name[1] != 'd')
     return;
 
-  data = arm_bfd_data_key.get (objfile->obfd);
+  data = arm_bfd_data_key.get (objfile->obfd.get ());
   if (data == NULL)
-    data = arm_bfd_data_key.emplace (objfile->obfd,
+    data = arm_bfd_data_key.emplace (objfile->obfd.get (),
 				     objfile->obfd->section_count);
   arm_mapping_symbol_vec &map
     = data->section_maps[bfd_asymbol_section (sym)->index];

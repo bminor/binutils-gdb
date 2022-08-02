@@ -1569,23 +1569,24 @@ dwarf2_has_info (struct objfile *objfile,
 	 We don't share with objfiles for which -readnow was requested,
 	 because it would complicate things when loading the same BFD with
 	 -readnow and then without -readnow.  */
-      if (!gdb_bfd_requires_relocations (objfile->obfd)
+      if (!gdb_bfd_requires_relocations (objfile->obfd.get ())
 	  && (objfile->flags & OBJF_READNOW) == 0)
 	{
 	  /* See if one has been created for this BFD yet.  */
-	  per_bfd = dwarf2_per_bfd_bfd_data_key.get (objfile->obfd);
+	  per_bfd = dwarf2_per_bfd_bfd_data_key.get (objfile->obfd.get ());
 
 	  if (per_bfd == nullptr)
 	    {
 	      /* No, create it now.  */
-	      per_bfd = new dwarf2_per_bfd (objfile->obfd, names, can_copy);
-	      dwarf2_per_bfd_bfd_data_key.set (objfile->obfd, per_bfd);
+	      per_bfd = new dwarf2_per_bfd (objfile->obfd.get (), names,
+					    can_copy);
+	      dwarf2_per_bfd_bfd_data_key.set (objfile->obfd.get (), per_bfd);
 	    }
 	}
       else
 	{
 	  /* No sharing possible, create one specifically for this objfile.  */
-	  per_bfd = new dwarf2_per_bfd (objfile->obfd, names, can_copy);
+	  per_bfd = new dwarf2_per_bfd (objfile->obfd.get (), names, can_copy);
 	  dwarf2_per_bfd_objfile_data_key.set (objfile, per_bfd);
 	}
 
@@ -2326,7 +2327,7 @@ read_addrmap_from_aranges (dwarf2_per_objfile *per_objfile,
 			   addrmap *mutable_map)
 {
   struct objfile *objfile = per_objfile->objfile;
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   struct gdbarch *gdbarch = objfile->arch ();
   const CORE_ADDR baseaddr = objfile->text_section_offset ();
   dwarf2_per_bfd *per_bfd = per_objfile->per_bfd;
@@ -4926,7 +4927,7 @@ dw2_debug_names_iterator::next ()
 
   dwarf2_per_bfd *per_bfd = m_per_objfile->per_bfd;
   struct objfile *objfile = m_per_objfile->objfile;
-  bfd *const abfd = objfile->obfd;
+  bfd *const abfd = objfile->obfd.get ();
 
  again:
 
@@ -5297,7 +5298,7 @@ get_gdb_index_contents_from_section (objfile *obj, T *section_owner)
 static gdb::array_view<const gdb_byte>
 get_gdb_index_contents_from_cache (objfile *obj, dwarf2_per_bfd *dwarf2_per_bfd)
 {
-  const bfd_build_id *build_id = build_id_bfd_get (obj->obfd);
+  const bfd_build_id *build_id = build_id_bfd_get (obj->obfd.get ());
   if (build_id == nullptr)
     return {};
 
@@ -11118,7 +11119,7 @@ try_open_dwop_file (dwarf2_per_objfile *per_objfile,
      This is important because things like demangled_names_hash lives in the
      objfile's per_bfd space and may have references to things like symbol
      names that live in the DWO/DWP file's per_bfd space.  PR 16426.  */
-  gdb_bfd_record_inclusion (per_objfile->objfile->obfd, sym_bfd.get ());
+  gdb_bfd_record_inclusion (per_objfile->objfile->obfd.get (), sym_bfd.get ());
 
   return sym_bfd;
 }
@@ -12645,7 +12646,7 @@ dwarf2_rnglists_process (unsigned offset, struct dwarf2_cu *cu,
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
-  bfd *obfd = objfile->obfd;
+  bfd *obfd = objfile->obfd.get ();
   /* Base address selection entry.  */
   gdb::optional<CORE_ADDR> base;
   const gdb_byte *buffer;
@@ -12841,7 +12842,7 @@ dwarf2_ranges_process (unsigned offset, struct dwarf2_cu *cu, dwarf_tag tag,
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
   struct comp_unit_head *cu_header = &cu->header;
-  bfd *obfd = objfile->obfd;
+  bfd *obfd = objfile->obfd.get ();
   unsigned int addr_size = cu_header->addr_size;
   CORE_ADDR mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Base address selection entry.  */
@@ -16683,7 +16684,8 @@ get_mpz (struct dwarf2_cu *cu, gdb_mpz *value, struct attribute *attr)
 	  if (ptr - blk->data + len <= blk->size)
 	    {
 	      mpz_import (value->val, len,
-			  bfd_big_endian (cu->per_objfile->objfile->obfd) ? 1 : -1,
+			  bfd_big_endian (cu->per_objfile->objfile->obfd.get ())
+			  ? 1 : -1,
 			  1, 0, 0, ptr);
 	      return;
 	    }
@@ -16696,7 +16698,8 @@ get_mpz (struct dwarf2_cu *cu, gdb_mpz *value, struct attribute *attr)
     {
       dwarf_block *blk = attr->as_block ();
       mpz_import (value->val, blk->size,
-		  bfd_big_endian (cu->per_objfile->objfile->obfd) ? 1 : -1,
+		  bfd_big_endian (cu->per_objfile->objfile->obfd.get ())
+		  ? 1 : -1,
 		  1, 0, 0, blk->data);
     }
   else
@@ -18791,7 +18794,7 @@ read_loclist_index (struct dwarf2_cu *cu, ULONGEST loclist_index)
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   ULONGEST loclist_header_size =
     (cu->header.initial_length_size == 4 ? LOCLIST_HEADER_SIZE32
      : LOCLIST_HEADER_SIZE64);
@@ -18850,7 +18853,7 @@ read_rnglist_index (struct dwarf2_cu *cu, ULONGEST rnglist_index,
 {
   struct dwarf2_per_objfile *dwarf2_per_objfile = cu->per_objfile;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   ULONGEST rnglist_header_size =
     (cu->header.initial_length_size == 4 ? RNGLIST_HEADER_SIZE32
      : RNGLIST_HEADER_SIZE64);
@@ -19285,7 +19288,7 @@ const char *
 dwarf2_per_objfile::read_line_string (const gdb_byte *buf,
 				      unsigned int offset_size)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   ULONGEST str_offset = read_offset (abfd, buf, offset_size);
 
   return per_bfd->line_str.read_string (objfile, str_offset, "DW_FORM_line_strp");
@@ -19298,7 +19301,7 @@ dwarf2_per_objfile::read_line_string (const gdb_byte *buf,
 				      const struct comp_unit_head *cu_header,
 				      unsigned int *bytes_read_ptr)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   LONGEST str_offset = cu_header->read_offset (abfd, buf, bytes_read_ptr);
 
   return per_bfd->line_str.read_string (objfile, str_offset, "DW_FORM_line_strp");
@@ -19313,7 +19316,7 @@ read_addr_index_1 (dwarf2_per_objfile *per_objfile, unsigned int addr_index,
 		   gdb::optional<ULONGEST> addr_base, int addr_size)
 {
   struct objfile *objfile = per_objfile->objfile;
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   const gdb_byte *info_ptr;
   ULONGEST addr_base_or_zero = addr_base.has_value () ? *addr_base : 0;
 
@@ -19349,7 +19352,7 @@ static CORE_ADDR
 read_addr_index_from_leb128 (struct dwarf2_cu *cu, const gdb_byte *info_ptr,
 			     unsigned int *bytes_read)
 {
-  bfd *abfd = cu->per_objfile->objfile->obfd;
+  bfd *abfd = cu->per_objfile->objfile->obfd.get ();
   unsigned int addr_index = read_unsigned_leb128 (abfd, info_ptr, bytes_read);
 
   return read_addr_index (cu, addr_index);
@@ -19411,7 +19414,7 @@ read_str_index (struct dwarf2_cu *cu,
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct objfile *objfile = per_objfile->objfile;
   const char *objf_name = objfile_name (objfile);
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   const gdb_byte *info_ptr;
   ULONGEST str_offset;
   static const char form_name[] = "DW_FORM_GNU_str_index or DW_FORM_strx";
@@ -20298,7 +20301,7 @@ dwarf_decode_lines_1 (struct line_header *lh, struct dwarf2_cu *cu,
   unsigned char op_code, extended_op;
   CORE_ADDR baseaddr;
   struct objfile *objfile = cu->per_objfile->objfile;
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   struct gdbarch *gdbarch = objfile->arch ();
 
   baseaddr = objfile->text_section_offset ();
@@ -20635,7 +20638,7 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
 
 	  if (block->data[0] == DW_OP_addr)
 	    sym->set_value_address
-	      (cu->header.read_address (objfile->obfd, block->data + 1,
+	      (cu->header.read_address (objfile->obfd.get (), block->data + 1,
 					&dummy));
 	  else
 	    sym->set_value_address
@@ -21107,7 +21110,7 @@ dwarf2_const_value_data (const struct attribute *attr, struct obstack *obstack,
 			 struct dwarf2_cu *cu, LONGEST *value, int bits)
 {
   struct objfile *objfile = cu->per_objfile->objfile;
-  enum bfd_endian byte_order = bfd_big_endian (objfile->obfd) ?
+  enum bfd_endian byte_order = bfd_big_endian (objfile->obfd.get ()) ?
 				BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
   LONGEST l = attr->constant_value (0);
 
@@ -21145,7 +21148,7 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
   struct objfile *objfile = per_objfile->objfile;
   struct comp_unit_head *cu_header = &cu->header;
   struct dwarf_block *blk;
-  enum bfd_endian byte_order = (bfd_big_endian (objfile->obfd) ?
+  enum bfd_endian byte_order = (bfd_big_endian (objfile->obfd.get ()) ?
 				BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE);
 
   *value = 0;
@@ -22497,7 +22500,7 @@ dwarf2_fetch_constant_bytes (sect_offset sect_off,
   if (attr == NULL)
     return NULL;
 
-  byte_order = (bfd_big_endian (objfile->obfd)
+  byte_order = (bfd_big_endian (objfile->obfd.get ())
 		? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE);
 
   switch (attr->form)
@@ -23009,43 +23012,44 @@ decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu, bool *computed)
 	  break;
 
 	case DW_OP_addr:
-	  stack[++stacki] = cu->header.read_address (objfile->obfd, &data[i],
+	  stack[++stacki] = cu->header.read_address (objfile->obfd.get (),
+						     &data[i],
 						     &bytes_read);
 	  i += bytes_read;
 	  break;
 
 	case DW_OP_const1u:
-	  stack[++stacki] = read_1_byte (objfile->obfd, &data[i]);
+	  stack[++stacki] = read_1_byte (objfile->obfd.get (), &data[i]);
 	  i += 1;
 	  break;
 
 	case DW_OP_const1s:
-	  stack[++stacki] = read_1_signed_byte (objfile->obfd, &data[i]);
+	  stack[++stacki] = read_1_signed_byte (objfile->obfd.get (), &data[i]);
 	  i += 1;
 	  break;
 
 	case DW_OP_const2u:
-	  stack[++stacki] = read_2_bytes (objfile->obfd, &data[i]);
+	  stack[++stacki] = read_2_bytes (objfile->obfd.get (), &data[i]);
 	  i += 2;
 	  break;
 
 	case DW_OP_const2s:
-	  stack[++stacki] = read_2_signed_bytes (objfile->obfd, &data[i]);
+	  stack[++stacki] = read_2_signed_bytes (objfile->obfd.get (), &data[i]);
 	  i += 2;
 	  break;
 
 	case DW_OP_const4u:
-	  stack[++stacki] = read_4_bytes (objfile->obfd, &data[i]);
+	  stack[++stacki] = read_4_bytes (objfile->obfd.get (), &data[i]);
 	  i += 4;
 	  break;
 
 	case DW_OP_const4s:
-	  stack[++stacki] = read_4_signed_bytes (objfile->obfd, &data[i]);
+	  stack[++stacki] = read_4_signed_bytes (objfile->obfd.get (), &data[i]);
 	  i += 4;
 	  break;
 
 	case DW_OP_const8u:
-	  stack[++stacki] = read_8_bytes (objfile->obfd, &data[i]);
+	  stack[++stacki] = read_8_bytes (objfile->obfd.get (), &data[i]);
 	  i += 8;
 	  break;
 

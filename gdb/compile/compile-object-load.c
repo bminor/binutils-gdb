@@ -643,7 +643,7 @@ compile_object_load (const compile_file_names &file_names,
 
   /* SYMFILE_VERBOSE is not passed even if FROM_TTY, user is not interested in
      "Reading symbols from ..." message for automatically generated file.  */
-  objfile_up objfile_holder (symbol_file_add_from_bfd (abfd.get (),
+  objfile_up objfile_holder (symbol_file_add_from_bfd (abfd,
 						       filename.get (),
 						       0, NULL, 0, NULL));
   objfile = objfile_holder.get ();

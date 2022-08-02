@@ -335,7 +335,7 @@ mdebug_build_psymtabs (minimal_symbol_reader &reader,
 		       const struct ecoff_debug_swap *swap,
 		       struct ecoff_debug_info *info)
 {
-  cur_bfd = objfile->obfd;
+  cur_bfd = objfile->obfd.get ();
   debug_swap = swap;
   debug_info = info;
 
@@ -357,7 +357,7 @@ mdebug_build_psymtabs (minimal_symbol_reader &reader,
 		 + info->symbolic_header.ifdMax * swap->external_fdr_size);
       fdr_ptr = info->fdr;
       for (; fdr_src < fdr_end; fdr_src += swap->external_fdr_size, fdr_ptr++)
-	(*swap->swap_fdr_in) (objfile->obfd, fdr_src, fdr_ptr);
+	(*swap->swap_fdr_in) (objfile->obfd.get (), fdr_src, fdr_ptr);
     }
 
   psymbol_functions *psf = new psymbol_functions ();
@@ -4764,7 +4764,7 @@ void
 elfmdebug_build_psymtabs (struct objfile *objfile,
 			  const struct ecoff_debug_swap *swap, asection *sec)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   struct ecoff_debug_info *info;
 
   /* FIXME: It's not clear whether we should be getting minimal symbol

@@ -958,7 +958,7 @@ frv_fdpic_find_canonical_descriptor (CORE_ADDR entry_point)
   /* Check the main executable.  */
   objfile *objf = current_program_space->symfile_object_file;
   addr = find_canonical_descriptor_in_load_object
-	   (entry_point, got_value, name, objf->obfd,
+	   (entry_point, got_value, name, objf->obfd.get (),
 	    main_executable_lm_info);
 
   /* If descriptor not found via main executable, check each load object

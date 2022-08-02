@@ -206,7 +206,7 @@ find_separate_debug_file_by_buildid (struct objfile *objfile)
 {
   const struct bfd_build_id *build_id;
 
-  build_id = build_id_bfd_get (objfile->obfd);
+  build_id = build_id_bfd_get (objfile->obfd.get ());
   if (build_id != NULL)
     {
       if (separate_debug_file_debug)

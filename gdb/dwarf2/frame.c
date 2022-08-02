@@ -138,7 +138,7 @@ typedef std::vector<dwarf2_fde *> dwarf2_fde_table;
 struct comp_unit
 {
   comp_unit (struct objfile *objf)
-    : abfd (objf->obfd)
+    : abfd (objf->obfd.get ())
   {
   }
 
@@ -1534,7 +1534,7 @@ bsearch_fde_cmp (const dwarf2_fde *fde, CORE_ADDR seek_pc)
 static comp_unit *
 find_comp_unit (struct objfile *objfile)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   if (gdb_bfd_requires_relocations (abfd))
     return dwarf2_frame_objfile_data.get (objfile);
 
@@ -1547,7 +1547,7 @@ find_comp_unit (struct objfile *objfile)
 static void
 set_comp_unit (struct objfile *objfile, struct comp_unit *unit)
 {
-  bfd *abfd = objfile->obfd;
+  bfd *abfd = objfile->obfd.get ();
   if (gdb_bfd_requires_relocations (abfd))
     return dwarf2_frame_objfile_data.set (objfile, unit);
 

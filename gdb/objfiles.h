@@ -401,7 +401,7 @@ struct objfile
 private:
 
   /* The only way to create an objfile is to call objfile::make.  */
-  objfile (bfd *, const char *, objfile_flags);
+  objfile (gdb_bfd_ref_ptr, const char *, objfile_flags);
 
 public:
 
@@ -414,8 +414,8 @@ public:
   ~objfile ();
 
   /* Create an objfile.  */
-  static objfile *make (bfd *bfd_, const char *name_, objfile_flags flags_,
-			objfile *parent = nullptr);
+  static objfile *make (gdb_bfd_ref_ptr bfd_, const char *name_,
+			objfile_flags flags_, objfile *parent = nullptr);
 
   /* Remove an objfile from the current program space, and free
      it.  */
@@ -597,7 +597,7 @@ public:
        section.  */
     gdb_assert (section->owner == nullptr || section->owner == this->obfd);
 
-    int idx = gdb_bfd_section_index (this->obfd, section);
+    int idx = gdb_bfd_section_index (this->obfd.get (), section);
     return this->section_offsets[idx];
   }
 
@@ -608,7 +608,7 @@ public:
        section.  */
     gdb_assert (section->owner == nullptr || section->owner == this->obfd);
 
-    int idx = gdb_bfd_section_index (this->obfd, section);
+    int idx = gdb_bfd_section_index (this->obfd.get (), section);
     this->section_offsets[idx] = offset;
   }
 
@@ -651,7 +651,7 @@ public:
   /* The object file's BFD.  Can be null if the objfile contains only
      minimal symbols, e.g. the run time common symbols for SunOS4.  */
 
-  bfd *obfd;
+  gdb_bfd_ref_ptr obfd;
 
   /* The per-BFD data.  Note that this is treated specially if OBFD
      is NULL.  */

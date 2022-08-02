@@ -355,7 +355,7 @@ dwarf2_find_location_expression (struct dwarf2_loclist_baton *baton,
   struct gdbarch *gdbarch = objfile->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int addr_size = baton->per_cu->addr_size ();
-  int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
+  int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd.get ());
   /* Adjustment for relocatable objects.  */
   CORE_ADDR text_offset = baton->per_objfile->objfile->text_section_offset ();
   CORE_ADDR base_address = baton->base_address;
@@ -3952,7 +3952,7 @@ loclist_describe_location (struct symbol *symbol, CORE_ADDR addr,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int addr_size = dlbaton->per_cu->addr_size ();
   int offset_size = dlbaton->per_cu->offset_size ();
-  int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd);
+  int signed_addr_p = bfd_get_sign_extend_vma (objfile->obfd.get ());
   /* Adjustment for relocatable objects.  */
   CORE_ADDR text_offset = objfile->text_section_offset ();
   CORE_ADDR base_address = dlbaton->base_address;

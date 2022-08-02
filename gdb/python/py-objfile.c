@@ -157,7 +157,7 @@ objfpy_get_build_id (PyObject *self, void *closure)
 
   try
     {
-      build_id = build_id_bfd_get (objfile->obfd);
+      build_id = build_id_bfd_get (objfile->obfd.get ());
     }
   catch (const gdb_exception &except)
     {
@@ -448,7 +448,7 @@ objfpy_add_separate_debug_file (PyObject *self, PyObject *args, PyObject *kw)
     {
       gdb_bfd_ref_ptr abfd (symfile_bfd_open (file_name));
 
-      symbol_file_add_separate (abfd.get (), file_name, 0, obj->objfile);
+      symbol_file_add_separate (abfd, file_name, 0, obj->objfile);
     }
   catch (const gdb_exception &except)
     {
@@ -625,7 +625,7 @@ objfpy_lookup_objfile_by_build_id (const char *build_id)
       /* Don't return separate debug files.  */
       if (objfile->separate_debug_objfile_backlink != NULL)
 	continue;
-      obfd_build_id = build_id_bfd_get (objfile->obfd);
+      obfd_build_id = build_id_bfd_get (objfile->obfd.get ());
       if (obfd_build_id == NULL)
 	continue;
       if (objfpy_build_id_matches (obfd_build_id, build_id))
