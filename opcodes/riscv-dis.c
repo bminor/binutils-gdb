@@ -964,24 +964,22 @@ riscv_disassemble_data (bfd_vma memaddr ATTRIBUTE_UNUSED,
       (*info->fprintf_styled_func)
 	(info->stream, dis_style_assembler_directive, ".byte\t");
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_immediate, "0x%02llx",
-	 (unsigned long long) data);
+	(info->stream, dis_style_immediate, "0x%02x", (unsigned) data);
       break;
     case 2:
       info->bytes_per_line = 8;
       (*info->fprintf_styled_func)
 	(info->stream, dis_style_assembler_directive, ".short\t");
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_immediate, "0x%04llx",
-	 (unsigned long long) data);
+	(info->stream, dis_style_immediate, "0x%04x", (unsigned) data);
       break;
     case 4:
       info->bytes_per_line = 8;
       (*info->fprintf_styled_func)
 	(info->stream, dis_style_assembler_directive, ".word\t");
       (*info->fprintf_styled_func)
-	(info->stream, dis_style_immediate, "0x%08llx",
-	 (unsigned long long) data);
+	(info->stream, dis_style_immediate, "0x%08lx",
+	 (unsigned long) data);
       break;
     case 8:
       info->bytes_per_line = 8;
