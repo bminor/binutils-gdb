@@ -27958,6 +27958,10 @@ tc_arm_regname_to_dw2regnum (char *regname)
   if (reg != FAIL)
     return reg + 256;
 
+  reg = arm_reg_parse (&regname, REG_TYPE_PSEUDO);
+  if (reg != FAIL)
+    return reg;
+
   return FAIL;
 }
 
