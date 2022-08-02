@@ -3674,7 +3674,7 @@ elf_get_reloc_section (asection *reloc_sec)
 /* Assign all ELF section numbers.  The dummy first section is handled here
    too.  The link/info pointers for the standard section types are filled
    in here too, while we're at it.  LINK_INFO will be 0 when arriving
-   here for objcopy, and when using the generic ELF linker.  */
+   here for gas, objcopy, and when using the generic ELF linker.  */
 
 static bool
 assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
@@ -3717,9 +3717,11 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	  reloc_count += sec->reloc_count;
 	}
 
-      /* Clear HAS_RELOC if there are no relocations.  */
+      /* Set/clear HAS_RELOC depending on whether there are relocations.  */
       if (reloc_count == 0)
 	abfd->flags &= ~HAS_RELOC;
+      else
+	abfd->flags |= HAS_RELOC;
     }
 
   for (sec = abfd->sections; sec; sec = sec->next)
