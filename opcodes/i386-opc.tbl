@@ -1994,10 +1994,10 @@ vpmacsww, 0x95, None, CpuXOP, Modrm|SpaceXOP08|VexSources=2|VexVVVV=1|VexW=1|No_
 vpmadcsswd, 0xa6, None, CpuXOP, Modrm|SpaceXOP08|VexSources=2|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM, RegXMM }
 vpmadcswd, 0xb6, None, CpuXOP, Modrm|SpaceXOP08|VexSources=2|VexVVVV=1|VexW=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM, RegXMM }
 vpperm, 0xa3, None, CpuXOP, D|Modrm|SpaceXOP08|VexSources=2|VexVVVV|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Vex, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM, RegXMM }
-vprot<xop_elem>, 0x90 | <xop_elem:opc>, None, CpuXOP, D|Modrm|Vex128|SpaceXOP09|VexW0|VexSources=1|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM }
-vprot<xop_elem>, 0xc0 | <xop_elem:opc>, None, CpuXOP, Modrm|Vex128|SpaceXOP08|VexW0|VexSources=1|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
-vpsha<xop_elem>, 0x98 | <xop_elem:opc>, None, CpuXOP, D|Modrm|Vex128|SpaceXOP09|VexW0|VexSources=1|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM }
-vpshl<xop_elem>, 0x94 | <xop_elem:opc>, None, CpuXOP, D|Modrm|Vex128|SpaceXOP09|VexW0|VexSources=1|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM }
+vprot<xop_elem>, 0x90 | <xop_elem:opc>, None, CpuXOP, D|Modrm|Vex128|SpaceXOP09|VexW0|VexSources=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM }
+vprot<xop_elem>, 0xc0 | <xop_elem:opc>, None, CpuXOP, Modrm|Vex128|SpaceXOP08|VexW0|VexSources=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf, { Imm8, RegXMM|Unspecified|BaseIndex, RegXMM }
+vpsha<xop_elem>, 0x98 | <xop_elem:opc>, None, CpuXOP, D|Modrm|Vex128|SpaceXOP09|VexW0|VexSources=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM }
+vpshl<xop_elem>, 0x94 | <xop_elem:opc>, None, CpuXOP, D|Modrm|Vex128|SpaceXOP09|VexW0|VexSources=1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf, { RegXMM, RegXMM|Unspecified|BaseIndex, RegXMM }
 
 // LWP instructions
 
