@@ -49,7 +49,14 @@ create_feature_loongarch_fpu (struct target_desc *result, long regnum)
   tdesc_create_reg (feature, "f29", regnum++, 1, "float", 64, "fputype");
   tdesc_create_reg (feature, "f30", regnum++, 1, "float", 64, "fputype");
   tdesc_create_reg (feature, "f31", regnum++, 1, "float", 64, "fputype");
-  tdesc_create_reg (feature, "fcc", regnum++, 1, "float", 64, "fputype");
+  tdesc_create_reg (feature, "fcc0", regnum++, 1, "float", 8, "uint8");
+  tdesc_create_reg (feature, "fcc1", regnum++, 1, "float", 8, "uint8");
+  tdesc_create_reg (feature, "fcc2", regnum++, 1, "float", 8, "uint8");
+  tdesc_create_reg (feature, "fcc3", regnum++, 1, "float", 8, "uint8");
+  tdesc_create_reg (feature, "fcc4", regnum++, 1, "float", 8, "uint8");
+  tdesc_create_reg (feature, "fcc5", regnum++, 1, "float", 8, "uint8");
+  tdesc_create_reg (feature, "fcc6", regnum++, 1, "float", 8, "uint8");
+  tdesc_create_reg (feature, "fcc7", regnum++, 1, "float", 8, "uint8");
   tdesc_create_reg (feature, "fcsr", regnum++, 1, "float", 32, "uint32");
   return regnum;
 }

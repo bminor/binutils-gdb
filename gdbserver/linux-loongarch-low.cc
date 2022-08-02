@@ -127,12 +127,24 @@ loongarch_fill_fpregset (struct regcache *regcache, void *buf)
 {
   gdb_byte *regbuf = nullptr;
   int fprsize = register_size (regcache->tdesc, LOONGARCH_FIRST_FP_REGNUM);
+  int fccsize = register_size (regcache->tdesc, LOONGARCH_FIRST_FCC_REGNUM);
 
   for (int i = 0; i < LOONGARCH_LINUX_NUM_FPREGSET; i++)
     {
       regbuf = (gdb_byte *)buf + fprsize * i;
       collect_register (regcache, LOONGARCH_FIRST_FP_REGNUM + i, regbuf);
     }
+
+  for (int i = 0; i < LOONGARCH_LINUX_NUM_FCC; i++)
+    {
+      regbuf = (gdb_byte *)buf + fprsize * LOONGARCH_LINUX_NUM_FPREGSET +
+	fccsize * i;
+      collect_register (regcache, LOONGARCH_FIRST_FCC_REGNUM + i, regbuf);
+    }
+
+  regbuf = (gdb_byte *)buf + fprsize * LOONGARCH_LINUX_NUM_FPREGSET +
+    fccsize * LOONGARCH_LINUX_NUM_FCC;
+  collect_register (regcache, LOONGARCH_FCSR_REGNUM, regbuf);
 }
 
 /* Supply FPRs from BUF into REGCACHE.  */
@@ -142,12 +154,24 @@ loongarch_store_fpregset (struct regcache *regcache, const void *buf)
 {
   const gdb_byte *regbuf = nullptr;
   int fprsize = register_size (regcache->tdesc, LOONGARCH_FIRST_FP_REGNUM);
+  int fccsize = register_size (regcache->tdesc, LOONGARCH_FIRST_FCC_REGNUM);
 
   for (int i = 0; i < LOONGARCH_LINUX_NUM_FPREGSET; i++)
     {
       regbuf = (const gdb_byte *)buf + fprsize * i;
       supply_register (regcache, LOONGARCH_FIRST_FP_REGNUM + i, regbuf);
     }
+
+  for (int i = 0; i < LOONGARCH_LINUX_NUM_FCC; i++)
+    {
+      regbuf = (const gdb_byte *)buf + fprsize * LOONGARCH_LINUX_NUM_FPREGSET +
+	fccsize * i;
+      supply_register (regcache, LOONGARCH_FIRST_FCC_REGNUM + i, regbuf);
+    }
+
+  regbuf = (const gdb_byte *)buf + fprsize * LOONGARCH_LINUX_NUM_FPREGSET +
+    fccsize * LOONGARCH_LINUX_NUM_FCC;
+  supply_register (regcache, LOONGARCH_FCSR_REGNUM, regbuf);
 }
 
 /* LoongArch/Linux regsets.  */

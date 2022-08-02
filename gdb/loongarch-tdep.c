@@ -1428,10 +1428,12 @@ loongarch_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Validate the description provides the fpu registers and
      allocate their numbers.  */
   regnum = LOONGARCH_FIRST_FP_REGNUM;
-  for (int i = 0; i < 32; i++)
+  for (int i = 0; i < LOONGARCH_LINUX_NUM_FPREGSET; i++)
     valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++,
 					loongarch_f_normal_name[i] + 1);
-  valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++, "fcc");
+  for (int i = 0; i < LOONGARCH_LINUX_NUM_FCC; i++)
+    valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++,
+					loongarch_c_normal_name[i] + 1);
   valid_p &= tdesc_numbered_register (feature_fpu, tdesc_data.get (), regnum++, "fcsr");
   if (!valid_p)
     return nullptr;
