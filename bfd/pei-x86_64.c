@@ -109,7 +109,7 @@ pex64_get_unwind_info (bfd *abfd, struct pex64_unwind_info *ui,
 
   memset (ui, 0, sizeof (struct pex64_unwind_info));
 
-  if (ex_dta >= ex_dta_end || ex_dta + 4 >= ex_dta_end)
+  if (ex_dta >= ex_dta_end || ex_dta + 4 > ex_dta_end)
     return false;
 
   ui->Version = PEX64_UWI_VERSION (ex_ui->Version_Flags);
@@ -124,13 +124,13 @@ pex64_get_unwind_info (bfd *abfd, struct pex64_unwind_info *ui,
   ui->rawUnwindCodesEnd = ex_dta_end;
 
   ex_dta += ui->SizeOfBlock;
-  if (ex_dta >= ex_dta_end)
+  if (ex_dta > ex_dta_end)
     return false;
 
   switch (ui->Flags)
     {
     case UNW_FLAG_CHAININFO:
-      if (ex_dta + 12 >= ex_dta_end)
+      if (ex_dta + 12 > ex_dta_end)
 	return false;
       ui->rva_BeginAddress = bfd_get_32 (abfd, ex_dta + 0);
       ui->rva_EndAddress = bfd_get_32 (abfd, ex_dta + 4);
@@ -140,7 +140,7 @@ pex64_get_unwind_info (bfd *abfd, struct pex64_unwind_info *ui,
     case UNW_FLAG_EHANDLER:
     case UNW_FLAG_UHANDLER:
     case UNW_FLAG_FHANDLER:
-      if (ex_dta + 4 >= ex_dta_end)
+      if (ex_dta + 4 > ex_dta_end)
 	return false;
       ui->rva_ExceptionHandler = bfd_get_32 (abfd, ex_dta);
       ui->SizeOfBlock += 4;
@@ -172,7 +172,7 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 
   i = 0;
 
-  if (ui->rawUnwindCodes + 1 >= ui->rawUnwindCodesEnd)
+  if (ui->rawUnwindCodes + ui->CountOfCodes * 2 > ui->rawUnwindCodesEnd)
     {
       fprintf (file, _("warning: corrupt unwind data\n"));
       return;
@@ -185,12 +185,6 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 	 Looks to be designed to speed-up unwinding, as there is no need
 	 to decode instruction flow if outside an epilog.  */
       unsigned int func_size = rf->rva_EndAddress - rf->rva_BeginAddress;
-
-      if (ui->rawUnwindCodes + 1 + (ui->CountOfCodes * 2) >= ui->rawUnwindCodesEnd)
-	{
-	  fprintf (file, _("warning: corrupt unwind data\n"));
-	  return;
-	}
 
       fprintf (file, "\tv2 epilog (length: %02x) at pc+:",
 	       ui->rawUnwindCodes[0]);
@@ -213,12 +207,6 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 	    fprintf (file, " 0x%x", func_size - off);
 	}
       fputc ('\n', file);
-    }
-
-  if (ui->rawUnwindCodes + 2 + (ui->CountOfCodes * 2) >= ui->rawUnwindCodesEnd)
-    {
-      fprintf (file, _("warning: corrupt unwind data\n"));
-      return;
     }
 
   for (; i < ui->CountOfCodes; i++)
