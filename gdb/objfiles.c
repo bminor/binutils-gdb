@@ -117,9 +117,10 @@ objfile_per_bfd_storage::~objfile_per_bfd_storage ()
    NULL, and it already has a per-BFD storage object, use that.
    Otherwise, allocate a new per-BFD storage object.  */
 
-static struct objfile_per_bfd_storage *
-get_objfile_bfd_data (bfd *abfd)
+void
+set_objfile_per_bfd (struct objfile *objfile)
 {
+  bfd *abfd = objfile->obfd.get ();
   struct objfile_per_bfd_storage *storage = NULL;
 
   if (abfd != NULL)
@@ -133,21 +134,15 @@ get_objfile_bfd_data (bfd *abfd)
 	 enough that this seems reasonable.  */
       if (abfd != NULL && !gdb_bfd_requires_relocations (abfd))
 	objfiles_bfd_data.set (abfd, storage);
+      else
+	objfile->per_bfd_storage.reset (storage);
 
       /* Look up the gdbarch associated with the BFD.  */
       if (abfd != NULL)
 	storage->gdbarch = gdbarch_from_bfd (abfd);
     }
 
-  return storage;
-}
-
-/* See objfiles.h.  */
-
-void
-set_objfile_per_bfd (struct objfile *objfile)
-{
-  objfile->per_bfd = get_objfile_bfd_data (objfile->obfd.get ());
+  objfile->per_bfd = storage;
 }
 
 /* Set the objfile's per-BFD notion of the "main" name and
@@ -353,7 +348,7 @@ objfile::objfile (gdb_bfd_ref_ptr bfd_, const char *name, objfile_flags flags_)
       build_objfile_section_table (this);
     }
 
-  per_bfd = get_objfile_bfd_data (obfd.get ());
+  set_objfile_per_bfd (this);
 }
 
 /* If there is a valid and known entry point, function fills *ENTRY_P with it
@@ -554,9 +549,6 @@ objfile::~objfile ()
 
   if (sf != NULL)
     (*sf->sym_finish) (this);
-
-  if (obfd == nullptr)
-    delete per_bfd;
 
   /* Before the symbol table code was redone to make it easier to
      selectively load and remove information particular to a specific

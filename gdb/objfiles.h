@@ -653,10 +653,15 @@ public:
 
   gdb_bfd_ref_ptr obfd;
 
-  /* The per-BFD data.  Note that this is treated specially if OBFD
-     is NULL.  */
+  /* The per-BFD data.  */
 
   struct objfile_per_bfd_storage *per_bfd = nullptr;
+
+  /* In some cases, the per_bfd object is owned by this objfile and
+     not by the BFD itself.  In this situation, this holds the owning
+     pointer.  */
+
+  std::unique_ptr<objfile_per_bfd_storage> per_bfd_storage;
 
   /* The modification timestamp of the object file, as of the last time
      we read its symbols.  */
