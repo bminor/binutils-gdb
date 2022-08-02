@@ -94,6 +94,13 @@ aarch64_fbsd_nat_target::fetch_registers (struct regcache *regcache,
   if (tdep->has_tls ())
     fetch_regset<uint64_t> (regcache, regnum, NT_ARM_TLS,
 			    &aarch64_fbsd_tls_regset, tdep->tls_regnum);
+
+#if __has_feature(capabilities)
+  if (tdep->has_capability ())
+    fetch_register_set<struct capreg> (regcache, regnum, PT_GETCAPREGS,
+				       &aarch64_fbsd_capregset,
+				       tdep->cap_reg_base);
+#endif
 }
 
 /* Store register REGNUM back into the inferior.  If REGNUM is -1, do
@@ -113,6 +120,15 @@ aarch64_fbsd_nat_target::store_registers (struct regcache *regcache,
   if (tdep->has_tls ())
     store_regset<uint64_t> (regcache, regnum, NT_ARM_TLS,
 			    &aarch64_fbsd_tls_regset, tdep->tls_regnum);
+
+#ifdef notyet
+#if __has_feature(capabilities)
+  if (tdep->has_capability ())
+    store_register_set<struct capreg> (regcache, regnum, PT_GETCAPREGS,
+				       PT_SETCAPREGS, &aarch64_fbsd_capregset,
+				       tdep->cap_reg_base);
+#endif
+#endif
 }
 
 /* Implement the target read_description method.  */
@@ -122,6 +138,10 @@ aarch64_fbsd_nat_target::read_description ()
 {
   aarch64_features features;
   features.tls = have_regset (inferior_ptid, NT_ARM_TLS) != 0;
+#if __has_feature(capabilities)
+  features.capability = have_register_set<struct capreg> (inferior_ptid,
+							  PT_GETCAPREGS);
+#endif
   return aarch64_read_description (features);
 }
 
