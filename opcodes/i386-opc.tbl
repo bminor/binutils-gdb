@@ -329,17 +329,17 @@ aam, 0xd4, None, CpuNo64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Im
 // Conversion insns.
 // Intel naming
 cbw, 0x98, None, 0, Size16|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
+cwde, 0x98, None, Cpu386, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 cdqe, 0x98, None, Cpu64, Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
-cwde, 0x98, None, 0, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 cwd, 0x99, None, 0, Size16|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
-cdq, 0x99, None, 0, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
+cdq, 0x99, None, Cpu386, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 cqo, 0x99, None, Cpu64, Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 // AT&T naming
 cbtw, 0x98, None, 0, Size16|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
+cwtl, 0x98, None, Cpu386, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 cltq, 0x98, None, Cpu64, Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
-cwtl, 0x98, None, 0, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 cwtd, 0x99, None, 0, Size16|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
-cltd, 0x99, None, 0, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
+cltd, 0x99, None, Cpu386, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 cqto, 0x99, None, Cpu64, Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 
 // Warning! the mul/imul (opcode 0xf6) must only have 1 operand!  They are
@@ -463,7 +463,7 @@ j<cc>, 0x7<cc:opc>, None, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldS
 
 // jcxz vs. jecxz is chosen on the basis of the address size prefix.
 jcxz, 0xe3, None, CpuNo64, JumpByte|Size16|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8 }
-jecxz, 0xe3, None, 0, JumpByte|Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8 }
+jecxz, 0xe3, None, Cpu386, JumpByte|Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8 }
 jrcxz, 0xe3, None, Cpu64, JumpByte|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Disp8 }
 
 // The loop instructions also use the address size prefix to select
@@ -488,8 +488,8 @@ set<cc>, 0xf9<cc:opc>, 0, Cpu386, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf
 cmps, 0xa6, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
 cmps, 0xa6, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 // Intel mode string compare.
-cmpsd, 0xa7, None, 0, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-cmpsd, 0xa7, None, 0, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsStringEsOp0|RepPrefixOk, { Dword|Unspecified|BaseIndex, Dword|Unspecified|BaseIndex }
+cmpsd, 0xa7, None, Cpu386, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
+cmpsd, 0xa7, None, Cpu386, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsStringEsOp0|RepPrefixOk, { Dword|Unspecified|BaseIndex, Dword|Unspecified|BaseIndex }
 scmp, 0xa6, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
 scmp, 0xa6, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp0|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 ins, 0x6c, None, Cpu186, W|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
@@ -505,8 +505,8 @@ slod, 0xac, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, { Byte|Word|Dword|
 movs, 0xa4, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
 movs, 0xa4, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp1|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 // Intel mode string move.
-movsd, 0xa5, None, 0, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
-movsd, 0xa5, None, 0, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsStringEsOp1|RepPrefixOk, { Dword|Unspecified|BaseIndex, Dword|Unspecified|BaseIndex }
+movsd, 0xa5, None, Cpu386, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsString|RepPrefixOk, {}
+movsd, 0xa5, None, Cpu386, Size32|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsStringEsOp1|RepPrefixOk, { Dword|Unspecified|BaseIndex, Dword|Unspecified|BaseIndex }
 smov, 0xa4, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
 smov, 0xa4, None, 0, W|No_sSuf|No_ldSuf|IsStringEsOp1|RepPrefixOk, { Byte|Word|Dword|Qword|Unspecified|BaseIndex, Byte|Word|Dword|Qword|Unspecified|BaseIndex }
 scas, 0xae, None, 0, W|No_sSuf|No_ldSuf|IsString|RepPrefixOk, {}
