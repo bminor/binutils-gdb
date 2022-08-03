@@ -161,8 +161,7 @@ movq, 0xf21, None, Cpu64, D|RegMem|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSu
 mov, 0xf24, None, Cpu386|CpuNo64, D|RegMem|IgnoreSize|No_bSuf|No_wSuf|No_sSuf|No_qSuf|No_ldSuf, { Test, Reg32 }
 
 // Move after swapping the bytes
-movbe, 0x0f38f0, None, CpuMovbe, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
-movbe, 0x0f38f1, None, CpuMovbe, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64, Word|Dword|Qword|Unspecified|BaseIndex }
+movbe, 0x0f38f0, None, CpuMovbe, D|Modrm|No_bSuf|No_sSuf|No_ldSuf, { Word|Dword|Qword|Unspecified|BaseIndex, Reg16|Reg32|Reg64 }
 
 // Move with sign extend.
 // "movsbl" & "movsbw" must not be unified into "movsb" to avoid

@@ -3572,7 +3572,7 @@ build_vex_prefix (const insn_template *t)
 
       if (i.tm.opcode_modifier.d)
 	i.tm.base_opcode ^= (i.tm.base_opcode & 0xee) != 0x6e
-			    ? Opcode_SIMD_FloatD : Opcode_SIMD_IntD;
+			    ? Opcode_ExtD : Opcode_SIMD_IntD;
       else /* Use the next insn.  */
 	install_template (&t[1]);
     }
@@ -6753,13 +6753,13 @@ match_template (char mnem_suffix)
 		  found_reverse_match = Opcode_VexW;
 		  goto check_operands_345;
 		}
-	      else if (operand_types[0].bitfield.xmmword
-		       || operand_types[i.operands - 1].bitfield.xmmword
-		       || operand_types[0].bitfield.class == RegMMX
-		       || operand_types[i.operands - 1].bitfield.class == RegMMX
-		       || is_any_vex_encoding(t))
+	      else if (t->opcode_modifier.opcodespace != SPACE_BASE
+		       && (t->opcode_modifier.opcodespace != SPACE_0F
+			   /* MOV to/from CR/DR/TR, as an exception, follow
+			      the base opcode space encoding model.  */
+			   || (t->base_opcode | 7) != 0x27))
 		found_reverse_match = (t->base_opcode & 0xee) != 0x6e
-				      ? Opcode_SIMD_FloatD : Opcode_SIMD_IntD;
+				      ? Opcode_ExtD : Opcode_SIMD_IntD;
 	      else
 		found_reverse_match = Opcode_D;
 	      if (t->opcode_modifier.floatr)
