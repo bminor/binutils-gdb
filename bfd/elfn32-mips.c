@@ -3514,6 +3514,7 @@ static const struct elf_reloc_map mips_reloc_map[] =
 {
   { BFD_RELOC_NONE, R_MIPS_NONE },
   { BFD_RELOC_MIPS_16, R_MIPS_16 },
+  { BFD_RELOC_16, R_MIPS_REL16 },
   { BFD_RELOC_32, R_MIPS_32 },
   /* There is no BFD reloc for R_MIPS_REL32.  */
   { BFD_RELOC_CTOR, R_MIPS_32 },
