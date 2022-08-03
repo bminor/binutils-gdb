@@ -36,6 +36,7 @@
 #include "elf-bfd.h"
 #include "dwarf2.h"
 #include "hashtab.h"
+#include "splay-tree.h"
 
 /* The data in the .debug_line statement prologue looks like this.  */
 
@@ -152,6 +153,45 @@ static struct trie_node *alloc_trie_leaf (bfd *abfd)
   return &leaf->head;
 }
 
+struct addr_range
+{
+  bfd_byte *start;
+  bfd_byte *end;
+};
+
+/* Return true if address range do intersect.  */
+
+static bool
+addr_range_intersects (struct addr_range *r1, struct addr_range *r2)
+{
+  return (r1->start <= r2->start && r2->start < r1->end)
+    || (r1->start <= (r2->end - 1) && (r2->end - 1) < r1->end);
+}
+
+/* Compare function for splay tree of addr_ranges.  */
+
+static int
+splay_tree_compare_addr_range (splay_tree_key xa, splay_tree_key xb)
+{
+  struct addr_range *r1 = (struct addr_range *) xa;
+  struct addr_range *r2 = (struct addr_range *) xb;
+
+  if (addr_range_intersects (r1, r2) || addr_range_intersects (r2, r1))
+    return 0;
+  else if (r1->end <= r2->start)
+    return -1;
+  else
+    return 1;
+}
+
+/* Splay tree release function for keys (addr_range).  */
+
+static void
+splay_tree_free_addr_range (splay_tree_key key)
+{
+  free ((struct addr_range *)key);
+}
+
 struct dwarf2_debug_file
 {
   /* The actual bfd from which debug info was loaded.  Might be
@@ -235,6 +275,9 @@ struct dwarf2_debug_file
 
   /* Root of a trie to map addresses to compilation units.  */
   struct trie_node *trie_root;
+
+  /* Splay tree to map info_ptr address to compilation units.  */
+  splay_tree comp_unit_tree;
 };
 
 struct dwarf2_debug
@@ -3447,16 +3490,12 @@ find_abstract_instance (struct comp_unit *unit,
       else
 	{
 	  /* Check other CUs to see if they contain the abbrev.  */
-	  struct comp_unit *u;
-
-	  for (u = unit->prev_unit; u != NULL; u = u->prev_unit)
-	    if (info_ptr >= u->info_ptr_unit && info_ptr < u->end_ptr)
-	      break;
-
-	  if (u == NULL)
-	    for (u = unit->next_unit; u != NULL; u = u->next_unit)
-	      if (info_ptr >= u->info_ptr_unit && info_ptr < u->end_ptr)
-		break;
+	  struct comp_unit *u = NULL;
+	  struct addr_range range = { info_ptr, info_ptr };
+	  splay_tree_node v = splay_tree_lookup (unit->file->comp_unit_tree,
+						 (splay_tree_key)&range);
+	  if (v != NULL)
+	    u = (struct comp_unit *)v->value;
 
 	  if (attr_ptr->form == DW_FORM_ref_addr)
 	    while (u == NULL)
@@ -5509,6 +5548,22 @@ stash_comp_unit (struct dwarf2_debug *stash, struct dwarf2_debug_file *file)
 						info_ptr_unit, offset_size);
       if (each)
 	{
+	  if (file->comp_unit_tree == NULL)
+	    file->comp_unit_tree
+	      = splay_tree_new (splay_tree_compare_addr_range,
+				splay_tree_free_addr_range, NULL);
+
+	  struct addr_range *r
+	    = (struct addr_range *)bfd_malloc (sizeof (struct addr_range));
+	  r->start = each->info_ptr_unit;
+	  r->end = each->end_ptr;
+	  splay_tree_node v = splay_tree_lookup (file->comp_unit_tree,
+						 (splay_tree_key)r);
+	  if (v != NULL || r->end <= r->start)
+	    abort ();
+	  splay_tree_insert (file->comp_unit_tree, (splay_tree_key)r,
+			     (splay_tree_value)each);
+
 	  if (file->all_comp_units)
 	    file->all_comp_units->prev_unit = each;
 	  else
@@ -5982,6 +6037,8 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd, void **pinfo)
 	  free (file->line_table->dirs);
 	}
       htab_delete (file->abbrev_offsets);
+      if (file->comp_unit_tree != NULL)
+	splay_tree_delete (file->comp_unit_tree);
 
       free (file->dwarf_line_str_buffer);
       free (file->dwarf_str_buffer);
