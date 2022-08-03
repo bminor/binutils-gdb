@@ -14252,51 +14252,31 @@ thumb2_record_decode_insn_handler (arm_insn_decode_record *thumb2_insn_r)
 }
 
 namespace {
-/* Abstract memory reader.  */
+/* Abstract instruction reader.  */
 
-class abstract_memory_reader
+class abstract_instruction_reader
 {
 public:
-  /* Read LEN bytes of target memory at address MEMADDR, placing the
-     results in GDB's memory at BUF.  Return true on success.  */
+  /* Read one instruction of size LEN from address MEMADDR and using
+     BYTE_ORDER endianness.  */
 
-  virtual bool read (CORE_ADDR memaddr, gdb_byte *buf, const size_t len) = 0;
+  virtual ULONGEST read (CORE_ADDR memaddr, const size_t len,
+			 enum bfd_endian byte_order) = 0;
 };
 
 /* Instruction reader from real target.  */
 
-class instruction_reader : public abstract_memory_reader
+class instruction_reader : public abstract_instruction_reader
 {
  public:
-  bool read (CORE_ADDR memaddr, gdb_byte *buf, const size_t len) override
+  ULONGEST read (CORE_ADDR memaddr, const size_t len,
+		 enum bfd_endian byte_order) override
   {
-    if (target_read_memory (memaddr, buf, len))
-      return false;
-    else
-      return true;
+    return read_code_unsigned_integer (memaddr, len, byte_order);
   }
 };
 
 } // namespace
-
-/* Extracts arm/thumb/thumb2 insn depending on the size, and returns 0 on success 
-and positive val on failure.  */
-
-static int
-extract_arm_insn (abstract_memory_reader& reader,
-		  arm_insn_decode_record *insn_record, uint32_t insn_size)
-{
-  gdb_byte buf[insn_size];
-
-  memset (&buf[0], 0, insn_size);
-  
-  if (!reader.read (insn_record->this_addr, buf, insn_size))
-    return 1;
-  insn_record->arm_insn = (uint32_t) extract_unsigned_integer (&buf[0],
-			   insn_size, 
-			   gdbarch_byte_order_for_code (insn_record->gdbarch));
-  return 0;
-}
 
 typedef int (*sti_arm_hdl_fp_t) (arm_insn_decode_record*);
 
@@ -14304,7 +14284,7 @@ typedef int (*sti_arm_hdl_fp_t) (arm_insn_decode_record*);
    dispatch it.  */
 
 static int
-decode_insn (abstract_memory_reader &reader,
+decode_insn (abstract_instruction_reader &reader,
 	     arm_insn_decode_record *arm_record,
 	     record_type_t record_type, uint32_t insn_size)
 {
@@ -14339,20 +14319,12 @@ decode_insn (abstract_memory_reader &reader,
 
   uint32_t ret = 0;    /* return value: negative:failure   0:success.  */
   uint32_t insn_id = 0;
+  enum bfd_endian code_endian
+    = gdbarch_byte_order_for_code (arm_record->gdbarch);
+  arm_record->arm_insn
+    = reader.read (arm_record->this_addr, insn_size, code_endian);
 
-  if (extract_arm_insn (reader, arm_record, insn_size))
-    {
-      if (record_debug)
-	{
-	  gdb_printf (gdb_stdlog,
-		      _("Process record: error reading memory at "
-			"addr %s len = %d.\n"),
-		      paddress (arm_record->gdbarch,
-				arm_record->this_addr), insn_size);
-	}
-      return -1;
-    }
-  else if (ARM_RECORD == record_type)
+  if (ARM_RECORD == record_type)
     {
       arm_record->cond = bits (arm_record->arm_insn, 28, 31);
       insn_id = bits (arm_record->arm_insn, 25, 27);
@@ -14412,36 +14384,35 @@ decode_insn (abstract_memory_reader &reader,
 #if GDB_SELF_TEST
 namespace selftests {
 
-/* Provide both 16-bit and 32-bit thumb instructions.  */
+/* Instruction reader class for selftests.
 
-class instruction_reader_thumb : public abstract_memory_reader
+   For 16-bit Thumb instructions, an array of uint16_t should be used.
+
+   For 32-bit Thumb instructions and regular 32-bit Arm instructions, an array
+   of uint32_t should be used.  */
+
+template<typename T>
+class instruction_reader_selftest : public abstract_instruction_reader
 {
 public:
   template<size_t SIZE>
-  instruction_reader_thumb (enum bfd_endian endian,
-			    const uint16_t (&insns)[SIZE])
-    : m_endian (endian), m_insns (insns), m_insns_size (SIZE)
+  instruction_reader_selftest (const T (&insns)[SIZE])
+    : m_insns (insns), m_insns_size (SIZE)
   {}
 
-  bool read (CORE_ADDR memaddr, gdb_byte *buf, const size_t len) override
+  ULONGEST read (CORE_ADDR memaddr, const size_t length,
+		 enum bfd_endian byte_order) override
   {
-    SELF_CHECK (len == 4 || len == 2);
-    SELF_CHECK (memaddr % 2 == 0);
-    SELF_CHECK ((memaddr / 2) < m_insns_size);
+    SELF_CHECK (length == sizeof (T));
+    SELF_CHECK (memaddr % sizeof (T) == 0);
+    SELF_CHECK ((memaddr / sizeof (T)) < m_insns_size);
 
-    store_unsigned_integer (buf, 2, m_endian, m_insns[memaddr / 2]);
-    if (len == 4)
-      {
-	store_unsigned_integer (&buf[2], 2, m_endian,
-				m_insns[memaddr / 2 + 1]);
-      }
-    return true;
+    return m_insns[memaddr / sizeof (T)];
   }
 
 private:
-  enum bfd_endian m_endian;
-  const uint16_t *m_insns;
-  size_t m_insns_size;
+  const T *m_insns;
+  const size_t m_insns_size;
 };
 
 static void
@@ -14461,6 +14432,8 @@ arm_record_test (void)
     memset (&arm_record, 0, sizeof (arm_insn_decode_record));
     arm_record.gdbarch = gdbarch;
 
+    /* Use the endian-free representation of the instructions here.  The test
+       will handle endianness conversions.  */
     static const uint16_t insns[] = {
       /* db b2	uxtb	r3, r3 */
       0xb2db,
@@ -14468,8 +14441,7 @@ arm_record_test (void)
       0x58cd,
     };
 
-    enum bfd_endian endian = gdbarch_byte_order_for_code (arm_record.gdbarch);
-    instruction_reader_thumb reader (endian, insns);
+    instruction_reader_selftest<uint16_t> reader (insns);
     int ret = decode_insn (reader, &arm_record, THUMB_RECORD,
 			   THUMB_INSN_SIZE_BYTES);
 
@@ -14495,13 +14467,14 @@ arm_record_test (void)
     memset (&arm_record, 0, sizeof (arm_insn_decode_record));
     arm_record.gdbarch = gdbarch;
 
-    static const uint16_t insns[] = {
-      /* 1d ee 70 7f	 mrc	15, 0, r7, cr13, cr0, {3} */
-      0xee1d, 0x7f70,
+    /* Use the endian-free representation of the instruction here.  The test
+       will handle endianness conversions.  */
+    static const uint32_t insns[] = {
+      /* mrc	15, 0, r7, cr13, cr0, {3} */
+      0x7f70ee1d,
     };
 
-    enum bfd_endian endian = gdbarch_byte_order_for_code (arm_record.gdbarch);
-    instruction_reader_thumb reader (endian, insns);
+    instruction_reader_selftest<uint32_t> reader (insns);
     int ret = decode_insn (reader, &arm_record, THUMB2_RECORD,
 			   THUMB2_INSN_SIZE_BYTES);
 
@@ -14509,6 +14482,27 @@ arm_record_test (void)
     SELF_CHECK (arm_record.mem_rec_count == 0);
     SELF_CHECK (arm_record.reg_rec_count == 1);
     SELF_CHECK (arm_record.arm_regs[0] == 7);
+  }
+
+  /* 32-bit instructions.  */
+  {
+    arm_insn_decode_record arm_record;
+
+    memset (&arm_record, 0, sizeof (arm_insn_decode_record));
+    arm_record.gdbarch = gdbarch;
+
+    /* Use the endian-free representation of the instruction here.  The test
+       will handle endianness conversions.  */
+    static const uint32_t insns[] = {
+      /* mov     r5, r0 */
+      0xe1a05000,
+    };
+
+    instruction_reader_selftest<uint32_t> reader (insns);
+    int ret = decode_insn (reader, &arm_record, ARM_RECORD,
+			   ARM_INSN_SIZE_BYTES);
+
+    SELF_CHECK (ret == 0);
   }
 }
 
@@ -14609,18 +14603,10 @@ arm_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
     }
 
   instruction_reader reader;
-  if (extract_arm_insn (reader, &arm_record, 2))
-    {
-      if (record_debug)
-	{
-	  gdb_printf (gdb_stdlog,
-		      _("Process record: error reading memory at "
-			"addr %s len = %d.\n"),
-		      paddress (arm_record.gdbarch,
-				arm_record.this_addr), 2);
-	}
-      return -1;
-    }
+  enum bfd_endian code_endian
+    = gdbarch_byte_order_for_code (arm_record.gdbarch);
+  arm_record.arm_insn
+    = reader.read (arm_record.this_addr, 2, code_endian);
 
   /* Check the insn, whether it is thumb or arm one.  */
 
