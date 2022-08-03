@@ -109,7 +109,7 @@ pex64_get_unwind_info (bfd *abfd, struct pex64_unwind_info *ui,
 
   memset (ui, 0, sizeof (struct pex64_unwind_info));
 
-  if (ex_dta >= ex_dta_end || ex_dta + 4 > ex_dta_end)
+  if (ex_dta_end - ex_dta < 4)
     return false;
 
   ui->Version = PEX64_UWI_VERSION (ex_ui->Version_Flags);
@@ -123,14 +123,14 @@ pex64_get_unwind_info (bfd *abfd, struct pex64_unwind_info *ui,
   ui->rawUnwindCodes = ex_dta + 4;
   ui->rawUnwindCodesEnd = ex_dta_end;
 
-  ex_dta += ui->SizeOfBlock;
-  if (ex_dta > ex_dta_end)
+  if ((size_t) (ex_dta_end - ex_dta) < ui->SizeOfBlock)
     return false;
+  ex_dta += ui->SizeOfBlock;
 
   switch (ui->Flags)
     {
     case UNW_FLAG_CHAININFO:
-      if (ex_dta + 12 > ex_dta_end)
+      if (ex_dta_end - ex_dta < 12)
 	return false;
       ui->rva_BeginAddress = bfd_get_32 (abfd, ex_dta + 0);
       ui->rva_EndAddress = bfd_get_32 (abfd, ex_dta + 4);
@@ -140,7 +140,7 @@ pex64_get_unwind_info (bfd *abfd, struct pex64_unwind_info *ui,
     case UNW_FLAG_EHANDLER:
     case UNW_FLAG_UHANDLER:
     case UNW_FLAG_FHANDLER:
-      if (ex_dta + 4 > ex_dta_end)
+      if (ex_dta_end - ex_dta < 4)
 	return false;
       ui->rva_ExceptionHandler = bfd_get_32 (abfd, ex_dta);
       ui->SizeOfBlock += 4;
@@ -172,7 +172,8 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 
   i = 0;
 
-  if (ui->rawUnwindCodes + ui->CountOfCodes * 2 > ui->rawUnwindCodesEnd)
+  if ((size_t) (ui->rawUnwindCodesEnd - ui->rawUnwindCodes)
+      < ui->CountOfCodes * 2)
     {
       fprintf (file, _("warning: corrupt unwind data\n"));
       return;
@@ -226,7 +227,7 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 	case UWOP_ALLOC_LARGE:
 	  if (info == 0)
 	    {
-	      if (dta + 4 > ui->rawUnwindCodesEnd)
+	      if (ui->rawUnwindCodesEnd - dta < 4)
 		{
 		  fprintf (file, _("warning: corrupt unwind data\n"));
 		  return;
@@ -236,7 +237,7 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 	    }
 	  else
 	    {
-	      if (dta + 6 > ui->rawUnwindCodesEnd)
+	      if (ui->rawUnwindCodesEnd - dta < 6)
 		{
 		  fprintf (file, _("warning: corrupt unwind data\n"));
 		  return;
@@ -261,7 +262,7 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 	  break;
 
 	case UWOP_SAVE_NONVOL:
-	  if (dta + 4 > ui->rawUnwindCodesEnd)
+	  if (ui->rawUnwindCodesEnd - dta < 4)
 	    {
 	      fprintf (file, _("warning: corrupt unwind data\n"));
 	      return;
@@ -273,7 +274,7 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 	  break;
 
 	case UWOP_SAVE_NONVOL_FAR:
-	  if (dta + 6 > ui->rawUnwindCodesEnd)
+	  if (ui->rawUnwindCodesEnd - dta < 6)
 	    {
 	      fprintf (file, _("warning: corrupt unwind data\n"));
 	      return;
@@ -287,7 +288,7 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 	case UWOP_SAVE_XMM:
 	  if (ui->Version == 1)
 	    {
-	      if (dta + 4 > ui->rawUnwindCodesEnd)
+	      if (ui->rawUnwindCodesEnd - dta < 4)
 		{
 		  fprintf (file, _("warning: corrupt unwind data\n"));
 		  return;
@@ -305,7 +306,7 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 	  break;
 
 	case UWOP_SAVE_XMM_FAR:
-	  if (dta + 6 > ui->rawUnwindCodesEnd)
+	  if (ui->rawUnwindCodesEnd - dta < 6)
 	    {
 	      fprintf (file, _("warning: corrupt unwind data\n"));
 	      return;
@@ -317,7 +318,7 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 	  break;
 
 	case UWOP_SAVE_XMM128:
-	  if (dta + 4 > ui->rawUnwindCodesEnd)
+	  if (ui->rawUnwindCodesEnd - dta < 4)
 	    {
 	      fprintf (file, _("warning: corrupt unwind data\n"));
 	      return;
@@ -329,7 +330,7 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 	  break;
 
 	case UWOP_SAVE_XMM128_FAR:
-	  if (dta + 6 > ui->rawUnwindCodesEnd)
+	  if (ui->rawUnwindCodesEnd - dta < 6)
 	    {
 	      fprintf (file, _("warning: corrupt unwind data\n"));
 	      return;
