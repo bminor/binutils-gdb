@@ -4329,24 +4329,19 @@ optimize_encoding (void)
 	   && !i.types[2].bitfield.xmmword
 	   && (i.tm.opcode_modifier.vex
 	       || ((!i.mask.reg || i.mask.zeroing)
-		   && i.rounding.type == rc_none
 		   && is_evex_encoding (&i.tm)
 		   && (i.vec_encoding != vex_encoding_evex
 		       || cpu_arch_isa_flags.bitfield.cpuavx512vl
 		       || i.tm.cpu_flags.bitfield.cpuavx512vl
 		       || (i.tm.operand_types[2].bitfield.zmmword
 			   && i.types[2].bitfield.ymmword))))
-	   && ((i.tm.base_opcode == 0x55
-		|| i.tm.base_opcode == 0x57
-		|| i.tm.base_opcode == 0xdf
-		|| i.tm.base_opcode == 0xef
-		|| i.tm.base_opcode == 0xf8
-		|| i.tm.base_opcode == 0xf9
-		|| i.tm.base_opcode == 0xfa
-		|| i.tm.base_opcode == 0xfb
-		|| i.tm.base_opcode == 0x42
-		|| i.tm.base_opcode == 0x47)
-	       && i.tm.extension_opcode == None))
+	   && i.tm.opcode_modifier.opcodespace == SPACE_0F
+	   && ((i.tm.base_opcode | 2) == 0x57
+	       || i.tm.base_opcode == 0xdf
+	       || i.tm.base_opcode == 0xef
+	       || (i.tm.base_opcode | 3) == 0xfb
+	       || i.tm.base_opcode == 0x42
+	       || i.tm.base_opcode == 0x47))
     {
       /* Optimize: -O1:
 	   VOP, one of vandnps, vandnpd, vxorps, vxorpd, vpsubb, vpsubd,
