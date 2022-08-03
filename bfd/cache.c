@@ -177,6 +177,7 @@ bfd_cache_delete (bfd *abfd)
 
   abfd->iostream = NULL;
   --open_files;
+  abfd->flags |= BFD_CLOSED_BY_CACHE;
 
   return ret;
 }
@@ -265,10 +266,13 @@ bfd_cache_lookup_worker (bfd *abfd, enum cache_flag flag)
 	   && !(flag & CACHE_NO_SEEK_ERROR))
     bfd_set_error (bfd_error_system_call);
   else
-    return (FILE *) abfd->iostream;
+    {
+      abfd->flags &= ~BFD_CLOSED_BY_CACHE;
+      return (FILE *) abfd->iostream;
+    }
 
   /* xgettext:c-format */
-  _bfd_error_handler (_("reopening %pB: %s\n"),
+  _bfd_error_handler (_("reopening %pB: %s"),
 		      abfd, bfd_errmsg (bfd_get_error ()));
   return NULL;
 }

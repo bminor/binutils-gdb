@@ -1,3 +1,14 @@
+2022-08-03  Alan Modra  <amodra@gmail.com>
+
+	PR 29389
+	* ldlang.h (lang_input_statement_struct): Add sort_key field.
+	* emultempl/pe.em (after_open): If multiple import libraries refer
+	to the same bfd, store their names in the sort_key field.
+	* emultempl/pep.em (after_open): Likewise.
+	* ldlang.c (sort_filename): New function.  Returns the filename to
+	be used when sorting input files.
+	(wild_sort): Use the sort_filename function.
+
 2022-07-29  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR ld/29411

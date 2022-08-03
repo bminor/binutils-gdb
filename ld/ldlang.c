@@ -1125,6 +1125,7 @@ new_afile (const char *name,
   p->flags.add_DT_NEEDED_for_regular = input_flags.add_DT_NEEDED_for_regular;
   p->flags.whole_archive = input_flags.whole_archive;
   p->flags.sysrooted = input_flags.sysrooted;
+  p->sort_key = NULL;
 
   switch (file_type)
     {
@@ -2723,6 +2724,17 @@ lang_add_section (lang_statement_list_type *ptr,
   new_section->pattern = pattern;
 }
 
+/* PE puts the sort key in the input statement.  */
+
+static const char *
+sort_filename (bfd *abfd)
+{
+  lang_input_statement_type *is = bfd_usrdata (abfd);
+  if (is->sort_key)
+    return is->sort_key;
+  return bfd_get_filename (abfd);
+}
+
 /* Handle wildcard sorting.  This returns the lang_input_section which
    should follow the one we are going to create for SECTION and FILE,
    based on the sorting requirements of WILD.  It returns NULL if the
@@ -2762,28 +2774,17 @@ wild_sort (lang_wild_statement_type *wild,
 	     the archive and then the name of the file within the
 	     archive.  */
 
-	  if (file->the_bfd != NULL
-	      && file->the_bfd->my_archive != NULL)
-	    {
-	      fn = bfd_get_filename (file->the_bfd->my_archive);
-	      fa = true;
-	    }
+	  fa = file->the_bfd->my_archive != NULL;
+	  if (fa)
+	    fn = sort_filename (file->the_bfd->my_archive);
 	  else
-	    {
-	      fn = file->filename;
-	      fa = false;
-	    }
+	    fn = sort_filename (file->the_bfd);
 
-	  if (ls->section->owner->my_archive != NULL)
-	    {
-	      ln = bfd_get_filename (ls->section->owner->my_archive);
-	      la = true;
-	    }
+	  la = ls->section->owner->my_archive != NULL;
+	  if (la)
+	    ln = sort_filename (ls->section->owner->my_archive);
 	  else
-	    {
-	      ln = bfd_get_filename (ls->section->owner);
-	      la = false;
-	    }
+	    ln = sort_filename (ls->section->owner);
 
 	  i = filename_cmp (fn, ln);
 	  if (i > 0)
@@ -2794,9 +2795,9 @@ wild_sort (lang_wild_statement_type *wild,
 	  if (fa || la)
 	    {
 	      if (fa)
-		fn = file->filename;
+		fn = sort_filename (file->the_bfd);
 	      if (la)
-		ln = bfd_get_filename (ls->section->owner);
+		ln = sort_filename (ls->section->owner);
 
 	      i = filename_cmp (fn, ln);
 	      if (i > 0)

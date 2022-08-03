@@ -1,3 +1,16 @@
+2022-08-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 29389
+	* bfd.c (BFD_CLOSED_BY_CACHE): New bfd flag.
+	* cache.c (bfd_cache_delete): Set BFD_CLOSED_BY_DELETE on the
+	closed bfd.
+	(bfd_cache_lookup_worker): Clear BFD_CLOSED_BY_DELETE on the newly
+	reopened bfd.
+	* opncls.c (bfd_set_filename): Refuse to change the name of a bfd
+	that has been closed by bfd_cache_delete.  Mark changed bfds as
+	uncacheable.
+	* bfd-in2.h: Regenerate.
+
 2022-07-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 29424

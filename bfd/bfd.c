@@ -176,6 +176,8 @@ CODE_FRAGMENT
 .  {* Put pathnames into archives (non-POSIX).  *}
 .#define BFD_ARCHIVE_FULL_PATH  0x100000
 .
+.#define BFD_CLOSED_BY_CACHE    0x200000
+.
 .  {* Flags bits to be saved in bfd_preserve_save.  *}
 .#define BFD_FLAGS_SAVED \
 .  (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_LINKER_CREATED \

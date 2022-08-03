@@ -1547,6 +1547,7 @@ gld${EMULATION_NAME}_after_open (void)
 		      {
 			struct bfd_symbol *s;
 			struct bfd_link_hash_entry * blhe;
+			bfd *other_bfd;
 			const char *other_bfd_filename;
 
 			s = (relocs[i]->sym_ptr_ptr)[0];
@@ -1563,20 +1564,25 @@ gld${EMULATION_NAME}_after_open (void)
 			    || blhe->type != bfd_link_hash_defined)
 			  continue;
 
+			other_bfd = blhe->u.def.section->owner;
+			if (other_bfd->my_archive == is->the_bfd->my_archive)
+			  continue;
+
 			other_bfd_filename
-			  = blhe->u.def.section->owner->my_archive
-			    ? bfd_get_filename (blhe->u.def.section->owner->my_archive)
-			    : bfd_get_filename (blhe->u.def.section->owner);
+			  = (other_bfd->my_archive
+			     ? bfd_get_filename (other_bfd->my_archive)
+			     : bfd_get_filename (other_bfd));
 
 			if (filename_cmp (bfd_get_filename
 					    (is->the_bfd->my_archive),
 					  other_bfd_filename) == 0)
 			  continue;
 
-			/* Rename this implib to match the other one.  */
-			if (!bfd_set_filename (is->the_bfd->my_archive,
-					       other_bfd_filename))
-			  einfo ("%F%P: %pB: %E\n", is->the_bfd);
+			/* Sort this implib to match the other one.  */
+			lang_input_statement_type *arch_is
+			  = bfd_usrdata (is->the_bfd->my_archive);
+			arch_is->sort_key = other_bfd_filename;
+			break;
 		      }
 
 		    free (relocs);
@@ -1683,10 +1689,7 @@ gld${EMULATION_NAME}_after_open (void)
 		  = xmalloc (strlen (bfd_get_filename (is->the_bfd)) + 3);
 		sprintf (new_name, "%s.%c",
 			 bfd_get_filename (is->the_bfd), seq);
-		is->filename = bfd_set_filename (is->the_bfd, new_name);
-		free (new_name);
-		if (!is->filename)
-		  einfo ("%F%P: %pB: %E\n", is->the_bfd);
+		is->sort_key = new_name;
 	      }
 	  }
       }
