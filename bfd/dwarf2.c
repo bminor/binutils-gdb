@@ -1801,7 +1801,7 @@ struct varinfo
   /* The type of this variable.  */
   int tag;
   /* The name of the variable, if it has one.  */
-  char *name;
+  const char *name;
   /* The address of the variable.  */
   bfd_vma addr;
   /* Where the symbol is defined.  */
@@ -4094,11 +4094,12 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		case DW_AT_specification:
 		  if (is_int_form (&attr) && attr.u.val)
 		    {
-		      struct varinfo * spec_var;
-
-		      spec_var = lookup_var_by_offset (attr.u.val,
-						       unit->variable_table);
-		      if (spec_var == NULL)
+		      bool is_linkage;
+		      if (!find_abstract_instance (unit, &attr, 0,
+						   &var->name,
+						   &is_linkage,
+						   &var->file,
+						   &var->line))
 			{
 			  _bfd_error_handler (_("DWARF error: could not find "
 						"variable specification "
@@ -4106,15 +4107,6 @@ scan_unit_for_symbols (struct comp_unit *unit)
 					      (unsigned long) attr.u.val);
 			  break;
 			}
-
-		      if (var->name == NULL)
-			var->name = spec_var->name;
-		      if (var->file == NULL && spec_var->file != NULL)
-			var->file = strdup (spec_var->file);
-		      if (var->line == 0)
-			var->line = spec_var->line;
-		      if (var->sec == NULL)
-			var->sec = spec_var->sec;
 		    }
 		  break;
 
