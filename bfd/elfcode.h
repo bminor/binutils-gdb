@@ -1002,9 +1002,10 @@ elf_write_relocs (bfd *abfd, asection *sec, void *data)
 	  && ptr->howto->bitsize > 32
 	  && ptr->addend - INT32_MIN > UINT32_MAX)
 	{
-	  _bfd_error_handler (_("%pB: %pA+%"BFD_VMA_FMT"x: "
-				"relocation addend %"BFD_VMA_FMT"x too large"),
-			      abfd, sec, ptr->address, ptr->addend);
+	  _bfd_error_handler (_("%pB: %pA+%" PRIx64 ": "
+				"relocation addend %" PRIx64 " too large"),
+			      abfd, sec, (uint64_t) ptr->address,
+			      (uint64_t) ptr->addend);
 	  *failedp = true;
 	  bfd_set_error (bfd_error_bad_value);
 	}

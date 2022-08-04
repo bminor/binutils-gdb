@@ -2815,11 +2815,11 @@ md_pcrel_from_section (fixS *fixP,
 	}
     }
 
-  pr_debug ("pcrel from %"BFD_VMA_FMT"x + %lx = %"BFD_VMA_FMT"x, "
-	    "symbol: %s (%"BFD_VMA_FMT"x)\n",
-	    fixP->fx_frag->fr_address, fixP->fx_where, base,
+  pr_debug ("pcrel from %" PRIx64 " + %lx = %" PRIx64 ", "
+	    "symbol: %s (%" PRIx64 ")\n",
+	    (uint64_t) fixP->fx_frag->fr_address, fixP->fx_where, (uint64_t) base,
 	    fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "(null)",
-	    fixP->fx_addsy ? S_GET_VALUE (fixP->fx_addsy) : 0);
+	    fixP->fx_addsy ? (uint64_t) S_GET_VALUE (fixP->fx_addsy) : (uint64_t) 0);
 
   return base;
 }
@@ -3311,9 +3311,9 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   table_entry = TC_GENERIC_RELAX_TABLE + fragP->fr_subtype;
 
   pr_debug ("%s:%d: md_convert_frag, subtype: %d, fix: %d, "
-	    "var: %"BFD_VMA_FMT"d\n",
+	    "var: %" PRId64 "\n",
 	    fragP->fr_file, fragP->fr_line,
-	    fragP->fr_subtype, fix, fragP->fr_var);
+	    fragP->fr_subtype, fix, (int64_t) fragP->fr_var);
 
   if (fragP->fr_subtype <= 0
       && fragP->fr_subtype >= arc_num_relax_opcodes)

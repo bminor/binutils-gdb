@@ -440,10 +440,9 @@ size_number (bfd_size_type num)
 {
   char buffer[40];
 
-  sprintf (buffer,
-	   (radix == decimal ? "%" BFD_VMA_FMT "u" :
-	   ((radix == octal) ? "0%" BFD_VMA_FMT "o" : "0x%" BFD_VMA_FMT "x")),
-	   num);
+  sprintf (buffer, (radix == decimal ? "%" PRIu64
+		    : radix == octal ? "0%" PRIo64 : "0x%" PRIx64),
+	   (uint64_t) num);
 
   return strlen (buffer);
 }
@@ -453,10 +452,9 @@ rprint_number (int width, bfd_size_type num)
 {
   char buffer[40];
 
-  sprintf (buffer,
-	   (radix == decimal ? "%" BFD_VMA_FMT "u" :
-	   ((radix == octal) ? "0%" BFD_VMA_FMT "o" : "0x%" BFD_VMA_FMT "x")),
-	   num);
+  sprintf (buffer, (radix == decimal ? "%" PRIu64
+		    : radix == octal ? "0%" PRIo64 : "0x%" PRIx64),
+	   (uint64_t) num);
 
   printf ("%*s", width, buffer);
 }

@@ -1750,7 +1750,7 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
 
 	      if (!strcmp (name, ""))
 		{
-		  sprintf (ab, "%#" BFD_VMA_FMT "x", dyn.d_tag);
+		  sprintf (ab, "%#" PRIx64, (uint64_t) dyn.d_tag);
 		  name = ab;
 		}
 	      break;

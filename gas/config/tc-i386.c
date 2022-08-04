@@ -3185,8 +3185,8 @@ static void
 pe (expressionS *e)
 {
   fprintf (stdout, "    operation     %d\n", e->X_op);
-  fprintf (stdout, "    add_number    %" BFD_VMA_FMT "d (%" BFD_VMA_FMT "x)\n",
-	   e->X_add_number, e->X_add_number);
+  fprintf (stdout, "    add_number    %" PRId64 " (%" PRIx64 ")\n",
+	   (int64_t) e->X_add_number, (uint64_t) (valueT) e->X_add_number);
   if (e->X_add_symbol)
     {
       fprintf (stdout, "    add_symbol    ");

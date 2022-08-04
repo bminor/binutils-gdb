@@ -430,30 +430,6 @@ get_dynamic_name (const Filedata *filedata, size_t offset)
 #define GNU_HASH_SECTION_NAME(filedata)		\
   filedata->dynamic_info_DT_MIPS_XHASH ? ".MIPS.xhash" : ".gnu.hash"
 
-/* Print a BFD_VMA to an internal buffer, for use in error messages.
-   BFD_FMA_FMT can't be used in translated strings.  */
-
-static const char *
-bfd_vmatoa (char *fmtch, bfd_vma value)
-{
-  /* bfd_vmatoa is used more then once in a printf call for output.
-     Cycle through an array of buffers.  */
-  static int buf_pos = 0;
-  static struct bfd_vmatoa_buf
-  {
-    char place[64];
-  } buf[4];
-  char *ret;
-  char fmt[32];
-
-  ret = buf[buf_pos++].place;
-  buf_pos %= ARRAY_SIZE (buf);
-
-  sprintf (fmt, "%%%s%s", BFD_VMA_FMT, fmtch);
-  snprintf (ret, sizeof (buf[0].place), fmt, value);
-  return ret;
-}
-
 /* Retrieve NMEMB structures, each SIZE bytes long from FILEDATA starting at
    OFFSET + the offset of the current archive member, if we are examining an
    archive.  Put the retrieved data into VAR, if it is not NULL.  Otherwise
@@ -484,9 +460,9 @@ get_data (void *         var,
       || (size_t) amt != amt)
     {
       if (reason)
-	error (_("Size truncation prevents reading %s"
-		 " elements of size %s for %s\n"),
-	       bfd_vmatoa ("u", nmemb), bfd_vmatoa ("u", size), reason);
+	error (_("Size truncation prevents reading %" PRIu64
+		 " elements of size %" PRIu64 " for %s\n"),
+	       (uint64_t) nmemb, (uint64_t) size, reason);
       return NULL;
     }
 
@@ -494,9 +470,9 @@ get_data (void *         var,
   if (amt / size != nmemb || (size_t) amt + 1 == 0)
     {
       if (reason)
-	error (_("Size overflow prevents reading %s"
-		 " elements of size %s for %s\n"),
-	       bfd_vmatoa ("u", nmemb), bfd_vmatoa ("u", size), reason);
+	error (_("Size overflow prevents reading %" PRIu64
+		 " elements of size %" PRIu64 " for %s\n"),
+	       (uint64_t) nmemb, (uint64_t) size, reason);
       return NULL;
     }
 
@@ -507,8 +483,8 @@ get_data (void *         var,
       || amt > filedata->file_size - filedata->archive_file_offset - offset)
     {
       if (reason)
-	error (_("Reading %s bytes extends past end of file for %s\n"),
-	       bfd_vmatoa ("u", amt), reason);
+	error (_("Reading %" PRIu64 " bytes extends past end of file for %s\n"),
+	       (uint64_t) amt, reason);
       return NULL;
     }
 
@@ -530,8 +506,8 @@ get_data (void *         var,
       if (mvar == NULL)
 	{
 	  if (reason)
-	    error (_("Out of memory allocating %s bytes for %s\n"),
-		   bfd_vmatoa ("u", amt), reason);
+	    error (_("Out of memory allocating %" PRIu64 " bytes for %s\n"),
+		   (uint64_t) amt, reason);
 	  return NULL;
 	}
 
@@ -541,8 +517,8 @@ get_data (void *         var,
   if (fread (mvar, (size_t) size, (size_t) nmemb, filedata->handle) != nmemb)
     {
       if (reason)
-	error (_("Unable to read in %s bytes of %s\n"),
-	       bfd_vmatoa ("u", amt), reason);
+	error (_("Unable to read in %" PRIu64 " bytes of %s\n"),
+	       (uint64_t) amt, reason);
       if (mvar != var)
 	free (mvar);
       return NULL;
@@ -573,34 +549,34 @@ print_vma (bfd_vma vma, print_mode mode)
 
     case DEC_5:
       if (vma <= 99999)
-	return printf ("%5" BFD_VMA_FMT "d", vma);
+	return printf ("%5" PRId64, (int64_t) vma);
       /* Fall through.  */
     case PREFIX_HEX:
       nc = printf ("0x");
       /* Fall through.  */
     case HEX:
-      return nc + printf ("%" BFD_VMA_FMT "x", vma);
+      return nc + printf ("%" PRIx64, (uint64_t) vma);
 
     case PREFIX_HEX_5:
       nc = printf ("0x");
       /* Fall through.  */
     case HEX_5:
-      return nc + printf ("%05" BFD_VMA_FMT "x", vma);
+      return nc + printf ("%05" PRIx64, (uint64_t) vma);
 
     case DEC:
-      return printf ("%" BFD_VMA_FMT "d", vma);
+      return printf ("%" PRId64, (int64_t) (bfd_signed_vma) vma);
 
     case UNSIGNED:
-      return printf ("%" BFD_VMA_FMT "u", vma);
+      return printf ("%" PRIu64, (uint64_t) vma);
 
     case UNSIGNED_5:
-      return printf ("%5" BFD_VMA_FMT "u", vma);
+      return printf ("%5" PRIu64, (uint64_t) vma);
 
     case OCTAL:
-      return printf ("%" BFD_VMA_FMT "o", vma);
+      return printf ("%" PRIo64, (uint64_t) vma);
 
     case OCTAL_5:
-      return printf ("%5" BFD_VMA_FMT "o", vma);
+      return printf ("%5" PRIo64, (uint64_t) vma);
 
     default:
       /* FIXME: Report unrecognised mode ?  */
@@ -1511,15 +1487,16 @@ dump_relocations (Filedata *          filedata,
     {
       bfd_vma * relrs;
       const char *format
-	  = is_32bit_elf ? "%08" BFD_VMA_FMT "x\n" : "%016" BFD_VMA_FMT "x\n";
+	= is_32bit_elf ? "%08" PRIx64 "\n" : "%016" PRIx64 "\n";
 
       if (!slurp_relr_relocs (filedata, rel_offset, rel_size, &relrs,
 			      &rel_size))
 	return false;
 
-      printf (ngettext ("  %lu offset\n", "  %lu offsets\n", rel_size), rel_size);
+      printf (ngettext ("  %lu offset\n", "  %lu offsets\n", rel_size),
+	      rel_size);
       for (i = 0; i < rel_size; i++)
-	printf (format, relrs[i]);
+	printf (format, (uint64_t) relrs[i]);
       free (relrs);
       return true;
     }
@@ -1582,9 +1559,9 @@ dump_relocations (Filedata *          filedata,
       else
 	{
 	  printf (do_wide
-		  ? "%16.16" BFD_VMA_FMT "x  %16.16" BFD_VMA_FMT "x "
-		  : "%12.12" BFD_VMA_FMT "x  %12.12" BFD_VMA_FMT "x ",
-		  offset, inf);
+		  ? "%16.16" PRIx64 "  %16.16" PRIx64 " "
+		  : "%12.12" PRIx64 "  %12.12" PRIx64 " ",
+		  (uint64_t) offset, (uint64_t) inf);
 	}
 
       switch (filedata->file_header.e_machine)
@@ -2089,9 +2066,9 @@ dump_relocations (Filedata *          filedata,
 		  bfd_vma off = rels[i].r_addend;
 
 		  if ((bfd_signed_vma) off < 0)
-		    printf (" - %" BFD_VMA_FMT "x", - off);
+		    printf (" - %" PRIx64, (uint64_t) -off);
 		  else
-		    printf (" + %" BFD_VMA_FMT "x", off);
+		    printf (" + %" PRIx64, (uint64_t) off);
 		}
 	    }
 	}
@@ -2101,9 +2078,9 @@ dump_relocations (Filedata *          filedata,
 
 	  printf ("%*c", is_32bit_elf ? 12 : 20, ' ');
 	  if ((bfd_signed_vma) off < 0)
-	    printf ("-%" BFD_VMA_FMT "x", - off);
+	    printf ("-%" PRIx64, (uint64_t) -off);
 	  else
-	    printf ("%" BFD_VMA_FMT "x", off);
+	    printf ("%" PRIx64, (uint64_t) off);
 	}
 
       if (filedata->file_header.e_machine == EM_SPARCV9
@@ -6031,12 +6008,15 @@ process_program_headers (Filedata * filedata)
 		filedata->file_name, get_file_type (filedata));
       else
 	printf (_("\nElf file type is %s\n"), get_file_type (filedata));
-      printf (_("Entry point 0x%s\n"), bfd_vmatoa ("x", filedata->file_header.e_entry));
-      printf (ngettext ("There is %d program header, starting at offset %s\n",
-			"There are %d program headers, starting at offset %s\n",
+      printf (_("Entry point 0x%" PRIx64 "\n"),
+	      (uint64_t) filedata->file_header.e_entry);
+      printf (ngettext ("There is %d program header,"
+			" starting at offset %" PRIu64 "\n",
+			"There are %d program headers,"
+			" starting at offset %" PRIu64 "\n",
 			filedata->file_header.e_phnum),
 	      filedata->file_header.e_phnum,
-	      bfd_vmatoa ("u", filedata->file_header.e_phoff));
+	      (uint64_t) filedata->file_header.e_phoff);
     }
 
   if (! get_program_headers (filedata))
@@ -8220,8 +8200,8 @@ dump_ia64_vms_dynamic_relocs (Filedata * filedata, struct ia64_vms_dynimgrela *i
       const char *rtype;
 
       printf ("%3u ", (unsigned) BYTE_GET (imrs [i].rela_seg));
-      printf ("%08" BFD_VMA_FMT "x ",
-              (bfd_vma) BYTE_GET (imrs [i].rela_offset));
+      printf ("%08" PRIx64 " ",
+	      (uint64_t) BYTE_GET (imrs [i].rela_offset));
       type = BYTE_GET (imrs [i].type);
       rtype = elf_ia64_reloc_type (type);
       if (rtype == NULL)
@@ -8230,8 +8210,8 @@ dump_ia64_vms_dynamic_relocs (Filedata * filedata, struct ia64_vms_dynimgrela *i
         printf ("%-31s ", rtype);
       print_vma (BYTE_GET (imrs [i].addend), FULL_HEX);
       printf ("%3u ", (unsigned) BYTE_GET (imrs [i].sym_seg));
-      printf ("%08" BFD_VMA_FMT "x\n",
-              (bfd_vma) BYTE_GET (imrs [i].sym_offset));
+      printf ("%08" PRIx64 "\n",
+	      (uint64_t) BYTE_GET (imrs [i].sym_offset));
     }
 
   free (imrs);
@@ -10949,8 +10929,9 @@ get_dynamic_data (Filedata * filedata, bfd_size_type number, unsigned int ent_si
   if (sizeof (size_t) < sizeof (bfd_size_type)
       && (bfd_size_type) ((size_t) number) != number)
     {
-      error (_("Size truncation prevents reading %s elements of size %u\n"),
-	     bfd_vmatoa ("u", number), ent_size);
+      error (_("Size truncation prevents reading %" PRIu64
+	       " elements of size %u\n"),
+	     (uint64_t) number, ent_size);
       return NULL;
     }
 
@@ -10958,23 +10939,23 @@ get_dynamic_data (Filedata * filedata, bfd_size_type number, unsigned int ent_si
      attempting to allocate memory when the read is bound to fail.  */
   if (ent_size * number > filedata->file_size)
     {
-      error (_("Invalid number of dynamic entries: %s\n"),
-	     bfd_vmatoa ("u", number));
+      error (_("Invalid number of dynamic entries: %" PRIu64 "\n"),
+	     (uint64_t) number);
       return NULL;
     }
 
   e_data = (unsigned char *) cmalloc ((size_t) number, ent_size);
   if (e_data == NULL)
     {
-      error (_("Out of memory reading %s dynamic entries\n"),
-	     bfd_vmatoa ("u", number));
+      error (_("Out of memory reading %" PRIu64 " dynamic entries\n"),
+	     (uint64_t) number);
       return NULL;
     }
 
   if (fread (e_data, ent_size, (size_t) number, filedata->handle) != number)
     {
-      error (_("Unable to read in %s bytes of dynamic data\n"),
-	     bfd_vmatoa ("u", number * ent_size));
+      error (_("Unable to read in %" PRIu64 " bytes of dynamic data\n"),
+	     (uint64_t) number * ent_size);
       free (e_data);
       return NULL;
     }
@@ -10982,8 +10963,8 @@ get_dynamic_data (Filedata * filedata, bfd_size_type number, unsigned int ent_si
   i_data = (bfd_vma *) cmalloc ((size_t) number, sizeof (*i_data));
   if (i_data == NULL)
     {
-      error (_("Out of memory allocating space for %s dynamic entries\n"),
-	     bfd_vmatoa ("u", number));
+      error (_("Out of memory allocating space for %" PRIu64 " dynamic entries\n"),
+	     (uint64_t) number);
       free (e_data);
       return NULL;
     }
@@ -20741,8 +20722,8 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
 	goto desc_size_fail;
       /* FIXME: Generate an error if descsz > 8 ?  */
 
-      printf ("0x%016" BFD_VMA_FMT "x\n",
-	      (bfd_vma) byte_get ((unsigned char *) pnote->descdata, 8));
+      printf ("0x%016" PRIx64 "\n",
+	      (uint64_t) byte_get ((unsigned char *) pnote->descdata, 8));
       break;
 
     case NT_VMS_LINKTIME:
@@ -20775,8 +20756,8 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
       printf (_("   Last modified  : "));
       print_vms_time (byte_get ((unsigned char *) pnote->descdata + 8, 8));
       printf (_("\n   Link flags  : "));
-      printf ("0x%016" BFD_VMA_FMT "x\n",
-	      (bfd_vma) byte_get ((unsigned char *) pnote->descdata + 16, 8));
+      printf ("0x%016" PRIx64 "\n",
+	      (uint64_t) byte_get ((unsigned char *) pnote->descdata + 16, 8));
       printf (_("   Header flags: 0x%08x\n"),
 	      (unsigned) byte_get ((unsigned char *) pnote->descdata + 24, 4));
       printf (_("   Image id    : %.*s\n"), maxlen - 32, pnote->descdata + 32);

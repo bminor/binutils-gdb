@@ -1595,7 +1595,7 @@ xcoff64_ppc_relocate_section (bfd *output_bfd,
 
 	    default:
 	      _bfd_error_handler
-		(_("%pB: relocation (%d) at (0x%" BFD_VMA_FMT "x) has wrong"
+		(_("%pB: relocation (%d) at (0x%" PRIx64 ") has wrong"
 		   " r_rsize (0x%x)\n"),
 		 input_bfd, rel->r_type, rel->r_vaddr, rel->r_size);
 	      return false;

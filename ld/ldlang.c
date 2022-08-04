@@ -9632,16 +9632,16 @@ lang_ld_feature (char *str)
 /* Pretty print memory amount.  */
 
 static void
-lang_print_memory_size (bfd_vma sz)
+lang_print_memory_size (uint64_t sz)
 {
   if ((sz & 0x3fffffff) == 0)
-    printf ("%10" BFD_VMA_FMT "u GB", sz >> 30);
+    printf ("%10" PRIu64 " GB", sz >> 30);
   else if ((sz & 0xfffff) == 0)
-    printf ("%10" BFD_VMA_FMT "u MB", sz >> 20);
+    printf ("%10" PRIu64 " MB", sz >> 20);
   else if ((sz & 0x3ff) == 0)
-    printf ("%10" BFD_VMA_FMT "u KB", sz >> 10);
+    printf ("%10" PRIu64 " KB", sz >> 10);
   else
-    printf (" %10" BFD_VMA_FMT "u B", sz);
+    printf (" %10" PRIu64 " B", sz);
 }
 
 /* Implement --print-memory-usage: disply per region memory usage.  */
@@ -9658,7 +9658,7 @@ lang_print_memory_usage (void)
 
       printf ("%16s: ",r->name_list.name);
       lang_print_memory_size (used_length);
-      lang_print_memory_size ((bfd_vma) r->length);
+      lang_print_memory_size (r->length);
 
       if (r->length != 0)
 	{

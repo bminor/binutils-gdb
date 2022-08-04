@@ -3037,21 +3037,21 @@ elfNN_aarch64_stub_name (const asection *input_section,
       len = 8 + 1 + strlen (hash->root.root.root.string) + 1 + 16 + 1;
       stub_name = bfd_malloc (len);
       if (stub_name != NULL)
-	snprintf (stub_name, len, "%08x_%s+%" BFD_VMA_FMT "x",
+	snprintf (stub_name, len, "%08x_%s+%" PRIx64,
 		  (unsigned int) input_section->id,
 		  hash->root.root.root.string,
-		  rel->r_addend);
+		  (uint64_t) rel->r_addend);
     }
   else
     {
       len = 8 + 1 + 8 + 1 + 8 + 1 + 16 + 1;
       stub_name = bfd_malloc (len);
       if (stub_name != NULL)
-	snprintf (stub_name, len, "%08x_%x:%x+%" BFD_VMA_FMT "x",
+	snprintf (stub_name, len, "%08x_%x:%x+%" PRIx64,
 		  (unsigned int) input_section->id,
 		  (unsigned int) sym_sec->id,
 		  (unsigned int) ELFNN_R_SYM (rel->r_info),
-		  rel->r_addend);
+		  (uint64_t) rel->r_addend);
     }
 
   return stub_name;
@@ -4118,10 +4118,10 @@ _bfd_aarch64_erratum_843419_stub_name (asection *input_section,
   char *stub_name = bfd_malloc (len);
 
   if (stub_name != NULL)
-    snprintf (stub_name, len, "e843419@%04x_%08x_%" BFD_VMA_FMT "x",
+    snprintf (stub_name, len, "e843419@%04x_%08x_%" PRIx64,
 	      input_section->owner->id,
 	      input_section->id,
-	      offset);
+	      (uint64_t) offset);
   return stub_name;
 }
 
@@ -5358,15 +5358,13 @@ _bfd_aarch64_erratum_843419_branch_to_stub (struct bfd_hash_entry *gen_entry,
     }
   else
     {
-      char imm_buf[128];
-
-      sprintf (imm_buf, "%" BFD_VMA_FMT "x", imm);
       abfd = stub_entry->target_section->owner;
       _bfd_error_handler
-	(_("%pB: error: erratum 843419 immediate 0x%s "
-	   "out of range for ADR (input file too large) and "
+	(_("%pB: error: erratum 843419 immediate 0x%" PRIx64
+	   " out of range for ADR (input file too large) and "
 	   "--fix-cortex-a53-843419=adr used.  Run the linker with "
-	   "--fix-cortex-a53-843419=full instead"), abfd, imm_buf);
+	   "--fix-cortex-a53-843419=full instead"),
+	 abfd, (uint64_t) (bfd_vma) imm);
       bfd_set_error (bfd_error_bad_value);
       /* This function is called inside a hashtable traversal and the error
 	 handlers called above turn into non-fatal errors.  Which means this

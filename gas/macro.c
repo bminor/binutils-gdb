@@ -419,7 +419,7 @@ get_any_string (size_t idx, sb *in, sb *out)
 			       idx + 1,
 			       in,
 			       &val);
-	  sprintf (buf, "%" BFD_VMA_FMT "d", val);
+	  sprintf (buf, "%" PRId64, (int64_t) val);
 	  sb_add_string (out, buf);
 	}
       else if (in->ptr[idx] == '"'

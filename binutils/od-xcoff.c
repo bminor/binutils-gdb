@@ -1686,42 +1686,42 @@ dump_dumpx_core (bfd *abfd, struct external_core_dumpx *hdr)
       printf ("  entries:    %u\n",
 	      (unsigned) bfd_h_get_16 (abfd, hdr->c_entries));
 #ifdef BFD64
-      printf ("  fdsinfox:   offset: 0x%08" BFD_VMA_FMT "x\n",
+      printf ("  fdsinfox:   offset: 0x%08" PRIx64 "\n",
 	      bfd_h_get_64 (abfd, hdr->c_fdsinfox));
-      printf ("  loader:     offset: 0x%08" BFD_VMA_FMT "x, "
-	      "size: 0x%" BFD_VMA_FMT"x\n",
+      printf ("  loader:     offset: 0x%08" PRIx64 ", "
+	      "size: 0x%" PRIx64 "\n",
 	      bfd_h_get_64 (abfd, hdr->c_loader),
 	      bfd_h_get_64 (abfd, hdr->c_lsize));
-      printf ("  thr:        offset: 0x%08" BFD_VMA_FMT "x, nbr: %u\n",
+      printf ("  thr:        offset: 0x%08" PRIx64 ", nbr: %u\n",
 	      bfd_h_get_64 (abfd, hdr->c_thr),
 	      (unsigned) bfd_h_get_32 (abfd, hdr->c_n_thr));
-      printf ("  segregions: offset: 0x%08" BFD_VMA_FMT "x, "
-	      "nbr: %" BFD_VMA_FMT "u\n",
+      printf ("  segregions: offset: 0x%08" PRIx64 ", "
+	      "nbr: %" PRIu64 "\n",
 	      bfd_h_get_64 (abfd, hdr->c_segregion),
 	      bfd_h_get_64 (abfd, hdr->c_segs));
-      printf ("  stack:      offset: 0x%08" BFD_VMA_FMT "x, "
-	      "org: 0x%" BFD_VMA_FMT"x, "
-	      "size: 0x%" BFD_VMA_FMT"x\n",
+      printf ("  stack:      offset: 0x%08" PRIx64 ", "
+	      "org: 0x%" PRIx64 ", "
+	      "size: 0x%" PRIx64 "\n",
 	      bfd_h_get_64 (abfd, hdr->c_stack),
 	      bfd_h_get_64 (abfd, hdr->c_stackorg),
 	      bfd_h_get_64 (abfd, hdr->c_size));
-      printf ("  data:       offset: 0x%08" BFD_VMA_FMT "x, "
-	      "org: 0x%" BFD_VMA_FMT"x, "
-	      "size: 0x%" BFD_VMA_FMT"x\n",
+      printf ("  data:       offset: 0x%08" PRIx64 ", "
+	      "org: 0x%" PRIx64 ", "
+	      "size: 0x%" PRIx64 "\n",
 	      bfd_h_get_64 (abfd, hdr->c_data),
 	      bfd_h_get_64 (abfd, hdr->c_dataorg),
 	      bfd_h_get_64 (abfd, hdr->c_datasize));
-      printf ("  sdata:         org: 0x%" BFD_VMA_FMT"x, "
-	      "size: 0x%" BFD_VMA_FMT"x\n",
+      printf ("  sdata:         org: 0x%" PRIx64 ", "
+	      "size: 0x%" PRIx64 "\n",
 	      bfd_h_get_64 (abfd, hdr->c_sdorg),
 	      bfd_h_get_64 (abfd, hdr->c_sdsize));
-      printf ("  vmmregions: offset: 0x%" BFD_VMA_FMT"x, "
-	      "num: 0x%" BFD_VMA_FMT"x\n",
+      printf ("  vmmregions: offset: 0x%" PRIx64 ", "
+	      "num: 0x%" PRIx64 "\n",
 	      bfd_h_get_64 (abfd, hdr->c_vmm),
 	      bfd_h_get_64 (abfd, hdr->c_vmmregions));
       printf ("  impl:       0x%08x\n",
 	      (unsigned) bfd_h_get_32 (abfd, hdr->c_impl));
-      printf ("  cprs:       0x%" BFD_VMA_FMT "x\n",
+      printf ("  cprs:       0x%" PRIx64 "\n",
 	      bfd_h_get_64 (abfd, hdr->c_cprs));
 #endif
     }

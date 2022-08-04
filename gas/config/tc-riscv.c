@@ -1683,8 +1683,8 @@ load_const (int reg, expressionS *ep)
 
       md_assemblef ("slli x%d, x%d, 0x%x", reg, reg, shift);
       if (lower.X_add_number != 0)
-	md_assemblef ("addi x%d, x%d, %" BFD_VMA_FMT "d", reg, reg,
-		      lower.X_add_number);
+	md_assemblef ("addi x%d, x%d, %" PRId64, reg, reg,
+		      (int64_t) lower.X_add_number);
     }
   else
     {
@@ -1696,13 +1696,13 @@ load_const (int reg, expressionS *ep)
 	  /* Discard low part and zero-extend upper immediate.  */
 	  upper_imm = ((uint32_t)upper.X_add_number >> shift);
 
-	  md_assemblef ("lui x%d, 0x%" BFD_VMA_FMT "x", reg, upper_imm);
+	  md_assemblef ("lui x%d, 0x%" PRIx64, reg, (uint64_t) upper_imm);
 	  hi_reg = reg;
 	}
 
       if (lower.X_add_number != 0 || hi_reg == 0)
-	md_assemblef ("%s x%d, x%d, %" BFD_VMA_FMT "d", ADD32_INSN, reg, hi_reg,
-		      lower.X_add_number);
+	md_assemblef ("%s x%d, x%d, %" PRId64, ADD32_INSN, reg, hi_reg,
+		      (int64_t) lower.X_add_number);
     }
 }
 

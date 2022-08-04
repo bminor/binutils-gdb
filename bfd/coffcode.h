@@ -2495,15 +2495,15 @@ coff_print_aux (bfd *abfd ATTRIBUTE_UNUSED,
       if (SMTYP_SMTYP (aux->u.auxent.x_csect.x_smtyp) != XTY_LD)
 	{
 	  BFD_ASSERT (! aux->fix_scnlen);
-	  fprintf (file, "val %5" BFD_VMA_FMT "d",
-		   aux->u.auxent.x_csect.x_scnlen.l);
+	  fprintf (file, "val %5" PRId64,
+		   (int64_t) aux->u.auxent.x_csect.x_scnlen.l);
 	}
       else
 	{
 	  fprintf (file, "indx ");
 	  if (! aux->fix_scnlen)
-	    fprintf (file, "%4" BFD_VMA_FMT "d",
-		     aux->u.auxent.x_csect.x_scnlen.l);
+	    fprintf (file, "%4" PRId64,
+		     (int64_t) aux->u.auxent.x_csect.x_scnlen.l);
 	  else
 	    fprintf (file, "%4ld",
 		     (long) (aux->u.auxent.x_csect.x_scnlen.p - table_base));
