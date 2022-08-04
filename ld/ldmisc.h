@@ -38,7 +38,8 @@ do { if (!(x)) info_assert(__FILE__,__LINE__); } while (0)
 #define FAIL() \
 do { info_assert(__FILE__,__LINE__); } while (0)
 
-extern void print_space (void);
+extern void print_spaces (int);
+#define print_space() print_spaces (1)
 extern void print_nl (void);
 
 #endif

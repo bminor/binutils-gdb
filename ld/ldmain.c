@@ -990,11 +990,7 @@ add_archive_element (struct bfd_link_info *info,
 	  print_nl ();
 	  len = 0;
 	}
-      while (len < 30)
-	{
-	  print_space ();
-	  ++len;
-	}
+      print_spaces (30 - len);
 
       if (from != NULL)
 	minfo ("%pB ", from);

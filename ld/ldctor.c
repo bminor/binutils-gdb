@@ -352,11 +352,7 @@ ldctor_build_sets (void)
 		  print_nl ();
 		  len = 0;
 		}
-	      while (len < 20)
-		{
-		  print_space ();
-		  ++len;
-		}
+	      print_spaces (20 - len);
 
 	      if (e->name != NULL)
 		minfo ("%pT\n", e->name);

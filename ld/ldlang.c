@@ -2221,7 +2221,7 @@ lang_print_asneeded (void)
 
   for (m = asneeded_list_head; m != NULL; m = m->next)
     {
-      size_t len;
+      int len;
 
       minfo ("%s", m->soname);
       len = strlen (m->soname);
@@ -2231,11 +2231,7 @@ lang_print_asneeded (void)
 	  print_nl ();
 	  len = 0;
 	}
-      while (len < 30)
-	{
-	  print_space ();
-	  ++len;
-	}
+      print_spaces (30 - len);
 
       if (m->ref != NULL)
 	minfo ("%pB ", m->ref);
@@ -2298,25 +2294,21 @@ lang_map (void)
 
   for (m = lang_memory_region_list; m != NULL; m = m->next)
     {
-      fprintf (config.map_file, "%-16s ", m->name_list.name);
+      fprintf (config.map_file, "%-16s", m->name_list.name);
 
-      minfo ("0x%V 0x%V", m->origin, m->length);
-      if (m->flags || m->not_flags)
+      char buf[32];
+      bfd_sprintf_vma (link_info.output_bfd, buf, m->origin);
+      fprintf (config.map_file, " 0x%-16s", buf);
+      bfd_sprintf_vma (link_info.output_bfd, buf, m->length);
+      fprintf (config.map_file,
+	       " 0x%*s", m->flags || m->not_flags ? -17 : 0, buf);
+      if (m->flags)
+	lang_map_flags (m->flags);
+
+      if (m->not_flags)
 	{
-#ifndef BFD64
-	  minfo ("        ");
-#endif
-	  if (m->flags)
-	    {
-	      print_space ();
-	      lang_map_flags (m->flags);
-	    }
-
-	  if (m->not_flags)
-	    {
-	      minfo (" !");
-	      lang_map_flags (m->not_flags);
-	    }
+	  minfo ("!");
+	  lang_map_flags (m->not_flags);
 	}
 
       print_nl ();
@@ -4668,11 +4660,7 @@ print_output_section_statement
 	      print_nl ();
 	      len = 0;
 	    }
-	  while (len < SECTION_NAME_MAP_LENGTH)
-	    {
-	      print_space ();
-	      ++len;
-	    }
+	  print_spaces (SECTION_NAME_MAP_LENGTH - len);
 
 	  minfo ("0x%V %W", section->vma, TO_ADDR (section->size));
 
@@ -4695,13 +4683,11 @@ static void
 print_assignment (lang_assignment_statement_type *assignment,
 		  lang_output_section_statement_type *output_section)
 {
-  unsigned int i;
   bool is_dot;
   etree_type *tree;
   asection *osec;
 
-  for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
-    print_space ();
+  print_spaces (SECTION_NAME_MAP_LENGTH);
 
   if (assignment->exp->type.node_class == etree_assert)
     {
@@ -4725,6 +4711,8 @@ print_assignment (lang_assignment_statement_type *assignment,
   else
     expld.result.valid_p = false;
 
+  char buf[32];
+  const char *str = buf;
   if (expld.result.valid_p)
     {
       bfd_vma value;
@@ -4738,7 +4726,9 @@ print_assignment (lang_assignment_statement_type *assignment,
 	  if (expld.result.section != NULL)
 	    value += expld.result.section->vma;
 
-	  minfo ("0x%V", value);
+	  buf[0] = '0';
+	  buf[1] = 'x';
+	  bfd_sprintf_vma (link_info.output_bfd, buf + 2, value);
 	  if (is_dot)
 	    print_dot = value;
 	}
@@ -4756,25 +4746,26 @@ print_assignment (lang_assignment_statement_type *assignment,
 	      value += h->u.def.section->output_section->vma;
 	      value += h->u.def.section->output_offset;
 
-	      minfo ("[0x%V]", value);
+	      buf[0] = '[';
+	      buf[1] = '0';
+	      buf[2] = 'x';
+	      bfd_sprintf_vma (link_info.output_bfd, buf + 3, value);
+	      strcat (buf, "]");
 	    }
 	  else
-	    minfo ("[unresolved]");
+	    str = "[unresolved]";
 	}
     }
   else
     {
       if (assignment->exp->type.node_class == etree_provide)
-	minfo ("[!provide]");
+	str = "[!provide]";
       else
-	minfo ("*undef*   ");
-#ifdef BFD64
-      minfo ("        ");
-#endif
+	str = "*undef*";
     }
   expld.assign_name = NULL;
 
-  minfo ("                ");
+  fprintf (config.map_file, "%-34s", str);
   exp_print_tree (assignment->exp);
   print_nl ();
 }
@@ -4798,10 +4789,7 @@ print_one_symbol (struct bfd_link_hash_entry *hash_entry, void *ptr)
        || hash_entry->type == bfd_link_hash_defweak)
       && sec == hash_entry->u.def.section)
     {
-      int i;
-
-      for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
-	print_space ();
+      print_spaces (SECTION_NAME_MAP_LENGTH);
       minfo ("0x%V   ",
 	     (hash_entry->u.def.value
 	      + hash_entry->u.def.section->output_offset
@@ -4869,8 +4857,7 @@ print_input_section (asection *i, bool is_discarded)
 
   init_opb (i);
 
-  print_space ();
-  minfo ("%s", i->name);
+  minfo (" %s", i->name);
 
   len = 1 + strlen (i->name);
   if (len >= SECTION_NAME_MAP_LENGTH - 1)
@@ -4878,11 +4865,7 @@ print_input_section (asection *i, bool is_discarded)
       print_nl ();
       len = 0;
     }
-  while (len < SECTION_NAME_MAP_LENGTH)
-    {
-      print_space ();
-      ++len;
-    }
+  print_spaces (SECTION_NAME_MAP_LENGTH - len);
 
   if (i->output_section != NULL
       && i->output_section->owner == link_info.output_bfd)
@@ -4894,22 +4877,14 @@ print_input_section (asection *i, bool is_discarded)
 	size = 0;
     }
 
-  minfo ("0x%V %W %pB\n", addr, TO_ADDR (size), i->owner);
+  char buf[32];
+  bfd_sprintf_vma (link_info.output_bfd, buf, addr);
+  minfo ("0x%s %W %pB\n", buf, TO_ADDR (size), i->owner);
 
   if (size != i->rawsize && i->rawsize != 0)
     {
-      len = SECTION_NAME_MAP_LENGTH + 3;
-#ifdef BFD64
-      len += 16;
-#else
-      len += 8;
-#endif
-      while (len > 0)
-	{
-	  print_space ();
-	  --len;
-	}
-
+      len = SECTION_NAME_MAP_LENGTH + 3 + strlen (buf);
+      print_spaces (len);
       minfo (_("%W (size before relaxing)\n"), TO_ADDR (i->rawsize));
     }
 
@@ -4943,14 +4918,12 @@ print_fill_statement (lang_fill_statement_type *fill)
 static void
 print_data_statement (lang_data_statement_type *data)
 {
-  int i;
   bfd_vma addr;
   bfd_size_type size;
   const char *name;
 
   init_opb (data->output_section);
-  for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
-    print_space ();
+  print_spaces (SECTION_NAME_MAP_LENGTH);
 
   addr = data->output_offset;
   if (data->output_section != NULL)
@@ -5013,13 +4986,11 @@ print_address_statement (lang_address_statement_type *address)
 static void
 print_reloc_statement (lang_reloc_statement_type *reloc)
 {
-  int i;
   bfd_vma addr;
   bfd_size_type size;
 
   init_opb (reloc->output_section);
-  for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
-    print_space ();
+  print_spaces (SECTION_NAME_MAP_LENGTH);
 
   addr = reloc->output_offset;
   if (reloc->output_section != NULL)
@@ -5051,11 +5022,7 @@ print_padding_statement (lang_padding_statement_type *s)
   minfo (" *fill*");
 
   len = sizeof " *fill*" - 1;
-  while (len < SECTION_NAME_MAP_LENGTH)
-    {
-      print_space ();
-      ++len;
-    }
+  print_spaces (SECTION_NAME_MAP_LENGTH - len);
 
   addr = s->output_offset;
   if (s->output_section != NULL)
@@ -7271,7 +7238,7 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
       static bool header_printed;
       int len;
       char *name;
-      char buf[50];
+      char buf[32];
 
       if (!header_printed)
 	{
@@ -7299,22 +7266,9 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
 	  print_nl ();
 	  len = 0;
 	}
-      while (len < 20)
-	{
-	  print_space ();
-	  ++len;
-	}
 
-      minfo ("0x");
       sprintf (buf, "%" PRIx64, (uint64_t) size);
-      minfo ("%s", buf);
-      len = strlen (buf);
-
-      while (len < 16)
-	{
-	  print_space ();
-	  ++len;
-	}
+      fprintf (config.map_file, "%*s0x%-16s", 20 - len, "", buf);
 
       minfo ("%pB\n", section->owner);
     }

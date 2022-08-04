@@ -1772,11 +1772,9 @@ gld${EMULATION_NAME}_print_symbol (struct bfd_link_hash_entry *hash_entry,
        || hash_entry->type == bfd_link_hash_defweak)
       && sec == hash_entry->u.def.section)
     {
-      int i;
       struct xcoff_link_hash_entry *h;
 
-      for (i = 0; i < SECTION_NAME_MAP_LENGTH; i++)
-	print_space ();
+      print_spaces (SECTION_NAME_MAP_LENGTH);
       minfo ("0x%V   ",
 	     (hash_entry->u.def.value
 	      + hash_entry->u.def.section->output_offset
