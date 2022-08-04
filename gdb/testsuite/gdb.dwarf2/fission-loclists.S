@@ -523,20 +523,6 @@ main:
 	.quad	.LFE1-.LFB1	# Length
 	.quad	0
 	.quad	0
-	.section	.debug_aranges,"",@progbits
-	.4byte	0x3c	# Length of Address Ranges Info
-	.value	0x2	# DWARF Version
-	.4byte	.Lskeleton_debug_info0	# Offset of Compilation Unit Info
-	.byte	0x8	# Size of Address
-	.byte	0	# Size of Segment Descriptor
-	.value	0	# Pad to 16 byte boundary
-	.value	0
-	.8byte	.Ltext0	# Address
-	.8byte	.Letext0-.Ltext0	# Length
-	.8byte	.LFB1	# Address
-	.8byte	.LFE1-.LFB1	# Length
-	.8byte	0
-	.8byte	0
 	.section	.debug_ranges,"",@progbits
 .Ldebug_ranges0:
 	.8byte	.Ltext0 - .Ltext0	# Offset 0
