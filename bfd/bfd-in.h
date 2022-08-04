@@ -113,16 +113,12 @@ typedef int64_t bfd_signed_vma;
 typedef uint64_t bfd_size_type;
 typedef uint64_t symvalue;
 
-#define BFD_VMA_FMT @BFD_INT64_FMT@
-
 #else /* not BFD64  */
 
 typedef unsigned long bfd_vma;
 typedef long bfd_signed_vma;
 typedef unsigned long symvalue;
 typedef unsigned long bfd_size_type;
-
-#define BFD_VMA_FMT "l"
 
 #endif /* not BFD64  */
 

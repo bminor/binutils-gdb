@@ -60,12 +60,6 @@ $DECK
       ERASE(match_pos);
       COPY_TEXT('64');
    ENDIF;
-   match_pos := SEARCH_QUIETLY('@BFD_INT64_FMT@', FORWARD, EXACT, rang);
-   IF match_pos <> 0 THEN;
-      POSITION(BEGINNING_OF(match_pos));
-      ERASE(match_pos);
-      COPY_TEXT('"l"');
-   ENDIF;
    match_pos := SEARCH_QUIETLY('@bfd_file_ptr@', FORWARD, EXACT, rang);
    IF match_pos <> 0 THEN;
       POSITION(BEGINNING_OF(match_pos));
@@ -119,12 +113,6 @@ $DECK
       POSITION(BEGINNING_OF(match_pos));
       ERASE(match_pos);
       COPY_TEXT('32');
-   ENDIF;
-   match_pos := SEARCH_QUIETLY('@BFD_INT64_FMT@', FORWARD, EXACT, rang);
-   IF match_pos <> 0 THEN;
-      POSITION(BEGINNING_OF(match_pos));
-      ERASE(match_pos);
-      COPY_TEXT('"ll"');
    ENDIF;
    match_pos := SEARCH_QUIETLY('@bfd_file_ptr@', FORWARD, EXACT, rang);
    IF match_pos <> 0 THEN;
