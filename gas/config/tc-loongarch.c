@@ -143,13 +143,13 @@ md_parse_option (int c, const char *arg)
   char ilp32[256] = "";
   unsigned char *suf = (unsigned char *)arg;
 
-  lp64['s'] = lp64['S'] = EF_LOONGARCH_ABI_LP64_SOFT_FLOAT;
-  lp64['f'] = lp64['F'] = EF_LOONGARCH_ABI_LP64_SINGLE_FLOAT;
-  lp64['d'] = lp64['D'] = EF_LOONGARCH_ABI_LP64_DOUBLE_FLOAT;
+  lp64['s'] = lp64['S'] = EF_LOONGARCH_ABI_SOFT_FLOAT;
+  lp64['f'] = lp64['F'] = EF_LOONGARCH_ABI_SINGLE_FLOAT;
+  lp64['d'] = lp64['D'] = EF_LOONGARCH_ABI_DOUBLE_FLOAT;
 
-  ilp32['s'] = ilp32['S'] = EF_LOONGARCH_ABI_ILP32_SOFT_FLOAT;
-  ilp32['f'] = ilp32['F'] = EF_LOONGARCH_ABI_ILP32_SINGLE_FLOAT;
-  ilp32['d'] = ilp32['D'] = EF_LOONGARCH_ABI_ILP32_DOUBLE_FLOAT;
+  ilp32['s'] = ilp32['S'] = EF_LOONGARCH_ABI_SOFT_FLOAT;
+  ilp32['f'] = ilp32['F'] = EF_LOONGARCH_ABI_SINGLE_FLOAT;
+  ilp32['d'] = ilp32['D'] = EF_LOONGARCH_ABI_DOUBLE_FLOAT;
 
   switch (c)
     {
@@ -216,24 +216,24 @@ void
 loongarch_after_parse_args ()
 {
   /* Set default ABI/ISA LP64D.  */
-  if (!EF_LOONGARCH_IS_LP64(LARCH_opts.ase_abi)
-      && !EF_LOONGARCH_IS_ILP32(LARCH_opts.ase_abi))
+  if (!LARCH_opts.ase_ilp32)
     {
       if (strcmp (default_arch, "loongarch64") == 0)
 	{
-	  LARCH_opts.ase_abi = EF_LOONGARCH_ABI_LP64_DOUBLE_FLOAT;
+	  LARCH_opts.ase_abi = EF_LOONGARCH_ABI_DOUBLE_FLOAT;
 	  LARCH_opts.ase_ilp32 = 1;
 	  LARCH_opts.ase_lp64 = 1;
 	}
       else if (strcmp (default_arch, "loongarch32") == 0)
 	{
-	  LARCH_opts.ase_abi = EF_LOONGARCH_ABI_ILP32_DOUBLE_FLOAT;
+	  LARCH_opts.ase_abi = EF_LOONGARCH_ABI_DOUBLE_FLOAT;
 	  LARCH_opts.ase_ilp32 = 1;
 	}
       else
 	as_bad ("unknown default architecture `%s'", default_arch);
     }
 
+  LARCH_opts.ase_abi |= EF_LOONGARCH_OBJABI_V1;
   /* Set default ISA double-float.  */
   if (!LARCH_opts.ase_nf
       && !LARCH_opts.ase_sf

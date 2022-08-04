@@ -416,8 +416,22 @@ elfNN_loongarch_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
       elf_elfheader (obfd)->e_flags = in_flags;
       return true;
     }
+  else if (out_flags != in_flags)
+    {
+      if ((EF_LOONGARCH_IS_OBJ_V0 (out_flags)
+	   && EF_LOONGARCH_IS_OBJ_V1 (in_flags))
+	  || (EF_LOONGARCH_IS_OBJ_V0 (in_flags)
+	      && EF_LOONGARCH_IS_OBJ_V1 (out_flags)))
+	{
+	  elf_elfheader (obfd)->e_flags |= EF_LOONGARCH_OBJABI_V1;
+	  out_flags = elf_elfheader (obfd)->e_flags;
+	  in_flags = out_flags;
+	}
+    }
 
   /* Disallow linking different ABIs.  */
+  /* Only check relocation version.
+     The obj_v0 is compatible with obj_v1.  */
   if (EF_LOONGARCH_ABI(out_flags ^ in_flags) & EF_LOONGARCH_ABI_MASK)
     {
       _bfd_error_handler (_("%pB: can't link different ABI object."), ibfd);
@@ -1579,15 +1593,16 @@ loongarch_elf_size_dynamic_sections (bfd *output_bfd,
       if (bfd_link_executable (info) && !info->nointerp)
 	{
 	  const char *interpreter;
-	  flagword flags = elf_elfheader (output_bfd)->e_flags;
 	  s = bfd_get_linker_section (dynobj, ".interp");
 	  BFD_ASSERT (s != NULL);
-	  if (EF_LOONGARCH_IS_ILP32 (flags))
+
+	  if (elf_elfheader (output_bfd)->e_ident[EI_CLASS] == ELFCLASS32)
 	    interpreter = "/lib32/ld.so.1";
-	  else if (EF_LOONGARCH_IS_LP64 (flags))
+	  else if (elf_elfheader (output_bfd)->e_ident[EI_CLASS] == ELFCLASS64)
 	    interpreter = "/lib64/ld.so.1";
 	  else
 	    interpreter = "/lib/ld.so.1";
+
 	  s->contents = (unsigned char *) interpreter;
 	  s->size = strlen (interpreter) + 1;
 	}

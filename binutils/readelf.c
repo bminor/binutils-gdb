@@ -4343,17 +4343,17 @@ get_machine_flags (Filedata * filedata, unsigned e_flags, unsigned e_machine)
 	    }
 	  break;
 	case EM_LOONGARCH:
-	  if (EF_LOONGARCH_IS_LP64 (e_flags))
-	    strcat (buf, ", LP64");
-	  else if (EF_LOONGARCH_IS_ILP32 (e_flags))
-	    strcat (buf, ", ILP32");
-
 	  if (EF_LOONGARCH_IS_SOFT_FLOAT (e_flags))
 	    strcat (buf, ", SOFT-FLOAT");
 	  else if (EF_LOONGARCH_IS_SINGLE_FLOAT (e_flags))
 	    strcat (buf, ", SINGLE-FLOAT");
 	  else if (EF_LOONGARCH_IS_DOUBLE_FLOAT (e_flags))
 	    strcat (buf, ", DOUBLE-FLOAT");
+
+	  if (EF_LOONGARCH_IS_OBJ_V0 (e_flags))
+	    strcat (buf, ", OBJ-v0");
+	  else if (EF_LOONGARCH_IS_OBJ_V1 (e_flags))
+	    strcat (buf, ", OBJ-v1");
 
 	  break;
 	}
