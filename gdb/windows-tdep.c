@@ -1007,10 +1007,11 @@ is_linked_with_cygwin_dll (bfd *abfd)
       || import_table_va >= idata_section_end_va)
     {
       warning (_("\
-%s: import table's virtual address (0x%" BFD_VMA_FMT "x) is outside .idata \
-section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
-	       bfd_get_filename (abfd), import_table_va, idata_section_va,
-	       idata_section_end_va);
+%s: import table's virtual address (%s) is outside .idata \
+section's range [%s, %s]."),
+	       bfd_get_filename (abfd), hex_string (import_table_va),
+	       hex_string (idata_section_va),
+	       hex_string (idata_section_end_va));
       return false;
     }
 
@@ -1057,10 +1058,11 @@ section's range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
       if (name_va < idata_section_va || name_va >= idata_section_end_va)
 	{
 	  warning (_("\
-%s: name's virtual address (0x%" BFD_VMA_FMT "x) is outside .idata section's \
-range [0x%" BFD_VMA_FMT "x, 0x%" BFD_VMA_FMT "x[."),
-		   bfd_get_filename (abfd), name_va, idata_section_va,
-		   idata_section_end_va);
+%s: name's virtual address (%s) is outside .idata section's \
+range [%s, %s]."),
+		   bfd_get_filename (abfd), hex_string (name_va),
+		   hex_string (idata_section_va),
+		   hex_string (idata_section_end_va));
 	  break;
 	}
 

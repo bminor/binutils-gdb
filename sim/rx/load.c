@@ -130,14 +130,15 @@ rx_load (bfd *prog, host_callback *callback)
       base = p->p_paddr;
       if (verbose > 1)
 	fprintf (stderr,
-		 "[load segment: lma=%08" BFD_VMA_FMT "x vma=%08x "
-		 "size=%08" BFD_VMA_FMT "x]\n",
-		 base, (int) p->p_vaddr, size);
+		 "[load segment: lma=%08" PRIx64 " vma=%08" PRIx64 " "
+		 "size=%08" PRIx64 "]\n",
+		 (uint64_t) base, (uint64_t) p->p_vaddr, (uint64_t) size);
       if (callback)
 	xprintf (callback,
-	         "Loading section %s, size %#lx lma %08lx vma %08lx\n",
+	         "Loading section %s, size %#" PRIx64 " lma %08" PRIx64
+		 " vma %08" PRIx64 "\n",
 	         find_section_name_by_offset (prog, p->p_offset),
-		 size, base, p->p_vaddr);
+		 (uint64_t) size, (uint64_t) base, (uint64_t) p->p_vaddr);
 
       buf = malloc (size);
       if (buf == NULL)
@@ -154,7 +155,8 @@ rx_load (bfd *prog, host_callback *callback)
 	}
       if (bfd_bread (buf, size, prog) != size)
 	{
-	  fprintf (stderr, "Failed to read %" BFD_VMA_FMT "x bytes\n", size);
+	  fprintf (stderr, "Failed to read %" PRIx64 " bytes\n",
+		   (uint64_t) size);
 	  continue;
 	}
 

@@ -257,17 +257,18 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
 
       if (verbose)
 	sim_io_printf (sd,
-		       "Loading segment at 0x%" BFD_VMA_FMT "x, "
-		       "size 0x%" BFD_VMA_FMT "x\n",
-		       lma, phdr[i].p_filesz);
+		       "Loading segment at 0x%" PRIx64 ", "
+		       "size 0x%" PRIx64 "\n",
+		       (uint64_t) lma, (uint64_t) phdr[i].p_filesz);
 
       if (bfd_seek (abfd, phdr[i].p_offset, SEEK_SET) != 0
 	  || (bfd_bread (buf, phdr[i].p_filesz, abfd) != phdr[i].p_filesz))
 	{
 	  sim_io_eprintf (sd,
-			  "%s: could not read segment at 0x%" BFD_VMA_FMT "x, "
-			  "size 0x%" BFD_VMA_FMT "x\n",
-			  STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
+			  "%s: could not read segment at 0x%" PRIx64 ", "
+			  "size 0x%" PRIx64 "\n",
+			  STATE_MY_NAME (sd), (uint64_t) lma,
+			  (uint64_t) phdr[i].p_filesz);
 	  free (buf);
 	  return FALSE;
 	}
@@ -275,9 +276,10 @@ cris_load_elf_file (SIM_DESC sd, struct bfd *abfd, sim_write_fn do_write)
       if (do_write (sd, lma, buf, phdr[i].p_filesz) != phdr[i].p_filesz)
 	{
 	  sim_io_eprintf (sd,
-			  "%s: could not load segment at 0x%" BFD_VMA_FMT "x, "
-			  "size 0x%" BFD_VMA_FMT "x\n",
-			  STATE_MY_NAME (sd), lma, phdr[i].p_filesz);
+			  "%s: could not load segment at 0x%" PRIx64 ", "
+			  "size 0x%" PRIx64 "\n",
+			  STATE_MY_NAME (sd), (uint64_t) lma,
+			  (uint64_t) phdr[i].p_filesz);
 	  free (buf);
 	  return FALSE;
 	}
@@ -573,9 +575,8 @@ cris_handle_interpreter (SIM_DESC sd, struct bfd *abfd)
 	 memory area, so we go via a temporary area.  Luckily, the
 	 interpreter is supposed to be small, less than 0x40000
 	 bytes.  */
-      sim_do_commandf (sd, "memory region 0x%" BFD_VMA_FMT "x,"
-		       "0x%" BFD_VMA_FMT "x",
-		       interp_load_addr, interpsiz);
+      sim_do_commandf (sd, "memory region 0x%" PRIx64 ",0x%" PRIx64,
+		       (uint64_t) interp_load_addr, (uint64_t) interpsiz);
 
       /* Now that memory for the interpreter is defined, load it.  */
       if (!cris_load_elf_file (sd, ibfd, cris_write_interp))
