@@ -340,6 +340,20 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	  if (rn == AARCH64_SP_REGNUM && rd == AARCH64_FP_REGNUM)
 	    seen_stack_set = true;
 	}
+      else if (inst.opcode->iclass == addsub_ext
+	       && strcmp ("sub", inst.opcode->name) == 0)
+	{
+	  unsigned rd = inst.operands[0].reg.regno;
+	  unsigned rn = inst.operands[1].reg.regno;
+	  unsigned rm = inst.operands[2].reg.regno;
+
+	  gdb_assert (aarch64_num_of_operands (inst.opcode) == 3);
+	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rd_SP);
+	  gdb_assert (inst.operands[1].type == AARCH64_OPND_Rn_SP);
+	  gdb_assert (inst.operands[2].type == AARCH64_OPND_Rm_EXT);
+
+	  regs[rd] = pv_subtract (regs[rn], regs[rm]);
+	}
       else if (inst.opcode->iclass == pcreladdr
 	       && inst.operands[1].type == AARCH64_OPND_ADDR_ADRP)
 	{
@@ -370,14 +384,20 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 	}
       else if (inst.opcode->op == OP_MOVZ)
 	{
+	  unsigned rd = inst.operands[0].reg.regno;
+
+	  gdb_assert (aarch64_num_of_operands (inst.opcode) == 2);
 	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rd);
+	  gdb_assert (inst.operands[1].type == AARCH64_OPND_HALF);
+	  gdb_assert (inst.operands[1].shifter.kind == AARCH64_MOD_LSL);
 
 	  /* If this shows up before we set the stack, keep going.  Otherwise
 	     stop the analysis.  */
 	  if (seen_stack_set)
 	    break;
 
-	  regs[inst.operands[0].reg.regno] = pv_unknown ();
+	  regs[rd] = pv_constant (inst.operands[1].imm.value
+				  << inst.operands[1].shifter.amount);
 	}
       else if (inst.opcode->iclass == log_shift
 	       && strcmp (inst.opcode->name, "orr") == 0)
