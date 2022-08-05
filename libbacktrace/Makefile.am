@@ -67,7 +67,7 @@ VIEW_FILES = \
 
 ALLOC_FILES = \
 	alloc.c \
-	mmap.c
+	mmap.c allocfail.sh
 
 EXTRA_libbacktrace_la_SOURCES = \
 	$(BACKTRACE_FILES) \
