@@ -203,7 +203,14 @@
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G1_NC	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLD_MOVW_DTPREL_G2	\
-   || (R_TYPE) == BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12	\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLS_DTPMOD			\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLS_DTPREL			\
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLS_TPREL			\
+   || IS_AARCH64_TLSLE_RELOC ((R_TYPE))				\
+   || IS_AARCH64_TLSDESC_RELOC ((R_TYPE)))
+
+#define IS_AARCH64_TLSLE_RELOC(R_TYPE)                          \
+   ((R_TYPE) == BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLE_LDST16_TPREL_LO12	\
@@ -218,11 +225,7 @@
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC	\
-   || (R_TYPE) == BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2		\
-   || (R_TYPE) == BFD_RELOC_AARCH64_TLS_DTPMOD			\
-   || (R_TYPE) == BFD_RELOC_AARCH64_TLS_DTPREL			\
-   || (R_TYPE) == BFD_RELOC_AARCH64_TLS_TPREL			\
-   || IS_AARCH64_TLSDESC_RELOC ((R_TYPE)))
+   || (R_TYPE) == BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2)
 
 #define IS_AARCH64_TLS_RELAX_RELOC(R_TYPE)			\
   ((R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_ADD			\
@@ -7567,7 +7570,24 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
     case BFD_RELOC_MORELLO_MOVW_SIZE_G2:
     case BFD_RELOC_MORELLO_MOVW_SIZE_G2_NC:
     case BFD_RELOC_MORELLO_MOVW_SIZE_G3:
-      BFD_ASSERT (!weak_undef_p && !signed_addend);
+      if (weak_undef_p || !SYMBOL_REFERENCES_LOCAL (info, h))
+	{
+	  int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
+	  const char *name;
+	  if (h && h->root.root.string)
+	    name = h->root.root.string;
+	  else
+	    name = bfd_elf_sym_name (input_bfd, symtab_hdr, sym, NULL);
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%pB: relocation %s against `%s' must be used against a "
+	       "non-interposable defined symbol"),
+	     input_bfd, elfNN_aarch64_howto_table[howto_index].name, name);
+	  bfd_set_error (bfd_error_bad_value);
+	  return bfd_reloc_continue;
+	}
+      /* signed addend should have been handled by relocate_section.  */
+      BFD_ASSERT (!signed_addend);
       value = sym ? sym->st_size : h->size;
       /* N.b. the call to resolve relocation is not really necessary since
 	 the relocation does not allow any addend, the relocation is not
@@ -7928,6 +7948,20 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	    _bfd_error_handler
 	      /* xgettext:c-format */
 	      (_("%pB: TLS relocation %s against undefined symbol `%s'"),
+		 input_bfd, elfNN_aarch64_howto_table[howto_index].name,
+		 h->root.root.string);
+	    bfd_set_error (bfd_error_bad_value);
+	    return bfd_reloc_notsupported;
+	  }
+	/* Cannot have a Local-Exec relocation against a symbol that is not in
+	   the current binary.  */
+	if (!TLS_SYMBOL_REFERENCES_LOCAL (info, h))
+	  {
+	    int howto_index = bfd_r_type - BFD_RELOC_AARCH64_RELOC_START;
+	    _bfd_error_handler
+	      /* xgettext:c-format */
+	      (_("%pB: Local-Exec TLS relocation %s against non-local "
+		 "symbol `%s'"),
 		 input_bfd, elfNN_aarch64_howto_table[howto_index].name,
 		 h->root.root.string);
 	    bfd_set_error (bfd_error_bad_value);
@@ -8680,6 +8714,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 				Elf_Internal_Sym *local_syms,
 				asection **local_sections)
 {
+  bool ret = true;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel;
@@ -8819,6 +8854,33 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	   so just skip over them.  */
 	continue;
 
+      /* We check TLS relocations with an addend here rather than in the
+	 final_link_relocate function since we want to base our decision on if
+	 the original relocation was a TLS relocation and the relaxation below
+	 could turn this relocation into a plain MORELLO_ADR_PREL_PG_HI20 or
+	 AARCH64_ADD_ABS_LO12_NC.  */
+      if (((IS_AARCH64_TLS_RELOC (bfd_r_type)
+	    && !IS_AARCH64_TLSLE_RELOC (bfd_r_type))
+	   || IS_MORELLO_SIZE_RELOC (bfd_r_type))
+	  && (rel->r_addend != 0 || addend != 0))
+	{
+	  _bfd_error_handler (_("%pB(%pA+%#" PRIx64 "): "
+				"relocation %s against `%s' is disallowed "
+				"with addend"),
+			      input_bfd, input_section,
+			      (uint64_t) rel->r_offset, howto->name, name);
+	  /* It could be confusing if there's not a TLS relocation with an
+	     addend but there was a TLS relocation with the previous relocation
+	     at the same spot.  */
+	  if (rel->r_addend == 0 && addend != 0)
+	    info->callbacks->warning
+	      (info,
+	       _("note: addend comes from previous relocation"),
+	       name, input_bfd, input_section, rel->r_offset);
+	  ret = false;
+	  continue;
+	}
+
       /* We relax only if we can see that there can be a valid transition
 	 from a reloc type to another.
 	 We call elfNN_aarch64_final_link_relocate unless we're completely
@@ -8844,7 +8906,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	    }
 	  r = elfNN_aarch64_tls_relax (input_bfd, info, input_section,
 				       contents, rel, h);
-	  unresolved_reloc = 0;
+	  unresolved_reloc = false;
 	}
       else
 	r = bfd_reloc_continue;
@@ -9237,7 +9299,7 @@ alignment than was declared where it was defined"),
 	addend = 0;
     }
 
-  return true;
+  return ret;
 }
 
 /* Set the right machine number.  */
