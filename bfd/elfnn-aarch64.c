@@ -176,6 +176,8 @@
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSGD_ADR_PREL21		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSGD_MOVW_G1		\
+   || (R_TYPE) == BFD_RELOC_MORELLO_TLSIE_ADR_GOTTPREL_PAGE20   \
+   || (R_TYPE) == BFD_RELOC_MORELLO_TLSIE_ADD_LO12              \
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC	\
@@ -242,6 +244,8 @@
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSGD_MOVW_G0_NC		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSGD_MOVW_G1		\
+   || (R_TYPE) == BFD_RELOC_MORELLO_TLSIE_ADR_GOTTPREL_PAGE20   \
+   || (R_TYPE) == BFD_RELOC_MORELLO_TLSIE_ADD_LO12              \
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19	\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSIE_LDNN_GOTTPREL_LO12_NC	\
@@ -266,6 +270,15 @@
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC		\
    || (R_TYPE) == BFD_RELOC_AARCH64_TLSDESC_OFF_G1)
 
+#define IS_MORELLO_SIZE_RELOC(R_TYPE)                 \
+    ((R_TYPE) == BFD_RELOC_MORELLO_MOVW_SIZE_G0       \
+     || (R_TYPE) == BFD_RELOC_MORELLO_MOVW_SIZE_G0_NC \
+     || (R_TYPE) == BFD_RELOC_MORELLO_MOVW_SIZE_G1    \
+     || (R_TYPE) == BFD_RELOC_MORELLO_MOVW_SIZE_G1_NC \
+     || (R_TYPE) == BFD_RELOC_MORELLO_MOVW_SIZE_G2    \
+     || (R_TYPE) == BFD_RELOC_MORELLO_MOVW_SIZE_G2_NC \
+     || (R_TYPE) == BFD_RELOC_MORELLO_MOVW_SIZE_G3)   \
+
 #define ELIMINATE_COPY_RELOCS 1
 
 /* Return size of a relocation entry.  HTAB is the bfd's
@@ -287,6 +300,25 @@
 
 /* Encoding of the nop instruction.  */
 #define INSN_NOP 0xd503201f
+
+/* This is just a neater name for something we want to check here.  The
+   difference between SYMBOL_CALLS_LOCAL and SYMBOL_REFERENCES_LOCAL is only in
+   their treating of protected symbols.  For SYMBOL_REFERENCES_LOCAL protected
+   symbols are not treated as known to reference locally.  This is because in
+   the case that the symbol is a function symbol it is possible that
+   `&protected_sym` could return an address in an executable (after function
+   equality has necessitated making the canonical address of that function the
+   PLT entry in the running executable).
+
+   SYMBOL_CALLS_LOCAL does not have the same treatment of protected symbols
+   since we know we will always *call* a protected symbol.
+
+   For TLS symbols we do not need to worry about this, since they can not be
+   function symbols.  But we don't want to have a confusing name asking whether
+   we will be calling a TLS symbol, so we rename it to
+   TLS_SYMBOL_REFERENCES_LOCAL.  */
+#define TLS_SYMBOL_REFERENCES_LOCAL(INFO, H) \
+    SYMBOL_CALLS_LOCAL ((INFO), (H))
 
 #define aarch64_compute_jump_table_size(htab)		\
   (((htab)->root.srelplt == NULL) ? 0			\
@@ -887,6 +919,112 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
 	 TRUE),		/* pcrel_offset */
+
+  /* Relocations to get the size of a symbol.  Used for Morello.  */
+  /* MOVZ:   ((S+A) >>  0) & 0xffff */
+  HOWTO64 (MORELLO_R (MOVW_SIZE_G0),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (MOVW_SIZE_G0),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* MOVK:   ((S+A) >>  0) & 0xffff [no overflow check] */
+  HOWTO64 (MORELLO_R (MOVW_SIZE_G0_NC),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (MOVW_SIZE_G0_NC),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* MOVZ:   ((S+A) >> 16) & 0xffff */
+  HOWTO64 (MORELLO_R (MOVW_SIZE_G1),	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (MOVW_SIZE_G1),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* MOVK:   ((S+A) >> 16) & 0xffff [no overflow check] */
+  HOWTO64 (MORELLO_R (MOVW_SIZE_G1_NC),	/* type */
+	 16,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (MOVW_SIZE_G1_NC),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* MOVZ:   ((S+A) >> 32) & 0xffff */
+  HOWTO64 (MORELLO_R (MOVW_SIZE_G2),	/* type */
+	 32,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (MOVW_SIZE_G2),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* MOVK:   ((S+A) >> 32) & 0xffff [no overflow check] */
+  HOWTO64 (MORELLO_R (MOVW_SIZE_G2_NC),	/* type */
+	 32,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (MOVW_SIZE_G2_NC),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* MOVZ:   ((S+A) >> 48) & 0xffff */
+  HOWTO64 (MORELLO_R (MOVW_SIZE_G3),	/* type */
+	 48,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_unsigned,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (MOVW_SIZE_G3),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xffff,		/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
 /* Relocations to generate 19, 21 and 33 bit PC-relative load/store
    addresses: PG(x) is (x & ~0xfff).  */
@@ -2258,6 +2396,34 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0x0,			/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
+  HOWTO64 (MORELLO_R (TLSIE_ADR_GOTTPREL_PAGE20),	/* type */
+	 12,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 20,			/* bitsize */
+	 TRUE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (TLSIE_ADR_GOTTPREL_PAGE20),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xfffff,		/* src_mask */
+	 0xfffff,		/* dst_mask */
+	 TRUE),		/* pcrel_offset */
+
+  HOWTO64 (MORELLO_R (TLSIE_ADD_LO12),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 12,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (TLSIE_ADD_LO12),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0xfff,			/* src_mask */
+	 0xfff,			/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
   HOWTO (AARCH64_R (COPY),	/* type */
 	 0,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -2475,6 +2641,20 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 MORELLO_R_STR (TLSDESC),	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 ALL_ONES,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  HOWTO64 (MORELLO_R (TPREL128),	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 64,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont,	/* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 MORELLO_R_STR (TPREL128),	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 ALL_ONES,		/* dst_mask */
@@ -5815,7 +5995,7 @@ aarch64_tls_transition_without_check (bfd_reloc_code_real_type r_type,
 				      bfd_boolean morello_reloc)
 {
   bfd_boolean local_exec = (bfd_link_executable (info)
-			    && SYMBOL_REFERENCES_LOCAL (info, h));
+			    && TLS_SYMBOL_REFERENCES_LOCAL (info, h));
 
   switch (r_type)
     {
@@ -5951,8 +6131,6 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
     case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
     case BFD_RELOC_MORELLO_TLSDESC_CALL:
     case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
-      return GOT_TLSDESC_GD | GOT_NORMAL;
-
     case BFD_RELOC_AARCH64_TLSDESC_ADD:
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
@@ -5966,6 +6144,8 @@ aarch64_reloc_got_type (bfd_reloc_code_real_type r_type)
     case BFD_RELOC_AARCH64_TLSDESC_OFF_G1:
       return GOT_TLSDESC_GD;
 
+    case BFD_RELOC_MORELLO_TLSIE_ADR_GOTTPREL_PAGE20:
+    case BFD_RELOC_MORELLO_TLSIE_ADD_LO12:
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
@@ -7211,6 +7391,25 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
       break;
 
+    case BFD_RELOC_MORELLO_MOVW_SIZE_G0:
+    case BFD_RELOC_MORELLO_MOVW_SIZE_G0_NC:
+    case BFD_RELOC_MORELLO_MOVW_SIZE_G1:
+    case BFD_RELOC_MORELLO_MOVW_SIZE_G1_NC:
+    case BFD_RELOC_MORELLO_MOVW_SIZE_G2:
+    case BFD_RELOC_MORELLO_MOVW_SIZE_G2_NC:
+    case BFD_RELOC_MORELLO_MOVW_SIZE_G3:
+      BFD_ASSERT (!weak_undef_p && !signed_addend);
+      value = sym ? sym->st_size : h->size;
+      /* N.b. the call to resolve relocation is not really necessary since
+	 the relocation does not allow any addend, the relocation is not
+	 PC-relative, and the relocation is against the base value.  I.e. there
+	 is no modification to `value` that we need to perform.  We keep it for
+	 consistency with other relocations.  */
+      value = _bfd_aarch64_elf_resolve_relocation (input_bfd, bfd_r_type,
+						   place, value,
+						   signed_addend, weak_undef_p);
+      break;
+
     case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
     case BFD_RELOC_MORELLO_ADR_GOT_PAGE:
     case BFD_RELOC_AARCH64_GOT_LD_PREL19:
@@ -7461,6 +7660,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	}
       break;
 
+    case BFD_RELOC_MORELLO_TLSIE_ADR_GOTTPREL_PAGE20:
+    case BFD_RELOC_MORELLO_TLSIE_ADD_LO12:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PREL21:
@@ -7829,7 +8030,7 @@ elfNN_aarch64_tls_relax (bfd *input_bfd, struct bfd_link_info *info,
 			 struct elf_link_hash_entry *h, unsigned long r_symndx)
 {
   bfd_boolean local_exec = (bfd_link_executable (info)
-			    && SYMBOL_REFERENCES_LOCAL (info, h));
+			    && TLS_SYMBOL_REFERENCES_LOCAL (info, h));
   unsigned int r_type = ELFNN_R_TYPE (rel->r_info);
   unsigned long insn;
   bfd_vma sym_size = 0;
@@ -8414,7 +8615,10 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	  && (h == NULL
 	      || h->root.type == bfd_link_hash_defined
 	      || h->root.type == bfd_link_hash_defweak)
-	  && IS_AARCH64_TLS_RELOC (bfd_r_type) != (sym_type == STT_TLS))
+	  && IS_AARCH64_TLS_RELOC (bfd_r_type) != (sym_type == STT_TLS)
+	  /* Morello SIZE relocation is allowed on TLS symbols and non-TLS
+	     symbols.  */
+	  && !IS_MORELLO_SIZE_RELOC (bfd_r_type))
 	{
 	  _bfd_error_handler
 	    ((sym_type == STT_TLS
@@ -8573,6 +8777,8 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	    }
 	  break;
 
+	case BFD_RELOC_MORELLO_TLSIE_ADR_GOTTPREL_PAGE20:
+	case BFD_RELOC_MORELLO_TLSIE_ADD_LO12:
 	case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
 	case BFD_RELOC_AARCH64_TLSIE_LDNN_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
@@ -8594,6 +8800,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		(h == NULL
 		 || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		 || h->root.type != bfd_link_hash_undefweak);
+	      need_relocs = need_relocs || c64_rtype;
 
 	      BFD_ASSERT (globals->root.srelgot != NULL);
 
@@ -8606,7 +8813,10 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		  else
 		    rela.r_addend = 0;
 
-		  rela.r_info = ELFNN_R_INFO (indx, AARCH64_R (TLS_TPREL));
+		  rela.r_info = ELFNN_R_INFO (indx,
+					      globals->c64_rel
+					      ? MORELLO_R (TPREL128)
+					      : AARCH64_R (TLS_TPREL));
 		  rela.r_offset = globals->root.sgot->output_section->vma +
 		    globals->root.sgot->output_offset + off;
 
@@ -8618,6 +8828,12 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 
 		  bfd_put_NN (output_bfd, rela.r_addend,
 			      globals->root.sgot->contents + off);
+		  if (c64_rtype && TLS_SYMBOL_REFERENCES_LOCAL (info, h))
+		    {
+		      bfd_vma sym_size = h ? h->size : sym->st_size;
+		      bfd_put_NN (output_bfd, sym_size,
+				  globals->root.sgot->contents + off + 8);
+		    }
 		}
 	      else
 		bfd_put_NN (output_bfd, relocation - tpoff_base (info),
@@ -8648,6 +8864,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	      need_relocs = (h == NULL
 			     || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 			     || h->root.type != bfd_link_hash_undefweak);
+	      need_relocs = need_relocs || c64_rtype;
 
 	      BFD_ASSERT (globals->root.srelgot != NULL);
 	      BFD_ASSERT (globals->root.sgot != NULL);
@@ -8683,13 +8900,31 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 
 		  bfd_elfNN_swap_reloca_out (output_bfd, &rela, loc);
 
-		  bfd_put_NN (output_bfd, (bfd_vma) 0,
-			      globals->root.sgotplt->contents + off +
-			      globals->sgotplt_jump_table_size);
-		  bfd_put_NN (output_bfd, (bfd_vma) 0,
-			      globals->root.sgotplt->contents + off +
-			      globals->sgotplt_jump_table_size +
-			      GOT_ENTRY_SIZE (globals));
+		  if (!c64_rtype)
+		    {
+		      bfd_put_NN (output_bfd, (bfd_vma) 0,
+				  globals->root.sgotplt->contents + off +
+				  globals->sgotplt_jump_table_size);
+		      bfd_put_NN (output_bfd, (bfd_vma) 0,
+				  globals->root.sgotplt->contents + off +
+				  globals->sgotplt_jump_table_size +
+				  GOT_ENTRY_SIZE (globals));
+		    }
+		  else
+		    {
+		      void * fragment_start
+			= globals->root.sgotplt->contents + off +
+			  globals->sgotplt_jump_table_size;
+
+		      bfd_vma sym_size = !TLS_SYMBOL_REFERENCES_LOCAL (info, h)
+			? 0
+			: h ? h->size : sym->st_size;
+
+		      bfd_put_NN (output_bfd, (bfd_vma) 0, fragment_start);
+		      bfd_put_NN (output_bfd, (bfd_vma) 0, fragment_start + 8);
+		      bfd_put_NN (output_bfd, (bfd_vma) 0, fragment_start + 16);
+		      bfd_put_NN (output_bfd, sym_size, fragment_start + 24);
+		    }
 		}
 
 	      symbol_tlsdesc_got_offset_mark (input_bfd, h, r_symndx);
@@ -9571,6 +9806,8 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case BFD_RELOC_MORELLO_LD128_GOT_LO12_NC:
 	case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
 	case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
+	case BFD_RELOC_MORELLO_TLSIE_ADR_GOTTPREL_PAGE20:
+	case BFD_RELOC_MORELLO_TLSIE_ADD_LO12:
 	  htab->c64_rel = 1;
 	  /* Fall through.  */
 
