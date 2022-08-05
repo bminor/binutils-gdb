@@ -1,4 +1,5 @@
 #source: emit-relocs-morello-2.s
+#target: [check_shared_lib_support]
 #as: -march=morello+a64c
 #ld: -shared
 #objdump: -DR -j .text -j .data -j .got

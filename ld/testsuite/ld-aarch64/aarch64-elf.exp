@@ -294,7 +294,8 @@ run_dump_test_lp64 "c64-ehdr-sized-reloc"
 
 # Test for morello dynamic relocs can not be written in the usual manner since
 # we need to specify different `ld` command lines for different objects.
-if { [ld_assemble_flags $as -march=morello+c64 $srcdir/$subdir/morello-dynamic-relocs-lib.s tmpdir/morello-dynamic-relocs-lib.o]
+if { [check_shared_lib_support]
+     && [ld_assemble_flags $as -march=morello+c64 $srcdir/$subdir/morello-dynamic-relocs-lib.s tmpdir/morello-dynamic-relocs-lib.o]
      && [ld_link $ld tmpdir/morello-dynamic-relocs.so "--shared tmpdir/morello-dynamic-relocs-lib.o"] } {
   run_dump_test_lp64 "morello-dynamic-relocs"
   run_dump_test_lp64 "morello-dynamic-link-rela-dyn"
@@ -310,7 +311,8 @@ if { [ld_assemble_flags $as -march=morello+c64 $srcdir/$subdir/morello-dynamic-r
   run_dump_test_lp64 "morello-dataptr-code-and-data"
 }
 
-if { [ld_assemble_flags $as -march=morello+c64 $srcdir/$subdir/morello-weakdefinitions.s tmpdir/morello-weakdefinitions.o]
+if { [check_shared_lib_support]
+     && [ld_assemble_flags $as -march=morello+c64 $srcdir/$subdir/morello-weakdefinitions.s tmpdir/morello-weakdefinitions.o]
      && [ld_link $ld tmpdir/morello-weakdefinitions.so "--shared tmpdir/morello-weakdefinitions.o"] } {
      run_dump_test_lp64 "morello-undefweak-relocs-PDE"
 }
@@ -318,6 +320,14 @@ run_dump_test_lp64 "morello-undefweak-relocs-no-dyn-linker"
 run_dump_test_lp64 "morello-undefweak-relocs-PIE"
 run_dump_test_lp64 "morello-undefweak-relocs-static"
 run_dump_test_lp64 "morello-undefweak-relocs-static-relocs"
+
+if { [check_shared_lib_support]
+     && [ld_assemble_flags $as -march=morello+c64 $srcdir/$subdir/tls-shared.s tmpdir/tls-shared.o]
+     && [ld_link $ld tmpdir/tls-shared.so "-shared tmpdir/tls-shared.o"] } {
+     run_dump_test_lp64 "morello-tls-pde"
+     run_dump_test_lp64 "illegal-tlsle-pde"
+     run_dump_test_lp64 "morello-tlsie-overflow"
+}
 
 run_dump_test_lp64 "morello-static-got"
 run_dump_test_lp64 "morello-dynamic-got"
@@ -338,6 +348,25 @@ run_dump_test_lp64 "morello-sec-start_stop-round"
 run_dump_test_lp64 "morello-tlsdesc"
 run_dump_test_lp64 "morello-tlsdesc-static"
 run_dump_test_lp64 "morello-tlsdesc-staticpie"
+run_dump_test_lp64 "morello-tlsdesc-seen-ie"
+
+run_dump_test_lp64 "morello-tlsle"
+run_dump_test_lp64 "morello-tlsle-pie"
+run_dump_test_lp64 "morello-tlsie"
+run_dump_test_lp64 "morello-tlsie-pie"
+run_dump_test_lp64 "morello-tlsie-shared"
+
+run_dump_test_lp64 "morello-size-relocs"
+run_dump_test_lp64 "morello-size-relocs-pie"
+run_dump_test_lp64 "morello-size-relocs-shared"
+
+run_dump_test_lp64 "morello-illegal-size-relocs"
+run_dump_test_lp64 "morello-illegal-size-relocs-pie"
+run_dump_test_lp64 "morello-illegal-size-relocs-shared"
+
+run_dump_test_lp64 "morello-illegal-tls"
+run_dump_test_lp64 "morello-illegal-tls-pie"
+run_dump_test_lp64 "morello-illegal-tls-shared"
 
 run_dump_test "no-morello-syms-static"
 

@@ -1,4 +1,5 @@
 #source: emit-relocs-morello-hidden.s
+#target: [check_shared_lib_support]
 #as: -march=morello+c64
 #ld: -shared
 #objdump: -DR -j .got -j .text

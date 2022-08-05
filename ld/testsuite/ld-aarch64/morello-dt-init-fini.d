@@ -1,5 +1,6 @@
 # Checking that the DT_INIT and DT_FINI entries in the dynamic section include
 # the LSB when referring to functions which include the LSB.
+#target: [check_shared_lib_support]
 #as: -march=morello+c64
 #ld: -shared
 #readelf: --symbols --dynamic --wide

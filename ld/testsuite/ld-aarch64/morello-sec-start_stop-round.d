@@ -7,7 +7,7 @@
 
 Disassembly of section \.data:
 
-[0-9a-f]+ <__data_start>:
+[0-9a-f]+ <.*>:
 #record: START_LIBC_ADDR
 .*:	([0-9a-f]+) 	.*
 .*:	00000000 	.*
