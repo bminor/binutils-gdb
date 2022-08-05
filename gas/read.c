@@ -1629,7 +1629,10 @@ read_symbol_name (void)
       /* Since quoted symbol names can contain non-ASCII characters,
 	 check the string and warn if it cannot be recognised by the
 	 current character set.  */
-      if (mbstowcs (NULL, name, len) == (size_t) -1)
+      /* PR 29447: mbstowcs ignores the third (length) parameter when
+	 the first (destination) parameter is NULL.  For clarity sake
+	 therefore we pass 0 rather than 'len' as the third parameter.  */
+      if (mbstowcs (NULL, name, 0) == (size_t) -1)
 	as_warn (_("symbol name not recognised in the current locale"));
     }
   else if (is_name_beginner (c) || (input_from_string && c == FAKE_LABEL_CHAR))
