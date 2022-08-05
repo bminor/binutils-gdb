@@ -149,25 +149,25 @@ check_PROGRAMS += object_unittest
 object_unittest_SOURCES = object_unittest.cc
 object_unittest_LDFLAGS = $(THREADFLAGS)
 object_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-	$(THREADLIBS) $(LIBDL) $(ZLIB)
+	$(THREADLIBS) $(LIBDL) $(ZLIB) $(JANSSON_LIBS)
 
 check_PROGRAMS += binary_unittest
 binary_unittest_SOURCES = binary_unittest.cc
 binary_unittest_LDFLAGS = $(THREADFLAGS)
 binary_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-	$(THREADLIBS) $(LIBDL) $(ZLIB)
+	$(THREADLIBS) $(LIBDL) $(ZLIB) $(JANSSON_LIBS)
 
 check_PROGRAMS += leb128_unittest
 leb128_unittest_SOURCES = leb128_unittest.cc
 leb128_unittest_LDFLAGS = $(THREADFLAGS)
 leb128_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-	$(THREADLIBS) $(LIBDL) $(ZLIB)
+	$(THREADLIBS) $(LIBDL) $(ZLIB) $(JANSSON_LIBS)
 
 check_PROGRAMS += overflow_unittest
 overflow_unittest_SOURCES = overflow_unittest.cc
 overflow_unittest_LDFLAGS = $(THREADFLAGS)
 overflow_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-	$(THREADLIBS) $(LIBDL) $(ZLIB)
+	$(THREADLIBS) $(LIBDL) $(ZLIB) $(JANSSON_LIBS)
 overflow_unittest.o: overflow_unittest.cc
 	$(CXXCOMPILE) -O3 -c -o $@ $<
 
@@ -4435,3 +4435,10 @@ retain_2.o: retain_2.s
 	$(TEST_AS) -o $@ $<
 
 endif DEFAULT_TARGET_X86_64
+
+check_PROGRAMS += package_metadata_test
+package_metadata_test.o: package_metadata_main.c
+	$(COMPILE) -c -o $@ $<
+package_metadata_test$(EXEEXT): package_metadata_test.o gcctestdir/ld
+	$(CXXLINK) package_metadata_test.o -Wl,--package-metadata='{"foo":"bar"}'
+	$(TEST_READELF) --notes $@ | grep -q '{"foo":"bar"}'

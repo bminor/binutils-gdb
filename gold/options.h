@@ -1102,6 +1102,10 @@ class General_options
   DEFINE_bool(p, options::ONE_DASH, 'p', false,
 	      N_("Ignored for ARM compatibility"), NULL);
 
+  DEFINE_optional_string(package_metadata, options::TWO_DASHES, '\0', NULL,
+			 N_("Generate package metadata note"),
+			 N_("[=JSON]"));
+
   DEFINE_bool(pie, options::ONE_DASH, '\0', false,
 	      N_("Create a position independent executable"),
 	      N_("Do not create a position independent executable"));

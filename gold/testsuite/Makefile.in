@@ -109,7 +109,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 	$(am__EXEEXT_37) $(am__EXEEXT_38) $(am__EXEEXT_39) \
 	$(am__EXEEXT_40) $(am__EXEEXT_41) $(am__EXEEXT_42) \
 	$(am__EXEEXT_43) $(am__EXEEXT_44) $(am__EXEEXT_45) \
-	$(am__EXEEXT_46) $(am__EXEEXT_47)
+	$(am__EXEEXT_46) $(am__EXEEXT_47) \
+	package_metadata_test$(EXEEXT)
 @NATIVE_OR_CROSS_LINKER_TRUE@am__append_1 = object_unittest \
 @NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest leb128_unittest \
 @NATIVE_OR_CROSS_LINKER_TRUE@	overflow_unittest
@@ -1146,6 +1147,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/ax_pthread.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
 	$(top_srcdir)/../config/nls.m4 \
 	$(top_srcdir)/../config/override.m4 \
+	$(top_srcdir)/../config/pkg.m4 \
 	$(top_srcdir)/../config/plugins.m4 \
 	$(top_srcdir)/../config/po.m4 \
 	$(top_srcdir)/../config/progtest.m4 \
@@ -1404,6 +1406,7 @@ am__DEPENDENCIES_1 =
 @NATIVE_OR_CROSS_LINKER_TRUE@binary_unittest_DEPENDENCIES =  \
 @NATIVE_OR_CROSS_LINKER_TRUE@	libgoldtest.a ../libgold.a \
 @NATIVE_OR_CROSS_LINKER_TRUE@	../../libiberty/libiberty.a \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
@@ -1732,6 +1735,7 @@ leb128_unittest_OBJECTS = $(am_leb128_unittest_OBJECTS)
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1)
 leb128_unittest_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(leb128_unittest_LDFLAGS) $(LDFLAGS) -o $@
@@ -1755,6 +1759,7 @@ object_unittest_OBJECTS = $(am_object_unittest_OBJECTS)
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1)
 object_unittest_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(object_unittest_LDFLAGS) $(LDFLAGS) -o $@
@@ -1767,9 +1772,13 @@ overflow_unittest_OBJECTS = $(am_overflow_unittest_OBJECTS)
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1) \
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(am__DEPENDENCIES_1)
 overflow_unittest_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(overflow_unittest_LDFLAGS) $(LDFLAGS) -o $@
+package_metadata_test_SOURCES = package_metadata_test.c
+package_metadata_test_OBJECTS = package_metadata_test.$(OBJEXT)
+package_metadata_test_LDADD = $(LDADD)
 permission_test_SOURCES = permission_test.c
 permission_test_OBJECTS = permission_test.$(OBJEXT)
 permission_test_LDADD = $(LDADD)
@@ -2313,13 +2322,14 @@ SOURCES = $(libgoldtest_a_SOURCES) $(aarch64_pr23870_SOURCES) \
 	$(large_symbol_alignment_SOURCES) $(leb128_unittest_SOURCES) \
 	local_labels_test.c many_sections_r_test.c \
 	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
-	$(overflow_unittest_SOURCES) permission_test.c \
-	$(pie_copyrelocs_test_SOURCES) plugin_test_1.c \
-	plugin_test_10.c plugin_test_11.c plugin_test_12.c \
-	plugin_test_2.c plugin_test_3.c plugin_test_4.c \
-	plugin_test_5.c plugin_test_6.c plugin_test_7.c \
-	plugin_test_8.c plugin_test_defsym.c plugin_test_start_lib.c \
-	plugin_test_tls.c plugin_test_wrap_symbols.c pr17704a_test.c \
+	$(overflow_unittest_SOURCES) package_metadata_test.c \
+	permission_test.c $(pie_copyrelocs_test_SOURCES) \
+	plugin_test_1.c plugin_test_10.c plugin_test_11.c \
+	plugin_test_12.c plugin_test_2.c plugin_test_3.c \
+	plugin_test_4.c plugin_test_5.c plugin_test_6.c \
+	plugin_test_7.c plugin_test_8.c plugin_test_defsym.c \
+	plugin_test_start_lib.c plugin_test_tls.c \
+	plugin_test_wrap_symbols.c pr17704a_test.c \
 	$(pr20216a_test_SOURCES) $(pr20216b_test_SOURCES) \
 	$(pr20216c_test_SOURCES) $(pr20216d_test_SOURCES) \
 	$(pr20216e_test_SOURCES) $(pr20308a_test_SOURCES) \
@@ -2635,6 +2645,8 @@ INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 INSTOBJEXT = @INSTOBJEXT@
+JANSSON_CFLAGS = @JANSSON_CFLAGS@
+JANSSON_LIBS = @JANSSON_LIBS@
 LDFLAGS = @LDFLAGS@
 LFS_CFLAGS = @LFS_CFLAGS@
 LIBINTL = @LIBINTL@
@@ -2661,6 +2673,9 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 POSUB = @POSUB@
 PTHREAD_CC = @PTHREAD_CC@
 PTHREAD_CFLAGS = @PTHREAD_CFLAGS@
@@ -2866,22 +2881,22 @@ DEPENDENCIES = \
 @NATIVE_OR_CROSS_LINKER_TRUE@object_unittest_SOURCES = object_unittest.cc
 @NATIVE_OR_CROSS_LINKER_TRUE@object_unittest_LDFLAGS = $(THREADFLAGS)
 @NATIVE_OR_CROSS_LINKER_TRUE@object_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-@NATIVE_OR_CROSS_LINKER_TRUE@	$(THREADLIBS) $(LIBDL) $(ZLIB)
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(THREADLIBS) $(LIBDL) $(ZLIB) $(JANSSON_LIBS)
 
 @NATIVE_OR_CROSS_LINKER_TRUE@binary_unittest_SOURCES = binary_unittest.cc
 @NATIVE_OR_CROSS_LINKER_TRUE@binary_unittest_LDFLAGS = $(THREADFLAGS)
 @NATIVE_OR_CROSS_LINKER_TRUE@binary_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-@NATIVE_OR_CROSS_LINKER_TRUE@	$(THREADLIBS) $(LIBDL) $(ZLIB)
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(THREADLIBS) $(LIBDL) $(ZLIB) $(JANSSON_LIBS)
 
 @NATIVE_OR_CROSS_LINKER_TRUE@leb128_unittest_SOURCES = leb128_unittest.cc
 @NATIVE_OR_CROSS_LINKER_TRUE@leb128_unittest_LDFLAGS = $(THREADFLAGS)
 @NATIVE_OR_CROSS_LINKER_TRUE@leb128_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-@NATIVE_OR_CROSS_LINKER_TRUE@	$(THREADLIBS) $(LIBDL) $(ZLIB)
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(THREADLIBS) $(LIBDL) $(ZLIB) $(JANSSON_LIBS)
 
 @NATIVE_OR_CROSS_LINKER_TRUE@overflow_unittest_SOURCES = overflow_unittest.cc
 @NATIVE_OR_CROSS_LINKER_TRUE@overflow_unittest_LDFLAGS = $(THREADFLAGS)
 @NATIVE_OR_CROSS_LINKER_TRUE@overflow_unittest_LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
-@NATIVE_OR_CROSS_LINKER_TRUE@	$(THREADLIBS) $(LIBDL) $(ZLIB)
+@NATIVE_OR_CROSS_LINKER_TRUE@	$(THREADLIBS) $(LIBDL) $(ZLIB) $(JANSSON_LIBS)
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_SOURCES = large_symbol_alignment.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_DEPENDENCIES = gcctestdir/ld
@@ -4828,6 +4843,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/overflow_unittest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/package_metadata_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/permission_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pie_copyrelocs_test-pie_copyrelocs_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/plugin_test_1.Po@am__quote@
@@ -7775,6 +7791,13 @@ aarch64_pr23870.log: aarch64_pr23870$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
+package_metadata_test.log: package_metadata_test$(EXEEXT)
+	@p='package_metadata_test$(EXEEXT)'; \
+	b='package_metadata_test'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
 .test.log:
 	@p='$<'; \
 	$(am__set_b); \
@@ -10414,6 +10437,11 @@ uninstall-am:
 @DEFAULT_TARGET_X86_64_TRUE@	../ld-new -pie -e _start --gc-sections -o $@  retain_2.o
 @DEFAULT_TARGET_X86_64_TRUE@retain_2.o: retain_2.s
 @DEFAULT_TARGET_X86_64_TRUE@	$(TEST_AS) -o $@ $<
+package_metadata_test.o: package_metadata_main.c
+	$(COMPILE) -c -o $@ $<
+package_metadata_test$(EXEEXT): package_metadata_test.o gcctestdir/ld
+	$(CXXLINK) package_metadata_test.o -Wl,--package-metadata='{"foo":"bar"}'
+	$(TEST_READELF) --notes $@ | grep -q '{"foo":"bar"}'
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
