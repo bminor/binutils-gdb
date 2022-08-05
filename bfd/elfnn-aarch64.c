@@ -341,7 +341,8 @@
    relocation for it when we can get an untagged zero capability by just
    loading some zeros.  */
 #define c64_needs_relocation(info, h) \
-    (!((h)->root.type == bfd_link_hash_undefweak \
+    (!((h) \
+       && (h)->root.type == bfd_link_hash_undefweak \
        && (UNDEFWEAK_NO_DYNAMIC_RELOC ((info), (h)) \
 	   || !elf_hash_table ((info))->dynamic_sections_created)))
 
@@ -3032,6 +3033,19 @@ struct elf_aarch64_stub_hash_entry
   bfd_vma adrp_offset;
 };
 
+struct elf_c64_tls_data_stub_hash_entry
+{
+  /* Symbol table entry, if any, for which this stub is made.  */
+  struct elf_aarch64_link_hash_entry *h;
+  /* Local symbol table index and BFD associated with it, if required, for
+     which this stub is made.  These are only used when `h` is NULL.  */
+  unsigned long r_symndx;
+  bfd *input_bfd;
+  /* Offset within htab->sc64_tls_stubs of the beginning of this stub.  */
+  bfd_vma tls_stub_offset;
+  bool populated;
+};
+
 /* Used to build a map of a section.  This is required for mixed-endian
    code/data.  */
 
@@ -3327,8 +3341,11 @@ struct elf_aarch64_link_hash_table
 
   /* Used for capability relocations.  */
   asection *srelcaps;
+  asection *sc64_tls_stubs;
   int c64_rel;
   bool c64_output;
+  htab_t c64_tls_data_stub_hash_table;
+  void * tls_data_stub_memory;
 };
 
 /* Create an entry in an AArch64 ELF linker hash table.  */
@@ -3400,6 +3417,119 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
     }
 
   return entry;
+}
+
+static hashval_t
+c64_tls_data_stub_hash (const void *ptr)
+{
+  struct elf_c64_tls_data_stub_hash_entry *entry
+    = (struct elf_c64_tls_data_stub_hash_entry *) ptr;
+  if (entry->h)
+    return htab_hash_pointer (entry->h);
+  struct elf_aarch64_local_symbol *l;
+  l = elf_aarch64_locals (entry->input_bfd);
+  return htab_hash_pointer (l + entry->r_symndx);
+}
+
+static int
+c64_tls_data_stub_eq (const void *ptr1, const void *ptr2)
+{
+  struct elf_c64_tls_data_stub_hash_entry *entry1
+     = (struct elf_c64_tls_data_stub_hash_entry *) ptr1;
+  struct elf_c64_tls_data_stub_hash_entry *entry2
+    = (struct elf_c64_tls_data_stub_hash_entry *) ptr2;
+
+  if (entry1->h && !entry2->h)
+    return 0;
+  if (!entry1->h && entry2->h)
+    return 0;
+  if (entry1->h && entry2->h)
+    return entry1->h == entry2->h;
+
+  if (entry1->input_bfd != entry2->input_bfd)
+    return 0;
+  return entry1->r_symndx == entry2->r_symndx;
+}
+
+static bool
+c64_record_tls_stub (struct elf_aarch64_link_hash_table *htab,
+		     bfd *input_bfd,
+		     struct elf_link_hash_entry *h,
+		     unsigned long r_symndx)
+{
+  if (htab->root.dynobj == NULL)
+    htab->root.dynobj = input_bfd;
+
+  if (!htab->sc64_tls_stubs)
+    {
+      asection *stub_sec;
+      flagword flags;
+
+      flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
+	       | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_KEEP
+	       | SEC_LINKER_CREATED);
+      /* Using the .rodata section is ABI -- N.b. I do have an outstanding
+	 clarification on this on the ABI PR.
+	 https://github.com/ARM-software/abi-aa/pull/80  */
+      stub_sec = bfd_make_section_anyway_with_flags
+		    (htab->root.dynobj, ".rodata", flags);
+      if (stub_sec == NULL)
+	return false;
+
+      /* Section contains stubs of 64 bit values, hence requires 8 byte
+	 alignment.  */
+      bfd_set_section_alignment (stub_sec, 3);
+      htab->sc64_tls_stubs = stub_sec;
+      BFD_ASSERT (htab->sc64_tls_stubs->size == 0);
+    }
+
+  if (h)
+    BFD_ASSERT (h->type == STT_TLS);
+
+  void **slot;
+  struct elf_c64_tls_data_stub_hash_entry e, *new_entry;
+  e.h = (struct elf_aarch64_link_hash_entry *)h;
+  e.r_symndx = r_symndx;
+  e.input_bfd = input_bfd;
+
+  slot = htab_find_slot (htab->c64_tls_data_stub_hash_table, &e, INSERT);
+  if (!slot)
+    return false;
+
+  if (*slot)
+    return true;
+  new_entry = (struct elf_c64_tls_data_stub_hash_entry *)
+    objalloc_alloc ((struct objalloc *) htab->tls_data_stub_memory,
+		    sizeof (struct elf_c64_tls_data_stub_hash_entry));
+  if (new_entry)
+    {
+      new_entry->h = (struct elf_aarch64_link_hash_entry *)h;
+      new_entry->r_symndx = r_symndx;
+      new_entry->input_bfd = input_bfd;
+      new_entry->tls_stub_offset = htab->sc64_tls_stubs->size;
+      new_entry->populated = false;
+      /* Size of a Morello data stub is 2 * 8 byte integers.  */
+      htab->sc64_tls_stubs->size += 16;
+      *slot = new_entry;
+      return true;
+    }
+  return false;
+}
+
+static struct elf_c64_tls_data_stub_hash_entry *
+c64_tls_stub_find (struct elf_link_hash_entry *h,
+		   bfd *input_bfd,
+		   unsigned long r_symndx,
+		   struct elf_aarch64_link_hash_table *htab)
+{
+  void *ret;
+  struct elf_c64_tls_data_stub_hash_entry e;
+  e.h = (struct elf_aarch64_link_hash_entry *)h;
+  e.r_symndx = r_symndx;
+  e.input_bfd = input_bfd;
+
+  ret = htab_find (htab->c64_tls_data_stub_hash_table, &e);
+  return (struct elf_c64_tls_data_stub_hash_entry *)ret;
 }
 
 /* Compute a hash of a local hash entry.  We use elf_link_hash_entry
@@ -3491,6 +3621,13 @@ elfNN_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
 	}
     }
 
+  /* This function is called to take the indirect symbol information from eind
+     and put it onto edir.  We never create a TLS data stub for a symbol which
+     needs such a transformation, hence there is no need to worry about
+     removing the hash entry for the indirected symbol and ensuring there is
+     now one for the final one.  */
+  BFD_ASSERT (!c64_tls_stub_find (ind, NULL, 0,
+				  elf_aarch64_hash_table (info)));
   _bfd_elf_link_hash_copy_indirect (info, dir, ind);
 }
 
@@ -3532,6 +3669,11 @@ elfNN_aarch64_link_hash_table_free (bfd *obfd)
   if (ret->loc_hash_memory)
     objalloc_free ((struct objalloc *) ret->loc_hash_memory);
 
+  if (ret->c64_tls_data_stub_hash_table)
+    htab_delete (ret->c64_tls_data_stub_hash_table);
+  if (ret->tls_data_stub_memory)
+    objalloc_free ((struct objalloc *) ret->tls_data_stub_memory);
+
   bfd_hash_table_free (&ret->stub_hash_table);
   _bfd_elf_link_hash_table_free (obfd);
 }
@@ -3568,6 +3710,16 @@ elfNN_aarch64_link_hash_table_create (bfd *abfd)
 			    sizeof (struct elf_aarch64_stub_hash_entry)))
     {
       _bfd_elf_link_hash_table_free (abfd);
+      return NULL;
+    }
+
+  ret->c64_tls_data_stub_hash_table
+    = htab_try_create (256, c64_tls_data_stub_hash, c64_tls_data_stub_eq,
+		       NULL);
+  ret->tls_data_stub_memory = objalloc_create ();
+  if (!ret->c64_tls_data_stub_hash_table || !ret->tls_data_stub_memory)
+    {
+      elfNN_aarch64_link_hash_table_free (abfd);
       return NULL;
     }
 
@@ -5992,18 +6144,13 @@ static bfd_reloc_code_real_type
 aarch64_tls_transition_without_check (bfd_reloc_code_real_type r_type,
 				      struct bfd_link_info *info,
 				      struct elf_link_hash_entry *h,
-				      bool morello_reloc)
+				      bool *requires_c64_tls_stub)
 {
   bool local_exec = (bfd_link_executable (info)
 		     && TLS_SYMBOL_REFERENCES_LOCAL (info, h));
 
   switch (r_type)
     {
-    case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
-      return (local_exec
-	      ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1
-	      : r_type);
-
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
       return (local_exec
@@ -6035,15 +6182,23 @@ aarch64_tls_transition_without_check (bfd_reloc_code_real_type r_type,
 	      ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2
 	      : BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1);
 
-    case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
-      return (local_exec
-	      ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC : r_type);
-
     case BFD_RELOC_AARCH64_TLSDESC_LDNN_LO12_NC:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
       return (local_exec
 	      ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC
 	      : BFD_RELOC_AARCH64_TLSIE_LDNN_GOTTPREL_LO12_NC);
+
+    case BFD_RELOC_MORELLO_TLSIE_ADR_GOTTPREL_PAGE20:
+      if (!local_exec)
+	return r_type;
+      *requires_c64_tls_stub = true;
+      return BFD_RELOC_MORELLO_ADR_HI20_PCREL;
+
+    case BFD_RELOC_MORELLO_TLSIE_ADD_LO12:
+      if (!local_exec)
+	return r_type;
+      *requires_c64_tls_stub = true;
+      return BFD_RELOC_AARCH64_ADD_LO12;
 
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
       return local_exec ? BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1 : r_type;
@@ -6059,19 +6214,32 @@ aarch64_tls_transition_without_check (bfd_reloc_code_real_type r_type,
 	      ? BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12
 	      : BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19);
 
+    case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
+      if (local_exec)
+	{
+	  *requires_c64_tls_stub = true;
+	  return BFD_RELOC_MORELLO_ADR_HI20_PCREL;
+	}
+      return BFD_RELOC_MORELLO_TLSIE_ADR_GOTTPREL_PAGE20;
+
+    case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
+      if (local_exec)
+	{
+	  *requires_c64_tls_stub = true;
+	  return BFD_RELOC_AARCH64_ADD_LO12;
+	}
+      return BFD_RELOC_MORELLO_TLSIE_ADD_LO12;
+
     case BFD_RELOC_MORELLO_TLSDESC_CALL:
-      return (local_exec
-	      ? BFD_RELOC_AARCH64_NONE : r_type);
+      /* Instructions with this relocation will be fully resolved during the
+	 transition into an add and scbnds pair.  */
+      return BFD_RELOC_AARCH64_NONE;
 
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
-      if (morello_reloc && !local_exec)
-	return r_type;
-      /* Fall through.  */
     case BFD_RELOC_AARCH64_TLSDESC_ADD:
     case BFD_RELOC_AARCH64_TLSDESC_CALL:
       /* Instructions with these relocations will be fully resolved during the
-         transition into either a NOP in the A64 case or movk and add in
-	 C64.  */
+	 transition into either a NOP in the A64 case or an ldp in C64.  */
       return BFD_RELOC_AARCH64_NONE;
 
     case BFD_RELOC_AARCH64_TLSLD_ADD_LO12_NC:
@@ -6200,8 +6368,12 @@ aarch64_tls_transition (bfd *input_bfd,
 			struct bfd_link_info *info,
 			const Elf_Internal_Rela *rel,
 			struct elf_link_hash_entry *h,
-			unsigned long r_symndx)
+			unsigned long r_symndx,
+			bool *requires_c64_tls_stub)
 {
+  /* Initialisation done here.  The set to TRUE is done in
+     aarch64_tls_transition_without_check if necessary.  */
+  *requires_c64_tls_stub = false;
   bfd_reloc_code_real_type bfd_r_type
     = elfNN_aarch64_bfd_reloc_from_type (input_bfd,
 					 ELFNN_R_TYPE (rel->r_info));
@@ -6209,12 +6381,8 @@ aarch64_tls_transition (bfd *input_bfd,
   if (! aarch64_can_relax_tls (input_bfd, info, rel, h, r_symndx))
     return bfd_r_type;
 
-  bool morello_reloc = (bfd_r_type == BFD_RELOC_AARCH64_TLSDESC_ADD_LO12
-			&& (ELFNN_R_TYPE (rel[1].r_info)
-			    == MORELLO_R (TLSDESC_CALL)));
-
   return aarch64_tls_transition_without_check (bfd_r_type, info, h,
-					       morello_reloc);
+					       requires_c64_tls_stub);
 }
 
 /* Return the base VMA address which should be subtracted from real addresses
@@ -7844,7 +8012,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	  outrel.r_addend = signed_addend;
 
-	  if (h && !c64_needs_relocation (info, h))
+	  if (!c64_needs_relocation (info, h))
 	    {
 	      /* If we know this symbol does not need a C64 dynamic relocation
 		 then it must be because this is an undefined weak symbol which
@@ -7955,6 +8123,12 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 # define movz_hw_R0	(0x52c00000)
 #endif
 
+/* C64 only instructions.  */
+#define add_C0_C0	(0x02000000)
+#define ldp_X0_X1_C0    (0xa9400400)
+#define add_C0_C2_X0    (0xc2a06040)
+#define scbnds_C0_C0_X1 (0xc2c10000)
+
 /* Structure to hold payload for _bfd_aarch64_erratum_843419_clear_stub,
    it is used to identify the stub information to reset.  */
 
@@ -8030,53 +8204,18 @@ static bfd_reloc_status_type
 elfNN_aarch64_tls_relax (bfd *input_bfd, struct bfd_link_info *info,
 			 asection *input_section,
 			 bfd_byte *contents, Elf_Internal_Rela *rel,
-			 struct elf_link_hash_entry *h, unsigned long r_symndx)
+			 struct elf_link_hash_entry *h)
 {
   bool local_exec = (bfd_link_executable (info)
 		     && TLS_SYMBOL_REFERENCES_LOCAL (info, h));
   unsigned int r_type = ELFNN_R_TYPE (rel->r_info);
   unsigned long insn;
-  bfd_vma sym_size = 0;
   struct elf_aarch64_link_hash_table *globals = elf_aarch64_hash_table (info);
 
   BFD_ASSERT (globals && input_bfd && contents && rel);
 
-  if (local_exec)
-    {
-      if (h != NULL)
-	sym_size = h->size;
-      else
-	{
-	  Elf_Internal_Sym *sym;
-
-	  sym = bfd_sym_from_r_symndx (&globals->root.sym_cache, input_bfd,
-				       r_symndx);
-	  BFD_ASSERT (sym != NULL);
-	  sym_size = sym->st_size;
-	}
-    }
-
   switch (elfNN_aarch64_bfd_reloc_from_type (input_bfd, r_type))
     {
-    case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
-      if (local_exec)
-	{
-	  /* GD->LE relaxation:
-	     nop                     =>   movz x1, objsize_hi16
-	     adrp x0, :tlsdesc:var   =>   movz x0, :tprel_g1:var  */
-	  bfd_putl32 (BUILD_MOVZ(1, sym_size), contents + rel->r_offset - 4);
-	  bfd_putl32 (movz_R0, contents + rel->r_offset);
-
-	  /* We have relaxed the adrp into a mov, we may have to clear any
-	     pending erratum fixes.  */
-	  clear_erratum_843419_entry (globals, rel->r_offset, input_section);
-	  return bfd_reloc_continue;
-	}
-      else
-	{
-	  /* GD->IE relaxation: Not implemented.  */
-	  return bfd_reloc_continue;
-	}
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
       if (local_exec)
@@ -8242,22 +8381,21 @@ elfNN_aarch64_tls_relax (bfd *input_bfd, struct bfd_link_info *info,
       return bfd_reloc_continue;
 #endif
 
+    case BFD_RELOC_MORELLO_TLSIE_ADR_GOTTPREL_PAGE20:
+      /* IE->LE relaxation:
+	 adrp c0, :gottprel:var   =>   adrp c0, __var_data
+	 Instruction does not change (just the relocation on it).  */
+      return bfd_reloc_continue;
+
+    case BFD_RELOC_MORELLO_TLSIE_ADD_LO12:
+      /* IE->LE relaxation:
+	 add c0, c0, :gottprel_lo12:var   =>   add c0, c0, :lo12:__var_data
+	 Instruction does not change (just the relocation on it).  */
+      return bfd_reloc_continue;
+
     case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
       return bfd_reloc_continue;
 
-    case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
-      if (local_exec)
-	{
-	  /* GD->LE relaxation:
-	     ldr xd, [x0, #:tlsdesc_lo12:var] => movk x0, :tprel_g0_nc:var  */
-	  bfd_putl32 (movk_R0, contents + rel->r_offset);
-	  return bfd_reloc_continue;
-	}
-      else
-	{
-	  /* GD->IE relaxation: not implemented.  */
-	  return bfd_reloc_continue;
-	}
     case BFD_RELOC_AARCH64_TLSDESC_LDNN_LO12_NC:
       if (local_exec)
 	{
@@ -8322,25 +8460,39 @@ elfNN_aarch64_tls_relax (bfd *input_bfd, struct bfd_link_info *info,
 	  return bfd_reloc_continue;
 	}
 
-    case BFD_RELOC_MORELLO_TLSDESC_CALL:
+    case BFD_RELOC_MORELLO_TLSDESC_ADR_PAGE20:
+      /* GD->IE relaxation:
+	 adrp c0, :tlsdesc:var   =>   adrp c0, :gottprel:var
+	 GD->LE relaxation:
+	 adrp c0, :tlsdesc:var   =>   adrp c0, __var_data
+	 (No change in instructions, just need a different relocation).  */
+      return bfd_reloc_continue;
+
+    case BFD_RELOC_MORELLO_TLSDESC_LD128_LO12:
       /* GD->LE relaxation:
-	 blr cd				  =>   add c0, c2, x0  */
-      if (local_exec)
-	{
-	  bfd_putl32 (0xc2a06040, contents + rel->r_offset);
-	  return bfd_reloc_ok;
-	}
-      else
-	goto set_nop;
+	 ldr c1, [c0, #:tlsdesc_lo12:var] => add c0, c0, :lo12:__var_data
+	 GD->IE relaxation:
+	 ldr c1, [c0, #:tlsdesc_lo12:var] => add c0, c0, :gottprel_lo12:__var_data
+	 (same relaxation in terms of instruction change, only different in
+	 terms of relocation that is used).  */
+      bfd_putl32 (add_C0_C0, contents + rel->r_offset);
+      return bfd_reloc_continue;
+
+    case BFD_RELOC_MORELLO_TLSDESC_CALL:
+      /* GD->LE relaxation  AND  GD->IE relaxation:
+	 nop                              =>   add c0, c2, x0
+	 blr cd				  =>   scbnds c0, c0, x1  */
+      bfd_putl32 (add_C0_C2_X0, contents + rel->r_offset - 4);
+      bfd_putl32 (scbnds_C0_C0_X1, contents + rel->r_offset);
+      return bfd_reloc_ok;
 
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12:
-      /* GD->LE relaxation:
-	 ldr cd, [c0, #:tlsdesc_lo12:var] => movk x1, objsize_lo16  */
-      if (local_exec
-	  && ELFNN_R_TYPE (rel[1].r_info) == MORELLO_R (TLSDESC_CALL))
+      /* GD->LE relaxation  AND  GD->IE relaxation:
+	 add c0, c0, :tlsdesc_lo12:var    =>  ldp x0, x1, [c0]  */
+      if (ELFNN_R_TYPE (rel[1].r_info) == MORELLO_R (TLSDESC_CALL))
 	{
-	  bfd_putl32 (BUILD_MOVK(1, sym_size), contents + rel->r_offset);
-	  return bfd_reloc_continue;
+	  bfd_putl32 (ldp_X0_X1_C0, contents + rel->r_offset);
+	  return bfd_reloc_ok;
 	}
 
       /* Fall through.  */
@@ -8350,7 +8502,6 @@ elfNN_aarch64_tls_relax (bfd *input_bfd, struct bfd_link_info *info,
 	 add x0, x0, #:tlsdesc_lo12:var	  =>   nop
 	 blr xd				  =>   nop
        */
-set_nop:
       bfd_putl32 (INSN_NOP, contents + rel->r_offset);
       return bfd_reloc_ok;
 
@@ -8491,6 +8642,35 @@ set_nop:
 }
 
 /* Relocate an AArch64 ELF section.  */
+
+static bfd_vma
+c64_populate_tls_data_stub (struct elf_aarch64_link_hash_table *globals,
+			    bfd *input_bfd,
+			    struct elf_link_hash_entry *h,
+			    unsigned long r_symndx,
+			    bfd_vma offset, bfd_vma size,
+			    bfd *output_bfd)
+{
+  struct elf_c64_tls_data_stub_hash_entry *found
+    = c64_tls_stub_find (h, input_bfd, r_symndx, globals);
+  BFD_ASSERT (found);
+
+  if (!found->populated)
+    {
+      bfd_put_NN (output_bfd, offset,
+		  globals->sc64_tls_stubs->contents +
+		  found->tls_stub_offset);
+      bfd_put_NN (output_bfd, size,
+		  globals->sc64_tls_stubs->contents +
+		  found->tls_stub_offset + 8);
+      found->populated = true;
+    }
+
+  return globals->sc64_tls_stubs->output_section->vma
+    + globals->sc64_tls_stubs->output_offset
+    + found->tls_stub_offset;
+}
+
 
 static int
 elfNN_aarch64_relocate_section (bfd *output_bfd,
@@ -8646,16 +8826,26 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	 We call elfNN_aarch64_final_link_relocate unless we're completely
 	 done, i.e., the relaxation produced the final output we want.  */
 
+      bool requires_c64_tls_stub;
       relaxed_bfd_r_type = aarch64_tls_transition (input_bfd, info, rel,
-						   h, r_symndx);
+						   h, r_symndx,
+						   &requires_c64_tls_stub);
       if (relaxed_bfd_r_type != bfd_r_type)
 	{
 	  bfd_r_type = relaxed_bfd_r_type;
 	  howto = elfNN_aarch64_howto_from_bfd_reloc (bfd_r_type);
 	  BFD_ASSERT (howto != NULL);
 	  r_type = howto->type;
+	  if (requires_c64_tls_stub)
+	    {
+	      relocation
+		= c64_populate_tls_data_stub (globals, input_bfd, h, r_symndx,
+					      relocation - tpoff_base (info),
+					      h ? h->size : sym->st_size,
+					      output_bfd);
+	    }
 	  r = elfNN_aarch64_tls_relax (input_bfd, info, input_section,
-				       contents, rel, h, r_symndx);
+				       contents, rel, h);
 	  unresolved_reloc = 0;
 	}
       else
@@ -8720,7 +8910,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 
 		  loc = globals->root.srelgot->contents;
 		  loc += globals->root.srelgot->reloc_count++
-		    * RELOC_SIZE (htab);
+		    * RELOC_SIZE (globals);
 		  bfd_elfNN_swap_reloca_out (output_bfd, &rela, loc);
 
 		  bfd_reloc_code_real_type real_type =
@@ -8782,6 +8972,9 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 
 	case BFD_RELOC_MORELLO_TLSIE_ADR_GOTTPREL_PAGE20:
 	case BFD_RELOC_MORELLO_TLSIE_ADD_LO12:
+	  c64_rtype = true;
+	  /* Fall through.  */
+
 	case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
 	case BFD_RELOC_AARCH64_TLSIE_LDNN_GOTTPREL_LO12_NC:
 	case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
@@ -8803,6 +8996,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 		(h == NULL
 		 || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 		 || h->root.type != bfd_link_hash_undefweak);
+	      BFD_ASSERT (!c64_rtype || c64_needs_relocation (info, h));
 	      need_relocs = need_relocs || c64_rtype;
 
 	      BFD_ASSERT (globals->root.srelgot != NULL);
@@ -8825,7 +9019,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 
 		  loc = globals->root.srelgot->contents;
 		  loc += globals->root.srelgot->reloc_count++
-		    * RELOC_SIZE (htab);
+		    * RELOC_SIZE (globals);
 
 		  bfd_elfNN_swap_reloca_out (output_bfd, &rela, loc);
 
@@ -8867,6 +9061,7 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	      need_relocs = (h == NULL
 			     || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 			     || h->root.type != bfd_link_hash_undefweak);
+	      BFD_ASSERT (!c64_rtype || c64_needs_relocation (info, h));
 	      need_relocs = need_relocs || c64_rtype;
 
 	      BFD_ASSERT (globals->root.srelgot != NULL);
@@ -9565,7 +9760,16 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	}
 
       /* Could be done earlier, if h were already available.  */
-      bfd_r_type = aarch64_tls_transition (abfd, info, rel, h, r_symndx);
+      bool requires_c64_tls_stub;
+      bfd_r_type = aarch64_tls_transition (abfd, info, rel, h, r_symndx,
+					   &requires_c64_tls_stub);
+      if (requires_c64_tls_stub
+	  && !c64_record_tls_stub (htab, abfd, h, r_symndx))
+	{
+	  _bfd_error_handler (_("%pB: failed to record TLS stub"), abfd);
+	  bfd_set_error (bfd_error_no_memory);
+	  return false;
+	}
 
       if (h != NULL)
 	{
@@ -9953,7 +10157,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  break;
 
 	case BFD_RELOC_MORELLO_CAPINIT:
-	  if (h && !c64_needs_relocation (info, h))
+	  if (!c64_needs_relocation (info, h))
 	    /* If this symbol does not need a relocation, then there's no
 	       reason to increase the srelcaps size for a relocation.  */
 	    break;
@@ -10659,14 +10863,17 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	      htab->root.sgot->size += GOT_ENTRY_SIZE (htab);
 	    }
 
+	  /* We avoid TLS relocations on undefweak symbols since it is not
+	     well defined.  Hence we should not be seeing got entries
+	     on any symbol which would not need a relocation in a C64 binary.
+	     */
+	  BFD_ASSERT (c64_needs_relocation (info, h));
 	  indx = h && h->dynindx != -1 ? h->dynindx : 0;
 	  if ((ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
 	       || h->root.type != bfd_link_hash_undefweak)
 	      && (!bfd_link_executable (info)
 		  || indx != 0
 		  || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)
-		  /* On Morello support only TLSDESC_GD to TLSLE relaxation;
-		     for everything else we must emit a dynamic relocation.  */
 		  || htab->c64_rel))
 	    {
 	      if (got_type & GOT_TLSDESC_GD)
@@ -11074,7 +11281,8 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd,
 	  || s == htab->root.iplt
 	  || s == htab->root.igotplt
 	  || s == htab->root.sdynbss
-	  || s == htab->root.sdynrelro)
+	  || s == htab->root.sdynrelro
+	  || s == htab->sc64_tls_stubs)
 	{
 	  /* Strip this section if we don't need it; see the
 	     comment below.  */
