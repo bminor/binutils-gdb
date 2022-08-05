@@ -1721,14 +1721,9 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
       extdynsize = get_elf_backend_data (abfd)->s->sizeof_dyn;
       swap_dyn_in = get_elf_backend_data (abfd)->s->swap_dyn_in;
 
-      extdyn = dynbuf;
-      /* PR 17512: file: 6f427532.  */
-      if (s->size < extdynsize)
-	goto error_return;
-      extdynend = extdyn + s->size;
-      /* PR 17512: file: id:000006,sig:06,src:000000,op:flip4,pos:5664.
-	 Fix range check.  */
-      for (; extdyn <= (extdynend - extdynsize); extdyn += extdynsize)
+      for (extdyn = dynbuf, extdynend = dynbuf + s->size;
+	   (size_t) (extdynend - extdyn) >= extdynsize;
+	   extdyn += extdynsize)
 	{
 	  Elf_Internal_Dyn dyn;
 	  const char *name = "";

@@ -4406,7 +4406,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	  shlink = elf_elfsections (abfd)[elfsec]->sh_link;
 
 	  for (extdyn = dynbuf;
-	       extdyn <= dynbuf + s->size - bed->s->sizeof_dyn;
+	       (size_t) (dynbuf + s->size - extdyn) >= bed->s->sizeof_dyn;
 	       extdyn += bed->s->sizeof_dyn)
 	    {
 	      Elf_Internal_Dyn dyn;
@@ -8219,9 +8219,9 @@ bfd_elf_get_bfd_needed_list (bfd *abfd,
   extdynsize = get_elf_backend_data (abfd)->s->sizeof_dyn;
   swap_dyn_in = get_elf_backend_data (abfd)->s->swap_dyn_in;
 
-  extdyn = dynbuf;
-  extdynend = extdyn + s->size;
-  for (; extdyn < extdynend; extdyn += extdynsize)
+  for (extdyn = dynbuf, extdynend = dynbuf + s->size;
+       (size_t) (extdynend - extdyn) >= extdynsize;
+       extdyn += extdynsize)
     {
       Elf_Internal_Dyn dyn;
 

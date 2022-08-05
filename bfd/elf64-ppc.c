@@ -2513,9 +2513,9 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	  extdynsize = get_elf_backend_data (abfd)->s->sizeof_dyn;
 	  swap_dyn_in = get_elf_backend_data (abfd)->s->swap_dyn_in;
 
-	  extdyn = dynbuf;
-	  extdynend = extdyn + dynamic->size;
-	  for (; extdyn < extdynend; extdyn += extdynsize)
+	  for (extdyn = dynbuf, extdynend = dynbuf + dynamic->size;
+	       (size_t) (extdynend - extdyn) >= extdynsize;
+	       extdyn += extdynsize)
 	    {
 	      Elf_Internal_Dyn dyn;
 	      (*swap_dyn_in) (abfd, extdyn, &dyn);

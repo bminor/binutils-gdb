@@ -4845,7 +4845,7 @@ elf64_vms_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	}
 
       for (extdyn = dynbuf;
-	   extdyn < dynbuf + s->size;
+	   (size_t) (dynbuf + s->size - extdyn) >= bed->s->sizeof_dyn;
 	   extdyn += bed->s->sizeof_dyn)
 	{
 	  Elf_Internal_Dyn dyn;
