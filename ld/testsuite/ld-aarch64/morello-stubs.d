@@ -1,4 +1,5 @@
 #source: morello-stubs.s
+#target: [check_shared_lib_support]
 #as:
 #ld: -shared -T morello-stubs.ld
 #objdump: -DR -j .text_low -j .text_high -j .got.plt -j .plt
