@@ -2773,7 +2773,7 @@ read_and_display_attr_value (unsigned long           attribute,
     case DW_FORM_rnglistx:
       if (!do_loc)
 	{
-	  dwarf_vma base, index;
+	  dwarf_vma base, idx;
 	  const char *suffix = strrchr (section->name, '.');
 	  bool dwo = suffix && strcmp (suffix, ".dwo") == 0;
 
@@ -2781,29 +2781,29 @@ read_and_display_attr_value (unsigned long           attribute,
 	    {
 	      if (dwo)
 		{
-		  index = fetch_indexed_value (uvalue, loclists_dwo, 0);
-		  index += (offset_size == 8) ? 20 : 12;
+		  idx = fetch_indexed_value (uvalue, loclists_dwo, 0);
+		  idx += (offset_size == 8) ? 20 : 12;
 		}
 	      else if (debug_info_p == NULL)
 		{
-		  index = fetch_indexed_value (uvalue, loclists, 0);
+		  idx = fetch_indexed_value (uvalue, loclists, 0);
 		}
 	      else
 		{
 		  /* We want to compute:
-		       index = fetch_indexed_value (uvalue, loclists, debug_info_p->loclists_base);
-		       index += debug_info_p->loclists_base;
+		       idx = fetch_indexed_value (uvalue, loclists, debug_info_p->loclists_base);
+		       idx += debug_info_p->loclists_base;
 		      Fortunately we already have that sum cached in the
 		      loc_offsets array.  */
-		  index = debug_info_p->loc_offsets [uvalue];
+		  idx = debug_info_p->loc_offsets [uvalue];
 		}
 	    }
 	  else if (form == DW_FORM_rnglistx)
 	    {
 	      if (dwo)
 		{
-		  index = fetch_indexed_value (uvalue, rnglists_dwo, 0);
-		  index += (offset_size == 8) ? 20 : 12;
+		  idx = fetch_indexed_value (uvalue, rnglists_dwo, 0);
+		  idx += (offset_size == 8) ? 20 : 12;
 		}
 	      else
 		{
@@ -2813,8 +2813,8 @@ read_and_display_attr_value (unsigned long           attribute,
 		    base = debug_info_p->rnglists_base;
 		  /* We do not have a cached value this time, so we perform the
 		     computation manually.  */
-		  index = fetch_indexed_value (uvalue, rnglists, base);
-		  index += base;
+		  idx = fetch_indexed_value (uvalue, rnglists, base);
+		  idx += base;
 		}
 	    }
 	  else
@@ -2827,13 +2827,13 @@ read_and_display_attr_value (unsigned long           attribute,
 		base = debug_info_p->addr_base;
 
 	      base += uvalue * pointer_size;
-	      index = fetch_indexed_addr (base, pointer_size);
+	      idx = fetch_indexed_addr (base, pointer_size);
 	    }
 
 	  /* We have already displayed the form name.  */
 	  printf (_("%c(index: 0x%s): %s"), delimiter,
 		  dwarf_vmatoa ("x", uvalue),
-		  dwarf_vmatoa ("x", index));
+		  dwarf_vmatoa ("x", idx));
 	}
       break;
 
