@@ -5615,6 +5615,34 @@ of a signed value.  */
 of a signed value.  */
   BFD_RELOC_AARCH64_MOVW_PREL_G3,
 
+/* Morello MOV[KZ] instruction with most significant bits 0 to 15 of the size of
+a symbol.  */
+  BFD_RELOC_MORELLO_MOVW_SIZE_G0,
+
+/* Morello MOV[KZ] instruction with less significant bits 0 to 15 of the size of
+a symbol.  */
+  BFD_RELOC_MORELLO_MOVW_SIZE_G0_NC,
+
+/* Morello MOV[KZ] instruction with most significant bits 16 to 31 of the size
+of a symbol.  */
+  BFD_RELOC_MORELLO_MOVW_SIZE_G1,
+
+/* Morello MOV[KZ] instruction with less significant bits 16 to 31 of the size
+of a symbol.  */
+  BFD_RELOC_MORELLO_MOVW_SIZE_G1_NC,
+
+/* Morello MOV[KZ] instruction with most significant bits 32 to 47 of the size
+of a symbol.  */
+  BFD_RELOC_MORELLO_MOVW_SIZE_G2,
+
+/* Morello MOV[KZ] instruction with less significant bits 32 to 47 of the size
+of a symbol.  */
+  BFD_RELOC_MORELLO_MOVW_SIZE_G2_NC,
+
+/* Morello MOV[KZ] instruction with most significant bits 48 to 64 of the size
+of a symbol.  */
+  BFD_RELOC_MORELLO_MOVW_SIZE_G3,
+
 /* AArch64 A64C Load Literal instruction, holding a 17 bit pc-relative
 word offset.  The lowest four bits must be zero and are not stored in
 the instruction, giving a 21 bit signed byte offset.  */
@@ -5957,6 +5985,12 @@ instructions.  */
 TLS descriptor function.  */
   BFD_RELOC_MORELLO_TLSDESC_CALL,
 
+/* Morello TLS INITIAL EXEC relocation.  */
+  BFD_RELOC_MORELLO_TLSIE_ADR_GOTTPREL_PAGE20,
+
+/* Morello TLS INITIAL EXEC relocation.  */
+  BFD_RELOC_MORELLO_TLSIE_ADD_LO12,
+
 /* AArch64 TLS relocation.  */
   BFD_RELOC_AARCH64_COPY,
 
@@ -6001,6 +6035,10 @@ TLS descriptor function.  */
 
 /* Morello TLS relocation, identifies the TLS descriptor to be filled.  */
   BFD_RELOC_MORELLO_TLSDESC,
+
+/* Morello TLS relocation, instructs the dynamic loader to initialize an offset
+and size for a given symbol.  */
+  BFD_RELOC_MORELLO_TPREL128,
 
 /* AArch64 pseudo relocation code to mark the end of the AArch64
 relocation enumerators that have direct mapping to ELF reloc codes.
