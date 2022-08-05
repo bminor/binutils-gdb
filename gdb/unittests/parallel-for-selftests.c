@@ -68,6 +68,34 @@ test (int n_threads)
 			  });
   SELF_CHECK (counter == 0);
 
+  auto task_size_max_ = [] (int iter)
+    {
+      return (size_t)SIZE_MAX;
+    };
+  auto task_size_max = gdb::make_function_view (task_size_max_);
+
+  counter = 0;
+  gdb::parallel_for_each (1, 0, NUMBER,
+			  [&] (int start, int end)
+			  {
+			    counter += end - start;
+			  }, task_size_max);
+  SELF_CHECK (counter == NUMBER);
+
+  auto task_size_one_ = [] (int iter)
+    {
+      return (size_t)1;
+    };
+  auto task_size_one = gdb::make_function_view (task_size_one_);
+
+  counter = 0;
+  gdb::parallel_for_each (1, 0, NUMBER,
+			  [&] (int start, int end)
+			  {
+			    counter += end - start;
+			  }, task_size_one);
+  SELF_CHECK (counter == NUMBER);
+
 #undef NUMBER
 }
 
