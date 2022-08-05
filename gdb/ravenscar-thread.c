@@ -302,10 +302,12 @@ ravenscar_thread_target::add_active_thread ()
   if (!runtime_initialized ())
     return nullptr;
 
-  /* Make sure we set m_base_ptid before calling active_task
-     as the latter relies on it.  */
+  /* It's possible for runtime_initialized to return true but for it
+     not to be fully initialized.  For example, this can happen for a
+     breakpoint placed at the task's beginning.  */
   ptid_t active_ptid = active_task (base_cpu);
-  gdb_assert (active_ptid != null_ptid);
+  if (active_ptid == null_ptid)
+    return nullptr;
 
   /* The running thread may not have been added to
      system.tasking.debug's list yet; so ravenscar_update_thread_list
@@ -437,7 +439,9 @@ ravenscar_thread_target::wait (ptid_t ptid,
     {
       m_base_ptid = event_ptid;
       this->update_thread_list ();
-      return this->add_active_thread ()->ptid;
+      thread_info *thr = this->add_active_thread ();
+      if (thr != nullptr)
+	return thr->ptid;
     }
   return event_ptid;
 }
