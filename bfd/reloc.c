@@ -7103,6 +7103,41 @@ ENUMDOC
   AArch64 MOVK instruction with most significant bits 47 to 63
   of a signed value.
 ENUM
+  BFD_RELOC_MORELLO_MOVW_SIZE_G0
+ENUMDOC
+  Morello MOV[KZ] instruction with most significant bits 0 to 15 of the size of
+  a symbol.
+ENUM
+  BFD_RELOC_MORELLO_MOVW_SIZE_G0_NC
+ENUMDOC
+  Morello MOV[KZ] instruction with less significant bits 0 to 15 of the size of
+  a symbol.
+ENUM
+  BFD_RELOC_MORELLO_MOVW_SIZE_G1
+ENUMDOC
+  Morello MOV[KZ] instruction with most significant bits 16 to 31 of the size
+  of a symbol.
+ENUM
+  BFD_RELOC_MORELLO_MOVW_SIZE_G1_NC
+ENUMDOC
+  Morello MOV[KZ] instruction with less significant bits 16 to 31 of the size
+  of a symbol.
+ENUM
+  BFD_RELOC_MORELLO_MOVW_SIZE_G2
+ENUMDOC
+  Morello MOV[KZ] instruction with most significant bits 32 to 47 of the size
+  of a symbol.
+ENUM
+  BFD_RELOC_MORELLO_MOVW_SIZE_G2_NC
+ENUMDOC
+  Morello MOV[KZ] instruction with less significant bits 32 to 47 of the size
+  of a symbol.
+ENUM
+  BFD_RELOC_MORELLO_MOVW_SIZE_G3
+ENUMDOC
+  Morello MOV[KZ] instruction with most significant bits 48 to 64 of the size
+  of a symbol.
+ENUM
   BFD_RELOC_MORELLO_LD_LO17_PCREL
 ENUMDOC
   AArch64 A64C Load Literal instruction, holding a 17 bit pc-relative
@@ -7537,6 +7572,14 @@ ENUMDOC
   Relocation to identify the BLR call which performs an indirect call to the
   TLS descriptor function.
 ENUM
+  BFD_RELOC_MORELLO_TLSIE_ADR_GOTTPREL_PAGE20
+ENUMDOC
+  Morello TLS INITIAL EXEC relocation.
+ENUM
+  BFD_RELOC_MORELLO_TLSIE_ADD_LO12
+ENUMDOC
+  Morello TLS INITIAL EXEC relocation.
+ENUM
   BFD_RELOC_AARCH64_COPY
 ENUMDOC
   AArch64 TLS relocation.
@@ -7596,6 +7639,11 @@ ENUM
   BFD_RELOC_MORELLO_TLSDESC
 ENUMDOC
   Morello TLS relocation, identifies the TLS descriptor to be filled.
+ENUM
+  BFD_RELOC_MORELLO_TPREL128
+ENUMDOC
+  Morello TLS relocation, instructs the dynamic loader to initialize an offset
+  and size for a given symbol.
 ENUM
   BFD_RELOC_AARCH64_RELOC_END
 ENUMDOC
