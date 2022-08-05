@@ -99,13 +99,16 @@ proc aarch64_required_func_addend { base result } {
 proc aarch64_page_plus_offset { page offset } {
   return [format %x [expr "0x$page + 0x$offset"] ];
 }
+proc aarch64_page_plus_decimal_offset { page offset } {
+  return [format %x [expr "0x$page + $offset"] ];
+}
 
 # Return the 8-hexdigit truncation of an address.
 proc aarch64_8digit_addr { addr { plusLSB 0 } } {
   if { $plusLSB } {
     return [aarch64_8digit_addr [format %08x [expr "0x$addr + 1"]]];
   }
-  return [string range "$addr" end-7 end];
+  return [format %08x "0x$addr"];
 }
 
 set eh-frame-merge-lp64 [list [list "EH Frame merge" \

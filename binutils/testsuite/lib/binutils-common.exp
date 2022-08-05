@@ -465,7 +465,7 @@ proc regexp_diff { file_1 file_2 args } {
 		}
 		foreach {name value} $extra_subst {
 		    set value [eval $value];
-		    regsub -- $name $line_bx $value line_bx
+		    regsub -all -- $name $line_bx $value line_bx
 		}
 		verbose "looking for $n\"^$line_bx$\"" 3
 		while { [expr [regexp "^$line_bx$" "$line_a" PREVMATCH {*}$extra_vars] == $negated] } {
@@ -489,7 +489,7 @@ proc regexp_diff { file_1 file_2 args } {
 		    }
 		    foreach {name value} $extra_subst {
 		        set value [eval $value];
-			regsub -- $name $line_bx $value line_bx
+			regsub -all -- $name $line_bx $value line_bx
 		    }
 		    verbose "optional match for $n\"^$line_bx$\"" 3
 		    if { [expr [regexp "^$line_bx$" "$line_a" PREVMATCH {*}$extra_vars] != $negated] } {
@@ -555,7 +555,7 @@ proc regexp_diff { file_1 file_2 args } {
 		set value [eval $value];
 		# send_user "match:       $name\n"
 		# send_user "replacement: $value\n"
-		regsub -- $name $line_bx $value line_bx
+		regsub -all -- $name $line_bx $value line_bx
 	    }
 	    # send_user "checking against $line_bx\n"
 	    verbose "regexp $n\"^$line_bx$\"\nline   \"$line_a\"" 3
