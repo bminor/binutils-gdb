@@ -80,8 +80,7 @@ extern void elf64_aarch64_next_input_section
   (struct bfd_link_info *, struct bfd_section *);
 extern bfd_boolean elf64_aarch64_size_stubs
   (bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
-   struct bfd_section * (*) (const char *, struct bfd_section *),
-   void (*) (void));
+   struct bfd_section * (*) (const char *, struct bfd_section *));
 
 extern void elf64_c64_resize_sections (bfd *, struct bfd_link_info *,
 				       void (*) (asection *, bfd_vma),
@@ -96,8 +95,7 @@ extern void elf32_aarch64_next_input_section
   (struct bfd_link_info *, struct bfd_section *);
 extern bfd_boolean elf32_aarch64_size_stubs
   (bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
-   struct bfd_section * (*) (const char *, struct bfd_section *),
-   void (*) (void));
+   struct bfd_section * (*) (const char *, struct bfd_section *));
 extern bfd_boolean elf32_aarch64_build_stubs
   (struct bfd_link_info *);
 

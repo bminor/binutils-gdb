@@ -5450,8 +5450,7 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
 			  struct bfd_link_info *info,
 			  bfd_signed_vma group_size,
 			  asection * (*add_stub_section) (const char *,
-							  asection *),
-			  void (*layout_sections_again) (void))
+							  asection *))
 {
   bfd_size_type stub_group_size;
   bfd_boolean stubs_always_before_branch;
@@ -5467,7 +5466,6 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
   /* Stash our params away.  */
   htab->stub_bfd = stub_bfd;
   htab->add_stub_section = add_stub_section;
-  htab->layout_sections_again = layout_sections_again;
   stubs_always_before_branch = group_size < 0;
   if (group_size < 0)
     stub_group_size = -group_size;
