@@ -292,6 +292,17 @@
   (((htab)->root.srelplt == NULL) ? 0			\
    : (htab)->root.srelplt->reloc_count * GOT_ENTRY_SIZE (htab))
 
+/* Macro to check for a static non-PIE binary.  Checking for this in incorrect
+   ways is something that has been the cause of a few bugs throughout Morello
+   development.  Making a macro for the check should help make this easier to
+   check.
+   N.b. this macro can only be called after symbols have been loaded by the
+   generic linker.  In practice this is not much of a restriction, since the
+   check_relocs, size_dynamic_sections, and relocate_section hooks are all done
+   after that point.  */
+#define static_pde(info) (!elf_hash_table (info)->dynamic_sections_created \
+			  && bfd_link_executable (info))
+
 /* The only time that we want the value of a symbol but do not want a
    relocation for it in Morello is when that symbol is undefined weak.  In this
    case we just need the zero capability and there's no point emitting a
@@ -7441,7 +7452,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		 done so that we can mark that section with
 		 __rela_dyn_{start,end} symbols for the runtime to find and
 		 initialise relocations with.  */
-	      if (bfd_link_executable (info) && !is_dynamic)
+	      if (static_pde (info))
 		s = globals->srelcaps;
 
 	      outrel.r_addend = signed_addend;
@@ -9149,8 +9160,7 @@ aarch64_elf_init_got_section (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* Track capability initialisation for static non-PIE binaries.  */
-  if (bfd_link_executable (info) && !globals->root.dynamic_sections_created
-      && globals->srelcaps == NULL)
+  if (static_pde (info) && globals->srelcaps == NULL)
     globals->srelcaps = globals->root.srelgot;
 
   if (globals->root.igotplt != NULL)
@@ -10382,22 +10392,16 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		 symbol that we know will not be resolved to anything by the
 		 runtime do not need a relocation.  */
 	    }
-	  else if (dyn)
-	    {
-	      /* Any capability relocations required in a dynamic binary
-		 should go in the srelgot.  N.b. many capability relocations
-		 would be caught by the first clause in this if chain.  */
-	      htab->root.srelgot->size += RELOC_SIZE (htab);
-	    }
-	  else if (bfd_link_executable (info))
-	    {
-	      /* If we have a capability relocation that is not handled by the
-		 case above then this must be a statically linked executable.
-		 We want capability relocations in a statically linked
-		 executable to go in the srelcaps section.  */
-	      BFD_ASSERT (!bfd_link_pic (info) && !dyn);
-	      htab->srelcaps->size += RELOC_SIZE (htab);
-	    }
+	  else if (!static_pde (info))
+	    /* Any capability relocations required in something other than a
+	       static PDE should go in the srelgot.  N.b. many capability
+	       relocations would be caught by the first clause in this if
+	       chain.  */
+	    htab->root.srelgot->size += RELOC_SIZE (htab);
+	  else
+	    /* We want capability relocations in a statically linked
+	       PDE to go in the srelcaps section.  */
+	    htab->srelcaps->size += RELOC_SIZE (htab);
 	}
       else
 	{
@@ -10740,10 +10744,8 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd,
 		      || got_type & GOT_NORMAL)
 		    htab->root.srelgot->size += RELOC_SIZE (htab);
 		}
-	      /* Static binary; put relocs into srelcaps.  */
-	      else if (bfd_link_executable (info)
-		       && !htab->root.dynamic_sections_created
-		       && htab->c64_rel)
+	      /* Static non-PIE; put relocs into srelcaps.  */
+	      else if (static_pde (info) && htab->c64_rel)
 		htab->srelcaps->size += RELOC_SIZE (htab);
 	      /* Else capability relocation needs to go into srelgot.  */
 	      else if (htab->c64_rel)
@@ -10772,8 +10774,7 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd,
 		 elfNN_aarch64_allocate_local_ifunc_dynrelocs,
 		 info);
 
-  if (bfd_link_executable (info)
-      && !htab->root.dynamic_sections_created
+  if (static_pde (info)
       && htab->srelcaps
       && htab->srelcaps->size > 0)
     {
