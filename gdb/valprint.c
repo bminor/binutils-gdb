@@ -1190,6 +1190,18 @@ value_print (struct value *val, struct ui_file *stream,
   current_language->value_print (val, stream, options);
 }
 
+/* Meant to be used in debug sessions, so don't export it in a header file.  */
+extern void ATTRIBUTE_UNUSED debug_val (struct value *val);
+
+/* Print VAL.  */
+
+void ATTRIBUTE_UNUSED
+debug_val (struct value *val)
+{
+  value_print (val, gdb_stdlog, &user_print_options);
+  gdb_flush (gdb_stdlog);
+}
+
 static void
 val_print_type_code_flags (struct type *type, struct value *original_value,
 			   int embedded_offset, struct ui_file *stream)

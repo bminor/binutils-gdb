@@ -65,6 +65,19 @@ dump_prefix_expression (struct expression *exp, struct ui_file *stream)
   exp->op->dump (stream, 0);
 }
 
+/* Meant to be used in debug sessions, so don't export it in a header file.  */
+extern void ATTRIBUTE_USED debug_exp (struct expression *exp);
+
+/* Print EXP.  */
+
+void
+ATTRIBUTE_USED
+debug_exp (struct expression *exp)
+{
+  exp->op->dump (gdb_stdlog, 0);
+  gdb_flush (gdb_stdlog);
+}
+
 namespace expr
 {
 
