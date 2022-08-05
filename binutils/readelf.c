@@ -7710,6 +7710,8 @@ process_section_headers (Filedata * filedata)
 		    {
 		      if (chdr.ch_type == ELFCOMPRESS_ZLIB)
 			printf ("       ZLIB, ");
+		      else if (chdr.ch_type == ELFCOMPRESS_ZSTD)
+			printf ("       ZSTD, ");
 		      else
 			printf (_("       [<unknown>: 0x%x], "),
 				chdr.ch_type);
