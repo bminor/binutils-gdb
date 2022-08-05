@@ -207,23 +207,30 @@ When the time comes to actually make the release....
 
   21. a. Update the release number in bfd/version.m4 on the release
          branch to a whole new minor version number, without a point
-         value.  Eg "2.38.90" becomes "2.39".
-	 
+         value.  Eg "2.39.90" becomes "2.40".
+
       b. Change bfd/development.sh to set all values to "false".
-      
+
       c. Regenerate the configure and makefiles.  And *info* files.
 
+            make all-gas all-ld all-binutils all-gprof all-gold all-gprofng
+	    make info
+	    
       d. Create a ChangeLog from the git refs for all of the commits
          from when changelog entries were no longer required:
 
            gitlog-to-changelog --since=2021-07-03 > ChangeLog.git
+           git add ChangeLog.git
 
-        The gitlog-to-changelog script is part of the sources
-	of the "config" project.
+         The gitlog-to-changelog script is part of the sources
+	 of the "config" project.
 	
-      e.  Add ChangeLog entries for all of the updates and add a
-          "this-is-the-2.38-release" comment and commit.
+      e. Add ChangeLog entries for all of the updates and add a
+         "this-is-the-2.38-release" comment and commit.
 
+           git commit
+	   git push
+	   
   22. Check that your file creation mask will create the
       correct file permissions.  Eg:
 
@@ -238,7 +245,7 @@ When the time comes to actually make the release....
   23. Note - check to see if any new files have been added to the top
       level of the source directory, but which are not in the
       DEVO_SUPPORT variable in the src-release.sh script.  If they are
-      needed then add them.  NB/ Add the new ChangeLog.git file.
+      needed then add them.
 
       Create the release tarballs:
   
@@ -247,46 +254,50 @@ When the time comes to actually make the release....
   24. Check that the files in the tarballs have the correct
       permissions.
 
-           tar tvf binutils-2.39.tar.bz2 | grep -e "---"
+           tar tvf binutils-*.tar.bz2 | grep -e "---"
 
       Also check that the man files are not empty.  (cf PR 28144).
 
-           tar tvf binutils-2.39.tar.xz | grep -e "\.1"
+           tar tvf binutils-*.tar.xz | grep -e "\.1"
 
   25. Sanity check the release on x86_64-pc-linux-gnu by building and
       running the testsuites (gas, gold, binutils and ld).  Make the
-      source directory read-only before building.  Also test
-      "make install".  If necessary fix any problems.
+      source directory read-only before building.  (Note - the gprofng
+      sources need a writeable doc/ directory.  This is a bug that needs
+      to be fixed).
+      Also test "make install".
+      If necessary fix any problems.
 
         pushd /dev/shm
 	mkdir delme
 	cd delme
 	tar xvf <path-to-sources>/binutils-2.*.tar.lz
 	chmod -R -w binutils-2.*
+	chmod +w binutils-2.*/gprofng/doc
 	mkdir build
 	cd build
 	../binutils-2.*/configure --quiet --enable-gold --prefix=`pwd`/install --enable-plugins --enable-shared
 	make all-gas all-gold all-ld all-binutils all-gprof all-gprofng
 	make check-gas check-binutils check-ld check-gold
-        make install-gas install-gold install-ld install-binutils
+        make install-gas install-gold install-ld install-binutils install-gprofng
 
         # Needed for step 29...
         make html pdf
 
         popd
-	
+
   26. Tag the branch with the new release number:
 	[optional: add "-u XXXXX" to sign with a gpg key]
 	enter a tag message such as: "Official GNU Binutils 2.3x release"
 
-	    git tag -a binutils-2_38 -u DD9E3C4F      <=== Be careful to get the tag right
+	    git tag -a binutils-2_40 -u DD9E3C4F      <=== Be careful to get the tag right
 
         NB/ If you do sign the binaries make sure to use a key
 	that has been published with the FSF.
 
         Then push the release:
 	
-	    git push origin binutils-2_3x
+	    git push origin binutils-2_40
 
         If you get an error message along the lines of:
 	"Invalid revision range ..." you can ignore it.
@@ -308,7 +319,7 @@ When the time comes to actually make the release....
        sftp sourceware.org
          cd /sourceware/ftp/pub/binutils/releases
  	 put binutils-2.3*.tar.*
- 	 chmod 644 binutils-2.3x.tar.*
+ 	 chmod 644 binutils-2.3*.tar.*
 	 quit
 
       FIXME: Are the signatures (created by the gnupload script in step 27)
