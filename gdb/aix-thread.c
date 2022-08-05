@@ -72,11 +72,6 @@ static bool debug_aix_thread;
 
 #define PD_TID(ptid)	(pd_active && ptid.tid () != 0)
 
-/* pthdb_user_t value that we pass to pthdb functions.  0 causes
-   PTHDB_BAD_USER errors, so use 1.  */
-
-#define PD_USER	1
-
 /* Success and failure values returned by pthdb callbacks.  */
 
 #define PDC_SUCCESS	PTHDB_SUCCESS
@@ -331,7 +326,7 @@ pid_to_prc (ptid_t *ptidp)
    the address of SYMBOLS[<i>].name.  */
 
 static int
-pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
+pdc_symbol_addrs (pthdb_user_t user_current_pid, pthdb_symbol_t *symbols, int count)
 {
   struct bound_minimal_symbol ms;
   int i;
@@ -339,8 +334,8 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
 
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog,
-		"pdc_symbol_addrs (user = %ld, symbols = 0x%lx, count = %d)\n",
-		user, (long) symbols, count);
+		"pdc_symbol_addrs (user_current_pid = %ld, symbols = 0x%lx, count = %d)\n",
+		user_current_pid, (long) symbols, count);
 
   for (i = 0; i < count; i++)
     {
@@ -378,7 +373,7 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
    If successful return 0, else non-zero is returned.  */
 
 static int
-pdc_read_regs (pthdb_user_t user, 
+pdc_read_regs (pthdb_user_t user_current_pid,
 	       pthdb_tid_t tid,
 	       unsigned long long flags,
 	       pthdb_context_t *context)
@@ -450,7 +445,7 @@ pdc_read_regs (pthdb_user_t user,
    If successful return 0, else non-zero is returned.  */
 
 static int
-pdc_write_regs (pthdb_user_t user,
+pdc_write_regs (pthdb_user_t user_current_pid,
 		pthdb_tid_t tid,
 		unsigned long long flags,
 		pthdb_context_t *context)
@@ -500,17 +495,29 @@ pdc_write_regs (pthdb_user_t user,
 /* pthdb callback: read LEN bytes from process ADDR into BUF.  */
 
 static int
-pdc_read_data (pthdb_user_t user, void *buf, 
+pdc_read_data (pthdb_user_t user_current_pid, void *buf,
 	       pthdb_addr_t addr, size_t len)
 {
   int status, ret;
 
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog,
-		"pdc_read_data (user = %ld, buf = 0x%lx, addr = %s, len = %ld)\n",
-		user, (long) buf, hex_string (addr), len);
+		"pdc_read_data (user_current_pid = %ld, buf = 0x%lx, addr = %s, len = %ld)\n",
+		user_current_pid, (long) buf, hex_string (addr), len);
 
-  status = target_read_memory (addr, (gdb_byte *) buf, len);
+  /* This is needed to eliminate the dependency of current thread
+     which is null so that thread reads the correct target memory.  */
+  {
+    scoped_restore_current_thread restore_current_thread;
+    /* Before the first inferior is added, we pass inferior_ptid.pid ()
+       from pd_enable () which is 0.  There is no need to switch threads
+       during first initialisation.  In the rest of the callbacks the
+       current thread needs to be correct.  */
+    if (user_current_pid != 0)
+      switch_to_thread (current_inferior ()->process_target (),
+			ptid_t (user_current_pid));
+    status = target_read_memory (addr, (gdb_byte *) buf, len);
+  }
   ret = status == 0 ? PDC_SUCCESS : PDC_FAILURE;
 
   if (debug_aix_thread)
@@ -522,15 +529,15 @@ pdc_read_data (pthdb_user_t user, void *buf,
 /* pthdb callback: write LEN bytes from BUF to process ADDR.  */
 
 static int
-pdc_write_data (pthdb_user_t user, void *buf, 
+pdc_write_data (pthdb_user_t user_current_pid, void *buf,
 		pthdb_addr_t addr, size_t len)
 {
   int status, ret;
 
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog,
-		"pdc_write_data (user = %ld, buf = 0x%lx, addr = %s, len = %ld)\n",
-		user, (long) buf, hex_string (addr), len);
+		"pdc_write_data (user_current_pid = %ld, buf = 0x%lx, addr = %s, len = %ld)\n",
+		user_current_pid, (long) buf, hex_string (addr), len);
 
   status = target_write_memory (addr, (gdb_byte *) buf, len);
   ret = status == 0 ? PDC_SUCCESS : PDC_FAILURE;
@@ -545,12 +552,12 @@ pdc_write_data (pthdb_user_t user, void *buf,
    in BUFP.  */
 
 static int
-pdc_alloc (pthdb_user_t user, size_t len, void **bufp)
+pdc_alloc (pthdb_user_t user_current_pid, size_t len, void **bufp)
 {
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog,
-		"pdc_alloc (user = %ld, len = %ld, bufp = 0x%lx)\n",
-		user, len, (long) bufp);
+		"pdc_alloc (user_current_pid = %ld, len = %ld, bufp = 0x%lx)\n",
+		user_current_pid, len, (long) bufp);
   *bufp = xmalloc (len);
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog, 
@@ -567,12 +574,12 @@ pdc_alloc (pthdb_user_t user, size_t len, void **bufp)
    pointer to the result in BUFP.  */
 
 static int
-pdc_realloc (pthdb_user_t user, void *buf, size_t len, void **bufp)
+pdc_realloc (pthdb_user_t user_current_pid, void *buf, size_t len, void **bufp)
 {
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog,
-		"pdc_realloc (user = %ld, buf = 0x%lx, len = %ld, bufp = 0x%lx)\n",
-		user, (long) buf, len, (long) bufp);
+		"pdc_realloc (user_current_pid = %ld, buf = 0x%lx, len = %ld, bufp = 0x%lx)\n",
+		user_current_pid, (long) buf, len, (long) bufp);
   *bufp = xrealloc (buf, len);
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog, 
@@ -584,11 +591,11 @@ pdc_realloc (pthdb_user_t user, void *buf, size_t len, void **bufp)
    realloc callback.  */
 
 static int
-pdc_dealloc (pthdb_user_t user, void *buf)
+pdc_dealloc (pthdb_user_t user_current_pid, void *buf)
 {
   if (debug_aix_thread)
     gdb_printf (gdb_stdlog, 
-		"pdc_free (user = %ld, buf = 0x%lx)\n", user,
+		"pdc_free (user_current_pid = %ld, buf = 0x%lx)\n", user_current_pid,
 		(long) buf);
   xfree (buf);
   return PDC_SUCCESS;
@@ -912,7 +919,7 @@ pd_activate (int pid)
 {
   int status;
 		
-  status = pthdb_session_init (PD_USER, arch64 ? PEM_64BIT : PEM_32BIT,
+  status = pthdb_session_init (pid, arch64 ? PEM_64BIT : PEM_32BIT,
 			       PTHDB_FLAG_REGS, &pd_callbacks, 
 			       &pd_session);
   if (status != PTHDB_SUCCESS)
@@ -955,7 +962,7 @@ pd_enable (void)
 
   /* Check whether the application is pthreaded.  */
   stub_name = NULL;
-  status = pthdb_session_pthreaded (PD_USER, PTHDB_FLAG_REGS,
+  status = pthdb_session_pthreaded (inferior_ptid.pid (), PTHDB_FLAG_REGS,
 				    &pd_callbacks, &stub_name);
   if ((status != PTHDB_SUCCESS
        && status != PTHDB_NOT_PTHREADED) || !stub_name)
@@ -976,7 +983,7 @@ pd_enable (void)
   /* If we're debugging a core file or an attached inferior, the
      pthread library may already have been initialized, so try to
      activate thread debugging.  */
-  pd_activate (1);
+  pd_activate (inferior_ptid.pid ());
 }
 
 /* Undo the effects of pd_enable().  */
