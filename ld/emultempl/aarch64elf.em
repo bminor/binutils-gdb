@@ -78,7 +78,7 @@ aarch64_elf_before_allocation (void)
 /* Fake input file for stubs.  */
 static lang_input_statement_type *stub_file;
 
-/* Whether we need to call gldarm_layout_sections_again.  */
+/* Whether we need to call gldaarch64_layout_sections_again.  */
 static int need_laying_out = 0;
 
 /* Maximum size of a group of input sections that can be handled by
@@ -303,8 +303,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 					  stub_file->the_bfd,
 					  & link_info,
 					  group_size,
-					  & elf${ELFSIZE}_aarch64_add_stub_section,
-					  & gldaarch64_layout_sections_again))
+					  & elf${ELFSIZE}_aarch64_add_stub_section))
 	    {
 	      einfo (_("%X%P: can not size stub section: %E\n"));
 	      return;
