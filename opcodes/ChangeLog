@@ -1,3 +1,8 @@
+2022-08-05  Nick Clifton  <nickc@redhat.com>
+
+	2.39 Release.
+	* configure: Regenerate.
+
 2022-07-21  Peter Bergner  <bergner@linux.ibm.com>
 
 	Backport from mainline:

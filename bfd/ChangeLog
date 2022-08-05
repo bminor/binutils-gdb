@@ -1,3 +1,11 @@
+2022-08-05  Nick Clifton  <nickc@redhat.com>
+
+	2.39 Release.
+	* development.sh (experimental): Set to false.
+	(development): Set to false.
+	* version.m4: Set to 2.39.
+	* configure: Regenerate.
+
 2022-07-29  Nick Clifton  <nickc@redhat.com>
 
 	PR 29424

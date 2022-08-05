@@ -1,3 +1,8 @@
+2022-08-05  Nick Clifton  <nickc@redhat.com>
+
+	2.39 Release.
+	* configure: Regenerate.
+
 2022-07-29  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 
 	PR ld/29411
