@@ -922,7 +922,7 @@ struct language_gdbarch
 {
   /* A vector of per-language per-architecture info.  Indexed by "enum
      language".  */
-  struct language_arch_info arch_info[nr_languages] {};
+  struct language_arch_info arch_info[nr_languages];
 };
 
 static const registry<gdbarch>::key<language_gdbarch> language_gdbarch_data;
