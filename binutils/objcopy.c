@@ -4014,7 +4014,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   bfd_vma vma;
   bfd_vma lma;
   flagword flags;
-  const char *err;
+  const char *err = NULL;
   const char * name;
   const char * new_name;
   char *prefix = NULL;
@@ -4097,10 +4097,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   else if (extract_symbol)
     size = 0;
   if (!bfd_set_section_size (osection, size))
-    {
-      err = _("failed to set size");
-      goto loser;
-    }
+    err = _("failed to set size");
 
   vma = bfd_section_vma (isection);
   p = find_section_list (bfd_section_name (isection), false,
@@ -4116,10 +4113,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
     vma += change_section_address;
 
   if (!bfd_set_section_vma (osection, vma))
-    {
-      err = _("failed to set vma");
-      goto loser;
-    }
+    err = _("failed to set vma");
 
   lma = isection->lma;
   p = find_section_list (bfd_section_name (isection), false,
@@ -4146,10 +4140,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   /* FIXME: This is probably not enough.  If we change the LMA we
      may have to recompute the header for the file as well.  */
   if (!bfd_set_section_alignment (osection, alignment))
-    {
-      err = _("failed to set alignment");
-      goto loser;
-    }
+    err = _("failed to set alignment");
 
   /* Copy merge entity size.  */
   osection->entsize = isection->entsize;
@@ -4178,16 +4169,13 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   /* Allow the BFD backend to copy any private data it understands
      from the input section to the output section.  */
   if (!bfd_copy_private_section_data (ibfd, isection, obfd, osection))
-    {
-      err = _("failed to copy private data");
-      goto loser;
-    }
+    err = _("failed to copy private data");
 
   if (make_nobits)
     elf_section_type (osection) = SHT_NOBITS;
 
-  /* All went well.  */
-  return;
+  if (!err)
+    return;
 
  loser:
   status = 1;

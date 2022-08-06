@@ -631,6 +631,8 @@ CODE_FRAGMENT
 .static inline bool
 .bfd_set_section_alignment (asection *sec, unsigned int val)
 .{
+.  if (val >= sizeof (bfd_vma) * 8 - 1)
+.    return false;
 .  sec->alignment_power = val;
 .  return true;
 .}

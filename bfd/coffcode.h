@@ -3189,7 +3189,7 @@ coff_compute_section_file_positions (bfd * abfd)
 #ifdef COFF_IMAGE_WITH_PE
 	  sofar = BFD_ALIGN (sofar, page_size);
 #else
-	  sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+	  sofar = BFD_ALIGN (sofar, (bfd_vma) 1 << current->alignment_power);
 #endif
 
 #ifdef RS6000COFF_C
@@ -3259,7 +3259,7 @@ coff_compute_section_file_positions (bfd * abfd)
 
 	  old_size = current->size;
 	  current->size = BFD_ALIGN (current->size,
-				     1 << current->alignment_power);
+				     (bfd_vma) 1 << current->alignment_power);
 	  align_adjust = current->size != old_size;
 	  sofar += current->size - old_size;
 	}
@@ -3269,7 +3269,7 @@ coff_compute_section_file_positions (bfd * abfd)
 #ifdef COFF_IMAGE_WITH_PE
 	  sofar = BFD_ALIGN (sofar, page_size);
 #else
-	  sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+	  sofar = BFD_ALIGN (sofar, (bfd_vma) 1 << current->alignment_power);
 #endif
 	  align_adjust = sofar != old_sofar;
 	  current->size += sofar - old_sofar;
@@ -3315,7 +3315,8 @@ coff_compute_section_file_positions (bfd * abfd)
   /* Make sure the relocations are aligned.  We don't need to make
      sure that this byte exists, because it will only matter if there
      really are relocs.  */
-  sofar = BFD_ALIGN (sofar, 1 << COFF_DEFAULT_SECTION_ALIGNMENT_POWER);
+  sofar = BFD_ALIGN (sofar,
+		     (bfd_vma) 1 << COFF_DEFAULT_SECTION_ALIGNMENT_POWER);
 
   obj_relocbase (abfd) = sofar;
   abfd->output_has_begun = true;
