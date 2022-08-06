@@ -573,9 +573,11 @@ BFD64_BACKENDS = \
 	mach-o-x86-64.lo \
 	mmo.lo \
 	pe-aarch64igen.lo \
+	pe-loongarch64igen.lo \
 	pe-x86_64.lo \
 	pei-aarch64.lo \
 	pei-ia64.lo \
+	pei-loongarch64.lo \
 	pei-x86_64.lo \
 	pepigen.lo \
 	pex64igen.lo \
@@ -618,6 +620,7 @@ BFD64_BACKENDS_CFILES = \
 	pe-x86_64.c \
 	pei-aarch64.c \
 	pei-ia64.c \
+	pei-loongarch64.c \
 	pei-x86_64.c \
 	vms-alpha.c
 
@@ -677,7 +680,7 @@ BUILD_CFILES = \
 	elf32-ia64.c elf64-ia64.c \
 	elf32-loongarch.c elf64-loongarch.c \
 	elf32-riscv.c elf64-riscv.c \
-	peigen.c pepigen.c pex64igen.c pe-aarch64igen.c
+	peigen.c pepigen.c pex64igen.c pe-aarch64igen.c pe-loongarch64igen.c
 
 CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 
@@ -893,6 +896,10 @@ pex64igen.c: peXXigen.c
 pe-aarch64igen.c: peXXigen.c
 	$(AM_V_at)echo "#line 1 \"peXXigen.c\"" > $@
 	$(AM_V_GEN)$(SED) -e s/XX/peAArch64/g < $< >> $@
+
+pe-loongarch64igen.c: peXXigen.c
+	$(AM_V_at)echo "#line 1 \"peXXigen.c\"" > $@
+	$(AM_V_GEN)$(SED) -e s/XX/peLoongArch64/g < $< >> $@
 
 host-aout.lo: Makefile
 

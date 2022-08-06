@@ -11,6 +11,7 @@
 /pepigen.c
 /pex64igen.c
 /pe-aarch64igen.c
+/pe-loongarch64igen.c
 /stmp-bfd-h
 /targmatch.h
 

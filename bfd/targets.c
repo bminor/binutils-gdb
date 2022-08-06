@@ -768,6 +768,7 @@ extern const bfd_target lm32_elf32_vec;
 extern const bfd_target lm32_elf32_fdpic_vec;
 extern const bfd_target loongarch_elf64_vec;
 extern const bfd_target loongarch_elf32_vec;
+extern const bfd_target loongarch64_pei_vec;
 extern const bfd_target m32c_elf32_vec;
 extern const bfd_target m32r_elf32_vec;
 extern const bfd_target m32r_elf32_le_vec;
@@ -1358,6 +1359,7 @@ static const bfd_target * const _bfd_target_vector[] =
 #ifdef BFD64
 	&loongarch_elf32_vec,
 	&loongarch_elf64_vec,
+	&loongarch64_pei_vec,
 #endif
 
 #endif /* not SELECT_VECS */

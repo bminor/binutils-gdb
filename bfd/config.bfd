@@ -1465,7 +1465,7 @@ case "${targ}" in
 
   loongarch64-*)
     targ_defvec=loongarch_elf64_vec
-    targ_selvecs="loongarch_elf32_vec loongarch_elf64_vec"
+    targ_selvecs="loongarch_elf32_vec loongarch_elf64_vec loongarch64_pei_vec"
     want64=true
     ;;
 #endif
