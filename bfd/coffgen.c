@@ -1539,9 +1539,10 @@ build_debug_section (bfd *abfd, asection ** sect_return)
     return NULL;
 
   sec_size = sect->size;
-  debug_section = (char *) _bfd_alloc_and_read (abfd, sec_size, sec_size);
+  debug_section = (char *) _bfd_alloc_and_read (abfd, sec_size + 1, sec_size);
   if (debug_section == NULL)
     return NULL;
+  debug_section[sec_size] = 0;
 
   if (bfd_seek (abfd, position, SEEK_SET) != 0)
     return NULL;
