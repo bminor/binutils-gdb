@@ -4941,13 +4941,9 @@ som_set_reloc_info (unsigned char *fixup,
 		    unsigned int symcount,
 		    bool just_count)
 {
-  unsigned int op, varname, deallocate_contents = 0;
+  unsigned int deallocate_contents = 0;
   unsigned char *end_fixups = &fixup[end];
-  const struct fixup_format *fp;
-  const char *cp;
-  unsigned char *save_fixup;
-  int variables[26], stack[20], c, v, count, prev_fixup, *sp, saved_unwind_bits;
-  const int *subop;
+  int variables[26], stack[20], count, prev_fixup, *sp, saved_unwind_bits;
   arelent *rptr = internal_relocs;
   unsigned int offset = 0;
 
@@ -4966,10 +4962,14 @@ som_set_reloc_info (unsigned char *fixup,
 
   while (fixup < end_fixups)
     {
+      const char *cp;
+      unsigned int op;
+      const struct fixup_format *fp;
+
       /* Save pointer to the start of this fixup.  We'll use
 	 it later to determine if it is necessary to put this fixup
 	 on the queue.  */
-      save_fixup = fixup;
+      unsigned char *save_fixup = fixup;
 
       /* Get the fixup code and its associated format.  */
       op = *fixup++;
@@ -5015,11 +5015,15 @@ som_set_reloc_info (unsigned char *fixup,
       while (*cp)
 	{
 	  /* The variable this pass is going to compute a value for.  */
-	  varname = *cp++;
+	  unsigned int varname = *cp++;
+	  const int *subop;
+	  int c;
 
 	  /* Start processing RHS.  Continue until a NULL or '=' is found.  */
 	  do
 	    {
+	      unsigned v;
+
 	      c = *cp++;
 
 	      /* If this is a variable, push it on the stack.  */
