@@ -1058,7 +1058,8 @@ coff_write_symbol (bfd *abfd,
 	  /* Adjust auxent only if this isn't the filename
 	     auxiliary entry.  */
 	  if (native->u.syment.n_sclass == C_FILE
-	      && (native + j + 1)->u.auxent.x_file.x_ftype)
+	      && (native + j + 1)->u.auxent.x_file.x_ftype
+	      && (native + j + 1)->extrap)
 	    coff_write_auxent_fname (abfd, (char *) (native + j + 1)->extrap,
 				     &(native + j + 1)->u.auxent, strtab, hash);
 
