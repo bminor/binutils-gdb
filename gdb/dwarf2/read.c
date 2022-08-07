@@ -4599,7 +4599,7 @@ read_debug_names_from_section (struct objfile *objfile,
 /* A helper for create_cus_from_debug_names that handles the MAP's CU
    list.  */
 
-static void
+static bool
 create_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
 				  const mapped_debug_names &map,
 				  dwarf2_section_info &section,
@@ -4624,7 +4624,7 @@ create_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
 					 sect_off, 0);
 	  per_bfd->all_comp_units.push_back (std::move (per_cu));
 	}
-      return;
+      return true;
     }
 
   sect_offset sect_off_prev;
@@ -4643,6 +4643,18 @@ create_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
 	sect_off_next = (sect_offset) section.size;
       if (i >= 1)
 	{
+	  if (sect_off_next == sect_off_prev)
+	    {
+	      warning (_("Section .debug_names has duplicate entry in CU table,"
+			 " ignoring .debug_names."));
+	      return false;
+	    }
+	  if (sect_off_next < sect_off_prev)
+	    {
+	      warning (_("Section .debug_names has non-ascending CU table,"
+			 " ignoring .debug_names."));
+	      return false;
+	    }
 	  const ULONGEST length = sect_off_next - sect_off_prev;
 	  dwarf2_per_cu_data_up per_cu
 	    = create_cu_from_index_list (per_bfd, &section, is_dwz,
@@ -4651,12 +4663,14 @@ create_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
 	}
       sect_off_prev = sect_off_next;
     }
+
+  return true;
 }
 
 /* Read the CU list from the mapped index, and use it to create all
    the CU objects for this dwarf2_per_objfile.  */
 
-static void
+static bool
 create_cus_from_debug_names (dwarf2_per_bfd *per_bfd,
 			     const mapped_debug_names &map,
 			     const mapped_debug_names &dwz_map)
@@ -4664,15 +4678,16 @@ create_cus_from_debug_names (dwarf2_per_bfd *per_bfd,
   gdb_assert (per_bfd->all_comp_units.empty ());
   per_bfd->all_comp_units.reserve (map.cu_count + dwz_map.cu_count);
 
-  create_cus_from_debug_names_list (per_bfd, map, per_bfd->info,
-				    false /* is_dwz */);
+  if (!create_cus_from_debug_names_list (per_bfd, map, per_bfd->info,
+					 false /* is_dwz */))
+    return false;
 
   if (dwz_map.cu_count == 0)
-    return;
+    return true;
 
   dwz_file *dwz = dwarf2_get_dwz_file (per_bfd);
-  create_cus_from_debug_names_list (per_bfd, dwz_map, dwz->info,
-				    true /* is_dwz */);
+  return create_cus_from_debug_names_list (per_bfd, dwz_map, dwz->info,
+					   true /* is_dwz */);
 }
 
 /* Read .debug_names.  If everything went ok, initialize the "quick"
@@ -4709,7 +4724,11 @@ dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
 	}
     }
 
-  create_cus_from_debug_names (per_bfd, *map, dwz_map);
+  if (!create_cus_from_debug_names (per_bfd, *map, dwz_map))
+    {
+      per_bfd->all_comp_units.clear ();
+      return false;
+    }
 
   if (map->tu_count != 0)
     {
