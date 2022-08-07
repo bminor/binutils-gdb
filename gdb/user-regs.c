@@ -74,15 +74,15 @@ append_user_reg (struct gdb_user_regs *regs, const char *name,
   reg->xread = xread;
   reg->baton = baton;
   reg->next = NULL;
+  if (regs->last == nullptr)
+    regs->last = &regs->first;
   (*regs->last) = reg;
   regs->last = &(*regs->last)->next;
 }
 
 /* An array of the builtin user registers.  */
 
-static struct gdb_user_regs builtin_user_regs = {
-  NULL, &builtin_user_regs.first
-};
+static struct gdb_user_regs builtin_user_regs;
 
 void
 user_reg_add_builtin (const char *name, user_reg_read_ftype *xread,
