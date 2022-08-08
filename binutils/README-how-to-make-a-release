@@ -449,6 +449,12 @@ Cheers
 
           <extract info from the NEWS files>
 
+        For more information see:
+	
+          https://sourceware.org/git/gitweb.cgi?p=binutils-gdb.git;a=blob_plain;f=gas/NEWS;;hb=refs/tags/binutils-2_39
+          https://sourceware.org/git/gitweb.cgi?p=binutils-gdb.git;a=blob_plain;f=ld/NEWS;hb=refs/tags/binutils-2_39
+          https://sourceware.org/git/gitweb.cgi?p=binutils-gdb.git;a=blob_plain;f=binutils/NEWS;hb=refs/tags/binutils-2_39
+
         Our thanks go out to all of the binutils contributors, past and
         present, for helping to make this release possible.
 

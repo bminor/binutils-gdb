@@ -1,3 +1,8 @@
+2022-08-08  Nick Clifton  <nickc@redhat.com>
+
+	* README-how-to-make-a-release: Add a link to the NEWS files in
+	the release announcement email.
+
 2022-07-08  Nick Clifton  <nickc@redhat.com>
 
 	* 2.39 branch created.
