@@ -53,6 +53,7 @@
 #include "debuginfod-support.h"
 #include "source.h"
 #include "cli/cli-style.h"
+#include "solib-target.h"
 
 /* Architecture-specific operations.  */
 
@@ -67,8 +68,8 @@ solib_ops (struct gdbarch *gdbarch)
   const struct target_so_ops *result = solib_data.get (gdbarch);
   if (result == nullptr)
     {
-      result = current_target_so_ops;
-      set_solib_ops (gdbarch, current_target_so_ops);
+      result = &solib_target_so_ops;
+      set_solib_ops (gdbarch, &solib_target_so_ops);
     }
   return result;
 }
@@ -83,10 +84,6 @@ set_solib_ops (struct gdbarch *gdbarch, const struct target_so_ops *new_ops)
 
 
 /* external data declarations */
-
-/* FIXME: gdbarch needs to control this variable, or else every
-   configuration needs to call set_solib_ops.  */
-struct target_so_ops *current_target_so_ops;
 
 /* Local function prototypes */
 
