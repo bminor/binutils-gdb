@@ -33,6 +33,7 @@
 #include "solist.h"
 #include "solib.h"
 #include "solib-svr4.h"
+#include "solib-darwin.h"
 
 #include "bfd-target.h"
 #include "elf-bfd.h"
@@ -674,18 +675,15 @@ darwin_bfd_open (const char *pathname)
   return res;
 }
 
-struct target_so_ops darwin_so_ops;
-
-void _initialize_darwin_solib ();
-void
-_initialize_darwin_solib ()
+const struct target_so_ops darwin_so_ops =
 {
-  darwin_so_ops.relocate_section_addresses = darwin_relocate_section_addresses;
-  darwin_so_ops.free_so = darwin_free_so;
-  darwin_so_ops.clear_solib = darwin_clear_solib;
-  darwin_so_ops.solib_create_inferior_hook = darwin_solib_create_inferior_hook;
-  darwin_so_ops.current_sos = darwin_current_sos;
-  darwin_so_ops.open_symbol_file_object = open_symbol_file_object;
-  darwin_so_ops.in_dynsym_resolve_code = darwin_in_dynsym_resolve_code;
-  darwin_so_ops.bfd_open = darwin_bfd_open;
-}
+  darwin_relocate_section_addresses,
+  darwin_free_so,
+  nullptr,
+  darwin_clear_solib,
+  darwin_solib_create_inferior_hook,
+  darwin_current_sos,
+  open_symbol_file_object,
+  darwin_in_dynsym_resolve_code,
+  darwin_bfd_open,
+};

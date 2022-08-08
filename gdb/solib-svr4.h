@@ -25,7 +25,7 @@
 struct objfile;
 struct target_so_ops;
 
-extern struct target_so_ops svr4_so_ops;
+extern const struct target_so_ops svr4_so_ops;
 
 /* Link map info to include in an allocated so_list entry.  */
 

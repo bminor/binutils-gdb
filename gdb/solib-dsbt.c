@@ -29,6 +29,7 @@
 #include "gdbcmd.h"
 #include "elf-bfd.h"
 #include "gdb_bfd.h"
+#include "solib-dsbt.h"
 
 #define GOT_MODULE_OFFSET 4
 
@@ -924,21 +925,23 @@ show_dsbt_debug (struct ui_file *file, int from_tty,
   gdb_printf (file, _("solib-dsbt debugging is %s.\n"), value);
 }
 
-struct target_so_ops dsbt_so_ops;
+const struct target_so_ops dsbt_so_ops =
+{
+  dsbt_relocate_section_addresses,
+  dsbt_free_so,
+  nullptr,
+  dsbt_clear_solib,
+  dsbt_solib_create_inferior_hook,
+  dsbt_current_sos,
+  open_symbol_file_object,
+  dsbt_in_dynsym_resolve_code,
+  solib_bfd_open,
+};
 
 void _initialize_dsbt_solib ();
 void
 _initialize_dsbt_solib ()
 {
-  dsbt_so_ops.relocate_section_addresses = dsbt_relocate_section_addresses;
-  dsbt_so_ops.free_so = dsbt_free_so;
-  dsbt_so_ops.clear_solib = dsbt_clear_solib;
-  dsbt_so_ops.solib_create_inferior_hook = dsbt_solib_create_inferior_hook;
-  dsbt_so_ops.current_sos = dsbt_current_sos;
-  dsbt_so_ops.open_symbol_file_object = open_symbol_file_object;
-  dsbt_so_ops.in_dynsym_resolve_code = dsbt_in_dynsym_resolve_code;
-  dsbt_so_ops.bfd_open = solib_bfd_open;
-
   /* Debug this file's internals.  */
   add_setshow_zuinteger_cmd ("solib-dsbt", class_maintenance,
 			     &solib_dsbt_debug, _("\

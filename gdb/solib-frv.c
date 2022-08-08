@@ -1129,21 +1129,23 @@ frv_fetch_objfile_link_map (struct objfile *objfile)
   return 0;
 }
 
-struct target_so_ops frv_so_ops;
+const struct target_so_ops frv_so_ops =
+{
+  frv_relocate_section_addresses,
+  frv_free_so,
+  nullptr,
+  frv_clear_solib,
+  frv_solib_create_inferior_hook,
+  frv_current_sos,
+  open_symbol_file_object,
+  frv_in_dynsym_resolve_code,
+  solib_bfd_open,
+};
 
 void _initialize_frv_solib ();
 void
 _initialize_frv_solib ()
 {
-  frv_so_ops.relocate_section_addresses = frv_relocate_section_addresses;
-  frv_so_ops.free_so = frv_free_so;
-  frv_so_ops.clear_solib = frv_clear_solib;
-  frv_so_ops.solib_create_inferior_hook = frv_solib_create_inferior_hook;
-  frv_so_ops.current_sos = frv_current_sos;
-  frv_so_ops.open_symbol_file_object = open_symbol_file_object;
-  frv_so_ops.in_dynsym_resolve_code = frv_in_dynsym_resolve_code;
-  frv_so_ops.bfd_open = solib_bfd_open;
-
   /* Debug this file's internals.  */
   add_setshow_zuinteger_cmd ("solib-frv", class_maintenance,
 			     &solib_frv_debug, _("\
