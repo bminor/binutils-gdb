@@ -931,7 +931,7 @@ windows_init_abi_common (struct gdbarch_info info, struct gdbarch *gdbarch)
   windows_so_ops = solib_target_so_ops;
   windows_so_ops.solib_create_inferior_hook
     = windows_solib_create_inferior_hook;
-  set_solib_ops (gdbarch, &windows_so_ops);
+  set_gdbarch_so_ops (gdbarch, &windows_so_ops);
 
   set_gdbarch_get_siginfo_type (gdbarch, windows_get_siginfo_type);
 }

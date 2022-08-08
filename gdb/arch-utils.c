@@ -36,6 +36,7 @@
 #include "reggroups.h"
 #include "auxv.h"
 #include "observable.h"
+#include "solib-target.h"
 
 #include "gdbsupport/version.h"
 

@@ -1556,7 +1556,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_convert_from_func_ptr_addr (gdbarch,
 					    frv_convert_from_func_ptr_addr);
 
-  set_solib_ops (gdbarch, &frv_so_ops);
+  set_gdbarch_so_ops (gdbarch, &frv_so_ops);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);

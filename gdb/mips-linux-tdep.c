@@ -1594,7 +1594,7 @@ mips_linux_init_abi (struct gdbarch_info info,
       mips_svr4_so_ops.in_dynsym_resolve_code
 	= mips_linux_in_dynsym_resolve_code;
     }
-  set_solib_ops (gdbarch, &mips_svr4_so_ops);
+  set_gdbarch_so_ops (gdbarch, &mips_svr4_so_ops);
 
   set_gdbarch_write_pc (gdbarch, mips_linux_write_pc);
 

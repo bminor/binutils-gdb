@@ -271,7 +271,7 @@ i386_darwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      alignment.  */
   set_gdbarch_long_double_bit (gdbarch, 128);
 
-  set_solib_ops (gdbarch, &darwin_so_ops);
+  set_gdbarch_so_ops (gdbarch, &darwin_so_ops);
 }
 
 static enum gdb_osabi

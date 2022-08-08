@@ -3026,7 +3026,7 @@ set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
 
   ops->fetch_link_map_offsets = flmo;
 
-  set_solib_ops (gdbarch, &svr4_so_ops);
+  set_gdbarch_so_ops (gdbarch, &svr4_so_ops);
   set_gdbarch_iterate_over_objfiles_in_search_order
     (gdbarch, svr4_iterate_over_objfiles_in_search_order);
 }

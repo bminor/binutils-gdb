@@ -1262,6 +1262,14 @@ Function(
     invalid=False,
 )
 
+Value(
+    comment="Vtable of solib operations functions.",
+    type="const struct target_so_ops *",
+    name="so_ops",
+    postdefault="&solib_target_so_ops",
+    printer="host_address_to_string (gdbarch->so_ops)",
+)
+
 Method(
     comment="""
 If in_solib_dynsym_resolve_code() returns true, and SKIP_SOLIB_RESOLVER

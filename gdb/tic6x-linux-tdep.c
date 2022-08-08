@@ -170,7 +170,7 @@ tic6x_uclinux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   linux_init_abi (info, gdbarch, 0);
 
   /* Shared library handling.  */
-  set_solib_ops (gdbarch, &dsbt_so_ops);
+  set_gdbarch_so_ops (gdbarch, &dsbt_so_ops);
 
   tdep->syscall_next_pc = tic6x_linux_syscall_next_pc;
 

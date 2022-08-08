@@ -2126,7 +2126,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	  powerpc_so_ops.in_dynsym_resolve_code =
 	    powerpc_linux_in_dynsym_resolve_code;
 	}
-      set_solib_ops (gdbarch, &powerpc_so_ops);
+      set_gdbarch_so_ops (gdbarch, &powerpc_so_ops);
 
       set_gdbarch_skip_solib_resolver (gdbarch, glibc_skip_solib_resolver);
     }

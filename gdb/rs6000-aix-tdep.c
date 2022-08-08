@@ -1180,7 +1180,7 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_wchar_signed (gdbarch, 0);
   set_gdbarch_auto_wide_charset (gdbarch, rs6000_aix_auto_wide_charset);
 
-  set_solib_ops (gdbarch, &solib_aix_so_ops);
+  set_gdbarch_so_ops (gdbarch, &solib_aix_so_ops);
   frame_unwind_append_unwinder (gdbarch, &aix_sighandle_frame_unwind);
 }
 
