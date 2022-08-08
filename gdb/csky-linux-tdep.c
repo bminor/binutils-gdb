@@ -36,6 +36,8 @@
 #define SIZEOF_CSKY_GREGSET 34*4
 /* Float regset fesr fsr fr0-fr31 for CK810.  */
 #define SIZEOF_CSKY_FREGSET 34*4
+/* Float regset vr0~vr15 fr15~fr31, reserved for CK810 when kernel 4.x.  */
+#define SIZEOF_CSKY_FREGSET_K4X  400
 
 /* Offset mapping table from core_section to regcache of general
    registers for ck810.  */
@@ -118,15 +120,79 @@ csky_supply_fregset (const struct regset *regset,
   int fregset_num = ARRAY_SIZE (csky_fregset_offset);
 
   gdb_assert (len >= SIZEOF_CSKY_FREGSET);
-  for (i = 0; i < fregset_num; i++)
+  if (len == SIZEOF_CSKY_FREGSET)
     {
-      if ((regnum == csky_fregset_offset[i] || regnum == -1)
-	  && csky_fregset_offset[i] != -1)
+      for (i = 0; i < fregset_num; i++)
 	{
-	  int num = csky_fregset_offset[i];
-	  offset += register_size (gdbarch, num);
-	  regcache->raw_supply (csky_fregset_offset[i], fregs + offset);
+	  if ((regnum == csky_fregset_offset[i] || regnum == -1)
+	      && csky_fregset_offset[i] != -1)
+	    {
+	      int num = csky_fregset_offset[i];
+	      offset += register_size (gdbarch, num);
+	      regcache->raw_supply (csky_fregset_offset[i], fregs + offset);
+	    }
 	}
+    }
+  else if (len == SIZEOF_CSKY_FREGSET_K4X)
+    {
+      /* When kernel version >= 4.x, .reg2 size will be 400.
+	 Contents is {
+	  unsigned long vr[96];
+	  unsigned long fcr;
+	  unsigned long fesr;
+	  unsigned long fid;
+	  unsigned long reserved;
+	 }
+	 VR[96] means: (vr0~vr15) + (fr16~fr31), each Vector register is
+	 128-bits, each Float register is 64 bits, the total size is
+	 (4*96).
+
+	 In addition, for fr0~fr15, each FRx is the lower 64 bits of the
+	 corresponding VRx. So fr0~fr15 and vr0~vr15 regisetrs use the same
+	 offset.  */
+      int fcr_regno[] = {122, 123, 121}; /* fcr, fesr, fid.  */
+
+      /* Supply vr0~vr15.  */
+      for (i = 0; i < 16; i ++)
+	{
+	  if (gdbarch_register_name (gdbarch, (CSKY_VR0_REGNUM + i)))
+	    {
+	      offset = 16 * i;
+	      regcache->raw_supply (CSKY_VR0_REGNUM + i, fregs + offset);
+	    }
+	}
+      /* Supply fr0~fr15.  */
+      for (i = 0; i < 16; i ++)
+	{
+	  if (gdbarch_register_name (gdbarch, (CSKY_FR0_REGNUM + i)))
+	    {
+	      offset = 16 * i;
+	      regcache->raw_supply (CSKY_FR0_REGNUM + i, fregs + offset);
+	    }
+	}
+      /* Supply fr16~fr31.  */
+      for (i = 0; i < 16; i ++)
+	{
+	  if (gdbarch_register_name (gdbarch, (CSKY_FR16_REGNUM + i)))
+	    {
+	      offset = (16 * 16) + (8 * i);
+	      regcache->raw_supply (CSKY_FR16_REGNUM + i, fregs + offset);
+	    }
+	}
+     /* Supply fcr, fesr, fid.  */
+      for (i = 0; i < 3; i ++)
+	{
+	  if (gdbarch_register_name (gdbarch, fcr_regno[i]))
+	    {
+	      offset = (16 * 16) + (16 * 8) + (4 * i);
+	      regcache->raw_supply (fcr_regno[i], fregs + offset);
+	    }
+	}
+    }
+  else
+    {
+      warning (_("Unknow size %ld of section .reg2, can not get value"
+		 " of float registers."), len);
     }
 }
 
@@ -144,14 +210,70 @@ csky_collect_fregset (const struct regset *regset,
   int offset = 0;
 
   gdb_assert (len >= SIZEOF_CSKY_FREGSET);
-  for (regno = 0; regno < fregset_num; regno++)
+  if (len == SIZEOF_CSKY_FREGSET)
     {
-      if ((regnum == csky_fregset_offset[regno] || regnum == -1)
-	  && csky_fregset_offset[regno] != -1)
+      for (regno = 0; regno < fregset_num; regno++)
 	{
-	  offset += register_size (gdbarch, csky_fregset_offset[regno]);
-	  regcache->raw_collect (regno, fregs + offset);
+	  if ((regnum == csky_fregset_offset[regno] || regnum == -1)
+	       && csky_fregset_offset[regno] != -1)
+	    {
+	      offset += register_size (gdbarch, csky_fregset_offset[regno]);
+	      regcache->raw_collect (regno, fregs + offset);
+	    }
 	}
+    }
+  else if (len == SIZEOF_CSKY_FREGSET_K4X)
+    {
+      /* When kernel version >= 4.x, .reg2 size will be 400.
+	 Contents is {
+	   unsigned long vr[96];
+	   unsigned long fcr;
+	   unsigned long fesr;
+	   unsigned long fid;
+	   unsigned long reserved;
+	 }
+	 VR[96] means: (vr0~vr15) + (fr16~fr31), each Vector register is$
+	 128-bits, each Float register is 64 bits, the total size is$
+	 (4*96).$
+
+	 In addition, for fr0~fr15, each FRx is the lower 64 bits of the$
+	 corresponding VRx. So fr0~fr15 and vr0~vr15 regisetrs use the same$
+	 offset.  */
+      int i = 0;
+      int fcr_regno[] = {122, 123, 121}; /* fcr, fesr, fid.  */
+
+      /* Supply vr0~vr15.  */
+      for (i = 0; i < 16; i ++)
+	{
+	  if (gdbarch_register_name (gdbarch, (CSKY_VR0_REGNUM + i)))
+	    {
+	      offset = 16 * i;
+	      regcache ->raw_collect (CSKY_VR0_REGNUM + i, fregs + offset);
+	    }
+	}
+      /* Supply fr16~fr31.  */
+      for (i = 0; i < 16; i ++)
+	{
+	  if (gdbarch_register_name (gdbarch, (CSKY_FR16_REGNUM + i)))
+	    {
+	      offset = (16 * 16) + (8 * i);
+	      regcache ->raw_collect (CSKY_FR16_REGNUM + i, fregs + offset);
+	    }
+	}
+      /* Supply fcr, fesr, fid.  */
+      for (i = 0; i < 3; i ++)
+	{
+	  if (gdbarch_register_name (gdbarch, fcr_regno[i]))
+	    {
+	      offset = (16 * 16) + (16 * 8) + (4 * i);
+	      regcache ->raw_collect (fcr_regno[i], fregs + offset);
+	    }
+	}
+    }
+  else
+    {
+      warning (_("Unknow size %ld of section .reg2, will not set value"
+		 " of float registers."), len);
     }
 }
 
@@ -166,7 +288,10 @@ static const struct regset csky_regset_float =
 {
   NULL,
   csky_supply_fregset,
-  csky_collect_fregset
+  csky_collect_fregset,
+  /* Allow .reg2 to have a different size, and the size of .reg2 should
+     always be bigger than SIZEOF_CSKY_FREGSET.  */
+  1
 };
 
 /* Iterate over core file register note sections.  */
