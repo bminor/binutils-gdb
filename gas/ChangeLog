@@ -1,3 +1,8 @@
+2022-08-08  Tsukasa OI  <research_trasio@irq.a4lg.com>
+
+	* config/obj-macho.c (obj_mach_o_get_section_names): Wrap two
+	string literals within with gettext macro.
+
 2022-08-05  Nick Clifton  <nickc@redhat.com>
 
 	PR 29447
