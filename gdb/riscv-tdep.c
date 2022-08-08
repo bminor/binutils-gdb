@@ -933,6 +933,15 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
   return name;
 }
 
+/* Implement the cannot_store_register gdbarch method.  The zero register
+   (x0) is read-only on RISC-V.  */
+
+static int
+riscv_cannot_store_register (struct gdbarch *gdbarch, int regnum)
+{
+  return regnum == RISCV_ZERO_REGNUM;
+}
+
 /* Construct a type for 64-bit FP registers.  */
 
 static struct type *
@@ -3821,6 +3830,9 @@ riscv_gdbarch_init (struct gdbarch_info info,
      mechanism.  This allows us to force our preferred names for the
      registers, no matter what the target description called them.  */
   set_gdbarch_register_name (gdbarch, riscv_register_name);
+
+  /* Tell GDB which RISC-V registers are read-only. */
+  set_gdbarch_cannot_store_register (gdbarch, riscv_cannot_store_register);
 
   /* Override the register group callback setup by the target description
      mechanism.  This allows us to force registers into the groups we
