@@ -64,7 +64,13 @@ static const registry<gdbarch>::key<const struct target_so_ops,
 static const struct target_so_ops *
 solib_ops (struct gdbarch *gdbarch)
 {
-  return solib_data.get (gdbarch);
+  const struct target_so_ops *result = solib_data.get (gdbarch);
+  if (result == nullptr)
+    {
+      result = current_target_so_ops;
+      set_solib_ops (gdbarch, current_target_so_ops);
+    }
+  return result;
 }
 
 /* Set the solib operations for GDBARCH to NEW_OPS.  */
