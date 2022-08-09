@@ -70,10 +70,7 @@ gdb_assert { [string equal $index "debug_names"] } ".debug_names used"
 # Verify that initially no symtab is expanded.
 gdb_test_no_output "maint info symtabs"
 
-if ![runto _start] {
-    return -1
-}
-
-# Verify that breaking on _start actually expanded a symtab, rather than
-# falling back on minimal symbols.
-gdb_test "maint info symtabs" "name <unknown>.*" "break _start expanded symtab"
+# Verify that _start is found in the debuginfo, rather than in the minimal
+# symbols, which would result instead in:
+#   $1 = {<text variable, no debug info>} $hex <_start>
+gdb_test "print _start" " = {void \\(\\)} $hex <_start>"
