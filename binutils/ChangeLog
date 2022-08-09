@@ -1,3 +1,19 @@
+2022-08-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 29457
+	* objdump.c (disassembler_color): Change type to an enum.
+	(disassembler_extended_color): Remove.
+	(usage): Update.
+	(objdump_color_for_assembler_style): Update.
+	(main): Update initialisation of disassembler_color.  If not
+	initialised via a command line option, set based upon terminal
+	output.
+	* doc/binutils.texi: Update description of disassmbler-color
+	option.
+	* testsuite/binutils-all/arc/objdump.exp: Add
+	--disassembler-color=off option when disassembling.
+	* testsuite/binutils-all/arm/objdump.exp: Likewise.
+
 2022-08-08  Nick Clifton  <nickc@redhat.com>
 
 	* README-how-to-make-a-release: Add a link to the NEWS files in

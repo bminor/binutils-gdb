@@ -130,8 +130,14 @@ static bool visualize_jumps = false;	/* --visualize-jumps.  */
 static bool color_output = false;	/* --visualize-jumps=color.  */
 static bool extended_color_output = false; /* --visualize-jumps=extended-color.  */
 static int process_links = false;       /* --process-links.  */
-static bool disassembler_color = false; /* --disassembler-color=color.  */
-static bool disassembler_extended_color = false; /* --disassembler-color=extended-color.  */
+
+static enum color_selection
+  {
+    on_if_terminal_output,
+    on,   				/* --disassembler-color=color.  */
+    off, 				/* --disassembler-color=off.  */
+    extended				/* --disassembler-color=extended-color.  */
+  } disassembler_color = on_if_terminal_output;
 
 static int dump_any_debugging;
 static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
@@ -409,6 +415,8 @@ usage (FILE *stream, int status)
       --disassembler-color=off   Disable disassembler color output.\n\n"));
       fprintf (stream, _("\
       --disassembler-color=color Use basic colors in disassembler output.\n\n"));
+      fprintf (stream, _("\
+      --disassembler-color=extended-color Use 8-bit colors in disassembler output.\n\n"));
 
       list_supported_targets (program_name, stream);
       list_supported_architectures (program_name, stream);
@@ -2158,44 +2166,66 @@ objdump_color_for_disassembler_style (enum disassembler_style style)
   if (style == dis_style_comment_start)
     disassembler_in_comment = true;
 
-  if (disassembler_color)
+  if (disassembler_color == on)
     {
       if (disassembler_in_comment)
 	return color;
 
       switch (style)
 	{
-	case dis_style_symbol: color = 32; break;
+	case dis_style_symbol:
+	  color = 32;
+	  break;
         case dis_style_assembler_directive:
 	case dis_style_sub_mnemonic:
-	case dis_style_mnemonic: color = 33; break;
-	case dis_style_register: color = 34; break;
+	case dis_style_mnemonic:
+	  color = 33;
+	  break;
+	case dis_style_register:
+	  color = 34;
+	  break;
 	case dis_style_address:
         case dis_style_address_offset:
-	case dis_style_immediate: color = 35; break;
+	case dis_style_immediate:
+	  color = 35;
+	  break;
 	default:
-	case dis_style_text: color = -1; break;
+	case dis_style_text:
+	  color = -1;
+	  break;
 	}
     }
-  else if (disassembler_extended_color)
+  else if (disassembler_color == extended)
     {
       if (disassembler_in_comment)
 	return 250;
 
       switch (style)
 	{
-	case dis_style_symbol: color = 40; break;
+	case dis_style_symbol:
+	  color = 40;
+	  break;
         case dis_style_assembler_directive:
 	case dis_style_sub_mnemonic:
-	case dis_style_mnemonic: color = 142; break;
-	case dis_style_register: color = 27; break;
+	case dis_style_mnemonic:
+	  color = 142;
+	  break;
+	case dis_style_register:
+	  color = 27;
+	  break;
 	case dis_style_address:
         case dis_style_address_offset:
-	case dis_style_immediate: color = 134; break;
+	case dis_style_immediate:
+	  color = 134;
+	  break;
 	default:
-	case dis_style_text: color = -1; break;
+	case dis_style_text:
+	  color = -1;
+	  break;
 	}
     }
+  else if (disassembler_color != off)
+    bfd_fatal (_("disassembly color not correctly selected"));
 
   return color;
 }
@@ -5683,11 +5713,11 @@ main (int argc, char **argv)
 	  break;
 	case OPTION_DISASSEMBLER_COLOR:
 	  if (streq (optarg, "off"))
-	    disassembler_color = false;
+	    disassembler_color = off;
 	  else if (streq (optarg, "color"))
-	    disassembler_color = true;
+	    disassembler_color = on;
 	  else if (streq (optarg, "extended-color"))
-	    disassembler_extended_color = true;
+	    disassembler_color = extended;
 	  else
 	    nonfatal (_("unrecognized argument to --disassembler-color"));
 	  break;
@@ -5899,6 +5929,9 @@ main (int argc, char **argv)
 	  usage (stderr, 1);
 	}
     }
+
+  if (disassembler_color == on_if_terminal_output)
+    disassembler_color = isatty (1) ? on : off;
 
   if (show_version)
     print_version ("objdump");

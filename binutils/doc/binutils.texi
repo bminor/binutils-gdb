@@ -2828,6 +2828,9 @@ If it is necessary to disable the @option{--disassembler-color} option
 after it has previously been enabled then use
 @option{--disassembler-color=off}.
 
+If this option is not specified then the default is to enable color
+output if displaying to a terminal, but not otherwise.
+
 @item -W[lLiaprmfFsoORtUuTgAckK]
 @itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]
 @include debug.options.texi
