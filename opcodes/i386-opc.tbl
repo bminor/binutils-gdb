@@ -1827,8 +1827,7 @@ vpsrlvd, 0x6645, None, CpuAVX2, Modrm|Vex|Space0F38|VexVVVV=1|VexW=1|CheckRegSiz
 vpsrlvq, 0x6645, None, CpuAVX2, Modrm|Vex|Space0F38|VexVVVV=1|VexW=2|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
 
 // AVX gather instructions
-vgatherdpd, 0x6692, None, CpuAVX2, Modrm|Vex|Space0F38|VexVVVV|VexW1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB128, { RegXMM, Qword|Unspecified|BaseIndex, RegXMM }
-vgatherdpd, 0x6692, None, CpuAVX2, Modrm|Vex=2|Space0F38|VexVVVV|VexW1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB128, { RegYMM, Qword|Unspecified|BaseIndex, RegYMM }
+vgatherdpd, 0x6692, None, CpuAVX2, Modrm|Vex|Space0F38|VexVVVV|VexW1|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB128, { RegXMM|RegYMM, Qword|Unspecified|BaseIndex, RegXMM|RegYMM }
 vgatherdps, 0x6692, None, CpuAVX2, Modrm|Vex|Space0F38|VexVVVV|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB128, { RegXMM, Dword|Unspecified|BaseIndex, RegXMM }
 vgatherdps, 0x6692, None, CpuAVX2, Modrm|Vex=2|Space0F38|VexVVVV|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB256, { RegYMM, Dword|Unspecified|BaseIndex, RegYMM }
 vgatherqpd, 0x6693, None, CpuAVX2, Modrm|Vex|Space0F38|VexVVVV|VexW1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB128, { RegXMM, Qword|Unspecified|BaseIndex, RegXMM }
@@ -1837,8 +1836,7 @@ vgatherqps, 0x6693, None, CpuAVX2, Modrm|Vex|Space0F38|VexVVVV|VexW0|No_bSuf|No_
 vgatherqps, 0x6693, None, CpuAVX2, Modrm|Vex=2|Space0F38|VexVVVV|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB256, { RegXMM, Dword|Unspecified|BaseIndex, RegXMM }
 vpgatherdd, 0x6690, None, CpuAVX2, Modrm|Vex|Space0F38|VexVVVV|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB128, { RegXMM, Dword|Unspecified|BaseIndex, RegXMM }
 vpgatherdd, 0x6690, None, CpuAVX2, Modrm|Vex=2|Space0F38|VexVVVV|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB256, { RegYMM, Dword|Unspecified|BaseIndex, RegYMM }
-vpgatherdq, 0x6690, None, CpuAVX2, Modrm|Vex|Space0F38|VexVVVV|VexW1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB128, { RegXMM, Qword|Unspecified|BaseIndex, RegXMM }
-vpgatherdq, 0x6690, None, CpuAVX2, Modrm|Vex=2|Space0F38|VexVVVV|VexW1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB128, { RegYMM, Qword|Unspecified|BaseIndex, RegYMM }
+vpgatherdq, 0x6690, None, CpuAVX2, Modrm|Vex|Space0F38|VexVVVV|VexW1|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB128, { RegXMM|RegYMM, Qword|Unspecified|BaseIndex, RegXMM|RegYMM }
 vpgatherqd, 0x6691, None, CpuAVX2, Modrm|Vex|Space0F38|VexVVVV|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB128, { RegXMM, Dword|Unspecified|BaseIndex, RegXMM }
 vpgatherqd, 0x6691, None, CpuAVX2, Modrm|Vex=2|Space0F38|VexVVVV|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB256, { RegXMM, Dword|Unspecified|BaseIndex, RegXMM }
 vpgatherqq, 0x6691, None, CpuAVX2, Modrm|Vex|Space0F38|VexVVVV|VexW1|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VecSIB128, { RegXMM, Qword|Unspecified|BaseIndex, RegXMM }
