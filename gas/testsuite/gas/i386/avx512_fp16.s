@@ -541,6 +541,7 @@ _start:
 	vfpclassph	$123, (%ecx){1to32}, %k5	 #AVX512-FP16 BROADCAST_EN
 	vfpclassphz	$123, 8128(%ecx), %k5	 #AVX512-FP16 Disp8(7f)
 	vfpclassph	$123, -256(%edx){1to32}, %k5{%k7}	 #AVX512-FP16 BROADCAST_EN Disp8(80) MASK_ENABLING
+	vfpclassphz	$123, 2(%ecx){1to32}, %k5	 #AVX512-FP16 BROADCAST_EN
 	vfpclasssh	$123, %xmm6, %k5	 #AVX512-FP16
 	vfpclasssh	$123, %xmm6, %k5{%k7}	 #AVX512-FP16 MASK_ENABLING
 	vfpclasssh	$123, 0x10000000(%esp, %esi, 8), %k5{%k7}	 #AVX512-FP16 MASK_ENABLING
