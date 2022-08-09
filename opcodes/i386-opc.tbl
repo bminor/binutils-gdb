@@ -148,7 +148,7 @@ movq, 0xb8, None, Cpu64, Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf
 // implementation defined value is zero).
 mov, 0x8c, None, 0, RegMem|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { SReg, Reg16|Reg32|Reg64 }
 mov, 0x8c, None, 0, D|Modrm|IgnoreSize|No_bSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { SReg, Word|Unspecified|BaseIndex }
-movq, 0x8c, None, Cpu64, D|RegMem|Size64|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { SReg, Reg64 }
+movq, 0x8c, None, Cpu64, D|RegMem|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { SReg, Reg64 }
 mov, 0x8e, None, 0, Modrm|IgnoreSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg16|Reg32|Reg64, SReg }
 // Move to/from control debug registers.  In the 16 or 32bit modes
 // they are 32bit.  In the 64bit mode they are 64bit.
