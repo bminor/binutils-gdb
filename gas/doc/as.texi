@@ -2885,9 +2885,9 @@ preprocessed.
 If the first line of an input file is @code{#NO_APP} or if you use the
 @samp{-f} option, whitespace and comments are not removed from the input file.
 Within an input file, you can ask for whitespace and comment removal in
-specific portions of the by putting a line that says @code{#APP} before the
+specific portions of the file by putting a line that says @code{#APP} before the
 text that may contain whitespace or comments, and putting a line that says
-@code{#NO_APP} after this text.  This feature is mainly intend to support
+@code{#NO_APP} after this text.  This feature is mainly intended to support
 @code{asm} statements in compilers whose output is otherwise free of comments
 and whitespace.
 
@@ -2923,12 +2923,13 @@ This means you may not nest these comments.
 @cindex line comment character
 Anything from a @dfn{line comment} character up to the next newline is
 considered a comment and is ignored.  The line comment character is target
-specific, and some targets multiple comment characters.  Some targets also have
-line comment characters that only work if they are the first character on a
-line.  Some targets use a sequence of two characters to introduce a line
-comment.  Some targets can also change their line comment characters depending
-upon command-line options that have been used.  For more details see the
-@emph{Syntax} section in the documentation for individual targets.
+specific, and some targets support multiple comment characters.  Some targets
+also have line comment characters that only work if they are the first
+character on a line.  Some targets use a sequence of two characters to
+introduce a line comment.  Some targets can also change their line comment
+characters depending upon command-line options that have been used.  For more
+details see the @emph{Syntax} section in the documentation for individual
+targets.
 
 If the line comment character is the hash sign (@samp{#}) then it still has the
 special ability to enable and disable preprocessing (@pxref{Preprocessing}) and
@@ -3649,7 +3650,7 @@ bug in the assembler.
 
 @cindex expr (internal section)
 @item expr section
-The assembler stores complex expression internally as combinations of
+The assembler stores complex expressions internally as combinations of
 symbols.  When it needs to represent an expression as a symbol, it puts
 it in the expr section.
 @c FIXME item debug
@@ -4356,7 +4357,7 @@ You may not subtract arguments from different sections.
 @dfn{Is Less Than Or Equal To}
 
 The comparison operators can be used as infix operators.  A true result has a
-value of -1 whereas a false result has a value of 0.   Note, these operators
+value of -1 whereas a false result has a value of 0.  Note, these operators
 perform signed comparisons.
 @end table
 
