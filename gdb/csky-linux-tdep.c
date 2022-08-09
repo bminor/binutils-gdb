@@ -191,8 +191,8 @@ csky_supply_fregset (const struct regset *regset,
     }
   else
     {
-      warning (_("Unknow size %ld of section .reg2, can not get value"
-		 " of float registers."), len);
+      warning (_("Unknow size %s of section .reg2, can not get value"
+		 " of float registers."), pulongest (len));
     }
 }
 
@@ -272,8 +272,8 @@ csky_collect_fregset (const struct regset *regset,
     }
   else
     {
-      warning (_("Unknow size %ld of section .reg2, will not set value"
-		 " of float registers."), len);
+      warning (_("Unknow size %s of section .reg2, will not set value"
+		 " of float registers."), pulongest (len));
     }
 }
 
