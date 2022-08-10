@@ -2359,28 +2359,20 @@ all_root_varobjs (gdb::function_view<void (struct varobj *var)> func)
 static void
 varobj_re_set_iter (struct varobj *var)
 {
-  /* Invalidated globals and floating var must be re-evaluated.  */
-  if (var->root->global || var->root->floating)
+  /* Invalidated global varobjs must be re-evaluated.  */
+  if (!var->root->is_valid && var->root->global)
     {
       struct varobj *tmp_var;
 
       /* Try to create a varobj with same expression.  If we succeed
-	 replace the old varobj, otherwise invalidate it.  */
+	 and have a global replace the old varobj.  */
       tmp_var = varobj_create (nullptr, var->name.c_str (), (CORE_ADDR) 0,
-			       var->root->floating
-			       ? USE_SELECTED_FRAME : USE_CURRENT_FRAME);
-      if (tmp_var != nullptr)
+			       USE_CURRENT_FRAME);
+      if (tmp_var != nullptr && tmp_var->root->global)
 	{
-	  gdb_assert (var->root->floating == tmp_var->root->floating);
 	  tmp_var->obj_name = var->obj_name;
 	  varobj_delete (var, 0);
 	  install_variable (tmp_var);
-	}
-      else if (var->root->global)
-	{
-	  /* Only invalidate globals as floating vars might still be valid in
-	     some other frame.  */
-	  var->root->is_valid = false;
 	}
     }
 }
