@@ -3960,16 +3960,25 @@ value_fetch_lazy_memory (struct value *val)
   CORE_ADDR addr = value_address (val);
   struct type *type = check_typedef (value_enclosing_type (val));
 
+  if (TYPE_CAPABILITY (type))
+    {
+      gdb::byte_vector cap = target_read_capability (addr);
+      if (cap.size () == TYPE_LENGTH (type) + 1)
+	{
+	  memcpy (value_contents_all_raw (val).data (), cap.data () + 1,
+		  TYPE_LENGTH (type));
+	  set_value_tag (val, cap[0] != 0);
+	  return;
+	}
+    }
+
   if (TYPE_LENGTH (type))
       read_value_memory (val, 0, value_stack (val),
 			 addr, value_contents_all_raw (val).data (),
 			 type_length_units (type));
 
   if (TYPE_CAPABILITY (type))
-    {
-      bool tag = gdbarch_get_cap_tag_from_address (get_value_arch (val), addr);
-      set_value_tag (val, tag);
-    }
+    set_value_tag (val, false);
 }
 
 /* Helper for value_fetch_lazy when the value is in a register.  */
