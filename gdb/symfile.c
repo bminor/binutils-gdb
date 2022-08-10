@@ -1656,6 +1656,9 @@ symbol_file_command (const char *args, int from_tty)
 
       /* Now it's safe to re-add the breakpoints.  */
       breakpoint_re_set ();
+
+      /* Also, it's safe to re-add varobjs.  */
+      varobj_re_set ();
     }
 }
 
@@ -2869,9 +2872,6 @@ clear_symtab_users (symfile_add_flags add_flags)
   clear_last_displayed_sal ();
   clear_pc_function_cache ();
   gdb::observers::new_objfile.notify (NULL);
-
-  /* Varobj may refer to old symbols, perform a cleanup.  */
-  varobj_invalidate ();
 
   /* Now that the various caches have been cleared, we can re_set
      our breakpoints without risking it using stale data.  */

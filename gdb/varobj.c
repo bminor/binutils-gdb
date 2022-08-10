@@ -2353,18 +2353,14 @@ all_root_varobjs (gdb::function_view<void (struct varobj *var)> func)
     }
 }
 
-/* Invalidate varobj VAR if it is tied to locals and re-create it if it is
-   defined on globals.  It is a helper for varobj_invalidate.
-
-   This function is called after changing the symbol file, in this case the
-   pointers to "struct type" stored by the varobj are no longer valid.  All
-   varobj must be either re-evaluated, or marked as invalid here.  */
+/* Try to recreate the varobj VAR if it is a global or floating.  This is a
+   helper function for varobj_re_set.  */
 
 static void
-varobj_invalidate_iter (struct varobj *var)
+varobj_re_set_iter (struct varobj *var)
 {
-  /* global and floating var must be re-evaluated.  */
-  if (var->root->floating || var->root->global)
+  /* Invalidated globals and floating var must be re-evaluated.  */
+  if (var->root->global || var->root->floating)
     {
       struct varobj *tmp_var;
 
@@ -2389,14 +2385,12 @@ varobj_invalidate_iter (struct varobj *var)
     }
 }
 
-/* Invalidate the varobjs that are tied to locals and re-create the ones that
-   are defined on globals.
-   Invalidated varobjs will be always printed in_scope="invalid".  */
+/* See varobj.h.  */
 
 void 
-varobj_invalidate (void)
+varobj_re_set (void)
 {
-  all_root_varobjs (varobj_invalidate_iter);
+  all_root_varobjs (varobj_re_set_iter);
 }
 
 /* Ensure that no varobj keep references to OBJFILE.  */

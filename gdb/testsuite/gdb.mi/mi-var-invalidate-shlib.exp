@@ -99,7 +99,7 @@ proc do_test { separate_debuginfo } {
 	# When reloading the symbol file, only the var for the global in the main
 	# executable is re-created.
 	mi_gdb_test "-var-update global_var" \
-	    "\\^done,changelist=\\\[{name=\"global_var\",in_scope=\"true\",type_changed=\"false\",has_more=\"0\"}\\\]" \
+	    "\\^done,changelist=\\\[\\\]" \
 	    "global_var recreated"
 	mi_gdb_test "-var-update global_shlib_var" \
 	    "\\^done,changelist=\\\[{name=\"global_shlib_var\",in_scope=\"invalid\",has_more=\"0\"}\\\]" \

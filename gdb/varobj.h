@@ -314,7 +314,10 @@ extern void all_root_varobjs (gdb::function_view<void (struct varobj *var)>);
 extern std::vector<varobj_update_result>
   varobj_update (struct varobj **varp, bool is_explicit);
 
-extern void varobj_invalidate (void);
+/* Try to recreate any global or floating varobj.  This is called after
+   changing symbol files.  */
+
+extern void varobj_re_set (void);
 
 extern bool varobj_editable_p (const struct varobj *var);
 
