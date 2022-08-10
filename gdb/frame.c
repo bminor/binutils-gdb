@@ -1399,15 +1399,21 @@ put_frame_register (struct frame_info *frame, int regnum,
     {
     case lval_memory:
       {
-	write_memory (addr, buf, register_size (gdbarch, regnum));
-
 	/* If this value is a capability, we need to handle the capability tag
-	   as well.  */
+	   as an atomic write.  */
 	if ((val_type->code () == TYPE_CODE_CAPABILITY
 	    || (val_type->code () == TYPE_CODE_PTR
 		&& TYPE_CAPABILITY (val_type)))
 	    && value_tagged (fromval))
-	  gdbarch_set_cap_tag_from_address (gdbarch, addr, value_tag (fromval));
+	  {
+	    gdb::byte_vector cap (register_size (gdbarch, regnum) + 1);
+
+	    cap[0] = value_tag (fromval) ? 1 : 0;
+	    memcpy (cap.data () + 1, buf, register_size (gdbarch, regnum));
+	    if (target_write_capability (addr, cap))
+	      break;
+	  }
+	write_memory (addr, buf, register_size (gdbarch, regnum));
 	break;
       }
     case lval_register:
