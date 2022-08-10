@@ -7675,22 +7675,18 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(
 
   switch (r_type)
     {
+    case elfcpp::R_PPC64_TOC:
+      if (size != 64)
+	break;
+      // Fall through.
     case elfcpp::R_POWERPC_NONE:
     case elfcpp::R_POWERPC_GNU_VTINHERIT:
     case elfcpp::R_POWERPC_GNU_VTENTRY:
-    case elfcpp::R_PPC64_TOC:
       // No symbol reference.
       break;
 
     case elfcpp::R_PPC64_ADDR64:
     case elfcpp::R_PPC64_UADDR64:
-    case elfcpp::R_POWERPC_ADDR32:
-    case elfcpp::R_POWERPC_UADDR32:
-    case elfcpp::R_POWERPC_ADDR16:
-    case elfcpp::R_POWERPC_UADDR16:
-    case elfcpp::R_POWERPC_ADDR16_LO:
-    case elfcpp::R_POWERPC_ADDR16_HI:
-    case elfcpp::R_POWERPC_ADDR16_HA:
     case elfcpp::R_PPC64_ADDR16_HIGHER34:
     case elfcpp::R_PPC64_ADDR16_HIGHERA34:
     case elfcpp::R_PPC64_ADDR16_HIGHEST34:
@@ -7700,6 +7696,16 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(
     case elfcpp::R_PPC64_D34_HI30:
     case elfcpp::R_PPC64_D34_HA30:
     case elfcpp::R_PPC64_D28:
+      if (size != 64)
+	break;
+      // Fall through.
+    case elfcpp::R_POWERPC_ADDR32:
+    case elfcpp::R_POWERPC_UADDR32:
+    case elfcpp::R_POWERPC_ADDR16:
+    case elfcpp::R_POWERPC_UADDR16:
+    case elfcpp::R_POWERPC_ADDR16_LO:
+    case elfcpp::R_POWERPC_ADDR16_HI:
+    case elfcpp::R_POWERPC_ADDR16_HA:
       ref = Symbol::ABSOLUTE_REF;
       break;
 
@@ -7710,13 +7716,14 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(
       ref = Symbol::FUNCTION_CALL | Symbol::ABSOLUTE_REF;
       break;
 
-    case elfcpp::R_PPC64_REL64:
-    case elfcpp::R_POWERPC_REL32:
     case elfcpp::R_PPC_LOCAL24PC:
-    case elfcpp::R_POWERPC_REL16:
-    case elfcpp::R_POWERPC_REL16_LO:
-    case elfcpp::R_POWERPC_REL16_HI:
-    case elfcpp::R_POWERPC_REL16_HA:
+      if (size != 32)
+	break;
+      // Fall through.
+      ref = Symbol::RELATIVE_REF;
+      break;
+
+    case elfcpp::R_PPC64_REL64:
     case elfcpp::R_PPC64_REL16_HIGH:
     case elfcpp::R_PPC64_REL16_HIGHA:
     case elfcpp::R_PPC64_REL16_HIGHER:
@@ -7729,36 +7736,45 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(
     case elfcpp::R_PPC64_REL16_HIGHEST34:
     case elfcpp::R_PPC64_REL16_HIGHESTA34:
     case elfcpp::R_PPC64_PCREL28:
+      if (size != 64)
+	break;
+      // Fall through.
+    case elfcpp::R_POWERPC_REL32:
+    case elfcpp::R_POWERPC_REL16:
+    case elfcpp::R_POWERPC_REL16_LO:
+    case elfcpp::R_POWERPC_REL16_HI:
+    case elfcpp::R_POWERPC_REL16_HA:
       ref = Symbol::RELATIVE_REF;
       break;
 
+    case elfcpp::R_PPC_PLTREL24:
+      if (size != 32)
+	break;
+      ref = Symbol::FUNCTION_CALL | Symbol::RELATIVE_REF;
+      break;
+
     case elfcpp::R_PPC64_REL24_NOTOC:
-      if (size == 32)
+    case elfcpp::R_PPC64_REL24_P9NOTOC:
+    case elfcpp::R_PPC64_PLT16_LO_DS:
+    case elfcpp::R_PPC64_PLTSEQ_NOTOC:
+    case elfcpp::R_PPC64_PLTCALL_NOTOC:
+    case elfcpp::R_PPC64_PLT_PCREL34:
+    case elfcpp::R_PPC64_PLT_PCREL34_NOTOC:
+      if (size != 64)
 	break;
       // Fall through.
-    case elfcpp::R_PPC64_REL24_P9NOTOC:
     case elfcpp::R_POWERPC_REL24:
-    case elfcpp::R_PPC_PLTREL24:
     case elfcpp::R_POWERPC_REL14:
     case elfcpp::R_POWERPC_REL14_BRTAKEN:
     case elfcpp::R_POWERPC_REL14_BRNTAKEN:
     case elfcpp::R_POWERPC_PLT16_LO:
     case elfcpp::R_POWERPC_PLT16_HI:
     case elfcpp::R_POWERPC_PLT16_HA:
-    case elfcpp::R_PPC64_PLT16_LO_DS:
     case elfcpp::R_POWERPC_PLTSEQ:
-    case elfcpp::R_PPC64_PLTSEQ_NOTOC:
     case elfcpp::R_POWERPC_PLTCALL:
-    case elfcpp::R_PPC64_PLTCALL_NOTOC:
-    case elfcpp::R_PPC64_PLT_PCREL34:
-    case elfcpp::R_PPC64_PLT_PCREL34_NOTOC:
       ref = Symbol::FUNCTION_CALL | Symbol::RELATIVE_REF;
       break;
 
-    case elfcpp::R_POWERPC_GOT16:
-    case elfcpp::R_POWERPC_GOT16_LO:
-    case elfcpp::R_POWERPC_GOT16_HI:
-    case elfcpp::R_POWERPC_GOT16_HA:
     case elfcpp::R_PPC64_GOT16_DS:
     case elfcpp::R_PPC64_GOT16_LO_DS:
     case elfcpp::R_PPC64_GOT_PCREL34:
@@ -7768,11 +7784,16 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(
     case elfcpp::R_PPC64_TOC16_HA:
     case elfcpp::R_PPC64_TOC16_DS:
     case elfcpp::R_PPC64_TOC16_LO_DS:
+      if (size != 64)
+	break;
+      // Fall through.
+    case elfcpp::R_POWERPC_GOT16:
+    case elfcpp::R_POWERPC_GOT16_LO:
+    case elfcpp::R_POWERPC_GOT16_HI:
+    case elfcpp::R_POWERPC_GOT16_HA:
       ref = Symbol::RELATIVE_REF;
       break;
 
-    case elfcpp::R_POWERPC_GOT_TPREL16:
-    case elfcpp::R_POWERPC_TLS:
     case elfcpp::R_PPC64_TLSGD:
     case elfcpp::R_PPC64_TLSLD:
     case elfcpp::R_PPC64_TPREL34:
@@ -7781,6 +7802,11 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(
     case elfcpp::R_PPC64_GOT_TLSLD_PCREL34:
     case elfcpp::R_PPC64_GOT_TPREL_PCREL34:
     case elfcpp::R_PPC64_GOT_DTPREL_PCREL34:
+      if (size != 64)
+	break;
+      // Fall through.
+    case elfcpp::R_POWERPC_GOT_TPREL16:
+    case elfcpp::R_POWERPC_TLS:
       ref = Symbol::TLS_REF;
       break;
 
@@ -10671,10 +10697,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
   bool has_stub_value = false;
   bool localentry0 = false;
   unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
-  bool use_plt_offset
-    = (gsym != NULL
-       ? gsym->use_plt_offset(Scan::get_reference_flags(r_type, target))
-       : object->local_has_plt_offset(r_sym));
+  bool pltcall_to_direct = false;
+
   if (is_plt16_reloc<size>(r_type)
       || r_type == elfcpp::R_PPC64_PLT_PCREL34
       || r_type == elfcpp::R_PPC64_PLT_PCREL34_NOTOC
@@ -10688,21 +10712,18 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       // that the decision depends on the PLTCALL reloc, and we don't
       // know the address of that instruction when processing others
       // in the sequence.  So the decision needs to be made in
-      // do_relax().  For now, don't optimise inline plt calls.
-      if (gsym)
-	use_plt_offset = gsym->has_plt_offset();
+      // do_relax().
+      pltcall_to_direct = !(gsym != NULL
+			    ? gsym->has_plt_offset()
+			    : object->local_has_plt_offset(r_sym));
     }
-  if (use_plt_offset
-      && !is_got_reloc(r_type)
-      && !is_plt16_reloc<size>(r_type)
-      && r_type != elfcpp::R_PPC64_PLT_PCREL34
-      && r_type != elfcpp::R_PPC64_PLT_PCREL34_NOTOC
-      && r_type != elfcpp::R_POWERPC_PLTSEQ
-      && r_type != elfcpp::R_POWERPC_PLTCALL
-      && r_type != elfcpp::R_PPC64_PLTSEQ_NOTOC
-      && r_type != elfcpp::R_PPC64_PLTCALL_NOTOC
-      && (!psymval->is_ifunc_symbol()
-	  || Scan::reloc_needs_plt_for_ifunc(target, object, r_type, false)))
+  else if ((gsym != NULL
+	    ? gsym->use_plt_offset(Scan::get_reference_flags(r_type, target))
+	    : psymval->is_ifunc_symbol() && object->local_has_plt_offset(r_sym))
+	   && !is_got_reloc(r_type)
+	   && (!psymval->is_ifunc_symbol()
+	       || Scan::reloc_needs_plt_for_ifunc(target, object, r_type,
+						  false)))
     {
       if (size == 64
 	  && gsym != NULL
@@ -10796,9 +10817,9 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       gold_assert(has_stub_value || !(os->flags() & elfcpp::SHF_ALLOC));
     }
 
-  if (use_plt_offset && (is_plt16_reloc<size>(r_type)
-			 || r_type == elfcpp::R_PPC64_PLT_PCREL34
-			 || r_type == elfcpp::R_PPC64_PLT_PCREL34_NOTOC))
+  if (!pltcall_to_direct && (is_plt16_reloc<size>(r_type)
+			     || r_type == elfcpp::R_PPC64_PLT_PCREL34
+			     || r_type == elfcpp::R_PPC64_PLT_PCREL34_NOTOC))
     {
       const Output_data_plt_powerpc<size, big_endian>* plt;
       if (gsym)
@@ -10826,7 +10847,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	    value -= target->toc_pointer();
 	}
     }
-  else if (!use_plt_offset
+  else if (pltcall_to_direct
 	   && (is_plt16_reloc<size>(r_type)
 	       || r_type == elfcpp::R_POWERPC_PLTSEQ
 	       || r_type == elfcpp::R_PPC64_PLTSEQ_NOTOC))
@@ -10835,7 +10856,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       elfcpp::Swap<32, big_endian>::writeval(iview, nop);
       r_type = elfcpp::R_POWERPC_NONE;
     }
-  else if (!use_plt_offset
+  else if (pltcall_to_direct
 	   && (r_type == elfcpp::R_PPC64_PLT_PCREL34
 	       || r_type == elfcpp::R_PPC64_PLT_PCREL34_NOTOC))
     {
@@ -11316,8 +11337,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     }
   else if (!has_stub_value)
     {
-      if (!use_plt_offset && (r_type == elfcpp::R_POWERPC_PLTCALL
-			      || r_type == elfcpp::R_PPC64_PLTCALL_NOTOC))
+      if (pltcall_to_direct && (r_type == elfcpp::R_POWERPC_PLTCALL
+				|| r_type == elfcpp::R_PPC64_PLTCALL_NOTOC))
 	{
 	  // PLTCALL without plt entry => convert to direct call
 	  Insn* iview = reinterpret_cast<Insn*>(view);
