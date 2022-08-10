@@ -1856,7 +1856,6 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 
 	/* If we changed interpreters, DON'T print out anything.  */
 	if (current_interp_named_p (INTERP_MI)
-	    || current_interp_named_p (INTERP_MI1)
 	    || current_interp_named_p (INTERP_MI2)
 	    || current_interp_named_p (INTERP_MI3)
 	    || current_interp_named_p (INTERP_MI4))

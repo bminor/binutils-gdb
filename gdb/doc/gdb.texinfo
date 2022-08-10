@@ -29150,10 +29150,6 @@ The @sc{gdb/mi} interface introduced in @value{GDBN} 9.1.
 @cindex mi2 interpreter
 The @sc{gdb/mi} interface introduced in @value{GDBN} 6.0.
 
-@item mi1
-@cindex mi1 interpreter
-The @sc{gdb/mi} interface introduced in @value{GDBN} 5.1.
-
 @end table
 
 @cindex invoke another interpreter

@@ -1317,7 +1317,6 @@ void
 _initialize_mi_interp ()
 {
   /* The various interpreter levels.  */
-  interp_factory_register (INTERP_MI1, mi_interp_factory);
   interp_factory_register (INTERP_MI2, mi_interp_factory);
   interp_factory_register (INTERP_MI3, mi_interp_factory);
   interp_factory_register (INTERP_MI4, mi_interp_factory);

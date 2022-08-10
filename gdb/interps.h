@@ -175,7 +175,6 @@ extern void interpreter_completer (struct cmd_list_element *ignore,
 
 /* well-known interpreters */
 #define INTERP_CONSOLE		"console"
-#define INTERP_MI1             "mi1"
 #define INTERP_MI2             "mi2"
 #define INTERP_MI3             "mi3"
 #define INTERP_MI4             "mi4"
