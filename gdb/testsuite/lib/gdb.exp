@@ -4323,6 +4323,70 @@ gdb_caching_proc allow_avx512fp16_tests {} {
     return $allow_avx512fp16_tests
 }
 
+# Run a test on the target to see if it supports LAM 57.  Return 1 if so,
+# 0 if it does not.  Based on the arch_prctl() handle ARCH_ENABLE_TAGGED_ADDR
+# to enable LAM which fails if the hardware or the OS does not support LAM.
+
+gdb_caching_proc allow_lam_tests {} {
+    global gdb_prompt inferior_exited_re
+
+    set me "allow_lam_tests"
+    if { ![istarget "x86_64-*-*"] } {
+	verbose "$me:  target does not support LAM, returning 1" 2
+	return 0
+    }
+
+    # Compile a test program.
+    set src {
+      #define _GNU_SOURCE
+      #include <unistd.h>
+      #include <sys/syscall.h>
+      #include <assert.h>
+      #include <errno.h>
+      #include <asm/prctl.h>
+
+      int configure_lam ()
+      {
+	errno = 0;
+	syscall (SYS_arch_prctl, ARCH_ENABLE_TAGGED_ADDR, 6);
+	assert_perror (errno);
+	return errno;
+      }
+
+      int
+      main () { return configure_lam (); }
+    }
+
+    if {![gdb_simple_compile $me $src executable ""]} {
+	return 0
+    }
+    # No error message, compilation succeeded so now run it via gdb.
+
+    set allow_lam_tests 0
+    clean_restart $obj
+    gdb_run_cmd
+    gdb_expect {
+	-re ".*$inferior_exited_re with code.*${gdb_prompt} $" {
+	    verbose -log "$me:  LAM support not detected."
+	}
+	-re ".*Program received signal SIGABRT, Aborted.*${gdb_prompt} $" {
+	    verbose -log "$me:  LAM support not detected."
+	}
+	-re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+	    verbose -log "$me:  LAM support detected."
+	    set allow_lam_tests 1
+	}
+	default {
+	    warning "\n$me:  default case taken."
+	}
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    verbose "$me:  returning $allow_lam_tests" 2
+    return $allow_lam_tests
+}
+
 # Run a test on the target to see if it supports btrace hardware.  Return 1 if so,
 # 0 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 

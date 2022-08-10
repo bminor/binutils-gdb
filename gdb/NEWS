@@ -3,6 +3,11 @@
 
 *** Changes since GDB 15
 
+* GDB now supports watchpoints for tagged data pointers (see
+  https://en.wikipedia.org/wiki/Tagged_pointer) on amd64, such as the
+  one used by the Linear Address Masking (LAM) feature provided by
+  Intel.
+
 * Debugging support for Intel MPX has been removed.  This includes the
   removal of
   ** MPX register support
