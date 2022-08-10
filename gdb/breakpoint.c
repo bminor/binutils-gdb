@@ -6162,6 +6162,10 @@ output_thread_groups (struct ui_out *uiout,
     }
 }
 
+/* See breakpoint.h. */
+
+bool fix_breakpoint_script_output_globally = false;
+
 /* Print B to gdb_stdout.  If RAW_LOC, print raw breakpoint locations
    instead of going via breakpoint_ops::print_one.  This makes "maint
    info breakpoints" show the software breakpoint locations of
@@ -6458,7 +6462,19 @@ print_one_breakpoint_location (struct breakpoint *b,
   if (!part_of_multiple && l)
     {
       annotate_field (9);
-      ui_out_emit_tuple tuple_emitter (uiout, "script");
+
+      bool use_fixed_output =
+	(uiout->test_flags (fix_breakpoint_script_output)
+         || fix_breakpoint_script_output_globally);
+
+      gdb::optional<ui_out_emit_tuple> tuple_emitter;
+      gdb::optional<ui_out_emit_list> list_emitter;
+
+      if (use_fixed_output)
+	list_emitter.emplace (uiout, "script");
+      else
+	tuple_emitter.emplace (uiout, "script");
+
       print_command_lines (uiout, l, 4);
     }
 

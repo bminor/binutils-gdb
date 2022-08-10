@@ -106,6 +106,25 @@ private:
      redirected.  */
   string_file *main_stream ();
 
+  /* Helper for the constructor, deduce ui_out_flags for the given
+     MI_VERSION.  */
+  static ui_out_flags make_flags (int mi_version)
+  {
+    ui_out_flags flags = 0;
+
+    /* In MI version 2 and below, multi-location breakpoints had a wrong
+       syntax.  It is fixed in version 3.  */
+    if (mi_version >= 3)
+      flags |= fix_multi_location_breakpoint_output;
+
+    /* In MI version 3 and below, the "script" field in breakpoint output
+       had a wrong syntax.  It is fixed in version 4.  */
+    if (mi_version >= 4)
+      flags |= fix_breakpoint_script_output;
+
+    return flags;
+  }
+
   bool m_suppress_field_separator;
   bool m_suppress_output;
   int m_mi_version;

@@ -55,7 +55,8 @@ enum ui_out_flag
   fix_multi_location_breakpoint_output = (1 << 1),
   /* This indicates that %pF should be disallowed in a printf format
      string.  */
-  disallow_ui_out_field = (1 << 2)
+  disallow_ui_out_field = (1 << 2),
+  fix_breakpoint_script_output = (1 << 3),
 };
 
 DEF_ENUM_FLAGS_TYPE (ui_out_flag, ui_out_flags);

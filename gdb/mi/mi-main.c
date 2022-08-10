@@ -1865,7 +1865,8 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 	if (current_interp_named_p (INTERP_MI)
 	    || current_interp_named_p (INTERP_MI1)
 	    || current_interp_named_p (INTERP_MI2)
-	    || current_interp_named_p (INTERP_MI3))
+	    || current_interp_named_p (INTERP_MI3)
+	    || current_interp_named_p (INTERP_MI4))
 	  {
 	    if (!running_result_record_printed)
 	      {
@@ -2707,6 +2708,14 @@ mi_cmd_fix_multi_location_breakpoint_output (const char *command, char **argv,
 					     int argc)
 {
   fix_multi_location_breakpoint_output_globally = true;
+}
+
+/* See mi/mi-main.h.  */
+
+void
+mi_cmd_fix_breakpoint_script_output (const char *command, char **argv, int argc)
+{
+  fix_breakpoint_script_output_globally = true;
 }
 
 /* Implement the "-complete" command.  */

@@ -30472,6 +30472,21 @@ The multiple locations are now placed in a @code{locations} field, whose value
 is a list.
 @end itemize
 
+@item
+@center 4
+@tab
+@center 13.1
+@tab
+
+@itemize
+@item
+The syntax of the "script" field in breakpoint output has changed in the
+responses to the @code{-break-insert} and @code{-break-info} commands, as
+well as the @code{=breakpoint-created} and @code{=breakpoint-modified}
+events.  The previous output was syntactically invalid.  The new output is
+a list.
+@end itemize
+
 @end multitable
 
 If your front end cannot yet migrate to a more recent version of the
@@ -30482,8 +30497,13 @@ available in those recent MI versions, using the following commands:
 
 @item -fix-multi-location-breakpoint-output
 Use the output for multi-location breakpoints which was introduced by
-MI 3, even when using MI versions 2 or 1.  This command has no
+MI 3, even when using MI versions below 3.  This command has no
 effect when using MI version 3 or later.
+
+@item -fix-breakpoint-script-output
+Use the output for the breakpoint "script" field which was introduced by
+MI 4, even when using MI versions below 4.  This command has no effect when
+using MI version 4 or later.
 
 @end table
 
@@ -31647,14 +31667,14 @@ The corresponding @value{GDBN} command is @samp{dprintf}.
 4^done,bkpt=@{number="1",type="dprintf",disp="keep",enabled="y",
 addr="0x000000000040061b",func="foo",file="mi-dprintf.c",
 fullname="mi-dprintf.c",line="25",thread-groups=["i1"],
-times="0",script=@{"printf \"At foo entry\\n\"","continue"@},
+times="0",script=["printf \"At foo entry\\n\"","continue"],
 original-location="foo"@}
 (gdb)
 5-dprintf-insert 26 "arg=%d, g=%d\n" arg g
 5^done,bkpt=@{number="2",type="dprintf",disp="keep",enabled="y",
 addr="0x000000000040062a",func="foo",file="mi-dprintf.c",
 fullname="mi-dprintf.c",line="26",thread-groups=["i1"],
-times="0",script=@{"printf \"arg=%d, g=%d\\n\", arg, g","continue"@},
+times="0",script=["printf \"arg=%d, g=%d\\n\", arg, g","continue"],
 original-location="mi-dprintf.c:26"@}
 (gdb)
 @end smallexample

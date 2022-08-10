@@ -1871,6 +1871,11 @@ extern cmd_list_element *commands_cmd_element;
 
 extern bool fix_multi_location_breakpoint_output_globally;
 
+/* Whether to use the fixed output when printing information about
+   commands attached to a breakpoint.  */
+
+extern bool fix_breakpoint_script_output_globally;
+
 /* Deal with "catch catch", "catch throw", and "catch rethrow" commands and
    the MI equivalents.  Sets up to catch events of type EX_EVENT.  When
    TEMPFLAG is true only the next matching event is caught after which the

@@ -1343,6 +1343,7 @@ _initialize_mi_interp ()
   interp_factory_register (INTERP_MI1, mi_interp_factory);
   interp_factory_register (INTERP_MI2, mi_interp_factory);
   interp_factory_register (INTERP_MI3, mi_interp_factory);
+  interp_factory_register (INTERP_MI4, mi_interp_factory);
   interp_factory_register (INTERP_MI, mi_interp_factory);
 
   gdb::observers::signal_received.attach (mi_on_signal_received, "mi-interp");

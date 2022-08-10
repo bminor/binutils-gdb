@@ -381,6 +381,20 @@ winheight
     option, which causes the new inferior to start without a
     connection.
 
+ ** The default version of the MI interpreter is now 4 (-i=mi4).
+
+ ** The "script" field in breakpoint output (which is syntactically
+    incorrect in MI 3 and below) has changed in MI 4 to become a list.
+    This affects the following commands and events:
+
+	- -break-insert
+	- -break-info
+	- =breakpoint-created
+	- =breakpoint-modified
+
+    The -fix-breakpoint-script-output command can be used to enable
+    this behavior with previous MI versions.
+
 * New targets
 
 GNU/Linux/LoongArch		loongarch*-*-linux*
