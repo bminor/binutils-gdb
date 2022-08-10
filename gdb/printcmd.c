@@ -1110,6 +1110,10 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
   bool print_range_tag = true;
   uint32_t gsize = gdbarch_memtag_granule_size (gdbarch);
 
+  /* Memory tag information for CHERI tags. */
+  bool print_cheri_tag = true;
+  uint32_t cap_size = gdbarch_capability_bit (gdbarch) / TARGET_CHAR_BIT;
+
   /* Print as many objects as specified in COUNT, at most maxelts per line,
      with the address of the next one at the start of each line.  */
 
@@ -1149,6 +1153,23 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	  print_range_tag = false;
 	}
 
+      CORE_ADDR cap_haddr = 0;
+
+      /* Print CHERI capability tags if requested.  */
+      if (fmt.print_tags && print_cheri_tag && cap_size != 0)
+	{
+	  CORE_ADDR cap_laddr = align_down (next_address, cap_size);
+	  cap_haddr = cap_laddr + cap_size;
+
+	  gdb::byte_vector cap = target_read_capability (cap_laddr);
+	  if (cap.size () != 0)
+	    printf_filtered (_("<CHERI Tag %u for range [%s,%s)>\n"),
+			     cap[0] != 0,
+			     paddress (gdbarch, cap_laddr),
+			     paddress (gdbarch, cap_haddr));
+	  print_cheri_tag = false;
+	}
+
       if (format == 'i')
 	puts_filtered (pc_prefix (next_address));
       print_address (next_gdbarch, next_address, gdb_stdout);
@@ -1184,6 +1205,9 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	     processed.  */
 	  if (tag_haddr <= next_address)
 	      print_range_tag = true;
+
+	  if (cap_haddr <= next_address)
+	      print_cheri_tag = true;
 	}
       printf_filtered ("\n");
     }
