@@ -1380,19 +1380,6 @@ gdb_disable_readline (void)
 {
   struct ui *ui = current_ui;
 
-  /* FIXME - It is too heavyweight to delete and remake these every
-     time you run an interpreter that needs readline.  It is probably
-     better to have the interpreters cache these, which in turn means
-     that this needs to be moved into interpreter specific code.  */
-
-#if 0
-  ui_file_delete (gdb_stdout);
-  ui_file_delete (gdb_stderr);
-  gdb_stdlog = NULL;
-  gdb_stdtarg = NULL;
-  gdb_stdtargerr = NULL;
-#endif
-
   if (ui->command_editing)
     gdb_rl_callback_handler_remove ();
   ui->unregister_file_handler ();
