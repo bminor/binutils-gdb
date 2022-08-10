@@ -1414,33 +1414,6 @@ proc mi_continue_to {func} {
     mi_runto_helper $func "continue"
 }
 
-proc mi0_execute_to { cmd reason func args file line extra test } {
-    mi_execute_to_helper "$cmd" "$reason" "$func" "\{$args\}" \
-	"$file" "$line" "$extra" "$test"
-}
-
-proc mi0_next_to { func args file line test } {
-    mi0_execute_to "exec-next" "end-stepping-range" "$func" "$args" \
-	"$file" "$line" "" "$test"
-}
-
-proc mi0_step_to { func args file line test } {
-    mi0_execute_to "exec-step" "end-stepping-range" "$func" "$args" \
-	"$file" "$line" "" "$test"
-}
-
-proc mi0_finish_to { func args file line result ret test } {
-    mi0_execute_to "exec-finish" "function-finished" "$func" "$args" \
-	"$file" "$line" \
-	",gdb-result-var=\"$result\",return-value=\"$ret\"" \
-	"$test"
-}
-
-proc mi0_continue_to { bkptno func args file line test } {
-    mi0_execute_to "exec-continue" "breakpoint-hit\",bkptno=\"$bkptno" \
-	"$func" "$args" "$file" "$line" "" "$test"
-}
-
 # Creates a breakpoint and checks the reported fields are as expected.
 # This procedure takes the same options as mi_make_breakpoint and
 # returns the breakpoint regexp from that procedure.
