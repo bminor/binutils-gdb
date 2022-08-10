@@ -348,9 +348,7 @@ capability_bit is the size of a target capability as represented in gdb
 """,
     type="int",
     name="capability_bit",
-    predefault="0",
-    postdefault="gdbarch_ptr_bit (gdbarch)",
-    invalid=True
+    invalid=False,
 )
 
 Value(
