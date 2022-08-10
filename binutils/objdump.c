@@ -2247,7 +2247,7 @@ objdump_styled_sprintf (SFILE *f, enum disassembler_style style,
 	{
 	  size_t space = f->alloc - f->pos;
 
-	  if (disassembler_color)
+	  if (disassembler_color == on)
 	    n = snprintf (f->buffer + f->pos, space, "\033[%dm", color);
 	  else
 	    n = snprintf (f->buffer + f->pos, space, "\033[38;5;%dm", color);
