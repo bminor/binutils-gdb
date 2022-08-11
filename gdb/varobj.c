@@ -2387,8 +2387,6 @@ varobj_invalidate_iter (struct varobj *var)
 	  var->root->is_valid = false;
 	}
     }
-  else /* locals must be invalidated.  */
-    var->root->is_valid = false;
 }
 
 /* Invalidate the varobjs that are tied to locals and re-create the ones that

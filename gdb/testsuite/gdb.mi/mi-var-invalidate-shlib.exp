@@ -40,10 +40,6 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $opt
 }
 
 proc do_test { separate_debuginfo } {
-    if { $separate_debuginfo } {
-	gdb_gnu_strip_debug $::shlib_path
-    }
-
     if { [mi_clean_restart] } {
 	unsupported "failed to start GDB"
 	return
@@ -132,6 +128,42 @@ proc do_test { separate_debuginfo } {
     }
 }
 
+proc_with_prefix local_not_invalidated { separate_debuginfo } {
+    if { [mi_clean_restart] } {
+	unsupported "failed to start GDB"
+	return
+    }
+
+    # Start the process once and create varobjs referencing the loaded objfiles.
+    with_test_prefix "setup" {
+	mi_load_shlibs $::shlib_path
+	if { $separate_debuginfo } {
+	    mi_load_shlibs ${::shlib_path}.debug
+	}
+
+	mi_gdb_reinitialize_dir $::srcdir/$::subdir
+	mi_gdb_load $::binfile
+
+	mi_runto foo -pending
+	mi_next "next"
+	mi_create_varobj local_var local_var "create local varobj"
+    }
+
+    # At this point we are stopped in the shared library.  If we reload symbols
+    # for the main binary, symbols for the shared library remain valid.  A
+    # varobj tracking variables in the scope of the shared library only should
+    # not be invalidated.
+    mi_gdb_load ${::binfile}
+    mi_gdb_test "-var-update local_var" \
+	"\\^done,changelist=\\\[\\\]" \
+	"local_var preserved"
+}
+
 foreach_with_prefix separate_debuginfo {0 1} {
+    if { $separate_debuginfo } {
+	gdb_gnu_strip_debug $::shlib_path
+    }
+
     do_test $separate_debuginfo
+    local_not_invalidated $separate_debuginfo
 }
