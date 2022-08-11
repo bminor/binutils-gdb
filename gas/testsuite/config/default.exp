@@ -52,6 +52,14 @@ if ![info exists NMFLAGS] then {
     set NMFLAGS {}
 }
 
+if ![info exists SIZE] then {
+    set SIZE [findfile $base_dir/size]
+}
+
+if ![info exists SIZEFLAGS] then {
+    set SIZEFLAGS ""
+}
+
 if ![info exists OBJCOPY] then {
     set OBJCOPY [findfile $base_dir/../../binutils/objcopy]
 }

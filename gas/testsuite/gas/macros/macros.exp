@@ -70,6 +70,7 @@ run_dump_test app2
 run_dump_test app3
 remote_download host "$srcdir/$subdir/app4b.s"
 run_dump_test app4
+run_dump_test app5
 
 run_list_test badarg ""
 
