@@ -904,8 +904,8 @@ tui_initialize_io (void)
 #endif
 
   /* Create tui output streams.  */
-  tui_stdout = new pager_file (new tui_file (stdout));
-  tui_stderr = new tui_file (stderr);
+  tui_stdout = new pager_file (new tui_file (stdout, true));
+  tui_stderr = new tui_file (stderr, false);
   tui_stdlog = new timestamped_file (tui_stderr);
   tui_out = new tui_ui_out (tui_stdout);
 
