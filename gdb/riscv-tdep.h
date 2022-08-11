@@ -90,6 +90,12 @@ struct riscv_gdbarch_tdep : gdbarch_tdep_base
   /* ISA-specific data types.  */
   struct type *riscv_fpreg_d_type = nullptr;
 
+  /* The location of these registers, set to -2 by default so we don't
+     match against -1 which is frequently used to mean "all registers",
+     e.g. in the regcache supply/collect code.  */
+  int fflags_regnum = -2;
+  int frm_regnum = -2;
+
   /* Use for tracking unknown CSRs in the target description.
      UNKNOWN_CSRS_FIRST_REGNUM is the number assigned to the first unknown
      CSR.  All other unknown CSRs will be assigned sequential numbers after

@@ -933,6 +933,72 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
   return name;
 }
 
+/* Implement gdbarch_pseudo_register_read.  Read pseudo-register REGNUM
+   from REGCACHE and place the register value into BUF.  BUF is sized
+   based on the type of register REGNUM, all of BUF should be written too,
+   the result should be sign or zero extended as appropriate.  */
+
+static enum register_status
+riscv_pseudo_register_read (struct gdbarch *gdbarch,
+			    readable_regcache *regcache,
+			    int regnum, gdb_byte *buf)
+{
+  riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
+
+  if (regnum == tdep->fflags_regnum || regnum == tdep->frm_regnum)
+    {
+      /* Clear BUF.  */
+      memset (buf, 0, register_size (gdbarch, regnum));
+
+      /* Read the first byte of the fcsr register, this contains both frm
+	 and fflags.  */
+      enum register_status status
+	= regcache->raw_read_part (RISCV_CSR_FCSR_REGNUM, 0, 1, buf);
+
+      if (status != REG_VALID)
+	return status;
+
+      /* Extract the appropriate parts.  */
+      if (regnum == tdep->fflags_regnum)
+	buf[0] &= 0x1f;
+      else if (regnum == tdep->frm_regnum)
+	buf[0] = (buf[0] >> 5) & 0x7;
+
+      return REG_VALID;
+    }
+
+  return REG_UNKNOWN;
+}
+
+/* Implement gdbarch_pseudo_register_write.  Write the contents of BUF into
+   pseudo-register REGNUM in REGCACHE.  BUF is sized based on the type of
+   register REGNUM.  */
+
+static void
+riscv_pseudo_register_write (struct gdbarch *gdbarch,
+			     struct regcache *regcache, int regnum,
+			     const gdb_byte *buf)
+{
+  riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
+
+  if (regnum == tdep->fflags_regnum || regnum == tdep->frm_regnum)
+    {
+      int fcsr_regnum = RISCV_CSR_FCSR_REGNUM;
+      gdb_byte raw_buf[register_size (gdbarch, fcsr_regnum)];
+
+      regcache->raw_read (fcsr_regnum, raw_buf);
+
+      if (regnum == tdep->fflags_regnum)
+	raw_buf[0] = (raw_buf[0] & ~0x1f) | (buf[0] & 0x1f);
+      else if (regnum == tdep->frm_regnum)
+	raw_buf[0] = (raw_buf[0] & ~(0x7 << 5)) | ((buf[0] & 0x7) << 5);
+
+      regcache->raw_write (fcsr_regnum, raw_buf);
+    }
+  else
+    gdb_assert_not_reached ("unknown pseudo register %d", regnum);
+}
+
 /* Implement the cannot_store_register gdbarch method.  The zero register
    (x0) is read-only on RISC-V.  */
 
@@ -1096,6 +1162,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
   else
     {
       struct value_print_options opts;
+      riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
 
       /* Print the register in hex.  */
       get_formatted_print_options (&opts, 'x');
@@ -1162,15 +1229,13 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 		}
 	    }
 	  else if (regnum == RISCV_CSR_FCSR_REGNUM
-		   || regnum == RISCV_CSR_FFLAGS_REGNUM
-		   || regnum == RISCV_CSR_FRM_REGNUM)
+		   || regnum == tdep->fflags_regnum
+		   || regnum == tdep->frm_regnum)
 	    {
-	      LONGEST d;
-
-	      d = value_as_long (val);
+	      LONGEST d = value_as_long (val);
 
 	      gdb_printf (file, "\t");
-	      if (regnum != RISCV_CSR_FRM_REGNUM)
+	      if (regnum != tdep->frm_regnum)
 		gdb_printf (file,
 			    "NV:%d DZ:%d OF:%d UF:%d NX:%d",
 			    (int) ((d >> 4) & 0x1),
@@ -1179,7 +1244,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 			    (int) ((d >> 1) & 0x1),
 			    (int) ((d >> 0) & 0x1));
 
-	      if (regnum != RISCV_CSR_FFLAGS_REGNUM)
+	      if (regnum != tdep->fflags_regnum)
 		{
 		  static const char * const sfrm[] =
 		    {
@@ -1284,13 +1349,15 @@ static int
 riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
 			   const struct reggroup *reggroup)
 {
+  riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
+
   /* Used by 'info registers' and 'info registers <groupname>'.  */
 
   if (gdbarch_register_name (gdbarch, regnum) == NULL
       || gdbarch_register_name (gdbarch, regnum)[0] == '\0')
     return 0;
 
-  if (regnum > RISCV_LAST_REGNUM)
+  if (regnum > RISCV_LAST_REGNUM && regnum < gdbarch_num_regs (gdbarch))
     {
       /* Any extra registers from the CSR tdesc_feature (identified in
 	 riscv_tdesc_unknown_reg) are removed from the save/restore groups
@@ -1331,8 +1398,8 @@ riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
   else if (reggroup == float_reggroup)
     return (riscv_is_fp_regno_p (regnum)
 	    || regnum == RISCV_CSR_FCSR_REGNUM
-	    || regnum == RISCV_CSR_FFLAGS_REGNUM
-	    || regnum == RISCV_CSR_FRM_REGNUM);
+	    || regnum == tdep->fflags_regnum
+	    || regnum == tdep->frm_regnum);
   else if (reggroup == general_reggroup)
     return regnum < RISCV_FIRST_FP_REGNUM;
   else if (reggroup == restore_reggroup || reggroup == save_reggroup)
@@ -1340,8 +1407,8 @@ riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
       if (riscv_has_fp_regs (gdbarch))
 	return (regnum <= RISCV_LAST_FP_REGNUM
 		|| regnum == RISCV_CSR_FCSR_REGNUM
-		|| regnum == RISCV_CSR_FFLAGS_REGNUM
-		|| regnum == RISCV_CSR_FRM_REGNUM);
+		|| regnum == tdep->fflags_regnum
+		|| regnum == tdep->frm_regnum);
       else
 	return regnum < RISCV_FIRST_FP_REGNUM;
     }
@@ -1359,6 +1426,45 @@ riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
     return (regnum >= RISCV_V0_REGNUM && regnum <= RISCV_V31_REGNUM);
   else
     return 0;
+}
+
+/* Return the name for pseudo-register REGNUM for GDBARCH.  */
+
+static const char *
+riscv_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
+{
+  riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
+
+  if (regnum == tdep->fflags_regnum)
+    return "fflags";
+  else if (regnum == tdep->frm_regnum)
+    return "frm";
+  else
+    gdb_assert_not_reached ("unknown pseudo register number %d", regnum);
+}
+
+/* Return the type for pseudo-register REGNUM for GDBARCH.  */
+
+static struct type *
+riscv_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
+{
+  riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
+
+  if (regnum == tdep->fflags_regnum || regnum == tdep->frm_regnum)
+   return builtin_type (gdbarch)->builtin_int32;
+  else
+    gdb_assert_not_reached ("unknown pseudo register number %d", regnum);
+}
+
+/* Return true (non-zero) if pseudo-register REGNUM from GDBARCH is a
+   member of REGGROUP, otherwise return false (zero).  */
+
+static int
+riscv_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
+				  const struct reggroup *reggroup)
+{
+  /* The standard function will also work for pseudo-registers.  */
+  return riscv_register_reggroup_p (gdbarch, regnum, reggroup);
 }
 
 /* Implement the print_registers_info gdbarch method.  This is used by
@@ -3713,6 +3819,13 @@ riscv_gdbarch_init (struct gdbarch_info info,
       return NULL;
     }
 
+  if (tdesc_found_register (tdesc_data.get (), RISCV_CSR_FFLAGS_REGNUM))
+    features.has_fflags_reg = true;
+  if (tdesc_found_register (tdesc_data.get (), RISCV_CSR_FRM_REGNUM))
+    features.has_frm_reg = true;
+  if (tdesc_found_register (tdesc_data.get (), RISCV_CSR_FCSR_REGNUM))
+    features.has_fcsr_reg = true;
+
   /* Have a look at what the supplied (if any) bfd object requires of the
      target, then check that this matches with what the target is
      providing.  */
@@ -3811,20 +3924,63 @@ riscv_gdbarch_init (struct gdbarch_info info,
      just a little easier.  */
   set_gdbarch_num_regs (gdbarch, RISCV_LAST_REGNUM + 1);
 
-  /* We don't have to provide the count of 0 here (its the default) but
-     include this line to make it explicit that, right now, we don't have
-     any pseudo registers on RISC-V.  */
-  set_gdbarch_num_pseudo_regs (gdbarch, 0);
-
   /* Some specific register numbers GDB likes to know about.  */
   set_gdbarch_sp_regnum (gdbarch, RISCV_SP_REGNUM);
   set_gdbarch_pc_regnum (gdbarch, RISCV_PC_REGNUM);
 
   set_gdbarch_print_registers_info (gdbarch, riscv_print_registers_info);
 
+  set_tdesc_pseudo_register_name (gdbarch, riscv_pseudo_register_name);
+  set_tdesc_pseudo_register_type (gdbarch, riscv_pseudo_register_type);
+  set_tdesc_pseudo_register_reggroup_p (gdbarch,
+					riscv_pseudo_register_reggroup_p);
+  set_gdbarch_pseudo_register_read (gdbarch, riscv_pseudo_register_read);
+  set_gdbarch_pseudo_register_write (gdbarch, riscv_pseudo_register_write);
+
   /* Finalise the target description registers.  */
   tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data),
 		       riscv_tdesc_unknown_reg);
+
+  /* Calculate the number of pseudo registers we need.  The fflags and frm
+     registers are sub-fields of the fcsr CSR register (csr3).  However,
+     these registers can also be accessed directly as separate CSR
+     registers (fflags is csr1, and frm is csr2).  And so, some targets
+     might choose to offer direct access to all three registers in the
+     target description, while other targets might choose to only offer
+     access to fcsr.
+
+     As we scan the target description we spot which of fcsr, fflags, and
+     frm are available.  If fcsr is available but either of fflags and/or
+     frm are not available, then we add pseudo-registers to provide the
+     missing functionality.
+
+     This has to be done after the call to tdesc_use_registers as we don't
+     know the final register number until after that call, and the pseudo
+     register numbers need to be after the physical registers.  */
+  int num_pseudo_regs = 0;
+  int next_pseudo_regnum = gdbarch_num_regs (gdbarch);
+
+  if (features.has_fflags_reg)
+    tdep->fflags_regnum = RISCV_CSR_FFLAGS_REGNUM;
+  else if (features.has_fcsr_reg)
+    {
+      tdep->fflags_regnum = next_pseudo_regnum;
+      pending_aliases.emplace_back ("csr1", (void *) &tdep->fflags_regnum);
+      next_pseudo_regnum++;
+      num_pseudo_regs++;
+    }
+
+  if (features.has_frm_reg)
+    tdep->frm_regnum = RISCV_CSR_FRM_REGNUM;
+  else if (features.has_fcsr_reg)
+    {
+      tdep->frm_regnum = next_pseudo_regnum;
+      pending_aliases.emplace_back ("csr2", (void *) &tdep->frm_regnum);
+      next_pseudo_regnum++;
+      num_pseudo_regs++;
+    }
+
+  set_gdbarch_num_pseudo_regs (gdbarch, num_pseudo_regs);
 
   /* Override the register type callback setup by the target description
      mechanism.  This allows us to provide special type for floating point
@@ -4033,8 +4189,12 @@ riscv_supply_regset (const struct regset *regset,
   if (regnum == -1 || regnum == RISCV_ZERO_REGNUM)
     regcache->raw_supply_zeroed (RISCV_ZERO_REGNUM);
 
-  if (regnum == -1 || regnum == RISCV_CSR_FFLAGS_REGNUM
-      || regnum == RISCV_CSR_FRM_REGNUM)
+  struct gdbarch *gdbarch = regcache->arch ();
+  riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
+
+  if (regnum == -1
+      || regnum == tdep->fflags_regnum
+      || regnum == tdep->frm_regnum)
     {
       int fcsr_regnum = RISCV_CSR_FCSR_REGNUM;
 
@@ -4048,6 +4208,12 @@ riscv_supply_regset (const struct regset *regset,
 	 registers.  */
       if (regcache->get_register_status (fcsr_regnum) == REG_VALID)
 	{
+	  /* If we have an fcsr register then we should have fflags and frm
+	     too, either provided by the target, or provided as a pseudo
+	     register by GDB.  */
+	  gdb_assert (tdep->fflags_regnum >= 0);
+	  gdb_assert (tdep->frm_regnum >= 0);
+
 	  ULONGEST fcsr_val;
 	  regcache->raw_read (fcsr_regnum, &fcsr_val);
 
@@ -4055,15 +4221,19 @@ riscv_supply_regset (const struct regset *regset,
 	  ULONGEST fflags_val = fcsr_val & 0x1f;
 	  ULONGEST frm_val = (fcsr_val >> 5) & 0x7;
 
-	  /* And supply these if needed.  */
-	  if (regnum == -1 || regnum == RISCV_CSR_FFLAGS_REGNUM)
-	    regcache->raw_supply_integer (RISCV_CSR_FFLAGS_REGNUM,
+	  /* And supply these if needed.  We can only supply real
+	     registers, so don't try to supply fflags or frm if they are
+	     implemented as pseudo-registers.  */
+	  if ((regnum == -1 || regnum == tdep->fflags_regnum)
+	      && tdep->fflags_regnum < gdbarch_num_regs (gdbarch))
+	    regcache->raw_supply_integer (tdep->fflags_regnum,
 					  (gdb_byte *) &fflags_val,
 					  sizeof (fflags_val),
 					  /* is_signed */ false);
 
-	  if (regnum == -1 || regnum == RISCV_CSR_FRM_REGNUM)
-	    regcache->raw_supply_integer (RISCV_CSR_FRM_REGNUM,
+	  if ((regnum == -1 || regnum == tdep->frm_regnum)
+	      && tdep->frm_regnum < gdbarch_num_regs (gdbarch))
+	    regcache->raw_supply_integer (tdep->frm_regnum,
 					  (gdb_byte *)&frm_val,
 					  sizeof (fflags_val),
 					  /* is_signed */ false);

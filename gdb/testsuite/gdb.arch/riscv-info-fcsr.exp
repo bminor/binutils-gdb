@@ -73,17 +73,6 @@ proc check_fcsr { fflags_value frm_value frm_string } {
 	    exp_continue
 	}
 
-	-re "^(fflags\|frm)\\s+<unavailable>\r\n" {
-	    # Currently, on some targets (e.g. RISC-V native Linux) the
-	    # fflags and frm registers show as being available, but are
-	    # unreadable, the result is these registers report
-	    # themselves as <unavailable>.  So long as fcsr is readable
-	    # (which is checked below), then for now we accept this.
-	    set reg_name $expect_out(1,string)
-	    incr reg_counts($reg_name)
-	    exp_continue
-	}
-
 	-re "^(frm)\\s+${frm_value}\\s+${frm_pattern}\r\n" {
 	    set reg_name $expect_out(1,string)
 	    incr reg_counts($reg_name)
@@ -127,6 +116,19 @@ proc test_fcsr { fflags_value frm_value frm_string } {
 	gdb_test_no_output "set \$fcsr = ${fcsr_value}"
 
 	with_test_prefix "set through fcsr" {
+	    check_fcsr $fflags_value $frm_value $frm_string
+	}
+
+	# Reset fcsr register back to zero.
+	gdb_test_no_output "set \$fcsr = 0x0" \
+	    "reset fcsr back to 0x0"
+	gdb_test "p/x \$fcsr" " = 0x0"
+
+	# Now set fcsr value through fflags and frm.
+	gdb_test_no_output "set \$fflags = ${fflags_value}"
+	gdb_test_no_output "set \$frm = ${frm_value}"
+
+	with_test_prefix "set through fflags and frm" {
 	    check_fcsr $fflags_value $frm_value $frm_string
 	}
     }

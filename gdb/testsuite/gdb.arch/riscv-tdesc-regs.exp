@@ -137,3 +137,39 @@ foreach rgroup {x_all all save restore general system csr} {
     }
     array unset reg_counts
 }
+
+# Next load a target description that contains fcsr, but not fflags or
+# frm.  Then check that GDB provides an fflags and frm registers using
+# the pseudo-register mechanism.
+if { $xlen == 4 } {
+    set xml_tdesc "riscv-tdesc-fcsr-32.xml"
+} else {
+    set xml_tdesc "riscv-tdesc-fcsr-64.xml"
+}
+set xml_tdesc "${srcdir}/${subdir}/${xml_tdesc}"
+
+# Maybe copy the target over if we're remote testing.
+if {[is_remote host]} {
+    set remote_file [remote_download host $xml_tdesc]
+} else {
+    set remote_file $xml_tdesc
+}
+
+gdb_test_no_output "set tdesc filename $remote_file" \
+    "load the target description that lacks fflags and frm"
+
+foreach reg {fflags frm} {
+    gdb_test_multiple "info registers $reg" "" {
+	-re "^info registers $reg\r\n" {
+	    exp_continue
+	}
+
+	-wrap -re "^Invalid register `$reg`" {
+	    fail $gdb_test_name
+	}
+
+	-wrap -re "^$reg\\s+\[^\r\n\]+" {
+	    pass $gdb_test_name
+	}
+    }
+}
