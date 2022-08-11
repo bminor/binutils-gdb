@@ -3346,19 +3346,7 @@ arm_m_exception_cache (struct frame_info *this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct arm_prologue_cache *cache;
-  CORE_ADDR lr;
-  CORE_ADDR sp;
-  CORE_ADDR unwound_sp;
-  uint32_t sp_r0_offset = 0;
-  LONGEST xpsr;
-  uint32_t exc_return;
-  bool fnc_return;
-  uint32_t extended_frame_used;
-  bool secure_stack_used = false;
-  bool default_callee_register_stacking = false;
-  bool exception_domain_is_secure = false;
 
   cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
   arm_cache_init (cache, this_frame);
@@ -3367,8 +3355,8 @@ arm_m_exception_cache (struct frame_info *this_frame)
      describes which bits in LR that define which stack was used prior
      to the exception and if FPU is used (causing extended stack frame).  */
 
-  lr = get_frame_register_unsigned (this_frame, ARM_LR_REGNUM);
-  sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
+  CORE_ADDR lr = get_frame_register_unsigned (this_frame, ARM_LR_REGNUM);
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
 
   /* ARMv7-M Architecture Reference "A2.3.1 Arm core registers"
      states that LR is set to 0xffffffff on reset.  ARMv8-M Architecture
@@ -3381,9 +3369,20 @@ arm_m_exception_cache (struct frame_info *this_frame)
       return cache;
     }
 
-  fnc_return = (((lr >> 24) & 0xff) == 0xfe);
-  if (tdep->have_sec_ext && fnc_return)
+  /* Check FNC_RETURN indicator bits (24-31).  */
+  bool fnc_return = (((lr >> 24) & 0xff) == 0xfe);
+  if (fnc_return)
     {
+      /* FNC_RETURN is only valid for targets with Security Extension.  */
+      if (!tdep->have_sec_ext)
+	{
+	  error (_("While unwinding an exception frame, found unexpected Link "
+		   "Register value %s that requires the security extension, "
+		   "but the extension was not found or is disabled.  This "
+		   "should not happen and may be caused by corrupt data or a "
+		   "bug in GDB."), phex (lr, ARM_INT_REGISTER_SIZE));
+	}
+
       if (!arm_unwind_secure_frames)
 	{
 	  warning (_("Non-secure to secure stack unwinding disabled."));
@@ -3393,7 +3392,7 @@ arm_m_exception_cache (struct frame_info *this_frame)
 	  return cache;
 	}
 
-      xpsr = get_frame_register_unsigned (this_frame, ARM_PS_REGNUM);
+      ULONGEST xpsr = get_frame_register_unsigned (this_frame, ARM_PS_REGNUM);
       if ((xpsr & 0xff) != 0)
 	/* Handler mode: This is the mode that exceptions are handled in.  */
 	arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_msp_s_regnum);
@@ -3401,7 +3400,7 @@ arm_m_exception_cache (struct frame_info *this_frame)
 	/* Thread mode: This is the normal mode that programs run in.  */
 	arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_psp_s_regnum);
 
-      unwound_sp = arm_cache_get_prev_sp_value (cache, tdep);
+      CORE_ADDR unwound_sp = arm_cache_get_prev_sp_value (cache, tdep);
 
       /* Stack layout for a function call from Secure to Non-Secure state
 	 (ARMv8-M section B3.16):
@@ -3426,17 +3425,23 @@ arm_m_exception_cache (struct frame_info *this_frame)
     }
 
   /* Check EXC_RETURN indicator bits (24-31).  */
-  exc_return = (((lr >> 24) & 0xff) == 0xff);
+  bool exc_return = (((lr >> 24) & 0xff) == 0xff);
   if (exc_return)
     {
+      int sp_regnum;
+      bool secure_stack_used = false;
+      bool default_callee_register_stacking = false;
+      bool exception_domain_is_secure = false;
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
       /* Check EXC_RETURN bit SPSEL if Main or Thread (process) stack used.  */
-      bool process_stack_used = ((lr & (1 << 2)) != 0);
+      bool process_stack_used = (bit (lr, 2) != 0);
 
       if (tdep->have_sec_ext)
 	{
-	  secure_stack_used = ((lr & (1 << 6)) != 0);
-	  default_callee_register_stacking = ((lr & (1 << 5)) != 0);
-	  exception_domain_is_secure = ((lr & (1 << 0)) == 0);
+	  secure_stack_used = (bit (lr, 6) != 0);
+	  default_callee_register_stacking = (bit (lr, 5) != 0);
+	  exception_domain_is_secure = (bit (lr, 0) == 0);
 
 	  /* Unwinding from non-secure to secure can trip security
 	     measures.  In order to avoid the debugger being
@@ -3456,188 +3461,208 @@ arm_m_exception_cache (struct frame_info *this_frame)
 	    {
 	      if (secure_stack_used)
 		/* Secure thread (process) stack used, use PSP_S as SP.  */
-		arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_psp_s_regnum);
+		sp_regnum = tdep->m_profile_psp_s_regnum;
 	      else
 		/* Non-secure thread (process) stack used, use PSP_NS as SP.  */
-		arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_psp_ns_regnum);
+		sp_regnum = tdep->m_profile_psp_ns_regnum;
 	    }
 	  else
 	    {
 	      if (secure_stack_used)
 		/* Secure main stack used, use MSP_S as SP.  */
-		arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_msp_s_regnum);
+		sp_regnum = tdep->m_profile_msp_s_regnum;
 	      else
 		/* Non-secure main stack used, use MSP_NS as SP.  */
-		arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_msp_ns_regnum);
+		sp_regnum = tdep->m_profile_msp_ns_regnum;
 	    }
 	}
       else
 	{
 	  if (process_stack_used)
 	    /* Thread (process) stack used, use PSP as SP.  */
-	    arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_psp_regnum);
+	    sp_regnum = tdep->m_profile_psp_regnum;
 	  else
 	    /* Main stack used, use MSP as SP.  */
-	    arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_msp_regnum);
+	    sp_regnum = tdep->m_profile_msp_regnum;
 	}
-    }
 
-  /* Fetch the SP to use for this frame.  */
-  unwound_sp = arm_cache_get_prev_sp_value (cache, tdep);
+      /* Set the active SP regnum.  */
+      arm_cache_switch_prev_sp (cache, tdep, sp_regnum);
 
-  /* Exception entry context stacking are described in ARMv8-M (section B3.19)
-     and ARMv7-M (sections B1.5.6 and B1.5.7) Architecture Reference Manuals.
+      /* Fetch the SP to use for this frame.  */
+      CORE_ADDR unwound_sp = arm_cache_get_prev_sp_value (cache, tdep);
 
-     The following figure shows the structure of the stack frame when Security
-     and Floating-point extensions are present.
+      /* Exception entry context stacking are described in ARMv8-M (section
+	 B3.19) and ARMv7-M (sections B1.5.6 and B1.5.7) Architecture Reference
+	 Manuals.
 
-                          SP Offsets
-            Without                         With
-          Callee Regs                    Callee Regs
-                                    (Secure -> Non-Secure)
-                    +-------------------+
-             0xA8   |                   |   0xD0
-                    +===================+         --+  <-- Original SP
-             0xA4   |        S31        |   0xCC    |
-                    +-------------------+           |
-                             ...                    |  Additional FP context
-                    +-------------------+           |
-             0x68   |        S16        |   0x90    |
-                    +===================+         --+
-             0x64   |      Reserved     |   0x8C    |
-                    +-------------------+           |
-             0x60   |       FPSCR       |   0x88    |
-                    +-------------------+           |
-             0x5C   |        S15        |   0x84    |  FP context
-                    +-------------------+           |
-                             ...                    |
-                    +-------------------+           |
-             0x20   |         S0        |   0x48    |
-                    +===================+         --+
-             0x1C   |       xPSR        |   0x44    |
-                    +-------------------+           |
-             0x18   |  Return address   |   0x40    |
-                    +-------------------+           |
-             0x14   |      LR(R14)      |   0x3C    |
-                    +-------------------+           |
-             0x10   |        R12        |   0x38    |  State context
-                    +-------------------+           |
-             0x0C   |         R3        |   0x34    |
-                    +-------------------+           |
-                             ...                    |
-                    +-------------------+           |
-             0x00   |         R0        |   0x28    |
-                    +===================+         --+
-                    |        R11        |   0x24    |
-                    +-------------------+           |
-                             ...                    |
-                    +-------------------+           |  Additional state context
-                    |         R4        |   0x08    |  when transitioning from
-                    +-------------------+           |  Secure to Non-Secure
-                    |      Reserved     |   0x04    |
-                    +-------------------+           |
-                    |  Magic signature  |   0x00    |
-                    +===================+         --+  <-- New SP  */
+	 The following figure shows the structure of the stack frame when
+	 Security and Floating-point extensions are present.
 
-  /* With the Security extension, the hardware saves R4..R11 too.  */
-  if (exc_return && tdep->have_sec_ext && secure_stack_used
-      && (!default_callee_register_stacking || exception_domain_is_secure))
-    {
-      /* Read R4..R11 from the integer callee registers.  */
-      cache->saved_regs[4].set_addr (unwound_sp + 0x08);
-      cache->saved_regs[5].set_addr (unwound_sp + 0x0C);
-      cache->saved_regs[6].set_addr (unwound_sp + 0x10);
-      cache->saved_regs[7].set_addr (unwound_sp + 0x14);
-      cache->saved_regs[8].set_addr (unwound_sp + 0x18);
-      cache->saved_regs[9].set_addr (unwound_sp + 0x1C);
-      cache->saved_regs[10].set_addr (unwound_sp + 0x20);
-      cache->saved_regs[11].set_addr (unwound_sp + 0x24);
-      sp_r0_offset = 0x28;
-    }
+			      SP Offsets
+		Without                         With
+	      Callee Regs                    Callee Regs
+					(Secure -> Non-Secure)
+			+-------------------+
+		 0xA8   |                   |   0xD0
+			+===================+         --+  <-- Original SP
+		 0xA4   |        S31        |   0xCC    |
+			+-------------------+           |
+				 ...                    |  Additional FP context
+			+-------------------+           |
+		 0x68   |        S16        |   0x90    |
+			+===================+         --+
+		 0x64   |      Reserved     |   0x8C    |
+			+-------------------+           |
+		 0x60   |       FPSCR       |   0x88    |
+			+-------------------+           |
+		 0x5C   |        S15        |   0x84    |  FP context
+			+-------------------+           |
+				 ...                    |
+			+-------------------+           |
+		 0x20   |         S0        |   0x48    |
+			+===================+         --+
+		 0x1C   |       xPSR        |   0x44    |
+			+-------------------+           |
+		 0x18   |  Return address   |   0x40    |
+			+-------------------+           |
+		 0x14   |      LR(R14)      |   0x3C    |
+			+-------------------+           |
+		 0x10   |        R12        |   0x38    |  State context
+			+-------------------+           |
+		 0x0C   |         R3        |   0x34    |
+			+-------------------+           |
+				 ...                    |
+			+-------------------+           |
+		 0x00   |         R0        |   0x28    |
+			+===================+         --+
+			|        R11        |   0x24    |
+			+-------------------+           |
+				 ...                    |
+			+-------------------+           |  Additional state
+			|         R4        |   0x08    |  context when
+			+-------------------+           |  transitioning from
+			|      Reserved     |   0x04    |  Secure to Non-Secure
+			+-------------------+           |
+			|  Magic signature  |   0x00    |
+			+===================+         --+  <-- New SP  */
 
-  /* The hardware saves eight 32-bit words, comprising xPSR,
-     ReturnAddress, LR (R14), R12, R3, R2, R1, R0.  See details in
-     "B1.5.6 Exception entry behavior" in
-     "ARMv7-M Architecture Reference Manual".  */
-  cache->saved_regs[0].set_addr (unwound_sp + sp_r0_offset);
-  cache->saved_regs[1].set_addr (unwound_sp + sp_r0_offset + 0x04);
-  cache->saved_regs[2].set_addr (unwound_sp + sp_r0_offset + 0x08);
-  cache->saved_regs[3].set_addr (unwound_sp + sp_r0_offset + 0x0C);
-  cache->saved_regs[ARM_IP_REGNUM].set_addr (unwound_sp + sp_r0_offset + 0x10);
-  cache->saved_regs[ARM_LR_REGNUM].set_addr (unwound_sp + sp_r0_offset + 0x14);
-  cache->saved_regs[ARM_PC_REGNUM].set_addr (unwound_sp + sp_r0_offset + 0x18);
-  cache->saved_regs[ARM_PS_REGNUM].set_addr (unwound_sp + sp_r0_offset + 0x1C);
+      uint32_t sp_r0_offset = 0;
 
-  /* Check EXC_RETURN bit FTYPE if extended stack frame (FPU regs stored)
-     type used.  */
-  extended_frame_used = ((lr & (1 << 4)) == 0);
-  if (exc_return && extended_frame_used)
-    {
-      int i;
-      int fpu_regs_stack_offset;
-      ULONGEST fpccr;
-
-      /* Read FPCCR register.  */
-      gdb_assert (safe_read_memory_unsigned_integer (FPCCR,
-                                                     ARM_INT_REGISTER_SIZE,
-                                                     byte_order, &fpccr));
-      bool fpccr_ts = bit (fpccr,26);
-
-      /* This code does not take into account the lazy stacking, see "Lazy
-	 context save of FP state", in B1.5.7, also ARM AN298, supported
-	 by Cortex-M4F architecture.
-	 To fully handle this the FPCCR register (Floating-point Context
-	 Control Register) needs to be read out and the bits ASPEN and LSPEN
-	 could be checked to setup correct lazy stacked FP registers.
-	 This register is located at address 0xE000EF34.  */
-
-      /* Extended stack frame type used.  */
-      fpu_regs_stack_offset = unwound_sp + sp_r0_offset + 0x20;
-      for (i = 0; i < 8; i++)
+      /* With the Security extension, the hardware saves R4..R11 too.  */
+      if (tdep->have_sec_ext && secure_stack_used
+	  && (!default_callee_register_stacking || exception_domain_is_secure))
 	{
-	  cache->saved_regs[ARM_D0_REGNUM + i].set_addr (fpu_regs_stack_offset);
-	  fpu_regs_stack_offset += 8;
+	  /* Read R4..R11 from the integer callee registers.  */
+	  cache->saved_regs[4].set_addr (unwound_sp + 0x08);
+	  cache->saved_regs[5].set_addr (unwound_sp + 0x0C);
+	  cache->saved_regs[6].set_addr (unwound_sp + 0x10);
+	  cache->saved_regs[7].set_addr (unwound_sp + 0x14);
+	  cache->saved_regs[8].set_addr (unwound_sp + 0x18);
+	  cache->saved_regs[9].set_addr (unwound_sp + 0x1C);
+	  cache->saved_regs[10].set_addr (unwound_sp + 0x20);
+	  cache->saved_regs[11].set_addr (unwound_sp + 0x24);
+	  sp_r0_offset = 0x28;
 	}
-      cache->saved_regs[ARM_FPSCR_REGNUM].set_addr (unwound_sp + sp_r0_offset + 0x60);
-      fpu_regs_stack_offset += 4;
 
-      if (tdep->have_sec_ext && !default_callee_register_stacking && fpccr_ts)
+      /* The hardware saves eight 32-bit words, comprising xPSR,
+	 ReturnAddress, LR (R14), R12, R3, R2, R1, R0.  See details in
+	 "B1.5.6 Exception entry behavior" in
+	 "ARMv7-M Architecture Reference Manual".  */
+      cache->saved_regs[0].set_addr (unwound_sp + sp_r0_offset);
+      cache->saved_regs[1].set_addr (unwound_sp + sp_r0_offset + 0x04);
+      cache->saved_regs[2].set_addr (unwound_sp + sp_r0_offset + 0x08);
+      cache->saved_regs[3].set_addr (unwound_sp + sp_r0_offset + 0x0C);
+      cache->saved_regs[ARM_IP_REGNUM].set_addr (unwound_sp + sp_r0_offset
+						 + 0x10);
+      cache->saved_regs[ARM_LR_REGNUM].set_addr (unwound_sp + sp_r0_offset
+						 + 0x14);
+      cache->saved_regs[ARM_PC_REGNUM].set_addr (unwound_sp + sp_r0_offset
+						 + 0x18);
+      cache->saved_regs[ARM_PS_REGNUM].set_addr (unwound_sp + sp_r0_offset
+						 + 0x1C);
+
+      /* Check EXC_RETURN bit FTYPE if extended stack frame (FPU regs stored)
+	 type used.  */
+      bool extended_frame_used = (bit (lr, 4) == 0);
+      if (extended_frame_used)
 	{
-	  /* Handle floating-point callee saved registers.  */
-	  fpu_regs_stack_offset = unwound_sp + sp_r0_offset + 0x68;
-	  for (i = 8; i < 16; i++)
+	  ULONGEST fpccr;
+
+	  /* Read FPCCR register.  */
+	  gdb_assert (safe_read_memory_unsigned_integer (FPCCR,
+							 ARM_INT_REGISTER_SIZE,
+							 byte_order, &fpccr));
+	  bool fpccr_ts = bit (fpccr, 26);
+
+	  /* This code does not take into account the lazy stacking, see "Lazy
+	     context save of FP state", in B1.5.7, also ARM AN298, supported
+	     by Cortex-M4F architecture.
+	     To fully handle this the FPCCR register (Floating-point Context
+	     Control Register) needs to be read out and the bits ASPEN and
+	     LSPEN could be checked to setup correct lazy stacked FP registers.
+	     This register is located at address 0xE000EF34.  */
+
+	  /* Extended stack frame type used.  */
+	  CORE_ADDR addr = unwound_sp + sp_r0_offset + 0x20;
+	  for (int i = 0; i < 8; i++)
 	    {
-	      cache->saved_regs[ARM_D0_REGNUM + i].set_addr (fpu_regs_stack_offset);
-	      fpu_regs_stack_offset += 8;
+	      cache->saved_regs[ARM_D0_REGNUM + i].set_addr (addr);
+	      addr += 8;
 	    }
+	  cache->saved_regs[ARM_FPSCR_REGNUM].set_addr (unwound_sp
+							+ sp_r0_offset + 0x60);
 
-	  arm_cache_set_active_sp_value (cache, tdep,
-					 unwound_sp + sp_r0_offset + 0xA8);
+	  if (tdep->have_sec_ext && !default_callee_register_stacking
+	      && fpccr_ts)
+	    {
+	      /* Handle floating-point callee saved registers.  */
+	      addr = unwound_sp + sp_r0_offset + 0x68;
+	      for (int i = 8; i < 16; i++)
+		{
+		  cache->saved_regs[ARM_D0_REGNUM + i].set_addr (addr);
+		  addr += 8;
+		}
+
+	      arm_cache_set_active_sp_value (cache, tdep,
+					     unwound_sp + sp_r0_offset + 0xA8);
+	    }
+	  else
+	    {
+	      /* Offset 0x64 is reserved.  */
+	      arm_cache_set_active_sp_value (cache, tdep,
+					     unwound_sp + sp_r0_offset + 0x68);
+	    }
 	}
       else
 	{
-	  /* Offset 0x64 is reserved.  */
+	  /* Standard stack frame type used.  */
 	  arm_cache_set_active_sp_value (cache, tdep,
-					 unwound_sp + sp_r0_offset + 0x68);
+					 unwound_sp + sp_r0_offset + 0x20);
 	}
-    }
-  else
-    {
-      /* Standard stack frame type used.  */
-      arm_cache_set_active_sp_value (cache, tdep,
-				     unwound_sp + sp_r0_offset + 0x20);
+
+      /* If bit 9 of the saved xPSR is set, then there is a four-byte
+	 aligner between the top of the 32-byte stack frame and the
+	 previous context's stack pointer.  */
+      ULONGEST xpsr;
+      gdb_assert (safe_read_memory_unsigned_integer (cache->saved_regs[
+						     ARM_PS_REGNUM].addr (), 4,
+						     byte_order, &xpsr));
+      if (bit (xpsr, 9) != 0)
+	{
+	  CORE_ADDR new_sp = arm_cache_get_prev_sp_value (cache, tdep) + 4;
+	  arm_cache_set_active_sp_value (cache, tdep, new_sp);
+	}
+
+      return cache;
     }
 
-  /* If bit 9 of the saved xPSR is set, then there is a four-byte
-     aligner between the top of the 32-byte stack frame and the
-     previous context's stack pointer.  */
-  if (safe_read_memory_integer (unwound_sp + sp_r0_offset + 0x1C, 4,
-				byte_order, &xpsr)
-      && (xpsr & (1 << 9)) != 0)
-    arm_cache_set_active_sp_value (cache, tdep,
-				   arm_cache_get_prev_sp_value (cache, tdep) + 4);
-
-  return cache;
+  internal_error (__FILE__, __LINE__, _("While unwinding an exception frame, "
+					"found unexpected Link Register value "
+					"%s.  This should not happen and may "
+					"be caused by corrupt data or a bug in"
+					" GDB."),
+		  phex (lr, ARM_INT_REGISTER_SIZE));
 }
 
 /* Implementation of function hook 'this_id' in
