@@ -599,35 +599,9 @@ static reloc_howto_type howto_table[] =
 	 MINUS_ONE,			/* dst_mask */
 	 false),			/* pcrel_offset */
 
-  /* GNU extension to record C++ vtable hierarchy */
-  HOWTO (R_RISCV_GNU_VTINHERIT,		/* type */
-	 0,				/* rightshift */
-	 8,				/* size */
-	 0,				/* bitsize */
-	 false,				/* pc_relative */
-	 0,				/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
-	 NULL,				/* special_function */
-	 "R_RISCV_GNU_VTINHERIT",	/* name */
-	 false,				/* partial_inplace */
-	 0,				/* src_mask */
-	 0,				/* dst_mask */
-	 false),			/* pcrel_offset */
-
-  /* GNU extension to record C++ vtable member usage */
-  HOWTO (R_RISCV_GNU_VTENTRY,		/* type */
-	 0,				/* rightshift */
-	 8,				/* size */
-	 0,				/* bitsize */
-	 false,				/* pc_relative */
-	 0,				/* bitpos */
-	 complain_overflow_dont,	/* complain_on_overflow */
-	 _bfd_elf_rel_vtable_reloc_fn,	/* special_function */
-	 "R_RISCV_GNU_VTENTRY",		/* name */
-	 false,				/* partial_inplace */
-	 0,				/* src_mask */
-	 0,				/* dst_mask */
-	 false),			/* pcrel_offset */
+  /* 41 and 42 are reserved.  */
+  EMPTY_HOWTO (0),
+  EMPTY_HOWTO (0),
 
   /* Indicates an alignment statement.  The addend field encodes how many
      bytes of NOPs follow the statement.  The desired alignment is the

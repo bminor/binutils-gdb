@@ -932,40 +932,12 @@ riscv_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  break;
 
-	case R_RISCV_GNU_VTINHERIT:
-	  if (!bfd_elf_gc_record_vtinherit (abfd, sec, h, rel->r_offset))
-	    return false;
-	  break;
-
-	case R_RISCV_GNU_VTENTRY:
-	  if (!bfd_elf_gc_record_vtentry (abfd, sec, h, rel->r_addend))
-	    return false;
-	  break;
-
 	default:
 	  break;
 	}
     }
 
   return true;
-}
-
-static asection *
-riscv_elf_gc_mark_hook (asection *sec,
-			struct bfd_link_info *info,
-			Elf_Internal_Rela *rel,
-			struct elf_link_hash_entry *h,
-			Elf_Internal_Sym *sym)
-{
-  if (h != NULL)
-    switch (ELFNN_R_TYPE (rel->r_info))
-      {
-      case R_RISCV_GNU_VTINHERIT:
-      case R_RISCV_GNU_VTENTRY:
-	return NULL;
-      }
-
-  return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
 /* Adjust a symbol defined by a dynamic object and referenced by a
@@ -2027,8 +1999,7 @@ riscv_elf_relocate_section (bfd *output_bfd,
       char *msg_buf = NULL;
       bool resolved_to_zero;
 
-      if (howto == NULL
-	  || r_type == R_RISCV_GNU_VTINHERIT || r_type == R_RISCV_GNU_VTENTRY)
+      if (howto == NULL)
 	continue;
 
       /* This is a final link.  */
@@ -5260,7 +5231,6 @@ riscv_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 #define elf_backend_relocate_section		riscv_elf_relocate_section
 #define elf_backend_finish_dynamic_symbol	riscv_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections	riscv_elf_finish_dynamic_sections
-#define elf_backend_gc_mark_hook		riscv_elf_gc_mark_hook
 #define elf_backend_plt_sym_val			riscv_elf_plt_sym_val
 #define elf_backend_grok_prstatus		riscv_elf_grok_prstatus
 #define elf_backend_grok_psinfo			riscv_elf_grok_psinfo
