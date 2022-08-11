@@ -8540,16 +8540,24 @@ init_dwarf_regnames_s390 (void)
 
 static const char *const dwarf_regnames_riscv[] =
 {
- "zero", "ra",   "sp",   "gp",  "tp",  "t0",  "t1",  "t2",  /* 0  - 7 */
- "s0",   "s1",   "a0",   "a1",  "a2",  "a3",  "a4",  "a5",  /* 8  - 15 */
- "a6",   "a7",   "s2",   "s3",  "s4",  "s5",  "s6",  "s7",  /* 16 - 23 */
- "s8",   "s9",   "s10",  "s11", "t3",  "t4",  "t5",  "t6",  /* 24 - 31 */
- "ft0",  "ft1",  "ft2",  "ft3", "ft4", "ft5", "ft6", "ft7", /* 32 - 39 */
- "fs0",  "fs1",                                             /* 40 - 41 */
- "fa0",  "fa1",  "fa2",  "fa3", "fa4", "fa5", "fa6", "fa7", /* 42 - 49 */
- "fs2",  "fs3",  "fs4",  "fs5", "fs6", "fs7", "fs8", "fs9", /* 50 - 57 */
- "fs10", "fs11",                                            /* 58 - 59 */
- "ft8",  "ft9",  "ft10", "ft11"                             /* 60 - 63 */
+ "zero", "ra",   "sp",   "gp",  "tp",  "t0",  "t1",  "t2",  /*   0 -   7 */
+ "s0",   "s1",   "a0",   "a1",  "a2",  "a3",  "a4",  "a5",  /*   8 -  15 */
+ "a6",   "a7",   "s2",   "s3",  "s4",  "s5",  "s6",  "s7",  /*  16 -  23 */
+ "s8",   "s9",   "s10",  "s11", "t3",  "t4",  "t5",  "t6",  /*  24 -  31 */
+ "ft0",  "ft1",  "ft2",  "ft3", "ft4", "ft5", "ft6", "ft7", /*  32 -  39 */
+ "fs0",  "fs1",                                             /*  40 -  41 */
+ "fa0",  "fa1",  "fa2",  "fa3", "fa4", "fa5", "fa6", "fa7", /*  42 -  49 */
+ "fs2",  "fs3",  "fs4",  "fs5", "fs6", "fs7", "fs8", "fs9", /*  50 -  57 */
+ "fs10", "fs11",                                            /*  58 -  59 */
+ "ft8",  "ft9",  "ft10", "ft11",                            /*  60 -  63 */
+ NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,     /*  64 -  71 */
+ NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,     /*  72 -  79 */
+ NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,     /*  80 -  87 */
+ NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,  NULL,     /*  88 -  95 */
+ "v0",  "v1",  "v2",  "v3",  "v4",  "v5",  "v6",  "v7",     /*  96 - 103 */
+ "v8",  "v9",  "v10", "v11", "v12", "v13", "v14", "v15",    /* 104 - 111 */
+ "v16", "v17", "v18", "v19", "v20", "v21", "v22", "v23",    /* 112 - 119 */
+ "v24", "v25", "v26", "v27", "v28", "v29", "v30", "v31",    /* 120 - 127 */
 };
 
 /* A RISC-V replacement for REGNAME_INTERNAL_BY_TABLE_ONLY which handles

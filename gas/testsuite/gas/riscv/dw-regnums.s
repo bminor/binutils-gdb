@@ -1,6 +1,8 @@
 # Check that CFI directives can accept all of the register names (including
 # aliases).  The results for this test also ensures that the DWARF
-# register numbers for the GPRs/FPRs registers shouldn't change.
+# register numbers for the GPRs/FPRs/vector registers shouldn't change.
+# Note that, because vector register size is "variable" in principle,
+# vector registers are very unlikely to be used within .cfi_offset directive.
 
 	.text
 	.global _start
@@ -143,6 +145,40 @@ _start:
 	.cfi_offset f29, 248
 	.cfi_offset f30, 252
 	.cfi_offset f31, 256
+
+	# Vector registers (numeric only)
+	.cfi_offset v0,  388
+	.cfi_offset v1,  392
+	.cfi_offset v2,  396
+	.cfi_offset v3,  400
+	.cfi_offset v4,  404
+	.cfi_offset v5,  408
+	.cfi_offset v6,  412
+	.cfi_offset v7,  416
+	.cfi_offset v8,  420
+	.cfi_offset v9,  424
+	.cfi_offset v10, 428
+	.cfi_offset v11, 432
+	.cfi_offset v12, 436
+	.cfi_offset v13, 440
+	.cfi_offset v14, 444
+	.cfi_offset v15, 448
+	.cfi_offset v16, 452
+	.cfi_offset v17, 456
+	.cfi_offset v18, 460
+	.cfi_offset v19, 464
+	.cfi_offset v20, 468
+	.cfi_offset v21, 472
+	.cfi_offset v22, 476
+	.cfi_offset v23, 480
+	.cfi_offset v24, 484
+	.cfi_offset v25, 488
+	.cfi_offset v26, 492
+	.cfi_offset v27, 496
+	.cfi_offset v28, 500
+	.cfi_offset v29, 504
+	.cfi_offset v30, 508
+	.cfi_offset v31, 512
 
 	nop
 	.cfi_endproc

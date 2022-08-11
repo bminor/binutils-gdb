@@ -1,4 +1,4 @@
-#as: -march=rv32if
+#as: -march=rv32iv
 #objdump: --dwarf=frames
 
 
@@ -145,4 +145,36 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r61 \(ft9\) at cfa\+248
   DW_CFA_offset_extended_sf: r62 \(ft10\) at cfa\+252
   DW_CFA_offset_extended_sf: r63 \(ft11\) at cfa\+256
+  DW_CFA_offset_extended_sf: r96 \(v0\) at cfa\+388
+  DW_CFA_offset_extended_sf: r97 \(v1\) at cfa\+392
+  DW_CFA_offset_extended_sf: r98 \(v2\) at cfa\+396
+  DW_CFA_offset_extended_sf: r99 \(v3\) at cfa\+400
+  DW_CFA_offset_extended_sf: r100 \(v4\) at cfa\+404
+  DW_CFA_offset_extended_sf: r101 \(v5\) at cfa\+408
+  DW_CFA_offset_extended_sf: r102 \(v6\) at cfa\+412
+  DW_CFA_offset_extended_sf: r103 \(v7\) at cfa\+416
+  DW_CFA_offset_extended_sf: r104 \(v8\) at cfa\+420
+  DW_CFA_offset_extended_sf: r105 \(v9\) at cfa\+424
+  DW_CFA_offset_extended_sf: r106 \(v10\) at cfa\+428
+  DW_CFA_offset_extended_sf: r107 \(v11\) at cfa\+432
+  DW_CFA_offset_extended_sf: r108 \(v12\) at cfa\+436
+  DW_CFA_offset_extended_sf: r109 \(v13\) at cfa\+440
+  DW_CFA_offset_extended_sf: r110 \(v14\) at cfa\+444
+  DW_CFA_offset_extended_sf: r111 \(v15\) at cfa\+448
+  DW_CFA_offset_extended_sf: r112 \(v16\) at cfa\+452
+  DW_CFA_offset_extended_sf: r113 \(v17\) at cfa\+456
+  DW_CFA_offset_extended_sf: r114 \(v18\) at cfa\+460
+  DW_CFA_offset_extended_sf: r115 \(v19\) at cfa\+464
+  DW_CFA_offset_extended_sf: r116 \(v20\) at cfa\+468
+  DW_CFA_offset_extended_sf: r117 \(v21\) at cfa\+472
+  DW_CFA_offset_extended_sf: r118 \(v22\) at cfa\+476
+  DW_CFA_offset_extended_sf: r119 \(v23\) at cfa\+480
+  DW_CFA_offset_extended_sf: r120 \(v24\) at cfa\+484
+  DW_CFA_offset_extended_sf: r121 \(v25\) at cfa\+488
+  DW_CFA_offset_extended_sf: r122 \(v26\) at cfa\+492
+  DW_CFA_offset_extended_sf: r123 \(v27\) at cfa\+496
+  DW_CFA_offset_extended_sf: r124 \(v28\) at cfa\+500
+  DW_CFA_offset_extended_sf: r125 \(v29\) at cfa\+504
+  DW_CFA_offset_extended_sf: r126 \(v30\) at cfa\+508
+  DW_CFA_offset_extended_sf: r127 \(v31\) at cfa\+512
 #...
