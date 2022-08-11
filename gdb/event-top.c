@@ -1330,17 +1330,6 @@ gdb_setup_readline (int editing)
 {
   struct ui *ui = current_ui;
 
-  /* This function is a noop for the sync case.  The assumption is
-     that the sync setup is ALL done in gdb_init, and we would only
-     mess it up here.  The sync stuff should really go away over
-     time.  */
-  if (!batch_silent)
-    gdb_stdout = new pager_file (new stdio_file (ui->outstream));
-  gdb_stderr = new stderr_file (ui->errstream);
-  gdb_stdlog = new timestamped_file (gdb_stderr);
-  gdb_stdtarg = gdb_stderr;
-  gdb_stdtargerr = gdb_stderr;
-
   /* If the input stream is connected to a terminal, turn on editing.
      However, that is only allowed on the main UI, as we can only have
      one instance of readline.  */
