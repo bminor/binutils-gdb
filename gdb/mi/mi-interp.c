@@ -1297,7 +1297,6 @@ mi_interp::set_logging (ui_file_up logfile, bool logging_redirect,
 	}
 
       mi->raw_stdout = logging_redirect ? logfile_p : tee;
-      mi->raw_stdlog = debug_redirect ? logfile_p : tee;
     }
   else
     {
