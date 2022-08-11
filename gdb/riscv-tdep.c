@@ -3591,22 +3591,25 @@ riscv_tdesc_unknown_reg (struct gdbarch *gdbarch, tdesc_feature *feature,
      and CSR register sets.
 
      Some targets (QEMU) copied these target descriptions into their source
-     tree, and so we're currently stuck working with some targets that
+     tree, and so we're now stuck working with some versions of QEMU that
      declare the same registers twice.
 
-     There's not much we can do about this any more.  Assuming the target
-     will direct a request for either register number to the correct
-     underlying hardware register then it doesn't matter which one GDB
-     uses, so long as we (GDB) are consistent (so that we don't end up with
-     invalid cache misses).
+     To make matters worse, if GDB tries to read or write to these
+     registers using the register number assigned in the FPU feature set,
+     then QEMU will fail to read the register, so we must use the register
+     number declared in the CSR feature set.
 
-     As we always scan the FPU registers first, then the CSRs, if the
-     target has included the offending registers in both sets then we will
-     always see the FPU copies here, as the CSR versions will replace them
-     in the register list.
+     Luckily, GDB scans the FPU feature first, and then the CSR feature,
+     which means that the CSR feature will be the one we end up using, the
+     versions of these registers in the FPU feature will appear as unknown
+     registers and will be passed through to this code.
 
-     To prevent these duplicates showing up in any of the register list,
-     record their register numbers here.  */
+     To prevent these duplicate registers showing up in any of the register
+     lists, and to prevent GDB every trying to access the FPU feature copies,
+     we spot the three problematic registers here, and record the register
+     number that GDB has assigned them.  Then in riscv_register_name we will
+     return no name for the three duplicates, this hides the duplicates from
+     the user.  */
   if (strcmp (tdesc_feature_name (feature), riscv_freg_feature.name ()) == 0)
     {
       riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
