@@ -49,6 +49,7 @@ Contents of the .* section:
   DW_CFA_offset_extended_sf: r29 \(t4\) at cfa\+120
   DW_CFA_offset_extended_sf: r30 \(t5\) at cfa\+124
   DW_CFA_offset_extended_sf: r31 \(t6\) at cfa\+128
+  DW_CFA_offset_extended_sf: r8 \(s0\) at cfa\+36
   DW_CFA_offset_extended_sf: r0 \(zero\) at cfa\+4
   DW_CFA_offset_extended_sf: r1 \(ra\) at cfa\+8
   DW_CFA_offset_extended_sf: r2 \(sp\) at cfa\+12

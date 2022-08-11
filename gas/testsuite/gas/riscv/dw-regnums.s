@@ -44,6 +44,9 @@ _start:
 	.cfi_offset t5,  124
 	.cfi_offset t6,  128
 
+	# GPR (ABI alias)
+	.cfi_offset fp,   36
+
 	# GPRs (Numeric)
 	.cfi_offset x0,    4
 	.cfi_offset x1,    8
