@@ -3168,12 +3168,11 @@ check_typedef (struct type *type)
 static struct type *
 safe_parse_type (struct gdbarch *gdbarch, const char *p, int length)
 {
-  struct ui_file *saved_gdb_stderr;
   struct type *type = NULL; /* Initialize to keep gcc happy.  */
 
   /* Suppress error messages.  */
-  saved_gdb_stderr = gdb_stderr;
-  gdb_stderr = &null_stream;
+  scoped_restore saved_gdb_stderr = make_scoped_restore (&gdb_stderr,
+							 &null_stream);
 
   /* Call parse_and_eval_type() without fear of longjmp()s.  */
   try
@@ -3184,9 +3183,6 @@ safe_parse_type (struct gdbarch *gdbarch, const char *p, int length)
     {
       type = builtin_type (gdbarch)->builtin_void;
     }
-
-  /* Stop suppressing error messages.  */
-  gdb_stderr = saved_gdb_stderr;
 
   return type;
 }
