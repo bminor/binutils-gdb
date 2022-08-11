@@ -907,7 +907,7 @@ tui_initialize_io (void)
   tui_stdout = new pager_file (new tui_file (stdout));
   tui_stderr = new tui_file (stderr);
   tui_stdlog = new timestamped_file (tui_stderr);
-  tui_out = tui_out_new (tui_stdout);
+  tui_out = new tui_ui_out (tui_stdout);
 
   /* Create the default UI.  */
   tui_old_uiout = new cli_ui_out (gdb_stdout);

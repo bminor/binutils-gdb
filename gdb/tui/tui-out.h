@@ -61,6 +61,4 @@ private:
   int m_start_of_line = 0;
 };
 
-extern tui_ui_out *tui_out_new (struct ui_file *stream);
-
 #endif /* TUI_TUI_OUT_H */
