@@ -849,6 +849,17 @@ tdesc_numbered_register_choices (const struct tdesc_feature *feature,
   return 0;
 }
 
+/* See target-descriptions.h.  */
+
+bool
+tdesc_found_register (struct tdesc_arch_data *data, int regno)
+{
+  gdb_assert (regno >= 0);
+
+  return (regno < data->arch_regs.size ()
+	  && data->arch_regs[regno].reg != nullptr);
+}
+
 /* Search FEATURE for a register named NAME, and return its size in
    bits.  The register must exist.  */
 
