@@ -428,15 +428,17 @@ private:
   struct ui_out *m_uiout;
 };
 
-/* On destruction, pop the last redirection by calling the uiout's
+/* On construction, redirect a uiout to a given stream.  On
+   destruction, pop the last redirection by calling the uiout's
    redirect method with a NULL parameter.  */
 class ui_out_redirect_pop
 {
 public:
 
-  ui_out_redirect_pop (ui_out *uiout)
+  ui_out_redirect_pop (ui_out *uiout, ui_file *stream)
     : m_uiout (uiout)
   {
+    m_uiout->redirect (stream);
   }
 
   ~ui_out_redirect_pop ()

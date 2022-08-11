@@ -548,19 +548,17 @@ bppy_get_commands (PyObject *self, void *closure)
 
   string_file stb;
 
-  current_uiout->redirect (&stb);
   try
     {
+      ui_out_redirect_pop redir (current_uiout, &stb);
       print_command_lines (current_uiout, breakpoint_commands (bp), 0);
     }
   catch (const gdb_exception &except)
     {
-      current_uiout->redirect (NULL);
       gdbpy_convert_exception (except);
       return NULL;
     }
 
-  current_uiout->redirect (NULL);
   return host_string_to_python_string (stb.c_str ()).release ();
 }
 

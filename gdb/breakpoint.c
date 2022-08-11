@@ -14058,18 +14058,9 @@ save_breakpoints (const char *filename, int from_tty,
 	{
 	  fp.puts ("  commands\n");
 
-	  current_uiout->redirect (&fp);
-	  try
-	    {
-	      print_command_lines (current_uiout, tp->commands.get (), 2);
-	    }
-	  catch (const gdb_exception &ex)
-	    {
-	    current_uiout->redirect (NULL);
-	      throw;
-	    }
+	  ui_out_redirect_pop redir (current_uiout, &fp);
+	  print_command_lines (current_uiout, tp->commands.get (), 2);
 
-	  current_uiout->redirect (NULL);
 	  fp.puts ("  end\n");
 	}
 
