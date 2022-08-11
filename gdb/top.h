@@ -142,9 +142,7 @@ struct ui
   /* Serious error notifications */
   struct ui_file *m_gdb_stderr;
   /* Log/debug/trace messages that should bypass normal stdout/stderr
-     filtering.  For moment, always call this stream using
-     *_unfiltered.  In the very near future that restriction shall be
-     removed - either call shall be unfiltered.  (cagney 1999-06-13).  */
+     filtering.  */
   struct ui_file *m_gdb_stdlog;
 
   /* The current ui_out.  */
