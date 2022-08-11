@@ -352,6 +352,8 @@ ui::~ui ()
   delete m_gdb_stdin;
   delete m_gdb_stdout;
   delete m_gdb_stderr;
+
+  buffer_free (&line_buffer);
 }
 
 /* Open file named NAME for read/write, making sure not to make it the
