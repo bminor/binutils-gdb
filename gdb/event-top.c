@@ -1338,8 +1338,8 @@ gdb_setup_readline (int editing)
     gdb_stdout = new pager_file (new stdio_file (ui->outstream));
   gdb_stderr = new stderr_file (ui->errstream);
   gdb_stdlog = new timestamped_file (gdb_stderr);
-  gdb_stdtarg = gdb_stderr; /* for moment */
-  gdb_stdtargerr = gdb_stderr; /* for moment */
+  gdb_stdtarg = gdb_stderr;
+  gdb_stdtargerr = gdb_stderr;
 
   /* If the input stream is connected to a terminal, turn on editing.
      However, that is only allowed on the main UI, as we can only have

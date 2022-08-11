@@ -839,8 +839,8 @@ tui_setup_io (int mode)
       gdb_stdout = tui_stdout;
       gdb_stderr = tui_stderr;
       gdb_stdlog = tui_stdlog;
-      gdb_stdtarg = gdb_stderr;	/* for moment */
-      gdb_stdtargerr = gdb_stderr;	/* for moment */
+      gdb_stdtarg = gdb_stderr;
+      gdb_stdtargerr = gdb_stderr;
       current_uiout = tui_out;
 
       /* Save tty for SIGCONT.  */
@@ -852,8 +852,8 @@ tui_setup_io (int mode)
       gdb_stdout = tui_old_stdout;
       gdb_stderr = tui_old_stderr;
       gdb_stdlog = tui_old_stdlog;
-      gdb_stdtarg = gdb_stderr;	/* for moment */
-      gdb_stdtargerr = gdb_stderr;	/* for moment */
+      gdb_stdtarg = gdb_stderr;
+      gdb_stdtargerr = gdb_stderr;
       current_uiout = tui_old_uiout;
 
       /* Restore readline.  */
