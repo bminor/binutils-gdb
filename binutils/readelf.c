@@ -50,13 +50,9 @@
 #include <msgpack.h>
 #endif
 
-#if __GNUC__ >= 2
 /* Define BFD64 here, even if our default architecture is 32 bit ELF
-   as this will allow us to read in and parse 64bit and 32bit ELF files.
-   Only do this if we believe that the compiler can support a 64 bit
-   data type.  For now we only rely on GCC being able to do this.  */
+   as this will allow us to read in and parse 64bit and 32bit ELF files.  */
 #define BFD64
-#endif
 
 #include "bfd.h"
 #include "bucomm.h"
@@ -287,24 +283,24 @@ typedef struct filedata
   Elf_Internal_Shdr *  dynamic_symtab_section;
   unsigned long        num_dynamic_syms;
   Elf_Internal_Sym *   dynamic_symbols;
-  bfd_vma              version_info[16];
+  uint64_t              version_info[16];
   unsigned int         dynamic_syminfo_nent;
   Elf_Internal_Syminfo * dynamic_syminfo;
   unsigned long        dynamic_syminfo_offset;
   uint64_t             nbuckets;
   uint64_t             nchains;
-  bfd_vma *            buckets;
-  bfd_vma *            chains;
+  uint64_t *           buckets;
+  uint64_t *           chains;
   uint64_t             ngnubuckets;
   uint64_t             ngnuchains;
-  bfd_vma *            gnubuckets;
-  bfd_vma *            gnuchains;
-  bfd_vma *            mipsxlat;
-  bfd_vma              gnusymidx;
+  uint64_t *           gnubuckets;
+  uint64_t *           gnuchains;
+  uint64_t *           mipsxlat;
+  uint64_t             gnusymidx;
   char *               program_interpreter;
-  bfd_vma              dynamic_info[DT_ENCODING];
-  bfd_vma              dynamic_info_DT_GNU_HASH;
-  bfd_vma              dynamic_info_DT_MIPS_XHASH;
+  uint64_t             dynamic_info[DT_ENCODING];
+  uint64_t             dynamic_info_DT_GNU_HASH;
+  uint64_t             dynamic_info_DT_MIPS_XHASH;
   elf_section_list *   symtab_shndx_list;
   size_t               group_count;
   struct group *       section_groups;
@@ -523,7 +519,7 @@ get_data (void *var,
    Returns the number of characters displayed.  */
 
 static unsigned int
-print_vma (bfd_vma vma, print_mode mode)
+print_vma (uint64_t vma, print_mode mode)
 {
   unsigned int nc = 0;
 
@@ -533,42 +529,40 @@ print_vma (bfd_vma vma, print_mode mode)
       nc = printf ("0x");
       /* Fall through.  */
     case LONG_HEX:
-#ifdef BFD64
       if (!is_32bit_elf)
-	return nc + printf ("%16.16" PRIx64, (uint64_t) vma);
-#endif
-      return nc + printf ("%8.8" PRIx64, (uint64_t) vma);
+	return nc + printf ("%16.16" PRIx64, vma);
+      return nc + printf ("%8.8" PRIx64, vma);
 
     case DEC_5:
       if (vma <= 99999)
-	return printf ("%5" PRId64, (int64_t) vma);
+	return printf ("%5" PRId64, vma);
       /* Fall through.  */
     case PREFIX_HEX:
       nc = printf ("0x");
       /* Fall through.  */
     case HEX:
-      return nc + printf ("%" PRIx64, (uint64_t) vma);
+      return nc + printf ("%" PRIx64, vma);
 
     case PREFIX_HEX_5:
       nc = printf ("0x");
       /* Fall through.  */
     case HEX_5:
-      return nc + printf ("%05" PRIx64, (uint64_t) vma);
+      return nc + printf ("%05" PRIx64, vma);
 
     case DEC:
-      return printf ("%" PRId64, (int64_t) (bfd_signed_vma) vma);
+      return printf ("%" PRId64, vma);
 
     case UNSIGNED:
-      return printf ("%" PRIu64, (uint64_t) vma);
+      return printf ("%" PRIu64, vma);
 
     case UNSIGNED_5:
-      return printf ("%5" PRIu64, (uint64_t) vma);
+      return printf ("%5" PRIu64, vma);
 
     case OCTAL:
-      return printf ("%" PRIo64, (uint64_t) vma);
+      return printf ("%" PRIo64, vma);
 
     case OCTAL_5:
-      return printf ("%5" PRIo64, (uint64_t) vma);
+      return printf ("%5" PRIo64, vma);
 
     default:
       /* FIXME: Report unrecognised mode ?  */
@@ -920,7 +914,7 @@ find_section (Filedata * filedata, const char * name)
    section exists.  */
 
 static Elf_Internal_Shdr *
-find_section_by_address (Filedata * filedata, bfd_vma addr)
+find_section_by_address (Filedata * filedata, uint64_t addr)
 {
   unsigned int i;
 
@@ -1199,10 +1193,6 @@ slurp_rela_relocs (Filedata *            filedata,
 	  relas[i].r_info   = BYTE_GET (erelas[i].r_info);
 	  relas[i].r_addend = BYTE_GET_SIGNED (erelas[i].r_addend);
 
-	  /* The #ifdef BFD64 below is to prevent a compile time
-	     warning.  We know that if we do not have a 64 bit data
-	     type that we will never execute this code anyway.  */
-#ifdef BFD64
 	  if (filedata->file_header.e_machine == EM_MIPS
 	      && filedata->file_header.e_ident[EI_DATA] != ELFDATA2MSB)
 	    {
@@ -1211,7 +1201,7 @@ slurp_rela_relocs (Filedata *            filedata,
 		 little-endian symbol index followed by four
 		 individual byte fields.  Reorder INFO
 		 accordingly.  */
-	      bfd_vma inf = relas[i].r_info;
+	      uint64_t inf = relas[i].r_info;
 	      inf = (((inf & 0xffffffff) << 32)
 		      | ((inf >> 56) & 0xff)
 		      | ((inf >> 40) & 0xff00)
@@ -1219,7 +1209,6 @@ slurp_rela_relocs (Filedata *            filedata,
 		      | ((inf >> 8) & 0xff000000));
 	      relas[i].r_info = inf;
 	    }
-#endif /* BFD64 */
 	}
 
       free (erelas);
@@ -1302,10 +1291,6 @@ slurp_rel_relocs (Filedata *            filedata,
 	  rels[i].r_info   = BYTE_GET (erels[i].r_info);
 	  rels[i].r_addend = 0;
 
-	  /* The #ifdef BFD64 below is to prevent a compile time
-	     warning.  We know that if we do not have a 64 bit data
-	     type that we will never execute this code anyway.  */
-#ifdef BFD64
 	  if (filedata->file_header.e_machine == EM_MIPS
 	      && filedata->file_header.e_ident[EI_DATA] != ELFDATA2MSB)
 	    {
@@ -1314,7 +1299,7 @@ slurp_rel_relocs (Filedata *            filedata,
 		 little-endian symbol index followed by four
 		 individual byte fields.  Reorder INFO
 		 accordingly.  */
-	      bfd_vma inf = rels[i].r_info;
+	      uint64_t inf = rels[i].r_info;
 	      inf = (((inf & 0xffffffff) << 32)
 		     | ((inf >> 56) & 0xff)
 		     | ((inf >> 40) & 0xff00)
@@ -1322,7 +1307,6 @@ slurp_rel_relocs (Filedata *            filedata,
 		     | ((inf >> 8) & 0xff000000));
 	      rels[i].r_info = inf;
 	    }
-#endif /* BFD64 */
 	}
 
       free (erels);
@@ -1337,12 +1321,12 @@ static bool
 slurp_relr_relocs (Filedata * filedata,
 		   unsigned long relr_offset,
 		   unsigned long relr_size,
-		   bfd_vma ** relrsp,
+		   uint64_t ** relrsp,
 		   unsigned long * nrelrsp)
 {
   void *relrs;
   size_t size = 0, nentries, i;
-  bfd_vma base = 0, addr, entry;
+  uint64_t base = 0, addr, entry;
 
   relrs = get_data (NULL, filedata, relr_offset, 1, relr_size,
 		    _("RELR relocation data"));
@@ -1367,7 +1351,7 @@ slurp_relr_relocs (Filedata * filedata,
 	    size++;
     }
 
-  *relrsp = (bfd_vma *) malloc (size * sizeof (bfd_vma));
+  *relrsp = malloc (size * sizeof (**relrsp));
   if (*relrsp == NULL)
     {
       free (relrs);
@@ -1378,7 +1362,7 @@ slurp_relr_relocs (Filedata * filedata,
   size = 0;
   for (i = 0; i < nentries; i++)
     {
-      const bfd_vma entry_bytes = is_32bit_elf ? 4 : 8;
+      const uint64_t entry_bytes = is_32bit_elf ? 4 : 8;
 
       if (is_32bit_elf)
 	entry = BYTE_GET (((Elf32_External_Relr *)relrs)[i].r_data);
@@ -1406,7 +1390,7 @@ slurp_relr_relocs (Filedata * filedata,
 /* Returns the reloc type extracted from the reloc info field.  */
 
 static unsigned int
-get_reloc_type (Filedata * filedata, bfd_vma reloc_info)
+get_reloc_type (Filedata * filedata, uint64_t reloc_info)
 {
   if (is_32bit_elf)
     return ELF32_R_TYPE (reloc_info);
@@ -1427,8 +1411,8 @@ get_reloc_type (Filedata * filedata, bfd_vma reloc_info)
 
 /* Return the symbol index extracted from the reloc info field.  */
 
-static bfd_vma
-get_reloc_symindex (bfd_vma reloc_info)
+static uint64_t
+get_reloc_symindex (uint64_t reloc_info)
 {
   return is_32bit_elf ? ELF32_R_SYM (reloc_info) : ELF64_R_SYM (reloc_info);
 }
@@ -1477,7 +1461,7 @@ dump_relocations (Filedata *          filedata,
     }
   else if (rel_type == reltype_relr)
     {
-      bfd_vma * relrs;
+      uint64_t * relrs;
       const char *format
 	= is_32bit_elf ? "%08" PRIx64 "\n" : "%016" PRIx64 "\n";
 
@@ -1488,7 +1472,7 @@ dump_relocations (Filedata *          filedata,
       printf (ngettext ("  %lu offset\n", "  %lu offsets\n", rel_size),
 	      rel_size);
       for (i = 0; i < rel_size; i++)
-	printf (format, (uint64_t) relrs[i]);
+	printf (format, relrs[i]);
       free (relrs);
       return true;
     }
@@ -1531,10 +1515,10 @@ dump_relocations (Filedata *          filedata,
   for (i = 0; i < rel_size; i++)
     {
       const char * rtype;
-      bfd_vma offset;
-      bfd_vma inf;
-      bfd_vma symtab_index;
-      bfd_vma type;
+      uint64_t offset;
+      uint64_t inf;
+      uint64_t symtab_index;
+      uint64_t type;
 
       offset = rels[i].r_offset;
       inf    = rels[i].r_info;
@@ -1553,7 +1537,7 @@ dump_relocations (Filedata *          filedata,
 	  printf (do_wide
 		  ? "%16.16" PRIx64 "  %16.16" PRIx64 " "
 		  : "%12.12" PRIx64 "  %12.12" PRIx64 " ",
-		  (uint64_t) offset, (uint64_t) inf);
+		  offset, inf);
 	}
 
       switch (filedata->file_header.e_machine)
@@ -2055,24 +2039,24 @@ dump_relocations (Filedata *          filedata,
 
 	      if (rel_type == reltype_rela)
 		{
-		  bfd_vma off = rels[i].r_addend;
+		  uint64_t off = rels[i].r_addend;
 
-		  if ((bfd_signed_vma) off < 0)
-		    printf (" - %" PRIx64, (uint64_t) -off);
+		  if ((int64_t) off < 0)
+		    printf (" - %" PRIx64, -off);
 		  else
-		    printf (" + %" PRIx64, (uint64_t) off);
+		    printf (" + %" PRIx64, off);
 		}
 	    }
 	}
       else if (rel_type == reltype_rela)
 	{
-	  bfd_vma off = rels[i].r_addend;
+	  uint64_t off = rels[i].r_addend;
 
 	  printf ("%*c", is_32bit_elf ? 12 : 20, ' ');
-	  if ((bfd_signed_vma) off < 0)
-	    printf ("-%" PRIx64, (uint64_t) -off);
+	  if ((int64_t) off < 0)
+	    printf ("-%" PRIx64, -off);
 	  else
-	    printf ("%" PRIx64, (uint64_t) off);
+	    printf ("%" PRIx64, off);
 	}
 
       if (filedata->file_header.e_machine == EM_SPARCV9
@@ -2082,11 +2066,10 @@ dump_relocations (Filedata *          filedata,
 
       putchar ('\n');
 
-#ifdef BFD64
       if (! is_32bit_elf && filedata->file_header.e_machine == EM_MIPS)
 	{
-	  bfd_vma type2 = ELF64_MIPS_R_TYPE2 (inf);
-	  bfd_vma type3 = ELF64_MIPS_R_TYPE3 (inf);
+	  uint64_t type2 = ELF64_MIPS_R_TYPE2 (inf);
+	  uint64_t type3 = ELF64_MIPS_R_TYPE3 (inf);
 	  const char * rtype2 = elf_mips_reloc_type (type2);
 	  const char * rtype3 = elf_mips_reloc_type (type3);
 
@@ -2108,7 +2091,6 @@ dump_relocations (Filedata *          filedata,
 
 	  putchar ('\n');
 	}
-#endif /* BFD64 */
     }
 
   free (rels);
@@ -6001,14 +5983,14 @@ process_program_headers (Filedata * filedata)
       else
 	printf (_("\nElf file type is %s\n"), get_file_type (filedata));
       printf (_("Entry point 0x%" PRIx64 "\n"),
-	      (uint64_t) filedata->file_header.e_entry);
+	      filedata->file_header.e_entry);
       printf (ngettext ("There is %d program header,"
 			" starting at offset %" PRIu64 "\n",
 			"There are %d program headers,"
 			" starting at offset %" PRIu64 "\n",
 			filedata->file_header.e_phnum),
 	      filedata->file_header.e_phnum,
-	      (uint64_t) filedata->file_header.e_phoff);
+	      filedata->file_header.e_phoff);
     }
 
   if (! get_program_headers (filedata))
@@ -6285,7 +6267,7 @@ the .dynamic section is not the same as the dynamic segment\n"));
 /* Find the file offset corresponding to VMA by using the program headers.  */
 
 static long
-offset_from_vma (Filedata * filedata, bfd_vma vma, uint64_t size)
+offset_from_vma (Filedata * filedata, uint64_t vma, uint64_t size)
 {
   Elf_Internal_Phdr * seg;
 
@@ -6704,16 +6686,16 @@ get_elf_symbols (Filedata *filedata,
 }
 
 static const char *
-get_elf_section_flags (Filedata * filedata, bfd_vma sh_flags)
+get_elf_section_flags (Filedata * filedata, uint64_t sh_flags)
 {
   static char buff[1024];
   char * p = buff;
   unsigned int field_size = is_32bit_elf ? 8 : 16;
   signed int sindex;
   unsigned int size = sizeof (buff) - (field_size + 4 + 1);
-  bfd_vma os_flags = 0;
-  bfd_vma proc_flags = 0;
-  bfd_vma unknown_flags = 0;
+  uint64_t os_flags = 0;
+  uint64_t proc_flags = 0;
+  uint64_t unknown_flags = 0;
   static const struct
     {
       const char * str;
@@ -6767,7 +6749,7 @@ get_elf_section_flags (Filedata * filedata, bfd_vma sh_flags)
 
   while (sh_flags)
     {
-      bfd_vma flag;
+      uint64_t flag;
 
       flag = sh_flags & - sh_flags;
       sh_flags &= ~ flag;
@@ -6798,7 +6780,6 @@ get_elf_section_flags (Filedata * filedata, bfd_vma sh_flags)
 		    sindex = 10;
 		  else if (flag == SHF_IA_64_NORECOV)
 		    sindex = 11;
-#ifdef BFD64
 		  else if (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_OPENVMS)
 		    switch (flag)
 		      {
@@ -6810,7 +6791,6 @@ get_elf_section_flags (Filedata * filedata, bfd_vma sh_flags)
 		      case SHF_IA_64_VMS_PROTECTED:   sindex = 17; break;
 		      default:                        break;
 		      }
-#endif
 		  break;
 
 		case EM_386:
@@ -7166,7 +7146,7 @@ process_section_headers (Filedata * filedata)
       if (section->sh_entsize != expected_entsize)			\
 	{								\
 	  error (_("Section %d has invalid sh_entsize of %" PRIx64 "\n"), \
-		 i, (uint64_t) section->sh_entsize);			\
+		 i, section->sh_entsize);				\
 	  error (_("(Using the expected size of %" PRIx64 " for the rest of this dump)\n"), \
 		 expected_entsize);					\
 	  section->sh_entsize = expected_entsize;			\
@@ -8100,19 +8080,19 @@ process_section_groups (Filedata * filedata)
 
 struct ia64_vms_dynfixup
 {
-  bfd_vma needed_ident;		/* Library ident number.  */
-  bfd_vma needed;		/* Index in the dstrtab of the library name.  */
-  bfd_vma fixup_needed;		/* Index of the library.  */
-  bfd_vma fixup_rela_cnt;	/* Number of fixups.  */
-  bfd_vma fixup_rela_off;	/* Fixups offset in the dynamic segment.  */
+  uint64_t needed_ident;	/* Library ident number.  */
+  uint64_t needed;		/* Index in the dstrtab of the library name.  */
+  uint64_t fixup_needed;	/* Index of the library.  */
+  uint64_t fixup_rela_cnt;	/* Number of fixups.  */
+  uint64_t fixup_rela_off;	/* Fixups offset in the dynamic segment.  */
 };
 
 /* Data used to display dynamic relocations.  */
 
 struct ia64_vms_dynimgrela
 {
-  bfd_vma img_rela_cnt;		/* Number of relocations.  */
-  bfd_vma img_rela_off;		/* Reloc offset in the dynamic segment.  */
+  uint64_t img_rela_cnt;	/* Number of relocations.  */
+  uint64_t img_rela_off;	/* Reloc offset in the dynamic segment.  */
 };
 
 /* Display IA-64 OpenVMS dynamic fixups (used to dynamically link a shared
@@ -8155,7 +8135,7 @@ dump_ia64_vms_dynamic_fixups (Filedata *                  filedata,
       const char *rtype;
 
       printf ("%3u ", (unsigned) BYTE_GET (imfs [i].fixup_seg));
-      printf ("%016" PRIx64 " ", (uint64_t) BYTE_GET (imfs [i].fixup_offset));
+      printf ("%016" PRIx64 " ", BYTE_GET (imfs [i].fixup_offset));
       type = BYTE_GET (imfs [i].type);
       rtype = elf_ia64_reloc_type (type);
       if (rtype == NULL)
@@ -8195,8 +8175,7 @@ dump_ia64_vms_dynamic_relocs (Filedata * filedata, struct ia64_vms_dynimgrela *i
       const char *rtype;
 
       printf ("%3u ", (unsigned) BYTE_GET (imrs [i].rela_seg));
-      printf ("%08" PRIx64 " ",
-	      (uint64_t) BYTE_GET (imrs [i].rela_offset));
+      printf ("%08" PRIx64 " ", BYTE_GET (imrs [i].rela_offset));
       type = BYTE_GET (imrs [i].type);
       rtype = elf_ia64_reloc_type (type);
       if (rtype == NULL)
@@ -8205,8 +8184,7 @@ dump_ia64_vms_dynamic_relocs (Filedata * filedata, struct ia64_vms_dynimgrela *i
         printf ("%-31s ", rtype);
       print_vma (BYTE_GET (imrs [i].addend), FULL_HEX);
       printf ("%3u ", (unsigned) BYTE_GET (imrs [i].sym_seg));
-      printf ("%08" PRIx64 "\n",
-	      (uint64_t) BYTE_GET (imrs [i].sym_offset));
+      printf ("%08" PRIx64 "\n", BYTE_GET (imrs [i].sym_offset));
     }
 
   free (imrs);
@@ -8221,8 +8199,8 @@ process_ia64_vms_dynamic_relocs (Filedata * filedata)
   struct ia64_vms_dynfixup fixup;
   struct ia64_vms_dynimgrela imgrela;
   Elf_Internal_Dyn *entry;
-  bfd_vma strtab_off = 0;
-  bfd_vma strtab_sz = 0;
+  uint64_t strtab_off = 0;
+  uint64_t strtab_sz = 0;
   char *strtab = NULL;
   bool res = true;
 
@@ -8493,7 +8471,7 @@ process_relocs (Filedata * filedata)
 struct absaddr
 {
   unsigned short section;
-  bfd_vma offset;
+  uint64_t offset;
 };
 
 /* Find the nearest symbol at or below ADDR.  Returns the symbol
@@ -8507,9 +8485,9 @@ find_symbol_for_address (Filedata *          filedata,
 			 unsigned long       strtab_size,
 			 struct absaddr      addr,
 			 const char **       symname,
-			 bfd_vma *           offset)
+			 uint64_t *          offset)
 {
-  bfd_vma dist = 0x100000;
+  uint64_t dist = 0x100000;
   Elf_Internal_Sym * sym;
   Elf_Internal_Sym * beg;
   Elf_Internal_Sym * end;
@@ -8521,7 +8499,7 @@ find_symbol_for_address (Filedata *          filedata,
 
   while (beg < end)
     {
-      bfd_vma value;
+      uint64_t value;
 
       sym = beg + (end - beg) / 2;
 
@@ -8583,8 +8561,8 @@ struct ia64_unw_aux_info
   unsigned long                 table_len;	/* Length of unwind table.  */
   unsigned char *               info;		/* Unwind info.  */
   unsigned long                 info_size;	/* Size of unwind info.  */
-  bfd_vma                       info_addr;	/* Starting address of unwind info.  */
-  bfd_vma                       seg_base;	/* Starting address of segment.  */
+  uint64_t                      info_addr;	/* Starting address of unwind info.  */
+  uint64_t                      seg_base;	/* Starting address of segment.  */
   Elf_Internal_Sym *            symtab;		/* The symbol table.  */
   unsigned long                 nsyms;		/* Number of symbols.  */
   Elf_Internal_Sym *            funtab;		/* Sorted table of STT_FUNC symbols.  */
@@ -8610,8 +8588,8 @@ dump_ia64_unwind (Filedata * filedata, struct ia64_unw_aux_info * aux)
 
   for (tp = aux->table; tp < aux->table + aux->table_len; ++tp)
     {
-      bfd_vma stamp;
-      bfd_vma offset;
+      uint64_t stamp;
+      uint64_t offset;
       const unsigned char * dp;
       const unsigned char * head;
       const unsigned char * end;
@@ -9045,7 +9023,7 @@ struct hppa_unw_aux_info
 {
   struct hppa_unw_table_entry *  table;		/* Unwind table.  */
   unsigned long                  table_len;	/* Length of unwind table.  */
-  bfd_vma                        seg_base;	/* Starting address of segment.  */
+  uint64_t                       seg_base;	/* Starting address of segment.  */
   Elf_Internal_Sym *             symtab;	/* The symbol table.  */
   unsigned long                  nsyms;		/* Number of symbols.  */
   Elf_Internal_Sym *             funtab;	/* Sorted table of STT_FUNC symbols.  */
@@ -9070,7 +9048,7 @@ dump_hppa_unwind (Filedata * filedata, struct hppa_unw_aux_info * aux)
 
   for (tp = aux->table; tp < aux->table + aux->table_len; ++tp)
     {
-      bfd_vma offset;
+      uint64_t offset;
       const char * procname;
 
       find_symbol_for_address (filedata, aux->funtab, aux->nfuns, aux->strtab,
@@ -9405,11 +9383,11 @@ struct arm_unw_aux_info
 static const char *
 arm_print_vma_and_name (Filedata *                 filedata,
 			struct arm_unw_aux_info *  aux,
-			bfd_vma                    fn,
+			uint64_t                   fn,
 			struct absaddr             addr)
 {
   const char *procname;
-  bfd_vma sym_offset;
+  uint64_t sym_offset;
 
   if (addr.section == SHN_UNDEF)
     addr.offset = fn;
@@ -9456,10 +9434,10 @@ get_unwind_section_word (Filedata *                 filedata,
 			 struct arm_unw_aux_info *  aux,
 			 struct arm_section *       arm_sec,
 			 Elf_Internal_Shdr *        sec,
-			 bfd_vma 		    word_offset,
+			 uint64_t 		    word_offset,
 			 unsigned int *             wordp,
 			 struct absaddr *           addr,
-			 bfd_vma *		    sym_name)
+			 uint64_t *		    sym_name)
 {
   Elf_Internal_Rela *rp;
   Elf_Internal_Sym *sym;
@@ -9474,7 +9452,7 @@ get_unwind_section_word (Filedata *                 filedata,
   addr->offset = 0;
 
   if (sym_name != NULL)
-    *sym_name = (bfd_vma) -1;
+    *sym_name = (uint64_t) -1;
 
   /* If necessary, update the section cache.  */
   if (sec != arm_sec->sec)
@@ -9528,8 +9506,7 @@ get_unwind_section_word (Filedata *                 filedata,
   /* If the offset is invalid then fail.  */
   if (/* PR 21343 *//* PR 18879 */
       sec->sh_size < 4
-      || word_offset > (sec->sh_size - 4)
-      || ((bfd_signed_vma) word_offset) < 0)
+      || word_offset > sec->sh_size - 4)
     return false;
 
   /* Get the word at the required offset.  */
@@ -9546,7 +9523,7 @@ get_unwind_section_word (Filedata *                 filedata,
   wrapped = false;
   for (rp = arm_sec->next_rela; rp != arm_sec->rela + arm_sec->nrelas; rp++)
     {
-      bfd_vma prelval, offset;
+      uint64_t prelval, offset;
 
       if (rp->r_offset > word_offset && !wrapped)
 	{
@@ -9574,7 +9551,7 @@ get_unwind_section_word (Filedata *                 filedata,
 	{
 	  offset = word & 0x7fffffff;
 	  if (offset & 0x40000000)
-	    offset |= ~ (bfd_vma) 0x7fffffff;
+	    offset |= ~ (uint64_t) 0x7fffffff;
 	}
       else if (arm_sec->rel_type == SHT_RELA)
 	offset = rp->r_addend;
@@ -9645,7 +9622,7 @@ get_unwind_section_word (Filedata *                 filedata,
 	  break;
 	}
 
-      word = (word & ~ (bfd_vma) 0x7fffffff) | (prelval & 0x7fffffff);
+      word = (word & ~ (uint64_t) 0x7fffffff) | (prelval & 0x7fffffff);
       addr->section = sym->st_shndx;
       addr->offset = offset;
 
@@ -9715,7 +9692,7 @@ decode_arm_unwind_bytecode (Filedata *                 filedata,
 			    unsigned int               word,
 			    unsigned int               remaining,
 			    unsigned int               more_words,
-			    bfd_vma                    data_offset,
+			    uint64_t                   data_offset,
 			    Elf_Internal_Shdr *        data_sec,
 			    struct arm_section *       data_arm_sec)
 {
@@ -9941,7 +9918,7 @@ decode_tic6x_unwind_bytecode (Filedata *                 filedata,
 			      unsigned int               word,
 			      unsigned int               remaining,
 			      unsigned int               more_words,
-			      bfd_vma                    data_offset,
+			      uint64_t                   data_offset,
 			      Elf_Internal_Shdr *        data_sec,
 			      struct arm_section *       data_arm_sec)
 {
@@ -10090,14 +10067,14 @@ decode_tic6x_unwind_bytecode (Filedata *                 filedata,
   return true;
 }
 
-static bfd_vma
-arm_expand_prel31 (Filedata * filedata, bfd_vma word, bfd_vma where)
+static uint64_t
+arm_expand_prel31 (Filedata * filedata, uint64_t word, uint64_t where)
 {
-  bfd_vma offset;
+  uint64_t offset;
 
   offset = word & 0x7fffffff;
   if (offset & 0x40000000)
-    offset |= ~ (bfd_vma) 0x7fffffff;
+    offset |= ~ (uint64_t) 0x7fffffff;
 
   if (filedata->file_header.e_machine == EM_TI_C6000)
     offset <<= 1;
@@ -10110,14 +10087,14 @@ decode_arm_unwind (Filedata *                 filedata,
 		   struct arm_unw_aux_info *  aux,
 		   unsigned int               word,
 		   unsigned int               remaining,
-		   bfd_vma                    data_offset,
+		   uint64_t                   data_offset,
 		   Elf_Internal_Shdr *        data_sec,
 		   struct arm_section *       data_arm_sec)
 {
   int per_index;
   unsigned int more_words = 0;
   struct absaddr addr;
-  bfd_vma sym_name = (bfd_vma) -1;
+  uint64_t sym_name = (uint64_t) -1;
   bool res = true;
 
   if (remaining == 0)
@@ -10142,14 +10119,14 @@ decode_arm_unwind (Filedata *                 filedata,
   if ((word & 0x80000000) == 0)
     {
       /* Expand prel31 for personality routine.  */
-      bfd_vma fn;
+      uint64_t fn;
       const char *procname;
 
       fn = arm_expand_prel31 (filedata, word, data_sec->sh_addr + data_offset);
       printf (_("  Personality routine: "));
       if (fn == 0
 	  && addr.section == SHN_UNDEF && addr.offset == 0
-	  && sym_name != (bfd_vma) -1 && sym_name < aux->strtab_size)
+	  && sym_name != (uint64_t) -1 && sym_name < aux->strtab_size)
 	{
 	  procname = aux->strtab + sym_name;
 	  print_vma (fn, PREFIX_HEX);
@@ -10300,7 +10277,7 @@ dump_arm_unwind (Filedata *                 filedata,
     {
       unsigned int exidx_fn, exidx_entry;
       struct absaddr fn_addr, entry_addr;
-      bfd_vma fn;
+      uint64_t fn;
 
       fputc ('\n', stdout);
 
@@ -10342,7 +10319,7 @@ dump_arm_unwind (Filedata *                 filedata,
 	}
       else
 	{
-	  bfd_vma table, table_offset = 0;
+	  uint64_t table, table_offset = 0;
 	  Elf_Internal_Shdr *table_sec;
 
 	  fputs ("@", stdout);
@@ -10357,8 +10334,7 @@ dump_arm_unwind (Filedata *                 filedata,
 	      table_sec = filedata->section_headers + entry_addr.section;
 	      table_offset = entry_addr.offset;
 	      /* PR 18879 */
-	      if (table_offset > table_sec->sh_size
-		  || ((bfd_signed_vma) table_offset) < 0)
+	      if (table_offset > table_sec->sh_size)
 		{
 		  warn (_("Unwind entry contains corrupt offset (0x%lx) into section %s\n"),
 			(unsigned long) table_offset,
@@ -10568,7 +10544,7 @@ dynamic_section_mips_val (Filedata * filedata, Elf_Internal_Dyn * entry)
 		get_dynamic_name (filedata, entry->d_un.d_val));
       else
 	printf (_("Interface Version: <corrupt: %" PRIx64 ">"),
-		(uint64_t) entry->d_un.d_ptr);
+		entry->d_un.d_ptr);
       break;
 
     case DT_MIPS_TIME_STAMP:
@@ -10650,7 +10626,7 @@ dynamic_section_parisc_val (Elf_Internal_Dyn * entry)
 	};
 	bool first = true;
 	size_t cnt;
-	bfd_vma val = entry->d_un.d_val;
+	uint64_t val = entry->d_un.d_val;
 
 	for (cnt = 0; cnt < ARRAY_SIZE (flags); ++cnt)
 	  if (val & flags[cnt].bit)
@@ -10677,8 +10653,6 @@ dynamic_section_parisc_val (Elf_Internal_Dyn * entry)
     }
   putchar ('\n');
 }
-
-#ifdef BFD64
 
 /* VMS vs Unix time offset and factor.  */
 
@@ -10708,7 +10682,6 @@ print_vms_time (int64_t vmstime)
 	    tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
 	    tm->tm_hour, tm->tm_min, tm->tm_sec);
 }
-#endif /* BFD64 */
 
 static void
 dynamic_section_ia64_val (Elf_Internal_Dyn * entry)
@@ -10723,9 +10696,7 @@ dynamic_section_ia64_val (Elf_Internal_Dyn * entry)
       break;
 
     case DT_IA_64_VMS_LINKTIME:
-#ifdef BFD64
       print_vms_time (entry->d_un.d_val);
-#endif
       break;
 
     case DT_IA_64_VMS_LNKFLAGS:
@@ -10883,13 +10854,13 @@ get_dynamic_section (Filedata *filedata)
 }
 
 static void
-print_dynamic_flags (bfd_vma flags)
+print_dynamic_flags (uint64_t flags)
 {
   bool first = true;
 
   while (flags)
     {
-      bfd_vma flag;
+      uint64_t flag;
 
       flag = flags & - flags;
       flags &= ~ flag;
@@ -10912,11 +10883,11 @@ print_dynamic_flags (bfd_vma flags)
   puts ("");
 }
 
-static bfd_vma *
+static uint64_t *
 get_dynamic_data (Filedata * filedata, uint64_t number, unsigned int ent_size)
 {
   unsigned char * e_data;
-  bfd_vma * i_data;
+  uint64_t * i_data;
 
   /* If size_t is smaller than uint64_t, eg because you are building
      on a 32-bit host, then make sure that when number is cast to
@@ -10955,7 +10926,7 @@ get_dynamic_data (Filedata * filedata, uint64_t number, unsigned int ent_size)
       return NULL;
     }
 
-  i_data = (bfd_vma *) cmalloc ((size_t) number, sizeof (*i_data));
+  i_data = (uint64_t *) cmalloc ((size_t) number, sizeof (*i_data));
   if (i_data == NULL)
     {
       error (_("Out of memory allocating space for %" PRIu64 " dynamic entries\n"),
@@ -11041,8 +11012,8 @@ get_num_dynamic_syms (Filedata * filedata)
   if (filedata->dynamic_info_DT_GNU_HASH)
     {
       unsigned char nb[16];
-      bfd_vma i, maxchain = 0xffffffff, bitmaskwords;
-      bfd_vma buckets_vma;
+      uint64_t i, maxchain = 0xffffffff, bitmaskwords;
+      uint64_t buckets_vma;
       unsigned long hn;
 
       if (fseek (filedata->handle,
@@ -11166,8 +11137,8 @@ get_num_dynamic_syms (Filedata * filedata)
       for (hn = 0; hn < filedata->ngnubuckets; ++hn)
 	if (filedata->gnubuckets[hn] != 0)
 	  {
-	    bfd_vma si = filedata->gnubuckets[hn];
-	    bfd_vma off = si - filedata->gnusymidx;
+	    uint64_t si = filedata->gnubuckets[hn];
+	    uint64_t off = si - filedata->gnusymidx;
 
 	    do
 	      {
@@ -11261,7 +11232,7 @@ process_dynamic_section (Filedata * filedata)
 	  && filedata->dynamic_info[DT_SYMENT])
 	{
 	  Elf_Internal_Phdr *seg;
-	  bfd_vma vma = filedata->dynamic_info[DT_SYMTAB];
+	  uint64_t vma = filedata->dynamic_info[DT_SYMTAB];
 
 	  if (! get_program_headers (filedata))
 	    {
@@ -12055,7 +12026,7 @@ process_version_sections (Filedata * filedata)
 		      printable_section_name (filedata, section),
 		      section->sh_info);
 
-	    printf (_(" Addr: 0x%016" PRIx64), (uint64_t) section->sh_addr);
+	    printf (_(" Addr: 0x%016" PRIx64), section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    printable_section_name_from_index (filedata, section->sh_link));
@@ -12201,7 +12172,7 @@ process_version_sections (Filedata * filedata)
 		      printable_section_name (filedata, section),
 		      section->sh_info);
 
-	    printf (_(" Addr: 0x%016" PRIx64), (uint64_t) section->sh_addr);
+	    printf (_(" Addr: 0x%016" PRIx64), section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    printable_section_name_from_index (filedata, section->sh_link));
@@ -12366,7 +12337,7 @@ process_version_sections (Filedata * filedata)
 		      printable_section_name (filedata, section),
 		      (unsigned long) total);
 
-	    printf (_(" Addr: 0x%016" PRIx64), (uint64_t) section->sh_addr);
+	    printf (_(" Addr: 0x%016" PRIx64), section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    printable_section_name (filedata, link_section));
@@ -13098,7 +13069,7 @@ get_symbol_version_string (Filedata *                   filedata,
 /* Display a symbol size on stdout.  Format is based on --sym-base setting.  */
 
 static unsigned int
-print_dynamic_symbol_size (bfd_vma vma, int base)
+print_dynamic_symbol_size (uint64_t vma, int base)
 {
   switch (base)
     {
@@ -13605,7 +13576,7 @@ process_symbol_table (Filedata * filedata)
       unsigned long * lengths;
       unsigned long * counts;
       unsigned long hn;
-      bfd_vma si;
+      uint64_t si;
       unsigned long maxlength = 0;
       unsigned long nzero_counts = 0;
       unsigned long nsyms = 0;
@@ -13711,7 +13682,7 @@ process_symbol_table (Filedata * filedata)
       for (hn = 0; hn < filedata->ngnubuckets; ++hn)
 	if (filedata->gnubuckets[hn] != 0)
 	  {
-	    bfd_vma off, length = 1;
+	    uint64_t off, length = 1;
 
 	    for (off = filedata->gnubuckets[hn] - filedata->gnusymidx;
 		 /* PR 17531 file: 010-77222-0.004.  */
@@ -13946,7 +13917,7 @@ target_specific_reloc_handling (Filedata *           filedata,
 	  handle_sym_diff:
 	    if (saved_sym != NULL)
 	      {
-		bfd_vma value;
+		uint64_t value;
 		unsigned int reloc_size = 0;
 		int leb_ret = 0;
 		switch (reloc_type)
@@ -14026,7 +13997,7 @@ target_specific_reloc_handling (Filedata *           filedata,
 	    if (saved_sym != NULL)
 	      {
 		int reloc_size = reloc_type == 1 ? 4 : 2;
-		bfd_vma value;
+		uint64_t value;
 
 		if (sym_index >= num_syms)
 		  error (_("MN10300 reloc contains invalid symbol index %lu\n"),
@@ -14057,9 +14028,9 @@ target_specific_reloc_handling (Filedata *           filedata,
 
     case EM_RL78:
       {
-	static bfd_vma saved_sym1 = 0;
-	static bfd_vma saved_sym2 = 0;
-	static bfd_vma value;
+	static uint64_t saved_sym1 = 0;
+	static uint64_t saved_sym2 = 0;
+	static uint64_t value;
 
 	if (reloc == NULL)
 	  {
@@ -14934,7 +14905,7 @@ apply_relocations (Filedata *filedata,
 
       for (rp = relocs; rp < relocs + num_relocs; ++rp)
 	{
-	  bfd_vma addend;
+	  uint64_t addend;
 	  unsigned int reloc_type;
 	  unsigned int reloc_size;
 	  bool reloc_inplace = false;
@@ -15421,7 +15392,7 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
   Elf_Internal_Shdr *relsec;
   size_t bytes;
   uint64_t section_size;
-  bfd_vma addr;
+  uint64_t addr;
   unsigned char *data;
   unsigned char *real_start;
   unsigned char *start;
@@ -15935,9 +15906,9 @@ get_build_id (void * data)
       Elf_External_Note * enote;
       Elf_Internal_Note inote;
 
-      bfd_vma offset = shdr->sh_offset;
-      bfd_vma align = shdr->sh_addralign;
-      bfd_vma length = shdr->sh_size;
+      uint64_t offset = shdr->sh_offset;
+      uint64_t align = shdr->sh_addralign;
+      uint64_t length = shdr->sh_size;
 
       enote = (Elf_External_Note *) get_section_contents (shdr, filedata);
       if (enote == NULL)
@@ -17886,14 +17857,14 @@ process_attributes (Filedata * filedata,
 	}
       else
 	{
-	  bfd_vma section_len;
+	  uint64_t section_len;
 
 	  section_len = sect->sh_size - 1;
 	  p++;
 
 	  while (section_len > 0)
 	    {
-	      bfd_vma attr_len;
+	      uint64_t attr_len;
 	      unsigned int namelen;
 	      bool public_section;
 	      bool gnu_section;
@@ -17954,7 +17925,7 @@ process_attributes (Filedata * filedata,
 		{
 		  int tag;
 		  unsigned int val;
-		  bfd_vma size;
+		  uint64_t size;
 		  unsigned char * end;
 
 		  /* PR binutils/17531: Safe handling of corrupt files.  */
@@ -18054,8 +18025,8 @@ process_attributes (Filedata * filedata,
    and return the VMA of the next entry, or -1 if there was a problem.
    Does not read from DATA_END or beyond.  */
 
-static bfd_vma
-print_mips_got_entry (unsigned char * data, bfd_vma pltgot, bfd_vma addr,
+static uint64_t
+print_mips_got_entry (unsigned char * data, uint64_t pltgot, uint64_t addr,
 		      unsigned char * data_end)
 {
   printf ("  ");
@@ -18070,14 +18041,14 @@ print_mips_got_entry (unsigned char * data, bfd_vma pltgot, bfd_vma addr,
     printf ("%*s", is_32bit_elf ? 8 : 16, _("<unknown>"));
   else
     {
-      bfd_vma entry;
+      uint64_t entry;
       unsigned char * from = data + addr - pltgot;
 
       if (from + (is_32bit_elf ? 4 : 8) > data_end)
 	{
 	  warn (_("MIPS GOT entry extends beyond the end of available data\n"));
 	  printf ("%*s", is_32bit_elf ? 8 : 16, _("<corrupt>"));
-	  return (bfd_vma) -1;
+	  return (uint64_t) -1;
 	}
       else
 	{
@@ -18092,8 +18063,8 @@ print_mips_got_entry (unsigned char * data, bfd_vma pltgot, bfd_vma addr,
    PLTGOT.  Print the Address and Initial fields of an entry at VMA
    ADDR and return the VMA of the next entry.  */
 
-static bfd_vma
-print_mips_pltgot_entry (unsigned char * data, bfd_vma pltgot, bfd_vma addr)
+static uint64_t
+print_mips_pltgot_entry (unsigned char * data, uint64_t pltgot, uint64_t addr)
 {
   printf ("  ");
   print_vma (addr, LONG_HEX);
@@ -18102,7 +18073,7 @@ print_mips_pltgot_entry (unsigned char * data, bfd_vma pltgot, bfd_vma addr)
     printf ("%*s", is_32bit_elf ? 8 : 16, _("<unknown>"));
   else
     {
-      bfd_vma entry;
+      uint64_t entry;
 
       entry = byte_get (data + addr - pltgot, is_32bit_elf ? 4 : 8);
       print_vma (entry, LONG_HEX);
@@ -18253,12 +18224,12 @@ process_mips_specific (Filedata * filedata)
   size_t conflicts_offset = 0;
   size_t pltrelsz = 0;
   size_t pltrel = 0;
-  bfd_vma pltgot = 0;
-  bfd_vma mips_pltgot = 0;
-  bfd_vma jmprel = 0;
-  bfd_vma local_gotno = 0;
-  bfd_vma gotsym = 0;
-  bfd_vma symtabno = 0;
+  uint64_t pltgot = 0;
+  uint64_t mips_pltgot = 0;
+  uint64_t jmprel = 0;
+  uint64_t local_gotno = 0;
+  uint64_t gotsym = 0;
+  uint64_t symtabno = 0;
   bool res = true;
 
   if (! process_attributes (filedata, NULL, SHT_GNU_ATTRIBUTES, NULL,
@@ -18328,7 +18299,7 @@ process_mips_specific (Filedata * filedata)
 	{
 	  unsigned char *data_end;
 	  unsigned char *data;
-	  bfd_vma ent, end;
+	  uint64_t ent, end;
 	  int addr_size;
 
 	  pltgot = sect->sh_addr;
@@ -18364,7 +18335,7 @@ process_mips_specific (Filedata * filedata)
 		      addr_size * 2, _("Value"));
 	      ent = print_mips_got_entry (data, pltgot, ent, data_end);
 	      printf ("\n");
-	      if (ent == (bfd_vma) -1)
+	      if (ent == (uint64_t) -1)
 		goto sgot_print_fail;
 
 	      /* Check for the MSB of GOT[1] being set, identifying a
@@ -18380,7 +18351,7 @@ process_mips_specific (Filedata * filedata)
 		{
 		  ent = print_mips_got_entry (data, pltgot, ent, data_end);
 		  printf ("\n");
-		  if (ent == (bfd_vma) -1)
+		  if (ent == (uint64_t) -1)
 		    goto sgot_print_fail;
 		}
 	      printf ("\n");
@@ -18396,7 +18367,7 @@ process_mips_specific (Filedata * filedata)
 		{
 		  ent = print_mips_got_entry (data, pltgot, ent, data_end);
 		  printf ("\n");
-		  if (ent == (bfd_vma) -1)
+		  if (ent == (uint64_t) -1)
 		    goto sgot_print_fail;
 		}
 	      printf ("\n");
@@ -18892,7 +18863,7 @@ process_mips_specific (Filedata * filedata)
 
   if (pltgot != 0 && local_gotno != 0)
     {
-      bfd_vma ent, local_end, global_end;
+      uint64_t ent, local_end, global_end;
       size_t i, offset;
       unsigned char * data;
       unsigned char * data_end;
@@ -18936,7 +18907,7 @@ process_mips_specific (Filedata * filedata)
 	      addr_size * 2, _("Initial"));
       ent = print_mips_got_entry (data, pltgot, ent, data_end);
       printf (_(" Lazy resolver\n"));
-      if (ent == (bfd_vma) -1)
+      if (ent == (uint64_t) -1)
 	goto got_print_fail;
 
       /* Check for the MSB of GOT[1] being set, denoting a GNU object.
@@ -18951,7 +18922,7 @@ process_mips_specific (Filedata * filedata)
 	{
 	  ent = print_mips_got_entry (data, pltgot, ent, data_end);
 	  printf (_(" Module pointer (GNU extension)\n"));
-	  if (ent == (bfd_vma) -1)
+	  if (ent == (uint64_t) -1)
 	    goto got_print_fail;
 	}
       printf ("\n");
@@ -18966,7 +18937,7 @@ process_mips_specific (Filedata * filedata)
 	    {
 	      ent = print_mips_got_entry (data, pltgot, ent, data_end);
 	      printf ("\n");
-	      if (ent == (bfd_vma) -1)
+	      if (ent == (uint64_t) -1)
 		goto got_print_fail;
 	    }
 	  printf ("\n");
@@ -19015,7 +18986,7 @@ process_mips_specific (Filedata * filedata)
 			(unsigned long) i);
 
 	      printf ("\n");
-	      if (ent == (bfd_vma) -1)
+	      if (ent == (uint64_t) -1)
 		break;
 	    }
 	  printf ("\n");
@@ -19027,7 +18998,7 @@ process_mips_specific (Filedata * filedata)
 
   if (mips_pltgot != 0 && jmprel != 0 && pltrel != 0 && pltrelsz != 0)
     {
-      bfd_vma ent, end;
+      uint64_t ent, end;
       size_t offset, rel_offset;
       unsigned long count, i;
       unsigned char * data;
@@ -19405,7 +19376,7 @@ static bool
 print_core_note (Elf_Internal_Note *pnote)
 {
   unsigned int addr_size = is_32bit_elf ? 4 : 8;
-  bfd_vma count, page_size;
+  uint64_t count, page_size;
   unsigned char *descdata, *filenames, *descend;
 
   if (pnote->type != NT_FILE)
@@ -19415,14 +19386,12 @@ print_core_note (Elf_Internal_Note *pnote)
       return true;
     }
 
-#ifndef BFD64
   if (!is_32bit_elf)
     {
       printf (_("    Cannot decode 64-bit note in 32-bit build\n"));
       /* Still "successful".  */
       return true;
     }
-#endif
 
   if (pnote->descsz < 2 * addr_size)
     {
@@ -19445,7 +19414,7 @@ print_core_note (Elf_Internal_Note *pnote)
   page_size = byte_get (descdata, addr_size);
   descdata += addr_size;
 
-  if (count > ((bfd_vma) -1 - 2 * addr_size) / (3 * addr_size)
+  if (count > ((uint64_t) -1 - 2 * addr_size) / (3 * addr_size)
       || pnote->descsz < 2 * addr_size + count * 3 * addr_size)
     {
       error (_("    Malformed note - too short for supplied file count\n"));
@@ -19463,7 +19432,7 @@ print_core_note (Elf_Internal_Note *pnote)
   filenames = descdata + count * 3 * addr_size;
   while (count-- > 0)
     {
-      bfd_vma start, end, file_ofs;
+      uint64_t start, end, file_ofs;
 
       if (filenames == descend)
 	{
@@ -20551,7 +20520,7 @@ print_stapsdt_note (Elf_Internal_Note *pnote)
   unsigned long addr_size = is_32bit_elf ? 4 : 8;
   char *data = pnote->descdata;
   char *data_end = pnote->descdata + pnote->descsz;
-  bfd_vma pc, base_addr, semaphore;
+  uint64_t pc, base_addr, semaphore;
   char *provider, *probe, *arg_fmt;
 
   if (pnote->descsz < (addr_size * 3))
@@ -20710,7 +20679,6 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
       printf (_("   Language: %.*s\n"), maxlen, pnote->descdata);
       break;
 
-#ifdef BFD64
     case NT_VMS_FPMODE:
       printf (_("   Floating Point mode: "));
       if (maxlen < 8)
@@ -20718,7 +20686,7 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
       /* FIXME: Generate an error if descsz > 8 ?  */
 
       printf ("0x%016" PRIx64 "\n",
-	      (uint64_t) byte_get ((unsigned char *) pnote->descdata, 8));
+	      byte_get ((unsigned char *) pnote->descdata, 8));
       break;
 
     case NT_VMS_LINKTIME:
@@ -20752,12 +20720,11 @@ print_ia64_vms_note (Elf_Internal_Note * pnote)
       print_vms_time (byte_get ((unsigned char *) pnote->descdata + 8, 8));
       printf (_("\n   Link flags  : "));
       printf ("0x%016" PRIx64 "\n",
-	      (uint64_t) byte_get ((unsigned char *) pnote->descdata + 16, 8));
+	      byte_get ((unsigned char *) pnote->descdata + 16, 8));
       printf (_("   Header flags: 0x%08x\n"),
 	      (unsigned) byte_get ((unsigned char *) pnote->descdata + 24, 4));
       printf (_("   Image id    : %.*s\n"), maxlen - 32, pnote->descdata + 32);
       break;
-#endif
 
     case NT_VMS_IMGNAM:
       printf (_("    Image name: %.*s\n"), maxlen, pnote->descdata);
@@ -21556,9 +21523,9 @@ process_note (Elf_Internal_Note *  pnote,
 static bool
 process_notes_at (Filedata *           filedata,
 		  Elf_Internal_Shdr *  section,
-		  bfd_vma              offset,
-		  bfd_vma              length,
-		  bfd_vma              align)
+		  uint64_t             offset,
+		  uint64_t             length,
+		  uint64_t             align)
 {
   Elf_External_Note *pnotes;
   Elf_External_Note *external;
@@ -21747,10 +21714,8 @@ process_corefile_note_segments (Filedata * filedata)
        i++, segment++)
     {
       if (segment->p_type == PT_NOTE)
-	if (! process_notes_at (filedata, NULL,
-				(bfd_vma) segment->p_offset,
-				(bfd_vma) segment->p_filesz,
-				(bfd_vma) segment->p_align))
+	if (! process_notes_at (filedata, NULL, segment->p_offset,
+				segment->p_filesz, segment->p_align))
 	  res = false;
     }
 
@@ -21758,7 +21723,7 @@ process_corefile_note_segments (Filedata * filedata)
 }
 
 static bool
-process_v850_notes (Filedata * filedata, bfd_vma offset, bfd_vma length)
+process_v850_notes (Filedata * filedata, uint64_t offset, uint64_t length)
 {
   Elf_External_Note * pnotes;
   Elf_External_Note * external;
@@ -21852,10 +21817,8 @@ process_note_sections (Filedata * filedata)
     {
       if (section->sh_type == SHT_NOTE)
 	{
-	  if (! process_notes_at (filedata, section,
-				  (bfd_vma) section->sh_offset,
-				  (bfd_vma) section->sh_size,
-				  (bfd_vma) section->sh_addralign))
+	  if (! process_notes_at (filedata, section, section->sh_offset,
+				  section->sh_size, section->sh_addralign))
 	    res = false;
 	  n++;
 	}
@@ -21865,9 +21828,8 @@ process_note_sections (Filedata * filedata)
 	   || filedata->file_header.e_machine == EM_CYGNUS_V850)
 	  && section->sh_type == SHT_RENESAS_INFO)
 	{
-	  if (! process_v850_notes (filedata,
-				    (bfd_vma) section->sh_offset,
-				    (bfd_vma) section->sh_size))
+	  if (! process_v850_notes (filedata, section->sh_offset,
+				    section->sh_size))
 	    res = false;
 	  n++;
 	}
@@ -22048,17 +22010,6 @@ get_file_header (Filedata * filedata)
   else
     {
       Elf64_External_Ehdr ehdr64;
-
-      /* If we have been compiled with sizeof (bfd_vma) == 4, then
-	 we will not be able to cope with the 64bit data found in
-	 64 ELF files.  Detect this now and abort before we start
-	 overwriting things.  */
-      if (sizeof (bfd_vma) < 8)
-	{
-	  error (_("This instance of readelf has been built without support for a\n\
-64 bit data type and so it cannot read 64 bit ELF files.\n"));
-	  return false;
-	}
 
       if (fread (ehdr64.e_type, sizeof (ehdr64) - EI_NIDENT, 1, filedata->handle) != 1)
 	return false;
