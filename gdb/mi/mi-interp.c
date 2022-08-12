@@ -190,10 +190,6 @@ mi_interp::resume ()
   /* Route target error through the MI as well.  */
   gdb_stdtargerr = mi->targ;
 
-  /* Replace all the hooks that we know about.  There really needs to
-     be a better way of doing this... */
-  clear_interpreter_hooks ();
-
   deprecated_show_load_progress = mi_load_progress;
 }
 
