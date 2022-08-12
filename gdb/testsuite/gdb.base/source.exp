@@ -73,3 +73,9 @@ gdb_test "source ${srcdir}/${subdir}/source-error.gdb" \
 		"source-error-1.gdb:21: Error in sourced command file:" \
 		"Cannot access memory at address 0x0" ] \
     "script contains error"
+
+# There was a case where sourcing a script containing "interpreter-exec"
+# commands would corrupt the interpreter mechanism and crash gdb.
+gdb_test "source ${srcdir}/${subdir}/interpreter-exec.gdb" \
+    "\\^done,value=\"off\"" \
+    "source interpreter-exec"
