@@ -4043,7 +4043,7 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 }
 
 bool
-reloc_at (struct dwarf_section * dsec, dwarf_vma offset)
+reloc_at (struct dwarf_section * dsec, uint64_t offset)
 {
   arelent ** relocs;
   arelent * rp;

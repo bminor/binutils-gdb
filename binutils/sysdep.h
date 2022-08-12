@@ -120,14 +120,6 @@ extern char **environ;
 
 #include <limits.h>
 
-#if SIZEOF_LONG_LONG > SIZEOF_LONG
-/* We can't use any bfd types here since readelf may define BFD64 and
-   objdump may not.  */
-#define HOST_WIDEST_INT	long long
-#else
-#define HOST_WIDEST_INT long
-#endif
-
 #define POISON_BFD_BOOLEAN 1
 
 #endif /* _BIN_SYSDEP_H */

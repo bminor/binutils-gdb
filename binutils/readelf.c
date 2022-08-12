@@ -13372,14 +13372,14 @@ display_lto_symtab (Filedata *           filedata,
 	      unsigned int sym_type = * ext_data ++;
 	      unsigned int sec_kind = * ext_data ++;
 
-	      printf ("  %10s %10s %11s %08lx  %08lx %9s %08lx _",
+	      printf ("  %10s %10s %11s %08" PRIx64 "  %08" PRIx64 " %9s %08x _",
 		      * comdat_key == 0 ? "-" : (char *) comdat_key,
 		      get_lto_kind (kind),
 		      get_lto_visibility (visibility),
-		      (long) size,
-		      (long) slot,
+		      size,
+		      slot,
 		      get_lto_sym_type (sym_type),
-		      (long) sec_kind);
+		      sec_kind);
 	      print_symbol (6, (const char *) sym_name);
 	    }
 	  else
@@ -13391,12 +13391,12 @@ display_lto_symtab (Filedata *           filedata,
 	}
       else
 	{
-	  printf ("  %10s %10s %11s %08lx  %08lx _",
+	  printf ("  %10s %10s %11s %08" PRIx64 "  %08" PRIx64 " _",
 		  * comdat_key == 0 ? "-" : (char *) comdat_key,
 		  get_lto_kind (kind),
 		  get_lto_visibility (visibility),
-		  (long) size,
-		  (long) slot);
+		  size,
+		  slot);
 	  print_symbol (21, (const char *) sym_name);
 	}
       putchar ('\n');
@@ -14808,7 +14808,7 @@ is_none_reloc (Filedata * filedata, unsigned int reloc_type)
    section NAME at OFFSET bytes.  */
 
 bool
-reloc_at (struct dwarf_section * dsec, dwarf_vma offset)
+reloc_at (struct dwarf_section * dsec, uint64_t offset)
 {
   Elf_Internal_Rela * relocs;
   Elf_Internal_Rela * rp;
@@ -15119,13 +15119,13 @@ get_section_contents (Elf_Internal_Shdr * section, Filedata * filedata)
 /* Uncompresses a section that was compressed using zlib, in place.  */
 
 static bool
-uncompress_section_contents (unsigned char **   buffer,
-			     dwarf_size_type    uncompressed_size,
-			     dwarf_size_type *  size)
+uncompress_section_contents (unsigned char **buffer,
+			     uint64_t uncompressed_size,
+			     uint64_t *size)
 {
-  dwarf_size_type compressed_size = *size;
-  unsigned char * compressed_buffer = *buffer;
-  unsigned char * uncompressed_buffer;
+  uint64_t compressed_size = *size;
+  unsigned char *compressed_buffer = *buffer;
+  unsigned char *uncompressed_buffer;
   z_stream strm;
   int rc;
 
@@ -15198,8 +15198,8 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
 
   if (decompress_dumps)
     {
-      dwarf_size_type new_size = num_bytes;
-      dwarf_size_type uncompressed_size = 0;
+      uint64_t new_size = num_bytes;
+      uint64_t uncompressed_size = 0;
 
       if ((section->sh_flags & SHF_COMPRESSED) != 0)
 	{
@@ -15414,8 +15414,8 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
 
   if (decompress_dumps)
     {
-      dwarf_size_type new_size = section_size;
-      dwarf_size_type uncompressed_size = 0;
+      uint64_t new_size = section_size;
+      uint64_t uncompressed_size = 0;
 
       if ((section->sh_flags & SHF_COMPRESSED) != 0)
 	{
@@ -15792,8 +15792,8 @@ load_specific_debug_section (enum dwarf_section_display_enum  debug,
   else
     {
       unsigned char *start = section->start;
-      dwarf_size_type size = sec->sh_size;
-      dwarf_size_type uncompressed_size = 0;
+      uint64_t size = sec->sh_size;
+      uint64_t uncompressed_size = 0;
 
       if ((sec->sh_flags & SHF_COMPRESSED) != 0)
 	{

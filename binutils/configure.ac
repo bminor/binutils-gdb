@@ -174,9 +174,6 @@ case "${host}" in
 esac
 AC_SUBST(DEMANGLER_NAME)
 
-AC_CHECK_SIZEOF([long])
-AC_CHECK_SIZEOF([long long])
-
 # We use headers from include/ that check various HAVE_*_H macros, thus
 # should ensure they are set by configure.  This is true even when C99
 # guarantees they are available.
