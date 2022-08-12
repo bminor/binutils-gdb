@@ -13395,10 +13395,10 @@ display_lto_symtab (Filedata *           filedata,
       unsigned int kind = *data++;
       unsigned int visibility = *data++;
 
-      elf_vma size = byte_get (data, 8);
+      uint64_t size = byte_get (data, 8);
       data += 8;
 
-      elf_vma slot = byte_get (data, 4);
+      uint64_t slot = byte_get (data, 4);
       data += 4;
 
       if (ext_data != NULL)
