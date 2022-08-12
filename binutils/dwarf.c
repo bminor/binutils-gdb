@@ -443,7 +443,7 @@ process_extended_line_op (unsigned char * data,
 	}
       else
 	SAFE_BYTE_GET (adr, data, len - 1, end);
-      printf (_("set Address to 0x%" PRIx64 "\n"), adr);
+      printf (_("set Address to %#" PRIx64 "\n"), adr);
       state_machine_regs.address = adr;
       state_machine_regs.view = 0;
       state_machine_regs.op_index = 0;
@@ -1481,13 +1481,13 @@ decode_location_expression (unsigned char * data,
 	  /* FIXME: Strictly speaking for 64-bit DWARF3 files
 	     this ought to be an 8-byte wide computation.  */
 	  SAFE_SIGNED_BYTE_GET_AND_INC (svalue, data, 2, end);
-	  printf ("DW_OP_call2: <0x%" PRIx64 ">", svalue + cu_offset);
+	  printf ("DW_OP_call2: <%#" PRIx64 ">", svalue + cu_offset);
 	  break;
 	case DW_OP_call4:
 	  /* FIXME: Strictly speaking for 64-bit DWARF3 files
 	     this ought to be an 8-byte wide computation.  */
 	  SAFE_SIGNED_BYTE_GET_AND_INC (svalue, data, 4, end);
-	  printf ("DW_OP_call4: <0x%" PRIx64 ">", svalue + cu_offset);
+	  printf ("DW_OP_call4: <%#" PRIx64 ">", svalue + cu_offset);
 	  break;
 	case DW_OP_call_ref:
 	  /* FIXME: Strictly speaking for 64-bit DWARF3 files
@@ -1506,7 +1506,7 @@ decode_location_expression (unsigned char * data,
 	    {
 	      SAFE_BYTE_GET_AND_INC (uvalue, data, offset_size, end);
 	    }
-	  printf ("DW_OP_call_ref: <0x%" PRIx64 ">", uvalue);
+	  printf ("DW_OP_call_ref: <%#" PRIx64 ">", uvalue);
 	  break;
 	case DW_OP_form_tls_address:
 	  printf ("DW_OP_form_tls_address");
@@ -1551,7 +1551,7 @@ decode_location_expression (unsigned char * data,
 	    addr = get_encoded_value (&data, encoding, section, end);
 
 	    printf ("DW_OP_GNU_encoded_addr: fmt:%02x addr:", encoding);
-	    print_hex (addr, pointer_size);
+	    print_hex_ns (addr, pointer_size);
 	  }
 	  break;
 	case DW_OP_implicit_pointer:
@@ -1576,7 +1576,7 @@ decode_location_expression (unsigned char * data,
 	      SAFE_BYTE_GET_AND_INC (uvalue, data, offset_size, end);
 	    }
 	  READ_SLEB (svalue, data, end);
-	  printf ("%s: <0x%" PRIx64 "> %" PRId64,
+	  printf ("%s: <%#" PRIx64 "> %" PRId64,
 		  (op == DW_OP_implicit_pointer
 		   ? "DW_OP_implicit_pointer" : "DW_OP_GNU_implicit_pointer"),
 		  uvalue, svalue);
@@ -1599,7 +1599,7 @@ decode_location_expression (unsigned char * data,
 	case DW_OP_const_type:
 	case DW_OP_GNU_const_type:
 	  READ_ULEB (uvalue, data, end);
-	  printf ("%s: <0x%" PRIx64 "> ",
+	  printf ("%s: <%#" PRIx64 "> ",
 		  (op == DW_OP_const_type ? "DW_OP_const_type"
 					  : "DW_OP_GNU_const_type"),
 		  cu_offset + uvalue);
@@ -1614,7 +1614,7 @@ decode_location_expression (unsigned char * data,
 					   : "DW_OP_GNU_regval_type"),
 		  uvalue, regname (uvalue, 1));
 	  READ_ULEB (uvalue, data, end);
-	  printf (" <0x%" PRIx64 ">", cu_offset + uvalue);
+	  printf (" <%#" PRIx64 ">", cu_offset + uvalue);
 	  break;
 	case DW_OP_deref_type:
 	case DW_OP_GNU_deref_type:
@@ -1624,39 +1624,39 @@ decode_location_expression (unsigned char * data,
 					  : "DW_OP_GNU_deref_type"),
 		  uvalue);
 	  READ_ULEB (uvalue, data, end);
-	  printf (" <0x%" PRIx64 ">", cu_offset + uvalue);
+	  printf (" <%#" PRIx64 ">", cu_offset + uvalue);
 	  break;
 	case DW_OP_convert:
 	case DW_OP_GNU_convert:
 	  READ_ULEB (uvalue, data, end);
-	  printf ("%s <0x%" PRIx64 ">",
+	  printf ("%s <%#" PRIx64 ">",
 		  (op == DW_OP_convert ? "DW_OP_convert" : "DW_OP_GNU_convert"),
 		  uvalue ? cu_offset + uvalue : uvalue);
 	  break;
 	case DW_OP_reinterpret:
 	case DW_OP_GNU_reinterpret:
 	  READ_ULEB (uvalue, data, end);
-	  printf ("%s <0x%" PRIx64 ">",
+	  printf ("%s <%#" PRIx64 ">",
 		  (op == DW_OP_reinterpret ? "DW_OP_reinterpret"
 					   : "DW_OP_GNU_reinterpret"),
 		  uvalue ? cu_offset + uvalue : uvalue);
 	  break;
 	case DW_OP_GNU_parameter_ref:
 	  SAFE_BYTE_GET_AND_INC (uvalue, data, 4, end);
-	  printf ("DW_OP_GNU_parameter_ref: <0x%" PRIx64 ">",
+	  printf ("DW_OP_GNU_parameter_ref: <%#" PRIx64 ">",
 		  cu_offset + uvalue);
 	  break;
 	case DW_OP_addrx:
 	  READ_ULEB (uvalue, data, end);
-	  printf ("DW_OP_addrx <0x%" PRIx64 ">", uvalue);
+	  printf ("DW_OP_addrx <%#" PRIx64 ">", uvalue);
 	  break;
 	case DW_OP_GNU_addr_index:
 	  READ_ULEB (uvalue, data, end);
-	  printf ("DW_OP_GNU_addr_index <0x%" PRIx64 ">", uvalue);
+	  printf ("DW_OP_GNU_addr_index <%#" PRIx64 ">", uvalue);
 	  break;
 	case DW_OP_GNU_const_index:
 	  READ_ULEB (uvalue, data, end);
-	  printf ("DW_OP_GNU_const_index <0x%" PRIx64 ">", uvalue);
+	  printf ("DW_OP_GNU_const_index <%#" PRIx64 ">", uvalue);
 	  break;
 	case DW_OP_GNU_variable_value:
 	  /* FIXME: Strictly speaking for 64-bit DWARF3 files
@@ -1675,7 +1675,7 @@ decode_location_expression (unsigned char * data,
 	    {
 	      SAFE_BYTE_GET_AND_INC (uvalue, data, offset_size, end);
 	    }
-	  printf ("DW_OP_GNU_variable_value: <0x%" PRIx64 ">", uvalue);
+	  printf ("DW_OP_GNU_variable_value: <%#" PRIx64 ">", uvalue);
 	  break;
 
 	  /* HP extensions.  */
@@ -1716,9 +1716,9 @@ decode_location_expression (unsigned char * data,
 	default:
 	  if (op >= DW_OP_lo_user
 	      && op <= DW_OP_hi_user)
-	    printf (_("(User defined location op 0x%x)"), op);
+	    printf (_("(User defined location op %#x)"), op);
 	  else
-	    printf (_("(Unknown location op 0x%x)"), op);
+	    printf (_("(Unknown location op %#x)"), op);
 	  /* No way to tell where the next op is, so just bail.  */
 	  return need_frame_base;
 	}
@@ -2508,7 +2508,7 @@ read_and_display_attr_value (unsigned long attribute,
     {
     case DW_FORM_ref_addr:
       if (!do_loc)
-	printf ("%c<0x%" PRIx64 ">", delimiter, uvalue);
+	printf ("%c<%#" PRIx64 ">", delimiter, uvalue);
       break;
 
     case DW_FORM_GNU_ref_alt:
@@ -2516,9 +2516,9 @@ read_and_display_attr_value (unsigned long attribute,
 	{
 	  if (do_wide)
 	    /* We have already printed the form name.  */
-	    printf ("%c<0x%" PRIx64 ">", delimiter, uvalue);
+	    printf ("%c<%#" PRIx64 ">", delimiter, uvalue);
 	  else
-	    printf ("%c<alt 0x%" PRIx64 ">", delimiter, uvalue);
+	    printf ("%c<alt %#" PRIx64 ">", delimiter, uvalue);
 	}
       /* FIXME: Follow the reference...  */
       break;
@@ -2529,14 +2529,14 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_FORM_ref_sup4:
     case DW_FORM_ref_udata:
       if (!do_loc)
-	printf ("%c<0x%" PRIx64 ">", delimiter, uvalue + cu_offset);
+	printf ("%c<%#" PRIx64 ">", delimiter, uvalue + cu_offset);
       break;
 
     case DW_FORM_data4:
     case DW_FORM_addr:
     case DW_FORM_sec_offset:
       if (!do_loc)
-	printf ("%c0x%" PRIx64, delimiter, uvalue);
+	printf ("%c%#" PRIx64, delimiter, uvalue);
       break;
 
     case DW_FORM_flag_present:
@@ -2566,7 +2566,7 @@ read_and_display_attr_value (unsigned long attribute,
 	  uint64_t utmp = uvalue;
 	  if (form == DW_FORM_ref8)
 	    utmp += cu_offset;
-	  printf ("%c0x%" PRIx64, delimiter, utmp);
+	  printf ("%c%#" PRIx64, delimiter, utmp);
 	}
       break;
 
@@ -2574,9 +2574,9 @@ read_and_display_attr_value (unsigned long attribute,
       if (!do_loc)
 	{
 	  if (uvalue_hi == 0)
-	    printf (" 0x%" PRIx64, uvalue);
+	    printf (" %#" PRIx64, uvalue);
 	  else
-	    printf (" 0x%" PRIx64 "%016" PRIx64, uvalue_hi, uvalue);
+	    printf (" %#" PRIx64 "%016" PRIx64, uvalue_hi, uvalue);
 	}
       break;
 
@@ -2630,10 +2630,10 @@ read_and_display_attr_value (unsigned long attribute,
 	{
 	  if (do_wide)
 	    /* We have already displayed the form name.  */
-	    printf (_("%c(offset: 0x%" PRIx64 "): %s"),
+	    printf (_("%c(offset: %#" PRIx64 "): %s"),
 		    delimiter, uvalue, fetch_indirect_string (uvalue));
 	  else
-	    printf (_("%c(indirect string, offset: 0x%" PRIx64 "): %s"),
+	    printf (_("%c(indirect string, offset: %#" PRIx64 "): %s"),
 		    delimiter, uvalue, fetch_indirect_string (uvalue));
 	}
       break;
@@ -2643,10 +2643,10 @@ read_and_display_attr_value (unsigned long attribute,
 	{
 	  if (do_wide)
 	    /* We have already displayed the form name.  */
-	    printf (_("%c(offset: 0x%" PRIx64 "): %s"),
+	    printf (_("%c(offset: %#" PRIx64 "): %s"),
 		    delimiter, uvalue, fetch_indirect_line_string (uvalue));
 	  else
-	    printf (_("%c(indirect line string, offset: 0x%" PRIx64 "): %s"),
+	    printf (_("%c(indirect line string, offset: %#" PRIx64 "): %s"),
 		    delimiter, uvalue, fetch_indirect_line_string (uvalue));
 	}
       break;
@@ -2667,10 +2667,10 @@ read_and_display_attr_value (unsigned long attribute,
 					debug_info_p ? debug_info_p->str_offsets_base : 0);
 	  if (do_wide)
 	    /* We have already displayed the form name.  */
-	    printf (_("%c(offset: 0x%" PRIx64 "): %s"),
+	    printf (_("%c(offset: %#" PRIx64 "): %s"),
 		    delimiter, uvalue, strng);
 	  else
-	    printf (_("%c(indexed string: 0x%" PRIx64 "): %s"),
+	    printf (_("%c(indexed string: %#" PRIx64 "): %s"),
 		    delimiter, uvalue, strng);
 	}
       break;
@@ -2680,10 +2680,10 @@ read_and_display_attr_value (unsigned long attribute,
 	{
 	  if (do_wide)
 	    /* We have already displayed the form name.  */
-	    printf (_("%c(offset: 0x%" PRIx64 ") %s"),
+	    printf (_("%c(offset: %#" PRIx64 ") %s"),
 		    delimiter, uvalue, fetch_alt_indirect_string (uvalue));
 	  else
-	    printf (_("%c(alt indirect string, offset: 0x%" PRIx64 ") %s"),
+	    printf (_("%c(alt indirect string, offset: %#" PRIx64 ") %s"),
 		    delimiter, uvalue, fetch_alt_indirect_string (uvalue));
 	}
       break;
@@ -2694,7 +2694,7 @@ read_and_display_attr_value (unsigned long attribute,
 
     case DW_FORM_ref_sig8:
       if (!do_loc)
-	printf ("%c%s: 0x%" PRIx64, delimiter, do_wide ? "" : "signature",
+	printf ("%c%s: %#" PRIx64, delimiter, do_wide ? "" : "signature",
 		uvalue);
       break;
 
@@ -2776,18 +2776,18 @@ read_and_display_attr_value (unsigned long attribute,
 
 	  /* We have already displayed the form name.  */
 	  if (idx != (uint64_t) -1)
-	    printf (_("%c(index: 0x%" PRIx64 "): %" PRIx64),
+	    printf (_("%c(index: %#" PRIx64 "): %#" PRIx64),
 		    delimiter, uvalue, idx);
 	}
       break;
 
     case DW_FORM_strp_sup:
       if (!do_loc)
-	printf ("%c<0x%" PRIx64 ">", delimiter, uvalue + cu_offset);
+	printf ("%c<%#" PRIx64 ">", delimiter, uvalue + cu_offset);
       break;
 
     default:
-      warn (_("Unrecognized form: 0x%lx\n"), form);
+      warn (_("Unrecognized form: %#lx\n"), form);
       /* What to do?  Consume a byte maybe?  */
       ++data;
       break;
@@ -3828,9 +3828,9 @@ process_debug_info (struct dwarf_section * section,
 
       if (!do_loc && dwarf_start_die == 0)
 	{
-	  printf (_("  Compilation Unit @ offset 0x%" PRIx64 ":\n"),
+	  printf (_("  Compilation Unit @ offset %#" PRIx64 ":\n"),
 		  cu_offset);
-	  printf (_("   Length:        0x%" PRIx64 " (%s)\n"),
+	  printf (_("   Length:        %#" PRIx64 " (%s)\n"),
 		  compunit.cu_length,
 		  offset_size == 8 ? "64-bit" : "32-bit");
 	  printf (_("   Version:       %d\n"), compunit.cu_version);
@@ -3842,29 +3842,29 @@ process_debug_info (struct dwarf_section * section,
 		      name ? name : "???",
 		      compunit.cu_unit_type);
 	    }
-	  printf (_("   Abbrev Offset: 0x%" PRIx64 "\n"),
+	  printf (_("   Abbrev Offset: %#" PRIx64 "\n"),
 		  compunit.cu_abbrev_offset);
 	  printf (_("   Pointer Size:  %d\n"), compunit.cu_pointer_size);
 	  if (do_types)
 	    {
-	      printf (_("   Signature:     0x%" PRIx64 "\n"), signature);
-	      printf (_("   Type Offset:   0x%" PRIx64 "\n"), type_offset);
+	      printf (_("   Signature:     %#" PRIx64 "\n"), signature);
+	      printf (_("   Type Offset:   %#" PRIx64 "\n"), type_offset);
 	    }
 	  if (do_dwo_id)
-	    printf (_("   DWO ID:        0x%" PRIx64 "\n"), dwo_id);
+	    printf (_("   DWO ID:        %#" PRIx64 "\n"), dwo_id);
 	  if (this_set != NULL)
 	    {
 	      uint64_t *offsets = this_set->section_offsets;
 	      size_t *sizes = this_set->section_sizes;
 
 	      printf (_("   Section contributions:\n"));
-	      printf (_("    .debug_abbrev.dwo:       0x%" PRIx64 "  0x%zx\n"),
+	      printf (_("    .debug_abbrev.dwo:       %#" PRIx64 "  %#zx\n"),
 		      offsets[DW_SECT_ABBREV], sizes[DW_SECT_ABBREV]);
-	      printf (_("    .debug_line.dwo:         0x%" PRIx64 "  0x%zx\n"),
+	      printf (_("    .debug_line.dwo:         %#" PRIx64 "  %#zx\n"),
 		      offsets[DW_SECT_LINE], sizes[DW_SECT_LINE]);
-	      printf (_("    .debug_loc.dwo:          0x%" PRIx64 "  0x%zx\n"),
+	      printf (_("    .debug_loc.dwo:          %#" PRIx64 "  %#zx\n"),
 		      offsets[DW_SECT_LOC], sizes[DW_SECT_LOC]);
-	      printf (_("    .debug_str_offsets.dwo:  0x%" PRIx64 "  0x%zx\n"),
+	      printf (_("    .debug_str_offsets.dwo:  %#" PRIx64 "  %#zx\n"),
 		      offsets[DW_SECT_STR_OFFSETS], sizes[DW_SECT_STR_OFFSETS]);
 	    }
 	}
@@ -4286,7 +4286,7 @@ display_formatted_table (unsigned char *data,
       return end;
     }
 
-  printf (_("\n The %s (offset 0x%tx, lines %" PRIu64 ", columns %u):\n"),
+  printf (_("\n The %s (offset %#tx, lines %" PRIu64 ", columns %u):\n"),
 	  table_name, data - start, data_count, format_count);
 
   printf (_("  Entry"));
@@ -4489,7 +4489,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 						& end_of_sequence)) == NULL)
 	    return 0;
 
-	  printf (_("  Offset:                      0x%tx\n"), data - start);
+	  printf (_("  Offset:                      %#tx\n"), data - start);
 	  printf (_("  Length:                      %" PRId64 "\n"), linfo.li_length);
 	  printf (_("  DWARF Version:               %d\n"), linfo.li_version);
 	  if (linfo.li_version >= 5)
@@ -4553,7 +4553,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 		{
 		  unsigned int last_dir_entry = 0;
 
-		  printf (_("\n The Directory Table (offset 0x%tx):\n"),
+		  printf (_("\n The Directory Table (offset %#tx):\n"),
 			  data - start);
 
 		  while (data < end && *data != 0)
@@ -4579,7 +4579,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 		printf (_("\n The File Name Table is empty.\n"));
 	      else
 		{
-		  printf (_("\n The File Name Table (offset 0x%tx):\n"),
+		  printf (_("\n The File Name Table (offset %#tx):\n"),
 			  data - start);
 		  printf (_("  Entry\tDir\tTime\tSize\tName\n"));
 
@@ -4648,7 +4648,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 			state_machine_regs.view = 0;
 		      printf (_("  Special opcode %d: "
 				"advance Address by %" PRIu64
-				" to 0x%" PRIx64 "%s"),
+				" to %#" PRIx64 "%s"),
 			      op_code, uladv, state_machine_regs.address,
 			      verbose_view && uladv
 			      ? _(" (reset view)") : "");
@@ -4668,7 +4668,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 			state_machine_regs.view = 0;
 		      printf (_("  Special opcode %d: "
 				"advance Address by %" PRIu64
-				" to 0x%" PRIx64 "[%d]%s"),
+				" to %#" PRIx64 "[%d]%s"),
 			      op_code, uladv, state_machine_regs.address,
 			      state_machine_regs.op_index,
 			      verbose_view && addrdelta
@@ -4711,7 +4711,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 			if (uladv)
 			  state_machine_regs.view = 0;
 			printf (_("  Advance PC by %" PRIu64
-				  " to 0x%" PRIx64 "%s\n"),
+				  " to %#" PRIx64 "%s\n"),
 				uladv, state_machine_regs.address,
 				verbose_view && uladv
 				? _(" (reset view)") : "");
@@ -4730,7 +4730,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 			if (addrdelta)
 			  state_machine_regs.view = 0;
 			printf (_("  Advance PC by %" PRIu64
-				  " to 0x%" PRIx64 "[%d]%s\n"),
+				  " to %#" PRIx64 "[%d]%s\n"),
 				uladv, state_machine_regs.address,
 				state_machine_regs.op_index,
 				verbose_view && addrdelta
@@ -4779,7 +4779,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 			if (uladv)
 			  state_machine_regs.view = 0;
 			printf (_("  Advance PC by constant %" PRIu64
-				  " to 0x%" PRIx64 "%s\n"),
+				  " to %#" PRIx64 "%s\n"),
 				uladv, state_machine_regs.address,
 				verbose_view && uladv
 				? _(" (reset view)") : "");
@@ -4798,7 +4798,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 			if (addrdelta)
 			  state_machine_regs.view = 0;
 			printf (_("  Advance PC by constant %" PRIu64
-				  " to 0x%" PRIx64 "[%d]%s\n"),
+				  " to %#" PRIx64 "[%d]%s\n"),
 				uladv, state_machine_regs.address,
 				state_machine_regs.op_index,
 				verbose_view && addrdelta
@@ -4811,7 +4811,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 		    state_machine_regs.address += uladv;
 		    state_machine_regs.op_index = 0;
 		    printf (_("  Advance PC by fixed size amount %" PRIu64
-			      " to 0x%" PRIx64 "\n"),
+			      " to %#" PRIx64 "\n"),
 			    uladv, state_machine_regs.address);
 		    /* Do NOT reset view.  */
 		    break;
@@ -4836,7 +4836,7 @@ display_debug_lines_raw (struct dwarf_section *  section,
 		      for (i = standard_opcodes[op_code - 1]; i > 0 ; --i)
 			{
 			  READ_ULEB (uladv, data, end);
-			  printf ("0x%" PRIx64 "%s", uladv, i == 1 ? "" : ", ");
+			  printf ("%#" PRIx64 "%s", uladv, i == 1 ? "" : ", ");
 			}
 		    putchar ('\n');
 		    break;
@@ -5476,7 +5476,7 @@ display_debug_lines_decoded (struct dwarf_section *  section,
 		      uint64_t val;
 
 		      READ_ULEB (val, data, end);
-		      printf ("0x%" PRIx64 "%s", val, i == 1 ? "" : ", ");
+		      printf ("%#" PRIx64 "%s", val, i == 1 ? "" : ", ");
 		    }
 		putchar ('\n');
 		break;
@@ -5740,7 +5740,7 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 	      names.pn_length);
       printf (_("  Version:                             %d\n"),
 	      names.pn_version);
-      printf (_("  Offset into .debug_info section:     0x%" PRIx64 "\n"),
+      printf (_("  Offset into .debug_info section:     %#" PRIx64 "\n"),
 	      names.pn_offset);
       printf (_("  Size of area in .debug_info section: %" PRId64 "\n"),
 	      names.pn_size);
@@ -6040,13 +6040,13 @@ display_debug_macro (struct dwarf_section *section,
 
       SAFE_BYTE_GET_AND_INC (flags, curr, 1, end);
       offset_size = (flags & 1) ? 8 : 4;
-      printf (_("  Offset:                      0x%" PRIx64 "\n"), sec_offset);
+      printf (_("  Offset:                      %#" PRIx64 "\n"), sec_offset);
       printf (_("  Version:                     %d\n"), version);
       printf (_("  Offset size:                 %d\n"), offset_size);
       if (flags & 2)
 	{
 	  SAFE_BYTE_GET_AND_INC (line_offset, curr, offset_size, end);
-	  printf (_("  Offset into .debug_line:     0x%" PRIx64 "\n"),
+	  printf (_("  Offset into .debug_line:     %#" PRIx64 "\n"),
 		  line_offset);
 	}
       if (flags & 4)
@@ -6196,7 +6196,7 @@ display_debug_macro (struct dwarf_section *section,
 
 	    case DW_MACRO_import:
 	      SAFE_BYTE_GET_AND_INC (offset, curr, offset_size, end);
-	      printf (_(" DW_MACRO_import - offset : 0x%" PRIx64 "\n"),
+	      printf (_(" DW_MACRO_import - offset : %#" PRIx64 "\n"),
 		      offset);
 	      break;
 
@@ -6204,7 +6204,7 @@ display_debug_macro (struct dwarf_section *section,
 	      READ_ULEB (lineno, curr, end);
 	      SAFE_BYTE_GET_AND_INC (offset, curr, offset_size, end);
 	      printf (_(" DW_MACRO_define_sup - lineno : %d"
-			" macro offset : 0x%" PRIx64 "\n"),
+			" macro offset : %#" PRIx64 "\n"),
 		      lineno, offset);
 	      break;
 
@@ -6212,13 +6212,13 @@ display_debug_macro (struct dwarf_section *section,
 	      READ_ULEB (lineno, curr, end);
 	      SAFE_BYTE_GET_AND_INC (offset, curr, offset_size, end);
 	      printf (_(" DW_MACRO_undef_sup - lineno : %d"
-			" macro offset : 0x%" PRIx64 "\n"),
+			" macro offset : %#" PRIx64 "\n"),
 		      lineno, offset);
 	      break;
 
 	    case DW_MACRO_import_sup:
 	      SAFE_BYTE_GET_AND_INC (offset, curr, offset_size, end);
-	      printf (_(" DW_MACRO_import_sup - offset : 0x%" PRIx64 "\n"),
+	      printf (_(" DW_MACRO_import_sup - offset : %#" PRIx64 "\n"),
 		      offset);
 	      break;
 
@@ -6233,7 +6233,7 @@ display_debug_macro (struct dwarf_section *section,
 	      else
 		printf (" DW_MACRO_undef_strx ");
 	      if (do_wide)
-		printf (_("(with offset %" PRIx64 ") "), offset);
+		printf (_("(with offset %#" PRIx64 ") "), offset);
 	      printf (_("lineno : %d macro : %s\n"),
 		      lineno, string);
 	      break;
@@ -6308,7 +6308,7 @@ display_debug_abbrev (struct dwarf_section *section,
 	break;
 
       if (list->first_abbrev)
-	printf (_("  Number TAG (0x%" PRIx64 ")\n"), offset);
+	printf (_("  Number TAG (%#" PRIx64 ")\n"), offset);
 
       for (entry = list->first_abbrev; entry; entry = entry->next)
 	{
@@ -6948,7 +6948,7 @@ display_offset_entry_loclists (struct dwarf_section *section)
       uint32_t i;
       bool is_64bit;
 
-      printf (_("Table at Offset 0x%tx\n"), start - section->start);
+      printf (_("Table at Offset %#tx\n"), start - section->start);
 
       SAFE_BYTE_GET_AND_INC (length, start, 4, end);
       if (length == 0xffffffff)
@@ -6964,7 +6964,7 @@ display_offset_entry_loclists (struct dwarf_section *section)
       SAFE_BYTE_GET_AND_INC (segment_selector_size, start, 1, end);
       SAFE_BYTE_GET_AND_INC (offset_entry_count, start, 4, end);
 
-      printf (_("  Length:          0x%" PRIx64 "\n"), length);
+      printf (_("  Length:          %#" PRIx64 "\n"), length);
       printf (_("  DWARF version:   %u\n"), version);
       printf (_("  Address size:    %u\n"), address_size);
       printf (_("  Segment size:    %u\n"), segment_selector_size);
@@ -6993,7 +6993,7 @@ display_offset_entry_loclists (struct dwarf_section *section)
 	  return 0;
 	}
 
-      printf (_("\n   Offset Entries starting at 0x%tx:\n"),
+      printf (_("\n   Offset Entries starting at %#tx:\n"),
 	      start - section->start);
 
       for (i = 0; i < offset_entry_count; i++)
@@ -7001,7 +7001,7 @@ display_offset_entry_loclists (struct dwarf_section *section)
 	  uint64_t entry;
 
 	  SAFE_BYTE_GET_AND_INC (entry, start, is_64bit ? 8 : 4, end);
-	  printf (_("    [%6u] 0x%" PRIx64 "\n"), i, entry);
+	  printf (_("    [%6u] %#" PRIx64 "\n"), i, entry);
 	}
 
       putchar ('\n');
@@ -7545,7 +7545,7 @@ display_debug_aranges (struct dwarf_section *section,
 
       printf (_("  Length:                   %" PRId64 "\n"), arange.ar_length);
       printf (_("  Version:                  %d\n"), arange.ar_version);
-      printf (_("  Offset into .debug_info:  0x%" PRIx64 "\n"),
+      printf (_("  Offset into .debug_info:  %#" PRIx64 "\n"),
 	      arange.ar_info_offset);
       printf (_("  Pointer Size:             %d\n"), arange.ar_pointer_size);
       printf (_("  Segment Size:             %d\n"), arange.ar_segment_size);
@@ -7588,7 +7588,7 @@ display_debug_aranges (struct dwarf_section *section,
 				 end_ranges);
 	  printf ("    ");
 	  print_hex (address, address_size);
-	  print_hex (length, address_size);
+	  print_hex_ns (length, address_size);
 	  putchar ('\n');
 	}
 
@@ -7667,7 +7667,7 @@ display_debug_addr (struct dwarf_section *section,
       unsigned int idx;
       unsigned int address_size = debug_addr_info [i]->pointer_size;
 
-      printf (_("  For compilation unit at offset 0x%" PRIx64 ":\n"),
+      printf (_("  For compilation unit at offset %#" PRIx64 ":\n"),
 	      debug_addr_info [i]->cu_offset);
 
       printf (_("\tIndex\tAddress\n"));
@@ -7709,7 +7709,7 @@ display_debug_addr (struct dwarf_section *section,
 	{
 	  uint64_t base = byte_get (entry, address_size);
 	  printf (_("\t%d:\t"), idx);
-	  print_hex (base, address_size);
+	  print_hex_ns (base, address_size);
 	  printf ("\n");
 	  entry += address_size;
 	  idx++;
@@ -7895,12 +7895,12 @@ display_debug_ranges_list (unsigned char *  start,
 	}
 
       print_hex (begin + base_address, pointer_size);
-      print_hex (end + base_address, pointer_size);
+      print_hex_ns (end + base_address, pointer_size);
 
       if (begin == end)
-	fputs (_("(start == end)"), stdout);
+	fputs (_(" (start == end)"), stdout);
       else if (begin > end)
-	fputs (_("(start > end)"), stdout);
+	fputs (_(" (start > end)"), stdout);
 
       putchar ('\n');
     }
@@ -8076,8 +8076,8 @@ display_debug_rnglists (struct dwarf_section *section)
       SAFE_BYTE_GET_AND_INC (segment_selector_size, start, 1, finish);
       SAFE_BYTE_GET_AND_INC (offset_entry_count, start, 4, finish);
 
-      printf (_(" Table at Offset: 0x%" PRIx64 ":\n"), offset);
-      printf (_("  Length:          0x%" PRIx64 "\n"), initial_length);
+      printf (_(" Table at Offset: %#" PRIx64 ":\n"), offset);
+      printf (_("  Length:          %#" PRIx64 "\n"), initial_length);
       printf (_("  DWARF version:   %u\n"), version);
       printf (_("  Address size:    %u\n"), address_size);
       printf (_("  Segment size:    %u\n"), segment_selector_size);
@@ -8103,7 +8103,7 @@ display_debug_rnglists (struct dwarf_section *section)
 
       if (offset_entry_count != 0)
 	{
-	  printf (_("\n   Offsets starting at 0x%tx:\n"),
+	  printf (_("\n   Offsets starting at %#tx:\n"),
 		  start - section->start);
 
 	  for (i = 0; i < offset_entry_count; i++)
@@ -8111,7 +8111,7 @@ display_debug_rnglists (struct dwarf_section *section)
 	      uint64_t entry;
 
 	      SAFE_BYTE_GET_AND_INC (entry, start, offset_size, finish);
-	      printf (_("    [%6u] 0x%" PRIx64 "\n"), i, entry);
+	      printf (_("    [%6u] %#" PRIx64 "\n"), i, entry);
 	    }
 	}
       else
@@ -8122,7 +8122,7 @@ display_debug_rnglists (struct dwarf_section *section)
 	  uint64_t indx = start - table_start;
 
 	  offset = start - section->start;
-	  printf (_("\n  Offset: %" PRIx64 ", Index: 0x%" PRIx64 "\n"),
+	  printf (_("\n  Offset: %#" PRIx64 ", Index: %#" PRIx64 "\n"),
 		  offset, indx);
 	  printf (_("    Offset   Begin    End\n"));
 	  start = display_debug_rnglists_list
@@ -10094,7 +10094,7 @@ display_debug_names (struct dwarf_section *section, void *file)
 	  uint64_t cu_offset;
 
 	  SAFE_BYTE_GET_AND_INC (cu_offset, hdrptr, offset_size, unit_end);
-	  printf ("[%3u] 0x%" PRIx64 "\n", i, cu_offset);
+	  printf ("[%3u] %#" PRIx64 "\n", i, cu_offset);
 	}
       putchar ('\n');
 
@@ -10107,7 +10107,7 @@ display_debug_names (struct dwarf_section *section, void *file)
 	  uint64_t tu_offset;
 
 	  SAFE_BYTE_GET_AND_INC (tu_offset, hdrptr, offset_size, unit_end);
-	  printf ("[%3u] 0x%" PRIx64 "\n", i, tu_offset);
+	  printf ("[%3u] %#" PRIx64 "\n", i, tu_offset);
 	}
       putchar ('\n');
 
@@ -10121,7 +10121,7 @@ display_debug_names (struct dwarf_section *section, void *file)
 
 	  SAFE_BYTE_GET_AND_INC (signature, hdrptr, 8, unit_end);
 	  printf (_("[%3u] "), i);
-	  print_hex (signature, 8);
+	  print_hex_ns (signature, 8);
 	  putchar ('\n');
 	}
       putchar ('\n');
@@ -10504,7 +10504,7 @@ display_gdb_index (struct dwarf_section *section,
       uint64_t cu_offset = byte_get_little_endian (cu_list + i * 16, 8);
       uint64_t cu_length = byte_get_little_endian (cu_list + i * 16 + 8, 8);
 
-      printf ("[%3u] 0x%" PRIx64 " - 0x%" PRIx64 "\n",
+      printf ("[%3u] %#" PRIx64 " - %#" PRIx64 "\n",
 	      i, cu_offset, cu_offset + cu_length - 1);
     }
 
@@ -10515,9 +10515,9 @@ display_gdb_index (struct dwarf_section *section,
       uint64_t type_offset = byte_get_little_endian (tu_list + i * 24 + 8, 8);
       uint64_t signature = byte_get_little_endian (tu_list + i * 24 + 16, 8);
 
-      printf ("[%3u] 0x%" PRIx64 " 0x%" PRIx64 " ",
+      printf ("[%3u] %#" PRIx64 " %#" PRIx64 " ",
 	      i, tu_offset, type_offset);
-      print_hex (signature, 8);
+      print_hex_ns (signature, 8);
       printf ("\n");
     }
 
@@ -10774,7 +10774,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 		}
 
 	      if (do_display)
-		printf (_("  [%3d] Signature:  0x%" PRIx64 "  Sections: "),
+		printf (_("  [%3d] Signature:  %#" PRIx64 "  Sections: "),
 			i, signature);
 	      for (;;)
 		{
@@ -10888,7 +10888,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 
 	      prow = poffsets + (row - 1) * ncols * 4;
 	      if (do_display)
-		printf ("  [%3d] 0x%" PRIx64, i, signature);
+		printf ("  [%3d] %#" PRIx64, i, signature);
 	      for (j = 0; j < ncols; j++)
 		{
 		  unsigned char *p = prow + j * 4;
@@ -10946,7 +10946,7 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 	      prow = psizes + (row - 1) * ncols * 4;
 
 	      if (do_display)
-		printf ("  [%3d] 0x%" PRIx64, i, signature);
+		printf ("  [%3d] %#" PRIx64, i, signature);
 
 	      for (j = 0; j < ncols; j++)
 		{

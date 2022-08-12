@@ -38,7 +38,7 @@ Contents of the .debug_info section:
 
 Contents of the .debug_abbrev section:
 
- +Number TAG \(0x0\)
+ +Number TAG \((0x)?0\)
  +1 +DW_TAG_compile_unit +\[has children\]
 #...
  +2 +DW_TAG_subprogram +\[no children\]
