@@ -268,7 +268,7 @@ typedef struct filedata
   const char *         file_name;
   bool                 is_separate;
   FILE *               handle;
-  bfd_size_type        file_size;
+  uint64_t             file_size;
   Elf_Internal_Ehdr    file_header;
   unsigned long        archive_file_offset;
   unsigned long        archive_file_size;
@@ -278,7 +278,7 @@ typedef struct filedata
   char *               string_table;
   unsigned long        string_table_length;
   unsigned long        dynamic_addr;
-  bfd_size_type        dynamic_size;
+  uint64_t             dynamic_size;
   size_t               dynamic_nent;
   Elf_Internal_Dyn *   dynamic_section;
   Elf_Internal_Shdr *  dynamic_strtab_section;
@@ -291,12 +291,12 @@ typedef struct filedata
   unsigned int         dynamic_syminfo_nent;
   Elf_Internal_Syminfo * dynamic_syminfo;
   unsigned long        dynamic_syminfo_offset;
-  bfd_size_type        nbuckets;
-  bfd_size_type        nchains;
+  uint64_t             nbuckets;
+  uint64_t             nchains;
   bfd_vma *            buckets;
   bfd_vma *            chains;
-  bfd_size_type        ngnubuckets;
-  bfd_size_type        ngnuchains;
+  uint64_t             ngnubuckets;
+  uint64_t             ngnuchains;
   bfd_vma *            gnubuckets;
   bfd_vma *            gnuchains;
   bfd_vma *            mipsxlat;
@@ -439,40 +439,32 @@ get_dynamic_name (const Filedata *filedata, size_t offset)
    message using REASON as part of the context.  */
 
 static void *
-get_data (void *         var,
-	  Filedata *     filedata,
-	  unsigned long  offset,
-	  bfd_size_type  size,
-	  bfd_size_type  nmemb,
-	  const char *   reason)
+get_data (void *var,
+	  Filedata *filedata,
+	  unsigned long offset,
+	  uint64_t size,
+	  uint64_t nmemb,
+	  const char *reason)
 {
   void * mvar;
-  bfd_size_type amt = size * nmemb;
+  uint64_t amt = size * nmemb;
 
   if (size == 0 || nmemb == 0)
     return NULL;
 
-  /* If the size_t type is smaller than the bfd_size_type, eg because
-     you are building a 32-bit tool on a 64-bit host, then make sure
-     that when the sizes are cast to (size_t) no information is lost.  */
+  /* If size_t is smaller than uint64_t, eg because you are building
+     on a 32-bit host, then make sure that when the sizes are cast to
+     size_t no information is lost.  */
   if ((size_t) size != size
       || (size_t) nmemb != nmemb
-      || (size_t) amt != amt)
-    {
-      if (reason)
-	error (_("Size truncation prevents reading %" PRIu64
-		 " elements of size %" PRIu64 " for %s\n"),
-	       (uint64_t) nmemb, (uint64_t) size, reason);
-      return NULL;
-    }
-
-  /* Check for size overflow.  */
-  if (amt / size != nmemb || (size_t) amt + 1 == 0)
+      || (size_t) amt != amt
+      || amt / size != nmemb
+      || (size_t) amt + 1 == 0)
     {
       if (reason)
 	error (_("Size overflow prevents reading %" PRIu64
 		 " elements of size %" PRIu64 " for %s\n"),
-	       (uint64_t) nmemb, (uint64_t) size, reason);
+	       nmemb, size, reason);
       return NULL;
     }
 
@@ -484,7 +476,7 @@ get_data (void *         var,
     {
       if (reason)
 	error (_("Reading %" PRIu64 " bytes extends past end of file for %s\n"),
-	       (uint64_t) amt, reason);
+	       amt, reason);
       return NULL;
     }
 
@@ -507,7 +499,7 @@ get_data (void *         var,
 	{
 	  if (reason)
 	    error (_("Out of memory allocating %" PRIu64 " bytes for %s\n"),
-		   (uint64_t) amt, reason);
+		   amt, reason);
 	  return NULL;
 	}
 
@@ -518,7 +510,7 @@ get_data (void *         var,
     {
       if (reason)
 	error (_("Unable to read in %" PRIu64 " bytes of %s\n"),
-	       (uint64_t) amt, reason);
+	       amt, reason);
       if (mvar != var)
 	free (mvar);
       return NULL;
@@ -2615,7 +2607,7 @@ static void
 locate_dynamic_section (Filedata *filedata)
 {
   unsigned long dynamic_addr = 0;
-  bfd_size_type dynamic_size = 0;
+  uint64_t dynamic_size = 0;
 
   if (filedata->file_header.e_phnum != 0
       && get_program_headers (filedata))
@@ -6045,7 +6037,7 @@ process_program_headers (Filedata * filedata)
     }
 
   unsigned long dynamic_addr = 0;
-  bfd_size_type dynamic_size = 0;
+  uint64_t dynamic_size = 0;
   for (i = 0, segment = filedata->program_headers;
        i < filedata->file_header.e_phnum;
        i++, segment++)
@@ -6293,7 +6285,7 @@ the .dynamic section is not the same as the dynamic segment\n"));
 /* Find the file offset corresponding to VMA by using the program headers.  */
 
 static long
-offset_from_vma (Filedata * filedata, bfd_vma vma, bfd_size_type size)
+offset_from_vma (Filedata * filedata, bfd_vma vma, uint64_t size)
 {
   Elf_Internal_Phdr * seg;
 
@@ -7028,7 +7020,8 @@ get_elf_section_flags (Filedata * filedata, bfd_vma sh_flags)
 }
 
 static unsigned int ATTRIBUTE_WARN_UNUSED_RESULT
-get_compression_header (Elf_Internal_Chdr *chdr, unsigned char *buf, bfd_size_type size)
+get_compression_header (Elf_Internal_Chdr *chdr, unsigned char *buf,
+			uint64_t size)
 {
   if (is_32bit_elf)
     {
@@ -7169,13 +7162,13 @@ process_section_headers (Filedata * filedata)
 #define CHECK_ENTSIZE_VALUES(section, i, size32, size64)		\
   do									\
     {									\
-      bfd_size_type expected_entsize = is_32bit_elf ? size32 : size64;	\
+      uint64_t expected_entsize = is_32bit_elf ? size32 : size64;	\
       if (section->sh_entsize != expected_entsize)			\
 	{								\
 	  error (_("Section %d has invalid sh_entsize of %" PRIx64 "\n"), \
 		 i, (uint64_t) section->sh_entsize);			\
 	  error (_("(Using the expected size of %" PRIx64 " for the rest of this dump)\n"), \
-		 (uint64_t) expected_entsize);				\
+		 expected_entsize);					\
 	  section->sh_entsize = expected_entsize;			\
 	}								\
     }									\
@@ -10920,20 +10913,20 @@ print_dynamic_flags (bfd_vma flags)
 }
 
 static bfd_vma *
-get_dynamic_data (Filedata * filedata, bfd_size_type number, unsigned int ent_size)
+get_dynamic_data (Filedata * filedata, uint64_t number, unsigned int ent_size)
 {
   unsigned char * e_data;
   bfd_vma * i_data;
 
-  /* If the size_t type is smaller than the bfd_size_type, eg because
-     you are building a 32-bit tool on a 64-bit host, then make sure
-     that when (number) is cast to (size_t) no information is lost.  */
-  if (sizeof (size_t) < sizeof (bfd_size_type)
-      && (bfd_size_type) ((size_t) number) != number)
+  /* If size_t is smaller than uint64_t, eg because you are building
+     on a 32-bit host, then make sure that when number is cast to
+     size_t no information is lost.  */
+  if ((size_t) number != number
+      || ent_size * number / ent_size != number)
     {
-      error (_("Size truncation prevents reading %" PRIu64
+      error (_("Size overflow prevents reading %" PRIu64
 	       " elements of size %u\n"),
-	     (uint64_t) number, ent_size);
+	     number, ent_size);
       return NULL;
     }
 
@@ -10942,7 +10935,7 @@ get_dynamic_data (Filedata * filedata, bfd_size_type number, unsigned int ent_si
   if (ent_size * number > filedata->file_size)
     {
       error (_("Invalid number of dynamic entries: %" PRIu64 "\n"),
-	     (uint64_t) number);
+	     number);
       return NULL;
     }
 
@@ -10950,14 +10943,14 @@ get_dynamic_data (Filedata * filedata, bfd_size_type number, unsigned int ent_si
   if (e_data == NULL)
     {
       error (_("Out of memory reading %" PRIu64 " dynamic entries\n"),
-	     (uint64_t) number);
+	     number);
       return NULL;
     }
 
   if (fread (e_data, ent_size, (size_t) number, filedata->handle) != number)
     {
       error (_("Unable to read in %" PRIu64 " bytes of dynamic data\n"),
-	     (uint64_t) number * ent_size);
+	     number * ent_size);
       free (e_data);
       return NULL;
     }
@@ -10966,7 +10959,7 @@ get_dynamic_data (Filedata * filedata, bfd_size_type number, unsigned int ent_si
   if (i_data == NULL)
     {
       error (_("Out of memory allocating space for %" PRIu64 " dynamic entries\n"),
-	     (uint64_t) number);
+	     number);
       free (e_data);
       return NULL;
     }
@@ -11348,7 +11341,7 @@ the .dynsym section doesn't match the DT_SYMTAB and DT_SYMENT tags\n"));
 	    && filedata->dynamic_info[DT_STRSZ])
 	  {
 	    unsigned long offset;
-	    bfd_size_type str_tab_len = filedata->dynamic_info[DT_STRSZ];
+	    uint64_t str_tab_len = filedata->dynamic_info[DT_STRSZ];
 
 	    offset = offset_from_vma (filedata,
 				      filedata->dynamic_info[DT_STRTAB],
@@ -14872,12 +14865,12 @@ reloc_at (struct dwarf_section * dsec, dwarf_vma offset)
    more relocations ?  */
 
 static bool
-apply_relocations (Filedata *                 filedata,
-		   const Elf_Internal_Shdr *  section,
-		   unsigned char *            start,
-		   bfd_size_type              size,
-		   void **                    relocs_return,
-		   unsigned long *            num_relocs_return)
+apply_relocations (Filedata *filedata,
+		   const Elf_Internal_Shdr *section,
+		   unsigned char *start,
+		   size_t size,
+		   void **relocs_return,
+		   unsigned long *num_relocs_return)
 {
   Elf_Internal_Shdr * relsec;
   unsigned char * end = start + size;
@@ -15139,7 +15132,7 @@ disassemble_section (Elf_Internal_Shdr * section, Filedata * filedata)
 static char *
 get_section_contents (Elf_Internal_Shdr * section, Filedata * filedata)
 {
-  bfd_size_type num_bytes = section->sh_size;
+  uint64_t num_bytes = section->sh_size;
 
   if (num_bytes == 0 || section->sh_type == SHT_NOBITS)
     {
@@ -15210,7 +15203,7 @@ static bool
 dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
 {
   Elf_Internal_Shdr *relsec;
-  bfd_size_type num_bytes;
+  uint64_t num_bytes;
   unsigned char *data;
   unsigned char *end;
   unsigned char *real_start;
@@ -15425,13 +15418,13 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
 		       Filedata *filedata,
 		       bool relocate)
 {
-  Elf_Internal_Shdr * relsec;
-  bfd_size_type       bytes;
-  bfd_size_type       section_size;
-  bfd_vma             addr;
-  unsigned char *     data;
-  unsigned char *     real_start;
-  unsigned char *     start;
+  Elf_Internal_Shdr *relsec;
+  size_t bytes;
+  uint64_t section_size;
+  bfd_vma addr;
+  unsigned char *data;
+  unsigned char *real_start;
+  unsigned char *start;
 
   real_start = start = (unsigned char *) get_section_contents (section, filedata);
   if (start == NULL)
@@ -16139,7 +16132,7 @@ display_debug_section (int shndx, Elf_Internal_Shdr * section, Filedata * fileda
   const char *name = (section_name_valid (filedata, section)
 		      ? section_name (filedata, section) : "");
   const char *print_name = printable_section_name (filedata, section);
-  bfd_size_type length;
+  uint64_t length;
   bool result = true;
   int i;
 
@@ -22167,7 +22160,7 @@ open_file (const char * pathname, bool is_separate)
   if (filedata->handle == NULL)
     goto fail;
 
-  filedata->file_size = (bfd_size_type) statbuf.st_size;
+  filedata->file_size = statbuf.st_size;
   filedata->file_name = pathname;
   filedata->is_separate = is_separate;
 
@@ -22727,7 +22720,7 @@ process_file (char * file_name)
       return false;
     }
 
-  filedata->file_size = (bfd_size_type) statbuf.st_size;
+  filedata->file_size = statbuf.st_size;
   filedata->is_separate = false;
 
   if (memcmp (armag, ARMAG, SARMAG) == 0)

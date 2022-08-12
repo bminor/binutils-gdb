@@ -5841,7 +5841,7 @@ display_debug_pubnames_worker (struct dwarf_section *section,
 
       while (1)
 	{
-	  bfd_size_type maxprint;
+	  size_t maxprint;
 	  dwarf_vma offset;
 
 	  SAFE_BYTE_GET_AND_INC (offset, data, offset_size, start);
@@ -8887,12 +8887,12 @@ frame_display_row (Frame_Chunk *fc, int *need_col_headers, unsigned int *max_reg
 static unsigned char *
 read_cie (unsigned char *start, unsigned char *end,
 	  Frame_Chunk **p_cie, int *p_version,
-	  bfd_size_type *p_aug_len, unsigned char **p_aug)
+	  dwarf_size_type *p_aug_len, unsigned char **p_aug)
 {
   int version;
   Frame_Chunk *fc;
   unsigned char *augmentation_data = NULL;
-  bfd_size_type augmentation_data_len = 0;
+  dwarf_size_type augmentation_data_len = 0;
 
   * p_cie = NULL;
   /* PR 17512: file: 001-228113-0.004.  */
@@ -8975,7 +8975,7 @@ read_cie (unsigned char *start, unsigned char *end,
       READ_ULEB (augmentation_data_len, start, end);
       augmentation_data = start;
       /* PR 17512: file: 11042-2589-0.004.  */
-      if (augmentation_data_len > (bfd_size_type) (end - start))
+      if (augmentation_data_len > (size_t) (end - start))
 	{
 	  warn (_("Augmentation data too long: 0x%s, expected at most %#lx\n"),
 		dwarf_vmatoa ("x", augmentation_data_len),
@@ -9038,9 +9038,7 @@ read_cie (unsigned char *start, unsigned char *end,
    output line.  */
 
 static void
-display_data (bfd_size_type          printed,
-	      const unsigned char *  data,
-	      const bfd_size_type    len)
+display_data (size_t printed, const unsigned char *data, size_t len)
 {
   if (do_wide || len < ((80 - printed) / 3))
     for (printed = 0; printed < len; ++printed)
@@ -9060,9 +9058,9 @@ display_data (bfd_size_type          printed,
    If do_wide is not enabled, then formats the output to fit into 80 columns.  */
 
 static void
-display_augmentation_data (const unsigned char * data, const bfd_size_type len)
+display_augmentation_data (const unsigned char * data, dwarf_size_type len)
 {
-  bfd_size_type i;
+  size_t i;
 
   i = printf (_("  Augmentation data:    "));
   display_data (i, data, len);
@@ -9095,7 +9093,7 @@ display_debug_frames (struct dwarf_section *section,
       Frame_Chunk *cie;
       int need_col_headers = 1;
       unsigned char *augmentation_data = NULL;
-      bfd_size_type augmentation_data_len = 0;
+      dwarf_size_type augmentation_data_len = 0;
       unsigned int encoded_ptr_size = saved_eh_addr_size;
       unsigned int offset_size;
       bool all_nops;
@@ -9348,7 +9346,7 @@ display_debug_frames (struct dwarf_section *section,
 	      READ_ULEB (augmentation_data_len, start, block_end);
 	      augmentation_data = start;
 	      /* PR 17512 file: 722-8446-0.004 and PR 22386.  */
-	      if (augmentation_data_len > (bfd_size_type) (block_end - start))
+	      if (augmentation_data_len > (size_t) (block_end - start))
 		{
 		  warn (_("Augmentation data too long: 0x%s, "
 			  "expected at most %#lx\n"),
@@ -10498,18 +10496,18 @@ display_debug_links (struct dwarf_section *  section,
     }
   else /* startswith (section->name, ".gnu_debugaltlink") */
     {
-      const unsigned char * build_id = section->start + filelen + 1;
-      bfd_size_type         build_id_len = section->size - (filelen + 1);
-      bfd_size_type         printed;
+      const unsigned char *build_id = section->start + filelen + 1;
+      size_t build_id_len = section->size - (filelen + 1);
+      size_t printed;
 
       /* FIXME: Should we support smaller build-id notes ?  */
       if (build_id_len < 0x14)
 	{
-	  warn (_("Build-ID is too short (%#lx bytes)\n"), (long) build_id_len);
+	  warn (_("Build-ID is too short (%#zx bytes)\n"), build_id_len);
 	  return 0;
 	}
 
-      printed = printf (_("  Build-ID (%#lx bytes):"), (long) build_id_len);
+      printed = printf (_("  Build-ID (%#zx bytes):"), build_id_len);
       display_data (printed, build_id, build_id_len);
       putchar ('\n');
     }
@@ -11236,9 +11234,9 @@ xcalloc2 (size_t nmemb, size_t size)
 }
 
 static unsigned long
-calc_gnu_debuglink_crc32 (unsigned long          crc,
-			  const unsigned char *  buf,
-			  bfd_size_type          len)
+calc_gnu_debuglink_crc32 (unsigned long crc,
+			  const unsigned char *buf,
+			  size_t len)
 {
   static const unsigned long crc32_table[256] =
     {
@@ -11309,11 +11307,11 @@ typedef const char *(* parse_func_type) (struct dwarf_section *, void *);
 static bool
 check_gnu_debuglink (const char * pathname, void * crc_pointer)
 {
-  static unsigned char buffer [8 * 1024];
-  FILE *         f;
-  bfd_size_type  count;
-  unsigned long  crc = 0;
-  void *         sep_data;
+  static unsigned char buffer[8 * 1024];
+  FILE *f;
+  size_t count;
+  unsigned long crc = 0;
+  void *sep_data;
 
   sep_data = open_debug_file (pathname);
   if (sep_data == NULL)
@@ -11383,17 +11381,17 @@ check_gnu_debugaltlink (const char * filename, void * data ATTRIBUTE_UNUSED)
 
 typedef struct build_id_data
 {
-  bfd_size_type          len;
-  const unsigned char *  data;
+  size_t len;
+  const unsigned char *data;
 } Build_id_data;
 
 static const char *
 parse_gnu_debugaltlink (struct dwarf_section * section, void * data)
 {
-  const char *     name;
-  bfd_size_type    namelen;
-  bfd_size_type    id_len;
-  Build_id_data *  build_id_data;
+  const char *name;
+  size_t namelen;
+  size_t id_len;
+  Build_id_data *build_id_data;
 
   /* The name is first.
      The build-id follows immediately, with no padding, up to the section's end.  */
