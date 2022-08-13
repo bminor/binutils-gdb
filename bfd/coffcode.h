@@ -4302,10 +4302,13 @@ coff_set_section_contents (bfd * abfd,
 
 	rec = (bfd_byte *) location;
 	recend = rec + count;
-	while (rec < recend)
+	while (recend - rec >= 4)
 	  {
+	    size_t len = bfd_get_32 (abfd, rec);
+	    if (len == 0 || len > (size_t) (recend - rec) / 4)
+	      break;
+	    rec += len * 4;
 	    ++section->lma;
-	    rec += bfd_get_32 (abfd, rec) * 4;
 	  }
 
 	BFD_ASSERT (rec == recend);
