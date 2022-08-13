@@ -4978,6 +4978,11 @@ som_set_reloc_info (unsigned char *fixup,
       /* Handle a request for a previous fixup.  */
       if (*fp->format == 'P')
 	{
+	  if (!reloc_queue[fp->D].reloc)
+	    /* The back-reference doesn't exist.  This is a broken
+	       object file, likely fuzzed.  Just ignore the fixup.  */
+	    continue;
+
 	  /* Get pointer to the beginning of the prev fixup, move
 	     the repeated fixup to the head of the queue.  */
 	  fixup = reloc_queue[fp->D].reloc;
