@@ -1172,8 +1172,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 	      gdb_printf (file, "\t");
 	      if (regnum != RISCV_CSR_FRM_REGNUM)
 		gdb_printf (file,
-			    "RD:%01X NV:%d DZ:%d OF:%d UF:%d NX:%d",
-			    (int) ((d >> 5) & 0x7),
+			    "NV:%d DZ:%d OF:%d UF:%d NX:%d",
 			    (int) ((d >> 4) & 0x1),
 			    (int) ((d >> 3) & 0x1),
 			    (int) ((d >> 2) & 0x1),
@@ -1184,17 +1183,20 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
 		{
 		  static const char * const sfrm[] =
 		    {
-		      "RNE (round to nearest; ties to even)",
-		      "RTZ (Round towards zero)",
-		      "RDN (Round down towards -INF)",
-		      "RUP (Round up towards +INF)",
-		      "RMM (Round to nearest; ties to max magnitude)",
-		      "INVALID[5]",
-		      "INVALID[6]",
-		      "dynamic rounding mode",
+		      _("RNE (round to nearest; ties to even)"),
+		      _("RTZ (Round towards zero)"),
+		      _("RDN (Round down towards -INF)"),
+		      _("RUP (Round up towards +INF)"),
+		      _("RMM (Round to nearest; ties to max magnitude)"),
+		      _("INVALID[5]"),
+		      _("INVALID[6]"),
+		      /* A value of 0x7 indicates dynamic rounding mode when
+			 used within an instructions rounding-mode field, but
+			 is invalid within the FRM register.  */
+		      _("INVALID[7] (Dynamic rounding mode)"),
 		    };
 		  int frm = ((regnum == RISCV_CSR_FCSR_REGNUM)
-			     ? (d >> 5) : d) & 0x3;
+			     ? (d >> 5) : d) & 0x7;
 
 		  gdb_printf (file, "%sFRM:%i [%s]",
 			      (regnum == RISCV_CSR_FCSR_REGNUM
