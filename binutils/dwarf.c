@@ -3509,6 +3509,21 @@ introduce (struct dwarf_section * section, bool raw)
     }
 }
 
+/* Free memory allocated for one unit in debug_information.  */
+
+static void
+free_debug_information (debug_info *ent)
+{
+  if (ent->max_loc_offsets)
+    {
+      free (ent->loc_offsets);
+      free (ent->loc_views);
+      free (ent->have_frame_base);
+    }
+  if (ent->max_range_lists)
+    free (ent->range_lists);
+}
+
 /* Process the contents of a .debug_info section.
    If do_loc is TRUE then we are scanning for location lists and dwo tags
    and we do not want to display anything to the user.
@@ -3805,25 +3820,14 @@ process_debug_info (struct dwarf_section * section,
 	  && alloc_num_debug_info_entries > unit
 	  && ! do_types)
 	{
-	  debug_information [unit].cu_offset = cu_offset;
-	  debug_information [unit].pointer_size
-	    = compunit.cu_pointer_size;
-	  debug_information [unit].offset_size = offset_size;
-	  debug_information [unit].dwarf_version = compunit.cu_version;
-	  debug_information [unit].base_address = 0;
-	  debug_information [unit].addr_base = DEBUG_INFO_UNAVAILABLE;
-	  debug_information [unit].ranges_base = DEBUG_INFO_UNAVAILABLE;
-	  debug_information [unit].rnglists_base = 0;
-	  debug_information [unit].loc_offsets = NULL;
-	  debug_information [unit].have_frame_base = NULL;
-	  debug_information [unit].max_loc_offsets = 0;
-	  debug_information [unit].num_loc_offsets = 0;
-	  debug_information [unit].loclists_base = 0;
-	  debug_information [unit].range_lists = NULL;
-	  debug_information [unit].max_range_lists= 0;
-	  debug_information [unit].num_range_lists = 0;
-	  debug_information [unit].rnglists_base = 0;
-	  debug_information [unit].str_offsets_base = 0;
+	  free_debug_information (&debug_information[unit]);
+	  memset (&debug_information[unit], 0, sizeof (*debug_information));
+	  debug_information[unit].pointer_size = compunit.cu_pointer_size;
+	  debug_information[unit].offset_size = offset_size;
+	  debug_information[unit].dwarf_version = compunit.cu_version;
+	  debug_information[unit].cu_offset = cu_offset;
+	  debug_information[unit].addr_base = DEBUG_INFO_UNAVAILABLE;
+	  debug_information[unit].ranges_base = DEBUG_INFO_UNAVAILABLE;
 	}
 
       if (!do_loc && dwarf_start_die == 0)
@@ -12021,15 +12025,7 @@ free_debug_memory (void)
   if (debug_information != NULL)
     {
       for (i = 0; i < alloc_num_debug_info_entries; i++)
-	{
-	  if (debug_information [i].max_loc_offsets)
-	    {
-	      free (debug_information [i].loc_offsets);
-	      free (debug_information [i].have_frame_base);
-	    }
-	  if (debug_information [i].max_range_lists)
-	    free (debug_information [i].range_lists);
-	}
+	free_debug_information (&debug_information[i]);
       free (debug_information);
       debug_information = NULL;
       alloc_num_debug_info_entries = num_debug_info_entries = 0;

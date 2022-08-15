@@ -1048,6 +1048,20 @@ create_symbol_htabs (void)
   redefine_specific_reverse_htab = create_symbol_htab ();
 }
 
+static void
+delete_symbol_htabs (void)
+{
+  htab_delete (strip_specific_htab);
+  htab_delete (strip_unneeded_htab);
+  htab_delete (keep_specific_htab);
+  htab_delete (localize_specific_htab);
+  htab_delete (globalize_specific_htab);
+  htab_delete (keepglobal_specific_htab);
+  htab_delete (weaken_specific_htab);
+  htab_delete (redefine_specific_htab);
+  htab_delete (redefine_specific_reverse_htab);
+}
+
 /* Add a symbol to strip_specific_list.  */
 
 static void
@@ -3736,6 +3750,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
   }
 
   rmdir (dir);
+  free (dir);
 }
 
 static void
@@ -6016,6 +6031,7 @@ main (int argc, char *argv[])
     }
 
   create_symbol_htabs ();
+  xatexit (delete_symbol_htabs);
 
   if (argv != NULL)
     bfd_set_error_program_name (argv[0]);

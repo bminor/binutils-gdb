@@ -4108,6 +4108,9 @@ free_debug_section (enum dwarf_section_display_enum debug)
   section->start = NULL;
   section->address = 0;
   section->size = 0;
+  free ((char*) section->reloc_info);
+  section->reloc_info = NULL;
+  section->num_relocs= 0;
 }
 
 void
