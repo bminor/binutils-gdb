@@ -511,7 +511,7 @@ relevant stream.
 @end defun
 
 @findex gdb.flush
-@defun gdb.flush ()
+@defun gdb.flush (@r{[}, stream@r{]})
 Flush the buffer of a @value{GDBN} paginated stream so that the
 contents are displayed immediately.  @value{GDBN} will flush the
 contents of a stream automatically when it encounters a newline in the
