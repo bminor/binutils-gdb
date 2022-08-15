@@ -353,6 +353,51 @@ csky_linux_rt_sigreturn_tramp_frame = {
   csky_linux_rt_sigreturn_init
 };
 
+static void
+csky_linux_rt_sigreturn_init_pt_regs (const struct tramp_frame *self,
+				      struct frame_info *this_frame,
+				      struct trad_frame_cache *this_cache,
+				      CORE_ADDR func)
+{
+  int i;
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, CSKY_SP_REGNUM);
+
+  CORE_ADDR base = sp + CSKY_SIGINFO_OFFSET + CSKY_SIGINFO_SIZE
+		   + CSKY_UCONTEXT_SIGCONTEXT
+		   + CSKY_SIGCONTEXT_PT_REGS_TLS;
+
+  /* LR */
+  trad_frame_set_reg_addr (this_cache, CSKY_R15_REGNUM, base);
+
+  /* PC */
+  trad_frame_set_reg_addr (this_cache, CSKY_PC_REGNUM, base + 4);
+
+  /* PSR */
+  trad_frame_set_reg_addr (this_cache, CSKY_CR0_REGNUM, base + 8);
+
+  /* SP */
+  trad_frame_set_reg_addr (this_cache, CSKY_SP_REGNUM, base + 12);
+
+  /* Set addrs of R0 ~ R13.  */
+  for (i = 0; i < 14; i++)
+    trad_frame_set_reg_addr (this_cache, i, base + i * 4 + 20);
+
+  trad_frame_set_id (this_cache, frame_id_build (sp, func));
+}
+
+
+static struct tramp_frame
+csky_linux_rt_sigreturn_tramp_frame_kernel_4x = {
+  SIGTRAMP_FRAME,
+  4,
+  {
+    { CSKY_MOVI_R7_139, ULONGEST_MAX },
+    { CSKY_TRAP_0, ULONGEST_MAX },
+    { TRAMP_SENTINEL_INSN }
+  },
+  csky_linux_rt_sigreturn_init_pt_regs
+};
+
 /* Hook function for gdbarch_register_osabi.  */
 
 static void
@@ -378,6 +423,8 @@ csky_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   tramp_frame_prepend_unwinder (gdbarch,
 				&csky_linux_rt_sigreturn_tramp_frame);
+  tramp_frame_prepend_unwinder (gdbarch,
+				&csky_linux_rt_sigreturn_tramp_frame_kernel_4x);
 }
 
 void _initialize_csky_linux_tdep ();

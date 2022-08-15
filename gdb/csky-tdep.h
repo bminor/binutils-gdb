@@ -379,4 +379,10 @@ enum csky_regnum
 #define CSKY_MOVI_R7_173 0x00adea07
 #define CSKY_TRAP_0 0x2020c000
 
+/* Sizeof (tls) */
+#define CSKY_SIGCONTEXT_PT_REGS_TLS  4
+
+/* Macro for kernel 4.x  */
+#define CSKY_MOVI_R7_139 0x008bea07
+
 #endif
