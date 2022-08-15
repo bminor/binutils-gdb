@@ -39,6 +39,9 @@ class _GdbFile(object):
     encoding = "UTF-8"
     errors = "strict"
 
+    def __init__(self, stream):
+        self.stream = stream
+
     def close(self):
         # Do nothing.
         return None
@@ -51,23 +54,15 @@ class _GdbFile(object):
             self.write(line)
 
     def flush(self):
-        flush()
+        flush(stream=self.stream)
 
-
-class _GdbOutputFile(_GdbFile):
     def write(self, s):
-        write(s, stream=STDOUT)
+        write(s, stream=self.stream)
 
 
-sys.stdout = _GdbOutputFile()
+sys.stdout = _GdbFile(STDOUT)
 
-
-class _GdbOutputErrorFile(_GdbFile):
-    def write(self, s):
-        write(s, stream=STDERR)
-
-
-sys.stderr = _GdbOutputErrorFile()
+sys.stderr = _GdbFile(STDERR)
 
 # Default prompt hook does nothing.
 prompt_hook = None

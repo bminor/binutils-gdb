@@ -297,8 +297,8 @@ with_test_prefix "test decode_line" {
 }
 
 # gdb.write
-gdb_test "python print (sys.stderr)" ".*gdb._GdbOutputErrorFile (instance|object) at.*" "test stderr location"
-gdb_test "python print (sys.stdout)" ".*gdb._GdbOutputFile (instance|object) at.*" "test stdout location"
+gdb_test "python print (sys.stderr)" ".*gdb._GdbFile (instance|object) at.*" "test stderr location"
+gdb_test "python print (sys.stdout)" ".*gdb._GdbFile (instance|object) at.*" "test stdout location"
 gdb_test "python gdb.write(\"Foo\\n\")" "Foo" "test default write"
 gdb_test "python gdb.write(\"Error stream\\n\", stream=gdb.STDERR)" "Error stream" "test stderr write"
 gdb_test "python gdb.write(\"Normal stream\\n\", stream=gdb.STDOUT)" "Normal stream" "test stdout write"
