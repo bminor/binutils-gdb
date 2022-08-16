@@ -40142,6 +40142,23 @@ The program being debugged stopped while in a function called from GDB.
 
 Takes an optional file parameter.
 
+@kindex maint print frame-id
+@item maint print frame-id
+@itemx maint print frame-id @var{level}
+Print @value{GDBN}'s internal frame-id for the frame at relative
+@var{level}, or for the currently selected frame when @var{level} is
+not given.
+
+If used, @var{level} should be an integer, as displayed in the
+@command{backtrace} output.
+
+@smallexample
+(@value{GDBP}) maint print frame-id
+frame-id for frame #0: @{stack=0x7fffffffac70,code=0x0000000000401106,!special@}
+(@value{GDBP}) maint print frame-id 2
+frame-id for frame #2: @{stack=0x7fffffffac90,code=0x000000000040111c,!special@}
+@end smallexample
+
 @kindex maint print registers
 @kindex maint print raw-registers
 @kindex maint print cooked-registers

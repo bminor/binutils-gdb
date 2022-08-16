@@ -3116,6 +3116,30 @@ the rest of the stack trace."),
   },
 };
 
+/* Implement the 'maintenance print frame-id' command.  */
+
+static void
+maintenance_print_frame_id (const char *args, int from_tty)
+{
+  struct frame_info *frame;
+
+  /* Use the currently selected frame, or select a frame based on the level
+     number passed by the user.  */
+  if (args == nullptr)
+    frame = get_selected_frame ("No frame selected");
+  else
+    {
+      int level = value_as_long (parse_and_eval (args));
+      frame = find_relative_frame (get_current_frame (), &level);
+    }
+
+  /* Print the frame-id.  */
+  gdb_assert (frame != nullptr);
+  gdb_printf ("frame-id for frame #%d: %s\n",
+	      frame_relative_level (frame),
+	      get_frame_id (frame).to_string ().c_str ());
+}
+
 void _initialize_frame ();
 void
 _initialize_frame ()
@@ -3160,4 +3184,8 @@ When non-zero, frame specific internal debugging is enabled."),
 			   NULL,
 			   show_frame_debug,
 			   &setdebuglist, &showdebuglist);
+
+  add_cmd ("frame-id", class_maintenance, maintenance_print_frame_id,
+	   _("Print the current frame-id."),
+	   &maintenanceprintlist);
 }

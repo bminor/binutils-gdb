@@ -93,6 +93,10 @@ show style disassembler symbol
   The 'disassembler address' and 'disassembler symbol' styles are
   aliases for the 'address' and 'function' styles respectively.
 
+maintenance print frame-id [ LEVEL ]
+  Print GDB's internal frame-id for the frame at LEVEL.  If LEVEL is
+  not given, then print the frame-id for the currently selected frame.
+
 * Changed commands
 
 maintenance info line-table
