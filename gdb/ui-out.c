@@ -900,14 +900,12 @@ buffered_streams::buffered_streams (buffer_group *group, ui_out *uiout)
     m_buffered_stderr (group, gdb_stderr),
     m_buffered_stdlog (group, gdb_stdlog),
     m_buffered_stdtarg (group, gdb_stdtarg),
-    m_buffered_stdtargerr (group, gdb_stdtargerr),
     m_uiout (uiout)
 {
   gdb_stdout = &m_buffered_stdout;
   gdb_stderr = &m_buffered_stderr;
   gdb_stdlog = &m_buffered_stdlog;
   gdb_stdtarg = &m_buffered_stdtarg;
-  gdb_stdtargerr = &m_buffered_stdtargerr;
 
   ui_file *stream = current_uiout->current_stream ();
   if (stream != nullptr)
@@ -940,7 +938,6 @@ buffered_streams::remove_buffers ()
   gdb_stderr = m_buffered_stderr.stream ();
   gdb_stdlog = m_buffered_stdlog.stream ();
   gdb_stdtarg = m_buffered_stdtarg.stream ();
-  gdb_stdtargerr = m_buffered_stdtargerr.stream ();
 
   if (m_buffered_current_uiout.has_value ())
     current_uiout->redirect (nullptr);

@@ -641,7 +641,7 @@ remote_fileio_func_write (remote_target *remote, char *buf)
 	return;
       case FIO_FD_CONSOLE_OUT:
 	{
-	  ui_file *file = target_fd == 1 ? gdb_stdtarg : gdb_stdtargerr;
+	  ui_file *file = gdb_stdtarg;
 	  file->write ((char *) buffer, length);
 	  file->flush ();
 	  ret = length;

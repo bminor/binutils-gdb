@@ -380,7 +380,7 @@ gdb_os_write_stderr (host_callback *p, const char *buf, int len)
     {
       b[0] = buf[i];
       b[1] = 0;
-      gdb_stdtargerr->puts (b);
+      gdb_stdtarg->puts (b);
     }
   return len;
 }
@@ -390,7 +390,7 @@ gdb_os_write_stderr (host_callback *p, const char *buf, int len)
 static void
 gdb_os_flush_stderr (host_callback *p)
 {
-  gdb_stdtargerr->flush ();
+  gdb_stdtarg->flush ();
 }
 
 /* GDB version of gdb_printf callback.  */

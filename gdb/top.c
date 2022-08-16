@@ -620,8 +620,6 @@ execute_fn_to_ui_file (struct ui_file *file, std::function<void(void)> fn)
       = make_scoped_restore (&gdb_stdlog, file);
     scoped_restore save_stdtarg
       = make_scoped_restore (&gdb_stdtarg, file);
-    scoped_restore save_stdtargerr
-      = make_scoped_restore (&gdb_stdtargerr, file);
 
     fn ();
   }

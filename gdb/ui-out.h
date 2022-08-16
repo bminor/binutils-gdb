@@ -645,7 +645,6 @@ private:
   buffering_file m_buffered_stderr;
   buffering_file m_buffered_stdlog;
   buffering_file m_buffered_stdtarg;
-  buffering_file m_buffered_stdtargerr;
 
   /* Buffer for current_uiout's output stream.  */
   std::optional<buffering_file> m_buffered_current_uiout;

@@ -50,7 +50,6 @@ private:
     ui_file *err;
     ui_file *log;
     ui_file *targ;
-    ui_file *targerr;
     /* When redirecting, some or all of these may be non-null
        depending on the logging mode.  */
     ui_file_up stdout_holder;

@@ -273,7 +273,6 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
       m_saved_output->err = gdb_stderr;
       m_saved_output->log = gdb_stdlog;
       m_saved_output->targ = gdb_stdtarg;
-      m_saved_output->targerr = gdb_stdtargerr;
 
       ui_file *logfile_p = logfile.get ();
       m_saved_output->logfile_holder = std::move (logfile);
@@ -299,7 +298,6 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
       gdb_stdlog = m_saved_output->stdlog_holder.get ();
       gdb_stderr = new_stderr;
       gdb_stdtarg = new_stderr;
-      gdb_stdtargerr = new_stderr;
     }
   else
     {
@@ -307,7 +305,6 @@ cli_interp_base::set_logging (ui_file_up logfile, bool logging_redirect,
       gdb_stderr = m_saved_output->err;
       gdb_stdlog = m_saved_output->log;
       gdb_stdtarg = m_saved_output->targ;
-      gdb_stdtargerr = m_saved_output->targerr;
 
       m_saved_output.reset (nullptr);
     }
