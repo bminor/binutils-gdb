@@ -34,10 +34,6 @@ public:
   bool supports_command_editing () override;
 };
 
-extern int cli_interpreter_supports_command_editing (struct interp *interp);
-
-extern void cli_interpreter_pre_command_loop (struct interp *self);
-
 /* Returns true if the current stop should be printed to
    CONSOLE_INTERP.  */
 extern int should_print_stop_to_console (struct interp *interp,
