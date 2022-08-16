@@ -6886,6 +6886,66 @@ _bfd_elf_symbol_from_bfd_symbol (bfd *abfd, asymbol **asym_ptr_ptr)
   return idx;
 }
 
+static inline bfd_vma
+segment_size (Elf_Internal_Phdr *segment)
+{
+  return (segment->p_memsz > segment->p_filesz
+	  ? segment->p_memsz : segment->p_filesz);
+}
+
+
+/* Returns the end address of the segment + 1.  */
+static inline bfd_vma
+segment_end (Elf_Internal_Phdr *segment, bfd_vma start)
+{
+  return start + segment_size (segment);
+}
+
+static inline bfd_size_type
+section_size (asection *section, Elf_Internal_Phdr *segment)
+{
+  if ((section->flags & SEC_HAS_CONTENTS) != 0
+      || (section->flags & SEC_THREAD_LOCAL) == 0
+      || segment->p_type == PT_TLS)
+    return section->size;
+  return 0;
+}
+
+/* Returns TRUE if the given section is contained within the given
+   segment.  LMA addresses are compared against PADDR when
+   bed->want_p_paddr_set_to_zero is false, VMA against VADDR when true.  */
+static bool
+is_contained_by (asection *section, Elf_Internal_Phdr *segment,
+		 bfd_vma paddr, bfd_vma vaddr, unsigned int opb,
+		 const struct elf_backend_data *bed)
+{
+  bfd_vma seg_addr = !bed->want_p_paddr_set_to_zero ? paddr : vaddr;
+  bfd_vma addr = !bed->want_p_paddr_set_to_zero ? section->lma : section->vma;
+  bfd_vma octet;
+  if (_bfd_mul_overflow (addr, opb, &octet))
+    return false;
+  /* The third and fourth lines below are testing that the section end
+     address is within the segment.  It's written this way to avoid
+     overflow.  Add seg_addr + section_size to both sides of the
+     inequality to make it obvious.  */
+  return (octet >= seg_addr
+	  && segment_size (segment) >= section_size (section, segment)
+	  && (octet - seg_addr
+	      <= segment_size (segment) - section_size (section, segment)));
+}
+
+/* Handle PT_NOTE segment.  */
+static bool
+is_note (Elf_Internal_Phdr *p, asection *s)
+{
+  return (p->p_type == PT_NOTE
+	  && elf_section_type (s) == SHT_NOTE
+	  && (ufile_ptr) s->filepos >= p->p_offset
+	  && p->p_filesz >= s->size
+	  && ((ufile_ptr) s->filepos - p->p_offset
+	      <= p->p_filesz - s->size));
+}
+
 /* Rewrite program header information.  */
 
 static bool
@@ -6913,47 +6973,6 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
   pointer_to_map = &map_first;
 
   num_segments = elf_elfheader (ibfd)->e_phnum;
-
-  /* Returns the end address of the segment + 1.  */
-#define SEGMENT_END(segment, start)					\
-  (start + (segment->p_memsz > segment->p_filesz			\
-	    ? segment->p_memsz : segment->p_filesz))
-
-#define SECTION_SIZE(section, segment)					\
-  (((section->flags & (SEC_HAS_CONTENTS | SEC_THREAD_LOCAL))		\
-    != SEC_THREAD_LOCAL || segment->p_type == PT_TLS)			\
-   ? section->size : 0)
-
-  /* Returns TRUE if the given section is contained within
-     the given segment.  VMA addresses are compared.  */
-#define IS_CONTAINED_BY_VMA(section, segment, opb)			\
-  (section->vma * (opb) >= segment->p_vaddr				\
-   && (section->vma * (opb) + SECTION_SIZE (section, segment)		\
-       <= (SEGMENT_END (segment, segment->p_vaddr))))
-
-  /* Returns TRUE if the given section is contained within
-     the given segment.  LMA addresses are compared.  */
-#define IS_CONTAINED_BY_LMA(section, segment, base, opb)		\
-  (section->lma * (opb) >= base						\
-   && (section->lma + SECTION_SIZE (section, segment) / (opb) >= section->lma) \
-   && (section->lma * (opb) + SECTION_SIZE (section, segment)		\
-       <= SEGMENT_END (segment, base)))
-
-  /* Handle PT_NOTE segment.  */
-#define IS_NOTE(p, s)							\
-  (p->p_type == PT_NOTE							\
-   && elf_section_type (s) == SHT_NOTE					\
-   && (bfd_vma) s->filepos >= p->p_offset				\
-   && ((bfd_vma) s->filepos + s->size					\
-       <= p->p_offset + p->p_filesz))
-
-  /* Special case: corefile "NOTE" section containing regs, prpsinfo
-     etc.  */
-#define IS_COREFILE_NOTE(p, s)						\
-  (IS_NOTE (p, s)							\
-   && bfd_get_format (ibfd) == bfd_core					\
-   && s->vma == 0							\
-   && s->lma == 0)
 
   /* The complicated case when p_vaddr is 0 is to handle the Solaris
      linker, which generates a PT_INTERP section with p_vaddr and
@@ -6983,11 +7002,10 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
        8. PT_DYNAMIC should not contain empty sections at the beginning
 	  (with the possible exception of .dynamic).  */
 #define IS_SECTION_IN_INPUT_SEGMENT(section, segment, bed, opb)		\
-  ((((segment->p_paddr							\
-      ? IS_CONTAINED_BY_LMA (section, segment, segment->p_paddr, opb)	\
-      : IS_CONTAINED_BY_VMA (section, segment, opb))			\
+  (((is_contained_by (section, segment, segment->p_paddr,		\
+		      segment->p_vaddr, opb, bed)			\
      && (section->flags & SEC_ALLOC) != 0)				\
-    || IS_NOTE (segment, section))					\
+    || is_note (segment, section))					\
    && segment->p_type != PT_GNU_STACK					\
    && (segment->p_type != PT_TLS					\
        || (section->flags & SEC_THREAD_LOCAL))				\
@@ -6995,7 +7013,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
        || segment->p_type == PT_TLS					\
        || (section->flags & SEC_THREAD_LOCAL) == 0)			\
    && (segment->p_type != PT_DYNAMIC					\
-       || SECTION_SIZE (section, segment) > 0				\
+       || section_size (section, segment) > 0				\
        || (segment->p_paddr						\
 	   ? segment->p_paddr != section->lma * (opb)			\
 	   : segment->p_vaddr != section->vma * (opb))			\
@@ -7010,7 +7028,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
 
   /* Returns TRUE iff seg1 starts after the end of seg2.  */
 #define SEGMENT_AFTER_SEGMENT(seg1, seg2, field)			\
-  (seg1->field >= SEGMENT_END (seg2, seg2->field))
+  (seg1->field >= segment_end (seg2, seg2->field))
 
   /* Returns TRUE iff seg1 and seg2 overlap. Segments overlap iff both
      their VMA address ranges and their LMA address ranges overlap.
@@ -7090,8 +7108,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
 	    {
 	      /* Extend SEGMENT2 to include SEGMENT and then delete
 		 SEGMENT.  */
-	      extra_length = (SEGMENT_END (segment, segment->p_vaddr)
-			      - SEGMENT_END (segment2, segment2->p_vaddr));
+	      extra_length = (segment_end (segment, segment->p_vaddr)
+			      - segment_end (segment2, segment2->p_vaddr));
 
 	      if (extra_length > 0)
 		{
@@ -7110,8 +7128,8 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
 	    {
 	      /* Extend SEGMENT to include SEGMENT2 and then delete
 		 SEGMENT2.  */
-	      extra_length = (SEGMENT_END (segment2, segment2->p_vaddr)
-			      - SEGMENT_END (segment, segment->p_vaddr));
+	      extra_length = (segment_end (segment2, segment2->p_vaddr)
+			      - segment_end (segment, segment->p_vaddr));
 
 	      if (extra_length > 0)
 		{
@@ -7311,11 +7329,9 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
 
 	      /* Match up the physical address of the segment with the
 		 LMA address of the output section.  */
-	      if (IS_CONTAINED_BY_LMA (output_section, segment, map->p_paddr,
-				       opb)
-		  || IS_COREFILE_NOTE (segment, section)
-		  || (bed->want_p_paddr_set_to_zero
-		      && IS_CONTAINED_BY_VMA (output_section, segment, opb)))
+	      if (is_contained_by (output_section, segment, map->p_paddr,
+				   map->p_paddr + map->p_vaddr_offset, opb, bed)
+		  || is_note (segment, section))
 		{
 		  if (matching_lma == NULL
 		      || output_section->lma < matching_lma->lma)
@@ -7431,9 +7447,9 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
 
 	      BFD_ASSERT (output_section != NULL);
 
-	      if (IS_CONTAINED_BY_LMA (output_section, segment, map->p_paddr,
-				       opb)
-		  || IS_COREFILE_NOTE (segment, section))
+	      if (is_contained_by (output_section, segment, map->p_paddr,
+				   map->p_paddr + map->p_vaddr_offset, opb, bed)
+		  || is_note (segment, section))
 		{
 		  if (map->count == 0)
 		    {
@@ -7556,12 +7572,6 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd, bfd_vma maxpagesize)
 	  }
     }
 
-#undef SEGMENT_END
-#undef SECTION_SIZE
-#undef IS_CONTAINED_BY_VMA
-#undef IS_CONTAINED_BY_LMA
-#undef IS_NOTE
-#undef IS_COREFILE_NOTE
 #undef IS_SOLARIS_PT_INTERP
 #undef IS_SECTION_IN_INPUT_SEGMENT
 #undef INCLUDE_SECTION_IN_SEGMENT
