@@ -354,14 +354,6 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
 
 	  regs[rd] = pv_subtract (regs[rn], regs[rm]);
 	}
-      else if (inst.opcode->iclass == pcreladdr
-	       && inst.operands[1].type == AARCH64_OPND_ADDR_ADRP)
-	{
-	  gdb_assert (aarch64_num_of_operands (inst.opcode) == 2);
-	  gdb_assert (inst.operands[0].type == AARCH64_OPND_Rd);
-
-	  regs[inst.operands[0].reg.regno] = pv_unknown ();
-	}
       else if (inst.opcode->iclass == branch_imm)
 	{
 	  /* Stop analysis on branch.  */
