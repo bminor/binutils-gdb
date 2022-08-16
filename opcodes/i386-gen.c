@@ -822,13 +822,13 @@ struct template_param {
 };
 
 struct template {
-  const struct template *next;
+  struct template *next;
   const char *name;
   const struct template_instance *instances;
   const struct template_param *params;
 };
 
-static const struct template *templates;
+static struct template *templates;
 
 static int
 compare (const void *x, const void *y)
@@ -1509,18 +1509,40 @@ static void
 parse_template (char *buf, int lineno)
 {
   char sep, *end, *name;
-  struct template *tmpl = xmalloc (sizeof (*tmpl));
+  struct template *tmpl;
   struct template_instance *last_inst = NULL;
 
   buf = remove_leading_whitespaces (buf + 1);
   end = strchr (buf, ':');
   if (end == NULL)
-    fail ("%s: %d: missing ':'\n", filename, lineno);
+    {
+      struct template *prev = NULL;
+
+      end = strchr (buf, '>');
+      if (end == NULL)
+	fail ("%s: %d: missing ':' or '>'\n", filename, lineno);
+      if (*remove_leading_whitespaces (end + 1))
+	fail ("%s: %d: malformed template purge\n", filename, lineno);
+      *end = '\0';
+      remove_trailing_whitespaces (buf);
+      /* Don't bother freeing the various structures.  */
+      for (tmpl = templates; tmpl != NULL; tmpl = (prev = tmpl)->next)
+	if (!strcmp (buf, tmpl->name))
+	  break;
+      if (tmpl == NULL)
+	fail ("%s: %d: no template '%s'\n", filename, lineno, buf);
+      if (prev)
+	prev->next = tmpl->next;
+      else
+	templates = tmpl->next;
+      return;
+    }
   *end++ = '\0';
   remove_trailing_whitespaces (buf);
 
   if (*buf == '\0')
     fail ("%s: %d: missing template identifier\n", filename, lineno);
+  tmpl = xmalloc (sizeof (*tmpl));
   tmpl->name = xstrdup (buf);
 
   tmpl->params = NULL;
