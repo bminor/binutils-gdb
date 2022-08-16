@@ -1147,7 +1147,7 @@ captured_main_1 (struct captured_main_args *context)
 
   /* Install the default UI.  All the interpreters should have had a
      look at things by now.  Initialize the default interpreter.  */
-  set_top_level_interpreter (interpreter_p.c_str ());
+  set_top_level_interpreter (interpreter_p.c_str (), false);
 
   /* The interpreter should have installed the real uiout by now.  */
   gdb_assert (current_uiout != temp_uiout.get ());

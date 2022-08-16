@@ -187,13 +187,16 @@ interp_lookup (struct ui *ui, const char *name)
 /* See interps.h.  */
 
 void
-set_top_level_interpreter (const char *name)
+set_top_level_interpreter (const char *name, bool for_new_ui)
 {
   /* Find it.  */
   struct interp *interp = interp_lookup (current_ui, name);
 
   if (interp == NULL)
     error (_("Interpreter `%s' unrecognized"), name);
+  if (for_new_ui && !interp->supports_new_ui ())
+    error (_("interpreter '%s' cannot be used with a new UI"), name);
+
   /* Install it.  */
   interp_set (interp, true);
 }

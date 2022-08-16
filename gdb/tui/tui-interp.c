@@ -50,6 +50,9 @@ public:
   void suspend () override;
   void exec (const char *command_str) override;
   ui_out *interp_ui_out () override;
+
+  bool supports_new_ui () const override
+  { return false; }
 };
 
 /* Cleanup the tui before exiting.  */

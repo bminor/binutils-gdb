@@ -62,6 +62,9 @@ public:
 
   void pre_command_loop () override;
 
+  bool supports_new_ui () const override
+  { return false; }
+
 private:
 
   std::unique_ptr<ui_out> m_ui_out;

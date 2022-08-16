@@ -224,7 +224,7 @@ new_ui_command (const char *args, int from_tty)
 
     current_ui = ui.get ();
 
-    set_top_level_interpreter (interpreter_name);
+    set_top_level_interpreter (interpreter_name, true);
 
     top_level_interpreter ()->pre_command_loop ();
 

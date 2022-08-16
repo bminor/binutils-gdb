@@ -84,6 +84,10 @@ public:
   virtual bool supports_command_editing ()
   { return false; }
 
+  /* Returns true if this interpreter supports new UIs.  */
+  virtual bool supports_new_ui () const
+  { return true; }
+
   const char *name () const
   { return m_name; }
 
@@ -201,8 +205,10 @@ extern struct interp *interp_lookup (struct ui *ui, const char *name);
 
 /* Set the current UI's top level interpreter to the interpreter named
    NAME.  Throws an error if NAME is not a known interpreter or the
-   interpreter fails to initialize.  */
-extern void set_top_level_interpreter (const char *name);
+   interpreter fails to initialize.  FOR_NEW_UI is true when called
+   from the 'new-ui' command, and causes an extra check to ensure the
+   interpreter is valid for a new UI.  */
+extern void set_top_level_interpreter (const char *name, bool for_new_ui);
 
 /* Temporarily set the current interpreter, and reset it on
    destruction.  */
