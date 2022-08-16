@@ -119,6 +119,9 @@ static void DistinctDest_Fixup (instr_info *, int, int);
    buffers.  See oappend_insert_style for more details.  */
 #define STYLE_MARKER_CHAR '\002'
 
+/* The maximum operand buffer size.  */
+#define MAX_OPERAND_BUFFER_SIZE 128
+
 struct dis_private {
   /* Points to first byte not fetched.  */
   bfd_byte *max_fetched;
@@ -165,7 +168,7 @@ struct instr_info
      current instruction.  */
   int evex_used;
 
-  char obuf[100];
+  char obuf[MAX_OPERAND_BUFFER_SIZE];
   char *obufp;
   char *mnemonicendp;
   unsigned char *start_codep;
@@ -9275,7 +9278,7 @@ i386_dis_printf (instr_info *ins, enum disassembler_style style,
   va_list ap;
   enum disassembler_style curr_style = style;
   char *start, *curr;
-  char staging_area[100];
+  char staging_area[MAX_OPERAND_BUFFER_SIZE];
   int res;
 
   va_start (ap, fmt);
@@ -9377,7 +9380,7 @@ print_insn (bfd_vma pc, disassemble_info *info, int intel_syntax)
     .last_seg_prefix = -1,
     .fwait_prefix = -1,
   };
-  char op_out[MAX_OPERANDS][100];
+  char op_out[MAX_OPERANDS][MAX_OPERAND_BUFFER_SIZE];
 
   priv.orig_sizeflag = AFLAG | DFLAG;
   if ((info->mach & bfd_mach_i386_i386) != 0)

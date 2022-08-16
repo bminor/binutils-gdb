@@ -1346,6 +1346,7 @@ if [gas_64_check] then {
 	run_dump_test ehinterp
     }
     run_dump_test pr27198
+    run_dump_test pr29483
 
     set ASFLAGS "$old_ASFLAGS --64"
 
