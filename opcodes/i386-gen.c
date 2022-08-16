@@ -1111,18 +1111,21 @@ output_opcode_modifier (FILE *table, bitfield *modifier, unsigned int size)
   fprintf (table, "%d },\n", modifier[i].value);
 }
 
+/* Returns LOG2 of element size.  */
 static int
-adjust_broadcast_modifier (char **opnd)
+get_element_size (char **opnd, int lineno)
 {
   char *str, *next, *last, *op;
-  int bcst_type = INT_MAX;
+  const char *full = opnd[0];
+  int elem_size = INT_MAX;
 
-  /* Skip the immediate operand.  */
-  op = opnd[0];
-  if (strcasecmp(op, "Imm8") == 0)
-    op = opnd[1];
+  /* Find the memory operand.  */
+  while (full != NULL && strstr(full, "BaseIndex") == NULL)
+    full = *++opnd;
+  if (full == NULL)
+    fail (_("%s: %d: no memory operand\n"), filename, lineno);
 
-  op = xstrdup (op);
+  op = xstrdup (full);
   last = op + strlen (op);
   for (next = op; next && next < last; )
     {
@@ -1131,34 +1134,34 @@ adjust_broadcast_modifier (char **opnd)
 	{
 	  if (strcasecmp(str, "Byte") == 0)
 	    {
-	      /* The smalest broadcast type, no need to check
+	      /* The smallest element size, no need to check
 		 further.  */
-	      bcst_type = BYTE_BROADCAST;
+	      elem_size = 0;
 	      break;
 	    }
 	  else if (strcasecmp(str, "Word") == 0)
 	    {
-	      if (bcst_type > WORD_BROADCAST)
-		bcst_type = WORD_BROADCAST;
+	      if (elem_size > 1)
+		elem_size = 1;
 	    }
 	  else if (strcasecmp(str, "Dword") == 0)
 	    {
-	      if (bcst_type > DWORD_BROADCAST)
-		bcst_type = DWORD_BROADCAST;
+	      if (elem_size > 2)
+		elem_size = 2;
 	    }
 	  else if (strcasecmp(str, "Qword") == 0)
 	    {
-	      if (bcst_type > QWORD_BROADCAST)
-		bcst_type = QWORD_BROADCAST;
+	      if (elem_size > 3)
+		elem_size = 3;
 	    }
 	}
     }
   free (op);
 
-  if (bcst_type == INT_MAX)
-    fail (_("unknown broadcast operand: %s\n"), op);
+  if (elem_size == INT_MAX)
+    fail (_("%s: %d: unknown element size: %s\n"), filename, lineno, full);
 
-  return bcst_type;
+  return elem_size;
 }
 
 static void
@@ -1185,7 +1188,9 @@ process_i386_opcode_modifier (FILE *table, char *mod, unsigned int space,
 	    {
 	      int val = 1;
 	      if (strcasecmp(str, "Broadcast") == 0)
-		val = adjust_broadcast_modifier (opnd);
+		val = get_element_size (opnd, lineno) + BYTE_BROADCAST;
+	      else if (strcasecmp(str, "Disp8MemShift") == 0)
+		val = get_element_size (opnd, lineno);
 
 	      set_bitfield (str, modifiers, val, ARRAY_SIZE (modifiers),
 			    lineno);
