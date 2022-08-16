@@ -199,6 +199,9 @@ regcache_cpy (struct regcache *dst, struct regcache *src)
 static const struct gdb::reg &
 find_register_by_number (const struct target_desc *tdesc, int n)
 {
+  gdb_assert (n >= 0);
+  gdb_assert (n < tdesc->reg_defs.size ());
+
   return tdesc->reg_defs[n];
 }
 
@@ -440,8 +443,6 @@ regcache_raw_read_unsigned (struct regcache *regcache, int regnum,
   int size;
 
   gdb_assert (regcache != NULL);
-  gdb_assert (regnum >= 0
-	      && regnum < regcache->tdesc->reg_defs.size ());
 
   size = register_size (regcache->tdesc, regnum);
 
