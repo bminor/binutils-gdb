@@ -1534,7 +1534,7 @@ $(srcdir)/i386-tbl.h: $(srcdir)/i386-init.h
 	@echo $@
 
 $(srcdir)/i386-init.h: @MAINT@ i386-gen$(EXEEXT_FOR_BUILD) i386-opc.tbl i386-reg.tbl i386-opc.h
-	$(CPP) -P $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) - \
+	$(CPP) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) - \
 		< $(srcdir)/i386-opc.tbl \
 		| ./i386-gen$(EXEEXT_FOR_BUILD) --srcdir $(srcdir)
 

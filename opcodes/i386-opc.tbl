@@ -22,6 +22,11 @@
 #include "i386-opc.h"
 #undef None
 
+// When necessary lines can be split in a non-standard way, by placing a
+// trailing + on a to-be-continued line.  This is intended mainly for non-insn
+// templates.  Insn templates are better kept all on one line to make grep and
+// alike produce useful results.
+
 #define Amd64		ISA64=AMD64
 #define Intel64		ISA64=INTEL64
 #define Intel64Only	ISA64=INTEL64ONLY
@@ -455,7 +460,7 @@ enter, 0xc8, None, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, 
 leave, 0xc9, None, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 leave, 0xc9, None, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, {}
 
-<cc:opc, o:0, no:1, b:2, c:2, nae:2, nb:3, nc:3, ae:3, e:4, z:4, ne:5, nz:5, be:6, na:6, nbe:7, a:7, \
+<cc:opc, o:0, no:1, b:2, c:2, nae:2, nb:3, nc:3, ae:3, e:4, z:4, ne:5, nz:5, be:6, na:6, nbe:7, a:7, +
          s:8, ns:9, p:a, pe:a, np:b, po:b, l:c, nge:c, nl:d, ge:d, le:e, ng:e, nle:f, g:f>
 
 // Conditional jumps.
@@ -871,9 +876,9 @@ rex.wrxb, 0x4f, None, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Is
 
 // Pseudo prefixes (base_opcode == PSEUDO_PREFIX)
 
-<pseudopfx:ident:cpu, disp8:Disp8:0, disp16:Disp16:0, disp32:Disp32:0, \
-                      load:Load:0, store:Store:0, \
-                      vex:VEX:0, vex2:VEX:0, vex3:VEX3:0, evex:EVEX:0, \
+<pseudopfx:ident:cpu, disp8:Disp8:0, disp16:Disp16:0, disp32:Disp32:0, +
+                      load:Load:0, store:Store:0, +
+                      vex:VEX:0, vex2:VEX:0, vex3:VEX3:0, evex:EVEX:0, +
                       rex:REX:Cpu64, nooptimize:NoOptimize:0>
 
 {<pseudopfx>}, PSEUDO_PREFIX, Prefix_<pseudopfx:ident>, <pseudopfx:cpu>, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, {}
@@ -962,13 +967,13 @@ pause, 0xf390, None, Cpu186, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {
 
 // MMX/SSE2 instructions.
 
-<mmx:cpu:pfx:attr:shimm:reg:mem, \
-    $avx:CpuAVX:66:Vex128|VexVVVV|VexW0|SSE2AVX:Vex128|VexVVVV=2|VexW0|SSE2AVX:RegXMM:Xmmword, \
-    $sse:CpuSSE2:66:::RegXMM:Xmmword, \
+<mmx:cpu:pfx:attr:shimm:reg:mem, +
+    $avx:CpuAVX:66:Vex128|VexVVVV|VexW0|SSE2AVX:Vex128|VexVVVV=2|VexW0|SSE2AVX:RegXMM:Xmmword, +
+    $sse:CpuSSE2:66:::RegXMM:Xmmword, +
     $mmx:CpuMMX::NoRex64::RegMMX:Qword>
 
-<sse2:cpu:attr:scal:vvvv:shimm, \
-    $avx:CpuAVX:Vex128|VexW0|SSE2AVX:VexLIG|VexW0|SSE2AVX:VexVVVV:Vex128|VexVVVV=2|VexW0|SSE2AVX, \
+<sse2:cpu:attr:scal:vvvv:shimm, +
+    $avx:CpuAVX:Vex128|VexW0|SSE2AVX:VexLIG|VexW0|SSE2AVX:VexVVVV:Vex128|VexVVVV=2|VexW0|SSE2AVX, +
     $sse:CpuSSE2::NoRex64::>
 
 emms, 0xf77, None, CpuMMX, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
@@ -1052,8 +1057,8 @@ pxor<mmx>, 0x<mmx:pfx>0fef, None, <mmx:cpu>, Modrm|<mmx:attr>|C|No_bSuf|No_wSuf|
 
 // SSE instructions.
 
-<sse:cpu:attr:scal:vvvv, \
-    $avx:CpuAVX:Vex128|VexW0|SSE2AVX:VexLIG|VexW0|SSE2AVX:VexVVVV, \
+<sse:cpu:attr:scal:vvvv, +
+    $avx:CpuAVX:Vex128|VexW0|SSE2AVX:VexLIG|VexW0|SSE2AVX:VexVVVV, +
     $sse:CpuSSE::IgnoreSize:>
 <sse_frel:imm:comm, eq:0:C, lt:1:, le:2:, unord:3:C, neq:4:C, nlt:5:, nle:6:, ord:7:C>
 
@@ -1309,9 +1314,9 @@ invpcid, 0x660f3882, None, CpuINVPCID|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No_qS
 
 // SSSE3 instructions.
 
-<ssse3:cpu:pfx:attr:vvvv:reg:mem, \
-    $avx:CpuAVX:66:Vex128|VexW0|SSE2AVX:VexVVVV:RegXMM:Xmmword, \
-    $sse:CpuSSSE3:66:::RegXMM:Xmmword, \
+<ssse3:cpu:pfx:attr:vvvv:reg:mem, +
+    $avx:CpuAVX:66:Vex128|VexW0|SSE2AVX:VexVVVV:RegXMM:Xmmword, +
+    $sse:CpuSSSE3:66:::RegXMM:Xmmword, +
     $mmx:CpuSSSE3::NoRex64::RegMMX:Qword>
 
 phaddw<ssse3>, 0x<ssse3:pfx>0f3801, None, <ssse3:cpu>, Modrm|<ssse3:attr>|<ssse3:vvvv>|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { <ssse3:reg>|<ssse3:mem>|Unspecified|BaseIndex, <ssse3:reg> }
@@ -1469,14 +1474,14 @@ gf2p8mulb<gfni>, 0x660f38cf, None, <gfni:cpu>CpuGFNI, Modrm|<gfni:w0>|No_bSuf|No
 
 // AVX instructions.
 
-<avx_frel:imm:comm, eq:00:C, eq_oq:00:C, lt:01:, lt_os:01:, le:02:, le_os:02:, \
-    unord:03:C, unord_q:03:C, neq:04:C, neq_uq:04:C, nlt:05:, nlt_us:05:, \
-    nle:06:, nle_us:06:, ord:07:C, ord_q:07:C, eq_uq:08:C, \
-    nge:09:, nge_us:09:, ngt:0a:, ngt_us:0a:, false:0b:C, false_oq:0b:C, \
-    neq_oq:0c:C, ge:0d:, ge_os:0d:, gt:0e:, gt_os:0e:, true:0f:C, \
-    true_uq:0f:C, eq_os:10:C, lt_oq:11:, le_oq:12:, \
-    unord_s:13:C, neq_us:14:C, nlt_uq:15:, nle_uq:16:, ord_s:17:C, eq_us:18:C, \
-    nge_uq:19:, ngt_uq:1a:, false_os:1b:C, neq_os:1c:C, ge_oq:1d:, gt_oq:1e:, \
+<avx_frel:imm:comm, eq:00:C, eq_oq:00:C, lt:01:, lt_os:01:, le:02:, le_os:02:, +
+    unord:03:C, unord_q:03:C, neq:04:C, neq_uq:04:C, nlt:05:, nlt_us:05:, +
+    nle:06:, nle_us:06:, ord:07:C, ord_q:07:C, eq_uq:08:C, +
+    nge:09:, nge_us:09:, ngt:0a:, ngt_us:0a:, false:0b:C, false_oq:0b:C, +
+    neq_oq:0c:C, ge:0d:, ge_os:0d:, gt:0e:, gt_os:0e:, true:0f:C, +
+    true_uq:0f:C, eq_os:10:C, lt_oq:11:, le_oq:12:, +
+    unord_s:13:C, neq_us:14:C, nlt_uq:15:, nle_uq:16:, ord_s:17:C, eq_us:18:C, +
+    nge_uq:19:, ngt_uq:1a:, false_os:1b:C, neq_os:1c:C, ge_oq:1d:, gt_oq:1e:, +
     true_us:1f:C>
 
 vaddpd, 0x6658, None, CpuAVX, Modrm|Vex|Space0F|VexVVVV=1|VexWIG|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }

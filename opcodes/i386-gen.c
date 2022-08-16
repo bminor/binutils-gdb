@@ -1764,17 +1764,36 @@ process_i386_opcodes (FILE *table)
       if (fgets (buf, sizeof (buf), fp) == NULL)
 	break;
 
-      lineno++;
-
       p = remove_leading_whitespaces (buf);
 
-      /* Skip comments.  */
-      str = strstr (p, "//");
-      if (str != NULL)
-	str[0] = '\0';
+      for ( ; ; )
+	{
+	  lineno++;
 
-      /* Remove trailing white spaces.  */
-      remove_trailing_whitespaces (p);
+	  /* Skip comments.  */
+	  str = strstr (p, "//");
+	  if (str != NULL)
+	    {
+	      str[0] = '\0';
+	      remove_trailing_whitespaces (p);
+	      break;
+	    }
+
+	  /* Look for line continuation character.  */
+	  remove_trailing_whitespaces (p);
+	  j = strlen (buf);
+	  if (!j || buf[j - 1] != '+')
+	    break;
+	  if (j >= sizeof (buf) - 1)
+	    fail (_("%s: %d: (continued) line too long\n"), filename, lineno);
+
+	  if (fgets (buf + j - 1, sizeof (buf) - j + 1, fp) == NULL)
+	    {
+	      fprintf (stderr, "%s: Line continuation on last line?\n",
+		       filename);
+	      break;
+	    }
+	}
 
       switch (p[0])
 	{
