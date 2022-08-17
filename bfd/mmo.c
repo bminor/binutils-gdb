@@ -1180,15 +1180,14 @@ mmo_get_byte (bfd *abfd)
 
   if (abfd->tdata.mmo_data->byte_no == 0)
     {
-      if (! abfd->tdata.mmo_data->have_error
+      if (!abfd->tdata.mmo_data->have_error
 	  && bfd_bread (abfd->tdata.mmo_data->buf, 4, abfd) != 4)
-	{
-	  abfd->tdata.mmo_data->have_error = true;
+	abfd->tdata.mmo_data->have_error = true;
 
-	  /* A value somewhat safe against tripping on some inconsistency
-	     when mopping up after this error.  */
-	  return 128;
-	}
+      /* A value somewhat safe against tripping on some inconsistency
+	 when mopping up after this error.  */
+      if (abfd->tdata.mmo_data->have_error)
+	return 128;
     }
 
   retval = abfd->tdata.mmo_data->buf[abfd->tdata.mmo_data->byte_no];
