@@ -463,17 +463,15 @@ mmo_make_section (bfd *abfd, const char *secname)
 
   if (sec == NULL)
     {
-      char *newsecname = strdup (secname);
+      size_t len = strlen (secname) + 1;
+      char *newsecname = bfd_alloc (abfd, len);
 
       if (newsecname == NULL)
 	{
-	  _bfd_error_handler
-	    /* xgettext:c-format */
-	    (_("%pB: no core to allocate section name %s"),
-	     abfd, secname);
-	  bfd_set_error (bfd_error_system_call);
+	  bfd_set_error (bfd_error_no_memory);
 	  return NULL;
 	}
+      memcpy (newsecname, secname, len);
       sec = bfd_make_section (abfd, newsecname);
     }
 
@@ -727,7 +725,7 @@ mmo_decide_section (bfd *abfd, bfd_vma vma)
   sprintf (sec_name, ".MMIX.sec.%d", abfd->tdata.mmo_data->sec_no++);
   sec = mmo_make_section (abfd, sec_name);
 
-  if (!sec->user_set_vma && !bfd_set_section_vma (sec, vma))
+  if (!sec || (!sec->user_set_vma && !bfd_set_section_vma (sec, vma)))
     return NULL;
 
   if (!bfd_set_section_flags (sec, (bfd_section_flags (sec)
