@@ -382,7 +382,7 @@ static bool mmo_scan (bfd *);
 static asection *mmo_decide_section (bfd *, bfd_vma);
 static asection *mmo_get_generic_spec_data_section (bfd *, int);
 static asection *mmo_get_spec_section (bfd *, int);
-static bfd_byte *mmo_get_loc (asection *, bfd_vma, int);
+static bfd_byte *mmo_get_loc (asection *, bfd_vma, unsigned int);
 static bfd_cleanup mmo_object_p (bfd *);
 static void mmo_map_set_sizes (bfd *, asection *, void *);
 static bool mmo_get_symbols (bfd *);
@@ -1492,7 +1492,7 @@ SUBSECTION
    MMO_SEC_CONTENTS_CHUNK_SIZE.  */
 
 static bfd_byte *
-mmo_get_loc (asection *sec, bfd_vma vma, int size)
+mmo_get_loc (asection *sec, bfd_vma vma, unsigned int size)
 {
   bfd_size_type allocated_size;
   struct mmo_section_data_struct *sdatap = mmo_section_data (sec);
@@ -1504,27 +1504,29 @@ mmo_get_loc (asection *sec, bfd_vma vma, int size)
   for (; datap != NULL; datap = datap->next)
     {
       if (datap->where <= vma
-	  && datap->where + datap->size >= vma + size)
-	return datap->data + vma - datap->where;
+	  && datap->size >= size
+	  && datap->size - size >= vma - datap->where)
+	return datap->data + (vma - datap->where);
       else if (datap->where <= vma
-	       && datap->where + datap->allocated_size >= vma + size
+	       && datap->allocated_size >= size
+	       && datap->allocated_size - size >= vma - datap->where
 	       /* Only munch on the "allocated size" if it does not
 		  overlap the next chunk.  */
 	       && (datap->next == NULL || datap->next->where >= vma + size))
 	{
 	  /* There was room allocated, but the size wasn't set to include
 	     it.  Do that now.  */
-	  datap->size += (vma + size) - (datap->where + datap->size);
+	  datap->size = vma - datap->where + size;
 
 	  /* Update the section size.  This happens only if we update the
 	     32-bit-aligned chunk size.  Callers that have
 	     non-32-bit-aligned sections should do all allocation and
 	     size-setting by themselves or at least set the section size
 	     after the last allocating call to this function.  */
-	  if (vma + size > sec->vma + sec->size)
-	    sec->size += (vma + size) - (sec->vma + sec->size);
+	  if (vma - sec->vma + size > sec->size)
+	    sec->size = vma - sec->vma + size;
 
-	  return datap->data + vma - datap->where;
+	  return datap->data + (vma - datap->where);
 	}
     }
 
@@ -1535,7 +1537,7 @@ mmo_get_loc (asection *sec, bfd_vma vma, int size)
      for no more than MMO_SEC_CONTENTS_CHUNK_SIZE will always get resolved.  */
 
   for (datap = sdatap->head; datap != NULL; datap = datap->next)
-    if ((datap->where <= vma && datap->where + datap->size > vma)
+    if ((datap->where <= vma && datap->size > vma - datap->where)
 	|| (datap->where < vma + size
 	    && datap->where + datap->size >= vma + size))
       return NULL;
@@ -1583,8 +1585,8 @@ mmo_get_loc (asection *sec, bfd_vma vma, int size)
 
   /* Update the section size.  This happens only when we add contents and
      re-size as we go.  The section size will then be aligned to 32 bits.  */
-  if (vma + size > sec->vma + sec->size)
-    sec->size += (vma + size) - (sec->vma + sec->size);
+  if (vma - sec->vma + size > sec->size)
+    sec->size = vma - sec->vma + size;
   return entry->data;
 }
 
