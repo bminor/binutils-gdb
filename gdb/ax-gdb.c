@@ -1920,8 +1920,7 @@ assign_operation::do_generate_ax (struct expression *exp,
     error (_("May only assign to trace state variables"));
 
   internalvar_operation *ivarop
-    = dynamic_cast<internalvar_operation *> (subop);
-  gdb_assert (ivarop != nullptr);
+    = gdb::checked_static_cast<internalvar_operation *> (subop);
 
   const char *name = internalvar_name (ivarop->get_internalvar ());
   struct trace_state_variable *tsv;
@@ -1950,8 +1949,7 @@ assign_modify_operation::do_generate_ax (struct expression *exp,
     error (_("May only assign to trace state variables"));
 
   internalvar_operation *ivarop
-    = dynamic_cast<internalvar_operation *> (subop);
-  gdb_assert (ivarop != nullptr);
+    = gdb::checked_static_cast<internalvar_operation *> (subop);
 
   const char *name = internalvar_name (ivarop->get_internalvar ());
   struct trace_state_variable *tsv;

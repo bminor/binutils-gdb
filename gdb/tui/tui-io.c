@@ -45,6 +45,7 @@
 #include "gdb_curses.h"
 #include <map>
 #include "pager.h"
+#include "gdbsupport/gdb-checked-static-cast.h"
 
 /* This redefines CTRL if it is not already defined, so it must come
    after terminal state releated include files like <term.h> and
@@ -832,8 +833,7 @@ tui_setup_io (int mode)
       tui_old_stdout = gdb_stdout;
       tui_old_stderr = gdb_stderr;
       tui_old_stdlog = gdb_stdlog;
-      tui_old_uiout = dynamic_cast<cli_ui_out *> (current_uiout);
-      gdb_assert (tui_old_uiout != nullptr);
+      tui_old_uiout = gdb::checked_static_cast<cli_ui_out *> (current_uiout);
 
       /* Reconfigure gdb output.  */
       gdb_stdout = tui_stdout;

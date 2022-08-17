@@ -18,6 +18,7 @@
 
 #include "defs.h"
 #include "gdbsupport/gdb_assert.h"
+#include "gdbsupport/gdb-checked-static-cast.h"
 #include "location.h"
 #include "symtab.h"
 #include "language.h"
@@ -848,8 +849,7 @@ string_to_location_spec (const char **stringp,
 	 linespec parsing below and discard the explicit location
 	 spec.  */
       explicit_location_spec *xloc
-	= dynamic_cast<explicit_location_spec *> (locspec.get ());
-      gdb_assert (xloc != nullptr);
+	= gdb::checked_static_cast<explicit_location_spec *> (locspec.get ());
       match_type = xloc->func_name_match_type;
     }
 

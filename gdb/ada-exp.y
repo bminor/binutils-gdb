@@ -342,9 +342,7 @@ static ada_choices_component *
 choice_component ()
 {
   ada_component *last = components.back ().get ();
-  ada_choices_component *result = dynamic_cast<ada_choices_component *> (last);
-  gdb_assert (result != nullptr);
-  return result;
+  return gdb::checked_static_cast<ada_choices_component *> (last);
 }
 
 /* Pop the most recent component from the global stack, and return

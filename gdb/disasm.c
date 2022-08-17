@@ -246,8 +246,7 @@ gdb_printing_disassembler::stream_from_gdb_disassemble_info (void *dis_info)
 {
   gdb_disassemble_info *di = (gdb_disassemble_info *) dis_info;
   gdb_printing_disassembler *dis
-    = dynamic_cast<gdb_printing_disassembler *> (di);
-  gdb_assert (dis != nullptr);
+    = gdb::checked_static_cast<gdb_printing_disassembler *> (di);
   ui_file *stream = dis->stream ();
   gdb_assert (stream != nullptr);
   return stream;

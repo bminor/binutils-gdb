@@ -687,7 +687,7 @@ validate_actionline (const char *line, struct breakpoint *b)
 		{
 		  symbol *sym;
 		  expr::var_value_operation *vvop
-		    = (dynamic_cast<expr::var_value_operation *>
+		    = (gdb::checked_static_cast<expr::var_value_operation *>
 		       (exp->op.get ()));
 		  sym = vvop->get_symbol ();
 
@@ -1357,7 +1357,7 @@ encode_actions_1 (struct command_line *action,
 		    case OP_REGISTER:
 		      {
 			expr::register_operation *regop
-			  = (dynamic_cast<expr::register_operation *>
+			  = (gdb::checked_static_cast<expr::register_operation *>
 			     (exp->op.get ()));
 			const char *name = regop->get_name ();
 
@@ -1380,7 +1380,7 @@ encode_actions_1 (struct command_line *action,
 			tempval = evaluate_expression (exp.get ());
 			addr = value_address (tempval);
 			expr::unop_memval_operation *memop
-			  = (dynamic_cast<expr::unop_memval_operation *>
+			  = (gdb::checked_static_cast<expr::unop_memval_operation *>
 			     (exp->op.get ()));
 			struct type *type = memop->get_type ();
 			/* Initialize the TYPE_LENGTH if it is a typedef.  */
@@ -1397,7 +1397,7 @@ encode_actions_1 (struct command_line *action,
 		    case OP_VAR_VALUE:
 		      {
 			expr::var_value_operation *vvo
-			  = (dynamic_cast<expr::var_value_operation *>
+			  = (gdb::checked_static_cast<expr::var_value_operation *>
 			     (exp->op.get ()));
 			struct symbol *sym = vvo->get_symbol ();
 			const char *name = sym->natural_name ();
