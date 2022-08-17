@@ -101,6 +101,25 @@ my_getExpression (expressionS *ep, const char *str)
 }
 
 static void
+emit_const_var (const char *op)
+{
+  expressionS ep;
+
+  if (end <= top)
+    as_fatal (_("expr too huge"));
+
+  my_getExpression (&ep, op);
+
+  if (ep.X_op != O_constant)
+    as_bad ("illegal operand: %s", op);
+
+  top->value.X_op = O_constant;
+  top->value.X_add_number = ep.X_add_number;
+  top->type = BFD_RELOC_LARCH_SOP_PUSH_ABSOLUTE;
+  top++;
+}
+
+static void
 reloc (const char *op_c_str, const char *id_c_str, offsetT addend)
 {
   expressionS id_sym_expr;
@@ -318,6 +337,7 @@ offsetT imm;
 
 primary_expression
 	: INTEGER {emit_const ($1);}
+	| IDENTIFIER {emit_const_var ($1);}
 	| '(' expression ')'
 	| '%' IDENTIFIER '(' IDENTIFIER addend ')' {reloc ($2, $4, $5); free ($2); free ($4);}
 	| '%' IDENTIFIER '(' INTEGER addend ')' {reloc ($2, NULL, $4 + $5); free ($2);}

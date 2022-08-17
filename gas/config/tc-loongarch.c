@@ -582,24 +582,6 @@ loongarch_args_parser_can_match_arg_helper (char esc_ch1, char esc_ch2,
       if (!ip->match_now)
 	break;
 
-      if (esc_ch1 == 's')
-	switch (esc_ch2)
-	  {
-	  case 'c':
-	    ip->match_now = reloc_num == 0;
-	    break;
-	  }
-      else
-	switch (esc_ch2)
-	  {
-	  case 'c':
-	    ip->match_now = reloc_num == 0 && 0 <= imm;
-	    break;
-	  }
-
-      if (!ip->match_now)
-	break;
-
       ret = imm;
       if (reloc_num)
 	{
