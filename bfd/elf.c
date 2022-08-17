@@ -3614,7 +3614,12 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
     }
 
   loc -= 4;
-  BFD_ASSERT (loc == sec->contents);
+  if (loc != sec->contents)
+    {
+      BFD_ASSERT (0);
+      memset (sec->contents + 4, 0, loc - sec->contents);
+      loc = sec->contents;
+    }
 
   H_PUT_32 (abfd, sec->flags & SEC_LINK_ONCE ? GRP_COMDAT : 0, loc);
 }
