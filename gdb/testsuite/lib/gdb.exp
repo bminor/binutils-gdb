@@ -7890,6 +7890,12 @@ proc multi_line_input { args } {
     return [join $args "\n"]
 }
 
+# Return how many newlines there are in the given string.
+
+proc count_newlines { string } {
+    return [regexp -all "\n" $string]
+}
+
 # Return the version of the DejaGnu framework.
 #
 # The return value is a list containing the major, minor and patch version

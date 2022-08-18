@@ -1728,10 +1728,6 @@ set mi_autotest_data ""
 # The name of the source file for autotesting.
 set mi_autotest_source ""
 
-proc count_newlines { string } {
-    return [regexp -all "\n" $string]
-}
-
 # Prepares for running inline tests in FILENAME.
 # See comments for mi_run_inline_test for detailed
 # explanation of the idea and syntax.
