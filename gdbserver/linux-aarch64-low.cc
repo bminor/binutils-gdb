@@ -846,12 +846,13 @@ aarch64_target::low_arch_setup ()
   if (is_elf64)
     {
       struct aarch64_features features;
+      int pid = current_thread->id.pid ();
 
       features.vq = aarch64_sve_get_vq (tid);
       /* A-profile PAC is 64-bit only.  */
-      features.pauth = linux_get_hwcap (8) & AARCH64_HWCAP_PACA;
+      features.pauth = linux_get_hwcap (pid, 8) & AARCH64_HWCAP_PACA;
       /* A-profile MTE is 64-bit only.  */
-      features.mte = linux_get_hwcap2 (8) & HWCAP2_MTE;
+      features.mte = linux_get_hwcap2 (pid, 8) & HWCAP2_MTE;
       features.tls = aarch64_tls_register_count (tid);
 
       current_process ()->tdesc = aarch64_linux_read_description (features);
@@ -3322,7 +3323,7 @@ aarch64_target::supports_memory_tagging ()
 #endif
     }
 
-  return (linux_get_hwcap2 (8) & HWCAP2_MTE) != 0;
+  return (linux_get_hwcap2 (current_thread->id.pid (), 8) & HWCAP2_MTE) != 0;
 }
 
 bool

@@ -346,8 +346,8 @@ process_stratum_target::supports_read_auxv ()
 }
 
 int
-process_stratum_target::read_auxv (CORE_ADDR offset, unsigned char *myaddr,
-				   unsigned int len)
+process_stratum_target::read_auxv (int pid, CORE_ADDR offset,
+				   unsigned char *myaddr, unsigned int len)
 {
   gdb_assert_not_reached ("target op read_auxv not supported");
 }

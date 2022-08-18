@@ -178,7 +178,7 @@ public:
 
   bool supports_read_auxv () override;
 
-  int read_auxv (CORE_ADDR offset, unsigned char *myaddr,
+  int read_auxv (int pid, CORE_ADDR offset, unsigned char *myaddr,
 		 unsigned int len) override;
 
   int insert_point (enum raw_bkpt_type type, CORE_ADDR addr,
@@ -941,22 +941,21 @@ bool thread_db_thread_handle (ptid_t ptid, gdb_byte **handle, int *handle_len);
 
 extern int have_ptrace_getregset;
 
-/* Search for the value with type MATCH in the auxv vector with
-   entries of length WORDSIZE bytes.  If found, store the value in
-   *VALP and return 1.  If not found or if there is an error, return
-   0.  */
+/* Search for the value with type MATCH in the auxv vector, with entries of
+   length WORDSIZE bytes, of process with pid PID.  If found, store the
+   value in *VALP and return 1.  If not found or if there is an error,
+   return 0.  */
 
-int linux_get_auxv (int wordsize, CORE_ADDR match,
-		    CORE_ADDR *valp);
+int linux_get_auxv (int pid, int wordsize, CORE_ADDR match, CORE_ADDR *valp);
 
 /* Fetch the AT_HWCAP entry from the auxv vector, where entries are length
-   WORDSIZE.  If no entry was found, return zero.  */
+   WORDSIZE, of process with pid PID.  If no entry was found, return 0.  */
 
-CORE_ADDR linux_get_hwcap (int wordsize);
+CORE_ADDR linux_get_hwcap (int pid, int wordsize);
 
 /* Fetch the AT_HWCAP2 entry from the auxv vector, where entries are length
-   WORDSIZE.  If no entry was found, return zero.  */
+   WORDSIZE, of process with pid PID.  If no entry was found, return 0.  */
 
-CORE_ADDR linux_get_hwcap2 (int wordsize);
+CORE_ADDR linux_get_hwcap2 (int pid, int wordsize);
 
 #endif /* GDBSERVER_LINUX_LOW_H */

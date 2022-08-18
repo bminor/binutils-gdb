@@ -581,11 +581,9 @@ netbsd_read_auxv(pid_t pid, void *offs, void *addr, size_t len)
    to debugger memory starting at MYADDR.  */
 
 int
-netbsd_process_target::read_auxv (CORE_ADDR offset,
+netbsd_process_target::read_auxv (int pid, CORE_ADDR offset,
 				  unsigned char *myaddr, unsigned int len)
 {
-  pid_t pid = pid_of (current_thread);
-
   return netbsd_read_auxv (pid, (void *) (intptr_t) offset, myaddr, len);
 }
 

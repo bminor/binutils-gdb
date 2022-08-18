@@ -592,7 +592,7 @@ s390_target::low_arch_setup ()
   /* Determine word size and HWCAP.  */
   int pid = pid_of (current_thread);
   int wordsize = s390_get_wordsize (pid);
-  unsigned long hwcap = linux_get_hwcap (wordsize);
+  unsigned long hwcap = linux_get_hwcap (pid, wordsize);
 
   /* Check whether the kernel supports extra register sets.  */
   int have_regset_last_break

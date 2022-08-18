@@ -894,8 +894,8 @@ ppc_target::low_arch_setup ()
 
   /* The value of current_process ()->tdesc needs to be set for this
      call.  */
-  ppc_hwcap = linux_get_hwcap (features.wordsize);
-  ppc_hwcap2 = linux_get_hwcap2 (features.wordsize);
+  ppc_hwcap = linux_get_hwcap (current_thread->id.pid (), features.wordsize);
+  ppc_hwcap2 = linux_get_hwcap2 (current_thread->id.pid (), features.wordsize);
 
   features.isa205 = ppc_linux_has_isa205 (ppc_hwcap);
 
@@ -1097,7 +1097,7 @@ is_elfv2_inferior (void)
   const struct target_desc *tdesc = current_process ()->tdesc;
   int wordsize = register_size (tdesc, 0);
 
-  if (!linux_get_auxv (wordsize, AT_PHDR, &phdr))
+  if (!linux_get_auxv (current_thread->id.pid (), wordsize, AT_PHDR, &phdr))
     return def_res;
 
   /* Assume ELF header is at the beginning of the page where program headers

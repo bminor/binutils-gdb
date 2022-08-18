@@ -172,10 +172,10 @@ public:
   /* Return true if the read_auxv target op is supported.  */
   virtual bool supports_read_auxv ();
 
-  /* Read auxiliary vector data from the inferior process.
+  /* Read auxiliary vector data from the process with pid PID.
 
      Read LEN bytes at OFFSET into a buffer at MYADDR.  */
-  virtual int read_auxv (CORE_ADDR offset, unsigned char *myaddr,
+  virtual int read_auxv (int pid, CORE_ADDR offset, unsigned char *myaddr,
 			 unsigned int len);
 
   /* Returns true if GDB Z breakpoint type TYPE is supported, false

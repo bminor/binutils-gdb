@@ -5483,12 +5483,11 @@ linux_process_target::supports_read_auxv ()
    to debugger memory starting at MYADDR.  */
 
 int
-linux_process_target::read_auxv (CORE_ADDR offset, unsigned char *myaddr,
-				 unsigned int len)
+linux_process_target::read_auxv (int pid, CORE_ADDR offset,
+				 unsigned char *myaddr, unsigned int len)
 {
   char filename[PATH_MAX];
   int fd, n;
-  int pid = lwpid_of (current_thread);
 
   xsnprintf (filename, sizeof filename, "/proc/%d/auxv", pid);
 
@@ -6982,14 +6981,15 @@ linux_get_pc_64bit (struct regcache *regcache)
 /* See linux-low.h.  */
 
 int
-linux_get_auxv (int wordsize, CORE_ADDR match, CORE_ADDR *valp)
+linux_get_auxv (int pid, int wordsize, CORE_ADDR match, CORE_ADDR *valp)
 {
   gdb_byte *data = (gdb_byte *) alloca (2 * wordsize);
   int offset = 0;
 
   gdb_assert (wordsize == 4 || wordsize == 8);
 
-  while (the_target->read_auxv (offset, data, 2 * wordsize) == 2 * wordsize)
+  while (the_target->read_auxv (pid, offset, data, 2 * wordsize)
+	 == 2 * wordsize)
     {
       if (wordsize == 4)
 	{
@@ -7019,20 +7019,20 @@ linux_get_auxv (int wordsize, CORE_ADDR match, CORE_ADDR *valp)
 /* See linux-low.h.  */
 
 CORE_ADDR
-linux_get_hwcap (int wordsize)
+linux_get_hwcap (int pid, int wordsize)
 {
   CORE_ADDR hwcap = 0;
-  linux_get_auxv (wordsize, AT_HWCAP, &hwcap);
+  linux_get_auxv (pid, wordsize, AT_HWCAP, &hwcap);
   return hwcap;
 }
 
 /* See linux-low.h.  */
 
 CORE_ADDR
-linux_get_hwcap2 (int wordsize)
+linux_get_hwcap2 (int pid, int wordsize)
 {
   CORE_ADDR hwcap2 = 0;
-  linux_get_auxv (wordsize, AT_HWCAP2, &hwcap2);
+  linux_get_auxv (pid, wordsize, AT_HWCAP2, &hwcap2);
   return hwcap2;
 }
 

@@ -1443,7 +1443,8 @@ handle_qxfer_auxv (const char *annex,
   if (annex[0] != '\0' || current_thread == NULL)
     return -1;
 
-  return the_target->read_auxv (offset, readbuf, len);
+  return the_target->read_auxv (current_thread->id.pid (), offset, readbuf,
+				len);
 }
 
 /* Handle qXfer:exec-file:read.  */
