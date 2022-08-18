@@ -226,6 +226,7 @@ union i386_op
 
 enum i386_error
   {
+    no_error, /* Must be first.  */
     operand_size_mismatch,
     operand_type_mismatch,
     register_type_mismatch,
