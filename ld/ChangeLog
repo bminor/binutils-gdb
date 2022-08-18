@@ -1,3 +1,8 @@
+2022-08-18  Ralf Habacker  <ralf.habacker@freenet.de>
+
+	PR 28362
+	* testsuite/ld-pe/pe-run2-def.exp: New file.
+
 2022-08-03  Alan Modra  <amodra@gmail.com>
 
 	PR 29389
