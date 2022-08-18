@@ -913,8 +913,10 @@ __collector_open_experiment (const char *exp, const char *params, sp_origin_t or
   __collector_ext_unwind_key_init (1, NULL);
 
   /* start java attach if suitable */
+#if defined(GPROFNG_JAVA_PROFILING)
   if (exp_origin == SP_ORIGIN_DBX_ATTACH)
     __collector_jprofile_start_attach ();
+#endif
   start_sec_time = CALL_UTIL (time)(NULL);
   __collector_start_time = collector_interface.getHiResTime ();
   TprintfT (DBG_LT0, "\t__collector_open_experiment; resetting start_time\n");
