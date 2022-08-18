@@ -3392,6 +3392,27 @@ aarch64_get_tdesc_vq (const struct target_desc *tdesc)
   return sve_vq_from_vl (vl);
 }
 
+/* Get the AArch64 features present in the given target description. */
+
+aarch64_features
+aarch64_features_from_target_desc (const struct target_desc *tdesc)
+{
+  aarch64_features features;
+
+  if (tdesc == nullptr)
+    return features;
+
+  features.vq = aarch64_get_tdesc_vq (tdesc);
+  features.pauth
+      = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth") != nullptr);
+  features.mte
+      = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.mte") != nullptr);
+  features.tls
+      = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.tls") != nullptr);
+
+  return features;
+}
+
 /* Implement the "cannot_store_register" gdbarch method.  */
 
 static int
@@ -3442,17 +3463,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int i, num_regs = 0, num_pseudo_regs = 0;
   int first_pauth_regnum = -1, ra_sign_state_offset = -1;
   int first_mte_regnum = -1, tls_regnum = -1;
-
-  /* Use the vector length passed via the target info.  Here -1 is used for no
-     SVE, and 0 is unset.  If unset then use the vector length from the existing
-     tdesc.  */
-  uint64_t vq = 0;
-  if (info.id == (int *) -1)
-    vq = 0;
-  else if (info.id != 0)
-    vq = (uint64_t) info.id;
-  else
-    vq = aarch64_get_tdesc_vq (info.target_desc);
+  uint64_t vq = aarch64_get_tdesc_vq (info.target_desc);
 
   if (vq > AARCH64_MAX_SVE_VQ)
     internal_error (__FILE__, __LINE__, _("VQ out of bounds: %s (max %d)"),
@@ -3472,12 +3483,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Ensure we always have a target descriptor, and that it is for the given VQ
      value.  */
   const struct target_desc *tdesc = info.target_desc;
-  if (!tdesc_has_registers (tdesc) || vq != aarch64_get_tdesc_vq (tdesc))
-    {
-      aarch64_features features;
-      features.vq = vq;
-      tdesc = aarch64_read_description (features);
-    }
+  if (!tdesc_has_registers (tdesc))
+    tdesc = aarch64_read_description ({});
   gdb_assert (tdesc);
 
   feature_core = tdesc_find_feature (tdesc,"org.gnu.gdb.aarch64.core");

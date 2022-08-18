@@ -121,6 +121,8 @@ struct aarch64_gdbarch_tdep : gdbarch_tdep_base
 };
 
 const target_desc *aarch64_read_description (const aarch64_features &features);
+aarch64_features
+aarch64_features_from_target_desc (const struct target_desc *tdesc);
 
 extern int aarch64_process_record (struct gdbarch *gdbarch,
 			       struct regcache *regcache, CORE_ADDR addr);

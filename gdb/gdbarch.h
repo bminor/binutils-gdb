@@ -251,17 +251,8 @@ struct gdbarch_info
 
   bfd *abfd = nullptr;
 
-  union
-    {
-      /* Architecture-specific target description data.  Numerous targets
-	 need only this, so give them an easy way to hold it.  */
-      struct tdesc_arch_data *tdesc_data;
-
-      /* SPU file system ID.  This is a single integer, so using the
-	 generic form would only complicate code.  Other targets may
-	 reuse this member if suitable.  */
-      int *id;
-    };
+  /* Architecture-specific target description data.  */
+  struct tdesc_arch_data *tdesc_data;
 
   enum gdb_osabi osabi = GDB_OSABI_UNKNOWN;
 
