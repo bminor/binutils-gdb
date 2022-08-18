@@ -109,6 +109,10 @@ public:
 
   bool supports_disable_randomization () override;
 
+#if __has_feature(capabilities)
+  gdb::byte_vector read_capability (CORE_ADDR addr) override;
+#endif
+
   /* Methods meant to be overridden by arch-specific target
      classes.  */
 
