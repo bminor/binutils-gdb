@@ -765,6 +765,9 @@ int optimize_align_code = 1;
 /* Non-zero to quieten some warnings.  */
 static int quiet_warnings = 0;
 
+/* Guard to avoid repeated warnings about non-16-bit code on 16-bit CPUs.  */
+static bool pre_386_16bit_warned;
+
 /* CPU name.  */
 static const char *cpu_arch_name = NULL;
 static char *cpu_sub_arch_name = NULL;
@@ -2809,6 +2812,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		      cpu_arch_tune = cpu_arch_isa;
 		      cpu_arch_tune_flags = cpu_arch_isa_flags;
 		    }
+		  pre_386_16bit_warned = false;
 		  break;
 		}
 
@@ -5486,12 +5490,7 @@ parse_insn (char *line, char *mnemonic)
     {
       supported |= cpu_flags_match (t);
       if (supported == CPU_FLAGS_PERFECT_MATCH)
-	{
-	  if (!cpu_arch_flags.bitfield.cpui386 && (flag_code != CODE_16BIT))
-	    as_warn (_("use .code16 to ensure correct addressing mode"));
-
-	  return l;
-	}
+	return l;
     }
 
   if (!(supported & CPU_FLAGS_64BIT_MATCH))
@@ -9539,6 +9538,13 @@ output_insn (void)
       fragP->tc_frag_data.mf_type = mf_jcc;
       fragP->tc_frag_data.branch_type = branch;
       fragP->tc_frag_data.max_bytes = max_branch_padding_size;
+    }
+
+  if (!cpu_arch_flags.bitfield.cpui386 && (flag_code != CODE_16BIT)
+      && !pre_386_16bit_warned)
+    {
+      as_warn (_("use .code16 to ensure correct addressing mode"));
+      pre_386_16bit_warned = true;
     }
 
   /* Output jumps.  */
