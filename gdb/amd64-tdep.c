@@ -2937,18 +2937,18 @@ amd64_epilogue_frame_cache (frame_info_ptr this_frame, void **this_cache)
 
   try
     {
-      /* Cache base will be %esp plus cache->sp_offset (-8).  */
+      /* Cache base will be %rsp plus cache->sp_offset (-8).  */
       get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
       cache->base = extract_unsigned_integer (buf, 8,
 					      byte_order) + cache->sp_offset;
 
       /* Cache pc will be the frame func.  */
-      cache->pc = get_frame_pc (this_frame);
+      cache->pc = get_frame_func (this_frame);
 
-      /* The saved %esp will be at cache->base plus 16.  */
+      /* The previous value of %rsp is cache->base plus 16.  */
       cache->saved_sp = cache->base + 16;
 
-      /* The saved %eip will be at cache->base plus 8.  */
+      /* The saved %rip will be at cache->base plus 8.  */
       cache->saved_regs[AMD64_RIP_REGNUM] = cache->base + 8;
 
       cache->base_p = 1;
@@ -2986,7 +2986,7 @@ amd64_epilogue_frame_this_id (frame_info_ptr this_frame,
   if (!cache->base_p)
     (*this_id) = frame_id_build_unavailable_stack (cache->pc);
   else
-    (*this_id) = frame_id_build (cache->base + 8, cache->pc);
+    (*this_id) = frame_id_build (cache->base + 16, cache->pc);
 }
 
 static const struct frame_unwind amd64_epilogue_frame_unwind =
