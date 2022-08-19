@@ -234,8 +234,8 @@ gdb_do_one_event (int mstimeout)
 	return 1;
     }
 
-  if (!mstimeout)
-    return 0;	/* Null timeout: do not wait for an event. */
+  if (mstimeout == 0)
+    return 0;	/* 0ms timeout: do not wait for an event. */
 
   /* Block waiting for a new event.  If gdb_wait_for_event returns -1,
      we should get out because this means that there are no event
