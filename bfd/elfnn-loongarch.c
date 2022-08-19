@@ -746,6 +746,12 @@ loongarch_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_LARCH_PCALA_HI20:
 	  if (h != NULL)
 	    {
+	      /* For pcalau12i + jirl.  */
+	      h->needs_plt = 1;
+	      if (h->plt.refcount < 0)
+		h->plt.refcount = 0;
+	      h->plt.refcount++;
+
 	      h->non_got_ref = 1;
 	      h->pointer_equality_needed = 1;
 	    }
