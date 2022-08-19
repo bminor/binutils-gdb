@@ -47,7 +47,8 @@ _ZL4funcRKi:
 	.cfi_offset 20, -360
 .LBB293:
 	.loc 1 28 0
-	add	x0, x29, 32
+	add	x20, x29, 32
+	mov	x0, x20
 .LVL1:
 	mov	w1, 16
 .LEHB0:
@@ -65,7 +66,7 @@ _ZL4funcRKi:
 	.file 2 "/usr/include/c++/4.8/sstream"
 	.loc 2 472 0
 	mov	x8, x0
-	add	x0, x29, 40
+	add	x0, x20, 8
 .LEHB1:
 	bl	_ZNKSt15basic_stringbufIcSt11char_traitsIcESaIcEE3strEv
 .LEHE1:
@@ -74,33 +75,37 @@ _ZL4funcRKi:
 .LBE294:
 	.loc 1 29 0 discriminator 1
 	mov	x0, x19
-	ldr	x1, .LC0
-	adrp	x2, _ZNSsD1Ev
-	add	x2, x2, :lo12:_ZNSsD1Ev
+	adrp	x1, :got:_ZTISs
+	ldr	x1, [x1, #:got_lo12:_ZTISs]
+	adrp	x2, :got:_ZNSsD1Ev
+	ldr	x2, [x2, #:got_lo12:_ZNSsD1Ev]
 .LEHB2:
 	bl	__cxa_throw
 .LEHE2:
 .LVL6:
 .L4:
 	mov	x20, x0
+.LVL7:
 	.loc 1 29 0 is_stmt 0
 	mov	x0, x19
 	bl	__cxa_free_exception
-.LVL7:
+.LVL8:
 	mov	x19, x20
 	b	.L3
+.LVL9:
 .L5:
 	mov	x19, x0
+.LVL10:
 .L3:
 	add	x0, x29, 32
-.LVL8:
+.LVL11:
 	bl	_ZNSt19basic_ostringstreamIcSt11char_traitsIcESaIcEED1Ev
-.LVL9:
+.LVL12:
 	mov	x0, x19
 .LEHB3:
 	bl	_Unwind_Resume
 .LEHE3:
-.LVL10:
+.LVL13:
 .LBE293:
 	.cfi_endproc
 .LFE1299:
@@ -131,9 +136,6 @@ _ZL4funcRKi:
 .LLSDACSE1299:
 	.text
 	.size	_ZL4funcRKi, .-_ZL4funcRKi
-	.align	3
-.LC0:
-	.xword	_ZTISs
 	.align	2
 	.global	main
 	.type	main, %function
@@ -152,12 +154,12 @@ main:
 	mov	w1, 1234
 	str	w1, [x0,-4]!
 	bl	_ZL4funcRKi
-.LVL11:
+.LVL14:
 	.cfi_endproc
 .LFE1300:
 	.size	main, .-main
 	.weak	_ZTISs
-	.section	.rodata._ZTISs,"aG",%progbits,_ZTISs,comdat
+	.section	.data.rel.ro._ZTISs,"awG",%progbits,_ZTISs,comdat
 	.align	3
 	.type	_ZTISs, %object
 	.size	_ZTISs, 16
@@ -224,7 +226,7 @@ _ZTSSs:
 	.file 51 "/usr/include/aarch64-linux-gnu/c++/4.8/bits/gthr-default.h"
 	.section	.debug_info,"",%progbits
 .Ldebug_info0:
-	.4byte	0x51c9
+	.4byte	0x51bc
 	.2byte	0x4
 	.4byte	.Ldebug_abbrev0
 	.byte	0x8
@@ -5042,7 +5044,7 @@ _ZTSSs:
 	.4byte	0x2be0
 	.4byte	0x2be6
 	.uleb128 0x18
-	.4byte	0x5178
+	.4byte	0x516b
 	.byte	0
 	.uleb128 0x2b
 	.4byte	.LASF458
@@ -8958,17 +8960,17 @@ _ZTSSs:
 	.8byte	.LFE1299-.LFB1299
 	.uleb128 0x1
 	.byte	0x9c
-	.4byte	0x507d
+	.4byte	0x5070
 	.uleb128 0x73
 	.string	"t"
 	.byte	0x1
 	.byte	0x1a
-	.4byte	0x507d
+	.4byte	0x5070
 	.4byte	.LLST0
 	.uleb128 0x74
 	.8byte	.LBB293
 	.8byte	.LBE293-.LBB293
-	.4byte	0x5068
+	.4byte	0x505b
 	.uleb128 0x75
 	.string	"oss"
 	.byte	0x1
@@ -8994,8 +8996,8 @@ _ZTSSs:
 	.uleb128 0x1
 	.byte	0x50
 	.uleb128 0x2
-	.byte	0x8f
-	.sleb128 40
+	.byte	0x84
+	.sleb128 8
 	.byte	0
 	.byte	0
 	.uleb128 0x7a
@@ -9010,12 +9012,12 @@ _ZTSSs:
 	.uleb128 0x1
 	.byte	0x50
 	.uleb128 0x2
-	.byte	0x8f
-	.sleb128 32
+	.byte	0x84
+	.sleb128 0
 	.byte	0
 	.uleb128 0x7b
 	.8byte	.LVL3
-	.4byte	0x517e
+	.4byte	0x5171
 	.4byte	0x501a
 	.uleb128 0x79
 	.uleb128 0x1
@@ -9025,14 +9027,8 @@ _ZTSSs:
 	.byte	0
 	.uleb128 0x7b
 	.8byte	.LVL6
-	.4byte	0x5192
-	.4byte	0x503f
-	.uleb128 0x79
-	.uleb128 0x1
-	.byte	0x51
-	.uleb128 0x9
-	.byte	0x3
-	.8byte	_ZTISs
+	.4byte	0x5185
+	.4byte	0x5032
 	.uleb128 0x79
 	.uleb128 0x1
 	.byte	0x50
@@ -9041,9 +9037,9 @@ _ZTSSs:
 	.sleb128 0
 	.byte	0
 	.uleb128 0x7b
-	.8byte	.LVL7
-	.4byte	0x51ac
-	.4byte	0x5057
+	.8byte	.LVL8
+	.4byte	0x519f
+	.4byte	0x504a
 	.uleb128 0x79
 	.uleb128 0x1
 	.byte	0x50
@@ -9052,7 +9048,7 @@ _ZTSSs:
 	.sleb128 0
 	.byte	0
 	.uleb128 0x7c
-	.8byte	.LVL9
+	.8byte	.LVL12
 	.uleb128 0x79
 	.uleb128 0x1
 	.byte	0x50
@@ -9062,8 +9058,8 @@ _ZTSSs:
 	.byte	0
 	.byte	0
 	.uleb128 0x78
-	.8byte	.LVL10
-	.4byte	0x51bc
+	.8byte	.LVL13
+	.4byte	0x51af
 	.uleb128 0x79
 	.uleb128 0x1
 	.byte	0x50
@@ -9073,10 +9069,10 @@ _ZTSSs:
 	.byte	0
 	.byte	0
 	.uleb128 0x10
-	.4byte	0x5082
+	.4byte	0x5075
 	.uleb128 0x55
 	.byte	0x8
-	.4byte	0x5088
+	.4byte	0x507b
 	.uleb128 0x10
 	.4byte	0x4872
 	.uleb128 0x7d
@@ -9088,9 +9084,9 @@ _ZTSSs:
 	.8byte	.LFE1300-.LFB1300
 	.uleb128 0x1
 	.byte	0x9c
-	.4byte	0x50c7
+	.4byte	0x50ba
 	.uleb128 0x78
-	.8byte	.LVL11
+	.8byte	.LVL14
 	.4byte	0x4f63
 	.uleb128 0x7e
 	.uleb128 0x1
@@ -9165,13 +9161,13 @@ _ZTSSs:
 	.uleb128 0x86
 	.4byte	.LASF799
 	.4byte	0x20d
-	.4byte	0x5192
+	.4byte	0x5185
 	.uleb128 0x19
 	.4byte	0x221
 	.byte	0
 	.uleb128 0x87
 	.4byte	.LASF801
-	.4byte	0x51ac
+	.4byte	0x519f
 	.uleb128 0x19
 	.4byte	0x20d
 	.uleb128 0x19
@@ -9181,7 +9177,7 @@ _ZTSSs:
 	.byte	0
 	.uleb128 0x87
 	.4byte	.LASF802
-	.4byte	0x51bc
+	.4byte	0x51af
 	.uleb128 0x19
 	.4byte	0x20d
 	.byte	0
@@ -11207,16 +11203,30 @@ _ZTSSs:
 	.8byte	0
 .LLST1:
 	.8byte	.LVL4-.Ltext0
-	.8byte	.LVL8-.Ltext0
+	.8byte	.LVL7-.Ltext0
+	.2byte	0x1
+	.byte	0x64
+	.8byte	.LVL7-.Ltext0
+	.8byte	.LVL9-.Ltext0
 	.2byte	0x3
 	.byte	0x8f
 	.sleb128 32
 	.byte	0x9f
-	.8byte	.LVL8-.Ltext0
-	.8byte	.LVL9-1-.Ltext0
+	.8byte	.LVL9-.Ltext0
+	.8byte	.LVL10-.Ltext0
+	.2byte	0x1
+	.byte	0x64
+	.8byte	.LVL10-.Ltext0
+	.8byte	.LVL11-.Ltext0
+	.2byte	0x3
+	.byte	0x8f
+	.sleb128 32
+	.byte	0x9f
+	.8byte	.LVL11-.Ltext0
+	.8byte	.LVL12-1-.Ltext0
 	.2byte	0x1
 	.byte	0x50
-	.8byte	.LVL9-1-.Ltext0
+	.8byte	.LVL12-1-.Ltext0
 	.8byte	.LFE1299-.Ltext0
 	.2byte	0x3
 	.byte	0x8f
@@ -11377,8 +11387,6 @@ _ZTSSs:
 	.string	"tm_isdst"
 .LASF654:
 	.string	"grouping"
-.LASF804:
-	.string	"GNU C++ 4.8.4 -g -O1 -std=c++11 -fstack-protector"
 .LASF20:
 	.string	"_lock"
 .LASF107:
@@ -12523,6 +12531,8 @@ _ZTSSs:
 	.string	"_ZNKSs17find_first_not_ofERKSsm"
 .LASF30:
 	.string	"__FILE"
+.LASF804:
+	.string	"GNU C++ 4.8.4 -g -O1 -std=c++11 -fPIE -fstack-protector"
 .LASF247:
 	.string	"_ZNSspLESt16initializer_listIcE"
 .LASF587:

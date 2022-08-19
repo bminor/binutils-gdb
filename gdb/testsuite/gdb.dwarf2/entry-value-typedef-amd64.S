@@ -19,7 +19,7 @@
 
      $ g++ --version
      g++ (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0
-     $ g++ entry-value-typedef.cpp -O1 -S -g -o entry-value-typedef-amd64.S
+     $ g++ entry-value-typedef.cpp -O1 -fPIE -S -g -o entry-value-typedef-amd64.S
 */
 
 	.file	"entry-value-typedef.cpp"
@@ -13647,8 +13647,6 @@ _ZTINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
 	.section	.debug_str,"MS",@progbits,1
 .LASF739:
 	.string	"int_p_sep_by_space"
-.LASF920:
-	.string	"GNU C++14 9.4.0 -mtune=generic -march=x86-64 -g -O1 -fasynchronous-unwind-tables -fstack-protector-strong -fstack-clash-protection -fcf-protection"
 .LASF547:
 	.string	"char"
 .LASF487:
@@ -15399,6 +15397,8 @@ _ZTINSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE:
 	.string	"__int_least8_t"
 .LASF495:
 	.string	"base"
+.LASF920:
+	.string	"GNU C++14 9.4.0 -mtune=generic -march=x86-64 -g -O1 -fPIE -fasynchronous-unwind-tables -fstack-protector-strong -fstack-clash-protection -fcf-protection"
 .LASF17:
 	.string	"const_pointer"
 .LASF764:
