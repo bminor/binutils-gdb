@@ -570,6 +570,8 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
       size_t len = TYPE_LENGTH (type);
       int align = type_align (type);
       enum type_code code = type->code ();
+      struct type *func_type = check_typedef (value_type (function));
+      bool varargs = (func_type->has_varargs () && i >= func_type->num_fields ());
 
       switch (code)
 	{
@@ -606,26 +608,63 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	case TYPE_CODE_FLT:
 	  if (len == 2 * regsize)
 	    {
-	      /* long double type is passed in a pair of GAR,
-		 with the low-order GRLEN bits in the lower-numbered register
-		 and the high-order GRLEN bits in the higher-numbered register.
-		 If exactly one register is available,
-		 the low-order GRLEN bits are passed in the register
-		 and the high-order GRLEN bits are passed on the stack.
-		 If no GAR is available, it's passed on the stack.  */
-	      if (gar >= 2)
+	      if (!varargs)
 		{
-		  pass_in_gar (regcache, gar--, val);
-		  pass_in_gar (regcache, gar--, val + regsize);
-		}
-	      else if (gar == 1)
-		{
-		  pass_in_gar (regcache, gar--, val);
-		  pass_on_stack (regcache, val + regsize, len - regsize, align, &addr);
+		  /* long double type is passed in a pair of GAR,
+		     with the low-order GRLEN bits in the lower-numbered register
+		     and the high-order GRLEN bits in the higher-numbered register.
+		     If exactly one register is available,
+		     the low-order GRLEN bits are passed in the register
+		     and the high-order GRLEN bits are passed on the stack.
+		     If no GAR is available, it's passed on the stack.  */
+		  if (gar >= 2)
+		    {
+		      pass_in_gar (regcache, gar--, val);
+		      pass_in_gar (regcache, gar--, val + regsize);
+		    }
+		  else if (gar == 1)
+		    {
+		      pass_in_gar (regcache, gar--, val);
+		      pass_on_stack (regcache, val + regsize, len - regsize, align, &addr);
+		    }
+		  else
+		    {
+		      pass_on_stack (regcache, val, len, align, &addr);
+		    }
 		}
 	      else
 		{
-		  pass_on_stack (regcache, val, len, align, &addr);
+		  /* Variadic arguments are passed in GARs
+		     in the same manner as named arguments.
+		     And after a variadic argument has been passed on the stack,
+		     all future arguments will also be passed on the stack,
+		     i.e., the last argument register may be left unused
+		     due to the aligned register pair rule.
+		     long double data tpye is passed in an aligned GAR pair,
+		     the first register in the pair is even-numbered.  */
+		  if (gar >= 2)
+		    {
+		      if (gar % 2 == 0)
+			{
+			  pass_in_gar (regcache, gar--, val);
+			  pass_in_gar (regcache, gar--, val + regsize);
+			}
+		      else
+			{
+			  gar--;
+			  pass_in_gar (regcache, gar--, val);
+			  pass_in_gar (regcache, gar--, val + regsize);
+			}
+		    }
+		  else if (gar == 1)
+		    {
+		      gar--;
+		      pass_on_stack (regcache, val, len, align, &addr);
+		    }
+		  else
+		    {
+		      pass_on_stack (regcache, val, len, align, &addr);
+		    }
 		}
 	    }
 	  else
@@ -633,7 +672,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	      /* The other floating-point type is passed in FAR.
 		 If no FAR is available, it's passed in GAR.
 		 If no GAR is available, it's passed on the stack.  */
-	      if (far > 0)
+	      if (!varargs && far > 0)
 		  pass_in_far (regcache, far--, val);
 	      else if (gar > 0)
 		  pass_in_gar (regcache, gar--, val);
@@ -673,7 +712,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		       if no GAR is available, the value is passed on the stack.  */
 		    if (floating_point_members == 1)
 		      {
-			if (far > 0)
+			if (!varargs && far > 0)
 			  pass_in_far (regcache, far--, val);
 			else if (gar > 0)
 			  pass_in_gar (regcache, gar--, val);
@@ -688,7 +727,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		       and passed on the stack if no GAR is available.  */
 		    else if (floating_point_members == 2)
 		      {
-			if (far >= 2)
+			if (!varargs && far >= 2)
 			  {
 			    pass_in_far (regcache, far--, val);
 			    pass_in_far (regcache, far--, val + align);
@@ -724,7 +763,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		       If no GAR is available, it's passed on the stack.  */
 		    else if (floating_point_members == 1 && fixed_point_members == 1)
 		      {
-			if (far > 0 && gar > 0)
+			if (!varargs && far > 0 && gar > 0)
 			  {
 			    if (first_member_is_fixed_point == false)
 			      {
@@ -799,8 +838,16 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 			  }
 			else if (gar == 1)
 			  {
-			    pass_in_gar (regcache, gar--, val);
-			    pass_on_stack (regcache, val + regsize, len - regsize, align, &addr);
+			    if (!varargs)
+			      {
+				pass_in_gar (regcache, gar--, val);
+				pass_on_stack (regcache, val + regsize, len - regsize, align, &addr);
+			      }
+			    else
+			      {
+				gar--;
+				pass_on_stack (regcache, val, len, align, &addr);
+			      }
 			  }
 			else
 			  {
@@ -823,7 +870,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		    else if ((len == 16 && floating_point_members == 2)
 			     || (len == 12 && floating_point_members == 2))
 		      {
-			if (far >= 2)
+			if (!varargs && far >= 2)
 			  {
 			    pass_in_far (regcache, far--, val);
 			    pass_in_far (regcache, far--, val + regsize);
@@ -859,7 +906,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 			   the low-order bits are in the GAR
 			   and the high-order bits are on the stack;
 			   And it's passed on the stack if no GAR is available.  */
-			if (far > 0 && gar > 0)
+			if (!varargs && far > 0 && gar > 0)
 			  {
 			    if (first_member_is_fixed_point == false)
 			      {
@@ -872,17 +919,17 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 				pass_in_far (regcache, far--, val + regsize);
 			      }
 			  }
-			else if (far == 0 && gar >= 2)
+			else if ((!varargs && far == 0 && gar >= 2) || (varargs && gar >= 2))
 			  {
 			    pass_in_gar (regcache, gar--, val);
 			    pass_in_gar (regcache, gar--, val + regsize);
 			  }
-			else if (far == 0 && gar == 1)
+			else if ((!varargs && far == 0 && gar == 1) || (varargs && gar == 1))
 			  {
 			    pass_in_gar (regcache, gar--, val);
 			    pass_on_stack (regcache, val + regsize, len - regsize, align, &addr);
 			  }
-			else if (far == 0 && gar == 0)
+			else if ((!varargs && far == 0 && gar == 0) || (varargs && gar == 0))
 			  {
 			    pass_on_stack (regcache, val, len, align, &addr);
 			  }
@@ -990,7 +1037,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		   and the high-order float member bits in the higher-numbered FAR.
 		   If the number of available FAR is less than 2, it's passed in a GAR,
 		   and passed on the stack if no GAR is available.  */
-		if (far >= 2)
+		if (!varargs && far >= 2)
 		  {
 		    pass_in_far (regcache, far--, val);
 		    pass_in_far (regcache, far--, val + align);
@@ -1019,7 +1066,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 		   and the high-order bits are on stack,
 		   and passed on the stack if no GAR is available.  */
 		{
-		  if (far >= 2)
+		  if (!varargs && far >= 2)
 		    {
 		      pass_in_far (regcache, far--, val);
 		      pass_in_far (regcache, far--, val + align);
