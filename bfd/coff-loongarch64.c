@@ -71,6 +71,10 @@ static reloc_howto_type pe_loongarch64_std_reloc_howto[] =
 #define bfd_pe_print_pdata      NULL
 #endif
 
+/* Handle include/coff/loongarch64.h external_reloc.  */
+#define SWAP_IN_RELOC_OFFSET	H_GET_32
+#define SWAP_OUT_RELOC_OFFSET	H_PUT_32
+
 /* Return TRUE if this relocation should
    appear in the output .reloc section.  */
 
