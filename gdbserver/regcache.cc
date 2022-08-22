@@ -244,16 +244,28 @@ registers_from_string (struct regcache *regcache, char *buf)
   hex2bin (buf, registers, len / 2);
 }
 
-int
-find_regno (const struct target_desc *tdesc, const char *name)
+/* See regcache.h */
+
+gdb::optional<int>
+find_regno_no_throw (const struct target_desc *tdesc, const char *name)
 {
   for (int i = 0; i < tdesc->reg_defs.size (); ++i)
     {
       if (strcmp (name, find_register_by_number (tdesc, i).name) == 0)
 	return i;
     }
-  internal_error ("Unknown register %s requested",
-		  name);
+  return {};
+}
+
+int
+find_regno (const struct target_desc *tdesc, const char *name)
+{
+  gdb::optional<int> regnum = find_regno_no_throw (tdesc, name);
+
+  if (regnum.has_value ())
+    return *regnum;
+
+  internal_error ("Unknown register %s requested", name);
 }
 
 static void

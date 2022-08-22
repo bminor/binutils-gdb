@@ -754,22 +754,30 @@ aarch64_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
 	  "MTE registers", cb_data);
     }
 
+  /* Handle the TLS registers.  */
   if (tdep->has_tls ())
     {
+      gdb_assert (tdep->tls_regnum_base != -1);
+      gdb_assert (tdep->tls_register_count > 0);
+
+      int sizeof_tls_regset
+	= AARCH64_TLS_REGISTER_SIZE * tdep->tls_register_count;
+
       const struct regcache_map_entry tls_regmap[] =
 	{
-	  { 1, tdep->tls_regnum, 8 },
+	  { tdep->tls_register_count, tdep->tls_regnum_base,
+	    AARCH64_TLS_REGISTER_SIZE },
 	  { 0 }
 	};
 
       const struct regset aarch64_linux_tls_regset =
 	{
-	  tls_regmap, regcache_supply_regset, regcache_collect_regset
+	  tls_regmap, regcache_supply_regset, regcache_collect_regset,
+	  REGSET_VARIABLE_SIZE
 	};
 
-      cb (".reg-aarch-tls", AARCH64_LINUX_SIZEOF_TLSREGSET,
-	  AARCH64_LINUX_SIZEOF_TLSREGSET, &aarch64_linux_tls_regset,
-	  "TLS register", cb_data);
+      cb (".reg-aarch-tls", sizeof_tls_regset, sizeof_tls_regset,
+	  &aarch64_linux_tls_regset, "TLS register", cb_data);
     }
 }
 
@@ -779,7 +787,6 @@ static const struct target_desc *
 aarch64_linux_core_read_description (struct gdbarch *gdbarch,
 				     struct target_ops *target, bfd *abfd)
 {
-  asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
   gdb::optional<gdb::byte_vector> auxv = target_read_auxv_raw (target);
   CORE_ADDR hwcap = linux_get_hwcap (auxv, target, gdbarch);
   CORE_ADDR hwcap2 = linux_get_hwcap2 (auxv, target, gdbarch);
@@ -788,7 +795,16 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
   features.vq = aarch64_linux_core_read_vq (gdbarch, abfd);
   features.pauth = hwcap & AARCH64_HWCAP_PACA;
   features.mte = hwcap2 & HWCAP2_MTE;
-  features.tls = tls != nullptr;
+
+  /* Handle the TLS section.  */
+  asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
+  if (tls != nullptr)
+    {
+      size_t size = bfd_section_size (tls);
+      /* Convert the size to the number of actual registers, by
+	 dividing by 8.  */
+      features.tls = size / AARCH64_TLS_REGISTER_SIZE;
+    }
 
   return aarch64_read_description (features);
 }

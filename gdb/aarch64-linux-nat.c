@@ -440,21 +440,22 @@ fetch_tlsregs_from_thread (struct regcache *regcache)
 {
   aarch64_gdbarch_tdep *tdep
     = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
-  int regno = tdep->tls_regnum;
+  int regno = tdep->tls_regnum_base;
 
   gdb_assert (regno != -1);
+  gdb_assert (tdep->tls_register_count > 0);
 
-  uint64_t tpidr = 0;
+  uint64_t tpidrs[tdep->tls_register_count] = { 0 };
   struct iovec iovec;
-
-  iovec.iov_base = &tpidr;
-  iovec.iov_len = sizeof (tpidr);
+  iovec.iov_base = tpidrs;
+  iovec.iov_len = sizeof (tpidrs);
 
   int tid = get_ptrace_pid (regcache->ptid ());
   if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_TLS, &iovec) != 0)
-      perror_with_name (_("unable to fetch TLS register"));
+      perror_with_name (_("unable to fetch TLS registers"));
 
-  regcache->raw_supply (regno, &tpidr);
+  for (int i = 0; i < tdep->tls_register_count; i++)
+    regcache->raw_supply (regno + i, &tpidrs[i]);
 }
 
 /* Store to the current thread the valid TLS register set in GDB's
@@ -465,21 +466,24 @@ store_tlsregs_to_thread (struct regcache *regcache)
 {
   aarch64_gdbarch_tdep *tdep
     = gdbarch_tdep<aarch64_gdbarch_tdep> (regcache->arch ());
-  int regno = tdep->tls_regnum;
+  int regno = tdep->tls_regnum_base;
 
   gdb_assert (regno != -1);
+  gdb_assert (tdep->tls_register_count > 0);
 
-  uint64_t tpidr = 0;
+  uint64_t tpidrs[tdep->tls_register_count] = { 0 };
 
-  if (REG_VALID != regcache->get_register_status (regno))
-    return;
+  for (int i = 0; i < tdep->tls_register_count; i++)
+    {
+      if (REG_VALID != regcache->get_register_status (regno + i))
+	continue;
 
-  regcache->raw_collect (regno, (char *) &tpidr);
+      regcache->raw_collect (regno + i, (char *) &tpidrs[i]);
+    }
 
   struct iovec iovec;
-
-  iovec.iov_base = &tpidr;
-  iovec.iov_len = sizeof (tpidr);
+  iovec.iov_base = &tpidrs;
+  iovec.iov_len = sizeof (tpidrs);
 
   int tid = get_ptrace_pid (regcache->ptid ());
   if (ptrace (PTRACE_SETREGSET, tid, NT_ARM_TLS, &iovec) != 0)
@@ -531,7 +535,9 @@ aarch64_fetch_registers (struct regcache *regcache, int regno)
       && (regno == tdep->mte_reg_base))
     fetch_mteregs_from_thread (regcache);
 
-  if (tdep->has_tls () && regno == tdep->tls_regnum)
+  if (tdep->has_tls ()
+      && regno >= tdep->tls_regnum_base
+      && regno < tdep->tls_regnum_base + tdep->tls_register_count)
     fetch_tlsregs_from_thread (regcache);
 }
 
@@ -607,7 +613,9 @@ aarch64_store_registers (struct regcache *regcache, int regno)
       && (regno == tdep->mte_reg_base))
     store_mteregs_to_thread (regcache);
 
-  if (tdep->has_tls () && regno == tdep->tls_regnum)
+  if (tdep->has_tls ()
+      && regno >= tdep->tls_regnum_base
+      && regno < tdep->tls_regnum_base + tdep->tls_register_count)
     store_tlsregs_to_thread (regcache);
 }
 
@@ -788,7 +796,7 @@ aarch64_linux_nat_target::read_description ()
   features.vq = aarch64_sve_get_vq (tid);
   features.pauth = hwcap & AARCH64_HWCAP_PACA;
   features.mte = hwcap2 & HWCAP2_MTE;
-  features.tls = true;
+  features.tls = aarch64_tls_register_count (tid);
 
   return aarch64_read_description (features);
 }

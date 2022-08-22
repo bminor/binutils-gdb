@@ -292,9 +292,16 @@ aarch64_store_mteregset (struct regcache *regcache, const void *buf)
 static void
 aarch64_fill_tlsregset (struct regcache *regcache, void *buf)
 {
+  gdb_byte *tls_buf = (gdb_byte *) buf;
   int tls_regnum  = find_regno (regcache->tdesc, "tpidr");
 
-  collect_register (regcache, tls_regnum, buf);
+  collect_register (regcache, tls_regnum, tls_buf);
+
+  /* Read TPIDR2, if it exists.  */
+  gdb::optional<int> regnum = find_regno_no_throw (regcache->tdesc, "tpidr2");
+
+  if (regnum.has_value ())
+    collect_register (regcache, *regnum, tls_buf + sizeof (uint64_t));
 }
 
 /* Store TLS register to regcache.  */
@@ -302,9 +309,16 @@ aarch64_fill_tlsregset (struct regcache *regcache, void *buf)
 static void
 aarch64_store_tlsregset (struct regcache *regcache, const void *buf)
 {
+  gdb_byte *tls_buf = (gdb_byte *) buf;
   int tls_regnum  = find_regno (regcache->tdesc, "tpidr");
 
-  supply_register (regcache, tls_regnum, buf);
+  supply_register (regcache, tls_regnum, tls_buf);
+
+  /* Write TPIDR2, if it exists.  */
+  gdb::optional<int> regnum = find_regno_no_throw (regcache->tdesc, "tpidr2");
+
+  if (regnum.has_value ())
+    supply_register (regcache, *regnum, tls_buf + sizeof (uint64_t));
 }
 
 bool
@@ -795,8 +809,8 @@ aarch64_adjust_register_sets (const struct aarch64_features &features)
 	    regset->size = AARCH64_LINUX_SIZEOF_MTE;
 	  break;
 	case NT_ARM_TLS:
-	  if (features.tls)
-	    regset->size = AARCH64_TLS_REGS_SIZE;
+	  if (features.tls > 0)
+	    regset->size = AARCH64_TLS_REGISTER_SIZE * features.tls;
 	  break;
 	default:
 	  gdb_assert_not_reached ("Unknown register set found.");
@@ -829,7 +843,7 @@ aarch64_target::low_arch_setup ()
       features.pauth = linux_get_hwcap (8) & AARCH64_HWCAP_PACA;
       /* A-profile MTE is 64-bit only.  */
       features.mte = linux_get_hwcap2 (8) & HWCAP2_MTE;
-      features.tls = true;
+      features.tls = aarch64_tls_register_count (tid);
 
       current_process ()->tdesc = aarch64_linux_read_description (features);
 

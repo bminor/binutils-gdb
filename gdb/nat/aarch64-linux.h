@@ -129,4 +129,8 @@ ps_err_e aarch64_ps_get_thread_area (struct ps_prochandle *ph,
 				       lwpid_t lwpid, int idx, void **base,
 				       int is_64bit_p);
 
+/* Return the number of TLS registers in the NT_ARM_TLS set.  This is only
+   used for aarch64 state.  */
+int aarch64_tls_register_count (int tid);
+
 #endif /* NAT_AARCH64_LINUX_H */

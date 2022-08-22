@@ -3465,8 +3465,18 @@ aarch64_features_from_target_desc (const struct target_desc *tdesc)
       = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.pauth") != nullptr);
   features.mte
       = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.mte") != nullptr);
-  features.tls
-      = (tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.tls") != nullptr);
+
+  const struct tdesc_feature *tls_feature
+    = tdesc_find_feature (tdesc, "org.gnu.gdb.aarch64.tls");
+
+  if (tls_feature != nullptr)
+    {
+      /* We have TLS registers.  Find out how many.  */
+      if (tdesc_unnumbered_register (tls_feature, "tpidr2"))
+	features.tls = 2;
+      else
+	features.tls = 1;
+    }
 
   return features;
 }
@@ -3526,7 +3536,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   bool valid_p = true;
   int i, num_regs = 0, num_pseudo_regs = 0;
   int first_pauth_regnum = -1, ra_sign_state_offset = -1;
-  int first_mte_regnum = -1, tls_regnum = -1;
+  int first_mte_regnum = -1, first_tls_regnum = -1;
   uint64_t vq = aarch64_get_tdesc_vq (info.target_desc);
 
   if (vq > AARCH64_MAX_SVE_VQ)
@@ -3614,15 +3624,38 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* Add the TLS register.  */
+  int tls_register_count = 0;
   if (feature_tls != nullptr)
     {
-      tls_regnum = num_regs;
-      /* Validate the descriptor provides the mandatory TLS register
-	 and allocate its number.  */
-      valid_p = tdesc_numbered_register (feature_tls, tdesc_data.get (),
-					 tls_regnum, "tpidr");
+      first_tls_regnum = num_regs;
 
-      num_regs++;
+      /* Look for the TLS registers.  tpidr is required, but tpidr2 is
+	 optional.  */
+      valid_p
+	= tdesc_numbered_register (feature_tls, tdesc_data.get (),
+				   first_tls_regnum, "tpidr");
+
+      if (valid_p)
+	{
+	  tls_register_count++;
+
+	  bool has_tpidr2
+	    = tdesc_numbered_register (feature_tls, tdesc_data.get (),
+				       first_tls_regnum + tls_register_count,
+				       "tpidr2");
+
+	  /* Figure out how many TLS registers we have.  */
+	  if (has_tpidr2)
+	    tls_register_count++;
+
+	  num_regs += tls_register_count;
+	}
+      else
+	{
+	  warning (_("Provided TLS register feature doesn't contain "
+		     "required tpidr register."));
+	  return nullptr;
+	}
     }
 
   /* Add the pauth registers.  */
@@ -3675,7 +3708,8 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->pauth_reg_base = first_pauth_regnum;
   tdep->ra_sign_state_regnum = -1;
   tdep->mte_reg_base = first_mte_regnum;
-  tdep->tls_regnum = tls_regnum;
+  tdep->tls_regnum_base = first_tls_regnum;
+  tdep->tls_register_count = tls_register_count;
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);

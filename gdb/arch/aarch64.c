@@ -53,8 +53,9 @@ aarch64_create_target_description (const aarch64_features &features)
   if (features.mte)
     regnum = create_feature_aarch64_mte (tdesc.get (), regnum);
 
-  if (features.tls)
-    regnum = create_feature_aarch64_tls (tdesc.get (), regnum);
+  /* TLS registers.  */
+  if (features.tls > 0)
+    regnum = create_feature_aarch64_tls (tdesc.get (), regnum, features.tls);
 
   return tdesc.release ();
 }

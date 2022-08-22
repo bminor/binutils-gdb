@@ -250,3 +250,24 @@ aarch64_ps_get_thread_area (struct ps_prochandle *ph,
 
   return PS_OK;
 }
+
+/* See nat/aarch64-linux.h.  */
+
+int
+aarch64_tls_register_count (int tid)
+{
+  uint64_t tls_regs[2];
+  struct iovec iovec;
+  iovec.iov_base = tls_regs;
+  iovec.iov_len = sizeof (tls_regs);
+
+  /* Attempt to read both TPIDR and TPIDR2.  If the request fails, it means
+     the Linux Kernel does not support TPIDR2.
+
+     Otherwise the Linux Kernel supports both TPIDR and TPIDR2.  */
+  if (ptrace (PTRACE_GETREGSET, tid, NT_ARM_TLS, &iovec) != 0)
+    return 1;
+
+  /* TPIDR2 is available as well.  */
+  return 2;
+}

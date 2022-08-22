@@ -111,12 +111,13 @@ struct aarch64_gdbarch_tdep : gdbarch_tdep_base
     return mte_reg_base != -1;
   }
 
-  /* TLS register.  This is -1 if the TLS register is not available.  */
-  int tls_regnum = 0;
+  /* TLS registers.  This is -1 if the TLS registers are not available.  */
+  int tls_regnum_base = 0;
+  int tls_register_count = 0;
 
   bool has_tls() const
   {
-    return tls_regnum != -1;
+    return tls_regnum_base != -1;
   }
 
   /* The W pseudo-registers.  */

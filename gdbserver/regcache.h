@@ -110,6 +110,11 @@ int register_cache_size (const struct target_desc *tdesc);
 
 int register_size (const struct target_desc *tdesc, int n);
 
+/* No throw version of find_regno.  If NAME is not a known register, return
+   an empty value.  */
+gdb::optional<int> find_regno_no_throw (const struct target_desc *tdesc,
+					const char *name);
+
 int find_regno (const struct target_desc *tdesc, const char *name);
 
 void supply_register (struct regcache *regcache, int n, const void *buf);

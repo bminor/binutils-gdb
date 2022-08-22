@@ -33,7 +33,9 @@ struct aarch64_features
 
   bool pauth = false;
   bool mte = false;
-  bool tls = false;
+
+  /* A positive TLS value indicates the number of TLS registers available.  */
+  uint8_t tls = 0;
 };
 
 inline bool operator==(const aarch64_features &lhs, const aarch64_features &rhs)
@@ -56,7 +58,9 @@ namespace std
       h = features.vq;
       h = h << 1 | features.pauth;
       h = h << 1 | features.mte;
-      h = h << 1 | features.tls;
+      /* Shift by two bits for now.  We may need to increase this in the future
+	 if more TLS registers get added.  */
+      h = h << 2 | features.tls;
       return h;
     }
   };
@@ -96,7 +100,9 @@ enum aarch64_regnum
   AARCH64_LAST_V_ARG_REGNUM = AARCH64_V0_REGNUM + 7
 };
 
-#define V_REGISTER_SIZE 16
+/* Sizes of various AArch64 registers.  */
+#define AARCH64_TLS_REGISTER_SIZE 8
+#define V_REGISTER_SIZE	  16
 
 /* Pseudo register base numbers.  */
 #define AARCH64_Q0_REGNUM 0
@@ -116,8 +122,6 @@ enum aarch64_regnum
 #define AARCH64_SVE_P_REGS_NUM 16
 #define AARCH64_NUM_REGS AARCH64_FPCR_REGNUM + 1
 #define AARCH64_SVE_NUM_REGS AARCH64_SVE_VG_REGNUM + 1
-
-#define	AARCH64_TLS_REGS_SIZE (8)
 
 /* There are a number of ways of expressing the current SVE vector size:
 

@@ -50,7 +50,7 @@ static const struct regcache_map_entry aarch64_fbsd_fpregmap[] =
     { 0 }
   };
 
-/* Register numbers are relative to tdep->tls_regnum.  */
+/* Register numbers are relative to tdep->tls_regnum_base.  */
 
 static const struct regcache_map_entry aarch64_fbsd_tls_regmap[] =
   {
@@ -151,7 +151,7 @@ aarch64_fbsd_supply_tls_regset (const struct regset *regset,
   struct gdbarch *gdbarch = regcache->arch ();
   aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
 
-  regcache->supply_regset (regset, tdep->tls_regnum, regnum, buf, size);
+  regcache->supply_regset (regset, tdep->tls_regnum_base, regnum, buf, size);
 }
 
 static void
@@ -162,7 +162,7 @@ aarch64_fbsd_collect_tls_regset (const struct regset *regset,
   struct gdbarch *gdbarch = regcache->arch ();
   aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
 
-  regcache->collect_regset (regset, tdep->tls_regnum, regnum, buf, size);
+  regcache->collect_regset (regset, tdep->tls_regnum_base, regnum, buf, size);
 }
 
 const struct regset aarch64_fbsd_tls_regset =
@@ -201,7 +201,7 @@ aarch64_fbsd_core_read_description (struct gdbarch *gdbarch,
   asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
 
   aarch64_features features;
-  features.tls = tls != nullptr;
+  features.tls = tls != nullptr? 1 : 0;
 
   return aarch64_read_description (features);
 }
@@ -218,10 +218,10 @@ aarch64_fbsd_get_thread_local_address (struct gdbarch *gdbarch, ptid_t ptid,
   regcache = get_thread_arch_regcache (current_inferior ()->process_target (),
 				       ptid, gdbarch);
 
-  target_fetch_registers (regcache, tdep->tls_regnum);
+  target_fetch_registers (regcache, tdep->tls_regnum_base);
 
   ULONGEST tpidr;
-  if (regcache->cooked_read (tdep->tls_regnum, &tpidr) != REG_VALID)
+  if (regcache->cooked_read (tdep->tls_regnum_base, &tpidr) != REG_VALID)
     error (_("Unable to fetch %%tpidr"));
 
   /* %tpidr points to the TCB whose first member is the dtv
