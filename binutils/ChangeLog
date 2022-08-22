@@ -1,3 +1,10 @@
+2022-08-22  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (check_magic_number): New function.  Checks the magic
+	bytes at the start of a file.  If they are not the ELF format
+	magic values, then attempts to generate a helpful error message.
+	(process_file_header): Call check_magic_number.
+
 2022-08-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 29457

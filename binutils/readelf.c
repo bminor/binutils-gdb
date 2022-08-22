@@ -5688,6 +5688,64 @@ get_data_encoding (unsigned int encoding)
     }
 }
 
+static bool
+check_magic_number (Filedata * filedata, Elf_Internal_Ehdr * header)
+{
+  if (header->e_ident[EI_MAG0] == ELFMAG0
+      && header->e_ident[EI_MAG1] == ELFMAG1
+      && header->e_ident[EI_MAG2] == ELFMAG2
+      && header->e_ident[EI_MAG3] == ELFMAG3)
+    return true;
+
+  /* Some compilers produce object files that are not in the ELF file format.
+     As an aid to users of readelf, try to identify these cases and suggest
+     alternative tools.
+
+     FIXME: It is not clear if all four bytes are used as constant magic
+     valus by all compilers.  It may be necessary to recode this function if
+     different tools use different length sequences.  */
+     
+  static struct
+  {
+    unsigned char  magic[4];
+    const char *   obj_message;
+    const char *   ar_message;
+  }
+  known_magic[] =
+  {
+    { { 'B', 'C', 0xc0, 0xde }, 
+      N_("This is a LLVM bitcode file - try using llvm-bcanalyzer\n"),
+      N_("This is a LLVM bitcode file - try extracing and then using llvm-bcanalyzer\n")
+    },
+    { { 'g', 'o', ' ', 'o' },
+      N_("This is a GO binary file - try using 'go tool objdump' or 'go tool nm'\n"),
+      NULL
+    }
+  };
+  int i;
+
+  for (i = ARRAY_SIZE (known_magic); i--;)
+    {
+      if (header->e_ident[EI_MAG0] == known_magic[i].magic[0]
+	  && header->e_ident[EI_MAG1] == known_magic[i].magic[1]
+	  && header->e_ident[EI_MAG2] == known_magic[i].magic[2]
+	  && header->e_ident[EI_MAG3] == known_magic[i].magic[3])
+	{
+	  /* Some compiler's analyzer tools do not handle archives,
+	     so we provide two different kinds of error message.  */
+	  if (filedata->archive_file_size > 0
+	      && known_magic[i].ar_message != NULL)
+	    error (known_magic[i].ar_message);
+	  else
+	    error (known_magic[i].obj_message);
+	  return false;
+	}
+    }
+
+  error (_("Not an ELF file - it has the wrong magic bytes at the start\n"));
+  return false;
+}
+
 /* Decode the data held in 'filedata->file_header'.  */
 
 static bool
@@ -5695,15 +5753,8 @@ process_file_header (Filedata * filedata)
 {
   Elf_Internal_Ehdr * header = & filedata->file_header;
 
-  if (   header->e_ident[EI_MAG0] != ELFMAG0
-      || header->e_ident[EI_MAG1] != ELFMAG1
-      || header->e_ident[EI_MAG2] != ELFMAG2
-      || header->e_ident[EI_MAG3] != ELFMAG3)
-    {
-      error
-	(_("Not an ELF file - it has the wrong magic bytes at the start\n"));
-      return false;
-    }
+  if (! check_magic_number (filedata, header))
+    return false;
 
   if (! filedata->is_separate)
     init_dwarf_regnames_by_elf_machine_code (header->e_machine);
