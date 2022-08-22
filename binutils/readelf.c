@@ -5735,9 +5735,9 @@ check_magic_number (Filedata * filedata, Elf_Internal_Ehdr * header)
 	     so we provide two different kinds of error message.  */
 	  if (filedata->archive_file_size > 0
 	      && known_magic[i].ar_message != NULL)
-	    error (known_magic[i].ar_message);
+	    error ("%s", known_magic[i].ar_message);
 	  else
-	    error (known_magic[i].obj_message);
+	    error ("%s", known_magic[i].obj_message);
 	  return false;
 	}
     }
