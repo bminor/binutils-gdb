@@ -2251,7 +2251,8 @@ elf_x86_64_scan_relocs (bfd *abfd, struct bfd_link_info *info,
 		      || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
 		    h->plt.refcount = 1;
 
-		  if (h->pointer_equality_needed
+		  if (htab->elf.target_os != is_solaris
+		      && h->pointer_equality_needed
 		      && h->type == STT_FUNC
 		      && eh->def_protected
 		      && !SYMBOL_DEFINED_NON_SHARED_P (h)

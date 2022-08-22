@@ -1808,7 +1808,8 @@ elf_i386_scan_relocs (bfd *abfd,
 		      || (sec->flags & (SEC_CODE | SEC_READONLY)) != 0)
 		    h->plt.refcount = 1;
 
-		  if (h->pointer_equality_needed
+		  if (htab->elf.target_os != is_solaris
+		      && h->pointer_equality_needed
 		      && h->type == STT_FUNC
 		      && eh->def_protected
 		      && !SYMBOL_DEFINED_NON_SHARED_P (h)
