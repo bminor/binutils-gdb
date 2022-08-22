@@ -1,3 +1,7 @@
+2022-08-22  Frederic Cambus  <fred@statdns.com>
+
+	* config.bfd (aarch64-*-openbsd*): Add target.
+
 2022-08-03  Nick Clifton  <nickc@redhat.com>
 
 	PR 29389
