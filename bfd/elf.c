@@ -2409,6 +2409,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	   its sh_link points to the null section.  */
 	if (((abfd->flags & (DYNAMIC | EXEC_P)) != 0
 	     && (hdr->sh_flags & SHF_ALLOC) != 0)
+	    || hdr->sh_type == SHT_RELR
 	    || hdr->sh_link == SHN_UNDEF
 	    || hdr->sh_link != elf_onesymtab (abfd)
 	    || hdr->sh_info == SHN_UNDEF
