@@ -133,7 +133,7 @@ responsibility among the other maintainers.
   RISC-V	   Palmer Dabbelt <palmer@dabbelt.com>
   RISC-V	   Andrew Waterman <andrew@sifive.com>
   RISC-V	   Jim Wilson <jim.wilson.gcc@gmail.com>
-  RISC-V	   Nelson Chu <nelson.chu@sifive.com>
+  RISC-V	   Nelson Chu <nelson@rivosinc.com>
   RX               Nick Clifton <nickc@redhat.com>
   S12Z		   John Darrington <john@darrington.wattle.id.au>
   s390, s390x	   Andreas Krebbel <krebbel@linux.ibm.com>
