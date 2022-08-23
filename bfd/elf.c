@@ -3594,6 +3594,8 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
 	    {
 	      elf_sec->rel.hdr->sh_flags |= SHF_GROUP;
 	      loc -= 4;
+	      if (loc == sec->contents)
+		break;
 	      H_PUT_32 (abfd, elf_sec->rel.idx, loc);
 	    }
 	  if (elf_sec->rela.hdr != NULL
@@ -3603,9 +3605,13 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
 	    {
 	      elf_sec->rela.hdr->sh_flags |= SHF_GROUP;
 	      loc -= 4;
+	      if (loc == sec->contents)
+		break;
 	      H_PUT_32 (abfd, elf_sec->rela.idx, loc);
 	    }
 	  loc -= 4;
+	  if (loc == sec->contents)
+	    break;
 	  H_PUT_32 (abfd, elf_sec->this_idx, loc);
 	}
       elt = elf_next_in_group (elt);
@@ -3613,12 +3619,20 @@ bfd_elf_set_group_contents (bfd *abfd, asection *sec, void *failedptrarg)
 	break;
     }
 
-  loc -= 4;
-  if (loc != sec->contents)
+  /* We should always get here with loc == sec->contents + 4, but it is
+     possible to craft bogus SHT_GROUP sections that will cause segfaults
+     in objcopy without checking loc here and in the loop above.  */
+  if (loc == sec->contents)
+    BFD_ASSERT (0);
+  else
     {
-      BFD_ASSERT (0);
-      memset (sec->contents + 4, 0, loc - sec->contents);
-      loc = sec->contents;
+      loc -= 4;
+      if (loc != sec->contents)
+	{
+	  BFD_ASSERT (0);
+	  memset (sec->contents + 4, 0, loc - sec->contents);
+	  loc = sec->contents;
+	}
     }
 
   H_PUT_32 (abfd, sec->flags & SEC_LINK_ONCE ? GRP_COMDAT : 0, loc);
