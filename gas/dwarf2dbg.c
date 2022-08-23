@@ -1572,15 +1572,15 @@ out_set_addr (symbolS *sym)
   emit_expr (&exp, sizeof_address);
 }
 
-static void scale_addr_delta (addressT *);
-
 static void
-scale_addr_delta (addressT *addr_delta)
+scale_addr_delta (int line_delta, addressT *addr_delta)
 {
   static int printed_this = 0;
   if (DWARF2_LINE_MIN_INSN_LENGTH > 1)
     {
-      if (*addr_delta % DWARF2_LINE_MIN_INSN_LENGTH != 0  && !printed_this)
+      /* Don't error on non-instruction bytes at end of section.  */
+      if (line_delta != INT_MAX
+	  && *addr_delta % DWARF2_LINE_MIN_INSN_LENGTH != 0  && !printed_this)
 	{
 	  as_bad("unaligned opcodes detected in executable segment");
 	  printed_this = 1;
@@ -1603,7 +1603,7 @@ size_inc_line_addr (int line_delta, addressT addr_delta)
   int len = 0;
 
   /* Scale the address delta by the minimum instruction length.  */
-  scale_addr_delta (&addr_delta);
+  scale_addr_delta (line_delta, &addr_delta);
 
   /* INT_MAX is a signal that this is actually a DW_LNE_end_sequence.
      We cannot use special opcodes here, since we want the end_sequence
@@ -1667,7 +1667,7 @@ emit_inc_line_addr (int line_delta, addressT addr_delta, char *p, int len)
   gas_assert ((offsetT) addr_delta >= 0);
 
   /* Scale the address delta by the minimum instruction length.  */
-  scale_addr_delta (&addr_delta);
+  scale_addr_delta (line_delta, &addr_delta);
 
   /* INT_MAX is a signal that this is actually a DW_LNE_end_sequence.
      We cannot use special opcodes here, since we want the end_sequence
