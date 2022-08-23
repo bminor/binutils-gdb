@@ -1649,10 +1649,6 @@ gld${EMULATION_NAME}_after_open (void)
   }
 
   {
-    int is_ms_arch = 0;
-    bfd *cur_arch = 0;
-    lang_input_statement_type *is2;
-    lang_input_statement_type *is3;
 
     /* Careful - this is a shell script.  Watch those dollar signs! */
     /* Microsoft import libraries have every member named the same,
@@ -1668,60 +1664,18 @@ gld${EMULATION_NAME}_after_open (void)
 	if (is->the_bfd->my_archive)
 	  {
 	    char *pnt;
-	    bfd *arch = is->the_bfd->my_archive;
 
-	    if (cur_arch != arch)
-	      {
-		cur_arch = arch;
-		is_ms_arch = 1;
-
-		for (is3 = is;
-		     is3 && is3->the_bfd->my_archive == arch;
-		     is3 = (lang_input_statement_type *) is3->next)
-		  {
-		    /* A MS dynamic import library can also contain static
-		       members, so look for the first element with a .dll
-		       extension, and use that for the remainder of the
-		       comparisons.  */
-		    pnt = strrchr (bfd_get_filename (is3->the_bfd), '.');
-		    if (pnt != NULL && fileext_cmp (pnt + 1, "dll") == 0)
-		      break;
-		  }
-
-		if (is3 == NULL)
-		  is_ms_arch = 0;
-		else
-		  {
-		    /* OK, found one.  Now look to see if the remaining
-		       (dynamic import) members use the same name.  */
-		    for (is2 = is;
-			 is2 && is2->the_bfd->my_archive == arch;
-			 is2 = (lang_input_statement_type *) is2->next)
-		      {
-			/* Skip static members, ie anything with a .obj
-			   extension.  */
-			pnt = strrchr (bfd_get_filename (is2->the_bfd), '.');
-			if (pnt != NULL && fileext_cmp (pnt + 1, "obj") == 0)
-			  continue;
-
-			if (filename_cmp (bfd_get_filename (is3->the_bfd),
-					  bfd_get_filename (is2->the_bfd)))
-			  {
-			    is_ms_arch = 0;
-			    break;
-			  }
-		      }
-		  }
-	      }
-
-	    /* This fragment might have come from an .obj file in a Microsoft
-	       import, and not an actual import record. If this is the case,
-	       then leave the filename alone.  */
+	    /* Microsoft import libraries may contain archive members for
+	       one or more DLLs, together with static object files.
+	       Inspect all members that are named *.dll - check whether
+	       they contain .idata sections. Do the renaming of all
+	       archive members that seem to be Microsoft style import
+	       objects.  */
 	    pnt = strrchr (bfd_get_filename (is->the_bfd), '.');
 
-	    if (is_ms_arch && pnt != NULL && (fileext_cmp (pnt + 1, "dll") == 0))
+	    if (pnt != NULL && (fileext_cmp (pnt + 1, "dll") == 0))
 	      {
-		int idata2 = 0, reloc_count=0;
+		int idata2 = 0, reloc_count = 0, idata = 0;
 		asection *sec;
 		char *new_name, seq;
 
@@ -1729,8 +1683,16 @@ gld${EMULATION_NAME}_after_open (void)
 		  {
 		    if (strcmp (sec->name, ".idata\$2") == 0)
 		      idata2 = 1;
+		    if (strncmp (sec->name, ".idata\$", 6) == 0)
+		      idata = 1;
 		    reloc_count += sec->reloc_count;
 		  }
+
+		/* An archive member named .dll, but not having any .idata
+		   sections - apparently not a Microsoft import object
+		   after all: Skip renaming it.  */
+		if (!idata)
+		  continue;
 
 		if (idata2) /* .idata2 is the TOC */
 		  seq = 'a';
