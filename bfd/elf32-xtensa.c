@@ -1116,7 +1116,7 @@ elf_xtensa_check_relocs (bfd *abfd,
       switch (r_type)
 	{
 	case R_XTENSA_TLSDESC_FN:
-	  if (bfd_link_pic (info))
+	  if (bfd_link_dll (info))
 	    {
 	      tls_type = GOT_TLS_GD;
 	      is_got = true;
@@ -1127,7 +1127,7 @@ elf_xtensa_check_relocs (bfd *abfd,
 	  break;
 
 	case R_XTENSA_TLSDESC_ARG:
-	  if (bfd_link_pic (info))
+	  if (bfd_link_dll (info))
 	    {
 	      tls_type = GOT_TLS_GD;
 	      is_got = true;
@@ -1135,13 +1135,14 @@ elf_xtensa_check_relocs (bfd *abfd,
 	  else
 	    {
 	      tls_type = GOT_TLS_IE;
-	      if (h && elf_xtensa_hash_entry (h) != htab->tlsbase)
+	      if (h && elf_xtensa_hash_entry (h) != htab->tlsbase
+		  && elf_xtensa_dynamic_symbol_p (h, info))
 		is_got = true;
 	    }
 	  break;
 
 	case R_XTENSA_TLS_DTPOFF:
-	  if (bfd_link_pic (info))
+	  if (bfd_link_dll (info))
 	    tls_type = GOT_TLS_GD;
 	  else
 	    tls_type = GOT_TLS_IE;
@@ -1151,7 +1152,7 @@ elf_xtensa_check_relocs (bfd *abfd,
 	  tls_type = GOT_TLS_IE;
 	  if (bfd_link_pic (info))
 	    info->flags |= DF_STATIC_TLS;
-	  if (bfd_link_pic (info) || h)
+	  if (bfd_link_dll (info) || elf_xtensa_dynamic_symbol_p (h, info))
 	    is_got = true;
 	  break;
 
@@ -2884,7 +2885,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 
 	case R_XTENSA_TLS_TPOFF:
 	  /* Switch to LE model for local symbols in an executable.  */
-	  if (! bfd_link_pic (info) && ! dynamic_symbol)
+	  if (! bfd_link_dll (info) && ! dynamic_symbol)
 	    {
 	      relocation = tpoff (info, relocation);
 	      break;
@@ -2896,12 +2897,12 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	  {
 	    if (r_type == R_XTENSA_TLSDESC_FN)
 	      {
-		if (! bfd_link_pic (info) || (tls_type & GOT_TLS_IE) != 0)
+		if (! bfd_link_dll (info) || (tls_type & GOT_TLS_IE) != 0)
 		  r_type = R_XTENSA_NONE;
 	      }
 	    else if (r_type == R_XTENSA_TLSDESC_ARG)
 	      {
-		if (bfd_link_pic (info))
+		if (bfd_link_dll (info))
 		  {
 		    if ((tls_type & GOT_TLS_IE) != 0)
 		      r_type = R_XTENSA_TLS_TPOFF;
@@ -2975,7 +2976,7 @@ elf_xtensa_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_XTENSA_TLS_DTPOFF:
-	  if (! bfd_link_pic (info))
+	  if (! bfd_link_dll (info))
 	    /* Switch from LD model to LE model.  */
 	    relocation = tpoff (info, relocation);
 	  else
