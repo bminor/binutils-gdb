@@ -4510,6 +4510,7 @@ dlltool [@option{-d}|@option{--input-def} @var{def-file-name}]
         [@option{-v}|@option{--verbose}]
         [@option{-h}|@option{--help}] [@option{-V}|@option{--version}]
         [@option{--no-leading-underscore}] [@option{--leading-underscore}]
+        [@option{--deterministic-libraries}] [@option{--non-deterministic-libraries}]
         [object-file @dots{}]
 @c man end
 @end smallexample
@@ -4628,6 +4629,14 @@ Specifies the name of the library file to be created by dlltool.
 @item -y @var{filename}
 @itemx --output-delaylib @var{filename}
 Specifies the name of the delay-import library file to be created by dlltool.
+
+@item --deterministic-libraries
+@itemx --non-deterministic-libraries
+When creating output libraries in response to either the
+@option{--output-lib} or @option{--output-delaylib} options either use
+the value of zero for any timestamps, user ids and group ids created
+(@option{--deterministic-libraries}) or the actual timestamps, user
+ids and group ids (@option{--non-deterministic-libraries}).
 
 @item --export-all-symbols
 Treat all global and weak defined symbols found in the input object

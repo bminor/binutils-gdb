@@ -1,3 +1,16 @@
+2022-08-23  Nick Clifton  <nickc@redhat.com>
+
+	PR 29489
+	* dlltool.c (deterministic): New variable.
+	(gen_lib_file): If deterministic is true set the
+	BFD_DETERMINISTIC_OUTPUT flag.
+	(usage): Mention --deterministic-libraries and
+	--non-deterministic-libraries.
+	(long_options): Add new options.
+	(main): Parse new options.
+	* doc/binutils.texi: Document the new options.
+	* NEWS: Mention the new feature.
+
 2022-08-22  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (check_magic_number): New function.  Checks the magic

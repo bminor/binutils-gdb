@@ -356,6 +356,7 @@ static char *imp_name;
 static char *delayimp_name;
 static char *identify_imp_name;
 static bool identify_strict;
+static bool deterministic = DEFAULT_AR_DETERMINISTIC;
 
 /* Types used to implement a linked list of dllnames associated
    with the specified import lib. Used by the identify_* code.
@@ -2942,6 +2943,9 @@ gen_lib_file (int delay)
   outarch->has_armap = 1;
   outarch->is_thin_archive = 0;
 
+  if (deterministic)
+    outarch->flags |= BFD_DETERMINISTIC_OUTPUT;
+
   /* Work out a reasonable size of things to put onto one line.  */
   if (delay)
     {
@@ -3674,6 +3678,16 @@ usage (FILE *file, int status)
   fprintf (file, _("   -e --output-exp <outname> Generate an export file.\n"));
   fprintf (file, _("   -l --output-lib <outname> Generate an interface library.\n"));
   fprintf (file, _("   -y --output-delaylib <outname> Create a delay-import library.\n"));
+  fprintf (file, _("      --deterministic-libraries\n"));
+  if (DEFAULT_AR_DETERMINISTIC)
+    fprintf (file, _("                             Use zero for timestamps and uids/gids in output libraries (default)\n"));
+  else
+    fprintf (file, _("                             Use zero for timestamps and uids/gids in output libraries\n"));
+  fprintf (file, _("      --non-deterministic-libraries\n"));
+  if (DEFAULT_AR_DETERMINISTIC)
+    fprintf (file, _("                             Use actual timestamps and uids/gids in output libraries\n"));
+  else
+    fprintf (file, _("                             Use actual timestamps and uids/gids in output libraries (default)\n"));
   fprintf (file, _("   -a --add-indirect         Add dll indirects to export file.\n"));
   fprintf (file, _("   -D --dllname <name>       Name of input dll to put into interface lib.\n"));
   fprintf (file, _("   -d --input-def <deffile>  Name of .def file to be read in.\n"));
@@ -3714,55 +3728,61 @@ usage (FILE *file, int status)
   exit (status);
 }
 
-#define OPTION_EXPORT_ALL_SYMS		150
-#define OPTION_NO_EXPORT_ALL_SYMS	(OPTION_EXPORT_ALL_SYMS + 1)
-#define OPTION_EXCLUDE_SYMS		(OPTION_NO_EXPORT_ALL_SYMS + 1)
-#define OPTION_NO_DEFAULT_EXCLUDES	(OPTION_EXCLUDE_SYMS + 1)
-#define OPTION_ADD_STDCALL_UNDERSCORE	(OPTION_NO_DEFAULT_EXCLUDES + 1)
-#define OPTION_USE_NUL_PREFIXED_IMPORT_TABLES \
-  (OPTION_ADD_STDCALL_UNDERSCORE + 1)
-#define OPTION_IDENTIFY_STRICT		(OPTION_USE_NUL_PREFIXED_IMPORT_TABLES + 1)
-#define OPTION_NO_LEADING_UNDERSCORE	(OPTION_IDENTIFY_STRICT + 1)
-#define OPTION_LEADING_UNDERSCORE	(OPTION_NO_LEADING_UNDERSCORE + 1)
+/* 150 isn't special; it's just an arbitrary non-ASCII char value.  */
+enum command_line_switch
+{
+  OPTION_EXPORT_ALL_SYMS = 150,
+  OPTION_NO_EXPORT_ALL_SYMS,
+  OPTION_EXCLUDE_SYMS,
+  OPTION_NO_DEFAULT_EXCLUDES,
+  OPTION_ADD_STDCALL_UNDERSCORE,
+  OPTION_USE_NUL_PREFIXED_IMPORT_TABLES,
+  OPTION_IDENTIFY_STRICT,
+  OPTION_NO_LEADING_UNDERSCORE,
+  OPTION_LEADING_UNDERSCORE,
+  OPTION_DETERMINISTIC_LIBRARIES,
+  OPTION_NON_DETERMINISTIC_LIBRARIES
+};
 
 static const struct option long_options[] =
 {
-  {"no-delete", no_argument, NULL, 'n'},
-  {"dllname", required_argument, NULL, 'D'},
-  {"no-idata4", no_argument, NULL, 'x'},
-  {"no-idata5", no_argument, NULL, 'c'},
-  {"use-nul-prefixed-import-tables", no_argument, NULL,
-   OPTION_USE_NUL_PREFIXED_IMPORT_TABLES},
-  {"output-exp", required_argument, NULL, 'e'},
-  {"output-def", required_argument, NULL, 'z'},
-  {"export-all-symbols", no_argument, NULL, OPTION_EXPORT_ALL_SYMS},
-  {"no-export-all-symbols", no_argument, NULL, OPTION_NO_EXPORT_ALL_SYMS},
-  {"exclude-symbols", required_argument, NULL, OPTION_EXCLUDE_SYMS},
-  {"no-default-excludes", no_argument, NULL, OPTION_NO_DEFAULT_EXCLUDES},
-  {"output-lib", required_argument, NULL, 'l'},
-  {"def", required_argument, NULL, 'd'}, /* for compatibility with older versions */
-  {"input-def", required_argument, NULL, 'd'},
-  {"add-underscore", no_argument, NULL, 'U'},
-  {"add-stdcall-underscore", no_argument, NULL, OPTION_ADD_STDCALL_UNDERSCORE},
-  {"no-leading-underscore", no_argument, NULL, OPTION_NO_LEADING_UNDERSCORE},
-  {"leading-underscore", no_argument, NULL, OPTION_LEADING_UNDERSCORE},
-  {"kill-at", no_argument, NULL, 'k'},
-  {"add-stdcall-alias", no_argument, NULL, 'A'},
-  {"ext-prefix-alias", required_argument, NULL, 'p'},
-  {"identify", required_argument, NULL, 'I'},
-  {"identify-strict", no_argument, NULL, OPTION_IDENTIFY_STRICT},
-  {"verbose", no_argument, NULL, 'v'},
-  {"version", no_argument, NULL, 'V'},
-  {"help", no_argument, NULL, 'h'},
-  {"machine", required_argument, NULL, 'm'},
   {"add-indirect", no_argument, NULL, 'a'},
-  {"base-file", required_argument, NULL, 'b'},
+  {"add-stdcall-alias", no_argument, NULL, 'A'},
+  {"add-stdcall-underscore", no_argument, NULL, OPTION_ADD_STDCALL_UNDERSCORE},
+  {"add-underscore", no_argument, NULL, 'U'},
   {"as", required_argument, NULL, 'S'},
   {"as-flags", required_argument, NULL, 'f'},
-  {"mcore-elf", required_argument, NULL, 'M'},
+  {"base-file", required_argument, NULL, 'b'},
   {"compat-implib", no_argument, NULL, 'C'},
-  {"temp-prefix", required_argument, NULL, 't'},
+  {"def", required_argument, NULL, 'd'},     /* For compatibility with older versions.  */
+  {"deterministic-libraries", no_argument, NULL, OPTION_DETERMINISTIC_LIBRARIES},
+  {"dllname", required_argument, NULL, 'D'},
+  {"exclude-symbols", required_argument, NULL, OPTION_EXCLUDE_SYMS},
+  {"export-all-symbols", no_argument, NULL, OPTION_EXPORT_ALL_SYMS},
+  {"ext-prefix-alias", required_argument, NULL, 'p'},
+  {"help", no_argument, NULL, 'h'},
+  {"identify", required_argument, NULL, 'I'},
+  {"identify-strict", no_argument, NULL, OPTION_IDENTIFY_STRICT},
+  {"input-def", required_argument, NULL, 'd'},
+  {"kill-at", no_argument, NULL, 'k'},
+  {"leading-underscore", no_argument, NULL, OPTION_LEADING_UNDERSCORE},
+  {"machine", required_argument, NULL, 'm'},
+  {"mcore-elf", required_argument, NULL, 'M'},
+  {"no-default-excludes", no_argument, NULL, OPTION_NO_DEFAULT_EXCLUDES},
+  {"no-delete", no_argument, NULL, 'n'},
+  {"no-export-all-symbols", no_argument, NULL, OPTION_NO_EXPORT_ALL_SYMS},
+  {"no-idata4", no_argument, NULL, 'x'},
+  {"no-idata5", no_argument, NULL, 'c'},
+  {"no-leading-underscore", no_argument, NULL, OPTION_NO_LEADING_UNDERSCORE},
+  {"non-deterministic-libraries", no_argument, NULL, OPTION_NON_DETERMINISTIC_LIBRARIES},
+  {"output-def", required_argument, NULL, 'z'},
   {"output-delaylib", required_argument, NULL, 'y'},
+  {"output-exp", required_argument, NULL, 'e'},
+  {"output-lib", required_argument, NULL, 'l'},
+  {"temp-prefix", required_argument, NULL, 't'},
+  {"use-nul-prefixed-import-tables", no_argument, NULL, OPTION_USE_NUL_PREFIXED_IMPORT_TABLES},
+  {"verbose", no_argument, NULL, 'v'},
+  {"version", no_argument, NULL, 'V'},
   {NULL,0,NULL,0}
 };
 
@@ -3923,6 +3943,12 @@ main (int ac, char **av)
 	  break;
 	case 'y':
 	  delayimp_name = optarg;
+	  break;
+	case OPTION_DETERMINISTIC_LIBRARIES:
+	  deterministic = true;
+	  break;
+	case OPTION_NON_DETERMINISTIC_LIBRARIES:
+	  deterministic = false;
 	  break;
 	default:
 	  usage (stderr, 1);
