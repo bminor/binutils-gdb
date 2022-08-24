@@ -105,6 +105,8 @@ Changes in 2.36:
   SHF_GNU_RETAIN specifies that the section should not be garbage
   collected by the linker.  It requires the GNU or FreeBSD ELF OSABIs.
 
+* Add support for the RISC-V Zihintpause extension.
+
 Changes in 2.35:
 
 * X86 NaCl target support is removed.
