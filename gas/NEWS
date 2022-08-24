@@ -124,6 +124,11 @@ Changes in 2.35:
 
 * Add -mbig-obj support to i386 MingW targets.
 
+* Add support for the -mriscv-isa-version argument, to select the version of
+  the RISC-V ISA specification used when assembling.
+
+* Remove support for the RISC-V privileged specification, version 1.9.
+
 Changes in 2.34:
 
 * Add -malign-branch-boundary=NUM, -malign-branch=TYPE[+TYPE...],
