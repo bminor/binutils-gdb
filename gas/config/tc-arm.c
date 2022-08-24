@@ -2851,12 +2851,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
   char saved_char;
 
   name = input_line_pointer;
-
-  while (*input_line_pointer != 0
-	 && *input_line_pointer != ' '
-	 && *input_line_pointer != '\n')
-    ++input_line_pointer;
-
+  input_line_pointer = find_end_of_line (input_line_pointer, flag_m68k_mri);
   saved_char = *input_line_pointer;
   *input_line_pointer = 0;
 
@@ -3208,6 +3203,7 @@ s_code (int unused ATTRIBUTE_UNUSED)
     default:
       as_bad (_("invalid operand to .code directive (%d) (expecting 16 or 32)"), temp);
     }
+  demand_empty_rest_of_line ();
 }
 
 static void
@@ -3230,7 +3226,7 @@ s_force_thumb (int ignore ATTRIBUTE_UNUSED)
 static void
 s_thumb_func (int ignore ATTRIBUTE_UNUSED)
 {
-  s_thumb (0);
+  s_thumb (0);  /* Will check for end-of-line.  */
 
   /* The following label is the name/address of the start of a Thumb function.
      We need to know this for the interworking support.	 */
@@ -3781,6 +3777,7 @@ s_ltorg (int ignored ATTRIBUTE_UNUSED)
   literal_pool * pool;
   char sym_name[20];
 
+  demand_empty_rest_of_line ();
   pool = find_literal_pool ();
   if (pool == NULL
       || pool->symbol == NULL
@@ -33365,10 +33362,16 @@ s_arm_cpu (int ignored ATTRIBUTE_UNUSED)
   char saved_char;
 
   name = input_line_pointer;
-  while (*input_line_pointer && !ISSPACE (*input_line_pointer))
-    input_line_pointer++;
+  input_line_pointer = find_end_of_line (input_line_pointer, flag_m68k_mri);
   saved_char = *input_line_pointer;
   *input_line_pointer = 0;
+
+  if (!*name)
+    {
+      as_bad (_(".cpu: missing cpu name"));
+      *input_line_pointer = saved_char;
+      return;
+    }
 
   /* Skip the first "all" entry.  */
   for (opt = arm_cpus + 1; opt->name != NULL; opt++)
@@ -33395,7 +33398,6 @@ s_arm_cpu (int ignored ATTRIBUTE_UNUSED)
       }
   as_bad (_("unknown cpu `%s'"), name);
   *input_line_pointer = saved_char;
-  ignore_rest_of_line ();
 }
 
 /* Parse a .arch directive.  */
@@ -33408,10 +33410,16 @@ s_arm_arch (int ignored ATTRIBUTE_UNUSED)
   char *name;
 
   name = input_line_pointer;
-  while (*input_line_pointer && !ISSPACE (*input_line_pointer))
-    input_line_pointer++;
+  input_line_pointer = find_end_of_line (input_line_pointer, flag_m68k_mri);
   saved_char = *input_line_pointer;
   *input_line_pointer = 0;
+
+  if (!*name)
+    {
+      as_bad (_(".arch: missing architecture name"));
+      *input_line_pointer = saved_char;
+      return;
+    }
 
   /* Skip the first "all" entry.  */
   for (opt = arm_archs + 1; opt->name != NULL; opt++)
@@ -33443,10 +33451,16 @@ s_arm_object_arch (int ignored ATTRIBUTE_UNUSED)
   char *name;
 
   name = input_line_pointer;
-  while (*input_line_pointer && !ISSPACE (*input_line_pointer))
-    input_line_pointer++;
+  input_line_pointer = find_end_of_line (input_line_pointer, flag_m68k_mri);
   saved_char = *input_line_pointer;
   *input_line_pointer = 0;
+
+  if (!*name)
+    {
+      as_bad (_(".object_arch: missing architecture name"));
+      *input_line_pointer = saved_char;
+      return;
+    }
 
   /* Skip the first "all" entry.  */
   for (opt = arm_archs + 1; opt->name != NULL; opt++)
@@ -33474,10 +33488,16 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
   int adding_value = 1;
 
   name = input_line_pointer;
-  while (*input_line_pointer && !ISSPACE (*input_line_pointer))
-    input_line_pointer++;
+  input_line_pointer = find_end_of_line (input_line_pointer, flag_m68k_mri);
   saved_char = *input_line_pointer;
   *input_line_pointer = 0;
+
+  if (!*name)
+    {
+      as_bad (_(".arch_extension: missing architecture extension"));
+      *input_line_pointer = saved_char;
+      return;
+    }
 
   if (strlen (name) >= 2
       && startswith (name, "no"))
@@ -33557,7 +33577,6 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
     as_bad (_("unknown architecture extension `%s'\n"), name);
 
   *input_line_pointer = saved_char;
-  ignore_rest_of_line ();
 }
 
 /* Parse a .fpu directive.  */
@@ -33570,10 +33589,16 @@ s_arm_fpu (int ignored ATTRIBUTE_UNUSED)
   char *name;
 
   name = input_line_pointer;
-  while (*input_line_pointer && !ISSPACE (*input_line_pointer))
-    input_line_pointer++;
+  input_line_pointer = find_end_of_line (input_line_pointer, flag_m68k_mri);
   saved_char = *input_line_pointer;
   *input_line_pointer = 0;
+
+  if (!*name)
+    {
+      as_bad (_(".fpu: missing fpu name"));
+      *input_line_pointer = saved_char;
+      return;
+    }
 
   for (opt = arm_fpus; opt->name != NULL; opt++)
     if (streq (opt->name, name))
@@ -33587,7 +33612,6 @@ s_arm_fpu (int ignored ATTRIBUTE_UNUSED)
 #endif
 	  ARM_MERGE_FEATURE_SETS (cpu_variant, selected_cpu, selected_fpu);
 	*input_line_pointer = saved_char;
-	demand_empty_rest_of_line ();
 	return;
       }
 
