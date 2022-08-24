@@ -218,6 +218,8 @@ Changes in 2.31:
 * Add support for .nops directive.  It is currently supported only for
   x86 targets.
 
+* Add support for the .insn directive on RISC-V targets.
+
 Changes in 2.30:
 
 * Add support for loaction views in DWARF debug line information.
