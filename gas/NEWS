@@ -49,6 +49,9 @@ Changes in 2.37:
 
 * Add support for Realm Management Extension (RME) for AArch64.
 
+* Add support for the Zba, Zbb, Zbc, and Zbs subsets of the RISC-V
+  bit manipulation extension, version 0.93.
+
 Changes in 2.36:
 
 * Add support for Intel AVX VNNI instructions.
