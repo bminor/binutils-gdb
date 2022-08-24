@@ -23,15 +23,18 @@ if ![istarget loongarch*-*-*] {
   return
 }
 
-run_ld_link_tests [list \
-		    [list \
-		    "medium jirl plt" \
-		    "-shared" "" \
-		    "" \
-		    {libjirl.s} \
-		    [list \
-			[list objdump -d cmodel-libjirl.dd] \
-		    ] \
-		    "libjirl.so" \
-		    ] \
-		  ]
+if [check_shared_lib_support] {
+    run_ld_link_tests \
+	[list \
+	     [list \
+		  "medium jirl plt" \
+		  "-shared" "" \
+		  "" \
+		  {libjirl.s} \
+		  [list \
+		       [list objdump -d cmodel-libjirl.dd] \
+		  ] \
+		  "libjirl.so" \
+	     ] \
+	]
+}
