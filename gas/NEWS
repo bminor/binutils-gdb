@@ -43,6 +43,17 @@ Changes in 2.38:
 
 * Add support for Intel AVX512_FP16 instructions.
 
+* Add support for the RISC-V scalar crypto extension, version 1.0.0.
+
+* Add support for the RISC-V vector extension, version 1.0.
+
+* Add support for the Z{f,d,q}inx extensions, version 1.0.0-rc.
+
+* Add support for the RISC-V svinval extension, version 1.0.
+
+* Add support for the RISC-V hypervisor extension, as defined by Privileged
+  Specification 1.12.
+
 Changes in 2.37:
 
 * arm-symbianelf support removed.
