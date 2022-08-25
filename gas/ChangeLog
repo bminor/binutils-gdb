@@ -1,3 +1,13 @@
+2022-08-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 29519
+	* config/tc-aarch64.c (s_unreq): Use find_end_of_line().
+	(s_aarch64_cpu): Likewise.
+	(s_aarch64_arch): Likewise.
+	(s_aarch64_arch_extension): Likewise.
+	* testsuite/gas/aarch64/pr29519.d: New test driver file.
+	* testsuite/gas/aarch64/pr29519.s: New test source file.
+
 2022-08-08  Tsukasa OI  <research_trasio@irq.a4lg.com>
 
 	* config/obj-macho.c (obj_mach_o_get_section_names): Wrap two
