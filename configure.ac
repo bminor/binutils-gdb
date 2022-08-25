@@ -1315,9 +1315,6 @@ case "${host}" in
   alpha*-linux*)
     host_makefile_frag="config/mh-alpha-linux"
     ;;
-  hppa*-hp-hpux10*)
-    host_makefile_frag="config/mh-pa-hpux10"
-    ;;
   hppa*-hp-hpux*)
     host_makefile_frag="config/mh-pa"
     ;;
@@ -3927,7 +3924,6 @@ compare_exclusions="$compare_exclusions | gcc/m2/gm2-compiler-boot/SYSTEM*"
 compare_exclusions="$compare_exclusions | gcc/m2/gm2version*"
 case "$target" in
   hppa*64*-*-hpux*) ;;
-  hppa*-*-hpux*) compare_exclusions="$compare_exclusions | */libgcc/lib2funcs* | gcc/function-tests.o" ;;
   powerpc*-ibm-aix*) compare_exclusions="$compare_exclusions | *libgomp*\$(objext)" ;;
 esac
 AC_SUBST(compare_exclusions)
