@@ -157,7 +157,8 @@ static char *pe_dll_search_prefix = NULL;
 
 extern const char *output_filename;
 
-static int is_underscoring (void)
+static int
+is_underscoring (void)
 {
   int u = 0;
   if (pe_leading_underscore != -1)
