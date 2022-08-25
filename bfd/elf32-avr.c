@@ -1048,7 +1048,7 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
 	       input_section->output_offset);
 
       if (srel & 1)
-	return bfd_reloc_outofrange;
+	return bfd_reloc_other;
       if (srel > ((1 << 7) - 1) || (srel < - (1 << 7)))
 	return bfd_reloc_overflow;
       x = bfd_get_16 (input_bfd, contents);
@@ -1066,7 +1066,7 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
 	       input_section->output_offset);
 
       if (srel & 1)
-	return bfd_reloc_outofrange;
+	return bfd_reloc_other;
 
       srel = avr_relative_distance_considering_wrap_around (srel);
 
@@ -1228,11 +1228,11 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
 		    (unsigned int) reloc_addr);
 
 	  if (avr_stub_is_required_for_16_bit_reloc (srel - base_addr))
-	    return bfd_reloc_outofrange;
+	    return bfd_reloc_overflow;
 	}
 
       if (srel & 1)
-	return bfd_reloc_outofrange;
+	return bfd_reloc_other;
       srel = srel >> 1;
       x = bfd_get_16 (input_bfd, contents);
       x = (x & 0xf0f0) | (srel & 0xf) | ((srel << 4) & 0xf00);
@@ -1261,11 +1261,11 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
 		    (unsigned int) reloc_addr);
 
 	  if (avr_stub_is_required_for_16_bit_reloc (srel - base_addr))
-	    return bfd_reloc_outofrange;
+	    return bfd_reloc_overflow;
 	}
 
       if (srel & 1)
-	return bfd_reloc_outofrange;
+	return bfd_reloc_other;
       srel = srel >> 1;
       srel = (srel >> 8) & 0xff;
       x = bfd_get_16 (input_bfd, contents);
@@ -1277,7 +1277,7 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
       contents += rel->r_offset;
       srel = (bfd_signed_vma) relocation + rel->r_addend;
       if (srel & 1)
-	return bfd_reloc_outofrange;
+	return bfd_reloc_other;
       srel = srel >> 1;
       srel = (srel >> 16) & 0xff;
       x = bfd_get_16 (input_bfd, contents);
@@ -1290,7 +1290,7 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
       srel = (bfd_signed_vma) relocation + rel->r_addend;
       srel = -srel;
       if (srel & 1)
-	return bfd_reloc_outofrange;
+	return bfd_reloc_other;
       srel = srel >> 1;
       x = bfd_get_16 (input_bfd, contents);
       x = (x & 0xf0f0) | (srel & 0xf) | ((srel << 4) & 0xf00);
@@ -1302,7 +1302,7 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
       srel = (bfd_signed_vma) relocation + rel->r_addend;
       srel = -srel;
       if (srel & 1)
-	return bfd_reloc_outofrange;
+	return bfd_reloc_other;
       srel = srel >> 1;
       srel = (srel >> 8) & 0xff;
       x = bfd_get_16 (input_bfd, contents);
@@ -1315,7 +1315,7 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
       srel = (bfd_signed_vma) relocation + rel->r_addend;
       srel = -srel;
       if (srel & 1)
-	return bfd_reloc_outofrange;
+	return bfd_reloc_other;
       srel = srel >> 1;
       srel = (srel >> 16) & 0xff;
       x = bfd_get_16 (input_bfd, contents);
@@ -1327,7 +1327,7 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
       contents += rel->r_offset;
       srel = (bfd_signed_vma) relocation + rel->r_addend;
       if (srel & 1)
-	return bfd_reloc_outofrange;
+	return bfd_reloc_other;
       srel = srel >> 1;
       x = bfd_get_16 (input_bfd, contents);
       x |= ((srel & 0x10000) | ((srel << 3) & 0x1f00000)) >> 16;
@@ -1355,11 +1355,11 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
 		    (unsigned int) reloc_addr);
 
 	  if (avr_stub_is_required_for_16_bit_reloc (srel - base_addr))
-	    return bfd_reloc_outofrange;
+	    return bfd_reloc_overflow;
 	}
 
       if (srel & 1)
-	return bfd_reloc_outofrange;
+	return bfd_reloc_other;
       srel = srel >> 1;
       bfd_put_16 (input_bfd, (bfd_vma) srel &0x00ffff, contents);
       break;
@@ -1375,7 +1375,7 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
       contents += rel->r_offset;
       srel = (bfd_signed_vma) relocation + rel->r_addend;
       if ((srel & 0xFFFF) < 0x40 || (srel & 0xFFFF) > 0xbf)
-	return bfd_reloc_outofrange;
+	return bfd_reloc_overflow;
       srel = srel & 0x7f;
       x = bfd_get_16 (input_bfd, contents);
       x |= (srel & 0x0f) | ((srel & 0x30) << 5) | ((srel & 0x40) << 2);
@@ -1386,7 +1386,7 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
       contents += rel->r_offset;
       srel = (bfd_signed_vma) relocation + rel->r_addend;
       if ((srel & 0xffff) > 0x3f)
-	return bfd_reloc_outofrange;
+	return bfd_reloc_overflow;
       x = bfd_get_16 (input_bfd, contents);
       x = (x & 0xf9f0) | ((srel & 0x30) << 5) | (srel & 0x0f);
       bfd_put_16 (input_bfd, x, contents);
@@ -1396,7 +1396,7 @@ avr_final_link_relocate (reloc_howto_type *		    howto,
       contents += rel->r_offset;
       srel = (bfd_signed_vma) relocation + rel->r_addend;
       if ((srel & 0xffff) > 0x1f)
-	return bfd_reloc_outofrange;
+	return bfd_reloc_overflow;
       x = bfd_get_16 (input_bfd, contents);
       x = (x & 0xff07) | ((srel & 0x1f) << 3);
       bfd_put_16 (input_bfd, x, contents);
@@ -1489,8 +1489,6 @@ elf32_avr_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       if (r != bfd_reloc_ok)
 	{
-	  const char * msg = (const char *) NULL;
-
 	  switch (r)
 	    {
 	    case bfd_reloc_overflow:
@@ -1505,25 +1503,29 @@ elf32_avr_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      break;
 
 	    case bfd_reloc_outofrange:
-	      msg = _("internal error: out of range error");
+	      /* xgettext:c-format */
+	      (*info->callbacks->einfo)
+		(_("%X%H: %s against `%s':"
+		   " error: relocation applies outside section\n"),
+		 input_bfd, input_section, rel->r_offset, howto->name, name);
 	      break;
 
-	    case bfd_reloc_notsupported:
-	      msg = _("internal error: unsupported relocation error");
-	      break;
-
-	    case bfd_reloc_dangerous:
-	      msg = _("internal error: dangerous relocation");
+	    case bfd_reloc_other:
+	      /* xgettext:c-format */
+	      (*info->callbacks->einfo)
+		(_("%X%H: %s against `%s':"
+		   " error: relocation target address is odd\n"),
+		 input_bfd, input_section, rel->r_offset, howto->name, name);
 	      break;
 
 	    default:
-	      msg = _("internal error: unknown error");
+	      /* xgettext:c-format */
+	      (*info->callbacks->einfo)
+		(_("%X%H: %s against `%s':"
+		   " internal error: unexpected relocation result %d\n"),
+		 input_bfd, input_section, rel->r_offset, howto->name, name, r);
 	      break;
 	    }
-
-	  if (msg)
-	    (*info->callbacks->warning) (info, msg, name, input_bfd,
-					 input_section, rel->r_offset);
 	}
     }
 
