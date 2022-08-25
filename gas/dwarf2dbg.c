@@ -160,6 +160,10 @@
 #define TC_PARSE_CONS_RETURN_NONE BFD_RELOC_NONE
 #endif
 
+#define GAS_ABBREV_COMP_UNIT 1
+#define GAS_ABBREV_SUBPROG   2
+#define GAS_ABBREV_NO_TYPE   3
+
 struct line_entry
 {
   struct line_entry *next;
@@ -2730,7 +2734,7 @@ out_debug_abbrev (segT abbrev_seg,
 
   subseg_set (abbrev_seg, 0);
 
-  out_uleb128 (1);
+  out_uleb128 (GAS_ABBREV_COMP_UNIT);
   out_uleb128 (DW_TAG_compile_unit);
   out_byte (have_efunc || have_lfunc ? DW_CHILDREN_yes : DW_CHILDREN_no);
   if (DWARF2_VERSION < 4)
@@ -2761,7 +2765,7 @@ out_debug_abbrev (segT abbrev_seg,
 
   if (have_efunc || have_lfunc)
     {
-      out_uleb128 (2);
+      out_uleb128 (GAS_ABBREV_SUBPROG);
       out_uleb128 (DW_TAG_subprogram);
       out_byte (DW_CHILDREN_no);
       out_abbrev (DW_AT_name, DW_FORM_strp);
@@ -2776,10 +2780,26 @@ out_debug_abbrev (segT abbrev_seg,
       else
 	/* Any non-zero value other than DW_FORM_flag will do.  */
 	*func_formP = DW_FORM_block;
+
+      /* PR 29517: Provide a return type for the function.  */
+      if (DWARF2_VERSION > 2)
+	out_abbrev (DW_AT_type, DW_FORM_ref_udata);
+
       out_abbrev (DW_AT_low_pc, DW_FORM_addr);
       out_abbrev (DW_AT_high_pc,
 		  DWARF2_VERSION < 4 ? DW_FORM_addr : DW_FORM_udata);
       out_abbrev (0, 0);
+
+      if (DWARF2_VERSION > 2)
+	{
+	  /* PR 29517: We do not actually know the return type of these
+	     functions, so provide an abbrev that uses DWARF's unspecified
+	     type.  */
+	  out_uleb128 (GAS_ABBREV_NO_TYPE);
+	  out_uleb128 (DW_TAG_unspecified_type);
+	  out_byte (DW_CHILDREN_no);
+	  out_abbrev (0, 0);
+	}
     }
 
   /* Terminate the abbreviations for this compilation unit.  */
@@ -2797,6 +2817,7 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
   expressionS exp;
   symbolS *info_end;
   int sizeof_offset;
+  valueT no_type_die = 0;
 
   memset (&exp, 0, sizeof exp);
   sizeof_offset = out_header (info_seg, &exp);
@@ -2825,8 +2846,18 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
       TC_DWARF2_EMIT_OFFSET (section_symbol (abbrev_seg), sizeof_offset);
     }
 
+  if (func_form && DWARF2_VERSION > 2)
+    {
+      /* PR 29517: Generate a DIE for the unspecified type abbrev.
+	 We do it here so that the offset from the start of the
+	 section is fixed.  */
+      subseg_set (info_seg, 0);
+      no_type_die = frag_now_fix_octets ();
+      out_uleb128 (GAS_ABBREV_NO_TYPE);
+    }
+
   /* DW_TAG_compile_unit DIE abbrev */
-  out_uleb128 (1);
+  out_uleb128 (GAS_ABBREV_COMP_UNIT);
 
   /* DW_AT_stmt_list */
   TC_DWARF2_EMIT_OFFSET (section_symbol (line_seg),
@@ -2917,7 +2948,7 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
 	  subseg_set (info_seg, 0);
 
 	  /* DW_TAG_subprogram DIE abbrev */
-	  out_uleb128 (2);
+	  out_uleb128 (GAS_ABBREV_SUBPROG);
 
 	  /* DW_AT_name */
 	  TC_DWARF2_EMIT_OFFSET (name_sym, sizeof_offset);
@@ -2925,6 +2956,11 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
 	  /* DW_AT_external.  */
 	  if (func_form == DW_FORM_flag)
 	    out_byte (S_IS_EXTERNAL (symp));
+
+	  /* PR 29517: Let consumers know that we do not
+	     have return type information for this function.  */
+	  if (DWARF2_VERSION > 2)
+	    out_uleb128 (no_type_die);
 
 	  /* DW_AT_low_pc */
 	  exp.X_op = O_symbol;

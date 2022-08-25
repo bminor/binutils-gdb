@@ -1,5 +1,23 @@
 2022-08-25  Nick Clifton  <nickc@redhat.com>
 
+	PR 29517
+	* dwarf2dbg.c (GAS_ABBREV_COMP_UNIT): New defined constant.
+	(GAS_ABBREV_SUBPROG): New defined constant.
+	(GAS_ABBREV_NO_TYPE): New defined constant.
+	(out_debug_abbrev): Use the new defined constants when emitting
+	abbreviation numbers.  Generate an abbreviation for an unspecified
+	type.
+	(out_debug_info): Use the new defined constants when referring to
+	abbreviations.  Generate a use of the no_type abbreviation.
+	Reference the use when generating DIEs for functions.
+	* testsuite/gas/elf/dwarf-3-func.d: Update to allow for newly
+	extended output from the assembler.
+	* testsuite/gas/elf/dwarf-5-func-global.d: Likewise.
+	* testsuite/gas/elf/dwarf-5-func-local.d: Likewise.
+	* testsuite/gas/elf/dwarf-5-func.d: Likewise.
+
+2022-08-25  Nick Clifton  <nickc@redhat.com>
+
 	PR 29519
 	* config/tc-aarch64.c (s_unreq): Use find_end_of_line().
 	(s_aarch64_cpu): Likewise.
