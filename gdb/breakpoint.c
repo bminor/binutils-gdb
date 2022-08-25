@@ -4803,7 +4803,7 @@ print_solib_event (bool is_catchpoint)
    further info to be printed.  */
 
 enum print_stop_action
-bpstat_print (bpstat *bs, int kind)
+bpstat_print (bpstat *bs, target_waitkind kind)
 {
   enum print_stop_action val;
 

@@ -35,6 +35,7 @@
 #include "gdbsupport/refcounted-object.h"
 #include "gdbsupport/safe-iterator.h"
 #include "cli/cli-script.h"
+#include "target/waitstatus.h"
 
 struct block;
 struct gdbpy_breakpoint_object;
@@ -1226,10 +1227,8 @@ extern bool bpstat_causes_stop (bpstat *);
    just to things like whether watchpoints are set.  */
 extern bool bpstat_should_step ();
 
-/* Print a message indicating what happened.  Returns nonzero to
-   say that only the source line should be printed after this (zero
-   return means print the frame as well as the source line).  */
-extern enum print_stop_action bpstat_print (bpstat *, int);
+/* Print a message indicating what happened.  */
+extern enum print_stop_action bpstat_print (bpstat *bs, target_waitkind kind);
 
 /* Put in *NUM the breakpoint number of the first breakpoint we are
    stopped at.  *BSP upon return is a bpstat which points to the
