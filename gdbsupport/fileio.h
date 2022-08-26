@@ -67,28 +67,32 @@
 #define FILEIO_SEEK_END             2
 
 /* errno values */
-#define FILEIO_EPERM                1
-#define FILEIO_ENOENT               2
-#define FILEIO_EINTR                4
-#define FILEIO_EIO                  5
-#define FILEIO_EBADF                9
-#define FILEIO_EACCES              13
-#define FILEIO_EFAULT              14
-#define FILEIO_EBUSY               16
-#define FILEIO_EEXIST              17
-#define FILEIO_ENODEV              19
-#define FILEIO_ENOTDIR             20
-#define FILEIO_EISDIR              21
-#define FILEIO_EINVAL              22
-#define FILEIO_ENFILE              23
-#define FILEIO_EMFILE              24
-#define FILEIO_EFBIG               27
-#define FILEIO_ENOSPC              28
-#define FILEIO_ESPIPE              29
-#define FILEIO_EROFS               30
-#define FILEIO_ENOSYS              88
-#define FILEIO_ENAMETOOLONG        91
-#define FILEIO_EUNKNOWN          9999
+enum fileio_error
+{
+  FILEIO_SUCCESS      =    0,
+  FILEIO_EPERM        =    1,
+  FILEIO_ENOENT       =    2,
+  FILEIO_EINTR        =    4,
+  FILEIO_EIO          =    5,
+  FILEIO_EBADF        =    9,
+  FILEIO_EACCES       =   13,
+  FILEIO_EFAULT       =   14,
+  FILEIO_EBUSY        =   16,
+  FILEIO_EEXIST       =   17,
+  FILEIO_ENODEV       =   19,
+  FILEIO_ENOTDIR      =   20,
+  FILEIO_EISDIR       =   21,
+  FILEIO_EINVAL       =   22,
+  FILEIO_ENFILE       =   23,
+  FILEIO_EMFILE       =   24,
+  FILEIO_EFBIG        =   27,
+  FILEIO_ENOSPC       =   28,
+  FILEIO_ESPIPE       =   29,
+  FILEIO_EROFS        =   30,
+  FILEIO_ENOSYS       =   88,
+  FILEIO_ENAMETOOLONG =   91,
+  FILEIO_EUNKNOWN     = 9999,
+};
 
 #define FIO_INT_LEN   4
 #define FIO_UINT_LEN  4
@@ -133,7 +137,7 @@ struct fio_timeval
 
 /* Convert a host-format errno value to a File-I/O error number.  */
 
-extern int host_to_fileio_error (int error);
+extern fileio_error host_to_fileio_error (int error);
 
 /* Convert File-I/O open flags FFLAGS to host format, storing
    the result in *FLAGS.  Return 0 on success, -1 on error.  */

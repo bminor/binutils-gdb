@@ -560,26 +560,26 @@ public:
 
   int fileio_open (struct inferior *inf, const char *filename,
 		   int flags, int mode, int warn_if_slow,
-		   int *target_errno) override;
+		   fileio_error *target_errno) override;
 
   int fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
-		     ULONGEST offset, int *target_errno) override;
+		     ULONGEST offset, fileio_error *target_errno) override;
 
   int fileio_pread (int fd, gdb_byte *read_buf, int len,
-		    ULONGEST offset, int *target_errno) override;
+		    ULONGEST offset, fileio_error *target_errno) override;
 
-  int fileio_fstat (int fd, struct stat *sb, int *target_errno) override;
+  int fileio_fstat (int fd, struct stat *sb, fileio_error *target_errno) override;
 
-  int fileio_close (int fd, int *target_errno) override;
+  int fileio_close (int fd, fileio_error *target_errno) override;
 
   int fileio_unlink (struct inferior *inf,
 		     const char *filename,
-		     int *target_errno) override;
+		     fileio_error *target_errno) override;
 
   gdb::optional<std::string>
     fileio_readlink (struct inferior *inf,
 		     const char *filename,
-		     int *target_errno) override;
+		     fileio_error *target_errno) override;
 
   bool supports_enable_disable_tracepoint () override;
 
@@ -701,25 +701,25 @@ public: /* Remote specific methods.  */
   void remote_file_delete (const char *remote_file, int from_tty);
 
   int remote_hostio_pread (int fd, gdb_byte *read_buf, int len,
-			   ULONGEST offset, int *remote_errno);
+			   ULONGEST offset, fileio_error *remote_errno);
   int remote_hostio_pwrite (int fd, const gdb_byte *write_buf, int len,
-			    ULONGEST offset, int *remote_errno);
+			    ULONGEST offset, fileio_error *remote_errno);
   int remote_hostio_pread_vFile (int fd, gdb_byte *read_buf, int len,
-				 ULONGEST offset, int *remote_errno);
+				 ULONGEST offset, fileio_error *remote_errno);
 
   int remote_hostio_send_command (int command_bytes, int which_packet,
-				  int *remote_errno, const char **attachment,
+				  fileio_error *remote_errno, const char **attachment,
 				  int *attachment_len);
   int remote_hostio_set_filesystem (struct inferior *inf,
-				    int *remote_errno);
+				    fileio_error *remote_errno);
   /* We should get rid of this and use fileio_open directly.  */
   int remote_hostio_open (struct inferior *inf, const char *filename,
 			  int flags, int mode, int warn_if_slow,
-			  int *remote_errno);
-  int remote_hostio_close (int fd, int *remote_errno);
+			  fileio_error *remote_errno);
+  int remote_hostio_close (int fd, fileio_error *remote_errno);
 
   int remote_hostio_unlink (inferior *inf, const char *filename,
-			    int *remote_errno);
+			    fileio_error *remote_errno);
 
   struct remote_state *get_remote_state ();
 
@@ -12130,7 +12130,7 @@ remote_buffer_add_int (char **buffer, int *left, ULONGEST value)
 }
 
 /* Parse an I/O result packet from BUFFER.  Set RETCODE to the return
-   value, *REMOTE_ERRNO to the remote error number or zero if none
+   value, *REMOTE_ERRNO to the remote error number or FILEIO_SUCCESS if none
    was included, and *ATTACHMENT to point to the start of the annex
    if any.  The length of the packet isn't needed here; there may
    be NUL bytes in BUFFER, but they will be after *ATTACHMENT.
@@ -12140,11 +12140,11 @@ remote_buffer_add_int (char **buffer, int *left, ULONGEST value)
 
 static int
 remote_hostio_parse_result (const char *buffer, int *retcode,
-			    int *remote_errno, const char **attachment)
+			    fileio_error *remote_errno, const char **attachment)
 {
   char *p, *p2;
 
-  *remote_errno = 0;
+  *remote_errno = FILEIO_SUCCESS;
   *attachment = NULL;
 
   if (buffer[0] != 'F')
@@ -12159,7 +12159,7 @@ remote_hostio_parse_result (const char *buffer, int *retcode,
   if (*p == ',')
     {
       errno = 0;
-      *remote_errno = strtol (p + 1, &p2, 16);
+      *remote_errno = (fileio_error) strtol (p + 1, &p2, 16);
       if (errno != 0 || p + 1 == p2)
 	return -1;
       p = p2;
@@ -12196,7 +12196,7 @@ remote_hostio_parse_result (const char *buffer, int *retcode,
 
 int
 remote_target::remote_hostio_send_command (int command_bytes, int which_packet,
-					   int *remote_errno, const char **attachment,
+					   fileio_error *remote_errno, const char **attachment,
 					   int *attachment_len)
 {
   struct remote_state *rs = get_remote_state ();
@@ -12281,7 +12281,7 @@ readahead_cache::invalidate_fd (int fd)
 
 int
 remote_target::remote_hostio_set_filesystem (struct inferior *inf,
-					     int *remote_errno)
+					     fileio_error *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   int required_pid = (inf == NULL || inf->fake_pid_p) ? 0 : inf->pid;
@@ -12318,7 +12318,7 @@ remote_target::remote_hostio_set_filesystem (struct inferior *inf,
 int
 remote_target::remote_hostio_open (inferior *inf, const char *filename,
 				   int flags, int mode, int warn_if_slow,
-				   int *remote_errno)
+				   fileio_error *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf.data ();
@@ -12361,7 +12361,7 @@ remote_target::remote_hostio_open (inferior *inf, const char *filename,
 int
 remote_target::fileio_open (struct inferior *inf, const char *filename,
 			    int flags, int mode, int warn_if_slow,
-			    int *remote_errno)
+			    fileio_error *remote_errno)
 {
   return remote_hostio_open (inf, filename, flags, mode, warn_if_slow,
 			     remote_errno);
@@ -12371,7 +12371,7 @@ remote_target::fileio_open (struct inferior *inf, const char *filename,
 
 int
 remote_target::remote_hostio_pwrite (int fd, const gdb_byte *write_buf, int len,
-				     ULONGEST offset, int *remote_errno)
+				     ULONGEST offset, fileio_error *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf.data ();
@@ -12398,7 +12398,7 @@ remote_target::remote_hostio_pwrite (int fd, const gdb_byte *write_buf, int len,
 
 int
 remote_target::fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
-			      ULONGEST offset, int *remote_errno)
+			      ULONGEST offset, fileio_error *remote_errno)
 {
   return remote_hostio_pwrite (fd, write_buf, len, offset, remote_errno);
 }
@@ -12408,7 +12408,7 @@ remote_target::fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
 
 int
 remote_target::remote_hostio_pread_vFile (int fd, gdb_byte *read_buf, int len,
-					  ULONGEST offset, int *remote_errno)
+					  ULONGEST offset, fileio_error *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf.data ();
@@ -12468,7 +12468,7 @@ readahead_cache::pread (int fd, gdb_byte *read_buf, size_t len,
 
 int
 remote_target::remote_hostio_pread (int fd, gdb_byte *read_buf, int len,
-				    ULONGEST offset, int *remote_errno)
+				    ULONGEST offset, fileio_error *remote_errno)
 {
   int ret;
   struct remote_state *rs = get_remote_state ();
@@ -12508,7 +12508,7 @@ remote_target::remote_hostio_pread (int fd, gdb_byte *read_buf, int len,
 
 int
 remote_target::fileio_pread (int fd, gdb_byte *read_buf, int len,
-			     ULONGEST offset, int *remote_errno)
+			     ULONGEST offset, fileio_error *remote_errno)
 {
   return remote_hostio_pread (fd, read_buf, len, offset, remote_errno);
 }
@@ -12516,7 +12516,7 @@ remote_target::fileio_pread (int fd, gdb_byte *read_buf, int len,
 /* Implementation of to_fileio_close.  */
 
 int
-remote_target::remote_hostio_close (int fd, int *remote_errno)
+remote_target::remote_hostio_close (int fd, fileio_error *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf.data ();
@@ -12533,7 +12533,7 @@ remote_target::remote_hostio_close (int fd, int *remote_errno)
 }
 
 int
-remote_target::fileio_close (int fd, int *remote_errno)
+remote_target::fileio_close (int fd, fileio_error *remote_errno)
 {
   return remote_hostio_close (fd, remote_errno);
 }
@@ -12542,7 +12542,7 @@ remote_target::fileio_close (int fd, int *remote_errno)
 
 int
 remote_target::remote_hostio_unlink (inferior *inf, const char *filename,
-				     int *remote_errno)
+				     fileio_error *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf.data ();
@@ -12562,7 +12562,7 @@ remote_target::remote_hostio_unlink (inferior *inf, const char *filename,
 
 int
 remote_target::fileio_unlink (struct inferior *inf, const char *filename,
-			      int *remote_errno)
+			      fileio_error *remote_errno)
 {
   return remote_hostio_unlink (inf, filename, remote_errno);
 }
@@ -12571,7 +12571,7 @@ remote_target::fileio_unlink (struct inferior *inf, const char *filename,
 
 gdb::optional<std::string>
 remote_target::fileio_readlink (struct inferior *inf, const char *filename,
-				int *remote_errno)
+				fileio_error *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf.data ();
@@ -12608,7 +12608,7 @@ remote_target::fileio_readlink (struct inferior *inf, const char *filename,
 /* Implementation of to_fileio_fstat.  */
 
 int
-remote_target::fileio_fstat (int fd, struct stat *st, int *remote_errno)
+remote_target::fileio_fstat (int fd, struct stat *st, fileio_error *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf.data ();
@@ -12680,7 +12680,8 @@ remote_target::filesystem_is_local ()
 
       if (ps == PACKET_SUPPORT_UNKNOWN)
 	{
-	  int fd, remote_errno;
+	  int fd;
+	  fileio_error remote_errno;
 
 	  /* Try opening a file to probe support.  The supplied
 	     filename is irrelevant, we only care about whether
@@ -12715,7 +12716,7 @@ remote_target::filesystem_is_local ()
 }
 
 static int
-remote_fileio_errno_to_host (int errnum)
+remote_fileio_errno_to_host (fileio_error errnum)
 {
   switch (errnum)
     {
@@ -12766,7 +12767,7 @@ remote_fileio_errno_to_host (int errnum)
 }
 
 static char *
-remote_hostio_error (int errnum)
+remote_hostio_error (fileio_error errnum)
 {
   int host_error = remote_fileio_errno_to_host (errnum);
 
@@ -12792,7 +12793,7 @@ public:
       {
 	try
 	  {
-	    int remote_errno;
+	    fileio_error remote_errno;
 	    m_remote->remote_hostio_close (m_fd, &remote_errno);
 	  }
 	catch (...)
@@ -12843,7 +12844,8 @@ void
 remote_target::remote_file_put (const char *local_file, const char *remote_file,
 				int from_tty)
 {
-  int retcode, remote_errno, bytes, io_size;
+  int retcode, bytes, io_size;
+  fileio_error remote_errno;
   int bytes_in_buffer;
   int saw_eof;
   ULONGEST offset;
@@ -12935,7 +12937,8 @@ void
 remote_target::remote_file_get (const char *remote_file, const char *local_file,
 				int from_tty)
 {
-  int remote_errno, bytes, io_size;
+  fileio_error remote_errno;
+  int bytes, io_size;
   ULONGEST offset;
 
   scoped_remote_fd fd
@@ -12993,7 +12996,8 @@ remote_file_delete (const char *remote_file, int from_tty)
 void
 remote_target::remote_file_delete (const char *remote_file, int from_tty)
 {
-  int retcode, remote_errno;
+  int retcode;
+  fileio_error remote_errno;
 
   retcode = remote_hostio_unlink (NULL, remote_file, &remote_errno);
   if (retcode == -1)

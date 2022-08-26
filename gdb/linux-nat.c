@@ -4372,7 +4372,7 @@ linux_nat_fileio_pid_of (struct inferior *inf)
 int
 linux_nat_target::fileio_open (struct inferior *inf, const char *filename,
 			       int flags, int mode, int warn_if_slow,
-			       int *target_errno)
+			       fileio_error *target_errno)
 {
   int nat_flags;
   mode_t nat_mode;
@@ -4397,7 +4397,7 @@ linux_nat_target::fileio_open (struct inferior *inf, const char *filename,
 
 gdb::optional<std::string>
 linux_nat_target::fileio_readlink (struct inferior *inf, const char *filename,
-				   int *target_errno)
+				   fileio_error *target_errno)
 {
   char buf[PATH_MAX];
   int len;
@@ -4417,7 +4417,7 @@ linux_nat_target::fileio_readlink (struct inferior *inf, const char *filename,
 
 int
 linux_nat_target::fileio_unlink (struct inferior *inf, const char *filename,
-				 int *target_errno)
+				 fileio_error *target_errno)
 {
   int ret;
 

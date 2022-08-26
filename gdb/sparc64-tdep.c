@@ -166,7 +166,7 @@ get_adi_info (pid_t pid)
 void
 sparc64_forget_process (pid_t pid)
 {
-  int target_errno;
+  fileio_error target_errno;
 
   for (auto pit = adi_proc_list.before_begin (),
 	 it = std::next (pit);
@@ -287,7 +287,7 @@ adi_tag_fd (void)
 
   char cl_name[MAX_PROC_NAME_SIZE];
   snprintf (cl_name, sizeof(cl_name), "/proc/%ld/adi/tags", (long) pid);
-  int target_errno;
+  fileio_error target_errno;
   proc->stat.tag_fd = target_fileio_open (NULL, cl_name, O_RDWR|O_EXCL, 
 					  false, 0, &target_errno);
   return proc->stat.tag_fd;
@@ -350,7 +350,7 @@ adi_read_versions (CORE_ADDR vaddr, size_t size, gdb_byte *tags)
 	    paddress (target_gdbarch (), vaddr * ast.blksize));
     }
 
-  int target_errno;
+  fileio_error target_errno;
   return target_fileio_pread (fd, tags, size, vaddr, &target_errno);
 }
 
@@ -371,7 +371,7 @@ adi_write_versions (CORE_ADDR vaddr, size_t size, unsigned char *tags)
 	    paddress (target_gdbarch (), vaddr * ast.blksize));
     }
 
-  int target_errno;
+  fileio_error target_errno;
   return target_fileio_pwrite (fd, tags, size, vaddr, &target_errno);
 }
 

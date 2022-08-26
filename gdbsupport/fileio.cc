@@ -24,7 +24,7 @@
 
 /* See fileio.h.  */
 
-int
+fileio_error
 host_to_fileio_error (int error)
 {
   switch (error)

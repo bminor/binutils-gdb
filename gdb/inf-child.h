@@ -75,19 +75,19 @@ public:
 
   int fileio_open (struct inferior *inf, const char *filename,
 		   int flags, int mode, int warn_if_slow,
-		   int *target_errno) override;
+		   fileio_error *target_errno) override;
   int fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
-		     ULONGEST offset, int *target_errno) override;
+		     ULONGEST offset, fileio_error *target_errno) override;
   int fileio_pread (int fd, gdb_byte *read_buf, int len,
-		    ULONGEST offset, int *target_errno) override;
-  int fileio_fstat (int fd, struct stat *sb, int *target_errno) override;
-  int fileio_close (int fd, int *target_errno) override;
+		    ULONGEST offset, fileio_error *target_errno) override;
+  int fileio_fstat (int fd, struct stat *sb, fileio_error *target_errno) override;
+  int fileio_close (int fd, fileio_error *target_errno) override;
   int fileio_unlink (struct inferior *inf,
 		     const char *filename,
-		     int *target_errno) override;
+		     fileio_error *target_errno) override;
   gdb::optional<std::string> fileio_readlink (struct inferior *inf,
 					      const char *filename,
-					      int *target_errno) override;
+					      fileio_error *target_errno) override;
   bool use_agent (bool use) override;
 
   bool can_use_agent () override;

@@ -813,7 +813,7 @@ linux_info_proc (struct gdbarch *gdbarch, const char *args,
   int status_f = (what == IP_STATUS || what == IP_ALL);
   int stat_f = (what == IP_STAT || what == IP_ALL);
   char filename[100];
-  int target_errno;
+  fileio_error target_errno;
 
   if (args && isdigit (args[0]))
     {
