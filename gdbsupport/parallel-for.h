@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <type_traits>
+#include "gdbsupport/invoke-result.h"
 #include "gdbsupport/thread-pool.h"
 #include "gdbsupport/function-view.h"
 
@@ -132,14 +133,14 @@ private:
 
 template<class RandomIt, class RangeFunction>
 typename gdb::detail::par_for_accumulator<
-    typename std::result_of<RangeFunction (RandomIt, RandomIt)>::type
+    typename gdb::invoke_result<RangeFunction, RandomIt, RandomIt>::type
   >::result_type
 parallel_for_each (unsigned n, RandomIt first, RandomIt last,
 		   RangeFunction callback,
 		   gdb::function_view<size_t(RandomIt)> task_size = nullptr)
 {
   using result_type
-    = typename std::result_of<RangeFunction (RandomIt, RandomIt)>::type;
+    = typename gdb::invoke_result<RangeFunction, RandomIt, RandomIt>::type;
 
   /* If enabled, print debug info about how the work is distributed across
      the threads.  */
@@ -276,14 +277,13 @@ parallel_for_each (unsigned n, RandomIt first, RandomIt last,
 
 template<class RandomIt, class RangeFunction>
 typename gdb::detail::par_for_accumulator<
-    typename std::result_of<RangeFunction (RandomIt, RandomIt)>::type
+    typename gdb::invoke_result<RangeFunction, RandomIt, RandomIt>::type
   >::result_type
 sequential_for_each (unsigned n, RandomIt first, RandomIt last,
 		     RangeFunction callback,
 		     gdb::function_view<size_t(RandomIt)> task_size = nullptr)
 {
-  using result_type
-    = typename std::result_of<RangeFunction (RandomIt, RandomIt)>::type;
+  using result_type = typename gdb::invoke_result<RangeFunction, RandomIt, RandomIt>::type;
 
   gdb::detail::par_for_accumulator<result_type> results (0);
 
