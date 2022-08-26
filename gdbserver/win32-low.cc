@@ -20,7 +20,7 @@
 
 #include "server.h"
 #include "regcache.h"
-#include "gdb/fileio.h"
+#include "gdbsupport/fileio.h"
 #include "mem-break.h"
 #include "win32-low.h"
 #include "gdbthread.h"

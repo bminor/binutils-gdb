@@ -30,7 +30,7 @@
 #endif
 #endif
 #include "target.h"
-#include "gdb/fileio.h"
+#include "gdbsupport/fileio.h"
 #include "inferior.h"
 #include "cli/cli-style.h"
 #include <unordered_map>

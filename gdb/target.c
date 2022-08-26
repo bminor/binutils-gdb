@@ -40,7 +40,7 @@
 #include "exec.h"
 #include "inline-frame.h"
 #include "tracepoint.h"
-#include "gdb/fileio.h"
+#include "gdbsupport/fileio.h"
 #include "gdbsupport/agent.h"
 #include "auxv.h"
 #include "target-debug.h"

@@ -59,7 +59,7 @@
 #include "gdbcore.h"
 
 #include "remote-fileio.h"
-#include "gdb/fileio.h"
+#include "gdbsupport/fileio.h"
 #include <sys/stat.h>
 #include "xml-support.h"
 
