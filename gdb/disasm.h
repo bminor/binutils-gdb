@@ -255,15 +255,15 @@ private:
      non-memory error.  */
   gdb::optional<CORE_ADDR> m_err_memaddr;
 
+  /* The stream to which disassembler output will be written.  */
+  ui_file *m_dest;
+
   /* Disassembler output is built up into this buffer.  Whether this
      string_file is created with styling support or not depends on the
      value of use_ext_lang_colorization_p, as well as whether disassembler
      styling in general is turned on, and also, whether *m_dest supports
      styling or not.  */
   string_file m_buffer;
-
-  /* The stream to which disassembler output will be written.  */
-  ui_file *m_dest;
 
   /* When true, m_buffer will be created without styling support,
      otherwise, m_buffer will be created with styling support.
@@ -284,6 +284,21 @@ private:
 				    struct disassemble_info *info);
   static void dis_asm_print_address (bfd_vma addr,
 				     struct disassemble_info *info);
+
+  /* Return true if we should use the extension language to apply
+     disassembler styling.  This requires disassembler styling to be on
+     (i.e. 'set style disassembler enabled on'), the output stream needs to
+     support styling, and libopcode styling needs to be either off, or not
+     supported for the current architecture (libopcodes is used in
+     preference to the extension language method).  */
+  bool use_ext_lang_for_styling () const;
+
+  /* Return true if we should use libopcodes to apply disassembler styling.
+     This requires disassembler styling to be on (i.e. 'set style
+     disassembler enabled on'), the output stream needs to support styling,
+     and libopcodes styling needs to be supported for the current
+     architecture, and not disabled by the user.  */
+  bool use_libopcodes_for_styling () const;
 };
 
 /* An instruction to be disassembled.  */

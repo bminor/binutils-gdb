@@ -394,6 +394,66 @@ proc test_disable_disassembler_styling { } {
     }
 }
 
+# Disassemble a single isntruction at the start of main, then strip
+# off the address and symbol information, returning just the
+# disassembled instruction part.
+proc get_single_disassembled_insn {} {
+    set disasm_line [capture_command_output "x/1i *main" ""]
+    regexp "^\[^:\]+:\\s*(.*)$" $disasm_line whole_match insn
+    return $insn
+}
+
+# Check that, if the user is using Python Pygments for disassembler
+# styling, then the styling correctly switches off when an error is
+# detected in the Python code.
+proc test_disassembler_error_handling { } {
+
+    # This test requires the Python Pygments module to be installed
+    # and used by GDB.
+    if { !$::python_disassembly_styling } {
+	return
+    }
+
+    save_vars { env(TERM) } {
+	# We need an ANSI-capable terminal to get the output.
+	setenv TERM ansi
+
+	# Restart GDB with the correct TERM variable setting, this
+	# means that GDB will enable styling.
+	clean_restart_and_disable "restart 4" $::binfile
+
+	# Disable use of libopcodes for styling.  As this function is
+	# only called when Python Pygments module is available, we
+	# should now be using that module to style the disassembler
+	# output.
+	gdb_test_no_output "maint set libopcodes-styling enabled off"
+
+	# Disassemble a single instruction and ensure that the output
+	# has styling markers in it.
+	set insn_before [get_single_disassembled_insn]
+	gdb_assert { [regexp "\033" $insn_before] } \
+	    "have style markers when Pygments is working fine"
+
+	# Now replace the standard function that colorizes the
+	# disassembler output, with a new function that always returns
+	# None, this should cause GDB to stop using the Pygments
+	# module for disassembler styling.
+	gdb_py_test_silent_cmd \
+	    [multi_line_input \
+		 "python" \
+		 "def replacement_colorize_disasm(content,gdbarch):" \
+		 "  return None" \
+		 "gdb.styling.colorize_disasm = replacement_colorize_disasm" \
+		 "\004"] \
+	    "setup replacement colorize_disasm function" \
+	    true
+
+	set insn_after [get_single_disassembled_insn]
+	gdb_assert { ![regexp "\033" $insn_after] } \
+	    "have no style markers when Pygments is broken"
+    }
+}
+
 # A separate test from the above as the styled text this checks can't
 # currently be disabled (the text is printed too early in GDB's
 # startup process).
@@ -434,6 +494,10 @@ foreach style { title file function highlight variable \
 
 # Check that the disassembler styling can be disabled.
 test_disable_disassembler_styling
+
+# Check that GDB handles an error in the Python Pygments disassembly
+# styling code.
+test_disassembler_error_handling
 
 # Finally, check the styling of the version string during startup.
 test_startup_version_string
