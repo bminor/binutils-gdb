@@ -497,7 +497,7 @@ get_command_line_buffer (void)
    instead of calling gdb_readline_no_editing_callback, give gdb a
    chance to detect errors and do something.  */
 
-void
+static void
 stdin_event_handler (int error, gdb_client_data client_data)
 {
   struct ui *ui = (struct ui *) client_data;
