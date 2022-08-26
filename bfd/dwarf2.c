@@ -1412,7 +1412,7 @@ read_indexed_address (uint64_t idx, struct comp_unit *unit)
 		     &file->dwarf_addr_buffer, &file->dwarf_addr_size))
     return 0;
 
-  if (_bfd_mul_overflow (idx, unit->offset_size, &offset))
+  if (_bfd_mul_overflow (idx, unit->addr_size, &offset))
     return 0;
 
   offset += unit->dwarf_addr_offset;
@@ -1423,9 +1423,9 @@ read_indexed_address (uint64_t idx, struct comp_unit *unit)
 
   info_ptr = file->dwarf_addr_buffer + offset;
 
-  if (unit->offset_size == 4)
+  if (unit->addr_size == 4)
     return bfd_get_32 (unit->abfd, info_ptr);
-  else if (unit->offset_size == 8)
+  else if (unit->addr_size == 8)
     return bfd_get_64 (unit->abfd, info_ptr);
   else
     return 0;
