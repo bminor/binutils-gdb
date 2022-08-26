@@ -317,39 +317,76 @@ proc test_disable_disassembler_styling { } {
 	set styled_hex [limited_style $::hex address]
 	set main [limited_style main function]
 
-	foreach_with_prefix disasm_styling { on off } {
-	    gdb_test_no_output "set style disassembler enabled ${disasm_styling}"
+	foreach_with_prefix libopcodes { on off } {
 
-	    set saw_header_line false
-	    set saw_styled_output_line false
-	    set saw_unstyled_output_line false
-	    gdb_test_multiple "disassemble main" "" {
-		-re "disassemble main\r\n" {
+	    set command_failed false
+	    gdb_test_multiple "maint set libopcodes-styling enabled ${libopcodes}" "" {
+		-re "^maint set libopcodes-styling enabled ${libopcodes}\r\n" {
 		    exp_continue
 		}
-		-re "^Dump of assembler code for function $main:" {
-		    set saw_header_line true
+
+		-re "Use of libopcodes styling not supported on architecture \[^\r\n\]+\r\n" {
+		    set command_failed true
 		    exp_continue
 		}
-		-re "^\\s+${styled_hex}\\s+<\[^>\]+>:\\s+\[^\r\n\033\]+\r\n" {
-		    set saw_unstyled_output_line true
-		    exp_continue
-		}
-		-re "^\\s+${styled_hex}\\s+<\[^>\]+>:\\s+\[^\r\n\]+\033\[^\r\n\]+\r\n" {
-		    set saw_styled_output_line true
-		    exp_continue
-		}
-		-re "^End of assembler dump\\.\r\n" {
-		    exp_continue
-		}
+
 		-re "^$::gdb_prompt $" {
-		    gdb_assert { $saw_header_line }
-		    if { $disasm_styling } {
-			gdb_assert { $saw_styled_output_line }
-			gdb_assert { !$saw_unstyled_output_line }
-		    } else {
-			gdb_assert { !$saw_styled_output_line }
-			gdb_assert { $saw_unstyled_output_line }
+		    gdb_assert { !$command_failed || [string equal $libopcodes "on"] } \
+			$gdb_test_name
+		}
+	    }
+
+	    if { $libopcodes == "on" && $command_failed } {
+		# We tried to turn on libopcodes disassembler styling,
+		# but this is not supported on this architecture.
+		continue
+	    }
+
+	    foreach_with_prefix disasm_styling { on off } {
+		gdb_test_no_output "set style disassembler enabled ${disasm_styling}"
+
+		if { $libopcodes == "off" && $disasm_styling == "on" \
+			 && !$::python_disassembly_styling} {
+		    # We have libopcodes based styling off, but
+		    # disassembler styling turned on.  We're expecting
+		    # Python Pygments to be used to add styling.
+		    #
+		    # However, if we get here, then we don't have the
+		    # Pygments module, so skip this test.
+		    continue
+		}
+
+		set saw_header_line false
+		set saw_styled_output_line false
+		set saw_unstyled_output_line false
+		gdb_test_multiple "disassemble main" "" {
+		    -re "disassemble main\r\n" {
+			exp_continue
+		    }
+		    -re "^Dump of assembler code for function $main:" {
+			set saw_header_line true
+			exp_continue
+		    }
+		    -re "^\\s+${styled_hex}\\s+<\[^>\]+>:\\s+\[^\r\n\033\]+\r\n" {
+			set saw_unstyled_output_line true
+			exp_continue
+		    }
+		    -re "^\\s+${styled_hex}\\s+<\[^>\]+>:\\s+\[^\r\n\]+\033\[^\r\n\]+\r\n" {
+			set saw_styled_output_line true
+			exp_continue
+		    }
+		    -re "^End of assembler dump\\.\r\n" {
+			exp_continue
+		    }
+		    -re "^$::gdb_prompt $" {
+			gdb_assert { $saw_header_line }
+			if { $disasm_styling } {
+			    gdb_assert { $saw_styled_output_line }
+			    gdb_assert { !$saw_unstyled_output_line }
+			} else {
+			    gdb_assert { !$saw_styled_output_line }
+			    gdb_assert { $saw_unstyled_output_line }
+			}
 		    }
 		}
 	    }
@@ -396,9 +433,7 @@ foreach style { title file function highlight variable \
 }
 
 # Check that the disassembler styling can be disabled.
-if { $python_disassembly_styling } {
-    test_disable_disassembler_styling
-}
+test_disable_disassembler_styling
 
 # Finally, check the styling of the version string during startup.
 test_startup_version_string
