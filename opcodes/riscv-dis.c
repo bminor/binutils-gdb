@@ -71,7 +71,7 @@ static const char * const *riscv_gpr_names;
 static const char * const *riscv_fpr_names;
 
 /* If set, disassemble as most general instruction.  */
-static int no_aliases;
+static bool no_aliases = false;
 
 
 /* Set default RISC-V disassembler options.  */
@@ -81,7 +81,7 @@ set_default_riscv_dis_options (void)
 {
   riscv_gpr_names = riscv_gpr_names_abi;
   riscv_fpr_names = riscv_fpr_names_abi;
-  no_aliases = 0;
+  no_aliases = false;
 }
 
 /* Parse RISC-V disassembler option (without arguments).  */
@@ -90,7 +90,7 @@ static bool
 parse_riscv_dis_option_without_args (const char *option)
 {
   if (strcmp (option, "no-aliases") == 0)
-    no_aliases = 1;
+    no_aliases = true;
   else if (strcmp (option, "numeric") == 0)
     {
       riscv_gpr_names = riscv_gpr_names_numeric;
@@ -645,7 +645,7 @@ static int
 riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 {
   const struct riscv_opcode *op;
-  static bool init = 0;
+  static bool init = false;
   static const struct riscv_opcode *riscv_hash[OP_MASK_OP + 1];
   struct riscv_private_data *pd;
   int insnlen;
@@ -659,7 +659,7 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 	if (!riscv_hash[OP_HASH_IDX (op->match)])
 	  riscv_hash[OP_HASH_IDX (op->match)] = op;
 
-      init = 1;
+      init = true;
     }
 
   if (info->private_data == NULL)
