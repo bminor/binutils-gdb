@@ -715,7 +715,7 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 	}
 
       /* If arch has the Zfinx extension, replace FPR with GPR.  */
-      if(riscv_subset_supports (&riscv_rps_dis, "zfinx"))
+      if (riscv_subset_supports (&riscv_rps_dis, "zfinx"))
 	riscv_fpr_names = riscv_gpr_names;
 
       for (; op->name; op++)
