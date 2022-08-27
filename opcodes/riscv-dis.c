@@ -181,10 +181,16 @@ maybe_print_address (struct riscv_private_data *pd, int base_reg, int offset,
     pd->print_addr = pd->gp + offset;
   else if (base_reg == X_TP || base_reg == 0)
     pd->print_addr = offset;
+  else
+    return;  /* Don't print the address.  */
 
   /* Sign-extend a 32-bit value to a 64-bit value.  */
   if (wide)
     pd->print_addr = (bfd_vma)(int32_t) pd->print_addr;
+
+  /* Fit into a 32-bit value on RV32.  */
+  if (xlen == 32)
+    pd->print_addr = (bfd_vma)(uint32_t)pd->print_addr;
 }
 
 /* Print insn arguments for 32/64-bit code.  */
@@ -397,7 +403,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	case 'b':
 	case 's':
 	  if ((l & MASK_JALR) == MATCH_JALR)
-	    maybe_print_address (pd, rs1, 0, 0);
+	    maybe_print_address (pd, rs1, EXTRACT_ITYPE_IMM (l), 0);
 	  print (info->stream, dis_style_register, "%s", riscv_gpr_names[rs1]);
 	  break;
 
