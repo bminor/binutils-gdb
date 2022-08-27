@@ -64,7 +64,6 @@ struct riscv_private_data
 /* Used for mapping symbols.  */
 static int last_map_symbol = -1;
 static bfd_vma last_stop_offset = 0;
-enum riscv_seg_mstate last_map_state;
 
 /* Register names as used by the disassembler.  */
 static const char * const *riscv_gpr_names;
@@ -1041,8 +1040,6 @@ print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
     set_default_riscv_dis_options ();
 
   mstate = riscv_search_mapping_symbol (memaddr, info);
-  /* Save the last mapping state.  */
-  last_map_state = mstate;
 
   /* Set the size to dump.  */
   if (mstate == MAP_DATA
