@@ -33,7 +33,7 @@
 #include <ctype.h>
 
 /* Current XLEN for the disassembler.  */
-unsigned xlen = 0;
+static unsigned xlen = 0;
 
 /* Default ISA specification version (constant as of now).  */
 static enum riscv_spec_class default_isa_spec = ISA_SPEC_CLASS_DRAFT - 1;
