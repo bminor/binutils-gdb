@@ -288,6 +288,12 @@ typedef int (gdbarch_dwarf2_reg_to_regnum_ftype) (struct gdbarch *gdbarch, int d
 extern int gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int dwarf2_regnr);
 extern void set_gdbarch_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, gdbarch_dwarf2_reg_to_regnum_ftype *dwarf2_reg_to_regnum);
 
+/* Return the name of register REGNR for the specified architecture.
+   REGNR can be any value greater than, or equal to zero, and less than
+   'gdbarch_num_cooked_regs (GDBARCH)'.  If REGNR is not supported for
+   GDBARCH, then this function will return an empty string, this function
+   should never return nullptr. */
+
 typedef const char * (gdbarch_register_name_ftype) (struct gdbarch *gdbarch, int regnr);
 extern const char * gdbarch_register_name (struct gdbarch *gdbarch, int regnr);
 extern void set_gdbarch_register_name (struct gdbarch *gdbarch, gdbarch_register_name_ftype *register_name);

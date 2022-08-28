@@ -558,6 +558,13 @@ Return -1 for bad REGNUM.  Note: Several targets get this wrong.
 )
 
 Method(
+    comment="""
+Return the name of register REGNR for the specified architecture.
+REGNR can be any value greater than, or equal to zero, and less than
+'gdbarch_num_cooked_regs (GDBARCH)'.  If REGNR is not supported for
+GDBARCH, then this function will return an empty string, this function
+should never return nullptr.
+""",
     type="const char *",
     name="register_name",
     params=[("int", "regnr")],
