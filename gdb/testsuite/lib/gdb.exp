@@ -7857,12 +7857,41 @@ proc capture_command_output { command prefix } {
     global gdb_prompt
     global expect_out
 
-    set output_string ""
-    gdb_test_multiple "$command" "capture_command_output for $command" {
-	-re "[string_to_regexp ${command}]\[\r\n\]+${prefix}(.*)\[\r\n\]+$gdb_prompt $" {
-	    set output_string $expect_out(1,string)
+    set code {
+	-re "^[string_to_regexp ${command}]\r\n" {
+	    if { $prefix != "" } {
+		exp_continue
+	    }
 	}
     }
+
+    if { $prefix != "" } {
+	append code {
+	    -re "^${prefix}" {
+		# Nothing, we just move onto the next gdb_test_multiple
+		# call, which actually collects the command output.
+	    }
+	}
+    }
+
+    gdb_test_multiple "$command" "capture_command_output for $command" $code
+
+    set output_string ""
+    gdb_test_multiple "" "" {
+	-re "^(\[^\r\n\]+\r\n)" {
+	    if { ![string equal $output_string ""] } {
+		set output_string [join [list $output_string $expect_out(1,string)] ""]
+	    } else {
+		set output_string $expect_out(1,string)
+	    }
+	    exp_continue
+	}
+
+	-re "^$gdb_prompt $" {
+	}
+    }
+
+    set output_string [regsub "\r\n$" $output_string ""]
     return $output_string
 }
 
