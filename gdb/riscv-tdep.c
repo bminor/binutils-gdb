@@ -882,8 +882,9 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
      then this is an unknown register.  If we do get a name back then we
      look up the registers preferred name below.  */
   const char *name = tdesc_register_name (gdbarch, regnum);
-  if (name == NULL || name[0] == '\0')
-    return NULL;
+  gdb_assert (name != nullptr);
+  if (name[0] == '\0')
+    return name;
 
   /* We want GDB to use the ABI names for registers even if the target
      gives us a target description with the architectural name.  For
@@ -893,13 +894,13 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
     return riscv_xreg_feature.register_name (regnum);
 
   /* Like with the x-regs we prefer the abi names for the floating point
-     registers.  */
+     registers.  If the target doesn't have floating point registers then
+     the tdesc_register_name call above should have returned an empty
+     string.  */
   if (regnum >= RISCV_FIRST_FP_REGNUM && regnum <= RISCV_LAST_FP_REGNUM)
     {
-      if (riscv_has_fp_regs (gdbarch))
-	return riscv_freg_feature.register_name (regnum);
-      else
-	return NULL;
+      gdb_assert (riscv_has_fp_regs (gdbarch));
+      return riscv_freg_feature.register_name (regnum);
     }
 
   /* Some targets (QEMU) are reporting these three registers twice, once
@@ -911,12 +912,10 @@ riscv_register_name (struct gdbarch *gdbarch, int regnum)
      duplicate copies of these registers (in riscv_tdesc_unknown_reg) and
      then hide the registers here by giving them no name.  */
   riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
-  if (tdep->duplicate_fflags_regnum == regnum)
-    return NULL;
-  if (tdep->duplicate_frm_regnum == regnum)
-    return NULL;
-  if (tdep->duplicate_fcsr_regnum == regnum)
-    return NULL;
+  if (tdep->duplicate_fflags_regnum == regnum
+      || tdep->duplicate_frm_regnum == regnum
+      || tdep->duplicate_fcsr_regnum == regnum)
+    return "";
 
   /* The remaining registers are different.  For all other registers on the
      machine we prefer to see the names that the target description
