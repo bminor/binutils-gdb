@@ -139,6 +139,10 @@ struct fio_timeval
 
 extern fileio_error host_to_fileio_error (int error);
 
+/* Convert a File-I/O error number to a host-format errno value.  */
+
+extern int fileio_error_to_host (fileio_error errnum);
+
 /* Convert File-I/O open flags FFLAGS to host format, storing
    the result in *FLAGS.  Return 0 on success, -1 on error.  */
 

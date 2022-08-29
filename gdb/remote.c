@@ -12715,61 +12715,10 @@ remote_target::filesystem_is_local ()
   return false;
 }
 
-static int
-remote_fileio_errno_to_host (fileio_error errnum)
-{
-  switch (errnum)
-    {
-      case FILEIO_EPERM:
-	return EPERM;
-      case FILEIO_ENOENT:
-	return ENOENT;
-      case FILEIO_EINTR:
-	return EINTR;
-      case FILEIO_EIO:
-	return EIO;
-      case FILEIO_EBADF:
-	return EBADF;
-      case FILEIO_EACCES:
-	return EACCES;
-      case FILEIO_EFAULT:
-	return EFAULT;
-      case FILEIO_EBUSY:
-	return EBUSY;
-      case FILEIO_EEXIST:
-	return EEXIST;
-      case FILEIO_ENODEV:
-	return ENODEV;
-      case FILEIO_ENOTDIR:
-	return ENOTDIR;
-      case FILEIO_EISDIR:
-	return EISDIR;
-      case FILEIO_EINVAL:
-	return EINVAL;
-      case FILEIO_ENFILE:
-	return ENFILE;
-      case FILEIO_EMFILE:
-	return EMFILE;
-      case FILEIO_EFBIG:
-	return EFBIG;
-      case FILEIO_ENOSPC:
-	return ENOSPC;
-      case FILEIO_ESPIPE:
-	return ESPIPE;
-      case FILEIO_EROFS:
-	return EROFS;
-      case FILEIO_ENOSYS:
-	return ENOSYS;
-      case FILEIO_ENAMETOOLONG:
-	return ENAMETOOLONG;
-    }
-  return -1;
-}
-
 static char *
 remote_hostio_error (fileio_error errnum)
 {
-  int host_error = remote_fileio_errno_to_host (errnum);
+  int host_error = fileio_error_to_host (errnum);
 
   if (host_error == -1)
     error (_("Unknown remote I/O error %d"), errnum);
