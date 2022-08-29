@@ -691,7 +691,7 @@ struct breakpoint
      breakpoint description in "info breakpoints".
 
      In the example below, the "address range" line was printed
-     by print_one_detail_ranged_breakpoint.
+     by ranged_breakpoint::print_one_detail.
 
      (gdb) info breakpoints
      Num     Type           Disp Enb Address    What

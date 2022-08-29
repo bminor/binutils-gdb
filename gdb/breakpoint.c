@@ -9215,7 +9215,7 @@ ranged_breakpoint::print_one (bp_location **last_loc) const
 
   if (opts.addressprint)
     /* We don't print the address range here, it will be printed later
-       by print_one_detail_ranged_breakpoint.  */
+       by ranged_breakpoint::print_one_detail.  */
     uiout->field_skip ("addr");
   annotate_field (5);
   print_breakpoint_location (this, bl);
