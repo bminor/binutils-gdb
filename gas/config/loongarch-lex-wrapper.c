@@ -16,5 +16,5 @@
    along with this program; see the file COPYING3.  If not,
    see <http://www.gnu.org/licenses/>.  */
 
-#include "sysdep.h"
+#include "config.h"
 #include "config/loongarch-lex.c"
