@@ -325,7 +325,6 @@ the native maintainer when resolving ABI issues.
 	s390		--target=s390-linux-gnu ,-Werror
 			Andreas Arnez		arnez@linux.ibm.com
 
-	score		--target=score-elf
 	sh		--target=sh-elf ,-Werror
 
 	sparc		--target=sparcv9-solaris2.11 ,-Werror

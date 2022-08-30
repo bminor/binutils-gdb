@@ -26,6 +26,7 @@ case $targ in
  m68*-*-os68k* | \
  mips*-*-pe | \
  rs6000-*-lynxos* | \
+ score-*-* | \
  sh*-*-pe | \
  hppa*-*-hpux* | \
  ia64-*-hpux* | \
