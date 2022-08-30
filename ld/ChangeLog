@@ -1,3 +1,8 @@
+2022-08-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 29529
+	* testsuite/ld-x86-64/pr27587.err: Update expected output.
+
 2022-08-18  Ralf Habacker  <ralf.habacker@freenet.de>
 
 	PR 28362

@@ -1779,6 +1779,7 @@ struct line_info_table
   unsigned int		num_files;
   unsigned int		num_dirs;
   unsigned int		num_sequences;
+  bool                  use_dir_and_file_0;
   char *		comp_dir;
   char **		dirs;
   struct fileinfo*	files;
@@ -1999,16 +2000,30 @@ concat_filename (struct line_info_table *table, unsigned int file)
 {
   char *filename;
 
-  if (table == NULL || file - 1 >= table->num_files)
+  /* Pre DWARF-5 entry 0 in the directory and filename tables was not used.
+     So in order to save space in the tables used here the info for, eg
+     directory 1 is stored in slot 0 of the directory table, directory 2
+     in slot 1 and so on.
+
+     Starting with DWARF-5 the 0'th entry is used so there is a one to one
+     mapping between DWARF slots and internal table entries.  */
+  if (! table->use_dir_and_file_0)
     {
-      /* FILE == 0 means unknown.  */
-      if (file)
-	_bfd_error_handler
-	  (_("DWARF error: mangled line number section (bad file number)"));
+      /* Pre DWARF-5, FILE == 0 means unknown.  */
+      if (file == 0)
+	return strdup ("<unknown>");
+      -- file;
+    }
+
+  if (table == NULL || file >= table->num_files)
+    {
+      _bfd_error_handler
+	(_("DWARF error: mangled line number section (bad file number)"));
       return strdup ("<unknown>");
     }
 
-  filename = table->files[file - 1].name;
+  filename = table->files[file].name;
+
   if (filename == NULL)
     return strdup ("<unknown>");
 
@@ -2019,12 +2034,17 @@ concat_filename (struct line_info_table *table, unsigned int file)
       char *name;
       size_t len;
 
-      if (table->files[file - 1].dir
+      if (table->files[file].dir
 	  /* PR 17512: file: 0317e960.  */
-	  && table->files[file - 1].dir <= table->num_dirs
+	  && table->files[file].dir <= table->num_dirs
 	  /* PR 17512: file: 7f3d2e4b.  */
 	  && table->dirs != NULL)
-	subdir_name = table->dirs[table->files[file - 1].dir - 1];
+	{
+	  if (table->use_dir_and_file_0)
+	    subdir_name = table->dirs[table->files[file].dir];
+	  else
+	    subdir_name = table->dirs[table->files[file].dir - 1];
+	}
 
       if (!subdir_name || !IS_ABSOLUTE_PATH (subdir_name))
 	dir_name = table->comp_dir;
@@ -2065,10 +2085,12 @@ concat_filename (struct line_info_table *table, unsigned int file)
 
 /* Check whether [low1, high1) can be combined with [low2, high2),
    i.e., they touch or overlap.  */
-static bool ranges_overlap (bfd_vma low1,
-			    bfd_vma high1,
-			    bfd_vma low2,
-			    bfd_vma high2)
+
+static bool
+ranges_overlap (bfd_vma low1,
+		bfd_vma high1,
+		bfd_vma low2,
+		bfd_vma high2)
 {
   if (low1 == low2 || high1 == high2)
     return true;
@@ -2095,15 +2117,16 @@ static bool ranges_overlap (bfd_vma low1,
 /* Insert an address range in the trie mapping addresses to compilation units.
    Will return the new trie node (usually the same as is being sent in, but
    in case of a leaf-to-interior conversion, or expansion of a leaf, it may be
-   different), or NULL on failure.
- */
-static struct trie_node *insert_arange_in_trie(bfd *abfd,
-					       struct trie_node *trie,
-					       bfd_vma trie_pc,
-					       unsigned int trie_pc_bits,
-					       struct comp_unit *unit,
-					       bfd_vma low_pc,
-					       bfd_vma high_pc)
+   different), or NULL on failure.  */
+
+static struct trie_node *
+insert_arange_in_trie (bfd *abfd,
+		       struct trie_node *trie,
+		       bfd_vma trie_pc,
+		       unsigned int trie_pc_bits,
+		       struct comp_unit *unit,
+		       bfd_vma low_pc,
+		       bfd_vma high_pc)
 {
   bfd_vma clamped_low_pc, clamped_high_pc;
   int ch, from_ch, to_ch;
@@ -2240,7 +2263,6 @@ static struct trie_node *insert_arange_in_trie(bfd *abfd,
 
     return trie;
 }
-
 
 static bool
 arange_add (struct comp_unit *unit, struct arange *first_arange,
@@ -2627,10 +2649,8 @@ read_formatted_entries (struct comp_unit *unit, bfd_byte **bufp,
 	    }
 	}
 
-      /* Skip the first "zero entry", which is the compilation dir/file.  */
-      if (datai != 0)
-	if (!callback (table, fe.name, fe.dir, fe.time, fe.size))
-	  return false;
+      if (!callback (table, fe.name, fe.dir, fe.time, fe.size))
+	return false;
     }
 
   *bufp = buf;
@@ -2807,6 +2827,7 @@ decode_line_info (struct comp_unit *unit)
       if (!read_formatted_entries (unit, &line_ptr, line_end, table,
 				   line_info_add_file_name))
 	goto fail;
+      table->use_dir_and_file_0 = true;
     }
   else
     {
@@ -2829,6 +2850,7 @@ decode_line_info (struct comp_unit *unit)
 	  if (!line_info_add_file_name (table, cur_file, dir, xtime, size))
 	    goto fail;
 	}
+      table->use_dir_and_file_0 = false;
     }
 
   /* Read the statement sequences until there's nothing left.  */
@@ -2837,7 +2859,7 @@ decode_line_info (struct comp_unit *unit)
       /* State machine registers.  */
       bfd_vma address = 0;
       unsigned char op_index = 0;
-      char * filename = table->num_files ? concat_filename (table, 1) : NULL;
+      char * filename = NULL;
       unsigned int line = 1;
       unsigned int column = 0;
       unsigned int discriminator = 0;
@@ -2851,6 +2873,14 @@ decode_line_info (struct comp_unit *unit)
 	 address, we must compare on every DW_LNS_copy, etc.  */
       bfd_vma low_pc  = (bfd_vma) -1;
       bfd_vma high_pc = 0;
+
+      if (table->num_files)
+	{
+	  if (table->use_dir_and_file_0)
+	    filename = concat_filename (table, 0);
+	  else
+	    filename = concat_filename (table, 1);
+	}
 
       /* Decode the table.  */
       while (!end_sequence && line_ptr < line_end)

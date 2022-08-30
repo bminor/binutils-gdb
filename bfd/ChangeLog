@@ -1,3 +1,15 @@
+2022-08-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 29529
+	* dwarf2.c (struct line_info_table): Add new field:
+	use_dir_and_file_0.
+	(concat_filename): Use new field to help select the correct table
+	slot.
+	(read_formatted_entries): Do not skip entry 0.
+	(decode_line_info): Set new field depending upon the version of
+	DWARF being parsed.  Initialise filename based upon the setting of
+	the new field.
+
 2022-08-22  Frederic Cambus  <fred@statdns.com>
 
 	* config.bfd (aarch64-*-openbsd*): Add target.
