@@ -118,7 +118,8 @@ struct ui
   FILE *errstream;
 
   /* The file descriptor for the input stream, so that we can register
-     it with the event loop.  */
+     it with the event loop.  This can be set to -1 to prevent this
+     registration.  */
   int input_fd;
 
   /* Whether ISATTY returns true on input_fd.  Cached here because

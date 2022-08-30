@@ -533,8 +533,9 @@ stdin_event_handler (int error, gdb_client_data client_data)
 void
 ui::register_file_handler ()
 {
-  add_file_handler (input_fd, stdin_event_handler, this,
-		    string_printf ("ui-%d", num), true);
+  if (input_fd != -1)
+    add_file_handler (input_fd, stdin_event_handler, this,
+		      string_printf ("ui-%d", num), true);
 }
 
 /* See top.h.  */
@@ -542,7 +543,8 @@ ui::register_file_handler ()
 void
 ui::unregister_file_handler ()
 {
-  delete_file_handler (input_fd);
+  if (input_fd != -1)
+    delete_file_handler (input_fd);
 }
 
 /* Re-enable stdin after the end of an execution command in
