@@ -1611,6 +1611,8 @@ print_arc_disassembler_options (FILE *stream)
   for (i = 0; args[i].name != NULL; ++i)
     {
       size_t len = 3;
+      if (args[i].values == NULL)
+	continue;
       fprintf (stream, _("\n\
   For the options above, the following values are supported for \"%s\":\n   "),
 	       args[i].name);

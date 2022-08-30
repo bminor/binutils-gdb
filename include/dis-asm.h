@@ -318,7 +318,8 @@ typedef struct
   /* Option argument name to use in descriptions.  */
   const char *name;
 
-  /* Vector of acceptable option argument values, NULL-terminated.  */
+  /* Vector of acceptable option argument values, NULL-terminated.
+     NULL if any values are accepted.  */
   const char **values;
 } disasm_option_arg_t;
 

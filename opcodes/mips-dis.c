@@ -2809,6 +2809,8 @@ with the -M switch (multiple options should be separated by commas):\n\n"));
 
   for (i = 0; args[i].name != NULL; i++)
     {
+      if (args[i].values == NULL)
+	continue;
       fprintf (stream, _("\n\
   For the options above, the following values are supported for \"%s\":\n   "),
 	       args[i].name);
