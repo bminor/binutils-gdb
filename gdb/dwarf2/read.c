@@ -4655,7 +4655,9 @@ create_cus_from_debug_names_list (dwarf2_per_bfd *per_bfd,
 			 " ignoring .debug_names."));
 	      return false;
 	    }
-	  const ULONGEST length = sect_off_next - sect_off_prev;
+	  /* Note: we're not using length = sect_off_next - sect_off_prev,
+	     to gracefully handle an incomplete CU list.  */
+	  const ULONGEST length = 0;
 	  dwarf2_per_cu_data_up per_cu
 	    = create_cu_from_index_list (per_bfd, &section, is_dwz,
 					 sect_off_prev, length);
