@@ -1654,7 +1654,7 @@ cris_special_register_name (struct gdbarch *gdbarch, int regno)
 	return cris_spec_regs[i].name;
     }
   /* Special register not applicable to this CRIS version.  */
-  return NULL;
+  return "";
 }
 
 static const char *
@@ -1678,7 +1678,7 @@ cris_register_name (struct gdbarch *gdbarch, int regno)
   else
     {
       /* Invalid register.  */
-      return NULL;
+      return "";
     }
 }
 

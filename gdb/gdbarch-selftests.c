@@ -122,6 +122,30 @@ register_to_value_test (struct gdbarch *gdbarch)
     }
 }
 
+/* Test function gdbarch_register_name.  */
+
+static void
+register_name_test (struct gdbarch *gdbarch)
+{
+  scoped_mock_context<test_target_ops> mockctx (gdbarch);
+
+  const int num_regs = gdbarch_num_cooked_regs (gdbarch);
+  for (auto regnum = 0; regnum < num_regs; regnum++)
+    {
+      /* If a register is to be hidden from the user then we should get
+	 back an empty string, not nullptr.  Every other register should
+	 return a non-empty string.  */
+      const char *name = gdbarch_register_name (gdbarch, regnum);
+
+      if (run_verbose() && name == nullptr)
+	debug_printf ("arch: %s, register: %d returned nullptr\n",
+		      gdbarch_bfd_arch_info (gdbarch)->printable_name,
+		      regnum);
+
+      SELF_CHECK (name != nullptr);
+    }
+}
+
 } // namespace selftests
 
 void _initialize_gdbarch_selftests ();
@@ -130,4 +154,7 @@ _initialize_gdbarch_selftests ()
 {
   selftests::register_test_foreach_arch ("register_to_value",
 					 selftests::register_to_value_test);
+
+  selftests::register_test_foreach_arch ("register_name",
+					 selftests::register_name_test);
 }

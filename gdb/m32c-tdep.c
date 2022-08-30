@@ -757,14 +757,14 @@ mark_save_restore (struct m32c_reg *reg)
 /* A raw banked general-purpose data register named NAME.
    NAME should be an identifier, not a string.  */
 #define RBD(name)						\
-  (R(NULL, tdep->int16, SIM (name ## _bank0)),		\
-   R(NULL, tdep->int16, SIM (name ## _bank1)) - 1)
+  (R("", tdep->int16, SIM (name ## _bank0)),		\
+   R("", tdep->int16, SIM (name ## _bank1)) - 1)
 
 /* A raw banked data address register named NAME.
    NAME should be an identifier, not a string.  */
 #define RBA(name)						\
-  (R(NULL, tdep->data_addr_reg_type, SIM (name ## _bank0)),	\
-   R(NULL, tdep->data_addr_reg_type, SIM (name ## _bank1)) - 1)
+  (R("", tdep->data_addr_reg_type, SIM (name ## _bank0)),	\
+   R("", tdep->data_addr_reg_type, SIM (name ## _bank1)) - 1)
 
 /* A cooked register named NAME referring to a raw banked register
    from the bank selected by the current value of FLG.  RAW_PAIR

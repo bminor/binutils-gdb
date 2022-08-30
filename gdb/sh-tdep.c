@@ -112,19 +112,12 @@ sh_sh_register_name (struct gdbarch *gdbarch, int reg_nr)
   static const char *register_names[] = {
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
     "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
-    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr",
-    "", "",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
-    "", "",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
+    "pc", "pr", "gbr", "vbr", "mach", "macl", "sr"
   };
-  if (reg_nr < 0)
-    return NULL;
+
+  gdb_assert (reg_nr >= 0);
   if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+    return "";
   return register_names[reg_nr];
 }
 
@@ -140,13 +133,12 @@ sh_sh3_register_name (struct gdbarch *gdbarch, int reg_nr)
     "", "", "", "", "", "", "", "",
     "ssr", "spc",
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
-    "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1"
-    "", "", "", "", "", "", "", "",
+    "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
   };
-  if (reg_nr < 0)
-    return NULL;
+
+  gdb_assert (reg_nr >= 0);
   if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+    return "";
   return register_names[reg_nr];
 }
 
@@ -163,12 +155,10 @@ sh_sh3e_register_name (struct gdbarch *gdbarch, int reg_nr)
     "ssr", "spc",
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
-    "", "", "", "", "", "", "", "",
   };
-  if (reg_nr < 0)
-    return NULL;
+  gdb_assert (reg_nr >= 0);
   if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+    return "";
   return register_names[reg_nr];
 }
 
@@ -182,15 +172,10 @@ sh_sh2e_register_name (struct gdbarch *gdbarch, int reg_nr)
     "fpul", "fpscr",
     "fr0", "fr1", "fr2", "fr3", "fr4", "fr5", "fr6", "fr7",
     "fr8", "fr9", "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
-    "", "",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
   };
-  if (reg_nr < 0)
-    return NULL;
+  gdb_assert (reg_nr >= 0);
   if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+    return "";
   return register_names[reg_nr];
 }
 
@@ -227,10 +212,9 @@ sh_sh2a_register_name (struct gdbarch *gdbarch, int reg_nr)
     /* double precision (pseudo) 68 - 75 */
     "dr0", "dr2", "dr4", "dr6", "dr8", "dr10", "dr12", "dr14",
   };
-  if (reg_nr < 0)
-    return NULL;
+  gdb_assert (reg_nr >= 0);
   if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+    return "";
   return register_names[reg_nr];
 }
 
@@ -264,13 +248,11 @@ sh_sh2a_nofpu_register_name (struct gdbarch *gdbarch, int reg_nr)
     "ibcr", "ibnr", "tbr",
     /* 67: register bank number, the user visible pseudo register.  */
     "bank",
-    /* double precision (pseudo) 68 - 75 */
-    "", "", "", "", "", "", "", "",
+    /* double precision (pseudo) 68 - 75: report blank, see below.  */
   };
-  if (reg_nr < 0)
-    return NULL;
+  gdb_assert (reg_nr >= 0);
   if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+    return "";
   return register_names[reg_nr];
 }
 
@@ -285,14 +267,11 @@ sh_sh_dsp_register_name (struct gdbarch *gdbarch, int reg_nr)
     "a0g", "a0", "a1g", "a1", "m0", "m1", "x0", "x1",
     "y0", "y1", "", "", "", "", "", "mod",
     "", "",
-    "rs", "re", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
+    "rs", "re",
   };
-  if (reg_nr < 0)
-    return NULL;
+  gdb_assert (reg_nr >= 0);
   if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+    return "";
   return register_names[reg_nr];
 }
 
@@ -309,13 +288,10 @@ sh_sh3_dsp_register_name (struct gdbarch *gdbarch, int reg_nr)
     "ssr", "spc",
     "rs", "re", "", "", "", "", "", "",
     "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
   };
-  if (reg_nr < 0)
-    return NULL;
+  gdb_assert (reg_nr >= 0);
   if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+    return "";
   return register_names[reg_nr];
 }
 
@@ -350,10 +326,9 @@ sh_sh4_register_name (struct gdbarch *gdbarch, int reg_nr)
     /* FIXME: missing XF */
     /* FIXME: missing XD */
   };
-  if (reg_nr < 0)
-    return NULL;
+  gdb_assert (reg_nr >= 0);
   if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+    return "";
   return register_names[reg_nr];
 }
 
@@ -383,13 +358,12 @@ sh_sh4_nofpu_register_name (struct gdbarch *gdbarch, int reg_nr)
     "",
     /* double precision (pseudo) 68 - 75 -- not for nofpu target */
     "", "", "", "", "", "", "", "",
-    /* vectors (pseudo) 76 - 79 -- not for nofpu target */
-    "", "", "", "",
+    /* vectors (pseudo) 76 - 79 -- not for nofpu target: report blank
+       below.  */
   };
-  if (reg_nr < 0)
-    return NULL;
+  gdb_assert (reg_nr >= 0);
   if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+    return "";
   return register_names[reg_nr];
 }
 
@@ -406,13 +380,10 @@ sh_sh4al_dsp_register_name (struct gdbarch *gdbarch, int reg_nr)
     "ssr", "spc",
     "rs", "re", "", "", "", "", "", "",
     "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b",
-    "", "", "", "", "", "", "", "",
-    "", "", "", "", "", "", "", "",
   };
-  if (reg_nr < 0)
-    return NULL;
+  gdb_assert (reg_nr >= 0);
   if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+    return "";
   return register_names[reg_nr];
 }
 

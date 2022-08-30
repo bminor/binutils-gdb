@@ -400,7 +400,7 @@ m68hc11_register_name (struct gdbarch *gdbarch, int reg_nr)
   /* If we don't know the address of a soft register, pretend it
      does not exist.  */
   if (reg_nr > M68HC11_LAST_HARD_REG && soft_regs[reg_nr].name == 0)
-    return NULL;
+    return "";
 
   return m68hc11_register_names[reg_nr];
 }

@@ -313,7 +313,7 @@ v850_register_name (struct gdbarch *gdbarch, int regnum)
     "pc", "fp"
   };
   if (regnum < 0 || regnum > E_NUM_OF_V850_REGS)
-    return NULL;
+    return "";
   return v850_reg_names[regnum];
 }
 
@@ -333,7 +333,7 @@ v850e_register_name (struct gdbarch *gdbarch, int regnum)
     "pc", "fp"
   };
   if (regnum < 0 || regnum > E_NUM_OF_V850E_REGS)
-    return NULL;
+    return "";
   return v850e_reg_names[regnum];
 }
 
@@ -377,7 +377,7 @@ v850e2_register_name (struct gdbarch *gdbarch, int regnum)
     "", "", "", "fpspc"
   };
   if (regnum < 0 || regnum >= E_NUM_OF_V850E2_REGS)
-    return NULL;
+    return "";
   return v850e2_reg_names[regnum];
 }
 
@@ -480,7 +480,7 @@ v850e3v5_register_name (struct gdbarch *gdbarch, int regnum)
   };
 
   if (regnum < 0 || regnum >= E_NUM_OF_V850E3V5_REGS)
-    return NULL;
+    return "";
   return v850e3v5_reg_names[regnum];
 }
 

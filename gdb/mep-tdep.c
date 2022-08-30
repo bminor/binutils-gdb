@@ -1016,7 +1016,7 @@ mep_register_name (struct gdbarch *gdbarch, int regnr)
      would affect the output of 'info all-registers', which would
      disturb the test suites.  So we leave it invisible.  */
   else
-    return NULL;
+    return "";
 }
 
 
