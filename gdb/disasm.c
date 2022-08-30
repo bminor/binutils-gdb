@@ -1270,6 +1270,8 @@ set_disassembler_options (const char *prospective_options)
 	    if (memcmp (opt, valid_options->name[i], len) != 0)
 	      continue;
 	    arg = opt + len;
+	    if (valid_options->arg[i]->values == NULL)
+	      break;
 	    for (j = 0; valid_options->arg[i]->values[j] != NULL; j++)
 	      if (disassembler_options_cmp
 		    (arg, valid_options->arg[i]->values[j]) == 0)
@@ -1391,6 +1393,8 @@ The following disassembler options are supported for use with the\n\
 
       for (i = 0; valid_args[i].name != NULL; i++)
 	{
+	  if (valid_args[i].values == NULL)
+	    continue;
 	  gdb_printf (file, _("\n\
   For the options above, the following values are supported for \"%s\":\n   "),
 		      valid_args[i].name);
