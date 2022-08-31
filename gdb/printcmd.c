@@ -213,7 +213,7 @@ decode_format (const char **string_ptr, int oformat, int osize)
 
   while (1)
     {
-      if (*p == 'b' || *p == 'h' || *p == 'w' || *p == 'g')
+      if (*p == 'b' || *p == 'h' || *p == 'w' || *p == 'g' || *p == 'C')
 	val.size = *p++;
       else if (*p == 'r')
 	{
@@ -279,6 +279,10 @@ decode_format (const char **string_ptr, int oformat, int osize)
 	/* The default is the size most recently specified.  */
 	val.size = osize;
       }
+
+  /* Capabilities only support 'x' and default formats.  */
+  if (val.size == 'C' && val.format != 'x')
+    val.format = 0;
 
   return val;
 }
@@ -417,6 +421,9 @@ print_scalar_formatted (const gdb_byte *valaddr, struct type *type,
 	  break;
 	case 'g':
 	  newlen = 8;
+	  break;
+	case 'C':
+	  newlen = gdbarch_capability_bit (gdbarch) / TARGET_CHAR_BIT;
 	  break;
 	default:
 	  error (_("Undefined output size \"%c\"."), size);
@@ -1020,12 +1027,18 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
   if (size == 'a')
     {
       /* Pick the appropriate size for an address.  */
-      if (gdbarch_ptr_bit (next_gdbarch) == 64)
+      if (gdbarch_capability_bit (next_gdbarch) == 128)
+	size = 'g';
+      else if (gdbarch_capability_bit (next_gdbarch) == 64)
+	size = 'w';
+      else if (gdbarch_ptr_bit (next_gdbarch) == 64)
 	size = 'g';
       else if (gdbarch_ptr_bit (next_gdbarch) == 32)
 	size = 'w';
       else if (gdbarch_ptr_bit (next_gdbarch) == 16)
 	size = 'h';
+      else if (gdbarch_capability_bit (next_gdbarch) == 128)
+	size = 'g';
       else
 	/* Bad value for gdbarch_ptr_bit.  */
 	internal_error (__FILE__, __LINE__,
@@ -1040,6 +1053,8 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
     val_type = builtin_type (next_gdbarch)->builtin_int32;
   else if (size == 'g')
     val_type = builtin_type (next_gdbarch)->builtin_int64;
+  else if (size == 'C')
+    val_type = builtin_type (next_gdbarch)->builtin_intcap_t;
 
   if (format == 's')
     {
@@ -1068,7 +1083,7 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
     maxelts = 4;
   if (size == 'g')
     maxelts = 2;
-  if (format == 's' || format == 'i')
+  if (format == 's' || format == 'i' || size == 'C')
     maxelts = 1;
 
   get_formatted_print_options (&opts, format);
