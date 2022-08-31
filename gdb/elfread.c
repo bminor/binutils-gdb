@@ -1279,13 +1279,14 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 	  has_dwarf2 = false;
 	  const struct bfd_build_id *build_id
 	    = build_id_bfd_get (objfile->obfd.get ());
+	  const char *filename = bfd_get_filename (objfile->obfd.get ());
 
 	  if (build_id != nullptr)
 	    {
 	      gdb::unique_xmalloc_ptr<char> symfile_path;
 	      scoped_fd fd (debuginfod_debuginfo_query (build_id->data,
 							build_id->size,
-							objfile->original_name,
+							filename,
 							&symfile_path));
 
 	      if (fd.get () >= 0)
@@ -1295,7 +1296,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 
 		  if (debug_bfd == nullptr)
 		    warning (_("File \"%s\" from debuginfod cannot be opened as bfd"),
-			     objfile->original_name);
+			     filename);
 		  else if (build_id_verify (debug_bfd.get (), build_id->size, build_id->data))
 		    {
 		      symbol_file_add_separate (debug_bfd, symfile_path.get (),
