@@ -1,3 +1,7 @@
+2022-08-31  Frederic Cambus  <fred@statdns.com>
+
+	* configure.tgt (aarch64*-*-openbsd*): Add target.
+
 2022-08-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 29494
