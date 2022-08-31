@@ -87,10 +87,8 @@ lm32_register_name (struct gdbarch *gdbarch, int reg_nr)
     "PC", "EID", "EBA", "DEBA", "IE", "IM", "IP"
   };
 
-  if ((reg_nr < 0) || (reg_nr >= ARRAY_SIZE (register_names)))
-    return NULL;
-  else
-    return register_names[reg_nr];
+  gdb_static_assert (ARRAY_SIZE (register_names) == SIM_LM32_NUM_REGS);
+  return register_names[reg_nr];
 }
 
 /* Return type of register.  */

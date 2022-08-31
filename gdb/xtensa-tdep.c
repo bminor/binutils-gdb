@@ -242,11 +242,7 @@ xtensa_register_name (struct gdbarch *gdbarch, int regnum)
   xtensa_gdbarch_tdep *tdep = gdbarch_tdep<xtensa_gdbarch_tdep> (gdbarch);
 
   /* Return the name stored in the register map.  */
-  if (regnum >= 0 && regnum < gdbarch_num_cooked_regs (gdbarch))
-    return tdep->regmap[regnum].name;
-
-  internal_error (__FILE__, __LINE__, _("invalid register %d"), regnum);
-  return 0;
+  return tdep->regmap[regnum].name;
 }
 
 /* Return the type of a register.  Create a new type, if necessary.  */

@@ -388,12 +388,9 @@ m68hc11_register_name (struct gdbarch *gdbarch, int reg_nr)
 
   if (reg_nr == HARD_PC_REGNUM && use_page_register (gdbarch))
     return "ppc";
-  
-  if (reg_nr < 0)
-    return NULL;
 
   if (reg_nr >= M68HC11_ALL_REGS)
-    return NULL;
+    return "";
 
   m68hc11_initialize_register_info ();
 

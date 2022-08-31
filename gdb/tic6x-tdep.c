@@ -102,9 +102,6 @@ static const int arg_regs[] = { 4, 20, 6, 22, 8, 24, 10, 26, 12, 28 };
 static const char *
 tic6x_register_name (struct gdbarch *gdbarch, int regno)
 {
-  if (regno < 0)
-    return NULL;
-
   if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
     return tdesc_register_name (gdbarch, regno);
   else if (regno >= ARRAY_SIZE (tic6x_register_names))

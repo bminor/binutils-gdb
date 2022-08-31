@@ -174,7 +174,7 @@ static const char *
 nios2_register_name (struct gdbarch *gdbarch, int regno)
 {
   /* Use mnemonic aliases for GPRs.  */
-  if (regno >= 0 && regno < NIOS2_NUM_REGS)
+  if (regno < NIOS2_NUM_REGS)
     return nios2_reg_names[regno];
   else
     return tdesc_register_name (gdbarch, regno);

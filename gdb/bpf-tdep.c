@@ -93,9 +93,8 @@ static const char *bpf_register_names[] =
 static const char *
 bpf_register_name (struct gdbarch *gdbarch, int reg)
 {
-  if (reg >= 0 && reg < BPF_NUM_REGS)
-    return bpf_register_names[reg];
-  return NULL;
+  gdb_static_assert (ARRAY_SIZE (bpf_register_names) == BPF_NUM_REGS);
+  return bpf_register_names[reg];
 }
 
 /* Return the GDB type of register REGNUM.  */

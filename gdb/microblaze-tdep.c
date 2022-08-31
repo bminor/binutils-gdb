@@ -92,9 +92,9 @@ static unsigned int microblaze_debug_flag = 0;
 static const char *
 microblaze_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  if (regnum >= 0 && regnum < MICROBLAZE_NUM_REGS)
-    return microblaze_register_names[regnum];
-  return NULL;
+  gdb_static_assert (ARRAY_SIZE (microblaze_register_names)
+		     == MICROBLAZE_NUM_REGS);
+  return microblaze_register_names[regnum];
 }
 
 static struct type *

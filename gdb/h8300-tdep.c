@@ -933,13 +933,8 @@ static const char *
 h8300_register_name_common (const char *regnames[], int numregs,
 			    struct gdbarch *gdbarch, int regno)
 {
-  if (regno < 0
-      || regno >= numregs)
-    internal_error (__FILE__, __LINE__,
-		    _("h8300_register_name_common: illegal register number %d"),
-		    regno);
-  else
-    return regnames[regno];
+  gdb_assert (numregs == gdbarch_num_cooked_regs (gdbarch));
+  return regnames[regno];
 }
 
 static const char *

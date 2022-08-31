@@ -810,12 +810,8 @@ sparc64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 {
   regnum -= gdbarch_num_regs (gdbarch);
 
-  if (regnum < SPARC64_NUM_PSEUDO_REGS)
-    return sparc64_pseudo_register_names[regnum];
-
-  internal_error (__FILE__, __LINE__,
-		  _("sparc64_pseudo_register_name: bad register number %d"),
-		  regnum);
+  gdb_assert (regnum < SPARC64_NUM_PSEUDO_REGS);
+  return sparc64_pseudo_register_names[regnum];
 }
 
 /* Return the name of register REGNUM.  */

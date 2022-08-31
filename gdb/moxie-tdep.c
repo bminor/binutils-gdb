@@ -81,10 +81,7 @@ static const char * const moxie_register_names[] = {
 static const char *
 moxie_register_name (struct gdbarch *gdbarch, int reg_nr)
 {
-  if (reg_nr < 0)
-    return NULL;
-  if (reg_nr >= MOXIE_NUM_REGS)
-    return NULL;
+  gdb_static_assert (ARRAY_SIZE (moxie_register_names) == MOXIE_NUM_REGS);
   return moxie_register_names[reg_nr];
 }
 

@@ -418,11 +418,8 @@ nds32_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
   regnum -= gdbarch_num_regs (gdbarch);
 
   /* Currently, only FSRs could be defined as pseudo registers.  */
-  if (regnum < gdbarch_num_pseudo_regs (gdbarch))
-    return nds32_fsr_register_names[regnum];
-
-  warning (_("Unknown nds32 pseudo register %d."), regnum);
-  return NULL;
+  gdb_assert (regnum < gdbarch_num_pseudo_regs (gdbarch));
+  return nds32_fsr_register_names[regnum];
 }
 
 /* Implement the "pseudo_register_read" gdbarch method.  */

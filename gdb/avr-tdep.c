@@ -216,10 +216,8 @@ avr_register_name (struct gdbarch *gdbarch, int regnum)
     "SREG", "SP", "PC2",
     "pc"
   };
-  if (regnum < 0)
-    return NULL;
-  if (regnum >= (sizeof (register_names) / sizeof (*register_names)))
-    return NULL;
+  gdb_static_assert (ARRAY_SIZE (register_names)
+		     == (AVR_NUM_REGS + AVR_NUM_PSEUDO_REGS));
   return register_names[regnum];
 }
 

@@ -135,8 +135,7 @@ iq2000_register_name (struct gdbarch *gdbarch, int regnum)
       "r30", "r31",
       "pc"
     };
-  if (regnum < 0 || regnum >= E_NUM_REGS)
-    return NULL;
+  gdb_static_assert (ARRAY_SIZE (names) == E_NUM_REGS);
   return names[regnum];
 }
 

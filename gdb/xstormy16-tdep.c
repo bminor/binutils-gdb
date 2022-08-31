@@ -108,13 +108,8 @@ xstormy16_register_name (struct gdbarch *gdbarch, int regnum)
     "psw", "sp", "pc"
   };
 
-  if (regnum < 0 || regnum >= E_NUM_REGS)
-    internal_error (__FILE__, __LINE__,
-		    _("xstormy16_register_name: illegal register number %d"),
-		    regnum);
-  else
-    return register_names[regnum];
-
+  gdb_static_assert (ARRAY_SIZE (register_names) == E_NUM_REGS);
+  return register_names[regnum];
 }
 
 static struct type *

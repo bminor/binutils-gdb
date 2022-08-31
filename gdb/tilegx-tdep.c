@@ -142,7 +142,7 @@ template_reverse_regs[TILEGX_NUM_PHYS_REGS] =
 static const char *
 tilegx_register_name (struct gdbarch *gdbarch, int regnum)
 {
-  static const char *const register_names[TILEGX_NUM_REGS] =
+  static const char *const register_names[] =
     {
       "r0",   "r1",   "r2",   "r3",   "r4",   "r5",   "r6",   "r7",
       "r8",   "r9",   "r10",  "r11",  "r12",  "r13",  "r14",  "r15",
@@ -155,11 +155,7 @@ tilegx_register_name (struct gdbarch *gdbarch, int regnum)
       "pc",   "faultnum",
     };
 
-  if (regnum < 0 || regnum >= TILEGX_NUM_REGS)
-    internal_error (__FILE__, __LINE__,
-		    "tilegx_register_name: invalid register number %d",
-		    regnum);
-
+  gdb_static_assert (TILEGX_NUM_REGS == ARRAY_SIZE (register_names));
   return register_names[regnum];
 }
 

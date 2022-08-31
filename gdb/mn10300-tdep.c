@@ -250,12 +250,10 @@ mn10300_return_value (struct gdbarch *gdbarch, struct value *function,
 }
 
 static const char *
-register_name (int reg, const char **regs, long sizeof_regs)
+register_name (int reg, const char **regs, long num_regs)
 {
-  if (reg < 0 || reg >= sizeof_regs / sizeof (regs[0]))
-    return NULL;
-  else
-    return regs[reg];
+  gdb_assert (reg < num_regs);
+  return regs[reg];
 }
 
 static const char *
@@ -267,7 +265,7 @@ mn10300_generic_register_name (struct gdbarch *gdbarch, int reg)
     "", "", "", "", "", "", "", "",
     "", "", "", "", "", "", "", "fp"
   };
-  return register_name (reg, regs, sizeof regs);
+  return register_name (reg, regs, ARRAY_SIZE (regs));
 }
 
 
@@ -280,7 +278,7 @@ am33_register_name (struct gdbarch *gdbarch, int reg)
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
     "ssp", "msp", "usp", "mcrh", "mcrl", "mcvf", "", "", ""
   };
-  return register_name (reg, regs, sizeof regs);
+  return register_name (reg, regs, ARRAY_SIZE (regs));
 }
 
 static const char *
@@ -297,7 +295,7 @@ am33_2_register_name (struct gdbarch *gdbarch, int reg)
     "fs16", "fs17", "fs18", "fs19", "fs20", "fs21", "fs22", "fs23",
     "fs24", "fs25", "fs26", "fs27", "fs28", "fs29", "fs30", "fs31"
   };
-  return register_name (reg, regs, sizeof regs);
+  return register_name (reg, regs, ARRAY_SIZE (regs));
 }
 
 static struct type *

@@ -1666,9 +1666,10 @@ cris_register_name (struct gdbarch *gdbarch, int regno)
     "r8",  "r9",  "r10", "r11", \
     "r12", "r13", "sp",  "pc" };
 
-  if (regno >= 0 && regno < NUM_GENREGS)
+  if (regno < NUM_GENREGS)
     {
       /* General register.  */
+      gdb_static_assert (ARRAY_SIZE (cris_genreg_names) == NUM_GENREGS);
       return cris_genreg_names[regno];
     }
   else if (regno >= NUM_GENREGS && regno < gdbarch_num_regs (gdbarch))

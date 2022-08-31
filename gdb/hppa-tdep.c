@@ -632,10 +632,8 @@ hppa32_register_name (struct gdbarch *gdbarch, int i)
     "fr28",    "fr28R",  "fr29",   "fr29R",
     "fr30",   "fr30R",   "fr31",   "fr31R"
   };
-  if (i < 0 || i >= (sizeof (names) / sizeof (*names)))
-    return NULL;
-  else
-    return names[i];
+  gdb_static_assert (ARRAY_SIZE (names) == hppa32_num_regs);
+  return names[i];
 }
 
 static const char *
@@ -667,10 +665,8 @@ hppa64_register_name (struct gdbarch *gdbarch, int i)
     "fr24",    "fr25",   "fr26",   "fr27",
     "fr28",  "fr29",    "fr30",   "fr31"
   };
-  if (i < 0 || i >= (sizeof (names) / sizeof (*names)))
-    return NULL;
-  else
-    return names[i];
+  gdb_static_assert (ARRAY_SIZE (names) == hppa64_num_regs);
+  return names[i];
 }
 
 /* Map dwarf DBX register numbers to GDB register numbers.  */

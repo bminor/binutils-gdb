@@ -115,8 +115,7 @@ sh_sh_register_name (struct gdbarch *gdbarch, int reg_nr)
     "pc", "pr", "gbr", "vbr", "mach", "macl", "sr"
   };
 
-  gdb_assert (reg_nr >= 0);
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+  if (reg_nr >= ARRAY_SIZE (register_names))
     return "";
   return register_names[reg_nr];
 }
@@ -136,8 +135,7 @@ sh_sh3_register_name (struct gdbarch *gdbarch, int reg_nr)
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
   };
 
-  gdb_assert (reg_nr >= 0);
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+  if (reg_nr >= ARRAY_SIZE (register_names))
     return "";
   return register_names[reg_nr];
 }
@@ -156,8 +154,7 @@ sh_sh3e_register_name (struct gdbarch *gdbarch, int reg_nr)
     "r0b0", "r1b0", "r2b0", "r3b0", "r4b0", "r5b0", "r6b0", "r7b0",
     "r0b1", "r1b1", "r2b1", "r3b1", "r4b1", "r5b1", "r6b1", "r7b1",
   };
-  gdb_assert (reg_nr >= 0);
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+  if (reg_nr >= ARRAY_SIZE (register_names))
     return "";
   return register_names[reg_nr];
 }
@@ -173,8 +170,7 @@ sh_sh2e_register_name (struct gdbarch *gdbarch, int reg_nr)
     "fr0", "fr1", "fr2", "fr3", "fr4", "fr5", "fr6", "fr7",
     "fr8", "fr9", "fr10", "fr11", "fr12", "fr13", "fr14", "fr15",
   };
-  gdb_assert (reg_nr >= 0);
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+  if (reg_nr >= ARRAY_SIZE (register_names))
     return "";
   return register_names[reg_nr];
 }
@@ -212,8 +208,7 @@ sh_sh2a_register_name (struct gdbarch *gdbarch, int reg_nr)
     /* double precision (pseudo) 68 - 75 */
     "dr0", "dr2", "dr4", "dr6", "dr8", "dr10", "dr12", "dr14",
   };
-  gdb_assert (reg_nr >= 0);
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+  if (reg_nr >= ARRAY_SIZE (register_names))
     return "";
   return register_names[reg_nr];
 }
@@ -250,8 +245,7 @@ sh_sh2a_nofpu_register_name (struct gdbarch *gdbarch, int reg_nr)
     "bank",
     /* double precision (pseudo) 68 - 75: report blank, see below.  */
   };
-  gdb_assert (reg_nr >= 0);
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+  if (reg_nr >= ARRAY_SIZE (register_names))
     return "";
   return register_names[reg_nr];
 }
@@ -269,8 +263,7 @@ sh_sh_dsp_register_name (struct gdbarch *gdbarch, int reg_nr)
     "", "",
     "rs", "re",
   };
-  gdb_assert (reg_nr >= 0);
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+  if (reg_nr >= ARRAY_SIZE (register_names))
     return "";
   return register_names[reg_nr];
 }
@@ -289,8 +282,7 @@ sh_sh3_dsp_register_name (struct gdbarch *gdbarch, int reg_nr)
     "rs", "re", "", "", "", "", "", "",
     "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b",
   };
-  gdb_assert (reg_nr >= 0);
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+  if (reg_nr >= ARRAY_SIZE (register_names))
     return "";
   return register_names[reg_nr];
 }
@@ -326,8 +318,7 @@ sh_sh4_register_name (struct gdbarch *gdbarch, int reg_nr)
     /* FIXME: missing XF */
     /* FIXME: missing XD */
   };
-  gdb_assert (reg_nr >= 0);
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+  if (reg_nr >= ARRAY_SIZE (register_names))
     return "";
   return register_names[reg_nr];
 }
@@ -361,8 +352,7 @@ sh_sh4_nofpu_register_name (struct gdbarch *gdbarch, int reg_nr)
     /* vectors (pseudo) 76 - 79 -- not for nofpu target: report blank
        below.  */
   };
-  gdb_assert (reg_nr >= 0);
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+  if (reg_nr >= ARRAY_SIZE (register_names))
     return "";
   return register_names[reg_nr];
 }
@@ -381,8 +371,7 @@ sh_sh4al_dsp_register_name (struct gdbarch *gdbarch, int reg_nr)
     "rs", "re", "", "", "", "", "", "",
     "r0b", "r1b", "r2b", "r3b", "r4b", "r5b", "r6b", "r7b",
   };
-  gdb_assert (reg_nr >= 0);
-  if (reg_nr >= (sizeof (register_names) / sizeof (*register_names)))
+  if (reg_nr >= ARRAY_SIZE (register_names))
     return "";
   return register_names[reg_nr];
 }

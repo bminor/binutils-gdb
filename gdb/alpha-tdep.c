@@ -99,10 +99,7 @@ alpha_register_name (struct gdbarch *gdbarch, int regno)
     "pc",   "",     "unique"
   };
 
-  if (regno < 0)
-    return NULL;
-  if (regno >= ARRAY_SIZE(register_names))
-    return NULL;
+  gdb_static_assert (ALPHA_NUM_REGS == ARRAY_SIZE (register_names));
   return register_names[regno];
 }
 
