@@ -936,6 +936,7 @@ execute_one (SIM_CPU *cpu, unsigned_word iw, const struct riscv_opcode *op)
     case INSN_CLASS_I:
       return execute_i (cpu, iw, op);
     case INSN_CLASS_M:
+    case INSN_CLASS_ZMMUL:
       return execute_m (cpu, iw, op);
     default:
       TRACE_INSN (cpu, "UNHANDLED EXTENSION: %d", op->insn_class);
