@@ -27,6 +27,8 @@
 #include "gdbarch.h"
 #include "scoped-mock-context.h"
 
+#include <map>
+
 namespace selftests {
 
 /* Test gdbarch methods register_to_value and value_to_register.  */
@@ -129,6 +131,9 @@ register_name_test (struct gdbarch *gdbarch)
 {
   scoped_mock_context<test_target_ops> mockctx (gdbarch);
 
+  /* Track the number of times each register name appears.  */
+  std::map<const std::string, int> name_counts;
+
   const int num_regs = gdbarch_num_cooked_regs (gdbarch);
   for (auto regnum = 0; regnum < num_regs; regnum++)
     {
@@ -141,8 +146,22 @@ register_name_test (struct gdbarch *gdbarch)
 	debug_printf ("arch: %s, register: %d returned nullptr\n",
 		      gdbarch_bfd_arch_info (gdbarch)->printable_name,
 		      regnum);
-
       SELF_CHECK (name != nullptr);
+
+      /* Every register name, that is not the empty string, should be
+	 unique.  If this is not the case then the user will see duplicate
+	 copies of the register in e.g. 'info registers' output, but will
+	 only be able to interact with one of the copies.  */
+      if (*name != '\0')
+	{
+	  std::string s (name);
+	  name_counts[s]++;
+	  if (run_verbose() && name_counts[s] > 1)
+	    debug_printf ("arch: %s, register: %d (%s) is a duplicate\n",
+			  gdbarch_bfd_arch_info (gdbarch)->printable_name,
+			  regnum, name);
+	  SELF_CHECK (name_counts[s] == 1);
+	}
     }
 }
 
