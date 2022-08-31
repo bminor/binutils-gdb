@@ -1352,8 +1352,7 @@ riscv_register_reggroup_p (struct gdbarch  *gdbarch, int regnum,
 
   /* Used by 'info registers' and 'info registers <groupname>'.  */
 
-  if (gdbarch_register_name (gdbarch, regnum) == NULL
-      || gdbarch_register_name (gdbarch, regnum)[0] == '\0')
+  if (gdbarch_register_name (gdbarch, regnum)[0] == '\0')
     return 0;
 
   if (regnum > RISCV_LAST_REGNUM && regnum < gdbarch_num_regs (gdbarch))
@@ -1478,8 +1477,7 @@ riscv_print_registers_info (struct gdbarch *gdbarch,
   if (regnum != -1)
     {
       /* Print one specified register.  */
-      if (gdbarch_register_name (gdbarch, regnum) == NULL
-	  || *(gdbarch_register_name (gdbarch, regnum)) == '\0')
+      if (*(gdbarch_register_name (gdbarch, regnum)) == '\0')
 	error (_("Not a valid register for the current processor type"));
       riscv_print_one_register_info (gdbarch, file, frame, regnum);
     }
@@ -1499,8 +1497,7 @@ riscv_print_registers_info (struct gdbarch *gdbarch,
 	    continue;
 
 	  /* Registers with no name are not valid on this ISA.  */
-	  if (gdbarch_register_name (gdbarch, regnum) == NULL
-	      || *(gdbarch_register_name (gdbarch, regnum)) == '\0')
+	  if (*(gdbarch_register_name (gdbarch, regnum)) == '\0')
 	    continue;
 
 	  /* Is the register in the group we're interested in?  */

@@ -1417,7 +1417,7 @@ address_of_variable (struct symbol *var, const struct block *b)
 
 	regname = gdbarch_register_name (get_frame_arch (frame),
 					 VALUE_REGNUM (val));
-	gdb_assert (regname && *regname);
+	gdb_assert (regname != nullptr && *regname != '\0');
 
 	error (_("Address requested for identifier "
 		 "\"%s\" which is in register $%s"),

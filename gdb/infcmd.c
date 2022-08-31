@@ -2224,8 +2224,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 
       /* If the register name is empty, it is undefined for this
 	 processor, so don't display anything.  */
-      if (gdbarch_register_name (gdbarch, i) == NULL
-	  || *(gdbarch_register_name (gdbarch, i)) == '\0')
+      if (*(gdbarch_register_name (gdbarch, i)) == '\0')
 	continue;
 
       default_print_one_register_info (file,

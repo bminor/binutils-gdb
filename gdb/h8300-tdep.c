@@ -996,7 +996,7 @@ h8300_print_register (struct gdbarch *gdbarch, struct ui_file *file,
   LONGEST rval;
   const char *name = gdbarch_register_name (gdbarch, regno);
 
-  if (!name || !*name)
+  if (*name == '\0')
     return;
 
   rval = get_frame_register_signed (frame, regno);

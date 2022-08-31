@@ -231,7 +231,7 @@ tui_data_window::show_register_group (const reggroup *group,
       /* If the register name is empty, it is undefined for this
 	 processor, so don't display anything.  */
       name = gdbarch_register_name (gdbarch, regnum);
-      if (name == 0 || *name == '\0')
+      if (*name == '\0')
 	continue;
 
       nr_regs++;
@@ -253,7 +253,7 @@ tui_data_window::show_register_group (const reggroup *group,
       /* If the register name is empty, it is undefined for this
 	 processor, so don't display anything.  */
       name = gdbarch_register_name (gdbarch, regnum);
-      if (name == 0 || *name == '\0')
+      if (*name == '\0')
 	continue;
 
       data_item_win = &m_regs_content[pos];

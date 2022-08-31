@@ -76,8 +76,7 @@ legacy_register_sim_regno (struct gdbarch *gdbarch, int regnum)
      suspected that some GDB/SIM combinations may rely on this
      behaviour.  The default should be one2one_register_sim_regno
      (below).  */
-  if (gdbarch_register_name (gdbarch, regnum) != NULL
-      && gdbarch_register_name (gdbarch, regnum)[0] != '\0')
+  if (gdbarch_register_name (gdbarch, regnum)[0] != '\0')
     return regnum;
   else
     return LEGACY_SIM_REGNO_IGNORE;

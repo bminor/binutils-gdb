@@ -139,18 +139,14 @@ user_reg_map_name_to_regnum (struct gdbarch *gdbarch, const char *name,
   /* Search register name space first - always let an architecture
      specific register override the user registers.  */
   {
-    int i;
     int maxregs = gdbarch_num_cooked_regs (gdbarch);
 
-    for (i = 0; i < maxregs; i++)
+    for (int i = 0; i < maxregs; i++)
       {
 	const char *regname = gdbarch_register_name (gdbarch, i);
 
-	if (regname != NULL && len == strlen (regname)
-	    && strncmp (regname, name, len) == 0)
-	  {
-	    return i;
-	  }
+	if (len == strlen (regname) && strncmp (regname, name, len) == 0)
+	  return i;
       }
   }
 

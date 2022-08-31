@@ -2030,8 +2030,7 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	{
 	  const char *regname = gdbarch_register_name (gdbarch, j);
 
-	  if (regname != NULL
-	      && strcmp (regname, nds32_register_aliases[i].name) == 0)
+	  if (strcmp (regname, nds32_register_aliases[i].name) == 0)
 	    {
 	      regnum = j;
 	      break;

@@ -1392,7 +1392,6 @@ regcache::debug_print_register (const char *func,  int regno)
 
   gdb_printf (gdb_stdlog, "%s ", func);
   if (regno >= 0 && regno < gdbarch_num_regs (gdbarch)
-      && gdbarch_register_name (gdbarch, regno) != NULL
       && gdbarch_register_name (gdbarch, regno)[0] != '\0')
     gdb_printf (gdb_stdlog, "(%s)",
 		gdbarch_register_name (gdbarch, regno));
@@ -1453,9 +1452,7 @@ register_dump::dump (ui_file *file)
 	{
 	  const char *p = gdbarch_register_name (m_gdbarch, regnum);
 
-	  if (p == NULL)
-	    p = "";
-	  else if (p[0] == '\0')
+	  if (p[0] == '\0')
 	    p = "''";
 	  gdb_printf (file, " %-10s", p);
 	}

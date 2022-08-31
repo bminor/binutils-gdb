@@ -1090,7 +1090,7 @@ m68hc11_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
     {
       const char *name = gdbarch_register_name (gdbarch, regno);
 
-      if (!name || !*name)
+      if (*name == '\0')
 	return;
 
       gdb_printf (file, "%-10s ", name);

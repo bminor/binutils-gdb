@@ -2353,8 +2353,7 @@ csky_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 {
   int raw_p;
 
-  if (gdbarch_register_name (gdbarch, regnum) == NULL
-      || gdbarch_register_name (gdbarch, regnum)[0] == '\0')
+  if (gdbarch_register_name (gdbarch, regnum)[0] == '\0')
     return 0;
 
   if (reggroup == all_reggroup)
