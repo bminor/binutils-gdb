@@ -155,7 +155,7 @@ csky_supply_fregset (const struct regset *regset,
       /* Supply vr0~vr15.  */
       for (i = 0; i < 16; i ++)
 	{
-	  if (gdbarch_register_name (gdbarch, (CSKY_VR0_REGNUM + i)))
+	  if (*gdbarch_register_name (gdbarch, (CSKY_VR0_REGNUM + i)) != '\0')
 	    {
 	      offset = 16 * i;
 	      regcache->raw_supply (CSKY_VR0_REGNUM + i, fregs + offset);
@@ -164,7 +164,7 @@ csky_supply_fregset (const struct regset *regset,
       /* Supply fr0~fr15.  */
       for (i = 0; i < 16; i ++)
 	{
-	  if (gdbarch_register_name (gdbarch, (CSKY_FR0_REGNUM + i)))
+	  if (*gdbarch_register_name (gdbarch, (CSKY_FR0_REGNUM + i)) != '\0')
 	    {
 	      offset = 16 * i;
 	      regcache->raw_supply (CSKY_FR0_REGNUM + i, fregs + offset);
@@ -173,7 +173,7 @@ csky_supply_fregset (const struct regset *regset,
       /* Supply fr16~fr31.  */
       for (i = 0; i < 16; i ++)
 	{
-	  if (gdbarch_register_name (gdbarch, (CSKY_FR16_REGNUM + i)))
+	  if (*gdbarch_register_name (gdbarch, (CSKY_FR16_REGNUM + i)) != '\0')
 	    {
 	      offset = (16 * 16) + (8 * i);
 	      regcache->raw_supply (CSKY_FR16_REGNUM + i, fregs + offset);
@@ -182,7 +182,7 @@ csky_supply_fregset (const struct regset *regset,
      /* Supply fcr, fesr, fid.  */
       for (i = 0; i < 3; i ++)
 	{
-	  if (gdbarch_register_name (gdbarch, fcr_regno[i]))
+	  if (*gdbarch_register_name (gdbarch, fcr_regno[i]) != '\0')
 	    {
 	      offset = (16 * 16) + (16 * 8) + (4 * i);
 	      regcache->raw_supply (fcr_regno[i], fregs + offset);
@@ -245,7 +245,7 @@ csky_collect_fregset (const struct regset *regset,
       /* Supply vr0~vr15.  */
       for (i = 0; i < 16; i ++)
 	{
-	  if (gdbarch_register_name (gdbarch, (CSKY_VR0_REGNUM + i)))
+	  if (*gdbarch_register_name (gdbarch, (CSKY_VR0_REGNUM + i)) != '\0')
 	    {
 	      offset = 16 * i;
 	      regcache ->raw_collect (CSKY_VR0_REGNUM + i, fregs + offset);
@@ -254,7 +254,7 @@ csky_collect_fregset (const struct regset *regset,
       /* Supply fr16~fr31.  */
       for (i = 0; i < 16; i ++)
 	{
-	  if (gdbarch_register_name (gdbarch, (CSKY_FR16_REGNUM + i)))
+	  if (*gdbarch_register_name (gdbarch, (CSKY_FR16_REGNUM + i)) != '\0')
 	    {
 	      offset = (16 * 16) + (8 * i);
 	      regcache ->raw_collect (CSKY_FR16_REGNUM + i, fregs + offset);
@@ -263,7 +263,7 @@ csky_collect_fregset (const struct regset *regset,
       /* Supply fcr, fesr, fid.  */
       for (i = 0; i < 3; i ++)
 	{
-	  if (gdbarch_register_name (gdbarch, fcr_regno[i]))
+	  if (*gdbarch_register_name (gdbarch, fcr_regno[i]) != '\0')
 	    {
 	      offset = (16 * 16) + (16 * 8) + (4 * i);
 	      regcache ->raw_collect (fcr_regno[i], fregs + offset);
