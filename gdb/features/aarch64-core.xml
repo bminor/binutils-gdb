@@ -76,7 +76,8 @@
     <field name="DIT" start="24" end="24"/>
     <!-- ARMv8.5-A: Tag Check Override.  -->
     <field name="TCO" start="25" end="25"/>
-
+    <!-- Morello C64 bit, indicating C64 execution state.  -->
+    <field name="C64" start="26" end="26"/>
     <!-- Overflow Condition flag.  -->
     <field name="V" start="28" end="28"/>
     <!-- Carry Condition flag.  -->
