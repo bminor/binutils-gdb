@@ -26,6 +26,7 @@ create_feature_aarch64_core (struct target_desc *result, long regnum)
   tdesc_add_flag (type_with_fields, 23, "UAO");
   tdesc_add_flag (type_with_fields, 24, "DIT");
   tdesc_add_flag (type_with_fields, 25, "TCO");
+  tdesc_add_flag (type_with_fields, 26, "C64");
   tdesc_add_flag (type_with_fields, 28, "V");
   tdesc_add_flag (type_with_fields, 29, "C");
   tdesc_add_flag (type_with_fields, 30, "Z");
