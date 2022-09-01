@@ -1270,7 +1270,7 @@ run (const char *what, char *args)
   int i;
   const char **argv;
   char *errmsg_fmt = NULL, *errmsg_arg = NULL;
-  char *temp_base = choose_temp_base ();
+  char *temp_base = make_temp_file ("");
 
   inform (_("run: %s %s"), what, args);
 

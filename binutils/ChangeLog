@@ -1,3 +1,11 @@
+2022-09-01  Nick Clifton  <nickc@redhat.com>
+
+	PR 29534
+	* dllwrap.c: Replace uses of choose_temp_base() with
+	make_temp_file().
+	* dlltool.c: Likewise.
+	* resrc.c: Likewise.
+
 2022-08-23  Nick Clifton  <nickc@redhat.com>
 
 	PR 29489
