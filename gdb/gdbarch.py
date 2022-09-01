@@ -49,6 +49,11 @@ class _Component:
             setattr(self, key, kwargs[key])
         components.append(self)
 
+        # It doesn't make sense to have a check of the result value
+        # for a function or method with void return type.
+        if self.type == "void" and self.result_checks:
+            raise Exception("can't have result checks with a void return type")
+
     def get_predicate(self):
         "Return the expression used for validity checking."
         assert self.predicate and not isinstance(self.invalid, str)
@@ -112,6 +117,8 @@ class Function(_Component):
         postdefault=None,
         invalid=None,
         printer=None,
+        param_checks=None,
+        result_checks=None,
     ):
         super().__init__(
             comment=comment,
@@ -123,6 +130,8 @@ class Function(_Component):
             invalid=invalid,
             printer=printer,
             params=params,
+            param_checks=param_checks,
+            result_checks=result_checks,
         )
 
     def ftype(self):
@@ -444,6 +453,9 @@ with open("gdbarch.c", "w") as f:
                     f"  /* Do not check predicate: {c.get_predicate()}, allow call.  */",
                     file=f,
                 )
+            if c.param_checks:
+                for rule in c.param_checks:
+                    print(f"  gdb_assert ({rule});", file=f)
             print("  if (gdbarch_debug >= 2)", file=f)
             print(
                 f"""    gdb_printf (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
@@ -451,8 +463,15 @@ with open("gdbarch.c", "w") as f:
             )
             print("  ", file=f, end="")
             if c.type != "void":
-                print("return ", file=f, end="")
+                if c.result_checks:
+                    print("auto result = ", file=f, end="")
+                else:
+                    print("return ", file=f, end="")
             print(f"gdbarch->{c.name} ({c.actuals()});", file=f)
+            if c.type != "void" and c.result_checks:
+                for rule in c.result_checks:
+                    print(f"  gdb_assert ({rule});", file=f)
+                print("  return result;", file=f)
             print("}", file=f)
             print(file=f)
             print("void", file=f)

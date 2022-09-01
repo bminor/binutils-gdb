@@ -2235,9 +2235,13 @@ gdbarch_register_name (struct gdbarch *gdbarch, int regnr)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->register_name != NULL);
+  gdb_assert (regnr >= 0);
+  gdb_assert (regnr < gdbarch_num_cooked_regs (gdbarch));
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_register_name called\n");
-  return gdbarch->register_name (gdbarch, regnr);
+  auto result = gdbarch->register_name (gdbarch, regnr);
+  gdb_assert (result != nullptr);
+  return result;
 }
 
 void
