@@ -40,7 +40,7 @@ Disassembly of section .text:
 0+74 <[^>]*> e1700000 ?	cmn	r0, r0
 0+78 <[^>]*> e1700000 ?	cmn	r0, r0
 0+7c <[^>]*> e170f000 ?	cmnp	r0, r0
-0+80 <[^>]*> e1a00000 ?	nop[\s]+; \(mov r0, r0\)
+0+80 <[^>]*> e1a00000 ?	nop[\s]+@ \(mov r0, r0\)
 0+84 <[^>]*> e1b00000 ?	movs	r0, r0
 0+88 <[^>]*> e1e00000 ?	mvn	r0, r0
 0+8c <[^>]*> e1f00000 ?	mvns	r0, r0
@@ -69,6 +69,6 @@ Disassembly of section .text:
 0+e8 <[^>]*> e8100001 ?	ldmda	r0, {r0}
 0+ec <[^>]*> e9100001 ?	ldmdb	r0, {r0}
 0+f0 <[^>]*> e9900001 ?	ldmib	r0, {r0}
-0+f4 <[^>]*> e1a00000 ?	nop[\s]+; \(mov r0, r0\)
-0+f8 <[^>]*> e1a00000 ?	nop[\s]+; \(mov r0, r0\)
-0+fc <[^>]*> e1a00000 ?	nop[\s]+; \(mov r0, r0\)
+0+f4 <[^>]*> e1a00000 ?	nop[\s]+@ \(mov r0, r0\)
+0+f8 <[^>]*> e1a00000 ?	nop[\s]+@ \(mov r0, r0\)
+0+fc <[^>]*> e1a00000 ?	nop[\s]+@ \(mov r0, r0\)

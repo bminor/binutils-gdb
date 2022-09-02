@@ -27,9 +27,9 @@ SYMBOL TABLE:
 Disassembly of section .code:
 
 00000000 <.code>:
-   0:	e1a00000 	nop			; \(mov r0, r0\)
+   0:	e1a00000 	nop			@ \(mov r0, r0\)
 
 Disassembly of section .tcode:
 
 00000000 <.tcode>:
-   0:	46c0      	nop			; \(mov r8, r8\)
+   0:	46c0      	nop			@ \(mov r8, r8\)

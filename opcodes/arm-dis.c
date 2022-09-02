@@ -458,10 +458,10 @@ enum opcode_sentinel_enum
   SENTINEL_GENERIC_START
 } opcode_sentinels;
 
-#define UNDEFINED_INSTRUCTION      "\t\t; <UNDEFINED> instruction: %0-31x"
-#define UNKNOWN_INSTRUCTION_32BIT  "\t\t; <UNDEFINED> instruction: %08x"
-#define UNKNOWN_INSTRUCTION_16BIT  "\t\t; <UNDEFINED> instruction: %04x"
-#define UNPREDICTABLE_INSTRUCTION  "\t; <UNPREDICTABLE>"
+#define UNDEFINED_INSTRUCTION      "\t\t@ <UNDEFINED> instruction: %0-31x"
+#define UNKNOWN_INSTRUCTION_32BIT  "\t\t@ <UNDEFINED> instruction: %08x"
+#define UNKNOWN_INSTRUCTION_16BIT  "\t\t@ <UNDEFINED> instruction: %04x"
+#define UNPREDICTABLE_INSTRUCTION  "\t@ <UNPREDICTABLE>"
 
 /* Common coprocessor opcodes shared between Arm and Thumb-2.  */
 
@@ -846,13 +846,13 @@ static const struct sopcode32 coprocessor_opcodes[] =
     0xec000f80, 0xfe101f80, "vstr%c\t%J, %K"},
 
   {ANY, ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
-    0x0d200b01, 0x0fb00f01, "fstmdbx%c\t%16-19r!, %z3\t;@ Deprecated"},
+    0x0d200b01, 0x0fb00f01, "fstmdbx%c\t%16-19r!, %z3\t@ Deprecated"},
   {ANY, ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
-    0x0d300b01, 0x0fb00f01, "fldmdbx%c\t%16-19r!, %z3\t;@ Deprecated"},
+    0x0d300b01, 0x0fb00f01, "fldmdbx%c\t%16-19r!, %z3\t@ Deprecated"},
   {ANY, ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
-    0x0c800b01, 0x0f900f01, "fstmiax%c\t%16-19r%21'!, %z3\t;@ Deprecated"},
+    0x0c800b01, 0x0f900f01, "fstmiax%c\t%16-19r%21'!, %z3\t@ Deprecated"},
   {ANY, ARM_FEATURE_COPROC (FPU_VFP_EXT_V1xD),
-    0x0c900b01, 0x0f900f01, "fldmiax%c\t%16-19r%21'!, %z3\t;@ Deprecated"},
+    0x0c900b01, 0x0f900f01, "fldmiax%c\t%16-19r%21'!, %z3\t@ Deprecated"},
 
   /* Data transfer between ARM and NEON registers.  */
   {ANY, ARM_FEATURE_COPROC (FPU_NEON_EXT_V1),
@@ -3657,7 +3657,7 @@ static const struct opcode32 arm_opcodes[] =
 {
   /* ARM instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0xe1a00000, 0xffffffff, "nop\t\t\t; (mov r0, r0)"},
+    0xe1a00000, 0xffffffff, "nop\t\t\t@ (mov r0, r0)"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0xe7f000f0, 0xfff000f0, "udf\t#%e"},
 
@@ -4140,7 +4140,7 @@ static const struct opcode32 arm_opcodes[] =
 
   /* ARM Instructions.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x052d0004, 0x0fff0fff, "push%c\t{%12-15r}\t\t; (str%c %12-15r, %a)"},
+    0x052d0004, 0x0fff0fff, "push%c\t{%12-15r}\t\t@ (str%c %12-15r, %a)"},
 
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0x04400000, 0x0e500000, "strb%t%c\t%12-15R, %a"},
@@ -4303,7 +4303,7 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0x06000010, 0x0e000010, UNDEFINED_INSTRUCTION},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
-    0x049d0004, 0x0fff0fff, "pop%c\t{%12-15r}\t\t; (ldr%c %12-15r, %a)"},
+    0x049d0004, 0x0fff0fff, "pop%c\t{%12-15r}\t\t@ (ldr%c %12-15r, %a)"},
 
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V1),
     0x04500000, 0x0c500000, "ldrb%t%c\t%12-15R, %a"},
@@ -4419,7 +4419,7 @@ static const struct opcode32 arm_opcodes[] =
    %c			print the condition code
    %C			print the condition code, or "s" if not conditional
    %x			print warning if conditional an not at end of IT block"
-   %X			print "\t; unpredictable <IT:code>" if conditional
+   %X			print "\t@ unpredictable <IT:code>" if conditional
    %I			print IT instruction suffix and operands
    %W			print Thumb Writeback indicator for LDMIA
    %<bitfield>r		print bitfield as an ARM register
@@ -4481,7 +4481,7 @@ static const struct opcode16 thumb_opcodes[] =
     0x4780, 0xff87, "blx%c\t%3-6r%x"},	/* note: 4 bit register number.  */
   /* ARM V4T ISA (Thumb v1).  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V4T),
-    0x46C0, 0xFFFF, "nop%c\t\t\t; (mov r8, r8)"},
+    0x46C0, 0xFFFF, "nop%c\t\t\t@ (mov r8, r8)"},
   /* Format 4.  */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V4T), 0x4000, 0xFFC0, "and%C\t%0-2r, %3-5r"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V4T), 0x4040, 0xFFC0, "eor%C\t%0-2r, %3-5r"},
@@ -4546,7 +4546,7 @@ static const struct opcode16 thumb_opcodes[] =
   /* TODO: Disassemble PC relative "LDR rD,=<symbolic>" */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V4T),
     0x4800, 0xF800,
-    "ldr%c\t%8-10r, [pc, #%0-7W]\t; (%0-7a)"},
+    "ldr%c\t%8-10r, [pc, #%0-7W]\t@ (%0-7a)"},
   /* format 9 */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V4T),
     0x6000, 0xF800, "str%c\t%0-2r, [%3-5r, #%6-10W]"},
@@ -4568,7 +4568,7 @@ static const struct opcode16 thumb_opcodes[] =
     0x9800, 0xF800, "ldr%c\t%8-10r, [sp, #%0-7W]"},
   /* format 12 */
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V4T),
-    0xA000, 0xF800, "add%c\t%8-10r, pc, #%0-7W\t; (adr %8-10r, %0-7a)"},
+    0xA000, 0xF800, "add%c\t%8-10r, pc, #%0-7W\t@ (adr %8-10r, %0-7a)"},
   {ARM_FEATURE_CORE_LOW (ARM_EXT_V4T),
     0xA800, 0xF800, "add%c\t%8-10r, sp, #%0-7W"},
   /* format 15 */
@@ -4628,7 +4628,7 @@ static const struct opcode16 thumb_opcodes[] =
        %P		print address for pli instruction.
        %c		print the condition code
        %x		print warning if conditional an not at end of IT block"
-       %X		print "\t; unpredictable <IT:code>" if conditional
+       %X		print "\t@ unpredictable <IT:code>" if conditional
 
        %<bitfield>d	print bitfield in decimal
        %<bitfield>D     print bitfield plus one in decimal
@@ -5488,7 +5488,7 @@ arm_decode_shift (long given, fprintf_ftype func, void *stream,
 	    func (stream, ", #%d", amount);
 	}
       else if ((given & 0x80) == 0x80)
-	func (stream, "\t; <illegal shifter operand>");
+	func (stream, "\t@ <illegal shifter operand>");
       else if (print_shift)
 	func (stream, ", %s %s", arm_shift[(given & 0x60) >> 5],
 	      arm_regnames[(given & 0xf00) >> 8]);
@@ -7067,14 +7067,14 @@ print_simd_imm8 (struct disassemble_info *info, unsigned long given,
   switch (size)
     {
     case 8:
-      func (stream, "#%ld\t; 0x%.2lx", value, value);
+      func (stream, "#%ld\t@ 0x%.2lx", value, value);
       break;
 
     case 16:
       func (stream,
 	    printU
-	    ? "#%lu\t; 0x%.4lx"
-	    : "#%ld\t; 0x%.4lx", value, value);
+	    ? "#%lu\t@ 0x%.4lx"
+	    : "#%ld\t@ 0x%.4lx", value, value);
       break;
 
     case 32:
@@ -7094,14 +7094,14 @@ print_simd_imm8 (struct disassemble_info *info, unsigned long given,
 	    (& floatformat_ieee_single_little, valbytes,
 	     & fvalue);
 
-	  func (stream, "#%.7g\t; 0x%.8lx", fvalue,
+	  func (stream, "#%.7g\t@ 0x%.8lx", fvalue,
 		value);
 	}
       else
 	func (stream,
 	      printU
-	      ? "#%lu\t; 0x%.8lx"
-	      : "#%ld\t; 0x%.8lx",
+	      ? "#%lu\t@ 0x%.8lx"
+	      : "#%ld\t@ 0x%.8lx",
 	      (long) (((value & 0x80000000L) != 0)
 		      && !printU
 		      ? value | ~0xffffffffL : value),
@@ -8242,7 +8242,7 @@ print_insn_coprocessor_1 (const struct sopcode32 *opcodes,
 		      }
 		    if (rn == 15 && (PRE_BIT_SET || WRITEBACK_BIT_SET))
 		      {
-			func (stream, "\t; ");
+			func (stream, "\t@ ");
 			/* For unaligned PCs, apply off-by-alignment
 			   correction.  */
 			info->print_address_func (offset + pc
@@ -8485,17 +8485,17 @@ print_insn_coprocessor_1 (const struct sopcode32 *opcodes,
 			    (16 + (value & 0xF));
 
 			  if (!(decVal % 1000000))
-			    func (stream, "%ld\t; 0x%08x %c%u.%01u", value,
+			    func (stream, "%ld\t@ 0x%08x %c%u.%01u", value,
 				  floatVal, value & 0x80 ? '-' : ' ',
 				  decVal / 10000000,
 				  decVal % 10000000 / 1000000);
 			  else if (!(decVal % 10000))
-			    func (stream, "%ld\t; 0x%08x %c%u.%03u", value,
+			    func (stream, "%ld\t@ 0x%08x %c%u.%03u", value,
 				  floatVal, value & 0x80 ? '-' : ' ',
 				  decVal / 10000000,
 				  decVal % 10000000 / 10000);
 			  else
-			    func (stream, "%ld\t; 0x%08x %c%u.%07u", value,
+			    func (stream, "%ld\t@ 0x%08x %c%u.%07u", value,
 				  floatVal, value & 0x80 ? '-' : ' ',
 				  decVal / 10000000, decVal % 10000000);
 			  break;
@@ -8765,7 +8765,7 @@ print_insn_coprocessor_1 (const struct sopcode32 *opcodes,
 	}
 
       if (value_in_comment > 32 || value_in_comment < -16)
-	func (stream, "\t; 0x%lx", (value_in_comment & 0xffffffffUL));
+	func (stream, "\t@ 0x%lx", (value_in_comment & 0xffffffffUL));
 
       if (is_unpredictable)
 	func (stream, UNPREDICTABLE_INSTRUCTION);
@@ -8840,7 +8840,7 @@ print_arm_address (bfd_vma pc, struct disassemble_info *info, long given)
 	  offset = pc + 8;
 	}
 
-      func (stream, "\t; ");
+      func (stream, "\t@ ");
       info->print_address_func (offset, info);
       offset = 0;
     }
@@ -9381,11 +9381,11 @@ print_insn_neon (struct disassemble_info *info, long given, bool thumb)
                         switch (size)
                           {
                           case 8:
-			    func (stream, "#%ld\t; 0x%.2lx", value, value);
+			    func (stream, "#%ld\t@ 0x%.2lx", value, value);
                             break;
 
                           case 16:
-                            func (stream, "#%ld\t; 0x%.4lx", value, value);
+                            func (stream, "#%ld\t@ 0x%.4lx", value, value);
                             break;
 
                           case 32:
@@ -9405,11 +9405,11 @@ print_insn_neon (struct disassemble_info *info, long given, bool thumb)
                                   (& floatformat_ieee_single_little, valbytes,
                                   & fvalue);
 
-                                func (stream, "#%.7g\t; 0x%.8lx", fvalue,
+                                func (stream, "#%.7g\t@ 0x%.8lx", fvalue,
                                       value);
                               }
                             else
-                              func (stream, "#%ld\t; 0x%.8lx",
+                              func (stream, "#%ld\t@ 0x%.8lx",
 				    (long) (((value & 0x80000000L) != 0)
 					    ? value | ~0xffffffffL : value),
 				    value);
@@ -9530,7 +9530,7 @@ print_insn_neon (struct disassemble_info *info, long given, bool thumb)
 	    }
 
 	  if (value_in_comment > 32 || value_in_comment < -16)
-	    func (stream, "\t; 0x%lx", value_in_comment);
+	    func (stream, "\t@ 0x%lx", value_in_comment);
 
 	  if (is_unpredictable)
 	    func (stream, UNPREDICTABLE_INSTRUCTION);
@@ -9894,7 +9894,7 @@ print_insn_mve (struct disassemble_info *info, long given)
 	    }
 
 	  if (value_in_comment > 32 || value_in_comment < -16)
-	    func (stream, "\t; 0x%lx", value_in_comment);
+	    func (stream, "\t@ 0x%lx", value_in_comment);
 
 	  if (is_unpredictable)
 	    print_mve_unpredictable (info, unpredictable_cond);
@@ -10059,10 +10059,10 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			    {
 			      /* Elide positive zero offset.  */
 			      if (offset || NEGATIVE_BIT_SET)
-				func (stream, "[pc, #%s%d]\t; ",
+				func (stream, "[pc, #%s%d]\t@ ",
 				      NEGATIVE_BIT_SET ? "-" : "", (int) offset);
 			      else
-				func (stream, "[pc]\t; ");
+				func (stream, "[pc]\t@ ");
 			      if (NEGATIVE_BIT_SET)
 				offset = -offset;
 			      info->print_address_func (offset + pc + 8, info);
@@ -10421,9 +10421,9 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 			    /* Some SWI instructions have special
 			       meanings.  */
 			    if ((given & 0x0fffffff) == 0x0FF00000)
-			      func (stream, "\t; IMB");
+			      func (stream, "\t@ IMB");
 			    else if ((given & 0x0fffffff) == 0x0FF00001)
-			      func (stream, "\t; IMBRange");
+			      func (stream, "\t@ IMBRange");
 			    break;
 			  case 'X':
 			    func (stream, "%01lx", value & 0xf);
@@ -10512,7 +10512,7 @@ print_insn_arm (bfd_vma pc, struct disassemble_info *info, long given)
 	    }
 
 	  if (value_in_comment > 32 || value_in_comment < -16)
-	    func (stream, "\t; 0x%lx", (value_in_comment & 0xffffffffUL));
+	    func (stream, "\t@ 0x%lx", (value_in_comment & 0xffffffffUL));
 
 	  if (is_unpredictable)
 	    func (stream, UNPREDICTABLE_INSTRUCTION);
@@ -10581,12 +10581,12 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 
 	      case 'x':
 		if (ifthen_next_state)
-		  func (stream, "\t; unpredictable branch in IT block\n");
+		  func (stream, "\t@ unpredictable branch in IT block\n");
 		break;
 
 	      case 'X':
 		if (ifthen_state)
-		  func (stream, "\t; unpredictable <IT:%s>",
+		  func (stream, "\t@ unpredictable <IT:%s>",
 			arm_conditional[IFTHEN_COND]);
 		break;
 
@@ -10798,7 +10798,7 @@ print_insn_thumb16 (bfd_vma pc, struct disassemble_info *info, long given)
 	  }
 
 	if (value_in_comment > 32 || value_in_comment < -16)
-	  func (stream, "\t; 0x%lx", value_in_comment);
+	  func (stream, "\t@ 0x%lx", value_in_comment);
 	return;
       }
 
@@ -10897,12 +10897,12 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 
 	      case 'x':
 		if (ifthen_next_state)
-		  func (stream, "\t; unpredictable branch in IT block\n");
+		  func (stream, "\t@ unpredictable branch in IT block\n");
 		break;
 
 	      case 'X':
 		if (ifthen_state)
-		  func (stream, "\t; unpredictable <IT:%s>",
+		  func (stream, "\t@ unpredictable <IT:%s>",
 			arm_conditional[IFTHEN_COND]);
 		break;
 
@@ -11103,7 +11103,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 
 		  if (Rn == 15)
 		    {
-		      func (stream, "\t; ");
+		      func (stream, "\t@ ");
 		      info->print_address_func (((pc + 4) & ~3) + offset, info);
 		    }
 		}
@@ -11539,7 +11539,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 
 		    if ((given & (1 << 23)) == 0)
 		      offset = - offset;
-		    func (stream, "\t; ");
+		    func (stream, "\t@ ");
 		    info->print_address_func ((pc & ~3) + 4 + offset, info);
 		  }
 		break;
@@ -11550,7 +11550,7 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 	  }
 
 	if (value_in_comment > 32 || value_in_comment < -16)
-	  func (stream, "\t; 0x%lx", value_in_comment);
+	  func (stream, "\t@ 0x%lx", value_in_comment);
 
 	if (is_unpredictable)
 	  func (stream, UNPREDICTABLE_INSTRUCTION);
