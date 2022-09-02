@@ -1,3 +1,16 @@
+2022-09-02  Aaron Merey  <amerey@redhat.com>
+
+	PR 29075
+	* objdump.c (find_separate_debug): New function. Finds the bfd
+	corresponding to the separate debuginfod of a given bfd.
+	(find_alt_debug): New function. Finds the bfd corresponding to the
+	.gnu_debugaltlink of a given bfd.
+	(slurp_file): Add bfd parameter. If a source file cannot be found
+	attempt to download it from debuginfod, if enabled.
+	(try_print_file_open): Add bfd parameter and pass it to slurp_file.
+	(show_line): If debuginfod is enabled, call
+	bfd_find_nearest_line_with_alt instead of bfd_find_nearest_line.
+
 2022-09-01  Nick Clifton  <nickc@redhat.com>
 
 	PR 29534
