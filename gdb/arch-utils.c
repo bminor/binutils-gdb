@@ -1237,6 +1237,7 @@ struct gdbarch_registration
   enum bfd_architecture bfd_architecture;
   gdbarch_init_ftype *init;
   gdbarch_dump_tdep_ftype *dump_tdep;
+  gdbarch_supports_arch_info_ftype *supports_arch_info;
   struct gdbarch_list *arches;
   struct gdbarch_registration *next;
 };
@@ -1260,7 +1261,9 @@ gdbarch_printable_names ()
 	internal_error (_("gdbarch_architecture_names: multi-arch unknown"));
       do
 	{
-	  arches.push_back (ap->printable_name);
+	  if (rego->supports_arch_info == nullptr
+	      || rego->supports_arch_info (ap))
+	    arches.push_back (ap->printable_name);
 	  ap = ap->next;
 	}
       while (ap != NULL);
@@ -1273,7 +1276,8 @@ gdbarch_printable_names ()
 void
 gdbarch_register (enum bfd_architecture bfd_architecture,
 		  gdbarch_init_ftype *init,
-		  gdbarch_dump_tdep_ftype *dump_tdep)
+		  gdbarch_dump_tdep_ftype *dump_tdep,
+		  gdbarch_supports_arch_info_ftype *supports_arch_info)
 {
   struct gdbarch_registration **curr;
   const struct bfd_arch_info *bfd_arch_info;
@@ -1306,6 +1310,7 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
   (*curr)->bfd_architecture = bfd_architecture;
   (*curr)->init = init;
   (*curr)->dump_tdep = dump_tdep;
+  (*curr)->supports_arch_info = supports_arch_info;
   (*curr)->arches = NULL;
   (*curr)->next = NULL;
 }
