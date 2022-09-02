@@ -456,6 +456,10 @@ extern bool _bfd_nosymbols_find_nearest_line
   (bfd *, asymbol **, asection *, bfd_vma,
    const char **, const char **, unsigned int *, unsigned int *)
   ATTRIBUTE_HIDDEN;
+extern bool _bfd_nosymbols_find_nearest_line_with_alt
+  (bfd *, const char *, asymbol **, asection *, bfd_vma,
+   const char **, const char **, unsigned int *, unsigned int *)
+  ATTRIBUTE_HIDDEN;
 extern bool _bfd_nosymbols_find_line
   (bfd *, asymbol **, asymbol *, const char **, unsigned int *)
   ATTRIBUTE_HIDDEN;
@@ -588,6 +592,13 @@ extern const struct dwarf_debug_section dwarf_debug_sections[] ATTRIBUTE_HIDDEN;
 /* Find the nearest line using DWARF 2 debugging information.  */
 extern int _bfd_dwarf2_find_nearest_line
   (bfd *, asymbol **, asymbol *, asection *, bfd_vma,
+   const char **, const char **, unsigned int *, unsigned int *,
+   const struct dwarf_debug_section *, void **) ATTRIBUTE_HIDDEN;
+
+/* Find the nearest line using DWARF 2 debugging information, with
+   the option of specifying a .gnu_debugaltlink file.  */
+extern int _bfd_dwarf2_find_nearest_line_with_alt
+  (bfd *, const char *, asymbol **, asymbol *, asection *, bfd_vma,
    const char **, const char **, unsigned int *, unsigned int *,
    const struct dwarf_debug_section *, void **) ATTRIBUTE_HIDDEN;
 

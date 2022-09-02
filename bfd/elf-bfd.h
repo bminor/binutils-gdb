@@ -2333,6 +2333,9 @@ extern bool _bfd_elf_set_arch_mach
 extern bool _bfd_elf_find_nearest_line
   (bfd *, asymbol **, asection *, bfd_vma,
    const char **, const char **, unsigned int *, unsigned int *);
+extern bool _bfd_elf_find_nearest_line_with_alt
+  (bfd *, const char *, asymbol **, asection *, bfd_vma,
+   const char **, const char **, unsigned int *, unsigned int *);
 extern bool _bfd_elf_find_line
   (bfd *, asymbol **, asymbol *, const char **, unsigned int *);
 extern bool _bfd_elf_find_inliner_info

@@ -7162,6 +7162,11 @@ bool bfd_set_private_flags (bfd *abfd, flagword flags);
        BFD_SEND (abfd, _bfd_find_nearest_line, \
                  (abfd, syms, sec, off, file, func, line, NULL))
 
+#define bfd_find_nearest_line_with_alt(abfd, alt_filename, sec, syms, off, \
+                                       file, func, line, disc) \
+       BFD_SEND (abfd, _bfd_find_nearest_line_with_alt, \
+                 (abfd, alt_filename, syms, sec, off, file, func, line, disc))
+
 #define bfd_find_nearest_line_discriminator(abfd, sec, syms, off, file, func, \
                                            line, disc) \
        BFD_SEND (abfd, _bfd_find_nearest_line, \
@@ -7554,6 +7559,7 @@ typedef struct bfd_target
   NAME##_bfd_is_target_special_symbol, \
   NAME##_get_lineno, \
   NAME##_find_nearest_line, \
+  NAME##_find_nearest_line_with_alt, \
   NAME##_find_line, \
   NAME##_find_inliner_info, \
   NAME##_bfd_make_debug_symbol, \
@@ -7584,6 +7590,11 @@ typedef struct bfd_target
                                   struct bfd_section *, bfd_vma,
                                   const char **, const char **,
                                   unsigned int *, unsigned int *);
+  bool (*_bfd_find_nearest_line_with_alt) (bfd *, const char *,
+                                           struct bfd_symbol **,
+                                           struct bfd_section *, bfd_vma,
+                                           const char **, const char **,
+                                           unsigned int *, unsigned int *);
   bool (*_bfd_find_line) (bfd *, struct bfd_symbol **,
                           struct bfd_symbol *, const char **,
                           unsigned int *);

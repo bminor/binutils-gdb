@@ -230,6 +230,9 @@ struct som_section_data_struct
 #define R_HPPA_BEGIN_TRY		R_BEGIN_TRY
 #define R_HPPA_END_TRY			R_END_TRY
 
+#define som_find_nearest_line_with_alt \
+  _bfd_nosymbols_find_nearest_line_with_alt
+
 /* Exported functions, mostly for use by GAS.  */
 bool bfd_som_set_section_attributes
   (asection *, int, int, unsigned int, int);

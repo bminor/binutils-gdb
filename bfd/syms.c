@@ -1505,6 +1505,21 @@ _bfd_nosymbols_find_nearest_line
 }
 
 bool
+_bfd_nosymbols_find_nearest_line_with_alt
+    (bfd *abfd,
+     const char *alt_filename ATTRIBUTE_UNUSED,
+     asymbol **symbols ATTRIBUTE_UNUSED,
+     asection *section ATTRIBUTE_UNUSED,
+     bfd_vma offset ATTRIBUTE_UNUSED,
+     const char **filename_ptr ATTRIBUTE_UNUSED,
+     const char **functionname_ptr ATTRIBUTE_UNUSED,
+     unsigned int *line_ptr ATTRIBUTE_UNUSED,
+     unsigned int *discriminator_ptr ATTRIBUTE_UNUSED)
+{
+  return _bfd_bool_bfd_false_error (abfd);
+}
+
+bool
 _bfd_nosymbols_find_line (bfd *abfd,
 			  asymbol **symbols ATTRIBUTE_UNUSED,
 			  asymbol *symbol ATTRIBUTE_UNUSED,

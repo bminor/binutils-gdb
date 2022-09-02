@@ -92,6 +92,8 @@ extern bool _bfd_mips_elf_is_target_special_symbol
 extern bool _bfd_mips_elf_find_nearest_line
   (bfd *, asymbol **, asection *, bfd_vma,
    const char **, const char **, unsigned int *, unsigned int *);
+#define _bfd_mips_elf_find_nearest_line_with_alt \
+  _bfd_nosymbols_find_nearest_line_with_alt
 extern bool _bfd_mips_elf_find_inliner_info
   (bfd *, const char **, const char **, unsigned int *);
 extern bool _bfd_mips_elf_set_section_contents

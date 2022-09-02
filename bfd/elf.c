@@ -9340,13 +9340,35 @@ _bfd_elf_find_nearest_line (bfd *abfd,
 			    unsigned int *line_ptr,
 			    unsigned int *discriminator_ptr)
 {
+  return _bfd_elf_find_nearest_line_with_alt (abfd, NULL, symbols, section,
+					      offset, filename_ptr,
+					      functionname_ptr, line_ptr,
+					      discriminator_ptr);
+}
+
+/* Find the nearest line to a particular section and offset,
+   for error reporting.  ALT_BFD representing a .gnu_debugaltlink file
+   can be optionally specified.  */
+
+bool
+_bfd_elf_find_nearest_line_with_alt (bfd *abfd,
+				     const char *alt_filename,
+				     asymbol **symbols,
+				     asection *section,
+				     bfd_vma offset,
+				     const char **filename_ptr,
+				     const char **functionname_ptr,
+				     unsigned int *line_ptr,
+				     unsigned int *discriminator_ptr)
+{
   bool found;
 
-  if (_bfd_dwarf2_find_nearest_line (abfd, symbols, NULL, section, offset,
-				     filename_ptr, functionname_ptr,
-				     line_ptr, discriminator_ptr,
-				     dwarf_debug_sections,
-				     &elf_tdata (abfd)->dwarf2_find_line_info))
+  if (_bfd_dwarf2_find_nearest_line_with_alt (abfd, alt_filename, symbols, NULL,
+					      section, offset, filename_ptr,
+					      functionname_ptr, line_ptr,
+					      discriminator_ptr,
+					      dwarf_debug_sections,
+					      &elf_tdata (abfd)->dwarf2_find_line_info))
     return true;
 
   if (_bfd_dwarf1_find_nearest_line (abfd, symbols, section, offset,

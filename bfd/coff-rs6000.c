@@ -4409,6 +4409,8 @@ const struct xcoff_dwsect_name xcoff_dwsect_names[] = {
   coff_bfd_is_target_special_symbol
 #define _bfd_xcoff_get_lineno coff_get_lineno
 #define _bfd_xcoff_find_nearest_line coff_find_nearest_line
+#define _bfd_xcoff_find_nearest_line_with_alt \
+coff_find_nearest_line_with_alt
 #define _bfd_xcoff_find_line coff_find_line
 #define _bfd_xcoff_find_inliner_info coff_find_inliner_info
 #define _bfd_xcoff_bfd_make_debug_symbol coff_bfd_make_debug_symbol

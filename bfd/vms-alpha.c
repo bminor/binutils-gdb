@@ -9992,6 +9992,8 @@ bfd_vms_get_data (bfd *abfd)
 #define alpha_vms_find_inliner_info	   _bfd_nosymbols_find_inliner_info
 #define alpha_vms_bfd_make_debug_symbol	   _bfd_nosymbols_bfd_make_debug_symbol
 #define alpha_vms_find_nearest_line	   _bfd_vms_find_nearest_line
+#define alpha_vms_find_nearest_line_with_alt \
+   _bfd_nosymbols_find_nearest_line_with_alt
 #define alpha_vms_find_line		   _bfd_nosymbols_find_line
 #define alpha_vms_bfd_is_local_label_name  vms_bfd_is_local_label_name
 

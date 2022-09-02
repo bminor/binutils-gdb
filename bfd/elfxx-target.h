@@ -52,6 +52,10 @@
 #ifndef bfd_elfNN_find_nearest_line
 #define bfd_elfNN_find_nearest_line	_bfd_elf_find_nearest_line
 #endif
+#ifndef bfd_elfNN_find_nearest_line_with_alt
+#define bfd_elfNN_find_nearest_line_with_alt \
+  _bfd_elf_find_nearest_line_with_alt
+#endif
 #ifndef bfd_elfNN_find_line
 #define bfd_elfNN_find_line		_bfd_elf_find_line
 #endif

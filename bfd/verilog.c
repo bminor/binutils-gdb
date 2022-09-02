@@ -370,6 +370,7 @@ verilog_mkobject (bfd *abfd)
 #define verilog_bfd_is_local_label_name		     bfd_generic_is_local_label_name
 #define verilog_get_lineno			     _bfd_nosymbols_get_lineno
 #define verilog_find_nearest_line		     _bfd_nosymbols_find_nearest_line
+#define verilog_find_nearest_line_with_alt	     _bfd_nosymbols_find_nearest_line_with_alt
 #define verilog_find_inliner_info		     _bfd_nosymbols_find_inliner_info
 #define verilog_make_empty_symbol		     _bfd_generic_make_empty_symbol
 #define verilog_bfd_make_debug_symbol		     _bfd_nosymbols_bfd_make_debug_symbol

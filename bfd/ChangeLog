@@ -1,3 +1,52 @@
+2022-09-02  Aaron Merey  <amerey@redhat.com>
+
+	* aout-target.h (MY_find_nearest_line_with_alt): New macro.
+	* bfd-in2.h: Regenerate.
+	* bfd.c (bfd_find_nearest_line_with_alt): New macro.
+	* binary.c (binary_find_nearest_line_with_alt): New macro.
+	* coff-rs6000.c (_bfd_xcoff_find_nearest_line_with_alt): New macro.
+	(rs6000_xcoff64_vec): Add coff_find_nearest_line_with_alt.
+	* dwarf2.c (_bfd_dwarf2_find_nearest_line): Calls
+	_bfd_dwarf2_find_nearest_line_with_alt.
+	(_bfd_dwarf2_find_nearest_line_with_alt): New function. Implements the
+	former _bfd_dwarf2_find_nearest_line. Adds parameter alt_filename.
+	Attempt to open alt_filename and use it as the .dwz file if not NULL.
+	* elf-bfd.h (_bfd_elf_find_nearest_line_with_alt): New declaration.
+	* elf.c (_bfd_elf_find_nearest_line): Calls
+	_bfd_elf_find_nearest_line_with_alt.
+	(_bfd_elf_find_nearest_line_with_alt): New function. Implements the
+	former _bfd_elf_find_nearest_line. Adds parameter alt_filename.
+	* elf32-mips.c (bfd_elf32_find_nearest_line_with_alt): New macro.
+	* elf64-mips.c (bfd_elf64_find_nearest_line_with_alt): New macro.
+	* elfn32-mips.c (bfd_elf32_find_nearest_line_with_alt): New macro.
+	* elfxx-mips.h (_bfd_mips_elf_find_nearest_line_with_alt): New macro.
+	* elfxx-target.h (bfd_elfNN_find_nearest_line_with_alt): New macro.
+	* i386mdos.c (msdos_find_nearest_line_with_alt): New macro.
+	* ihex.c (ihex_find_nearest_line_with_alt): New macro.
+	* libbfd-in.h (_bfd_nosymbols_find_nearest_line_with_alt): New
+	declaration.
+	(_bfd_dwarf2_find_nearest_line_with_alt): New declaration.
+	* libbfd.h: Regenerate.
+	* libcoff-in.h (coff_find_nearest_line_with_alt): New macro.
+	* libcoff.h: Regenerate.
+	* libecoff.h (_bfd_ecoff_find_nearest_line_with_alt): New macro.
+	* mach-o.h (bfd_mach_o_find_nearest_line_with_alt): New macro.
+	* mmo.c (mmo_find_nearest_line_with_alt): New macro.
+	* pef.c (bfd_pef_find_nearest_line_with_alt): New macro.
+	* plugin.c (bfd_plugin_find_nearest_line_with_alt): New macro.
+	* ppcboot.c (ppcboot_find_nearest_line_with_alt): New macro.
+	* som.h (som_find_nearest_line_with_alt): New macro.
+	* srec.c (srec_find_nearest_line_with_alt): New macro.
+	* syms.c (_bfd_nosymbols_find_nearest_line_with_alt): New function.
+	* targets.c (BFD_JUMP_TABLE_SYMBOLS): Add symbol for
+	NAME##_find_nearest_line_with_alt.
+	(_bfd_find_nearest_line_with_alt): Add declaration.
+	* tekhex.c (tekhex_find_nearest_line_with_alt): New macro.
+	* verilog.c (verilog_find_nearest_line_with_alt): New macro.
+	* vms-alpha.c (_bfd_vms_find_nearest_line_with_alt): New macro.
+	* wasm-module.c (wasm_find_nearest_line_with_alt): New macro.
+	* xsym.c (bfd_sym_find_nearest_line_with_alt): New macro.
+
 2022-09-02  Frederic Cambus  <fred@statdns.com>
 
 	* config.bfd (arm-*-openbsd*): Restore target.

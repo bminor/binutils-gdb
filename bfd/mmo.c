@@ -3316,6 +3316,7 @@ mmo_write_object_contents (bfd *abfd)
 /* FIXME: We can do better on this one, if we have a dwarf2 .debug_line
    section or if MMO line numbers are implemented.  */
 #define mmo_find_nearest_line _bfd_nosymbols_find_nearest_line
+#define mmo_find_nearest_line_with_alt _bfd_nosymbols_find_nearest_line_with_alt
 #define mmo_find_line _bfd_nosymbols_find_line
 #define mmo_find_inliner_info _bfd_nosymbols_find_inliner_info
 #define mmo_make_empty_symbol _bfd_generic_make_empty_symbol

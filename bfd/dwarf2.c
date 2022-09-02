@@ -5699,18 +5699,7 @@ _bfd_dwarf2_find_symbol_bias (asymbol ** symbols, void ** pinfo)
   return result;
 }
 
-/* Find the source code location of SYMBOL.  If SYMBOL is NULL
-   then find the nearest source code location corresponding to
-   the address SECTION + OFFSET.
-   Returns 1 if the line is found without error and fills in
-   FILENAME_PTR and LINENUMBER_PTR.  In the case where SYMBOL was
-   NULL the FUNCTIONNAME_PTR is also filled in.
-   Returns 2 if partial information from _bfd_elf_find_function is
-   returned (function and maybe file) by looking at symbols.  DWARF2
-   info is present but not regarding the requested code location.
-   Returns 0 otherwise.
-   SYMBOLS contains the symbol table for ABFD.
-   DEBUG_SECTIONS contains the name of the dwarf debug sections.  */
+/* See _bfd_dwarf2_find_nearest_line_with_alt.  */
 
 int
 _bfd_dwarf2_find_nearest_line (bfd *abfd,
@@ -5724,6 +5713,43 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
 			       unsigned int *discriminator_ptr,
 			       const struct dwarf_debug_section *debug_sections,
 			       void **pinfo)
+{
+  return _bfd_dwarf2_find_nearest_line_with_alt
+    (abfd, NULL, symbols, symbol, section, offset, filename_ptr,
+     functionname_ptr, linenumber_ptr, discriminator_ptr, debug_sections,
+     pinfo);
+}
+
+/* Find the source code location of SYMBOL.  If SYMBOL is NULL
+   then find the nearest source code location corresponding to
+   the address SECTION + OFFSET.
+   Returns 1 if the line is found without error and fills in
+   FILENAME_PTR and LINENUMBER_PTR.  In the case where SYMBOL was
+   NULL the FUNCTIONNAME_PTR is also filled in.
+   Returns 2 if partial information from _bfd_elf_find_function is
+   returned (function and maybe file) by looking at symbols.  DWARF2
+   info is present but not regarding the requested code location.
+   Returns 0 otherwise.
+   SYMBOLS contains the symbol table for ABFD.
+   DEBUG_SECTIONS contains the name of the dwarf debug sections.
+   If ALT_FILENAME is given, attempt to open the file and use it
+   as the .gnu_debugaltlink file. Otherwise this file will be
+   searched for when needed.  */
+
+int
+_bfd_dwarf2_find_nearest_line_with_alt
+  (bfd *abfd,
+   const char *alt_filename,
+   asymbol **symbols,
+   asymbol *symbol,
+   asection *section,
+   bfd_vma offset,
+   const char **filename_ptr,
+   const char **functionname_ptr,
+   unsigned int *linenumber_ptr,
+   unsigned int *discriminator_ptr,
+   const struct dwarf_debug_section *debug_sections,
+   void **pinfo)
 {
   /* Read each compilation unit from the section .debug_info, and check
      to see if it contains the address we are searching for.  If yes,
@@ -5754,6 +5780,23 @@ _bfd_dwarf2_find_nearest_line (bfd *abfd,
     return false;
 
   stash = (struct dwarf2_debug *) *pinfo;
+
+  if (stash->alt.bfd_ptr == NULL && alt_filename != NULL)
+    {
+      bfd *alt_bfd = bfd_openr (alt_filename, NULL);
+
+      if (alt_bfd == NULL)
+	/* bfd_openr will have set the bfd_error.  */
+	return false;
+      if (!bfd_check_format (alt_bfd, bfd_object))
+	{
+	  bfd_set_error (bfd_error_wrong_format);
+	  bfd_close (alt_bfd);
+	  return false;
+	}
+
+      stash->alt.bfd_ptr = alt_bfd;
+    }
 
   do_line = symbol != NULL;
   if (do_line)
