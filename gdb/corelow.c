@@ -1158,7 +1158,7 @@ core_target::fetch_memtags (CORE_ADDR address, size_t len,
   memtag_section_info info;
   info.memtag_section = nullptr;
 
-  while (get_next_core_memtag_section (core_bfd, info.memtag_section,
+  while (get_next_core_memtag_section (core_bfd, "memtag", info.memtag_section,
 				       address, info))
   {
     size_t adjusted_length

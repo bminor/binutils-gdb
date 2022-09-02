@@ -34,17 +34,17 @@ struct memtag_section_info
 
 /* Helper function to walk through memory tag sections in a core file.
 
-   Return TRUE if there is a "memtag" section containing ADDRESS.  Return FALSE
-   otherwise.
+   Return TRUE if there is a memory tag section named SECTION_NAME
+   containing ADDRESS.  Return FALSE otherwise.
 
    If SECTION is provided, search from that section onwards. If SECTION is
    nullptr, then start a new search.
 
-   If a "memtag" section containing ADDRESS is found, fill INFO with data
+   If a memory tag section containing ADDRESS is found, fill INFO with data
    about such section.  Otherwise leave it unchanged.  */
 
-bool get_next_core_memtag_section (bfd *abfd, asection *section,
-				   CORE_ADDR address,
+bool get_next_core_memtag_section (bfd *abfd, const char *section_name,
+				   asection *section, CORE_ADDR address,
 				   memtag_section_info &info);
 
 #endif /* MEMTAG_H */

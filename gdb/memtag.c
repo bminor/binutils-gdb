@@ -24,13 +24,14 @@
 /* See memtag.h */
 
 bool
-get_next_core_memtag_section (bfd *abfd, asection *section,
-			      CORE_ADDR address, memtag_section_info &info)
+get_next_core_memtag_section (bfd *abfd, const char *section_name,
+			      asection *section, CORE_ADDR address,
+			      memtag_section_info &info)
 {
   /* If the caller provided no SECTION to start from, search from the
      beginning.  */
   if (section == nullptr)
-    section = bfd_get_section_by_name (abfd, "memtag");
+    section = bfd_get_section_by_name (abfd, section_name);
 
   /* Go through all the memtag sections and figure out if ADDRESS
      falls within one of the memory ranges that contain tags.  */

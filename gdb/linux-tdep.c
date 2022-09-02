@@ -1496,7 +1496,8 @@ linux_core_file_address_in_memtag_page (CORE_ADDR address)
     return false;
 
   memtag_section_info info;
-  return get_next_core_memtag_section (core_bfd, nullptr, address, info);
+  return get_next_core_memtag_section (core_bfd, "memtag", nullptr, address,
+				       info);
 }
 
 /* See linux-tdep.h.  */
