@@ -2341,9 +2341,10 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	case R_LARCH_SOP_PUSH_PLT_PCREL:
 	  unresolved_reloc = false;
 
-	  if (resolved_to_const)
+	  if (!is_undefweak && resolved_to_const)
 	    {
 	      relocation += rel->r_addend;
+	      relocation -= pc;
 	      break;
 	    }
 	  else if (is_undefweak)
