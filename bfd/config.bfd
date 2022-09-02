@@ -90,7 +90,6 @@ case $targ in
  arm*-*-aout | \
  arm-*-coff | \
  arm*-*-netbsdaout* | \
- arm-*-openbsd* | \
  arm-*-oabi | \
  arm-*-riscix* | \
  arm*-*-symbianelf* | \
@@ -383,7 +382,7 @@ case "${targ}" in
     targ_defvec=arm_elf32_be_vec
     targ_selvecs="arm_elf32_le_vec"
     ;;
-  arm-*-netbsd*)
+  arm-*-netbsd* | arm-*-openbsd*)
     targ_defvec=arm_elf32_le_vec
     targ_selvecs="arm_elf32_be_vec"
     ;;

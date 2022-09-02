@@ -1,3 +1,7 @@
+2022-09-02  Frederic Cambus  <fred@statdns.com>
+
+	* config.bfd (arm-*-openbsd*): Restore target.
+
 2022-08-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 29529
