@@ -32,6 +32,8 @@
 
 #define ROUND_UP(a, b) (((a)+((b)-1))&~((b)-1))
 
+#define SYMBOL_LIST_ARRAY_GROW 64
+
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
    yacc generated parsers in ld.  Note that these are only the variables
@@ -440,6 +442,7 @@ void
 def_file_free (def_file *fdef)
 {
   int i;
+  unsigned int ui;
 
   if (!fdef)
     return;
@@ -497,14 +500,11 @@ def_file_free (def_file *fdef)
       free (c);
     }
 
-  while (fdef->exclude_symbols)
+  for (ui = 0; ui < fdef->num_exclude_symbols; ui++)
     {
-      def_file_exclude_symbol *e = fdef->exclude_symbols;
-
-      fdef->exclude_symbols = fdef->exclude_symbols->next;
-      free (e->symbol_name);
-      free (e);
+      free (fdef->exclude_symbols[ui].symbol_name);
     }
+  free (fdef->exclude_symbols);
 
   free (fdef);
 }
@@ -949,6 +949,93 @@ def_file_add_import_at (def_file *fdef,
   return i;
 }
 
+/* Search the position of the identical element, or returns the position
+   of the next higher element. If last valid element is smaller, then MAX
+   is returned. The max parameter indicates the number of elements in the
+   array. On return, *is_ident indicates whether the returned array index
+   points at an element which is identical to the one searched for.  */
+
+static unsigned int
+find_exclude_in_list (def_file_exclude_symbol *b, unsigned int max,
+		      const char *name, bool *is_ident)
+{
+  int e;
+  unsigned int l, r, p;
+
+  *is_ident = false;
+  if (!max)
+    return 0;
+  if ((e = strcmp (b[0].symbol_name, name)) <= 0)
+    {
+      if (!e)
+	*is_ident = true;
+      return 0;
+    }
+  if (max == 1)
+    return 1;
+  if ((e = strcmp (b[max - 1].symbol_name, name)) > 0)
+    return max;
+  else if (!e || max == 2)
+    {
+      if (!e)
+	*is_ident = true;
+      return max - 1;
+    }
+  l = 0; r = max - 1;
+  while (l < r)
+    {
+      p = (l + r) / 2;
+      e = strcmp (b[p].symbol_name, name);
+      if (!e)
+	{
+	  *is_ident = true;
+	  return p;
+	}
+      else if (e < 0)
+	r = p - 1;
+      else if (e > 0)
+	l = p + 1;
+    }
+  if ((e = strcmp (b[l].symbol_name, name)) > 0)
+    ++l;
+  else if (!e)
+    *is_ident = true;
+  return l;
+}
+
+static def_file_exclude_symbol *
+def_file_add_exclude_symbol (def_file *fdef, const char *name)
+{
+  def_file_exclude_symbol *e;
+  unsigned pos;
+  bool is_dup = false;
+
+  pos = find_exclude_in_list (fdef->exclude_symbols, fdef->num_exclude_symbols,
+			      name, &is_dup);
+
+  /* We need to avoid duplicates.  */
+  if (is_dup)
+    return (fdef->exclude_symbols + pos);
+
+  if (fdef->num_exclude_symbols >= fdef->max_exclude_symbols)
+    {
+      fdef->max_exclude_symbols += SYMBOL_LIST_ARRAY_GROW;
+      fdef->exclude_symbols = xrealloc (fdef->exclude_symbols,
+					fdef->max_exclude_symbols * sizeof (def_file_exclude_symbol));
+    }
+
+  e = fdef->exclude_symbols + pos;
+  /* If we're inserting in the middle of the array, we need to move the
+     following elements forward.  */
+  if (pos != fdef->num_exclude_symbols)
+    memmove (&e[1], e, (sizeof (def_file_exclude_symbol) * (fdef->num_exclude_symbols - pos)));
+  /* Wipe the element for use as a new entry.  */
+  memset (e, 0, sizeof (def_file_exclude_symbol));
+  e->symbol_name = xstrdup (name);
+  fdef->num_exclude_symbols++;
+  return e;
+}
+
 struct
 {
   char *param;
@@ -1280,30 +1367,7 @@ def_aligncomm (char *str, int align)
 static void
 def_exclude_symbols (char *str)
 {
-  def_file_exclude_symbol *c, *p;
-
-  p = NULL;
-  c = def->exclude_symbols;
-  while (c != NULL)
-    {
-      int e = strcmp (c->symbol_name, str);
-      if (!e)
-        return;
-      c = (p = c)->next;
-    }
-
-  c = xmalloc (sizeof (def_file_exclude_symbol));
-  c->symbol_name = xstrdup (str);
-  if (!p)
-    {
-      c->next = def->exclude_symbols;
-      def->exclude_symbols = c;
-    }
-  else
-    {
-      c->next = p->next;
-      p->next = c;
-    }
+  def_file_add_exclude_symbol (def, str);
 }
 
 static void

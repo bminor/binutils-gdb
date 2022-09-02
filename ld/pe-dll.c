@@ -671,6 +671,7 @@ static void
 process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 {
   int i, j;
+  unsigned int ui;
   struct bfd_link_hash_entry *blhe;
   bfd *b;
   struct bfd_section *s;
@@ -720,11 +721,10 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 
   if (pe_def_file->exclude_symbols)
     {
-      def_file_exclude_symbol *ac = pe_def_file->exclude_symbols;
-      while (ac)
+      for (ui = 0; ui < pe_def_file->num_exclude_symbols; ui++)
 	{
-	  pe_dll_add_excludes (ac->symbol_name, EXCLUDESYMS);
-	  ac = ac->next;
+	  pe_dll_add_excludes (pe_def_file->exclude_symbols[ui].symbol_name,
+			       EXCLUDESYMS);
 	}
     }
 

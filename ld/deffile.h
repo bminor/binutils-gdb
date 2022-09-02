@@ -62,7 +62,6 @@ typedef struct def_file_aligncomm {
 } def_file_aligncomm;
 
 typedef struct def_file_exclude_symbol {
-  struct def_file_exclude_symbol *next;	/* Chain pointer.  */
   char *symbol_name;		/* Name of excluded symbol.  */
 } def_file_exclude_symbol;
 
@@ -101,6 +100,7 @@ typedef struct def_file {
   def_file_aligncomm *aligncomms;
 
   /* From EXCLUDE_SYMBOLS or embedded directives. */
+  unsigned int num_exclude_symbols, max_exclude_symbols;
   def_file_exclude_symbol *exclude_symbols;
 
 } def_file;
