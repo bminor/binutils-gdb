@@ -10420,16 +10420,30 @@ elfNN_aarch64_section_from_phdr (bfd *abfd ATTRIBUTE_UNUSED,
 				 int hdr_index ATTRIBUTE_UNUSED,
 				 const char *name ATTRIBUTE_UNUSED)
 {
-  /* Right now we only handle the PT_AARCH64_MEMTAG_MTE segment type.  */
-  if (hdr == NULL || hdr->p_type != PT_AARCH64_MEMTAG_MTE)
+  const char *sectname;
+
+  if (hdr == NULL)
     return false;
 
-  if (hdr->p_filesz > 0)
+  /* Right now we only handle the PT_AARCH64_MEMTAG_* segment types.  */
+  switch (hdr->p_type)
     {
+    case PT_AARCH64_MEMTAG_MTE:
       /* Sections created from memory tag p_type's are always named
 	 "memtag".  This makes it easier for tools (for example, GDB)
 	 to find them.  */
-      asection *newsect = bfd_make_section_anyway (abfd, "memtag");
+      sectname = "memtag";
+      break;
+    case PT_AARCH64_MEMTAG_CHERI:
+      sectname = "memtag.cheri";
+      break;
+    default:
+      return false;
+    }
+
+  if (hdr->p_filesz > 0)
+    {
+      asection *newsect = bfd_make_section_anyway (abfd, sectname);
 
       if (newsect == NULL)
 	return false;
@@ -10472,7 +10486,8 @@ elfNN_aarch64_modify_headers (bfd *abfd,
       /* We are only interested in the memory tag segment that will be dumped
 	 to a core file.  If we have no memory tags or this isn't a core file we
 	 are dealing with, just skip this segment.  */
-      if (m->p_type != PT_AARCH64_MEMTAG_MTE
+      if ((m->p_type != PT_AARCH64_MEMTAG_MTE
+	   && m->p_type != PT_AARCH64_MEMTAG_CHERI)
 	  || bfd_get_format (abfd) != bfd_core)
 	continue;
 
@@ -10485,6 +10500,7 @@ elfNN_aarch64_modify_headers (bfd *abfd,
 	  p = elf_tdata (abfd)->phdr;
 	  p += m->idx;
 	  p->p_memsz = m->sections[0]->rawsize;
+	  /* XXX: CHERI phdrs should set flags to cap permissions */
 	  p->p_flags = 0;
 	  p->p_paddr = 0;
 	  p->p_align = 0;
