@@ -107,6 +107,8 @@ public:
   bool fetch_memtags (CORE_ADDR address, size_t len,
 		      gdb::byte_vector &tags, int type) override;
 
+  gdb::byte_vector read_capability (CORE_ADDR addr) override;
+
   /* A few helpers.  */
 
   /* Getter, see variable definition.  */
@@ -1183,6 +1185,43 @@ core_target::fetch_memtags (CORE_ADDR address, size_t len,
   }
 
   return false;
+}
+
+/* Implementation of the "read_capability" target_ops method.  */
+
+gdb::byte_vector
+core_target::read_capability (CORE_ADDR addr)
+{
+  struct gdbarch *gdbarch = target_gdbarch ();
+  int capsize = gdbarch_capability_bit (gdbarch) / TARGET_CHAR_BIT;
+
+  if (capsize == 0 || addr % capsize != 0)
+    return {};
+
+  memtag_section_info info;
+  if (!get_next_core_memtag_section (core_bfd, "memtag.cheri", nullptr, addr,
+				     info))
+    return {};
+
+  asection *section = info.memtag_section;
+  CORE_ADDR capidx = (addr - section->vma) / capsize;
+  gdb_byte tag;
+
+  /* Read the byte containing the tag.  */
+  if (!bfd_get_section_contents (section->owner, section, &tag,
+				 capidx / TARGET_CHAR_BIT, sizeof (tag)))
+    error (_("Couldn't read contents from memtag section."));
+
+  /* Select the individual tag.  */
+  tag >>= capidx % TARGET_CHAR_BIT;
+  tag &= 1;
+
+  gdb::byte_vector cap_vec (capsize + 1);
+  cap_vec.data () [0] = tag;
+  if (target_read_memory (addr, cap_vec.data () + 1, capsize) != 0)
+    return {};
+
+  return cap_vec;
 }
 
 /* Get a pointer to the current core target.  If not connected to a
