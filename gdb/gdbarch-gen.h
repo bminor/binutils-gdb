@@ -547,18 +547,6 @@ typedef int (gdbarch_remote_register_number_ftype) (struct gdbarch *gdbarch, int
 extern int gdbarch_remote_register_number (struct gdbarch *gdbarch, int regno);
 extern void set_gdbarch_remote_register_number (struct gdbarch *gdbarch, gdbarch_remote_register_number_ftype *remote_register_number);
 
-/* Return the tag from a capability stored at address ADDR. */
-
-typedef bool (gdbarch_get_cap_tag_from_address_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
-extern bool gdbarch_get_cap_tag_from_address (struct gdbarch *gdbarch, CORE_ADDR addr);
-extern void set_gdbarch_get_cap_tag_from_address (struct gdbarch *gdbarch, gdbarch_get_cap_tag_from_address_ftype *get_cap_tag_from_address);
-
-/* Set the tag from a capability stored at address ADDR to TAG. */
-
-typedef void (gdbarch_set_cap_tag_from_address_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr, bool tag);
-extern void gdbarch_set_cap_tag_from_address (struct gdbarch *gdbarch, CORE_ADDR addr, bool tag);
-extern void set_gdbarch_set_cap_tag_from_address (struct gdbarch *gdbarch, gdbarch_set_cap_tag_from_address_ftype *set_cap_tag_from_address);
-
 /* Print value of a capability containing CONTENTS and TAG to STREAM. */
 
 typedef void (gdbarch_print_cap_ftype) (struct gdbarch *gdbarch, const gdb_byte *contents, bool tag, bool compact, struct ui_file *stream);

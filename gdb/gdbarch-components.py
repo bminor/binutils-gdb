@@ -1023,28 +1023,6 @@ register.  Normally the identity mapping.
 
 Method(
     comment="""
-Return the tag from a capability stored at address ADDR.
-""",
-    type="bool",
-    name="get_cap_tag_from_address",
-    params=[("CORE_ADDR", "addr")],
-    predefault="default_get_cap_tag_from_address",
-    invalid=False,
-)
-
-Method(
-    comment="""
-Set the tag from a capability stored at address ADDR to TAG.
-""",
-    type="void",
-    name="set_cap_tag_from_address",
-    params=[("CORE_ADDR", "addr"), ("bool", "tag")],
-    predefault="default_set_cap_tag_from_address",
-    invalid=False,
-)
-
-Method(
-    comment="""
 Print value of a capability containing CONTENTS and TAG to STREAM.
 """,
     type="void",

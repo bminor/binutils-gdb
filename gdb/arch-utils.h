@@ -301,14 +301,6 @@ extern void default_read_core_file_mappings
    read_core_file_mappings_pre_loop_ftype pre_loop_cb,
    read_core_file_mappings_loop_ftype loop_cb);
 
-/* Default implementation of gdbarch_cap_tag_from_address.  */
-extern bool default_get_cap_tag_from_address (struct gdbarch *gdbarch,
-					      CORE_ADDR addr);
-
-/* Default implementation of gdbarch_set_cap_tag_from_address.  */
-extern void default_set_cap_tag_from_address (struct gdbarch *gdbarch,
-					      CORE_ADDR addr, bool tag);
-
 /* Default implementation of gdbarch_print_cap_attributes.  */
 extern void default_print_cap (struct gdbarch *gdbarch,
 			       const gdb_byte *contents, bool tag, bool compact,

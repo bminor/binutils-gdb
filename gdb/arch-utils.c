@@ -1093,21 +1093,6 @@ default_read_core_file_mappings
 }
 
 /* See arch-utils.h.  */
-bool default_get_cap_tag_from_address (struct gdbarch *gdbarch,
-				       CORE_ADDR addr)
-{
-  return false;
-}
-
-/* See arch-utils.h.  */
-void
-default_set_cap_tag_from_address (struct gdbarch *gdbarch,
-				  CORE_ADDR addr, bool tag)
-{
-  return;
-}
-
-/* See arch-utils.h.  */
 
 void
 default_print_cap (struct gdbarch *gdbarch, const gdb_byte *contents, bool tag,
