@@ -156,6 +156,21 @@ run_sim(struct pstate *sregs, uint64_t icount, int dis)
     return TIME_OUT;
 }
 
+static int
+fprintf_styled (void *stream, enum disassembler_style style,
+		const char *fmt, ...)
+{
+  int ret;
+  FILE *out = (FILE *) stream;
+  va_list args;
+
+  va_start (args, fmt);
+  ret = vfprintf (out, fmt, args);
+  va_end (args);
+
+  return ret;
+}
+
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *callback,
 	  struct bfd *abfd, char * const *argv)
