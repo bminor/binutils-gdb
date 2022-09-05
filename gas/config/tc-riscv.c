@@ -935,7 +935,7 @@ riscv_csr_address (const char *csr_name,
       extension = "zkr";
       break;
     case CSR_CLASS_V:
-      extension = "v";
+      extension = "zve32x";
       break;
     case CSR_CLASS_SMSTATEEN:
     case CSR_CLASS_SMSTATEEN_AND_H:
