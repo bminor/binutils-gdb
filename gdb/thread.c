@@ -834,6 +834,10 @@ set_running_thread (struct thread_info *tp, bool running)
     started = true;
   tp->state = running ? THREAD_RUNNING : THREAD_STOPPED;
 
+  threads_debug_printf ("thread: %s, running? %d%s",
+			tp->ptid.to_string ().c_str (), running,
+			(started ? " (started" : ""));
+
   if (!running)
     {
       /* If the thread is now marked stopped, remove it from
@@ -1298,6 +1302,9 @@ info_threads_command_completer (struct cmd_list_element *ignore,
 void
 switch_to_thread_no_regs (struct thread_info *thread)
 {
+  gdb_assert (thread != nullptr);
+  threads_debug_printf ("thread = %s", thread->ptid.to_string ().c_str ());
+
   struct inferior *inf = thread->inf;
 
   set_current_program_space (inf->pspace);
@@ -1314,6 +1321,8 @@ switch_to_no_thread ()
 {
   if (current_thread_ == nullptr)
     return;
+
+  threads_debug_printf ("thread = NONE");
 
   current_thread_ = nullptr;
   inferior_ptid = null_ptid;
