@@ -403,7 +403,11 @@ proc gdb_default_target_compile_1 {source destfile type options} {
     }
 
     if { $compiler == "" } {
-	set compiler [board_info $dest compiler]
+	if { [board_info $dest exists compiler] } {
+	    set compiler [board_info $dest compiler]
+	} elseif { $compiler_type eq "c" } {
+	    set compiler [find_gcc]
+	}
 	if { $compiler == "" } {
 	    return "default_target_compile: No compiler to compile with"
 	}
