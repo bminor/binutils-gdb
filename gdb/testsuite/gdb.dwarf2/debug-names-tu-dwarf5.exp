@@ -13,6 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set dwarf_version 4
+set dwarf_version 5
 
 source $srcdir/$subdir/debug-names-tu.exp.tcl

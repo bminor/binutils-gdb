@@ -1563,6 +1563,7 @@ namespace eval Dwarf {
 	set label ""
 
 	foreach { name value } $options {
+	    set value [uplevel 1 "subst \"$value\""]
 	    switch -exact -- $name {
 		is_64 { set is_64 $value }
 		version { set _cu_version $value }
@@ -1580,9 +1581,12 @@ namespace eval Dwarf {
 	    }
 	}
 	set _cu_offset_size [expr { $is_64 ? 8 : 4 }]
+	if { $_cu_version == 5 } {
+	    set section ".debug_info"
+	}
 	if { $_cu_is_fission } {
-	    set section ".debug_types.dwo"
-	    set _abbrev_section ".debug_abbrev.dwo"
+	    set section "$section.dwo"
+	    set _abbrev_section "$section.dwo"
 	}
 
 	_section $section
@@ -1609,8 +1613,17 @@ namespace eval Dwarf {
 	}
 	define_label $start_label
 	_op .2byte $_cu_version Version
-	_op_offset $_cu_offset_size $my_abbrevs Abbrevs
-	_op .byte $_cu_addr_size "Pointer size"
+
+	# The CU header for DWARF 4 and 5 are slightly different.
+	if { $_cu_version == 5 } {
+	    _op .byte 0x2 "DW_UT_type"
+	    _op .byte $_cu_addr_size "Pointer size"
+	    _op_offset $_cu_offset_size $my_abbrevs Abbrevs
+	} else {
+	    _op_offset $_cu_offset_size $my_abbrevs Abbrevs
+	    _op .byte $_cu_addr_size "Pointer size"
+	}
+
 	_op .8byte $signature Signature
 	if { $type_label != "" } {
 	    uplevel declare_labels $type_label

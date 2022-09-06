@@ -4736,13 +4736,16 @@ dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
     {
       /* We can only handle a single .debug_types when we have an
 	 index.  */
-      if (per_bfd->types.size () != 1)
+      if (per_bfd->types.size () > 1)
 	{
 	  per_bfd->all_comp_units.clear ();
 	  return false;
 	}
 
-      dwarf2_section_info *section = &per_bfd->types[0];
+      dwarf2_section_info *section
+	= (per_bfd->types.size () == 1
+	   ? &per_bfd->types[0]
+	   : &per_bfd->info);
 
       create_signatured_type_table_from_debug_names
 	(per_objfile, *map, section, &per_bfd->abbrev);
