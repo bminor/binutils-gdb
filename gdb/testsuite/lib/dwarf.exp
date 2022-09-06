@@ -1560,6 +1560,7 @@ namespace eval Dwarf {
 	set _cu_is_fission 0
 	set section ".debug_types"
 	set _abbrev_section ".debug_abbrev"
+	set label ""
 
 	foreach { name value } $options {
 	    switch -exact -- $name {
@@ -1567,6 +1568,7 @@ namespace eval Dwarf {
 		version { set _cu_version $value }
 		addr_size { set _cu_addr_size $value }
 		fission { set _cu_is_fission $value }
+		label { set label $value }
 		default { error "unknown option $name" }
 	    }
 	}
@@ -1592,6 +1594,11 @@ namespace eval Dwarf {
 	set _cu_label [_compute_label "cu${cu_num}_begin"]
 	set start_label [_compute_label "cu${cu_num}_start"]
 	set end_label [_compute_label "cu${cu_num}_end"]
+
+	if { $label != "" } {
+	    upvar $label my_label
+	    set my_label $_cu_label
+	}
 
 	define_label $_cu_label
 	if {$is_64} {
@@ -2991,6 +2998,12 @@ namespace eval Dwarf {
 	    variable _debug_names_cus
 	    lappend _debug_names_cus $cu
 	}
+       variable _debug_names_tus
+       set _debug_names_tus []
+       proc _debug_names_tu { tu } {
+	   variable _debug_names_tus
+	   lappend _debug_names_tus $tu
+       }
 	variable _debug_names
 	set _debug_names []
 	proc _debug_names_name { name tag cu hash } {
@@ -2999,13 +3012,14 @@ namespace eval Dwarf {
 	    lappend _debug_names [list $name $tag $cu $hash $entry_pool_offset]
 	}
 	with_override Dwarf::cu Dwarf::_debug_names_cu {
+	with_override Dwarf::tu Dwarf::_debug_names_tu {
 	with_override Dwarf::name Dwarf::_debug_names_name {
 	    uplevel $body
-	}}
+	}}}
 
 	# Header - CU / TU / foreign TU count.
 	_op .4byte [llength $_debug_names_cus] "Comp_unit_count"
-	_op .4byte 0 "Local_type_unit_count"
+	_op .4byte [llength $_debug_names_tus] "Local_type_unit_count"
 	_op .4byte 0 "Foreign_type_unit_count"
 
 	# Header - bucket count.
@@ -3037,7 +3051,15 @@ namespace eval Dwarf {
 	}
 
 	# List of Local TUs.
-	#
+	set comment "TU offset"
+	foreach tu $_debug_names_tus {
+	    upvar $tu tmp
+	    if { $is_64 } {
+		_op .8byte $tmp $comment
+	    } else {
+		_op .4byte $tmp $comment
+	    }
+	}
 
 	# List of Foreign TUs.
 	#
@@ -3087,9 +3109,20 @@ namespace eval Dwarf {
 	foreach idx $_debug_names {
 	    set name [lindex $idx 0]
 	    set tag [lindex $idx 1]
+	    set cu [lindex $idx 2]
+
+	    set cu_index [lsearch -exact $_debug_names_cus $cu]
+	    if { $cu_index == -1 } {
+		set attr_name type_unit
+		set attr_val 2
+	    } else {
+		set attr_name compile_unit
+		set attr_val 1
+	    }
+
 	    _op .byte $abbrev "abbrev $abbrev"
 	    _op .uleb128 $_constants(DW_TAG_$tag) "DW_TAG_$tag"
-	    _op .byte 1  "DW_IDX_compile_unit (attribute)"
+	    _op .byte $attr_val  "DW_IDX_$attr_name (attribute)"
 	    _op .byte 0x0f "DW_FORM_udata (form)"
 	    _op .byte 0  "abbrev terminator (attribute)"
 	    _op .byte 0  "abbrev terminator (form)"
@@ -3105,17 +3138,16 @@ namespace eval Dwarf {
 	    set cu [lindex $idx 2]
 	    set label [lindex $idx 4]
 
-	    set cu_index 0
-	    foreach idx2 $_debug_names_cus {
-		if { $idx2 == $cu } {
-		    break
-		}
-		incr cu_index
+	    set cu_index [lsearch -exact $_debug_names_cus $cu]
+	    if { $cu_index == -1 } {
+		set cu_index [lsearch -exact $_debug_names_tus $cu]
+		set comment "$name: TU index"
+	    } else {
+		set comment "$name: CU index"
 	    }
-
 	    define_label $label
 	    _op .byte $abbrev "$name: abbrev"
-	    _op .uleb128 $cu_index "$name: CU index"
+	    _op .uleb128 $cu_index $comment
 	    _op .byte 0 "$name: terminator"
 	    incr abbrev
 	}
