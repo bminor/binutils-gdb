@@ -666,7 +666,8 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class theclass[2])
 	loc_bitpos attributes, which will cause an assert to trigger within
 	the unaligned field check.  As classes with virtual bases are not
 	trivially copyable, checking that first avoids this problem.  */
-  if (type->length () > 16
+  if (TYPE_HAS_DYNAMIC_LENGTH (type)
+      || type->length () > 16
       || !language_pass_by_reference (type).trivially_copyable
       || amd64_has_unaligned_fields (type))
     {
