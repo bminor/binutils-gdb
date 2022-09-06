@@ -791,7 +791,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 
 		  if (auto_export (b, pe_def_file, sn))
 		    {
-		      int is_dup = 0;
+		      bool is_dup = false;
 		      def_file_export *p;
 
 		      p = def_file_add_export (pe_def_file, sn, 0, -1,
@@ -857,7 +857,7 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
 
 	  if (strchr (pe_def_file->exports[i].name, '@'))
 	    {
-	      int is_dup = 1;
+	      bool is_dup = true;
 	      int lead_at = (*pe_def_file->exports[i].name == '@');
 	      char *tmp = xstrdup (pe_def_file->exports[i].name + lead_at);
 
@@ -3579,7 +3579,7 @@ pe_implied_import_dll (const char *filename)
 	 exported in buggy auto-import releases.  */
       if (! startswith (erva + name_rva, "__nm_"))
 	{
-	  int is_dup = 0;
+	  bool is_dup = false;
 	  /* is_data is true if the address is in the data, rdata or bss
 	     segment.  */
 	  is_data =

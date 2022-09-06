@@ -84,6 +84,7 @@ typedef struct def_file {
 
   /* From the EXPORTS commands.  */
   int num_exports;
+  unsigned int max_exports;
   def_file_export *exports;
 
   /* Used by imports for module names.  */
@@ -91,6 +92,7 @@ typedef struct def_file {
 
   /* From the IMPORTS commands.  */
   int num_imports;
+  unsigned int max_imports;
   def_file_import *imports;
 
   /* From the VERSION command, -1 if not specified.  */
@@ -112,10 +114,10 @@ extern def_file *def_file_parse (const char *, def_file *);
 extern void def_file_free (def_file *);
 extern def_file_export *def_file_add_export (def_file *, const char *,
 					     const char *, int,
-					     const char *, int *);
+					     const char *, bool *);
 extern def_file_import *def_file_add_import (def_file *, const char *,
 					     const char *, int, const char *,
-					     const char *, int *);
+					     const char *, bool *);
 extern int def_file_add_import_from (def_file *fdef,
 				     int num_imports,
 				     const char *name,
