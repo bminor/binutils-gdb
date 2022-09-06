@@ -2957,6 +2957,8 @@ namespace eval Dwarf {
     #     -- add a name.
 
     proc debug_names { options body } {
+	global decimal
+
 	parse_options {
 	    { is_64 0 }
 	    { version 5 }
@@ -3111,13 +3113,21 @@ namespace eval Dwarf {
 	    set tag [lindex $idx 1]
 	    set cu [lindex $idx 2]
 
-	    set cu_index [lsearch -exact $_debug_names_cus $cu]
-	    if { $cu_index == -1 } {
+	    if { [regexp "^CU-($decimal)$" $cu dummy cu_index] } {
+		set attr_name compile_unit
+		set attr_val 1
+	    } elseif { [regexp "^TU-($decimal)$" $cu dummy cu_index] } {
 		set attr_name type_unit
 		set attr_val 2
 	    } else {
-		set attr_name compile_unit
-		set attr_val 1
+		set cu_index [lsearch -exact $_debug_names_cus $cu]
+		if { $cu_index == -1 } {
+		    set attr_name type_unit
+		    set attr_val 2
+		} else {
+		    set attr_name compile_unit
+		    set attr_val 1
+		}
 	    }
 
 	    _op .byte $abbrev "abbrev $abbrev"
@@ -3138,12 +3148,18 @@ namespace eval Dwarf {
 	    set cu [lindex $idx 2]
 	    set label [lindex $idx 4]
 
-	    set cu_index [lsearch -exact $_debug_names_cus $cu]
-	    if { $cu_index == -1 } {
-		set cu_index [lsearch -exact $_debug_names_tus $cu]
+	    if { [regexp "^CU-($decimal)$" $cu dummy cu_index] } {
+		set comment "$name: CU index"
+	    } elseif { [regexp "^TU-($decimal)$" $cu dummy cu_index] } {
 		set comment "$name: TU index"
 	    } else {
-		set comment "$name: CU index"
+		set cu_index [lsearch -exact $_debug_names_cus $cu]
+		if { $cu_index == -1 } {
+		    set cu_index [lsearch -exact $_debug_names_tus $cu]
+		    set comment "$name: TU index"
+		} else {
+		    set comment "$name: CU index"
+		}
 	    }
 	    define_label $label
 	    _op .byte $abbrev "$name: abbrev"
