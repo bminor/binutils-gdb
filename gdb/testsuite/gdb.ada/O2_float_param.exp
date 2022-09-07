@@ -19,6 +19,13 @@ if { [skip_ada_tests] } { return -1 }
 
 standard_ada_testfile foo
 
+set have_xfail 0
+if { [is_aarch64_target] } then {
+    if { [gcc_major_version] <= 8 } {
+       set have_xfail 1
+    }
+}
+
 foreach_with_prefix scenario {all minimal} {
     set flags [list debug \
 		   optimize=-O2 \
@@ -32,6 +39,21 @@ foreach_with_prefix scenario {all minimal} {
 
     runto "increment"
 
-    gdb_test "frame" \
+    set re \
 	"#0\\s+callee\\.increment \\(val(=val@entry)?=99\\.0, msg=\\.\\.\\.\\).*"
+    set re_different_entry_val \
+       "#0\\s+callee\\.increment \\(val=99.0, val@entry=.*, msg=\\.\\.\\.\\).*"
+    gdb_test_multiple "frame" "" {
+       -re -wrap $re {
+	   pass $gdb_test_name
+       }
+       -re -wrap $re_different_entry_val {
+	   if { $have_xfail } {
+	      # GCC PR98148
+	      xfail $gdb_test_name
+	   } else {
+	      fail $gdb_test_name
+	   }
+       }
+    }
 }
