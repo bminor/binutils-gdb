@@ -18,7 +18,14 @@ if { [skip_cplus_tests] } { return }
 
 standard_testfile .cc
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
+set flags [list debug c++]
+# When using recent Clangs, this test fails to compile without this warning
+# being disabled.  However, older Clangs fail to recognize the flag.
+if { [gcc_major_version "clang-*" "c++"] > 10 } {
+    lappend flags additional_flags=-Wno-non-c-typedef-for-linkage
+}
+
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile $flags]} {
     return -1
 }
 
