@@ -476,12 +476,7 @@ get_call_return_value (struct call_return_meta_info *ri)
 	  push_thread_stack_temporary (thr, retval);
 	}
       else
-	{
-	  retval = allocate_value (ri->value_type);
-	  read_value_memory (retval, 0, 1, ri->struct_addr,
-			     value_contents_raw (retval).data (),
-			     ri->value_type->length ());
-	}
+	retval = value_at_non_lval (ri->value_type, ri->struct_addr);
     }
   else
     {
