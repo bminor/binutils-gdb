@@ -41,7 +41,7 @@ gdb_breakpoint [gdb_get_line_number "break-at-exit"]
 
 set test "get pid"
 set pid ""
-gdb_test_multiple "p (int) getpid ()" $test {
+gdb_test_multiple "p ((int (*) (void))getpid) ()" $test {
     -re " = (\[0-9\]+)\r\n$gdb_prompt $" {
 	set pid $expect_out(1,string)
 	pass $test
