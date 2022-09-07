@@ -18,35 +18,9 @@
 standard_testfile main.c
 
 load_lib dwarf.exp
+load_lib debuginfod-support.exp
 
-if { [which debuginfod] == 0 } {
-    untested "cannot find debuginfod"
-    return -1
-}
-
-if { [which curl] == 0 } {
-    untested "cannot find curl"
-    return -1
-}
-
-# Skip testing if gdb was not configured with debuginfod
-#
-# If GDB is built with ASan, it warns that some signal handlers (installed by
-# ASan) exist on startup.  That makes TCL's exec throw an error.  Disable that
-# by passing --quiet.
-
-if { [string first "with-debuginfod" \
-	 [eval exec $GDB --quiet $INTERNAL_GDBFLAGS --configuration]] == -1 } {
-    untested "gdb not configured with debuginfod"
-    return -1
-}
-
-set cache [standard_output_file ".client_cache"]
-set db [standard_output_file ".debuginfod.db"]
-
-# Delete any preexisting test files
-file delete -force $cache
-file delete -force $db
+if { [skip_debuginfod_tests] } { return -1 }
 
 set sourcetmp [standard_output_file tmp-${srcfile}]
 set outputdir [standard_output_file {}]
@@ -121,19 +95,25 @@ proc write_dwarf_file {filename buildid {value 99}} {
 
 set corefile [standard_output_file "corefile"]
 
-proc no_url { } {
+# Setup the global variable DEBUGDIR as a directory containing the
+# debug information for the test executable.
+#
+# Run some tests to confirm that GDB is not able to find any of the
+# debug information from DEBUGDIR when the debuginfod server is not
+# running.
+proc_with_prefix no_url { } {
     global binfile outputdir debugdir
 
     setenv DEBUGINFOD_URLS ""
 
-    # Test that gdb cannot find source without debuginfod
+    # Test that GDB cannot find source without debuginfod.
     clean_restart $binfile
     gdb_test_no_output "set substitute-path $outputdir /dev/null" \
 	"set substitute-path"
     gdb_test "list" ".*No such file or directory.*"
 
-    # Strip symbols into separate file and move it so gdb cannot find it \
-	without debuginfod
+    # Strip symbols into separate file and move it so GDB cannot find it
+    # without debuginfod.
     if { [gdb_gnu_strip_debug $binfile ""] != 0 } {
 	fail "strip debuginfo"
 	return -1
@@ -145,7 +125,7 @@ proc no_url { } {
     file mkdir $debugdir
     file rename -force $debuginfo $debugdir
 
-    # Test that gdb cannot find symbols without debuginfod
+    # Test that GDB cannot find symbols without debuginfod.
     clean_restart $binfile
     gdb_test "file" ".*No symbol file.*"
 
@@ -169,13 +149,14 @@ proc no_url { } {
 
     file rename -force ${binfile}_dwz.o $debugdir
 
-    # Test that gdb cannot find dwz without debuginfod.
+    # Test that GDB cannot find dwz without debuginfod.
     clean_restart
     gdb_test "file ${binfile}_alt.o" \
 	".*could not find '.gnu_debugaltlink'.*" \
 	"file [file tail ${binfile}_alt.o]"
 
-    # Generate a core file and test that gdb cannot find the executable
+    # Generate a core file and test that GDB cannot find the
+    # executable.
     clean_restart ${binfile}2
     gdb_test "start" "Temporary breakpoint.*"
     gdb_test "generate-core-file $::corefile" "Saved corefile $::corefile" \
@@ -208,64 +189,24 @@ proc test_urls {urls pattern_re test} {
 	$test
 }
 
-proc local_url { } {
-    global binfile outputdir db debugdir
+# Uses the global variables DEBUGDIR and DB which are setup elsewhere
+# in this script.
+#
+# Start debuginfod server, and confirm that GDB can now find all the
+# expected debug information.
+proc_with_prefix local_url { } {
+    global binfile outputdir debugdir db
 
-    # Find an unused port
-    set port 7999
-    set found 0
-    while { ! $found } {
-	incr port
-	if { $port == 65536 } {
-	    fail "no available ports"
-	    return -1
-	}
-
-	spawn debuginfod -vvvv -d $db -p $port -F $debugdir
-	expect {
-	    "started http server on IPv4 IPv6 port=$port" { set found 1 }
-	    "started http server on IPv4 port=$port" { set found 1 }
-	    "started http server on IPv6 port=$port" {}
-	    "failed to bind to port" {}
-	    timeout {
-		fail "find port timeout"
-		return -1
-	    }
-	}
-	if { ! $found } {
-	    kill_wait_spawned_process $spawn_id
-	}
+    set url [start_debuginfod $db $debugdir]
+    if { $url == "" } {
+	unresolved "failed to start debuginfod server"
+	return
     }
 
-    set metrics [list "ready 1" \
-		     "thread_work_total{role=\"traverse\"} 1" \
-		     "thread_work_pending{role=\"scan\"} 0" \
-		     "thread_busy{role=\"scan\"} 0"]
+    # Point the client to the server.
+    setenv DEBUGINFOD_URLS $url
 
-    # Check server metrics to confirm init has completed.
-    foreach m $metrics {
-	set timelim 20
-	while { $timelim != 0 } {
-	    sleep 0.5
-	    catch {exec curl -s http://127.0.0.1:$port/metrics} got
-
-	    if { [regexp $m $got] } {
-		break
-	    }
-
-	    incr timelim -1
-	}
-
-	if { $timelim == 0 } {
-	    fail "server init timeout"
-	    return -1
-	}
-    }
-
-    # Point the client to the server
-    setenv DEBUGINFOD_URLS http://127.0.0.1:$port
-
-    # gdb should now find the symbol and source files
+    # GDB should now find the symbol and source files.
     clean_restart
     gdb_test "file $binfile" "" "file [file tail $binfile]" "Enable debuginfod?.*" "y"
     gdb_test_no_output "set substitute-path $outputdir /dev/null" \
@@ -273,31 +214,33 @@ proc local_url { } {
     gdb_test "br main" "Breakpoint 1 at.*file.*"
     gdb_test "l" ".*This program is distributed in the hope.*"
 
-    # gdb should now find the executable file
+    # GDB should now find the executable file.
     clean_restart
     gdb_test "core $::corefile" ".*return 0.*" "file [file tail $::corefile]" \
 	"Enable debuginfod?.*" "y"
 
-    # gdb should now find the debugaltlink file
+    # GDB should now find the debugaltlink file.
     clean_restart
     gdb_test "file ${binfile}_alt.o" \
 	".*Downloading.*separate debug info.*" \
 	"file [file tail ${binfile}_alt.o]" \
 	".*Enable debuginfod?.*" "y"
 
-    # Configure debuginfod with commands
+    # Configure debuginfod with commands.
     unsetenv DEBUGINFOD_URLS
     clean_restart
     gdb_test "file $binfile" ".*No debugging symbols.*" \
 	"file [file tail $binfile] cmd"
     gdb_test_no_output "set debuginfod enabled off"
-    gdb_test_no_output "set debuginfod urls http://127.0.0.1:$port"
+    gdb_test_no_output "set debuginfod urls $url" \
+	"set debuginfod url environment variable"
 
-    # gdb shouldn't find the debuginfo since debuginfod has been disabled
+    # GDB shouldn't find the debuginfo since debuginfod has been
+    # disabled.
     gdb_test "file $binfile" ".*No debugging symbols.*" \
 	"file [file tail $binfile] cmd off"
 
-    # Enable debuginfod and fetch the debuginfo
+    # Enable debuginfod and fetch the debuginfo.
     gdb_test_no_output "set debuginfod enabled on"
     gdb_test "file $binfile" ".*Reading symbols from.*debuginfo.*" \
 	"file [file tail $binfile] cmd on"
@@ -331,8 +274,6 @@ proc local_url { } {
 	}
     }
 
-    set url "http://127.0.0.1:$port"
-
     test_urls $url \
 	"<$url>" \
 	"notice 1 URL"
@@ -341,7 +282,7 @@ proc local_url { } {
 	"<$url>" \
 	"notice 1 URL with whitespace"
 
-    set url2 "127.0.0.1:$port"
+    set url2 [regsub "^http://" $url ""]
 
     test_urls "$url $url2" \
 	"<$url>\r\n +<$url2>" \
@@ -352,17 +293,12 @@ proc local_url { } {
 	"notice 2 URLs with whitespace"
 }
 
-set envlist \
-    [list \
-	 env(DEBUGINFOD_URLS) \
-	 env(DEBUGINFOD_TIMEOUT) \
-	 env(DEBUGINFOD_CACHE_PATH)]
+# Create CACHE and DB directories ready for debuginfod to use.
+prepare_for_debuginfod cache db
 
-save_vars $envlist {
-    setenv DEBUGINFOD_TIMEOUT 30
-    setenv DEBUGINFOD_CACHE_PATH $cache
-
-    with_test_prefix no_url no_url
-
-    with_test_prefix local_url local_url
+with_debuginfod_env $cache {
+    no_url
+    local_url
 }
+
+stop_debuginfod
