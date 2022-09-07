@@ -1038,8 +1038,8 @@ elf_gnu_ifunc_resolver_return_stop (code_breakpoint *b)
   set_value_address (func_func, b->loc->related_address);
 
   value = allocate_value (value_type);
-  gdbarch_return_value (gdbarch, func_func, value_type, regcache,
-			value_contents_raw (value).data (), NULL);
+  gdbarch_return_value_as_value (gdbarch, func_func, value_type, regcache,
+				 &value, NULL);
   resolved_address = value_as_address (value);
   resolved_pc = gdbarch_convert_from_func_ptr_addr
     (gdbarch, resolved_address, current_inferior ()->top_target ());

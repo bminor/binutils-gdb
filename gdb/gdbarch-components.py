@@ -854,6 +854,9 @@ If WRITEBUF is not NULL, it contains a return value which will be
 stored into the appropriate register.  This can be used when we want
 to force the value returned by a function (see the "return" command
 for instance).
+
+NOTE: it is better to implement return_value_as_value instead, as that
+method can properly handle variably-sized types.
 """,
     type="enum return_value_convention",
     name="return_value",
@@ -864,8 +867,37 @@ for instance).
         ("gdb_byte *", "readbuf"),
         ("const gdb_byte *", "writebuf"),
     ],
-    predicate=True,
-    invalid=True,
+    invalid=False,
+)
+
+Method(
+    comment="""
+Return the return-value convention that will be used by FUNCTION
+to return a value of type VALTYPE.  FUNCTION may be NULL in which
+case the return convention is computed based only on VALTYPE.
+
+If READ_VALUE is not NULL, extract the return value and save it in
+this pointer.
+
+If WRITEBUF is not NULL, it contains a return value which will be
+stored into the appropriate register.  This can be used when we want
+to force the value returned by a function (see the "return" command
+for instance).
+""",
+    type="enum return_value_convention",
+    name="return_value_as_value",
+    params=[
+        ("struct value *", "function"),
+        ("struct type *", "valtype"),
+        ("struct regcache *", "regcache"),
+        ("struct value **", "read_value"),
+        ("const gdb_byte *", "writebuf"),
+    ],
+    predefault="default_gdbarch_return_value",
+    # If we're using the default, then the other method must be set;
+    # but if we aren't using the default here then the other method
+    # must not be set.
+    invalid="(gdbarch->return_value_as_value == default_gdbarch_return_value) == (gdbarch->return_value == nullptr)",
 )
 
 Function(

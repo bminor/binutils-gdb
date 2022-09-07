@@ -433,13 +433,30 @@ extern void set_gdbarch_integer_to_address (struct gdbarch *gdbarch, gdbarch_int
    If WRITEBUF is not NULL, it contains a return value which will be
    stored into the appropriate register.  This can be used when we want
    to force the value returned by a function (see the "return" command
-   for instance). */
+   for instance).
 
-extern bool gdbarch_return_value_p (struct gdbarch *gdbarch);
+   NOTE: it is better to implement return_value_as_value instead, as that
+   method can properly handle variably-sized types. */
 
 typedef enum return_value_convention (gdbarch_return_value_ftype) (struct gdbarch *gdbarch, struct value *function, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf);
 extern enum return_value_convention gdbarch_return_value (struct gdbarch *gdbarch, struct value *function, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf);
 extern void set_gdbarch_return_value (struct gdbarch *gdbarch, gdbarch_return_value_ftype *return_value);
+
+/* Return the return-value convention that will be used by FUNCTION
+   to return a value of type VALTYPE.  FUNCTION may be NULL in which
+   case the return convention is computed based only on VALTYPE.
+
+   If READ_VALUE is not NULL, extract the return value and save it in
+   this pointer.
+
+   If WRITEBUF is not NULL, it contains a return value which will be
+   stored into the appropriate register.  This can be used when we want
+   to force the value returned by a function (see the "return" command
+   for instance). */
+
+typedef enum return_value_convention (gdbarch_return_value_as_value_ftype) (struct gdbarch *gdbarch, struct value *function, struct type *valtype, struct regcache *regcache, struct value **read_value, const gdb_byte *writebuf);
+extern enum return_value_convention gdbarch_return_value_as_value (struct gdbarch *gdbarch, struct value *function, struct type *valtype, struct regcache *regcache, struct value **read_value, const gdb_byte *writebuf);
+extern void set_gdbarch_return_value_as_value (struct gdbarch *gdbarch, gdbarch_return_value_as_value_ftype *return_value_as_value);
 
 /* Return the address at which the value being returned from
    the current function will be stored.  This routine is only

@@ -485,10 +485,9 @@ get_call_return_value (struct call_return_meta_info *ri)
     }
   else
     {
-      retval = allocate_value (ri->value_type);
-      gdbarch_return_value (ri->gdbarch, ri->function, ri->value_type,
-			    get_current_regcache (),
-			    value_contents_raw (retval).data (), NULL);
+      gdbarch_return_value_as_value (ri->gdbarch, ri->function, ri->value_type,
+				     get_current_regcache (),
+				     &retval, NULL);
       if (stack_temporaries && class_or_union_p (ri->value_type))
 	{
 	  /* Values of class type returned in registers are copied onto

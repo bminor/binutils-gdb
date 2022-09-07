@@ -1497,15 +1497,14 @@ get_return_value (struct symbol *func_symbol, struct value *function)
      inferior function call code.  In fact, when inferior function
      calls are made async, this will likely be made the norm.  */
 
-  switch (gdbarch_return_value (gdbarch, function, value_type,
-				nullptr, nullptr, nullptr))
+  switch (gdbarch_return_value_as_value (gdbarch, function, value_type,
+					 nullptr, nullptr, nullptr))
     {
     case RETURN_VALUE_REGISTER_CONVENTION:
     case RETURN_VALUE_ABI_RETURNS_ADDRESS:
     case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
-      value = allocate_value (value_type);
-      gdbarch_return_value (gdbarch, function, value_type, stop_regs,
-			    value_contents_raw (value).data (), nullptr);
+      gdbarch_return_value_as_value (gdbarch, function, value_type, stop_regs,
+				     &value, nullptr);
       break;
     case RETURN_VALUE_STRUCT_CONVENTION:
       value = nullptr;
@@ -1889,10 +1888,11 @@ finish_command (const char *arg, int from_tty)
       struct type * val_type
 	= check_typedef (sm->function->type ()->target_type ());
 
-      return_value = gdbarch_return_value (gdbarch,
-					   read_var_value (sm->function, nullptr,
-							   callee_frame),
-					   val_type, nullptr, nullptr, nullptr);
+      return_value
+	= gdbarch_return_value_as_value (gdbarch,
+					 read_var_value (sm->function, nullptr,
+							 callee_frame),
+					 val_type, nullptr, nullptr, nullptr);
 
       if (return_value == RETURN_VALUE_STRUCT_CONVENTION
 	  && val_type->code () != TYPE_CODE_VOID)

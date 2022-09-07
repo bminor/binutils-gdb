@@ -308,4 +308,10 @@ extern void default_read_core_file_mappings
 /* Default implementation of gdbarch default_get_return_buf_addr method.  */
 extern CORE_ADDR default_get_return_buf_addr (struct type *val_typegdbarch,
 					      frame_info_ptr cur_frame);
+
+extern enum return_value_convention default_gdbarch_return_value
+     (struct gdbarch *gdbarch, struct value *function, struct type *valtype,
+      struct regcache *regcache, struct value **read_value,
+      const gdb_byte *writebuf);
+
 #endif /* ARCH_UTILS_H */
