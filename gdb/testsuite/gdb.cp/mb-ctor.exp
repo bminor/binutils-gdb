@@ -25,6 +25,12 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
     return -1
 }
 
+if {[test_compiler_info {clang-*-*} c++]} {
+    set using_clang true
+} else {
+    set using_clang false
+}
+
 if ![runto_main] then {
     perror "couldn't run to breakpoint"
     return
@@ -71,6 +77,13 @@ gdb_continue_to_breakpoint "set breakpoint here, second dynamic time"\
 
 gdb_test "continue" ".*Breakpoint.*~Derived.*" "Run to dynamic destructor v1"
 
+# Clang makes Derived::~Derived(this) call Derived::~Derives(this, vtt)
+# whereas gcc puts all the logic necessary on both functions.
+if {$using_clang} {
+    gdb_test "continue" ".*Breakpoint.*~Derived.*"\
+	"clang's nested dynamic destructor call"
+}
+
 gdb_test "continue" ".*Breakpoint.*~Derived.*" "Run to dynamic destructor v2"
 
 gdb_test "continue" \
@@ -80,6 +93,11 @@ gdb_test "continue" \
 gdb_test "continue" \
     ".*Breakpoint.*~Derived.*" \
     "run to breakpoint 3 v2"
+
+if {$using_clang} {
+    gdb_test "continue" ".*Breakpoint.*~Derived.*"\
+	"clang's nested destructor call"
+}
 
 gdb_test "continue" \
     ".*exited normally.*" \
