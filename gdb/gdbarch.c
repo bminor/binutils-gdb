@@ -2571,16 +2571,6 @@ set_gdbarch_integer_to_address (struct gdbarch *gdbarch,
   gdbarch->integer_to_address = integer_to_address;
 }
 
-enum return_value_convention
-gdbarch_return_value (struct gdbarch *gdbarch, struct value *function, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->return_value != NULL);
-  if (gdbarch_debug >= 2)
-    gdb_printf (gdb_stdlog, "gdbarch_return_value called\n");
-  return gdbarch->return_value (gdbarch, function, valtype, regcache, readbuf, writebuf);
-}
-
 void
 set_gdbarch_return_value (struct gdbarch *gdbarch,
 			  gdbarch_return_value_ftype return_value)

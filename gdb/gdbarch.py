@@ -124,6 +124,7 @@ class Function(_Component):
         printer=None,
         param_checks=None,
         result_checks=None,
+        implement=True,
     ):
         super().__init__(
             comment=comment,
@@ -137,6 +138,7 @@ class Function(_Component):
             params=params,
             param_checks=param_checks,
             result_checks=result_checks,
+            implement=implement,
         )
 
     def ftype(self):
@@ -251,10 +253,11 @@ with open("gdbarch-gen.h", "w") as f:
                 f"typedef {c.type} ({c.ftype()}) ({c.param_list()});",
                 file=f,
             )
-            print(
-                f"extern {c.type} gdbarch_{c.name} ({c.set_list()});",
-                file=f,
-            )
+            if c.implement:
+                print(
+                    f"extern {c.type} gdbarch_{c.name} ({c.set_list()});",
+                    file=f,
+                )
             print(
                 f"extern void set_gdbarch_{c.name} (struct gdbarch *gdbarch, {c.ftype()} *{c.name});",
                 file=f,
@@ -445,38 +448,39 @@ with open("gdbarch.c", "w") as f:
             print(f"  return {c.get_predicate()};", file=f)
             print("}", file=f)
         if isinstance(c, Function):
-            print(file=f)
-            print(f"{c.type}", file=f)
-            print(f"gdbarch_{c.name} ({c.set_list()})", file=f)
-            print("{", file=f)
-            print("  gdb_assert (gdbarch != NULL);", file=f)
-            print(f"  gdb_assert (gdbarch->{c.name} != NULL);", file=f)
-            if c.predicate and c.predefault:
-                # Allow a call to a function with a predicate.
+            if c.implement:
+                print(file=f)
+                print(f"{c.type}", file=f)
+                print(f"gdbarch_{c.name} ({c.set_list()})", file=f)
+                print("{", file=f)
+                print("  gdb_assert (gdbarch != NULL);", file=f)
+                print(f"  gdb_assert (gdbarch->{c.name} != NULL);", file=f)
+                if c.predicate and c.predefault:
+                    # Allow a call to a function with a predicate.
+                    print(
+                        f"  /* Do not check predicate: {c.get_predicate()}, allow call.  */",
+                        file=f,
+                    )
+                if c.param_checks:
+                    for rule in c.param_checks:
+                        print(f"  gdb_assert ({rule});", file=f)
+                print("  if (gdbarch_debug >= 2)", file=f)
                 print(
-                    f"  /* Do not check predicate: {c.get_predicate()}, allow call.  */",
+                    f"""    gdb_printf (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
                     file=f,
                 )
-            if c.param_checks:
-                for rule in c.param_checks:
-                    print(f"  gdb_assert ({rule});", file=f)
-            print("  if (gdbarch_debug >= 2)", file=f)
-            print(
-                f"""    gdb_printf (gdb_stdlog, "gdbarch_{c.name} called\\n");""",
-                file=f,
-            )
-            print("  ", file=f, end="")
-            if c.type != "void":
-                if c.result_checks:
-                    print("auto result = ", file=f, end="")
-                else:
-                    print("return ", file=f, end="")
-            print(f"gdbarch->{c.name} ({c.actuals()});", file=f)
-            if c.type != "void" and c.result_checks:
-                for rule in c.result_checks:
-                    print(f"  gdb_assert ({rule});", file=f)
-                print("  return result;", file=f)
-            print("}", file=f)
+                print("  ", file=f, end="")
+                if c.type != "void":
+                    if c.result_checks:
+                        print("auto result = ", file=f, end="")
+                    else:
+                        print("return ", file=f, end="")
+                print(f"gdbarch->{c.name} ({c.actuals()});", file=f)
+                if c.type != "void" and c.result_checks:
+                    for rule in c.result_checks:
+                        print(f"  gdb_assert ({rule});", file=f)
+                    print("  return result;", file=f)
+                print("}", file=f)
             print(file=f)
             print("void", file=f)
             setter_name = f"set_gdbarch_{c.name}"

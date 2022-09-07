@@ -113,6 +113,9 @@
 # 'result' can be used to reference the result of the function/method
 # implementation.  The 'result_checks' can only be used if the 'type'
 # of this Function/Method is not 'void'.
+#
+# * "implement" - optional, a boolean.  If True (the default), a
+# wrapper function for this function will be emitted.
 
 Info(
     type="const struct bfd_arch_info *",
@@ -868,6 +871,9 @@ method can properly handle variably-sized types.
         ("const gdb_byte *", "writebuf"),
     ],
     invalid=False,
+    # We don't want to accidentally introduce calls to this, as gdb
+    # should only ever call return_value_new (see below).
+    implement=False,
 )
 
 Method(

@@ -1098,24 +1098,6 @@ default_get_return_buf_addr (struct type *val_type, frame_info_ptr cur_frame)
   return 0;
 }
 
-enum return_value_convention
-default_gdbarch_return_value
-     (struct gdbarch *gdbarch, struct value *function, struct type *valtype,
-      struct regcache *regcache, struct value **read_value,
-      const gdb_byte *writebuf)
-{
-  gdb_byte *readbuf = nullptr;
-
-  if (read_value != nullptr)
-    {
-      *read_value = allocate_value (valtype);
-      readbuf = value_contents_raw (*read_value).data ();
-    }
-
-  return gdbarch_return_value (gdbarch, function, valtype, regcache,
-			       readbuf, writebuf);
-}
-
 /* Non-zero if we want to trace architecture code.  */
 
 #ifndef GDBARCH_DEBUG
@@ -1185,6 +1167,24 @@ pstring_list (const char *const *list)
 }
 
 #include "gdbarch.c"
+
+enum return_value_convention
+default_gdbarch_return_value
+     (struct gdbarch *gdbarch, struct value *function, struct type *valtype,
+      struct regcache *regcache, struct value **read_value,
+      const gdb_byte *writebuf)
+{
+  gdb_byte *readbuf = nullptr;
+
+  if (read_value != nullptr)
+    {
+      *read_value = allocate_value (valtype);
+      readbuf = value_contents_raw (*read_value).data ();
+    }
+
+  return gdbarch->return_value (gdbarch, function, valtype, regcache,
+				readbuf, writebuf);
+}
 
 obstack *gdbarch_obstack (gdbarch *arch)
 {
