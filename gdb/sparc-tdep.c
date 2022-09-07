@@ -1500,13 +1500,6 @@ sparc32_return_value (struct gdbarch *gdbarch, struct value *function,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
-  gdb_byte *readbuf = nullptr;
-  if (read_value != nullptr)
-    {
-      *read_value = allocate_value (type);
-      readbuf = value_contents_raw (*read_value).data ();
-    }
-
   /* The psABI says that "...every stack frame reserves the word at
      %fp+64.  If a function returns a structure, union, or
      quad-precision value, this word should hold the address of the
@@ -1519,11 +1512,11 @@ sparc32_return_value (struct gdbarch *gdbarch, struct value *function,
       ULONGEST sp;
       CORE_ADDR addr;
 
-      if (readbuf)
+      if (read_value != nullptr)
 	{
 	  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
 	  addr = read_memory_unsigned_integer (sp + 64, 4, byte_order);
-	  read_memory (addr, readbuf, type->length ());
+	  *read_value = value_at_non_lval (type, addr);
 	}
       if (writebuf)
 	{
@@ -1535,8 +1528,12 @@ sparc32_return_value (struct gdbarch *gdbarch, struct value *function,
       return RETURN_VALUE_ABI_PRESERVES_ADDRESS;
     }
 
-  if (readbuf)
-    sparc32_extract_return_value (type, regcache, readbuf);
+  if (read_value != nullptr)
+    {
+      *read_value = allocate_value (type);
+      gdb_byte *readbuf = value_contents_raw (*read_value).data ();
+      sparc32_extract_return_value (type, regcache, readbuf);
+    }
   if (writebuf)
     sparc32_store_return_value (type, regcache, writebuf);
 

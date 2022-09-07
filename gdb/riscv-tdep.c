@@ -2492,7 +2492,8 @@ static void
 riscv_call_arg_scalar_int (struct riscv_arg_info *ainfo,
 			   struct riscv_call_info *cinfo)
 {
-  if (ainfo->length > (2 * cinfo->xlen))
+  if (TYPE_HAS_DYNAMIC_LENGTH (ainfo->type)
+      || ainfo->length > (2 * cinfo->xlen))
     {
       /* Argument is going to be passed by reference.  */
       ainfo->argloc[0].loc_type
@@ -2910,8 +2911,12 @@ riscv_arg_location (struct gdbarch *gdbarch,
       break;
 
     case TYPE_CODE_STRUCT:
-      riscv_call_arg_struct (ainfo, cinfo);
-      break;
+      if (!TYPE_HAS_DYNAMIC_LENGTH (ainfo->type))
+	{
+	  riscv_call_arg_struct (ainfo, cinfo);
+	  break;
+	}
+      /* FALLTHROUGH */
 
     default:
       riscv_call_arg_scalar_int (ainfo, cinfo);
@@ -3228,13 +3233,6 @@ riscv_return_value (struct gdbarch  *gdbarch,
   struct riscv_arg_info info;
   struct type *arg_type;
 
-  gdb_byte *readbuf = nullptr;
-  if (read_value != nullptr)
-    {
-      *read_value = allocate_value (type);
-      readbuf = value_contents_raw (*read_value).data ();
-    }
-
   arg_type = check_typedef (type);
   riscv_arg_location (gdbarch, &info, &call_info, arg_type, false);
 
@@ -3246,15 +3244,15 @@ riscv_return_value (struct gdbarch  *gdbarch,
       gdb_printf (gdb_stdlog, "\n");
     }
 
-  if (readbuf != nullptr || writebuf != nullptr)
+  if (read_value != nullptr || writebuf != nullptr)
     {
       unsigned int arg_len;
       struct value *abi_val;
-      gdb_byte *old_readbuf = nullptr;
+      gdb_byte *readbuf = nullptr;
       int regnum;
 
       /* We only do one thing at a time.  */
-      gdb_assert (readbuf == nullptr || writebuf == nullptr);
+      gdb_assert (read_value == nullptr || writebuf == nullptr);
 
       /* In some cases the argument is not returned as the declared type,
 	 and we need to cast to or from the ABI type in order to
@@ -3295,7 +3293,6 @@ riscv_return_value (struct gdbarch  *gdbarch,
       else
 	{
 	  abi_val = allocate_value (info.type);
-	  old_readbuf = readbuf;
 	  readbuf = value_contents_raw (abi_val).data ();
 	}
       arg_len = info.type->length ();
@@ -3375,8 +3372,17 @@ riscv_return_value (struct gdbarch  *gdbarch,
 
 	    regcache_cooked_read_unsigned (regcache, RISCV_A0_REGNUM,
 					   &addr);
-	    if (readbuf != nullptr)
-	      read_memory (addr, readbuf, info.length);
+	    if (read_value != nullptr)
+	      {
+		abi_val = value_at_non_lval (type, addr);
+		/* Also reset the expected type, so that the cast
+		   later on is a no-op.  If the cast is not a no-op,
+		   and if the return type is variably-sized, then the
+		   type of ABI_VAL will differ from ARG_TYPE due to
+		   dynamic type resolution, and so will most likely
+		   fail.  */
+		arg_type = value_type (abi_val);
+	      }
 	    if (writebuf != nullptr)
 	      write_memory (addr, writebuf, info.length);
 	  }
@@ -3391,10 +3397,8 @@ riscv_return_value (struct gdbarch  *gdbarch,
       /* This completes the cast from abi type back to the declared type
 	 in the case that we are reading from the machine.  See the
 	 comment at the head of this block for more details.  */
-      if (readbuf != nullptr)
+      if (read_value != nullptr)
 	{
-	  struct value *arg_val;
-
 	  if (is_fixed_point_type (arg_type))
 	    {
 	      /* Convert abi_val to the actual return type, but
@@ -3405,15 +3409,13 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	      unscaled.read (value_contents (abi_val),
 			     type_byte_order (info.type),
 			     info.type->is_unsigned ());
-	      arg_val = allocate_value (arg_type);
-	      unscaled.write (value_contents_raw (arg_val),
+	      *read_value = allocate_value (arg_type);
+	      unscaled.write (value_contents_raw (*read_value),
 			      type_byte_order (arg_type),
 			      arg_type->is_unsigned ());
 	    }
 	  else
-	    arg_val = value_cast (arg_type, abi_val);
-	  memcpy (old_readbuf, value_contents_raw (arg_val).data (),
-		  arg_type->length ());
+	    *read_value = value_cast (arg_type, abi_val);
 	}
     }
 

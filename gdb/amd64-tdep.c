@@ -801,13 +801,6 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
 
   gdb_assert (!(read_value && writebuf));
 
-  gdb_byte *readbuf = nullptr;
-  if (read_value != nullptr)
-    {
-      *read_value = allocate_value (type);
-      readbuf = value_contents_raw (*read_value).data ();
-    }
-
   /* 1. Classify the return type with the classification algorithm.  */
   amd64_classify (type, theclass);
 
@@ -824,15 +817,22 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
 	 can always find the return value just after the function has
 	 returned.  */
 
-      if (readbuf)
+      if (read_value != nullptr)
 	{
 	  ULONGEST addr;
 
 	  regcache_raw_read_unsigned (regcache, AMD64_RAX_REGNUM, &addr);
-	  read_memory (addr, readbuf, type->length ());
+	  *read_value = value_at_non_lval (type, addr);
 	}
 
       return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+    }
+
+  gdb_byte *readbuf = nullptr;
+  if (read_value != nullptr)
+    {
+      *read_value = allocate_value (type);
+      readbuf = value_contents_raw (*read_value).data ();
     }
 
   /* 8. If the class is COMPLEX_X87, the real part of the value is

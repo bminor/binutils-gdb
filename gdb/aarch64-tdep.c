@@ -2334,6 +2334,9 @@ aarch64_return_in_memory (struct gdbarch *gdbarch, struct type *type)
   int elements;
   struct type *fundamental_type;
 
+  if (TYPE_HAS_DYNAMIC_LENGTH (type))
+    return 1;
+
   if (aapcs_is_vfp_call_or_return_candidate (type, &elements,
 					     &fundamental_type))
     {
@@ -2448,13 +2451,6 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
 		      struct type *valtype, struct regcache *regcache,
 		      struct value **read_value, const gdb_byte *writebuf)
 {
-  gdb_byte *readbuf = nullptr;
-  if (read_value != nullptr)
-    {
-      *read_value = allocate_value (valtype);
-      readbuf = value_contents_raw (*read_value).data ();
-    }
-
   if (valtype->code () == TYPE_CODE_STRUCT
       || valtype->code () == TYPE_CODE_UNION
       || valtype->code () == TYPE_CODE_ARRAY)
@@ -2470,12 +2466,12 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
 
 	  aarch64_debug_printf ("return value in memory");
 
-	  if (readbuf)
+	  if (read_value != nullptr)
 	    {
 	      CORE_ADDR addr;
 
 	      regcache->cooked_read (AARCH64_STRUCT_RETURN_REGNUM, &addr);
-	      read_memory (addr, readbuf, valtype->length ());
+	      *read_value = value_at_non_lval (valtype, addr);
 	    }
 
 	  return RETURN_VALUE_ABI_RETURNS_ADDRESS;
@@ -2485,8 +2481,12 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
   if (writebuf)
     aarch64_store_return_value (valtype, regcache, writebuf);
 
-  if (readbuf)
-    aarch64_extract_return_value (valtype, regcache, readbuf);
+  if (read_value)
+    {
+      *read_value = allocate_value (valtype);
+      aarch64_extract_return_value (valtype, regcache,
+				    value_contents_raw (*read_value).data ());
+    }
 
   aarch64_debug_printf ("return value in registers");
 

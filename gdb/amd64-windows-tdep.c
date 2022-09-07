@@ -360,13 +360,6 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
   int len = type->length ();
   int regnum = -1;
 
-  gdb_byte *readbuf = nullptr;
-  if (read_value != nullptr)
-    {
-      *read_value = allocate_value (type);
-      readbuf = value_contents_raw (*read_value).data ();
-    }
-
   /* See if our value is returned through a register.  If it is, then
      store the associated register number in REGNUM.  */
   switch (type->code ())
@@ -401,20 +394,24 @@ amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
   if (regnum < 0)
     {
       /* RAX contains the address where the return value has been stored.  */
-      if (readbuf)
+      if (read_value != nullptr)
 	{
 	  ULONGEST addr;
 
 	  regcache_raw_read_unsigned (regcache, AMD64_RAX_REGNUM, &addr);
-	  read_memory (addr, readbuf, type->length ());
+	  *read_value = value_at_non_lval (type, addr);
 	}
       return RETURN_VALUE_ABI_RETURNS_ADDRESS;
     }
   else
     {
       /* Extract the return value from the register where it was stored.  */
-      if (readbuf)
-	regcache->raw_read_part (regnum, 0, len, readbuf);
+      if (read_value != nullptr)
+	{
+	  *read_value = allocate_value (type);
+	  regcache->raw_read_part (regnum, 0, len,
+				   value_contents_raw (*read_value).data ());
+	}
       if (writebuf)
 	regcache->raw_write_part (regnum, 0, len, writebuf);
       return RETURN_VALUE_REGISTER_CONVENTION;
