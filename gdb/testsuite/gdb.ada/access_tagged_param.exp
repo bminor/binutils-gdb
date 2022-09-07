@@ -33,7 +33,7 @@ if ![runto "foo"] then {
   return
 }
 
-gdb_breakpoint "pck.inspect"
+gdb_breakpoint "pck.adb:19"
 
 # Continue until we reach the breakpoint, and verify that we can print
 # the value of all the parameters.

@@ -27,7 +27,7 @@ set has_runtime_debug_info [gnat_runtime_has_debug_info]
 
 clean_restart ${testfile}
 
-if ![runto "position_x" ] then {
+if ![runto "pck.adb:20" ] then {
   return -1
 }
 
