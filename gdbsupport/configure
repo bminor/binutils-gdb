@@ -10470,7 +10470,7 @@ $as_echo "#define USE_WIN32API 1" >>confdefs.h
     ;;
 esac
 
-CONFIG_STATUS_DEPENDENCIES='$srcdir/../bfd/development.sh'
+CONFIG_STATUS_DEPENDENCIES='$(srcdir)/../bfd/development.sh'
 
 
 ac_config_files="$ac_config_files Makefile"
