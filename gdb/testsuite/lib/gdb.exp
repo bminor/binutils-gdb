@@ -743,13 +743,13 @@ proc runto { linespec args } {
     # the "at foo.c:36" output we get with -g.
     # the "in func" output we get without -g.
     gdb_expect 30 {
-	-re "Break.* at .*:$decimal.*$gdb_prompt $" {
+	-re "(?:Break|Temporary break).* at .*:$decimal.*$gdb_prompt $" {
 	    if { $print_pass } {
 		pass $test_name
 	    }
 	    return 1
 	}
-	-re "Breakpoint $bkptno_numopt_re, \[0-9xa-f\]* in .*$gdb_prompt $" {
+	-re "(?:Breakpoint|Temporary breakpoint) $bkptno_numopt_re, \[0-9xa-f\]* in .*$gdb_prompt $" {
 	    if { $print_pass } {
 		pass $test_name
 	    }
