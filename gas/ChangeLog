@@ -1,3 +1,14 @@
+2022-09-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 29559
+	* dwarf2dbg.c (out_debug_info): Place DW_TAG_unspecified_type at
+	the end of the list of children, not at the start of the CU
+	information.
+	* testsuite/gas/elf/dwarf-3-func.d: Update expected output.
+	* testsuite/gas/elf/dwarf-5-func-global.d: Likewise.
+	* testsuite/gas/elf/dwarf-5-func-local.d: Likewise.
+	* testsuite/gas/elf/dwarf-5-func.d: Likewise.
+
 2022-08-31  Frederic Cambus  <fred@statdns.com>
 
 	* configure.tgt (aarch64*-*-openbsd*): Add target.

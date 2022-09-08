@@ -12,22 +12,22 @@ Contents of the .debug_info section:
  +Unit Type: +DW_UT_compile \(1\)
  +Abbrev Offset: +(0x)?0
  +Pointer Size: .*
- <0><[0-9a-f]+>: Abbrev Number: 3 \(DW_TAG_unspecified_type\)
 #...
  <0><[0-9a-f]+>: Abbrev Number: 1 \(DW_TAG_compile_unit\)
 #...
  <1><[0-9a-f]+>: Abbrev Number: 2 \(DW_TAG_subprogram\)
  +<[0-9a-f]+> +DW_AT_name +: \(strp\) \(offset: (0x)?[0-9a-f]+\): efunc1
  +<[0-9a-f]+> +DW_AT_external +: \(flag_present\) 1
- +<[0-9a-f]+> +DW_AT_type +: \(ref_udata\) <0x.>
+ +<[0-9a-f]+> +DW_AT_type +: \(ref_udata\) <0x[0-9a-f]+>
  +<[0-9a-f]+> +DW_AT_low_pc +: \(addr\) (0x)?0
  +<[0-9a-f]+> +DW_AT_high_pc +: \(udata\) 2
  <1><[0-9a-f]+>: Abbrev Number: 2 \(DW_TAG_subprogram\)
  +<[0-9a-f]+> +DW_AT_name +: \(strp\) \(offset: (0x)?[0-9a-f]+\): efunc2
  +<[0-9a-f]+> +DW_AT_external +: \(flag_present\) 1
- +<[0-9a-f]+> +DW_AT_type +: \(ref_udata\) <0x.>
+ +<[0-9a-f]+> +DW_AT_type +: \(ref_udata\) <0x[0-9a-f]+>
  +<[0-9a-f]+> +DW_AT_low_pc +: \(addr\) (0x)?2
  +<[0-9a-f]+> +DW_AT_high_pc +: \(udata\) 34
+ <1><[0-9a-f]+>: Abbrev Number: 3 \(DW_TAG_unspecified_type\)
  <1><[0-9a-f]+>: Abbrev Number: 0
 
 Contents of the .debug_abbrev section:

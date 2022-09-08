@@ -2817,7 +2817,6 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
   expressionS exp;
   symbolS *info_end;
   int sizeof_offset;
-  valueT no_type_die = 0;
 
   memset (&exp, 0, sizeof exp);
   sizeof_offset = out_header (info_seg, &exp);
@@ -2844,16 +2843,6 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
     {
       /* .debug_abbrev offset */
       TC_DWARF2_EMIT_OFFSET (section_symbol (abbrev_seg), sizeof_offset);
-    }
-
-  if (func_form && DWARF2_VERSION > 2)
-    {
-      /* PR 29517: Generate a DIE for the unspecified type abbrev.
-	 We do it here so that the offset from the start of the
-	 section is fixed.  */
-      subseg_set (info_seg, 0);
-      no_type_die = frag_now_fix_octets ();
-      out_uleb128 (GAS_ABBREV_NO_TYPE);
     }
 
   /* DW_TAG_compile_unit DIE abbrev */
@@ -2908,6 +2897,12 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
   if (func_form)
     {
       symbolS *symp;
+      symbolS *no_type_tag;
+
+      if (DWARF2_VERSION > 2)
+	no_type_tag = symbol_make (".Ldebug_no_type_tag");
+      else
+	no_type_tag = NULL;
 
       for (symp = symbol_rootP; symp; symp = symbol_next (symp))
 	{
@@ -2957,10 +2952,15 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
 	  if (func_form == DW_FORM_flag)
 	    out_byte (S_IS_EXTERNAL (symp));
 
-	  /* PR 29517: Let consumers know that we do not
-	     have return type information for this function.  */
+	  /* PR 29517: Let consumers know that we do not have
+	     return type information for this function.  */
 	  if (DWARF2_VERSION > 2)
-	    out_uleb128 (no_type_die);
+	    {
+	      exp.X_op = O_symbol;
+	      exp.X_add_symbol = no_type_tag;
+	      exp.X_add_number = 0;
+	      emit_leb128_expr (&exp, 0);
+	    }
 
 	  /* DW_AT_low_pc */
 	  exp.X_op = O_symbol;
@@ -2980,6 +2980,15 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT str_seg,
 	    out_uleb128 (size.X_add_number);
 	  else
 	    emit_leb128_expr (symbol_get_value_expression (size.X_op_symbol), 0);
+	}
+
+      if (DWARF2_VERSION > 2)
+	{
+	  /* PR 29517: Generate a DIE for the unspecified type abbrev.
+	     We do it here because it cannot be part of the top level DIE.   */
+	  subseg_set (info_seg, 0);
+	  symbol_set_value_now (no_type_tag);
+	  out_uleb128 (GAS_ABBREV_NO_TYPE);
 	}
 
       /* End of children.  */
