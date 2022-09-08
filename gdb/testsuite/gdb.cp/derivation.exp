@@ -77,6 +77,10 @@ gdb_test "up" ".*main.*" "up from marker1"
 
 gdb_test "print a_instance" "\\$\[0-9\]+ = \{a = 1, aa = 2\}" "print value of a_instance"
 
+# Clang does not add accessibility information for typedefs inside classes.
+if {[test_compiler_info {clang*} c++]} {
+    setup_xfail "clang 57608" *-*-*
+}
 cp_test_ptype_class \
     "a_instance" "" "class" "A" \
     {
