@@ -10,11 +10,12 @@ find the sources for these in the respective upstream directories:
   ftp://ftp.gnu.org/gnu/libtool
   ftp://ftp.gnu.org/gnu/gettext
 
-The required versions of the tools for this tree are
+The required versions of the tools for this tree are:
+
   autoconf 2.69
   automake 1.15.1
   libtool 2.2.6
-  gettext 0.14.5
+  gettext 0.16.1
 
 Note - "make distclean" does not work with maintainer mode enabled.
 The Makefiles in the some of the po/ subdirectories depend upon the
