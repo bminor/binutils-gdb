@@ -1,3 +1,9 @@
+2022-09-08  Nick Clifton  <nickc@redhat.com>
+
+	PR 29523
+	* dwarf.c (display_debug_lines_decoded): Correctly handle DWARF-5
+	directory and filename tables.
+
 2022-09-02  Aaron Merey  <amerey@redhat.com>
 
 	PR 29075
