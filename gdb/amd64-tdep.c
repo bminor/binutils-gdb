@@ -789,7 +789,7 @@ amd64_classify (struct type *type, enum amd64_reg_class theclass[2])
 static enum return_value_convention
 amd64_return_value (struct gdbarch *gdbarch, struct value *function,
 		    struct type *type, struct regcache *regcache,
-		    gdb_byte *readbuf, const gdb_byte *writebuf)
+		    struct value **read_value, const gdb_byte *writebuf)
 {
   enum amd64_reg_class theclass[2];
   int len = type->length ();
@@ -799,7 +799,14 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
   int sse_reg = 0;
   int i;
 
-  gdb_assert (!(readbuf && writebuf));
+  gdb_assert (!(read_value && writebuf));
+
+  gdb_byte *readbuf = nullptr;
+  if (read_value != nullptr)
+    {
+      *read_value = allocate_value (type);
+      readbuf = value_contents_raw (*read_value).data ();
+    }
 
   /* 1. Classify the return type with the classification algorithm.  */
   amd64_classify (type, theclass);
@@ -3236,7 +3243,7 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
   set_gdbarch_register_to_value (gdbarch, i387_register_to_value);
   set_gdbarch_value_to_register (gdbarch, i387_value_to_register);
 
-  set_gdbarch_return_value (gdbarch, amd64_return_value);
+  set_gdbarch_return_value_as_value (gdbarch, amd64_return_value);
 
   set_gdbarch_skip_prologue (gdbarch, amd64_skip_prologue);
 

@@ -3221,12 +3221,19 @@ riscv_return_value (struct gdbarch  *gdbarch,
 		    struct value *function,
 		    struct type *type,
 		    struct regcache *regcache,
-		    gdb_byte *readbuf,
+		    struct value **read_value,
 		    const gdb_byte *writebuf)
 {
   struct riscv_call_info call_info (gdbarch);
   struct riscv_arg_info info;
   struct type *arg_type;
+
+  gdb_byte *readbuf = nullptr;
+  if (read_value != nullptr)
+    {
+      *read_value = allocate_value (type);
+      readbuf = value_contents_raw (*read_value).data ();
+    }
 
   arg_type = check_typedef (type);
   riscv_arg_location (gdbarch, &info, &call_info, arg_type, false);
@@ -3888,7 +3895,7 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_type_align (gdbarch, riscv_type_align);
 
   /* Information about the target architecture.  */
-  set_gdbarch_return_value (gdbarch, riscv_return_value);
+  set_gdbarch_return_value_as_value (gdbarch, riscv_return_value);
   set_gdbarch_breakpoint_kind_from_pc (gdbarch, riscv_breakpoint_kind_from_pc);
   set_gdbarch_sw_breakpoint_from_kind (gdbarch, riscv_sw_breakpoint_from_kind);
   set_gdbarch_have_nonsteppable_watchpoint (gdbarch, 1);

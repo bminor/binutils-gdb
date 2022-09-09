@@ -1835,6 +1835,7 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_push_dummy_call (gdbarch, sparc64_push_dummy_call);
 
   set_gdbarch_return_value (gdbarch, sparc64_return_value);
+  set_gdbarch_return_value_as_value (gdbarch, default_gdbarch_return_value);
   set_gdbarch_stabs_argument_has_addr
     (gdbarch, default_stabs_argument_has_addr);
 

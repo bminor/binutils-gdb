@@ -249,8 +249,15 @@ ppc_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
 static enum return_value_convention
 ppc_linux_return_value (struct gdbarch *gdbarch, struct value *function,
 			struct type *valtype, struct regcache *regcache,
-			gdb_byte *readbuf, const gdb_byte *writebuf)
+			struct value **read_value, const gdb_byte *writebuf)
 {  
+  gdb_byte *readbuf = nullptr;
+  if (read_value != nullptr)
+    {
+      *read_value = allocate_value (valtype);
+      readbuf = value_contents_raw (*read_value).data ();
+    }
+
   if ((valtype->code () == TYPE_CODE_STRUCT
        || valtype->code () == TYPE_CODE_UNION)
       && !((valtype->length () == 16 || valtype->length () == 8)
@@ -2102,7 +2109,8 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	 (well ignoring vectors that is).  When this was corrected, it
 	 wasn't fixed for GNU/Linux native platform.  Use the
 	 PowerOpen struct convention.  */
-      set_gdbarch_return_value (gdbarch, ppc_linux_return_value);
+      set_gdbarch_return_value_as_value (gdbarch, ppc_linux_return_value);
+      set_gdbarch_return_value (gdbarch, nullptr);
 
       set_gdbarch_memory_remove_breakpoint (gdbarch,
 					    ppc_linux_memory_remove_breakpoint);

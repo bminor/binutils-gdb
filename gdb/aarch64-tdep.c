@@ -2446,8 +2446,14 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 static enum return_value_convention
 aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
 		      struct type *valtype, struct regcache *regcache,
-		      gdb_byte *readbuf, const gdb_byte *writebuf)
+		      struct value **read_value, const gdb_byte *writebuf)
 {
+  gdb_byte *readbuf = nullptr;
+  if (read_value != nullptr)
+    {
+      *read_value = allocate_value (valtype);
+      readbuf = value_contents_raw (*read_value).data ();
+    }
 
   if (valtype->code () == TYPE_CODE_STRUCT
       || valtype->code () == TYPE_CODE_UNION
@@ -3765,7 +3771,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, aarch64_dwarf_reg_to_regnum);
 
   /* Returning results.  */
-  set_gdbarch_return_value (gdbarch, aarch64_return_value);
+  set_gdbarch_return_value_as_value (gdbarch, aarch64_return_value);
 
   /* Disassembly.  */
   set_gdbarch_print_insn (gdbarch, aarch64_gdb_print_insn);

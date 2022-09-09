@@ -355,10 +355,17 @@ amd64_windows_push_dummy_call
 static enum return_value_convention
 amd64_windows_return_value (struct gdbarch *gdbarch, struct value *function,
 			    struct type *type, struct regcache *regcache,
-			    gdb_byte *readbuf, const gdb_byte *writebuf)
+			    struct value **read_value, const gdb_byte *writebuf)
 {
   int len = type->length ();
   int regnum = -1;
+
+  gdb_byte *readbuf = nullptr;
+  if (read_value != nullptr)
+    {
+      *read_value = allocate_value (type);
+      readbuf = value_contents_raw (*read_value).data ();
+    }
 
   /* See if our value is returned through a register.  If it is, then
      store the associated register number in REGNUM.  */
@@ -1297,7 +1304,7 @@ amd64_windows_init_abi_common (gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Function calls.  */
   set_gdbarch_push_dummy_call (gdbarch, amd64_windows_push_dummy_call);
-  set_gdbarch_return_value (gdbarch, amd64_windows_return_value);
+  set_gdbarch_return_value_as_value (gdbarch, amd64_windows_return_value);
   set_gdbarch_skip_main_prologue (gdbarch, amd64_skip_main_prologue);
   set_gdbarch_skip_trampoline_code (gdbarch,
 				    amd64_windows_skip_trampoline_code);
