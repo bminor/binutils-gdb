@@ -30,11 +30,18 @@ if ![runto_main] then {
     return
 }
 
+if {[test_compiler_info {clang-*-*} c++]} {
+    set using_clang true
+} else {
+    set using_clang false
+}
+
 gdb_test_no_output "set language c++" ""
 gdb_test_no_output "set width 0" ""
 
 proc do_check_holder {name {flags ""} {show_typedefs 1} {show_methods 1}
 		      {raw 0}} {
+    global using_clang
 
     set contents {
 	{ base "public Base<T>" }
@@ -49,6 +56,11 @@ proc do_check_holder {name {flags ""} {show_typedefs 1} {show_methods 1}
     }
 
     if {$show_typedefs} {
+	# Clang does not add accessibility information for typedefs:
+	# https://github.com/llvm/llvm-project/issues/57608
+	if {$using_clang} {
+	    setup_xfail "clang 57608" *-*-*
+	}
 	lappend contents { typedef public "typedef Simple<Simple<T> > Z;" }
     }
 
