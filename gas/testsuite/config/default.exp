@@ -53,7 +53,7 @@ if ![info exists NMFLAGS] then {
 }
 
 if ![info exists SIZE] then {
-    set SIZE [findfile $base_dir/size]
+    set SIZE [findfile $base_dir/../../binutils/size]
 }
 
 if ![info exists SIZEFLAGS] then {
