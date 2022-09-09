@@ -4084,17 +4084,26 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	   && (flags & (SEC_ALLOC | SEC_GROUP)) != 0
 	   && !is_nondebug_keep_contents_section (ibfd, isection))
     {
-      flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD | SEC_GROUP);
+      flagword remove = SEC_HAS_CONTENTS | SEC_LOAD | SEC_GROUP;
+
       if (bfd_get_flavour (obfd) == bfd_target_elf_flavour)
 	{
-	  make_nobits = true;
+	  /* PR 29532: Copy group sections intact as otherwise we end up with
+	     empty groups.  This prevents separate debug info files from
+	     being used with GDB, if they were based upon files that
+	     originally contained groups.  */
+	  if (flags & SEC_GROUP)
+	    remove = SEC_LOAD;
+	  else
+	    make_nobits = true;
 
 	  /* Twiddle the input section flags so that it seems to
 	     elf.c:copy_private_bfd_data that section flags have not
 	     changed between input and output sections.  This hack
 	     prevents wholesale rewriting of the program headers.  */
-	  isection->flags &= ~(SEC_HAS_CONTENTS | SEC_LOAD | SEC_GROUP);
+	  isection->flags &= ~remove;
 	}
+      flags &= ~remove;
     }
 
   osection = bfd_make_section_anyway_with_flags (obfd, name, flags);

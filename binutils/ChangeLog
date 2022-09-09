@@ -1,3 +1,9 @@
+2022-09-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 29532
+	* objcopy.c (setup_section): Leave group sections intact when
+	creating separate debuginfo files.
+
 2022-09-08  Nick Clifton  <nickc@redhat.com>
 
 	PR 29523

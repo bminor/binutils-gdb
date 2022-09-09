@@ -830,7 +830,11 @@ setup_group (bfd *abfd, Elf_Internal_Shdr *hdr, asection *newsect)
       /* xgettext:c-format */
       _bfd_error_handler (_("%pB: no group info for section '%pA'"),
 			  abfd, newsect);
-      return false;
+      /* PR 29532: Return true here, even though the group info has not been
+	 read.  Separate debug info files can have empty group sections, but
+	 we do not want this to prevent them from being loaded as otherwise
+	 GDB will not be able to use them.  */
+      return true;
     }
   return true;
 }

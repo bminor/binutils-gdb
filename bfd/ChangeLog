@@ -1,3 +1,9 @@
+2022-09-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 29532
+	* elf.c (setup_group): Do not return false if there is no group
+	information available.
+
 2022-09-02  Aaron Merey  <amerey@redhat.com>
 
 	* aout-target.h (MY_find_nearest_line_with_alt): New macro.
