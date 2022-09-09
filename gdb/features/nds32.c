@@ -5,7 +5,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_nds32;
+const struct target_desc *tdesc_nds32;
 static void
 initialize_tdesc_nds32 (void)
 {

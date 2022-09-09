@@ -5,7 +5,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_z80;
+const struct target_desc *tdesc_z80;
 static void
 initialize_tdesc_z80 (void)
 {

@@ -5,7 +5,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_powerpc_e500l;
+const struct target_desc *tdesc_powerpc_e500l;
 static void
 initialize_tdesc_powerpc_e500l (void)
 {
