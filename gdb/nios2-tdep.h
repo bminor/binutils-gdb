@@ -84,7 +84,7 @@ struct nios2_gdbarch_tdep : gdbarch_tdep_base
   int jb_pc = 0;
 };
 
-extern struct target_desc *tdesc_nios2_linux;
-extern struct target_desc *tdesc_nios2;
+extern const struct target_desc *tdesc_nios2_linux;
+extern const struct target_desc *tdesc_nios2;
 
 #endif /* NIOS2_TDEP_H */

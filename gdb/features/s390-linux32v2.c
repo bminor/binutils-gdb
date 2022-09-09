@@ -5,7 +5,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_s390_linux32v2;
+const struct target_desc *tdesc_s390_linux32v2;
 static void
 initialize_tdesc_s390_linux32v2 (void)
 {

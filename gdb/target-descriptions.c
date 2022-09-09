@@ -1370,7 +1370,7 @@ public:
     gdb_printf ("#include \"target-descriptions.h\"\n");
     gdb_printf ("\n");
 
-    gdb_printf ("struct target_desc *tdesc_%s;\n", m_function);
+    gdb_printf ("const struct target_desc *tdesc_%s;\n", m_function);
     gdb_printf ("static void\n");
     gdb_printf ("initialize_tdesc_%s (void)\n", m_function);
     gdb_printf ("{\n");

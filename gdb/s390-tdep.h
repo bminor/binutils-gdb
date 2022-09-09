@@ -317,7 +317,7 @@ extern struct value *s390_trad_frame_prev_register
     (struct frame_info *this_frame, struct trad_frame_saved_reg saved_regs[],
      int regnum);
 
-extern struct target_desc *tdesc_s390_linux32;
-extern struct target_desc *tdesc_s390x_linux64;
+extern const struct target_desc *tdesc_s390_linux32;
+extern const struct target_desc *tdesc_s390x_linux64;
 
 #endif /* S390_TDEP_H */

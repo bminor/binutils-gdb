@@ -3466,7 +3466,7 @@ struct ppc_variant
     unsigned long mach;
 
     /* Target description for this variant.  */
-    struct target_desc **tdesc;
+    const struct target_desc **tdesc;
   };
 
 static struct ppc_variant variants[] =

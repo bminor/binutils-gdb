@@ -5,7 +5,7 @@
 #include "osabi.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_sparc64_solaris;
+const struct target_desc *tdesc_sparc64_solaris;
 static void
 initialize_tdesc_sparc64_solaris (void)
 {
