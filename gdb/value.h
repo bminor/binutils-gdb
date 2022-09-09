@@ -711,6 +711,10 @@ extern struct value *value_from_component_bitsize (struct value *whole,
 extern struct value *value_at (struct type *type, CORE_ADDR addr);
 extern struct value *value_at_lazy (struct type *type, CORE_ADDR addr);
 
+/* Like value_at, but ensures that the result is marked not_lval.
+   This can be important if the memory is "volatile".  */
+extern struct value *value_at_non_lval (struct type *type, CORE_ADDR addr);
+
 extern struct value *value_from_contents_and_address_unresolved
      (struct type *, const gdb_byte *, CORE_ADDR);
 extern struct value *value_from_contents_and_address (struct type *,

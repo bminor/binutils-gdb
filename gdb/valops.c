@@ -1019,6 +1019,16 @@ value_at (struct type *type, CORE_ADDR addr)
   return get_value_at (type, addr, 0);
 }
 
+/* See value.h.  */
+
+struct value *
+value_at_non_lval (struct type *type, CORE_ADDR addr)
+{
+  struct value *result = value_at (type, addr);
+  VALUE_LVAL (result) = not_lval;
+  return result;
+}
+
 /* Return a lazy value with type TYPE located at ADDR (cf. value_at).
    The type of the created value may differ from the passed type TYPE.
    Make sure to retrieve the returned values's new type after this call
