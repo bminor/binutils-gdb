@@ -3598,8 +3598,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->jb_elt_size = 8;
   tdep->vq = vq;
   tdep->pauth_reg_base = first_pauth_regnum;
-  tdep->ra_sign_state_regnum = (feature_pauth == NULL) ? -1
-				: ra_sign_state_offset + num_regs;
+  tdep->ra_sign_state_regnum = -1;
   tdep->mte_reg_base = first_mte_regnum;
   tdep->tls_regnum = tls_regnum;
 
@@ -3697,6 +3696,18 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_get_pc_address_flags (gdbarch, aarch64_get_pc_address_flags);
 
   tdesc_use_registers (gdbarch, tdesc, std::move (tdesc_data));
+
+  /* Fetch the updated number of registers after we're done adding all
+     entries from features we don't explicitly care about.  This is the case
+     for bare metal debugging stubs that include a lot of system registers.  */
+  num_regs = gdbarch_num_regs (gdbarch);
+
+  /* With the number of real registers updated, setup the pseudo-registers and
+     record their numbers.  */
+
+  /* Pointer authentication pseudo-registers.  */
+  if (tdep->has_pauth ())
+    tdep->ra_sign_state_regnum = ra_sign_state_offset + num_regs;
 
   /* Add standard register aliases.  */
   for (i = 0; i < ARRAY_SIZE (aarch64_register_aliases); i++)
