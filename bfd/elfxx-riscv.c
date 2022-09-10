@@ -1876,13 +1876,6 @@ riscv_parse_check_conflicts (riscv_parse_subset_t *rps)
       rps->error_handler (_("rv%d does not support the `q' extension"), xlen);
       no_conflict = false;
     }
-  if (riscv_lookup_subset (rps->subset_list, "e", &subset)
-      && riscv_lookup_subset (rps->subset_list, "f", &subset))
-    {
-      rps->error_handler
-        (_("rv32e does not support the `f' extension"));
-      no_conflict = false;
-    }
   if (riscv_lookup_subset (rps->subset_list, "zfinx", &subset)
       && riscv_lookup_subset (rps->subset_list, "f", &subset))
     {
