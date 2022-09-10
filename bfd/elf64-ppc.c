@@ -10000,20 +10000,21 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       /* Finally, allocate space.  */
       for (p = (struct ppc_dyn_relocs *) h->dyn_relocs; p != NULL; p = p->next)
-	{
-	  unsigned int count;
-	  asection *sreloc = elf_section_data (p->sec)->sreloc;
-	  if (eh->elf.type == STT_GNU_IFUNC)
-	    sreloc = htab->elf.irelplt;
-	  count = p->count;
-	  if (info->enable_dt_relr
-	      && ((!NO_OPD_RELOCS
-		   && ppc64_elf_section_data (p->sec)->sec_type == sec_opd)
-		  || (eh->elf.type != STT_GNU_IFUNC
-		      && SYMBOL_REFERENCES_LOCAL (info, h))))
-	    count -= p->rel_count;
-	  sreloc->size += count * sizeof (Elf64_External_Rela);
-	}
+	if (!discarded_section (p->sec))
+	  {
+	    unsigned int count;
+	    asection *sreloc = elf_section_data (p->sec)->sreloc;
+	    if (eh->elf.type == STT_GNU_IFUNC)
+	      sreloc = htab->elf.irelplt;
+	    count = p->count;
+	    if (info->enable_dt_relr
+		&& ((!NO_OPD_RELOCS
+		     && ppc64_elf_section_data (p->sec)->sec_type == sec_opd)
+		    || (eh->elf.type != STT_GNU_IFUNC
+			&& SYMBOL_REFERENCES_LOCAL (info, h))))
+	      count -= p->rel_count;
+	    sreloc->size += count * sizeof (Elf64_External_Rela);
+	  }
     }
 
   /* We might need a PLT entry when the symbol
@@ -10248,8 +10249,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 
 	  for (p = elf_section_data (s)->local_dynrel; p != NULL; p = p->next)
 	    {
-	      if (!bfd_is_abs_section (p->sec)
-		  && bfd_is_abs_section (p->sec->output_section))
+	      if (discarded_section (p->sec))
 		{
 		  /* Input section has been discarded, either because
 		     it is a copy of a linkonce section or due to

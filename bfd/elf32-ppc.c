@@ -5268,12 +5268,13 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   /* Allocate space.  */
   for (p = h->dyn_relocs; p != NULL; p = p->next)
-    {
-      asection *sreloc = elf_section_data (p->sec)->sreloc;
-      if (eh->elf.type == STT_GNU_IFUNC)
-	sreloc = htab->elf.irelplt;
-      sreloc->size += p->count * sizeof (Elf32_External_Rela);
-    }
+    if (!discarded_section (p->sec))
+      {
+	asection *sreloc = elf_section_data (p->sec)->sreloc;
+	if (eh->elf.type == STT_GNU_IFUNC)
+	  sreloc = htab->elf.irelplt;
+	sreloc->size += p->count * sizeof (Elf32_External_Rela);
+      }
 
   /* Handle PLT relocs.  Done last, after dynindx has settled.
      We might need a PLT entry when the symbol
@@ -5535,8 +5536,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd,
 	       p != NULL;
 	       p = p->next)
 	    {
-	      if (!bfd_is_abs_section (p->sec)
-		  && bfd_is_abs_section (p->sec->output_section))
+	      if (discarded_section (p->sec))
 		{
 		  /* Input section has been discarded, either because
 		     it is a copy of a linkonce section or due to
