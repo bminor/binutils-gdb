@@ -137,10 +137,14 @@ static const char *const aarch64_sve_register_names[] =
 
 static const char *const aarch64_pauth_register_names[] =
 {
-  /* Authentication mask for data pointer.  */
+  /* Authentication mask for data pointer, low half/user pointers.  */
   "pauth_dmask",
-  /* Authentication mask for code pointer.  */
-  "pauth_cmask"
+  /* Authentication mask for code pointer, low half/user pointers.  */
+  "pauth_cmask",
+  /* Authentication mask for data pointer, high half / kernel pointers.  */
+  "pauth_dmask_high",
+  /* Authentication mask for code pointer, high half / kernel pointers.  */
+  "pauth_cmask_high"
 };
 
 static const char *const aarch64_mte_register_names[] =
@@ -228,9 +232,19 @@ aarch64_frame_unmask_lr (aarch64_gdbarch_tdep *tdep,
       && frame_unwind_register_unsigned (this_frame,
 					 tdep->ra_sign_state_regnum))
     {
-      int cmask_num = AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base);
-      CORE_ADDR cmask = frame_unwind_register_unsigned (this_frame, cmask_num);
-      addr = addr & ~cmask;
+      /* VA range select (bit 55) tells us whether to use the low half masks
+	 or the high half masks.  */
+      int cmask_num;
+      if (tdep->pauth_reg_count > 2 && addr & VA_RANGE_SELECT_BIT_MASK)
+	cmask_num = AARCH64_PAUTH_CMASK_HIGH_REGNUM (tdep->pauth_reg_base);
+      else
+	cmask_num = AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base);
+
+      /* By default, we assume TBI and discard the top 8 bits plus the VA range
+	 select bit (55).  */
+      CORE_ADDR mask = AARCH64_TOP_BITS_MASK;
+      mask |= frame_unwind_register_unsigned (this_frame, cmask_num);
+      addr = aarch64_remove_top_bits (addr, mask);
 
       /* Record in the frame that the link register required unmasking.  */
       set_frame_previous_pc_masked (this_frame);
@@ -1326,8 +1340,8 @@ aarch64_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 	  reg->loc.exp.len = 1;
 	  return;
 	}
-      else if (regnum == AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base)
-	       || regnum == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base))
+      else if (regnum >= tdep->pauth_reg_base
+	       && regnum < tdep->pauth_reg_base + tdep->pauth_reg_count)
 	{
 	  reg->how = DWARF2_FRAME_REG_SAME_VALUE;
 	  return;
@@ -3507,8 +3521,8 @@ aarch64_cannot_store_register (struct gdbarch *gdbarch, int regnum)
     return 0;
 
   /* Pointer authentication registers are read-only.  */
-  return (regnum == AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base)
-	  || regnum == AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base));
+  return (regnum >= tdep->pauth_reg_base
+	  && regnum < tdep->pauth_reg_base + tdep->pauth_reg_count);
 }
 
 /* Implement the stack_frame_destroyed_p gdbarch method.  */
@@ -3534,6 +3548,51 @@ aarch64_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
     return 0;
 
   return streq (inst.opcode->name, "ret");
+}
+
+/* AArch64 implementation of the remove_non_address_bits gdbarch hook.  Remove
+   non address bits from a pointer value.  */
+
+static CORE_ADDR
+aarch64_remove_non_address_bits (struct gdbarch *gdbarch, CORE_ADDR pointer)
+{
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  /* By default, we assume TBI and discard the top 8 bits plus the VA range
+     select bit (55).  */
+  CORE_ADDR mask = AARCH64_TOP_BITS_MASK;
+
+  if (tdep->has_pauth ())
+    {
+      /* Fetch the PAC masks.  These masks are per-process, so we can just
+	 fetch data from whatever thread we have at the moment.
+
+	 Also, we have both a code mask and a data mask.  For now they are the
+	 same, but this may change in the future.  */
+      struct regcache *regs = get_current_regcache ();
+      CORE_ADDR cmask, dmask;
+      int dmask_regnum = AARCH64_PAUTH_DMASK_REGNUM (tdep->pauth_reg_base);
+      int cmask_regnum = AARCH64_PAUTH_CMASK_REGNUM (tdep->pauth_reg_base);
+
+      /* If we have a kernel address and we have kernel-mode address mask
+	 registers, use those instead.  */
+      if (tdep->pauth_reg_count > 2
+	  && pointer & VA_RANGE_SELECT_BIT_MASK)
+	{
+	  dmask_regnum = AARCH64_PAUTH_DMASK_HIGH_REGNUM (tdep->pauth_reg_base);
+	  cmask_regnum = AARCH64_PAUTH_CMASK_HIGH_REGNUM (tdep->pauth_reg_base);
+	}
+
+      if (regs->cooked_read (dmask_regnum, &dmask) != REG_VALID)
+	dmask = mask;
+
+      if (regs->cooked_read (cmask_regnum, &cmask) != REG_VALID)
+	cmask = mask;
+
+      mask |= aarch64_mask_from_pac_registers (cmask, dmask);
+    }
+
+  return aarch64_remove_top_bits (pointer, mask);
 }
 
 /* Initialize the current architecture based on INFO.  If possible,
@@ -3674,19 +3733,35 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     }
 
   /* Add the pauth registers.  */
+  int pauth_masks = 0;
   if (feature_pauth != NULL)
     {
       first_pauth_regnum = num_regs;
       ra_sign_state_offset = num_pseudo_regs;
+
+      /* Size of the expected register set with all 4 masks.  */
+      int set_size = ARRAY_SIZE (aarch64_pauth_register_names);
+
+      /* QEMU exposes a couple additional masks for the high half of the
+	 address.  We should either have 2 registers or 4 registers.  */
+      if (tdesc_unnumbered_register (feature_pauth,
+				     "pauth_dmask_high") == 0)
+	{
+	  /* We did not find pauth_dmask_high, assume we only have
+	     2 masks.  We are not dealing with QEMU/Emulators then.  */
+	  set_size -= 2;
+	}
+
       /* Validate the descriptor provides the mandatory PAUTH registers and
 	 allocate their numbers.  */
-      for (i = 0; i < ARRAY_SIZE (aarch64_pauth_register_names); i++)
+      for (i = 0; i < set_size; i++)
 	valid_p &= tdesc_numbered_register (feature_pauth, tdesc_data.get (),
 					    first_pauth_regnum + i,
 					    aarch64_pauth_register_names[i]);
 
       num_regs += i;
       num_pseudo_regs += 1;	/* Count RA_STATE pseudo register.  */
+      pauth_masks = set_size;
     }
 
   /* Add the MTE registers.  */
@@ -3722,6 +3797,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->jb_elt_size = 8;
   tdep->vq = vq;
   tdep->pauth_reg_base = first_pauth_regnum;
+  tdep->pauth_reg_count = pauth_masks;
   tdep->ra_sign_state_regnum = -1;
   tdep->mte_reg_base = first_mte_regnum;
   tdep->tls_regnum_base = first_tls_regnum;
@@ -3837,6 +3913,11 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Pointer authentication pseudo-registers.  */
   if (tdep->has_pauth ())
     tdep->ra_sign_state_regnum = ra_sign_state_offset + num_regs;
+
+  /* Architecture hook to remove bits of a pointer that are not part of the
+     address, like memory tags (MTE) and pointer authentication signatures.  */
+  set_gdbarch_remove_non_address_bits (gdbarch,
+				       aarch64_remove_non_address_bits);
 
   /* Add standard register aliases.  */
   for (i = 0; i < ARRAY_SIZE (aarch64_register_aliases); i++)

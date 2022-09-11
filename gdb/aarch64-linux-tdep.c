@@ -1980,40 +1980,6 @@ aarch64_linux_decode_memtag_section (struct gdbarch *gdbarch,
   return tags;
 }
 
-/* AArch64 implementation of the remove_non_address_bits gdbarch hook.  Remove
-   non address bits from a pointer value.  */
-
-static CORE_ADDR
-aarch64_remove_non_address_bits (struct gdbarch *gdbarch, CORE_ADDR pointer)
-{
-  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
-
-  /* By default, we assume TBI and discard the top 8 bits plus the VA range
-     select bit (55).  */
-  CORE_ADDR mask = AARCH64_TOP_BITS_MASK;
-
-  if (tdep->has_pauth ())
-    {
-      /* Fetch the PAC masks.  These masks are per-process, so we can just
-	 fetch data from whatever thread we have at the moment.
-
-	 Also, we have both a code mask and a data mask.  For now they are the
-	 same, but this may change in the future.  */
-      struct regcache *regs = get_current_regcache ();
-      CORE_ADDR cmask, dmask;
-
-      if (regs->cooked_read (tdep->pauth_reg_base, &dmask) != REG_VALID)
-	dmask = mask;
-
-      if (regs->cooked_read (tdep->pauth_reg_base + 1, &cmask) != REG_VALID)
-	cmask = mask;
-
-      mask |= aarch64_mask_from_pac_registers (cmask, dmask);
-    }
-
-  return aarch64_remove_top_bits (pointer, mask);
-}
-
 static void
 aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -2065,12 +2031,6 @@ aarch64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_process_record (gdbarch, aarch64_process_record);
   /* Syscall record.  */
   tdep->aarch64_syscall_record = aarch64_linux_syscall_record;
-
-  /* The top byte of a user space address known as the "tag",
-     is ignored by the kernel and can be regarded as additional
-     data associated with the address.  */
-  set_gdbarch_remove_non_address_bits (gdbarch,
-				       aarch64_remove_non_address_bits);
 
   /* MTE-specific settings and hooks.  */
   if (tdep->has_mte ())

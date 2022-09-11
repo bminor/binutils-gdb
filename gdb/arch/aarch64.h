@@ -132,6 +132,12 @@ enum aarch64_regnum
 
 #define AARCH64_PAUTH_DMASK_REGNUM(pauth_reg_base) (pauth_reg_base)
 #define AARCH64_PAUTH_CMASK_REGNUM(pauth_reg_base) (pauth_reg_base + 1)
+/* The high versions of these masks are used for bare metal/kernel-mode pointer
+   authentication support.  */
+#define AARCH64_PAUTH_DMASK_HIGH_REGNUM(pauth_reg_base) (pauth_reg_base + 2)
+#define AARCH64_PAUTH_CMASK_HIGH_REGNUM(pauth_reg_base) (pauth_reg_base + 3)
+
+/* This size is only meant for Linux, not bare metal.  QEMU exposes 4 masks.  */
 #define AARCH64_PAUTH_REGS_SIZE (16)
 
 #define AARCH64_X_REGS_NUM 31
