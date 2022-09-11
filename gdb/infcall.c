@@ -814,7 +814,7 @@ call_function_by_hand_dummy (struct value *function,
 	     "target calling convention."),
 	   get_function_name (funaddr, name_buf, sizeof (name_buf)));
 
-  if (values_type == NULL)
+  if (values_type == NULL || values_type->is_stub ())
     values_type = default_return_type;
   if (values_type == NULL)
     {

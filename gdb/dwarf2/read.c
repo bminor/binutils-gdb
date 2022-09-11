@@ -17714,9 +17714,9 @@ read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
   /* In Ada, an unspecified type is typically used when the description
      of the type is deferred to a different unit.  When encountering
      such a type, we treat it as a stub, and try to resolve it later on,
-     when needed.  */
-  if (cu->lang () == language_ada)
-    type->set_is_stub (true);
+     when needed.
+     Mark this as a stub type for all languages though.  */
+  type->set_is_stub (true);
 
   return set_die_type (die, type, cu);
 }
