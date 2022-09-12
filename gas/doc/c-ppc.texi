@@ -150,6 +150,9 @@ Generate code for Power9 architecture.
 @item -mpower10, -mpwr10
 Generate code for Power10 architecture.
 
+@item -mfuture
+Generate code for 'future' architecture.
+
 @item -mcell
 @item -mcell
 Generate code for Cell Broadband Engine architecture.

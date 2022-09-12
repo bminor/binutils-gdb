@@ -240,6 +240,9 @@ extern const unsigned int spe2_num_opcodes;
 /* Opcode is only supported by SVP64 extensions (LibreSOC architecture).  */
 #define PPC_OPCODE_SVP64    0x800000000000ull
 
+/* Opcode is only supported by 'future' architecture.  */
+#define PPC_OPCODE_FUTURE  0x1000000000000ull
+
 /* A macro to extract the major opcode from an instruction.  */
 #define PPC_OP(i) (((i) >> 26) & 0x3f)
 

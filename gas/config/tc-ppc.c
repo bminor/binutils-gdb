@@ -1384,6 +1384,8 @@ PowerPC options:\n"));
   fprintf (stream, _("\
 -mlibresoc              generate code for Libre-SOC architecture\n"));
   fprintf (stream, _("\
+-mfuture                generate code for 'future' architecture\n"));
+  fprintf (stream, _("\
 -mcell                  generate code for Cell Broadband Engine architecture\n"));
   fprintf (stream, _("\
 -mcom                   generate code for Power/PowerPC common instructions\n"));

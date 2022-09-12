@@ -4847,6 +4847,7 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 #define POWER8	PPC_OPCODE_POWER8
 #define POWER9	PPC_OPCODE_POWER9
 #define POWER10 PPC_OPCODE_POWER10
+#define FUTURE	PPC_OPCODE_FUTURE
 #define CELL	PPC_OPCODE_CELL
 #define PPC64	PPC_OPCODE_64 | PPC_OPCODE_64_BRIDGE
 #define NON32	(PPC_OPCODE_64 | PPC_OPCODE_POWER4	\
