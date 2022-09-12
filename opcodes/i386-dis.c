@@ -9267,31 +9267,40 @@ oappend_register (instr_info *ins, const char *s)
    STYLE is the default style to use in the fprintf_styled_func calls,
    however, FMT might include embedded style markers (see oappend_style),
    these embedded markers are not printed, but instead change the style
-   used in the next fprintf_styled_func call.
+   used in the next fprintf_styled_func call.  */
 
-   Return non-zero to indicate the print call was a success.  */
-
-static int ATTRIBUTE_PRINTF_3
+static void ATTRIBUTE_PRINTF_3
 i386_dis_printf (instr_info *ins, enum disassembler_style style,
 		 const char *fmt, ...)
 {
   va_list ap;
   enum disassembler_style curr_style = style;
-  char *start, *curr;
-  char staging_area[MAX_OPERAND_BUFFER_SIZE];
-  int res;
+  const char *start, *curr;
+  char staging_area[40];
 
   va_start (ap, fmt);
-  res = vsnprintf (staging_area, sizeof (staging_area), fmt, ap);
-  va_end (ap);
+  /* In particular print_insn()'s processing of op_txt[] can hand rather long
+     strings here.  Bypass vsnprintf() in such cases to avoid capacity issues
+     with the staging area.  */
+  if (strcmp (fmt, "%s"))
+    {
+      int res = vsnprintf (staging_area, sizeof (staging_area), fmt, ap);
 
-  if (res < 0)
-    return res;
+      va_end (ap);
 
-  if ((size_t) res >= sizeof (staging_area))
-    abort ();
+      if (res < 0)
+	return;
 
-  start = curr = staging_area;
+      if ((size_t) res >= sizeof (staging_area))
+	abort ();
+
+      start = curr = staging_area;
+    }
+  else
+    {
+      start = curr = va_arg (ap, const char *);
+      va_end (ap);
+    }
 
   do
     {
@@ -9306,10 +9315,7 @@ i386_dis_printf (instr_info *ins, enum disassembler_style style,
 						     curr_style,
 						     "%.*s", len, start);
 	  if (n < 0)
-	    {
-	      res = n;
-	      break;
-	    }
+	    break;
 
 	  if (*curr == '\0')
 	    break;
@@ -9343,8 +9349,6 @@ i386_dis_printf (instr_info *ins, enum disassembler_style style,
 	++curr;
     }
   while (true);
-
-  return res;
 }
 
 static int
