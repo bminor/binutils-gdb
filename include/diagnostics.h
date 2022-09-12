@@ -68,6 +68,11 @@
    DIAGNOSTIC_IGNORE ("-Wuser-defined-warnings")
 # endif
 
+# if __has_warning ("-Wunused-but-set-variable")
+#  define DIAGNOSTIC_IGNORE_UNUSED_BUT_SET_VARIABLE \
+   DIAGNOSTIC_IGNORE ("-Wunused-but-set-variable")
+# endif
+
 # define DIAGNOSTIC_ERROR_SWITCH \
   DIAGNOSTIC_ERROR ("-Wswitch")
 
@@ -88,6 +93,11 @@
 
 # define DIAGNOSTIC_IGNORE_FORMAT_NONLITERAL \
   DIAGNOSTIC_IGNORE ("-Wformat-nonliteral")
+
+# if __GNUC__ >= 5
+#  define DIAGNOSTIC_IGNORE_UNUSED_BUT_SET_VARIABLE \
+   DIAGNOSTIC_IGNORE ("-Wunused-but-set-variable")
+# endif
 
 /* GCC 4.8's "diagnostic push/pop" seems broken when using this, -Wswitch
    remains enabled at the error level even after a pop.  Therefore, don't
@@ -128,6 +138,10 @@
 
 #ifndef DIAGNOSTIC_IGNORE_USER_DEFINED_WARNINGS
 # define DIAGNOSTIC_IGNORE_USER_DEFINED_WARNINGS
+#endif
+
+#ifndef DIAGNOSTIC_IGNORE_UNUSED_BUT_SET_VARIABLE
+# define DIAGNOSTIC_IGNORE_UNUSED_BUT_SET_VARIABLE
 #endif
 
 #ifndef DIAGNOSTIC_ERROR_SWITCH
