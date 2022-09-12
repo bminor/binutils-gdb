@@ -2933,8 +2933,10 @@ som_write_fixups (bfd *abfd,
       asection *subsection;
 
       /* Find a space.  */
-      while (!som_is_space (section))
+      while (section && !som_is_space (section))
 	section = section->next;
+      if (!section)
+	break;
 
       /* Now iterate through each of its subspaces.  */
       for (subsection = abfd->sections;
