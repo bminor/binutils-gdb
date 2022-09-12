@@ -1570,6 +1570,8 @@ dst_define_location (bfd *abfd, unsigned int loc)
 			       (loc + 1) * sizeof (unsigned int));
       if (PRIV (dst_ptr_offsets) == NULL)
 	return false;
+      memset (PRIV (dst_ptr_offsets) + PRIV (dst_ptr_offsets_count), 0,
+	      (loc - PRIV (dst_ptr_offsets_count)) * sizeof (unsigned int));
       PRIV (dst_ptr_offsets_count) = loc + 1;
     }
 
