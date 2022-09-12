@@ -647,7 +647,7 @@ Method(
 )
 
 Value(
-    type="int",
+    type="enum call_dummy_location_type",
     name="call_dummy_location",
     predefault="AT_ENTRY_POINT",
     invalid=False,

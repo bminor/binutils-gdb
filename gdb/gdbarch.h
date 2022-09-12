@@ -149,6 +149,13 @@ using read_core_file_mappings_loop_ftype =
 			   const char *filename,
 			   const bfd_build_id *build_id)>;
 
+/* Possible values for gdbarch_call_dummy_location.  */
+enum call_dummy_location_type
+{
+  ON_STACK,
+  AT_ENTRY_POINT,
+};
+
 #include "gdbarch-gen.h"
 
 /* An internal function that should _only_ be called from gdbarch_tdep.

@@ -282,9 +282,6 @@ enum stop_kind
   };
 
 
-/* Possible values for gdbarch_call_dummy_location.  */
-#define ON_STACK 1
-#define AT_ENTRY_POINT 4
 
 /* Base class for target-specific inferior data.  */
 

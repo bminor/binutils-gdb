@@ -331,8 +331,8 @@ typedef CORE_ADDR (gdbarch_push_dummy_call_ftype) (struct gdbarch *gdbarch, stru
 extern CORE_ADDR gdbarch_push_dummy_call (struct gdbarch *gdbarch, struct value *function, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, function_call_return_method return_method, CORE_ADDR struct_addr);
 extern void set_gdbarch_push_dummy_call (struct gdbarch *gdbarch, gdbarch_push_dummy_call_ftype *push_dummy_call);
 
-extern int gdbarch_call_dummy_location (struct gdbarch *gdbarch);
-extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, int call_dummy_location);
+extern enum call_dummy_location_type gdbarch_call_dummy_location (struct gdbarch *gdbarch);
+extern void set_gdbarch_call_dummy_location (struct gdbarch *gdbarch, enum call_dummy_location_type call_dummy_location);
 
 extern bool gdbarch_push_dummy_code_p (struct gdbarch *gdbarch);
 

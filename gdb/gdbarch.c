@@ -97,7 +97,7 @@ struct gdbarch
   gdbarch_dummy_id_ftype *dummy_id = default_dummy_id;
   int deprecated_fp_regnum = -1;
   gdbarch_push_dummy_call_ftype *push_dummy_call = nullptr;
-  int call_dummy_location = AT_ENTRY_POINT;
+  enum call_dummy_location_type call_dummy_location = AT_ENTRY_POINT;
   gdbarch_push_dummy_code_ftype *push_dummy_code = nullptr;
   gdbarch_code_of_frame_writable_ftype *code_of_frame_writable = default_code_of_frame_writable;
   gdbarch_print_registers_info_ftype *print_registers_info = default_print_registers_info;
@@ -2229,7 +2229,7 @@ set_gdbarch_push_dummy_call (struct gdbarch *gdbarch,
   gdbarch->push_dummy_call = push_dummy_call;
 }
 
-int
+enum call_dummy_location_type
 gdbarch_call_dummy_location (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
@@ -2241,7 +2241,7 @@ gdbarch_call_dummy_location (struct gdbarch *gdbarch)
 
 void
 set_gdbarch_call_dummy_location (struct gdbarch *gdbarch,
-                                 int call_dummy_location)
+                                 enum call_dummy_location_type call_dummy_location)
 {
   gdbarch->call_dummy_location = call_dummy_location;
 }
