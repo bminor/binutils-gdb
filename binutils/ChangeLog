@@ -1,3 +1,10 @@
+2022-09-12  Aaron Merey  <amerey@redhat.com>
+
+	* objcopy.c (might_need_separate_debug_info): Add with_source_code to
+	the options that cause this function to return true.
+	(main.c): Add with_source_code to the options that enable
+	dump_any_debugging.
+
 2022-09-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 29532

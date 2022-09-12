@@ -5407,7 +5407,7 @@ might_need_separate_debug_info (bool is_mainfile)
     return true;
   
   if (process_links || dump_symtab || dump_debugging
-      || dump_dwarf_section_info)
+      || dump_dwarf_section_info || with_source_code)
     return true;
 
   return false;  
@@ -6114,7 +6114,8 @@ main (int argc, char **argv)
 
   dump_any_debugging = (dump_debugging
 			|| dump_dwarf_section_info
-			|| process_links);
+			|| process_links
+			|| with_source_code);
 
   if (formats_info)
     exit_status = display_info ();
