@@ -8957,7 +8957,7 @@ print_insn_cde (struct disassemble_info *info, long given, bool thumb)
 		    break;
 
 		  case 'T':
-		    func (stream, "%s", arm_regnames[value + 1]);
+		    func (stream, "%s", arm_regnames[(value + 1) & 15]);
 		    break;
 
 		  case 'd':
