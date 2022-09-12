@@ -2457,12 +2457,44 @@ riscv_elf_relocate_section (bfd *output_bfd,
 
 	case R_RISCV_JAL:
 	case R_RISCV_RVC_JUMP:
-	  /* This line has to match the check in _bfd_riscv_relax_section.  */
-	  if (bfd_link_pic (info) && h != NULL && h->plt.offset != MINUS_ONE)
+	  if (bfd_link_pic (info) && h != NULL)
 	    {
-	      /* Refer to the PLT entry.  */
-	      relocation = sec_addr (htab->elf.splt) + h->plt.offset;
-	      unresolved_reloc = false;
+	      if (h->plt.offset != MINUS_ONE)
+		{
+		  /* Refer to the PLT entry.  This check has to match the
+		     check in _bfd_riscv_relax_section.  */
+		  relocation = sec_addr (htab->elf.splt) + h->plt.offset;
+		  unresolved_reloc = false;
+		}
+	      else if (!SYMBOL_REFERENCES_LOCAL (info, h)
+		       && (input_section->flags & SEC_ALLOC) != 0
+		       && (input_section->flags & SEC_READONLY) != 0
+		       && ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
+		{
+		  /* PR 28509, when generating the shared object, these
+		     referenced symbols may bind externally, which means
+		     they will be exported to the dynamic symbol table,
+		     and are preemptible by default.  These symbols cannot
+		     be referenced by the non-pic relocations, like
+		     R_RISCV_JAL and R_RISCV_RVC_JUMP relocations.
+
+		     However, consider that linker may relax the R_RISCV_CALL
+		     relocations to R_RISCV_JAL or R_RISCV_RVC_JUMP, if
+		     these relocations are relocated to the plt entries,
+		     then we won't report error for them.
+
+		     Perhaps we also need the similar checks for the
+		     R_RISCV_BRANCH and R_RISCV_RVC_BRANCH relocations.  */
+		  if (asprintf (&msg_buf,
+				_("%%X%%P: relocation %s against `%s' which "
+				  "may bind externally can not be used when "
+				  "making a shared object; recompile "
+				  "with -fPIC\n"),
+				howto->name, h->root.root.string) == -1)
+		    msg_buf = NULL;
+		  msg = msg_buf;
+		  r = bfd_reloc_notsupported;
+		}
 	    }
 	  break;
 
@@ -2755,29 +2787,12 @@ riscv_elf_relocate_section (bfd *output_bfd,
 	  && _bfd_elf_section_offset (output_bfd, info, input_section,
 				      rel->r_offset) != (bfd_vma) -1)
 	{
-	  switch (r_type)
-	    {
-	    case R_RISCV_JAL:
-	    case R_RISCV_RVC_JUMP:
-	      if (asprintf (&msg_buf,
-			    _("%%X%%P: relocation %s against `%s' can "
-			      "not be used when making a shared object; "
-			      "recompile with -fPIC\n"),
-			    howto->name,
-			    h->root.root.string) == -1)
-		msg_buf = NULL;
-	      break;
-
-	    default:
-	      if (asprintf (&msg_buf,
-			    _("%%X%%P: unresolvable %s relocation against "
-			      "symbol `%s'\n"),
-			    howto->name,
-			    h->root.root.string) == -1)
-		msg_buf = NULL;
-	      break;
-	    }
-
+	  if (asprintf (&msg_buf,
+			_("%%X%%P: unresolvable %s relocation against "
+			  "symbol `%s'\n"),
+			howto->name,
+			h->root.root.string) == -1)
+	    msg_buf = NULL;
 	  msg = msg_buf;
 	  r = bfd_reloc_notsupported;
 	}
