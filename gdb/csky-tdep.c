@@ -2445,30 +2445,6 @@ csky_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int dw_reg)
   return -1;
 }
 
-/* Override interface for command: info register.  */
-
-static void
-csky_print_registers_info (struct gdbarch *gdbarch, struct ui_file *file,
-			   struct frame_info *frame, int regnum, int all)
-{
-  /* Call default print_registers_info function.  */
-  default_print_registers_info (gdbarch, file, frame, regnum, all);
-
-  /* For command: info register.  */
-  if (regnum == -1 && all == 0)
-    {
-      default_print_registers_info (gdbarch, file, frame,
-				    CSKY_PC_REGNUM, 0);
-      default_print_registers_info (gdbarch, file, frame,
-				    CSKY_EPC_REGNUM, 0);
-      default_print_registers_info (gdbarch, file, frame,
-				    CSKY_CR0_REGNUM, 0);
-      default_print_registers_info (gdbarch, file, frame,
-				    CSKY_EPSR_REGNUM, 0);
-    }
-  return;
-}
-
 /* Check whether xml has discribled the essential regs.  */
 
 static int
@@ -2844,7 +2820,6 @@ csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_type (gdbarch, csky_register_type);
   set_gdbarch_read_pc (gdbarch, csky_read_pc);
   set_gdbarch_write_pc (gdbarch, csky_write_pc);
-  set_gdbarch_print_registers_info (gdbarch, csky_print_registers_info);
   csky_add_reggroups (gdbarch);
   set_gdbarch_register_reggroup_p (gdbarch, csky_register_reggroup_p);
   set_gdbarch_stab_reg_to_regnum (gdbarch, csky_dwarf_reg_to_regnum);
