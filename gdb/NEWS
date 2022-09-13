@@ -118,6 +118,8 @@ maintenance info line-table
 
 GNU/Linux/LoongArch (gdbserver)	loongarch*-*-linux*
 
+GNU/Linux/CSKY (gdbserver) csky*-*linux*
+
 * Python API
 
   ** GDB will now reformat the doc string for gdb.Command and
@@ -194,6 +196,8 @@ GNU/Linux/LoongArch (gdbserver)	loongarch*-*-linux*
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on LoongArch GNU/Linux.
+  
+  ** GDBserver is now supported on CSKY GNU/Linux.
 
 * LoongArch floating-point support
 

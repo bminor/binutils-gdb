@@ -88,6 +88,11 @@ case "${gdbserver_host}" in
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
+  csky*-*linux*)	srv_tgtobj="$srv_linux_obj linux-csky-low.o"
+			srv_tgtobj="${srv_tgtobj} arch/csky.o"
+			srv_linux_regsets=yes
+			srv_linux_thread_db=yes
+			;;
   i[34567]86-*-cygwin*)	srv_regobj=""
 			srv_tgtobj="x86-low.o nat/x86-dregs.o win32-low.o"
 			srv_tgtobj="${srv_tgtobj} win32-i386-low.o"
