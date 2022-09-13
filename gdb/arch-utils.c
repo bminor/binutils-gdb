@@ -1326,13 +1326,13 @@ gdbarch_find_by_info (struct gdbarch_info info)
   gdbarch_info_fill (&info);
 
   /* Must have found some sort of architecture.  */
-  gdb_assert (info.bfd_arch_info != NULL);
+  gdb_assert (info.bfd_arch_info != nullptr);
 
   if (gdbarch_debug)
     {
       gdb_printf (gdb_stdlog,
 		  "gdbarch_find_by_info: info.bfd_arch_info %s\n",
-		  (info.bfd_arch_info != NULL
+		  (info.bfd_arch_info != nullptr
 		   ? info.bfd_arch_info->printable_name
 		   : "(null)"));
       gdb_printf (gdb_stdlog,
@@ -1351,16 +1351,16 @@ gdbarch_find_by_info (struct gdbarch_info info)
 
   /* Find the tdep code that knows about this architecture.  */
   for (rego = gdbarch_registry;
-       rego != NULL;
+       rego != nullptr;
        rego = rego->next)
     if (rego->bfd_architecture == info.bfd_arch_info->arch)
       break;
-  if (rego == NULL)
+  if (rego == nullptr)
     {
       if (gdbarch_debug)
 	gdb_printf (gdb_stdlog, "gdbarch_find_by_info: "
 		    "No matching architecture\n");
-      return 0;
+      return nullptr;
     }
 
   /* Ask the tdep code for an architecture that matches "info".  */
@@ -1368,12 +1368,12 @@ gdbarch_find_by_info (struct gdbarch_info info)
 
   /* Did the tdep code like it?  No.  Reject the change and revert to
      the old architecture.  */
-  if (new_gdbarch == NULL)
+  if (new_gdbarch == nullptr)
     {
       if (gdbarch_debug)
 	gdb_printf (gdb_stdlog, "gdbarch_find_by_info: "
 		    "Target rejected architecture\n");
-      return NULL;
+      return nullptr;
     }
 
   /* Is this a pre-existing architecture (as determined by already
@@ -1390,10 +1390,10 @@ gdbarch_find_by_info (struct gdbarch_info info)
 		    new_gdbarch->bfd_arch_info->printable_name);
       /* Find the existing arch in the list.  */
       for (list = &rego->arches;
-	   (*list) != NULL && (*list)->gdbarch != new_gdbarch;
+	   (*list) != nullptr && (*list)->gdbarch != new_gdbarch;
 	   list = &(*list)->next);
       /* It had better be in the list of architectures.  */
-      gdb_assert ((*list) != NULL && (*list)->gdbarch == new_gdbarch);
+      gdb_assert ((*list) != nullptr && (*list)->gdbarch == new_gdbarch);
       /* Unlink SELF.  */
       self = (*list);
       (*list) = self->next;
