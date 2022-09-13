@@ -385,4 +385,9 @@ enum csky_regnum
 /* Macro for kernel 4.x  */
 #define CSKY_MOVI_R7_139 0x008bea07
 
+/* Macro for check long branch.  */
+#define CSKY_JMPI_PC_4      0x1eac0
+#define CSKY_LRW_T1_PC_8    0x2ea8d
+#define CSKY_JMP_T1_VS_NOP  0x6c037834
+
 #endif

@@ -2358,20 +2358,70 @@ static const struct frame_unwind csky_unwind_cache = {
   NULL
 };
 
+static CORE_ADDR
+csky_check_long_branch (struct frame_info *frame, CORE_ADDR pc)
+{
+  gdb_byte buf[8];
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order_for_code
+	= gdbarch_byte_order_for_code (gdbarch);
 
+  if (target_read_memory (pc, buf, 8) == 0)
+    {
+      unsigned int data0
+	= extract_unsigned_integer (buf, 4, byte_order_for_code);
+      unsigned int data1
+	= extract_unsigned_integer (buf + 4, 4, byte_order_for_code);
+
+      /* Case: jmpi [pc+4] : 0xeac00001
+	 .long addr   */
+      if (data0 == CSKY_JMPI_PC_4)
+	return data1;
+
+      /* Case: lrw t1, [pc+8] : 0xea8d0002
+	       jmp t1         : 0x7834
+	       nop            : 0x6c03
+	       .long addr  */
+      if ((data0 == CSKY_LRW_T1_PC_8) && (data1 == CSKY_JMP_T1_VS_NOP))
+	{
+	  if (target_read_memory (pc + 8, buf, 4) == 0)
+	    return  extract_unsigned_integer (buf, 4, byte_order_for_code);
+	}
+
+      return 0;
+    }
+
+  return 0;
+}
 
 static int
 csky_stub_unwind_sniffer (const struct frame_unwind *self,
-			 struct frame_info *this_frame,
-			 void **this_prologue_cache)
+			  struct frame_info *this_frame,
+			  void **this_prologue_cache)
 {
-  CORE_ADDR addr_in_block;
+  CORE_ADDR addr_in_block, pc;
+  gdb_byte dummy[4];
+  const char *name;
+  CORE_ADDR start_addr;
 
+  /* Get pc */
   addr_in_block = get_frame_address_in_block (this_frame);
+  pc = get_frame_pc (this_frame);
 
-  if (find_pc_partial_function (addr_in_block, NULL, NULL, NULL) == 0
-      || in_plt_section (addr_in_block))
+  if (in_plt_section (addr_in_block)
+      || target_read_memory (pc, dummy, 4) != 0)
     return 1;
+
+  /* Find the starting address and name of the function containing the PC.  */
+  if (find_pc_partial_function (pc, &name, &start_addr, NULL) == 0)
+    {
+      start_addr = csky_check_long_branch (this_frame, pc);
+      /* if not long branch, return 0.  */
+      if (start_addr != 0)
+	return 1;
+
+      return 0;
+    }
 
   return 0;
 }
