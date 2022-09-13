@@ -367,6 +367,7 @@ BFD32_BACKENDS = \
 	mach-o-arm.lo \
 	ns32knetbsd.lo \
 	pc532-mach.lo \
+	pdb.lo \
 	pdp11.lo \
 	pe-arm-wince.lo \
 	pe-arm.lo \
@@ -499,6 +500,7 @@ BFD32_BACKENDS_CFILES = \
 	mach-o-arm.c \
 	ns32knetbsd.c \
 	pc532-mach.c \
+	pdb.c \
 	pdp11.c \
 	pe-arm-wince.c \
 	pe-arm.c \
