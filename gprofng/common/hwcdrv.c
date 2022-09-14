@@ -440,7 +440,7 @@ typedef struct
 { // per-thread context
   counter_state_t *ctr_list;
   int signal_fd;                // fd that caused the most recent signal
-  pthread_t tid;                // for debugging signal delivery problems
+  pid_t tid;			// for debugging signal delivery problems
 } hdrv_pcl_ctx_t;
 
 /*---------------------------------------------------------------------------*/
@@ -1321,7 +1321,7 @@ hwcdrv_free_counters () // note: only performs shutdown for this thread
   for (int ii = 0; ii < hdrv_pcl_state.hwcdef_cnt; ii++)
     if (stop_one_ctr (ii, ctr_list))
       hwc_rc = HWCFUNCS_ERROR_GENERIC;
-  TprintfT (DBG_LT1, "hwcdrv: hwcdrv_free_counters(tid=0x%lx).\n", pctx->tid);
+  TprintfT (DBG_LT1, "hwcdrv: hwcdrv_free_counters(tid=0x%lx).\n", (long) pctx->tid);
   pctx->ctr_list = NULL;
   return hwc_rc;
 }
@@ -1351,7 +1351,7 @@ hwcdrv_start (void) /* must be called from each thread ? */
       return HWCFUNCS_ERROR_UNEXPECTED;
     }
   pctx->tid = hwcdrv_gettid ();
-  TprintfT (DBG_LT1, "hwcdrv: hwcdrv_start(tid=0x%lx)\n", pctx->tid);
+  TprintfT (DBG_LT1, "hwcdrv: hwcdrv_start(tid=0x%lx)\n", (long) pctx->tid);
 
   /*
    * create per-thread counter list

@@ -441,13 +441,9 @@ checksum_mapname (MapInfo* map)
 }
 
 
-#if (ARCH(Intel) && WSIZE(32)) || ARCH(SPARC)
 static void*
-dlopen_searchpath_symver (void*(real_dlopen) (), void* caller_addr, const char* basename, int mode)
-#else
-static void*
-dlopen_searchpath (void* caller_addr, const char* basename, int mode)
-#endif
+dlopen_searchpath (void*(real_dlopen) (const char *, int),
+		void *caller_addr, const char *basename, int mode)
 {
   TprintfT (DBG_LT2, "dlopen_searchpath(%p, %s, %d)\n", caller_addr, basename, mode);
   Dl_info dl_info;
@@ -458,7 +454,8 @@ dlopen_searchpath (void* caller_addr, const char* basename, int mode)
     }
   TprintfT (DBG_LT2, "dladdr(%p): %p fname=%s\n",
 	    caller_addr, dl_info.dli_fbase, dl_info.dli_fname);
-  int noload = RTLD_BINDING_MASK | RTLD_NOLOAD; //XXXX why RTLD_BINDING_MASK?
+  int noload = RTLD_LAZY | RTLD_NOW | RTLD_NOLOAD;
+  void *caller_hndl = NULL;
 #define WORKAROUND_RTLD_BUG 1
 #ifdef WORKAROUND_RTLD_BUG
   // A dynamic linker dlopen bug can result in corruption/closure of open streams
@@ -470,29 +467,20 @@ dlopen_searchpath (void* caller_addr, const char* basename, int mode)
 #endif
   const char* tmp_path =
 	  (dl_info.dli_fbase == (void*) MAINBASE) ? NULL : dl_info.dli_fname;
-  void* caller_hndl = NULL;
-#if ((ARCH(Intel) && WSIZE(32)) || ARCH(SPARC))
-  caller_hndl = (real_dlopen) (tmp_path, noload);
-#else
-  caller_hndl = CALL_REAL (dlopen)(tmp_path, noload);
-#endif
+  caller_hndl = real_dlopen (tmp_path, noload);
 
 #else //XXXX workaround should be removed once linker patches are all available
 
-  void* caller_hndl = NULL;
-#if (ARCH(Intel) && WSIZE(32) || ARCH(SPARC)
-  caller_hndl = (real_dlopen) (dl_info.dli_fname, noload);
-#else
-  caller_hndl = CALL_REAL (dlopen)(dl_info.dli_fname, noload);
-#endif
+  caller_hndl = real_dlopen (dl_info.dli_fname, noload);
 
 #endif //XXXX workaround should be removed once linker patches are all available
 
   if (!caller_hndl)
     {
       TprintfT (0, "ERROR: dlopen(%s,NOLOAD): %s\n", dl_info.dli_fname, dlerror ());
-      return 0;
+      return NULL;
     }
+#if !defined(__MUSL_LIBC)
   Dl_serinfo _info, *info = &_info;
   Dl_serpath *path;
 
@@ -546,7 +534,7 @@ dlopen_searchpath (void* caller_addr, const char* basename, int mode)
       I have already confirmed with our user that the workaround
       is working with his real application. Additionally,
       the dlopen_searchpath() function is called only by the
-      libcorrector init() function when the experiment is started.
+      libcollector init() function when the experiment is started.
       Therefore, allocating some extra bytes on the stack which
       is local to this routine is harmless.
    */
@@ -575,7 +563,8 @@ dlopen_searchpath (void* caller_addr, const char* basename, int mode)
       if (ret)
 	return ret; // success!
     }
-  return 0;
+#endif
+  return NULL;
 }
 
 static void
@@ -1550,40 +1539,9 @@ munmap (void *start, size_t length)
 
 
 /*------------------------------------------------------------- dlopen */
-// map interposed symbol versions
-#if (ARCH(Intel) && WSIZE(32)) || ARCH(SPARC)
-
 static void *
-__collector_dlopen_symver (void*(real_dlopen) (), void *caller, const char *pathname, int mode);
-
-SYMVER_ATTRIBUTE (__collector_dlopen_2_1, dlopen@@GLIBC_2.1)
-void *
-__collector_dlopen_2_1 (const char *pathname, int mode)
-{
-  if (NULL_PTR (dlopen))
-    init_mmap_intf ();
-  void *caller = __builtin_return_address (0); // must be called inside dlopen first layer interpostion
-  return __collector_dlopen_symver (CALL_REAL (dlopen_2_1), caller, pathname, mode);
-}
-
-SYMVER_ATTRIBUTE (__collector_dlopen_2_0, dlopen@GLIBC_2.0)
-void *
-__collector_dlopen_2_0 (const char *pathname, int mode)
-{
-  if (NULL_PTR (dlopen))
-    init_mmap_intf ();
-  void* caller = __builtin_return_address (0); // must be called inside dlopen first layer interpostion
-  return __collector_dlopen_symver (CALL_REAL (dlopen_2_0), caller, pathname, mode);
-}
-#endif
-
-#if (ARCH(Intel) && WSIZE(32)) || ARCH(SPARC)
-static void *
-__collector_dlopen_symver (void*(real_dlopen) (), void *caller, const char *pathname, int mode)
-#else
-void *
-dlopen (const char *pathname, int mode)
-#endif
+__collector_dlopen_symver (void*(real_dlopen) (const char *, int),
+			   void *caller, const char *pathname, int mode)
 {
   const char * real_pathname = pathname;
   char new_pathname[MAXPATHLEN];
@@ -1595,10 +1553,6 @@ dlopen (const char *pathname, int mode)
     origin_offset = 10;
   if (origin_offset)
     {
-#if ! ((ARCH(Intel) && WSIZE(32)) || ARCH(SPARC))
-      // 'caller' is not passed as an argument
-      void * caller = __builtin_return_address (0); // must be called inside dlopen first layer interpostion
-#endif
       Dl_info dl_info;
       if (caller && dladdr (caller, &dl_info) != 0)
 	{
@@ -1619,37 +1573,18 @@ dlopen (const char *pathname, int mode)
     init_mmap_intf ();
   TprintfT (DBG_LT2, "libcollector.dlopen(%s,%d) interposing\n",
 	    pathname ? pathname : "", mode);
-  void* ret = NULL;
+  void *ret = NULL;
 
   // set guard for duration of handling dlopen, since want to ensure
   // new mappings are resolved after the actual dlopen has occurred
   PUSH_REENTRANCE;
   hrtime_t hrt = GETRELTIME ();
 
-  if (real_pathname && !__collector_strchr (real_pathname, '/'))
-    { // got an unqualified name
-      // get caller and use its searchpath
-#if ! ((ARCH(Intel) && WSIZE(32)) || ARCH(SPARC))
-      void* caller = __builtin_return_address (0); // must be called inside dlopen
-#endif
-      if (caller)
-	{
-#if (ARCH(Intel) && WSIZE(32)) || ARCH(SPARC)
-	  ret = dlopen_searchpath_symver (real_dlopen, caller, real_pathname, mode);
-#else
-	  ret = dlopen_searchpath (caller, real_pathname, mode);
-#endif
-	}
-    }
+  if (caller && real_pathname && !__collector_strchr (real_pathname, '/'))
+    ret = dlopen_searchpath (real_dlopen, caller, real_pathname, mode);
 
   if (!ret)
-    {
-#if (ARCH(Intel) && WSIZE(32)) || ARCH(SPARC)
-      ret = (real_dlopen) (real_pathname, mode);
-#else
-      ret = CALL_REAL (dlopen)(real_pathname, mode);
-#endif
-    }
+    ret = real_dlopen (real_pathname, mode);
   TprintfT (DBG_LT2, "libcollector -- dlopen(%s) returning %p\n", pathname, ret);
 
   /* Don't call update if dlopen failed: preserve dlerror() */
@@ -1659,6 +1594,39 @@ dlopen (const char *pathname, int mode)
   POP_REENTRANCE;
   return ret;
 }
+
+void *
+dlopen (const char *pathname, int mode)
+{
+  if (NULL_PTR (dlopen))
+    init_mmap_intf ();
+  void* caller = __builtin_return_address (0); // must be called inside dlopen first layer interpostion
+  return __collector_dlopen_symver (CALL_REAL (dlopen), caller, pathname, mode);
+}
+
+#if !defined(__MUSL_LIBC) && ((ARCH(Intel) && WSIZE(32)) || ARCH(SPARC))
+// map interposed symbol versions
+
+SYMVER_ATTRIBUTE (__collector_dlopen_2_1, dlopen@@GLIBC_2.1)
+void *
+__collector_dlopen_2_1 (const char *pathname, int mode)
+{
+  if (NULL_PTR (dlopen_2_1))
+    init_mmap_intf ();
+  void *caller = __builtin_return_address (0); // must be called inside dlopen first layer interpostion
+  return __collector_dlopen_symver (CALL_REAL (dlopen_2_1), caller, pathname, mode);
+}
+
+SYMVER_ATTRIBUTE (__collector_dlopen_2_0, dlopen@GLIBC_2.0)
+void *
+__collector_dlopen_2_0 (const char *pathname, int mode)
+{
+  if (NULL_PTR (dlopen_2_0))
+    init_mmap_intf ();
+  void* caller = __builtin_return_address (0); // must be called inside dlopen first layer interpostion
+  return __collector_dlopen_symver (CALL_REAL (dlopen_2_0), caller, pathname, mode);
+}
+#endif
 
 /*------------------------------------------------------------- dlclose */
 int

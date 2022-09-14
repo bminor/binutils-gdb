@@ -29,6 +29,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/mman.h>
+#include <limits.h>
+
 
 #include "descendants.h"
 
@@ -360,7 +362,7 @@ check_fd_dynamic (int fd)
   size_t sz = (size_t) 8192; /* one page should suffice */
   if (sz > off)
     sz = off;
-  char *p = CALL_UTIL (mmap64)((char *) 0, sz, PROT_READ, MAP_PRIVATE, fd, (off64_t) 0);
+  char *p = CALL_UTIL (mmap64_)((char *) 0, sz, PROT_READ, MAP_PRIVATE, fd, (off64_t) 0);
   if (p == MAP_FAILED)
     {
       TprintfT (DBG_LT0, "check_fd_dynamic(): ERROR/WARNING: mmap failed for `%d'\n", fd);

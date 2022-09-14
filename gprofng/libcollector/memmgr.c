@@ -131,7 +131,7 @@ alloc_chunk (unsigned sz, int log)
   if (log == 1)
     Tprintf (DBG_LT2, "alloc_chunk mapping %u, rounded up from %u\n", (unsigned int) chunksz, sz);
   /* mmap64 is only in 32-bits; this call goes to mmap in 64-bits */
-  ptr = (char*) CALL_UTIL (mmap64)(0, chunksz, PROT_READ | PROT_WRITE,
+  ptr = (char*) CALL_UTIL (mmap64_)(0, chunksz, PROT_READ | PROT_WRITE,
 				   MAP_PRIVATE | MAP_ANON, (int) -1, (off64_t) 0);
   if (ptr == MAP_FAILED)
     {

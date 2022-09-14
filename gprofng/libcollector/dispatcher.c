@@ -30,9 +30,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ucontext.h>
 #include <sys/param.h>
-#include <sys/signal.h>
 #include <sys/syscall.h>
 #include <time.h>
 #include <signal.h>
@@ -575,7 +573,9 @@ collector_timer_create (timer_t * ptimerid)
   sigev.sigev_notify = SIGEV_THREAD_ID | SIGEV_SIGNAL;
   sigev.sigev_signo = SIGPROF;
   sigev.sigev_value.sival_ptr = ptimerid;
+#if !defined(__MUSL_LIBC)
   sigev._sigev_un._tid = __collector_gettid ();
+#endif
   if (CALL_REAL (timer_create)(CLOCK_THREAD_CPUTIME_ID, &sigev, ptimerid) == -1)
     {
       TprintfT (DBG_LT2, "collector_timer_settime() failed! errno=%d\n", errno);

@@ -285,12 +285,6 @@ __collector_jprofile_start_attach (void)
 	    {
 	      jthread thread;
 	      (*jvmti)->GetCurrentThread (jvmti, &thread);
-#ifdef DEBUG
-	      collector_thread_t tid;
-	      tid = __collector_thr_self ();
-	      TprintfT (0, "jprofile attach: AttachCurrentThread: thread: %lu jni_env=%p jthread=%p\n",
-			(unsigned long) tid, jni_env, thread);
-#endif /* DEBUG */
 	      jvmti_VMInit (jvmti, jni_env, thread);
 	      (*jvmti)->GenerateEvents (jvmti, JVMTI_EVENT_COMPILED_METHOD_LOAD);
 	      (*jvmti)->GenerateEvents (jvmti, JVMTI_EVENT_DYNAMIC_CODE_GENERATED);

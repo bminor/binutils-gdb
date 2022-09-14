@@ -34,7 +34,7 @@
 #include <fcntl.h>
 
 #include "gp-defs.h"
-#include "collector_module.h"
+#include "collector.h"
 #include "gp-experiment.h"
 #include "data_pckts.h"
 #include "tsd.h"
@@ -997,6 +997,22 @@ init_io_intf ()
 #endif
   init_io_intf_finished++;
   return rc;
+}
+
+static void
+write_io_packet (int fd, ssize_t ret, hrtime_t reqt, int iotype)
+{
+  IOTrace_packet iopkt;
+  collector_memset (&iopkt, 0, sizeof ( IOTrace_packet));
+  iopkt.comm.tsize = sizeof (IOTrace_packet);
+  iopkt.comm.tstamp = gethrtime ();
+  iopkt.requested = reqt;
+  iopkt.iotype = iotype;
+  iopkt.fd = fd;
+  iopkt.nbyte = ret;
+  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl,
+			iopkt.comm.tstamp, FRINFO_FROM_STACK, &iopkt);
+  collector_interface->writeDataRecord (io_hndl, (Common_packet*) & iopkt);
 }
 
 /*------------------------------------------------------------- open */
@@ -2412,162 +2428,147 @@ pread (int fildes, void *buf, size_t nbyte, off_t offset)
 }
 
 /*------------------------------------------------------------- pwrite */
-#if ARCH(Intel) && WSIZE(32)
+
+#if !defined(__MUSL_LIBC) && ARCH(Intel) && WSIZE(32)
 // map interposed symbol versions
-static int
-__collector_pwrite_symver (int(real_pwrite) (), int fildes, const void *buf, size_t nbyte, off_t offset);
 
 SYMVER_ATTRIBUTE (__collector_pwrite_2_2, pwrite@@GLIBC_2.2)
 int
 __collector_pwrite_2_2 (int fildes, const void *buf, size_t nbyte, off_t offset)
 {
-  TprintfT (DBG_LTT, "iotrace: __collector_pwrite_2_2@%p(fildes=%d, buf=%p, nbyte=%lld, offset=%lld)\n",
-	    CALL_REAL (pwrite_2_2), fildes, buf, (long long) nbyte, (long long) offset);
-  if (NULL_PTR (pwrite))
+  int *guard;
+  if (NULL_PTR (pwrite_2_2))
     init_io_intf ();
-  return __collector_pwrite_symver (CALL_REAL (pwrite_2_2), fildes, buf, nbyte, offset);
+  if (CHCK_REENTRANCE (guard))
+    return CALL_REAL (pwrite_2_2)(fildes, buf, nbyte, offset);
+  PUSH_REENTRANCE (guard);
+  hrtime_t reqt = gethrtime ();
+  ssize_t ret = CALL_REAL (pwrite_2_2)(fildes, buf, nbyte, offset);
+  if (RECHCK_REENTRANCE (guard))
+    {
+      POP_REENTRANCE (guard);
+      return ret;
+    }
+  write_io_packet (fildes, ret, reqt, ret >= 0 ? WRITE_TRACE : WRITE_TRACE_ERROR);
+  POP_REENTRANCE (guard);
+  return ret;
 }
 
 SYMVER_ATTRIBUTE (__collector_pwrite_2_1, pwrite@GLIBC_2.1)
 int
 __collector_pwrite_2_1 (int fildes, const void *buf, size_t nbyte, off_t offset)
 {
-  TprintfT (DBG_LTT, "iotrace: __collector_pwrite_2_1@%p(fildes=%d, buf=%p, nbyte=%lld, offset=%lld)\n",
-	    CALL_REAL (pwrite_2_1), fildes, buf, (long long) nbyte, (long long) offset);
-  if (NULL_PTR (pwrite))
-    init_io_intf ();
-  return __collector_pwrite_symver (CALL_REAL (pwrite_2_1), fildes, buf, nbyte, offset);
-}
-
-static int
-__collector_pwrite_symver (int(real_pwrite) (), int fildes, const void *buf, size_t nbyte, off_t offset)
-{
-#else /* ^ARCH(Intel) && WSIZE(32) */
-
-ssize_t
-pwrite (int fildes, const void *buf, size_t nbyte, off_t offset)
-{
-#endif /* ^ARCH(Intel) && WSIZE(32) */
   int *guard;
-  ssize_t ret;
-  IOTrace_packet iopkt;
-  if (NULL_PTR (pwrite))
+  if (NULL_PTR (pwrite_2_1))
     init_io_intf ();
   if (CHCK_REENTRANCE (guard))
-    {
-#if ARCH(Intel) && WSIZE(32)
-      return (real_pwrite) (fildes, buf, nbyte, offset);
-#else
-      return CALL_REAL (pwrite)(fildes, buf, nbyte, offset);
-#endif
-    }
+    return CALL_REAL (pwrite_2_1)(fildes, buf, nbyte, offset);
   PUSH_REENTRANCE (guard);
   hrtime_t reqt = gethrtime ();
-#if ARCH(Intel) && WSIZE(32)
-  ret = (real_pwrite) (fildes, buf, nbyte, offset);
-#else
-  ret = CALL_REAL (pwrite)(fildes, buf, nbyte, offset);
-#endif
+  ssize_t ret = CALL_REAL (pwrite_2_1)(fildes, buf, nbyte, offset);
   if (RECHCK_REENTRANCE (guard))
     {
       POP_REENTRANCE (guard);
       return ret;
     }
-  hrtime_t grnt = gethrtime ();
-  collector_memset (&iopkt, 0, sizeof ( IOTrace_packet));
-  iopkt.comm.tsize = sizeof ( IOTrace_packet);
-  iopkt.comm.tstamp = grnt;
-  iopkt.requested = reqt;
-  if (ret >= 0)
-    iopkt.iotype = WRITE_TRACE;
-  else
-    iopkt.iotype = WRITE_TRACE_ERROR;
-  iopkt.fd = fildes;
-  iopkt.nbyte = ret;
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK, &iopkt);
-  collector_interface->writeDataRecord (io_hndl, (Common_packet*) & iopkt);
+  write_io_packet (fildes, ret, reqt, ret >= 0 ? WRITE_TRACE : WRITE_TRACE_ERROR);
+  POP_REENTRANCE (guard);
+  return ret;
+}
+#endif /* !defined(__MUSL_LIBC) && ARCH(Intel) && WSIZE(32) */
+
+ssize_t
+pwrite (int fildes, const void *buf, size_t nbyte, off_t offset)
+{
+  int *guard;
+  if (NULL_PTR (pwrite))
+    init_io_intf ();
+  if (CHCK_REENTRANCE (guard))
+    return CALL_REAL (pwrite)(fildes, buf, nbyte, offset);
+  PUSH_REENTRANCE (guard);
+  hrtime_t reqt = gethrtime ();
+  ssize_t ret = CALL_REAL (pwrite)(fildes, buf, nbyte, offset);
+  if (RECHCK_REENTRANCE (guard))
+    {
+      POP_REENTRANCE (guard);
+      return ret;
+    }
+  write_io_packet (fildes, ret, reqt, ret >= 0 ? WRITE_TRACE : WRITE_TRACE_ERROR);
   POP_REENTRANCE (guard);
   return ret;
 }
 
 /*------------------------------------------------------------- pwrite64 */
+#if !defined(__MUSL_LIBC)
 #if ARCH(Intel) && WSIZE(32)
 // map interposed symbol versions
-static int
-__collector_pwrite64_symver (int(real_pwrite64) (), int fildes, const void *buf, size_t nbyte, off64_t offset);
 
 SYMVER_ATTRIBUTE (__collector_pwrite64_2_2, pwrite64@@GLIBC_2.2)
-int
+ssize_t
 __collector_pwrite64_2_2 (int fildes, const void *buf, size_t nbyte, off64_t offset)
 {
-  TprintfT (DBG_LTT, "iotrace: __collector_pwrite64_2_2@%p(fildes=%d, buf=%p, nbyte=%lld, offset=%lld)\n",
-	    CALL_REAL (pwrite64_2_2), fildes, buf, (long long) nbyte, (long long) offset);
-  if (NULL_PTR (pwrite64))
+  int *guard;
+  if (NULL_PTR (pwrite64_2_2))
     init_io_intf ();
-  return __collector_pwrite64_symver (CALL_REAL (pwrite64_2_2), fildes, buf, nbyte, offset);
+  if (CHCK_REENTRANCE (guard))
+    return CALL_REAL (pwrite64_2_2)(fildes, buf, nbyte, offset);
+  PUSH_REENTRANCE (guard);
+  hrtime_t reqt = gethrtime ();
+  ssize_t ret = CALL_REAL (pwrite64_2_2)(fildes, buf, nbyte, offset);
+  if (RECHCK_REENTRANCE (guard))
+    {
+      POP_REENTRANCE (guard);
+      return ret;
+    }
+  write_io_packet (fildes, ret, reqt, ret >= 0 ? WRITE_TRACE : WRITE_TRACE_ERROR);
+  POP_REENTRANCE (guard);
+  return ret;
 }
 
 SYMVER_ATTRIBUTE (__collector_pwrite64_2_1, pwrite64@GLIBC_2.1)
 int
 __collector_pwrite64_2_1 (int fildes, const void *buf, size_t nbyte, off64_t offset)
 {
-  TprintfT (DBG_LTT, "iotrace: __collector_pwrite64_2_1@%p(fildes=%d, buf=%p, nbyte=%lld, offset=%lld)\n",
-	    CALL_REAL (pwrite64_2_1), fildes, buf, (long long) nbyte, (long long) offset);
-  if (NULL_PTR (pwrite64))
-    init_io_intf ();
-  return __collector_pwrite64_symver (CALL_REAL (pwrite64_2_1), fildes, buf, nbyte, offset);
-}
-
-static int
-__collector_pwrite64_symver (int(real_pwrite64) (), int fildes, const void *buf, size_t nbyte, off64_t offset)
-{
-#else /* ^ARCH(Intel) && WSIZE(32) */
-
-ssize_t
-pwrite64 (int fildes, const void *buf, size_t nbyte, off64_t offset)
-{
-#endif /* ^ARCH(Intel) && WSIZE(32) */
   int *guard;
-  ssize_t ret;
-  IOTrace_packet iopkt;
-  if (NULL_PTR (pwrite64))
+  if (NULL_PTR (pwrite64_2_1))
     init_io_intf ();
   if (CHCK_REENTRANCE (guard))
-    {
-#if ARCH(Intel) && WSIZE(32)
-      return (real_pwrite64) (fildes, buf, nbyte, offset);
-#else
-      return CALL_REAL (pwrite64)(fildes, buf, nbyte, offset);
-#endif
-    }
+    return CALL_REAL (pwrite64_2_1)(fildes, buf, nbyte, offset);
   PUSH_REENTRANCE (guard);
   hrtime_t reqt = gethrtime ();
-#if ARCH(Intel) && WSIZE(32)
-  ret = (real_pwrite64) (fildes, buf, nbyte, offset);
-#else
-  ret = CALL_REAL (pwrite64)(fildes, buf, nbyte, offset);
-#endif
+  ssize_t ret = CALL_REAL (pwrite64_2_1)(fildes, buf, nbyte, offset);
   if (RECHCK_REENTRANCE (guard))
     {
       POP_REENTRANCE (guard);
       return ret;
     }
-  hrtime_t grnt = gethrtime ();
-  collector_memset (&iopkt, 0, sizeof ( IOTrace_packet));
-  iopkt.comm.tsize = sizeof ( IOTrace_packet);
-  iopkt.comm.tstamp = grnt;
-  iopkt.requested = reqt;
-  if (ret >= 0)
-    iopkt.iotype = WRITE_TRACE;
-  else
-    iopkt.iotype = WRITE_TRACE_ERROR;
-  iopkt.fd = fildes;
-  iopkt.nbyte = ret;
-  iopkt.comm.frinfo = collector_interface->getFrameInfo (io_hndl, iopkt.comm.tstamp, FRINFO_FROM_STACK, &iopkt);
-  collector_interface->writeDataRecord (io_hndl, (Common_packet*) & iopkt);
+  write_io_packet (fildes, ret, reqt, ret >= 0 ? WRITE_TRACE : WRITE_TRACE_ERROR);
   POP_REENTRANCE (guard);
   return ret;
 }
+#endif
+
+ssize_t
+pwrite64 (int fildes, const void *buf, size_t nbyte, off64_t offset)
+{
+  int *guard;
+  if (NULL_PTR (pwrite64))
+    init_io_intf ();
+  if (CHCK_REENTRANCE (guard))
+    return CALL_REAL (pwrite64)(fildes, buf, nbyte, offset);
+  PUSH_REENTRANCE (guard);
+  hrtime_t reqt = gethrtime ();
+  ssize_t ret = CALL_REAL (pwrite64)(fildes, buf, nbyte, offset);
+  if (RECHCK_REENTRANCE (guard))
+    {
+      POP_REENTRANCE (guard);
+      return ret;
+    }
+  write_io_packet (fildes, ret, reqt, ret >= 0 ? WRITE_TRACE : WRITE_TRACE_ERROR);
+  POP_REENTRANCE (guard);
+  return ret;
+}
+#endif
 
 /*------------------------------------------------------------- fgets */
 char*

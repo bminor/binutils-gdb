@@ -2155,7 +2155,7 @@ log_header_write (sp_origin_t origin)
   ucontext_t ucp;
   ucp.uc_stack.ss_sp = NULL;
   ucp.uc_stack.ss_size = 0;
-  if (getcontext (&ucp) == 0)
+  if (CALL_UTIL (getcontext) (&ucp) == 0)
     {
       (void) __collector_log_write ("<process stackbase=\"0x%lx\"></process>\n",
 				    (unsigned long) ucp.uc_stack.ss_sp + ucp.uc_stack.ss_size);
@@ -2413,10 +2413,9 @@ __collector_dlog (int tflag, int level, char *format, ...)
   int left = bufsz;
   if ((tflag & SP_DUMP_NOHEADER) == 0)
     {
-      p += CALL_UTIL (snprintf)(p, left, "P%d,L%02u,t%02lu",
-				(int) getpid (),
-				(unsigned int) __collector_lwp_self (),
-				__collector_no_threads ? 0 : __collector_thr_self ());
+      p += CALL_UTIL (snprintf) (p, left, "P%ld,L%02lu,t%02lu",
+	 (long) getpid (), (unsigned long) __collector_lwp_self (),
+	 (unsigned long) (__collector_no_threads ? 0 : __collector_thr_self ()));
       left = bufsz - (p - buf);
       if (tflag)
 	{

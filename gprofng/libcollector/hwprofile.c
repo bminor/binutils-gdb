@@ -29,7 +29,6 @@
 #include <errno.h>
 #include <sys/syscall.h>
 #include <signal.h>
-#include <ucontext.h>
 
 #include "gp-defs.h"
 #define _STRING_H 1  /* XXX MEZ: temporary workaround */
@@ -378,23 +377,23 @@ static void
 init_ucontexts (void)
 {
   /* initialize dummy context for "collector" frames */
-  getcontext (&expr_dummy_uc);
+  CALL_UTIL (getcontext) (&expr_dummy_uc);
   SETFUNCTIONCONTEXT (&expr_dummy_uc, NULL);
 
   /* initialize dummy context for "out-of-range" frames */
-  getcontext (&expr_out_of_range_uc);
+  CALL_UTIL (getcontext) (&expr_out_of_range_uc);
   SETFUNCTIONCONTEXT (&expr_out_of_range_uc, &__collector_hwcs_out_of_range);
 
   /* initialize dummy context for "frozen" frames */
-  getcontext (&expr_frozen_uc);
+  CALL_UTIL (getcontext) (&expr_frozen_uc);
   SETFUNCTIONCONTEXT (&expr_frozen_uc, &__collector_hwcs_frozen);
 
   /* initialize dummy context for non-program-related frames */
-  getcontext (&expr_nopc_uc);
+  CALL_UTIL (getcontext) (&expr_nopc_uc);
   SETFUNCTIONCONTEXT (&expr_nopc_uc, &__collector_not_program_related);
 
   /* initialize dummy context for lost-counts-related frames */
-  getcontext (&expr_lostcounts_uc);
+  CALL_UTIL (getcontext) (&expr_lostcounts_uc);
   SETFUNCTIONCONTEXT (&expr_lostcounts_uc, &__collector_hwc_samples_lost);
 }
 /* initialize the signal handler */

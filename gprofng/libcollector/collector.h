@@ -21,7 +21,6 @@
 #ifndef _COLLECTOR_H
 #define _COLLECTOR_H
 
-#include <ucontext.h>
 #include <signal.h>
 
 #include "gp-defs.h"
@@ -30,6 +29,11 @@
 #include "collector_module.h"
 
 #define GETRELTIME()    (__collector_gethrtime() - __collector_start_time)
+
+#if defined(__MUSL_LIBC)
+#define dlvsym(f, nm, v)  dlsym (f, nm)
+#define SIGEV_THREAD_ID   4
+#endif
 
 extern hrtime_t __collector_start_time;
 

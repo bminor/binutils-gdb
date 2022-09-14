@@ -25,6 +25,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <ucontext.h>
 #include <dirent.h>
 
 #include "gp-defs.h"
@@ -55,6 +56,7 @@ typedef struct CollectorUtilFuncs
   int (*fprintf)(FILE *stream, const char *format, ...);
   void (*free)(void *ptr);
   int (*fstat)(int fd, struct stat *buf);
+  int (*getcontext)(ucontext_t *ucp);
   int (*getcpuid)();
   char *(*getcwd)(char *buf, size_t size);
   char *(*getenv)(const char *name);
@@ -66,7 +68,7 @@ typedef struct CollectorUtilFuncs
   int (*mkdir)();
   time_t (*mktime)(struct tm *timeptr);
   void *(*mmap)(void *, size_t, int, int, int, off_t);
-  void *(*mmap64)();
+  void *(*mmap64_)();
   int (*munmap)();
   int (*open)(const char *, int, ...);
   int (*open_bare)(const char *, int, ...);
@@ -75,7 +77,7 @@ typedef struct CollectorUtilFuncs
   FILE *(*popen)(const char *command, const char *mode);
   int (*putenv)(char *string);
   ssize_t (*pwrite)();
-  ssize_t (*pwrite64)();
+  ssize_t (*pwrite64_)();
   ssize_t (*read)();
   int (*setenv)(const char *name, const char *value, int overwrite);
   int (*sigfillset)(sigset_t *set);

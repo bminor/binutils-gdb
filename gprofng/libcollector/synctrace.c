@@ -32,10 +32,9 @@
 #include <pthread.h>
 
 #include "gp-defs.h"
-#include "collector_module.h"
+#include "collector.h"
 #include "gp-experiment.h"
 #include "data_pckts.h"
-#include "i18n.h"
 #include "tsd.h"
 #include "cc_libcollector.h"
 

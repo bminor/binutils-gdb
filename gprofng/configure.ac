@@ -142,7 +142,7 @@ class Simple{
   }
 }
 EOF
-      if AC_TRY_COMMAND($JAVAC conftest.java &AS_MESSAGE_LOG_FD 2>&1); then
+      if AC_TRY_COMMAND($JAVAC configtest.java &AS_MESSAGE_LOG_FD 2>&1); then
 	GPROFNG_BROKEN_JAVAC=no
       else
 	GPROFNG_BROKEN_JAVAC=yes
@@ -158,6 +158,31 @@ GCC_ENABLE([gprofng-debug], [no], [], [Enable debugging output])
 if test "${enable_gprofng_debug}" = yes; then
     AC_DEFINE(DEBUG, 1, [Enable debugging output.])
 fi
+
+cat > "dummy.c" << EOF
+#include <features.h>
+#if defined(__UCLIBC__)
+LIBC=uclibc
+#elif defined(__dietlibc__)
+LIBC=dietlibc
+#elif defined(__GLIBC__)
+LIBC=gnu
+#else
+#include <stdarg.h>
+/* First heuristic to detect musl libc.  */
+#ifdef __DEFINED_va_list
+LIBC=musl
+#else
+LIBC=gnu
+#endif
+#endif
+EOF
+cc_set_libc=`$CC -E "dummy.c" 2>/dev/null | grep '^LIBC=' | sed 's, ,,g'`
+eval "$cc_set_libc"
+if test "$LIBC" = musl; then
+  AC_DEFINE(__MUSL_LIBC, 1, [Build with musl-libc.])
+fi
+
 
 # Check if linker supports --as-needed and --no-as-needed options.
 AC_CACHE_CHECK(linker --as-needed support, bfd_cv_ld_as_needed,
