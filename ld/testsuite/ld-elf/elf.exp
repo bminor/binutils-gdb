@@ -237,18 +237,11 @@ if {   [istarget *-*-*linux*]
 	return $text
     }
 
-    # The HPPA target disables the warnings by default since it needs an
-    # executable stack to support older kernels and an RWX segment to
-    # support its PLT.  MIPS also turns off exec stack warnings.
-    if { [istarget "hppa*-*-*"] || [istarget mips*-*-*] } {
-        set extra_link_opts "--warn-execstack --warn-rwx-segments"
-    } else {
-        set extra_link_opts ""
-    }
-
+    # Since the warnings can be disabled by configure, ensure consistency
+    # of the first test by forcing the flags.
     run_ld_link_tests [list \
 	[list "PR ld/29072 (warn about an executable .note.GNU-stack)" \
-	    "-e 0 $extra_link_opts" \
+	    "-e 0 --warn-execstack --warn-rwx-segments" \
 	    "" \
 	    "" \
 	    {pr29072-a.s} \
