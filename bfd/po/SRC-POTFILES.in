@@ -311,6 +311,7 @@ ns32knetbsd.c
 opncls.c
 osf-core.c
 pc532-mach.c
+pdb.c
 pdp11.c
 pe-arm-wince.c
 pe-arm.c
