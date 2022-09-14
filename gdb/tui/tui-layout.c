@@ -44,6 +44,7 @@
 #include "tui/tui-layout.h"
 #include "tui/tui-source.h"
 #include "gdb_curses.h"
+#include "safe-ctype.h"
 
 static void extract_display_start_addr (struct gdbarch **, CORE_ADDR *);
 
@@ -404,6 +405,18 @@ tui_register_window (const char *name, window_factory &&factory)
   if (name_copy == SRC_NAME || name_copy == CMD_NAME || name_copy == DATA_NAME
       || name_copy == DISASSEM_NAME || name_copy == STATUS_NAME)
     error (_("Window type \"%s\" is built-in"), name);
+
+  for (const char &c : name_copy)
+    {
+      if (ISSPACE (c))
+	error (_("invalid whitespace character in window name"));
+
+      if (!ISALNUM (c) && strchr ("-_.", c) == nullptr)
+	error (_("invalid character '%c' in window name"), c);
+    }
+
+  if (!ISALPHA (name_copy[0]))
+    error (_("window name must start with a letter, not '%c'"), name_copy[0]);
 
   known_window_types->emplace (std::move (name_copy),
 			       std::move (factory));

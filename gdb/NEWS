@@ -193,6 +193,11 @@ GNU/Linux/CSKY (gdbserver) csky*-*linux*
      gdb.BreakpointLocation objects specifying the locations where the
      breakpoint is inserted into the debuggee.
 
+  ** The gdb.register_window_type method now restricts the set of
+     acceptable window names.  The first character of a window's name
+     must start with a character in the set [a-zA-Z], every subsequent
+     character of a window's name must be in the set [-_.a-zA-Z0-9].
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver is now supported on LoongArch GNU/Linux.
