@@ -29,6 +29,12 @@ if ![isnative] {
     return
 }
 
+# Skip if OFILES aren't provided, it can happen when lauching
+# the testsuites outside the build directory.
+if {![info exists OFILES]} {
+    return
+}
+
 # Skip for -fprofile-generate=.
 catch "exec $nm $plug_opt $OFILES" exec_output
 send_log "foo: $exec_output"
