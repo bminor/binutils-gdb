@@ -57,14 +57,21 @@ remote_exec host "mkdir -p tmpdir"
 
 # Make symlinks from tmpdir/ld to the linker and assembler in the
 # build tree, so that we can use a -B option to gcc to force it to use
-# the newly built linker and assembler. 
-if {![file isdirectory tmpdir/ld]} then {
-    catch "exec mkdir tmpdir/ld" status
-    catch "exec ln -s ../../ld-new tmpdir/ld/ld" status
-    catch "exec ln -s ld tmpdir/ld/collect-ld" status
-    catch "exec ln -s ../../../gas/as-new tmpdir/ld/as" status
+# the newly built linker and assembler.
+# The variable ld_testsuite_bindir allows to provide another directory
+# for -B option. This can be useful when launching the testsuite outside
+# the build tree as the symlinks will be wrong in this case.
+if {[info exists ld_testsuite_bindir]} {
+    set gcc_B_opt "-B$ld_testsuite_bindir/"
+} else {
+    if {![file isdirectory tmpdir/ld]} then {
+	catch "exec mkdir tmpdir/ld" status
+	catch "exec ln -s ../../ld-new tmpdir/ld/ld" status
+	catch "exec ln -s ld tmpdir/ld/collect-ld" status
+	catch "exec ln -s ../../../gas/as-new tmpdir/ld/as" status
+    }
+    set gcc_B_opt "-B[pwd]/tmpdir/ld/"
 }
-set gcc_B_opt "-B[pwd]/tmpdir/ld/"
 
 # load the linker path
 set ld_L_opt ""
