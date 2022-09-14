@@ -5497,6 +5497,22 @@ typedef struct mach_o_fat_data_struct
   mach_o_fat_archentry *archentries;
 } mach_o_fat_data_struct;
 
+/* Check for overlapping archive elements.  Note that we can't allow
+   multiple elements at the same offset even if one is empty, because
+   bfd_mach_o_fat_openr_next_archived_file assume distinct offsets.  */
+static bool
+overlap_previous (const mach_o_fat_archentry *elt, unsigned long i)
+{
+  unsigned long j = i;
+  while (j-- != 0)
+    if (elt[i].offset == elt[j].offset
+	|| (elt[i].offset > elt[j].offset
+	    ? elt[i].offset - elt[j].offset < elt[j].size
+	    : elt[j].offset - elt[i].offset < elt[i].size))
+      return true;
+  return false;
+}
+
 bfd_cleanup
 bfd_mach_o_fat_archive_p (bfd *abfd)
 {
@@ -5545,10 +5561,13 @@ bfd_mach_o_fat_archive_p (bfd *abfd)
       adata->archentries[i].offset = bfd_getb32 (arch.offset);
       adata->archentries[i].size = bfd_getb32 (arch.size);
       adata->archentries[i].align = bfd_getb32 (arch.align);
-      if (filesize != 0
-	  && (adata->archentries[i].offset > filesize
-	      || (adata->archentries[i].size
-		  > filesize - adata->archentries[i].offset)))
+      if ((filesize != 0
+	   && (adata->archentries[i].offset > filesize
+	       || (adata->archentries[i].size
+		   > filesize - adata->archentries[i].offset)))
+	  || (adata->archentries[i].offset
+	      < sizeof (hdr) + adata->nfat_arch * sizeof (arch))
+	  || overlap_previous (adata->archentries, i))
 	{
 	  bfd_release (abfd, adata);
 	  bfd_set_error (bfd_error_malformed_archive);
