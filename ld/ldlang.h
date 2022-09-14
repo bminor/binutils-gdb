@@ -399,7 +399,6 @@ struct lang_wild_statement_struct
   lang_statement_list_type children;
   struct name_list *exclude_name_list;
   lang_statement_list_type matching_sections;
-  bool resolved;
 
   walk_wild_section_handler_t walk_wild_section_handler;
   struct wildcard_list *handler_data[4];
