@@ -79,6 +79,13 @@ pdb_get_elt_at_index (bfd *abfd, symindex sym_index)
     }
 
   block_size = bfd_getl32 (int_buf);
+  if ((block_size & -block_size) != block_size
+      || block_size < 512
+      || block_size > 4096)
+    {
+      bfd_set_error (bfd_error_malformed_archive);
+      return NULL;
+    }
 
   /* Get block_map_addr.  */
 
