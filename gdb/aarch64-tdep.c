@@ -72,40 +72,6 @@ static const struct
   {"fp", AARCH64_FP_REGNUM},
   {"lr", AARCH64_LR_REGNUM},
   {"sp", AARCH64_SP_REGNUM},
-
-  /* 32-bit register names.  */
-  {"w0", AARCH64_X0_REGNUM + 0},
-  {"w1", AARCH64_X0_REGNUM + 1},
-  {"w2", AARCH64_X0_REGNUM + 2},
-  {"w3", AARCH64_X0_REGNUM + 3},
-  {"w4", AARCH64_X0_REGNUM + 4},
-  {"w5", AARCH64_X0_REGNUM + 5},
-  {"w6", AARCH64_X0_REGNUM + 6},
-  {"w7", AARCH64_X0_REGNUM + 7},
-  {"w8", AARCH64_X0_REGNUM + 8},
-  {"w9", AARCH64_X0_REGNUM + 9},
-  {"w10", AARCH64_X0_REGNUM + 10},
-  {"w11", AARCH64_X0_REGNUM + 11},
-  {"w12", AARCH64_X0_REGNUM + 12},
-  {"w13", AARCH64_X0_REGNUM + 13},
-  {"w14", AARCH64_X0_REGNUM + 14},
-  {"w15", AARCH64_X0_REGNUM + 15},
-  {"w16", AARCH64_X0_REGNUM + 16},
-  {"w17", AARCH64_X0_REGNUM + 17},
-  {"w18", AARCH64_X0_REGNUM + 18},
-  {"w19", AARCH64_X0_REGNUM + 19},
-  {"w20", AARCH64_X0_REGNUM + 20},
-  {"w21", AARCH64_X0_REGNUM + 21},
-  {"w22", AARCH64_X0_REGNUM + 22},
-  {"w23", AARCH64_X0_REGNUM + 23},
-  {"w24", AARCH64_X0_REGNUM + 24},
-  {"w25", AARCH64_X0_REGNUM + 25},
-  {"w26", AARCH64_X0_REGNUM + 26},
-  {"w27", AARCH64_X0_REGNUM + 27},
-  {"w28", AARCH64_X0_REGNUM + 28},
-  {"w29", AARCH64_X0_REGNUM + 29},
-  {"w30", AARCH64_X0_REGNUM + 30},
-
   /*  specials */
   {"ip0", AARCH64_X0_REGNUM + 16},
   {"ip1", AARCH64_X0_REGNUM + 17}
@@ -2556,12 +2522,40 @@ aarch64_gen_return_address (struct gdbarch *gdbarch,
 }
 
 
+/* Return TRUE if REGNUM is a W pseudo-register number.  Return FALSE
+   otherwise.  */
+
+static bool
+is_w_pseudo_register (struct gdbarch *gdbarch, int regnum)
+{
+  aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  if (tdep->w_pseudo_base <= regnum
+      && regnum < tdep->w_pseudo_base + tdep->w_pseudo_count)
+    return true;
+
+  return false;
+}
+
 /* Return the pseudo register name corresponding to register regnum.  */
 
 static const char *
 aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 {
   aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  /* W pseudo-registers.  Bottom halves of the X registers.  */
+  static const char *const w_name[] =
+    {
+      "w0", "w1", "w2", "w3",
+      "w4", "w5", "w6", "w7",
+      "w8", "w9", "w10", "w11",
+      "w12", "w13", "w14", "w15",
+      "w16", "w17", "w18", "w19",
+      "w20", "w21", "w22", "w23",
+      "w24", "w25", "w26", "w27",
+      "w28", "w29", "w30",
+    };
 
   static const char *const q_name[] =
     {
@@ -2640,6 +2634,10 @@ aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
   if (p_regnum >= AARCH64_B0_REGNUM && p_regnum < AARCH64_B0_REGNUM + 32)
     return b_name[p_regnum - AARCH64_B0_REGNUM];
 
+  /* W pseudo-registers? */
+  if (is_w_pseudo_register (gdbarch, regnum))
+    return w_name[regnum - tdep->w_pseudo_base];
+
   if (tdep->has_sve ())
     {
       static const char *const sve_v_name[] =
@@ -2697,6 +2695,10 @@ aarch64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (tdep->has_sve () && p_regnum >= AARCH64_SVE_V0_REGNUM
       && p_regnum < AARCH64_SVE_V0_REGNUM + AARCH64_V_REGS_NUM)
     return aarch64_vnv_type (gdbarch);
+
+  /* W pseudo-registers are 32-bit.  */
+  if (is_w_pseudo_register (gdbarch, regnum))
+    return builtin_type (gdbarch)->builtin_uint32;
 
   if (tdep->has_pauth () && regnum == tdep->ra_sign_state_regnum)
     return builtin_type (gdbarch)->builtin_uint64;
@@ -2772,6 +2774,28 @@ aarch64_pseudo_read_value (struct gdbarch *gdbarch, readable_regcache *regcache,
   VALUE_LVAL (result_value) = lval_register;
   VALUE_REGNUM (result_value) = regnum;
 
+  if (is_w_pseudo_register (gdbarch, regnum))
+    {
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      /* Default offset for little endian.  */
+      int offset = 0;
+
+      if (byte_order == BFD_ENDIAN_BIG)
+	offset = 4;
+
+      /* Find the correct X register to extract the data from.  */
+      int x_regnum = AARCH64_X0_REGNUM + (regnum - tdep->w_pseudo_base);
+      gdb_byte data[4];
+
+      /* Read the bottom 4 bytes of X.  */
+      if (regcache->raw_read_part (x_regnum, offset, 4, data) != REG_VALID)
+	mark_value_bytes_unavailable (result_value, 0, 4);
+      else
+	memcpy (value_contents_raw (result_value).data (), data, 4);
+
+      return result_value;
+    }
+
   regnum -= gdbarch_num_regs (gdbarch);
 
   if (regnum >= AARCH64_Q0_REGNUM && regnum < AARCH64_Q0_REGNUM + 32)
@@ -2837,6 +2861,27 @@ aarch64_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
 		      int regnum, const gdb_byte *buf)
 {
   aarch64_gdbarch_tdep *tdep = gdbarch_tdep<aarch64_gdbarch_tdep> (gdbarch);
+
+  if (is_w_pseudo_register (gdbarch, regnum))
+    {
+      enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+      /* Default offset for little endian.  */
+      int offset = 0;
+
+      if (byte_order == BFD_ENDIAN_BIG)
+	offset = 4;
+
+      /* Find the correct X register to extract the data from.  */
+      int x_regnum = AARCH64_X0_REGNUM + (regnum - tdep->w_pseudo_base);
+
+      /* First zero-out the contents of X.  */
+      ULONGEST zero = 0;
+      regcache->raw_write (x_regnum, zero);
+      /* Write to the bottom 4 bytes of X.  */
+      regcache->raw_write_part (x_regnum, offset, 4, buf);
+      return;
+    }
+
   regnum -= gdbarch_num_regs (gdbarch);
 
   if (regnum >= AARCH64_Q0_REGNUM && regnum < AARCH64_Q0_REGNUM + 32)
@@ -3582,6 +3627,9 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
       num_regs += i;
     }
+    /* W pseudo-registers */
+    int first_w_regnum = num_pseudo_regs;
+    num_pseudo_regs += 31;
 
   if (!valid_p)
     return nullptr;
@@ -3704,6 +3752,10 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* With the number of real registers updated, setup the pseudo-registers and
      record their numbers.  */
+
+  /* Setup W pseudo-register numbers.  */
+  tdep->w_pseudo_base = first_w_regnum + num_regs;
+  tdep->w_pseudo_count = 31;
 
   /* Pointer authentication pseudo-registers.  */
   if (tdep->has_pauth ())

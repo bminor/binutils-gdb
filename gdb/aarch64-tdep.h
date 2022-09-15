@@ -118,6 +118,10 @@ struct aarch64_gdbarch_tdep : gdbarch_tdep_base
   {
     return tls_regnum != -1;
   }
+
+  /* The W pseudo-registers.  */
+  int w_pseudo_base = 0;
+  int w_pseudo_count = 0;
 };
 
 const target_desc *aarch64_read_description (const aarch64_features &features);
