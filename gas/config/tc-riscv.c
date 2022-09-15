@@ -2303,7 +2303,6 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
   char save_c = 0;
   struct riscv_opcode *insn;
   unsigned int regno;
-  int argnum;
   const struct percent_op_match *p;
   struct riscv_ip_error error;
   error.msg = "unrecognized opcode";
@@ -2341,7 +2340,6 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
       error.msg = _("illegal operands");
       error.missing_ext = NULL;
       create_insn (ip, insn);
-      argnum = 1;
 
       imm_expr->X_op = O_absent;
       *imm_reloc = BFD_RELOC_UNUSED;
@@ -2859,7 +2857,6 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      break; /* end RVV */
 
 	    case ',':
-	      ++argnum;
 	      if (*asarg++ == *oparg)
 		continue;
 	      asarg--;

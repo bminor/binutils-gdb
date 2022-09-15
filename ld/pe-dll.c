@@ -1510,8 +1510,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
   int total_relocs = 0;
   int i;
   bfd_vma sec_page = (bfd_vma) -1;
-  bfd_vma page_ptr, page_count;
-  int bi;
+  bfd_vma page_ptr;
   bfd *b;
   struct bfd_section *s;
 
@@ -1525,8 +1524,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
   reloc_data = xmalloc (total_relocs * sizeof (reloc_data_type));
 
   total_relocs = 0;
-  bi = 0;
-  for (bi = 0, b = info->input_bfds; b; bi++, b = b->link.next)
+  for (b = info->input_bfds; b; b = b->link.next)
     {
       arelent **relocs;
       int relsize, nrelocs;
@@ -1721,7 +1719,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
   sec_page = (bfd_vma) -1;
   reloc_sz = 0;
   page_ptr = (bfd_vma) -1;
-  page_count = 0;
 
   for (i = 0; i < total_relocs; i++)
     {
@@ -1740,7 +1737,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	  page_ptr = reloc_sz;
 	  reloc_sz += 8;
 	  sec_page = this_page;
-	  page_count = 0;
 	}
 
       bfd_put_16 (abfd, (rva & 0xfff) + (reloc_data[i].type << 12),
@@ -1753,7 +1749,6 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	  reloc_sz += 2;
 	}
 
-      page_count++;
     }
 
   while (reloc_sz & 3)

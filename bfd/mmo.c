@@ -1602,7 +1602,7 @@ static bool
 mmo_scan (bfd *abfd)
 {
   unsigned int i;
-  unsigned int lineno = 1;
+  unsigned int lineno ATTRIBUTE_UNUSED = 1;
   bool error = false;
   bfd_vma vma = 0;
   asection *sec = NULL;
