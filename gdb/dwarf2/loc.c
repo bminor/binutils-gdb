@@ -1641,6 +1641,11 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
   if (prop == NULL)
     return false;
 
+  /* Evaluating a property should not change the current language.
+     Without this here this could happen if the code below selects a
+     frame.  */
+  scoped_restore_current_language save_language;
+
   if (frame == NULL && has_stack_frames ())
     frame = get_selected_frame (NULL);
 
