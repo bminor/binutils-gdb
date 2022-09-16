@@ -33,6 +33,7 @@
 #include "gdb/fileio.h"
 #include "inferior.h"
 #include "cli/cli-style.h"
+#include <unordered_map>
 
 /* An object of this type is stored in the section's user data when
    mapping a section.  */
@@ -1125,6 +1126,69 @@ maintenance_info_bfds (const char *arg, int from_tty)
   htab_traverse (all_bfds, print_one_bfd, uiout);
 }
 
+/* BFD related per-inferior data.  */
+
+struct bfd_inferior_data
+{
+  std::unordered_map<std::string, unsigned long> bfd_error_string_counts;
+};
+
+/* Per-inferior data key.  */
+
+static const registry<inferior>::key<bfd_inferior_data> bfd_inferior_data_key;
+
+/* Fetch per-inferior BFD data.  It always returns a valid pointer to
+   a bfd_inferior_data struct.  */
+
+static struct bfd_inferior_data *
+get_bfd_inferior_data (struct inferior *inf)
+{
+  struct bfd_inferior_data *data;
+
+  data = bfd_inferior_data_key.get (inf);
+  if (data == nullptr)
+    data = bfd_inferior_data_key.emplace (inf);
+
+  return data;
+}
+
+/* Increment the BFD error count for STR and return the updated
+   count.  */
+
+static unsigned long
+increment_bfd_error_count (std::string str)
+{
+  struct bfd_inferior_data *bid = get_bfd_inferior_data (current_inferior ());
+
+  auto &map = bid->bfd_error_string_counts;
+  return ++map[std::move (str)];
+}
+
+static bfd_error_handler_type default_bfd_error_handler;
+
+/* Define a BFD error handler which will suppress the printing of
+   messages which have been printed once already.  This is done on a
+   per-inferior basis.  */
+
+static void
+gdb_bfd_error_handler (const char *fmt, va_list ap)
+{
+  va_list ap_copy;
+
+  va_copy(ap_copy, ap);
+  const std::string str = string_vprintf (fmt, ap_copy);
+  va_end (ap_copy);
+
+  if (increment_bfd_error_count (std::move (str)) > 1)
+    return;
+
+  /* We must call the BFD mechanism for printing format strings since
+     it supports additional format specifiers that GDB's vwarning() doesn't
+     recognize.  It also outputs additional text, i.e. "BFD: ", which
+     makes it clear that it's a BFD warning/error.  */
+  (*default_bfd_error_handler) (fmt, ap);
+}
+
 void _initialize_gdb_bfd ();
 void
 _initialize_gdb_bfd ()
@@ -1157,4 +1221,7 @@ When non-zero, bfd cache specific debugging is enabled."),
 			   NULL,
 			   &show_bfd_cache_debug,
 			   &setdebuglist, &showdebuglist);
+
+  /* Hook the BFD error/warning handler to limit amount of output.  */
+  default_bfd_error_handler = bfd_set_error_handler (gdb_bfd_error_handler);
 }
