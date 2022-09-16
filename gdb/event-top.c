@@ -186,6 +186,22 @@ gdb_rl_callback_read_char_wrapper_noexcept () noexcept
   TRY_SJLJ
     {
       rl_callback_read_char ();
+#if RL_VERSION_MAJOR >= 8
+      /* It can happen that readline (while in rl_callback_read_char)
+	 received a signal, but didn't handle it yet.  Make sure it's handled
+	 now.  If we don't do that we run into two related problems:
+	 - we have to wait for another event triggering
+	   rl_callback_read_char before the signal is handled
+	 - there's no guarantee that the signal will be processed before the
+	   event.  */
+      while (rl_pending_signal () != 0)
+	/* Do this in a while loop, in case rl_check_signals also leaves a
+	   pending signal.  I'm not sure if that's possible, but it seems
+	   better to handle the scenario than to assert.  */
+	rl_check_signals ();
+#else
+      /* Unfortunately, rl_check_signals is not available.  */
+#endif
       if (after_char_processing_hook)
 	(*after_char_processing_hook) ();
     }
