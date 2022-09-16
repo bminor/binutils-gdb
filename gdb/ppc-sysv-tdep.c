@@ -1444,7 +1444,7 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 	  == floatformats_ieee_quad))
     {
       /* IEEE FLOAT128, args in vector registers.  */
-      ppc64_sysv_abi_push_val (gdbarch, val, TYPE_LENGTH (type), 0, argpos);
+      ppc64_sysv_abi_push_val (gdbarch, val, TYPE_LENGTH (type), 16, argpos);
       ppc64_sysv_abi_push_vreg (gdbarch, val, argpos);
     }
   else if (type->code () == TYPE_CODE_FLT
@@ -1514,7 +1514,10 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
     }
   else
     {
-      ppc64_sysv_abi_push_val (gdbarch, val, TYPE_LENGTH (type), 0, argpos);
+      /* Align == 0 is correct for ppc64_sysv_abi_push_freg,
+	 Align == 16 is correct for ppc64_sysv_abi_push_vreg.
+	 Default to 0.	*/
+      int align = 0;
 
       /* The ABI (version 1.9) specifies that structs containing a
 	 single floating-point value, at any level of nesting of
@@ -1532,7 +1535,10 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 	    if (TYPE_LENGTH (type) == 16
 		&& (gdbarch_long_double_format (gdbarch)
 		    == floatformats_ieee_quad))
-	      ppc64_sysv_abi_push_vreg (gdbarch, val, argpos);
+	      {
+		ppc64_sysv_abi_push_vreg (gdbarch, val, argpos);
+		align = 16;
+	      }
 	    else
 	      ppc64_sysv_abi_push_freg (gdbarch, type, val, argpos);
 	  }
@@ -1556,8 +1562,10 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 		    && (gdbarch_long_double_format (gdbarch)
 			== floatformats_ieee_quad))
                  /* IEEE FLOAT128, args in vector registers.  */
-                 ppc64_sysv_abi_push_vreg (gdbarch, elval, argpos);
-
+		  {
+		    ppc64_sysv_abi_push_vreg (gdbarch, elval, argpos);
+		    align = 16;
+		  }
 		else if (eltype->code () == TYPE_CODE_FLT
                           || eltype->code () == TYPE_CODE_DECFLOAT)
 		    /* IBM long double and all other floats and decfloats, args
@@ -1567,9 +1575,14 @@ ppc64_sysv_abi_push_param (struct gdbarch *gdbarch,
 			 && eltype->is_vector ()
 			 && tdep->vector_abi == POWERPC_VEC_ALTIVEC
 			 && TYPE_LENGTH (eltype) == 16)
-		  ppc64_sysv_abi_push_vreg (gdbarch, elval, argpos);
+		  {
+		    ppc64_sysv_abi_push_vreg (gdbarch, elval, argpos);
+		    align = 16;
+		  }
 	      }
 	}
+
+      ppc64_sysv_abi_push_val (gdbarch, val, TYPE_LENGTH (type), align, argpos);
     }
 }
 
