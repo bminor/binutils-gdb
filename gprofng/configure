@@ -16628,7 +16628,6 @@ LIBC=gnu
 EOF
 cc_set_libc=`$CC -E "dummy.c" 2>/dev/null | grep '^LIBC=' | sed 's, ,,g'`
 eval "$cc_set_libc"
-echo "cc_set_libc=$cc_set_libc;"
 if test "$LIBC" = musl; then
 
 $as_echo "#define __MUSL_LIBC 1" >>confdefs.h
