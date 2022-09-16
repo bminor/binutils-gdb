@@ -717,7 +717,7 @@ frapy_richcompare (PyObject *self, PyObject *other, int op)
 
 /* Sets up the Frame API in the gdb module.  */
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_frames (void)
 {
   frame_object_type.tp_new = PyType_GenericNew;
@@ -748,6 +748,8 @@ gdbpy_initialize_frames (void)
   return gdb_pymodule_addobject (gdb_module, "Frame",
 				 (PyObject *) &frame_object_type);
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_frames);
 
 
 

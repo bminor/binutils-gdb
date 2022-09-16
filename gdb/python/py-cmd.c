@@ -551,7 +551,7 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 
 /* Initialize the 'commands' code.  */
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_commands (void)
 {
   int i;
@@ -600,6 +600,8 @@ gdbpy_initialize_commands (void)
 
   return 0;
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_commands);
 
 
 

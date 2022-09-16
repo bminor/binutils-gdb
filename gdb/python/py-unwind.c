@@ -969,23 +969,9 @@ pyuw_on_new_gdbarch (struct gdbarch *newarch)
     }
 }
 
-void _initialize_py_unwind ();
-void
-_initialize_py_unwind ()
-{
-  add_setshow_boolean_cmd
-      ("py-unwind", class_maintenance, &pyuw_debug,
-	_("Set Python unwinder debugging."),
-	_("Show Python unwinder debugging."),
-	_("When on, Python unwinder debugging is enabled."),
-	NULL,
-	show_pyuw_debug,
-	&setdebuglist, &showdebuglist);
-}
-
 /* Initialize unwind machinery.  */
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_unwind (void)
 {
   gdb::observers::architecture_changed.attach (pyuw_on_new_gdbarch,
@@ -1003,6 +989,24 @@ gdbpy_initialize_unwind (void)
   return gdb_pymodule_addobject (gdb_module, "UnwindInfo",
       (PyObject *) &unwind_info_object_type);
 }
+
+void _initialize_py_unwind ();
+void
+_initialize_py_unwind ()
+{
+  add_setshow_boolean_cmd
+      ("py-unwind", class_maintenance, &pyuw_debug,
+	_("Set Python unwinder debugging."),
+	_("Show Python unwinder debugging."),
+	_("When on, Python unwinder debugging is enabled."),
+	NULL,
+	show_pyuw_debug,
+	&setdebuglist, &showdebuglist);
+}
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_unwind);
+
+
 
 static PyMethodDef pending_frame_object_methods[] =
 {

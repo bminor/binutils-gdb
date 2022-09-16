@@ -1955,8 +1955,8 @@ finalize_python (void *ignore)
   (void) PyGILState_Ensure ();
   gdbpy_enter::finalize ();
 
-  gdbpy_finalize_micommands ();
-  gdbpy_finalize_tui ();
+  /* Call the gdbpy_finalize_* functions from every *.c file.  */
+  gdbpy_initialize_file::finalize_all ();
 
   Py_Finalize ();
 
@@ -2144,41 +2144,8 @@ init_done:
 				 gdbpy_gdberror_exc) < 0)
     return false;
 
-  gdbpy_initialize_gdb_readline ();
-
-  if (gdbpy_initialize_auto_load () < 0
-      || gdbpy_initialize_values () < 0
-      || gdbpy_initialize_disasm () < 0
-      || gdbpy_initialize_frames () < 0
-      || gdbpy_initialize_commands () < 0
-      || gdbpy_initialize_instruction () < 0
-      || gdbpy_initialize_record () < 0
-      || gdbpy_initialize_btrace () < 0
-      || gdbpy_initialize_symbols () < 0
-      || gdbpy_initialize_symtabs () < 0
-      || gdbpy_initialize_blocks () < 0
-      || gdbpy_initialize_functions () < 0
-      || gdbpy_initialize_parameters () < 0
-      || gdbpy_initialize_types () < 0
-      || gdbpy_initialize_pspace () < 0
-      || gdbpy_initialize_objfile () < 0
-      || gdbpy_initialize_breakpoints () < 0
-      || gdbpy_initialize_breakpoint_locations () < 0
-      || gdbpy_initialize_finishbreakpoints () < 0
-      || gdbpy_initialize_lazy_string () < 0
-      || gdbpy_initialize_linetable () < 0
-      || gdbpy_initialize_thread () < 0
-      || gdbpy_initialize_inferior () < 0
-      || gdbpy_initialize_eventregistry () < 0
-      || gdbpy_initialize_event () < 0
-      || gdbpy_initialize_arch () < 0
-      || gdbpy_initialize_registers () < 0
-      || gdbpy_initialize_xmethods () < 0
-      || gdbpy_initialize_unwind () < 0
-      || gdbpy_initialize_membuf () < 0
-      || gdbpy_initialize_connection () < 0
-      || gdbpy_initialize_tui () < 0
-      || gdbpy_initialize_micommands () < 0)
+  /* Call the gdbpy_initialize_* functions from every *.c file.  */
+  if (!gdbpy_initialize_file::initialize_all ())
     return false;
 
 #define GDB_PY_DEFINE_EVENT_TYPE(name, py_name, doc, base)	\

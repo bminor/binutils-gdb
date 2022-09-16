@@ -90,7 +90,7 @@ gdbpy_readline_wrapper (FILE *sys_stdin, FILE *sys_stdout,
 
 /* Initialize Python readline support.  */
 
-void
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_gdb_readline (void)
 {
   /* Python's readline module conflicts with GDB's use of readline
@@ -114,5 +114,8 @@ class GdbRemoveReadlineFinder:\n\
 sys.meta_path.append(GdbRemoveReadlineFinder())\n\
 ") == 0)
     PyOS_ReadlineFunctionPointer = gdbpy_readline_wrapper;
+
+  return 0;
 }
 
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_gdb_readline);

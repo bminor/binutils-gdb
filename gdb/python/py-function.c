@@ -134,7 +134,7 @@ fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 
 /* Initialize internal function support.  */
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_functions (void)
 {
   fnpy_object_type.tp_new = PyType_GenericNew;
@@ -144,6 +144,8 @@ gdbpy_initialize_functions (void)
   return gdb_pymodule_addobject (gdb_module, "Function",
 				 (PyObject *) &fnpy_object_type);
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_functions);
 
 
 

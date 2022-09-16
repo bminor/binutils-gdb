@@ -601,7 +601,7 @@ PyTypeObject gdbpy_tui_window_object_type =
 
 /* Initialize this module.  */
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_tui ()
 {
 #ifdef TUI
@@ -615,10 +615,12 @@ gdbpy_initialize_tui ()
 
 /* Finalize this module.  */
 
-void
+static void
 gdbpy_finalize_tui ()
 {
 #ifdef TUI
   gdbpy_tui_window_maker::invalidate_all ();
 #endif	/* TUI */
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_tui, gdbpy_finalize_tui);

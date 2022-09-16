@@ -509,7 +509,7 @@ symtab_object_to_symtab (PyObject *obj)
   return ((symtab_object *) obj)->symtab;
 }
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_symtabs (void)
 {
   symtab_object_type.tp_new = PyType_GenericNew;
@@ -527,6 +527,8 @@ gdbpy_initialize_symtabs (void)
   return gdb_pymodule_addobject (gdb_module, "Symtab_and_line",
 				 (PyObject *) &sal_object_type);
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_symtabs);
 
 
 

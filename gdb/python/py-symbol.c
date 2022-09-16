@@ -618,7 +618,7 @@ gdbpy_lookup_static_symbols (PyObject *self, PyObject *args, PyObject *kw)
   return return_list.release ();
 }
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_symbols (void)
 {
   if (PyType_Ready (&symbol_object_type) < 0)
@@ -686,6 +686,8 @@ gdbpy_initialize_symbols (void)
   return gdb_pymodule_addobject (gdb_module, "Symbol",
 				 (PyObject *) &symbol_object_type);
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_symbols);
 
 
 

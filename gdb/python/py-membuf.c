@@ -99,7 +99,7 @@ get_buffer (PyObject *self, Py_buffer *buf, int flags)
 
 /* General Python initialization callback.  */
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_membuf (void)
 {
   membuf_object_type.tp_new = PyType_GenericNew;
@@ -109,6 +109,10 @@ gdbpy_initialize_membuf (void)
   return gdb_pymodule_addobject (gdb_module, "Membuf",
 				 (PyObject *) &membuf_object_type);
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_membuf);
+
+
 
 static PyBufferProcs buffer_procs =
 {

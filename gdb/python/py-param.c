@@ -906,7 +906,7 @@ parmpy_dealloc (PyObject *obj)
 }
 
 /* Initialize the 'parameters' module.  */
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_parameters (void)
 {
   int i;
@@ -933,6 +933,8 @@ gdbpy_initialize_parameters (void)
   return gdb_pymodule_addobject (gdb_module, "Parameter",
 				 (PyObject *) &parmpy_object_type);
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_parameters);
 
 
 

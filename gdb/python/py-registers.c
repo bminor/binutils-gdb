@@ -427,7 +427,7 @@ gdbpy_parse_register_id (struct gdbarch *gdbarch, PyObject *pyo_reg_id,
 
 /* Initializes the new Python classes from this file in the gdb module.  */
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_registers ()
 {
   register_descriptor_object_type.tp_new = PyType_GenericNew;
@@ -461,6 +461,10 @@ gdbpy_initialize_registers ()
 	  (gdb_module, "RegisterDescriptorIterator",
 	   (PyObject *) &register_descriptor_iterator_object_type));
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_registers);
+
+
 
 static PyMethodDef register_descriptor_iterator_object_methods [] = {
   { "find", (PyCFunction) register_descriptor_iter_find,

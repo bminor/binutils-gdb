@@ -285,7 +285,7 @@ ltpy_dealloc (PyObject *self)
 /* Initialize LineTable, LineTableEntry and LineTableIterator
    objects.  */
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_linetable (void)
 {
   if (PyType_Ready (&linetable_object_type) < 0)
@@ -445,6 +445,8 @@ ltpy_iter_is_valid (PyObject *self, PyObject *args)
 
   Py_RETURN_TRUE;
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_linetable);
 
 
 

@@ -595,7 +595,7 @@ micmdpy_dealloc (PyObject *obj)
 
 /* Python initialization for the MI commands components.  */
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_micommands ()
 {
   micmdpy_object_type.tp_new = PyType_GenericNew;
@@ -614,7 +614,9 @@ gdbpy_initialize_micommands ()
   return 0;
 }
 
-void
+/* Cleanup just before GDB shuts down the Python interpreter.  */
+
+static void
 gdbpy_finalize_micommands ()
 {
   /* mi_command_py objects hold references to micmdpy_object objects.  They must
@@ -737,3 +739,5 @@ _initialize_py_micmd ()
      show_pymicmd_debug,
      &setdebuglist, &showdebuglist);
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_micommands, gdbpy_finalize_micommands);

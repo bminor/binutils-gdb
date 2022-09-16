@@ -544,7 +544,7 @@ static gdb_PyGetSetDef recpy_gap_getset[] = {
 
 /* Sets up the record API in the gdb module.  */
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_record (void)
 {
   recpy_record_type.tp_new = PyType_GenericNew;
@@ -648,3 +648,5 @@ gdbpy_stop_recording (PyObject *self, PyObject *args)
 
   Py_RETURN_NONE;
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_record);

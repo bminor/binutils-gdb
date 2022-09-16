@@ -1445,7 +1445,7 @@ gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw)
   return type_to_type_object (type);
 }
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_types (void)
 {
   if (PyType_Ready (&type_object_type) < 0)
@@ -1472,6 +1472,8 @@ gdbpy_initialize_types (void)
   return gdb_pymodule_addobject (gdb_module, "Field",
 				 (PyObject *) &field_object_type);
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_types);
 
 
 

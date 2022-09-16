@@ -344,7 +344,7 @@ gdbpy_all_architecture_names (PyObject *self, PyObject *args)
 
 /* Initializes the Architecture class in the gdb module.  */
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_arch (void)
 {
   arch_object_type.tp_new = PyType_GenericNew;
@@ -354,6 +354,10 @@ gdbpy_initialize_arch (void)
   return gdb_pymodule_addobject (gdb_module, "Architecture",
 				 (PyObject *) &arch_object_type);
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_arch);
+
+
 
 static PyMethodDef arch_object_methods [] = {
   { "name", archpy_name, METH_NOARGS,

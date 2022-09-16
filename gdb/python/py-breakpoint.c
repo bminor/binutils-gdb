@@ -1246,7 +1246,7 @@ gdbpy_breakpoint_modified (struct breakpoint *b)
 
 
 /* Initialize the Python breakpoint code.  */
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_breakpoints (void)
 {
   int i;
@@ -1286,7 +1286,7 @@ gdbpy_initialize_breakpoints (void)
 
 /* Initialize the Python BreakpointLocation code.  */
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_breakpoint_locations ()
 {
   if (PyType_Ready (&breakpoint_location_object_type) < 0)
@@ -1449,6 +1449,9 @@ _initialize_py_breakpoint ()
 	show_pybp_debug,
 	&setdebuglist, &showdebuglist);
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_breakpoints);
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_breakpoint_locations);
 
 /* Python function to set the enabled state of a breakpoint location.  */
 

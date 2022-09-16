@@ -488,77 +488,120 @@ struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
 
 extern struct program_space *progspace_object_to_program_space (PyObject *obj);
 
-void gdbpy_initialize_gdb_readline (void);
-int gdbpy_initialize_auto_load (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_values (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_frames (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_instruction (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_btrace (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_record (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_symtabs (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_commands (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_symbols (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_symtabs (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_blocks (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_types (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_functions (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_pspace (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_objfile (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_breakpoints (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_breakpoint_locations ()
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_finishbreakpoints (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_lazy_string (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_linetable (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_parameters (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_thread (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_inferior (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_eventregistry (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_event (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_arch (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_registers ()
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_xmethods (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_unwind (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_tui ()
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-void gdbpy_finalize_tui ();
-int gdbpy_initialize_membuf ()
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_connection ()
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-int gdbpy_initialize_micommands (void)
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
-void gdbpy_finalize_micommands ();
-int gdbpy_initialize_disasm ()
-  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+/* A class for managing the initialization, and finalization functions
+   from all Python files (e.g. gdb/python/py-*.c).
+
+   Within any Python file, create an instance of this class, passing in
+   the initialization function, and, optionally, the finalization
+   function.
+
+   These functions are added to a single global list of functions, which
+   can then be called from do_start_initialization and finalize_python
+   (see python.c) to initialize all the Python files within GDB.  */
+
+class gdbpy_initialize_file
+{
+  /* The type of a function that can be called just after GDB has setup the
+     Python interpreter.  This function will setup any additional Python
+     state required by a particular subsystem.  Return 0 if the setup was
+     successful, or return -1 if setup failed, in which case a Python
+     exception should have been raised.  */
+
+  using gdbpy_initialize_file_ftype = int (*) (void);
+
+  /* The type of a function that can be called just before GDB shuts down
+     the Python interpreter.  This function can cleanup an Python state
+     that is cached within GDB, for example, if GDB is holding any
+     references to Python objects, these should be released before the
+     Python interpreter is shut down.
+
+     There is no error return in this case.  This function is only called
+     when GDB is already shutting down.  The function should make a best
+     effort to clean up, and then return.  */
+
+  using gdbpy_finalize_file_ftype = void (*) (void);
+
+  /* The type for an initialization and finalization function pair.  */
+
+  using callback_pair_t = std::pair<gdbpy_initialize_file_ftype,
+				    gdbpy_finalize_file_ftype>;
+
+  /* Return the vector of callbacks.  The vector is defined as a static
+     variable within this function so that it will be initialized the first
+     time this function is called.  This is important, as this function is
+     called as part of the global object initialization process; if the
+     vector was a static variable within this class then we could not
+     guarantee that it had been initialized before it was used.  */
+
+  static std::vector<callback_pair_t> &
+  callbacks ()
+  {
+    static std::vector<callback_pair_t> list;
+    return list;
+  }
+
+public:
+
+  /* Register the initialization (INIT) and finalization (FINI) functions
+     for a Python file.  See the comments on the function types above for
+     when these functions will be called.
+
+     Either of these functions can be nullptr, in which case no function
+     will be called.
+
+     The FINI argument is optional, and defaults to nullptr (no function to
+     call).  */
+
+  gdbpy_initialize_file (gdbpy_initialize_file_ftype init,
+			 gdbpy_finalize_file_ftype fini = nullptr)
+  {
+    callbacks ().emplace_back (init, fini);
+  }
+
+  /* Run all the Python file initialize functions and return true.  If any
+     of the initialize functions fails then this function returns false.
+     In the case of failure it is undefined how many of the initialize
+     functions will have been called.  */
+
+  static bool
+  initialize_all ()
+  {
+    /* The initialize_all function should only be called once.  The
+       following check reverses the global list, which will effect this
+       initialize_all call, as well as the later finalize_all call.
+
+       The environment variable checked here is the same as the one checked
+       in the generated init.c file.  */
+    if (getenv ("GDB_REVERSE_INIT_FUNCTIONS") != nullptr)
+      std::reverse (callbacks ().begin (), callbacks ().end ());
+
+    for (const auto &p : gdbpy_initialize_file::callbacks ())
+      {
+	if (p.first != nullptr && p.first () < 0)
+	  return false;
+      }
+    return true;
+  }
+
+  /* Run all the Python file finalize functions.  */
+
+  static void
+  finalize_all ()
+  {
+    for (const auto &p : gdbpy_initialize_file::callbacks ())
+      {
+	if (p.second != nullptr)
+	  p.second ();
+      }
+  }
+};
+
+/* Macro to simplify registering the initialization and finalization
+   functions for a Python file.  */
+
+#define GDBPY_INITIALIZE_FILE(INIT, ...)				\
+  static gdbpy_initialize_file						\
+    CONCAT(gdbpy_initialize_file_obj_, __LINE__) (INIT, ##__VA_ARGS__)
 
 PyMODINIT_FUNC gdbpy_events_mod_func ();
 

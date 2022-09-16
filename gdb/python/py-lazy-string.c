@@ -234,7 +234,7 @@ gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
   return (PyObject *) str_obj;
 }
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_lazy_string (void)
 {
   if (PyType_Ready (&lazy_string_object_type) < 0)
@@ -295,6 +295,8 @@ gdbpy_extract_lazy_string (PyObject *string, CORE_ADDR *addr,
   *length = lazy->length;
   encoding->reset (lazy->encoding ? xstrdup (lazy->encoding) : NULL);
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_lazy_string);
 
 
 

@@ -435,7 +435,7 @@ bpfinishpy_handle_exit (struct inferior *inf)
 
 /* Initialize the Python finish breakpoint code.  */
 
-int
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 gdbpy_initialize_finishbreakpoints (void)
 {
   if (!gdbpy_breakpoint_init_breakpoint_type ())
@@ -455,6 +455,10 @@ gdbpy_initialize_finishbreakpoints (void)
 
   return 0;
 }
+
+GDBPY_INITIALIZE_FILE (gdbpy_initialize_finishbreakpoints);
+
+
 
 static gdb_PyGetSetDef finish_breakpoint_object_getset[] = {
   { "return_value", bpfinishpy_get_returnvalue, NULL,
