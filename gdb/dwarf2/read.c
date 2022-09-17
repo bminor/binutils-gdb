@@ -9498,8 +9498,8 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu)
 
 static void
 handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
-			const file_and_directory &fnd,
-			CORE_ADDR lowpc) /* ARI: editCase function */
+			const file_and_directory &fnd, CORE_ADDR lowpc,
+			bool have_code) /* ARI: editCase function */
 {
   dwarf2_per_objfile *per_objfile = cu->per_objfile;
   struct attribute *attr;
@@ -9586,7 +9586,12 @@ handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
       gdb_assert (die->tag != DW_TAG_partial_unit);
     }
   decode_mapping = (die->tag != DW_TAG_partial_unit);
-  dwarf_decode_lines (cu->line_header, cu, lowpc, decode_mapping);
+  /* The have_code check is here because, if LOWPC and HIGHPC are both 0x0,
+     then there won't be any interesting code in the CU, but a check later on
+     (in lnp_state_machine::check_line_address) will fail to properly exclude
+     an entry that was removed via --gc-sections.  */
+  if (have_code)
+    dwarf_decode_lines (cu->line_header, cu, lowpc, decode_mapping);
 }
 
 /* Process DW_TAG_compile_unit or DW_TAG_partial_unit.  */
@@ -9625,13 +9630,8 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
 
   /* Decode line number information if present.  We do this before
      processing child DIEs, so that the line header table is available
-     for DW_AT_decl_file.  The PC check is here because, if LOWPC and
-     HIGHPC are both 0x0, then there won't be any interesting code in
-     the CU, but a check later on (in
-     lnp_state_machine::check_line_address) will fail to properly
-     exclude an entry that was removed via --gc-sections.  */
-  if (lowpc != highpc)
-    handle_DW_AT_stmt_list (die, cu, fnd, lowpc);
+     for DW_AT_decl_file.  */
+  handle_DW_AT_stmt_list (die, cu, fnd, lowpc, lowpc != highpc);
 
   /* Process all dies in compilation unit.  */
   if (die->child != NULL)
