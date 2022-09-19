@@ -1170,7 +1170,7 @@ static bfd_error_handler_type default_bfd_error_handler;
    messages which have been printed once already.  This is done on a
    per-inferior basis.  */
 
-static void
+static void ATTRIBUTE_PRINTF (1, 0)
 gdb_bfd_error_handler (const char *fmt, va_list ap)
 {
   va_list ap_copy;
