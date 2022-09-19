@@ -313,9 +313,12 @@ poke_alien_token_handler (const char *id, char **errmsg)
 
       alien_token.kind = PK_ALIEN_TOKEN_OFFSET;
       alien_token.value.offset.magnitude = addr;
-      alien_token.value.offset.width = 64;
+      alien_token.value.offset.width
+	= HOST_CHAR_BIT * sizeof (decltype (addr));
       alien_token.value.offset.signed_p = 0;
-      alien_token.value.offset.unit = 8;
+      alien_token.value.offset.unit
+	= (gdbarch_addressable_memory_unit_size (target_gdbarch ())
+	   * 8);
     }
   else
     {
@@ -338,9 +341,10 @@ poke_alien_token_handler (const char *id, char **errmsg)
 	  alien_token.value.offset.magnitude
 	    = value_as_address (value);
 	  alien_token.value.offset.width
-	    = TYPE_LENGTH (type) * 8;
+	    = TYPE_LENGTH (type) * HOST_CHAR_BIT;
 	  alien_token.value.offset.signed_p = 0;
-	  alien_token.value.offset.unit = 8;
+	  alien_token.value.offset.unit
+	    = gdbarch_addressable_memory_unit_size (target_gdbarch ()) * 8;
 	}
       else if (is_integral_type (type))
 	{
@@ -348,7 +352,7 @@ poke_alien_token_handler (const char *id, char **errmsg)
 	  alien_token.value.integer.magnitude
 	    = value_as_long (value);
 	  alien_token.value.integer.width
-	    = TYPE_LENGTH (type) * 8;
+	    = TYPE_LENGTH (type) * HOST_CHAR_BIT;
 	  alien_token.value.integer.signed_p
 	    = !type->is_unsigned ();
 	}
@@ -444,7 +448,7 @@ poke_add_type (struct type *type)
 	case TYPE_CODE_PTR:
 	  {
 	    str = ("offset<uint<"
-		   + (std::to_string (TYPE_LENGTH (type) * 8))
+		   + (std::to_string (TYPE_LENGTH (type) * HOST_CHAR_BIT))
 		   + ">,B>");
 	    break;
 	  }
@@ -464,7 +468,7 @@ poke_add_type (struct type *type)
 	  }
 	case TYPE_CODE_INT:
 	  {
-	    size_t type_length = TYPE_LENGTH (type) * 8;
+	    size_t type_length = TYPE_LENGTH (type) * HOST_CHAR_BIT;
 
 	    if (type_length > 64)
 	      goto skip;
@@ -530,12 +534,19 @@ poke_add_type (struct type *type)
 		if (field_name != "")
 		  str += field_name;
 		if (field_bitpos != natural_bitpos)
-		  str += " @ " + (field_bitpos % 8 == 0
-				  ? std::to_string (field_bitpos / 8) + "#B"
-				  : std::to_string (field_bitpos) + "#b");
+		  {
+		    const size_t target_byte_size
+		      = (gdbarch_addressable_memory_unit_size (target_gdbarch ())
+			 * 8);
+		    str += " @ " + (field_bitpos % target_byte_size == 0
+				    ? std::to_string (field_bitpos
+						      / target_byte_size) + "#B"
+				    : std::to_string (field_bitpos) + "#b");
+		  }
 		str += ";";
 
-		natural_bitpos = field_bitpos + TYPE_LENGTH (field_type) * 8;
+		natural_bitpos
+		  = field_bitpos + TYPE_LENGTH (field_type) * HOST_CHAR_BIT;
 	      }
 
 	    str += "}";
