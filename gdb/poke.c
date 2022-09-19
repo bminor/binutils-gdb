@@ -22,6 +22,7 @@
 #include "arch-utils.h"
 #include "target.h"
 #include "gdbcmd.h"
+#include "user-regs.h"
 extern "C" {
 #include <libpoke.h>
 }
@@ -319,6 +320,57 @@ poke_alien_token_handler (const char *id, char **errmsg)
       alien_token.value.offset.unit
 	= (gdbarch_addressable_memory_unit_size (target_gdbarch ())
 	   * 8);
+    }
+  else if (strncmp (id, "reg::", 5) == 0)
+    {
+      const std::string regname { id + 5 };
+
+      if (!target_has_registers ())
+	{
+	  *errmsg
+	    = xstrdup (string_printf (_("cannot read register '%s': "
+					"target has no registers"),
+				      regname.c_str ()).c_str ());
+	  return nullptr;
+	}
+
+      frame_info *frame = get_selected_frame ();
+      struct gdbarch *gdbarch = get_frame_arch (frame);
+      const int regnum
+	= user_reg_map_name_to_regnum (gdbarch, regname.c_str (),
+				       regname.length ());
+
+      if (regnum == -1)
+	{
+	  *errmsg = xstrdup (string_printf (_("unknown register '%s'"),
+					    regname.c_str ()).c_str ());
+	  return nullptr;
+	}
+
+      struct value *reg_value;
+
+      try
+	{
+	  reg_value = value_of_register (regnum, frame);
+	}
+      catch (const gdb_exception_error &except)
+	{
+	  *errmsg
+	    = xstrdup (string_printf (_("failed to fetch register '%s' "
+					"for selected frame"),
+				      regname.c_str ()).c_str ());
+	  return nullptr;
+	}
+
+      struct type *type = value_type (reg_value);
+
+      alien_token.kind = PK_ALIEN_TOKEN_INTEGER;
+      alien_token.value.integer.magnitude
+	= value_as_long (reg_value);
+      alien_token.value.integer.width
+	= TYPE_LENGTH (type) * HOST_CHAR_BIT;
+      alien_token.value.integer.signed_p
+	= !type->is_unsigned ();
     }
   else
     {

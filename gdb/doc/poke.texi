@@ -373,3 +373,45 @@ struct_person @{
   postal_address=0x5555555547c5UL#B
 @}
 @end smallexample
+
+Poke can read registers in the target by using the @code{$reg::REGNAME}
+notation.  The read is done in the context of the selected frame.
+
+The following example shows how poke could be used to decode the value of the
+@code{EFLAGS} register of the x86 ISA:
+
+@smallexample
+(@value{GDBN}) poke type EFlags_T =
+  struct uint<32>
+  @{
+    uint<27> other_flags;
+    uint<1> AF;
+    uint<1> r2 = 0;
+    uint<1> PF;
+    uint<1> r1 = 1;
+    uint<1> CF;
+  @}
+(@value{GDBN}) poke $reg::eflags as EFlags_T
+EFlags_T @{
+  other_flags=(uint<27>) 0x12,
+  AF=(uint<1>) 0x0,
+  r2=(uint<1>) 0x0,
+  PF=(uint<1>) 0x1,
+  r1=(uint<1>) 0x1,
+  CF=(uint<1>) 0x0
+@}
+@end smallexample
+
+It can also be useful to interpret the content of a register as an address.  To
+do so, it is possible to use the @code{$reg::REGNAME#B} notation.
+
+For example, the following can be used to inspect the current stack frame:
+
+@smallexample
+(@value{GDBN}) poke load "std-types.pk"
+(@value{GDBN}) poke load ios
+(@value{GDBN}) poke ios_dump_bytes :ios get_ios :from $reg::sp#B
+                                   :size ($reg::fp - $reg::sp)#B
+                                   :group_by 1#B
+00007fffffffddd0: 0d f0 ad de 00 00 00 00  ef be ad de 00 00 00 00
+@end smallexample
