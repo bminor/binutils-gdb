@@ -3514,6 +3514,12 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
 {
   struct loongarch_elf_link_hash_table *htab = loongarch_elf_hash_table (info);
   const struct elf_backend_data *bed = get_elf_backend_data (output_bfd);
+  asection *rela_dyn = bfd_get_section_by_name (output_bfd, ".rela.dyn");
+  struct bfd_link_order *lo = NULL;
+  Elf_Internal_Rela *slot = NULL, *last_slot = NULL;
+
+  if (rela_dyn)
+    lo = rela_dyn->map_head.link_order;
 
   if (h->plt.offset != MINUS_ONE)
     {
@@ -3523,6 +3529,7 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
       uint32_t plt_entry[PLT_ENTRY_INSNS];
       bfd_byte *loc;
       Elf_Internal_Rela rela;
+      asection *rela_sec = NULL;
 
       if (htab->elf.splt)
 	{
@@ -3575,31 +3582,31 @@ loongarch_elf_finish_dynamic_symbol (bfd *output_bfd,
 	  && (relplt == htab->elf.srelgot
 	      || relplt == htab->elf.irelplt))
 	{
-	    {
-	      rela.r_info = ELFNN_R_INFO (0, R_LARCH_IRELATIVE);
-	      rela.r_addend = (h->root.u.def.value
+	  rela.r_info = ELFNN_R_INFO (0, R_LARCH_IRELATIVE);
+	  rela.r_addend = (h->root.u.def.value
 			       + h->root.u.def.section->output_section->vma
 			       + h->root.u.def.section->output_offset);
-	    }
 
-	    /* Find the space after dyn sort.  */
+	  /* Find the space after dyn sort.  */
+	  while (slot == last_slot || slot->r_offset != 0)
 	    {
-	      Elf_Internal_Rela *dyn = (Elf_Internal_Rela *)relplt->contents;
-	      bool fill = false;
-	      for (;dyn < dyn + relplt->size / sizeof (*dyn); dyn++)
+	      if (slot != last_slot)
 		{
-		  if (0 == dyn->r_offset)
-		    {
-		      bed->s->swap_reloca_out (output_bfd, &rela,
-					       (bfd_byte *)dyn);
-		      relplt->reloc_count++;
-		      fill = true;
-		      break;
-		    }
+		  slot++;
+		  continue;
 		}
-	      BFD_ASSERT (fill);
+
+	      BFD_ASSERT (lo != NULL);
+	      rela_sec = lo->u.indirect.section;
+	      lo = lo->next;
+
+	      slot = (Elf_Internal_Rela *)rela_sec->contents;
+	      last_slot = (Elf_Internal_Rela *)(rela_sec->contents +
+						rela_sec->size);
 	    }
 
+	  bed->s->swap_reloca_out (output_bfd, &rela, (bfd_byte *)slot);
+	  rela_sec->reloc_count++;
 	}
       else
 	{

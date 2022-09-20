@@ -31,6 +31,7 @@ if [istarget "loongarch64-*-*"] {
     run_dump_test "macro_op"
     run_dump_test "syscall"
     run_dump_test "disas-jirl"
+    run_dump_test "local-ifunc-reloc"
 }
 
 if [istarget "loongarch32-*-*"] {
