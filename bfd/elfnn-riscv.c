@@ -3872,6 +3872,9 @@ _bfd_riscv_elf_merge_private_bfd_data (bfd *ibfd, struct bfd_link_info *info)
   /* Allow linking RVC and non-RVC, and keep the RVC flag.  */
   elf_elfheader (obfd)->e_flags |= new_flags & EF_RISCV_RVC;
 
+  /* Allow linking TSO and non-TSO, and keep the TSO flag.  */
+  elf_elfheader (obfd)->e_flags |= new_flags & EF_RISCV_TSO;
+
   return true;
 
  fail:

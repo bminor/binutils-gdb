@@ -121,6 +121,9 @@ END_RELOC_NUMBERS (R_RISCV_max)
 /* RISC-V specific values for st_other.  */
 #define STO_RISCV_VARIANT_CC 0x80
 
+/* File uses the TSO model. */
+#define EF_RISCV_TSO 0x0010
+
 /* Additional section types.  */
 #define SHT_RISCV_ATTRIBUTES 0x70000003 /* Section holds attributes.  */
 

@@ -257,6 +257,14 @@ riscv_set_rvc (bool rvc_value)
   riscv_opts.rvc = rvc_value;
 }
 
+/* Turn on the tso flag for elf_flags once we have enabled ztso extension.  */
+
+static void
+riscv_set_tso ()
+{
+  elf_flags |= EF_RISCV_TSO;
+}
+
 /* This linked list records all enabled extensions, which are parsed from
    the architecture string.  The architecture string can be set by the
    -march option, the elf architecture attributes, and the --with-arch
@@ -307,6 +315,9 @@ riscv_set_arch (const char *s)
   riscv_set_rvc (false);
   if (riscv_subset_supports (&riscv_rps_as, "c"))
     riscv_set_rvc (true);
+
+  if (riscv_subset_supports (&riscv_rps_as, "ztso"))
+    riscv_set_tso ();
 }
 
 /* Indicate -mabi option is explictly set.  */
