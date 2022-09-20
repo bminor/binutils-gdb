@@ -3179,6 +3179,8 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 						     htab->elf.srelgot, &rela);
 			}
 		      h->got.offset |= 1;
+		      bfd_put_NN (output_bfd, relocation,
+				  got->contents + got_off);
 		    }
 		}
 	      else
@@ -3200,9 +3202,8 @@ loongarch_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 			}
 		      local_got_offsets[r_symndx] |= 1;
 		    }
+		  bfd_put_NN (output_bfd, relocation, got->contents + got_off);
 		}
-
-	      bfd_put_NN (output_bfd, relocation, got->contents + got_off);
 
 	      relocation = got_off + sec_addr (got);
 	    }
