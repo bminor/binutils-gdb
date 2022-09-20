@@ -1,3 +1,8 @@
+2022-09-20  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (copy_object): Do not issue a warning message when
+	encountering empty .gnu.build.attribute sections.
+
 2022-09-14  Rupesh Potharla  <Rupesh.Potharla@amd.com>
 
 	* testsuite/binutils-all/readelf.exp (readelf_wi_test): Extend

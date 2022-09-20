@@ -2968,11 +2968,9 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 	  bfd_size_type size = bfd_section_size (osec);
 
 	  if (size == 0)
-	    {
-	      bfd_nonfatal_message (NULL, ibfd, osec,
-				    _("warning: note section is empty"));
-	      continue;
-	    }
+	    /* This can happen, eg when stripping a binary for a second
+	       time.  See BZ 2121365 for an example.  */
+	    continue;
 
 	  merged_note_section * merged = xmalloc (sizeof * merged);
 	  merged->contents = NULL;
