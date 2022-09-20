@@ -927,6 +927,15 @@ struct main_type
 
   unsigned int m_flag_flag_enum : 1;
 
+  /* * For TYPE_CODE_ARRAY, this is true if this type is part of a
+     multi-dimensional array.  Multi-dimensional arrays are
+     represented internally as arrays of arrays, and this flag lets
+     gdb distinguish between multiple dimensions and an ordinary array
+     of arrays.  The flag is set on each inner dimension, but not the
+     outermost dimension.  */
+
+  unsigned int m_multi_dimensional : 1;
+
   /* * A discriminant telling us which field of the type_specific
      union is being used for this type, if any.  */
 
@@ -1348,6 +1357,18 @@ struct type
   void set_is_flag_enum (bool is_flag_enum)
   {
     this->main_type->m_flag_flag_enum = is_flag_enum;
+  }
+
+  /* True if this array type is part of a multi-dimensional array.  */
+
+  bool is_multi_dimensional () const
+  {
+    return this->main_type->m_multi_dimensional;
+  }
+
+  void set_is_multi_dimensional (bool value)
+  {
+    this->main_type->m_multi_dimensional = value;
   }
 
   /* * Assuming that THIS is a TYPE_CODE_FIXED_POINT, return a reference

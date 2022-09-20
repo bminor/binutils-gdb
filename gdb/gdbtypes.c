@@ -1319,6 +1319,7 @@ update_static_array_size (struct type *type)
 	 wrong size when trying to find elements of the outer
 	 array.  */
       if (element_type->code () == TYPE_CODE_ARRAY
+	  && (stride != 0 || element_type->is_multi_dimensional ())
 	  && element_type->length () != 0
 	  && TYPE_FIELD_BITSIZE (element_type, 0) != 0
 	  && get_array_bounds (element_type, &low_bound, &high_bound)

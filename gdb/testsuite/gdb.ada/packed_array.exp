@@ -57,4 +57,10 @@ foreach_with_prefix scenario {all minimal} {
 	    xfail $test
 	}
     }
+
+    set line "(4 => true, false, true, false, true)"
+    gdb_test "print o_var" \
+	[string_to_regexp " = ($line, $line, $line, $line)"]
+    gdb_test "print o2_var" \
+	[string_to_regexp " = ($line, $line, $line, $line)"]
 }

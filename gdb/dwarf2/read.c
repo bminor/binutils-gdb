@@ -15690,6 +15690,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  type = create_array_type_with_stride (NULL, type, range_types[i++],
 						byte_stride_prop, bit_stride);
+	  type->set_is_multi_dimensional (true);
 	  bit_stride = 0;
 	  byte_stride_prop = nullptr;
 	}
@@ -15701,11 +15702,14 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
 	{
 	  type = create_array_type_with_stride (NULL, type, range_types[ndim],
 						byte_stride_prop, bit_stride);
+	  type->set_is_multi_dimensional (true);
 	  bit_stride = 0;
 	  byte_stride_prop = nullptr;
 	}
     }
 
+  /* Clear the flag on the outermost array type.  */
+  type->set_is_multi_dimensional (false);
   gdb_assert (type != element_type);
 
   /* Understand Dwarf2 support for vector types (like they occur on

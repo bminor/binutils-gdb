@@ -27,6 +27,20 @@ procedure PA is
 
    U_Var : Unconstrained_Packed_Array (1 .. Ident (6));
 
+   -- Note that this array is not packed.
+   type Outer_Array is array (1 .. 4) of Packed_Array;
+   O_Var : Outer_Array := ((true, false, true, false, true),
+                           (true, false, true, false, true),
+                           (true, false, true, false, true),
+                           (true, false, true, false, true));
+
+   type Outer_Array2 is array (1 .. 4) of Packed_Array;
+   pragma pack (Outer_Array2);
+   O2_Var : Outer_Array2 := ((true, false, true, false, true),
+                           (true, false, true, false, true),
+                           (true, false, true, false, true),
+                           (true, false, true, false, true));
+
 begin
 
    Var := (True, False, True, False, True);
