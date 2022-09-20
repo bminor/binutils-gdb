@@ -4,10 +4,10 @@
 # Мирослав Николић <miroslavnikolic@rocketmail.com>, 2020–2022.
 msgid ""
 msgstr ""
-"Project-Id-Version: gold-2.37.90\n"
+"Project-Id-Version: gold-2.38.90\n"
 "Report-Msgid-Bugs-To: https://sourceware.org/bugzilla/\n"
-"POT-Creation-Date: 2022-01-22 12:25+0000\n"
-"PO-Revision-Date: 2022-02-15 20:05+0200\n"
+"POT-Creation-Date: 2022-07-08 10:58+0100\n"
+"PO-Revision-Date: 2022-09-17 20:43+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: Serbian <(nothing)>\n"
 "Language: sr\n"
@@ -16,6 +16,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Bugs: Report translation errors to the Language-Team address.\n"
+"X-Generator: Poedit 2.3\n"
 
 #: aarch64-reloc-property.cc:173 arm-reloc-property.cc:303
 #, c-format
@@ -846,62 +847,67 @@ msgstr "%s: „fstat“ није успело: %s"
 msgid "could not reopen file %s"
 msgstr "не могу поново да отворим датотеку „%s“"
 
-#: fileread.cc:406
+#: fileread.cc:390
+#, c-format
+msgid "%s: read failed, starting offset (%#llx) less than zero"
+msgstr "%s: читање није успело, почетни померај (%#llx) је мањи од нуле"
+
+#: fileread.cc:412
 #, c-format
 msgid "%s: pread failed: %s"
 msgstr "%s: „pread“ није успело: %s"
 
-#: fileread.cc:420
+#: fileread.cc:426
 #, c-format
 msgid "%s: file too short: read only %lld of %lld bytes at %lld"
 msgstr "%s: датотека је прекратка: читам само %lld од %lld бајта при %lld"
 
-#: fileread.cc:543
+#: fileread.cc:549
 #, c-format
 msgid "%s: attempt to map %lld bytes at offset %lld exceeds size of file; the file may be corrupt"
 msgstr "%s: покушај мапирања %lld бајта на померају %lld превазилази величину датотеке; можда је оштећена датотека"
 
-#: fileread.cc:683
+#: fileread.cc:689
 #, c-format
 msgid "%s: lseek failed: %s"
 msgstr "%s: „lseek“ није успело: %s"
 
-#: fileread.cc:689
+#: fileread.cc:695
 #, c-format
 msgid "%s: readv failed: %s"
 msgstr "%s: „readv“ није успело: %s"
 
-#: fileread.cc:692
+#: fileread.cc:698
 #, c-format
 msgid "%s: file too short: read only %zd of %zd bytes at %lld"
 msgstr "%s: датотека је прекратка: читам само %zd од %zd бајта при %lld"
 
-#: fileread.cc:859
+#: fileread.cc:865
 #, c-format
 msgid "%s: total bytes mapped for read: %llu\n"
 msgstr "%s: укупно бајтова мапираних за читање: %llu\n"
 
-#: fileread.cc:861
+#: fileread.cc:867
 #, c-format
 msgid "%s: maximum bytes mapped for read at one time: %llu\n"
 msgstr "%s: највише бајтова мапираних за читање у исто време: %llu\n"
 
-#: fileread.cc:954
+#: fileread.cc:960
 #, c-format
 msgid "%s: stat failed: %s"
 msgstr "%s: „stat“ није успело: %s"
 
-#: fileread.cc:1051
+#: fileread.cc:1057
 #, c-format
 msgid "cannot find %s%s"
 msgstr "не могу да нађем „%s%s“"
 
-#: fileread.cc:1076
+#: fileread.cc:1082
 #, c-format
 msgid "cannot find %s"
 msgstr "не могу да нађем „%s“"
 
-#: fileread.cc:1115
+#: fileread.cc:1121
 #, c-format
 msgid "cannot open %s: %s"
 msgstr "не могу да отворим „%s“: %s"
