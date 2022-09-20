@@ -66,8 +66,8 @@ result:
 This declares a couple of Poke types and a variable:
 
 @smallexample
-(@value{GDBP}) type byte = uint<8>
-(@value{GDBP}) type Packet = struct @{ byte magic == 0x4a; byte sz; \
+(@value{GDBP}) poke type byte = uint<8>
+(@value{GDBP}) poke type Packet = struct @{ byte magic == 0x4a; byte sz; \
                                        byte[sz] payload; @}
 (@value{GDBP}) poke Packet @{ sz = 4 @}
 Packet @{
@@ -75,7 +75,7 @@ Packet @{
   sz=0x4UB,
   payload=[0x0UB,0x0UB,0x0UB,0x0UB]
 @}
-(@value{GDBP}) var p = Packet @{ sz = 4 @}
+(@value{GDBP}) poke var p = Packet @{ sz = 4 @}
 (@value{GDBP}) poke p.payload
 [0x0UB,0x0UB,0x0UB,0x0UB]
 @end smallexample
@@ -339,7 +339,7 @@ short counter;
 In @value{GDBN} we can access to the value of that variable like this:
 
 @smallexample
-(@value{GDBN}) counter
+(@value{GDBN}) p counter
 $1 = 0
 @end smallexample
 

@@ -190,11 +190,11 @@ iod_get_if_name (void)
 static char *
 iod_handler_normalize (const char *handler, uint64_t flags, int *error)
 {
-  char *new_handler = NULL;
+  char *new_handler = nullptr;
 
   if (strcmp (handler, "<gdb>") == 0)
     new_handler = xstrdup (handler);
-  if (error)
+  if (error != nullptr)
     *error = PK_IOD_OK;
 
   return new_handler;
@@ -356,7 +356,7 @@ poke_alien_token_handler (const char *id, char **errmsg)
 	goto error;
     }
 
-  *errmsg = NULL;
+  *errmsg = nullptr;
   return &alien_token;
 
  error:
@@ -364,13 +364,13 @@ poke_alien_token_handler (const char *id, char **errmsg)
   emsg += id;
   emsg += "'";
   *errmsg = xstrdup (emsg.c_str ());
-  return NULL;
+  return nullptr;
 }
 
 /* Given a string, prefix it in order to avoid collision with Poke's
    keywords.  */
 
-static std::vector<std::string> poke_keywords
+static const std::vector<std::string> poke_keywords
   {
     "pinned", "struct", "union", "else", "while", "until",
     "for", "in", "where", "if", "sizeof", "fun", "method",
@@ -394,7 +394,7 @@ normalize_poke_identifier (std::string prefix, std::string str)
 /* Given a GDB type name, mangle it to a valid Poke type name.  */
 
 static std::string
-gdb_type_name_to_poke (std::string str, struct type *type = NULL)
+gdb_type_name_to_poke (std::string str, struct type *type = nullptr)
 {
   for (int i = 0; i < str.length (); ++i)
     if (!(str.begin()[i] == '_'
@@ -429,7 +429,7 @@ poke_add_type (struct type *type)
 
   if (type != nullptr)
     {
-      if (type->name ())
+      if (type->name () != nullptr)
 	type_name = type->name ();
 
       /* Do not try to add a type that is already defined.  */
@@ -450,13 +450,13 @@ poke_add_type (struct type *type)
 	  }
 	case TYPE_CODE_TYPEDEF:
 	  {
-	    struct type *target_type = TYPE_TARGET_TYPE (type);
+	    struct type *target_type = check_typedef (type);
 	    std::string target_type_code = poke_add_type (target_type);
 
 	    if (target_type_code == "")
 	      goto skip;
 
-	    if (target_type->name ())
+	    if (target_type->name () != nullptr)
 	      str += gdb_type_name_to_poke (target_type->name (), target_type);
 	    else
 	      str += target_type_code;
@@ -504,17 +504,20 @@ poke_add_type (struct type *type)
 	    for (int idx = 0; idx < type->num_fields (); idx++)
 	      {
 		std::string field_name
-		  = normalize_poke_identifier ("__f", type->field (idx).name ());
-		struct type *field_type = type->field (idx).type ();
+		  = normalize_poke_identifier ("__f",
+					       type->field (idx).name ());
+		struct type *field_type
+		  = check_typedef (type->field (idx).type ());
 		size_t field_bitpos = type->field (idx).loc_bitpos ();
 
 		if (idx > 0)
 		  str += " ";
-		if (field_type->name ())
+		if (field_type->name () != nullptr)
 		  {
 		    if (poke_add_type (field_type) == "")
 		      goto skip;
-		    str += gdb_type_name_to_poke (field_type->name (), field_type);
+		    str += gdb_type_name_to_poke (field_type->name (),
+						  field_type);
 		  }
 		else
 		  {
@@ -594,7 +597,7 @@ poke_handle_exception (pk_val exception)
 
   if (handler == PK_NULL)
     error (_("Couldn't get a handler for poke gdb_exception_handler"));
-  if (pk_call (poke_compiler, handler, NULL, NULL, 1, exception)
+  if (pk_call (poke_compiler, handler, nullptr, nullptr, 1, exception)
       == PK_ERROR)
     error (_("Couldn't call gdb_exception_handler in poke"));
 }
@@ -611,7 +614,7 @@ start_poke (void)
      types.  */
   poke_compiler = pk_compiler_new_with_flags (&poke_term_if,
 					      PK_F_NOSTDTYPES);
-  if (poke_compiler == NULL)
+  if (poke_compiler == nullptr)
     error (_("Couldn't start the poke incremental compiler."));
   poke_compiler_lives = true;
 
@@ -628,7 +631,7 @@ start_poke (void)
   /* Define a handler that we will use for processing unhandled Poke
      exceptions.  */
   if (pk_compile_buffer (poke_compiler, poke_exception_handler,
-			 NULL, &exit_exception) != PK_OK
+			 nullptr, &exit_exception) != PK_OK
       || exit_exception != PK_NULL)
     error (_("Could not define the Poke default exception handler"));
 
@@ -637,7 +640,7 @@ start_poke (void)
   if (pk_register_iod (poke_compiler, &iod_if) != PK_OK)
     error (_("Could not register the foreign IO device interface in poke."));
 
-  if (pk_compile_buffer (poke_compiler, "open (\"<gdb>\");", NULL,
+  if (pk_compile_buffer (poke_compiler, "open (\"<gdb>\");", nullptr,
 			 &exit_exception) != PK_OK
       || exit_exception != PK_NULL)
     {
@@ -665,7 +668,7 @@ poke_finalize (void *arg)
       pk_val val, exit_exception;
       if (pk_compile_statement (poke_compiler,
 				"try close (get_ios); catch if E_no_ios {}",
-				NULL, &val, &exit_exception) != PK_OK
+				nullptr, &val, &exit_exception) != PK_OK
 	  || exit_exception != PK_NULL)
 	error (_("Error while closing an IOS on exit."));
 
@@ -743,14 +746,14 @@ poke_command (const char *args, int from_tty)
    && ((input)[sizeof (cmd) - 1] == ' ' || (input)[sizeof (cmd) - 1] == '\t'))
 
   args = skip_spaces (args);
-  if (args == NULL)
+  if (args == nullptr)
     return;
 
   if (IS_COMMAND (args, "fun"))
-  {
-    what = 0;
-    cmd = args;
-  }
+    {
+      what = 0;
+      cmd = args;
+    }
   else
     {
       if (IS_COMMAND (args, "var")
@@ -820,5 +823,5 @@ Usage: poke-dump-types\n"));
 Execute a Poke statement or declaration.\n\
 Usage: poke [STMT]\n"));
 
-  make_final_cleanup (poke_finalize, NULL);
+  make_final_cleanup (poke_finalize, nullptr);
 }
