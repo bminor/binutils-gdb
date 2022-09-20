@@ -11719,7 +11719,7 @@ load_build_id_debug_file (const char * main_filename ATTRIBUTE_UNUSED, void * ma
 
   if (build_id_size > (section->size - 16))
     {
-      warn (_(".note.gnu.build-id data size is too bug\n"));
+      warn (_(".note.gnu.build-id data size is too big\n"));
       return;
     }
 
