@@ -32,6 +32,7 @@
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
+#include "demangle.h"
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "dwarf2.h"
@@ -1711,31 +1712,52 @@ read_attribute (struct attribute *    attr,
   return info_ptr;
 }
 
-/* Return whether DW_AT_name will return the same as DW_AT_linkage_name
-   for a function.  */
+/* Return mangling style given LANG.  */
 
-static bool
-non_mangled (int lang)
+static int
+mangle_style (int lang)
 {
   switch (lang)
     {
+    case DW_LANG_Ada83:
+    case DW_LANG_Ada95:
+      return DMGL_GNAT;
+
+    case DW_LANG_C_plus_plus:
+    case DW_LANG_C_plus_plus_03:
+    case DW_LANG_C_plus_plus_11:
+    case DW_LANG_C_plus_plus_14:
+      return DMGL_GNU_V3;
+
+    case DW_LANG_Java:
+      return DMGL_JAVA;
+
+    case DW_LANG_D:
+      return DMGL_DLANG;
+
+    case DW_LANG_Rust:
+    case DW_LANG_Rust_old:
+      return DMGL_RUST;
+
     default:
-      return false;
+      return DMGL_AUTO;
 
     case DW_LANG_C89:
     case DW_LANG_C:
-    case DW_LANG_Ada83:
     case DW_LANG_Cobol74:
     case DW_LANG_Cobol85:
     case DW_LANG_Fortran77:
     case DW_LANG_Pascal83:
-    case DW_LANG_C99:
-    case DW_LANG_Ada95:
     case DW_LANG_PLI:
+    case DW_LANG_C99:
     case DW_LANG_UPC:
     case DW_LANG_C11:
     case DW_LANG_Mips_Assembler:
-      return true;
+    case DW_LANG_Upc:
+    case DW_LANG_HP_Basic91:
+    case DW_LANG_HP_IMacro:
+    case DW_LANG_HP_Assembler:
+      return 0;
     }
 }
 
@@ -3599,7 +3621,7 @@ find_abstract_instance (struct comp_unit *unit,
 		  if (name == NULL && is_str_form (&attr))
 		    {
 		      name = attr.u.str;
-		      if (non_mangled (unit->lang))
+		      if (mangle_style (unit->lang) == 0)
 			*is_linkage = true;
 		    }
 		  break;
@@ -4095,7 +4117,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		  if (func->name == NULL && is_str_form (&attr))
 		    {
 		      func->name = attr.u.str;
-		      if (non_mangled (unit->lang))
+		      if (mangle_style (unit->lang) == 0)
 			func->is_linkage = true;
 		    }
 		  break;
