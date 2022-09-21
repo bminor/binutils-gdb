@@ -3888,6 +3888,9 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
       riscv_set_rvc (false);
       if (riscv_subset_supports (&riscv_rps_as, "c"))
 	riscv_set_rvc (true);
+
+      if (riscv_subset_supports (&riscv_rps_as, "ztso"))
+	riscv_set_tso ();
     }
   else if (strcmp (name, "push") == 0)
     {
