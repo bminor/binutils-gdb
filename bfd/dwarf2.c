@@ -3288,7 +3288,7 @@ lookup_address_in_function_table (struct comp_unit *unit,
   struct lookup_funcinfo* lookup_funcinfo = NULL;
   struct funcinfo* funcinfo = NULL;
   struct funcinfo* best_fit = NULL;
-  bfd_vma best_fit_len = 0;
+  bfd_vma best_fit_len = (bfd_vma) -1;
   bfd_size_type low, high, mid, first;
   struct arange *arange;
 
@@ -3334,8 +3334,7 @@ lookup_address_in_function_table (struct comp_unit *unit,
 	  if (addr < arange->low || addr >= arange->high)
 	    continue;
 
-	  if (!best_fit
-	      || arange->high - arange->low < best_fit_len
+	  if (arange->high - arange->low < best_fit_len
 	      /* The following comparison is designed to return the same
 		 match as the previous algorithm for routines which have the
 		 same best fit length.  */
@@ -3367,32 +3366,24 @@ lookup_symbol_in_function_table (struct comp_unit *unit,
 				 const char **filename_ptr,
 				 unsigned int *linenumber_ptr)
 {
-  struct funcinfo* each_func;
+  struct funcinfo* each;
   struct funcinfo* best_fit = NULL;
-  bfd_vma best_fit_len = 0;
+  bfd_vma best_fit_len = (bfd_vma) -1;
   struct arange *arange;
   const char *name = bfd_asymbol_name (sym);
 
-  for (each_func = unit->function_table;
-       each_func;
-       each_func = each_func->prev_func)
-    {
-      for (arange = &each_func->arange;
-	   arange;
-	   arange = arange->next)
+  for (each = unit->function_table; each; each = each->prev_func)
+    for (arange = &each->arange; arange; arange = arange->next)
+      if (addr >= arange->low
+	  && addr < arange->high
+	  && arange->high - arange->low < best_fit_len
+	  && each->file
+	  && each->name
+	  && strcmp (name, each->name) == 0)
 	{
-	  if (addr >= arange->low
-	      && addr < arange->high
-	      && each_func->name
-	      && strcmp (name, each_func->name) == 0
-	      && (!best_fit
-		  || arange->high - arange->low < best_fit_len))
-	    {
-	      best_fit = each_func;
-	      best_fit_len = arange->high - arange->low;
-	    }
+	  best_fit = each;
+	  best_fit_len = arange->high - arange->low;
 	}
-    }
 
   if (best_fit)
     {
@@ -3400,8 +3391,8 @@ lookup_symbol_in_function_table (struct comp_unit *unit,
       *linenumber_ptr = best_fit->line;
       return true;
     }
-  else
-    return false;
+
+  return false;
 }
 
 /* Variable table functions.  */
@@ -3416,14 +3407,14 @@ lookup_symbol_in_variable_table (struct comp_unit *unit,
 				 const char **filename_ptr,
 				 unsigned int *linenumber_ptr)
 {
-  const char *name = bfd_asymbol_name (sym);
   struct varinfo* each;
+  const char *name = bfd_asymbol_name (sym);
 
   for (each = unit->variable_table; each; each = each->prev_var)
-    if (! each->stack
+    if (each->addr == addr
+	&& !each->stack
 	&& each->file != NULL
 	&& each->name != NULL
-	&& each->addr == addr
 	&& strcmp (name, each->name) == 0)
       break;
 
@@ -5087,7 +5078,7 @@ info_hash_lookup_funcinfo (struct info_hash_table *hash_table,
 {
   struct funcinfo* each_func;
   struct funcinfo* best_fit = NULL;
-  bfd_vma best_fit_len = 0;
+  bfd_vma best_fit_len = (bfd_vma) -1;
   struct info_list_node *node;
   struct arange *arange;
   const char *name = bfd_asymbol_name (sym);
@@ -5103,8 +5094,7 @@ info_hash_lookup_funcinfo (struct info_hash_table *hash_table,
 	{
 	  if (addr >= arange->low
 	      && addr < arange->high
-	      && (!best_fit
-		  || arange->high - arange->low < best_fit_len))
+	      && arange->high - arange->low < best_fit_len)
 	    {
 	      best_fit = each_func;
 	      best_fit_len = arange->high - arange->low;
@@ -5135,9 +5125,9 @@ info_hash_lookup_varinfo (struct info_hash_table *hash_table,
 			  const char **filename_ptr,
 			  unsigned int *linenumber_ptr)
 {
-  const char *name = bfd_asymbol_name (sym);
   struct varinfo* each;
   struct info_list_node *node;
+  const char *name = bfd_asymbol_name (sym);
 
   for (node = lookup_info_hash_table (hash_table, name);
        node;
