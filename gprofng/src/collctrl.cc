@@ -760,7 +760,7 @@ Coll_Ctrl::get_collect_args ()
       *p++ = strdup ("-s");
       if (synctrace_thresh < 0)
 	*p++ = strdup ("calibrate");
-      else if (synctrace_thresh < 0)
+      else if (synctrace_thresh == 0)
 	*p++ = strdup ("all");
       else
 	*p++ = dbe_sprintf ("%d", synctrace_thresh);
