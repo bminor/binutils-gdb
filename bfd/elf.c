@@ -2479,7 +2479,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       }
 
     case SHT_GNU_verdef:
-      elf_dynverdef (abfd) = shindex;
+      if (hdr->sh_info != 0)
+	elf_dynverdef (abfd) = shindex;
       elf_tdata (abfd)->dynverdef_hdr = *hdr;
       ret = _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
       goto success;
@@ -2494,7 +2495,8 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
       goto success;
 
     case SHT_GNU_verneed:
-      elf_dynverref (abfd) = shindex;
+      if (hdr->sh_info != 0)
+	elf_dynverref (abfd) = shindex;
       elf_tdata (abfd)->dynverref_hdr = *hdr;
       ret = _bfd_elf_make_section_from_shdr (abfd, hdr, name, shindex);
       goto success;
@@ -8877,8 +8879,7 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bool default_imported_symver)
 
       hdr = &elf_tdata (abfd)->dynverref_hdr;
 
-      if (hdr->sh_info == 0
-	  || hdr->sh_info > hdr->sh_size / sizeof (Elf_External_Verneed))
+      if (hdr->sh_info > hdr->sh_size / sizeof (Elf_External_Verneed))
 	{
 	error_return_bad_verref:
 	  _bfd_error_handler
@@ -9011,7 +9012,7 @@ _bfd_elf_slurp_version_tables (bfd *abfd, bool default_imported_symver)
 
       hdr = &elf_tdata (abfd)->dynverdef_hdr;
 
-      if (hdr->sh_info == 0 || hdr->sh_size < sizeof (Elf_External_Verdef))
+      if (hdr->sh_size < sizeof (Elf_External_Verdef))
 	{
 	error_return_bad_verdef:
 	  _bfd_error_handler
