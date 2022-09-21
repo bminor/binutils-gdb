@@ -1810,8 +1810,6 @@ struct funcinfo
   bool is_linkage;
   const char *name;
   struct arange arange;
-  /* Where the symbol is defined.  */
-  asection *sec;
   /* The offset of the funcinfo from the start of the unit.  */
   uint64_t unit_offset;
 };
@@ -1848,8 +1846,6 @@ struct varinfo
   const char *name;
   /* The address of the variable.  */
   bfd_vma addr;
-  /* Where the symbol is defined.  */
-  asection *sec;
   /* Is this a stack variable?  */
   bool stack;
 };
@@ -3354,7 +3350,6 @@ lookup_symbol_in_function_table (struct comp_unit *unit,
   bfd_vma best_fit_len = 0;
   struct arange *arange;
   const char *name = bfd_asymbol_name (sym);
-  asection *sec = bfd_asymbol_section (sym);
 
   for (each_func = unit->function_table;
        each_func;
@@ -3364,8 +3359,7 @@ lookup_symbol_in_function_table (struct comp_unit *unit,
 	   arange;
 	   arange = arange->next)
 	{
-	  if ((!each_func->sec || each_func->sec == sec)
-	      && addr >= arange->low
+	  if (addr >= arange->low
 	      && addr < arange->high
 	      && each_func->name
 	      && strcmp (name, each_func->name) == 0
@@ -3380,7 +3374,6 @@ lookup_symbol_in_function_table (struct comp_unit *unit,
 
   if (best_fit)
     {
-      best_fit->sec = sec;
       *filename_ptr = best_fit->file;
       *linenumber_ptr = best_fit->line;
       return true;
@@ -3402,7 +3395,6 @@ lookup_symbol_in_variable_table (struct comp_unit *unit,
 				 unsigned int *linenumber_ptr)
 {
   const char *name = bfd_asymbol_name (sym);
-  asection *sec = bfd_asymbol_section (sym);
   struct varinfo* each;
 
   for (each = unit->variable_table; each; each = each->prev_var)
@@ -3410,13 +3402,11 @@ lookup_symbol_in_variable_table (struct comp_unit *unit,
 	&& each->file != NULL
 	&& each->name != NULL
 	&& each->addr == addr
-	&& (!each->sec || each->sec == sec)
 	&& strcmp (name, each->name) == 0)
       break;
 
   if (each)
     {
-      each->sec = sec;
       *filename_ptr = each->file;
       *linenumber_ptr = each->line;
       return true;
@@ -5079,7 +5069,6 @@ info_hash_lookup_funcinfo (struct info_hash_table *hash_table,
   struct info_list_node *node;
   struct arange *arange;
   const char *name = bfd_asymbol_name (sym);
-  asection *sec = bfd_asymbol_section (sym);
 
   for (node = lookup_info_hash_table (hash_table, name);
        node;
@@ -5090,8 +5079,7 @@ info_hash_lookup_funcinfo (struct info_hash_table *hash_table,
 	   arange;
 	   arange = arange->next)
 	{
-	  if ((!each_func->sec || each_func->sec == sec)
-	      && addr >= arange->low
+	  if (addr >= arange->low
 	      && addr < arange->high
 	      && (!best_fit
 		  || arange->high - arange->low < best_fit_len))
@@ -5104,7 +5092,6 @@ info_hash_lookup_funcinfo (struct info_hash_table *hash_table,
 
   if (best_fit)
     {
-      best_fit->sec = sec;
       *filename_ptr = best_fit->file;
       *linenumber_ptr = best_fit->line;
       return true;
@@ -5127,7 +5114,6 @@ info_hash_lookup_varinfo (struct info_hash_table *hash_table,
 			  unsigned int *linenumber_ptr)
 {
   const char *name = bfd_asymbol_name (sym);
-  asection *sec = bfd_asymbol_section (sym);
   struct varinfo* each;
   struct info_list_node *node;
 
@@ -5136,10 +5122,8 @@ info_hash_lookup_varinfo (struct info_hash_table *hash_table,
        node = node->next)
     {
       each = (struct varinfo *) node->info;
-      if (each->addr == addr
-	  && (!each->sec || each->sec == sec))
+      if (each->addr == addr)
 	{
-	  each->sec = sec;
 	  *filename_ptr = each->file;
 	  *linenumber_ptr = each->line;
 	  return true;
