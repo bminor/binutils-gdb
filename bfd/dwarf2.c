@@ -3379,7 +3379,7 @@ lookup_symbol_in_function_table (struct comp_unit *unit,
 	  && arange->high - arange->low < best_fit_len
 	  && each->file
 	  && each->name
-	  && strcmp (name, each->name) == 0)
+	  && strstr (name, each->name) != NULL)
 	{
 	  best_fit = each;
 	  best_fit_len = arange->high - arange->low;
@@ -3415,7 +3415,7 @@ lookup_symbol_in_variable_table (struct comp_unit *unit,
 	&& !each->stack
 	&& each->file != NULL
 	&& each->name != NULL
-	&& strcmp (name, each->name) == 0)
+	&& strstr (name, each->name) != NULL)
       break;
 
   if (each)
@@ -5867,25 +5867,23 @@ _bfd_dwarf2_find_nearest_line_with_alt
 
       if (stash->info_hash_status == STASH_INFO_HASH_ON)
 	{
-	  found = stash_find_line_fast (stash, symbol, addr, filename_ptr,
-					linenumber_ptr);
+	  found = stash_find_line_fast (stash, symbol, addr,
+					filename_ptr, linenumber_ptr);
 	  if (found)
 	    goto done;
 	}
-      else
-	{
-	  /* Check the previously read comp. units first.  */
-	  for (each = stash->f.all_comp_units; each; each = each->next_unit)
-	    if ((symbol->flags & BSF_FUNCTION) == 0
-		|| each->arange.high == 0
-		|| comp_unit_contains_address (each, addr))
-	      {
-		found = comp_unit_find_line (each, symbol, addr, filename_ptr,
-					     linenumber_ptr);
-		if (found)
-		  goto done;
-	      }
-	}
+
+      /* Check the previously read comp. units first.  */
+      for (each = stash->f.all_comp_units; each; each = each->next_unit)
+	if ((symbol->flags & BSF_FUNCTION) == 0
+	    || each->arange.high == 0
+	    || comp_unit_contains_address (each, addr))
+	  {
+	    found = comp_unit_find_line (each, symbol, addr, filename_ptr,
+					 linenumber_ptr);
+	    if (found)
+	      goto done;
+	  }
     }
   else
     {
