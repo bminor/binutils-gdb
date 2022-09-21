@@ -403,6 +403,9 @@ bpfinishpy_handle_exit (struct inferior *inf)
 int
 gdbpy_initialize_finishbreakpoints (void)
 {
+  if (!gdbpy_breakpoint_init_breakpoint_type ())
+    return -1;
+
   if (PyType_Ready (&finish_breakpoint_object_type) < 0)
     return -1;
 

@@ -989,6 +989,26 @@ build_bp_list (struct breakpoint *b, PyObject *list)
   return PyList_Append (list, bp) == 0;
 }
 
+/* See python-internal.h.  */
+
+bool
+gdbpy_breakpoint_init_breakpoint_type ()
+{
+  if (breakpoint_object_type.tp_new == nullptr)
+    {
+      breakpoint_object_type.tp_new = PyType_GenericNew;
+      if (PyType_Ready (&breakpoint_object_type) < 0)
+	{
+	  /* Reset tp_new back to nullptr so future calls to this function
+	     will try calling PyType_Ready again.  */
+	  breakpoint_object_type.tp_new = nullptr;
+	  return false;
+	}
+    }
+
+  return true;
+}
+
 /* Static function to return a tuple holding all breakpoints.  */
 
 PyObject *
@@ -1216,8 +1236,7 @@ gdbpy_initialize_breakpoints (void)
 {
   int i;
 
-  breakpoint_object_type.tp_new = PyType_GenericNew;
-  if (PyType_Ready (&breakpoint_object_type) < 0)
+  if (!gdbpy_breakpoint_init_breakpoint_type ())
     return -1;
 
   if (gdb_pymodule_addobject (gdb_module, "Breakpoint",
