@@ -260,7 +260,7 @@ riscv_set_rvc (bool rvc_value)
 /* Turn on the tso flag for elf_flags once we have enabled ztso extension.  */
 
 static void
-riscv_set_tso ()
+riscv_set_tso (void)
 {
   elf_flags |= EF_RISCV_TSO;
 }
