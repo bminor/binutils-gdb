@@ -3168,12 +3168,12 @@ ia64_use_struct_convention (struct type *type)
      case.  */
   float_elt_type = is_float_or_hfa_type (type);
   if (float_elt_type != NULL
-      && TYPE_LENGTH (type) / TYPE_LENGTH (float_elt_type) <= 8)
+      && type->length () / float_elt_type->length () <= 8)
     return 0;
 
   /* Other structs of length 32 or less are returned in r8-r11.
      Don't use the struct convention for those either.  */
-  return TYPE_LENGTH (type) > 32;
+  return type->length () > 32;
 }
 
 /* Return non-zero if TYPE is a structure or union type.  */
@@ -3198,18 +3198,18 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache,
       gdb_byte from[IA64_FP_REGISTER_SIZE];
       int offset = 0;
       int regnum = IA64_FR8_REGNUM;
-      int n = TYPE_LENGTH (type) / TYPE_LENGTH (float_elt_type);
+      int n = type->length () / float_elt_type->length ();
 
       while (n-- > 0)
 	{
 	  regcache->cooked_read (regnum, from);
 	  target_float_convert (from, ia64_ext_type (gdbarch),
 				valbuf + offset, float_elt_type);
-	  offset += TYPE_LENGTH (float_elt_type);
+	  offset += float_elt_type->length ();
 	  regnum++;
 	}
     }
-  else if (!ia64_struct_type_p (type) && TYPE_LENGTH (type) < 8)
+  else if (!ia64_struct_type_p (type) && type->length () < 8)
     {
       /* This is an integral value, and its size is less than 8 bytes.
 	 These values are LSB-aligned, so extract the relevant bytes,
@@ -3222,16 +3222,16 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache,
       ULONGEST val;
 
       regcache_cooked_read_unsigned (regcache, IA64_GR8_REGNUM, &val);
-      store_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order, val);
+      store_unsigned_integer (valbuf, type->length (), byte_order, val);
     }
   else
     {
       ULONGEST val;
       int offset = 0;
       int regnum = IA64_GR8_REGNUM;
-      int reglen = TYPE_LENGTH (register_type (gdbarch, IA64_GR8_REGNUM));
-      int n = TYPE_LENGTH (type) / reglen;
-      int m = TYPE_LENGTH (type) % reglen;
+      int reglen = register_type (gdbarch, IA64_GR8_REGNUM)->length ();
+      int n = type->length () / reglen;
+      int m = type->length () % reglen;
 
       while (n-- > 0)
 	{
@@ -3263,14 +3263,14 @@ ia64_store_return_value (struct type *type, struct regcache *regcache,
       gdb_byte to[IA64_FP_REGISTER_SIZE];
       int offset = 0;
       int regnum = IA64_FR8_REGNUM;
-      int n = TYPE_LENGTH (type) / TYPE_LENGTH (float_elt_type);
+      int n = type->length () / float_elt_type->length ();
 
       while (n-- > 0)
 	{
 	  target_float_convert (valbuf + offset, float_elt_type,
 				to, ia64_ext_type (gdbarch));
 	  regcache->cooked_write (regnum, to);
-	  offset += TYPE_LENGTH (float_elt_type);
+	  offset += float_elt_type->length ();
 	  regnum++;
 	}
     }
@@ -3278,9 +3278,9 @@ ia64_store_return_value (struct type *type, struct regcache *regcache,
     {
       int offset = 0;
       int regnum = IA64_GR8_REGNUM;
-      int reglen = TYPE_LENGTH (register_type (gdbarch, IA64_GR8_REGNUM));
-      int n = TYPE_LENGTH (type) / reglen;
-      int m = TYPE_LENGTH (type) % reglen;
+      int reglen = register_type (gdbarch, IA64_GR8_REGNUM)->length ();
+      int n = type->length () / reglen;
+      int m = type->length () % reglen;
 
       while (n-- > 0)
 	{
@@ -3332,7 +3332,7 @@ is_float_or_hfa_type_recurse (struct type *t, struct type **etp)
     {
     case TYPE_CODE_FLT:
       if (*etp)
-	return TYPE_LENGTH (*etp) == TYPE_LENGTH (t);
+	return (*etp)->length () == t->length ();
       else
 	{
 	  *etp = t;
@@ -3387,7 +3387,7 @@ slot_alignment_is_next_even (struct type *t)
     {
     case TYPE_CODE_INT:
     case TYPE_CODE_FLT:
-      if (TYPE_LENGTH (t) > 8)
+      if (t->length () > 8)
 	return 1;
       else
 	return 0;
@@ -3699,7 +3699,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       arg = args[argno];
       type = check_typedef (value_type (arg));
-      len = TYPE_LENGTH (type);
+      len = type->length ();
 
       if ((nslots & 1) && slot_alignment_is_next_even (type))
 	nslots++;
@@ -3742,7 +3742,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       arg = args[argno];
       type = check_typedef (value_type (arg));
-      len = TYPE_LENGTH (type);
+      len = type->length ();
 
       /* Special handling for function parameters.  */
       if (len == 8
@@ -3817,7 +3817,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       if (float_elt_type != NULL)
 	{
 	  argoffset = 0;
-	  len = TYPE_LENGTH (type);
+	  len = type->length ();
 	  while (len > 0 && floatreg < IA64_FR16_REGNUM)
 	    {
 	      gdb_byte to[IA64_FP_REGISTER_SIZE];
@@ -3826,8 +3826,8 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 				    ia64_ext_type (gdbarch));
 	      regcache->cooked_write (floatreg, to);
 	      floatreg++;
-	      argoffset += TYPE_LENGTH (float_elt_type);
-	      len -= TYPE_LENGTH (float_elt_type);
+	      argoffset += float_elt_type->length ();
+	      len -= float_elt_type->length ();
 	    }
 	}
     }

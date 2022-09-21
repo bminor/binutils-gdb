@@ -208,7 +208,7 @@ sparc_fetch_wcookie (struct gdbarch *gdbarch)
 static int
 sparc_integral_or_pointer_p (const struct type *type)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   switch (type->code ())
     {
@@ -242,7 +242,7 @@ sparc_floating_p (const struct type *type)
     {
     case TYPE_CODE_FLT:
       {
-	int len = TYPE_LENGTH (type);
+	int len = type->length ();
 	return (len == 4 || len == 8 || len == 16);
       }
     default:
@@ -261,7 +261,7 @@ sparc_complex_floating_p (const struct type *type)
     {
     case TYPE_CODE_COMPLEX:
       {
-	int len = TYPE_LENGTH (type);
+	int len = type->length ();
 	return (len == 8 || len == 16 || len == 32);
       }
     default:
@@ -306,14 +306,14 @@ sparc_structure_return_p (const struct type *type)
 	return true;
       /* Integer vectors are returned by memory if the vector size
 	 is greater than 8 bytes long.  */
-      return (TYPE_LENGTH (type) > 8);
+      return (type->length () > 8);
     }
 
   if (sparc_floating_p (type))
     {
       /* Floating point types are passed by register for size 4 and
 	 8 bytes, and by memory for size 16 bytes.  */
-      return (TYPE_LENGTH (type) == 16);
+      return (type->length () == 16);
     }
 
   /* Other than that, only aggregates of all sizes get returned by
@@ -334,13 +334,13 @@ sparc_arg_by_memory_p (const struct type *type)
 	return true;
       /* Integer vectors are passed by memory if the vector size
 	 is greater than 8 bytes long.  */
-      return (TYPE_LENGTH (type) > 8);
+      return (type->length () > 8);
     }
 
   /* Floats are passed by register for size 4 and 8 bytes, and by memory
      for size 16 bytes.  */
   if (sparc_floating_p (type))
-    return (TYPE_LENGTH (type) == 16);
+    return (type->length () == 16);
 
   /* Complex floats and aggregates of all sizes are passed by memory.  */
   if (sparc_complex_floating_p (type) || sparc_structure_or_union_p (type))
@@ -603,7 +603,7 @@ sparc32_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 
       /* This is an UNIMP instruction.  */
       store_unsigned_integer (buf, 4, byte_order,
-			      TYPE_LENGTH (value_type) & 0x1fff);
+			      value_type->length () & 0x1fff);
       write_memory (sp - 8, buf, 4);
       return sp - 8;
     }
@@ -627,7 +627,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
   for (i = 0; i < nargs; i++)
     {
       struct type *type = value_type (args[i]);
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
 
       if (sparc_arg_by_memory_p (type))
 	{
@@ -671,7 +671,7 @@ sparc32_store_arguments (struct regcache *regcache, int nargs,
     {
       const bfd_byte *valbuf = value_contents (args[i]).data ();
       struct type *type = value_type (args[i]);
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       gdb_byte buf[4];
 
       if (len < 4)
@@ -1236,7 +1236,7 @@ sparc32_struct_return_from_sym (struct symbol *sym)
     {
       type = check_typedef (type->target_type ());
       if (sparc_structure_or_union_p (type)
-	  || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
+	  || (sparc_floating_p (type) && type->length () == 16))
 	return 1;
     }
 
@@ -1399,7 +1399,7 @@ static void
 sparc32_extract_return_value (struct type *type, struct regcache *regcache,
 			      gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   gdb_byte buf[32];
 
   gdb_assert (!sparc_structure_return_p (type));
@@ -1453,7 +1453,7 @@ static void
 sparc32_store_return_value (struct type *type, struct regcache *regcache,
 			    const gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   gdb_byte buf[32];
 
   gdb_assert (!sparc_structure_return_p (type));
@@ -1521,13 +1521,13 @@ sparc32_return_value (struct gdbarch *gdbarch, struct value *function,
 	{
 	  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
 	  addr = read_memory_unsigned_integer (sp + 64, 4, byte_order);
-	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	  read_memory (addr, readbuf, type->length ());
 	}
       if (writebuf)
 	{
 	  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
 	  addr = read_memory_unsigned_integer (sp + 64, 4, byte_order);
-	  write_memory (addr, writebuf, TYPE_LENGTH (type));
+	  write_memory (addr, writebuf, type->length ());
 	}
 
       return RETURN_VALUE_ABI_PRESERVES_ADDRESS;
@@ -1545,7 +1545,7 @@ static int
 sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
 {
   return (sparc_structure_or_union_p (type)
-	  || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16)
+	  || (sparc_floating_p (type) && type->length () == 16)
 	  || sparc_complex_floating_p (type));
 }
 

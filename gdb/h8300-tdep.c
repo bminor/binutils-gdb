@@ -632,8 +632,7 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Now make sure there's space on the stack for the arguments.  We
      may over-allocate a little here, but that won't hurt anything.  */
   for (argument = 0; argument < nargs; argument++)
-    stack_alloc += align_up (TYPE_LENGTH (value_type (args[argument])),
-			     wordsize);
+    stack_alloc += align_up (value_type (args[argument])->length (), wordsize);
   sp -= stack_alloc;
 
   /* Now load as many arguments as possible into registers, and push
@@ -647,7 +646,7 @@ h8300_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (argument = 0; argument < nargs; argument++)
     {
       struct type *type = value_type (args[argument]);
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       char *contents = (char *) value_contents (args[argument]).data ();
 
       /* Pad the argument appropriately.  */
@@ -725,7 +724,7 @@ h8300_extract_return_value (struct type *type, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   ULONGEST c, addr;
 
   switch (len)
@@ -764,13 +763,13 @@ h8300h_extract_return_value (struct type *type, struct regcache *regcache,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST c;
 
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
     case 1:
     case 2:
     case 4:
       regcache_cooked_read_unsigned (regcache, E_RET0_REGNUM, &c);
-      store_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order, c);
+      store_unsigned_integer (valbuf, type->length (), byte_order, c);
       break;
     case 8:			/* long long is now 8 bytes.  */
       if (type->code () == TYPE_CODE_INT)
@@ -797,9 +796,9 @@ h8300_use_struct_convention (struct type *value_type)
   if (value_type->code () == TYPE_CODE_STRUCT
       || value_type->code () == TYPE_CODE_UNION)
     return 1;
-  return !(TYPE_LENGTH (value_type) == 1
-	   || TYPE_LENGTH (value_type) == 2
-	   || TYPE_LENGTH (value_type) == 4);
+  return !(value_type->length () == 1
+	   || value_type->length () == 2
+	   || value_type->length () == 4);
 }
 
 static int
@@ -810,10 +809,10 @@ h8300h_use_struct_convention (struct type *value_type)
   if (value_type->code () == TYPE_CODE_STRUCT
       || value_type->code () == TYPE_CODE_UNION)
     return 1;
-  return !(TYPE_LENGTH (value_type) == 1
-	   || TYPE_LENGTH (value_type) == 2
-	   || TYPE_LENGTH (value_type) == 4
-	   || (TYPE_LENGTH (value_type) == 8
+  return !(value_type->length () == 1
+	   || value_type->length () == 2
+	   || value_type->length () == 4
+	   || (value_type->length () == 8
 	       && value_type->code () == TYPE_CODE_INT));
 }
 
@@ -829,15 +828,15 @@ h8300_store_return_value (struct type *type, struct regcache *regcache,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
 
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
     case 1:
     case 2:			/* short...  */
-      val = extract_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order);
+      val = extract_unsigned_integer (valbuf, type->length (), byte_order);
       regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM, val);
       break;
     case 4:			/* long, float */
-      val = extract_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order);
+      val = extract_unsigned_integer (valbuf, type->length (), byte_order);
       regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM,
 				      (val >> 16) & 0xffff);
       regcache_cooked_write_unsigned (regcache, E_RET1_REGNUM, val & 0xffff);
@@ -858,16 +857,16 @@ h8300h_store_return_value (struct type *type, struct regcache *regcache,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
 
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
     case 1:
     case 2:
     case 4:			/* long, float */
-      val = extract_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order);
+      val = extract_unsigned_integer (valbuf, type->length (), byte_order);
       regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM, val);
       break;
     case 8:
-      val = extract_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order);
+      val = extract_unsigned_integer (valbuf, type->length (), byte_order);
       regcache_cooked_write_unsigned (regcache, E_RET0_REGNUM,
 				      (val >> 32) & 0xffffffff);
       regcache_cooked_write_unsigned (regcache, E_RET1_REGNUM,
@@ -902,7 +901,7 @@ h8300h_return_value (struct gdbarch *gdbarch, struct value *function,
 	  ULONGEST addr;
 
 	  regcache_raw_read_unsigned (regcache, E_R0_REGNUM, &addr);
-	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	  read_memory (addr, readbuf, type->length ());
 	}
 
       return RETURN_VALUE_ABI_RETURNS_ADDRESS;

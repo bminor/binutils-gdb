@@ -82,7 +82,7 @@ register_to_value_test (struct gdbarch *gdbarch)
 	{
 	  if (gdbarch_convert_register_p (gdbarch, regnum, type))
 	    {
-	      std::vector<gdb_byte> expected (TYPE_LENGTH (type), 0);
+	      std::vector<gdb_byte> expected (type->length (), 0);
 
 	      if (type->code () == TYPE_CODE_FLT)
 		{
@@ -99,12 +99,12 @@ register_to_value_test (struct gdbarch *gdbarch)
 					 expected.data ());
 
 	      /* Allocate two bytes more for overflow check.  */
-	      std::vector<gdb_byte> buf (TYPE_LENGTH (type) + 2, 0);
+	      std::vector<gdb_byte> buf (type->length () + 2, 0);
 	      int optim, unavail, ok;
 
 	      /* Set the fingerprint in the last two bytes.  */
-	      buf [TYPE_LENGTH (type)]= 'w';
-	      buf [TYPE_LENGTH (type) + 1]= 'l';
+	      buf [type->length ()]= 'w';
+	      buf [type->length () + 1]= 'l';
 	      ok = gdbarch_register_to_value (gdbarch, frame, regnum, type,
 					      buf.data (), &optim, &unavail);
 
@@ -112,10 +112,10 @@ register_to_value_test (struct gdbarch *gdbarch)
 	      SELF_CHECK (!optim);
 	      SELF_CHECK (!unavail);
 
-	      SELF_CHECK (buf[TYPE_LENGTH (type)] == 'w');
-	      SELF_CHECK (buf[TYPE_LENGTH (type) + 1] == 'l');
+	      SELF_CHECK (buf[type->length ()] == 'w');
+	      SELF_CHECK (buf[type->length () + 1] == 'l');
 
-	      for (auto k = 0; k < TYPE_LENGTH(type); k++)
+	      for (auto k = 0; k < type->length (); k++)
 		SELF_CHECK (buf[k] == expected[k]);
 	    }
 	}

@@ -1041,8 +1041,8 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	       are hopefully rare enough.
 	       Alpha cc -migrate has a sh.value field of zero, we adjust
 	       that too.  */
-	    if (TYPE_LENGTH (t) == t->num_fields ()
-		|| TYPE_LENGTH (t) == 0)
+	    if (t->length () == t->num_fields ()
+		|| t->length () == 0)
 	      t->set_length (gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT);
 	    for (ext_tsym = ext_sh + external_sym_size;
 		 ;
@@ -1869,7 +1869,7 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
 	 dbx seems to ignore it too.  */
 
       /* TYPE_TARGET_STUB now takes care of the zero TYPE_LENGTH problem.  */
-      if (TYPE_LENGTH (*tpp) == 0)
+      if ((*tpp)->length () == 0)
 	t->set_target_is_stub (true);
 
       *tpp = t;

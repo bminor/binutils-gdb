@@ -1019,7 +1019,7 @@ ada_print_type (struct type *type0, const char *varstring,
 	  if (!ada_is_range_type_name (name))
 	    fprintf_styled (stream, metadata_style.style (),
 			    _("<%s-byte integer>"),
-			    pulongest (TYPE_LENGTH (type)));
+			    pulongest (type->length ()));
 	  else
 	    {
 	      gdb_printf (stream, "range ");
@@ -1046,7 +1046,7 @@ ada_print_type (struct type *type0, const char *varstring,
       case TYPE_CODE_FLT:
 	fprintf_styled (stream, metadata_style.style (),
 			_("<%s-byte float>"),
-			pulongest (TYPE_LENGTH (type)));
+			pulongest (type->length ()));
 	break;
       case TYPE_CODE_ENUM:
 	if (show < 0)

@@ -110,7 +110,7 @@ static int
 i386_m128_p (struct type *type)
 {
   return (type->code () == TYPE_CODE_ARRAY && type->is_vector ()
-	  && TYPE_LENGTH (type) == 16);
+	  && type->length () == 16);
 }
 
 /* Return the alignment for TYPE when passed as an argument.  */
@@ -125,7 +125,7 @@ i386_darwin_arg_type_alignment (struct type *type)
      7.  [...]  The caller aligns 128-bit vectors in the parameter area to
 	 16-byte boundaries.  */
   if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
-    return TYPE_LENGTH (type);
+    return type->length ();
   /* 4.  The caller places all the fields of structures (or unions) with no
 	 vector elements in the parameter area.  These structures are 4-byte
 	 aligned.
@@ -201,7 +201,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	      if (write_pass)
 		write_memory (sp + args_space,
 			      value_contents_all (args[i]).data (),
-			      TYPE_LENGTH (arg_type));
+			      arg_type->length ());
 
 	      /* The System V ABI says that:
 		 
@@ -210,7 +210,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		 depending on the size of the argument."
 		 
 		 This makes sure the stack stays word-aligned.  */
-	      args_space += align_up (TYPE_LENGTH (arg_type), 4);
+	      args_space += align_up (arg_type->length (), 4);
 	    }
 	}
 

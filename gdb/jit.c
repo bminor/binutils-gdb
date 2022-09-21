@@ -265,7 +265,7 @@ jit_read_descriptor (gdbarch *gdbarch,
 
   /* Figure out how big the descriptor is on the remote and how to read it.  */
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-  ptr_size = TYPE_LENGTH (ptr_type);
+  ptr_size = ptr_type->length ();
   desc_size = 8 + 2 * ptr_size;  /* Two 32-bit ints and two pointers.  */
   desc_buf = (gdb_byte *) alloca (desc_size);
 
@@ -305,7 +305,7 @@ jit_read_code_entry (struct gdbarch *gdbarch,
 
   /* Figure out how big the entry is on the remote and how to read it.  */
   ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-  ptr_size = TYPE_LENGTH (ptr_type);
+  ptr_size = ptr_type->length ();
 
   /* Figure out where the uint64_t value will be.  */
   align_bytes = type_align (builtin_type (gdbarch)->builtin_uint64);

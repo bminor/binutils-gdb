@@ -567,7 +567,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
       struct value *arg = args[i];
       const gdb_byte *val = value_contents (arg).data ();
       struct type *type = check_typedef (value_type (arg));
-      size_t len = TYPE_LENGTH (type);
+      size_t len = type->length ();
       int align = type_align (type);
       enum type_code code = type->code ();
       struct type *func_type = check_typedef (value_type (function));
@@ -1027,7 +1027,7 @@ loongarch_push_dummy_call (struct gdbarch *gdbarch,
 	case TYPE_CODE_COMPLEX:
 	  {
 	    struct type *target_type = check_typedef (type->target_type ());
-	    size_t target_len = TYPE_LENGTH (target_type);
+	    size_t target_len = target_type->length ();
 
 	    if (target_len < regsize)
 	      {
@@ -1143,7 +1143,7 @@ loongarch_return_value (struct gdbarch *gdbarch, struct value *function,
 {
   int regsize = register_size (gdbarch, 0);
   enum type_code code = type->code ();
-  size_t len = TYPE_LENGTH (type);
+  size_t len = type->length ();
   unsigned int fixed_point_members;
   unsigned int floating_point_members;
   bool first_member_is_fixed_point;

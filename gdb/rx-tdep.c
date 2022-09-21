@@ -712,8 +712,8 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  gdb_assert (return_type->code () == TYPE_CODE_STRUCT
 		      || func_type->code () == TYPE_CODE_UNION);
 
-	  if (TYPE_LENGTH (return_type) > 16
-	      || TYPE_LENGTH (return_type) % 4 != 0)
+	  if (return_type->length () > 16
+	      || return_type->length () % 4 != 0)
 	    {
 	      if (write_pass)
 		regcache_cooked_write_unsigned (regcache, RX_R15_REGNUM,
@@ -727,7 +727,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  struct value *arg = args[i];
 	  const gdb_byte *arg_bits = value_contents_all (arg).data ();
 	  struct type *arg_type = check_typedef (value_type (arg));
-	  ULONGEST arg_size = TYPE_LENGTH (arg_type);
+	  ULONGEST arg_size = arg_type->length ();
 
 	  if (i == 0 && struct_addr != 0
 	      && return_method != return_method_struct
@@ -803,7 +803,7 @@ rx_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 			{
 			  struct type *p_arg_type =
 			    func_type->field (i).type ();
-			  p_arg_size = TYPE_LENGTH (p_arg_type);
+			  p_arg_size = p_arg_type->length ();
 			}
 
 		      sp_off = align_up (sp_off, p_arg_size);
@@ -874,12 +874,12 @@ rx_return_value (struct gdbarch *gdbarch,
 		 gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  ULONGEST valtype_len = TYPE_LENGTH (valtype);
+  ULONGEST valtype_len = valtype->length ();
 
-  if (TYPE_LENGTH (valtype) > 16
+  if (valtype->length () > 16
       || ((valtype->code () == TYPE_CODE_STRUCT
 	   || valtype->code () == TYPE_CODE_UNION)
-	  && TYPE_LENGTH (valtype) % 4 != 0))
+	  && valtype->length () % 4 != 0))
     return RETURN_VALUE_STRUCT_CONVENTION;
 
   if (readbuf)

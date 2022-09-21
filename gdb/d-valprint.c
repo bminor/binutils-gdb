@@ -40,7 +40,7 @@ dynamic_array_type (struct type *type,
       && strcmp (type->field (1).name (), "ptr") == 0
       && !value_bits_any_optimized_out (val,
 					TARGET_CHAR_BIT * embedded_offset,
-					TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+					TARGET_CHAR_BIT * type->length ()))
     {
       CORE_ADDR addr;
       struct type *elttype;

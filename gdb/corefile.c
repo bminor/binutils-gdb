@@ -335,9 +335,9 @@ read_code_unsigned_integer (CORE_ADDR memaddr, int len,
 CORE_ADDR
 read_memory_typed_address (CORE_ADDR addr, struct type *type)
 {
-  gdb_byte *buf = (gdb_byte *) alloca (TYPE_LENGTH (type));
+  gdb_byte *buf = (gdb_byte *) alloca (type->length ());
 
-  read_memory (addr, buf, TYPE_LENGTH (type));
+  read_memory (addr, buf, type->length ());
   return extract_typed_address (buf, type);
 }
 

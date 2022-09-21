@@ -55,8 +55,8 @@ lookup_opencl_vector_type (struct gdbarch *gdbarch, enum type_code code,
 	    && get_array_bounds (type, &lowb, &highb)
 	    && type->target_type ()->code () == code
 	    && type->target_type ()->is_unsigned () == flag_unsigned
-	    && TYPE_LENGTH (type->target_type ()) == el_length
-	    && TYPE_LENGTH (type) == length
+	    && type->target_type ()->length () == el_length
+	    && type->length () == length
 	    && highb - lowb + 1 == n);
   };
   const struct language_defn *lang = language_def (language_opencl);
@@ -123,7 +123,7 @@ lval_func_read (struct value *v)
   struct type *type = check_typedef (value_type (v));
   struct type *eltype = check_typedef (value_type (c->val))->target_type ();
   LONGEST offset = value_offset (v);
-  LONGEST elsize = TYPE_LENGTH (eltype);
+  LONGEST elsize = eltype->length ();
   int n, i, j = 0;
   LONGEST lowb = 0;
   LONGEST highb = 0;
@@ -152,7 +152,7 @@ lval_func_write (struct value *v, struct value *fromval)
   struct type *type = check_typedef (value_type (v));
   struct type *eltype = check_typedef (value_type (c->val))->target_type ();
   LONGEST offset = value_offset (v);
-  LONGEST elsize = TYPE_LENGTH (eltype);
+  LONGEST elsize = eltype->length ();
   int n, i, j = 0;
   LONGEST lowb = 0;
   LONGEST highb = 0;
@@ -198,7 +198,7 @@ lval_func_check_synthetic_pointer (const struct value *v,
   struct lval_closure *c = (struct lval_closure *) value_computed_closure (v);
   /* Size of the target type in bits.  */
   int elsize =
-      TYPE_LENGTH (check_typedef (value_type (c->val))->target_type ()) * 8;
+      check_typedef (value_type (c->val))->target_type ()->length () * 8;
   int startrest = offset % elsize;
   int start = offset / elsize;
   int endrest = (offset + length) % elsize;
@@ -289,7 +289,7 @@ create_value (struct gdbarch *gdbarch, struct value *val, enum noside noside,
 	 resulting type is a vector as well.  */
       struct type *dst_type =
 	lookup_opencl_vector_type (gdbarch, elm_type->code (),
-				   TYPE_LENGTH (elm_type),
+				   elm_type->length (),
 				   elm_type->is_unsigned (), n);
 
       if (dst_type == NULL)
@@ -316,10 +316,10 @@ create_value (struct gdbarch *gdbarch, struct value *val, enum noside noside,
 	      /* Copy src val contents into the destination value.  */
 	      for (i = 0; i < n; i++)
 		memcpy (value_contents_writeable (ret).data ()
-			+ (i * TYPE_LENGTH (elm_type)),
+			+ (i * elm_type->length ()),
 			value_contents (val).data ()
-			+ (indices[i] * TYPE_LENGTH (elm_type)),
-			TYPE_LENGTH (elm_type));
+			+ (indices[i] * elm_type->length ()),
+			elm_type->length ());
 	    }
 	}
     }
@@ -463,7 +463,7 @@ opencl_logical_not (struct type *expect_type, struct expression *exp,
       /* Determine the resulting type of the operation and allocate the
 	 value.  */
       rettype = lookup_opencl_vector_type (exp->gdbarch, TYPE_CODE_INT,
-					   TYPE_LENGTH (eltype), 0,
+					   eltype->length (), 0,
 					   highb - lowb + 1);
       ret = allocate_value (rettype);
 
@@ -474,8 +474,8 @@ opencl_logical_not (struct type *expect_type, struct expression *exp,
 	  set) if the value of its operand compares equal to 0.  */
 	  int tmp = value_logical_not (value_subscript (arg, i)) ? -1 : 0;
 	  memset ((value_contents_writeable (ret).data ()
-		   + i * TYPE_LENGTH (eltype)),
-		  tmp, TYPE_LENGTH (eltype));
+		   + i * eltype->length ()),
+		  tmp, eltype->length ());
 	}
     }
   else
@@ -556,14 +556,14 @@ vector_relop (struct expression *exp, struct value *val1, struct value *val2,
 
   /* Check whether the vector types are compatible.  */
   if (eltype1->code () != eltype2->code ()
-      || TYPE_LENGTH (eltype1) != TYPE_LENGTH (eltype2)
+      || eltype1->length () != eltype2->length ()
       || eltype1->is_unsigned () != eltype2->is_unsigned ()
       || lowb1 != lowb2 || highb1 != highb2)
     error (_("Cannot perform operation on vectors with different types"));
 
   /* Determine the resulting type of the operation and allocate the value.  */
   rettype = lookup_opencl_vector_type (exp->gdbarch, TYPE_CODE_INT,
-				       TYPE_LENGTH (eltype1), 0,
+				       eltype1->length (), 0,
 				       highb1 - lowb1 + 1);
   ret = allocate_value (rettype);
 
@@ -575,8 +575,8 @@ vector_relop (struct expression *exp, struct value *val1, struct value *val2,
       int tmp = scalar_relop (value_subscript (val1, i),
 			      value_subscript (val2, i), op) ? -1 : 0;
       memset ((value_contents_writeable (ret).data ()
-	       + i * TYPE_LENGTH (eltype1)),
-	      tmp, TYPE_LENGTH (eltype1));
+	       + i * eltype1->length ()),
+	      tmp, eltype1->length ());
      }
 
   return ret;
@@ -820,7 +820,7 @@ Cannot perform conditional operation on incompatible types"));
 
       /* Throw an error if the types of arg2 or arg3 are incompatible.  */
       if (eltype2->code () != eltype3->code ()
-	  || TYPE_LENGTH (eltype2) != TYPE_LENGTH (eltype3)
+	  || eltype2->length () != eltype3->length ()
 	  || eltype2->is_unsigned () != eltype3->is_unsigned ()
 	  || lowb2 != lowb3 || highb2 != highb3)
 	error (_("\
@@ -839,8 +839,8 @@ Cannot perform conditional operation on vectors with different sizes"));
 	  tmp = value_logical_not (value_subscript (arg1, i)) ?
 	    value_subscript (arg3, i) : value_subscript (arg2, i);
 	  memcpy (value_contents_writeable (ret).data () +
-		  i * TYPE_LENGTH (eltype2), value_contents_all (tmp).data (),
-		  TYPE_LENGTH (eltype2));
+		  i * eltype2->length (), value_contents_all (tmp).data (),
+		  eltype2->length ());
 	}
 
       return ret;
@@ -899,7 +899,7 @@ public:
 	tmp->set_name (OCL_STRING(TYPE ## 2));			\
 	tmp = add (init_vector_type (ELEMENT_TYPE, 3));		\
 	tmp->set_name (OCL_STRING(TYPE ## 3));			\
-	tmp->set_length (4 * TYPE_LENGTH (ELEMENT_TYPE));	\
+	tmp->set_length (4 * (ELEMENT_TYPE)->length ());	\
 	tmp = add (init_vector_type (ELEMENT_TYPE, 4));		\
 	tmp->set_name (OCL_STRING(TYPE ## 4));			\
 	tmp = add (init_vector_type (ELEMENT_TYPE, 8));		\

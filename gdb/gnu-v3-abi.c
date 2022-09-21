@@ -142,28 +142,28 @@ get_gdb_vtable_type (struct gdbarch *arch)
   field->set_name ("vcall_and_vbase_offsets");
   field->set_type (lookup_array_range_type (ptrdiff_type, 0, -1));
   field->set_loc_bitpos (offset * TARGET_CHAR_BIT);
-  offset += TYPE_LENGTH (field->type ());
+  offset += field->type ()->length ();
   field++;
 
   /* ptrdiff_t offset_to_top; */
   field->set_name ("offset_to_top");
   field->set_type (ptrdiff_type);
   field->set_loc_bitpos (offset * TARGET_CHAR_BIT);
-  offset += TYPE_LENGTH (field->type ());
+  offset += field->type ()->length ();
   field++;
 
   /* void *type_info; */
   field->set_name ("type_info");
   field->set_type (void_ptr_type);
   field->set_loc_bitpos (offset * TARGET_CHAR_BIT);
-  offset += TYPE_LENGTH (field->type ());
+  offset += field->type ()->length ();
   field++;
 
   /* void (*virtual_functions[0]) (); */
   field->set_name ("virtual_functions");
   field->set_type (lookup_array_range_type (ptr_to_void_fn_type, 0, -1));
   field->set_loc_bitpos (offset * TARGET_CHAR_BIT);
-  offset += TYPE_LENGTH (field->type ());
+  offset += field->type ()->length ();
   field++;
 
   /* We assumed in the allocation above that there were four fields.  */
@@ -371,8 +371,8 @@ gnuv3_rtti_type (struct value *value,
 
   if (full_p)
     *full_p = (- offset_to_top == value_embedded_offset (value)
-	       && (TYPE_LENGTH (value_enclosing_type (value))
-		   >= TYPE_LENGTH (run_time_type)));
+	       && (value_enclosing_type (value)->length ()
+		   >= run_time_type->length ()));
   if (top_p)
     *top_p = - offset_to_top;
   return run_time_type;
@@ -500,9 +500,9 @@ gnuv3_baseclass_offset (struct type *type, int index,
     error (_("Expected a negative vbase offset (old compiler?)"));
 
   cur_base_offset = cur_base_offset + vtable_address_point_offset (gdbarch);
-  if ((- cur_base_offset) % TYPE_LENGTH (ptr_type) != 0)
+  if ((- cur_base_offset) % ptr_type->length () != 0)
     error (_("Misaligned vbase offset."));
-  cur_base_offset = cur_base_offset / ((int) TYPE_LENGTH (ptr_type));
+  cur_base_offset = cur_base_offset / ((int) ptr_type->length ());
 
   vtable = gnuv3_get_vtable (gdbarch, type, address + embedded_offset);
   gdb_assert (vtable != NULL);
@@ -556,7 +556,7 @@ gnuv3_find_method_in (struct type *domain, CORE_ADDR voffset,
       basetype = domain->field (i).type ();
       /* Recurse with a modified adjustment.  We don't need to adjust
 	 voffset.  */
-      if (adjustment >= pos && adjustment < pos + TYPE_LENGTH (basetype))
+      if (adjustment >= pos && adjustment < pos + basetype->length ())
 	return gnuv3_find_method_in (basetype, voffset, adjustment - pos);
     }
 
@@ -586,10 +586,10 @@ gnuv3_decode_method_ptr (struct gdbarch *gdbarch,
      interpretations and choose the right one later on.  */
   ptr_value = extract_typed_address (contents, funcptr_type);
   voffset = extract_signed_integer (contents,
-				    TYPE_LENGTH (funcptr_type), byte_order);
-  contents += TYPE_LENGTH (funcptr_type);
+				    funcptr_type->length (), byte_order);
+  contents += funcptr_type->length ();
   adjustment = extract_signed_integer (contents,
-				       TYPE_LENGTH (offset_type), byte_order);
+				       offset_type->length (), byte_order);
 
   if (!gdbarch_vbit_in_delta (gdbarch))
     {
@@ -639,7 +639,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
       /* It's a virtual table offset, maybe in this class.  Search
 	 for a field with the correct vtable offset.  First convert it
 	 to an index, as used in TYPE_FN_FIELD_VOFFSET.  */
-      voffset = ptr_value / TYPE_LENGTH (vtable_ptrdiff_type (gdbarch));
+      voffset = ptr_value / vtable_ptrdiff_type (gdbarch)->length ();
 
       physname = gnuv3_find_method_in (self_type, voffset, adjustment);
 
@@ -693,7 +693,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 static int
 gnuv3_method_ptr_size (struct type *type)
 {
-  return 2 * TYPE_LENGTH (builtin_type (type->arch ())->builtin_data_ptr);
+  return 2 * builtin_type (type->arch ())->builtin_data_ptr->length ();
 }
 
 /* GNU v3 implementation of cplus_make_method_ptr.  */
@@ -703,7 +703,7 @@ gnuv3_make_method_ptr (struct type *type, gdb_byte *contents,
 		       CORE_ADDR value, int is_virtual)
 {
   struct gdbarch *gdbarch = type->arch ();
-  int size = TYPE_LENGTH (builtin_type (gdbarch)->builtin_data_ptr);
+  int size = builtin_type (gdbarch)->builtin_data_ptr->length ();
   enum bfd_endian byte_order = type_byte_order (type);
 
   /* FIXME drow/2006-12-24: The adjustment of "this" is currently
@@ -775,7 +775,7 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
     {
       LONGEST voffset;
 
-      voffset = ptr_value / TYPE_LENGTH (vtable_ptrdiff_type (gdbarch));
+      voffset = ptr_value / vtable_ptrdiff_type (gdbarch)->length ();
       return gnuv3_get_virtual_fn (gdbarch, value_ind (*this_p),
 				   method_type, voffset);
     }
@@ -1040,14 +1040,14 @@ build_std_type_info_type (struct gdbarch *arch)
   field->set_name ("_vptr.type_info");
   field->set_type (void_ptr_type);
   field->set_loc_bitpos (offset * TARGET_CHAR_BIT);
-  offset += TYPE_LENGTH (field->type ());
+  offset += field->type ()->length ();
   field++;
 
   /* The name.  */
   field->set_name ("__name");
   field->set_type (char_ptr_type);
   field->set_loc_bitpos (offset * TARGET_CHAR_BIT);
-  offset += TYPE_LENGTH (field->type ());
+  offset += field->type ()->length ();
   field++;
 
   gdb_assert (field == (field_list + 2));

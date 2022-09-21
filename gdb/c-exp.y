@@ -957,7 +957,7 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 			    type = check_typedef (type->target_type ());
 
 			  pstate->push_new<long_const_operation>
-			    (int_type, TYPE_LENGTH (type));
+			    (int_type, type->length ());
 			}
 	;
 

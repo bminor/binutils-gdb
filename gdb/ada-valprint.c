@@ -195,12 +195,12 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 					       (i * bitsize) / HOST_CHAR_BIT,
 					       (i * bitsize) % HOST_CHAR_BIT,
 					       bitsize, elttype);
-	  if (TYPE_LENGTH (check_typedef (value_type (v0)))
-	      != TYPE_LENGTH (check_typedef (value_type (v1))))
+	  if (check_typedef (value_type (v0))->length ()
+	      != check_typedef (value_type (v1))->length ())
 	    break;
 	  if (!value_contents_eq (v0, value_embedded_offset (v0),
 				  v1, value_embedded_offset (v1),
-				  TYPE_LENGTH (check_typedef (value_type (v0)))))
+				  check_typedef (value_type (v0))->length ()))
 	    break;
 	}
 
@@ -363,7 +363,7 @@ void
 ada_printchar (int c, struct type *type, struct ui_file *stream)
 {
   gdb_puts ("'", stream);
-  ada_emit_char (c, type, stream, '\'', TYPE_LENGTH (type));
+  ada_emit_char (c, type, stream, '\'', type->length ());
   gdb_puts ("'", stream);
 }
 
@@ -540,7 +540,7 @@ ada_printstr (struct ui_file *stream, struct type *type,
 	      const char *encoding, int force_ellipses,
 	      const struct value_print_options *options)
 {
-  printstr (stream, type, string, length, force_ellipses, TYPE_LENGTH (type),
+  printstr (stream, type, string, length, force_ellipses, type->length (),
 	    options);
 }
 
@@ -697,10 +697,10 @@ ada_val_print_string (struct type *type, const gdb_byte *valaddr,
      Similarly, the size of ELTTYPE should also be non-null, since
      it's a character-like type.  */
   gdb_assert (elttype != NULL);
-  gdb_assert (TYPE_LENGTH (elttype) != 0);
+  gdb_assert (elttype->length () != 0);
 
-  eltlen = TYPE_LENGTH (elttype);
-  len = TYPE_LENGTH (type) / eltlen;
+  eltlen = elttype->length ();
+  len = type->length () / eltlen;
 
   /* If requested, look for the first null char and only print
      elements up to it.  */
@@ -732,7 +732,7 @@ ada_value_print_ptr (struct value *val,
 {
   if (!options->format
       && value_type (val)->target_type ()->code () == TYPE_CODE_INT
-      && TYPE_LENGTH (value_type (val)->target_type ()) == 0)
+      && value_type (val)->target_type ()->length () == 0)
     {
       gdb_puts ("null", stream);
       return;
@@ -1023,7 +1023,7 @@ ada_value_print_inner (struct value *val, struct ui_file *stream, int recurse,
   const gdb_byte *valaddr = value_contents_for_printing (val).data ();
   CORE_ADDR address = value_address (val);
   gdb::array_view<const gdb_byte> view
-    = gdb::make_array_view (valaddr, TYPE_LENGTH (type));
+    = gdb::make_array_view (valaddr, type->length ());
   type = ada_check_typedef (resolve_dynamic_type (type, view, address));
   if (type != saved_type)
     {
@@ -1094,11 +1094,11 @@ ada_value_print (struct value *val0, struct ui_file *stream,
      "void *" pointers.  */
   if (type->code () == TYPE_CODE_PTR
       && !(type->target_type ()->code () == TYPE_CODE_INT
-	   && TYPE_LENGTH (type->target_type ()) == 0))
+	   && type->target_type ()->length () == 0))
     {
       /* Hack:  don't print (char *) for char strings.  Their
 	 type is indicated by the quoted string anyway.  */
-      if (TYPE_LENGTH (type->target_type ()) != sizeof (char)
+      if (type->target_type ()->length () != sizeof (char)
 	  || type->target_type ()->code () != TYPE_CODE_INT
 	  || type->target_type ()->is_unsigned ())
 	{

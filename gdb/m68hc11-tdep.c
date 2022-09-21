@@ -1176,16 +1176,16 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       type = value_type (args[0]);
 
       /* First argument is passed in D and X registers.  */
-      if (TYPE_LENGTH (type) <= 4)
+      if (type->length () <= 4)
 	{
 	  ULONGEST v;
 
 	  v = extract_unsigned_integer (value_contents (args[0]).data (),
-					TYPE_LENGTH (type), byte_order);
+					type->length (), byte_order);
 	  first_stack_argnum = 1;
 
 	  regcache_cooked_write_unsigned (regcache, HARD_D_REGNUM, v);
-	  if (TYPE_LENGTH (type) > 2)
+	  if (type->length () > 2)
 	    {
 	      v >>= 16;
 	      regcache_cooked_write_unsigned (regcache, HARD_X_REGNUM, v);
@@ -1197,7 +1197,7 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       type = value_type (args[argnum]);
 
-      if (TYPE_LENGTH (type) & 1)
+      if (type->length () & 1)
 	{
 	  static gdb_byte zero = 0;
 
@@ -1205,8 +1205,8 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  write_memory (sp, &zero, 1);
 	}
       val = value_contents (args[argnum]).data ();
-      sp -= TYPE_LENGTH (type);
-      write_memory (sp, val, TYPE_LENGTH (type));
+      sp -= type->length ();
+      write_memory (sp, val, type->length ());
     }
 
   /* Store return address.  */
@@ -1255,7 +1255,7 @@ m68hc11_store_return_value (struct type *type, struct regcache *regcache,
 {
   int len;
 
-  len = TYPE_LENGTH (type);
+  len = type->length ();
 
   /* First argument is passed in D and X registers.  */
   if (len <= 2)
@@ -1280,7 +1280,7 @@ m68hc11_extract_return_value (struct type *type, struct regcache *regcache,
   gdb_byte buf[M68HC11_REG_SIZE];
 
   regcache->raw_read (HARD_D_REGNUM, buf);
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
     case 1:
       memcpy (valbuf, buf + 1, 1);
@@ -1315,7 +1315,7 @@ m68hc11_return_value (struct gdbarch *gdbarch, struct value *function,
   if (valtype->code () == TYPE_CODE_STRUCT
       || valtype->code () == TYPE_CODE_UNION
       || valtype->code () == TYPE_CODE_ARRAY
-      || TYPE_LENGTH (valtype) > 4)
+      || valtype->length () > 4)
     return RETURN_VALUE_STRUCT_CONVENTION;
   else
     {

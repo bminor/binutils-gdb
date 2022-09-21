@@ -409,10 +409,10 @@ static void
 m32c_find_part (struct m32c_reg *reg, int *offset_p, int *len_p)
 {
   /* The length of the containing register, of which REG is one part.  */
-  int containing_len = TYPE_LENGTH (reg->rx->type);
+  int containing_len = reg->rx->type->length ();
 
   /* The length of one "element" in our imaginary array.  */
-  int elt_len = TYPE_LENGTH (reg->type);
+  int elt_len = reg->type->length ();
 
   /* The offset of REG's "element" from the least significant end of
      the containing register.  */
@@ -429,7 +429,7 @@ m32c_find_part (struct m32c_reg *reg, int *offset_p, int *len_p)
 
   /* Flip the offset around if we're big-endian.  */
   if (gdbarch_byte_order (reg->arch) == BFD_ENDIAN_BIG)
-    elt_offset = TYPE_LENGTH (reg->rx->type) - elt_offset - elt_len;
+    elt_offset = reg->rx->type->length () - elt_offset - elt_len;
 
   *offset_p = elt_offset;
   *len_p = elt_len;
@@ -445,7 +445,7 @@ m32c_part_read (struct m32c_reg *reg, readable_regcache *cache, gdb_byte *buf)
 {
   int offset, len;
 
-  memset (buf, 0, TYPE_LENGTH (reg->type));
+  memset (buf, 0, reg->type->length ());
   m32c_find_part (reg, &offset, &len);
   return cache->cooked_read_part (reg->rx->num, offset, len, buf);
 }
@@ -474,11 +474,11 @@ m32c_part_write (struct m32c_reg *reg, struct regcache *cache,
 static enum register_status
 m32c_cat_read (struct m32c_reg *reg, readable_regcache *cache, gdb_byte *buf)
 {
-  int high_bytes = TYPE_LENGTH (reg->rx->type);
-  int low_bytes  = TYPE_LENGTH (reg->ry->type);
+  int high_bytes = reg->rx->type->length ();
+  int low_bytes  = reg->ry->type->length ();
   enum register_status status;
 
-  gdb_assert (TYPE_LENGTH (reg->type) == high_bytes + low_bytes);
+  gdb_assert (reg->type->length () == high_bytes + low_bytes);
 
   if (gdbarch_byte_order (reg->arch) == BFD_ENDIAN_BIG)
     {
@@ -503,10 +503,10 @@ static enum register_status
 m32c_cat_write (struct m32c_reg *reg, struct regcache *cache,
 		const gdb_byte *buf)
 {
-  int high_bytes = TYPE_LENGTH (reg->rx->type);
-  int low_bytes  = TYPE_LENGTH (reg->ry->type);
+  int high_bytes = reg->rx->type->length ();
+  int low_bytes  = reg->ry->type->length ();
 
-  gdb_assert (TYPE_LENGTH (reg->type) == high_bytes + low_bytes);
+  gdb_assert (reg->type->length () == high_bytes + low_bytes);
 
   if (gdbarch_byte_order (reg->arch) == BFD_ENDIAN_BIG)
     {
@@ -531,7 +531,7 @@ m32c_r3r2r1r0_read (struct m32c_reg *reg, readable_regcache *cache, gdb_byte *bu
 {
   gdbarch *arch = reg->arch;
   m32c_gdbarch_tdep *tdep = gdbarch_tdep<m32c_gdbarch_tdep> (arch);
-  int len = TYPE_LENGTH (tdep->r0->type);
+  int len = tdep->r0->type->length ();
   enum register_status status;
 
   if (gdbarch_byte_order (reg->arch) == BFD_ENDIAN_BIG)
@@ -568,7 +568,7 @@ m32c_r3r2r1r0_write (struct m32c_reg *reg, struct regcache *cache,
 {
   gdbarch *arch = reg->arch;
   m32c_gdbarch_tdep *tdep = gdbarch_tdep<m32c_gdbarch_tdep> (arch);
-  int len = TYPE_LENGTH (tdep->r0->type);
+  int len = tdep->r0->type->length ();
 
   if (gdbarch_byte_order (reg->arch) == BFD_ENDIAN_BIG)
     {
@@ -2052,7 +2052,7 @@ m32c_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      subsequent arguments are allocated to registers.  */
   if (return_method == return_method_struct)
     {
-      int ptr_len = TYPE_LENGTH (tdep->ptr_voyd);
+      int ptr_len = tdep->ptr_voyd->length ();
       sp -= ptr_len;
       write_memory_unsigned_integer (sp, ptr_len, byte_order, struct_addr);
     }
@@ -2063,7 +2063,7 @@ m32c_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct value *arg = args[i];
       const gdb_byte *arg_bits = value_contents (arg).data ();
       struct type *arg_type = value_type (arg);
-      ULONGEST arg_size = TYPE_LENGTH (arg_type);
+      ULONGEST arg_size = arg_type->length ();
 
       /* Can it go in r1 or r1l (for m16c) or r0 or r0l (for m32c)?  */
       if (i == 0
@@ -2181,7 +2181,7 @@ m32c_return_value (struct gdbarch *gdbarch,
   m32c_gdbarch_tdep *tdep = gdbarch_tdep<m32c_gdbarch_tdep> (gdbarch);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum return_value_convention conv;
-  ULONGEST valtype_len = TYPE_LENGTH (valtype);
+  ULONGEST valtype_len = valtype->length ();
 
   if (m32c_return_by_passed_buf (valtype))
     conv = RETURN_VALUE_STRUCT_CONVENTION;
@@ -2198,7 +2198,7 @@ m32c_return_value (struct gdbarch *gdbarch,
       gdb_assert (valtype_len <= 8);
 
       /* Anything that fits in r0 is returned there.  */
-      if (valtype_len <= TYPE_LENGTH (tdep->r0->type))
+      if (valtype_len <= tdep->r0->type->length ())
 	{
 	  ULONGEST u;
 	  regcache_cooked_read_unsigned (regcache, tdep->r0->num, &u);
@@ -2230,7 +2230,7 @@ m32c_return_value (struct gdbarch *gdbarch,
       gdb_assert (valtype_len <= 8);
 
       /* Anything that fits in r0 is returned there.  */
-      if (valtype_len <= TYPE_LENGTH (tdep->r0->type))
+      if (valtype_len <= tdep->r0->type->length ())
 	{
 	  ULONGEST u = extract_unsigned_integer (writebuf, valtype_len,
 						 byte_order);
@@ -2477,7 +2477,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
 	}
     }
 
-  store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order, addr);
+  store_unsigned_integer (buf, type->length (), byte_order, addr);
 }
 
 
@@ -2491,7 +2491,7 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
 
   gdb_assert (type->code () == TYPE_CODE_PTR || TYPE_IS_REFERENCE (type));
 
-  ptr = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
+  ptr = extract_unsigned_integer (buf, type->length (), byte_order);
 
   target_code = type->target_type ()->code ();
 

@@ -265,7 +265,7 @@ static void
 bpf_extract_return_value (struct type *type, struct regcache *regcache,
 			  gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   gdb_byte vbuf[8];
 
   gdb_assert (len <= 8);
@@ -279,7 +279,7 @@ static void
 bpf_store_return_value (struct type *type, struct regcache *regcache,
 			const gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   gdb_byte vbuf[8];
 
   gdb_assert (len <= 8);
@@ -295,7 +295,7 @@ bpf_return_value (struct gdbarch *gdbarch, struct value *function,
 		  struct type *type, struct regcache *regcache,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   if (len > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;

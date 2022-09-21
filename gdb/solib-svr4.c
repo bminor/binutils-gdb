@@ -672,7 +672,7 @@ elf_locate_base (void)
     {
       struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
       gdb_byte *pbuf;
-      int pbuf_size = TYPE_LENGTH (ptr_type);
+      int pbuf_size = ptr_type->length ();
 
       pbuf = (gdb_byte *) alloca (pbuf_size);
       /* DT_MIPS_RLD_MAP contains a pointer to the address
@@ -692,7 +692,7 @@ elf_locate_base (void)
     {
       struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
       gdb_byte *pbuf;
-      int pbuf_size = TYPE_LENGTH (ptr_type);
+      int pbuf_size = ptr_type->length ();
 
       pbuf = (gdb_byte *) alloca (pbuf_size);
       /* DT_MIPS_RLD_MAP_REL contains an offset from the address of the
@@ -868,7 +868,7 @@ open_symbol_file_object (int from_tty)
   CORE_ADDR lm, l_name;
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
-  int l_name_size = TYPE_LENGTH (ptr_type);
+  int l_name_size = ptr_type->length ();
   gdb::byte_vector l_name_buf (l_name_size);
   struct svr4_info *info = get_svr4_info (current_program_space);
   symfile_add_flags add_flags = 0;

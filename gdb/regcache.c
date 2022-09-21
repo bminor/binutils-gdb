@@ -118,7 +118,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
       = GDBARCH_OBSTACK_CALLOC (gdbarch, descr->nr_cooked_registers, long);
     for (i = 0; i < gdbarch_num_regs (gdbarch); i++)
       {
-	descr->sizeof_register[i] = TYPE_LENGTH (descr->register_type[i]);
+	descr->sizeof_register[i] = descr->register_type[i]->length ();
 	descr->register_offset[i] = offset;
 	offset += descr->sizeof_register[i];
       }
@@ -127,7 +127,7 @@ init_regcache_descr (struct gdbarch *gdbarch)
 
     for (; i < descr->nr_cooked_registers; i++)
       {
-	descr->sizeof_register[i] = TYPE_LENGTH (descr->register_type[i]);
+	descr->sizeof_register[i] = descr->register_type[i]->length ();
 	descr->register_offset[i] = offset;
 	offset += descr->sizeof_register[i];
       }
@@ -755,7 +755,7 @@ readable_regcache::cooked_read_value (int regnum)
       if (cooked_read (regnum,
 		       value_contents_raw (result).data ()) == REG_UNAVAILABLE)
 	mark_value_bytes_unavailable (result, 0,
-				      TYPE_LENGTH (value_type (result)));
+				      value_type (result)->length ());
 
       return result;
     }

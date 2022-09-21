@@ -821,7 +821,7 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       int reg_demand;
       int i;
       
-      len = TYPE_LENGTH (value_type (args[argnum]));
+      len = value_type (args[argnum])->length ();
       val = value_contents (args[argnum]).data ();
       
       /* How may registers worth of storage do we need for this argument?  */
@@ -1611,7 +1611,7 @@ cris_store_return_value (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   
   if (len <= 4)
     {
@@ -1779,7 +1779,7 @@ cris_extract_return_value (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   
   if (len <= 4)
     {
@@ -1808,7 +1808,7 @@ cris_return_value (struct gdbarch *gdbarch, struct value *function,
 {
   if (type->code () == TYPE_CODE_STRUCT
       || type->code () == TYPE_CODE_UNION
-      || TYPE_LENGTH (type) > 8)
+      || type->length () > 8)
     /* Structs, unions, and anything larger than 8 bytes (2 registers)
        goes on the stack.  */
     return RETURN_VALUE_STRUCT_CONVENTION;

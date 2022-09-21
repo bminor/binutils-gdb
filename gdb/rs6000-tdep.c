@@ -2665,8 +2665,8 @@ rs6000_convert_register_p (struct gdbarch *gdbarch, int regnum,
 	  && regnum >= tdep->ppc_fp0_regnum
 	  && regnum < tdep->ppc_fp0_regnum + ppc_num_fprs
 	  && type->code () == TYPE_CODE_FLT
-	  && TYPE_LENGTH (type)
-	     != TYPE_LENGTH (builtin_type (gdbarch)->builtin_double));
+	  && (type->length ()
+	      != builtin_type (gdbarch)->builtin_double->length ()));
 }
 
 static int

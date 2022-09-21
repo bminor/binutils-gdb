@@ -84,7 +84,7 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
   struct bound_minimal_symbol msym;
   CORE_ADDR data_address, pointer_address;
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
-  size_t ptr_size = TYPE_LENGTH (ptr_type);
+  size_t ptr_size = ptr_type->length ();
   size_t auxv_pair_size = 2 * ptr_size;
   gdb_byte *ptr_buf = (gdb_byte *) alloca (ptr_size);
   LONGEST retval;
@@ -255,7 +255,7 @@ generic_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr,
 		    int sizeof_auxv_type)
 {
   struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-  const int sizeof_auxv_val = TYPE_LENGTH (ptr_type);
+  const int sizeof_auxv_val = ptr_type->length ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte *ptr = *readptr;
 
@@ -286,7 +286,7 @@ default_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
 {
   struct gdbarch *gdbarch = target_gdbarch ();
   struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-  const int sizeof_auxv_type = TYPE_LENGTH (ptr_type);
+  const int sizeof_auxv_type = ptr_type->length ();
 
   return generic_auxv_parse (gdbarch, readptr, endptr, typep, valp,
 			     sizeof_auxv_type);
@@ -299,7 +299,7 @@ svr4_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr,
 		 gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
   struct type *int_type = builtin_type (gdbarch)->builtin_int;
-  const int sizeof_auxv_type = TYPE_LENGTH (int_type);
+  const int sizeof_auxv_type = int_type->length ();
 
   return generic_auxv_parse (gdbarch, readptr, endptr, typep, valp,
 			     sizeof_auxv_type);

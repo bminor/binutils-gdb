@@ -2120,7 +2120,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
 		      loc->length = ((bitpos % 8) + bitsize + 7) / 8;
 		    }
 		  else
-		    loc->length = TYPE_LENGTH (value_type (v));
+		    loc->length = value_type (v)->length ();
 
 		  loc->watchpoint_type = type;
 		}
@@ -10259,7 +10259,7 @@ can_use_hardware_watchpoint (const std::vector<value_ref_ptr> &vals)
 
 		  len = (target_exact_watchpoints
 			 && is_scalar_type_recursive (vtype))?
-		    1 : TYPE_LENGTH (value_type (v));
+		    1 : value_type (v)->length ();
 
 		  num_regs = target_region_ok_for_hw_watchpoint (vaddr, len);
 		  if (!num_regs)

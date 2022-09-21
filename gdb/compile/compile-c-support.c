@@ -252,7 +252,7 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 	      case TYPE_CODE_INT:
 		{
 		  const char *mode
-		    = c_get_mode_for_size (TYPE_LENGTH (regtype));
+		    = c_get_mode_for_size (regtype->length ());
 
 		  if (mode != NULL)
 		    {
@@ -275,7 +275,7 @@ generate_register_struct (struct ui_file *stream, struct gdbarch *gdbarch,
 			    " __attribute__((__aligned__("
 			    "__BIGGEST_ALIGNMENT__)))",
 			    regname.c_str (),
-			    pulongest (TYPE_LENGTH (regtype)));
+			    pulongest (regtype->length ()));
 	      }
 	    gdb_puts (";\n", stream);
 	  }

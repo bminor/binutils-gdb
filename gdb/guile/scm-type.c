@@ -633,7 +633,7 @@ gdbscm_type_sizeof (SCM self)
 
   /* Ignore exceptions.  */
 
-  return scm_from_long (TYPE_LENGTH (type));
+  return scm_from_long (type->length ());
 }
 
 /* (type-strip-typedefs <gdb:type>) -> <gdb:type>

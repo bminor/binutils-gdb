@@ -1537,7 +1537,7 @@ xtensa_extract_return_value (struct type *type,
 {
   struct gdbarch *gdbarch = regcache->arch ();
   bfd_byte *valbuf = (bfd_byte *) dst;
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   ULONGEST pc, wb;
   int callsize, areg;
   int offset = 0;
@@ -1597,7 +1597,7 @@ xtensa_store_return_value (struct type *type,
   unsigned int areg;
   ULONGEST pc, wb;
   int callsize;
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int offset = 0;
 
   DEBUGTRACE ("xtensa_store_return_value (...)\n");
@@ -1613,7 +1613,7 @@ xtensa_store_return_value (struct type *type,
       if (len > (callsize > 8 ? 8 : 16))
 	internal_error (__FILE__, __LINE__,
 			_("unimplemented for this length: %s"),
-			pulongest (TYPE_LENGTH (type)));
+			pulongest (type->length ()));
       areg = arreg_number (gdbarch,
 			   tdep->a0_base + 2 + callsize, wb);
 
@@ -1651,7 +1651,7 @@ xtensa_return_value (struct gdbarch *gdbarch,
   int struct_return = ((valtype->code () == TYPE_CODE_STRUCT
 			|| valtype->code () == TYPE_CODE_UNION
 			|| valtype->code () == TYPE_CODE_ARRAY)
-		       && TYPE_LENGTH (valtype) > 16);
+		       && valtype->length () > 16);
 
   if (struct_return)
     return RETURN_VALUE_STRUCT_CONVENTION;
@@ -1723,7 +1723,7 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	  struct type *arg_type = check_typedef (value_type (arg));
 	  gdb_printf (gdb_stdlog, "%2d: %s %3s ", i,
 		      host_address_to_string (arg),
-		      pulongest (TYPE_LENGTH (arg_type)));
+		      pulongest (arg_type->length ()));
 	  switch (arg_type->code ())
 	    {
 	    case TYPE_CODE_INT:
@@ -1767,32 +1767,32 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	case TYPE_CODE_ENUM:
 
 	  /* Cast argument to long if necessary as the mask does it too.  */
-	  if (TYPE_LENGTH (arg_type)
-	      < TYPE_LENGTH (builtin_type (gdbarch)->builtin_long))
+	  if (arg_type->length ()
+	      < builtin_type (gdbarch)->builtin_long->length ())
 	    {
 	      arg_type = builtin_type (gdbarch)->builtin_long;
 	      arg = value_cast (arg_type, arg);
 	    }
 	  /* Aligment is equal to the type length for the basic types.  */
-	  info->align = TYPE_LENGTH (arg_type);
+	  info->align = arg_type->length ();
 	  break;
 
 	case TYPE_CODE_FLT:
 
 	  /* Align doubles correctly.  */
-	  if (TYPE_LENGTH (arg_type)
-	      == TYPE_LENGTH (builtin_type (gdbarch)->builtin_double))
-	    info->align = TYPE_LENGTH (builtin_type (gdbarch)->builtin_double);
+	  if (arg_type->length ()
+	      == builtin_type (gdbarch)->builtin_double->length ())
+	    info->align = builtin_type (gdbarch)->builtin_double->length ();
 	  else
-	    info->align = TYPE_LENGTH (builtin_type (gdbarch)->builtin_long);
+	    info->align = builtin_type (gdbarch)->builtin_long->length ();
 	  break;
 
 	case TYPE_CODE_STRUCT:
 	default:
-	  info->align = TYPE_LENGTH (builtin_type (gdbarch)->builtin_long);
+	  info->align = builtin_type (gdbarch)->builtin_long->length ();
 	  break;
 	}
-      info->length = TYPE_LENGTH (arg_type);
+      info->length = arg_type->length ();
       info->contents = value_contents (arg).data ();
 
       /* Align size and onstack_size.  */

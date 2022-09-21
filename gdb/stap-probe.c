@@ -1482,14 +1482,14 @@ stap_modify_semaphore (CORE_ADDR address, int set, struct gdbarch *gdbarch)
   ULONGEST value;
 
   /* Swallow errors.  */
-  if (target_read_memory (address, bytes, TYPE_LENGTH (type)) != 0)
+  if (target_read_memory (address, bytes, type->length ()) != 0)
     {
       warning (_("Could not read the value of a SystemTap semaphore."));
       return;
     }
 
   enum bfd_endian byte_order = type_byte_order (type);
-  value = extract_unsigned_integer (bytes, TYPE_LENGTH (type), byte_order);
+  value = extract_unsigned_integer (bytes, type->length (), byte_order);
   /* Note that we explicitly don't worry about overflow or
      underflow.  */
   if (set)
@@ -1497,9 +1497,9 @@ stap_modify_semaphore (CORE_ADDR address, int set, struct gdbarch *gdbarch)
   else
     --value;
 
-  store_unsigned_integer (bytes, TYPE_LENGTH (type), byte_order, value);
+  store_unsigned_integer (bytes, type->length (), byte_order, value);
 
-  if (target_write_memory (address, bytes, TYPE_LENGTH (type)) != 0)
+  if (target_write_memory (address, bytes, type->length ()) != 0)
     warning (_("Could not write the value of a SystemTap semaphore."));
 }
 

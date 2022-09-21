@@ -110,7 +110,7 @@ convert_struct_or_union (compile_c_instance *context, struct type *type)
 
       field_type = context->convert_type (type->field (i).type ());
       if (bitsize == 0)
-	bitsize = 8 * TYPE_LENGTH (type->field (i).type ());
+	bitsize = 8 * type->field (i).type ()->length ();
       context->plugin ().build_add_field (result,
 					  type->field (i).name (),
 					  field_type,
@@ -118,7 +118,7 @@ convert_struct_or_union (compile_c_instance *context, struct type *type)
 					  type->field (i).loc_bitpos ());
     }
 
-  context->plugin ().finish_record_or_union (result, TYPE_LENGTH (type));
+  context->plugin ().finish_record_or_union (result, type->length ());
   return result;
 }
 
@@ -131,7 +131,7 @@ convert_enum (compile_c_instance *context, struct type *type)
   int i;
 
   int_type = context->plugin ().int_type_v0 (type->is_unsigned (),
-					     TYPE_LENGTH (type));
+					     type->length ());
 
   result = context->plugin ().build_enum_type (int_type);
   for (i = 0; i < type->num_fields (); ++i)
@@ -196,16 +196,16 @@ convert_int (compile_c_instance *context, struct type *type)
     {
       if (type->has_no_signedness ())
 	{
-	  gdb_assert (TYPE_LENGTH (type) == 1);
+	  gdb_assert (type->length () == 1);
 	  return context->plugin ().char_type ();
 	}
       return context->plugin ().int_type (type->is_unsigned (),
-					  TYPE_LENGTH (type),
+					  type->length (),
 					  type->name ());
     }
   else
     return context->plugin ().int_type_v0 (type->is_unsigned (),
-					   TYPE_LENGTH (type));
+					   type->length ());
 }
 
 /* Convert a floating-point type to its gcc representation.  */
@@ -214,10 +214,10 @@ static gcc_type
 convert_float (compile_c_instance *context, struct type *type)
 {
   if (context->plugin ().version () >= GCC_C_FE_VERSION_1)
-    return context->plugin ().float_type (TYPE_LENGTH (type),
+    return context->plugin ().float_type (type->length (),
 					  type->name ());
   else
-    return context->plugin ().float_type_v0 (TYPE_LENGTH (type));
+    return context->plugin ().float_type_v0 (type->length ());
 }
 
 /* Convert the 'void' type to its gcc representation.  */

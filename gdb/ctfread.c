@@ -749,7 +749,7 @@ read_enum_type (struct ctf_context *ccp, ctf_id_t tid)
   type->set_code (TYPE_CODE_ENUM);
   type->set_length (ctf_type_size (fp, tid));
   /* Set the underlying type based on its ctf_type_size bits.  */
-  type->set_target_type (objfile_int_type (of, TYPE_LENGTH (type), false));
+  type->set_target_type (objfile_int_type (of, type->length (), false));
   set_type_align (type, ctf_type_align (fp, tid));
 
   return set_tid_type (of, tid, type);

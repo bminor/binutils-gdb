@@ -550,7 +550,7 @@ extern void mark_value_bits_unavailable (struct value *value,
    example, to compare a complete object value with itself, including
    its enclosing type chunk, you'd do:
 
-     int len = TYPE_LENGTH (check_typedef (value_enclosing_type (val)));
+     int len = check_typedef (value_enclosing_type (val))->length ();
      value_contents_eq (val, 0, val, 0, len);
 
    Returns true iff the set of available/valid contents match.

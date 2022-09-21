@@ -267,7 +267,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, LONGEST *top, int *using_enc)
 				      TYPE_VPTR_FIELDNO(rtti_type)) / 8;
       if (top && ((*top) >0))
 	{
-	  if (TYPE_LENGTH(rtti_type) > TYPE_LENGTH(known_type))
+	  if (rtti_type->length () > known_type->length ())
 	    {
 	      if (full)
 		*full=0;
@@ -365,7 +365,7 @@ gnuv2_baseclass_offset (struct type *type, int index,
 
 	      field_type = check_typedef (type->field (i).type ());
 	      field_offset = type->field (i).loc_bitpos () / 8;
-	      field_length = TYPE_LENGTH (field_type);
+	      field_length = field_type->length ();
 
 	      if (!value_bytes_available (val, embedded_offset + field_offset,
 					  field_length))

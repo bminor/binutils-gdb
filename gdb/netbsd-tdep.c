@@ -410,27 +410,27 @@ nbsd_get_siginfo_type (struct gdbarch *gdbarch)
   type *uint32_type = builtin_type (gdbarch)->builtin_uint32;
   type *uint64_type = builtin_type (gdbarch)->builtin_uint64;
 
-  bool lp64 = TYPE_LENGTH (void_ptr_type) == 8;
+  bool lp64 = void_ptr_type->length () == 8;
   size_t char_bits = gdbarch_addressable_memory_unit_size (gdbarch) * 8;
 
   /* pid_t */
   type *pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			      TYPE_LENGTH (int32_type) * char_bits, "pid_t");
+			      int32_type->length () * char_bits, "pid_t");
   pid_type->set_target_type (int32_type);
 
   /* uid_t */
   type *uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			      TYPE_LENGTH (uint32_type) * char_bits, "uid_t");
+			      uint32_type->length () * char_bits, "uid_t");
   uid_type->set_target_type (uint32_type);
 
   /* clock_t */
   type *clock_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-				TYPE_LENGTH (int_type) * char_bits, "clock_t");
+				int_type->length () * char_bits, "clock_t");
   clock_type->set_target_type (int_type);
 
   /* lwpid_t */
   type *lwpid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-				TYPE_LENGTH (int32_type) * char_bits,
+				int32_type->length () * char_bits,
 				"lwpid_t");
   lwpid_type->set_target_type (int32_type);
 

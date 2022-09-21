@@ -224,7 +224,7 @@ rust_u8_type_p (struct type *type)
 {
   return (type->code () == TYPE_CODE_INT
 	  && type->is_unsigned ()
-	  && TYPE_LENGTH (type) == 1);
+	  && type->length () == 1);
 }
 
 /* Return true if TYPE is a Rust character type.  */
@@ -233,7 +233,7 @@ static bool
 rust_chartype_p (struct type *type)
 {
   return (type->code () == TYPE_CODE_CHAR
-	  && TYPE_LENGTH (type) == 4
+	  && type->length () == 4
 	  && type->is_unsigned ());
 }
 
@@ -456,7 +456,7 @@ rust_language::print_enum (struct value *val, struct ui_file *stream,
   gdb_assert (rust_enum_p (type));
   gdb::array_view<const gdb_byte> view
     (value_contents_for_printing (val).data (),
-     TYPE_LENGTH (value_type (val)));
+     value_type (val)->length ());
   type = resolve_dynamic_type (type, view, value_address (val));
 
   if (rust_empty_enum_p (type))
@@ -564,7 +564,7 @@ rust_language::value_print_inner
 
     case TYPE_CODE_INT:
       /* Recognize the unit type.  */
-      if (type->is_unsigned () && TYPE_LENGTH (type) == 0
+      if (type->is_unsigned () && type->length () == 0
 	  && type->name () != NULL && strcmp (type->name (), "()") == 0)
 	{
 	  gdb_puts ("()", stream);
@@ -961,7 +961,7 @@ rust_composite_type (struct type *original,
       struct field *field = &result->field (i);
 
       field->set_loc_bitpos (bitpos);
-      bitpos += TYPE_LENGTH (type1) * TARGET_CHAR_BIT;
+      bitpos += type1->length () * TARGET_CHAR_BIT;
 
       field->set_name (field1);
       field->set_type (type1);
@@ -990,7 +990,7 @@ rust_composite_type (struct type *original,
 
   if (i > 0)
     result->set_length (result->field (i - 1).loc_bitpos () / TARGET_CHAR_BIT
-			+ TYPE_LENGTH (result->field (i - 1).type ()));
+			+ result->field (i - 1).type ()->length ());
   return result;
 }
 
@@ -1071,7 +1071,7 @@ rust_range (struct type *expect_type, struct expression *exp,
   if (noside == EVAL_AVOID_SIDE_EFFECTS)
     return value_zero (range_type, lval_memory);
 
-  addrval = value_allocate_space_in_inferior (TYPE_LENGTH (range_type));
+  addrval = value_allocate_space_in_inferior (range_type->length ());
   addr = value_as_long (addrval);
   result = value_at_lazy (range_type, addr);
 
@@ -1273,7 +1273,7 @@ rust_subscript (struct type *expect_type, struct expression *exp,
 
 	  slice = rust_slice_type (new_name, value_type (result), usize);
 
-	  addrval = value_allocate_space_in_inferior (TYPE_LENGTH (slice));
+	  addrval = value_allocate_space_in_inferior (slice->length ());
 	  addr = value_as_long (addrval);
 	  tem = value_at_lazy (slice, addr);
 
@@ -1485,7 +1485,7 @@ rust_aggregate_operation::evaluate (struct type *expect_type,
 
   if (noside == EVAL_NORMAL)
     {
-      addrval = value_allocate_space_in_inferior (TYPE_LENGTH (type));
+      addrval = value_allocate_space_in_inferior (type->length ());
       addr = value_as_long (addrval);
       result = value_at_lazy (type, addr);
     }
@@ -1606,7 +1606,7 @@ rust_language::language_arch_info (struct gdbarch *gdbarch,
   add (arch_integer_type (gdbarch, 64, 0, "i64"));
   add (arch_integer_type (gdbarch, 64, 1, "u64"));
 
-  unsigned int length = 8 * TYPE_LENGTH (builtin->builtin_data_ptr);
+  unsigned int length = 8 * builtin->builtin_data_ptr->length ();
   add (arch_integer_type (gdbarch, length, 0, "isize"));
   struct type *usize_type
     = add (arch_integer_type (gdbarch, length, 1, "usize"));

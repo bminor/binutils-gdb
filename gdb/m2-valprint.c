@@ -207,7 +207,7 @@ print_unpacked_pointer (struct type *type,
   /* For a pointer to char or unsigned char, also print the string
      pointed to, unless pointer is null.  */
 
-  if (TYPE_LENGTH (elttype) == 1
+  if (elttype->length () == 1
       && elttype->code () == TYPE_CODE_INT
       && (options->format == 0 || options->format == 's')
       && addr != 0)
@@ -262,10 +262,10 @@ m2_print_array_contents (struct value *val,
 {
   struct type *type = check_typedef (value_type (val));
 
-  if (TYPE_LENGTH (type) > 0)
+  if (type->length () > 0)
     {
       /* For an array of chars, print with string syntax.  */
-      if (TYPE_LENGTH (type) == 1 &&
+      if (type->length () == 1 &&
 	  ((type->code () == TYPE_CODE_INT)
 	   || ((current_language->la_language == language_m2)
 	       && (type->code () == TYPE_CODE_CHAR)))
@@ -312,12 +312,12 @@ m2_language::value_print_inner (struct value *val, struct ui_file *stream,
   switch (type->code ())
     {
     case TYPE_CODE_ARRAY:
-      if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (type->target_type ()) > 0)
+      if (type->length () > 0 && type->target_type ()->length () > 0)
 	{
 	  elttype = check_typedef (type->target_type ());
-	  len = TYPE_LENGTH (type) / TYPE_LENGTH (elttype);
+	  len = type->length () / elttype->length ();
 	  /* For an array of chars, print with string syntax.  */
-	  if (TYPE_LENGTH (elttype) == 1 &&
+	  if (elttype->length () == 1 &&
 	      ((elttype->code () == TYPE_CODE_INT)
 	       || ((current_language->la_language == language_m2)
 		   && (elttype->code () == TYPE_CODE_CHAR)))
@@ -443,7 +443,7 @@ m2_language::value_print_inner (struct value *val, struct ui_file *stream,
       break;
 
     case TYPE_CODE_RANGE:
-      if (TYPE_LENGTH (type) == TYPE_LENGTH (type->target_type ()))
+      if (type->length () == type->target_type ()->length ())
 	{
 	  struct value *v = value_cast (type->target_type (), val);
 	  value_print_inner (v, stream, recurse, options);

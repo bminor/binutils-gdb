@@ -618,7 +618,7 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 			  $3 = check_typedef ($3);
 			  pstate->push_new<long_const_operation>
 			    (parse_f_type (pstate)->builtin_integer,
-			     TYPE_LENGTH ($3));
+			     $3->length ());
 			}
 	;
 

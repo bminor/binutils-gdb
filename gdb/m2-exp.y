@@ -480,7 +480,7 @@ exp	:	SIZE '(' type ')'	%prec UNARY
 			{
 			  pstate->push_new<long_const_operation>
 			    (parse_m2_type (pstate)->builtin_int,
-			     TYPE_LENGTH ($3));
+			     $3->length ());
 			}
 	;
 

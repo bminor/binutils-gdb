@@ -8191,7 +8191,7 @@ quirk_rust_enum (struct type *type, struct objfile *objfile)
 
 	  /* In Rust, each element should have the size of the
 	     enclosing enum.  */
-	  type->field (i).type ()->set_length (TYPE_LENGTH (type));
+	  type->field (i).type ()->set_length (type->length ());
 
 	  /* Remove the discriminant field, if it exists.  */
 	  struct type *sub_type = type->field (i).type ();
@@ -9012,7 +9012,7 @@ dwarf2_compute_name (const char *name,
 			{
 			  v = allocate_value (type);
 			  memcpy (value_contents_writeable (v).data (), bytes,
-				  TYPE_LENGTH (type));
+				  type->length ());
 			}
 		      else
 			v = value_from_longest (type, value);
@@ -13613,7 +13613,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 		     the bit field must be inferred from the type
 		     attribute of the data member containing the
 		     bit field.  */
-		  anonymous_size = TYPE_LENGTH (fp->type ());
+		  anonymous_size = fp->type ()->length ();
 		}
 	      fp->set_loc_bitpos (fp->loc_bitpos ()
 				  + anonymous_size * bits_per_byte
@@ -14655,7 +14655,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
 
   maybe_set_alignment (cu, die, type);
 
-  if (producer_is_icc_lt_14 (cu) && (TYPE_LENGTH (type) == 0))
+  if (producer_is_icc_lt_14 (cu) && (type->length () == 0))
     {
       /* ICC<14 does not output the required DW_AT_declaration on
 	 incomplete types, but gives them a size of zero.  */
@@ -15227,8 +15227,8 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
 
       type->set_is_unsigned (underlying_type->is_unsigned ());
 
-      if (TYPE_LENGTH (type) == 0)
-	type->set_length (TYPE_LENGTH (underlying_type));
+      if (type->length () == 0)
+	type->set_length (underlying_type->length ());
 
       if (TYPE_RAW_ALIGN (type) == 0
 	  && TYPE_RAW_ALIGN (underlying_type) != 0)
@@ -15409,7 +15409,7 @@ recognize_bound_expression (struct die_info *die, enum dwarf_attribute name,
     return false;
 
   field->set_loc_bitpos (8 * offset);
-  if (size != TYPE_LENGTH (field->type ()))
+  if (size != field->type ()->length ())
     FIELD_BITSIZE (*field) = 8 * size;
 
   return true;
@@ -15524,7 +15524,7 @@ quirk_ada_thick_pointer (struct die_info *die, struct dwarf2_cu *cu,
 
   int last_fieldno = range_fields.size () - 1;
   int bounds_size = (bounds->field (last_fieldno).loc_bitpos () / 8
-		     + TYPE_LENGTH (bounds->field (last_fieldno).type ()));
+		     + bounds->field (last_fieldno).type ()->length ());
   bounds->set_length (align_up (bounds_size, max_align));
 
   /* Rewrite the existing array type in place.  Specifically, we
@@ -15559,8 +15559,8 @@ quirk_ada_thick_pointer (struct die_info *die, struct dwarf2_cu *cu,
   result->field (1).set_loc_bitpos (8 * bounds_offset);
 
   result->set_name (type->name ());
-  result->set_length (TYPE_LENGTH (result->field (0).type ())
-		      + TYPE_LENGTH (result->field (1).type ()));
+  result->set_length (result->field (0).type ()->length ()
+		      + result->field (1).type ()->length ());
 
   return result;
 }
@@ -15700,7 +15700,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_byte_size, cu);
   if (attr != nullptr && attr->form_is_unsigned ())
     {
-      if (attr->as_unsigned () >= TYPE_LENGTH (type))
+      if (attr->as_unsigned () >= type->length ())
 	type->set_length (attr->as_unsigned ());
       else
 	complaint (_("DW_AT_byte_size for array type smaller "
@@ -16158,7 +16158,7 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
   /* If the pointer size, alignment, or address class is different
      than the default, create a type variant marked as such and set
      the length accordingly.  */
-  if (TYPE_LENGTH (type) != byte_size
+  if (type->length () != byte_size
       || (alignment != 0 && TYPE_RAW_ALIGN (type) != 0
 	  && alignment != TYPE_RAW_ALIGN (type))
       || addr_class != DW_ADDR_none)
@@ -16172,7 +16172,7 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
 		      == 0);
 	  type = make_type_with_address_space (type, type_flags);
 	}
-      else if (TYPE_LENGTH (type) != byte_size)
+      else if (type->length () != byte_size)
 	{
 	  complaint (_("invalid pointer size %d"), byte_size);
 	}
@@ -17088,7 +17088,7 @@ dwarf2_init_complex_target_type (struct dwarf2_cu *cu,
   /* If the type we found doesn't match the size we were looking for, then
      pretend we didn't find a type at all, the complex target type we
      create will then be nameless.  */
-  if (tt != nullptr && TYPE_LENGTH (tt) * TARGET_CHAR_BIT != bits)
+  if (tt != nullptr && tt->length () * TARGET_CHAR_BIT != bits)
     tt = nullptr;
 
   const char *name = (tt == nullptr) ? nullptr : tt->name ();
@@ -17280,14 +17280,14 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   if (TYPE_SPECIFIC_FIELD (type) == TYPE_SPECIFIC_INT)
     {
       attr = dwarf2_attr (die, DW_AT_bit_size, cu);
-      if (attr != nullptr && attr->as_unsigned () <= 8 * TYPE_LENGTH (type))
+      if (attr != nullptr && attr->as_unsigned () <= 8 * type->length ())
 	{
 	  unsigned real_bit_size = attr->as_unsigned ();
 	  attr = dwarf2_attr (die, DW_AT_data_bit_offset, cu);
 	  /* Only use the attributes if they make sense together.  */
 	  if (attr == nullptr
 	      || (attr->as_unsigned () + real_bit_size
-		  <= 8 * TYPE_LENGTH (type)))
+		  <= 8 * type->length ()))
 	    {
 	      TYPE_MAIN_TYPE (type)->type_specific.int_stuff.bit_size
 		= real_bit_size;
@@ -17618,7 +17618,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
      the bounds as signed, and thus sign-extend their values, when
      the base type is signed.  */
   negative_mask =
-    -((ULONGEST) 1 << (TYPE_LENGTH (base_type) * TARGET_CHAR_BIT - 1));
+    -((ULONGEST) 1 << (base_type->length () * TARGET_CHAR_BIT - 1));
   if (low.kind () == PROP_CONST
       && !base_type->is_unsigned () && (low.const_val () & negative_mask))
     low.set_const_val (low.const_val () | negative_mask);
@@ -21188,10 +21188,10 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
       {
 	gdb_byte *data;
 
-	if (TYPE_LENGTH (type) != cu_header->addr_size)
+	if (type->length () != cu_header->addr_size)
 	  dwarf2_const_value_length_mismatch_complaint (name,
 							cu_header->addr_size,
-							TYPE_LENGTH (type));
+							type->length ());
 	/* Symbols of this form are reasonably rare, so we just
 	   piggyback on the existing location code rather than writing
 	   a new implementation of symbol_computed_ops.  */
@@ -21226,9 +21226,9 @@ dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
     case DW_FORM_exprloc:
     case DW_FORM_data16:
       blk = attr->as_block ();
-      if (TYPE_LENGTH (type) != blk->size)
+      if (type->length () != blk->size)
 	dwarf2_const_value_length_mismatch_complaint (name, blk->size,
-						      TYPE_LENGTH (type));
+						      type->length ());
       *bytes = blk->data;
       break;
 
@@ -22523,7 +22523,7 @@ write_constant_as_bytes (struct obstack *obstack,
 {
   gdb_byte *result;
 
-  *len = TYPE_LENGTH (type);
+  *len = type->length ();
   result = (gdb_byte *) obstack_alloc (obstack, *len);
   store_unsigned_integer (result, *len, byte_order, value);
 

@@ -252,7 +252,7 @@ lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	case TYPE_CODE_CHAR:
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_ENUM:
-	  if (TYPE_LENGTH (arg_type) < 4)
+	  if (arg_type->length () < 4)
 	    {
 	      arg_type = builtin_type (gdbarch)->builtin_int32;
 	      arg = value_cast (arg_type, arg);
@@ -263,7 +263,7 @@ lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       /* FIXME: Handle structures.  */
 
       contents = (gdb_byte *) value_contents (arg).data ();
-      val = extract_unsigned_integer (contents, TYPE_LENGTH (arg_type),
+      val = extract_unsigned_integer (contents, arg_type->length (),
 				      byte_order);
 
       /* First num_arg_regs parameters are passed by registers, 
@@ -272,7 +272,7 @@ lm32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	regcache_cooked_write_unsigned (regcache, first_arg_reg + i, val);
       else
 	{
-	  write_memory_unsigned_integer (sp, TYPE_LENGTH (arg_type), byte_order,
+	  write_memory_unsigned_integer (sp, arg_type->length (), byte_order,
 					 val);
 	  sp -= 4;
 	}
@@ -298,13 +298,13 @@ lm32_extract_return_value (struct type *type, struct regcache *regcache,
 
   if (type->code () != TYPE_CODE_STRUCT
       && type->code () != TYPE_CODE_UNION
-      && type->code () != TYPE_CODE_ARRAY && TYPE_LENGTH (type) <= 4)
+      && type->code () != TYPE_CODE_ARRAY && type->length () <= 4)
     {
       /* Return value is returned in a single register.  */
       regcache_cooked_read_unsigned (regcache, SIM_LM32_R1_REGNUM, &l);
-      store_unsigned_integer (valbuf, TYPE_LENGTH (type), byte_order, l);
+      store_unsigned_integer (valbuf, type->length (), byte_order, l);
     }
-  else if ((type->code () == TYPE_CODE_INT) && (TYPE_LENGTH (type) == 8))
+  else if ((type->code () == TYPE_CODE_INT) && (type->length () == 8))
     {
       /* 64-bit values are returned in a register pair.  */
       regcache_cooked_read_unsigned (regcache, SIM_LM32_R1_REGNUM, &l);
@@ -318,7 +318,7 @@ lm32_extract_return_value (struct type *type, struct regcache *regcache,
 	 in memory.  FIXME: Unless they are only 2 regs?.  */
       regcache_cooked_read_unsigned (regcache, SIM_LM32_R1_REGNUM, &l);
       return_buffer = l;
-      read_memory (return_buffer, valbuf, TYPE_LENGTH (type));
+      read_memory (return_buffer, valbuf, type->length ());
     }
 }
 
@@ -331,7 +331,7 @@ lm32_store_return_value (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   if (len <= 4)
     {
@@ -359,7 +359,7 @@ lm32_return_value (struct gdbarch *gdbarch, struct value *function,
 
   if (code == TYPE_CODE_STRUCT
       || code == TYPE_CODE_UNION
-      || code == TYPE_CODE_ARRAY || TYPE_LENGTH (valtype) > 8)
+      || code == TYPE_CODE_ARRAY || valtype->length () > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
   if (readbuf)

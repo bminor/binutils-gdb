@@ -104,7 +104,7 @@ pascal_is_string_type (struct type *type,int *length_pos, int *length_size,
 	  if (length_pos)
 	    *length_pos = type->field (0).loc_bitpos () / TARGET_CHAR_BIT;
 	  if (length_size)
-	    *length_size = TYPE_LENGTH (type->field (0).type ());
+	    *length_size = type->field (0).type ()->length ();
 	  if (string_pos)
 	    *string_pos = type->field (1).loc_bitpos () / TARGET_CHAR_BIT;
 	  if (char_type)
@@ -124,7 +124,7 @@ pascal_is_string_type (struct type *type,int *length_pos, int *length_size,
 	  if (length_pos)
 	    *length_pos = type->field (1).loc_bitpos () / TARGET_CHAR_BIT;
 	  if (length_size)
-	    *length_size = TYPE_LENGTH (type->field (1).type ());
+	    *length_size = type->field (1).type ()->length ();
 	  if (string_pos)
 	    *string_pos = type->field (2).loc_bitpos () / TARGET_CHAR_BIT;
 	  /* FIXME: how can I detect wide chars in GPC ??  */
@@ -237,7 +237,7 @@ pascal_language::printstr (struct ui_file *stream, struct type *elttype,
 
   /* Preserve ELTTYPE's original type, just set its LENGTH.  */
   check_typedef (elttype);
-  width = TYPE_LENGTH (elttype);
+  width = elttype->length ();
 
   /* If the string was not truncated due to `set print elements', and
      the last byte of it is a null, we don't print that, in traditional C

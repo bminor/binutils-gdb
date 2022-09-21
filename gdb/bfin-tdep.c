@@ -511,7 +511,7 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
     {
       struct type *value_type = value_enclosing_type (args[i]);
 
-      total_len += align_up (TYPE_LENGTH (value_type), 4);
+      total_len += align_up (value_type->length (), 4);
     }
 
   /* At least twelve bytes of stack space must be allocated for the function's
@@ -527,7 +527,7 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
     {
       struct type *value_type = value_enclosing_type (args[i]);
       struct type *arg_type = check_typedef (value_type);
-      int container_len = align_up (TYPE_LENGTH (arg_type), 4);
+      int container_len = align_up (arg_type->length (), 4);
 
       sp -= container_len;
       write_memory (sp, value_contents (args[i]).data (), container_len);
@@ -612,7 +612,7 @@ bfin_extract_return_value (struct type *type,
   struct gdbarch *gdbarch = regs->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   bfd_byte *valbuf = dst;
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   ULONGEST tmp;
   int regno = BFIN_R0_REGNUM;
 
@@ -641,7 +641,7 @@ bfin_store_return_value (struct type *type,
      registers starting with R0.  This will always be a multiple of
      the register size.  */
 
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int regno = BFIN_R0_REGNUM;
 
   gdb_assert (len <= 8);
@@ -668,7 +668,7 @@ bfin_return_value (struct gdbarch *gdbarch,
 		   gdb_byte *readbuf,
 		   const gdb_byte *writebuf)
 {
-  if (TYPE_LENGTH (type) > 8)
+  if (type->length () > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
   if (readbuf)

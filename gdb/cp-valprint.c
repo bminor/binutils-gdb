@@ -451,12 +451,12 @@ cp_print_value (struct value *val, struct ui_file *stream,
 		 clobbered by the user program. Make sure that it
 		 still points to a valid memory location.  */
 
-	      if (boffset < 0 || boffset >= TYPE_LENGTH (type))
+	      if (boffset < 0 || boffset >= type->length ())
 		{
-		  gdb::byte_vector buf (TYPE_LENGTH (baseclass));
+		  gdb::byte_vector buf (baseclass->length ());
 
 		  if (target_read_memory (address + boffset, buf.data (),
-					  TYPE_LENGTH (baseclass)) != 0)
+					  baseclass->length ()) != 0)
 		    skip = 1;
 		  base_val = value_from_contents_and_address (baseclass,
 							      buf.data (),
@@ -652,7 +652,7 @@ cp_find_class_member (struct type **self_p, int *fieldno,
   for (i = 0; i < TYPE_N_BASECLASSES (self); i++)
     {
       LONGEST bitpos = self->field (i).loc_bitpos ();
-      LONGEST bitsize = 8 * TYPE_LENGTH (self->field (i).type ());
+      LONGEST bitsize = 8 * self->field (i).type ()->length ();
 
       if (offset >= bitpos && offset < bitpos + bitsize)
 	{
@@ -679,7 +679,7 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
   int fieldno;
 
   val = extract_signed_integer (valaddr,
-				TYPE_LENGTH (type),
+				type->length (),
 				byte_order);
 
   /* Pointers to data members are usually byte offsets into an object.
@@ -763,7 +763,7 @@ test_print_fields (gdbarch *arch)
 
   value *val = allocate_value (the_struct);
   gdb_byte *contents = value_contents_writeable (val).data ();
-  store_unsigned_integer (contents, TYPE_LENGTH (value_enclosing_type (val)),
+  store_unsigned_integer (contents, value_enclosing_type (val)->length (),
 			  gdbarch_byte_order (arch), 0xe9);
 
   string_file out;

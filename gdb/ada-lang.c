@@ -560,12 +560,12 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
       else if (value_lazy (val)
 	       /* Be careful not to make a lazy not_lval value.  */
 	       || (VALUE_LVAL (val) != not_lval
-		   && TYPE_LENGTH (type) > TYPE_LENGTH (value_type (val))))
+		   && type->length () > value_type (val)->length ()))
 	result = allocate_value_lazy (type);
       else
 	{
 	  result = allocate_value (type);
-	  value_contents_copy (result, 0, val, 0, TYPE_LENGTH (type));
+	  value_contents_copy (result, 0, val, 0, type->length ());
 	}
       set_value_component_location (result, val);
       set_value_bitsize (result, value_bitsize (val));
@@ -646,9 +646,9 @@ static LONGEST
 max_of_type (struct type *t)
 {
   if (t->is_unsigned ())
-    return (LONGEST) umax_of_size (TYPE_LENGTH (t));
+    return (LONGEST) umax_of_size (t->length ());
   else
-    return max_of_size (TYPE_LENGTH (t));
+    return max_of_size (t->length ());
 }
 
 /* Minimum value of integral type T, as a signed quantity.  */
@@ -658,7 +658,7 @@ min_of_type (struct type *t)
   if (t->is_unsigned ())
     return 0;
   else
-    return min_of_size (TYPE_LENGTH (t));
+    return min_of_size (t->length ());
 }
 
 /* The largest value in the domain of TYPE, a discrete type, as an integer.  */
@@ -1832,7 +1832,7 @@ desc_bounds (struct value *arr)
 
       return
 	value_from_longest (lookup_pointer_type (bounds_type),
-			    addr - TYPE_LENGTH (bounds_type));
+			    addr - bounds_type->length ());
     }
 
   else if (is_thick_pntr (type))
@@ -1880,7 +1880,7 @@ fat_pntr_bounds_bitsize (struct type *type)
   if (TYPE_FIELD_BITSIZE (type, 1) > 0)
     return TYPE_FIELD_BITSIZE (type, 1);
   else
-    return 8 * TYPE_LENGTH (ada_check_typedef (type->field (1).type ()));
+    return 8 * ada_check_typedef (type->field (1).type ())->length ();
 }
 
 /* If TYPE is the type of an array descriptor (fat or thin pointer) or a
@@ -1946,7 +1946,7 @@ fat_pntr_data_bitsize (struct type *type)
   if (TYPE_FIELD_BITSIZE (type, 0) > 0)
     return TYPE_FIELD_BITSIZE (type, 0);
   else
-    return TARGET_CHAR_BIT * TYPE_LENGTH (type->field (0).type ());
+    return TARGET_CHAR_BIT * type->field (0).type ()->length ();
 }
 
 /* If BOUNDS is an array-bounds structure (or pointer to one), return
@@ -1985,7 +1985,7 @@ desc_bound_bitsize (struct type *type, int i, int which)
   if (TYPE_FIELD_BITSIZE (type, 2 * i + which - 2) > 0)
     return TYPE_FIELD_BITSIZE (type, 2 * i + which - 2);
   else
-    return 8 * TYPE_LENGTH (type->field (2 * i + which - 2).type ());
+    return 8 * type->field (2 * i + which - 2).type ()->length ();
 }
 
 /* If TYPE is the type of an array-bounds structure, the type of its
@@ -2517,7 +2517,7 @@ decode_constrained_packed_array (struct value *arr)
   const gdb_byte *valaddr = value_contents_for_printing (arr).data ();
   CORE_ADDR address = value_address (arr);
   gdb::array_view<const gdb_byte> view
-    = gdb::make_array_view (valaddr, TYPE_LENGTH (type));
+    = gdb::make_array_view (valaddr, type->length ());
   type = resolve_dynamic_type (type, view, address);
   recursively_update_array_bitsize (type);
 
@@ -2538,7 +2538,7 @@ decode_constrained_packed_array (struct value *arr)
 	  bit_size += 1;
 	  mod >>= 1;
 	}
-      bit_pos = HOST_CHAR_BIT * TYPE_LENGTH (value_type (arr)) - bit_size;
+      bit_pos = HOST_CHAR_BIT * value_type (arr)->length () - bit_size;
       arr = ada_value_primitive_packed_val (arr, NULL,
 					    bit_pos / HOST_CHAR_BIT,
 					    bit_pos % HOST_CHAR_BIT,
@@ -2790,7 +2790,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 				is_big_endian, has_negatives (type),
 				is_scalar);
       type = resolve_dynamic_type (type, staging, 0);
-      if (TYPE_LENGTH (type) < (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT)
+      if (type->length () < (bit_size + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT)
 	{
 	  /* This happens when the length of the object is dynamic,
 	     and is actually smaller than the space reserved for it.
@@ -2799,7 +2799,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 	     normally equal to the maximum size of its element.
 	     But, in reality, each element only actually spans a portion
 	     of that stride.  */
-	  bit_size = TYPE_LENGTH (type) * HOST_CHAR_BIT;
+	  bit_size = type->length () * HOST_CHAR_BIT;
 	}
     }
 
@@ -2848,11 +2848,11 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
 
   if (bit_size == 0)
     {
-      memset (unpacked, 0, TYPE_LENGTH (type));
+      memset (unpacked, 0, type->length ());
       return v;
     }
 
-  if (staging.size () == TYPE_LENGTH (type))
+  if (staging.size () == type->length ())
     {
       /* Small short-cut: If we've unpacked the data into a buffer
 	 of the same size as TYPE's length, then we can reuse that,
@@ -2861,7 +2861,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
     }
   else
     ada_unpack_from_contents (src, bit_offset, bit_size,
-			      unpacked, TYPE_LENGTH (type),
+			      unpacked, type->length (),
 			      is_big_endian, has_negatives (type), is_scalar);
 
   return v;
@@ -2907,7 +2907,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       read_memory (to_addr, buffer, len);
       from_size = value_bitsize (fromval);
       if (from_size == 0)
-	from_size = TYPE_LENGTH (value_type (fromval)) * TARGET_CHAR_BIT;
+	from_size = value_type (fromval)->length () * TARGET_CHAR_BIT;
 
       const int is_big_endian = type_byte_order (type) == BFD_ENDIAN_BIG;
       ULONGEST from_offset = 0;
@@ -2921,7 +2921,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       val = value_copy (toval);
       memcpy (value_contents_raw (val).data (),
 	      value_contents (fromval).data (),
-	      TYPE_LENGTH (type));
+	      type->length ());
       deprecated_set_value_type (val, type);
 
       return val;
@@ -2955,7 +2955,7 @@ value_assign_to_component (struct value *container, struct value *component,
   val = value_cast (value_type (component), val);
 
   if (value_bitsize (component) == 0)
-    bits = TARGET_CHAR_BIT * TYPE_LENGTH (value_type (component));
+    bits = TARGET_CHAR_BIT * value_type (component)->length ();
   else
     bits = value_bitsize (component);
 
@@ -2965,7 +2965,7 @@ value_assign_to_component (struct value *container, struct value *component,
 
       if (is_scalar_type (check_typedef (value_type (component))))
 	src_offset
-	  = TYPE_LENGTH (value_type (component)) * TARGET_CHAR_BIT - bits;
+	  = value_type (component)->length () * TARGET_CHAR_BIT - bits;
       else
 	src_offset = 0;
       copy_bitwise ((value_contents_writeable (container).data ()
@@ -3112,7 +3112,7 @@ ada_value_slice_from_ptr (struct value *array_ptr, struct type *type,
 
   ULONGEST stride = TYPE_FIELD_BITSIZE (slice_type, 0) / 8;
   if (stride == 0)
-    stride = TYPE_LENGTH (type0->target_type ());
+    stride = type0->target_type ()->length ();
 
   base = value_as_address (array_ptr) + (*low_pos - *base_low_pos) * stride;
   return value_at_lazy (slice_type, base);
@@ -3920,7 +3920,7 @@ ada_type_match (struct type *ftype, struct type *atype)
 	return 0;
       atype = atype->target_type ();
       /* This can only happen if the actual argument is 'null'.  */
-      if (atype->code () == TYPE_CODE_INT && TYPE_LENGTH (atype) == 0)
+      if (atype->code () == TYPE_CODE_INT && atype->length () == 0)
 	return 1;
       return ada_type_match (ftype->target_type (), atype);
     case TYPE_CODE_INT:
@@ -4346,7 +4346,7 @@ ensure_lval (struct value *val)
   if (VALUE_LVAL (val) == not_lval
       || VALUE_LVAL (val) == lval_internalvar)
     {
-      int len = TYPE_LENGTH (ada_check_typedef (value_type (val)));
+      int len = ada_check_typedef (value_type (val))->length ();
       const CORE_ADDR addr =
 	value_as_long (value_allocate_space_in_inferior (len));
 
@@ -4556,7 +4556,7 @@ ada_convert_actual (struct value *actual, struct type *formal_type0)
 static CORE_ADDR
 value_pointer (struct value *value, struct type *type)
 {
-  unsigned len = TYPE_LENGTH (type);
+  unsigned len = type->length ();
   gdb_byte *buf = (gdb_byte *) alloca (len);
   CORE_ADDR addr;
 
@@ -6399,7 +6399,7 @@ value_tag_from_contents_and_address (struct type *type,
 
   gdb::array_view<const gdb_byte> contents;
   if (valaddr != nullptr)
-    contents = gdb::make_array_view (valaddr, TYPE_LENGTH (type));
+    contents = gdb::make_array_view (valaddr, type->length ());
   struct type *resolved_type = resolve_dynamic_type (type, contents, address);
   if (find_struct_field ("_tag", resolved_type, 0, &tag_type, &tag_byte_offset,
 			 NULL, NULL, NULL))
@@ -6493,7 +6493,7 @@ ada_tag_value_at_base_address (struct value *obj)
   /* Storage_Offset'Last is used to indicate that a dynamic offset to
      top is used.  In this situation the offset is stored just after
      the tag, in the object itself.  */
-  ULONGEST last = (((ULONGEST) 1) << (8 * TYPE_LENGTH (offset_type) - 1)) - 1;
+  ULONGEST last = (((ULONGEST) 1) << (8 * offset_type->length () - 1)) - 1;
   if (offset_to_top == last)
     {
       struct value *tem = value_addr (tag);
@@ -7960,8 +7960,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	     an overflow should not happen in practice.  So rather than
 	     adding overflow recovery code to this already complex code,
 	     we just assume that it's not going to happen.  */
-	  fld_bit_len =
-	    TYPE_LENGTH (rtype->field (f).type ()) * TARGET_CHAR_BIT;
+	  fld_bit_len = rtype->field (f).type ()->length () * TARGET_CHAR_BIT;
 	}
       else
 	{
@@ -7992,7 +7991,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 		field_type = ada_typedef_target_type (field_type);
 
 	      fld_bit_len =
-		TYPE_LENGTH (ada_check_typedef (field_type)) * TARGET_CHAR_BIT;
+		ada_check_typedef (field_type)->length () * TARGET_CHAR_BIT;
 	    }
 	}
       if (off + fld_bit_len > bit_len)
@@ -8039,8 +8038,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 	  rtype->field (variant_field).set_type (branch_type);
 	  rtype->field (variant_field).set_name ("S");
 	  fld_bit_len =
-	    TYPE_LENGTH (rtype->field (variant_field).type ()) *
-	    TARGET_CHAR_BIT;
+	    rtype->field (variant_field).type ()->length () * TARGET_CHAR_BIT;
 	  if (off + fld_bit_len > bit_len)
 	    bit_len = off + fld_bit_len;
 
@@ -8055,17 +8053,17 @@ ada_template_to_fixed_record_type_1 (struct type *type,
      probably in the debug info.  In that case, we don't round up the size
      of the resulting type.  If this record is not part of another structure,
      the current RTYPE length might be good enough for our purposes.  */
-  if (TYPE_LENGTH (type) <= 0)
+  if (type->length () <= 0)
     {
       if (rtype->name ())
 	warning (_("Invalid type size for `%s' detected: %s."),
-		 rtype->name (), pulongest (TYPE_LENGTH (type)));
+		 rtype->name (), pulongest (type->length ()));
       else
 	warning (_("Invalid type size for <unnamed> detected: %s."),
-		 pulongest (TYPE_LENGTH (type)));
+		 pulongest (type->length ()));
     }
   else
-    rtype->set_length (align_up (TYPE_LENGTH (rtype), TYPE_LENGTH (type)));
+    rtype->set_length (align_up (rtype->length (), type->length ()));
 
   value_free_to_mark (mark);
   return rtype;
@@ -8198,7 +8196,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
 
   rtype->set_name (ada_type_name (type));
   rtype->set_is_fixed_instance (true);
-  rtype->set_length (TYPE_LENGTH (type));
+  rtype->set_length (type->length ());
 
   branch_type = to_fixed_variant_branch_type
     (type->field (variant_field).type (),
@@ -8221,11 +8219,11 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
       rtype->field (variant_field).set_type (branch_type);
       rtype->field (variant_field).set_name ("S");
       TYPE_FIELD_BITSIZE (rtype, variant_field) = 0;
-      rtype->set_length (TYPE_LENGTH (rtype) + TYPE_LENGTH (branch_type));
+      rtype->set_length (rtype->length () + branch_type->length ());
     }
 
-  rtype->set_length (TYPE_LENGTH (rtype)
-		     - TYPE_LENGTH (type->field (variant_field).type ()));
+  rtype->set_length (rtype->length ()
+		     - type->field (variant_field).type ()->length ());
 
   value_free_to_mark (mark);
   return rtype;
@@ -8529,13 +8527,13 @@ to_fixed_array_type (struct type *type0, struct value *dval,
 	 type was a regular (non-packed) array type.  As a result, the
 	 bitsize of the array elements needs to be set again, and the array
 	 length needs to be recomputed based on that bitsize.  */
-      int len = TYPE_LENGTH (result) / TYPE_LENGTH (result->target_type ());
+      int len = result->length () / result->target_type ()->length ();
       int elt_bitsize = TYPE_FIELD_BITSIZE (type0, 0);
 
       TYPE_FIELD_BITSIZE (result, 0) = TYPE_FIELD_BITSIZE (type0, 0);
       result->set_length (len * elt_bitsize / HOST_CHAR_BIT);
-      if (TYPE_LENGTH (result) * HOST_CHAR_BIT < len * elt_bitsize)
-	result->set_length (TYPE_LENGTH (result) + 1);
+      if (result->length () * HOST_CHAR_BIT < len * elt_bitsize)
+	result->set_length (result->length () + 1);
     }
 
   result->set_is_fixed_instance (true);
@@ -8628,7 +8626,7 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
 			     xvz_name, except.what ());
 	      }
 
-	    if (xvz_found && TYPE_LENGTH (fixed_record_type) != size)
+	    if (xvz_found && fixed_record_type->length () != size)
 	      {
 		fixed_record_type = copy_type (fixed_record_type);
 		fixed_record_type->set_length (size);
@@ -9282,8 +9280,8 @@ ada_promote_array_of_integrals (struct type *type, struct value *val)
   gdb_assert (is_integral_type (type->target_type ()));
   gdb_assert (value_type (val)->code () == TYPE_CODE_ARRAY);
   gdb_assert (is_integral_type (value_type (val)->target_type ()));
-  gdb_assert (TYPE_LENGTH (type->target_type ())
-	      > TYPE_LENGTH (value_type (val)->target_type ()));
+  gdb_assert (type->target_type ()->length ()
+	      > value_type (val)->target_type ()->length ());
 
   if (!get_array_bounds (type, &lo, &hi))
     error (_("unable to determine array bounds"));
@@ -9295,7 +9293,7 @@ ada_promote_array_of_integrals (struct type *type, struct value *val)
   for (i = 0; i < hi - lo + 1; i++)
     {
       struct value *elt = value_cast (elt_type, value_subscript (val, lo + i));
-      int elt_len = TYPE_LENGTH (elt_type);
+      int elt_len = elt_type->length ();
 
       copy (value_contents_all (elt), res_contents.slice (elt_len * i, elt_len));
     }
@@ -9332,16 +9330,14 @@ coerce_for_assign (struct type *type, struct value *val)
 
       if (is_integral_type (type->target_type ())
 	  && is_integral_type (type2->target_type ())
-	  && TYPE_LENGTH (type2->target_type ())
-	       < TYPE_LENGTH (type->target_type ()))
+	  && type2->target_type ()->length () < type->target_type ()->length ())
 	{
 	  /* Allow implicit promotion of the array elements to
 	     a wider type.  */
 	  return ada_promote_array_of_integrals (type, val);
 	}
 
-      if (TYPE_LENGTH (type2->target_type ())
-	  != TYPE_LENGTH (type->target_type ()))
+      if (type2->target_type ()->length () != type->target_type ()->length ())
 	error (_("Incompatible types in assignment"));
       deprecated_set_value_type (val, type);
     }
@@ -9414,7 +9410,7 @@ ada_value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
   val = allocate_value (type1);
   store_unsigned_integer (value_contents_raw (val).data (),
-			  TYPE_LENGTH (value_type (val)),
+			  value_type (val)->length (),
 			  type_byte_order (type1), v);
   return val;
 }
@@ -9444,10 +9440,10 @@ ada_value_equal (struct value *arg1, struct value *arg2)
       /* FIXME: The following works only for types whose
 	 representations use all bits (no padding or undefined bits)
 	 and do not have user-defined equality.  */
-      return (TYPE_LENGTH (arg1_type) == TYPE_LENGTH (arg2_type)
+      return (arg1_type->length () == arg2_type->length ()
 	      && memcmp (value_contents (arg1).data (),
 			 value_contents (arg2).data (),
-			 TYPE_LENGTH (arg1_type)) == 0);
+			 arg1_type->length ()) == 0);
     }
   return value_equal (arg1, arg2);
 }
@@ -10198,7 +10194,7 @@ ada_atr_size (struct type *expect_type,
     return value_zero (builtin_type (exp->gdbarch)->builtin_int, not_lval);
   else
     return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
-			       TARGET_CHAR_BIT * TYPE_LENGTH (type));
+			       TARGET_CHAR_BIT * type->length ());
 }
 
 /* A helper function for UNOP_ABS.  */
@@ -10667,7 +10663,7 @@ ada_string_operation::evaluate (struct type *expect_type,
 
   const std::string &str = std::get<0> (m_storage);
   const char *encoding;
-  switch (TYPE_LENGTH (char_type))
+  switch (char_type->length ())
     {
     case 1:
       {
@@ -10698,7 +10694,7 @@ ada_string_operation::evaluate (struct type *expect_type,
 
     default:
       error (_("unexpected character type size %s"),
-	     pulongest (TYPE_LENGTH (char_type)));
+	     pulongest (char_type->length ()));
     }
 
   auto_obstack converted;
@@ -10710,7 +10706,7 @@ ada_string_operation::evaluate (struct type *expect_type,
   struct type *stringtype
     = lookup_array_range_type (char_type, 1,
 			       obstack_object_size (&converted)
-			       / TYPE_LENGTH (char_type));
+			       / char_type->length ());
   struct value *val = allocate_value (stringtype);
   memcpy (value_contents_raw (val).data (),
 	  obstack_base (&converted),
@@ -11529,7 +11525,7 @@ to_fixed_range_type (struct type *raw_type, struct value *dval)
       /* create_static_range_type alters the resulting type's length
 	 to match the size of the base_type, which is not what we want.
 	 Set it back to the original range type's length.  */
-      type->set_length (TYPE_LENGTH (raw_type));
+      type->set_length (raw_type->length ());
       type->set_name (name);
       return type;
     }
@@ -12034,7 +12030,7 @@ ada_exception_message_1 (void)
 
   e_msg_val = ada_coerce_to_simple_array (e_msg_val);
   gdb_assert (e_msg_val != NULL);
-  e_msg_len = TYPE_LENGTH (value_type (e_msg_val));
+  e_msg_len = value_type (e_msg_val)->length ();
 
   /* If the message string is empty, then treat it as if there was
      no exception message.  */
@@ -13548,7 +13544,7 @@ public:
     /* Create the equivalent of the System.Storage_Elements.Storage_Offset
        type.  This is a signed integral type whose size is the same as
        the size of addresses.  */
-    unsigned int addr_length = TYPE_LENGTH (system_addr_ptr);
+    unsigned int addr_length = system_addr_ptr->length ();
     add (arch_integer_type (gdbarch, addr_length * HOST_CHAR_BIT, 0,
 			    "storage_offset"));
 

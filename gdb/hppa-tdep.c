@@ -741,15 +741,15 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  gdb_byte param_val[8];
 	  int param_len;
 	  memset (param_val, 0, sizeof param_val);
-	  if (TYPE_LENGTH (type) > 8)
+	  if (type->length () > 8)
 	    {
 	      /* Large parameter, pass by reference.  Store the value
 		 in "struct" area and then pass its address.  */
 	      param_len = 4;
-	      struct_ptr += align_up (TYPE_LENGTH (type), 8);
+	      struct_ptr += align_up (type->length (), 8);
 	      if (write_pass)
 		write_memory (struct_end - struct_ptr,
-			      value_contents (arg).data (), TYPE_LENGTH (type));
+			      value_contents (arg).data (), type->length ());
 	      store_unsigned_integer (param_val, 4, byte_order,
 				      struct_end - struct_ptr);
 	    }
@@ -758,7 +758,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    {
 	      /* Integer value store, right aligned.  "unpack_long"
 		 takes care of any sign-extension problems.  */
-	      param_len = align_up (TYPE_LENGTH (type), 4);
+	      param_len = align_up (type->length (), 4);
 	      store_unsigned_integer
 		(param_val, param_len, byte_order,
 		 unpack_long (type, value_contents (arg).data ()));
@@ -766,16 +766,16 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  else if (type->code () == TYPE_CODE_FLT)
 	    {
 	      /* Floating point value store, right aligned.  */
-	      param_len = align_up (TYPE_LENGTH (type), 4);
+	      param_len = align_up (type->length (), 4);
 	      memcpy (param_val, value_contents (arg).data (), param_len);
 	    }
 	  else
 	    {
-	      param_len = align_up (TYPE_LENGTH (type), 4);
+	      param_len = align_up (type->length (), 4);
 
 	      /* Small struct value are stored right-aligned.  */
-	      memcpy (param_val + param_len - TYPE_LENGTH (type),
-		      value_contents (arg).data (), TYPE_LENGTH (type));
+	      memcpy (param_val + param_len - type->length (),
+		      value_contents (arg).data (), type->length ());
 
 	      /* Structures of size 5, 6 and 7 bytes are special in that
 		 the higher-ordered word is stored in the lower-ordered
@@ -874,13 +874,13 @@ hppa64_integral_or_pointer_p (const struct type *type)
     case TYPE_CODE_ENUM:
     case TYPE_CODE_RANGE:
       {
-	int len = TYPE_LENGTH (type);
+	int len = type->length ();
 	return (len == 1 || len == 2 || len == 4 || len == 8);
       }
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
-      return (TYPE_LENGTH (type) == 8);
+      return (type->length () == 8);
     default:
       break;
     }
@@ -897,7 +897,7 @@ hppa64_floating_p (const struct type *type)
     {
     case TYPE_CODE_FLT:
       {
-	int len = TYPE_LENGTH (type);
+	int len = type->length ();
 	return (len == 4 || len == 8 || len == 16);
       }
     default:
@@ -970,7 +970,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       struct value *arg = args[i];
       struct type *type = value_type (arg);
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       const bfd_byte *valbuf;
       bfd_byte fptrbuf[8];
       int regnum;
@@ -1057,7 +1057,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	  codeptr = unpack_long (type, value_contents (arg).data ());
 	  fptr = hppa64_convert_code_addr_to_fptr (gdbarch, codeptr);
-	  store_unsigned_integer (fptrbuf, TYPE_LENGTH (type), byte_order,
+	  store_unsigned_integer (fptrbuf, type->length (), byte_order,
 				  fptr);
 	  valbuf = fptrbuf;
 	}
@@ -1125,13 +1125,13 @@ hppa32_return_value (struct gdbarch *gdbarch, struct value *function,
 		     struct type *type, struct regcache *regcache,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  if (TYPE_LENGTH (type) <= 2 * 4)
+  if (type->length () <= 2 * 4)
     {
       /* The value always lives in the right hand end of the register
 	 (or register pair)?  */
       int b;
       int reg = type->code () == TYPE_CODE_FLT ? HPPA_FP4_REGNUM : 28;
-      int part = TYPE_LENGTH (type) % 4;
+      int part = type->length () % 4;
       /* The left hand register contains only part of the value,
 	 transfer that first so that the rest can be xfered as entire
 	 4-byte registers.  */
@@ -1144,7 +1144,7 @@ hppa32_return_value (struct gdbarch *gdbarch, struct value *function,
 	  reg++;
 	}
       /* Now transfer the remaining register values.  */
-      for (b = part; b < TYPE_LENGTH (type); b += 4)
+      for (b = part; b < type->length (); b += 4)
 	{
 	  if (readbuf != NULL)
 	    regcache->cooked_read (reg, readbuf + b);
@@ -1163,7 +1163,7 @@ hppa64_return_value (struct gdbarch *gdbarch, struct value *function,
 		     struct type *type, struct regcache *regcache,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int regnum, offset;
 
   if (len > 16)

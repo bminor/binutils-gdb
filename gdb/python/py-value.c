@@ -158,7 +158,7 @@ convert_buffer_and_type_to_value (PyObject *obj, struct type *type)
       return nullptr;
     }
 
-  if (TYPE_LENGTH (type) > py_buf.len)
+  if (type->length () > py_buf.len)
     {
       PyErr_SetString (PyExc_ValueError,
 		       _("Size of type is larger than that of buffer object."));
@@ -597,7 +597,7 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
 
   encoding = (user_encoding && *user_encoding) ? user_encoding : la_encoding;
   return PyUnicode_Decode ((const char *) buffer.get (),
-			   length * TYPE_LENGTH (char_type),
+			   length * char_type->length (),
 			   encoding, errors);
 }
 

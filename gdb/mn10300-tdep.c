@@ -100,10 +100,10 @@ mn10300_type_align (struct type *type)
     case TYPE_CODE_PTR:
     case TYPE_CODE_REF:
     case TYPE_CODE_RVALUE_REF:
-      return TYPE_LENGTH (type);
+      return type->length ();
 
     case TYPE_CODE_COMPLEX:
-      return TYPE_LENGTH (type) / 2;
+      return type->length () / 2;
 
     case TYPE_CODE_STRUCT:
     case TYPE_CODE_UNION:
@@ -134,7 +134,7 @@ mn10300_use_struct_convention (struct type *type)
 {
   /* Structures bigger than a pair of words can't be returned in
      registers.  */
-  if (TYPE_LENGTH (type) > 8)
+  if (type->length () > 8)
     return 1;
 
   switch (type->code ())
@@ -171,7 +171,7 @@ static void
 mn10300_store_return_value (struct gdbarch *gdbarch, struct type *type,
 			    struct regcache *regcache, const gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int reg, regsz;
   
   if (type->code () == TYPE_CODE_PTR)
@@ -199,7 +199,7 @@ mn10300_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 			      struct regcache *regcache, void *valbuf)
 {
   gdb_byte buf[MN10300_MAX_REGISTER_SIZE];
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int reg, regsz;
 
   if (type->code () == TYPE_CODE_PTR)
@@ -1185,7 +1185,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
   regs_used = (return_method == return_method_struct) ? 1 : 0;
   for (len = 0, argnum = 0; argnum < nargs; argnum++)
     {
-      arg_len = (TYPE_LENGTH (value_type (args[argnum])) + 3) & ~3;
+      arg_len = (value_type (args[argnum])->length () + 3) & ~3;
       while (regs_used < 2 && arg_len > 0)
 	{
 	  regs_used++;
@@ -1210,7 +1210,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
     {
       /* FIXME what about structs?  Unions?  */
       if (value_type (*args)->code () == TYPE_CODE_STRUCT
-	  && TYPE_LENGTH (value_type (*args)) > 8)
+	  && value_type (*args)->length () > 8)
 	{
 	  /* Change to pointer-to-type.  */
 	  arg_len = push_size;
@@ -1221,7 +1221,7 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
 	}
       else
 	{
-	  arg_len = TYPE_LENGTH (value_type (*args));
+	  arg_len = value_type (*args)->length ();
 	  val = value_contents (*args).data ();
 	}
 

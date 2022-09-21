@@ -553,7 +553,7 @@ elf_rel_plt_read (minimal_symbol_reader &reader,
   bfd_size_type reloc_count, reloc;
   struct gdbarch *gdbarch = objfile->arch ();
   struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-  size_t ptr_size = TYPE_LENGTH (ptr_type);
+  size_t ptr_size = ptr_type->length ();
 
   if (objfile->separate_debug_objfile_backlink)
     return;
@@ -819,7 +819,7 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
       bfd *obfd = objfile->obfd.get ();
       struct gdbarch *gdbarch = objfile->arch ();
       struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
-      size_t ptr_size = TYPE_LENGTH (ptr_type);
+      size_t ptr_size = ptr_type->length ();
       CORE_ADDR pointer_address, addr;
       asection *plt;
       gdb_byte *buf = (gdb_byte *) alloca (ptr_size);

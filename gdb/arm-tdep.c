@@ -4132,10 +4132,10 @@ arm_type_align (gdbarch *gdbarch, struct type *t)
     {
       /* Use the natural alignment for vector types (the same for
 	 scalar type), but the maximum alignment is 64-bit.  */
-      if (TYPE_LENGTH (t) > 8)
+      if (t->length () > 8)
 	return 8;
       else
-	return TYPE_LENGTH (t);
+	return t->length ();
     }
 
   /* Allow the common code to calculate the alignment.  */
@@ -4218,7 +4218,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
   switch (t->code ())
     {
     case TYPE_CODE_FLT:
-      switch (TYPE_LENGTH (t))
+      switch (t->length ())
 	{
 	case 4:
 	  if (*base_type == VFP_CPRC_UNKNOWN)
@@ -4250,7 +4250,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	 };
 
       */
-      switch (TYPE_LENGTH (t))
+      switch (t->length ())
 	{
 	case 8:
 	  if (*base_type == VFP_CPRC_UNKNOWN)
@@ -4277,7 +4277,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	  {
 	    /* A 64-bit or 128-bit containerized vector type are VFP
 	       CPRCs.  */
-	    switch (TYPE_LENGTH (t))
+	    switch (t->length ())
 	      {
 	      case 8:
 		if (*base_type == VFP_CPRC_UNKNOWN)
@@ -4300,7 +4300,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 						base_type);
 	    if (count == -1)
 	      return -1;
-	    if (TYPE_LENGTH (t) == 0)
+	    if (t->length () == 0)
 	      {
 		gdb_assert (count == 0);
 		return 0;
@@ -4308,8 +4308,8 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	    else if (count == 0)
 	      return -1;
 	    unitlen = arm_vfp_cprc_unit_length (*base_type);
-	    gdb_assert ((TYPE_LENGTH (t) % unitlen) == 0);
-	    return TYPE_LENGTH (t) / unitlen;
+	    gdb_assert ((t->length () % unitlen) == 0);
+	    return t->length () / unitlen;
 	  }
       }
       break;
@@ -4330,7 +4330,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	      return -1;
 	    count += sub_count;
 	  }
-	if (TYPE_LENGTH (t) == 0)
+	if (t->length () == 0)
 	  {
 	    gdb_assert (count == 0);
 	    return 0;
@@ -4338,7 +4338,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	else if (count == 0)
 	  return -1;
 	unitlen = arm_vfp_cprc_unit_length (*base_type);
-	if (TYPE_LENGTH (t) != unitlen * count)
+	if (t->length () != unitlen * count)
 	  return -1;
 	return count;
       }
@@ -4356,7 +4356,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	      return -1;
 	    count = (count > sub_count ? count : sub_count);
 	  }
-	if (TYPE_LENGTH (t) == 0)
+	if (t->length () == 0)
 	  {
 	    gdb_assert (count == 0);
 	    return 0;
@@ -4364,7 +4364,7 @@ arm_vfp_cprc_sub_candidate (struct type *t,
 	else if (count == 0)
 	  return -1;
 	unitlen = arm_vfp_cprc_unit_length (*base_type);
-	if (TYPE_LENGTH (t) != unitlen * count)
+	if (t->length () != unitlen * count)
 	  return -1;
 	return count;
       }
@@ -4484,7 +4484,7 @@ arm_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       int may_use_core_reg = 1;
 
       arg_type = check_typedef (value_type (args[argnum]));
-      len = TYPE_LENGTH (arg_type);
+      len = arg_type->length ();
       target_type = arg_type->target_type ();
       typecode = arg_type->code ();
       val = value_contents (args[argnum]).data ();
@@ -8705,7 +8705,7 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 	     not using the VFP ABI code.  */
 	case ARM_FLOAT_VFP:
 	  regs->cooked_read (ARM_A1_REGNUM, valbuf);
-	  if (TYPE_LENGTH (type) > 4)
+	  if (type->length () > 4)
 	    regs->cooked_read (ARM_A1_REGNUM + 1,
 			       valbuf + ARM_INT_REGISTER_SIZE);
 	  break;
@@ -8728,7 +8728,7 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
       /* If the type is a plain integer, then the access is
 	 straight-forward.  Otherwise we have to play around a bit
 	 more.  */
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       int regno = ARM_A1_REGNUM;
       ULONGEST tmp;
 
@@ -8750,7 +8750,7 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
       /* For a structure or union the behaviour is as if the value had
 	 been stored to word-aligned memory and then loaded into 
 	 registers with 32-bit load instruction(s).  */
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       int regno = ARM_A1_REGNUM;
       bfd_byte tmpbuf[ARM_INT_REGISTER_SIZE];
 
@@ -8788,7 +8788,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
     {
       /* Vector values should be returned using ARM registers if they
 	 are not over 16 bytes.  */
-      return (TYPE_LENGTH (type) > 16);
+      return (type->length () > 16);
     }
 
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
@@ -8796,7 +8796,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
     {
       /* The AAPCS says all aggregates not larger than a word are returned
 	 in a register.  */
-      if (TYPE_LENGTH (type) <= ARM_INT_REGISTER_SIZE
+      if (type->length () <= ARM_INT_REGISTER_SIZE
 	  && language_pass_by_reference (type).trivially_copyable)
 	return 0;
 
@@ -8808,7 +8808,7 @@ arm_return_in_memory (struct gdbarch *gdbarch, struct type *type)
 
       /* All aggregate types that won't fit in a register must be returned
 	 in memory.  */
-      if (TYPE_LENGTH (type) > ARM_INT_REGISTER_SIZE
+      if (type->length () > ARM_INT_REGISTER_SIZE
 	  || !language_pass_by_reference (type).trivially_copyable)
 	return 1;
 
@@ -8913,7 +8913,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	     not using the VFP ABI code.  */
 	case ARM_FLOAT_VFP:
 	  regs->cooked_write (ARM_A1_REGNUM, valbuf);
-	  if (TYPE_LENGTH (type) > 4)
+	  if (type->length () > 4)
 	    regs->cooked_write (ARM_A1_REGNUM + 1,
 				valbuf + ARM_INT_REGISTER_SIZE);
 	  break;
@@ -8932,7 +8932,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	   || TYPE_IS_REFERENCE (type)
 	   || type->code () == TYPE_CODE_ENUM)
     {
-      if (TYPE_LENGTH (type) <= 4)
+      if (type->length () <= 4)
 	{
 	  /* Values of one word or less are zero/sign-extended and
 	     returned in r0.  */
@@ -8947,7 +8947,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	  /* Integral values greater than one word are stored in consecutive
 	     registers starting with r0.  This will always be a multiple of
 	     the regiser size.  */
-	  int len = TYPE_LENGTH (type);
+	  int len = type->length ();
 	  int regno = ARM_A1_REGNUM;
 
 	  while (len > 0)
@@ -8963,7 +8963,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
       /* For a structure or union the behaviour is as if the value had
 	 been stored to word-aligned memory and then loaded into 
 	 registers with 32-bit load instruction(s).  */
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       int regno = ARM_A1_REGNUM;
       bfd_byte tmpbuf[ARM_INT_REGISTER_SIZE];
 
@@ -9053,7 +9053,7 @@ arm_return_value (struct gdbarch *gdbarch, struct value *function,
 	      CORE_ADDR addr;
 
 	      regcache->cooked_read (ARM_A1_REGNUM, &addr);
-	      read_memory (addr, readbuf, TYPE_LENGTH (valtype));
+	      read_memory (addr, readbuf, valtype->length ());
 	    }
 	  return RETURN_VALUE_ABI_RETURNS_ADDRESS;
 	}

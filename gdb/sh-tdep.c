@@ -812,7 +812,7 @@ sh_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 static int
 sh_use_struct_convention (int renesas_abi, struct type *type)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int nelem = type->num_fields ();
 
   /* The Renesas ABI returns aggregate types always on stack.  */
@@ -832,13 +832,13 @@ sh_use_struct_convention (int renesas_abi, struct type *type)
 
   /* If the first field in the aggregate has the same length as the entire
      aggregate type, the type is returned in registers.  */
-  if (TYPE_LENGTH (type->field (0).type ()) == len)
+  if (type->field (0).type ()->length () == len)
     return 0;
 
   /* If the size of the aggregate is 8 bytes and the first field is
      of size 4 bytes its alignment is equal to long long's alignment,
      so it's returned in registers.  */
-  if (len == 8 && TYPE_LENGTH (type->field (0).type ()) == 4)
+  if (len == 8 && type->field (0).type ()->length () == 4)
     return 0;
 
   /* Otherwise use struct convention.  */
@@ -849,7 +849,7 @@ static int
 sh_use_struct_convention_nofpu (int renesas_abi, struct type *type)
 {
   /* The Renesas ABI returns long longs/doubles etc. always on stack.  */
-  if (renesas_abi && type->num_fields () == 0 && TYPE_LENGTH (type) >= 8)
+  if (renesas_abi && type->num_fields () == 0 && type->length () >= 8)
     return 1;
   return sh_use_struct_convention (renesas_abi, type);
 }
@@ -937,7 +937,7 @@ sh_stack_allocsize (int nargs, struct value **args)
 {
   int stack_alloc = 0;
   while (nargs-- > 0)
-    stack_alloc += ((TYPE_LENGTH (value_type (args[nargs])) + 3) & ~3);
+    stack_alloc += ((value_type (args[nargs])->length () + 3) & ~3);
   return stack_alloc;
 }
 
@@ -1101,7 +1101,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       type = value_type (args[argnum]);
-      len = TYPE_LENGTH (type);
+      len = type->length ();
       val = sh_justify_value_in_reg (gdbarch, args[argnum], len);
 
       /* Some decisions have to be made how various types are handled.
@@ -1150,7 +1150,7 @@ sh_push_dummy_call_fpu (struct gdbarch *gdbarch,
 		 and then proceeds as normal by writing the second 32 bits
 		 into the next register.  */
 	      if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE
-		  && TYPE_LENGTH (type) == 2 * reg_size)
+		  && type->length () == 2 * reg_size)
 		{
 		  regcache_cooked_write_unsigned (regcache, flt_argreg + 1,
 						  regval);
@@ -1239,7 +1239,7 @@ sh_push_dummy_call_nofpu (struct gdbarch *gdbarch,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       type = value_type (args[argnum]);
-      len = TYPE_LENGTH (type);
+      len = type->length ();
       val = sh_justify_value_in_reg (gdbarch, args[argnum], len);
 
       /* Some decisions have to be made how various types are handled.
@@ -1312,7 +1312,7 @@ sh_extract_return_value_nofpu (struct type *type, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   if (len <= 4)
     {
@@ -1338,7 +1338,7 @@ sh_extract_return_value_fpu (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   if (sh_treat_as_flt_p (type))
     {
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       int i, regnum = gdbarch_fp0_regnum (gdbarch);
       for (i = 0; i < len; i += 4)
 	if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
@@ -1364,7 +1364,7 @@ sh_store_return_value_nofpu (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST val;
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   if (len <= 4)
     {
@@ -1386,7 +1386,7 @@ sh_store_return_value_fpu (struct type *type, struct regcache *regcache,
   struct gdbarch *gdbarch = regcache->arch ();
   if (sh_treat_as_flt_p (type))
     {
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       int i, regnum = gdbarch_fp0_regnum (gdbarch);
       for (i = 0; i < len; i += 4)
 	if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)

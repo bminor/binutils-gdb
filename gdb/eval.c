@@ -245,7 +245,7 @@ unop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 	  {
 	    struct type *builtin_int = builtin_type (gdbarch)->builtin_int;
 
-	    if (TYPE_LENGTH (type1) < TYPE_LENGTH (builtin_int))
+	    if (type1->length () < builtin_int->length ())
 	      *arg1 = value_cast (builtin_int, *arg1);
 	  }
 	  break;
@@ -306,8 +306,8 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 	     version 6.7 for backward compatibility.
 	     If either arg was long double, make sure that value is also long
 	     double.  Otherwise use double.  */
-	  if (TYPE_LENGTH (type1) * 8 > gdbarch_double_bit (gdbarch)
-	      || TYPE_LENGTH (type2) * 8 > gdbarch_double_bit (gdbarch))
+	  if (type1->length () * 8 > gdbarch_double_bit (gdbarch)
+	      || type2->length () * 8 > gdbarch_double_bit (gdbarch))
 	    promoted_type = builtin_type (gdbarch)->builtin_long_double;
 	  else
 	    promoted_type = builtin_type (gdbarch)->builtin_double;
@@ -324,8 +324,8 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
     /* FIXME: Also mixed integral/booleans, with result an integer.  */
     {
       const struct builtin_type *builtin = builtin_type (gdbarch);
-      unsigned int promoted_len1 = TYPE_LENGTH (type1);
-      unsigned int promoted_len2 = TYPE_LENGTH (type2);
+      unsigned int promoted_len1 = type1->length ();
+      unsigned int promoted_len2 = type2->length ();
       int is_unsigned1 = type1->is_unsigned ();
       int is_unsigned2 = type2->is_unsigned ();
       unsigned int result_len;
@@ -333,15 +333,15 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 
       /* Determine type length and signedness after promotion for
 	 both operands.  */
-      if (promoted_len1 < TYPE_LENGTH (builtin->builtin_int))
+      if (promoted_len1 < builtin->builtin_int->length ())
 	{
 	  is_unsigned1 = 0;
-	  promoted_len1 = TYPE_LENGTH (builtin->builtin_int);
+	  promoted_len1 = builtin->builtin_int->length ();
 	}
-      if (promoted_len2 < TYPE_LENGTH (builtin->builtin_int))
+      if (promoted_len2 < builtin->builtin_int->length ())
 	{
 	  is_unsigned2 = 0;
-	  promoted_len2 = TYPE_LENGTH (builtin->builtin_int);
+	  promoted_len2 = builtin->builtin_int->length ();
 	}
 
       if (promoted_len1 > promoted_len2)
@@ -366,13 +366,13 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 	case language_cplus:
 	case language_asm:
 	case language_objc:
-	  if (result_len <= TYPE_LENGTH (builtin->builtin_int))
+	  if (result_len <= builtin->builtin_int->length ())
 	    {
 	      promoted_type = (unsigned_operation
 			       ? builtin->builtin_unsigned_int
 			       : builtin->builtin_int);
 	    }
-	  else if (result_len <= TYPE_LENGTH (builtin->builtin_long))
+	  else if (result_len <= builtin->builtin_long->length ())
 	    {
 	      promoted_type = (unsigned_operation
 			       ? builtin->builtin_unsigned_long
@@ -386,16 +386,16 @@ binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
 	    }
 	  break;
 	case language_opencl:
-	  if (result_len <= TYPE_LENGTH (lookup_signed_typename
-					 (language, "int")))
+	  if (result_len
+	      <= lookup_signed_typename (language, "int")->length())
 	    {
 	      promoted_type =
 		(unsigned_operation
 		 ? lookup_unsigned_typename (language, "int")
 		 : lookup_signed_typename (language, "int"));
 	    }
-	  else if (result_len <= TYPE_LENGTH (lookup_signed_typename
-					      (language, "long")))
+	  else if (result_len
+		   <= lookup_signed_typename (language, "long")->length())
 	    {
 	      promoted_type =
 		(unsigned_operation
@@ -2408,7 +2408,7 @@ array_operation::evaluate_struct_tuple (struct value *struct_val,
 		      value_as_long (val), bitpos % 8, bitsize);
       else
 	memcpy (addr, value_contents (val).data (),
-		TYPE_LENGTH (value_type (val)));
+		value_type (val)->length ());
 
     }
   return struct_val;
@@ -2431,7 +2431,7 @@ array_operation::evaluate (struct type *expect_type,
     {
       struct value *rec = allocate_value (expect_type);
 
-      memset (value_contents_raw (rec).data (), '\0', TYPE_LENGTH (type));
+      memset (value_contents_raw (rec).data (), '\0', type->length ());
       return evaluate_struct_tuple (rec, exp, noside, nargs);
     }
 
@@ -2441,16 +2441,16 @@ array_operation::evaluate (struct type *expect_type,
       struct type *range_type = type->index_type ();
       struct type *element_type = type->target_type ();
       struct value *array = allocate_value (expect_type);
-      int element_size = TYPE_LENGTH (check_typedef (element_type));
+      int element_size = check_typedef (element_type)->length ();
       LONGEST low_bound, high_bound, index;
 
       if (!get_discrete_bounds (range_type, &low_bound, &high_bound))
 	{
 	  low_bound = 0;
-	  high_bound = (TYPE_LENGTH (type) / element_size) - 1;
+	  high_bound = (type->length () / element_size) - 1;
 	}
       index = low_bound;
-      memset (value_contents_raw (array).data (), 0, TYPE_LENGTH (expect_type));
+      memset (value_contents_raw (array).data (), 0, expect_type->length ());
       for (tem = nargs; --nargs >= 0;)
 	{
 	  struct value *element;
@@ -2487,7 +2487,7 @@ array_operation::evaluate (struct type *expect_type,
 
       if (!get_discrete_bounds (element_type, &low_bound, &high_bound))
 	error (_("(power)set type with unknown size"));
-      memset (valaddr, '\0', TYPE_LENGTH (type));
+      memset (valaddr, '\0', type->length ());
       int idx = 0;
       for (tem = 0; tem < nargs; tem++)
 	{
@@ -2555,11 +2555,11 @@ unop_extract_operation::evaluate (struct type *expect_type,
   value *old_value = std::get<0> (m_storage)->evaluate (nullptr, exp, noside);
   struct type *type = get_type ();
 
-  if (TYPE_LENGTH (type) > TYPE_LENGTH (value_type (old_value)))
+  if (type->length () > value_type (old_value)->length ())
     error (_("length type is larger than the value type"));
 
   struct value *result = allocate_value (type);
-  value_contents_copy (result, 0, old_value, 0, TYPE_LENGTH (type));
+  value_contents_copy (result, 0, old_value, 0, type->length ());
   return result;
 }
 
@@ -2730,7 +2730,7 @@ evaluate_subexp_for_sizeof_base (struct expression *exp, struct type *type)
   if (exp->language_defn->la_language == language_cplus
       && (TYPE_IS_REFERENCE (type)))
     type = check_typedef (type->target_type ());
-  return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
+  return value_from_longest (size_type, (LONGEST) type->length ());
 }
 
 namespace expr
@@ -2757,7 +2757,7 @@ var_msym_value_operation::evaluate_for_sizeof (struct expression *exp,
 
   /* FIXME: This should be size_t.  */
   struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
-  return value_from_longest (size_type, TYPE_LENGTH (type));
+  return value_from_longest (size_type, type->length ());
 }
 
 value *
@@ -2784,7 +2784,7 @@ subscript_operation::evaluate_for_sizeof (struct expression *exp,
 		  struct type *size_type
 		    = builtin_type (exp->gdbarch)->builtin_int;
 		  return value_from_longest
-		    (size_type, (LONGEST) TYPE_LENGTH (value_type (val)));
+		    (size_type, (LONGEST) value_type (val)->length ());
 		}
 	    }
 	}
@@ -2808,7 +2808,7 @@ unop_ind_base_operation::evaluate_for_sizeof (struct expression *exp,
     type = value_type (value_ind (val));
   /* FIXME: This should be size_t.  */
   struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
-  return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
+  return value_from_longest (size_type, (LONGEST) type->length ());
 }
 
 value *

@@ -91,7 +91,7 @@ gccgo_string_p (struct type *type)
 	  target_type = check_typedef (target_type);
 
 	  if (target_type->code () == TYPE_CODE_INT
-	      && TYPE_LENGTH (target_type) == 1
+	      && target_type->length () == 1
 	      && strcmp (target_type->name (), "uint8") == 0)
 	    return 1;
 	}

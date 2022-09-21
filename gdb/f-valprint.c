@@ -92,7 +92,7 @@ f77_get_dynamic_length_of_aggregate (struct type *type)
 
   /* Patch in a valid length value.  */
   type->set_length ((upper_bound - lower_bound + 1)
-		    * TYPE_LENGTH (check_typedef (type->target_type ())));
+		    * check_typedef (type->target_type ())->length ());
 }
 
 /* Per-dimension statistics.  */
@@ -264,7 +264,7 @@ public:
     bool repeated = (m_options->repeat_count_threshold < UINT_MAX
 		     && elt_type_prev != nullptr
 		     && value_contents_eq (m_val, elt_off_prev, m_val, elt_off,
-					   TYPE_LENGTH (elt_type)));
+					   elt_type->length ()));
 
     if (repeated)
       m_nrepeats++;
@@ -363,7 +363,7 @@ private:
       }
     else
       return value_contents_eq (val, offset1, val, offset2,
-				TYPE_LENGTH (type));
+				type->length ());
   }
 
   /* The number of elements printed so far.  */
@@ -446,7 +446,7 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
     case TYPE_CODE_STRING:
       f77_get_dynamic_length_of_aggregate (type);
       printstr (stream, builtin_type (gdbarch)->builtin_char, valaddr,
-		TYPE_LENGTH (type), NULL, 0, options);
+		type->length (), NULL, 0, options);
       break;
 
     case TYPE_CODE_ARRAY:
@@ -458,7 +458,7 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
 
 	  f77_get_dynamic_length_of_aggregate (type);
 	  printstr (stream, ch_type, valaddr,
-		    TYPE_LENGTH (type) / TYPE_LENGTH (ch_type), NULL, 0,
+		    type->length () / ch_type->length (), NULL, 0,
 		    options);
 	}
       break;
@@ -494,7 +494,7 @@ f_language::value_print_inner (struct value *val, struct ui_file *stream,
 
 	  /* For a pointer to char or unsigned char, also print the string
 	     pointed to, unless pointer is null.  */
-	  if (TYPE_LENGTH (elttype) == 1
+	  if (elttype->length () == 1
 	      && elttype->code () == TYPE_CODE_INT
 	      && (options->format == 0 || options->format == 's')
 	      && addr != 0)

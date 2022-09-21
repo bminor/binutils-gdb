@@ -293,19 +293,19 @@ linux_get_siginfo_type_with_fields (struct gdbarch *gdbarch,
 
   /* __pid_t */
   pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			TYPE_LENGTH (int_type) * TARGET_CHAR_BIT, "__pid_t");
+			int_type->length () * TARGET_CHAR_BIT, "__pid_t");
   pid_type->set_target_type (int_type);
   pid_type->set_target_is_stub (true);
 
   /* __uid_t */
   uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			TYPE_LENGTH (uint_type) * TARGET_CHAR_BIT, "__uid_t");
+			uint_type->length () * TARGET_CHAR_BIT, "__uid_t");
   uid_type->set_target_type (uint_type);
   uid_type->set_target_is_stub (true);
 
   /* __clock_t */
   clock_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			  TYPE_LENGTH (long_type) * TARGET_CHAR_BIT,
+			  long_type->length () * TARGET_CHAR_BIT,
 			  "__clock_t");
   clock_type->set_target_type (long_type);
   clock_type->set_target_is_stub (true);
@@ -394,7 +394,7 @@ linux_get_siginfo_type_with_fields (struct gdbarch *gdbarch,
   append_composite_type_field (siginfo_type, "si_code", int_type);
   append_composite_type_field_aligned (siginfo_type,
 				       "_sifields", sifields_type,
-				       TYPE_LENGTH (long_type));
+				       long_type->length ());
 
   linux_gdbarch_data->siginfo_type = siginfo_type;
 
@@ -1715,11 +1715,11 @@ linux_make_mappings_callback (ULONGEST vaddr, ULONGEST size,
   ++map_data->file_count;
 
   pack_long (buf, map_data->long_type, vaddr);
-  obstack_grow (map_data->data_obstack, buf, TYPE_LENGTH (map_data->long_type));
+  obstack_grow (map_data->data_obstack, buf, map_data->long_type->length ());
   pack_long (buf, map_data->long_type, vaddr + size);
-  obstack_grow (map_data->data_obstack, buf, TYPE_LENGTH (map_data->long_type));
+  obstack_grow (map_data->data_obstack, buf, map_data->long_type->length ());
   pack_long (buf, map_data->long_type, offset);
-  obstack_grow (map_data->data_obstack, buf, TYPE_LENGTH (map_data->long_type));
+  obstack_grow (map_data->data_obstack, buf, map_data->long_type->length ());
 
   obstack_grow_str0 (map_data->filename_obstack, filename);
 
@@ -1748,11 +1748,11 @@ linux_make_mappings_corefile_notes (struct gdbarch *gdbarch, bfd *obfd,
   mapping_data.long_type = long_type;
 
   /* Reserve space for the count.  */
-  obstack_blank (&data_obstack, TYPE_LENGTH (long_type));
+  obstack_blank (&data_obstack, long_type->length ());
   /* We always write the page size as 1 since we have no good way to
      determine the correct value.  */
   pack_long (buf, long_type, 1);
-  obstack_grow (&data_obstack, buf, TYPE_LENGTH (long_type));
+  obstack_grow (&data_obstack, buf, long_type->length ());
 
   linux_find_memory_regions_full (gdbarch, 
 				  dump_note_entry_p,
@@ -1794,12 +1794,12 @@ linux_get_siginfo_data (thread_info *thread, struct gdbarch *gdbarch)
 
   siginfo_type = gdbarch_get_siginfo_type (gdbarch);
 
-  gdb::byte_vector buf (TYPE_LENGTH (siginfo_type));
+  gdb::byte_vector buf (siginfo_type->length ());
 
   bytes_read = target_read (current_inferior ()->top_target (),
 			    TARGET_OBJECT_SIGNAL_INFO, NULL,
-			    buf.data (), 0, TYPE_LENGTH (siginfo_type));
-  if (bytes_read != TYPE_LENGTH (siginfo_type))
+			    buf.data (), 0, siginfo_type->length ());
+  if (bytes_read != siginfo_type->length ())
     buf.clear ();
 
   return buf;

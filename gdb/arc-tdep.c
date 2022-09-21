@@ -761,7 +761,7 @@ arc_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	 argument's size up to an integral number of words.  */
       for (int i = 0; i < nargs; i++)
 	{
-	  unsigned int len = TYPE_LENGTH (value_type (args[i]));
+	  unsigned int len = value_type (args[i])->length ();
 	  unsigned int space = align_up (len, 4);
 
 	  total_space += space;
@@ -776,7 +776,7 @@ arc_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       gdb_byte *data = memory_image;
       for (int i = 0; i < nargs; i++)
 	{
-	  unsigned int len = TYPE_LENGTH (value_type (args[i]));
+	  unsigned int len = value_type (args[i])->length ();
 	  unsigned int space = align_up (len, 4);
 
 	  memcpy (data, value_contents (args[i]).data (), (size_t) len);
@@ -906,7 +906,7 @@ static void
 arc_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 			  struct regcache *regcache, gdb_byte *valbuf)
 {
-  unsigned int len = TYPE_LENGTH (type);
+  unsigned int len = type->length ();
 
   arc_debug_printf ("called");
 
@@ -957,7 +957,7 @@ static void
 arc_store_return_value (struct gdbarch *gdbarch, struct type *type,
 			struct regcache *regcache, const gdb_byte *valbuf)
 {
-  unsigned int len = TYPE_LENGTH (type);
+  unsigned int len = type->length ();
 
   arc_debug_printf ("called");
 
@@ -1029,7 +1029,7 @@ arc_return_value (struct gdbarch *gdbarch, struct value *function,
      stored.  Otherwise, the result is returned in registers.  */
   int is_struct_return = (valtype->code () == TYPE_CODE_STRUCT
 			  || valtype->code () == TYPE_CODE_UNION
-			  || TYPE_LENGTH (valtype) > 2 * ARC_REGISTER_SIZE);
+			  || valtype->length () > 2 * ARC_REGISTER_SIZE);
 
   arc_debug_printf ("readbuf = %s, writebuf = %s",
 		    host_address_to_string (readbuf),
@@ -2237,7 +2237,7 @@ arc_type_align (struct gdbarch *gdbarch, struct type *type)
     case TYPE_CODE_METHODPTR:
     case TYPE_CODE_MEMBERPTR:
       type = check_typedef (type);
-      return std::min<ULONGEST> (4, TYPE_LENGTH (type));
+      return std::min<ULONGEST> (4, type->length ());
     default:
       return 0;
     }

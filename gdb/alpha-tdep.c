@@ -234,7 +234,7 @@ alpha_convert_register_p (struct gdbarch *gdbarch, int regno,
 			  struct type *type)
 {
   return (regno >= ALPHA_FP0_REGNUM && regno < ALPHA_FP0_REGNUM + 31
-	  && TYPE_LENGTH (type) == 4);
+	  && type->length () == 4);
 }
 
 static int
@@ -257,7 +257,7 @@ alpha_register_to_value (struct frame_info *frame, int regnum,
 
   /* Convert to VALTYPE.  */
 
-  gdb_assert (TYPE_LENGTH (valtype) == 4);
+  gdb_assert (valtype->length () == 4);
   alpha_sts (gdbarch, out, value_contents_all (value).data ());
 
   release_value (value);
@@ -270,7 +270,7 @@ alpha_value_to_register (struct frame_info *frame, int regnum,
 {
   gdb_byte out[ALPHA_REGISTER_SIZE];
 
-  gdb_assert (TYPE_LENGTH (valtype) == 4);
+  gdb_assert (valtype->length () == 4);
   gdb_assert (register_size (get_frame_arch (frame), regnum)
 	      <= ALPHA_REGISTER_SIZE);
   alpha_lds (get_frame_arch (frame), out, in);
@@ -334,14 +334,14 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	case TYPE_CODE_CHAR:
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_ENUM:
-	  if (TYPE_LENGTH (arg_type) == 4)
+	  if (arg_type->length () == 4)
 	    {
 	      /* 32-bit values must be sign-extended to 64 bits
 		 even if the base data type is unsigned.  */
 	      arg_type = builtin_type (gdbarch)->builtin_int32;
 	      arg = value_cast (arg_type, arg);
 	    }
-	  if (TYPE_LENGTH (arg_type) < ALPHA_REGISTER_SIZE)
+	  if (arg_type->length () < ALPHA_REGISTER_SIZE)
 	    {
 	      arg_type = builtin_type (gdbarch)->builtin_int64;
 	      arg = value_cast (arg_type, arg);
@@ -352,14 +352,14 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  /* "float" arguments loaded in registers must be passed in
 	     register format, aka "double".  */
 	  if (accumulate_size < sizeof (arg_reg_buffer)
-	      && TYPE_LENGTH (arg_type) == 4)
+	      && arg_type->length () == 4)
 	    {
 	      arg_type = builtin_type (gdbarch)->builtin_double;
 	      arg = value_cast (arg_type, arg);
 	    }
 	  /* Tru64 5.1 has a 128-bit long double, and passes this by
 	     invisible reference.  No one else uses this data type.  */
-	  else if (TYPE_LENGTH (arg_type) == 16)
+	  else if (arg_type->length () == 16)
 	    {
 	      /* Allocate aligned storage.  */
 	      sp = (sp & -16) - 16;
@@ -380,7 +380,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 	  /* Tru64 5.1 has a 128-bit long double, and passes this by
 	     invisible reference.  */
-	  if (TYPE_LENGTH (arg_type) == 32)
+	  if (arg_type->length () == 32)
 	    {
 	      /* Allocate aligned storage.  */
 	      sp = (sp & -16) - 16;
@@ -397,7 +397,7 @@ alpha_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	default:
 	  break;
 	}
-      m_arg->len = TYPE_LENGTH (arg_type);
+      m_arg->len = arg_type->length ();
       m_arg->offset = accumulate_size;
       accumulate_size = (accumulate_size + m_arg->len + 7) & ~7;
       m_arg->contents = value_contents (arg).data ();
@@ -481,7 +481,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
   switch (valtype->code ())
     {
     case TYPE_CODE_FLT:
-      switch (TYPE_LENGTH (valtype))
+      switch (valtype->length ())
 	{
 	case 4:
 	  regcache->cooked_read (ALPHA_FP0_REGNUM, raw_buffer);
@@ -504,7 +504,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
       break;
 
     case TYPE_CODE_COMPLEX:
-      switch (TYPE_LENGTH (valtype))
+      switch (valtype->length ())
 	{
 	case 8:
 	  /* ??? This isn't correct wrt the ABI, but it's what GCC does.  */
@@ -530,7 +530,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
     default:
       /* Assume everything else degenerates to an integer.  */
       regcache_cooked_read_unsigned (regcache, ALPHA_V0_REGNUM, &l);
-      store_unsigned_integer (valbuf, TYPE_LENGTH (valtype), byte_order, l);
+      store_unsigned_integer (valbuf, valtype->length (), byte_order, l);
       break;
     }
 }
@@ -549,7 +549,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
   switch (valtype->code ())
     {
     case TYPE_CODE_FLT:
-      switch (TYPE_LENGTH (valtype))
+      switch (valtype->length ())
 	{
 	case 4:
 	  alpha_lds (gdbarch, raw_buffer, valbuf);
@@ -573,7 +573,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
       break;
 
     case TYPE_CODE_COMPLEX:
-      switch (TYPE_LENGTH (valtype))
+      switch (valtype->length ())
 	{
 	case 8:
 	  /* ??? This isn't correct wrt the ABI, but it's what GCC does.  */
@@ -601,7 +601,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
       /* Assume everything else degenerates to an integer.  */
       /* 32-bit values must be sign-extended to 64 bits
 	 even if the base data type is unsigned.  */
-      if (TYPE_LENGTH (valtype) == 4)
+      if (valtype->length () == 4)
 	valtype = builtin_type (gdbarch)->builtin_int32;
       l = unpack_long (valtype, valbuf);
       regcache_cooked_write_unsigned (regcache, ALPHA_V0_REGNUM, l);
@@ -626,7 +626,7 @@ alpha_return_value (struct gdbarch *gdbarch, struct value *function,
 	{
 	  ULONGEST addr;
 	  regcache_raw_read_unsigned (regcache, ALPHA_V0_REGNUM, &addr);
-	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	  read_memory (addr, readbuf, type->length ());
 	}
 
       return RETURN_VALUE_ABI_RETURNS_ADDRESS;

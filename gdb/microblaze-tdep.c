@@ -516,7 +516,7 @@ microblaze_extract_return_value (struct type *type, struct regcache *regcache,
   gdb_byte buf[8];
 
   /* Copy the return value (starting) in RETVAL_REGNUM to VALBUF.  */
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
       case 1:	/* return last byte in the register.  */
 	regcache->cooked_read (MICROBLAZE_RETVAL_REGNUM, buf);
@@ -530,7 +530,7 @@ microblaze_extract_return_value (struct type *type, struct regcache *regcache,
       case 8:
 	regcache->cooked_read (MICROBLAZE_RETVAL_REGNUM, buf);
 	regcache->cooked_read (MICROBLAZE_RETVAL_REGNUM + 1, buf+4);
-	memcpy (valbuf, buf, TYPE_LENGTH (type));
+	memcpy (valbuf, buf, type->length ());
 	return;
       default:
 	internal_error (__FILE__, __LINE__, 
@@ -552,7 +552,7 @@ static void
 microblaze_store_return_value (struct type *type, struct regcache *regcache,
 			       const gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   gdb_byte buf[8];
 
   memset (buf, 0, sizeof(buf));
@@ -588,7 +588,7 @@ microblaze_return_value (struct gdbarch *gdbarch, struct value *function,
 static int
 microblaze_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
 {
-  return (TYPE_LENGTH (type) == 16);
+  return (type->length () == 16);
 }
 
 

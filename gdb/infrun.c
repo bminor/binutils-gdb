@@ -9177,9 +9177,9 @@ siginfo_value_read (struct value *v)
 		 NULL,
 		 value_contents_all_raw (v).data (),
 		 value_offset (v),
-		 TYPE_LENGTH (value_type (v)));
+		 value_type (v)->length ());
 
-  if (transferred != TYPE_LENGTH (value_type (v)))
+  if (transferred != value_type (v)->length ())
     error (_("Unable to read siginfo"));
 }
 
@@ -9200,9 +9200,9 @@ siginfo_value_write (struct value *v, struct value *fromval)
 			      NULL,
 			      value_contents_all_raw (fromval).data (),
 			      value_offset (v),
-			      TYPE_LENGTH (value_type (fromval)));
+			      value_type (fromval)->length ());
 
-  if (transferred != TYPE_LENGTH (value_type (fromval)))
+  if (transferred != value_type (fromval)->length ())
     error (_("Unable to write siginfo"));
 }
 
@@ -9256,7 +9256,7 @@ public:
     if (gdbarch_get_siginfo_type_p (gdbarch))
       {
 	struct type *type = gdbarch_get_siginfo_type (gdbarch);
-	size_t len = TYPE_LENGTH (type);
+	size_t len = type->length ();
 
 	siginfo_data.reset ((gdb_byte *) xmalloc (len));
 
@@ -9298,7 +9298,7 @@ public:
 	/* Errors ignored.  */
 	target_write (current_inferior ()->top_target (),
 		      TARGET_OBJECT_SIGNAL_INFO, NULL,
-		      m_siginfo_data.get (), 0, TYPE_LENGTH (type));
+		      m_siginfo_data.get (), 0, type->length ());
       }
 
     /* The inferior can be gone if the user types "print exit(0)"
@@ -9320,7 +9320,7 @@ private:
   struct gdbarch *m_siginfo_gdbarch = nullptr;
 
   /* The inferior format depends on SIGINFO_GDBARCH and it has a length of
-     TYPE_LENGTH (gdbarch_get_siginfo_type ()).  For different gdbarch the
+     gdbarch_get_siginfo_type ()->length ().  For different gdbarch the
      content would be invalid.  */
   gdb::unique_xmalloc_ptr<gdb_byte> m_siginfo_data;
 };

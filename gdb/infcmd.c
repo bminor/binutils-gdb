@@ -2151,7 +2151,7 @@ default_print_one_register_info (struct ui_file *file,
 	{
 	  pad_to_column (format_stream, value_column_2);
 	  format_stream.puts ("(raw ");
-	  print_hex_chars (&format_stream, valaddr, TYPE_LENGTH (regtype),
+	  print_hex_chars (&format_stream, valaddr, regtype->length (),
 			   byte_order, true);
 	  format_stream.putc (')');
 	}

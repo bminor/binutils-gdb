@@ -1188,7 +1188,7 @@ c_type_print_base_struct_union (struct type *type, struct ui_file *stream,
 		 the whole struct/union.  */
 	      local_podata.end_bitpos
 		= podata->end_bitpos
-		  - TYPE_LENGTH (type->field (i).type ()) * TARGET_CHAR_BIT;
+		  - type->field (i).type ()->length () * TARGET_CHAR_BIT;
 	    }
 
 	  c_print_type_1 (type->field (i).type (),

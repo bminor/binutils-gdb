@@ -148,7 +148,7 @@ static int
 xstormy16_use_struct_convention (struct type *type)
 {
   return !xstormy16_type_is_scalar (type)
-	 || TYPE_LENGTH (type) > E_MAX_RETTYPE_SIZE_IN_REGS;
+	 || type->length () > E_MAX_RETTYPE_SIZE_IN_REGS;
 } 
 
 /* Function: xstormy16_extract_return_value
@@ -159,7 +159,7 @@ static void
 xstormy16_extract_return_value (struct type *type, struct regcache *regcache,
 				gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int i, regnum = E_1ST_ARG_REGNUM;
 
   for (i = 0; i < len; i += xstormy16_reg_size)
@@ -175,7 +175,7 @@ static void
 xstormy16_store_return_value (struct type *type, struct regcache *regcache,
 			      const gdb_byte *valbuf)
 {
-  if (TYPE_LENGTH (type) == 1)
+  if (type->length () == 1)
     {    
       /* Add leading zeros to the value.  */
       gdb_byte buf[xstormy16_reg_size];
@@ -185,7 +185,7 @@ xstormy16_store_return_value (struct type *type, struct regcache *regcache,
     }
   else
     {
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       int i, regnum = E_1ST_ARG_REGNUM;
 
       for (i = 0; i < len; i += xstormy16_reg_size)
@@ -252,7 +252,7 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
      would fit in the remaining unused registers.  */
   for (i = 0; i < nargs && argreg <= E_LST_ARG_REGNUM; i++)
     {
-      typelen = TYPE_LENGTH (value_enclosing_type (args[i]));
+      typelen = value_enclosing_type (args[i])->length ();
       if (typelen > E_MAX_RETTYPE_SIZE (argreg))
 	break;
 
@@ -277,7 +277,7 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
     {
       const gdb_byte *bytes = value_contents (args[j]).data ();
 
-      typelen = TYPE_LENGTH (value_enclosing_type (args[j]));
+      typelen = value_enclosing_type (args[j])->length ();
       slacklen = typelen & 1;
       gdb::byte_vector val (typelen + slacklen);
       memcpy (val.data (), bytes, typelen);
@@ -612,7 +612,7 @@ xstormy16_pointer_to_address (struct gdbarch *gdbarch,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum type_code target = type->target_type ()->code ();
   CORE_ADDR addr
-    = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
+    = extract_unsigned_integer (buf, type->length (), byte_order);
 
   if (target == TYPE_CODE_FUNC || target == TYPE_CODE_METHOD)
     {
@@ -637,7 +637,7 @@ xstormy16_address_to_pointer (struct gdbarch *gdbarch,
       if (addr2)
 	addr = addr2;
     }
-  store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order, addr);
+  store_unsigned_integer (buf, type->length (), byte_order, addr);
 }
 
 static struct xstormy16_frame_cache *

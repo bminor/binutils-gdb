@@ -294,7 +294,7 @@ static void
 m68k_extract_return_value (struct type *type, struct regcache *regcache,
 			   gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   gdb_byte buf[M68K_MAX_REGISTER_SIZE];
 
   if (type->code () == TYPE_CODE_PTR && len == 4)
@@ -343,7 +343,7 @@ static void
 m68k_store_return_value (struct type *type, struct regcache *regcache,
 			 const gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   if (type->code () == TYPE_CODE_PTR && len == 4)
     {
@@ -393,7 +393,7 @@ m68k_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
 {
   m68k_gdbarch_tdep *tdep = gdbarch_tdep<m68k_gdbarch_tdep> (gdbarch);
   enum type_code code = type->code ();
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   gdb_assert (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION
 	      || code == TYPE_CODE_COMPLEX || code == TYPE_CODE_ARRAY);
@@ -438,7 +438,7 @@ m68k_return_value (struct gdbarch *gdbarch, struct value *function,
   if (((code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION
 	|| code == TYPE_CODE_COMPLEX || code == TYPE_CODE_ARRAY)
        && !m68k_reg_struct_return_p (gdbarch, type))
-      || (code == TYPE_CODE_FLT && TYPE_LENGTH (type) == 12))
+      || (code == TYPE_CODE_FLT && type->length () == 12))
     {
       /* The default on m68k is to return structures in static memory.
 	 Consequently a function must return the address where we can
@@ -449,7 +449,7 @@ m68k_return_value (struct gdbarch *gdbarch, struct value *function,
 	  ULONGEST addr;
 
 	  regcache_raw_read_unsigned (regcache, M68K_D0_REGNUM, &addr);
-	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	  read_memory (addr, readbuf, type->length ());
 	}
 
       return RETURN_VALUE_ABI_RETURNS_ADDRESS;
@@ -487,7 +487,7 @@ m68k_svr4_return_value (struct gdbarch *gdbarch, struct value *function,
       /* GCC may return a `long double' in memory too.  */
       || (!tdep->float_return
 	  && code == TYPE_CODE_FLT
-	  && TYPE_LENGTH (type) == 12))
+	  && type->length () == 12))
     {
       /* The System V ABI says that:
 
@@ -509,7 +509,7 @@ m68k_svr4_return_value (struct gdbarch *gdbarch, struct value *function,
 
 	  regcache_raw_read_unsigned (regcache, tdep->pointer_result_regnum,
 				      &addr);
-	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	  read_memory (addr, readbuf, type->length ());
 	}
 
       return RETURN_VALUE_ABI_RETURNS_ADDRESS;
@@ -550,7 +550,7 @@ m68k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (i = nargs - 1; i >= 0; i--)
     {
       struct type *value_type = value_enclosing_type (args[i]);
-      int len = TYPE_LENGTH (value_type);
+      int len = value_type->length ();
       int container_len = (len + 3) & ~3;
       int offset;
 

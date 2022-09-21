@@ -818,7 +818,7 @@ add_ada_task (CORE_ADDR task_id, struct inferior *inf)
 static bool
 read_known_tasks_array (struct ada_tasks_inferior_data *data)
 {
-  const int target_ptr_byte = TYPE_LENGTH (data->known_tasks_element);
+  const int target_ptr_byte = data->known_tasks_element->length ();
   const int known_tasks_size = target_ptr_byte * data->known_tasks_length;
   gdb_byte *known_tasks = (gdb_byte *) alloca (known_tasks_size);
   int i;
@@ -845,7 +845,7 @@ read_known_tasks_array (struct ada_tasks_inferior_data *data)
 static bool
 read_known_tasks_list (struct ada_tasks_inferior_data *data)
 {
-  const int target_ptr_byte = TYPE_LENGTH (data->known_tasks_element);
+  const int target_ptr_byte = data->known_tasks_element->length ();
   gdb_byte *known_tasks = (gdb_byte *) alloca (target_ptr_byte);
   CORE_ADDR task_id;
   const struct ada_tasks_pspace_data *pspace_data

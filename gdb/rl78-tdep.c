@@ -1034,7 +1034,7 @@ rl78_address_to_pointer (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
-  store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order,
+  store_unsigned_integer (buf, type->length (), byte_order,
 			  addr & 0xffffff);
 }
 
@@ -1046,13 +1046,13 @@ rl78_pointer_to_address (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR addr
-    = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
+    = extract_unsigned_integer (buf, type->length (), byte_order);
 
   /* Is it a code address?  */
   if (type->target_type ()->code () == TYPE_CODE_FUNC
       || type->target_type ()->code () == TYPE_CODE_METHOD
       || TYPE_CODE_SPACE (type->target_type ())
-      || TYPE_LENGTH (type) == 4)
+      || type->length () == 4)
     return rl78_make_instruction_address (addr);
   else
     return rl78_make_data_address (addr);
@@ -1247,7 +1247,7 @@ rl78_return_value (struct gdbarch *gdbarch,
 		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  ULONGEST valtype_len = TYPE_LENGTH (valtype);
+  ULONGEST valtype_len = valtype->length ();
   rl78_gdbarch_tdep *tdep = gdbarch_tdep<rl78_gdbarch_tdep> (gdbarch);
   int is_g10 = tdep->elf_flags & E_FLAG_RL78_G10;
 
@@ -1342,7 +1342,7 @@ rl78_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (i = nargs - 1; i >= 0; i--)
     {
       struct type *value_type = value_enclosing_type (args[i]);
-      int len = TYPE_LENGTH (value_type);
+      int len = value_type->length ();
       int container_len = (len + 1) & ~1;
 
       sp -= container_len;

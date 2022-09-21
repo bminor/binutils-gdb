@@ -557,7 +557,7 @@ store_regs (struct type *regs_type, CORE_ADDR regs_base)
       ULONGEST reg_offset;
       struct type *reg_type
 	= check_typedef (regs_type->field (fieldno).type ());
-      ULONGEST reg_size = TYPE_LENGTH (reg_type);
+      ULONGEST reg_size = reg_type->length ();
       int regnum;
       struct value *regval;
       CORE_ADDR inferior_addr;
@@ -806,15 +806,15 @@ compile_object_load (const compile_file_names &file_names,
     {
       /* Use read-only non-executable memory protection.  */
       regs_addr = gdbarch_infcall_mmap (target_gdbarch (),
-					TYPE_LENGTH (regs_type),
+					regs_type->length (),
 					GDB_MMAP_PROT_READ);
       gdb_assert (regs_addr != 0);
-      setup_sections_data.munmap_list.add (regs_addr, TYPE_LENGTH (regs_type));
+      setup_sections_data.munmap_list.add (regs_addr, regs_type->length ());
       if (compile_debug)
 	gdb_printf (gdb_stdlog,
 		    "allocated %s bytes at %s for registers\n",
 		    paddress (target_gdbarch (),
-			      TYPE_LENGTH (regs_type)),
+			      regs_type->length ()),
 		    paddress (target_gdbarch (), regs_addr));
       store_regs (regs_type, regs_addr);
     }
@@ -827,17 +827,17 @@ compile_object_load (const compile_file_names &file_names,
 	return NULL;
       check_typedef (out_value_type);
       out_value_addr = gdbarch_infcall_mmap (target_gdbarch (),
-					     TYPE_LENGTH (out_value_type),
+					     out_value_type->length (),
 					     (GDB_MMAP_PROT_READ
 					      | GDB_MMAP_PROT_WRITE));
       gdb_assert (out_value_addr != 0);
       setup_sections_data.munmap_list.add (out_value_addr,
-					   TYPE_LENGTH (out_value_type));
+					   out_value_type->length ());
       if (compile_debug)
 	gdb_printf (gdb_stdlog,
 		    "allocated %s bytes at %s for printed value\n",
 		    paddress (target_gdbarch (),
-			      TYPE_LENGTH (out_value_type)),
+			      out_value_type->length ()),
 		    paddress (target_gdbarch (), out_value_addr));
     }
 

@@ -455,7 +455,7 @@ processInt (struct parser_state *par_state, const char *base0,
 
       yylval.typed_val_float.type = fp_type;
       result.write (gdb::make_array_view (yylval.typed_val_float.val,
-					  TYPE_LENGTH (fp_type)),
+					  fp_type->length ()),
 		    type_byte_order (fp_type),
 		    true);
 

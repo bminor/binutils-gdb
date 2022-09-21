@@ -182,14 +182,14 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 	      == BFD_ENDIAN_BIG))
 	{
 	  /* Use the least significant bits of FROM.  */
-	  max_offset = 8 * TYPE_LENGTH (value_type (from));
+	  max_offset = 8 * value_type (from)->length ();
 	  offset = max_offset - value_bitsize (v);
 	}
       else
 	max_offset = value_bitsize (v);
     }
   else
-    max_offset = 8 * TYPE_LENGTH (value_type (v));
+    max_offset = 8 * value_type (v)->length ();
 
   /* Advance to the first non-skipped piece.  */
   for (i = 0; i < c->pieces.size () && bits_to_skip >= c->pieces[i].size; i++)
@@ -368,7 +368,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 
 	    gdbarch *objfile_gdbarch = c->per_objfile->objfile->arch ();
 	    ULONGEST stack_value_size_bits
-	      = 8 * TYPE_LENGTH (value_type (p->v.value));
+	      = 8 * value_type (p->v.value)->length ();
 
 	    /* Use zeroes if piece reaches beyond stack value.  */
 	    if (p->offset + p->size > stack_value_size_bits)
@@ -515,7 +515,7 @@ indirect_pieced_value (value *value)
   if (type->code () != TYPE_CODE_PTR)
     return NULL;
 
-  int bit_length = 8 * TYPE_LENGTH (type);
+  int bit_length = 8 * type->length ();
   LONGEST bit_offset = 8 * value_offset (value);
   if (value_bitsize (value))
     bit_offset += value_bitpos (value);
@@ -581,7 +581,7 @@ coerce_pieced_ref (const value *value)
   struct type *type = check_typedef (value_type (value));
 
   if (value_bits_synthetic_pointer (value, value_embedded_offset (value),
-				    TARGET_CHAR_BIT * TYPE_LENGTH (type)))
+				    TARGET_CHAR_BIT * type->length ()))
     {
       const piece_closure *closure
 	= (piece_closure *) value_computed_closure (value);
@@ -930,7 +930,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	bit_size += piece.size;
       /* Complain if the expression is larger than the size of the
 	 outer type.  */
-      if (bit_size > 8 * TYPE_LENGTH (type))
+      if (bit_size > 8 * type->length ())
 	invalid_synthetic_pointer ();
 
       piece_closure *c
@@ -974,7 +974,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 		   <optimized out> instead of <not saved>.  */
 		value *tmp = allocate_value (subobj_type);
 		value_contents_copy (tmp, 0, retval, 0,
-				     TYPE_LENGTH (subobj_type));
+				     subobj_type->length ());
 		retval = tmp;
 	      }
 	  }
@@ -1016,9 +1016,9 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	case DWARF_VALUE_STACK:
 	  {
 	    value *val = this->fetch (0);
-	    size_t n = TYPE_LENGTH (value_type (val));
-	    size_t len = TYPE_LENGTH (subobj_type);
-	    size_t max = TYPE_LENGTH (type);
+	    size_t n = value_type (val)->length ();
+	    size_t len = subobj_type->length ();
+	    size_t max = type->length ();
 
 	    if (subobj_offset + len > max)
 	      invalid_synthetic_pointer ();
@@ -1036,7 +1036,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 
 	case DWARF_VALUE_LITERAL:
 	  {
-	    size_t n = TYPE_LENGTH (subobj_type);
+	    size_t n = subobj_type->length ();
 
 	    if (subobj_offset + n > this->m_len)
 	      invalid_synthetic_pointer ();
@@ -1100,7 +1100,7 @@ dwarf_require_integral (struct type *type)
 static struct type *
 get_unsigned_type (struct gdbarch *gdbarch, struct type *type)
 {
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
     case 1:
       return builtin_type (gdbarch)->builtin_uint8;
@@ -1122,7 +1122,7 @@ get_unsigned_type (struct gdbarch *gdbarch, struct type *type)
 static struct type *
 get_signed_type (struct gdbarch *gdbarch, struct type *type)
 {
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
     case 1:
       return builtin_type (gdbarch)->builtin_int8;
@@ -1308,7 +1308,7 @@ base_types_equal_p (struct type *t1, struct type *t2)
     return 0;
   if (t1->is_unsigned () != t2->is_unsigned ())
     return 0;
-  return TYPE_LENGTH (t1) == TYPE_LENGTH (t2);
+  return t1->length () == t2->length ();
 }
 
 /* If <BUF..BUF_END] contains DW_FORM_block* with single DW_OP_reg* return the
@@ -1906,13 +1906,13 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	    /* If the size of the object read from memory is different
 	       from the type length, we need to zero-extend it.  */
-	    if (TYPE_LENGTH (type) != addr_size)
+	    if (type->length () != addr_size)
 	      {
 		ULONGEST datum =
 		  extract_unsigned_integer (buf, addr_size, byte_order);
 
-		buf = (gdb_byte *) alloca (TYPE_LENGTH (type));
-		store_unsigned_integer (buf, TYPE_LENGTH (type),
+		buf = (gdb_byte *) alloca (type->length ());
+		store_unsigned_integer (buf, type->length (),
 					byte_order, datum);
 	      }
 
@@ -2302,7 +2302,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 
 	    type = get_base_type (type_die_cu_off);
 
-	    if (TYPE_LENGTH (type) != n)
+	    if (type->length () != n)
 	      error (_("DW_OP_const_type has different sizes for type and data"));
 
 	    result_val = value_from_contents (type, data);
@@ -2350,8 +2350,8 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	      {
 		/* Nothing.  */
 	      }
-	    else if (TYPE_LENGTH (type)
-		     != TYPE_LENGTH (value_type (result_val)))
+	    else if (type->length ()
+		     != value_type (result_val)->length ())
 	      error (_("DW_OP_reinterpret has wrong size"));
 	    else
 	      result_val

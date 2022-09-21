@@ -1454,10 +1454,10 @@ aarch64_type_align (gdbarch *gdbarch, struct type *t)
     {
       /* Use the natural alignment for vector types (the same for
 	 scalar type), but the maximum alignment is 128-bit.  */
-      if (TYPE_LENGTH (t) > 16)
+      if (t->length () > 16)
 	return 16;
       else
-	return TYPE_LENGTH (t);
+	return t->length ();
     }
 
   /* Allow the common code to calculate the alignment.  */
@@ -1483,12 +1483,12 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
     {
     case TYPE_CODE_FLT:
     case TYPE_CODE_DECFLOAT:
-      if (TYPE_LENGTH (type) > 16)
+      if (type->length () > 16)
 	return -1;
 
       if (*fundamental_type == nullptr)
 	*fundamental_type = type;
-      else if (TYPE_LENGTH (type) != TYPE_LENGTH (*fundamental_type)
+      else if (type->length () != (*fundamental_type)->length ()
 	       || type->code () != (*fundamental_type)->code ())
 	return -1;
 
@@ -1497,12 +1497,12 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
     case TYPE_CODE_COMPLEX:
       {
 	struct type *target_type = check_typedef (type->target_type ());
-	if (TYPE_LENGTH (target_type) > 16)
+	if (target_type->length () > 16)
 	  return -1;
 
 	if (*fundamental_type == nullptr)
 	  *fundamental_type = target_type;
-	else if (TYPE_LENGTH (target_type) != TYPE_LENGTH (*fundamental_type)
+	else if (target_type->length () != (*fundamental_type)->length ()
 		 || target_type->code () != (*fundamental_type)->code ())
 	  return -1;
 
@@ -1513,12 +1513,12 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
       {
 	if (type->is_vector ())
 	  {
-	    if (TYPE_LENGTH (type) != 8 && TYPE_LENGTH (type) != 16)
+	    if (type->length () != 8 && type->length () != 16)
 	      return -1;
 
 	    if (*fundamental_type == nullptr)
 	      *fundamental_type = type;
-	    else if (TYPE_LENGTH (type) != TYPE_LENGTH (*fundamental_type)
+	    else if (type->length () != (*fundamental_type)->length ()
 		     || type->code () != (*fundamental_type)->code ())
 	      return -1;
 
@@ -1533,7 +1533,7 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 	    if (count == -1)
 	      return count;
 
-	    count *= (TYPE_LENGTH (type) / TYPE_LENGTH (target_type));
+	    count *= (type->length () / target_type->length ());
 	      return count;
 	  }
       }
@@ -1561,8 +1561,8 @@ aapcs_is_vfp_call_or_return_candidate_1 (struct type *type,
 	/* Ensure there is no padding between the fields (allowing for empty
 	   zero length structs)  */
 	int ftype_length = (*fundamental_type == nullptr)
-			   ? 0 : TYPE_LENGTH (*fundamental_type);
-	if (count * ftype_length != TYPE_LENGTH (type))
+			   ? 0 : (*fundamental_type)->length ();
+	if (count * ftype_length != type->length ())
 	  return -1;
 
 	return count;
@@ -1645,7 +1645,7 @@ pass_in_x (struct gdbarch *gdbarch, struct regcache *regcache,
 	   struct value *arg)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   enum type_code typecode = type->code ();
   int regnum = AARCH64_X0_REGNUM + info->ngrn;
   const bfd_byte *buf = value_contents (arg).data ();
@@ -1719,7 +1719,7 @@ pass_on_stack (struct aarch64_call_info *info, struct type *type,
 	       struct value *arg)
 {
   const bfd_byte *buf = value_contents (arg).data ();
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int align;
   stack_item_t item;
 
@@ -1765,7 +1765,7 @@ pass_in_x_or_stack (struct gdbarch *gdbarch, struct regcache *regcache,
 		    struct aarch64_call_info *info, struct type *type,
 		    struct value *arg)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int nregs = (len + X_REGISTER_SIZE - 1) / X_REGISTER_SIZE;
 
   /* PCS C.13 - Pass in registers if we have enough spare */
@@ -1794,7 +1794,7 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
     {
     case TYPE_CODE_FLT:
     case TYPE_CODE_DECFLOAT:
-      return pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (arg_type),
+      return pass_in_v (gdbarch, regcache, info, arg_type->length (),
 			value_contents (arg).data ());
       break;
 
@@ -1803,17 +1803,17 @@ pass_in_v_vfp_candidate (struct gdbarch *gdbarch, struct regcache *regcache,
 	const bfd_byte *buf = value_contents (arg).data ();
 	struct type *target_type = check_typedef (arg_type->target_type ());
 
-	if (!pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (target_type),
+	if (!pass_in_v (gdbarch, regcache, info, target_type->length (),
 			buf))
 	  return false;
 
-	return pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (target_type),
-			  buf + TYPE_LENGTH (target_type));
+	return pass_in_v (gdbarch, regcache, info, target_type->length (),
+			  buf + target_type->length ());
       }
 
     case TYPE_CODE_ARRAY:
       if (arg_type->is_vector ())
-	return pass_in_v (gdbarch, regcache, info, TYPE_LENGTH (arg_type),
+	return pass_in_v (gdbarch, regcache, info, arg_type->length (),
 			  value_contents (arg).data ());
       /* fall through.  */
 
@@ -1902,7 +1902,7 @@ aarch64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       int len, elements;
 
       arg_type = check_typedef (value_type (arg));
-      len = TYPE_LENGTH (arg_type);
+      len = arg_type->length ();
 
       /* If arg can be passed in v registers as per the AAPCS64, then do so if
 	 if there are enough spare registers.  */
@@ -2293,7 +2293,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
   if (aapcs_is_vfp_call_or_return_candidate (type, &elements,
 					     &fundamental_type))
     {
-      int len = TYPE_LENGTH (fundamental_type);
+      int len = fundamental_type->length ();
 
       for (int i = 0; i < elements; i++)
 	{
@@ -2322,7 +2322,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
       /* If the type is a plain integer, then the access is
 	 straight-forward.  Otherwise we have to play around a bit
 	 more.  */
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       int regno = AARCH64_X0_REGNUM;
       ULONGEST tmp;
 
@@ -2343,7 +2343,7 @@ aarch64_extract_return_value (struct type *type, struct regcache *regs,
       /* For a structure or union the behaviour is as if the value had
 	 been stored to word-aligned memory and then loaded into
 	 registers with 64-bit load instruction(s).  */
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       int regno = AARCH64_X0_REGNUM;
       bfd_byte buf[X_REGISTER_SIZE];
 
@@ -2377,7 +2377,7 @@ aarch64_return_in_memory (struct gdbarch *gdbarch, struct type *type)
       return 0;
     }
 
-  if (TYPE_LENGTH (type) > 16
+  if (type->length () > 16
       || !language_pass_by_reference (type).trivially_copyable)
     {
       /* PCS B.6 Aggregates larger than 16 bytes are passed by
@@ -2404,7 +2404,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
   if (aapcs_is_vfp_call_or_return_candidate (type, &elements,
 					     &fundamental_type))
     {
-      int len = TYPE_LENGTH (fundamental_type);
+      int len = fundamental_type->length ();
 
       for (int i = 0; i < elements; i++)
 	{
@@ -2430,7 +2430,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	   || TYPE_IS_REFERENCE (type)
 	   || type->code () == TYPE_CODE_ENUM)
     {
-      if (TYPE_LENGTH (type) <= X_REGISTER_SIZE)
+      if (type->length () <= X_REGISTER_SIZE)
 	{
 	  /* Values of one word or less are zero/sign-extended and
 	     returned in r0.  */
@@ -2445,7 +2445,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
 	  /* Integral values greater than one word are stored in
 	     consecutive registers starting with r0.  This will always
 	     be a multiple of the regiser size.  */
-	  int len = TYPE_LENGTH (type);
+	  int len = type->length ();
 	  int regno = AARCH64_X0_REGNUM;
 
 	  while (len > 0)
@@ -2461,7 +2461,7 @@ aarch64_store_return_value (struct type *type, struct regcache *regs,
       /* For a structure or union the behaviour is as if the value had
 	 been stored to word-aligned memory and then loaded into
 	 registers with 64-bit load instruction(s).  */
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       int regno = AARCH64_X0_REGNUM;
       bfd_byte tmpbuf[X_REGISTER_SIZE];
 
@@ -2504,7 +2504,7 @@ aarch64_return_value (struct gdbarch *gdbarch, struct value *func_value,
 	      CORE_ADDR addr;
 
 	      regcache->cooked_read (AARCH64_STRUCT_RETURN_REGNUM, &addr);
-	      read_memory (addr, readbuf, TYPE_LENGTH (valtype));
+	      read_memory (addr, readbuf, valtype->length ());
 	    }
 
 	  return RETURN_VALUE_ABI_RETURNS_ADDRESS;
@@ -2753,7 +2753,7 @@ aarch64_pseudo_read_value_1 (struct gdbarch *gdbarch,
 
   if (regcache->raw_read (v_regnum, reg_buf) != REG_VALID)
     mark_value_bytes_unavailable (result_value, 0,
-				  TYPE_LENGTH (value_type (result_value)));
+				  value_type (result_value)->length ());
   else
     memcpy (value_contents_raw (result_value).data (), reg_buf, regsize);
 

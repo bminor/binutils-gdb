@@ -553,7 +553,7 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 			  $3 = check_typedef ($3);
 			  pstate->push_new<long_const_operation>
 			    (parse_type (pstate)->builtin_int,
-			     TYPE_LENGTH ($3)); }
+			     $3->length ()); }
 	;
 
 exp	:	SIZEOF  '(' exp ')'      %prec UNARY

@@ -802,7 +802,7 @@ csky_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       const gdb_byte *val;
 
       arg_type = check_typedef (value_type (args[argnum]));
-      len = TYPE_LENGTH (arg_type);
+      len = arg_type->length ();
       val = value_contents (args[argnum]).data ();
 
       /* Copy the argument to argument registers or the dummy stack.
@@ -869,7 +869,7 @@ csky_return_value (struct gdbarch *gdbarch, struct value *function,
 {
   CORE_ADDR regval;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int len = TYPE_LENGTH (valtype);
+  int len = valtype->length ();
   unsigned int ret_regnum = CSKY_RET_REGNUM;
 
   /* Csky abi specifies that return values larger than 8 bytes

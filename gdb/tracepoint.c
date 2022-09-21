@@ -922,7 +922,7 @@ collection_list::collect_symbol (struct symbol *sym,
   bfd_signed_vma offset;
   int treat_as_expr = 0;
 
-  len = TYPE_LENGTH (check_typedef (sym->type ()));
+  len = check_typedef (sym->type ())->length ();
   switch (sym->aclass ())
     {
     default:
@@ -1387,7 +1387,7 @@ encode_actions_1 (struct command_line *action,
 			check_typedef (type);
 			collect->add_memrange (target_gdbarch (),
 					       memrange_absolute, addr,
-					       TYPE_LENGTH (type),
+					       type->length (),
 					       tloc->address);
 			collect->append_exp (std::string (exp_start,
 							  action_exp));
@@ -2532,7 +2532,7 @@ info_scope_command (const char *args_in, int from_tty)
 		case LOC_CONST_BYTES:
 		  gdb_printf ("constant bytes: ");
 		  if (sym->type ())
-		    for (j = 0; j < TYPE_LENGTH (sym->type ()); j++)
+		    for (j = 0; j < sym->type ()->length (); j++)
 		      gdb_printf (" %02x", (unsigned) sym->value_bytes ()[j]);
 		  break;
 		case LOC_STATIC:
@@ -2612,7 +2612,7 @@ info_scope_command (const char *args_in, int from_tty)
 	    {
 	      struct type *t = check_typedef (sym->type ());
 
-	      gdb_printf (", length %s.\n", pulongest (TYPE_LENGTH (t)));
+	      gdb_printf (", length %s.\n", pulongest (t->length ()));
 	    }
 	}
       if (block->function ())

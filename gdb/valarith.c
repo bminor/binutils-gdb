@@ -115,8 +115,8 @@ value_ptrdiff (struct value *arg1, struct value *arg2)
   gdb_assert (type1->code () == TYPE_CODE_PTR);
   gdb_assert (type2->code () == TYPE_CODE_PTR);
 
-  if (TYPE_LENGTH (check_typedef (type1->target_type ()))
-      != TYPE_LENGTH (check_typedef (type2->target_type ())))
+  if (check_typedef (type1->target_type ())->length ()
+      != check_typedef (type2->target_type ())->length ())
     error (_("First argument of `-' is a pointer and "
 	     "second argument is neither\n"
 	     "an integer nor a pointer of the same type."));
@@ -770,7 +770,7 @@ value_args_as_target_float (struct value *arg1, struct value *arg2,
   if (is_floating_type (type1))
     {
       *eff_type_x = type1;
-      memcpy (x, value_contents (arg1).data (), TYPE_LENGTH (type1));
+      memcpy (x, value_contents (arg1).data (), type1->length ());
     }
   else if (is_integral_type (type1))
     {
@@ -789,7 +789,7 @@ value_args_as_target_float (struct value *arg1, struct value *arg2,
   if (is_floating_type (type2))
     {
       *eff_type_y = type2;
-      memcpy (y, value_contents (arg2).data (), TYPE_LENGTH (type2));
+      memcpy (y, value_contents (arg2).data (), type2->length ());
     }
   else if (is_integral_type (type2))
     {
@@ -930,7 +930,7 @@ promotion_type (struct type *type1, struct type *type2)
 	result_type = type2;
       else if (!is_floating_type (type2))
 	result_type = type1;
-      else if (TYPE_LENGTH (type2) > TYPE_LENGTH (type1))
+      else if (type2->length () > type1->length ())
 	result_type = type2;
       else
 	result_type = type1;
@@ -938,9 +938,9 @@ promotion_type (struct type *type1, struct type *type2)
   else
     {
       /* Integer types.  */
-      if (TYPE_LENGTH (type1) > TYPE_LENGTH (type2))
+      if (type1->length () > type2->length ())
 	result_type = type1;
-      else if (TYPE_LENGTH (type2) > TYPE_LENGTH (type1))
+      else if (type2->length () > type1->length ())
 	result_type = type2;
       else if (type1->is_unsigned ())
 	result_type = type1;
@@ -1074,7 +1074,7 @@ static int
 type_length_bits (type *type)
 {
   int unit_size = gdbarch_addressable_memory_unit_size (type->arch ());
-  return unit_size * 8 * TYPE_LENGTH (type);
+  return unit_size * 8 * type->length ();
 }
 
 /* Check whether the RHS value of a shift is valid in C/C++ semantics.
@@ -1168,8 +1168,8 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
       struct type *eff_type_v1, *eff_type_v2;
       gdb::byte_vector v1, v2;
-      v1.resize (TYPE_LENGTH (result_type));
-      v2.resize (TYPE_LENGTH (result_type));
+      v1.resize (result_type->length ());
+      v2.resize (result_type->length ());
 
       value_args_as_target_float (arg1, arg2,
 				  v1.data (), &eff_type_v1,
@@ -1216,7 +1216,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
       val = allocate_value (result_type);
       store_signed_integer (value_contents_raw (val).data (),
-			    TYPE_LENGTH (result_type),
+			    result_type->length (),
 			    type_byte_order (result_type),
 			    v);
     }
@@ -1362,7 +1362,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
 	  val = allocate_value (result_type);
 	  store_unsigned_integer (value_contents_raw (val).data (),
-				  TYPE_LENGTH (value_type (val)),
+				  value_type (val)->length (),
 				  type_byte_order (result_type),
 				  v);
 	}
@@ -1523,7 +1523,7 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 
 	  val = allocate_value (result_type);
 	  store_signed_integer (value_contents_raw (val).data (),
-				TYPE_LENGTH (value_type (val)),
+				value_type (val)->length (),
 				type_byte_order (result_type),
 				v);
 	}
@@ -1562,13 +1562,13 @@ value_vector_widen (struct value *scalar_value, struct type *vector_type)
 
   /* If we reduced the length of the scalar then check we didn't loose any
      important bits.  */
-  if (TYPE_LENGTH (eltype) < TYPE_LENGTH (scalar_type)
+  if (eltype->length () < scalar_type->length ()
       && !value_equal (elval, scalar_value))
     error (_("conversion of scalar to vector involves truncation"));
 
   value *val = allocate_value (vector_type);
   gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
-  int elt_len = TYPE_LENGTH (eltype);
+  int elt_len = eltype->length ();
 
   for (i = 0; i < high_bound - low_bound + 1; i++)
     /* Duplicate the contents of elval into the destination vector.  */
@@ -1605,10 +1605,10 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
 
   eltype1 = check_typedef (type1->target_type ());
   eltype2 = check_typedef (type2->target_type ());
-  elsize = TYPE_LENGTH (eltype1);
+  elsize = eltype1->length ();
 
   if (eltype1->code () != eltype2->code ()
-      || elsize != TYPE_LENGTH (eltype2)
+      || elsize != eltype2->length ()
       || eltype1->is_unsigned () != eltype2->is_unsigned ()
       || low_bound1 != low_bound2 || high_bound1 != high_bound2)
     error (_("Cannot perform operation on vectors with different types"));
@@ -1680,7 +1680,7 @@ value_logical_not (struct value *arg1)
   if (is_floating_value (arg1))
     return target_float_is_zero (value_contents (arg1).data (), type1);
 
-  len = TYPE_LENGTH (type1);
+  len = type1->length ();
   p = value_contents (arg1).data ();
 
   while (--len >= 0)
@@ -1698,8 +1698,8 @@ value_logical_not (struct value *arg1)
 static int
 value_strcmp (struct value *arg1, struct value *arg2)
 {
-  int len1 = TYPE_LENGTH (value_type (arg1));
-  int len2 = TYPE_LENGTH (value_type (arg2));
+  int len1 = value_type (arg1)->length ();
+  int len2 = value_type (arg2)->length ();
   const gdb_byte *s1 = value_contents (arg1).data ();
   const gdb_byte *s2 = value_contents (arg2).data ();
   int i, len = len1 < len2 ? len1 : len2;
@@ -1754,8 +1754,8 @@ value_equal (struct value *arg1, struct value *arg2)
     {
       struct type *eff_type_v1, *eff_type_v2;
       gdb::byte_vector v1, v2;
-      v1.resize (std::max (TYPE_LENGTH (type1), TYPE_LENGTH (type2)));
-      v2.resize (std::max (TYPE_LENGTH (type1), TYPE_LENGTH (type2)));
+      v1.resize (std::max (type1->length (), type2->length ()));
+      v2.resize (std::max (type1->length (), type2->length ()));
 
       value_args_as_target_float (arg1, arg2,
 				  v1.data (), &eff_type_v1,
@@ -1773,8 +1773,8 @@ value_equal (struct value *arg1, struct value *arg2)
     return (CORE_ADDR) value_as_long (arg1) == value_as_address (arg2);
 
   else if (code1 == code2
-	   && ((len = (int) TYPE_LENGTH (type1))
-	       == (int) TYPE_LENGTH (type2)))
+	   && ((len = (int) type1->length ())
+	       == (int) type2->length ()))
     {
       p1 = value_contents (arg1).data ();
       p2 = value_contents (arg2).data ();
@@ -1806,10 +1806,10 @@ value_equal_contents (struct value *arg1, struct value *arg2)
   type2 = check_typedef (value_type (arg2));
 
   return (type1->code () == type2->code ()
-	  && TYPE_LENGTH (type1) == TYPE_LENGTH (type2)
+	  && type1->length () == type2->length ()
 	  && memcmp (value_contents (arg1).data (),
 		     value_contents (arg2).data (),
-		     TYPE_LENGTH (type1)) == 0);
+		     type1->length ()) == 0);
 }
 
 /* Simulate the C operator < by returning 1
@@ -1842,8 +1842,8 @@ value_less (struct value *arg1, struct value *arg2)
     {
       struct type *eff_type_v1, *eff_type_v2;
       gdb::byte_vector v1, v2;
-      v1.resize (std::max (TYPE_LENGTH (type1), TYPE_LENGTH (type2)));
-      v2.resize (std::max (TYPE_LENGTH (type1), TYPE_LENGTH (type2)));
+      v1.resize (std::max (type1->length (), type2->length ()));
+      v2.resize (std::max (type1->length (), type2->length ()));
 
       value_args_as_target_float (arg1, arg2,
 				  v1.data (), &eff_type_v1,
@@ -1911,7 +1911,7 @@ value_neg (struct value *arg1)
 	error (_("Could not determine the vector bounds"));
 
       gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
-      int elt_len = TYPE_LENGTH (eltype);
+      int elt_len = eltype->length ();
 
       for (i = 0; i < high_bound - low_bound + 1; i++)
 	{
@@ -1956,7 +1956,7 @@ value_complement (struct value *arg1)
 
       val = allocate_value (type);
       gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
-      int elt_len = TYPE_LENGTH (eltype);
+      int elt_len = eltype->length ();
 
       for (i = 0; i < high_bound - low_bound + 1; i++)
 	{

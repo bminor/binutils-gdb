@@ -1509,7 +1509,7 @@ patch_opaque_types (struct symtab *s)
       if (real_sym->aclass () == LOC_TYPEDEF
 	  && real_sym->domain () == VAR_DOMAIN
 	  && real_sym->type ()->code () == TYPE_CODE_PTR
-	  && TYPE_LENGTH (real_sym->type ()->target_type ()) != 0)
+	  && real_sym->type ()->target_type ()->length () != 0)
 	{
 	  const char *name = real_sym->linkage_name ();
 	  int hash = hashname (name);
@@ -1699,7 +1699,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	     references work themselves out via the magic of
 	     coff_lookup_type.  */
 	  if (sym->type ()->code () == TYPE_CODE_PTR
-	      && TYPE_LENGTH (sym->type ()->target_type ()) == 0
+	      && sym->type ()->target_type ()->length () == 0
 	      && sym->type ()->target_type ()->code ()
 	      != TYPE_CODE_UNDEF)
 	    {

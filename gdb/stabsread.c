@@ -800,7 +800,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	    dbl_type = objfile_type (objfile)->builtin_double;
 	    dbl_valu
 	      = (gdb_byte *) obstack_alloc (&objfile->objfile_obstack,
-					    TYPE_LENGTH (dbl_type));
+					    dbl_type->length ());
 
 	    target_float_from_string (dbl_valu, dbl_type, std::string (p));
 
@@ -1086,7 +1086,7 @@ define_symbol (CORE_ADDR valu, const char *string, int desc, int type,
 	{
 	  /* If PCC says a parameter is a short or a char, it is
 	     really an int.  */
-	  if (TYPE_LENGTH (sym->type ())
+	  if (sym->type ()->length ()
 	      < gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT
 	      && sym->type ()->code () == TYPE_CODE_INT)
 	    {
@@ -2883,7 +2883,7 @@ read_one_struct_field (struct stab_field_info *fip, const char **pp,
 	  FIELD_BITSIZE (fip->list->field) = 0;
 	}
       if ((FIELD_BITSIZE (fip->list->field)
-	   == TARGET_CHAR_BIT * TYPE_LENGTH (field_type)
+	   == TARGET_CHAR_BIT * field_type->length ()
 	   || (field_type->code () == TYPE_CODE_ENUM
 	       && FIELD_BITSIZE (fip->list->field)
 		  == gdbarch_int_bit (gdbarch))
@@ -3384,8 +3384,8 @@ set_length_in_type_chain (struct type *type)
 
   while (ntype != type)
     {
-      if (TYPE_LENGTH(ntype) == 0)
-	ntype->set_length (TYPE_LENGTH (type));
+      if (ntype->length () == 0)
+	ntype->set_length (type->length ());
       else
 	complain_about_struct_wipeout (ntype);
       ntype = TYPE_CHAIN (ntype);

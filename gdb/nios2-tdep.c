@@ -205,7 +205,7 @@ static void
 nios2_extract_return_value (struct gdbarch *gdbarch, struct type *valtype,
 			    struct regcache *regcache, gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (valtype);
+  int len = valtype->length ();
 
   /* Return values of up to 8 bytes are returned in $r2 $r3.  */
   if (len <= register_size (gdbarch, NIOS2_R2_REGNUM))
@@ -226,7 +226,7 @@ static void
 nios2_store_return_value (struct gdbarch *gdbarch, struct type *valtype,
 			  struct regcache *regcache, const gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (valtype);
+  int len = valtype->length ();
 
   /* Return values of up to 8 bytes are returned in $r2 $r3.  */
   if (len <= register_size (gdbarch, NIOS2_R2_REGNUM))
@@ -1786,7 +1786,7 @@ nios2_return_value (struct gdbarch *gdbarch, struct value *function,
 		    struct type *type, struct regcache *regcache,
 		    gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  if (TYPE_LENGTH (type) > 8)
+  if (type->length () > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
   if (readbuf)
@@ -1818,7 +1818,7 @@ nios2_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    arg_space += align_up (TYPE_LENGTH (value_type (args[argnum])), 4);
+    arg_space += align_up (value_type (args[argnum])->length (), 4);
   sp -= arg_space;
 
   /* Initialize the register pointer.  */
@@ -1837,7 +1837,7 @@ nios2_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       const gdb_byte *val;
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (value_type (arg));
-      int len = TYPE_LENGTH (arg_type);
+      int len = arg_type->length ();
 
       val = value_contents (arg).data ();
 
@@ -2255,7 +2255,7 @@ nios2_type_align (struct gdbarch *gdbarch, struct type *type)
     case TYPE_CODE_METHODPTR:
     case TYPE_CODE_MEMBERPTR:
       type = check_typedef (type);
-      return std::min<ULONGEST> (4, TYPE_LENGTH (type));
+      return std::min<ULONGEST> (4, type->length ());
     default:
       return 0;
     }

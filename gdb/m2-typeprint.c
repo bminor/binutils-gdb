@@ -225,7 +225,7 @@ static void m2_array (struct type *type, struct ui_file *stream,
 		      int show, int level, const struct type_print_options *flags)
 {
   gdb_printf (stream, "ARRAY [");
-  if (TYPE_LENGTH (type->target_type ()) > 0
+  if (type->target_type ()->length () > 0
       && type->bounds ()->high.kind () != PROP_UNDEFINED)
     {
       if (type->index_type () != 0)
@@ -235,8 +235,8 @@ static void m2_array (struct type *type, struct ui_file *stream,
 	  m2_print_bounds (type->index_type (), stream, show, -1, 1);
 	}
       else
-	gdb_puts (pulongest ((TYPE_LENGTH (type)
-			      / TYPE_LENGTH (type->target_type ()))),
+	gdb_puts (pulongest ((type->length ()
+			     / type->target_type ()->length ())),
 		  stream);
     }
   gdb_printf (stream, "] OF ");
@@ -379,11 +379,11 @@ m2_get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
   switch (type->code ())
     {
     case TYPE_CODE_CHAR:
-      if (TYPE_LENGTH (type) < sizeof (LONGEST))
+      if (type->length () < sizeof (LONGEST))
 	{
 	  if (!type->is_unsigned ())
 	    {
-	      *lowp = -(1 << (TYPE_LENGTH (type) * TARGET_CHAR_BIT - 1));
+	      *lowp = -(1 << (type->length () * TARGET_CHAR_BIT - 1));
 	      *highp = -*lowp - 1;
 	      return 0;
 	    }

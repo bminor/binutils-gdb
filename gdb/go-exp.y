@@ -475,7 +475,7 @@ exp	:	SIZEOF_KEYWORD '(' type ')'  %prec UNARY
 			    = parse_type (pstate)->builtin_unsigned_int;
 			  $3 = check_typedef ($3);
 			  pstate->push_new<long_const_operation>
-			    (size_type, (LONGEST) TYPE_LENGTH ($3));
+			    (size_type, (LONGEST) $3->length ());
 			}
 	;
 

@@ -522,7 +522,7 @@ z80_return_value (struct gdbarch *gdbarch, struct value *function,
 		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   /* Byte are returned in L, word in HL, dword in DEHL.  */
-  int len = TYPE_LENGTH (valtype);
+  int len = valtype->length ();
 
   if ((valtype->code () == TYPE_CODE_STRUCT
        || valtype->code () == TYPE_CODE_UNION

@@ -247,7 +247,7 @@ or1k_return_value (struct gdbarch *gdbarch, struct value *functype,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   enum type_code rv_type = valtype->code ();
-  unsigned int rv_size = TYPE_LENGTH (valtype);
+  unsigned int rv_size = valtype->length ();
   or1k_gdbarch_tdep *tdep = gdbarch_tdep<or1k_gdbarch_tdep> (gdbarch);
   int bpw = tdep->bytes_per_word;
 
@@ -663,7 +663,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (value_type (arg));
-      int len = TYPE_LENGTH (arg_type);
+      int len = arg_type->length ();
       enum type_code typecode = arg_type->code ();
 
       if (func_type->has_varargs () && argnum >= func_type->num_fields ())
@@ -753,7 +753,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     {
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (value_type (arg));
-      int len = TYPE_LENGTH (arg_type);
+      int len = arg_type->length ();
       enum type_code typecode = arg_type->code ();
 
       if ((TYPE_CODE_STRUCT == typecode) || (TYPE_CODE_UNION == typecode)
@@ -785,7 +785,7 @@ or1k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (value_type (arg));
-      int len = TYPE_LENGTH (arg_type);
+      int len = arg_type->length ();
       enum type_code typecode = arg_type->code ();
       /* The EABI passes structures that do not fit in a register by
 	 reference.  In all other cases, pass the structure by value.  */

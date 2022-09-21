@@ -315,7 +315,7 @@ avr_address_to_pointer (struct gdbarch *gdbarch,
   if (AVR_TYPE_ADDRESS_CLASS_FLASH (type))
     {
       /* A data pointer in flash is byte addressed.  */
-      store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order,
+      store_unsigned_integer (buf, type->length (), byte_order,
 			      avr_convert_iaddr_to_raw (addr));
     }
   /* Is it a code address?  */
@@ -324,13 +324,13 @@ avr_address_to_pointer (struct gdbarch *gdbarch,
     {
       /* A code pointer is word (16 bits) addressed.  We shift the address down
 	 by 1 bit to convert it to a pointer.  */
-      store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order,
+      store_unsigned_integer (buf, type->length (), byte_order,
 			      avr_convert_iaddr_to_raw (addr >> 1));
     }
   else
     {
       /* Strip off any upper segment bits.  */
-      store_unsigned_integer (buf, TYPE_LENGTH (type), byte_order,
+      store_unsigned_integer (buf, type->length (), byte_order,
 			      avr_convert_saddr_to_raw (addr));
     }
 }
@@ -341,7 +341,7 @@ avr_pointer_to_address (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR addr
-    = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
+    = extract_unsigned_integer (buf, type->length (), byte_order);
 
   /* Is it a data address in flash?  */
   if (AVR_TYPE_ADDRESS_CLASS_FLASH (type))
@@ -946,27 +946,27 @@ avr_return_value (struct gdbarch *gdbarch, struct value *function,
   if ((valtype->code () == TYPE_CODE_STRUCT
        || valtype->code () == TYPE_CODE_UNION
        || valtype->code () == TYPE_CODE_ARRAY)
-      && TYPE_LENGTH (valtype) > 8)
+      && valtype->length () > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
-  if (TYPE_LENGTH (valtype) <= 2)
+  if (valtype->length () <= 2)
     lsb_reg = 24;
-  else if (TYPE_LENGTH (valtype) <= 4)
+  else if (valtype->length () <= 4)
     lsb_reg = 22;
-  else if (TYPE_LENGTH (valtype) <= 8)
+  else if (valtype->length () <= 8)
     lsb_reg = 18;
   else
     gdb_assert_not_reached ("unexpected type length");
 
   if (writebuf != NULL)
     {
-      for (i = 0; i < TYPE_LENGTH (valtype); i++)
+      for (i = 0; i < valtype->length (); i++)
 	regcache->cooked_write (lsb_reg + i, writebuf + i);
     }
 
   if (readbuf != NULL)
     {
-      for (i = 0; i < TYPE_LENGTH (valtype); i++)
+      for (i = 0; i < valtype->length (); i++)
 	regcache->cooked_read (lsb_reg + i, readbuf + i);
     }
 
@@ -1302,7 +1302,7 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       struct value *arg = args[i];
       struct type *type = check_typedef (value_type (arg));
       const bfd_byte *contents = value_contents (arg).data ();
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
 
       /* Calculate the potential last register needed.
 	 E.g. For length 2, registers regnum and regnum-1 (say 25 and 24)

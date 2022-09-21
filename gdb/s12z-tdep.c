@@ -557,7 +557,7 @@ s12z_extract_return_value (struct type *type, struct regcache *regcache,
 {
   int reg = -1;
 
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
     case 0:   /* Nothing to do */
       return;
@@ -594,7 +594,7 @@ s12z_return_value (struct gdbarch *gdbarch, struct value *function,
   if (type->code () == TYPE_CODE_STRUCT
       || type->code () == TYPE_CODE_UNION
       || type->code () == TYPE_CODE_ARRAY
-      || TYPE_LENGTH (type) > 4)
+      || type->length () > 4)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
   if (readbuf)

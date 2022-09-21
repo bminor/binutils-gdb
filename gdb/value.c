@@ -436,7 +436,7 @@ value_entirely_covered_by_range_vector (struct value *value,
 
       if (t.offset == 0
 	  && t.length == (TARGET_CHAR_BIT
-			  * TYPE_LENGTH (value_enclosing_type (value))))
+			  * value_enclosing_type (value)->length ()))
 	return 1;
     }
 
@@ -858,9 +858,9 @@ value_contents_bits_eq (const struct value *val1, int offset1,
 
   /* We shouldn't be trying to compare past the end of the values.  */
   gdb_assert (offset1 + length
-	      <= TYPE_LENGTH (val1->enclosing_type) * TARGET_CHAR_BIT);
+	      <= val1->enclosing_type->length () * TARGET_CHAR_BIT);
   gdb_assert (offset2 + length
-	      <= TYPE_LENGTH (val2->enclosing_type) * TARGET_CHAR_BIT);
+	      <= val2->enclosing_type->length () * TARGET_CHAR_BIT);
 
   memset (&rp1, 0, sizeof (rp1));
   memset (&rp2, 0, sizeof (rp2));
@@ -1010,7 +1010,7 @@ show_max_value_size (struct ui_file *file, int from_tty,
 static void
 check_type_length_before_alloc (const struct type *type)
 {
-  ULONGEST length = TYPE_LENGTH (type);
+  ULONGEST length = type->length ();
 
   if (max_value_size > -1 && length > max_value_size)
     {
@@ -1032,7 +1032,7 @@ allocate_value_contents (struct value *val)
     {
       check_type_length_before_alloc (val->enclosing_type);
       val->contents.reset
-	((gdb_byte *) xzalloc (TYPE_LENGTH (val->enclosing_type)));
+	((gdb_byte *) xzalloc (val->enclosing_type->length ()));
     }
 }
 
@@ -1087,7 +1087,7 @@ allocate_optimized_out_value (struct type *type)
 {
   struct value *retval = allocate_value_lazy (type);
 
-  mark_value_bytes_optimized_out (retval, 0, TYPE_LENGTH (type));
+  mark_value_bytes_optimized_out (retval, 0, type->length ());
   set_value_lazy (retval, 0);
   return retval;
 }
@@ -1160,7 +1160,7 @@ value_contents_raw (struct value *value)
 
   allocate_value_contents (value);
 
-  ULONGEST length = TYPE_LENGTH (value_type (value));
+  ULONGEST length = value_type (value)->length ();
   return gdb::make_array_view
     (value->contents.get () + value->embedded_offset * unit_size, length);
 }
@@ -1170,7 +1170,7 @@ value_contents_all_raw (struct value *value)
 {
   allocate_value_contents (value);
 
-  ULONGEST length = TYPE_LENGTH (value_enclosing_type (value));
+  ULONGEST length = value_enclosing_type (value)->length ();
   return gdb::make_array_view (value->contents.get (), length);
 }
 
@@ -1256,7 +1256,7 @@ value_contents_for_printing (struct value *value)
   if (value->lazy)
     value_fetch_lazy (value);
 
-  ULONGEST length = TYPE_LENGTH (value_enclosing_type (value));
+  ULONGEST length = value_enclosing_type (value)->length ();
   return gdb::make_array_view (value->contents.get (), length);
 }
 
@@ -1265,7 +1265,7 @@ value_contents_for_printing_const (const struct value *value)
 {
   gdb_assert (!value->lazy);
 
-  ULONGEST length = TYPE_LENGTH (value_enclosing_type (value));
+  ULONGEST length = value_enclosing_type (value)->length ();
   return gdb::make_array_view (value->contents.get (), length);
 }
 
@@ -1737,7 +1737,7 @@ value_copy (const value *arg)
   if (!value_lazy (val) && !value_entirely_optimized_out (val))
     {
       gdb_assert (arg->contents != nullptr);
-      ULONGEST length = TYPE_LENGTH (value_enclosing_type (arg));
+      ULONGEST length = value_enclosing_type (arg)->length ();
       const auto &arg_view
 	= gdb::make_array_view (arg->contents.get (), length);
       copy (arg_view, value_contents_all_raw (val));
@@ -1801,7 +1801,7 @@ value_force_lval (struct value *v, CORE_ADDR addr)
 {
   gdb_assert (VALUE_LVAL (v) == not_lval);
 
-  write_memory (addr, value_contents_raw (v).data (), TYPE_LENGTH (value_type (v)));
+  write_memory (addr, value_contents_raw (v).data (), value_type (v)->length ());
   v->lval = lval_memory;
   v->location.address = addr;
 }
@@ -2343,7 +2343,7 @@ set_internalvar_component (struct internalvar *var,
 		      value_as_long (newval), bitpos, bitsize);
       else
 	memcpy (addr + offset * unit_size, value_contents (newval).data (),
-		TYPE_LENGTH (value_type (newval)));
+		value_type (newval)->length ());
       break;
 
     default:
@@ -2877,7 +2877,7 @@ unpack_long (struct type *type, const gdb_byte *valaddr)
 
   enum bfd_endian byte_order = type_byte_order (type);
   enum type_code code = type->code ();
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int nosign = type->is_unsigned ();
 
   switch (code)
@@ -3037,12 +3037,12 @@ value_static_field (struct type *type, int fieldno)
 void
 set_value_enclosing_type (struct value *val, struct type *new_encl_type)
 {
-  if (TYPE_LENGTH (new_encl_type) > TYPE_LENGTH (value_enclosing_type (val)))
+  if (new_encl_type->length () > value_enclosing_type (val)->length ())
     {
       check_type_length_before_alloc (new_encl_type);
       val->contents
 	.reset ((gdb_byte *) xrealloc (val->contents.release (),
-				       TYPE_LENGTH (new_encl_type)));
+				       new_encl_type->length ()));
     }
 
   val->enclosing_type = new_encl_type;
@@ -3085,12 +3085,12 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	 are sufficiently aligned.  */
 
       LONGEST bitpos = arg_type->field (fieldno).loc_bitpos ();
-      LONGEST container_bitsize = TYPE_LENGTH (type) * 8;
+      LONGEST container_bitsize = type->length () * 8;
 
       v = allocate_value_lazy (type);
       v->bitsize = TYPE_FIELD_BITSIZE (arg_type, fieldno);
       if ((bitpos % container_bitsize) + v->bitsize <= container_bitsize
-	  && TYPE_LENGTH (type) <= (int) sizeof (LONGEST))
+	  && type->length () <= (int) sizeof (LONGEST))
 	v->bitpos = bitpos % container_bitsize;
       else
 	v->bitpos = bitpos % 8;
@@ -3130,7 +3130,7 @@ value_primitive_field (struct value *arg1, LONGEST offset,
 	{
 	  v = allocate_value (value_enclosing_type (arg1));
 	  value_contents_copy_raw (v, 0, arg1, 0,
-				   TYPE_LENGTH (value_enclosing_type (arg1)));
+				   value_enclosing_type (arg1)->length ());
 	}
       v->type = type;
       v->offset = value_offset (arg1);
@@ -3263,7 +3263,7 @@ unpack_bits_as_long (struct type *field_type, const gdb_byte *valaddr,
     bytes_read = ((bitpos % 8) + bitsize + 7) / 8;
   else
     {
-      bytes_read = TYPE_LENGTH (field_type);
+      bytes_read = field_type->length ();
       bitsize = 8 * bytes_read;
     }
 
@@ -3372,14 +3372,14 @@ unpack_value_bitfield (struct value *dest_val,
       num = unpack_bits_as_long (field_type, valaddr + embedded_offset,
 				 bitpos, bitsize);
       store_signed_integer (value_contents_raw (dest_val).data (),
-			    TYPE_LENGTH (field_type), byte_order, num);
+			    field_type->length (), byte_order, num);
     }
 
   /* Now copy the optimized out / unavailability ranges to the right
      bits.  */
   src_bit_offset = embedded_offset * TARGET_CHAR_BIT + bitpos;
   if (byte_order == BFD_ENDIAN_BIG)
-    dst_bit_offset = TYPE_LENGTH (field_type) * TARGET_CHAR_BIT - bitsize;
+    dst_bit_offset = field_type->length () * TARGET_CHAR_BIT - bitsize;
   else
     dst_bit_offset = 0;
   value_ranges_copy_adjusted (dest_val, dst_bit_offset,
@@ -3468,7 +3468,7 @@ pack_long (gdb_byte *buf, struct type *type, LONGEST num)
   LONGEST len;
 
   type = check_typedef (type);
-  len = TYPE_LENGTH (type);
+  len = type->length ();
 
   switch (type->code ())
     {
@@ -3518,7 +3518,7 @@ pack_unsigned_long (gdb_byte *buf, struct type *type, ULONGEST num)
   enum bfd_endian byte_order;
 
   type = check_typedef (type);
-  len = TYPE_LENGTH (type);
+  len = type->length ();
   byte_order = type_byte_order (type);
 
   switch (type->code ())
@@ -3658,7 +3658,7 @@ value_from_contents_and_address (struct type *type,
 {
   gdb::array_view<const gdb_byte> view;
   if (valaddr != nullptr)
-    view = gdb::make_array_view (valaddr, TYPE_LENGTH (type));
+    view = gdb::make_array_view (valaddr, type->length ());
   struct type *resolved_type = resolve_dynamic_type (type, view, address);
   struct type *resolved_type_no_typedef = check_typedef (resolved_type);
   struct value *v;
@@ -3684,7 +3684,7 @@ value_from_contents (struct type *type, const gdb_byte *contents)
   struct value *result;
 
   result = allocate_value (type);
-  memcpy (value_contents_raw (result).data (), contents, TYPE_LENGTH (type));
+  memcpy (value_contents_raw (result).data (), contents, type->length ());
   return result;
 }
 
@@ -3947,7 +3947,7 @@ value_fetch_lazy_memory (struct value *val)
   CORE_ADDR addr = value_address (val);
   struct type *type = check_typedef (value_enclosing_type (val));
 
-  if (TYPE_LENGTH (type))
+  if (type->length ())
       read_value_memory (val, 0, value_stack (val),
 			 addr, value_contents_all_raw (val).data (),
 			 type_length_units (type));

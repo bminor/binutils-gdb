@@ -1453,7 +1453,7 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       if (align == 0)
 	continue;
 
-      sp -= TYPE_LENGTH (type);
+      sp -= type->length ();
       sp = align_down (sp, align);
     }
 
@@ -1471,7 +1471,7 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       type = value_type (args[i]);
       calling_use_fpr = nds32_check_calling_use_fpr (type);
-      len = TYPE_LENGTH (type);
+      len = type->length ();
       align = type_align (type);
       val = value_contents (args[i]).data ();
 
@@ -1658,7 +1658,7 @@ nds32_extract_return_value (struct gdbarch *gdbarch, struct type *type,
   int len;
 
   calling_use_fpr = nds32_check_calling_use_fpr (type);
-  len = TYPE_LENGTH (type);
+  len = type->length ();
 
   if (abi_use_fpr && calling_use_fpr)
     {
@@ -1748,7 +1748,7 @@ nds32_store_return_value (struct gdbarch *gdbarch, struct type *type,
   int len;
 
   calling_use_fpr = nds32_check_calling_use_fpr (type);
-  len = TYPE_LENGTH (type);
+  len = type->length ();
 
   if (abi_use_fpr && calling_use_fpr)
     {
@@ -1809,7 +1809,7 @@ nds32_return_value (struct gdbarch *gdbarch, struct value *func_type,
 		    struct type *type, struct regcache *regcache,
 		    gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  if (TYPE_LENGTH (type) > 8)
+  if (type->length () > 8)
     {
       return RETURN_VALUE_STRUCT_CONVENTION;
     }

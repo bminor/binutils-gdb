@@ -1066,7 +1066,7 @@ riscv_register_type (struct gdbarch *gdbarch, int regnum)
       int flen = riscv_isa_flen (gdbarch);
       if (flen == 8
 	  && type->code () == TYPE_CODE_FLT
-	  && TYPE_LENGTH (type) == flen
+	  && type->length () == flen
 	  && (strcmp (type->name (), "builtin_type_ieee_double") == 0
 	      || strcmp (type->name (), "double") == 0))
 	type = riscv_fpreg_d_type (gdbarch);
@@ -1079,7 +1079,7 @@ riscv_register_type (struct gdbarch *gdbarch, int regnum)
        || regnum == RISCV_GP_REGNUM
        || regnum == RISCV_TP_REGNUM)
       && type->code () == TYPE_CODE_INT
-      && TYPE_LENGTH (type) == xlen)
+      && type->length () == xlen)
     {
       /* This spots the case where some interesting registers are defined
 	 as simple integers of the expected size, we force these registers
@@ -1154,7 +1154,7 @@ riscv_print_one_register_info (struct gdbarch *gdbarch,
       if (print_raw_format)
 	{
 	  gdb_printf (file, "\t(raw ");
-	  print_hex_chars (file, valaddr, TYPE_LENGTH (regtype), byte_order,
+	  print_hex_chars (file, valaddr, regtype->length (), byte_order,
 			   true);
 	  gdb_printf (file, ")");
 	}
@@ -2243,7 +2243,7 @@ riscv_type_align (gdbarch *gdbarch, type *type)
 {
   type = check_typedef (type);
   if (type->code () == TYPE_CODE_ARRAY && type->is_vector ())
-    return std::min (TYPE_LENGTH (type), (ULONGEST) BIGGEST_ALIGNMENT);
+    return std::min (type->length (), (ULONGEST) BIGGEST_ALIGNMENT);
 
   /* Anything else will be aligned by the generic code.  */
   return 0;
@@ -2729,12 +2729,12 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	     except we use the type of the complex field instead of the
 	     type from AINFO, and the first location might be at a non-zero
 	     offset.  */
-	  if (TYPE_LENGTH (sinfo.field_type (0)) <= (2 * cinfo->flen)
+	  if (sinfo.field_type (0)->length () <= (2 * cinfo->flen)
 	      && riscv_arg_regs_available (&cinfo->float_regs) >= 2
 	      && !ainfo->is_unnamed)
 	    {
 	      bool result;
-	      int len = TYPE_LENGTH (sinfo.field_type (0)) / 2;
+	      int len = sinfo.field_type (0)->length () / 2;
 	      int offset = sinfo.field_offset (0);
 
 	      result = riscv_assign_reg_location (&ainfo->argloc[0],
@@ -2759,13 +2759,13 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 	     except we use the type of the first scalar field instead of
 	     the type from AINFO.  Also the location might be at a non-zero
 	     offset.  */
-	  if (TYPE_LENGTH (sinfo.field_type (0)) > cinfo->flen
+	  if (sinfo.field_type (0)->length () > cinfo->flen
 	      || ainfo->is_unnamed)
 	    riscv_call_arg_scalar_int (ainfo, cinfo);
 	  else
 	    {
 	      int offset = sinfo.field_offset (0);
-	      int len = TYPE_LENGTH (sinfo.field_type (0));
+	      int len = sinfo.field_type (0)->length ();
 
 	      if (!riscv_assign_reg_location (&ainfo->argloc[0],
 					      &cinfo->float_regs,
@@ -2777,21 +2777,21 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
 
       if (sinfo.number_of_fields () == 2
 	  && sinfo.field_type(0)->code () == TYPE_CODE_FLT
-	  && TYPE_LENGTH (sinfo.field_type (0)) <= cinfo->flen
+	  && sinfo.field_type (0)->length () <= cinfo->flen
 	  && sinfo.field_type(1)->code () == TYPE_CODE_FLT
-	  && TYPE_LENGTH (sinfo.field_type (1)) <= cinfo->flen
+	  && sinfo.field_type (1)->length () <= cinfo->flen
 	  && riscv_arg_regs_available (&cinfo->float_regs) >= 2)
 	{
-	  int len0 = TYPE_LENGTH (sinfo.field_type (0));
+	  int len0 = sinfo.field_type (0)->length ();
 	  int offset = sinfo.field_offset (0);
 	  if (!riscv_assign_reg_location (&ainfo->argloc[0],
 					  &cinfo->float_regs, len0, offset))
 	    error (_("failed during argument setup"));
 
-	  int len1 = TYPE_LENGTH (sinfo.field_type (1));
+	  int len1 = sinfo.field_type (1)->length ();
 	  offset = sinfo.field_offset (1);
-	  gdb_assert (len1 <= (TYPE_LENGTH (ainfo->type)
-			       - TYPE_LENGTH (sinfo.field_type (0))));
+	  gdb_assert (len1 <= (ainfo->type->length ()
+			       - sinfo.field_type (0)->length ()));
 
 	  if (!riscv_assign_reg_location (&ainfo->argloc[1],
 					  &cinfo->float_regs,
@@ -2803,17 +2803,17 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
       if (sinfo.number_of_fields () == 2
 	  && riscv_arg_regs_available (&cinfo->int_regs) >= 1
 	  && (sinfo.field_type(0)->code () == TYPE_CODE_FLT
-	      && TYPE_LENGTH (sinfo.field_type (0)) <= cinfo->flen
+	      && sinfo.field_type (0)->length () <= cinfo->flen
 	      && is_integral_type (sinfo.field_type (1))
-	      && TYPE_LENGTH (sinfo.field_type (1)) <= cinfo->xlen))
+	      && sinfo.field_type (1)->length () <= cinfo->xlen))
 	{
-	  int  len0 = TYPE_LENGTH (sinfo.field_type (0));
+	  int  len0 = sinfo.field_type (0)->length ();
 	  int offset = sinfo.field_offset (0);
 	  if (!riscv_assign_reg_location (&ainfo->argloc[0],
 					  &cinfo->float_regs, len0, offset))
 	    error (_("failed during argument setup"));
 
-	  int len1 = TYPE_LENGTH (sinfo.field_type (1));
+	  int len1 = sinfo.field_type (1)->length ();
 	  offset = sinfo.field_offset (1);
 	  gdb_assert (len1 <= cinfo->xlen);
 	  if (!riscv_assign_reg_location (&ainfo->argloc[1],
@@ -2825,12 +2825,12 @@ riscv_call_arg_struct (struct riscv_arg_info *ainfo,
       if (sinfo.number_of_fields () == 2
 	  && riscv_arg_regs_available (&cinfo->int_regs) >= 1
 	  && (is_integral_type (sinfo.field_type (0))
-	      && TYPE_LENGTH (sinfo.field_type (0)) <= cinfo->xlen
+	      && sinfo.field_type (0)->length () <= cinfo->xlen
 	      && sinfo.field_type(1)->code () == TYPE_CODE_FLT
-	      && TYPE_LENGTH (sinfo.field_type (1)) <= cinfo->flen))
+	      && sinfo.field_type (1)->length () <= cinfo->flen))
 	{
-	  int len0 = TYPE_LENGTH (sinfo.field_type (0));
-	  int len1 = TYPE_LENGTH (sinfo.field_type (1));
+	  int len0 = sinfo.field_type (0)->length ();
+	  int len1 = sinfo.field_type (1)->length ();
 
 	  gdb_assert (len0 <= cinfo->xlen);
 	  gdb_assert (len1 <= cinfo->flen);
@@ -2872,7 +2872,7 @@ riscv_arg_location (struct gdbarch *gdbarch,
 		    struct type *type, bool is_unnamed)
 {
   ainfo->type = type;
-  ainfo->length = TYPE_LENGTH (ainfo->type);
+  ainfo->length = ainfo->type->length ();
   ainfo->align = type_align (ainfo->type);
   ainfo->is_unnamed = is_unnamed;
   ainfo->contents = nullptr;
@@ -3273,7 +3273,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 		gdb_mpz unscaled;
 
 		unscaled.read (gdb::make_array_view (writebuf,
-						     TYPE_LENGTH (arg_type)),
+						     arg_type->length ()),
 			       type_byte_order (arg_type),
 			       arg_type->is_unsigned ());
 		abi_val = allocate_value (info.type);
@@ -3294,7 +3294,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	    old_readbuf = readbuf;
 	    readbuf = value_contents_raw (abi_val).data ();
 	  }
-	arg_len = TYPE_LENGTH (info.type);
+	arg_len = info.type->length ();
 
 	switch (info.argloc[0].loc_type)
 	  {
@@ -3409,7 +3409,7 @@ riscv_return_value (struct gdbarch  *gdbarch,
 	    else
 	      arg_val = value_cast (arg_type, abi_val);
 	    memcpy (old_readbuf, value_contents_raw (arg_val).data (),
-		    TYPE_LENGTH (arg_type));
+		    arg_type->length ());
 	  }
     }
 

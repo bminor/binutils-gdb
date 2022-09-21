@@ -508,7 +508,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 	  || (val_print_scalar_type_p (value_type (arg->val))
 	      && !value_bytes_available (arg->val,
 					 value_embedded_offset (arg->val),
-					 TYPE_LENGTH (value_type (arg->val))))))
+					 value_type (arg->val)->length ()))))
     return;
 
   gdb::optional<ui_out_emit_tuple> tuple_emitter;

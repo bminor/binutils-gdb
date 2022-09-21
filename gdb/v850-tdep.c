@@ -515,14 +515,14 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
 
   if (tdep->abi == V850_ABI_RH850)
     {
-      if (v850_type_is_scalar (type) && TYPE_LENGTH(type) <= 8)
+      if (v850_type_is_scalar (type) && type->length () <= 8)
 	return 0;
 
       /* Structs are never returned in registers for this ABI.  */
       return 1;
     }
   /* 1. The value is greater than 8 bytes -> returned by copying.  */
-  if (TYPE_LENGTH (type) > 8)
+  if (type->length () > 8)
     return 1;
 
   /* 2. The value is a single basic type -> returned in register.  */
@@ -537,13 +537,13 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
        && type->num_fields () == 1)
     {
       fld_type = type->field (0).type ();
-      if (v850_type_is_scalar (fld_type) && TYPE_LENGTH (fld_type) >= 4)
+      if (v850_type_is_scalar (fld_type) && fld_type->length () >= 4)
 	return 0;
 
       if (fld_type->code () == TYPE_CODE_ARRAY)
 	{
 	  tgt_type = fld_type->target_type ();
-	  if (v850_type_is_scalar (tgt_type) && TYPE_LENGTH (tgt_type) >= 4)
+	  if (v850_type_is_scalar (tgt_type) && tgt_type->length () >= 4)
 	    return 0;
 	}
     }
@@ -553,7 +553,7 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
      register.  */
   if (type->code () == TYPE_CODE_STRUCT
       && v850_type_is_scalar (type->field (0).type ())
-      && TYPE_LENGTH (type->field (0).type ()) == 4)
+      && type->field (0).type ()->length () == 4)
     {
       for (i = 1; i < type->num_fields (); ++i)
 	{
@@ -561,8 +561,8 @@ v850_use_struct_convention (struct gdbarch *gdbarch, struct type *type)
 	  if (fld_type->code () == TYPE_CODE_ARRAY)
 	    {
 	      tgt_type = fld_type->target_type ();
-	      if (TYPE_LENGTH (tgt_type) > 0
-		  && TYPE_LENGTH (fld_type) / TYPE_LENGTH (tgt_type) > 2)
+	      if (tgt_type->length () > 0
+		  && fld_type->length () / tgt_type->length () > 2)
 		return 1;
 	    }
 	}
@@ -978,7 +978,7 @@ v850_eight_byte_align_p (struct type *type)
   type = check_typedef (type);
 
   if (v850_type_is_scalar (type))
-    return (TYPE_LENGTH (type) == 8);
+    return (type->length () == 8);
   else
     {
       int i;
@@ -1039,7 +1039,7 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
 
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
-    arg_space += ((TYPE_LENGTH (value_type (args[argnum])) + 3) & ~3);
+    arg_space += ((value_type (args[argnum])->length () + 3) & ~3);
   sp -= arg_space + stack_offset;
 
   argreg = E_ARG0_REGNUM;
@@ -1058,7 +1058,7 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
 
       if (!v850_type_is_scalar (value_type (*args))
 	  && tdep->abi == V850_ABI_GCC
-	  && TYPE_LENGTH (value_type (*args)) > E_MAX_RETTYPE_SIZE_IN_REGS)
+	  && value_type (*args)->length () > E_MAX_RETTYPE_SIZE_IN_REGS)
 	{
 	  store_unsigned_integer (valbuf, 4, byte_order,
 				  value_address (*args));
@@ -1067,7 +1067,7 @@ v850_push_dummy_call (struct gdbarch *gdbarch,
 	}
       else
 	{
-	  len = TYPE_LENGTH (value_type (*args));
+	  len = value_type (*args)->length ();
 	  val = (gdb_byte *) value_contents (*args).data ();
 	}
 
@@ -1118,7 +1118,7 @@ v850_extract_return_value (struct type *type, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   if (len <= v850_reg_size)
     {
@@ -1145,7 +1145,7 @@ v850_store_return_value (struct type *type, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = regcache->arch ();
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   if (len <= v850_reg_size)
       regcache_cooked_write_unsigned

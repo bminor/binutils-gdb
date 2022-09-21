@@ -118,12 +118,12 @@ public:
   {
     type = check_typedef (type);
     if (type->code () == TYPE_CODE_ARRAY
-	&& TYPE_LENGTH (type) > 0
-	&& TYPE_LENGTH (type->target_type ()) > 0)
+	&& type->length () > 0
+	&& type->target_type ()->length () > 0)
       {
 	struct type *elttype = check_typedef (type->target_type ());
 
-	if (TYPE_LENGTH (elttype) == 1
+	if (elttype->length () == 1
 	    && (elttype->code () == TYPE_CODE_INT
 		|| elttype->code () == TYPE_CODE_CHAR))
 	  return true;

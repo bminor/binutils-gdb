@@ -84,7 +84,7 @@
 #define RECORD_Q_XGETQUOTA	(('3' << 8) + 3)
 
 #define OUTPUT_REG(val, num)      phex_nz ((val), \
-    TYPE_LENGTH (gdbarch_register_type (regcache->arch (), (num))))
+    gdbarch_register_type (regcache->arch (), (num))->length ())
 
 /* Record a memory area of length LEN pointed to by register
    REGNUM.  */

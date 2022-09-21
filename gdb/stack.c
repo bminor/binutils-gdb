@@ -585,7 +585,7 @@ read_frame_arg (const frame_print_options &fp_opts,
 	      if (value_lazy (entryval))
 		value_fetch_lazy (entryval);
 
-	      if (value_contents_eq (val, 0, entryval, 0, TYPE_LENGTH (type)))
+	      if (value_contents_eq (val, 0, entryval, 0, type->length ()))
 		{
 		  /* Initialize it just to avoid a GCC false warning.  */
 		  struct value *val_deref = NULL, *entryval_deref;
@@ -612,7 +612,7 @@ read_frame_arg (const frame_print_options &fp_opts,
 		      if (val != val_deref
 			  && value_contents_eq (val_deref, 0,
 						entryval_deref, 0,
-						TYPE_LENGTH (type_deref)))
+						type_deref->length ()))
 			val_equal = 1;
 		    }
 		  catch (const gdb_exception_error &except)
@@ -779,7 +779,7 @@ print_frame_args (const frame_print_options &fp_opts,
 	    case LOC_REF_ARG:
 	      {
 		long current_offset = sym->value_longest ();
-		int arg_size = TYPE_LENGTH (sym->type ());
+		int arg_size = sym->type ()->length ();
 
 		/* Compute address of next argument by adding the size of
 		   this argument and rounding to an int boundary.  */

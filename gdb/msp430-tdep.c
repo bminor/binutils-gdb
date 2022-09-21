@@ -569,11 +569,11 @@ msp430_return_value (struct gdbarch *gdbarch,
 		     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  LONGEST valtype_len = TYPE_LENGTH (valtype);
+  LONGEST valtype_len = valtype->length ();
   msp430_gdbarch_tdep *tdep = gdbarch_tdep<msp430_gdbarch_tdep> (gdbarch);
   int code_model = tdep->code_model;
 
-  if (TYPE_LENGTH (valtype) > 8
+  if (valtype->length () > 8
       || valtype->code () == TYPE_CODE_STRUCT
       || valtype->code () == TYPE_CODE_UNION)
     return RETURN_VALUE_STRUCT_CONVENTION;
@@ -689,7 +689,7 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  struct value *arg = args[i];
 	  const gdb_byte *arg_bits = value_contents_all (arg).data ();
 	  struct type *arg_type = check_typedef (value_type (arg));
-	  ULONGEST arg_size = TYPE_LENGTH (arg_type);
+	  ULONGEST arg_size = arg_type->length ();
 	  int offset;
 	  int current_arg_on_stack;
 	  gdb_byte struct_addr_buf[4];

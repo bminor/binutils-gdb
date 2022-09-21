@@ -1364,7 +1364,7 @@ value_of_dwarf_reg_entry (struct type *type, struct frame_info *frame,
     return outer_val;
 
   target_val = dwarf_entry_parameter_to_value (parameter,
-					       TYPE_LENGTH (target_type),
+					       target_type->length (),
 					       target_type, caller_frame,
 					       caller_per_cu,
 					       caller_per_objfile);
@@ -1375,7 +1375,7 @@ value_of_dwarf_reg_entry (struct type *type, struct frame_info *frame,
   /* Copy the referencing pointer to the new computed value.  */
   memcpy (value_contents_raw (val).data (),
 	  value_contents_raw (outer_val).data (),
-	  TYPE_LENGTH (checked_type));
+	  checked_type->length ());
   set_value_lazy (val, 0);
 
   return val;
@@ -1430,7 +1430,7 @@ fetch_const_value_from_synthetic_pointer (sect_offset die, LONGEST byte_offset,
   if (bytes != NULL)
     {
       if (byte_offset >= 0
-	  && byte_offset + TYPE_LENGTH (type->target_type ()) <= len)
+	  && byte_offset + type->target_type ()->length () <= len)
 	{
 	  bytes += byte_offset;
 	  result = value_from_contents (type->target_type (), bytes);
@@ -1526,7 +1526,7 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	  free_values.free_to_mark ();
 	  retval = allocate_value (subobj_type);
 	  mark_value_bytes_unavailable (retval, 0,
-					TYPE_LENGTH (subobj_type));
+					subobj_type->length ());
 	  return retval;
 	}
       else if (ex.error == NO_ENTRY_VALUE_ERROR)
@@ -1672,7 +1672,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
 		gdb_assert (baton->property_type != NULL);
 
 		struct type *type = check_typedef (baton->property_type);
-		if (TYPE_LENGTH (type) < sizeof (CORE_ADDR)
+		if (type->length () < sizeof (CORE_ADDR)
 		    && !type->is_unsigned ())
 		  {
 		    /* If we have a valid return candidate and it's value

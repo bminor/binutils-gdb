@@ -204,7 +204,7 @@ tilegx_use_struct_convention (struct type *type)
   /* Only scalars which fit in R0 - R9 can be returned in registers.
      Otherwise, they are returned via a pointer passed in R0.  */
   return (!tilegx_type_is_scalar (type)
-	  && (TYPE_LENGTH (type) > (1 + TILEGX_R9_REGNUM - TILEGX_R0_REGNUM)
+	  && (type->length () > (1 + TILEGX_R9_REGNUM - TILEGX_R0_REGNUM)
 	      * tilegx_reg_size));
 }
 
@@ -215,7 +215,7 @@ static void
 tilegx_extract_return_value (struct type *type, struct regcache *regcache,
 			     gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int i, regnum = TILEGX_R0_REGNUM;
 
   for (i = 0; i < len; i += tilegx_reg_size)
@@ -230,17 +230,17 @@ static void
 tilegx_store_return_value (struct type *type, struct regcache *regcache,
 			   const void *valbuf)
 {
-  if (TYPE_LENGTH (type) < tilegx_reg_size)
+  if (type->length () < tilegx_reg_size)
     {
       /* Add leading zeros to the (little-endian) value.  */
       gdb_byte buf[tilegx_reg_size] = { 0 };
 
-      memcpy (buf, valbuf, TYPE_LENGTH (type));
+      memcpy (buf, valbuf, type->length ());
       regcache->raw_write (TILEGX_R0_REGNUM, buf);
     }
   else
     {
-      int len = TYPE_LENGTH (type);
+      int len = type->length ();
       int i, regnum = TILEGX_R0_REGNUM;
 
       for (i = 0; i < len; i += tilegx_reg_size)
@@ -302,7 +302,7 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
   for (i = 0; i < nargs && argreg <= TILEGX_R9_REGNUM; i++)
     {
       const gdb_byte *val;
-      typelen = TYPE_LENGTH (value_enclosing_type (args[i]));
+      typelen = value_enclosing_type (args[i])->length ();
 
       if (typelen > (TILEGX_R9_REGNUM - argreg + 1) * tilegx_reg_size)
 	break;
@@ -329,7 +329,7 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
     {
       const gdb_byte *contents = value_contents (args[j]).data ();
 
-      typelen = TYPE_LENGTH (value_enclosing_type (args[j]));
+      typelen = value_enclosing_type (args[j])->length ();
       slacklen = align_up (typelen, 8) - typelen;
       gdb::byte_vector val (typelen + slacklen);
       memcpy (val.data (), contents, typelen);

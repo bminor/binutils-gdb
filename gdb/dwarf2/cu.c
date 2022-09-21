@@ -110,7 +110,7 @@ dwarf2_cu::addr_type () const
   struct type *addr_type = lookup_pointer_type (void_type);
   int addr_size = this->per_cu->addr_size ();
 
-  if (TYPE_LENGTH (addr_type) == addr_size)
+  if (addr_type->length () == addr_size)
     return addr_type;
 
   addr_type = addr_sized_int_type (addr_type->is_unsigned ());

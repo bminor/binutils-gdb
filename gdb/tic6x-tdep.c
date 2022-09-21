@@ -702,7 +702,7 @@ static void
 tic6x_extract_return_value (struct type *valtype, struct regcache *regcache,
 			    enum bfd_endian byte_order, gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (valtype);
+  int len = valtype->length ();
 
   /* pointer types are returned in register A4,
      up to 32-bit types in A4
@@ -746,7 +746,7 @@ static void
 tic6x_store_return_value (struct type *valtype, struct regcache *regcache,
 			  enum bfd_endian byte_order, const gdb_byte *valbuf)
 {
-  int len = TYPE_LENGTH (valtype);
+  int len = valtype->length ();
 
   /* return values of up to 8 bytes are returned in A5:A4 */
 
@@ -792,7 +792,7 @@ tic6x_return_value (struct gdbarch *gdbarch, struct value *function,
 	}
     }
 
-  if (TYPE_LENGTH (type) > 8)
+  if (type->length () > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
 
   if (readbuf)
@@ -810,7 +810,7 @@ tic6x_return_value (struct gdbarch *gdbarch, struct value *function,
 static int
 tic6x_arg_type_alignment (struct type *type)
 {
-  int len = TYPE_LENGTH (check_typedef (type));
+  int len = check_typedef (type)->length ();
   enum type_code typecode = check_typedef (type)->code ();
 
   if (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
@@ -898,7 +898,7 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Now make space on the stack for the args.  */
   for (argnum = 0; argnum < nargs; argnum++)
     {
-      int len = align_up (TYPE_LENGTH (value_type (args[argnum])), 4);
+      int len = align_up (value_type (args[argnum])->length (), 4);
       if (argnum >= 10 - argreg)
 	references_offset += len;
       stack_offset += len;
@@ -917,7 +917,7 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       const gdb_byte *val;
       struct value *arg = args[argnum];
       struct type *arg_type = check_typedef (value_type (arg));
-      int len = TYPE_LENGTH (arg_type);
+      int len = arg_type->length ();
       enum type_code typecode = arg_type->code ();
 
       val = value_contents (arg).data ();

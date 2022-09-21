@@ -1354,7 +1354,7 @@ objfile_int_type (struct objfile *of, int size_in_bytes, bool unsigned_p)
   int_type = (unsigned_p						\
 	      ? objfile_type (of)->builtin_unsigned_ ## F		\
 	      : objfile_type (of)->builtin_ ## F);			\
-  if (int_type != NULL && TYPE_LENGTH (int_type) == size_in_bytes)	\
+  if (int_type != NULL && int_type->length () == size_in_bytes)	\
     return int_type
 
   TRY_TYPE (char);

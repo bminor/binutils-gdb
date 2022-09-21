@@ -82,7 +82,7 @@ f_language::get_encoding (struct type *type)
 {
   const char *encoding;
 
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
     case 1:
       encoding = target_charset (type->arch ());
@@ -141,7 +141,7 @@ fortran_bounds_all_dims (bool lbound_p,
 
   /* Walk the array dimensions backwards due to the way the array will be
      laid out in memory, the first dimension will be the most inner.  */
-  LONGEST elm_len = TYPE_LENGTH (elm_type);
+  LONGEST elm_len = elm_type->length ();
   for (LONGEST dst_offset = elm_len * (ndimensions - 1);
        dst_offset >= 0;
        dst_offset -= elm_len)
@@ -156,9 +156,9 @@ fortran_bounds_all_dims (bool lbound_p,
 
       /* And copy the value into the result value.  */
       struct value *v = value_from_longest (elm_type, b);
-      gdb_assert (dst_offset + TYPE_LENGTH (value_type (v))
-		  <= TYPE_LENGTH (value_type (result)));
-      gdb_assert (TYPE_LENGTH (value_type (v)) == elm_len);
+      gdb_assert (dst_offset + value_type (v)->length ()
+		  <= value_type (result)->length ());
+      gdb_assert (value_type (v)->length () == elm_len);
       value_contents_copy (result, dst_offset, v, 0, elm_len);
 
       /* Peel another dimension of the array.  */
@@ -283,8 +283,8 @@ protected:
   void copy_element_to_dest (struct value *elt)
   {
     value_contents_copy (m_dest, m_dest_offset, elt, 0,
-			 TYPE_LENGTH (value_type (elt)));
-    m_dest_offset += TYPE_LENGTH (value_type (elt));
+			 value_type (elt)->length ());
+    m_dest_offset += value_type (elt)->length ();
   }
 
   /* The value being written to.  */
@@ -447,8 +447,8 @@ fortran_associated (struct gdbarch *gdbarch, const language_defn *lang,
 
   if (pointer_target_type->code () != target_target_type->code ()
       || (pointer_target_type->code () != TYPE_CODE_ARRAY
-	  && (TYPE_LENGTH (pointer_target_type)
-	      != TYPE_LENGTH (target_target_type))))
+	  && (pointer_target_type->length ()
+	      != target_target_type->length ())))
     error (_("arguments to associated must be of same type and kind"));
 
   /* If TARGET is not in memory, or the original pointer is specifically
@@ -721,7 +721,7 @@ fortran_array_shape (struct gdbarch *gdbarch, const language_defn *lang,
   struct type *elm_type = builtin_f_type (gdbarch)->builtin_integer;
   struct type *result_type = create_array_type (nullptr, elm_type, range);
   struct value *result = allocate_value (result_type);
-  LONGEST elm_len = TYPE_LENGTH (elm_type);
+  LONGEST elm_len = elm_type->length ();
 
   /* Walk the array dimensions backwards due to the way the array will be
      laid out in memory, the first dimension will be the most inner.
@@ -741,9 +741,9 @@ fortran_array_shape (struct gdbarch *gdbarch, const language_defn *lang,
 
       /* And copy the value into the result value.  */
       struct value *v = value_from_longest (elm_type, dim_size);
-      gdb_assert (dst_offset + TYPE_LENGTH (value_type (v))
-		  <= TYPE_LENGTH (value_type (result)));
-      gdb_assert (TYPE_LENGTH (value_type (v)) == elm_len);
+      gdb_assert (dst_offset + value_type (v)->length ()
+		  <= value_type (result)->length ());
+      gdb_assert (value_type (v)->length () == elm_len);
       value_contents_copy (result, dst_offset, v, 0, elm_len);
 
       /* Peel another dimension of the array.  */
@@ -1018,9 +1018,9 @@ eval_op_f_kind (struct type *expect_type, struct expression *exp,
 
   if (!type->target_type ())
     return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
-			       TYPE_LENGTH (type));
+			       type->length ());
   return value_from_longest (builtin_type (exp->gdbarch)->builtin_int,
-			     TYPE_LENGTH (type->target_type ()));
+			     type->target_type ()->length ());
 }
 
 /* A helper function for UNOP_FORTRAN_ALLOCATED.  */
@@ -1153,7 +1153,7 @@ fortran_undetermined::value_subarray (value *array,
      of an element at each dimension of the new slice array.  Initially the
      elements of the inner most dimension of the array are the same inner
      most elements as the original ARRAY.  */
-  LONGEST slice_element_size = TYPE_LENGTH (inner_element_type);
+  LONGEST slice_element_size = inner_element_type->length ();
 
   /* Start off assuming all data is contiguous, this will be set to false
      if access to any dimension results in non-contiguous data.  */
@@ -1234,7 +1234,7 @@ fortran_undetermined::value_subarray (value *array,
 	  LONGEST ub = f77_get_upperbound (dim_type);
 	  LONGEST sd = index_type->bit_stride ();
 	  if (sd == 0)
-	    sd = TYPE_LENGTH (target_type) * 8;
+	    sd = target_type->length () * 8;
 
 	  if (fortran_array_slicing_debug)
 	    {
@@ -1247,9 +1247,9 @@ fortran_undetermined::value_subarray (value *array,
 	      debug_printf ("|   |   |-> Bit stride: %s\n", plongest (sd));
 	      debug_printf ("|   |   |-> Byte stride: %s\n", plongest (sd / 8));
 	      debug_printf ("|   |   |-> Type size: %s\n",
-			    pulongest (TYPE_LENGTH (dim_type)));
+			    pulongest (dim_type->length ()));
 	      debug_printf ("|   |   '-> Target type size: %s\n",
-			    pulongest (TYPE_LENGTH (target_type)));
+			    pulongest (target_type->length ()));
 	      debug_printf ("|   |-> Accessing:\n");
 	      debug_printf ("|   |   |-> Low bound: %s\n",
 			    plongest (low));
@@ -1282,7 +1282,7 @@ fortran_undetermined::value_subarray (value *array,
 	  LONGEST remainder = high - last_elem;
 	  if (low > high)
 	    {
-	      offset += std::abs (remainder) * TYPE_LENGTH (target_type);
+	      offset += std::abs (remainder) * target_type->length ();
 	      if (stride > 0)
 		error (_("incorrect stride and boundary combination"));
 	    }
@@ -1336,7 +1336,7 @@ fortran_undetermined::value_subarray (value *array,
 	  LONGEST ub = f77_get_upperbound (dim_type);
 	  LONGEST sd = index_type->bit_stride () / 8;
 	  if (sd == 0)
-	    sd = TYPE_LENGTH (target_type);
+	    sd = target_type->length ();
 
 	  if (fortran_array_slicing_debug)
 	    {
@@ -1348,9 +1348,9 @@ fortran_undetermined::value_subarray (value *array,
 	      debug_printf ("|   |   |-> High bound: %s\n", plongest (ub));
 	      debug_printf ("|   |   |-> Byte stride: %s\n", plongest (sd));
 	      debug_printf ("|   |   |-> Type size: %s\n",
-			    pulongest (TYPE_LENGTH (dim_type)));
+			    pulongest (dim_type->length ()));
 	      debug_printf ("|   |   '-> Target type size: %s\n",
-			    pulongest (TYPE_LENGTH (target_type)));
+			    pulongest (target_type->length ()));
 	      debug_printf ("|   '-> Accessing:\n");
 	      debug_printf ("|       '-> Index: %s\n",
 			    plongest (index));
@@ -1427,7 +1427,7 @@ fortran_undetermined::value_subarray (value *array,
 
 	  p_low.set_const_val (d.low);
 	  p_high.set_const_val (d.high);
-	  p_stride.set_const_val (TYPE_LENGTH (repacked_array_type));
+	  p_stride.set_const_val (repacked_array_type->length ());
 
 	  struct type *new_range
 	    = create_range_type_with_stride ((struct type *) NULL,
@@ -1442,8 +1442,8 @@ fortran_undetermined::value_subarray (value *array,
 	 array value DEST.  */
       struct value *dest = allocate_value (repacked_array_type);
       if (value_lazy (array)
-	  || (total_offset + TYPE_LENGTH (array_slice_type)
-	      > TYPE_LENGTH (check_typedef (value_type (array)))))
+	  || (total_offset + array_slice_type->length ()
+	      > check_typedef (value_type (array))->length ()))
 	{
 	  fortran_array_walker<fortran_lazy_array_repacker_impl> p
 	    (array_slice_type, value_address (array) + total_offset, dest);
@@ -1467,8 +1467,8 @@ fortran_undetermined::value_subarray (value *array,
 	     just create a new lazy value pointing at the memory where the
 	     contents we're looking for exist.  */
 	  if (value_lazy (array)
-	      || (total_offset + TYPE_LENGTH (array_slice_type)
-		  > TYPE_LENGTH (check_typedef (value_type (array)))))
+	      || (total_offset + array_slice_type->length ()
+		  > check_typedef (value_type (array))->length ()))
 	    array = value_at_lazy (array_slice_type,
 				   value_address (array) + total_offset);
 	  else
@@ -1634,7 +1634,7 @@ fortran_structop_operation::evaluate (struct type *expect_type,
 	  const gdb_byte *valaddr = value_contents_for_printing (elt).data ();
 	  CORE_ADDR address = value_address (elt);
 	  gdb::array_view<const gdb_byte> view
-	    = gdb::make_array_view (valaddr, TYPE_LENGTH (elt_type));
+	    = gdb::make_array_view (valaddr, elt_type->length ());
 	  elt_type = resolve_dynamic_type (elt_type, view, address);
 	}
       elt = value_zero (elt_type, VALUE_LVAL (elt));
@@ -1875,7 +1875,7 @@ fortran_argument_convert (struct value *value, bool is_artificial)
       if (VALUE_LVAL (value) != lval_memory)
 	{
 	  struct type *type = value_type (value);
-	  const int length = TYPE_LENGTH (type);
+	  const int length = type->length ();
 	  const CORE_ADDR addr
 	    = value_as_long (value_allocate_space_in_inferior (length));
 	  write_memory (addr, value_contents (value).data (), length);

@@ -292,13 +292,13 @@ unwind_infopy_add_saved_register (PyObject *self, PyObject *args)
 	return NULL;
       }
     data_size = register_size (pending_frame->gdbarch, regnum);
-    if (data_size != TYPE_LENGTH (value_type (value)))
+    if (data_size != value_type (value)->length ())
       {
 	PyErr_Format (
 	    PyExc_ValueError,
 	    "The value of the register returned by the Python "
 	    "sniffer has unexpected size: %u instead of %u.",
-	    (unsigned) TYPE_LENGTH (value_type (value)),
+	    (unsigned) value_type (value)->length (),
 	    (unsigned) data_size);
 	return NULL;
       }
@@ -620,7 +620,7 @@ pyuw_sniffer (const struct frame_unwind *self, struct frame_info *this_frame,
 
 	/* `value' validation was done before, just assert.  */
 	gdb_assert (value != NULL);
-	gdb_assert (data_size == TYPE_LENGTH (value_type (value)));
+	gdb_assert (data_size == value_type (value)->length ());
 
 	cached_frame->reg[i].data = (gdb_byte *) xmalloc (data_size);
 	memcpy (cached_frame->reg[i].data,

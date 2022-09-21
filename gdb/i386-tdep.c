@@ -2644,7 +2644,7 @@ i386_16_byte_align_p (struct type *type)
   type = check_typedef (type);
   if ((type->code () == TYPE_CODE_DECFLOAT
        || (type->code () == TYPE_CODE_ARRAY && type->is_vector ()))
-      && TYPE_LENGTH (type) == 16)
+      && type->length () == 16)
     return 1;
   if (type->code () == TYPE_CODE_ARRAY)
     return i386_16_byte_align_p (type->target_type ());
@@ -2725,7 +2725,7 @@ i386_thiscall_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       for (i = thiscall ? 1 : 0; i < nargs; i++)
 	{
-	  int len = TYPE_LENGTH (value_enclosing_type (args[i]));
+	  int len = value_enclosing_type (args[i])->length ();
 
 	  if (write_pass)
 	    {
@@ -2862,7 +2862,7 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 			   struct regcache *regcache, gdb_byte *valbuf)
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   gdb_byte buf[I386_MAX_REGISTER_SIZE];
 
   /* _Float16 and _Float16 _Complex values are returned via xmm0.  */
@@ -2920,7 +2920,7 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
 			 struct regcache *regcache, const gdb_byte *valbuf)
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   if (type->code () == TYPE_CODE_FLT)
     {
@@ -3000,7 +3000,7 @@ i386_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
 {
   i386_gdbarch_tdep *tdep = gdbarch_tdep<i386_gdbarch_tdep> (gdbarch);
   enum type_code code = type->code ();
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   gdb_assert (code == TYPE_CODE_STRUCT
 	      || code == TYPE_CODE_UNION
@@ -3041,10 +3041,10 @@ i386_return_value (struct gdbarch *gdbarch, struct value *function,
 	|| code == TYPE_CODE_ARRAY)
        && !i386_reg_struct_return_p (gdbarch, type))
       /* Complex double and long double uses the struct return convention.  */
-      || (code == TYPE_CODE_COMPLEX && TYPE_LENGTH (type) == 16)
-      || (code == TYPE_CODE_COMPLEX && TYPE_LENGTH (type) == 24)
+      || (code == TYPE_CODE_COMPLEX && type->length () == 16)
+      || (code == TYPE_CODE_COMPLEX && type->length () == 24)
       /* 128-bit decimal float uses the struct return convention.  */
-      || (code == TYPE_CODE_DECFLOAT && TYPE_LENGTH (type) == 16))
+      || (code == TYPE_CODE_DECFLOAT && type->length () == 16))
     {
       /* The System V ABI says that:
 
@@ -3068,7 +3068,7 @@ i386_return_value (struct gdbarch *gdbarch, struct value *function,
 	  ULONGEST addr;
 
 	  regcache_raw_read_unsigned (regcache, I386_EAX_REGNUM, &addr);
-	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	  read_memory (addr, readbuf, type->length ());
 	}
 
       return RETURN_VALUE_ABI_RETURNS_ADDRESS;
@@ -3382,7 +3382,7 @@ i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
       status = regcache->raw_read (fpnum, raw_buf);
       if (status != REG_VALID)
 	mark_value_bytes_unavailable (result_value, 0,
-				      TYPE_LENGTH (value_type (result_value)));
+				      value_type (result_value)->length ());
       else
 	memcpy (buf, raw_buf, register_size (gdbarch, regnum));
     }
@@ -3402,7 +3402,7 @@ i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
 	    {
 	      enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 	      LONGEST upper, lower;
-	      int size = TYPE_LENGTH (builtin_type (gdbarch)->builtin_data_ptr);
+	      int size = builtin_type (gdbarch)->builtin_data_ptr->length ();
 
 	      lower = extract_unsigned_integer (raw_buf, 8, byte_order);
 	      upper = extract_unsigned_integer (raw_buf + 8, 8, byte_order);
@@ -3519,7 +3519,7 @@ i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
 	  status = regcache->raw_read (gpnum, raw_buf);
 	  if (status != REG_VALID)
 	    mark_value_bytes_unavailable (result_value, 0,
-					  TYPE_LENGTH (value_type (result_value)));
+					  value_type (result_value)->length ());
 	  else
 	    memcpy (buf, raw_buf, 2);
 	}
@@ -3532,7 +3532,7 @@ i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
 	  status = regcache->raw_read (gpnum % 4, raw_buf);
 	  if (status != REG_VALID)
 	    mark_value_bytes_unavailable (result_value, 0,
-					  TYPE_LENGTH (value_type (result_value)));
+					  value_type (result_value)->length ());
 	  else if (gpnum >= 4)
 	    memcpy (buf, raw_buf + 1, 1);
 	  else
@@ -3583,7 +3583,7 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       if (i386_bnd_regnum_p (gdbarch, regnum))
 	{
 	  ULONGEST upper, lower;
-	  int size = TYPE_LENGTH (builtin_type (gdbarch)->builtin_data_ptr);
+	  int size = builtin_type (gdbarch)->builtin_data_ptr->length ();
 	  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 
 	  /* New values from input value.  */
@@ -3799,7 +3799,7 @@ static int
 i386_convert_register_p (struct gdbarch *gdbarch,
 			 int regnum, struct type *type)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   /* Values may be spread across multiple registers.  Most debugging
      formats aren't expressive enough to specify the locations, so
@@ -3832,7 +3832,7 @@ i386_register_to_value (struct frame_info *frame, int regnum,
 			int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   if (i386_fp_regnum_p (gdbarch, regnum))
     return i387_register_to_value (frame, regnum, type, to,
@@ -3870,7 +3870,7 @@ static void
 i386_value_to_register (struct frame_info *frame, int regnum,
 			struct type *type, const gdb_byte *from)
 {
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
 
   if (i386_fp_regnum_p (get_frame_arch (frame), regnum))
     {
@@ -4443,7 +4443,7 @@ i386_stap_adjust_register (struct gdbarch *gdbarch, struct stap_parse_info *p,
      specified by the "[-]N@" prefix, and it is one of the registers that
      we know has an extended variant available, then use the extended
      version of the register instead.  */
-  if (register_size (gdbarch, regnum) < TYPE_LENGTH (p->arg_type)
+  if (register_size (gdbarch, regnum) < p->arg_type->length ()
       && reg_assoc.find (regname) != reg_assoc.end ())
     return "e" + regname;
 
@@ -8427,12 +8427,12 @@ i386_type_align (struct gdbarch *gdbarch, struct type *type)
     {
       if ((type->code () == TYPE_CODE_INT
 	   || type->code () == TYPE_CODE_FLT)
-	  && TYPE_LENGTH (type) > 4)
+	  && type->length () > 4)
 	return 4;
 
       /* Handle x86's funny long double.  */
       if (type->code () == TYPE_CODE_FLT
-	  && gdbarch_long_double_bit (gdbarch) == TYPE_LENGTH (type) * 8)
+	  && gdbarch_long_double_bit (gdbarch) == type->length () * 8)
 	return 4;
     }
 
@@ -9006,7 +9006,7 @@ i386_mpx_info_bounds (const char *args, int from_tty)
 
   for (i = 0; i < 4; i++)
     bt_entry[i] = read_memory_typed_address (bt_entry_addr
-					     + i * TYPE_LENGTH (data_ptr_type),
+					     + i * data_ptr_type->length (),
 					     data_ptr_type);
 
   i386_mpx_print_bounds (bt_entry);
@@ -9053,15 +9053,15 @@ i386_mpx_set_bounds (const char *args, int from_tty)
   bt_entry_addr = i386_mpx_get_bt_entry (addr, bd_base);
   for (i = 0; i < 2; i++)
     bt_entry[i] = read_memory_typed_address (bt_entry_addr
-					     + i * TYPE_LENGTH (data_ptr_type),
+					     + i * data_ptr_type->length (),
 					     data_ptr_type);
   bt_entry[0] = (uint64_t) lower;
   bt_entry[1] = ~(uint64_t) upper;
 
   for (i = 0; i < 2; i++)
     write_memory_unsigned_integer (bt_entry_addr
-				   + i * TYPE_LENGTH (data_ptr_type),
-				   TYPE_LENGTH (data_ptr_type), byte_order,
+				   + i * data_ptr_type->length (),
+				   data_ptr_type->length (), byte_order,
 				   bt_entry[i]);
 }
 

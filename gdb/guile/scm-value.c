@@ -827,7 +827,7 @@ gdbscm_value_to_bytevector (SCM self)
   try
     {
       type = check_typedef (type);
-      length = TYPE_LENGTH (type);
+      length = type->length ();
       contents = value_contents (value).data ();
     }
   catch (const gdb_exception &except)
@@ -1104,7 +1104,7 @@ gdbscm_value_to_string (SCM self, SCM rest)
   gdbscm_dynwind_xfree (buffer_contents);
 
   result = scm_from_stringn ((const char *) buffer_contents,
-			     length * TYPE_LENGTH (char_type),
+			     length * char_type->length (),
 			     (encoding != NULL && *encoding != '\0'
 			      ? encoding
 			      : la_encoding),

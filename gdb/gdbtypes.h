@@ -1045,6 +1045,10 @@ struct type
     this->main_type->name = name;
   }
 
+  /* Note that if thistype is a TYPEDEF type, you have to call check_typedef.
+     But check_typedef does set the TYPE_LENGTH of the TYPEDEF type,
+     so you only have to call check_typedef once.  Since allocate_value
+     calls check_typedef, VALUE_TYPE (X)->length () is safe.  */
   ULONGEST length () const
   {
     return this->m_length;
@@ -2111,11 +2115,6 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_REFERENCE_TYPE(thistype) (thistype)->reference_type
 #define TYPE_RVALUE_REFERENCE_TYPE(thistype) (thistype)->rvalue_reference_type
 #define TYPE_CHAIN(thistype) (thistype)->chain
-/* * Note that if thistype is a TYPEDEF type, you have to call check_typedef.
-   But check_typedef does set the TYPE_LENGTH of the TYPEDEF type,
-   so you only have to call check_typedef once.  Since allocate_value
-   calls check_typedef, TYPE_LENGTH (VALUE_TYPE (X)) is safe.  */
-#define TYPE_LENGTH(thistype) ((thistype)->length ())
 
 /* * Return the alignment of the type in target addressable memory
    units, or 0 if no alignment was specified.  */

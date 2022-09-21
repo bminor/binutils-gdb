@@ -280,7 +280,7 @@ c_get_string (struct value *value, gdb::unique_xmalloc_ptr<gdb_byte> *buffer,
   if (! c_textual_element_type (element_type, 0))
     goto error;
   classify_type (element_type, element_type->arch (), charset);
-  width = TYPE_LENGTH (element_type);
+  width = element_type->length ();
 
   /* If the string lives in GDB's memory instead of the inferior's,
      then we just need to copy it to BUFFER.  Also, since such strings
@@ -433,9 +433,9 @@ emit_numeric_character (struct type *type, unsigned long value,
 {
   gdb_byte *buffer;
 
-  buffer = (gdb_byte *) alloca (TYPE_LENGTH (type));
+  buffer = (gdb_byte *) alloca (type->length ());
   pack_long (buffer, type, value);
-  obstack_grow (output, buffer, TYPE_LENGTH (type));
+  obstack_grow (output, buffer, type->length ());
 }
 
 /* Convert an octal escape sequence.  TYPE is the target character
@@ -645,7 +645,7 @@ c_string_operation::evaluate (struct type *expect_type,
     {
       LONGEST value;
 
-      if (obstack_object_size (&output) != TYPE_LENGTH (type))
+      if (obstack_object_size (&output) != type->length ())
 	error (_("Could not convert character "
 		 "constant to target character set"));
       value = unpack_long (type, (gdb_byte *) obstack_base (&output));
@@ -656,19 +656,19 @@ c_string_operation::evaluate (struct type *expect_type,
       int i;
 
       /* Write the terminating character.  */
-      for (i = 0; i < TYPE_LENGTH (type); ++i)
+      for (i = 0; i < type->length (); ++i)
 	obstack_1grow (&output, 0);
 
       if (satisfy_expected)
 	{
 	  LONGEST low_bound, high_bound;
-	  int element_size = TYPE_LENGTH (type);
+	  int element_size = type->length ();
 
 	  if (!get_discrete_bounds (expect_type->index_type (),
 				    &low_bound, &high_bound))
 	    {
 	      low_bound = 0;
-	      high_bound = (TYPE_LENGTH (expect_type) / element_size) - 1;
+	      high_bound = (expect_type->length () / element_size) - 1;
 	    }
 	  if (obstack_object_size (&output) / element_size
 	      > (high_bound - low_bound + 1))
@@ -707,8 +707,8 @@ c_is_string_type_p (struct type *type)
       {
 	/* See if target type looks like a string.  */
 	struct type *array_target_type = type->target_type ();
-	return (TYPE_LENGTH (type) > 0
-		&& TYPE_LENGTH (array_target_type) > 0
+	return (type->length () > 0
+		&& array_target_type->length () > 0
 		&& c_textual_element_type (array_target_type, 0));
       }
     case TYPE_CODE_STRING:

@@ -62,7 +62,7 @@ s390_type_align (gdbarch *gdbarch, struct type *t)
 {
   t = check_typedef (t);
 
-  if (TYPE_LENGTH (t) > 8)
+  if (t->length () > 8)
     {
       switch (t->code ())
 	{
@@ -1237,7 +1237,7 @@ s390_value_from_register (struct gdbarch *gdbarch, struct type *type,
   check_typedef (type);
 
   if ((regnum >= S390_F0_REGNUM && regnum <= S390_F15_REGNUM
-       && TYPE_LENGTH (type) < 8)
+       && type->length () < 8)
       || regnum_is_vxr_full (tdep, regnum)
       || (regnum >= S390_V16_REGNUM && regnum <= S390_V31_REGNUM))
     set_value_offset (value, 0);
@@ -1649,7 +1649,7 @@ s390_effective_inner_type (struct type *type, unsigned int min_size)
       if (inner == NULL)
 	break;
       inner = check_typedef (inner);
-      if (TYPE_LENGTH (inner) < min_size)
+      if (inner->length () < min_size)
 	break;
       type = inner;
     }
@@ -1665,7 +1665,7 @@ s390_function_arg_float (struct type *type)
 {
   /* Note that long double as well as complex types are intentionally
      excluded. */
-  if (TYPE_LENGTH (type) > 8)
+  if (type->length () > 8)
     return 0;
 
   /* A struct containing just a float or double is passed like a float
@@ -1681,11 +1681,11 @@ s390_function_arg_float (struct type *type)
 static int
 s390_function_arg_vector (struct type *type)
 {
-  if (TYPE_LENGTH (type) > 16)
+  if (type->length () > 16)
     return 0;
 
   /* Structs containing just a vector are passed like a vector.  */
-  type = s390_effective_inner_type (type, TYPE_LENGTH (type));
+  type = s390_effective_inner_type (type, type->length ());
 
   return type->code () == TYPE_CODE_ARRAY && type->is_vector ();
 }
@@ -1707,7 +1707,7 @@ s390_function_arg_integer (struct type *type)
 {
   enum type_code code = type->code ();
 
-  if (TYPE_LENGTH (type) > 8)
+  if (type->length () > 8)
     return 0;
 
   if (code == TYPE_CODE_INT
@@ -1720,7 +1720,7 @@ s390_function_arg_integer (struct type *type)
     return 1;
 
   return ((code == TYPE_CODE_UNION || code == TYPE_CODE_STRUCT)
-	  && is_power_of_two (TYPE_LENGTH (type)));
+	  && is_power_of_two (type->length ()));
 }
 
 /* Argument passing state: Internal data structure passed to helper
@@ -1750,7 +1750,7 @@ s390_handle_arg (struct s390_arg_state *as, struct value *arg,
 		 enum bfd_endian byte_order, int is_unnamed)
 {
   struct type *type = check_typedef (value_type (arg));
-  unsigned int length = TYPE_LENGTH (type);
+  unsigned int length = type->length ();
   int write_mode = as->regcache != NULL;
 
   if (s390_function_arg_float (type))
@@ -2012,7 +2012,7 @@ s390_register_return_value (struct gdbarch *gdbarch, struct type *type,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
-  int length = TYPE_LENGTH (type);
+  int length = type->length ();
   int code = type->code ();
 
   if (code == TYPE_CODE_FLT || code == TYPE_CODE_DECFLOAT)
@@ -2086,13 +2086,13 @@ s390_return_value (struct gdbarch *gdbarch, struct value *function,
       {
 	s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
 	rvc = (tdep->vector_abi == S390_VECTOR_ABI_128
-	       && TYPE_LENGTH (type) <= 16 && type->is_vector ())
+	       && type->length () <= 16 && type->is_vector ())
 	  ? RETURN_VALUE_REGISTER_CONVENTION
 	  : RETURN_VALUE_STRUCT_CONVENTION;
 	break;
       }
     default:
-      rvc = TYPE_LENGTH (type) <= 8
+      rvc = type->length () <= 8
 	? RETURN_VALUE_REGISTER_CONVENTION
 	: RETURN_VALUE_STRUCT_CONVENTION;
     }
@@ -2203,7 +2203,7 @@ s390_unwind_pseudo_register (struct frame_info *this_frame, int regnum)
 	{
 	  LONGEST pswa = value_as_long (val);
 
-	  if (TYPE_LENGTH (type) == 4)
+	  if (type->length () == 4)
 	    return value_from_pointer (type, pswa & 0x7fffffff);
 	  else
 	    return value_from_pointer (type, pswa);
@@ -2220,7 +2220,7 @@ s390_unwind_pseudo_register (struct frame_info *this_frame, int regnum)
 	{
 	  LONGEST pswm = value_as_long (val);
 
-	  if (TYPE_LENGTH (type) == 4)
+	  if (type->length () == 4)
 	    return value_from_longest (type, (pswm >> 12) & 3);
 	  else
 	    return value_from_longest (type, (pswm >> 44) & 3);

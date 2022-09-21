@@ -921,7 +921,7 @@ host_float_ops<T>::to_target (const struct type *type,
 			      const T *from, gdb_byte *to) const
 {
   /* Ensure possible padding bytes in the target buffer are zeroed out.  */
-  memset (to, 0, TYPE_LENGTH (type));
+  memset (to, 0, type->length ());
 
   to_target (floatformat_from_type (type), from, to);
 }
@@ -1499,7 +1499,7 @@ mpfr_float_ops::to_target (const struct type *type,
 			   const gdb_mpfr &from, gdb_byte *to) const
 {
   /* Ensure possible padding bytes in the target buffer are zeroed out.  */
-  memset (to, 0, TYPE_LENGTH (type));
+  memset (to, 0, type->length ());
 
   to_target (floatformat_from_type (type), from, to);
 }
@@ -1744,7 +1744,7 @@ match_endianness (const gdb_byte *from, const struct type *type, gdb_byte *to)
 {
   gdb_assert (type->code () == TYPE_CODE_DECFLOAT);
 
-  int len = TYPE_LENGTH (type);
+  int len = type->length ();
   int i;
 
 #if WORDS_BIGENDIAN
@@ -1770,7 +1770,7 @@ set_decnumber_context (decContext *ctx, const struct type *type)
 {
   gdb_assert (type->code () == TYPE_CODE_DECFLOAT);
 
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
       case 4:
 	decContextDefault (ctx, DEC_INIT_DECIMAL32);
@@ -1816,7 +1816,7 @@ decimal_from_number (const decNumber *from,
 
   set_decnumber_context (&set, type);
 
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
       case 4:
 	decimal32FromNumber ((decimal32 *) dec, from, &set);
@@ -1844,7 +1844,7 @@ decimal_to_number (const gdb_byte *addr, const struct type *type,
   gdb_byte dec[16];
   match_endianness (addr, type, dec);
 
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
       case 4:
 	decimal32ToNumber ((decimal32 *) dec, to);
@@ -1940,7 +1940,7 @@ decimal_float_ops::to_string (const gdb_byte *addr, const struct type *type,
   std::string result;
   result.resize (MAX_DECIMAL_STRING);
 
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
       case 4:
 	decimal32ToString ((decimal32 *) dec, &result[0]);
@@ -1971,7 +1971,7 @@ decimal_float_ops::from_string (gdb_byte *addr, const struct type *type,
 
   set_decnumber_context (&set, type);
 
-  switch (TYPE_LENGTH (type))
+  switch (type->length ())
     {
       case 4:
 	decimal32FromString ((decimal32 *) dec, string.c_str (), &set);
@@ -2100,7 +2100,7 @@ decimal_float_ops::compare (const gdb_byte *x, const struct type *type_x,
   decimal_to_number (y, type_y, &number2);
 
   /* Perform the comparison in the larger of the two sizes.  */
-  type_result = TYPE_LENGTH (type_x) > TYPE_LENGTH (type_y) ? type_x : type_y;
+  type_result = type_x->length () > type_y->length () ? type_x : type_y;
   set_decnumber_context (&set, type_result);
 
   decNumberCompare (&result, &number1, &number2, &set);
@@ -2159,7 +2159,7 @@ target_float_same_format_p (const struct type *type1,
 	return floatformat_from_type (type1) == floatformat_from_type (type2);
 
       case TYPE_CODE_DECFLOAT:
-	return (TYPE_LENGTH (type1) == TYPE_LENGTH (type2)
+	return (type1->length () == type2->length ()
 		&& (type_byte_order (type1)
 		    == type_byte_order (type2)));
 
@@ -2179,7 +2179,7 @@ target_float_format_length (const struct type *type)
 	return floatformat_totalsize_bytes (floatformat_from_type (type));
 
       case TYPE_CODE_DECFLOAT:
-	return TYPE_LENGTH (type);
+	return type->length ();
 
       default:
 	gdb_assert_not_reached ("unexpected type code");
@@ -2459,7 +2459,7 @@ target_float_convert (const gdb_byte *from, const struct type *from_type,
 
   /* The floating-point formats match, so we simply copy the data, ensuring
      possible padding bytes in the target buffer are zeroed out.  */
-  memset (to, 0, TYPE_LENGTH (to_type));
+  memset (to, 0, to_type->length ());
   memcpy (to, from, target_float_format_length (to_type));
 }
 

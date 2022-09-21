@@ -175,7 +175,7 @@ public:
   {
     const char *type_encoding = get_encoding (elttype);
 
-    if (TYPE_LENGTH (elttype) == 4)
+    if (elttype->length () == 4)
       gdb_puts ("4_", stream);
 
     if (!encoding || !*encoding)

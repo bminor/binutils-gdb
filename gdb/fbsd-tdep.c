@@ -1608,13 +1608,13 @@ fbsd_get_siginfo_type (struct gdbarch *gdbarch)
 
   /* __pid_t */
   pid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			TYPE_LENGTH (int32_type) * TARGET_CHAR_BIT, "__pid_t");
+			int32_type->length () * TARGET_CHAR_BIT, "__pid_t");
   pid_type->set_target_type (int32_type);
   pid_type->set_target_is_stub (true);
 
   /* __uid_t */
   uid_type = arch_type (gdbarch, TYPE_CODE_TYPEDEF,
-			TYPE_LENGTH (uint32_type) * TARGET_CHAR_BIT,
+			uint32_type->length () * TARGET_CHAR_BIT,
 			"__uid_t");
   uid_type->set_target_type (uint32_type);
   pid_type->set_target_is_stub (true);
@@ -2030,7 +2030,7 @@ fbsd_get_thread_local_address (struct gdbarch *gdbarch, CORE_ADDR dtv_addr,
   CORE_ADDR addr = gdbarch_pointer_to_address (gdbarch,
 					       builtin->builtin_data_ptr, buf);
 
-  addr += (tls_index + 1) * TYPE_LENGTH (builtin->builtin_data_ptr);
+  addr += (tls_index + 1) * builtin->builtin_data_ptr->length ();
   if (target_read_memory (addr, buf, sizeof buf) != 0)
     throw_error (TLS_GENERIC_ERROR,
 		 _("Cannot find thread-local variables on this target"));

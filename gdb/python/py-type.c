@@ -771,7 +771,7 @@ typy_get_sizeof (PyObject *self, void *closure)
 
   if (size_varies)
     Py_RETURN_NONE;
-  return gdb_py_object_from_longest (TYPE_LENGTH (type)).release ();
+  return gdb_py_object_from_longest (type->length ()).release ();
 }
 
 /* Return the alignment of the type represented by SELF, in bytes.  */
