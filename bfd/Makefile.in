@@ -2285,12 +2285,12 @@ $(BFD32_LIBS) \
  $(BFD64_BACKENDS) \
  $(OPTIONAL_BACKENDS): $(BFD_H) $(BFD_H_DEPS) $(LOCAL_H_DEPS)
 
-po/SRC-POTFILES.in: @MAINT@ Makefile $(SRC_POTFILES)
+po/SRC-POTFILES.in: @MAINT@ Makefile
 	for file in $(SRC_POTFILES); do echo $$file; done \
 	  | LC_ALL=C sort > tmp.src \
 	  && mv tmp.src $(srcdir)/po/SRC-POTFILES.in
 
-po/BLD-POTFILES.in: @MAINT@ Makefile $(BLD_POTFILES)
+po/BLD-POTFILES.in: @MAINT@ Makefile
 	for file in $(BLD_POTFILES); do echo $$file; done \
 	  | LC_ALL=C sort > tmp.bld \
 	  && mv tmp.bld $(srcdir)/po/BLD-POTFILES.in

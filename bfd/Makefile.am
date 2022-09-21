@@ -735,12 +735,12 @@ $(BFD32_LIBS) \
 SRC_POTFILES = $(SOURCE_CFILES) $(SOURCE_HFILES)
 BLD_POTFILES = $(BUILD_CFILES) $(BUILD_HFILES)
 
-po/SRC-POTFILES.in: @MAINT@ Makefile $(SRC_POTFILES)
+po/SRC-POTFILES.in: @MAINT@ Makefile
 	for file in $(SRC_POTFILES); do echo $$file; done \
 	  | LC_ALL=C sort > tmp.src \
 	  && mv tmp.src $(srcdir)/po/SRC-POTFILES.in
 
-po/BLD-POTFILES.in: @MAINT@ Makefile $(BLD_POTFILES)
+po/BLD-POTFILES.in: @MAINT@ Makefile
 	for file in $(BLD_POTFILES); do echo $$file; done \
 	  | LC_ALL=C sort > tmp.bld \
 	  && mv tmp.bld $(srcdir)/po/BLD-POTFILES.in
