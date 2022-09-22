@@ -4702,7 +4702,7 @@ remote_target::process_initial_stop_replies (int from_tty)
     }
 }
 
-/* Mark a remote_target as marking (by setting the starting_up flag within
+/* Mark a remote_target as starting (by setting the starting_up flag within
    its remote_state) for the lifetime of this object.  The reference count
    on the remote target is temporarily incremented, to prevent the target
    being deleted under our feet.  */
@@ -4712,26 +4712,32 @@ struct scoped_mark_target_starting
   /* Constructor, TARGET is the target to be marked as starting, its
      reference count will be incremented.  */
   scoped_mark_target_starting (remote_target *target)
-    : m_remote_target (target)
-  {
-    m_remote_target->incref ();
-    remote_state *rs = m_remote_target->get_remote_state ();
-    rs->starting_up = true;
-  }
-
-  /* Destructor, mark the target being worked on as no longer starting, and
-     decrement the reference count.  */
-  ~scoped_mark_target_starting ()
-  {
-    remote_state *rs = m_remote_target->get_remote_state ();
-    rs->starting_up = false;
-    decref_target (m_remote_target);
-  }
+    : m_remote_target (remote_target_ref::new_reference (target)),
+      m_restore_starting_up (set_starting_up_flag (target))
+  { /* Nothing.  */ }
 
 private:
 
-  /* The target on which we are operating.  */
-  remote_target *m_remote_target;
+  /* Helper function, set the starting_up flag on TARGET and return an
+     object which, when it goes out of scope, will restore the previous
+     value of the starting_up flag.  */
+  static scoped_restore_tmpl<bool>
+  set_starting_up_flag (remote_target *target)
+  {
+    remote_state *rs = target->get_remote_state ();
+    gdb_assert (!rs->starting_up);
+    return make_scoped_restore (&rs->starting_up, true);
+  }
+
+  /* A gdb::ref_ptr pointer to a remote_target.  */
+  using remote_target_ref = gdb::ref_ptr<remote_target, target_ops_ref_policy>;
+
+  /* A reference to the target on which we are operating.  */
+  remote_target_ref m_remote_target;
+
+  /* An object which restores the previous value of the starting_up flag
+     when it goes out of scope.  */
+  scoped_restore_tmpl<bool> m_restore_starting_up;
 };
 
 /* Helper for remote_target::start_remote, start the remote connection and
