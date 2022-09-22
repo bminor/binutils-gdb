@@ -1293,10 +1293,9 @@ async_disconnect (gdb_client_data arg)
 
   for (inferior *inf : all_inferiors ())
     {
-      switch_to_inferior_no_thread (inf);
       try
 	{
-	  pop_all_targets ();
+	  inf->pop_all_targets ();
 	}
       catch (const gdb_exception &exception)
 	{

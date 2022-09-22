@@ -5717,7 +5717,7 @@ remote_unpush_target (remote_target *target)
   for (inferior *inf : all_inferiors (target))
     {
       switch_to_inferior_no_thread (inf);
-      pop_all_targets_at_and_above (process_stratum);
+      inf->pop_all_targets_at_and_above (process_stratum);
       generic_mourn_inferior ();
     }
 

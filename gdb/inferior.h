@@ -398,6 +398,22 @@ public:
   target_ops *top_target ()
   { return m_target_stack.top (); }
 
+  /* Unpush all targets except the dummy target from m_target_stack.  As
+     targets are removed from m_target_stack their reference count is
+     decremented, which may cause a target to close.  */
+  void pop_all_targets ()
+  { pop_all_targets_above (dummy_stratum); }
+
+  /* Unpush all targets above STRATUM from m_target_stack.  As targets are
+     removed from m_target_stack their reference count is decremented,
+     which may cause a target to close.  */
+  void pop_all_targets_above (enum strata stratum);
+
+  /* Unpush all targets at and above STRATUM from m_target_stack.  As
+     targets are removed from m_target_stack their reference count is
+     decremented, which may cause a target to close.  */
+  void pop_all_targets_at_and_above (enum strata stratum);
+
   /* Return the target at process_stratum level in this inferior's
      target stack.  */
   struct process_stratum_target *process_target ()
@@ -616,6 +632,10 @@ public:
   registry<inferior> registry_fields;
 
 private:
+
+  /* Unpush TARGET and assert that it worked.  */
+  void unpush_target_and_assert (struct target_ops *target);
+
   /* The inferior's target stack.  */
   target_stack m_target_stack;
 

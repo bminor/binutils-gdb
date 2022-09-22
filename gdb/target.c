@@ -1245,44 +1245,6 @@ target_stack::unpush (target_ops *t)
   return true;
 }
 
-/* Unpush TARGET and assert that it worked.  */
-
-static void
-unpush_target_and_assert (struct target_ops *target)
-{
-  if (!current_inferior ()->unpush_target (target))
-    {
-      gdb_printf (gdb_stderr,
-		  "pop_all_targets couldn't find target %s\n",
-		  target->shortname ());
-      internal_error (_("failed internal consistency check"));
-    }
-}
-
-void
-pop_all_targets_above (enum strata above_stratum)
-{
-  while ((int) (current_inferior ()->top_target ()->stratum ())
-	 > (int) above_stratum)
-    unpush_target_and_assert (current_inferior ()->top_target ());
-}
-
-/* See target.h.  */
-
-void
-pop_all_targets_at_and_above (enum strata stratum)
-{
-  while ((int) (current_inferior ()->top_target ()->stratum ())
-	 >= (int) stratum)
-    unpush_target_and_assert (current_inferior ()->top_target ());
-}
-
-void
-pop_all_targets (void)
-{
-  pop_all_targets_above (dummy_stratum);
-}
-
 void
 target_unpusher::operator() (struct target_ops *ops) const
 {
@@ -2539,7 +2501,7 @@ target_preopen (int from_tty)
      it doesn't (which seems like a win for UDI), remove it now.  */
   /* Leave the exec target, though.  The user may be switching from a
      live process to a core of the same program.  */
-  pop_all_targets_above (file_stratum);
+  current_inferior ()->pop_all_targets_above (file_stratum);
 
   target_pre_inferior (from_tty);
 }

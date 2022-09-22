@@ -103,6 +103,48 @@ inferior::unpush_target (struct target_ops *t)
   return m_target_stack.unpush (t);
 }
 
+/* See inferior.h.  */
+
+void
+inferior::unpush_target_and_assert (struct target_ops *target)
+{
+  gdb_assert (current_inferior () == this);
+
+  if (!unpush_target (target))
+    internal_error ("pop_all_targets couldn't find target %s\n",
+		    target->shortname ());
+}
+
+/* See inferior.h.  */
+
+void
+inferior::pop_all_targets_above (enum strata stratum)
+{
+  /* Unpushing a target might cause it to close.  Some targets currently
+     rely on the current_inferior being set for their ::close method, so we
+     temporarily switch inferior now.  */
+  scoped_restore_current_pspace_and_thread restore_pspace_and_thread;
+  switch_to_inferior_no_thread (this);
+
+  while (top_target ()->stratum () > stratum)
+    unpush_target_and_assert (top_target ());
+}
+
+/* See inferior.h.  */
+
+void
+inferior::pop_all_targets_at_and_above (enum strata stratum)
+{
+  /* Unpushing a target might cause it to close.  Some targets currently
+     rely on the current_inferior being set for their ::close method, so we
+     temporarily switch inferior now.  */
+  scoped_restore_current_pspace_and_thread restore_pspace_and_thread;
+  switch_to_inferior_no_thread (this);
+
+  while (top_target ()->stratum () >= stratum)
+    unpush_target_and_assert (top_target ());
+}
+
 void
 inferior::set_tty (std::string terminal_name)
 {

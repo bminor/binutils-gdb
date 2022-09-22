@@ -1855,10 +1855,9 @@ quit_force (int *exit_arg, int from_tty)
      them all out.  */
   for (inferior *inf : all_inferiors ())
     {
-      switch_to_inferior_no_thread (inf);
       try
 	{
-	  pop_all_targets ();
+	  inf->pop_all_targets ();
 	}
       catch (const gdb_exception &ex)
 	{
