@@ -1,3 +1,8 @@
+2022-09-22  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* sh-dis.c (print_insn_sh): Enforce bit7 of LDC Rm,Rn_BANK and STC
+	Rm_BANK,Rn is always 1.
+
 2022-07-21  Peter Bergner  <bergner@linux.ibm.com>
 
 	* ppc-opc.c (XACC_MASK, XX3ACC_MASK): New defines.
