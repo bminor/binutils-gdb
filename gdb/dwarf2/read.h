@@ -433,7 +433,7 @@ struct dwarf2_per_bfd
   /* Return the CU given its index.  */
   dwarf2_per_cu_data *get_cu (int index) const
   {
-    return this->all_comp_units[index].get ();
+    return this->all_units[index].get ();
   }
 
   /* A convenience function to allocate a dwarf2_per_cu_data.  The
@@ -489,7 +489,7 @@ public:
 
   /* Table of all the compilation units.  This is used to locate
      the target compilation unit of a particular reference.  */
-  std::vector<dwarf2_per_cu_data_up> all_comp_units;
+  std::vector<dwarf2_per_cu_data_up> all_units;
 
   /* Table of struct type_unit_group objects.
      The hash key is the DW_AT_stmt_list value.  */

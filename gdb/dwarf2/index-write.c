@@ -1025,7 +1025,7 @@ private:
 static bool
 check_dwarf64_offsets (dwarf2_per_objfile *per_objfile)
 {
-  for (const auto &per_cu : per_objfile->per_bfd->all_comp_units)
+  for (const auto &per_cu : per_objfile->per_bfd->all_units)
     {
       if (to_underlying (per_cu->sect_off)
 	  >= (static_cast<uint64_t> (1) << 32))
@@ -1176,28 +1176,28 @@ write_gdbindex (dwarf2_per_objfile *per_objfile,
      in the index file).  This will later be needed to write the address
      table.  */
   cu_index_map cu_index_htab;
-  cu_index_htab.reserve (per_objfile->per_bfd->all_comp_units.size ());
+  cu_index_htab.reserve (per_objfile->per_bfd->all_units.size ());
 
   /* Store out the .debug_type CUs, if any.  */
   data_buf types_cu_list;
 
   /* The CU list is already sorted, so we don't need to do additional
      work here.  Also, the debug_types entries do not appear in
-     all_comp_units, but only in their own hash table.  */
+     all_units, but only in their own hash table.  */
 
   int counter = 0;
   int types_counter = 0;
-  for (int i = 0; i < per_objfile->per_bfd->all_comp_units.size (); ++i)
+  for (int i = 0; i < per_objfile->per_bfd->all_units.size (); ++i)
     {
       dwarf2_per_cu_data *per_cu
-	= per_objfile->per_bfd->all_comp_units[i].get ();
+	= per_objfile->per_bfd->all_units[i].get ();
 
       int &this_counter = per_cu->is_debug_types ? types_counter : counter;
 
       const auto insertpair = cu_index_htab.emplace (per_cu, this_counter);
       gdb_assert (insertpair.second);
 
-      /* The all_comp_units list contains CUs read from the objfile as well as
+      /* The all_units list contains CUs read from the objfile as well as
 	 from the eventual dwz file.  We need to place the entry in the
 	 corresponding index.  */
       data_buf &cu_list = (per_cu->is_debug_types
@@ -1264,16 +1264,16 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
 
   /* The CU list is already sorted, so we don't need to do additional
      work here.  Also, the debug_types entries do not appear in
-     all_comp_units, but only in their own hash table.  */
+     all_units, but only in their own hash table.  */
   data_buf cu_list;
   data_buf types_cu_list;
   debug_names nametable (per_objfile, dwarf5_is_dwarf64, dwarf5_byte_order);
   int counter = 0;
   int types_counter = 0;
-  for (int i = 0; i < per_objfile->per_bfd->all_comp_units.size (); ++i)
+  for (int i = 0; i < per_objfile->per_bfd->all_units.size (); ++i)
     {
       dwarf2_per_cu_data *per_cu
-	= per_objfile->per_bfd->all_comp_units[i].get ();
+	= per_objfile->per_bfd->all_units[i].get ();
 
       int &this_counter = per_cu->is_debug_types ? types_counter : counter;
       data_buf &this_list = per_cu->is_debug_types ? types_cu_list : cu_list;
@@ -1286,7 +1286,7 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
     }
 
    /* Verify that all units are represented.  */
-  gdb_assert (counter == (per_objfile->per_bfd->all_comp_units.size ()
+  gdb_assert (counter == (per_objfile->per_bfd->all_units.size ()
 			  - per_objfile->per_bfd->tu_stats.nr_tus));
   gdb_assert (types_counter == per_objfile->per_bfd->tu_stats.nr_tus);
 
