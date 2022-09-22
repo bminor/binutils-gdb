@@ -491,6 +491,11 @@ public:
      the target compilation unit of a particular reference.  */
   std::vector<dwarf2_per_cu_data_up> all_units;
 
+  /* The all_units vector contains both CUs and TUs.  Provide views on the
+     vector that are limited to either the CU part or the TU part.  */
+  gdb::array_view<dwarf2_per_cu_data_up> all_comp_units;
+  gdb::array_view<dwarf2_per_cu_data_up> all_type_units;
+
   /* Table of struct type_unit_group objects.
      The hash key is the DW_AT_stmt_list value.  */
   htab_up type_unit_groups;

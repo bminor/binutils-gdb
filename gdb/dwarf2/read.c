@@ -2631,6 +2631,8 @@ to use the section anyway."),
   return 1;
 }
 
+static void finalize_all_units (dwarf2_per_bfd *per_bfd);
+
 /* Callback types for dwarf2_read_gdb_index.  */
 
 typedef gdb::function_view
@@ -2721,6 +2723,8 @@ dwarf2_read_gdb_index
       create_signatured_type_table_from_index (per_bfd, section, types_list,
 					       types_list_elements);
     }
+
+  finalize_all_units (per_bfd);
 
   create_addrmap_from_index (per_objfile, map.get ());
 
@@ -4754,6 +4758,8 @@ dwarf2_read_debug_names (dwarf2_per_objfile *per_objfile)
 	(per_objfile, *map, section, &per_bfd->abbrev);
     }
 
+  finalize_all_units (per_bfd);
+
   create_addrmap_from_aranges (per_objfile, &per_bfd->debug_aranges);
 
   per_bfd->index_table = std::move (map);
@@ -5017,9 +5023,7 @@ dw2_debug_names_iterator::next ()
 	case DW_IDX_compile_unit:
 	  {
 	    /* Don't crash on bad data.  */
-	    int nr_cus = (per_bfd->all_units.size ()
-			  - per_bfd->tu_stats.nr_tus);
-	    if (ull >= nr_cus)
+	    if (ull >= per_bfd->all_comp_units.size ())
 	      {
 		complaint (_(".debug_names entry has bad CU index %s"
 			     " [in module %s]"),
@@ -5032,7 +5036,7 @@ dw2_debug_names_iterator::next ()
 	  break;
 	case DW_IDX_type_unit:
 	  /* Don't crash on bad data.  */
-	  if (ull >= per_bfd->tu_stats.nr_tus)
+	  if (ull >= per_bfd->all_type_units.size ())
 	    {
 	      complaint (_(".debug_names entry has bad TU index %s"
 			   " [in module %s]"),
@@ -5041,8 +5045,7 @@ dw2_debug_names_iterator::next ()
 	      continue;
 	    }
 	  {
-	    int nr_cus = (per_bfd->all_units.size ()
-			  - per_bfd->tu_stats.nr_tus);
+	    int nr_cus = per_bfd->all_comp_units.size ();
 	    per_cu = per_bfd->get_cu (nr_cus + ull);
 	  }
 	  break;
@@ -6918,7 +6921,7 @@ build_type_psymtabs (dwarf2_per_objfile *per_objfile,
   /* It's up to the caller to not call us multiple times.  */
   gdb_assert (per_objfile->per_bfd->type_unit_groups == NULL);
 
-  if (per_objfile->per_bfd->tu_stats.nr_tus == 0)
+  if (per_objfile->per_bfd->all_type_units.size () == 0)
     return;
 
   /* TUs typically share abbrev tables, and there can be way more TUs than
@@ -6945,7 +6948,7 @@ build_type_psymtabs (dwarf2_per_objfile *per_objfile,
   /* Sort in a separate table to maintain the order of all_units
      for .gdb_index: TU indices directly index all_type_units.  */
   std::vector<tu_abbrev_offset> sorted_by_abbrev;
-  sorted_by_abbrev.reserve (per_objfile->per_bfd->tu_stats.nr_tus);
+  sorted_by_abbrev.reserve (per_objfile->per_bfd->all_type_units.size ());
 
   for (const auto &cu : per_objfile->per_bfd->all_units)
     {
@@ -7259,6 +7262,18 @@ read_comp_units_from_section (dwarf2_per_objfile *per_objfile,
     }
 }
 
+/* Initialize the views on all_units.  */
+
+static void
+finalize_all_units (dwarf2_per_bfd *per_bfd)
+{
+  size_t nr_tus = per_bfd->tu_stats.nr_tus;
+  size_t nr_cus = per_bfd->all_units.size () - nr_tus;
+  gdb::array_view<dwarf2_per_cu_data_up> tmp = per_bfd->all_units;
+  per_bfd->all_comp_units = tmp.slice (0, nr_cus);
+  per_bfd->all_type_units = tmp.slice (nr_cus, nr_tus);
+}
+
 /* Create a list of all compilation units in OBJFILE.
    This is only done for -readnow and building partial symtabs.  */
 
@@ -7290,6 +7305,8 @@ create_all_units (dwarf2_per_objfile *per_objfile)
     }
 
   per_objfile->per_bfd->signatured_types = std::move (types_htab);
+
+  finalize_all_units (per_objfile->per_bfd);
 }
 
 /* Return the initial uleb128 in the die at INFO_PTR.  */

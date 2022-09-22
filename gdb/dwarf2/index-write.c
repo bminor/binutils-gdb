@@ -1286,9 +1286,8 @@ write_debug_names (dwarf2_per_objfile *per_objfile,
     }
 
    /* Verify that all units are represented.  */
-  gdb_assert (counter == (per_objfile->per_bfd->all_units.size ()
-			  - per_objfile->per_bfd->tu_stats.nr_tus));
-  gdb_assert (types_counter == per_objfile->per_bfd->tu_stats.nr_tus);
+  gdb_assert (counter == per_objfile->per_bfd->all_comp_units.size ());
+  gdb_assert (types_counter == per_objfile->per_bfd->all_type_units.size ());
 
   for (const cooked_index_entry *entry : table->all_entries ())
     nametable.insert (entry);
