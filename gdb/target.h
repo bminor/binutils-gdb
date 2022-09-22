@@ -1337,9 +1337,6 @@ struct target_ops_deleter
 /* A unique pointer for target_ops.  */
 typedef std::unique_ptr<target_ops, target_ops_deleter> target_ops_up;
 
-/* Decref a target and close if, if there are no references left.  */
-extern void decref_target (target_ops *t);
-
 /* A policy class to interface gdb::ref_ptr with target_ops.  */
 
 struct target_ops_ref_policy
@@ -1349,10 +1346,9 @@ struct target_ops_ref_policy
     t->incref ();
   }
 
-  static void decref (target_ops *t)
-  {
-    decref_target (t);
-  }
+  /* Decrement the reference count on T, and, if the reference count
+     reaches zero, close the target.  */
+  static void decref (target_ops *t);
 };
 
 /* A gdb::ref_ptr pointer to a target_ops.  */

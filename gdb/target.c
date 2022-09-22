@@ -1166,7 +1166,7 @@ to_execution_direction must be implemented for reverse async");
 /* See target.h.  */
 
 void
-decref_target (target_ops *t)
+target_ops_ref_policy::decref (target_ops *t)
 {
   t->decref ();
   if (t->refcount () == 0)
