@@ -146,7 +146,8 @@ make_a_section_from_file (bfd *abfd,
 
   /* Compress/decompress DWARF debug sections with names: .debug_* and
      .zdebug_*, after the section flags is set.  */
-  if ((flags & SEC_DEBUGGING)
+  if ((flags & SEC_DEBUGGING) != 0
+      && (flags & SEC_HAS_CONTENTS) != 0
       && strlen (name) > 7
       && ((name[1] == 'd' && name[6] == '_')
 	  || (strlen (name) > 8 && name[1] == 'z' && name[7] == '_')))

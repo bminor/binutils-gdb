@@ -1201,7 +1201,8 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 
   /* Compress/decompress DWARF debug sections with names: .debug_* and
      .zdebug_*, after the section flags is set.  */
-  if ((newsect->flags & SEC_DEBUGGING)
+  if ((newsect->flags & SEC_DEBUGGING) != 0
+      && (newsect->flags & SEC_HAS_CONTENTS) != 0
       && ((name[1] == 'd' && name[6] == '_')
 	  || (name[1] == 'z' && name[7] == '_')))
     {
