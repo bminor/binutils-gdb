@@ -70,6 +70,15 @@ inferior::~inferior ()
 {
   inferior *inf = this;
 
+  /* Before the inferior is deleted, all target_ops should be popped from
+     the target stack, this leaves just the dummy_target behind.  If this
+     is not done, then any target left in the target stack will be left
+     with an artificially high reference count.  As the dummy_target is
+     still on the target stack then we are about to loose a reference to
+     that target, leaving its reference count artificially high.  However,
+     this is not critical as the dummy_target is a singleton.  */
+  gdb_assert (m_target_stack.top ()->stratum () == dummy_stratum);
+
   m_continuations.clear ();
   target_desc_info_free (inf->tdesc_info);
 }
@@ -232,6 +241,12 @@ delete_inferior (struct inferior *inf)
   inferior_list.erase (it);
 
   gdb::observers::inferior_removed.notify (inf);
+
+  /* Pop all targets now, this ensures that inferior::unpush is called
+     correctly.  As pop_all_targets ends up making a temporary switch to
+     inferior INF then we need to make this call before we delete the
+     program space, which we do below.  */
+  inf->pop_all_targets ();
 
   /* If this program space is rendered useless, remove it. */
   if (inf->pspace->empty ())
