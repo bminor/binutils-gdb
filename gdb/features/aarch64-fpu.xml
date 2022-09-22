@@ -142,11 +142,25 @@
     <field name="UFE" start="11" end="11"/>
     <!-- Inexact floating-point exception trap enable.  -->
     <field name="IXE" start="12" end="12"/>
+    <!-- The value of this bit controls the numeric behaviors of BFloat16 dot
+	 product calculations performed by the BFDOT, BFMMLA, BFMOPA, and
+	 BFMOPS instructions when FEAT_EBF16 is implemented.  -->
+    <field name="EBF" start="13" end="13"/>
     <!-- Input Denormal floating-point exception trap enable.  -->
     <field name="IDE" start="15" end="15"/>
+    <!-- This field has no function in AArch64 state, and non-zero values are
+	 ignored during execution in AArch64 state.
+	 This field is included only for context saving and restoration of
+	 the AArch32 FPSCR.Len field.  -->
+    <field name="Len" start="16" end="18"/>
     <!-- Flush-to-zero mode control bit on half-precision data-processing
          instructions.  -->
     <field name="FZ16" start="19" end="19"/>
+    <!-- This field has no function in AArch64 state, and non-zero values are
+	 ignored during execution in AArch64 state.
+	 This field is included only for context saving and restoration of the
+	 AArch32 FPSCR.Stride field.  -->
+    <field name="Stride" start="20" end="21"/>
     <!-- Rounding Mode control field.  -->
     <field name="RMode" start="22" end="23"/>
     <!-- Flush-to-zero mode control bit.  -->
