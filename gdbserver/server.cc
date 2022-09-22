@@ -2984,9 +2984,6 @@ handle_v_run (char *own_buf)
   char *new_program_name = NULL;
   int i;
 
-  for (p = own_buf + strlen ("vRun;"); p && *p; p = strchr (p, ';'))
-    p++;
-
   for (i = 0, p = own_buf + strlen ("vRun;"); *p; p = next_p, ++i)
     {
       next_p = strchr (p, ';');
