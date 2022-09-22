@@ -1389,7 +1389,7 @@ public:
   { return at (t->stratum ()) == t; }
 
   /* Return the target at STRATUM.  */
-  target_ops *at (strata stratum) const { return m_stack[stratum]; }
+  target_ops *at (strata stratum) const { return m_stack[stratum].get (); }
 
   /* Return the target at the top of the stack.  */
   target_ops *top () const { return at (m_top); }
@@ -1404,7 +1404,7 @@ private:
   /* The stack, represented as an array, with one slot per stratum.
      If no target is pushed at some stratum, the corresponding slot is
      null.  */
-  target_ops *m_stack[(int) debug_stratum + 1] {};
+  std::array<target_ops_ref, (int) debug_stratum + 1> m_stack;
 };
 
 /* Return the dummy target.  */
