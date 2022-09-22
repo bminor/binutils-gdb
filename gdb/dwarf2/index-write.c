@@ -1109,21 +1109,47 @@ write_cooked_index (cooked_index_vector *table,
   htab_up var_names (htab_create_alloc (10, htab_hash_string, htab_eq_string,
 					nullptr, xcalloc, xfree));
 
+  const char *main_for_ada = main_name ();
+
   for (const cooked_index_entry *entry : table->all_entries ())
     {
-      /* GDB never put C++ linkage names into .gdb_index.  The theory
-	 here is that a linkage name will normally be in the minimal
-	 symbols anyway, so including it in the index is usually
-	 redundant -- and the cases where it would not be redundant
-	 are rare and not worth supporting.  */
-      if (entry->per_cu->lang () == language_cplus
-	  && (entry->flags & IS_LINKAGE) != 0)
-	continue;
-
       const auto it = cu_index_htab.find (entry->per_cu);
       gdb_assert (it != cu_index_htab.cend ());
 
       const char *name = entry->full_name (&symtab->m_string_obstack);
+
+      if (entry->per_cu->lang () == language_ada)
+	{
+	  /* We want to ensure that the Ada main function's name
+	     appears verbatim in the index.  However, this name will
+	     be of the form "_ada_mumble", and will be rewritten by
+	     ada_decode.  So, recognize it specially here and add it
+	     to the index by hand.  */
+	  if (entry->tag == DW_TAG_subprogram
+	      && strcmp (main_for_ada, name) == 0)
+	    {
+	      /* Leave it alone.  */
+	    }
+	  else
+	    {
+	      /* In order for the index to work when read back into
+		 gdb, it has to use the encoded name, with any
+		 suffixes stripped.  */
+	      std::string encoded = ada_encode (name, false);
+	      name = obstack_strdup (&symtab->m_string_obstack,
+				     encoded.c_str ());
+	    }
+	}
+      else if (entry->per_cu->lang () == language_cplus
+	       && (entry->flags & IS_LINKAGE) != 0)
+	{
+	  /* GDB never put C++ linkage names into .gdb_index.  The
+	     theory here is that a linkage name will normally be in
+	     the minimal symbols anyway, so including it in the index
+	     is usually redundant -- and the cases where it would not
+	     be redundant are rare and not worth supporting.  */
+	  continue;
+	}
 
       gdb_index_symbol_kind kind;
       if (entry->tag == DW_TAG_subprogram)

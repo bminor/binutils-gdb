@@ -316,7 +316,7 @@ extern struct type *ada_get_base_type (struct type *);
 
 extern struct type *ada_check_typedef (struct type *);
 
-extern std::string ada_encode (const char *);
+extern std::string ada_encode (const char *, bool fold = true);
 
 extern const char *ada_enum_name (const char *);
 

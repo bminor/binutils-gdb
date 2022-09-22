@@ -1146,12 +1146,14 @@ ada_fold_name (gdb::string_view name, bool throw_on_error = false)
   return fold_storage.c_str ();
 }
 
-/* The "encoded" form of DECODED, according to GNAT conventions.  */
+/* The "encoded" form of DECODED, according to GNAT conventions.  If
+   FOLD is true (the default), case-fold any ordinary symbol.  Symbols
+   with <...> quoting are not folded in any case.  */
 
 std::string
-ada_encode (const char *decoded)
+ada_encode (const char *decoded, bool fold)
 {
-  if (decoded[0] != '<')
+  if (fold && decoded[0] != '<')
     decoded = ada_fold_name (decoded);
   return ada_encode_1 (decoded, true);
 }
