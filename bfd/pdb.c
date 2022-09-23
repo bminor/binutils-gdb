@@ -54,6 +54,11 @@ pdb_archive_p (bfd *abfd)
       return NULL;
     }
 
+  void *tdata = bfd_zalloc (abfd, sizeof (struct artdata));
+  if (tdata == NULL)
+    return NULL;
+  bfd_ardata (abfd) = tdata;
+
   return _bfd_no_cleanup;
 }
 
@@ -755,7 +760,7 @@ pdb_write_contents (bfd *abfd)
 #define pdb_new_section_hook _bfd_generic_new_section_hook
 #define pdb_get_section_contents _bfd_generic_get_section_contents
 #define pdb_get_section_contents_in_window _bfd_generic_get_section_contents_in_window
-#define pdb_close_and_cleanup _bfd_bool_bfd_true
+#define pdb_close_and_cleanup _bfd_generic_close_and_cleanup
 
 #define pdb_slurp_armap _bfd_noarchive_slurp_armap
 #define pdb_slurp_extended_name_table _bfd_noarchive_slurp_extended_name_table
