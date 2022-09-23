@@ -519,10 +519,29 @@ public:
   enum class unit_kind { cu, tu };
 
   /* Insert one symbol.  */
-  void insert (int dwarf_tag, const char *name, int cu_index, bool is_static,
-	       unit_kind kind, enum language lang)
+  void insert (const cooked_index_entry *entry)
   {
-    if (lang == language_ada)
+    const auto it = m_cu_index_htab.find (entry->per_cu);
+    gdb_assert (it != m_cu_index_htab.cend ());
+    const char *name = entry->full_name (&m_string_obstack);
+
+    /* This is incorrect but it mirrors gdb's historical behavior; and
+       because the current .debug_names generation is also incorrect,
+       it seems better to follow what was done before, rather than
+       introduce a mismatch between the newer and older gdb.  */
+    dwarf_tag tag = entry->tag;
+    if (tag != DW_TAG_typedef && tag_is_type (tag))
+      tag = DW_TAG_structure_type;
+    else if (tag == DW_TAG_enumerator || tag == DW_TAG_constant)
+      tag = DW_TAG_variable;
+
+    int cu_index = it->second;
+    bool is_static = (entry->flags & IS_STATIC) != 0;
+    unit_kind kind = (entry->per_cu->is_debug_types
+		      ? unit_kind::tu
+		      : unit_kind::cu);
+
+    if (entry->per_cu->lang () == language_ada)
       {
 	/* We want to ensure that the Ada main function's name appears
 	   verbatim in the index.  However, this name will be of the
@@ -535,8 +554,7 @@ public:
 	      = m_name_to_value_set.emplace (c_str_view (name),
 					     std::set<symbol_value> ());
 	    std::set<symbol_value> &value_set = insertpair.first->second;
-	    value_set.emplace (symbol_value (dwarf_tag, cu_index, is_static,
-					     kind));
+	    value_set.emplace (symbol_value (tag, cu_index, is_static, kind));
 	  }
 
 	/* In order for the index to work when read back into gdb, it
@@ -562,28 +580,7 @@ public:
       = m_name_to_value_set.emplace (c_str_view (name),
 				     std::set<symbol_value> ());
     std::set<symbol_value> &value_set = insertpair.first->second;
-    value_set.emplace (symbol_value (dwarf_tag, cu_index, is_static, kind));
-  }
-
-  void insert (const cooked_index_entry *entry)
-  {
-    const auto it = m_cu_index_htab.find (entry->per_cu);
-    gdb_assert (it != m_cu_index_htab.cend ());
-    const char *name = entry->full_name (&m_string_obstack);
-
-    /* This is incorrect but it mirrors gdb's historical behavior; and
-       because the current .debug_names generation is also incorrect,
-       it seems better to follow what was done before, rather than
-       introduce a mismatch between the newer and older gdb.  */
-    dwarf_tag tag = entry->tag;
-    if (tag != DW_TAG_typedef && tag_is_type (tag))
-      tag = DW_TAG_structure_type;
-    else if (tag == DW_TAG_enumerator || tag == DW_TAG_constant)
-      tag = DW_TAG_variable;
-
-    insert (tag, name, it->second, (entry->flags & IS_STATIC) != 0,
-	    entry->per_cu->is_debug_types ? unit_kind::tu : unit_kind::cu,
-	    entry->per_cu->lang ());
+    value_set.emplace (symbol_value (tag, cu_index, is_static, kind));
   }
 
   /* Build all the tables.  All symbols must be already inserted.
