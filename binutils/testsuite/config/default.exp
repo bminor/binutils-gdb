@@ -92,7 +92,10 @@ if ![info exists DLLTOOL] then {
     set DLLTOOL [findfile $base_dir/dlltool]
 }
 if ![info exists CXXFILT] then {
-    set CXXFILT [findfile $base_dir/cxxfilt]
+    set CXXFILT [findfile $base_dir/cxxfilt $base_dir/cxxfilt [which [transform cxxfilt]]]
+    if {$CXXFILT == 0} then {
+	set CXXFILT [transform c++filt]
+    }
 }
 if ![info exists CXXFILTFLAGS] then {
     set CXXFILTFLAGS ""
