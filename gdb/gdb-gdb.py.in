@@ -115,7 +115,7 @@ class StructTypePrettyPrinter:
         fields.append(
             "instance_flags = %s" % TypeFlagsPrinter(self.val["m_instance_flags"])
         )
-        fields.append("length = %d" % self.val["length"])
+        fields.append("length = %d" % self.val["m_length"])
         fields.append("main_type = %s" % self.val["main_type"])
         return "\n{" + ",\n ".join(fields) + "}"
 
@@ -260,7 +260,7 @@ class StructMainTypePrettyPrinter:
         fields.append("code = %s" % self.val["code"])
         fields.append("flags = [%s]" % self.flags_to_string())
         fields.append("owner = %s" % self.owner_to_string())
-        fields.append("target_type = %s" % self.val["target_type"])
+        fields.append("target_type = %s" % self.val["m_target_type"])
         if self.val["nfields"] > 0:
             for fieldno in range(self.val["nfields"]):
                 fields.append(self.struct_field_img(fieldno))
