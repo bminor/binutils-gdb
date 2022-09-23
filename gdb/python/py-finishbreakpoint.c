@@ -90,9 +90,9 @@ bpfinishpy_dealloc (PyObject *self)
   Py_TYPE (self)->tp_free (self);
 }
 
-/* Triggered when gdbpy_should_stop is about to execute the `stop' callback
-   of the gdb.FinishBreakpoint object BP_OBJ.  Will compute and cache the
-   `return_value', if possible.  */
+/* Triggered when gdbpy_breakpoint_cond_says_stop is about to execute the `stop'
+   callback of the gdb.FinishBreakpoint object BP_OBJ.  Will compute and cache
+   the `return_value', if possible.  */
 
 void
 bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
@@ -134,8 +134,8 @@ bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
     }
 }
 
-/* Triggered when gdbpy_should_stop has triggered the `stop' callback
-   of the gdb.FinishBreakpoint object BP_OBJ.  */
+/* Triggered when gdbpy_breakpoint_cond_says_stop has triggered the `stop'
+   callback of the gdb.FinishBreakpoint object BP_OBJ.  */
 
 void
 bpfinishpy_post_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
