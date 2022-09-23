@@ -451,10 +451,10 @@ FUNCTION
 	aout_@var{size}_some_aout_object_p
 
 SYNOPSIS
-	const bfd_target *aout_@var{size}_some_aout_object_p
+	bfd_cleanup aout_@var{size}_some_aout_object_p
 	 (bfd *abfd,
 	  struct internal_exec *execp,
-	  const bfd_target *(*callback_to_real_object_p) (bfd *));
+	  bfd_cleanup (*callback_to_real_object_p) (bfd *));
 
 DESCRIPTION
 	Some a.out variant thinks that the file open in @var{abfd}
