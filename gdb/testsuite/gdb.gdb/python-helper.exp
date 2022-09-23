@@ -82,13 +82,11 @@ proc test_python_helper {} {
     # binary into the inner GDB.
     gdb_test_no_output "disable breakpoints"
 
+    set outer_prompt_re "\\(outer-gdb\\) $"
+
     # Adjust the prompt on the outer gdb, this just makes things a
     # little clearer when trying to unpick which GDB is active.
-    gdb_test_multiple "set prompt (outer-gdb) " "set outer gdb prompt" {
-	-re "\[(\]outer-gdb\[)\].*\[(\]outer-gdb\[)\] $" {
-	    pass $gdb_test_name
-	}
-    }
+    gdb_test_no_output -prompt $outer_prompt_re  "set prompt (outer-gdb) " "set outer gdb prompt"
 
     # Send a command to the outer GDB to continue the inner GDB.  The
     # stop is being detected from the inner GDB, hence the use of -i
@@ -113,18 +111,10 @@ proc test_python_helper {} {
     # Send Ctrl-C to the inner GDB, this should kick us back to the
     # prompt of the outer GDB.
     send_inferior "\003"
-    gdb_test_multiple "" "interrupted the inner" {
-	-re ".*\\(outer-gdb\\) $" {
-	    pass $gdb_test_name
-	}
-    }
+    gdb_test -prompt $outer_prompt_re "" "" "interrupted the inner"
 
     # Now enable all breakpoints within the outer GDB.
-    gdb_test_multiple "enable breakpoints" "" {
-	-re "\\(outer-gdb\\) $" {
-	    pass $gdb_test_name
-	}
-    }
+    gdb_test_no_output -prompt $outer_prompt_re "enable breakpoints"
 
     # We need to resume the inner GDB after interrupting it, this is
     # done by sending 'continue'.  However, GDB will not redisplay the
@@ -137,11 +127,7 @@ proc test_python_helper {} {
     # GDB, this should result in the outer GDB stopping at one of the
     # breakpoints we created..
     send_inferior "print 1\n"
-    gdb_test_multiple "" "hit breakpoint in outer gdb" {
-	-re "Breakpoint $decimal, value_print.*\\(outer-gdb\\) $" {
-	    pass $gdb_test_name
-	}
-    }
+    gdb_test -prompt $outer_prompt_re "" "Breakpoint $decimal, value_print.*" "hit breakpoint in outer gdb"
 
     # Now inspect the type of parameter VAL, this should trigger the
     # pretty printers.
@@ -152,16 +138,8 @@ proc test_python_helper {} {
 		    " chain = 0x0," \
 		    " instance_flags = 0," \
 		    " length = $decimal," \
-		    " main_type = $hex}" \
-		    "\\(outer-gdb\\) $"]
-    gdb_test_multiple "print *val->type" "pretty print type" {
-	-re "$answer" {
-	    pass $gdb_test_name
-	}
-	-re "There is no member named.*\r\n\\(outer-gdb\\) $" {
-	    fail $gdb_test_name
-	}
-    }
+		    " main_type = $hex}"]
+    gdb_test -prompt $outer_prompt_re "print *val->type" $answer "pretty print type"
 
     set answer [multi_line \
 		    "$decimal = " \
@@ -170,16 +148,8 @@ proc test_python_helper {} {
 		    " flags = \[^\r\n\]+," \
 		    " owner = $hex \\(gdbarch\\)," \
 		    " target_type = 0x0," \
-		    " type_specific_field = TYPE_SPECIFIC_NONE}" \
-		    "\\(outer-gdb\\) $"]
-    gdb_test_multiple "print *val->type->main_type" "pretty print type->main_type" {
-	-re "$answer" {
-	    pass $gdb_test_name
-	}
-	-re "There is no member named.*\r\n\\(outer-gdb\\) $" {
-	    fail $gdb_test_name
-	}
-    }
+		    " type_specific_field = TYPE_SPECIFIC_NONE}"]
+    gdb_test -prompt $outer_prompt_re "print *val->type->main_type" $answer "pretty print type->main_type"
 
     # Send the continue to the outer GDB, which resumes the inner GDB,
     # we then detect the prompt from the inner GDB, hence the use of
@@ -195,12 +165,8 @@ proc test_python_helper {} {
     # information, this will include the TYPE_SPECIFIC_INT
     # information.
     send_inferior "print global_c.m_val\n"
-    gdb_test_multiple "" "print integer from DWARF info" {
-	-re "Breakpoint $decimal, value_print.*\\(outer-gdb\\) $" {
-	    pass $gdb_test_name
-	}
-    }
-
+    gdb_test -prompt $outer_prompt_re "" "Breakpoint $decimal, value_print.*" "print integer from DWARF info"
+	
     set answer [multi_line \
 		    "$decimal = " \
 		    "{name = $hex \"int\"," \
@@ -208,16 +174,8 @@ proc test_python_helper {} {
 		    " flags = \[^\r\n\]+," \
 		    " owner = $hex \\(objfile\\)," \
 		    " target_type = 0x0," \
-		    " int_stuff = { bit_size = $decimal, bit_offset = $decimal }}" \
-		    "\\(outer-gdb\\) $"]
-    gdb_test_multiple "print *val->type->main_type" "pretty print type->main_type for DWARF type" {
-	-re "$answer" {
-	    pass $gdb_test_name
-	}
-	-re "There is no member named.*\r\n\\(outer-gdb\\) $" {
-	    fail $gdb_test_name
-	}
-    }
+		    " int_stuff = { bit_size = $decimal, bit_offset = $decimal }}"]
+    gdb_test -prompt $outer_prompt_re "print *val->type->main_type" $answer "pretty print type->main_type for DWARF type"
 
     # Send the continue to the outer GDB, which resumes the inner GDB,
     # we then detect the prompt from the inner GDB, hence the use of
@@ -232,11 +190,7 @@ proc test_python_helper {} {
     # Send a command to the inner GDB, this should result in the outer
     # GDB stopping at the value_print breakpoint again.
     send_inferior "ptype global_c\n"
-    gdb_test_multiple "" "hit breakpoint in outer gdb again" {
-	-re "Breakpoint $decimal, c_print_type .*\\(outer-gdb\\) $" {
-	    pass $gdb_test_name
-	}
-    }
+    gdb_test -prompt $outer_prompt_re "" "Breakpoint $decimal, c_print_type.*" "hit breakpoint in outer gdb again"
 
     set answer [multi_line \
 		    "$decimal = " \
@@ -251,16 +205,8 @@ proc test_python_helper {} {
 		    "   m_loc_kind = FIELD_LOC_KIND_BITPOS," \
 		    "   bitsize = 0," \
 		    "   bitpos = 0}," \
-		    " cplus_stuff = $hex}" \
-		    "\\(outer-gdb\\) $"]
-    gdb_test_multiple "print *type->main_type" "" {
-	-re "$answer" {
-	    pass $gdb_test_name
-	}
-	-re "\r\n\\(outer-gdb\\) $" {
-	    fail $gdb_test_name
-	}
-    }
+		    " cplus_stuff = $hex}"]
+    gdb_test -prompt $outer_prompt_re "print *type->main_type" $answer
 
     return 0
 }

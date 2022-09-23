@@ -1478,17 +1478,17 @@ proc gdb_test_no_output { args } {
     global gdb_prompt
 
     parse_args {
-	{prompt_re ""}
+	{prompt ""}
 	{nopass}
     }
 
     lassign $args command message
 
-    set prompt_re [fill_in_default_prompt $prompt_re]
+    set prompt [fill_in_default_prompt $prompt]
 
     set command_regex [string_to_regexp $command]
-    gdb_test_multiple $command $message -prompt $prompt_re {
-	-re "^$command_regex\r\n$prompt_re" {
+    gdb_test_multiple $command $message -prompt $prompt {
+	-re "^$command_regex\r\n$prompt" {
 	    if {!$nopass} {
 		pass $gdb_test_name
 	    }
