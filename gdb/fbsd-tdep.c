@@ -1571,6 +1571,8 @@ fbsd_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
       TAG (PS_STRINGS, _("Pointer to ps_strings"), AUXV_FORMAT_HEX);
       TAG (FXRNG, _("Pointer to root RNG seed version"), AUXV_FORMAT_HEX);
       TAG (KPRELOAD, _("Base address of vDSO"), AUXV_FORMAT_HEX);
+      TAG (USRSTACKBASE, _("Top of user stack"), AUXV_FORMAT_HEX);
+      TAG (USRSTACKLIM, _("Grow limit of user stack"), AUXV_FORMAT_HEX);
     }
 
   fprint_auxv_entry (file, name, description, format, type, val);

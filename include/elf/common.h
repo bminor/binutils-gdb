@@ -1405,6 +1405,8 @@
 #define AT_FREEBSD_PS_STRINGS   32      /* struct ps_strings. */
 #define AT_FREEBSD_FXRNG        33      /* Pointer to root RNG seed version. */
 #define AT_FREEBSD_KPRELOAD     34      /* Base of vdso. */
+#define AT_FREEBSD_USRSTACKBASE 35      /* Top of user stack. */
+#define AT_FREEBSD_USRSTACKLIM  36      /* Grow limit of user stack. */
 
 #define AT_SUN_UID      2000    /* Effective user ID.  */
 #define AT_SUN_RUID     2001    /* Real user ID.  */
