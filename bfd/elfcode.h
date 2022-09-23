@@ -323,11 +323,11 @@ elf_swap_shdr_in (bfd *abfd,
 
       if (filesize != 0
 	  && ((ufile_ptr) dst->sh_offset > filesize
-	      || dst->sh_size > filesize - dst->sh_offset))
+	      || dst->sh_size > filesize - dst->sh_offset)
+	  && !abfd->read_only)
 	{
-	  if (!abfd->read_only)
-	    _bfd_error_handler (_("warning: %pB has a section "
-				  "extending past end of file"), abfd);
+	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
+	  *warn = _("warning: %pB has a section extending past end of file");
 	  abfd->read_only = 1;
 	}
     }
@@ -771,10 +771,12 @@ elf_object_p (bfd *abfd)
 	     So we are kind, and reset the string index value to 0
 	     so that at least some processing can be done.  */
 	  i_ehdrp->e_shstrndx = SHN_UNDEF;
-	  abfd->read_only = 1;
-	  _bfd_error_handler
-	    (_("warning: %pB has a corrupt string table index - ignoring"),
-	     abfd);
+	  if (!abfd->read_only)
+	    {
+	      const char **warn = _bfd_per_xvec_warn (abfd->xvec);
+	      *warn = _("warning: %pB has a corrupt string table index");
+	      abfd->read_only = 1;
+	    }
 	}
     }
   else if (i_ehdrp->e_shstrndx != SHN_UNDEF)
@@ -816,9 +818,14 @@ elf_object_p (bfd *abfd)
 	     two, as required by the ELF spec.  */
 	  if (i_phdr->p_align != (i_phdr->p_align & -i_phdr->p_align))
 	    {
-	      abfd->read_only = 1;
-	      _bfd_error_handler (_("warning: %pB has a program header "
-				    "with invalid alignment"), abfd);
+	      i_phdr->p_align &= -i_phdr->p_align;
+	      if (!abfd->read_only)
+		{
+		  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
+		  *warn = _("warning: %pB has a program header "
+			    "with invalid alignment");
+		  abfd->read_only = 1;
+		}
 	    }
 	}
     }

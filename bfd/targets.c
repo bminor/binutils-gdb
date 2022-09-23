@@ -20,6 +20,7 @@
    MA 02110-1301, USA.  */
 
 #include "sysdep.h"
+#include "libiberty.h"
 #include "bfd.h"
 #include "libbfd.h"
 #include "fnmatch.h"
@@ -1454,7 +1455,10 @@ const bfd_target *const *const bfd_associated_vector = _bfd_associated_vector;
 /* When there is an ambiguous match, bfd_check_format_matches puts the
    names of the matching targets in an array.  This variable is the maximum
    number of entries that the array could possibly need.  */
-const size_t _bfd_target_vector_entries = sizeof (_bfd_target_vector)/sizeof (*_bfd_target_vector);
+const size_t _bfd_target_vector_entries = ARRAY_SIZE (_bfd_target_vector);
+
+/* A place to stash a warning from _bfd_check_format.  */
+static const char *per_xvec_warn[ARRAY_SIZE (_bfd_target_vector) + 1];
 
 /* This array maps configuration triplets onto BFD vectors.  */
 
@@ -1473,6 +1477,29 @@ static const struct targmatch bfd_target_match[] = {
 #include "targmatch.h"
   { NULL, NULL }
 };
+
+/*
+INTERNAL_FUNCTION
+	_bfd_per_xvec_warn
+
+SYNOPSIS
+	const char **_bfd_per_xvec_warn (const bfd_target *);
+
+DESCRIPTION
+	Return a location for the given target xvec to use for
+	warnings specific to that target.
+*/
+
+const char **
+_bfd_per_xvec_warn (const bfd_target *targ)
+{
+  size_t idx;
+
+  for (idx = 0; idx < ARRAY_SIZE (_bfd_target_vector); idx++)
+    if (_bfd_target_vector[idx] == targ)
+      break;
+  return per_xvec_warn + idx;
+}
 
 /* Find a target vector, given a name or configuration triplet.  */
 
