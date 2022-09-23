@@ -2066,9 +2066,7 @@ struct_field_searcher::search (struct value *arg1, LONGEST offset,
 	 name is not yet filled in.  */
       int found_baseclass = (m_looking_for_baseclass
 			     && TYPE_BASECLASS_NAME (type, i) != NULL
-			     && (strcmp_iw (m_name,
-					    TYPE_BASECLASS_NAME (type,
-								 i)) == 0));
+			     && (strcmp_iw (m_name, basetype->name ()) == 0));
       LONGEST boffset = value_embedded_offset (arg1) + offset;
 
       if (BASETYPE_VIA_VIRTUAL (type, i))

@@ -780,12 +780,13 @@ cp_find_type_baseclass_by_name (struct type *parent_type, const char *name)
   for (i = 0; i < TYPE_N_BASECLASSES (parent_type); ++i)
     {
       struct type *type = check_typedef (TYPE_BASECLASS (parent_type, i));
-      const char *base_name = TYPE_BASECLASS_NAME (parent_type, i);
+      const char *tdef_name = TYPE_BASECLASS_NAME (parent_type, i);
+      const char *base_name = type->name ();
 
       if (base_name == NULL)
 	continue;
 
-      if (streq (base_name, name))
+      if (streq (tdef_name, name) || streq (base_name, name))
 	return type;
 
       type = cp_find_type_baseclass_by_name (type, name);
