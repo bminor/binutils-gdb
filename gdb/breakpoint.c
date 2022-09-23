@@ -7956,7 +7956,7 @@ catchpoint::catchpoint (struct gdbarch *gdbarch, bool temp,
   pspace = current_program_space;
 }
 
-void
+breakpoint *
 install_breakpoint (int internal, std::unique_ptr<breakpoint> &&arg, int update_gll)
 {
   breakpoint *b = add_to_breakpoint_chain (std::move (arg));
@@ -7969,6 +7969,8 @@ install_breakpoint (int internal, std::unique_ptr<breakpoint> &&arg, int update_
 
   if (update_gll)
     update_global_location_list (UGLL_MAY_INSERT);
+
+  return b;
 }
 
 static int

@@ -1484,10 +1484,12 @@ extern void
    target and breakpoint_created observers of its existence.  If
    INTERNAL is non-zero, the breakpoint number will be allocated from
    the internal breakpoint count.  If UPDATE_GLL is non-zero,
-   update_global_location_list will be called.  */
+   update_global_location_list will be called.
 
-extern void install_breakpoint (int internal, std::unique_ptr<breakpoint> &&b,
-				int update_gll);
+   Takes ownership of B, and returns a non-owning reference to it.  */
+
+extern breakpoint *install_breakpoint
+  (int internal, std::unique_ptr<breakpoint> &&b, int update_gll);
 
 /* Returns the breakpoint ops appropriate for use with with LOCSPEC
    and according to IS_TRACEPOINT.  Use this to ensure, for example,
