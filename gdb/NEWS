@@ -178,6 +178,10 @@ set debug solib-frv on|off
 show debug solib-frv
   Removed in favor of "set/show debug solib".
 
+maintenance info program-spaces
+  This command now includes a 'Core File' column which indicates the
+  name of the core file associated with each program space.
+
 * New targets
 
 GNU/Linux/LoongArch (gdbserver)	loongarch*-*-linux*
