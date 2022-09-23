@@ -32,7 +32,7 @@ csky_create_target_description (void)
   set_tdesc_architecture (tdesc.get (), arch_name.c_str ());
 #endif
 
-  create_feature_cskyv2_linux (tdesc.get ());
+  create_feature_cskyv2_linux (tdesc.get (), 0);
 
   return tdesc;
 }

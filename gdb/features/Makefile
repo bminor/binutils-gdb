@@ -213,6 +213,7 @@ FEATURE_XMLFILES = aarch64-core.xml \
 	arm/arm-vfpv2.xml \
 	arm/arm-vfpv3.xml \
 	arm/xscale-iwmmxt.xml \
+	cskyv2-linux.xml \
 	i386/32bit-core.xml \
 	i386/32bit-sse.xml \
 	i386/32bit-linux.xml \
