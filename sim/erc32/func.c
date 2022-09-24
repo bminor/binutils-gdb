@@ -874,7 +874,7 @@ init_event(void)
 }
 
 void
-set_int(int32_t level, void (*callback) (), int32_t arg)
+set_int(int32_t level, void (*callback) (int32_t), int32_t arg)
 {
     irqarr[level & 0x0f].callback = callback;
     irqarr[level & 0x0f].arg = arg;
