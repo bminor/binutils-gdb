@@ -124,7 +124,7 @@ struct pstate {
 };
 
 struct evcell {
-    void            (*cfunc) ();
+    void            (*cfunc) (int32_t);
     int32_t           arg;
     uint64_t          time;
     struct evcell  *nxt;
@@ -183,7 +183,7 @@ extern void	init_signals (void);
 struct disassemble_info;
 extern void	dis_mem (uint32_t addr, uint32_t len,
 			 struct disassemble_info *info);
-extern void	event (void (*cfunc) (), int32_t arg, uint64_t delta);
+extern void	event (void (*cfunc) (int32_t), int32_t arg, uint64_t delta);
 extern void	set_int (int32_t level, void (*callback) (), int32_t arg);
 extern void	advance_time (struct pstate  *sregs);
 extern uint32_t	now (void);

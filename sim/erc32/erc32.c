@@ -274,19 +274,19 @@ static void	port_init (void);
 static uint32_t	read_uart (uint32_t addr);
 static void	write_uart (uint32_t addr, uint32_t data);
 static void	flush_uart (void);
-static void	uarta_tx (void);
-static void	uartb_tx (void);
-static void	uart_rx (void *arg);
-static void	uart_intr (void *arg);
+static void	uarta_tx (int32_t);
+static void	uartb_tx (int32_t);
+static void	uart_rx (int32_t);
+static void	uart_intr (int32_t);
 static void	uart_irq_start (void);
-static void	wdog_intr (void *arg);
+static void	wdog_intr (int32_t);
 static void	wdog_start (void);
-static void	rtc_intr (void *arg);
+static void	rtc_intr (int32_t);
 static void	rtc_start (void);
 static uint32_t	rtc_counter_read (void);
 static void	rtc_scaler_set (uint32_t val);
 static void	rtc_reload_set (uint32_t val);
-static void	gpt_intr (void *arg);
+static void	gpt_intr (int32_t);
 static void	gpt_start (void);
 static uint32_t	gpt_counter_read (void);
 static void	gpt_scaler_set (uint32_t val);
@@ -1245,7 +1245,7 @@ flush_uart(void)
 
 ATTRIBUTE_UNUSED
 static void
-uarta_tx(void)
+uarta_tx(int32_t arg ATTRIBUTE_UNUSED)
 {
 
     while (f1open && fwrite(&uarta_sreg, 1, 1, f1out) != 1);
@@ -1261,7 +1261,7 @@ uarta_tx(void)
 
 ATTRIBUTE_UNUSED
 static void
-uartb_tx(void)
+uartb_tx(int32_t arg ATTRIBUTE_UNUSED)
 {
     while (f2open && fwrite(&uartb_sreg, 1, 1, f2out) != 1);
     if (uart_stat_reg & UARTB_HRE) {
@@ -1276,7 +1276,7 @@ uartb_tx(void)
 
 ATTRIBUTE_UNUSED
 static void
-uart_rx(void *arg)
+uart_rx(int32_t arg ATTRIBUTE_UNUSED)
 {
     int32_t           rsize;
     char            rxd;
@@ -1318,7 +1318,7 @@ uart_rx(void *arg)
 }
 
 static void
-uart_intr(void *arg)
+uart_intr(int32_t arg ATTRIBUTE_UNUSED)
 {
     read_uart(0xE8);		/* Check for UART interrupts every 1000 clk */
     flush_uart();		/* Flush UART ports      */
@@ -1341,7 +1341,7 @@ uart_irq_start(void)
 /* Watch-dog */
 
 static void
-wdog_intr(void *arg)
+wdog_intr(int32_t arg ATTRIBUTE_UNUSED)
 {
     if (wdog_status == disabled) {
 	wdog_status = stopped;
@@ -1379,7 +1379,7 @@ wdog_start(void)
 
 
 static void
-rtc_intr(void *arg)
+rtc_intr(int32_t arg ATTRIBUTE_UNUSED)
 {
     if (rtc_counter == 0) {
 
@@ -1430,7 +1430,7 @@ rtc_reload_set(uint32_t val)
 }
 
 static void
-gpt_intr(void *arg)
+gpt_intr(int32_t arg ATTRIBUTE_UNUSED)
 {
     if (gpt_counter == 0) {
 	mec_irq(12);
