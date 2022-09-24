@@ -419,8 +419,6 @@ add_stab_to_list (char *stabname, struct pending_stabs **stabvector)
 static void
 arrange_linetable (std::vector<linetable_entry> &old_linetable)
 {
-  int extra_lines = 0;
-
   std::vector<linetable_entry> fentries;
 
   for (int ii = 0; ii < old_linetable.size (); ++ii)
@@ -436,12 +434,6 @@ arrange_linetable (std::vector<linetable_entry> &old_linetable)
 	  e.line = ii;
 	  e.is_stmt = 1;
 	  e.pc = old_linetable[ii].pc;
-
-	  /* If the function was compiled with XLC, we may have to add an
-	     extra line entry later.  Reserve space for that.  */
-	  if (ii + 1 < old_linetable.size ()
-	      && old_linetable[ii].pc != old_linetable[ii + 1].pc)
-	    extra_lines++;
 	}
     }
 
