@@ -1492,8 +1492,6 @@ get_loop_bounds (int rs, int re, unsigned char *memory, unsigned char *mem_end,
   return loop;
 }
 
-static void ppi_insn ();
-
 #include "ppi.c"
 
 /* Provide calloc / free versions that use an anonymous mmap.  This can
