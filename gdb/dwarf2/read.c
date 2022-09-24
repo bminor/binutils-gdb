@@ -3155,8 +3155,8 @@ dwarf2_gdb_index::expand_matching_symbols
   const block_enum block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
 
   mapped_index &index
-    = (static_cast<mapped_index &>
-       (*per_objfile->per_bfd->index_table.get ()));
+    = *(gdb::checked_static_cast<mapped_index *>
+	(per_objfile->per_bfd->index_table.get ()));
 
   const char *match_name = name.ada ().lookup_name ().c_str ();
   auto matcher = [&] (const char *symname)
@@ -4005,8 +4005,8 @@ dw2_expand_marked_cus
   offset_type vec_len, vec_idx;
   bool global_seen = false;
   mapped_index &index
-    = (static_cast<mapped_index &>
-       (*per_objfile->per_bfd->index_table.get ()));
+    = *(gdb::checked_static_cast<mapped_index *>
+	(per_objfile->per_bfd->index_table.get ()));
 
   offset_view vec (index.constant_pool.slice (index.symbol_vec_index (idx)));
   vec_len = vec[0];
@@ -4225,8 +4225,8 @@ dwarf2_gdb_index::expand_symtabs_matching
     }
 
   mapped_index &index
-    = (static_cast<mapped_index &>
-       (*per_objfile->per_bfd->index_table.get ()));
+    = *(gdb::checked_static_cast<mapped_index *>
+	(per_objfile->per_bfd->index_table.get ()));
 
   bool result
     = dw2_expand_symtabs_matching_symbol (index, *lookup_name,
@@ -5208,8 +5208,8 @@ dwarf2_debug_names_index::expand_matching_symbols
   dwarf2_per_objfile *per_objfile = get_dwarf2_per_objfile (objfile);
 
   mapped_debug_names &map
-    = (static_cast<mapped_debug_names &>
-       (*per_objfile->per_bfd->index_table.get ()));
+    = *(gdb::checked_static_cast<mapped_debug_names *>
+	(per_objfile->per_bfd->index_table.get ()));
   const block_search_flags block_flags
     = global ? SEARCH_GLOBAL_BLOCK : SEARCH_STATIC_BLOCK;
 
@@ -5270,8 +5270,8 @@ dwarf2_debug_names_index::expand_symtabs_matching
     }
 
   mapped_debug_names &map
-    = (static_cast<mapped_debug_names &>
-       (*per_objfile->per_bfd->index_table.get ()));
+    = *(gdb::checked_static_cast<mapped_debug_names *>
+	(per_objfile->per_bfd->index_table.get ()));
 
   bool result
     = dw2_expand_symtabs_matching_symbol (map, *lookup_name,
