@@ -978,7 +978,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
     {
       if (info->stabsec == NULL || info->strsec == NULL)
 	{
-	  /* No stabs debugging information.  */
+	  /* No usable stabs debugging information.  */
 	  return true;
 	}
 
@@ -1000,6 +1000,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
       info = (struct stab_find_info *) bfd_zalloc (abfd, amt);
       if (info == NULL)
 	return false;
+      *pinfo = info;
 
       /* FIXME: When using the linker --split-by-file or
 	 --split-by-reloc options, it is possible for the .stab and
@@ -1015,12 +1016,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	  info->strsec  = bfd_get_section_by_name (abfd, "$GDB_STRINGS$");
 
 	  if (info->stabsec == NULL || info->strsec == NULL)
-	    {
-	      /* No stabs debugging information.  Set *pinfo so that we
-		 can return quickly in the info != NULL case above.  */
-	      *pinfo = info;
-	      return true;
-	    }
+	    return true;
 	}
 
       stabsize = (info->stabsec->rawsize
@@ -1031,16 +1027,10 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 		 ? info->strsec->rawsize
 		 : info->strsec->size);
 
-      info->stabs = (bfd_byte *) bfd_alloc (abfd, stabsize);
-      info->strs = (bfd_byte *) bfd_alloc (abfd, strsize);
-      if (info->stabs == NULL || info->strs == NULL)
-	return false;
-
-      if (! bfd_get_section_contents (abfd, info->stabsec, info->stabs,
-				      0, stabsize)
-	  || ! bfd_get_section_contents (abfd, info->strsec, info->strs,
-					 0, strsize))
-	return false;
+      if (!bfd_malloc_and_get_section (abfd, info->stabsec, &info->stabs))
+	goto out;
+      if (!bfd_malloc_and_get_section (abfd, info->strsec, &info->strs))
+	goto out1;
 
       /* Stab strings ought to be nul terminated.  Ensure the last one
 	 is, to prevent running off the end of the buffer.  */
@@ -1052,15 +1042,24 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	 this should be no big deal.  */
       reloc_size = bfd_get_reloc_upper_bound (abfd, info->stabsec);
       if (reloc_size < 0)
-	return false;
+	goto out2;
       reloc_vector = (arelent **) bfd_malloc (reloc_size);
       if (reloc_vector == NULL && reloc_size != 0)
-	return false;
+	goto out2;
       reloc_count = bfd_canonicalize_reloc (abfd, info->stabsec, reloc_vector,
 					    symbols);
       if (reloc_count < 0)
 	{
+	out3:
 	  free (reloc_vector);
+	out2:
+	  free (info->strs);
+	  info->strs = NULL;
+	out1:
+	  free (info->stabs);
+	  info->stabs = NULL;
+	out:
+	  info->stabsec = NULL;
 	  return false;
 	}
       if (reloc_count > 0)
@@ -1091,8 +1090,7 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 		  _bfd_error_handler
 		    (_("unsupported .stab relocation"));
 		  bfd_set_error (bfd_error_invalid_operation);
-		  free (reloc_vector);
-		  return false;
+		  goto out3;
 		}
 
 	      val = bfd_get_32 (abfd, info->stabs + octets);
@@ -1146,14 +1144,21 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	++info->indextablesize;
 
       if (info->indextablesize == 0)
-	return true;
+	{
+	  free (info->strs);
+	  info->strs = NULL;
+	  free (info->stabs);
+	  info->stabs = NULL;
+	  info->stabsec = NULL;
+	  return true;
+	}
       ++info->indextablesize;
 
       amt = info->indextablesize;
       amt *= sizeof (struct indexentry);
-      info->indextable = (struct indexentry *) bfd_alloc (abfd, amt);
+      info->indextable = (struct indexentry *) bfd_malloc (amt);
       if (info->indextable == NULL)
-	return false;
+	goto out3;
 
       file_name = NULL;
       directory_name = NULL;
@@ -1280,8 +1285,6 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
       info->indextablesize = i;
       qsort (info->indextable, (size_t) i, sizeof (struct indexentry),
 	     cmpindexentry);
-
-      *pinfo = info;
     }
 
   /* We are passed a section relative offset.  The offsets in the
@@ -1444,6 +1447,18 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
     }
 
   return true;
+}
+
+void
+_bfd_stab_cleanup (bfd *abfd ATTRIBUTE_UNUSED, void **pinfo)
+{
+  struct stab_find_info *info = (struct stab_find_info *) *pinfo;
+  if (info == NULL)
+    return;
+
+  free (info->indextable);
+  free (info->strs);
+  free (info->stabs);
 }
 
 long

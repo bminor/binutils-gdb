@@ -3175,7 +3175,10 @@ _bfd_coff_close_and_cleanup (bfd *abfd)
 
       if (bfd_get_format (abfd) == bfd_object
 	  || bfd_get_format (abfd) == bfd_core)
-	_bfd_dwarf2_cleanup_debug_info (abfd, &tdata->dwarf2_find_line_info);
+	{
+	  _bfd_dwarf2_cleanup_debug_info (abfd, &tdata->dwarf2_find_line_info);
+	  _bfd_stab_cleanup (abfd, &tdata->line_info);
+	}
     }
   return _bfd_generic_close_and_cleanup (abfd);
 }

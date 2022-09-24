@@ -620,6 +620,9 @@ extern bool _bfd_dwarf2_slurp_debug_info
 extern void _bfd_dwarf2_cleanup_debug_info
   (bfd *, void **) ATTRIBUTE_HIDDEN;
 
+extern void _bfd_stab_cleanup
+  (bfd *, void **) ATTRIBUTE_HIDDEN;
+
 /* Create a new section entry.  */
 extern struct bfd_hash_entry *bfd_section_hash_newfunc
   (struct bfd_hash_entry *, struct bfd_hash_table *, const char *)
