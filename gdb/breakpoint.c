@@ -997,7 +997,7 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
       b->cond_string.reset ();
 
       if (is_watchpoint (b))
-	static_cast<watchpoint *> (b)->cond_exp.reset ();
+	gdb::checked_static_cast<watchpoint *> (b)->cond_exp.reset ();
       else
 	{
 	  int loc_num = 1;
@@ -1029,7 +1029,7 @@ set_breakpoint_condition (struct breakpoint *b, const char *exp,
 	  expression_up new_exp = parse_exp_1 (&arg, 0, 0, 0, &tracker);
 	  if (*arg != 0)
 	    error (_("Junk at end of expression"));
-	  watchpoint *w = static_cast<watchpoint *> (b);
+	  watchpoint *w = gdb::checked_static_cast<watchpoint *> (b);
 	  w->cond_exp = std::move (new_exp);
 	  w->cond_exp_valid_block = tracker.block ();
 	}
@@ -8312,7 +8312,7 @@ code_breakpoint::code_breakpoint (struct gdbarch *gdbarch_,
   if (type == bp_static_tracepoint
       || type == bp_static_marker_tracepoint)
     {
-      auto *t = static_cast<struct tracepoint *> (this);
+      auto *t = gdb::checked_static_cast<struct tracepoint *> (this);
       struct static_tracepoint_marker marker;
 
       if (strace_marker_p (this))
@@ -13502,7 +13502,8 @@ insert_single_step_breakpoint (struct gdbarch *gdbarch,
   sal.explicit_pc = 1;
 
   auto *ss_bp
-    = static_cast<momentary_breakpoint *> (tp->control.single_step_breakpoints);
+    = (gdb::checked_static_cast<momentary_breakpoint *>
+       (tp->control.single_step_breakpoints));
   ss_bp->add_location (sal);
 
   update_global_location_list (UGLL_INSERT);

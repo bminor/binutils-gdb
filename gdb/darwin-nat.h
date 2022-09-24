@@ -154,7 +154,7 @@ struct darwin_exception_info
 static inline darwin_thread_info *
 get_darwin_thread_info (class thread_info *thread)
 {
-  return static_cast<darwin_thread_info *> (thread->priv.get ());
+  return gdb::checked_static_cast<darwin_thread_info *> (thread->priv.get ());
 }
 
 /* Describe an inferior.  */
@@ -188,7 +188,7 @@ struct darwin_inferior : public private_inferior
 static inline darwin_inferior *
 get_darwin_inferior (inferior *inf)
 {
-  return static_cast<darwin_inferior *> (inf->priv.get ());
+  return gdb::checked_static_cast<darwin_inferior *> (inf->priv.get ());
 }
 
 /* Exception port.  */

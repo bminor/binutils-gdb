@@ -2694,7 +2694,7 @@ get_remote_thread_info (thread_info *thread)
   if (thread->priv == NULL)
     thread->priv.reset (new remote_thread_info);
 
-  return static_cast<remote_thread_info *> (thread->priv.get ());
+  return gdb::checked_static_cast<remote_thread_info *> (thread->priv.get ());
 }
 
 /* Return PTID's private thread data, creating it if necessary.  */
@@ -6611,7 +6611,7 @@ get_remote_inferior (inferior *inf)
   if (inf->priv == NULL)
     inf->priv.reset (new remote_inferior);
 
-  return static_cast<remote_inferior *> (inf->priv.get ());
+  return gdb::checked_static_cast<remote_inferior *> (inf->priv.get ());
 }
 
 /* Class used to track the construction of a vCont packet in the

@@ -90,7 +90,7 @@ struct aix_thread_info : public private_thread_info
 static aix_thread_info *
 get_aix_thread_info (thread_info *thread)
 {
-  return static_cast<aix_thread_info *> (thread->priv.get ());
+  return gdb::checked_static_cast<aix_thread_info *> (thread->priv.get ());
 }
 
 /* Information about a thread of which libpthdebug is aware.  */
