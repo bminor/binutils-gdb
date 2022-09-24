@@ -298,7 +298,7 @@ disp_reg(struct pstate *sregs, char *reg)
 #ifdef ERRINJ
 
 void
-errinj()
+errinj (void)
 {
     int	err;
 
@@ -322,7 +322,7 @@ errinj()
 }
 
 void
-errinjstart()
+errinjstart (void)
 {
     if (errper) event(errinj, 0, (random()%errper));
 }
@@ -855,7 +855,7 @@ event(void (*cfunc) (), int32_t arg, uint64_t delta)
 
 #if 0	/* apparently not used */
 void
-stop_event()
+stop_event(void)
 {
 }
 #endif
