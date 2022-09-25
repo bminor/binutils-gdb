@@ -4338,7 +4338,8 @@ template<int size, bool big_endian>
 void
 Output_data_plt_powerpc<size, big_endian>::do_write(Output_file* of)
 {
-  if (!this->sym_ents_.empty())
+  if (!this->sym_ents_.empty()
+      && !parameters->options().output_is_position_independent())
     {
       const section_size_type offset = this->offset();
       const section_size_type oview_size
