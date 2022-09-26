@@ -19,4 +19,5 @@ int
 foo (void)
 {
   asm ("foo_label: .globl foo_label");
+  return 0;
 }
