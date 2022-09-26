@@ -578,7 +578,7 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		  oparg++;
 		  while (*oparg && *oparg != ',')
 		    {
-		      print (info->stream, dis_style_text, "%c", *oparg);
+		      print (info->stream, dis_style_immediate, "%c", *oparg);
 		      oparg++;
 		    }
 		  oparg--;
