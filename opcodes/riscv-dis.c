@@ -597,11 +597,11 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		  oparg--;
 
 		  if (!sign)
-		    print (info->stream, dis_style_immediate, "%u",
-			   (unsigned)EXTRACT_U_IMM (n, s, l));
+		    print (info->stream, dis_style_immediate, "%lu",
+			   (unsigned long)EXTRACT_U_IMM (n, s, l));
 		  else
-		    print (info->stream, dis_style_immediate, "%i",
-			   (unsigned)EXTRACT_S_IMM (n, s, l));
+		    print (info->stream, dis_style_immediate, "%li",
+			   (signed long)EXTRACT_S_IMM (n, s, l));
 		  break;
 		default:
 		  goto undefined_modifier;
