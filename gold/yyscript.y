@@ -26,6 +26,7 @@
 %{
 
 #include "config.h"
+#include "diagnostics.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -33,6 +34,8 @@
 #include <string.h>
 
 #include "script-c.h"
+
+DIAGNOSTIC_IGNORE_UNUSED_BUT_SET_VARIABLE
 
 %}
 
