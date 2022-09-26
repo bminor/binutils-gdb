@@ -547,7 +547,7 @@ m32r_trap (SIM_CPU *current_cpu, PCADDR pc, int num)
 	  case TARGET_LINUX_SYS_getgroups32:
 	  case TARGET_LINUX_SYS_getgroups:
 	    {
-	      gid_t *list;
+	      gid_t *list = NULL;
 
 	      if (arg1 > 0)
 		list = (gid_t *) malloc (arg1 * sizeof(gid_t));
