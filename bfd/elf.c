@@ -13482,9 +13482,9 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
 	{
 	  asymbol *    last_sym;
 	  int          last_sym_idx;
-	  unsigned int reloc_count;
-	  unsigned int idx;
-	  unsigned int entsize;
+	  size_t       reloc_count;
+	  size_t       idx;
+	  bfd_size_type entsize;
 	  arelent *    src_irel;
 	  bfd_byte *   dst_rela;
 
@@ -13525,7 +13525,8 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
 	    }
 
 	  reloc_count = hdr->sh_size / entsize;
-	  if (reloc_count <= 0)
+	  hdr->sh_size = entsize * reloc_count;
+	  if (reloc_count == 0)
 	    {
 	      _bfd_error_handler
 		/* xgettext:c-format */
@@ -13572,7 +13573,7 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB(%pA): error: reloc table entry %u is empty"),
+		    (_("%pB(%pA): error: reloc table entry %zu is empty"),
 		     abfd, relsec, idx);
 		  bfd_set_error (bfd_error_bad_value);
 		  result = false;
@@ -13597,7 +13598,7 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
 			{
 			  _bfd_error_handler
 			    /* xgettext:c-format */
-			    (_("%pB(%pA): error: secondary reloc %u"
+			    (_("%pB(%pA): error: secondary reloc %zu"
 			       " references a missing symbol"),
 			     abfd, relsec, idx);
 			  bfd_set_error (bfd_error_bad_value);
@@ -13615,7 +13616,7 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
 		    {
 		      _bfd_error_handler
 			/* xgettext:c-format */
-			(_("%pB(%pA): error: secondary reloc %u"
+			(_("%pB(%pA): error: secondary reloc %zu"
 			   " references a deleted symbol"),
 			 abfd, relsec, idx);
 		      bfd_set_error (bfd_error_bad_value);
@@ -13629,7 +13630,7 @@ _bfd_elf_write_secondary_reloc_section (bfd *abfd, asection *sec)
 		{
 		  _bfd_error_handler
 		    /* xgettext:c-format */
-		    (_("%pB(%pA): error: secondary reloc %u"
+		    (_("%pB(%pA): error: secondary reloc %zu"
 		       " is of an unknown type"),
 		     abfd, relsec, idx);
 		  bfd_set_error (bfd_error_bad_value);
