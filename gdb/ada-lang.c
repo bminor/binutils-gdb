@@ -4149,7 +4149,9 @@ scalar_type_p (struct type *type)
     }
 }
 
-/* True iff TYPE is discrete (INT, RANGE, ENUM).  */
+/* True iff TYPE is discrete, as defined in the Ada Reference Manual.
+   This essentially means one of (INT, RANGE, ENUM) -- but note that
+   "enum" includes character and boolean as well.  */
 
 static int
 discrete_type_p (struct type *type)
@@ -4164,6 +4166,7 @@ discrete_type_p (struct type *type)
 	case TYPE_CODE_RANGE:
 	case TYPE_CODE_ENUM:
 	case TYPE_CODE_BOOL:
+	case TYPE_CODE_CHAR:
 	  return 1;
 	default:
 	  return 0;
