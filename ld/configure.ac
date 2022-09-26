@@ -296,24 +296,15 @@ AC_ARG_ENABLE([jansson],
   [enable_jansson=$enableval],
   [enable_jansson="no"])
 
-if test "x$enable_jansson" != "xno"; then
-  PKG_PROG_PKG_CONFIG
-  AS_IF([test -n "$PKG_CONFIG"],
+AS_IF([test "x$enable_jansson" != "xno"],
+  [PKG_CHECK_MODULES(JANSSON, [jansson],
     [
-      PKG_CHECK_MODULES(JANSSON, [jansson],
-	[
-	  AC_DEFINE(HAVE_JANSSON, 1, [The jansson library is to be used])
-	  AC_SUBST([JANSSON_CFLAGS])
-	  AC_SUBST([JANSSON_LIBS])
-	],
-	[
-	  AC_MSG_ERROR([Cannot find jansson library])
-	])
+      AC_DEFINE(HAVE_JANSSON, 1, [The jansson library is to be used])
+      AC_SUBST([JANSSON_CFLAGS])
+      AC_SUBST([JANSSON_LIBS])
     ],
-    [
-      AC_MSG_ERROR([Cannot find pkg-config])
-    ])
-fi
+    [AC_MSG_ERROR([Cannot find jansson library])])
+  ])
 
 AM_BINUTILS_WARNINGS
 

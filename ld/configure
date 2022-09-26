@@ -15585,7 +15585,6 @@ else
 fi
 
 
-if test "x$enable_jansson" != "xno"; then
 
 
 
@@ -15706,8 +15705,7 @@ $as_echo "no" >&6; }
 		PKG_CONFIG=""
 	fi
 fi
-  if test -n "$PKG_CONFIG"; then :
-
+if test "x$enable_jansson" != "xno"; then :
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for jansson" >&5
@@ -15791,15 +15789,11 @@ fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$JANSSON_PKG_ERRORS" >&5
 
-
-	  as_fn_error $? "Cannot find jansson library" "$LINENO" 5
-
+	as_fn_error $? "Cannot find jansson library" "$LINENO" 5
 elif test $pkg_failed = untried; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-
-	  as_fn_error $? "Cannot find jansson library" "$LINENO" 5
-
+	as_fn_error $? "Cannot find jansson library" "$LINENO" 5
 else
 	JANSSON_CFLAGS=$pkg_cv_JANSSON_CFLAGS
 	JANSSON_LIBS=$pkg_cv_JANSSON_LIBS
@@ -15814,11 +15808,6 @@ $as_echo "#define HAVE_JANSSON 1" >>confdefs.h
 
 fi
 
-else
-
-      as_fn_error $? "Cannot find pkg-config" "$LINENO" 5
-
-fi
 fi
 
 
