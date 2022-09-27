@@ -193,7 +193,7 @@ pdb_get_elt_at_index (bfd *abfd, symindex sym_index)
     goto fail;
 
   file->arelt_data =
-    (struct areltdata *) bfd_malloc (sizeof (struct areltdata));
+    (struct areltdata *) bfd_zmalloc (sizeof (struct areltdata));
 
   if (!file->arelt_data)
     goto fail;
