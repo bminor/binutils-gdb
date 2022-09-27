@@ -643,6 +643,8 @@ INSTALL_LIBBFD_TRUE
 MAINT
 MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
+HAVE_SFRAME_AS_FALSE
+HAVE_SFRAME_AS_TRUE
 HAVE_LD_VERSION_SCRIPT_FALSE
 HAVE_LD_VERSION_SCRIPT_TRUE
 HAVE_SOLARIS_LD_FALSE
@@ -11517,7 +11519,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11520 "configure"
+#line 11522 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11623,7 +11625,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11626 "configure"
+#line 11628 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12418,6 +12420,52 @@ fi
 
 
 
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking if as supports --gsframe" >&5
+$as_echo_n "checking if as supports --gsframe... " >&6; }
+if ${sframe_cv_have_sframe_as+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+    ac_save_CFLAGS="$CFLAGS"
+    CFLAGS="$CFLAGS -Wa,--gsframe"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for as that supports --gsframe" >&5
+$as_echo_n "checking for as that supports --gsframe... " >&6; }
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  sframe_cv_have_sframe_as=yes
+else
+  sframe_cv_have_sframe_as=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $sframe_cv_have_sframe_as" >&5
+$as_echo "$sframe_cv_have_sframe_as" >&6; }
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $sframe_cv_have_sframe_as" >&5
+$as_echo "$sframe_cv_have_sframe_as" >&6; }
+  CFLAGS="$ac_save_CFLAGS"
+
+ if test "x$sframe_cv_have_sframe_as" = "xyes"; then
+  HAVE_SFRAME_AS_TRUE=
+  HAVE_SFRAME_AS_FALSE='#'
+else
+  HAVE_SFRAME_AS_TRUE='#'
+  HAVE_SFRAME_AS_FALSE=
+fi
+
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable maintainer-specific portions of Makefiles" >&5
 $as_echo_n "checking whether to enable maintainer-specific portions of Makefiles... " >&6; }
     # Check whether --enable-maintainer-mode was given.
@@ -12903,6 +12951,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_LD_VERSION_SCRIPT_TRUE}" && test -z "${HAVE_LD_VERSION_SCRIPT_FALSE}"; then
   as_fn_error $? "conditional \"HAVE_LD_VERSION_SCRIPT\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${HAVE_SFRAME_AS_TRUE}" && test -z "${HAVE_SFRAME_AS_FALSE}"; then
+  as_fn_error $? "conditional \"HAVE_SFRAME_AS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${MAINTAINER_MODE_TRUE}" && test -z "${MAINTAINER_MODE_FALSE}"; then

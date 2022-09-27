@@ -107,11 +107,14 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@BUILD_INFO_TRUE@am__append_1 = doc/sframe-spec.texi
-@BUILD_INFO_TRUE@am__append_2 = texput.log
-@BUILD_INFO_TRUE@am__append_3 = doc/sframe-spec.info
+@HAVE_SFRAME_AS_TRUE@@INSTALL_LIBBFD_TRUE@am__append_1 = libsframebt.la
+@HAVE_SFRAME_AS_TRUE@@INSTALL_LIBBFD_TRUE@am__append_2 = $(INCDIR)/sframe-backtrace-api.h
+@HAVE_SFRAME_AS_TRUE@@INSTALL_LIBBFD_FALSE@am__append_3 = libsframebt.la
+@BUILD_INFO_TRUE@am__append_4 = doc/sframe-spec.texi
+@BUILD_INFO_TRUE@am__append_5 = texput.log
+@BUILD_INFO_TRUE@am__append_6 = doc/sframe-spec.info
 check_PROGRAMS = $(am__EXEEXT_1)
-@HAVE_COMPAT_DEJAGNU_TRUE@am__append_4 = testsuite/libsframe.decode/be-flipping \
+@HAVE_COMPAT_DEJAGNU_TRUE@am__append_7 = testsuite/libsframe.decode/be-flipping \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.decode/frecnt-1 \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.decode/frecnt-2 \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.encode/encode-1 \
@@ -131,7 +134,8 @@ am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
 	$(top_srcdir)/../config/warnings.m4 \
 	$(top_srcdir)/../libtool.m4 $(top_srcdir)/../ltoptions.m4 \
 	$(top_srcdir)/../ltsugar.m4 $(top_srcdir)/../ltversion.m4 \
-	$(top_srcdir)/../lt~obsolete.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/../lt~obsolete.m4 $(top_srcdir)/acinclude.m4 \
+	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -186,6 +190,20 @@ libsframe_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
 	$(libsframe_la_LDFLAGS) $(LDFLAGS) -o $@
 @INSTALL_LIBBFD_FALSE@am_libsframe_la_rpath =
 @INSTALL_LIBBFD_TRUE@am_libsframe_la_rpath = -rpath $(libdir)
+libsframebt_la_LIBADD =
+am__libsframebt_la_SOURCES_DIST = sframe-backtrace.c \
+	sframe-backtrace-err.c
+@HAVE_SFRAME_AS_TRUE@am_libsframebt_la_OBJECTS =  \
+@HAVE_SFRAME_AS_TRUE@	libsframebt_la-sframe-backtrace.lo \
+@HAVE_SFRAME_AS_TRUE@	libsframebt_la-sframe-backtrace-err.lo
+libsframebt_la_OBJECTS = $(am_libsframebt_la_OBJECTS)
+libsframebt_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC \
+	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CCLD) \
+	$(libsframebt_la_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o \
+	$@
+@HAVE_SFRAME_AS_TRUE@@INSTALL_LIBBFD_FALSE@am_libsframebt_la_rpath =
+@HAVE_SFRAME_AS_TRUE@@INSTALL_LIBBFD_TRUE@am_libsframebt_la_rpath =  \
+@HAVE_SFRAME_AS_TRUE@@INSTALL_LIBBFD_TRUE@	-rpath $(libdir)
 @HAVE_COMPAT_DEJAGNU_TRUE@am__EXEEXT_1 = testsuite/libsframe.decode/be-flipping$(EXEEXT) \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.decode/frecnt-1$(EXEEXT) \
 @HAVE_COMPAT_DEJAGNU_TRUE@	testsuite/libsframe.decode/frecnt-2$(EXEEXT) \
@@ -263,7 +281,7 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(libsframe_la_SOURCES) \
+SOURCES = $(libsframe_la_SOURCES) $(libsframebt_la_SOURCES) \
 	$(testsuite_libsframe_decode_be_flipping_SOURCES) \
 	$(testsuite_libsframe_decode_frecnt_1_SOURCES) \
 	$(testsuite_libsframe_decode_frecnt_2_SOURCES) \
@@ -272,6 +290,7 @@ SOURCES = $(libsframe_la_SOURCES) \
 	$(testsuite_libsframe_find_findfunc_1_SOURCES) \
 	$(testsuite_libsframe_find_plt_findfre_1_SOURCES)
 DIST_SOURCES = $(libsframe_la_SOURCES) \
+	$(am__libsframebt_la_SOURCES_DIST) \
 	$(testsuite_libsframe_decode_be_flipping_SOURCES) \
 	$(testsuite_libsframe_decode_frecnt_1_SOURCES) \
 	$(testsuite_libsframe_decode_frecnt_2_SOURCES) \
@@ -313,7 +332,7 @@ DVIS = doc/sframe-spec.dvi
 PDFS = doc/sframe-spec.pdf
 PSS = doc/sframe-spec.ps
 HTMLS = doc/sframe-spec.html
-TEXINFOS = $(am__append_1)
+TEXINFOS = $(am__append_4)
 TEXI2DVI = texi2dvi
 TEXI2PDF = $(TEXI2DVI) --pdf --batch
 MAKEINFOHTML = $(MAKEINFO) --html
@@ -324,7 +343,8 @@ am__can_run_installinfo = \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-am__include_HEADERS_DIST = $(INCDIR)/sframe.h $(INCDIR)/sframe-api.h
+am__include_HEADERS_DIST = $(INCDIR)/sframe-backtrace-api.h \
+	$(INCDIR)/sframe.h $(INCDIR)/sframe-api.h
 HEADERS = $(include_HEADERS)
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) \
 	$(LISP)config.h.in
@@ -516,9 +536,9 @@ ACLOCAL_AMFLAGS = -I .. -I ../config -I ../bfd
 AUTOMAKE_OPTIONS = dejagnu foreign no-texinfo.tex info-in-builddir subdir-objects
 
 # Variables that we might accumulate conditionally or in subdirs.
-info_TEXINFOS = $(am__append_1)
-DISTCLEANFILES = $(am__append_2)
-MAINTAINERCLEANFILES = $(am__append_3)
+info_TEXINFOS = $(am__append_4)
+DISTCLEANFILES = $(am__append_5)
+MAINTAINERCLEANFILES = $(am__append_6)
 INCDIR = $(srcdir)/../include
 # include libctf for swap.h
 AM_CPPFLAGS = -I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../libctf
@@ -529,14 +549,19 @@ libsframe_version_info = -version-info `grep -v '^\#' $(srcdir)/libtool-version`
 # not support symbol versioning, there is no need to fall back on libtool's
 # -export-symbols option.
 @HAVE_LD_VERSION_SCRIPT_TRUE@@HAVE_SOLARIS_LD_TRUE@libsframe_version_script = -Wl,-M -Wl,$(srcdir)/libsframe.ver
-@INSTALL_LIBBFD_TRUE@lib_LTLIBRARIES = libsframe.la
-@INSTALL_LIBBFD_FALSE@include_HEADERS = 
-@INSTALL_LIBBFD_TRUE@include_HEADERS = $(INCDIR)/sframe.h $(INCDIR)/sframe-api.h
-@INSTALL_LIBBFD_FALSE@noinst_LTLIBRARIES = libsframe.la
+@INSTALL_LIBBFD_TRUE@lib_LTLIBRARIES = libsframe.la $(am__append_1)
+@INSTALL_LIBBFD_FALSE@include_HEADERS = $(am__append_2)
+@INSTALL_LIBBFD_TRUE@include_HEADERS = $(INCDIR)/sframe.h \
+@INSTALL_LIBBFD_TRUE@	$(INCDIR)/sframe-api.h $(am__append_2)
+@INSTALL_LIBBFD_FALSE@noinst_LTLIBRARIES = libsframe.la \
+@INSTALL_LIBBFD_FALSE@	$(am__append_3)
 libsframe_la_SOURCES = sframe.c sframe-dump.c sframe-error.c
 libsframe_la_CPPFLAGS = $(AM_CPPFLAGS)
 libsframe_la_LDFLAGS = $(libsframe_version_info) $(libsframe_version_script)
 EXTRA_DIST = libtool-version libsframe.ver
+@HAVE_SFRAME_AS_TRUE@libsframebt_la_SOURCES = sframe-backtrace.c sframe-backtrace-err.c
+@HAVE_SFRAME_AS_TRUE@libsframebt_la_CPPFLAGS = -I$(srcdir) -I$(srcdir)/../include
+@HAVE_SFRAME_AS_TRUE@libsframebt_la_CFLAGS = -Wa,--gsframe
 @BUILD_INFO_TRUE@AM_MAKEINFOFLAGS = --no-split
 
 # Setup the testing framework
@@ -668,6 +693,9 @@ clean-noinstLTLIBRARIES:
 libsframe.la: $(libsframe_la_OBJECTS) $(libsframe_la_DEPENDENCIES) $(EXTRA_libsframe_la_DEPENDENCIES) 
 	$(AM_V_CCLD)$(libsframe_la_LINK) $(am_libsframe_la_rpath) $(libsframe_la_OBJECTS) $(libsframe_la_LIBADD) $(LIBS)
 
+libsframebt.la: $(libsframebt_la_OBJECTS) $(libsframebt_la_DEPENDENCIES) $(EXTRA_libsframebt_la_DEPENDENCIES) 
+	$(AM_V_CCLD)$(libsframebt_la_LINK) $(am_libsframebt_la_rpath) $(libsframebt_la_OBJECTS) $(libsframebt_la_LIBADD) $(LIBS)
+
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
 	echo " rm -f" $$list; \
@@ -756,6 +784,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsframe_la-sframe-dump.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsframe_la-sframe-error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsframe_la-sframe.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsframebt_la-sframe-backtrace-err.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libsframebt_la-sframe-backtrace.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@testsuite/libsframe.decode/$(DEPDIR)/testsuite_libsframe_decode_be_flipping-be-flipping.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@testsuite/libsframe.decode/$(DEPDIR)/testsuite_libsframe_decode_frecnt_1-frecnt-1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@testsuite/libsframe.decode/$(DEPDIR)/testsuite_libsframe_decode_frecnt_2-frecnt-2.Po@am__quote@
@@ -808,6 +838,20 @@ libsframe_la-sframe-error.lo: sframe-error.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sframe-error.c' object='libsframe_la-sframe-error.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsframe_la_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o libsframe_la-sframe-error.lo `test -f 'sframe-error.c' || echo '$(srcdir)/'`sframe-error.c
+
+libsframebt_la-sframe-backtrace.lo: sframe-backtrace.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsframebt_la_CPPFLAGS) $(CPPFLAGS) $(libsframebt_la_CFLAGS) $(CFLAGS) -MT libsframebt_la-sframe-backtrace.lo -MD -MP -MF $(DEPDIR)/libsframebt_la-sframe-backtrace.Tpo -c -o libsframebt_la-sframe-backtrace.lo `test -f 'sframe-backtrace.c' || echo '$(srcdir)/'`sframe-backtrace.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libsframebt_la-sframe-backtrace.Tpo $(DEPDIR)/libsframebt_la-sframe-backtrace.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sframe-backtrace.c' object='libsframebt_la-sframe-backtrace.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsframebt_la_CPPFLAGS) $(CPPFLAGS) $(libsframebt_la_CFLAGS) $(CFLAGS) -c -o libsframebt_la-sframe-backtrace.lo `test -f 'sframe-backtrace.c' || echo '$(srcdir)/'`sframe-backtrace.c
+
+libsframebt_la-sframe-backtrace-err.lo: sframe-backtrace-err.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsframebt_la_CPPFLAGS) $(CPPFLAGS) $(libsframebt_la_CFLAGS) $(CFLAGS) -MT libsframebt_la-sframe-backtrace-err.lo -MD -MP -MF $(DEPDIR)/libsframebt_la-sframe-backtrace-err.Tpo -c -o libsframebt_la-sframe-backtrace-err.lo `test -f 'sframe-backtrace-err.c' || echo '$(srcdir)/'`sframe-backtrace-err.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libsframebt_la-sframe-backtrace-err.Tpo $(DEPDIR)/libsframebt_la-sframe-backtrace-err.Plo
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='sframe-backtrace-err.c' object='libsframebt_la-sframe-backtrace-err.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libsframebt_la_CPPFLAGS) $(CPPFLAGS) $(libsframebt_la_CFLAGS) $(CFLAGS) -c -o libsframebt_la-sframe-backtrace-err.lo `test -f 'sframe-backtrace-err.c' || echo '$(srcdir)/'`sframe-backtrace-err.c
 
 testsuite/libsframe.decode/testsuite_libsframe_decode_be_flipping-be-flipping.o: testsuite/libsframe.decode/be-flipping.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(testsuite_libsframe_decode_be_flipping_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT testsuite/libsframe.decode/testsuite_libsframe_decode_be_flipping-be-flipping.o -MD -MP -MF testsuite/libsframe.decode/$(DEPDIR)/testsuite_libsframe_decode_be_flipping-be-flipping.Tpo -c -o testsuite/libsframe.decode/testsuite_libsframe_decode_be_flipping-be-flipping.o `test -f 'testsuite/libsframe.decode/be-flipping.c' || echo '$(srcdir)/'`testsuite/libsframe.decode/be-flipping.c

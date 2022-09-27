@@ -109,6 +109,13 @@ else
 fi
 AM_CONDITIONAL(HAVE_LD_VERSION_SCRIPT, test "$have_ld_version_script" = "yes")
 
+dnl The libsframebt library needs to be built with SFrame info.
+dnl If the build assembler is not capable of generate SFrame then
+dnl the library is not built.
+
+SFRAME_CHECK_HAVE_SFRAME_AS
+AM_CONDITIONAL([HAVE_SFRAME_AS], [test "x$sframe_cv_have_sframe_as" = "xyes"])
+
 AM_MAINTAINER_MODE
 AM_INSTALL_LIBBFD
 
