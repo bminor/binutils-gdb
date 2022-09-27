@@ -46,6 +46,7 @@ DEPMODE = @CCDEPMODE@
 DEPDIR = @DEPDIR@
 
 zlibdir = @zlibdir@
+ZSTD_LIBS = @ZSTD_LIBS@
 @PLUGINS_TRUE@LIBDL = @lt_cv_dlopen_libs@
 LIBINTL = @LIBINTL@
 LIBINTL_DEP = @LIBINTL_DEP@
