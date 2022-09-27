@@ -1927,7 +1927,6 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
   unsigned int things_printed = 0;
   unsigned len;
   struct type *elttype, *index_type;
-  unsigned eltlen;
   /* Position of the array element we are examining to see
      whether it is repeated.  */
   unsigned int rep1;
@@ -1938,7 +1937,9 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
   struct type *type = check_typedef (value_type (val));
 
   elttype = type->target_type ();
-  eltlen = type_length_units (check_typedef (elttype));
+  unsigned bit_stride = type->bit_stride ();
+  if (bit_stride == 0)
+    bit_stride = 8 * check_typedef (elttype)->length ();
   index_type = type->index_type ();
   if (index_type->code () == TYPE_CODE_RANGE)
     index_type = index_type->target_type ();
@@ -1987,23 +1988,28 @@ value_print_array_elements (struct value *val, struct ui_file *stream,
       maybe_print_array_index (index_type, i + low_bound,
 			       stream, options);
 
+      struct value *element = value_from_component_bitsize (val, elttype,
+							    bit_stride * i,
+							    bit_stride);
       rep1 = i + 1;
       reps = 1;
       /* Only check for reps if repeat_count_threshold is not set to
 	 UINT_MAX (unlimited).  */
       if (options->repeat_count_threshold < UINT_MAX)
 	{
-	  while (rep1 < len
-		 && value_contents_eq (val, i * eltlen,
-				       val, rep1 * eltlen,
-				       eltlen))
+	  while (rep1 < len)
 	    {
+	      struct value *rep_elt
+		= value_from_component_bitsize (val, elttype,
+						rep1 * bit_stride,
+						bit_stride);
+	      if (!value_contents_eq (element, rep_elt))
+		break;
 	      ++reps;
 	      ++rep1;
 	    }
 	}
 
-      struct value *element = value_from_component (val, elttype, eltlen * i);
       common_val_print (element, stream, recurse + 1, options,
 			current_language);
 

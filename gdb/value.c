@@ -916,6 +916,17 @@ value_contents_eq (const struct value *val1, LONGEST offset1,
 				 length * TARGET_CHAR_BIT);
 }
 
+/* See value.h.  */
+
+bool
+value_contents_eq (const struct value *val1, const struct value *val2)
+{
+  ULONGEST len1 = check_typedef (value_enclosing_type (val1))->length ();
+  ULONGEST len2 = check_typedef (value_enclosing_type (val2))->length ();
+  if (len1 != len2)
+    return false;
+  return value_contents_eq (val1, 0, val2, 0, len1);
+}
 
 /* The value-history records all the values printed by print commands
    during this session.  */
@@ -1363,6 +1374,43 @@ value_contents_copy_raw (struct value *dst, LONGEST dst_offset,
   dst_bit_offset = dst_offset * unit_size * HOST_CHAR_BIT;
   bit_length = length * unit_size * HOST_CHAR_BIT;
 
+  value_ranges_copy_adjusted (dst, dst_bit_offset,
+			      src, src_bit_offset,
+			      bit_length);
+}
+
+/* A helper for value_from_component_bitsize that copies bits from SRC
+   to DEST.  */
+
+static void
+value_contents_copy_raw_bitwise (struct value *dst, LONGEST dst_bit_offset,
+				 struct value *src, LONGEST src_bit_offset,
+				 LONGEST bit_length)
+{
+  /* A lazy DST would make that this copy operation useless, since as
+     soon as DST's contents were un-lazied (by a later value_contents
+     call, say), the contents would be overwritten.  A lazy SRC would
+     mean we'd be copying garbage.  */
+  gdb_assert (!dst->lazy && !src->lazy);
+
+  /* The overwritten DST range gets unavailability ORed in, not
+     replaced.  Make sure to remember to implement replacing if it
+     turns out actually necessary.  */
+  LONGEST dst_offset = dst_bit_offset / TARGET_CHAR_BIT;
+  LONGEST length = bit_length / TARGET_CHAR_BIT;
+  gdb_assert (value_bytes_available (dst, dst_offset, length));
+  gdb_assert (!value_bits_any_optimized_out (dst, dst_bit_offset,
+					     bit_length));
+
+  /* Copy the data.  */
+  gdb::array_view<gdb_byte> dst_contents = value_contents_all_raw (dst);
+  gdb::array_view<const gdb_byte> src_contents = value_contents_all_raw (src);
+  copy_bitwise (dst_contents.data (), dst_bit_offset,
+		src_contents.data (), src_bit_offset,
+		bit_length,
+		type_byte_order (value_type (src)) == BFD_ENDIAN_BIG);
+
+  /* Copy the meta-data.  */
   value_ranges_copy_adjusted (dst, dst_bit_offset,
 			      src, src_bit_offset,
 			      bit_length);
@@ -3771,6 +3819,37 @@ value_from_component (struct value *whole, struct type *type, LONGEST offset)
   v->offset = value_offset (whole) + offset + value_embedded_offset (whole);
   set_value_component_location (v, whole);
 
+  return v;
+}
+
+/* See value.h.  */
+
+struct value *
+value_from_component_bitsize (struct value *whole, struct type *type,
+			      LONGEST bit_offset, LONGEST bit_length)
+{
+  gdb_assert (!value_lazy (whole));
+
+  /* Preserve lvalue-ness if possible.  This is needed to avoid
+     array-printing failures (including crashes) when printing Ada
+     arrays in programs compiled with -fgnat-encodings=all.  */
+  if ((bit_offset % TARGET_CHAR_BIT) == 0
+      && (bit_length % TARGET_CHAR_BIT) == 0
+      && bit_length == TARGET_CHAR_BIT * type->length ())
+    return value_from_component (whole, type, bit_offset / TARGET_CHAR_BIT);
+
+  struct value *v = allocate_value (type);
+
+  LONGEST dst_offset = TARGET_CHAR_BIT * value_embedded_offset (v);
+  if (is_scalar_type (type) && type_byte_order (type) == BFD_ENDIAN_BIG)
+    dst_offset += TARGET_CHAR_BIT * type->length () - bit_length;
+
+  value_contents_copy_raw_bitwise (v, dst_offset,
+				   whole,
+				   TARGET_CHAR_BIT
+				   * value_embedded_offset (whole)
+				   + bit_offset,
+				   bit_length);
   return v;
 }
 

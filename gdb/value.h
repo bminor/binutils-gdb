@@ -599,6 +599,12 @@ extern bool value_contents_eq (const struct value *val1, LONGEST offset1,
 			       const struct value *val2, LONGEST offset2,
 			       LONGEST length);
 
+/* An overload of value_contents_eq that compares the entirety of both
+   values.  */
+
+extern bool value_contents_eq (const struct value *val1,
+			       const struct value *val2);
+
 /* Read LENGTH addressable memory units starting at MEMADDR into BUFFER,
    which is (or will be copied to) VAL's contents buffer offset by
    BIT_OFFSET bits.  Marks value contents ranges as unavailable if
@@ -686,6 +692,21 @@ extern struct value *value_from_host_double (struct type *type, double d);
 extern struct value *value_from_history_ref (const char *, const char **);
 extern struct value *value_from_component (struct value *, struct type *,
 					   LONGEST);
+
+
+/* Create a new value by extracting it from WHOLE.  TYPE is the type
+   of the new value.  BIT_OFFSET and BIT_LENGTH describe the offset
+   and field width of the value to extract from WHOLE -- BIT_LENGTH
+   may differ from TYPE's length in the case where WHOLE's type is
+   packed.
+
+   When the value does come from a non-byte-aligned offset or field
+   width, it will be marked non_lval.  */
+
+extern struct value *value_from_component_bitsize (struct value *whole,
+						   struct type *type,
+						   LONGEST bit_offset,
+						   LONGEST bit_length);
 
 extern struct value *value_at (struct type *type, CORE_ADDR addr);
 extern struct value *value_at_lazy (struct type *type, CORE_ADDR addr);
