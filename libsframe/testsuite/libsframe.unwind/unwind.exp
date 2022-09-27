@@ -1,0 +1,189 @@
+# Copyright (C) 2022 Free Software Foundation, Inc.
+#
+# This file is part of the GNU Binutils.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+# MA 02110-1301, USA.
+#
+
+# Run the tests only if sframebt library exists.
+
+if [catch "exec ls $objdir/.libs/libsframebt.la" status] then {
+  verbose -log "$objdir/.libs/libsframebt.la not found.";
+  verbose -log "Skipping SFrame unwind tests";
+  return;
+}
+
+proc run_unwind_test { name } {
+    global CC
+    global CFLAGS
+    global copyfile env runtests srcdir subdir verbose
+
+    # Append additional flags for unwinder to work properly
+    set unwind_cflags "-Wa,--gsframe -rdynamic "
+
+    if ![runtest_file_p $runtests $name] then {
+	return
+    }
+
+    if [string match "*/*" $name] {
+	set file $name
+	set name [file tail $name]
+    } else {
+	set file "$srcdir/$subdir/$name"
+    }
+
+    set opt_array [slurp_options "${file}.lk"]
+    if { $opt_array == -1 } {
+	perror "error reading options from $file.lk"
+	unresolved $subdir/$name
+	return
+    }
+    set run_ld 0
+    set shared "-shared"
+    set opts(cflags) {}
+    set opts(link) {}
+    set opts(link_flags) {}
+    set opts(nonshared) {}
+    set opts(unwind) {}
+    set opts(name) {}
+    set opts(source) {}
+    set opts(xfail) {}
+
+    foreach i $opt_array {
+	set opt_name [lindex $i 0]
+	set opt_val [lindex $i 1]
+	if { $opt_name == "" } {
+	    set in_extra 1
+	    continue
+	}
+	if ![info exists opts($opt_name)] {
+	    perror "unknown option $opt_name in file $file.lk"
+	    unresolved $subdir/$name
+	    return
+	}
+
+	set opts($opt_name) [concat $opts($opt_name) $opt_val]
+    }
+
+    if { [llength $opts(unwind)] == 0 } {
+	set opts(unwind) "$file.c"
+    } else {
+	set opts(unwind) "[file dirname $file]/$opts(unwind)"
+    }
+
+    if { [llength $opts(name)] == 0 } {
+	set opts(name) $opts(unwind)
+    }
+
+    if { [llength $opts(cflags)] != 0 } {
+	append unwind_cflags $opts(cflags)
+    }
+
+    if { [llength $opts(link)] != 0
+	 || [llength $opts(source)] > 1 } {
+	set run_ld 1
+    }
+
+    if { [llength $opts(nonshared)] != 0 } {
+	set shared ""
+    }
+
+    set testname $opts(name)
+    if { $opts(name) == "" } {
+	set testname "$subdir/$name"
+    }
+
+    # Compile and link the unwind program.
+    set comp_output [compile_link_one_host_cc $opts(unwind) "tmpdir/test_x" "./.libs/libsframebt.la ./.libs/libsframe.la"]
+
+    if { $comp_output != ""} {
+	send_log "compilation of unwind program $opts(unwind) failed with <$comp_output>"
+	perror "compilation of unwind program $opts(unwind) failed"
+	fail $testname
+	return 0
+    }
+
+    # Compile the inputs and posibly link them together.
+
+    set unwind ""
+    if { [llength $opts(source)] > 0 } {
+	set unwind ""
+	if { $run_ld } {
+	    set unwind_output "tmpdir/test_x ./.libs/libsframebt.a ./.libs/libsframe.a"
+	    # set unwind_output "tmpdir/out.so"
+	    # set unwind_flags "-fPIC $shared $opts(link_flags)"
+	} else {
+	    set unwind_output "tmpdir/out.o"
+	    # set unwind_flags "-fPIC -c"
+	}
+	if [board_info [target_info name] exists cflags] {
+	    append unwind_flags " [board_info [target_info name] cflags]"
+	}
+	if [board_info [target_info name] exists ldflags] {
+	    append unwind_flags " [board_info [target_info name] ldflags]"
+	}
+	set src {}
+	foreach sfile $opts(source) {
+	    if [is_remote host] {
+		lappend src [remote_download host [file join [file dirname $file] $sfile]]
+	    } else {
+		lappend src [file join [file dirname $file] $sfile]
+	    }
+	}
+
+	set comp_output [run_host_cmd "$CC" "$CFLAGS $unwind_cflags [concat $src] -o $unwind_output"]
+
+	if { $comp_output != ""} {
+	    send_log "compilation of SFrame test program [concat $src] failed with <$comp_output>"
+	    fail $testname
+	    return 0
+	}
+    }
+
+    # Time to setup xfailures.
+    foreach targ $opts(xfail) {
+	if [match_target $targ] {
+	    setup_xfail "*-*-*"
+	    break
+	}
+    }
+
+    # Invoke the unwind program on the outputs.
+
+    verbose -log "$srcdir"
+    set results [run_host_cmd tmpdir/test_x $unwind_output]
+
+    set f [open "tmpdir/test_x.out" "w"]
+    puts $f $results
+    close $f
+
+    if { [regexp_diff "tmpdir/test_x.out" "${file}.lk"] } then {
+	fail $testname
+	if { $verbose == 2 } then { verbose "output is [file_contents tmpdir/test_x.out]" 2 }
+	return 0
+    }
+
+    pass $testname
+    return 0
+}
+
+set sframe_test_list [lsort [glob -nocomplain $srcdir/$subdir/*.lk]]
+
+foreach sframe_test $sframe_test_list {
+    verbose [file rootname $sframe_test]
+    verbose running unwind test on $sframe_test
+    run_unwind_test [file rootname $sframe_test]
+}

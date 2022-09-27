@@ -52,3 +52,6 @@ if {![info exists CFLAGS]} {
 if {![info exists CFLAGS_FOR_TARGET]} {
     set CFLAGS_FOR_TARGET $CFLAGS
 }
+
+# load the utility procedures
+load_lib sframe-lib.exp

@@ -20,6 +20,8 @@ dnl
 
 AC_INIT([libsframe], BFD_VERSION)
 AC_CONFIG_SRCDIR(sframe.c)
+AC_CANONICAL_TARGET
+AC_CANONICAL_HOST
 AC_USE_SYSTEM_EXTENSIONS
 AM_INIT_AUTOMAKE
 AM_SILENT_RULES([yes])
@@ -108,6 +110,17 @@ else
   AC_MSG_WARN(*** Versioned symbols not enabled.)
 fi
 AM_CONDITIONAL(HAVE_LD_VERSION_SCRIPT, test "$have_ld_version_script" = "yes")
+
+dnl Determine if we are cross compiling
+
+is_cross_compiler=
+if test x"${host}" = x"${target}" ; then
+  is_cross_compiler=no
+else
+  is_cross_compiler=yes
+fi
+CROSS_COMPILE=$is_cross_compiler
+AC_SUBST([CROSS_COMPILE])
 
 dnl The libsframebt library needs to be built with SFrame info.
 dnl If the build assembler is not capable of generate SFrame then
