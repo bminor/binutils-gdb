@@ -2159,21 +2159,23 @@ ELF ABI.  Note - if compression would actually make a section
 @itemx --compress-debug-sections=zlib
 @itemx --compress-debug-sections=zlib-gnu
 @itemx --compress-debug-sections=zlib-gabi
+@itemx --compress-debug-sections=zstd
 For ELF files, these options control how DWARF debug sections are
 compressed.  @option{--compress-debug-sections=none} is equivalent
 to @option{--decompress-debug-sections}.
 @option{--compress-debug-sections=zlib} and
 @option{--compress-debug-sections=zlib-gabi} are equivalent to
 @option{--compress-debug-sections}.
-@option{--compress-debug-sections=zlib-gnu} compresses DWARF debug
-sections using zlib.  The debug sections are renamed to begin with
-@samp{.zdebug} instead of @samp{.debug}.  Note - if compression would
-actually make a section @emph{larger}, then it is not compressed nor
-renamed.
+@option{--compress-debug-sections=zlib-gnu} compresses DWARF debug sections
+using the obsoleted zlib-gnu format.  The debug sections are renamed to begin
+with @samp{.zdebug}.
+@option{--compress-debug-sections=zstd} compresses DWARF debug
+sections using zstd.  Note - if compression would actually make a section
+@emph{larger}, then it is not compressed nor renamed.
 
 @item --decompress-debug-sections
-Decompress DWARF debug sections using zlib.  The original section
-names of the compressed sections are restored.
+Decompress DWARF debug sections.  For a @samp{.zdebug} section, the original
+name is restored.
 
 @item --elf-stt-common=yes
 @itemx --elf-stt-common=no

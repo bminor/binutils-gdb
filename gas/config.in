@@ -134,6 +134,9 @@
 /* Define to 1 if you have the <windows.h> header file. */
 #undef HAVE_WINDOWS_H
 
+/* Define to 1 if zstd is enabled. */
+#undef HAVE_ZSTD
+
 /* Using i386 COFF? */
 #undef I386COFF
 

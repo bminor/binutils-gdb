@@ -2146,8 +2146,8 @@ elf_static_list_options (FILE *file)
   fprintf (file, _("\
   --package-metadata[=JSON]   Generate package metadata note\n"));
   fprintf (file, _("\
-  --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi]\n\
-                              Compress DWARF debug sections using zlib\n"));
+  --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi|zstd]\n\
+			      Compress DWARF debug sections\n"));
 #ifdef DEFAULT_FLAG_COMPRESS_DEBUG
   fprintf (file, _("\
                                 Default: zlib-gabi\n"));

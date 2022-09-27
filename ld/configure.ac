@@ -34,6 +34,7 @@ AC_PROG_GREP
 AC_GNU_SOURCE
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_INSTALL
+PKG_PROG_PKG_CONFIG
 
 LT_INIT
 ACX_LARGEFILE
@@ -377,9 +378,10 @@ if test $ld_cv_decl_getopt_unistd_h = yes; then
 	    [Is the prototype for getopt in <unistd.h> in the expected format?])
 fi
 
-# Link in zlib if we can.  This allows us to read and write
-# compressed CTF sections.
+# Link in zlib/zstd if we can.  This allows us to read and write
+# compressed debug sections.
 AM_ZLIB
+AC_ZSTD
 
 # When converting linker scripts into strings for use in emulation
 # files, use astring.sed if the compiler supports ANSI string

@@ -589,6 +589,9 @@
 /* Define to 1 if you have the `XML_StopParser' function. */
 #undef HAVE_XML_STOPPARSER
 
+/* Define to 1 if zstd is enabled. */
+#undef HAVE_ZSTD
+
 /* Define to 1 if your system has the _etext variable. */
 #undef HAVE__ETEXT
 

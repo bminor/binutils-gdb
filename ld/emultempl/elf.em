@@ -668,6 +668,15 @@ gld${EMULATION_NAME}_handle_option (int optc)
 	link_info.compress_debug = COMPRESS_DEBUG_GNU_ZLIB;
       else if (strcasecmp (optarg, "zlib-gabi") == 0)
 	link_info.compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
+      else if (strcasecmp (optarg, "zstd") == 0)
+	{
+#ifdef HAVE_ZSTD
+	  link_info.compress_debug = COMPRESS_DEBUG_ZSTD;
+#else
+	  einfo (_ ("%F%P: --compress-debug-sections=zstd: ld is not built "
+		    "with zstd support\n"));
+#endif
+	}
       else
 	einfo (_("%F%P: invalid --compress-debug-sections option: \`%s'\n"),
 	       optarg);

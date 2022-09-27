@@ -21,19 +21,19 @@
 #ifndef COMPRESS_DEBUG_H
 #define COMPRESS_DEBUG_H
 
+#include <stdbool.h>
+
 struct z_stream_s;
 
 /* Initialize the compression engine.  */
-extern struct z_stream_s *
-compress_init (void);
+extern void *compress_init (bool);
 
 /* Stream the contents of a frag to the compression engine.  Output
    from the engine goes into the current frag on the obstack.  */
-extern int
-compress_data (struct z_stream_s *, const char **, int *, char **, int *);
+extern int compress_data (bool, void *, const char **, int *, char **, int *);
 
 /* Finish the compression and consume the remaining compressed output.  */
 extern int
-compress_finish (struct z_stream_s *, char **, int *, int *);
+compress_finish (bool, void *, char **, int *, int *);
 
 #endif /* COMPRESS_DEBUG_H */

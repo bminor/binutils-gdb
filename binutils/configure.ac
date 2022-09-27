@@ -265,10 +265,11 @@ fi
 
 AC_CHECK_DECLS([asprintf, environ, getc_unlocked, stpcpy, strnlen])
 
-# Link in zlib if we can.  This allows us to read compressed debug
+# Link in zlib/zstd if we can.  This allows us to read compressed debug
 # sections.  This is used only by readelf.c (objdump uses bfd for
 # reading compressed sections).
 AM_ZLIB
+AC_ZSTD
 
 BFD_BINARY_FOPEN
 

@@ -1260,6 +1260,18 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 		 abfd, name);
 	      return false;
 	    }
+#ifndef HAVE_ZSTD
+	  if (newsect->compress_status == DECOMPRESS_SECTION_ZSTD)
+	    {
+	      _bfd_error_handler
+		  /* xgettext:c-format */
+		  (_ ("%pB: section %s is compressed with zstd, but BFD "
+		      "is not built with zstd support"),
+		   abfd, name);
+	      newsect->compress_status = COMPRESS_SECTION_NONE;
+	      return false;
+	    }
+#endif
 	}
 
       if (abfd->is_linker_input)

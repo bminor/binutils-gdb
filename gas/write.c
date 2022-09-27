@@ -1413,7 +1413,7 @@ write_relocs (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
 }
 
 static int
-compress_frag (struct z_stream_s *strm, const char *contents, int in_size,
+compress_frag (bool use_zstd, void *ctx, const char *contents, int in_size,
 	       fragS **last_newf, struct obstack *ob)
 {
   int out_size;
@@ -1442,10 +1442,10 @@ compress_frag (struct z_stream_s *strm, const char *contents, int in_size,
 	as_fatal (_("can't extend frag"));
       next_out = obstack_next_free (ob);
       obstack_blank_fast (ob, avail_out);
-      out_size = compress_data (strm, &contents, &in_size,
-				&next_out, &avail_out);
+      out_size = compress_data (use_zstd, ctx, &contents, &in_size, &next_out,
+				&avail_out);
       if (out_size < 0)
-        return -1;
+	return -1;
 
       f->fr_fix += out_size;
       total_out_size += out_size;
@@ -1471,7 +1471,6 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   const char *section_name;
   char *compressed_name;
   char *header;
-  struct z_stream_s *strm;
   int x;
   flagword flags = bfd_section_flags (sec);
   unsigned int header_size, compression_header_size;
@@ -1485,20 +1484,21 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   if (!startswith (section_name, ".debug_"))
     return;
 
-  strm = compress_init ();
-  if (strm == NULL)
+  bool use_zstd = abfd->flags & BFD_COMPRESS_ZSTD;
+  void *ctx = compress_init (use_zstd);
+  if (ctx == NULL)
     return;
 
-  if (flag_compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
+  if (flag_compress_debug == COMPRESS_DEBUG_GNU_ZLIB)
+    {
+      compression_header_size = 0;
+      header_size = 12;
+    }
+  else
     {
       compression_header_size
 	= bfd_get_compression_header_size (stdoutput, NULL);
       header_size = compression_header_size;
-    }
-  else
-    {
-      compression_header_size = 0;
-      header_size = 12;
     }
 
   /* Create a new frag to contain the compression header.  */
@@ -1531,7 +1531,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
       gas_assert (f->fr_type == rs_fill);
       if (f->fr_fix)
 	{
-	  out_size = compress_frag (strm, f->fr_literal, f->fr_fix,
+	  out_size = compress_frag (use_zstd, ctx, f->fr_literal, f->fr_fix,
 				    &last_newf, ob);
 	  if (out_size < 0)
 	    return;
@@ -1545,8 +1545,8 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	{
 	  while (count--)
 	    {
-	      out_size = compress_frag (strm, fill_literal, (int) fill_size,
-				        &last_newf, ob);
+	      out_size = compress_frag (use_zstd, ctx, fill_literal,
+					(int)fill_size, &last_newf, ob);
 	      if (out_size < 0)
 		return;
 	      compressed_size += out_size;
@@ -1579,7 +1579,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 	as_fatal (_("can't extend frag"));
       next_out = obstack_next_free (ob);
       obstack_blank_fast (ob, avail_out);
-      x = compress_finish (strm, &next_out, &avail_out, &out_size);
+      x = compress_finish (use_zstd, ctx, &next_out, &avail_out, &out_size);
       if (x < 0)
 	return;
 
@@ -2540,6 +2540,8 @@ write_object_file (void)
     {
       if (flag_compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
 	stdoutput->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI;
+      else if (flag_compress_debug == COMPRESS_DEBUG_ZSTD)
+	stdoutput->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI | BFD_COMPRESS_ZSTD;
       else
 	stdoutput->flags |= BFD_COMPRESS;
       bfd_map_over_sections (stdoutput, compress_debug, (char *) 0);

@@ -232,7 +232,8 @@ static enum
   compress_zlib = compress | 1 << 1,
   compress_gnu_zlib = compress | 1 << 2,
   compress_gabi_zlib = compress | 1 << 3,
-  decompress = 1 << 4
+  compress_zstd = compress | 1 << 4,
+  decompress = 1 << 5
 } do_debug_sections = nothing;
 
 /* Whether to generate ELF common symbols with the STT_COMMON type.  */
@@ -678,8 +679,8 @@ copy_usage (FILE *stream, int exit_status)
                                    <commit>\n\
      --subsystem <name>[:<version>]\n\
                                    Set PE subsystem to <name> [& <version>]\n\
-     --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi}]\n\
-                                   Compress DWARF debug sections using zlib\n\
+     --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi|zstd}]\n\
+				   Compress DWARF debug sections\n\
      --decompress-debug-sections   Decompress DWARF debug sections using zlib\n\
      --elf-stt-common=[yes|no]     Generate ELF common symbols with STT_COMMON\n\
                                      type\n\
@@ -2659,7 +2660,8 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       if ((do_debug_sections & compress) != 0
 	  && do_debug_sections != compress)
 	{
-	  non_fatal (_("--compress-debug-sections=[zlib|zlib-gnu|zlib-gabi] is unsupported on `%s'"),
+	  non_fatal (_ ("--compress-debug-sections=[zlib|zlib-gnu|zlib-gabi|"
+			"zstd] is unsupported on `%s'"),
 		     bfd_get_archive_filename (ibfd));
 	  return false;
 	}
@@ -3806,6 +3808,13 @@ copy_file (const char *input_filename, const char *output_filename, int ofd,
 	 only available after bfd_check_format_matches is called.  */
       if (do_debug_sections != compress_gnu_zlib)
 	ibfd->flags |= BFD_COMPRESS_GABI;
+      break;
+    case compress_zstd:
+      ibfd->flags |= BFD_COMPRESS | BFD_COMPRESS_GABI | BFD_COMPRESS_ZSTD;
+#ifndef HAVE_ZSTD
+      fatal (_ ("--compress-debug-sections=zstd: binutils is not built with "
+		"zstd support"));
+#endif
       break;
     case decompress:
       ibfd->flags |= BFD_DECOMPRESS;
@@ -5469,6 +5478,8 @@ copy_main (int argc, char *argv[])
 		do_debug_sections = compress_gnu_zlib;
 	      else if (strcasecmp (optarg, "zlib-gabi") == 0)
 		do_debug_sections = compress_gabi_zlib;
+	      else if (strcasecmp (optarg, "zstd") == 0)
+		do_debug_sections = compress_zstd;
 	      else
 		fatal (_("unrecognized --compress-debug-sections type `%s'"),
 		       optarg);

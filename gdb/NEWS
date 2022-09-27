@@ -57,6 +57,8 @@
 
 * The Windows native target now supports target async.
 
+* gdb now supports zstd compressed debug sections (ELFCOMPRESS_ZSTD) for ELF.
+
 * New commands
 
 maintenance set ignore-prologue-end-flag on|off

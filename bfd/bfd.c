@@ -177,12 +177,15 @@ CODE_FRAGMENT
 .#define BFD_ARCHIVE_FULL_PATH  0x100000
 .
 .#define BFD_CLOSED_BY_CACHE    0x200000
+
+.  {* Compress sections in this BFD with SHF_COMPRESSED zstd.  *}
+.#define BFD_COMPRESS_ZSTD      0x400000
 .
 .  {* Flags bits to be saved in bfd_preserve_save.  *}
 .#define BFD_FLAGS_SAVED \
 .  (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_LINKER_CREATED \
 .   | BFD_PLUGIN | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON \
-.   | BFD_USE_ELF_STT_COMMON)
+.   | BFD_USE_ELF_STT_COMMON | BFD_COMPRESS_ZSTD)
 .
 .  {* Flags bits which are for BFD use only.  *}
 .#define BFD_FLAGS_FOR_BFD_USE_MASK \
@@ -2500,6 +2503,9 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 	{
 	  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 	  struct bfd_elf_section_data * esd = elf_section_data (sec);
+	  const unsigned int ch_type = abfd->flags & BFD_COMPRESS_ZSTD
+					   ? ELFCOMPRESS_ZSTD
+					   : ELFCOMPRESS_ZLIB;
 
 	  /* Set the SHF_COMPRESSED bit.  */
 	  elf_section_flags (sec) |= SHF_COMPRESSED;
@@ -2507,7 +2513,7 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 	  if (bed->s->elfclass == ELFCLASS32)
 	    {
 	      Elf32_External_Chdr *echdr = (Elf32_External_Chdr *) contents;
-	      bfd_put_32 (abfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+	      bfd_put_32 (abfd, ch_type, &echdr->ch_type);
 	      bfd_put_32 (abfd, sec->size, &echdr->ch_size);
 	      bfd_put_32 (abfd, 1u << sec->alignment_power,
 			  &echdr->ch_addralign);
@@ -2518,7 +2524,7 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
 	  else
 	    {
 	      Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) contents;
-	      bfd_put_32 (abfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+	      bfd_put_32 (abfd, ch_type, &echdr->ch_type);
 	      bfd_put_32 (abfd, 0, &echdr->ch_reserved);
 	      bfd_put_64 (abfd, sec->size, &echdr->ch_size);
 	      bfd_put_64 (abfd, UINT64_C (1) << sec->alignment_power,
@@ -2553,14 +2559,15 @@ bfd_update_compression_header (bfd *abfd, bfd_byte *contents,
    SYNOPSIS
 	bool bfd_check_compression_header
 	  (bfd *abfd, bfd_byte *contents, asection *sec,
+	  unsigned int *ch_type,
 	  bfd_size_type *uncompressed_size,
 	  unsigned int *uncompressed_alignment_power);
 
 DESCRIPTION
-	Check the compression header at CONTENTS of SEC in ABFD and
-	store the uncompressed size in UNCOMPRESSED_SIZE and the
-	uncompressed data alignment in UNCOMPRESSED_ALIGNMENT_POWER
-	if the compression header is valid.
+	Check the compression header at CONTENTS of SEC in ABFD and store the
+	ch_type in CH_TYPE, uncompressed size in UNCOMPRESSED_SIZE, and the
+	uncompressed data alignment in UNCOMPRESSED_ALIGNMENT_POWER if the
+	compression header is valid.
 
 RETURNS
 	Return TRUE if the compression header is valid.
@@ -2569,6 +2576,7 @@ RETURNS
 bool
 bfd_check_compression_header (bfd *abfd, bfd_byte *contents,
 			      asection *sec,
+			      unsigned int *ch_type,
 			      bfd_size_type *uncompressed_size,
 			      unsigned int *uncompressed_alignment_power)
 {
@@ -2591,7 +2599,9 @@ bfd_check_compression_header (bfd *abfd, bfd_byte *contents,
 	  chdr.ch_size = bfd_get_64 (abfd, &echdr->ch_size);
 	  chdr.ch_addralign = bfd_get_64 (abfd, &echdr->ch_addralign);
 	}
-      if (chdr.ch_type == ELFCOMPRESS_ZLIB
+      *ch_type = chdr.ch_type;
+      if ((chdr.ch_type == ELFCOMPRESS_ZLIB
+	   || chdr.ch_type == ELFCOMPRESS_ZSTD)
 	  && chdr.ch_addralign == (chdr.ch_addralign & -chdr.ch_addralign))
 	{
 	  *uncompressed_size = chdr.ch_size;

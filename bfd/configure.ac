@@ -230,9 +230,10 @@ AC_CHECK_DECLS([basename, ffs, stpcpy, asprintf, vasprintf, strnlen])
 
 BFD_BINARY_FOPEN
 
-# Link in zlib if we can.  This allows us to read compressed debug sections.
+# Link in zlib/zstd if we can.  This allows us to read compressed debug sections.
 # This is used only by compress.c.
 AM_ZLIB
+AC_ZSTD
 
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -Werror"

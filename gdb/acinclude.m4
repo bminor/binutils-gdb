@@ -43,6 +43,7 @@ m4_include([../config/lib-link.m4])
 m4_include([../config/iconv.m4])
 
 m4_include([../config/zlib.m4])
+m4_include([../config/zstd.m4])
 
 m4_include([../gdbsupport/common.m4])
 
@@ -233,7 +234,7 @@ AC_DEFUN([GDB_AC_CHECK_BFD], [
   # always want our bfd.
   CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
   ZLIBDIR=`echo $zlibdir | sed 's,\$(top_builddir)/,,g'`
-  LDFLAGS="-L../bfd -L../libiberty $ZLIBDIR $LDFLAGS"
+  LDFLAGS="-L../bfd -L../libiberty $ZLIBDIR $ZSTD_LIBS $LDFLAGS"
   intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
   LIBS="-lbfd -liberty -lz $intl $LIBS"
   AC_CACHE_CHECK(

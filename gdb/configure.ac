@@ -460,8 +460,10 @@ AC_SEARCH_LIBS(gethostbyname, nsl)
 # Some systems (e.g. Solaris) have `socketpair' in libsocket.
 AC_SEARCH_LIBS(socketpair, socket)
 
-# Link in zlib if we can.  This allows us to read compressed debug sections.
+# Link in zlib/zstd if we can.  This allows us to read compressed debug
+# sections.
 AM_ZLIB
+AC_ZSTD
 
 AM_ICONV
 

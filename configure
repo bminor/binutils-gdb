@@ -785,6 +785,7 @@ ac_user_opts='
 enable_option_checking
 with_build_libsubdir
 with_system_zlib
+with_zstd
 enable_as_accelerator_for
 enable_offload_targets
 enable_gold
@@ -1567,6 +1568,8 @@ Optional Packages:
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-build-libsubdir=DIR  Directory where to find libraries for build system
   --with-system-zlib      use installed libz
+  --with-zstd             Support zstd compressed debug sections
+                          (default=auto)
   --with-mpc=PATH         specify prefix directory for installed MPC package.
                           Equivalent to --with-mpc-include=PATH/include plus
                           --with-mpc-lib=PATH/lib
@@ -2924,6 +2927,13 @@ if test x$with_system_zlib = xyes ; then
   use_included_zlib=no
   noconfigdirs="$noconfigdirs zlib"
 fi
+
+
+# Check whether --with-zstd was given.
+if test "${with_zstd+set}" = set; then :
+  withval=$with_zstd;
+fi
+
 
 # Don't compile the bundled readline/libreadline.a if --with-system-readline
 # is provided.

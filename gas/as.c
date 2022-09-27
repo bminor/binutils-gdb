@@ -252,14 +252,14 @@ Options:\n\
   --alternate             initially turn on alternate macro syntax\n"));
 #ifdef DEFAULT_FLAG_COMPRESS_DEBUG
   fprintf (stream, _("\
-  --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi}]\n\
+  --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi|zstd}]\n\
                           compress DWARF debug sections using zlib [default]\n"));
   fprintf (stream, _("\
   --nocompress-debug-sections\n\
                           don't compress DWARF debug sections\n"));
 #else
   fprintf (stream, _("\
-  --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi}]\n\
+  --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi|zstd}]\n\
                           compress DWARF debug sections using zlib\n"));
   fprintf (stream, _("\
   --nocompress-debug-sections\n\
@@ -736,6 +736,15 @@ This program has absolutely no warranty.\n"));
 		flag_compress_debug = COMPRESS_DEBUG_GNU_ZLIB;
 	      else if (strcasecmp (optarg, "zlib-gabi") == 0)
 		flag_compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
+	      else if (strcasecmp (optarg, "zstd") == 0)
+		{
+#ifdef HAVE_ZSTD
+		  flag_compress_debug = COMPRESS_DEBUG_ZSTD;
+#else
+		  as_fatal (_ ("--compress-debug-sections=zstd: gas is not "
+			       "built with zstd support"));
+#endif
+		}
 	      else
 		as_fatal (_("Invalid --compress-debug-sections option: `%s'"),
 			  optarg);

@@ -506,8 +506,12 @@ main (int argc, char **argv)
   if ((link_info.compress_debug & COMPRESS_DEBUG))
     {
       link_info.output_bfd->flags |= BFD_COMPRESS;
-      if (link_info.compress_debug == COMPRESS_DEBUG_GABI_ZLIB)
-	link_info.output_bfd->flags |= BFD_COMPRESS_GABI;
+      if (link_info.compress_debug != COMPRESS_DEBUG_GNU_ZLIB)
+	{
+	  link_info.output_bfd->flags |= BFD_COMPRESS_GABI;
+	  if (link_info.compress_debug == COMPRESS_DEBUG_ZSTD)
+	    link_info.output_bfd->flags |= BFD_COMPRESS_ZSTD;
+	}
     }
 
   ldwrite ();

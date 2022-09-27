@@ -157,6 +157,9 @@
 /* Define to 1 if you have the <windows.h> header file. */
 #undef HAVE_WINDOWS_H
 
+/* Define to 1 if zstd is enabled. */
+#undef HAVE_ZSTD
+
 /* Define as const if the declaration of iconv() needs const. */
 #undef ICONV_CONST
 

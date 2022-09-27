@@ -342,7 +342,8 @@ enum compressed_debug_section_type
   COMPRESS_DEBUG_NONE = 0,
   COMPRESS_DEBUG = 1 << 0,
   COMPRESS_DEBUG_GNU_ZLIB = COMPRESS_DEBUG | 1 << 1,
-  COMPRESS_DEBUG_GABI_ZLIB = COMPRESS_DEBUG | 1 << 2
+  COMPRESS_DEBUG_GABI_ZLIB = COMPRESS_DEBUG | 1 << 2,
+  COMPRESS_DEBUG_ZSTD = COMPRESS_DEBUG | 1 << 3
 };
 
 /* This structure is used to keep track of stabs in sections

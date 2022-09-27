@@ -161,6 +161,10 @@ foreach flags $test_flags {
 	set extralibs "$extralibs -lz"
     }
 
+    if { [lindex [remote_exec build grep "-q \"HAVE_ZSTD 1\" config.h" ] 0] == 0 } then {
+	set extralibs "$extralibs -lzstd"
+    }
+
     # Check if the system's jansson library is used. If so, the object files will
     # be using symbols from it, so link to it.
     if { [lindex [remote_exec build grep "-q \"HAVE_JANSSON 1\" config.h" ] 0] == 0 } then {

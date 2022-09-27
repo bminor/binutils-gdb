@@ -349,7 +349,8 @@ enum compressed_debug_section_type
   COMPRESS_DEBUG_NONE = 0,
   COMPRESS_DEBUG = 1 << 0,
   COMPRESS_DEBUG_GNU_ZLIB = COMPRESS_DEBUG | 1 << 1,
-  COMPRESS_DEBUG_GABI_ZLIB = COMPRESS_DEBUG | 1 << 2
+  COMPRESS_DEBUG_GABI_ZLIB = COMPRESS_DEBUG | 1 << 2,
+  COMPRESS_DEBUG_ZSTD = COMPRESS_DEBUG | 1 << 3
 };
 
 /* This structure is used to keep track of stabs in sections
@@ -962,7 +963,8 @@ typedef struct bfd_section
   unsigned int compress_status : 2;
 #define COMPRESS_SECTION_NONE    0
 #define COMPRESS_SECTION_DONE    1
-#define DECOMPRESS_SECTION_SIZED 2
+#define DECOMPRESS_SECTION_ZLIB  2
+#define DECOMPRESS_SECTION_ZSTD  3
 
   /* The following flags are used by the ELF linker. */
 
@@ -6637,12 +6639,14 @@ struct bfd
 #define BFD_ARCHIVE_FULL_PATH  0x100000
 
 #define BFD_CLOSED_BY_CACHE    0x200000
+  /* Compress sections in this BFD with SHF_COMPRESSED zstd.  */
+#define BFD_COMPRESS_ZSTD      0x400000
 
   /* Flags bits to be saved in bfd_preserve_save.  */
 #define BFD_FLAGS_SAVED \
   (BFD_IN_MEMORY | BFD_COMPRESS | BFD_DECOMPRESS | BFD_LINKER_CREATED \
    | BFD_PLUGIN | BFD_COMPRESS_GABI | BFD_CONVERT_ELF_COMMON \
-   | BFD_USE_ELF_STT_COMMON)
+   | BFD_USE_ELF_STT_COMMON | BFD_COMPRESS_ZSTD)
 
   /* Flags bits which are for BFD use only.  */
 #define BFD_FLAGS_FOR_BFD_USE_MASK \
@@ -7271,6 +7275,7 @@ void bfd_update_compression_header
 
 bool bfd_check_compression_header
    (bfd *abfd, bfd_byte *contents, asection *sec,
+    unsigned int *ch_type,
     bfd_size_type *uncompressed_size,
     unsigned int *uncompressed_alignment_power);
 

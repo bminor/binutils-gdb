@@ -1,5 +1,8 @@
 -*- text -*-
 
+* ld now supports zstd compressed debug sections.  The new option
+  --compress-debug-sections=zstd compresses debug sections with zstd.
+
 Changes in 2.39:
 
 * The ELF linker will now generate a warning message if the stack is made

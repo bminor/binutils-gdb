@@ -1004,8 +1004,9 @@ AC_CHECK_DECLS([asprintf, mempcpy, stpcpy])
 
 BFD_BINARY_FOPEN
 
-# Link in zlib if we can.  This allows us to write compressed debug sections.
+# Link in zlib/zstd if we can.  This allows us to write compressed debug sections.
 AM_ZLIB
+AC_ZSTD
 
 # Support for VMS timestamps via cross compile
 

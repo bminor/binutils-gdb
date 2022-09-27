@@ -1,5 +1,11 @@
 -*- text -*-
 
+* objcopy --decompress-debug-sections now supports zstd compressed debug
+  sections.  The new option --compress-debug-sections=zstd compresses debug
+  sections with zstd.
+
+* addr2line and objdump --dwarf now support zstd compressed debug sections.
+
 * The dlltool program now accepts --deterministic-libraries and
   --non-deterministic-libraries as command line options to control whether or
   not it generates deterministic output libraries.  If neither of these options

@@ -392,7 +392,8 @@ CODE_FRAGMENT
 .  unsigned int compress_status : 2;
 .#define COMPRESS_SECTION_NONE    0
 .#define COMPRESS_SECTION_DONE    1
-.#define DECOMPRESS_SECTION_SIZED 2
+.#define DECOMPRESS_SECTION_ZLIB  2
+.#define DECOMPRESS_SECTION_ZSTD  3
 .
 .  {* The following flags are used by the ELF linker. *}
 .

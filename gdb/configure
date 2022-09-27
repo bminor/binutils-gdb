@@ -747,6 +747,8 @@ READLINE_DEPS
 READLINE
 LTLIBICONV
 LIBICONV
+ZSTD_LIBS
+ZSTD_CFLAGS
 zlibinc
 zlibdir
 MIG
@@ -893,6 +895,7 @@ enable_codesign
 with_pkgversion
 with_bugurl
 with_system_zlib
+with_zstd
 with_gnu_ld
 enable_rpath
 with_libiconv_prefix
@@ -961,6 +964,8 @@ DEBUGINFOD_CFLAGS
 DEBUGINFOD_LIBS
 YACC
 YFLAGS
+ZSTD_CFLAGS
+ZSTD_LIBS
 XMKMF'
 ac_subdirs_all='testsuite
 gdbtk'
@@ -1641,6 +1646,8 @@ Optional Packages:
   --with-pkgversion=PKG   Use PKG in the version string in place of "GDB"
   --with-bugurl=URL       Direct users to URL to report a bug
   --with-system-zlib      use installed libz
+  --with-zstd             support zstd compressed debug sections
+                          (default=auto)
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-libiconv-prefix[=DIR]  search for libiconv in DIR/include and DIR/lib
   --without-libiconv-prefix     don't search for libiconv in includedir and libdir
@@ -1721,6 +1728,8 @@ Some influential environment variables:
   YFLAGS      The list of arguments that will be passed by default to $YACC.
               This script will default YFLAGS to the empty string to avoid a
               default value of `-d' given by some make applications.
+  ZSTD_CFLAGS C compiler flags for ZSTD, overriding pkg-config
+  ZSTD_LIBS   linker flags for ZSTD, overriding pkg-config
   XMKMF       Path to xmkmf, Makefile generator for X Window System
 
 Use these variables to override the choices made by `configure' or to help
@@ -8242,7 +8251,8 @@ if test "$ac_res" != no; then :
 fi
 
 
-# Link in zlib if we can.  This allows us to read compressed debug sections.
+# Link in zlib/zstd if we can.  This allows us to read compressed debug
+# sections.
 
   # Use the system's zlib library.
   zlibdir="-L\$(top_builddir)/../zlib"
@@ -8259,6 +8269,127 @@ fi
 
 
 
+
+
+
+# Check whether --with-zstd was given.
+if test "${with_zstd+set}" = set; then :
+  withval=$with_zstd;
+else
+  with_zstd=auto
+fi
+
+
+if test "$with_zstd" != no; then :
+
+pkg_failed=no
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for libzstd" >&5
+$as_echo_n "checking for libzstd... " >&6; }
+
+if test -n "$ZSTD_CFLAGS"; then
+    pkg_cv_ZSTD_CFLAGS="$ZSTD_CFLAGS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libzstd\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libzstd") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_ZSTD_CFLAGS=`$PKG_CONFIG --cflags "libzstd" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+if test -n "$ZSTD_LIBS"; then
+    pkg_cv_ZSTD_LIBS="$ZSTD_LIBS"
+ elif test -n "$PKG_CONFIG"; then
+    if test -n "$PKG_CONFIG" && \
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"libzstd\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "libzstd") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }; then
+  pkg_cv_ZSTD_LIBS=`$PKG_CONFIG --libs "libzstd" 2>/dev/null`
+		      test "x$?" != "x0" && pkg_failed=yes
+else
+  pkg_failed=yes
+fi
+ else
+    pkg_failed=untried
+fi
+
+if test $pkg_failed = no; then
+  pkg_save_LDFLAGS="$LDFLAGS"
+  LDFLAGS="$LDFLAGS $pkg_cv_ZSTD_LIBS"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+
+else
+  pkg_failed=yes
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+  LDFLAGS=$pkg_save_LDFLAGS
+fi
+
+
+
+if test $pkg_failed = yes; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+if $PKG_CONFIG --atleast-pkgconfig-version 0.20; then
+        _pkg_short_errors_supported=yes
+else
+        _pkg_short_errors_supported=no
+fi
+        if test $_pkg_short_errors_supported = yes; then
+	        ZSTD_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "libzstd" 2>&1`
+        else
+	        ZSTD_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "libzstd" 2>&1`
+        fi
+	# Put the nasty error message in config.log where it belongs
+	echo "$ZSTD_PKG_ERRORS" >&5
+
+
+    if test "$with_zstd" = yes; then
+      as_fn_error $? "--with-zstd was given, but pkgconfig/libzstd.pc is not found" "$LINENO" 5
+    fi
+
+elif test $pkg_failed = untried; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+
+    if test "$with_zstd" = yes; then
+      as_fn_error $? "--with-zstd was given, but pkgconfig/libzstd.pc is not found" "$LINENO" 5
+    fi
+
+else
+	ZSTD_CFLAGS=$pkg_cv_ZSTD_CFLAGS
+	ZSTD_LIBS=$pkg_cv_ZSTD_LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+
+
+$as_echo "#define HAVE_ZSTD 1" >>confdefs.h
+
+
+fi
+
+fi
 
 
 
@@ -17281,7 +17412,7 @@ WIN32LIBS="$WIN32LIBS $WIN32APILIBS"
   # always want our bfd.
   CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
   ZLIBDIR=`echo $zlibdir | sed 's,\$(top_builddir)/,,g'`
-  LDFLAGS="-L../bfd -L../libiberty $ZLIBDIR $LDFLAGS"
+  LDFLAGS="-L../bfd -L../libiberty $ZLIBDIR $ZSTD_LIBS $LDFLAGS"
   intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
   LIBS="-lbfd -liberty -lz $intl $LIBS"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ELF support in BFD" >&5
@@ -17396,7 +17527,7 @@ fi
   # always want our bfd.
   CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
   ZLIBDIR=`echo $zlibdir | sed 's,\$(top_builddir)/,,g'`
-  LDFLAGS="-L../bfd -L../libiberty $ZLIBDIR $LDFLAGS"
+  LDFLAGS="-L../bfd -L../libiberty $ZLIBDIR $ZSTD_LIBS $LDFLAGS"
   intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
   LIBS="-lbfd -liberty -lz $intl $LIBS"
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Mach-O support in BFD" >&5
