@@ -56,6 +56,18 @@ libsframe_la_LDFLAGS = $(libsframe_version_info) $(libsframe_version_script)
 EXTRA_DIST = libtool-version libsframe.ver
 diststuff: $(EXTRA_DIST) info
 
+if HAVE_SFRAME_AS
+  libsframebt_la_SOURCES = sframe-backtrace.c sframe-backtrace-err.c
+  libsframebt_la_CPPFLAGS = -I$(srcdir) -I$(srcdir)/../include
+  libsframebt_la_CFLAGS = -Wa,--gsframe
+if INSTALL_LIBBFD
+  lib_LTLIBRARIES += libsframebt.la
+  include_HEADERS += $(INCDIR)/sframe-backtrace-api.h
+else
+  noinst_LTLIBRARIES += libsframebt.la
+endif
+endif
+
 include doc/local.mk
 
 include testsuite/local.mk
