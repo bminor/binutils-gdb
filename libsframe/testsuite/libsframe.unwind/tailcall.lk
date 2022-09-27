@@ -1,0 +1,3 @@
+# source: tailcall.c
+# link: on
+PASS: tailcall test

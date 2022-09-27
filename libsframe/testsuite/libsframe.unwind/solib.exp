@@ -1,0 +1,70 @@
+# Copyright 2022 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Run the test only if sframebt library exists.
+if [catch "exec ls $objdir/.libs/libsframebt.la" status] then {
+  return;
+}
+
+set experimental ""
+
+# Shared object files.
+set libname1 "solib-lib1"
+set srcfile_lib1 ${srcdir}/${subdir}/${libname1}.c
+set binfile_lib1 ${objdir}/${libname1}.so
+set libname2 "solib-lib2"
+set srcfile_lib2 ${srcdir}/${subdir}/${libname2}.c
+set binfile_lib2 ${objdir}/${libname2}.so
+
+# Binary file.
+set testfile "solib-main"
+set srcfile ${srcdir}/${subdir}/${testfile}.c
+set binfile [standard_output_file ${testfile}]
+set bin_flags [list debug shlib=${binfile_lib1} shlib=${binfile_lib2}]
+
+if { [unwind_compile_so ${srcfile_lib1} ${binfile_lib1}] != ""
+     || [unwind_compile_so ${srcfile_lib2} ${binfile_lib2}] != ""
+     || [unwind_compile ${srcfile} ${binfile} executable $bin_flags] != "" } {
+    untested "failed to compile"
+    return -1
+}
+
+if {[info exists env(LD_LIBRARY_PATH)]} {
+    set old_ld_lib $env(LD_LIBRARY_PATH)
+}
+set env(LD_LIBRARY_PATH) "${objdir}"
+
+set solib_output "${binfile} ${binfile_lib1} ${binfile_lib2}"
+set results [run_host_cmd ${binfile} $solib_output]
+
+set f [open "tmpdir/solib.out" "w"]
+puts $f $results
+close $f
+
+if { [regexp_diff "tmpdir/solib.out" "${srcdir}/${subdir}/${testfile}.d"] } then {
+    fail "$test_name"
+} else {
+    pass "$test_name"
+}
+
+catch "exec rm ${binfile_lib1}" status
+catch "exec rm ${binfile_lib2}" status
+catch "exec rm tmpdir/solib.out" status
+
+if {[info exists old_ld_lib]} {
+    set env(LD_LIBRARY_PATH) $old_ld_lib
+} else {
+    unset env(LD_LIBRARY_PATH)
+}

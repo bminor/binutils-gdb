@@ -645,6 +645,7 @@ MAINTAINER_MODE_FALSE
 MAINTAINER_MODE_TRUE
 HAVE_SFRAME_AS_FALSE
 HAVE_SFRAME_AS_TRUE
+CROSS_COMPILE
 HAVE_LD_VERSION_SCRIPT_FALSE
 HAVE_LD_VERSION_SCRIPT_TRUE
 HAVE_SOLARIS_LD_FALSE
@@ -2418,6 +2419,7 @@ test -n "$target_alias" &&
   test "$program_prefix$program_suffix$program_transform_name" = \
     NONENONEs,x,x, &&
   program_prefix=${target_alias}-
+
 
 # Expand $ac_aux_dir to an absolute path.
 am_aux_dir=`cd "$ac_aux_dir" && pwd`
@@ -11565,7 +11567,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11568 "configure"
+#line 11570 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11671,7 +11673,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 11674 "configure"
+#line 11676 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12463,6 +12465,16 @@ else
   HAVE_LD_VERSION_SCRIPT_TRUE='#'
   HAVE_LD_VERSION_SCRIPT_FALSE=
 fi
+
+
+
+is_cross_compiler=
+if test x"${host}" = x"${target}" ; then
+  is_cross_compiler=no
+else
+  is_cross_compiler=yes
+fi
+CROSS_COMPILE=$is_cross_compiler
 
 
 

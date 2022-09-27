@@ -1,0 +1,180 @@
+# Support routines for libsframe testsuite.
+#   Copyright (C) 2022 Free Software Foundation, Inc.
+#
+# This file is part of the GNU Binutils.
+#
+# This file is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+# MA 02110-1301, USA.
+
+load_file $srcdir/../../ld/testsuite/lib/ld-lib.exp
+
+set unwind_test_file_name ""
+
+proc run_native_host_cmd { command } {
+    global link_output
+    global ld
+
+    verbose -log "$command"
+    set run_output ""
+    try {
+	set run_output [exec "sh" "-c" "$command" "2>@1"]
+	set status 0
+    } trap CHILDSTATUS {results options} {
+	set status [lindex [dict get $options -errorcode] 2]
+	set run_output $results
+    }
+    regsub "\n$" $run_output "" run_output
+    if { [lindex $status 0] != 0 && [string match "" $run_output] } then {
+	append run_output "child process exited abnormally"
+    }
+
+    if [string match "" $run_output] then {
+	return ""
+    }
+
+    verbose -log "$run_output"
+    return "$run_output"
+}
+
+# Compile and link a C source file for execution on the host.
+proc compile_link_one_host_cc { src output additional_args } {
+    global CC
+    global CFLAGS
+
+    return [run_native_host_cmd "./libtool --quiet --tag=CC --mode=link $CC $CFLAGS $src -o $output $additional_args" ]
+}
+
+proc make_unwind_parallel_path { args } {
+    global objdir
+    set joiner [list "file" "join" $objdir]
+    set joiner [concat $joiner $args]
+    return [eval $joiner]
+}
+
+proc standard_output_file {basename} {
+    global objdir subdir unwind_test_file_name
+
+    set dir [make_unwind_parallel_path outputs $subdir $unwind_test_file_name]
+    file mkdir $dir
+    return [file join $dir $basename]
+}
+
+proc standard_testfile {args} {
+    global unwind_test_file_name
+    global subdir
+    global unwind_test_file_last_vars
+
+    # Outputs.
+    global testfile binfile
+
+    set testfile $unwind_test_file_name
+    set binfile [standard_output_file ${testfile}]
+
+    if {[llength $args] == 0} {
+	set args .c
+    }
+
+    # Unset our previous output variables.
+    # This can help catch hidden bugs.
+    if {[info exists unwind_test_file_last_vars]} {
+	foreach varname $unwind_test_file_last_vars {
+	    global $varname
+	    catch {unset $varname}
+	}
+    }
+    # 'executable' is often set by tests.
+    set unwind_test_file_last_vars {executable}
+
+    set suffix ""
+    foreach arg $args {
+	set varname srcfile$suffix
+	global $varname
+
+	# Handle an extension.
+	if {$arg == ""} {
+	    set arg $testfile.c
+	} else {
+	    set first [string range $arg 0 0]
+	    if { $first == "." || $first == "-" } {
+		set arg $testfile$arg
+	    }
+	}
+
+	set $varname $arg
+	lappend unwind_test_file_last_vars $varname
+
+	if {$suffix == ""} {
+	    set suffix 2
+	} else {
+	    incr suffix
+	}
+    }
+}
+
+# Build a shared object DEST from SOURCES.
+proc unwind_compile_so {sources dest} {
+    global CFLAGS
+    set obj_options $CFLAGS
+    lappend obj_options "additional_flags=-fPIC -Wa,--gsframe"
+
+    set outdir [file dirname $dest]
+    set objects ""
+    foreach source $sources {
+	set sourcebase [file tail $source]
+	set object ${outdir}/${sourcebase}.o
+
+	if {[target_compile $source $object object \
+		  $obj_options] != ""} {
+	    return -1
+	}
+
+	lappend objects $object
+    }
+
+    set link_options "additional_flags=-shared"
+
+    set destbase [file tail $dest]
+    lappend link_options "additional_flags=-Wl,-soname,$destbase"
+
+    if {[target_compile "${objects}" "${dest}" executable $link_options] != ""} {
+	catch "exec rm ${objects}" status
+	return -1
+    }
+    catch "exec rm ${objects}" status
+    return ""
+}
+
+# Build a binary of TYPE from SOURCE at path DEST.
+proc unwind_compile {source dest type options} {
+    set new_options ""
+
+    foreach opt $options {
+	if {[regexp {^shlib=(.*)} $opt dummy_var shlib_name]
+	    && $type == "executable"} {
+	    lappend source "-Wl,$shlib_name"
+	} else {
+	    lappend new_options $opt
+	}
+    }
+    set options $new_options
+
+    verbose "options are $options"
+    verbose "source is $source $dest $type $options"
+
+    lappend options "additional_flags=-rdynamic -Wa,--gsframe ./.libs/libsframebt.a ./.libs/libsframe.a"
+    set result [target_compile $source $dest $type $options]
+
+    return $result
+}
