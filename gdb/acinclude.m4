@@ -234,9 +234,9 @@ AC_DEFUN([GDB_AC_CHECK_BFD], [
   # always want our bfd.
   CFLAGS="-I${srcdir}/../include -I../bfd -I${srcdir}/../bfd $CFLAGS"
   ZLIBDIR=`echo $zlibdir | sed 's,\$(top_builddir)/,,g'`
-  LDFLAGS="-L../bfd -L../libiberty $ZLIBDIR $ZSTD_LIBS $LDFLAGS"
+  LDFLAGS="-L../bfd -L../libiberty $ZLIBDIR $LDFLAGS"
   intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
-  LIBS="-lbfd -liberty -lz $intl $LIBS"
+  LIBS="-lbfd -liberty -lz $ZSTD_LIBS $intl $LIBS"
   AC_CACHE_CHECK(
     [$1],
     [$2],
