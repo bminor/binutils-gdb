@@ -1027,6 +1027,9 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 		 ? info->strsec->rawsize
 		 : info->strsec->size);
 
+      if (stabsize == 0 || strsize == 0)
+	goto out;
+
       if (!bfd_malloc_and_get_section (abfd, info->stabsec, &info->stabs))
 	goto out;
       if (!bfd_malloc_and_get_section (abfd, info->strsec, &info->strs))
