@@ -13164,7 +13164,7 @@ else
 fi
 
 
-if test "$with_zstd" != no; then
+if test "$with_zstd" != no; then :
 
 pkg_failed=no
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for libzstd" >&5
@@ -13272,6 +13272,7 @@ $as_echo "#define HAVE_ZSTD 1" >>confdefs.h
 
 
 fi
+
 fi
 
 
