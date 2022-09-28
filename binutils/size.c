@@ -92,11 +92,12 @@ usage (FILE *stream, int status)
   -A|-B|-G  --format={sysv|berkeley|gnu}  Select output style (default is %s)\n\
   -o|-d|-x  --radix={8|10|16}         Display numbers in octal, decimal or hex\n\
   -t        --totals                  Display the total sizes (Berkeley only)\n\
+  -f                                  Ignored.\n\
             --common                  Display total size for *COM* syms\n\
             --target=<bfdname>        Set the binary file format\n\
             @<file>                   Read options from <file>\n\
-  -h        --help                    Display this information\n\
-  -v        --version                 Display the program's version\n\
+  -h|-H|-?  --help                    Display this information\n\
+  -v|-V     --version                 Display the program's version\n\
 \n"),
 #if BSD_DEFAULT
   "berkeley"

@@ -1,3 +1,9 @@
+2022-09-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 29628
+	* size.c (usage): Add -f.
+	* doc/binutils.texi (size): Add -f.
+
 2022-09-20  Nick Clifton  <nickc@redhat.com>
 
 	* objcopy.c (copy_object): Do not issue a warning message when

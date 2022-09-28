@@ -3117,6 +3117,7 @@ size [@option{-A}|@option{-B}|@option{-G}|@option{--format=}@var{compatibility}]
      [@option{--common}]
      [@option{-t}|@option{--totals}]
      [@option{--target=}@var{bfdname}] [@option{-V}|@option{--version}]
+     [@option{-f}]
      [@var{objfile}@dots{}]
 @c man end
 @end smallexample
@@ -3203,6 +3204,9 @@ Total         388688
 @end smallexample
 
 @item --help
+@itemx -h
+@itemx -H
+@item -?
 Show a summary of acceptable arguments and options.
 
 @item -d
@@ -3234,9 +3238,15 @@ Specify that the object-code format for @var{objfile} is
 automatically recognize many formats.
 @xref{Target Selection}, for more information.
 
+@item -v
 @item -V
 @itemx --version
 Display the version number of @command{size}.
+
+@item -f
+Ignored.  This option is used by other versions of the @command{size}
+program, but it is not supported by the GNU Binutils version.
+
 @end table
 
 @c man end
