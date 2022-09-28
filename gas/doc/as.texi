@@ -226,27 +226,41 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @c to be limited to one line for the header.
 @smallexample
 @c man begin SYNOPSIS
-@value{AS} [@b{-a}[@b{cdghlns}][=@var{file}]] [@b{--alternate}] [@b{-D}]
- [@b{--compress-debug-sections}]  [@b{--nocompress-debug-sections}]
+@value{AS} [@b{-a}[@b{cdghlns}][=@var{file}]]
+ [@b{--alternate}]
+ [@b{--compress-debug-sections}] [@b{--nocompress-debug-sections}]
+ [@b{-D}]
+ [@b{--dump-config}]
  [@b{--debug-prefix-map} @var{old}=@var{new}]
- [@b{--defsym} @var{sym}=@var{val}] [@b{-f}] [@b{-g}] [@b{--gstabs}]
- [@b{--gstabs+}] [@b{--gdwarf-<N>}] [@b{--gdwarf-sections}]
+ [@b{--defsym} @var{sym}=@var{val}]
+ [@b{--elf-stt-common=[no|yes]}]
+ [@b{--emulation}=@var{name}]
+ [@b{-f}]
+ [@b{-g}] [@b{--gstabs}] [@b{--gstabs+}]
+ [@b{--gdwarf-<N>}] [@b{--gdwarf-sections}]
  [@b{--gdwarf-cie-version}=@var{VERSION}]
- [@b{--help}] [@b{-I} @var{dir}] [@b{-J}]
- [@b{-K}] [@b{-L}] [@b{--listing-lhs-width}=@var{NUM}]
- [@b{--listing-lhs-width2}=@var{NUM}] [@b{--listing-rhs-width}=@var{NUM}]
- [@b{--listing-cont-lines}=@var{NUM}] [@b{--keep-locals}]
+ [@b{--generate-missing-build-notes=[no|yes]}]
+ [@b{--hash-size}=@var{N}]
+ [@b{--help}] [@b{--target-help}]
+ [@b{-I} @var{dir}]
+ [@b{-J}]
+ [@b{-K}]
+ [@b{--keep-locals}]
+ [@b{-L}]
+ [@b{--listing-lhs-width}=@var{NUM}]
+ [@b{--listing-lhs-width2}=@var{NUM}]
+ [@b{--listing-rhs-width}=@var{NUM}]
+ [@b{--listing-cont-lines}=@var{NUM}]
+ [@b{--multibyte-handling=[allow|warn|warn-sym-only]}]
  [@b{--no-pad-sections}]
  [@b{-o} @var{objfile}] [@b{-R}]
+ [@b{--sectname-subst}]
+ [@b{--size-check=[error|warning]}]
  [@b{--statistics}]
  [@b{-v}] [@b{-version}] [@b{--version}]
  [@b{-W}] [@b{--warn}] [@b{--fatal-warnings}] [@b{-w}] [@b{-x}]
  [@b{-Z}] [@b{@@@var{FILE}}]
- [@b{--sectname-subst}] [@b{--size-check=[error|warning]}]
- [@b{--elf-stt-common=[no|yes]}]
- [@b{--generate-missing-build-notes=[no|yes]}]
- [@b{--multibyte-handling=[allow|warn|warn-sym-only]}]
- [@b{--target-help}] [@var{target-options}]
+ [@var{target-options}]
  [@b{--}|@var{files} @dots{}]
 @c
 @c man end
@@ -733,7 +747,8 @@ targets except the x86/x86_64, but a configure time option can be used to
 override this.
 
 @item -D
-Ignored.  This option is accepted for script compatibility with calls to
+Enable denugging in target specific backends, if supported.  Otherwise ignored.
+Even if ignored, this option is accepted for script compatibility with calls to
 other assemblers.
 
 @item --debug-prefix-map @var{old}=@var{new}
@@ -746,6 +761,21 @@ Define the symbol @var{sym} to be @var{value} before assembling the input file.
 indicates a hexadecimal value, and a leading @samp{0} indicates an octal
 value.  The value of the symbol can be overridden inside a source file via the
 use of a @code{.set} pseudo-op.
+
+@item --dump-config
+Displays how the assembler is configured and then exits.
+
+@ifset ELF
+@item --elf-stt-common=no
+@itemx --elf-stt-common=yes
+These options control whether the ELF assembler should generate common
+symbols with the @code{STT_COMMON} type.  The default can be controlled
+by a configure option @option{--enable-elf-stt-common}.
+@end ifset
+
+@item --emulation=@var{name}
+If the assembler is configured to support multiple different target
+configurations then this option can be used to select the desired form.
 
 @item -f
 ``fast''---skip whitespace and comment preprocessing (assume source is
@@ -811,24 +841,16 @@ When this flag is not specificed the default is version 1, though some targets
 can modify this default.  Other possible values for @var{version} are 3 or 4.
 
 @ifset ELF
-@item --size-check=error
-@itemx --size-check=warning
-Issue an error or warning for invalid ELF .size directive.
-
-@item --elf-stt-common=no
-@itemx --elf-stt-common=yes
-These options control whether the ELF assembler should generate common
-symbols with the @code{STT_COMMON} type.  The default can be controlled
-by a configure option @option{--enable-elf-stt-common}.
-
 @item --generate-missing-build-notes=yes
 @itemx --generate-missing-build-notes=no
 These options control whether the ELF assembler should generate GNU Build
 attribute notes if none are present in the input sources.
 The default can be controlled by the @option{--enable-generate-build-notes}
 configure option.
-
 @end ifset
+
+@item --hash-size @var{N}
+Ignored.  Supported for command line compatibility with other assemblers.
 
 @item --help
 Print a summary of the command-line options and exit.
@@ -878,6 +900,7 @@ to @var{number} + 1.
 @item --multibyte-handling=allow
 @itemx --multibyte-handling=warn
 @itemx --multibyte-handling=warn-sym-only
+@itemx --multibyte-handling=warn_sym_only
 Controls how the assembler handles multibyte characters in the input.  The
 default (which can be restored by using the @option{allow} argument) is to
 allow such characters without complaint.  Using the @option{warn} argument will
@@ -898,12 +921,20 @@ Name the object-file output from @command{@value{AS}} @var{objfile}.
 @item -R
 Fold the data section into the text section.
 
+@item --reduce-memory-overheads
+Ignored.  Supported for compatibility with tools that apss the same option to
+both the assembler and the linker.
+
 @ifset ELF
 @item --sectname-subst
 Honor substitution sequences in section names.
 @ifclear man
 @xref{Section Name Substitutions,,@code{.section @var{name}}}.
 @end ifclear
+
+@item --size-check=error
+@itemx --size-check=warning
+Issue an error or warning for invalid ELF .size directive.
 @end ifset
 
 @item --statistics
@@ -2101,7 +2132,7 @@ If you use (or have used) the @sc{gnu} assembler on one architecture, you
 should find a fairly similar environment when you use it on another
 architecture.  Each version has much in common with the others,
 including object file formats, most assembler directives (often called
-@dfn{pseudo-ops}) and assembler syntax.@refill
+@dfn{pseudo-ops}) and assembler syntax.
 
 @cindex purpose of @sc{gnu} assembler
 @command{@value{AS}} is primarily intended to assemble the output of the
@@ -2368,7 +2399,7 @@ assembler.)
 @menu
 * a::             -a[cdghlns] enable listings
 * alternate::     --alternate enable alternate macro syntax
-* D::             -D for compatibility
+* D::             -D for compatibility and debugging
 * f::             -f to work faster
 * I::             -I for .include search path
 @ifclear DIFF-TBL-KLUGE
@@ -2456,8 +2487,9 @@ Begin in alternate macro mode, see @ref{Altmacro,,@code{.altmacro}}.
 @section @option{-D}
 
 @kindex -D
-This option has no effect whatsoever, but it is accepted to make it more
-likely that scripts written for other assemblers also work with
+This option enables debugging, if it is supported by the assembler's
+configuration.  Otherwise it does nothing as is ignored.  This allows scripts
+designed to work with other assemblers to also work with GAS.
 @command{@value{AS}}.
 
 @node f
@@ -3013,7 +3045,7 @@ exception: they do not end statements.
 @cindex newline, required at file end
 @cindex EOF, newline must precede
 It is an error to end any statement with end-of-file:  the last
-character of any input file should be a newline.@refill
+character of any input file should be a newline.
 
 An empty statement is allowed, and may include whitespace.  It is ignored.
 
@@ -3033,7 +3065,7 @@ assembles into a machine language instruction.
 Different versions of @command{@value{AS}} for different computers
 recognize different instructions.  In fact, the same symbol may
 represent a different instruction in a different computer's assembly
-language.@refill
+language.
 @end ifset
 
 @cindex @code{:} (label)
@@ -3232,7 +3264,7 @@ immediately following an acute accent is taken as a literal character
 and does not count as the end of a statement.  The value of a character
 constant in a numeric expression is the machine's byte-wide code for
 that character.  @command{@value{AS}} assumes your character code is ASCII:
-@kbd{'A} means 65, @kbd{'B} means 66, and so on. @refill
+@kbd{'A} means 65, @kbd{'B} means 66, and so on.
 
 @node Numbers
 @subsection Number Constants

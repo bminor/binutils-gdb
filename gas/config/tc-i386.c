@@ -13813,7 +13813,8 @@ md_show_usage (FILE *stream)
   -k                      ignored\n"));
 #endif
   fprintf (stream, _("\
-  -n                      Do not optimize code alignment\n\
+  -n                      do not optimize code alignment\n\
+  -O{012s}                attempt some code optimizations\n\
   -q                      quieten some warnings\n"));
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   fprintf (stream, _("\

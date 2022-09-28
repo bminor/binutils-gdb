@@ -268,6 +268,8 @@ Options:\n\
   fprintf (stream, _("\
   -D                      produce assembler debugging messages\n"));
   fprintf (stream, _("\
+  --dump-config           display how the assembler is configured and then exit\n"));
+  fprintf (stream, _("\
   --debug-prefix-map OLD=NEW\n\
                           map OLD to NEW in debug information\n"));
   fprintf (stream, _("\
@@ -278,7 +280,7 @@ Options:\n\
     const char *def_em;
 
     fprintf (stream, "\
-  --em=[");
+  --emulation=[");
     for (i = 0; i < n_emulations - 1; i++)
       fprintf (stream, "%s | ", emulations[i]->name);
     fprintf (stream, "%s]\n", emulations[i]->name);
@@ -331,7 +333,13 @@ Options:\n\
   fprintf (stream, _("\
   --gdwarf-<N>            generate DWARF<N> debugging information. 2 <= <N> <= 5\n"));
   fprintf (stream, _("\
+  --gdwarf-cie-version=<N> generate version 1, 3 or 4 DWARF CIEs\n"));
+  fprintf (stream, _("\
   --gdwarf-sections       generate per-function section names for DWARF line information\n"));
+  fprintf (stream, _("\
+  --hash-size=<N>         ignored\n"));
+  fprintf (stream, _("\
+  --help                  show all assembler options\n"));
   fprintf (stream, _("\
   --target-help           show target specific options\n"));
   fprintf (stream, _("\
@@ -347,6 +355,9 @@ Options:\n\
   fprintf (stream, _("\
   --MD FILE               write dependency information in FILE (default none)\n"));
   fprintf (stream, _("\
+  --multibyte-handling=<method>\n\
+                          what to do with multibyte characters encountered in the input\n"));
+  fprintf (stream, _("\
   -nocpp                  ignored\n"));
   fprintf (stream, _("\
   -no-pad-sections        do not pad the end of sections to alignment boundaries\n"));
@@ -354,6 +365,8 @@ Options:\n\
   -o OBJFILE              name the object-file output OBJFILE (default a.out)\n"));
   fprintf (stream, _("\
   -R                      fold data section into text section\n"));
+  fprintf (stream, _("\
+  --reduce-memory-overheads ignored\n"));
   fprintf (stream, _("\
   --statistics            print various measured statistics from execution\n"));
   fprintf (stream, _("\

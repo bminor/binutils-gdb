@@ -1,3 +1,13 @@
+2022-09-28  Nick Clifton  <nickc@redhat.com>
+
+	PR 29623
+	* as.c (show_usage): Document the --dump-config,
+	--gdwarf-cie-version, --hash-size, --multibyte-handling,
+	and --reduce-memory-overheads options.
+	* config/tc-i386.c (md_show_usage): Document the -O option.
+	* doc/as.texi: Document the --dump-config, --emulation,
+	--hash-size, and --reduce-memory-overheads options.
+
 2022-09-08  Nick Clifton  <nickc@redhat.com>
 
 	PR 29559
