@@ -108,11 +108,7 @@ main ()
   READELF="$prog"
 
   # Sanity check the input file
-  match="Class:.*ELF32
-Type:.*EXEC
-Machine:.*SPU
-Machine:.*17"
-  if test `${READELF} -h ${INFILE} | grep "${match}" | wc -l` != 3
+  if test `${READELF} -h ${INFILE} | sed -n -e '/Class:.*ELF32/p' -e '/Type:.*EXEC/p' -e '/Machine:.*SPU/p' -e '/Machine:.*17/p' | sed -n '$='` != 3
   then
     echo "${INFILE}: Does not appear to be an SPU executable"
     exit 1
