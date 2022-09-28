@@ -62,6 +62,7 @@ DEFINE_OBSERVABLE (architecture_changed);
 DEFINE_OBSERVABLE (thread_ptid_changed);
 DEFINE_OBSERVABLE (inferior_added);
 DEFINE_OBSERVABLE (inferior_appeared);
+DEFINE_OBSERVABLE (inferior_pre_detach);
 DEFINE_OBSERVABLE (inferior_exit);
 DEFINE_OBSERVABLE (inferior_removed);
 DEFINE_OBSERVABLE (memory_changed);

@@ -2528,6 +2528,8 @@ target_detach (inferior *inf, int from_tty)
 
   prepare_for_detach ();
 
+  gdb::observers::inferior_pre_detach.notify (inf);
+
   /* Hold a strong reference because detaching may unpush the
      target.  */
   auto proc_target_ref = target_ops_ref::new_reference (inf->process_target ());

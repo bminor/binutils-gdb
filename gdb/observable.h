@@ -181,6 +181,9 @@ extern observable<struct inferior */* inf */> inferior_added;
    process.  */
 extern observable<struct inferior */* inf */> inferior_appeared;
 
+/* Inferior INF is about to be detached.  */
+extern observable<struct inferior */* inf */> inferior_pre_detach;
+
 /* Either the inferior associated with INF has been detached from
    the process, or the process has exited.  */
 extern observable<struct inferior */* inf */> inferior_exit;
