@@ -25,7 +25,7 @@
 
 match()
 {
-  if ! egrep "$1" "$2" >/dev/null 2>&1; then
+  if ! $EGREP "$1" "$2" >/dev/null 2>&1; then
     echo 1>&2 "could not find '$1' in $2"
     exit 1
   fi
@@ -33,7 +33,7 @@ match()
 
 nomatch()
 {
-  if egrep "$1" "$2" >/dev/null 2>&1; then
+  if $EGREP "$1" "$2" >/dev/null 2>&1; then
     echo 1>&2 "found unexpected '$1' in $2"
     exit 1
   fi

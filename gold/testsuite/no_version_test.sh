@@ -32,7 +32,7 @@ check()
 {
     file=$1
 
-    found=`egrep "\.gnu\.version.*" $file`
+    found=`$EGREP "\.gnu\.version.*" $file`
     if test -n "$found"; then
 	echo "These section should not be in $file:"
 	echo "$found"

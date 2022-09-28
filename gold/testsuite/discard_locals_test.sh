@@ -32,7 +32,7 @@ check_discarded()
     file=$1
     sym=$2
 
-    found=`egrep $sym $file`
+    found=`$EGREP $sym $file`
     if test -n "$found"; then
 	echo "These local symbols are not discarded in $file:"
 	echo "$found"
@@ -45,7 +45,7 @@ check_non_discarded()
     file=$1
     sym=$2
 
-    found=`egrep $sym $file`
+    found=`$EGREP $sym $file`
     if test -z "$found"; then
 	echo "This local symbol is discarded in $file:"
 	echo "$2"

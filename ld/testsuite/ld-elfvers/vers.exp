@@ -109,7 +109,9 @@ proc test_ar { test lib object expect } {
 	return
     }
 
-    set cmd "$nm --print-armap $tmpdir/$lib | grep \\\ in\\\  | egrep VERS\\\|bar\\\|foo | grep -v ^\\\\. | sort > $tmpdir/nm.out"
+    set cmd "$nm --print-armap $tmpdir/$lib | grep \" in \" | grep \"VERS
+bar
+foo\" | grep -v ^\\\\. | sort > $tmpdir/nm.out"
     verbose -log $cmd
     catch "exec $cmd" exec_output
     if [string match "" $exec_output] then {
