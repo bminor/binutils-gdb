@@ -46,13 +46,6 @@ extern int svr4_auxv_parse (struct gdbarch *gdbarch, const gdb_byte **readptr,
 			    const gdb_byte *endptr, CORE_ADDR *typep,
 			    CORE_ADDR *valp);
 
-/* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
-   Return 0 if *READPTR is already at the end of the buffer.
-   Return -1 if there is insufficient buffer for a whole entry.
-   Return 1 if an entry was read into *TYPEP and *VALP.  */
-extern int target_auxv_parse (const gdb_byte **readptr, const gdb_byte *endptr,
-			      CORE_ADDR *typep, CORE_ADDR *valp);
-
 /* Extract the auxiliary vector entry with a_type matching MATCH.
    Return zero if no such entry was found, or -1 if there was
    an error getting the information.  On success, return 1 after
