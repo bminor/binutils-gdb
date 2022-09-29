@@ -2492,8 +2492,8 @@ Return 1 if an entry was read into *TYPEP and *VALP.
     type="int",
     name="auxv_parse",
     params=[
-        ("gdb_byte **", "readptr"),
-        ("gdb_byte *", "endptr"),
+        ("const gdb_byte **", "readptr"),
+        ("const gdb_byte *", "endptr"),
         ("CORE_ADDR *", "typep"),
         ("CORE_ADDR *", "valp"),
     ],

@@ -530,8 +530,8 @@ struct ppc_linux_nat_target final : public linux_nat_target
 
   const struct target_desc *read_description ()  override;
 
-  int auxv_parse (gdb_byte **readptr,
-		  gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+  int auxv_parse (const gdb_byte **readptr,
+		  const gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
     override;
 
   /* Override linux_nat_target low methods.  */
@@ -1915,8 +1915,8 @@ fill_fpregset (const struct regcache *regcache,
 }
 
 int
-ppc_linux_nat_target::auxv_parse (gdb_byte **readptr,
-				  gdb_byte *endptr, CORE_ADDR *typep,
+ppc_linux_nat_target::auxv_parse (const gdb_byte **readptr,
+				  const gdb_byte *endptr, CORE_ADDR *typep,
 				  CORE_ADDR *valp)
 {
   int tid = inferior_ptid.lwp ();
@@ -1926,7 +1926,7 @@ ppc_linux_nat_target::auxv_parse (gdb_byte **readptr,
   int sizeof_auxv_field = ppc_linux_target_wordsize (tid);
 
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  gdb_byte *ptr = *readptr;
+  const gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)
     return 0;

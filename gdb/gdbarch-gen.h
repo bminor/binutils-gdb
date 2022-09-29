@@ -1539,8 +1539,8 @@ extern void set_gdbarch_program_breakpoint_here_p (struct gdbarch *gdbarch, gdba
 
 extern bool gdbarch_auxv_parse_p (struct gdbarch *gdbarch);
 
-typedef int (gdbarch_auxv_parse_ftype) (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
-extern int gdbarch_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
+typedef int (gdbarch_auxv_parse_ftype) (struct gdbarch *gdbarch, const gdb_byte **readptr, const gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
+extern int gdbarch_auxv_parse (struct gdbarch *gdbarch, const gdb_byte **readptr, const gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
 extern void set_gdbarch_auxv_parse (struct gdbarch *gdbarch, gdbarch_auxv_parse_ftype *auxv_parse);
 
 /* Print the description of a single auxv entry described by TYPE and VAL

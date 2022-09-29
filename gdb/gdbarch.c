@@ -5149,7 +5149,7 @@ gdbarch_auxv_parse_p (struct gdbarch *gdbarch)
 }
 
 int
-gdbarch_auxv_parse (struct gdbarch *gdbarch, gdb_byte **readptr, gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+gdbarch_auxv_parse (struct gdbarch *gdbarch, const gdb_byte **readptr, const gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
   gdb_assert (gdbarch != NULL);
   gdb_assert (gdbarch->auxv_parse != NULL);

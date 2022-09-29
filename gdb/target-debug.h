@@ -76,7 +76,7 @@
   target_debug_do_print (host_address_to_string (X))
 #define target_debug_print_gdb_byte_p(X)	\
   target_debug_do_print (host_address_to_string (X))
-#define target_debug_print_gdb_byte_pp(X)	\
+#define target_debug_print_const_gdb_byte_pp(X)	\
   target_debug_do_print (host_address_to_string (*(X)))
 #define target_debug_print_enum_gdb_signal(X)	\
   target_debug_do_print (gdb_signal_to_name (X))

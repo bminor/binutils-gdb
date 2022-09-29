@@ -862,8 +862,8 @@ struct target_ops
        Return 0 if *READPTR is already at the end of the buffer.
        Return -1 if there is insufficient buffer for a whole entry.
        Return 1 if an entry was read into *TYPEP and *VALP.  */
-    virtual int auxv_parse (gdb_byte **readptr,
-			    gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+    virtual int auxv_parse (const gdb_byte **readptr,
+			    const gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
       TARGET_DEFAULT_FUNC (default_auxv_parse);
 
     /* Search SEARCH_SPACE_LEN bytes beginning at START_ADDR for the
