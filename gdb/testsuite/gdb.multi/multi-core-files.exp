@@ -1,0 +1,171 @@
+# Copyright 2022-2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This script runs some basic tests that GDB can support multiple
+# inferiors each debugging different core files.
+#
+# We also check the behaviour of GDB if the user attempts to clone or
+# duplicate an inferior that is debugging a core file.
+
+standard_testfile -1.c -2.c
+
+set testfile1 "${testfile}-1"
+set testfile2 "${testfile}-2"
+
+set binfile1 [standard_output_file $testfile1]
+set binfile2 [standard_output_file $testfile2]
+
+if {[build_executable "build first executable" $binfile1 $srcfile] == -1} {
+    return
+}
+
+if {[build_executable "build second executable" $binfile2 $srcfile2] == -1} {
+    return
+}
+
+set corefile1 [core_find $binfile1]
+set corefile2 [core_find $binfile2]
+if { $corefile1 == "" || $corefile2 == "" } {
+    untested "Can't generate core files"
+    return
+}
+
+# Start GDB, and load the first executable and corefile into the first
+# inferior.
+clean_restart ${testfile1}
+gdb_test "core-file $corefile1" "Program terminated with .*" \
+    "load core file"
+gdb_test "bt" "bar \\(\\) at .*" \
+    "check backtrace in inferior 1"
+
+# The native-extended-remote board connects to the remote target as
+# soon as GDB is started, this means that connection 1 is to the
+# remote target, and the core target we create below will be
+# connection 2.
+#
+# In all other cases, the core target gets to be connection 1.
+if { [target_info gdb_protocol] == "extended-remote"} {
+    set conn_num 2
+} else {
+    set conn_num 1
+}
+
+# Try to use add-inferior and clone-inferior to create new
+# inferiors.  In both cases this will try to share the core_target
+# between inferior 1 and the new inferior.  As the core_target can't
+# be shared we should get a warning, and the inferior should be
+# created without a connection.
+gdb_test "add-inferior" \
+    [multi_line \
+	 "\\\[New inferior 2\\\]" \
+	 "warning: can't share connection ${conn_num} \\(core\\) between inferiors" \
+	 "Added inferior 2"]
+gdb_test "clone-inferior" \
+    [multi_line \
+	 "\\\[New inferior 3\\\]" \
+	 "warning: can't share connection ${conn_num} \\(core\\) between inferiors" \
+	 "Added inferior 3"]
+
+# Check the MI -add-inferior command.  Do this using interpreter-exec.
+# We're not doing a full MI test here, just checking this one command.
+gdb_test "interpreter-exec mi \"-add-inferior\"" \
+    [multi_line \
+	 "~\"\\\[New inferior 4\\\]..\"" \
+	 "&\"warning: can't share connection ${conn_num} \\(core\\) between inferiors..\"" \
+	 "~\"Added inferior 4..\"" \
+	 "\\^done,inferior=\"\[^\"\]+\""]
+
+# Now check that none of the new inferiors have a connection.
+gdb_test "info inferiors" \
+    [multi_line \
+	 "\\*\\s+1\\s+\[^\r\n\]+\\s+${conn_num} \\(core\\)\\s+\[^\r\n\]+.*" \
+	 "\\s+2\\s+<null>\\s+" \
+	 "\\s+3\\s+<null>\\s+\[^\r\n\]+" \
+	 "\\s+4\\s+<null>\\s+"] \
+    "first info inferiors call"
+
+# Now use add-inferior and clone-inferior but this time with the
+# -no-connection option, this should avoid issuing the warning.  We
+# also use interpreter-exec to test the MI version of this command.
+gdb_test "add-inferior -no-connection" \
+    [multi_line \
+	 "\\\[New inferior 5\\\]" \
+	 "Added inferior 5"]
+gdb_test "clone-inferior -no-connection" \
+    [multi_line \
+	 "\\\[New inferior 6\\\]" \
+	 "Added inferior 6"]
+gdb_test "interpreter-exec mi \"-add-inferior --no-connection\"" \
+    "\\\[New inferior 7\\\].*Added inferior 7.*"
+
+# Now check that none of the new inferiors have a connection.
+gdb_test "info inferiors" \
+    [multi_line \
+	 "\\*\\s+1\\s+\[^\r\n\]+\\s+${conn_num} \\(core\\)\\s+\[^\r\n\]+.*" \
+	 "\\s+2\\s+<null>\\s+" \
+	 "\\s+3\\s+<null>\\s+\[^\r\n\]+" \
+	 "\\s+4\\s+<null>\\s+" \
+	 "\\s+5\\s+<null>\\s+" \
+	 "\\s+6\\s+<null>\\s+\[^\r\n\]+" \
+	 "\\s+7\\s+<null>\\s+"] \
+    "second info inferiors call"
+
+# Check after all the new inferiors have been created that we still
+# only have a single connection.
+gdb_test "info connections" \
+    "\\*\\s+${conn_num}\\s+\\s+core\\s+Local core dump file\\s*"
+
+# Now switch to inferior 2 and load the second executable and core
+# file.  Check the backtrace for the presence of function 'foo', this
+# indicates we are seeing the correct core file.
+gdb_test "inferior 2" "Switching to inferior 2 .*"
+gdb_test "file $binfile2" \
+    "Reading symbols from .*" \
+    "Loaded second test binary"
+gdb_test "core-file $corefile2" \
+    "Program terminated with signal SIGABRT, Aborted.*" \
+    "Loaded second core file"
+gdb_test "bt" "foo \\(\\) at .*" \
+    "check backtrace in inferior 2"
+
+# Switch to inferior 3, this one was cloned from inferior 1, so is
+# already debugging the first binary file.  Check its backtrace for
+# 'bar', which indicates we are debugging the correct core file.
+gdb_test "inferior 3" "Switching to inferior 3 .*"
+gdb_test "core-file $corefile1" \
+    "Program terminated with signal SIGABRT, Aborted.*" \
+    "Loaded first core file into inferior 3"
+gdb_test "bt" "bar \\(\\) at .*" \
+    "check backtrace in inferior 3"
+
+# Detach from some of the core files and delete some of the inferiors.
+gdb_test "detach" "No core file now\\." \
+    "detach from inferior 3 core file"
+gdb_test "inferior 2" "Switching to inferior 2 .*" \
+    "switch back to inferior 2"
+gdb_test_no_output "remove-inferiors 3 4"
+
+# Now detach in inferior 2, and delete the inferior.
+gdb_test "detach" "No core file now\\." \
+    "detach from inferior 2 core file"
+gdb_test "inferior 1" "Switching to inferior 1 .*" \
+    "switch back to inferior 1"
+gdb_test_no_output "remove-inferiors 2"
+
+# Finally, check that inferior 1 backtrace is still working.
+gdb_test "bt" "bar \\(\\) at .*" \
+    "check backtrace in inferior 1 again"
+gdb_test "detach" "No core file now\\." \
+    "detach from inferior 1 core file"

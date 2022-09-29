@@ -880,6 +880,19 @@ switch_to_inferior_and_push_target (inferior *new_inf,
      symbols.  */
   switch_to_inferior_no_thread (new_inf);
 
+  /* If the user didn't specify '-no-connection', and the ORG_INF has a
+     process stratum target, but that target cannot be shared, or cannot
+     start a new inferior, then don't try to share the target.  */
+  if (!no_connection && proc_target != nullptr
+      && (!proc_target->is_shareable ()
+	  || !proc_target->can_create_inferior ()))
+    {
+      warning (_("can't share connection %d (%s) between inferiors"),
+	       proc_target->connection_number,
+	       make_target_connection_string (proc_target).c_str ());
+      proc_target = nullptr;
+    }
+
   /* Reuse the target for new inferior.  */
   if (!no_connection && proc_target != NULL)
     {

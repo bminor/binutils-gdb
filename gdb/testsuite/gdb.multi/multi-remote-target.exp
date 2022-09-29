@@ -1,0 +1,89 @@
+# Copyright 2025 Free Software Foundation, Inc.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Check that an attempt to share a 'remote' (not 'extended-remote')
+# will be prevented.  But also make sure that the remote connection
+# can be shared after the inferior does a 'fork'.
+
+load_lib gdbserver-support.exp
+
+require allow_gdbserver_tests
+
+standard_testfile
+
+save_vars { GDBFLAGS } {
+    # If GDB and GDBserver are both running locally, set the sysroot to avoid
+    # reading files via the remote protocol (the `is_remote target` check is
+    # already done above).
+    if { ![is_remote host] && ![is_remote target] } {
+	set GDBFLAGS "$GDBFLAGS -ex \"set sysroot\""
+    }
+    if {[prepare_for_testing "prepare" $testfile $srcfile] == -1} {
+	return
+    }
+}
+
+set target_binfile [gdb_remote_download target $binfile]
+
+# Make sure we're disconnected, in case we're testing with an
+# extended-remote board, therefore already connected.
+gdb_test "disconnect" ".*"
+
+# Start gdbserver and connect.
+set res [gdbserver_start "" $target_binfile]
+set gdbserver_addr [lindex $res 1]
+if { [gdb_target_cmd "remote" $gdbserver_addr] != 0 } {
+    unsupported "start gdbserver"
+    return
+}
+
+# The inferior will fork.  The following commands force GDB to create
+# a new inferior to follow the child process.  This ensures that GDB
+# is able to share the remote connection between inferiors after a
+# fork.
+gdb_test_no_output "set follow-fork-mode parent"
+gdb_test_no_output "set detach-on-fork off"
+gdb_breakpoint breakpt
+gdb_continue_to_breakpoint "runto breakpt function"
+
+# If we are using an extended-remote board, then an extended-remote
+# connection will have been setup when GDB initially started.  We then
+# disconnected, and setup a basic 'remote' connection above.  However,
+# the 'remote' connection will now be connection 2.
+#
+# For all other boards, the 'remote' connection will be number 1.
+if { [target_info gdb_protocol] == "extended-remote"} {
+    set conn_num 2
+} else {
+    set conn_num 1
+}
+
+# But as this is only a 'remote' (not 'extended-remote') connection,
+# then new inferiors cannot be started by the user.  This means that
+# when the user does 'add-inferior' there is no point sharing the
+# remote connection with the new inferior, it can never run anything.
+gdb_test "add-inferior" \
+    [multi_line \
+	 "warning: can't share connection $conn_num \\(remote \[^\r\n\]+\\) between inferiors" \
+	 "Added inferior 3"] \
+    "connection is dropped when adding a new inferior"
+
+# Ensure the new inferior shows no connection.
+gdb_test "info inferiors" \
+    [multi_line \
+	 "\\*\\s+1\\s+\[^\r\n\]+\\s+${conn_num} \\(remote \[^\r\n\]+\\)\\s+\[^\r\n\]+" \
+	 "\\s+2\\s+\[^\r\n\]+\\s+${conn_num} \\(remote \[^\r\n\]+\\)\\s+\[^\r\n\]+" \
+	 "\\s+3\\s+<null>\\s+"] \
+    "third inferior has no connection"

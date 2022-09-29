@@ -137,6 +137,10 @@ public:
   std::vector<static_tracepoint_marker>
     static_tracepoint_markers_by_strid (const char *id) override;
 
+  /* Linux ptrace targets are shareable.  */
+  bool is_shareable () override final
+  { return true; }
+
   /* Methods that are meant to overridden by the concrete
      arch-specific target instance.  */
 

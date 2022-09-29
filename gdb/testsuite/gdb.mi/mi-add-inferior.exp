@@ -73,14 +73,31 @@ set inf_line [string range "${inf_line}" $idx end]
 regexp "^(${decimal} \\(\[^)\]+\\))" $inf_line conn_info
 set conn_pattern [string_to_regexp "${conn_info}"]
 
+# When using the 'remote' protocol, the connection cannot be shared
+# between the original inferior, and the inferior created by
+# 'add-inferior'.  Remember, the 'remote' protocol doesn't allow new
+# inferiors to be started.  As a result, some of GDB's output will
+# change.
+set is_remote_conn [string equal [target_info gdb_protocol] "remote"]
+
 # Now add a new inferior, this should use the connection of the
 # current inferior.
-mi_gdb_test "-add-inferior" \
-    [multi_line "=thread-group-added,id=\"\[^\"\]+\"" \
-	 "~\"\\\[New inferior 2\\\]\\\\n\"" \
-	 "\~\"Added inferior 2 on connection ${conn_pattern}\\\\n\"" \
-	 "\\^done,inferior=\"\[^\"\]+\",connection=\{number=\"$decimal\",name=\"\[^\"\]+\"\}" ] \
-    "mi add inferior"
+if { $is_remote_conn } {
+    mi_gdb_test "-add-inferior" \
+	[multi_line "=thread-group-added,id=\"\[^\"\]+\"" \
+	     "~\"\\\[New inferior 2\\\]\\\\n\"" \
+	     "&\"warning: can't share connection 1 \\(remote \[^\r\n\]+\\) between inferiors\\\\n\"" \
+	     "\~\"Added inferior 2\\\\n\"" \
+	     "\\^done,inferior=\"\[^\"\]+\"" ] \
+	"mi add inferior"
+} else {
+    mi_gdb_test "-add-inferior" \
+	[multi_line "=thread-group-added,id=\"\[^\"\]+\"" \
+	     "~\"\\\[New inferior 2\\\]\\\\n\"" \
+	     "\~\"Added inferior 2 on connection ${conn_pattern}\\\\n\"" \
+	     "\\^done,inferior=\"\[^\"\]+\",connection=\{number=\"$decimal\",name=\"\[^\"\]+\"\}" ] \
+	"mi add inferior"
+}
 
 # Now run 'info inferiors' again to check that the currently selected
 # inferior has not changed.
@@ -107,7 +124,16 @@ gdb_test_multiple "info inferiors" \
 	}
 
 	-re "^~\"\\s+2\\s+\[^\r\n\]+\\s+${conn_pattern}\\s+\[^\r\n\]+\r\n" {
-	    set saw_new_inferior true
+	    if { ! $is_remote_conn } {
+		set saw_new_inferior true
+	    }
+	    exp_continue
+	}
+
+	-re "^~\"\\s+2\\s+<null>\\s*\[^\r\n\]+\r\n" {
+	    if { $is_remote_conn } {
+		set saw_new_inferior true
+	    }
 	    exp_continue
 	}
 

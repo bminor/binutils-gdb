@@ -120,8 +120,13 @@ proc quit_with_live_inferior {appear_how extra_inferior quit_how} {
     }
 
     if {$extra_inferior} {
-	gdb_test "add-inferior" "Added inferior 2 on connection .*" \
-	    "add empty inferior 2"
+	if {[target_info gdb_protocol] ne "remote"} {
+	    gdb_test "add-inferior" "Added inferior 2 on connection .*" \
+		"add empty inferior 2"
+	} else {
+	    gdb_test "add-inferior -no-connection" "Added inferior 2" \
+		"add empty inferior 2"
+	}
 	gdb_test "inferior 2" "Switching to inferior 2.*" \
 	    "switch to inferior 2"
     }

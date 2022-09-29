@@ -14,6 +14,15 @@
   this flag is used gdbserver will not escape special shell characters
   within the inferior arguments.
 
+* The add-inferior, clone-inferior, and MI -add-inferior commands will
+  now give a warning, and create the new inferior without a
+  connection, when the current inferior's connection, at the time the
+  command is given, is unshareable.  For example, the core-file target
+  cannot be shared between inferiors, nor can the Window native
+  target.  These targets could never really be shared.  Attempting to
+  share them would usually lead to GDB crashing.  GDB now prevents
+  this invalid sharing.
+
 * New targets
 
 GNU/Linux/MicroBlaze (gdbserver) microblazeel-*linux*

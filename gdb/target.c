@@ -1186,6 +1186,14 @@ target_stack::push (target_ops *t)
   if (m_stack[stratum].get () != nullptr)
     unpush (m_stack[stratum].get ());
 
+  /* If this target can't be shared, then check that the target doesn't
+     already appear on some other target stack.  */
+  if (!t->is_shareable ())
+    for (inferior *inf : all_inferiors ())
+      if (inf->target_is_pushed (t))
+	internal_error (_("Attempt to push unshareable target: %s."),
+			t->shortname ());
+
   /* Now add the new one.  */
   m_stack[stratum] = std::move (ref);
 

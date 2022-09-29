@@ -122,6 +122,10 @@ public:
 
   bool supports_disable_randomization () override;
 
+  /* FreeBSD ptrace targets are shareable.  */
+  bool is_shareable () override final
+  { return true; }
+
   /* Methods meant to be overridden by arch-specific target
      classes.  */
 

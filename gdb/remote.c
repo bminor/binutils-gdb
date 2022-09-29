@@ -1167,6 +1167,12 @@ public:
 
   bool is_address_tagged (gdbarch *gdbarch, CORE_ADDR address) override;
 
+  /* A remote target can be shared if it is able to create new inferiors.  */
+  bool is_shareable () override final
+  {
+    return true;
+  }
+
 public: /* Remote specific methods.  */
 
   void remote_download_command_source (int num, ULONGEST addr,

@@ -1399,6 +1399,23 @@ struct target_ops
     virtual void displaced_step_restore_all_in_ptid (inferior *parent_inf,
 						     ptid_t child_ptid)
       TARGET_DEFAULT_FUNC (default_displaced_step_restore_all_in_ptid);
+
+    /* Return true if an instance of this target can appear on multiple
+       target stacks, or false if an instance of this target can only
+       appear on a single target stack.
+
+       Returning false doesn't mean that GDB can't create multiple
+       instances of this target, just that each instance will only be used
+       by a single inferior.
+
+       The default return value for this function is true indicating
+       targets can be shared.  The only non-shareable targets are some of
+       the process_stratum_target sub-classes, as such, this default is
+       changed in process_stratum_target to return false, then those
+       process_stratum_target sub-classes that are shareable set this to
+       true.  */
+    virtual bool is_shareable ()
+    { return true; }
   };
 
 /* Deleter for std::unique_ptr.  See comments in

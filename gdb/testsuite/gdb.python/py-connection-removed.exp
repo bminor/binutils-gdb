@@ -58,8 +58,17 @@ if { [target_info exists gdb_protocol] } {
     set connection_type "native"
 }
 
-# Add an inferior that shares a connection with inferior 1.
-gdb_test "add-inferior" "Added inferior 2 on connection 1 \[^\r\n\]+"
+# Add an inferior that shares a connection with inferior 1.  If we are
+# using a 'remote' connection then this cannot be shared with the new
+# inferior, so we get a warning, and a new inferior with no connection.
+if { $connection_type == "remote" } {
+    gdb_test "add-inferior" \
+	[multi_line \
+	     "warning: can't share connection 1 \\(remote \[^\r\n\]+\\) between inferiors" \
+	     "Added inferior 2"]
+} else {
+    gdb_test "add-inferior" "Added inferior 2 on connection 1 \[^\r\n\]+"
+}
 
 # Add an inferior with no connection.
 gdb_test "add-inferior -no-connection" "Added inferior 3"
