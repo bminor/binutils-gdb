@@ -417,10 +417,9 @@ int
 linux_is_uclinux (void)
 {
   CORE_ADDR dummy;
-  target_ops *target = current_inferior ()->top_target ();
 
-  return (target_auxv_search (target, AT_NULL, &dummy) > 0
-	  && target_auxv_search (target, AT_PAGESZ, &dummy) == 0);
+  return (target_auxv_search (AT_NULL, &dummy) > 0
+	  && target_auxv_search (AT_PAGESZ, &dummy) == 0);
 }
 
 static int
@@ -2379,8 +2378,7 @@ linux_vsyscall_range_raw (struct gdbarch *gdbarch, struct mem_range *range)
   char filename[100];
   long pid;
 
-  if (target_auxv_search (current_inferior ()->top_target (),
-			  AT_SYSINFO_EHDR, &range->start) <= 0)
+  if (target_auxv_search (AT_SYSINFO_EHDR, &range->start) <= 0)
     return 0;
 
   /* It doesn't make sense to access the host's /proc when debugging a
@@ -2570,8 +2568,7 @@ linux_displaced_step_location (struct gdbarch *gdbarch)
      local-store address and is thus not usable as displaced stepping
      location.  The auxiliary vector gets us the PowerPC-side entry
      point address instead.  */
-  if (target_auxv_search (current_inferior ()->top_target (),
-			  AT_ENTRY, &addr) <= 0)
+  if (target_auxv_search (AT_ENTRY, &addr) <= 0)
     throw_error (NOT_SUPPORTED_ERROR,
 		 _("Cannot find AT_ENTRY auxiliary vector entry."));
 
@@ -2658,13 +2655,15 @@ linux_displaced_step_restore_all_in_ptid (inferior *parent_inf, ptid_t ptid)
   per_inferior->disp_step_bufs->restore_in_ptid (ptid);
 }
 
-/* See linux-tdep.h.  */
+/* Helper for linux_get_hwcap and linux_get_hwcap2.  */
 
-CORE_ADDR
-linux_get_hwcap (struct target_ops *target)
+static CORE_ADDR
+linux_get_hwcap_helper (const gdb::optional<gdb::byte_vector> &auxv,
+			target_ops *target, gdbarch *gdbarch, CORE_ADDR match)
 {
   CORE_ADDR field;
-  if (target_auxv_search (target, AT_HWCAP, &field) != 1)
+  if (!auxv.has_value ()
+      || target_auxv_search (*auxv, target, gdbarch, match, &field) != 1)
     return 0;
   return field;
 }
@@ -2672,12 +2671,39 @@ linux_get_hwcap (struct target_ops *target)
 /* See linux-tdep.h.  */
 
 CORE_ADDR
-linux_get_hwcap2 (struct target_ops *target)
+linux_get_hwcap (const gdb::optional<gdb::byte_vector> &auxv,
+		 target_ops *target, gdbarch *gdbarch)
 {
-  CORE_ADDR field;
-  if (target_auxv_search (target, AT_HWCAP2, &field) != 1)
-    return 0;
-  return field;
+  return linux_get_hwcap_helper (auxv, target, gdbarch, AT_HWCAP);
+}
+
+/* See linux-tdep.h.  */
+
+CORE_ADDR
+linux_get_hwcap ()
+{
+  return linux_get_hwcap (target_read_auxv (),
+			  current_inferior ()->top_target (),
+			  current_inferior ()->gdbarch);
+}
+
+/* See linux-tdep.h.  */
+
+CORE_ADDR
+linux_get_hwcap2 (const gdb::optional<gdb::byte_vector> &auxv,
+		  target_ops *target, gdbarch *gdbarch)
+{
+  return linux_get_hwcap_helper (auxv, target, gdbarch, AT_HWCAP2);
+}
+
+/* See linux-tdep.h.  */
+
+CORE_ADDR
+linux_get_hwcap2 ()
+{
+  return linux_get_hwcap2 (target_read_auxv (),
+			   current_inferior ()->top_target (),
+			   current_inferior ()->gdbarch);
 }
 
 /* Display whether the gcore command is using the

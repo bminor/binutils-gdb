@@ -33,6 +33,7 @@
 #include "target.h"
 #include "target/target.h"
 #include "expop.h"
+#include "auxv.h"
 
 #include "regcache.h"
 #include "regset.h"
@@ -779,8 +780,9 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
 				     struct target_ops *target, bfd *abfd)
 {
   asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
-  CORE_ADDR hwcap = linux_get_hwcap (target);
-  CORE_ADDR hwcap2 = linux_get_hwcap2 (target);
+  gdb::optional<gdb::byte_vector> auxv = target_read_auxv (target);
+  CORE_ADDR hwcap = linux_get_hwcap (auxv, target, gdbarch);
+  CORE_ADDR hwcap2 = linux_get_hwcap2 (auxv, target, gdbarch);
 
   aarch64_features features;
   features.vq = aarch64_linux_core_read_vq (gdbarch, abfd);

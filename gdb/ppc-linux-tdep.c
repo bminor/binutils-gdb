@@ -1599,7 +1599,8 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
   if (vsx)
     features.vsx = true;
 
-  CORE_ADDR hwcap = linux_get_hwcap (target);
+  gdb::optional<gdb::byte_vector> auxv = target_read_auxv (target);
+  CORE_ADDR hwcap = linux_get_hwcap (auxv, target, gdbarch);
 
   features.isa205 = ppc_linux_has_isa205 (hwcap);
 

@@ -2308,9 +2308,7 @@ fbsd_vmmap_length (struct gdbarch *gdbarch, unsigned char *entries, size_t len,
 static bool
 fbsd_vdso_range (struct gdbarch *gdbarch, struct mem_range *range)
 {
-  struct target_ops *ops = current_inferior ()->top_target ();
-
-  if (target_auxv_search (ops, AT_FREEBSD_KPRELOAD, &range->start) <= 0)
+  if (target_auxv_search (AT_FREEBSD_KPRELOAD, &range->start) <= 0)
     return false;
 
   if (!target_has_execution ())
@@ -2337,7 +2335,8 @@ fbsd_vdso_range (struct gdbarch *gdbarch, struct mem_range *range)
     {
       /* Fetch the list of address space entries from the running target. */
       gdb::optional<gdb::byte_vector> buf =
-	target_read_alloc (ops, TARGET_OBJECT_FREEBSD_VMMAP, nullptr);
+	target_read_alloc (current_inferior ()->top_target (),
+			   TARGET_OBJECT_FREEBSD_VMMAP, nullptr);
       if (!buf || buf->empty ())
 	return false;
 

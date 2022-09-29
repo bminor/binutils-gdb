@@ -909,7 +909,7 @@ elf_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
      parameter.  FUNCTION is the function entry address.  ADDRESS may be a
      function descriptor.  */
 
-  target_auxv_search (current_inferior ()->top_target (), AT_HWCAP, &hwcap);
+  target_auxv_search (AT_HWCAP, &hwcap);
   hwcap_val = value_from_longest (builtin_type (gdbarch)
 				  ->builtin_unsigned_long, hwcap);
   address_val = call_function_by_hand (function, NULL, hwcap_val);

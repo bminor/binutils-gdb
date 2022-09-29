@@ -531,7 +531,7 @@ ps_get_thread_area (struct ps_prochandle *ph,
 const struct target_desc *
 arm_linux_nat_target::read_description ()
 {
-  CORE_ADDR arm_hwcap = linux_get_hwcap (this);
+  CORE_ADDR arm_hwcap = linux_get_hwcap ();
 
   if (have_ptrace_getregset == TRIBOOL_UNKNOWN)
     {

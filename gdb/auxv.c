@@ -307,23 +307,21 @@ svr4_auxv_parse (struct gdbarch *gdbarch, const gdb_byte **readptr,
 
 /* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
 
-   Use the auxv_parse method from the current inferior's gdbarch, if defined,
-   else use the current inferior's target stack's auxv_parse.
+   Use the auxv_parse method from GDBARCH, if defined, else use the auxv_parse
+   method of OPS.
 
    Return 0 if *READPTR is already at the end of the buffer.
    Return -1 if there is insufficient buffer for a whole entry.
    Return 1 if an entry was read into *TYPEP and *VALP.  */
-static int
-parse_auxv (const gdb_byte **readptr, const gdb_byte *endptr, CORE_ADDR *typep,
-	    CORE_ADDR *valp)
-{
-  struct gdbarch *gdbarch = target_gdbarch();
 
+static int
+parse_auxv (target_ops *ops, gdbarch *gdbarch, const gdb_byte **readptr,
+	    const gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+{
   if (gdbarch_auxv_parse_p (gdbarch))
     return gdbarch_auxv_parse (gdbarch, readptr, endptr, typep, valp);
 
-  return current_inferior ()->top_target ()->auxv_parse (readptr, endptr,
-							 typep, valp);
+  return ops->auxv_parse (readptr, endptr, typep, valp);
 }
 
 
@@ -354,45 +352,45 @@ invalidate_auxv_cache (void)
   invalidate_auxv_cache_inf (current_inferior ());
 }
 
-/* Fetch the auxv object from inferior INF.  If auxv is cached already,
-   return a pointer to the cache.  If not, fetch the auxv object from the
-   target and cache it.  This function always returns a valid INFO pointer.  */
+/* See auxv.h.  */
 
-static struct auxv_info *
-get_auxv_inferior_data (struct target_ops *ops)
+gdb::optional<gdb::byte_vector>
+target_read_auxv ()
 {
-  struct auxv_info *info;
-  struct inferior *inf = current_inferior ();
+  inferior *inf = current_inferior ();
+  auxv_info *info = auxv_inferior_data.get (inf);
 
-  info = auxv_inferior_data.get (inf);
-  if (info == NULL)
+  if (info == nullptr)
     {
       info = auxv_inferior_data.emplace (inf);
-      info->data = target_read_alloc (ops, TARGET_OBJECT_AUXV, NULL);
+      info->data = target_read_alloc (inf->top_target (), TARGET_OBJECT_AUXV,
+				      nullptr);
     }
 
-  return info;
+  return info->data;
 }
 
-/* Extract the auxiliary vector entry with a_type matching MATCH.
-   Return zero if no such entry was found, or -1 if there was
-   an error getting the information.  On success, return 1 after
-   storing the entry's value field in *VALP.  */
+/* See auxv.h.  */
+
+gdb::optional<gdb::byte_vector>
+target_read_auxv (target_ops *ops)
+{
+  return target_read_alloc (ops, TARGET_OBJECT_AUXV, NULL);
+}
+
+/* See auxv.h.  */
+
 int
-target_auxv_search (struct target_ops *ops, CORE_ADDR match, CORE_ADDR *valp)
+target_auxv_search (const gdb::byte_vector &auxv, target_ops *ops,
+		    gdbarch *gdbarch, CORE_ADDR match, CORE_ADDR *valp)
 {
   CORE_ADDR type, val;
-  auxv_info *info = get_auxv_inferior_data (ops);
-
-  if (!info->data)
-    return -1;
-
-  const gdb_byte *data = info->data->data ();
+  const gdb_byte *data = auxv.data ();
   const gdb_byte *ptr = data;
-  size_t len = info->data->size ();
+  size_t len = auxv.size ();
 
   while (1)
-    switch (parse_auxv (&ptr, data + len, &type, &val))
+    switch (parse_auxv (ops, gdbarch, &ptr, data + len, &type, &val))
       {
       case 1:			/* Here's an entry, check it.  */
 	if (type == match)
@@ -406,10 +404,21 @@ target_auxv_search (struct target_ops *ops, CORE_ADDR match, CORE_ADDR *valp)
       default:			/* Bogosity.  */
 	return -1;
       }
-
-  /*NOTREACHED*/
 }
 
+/* See auxv.h.  */
+
+int
+target_auxv_search (CORE_ADDR match, CORE_ADDR *valp)
+{
+  gdb::optional<gdb::byte_vector> auxv = target_read_auxv ();
+
+  if (!auxv.has_value ())
+    return -1;
+
+  return target_auxv_search (*auxv, current_inferior ()->top_target (),
+			     current_inferior ()->gdbarch, match, valp);
+}
 
 /* Print the description of a single AUXV entry on the specified file.  */
 
@@ -551,21 +560,23 @@ default_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
 /* Print the contents of the target's AUXV on the specified file.  */
 
 static int
-fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
+fprint_target_auxv (struct ui_file *file)
 {
   struct gdbarch *gdbarch = target_gdbarch ();
   CORE_ADDR type, val;
   int ents = 0;
-  auxv_info *info = get_auxv_inferior_data (ops);
+  gdb::optional<gdb::byte_vector> auxv = target_read_auxv ();
 
-  if (!info->data)
+  if (!auxv.has_value ())
     return -1;
 
-  const gdb_byte *data = info->data->data ();
+  const gdb_byte *data = auxv->data ();
   const gdb_byte *ptr = data;
-  size_t len = info->data->size ();
+  size_t len = auxv->size ();
 
-  while (parse_auxv (&ptr, data + len, &type, &val) > 0)
+  while (parse_auxv (current_inferior ()->top_target (),
+		     current_inferior ()->gdbarch,
+		     &ptr, data + len, &type, &val) > 0)
     {
       gdbarch_print_auxv_entry (gdbarch, file, type, val);
       ++ents;
@@ -583,8 +594,7 @@ info_auxv_command (const char *cmd, int from_tty)
     error (_("The program has no auxiliary information now."));
   else
     {
-      int ents = fprint_target_auxv (gdb_stdout,
-				     current_inferior ()->top_target ());
+      int ents = fprint_target_auxv (gdb_stdout);
 
       if (ents < 0)
 	error (_("No auxiliary vector found, or failed reading it."));

@@ -122,7 +122,7 @@ arm_fbsd_nat_target::read_description ()
 #ifdef PT_GETREGSET
   tls = have_regset (inferior_ptid, NT_ARM_TLS) != 0;
 #endif
-  desc = arm_fbsd_read_description_auxv (this, tls);
+  desc = arm_fbsd_read_description_auxv (tls);
   if (desc == NULL)
     desc = this->beneath ()->read_description ();
   return desc;

@@ -332,7 +332,8 @@ s390_core_read_description (struct gdbarch *gdbarch,
 			    struct target_ops *target, bfd *abfd)
 {
   asection *section = bfd_get_section_by_name (abfd, ".reg");
-  CORE_ADDR hwcap = linux_get_hwcap (target);
+  gdb::optional<gdb::byte_vector> auxv = target_read_auxv (target);
+  CORE_ADDR hwcap = linux_get_hwcap (auxv, target, gdbarch);
   bool high_gprs, v1, v2, te, vx, gs;
 
   if (!section)

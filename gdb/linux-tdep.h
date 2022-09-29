@@ -90,13 +90,27 @@ extern void linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch,
 
 extern int linux_is_uclinux (void);
 
-/* Fetch the AT_HWCAP entry from the auxv vector for the given TARGET.  On
-   error, 0 is returned.  */
-extern CORE_ADDR linux_get_hwcap (struct target_ops *target);
+/* Fetch the AT_HWCAP entry from auxv data AUXV.  Use TARGET and GDBARCH to
+   parse auxv entries.
 
-/* Fetch the AT_HWCAP2 entry from the auxv vector for the given TARGET.  On
-   error, 0 is returned.  */
-extern CORE_ADDR linux_get_hwcap2 (struct target_ops *target);
+   On error, 0 is returned.  */
+extern CORE_ADDR linux_get_hwcap (const gdb::optional<gdb::byte_vector> &auxv,
+				  struct target_ops *target, gdbarch *gdbarch);
+
+/* Same as the above, but obtain all the inputs from the current inferior.  */
+
+extern CORE_ADDR linux_get_hwcap ();
+
+/* Fetch the AT_HWCAP2 entry from auxv data AUXV.  Use TARGET and GDBARCH to
+   parse auxv entries.
+
+   On error, 0 is returned.  */
+extern CORE_ADDR linux_get_hwcap2 (const gdb::optional<gdb::byte_vector> &auxv,
+				   struct target_ops *target, gdbarch *gdbarch);
+
+/* Same as the above, but obtain all the inputs from the current inferior.  */
+
+extern CORE_ADDR linux_get_hwcap2 ();
 
 /* Fetch (and possibly build) an appropriate `struct link_map_offsets'
    for ILP32 and LP64 Linux systems.  */

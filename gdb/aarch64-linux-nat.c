@@ -781,8 +781,8 @@ aarch64_linux_nat_target::read_description ()
   if (ret == 0)
     return aarch32_read_description ();
 
-  CORE_ADDR hwcap = linux_get_hwcap (this);
-  CORE_ADDR hwcap2 = linux_get_hwcap2 (this);
+  CORE_ADDR hwcap = linux_get_hwcap ();
+  CORE_ADDR hwcap2 = linux_get_hwcap2 ();
 
   aarch64_features features;
   features.vq = aarch64_sve_get_vq (tid);
@@ -918,7 +918,7 @@ aarch64_linux_nat_target::thread_architecture (ptid_t ptid)
 bool
 aarch64_linux_nat_target::supports_memory_tagging ()
 {
-  return (linux_get_hwcap2 (this) & HWCAP2_MTE) != 0;
+  return (linux_get_hwcap2 () & HWCAP2_MTE) != 0;
 }
 
 /* Implement the "fetch_memtags" target_ops method.  */

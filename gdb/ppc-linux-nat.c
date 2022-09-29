@@ -1965,8 +1965,8 @@ ppc_linux_nat_target::read_description ()
 
   features.wordsize = ppc_linux_target_wordsize (tid);
 
-  CORE_ADDR hwcap = linux_get_hwcap (current_inferior ()->top_target ());
-  CORE_ADDR hwcap2 = linux_get_hwcap2 (current_inferior ()->top_target ());
+  CORE_ADDR hwcap = linux_get_hwcap ();
+  CORE_ADDR hwcap2 = linux_get_hwcap2 ();
 
   if (have_ptrace_getsetvsxregs
       && (hwcap & PPC_FEATURE_HAS_VSX))
@@ -2123,8 +2123,7 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 	 takes two hardware watchpoints though.  */
       if (len > 1
 	  && hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE
-	  && (linux_get_hwcap (current_inferior ()->top_target ())
-	      & PPC_FEATURE_BOOKE))
+	  && (linux_get_hwcap () & PPC_FEATURE_BOOKE))
 	return 2;
       /* Check if the processor provides DAWR interface.  */
       if (hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_DAWR)
@@ -2152,8 +2151,7 @@ ppc_linux_nat_target::region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
     {
       gdb_assert (m_dreg_interface.debugreg_p ());
 
-      if (((linux_get_hwcap (current_inferior ()->top_target ())
-	    & PPC_FEATURE_BOOKE)
+      if (((linux_get_hwcap () & PPC_FEATURE_BOOKE)
 	   && (addr + len) > (addr & ~3) + 4)
 	  || (addr + len) > (addr & ~7) + 8)
 	return 0;
@@ -2640,8 +2638,7 @@ ppc_linux_nat_target::insert_watchpoint (CORE_ADDR addr, int len,
       long wp_value;
       long read_mode, write_mode;
 
-      if (linux_get_hwcap (current_inferior ()->top_target ())
-	  & PPC_FEATURE_BOOKE)
+      if (linux_get_hwcap () & PPC_FEATURE_BOOKE)
 	{
 	  /* PowerPC 440 requires only the read/write flags to be passed
 	     to the kernel.  */
@@ -3014,11 +3011,9 @@ ppc_linux_nat_target::watchpoint_addr_within_range (CORE_ADDR addr,
   int mask;
 
   if (m_dreg_interface.hwdebug_p ()
-      && (linux_get_hwcap (current_inferior ()->top_target ())
-	  & PPC_FEATURE_BOOKE))
+      && (linux_get_hwcap () & PPC_FEATURE_BOOKE))
     return start <= addr && start + length >= addr;
-  else if (linux_get_hwcap (current_inferior ()->top_target ())
-	   & PPC_FEATURE_BOOKE)
+  else if (linux_get_hwcap () & PPC_FEATURE_BOOKE)
     mask = 3;
   else
     mask = 7;

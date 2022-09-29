@@ -46,12 +46,30 @@ extern int svr4_auxv_parse (struct gdbarch *gdbarch, const gdb_byte **readptr,
 			    const gdb_byte *endptr, CORE_ADDR *typep,
 			    CORE_ADDR *valp);
 
-/* Extract the auxiliary vector entry with a_type matching MATCH.
+/* Read auxv data from the current inferior's target stack.  */
+
+extern gdb::optional<gdb::byte_vector> target_read_auxv ();
+
+/* Read auxv data from OPS.  */
+
+extern gdb::optional<gdb::byte_vector> target_read_auxv (target_ops *ops);
+
+/* Search AUXV for an entry with a_type matching MATCH.
+
+   OPS and GDBARCH are the target and architecture to use to parse auxv entries.
+
    Return zero if no such entry was found, or -1 if there was
    an error getting the information.  On success, return 1 after
    storing the entry's value field in *VALP.  */
-extern int target_auxv_search (struct target_ops *ops,
+
+extern int target_auxv_search (const gdb::byte_vector &auxv,
+			       target_ops *ops, gdbarch *gdbarch,
 			       CORE_ADDR match, CORE_ADDR *valp);
+
+/* Same as the above, but read the auxv data from the current inferior.  Use
+   the current inferior's top target and arch to parse auxv entries.  */
+
+extern int target_auxv_search (CORE_ADDR match, CORE_ADDR *valp);
 
 /* Print a description of a single AUXV entry on the specified file.  */
 enum auxv_format { AUXV_FORMAT_DEC, AUXV_FORMAT_HEX, AUXV_FORMAT_STR };
