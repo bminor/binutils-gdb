@@ -29,8 +29,16 @@ proc do_typeid_tests {started} {
     # We might see the standard type or gdb's internal type.
     set type_re "(std::type_info|gdb_gnu_v3_type_info)"
 
+    set var {ca b}
+    if {$started || ![test_compiler_info clang-*-* c++]} {
+	# Clang doesn't place type information for the base types in
+	# the executable, and relies on this being linked in from the
+	# standard library.  As a result, type information for these
+	# variables is only available once the inferior is started.
+	lappend var i cp ccp
+    }
 
-    foreach simple_var {i cp ccp ca b} {
+    foreach simple_var $var {
 	gdb_test "print &typeid($simple_var)" \
 	    " = \\($type_re \\*\\) $hex.*"
 
