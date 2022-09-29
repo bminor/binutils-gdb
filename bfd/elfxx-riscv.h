@@ -51,6 +51,7 @@ typedef struct
 {
   riscv_subset_t *head;
   riscv_subset_t *tail;
+  const char *arch_str;
 } riscv_subset_list_t;
 
 extern void

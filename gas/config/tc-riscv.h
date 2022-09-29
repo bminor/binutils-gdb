@@ -130,14 +130,16 @@ extern void riscv_md_finish (void);
 extern int riscv_convert_symbolic_attribute (const char *);
 
 /* Set mapping symbol states.  */
-#define md_cons_align(nbytes) riscv_mapping_state (MAP_DATA, 0)
-void riscv_mapping_state (enum riscv_seg_mstate, int);
+#define md_cons_align(nbytes) riscv_mapping_state (MAP_DATA, 0, 0)
+void riscv_mapping_state (enum riscv_seg_mstate, int, bool);
 
 /* Define target segment type.  */
 #define TC_SEGMENT_INFO_TYPE struct riscv_segment_info_type
 struct riscv_segment_info_type
 {
   enum riscv_seg_mstate map_state;
+  /* The current mapping symbol with architecture string.  */
+  symbolS *arch_map_symbol;
 };
 
 /* Define target fragment type.  */

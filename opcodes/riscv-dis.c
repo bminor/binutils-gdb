@@ -716,6 +716,9 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
       /* If arch has the Zfinx extension, replace FPR with GPR.  */
       if (riscv_subset_supports (&riscv_rps_dis, "zfinx"))
 	riscv_fpr_names = riscv_gpr_names;
+      else
+	riscv_fpr_names = riscv_gpr_names == riscv_gpr_names_abi ?
+			  riscv_fpr_names_abi : riscv_fpr_names_numeric;
 
       for (; op->name; op++)
 	{
@@ -832,6 +835,12 @@ riscv_get_map_state (int n,
     *state = MAP_INSN;
   else if (strcmp (name, "$d") == 0)
     *state = MAP_DATA;
+  else if (strncmp (name, "$xrv", 4) == 0)
+    {
+      *state = MAP_INSN;
+      riscv_release_subset_list (&riscv_subsets);
+      riscv_parse_subset (&riscv_rps_dis, name + 2);
+    }
   else
     return false;
 
