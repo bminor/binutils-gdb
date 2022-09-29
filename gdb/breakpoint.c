@@ -100,10 +100,6 @@ static void create_breakpoints_sal (struct gdbarch *,
 				    int,
 				    int, int, int, unsigned);
 
-static std::vector<symtab_and_line> decode_location_spec_default
-  (struct breakpoint *b, struct location_spec *locspec,
-   struct program_space *search_pspace);
-
 static int can_use_hardware_watchpoint
     (const std::vector<value_ref_ptr> &vals);
 
@@ -11692,7 +11688,21 @@ code_breakpoint::decode_location_spec (location_spec *locspec,
   if (locspec->type () == PROBE_LOCATION_SPEC)
     return bkpt_probe_decode_location_spec (this, locspec, search_pspace);
 
-  return decode_location_spec_default (this, locspec, search_pspace);
+  struct linespec_result canonical;
+
+  decode_line_full (locspec, DECODE_LINE_FUNFIRSTLINE, search_pspace,
+		    NULL, 0, &canonical, multiple_symbols_all,
+		    filter.get ());
+
+  /* We should get 0 or 1 resulting SALs.  */
+  gdb_assert (canonical.lsals.size () < 2);
+
+  if (!canonical.lsals.empty ())
+    {
+      const linespec_sals &lsal = canonical.lsals[0];
+      return std::move (lsal.sals);
+    }
+  return {};
 }
 
 /* Virtual table for internal breakpoints.  */
@@ -12748,31 +12758,6 @@ create_sals_from_location_spec_default (location_spec *locspec,
 					struct linespec_result *canonical)
 {
   parse_breakpoint_sals (locspec, canonical);
-}
-
-/* Decode the line represented by S by calling decode_line_full.  This is the
-   default function for the `decode_location' method of breakpoint_ops.  */
-
-static std::vector<symtab_and_line>
-decode_location_spec_default (struct breakpoint *b,
-			      location_spec *locspec,
-			      program_space *search_pspace)
-{
-  struct linespec_result canonical;
-
-  decode_line_full (locspec, DECODE_LINE_FUNFIRSTLINE, search_pspace,
-		    NULL, 0, &canonical, multiple_symbols_all,
-		    b->filter.get ());
-
-  /* We should get 0 or 1 resulting SALs.  */
-  gdb_assert (canonical.lsals.size () < 2);
-
-  if (!canonical.lsals.empty ())
-    {
-      const linespec_sals &lsal = canonical.lsals[0];
-      return std::move (lsal.sals);
-    }
-  return {};
 }
 
 /* Reset a breakpoint.  */
