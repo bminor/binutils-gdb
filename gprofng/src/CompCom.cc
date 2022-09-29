@@ -305,7 +305,7 @@ CompComment::compcom_format (int index, compmsg *msg, int &visible)
       for (int i = 0; i < plist_idx - 1; i++)
 	{
 	  prim_ty = ccm_param_primtype (msg->msg_type, i + 1);
-	  if (prim_ty == CCM_PRIMTYPE_STRING || prim_ty == CCM_PRIMTYPE_STRING)
+	  if (prim_ty == CCM_PRIMTYPE_STRING)
 	    free (parms[i]);
 	}
     }

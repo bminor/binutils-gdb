@@ -696,7 +696,7 @@ init_perf_event (struct perf_event_attr *hw, uint64_t event, uint64_t period)
 #endif
 
   hw->sample_period = period;
-  hw->sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_READ |
+  hw->sample_type = PERF_SAMPLE_IP |
 	  // PERF_SAMPLE_TID		|
 	  // PERF_SAMPLE_TIME		| // possibly interesting
 	  // PERF_SAMPLE_ADDR		|
