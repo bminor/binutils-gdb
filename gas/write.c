@@ -1481,7 +1481,9 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     return;
 
   section_name = bfd_section_name (sec);
-  if (!startswith (section_name, ".debug_"))
+  if (!startswith (section_name, ".debug_")
+      && (!startswith (section_name, ".gnu.debuglto_.debug_")
+	  || flag_compress_debug == COMPRESS_DEBUG_GNU_ZLIB))
     return;
 
   bool use_zstd = abfd->flags & BFD_COMPRESS_ZSTD;
