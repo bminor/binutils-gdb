@@ -110,7 +110,7 @@ in the section entitled ``GNU Free Documentation License''.
 
 @smallexample
 @c man begin SYNOPSIS
-gprof [ -[abcDhilLrsTvwxyz] ] [ -[ACeEfFJnNOpPqQRStZ][@var{name}] ]
+gprof [ -[abcDhilLrsTvwxyz] ] [ -[ABCeEfFJnNOpPqQRStZ][@var{name}] ]
  [ -I @var{dirs} ] [ -d[@var{num}] ] [ -k @var{from/to} ]
  [ -m @var{min-count} ] [ -R @var{map_file} ] [ -t @var{table-length} ]
  [ --[no-]annotated-source[=@var{name}] ]
@@ -488,6 +488,9 @@ If the @samp{-b} option is given, @code{gprof} doesn't print the
 verbose blurbs that try to explain the meaning of all of the fields in
 the tables.  This is useful if you intend to print out the output, or
 are tired of seeing the blurbs.
+
+@item -B
+The @samp{-B} option causes @code{gprof} to print the call graph analysis.
 
 @item -C[@var{symspec}]
 @itemx --exec-counts[=@var{symspec}]

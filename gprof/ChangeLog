@@ -1,3 +1,10 @@
+2022-09-29  Nick Clifton  <nickc@redhat.com>
+
+	PR 29627
+	* gprof.c (usage): Add -B.
+	* gprof.texi (synopsis): Add -B.
+	(Output Options): Add entry for -B.
+
 2022-07-08  Nick Clifton  <nickc@redhat.com>
 
 	* 2.39 branch created.
