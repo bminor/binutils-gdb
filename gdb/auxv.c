@@ -546,7 +546,7 @@ default_print_auxv_entry (struct gdbarch *gdbarch, struct ui_file *file,
 
 /* Print the contents of the target's AUXV on the specified file.  */
 
-int
+static int
 fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 {
   struct gdbarch *gdbarch = target_gdbarch ();

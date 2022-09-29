@@ -74,9 +74,6 @@ extern void default_print_auxv_entry (struct gdbarch *gdbarch,
 				      struct ui_file *file, CORE_ADDR type,
 				      CORE_ADDR val);
 
-/* Print the contents of the target's AUXV on the specified file.  */
-extern int fprint_target_auxv (struct ui_file *file, struct target_ops *ops);
-
 extern target_xfer_partial_ftype memory_xfer_auxv;
 
 
