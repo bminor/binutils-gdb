@@ -369,7 +369,7 @@ public:
   int unpush_target (struct target_ops *t);
 
   /* Returns true if T is pushed in this inferior's target stack.  */
-  bool target_is_pushed (target_ops *t)
+  bool target_is_pushed (const target_ops *t)
   { return m_target_stack.is_pushed (t); }
 
   /* Find the target beneath T in this inferior's target stack.  */

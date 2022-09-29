@@ -1385,7 +1385,7 @@ public:
   bool unpush (target_ops *t);
 
   /* Returns true if T is pushed on the target stack.  */
-  bool is_pushed (target_ops *t) const
+  bool is_pushed (const target_ops *t) const
   { return at (t->stratum ()) == t; }
 
   /* Return the target at STRATUM.  */
