@@ -1,12 +1,12 @@
 .*: Assembler messages:
-.*:26: Error: .*unsupported instruction.*
-.*:27: Error: .*unsupported instruction.*
+.*:26: Error: .*unsupported masking.*
+.*:27: Error: .*unsupported masking.*
 .*:29: Error: .*unsupported instruction.*
 .*:30: Error: .*unsupported instruction.*
 .*:32: Error: .*unsupported instruction.*
 .*:33: Error: .*unsupported instruction.*
-.*:36: Error: .*unsupported instruction.*
-.*:37: Error: .*unsupported instruction.*
+.*:36: Error: .*unsupported masking.*
+.*:37: Error: .*unsupported masking.*
 .*:39: Error: .*unsupported instruction.*
 .*:40: Error: .*unsupported instruction.*
 .*:43: Error: .*unsupported instruction.*

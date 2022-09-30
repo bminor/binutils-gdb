@@ -2083,12 +2083,7 @@ operand_size_match (const insn_template *t)
     }
 
   if (!t->opcode_modifier.d)
-    {
-    mismatch:
-      if (!match)
-	i.error = operand_size_mismatch;
-      return match;
-    }
+    return match;
 
   /* Check reverse.  */
   gas_assert ((i.operands >= 2 && i.operands <= 3)
@@ -2105,19 +2100,19 @@ operand_size_match (const insn_template *t)
 
       if (t->operand_types[j].bitfield.class == Reg
 	  && !match_operand_size (t, j, given))
-	goto mismatch;
+	return match;
 
       if (t->operand_types[j].bitfield.class == RegSIMD
 	  && !match_simd_size (t, j, given))
-	goto mismatch;
+	return match;
 
       if (t->operand_types[j].bitfield.instance == Accum
 	  && (!match_operand_size (t, j, given)
 	      || !match_simd_size (t, j, given)))
-	goto mismatch;
+	return match;
 
       if ((i.flags[given] & Operand_Mem) && !match_mem_size (t, j, given))
-	goto mismatch;
+	return match;
     }
 
   return match | MATCH_REVERSE;
@@ -6386,6 +6381,17 @@ VEX_check_encoding (const insn_template *t)
   return 0;
 }
 
+/* Helper function for the progress() macro in match_template().  */
+static INLINE enum i386_error progress (enum i386_error new,
+					enum i386_error last,
+					unsigned int line, unsigned int *line_p)
+{
+  if (line <= *line_p)
+    return last;
+  *line_p = line;
+  return new;
+}
+
 static const insn_template *
 match_template (char mnem_suffix)
 {
@@ -6397,8 +6403,9 @@ match_template (char mnem_suffix)
   i386_opcode_modifier suffix_check;
   i386_operand_type operand_types [MAX_OPERANDS];
   int addr_prefix_disp;
-  unsigned int j, size_match, check_register;
-  enum i386_error specific_error = 0;
+  unsigned int j, size_match, check_register, errline = __LINE__;
+  enum i386_error specific_error = number_of_operands_mismatch;
+#define progress(err) progress (err, specific_error, __LINE__, &errline)
 
 #if MAX_OPERANDS != 5
 # error "MAX_OPERANDS must be 5."
@@ -6436,36 +6443,33 @@ match_template (char mnem_suffix)
 	suffix_check.no_ldsuf = 1;
     }
 
-  /* Must have right number of operands.  */
-  i.error = number_of_operands_mismatch;
-
   for (t = current_templates->start; t < current_templates->end; t++)
     {
       addr_prefix_disp = -1;
       found_reverse_match = 0;
 
+      /* Must have right number of operands.  */
       if (i.operands != t->operands)
 	continue;
 
       /* Check processor support.  */
-      i.error = unsupported;
+      specific_error = progress (unsupported);
       if (cpu_flags_match (t) != CPU_FLAGS_PERFECT_MATCH)
 	continue;
 
       /* Check Pseudo Prefix.  */
-      i.error = unsupported;
       if (t->opcode_modifier.pseudovexprefix
 	  && !(i.vec_encoding == vex_encoding_vex
 	      || i.vec_encoding == vex_encoding_vex3))
 	continue;
 
       /* Check AT&T mnemonic.   */
-      i.error = unsupported_with_intel_mnemonic;
+      specific_error = progress (unsupported_with_intel_mnemonic);
       if (intel_mnemonic && t->opcode_modifier.attmnemonic)
 	continue;
 
       /* Check AT&T/Intel syntax.  */
-      i.error = unsupported_syntax;
+      specific_error = progress (unsupported_syntax);
       if ((intel_syntax && t->opcode_modifier.attsyntax)
 	  || (!intel_syntax && t->opcode_modifier.intelsyntax))
 	continue;
@@ -6491,7 +6495,7 @@ match_template (char mnem_suffix)
 	}
 
       /* Check the suffix.  */
-      i.error = invalid_instruction_suffix;
+      specific_error = progress (invalid_instruction_suffix);
       if ((t->opcode_modifier.no_bsuf && suffix_check.no_bsuf)
 	  || (t->opcode_modifier.no_wsuf && suffix_check.no_wsuf)
 	  || (t->opcode_modifier.no_lsuf && suffix_check.no_lsuf)
@@ -6500,6 +6504,7 @@ match_template (char mnem_suffix)
 	  || (t->opcode_modifier.no_ldsuf && suffix_check.no_ldsuf))
 	continue;
 
+      specific_error = progress (operand_size_mismatch);
       size_match = operand_size_match (t);
       if (!size_match)
 	continue;
@@ -6510,11 +6515,9 @@ match_template (char mnem_suffix)
 
 	 as the case of a missing * on the operand is accepted (perhaps with
 	 a warning, issued further down).  */
+      specific_error = progress (operand_type_mismatch);
       if (i.jumpabsolute && t->opcode_modifier.jump != JUMP_ABSOLUTE)
-	{
-	  i.error = operand_type_mismatch;
-	  continue;
-	}
+	continue;
 
       for (j = 0; j < MAX_OPERANDS; j++)
 	operand_types[j] = t->operand_types[j];
@@ -6522,6 +6525,8 @@ match_template (char mnem_suffix)
       /* In general, don't allow
 	 - 64-bit operands outside of 64-bit mode,
 	 - 32-bit operands on pre-386.  */
+      specific_error = progress (mnem_suffix ? invalid_instruction_suffix
+					     : operand_size_mismatch);
       j = i.imm_operands + (t->operands > i.imm_operands + 1);
       if (((i.suffix == QWORD_MNEM_SUFFIX
 	    && flag_code != CODE_64BIT
@@ -6550,7 +6555,7 @@ match_template (char mnem_suffix)
 	{
 	  if (VEX_check_encoding (t))
 	    {
-	      specific_error = i.error;
+	      specific_error = progress (i.error);
 	      continue;
 	    }
 
@@ -6711,6 +6716,8 @@ match_template (char mnem_suffix)
 						   i.types[1],
 						   operand_types[1])))
 	    {
+	      specific_error = progress (i.error);
+
 	      /* Check if other direction is valid ...  */
 	      if (!t->opcode_modifier.d)
 		continue;
@@ -6735,6 +6742,7 @@ match_template (char mnem_suffix)
 						       operand_types[0])))
 		{
 		  /* Does not match either direction.  */
+		  specific_error = progress (i.error);
 		  continue;
 		}
 	      /* found_reverse_match holds which of D or FloatR
@@ -6773,7 +6781,10 @@ match_template (char mnem_suffix)
 						       operand_types[3],
 						       i.types[4],
 						       operand_types[4]))
-		    continue;
+		    {
+		      specific_error = progress (i.error);
+		      continue;
+		    }
 		  /* Fall through.  */
 		case 4:
 		  overlap3 = operand_type_and (i.types[3], operand_types[3]);
@@ -6788,7 +6799,10 @@ match_template (char mnem_suffix)
 							    operand_types[2],
 							    i.types[3],
 							    operand_types[3])))
-		    continue;
+		    {
+		      specific_error = progress (i.error);
+		      continue;
+		    }
 		  /* Fall through.  */
 		case 3:
 		  overlap2 = operand_type_and (i.types[2], operand_types[2]);
@@ -6803,7 +6817,10 @@ match_template (char mnem_suffix)
 							    operand_types[1],
 							    i.types[2],
 							    operand_types[2])))
-		    continue;
+		    {
+		      specific_error = progress (i.error);
+		      continue;
+		    }
 		  break;
 		}
 	    }
@@ -6814,14 +6831,14 @@ match_template (char mnem_suffix)
       /* Check if vector operands are valid.  */
       if (check_VecOperands (t))
 	{
-	  specific_error = i.error;
+	  specific_error = progress (i.error);
 	  continue;
 	}
 
       /* Check if VEX/EVEX encoding requirements can be satisfied.  */
       if (VEX_check_encoding (t))
 	{
-	  specific_error = i.error;
+	  specific_error = progress (i.error);
 	  continue;
 	}
 
@@ -6829,11 +6846,13 @@ match_template (char mnem_suffix)
       break;
     }
 
+#undef progress
+
   if (t == current_templates->end)
     {
       /* We found no match.  */
       const char *err_msg;
-      switch (specific_error ? specific_error : i.error)
+      switch (specific_error)
 	{
 	default:
 	  abort ();
