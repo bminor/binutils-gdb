@@ -958,19 +958,19 @@ aarch64_find_best_match (const aarch64_inst *inst,
 	dump_match_qualifiers (inst->operands, qualifiers);
 #endif
 
-      /* Most opcodes has much fewer patterns in the list.
-	 First NIL qualifier indicates the end in the list.   */
-      if (empty_qualifier_sequence_p (qualifiers))
+      /* The first entry should be taken literally, even if it's an empty
+	 qualifier sequence.  (This matters for strict testing.)  In other
+	 positions an empty sequence acts as a terminator.  */
+      if (i > 0 && empty_qualifier_sequence_p (qualifiers))
 	{
-	  DEBUG_TRACE_IF (i == 0, "SUCCEED: empty qualifier list");
-	  if (i)
-	    found = 0;
+	  found = 0;
 	  break;
 	}
 
       for (j = 0; j < num_opnds && j <= stop_at; ++j, ++qualifiers)
 	{
-	  if (inst->operands[j].qualifier == AARCH64_OPND_QLF_NIL)
+	  if (inst->operands[j].qualifier == AARCH64_OPND_QLF_NIL
+	      && !(inst->opcode->flags & F_STRICT))
 	    {
 	      /* Either the operand does not have qualifier, or the qualifier
 		 for the operand needs to be deduced from the qualifier
@@ -1038,7 +1038,7 @@ aarch64_find_best_match (const aarch64_inst *inst,
 static int
 match_operands_qualifier (aarch64_inst *inst, bool update_p)
 {
-  int i, nops;
+  int i;
   aarch64_opnd_qualifier_seq_t qualifiers;
 
   if (!aarch64_find_best_match (inst, inst->opcode->qualifiers_list, -1,
@@ -1046,15 +1046,6 @@ match_operands_qualifier (aarch64_inst *inst, bool update_p)
     {
       DEBUG_TRACE ("matching FAIL");
       return 0;
-    }
-
-  if (inst->opcode->flags & F_STRICT)
-    {
-      /* Require an exact qualifier match, even for NIL qualifiers.  */
-      nops = aarch64_num_of_operands (inst->opcode);
-      for (i = 0; i < nops; ++i)
-	if (inst->operands[i].qualifier != qualifiers[i])
-	  return false;
     }
 
   /* Update the qualifiers.  */
