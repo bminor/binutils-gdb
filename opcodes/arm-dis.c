@@ -11865,77 +11865,75 @@ mapping_symbol_for_insn (bfd_vma pc, struct disassemble_info *info,
   struct arm_private_data *private_data;
 
   if (info->private_data == NULL
+      || info->symtab_size == 0
       || bfd_asymbol_flavour (*info->symtab) != bfd_target_elf_flavour)
     return false;
 
   private_data = info->private_data;
 
   /* First, look for mapping symbols.  */
-  if (info->symtab_size != 0)
-  {
-    if (pc <= private_data->last_mapping_addr)
-      private_data->last_mapping_sym = -1;
+  if (pc <= private_data->last_mapping_addr)
+    private_data->last_mapping_sym = -1;
 
-    /* Start scanning at the start of the function, or wherever
-       we finished last time.  */
-    n = info->symtab_pos + 1;
+  /* Start scanning at the start of the function, or wherever
+     we finished last time.  */
+  n = info->symtab_pos + 1;
 
-    /* If the last stop offset is different from the current one it means we
-       are disassembling a different glob of bytes.  As such the optimization
-       would not be safe and we should start over.  */
-    can_use_search_opt_p
-      = private_data->last_mapping_sym >= 0
-	&& info->stop_offset == private_data->last_stop_offset;
+  /* If the last stop offset is different from the current one it means we
+     are disassembling a different glob of bytes.  As such the optimization
+     would not be safe and we should start over.  */
+  can_use_search_opt_p
+    = (private_data->last_mapping_sym >= 0
+       && info->stop_offset == private_data->last_stop_offset);
 
-    if (n >= private_data->last_mapping_sym && can_use_search_opt_p)
-      n = private_data->last_mapping_sym;
+  if (n >= private_data->last_mapping_sym && can_use_search_opt_p)
+    n = private_data->last_mapping_sym;
 
-    /* Look down while we haven't passed the location being disassembled.
-       The reason for this is that there's no defined order between a symbol
-       and an mapping symbol that may be at the same address.  We may have to
-       look at least one position ahead.  */
-    for (; n < info->symtab_size; n++)
-      {
-	addr = bfd_asymbol_value (info->symtab[n]);
-	if (addr > pc)
-	  break;
-	if (get_map_sym_type (info, n, &type))
-	  {
-	    last_sym = n;
-	    found = true;
-	  }
-      }
+  /* Look down while we haven't passed the location being disassembled.
+     The reason for this is that there's no defined order between a symbol
+     and an mapping symbol that may be at the same address.  We may have to
+     look at least one position ahead.  */
+  for (; n < info->symtab_size; n++)
+    {
+      addr = bfd_asymbol_value (info->symtab[n]);
+      if (addr > pc)
+	break;
+      if (get_map_sym_type (info, n, &type))
+	{
+	  last_sym = n;
+	  found = true;
+	}
+    }
 
-    if (!found)
-      {
-	n = info->symtab_pos;
-	if (n >= private_data->last_mapping_sym && can_use_search_opt_p)
-	  n = private_data->last_mapping_sym;
+  if (!found)
+    {
+      n = info->symtab_pos;
+      if (n >= private_data->last_mapping_sym && can_use_search_opt_p)
+	n = private_data->last_mapping_sym;
 
-	/* No mapping symbol found at this address.  Look backwards
-	   for a preceeding one, but don't go pass the section start
-	   otherwise a data section with no mapping symbol can pick up
-	   a text mapping symbol of a preceeding section.  The documentation
-	   says section can be NULL, in which case we will seek up all the
-	   way to the top.  */
-	if (info->section)
-	  section_vma = info->section->vma;
+      /* No mapping symbol found at this address.  Look backwards
+	 for a preceeding one, but don't go pass the section start
+	 otherwise a data section with no mapping symbol can pick up
+	 a text mapping symbol of a preceeding section.  The documentation
+	 says section can be NULL, in which case we will seek up all the
+	 way to the top.  */
+      if (info->section)
+	section_vma = info->section->vma;
 
-	for (; n >= 0; n--)
-	  {
-	    addr = bfd_asymbol_value (info->symtab[n]);
-	    if (addr < section_vma)
+      for (; n >= 0; n--)
+	{
+	  addr = bfd_asymbol_value (info->symtab[n]);
+	  if (addr < section_vma)
+	    break;
+
+	  if (get_map_sym_type (info, n, &type))
+	    {
+	      last_sym = n;
+	      found = true;
 	      break;
-
-	    if (get_map_sym_type (info, n, &type))
-	      {
-		last_sym = n;
-		found = true;
-		break;
-	      }
-	  }
-      }
-  }
+	    }
+	}
+    }
 
   /* If no mapping symbol was found, try looking up without a mapping
      symbol.  This is done by walking up from the current PC to the nearest
