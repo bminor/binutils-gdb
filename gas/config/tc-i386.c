@@ -7071,42 +7071,22 @@ process_suffix (void)
 	}
       else if (i.suffix == BYTE_MNEM_SUFFIX)
 	{
-	  if (intel_syntax
-	      && i.tm.opcode_modifier.mnemonicsize == IGNORESIZE
-	      && i.tm.opcode_modifier.no_bsuf)
-	    i.suffix = 0;
-	  else if (!check_byte_reg ())
+	  if (!check_byte_reg ())
 	    return 0;
 	}
       else if (i.suffix == LONG_MNEM_SUFFIX)
 	{
-	  if (intel_syntax
-	      && i.tm.opcode_modifier.mnemonicsize == IGNORESIZE
-	      && i.tm.opcode_modifier.no_lsuf
-	      && !i.tm.opcode_modifier.todword
-	      && !i.tm.opcode_modifier.toqword)
-	    i.suffix = 0;
-	  else if (!check_long_reg ())
+	  if (!check_long_reg ())
 	    return 0;
 	}
       else if (i.suffix == QWORD_MNEM_SUFFIX)
 	{
-	  if (intel_syntax
-	      && i.tm.opcode_modifier.mnemonicsize == IGNORESIZE
-	      && i.tm.opcode_modifier.no_qsuf
-	      && !i.tm.opcode_modifier.todword
-	      && !i.tm.opcode_modifier.toqword)
-	    i.suffix = 0;
-	  else if (!check_qword_reg ())
+	  if (!check_qword_reg ())
 	    return 0;
 	}
       else if (i.suffix == WORD_MNEM_SUFFIX)
 	{
-	  if (intel_syntax
-	      && i.tm.opcode_modifier.mnemonicsize == IGNORESIZE
-	      && i.tm.opcode_modifier.no_wsuf)
-	    i.suffix = 0;
-	  else if (!check_word_reg ())
+	  if (!check_word_reg ())
 	    return 0;
 	}
       else if (intel_syntax
@@ -7566,20 +7546,9 @@ check_long_reg (void)
 		 || i.tm.operand_types[op].bitfield.instance == Accum)
 	     && i.tm.operand_types[op].bitfield.dword)
       {
-	if (intel_syntax
-	    && i.tm.opcode_modifier.toqword
-	    && i.types[0].bitfield.class != RegSIMD)
-	  {
-	    /* Convert to QWORD.  We want REX byte. */
-	    i.suffix = QWORD_MNEM_SUFFIX;
-	  }
-	else
-	  {
-	    as_bad (_("incorrect register `%s%s' used with `%c' suffix"),
-		    register_prefix, i.op[op].regs->reg_name,
-		    i.suffix);
-	    return 0;
-	  }
+	as_bad (_("incorrect register `%s%s' used with `%c' suffix"),
+		register_prefix, i.op[op].regs->reg_name, i.suffix);
+	return 0;
       }
   return 1;
 }
@@ -7617,20 +7586,9 @@ check_qword_reg (void)
       {
 	/* Prohibit these changes in the 64bit mode, since the
 	   lowering is more complicated.  */
-	if (intel_syntax
-	    && i.tm.opcode_modifier.todword
-	    && i.types[0].bitfield.class != RegSIMD)
-	  {
-	    /* Convert to DWORD.  We don't want REX byte. */
-	    i.suffix = LONG_MNEM_SUFFIX;
-	  }
-	else
-	  {
-	    as_bad (_("incorrect register `%s%s' used with `%c' suffix"),
-		    register_prefix, i.op[op].regs->reg_name,
-		    i.suffix);
-	    return 0;
-	  }
+	as_bad (_("incorrect register `%s%s' used with `%c' suffix"),
+		register_prefix, i.op[op].regs->reg_name, i.suffix);
+	return 0;
       }
   return 1;
 }
@@ -7669,14 +7627,6 @@ check_word_reg (void)
 		register_prefix, i.op[op].regs->reg_name,
 		i.suffix);
 	return 0;
-      }
-    /* For some instructions need encode as EVEX.W=1 without explicit VexW1. */
-    else if (i.types[op].bitfield.qword
-	     && intel_syntax
-	     && i.tm.opcode_modifier.toqword)
-      {
-	  /* Convert to QWORD.  We want EVEX.W byte. */
-	  i.suffix = QWORD_MNEM_SUFFIX;
       }
   return 1;
 }

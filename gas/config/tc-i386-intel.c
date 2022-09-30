@@ -790,9 +790,83 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  break;
 	}
 
+      /* Now check whether we actually want to infer an AT&T-like suffix.
+	 We really only need to do this when operand size determination (incl.
+	 REX.W) is going to be derived from it.  For this we check whether the
+	 given suffix is valid for any of the candidate templates.  */
+      if (suffix && suffix != i.suffix
+	  && (current_templates->start->opcode_modifier.opcodespace != SPACE_BASE
+	      || current_templates->start->base_opcode != 0x62 /* bound */))
+	{
+	  const insn_template *t;
+
+	  for (t = current_templates->start; t < current_templates->end; ++t)
+	    {
+	      /* Operands haven't been swapped yet.  */
+	      unsigned int op = t->operands - 1 - this_operand;
+
+	      /* Easy checks to skip templates which won't match anyway.  */
+	      if (this_operand >= t->operands || t->opcode_modifier.attsyntax)
+		continue;
+
+	      switch (suffix)
+		{
+		case BYTE_MNEM_SUFFIX:
+		  if (t->opcode_modifier.no_bsuf)
+		    continue;
+		  break;
+		case WORD_MNEM_SUFFIX:
+		  if (t->opcode_modifier.no_wsuf)
+		    continue;
+		  break;
+		case LONG_MNEM_SUFFIX:
+		  if (t->opcode_modifier.no_lsuf)
+		    continue;
+		  break;
+		case QWORD_MNEM_SUFFIX:
+		  if (t->opcode_modifier.no_qsuf)
+		    continue;
+		  break;
+		case SHORT_MNEM_SUFFIX:
+		  if (t->opcode_modifier.no_ssuf)
+		    continue;
+		  break;
+		case LONG_DOUBLE_MNEM_SUFFIX:
+		  if (t->opcode_modifier.no_ldsuf)
+		    continue;
+		  break;
+		default:
+		  abort ();
+		}
+
+	      /* In a few cases suffixes are permitted, but we can nevertheless
+		 derive that these aren't going to be needed.  This is only of
+		 interest for insns using ModR/M, plus we can skip templates with
+		 swappable operands here (simplifying subsequent logic).  */
+	      if (!t->opcode_modifier.modrm || t->opcode_modifier.d)
+		break;
+
+	      if (!t->operand_types[op].bitfield.baseindex)
+		continue;
+
+	      switch (t->operand_types[op].bitfield.class)
+		{
+		case RegMMX:
+		case RegSIMD:
+		case RegMask:
+		  continue;
+		}
+
+	      break;
+	    }
+
+	  if (t == current_templates->end)
+	    suffix = 0;
+	}
+
       if (!i.suffix)
 	i.suffix = suffix;
-      else if (i.suffix != suffix)
+      else if (suffix && i.suffix != suffix)
 	{
 	  as_bad (_("conflicting operand size modifiers"));
 	  return 0;

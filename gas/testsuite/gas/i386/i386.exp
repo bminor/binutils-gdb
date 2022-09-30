@@ -169,6 +169,7 @@ if [gas_32_check] then {
     run_dump_test "simd"
     run_dump_test "simd-intel"
     run_dump_test "simd-suffix"
+    run_dump_test "simd16"
     run_dump_test "mem"
     run_dump_test "mem-intel"
     run_dump_test "reg"

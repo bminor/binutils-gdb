@@ -521,10 +521,6 @@ enum
 #define PrefixHLELock		5 /* Okay with a LOCK prefix.  */
 #define PrefixHLEAny		6 /* Okay with or without a LOCK prefix.  */
   PrefixOk,
-  /* Convert to DWORD */
-  ToDword,
-  /* Convert to QWORD */
-  ToQword,
   /* Address prefix changes register operand */
   AddrPrefixOpReg,
   /* opcode is a prefix */
@@ -740,8 +736,6 @@ typedef struct i386_opcode_modifier
   unsigned int regkludge:1;
   unsigned int implicit1stxmm0:1;
   unsigned int prefixok:3;
-  unsigned int todword:1;
-  unsigned int toqword:1;
   unsigned int addrprefixopreg:1;
   unsigned int isprefix:1;
   unsigned int immext:1;
