@@ -2861,21 +2861,21 @@ class MyUnwinder(Unwinder):
 
 @end smallexample
 
-@subheading Registering a Unwinder
+@subheading Registering an Unwinder
 
-An object file, a program space, and the @value{GDBN} proper can have
-unwinders registered with it.
+Object files and program spaces can have unwinders registered with
+them.  In addition, you can also register unwinders globally.
 
-The @code{gdb.unwinders} module provides the function to register a
+The @code{gdb.unwinders} module provides the function to register an
 unwinder:
 
 @defun gdb.unwinder.register_unwinder (locus, unwinder, replace=False)
-@var{locus} is specifies an object file or a program space to which
-@var{unwinder} is added.  Passing @code{None} or @code{gdb} adds
-@var{unwinder} to the @value{GDBN}'s global unwinder list.  The newly
-added @var{unwinder} will be called before any other unwinder from the
+@var{locus} specifies to which unwinder list to prepend the
+@var{unwinder}.  It can be either an object file, a program space, or
+@code{None}, in which case the unwinder is registered globally.  The
+newly added @var{unwinder} will be called before any other unwinder from the
 same locus.  Two unwinders in the same locus cannot have the same
-name.  An attempt to add a unwinder with already existing name raises
+name.  An attempt to add an unwinder with an already existing name raises
 an exception unless @var{replace} is @code{True}, in which case the
 old unwinder is deleted.
 @end defun
