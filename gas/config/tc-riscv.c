@@ -1287,10 +1287,10 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 		case 'u': /* 'XuN@S' ... N-bit unsigned immediate at bit S.  */
 		  goto use_imm;
 		use_imm:
-		  n = strtol (++oparg, (char **)&oparg, 10);
+		  n = strtol (oparg + 1, (char **)&oparg, 10);
 		  if (*oparg != '@')
 		    goto unknown_validate_operand;
-		  s = strtol (++oparg, (char **)&oparg, 10);
+		  s = strtol (oparg + 1, (char **)&oparg, 10);
 		  oparg--;
 
 		  USE_IMM (n, s);
@@ -3327,10 +3327,10 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      sign = false;
 		      goto parse_imm;
 		    parse_imm:
-		      n = strtol (++oparg, (char **)&oparg, 10);
+		      n = strtol (oparg + 1, (char **)&oparg, 10);
 		      if (*oparg != '@')
 			goto unknown_riscv_ip_operand;
-		      s = strtol (++oparg, (char **)&oparg, 10);
+		      s = strtol (oparg + 1, (char **)&oparg, 10);
 		      oparg--;
 
 		      my_getExpression (imm_expr, asarg);

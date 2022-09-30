@@ -586,10 +586,10 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		  sign = false;
 		  goto print_imm;
 		print_imm:
-		  n = strtol (++oparg, (char **)&oparg, 10);
+		  n = strtol (oparg + 1, (char **)&oparg, 10);
 		  if (*oparg != '@')
 		    goto undefined_modifier;
-		  s = strtol (++oparg, (char **)&oparg, 10);
+		  s = strtol (oparg + 1, (char **)&oparg, 10);
 		  oparg--;
 
 		  if (!sign)
