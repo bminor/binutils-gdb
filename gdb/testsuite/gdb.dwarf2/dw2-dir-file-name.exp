@@ -317,6 +317,22 @@ puts -nonewline $f "\
 "
 out_compdir out_cu
 
+Dwarf::assemble { add_dummy_cus 0 file_id $f } {
+    global func_info_names
+
+    foreach name $func_info_names {
+	global ${name}_start
+	global ${name}_end
+	set name_start [set ${name}_start]
+	set name_end [set ${name}_end]
+
+	set cu_label .L${name}_begin
+	aranges {} cu_label {
+	    arange {} $name_start "$name_end - $name_start"
+	}
+    }
+}
+
 puts $f "  .section .debug_line"
 out_compdir out_line
 

@@ -3193,6 +3193,9 @@ namespace eval Dwarf {
     #           - the name of the file where the generated assembly
     #             code is written.
     #             default = "".
+    # file_id <tcl channel identifier>
+    #           - open file where the generated assemble core is written.
+    #             default = "".
     #  add_dummy_cus <0|1>
     #           - Whether to add dummy CUs before and after the CUs
     #             added in the BODY.
@@ -3233,6 +3236,7 @@ namespace eval Dwarf {
 
 	parse_options {
 	    { filename "" }
+	    { file_id "" }
 	    { add_dummy_cus 1 }
 	}
 
@@ -3241,7 +3245,12 @@ namespace eval Dwarf {
 	    set _initialized 1
 	}
 
-	set _output_file [open $filename w]
+	if { $file_id != "" } {
+	    set _output_file $file_id
+	} else {
+	    set _output_file [open $filename w]
+	}
+
 	set _cu_count -1
 	_empty_array _deferred_output
 	set _defer ""
@@ -3274,7 +3283,9 @@ namespace eval Dwarf {
 
 	_write_deferred_output
 
-	catch {close $_output_file}
+	if { $file_id == "" } {
+	    catch {close $_output_file}
+	}
 	set _output_file {}
     }
 }
