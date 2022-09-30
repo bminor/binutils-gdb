@@ -104,7 +104,7 @@ gdb_test "ptype /oTM struct abc" \
 "/*     48      |       2 */    my_int_type field9;" \
 "" \
 "                               abc(void);" \
-"                               ~abc();" \
+"                               ~abc(void);" \
 "" \
 "                               typedef short my_int_type;" \
 "/* XXX  6-byte padding   */" \

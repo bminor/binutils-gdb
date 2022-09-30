@@ -273,35 +273,44 @@ cp_type_print_method_args (struct type *mtype, const char *prefix,
 		  language_cplus, DMGL_ANSI);
   gdb_puts ("(", stream);
 
-  /* Skip the class variable.  We keep this here to accommodate older
-     compilers and debug formats which may not support artificial
-     parameters.  */
-  i = staticp ? 0 : 1;
-  if (nargs > i)
+  int printed_args = 0;
+  for (i = 0; i < nargs; ++i)
     {
-      while (i < nargs)
+      if (i == 0 && !staticp)
 	{
-	  struct field arg = args[i++];
-
-	  /* Skip any artificial arguments.  */
-	  if (FIELD_ARTIFICIAL (arg))
-	    continue;
-
-	  c_print_type (arg.type (), "", stream, 0, 0, language, flags);
-
-	  if (i == nargs && varargs)
-	    gdb_printf (stream, ", ...");
-	  else if (i < nargs)
-	    {
-	      gdb_printf (stream, ", ");
-	      stream->wrap_here (8);
-	    }
+	  /* Skip the class variable.  We keep this here to accommodate older
+	     compilers and debug formats which may not support artificial
+	     parameters.  */
+	  continue;
 	}
+
+      struct field arg = args[i];
+      /* Skip any artificial arguments.  */
+      if (FIELD_ARTIFICIAL (arg))
+	continue;
+
+      if (printed_args > 0)
+	{
+	  gdb_printf (stream, ", ");
+	  stream->wrap_here (8);
+	}
+
+      c_print_type (arg.type (), "", stream, 0, 0, language, flags);
+      printed_args++;
     }
-  else if (varargs)
-    gdb_printf (stream, "...");
-  else if (language == language_cplus)
-    gdb_printf (stream, "void");
+
+  if (varargs)
+    {
+      if (printed_args == 0)
+	gdb_printf (stream, "...");
+      else
+	gdb_printf (stream, ", ...");
+    }
+  else if (printed_args == 0)
+    {
+      if (language == language_cplus)
+	gdb_printf (stream, "void");
+    }
 
   gdb_printf (stream, ")");
 
