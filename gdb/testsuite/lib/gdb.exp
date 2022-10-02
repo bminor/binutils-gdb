@@ -2904,6 +2904,116 @@ proc with_cwd { dir body } {
     }
 }
 
+# Use GDB's 'cd' command to switch to DIR.  Return true if the switch
+# was successful, otherwise, call perror and return false.
+
+proc gdb_cd { dir } {
+    set new_dir ""
+    gdb_test_multiple "cd $dir" "" {
+	-re "^cd \[^\r\n\]+\r\n" {
+	    exp_continue
+	}
+
+	-re "^Working directory (\[^\r\n\]+)\\.\r\n" {
+	    set new_dir $expect_out(1,string)
+	    exp_continue
+	}
+
+	-re "^$::gdb_prompt $" {
+	    if { $new_dir == "" || $new_dir != $dir } {
+		perror "failed to switch to $dir"
+		return false
+	    }
+	}
+    }
+
+    return true
+}
+
+# Use GDB's 'pwd' command to figure out the current working directory.
+# Return the directory as a string.  If we can't figure out the
+# current working directory, then call perror, and return the empty
+# string.
+
+proc gdb_pwd { } {
+    set dir ""
+    gdb_test_multiple "pwd" "" {
+	-re "^pwd\r\n" {
+	    exp_continue
+	}
+
+	-re "^Working directory (\[^\r\n\]+)\\.\r\n" {
+	    set dir $expect_out(1,string)
+	    exp_continue
+	}
+
+	-re "^$::gdb_prompt $" {
+	}
+    }
+
+    if { $dir == "" } {
+	perror "failed to read GDB's current working directory"
+    }
+
+    return $dir
+}
+
+# Similar to the with_cwd proc, this proc runs BODY with the current
+# working directory changed to CWD.
+#
+# Unlike with_cwd, the directory change here is done within GDB
+# itself, so GDB must be running before this proc is called.
+
+proc with_gdb_cwd { dir body } {
+    set saved_dir [gdb_pwd]
+    if { $saved_dir == "" } {
+	return
+    }
+
+    verbose -log "Switching to directory $dir (saved CWD: $saved_dir)."
+    if ![gdb_cd $dir] {
+	return
+    }
+
+    set code [catch {uplevel 1 $body} result]
+
+    verbose -log "Switching back to $saved_dir."
+    if ![gdb_cd $saved_dir] {
+	return
+    }
+
+    # Check that GDB is still alive.  If GDB crashed in the above code
+    # then any corefile will have been left in DIR, not the root
+    # testsuite directory.  As a result the corefile will not be
+    # brought to the users attention.  Instead, if GDB crashed, then
+    # this check should cause a FAIL, which should be enough to alert
+    # the user.
+    set saw_result false
+    gdb_test_multiple "p 123" "" {
+	-re "p 123\r\n" {
+	    exp_continue
+	}
+
+	-re "^\\\$$::decimal = 123\r\n" {
+	    set saw_result true
+	    exp_continue
+	}
+
+	-re "^$::gdb_prompt $" {
+	    if { !$saw_result } {
+		fail "check gdb is alive in with_gdb_cwd"
+	    }
+	}
+    }
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}
+
 # Run tests in BODY with GDB prompt and variable $gdb_prompt set to
 # PROMPT.  When BODY is finished, restore GDB prompt and variable
 # $gdb_prompt.
