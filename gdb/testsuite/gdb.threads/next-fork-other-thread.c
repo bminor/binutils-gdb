@@ -44,7 +44,7 @@ forker (void *arg)
       do
 	{
 	  ret = waitpid (pid, &stat, 0);
-	} while (ret == EINTR);
+	} while (ret == -1 && errno == EINTR);
 
       assert (ret == pid);
       assert (WIFEXITED (stat));
