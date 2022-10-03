@@ -547,7 +547,8 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	      }
 
 	    if (riscv_csr_hash[csr] != NULL)
-	      print (info->stream, dis_style_text, "%s", riscv_csr_hash[csr]);
+	      print (info->stream, dis_style_register, "%s",
+		     riscv_csr_hash[csr]);
 	    else
 	      print (info->stream, dis_style_text, "0x%x", csr);
 	    break;
