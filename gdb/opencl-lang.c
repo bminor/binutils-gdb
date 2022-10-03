@@ -147,7 +147,8 @@ lval_func_read (struct value *v)
 static void
 lval_func_write (struct value *v, struct value *fromval)
 {
-  struct value *mark = value_mark ();
+  scoped_value_mark mark;
+
   struct lval_closure *c = (struct lval_closure *) value_computed_closure (v);
   struct type *type = check_typedef (value_type (v));
   struct type *eltype = check_typedef (value_type (c->val))->target_type ();
@@ -184,8 +185,6 @@ lval_func_write (struct value *v, struct value *fromval)
 	      elsize);
       value_assign (to_elm_val, from_elm_val);
     }
-
-  value_free_to_mark (mark);
 }
 
 /* Return nonzero if bits in V from OFFSET and LENGTH represent a

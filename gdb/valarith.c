@@ -1615,7 +1615,7 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
 
   value *val = allocate_value (type1);
   gdb::array_view<gdb_byte> val_contents = value_contents_writeable (val);
-  value *mark = value_mark ();
+  scoped_value_mark mark;
   for (i = 0; i < high_bound1 - low_bound1 + 1; i++)
     {
       value *tmp = value_binop (value_subscript (val1, i),
@@ -1623,7 +1623,6 @@ vector_binop (struct value *val1, struct value *val2, enum exp_opcode op)
       copy (value_contents_all (tmp),
 	    val_contents.slice (i * elsize, elsize));
      }
-  value_free_to_mark (mark);
 
   return val;
 }

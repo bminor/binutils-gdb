@@ -127,8 +127,9 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
   unsigned len;
   struct type *elttype, *index_type;
   unsigned long bitsize = TYPE_FIELD_BITSIZE (type, 0);
-  struct value *mark = value_mark ();
   LONGEST low = 0;
+
+  scoped_value_mark mark;
 
   elttype = type->target_type ();
   index_type = type->index_type ();
@@ -251,8 +252,6 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
     {
       gdb_printf (stream, "...");
     }
-
-  value_free_to_mark (mark);
 }
 
 /* Print the character C on STREAM as part of the contents of a literal

@@ -708,10 +708,10 @@ readable_regcache::cooked_read (int regnum, gdb_byte *buf)
     }
   else if (gdbarch_pseudo_register_read_value_p (m_descr->gdbarch))
     {
-      struct value *mark, *computed;
+      struct value *computed;
       enum register_status result = REG_VALID;
 
-      mark = value_mark ();
+      scoped_value_mark mark;
 
       computed = gdbarch_pseudo_register_read_value (m_descr->gdbarch,
 						     this, regnum);
@@ -723,8 +723,6 @@ readable_regcache::cooked_read (int regnum, gdb_byte *buf)
 	  memset (buf, 0, m_descr->sizeof_register[regnum]);
 	  result = REG_UNAVAILABLE;
 	}
-
-      value_free_to_mark (mark);
 
       return result;
     }

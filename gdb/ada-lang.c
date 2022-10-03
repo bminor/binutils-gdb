@@ -7858,7 +7858,6 @@ ada_template_to_fixed_record_type_1 (struct type *type,
 				     CORE_ADDR address, struct value *dval0,
 				     int keep_dynamic_fields)
 {
-  struct value *mark = value_mark ();
   struct value *dval;
   struct type *rtype;
   int nfields, bit_len;
@@ -7866,6 +7865,8 @@ ada_template_to_fixed_record_type_1 (struct type *type,
   long off;
   int fld_bit_len;
   int f;
+
+  scoped_value_mark mark;
 
   /* Compute the number of fields in this record type that are going
      to be processed: unless keep_dynamic_fields, this includes only
@@ -8068,7 +8069,6 @@ ada_template_to_fixed_record_type_1 (struct type *type,
   else
     rtype->set_length (align_up (rtype->length (), type->length ()));
 
-  value_free_to_mark (mark);
   return rtype;
 }
 
@@ -8169,7 +8169,6 @@ static struct type *
 to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
 				   CORE_ADDR address, struct value *dval0)
 {
-  struct value *mark = value_mark ();
   struct value *dval;
   struct type *rtype;
   struct type *branch_type;
@@ -8179,6 +8178,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
   if (variant_field == -1)
     return type;
 
+  scoped_value_mark mark;
   if (dval0 == NULL)
     {
       dval = value_from_contents_and_address (type, valaddr, address);
@@ -8228,7 +8228,6 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
   rtype->set_length (rtype->length ()
 		     - type->field (variant_field).type ()->length ());
 
-  value_free_to_mark (mark);
   return rtype;
 }
 
@@ -12311,11 +12310,8 @@ should_stop_exception (const struct bp_location *bl)
   stop = true;
   try
     {
-      struct value *mark;
-
-      mark = value_mark ();
+      scoped_value_mark mark;
       stop = value_true (evaluate_expression (ada_loc->excep_cond_expr.get ()));
-      value_free_to_mark (mark);
     }
   catch (const gdb_exception &ex)
     {

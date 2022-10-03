@@ -512,8 +512,6 @@ static enum command_control_type
 execute_control_command_1 (struct command_line *cmd, int from_tty)
 {
   struct command_line *current;
-  struct value *val;
-  struct value *val_mark;
   int loop;
   enum command_control_type ret;
 
@@ -567,10 +565,11 @@ execute_control_command_1 (struct command_line *cmd, int from_tty)
 	    QUIT;
 
 	    /* Evaluate the expression.  */
-	    val_mark = value_mark ();
-	    val = evaluate_expression (expr.get ());
-	    cond_result = value_true (val);
-	    value_free_to_mark (val_mark);
+	    {
+	      scoped_value_mark mark;
+	      value *val = evaluate_expression (expr.get ());
+	      cond_result = value_true (val);
+	    }
 
 	    /* If the value is false, then break out of the loop.  */
 	    if (!cond_result)
@@ -621,16 +620,17 @@ execute_control_command_1 (struct command_line *cmd, int from_tty)
 	ret = simple_control;
 
 	/* Evaluate the conditional.  */
-	val_mark = value_mark ();
-	val = evaluate_expression (expr.get ());
+	{
+	  scoped_value_mark mark;
+	  value *val = evaluate_expression (expr.get ());
 
-	/* Choose which arm to take commands from based on the value
-	   of the conditional expression.  */
-	if (value_true (val))
-	  current = cmd->body_list_0.get ();
-	else if (cmd->body_list_1 != nullptr)
-	  current = cmd->body_list_1.get ();
-	value_free_to_mark (val_mark);
+	  /* Choose which arm to take commands from based on the value
+	     of the conditional expression.  */
+	  if (value_true (val))
+	    current = cmd->body_list_0.get ();
+	  else if (cmd->body_list_1 != nullptr)
+	    current = cmd->body_list_1.get ();
+	}
 
 	/* Execute commands in the given arm.  */
 	while (current)

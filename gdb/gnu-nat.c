@@ -3062,7 +3062,7 @@ static void
 info_port_rights (const char *args, mach_port_type_t only)
 {
   struct inf *inf = active_inf ();
-  struct value *vmark = value_mark ();
+  scoped_value_mark vmark;
 
   if (args)
     /* Explicit list of port rights.  */
@@ -3088,8 +3088,6 @@ info_port_rights (const char *args, mach_port_type_t only)
       if (err)
 	error (_("%s."), safe_strerror (err));
     }
-
-  value_free_to_mark (vmark);
 }
 
 static void

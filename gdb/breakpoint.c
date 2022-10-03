@@ -4837,11 +4837,8 @@ bpstat_print (bpstat *bs, target_waitkind kind)
 static bool
 breakpoint_cond_eval (expression *exp)
 {
-  struct value *mark = value_mark ();
-  bool res = value_true (evaluate_expression (exp));
-
-  value_free_to_mark (mark);
-  return res;
+  scoped_value_mark mark;
+  return value_true (evaluate_expression (exp));
 }
 
 /* Allocate a new bpstat.  Link it to the FIFO list by BS_LINK_POINTER.  */
@@ -5363,12 +5360,11 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
       int within_current_scope = 1;
       struct watchpoint * w;
 
-      /* We use value_mark and value_free_to_mark because it could
-	 be a long time before we return to the command level and
-	 call free_all_values.  We can't call free_all_values
-	 because we might be in the middle of evaluating a
-	 function call.  */
-      struct value *mark = value_mark ();
+      /* We use scoped_value_mark because it could be a long time
+	 before we return to the command level and call
+	 free_all_values.  We can't call free_all_values because we
+	 might be in the middle of evaluating a function call.  */
+      scoped_value_mark mark;
 
       if (is_watchpoint (b))
 	w = (struct watchpoint *) b;
@@ -5427,7 +5423,6 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
 	     watchpoint, unconditionally report it.  */
 	}
       /* FIXME-someday, should give breakpoint #.  */
-      value_free_to_mark (mark);
     }
 
   if (cond != nullptr && !condition_result)
@@ -9979,17 +9974,16 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	      /* We've found a "mask" token, which means the user wants to
 		 create a hardware watchpoint that is going to have the mask
 		 facility.  */
-	      struct value *mask_value, *mark;
+	      struct value *mask_value;
 
 	      if (use_mask)
 		error(_("You can specify only one mask."));
 
 	      use_mask = just_location = true;
 
-	      mark = value_mark ();
+	      scoped_value_mark mark;
 	      mask_value = parse_to_comma_and_eval (&value_start);
 	      mask = value_as_address (mask_value);
-	      value_free_to_mark (mark);
 	    }
 	  else
 	    /* We didn't recognize what we found.  We should stop here.  */
