@@ -250,21 +250,16 @@ Options:\n\
 
   fprintf (stream, _("\
   --alternate             initially turn on alternate macro syntax\n"));
-#ifdef DEFAULT_FLAG_COMPRESS_DEBUG
   fprintf (stream, _("\
   --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi|zstd}]\n\
-                          compress DWARF debug sections using zlib [default]\n"));
+                          compress DWARF debug sections\n")),
+  fprintf (stream, _("\
+		            Default: %s\n"),
+	   bfd_get_compression_algorithm_name (flag_compress_debug));
+
   fprintf (stream, _("\
   --nocompress-debug-sections\n\
                           don't compress DWARF debug sections\n"));
-#else
-  fprintf (stream, _("\
-  --compress-debug-sections[={none|zlib|zlib-gnu|zlib-gabi|zstd}]\n\
-                          compress DWARF debug sections using zlib\n"));
-  fprintf (stream, _("\
-  --nocompress-debug-sections\n\
-                          don't compress DWARF debug sections [default]\n"));
-#endif
   fprintf (stream, _("\
   -D                      produce assembler debugging messages\n"));
   fprintf (stream, _("\
@@ -741,24 +736,13 @@ This program has absolutely no warranty.\n"));
 	  if (optarg)
 	    {
 #if defined OBJ_ELF || defined OBJ_MAYBE_ELF
-	      if (strcasecmp (optarg, "none") == 0)
-		flag_compress_debug = COMPRESS_DEBUG_NONE;
-	      else if (strcasecmp (optarg, "zlib") == 0)
-		flag_compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
-	      else if (strcasecmp (optarg, "zlib-gnu") == 0)
-		flag_compress_debug = COMPRESS_DEBUG_GNU_ZLIB;
-	      else if (strcasecmp (optarg, "zlib-gabi") == 0)
-		flag_compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
-	      else if (strcasecmp (optarg, "zstd") == 0)
-		{
-#ifdef HAVE_ZSTD
-		  flag_compress_debug = COMPRESS_DEBUG_ZSTD;
-#else
+	      flag_compress_debug = bfd_get_compression_algorithm (optarg);
+#ifndef HAVE_ZSTD
+	      if (flag_compress_debug == COMPRESS_DEBUG_ZSTD)
 		  as_fatal (_ ("--compress-debug-sections=zstd: gas is not "
 			       "built with zstd support"));
 #endif
-		}
-	      else
+	      if (flag_compress_debug == COMPRESS_UNKNOWN)
 		as_fatal (_("Invalid --compress-debug-sections option: `%s'"),
 			  optarg);
 #else

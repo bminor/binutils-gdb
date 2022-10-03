@@ -2148,13 +2148,9 @@ elf_static_list_options (FILE *file)
   fprintf (file, _("\
   --compress-debug-sections=[none|zlib|zlib-gnu|zlib-gabi|zstd]\n\
 			      Compress DWARF debug sections\n"));
-#ifdef DEFAULT_FLAG_COMPRESS_DEBUG
   fprintf (file, _("\
-                                Default: zlib-gabi\n"));
-#else
-  fprintf (file, _("\
-                                Default: none\n"));
-#endif
+                                Default: %s\n"),
+	   bfd_get_compression_algorithm_name (link_info.compress_debug));
   fprintf (file, _("\
   -z common-page-size=SIZE    Set common page size to SIZE\n"));
   fprintf (file, _("\

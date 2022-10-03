@@ -660,24 +660,16 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
 
     case OPTION_COMPRESS_DEBUG:
-      if (strcasecmp (optarg, "none") == 0)
-	link_info.compress_debug = COMPRESS_DEBUG_NONE;
-      else if (strcasecmp (optarg, "zlib") == 0)
-	link_info.compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
-      else if (strcasecmp (optarg, "zlib-gnu") == 0)
-	link_info.compress_debug = COMPRESS_DEBUG_GNU_ZLIB;
-      else if (strcasecmp (optarg, "zlib-gabi") == 0)
-	link_info.compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
-      else if (strcasecmp (optarg, "zstd") == 0)
+      link_info.compress_debug = bfd_get_compression_algorithm (optarg);
+      if (strcasecmp (optarg, "zstd") == 0)
 	{
-#ifdef HAVE_ZSTD
-	  link_info.compress_debug = COMPRESS_DEBUG_ZSTD;
-#else
-	  einfo (_ ("%F%P: --compress-debug-sections=zstd: ld is not built "
-		    "with zstd support\n"));
+#ifndef HAVE_ZSTD
+	  if (link_info.compress_debug == COMPRESS_DEBUG_ZSTD)
+	    einfo (_ ("%F%P: --compress-debug-sections=zstd: ld is not built "
+		  "with zstd support\n"));
 #endif
 	}
-      else
+      if (link_info.compress_debug == COMPRESS_UNKNOWN)
 	einfo (_("%F%P: invalid --compress-debug-sections option: \`%s'\n"),
 	       optarg);
       break;
