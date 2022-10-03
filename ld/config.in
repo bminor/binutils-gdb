@@ -7,6 +7,9 @@
 #endif
 #define __CONFIG_H__ 1
 
+/* Default compression algorithm for --enable-compressed-debug-sections. */
+#undef DEFAULT_COMPRESSED_DEBUG_ALGORITHM
+
 /* Define to 1 if you want to emit gnu hash in the ELF linker by default. */
 #undef DEFAULT_EMIT_GNU_HASH
 

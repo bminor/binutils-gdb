@@ -352,7 +352,7 @@ main (int argc, char **argv)
   link_info.spare_dynamic_tags = 5;
   link_info.path_separator = ':';
 #ifdef DEFAULT_FLAG_COMPRESS_DEBUG
-  link_info.compress_debug = COMPRESS_DEBUG_GABI_ZLIB;
+  link_info.compress_debug = DEFAULT_COMPRESSED_DEBUG_ALGORITHM;
 #endif
 #ifdef DEFAULT_NEW_DTAGS
   link_info.new_dtags = DEFAULT_NEW_DTAGS;

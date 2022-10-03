@@ -226,7 +226,7 @@ print_version_id (void)
 
 #ifdef DEFAULT_FLAG_COMPRESS_DEBUG
 enum compressed_debug_section_type flag_compress_debug
-  = COMPRESS_DEBUG_GABI_ZLIB;
+  = DEFAULT_COMPRESSED_DEBUG_ALGORITHM;
 #endif
 
 static void

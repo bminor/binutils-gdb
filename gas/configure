@@ -810,6 +810,7 @@ enable_largefile
 enable_targets
 enable_checking
 enable_compressed_debug_sections
+enable_default_compressed_debug_sections_algorithm
 enable_x86_relax_relocations
 enable_elf_stt_common
 enable_generate_build_notes
@@ -1476,6 +1477,9 @@ Optional Features:
   --enable-checking       enable run-time checks
   --enable-compressed-debug-sections={all,gas,none}
                           compress debug sections by default
+  --enable-default-compressed-debug-sections-algorithm={zlib,zstd}
+                          Default compression algorithm for
+                          --enable-compressed-debug-sections.
   --enable-x86-relax-relocations
                           generate x86 relax relocations by default
   --enable-elf-stt-common generate ELF common symbols with STT_COMMON type by
@@ -10722,7 +10726,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10725 "configure"
+#line 10729 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10828,7 +10832,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10831 "configure"
+#line 10835 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11499,6 +11503,15 @@ if test "${enable_compressed_debug_sections+set}" = set; then :
   ,yes, | ,all, | *,gas,*) ac_default_compressed_debug_sections=yes ;;
   ,no, | ,none,)  ac_default_compressed_debug_sections=no ;;
   *)   ac_default_compressed_debug_sections=unset ;;
+esac
+fi
+
+# Select default compression algorithm.
+ac_default_compressed_debug_sections_algorithm=COMPRESS_DEBUG_GABI_ZLIB
+# Check whether --enable-default_compressed_debug_sections_algorithm was given.
+if test "${enable_default_compressed_debug_sections_algorithm+set}" = set; then :
+  enableval=$enable_default_compressed_debug_sections_algorithm; case "${enableval}" in
+   zstd) ac_default_compressed_debug_sections_algorithm=COMPRESS_DEBUG_ZSTD ;;
 esac
 fi
 
@@ -12670,6 +12683,12 @@ if test x$ac_default_compressed_debug_sections = xyes ; then
 $as_echo "#define DEFAULT_FLAG_COMPRESS_DEBUG 1" >>confdefs.h
 
 fi
+
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_COMPRESSED_DEBUG_ALGORITHM $ac_default_compressed_debug_sections_algorithm
+_ACEOF
+
 
 # Turn on all targets if possible
 if test ${all_targets} = "yes"; then
