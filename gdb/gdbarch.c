@@ -45,7 +45,7 @@ struct gdbarch
   const struct target_desc * target_desc;
 
   /* target specific vector.  */
-  struct gdbarch_tdep_base *tdep = nullptr;
+  gdbarch_tdep_up tdep;
   gdbarch_dump_tdep_ftype *dump_tdep = nullptr;
 
   /* per-architecture data-pointers.  */
@@ -263,13 +263,13 @@ struct gdbarch
 
 struct gdbarch *
 gdbarch_alloc (const struct gdbarch_info *info,
-	       struct gdbarch_tdep_base *tdep)
+	       gdbarch_tdep_up tdep)
 {
   struct gdbarch *gdbarch;
 
   gdbarch = new struct gdbarch;
 
-  gdbarch->tdep = tdep;
+  gdbarch->tdep = std::move (tdep);
 
   gdbarch->bfd_arch_info = info->bfd_arch_info;
   gdbarch->byte_order = info->byte_order;

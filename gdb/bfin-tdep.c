@@ -778,7 +778,6 @@ bfin_abi (struct gdbarch *gdbarch)
 static struct gdbarch *
 bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   enum bfin_abi abi;
 
   abi = BFIN_ABI_FLAT;
@@ -798,8 +797,9 @@ bfin_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       return arches->gdbarch;
     }
 
-  bfin_gdbarch_tdep *tdep = new bfin_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new bfin_gdbarch_tdep));
+  bfin_gdbarch_tdep *tdep = gdbarch_tdep<bfin_gdbarch_tdep> (gdbarch);
 
   tdep->bfin_abi = abi;
 

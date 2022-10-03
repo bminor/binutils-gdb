@@ -2982,16 +2982,15 @@ hppa_skip_trampoline_code (frame_info_ptr frame, CORE_ADDR pc)
 static struct gdbarch *
 hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
-
   /* find a candidate among the list of pre-declared architectures.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
     return (arches->gdbarch);
 
   /* If none found, then allocate and initialize one.  */
-  hppa_gdbarch_tdep *tdep = new hppa_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new hppa_gdbarch_tdep));
+  hppa_gdbarch_tdep *tdep = gdbarch_tdep<hppa_gdbarch_tdep> (gdbarch);
 
   /* Determine from the bfd_arch_info structure if we are dealing with
      a 32 or 64 bits architecture.  If the bfd_arch_info is not available,

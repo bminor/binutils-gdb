@@ -89,6 +89,8 @@ struct frv_gdbarch_tdep : gdbarch_tdep_base
   const char **register_names = nullptr;
 };
 
+using frv_gdbarch_tdep_up = std::unique_ptr<frv_gdbarch_tdep>;
+
 /* Return the FR-V ABI associated with GDBARCH.  */
 enum frv_abi
 frv_abi (struct gdbarch *gdbarch)
@@ -130,12 +132,12 @@ frv_fdpic_loadmap_addresses (struct gdbarch *gdbarch, CORE_ADDR *interp_addr,
 
 /* Allocate a new variant structure, and set up default values for all
    the fields.  */
-static frv_gdbarch_tdep *
-new_variant (void)
+static frv_gdbarch_tdep_up
+new_variant ()
 {
   int r;
 
-  frv_gdbarch_tdep *var = new frv_gdbarch_tdep;
+  frv_gdbarch_tdep_up var (new frv_gdbarch_tdep);
 
   var->frv_abi = FRV_ABI_EABI;
   var->num_gprs = 64;
@@ -1427,7 +1429,6 @@ static const struct frame_base frv_frame_base = {
 static struct gdbarch *
 frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   int elf_flags = 0;
 
   /* Check to see if we've already built an appropriate architecture
@@ -1437,7 +1438,9 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return arches->gdbarch;
 
   /* Select the right tdep structure for this variant.  */
-  frv_gdbarch_tdep *var = new_variant ();
+  gdbarch *gdbarch = gdbarch_alloc (&info, new_variant ());
+  frv_gdbarch_tdep *var = gdbarch_tdep<frv_gdbarch_tdep> (gdbarch);
+
   switch (info.bfd_arch_info->mach)
     {
     case bfd_mach_frv:
@@ -1470,8 +1473,6 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   if (elf_flags & EF_FRV_CPU_FR450)
     set_variant_scratch_registers (var);
-
-  gdbarch = gdbarch_alloc (&info, var);
 
   set_gdbarch_short_bit (gdbarch, 16);
   set_gdbarch_int_bit (gdbarch, 32);

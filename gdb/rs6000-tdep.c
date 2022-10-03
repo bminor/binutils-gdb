@@ -7471,7 +7471,6 @@ rs6000_program_breakpoint_here_p (gdbarch *gdbarch, CORE_ADDR address)
 static struct gdbarch *
 rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   int wordsize, from_xcoff_exec, from_elf_exec;
   enum bfd_architecture arch;
   unsigned long mach;
@@ -8179,14 +8178,15 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        - "set arch"		trust blindly
        - GDB startup		useless but harmless */
 
-  ppc_gdbarch_tdep *tdep = new ppc_gdbarch_tdep;
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new ppc_gdbarch_tdep));
+  ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
+
   tdep->wordsize = wordsize;
   tdep->elf_abi = elf_abi;
   tdep->soft_float = soft_float;
   tdep->long_double_abi = long_double_abi;
   tdep->vector_abi = vector_abi;
-
-  gdbarch = gdbarch_alloc (&info, tdep);
 
   tdep->ppc_gp0_regnum = PPC_R0_REGNUM;
   tdep->ppc_toc_regnum = PPC_R0_REGNUM + 2;

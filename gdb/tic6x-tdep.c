@@ -1136,7 +1136,6 @@ tic6x_return_in_first_hidden_param_p (struct gdbarch *gdbarch,
 static struct gdbarch *
 tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
   int has_gp = 0;
@@ -1221,10 +1220,11 @@ tic6x_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	return arches->gdbarch;
     }
 
-  tic6x_gdbarch_tdep *tdep = new tic6x_gdbarch_tdep;
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new tic6x_gdbarch_tdep));
+  tic6x_gdbarch_tdep *tdep = gdbarch_tdep<tic6x_gdbarch_tdep> (gdbarch);
 
   tdep->has_gp = has_gp;
-  gdbarch = gdbarch_alloc (&info, tdep);
 
   /* Data type sizes.  */
   set_gdbarch_ptr_bit (gdbarch, 32);

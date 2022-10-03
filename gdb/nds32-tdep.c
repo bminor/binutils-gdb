@@ -1940,7 +1940,6 @@ nds32_validate_tdesc_p (const struct target_desc *tdesc,
 static struct gdbarch *
 nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   struct gdbarch_list *best_arch;
   tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
@@ -1981,13 +1980,14 @@ nds32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     return NULL;
 
   /* Allocate space for the new architecture.  */
-  nds32_gdbarch_tdep *tdep = new nds32_gdbarch_tdep;
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new nds32_gdbarch_tdep));
+  nds32_gdbarch_tdep *tdep = gdbarch_tdep<nds32_gdbarch_tdep> (gdbarch);
+
   tdep->fpu_freg = fpu_freg;
   tdep->use_pseudo_fsrs = use_pseudo_fsrs;
   tdep->fs0_regnum = -1;
   tdep->elf_abi = elf_abi;
-
-  gdbarch = gdbarch_alloc (&info, tdep);
 
   set_gdbarch_wchar_bit (gdbarch, 16);
   set_gdbarch_wchar_signed (gdbarch, 0);

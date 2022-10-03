@@ -2671,7 +2671,6 @@ csky_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 static struct gdbarch *
 csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   /* Analyze info.abfd.  */
   unsigned int fpu_abi = 0;
   unsigned int vdsp_version = 0;
@@ -2761,8 +2760,10 @@ csky_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided.  */
-  csky_gdbarch_tdep *tdep = new csky_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new csky_gdbarch_tdep));
+  csky_gdbarch_tdep *tdep = gdbarch_tdep<csky_gdbarch_tdep> (gdbarch);
+
   tdep->fpu_abi = fpu_abi;
   tdep->vdsp_version = vdsp_version;
   tdep->fpu_hardfp = fpu_hardfp;

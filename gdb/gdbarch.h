@@ -69,6 +69,8 @@ struct gdbarch_tdep_base
   virtual ~gdbarch_tdep_base() = default;
 };
 
+using gdbarch_tdep_up = std::unique_ptr<gdbarch_tdep_base>;
+
 /* The architecture associated with the inferior through the
    connection to the target.
 
@@ -292,7 +294,8 @@ extern struct gdbarch_list *gdbarch_list_lookup_by_info (struct gdbarch_list *ar
    parameters.  set_gdbarch_*() functions are called to complete the
    initialization of the object.  */
 
-extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info, struct gdbarch_tdep_base *tdep);
+extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info,
+				      gdbarch_tdep_up tdep);
 
 
 /* Helper function.  Free a partially-constructed ``struct gdbarch''.

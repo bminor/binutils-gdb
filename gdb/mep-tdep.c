@@ -2331,8 +2331,6 @@ mep_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static struct gdbarch *
 mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
-
   /* Which me_module are we building a gdbarch object for?  */
   CONFIG_ATTR me_module;
 
@@ -2397,8 +2395,9 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	return arches->gdbarch;
     }
 
-  mep_gdbarch_tdep *tdep = new mep_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new mep_gdbarch_tdep));
+  mep_gdbarch_tdep *tdep = gdbarch_tdep<mep_gdbarch_tdep> (gdbarch);
 
   /* Get a CGEN CPU descriptor for this architecture.  */
   {

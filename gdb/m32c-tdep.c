@@ -2587,7 +2587,6 @@ m32c_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
 static struct gdbarch *
 m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   unsigned long mach = info.bfd_arch_info->mach;
 
   /* Find a candidate among the list of architectures we've created
@@ -2597,8 +2596,8 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
        arches = gdbarch_list_lookup_by_info (arches->next, &info))
     return arches->gdbarch;
 
-  m32c_gdbarch_tdep *tdep = new m32c_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new m32c_gdbarch_tdep));
 
   /* Essential types.  */
   make_types (gdbarch);

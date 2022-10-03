@@ -6983,13 +6983,12 @@ s390_tdesc_valid (s390_gdbarch_tdep *tdep,
   return true;
 }
 
-/* Allocate and initialize new gdbarch_tdep.  Caller is responsible to free
-   memory after use.  */
+/* Allocate and initialize new gdbarch_tdep.  */
 
-static s390_gdbarch_tdep *
+static s390_gdbarch_tdep_up
 s390_gdbarch_tdep_alloc ()
 {
-  s390_gdbarch_tdep *tdep = new s390_gdbarch_tdep;
+  s390_gdbarch_tdep_up tdep (new s390_gdbarch_tdep);
 
   tdep->tdesc = NULL;
 
@@ -7026,8 +7025,8 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   static const char *const stap_register_indirection_suffixes[] = { ")",
 								    NULL };
 
-  s390_gdbarch_tdep *tdep = s390_gdbarch_tdep_alloc ();
-  struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch = gdbarch_alloc (&info, s390_gdbarch_tdep_alloc ());
+  s390_gdbarch_tdep *tdep = gdbarch_tdep<s390_gdbarch_tdep> (gdbarch);
   tdesc_arch_data_up tdesc_data = tdesc_data_alloc ();
   info.tdesc_data = tdesc_data.get ();
 
@@ -7156,7 +7155,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Check any target description for validity.  */
   if (!s390_tdesc_valid (tdep, tdesc_data.get ()))
     {
-      delete tdep;
       gdbarch_free (gdbarch);
       return NULL;
     }
@@ -7189,7 +7187,6 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       if (tmp->vector_abi != tdep->vector_abi)
 	continue;
 
-      delete tdep;
       gdbarch_free (gdbarch);
       return arches->gdbarch;
     }

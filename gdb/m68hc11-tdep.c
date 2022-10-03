@@ -1396,7 +1396,6 @@ static struct gdbarch *
 m68hc11_gdbarch_init (struct gdbarch_info info,
 		      struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   int elf_flags;
 
   soft_reg_initialized = 0;
@@ -1423,8 +1422,10 @@ m68hc11_gdbarch_init (struct gdbarch_info info,
     }
 
   /* Need a new architecture.  Fill in a target specific vector.  */
-  m68gc11_gdbarch_tdep *tdep = new m68gc11_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new m68gc11_gdbarch_tdep));
+  m68gc11_gdbarch_tdep *tdep = gdbarch_tdep<m68gc11_gdbarch_tdep> (gdbarch);
+
   tdep->elf_flags = elf_flags;
 
   switch (info.bfd_arch_info->arch)

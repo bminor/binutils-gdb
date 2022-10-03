@@ -944,7 +944,6 @@ rx_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 static struct gdbarch *
 rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   int elf_flags;
   tdesc_arch_data_up tdesc_data;
   const struct target_desc *tdesc = info.target_desc;
@@ -997,8 +996,10 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   gdb_assert(tdesc_data != NULL);
 
-  rx_gdbarch_tdep *tdep = new rx_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new rx_gdbarch_tdep));
+  rx_gdbarch_tdep *tdep = gdbarch_tdep<rx_gdbarch_tdep> (gdbarch);
+
   tdep->elf_flags = elf_flags;
 
   set_gdbarch_num_regs (gdbarch, RX_NUM_REGS);

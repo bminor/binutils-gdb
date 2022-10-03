@@ -616,8 +616,8 @@ show_bdccsr_command (const char *args, int from_tty)
 static struct gdbarch *
 s12z_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  s12z_gdbarch_tdep *tdep = new s12z_gdbarch_tdep;
-  struct gdbarch *gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new s12z_gdbarch_tdep));
 
   add_cmd ("bdccsr", class_support, show_bdccsr_command,
 	   _("Show the current value of the microcontroller's BDCCSR."),

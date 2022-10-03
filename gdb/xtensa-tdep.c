@@ -3145,13 +3145,11 @@ xtensa_derive_tdep (xtensa_gdbarch_tdep *tdep)
 
 /* Module "constructor" function.  */
 
-extern xtensa_gdbarch_tdep xtensa_tdep;
+extern xtensa_register_t xtensa_rmap[];
 
 static struct gdbarch *
 xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
-
   DEBUGTRACE ("gdbarch_init()\n");
 
   if (!xtensa_default_isa)
@@ -3160,8 +3158,10 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* We have to set the byte order before we call gdbarch_alloc.  */
   info.byte_order = XCHAL_HAVE_BE ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
 
-  xtensa_gdbarch_tdep *tdep = &xtensa_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info,
+		     gdbarch_tdep_up (new xtensa_gdbarch_tdep (xtensa_rmap)));
+  xtensa_gdbarch_tdep *tdep = gdbarch_tdep<xtensa_gdbarch_tdep> (gdbarch);
   xtensa_derive_tdep (tdep);
 
   /* Verify our configuration.  */

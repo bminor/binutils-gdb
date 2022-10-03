@@ -1221,7 +1221,7 @@ gdbarch_tdep_1 (struct gdbarch *gdbarch)
 {
   if (gdbarch_debug >= 2)
     gdb_printf (gdb_stdlog, "gdbarch_tdep_1 called\n");
-  return gdbarch->tdep;
+  return gdbarch->tdep.get ();
 }
 
 registry<gdbarch> *

@@ -67,6 +67,8 @@ struct s390_gdbarch_tdep : gdbarch_tdep_base
     = nullptr;
 };
 
+using s390_gdbarch_tdep_up = std::unique_ptr<s390_gdbarch_tdep>;
+
 /* Decoding S/390 instructions.  */
 
 /* Named opcode values for the S/390 instructions we recognize.  Some

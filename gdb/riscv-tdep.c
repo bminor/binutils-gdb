@@ -3792,7 +3792,6 @@ static struct gdbarch *
 riscv_gdbarch_init (struct gdbarch_info info,
 		    struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   struct riscv_gdbarch_features features;
   const struct target_desc *tdesc = info.target_desc;
 
@@ -3878,8 +3877,10 @@ riscv_gdbarch_init (struct gdbarch_info info,
     return arches->gdbarch;
 
   /* None found, so create a new architecture from the information provided.  */
-  riscv_gdbarch_tdep *tdep = new riscv_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new riscv_gdbarch_tdep));
+  riscv_gdbarch_tdep *tdep = gdbarch_tdep<riscv_gdbarch_tdep> (gdbarch);
+
   tdep->isa_features = features;
   tdep->abi_features = abi_features;
 

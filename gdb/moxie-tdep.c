@@ -1049,16 +1049,14 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 static struct gdbarch *
 moxie_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
-
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
   if (arches != NULL)
     return arches->gdbarch;
 
   /* Allocate space for the new architecture.  */
-  moxie_gdbarch_tdep *tdep = new moxie_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new moxie_gdbarch_tdep));
 
   set_gdbarch_wchar_bit (gdbarch, 32);
   set_gdbarch_wchar_signed (gdbarch, 0);

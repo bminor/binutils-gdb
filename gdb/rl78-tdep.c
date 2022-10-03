@@ -1375,7 +1375,6 @@ rl78_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 static struct gdbarch *
 rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
-  struct gdbarch *gdbarch;
   int elf_flags;
 
   /* Extract the elf_flags if available.  */
@@ -1403,8 +1402,10 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* None found, create a new architecture from the information
      provided.  */
-  rl78_gdbarch_tdep * tdep = new rl78_gdbarch_tdep;
-  gdbarch = gdbarch_alloc (&info, tdep);
+  gdbarch *gdbarch
+    = gdbarch_alloc (&info, gdbarch_tdep_up (new rl78_gdbarch_tdep));
+  rl78_gdbarch_tdep *tdep = gdbarch_tdep<rl78_gdbarch_tdep> (gdbarch);
+
   tdep->elf_flags = elf_flags;
 
   /* Initialize types.  */
