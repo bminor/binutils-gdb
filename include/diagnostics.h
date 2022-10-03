@@ -99,6 +99,10 @@
    DIAGNOSTIC_IGNORE ("-Wunused-but-set-variable")
 # endif
 
+# if __GNUC__ >= 13
+#  define DIAGNOSTIC_IGNORE_SELF_MOVE DIAGNOSTIC_IGNORE ("-Wself-move")
+# endif
+
 /* GCC 4.8's "diagnostic push/pop" seems broken when using this, -Wswitch
    remains enabled at the error level even after a pop.  Therefore, don't
    use it for GCC < 5.  */
