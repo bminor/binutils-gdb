@@ -6365,6 +6365,13 @@ get_32bit_section_headers (Filedata * filedata, bool probe)
   /* PR binutils/17531: Cope with unexpected section header sizes.  */
   if (size == 0 || num == 0)
     return false;
+
+  /* The section header cannot be at the start of the file - that is
+     where the ELF file header is located.  A file with absolutely no
+     sections in it will use a shoff of 0.  */
+  if (filedata->file_header.e_shoff == 0)
+    return false;
+
   if (size < sizeof * shdrs)
     {
       if (! probe)
@@ -6427,6 +6434,12 @@ get_64bit_section_headers (Filedata * filedata, bool probe)
 
   /* PR binutils/17531: Cope with unexpected section header sizes.  */
   if (size == 0 || num == 0)
+    return false;
+
+  /* The section header cannot be at the start of the file - that is
+     where the ELF file header is located.  A file with absolutely no
+     sections in it will use a shoff of 0.  */
+  if (filedata->file_header.e_shoff == 0)
     return false;
 
   if (size < sizeof * shdrs)

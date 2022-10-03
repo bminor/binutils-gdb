@@ -1,3 +1,9 @@
+2022-10-03  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_32bit_section_headers): Return false if the
+	e_shoff field is zero.
+	(get_64bit_section_headers): Likewise.
+
 2022-09-28  Nick Clifton  <nickc@redhat.com>
 
 	PR 29628
