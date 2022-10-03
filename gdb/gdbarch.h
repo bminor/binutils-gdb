@@ -306,6 +306,14 @@ extern struct gdbarch *gdbarch_alloc (const struct gdbarch_info *info,
 
 extern void gdbarch_free (struct gdbarch *);
 
+struct gdbarch_deleter
+{
+  void operator() (gdbarch *arch) const
+  { gdbarch_free (arch); }
+};
+
+using gdbarch_up = std::unique_ptr<gdbarch, gdbarch_deleter>;
+
 /* Get the obstack owned by ARCH.  */
 
 extern obstack *gdbarch_obstack (gdbarch *arch);
