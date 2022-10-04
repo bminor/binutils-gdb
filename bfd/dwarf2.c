@@ -4411,13 +4411,23 @@ parse_comp_unit (struct dwarf2_debug *stash,
   if (version < 5)
     addr_size = read_1_byte (abfd, &info_ptr, end_ptr);
 
-  if (unit_type == DW_UT_type)
+  switch (unit_type)
     {
+    case DW_UT_type:
       /* Skip type signature.  */
       info_ptr += 8;
 
       /* Skip type offset.  */
       info_ptr += offset_size;
+      break;
+
+    case DW_UT_skeleton:
+      /* Skip DWO_id field.  */
+      info_ptr += 8;
+      break;
+
+    default:
+      break;
     }
 
   if (addr_size > sizeof (bfd_vma))
