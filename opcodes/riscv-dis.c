@@ -1000,7 +1000,7 @@ riscv_disassemble_data (bfd_vma memaddr ATTRIBUTE_UNUSED,
 int
 print_insn_riscv (bfd_vma memaddr, struct disassemble_info *info)
 {
-  bfd_byte packet[8];
+  bfd_byte packet[RISCV_MAX_INSN_LEN];
   insn_t insn = 0;
   bfd_vma dump_size;
   int status;

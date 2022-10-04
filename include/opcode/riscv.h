@@ -40,6 +40,8 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   /* 80- ... 176-bit instructions.  */
   if ((insn & 0x7f) == 0x7f && (insn & 0x7000) != 0x7000)
     return 10 + ((insn >> 11) & 0xe);
+  /* Maximum value returned by this function.  */
+#define RISCV_MAX_INSN_LEN 22
   /* Longer instructions not supported at the moment.  */
   return 2;
 }
