@@ -7953,11 +7953,12 @@ bool bfd_get_full_section_contents
 void bfd_cache_section_contents
    (asection *sec, void *contents);
 
-bool bfd_is_section_compressed_with_header
+bool bfd_is_section_compressed_info
    (bfd *abfd, asection *section,
     int *compression_header_size_p,
     bfd_size_type *uncompressed_size_p,
-    unsigned int *uncompressed_alignment_power_p);
+    unsigned int *uncompressed_alignment_power_p,
+    unsigned int *ch_type);
 
 bool bfd_is_section_compressed
    (bfd *abfd, asection *section);

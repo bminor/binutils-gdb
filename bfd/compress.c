@@ -81,8 +81,7 @@ decompress_contents (bool is_zstd, bfd_byte *compressed_buffer,
   return inflateEnd (&strm) == Z_OK && rc == Z_OK && strm.avail_out == 0;
 }
 
-/* Compress data of the size specified in @var{uncompressed_size}
-   and pointed to by @var{uncompressed_buffer} using zlib/zstd and store
+/* Compress section contents using zlib/zstd and store
    as the contents field.  This function assumes the contents
    field was allocated using bfd_malloc() or equivalent.
 
@@ -90,111 +89,99 @@ decompress_contents (bool is_zstd, bfd_byte *compressed_buffer,
    compressed successfully.  Otherwise return 0.  */
 
 static bfd_size_type
-bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
-			       bfd_byte *uncompressed_buffer,
-			       bfd_size_type uncompressed_size)
+bfd_compress_section_contents (bfd *abfd, sec_ptr sec)
 {
+  bfd_byte *input_buffer;
   uLong compressed_size;
   bfd_byte *buffer;
   bfd_size_type buffer_size;
-  bool decompress;
   int zlib_size = 0;
-  int orig_compression_header_size;
-  bfd_size_type orig_uncompressed_size;
-  unsigned int orig_uncompressed_alignment_pow;
-  int header_size = bfd_get_compression_header_size (abfd, NULL);
+  int orig_header_size;
+  bfd_size_type uncompressed_size;
+  unsigned int uncompressed_alignment_pow;
+  unsigned int ch_type = 0;
+  int new_header_size = bfd_get_compression_header_size (abfd, NULL);
   bool compressed
-    = bfd_is_section_compressed_with_header (abfd, sec,
-					     &orig_compression_header_size,
-					     &orig_uncompressed_size,
-					     &orig_uncompressed_alignment_pow);
+    = bfd_is_section_compressed_info (abfd, sec,
+				      &orig_header_size,
+				      &uncompressed_size,
+				      &uncompressed_alignment_pow,
+				      &ch_type);
+  bool update = false;
+
+  /* We shouldn't be trying to decompress unsupported compressed sections.  */
+  if (compressed && orig_header_size < 0)
+    abort ();
 
   /* Either ELF compression header or the 12-byte, "ZLIB" + 8-byte size,
      overhead in .zdebug* section.  */
-  if (!header_size)
-     header_size = 12;
+  if (!new_header_size)
+    new_header_size = 12;
+  if (ch_type == 0)
+    orig_header_size = 12;
 
+  input_buffer = sec->contents;
   if (compressed)
     {
-      /* We shouldn't decompress unsupported compressed section.  */
-      if (orig_compression_header_size < 0)
-	abort ();
+      zlib_size = sec->size - orig_header_size;
+      compressed_size = zlib_size + new_header_size;
 
-      /* Different compression schemes.  Just move the compressed section
-	 contents to the right position. */
-      if (orig_compression_header_size == 0)
+      /* If we are converting between zlib-gnu and zlib-gabi then the
+	 compressed contents just need to be moved.  */
+      update = (ch_type < ELFCOMPRESS_ZSTD
+		&& (abfd->flags & BFD_COMPRESS_ZSTD) == 0);
+
+      /* Uncompress when not just moving contents or when compressed
+	 is not smaller than uncompressed.  */
+      if (!update || compressed_size >= uncompressed_size)
 	{
-	  /* Convert it from .zdebug* section.  Get the uncompressed
-	     size first.  We need to subtract the 12-byte overhead in
-	     .zdebug* section.  Set orig_compression_header_size to
-	     the 12-bye overhead.  */
-	  orig_compression_header_size = 12;
-	  zlib_size = uncompressed_size - 12;
-	}
-      else
-	{
-	  /* Convert it to .zdebug* section.  */
-	  zlib_size = uncompressed_size - orig_compression_header_size;
-	}
+	  buffer_size = uncompressed_size;
+	  buffer = bfd_malloc (buffer_size);
+	  if (buffer == NULL)
+	    return 0;
 
-      /* Add the header size.  */
-      compressed_size = zlib_size + header_size;
+	  if (!decompress_contents (ch_type == ELFCOMPRESS_ZSTD,
+				    input_buffer + orig_header_size,
+				    zlib_size, buffer, buffer_size))
+	    {
+	      bfd_set_error (bfd_error_bad_value);
+	      free (buffer);
+	      return 0;
+	    }
+	  free (input_buffer);
+	  bfd_set_section_alignment (sec, uncompressed_alignment_pow);
+	  sec->contents = buffer;
+	  sec->compress_status = COMPRESS_SECTION_DONE;
+	  sec->size = uncompressed_size;
+	  input_buffer = buffer;
+	}
     }
-  else
-    compressed_size = compressBound (uncompressed_size) + header_size;
 
-  /* Uncompress if it leads to smaller size.  */
-  if (compressed && compressed_size > orig_uncompressed_size)
-    {
-      decompress = true;
-      buffer_size = orig_uncompressed_size;
-    }
-  else
-    {
-      decompress = false;
-      buffer_size = compressed_size;
-    }
-  buffer = (bfd_byte *) bfd_alloc (abfd, buffer_size);
+  if (!update)
+    compressed_size = compressBound (uncompressed_size) + new_header_size;
+
+  buffer_size = compressed_size;
+  buffer = bfd_alloc (abfd, buffer_size);
   if (buffer == NULL)
     return 0;
 
-  if (compressed)
+  if (update)
     {
-      sec->size = orig_uncompressed_size;
-      if (decompress)
-	{
-	  if (!decompress_contents (
-		  sec->compress_status == DECOMPRESS_SECTION_ZSTD,
-		  uncompressed_buffer + orig_compression_header_size,
-		  zlib_size, buffer, buffer_size))
-	    {
-	      bfd_set_error (bfd_error_bad_value);
-	      bfd_release (abfd, buffer);
-	      return 0;
-	    }
-	  free (uncompressed_buffer);
-	  bfd_set_section_alignment (sec, orig_uncompressed_alignment_pow);
-
-	  sec->contents = buffer;
-	  sec->compress_status = COMPRESS_SECTION_DONE;
-	  return orig_uncompressed_size;
-	}
-      else
-	{
-	  bfd_update_compression_header (abfd, buffer, sec);
-	  memmove (buffer + header_size,
-		   uncompressed_buffer + orig_compression_header_size,
-		   zlib_size);
-	}
+      if (compressed_size < uncompressed_size)
+	memcpy (buffer + new_header_size,
+		input_buffer + orig_header_size,
+		zlib_size);
     }
   else
     {
       if (abfd->flags & BFD_COMPRESS_ZSTD)
 	{
 #if HAVE_ZSTD
-	  compressed_size = ZSTD_compress (
-		  buffer + header_size, compressed_size, uncompressed_buffer,
-		  uncompressed_size, ZSTD_CLEVEL_DEFAULT);
+	  compressed_size = ZSTD_compress (buffer + new_header_size,
+					   compressed_size,
+					   input_buffer,
+					   uncompressed_size,
+					   ZSTD_CLEVEL_DEFAULT);
 	  if (ZSTD_isError (compressed_size))
 	    {
 	      bfd_release (abfd, buffer);
@@ -203,8 +190,8 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
 	    }
 #endif
 	}
-      else if (compress ((Bytef *)buffer + header_size, &compressed_size,
-			 (const Bytef *)uncompressed_buffer, uncompressed_size)
+      else if (compress ((Bytef *) buffer + new_header_size, &compressed_size,
+			 (const Bytef *) input_buffer, uncompressed_size)
 	       != Z_OK)
 	{
 	  bfd_release (abfd, buffer);
@@ -212,27 +199,24 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec,
 	  return 0;
 	}
 
-      compressed_size += header_size;
-      /* PR binutils/18087: If compression didn't make the section smaller,
-	 just keep it uncompressed.  */
-      if (compressed_size < uncompressed_size)
-	bfd_update_compression_header (abfd, buffer, sec);
-      else
-	{
-	  /* NOTE: There is a small memory leak here since
-	     uncompressed_buffer is malloced and won't be freed.  */
-	  bfd_release (abfd, buffer);
-	  sec->contents = uncompressed_buffer;
-	  sec->compress_status = COMPRESS_SECTION_NONE;
-	  return uncompressed_size;
-	}
+      compressed_size += new_header_size;
     }
 
-  free (uncompressed_buffer);
+  /* If compression didn't make the section smaller, keep it uncompressed.  */
+  if (compressed_size >= uncompressed_size)
+    {
+      memcpy (buffer, input_buffer, uncompressed_size);
+      sec->compress_status = COMPRESS_SECTION_NONE;
+    }
+  else
+    {
+      sec->size = uncompressed_size;
+      bfd_update_compression_header (abfd, buffer, sec);
+      sec->size = compressed_size;
+      sec->compress_status = COMPRESS_SECTION_DONE;
+    }
   sec->contents = buffer;
-  sec->size = compressed_size;
-  sec->compress_status = COMPRESS_SECTION_DONE;
-
+  free (input_buffer);
   return uncompressed_size;
 }
 
@@ -421,14 +405,15 @@ bfd_cache_section_contents (asection *sec, void *contents)
 
 /*
 FUNCTION
-	bfd_is_section_compressed_with_header
+	bfd_is_section_compressed_info
 
 SYNOPSIS
-	bool bfd_is_section_compressed_with_header
+	bool bfd_is_section_compressed_info
 	  (bfd *abfd, asection *section,
-	  int *compression_header_size_p,
-	  bfd_size_type *uncompressed_size_p,
-	  unsigned int *uncompressed_alignment_power_p);
+	   int *compression_header_size_p,
+	   bfd_size_type *uncompressed_size_p,
+	   unsigned int *uncompressed_alignment_power_p,
+	   unsigned int *ch_type);
 
 DESCRIPTION
 	Return @code{TRUE} if @var{section} is compressed.  Compression
@@ -441,16 +426,16 @@ DESCRIPTION
 */
 
 bool
-bfd_is_section_compressed_with_header (bfd *abfd, sec_ptr sec,
-				       int *compression_header_size_p,
-				       bfd_size_type *uncompressed_size_p,
-				       unsigned int *uncompressed_align_pow_p)
+bfd_is_section_compressed_info (bfd *abfd, sec_ptr sec,
+				int *compression_header_size_p,
+				bfd_size_type *uncompressed_size_p,
+				unsigned int *uncompressed_align_pow_p,
+				unsigned int *ch_type)
 {
   bfd_byte header[MAX_COMPRESSION_HEADER_SIZE];
   int compression_header_size;
   int header_size;
   unsigned int saved = sec->compress_status;
-  unsigned int ch_type;
   bool compressed;
 
   *uncompressed_align_pow_p = 0;
@@ -481,7 +466,7 @@ bfd_is_section_compressed_with_header (bfd *abfd, sec_ptr sec,
     {
       if (compression_header_size != 0)
 	{
-	  if (!bfd_check_compression_header (abfd, header, sec, &ch_type,
+	  if (!bfd_check_compression_header (abfd, header, sec, ch_type,
 					     uncompressed_size_p,
 					     uncompressed_align_pow_p))
 	    compression_header_size = -1;
@@ -521,10 +506,12 @@ bfd_is_section_compressed (bfd *abfd, sec_ptr sec)
   int compression_header_size;
   bfd_size_type uncompressed_size;
   unsigned int uncompressed_align_power;
-  return (bfd_is_section_compressed_with_header (abfd, sec,
-						 &compression_header_size,
-						 &uncompressed_size,
-						 &uncompressed_align_power)
+  unsigned int ch_type;
+  return (bfd_is_section_compressed_info (abfd, sec,
+					  &compression_header_size,
+					  &uncompressed_size,
+					  &uncompressed_align_power,
+					  &ch_type)
 	  && compression_header_size >= 0
 	  && uncompressed_size > 0);
 }
@@ -654,10 +641,14 @@ bfd_init_section_compress_status (bfd *abfd, sec_ptr sec)
 				 0, uncompressed_size))
     return false;
 
-  uncompressed_size = bfd_compress_section_contents (abfd, sec,
-						     uncompressed_buffer,
-						     uncompressed_size);
-  return uncompressed_size != 0;
+  sec->contents = uncompressed_buffer;
+  if (bfd_compress_section_contents (abfd, sec) == 0)
+    {
+      free (sec->contents);
+      sec->contents = NULL;
+      return false;
+    }
+  return true;
 }
 
 /*
@@ -673,7 +664,7 @@ DESCRIPTION
 	compressed size and set compress_status to COMPRESS_SECTION_DONE.
 
 	Return @code{FALSE} if compression fail.  Otherwise, return
-	@code{TRUE}.
+	@code{TRUE}.  UNCOMPRESSED_BUFFER is freed in both cases.
 */
 
 bool
@@ -693,7 +684,12 @@ bfd_compress_section (bfd *abfd, sec_ptr sec, bfd_byte *uncompressed_buffer)
       return false;
     }
 
-  /* Compress it.  */
-  return bfd_compress_section_contents (abfd, sec, uncompressed_buffer,
-					uncompressed_size) != 0;
+  sec->contents = uncompressed_buffer;
+  if (bfd_compress_section_contents (abfd, sec) == 0)
+    {
+      free (sec->contents);
+      sec->contents = NULL;
+      return false;
+    }
+  return true;
 }
