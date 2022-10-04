@@ -1476,7 +1476,6 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
     }
 
   add_fixed_insn (ip);
-  install_insn (ip);
 
   /* We need to start a new frag after any instruction that can be
      optimized away or compressed by the linker during relaxation, to prevent
