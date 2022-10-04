@@ -1445,7 +1445,7 @@ append_insn (struct riscv_cl_insn *ip, expressionS *address_expr,
 	  || reloc_type == BFD_RELOC_RISCV_JMP)
 	{
 	  int j = reloc_type == BFD_RELOC_RISCV_JMP;
-	  int best_case = riscv_insn_length (ip->insn_opcode);
+	  int best_case = insn_length (ip);
 	  unsigned worst_case = relaxed_branch_length (NULL, NULL, 0);
 
 	  if (now_seg == absolute_section)
