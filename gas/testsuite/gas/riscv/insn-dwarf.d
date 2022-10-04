@@ -65,8 +65,14 @@ insn.s +60 +0xac.*
 insn.s +61 +0xb0.*
 insn.s +62 +0xb6.*
 insn.s +63 +0xbe.*
-insn.s +64 +0xc0.*
-insn.s +65 +0xc4.*
-insn.s +66 +0xca.*
-insn.s +- +0xd2
+insn.s +64 +0xc8.*
+insn.s +65 +0xd4.*
+insn.s +66 +0xea.*
+insn.s +67 +0xec.*
+insn.s +68 +0xf0.*
+insn.s +69 +0xf6.*
+insn.s +70 +0xfe.*
+insn.s +71 +0x108.*
+insn.s +72 +0x114.*
+insn.s +- +0x12a
 #pass

@@ -3389,8 +3389,15 @@ riscv_ip_hardcode (char *str,
   do
     {
       expression (imm_expr);
-      if (imm_expr->X_op != O_constant)
+      switch (imm_expr->X_op)
 	{
+	case O_constant:
+	  values[num++] = (insn_t) imm_expr->X_add_number;
+	  break;
+	case O_big:
+	  values[num++] = generic_bignum[0];
+	  break;
+	default:
 	  /* The first value isn't constant, so it should be
 	     .insn <type> <operands>.  We have been parsed it
 	     in the riscv_ip.  */
@@ -3398,9 +3405,8 @@ riscv_ip_hardcode (char *str,
 	    return error;
 	  return _("values must be constant");
 	}
-      values[num++] = (insn_t) imm_expr->X_add_number;
     }
-  while (*input_line_pointer++ == ',' && num < 2);
+  while (*input_line_pointer++ == ',' && num < 2 && imm_expr->X_op != O_big);
 
   input_line_pointer--;
   if (*input_line_pointer != '\0')
@@ -3410,8 +3416,22 @@ riscv_ip_hardcode (char *str,
   insn->match = values[num - 1];
   create_insn (ip, insn);
   unsigned int bytes = riscv_insn_length (insn->match);
-  if ((bytes < sizeof(values[0]) && values[num - 1] >> (8 * bytes) != 0)
-      || (num == 2 && values[0] != bytes))
+
+  if (num == 2 && values[0] != bytes)
+    return _("value conflicts with instruction length");
+
+  if (imm_expr->X_op == O_big)
+    {
+      if (bytes != imm_expr->X_add_number * CHARS_PER_LITTLENUM)
+	return _("value conflicts with instruction length");
+      char *f = frag_more (bytes);
+      for (num = 0; num < imm_expr->X_add_number; ++num)
+	number_to_chars_littleendian (f + num * CHARS_PER_LITTLENUM,
+	                              generic_bignum[num], CHARS_PER_LITTLENUM);
+      return NULL;
+    }
+
+  if (bytes < sizeof(values[0]) && values[num - 1] >> (8 * bytes) != 0)
     return _("value conflicts with instruction length");
 
   return NULL;
@@ -4476,7 +4496,7 @@ s_riscv_insn (int x ATTRIBUTE_UNUSED)
       else
 	as_bad ("%s `%s'", error.msg, error.statement);
     }
-  else
+  else if (imm_expr.X_op != O_big)
     {
       gas_assert (insn.insn_mo->pinfo != INSN_MACRO);
       append_insn (&insn, &imm_expr, imm_reloc);

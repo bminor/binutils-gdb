@@ -37,6 +37,9 @@ static inline unsigned int riscv_insn_length (insn_t insn)
     return 6;
   if ((insn & 0x7f) == 0x3f) /* 64-bit instructions.  */
     return 8;
+  /* 80- ... 176-bit instructions.  */
+  if ((insn & 0x7f) == 0x7f && (insn & 0x7000) != 0x7000)
+    return 10 + ((insn >> 11) & 0xe);
   /* Longer instructions not supported at the moment.  */
   return 2;
 }
