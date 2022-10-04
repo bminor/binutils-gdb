@@ -265,11 +265,10 @@ riscv_set_tso (void)
   elf_flags |= EF_RISCV_TSO;
 }
 
-/* This linked list records all enabled extensions, which are parsed from
-   the architecture string.  The architecture string can be set by the
-   -march option, the elf architecture attributes, and the --with-arch
-   configure option.  */
-static riscv_subset_list_t *riscv_subsets = NULL;
+/* The linked list hanging off of .subsets_list records all enabled extensions,
+   which are parsed from the architecture string.  The architecture string can
+   be set by the -march option, the elf architecture attributes, and the
+   --with-arch configure option.  */
 static riscv_parse_subset_t riscv_rps_as =
 {
   NULL,			/* subset_list, we will set it later once
@@ -302,14 +301,13 @@ riscv_set_arch (const char *s)
       return;
     }
 
-  if (riscv_subsets == NULL)
+  if (riscv_rps_as.subset_list == NULL)
     {
-      riscv_subsets = XNEW (riscv_subset_list_t);
-      riscv_subsets->head = NULL;
-      riscv_subsets->tail = NULL;
-      riscv_rps_as.subset_list = riscv_subsets;
+      riscv_rps_as.subset_list = XNEW (riscv_subset_list_t);
+      riscv_rps_as.subset_list->head = NULL;
+      riscv_rps_as.subset_list->tail = NULL;
     }
-  riscv_release_subset_list (riscv_subsets);
+  riscv_release_subset_list (riscv_rps_as.subset_list);
   riscv_parse_subset (&riscv_rps_as, s);
 
   riscv_set_rvc (false);
@@ -3986,10 +3984,9 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
       s = XNEW (struct riscv_option_stack);
       s->next = riscv_opts_stack;
       s->options = riscv_opts;
-      s->subset_list = riscv_subsets;
+      s->subset_list = riscv_rps_as.subset_list;
       riscv_opts_stack = s;
-      riscv_subsets = riscv_copy_subset_list (s->subset_list);
-      riscv_rps_as.subset_list = riscv_subsets;
+      riscv_rps_as.subset_list = riscv_copy_subset_list (s->subset_list);
     }
   else if (strcmp (name, "pop") == 0)
     {
@@ -4000,11 +3997,10 @@ s_riscv_option (int x ATTRIBUTE_UNUSED)
 	as_bad (_(".option pop with no .option push"));
       else
 	{
-	  riscv_subset_list_t *release_subsets = riscv_subsets;
+	  riscv_subset_list_t *release_subsets = riscv_rps_as.subset_list;
 	  riscv_opts_stack = s->next;
 	  riscv_opts = s->options;
-	  riscv_subsets = s->subset_list;
-	  riscv_rps_as.subset_list = riscv_subsets;
+	  riscv_rps_as.subset_list = s->subset_list;
 	  riscv_release_subset_list (release_subsets);
 	  free (s);
 	}
@@ -4505,7 +4501,7 @@ riscv_write_out_attrs (void)
   unsigned int i;
 
   /* Re-write architecture elf attribute.  */
-  arch_str = riscv_arch_str (xlen, riscv_subsets);
+  arch_str = riscv_arch_str (xlen, riscv_rps_as.subset_list);
   bfd_elf_add_proc_attr_string (stdoutput, Tag_RISCV_arch, arch_str);
   xfree ((void *) arch_str);
 
