@@ -3338,14 +3338,14 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		      if (!sign)
 			{
 			  if (!VALIDATE_U_IMM (imm_expr->X_add_number, n))
-			    as_bad (_("improper immediate value (%lu)"),
-				    (unsigned long) imm_expr->X_add_number);
+			    as_bad (_("improper immediate value (%"PRIu64")"),
+				    imm_expr->X_add_number);
 			}
 		      else
 			{
 			  if (!VALIDATE_S_IMM (imm_expr->X_add_number, n))
-			    as_bad (_("improper immediate value (%li)"),
-				    (long) imm_expr->X_add_number);
+			    as_bad (_("improper immediate value (%"PRIi64")"),
+				    imm_expr->X_add_number);
 			}
 		      INSERT_IMM (n, s, *ip, imm_expr->X_add_number);
 		      imm_expr->X_op = O_absent;
