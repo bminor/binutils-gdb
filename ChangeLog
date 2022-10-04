@@ -1,3 +1,8 @@
+2022-10-04  Nick Clifton  <nickc@redhat.com>
+
+	* README-maintainer-mode: Add a minimum version of dejagnu
+	requirement.
+
 2022-09-08  Nick Clifton  <nickc@redhat.com>
 
 	* README-maintainer-mode: Update minimum version  of gettext
