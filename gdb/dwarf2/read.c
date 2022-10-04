@@ -12051,7 +12051,9 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	   && attr->is_nonnegative ()
 	   && (attr->as_nonnegative () == DW_INL_inlined
 	       || attr->as_nonnegative () == DW_INL_declared_inlined));
-      if (!external_p && !inlined_p)
+      attr = dwarf2_attr (die, DW_AT_declaration, cu);
+      bool decl_p = attr != nullptr && attr->as_boolean ();
+      if (!external_p && !inlined_p && !decl_p)
 	complaint (_("cannot get low and high bounds "
 		     "for subprogram DIE at %s"),
 		   sect_offset_str (die->sect_off));
