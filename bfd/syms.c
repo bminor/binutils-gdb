@@ -1019,6 +1019,10 @@ _bfd_stab_section_find_nearest_line (bfd *abfd,
 	    return true;
 	}
 
+      if ((info->stabsec->flags & SEC_HAS_CONTENTS) == 0
+	  || (info->strsec->flags & SEC_HAS_CONTENTS) == 0)
+	goto out;
+
       stabsize = (info->stabsec->rawsize
 		  ? info->stabsec->rawsize
 		  : info->stabsec->size);
