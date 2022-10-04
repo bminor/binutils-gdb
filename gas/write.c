@@ -1473,7 +1473,7 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   char *header;
   int x;
   flagword flags = bfd_section_flags (sec);
-  unsigned int header_size, compression_header_size;
+  unsigned int header_size;
 
   if (seginfo == NULL
       || sec->size < 32
@@ -1482,8 +1482,8 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
 
   section_name = bfd_section_name (sec);
   if (!startswith (section_name, ".debug_")
-      && (!startswith (section_name, ".gnu.debuglto_.debug_")
-	  || flag_compress_debug == COMPRESS_DEBUG_GNU_ZLIB))
+      && !startswith (section_name, ".gnu.debuglto_.debug_")
+      && !startswith (section_name, ".gnu.linkonce.wi."))
     return;
 
   bool use_zstd = abfd->flags & BFD_COMPRESS_ZSTD;
@@ -1492,16 +1492,9 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
     return;
 
   if (flag_compress_debug == COMPRESS_DEBUG_GNU_ZLIB)
-    {
-      compression_header_size = 0;
-      header_size = 12;
-    }
+    header_size = 12;
   else
-    {
-      compression_header_size
-	= bfd_get_compression_header_size (stdoutput, NULL);
-      header_size = compression_header_size;
-    }
+    header_size = bfd_get_compression_header_size (stdoutput, NULL);
 
   /* Create a new frag to contain the compression header.  */
   first_newf = frag_alloc (ob);
@@ -1609,7 +1602,8 @@ compress_debug (bfd *abfd, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   bfd_update_compression_header (abfd, (bfd_byte *) header, sec);
   x = bfd_set_section_size (sec, compressed_size);
   gas_assert (x);
-  if (!compression_header_size)
+  if (flag_compress_debug == COMPRESS_DEBUG_GNU_ZLIB
+      && section_name[1] == 'd')
     {
       compressed_name = concat (".z", section_name + 1, (char *) NULL);
       bfd_rename_section (sec, compressed_name);

@@ -3234,7 +3234,8 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 	      name = new_name;
 	    }
 	}
-      else if (asect->compress_status == COMPRESS_SECTION_DONE)
+      else if (asect->compress_status == COMPRESS_SECTION_DONE
+	       && name[1] == 'd')
 	{
 	  /* PR binutils/18087: Compression does not always make a
 	     section smaller.  So only rename the section when
@@ -3246,7 +3247,6 @@ elf_fake_sections (bfd *abfd, asection *asect, void *fsarg)
 	      arg->failed = true;
 	      return;
 	    }
-	  BFD_ASSERT (name[1] != 'z');
 	  name = new_name;
 	}
     }
@@ -6689,7 +6689,8 @@ _bfd_elf_assign_file_positions_for_non_load (bfd *abfd)
 		    return false;
 
 		  if (sec->compress_status == COMPRESS_SECTION_DONE
-		      && (abfd->flags & BFD_COMPRESS_GABI) == 0)
+		      && (abfd->flags & BFD_COMPRESS_GABI) == 0
+		      && name[1] == 'd')
 		    {
 		      /* If section is compressed with zlib-gnu, convert
 			 section name from .debug_* to .zdebug_*.  */
