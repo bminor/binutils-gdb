@@ -1355,7 +1355,7 @@ __collector_posix_spawn_symver (int(real_posix_spawn) (),
 				const posix_spawnattr_t *attrp,
 				char *const argv[], char *const envp[]);
 
-SYMVER_ATTRIBUTE (__collector_posix_spawn_2_15, posix_spawn@@GLIBC_2.15)
+SYMVER_ATTRIBUTE (__collector_posix_spawn_2_15, posix_spawn@GLIBC_2.15)
 int
 __collector_posix_spawn_2_15 (pid_t *pidp, const char *path,
 			      const posix_spawn_file_actions_t *file_actions,
@@ -1465,7 +1465,7 @@ __collector_posix_spawnp_symver (int(real_posix_spawnp) (), pid_t *pidp,
 				 const posix_spawnattr_t *attrp,
 				 char *const argv[], char *const envp[]);
 
-SYMVER_ATTRIBUTE (__collector_posix_spawnp_2_15, posix_spawnp@@GLIBC_2.15)
+SYMVER_ATTRIBUTE (__collector_posix_spawnp_2_15, posix_spawnp@GLIBC_2.15)
 int // Common interposition
 __collector_posix_spawnp_2_15 (pid_t *pidp, const char *path,
 			       const posix_spawn_file_actions_t *file_actions,
@@ -1597,7 +1597,7 @@ __collector_system (const char *cmd)
 static FILE *
 __collector_popen_symver (FILE*(real_popen) (), const char *cmd, const char *mode);
 
-SYMVER_ATTRIBUTE (__collector_popen_2_1, popen@@GLIBC_2.1)
+SYMVER_ATTRIBUTE (__collector_popen_2_1, popen@GLIBC_2.1)
 FILE *
 __collector_popen_2_1 (const char *cmd, const char *mode)
 {
@@ -1617,7 +1617,7 @@ __collector_popen_2_0 (const char *cmd, const char *mode)
   return __collector_popen_symver (CALL_REALF (popen_2_0), cmd, mode);
 }
 
-SYMVER_ATTRIBUTE (__collector__popen_2_1, _popen@@GLIBC_2.1)
+SYMVER_ATTRIBUTE (__collector__popen_2_1, _popen@GLIBC_2.1)
 FILE *
 __collector__popen_2_1 (const char *cmd, const char *mode)
 {

@@ -1600,20 +1600,20 @@ dlopen (const char *pathname, int mode)
 {
   if (NULL_PTR (dlopen))
     init_mmap_intf ();
-  void* caller = __builtin_return_address (0); // must be called inside dlopen first layer interpostion
+  void* caller = __builtin_return_address (0); // must be called inside dlopen first layer interposition
   return __collector_dlopen_symver (CALL_REAL (dlopen), caller, pathname, mode);
 }
 
 #if !defined(__MUSL_LIBC) && ((ARCH(Intel) && WSIZE(32)) || ARCH(SPARC))
 // map interposed symbol versions
 
-SYMVER_ATTRIBUTE (__collector_dlopen_2_1, dlopen@@GLIBC_2.1)
+SYMVER_ATTRIBUTE (__collector_dlopen_2_1, dlopen@GLIBC_2.1)
 void *
 __collector_dlopen_2_1 (const char *pathname, int mode)
 {
   if (NULL_PTR (dlopen_2_1))
     init_mmap_intf ();
-  void *caller = __builtin_return_address (0); // must be called inside dlopen first layer interpostion
+  void *caller = __builtin_return_address (0); // must be called inside dlopen first layer interposition
   return __collector_dlopen_symver (CALL_REAL (dlopen_2_1), caller, pathname, mode);
 }
 
@@ -1623,7 +1623,7 @@ __collector_dlopen_2_0 (const char *pathname, int mode)
 {
   if (NULL_PTR (dlopen_2_0))
     init_mmap_intf ();
-  void* caller = __builtin_return_address (0); // must be called inside dlopen first layer interpostion
+  void* caller = __builtin_return_address (0); // must be called inside dlopen first layer interposition
   return __collector_dlopen_symver (CALL_REAL (dlopen_2_0), caller, pathname, mode);
 }
 #endif

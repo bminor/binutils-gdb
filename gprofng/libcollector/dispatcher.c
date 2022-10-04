@@ -818,7 +818,7 @@ static int
 __collector_timer_create_symver (int(real_timer_create) (), clockid_t clockid, struct sigevent *sevp,
 				 timer_t *timerid);
 
-SYMVER_ATTRIBUTE (__collector_timer_create_2_3_3, timer_create@@GLIBC_2.3.3)
+SYMVER_ATTRIBUTE (__collector_timer_create_2_3_3, timer_create@GLIBC_2.3.3)
 int
 __collector_timer_create_2_3_3 (clockid_t clockid, struct sigevent *sevp,
 				timer_t *timerid)
@@ -1078,7 +1078,7 @@ __collector_pthread_create_symver (int(real_pthread_create) (),
 				   void *(*func)(void*),
 				   void *arg);
 
-SYMVER_ATTRIBUTE (__collector_pthread_create_2_1, pthread_create@@GLIBC_2.1)
+SYMVER_ATTRIBUTE (__collector_pthread_create_2_1, pthread_create@GLIBC_2.1)
 int
 __collector_pthread_create_2_1 (pthread_t *thread,
 				const pthread_attr_t *attr,

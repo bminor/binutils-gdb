@@ -1085,7 +1085,7 @@ static int
 __collector_open64_symver (int(real_open64) (const char *, int, ...),
 			   const char *path, int oflag, mode_t mode);
 
-SYMVER_ATTRIBUTE (__collector_open64_2_2, open64@@GLIBC_2.2)
+SYMVER_ATTRIBUTE (__collector_open64_2_2, open64@GLIBC_2.2)
 int
 __collector_open64_2_2 (const char *path, int oflag, ...)
 {
@@ -1650,7 +1650,7 @@ close (int fildes)
 static FILE*
 __collector_fopen_symver (FILE*(real_fopen) (), const char *filename, const char *mode);
 
-SYMVER_ATTRIBUTE (__collector_fopen_2_1, fopen@@GLIBC_2.1)
+SYMVER_ATTRIBUTE (__collector_fopen_2_1, fopen@GLIBC_2.1)
 FILE*
 __collector_fopen_2_1 (const char *filename, const char *mode)
 {
@@ -1762,7 +1762,7 @@ fopen (const char *filename, const char *mode)
 static int
 __collector_fclose_symver (int(real_fclose) (), FILE *stream);
 
-SYMVER_ATTRIBUTE (__collector_fclose_2_1, fclose@@GLIBC_2.1)
+SYMVER_ATTRIBUTE (__collector_fclose_2_1, fclose@GLIBC_2.1)
 int
 __collector_fclose_2_1 (FILE *stream)
 {
@@ -1886,7 +1886,7 @@ fflush (FILE *stream)
 static FILE*
 __collector_fdopen_symver (FILE*(real_fdopen) (), int fildes, const char *mode);
 
-SYMVER_ATTRIBUTE (__collector_fdopen_2_1, fdopen@@GLIBC_2.1)
+SYMVER_ATTRIBUTE (__collector_fdopen_2_1, fdopen@GLIBC_2.1)
 FILE*
 __collector_fdopen_2_1 (int fildes, const char *mode)
 {
@@ -2354,7 +2354,7 @@ fwrite (const void *ptr, size_t size, size_t nitems, FILE *stream)
 static int
 __collector_pread_symver (int(real_pread) (), int fildes, void *buf, size_t nbyte, off_t offset);
 
-SYMVER_ATTRIBUTE (__collector_pread_2_2, pread@@GLIBC_2.2)
+SYMVER_ATTRIBUTE (__collector_pread_2_2, pread@GLIBC_2.2)
 int
 __collector_pread_2_2 (int fildes, void *buf, size_t nbyte, off_t offset)
 {
@@ -2432,7 +2432,7 @@ pread (int fildes, void *buf, size_t nbyte, off_t offset)
 #if !defined(__MUSL_LIBC) && ARCH(Intel) && WSIZE(32)
 // map interposed symbol versions
 
-SYMVER_ATTRIBUTE (__collector_pwrite_2_2, pwrite@@GLIBC_2.2)
+SYMVER_ATTRIBUTE (__collector_pwrite_2_2, pwrite@GLIBC_2.2)
 int
 __collector_pwrite_2_2 (int fildes, const void *buf, size_t nbyte, off_t offset)
 {
@@ -2475,8 +2475,8 @@ __collector_pwrite_2_1 (int fildes, const void *buf, size_t nbyte, off_t offset)
   POP_REENTRANCE (guard);
   return ret;
 }
-#endif /* !defined(__MUSL_LIBC) && ARCH(Intel) && WSIZE(32) */
 
+#else
 ssize_t
 pwrite (int fildes, const void *buf, size_t nbyte, off_t offset)
 {
@@ -2497,13 +2497,14 @@ pwrite (int fildes, const void *buf, size_t nbyte, off_t offset)
   POP_REENTRANCE (guard);
   return ret;
 }
+#endif
 
 /*------------------------------------------------------------- pwrite64 */
-#if !defined(__MUSL_LIBC)
-#if ARCH(Intel) && WSIZE(32)
+#if WSIZE(32)
+#if !defined(__MUSL_LIBC) && ARCH(Intel)
 // map interposed symbol versions
 
-SYMVER_ATTRIBUTE (__collector_pwrite64_2_2, pwrite64@@GLIBC_2.2)
+SYMVER_ATTRIBUTE (__collector_pwrite64_2_2, pwrite64@GLIBC_2.2)
 ssize_t
 __collector_pwrite64_2_2 (int fildes, const void *buf, size_t nbyte, off64_t offset)
 {
@@ -2546,8 +2547,8 @@ __collector_pwrite64_2_1 (int fildes, const void *buf, size_t nbyte, off64_t off
   POP_REENTRANCE (guard);
   return ret;
 }
-#endif
 
+#else
 ssize_t
 pwrite64 (int fildes, const void *buf, size_t nbyte, off64_t offset)
 {
@@ -2569,6 +2570,7 @@ pwrite64 (int fildes, const void *buf, size_t nbyte, off64_t offset)
   return ret;
 }
 #endif
+#endif /* SIZE(32) */
 
 /*------------------------------------------------------------- fgets */
 char*
@@ -3252,7 +3254,7 @@ ftell (FILE *stream)
 static int
 __collector_fgetpos_symver (int(real_fgetpos) (), FILE *stream, fpos_t *pos);
 
-SYMVER_ATTRIBUTE (__collector_fgetpos_2_2, fgetpos@@GLIBC_2.2)
+SYMVER_ATTRIBUTE (__collector_fgetpos_2_2, fgetpos@GLIBC_2.2)
 int
 __collector_fgetpos_2_2 (FILE *stream, fpos_t *pos)
 {
@@ -3337,7 +3339,7 @@ fgetpos (FILE *stream, fpos_t *pos)
 static int
 __collector_fgetpos64_symver (int(real_fgetpos64) (), FILE *stream, fpos64_t *pos);
 
-SYMVER_ATTRIBUTE (__collector_fgetpos64_2_2, fgetpos64@@GLIBC_2.2)
+SYMVER_ATTRIBUTE (__collector_fgetpos64_2_2, fgetpos64@GLIBC_2.2)
 int
 __collector_fgetpos64_2_2 (FILE *stream, fpos64_t *pos)
 {
@@ -3419,7 +3421,7 @@ fgetpos64 (FILE *stream, fpos64_t *pos)
 static int
 __collector_fsetpos_symver (int(real_fsetpos) (), FILE *stream, const fpos_t *pos);
 
-SYMVER_ATTRIBUTE (__collector_fsetpos_2_2, fsetpos@@GLIBC_2.2)
+SYMVER_ATTRIBUTE (__collector_fsetpos_2_2, fsetpos@GLIBC_2.2)
 int
 __collector_fsetpos_2_2 (FILE *stream, const fpos_t *pos)
 {
@@ -3502,7 +3504,7 @@ fsetpos (FILE *stream, const fpos_t *pos)
 static int
 __collector_fsetpos64_symver (int(real_fsetpos64) (), FILE *stream, const fpos64_t *pos);
 
-SYMVER_ATTRIBUTE (__collector_fsetpos64_2_2, fsetpos64@@GLIBC_2.2)
+SYMVER_ATTRIBUTE (__collector_fsetpos64_2_2, fsetpos64@GLIBC_2.2)
 int
 __collector_fsetpos64_2_2 (FILE *stream, const fpos64_t *pos)
 {

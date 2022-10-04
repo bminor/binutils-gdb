@@ -759,7 +759,7 @@ __collector_pthread_cond_wait_symver (int(real_pthread_cond_wait) (), pthread_co
 
 #if ARCH(Intel) || ARCH(SPARC)
 SYMVER_ATTRIBUTE (__collector_pthread_cond_wait_2_3_2,
-		  pthread_cond_wait@@GLIBC_2.3.2)
+		  pthread_cond_wait@GLIBC_2.3.2)
 #endif
 int
 __collector_pthread_cond_wait_2_3_2 (pthread_cond_t *cond, pthread_mutex_t *mutex)
@@ -852,7 +852,7 @@ __collector_pthread_cond_timedwait_symver (int(real_pthread_cond_timedwait) (),
 
 #if ARCH(Intel) || ARCH(SPARC)
 SYMVER_ATTRIBUTE (__collector_pthread_cond_timedwait_2_3_2,
-		  pthread_cond_timedwait@@GLIBC_2.3.2)
+		  pthread_cond_timedwait@GLIBC_2.3.2)
 #endif  // ARCH()
 int
 __collector_pthread_cond_timedwait_2_3_2 (pthread_cond_t *cond,
@@ -984,7 +984,7 @@ pthread_join (pthread_t target_thread, void **status)
 static int
 __collector_sem_wait_symver (int(real_sem_wait) (), sem_t *sp);
 
-SYMVER_ATTRIBUTE (__collector_sem_wait_2_1, sem_wait@@GLIBC_2.1)
+SYMVER_ATTRIBUTE (__collector_sem_wait_2_1, sem_wait@GLIBC_2.1)
 int
 __collector_sem_wait_2_1 (sem_t *sp)
 {
