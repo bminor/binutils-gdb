@@ -121,11 +121,11 @@ static CORE_ADDR adjust_breakpoint_address (struct gdbarch *gdbarch,
 					    enum bptype bptype,
 					    struct program_space *pspace);
 
-static int watchpoint_locations_match (struct bp_location *loc1,
-				       struct bp_location *loc2);
+static int watchpoint_locations_match (const struct bp_location *loc1,
+				       const struct bp_location *loc2);
 
-static int breakpoint_locations_match (struct bp_location *loc1,
-				       struct bp_location *loc2,
+static int breakpoint_locations_match (const struct bp_location *loc1,
+				       const struct bp_location *loc2,
 				       bool sw_hw_bps_match = false);
 
 static int breakpoint_location_address_match (struct bp_location *bl,
@@ -2641,7 +2641,7 @@ build_target_command_list (struct bp_location *bl)
    registers state.  */
 
 static int
-breakpoint_kind (struct bp_location *bl, CORE_ADDR *addr)
+breakpoint_kind (const struct bp_location *bl, CORE_ADDR *addr)
 {
   if (bl->owner->type == bp_single_step)
     {
@@ -4227,7 +4227,7 @@ moribund_breakpoint_here_p (const address_space *aspace, CORE_ADDR pc)
    ASPACE.  */
 
 static int
-bp_location_inserted_here_p (struct bp_location *bl,
+bp_location_inserted_here_p (const struct bp_location *bl,
 			     const address_space *aspace, CORE_ADDR pc)
 {
   if (bl->inserted
@@ -5452,7 +5452,7 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
    on the current target.  */
 
 static int
-need_moribund_for_location_type (struct bp_location *loc)
+need_moribund_for_location_type (const struct bp_location *loc)
 {
   return ((loc->loc_type == bp_loc_software_breakpoint
 	   && !target_supports_stopped_by_sw_breakpoint ())
@@ -5987,7 +5987,7 @@ bp_condition_evaluator (const breakpoint *b)
    similar to bp_condition_evaluator, but for locations.  */
 
 static const char *
-bp_location_condition_evaluator (struct bp_location *bl)
+bp_location_condition_evaluator (const struct bp_location *bl)
 {
   if (bl && !is_breakpoint (bl->owner))
     return NULL;
@@ -6945,8 +6945,8 @@ bl_address_is_meaningful (bp_location *loc)
    true if LOC1 and LOC2 represent the same watchpoint location.  */
 
 static int
-watchpoint_locations_match (struct bp_location *loc1, 
-			    struct bp_location *loc2)
+watchpoint_locations_match (const struct bp_location *loc1,
+			    const struct bp_location *loc2)
 {
   struct watchpoint *w1 = (struct watchpoint *) loc1->owner;
   struct watchpoint *w2 = (struct watchpoint *) loc2->owner;
@@ -7057,8 +7057,8 @@ breakpoint_location_address_range_overlap (struct bp_location *bl,
    true, otherwise returns false.  */
 
 static int
-tracepoint_locations_match (struct bp_location *loc1,
-			    struct bp_location *loc2)
+tracepoint_locations_match (const struct bp_location *loc1,
+			    const struct bp_location *loc2)
 {
   if (is_tracepoint (loc1->owner) && is_tracepoint (loc2->owner))
     /* Since tracepoint locations are never duplicated with others', tracepoint
@@ -7076,8 +7076,8 @@ tracepoint_locations_match (struct bp_location *loc1,
    otherwise they don't.  */
 
 static int
-breakpoint_locations_match (struct bp_location *loc1,
-			    struct bp_location *loc2,
+breakpoint_locations_match (const struct bp_location *loc1,
+			    const struct bp_location *loc2,
 			    bool sw_hw_bps_match)
 {
   int hw_point1, hw_point2;
