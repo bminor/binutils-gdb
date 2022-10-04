@@ -1770,7 +1770,7 @@ riscv_insn::fetch_instruction (struct gdbarch *gdbarch,
 			       CORE_ADDR addr, int *len)
 {
   enum bfd_endian byte_order = gdbarch_byte_order_for_code (gdbarch);
-  gdb_byte buf[8];
+  gdb_byte buf[RISCV_MAX_INSN_LEN];
   int instlen, status;
 
   /* All insns are at least 16 bits.  */
@@ -1933,9 +1933,10 @@ riscv_insn::decode (struct gdbarch *gdbarch, CORE_ADDR pc)
     }
   else
     {
-      /* This must be a 6 or 8 byte instruction, we don't currently decode
-	 any of these, so just ignore it.  */
-      gdb_assert (m_length == 6 || m_length == 8);
+      /* 6 bytes or more.  If the instruction is longer than 8 bytes, we don't
+	 have full instruction bits in ival.  At least, such long instructions
+	 are not defined yet, so just ignore it.  */
+      gdb_assert (m_length > 0 && m_length % 2 == 0);
       m_opcode = OTHER;
     }
 }
