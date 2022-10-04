@@ -1924,9 +1924,7 @@ add_dummy_location (struct breakpoint *b,
 static void
 update_watchpoint (struct watchpoint *b, int reparse)
 {
-  int within_current_scope;
-  struct frame_id saved_frame_id;
-  int frame_saved;
+  bool within_current_scope;
 
   /* If this is a local watchpoint, we only want to check if the
      watchpoint frame is in scope if the current thread is the thread
@@ -1936,12 +1934,12 @@ update_watchpoint (struct watchpoint *b, int reparse)
 
   if (b->disposition == disp_del_at_next_stop)
     return;
- 
-  frame_saved = 0;
+
+  gdb::optional<scoped_restore_selected_frame> restore_frame;
 
   /* Determine if the watchpoint is within scope.  */
   if (b->exp_valid_block == NULL)
-    within_current_scope = 1;
+    within_current_scope = true;
   else
     {
       frame_info_ptr fi = get_current_frame ();
@@ -1960,8 +1958,7 @@ update_watchpoint (struct watchpoint *b, int reparse)
       /* FIXME drow/2003-09-09: It would be nice if evaluate_expression
 	 took a frame parameter, so that we didn't have to change the
 	 selected frame.  */
-      frame_saved = 1;
-      saved_frame_id = get_frame_id (get_selected_frame (NULL));
+      restore_frame.emplace ();
 
       fi = frame_find_by_id (b->watchpoint_frame);
       within_current_scope = (fi != NULL);
@@ -2227,10 +2224,6 @@ in which its expression is valid.\n"),
 		  b->number);
       watchpoint_del_at_next_stop (b);
     }
-
-  /* Restore the selected frame.  */
-  if (frame_saved)
-    select_frame (frame_find_by_id (saved_frame_id));
 }
 
 
