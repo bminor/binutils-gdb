@@ -161,6 +161,8 @@ static std::vector<symtab_and_line> bkpt_probe_decode_location_spec
 
 static bool bl_address_is_meaningful (bp_location *loc);
 
+static int find_loc_num_by_location (const bp_location *loc);
+
 /* update_global_location_list's modes of operation wrt to whether to
    insert locations now.  */
 enum ugll_insert_mode
@@ -5298,6 +5300,8 @@ bpstat_check_watchpoint (bpstat *bs)
 static void
 bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
 {
+  INFRUN_SCOPED_DEBUG_ENTER_EXIT;
+
   const struct bp_location *bl;
   struct breakpoint *b;
   /* Assume stop.  */
@@ -5312,6 +5316,10 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
   b = bs->breakpoint_at;
   gdb_assert (b != NULL);
 
+  infrun_debug_printf ("thread = %s, breakpoint %d.%d",
+		       thread->ptid.to_string ().c_str (),
+		       b->number, find_loc_num_by_location (bl));
+
   /* Even if the target evaluated the condition on its end and notified GDB, we
      need to do so again since GDB does not know if we stopped due to a
      breakpoint or a single step breakpoint.  */
@@ -5319,6 +5327,9 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
   if (frame_id_p (b->frame_id)
       && !frame_id_eq (b->frame_id, get_stack_frame_id (get_current_frame ())))
     {
+      infrun_debug_printf ("incorrect frame %s not %s, not stopping",
+			   get_stack_frame_id (get_current_frame ()).to_string ().c_str (),
+			   b->frame_id.to_string ().c_str ());
       bs->stop = 0;
       return;
     }
@@ -5329,6 +5340,7 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
   if ((b->thread != -1 && b->thread != thread->global_num)
       || (b->task != 0 && b->task != ada_get_task_number (thread)))
     {
+      infrun_debug_printf ("incorrect thread or task, not stopping");
       bs->stop = 0;
       return;
     }
@@ -5420,16 +5432,26 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
 
   if (cond && !condition_result)
     {
+      infrun_debug_printf ("condition_result = false, not stopping");
       bs->stop = 0;
+      return;
     }
   else if (b->ignore_count > 0)
     {
+      infrun_debug_printf ("ignore count %d, not stopping",
+			   b->ignore_count);
       b->ignore_count--;
       bs->stop = 0;
       /* Increase the hit count even though we don't stop.  */
       ++(b->hit_count);
       gdb::observers::breakpoint_modified.notify (b);
-    }	
+      return;
+    }
+
+  if (bs->stop)
+    infrun_debug_printf ("stopping at this breakpoint");
+  else
+    infrun_debug_printf ("not stopping at this breakpoint");
 }
 
 /* Returns true if we need to track moribund locations of LOC's type
@@ -13142,7 +13164,7 @@ enable_disable_bp_num_loc (int bp_num, int loc_num, bool enable)
    owner.  1-based indexing.  -1 signals NOT FOUND.  */
 
 static int
-find_loc_num_by_location (bp_location *loc)
+find_loc_num_by_location (const bp_location *loc)
 {
   if (loc != nullptr && loc->owner != nullptr)
     {
