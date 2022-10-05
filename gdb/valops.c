@@ -41,6 +41,7 @@
 #include "extension.h"
 #include "gdbtypes.h"
 #include "gdbsupport/byte-vector.h"
+#include "typeprint.h"
 
 /* Local functions.  */
 
@@ -2617,6 +2618,49 @@ value_find_oload_method_list (struct value **argp, const char *method,
 		    basetype, boffset);
 }
 
+/* Helper function for find_overload_match.  If no matches were
+   found, this function may generate a hint for the user that some
+   of the relevant types are incomplete, so GDB can't evaluate
+   type relationships to properly evaluate overloads.
+
+   If no incomplete types are present, an empty string is returned.  */
+static std::string
+incomplete_type_hint (gdb::array_view<value *> args)
+{
+  int incomplete_types = 0;
+  std::string incomplete_arg_names;
+  for (const struct value *arg : args)
+    {
+      struct type *t = value_type (arg);
+      while (t->code () == TYPE_CODE_PTR)
+	t = t->target_type ();
+      if (t->is_stub ())
+	{
+	  string_file buffer;
+	  if (incomplete_types > 0)
+	    incomplete_arg_names += ", ";
+
+	  current_language->print_type (value_type (arg), "", &buffer,
+				       -1, 0, &type_print_raw_options);
+
+	  incomplete_types++;
+	  incomplete_arg_names += buffer.string ();
+	}
+    }
+  std::string hint;
+  if (incomplete_types > 1)
+    hint = string_printf (_("\nThe types: '%s' aren't fully known to GDB."
+			    " Please cast them directly to the desired"
+			    " typed in the function call."),
+			    incomplete_arg_names.c_str ());
+  else if (incomplete_types == 1)
+    hint = string_printf (_("\nThe type: '%s' isn't fully known to GDB."
+			    " Please cast it directly to the desired"
+			    " typed in the function call."),
+			    incomplete_arg_names.c_str ());
+  return hint;
+}
+
 /* Given an array of arguments (ARGS) (which includes an entry for
    "this" in the case of C++ methods), the NAME of a function, and
    whether it's a method or not (METHOD), find the best function that
@@ -2933,14 +2977,15 @@ find_overload_match (gdb::array_view<value *> args,
 
   if (match_quality == INCOMPATIBLE)
     {
+      std::string hint = incomplete_type_hint (args);
       if (method == METHOD)
-	error (_("Cannot resolve method %s%s%s to any overloaded instance"),
+	error (_("Cannot resolve method %s%s%s to any overloaded instance.%s"),
 	       obj_type_name,
 	       (obj_type_name && *obj_type_name) ? "::" : "",
-	       name);
+	       name, hint.c_str ());
       else
-	error (_("Cannot resolve function %s to any overloaded instance"),
-	       func_name);
+	error (_("Cannot resolve function %s to any overloaded instance.%s"),
+	       func_name, hint.c_str ());
     }
   else if (match_quality == NON_STANDARD)
     {
