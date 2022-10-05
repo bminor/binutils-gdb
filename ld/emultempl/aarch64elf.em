@@ -205,31 +205,76 @@ elf${ELFSIZE}_aarch64_add_stub_section (const char *stub_sec_name,
   return NULL;
 }
 
-/* Insert a pad immediately after OUTPUT_SECTION.  */
+/* Insert a pad of PADDING bytes immediately after the output section
+   OSEC.  If *COOKIE is null, it is set to an opaque pointer which can be
+   re-used to adjust the amount of padding inserted by re-invoking the
+   function with *COOKIE set to the same pointer.  */
 
 static void
-elf64_c64_pad_section (asection *osec, bfd_vma padding)
+c64_set_section_padding (asection *osec, bfd_vma padding, void **cookie)
 {
-  if (padding > 0)
+  etree_type *pad_exp;
+
+  if (*cookie)
     {
-      lang_statement_list_type list;
-      lang_output_section_statement_type *os = lang_output_section_get (osec);
-
-      lang_list_init (&list);
-      lang_add_assignment_internal (&list,
-	    exp_assign (".",
-		exp_binop ('+', exp_nameop (NAME, "."), exp_intop (padding)),
-		FALSE));
-
-      if (list.head == NULL)
-        {
-          einfo (_("%X%P: can not make padding section: %E\n"));
-          return;
-        }
-
-      *(list.tail) = NULL;
-      *(os->children.tail) = list.head;
+      pad_exp = *cookie;
+      if (pad_exp->type.node_code != INT)
+	abort ();
+      pad_exp->value.value = padding;
     }
+  else if (padding > 0)
+    {
+      lang_output_section_statement_type *os = lang_output_section_get (osec);
+      pad_exp = exp_intop (padding);
+      *cookie = pad_exp;
+      lang_add_assignment_internal (&os->children,
+	    exp_assign (".",
+		exp_binop ('+', exp_nameop (NAME, "."), pad_exp),
+		FALSE));
+    }
+}
+
+/* Insert PADDING bytes of padding after the output section OSEC.
+
+   Unlike c64_set_section_padding, the padding cannot be adjusted after
+   it has been applied, and the padding does not affect the size of the
+   output section itself, but instead just changes where the next output
+   section starts.  */
+
+static void
+c64_pad_after_section (asection *osec, bfd_vma padding)
+{
+  if (!padding)
+    return;
+
+  lang_output_section_statement_type *os = lang_output_section_get (osec);
+
+  etree_type *assign_exp
+    = exp_assign (".",
+		  exp_binop ('+',
+			     exp_nameop (NAME, "."),
+			     exp_intop (padding)), FALSE);
+
+  lang_statement_list_type dummy;
+  lang_list_init (&dummy);
+  lang_add_assignment_internal (&dummy, assign_exp);
+  lang_statement_union_type *assign = dummy.head;
+
+  lang_statement_union_type *next = os->header.next;
+  os->header.next = (lang_statement_union_type *)assign;
+  assign->header.next = next;
+}
+
+static bfd_vma
+c64_get_section_padding (void *cookie)
+{
+  if (!cookie)
+    return 0;
+
+  etree_type *exp = cookie;
+  if (exp->type.node_code != INT)
+    abort ();
+  return exp->value.value;
 }
 
 /* Another call-back for elf${ELFSIZE}_aarch64_size_stubs.  */
@@ -277,9 +322,15 @@ gld${EMULATION_NAME}_after_allocation (void)
   else if (ret > 0)
     need_laying_out = 1;
 
-  elf${ELFSIZE}_c64_resize_sections (link_info.output_bfd, & link_info,
-				     & elf64_c64_pad_section,
-				     & gldaarch64_layout_sections_again);
+  if (!elf${ELFSIZE}_c64_resize_sections (link_info.output_bfd, & link_info,
+					  & c64_set_section_padding,
+					  & c64_get_section_padding,
+					  & c64_pad_after_section,
+					  & gldaarch64_layout_sections_again))
+    {
+      einfo (_("%X%P: failed to resize sections for C64: %E\n"));
+      return;
+    }
 
   /* If generating a relocatable output file, then we don't
      have to examine the relocs.  */

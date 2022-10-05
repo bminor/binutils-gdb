@@ -20,11 +20,9 @@
 Sections:
 Idx Name          Size      VMA               LMA               File off  Algn
 .* \.text         00000010  00000000000001a0  00000000000001a0  000001a0  2\*\*5
-#record: LAST_RO_SIZE LAST_RO_VMA
+#record: FIRST_RW_VMA
 #...
- +[0-9]+ \.rela\.dyn +([0-9a-f]+)  ([0-9a-f]+) .*
- + CONTENTS, ALLOC, LOAD, READONLY, DATA
- +[0-9]+ \.data .*
+ +[0-9]+ \.first_rw +[0-9a-f]+  ([0-9a-f]+) .*
 #...
 
 Disassembly of section \.text:
@@ -33,7 +31,7 @@ Disassembly of section \.text:
 #...
 Disassembly of section \.data:
 
-#check: PCC_SIZE format %08x [expr "0x$LAST_RO_VMA + 0x$LAST_RO_SIZE - 0x1a0"]
+#check: PCC_SIZE format %08x [expr "0x$FIRST_RW_VMA - 0x1a0"]
 0000000000014000 <data_start>:
    [0-9a-f]+:	000001a0 	.*
 			14000: R_MORELLO_RELATIVE	\*ABS\*

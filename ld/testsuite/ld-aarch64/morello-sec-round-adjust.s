@@ -20,3 +20,6 @@ __start:
 .capinit __data_rel_ro_startsym
 .xword 0
 .xword 0
+
+.section .tail_rw,"aw"
+.xword 42

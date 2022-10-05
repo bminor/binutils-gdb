@@ -3315,6 +3315,9 @@ struct elf_aarch64_link_hash_table
   /* Linker call-backs.  */
   asection *(*add_stub_section) (const char *, asection *);
   void (*layout_sections_again) (void);
+  c64_section_padding_setter_t c64_set_section_padding;
+  c64_section_padding_getter_t c64_get_section_padding;
+  c64_pad_after_section_t c64_pad_after_section;
 
   /* Array to keep track of which stub sections have been created, and
      information on stub grouping.  */
@@ -3349,6 +3352,11 @@ struct elf_aarch64_link_hash_table
   bfd_boolean c64_output;
   htab_t c64_tls_data_stub_hash_table;
   void * tls_data_stub_memory;
+
+  /* Bookkeeping for padding we add to sections in C64.  */
+  void **c64_sec_info;
+  unsigned min_output_section_id;
+  unsigned max_output_section_id;
 };
 
 /* Create an entry in an AArch64 ELF linker hash table.  */
@@ -4322,6 +4330,12 @@ elfNN_aarch64_setup_section_lists (bfd *output_bfd,
   struct elf_aarch64_link_hash_table *htab =
     elf_aarch64_hash_table (info);
 
+  /* XXX: in practice, we believe this branch should never be taken.
+     This function is only ever called from gld*_after_allocation
+     (defined in ld/emultempl/aarch64elf.em), which can only ever be
+     called if the LD emulation is an AArch64 ELF emulation.  The branch
+     can only be taken if the BFD backend is not an ELF backend.  In
+     practice, this isn't supported, see PR29649 for details.  */
   if (!is_elf_hash_table (htab))
     return 0;
 
@@ -5184,25 +5198,86 @@ c64_valid_cap_range (bfd_vma *basep, bfd_vma *limitp, unsigned *alignmentp)
   return FALSE;
 }
 
+static bfd_boolean
+c64_get_section_padding_info (struct elf_aarch64_link_hash_table *htab,
+			      asection *sec, void ***info)
+{
+  if (!htab->c64_sec_info)
+    {
+      unsigned min_os_id, max_os_id;
+      min_os_id = max_os_id = sec->id;
+      asection *iter;
+      bfd *output_bfd = sec->owner;
+      for (iter = output_bfd->sections; iter; iter = iter->next)
+	{
+	  BFD_ASSERT (iter->output_section == iter);
+	  if (iter->id < min_os_id)
+	    min_os_id = iter->id;
+	  if (iter->id > max_os_id)
+	    max_os_id = iter->id;
+	}
+
+      /* Create a sparse array mapping sections IDs onto cookies.  */
+      const int num_slots = max_os_id - min_os_id + 1;
+      htab->min_output_section_id = min_os_id;
+      htab->max_output_section_id = max_os_id;
+      const size_t mem_sz = num_slots * sizeof (void *);
+      htab->c64_sec_info = bfd_zalloc (output_bfd, mem_sz);
+      if (!htab->c64_sec_info)
+	{
+	  _bfd_error_handler (_("out of memory allocating padding info"));
+	  bfd_set_error (bfd_error_no_memory);
+	  return FALSE;
+	}
+    }
+
+  BFD_ASSERT (sec->id >= htab->min_output_section_id);
+  BFD_ASSERT (sec->id <= htab->max_output_section_id);
+  *info = htab->c64_sec_info + (sec->id - htab->min_output_section_id);
+  return TRUE;
+}
+
 /* Check if the bounds of section SEC will get rounded off in the Morello
    capability format and if it would, adjust the section to ensure any
    capability spanning this section would have its bounds precise.  */
-static inline void
+static bfd_boolean
 ensure_precisely_bounded_section (asection *sec,
 				  struct elf_aarch64_link_hash_table *htab,
-				  void (*c64_pad_section) (asection *, bfd_vma))
+				  bfd_boolean *changed_layout)
 {
   bfd_vma low = sec->vma;
   bfd_vma high = sec->vma + sec->size;
   unsigned alignment;
 
+  void **info;
+  if (!c64_get_section_padding_info (htab, sec, &info))
+    return FALSE;
+
+  bfd_vma old_padding = htab->c64_get_section_padding (*info);
+
+  /* Ignore any existing padding when calculating bounds validity.  */
+  high -= old_padding;
+
   bfd_boolean did_change = FALSE;
   if (!c64_valid_cap_range (&low, &high, &alignment))
     {
-      bfd_vma padding = high - low - sec->size;
-      c64_pad_section (sec, padding);
+      bfd_vma padding = high - low - (sec->size - old_padding);
+      if (padding != old_padding)
+	{
+	  htab->c64_set_section_padding (sec, padding, info);
+	  did_change = TRUE;
+	}
+    }
+  else if (old_padding)
+    {
+      /* If the range without the padding is valid, then
+	 we can drop the padding.  This may happen e.g. if a stub gets
+	 added that happens to take up the space occupied by the
+	 padding.  */
+      htab->c64_set_section_padding (sec, 0, info);
       did_change = TRUE;
     }
+
   if (sec->alignment_power < alignment)
     {
       sec->alignment_power = alignment;
@@ -5210,7 +5285,13 @@ ensure_precisely_bounded_section (asection *sec,
     }
 
   if (did_change)
-    (*htab->layout_sections_again) ();
+    {
+      (*htab->layout_sections_again) ();
+      if (changed_layout)
+	*changed_layout = TRUE;
+    }
+
+  return TRUE;
 }
 
 /* Make sure that all capabilities that refer to sections have bounds that
@@ -5226,17 +5307,17 @@ ensure_precisely_bounded_section (asection *sec,
 
 static bfd_vma pcc_low;
 static bfd_vma pcc_high;
-void
-elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
-			   void (*c64_pad_section) (asection *, bfd_vma),
-			   void (*layout_sections_again) (void))
+static asection *pcc_low_sec;
+static asection *pcc_high_sec;
+
+static bfd_boolean
+c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
+		     bfd_boolean *changed_layout)
 {
   asection *sec;
   struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
   bfd *input_bfd;
   unsigned align = 0;
-
-  htab->layout_sections_again = layout_sections_again;
 
   /* If this is not a PURECAP binary, and has no C64 code in it, then this is
      just a stock AArch64 binary and the section padding is not necessary.
@@ -5245,7 +5326,7 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
      binaries, so just checking for PURECAP is not enough.  */
   if (!(htab->c64_output
 	|| (elf_elfheader (output_bfd)->e_flags & EF_AARCH64_CHERI_PURECAP)))
-    return;
+    return TRUE;
 
   /* First, walk through all the relocations to find those referring to linker
      defined and ldscript defined symbols since we set their range to their
@@ -5308,8 +5389,25 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 
 	      os = h->root.u.def.section->output_section;
 
-	      if (h->root.linker_def)
-		ensure_precisely_bounded_section (os, htab, c64_pad_section);
+	      /* XXX: we may see some ldscript-defined
+		 symbols here whose output section is set to *ABS*.
+		 These symbols should get their output section resolved
+		 to a real output section in ldexp_finalize_syms, but
+		 because we are running earlier in the lang_process
+		 flow (specifically in ldemul_after_allocation here) we
+		 see these symbols as pointing into the *ABS* section.
+
+		 For now, we just skip such symbols, but this should be
+		 fixed properly later on.  */
+	      if (os == bfd_abs_section_ptr)
+		continue;
+
+	      if (h->root.linker_def || h->start_stop)
+		{
+		  if (!ensure_precisely_bounded_section (os, htab,
+							 changed_layout))
+		    return FALSE;
+		}
 	      else if (h->root.ldscript_def)
 		{
 		  const char *name = h->root.root.string;
@@ -5323,12 +5421,16 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 		      && ((altos = bfd_sections_find_if
 			   (info->output_bfd, section_start_symbol, &value))
 			  != NULL))
-		    ensure_precisely_bounded_section (altos, htab,
-						      c64_pad_section);
+		    if (!ensure_precisely_bounded_section (altos, htab,
+							   changed_layout))
+		      return FALSE;
+
 		  /* XXX We're overfitting here because the offset of H within
 		     the output section is not yet resolved and ldscript
 		     defined symbols do not have input section information.  */
-		  ensure_precisely_bounded_section (os, htab, c64_pad_section);
+		  if (!ensure_precisely_bounded_section (os, htab,
+							 changed_layout))
+		    return FALSE;
 		}
 	    }
 	}
@@ -5350,10 +5452,10 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
      While that seems unlikely to happen, having no relocations in a file also
      seems quite unlikely, so we may as well play it safe.  */
   if (!htab->c64_output)
-    return;
+    return TRUE;
 
   bfd_vma low = (bfd_vma) -1, high = 0;
-  asection *pcc_low_sec = NULL, *pcc_high_sec = NULL;
+  pcc_low_sec = pcc_high_sec = NULL;
   for (sec = output_bfd->sections; sec != NULL; sec = sec->next)
     {
       /* XXX This is a good place to figure out if there are any readable or
@@ -5404,40 +5506,52 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
 	 different sections with their own alignment requirements can easily
 	 change the length of the region we want the PCC to span.
 	 Also, that change in length could change the alignment we want.  We
-	 don't proove that the alignment requirement converges, but believe
+	 don't prove that the alignment requirement converges, but believe
 	 that it should (there is only so much space that existing alignment
 	 requirements could trigger to be added -- a section with an alignment
 	 requirement of 16 can only really add 15 bytes to the length).  */
-      bfd_boolean valid_range = FALSE;
       while (TRUE) {
 	  pcc_low_tmp = pcc_low_sec->vma;
 	  pcc_high_tmp = pcc_high_sec->vma + pcc_high_sec->size;
-	  valid_range =
-	    c64_valid_cap_range (&pcc_low_tmp, &pcc_high_tmp, &align);
+	  c64_valid_cap_range (&pcc_low_tmp, &pcc_high_tmp, &align);
 	  if (pcc_low_sec->alignment_power >= align)
 	    break;
 	  pcc_low_sec->alignment_power = align;
 	  (*htab->layout_sections_again) ();
+	  if (changed_layout)
+	    *changed_layout = TRUE;
       }
 
-      /* We have calculated the bottom and top address that we want in the
-	 above call to c64_valid_cap_range.  We have also aligned the lowest
-	 section in the PCC range to where we want it.  Just have to add the
-	 padding remaining if needs be.  */
-      if (!valid_range)
-	{
-	  BFD_ASSERT (pcc_low_tmp == pcc_low_sec->vma);
-	  bfd_vma current_length =
-	    (pcc_high_sec->vma + pcc_high_sec->size) - pcc_low_sec->vma;
-	  bfd_vma desired_length = (pcc_high_tmp - pcc_low_tmp);
-	  bfd_vma padding = desired_length - current_length;
-	  c64_pad_section (pcc_high_sec, padding);
-	  (*htab->layout_sections_again) ();
-	}
-
-      pcc_low = pcc_low_sec->vma;
-      pcc_high = pcc_high_sec->vma + pcc_high_sec->size;
+      /* We have aligned the base section appropriately, but we may
+	 still (later) need to add padding after pcc_high_sec to
+	 get representable PCC bounds.  */
+      BFD_ASSERT (pcc_low_tmp == pcc_low_sec->vma);
+      pcc_low = pcc_low_tmp;
+      pcc_high = pcc_high_tmp;
     }
+
+  return TRUE;
+}
+
+bfd_boolean
+elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
+			   c64_section_padding_setter_t set_padding,
+			   c64_section_padding_getter_t get_padding,
+			   c64_pad_after_section_t pad_after_section,
+			   void (*layout_sections_again) (void))
+{
+  struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
+  htab->c64_set_section_padding = set_padding;
+  htab->c64_get_section_padding = get_padding;
+  htab->c64_pad_after_section = pad_after_section;
+  htab->layout_sections_again = layout_sections_again;
+
+  /* We assert this here since we require elfNN_aarch64_size_stubs to be
+     called to complete setting the PCC bounds, see the comment at the
+     top of elfNN_aarch64_setup_section_lists.  */
+  BFD_ASSERT (is_elf_hash_table (htab));
+
+  return c64_resize_sections (output_bfd, info, NULL);
 }
 
 /* Determine and set the size of the stub section for a final link.
@@ -5447,44 +5561,13 @@ elfNN_c64_resize_sections (bfd *output_bfd, struct bfd_link_info *info,
    C64 or vice versa) or in case of unconditional branches (B/BL), is
    unreachable.  */
 
-bfd_boolean
-elfNN_aarch64_size_stubs (bfd *output_bfd,
-			  bfd *stub_bfd,
-			  struct bfd_link_info *info,
-			  bfd_signed_vma group_size,
-			  asection * (*add_stub_section) (const char *,
-							  asection *))
+static bfd_boolean
+aarch64_size_stubs (bfd *output_bfd,
+		    struct bfd_link_info *info)
 {
-  bfd_size_type stub_group_size;
-  bfd_boolean stubs_always_before_branch;
   bfd_boolean stub_changed = FALSE;
   struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
   unsigned int num_erratum_835769_fixes = 0;
-
-  /* Propagate mach to stub bfd, because it may not have been
-     finalized when we created stub_bfd.  */
-  bfd_set_arch_mach (stub_bfd, bfd_get_arch (output_bfd),
-		     bfd_get_mach (output_bfd));
-
-  /* Stash our params away.  */
-  htab->stub_bfd = stub_bfd;
-  htab->add_stub_section = add_stub_section;
-  stubs_always_before_branch = group_size < 0;
-  if (group_size < 0)
-    stub_group_size = -group_size;
-  else
-    stub_group_size = group_size;
-
-  if (stub_group_size == 1)
-    {
-      /* Default values.  */
-      /* AArch64 branch range is +-128MB. The value used is 1MB less.  */
-      stub_group_size = 127 * 1024 * 1024;
-    }
-
-  group_sections (htab, stub_group_size, stubs_always_before_branch);
-
-  (*htab->layout_sections_again) ();
 
   if (htab->fix_erratum_835769)
     {
@@ -5831,6 +5914,89 @@ elfNN_aarch64_size_stubs (bfd *output_bfd,
  error_ret_free_local:
   return FALSE;
 }
+
+bfd_boolean
+elfNN_aarch64_size_stubs (bfd *output_bfd,
+			  bfd *stub_bfd,
+			  struct bfd_link_info *info,
+			  bfd_signed_vma group_size,
+			  asection * (*add_stub_section) (const char *,
+							  asection *))
+{
+  bfd_size_type stub_group_size;
+  bfd_boolean stubs_always_before_branch;
+  struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
+
+  /* Propagate mach to stub bfd, because it may not have been
+     finalized when we created stub_bfd.  */
+  bfd_set_arch_mach (stub_bfd, bfd_get_arch (output_bfd),
+		     bfd_get_mach (output_bfd));
+
+  /* Stash our params away.  */
+  htab->stub_bfd = stub_bfd;
+  htab->add_stub_section = add_stub_section;
+
+  stubs_always_before_branch = group_size < 0;
+  if (group_size < 0)
+    stub_group_size = -group_size;
+  else
+    stub_group_size = group_size;
+
+  if (stub_group_size == 1)
+    {
+      /* Default values.  */
+      /* AArch64 branch range is +-128MB.  The value used is 1MB less.  */
+      stub_group_size = 127 * 1024 * 1024;
+    }
+
+  group_sections (htab, stub_group_size, stubs_always_before_branch);
+
+  (*htab->layout_sections_again) ();
+
+  /* The layout changes we do in aarch64_size_stubs may mean we need to
+     adjust the PCC base alignment (or individual section bounds) again,
+     and vice versa.  Here we run both in a loop until we no longer make
+     further adjustments.  */
+  enum { max_tries = 10 };
+  int tries;
+  for (tries = 0; tries < max_tries; tries++)
+    {
+      if (!aarch64_size_stubs (output_bfd, info))
+	return FALSE;
+
+      bfd_boolean changed_layout = FALSE;
+      if (!c64_resize_sections (output_bfd, info, &changed_layout))
+	return FALSE;
+
+      if (!changed_layout)
+	break;
+    }
+
+  if (tries >= max_tries)
+     {
+       _bfd_error_handler (_("looping in elfNN_aarch64_size_stubs"));
+       abort ();
+     }
+
+  if (pcc_high_sec)
+    {
+      /* Now that we've sized everything up, add any additional
+	 padding *after* the last section needed to get exact
+	 PCC bounds.  */
+      bfd_vma current_high = pcc_high_sec->vma + pcc_high_sec->size;
+      bfd_vma desired_high = pcc_high;
+      BFD_ASSERT (desired_high >= current_high);
+      bfd_vma padding = desired_high - current_high;
+      if (padding)
+	{
+	  htab->c64_pad_after_section (pcc_high_sec, padding);
+	  htab->layout_sections_again ();
+	}
+    }
+
+  return TRUE;
+}
+
 
 /* Build all the stubs associated with the current output file.  The
    stubs are kept in a hash table attached to the main linker hash

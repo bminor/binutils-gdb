@@ -13,5 +13,6 @@ SECTIONS {
    .iplt : { *(.iplt) }
    .data : { *(.data) }
    .rela.dyn : { *(.rela.dyn) }
+   .tail_rw : { *(.tail_rw) }
    .interp : { *(.interp) }
 }

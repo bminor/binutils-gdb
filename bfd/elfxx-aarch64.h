@@ -82,9 +82,15 @@ extern bfd_boolean elf64_aarch64_size_stubs
   (bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
    struct bfd_section * (*) (const char *, struct bfd_section *));
 
-extern void elf64_c64_resize_sections (bfd *, struct bfd_link_info *,
-				       void (*) (asection *, bfd_vma),
-				       void (*) (void));
+typedef void (*c64_section_padding_setter_t)(asection *, bfd_vma, void **);
+typedef bfd_vma (*c64_section_padding_getter_t)(void *);
+typedef void (*c64_pad_after_section_t)(asection *, bfd_vma);
+
+extern bfd_boolean elf64_c64_resize_sections (bfd *, struct bfd_link_info *,
+					      c64_section_padding_setter_t,
+					      c64_section_padding_getter_t,
+					      c64_pad_after_section_t,
+					      void (*) (void));
 
 extern bfd_boolean elf64_aarch64_build_stubs
   (struct bfd_link_info *);
@@ -99,9 +105,11 @@ extern bfd_boolean elf32_aarch64_size_stubs
 extern bfd_boolean elf32_aarch64_build_stubs
   (struct bfd_link_info *);
 
-extern void elf32_c64_resize_sections (bfd *, struct bfd_link_info *,
-				       void (*) (asection *, bfd_vma),
-				       void (*) (void));
+extern bfd_boolean elf32_c64_resize_sections (bfd *, struct bfd_link_info *,
+					      c64_section_padding_setter_t,
+					      c64_section_padding_getter_t,
+					      c64_pad_after_section_t,
+					      void (*) (void));
 
 /* Take the PAGE component of an address or offset.  */
 #define PG(x)	     ((x) & ~ (bfd_vma) 0xfff)

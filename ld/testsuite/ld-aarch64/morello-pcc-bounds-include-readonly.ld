@@ -6,6 +6,7 @@ SECTIONS {
 	.got            : { *(.got.plt) *(.igot.plt) *(.got) *(.igot) }
 	. = DATA_SEGMENT_RELRO_END (0, .);
 	.othersection ALIGN(0x2000) : { *(.othersection*) }
+	.first_rw : { *(.first_rw) }
 	.data ALIGN(0x2000) : { *(.data) }
 	. = DATA_SEGMENT_END (.);
 }

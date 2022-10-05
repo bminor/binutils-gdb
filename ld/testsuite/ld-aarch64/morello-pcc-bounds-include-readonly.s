@@ -16,3 +16,5 @@ obj:
   ldr     c0, [c0]
   ldr     c0, [c0]
 
+.section .first_rw,"aw"
+.xword 42
