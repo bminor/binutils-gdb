@@ -288,14 +288,13 @@ mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
 
 gdb_bfd_ref_ptr
 gdb_bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size,
-				 const char *target,
-				 const char *filename)
+				 const char *target)
 {
   struct target_buffer *buffer = XNEW (struct target_buffer);
 
   buffer->base = addr;
   buffer->size = size;
-  return gdb_bfd_openr_iovec (filename ? filename : "<in-memory>", target,
+  return gdb_bfd_openr_iovec ("<in-memory>", target,
 			      mem_bfd_iovec_open,
 			      buffer,
 			      mem_bfd_iovec_pread,
