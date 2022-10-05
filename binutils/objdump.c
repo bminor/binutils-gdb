@@ -2069,7 +2069,6 @@ print_line (struct print_file_list *p, unsigned int linenum)
   const char *l;
   size_t len;
 
-  --linenum;
   if (linenum >= p->maxline)
     return;
   l = p->linemap [linenum];
@@ -2088,7 +2087,9 @@ dump_lines (struct print_file_list *p, unsigned int start, unsigned int end)
 {
   if (p->map == NULL)
     return;
-  while (start <= end)
+  if (start != 0)
+    --start;
+  while (start < end)
     {
       print_line (p, start);
       start++;
