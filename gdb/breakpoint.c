@@ -2299,16 +2299,13 @@ should_be_inserted (struct bp_location *bl)
 /* Same as should_be_inserted but does the check assuming
    that the location is not duplicated.  */
 
-static int
+static bool
 unduplicated_should_be_inserted (struct bp_location *bl)
 {
-  int result;
-  const int save_duplicate = bl->duplicate;
+  scoped_restore restore_bl_duplicate
+    = make_scoped_restore (&bl->duplicate, 0);
 
-  bl->duplicate = 0;
-  result = should_be_inserted (bl);
-  bl->duplicate = save_duplicate;
-  return result;
+  return should_be_inserted (bl);
 }
 
 /* Parses a conditional described by an expression COND into an
