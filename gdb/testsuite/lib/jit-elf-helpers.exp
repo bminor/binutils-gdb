@@ -74,9 +74,13 @@ proc compile_jit_elf_main_as_so {main_solib_srcfile main_solib_binfile options} 
 # Compile jit-elf-solib.c as a shared library in multiple copies and
 # upload them to the target.
 #
+# OPTIONS_LIST is a list of additional options to pass through to
+# gdb_compile_shlib.
+#
 # On success, return a list of target path to the shared libraries.
 # On failure, return -1.
-proc compile_and_download_n_jit_so {jit_solib_basename jit_solib_srcfile count} {
+proc compile_and_download_n_jit_so {jit_solib_basename jit_solib_srcfile \
+					count {options_list {}}} {
     global jit_load_address jit_load_increment
     set binfiles_target {}
 
@@ -93,9 +97,11 @@ proc compile_and_download_n_jit_so {jit_solib_basename jit_solib_srcfile count} 
 	# compiled shared library against a fixed base address.  Combined
 	# with mapping the resulting binary to the same fixed base it allows
 	# to dynamically execute functions from it without any further adjustments.
+	set fname [format "jit_function_%04d" $i]
 	set options [list \
-	    additional_flags=-DFUNCTION_NAME=[format "jit_function_%04d" $i] \
-	    text_segment=$addr]
+			 ${options_list} \
+			 additional_flags=-DFUNCTION_NAME=$fname \
+			 text_segment=$addr]
 	if { [gdb_compile_shlib ${jit_solib_srcfile} ${binfile} \
 		  $options] != "" } {
 	    set f [file tail $binfile]

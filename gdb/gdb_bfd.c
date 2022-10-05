@@ -217,12 +217,43 @@ gdb_bfd_has_target_filename (struct bfd *abfd)
   return is_target_filename (bfd_get_filename (abfd));
 }
 
-/* For `gdb_bfd_open_from_target_memory`.  */
+/* For `gdb_bfd_open_from_target_memory`.  An object that manages the
+   details of a BFD in target memory.  */
 
 struct target_buffer
 {
-  CORE_ADDR base;
-  ULONGEST size;
+  /* Constructor.  BASE and SIZE define where the BFD can be found in
+     target memory.  */
+  target_buffer (CORE_ADDR base, ULONGEST size)
+    : m_base (base),
+      m_size (size)
+  {
+    m_filename
+      = xstrprintf ("<in-memory@%s>", core_addr_to_string_nz (m_base));
+  }
+
+  /* Return the size of the in-memory BFD file.  */
+  ULONGEST size () const
+  { return m_size; }
+
+  /* Return the base address of the in-memory BFD file.  */
+  CORE_ADDR base () const
+  { return m_base; }
+
+  /* Return a generated filename for the in-memory BFD file.  The generated
+     name will include the M_BASE value.  */
+  const char *filename () const
+  { return m_filename.get (); }
+
+private:
+  /* The base address of the in-memory BFD file.  */
+  CORE_ADDR m_base;
+
+  /* The size (in-bytes) of the in-memory BFD file.  */
+  ULONGEST m_size;
+
+  /* Holds the generated name of the in-memory BFD file.  */
+  gdb::unique_xmalloc_ptr<char> m_filename;
 };
 
 /* For `gdb_bfd_open_from_target_memory`.  Opening the file is a no-op.  */
@@ -239,7 +270,8 @@ mem_bfd_iovec_open (struct bfd *abfd, void *open_closure)
 static int
 mem_bfd_iovec_close (struct bfd *abfd, void *stream)
 {
-  xfree (stream);
+  struct target_buffer *buffer = (target_buffer *) stream;
+  delete buffer;
 
   /* Zero means success.  */
   return 0;
@@ -253,18 +285,18 @@ static file_ptr
 mem_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
 		     file_ptr nbytes, file_ptr offset)
 {
-  int err;
   struct target_buffer *buffer = (struct target_buffer *) stream;
 
   /* If this read will read all of the file, limit it to just the rest.  */
-  if (offset + nbytes > buffer->size)
-    nbytes = buffer->size - offset;
+  if (offset + nbytes > buffer->size ())
+    nbytes = buffer->size () - offset;
 
   /* If there are no more bytes left, we've reached EOF.  */
   if (nbytes == 0)
     return 0;
 
-  err = target_read_memory (buffer->base + offset, (gdb_byte *) buf, nbytes);
+  int err
+    = target_read_memory (buffer->base () + offset, (gdb_byte *) buf, nbytes);
   if (err)
     return -1;
 
@@ -280,7 +312,7 @@ mem_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
   struct target_buffer *buffer = (struct target_buffer*) stream;
 
   memset (sb, 0, sizeof (struct stat));
-  sb->st_size = buffer->size;
+  sb->st_size = buffer->size ();
   return 0;
 }
 
@@ -290,11 +322,9 @@ gdb_bfd_ref_ptr
 gdb_bfd_open_from_target_memory (CORE_ADDR addr, ULONGEST size,
 				 const char *target)
 {
-  struct target_buffer *buffer = XNEW (struct target_buffer);
+  struct target_buffer *buffer = new target_buffer (addr, size);
 
-  buffer->base = addr;
-  buffer->size = size;
-  return gdb_bfd_openr_iovec ("<in-memory>", target,
+  return gdb_bfd_openr_iovec (buffer->filename (), target,
 			      mem_bfd_iovec_open,
 			      buffer,
 			      mem_bfd_iovec_pread,
