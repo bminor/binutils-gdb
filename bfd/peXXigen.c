@@ -517,45 +517,26 @@ _bfd_XXi_swap_aouthdr_in (bfd * abfd,
   a->LoaderFlags = H_GET_32 (abfd, src->LoaderFlags);
   a->NumberOfRvaAndSizes = H_GET_32 (abfd, src->NumberOfRvaAndSizes);
 
-  {
-    unsigned idx;
+  /* PR 17512: Don't blindly trust NumberOfRvaAndSizes.  */
+  unsigned idx;
+  for (idx = 0;
+       idx < a->NumberOfRvaAndSizes && idx < IMAGE_NUMBEROF_DIRECTORY_ENTRIES;
+       idx++)
+    {
+      /* If data directory is empty, rva also should be 0.  */
+      int size = H_GET_32 (abfd, src->DataDirectory[idx][1]);
+      int vma = size ? H_GET_32 (abfd, src->DataDirectory[idx][0]) : 0;
 
-    /* PR 17512: Corrupt PE binaries can cause seg-faults.  */
-    if (a->NumberOfRvaAndSizes > IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
-      {
-	/* xgettext:c-format */
-	_bfd_error_handler
-	  (_("%pB: aout header specifies an invalid number of"
-	     " data-directory entries: %u"), abfd, a->NumberOfRvaAndSizes);
-	bfd_set_error (bfd_error_bad_value);
+      a->DataDirectory[idx].Size = size;
+      a->DataDirectory[idx].VirtualAddress = vma;
+    }
 
-	/* Paranoia: If the number is corrupt, then assume that the
-	   actual entries themselves might be corrupt as well.  */
-	a->NumberOfRvaAndSizes = 0;
-      }
-
-    for (idx = 0; idx < a->NumberOfRvaAndSizes; idx++)
-      {
-	/* If data directory is empty, rva also should be 0.  */
-	int size =
-	  H_GET_32 (abfd, src->DataDirectory[idx][1]);
-
-	a->DataDirectory[idx].Size = size;
-
-	if (size)
-	  a->DataDirectory[idx].VirtualAddress =
-	    H_GET_32 (abfd, src->DataDirectory[idx][0]);
-	else
-	  a->DataDirectory[idx].VirtualAddress = 0;
-      }
-
-    while (idx < IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
-      {
-	a->DataDirectory[idx].Size = 0;
-	a->DataDirectory[idx].VirtualAddress = 0;
-	idx ++;
-      }
-  }
+  while (idx < IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
+    {
+      a->DataDirectory[idx].Size = 0;
+      a->DataDirectory[idx].VirtualAddress = 0;
+      idx++;
+    }
 
   if (aouthdr_int->entry)
     {

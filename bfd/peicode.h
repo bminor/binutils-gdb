@@ -1519,18 +1519,40 @@ pe_bfd_object_p (bfd * abfd)
       if (amt > opt_hdr_size)
 	memset (opthdr + opt_hdr_size, 0, amt - opt_hdr_size);
 
-      bfd_set_error (bfd_error_no_error);
-      bfd_coff_swap_aouthdr_in (abfd, opthdr, & internal_a);
-      if (bfd_get_error () != bfd_error_no_error)
-	return NULL;
-    }
+      bfd_coff_swap_aouthdr_in (abfd, opthdr, &internal_a);
 
+      struct internal_extra_pe_aouthdr *a = &internal_a.pe;
+      if ((a->SectionAlignment & -a->SectionAlignment) != a->SectionAlignment
+	  || a->SectionAlignment >= 0x80000000)
+	{
+	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
+	  *warn = _("%pB: adjusting invalid SectionAlignment");
+	  a->SectionAlignment &= -a->SectionAlignment;
+	  if (a->SectionAlignment >= 0x80000000)
+	    a->SectionAlignment = 0x40000000;
+	}
+
+      if ((a->FileAlignment & -a->FileAlignment) != a->FileAlignment
+	  || a->FileAlignment > a->SectionAlignment)
+	{
+	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
+	  *warn = _("%pB: adjusting invalid FileAlignment");
+	  a->FileAlignment &= -a->FileAlignment;
+	  if (a->FileAlignment > a->SectionAlignment)
+	    a->FileAlignment = a->SectionAlignment;
+	}
+
+      if (a->NumberOfRvaAndSizes > IMAGE_NUMBEROF_DIRECTORY_ENTRIES)
+	{
+	  const char **warn = _bfd_per_xvec_warn (abfd->xvec);
+	  *warn = _("%pB: invalid NumberOfRvaAndSizes");
+	}
+    }
 
   result = coff_real_object_p (abfd, internal_f.f_nscns, &internal_f,
 			       (opt_hdr_size != 0
 				? &internal_a
 				: (struct internal_aouthdr *) NULL));
-
 
   if (result)
     {
