@@ -1382,7 +1382,7 @@ make_first_thread (SIM_CPU *current_cpu)
 /* Handle unknown system calls.  Returns (if it does) the syscall
    return value.  */
 
-static USI
+static USI ATTRIBUTE_PRINTF (3, 4)
 cris_unknown_syscall (SIM_CPU *current_cpu, USI pc, char *s, ...)
 {
   SIM_DESC sd = CPU_STATE (current_cpu);
