@@ -1097,6 +1097,9 @@ print_insn_powerpc (bfd_vma memaddr,
 	  else if ((operand->flags & PPC_OPERAND_VSR) != 0)
 	    (*info->fprintf_styled_func) (info->stream, dis_style_register,
 					  "vs%" PRId64, value);
+	  else if ((operand->flags & PPC_OPERAND_DMR) != 0)
+	    (*info->fprintf_styled_func) (info->stream, dis_style_register,
+					  "dm%" PRId64, value);
 	  else if ((operand->flags & PPC_OPERAND_ACC) != 0)
 	    (*info->fprintf_styled_func) (info->stream, dis_style_register,
 					  "a%" PRId64, value);
