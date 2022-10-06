@@ -30,8 +30,8 @@
 #include "ansidecl.h"
 #include "filter_filename.h"
 
-extern void error
-(const char *msg, ...);
+extern void error (const char *msg, ...)
+  ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
 
 #define ASSERT(EXPRESSION) \
 do { \
@@ -47,8 +47,8 @@ do { \
 extern void *zalloc
 (long size);
 
-extern void dumpf
-(int indent, const char *msg, ...);
+extern void dumpf (int indent, const char *msg, ...)
+  ATTRIBUTE_PRINTF (2, 3);
 
 extern unsigned target_a2i
 (int ms_bit_nr,
