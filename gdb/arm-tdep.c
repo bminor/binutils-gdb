@@ -3591,9 +3591,14 @@ arm_m_exception_cache (frame_info_ptr this_frame)
 	  ULONGEST fpcar;
 
 	  /* Read FPCCR register.  */
-	  gdb_assert (safe_read_memory_unsigned_integer (FPCCR,
-							 ARM_INT_REGISTER_SIZE,
-							 byte_order, &fpccr));
+	  if (!safe_read_memory_unsigned_integer (FPCCR, ARM_INT_REGISTER_SIZE,
+						 byte_order, &fpccr))
+	    {
+	      warning (_("Could not fetch required FPCCR content.  Further "
+			 "unwinding is impossible."));
+	      arm_cache_set_active_sp_value (cache, tdep, 0);
+	      return cache;
+	    }
 
 	  /* Read FPCAR register.  */
 	  if (!safe_read_memory_unsigned_integer (FPCAR, ARM_INT_REGISTER_SIZE,
@@ -3669,9 +3674,16 @@ arm_m_exception_cache (frame_info_ptr this_frame)
 	 aligner between the top of the 32-byte stack frame and the
 	 previous context's stack pointer.  */
       ULONGEST xpsr;
-      gdb_assert (safe_read_memory_unsigned_integer (cache->saved_regs[
-						     ARM_PS_REGNUM].addr (), 4,
-						     byte_order, &xpsr));
+      if (!safe_read_memory_unsigned_integer (cache->saved_regs[ARM_PS_REGNUM]
+					      .addr (), ARM_INT_REGISTER_SIZE,
+					      byte_order, &xpsr))
+	{
+	  warning (_("Could not fetch required XPSR content.  Further "
+		     "unwinding is impossible."));
+	  arm_cache_set_active_sp_value (cache, tdep, 0);
+	  return cache;
+	}
+
       if (bit (xpsr, 9) != 0)
 	{
 	  CORE_ADDR new_sp = arm_cache_get_prev_sp_value (cache, tdep) + 4;
@@ -3687,6 +3699,27 @@ arm_m_exception_cache (frame_info_ptr this_frame)
 					"be caused by corrupt data or a bug in"
 					" GDB."),
 		  phex (lr, ARM_INT_REGISTER_SIZE));
+}
+
+/* Implementation of the stop_reason hook for arm_m_exception frames.  */
+
+static enum unwind_stop_reason
+arm_m_exception_frame_unwind_stop_reason (frame_info_ptr this_frame,
+					  void **this_cache)
+{
+  struct arm_prologue_cache *cache;
+  arm_gdbarch_tdep *tdep
+    = gdbarch_tdep<arm_gdbarch_tdep> (get_frame_arch (this_frame));
+
+  if (*this_cache == NULL)
+    *this_cache = arm_m_exception_cache (this_frame);
+  cache = (struct arm_prologue_cache *) *this_cache;
+
+  /* If we've hit a wall, stop.  */
+  if (arm_cache_get_prev_sp_value (cache, tdep) == 0)
+    return UNWIND_OUTERMOST;
+
+  return UNWIND_NO_REASON;
 }
 
 /* Implementation of function hook 'this_id' in
@@ -3798,7 +3831,7 @@ struct frame_unwind arm_m_exception_unwind =
 {
   "arm m exception",
   SIGTRAMP_FRAME,
-  default_frame_unwind_stop_reason,
+  arm_m_exception_frame_unwind_stop_reason,
   arm_m_exception_this_id,
   arm_m_exception_prev_register,
   NULL,
