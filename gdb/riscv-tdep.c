@@ -3241,173 +3241,173 @@ riscv_return_value (struct gdbarch  *gdbarch,
 
   if (readbuf != nullptr || writebuf != nullptr)
     {
-	unsigned int arg_len;
-	struct value *abi_val;
-	gdb_byte *old_readbuf = nullptr;
-	int regnum;
+      unsigned int arg_len;
+      struct value *abi_val;
+      gdb_byte *old_readbuf = nullptr;
+      int regnum;
 
-	/* We only do one thing at a time.  */
-	gdb_assert (readbuf == nullptr || writebuf == nullptr);
+      /* We only do one thing at a time.  */
+      gdb_assert (readbuf == nullptr || writebuf == nullptr);
 
-	/* In some cases the argument is not returned as the declared type,
-	   and we need to cast to or from the ABI type in order to
-	   correctly access the argument.  When writing to the machine we
-	   do the cast here, when reading from the machine the cast occurs
-	   later, after extracting the value.  As the ABI type can be
-	   larger than the declared type, then the read or write buffers
-	   passed in might be too small.  Here we ensure that we are using
-	   buffers of sufficient size.  */
-	if (writebuf != nullptr)
-	  {
-	    struct value *arg_val;
+      /* In some cases the argument is not returned as the declared type,
+	 and we need to cast to or from the ABI type in order to
+	 correctly access the argument.  When writing to the machine we
+	 do the cast here, when reading from the machine the cast occurs
+	 later, after extracting the value.  As the ABI type can be
+	 larger than the declared type, then the read or write buffers
+	 passed in might be too small.  Here we ensure that we are using
+	 buffers of sufficient size.  */
+      if (writebuf != nullptr)
+	{
+	  struct value *arg_val;
 
-	    if (is_fixed_point_type (arg_type))
-	      {
-		/* Convert the argument to the type used to pass
-		   the return value, but being careful to preserve
-		   the fact that the value needs to be returned
-		   unscaled.  */
-		gdb_mpz unscaled;
-
-		unscaled.read (gdb::make_array_view (writebuf,
-						     arg_type->length ()),
-			       type_byte_order (arg_type),
-			       arg_type->is_unsigned ());
-		abi_val = allocate_value (info.type);
-		unscaled.write (value_contents_raw (abi_val),
-				type_byte_order (info.type),
-				info.type->is_unsigned ());
-	      }
-	    else
-	      {
-		arg_val = value_from_contents (arg_type, writebuf);
-		abi_val = value_cast (info.type, arg_val);
-	      }
-	    writebuf = value_contents_raw (abi_val).data ();
-	  }
-	else
-	  {
-	    abi_val = allocate_value (info.type);
-	    old_readbuf = readbuf;
-	    readbuf = value_contents_raw (abi_val).data ();
-	  }
-	arg_len = info.type->length ();
-
-	switch (info.argloc[0].loc_type)
-	  {
-	    /* Return value in register(s).  */
-	  case riscv_arg_info::location::in_reg:
+	  if (is_fixed_point_type (arg_type))
 	    {
-	      regnum = info.argloc[0].loc_data.regno;
-	      gdb_assert (info.argloc[0].c_length <= arg_len);
-	      gdb_assert (info.argloc[0].c_length
-			  <= register_size (gdbarch, regnum));
+	      /* Convert the argument to the type used to pass
+		 the return value, but being careful to preserve
+		 the fact that the value needs to be returned
+		 unscaled.  */
+	      gdb_mpz unscaled;
 
-	      if (readbuf)
-		{
-		  gdb_byte *ptr = readbuf + info.argloc[0].c_offset;
-		  regcache->cooked_read_part (regnum, 0,
-					      info.argloc[0].c_length,
-					      ptr);
-		}
-
-	      if (writebuf)
-		{
-		  const gdb_byte *ptr = writebuf + info.argloc[0].c_offset;
-		  riscv_regcache_cooked_write (regnum, ptr,
-					       info.argloc[0].c_length,
-					       regcache, call_info.flen);
-		}
-
-	      /* A return value in register can have a second part in a
-		 second register.  */
-	      if (info.argloc[1].c_length > 0)
-		{
-		  switch (info.argloc[1].loc_type)
-		    {
-		    case riscv_arg_info::location::in_reg:
-		      regnum = info.argloc[1].loc_data.regno;
-
-		      gdb_assert ((info.argloc[0].c_length
-				   + info.argloc[1].c_length) <= arg_len);
-		      gdb_assert (info.argloc[1].c_length
-				  <= register_size (gdbarch, regnum));
-
-		      if (readbuf)
-			{
-			  readbuf += info.argloc[1].c_offset;
-			  regcache->cooked_read_part (regnum, 0,
-						      info.argloc[1].c_length,
-						      readbuf);
-			}
-
-		      if (writebuf)
-			{
-			  const gdb_byte *ptr
-			    = writebuf + info.argloc[1].c_offset;
-			  riscv_regcache_cooked_write
-			    (regnum, ptr, info.argloc[1].c_length,
-			     regcache, call_info.flen);
-			}
-		      break;
-
-		    case riscv_arg_info::location::by_ref:
-		    case riscv_arg_info::location::on_stack:
-		    default:
-		      error (_("invalid argument location"));
-		      break;
-		    }
-		}
+	      unscaled.read (gdb::make_array_view (writebuf,
+						   arg_type->length ()),
+			     type_byte_order (arg_type),
+			     arg_type->is_unsigned ());
+	      abi_val = allocate_value (info.type);
+	      unscaled.write (value_contents_raw (abi_val),
+			      type_byte_order (info.type),
+			      info.type->is_unsigned ());
 	    }
-	    break;
-
-	    /* Return value by reference will have its address in A0.  */
-	  case riscv_arg_info::location::by_ref:
+	  else
 	    {
-	      ULONGEST addr;
-
-	      regcache_cooked_read_unsigned (regcache, RISCV_A0_REGNUM,
-					     &addr);
-	      if (readbuf != nullptr)
-		read_memory (addr, readbuf, info.length);
-	      if (writebuf != nullptr)
-		write_memory (addr, writebuf, info.length);
+	      arg_val = value_from_contents (arg_type, writebuf);
+	      abi_val = value_cast (info.type, arg_val);
 	    }
-	    break;
+	  writebuf = value_contents_raw (abi_val).data ();
+	}
+      else
+	{
+	  abi_val = allocate_value (info.type);
+	  old_readbuf = readbuf;
+	  readbuf = value_contents_raw (abi_val).data ();
+	}
+      arg_len = info.type->length ();
 
-	  case riscv_arg_info::location::on_stack:
-	  default:
-	    error (_("invalid argument location"));
-	    break;
-	  }
-
-	/* This completes the cast from abi type back to the declared type
-	   in the case that we are reading from the machine.  See the
-	   comment at the head of this block for more details.  */
-	if (readbuf != nullptr)
+      switch (info.argloc[0].loc_type)
+	{
+	  /* Return value in register(s).  */
+	case riscv_arg_info::location::in_reg:
 	  {
-	    struct value *arg_val;
+	    regnum = info.argloc[0].loc_data.regno;
+	    gdb_assert (info.argloc[0].c_length <= arg_len);
+	    gdb_assert (info.argloc[0].c_length
+			<= register_size (gdbarch, regnum));
 
-	    if (is_fixed_point_type (arg_type))
+	    if (readbuf)
 	      {
-		/* Convert abi_val to the actual return type, but
-		   being careful to preserve the fact that abi_val
-		   is unscaled.  */
-		gdb_mpz unscaled;
-
-		unscaled.read (value_contents (abi_val),
-			       type_byte_order (info.type),
-			       info.type->is_unsigned ());
-		arg_val = allocate_value (arg_type);
-		unscaled.write (value_contents_raw (arg_val),
-				type_byte_order (arg_type),
-				arg_type->is_unsigned ());
+		gdb_byte *ptr = readbuf + info.argloc[0].c_offset;
+		regcache->cooked_read_part (regnum, 0,
+					    info.argloc[0].c_length,
+					    ptr);
 	      }
-	    else
-	      arg_val = value_cast (arg_type, abi_val);
-	    memcpy (old_readbuf, value_contents_raw (arg_val).data (),
-		    arg_type->length ());
+
+	    if (writebuf)
+	      {
+		const gdb_byte *ptr = writebuf + info.argloc[0].c_offset;
+		riscv_regcache_cooked_write (regnum, ptr,
+					     info.argloc[0].c_length,
+					     regcache, call_info.flen);
+	      }
+
+	    /* A return value in register can have a second part in a
+	       second register.  */
+	    if (info.argloc[1].c_length > 0)
+	      {
+		switch (info.argloc[1].loc_type)
+		  {
+		  case riscv_arg_info::location::in_reg:
+		    regnum = info.argloc[1].loc_data.regno;
+
+		    gdb_assert ((info.argloc[0].c_length
+				 + info.argloc[1].c_length) <= arg_len);
+		    gdb_assert (info.argloc[1].c_length
+				<= register_size (gdbarch, regnum));
+
+		    if (readbuf)
+		      {
+			readbuf += info.argloc[1].c_offset;
+			regcache->cooked_read_part (regnum, 0,
+						    info.argloc[1].c_length,
+						    readbuf);
+		      }
+
+		    if (writebuf)
+		      {
+			const gdb_byte *ptr
+			  = writebuf + info.argloc[1].c_offset;
+			riscv_regcache_cooked_write
+			  (regnum, ptr, info.argloc[1].c_length,
+			   regcache, call_info.flen);
+		      }
+		    break;
+
+		  case riscv_arg_info::location::by_ref:
+		  case riscv_arg_info::location::on_stack:
+		  default:
+		    error (_("invalid argument location"));
+		    break;
+		  }
+	      }
 	  }
+	  break;
+
+	  /* Return value by reference will have its address in A0.  */
+	case riscv_arg_info::location::by_ref:
+	  {
+	    ULONGEST addr;
+
+	    regcache_cooked_read_unsigned (regcache, RISCV_A0_REGNUM,
+					   &addr);
+	    if (readbuf != nullptr)
+	      read_memory (addr, readbuf, info.length);
+	    if (writebuf != nullptr)
+	      write_memory (addr, writebuf, info.length);
+	  }
+	  break;
+
+	case riscv_arg_info::location::on_stack:
+	default:
+	  error (_("invalid argument location"));
+	  break;
+	}
+
+      /* This completes the cast from abi type back to the declared type
+	 in the case that we are reading from the machine.  See the
+	 comment at the head of this block for more details.  */
+      if (readbuf != nullptr)
+	{
+	  struct value *arg_val;
+
+	  if (is_fixed_point_type (arg_type))
+	    {
+	      /* Convert abi_val to the actual return type, but
+		 being careful to preserve the fact that abi_val
+		 is unscaled.  */
+	      gdb_mpz unscaled;
+
+	      unscaled.read (value_contents (abi_val),
+			     type_byte_order (info.type),
+			     info.type->is_unsigned ());
+	      arg_val = allocate_value (arg_type);
+	      unscaled.write (value_contents_raw (arg_val),
+			      type_byte_order (arg_type),
+			      arg_type->is_unsigned ());
+	    }
+	  else
+	    arg_val = value_cast (arg_type, abi_val);
+	  memcpy (old_readbuf, value_contents_raw (arg_val).data (),
+		  arg_type->length ());
+	}
     }
 
   switch (info.argloc[0].loc_type)
