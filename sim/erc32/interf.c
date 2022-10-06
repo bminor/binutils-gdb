@@ -156,7 +156,7 @@ run_sim(struct pstate *sregs, uint64_t icount, int dis)
     return TIME_OUT;
 }
 
-static int
+static int ATTRIBUTE_PRINTF (3, 4)
 fprintf_styled (void *stream, enum disassembler_style style,
 		const char *fmt, ...)
 {
