@@ -31,6 +31,15 @@ extern void complaint_internal (const char *fmt, ...)
 
 extern int stop_whining;
 
+/* Return true if complaints are enabled.  This can be used to guard code
+   that is used only to decide whether to issue a complaint.  */
+
+static inline bool
+have_complaint ()
+{
+  return stop_whining > 0;
+}
+
 /* Register a complaint.  This is a macro around complaint_internal to
    avoid computing complaint's arguments when complaints are disabled.
    Running FMT via gettext [i.e., _(FMT)] can be quite expensive, for
@@ -38,7 +47,7 @@ extern int stop_whining;
 #define complaint(FMT, ...)					\
   do								\
     {								\
-      if (stop_whining > 0)					\
+      if (have_complaint ())					\
 	complaint_internal (FMT, ##__VA_ARGS__);		\
     }								\
   while (0)

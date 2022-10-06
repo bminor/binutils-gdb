@@ -12043,20 +12043,23 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (dwarf2_get_pc_bounds (die, &lowpc, &highpc, cu, nullptr, nullptr)
       <= PC_BOUNDS_INVALID)
     {
-      attr = dwarf2_attr (die, DW_AT_external, cu);
-      bool external_p = attr != nullptr && attr->as_boolean ();
-      attr = dwarf2_attr (die, DW_AT_inline, cu);
-      bool inlined_p
-	= (attr != nullptr
-	   && attr->is_nonnegative ()
-	   && (attr->as_nonnegative () == DW_INL_inlined
-	       || attr->as_nonnegative () == DW_INL_declared_inlined));
-      attr = dwarf2_attr (die, DW_AT_declaration, cu);
-      bool decl_p = attr != nullptr && attr->as_boolean ();
-      if (!external_p && !inlined_p && !decl_p)
-	complaint (_("cannot get low and high bounds "
-		     "for subprogram DIE at %s"),
-		   sect_offset_str (die->sect_off));
+      if (have_complaint ())
+	{
+	  attr = dwarf2_attr (die, DW_AT_external, cu);
+	  bool external_p = attr != nullptr && attr->as_boolean ();
+	  attr = dwarf2_attr (die, DW_AT_inline, cu);
+	  bool inlined_p
+	    = (attr != nullptr
+	       && attr->is_nonnegative ()
+	       && (attr->as_nonnegative () == DW_INL_inlined
+		   || attr->as_nonnegative () == DW_INL_declared_inlined));
+	  attr = dwarf2_attr (die, DW_AT_declaration, cu);
+	  bool decl_p = attr != nullptr && attr->as_boolean ();
+	  if (!external_p && !inlined_p && !decl_p)
+	    complaint (_("cannot get low and high bounds "
+			 "for subprogram DIE at %s"),
+		       sect_offset_str (die->sect_off));
+	}
       return;
     }
 
