@@ -87,12 +87,12 @@ SIM_RC sim_profile_set_option (SIM_DESC sd_, const char *name_, int idx_,
 #define PROFILE_core   (1 << PROFILE_CORE_IDX)
 
 /* Preprocessor macros to simplify tests of WITH_PROFILE.  */
-#define WITH_PROFILE_INSN_P (WITH_PROFILE & PROFILE_insn)
-#define WITH_PROFILE_MEMORY_P (WITH_PROFILE & PROFILE_memory)
-#define WITH_PROFILE_MODEL_P (WITH_PROFILE & PROFILE_model)
-#define WITH_PROFILE_SCACHE_P (WITH_PROFILE & PROFILE_scache)
-#define WITH_PROFILE_PC_P (WITH_PROFILE & PROFILE_pc)
-#define WITH_PROFILE_CORE_P (WITH_PROFILE & PROFILE_core)
+#define WITH_PROFILE_INSN_P   ((WITH_PROFILE & PROFILE_insn) != 0)
+#define WITH_PROFILE_MEMORY_P ((WITH_PROFILE & PROFILE_memory) != 0)
+#define WITH_PROFILE_MODEL_P  ((WITH_PROFILE & PROFILE_model) != 0)
+#define WITH_PROFILE_SCACHE_P ((WITH_PROFILE & PROFILE_scache) != 0)
+#define WITH_PROFILE_PC_P     ((WITH_PROFILE & PROFILE_pc) != 0)
+#define WITH_PROFILE_CORE_P   ((WITH_PROFILE & PROFILE_core) != 0)
 
 /* If MAX_TARGET_MODES isn't defined, we can't do memory profiling.
    ??? It is intended that this is a temporary occurrence.  Normally
