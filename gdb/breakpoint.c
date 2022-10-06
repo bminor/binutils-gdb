@@ -5358,7 +5358,7 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
   else
     cond = bl->cond.get ();
 
-  if (cond && b->disposition != disp_del_at_next_stop)
+  if (cond != nullptr && b->disposition != disp_del_at_next_stop)
     {
       int within_current_scope = 1;
       struct watchpoint * w;
@@ -5430,7 +5430,7 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
       value_free_to_mark (mark);
     }
 
-  if (cond && !condition_result)
+  if (cond != nullptr && !condition_result)
     {
       infrun_debug_printf ("condition_result = false, not stopping");
       bs->stop = 0;
