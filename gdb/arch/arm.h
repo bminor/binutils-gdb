@@ -115,7 +115,12 @@ enum system_register_address : CORE_ADDR
   /* M-profile Floating-Point Context Control Register address, defined in
      ARMv7-M (Section B3.2.2) and ARMv8-M (Section D1.2.99) reference
      manuals.  */
-  FPCCR = 0xe000ef34
+  FPCCR = 0xe000ef34,
+
+  /* M-profile Floating-Point Context Address Register address, defined in
+     ARMv7-M (Section B3.2.2) and ARMv8-M (Section D1.2.98) reference
+     manuals.  */
+  FPCAR = 0xe000ef38
 };
 
 /* Instruction condition field values.  */

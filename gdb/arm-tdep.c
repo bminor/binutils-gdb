@@ -3588,27 +3588,48 @@ arm_m_exception_cache (struct frame_info *this_frame)
       if (extended_frame_used)
 	{
 	  ULONGEST fpccr;
+	  ULONGEST fpcar;
 
 	  /* Read FPCCR register.  */
 	  gdb_assert (safe_read_memory_unsigned_integer (FPCCR,
 							 ARM_INT_REGISTER_SIZE,
 							 byte_order, &fpccr));
-	  bool fpccr_ts = bit (fpccr, 26);
 
-	  /* This code does not take into account the lazy stacking, see "Lazy
-	     context save of FP state", in B1.5.7, also ARM AN298, supported
-	     by Cortex-M4F architecture.
-	     To fully handle this the FPCCR register (Floating-point Context
-	     Control Register) needs to be read out and the bits ASPEN and
-	     LSPEN could be checked to setup correct lazy stacked FP registers.
-	     This register is located at address 0xE000EF34.  */
+	  /* Read FPCAR register.  */
+	  if (!safe_read_memory_unsigned_integer (FPCAR, ARM_INT_REGISTER_SIZE,
+						  byte_order, &fpcar))
+	    {
+	      warning (_("Could not fetch FPCAR content. Further unwinding of "
+			 "FP register values will be unreliable."));
+	      fpcar = 0;
+	    }
+
+	  bool fpccr_aspen = bit (fpccr, 31);
+	  bool fpccr_lspen = bit (fpccr, 30);
+	  bool fpccr_ts = bit (fpccr, 26);
+	  bool fpccr_lspact = bit (fpccr, 0);
+
+	  /* The LSPEN and ASPEN bits indicate if the lazy state preservation
+	     for FP registers is enabled or disabled.  The LSPACT bit indicate,
+	     together with FPCAR, if the lazy state preservation feature is
+	     active for the current frame or for another frame.
+	     See "Lazy context save of FP state", in B1.5.7, also ARM AN298,
+	     supported by Cortex-M4F architecture for details.  */
+	  bool fpcar_points_to_this_frame = ((unwound_sp + sp_r0_offset + 0x20)
+					     == (fpcar & ~0x7));
+	  bool read_fp_regs_from_stack = (!(fpccr_aspen && fpccr_lspen
+					    && fpccr_lspact
+					    && fpcar_points_to_this_frame));
 
 	  /* Extended stack frame type used.  */
-	  CORE_ADDR addr = unwound_sp + sp_r0_offset + 0x20;
-	  for (int i = 0; i < 8; i++)
+	  if (read_fp_regs_from_stack)
 	    {
-	      cache->saved_regs[ARM_D0_REGNUM + i].set_addr (addr);
-	      addr += 8;
+	      CORE_ADDR addr = unwound_sp + sp_r0_offset + 0x20;
+	      for (int i = 0; i < 8; i++)
+		{
+		  cache->saved_regs[ARM_D0_REGNUM + i].set_addr (addr);
+		  addr += 8;
+		}
 	    }
 	  cache->saved_regs[ARM_FPSCR_REGNUM].set_addr (unwound_sp
 							+ sp_r0_offset + 0x60);
@@ -3617,11 +3638,14 @@ arm_m_exception_cache (struct frame_info *this_frame)
 	      && fpccr_ts)
 	    {
 	      /* Handle floating-point callee saved registers.  */
-	      addr = unwound_sp + sp_r0_offset + 0x68;
-	      for (int i = 8; i < 16; i++)
+	      if (read_fp_regs_from_stack)
 		{
-		  cache->saved_regs[ARM_D0_REGNUM + i].set_addr (addr);
-		  addr += 8;
+		  CORE_ADDR addr = unwound_sp + sp_r0_offset + 0x68;
+		  for (int i = 8; i < 16; i++)
+		    {
+		      cache->saved_regs[ARM_D0_REGNUM + i].set_addr (addr);
+		      addr += 8;
+		    }
 		}
 
 	      arm_cache_set_active_sp_value (cache, tdep,
