@@ -437,10 +437,8 @@ void hw_abort
  const char *fmt,
  ...) ATTRIBUTE_PRINTF (2, 3) ATTRIBUTE_NORETURN;
 
-void hw_vabort
-(struct hw *me,
- const char *fmt,
- va_list ap) ATTRIBUTE_NORETURN;
+extern void hw_vabort (struct hw *me, const char *fmt, va_list ap)
+  ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 0);
 
 void hw_halt
 (struct hw *me,
