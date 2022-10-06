@@ -177,6 +177,16 @@ SIM_AC_OPTION_STDIO
 SIM_AC_OPTION_TRACE
 SIM_AC_OPTION_WARNINGS
 
+AC_MSG_CHECKING(for a known getopt prototype in unistd.h)
+AC_CACHE_VAL(sim_cv_decl_getopt_unistd_h,
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <unistd.h>], [extern int getopt (int, char *const*, const char *);])],
+sim_cv_decl_getopt_unistd_h=yes, sim_cv_decl_getopt_unistd_h=no)])
+AC_MSG_RESULT($sim_cv_decl_getopt_unistd_h)
+if test $sim_cv_decl_getopt_unistd_h = yes; then
+  AC_DEFINE([HAVE_DECL_GETOPT], 1,
+	    [Is the prototype for getopt in <unistd.h> in the expected format?])
+fi
+
 dnl These are unfortunate.  They are conditionally called by other sim macros
 dnl but always used by common/Make-common.in.  So we have to subst here even
 dnl when the rest of the code is in the respective macros.  Once we merge the
