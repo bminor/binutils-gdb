@@ -5614,7 +5614,8 @@ proc gdb_load_shlib { file } {
 	# We could set this even when not testing remotely, but a user
 	# generally won't set it unless necessary.  In order to make the tests
 	# more like the real-life scenarios, we don't set it for local testing.
-	gdb_test "set solib-search-path [file dirname $file]" "" ""
+	gdb_test "set solib-search-path [file dirname $file]" "" \
+	    "set solib-search-path for [file tail $file]"
     }
 
     return $dest
