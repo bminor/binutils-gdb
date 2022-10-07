@@ -5572,10 +5572,14 @@ proc gdb_remote_download {dest fromfile {tofile {}}} {
 
     if {[is_remote $dest]} {
 	# When the DEST is remote, we simply send the file to DEST.
-	global cleanfiles
+	global cleanfiles_target cleanfiles_host
 
 	set destname [remote_download $dest $fromfile $tofile]
-	lappend cleanfiles $destname
+	if { $dest == "target" } {
+	    lappend cleanfiles_target $destname
+	} elseif { $dest == "host" } {
+	    lappend cleanfiles_host $destname
+	}
 
 	return $destname
     } else {
@@ -5722,7 +5726,8 @@ proc default_gdb_init { test_file_name } {
     global gdb_wrapper_initialized
     global gdb_wrapper_target
     global gdb_test_file_name
-    global cleanfiles
+    global cleanfiles_target
+    global cleanfiles_host
     global pf_prefix
     
     # Reset the timeout value to the default.  This way, any testcase
@@ -5838,7 +5843,8 @@ proc default_gdb_init { test_file_name } {
     global gdb_instances
     set gdb_instances 0
 
-    set cleanfiles {}
+    set cleanfiles_target {}
+    set cleanfiles_host {}
 
     set gdb_test_file_name [file rootname [file tail $test_file_name]]
 
@@ -6150,7 +6156,8 @@ proc gdb_init { args } {
 proc gdb_finish { } {
     global gdbserver_reconnect_p
     global gdb_prompt
-    global cleanfiles
+    global cleanfiles_target
+    global cleanfiles_host
     global known_globals
 
     if { [info procs ::gdb_tcl_unknown] != "" } {
@@ -6162,9 +6169,13 @@ proc gdb_finish { } {
     # Exit first, so that the files are no longer in use.
     gdb_exit
 
-    if { [llength $cleanfiles] > 0 } {
-	eval remote_file target delete $cleanfiles
-	set cleanfiles {}
+    if { [llength $cleanfiles_target] > 0 } {
+	eval remote_file target delete $cleanfiles_target
+	set cleanfiles_target {}
+    }
+    if { [llength $cleanfiles_host] > 0 } {
+	eval remote_file host delete $cleanfiles_host
+	set cleanfiles_host {}
     }
 
     # Unblock write access to the banned variables.  Dejagnu typically
