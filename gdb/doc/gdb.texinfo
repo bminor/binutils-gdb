@@ -20806,6 +20806,72 @@ to resume the inferior (using commands like @code{continue},
 @code{step}, etc).  In this case, when the inferior finally returns to
 the dummy-frame, @value{GDBN} will once again halt the inferior.
 
+On targets that support asynchronous execution (@pxref{Background
+Execution}) @value{GDBN} can place a timeout on any functions called
+from @value{GDBN}.  If the timeout expires and the function call is
+still ongoing, then @value{GDBN} will interrupt the program.
+
+For targets that don't support asynchronous execution
+(@pxref{Background Execution}) then timeouts for functions called from
+@value{GDBN} are not supported, the timeout settings described below
+will be treated as @code{unlimited}, meaning @value{GDBN} will wait
+indefinitely for function call to complete, unless interrupted by the
+user using @kbd{Ctrl-C}.
+
+@table @code
+@item set direct-call-timeout @var{seconds}
+@kindex set direct-call-timeout
+@cindex timeout for called functions
+Set the timeout used when calling functions in the program to
+@var{seconds}, which should be an integer greater than zero, or the
+special value @code{unlimited}, which indicates no timeout should be
+used.  The default for this setting is @code{unlimited}.
+
+This setting is used when the user calls a function directly from the
+command prompt, for example with a @code{call} or @code{print}
+command.
+
+This setting only works for targets that support asynchronous
+execution (@pxref{Background Execution}), for any other target the
+setting is treated as @code{unlimited}.
+
+@item show direct-call-timeout
+@kindex show direct-call-timeout
+@cindex timeout for called functions
+Show the timeout used when calling functions in the program with a
+@code{call} or @code{print} command.
+@end table
+
+It is also possible to call functions within the program from the
+condition of a conditional breakpoint (@pxref{Conditions, ,Break
+Conditions}).  A different setting controls the timeout used for
+function calls made from a breakpoint condition.
+
+@table @code
+@item set indirect-call-timeout @var{seconds}
+@kindex set indirect-call-timeout
+@cindex timeout for called functions
+Set the timeout used when calling functions in the program from a
+breakpoint or watchpoint condition to @var{seconds}, which should be
+an integer greater than zero, or the special value @code{unlimited},
+which indicates no timeout should be used.  The default for this
+setting is @code{30} seconds.
+
+This setting only works for targets that support asynchronous
+execution (@pxref{Background Execution}), for any other target the
+setting is treated as @code{unlimited}.
+
+If a function called from a breakpoint or watchpoint condition times
+out, then @value{GDBN} will stop at the point where the timeout
+occurred.  The breakpoint condition evaluation will be abandoned.
+
+@item show indirect-call-timeout
+@kindex show indirect-call-timeout
+@cindex timeout for called functions
+Show the timeout used when calling functions in the program from a
+breakpoint or watchpoint condition.
+@end table
+
 @subsection Calling functions with no debug info
 
 @cindex no debug info functions
