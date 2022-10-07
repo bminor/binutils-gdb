@@ -2320,6 +2320,9 @@
 #define MASK_WRS_NTO 0xffffffff
 #define MATCH_WRS_STO 0x01d00073
 #define MASK_WRS_STO 0xffffffff
+/* Vendor-specific (CORE-V) Xcvelw instructions.  */
+#define MATCH_CV_ELW      0x300b
+#define MASK_CV_ELW       0x707f
 /* Vendor-specific (T-Head) XTheadBa instructions.  */
 #define MATCH_TH_ADDSL 0x0000100b
 #define MASK_TH_ADDSL 0xf800707f

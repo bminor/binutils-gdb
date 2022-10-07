@@ -2177,6 +2177,9 @@ const struct riscv_opcode riscv_opcodes[] =
 {"vt.maskc",   64, INSN_CLASS_XVENTANACONDOPS, "d,s,t", MATCH_VT_MASKC, MASK_VT_MASKC, match_opcode, 0 },
 {"vt.maskcn",  64, INSN_CLASS_XVENTANACONDOPS, "d,s,t", MATCH_VT_MASKCN, MASK_VT_MASKCN, match_opcode, 0 },
 
+/* Vendor-specific (CORE-V) Xcvelw instruction.  */
+{"cv.elw", 0, INSN_CLASS_XCVELW, "d,o(s)",  MATCH_CV_ELW, MASK_CV_ELW, match_opcode, 0},
+
 /* Terminate the list.  */
 {0, 0, INSN_CLASS_NONE, 0, 0, 0, 0, 0}
 };

@@ -745,6 +745,11 @@ extensions supported and provides the location of their
 publicly-released documentation:
 
 @table @r
+@item Xcvelw (not supported for CV32E40Pv1, version 1 for CV32E40Pv2)
+The Xcvelw extension provides instructions for event-load operations.
+
+It is documented in @url{https://docs.openhwgroup.org/projects/cv32e40p-user-manual/en/latest/instruction_set_extensions.html#event-load-instruction}
+
 @item XTheadBa
 The XTheadBa extension provides instructions for address calculations.
 
