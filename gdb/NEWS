@@ -54,6 +54,24 @@ set remote thread-options-packet
 show remote thread-options-packet
   Set/show the use of the thread options packet.
 
+set direct-call-timeout SECONDS
+show direct-call-timeout
+set indirect-call-timeout SECONDS
+show indirect-call-timeout
+  These new settings can be used to limit how long GDB will wait for
+  an inferior function call to complete.  The direct timeout is used
+  for inferior function calls from e.g. 'call' and 'print' commands,
+  while the indirect timeout is used for inferior function calls from
+  within a conditional breakpoint expression.
+
+  The default for the direct timeout is unlimited, while the default
+  for the indirect timeout is 30 seconds.
+
+  These timeouts will only have an effect for targets that are
+  operating in async mode.  For non-async targets the timeouts are
+  ignored, GDB will wait indefinitely for an inferior function to
+  complete, unless interrupted by the user using Ctrl-C.
+
 * New features in the GDB remote stub, GDBserver
 
   ** The --remote-debug and --event-loop-debug command line options
