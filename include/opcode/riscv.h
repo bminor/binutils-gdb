@@ -46,17 +46,6 @@ static inline unsigned int riscv_insn_length (insn_t insn)
   return 2;
 }
 
-static const char * const riscv_rm[8] =
-{
-  "rne", "rtz", "rdn", "rup", "rmm", 0, 0, "dyn"
-};
-
-static const char * const riscv_pred_succ[16] =
-{
-  0,   "w",  "r",  "rw",  "o",  "ow",  "or",  "orw",
-  "i", "iw", "ir", "irw", "io", "iow", "ior", "iorw"
-};
-
 #define RVC_JUMP_BITS 11
 #define RVC_JUMP_REACH ((1ULL << RVC_JUMP_BITS) * RISCV_JUMP_ALIGN)
 
@@ -555,6 +544,8 @@ extern const char * const riscv_gpr_names_numeric[NGPR];
 extern const char * const riscv_gpr_names_abi[NGPR];
 extern const char * const riscv_fpr_names_numeric[NFPR];
 extern const char * const riscv_fpr_names_abi[NFPR];
+extern const char * const riscv_rm[8];
+extern const char * const riscv_pred_succ[16];
 extern const char * const riscv_vecr_names_numeric[NVECR];
 extern const char * const riscv_vecm_names_numeric[NVECM];
 extern const char * const riscv_vsew[8];

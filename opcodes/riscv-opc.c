@@ -58,6 +58,19 @@ const char * const riscv_fpr_names_abi[NFPR] =
   "fs8",  "fs9",  "fs10", "fs11", "ft8",  "ft9",  "ft10", "ft11"
 };
 
+/* Rounding modes.  */
+const char * const riscv_rm[8] =
+{
+  "rne", "rtz", "rdn", "rup", "rmm", 0, 0, "dyn"
+};
+
+/* FENCE: predecessor/successor sets.  */
+const char * const riscv_pred_succ[16] =
+{
+  0,   "w",  "r",  "rw",  "o",  "ow",  "or",  "orw",
+  "i", "iw", "ir", "irw", "io", "iow", "ior", "iorw"
+};
+
 /* RVV registers.  */
 const char * const riscv_vecr_names_numeric[NVECR] =
 {
