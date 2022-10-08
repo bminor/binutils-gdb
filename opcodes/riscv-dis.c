@@ -473,11 +473,6 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 		 (int)EXTRACT_STYPE_IMM (l));
 	  break;
 
-	case 'f':
-	  print (info->stream, dis_style_address_offset, "%d",
-		 (int)EXTRACT_STYPE_IMM (l));
-	  break;
-
 	case 'a':
 	  info->target = EXTRACT_JTYPE_IMM (l) + pc;
 	  (*info->print_address_func) (info->target, info);
@@ -580,6 +575,27 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 
 	case 'Z':
 	  print (info->stream, dis_style_immediate, "%d", rs1);
+	  break;
+
+	case 'W': /* Various operands.  */
+	  {
+	    switch (*++oparg)
+	      {
+	      case 'i':
+		switch (*++oparg)
+		  {
+		  case 'f':
+		    print (info->stream, dis_style_address_offset, "%d",
+			   (int) EXTRACT_STYPE_IMM (l));
+		    break;
+		  default:
+		    goto undefined_modifier;
+		  }
+		  break;
+	      default:
+		goto undefined_modifier;
+	      }
+	  }
 	  break;
 
 	case 'X': /* Integer immediate.  */

@@ -1362,7 +1362,6 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	case 'j': used_bits |= ENCODE_ITYPE_IMM (-1U); break;
 	case 'a': used_bits |= ENCODE_JTYPE_IMM (-1U); break;
 	case 'p': used_bits |= ENCODE_BTYPE_IMM (-1U); break;
-	case 'f': /* Fall through.  */
 	case 'q': used_bits |= ENCODE_STYPE_IMM (-1U); break;
 	case 'u': used_bits |= ENCODE_UTYPE_IMM (-1U); break;
 	case 'z': break; /* Zero immediate.  */
@@ -1387,6 +1386,21 @@ validate_riscv_insn (const struct riscv_opcode *opc, int length)
 	      case '2': USE_BITS (OP_MASK_OP2, OP_SH_OP2); break;
 	      default:
 		goto unknown_validate_operand;
+	    }
+	  break;
+	case 'W': /* Various operands.  */
+	  switch (*++oparg)
+	    {
+	    case 'i':
+	      switch (*++oparg)
+		{
+		case 'f': used_bits |= ENCODE_STYPE_IMM (-1U); break;
+		default:
+		  goto unknown_validate_operand;
+		}
+	      break;
+	    default:
+	      goto unknown_validate_operand;
 	    }
 	  break;
 	case 'X': /* Integer immediate.  */
@@ -3420,22 +3434,37 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 	      imm_expr->X_op = O_absent;
 	      continue;
 
-	    case 'f': /* Prefetch offset, pseudo S-type but lower 5-bits zero.  */
-	      if (riscv_handle_implicit_zero_offset (imm_expr, asarg))
-		continue;
-	      my_getExpression (imm_expr, asarg);
-	      check_absolute_expr (ip, imm_expr, false);
-	      if (((unsigned) (imm_expr->X_add_number) & 0x1fU)
-		  || imm_expr->X_add_number >= (signed) RISCV_IMM_REACH / 2
-		  || imm_expr->X_add_number < -(signed) RISCV_IMM_REACH / 2)
-		as_bad (_("improper prefetch offset (%ld)"),
-			(long) imm_expr->X_add_number);
-	      ip->insn_opcode |=
-		ENCODE_STYPE_IMM ((unsigned) (imm_expr->X_add_number) &
-				  ~ 0x1fU);
-	      imm_expr->X_op = O_absent;
-	      asarg = expr_parse_end;
-	      continue;
+	    case 'W': /* Various operands.  */
+	      switch (*++oparg)
+		{
+		case 'i':
+		  switch (*++oparg)
+		    {
+		    case 'f':
+		      /* Prefetch offset for 'Zicbop' extension.
+			 pseudo S-type but lower 5-bits zero.  */
+		      if (riscv_handle_implicit_zero_offset (imm_expr, asarg))
+			continue;
+		      my_getExpression (imm_expr, asarg);
+		      check_absolute_expr (ip, imm_expr, false);
+		      if (((unsigned) (imm_expr->X_add_number) & 0x1fU)
+			  || imm_expr->X_add_number >= RISCV_IMM_REACH / 2
+			  || imm_expr->X_add_number < -RISCV_IMM_REACH / 2)
+			as_bad (_ ("improper prefetch offset (%ld)"),
+				(long) imm_expr->X_add_number);
+		      ip->insn_opcode |= ENCODE_STYPE_IMM (
+			  (unsigned) (imm_expr->X_add_number) & ~0x1fU);
+		      imm_expr->X_op = O_absent;
+		      asarg = expr_parse_end;
+		      continue;
+		    default:
+		      goto unknown_riscv_ip_operand;
+		    }
+		  break;
+		default:
+		  goto unknown_riscv_ip_operand;
+		}
+	      break;
 
 	    case 'X': /* Integer immediate.  */
 	      {
@@ -3488,6 +3517,7 @@ riscv_ip (char *str, struct riscv_cl_insn *ip, expressionS *imm_expr,
 		  }
 	      }
 	      break;
+
 	    default:
 	    unknown_riscv_ip_operand:
 	      as_fatal (_("internal: unknown argument type `%s'"),
