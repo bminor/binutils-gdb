@@ -444,7 +444,7 @@ proc test_disassembler_error_handling { } {
 		 "def replacement_colorize_disasm(content,gdbarch):" \
 		 "  return None" \
 		 "gdb.styling.colorize_disasm = replacement_colorize_disasm" \
-		 "\004"] \
+		 "end"] \
 	    "setup replacement colorize_disasm function" \
 	    true
 
