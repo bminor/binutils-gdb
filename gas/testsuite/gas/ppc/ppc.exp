@@ -146,6 +146,7 @@ run_dump_test "scalarquad"
 run_dump_test "rop"
 run_dump_test "rop-checks"
 run_dump_test "rfc02653"
+run_dump_test "rfc02658"
 
 run_dump_test "dcbt"
 run_dump_test "pr27676"
