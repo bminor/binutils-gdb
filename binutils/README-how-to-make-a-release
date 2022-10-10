@@ -251,6 +251,10 @@ When the time comes to actually make the release....
   
             ./src-release.sh -b -g -l -x binutils
 
+      OR ... for a more reproducible tarball:
+
+            ./src-release.sh -b -g -l -x -r `git log -1 --format=%cd --date=format:%F bfd/version.m4` binutils
+
   24. Check that the files in the tarballs have the correct
       permissions.
 
