@@ -4152,10 +4152,259 @@ gdb_caching_proc allow_aarch64_sve_tests {} {
     gdb_exit
     remote_file build delete $obj
 
+    # While testing for SVE support, also discover all the supported vector
+    # length values.
+    aarch64_initialize_sve_information
+
     verbose "$me:  returning $allow_sve_tests" 2
     return $allow_sve_tests
 }
 
+# Assuming SVE is supported by the target, run some checks to determine all
+# the supported vector length values and return an array containing all of those
+# values.  Since this is a gdb_caching_proc, this proc will only be executed
+# once.
+#
+# To check if a particular SVE vector length is supported, the following code
+# can be used. For instance, for vl == 16:
+#
+# if {[aarch64_supports_sve_vl 16]} {
+#     verbose -log "SVE vector length 16 is supported."
+# }
+#
+# This procedure should NEVER be called by hand, as it reinitializes the GDB
+# session and will derail a test.  This should be called automatically as part
+# of the SVE support test routine allow_aarch64_sve_tests.  Users should
+# restrict themselves to calling the helper proc aarch64_supports_sve_vl.
+
+gdb_caching_proc aarch64_initialize_sve_information { } {
+    global srcdir
+
+    set src "${srcdir}/lib/aarch64-test-sve.c"
+    set test_exec [standard_temp_file "aarch64-test-sve.x"]
+    set compile_flags "{additional_flags=-march=armv8-a+sve}"
+    array set supported_vl {}
+
+    # Compile the SVE vector length test.
+    set result [gdb_compile $src $test_exec executable [list debug ${compile_flags} nowarnings]]
+
+    if {$result != ""} {
+	verbose -log "Failed to compile SVE information gathering test."
+	return [array get supported_vl]
+    }
+
+    clean_restart $test_exec
+
+    if {![runto_main]} {
+	return [array get supported_vl]
+    }
+
+    set stop_breakpoint "stop here"
+    gdb_breakpoint [gdb_get_line_number $stop_breakpoint $src]
+    gdb_continue_to_breakpoint $stop_breakpoint
+
+    # Go through the data and extract the supported SVE vector lengths.
+    set vl_count [get_valueof "" "supported_vl_count" "0" \
+			      "fetch value of supported_vl_count"]
+    verbose -log "Found $vl_count supported SVE vector length values"
+
+    for {set vl_index 0} {$vl_index < $vl_count} {incr vl_index} {
+	set test_vl [get_valueof "" "supported_vl\[$vl_index\]" "0" \
+				 "fetch value of supported_vl\[$vl_index\]"]
+
+	# Mark this vector length as supported.
+	if {$test_vl != 0} {
+	    verbose -log "Found supported SVE vector length $test_vl"
+	    set supported_vl($test_vl) 1
+	}
+    }
+
+    gdb_exit
+    verbose -log "Cleaning up"
+    remote_file build delete $test_exec
+
+    verbose -log "Done gathering information about AArch64 SVE vector lengths."
+
+    # Return the array containing all of the supported SVE vl values.
+    return [array get supported_vl]
+}
+
+#
+# Return 1 if the target supports SVE vl LENGTH
+# Return 0 otherwise.
+#
+
+proc aarch64_supports_sve_vl { length } {
+
+    # Fetch the cached array of supported SVE vl values.
+    array set supported_vl [aarch64_initialize_sve_information]
+
+    # Do we have the global values cached?
+    if {![info exists supported_vl($length)]} {
+	verbose -log "Target does not support SVE vl $length"
+	return 0
+    }
+
+    # The target supports SVE vl LENGTH.
+    return 1
+}
+
+# Run a test on the target to see if it supports Aarch64 SME extensions.
+# Return 0 if so, 1 if it does not.  Note this causes a restart of GDB.
+
+gdb_caching_proc allow_aarch64_sme_tests {} {
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    set me "allow_aarch64_sme_tests"
+
+    if { ![is_aarch64_target]} {
+	return 0
+    }
+
+    set compile_flags "{additional_flags=-march=armv8-a+sme}"
+
+    # Compile a test program containing SME instructions.
+    set src {
+	int main() {
+	    asm volatile ("smstart za");
+	    return 0;
+	}
+    }
+    if {![gdb_simple_compile $me $src executable $compile_flags]} {
+	# Try again, but with a raw hex instruction so we don't rely on
+	# assembler support for SME.
+
+	set compile_flags "{additional_flags=-march=armv8-a}"
+
+	# Compile a test program containing SME instructions.
+	set src {
+	    int main() {
+		asm volatile (".word 0xD503457F");
+		return 0;
+	    }
+	}
+
+	if {![gdb_simple_compile $me $src executable $compile_flags]} {
+	    return 0
+	}
+    }
+
+    # Compilation succeeded so now run it via gdb.
+    clean_restart $obj
+    gdb_run_cmd
+    gdb_expect {
+	-re ".*Illegal instruction.*${gdb_prompt} $" {
+	    verbose -log "\n$me sme support not detected"
+	    set allow_sme_tests 0
+	}
+	-re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
+	    verbose -log "\n$me: sme support detected"
+	    set allow_sme_tests 1
+	}
+	default {
+	  warning "\n$me: default case taken"
+	    set allow_sme_tests 0
+	}
+    }
+    gdb_exit
+    remote_file build delete $obj
+
+    # While testing for SME support, also discover all the supported vector
+    # length values.
+    aarch64_initialize_sme_information
+
+    verbose "$me:  returning $allow_sme_tests" 2
+    return $allow_sme_tests
+}
+
+# Assuming SME is supported by the target, run some checks to determine all
+# the supported streaming vector length values and return an array containing
+# all of those values.  Since this is a gdb_caching_proc, this proc will only
+# be executed once.
+#
+# To check if a particular SME streaming vector length is supported, the
+# following code can be used. For instance, for svl == 32:
+#
+# if {[aarch64_supports_sme_svl 32]} {
+#     verbose -log "SME streaming vector length 32 is supported."
+# }
+#
+# This procedure should NEVER be called by hand, as it reinitializes the GDB
+# session and will derail a test.  This should be called automatically as part
+# of the SME support test routine allow_aarch64_sme_tests.  Users should
+# restrict themselves to calling the helper proc aarch64_supports_sme_svl.
+
+gdb_caching_proc aarch64_initialize_sme_information { } {
+    global srcdir
+
+    set src "${srcdir}/lib/aarch64-test-sme.c"
+    set test_exec [standard_temp_file "aarch64-test-sme.x"]
+    set compile_flags "{additional_flags=-march=armv8-a+sme}"
+    array set supported_svl {}
+
+    # Compile the SME vector length test.
+    set result [gdb_compile $src $test_exec executable [list debug ${compile_flags} nowarnings]]
+
+    if {$result != ""} {
+	verbose -log "Failed to compile SME information gathering test."
+	return [array get supported_svl]
+    }
+
+    clean_restart $test_exec
+
+    if {![runto_main]} {
+	return [array get supported_svl]
+    }
+
+    set stop_breakpoint "stop here"
+    gdb_breakpoint [gdb_get_line_number $stop_breakpoint $src]
+    gdb_continue_to_breakpoint $stop_breakpoint
+
+    # Go through the data and extract the supported SME vector lengths.
+    set svl_count [get_valueof "" "supported_svl_count" "0" \
+			       "fetch value of supported_svl_count"]
+    verbose -log "Found $svl_count supported SME vector length values"
+
+    for {set svl_index 0} {$svl_index < $svl_count} {incr svl_index} {
+	set test_svl [get_valueof "" "supported_svl\[$svl_index\]" "0" \
+				  "fetch value of supported_svl\[$svl_index\]"]
+
+	# Mark this streaming vector length as supported.
+	if {$test_svl != 0} {
+	    verbose -log "Found supported SME vector length $test_svl"
+	    set supported_svl($test_svl) 1
+	}
+    }
+
+    gdb_exit
+    verbose -log "Cleaning up"
+    remote_file build delete $test_exec
+
+    verbose -log "Done gathering information about AArch64 SME vector lengths."
+
+    # Return the array containing all of the supported SME svl values.
+    return [array get supported_svl]
+}
+
+#
+# Return 1 if the target supports SME svl LENGTH
+# Return 0 otherwise.
+#
+
+proc aarch64_supports_sme_svl { length } {
+
+    # Fetch the cached array of supported SME svl values.
+    array set supported_svl [aarch64_initialize_sme_information]
+
+    # Do we have the global values cached?
+    if {![info exists supported_svl($length)]} {
+	verbose -log "Target does not support SME svl $length"
+	return 0
+    }
+
+    # The target supports SME svl LENGTH.
+    return 1
+}
 
 # A helper that compiles a test case to see if __int128 is supported.
 proc gdb_int128_helper {lang} {
