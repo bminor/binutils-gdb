@@ -108,7 +108,7 @@ LOCALEDIR = @localedir@
 SYSCONFDIR = @sysconfdir@
 
 AM_CPPFLAGS = $(GPROFNG_CPPFLAGS) -DLOCALEDIR=\"$(LOCALEDIR)\" \
-	-DSYSCONFDIR=\"$(SYSCONFDIR)\" \
+	-DSYSCONFDIR=\"$(SYSCONFDIR)\" -DLIBDIR=\"$(libdir)\" \
 	-I.. -I$(srcdir) \
 	-I$(srcdir)/../common \
 	-I$(srcdir)/../../include -I$(srcdir)/../../opcodes \

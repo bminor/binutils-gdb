@@ -159,12 +159,18 @@ collect::putenv_libcollector_ld_misc ()
   sb.appendf ("%s=", "SP_COLLECTOR_LIBRARY_PATH");
   int len = sb.length ();
   int cnt = 0;
+  char *fname = dbe_sprintf ("%s/%s/%s", LIBDIR, PACKAGE, LIBGP_COLLECTOR);
+  if (access (fname, R_OK | F_OK) == 0)
+    {
+      ++cnt;
+      sb.appendf ("%s/%s", LIBDIR, PACKAGE);
+    }
+  free (fname);
   for (char *s = ev; s;)
     {
       char *s1 = strchr (s, ':');
       if (s1)
 	*(s1++) = 0;
-      char *fname;
       if (*s == '/')
 	{
 	  fname = dbe_sprintf ("%s/%s/%s", s, PACKAGE, LIBGP_COLLECTOR);
