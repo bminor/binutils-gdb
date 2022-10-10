@@ -169,8 +169,7 @@ MAINTAINERCLEANFILES += $(man_MANS) %D%/binutils.info %D%/cxxfilt.man
 	else \
 	  man=$(srcdir)/%D%/cxxfilt.man; \
 	fi; \
-	sed -e 's/@PROGRAM@/$(DEMANGLER_NAME)/' \
-	    -e 's/cxxfilt/$(DEMANGLER_NAME)/' < $$man \
+	sed -e 's/cxxfilt/$(DEMANGLER_NAME)/' < $$man \
 		> %D%/$(DEMANGLER_NAME).1
 
 html-local: %D%/binutils/index.html
