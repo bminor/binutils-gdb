@@ -1000,7 +1000,7 @@ proc gdb_test_multiple { command message args } {
     }
 
     if [string match "*\[\r\n\]" $command] {
-	error "Invalid trailing newline in \"$message\" test"
+	error "Invalid trailing newline in \"$command\" command"
     }
 
     if [string match "*\[\r\n\]*" $message] {
