@@ -447,7 +447,7 @@ extern int frscm_is_frame (SCM scm);
 extern frame_smob *frscm_get_frame_smob_arg_unsafe (SCM frame_scm, int arg_pos,
 						    const char *func_name);
 
-extern struct frame_info *frscm_frame_smob_to_frame (frame_smob *);
+extern struct frame_info_ptr frscm_frame_smob_to_frame (frame_smob *);
 
 /* scm-iterator.c */
 

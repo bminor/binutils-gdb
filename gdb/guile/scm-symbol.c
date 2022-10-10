@@ -520,7 +520,6 @@ gdbscm_symbol_value (SCM self, SCM rest)
   int frame_pos = -1;
   SCM frame_scm = SCM_BOOL_F;
   frame_smob *f_smob = NULL;
-  struct frame_info *frame_info = NULL;
   struct value *value = NULL;
 
   gdbscm_parse_function_args (FUNC_NAME, SCM_ARG2, keywords, "#O",
@@ -537,9 +536,11 @@ gdbscm_symbol_value (SCM self, SCM rest)
   gdbscm_gdb_exception exc {};
   try
     {
+      frame_info_ptr frame_info;
+
       if (f_smob != NULL)
 	{
-	  frame_info = frscm_frame_smob_to_frame (f_smob);
+	  frame_info = frame_info_ptr (frscm_frame_smob_to_frame (f_smob));
 	  if (frame_info == NULL)
 	    error (_("Invalid frame"));
 	}
@@ -598,12 +599,11 @@ gdbscm_lookup_symbol (SCM name_scm, SCM rest)
     }
   else
     {
-      struct frame_info *selected_frame;
-
       gdbscm_gdb_exception exc {};
       try
 	{
-	  selected_frame = get_selected_frame (_("no frame selected"));
+	  frame_info_ptr selected_frame
+	    = get_selected_frame (_("no frame selected"));
 	  block = get_frame_block (selected_frame, NULL);
 	}
       catch (const gdb_exception &ex)
