@@ -58,7 +58,7 @@ proc run_display_test { dir cflags gprofflags } {
     set tdir "tmpdir/$testdir"
 	send_log "create dir: $tdir\n"
 	set output [run_native_host_cmd "mkdir -p $tdir"]
-	set gprofng [exec find $BUILDDIR/tmpdir -type f -name gprofng -perm -u+x | head -1]
+	set gprofng $BUILDDIR/src/gprofng
 
 	set fd [open "$tdir/rules.txt" "w"]
 	switch -regexp -- $testdir {
