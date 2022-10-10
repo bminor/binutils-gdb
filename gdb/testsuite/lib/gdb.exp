@@ -861,9 +861,18 @@ proc gdb_internal_error_resync {} {
 }
 
 # Fill in the default prompt if PROMPT_REGEXP is empty.
-proc fill_in_default_prompt {prompt_regexp} {
+#
+# If WITH_ANCHOR is true and the default prompt is used, append a `$` at the end
+# of the regexp, to anchor the match at the end of the buffer.
+proc fill_in_default_prompt {prompt_regexp with_anchor} {
     if { "$prompt_regexp" == "" } {
-	return "$::gdb_prompt $"
+	set prompt "$::gdb_prompt "
+
+	if { $with_anchor } {
+	    append prompt "$"
+	}
+
+	return $prompt
     }
     return $prompt_regexp
 }
@@ -993,7 +1002,7 @@ proc gdb_test_multiple { command message args } {
 	error "Too few arguments to gdb_test_multiple"
     }
 
-    set prompt_regexp [fill_in_default_prompt $prompt_regexp]
+    set prompt_regexp [fill_in_default_prompt $prompt_regexp true]
 
     if { $message == "" } {
 	set message $command
@@ -1369,6 +1378,10 @@ proc gdb_test_multiline { name args } {
 #
 # -prompt PROMPT_REGEXP specifies a regexp matching the expected prompt
 #   after the command output.  If empty, defaults to "$gdb_prompt $".
+# -no-prompt-anchor specifies that if the default prompt regexp is used, it
+#   should not be anchored at the end of the buffer.  This means that the
+#   pattern can match even if there is stuff output after the prompt.  Does not
+#   have any effect if -prompt is specified.
 # -lbl specifies that line-by-line matching will be used.
 # -nopass specifies that a PASS should not be issued.
 #
@@ -1383,6 +1396,7 @@ proc gdb_test { args } {
 
     parse_args {
 	{prompt ""}
+	{no-prompt-anchor}
 	{lbl}
 	{nopass}
     }
@@ -1398,7 +1412,7 @@ proc gdb_test { args } {
 	set message $command
     }
 
-    set prompt [fill_in_default_prompt $prompt]
+    set prompt [fill_in_default_prompt $prompt [expr !${no-prompt-anchor}]]
 
     set saw_question 0
 
@@ -1475,20 +1489,21 @@ if { [tcl_version_at_least 8 5] == 0 } {
 # gdb_test_no_output [-prompt PROMPT_REGEXP] [-nopass] COMMAND [MESSAGE]
 # Send a command to GDB and verify that this command generated no output.
 #
-# See gdb_test for a description of the -prompt, -nopass, COMMAND, and
-# MESSAGE parameters.
+# See gdb_test for a description of the -prompt, -no-prompt-anchor, -nopass,
+# COMMAND, and MESSAGE parameters.
 
 proc gdb_test_no_output { args } {
     global gdb_prompt
 
     parse_args {
 	{prompt ""}
+	{no-prompt-anchor}
 	{nopass}
     }
 
     lassign $args command message
 
-    set prompt [fill_in_default_prompt $prompt]
+    set prompt [fill_in_default_prompt $prompt [expr !${no-prompt-anchor}]]
 
     set command_regex [string_to_regexp $command]
     gdb_test_multiple $command $message -prompt $prompt {
