@@ -19,10 +19,32 @@ clean_restart
 
 # Check that a command with trailing newline triggers an error.
 
-set results [catch {
-    gdb_test "pwd\n" ".*" "cmd with trailing newline"
-} output]
+with_test_prefix "cmd with trailing newline" {
+    set results [catch {
+	gdb_test "pwd\n" ".*" "pwd"
+    } output]
 
-gdb_assert { $results == 1 }
-set expected_error_msg "Invalid trailing newline in \"pwd\n\" command"
-gdb_assert { [string equal $output $expected_error_msg] }
+    gdb_assert { $results == 1 }
+    set expected_error_msg "Invalid trailing newline in \"pwd\n\" command"
+    gdb_assert { [string equal $output $expected_error_msg] }
+}
+
+with_test_prefix "cmd with trailing control code" {
+    foreach_with_prefix control_code {^C ^D} {
+	switch $control_code {
+	    ^C {
+		set cmd "\003"
+	    }
+	    ^D {
+		set cmd "\004"
+	    }
+	}
+	set results [catch {
+	    gdb_test $cmd ".*" "control code"
+	} output]
+
+	gdb_assert { $results == 1 }
+	set expected_error_msg "Invalid trailing control code in \"$cmd\" command"
+	gdb_assert { [string equal $output $expected_error_msg] }
+    }
+}

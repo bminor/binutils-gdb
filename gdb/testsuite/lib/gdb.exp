@@ -1003,6 +1003,10 @@ proc gdb_test_multiple { command message args } {
 	error "Invalid trailing newline in \"$command\" command"
     }
 
+    if [string match "*\[\003\004\]" $command] {
+	error "Invalid trailing control code in \"$command\" command"
+    }
+
     if [string match "*\[\r\n\]*" $message] {
 	error "Invalid newline in \"$message\" test"
     }
