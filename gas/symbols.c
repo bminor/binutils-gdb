@@ -2236,8 +2236,13 @@ S_GET_VALUE (symbolS *s)
       if (! s->flags.resolved
 	  || s->x->value.X_op != O_symbol
 	  || (S_IS_DEFINED (s) && ! S_IS_COMMON (s)))
-	as_bad (_("attempt to get value of unresolved symbol `%s'"),
-		S_GET_NAME (s));
+	{
+	  if (strcmp (S_GET_NAME (s), FAKE_LABEL_NAME) == 0)
+	    as_bad (_("expression is too complex to be resolved"));
+	  else
+	    as_bad (_("attempt to get value of unresolved symbol `%s'"),
+		    S_GET_NAME (s));
+	}
     }
   return (valueT) s->x->value.X_add_number;
 }
