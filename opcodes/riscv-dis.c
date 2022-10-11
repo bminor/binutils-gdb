@@ -61,6 +61,7 @@ enum riscv_seg_mstate last_map_state;
 
 static const char * const *riscv_gpr_names;
 static const char * const *riscv_fpr_names;
+static const char * const *riscv_gpcr_names;
 
 /* If set, disassemble as most general instruction.  */
 static int no_aliases;
@@ -70,6 +71,7 @@ set_default_riscv_dis_options (void)
 {
   riscv_gpr_names = riscv_gpr_names_abi;
   riscv_fpr_names = riscv_fpr_names_abi;
+  riscv_gpcr_names = riscv_gpcr_names_abi;
   no_aliases = 0;
 }
 
@@ -82,6 +84,7 @@ parse_riscv_dis_option_without_args (const char *option)
     {
       riscv_gpr_names = riscv_gpr_names_numeric;
       riscv_fpr_names = riscv_fpr_names_numeric;
+      riscv_gpcr_names = riscv_gpcr_names_numeric;
     }
   else
     return false;
@@ -356,6 +359,60 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	    case 'm':
 	      if (! EXTRACT_OPERAND (VMASK, l))
 		print (info->stream, ",%s", riscv_vecm_names_numeric[0]);
+	      break;
+	    }
+	  break;
+
+	case 'X': /* CHERI */
+	  switch (*++oparg)
+	    {
+	    case 's':
+	      print (info->stream, "%s", riscv_gpcr_names[rs1]);
+	      break;
+	    case 't':
+	      print (info->stream, "%s", riscv_gpcr_names[EXTRACT_OPERAND (RS2, l)]);
+	      break;
+	    case 'd':
+	      print (info->stream, "%s", riscv_gpcr_names[rd]);
+	      break;
+	    case 'D': /* 0 means DDC */
+	      {
+		const char *reg_name = NULL;
+		unsigned int reg = 0;
+		switch (*++oparg)
+		  {
+		  case 's':
+		    reg = rs1;
+		    break;
+		  case 't':
+		    reg = EXTRACT_OPERAND (RS2, l);
+		    break;
+		  }
+		if (reg == 0)
+		  reg_name = "ddc";
+		else
+		  reg_name = riscv_gpcr_names[reg];
+		print (info->stream, "%s", reg_name);
+		break;
+	      }
+	    case 'E':
+	      {
+		const char* scr_name = NULL;
+		unsigned int scr = EXTRACT_OPERAND (SCR, l);
+		switch (scr)
+		  {
+#define DECLARE_CHERI_SCR(name, num) case num: scr_name = #name; break;
+#include "opcode/riscv-opc.h"
+#undef DECLARE_CHERI_SCR
+		  }
+		if (scr_name)
+		  print (info->stream, "%s", scr_name);
+		else
+		  print (info->stream, "0x%x", scr);
+		break;
+	      }
+	    case 'I':
+	      print (info->stream, "0x%x", (int) EXTRACT_OPERAND (IMM16, l) & 0xffff);
 	      break;
 	    }
 	  break;
