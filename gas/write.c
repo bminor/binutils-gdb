@@ -972,16 +972,18 @@ fixup_segment (fixS *fixP, segT this_segment)
       if (fixP->fx_subsy != NULL)
 	{
 	  segT sub_symbol_segment;
+
 	  resolve_symbol_value (fixP->fx_subsy);
 	  sub_symbol_segment = S_GET_SEGMENT (fixP->fx_subsy);
+
 	  if (fixP->fx_addsy != NULL
 	      && sub_symbol_segment == add_symbol_segment
 	      && !S_FORCE_RELOC (fixP->fx_addsy, 0)
 	      && !S_FORCE_RELOC (fixP->fx_subsy, 0)
 	      && !TC_FORCE_RELOCATION_SUB_SAME (fixP, add_symbol_segment))
 	    {
-	      add_number += S_GET_VALUE (fixP->fx_addsy);
-	      add_number -= S_GET_VALUE (fixP->fx_subsy);
+	      add_number += S_GET_VALUE_WHERE (fixP->fx_addsy, fixP->fx_file, fixP->fx_line);
+	      add_number -= S_GET_VALUE_WHERE (fixP->fx_subsy, fixP->fx_file, fixP->fx_line);
 	      fixP->fx_offset = add_number;
 	      fixP->fx_addsy = NULL;
 	      fixP->fx_subsy = NULL;
@@ -994,7 +996,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 		   && !S_FORCE_RELOC (fixP->fx_subsy, 0)
 		   && !TC_FORCE_RELOCATION_SUB_ABS (fixP, add_symbol_segment))
 	    {
-	      add_number -= S_GET_VALUE (fixP->fx_subsy);
+	      add_number -= S_GET_VALUE_WHERE (fixP->fx_subsy, fixP->fx_file, fixP->fx_line);
 	      fixP->fx_offset = add_number;
 	      fixP->fx_subsy = NULL;
 	    }
@@ -1002,7 +1004,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 		   && !S_FORCE_RELOC (fixP->fx_subsy, 0)
 		   && !TC_FORCE_RELOCATION_SUB_LOCAL (fixP, add_symbol_segment))
 	    {
-	      add_number -= S_GET_VALUE (fixP->fx_subsy);
+	      add_number -= S_GET_VALUE_WHERE (fixP->fx_subsy, fixP->fx_file, fixP->fx_line);
 	      fixP->fx_offset = (add_number + fixP->fx_dot_value
 				 + fixP->fx_dot_frag->fr_address);
 
@@ -1035,7 +1037,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 	  else if (sub_symbol_segment != undefined_section
 		   && ! bfd_is_com_section (sub_symbol_segment)
 		   && MD_APPLY_SYM_VALUE (fixP))
-	    add_number -= S_GET_VALUE (fixP->fx_subsy);
+	    add_number -= S_GET_VALUE_WHERE (fixP->fx_subsy, fixP->fx_file, fixP->fx_line);
 	}
 
       if (fixP->fx_addsy)
@@ -1047,7 +1049,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 	      /* This fixup was made when the symbol's segment was
 		 SEG_UNKNOWN, but it is now in the local segment.
 		 So we know how to do the address without relocation.  */
-	      add_number += S_GET_VALUE (fixP->fx_addsy);
+	      add_number += S_GET_VALUE_WHERE (fixP->fx_addsy, fixP->fx_file, fixP->fx_line);
 	      fixP->fx_offset = add_number;
 	      if (fixP->fx_pcrel)
 		add_number -= MD_PCREL_FROM_SECTION (fixP, this_segment);
@@ -1058,14 +1060,14 @@ fixup_segment (fixS *fixP, segT this_segment)
 		   && !S_FORCE_RELOC (fixP->fx_addsy, 0)
 		   && !TC_FORCE_RELOCATION_ABS (fixP))
 	    {
-	      add_number += S_GET_VALUE (fixP->fx_addsy);
+	      add_number += S_GET_VALUE_WHERE (fixP->fx_addsy, fixP->fx_file, fixP->fx_line);
 	      fixP->fx_offset = add_number;
 	      fixP->fx_addsy = NULL;
 	    }
 	  else if (add_symbol_segment != undefined_section
 		   && ! bfd_is_com_section (add_symbol_segment)
 		   && MD_APPLY_SYM_VALUE (fixP))
-	    add_number += S_GET_VALUE (fixP->fx_addsy);
+	    add_number += S_GET_VALUE_WHERE (fixP->fx_addsy, fixP->fx_file, fixP->fx_line);
 	}
 
       if (fixP->fx_pcrel)

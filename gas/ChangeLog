@@ -2,6 +2,10 @@
 
 	* symbols.c (S_GET_VALUE): If the unresolved symbol is the fake
 	label provide a more helpful error message to the user.
+	(S_GET_VALUE_WHERE): Like S_GET_VALUE, but includes a file/line
+	number for error reporting purposes.
+	* symbols.h (S_GET_VALUE_WHERE): Prototype.
+	* write.c (fixup_segment): Use S_GET_VALUE_WHERE.
 
 2022-09-28  Nick Clifton  <nickc@redhat.com>
 

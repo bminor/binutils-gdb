@@ -2217,7 +2217,7 @@ decode_local_label_name (char *s)
 /* Get the value of a symbol.  */
 
 valueT
-S_GET_VALUE (symbolS *s)
+S_GET_VALUE_WHERE (symbolS *s, const char * file, unsigned int line)
 {
   if (s->flags.local_symbol)
     return resolve_symbol_value (s);
@@ -2238,13 +2238,22 @@ S_GET_VALUE (symbolS *s)
 	  || (S_IS_DEFINED (s) && ! S_IS_COMMON (s)))
 	{
 	  if (strcmp (S_GET_NAME (s), FAKE_LABEL_NAME) == 0)
-	    as_bad (_("expression is too complex to be resolved"));
+	    as_bad_where (file, line, _("expression is too complex to be resolved or converted into relocations"));
+	  else if (file != NULL)
+	    as_bad_where (file, line, _("attempt to get value of unresolved symbol `%s'"),
+			  S_GET_NAME (s));
 	  else
 	    as_bad (_("attempt to get value of unresolved symbol `%s'"),
 		    S_GET_NAME (s));
 	}
     }
   return (valueT) s->x->value.X_add_number;
+}
+
+valueT
+S_GET_VALUE (symbolS *s)
+{
+  return S_GET_VALUE_WHERE (s, NULL, 0);
 }
 
 /* Set the value of a symbol.  */
