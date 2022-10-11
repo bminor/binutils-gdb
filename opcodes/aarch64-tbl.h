@@ -1923,6 +1923,15 @@
   QLF2(S_S,NIL),                                        \
   QLF2(S_D,NIL),                                        \
 }
+#define OP_SVE_Vv_HSD                                   \
+{                                                       \
+  QLF2(S_H,S_H),                                        \
+  QLF2(S_S,S_S),                                        \
+  QLF2(S_D,S_D),                                        \
+  QLF2(S_H,NIL),                                        \
+  QLF2(S_S,NIL),                                        \
+  QLF2(S_D,NIL),                                        \
+}
 #define OP_SVE_VVD_BHS                                  \
 {                                                       \
   QLF3(S_B,S_B,S_D),                                    \
@@ -4201,7 +4210,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _SVE_INSN ("decd", 0x04f0e400, 0xfff0fc00, sve_misc, 0, OP2 (Rd, SVE_PATTERN_SCALED), OP_SVE_XU, F_OPD1_OPT | F_DEFAULT(31), 0),
   _SVE_INSNC ("dech", 0x0470c400, 0xfff0fc00, sve_misc, 0, OP2 (SVE_Zd, SVE_PATTERN_SCALED), OP_SVE_HU, F_OPD1_OPT | F_DEFAULT(31), C_SCAN_MOVPRFX, 0),
   _SVE_INSN ("dech", 0x0470e400, 0xfff0fc00, sve_misc, 0, OP2 (Rd, SVE_PATTERN_SCALED), OP_SVE_XU, F_OPD1_OPT | F_DEFAULT(31), 0),
-  _SVE_INSNC ("decp", 0x252d8000, 0xff3ffe00, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_Pg4_5), OP_SVE_VU_HSD, 0, C_SCAN_MOVPRFX, 0),
+  _SVE_INSNC ("decp", 0x252d8000, 0xff3ffe00, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_Pg4_5), OP_SVE_Vv_HSD, 0, C_SCAN_MOVPRFX, 0),
   _SVE_INSN ("decp", 0x252d8800, 0xff3ffe00, sve_size_bhsd, 0, OP2 (Rd, SVE_Pg4_5), OP_SVE_XV_BHSD, 0, 0),
   _SVE_INSNC ("decw", 0x04b0c400, 0xfff0fc00, sve_misc, 0, OP2 (SVE_Zd, SVE_PATTERN_SCALED), OP_SVE_SU, F_OPD1_OPT | F_DEFAULT(31), C_SCAN_MOVPRFX, 0),
   _SVE_INSN ("decw", 0x04b0e400, 0xfff0fc00, sve_misc, 0, OP2 (Rd, SVE_PATTERN_SCALED), OP_SVE_XU, F_OPD1_OPT | F_DEFAULT(31), 0),
@@ -4326,7 +4335,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _SVE_INSN ("incd", 0x04f0e000, 0xfff0fc00, sve_misc, 0, OP2 (Rd, SVE_PATTERN_SCALED), OP_SVE_XU, F_OPD1_OPT | F_DEFAULT(31), 0),
   _SVE_INSNC ("inch", 0x0470c000, 0xfff0fc00, sve_misc, 0, OP2 (SVE_Zd, SVE_PATTERN_SCALED), OP_SVE_HU, F_OPD1_OPT | F_DEFAULT(31), C_SCAN_MOVPRFX, 0),
   _SVE_INSN ("inch", 0x0470e000, 0xfff0fc00, sve_misc, 0, OP2 (Rd, SVE_PATTERN_SCALED), OP_SVE_XU, F_OPD1_OPT | F_DEFAULT(31), 0),
-  _SVE_INSNC ("incp", 0x252c8000, 0xff3ffe00, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_Pg4_5), OP_SVE_VU_HSD, 0, C_SCAN_MOVPRFX, 0),
+  _SVE_INSNC ("incp", 0x252c8000, 0xff3ffe00, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_Pg4_5), OP_SVE_Vv_HSD, 0, C_SCAN_MOVPRFX, 0),
   _SVE_INSN ("incp", 0x252c8800, 0xff3ffe00, sve_size_bhsd, 0, OP2 (Rd, SVE_Pg4_5), OP_SVE_XV_BHSD, 0, 0),
   _SVE_INSNC ("incw", 0x04b0c000, 0xfff0fc00, sve_misc, 0, OP2 (SVE_Zd, SVE_PATTERN_SCALED), OP_SVE_SU, F_OPD1_OPT | F_DEFAULT(31), C_SCAN_MOVPRFX, 0),
   _SVE_INSN ("incw", 0x04b0e000, 0xfff0fc00, sve_misc, 0, OP2 (Rd, SVE_PATTERN_SCALED), OP_SVE_XU, F_OPD1_OPT | F_DEFAULT(31), 0),
@@ -4689,7 +4698,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _SVE_INSNC ("sqdech", 0x0460c800, 0xfff0fc00, sve_misc, 0, OP2 (SVE_Zd, SVE_PATTERN_SCALED), OP_SVE_HU, F_OPD1_OPT | F_DEFAULT(31), C_SCAN_MOVPRFX, 0),
   _SVE_INSN ("sqdech", 0x0470f800, 0xfff0fc00, sve_misc, 0, OP2 (Rd, SVE_PATTERN_SCALED), OP_SVE_XU, F_OPD1_OPT | F_DEFAULT(31), 0),
   _SVE_INSN ("sqdech", 0x0460f800, 0xfff0fc00, sve_misc, 0, OP3 (Rd, Rd, SVE_PATTERN_SCALED), OP_SVE_XWU, F_OPD2_OPT | F_DEFAULT(31), 1),
-  _SVE_INSNC ("sqdecp", 0x252a8000, 0xff3ffe00, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_Pg4_5), OP_SVE_VU_HSD, 0, C_SCAN_MOVPRFX, 0),
+  _SVE_INSNC ("sqdecp", 0x252a8000, 0xff3ffe00, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_Pg4_5), OP_SVE_Vv_HSD, 0, C_SCAN_MOVPRFX, 0),
   _SVE_INSN ("sqdecp", 0x252a8c00, 0xff3ffe00, sve_size_bhsd, 0, OP2 (Rd, SVE_Pg4_5), OP_SVE_XV_BHSD, 0, 0),
   _SVE_INSN ("sqdecp", 0x252a8800, 0xff3ffe00, sve_size_bhsd, 0, OP3 (Rd, SVE_Pg4_5, Rd), OP_SVE_XVW_BHSD, 0, 2),
   _SVE_INSNC ("sqdecw", 0x04a0c800, 0xfff0fc00, sve_misc, 0, OP2 (SVE_Zd, SVE_PATTERN_SCALED), OP_SVE_SU, F_OPD1_OPT | F_DEFAULT(31), C_SCAN_MOVPRFX, 0),
@@ -4703,7 +4712,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _SVE_INSNC ("sqinch", 0x0460c000, 0xfff0fc00, sve_misc, 0, OP2 (SVE_Zd, SVE_PATTERN_SCALED), OP_SVE_HU, F_OPD1_OPT | F_DEFAULT(31), C_SCAN_MOVPRFX, 0),
   _SVE_INSN ("sqinch", 0x0470f000, 0xfff0fc00, sve_misc, 0, OP2 (Rd, SVE_PATTERN_SCALED), OP_SVE_XU, F_OPD1_OPT | F_DEFAULT(31), 0),
   _SVE_INSN ("sqinch", 0x0460f000, 0xfff0fc00, sve_misc, 0, OP3 (Rd, Rd, SVE_PATTERN_SCALED), OP_SVE_XWU, F_OPD2_OPT | F_DEFAULT(31), 1),
-  _SVE_INSNC ("sqincp", 0x25288000, 0xff3ffe00, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_Pg4_5), OP_SVE_VU_HSD, 0, C_SCAN_MOVPRFX, 0),
+  _SVE_INSNC ("sqincp", 0x25288000, 0xff3ffe00, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_Pg4_5), OP_SVE_Vv_HSD, 0, C_SCAN_MOVPRFX, 0),
   _SVE_INSN ("sqincp", 0x25288c00, 0xff3ffe00, sve_size_bhsd, 0, OP2 (Rd, SVE_Pg4_5), OP_SVE_XV_BHSD, 0, 0),
   _SVE_INSN ("sqincp", 0x25288800, 0xff3ffe00, sve_size_bhsd, 0, OP3 (Rd, SVE_Pg4_5, Rd), OP_SVE_XVW_BHSD, 0, 2),
   _SVE_INSNC ("sqincw", 0x04a0c000, 0xfff0fc00, sve_misc, 0, OP2 (SVE_Zd, SVE_PATTERN_SCALED), OP_SVE_SU, F_OPD1_OPT | F_DEFAULT(31), C_SCAN_MOVPRFX, 0),
@@ -4837,7 +4846,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _SVE_INSNC ("uqdech", 0x0460cc00, 0xfff0fc00, sve_misc, 0, OP2 (SVE_Zd, SVE_PATTERN_SCALED), OP_SVE_HU, F_OPD1_OPT | F_DEFAULT(31), C_SCAN_MOVPRFX, 0),
   _SVE_INSN ("uqdech", 0x0460fc00, 0xfff0fc00, sve_misc, 0, OP2 (Rd, SVE_PATTERN_SCALED), OP_SVE_WU, F_OPD1_OPT | F_DEFAULT(31), 0),
   _SVE_INSN ("uqdech", 0x0470fc00, 0xfff0fc00, sve_misc, 0, OP2 (Rd, SVE_PATTERN_SCALED), OP_SVE_XU, F_OPD1_OPT | F_DEFAULT(31), 0),
-  _SVE_INSNC ("uqdecp", 0x252b8000, 0xff3ffe00, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_Pg4_5), OP_SVE_VU_HSD, 0, C_SCAN_MOVPRFX, 0),
+  _SVE_INSNC ("uqdecp", 0x252b8000, 0xff3ffe00, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_Pg4_5), OP_SVE_Vv_HSD, 0, C_SCAN_MOVPRFX, 0),
   _SVE_INSN ("uqdecp", 0x252b8800, 0xff3ffe00, sve_size_bhsd, 0, OP2 (Rd, SVE_Pg4_5), OP_SVE_WV_BHSD, 0, 0),
   _SVE_INSN ("uqdecp", 0x252b8c00, 0xff3ffe00, sve_size_bhsd, 0, OP2 (Rd, SVE_Pg4_5), OP_SVE_XV_BHSD, 0, 0),
   _SVE_INSNC ("uqdecw", 0x04a0cc00, 0xfff0fc00, sve_misc, 0, OP2 (SVE_Zd, SVE_PATTERN_SCALED), OP_SVE_SU, F_OPD1_OPT | F_DEFAULT(31), C_SCAN_MOVPRFX, 0),
@@ -4851,7 +4860,7 @@ const struct aarch64_opcode aarch64_opcode_table[] =
   _SVE_INSNC ("uqinch", 0x0460c400, 0xfff0fc00, sve_misc, 0, OP2 (SVE_Zd, SVE_PATTERN_SCALED), OP_SVE_HU, F_OPD1_OPT | F_DEFAULT(31), C_SCAN_MOVPRFX, 0),
   _SVE_INSN ("uqinch", 0x0460f400, 0xfff0fc00, sve_misc, 0, OP2 (Rd, SVE_PATTERN_SCALED), OP_SVE_WU, F_OPD1_OPT | F_DEFAULT(31), 0),
   _SVE_INSN ("uqinch", 0x0470f400, 0xfff0fc00, sve_misc, 0, OP2 (Rd, SVE_PATTERN_SCALED), OP_SVE_XU, F_OPD1_OPT | F_DEFAULT(31), 0),
-  _SVE_INSNC ("uqincp", 0x25298000, 0xff3ffe00, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_Pg4_5), OP_SVE_VU_HSD, 0, C_SCAN_MOVPRFX, 0),
+  _SVE_INSNC ("uqincp", 0x25298000, 0xff3ffe00, sve_size_hsd, 0, OP2 (SVE_Zd, SVE_Pg4_5), OP_SVE_Vv_HSD, 0, C_SCAN_MOVPRFX, 0),
   _SVE_INSN ("uqincp", 0x25298800, 0xff3ffe00, sve_size_bhsd, 0, OP2 (Rd, SVE_Pg4_5), OP_SVE_WV_BHSD, 0, 0),
   _SVE_INSN ("uqincp", 0x25298c00, 0xff3ffe00, sve_size_bhsd, 0, OP2 (Rd, SVE_Pg4_5), OP_SVE_XV_BHSD, 0, 0),
   _SVE_INSNC ("uqincw", 0x04a0c400, 0xfff0fc00, sve_misc, 0, OP2 (SVE_Zd, SVE_PATTERN_SCALED), OP_SVE_SU, F_OPD1_OPT | F_DEFAULT(31), C_SCAN_MOVPRFX, 0),
