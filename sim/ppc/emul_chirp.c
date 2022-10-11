@@ -1509,7 +1509,7 @@ map_over_chirp_note(bfd *image,
       return;
     /* check the name field */
     if (head.namesz > sizeof(name)) {
-      error("chirp: note name too long (%d > %d)\n", (int)head.namesz, sizeof(name));
+      error("chirp: note name too long (%d > %d)\n", (int)head.namesz, (int)sizeof(name));
     }
     if (!bfd_get_section_contents(image, sect,
 				  name, sizeof(head), head.namesz)) {
@@ -1971,12 +1971,14 @@ emul_chirp_instruction_call(cpu *processor,
     }
     if (emul_data->n_args > 6) { /* See iee1275 requirements on nr returns */
       error("OpenFirmware service %s called from 0x%lx with args 0x%lx, too many args (%d)\n",
+	    service_name,
 	    (unsigned long)emul_data->return_address,
 	    (unsigned long)emul_data->arguments,
 	    emul_data->n_returns);
     }
     if (emul_data->n_returns > 6) {
       error("OpenFirmware service %s called from 0x%lx with args 0x%lx,  with too many returns (%d)\n",
+	    service_name,
 	    (unsigned long)emul_data->return_address,
 	    (unsigned long)emul_data->arguments,
 	    emul_data->n_args);
