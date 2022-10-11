@@ -3684,6 +3684,64 @@ riscv_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   return -1;
 }
 
+static CORE_ADDR
+riscv_cheri_pointer_to_address (struct gdbarch *gdbarch, struct type *type,
+				const gdb_byte *buf)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int xlen = riscv_isa_xlen (gdbarch);
+
+  if (type->length <= xlen)
+    {
+      if (type->is_unsigned ())
+	return unsigned_pointer_to_address (gdbarch, type, buf);
+      else
+	return signed_pointer_to_address (gdbarch, type, buf);
+    }
+  else
+    {
+      if (type->is_unsigned ())
+	return extract_unsigned_integer (buf, xlen, byte_order);
+      else
+	return extract_signed_integer (buf, xlen, byte_order);
+    }
+}
+
+/* XXX: This does not generate a valid capability.  However, a
+   round-trip that converts an address to a pointer back to an address
+   will work with this implementation. */
+
+static void
+riscv_cheri_address_to_pointer (struct gdbarch *gdbarch, struct type *type,
+				gdb_byte *buf, CORE_ADDR addr)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int xlen = riscv_isa_xlen (gdbarch);
+
+  if (type->length <= xlen)
+    {
+      if (type->is_unsigned ())
+	unsigned_address_to_pointer (gdbarch, type, buf, addr);
+      else
+	address_to_signed_pointer (gdbarch, type, buf, addr);
+    }
+  else
+    {
+      memset (buf, 0, type->length);
+      if (type->is_unsigned ())
+	store_unsigned_integer (buf, xlen, byte_order, addr);
+      else
+	store_signed_integer (buf, xlen, byte_order, addr);
+    }
+}
+
+static CORE_ADDR
+riscv_cheri_integer_to_address (struct gdbarch *gdbarch,
+				struct type *type, const gdb_byte *buf)
+{
+  return riscv_cheri_pointer_to_address (gdbarch, type, buf);
+}
+
 /* Implement the gcc_target_options method.  We have to select the arch and abi
    from the feature info.  We have enough feature info to select the abi, but
    not enough info for the arch given all of the possible architecture
@@ -3929,7 +3987,16 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_double_bit (gdbarch, 64);
   set_gdbarch_long_double_bit (gdbarch, 128);
   set_gdbarch_long_double_format (gdbarch, floatformats_ia64_quad);
-  set_gdbarch_ptr_bit (gdbarch, riscv_isa_xlen (gdbarch) * 8);
+  if (riscv_has_cheri (gdbarch))
+    set_gdbarch_capability_bit (gdbarch, riscv_isa_clen (gdbarch) * 8);
+  if (riscv_has_cheriabi (gdbarch))
+    {
+      set_gdbarch_ptr_bit (gdbarch, riscv_abi_clen (gdbarch) * 8);
+      set_gdbarch_addr_bit (gdbarch, riscv_isa_xlen (gdbarch) * 8);
+      set_gdbarch_dwarf2_addr_size (gdbarch, riscv_isa_xlen (gdbarch));
+    }
+  else
+    set_gdbarch_ptr_bit (gdbarch, riscv_isa_xlen (gdbarch) * 8);
   set_gdbarch_char_signed (gdbarch, 0);
   set_gdbarch_type_align (gdbarch, riscv_type_align);
 
@@ -3957,6 +4024,14 @@ riscv_gdbarch_init (struct gdbarch_info info,
   /* Register architecture.  */
   riscv_add_reggroups (gdbarch);
 
+  /* Settings for CHERI processors.  */
+  if (riscv_has_cheri (gdbarch))
+    {
+      set_gdbarch_pointer_to_address (gdbarch, riscv_cheri_pointer_to_address);
+      set_gdbarch_address_to_pointer (gdbarch, riscv_cheri_address_to_pointer);
+      set_gdbarch_integer_to_address (gdbarch, riscv_cheri_integer_to_address);
+    }
+
   /* Internal <-> external register number maps.  */
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, riscv_dwarf_reg_to_regnum);
 
@@ -3972,8 +4047,16 @@ riscv_gdbarch_init (struct gdbarch_info info,
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
 
   /* Some specific register numbers GDB likes to know about.  */
-  set_gdbarch_sp_regnum (gdbarch, RISCV_SP_REGNUM);
-  set_gdbarch_pc_regnum (gdbarch, RISCV_PC_REGNUM);
+  if (riscv_has_cheriabi (gdbarch))
+    {
+      set_gdbarch_sp_regnum (gdbarch, RISCV_CSP_REGNUM);
+      set_gdbarch_pc_regnum (gdbarch, RISCV_PCC_REGNUM);
+    }
+  else
+    {
+      set_gdbarch_sp_regnum (gdbarch, RISCV_SP_REGNUM);
+      set_gdbarch_pc_regnum (gdbarch, RISCV_PC_REGNUM);
+    }
 
   set_gdbarch_print_registers_info (gdbarch, riscv_print_registers_info);
 
