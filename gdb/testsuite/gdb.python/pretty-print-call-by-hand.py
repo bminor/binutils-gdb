@@ -21,21 +21,25 @@ class MytypePrinter:
         self.val = val
 
     def to_string(self):
-        calls = gdb.parse_and_eval('f()')
-        return "mytype is %s" % self.val['x']
+        calls = gdb.parse_and_eval("f()")
+        return "mytype is %s" % self.val["x"]
+
 
 def ec_lookup_function(val):
     typ = val.type
     if typ.code == gdb.TYPE_CODE_REF:
         typ = typ.target()
-    if str(typ) == 'struct mytype':
+    if str(typ) == "struct mytype":
         return MytypePrinter(val)
     return None
+
 
 def disable_lookup_function():
     ec_lookup_function.enabled = False
 
+
 def enable_lookup_function():
     ec_lookup_function.enabled = True
+
 
 gdb.pretty_printers.append(ec_lookup_function)
