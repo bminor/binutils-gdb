@@ -1249,7 +1249,7 @@ _bfd_generic_init_private_section_data (bfd *ibfd ATTRIBUTE_UNUSED,
 static const struct compressed_type_tuple compressed_debug_section_names[] =
 {
   { COMPRESS_DEBUG_NONE, "none" },
-  { COMPRESS_DEBUG, "zlib" },
+  { COMPRESS_DEBUG_GABI_ZLIB, "zlib" },
   { COMPRESS_DEBUG_GNU_ZLIB, "zlib-gnu" },
   { COMPRESS_DEBUG_GABI_ZLIB, "zlib-gabi" },
   { COMPRESS_DEBUG_ZSTD, "zstd" },
