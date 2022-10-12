@@ -131,11 +131,17 @@ struct ppc_mopt ppc_opts[] = {
     0 },
   { "com",     PPC_OPCODE_COMMON,
     0 },
-  { "e200z4",  (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE| PPC_OPCODE_SPE
+  { "e200z2",  (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_LSP
 		| PPC_OPCODE_ISEL | PPC_OPCODE_EFS | PPC_OPCODE_BRLOCK
 		| PPC_OPCODE_PMR | PPC_OPCODE_CACHELCK | PPC_OPCODE_RFMCI
 		| PPC_OPCODE_E500 | PPC_OPCODE_VLE | PPC_OPCODE_E200Z4
-		| PPC_OPCODE_EFS2 | PPC_OPCODE_LSP),
+		| PPC_OPCODE_EFS2),
+    0 },
+  { "e200z4",  (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_SPE
+		| PPC_OPCODE_ISEL | PPC_OPCODE_EFS | PPC_OPCODE_BRLOCK
+		| PPC_OPCODE_PMR | PPC_OPCODE_CACHELCK | PPC_OPCODE_RFMCI
+		| PPC_OPCODE_E500 | PPC_OPCODE_VLE | PPC_OPCODE_E200Z4
+		| PPC_OPCODE_EFS2),
     0 },
   { "e300",    PPC_OPCODE_PPC | PPC_OPCODE_E300,
     0 },
@@ -173,6 +179,8 @@ struct ppc_mopt ppc_opts[] = {
     0 },
   { "efs2",    PPC_OPCODE_PPC | PPC_OPCODE_EFS | PPC_OPCODE_EFS2,
     0 },
+  { "lsp",     PPC_OPCODE_PPC,
+    PPC_OPCODE_LSP },
   { "power4",  PPC_OPCODE_PPC | PPC_OPCODE_64 | PPC_OPCODE_POWER4,
     0 },
   { "power5",  (PPC_OPCODE_PPC | PPC_OPCODE_64 | PPC_OPCODE_POWER4
@@ -270,10 +278,10 @@ struct ppc_mopt ppc_opts[] = {
   { "titan",   (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_PMR
 		| PPC_OPCODE_RFMCI | PPC_OPCODE_TITAN),
     0 },
-  { "vle",     (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE| PPC_OPCODE_SPE
+  { "vle",     (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_SPE
 		| PPC_OPCODE_ISEL | PPC_OPCODE_EFS | PPC_OPCODE_BRLOCK
 		| PPC_OPCODE_PMR | PPC_OPCODE_CACHELCK | PPC_OPCODE_RFMCI
-		| PPC_OPCODE_LSP | PPC_OPCODE_EFS2 | PPC_OPCODE_SPE2),
+		| PPC_OPCODE_EFS2 | PPC_OPCODE_SPE2),
     PPC_OPCODE_VLE },
   { "vsx",     PPC_OPCODE_PPC,
     PPC_OPCODE_VSX },
@@ -321,7 +329,15 @@ ppc_parse_cpu (ppc_cpu_t ppc_cpu, ppc_cpu_t *sticky, const char *arg)
   if (i >= ARRAY_SIZE (ppc_opts))
     return 0;
 
+  /* SPE and LSP are mutually exclusive, don't allow them both in
+     sticky options.  However do allow them both in ppc_cpu, so that
+     for example, -mvle -mlsp enables both SPE and LSP for assembly.  */
+  if ((ppc_opts[i].sticky & PPC_OPCODE_LSP) != 0)
+    *sticky &= ~(PPC_OPCODE_SPE | PPC_OPCODE_SPE2);
+  else if ((ppc_opts[i].sticky & (PPC_OPCODE_SPE | PPC_OPCODE_SPE2)) != 0)
+    *sticky &= ~PPC_OPCODE_LSP;
   ppc_cpu |= *sticky;
+
   return ppc_cpu;
 }
 
@@ -412,6 +428,8 @@ static unsigned short powerpc_opcd_indices[PPC_OPCD_SEGS + 1];
 static unsigned short prefix_opcd_indices[PREFIX_OPCD_SEGS + 1];
 #define VLE_OPCD_SEGS (1 + VLE_OP_TO_SEG (VLE_OP (-1, 0xffff)))
 static unsigned short vle_opcd_indices[VLE_OPCD_SEGS + 1];
+#define LSP_OPCD_SEGS (1 + LSP_OP_TO_SEG (-1))
+static unsigned short lsp_opcd_indices[LSP_OPCD_SEGS + 1];
 #define SPE2_OPCD_SEGS (1 + SPE2_XOP_TO_SEG (SPE2_XOP (-1)))
 static unsigned short spe2_opcd_indices[SPE2_OPCD_SEGS + 1];
 
@@ -477,6 +495,15 @@ disassemble_init_powerpc (struct disassemble_info *info)
 	      if (seg < VLE_OP_TO_SEG (op))
 		break;
 	    }
+	}
+
+      /* LSP opcodes */
+      for (seg = 0, idx = 0; seg <= LSP_OPCD_SEGS; seg++)
+	{
+	  lsp_opcd_indices[seg] = idx;
+	  for (; idx < lsp_num_opcodes; idx++)
+	    if (seg < LSP_OP_TO_SEG (lsp_opcodes[idx].opcode))
+	      break;
 	}
 
       /* SPE2 opcodes */
@@ -728,6 +755,51 @@ lookup_vle (uint64_t insn, ppc_cpu_t dialect)
   return NULL;
 }
 
+/* Find a match for INSN in the LSP opcode table.  */
+
+static const struct powerpc_opcode *
+lookup_lsp (uint64_t insn, ppc_cpu_t dialect)
+{
+  const struct powerpc_opcode *opcode, *opcode_end;
+  unsigned op, seg;
+
+  op = PPC_OP (insn);
+  if (op != 0x4)
+    return NULL;
+
+  seg = LSP_OP_TO_SEG (insn);
+
+  /* Find the first match in the opcode table for this opcode.  */
+  opcode_end = lsp_opcodes + lsp_opcd_indices[seg + 1];
+  for (opcode = lsp_opcodes + lsp_opcd_indices[seg];
+       opcode < opcode_end;
+       ++opcode)
+    {
+      const ppc_opindex_t *opindex;
+      const struct powerpc_operand *operand;
+      int invalid;
+
+      if ((insn & opcode->mask) != opcode->opcode
+	  || (opcode->deprecated & dialect) != 0)
+	continue;
+
+      /* Check validity of operands.  */
+      invalid = 0;
+      for (opindex = opcode->operands; *opindex != 0; ++opindex)
+	{
+	  operand = powerpc_operands + *opindex;
+	  if (operand->extract)
+	    (*operand->extract) (insn, (ppc_cpu_t) 0, &invalid);
+	}
+      if (invalid)
+	continue;
+
+      return opcode;
+    }
+
+  return NULL;
+}
+
 /* Find a match for INSN in the SPE2 opcode table.  */
 
 static const struct powerpc_opcode *
@@ -746,7 +818,7 @@ lookup_spe2 (uint64_t insn, ppc_cpu_t dialect)
   xop = SPE2_XOP (insn);
   seg = SPE2_XOP_TO_SEG (xop);
 
-  /* Find the first match in the opcode table for this major opcode.  */
+  /* Find the first match in the opcode table for this opcode.  */
   opcode_end = spe2_opcodes + spe2_opcd_indices[seg + 1];
   for (opcode = spe2_opcodes + spe2_opcd_indices[seg];
        opcode < opcode_end;
@@ -936,6 +1008,8 @@ print_insn_powerpc (bfd_vma memaddr,
     }
   if (opcode == NULL && insn_length == 4)
     {
+      if ((dialect & PPC_OPCODE_LSP) != 0)
+	opcode = lookup_lsp (insn, dialect);
       if ((dialect & PPC_OPCODE_SPE2) != 0)
 	opcode = lookup_spe2 (insn, dialect);
       if (opcode == NULL)

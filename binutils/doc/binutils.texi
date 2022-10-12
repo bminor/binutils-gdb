@@ -2632,7 +2632,7 @@ rather than @code{li}.  All of the @option{-m} arguments for
 @option{601}, @option{603}, @option{604}, @option{620}, @option{7400},
 @option{7410}, @option{7450}, @option{7455}, @option{750cl},
 @option{821}, @option{850}, @option{860}, @option{a2}, @option{booke},
-@option{booke32}, @option{cell}, @option{com}, @option{e200z4},
+@option{booke32}, @option{cell}, @option{com}, @option{e200z2}, @option{e200z4},
 @option{e300}, @option{e500}, @option{e500mc}, @option{e500mc64},
 @option{e500x2}, @option{e5500}, @option{e6500}, @option{efs},
 @option{power4}, @option{power5}, @option{power6}, @option{power7},
@@ -2643,9 +2643,10 @@ rather than @code{li}.  All of the @option{-m} arguments for
 @option{pwrx}, @option{titan}, @option{vle}, and @option{future}.
 @option{32} and @option{64} modify the default or a prior CPU
 selection, disabling and enabling 64-bit insns respectively.  In
-addition, @option{altivec}, @option{any}, @option{htm}, @option{vsx},
-and @option{spe} add capabilities to a previous @emph{or later} CPU
-selection.  @option{any} will disassemble any opcode known to
+addition, @option{altivec}, @option{any}, @option{lsp}, @option{htm},
+@option{vsx}, @option{spe} and  @option{spe2} add capabilities to a
+previous @emph{or later} CPU selection.
+@option{any} will disassemble any opcode known to
 binutils, but in cases where an opcode has two different meanings or
 different arguments, you may not see the disassembly you expect.
 If you disassemble without giving a CPU selection, a default will be

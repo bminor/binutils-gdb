@@ -78,6 +78,8 @@ extern const struct powerpc_opcode prefix_opcodes[];
 extern const unsigned int prefix_num_opcodes;
 extern const struct powerpc_opcode vle_opcodes[];
 extern const unsigned int vle_num_opcodes;
+extern const struct powerpc_opcode lsp_opcodes[];
+extern const unsigned int lsp_num_opcodes;
 extern const struct powerpc_opcode spe2_opcodes[];
 extern const unsigned int spe2_num_opcodes;
 
@@ -254,6 +256,9 @@ extern const unsigned int spe2_num_opcodes;
 
 /* A macro to convert a VLE opcode to a VLE opcode segment.  */
 #define VLE_OP_TO_SEG(i) ((i) >> 1)
+
+/* Map LSP insn to lookup segment for disassembly.  */
+#define LSP_OP_TO_SEG(i) (((i) & 0x7ff) >> 6)
 
 /* A macro to extract the extended opcode from a SPE2 instruction.  */
 #define SPE2_XOP(i) ((i) & 0x7ff)

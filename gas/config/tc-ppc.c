@@ -1810,6 +1810,30 @@ ppc_setup_opcodes (void)
 	}
     }
 
+  /* LSP instructions */
+  if ((ppc_cpu & PPC_OPCODE_LSP) != 0)
+    {
+      unsigned int prev_seg = 0;
+      unsigned int seg;
+      op_end = lsp_opcodes + lsp_num_opcodes;
+      for (op = lsp_opcodes; op < op_end; op++)
+	{
+	  if (ENABLE_CHECKING)
+	    {
+	      seg = LSP_OP_TO_SEG (op->opcode);
+	      if (seg < prev_seg)
+		{
+		  as_bad (_("opcode is not sorted for %s"), op->name);
+		  bad_insn = true;
+		}
+	      prev_seg = seg;
+	      bad_insn |= insn_validate (op);
+	    }
+
+	  str_hash_insert (ppc_hash, op->name, op, 0);
+	}
+    }
+
   /* SPE2 instructions */
   if ((ppc_cpu & PPC_OPCODE_SPE2) == PPC_OPCODE_SPE2)
     {
