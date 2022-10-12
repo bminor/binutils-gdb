@@ -112,7 +112,6 @@ set object_file [standard_output_file ${testfile}.o]
 if { [build_executable_and_dwo_files "${testfile}.exp" ${binfile} {nodebug} \
 	  [list $asm_file {nodebug split-dwo} ${object_file}] \
 	  [list $srcfile {nodebug}]] } {
-    perror "failed to compile ${gdb_test_file_name}"
     return -1
 }
 
