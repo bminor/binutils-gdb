@@ -346,7 +346,12 @@ static void yyerror (cpname_state *, const char *);
 %%
 
 result		:	start
-			{ state->global_result = $1; }
+			{
+			  state->global_result = $1;
+
+			  /* Avoid warning about "yynerrs" being unused.  */
+			  (void) yynerrs;
+			}
 		;
 
 start		:	type
