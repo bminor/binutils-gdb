@@ -285,7 +285,7 @@ if [ "$want_gnu_debuglink" = true ]; then
 
 	# Overwrite output_file with stripped version containing
 	# .gnu_debuglink to debug_file.
-	objcopy --add-gnu-debuglink="$link" "${stripped_file}" \
+	$OBJCOPY --add-gnu-debuglink="$link" "${stripped_file}" \
 		"${output_file}"
 	rc=$?
 	[ $rc != 0 ] && exit $rc
