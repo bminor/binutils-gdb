@@ -442,7 +442,7 @@ main(int argc,
 	        code |= generate_with_icache;
                 break;
               default:
-                error (NULL, "Expecting -Ggen-icache or -Ggen-icache=<N>\n");
+		error ("Expecting -Ggen-icache or -Ggen-icache=<N>\n");
               }
           }
 	}

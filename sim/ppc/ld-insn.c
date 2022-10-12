@@ -827,29 +827,18 @@ static void
 dump_insn_field(insn_field *field,
 		int indent)
 {
-
-  printf("(insn_field*)0x%lx\n", (unsigned long)field);
-
-  dumpf(indent, "(first %d)\n", field->first);
-
-  dumpf(indent, "(last %d)\n", field->last);
-
-  dumpf(indent, "(width %d)\n", field->width);
-
+  printf ("(insn_field*)%p\n", field);
+  dumpf (indent, "(first %d)\n", field->first);
+  dumpf (indent, "(last %d)\n", field->last);
+  dumpf (indent, "(width %d)\n", field->width);
   if (field->is_int)
-    dumpf(indent, "(is_int %d)\n", field->val_int);
-
+    dumpf (indent, "(is_int %d)\n", field->val_int);
   if (field->is_slash)
-    dumpf(indent, "(is_slash)\n");
-
+    dumpf (indent, "(is_slash)\n");
   if (field->is_string)
-    dumpf(indent, "(is_string `%s')\n", field->val_string);
-  
-  dumpf(indent, "(next 0x%x)\n", field->next);
-  
-  dumpf(indent, "(prev 0x%x)\n", field->prev);
-  
-
+    dumpf (indent, "(is_string `%s')\n", field->val_string);
+  dumpf (indent, "(next %p)\n", field->next);
+  dumpf (indent, "(prev %p)\n", field->prev);
 }
 
 static void
@@ -860,13 +849,13 @@ dump_insn_fields(insn_fields *fields,
 
   printf("(insn_fields*)%p\n", fields);
 
-  dumpf(indent, "(first 0x%x)\n", fields->first);
-  dumpf(indent, "(last 0x%x)\n", fields->last);
+  dumpf(indent, "(first %p)\n", fields->first);
+  dumpf(indent, "(last %p)\n", fields->last);
 
   dumpf(indent, "(value 0x%x)\n", fields->value);
 
   for (i = 0; i < insn_bit_size; i++) {
-    dumpf(indent, "(bits[%d] ", i, fields->bits[i]);
+    dumpf(indent, "(bits[%d]", i);
     dump_insn_field(fields->bits[i], indent+1);
     dumpf(indent, " )\n");
   }
@@ -961,16 +950,16 @@ dump_insn_table(insn_table *table,
     dump_opcode_field(table->opcode, indent+1, 1);
     dumpf(indent, " )\n");
 
-    dumpf(indent, "(nr_entries %d)\n", table->entries);
+    dumpf(indent, "(nr_entries %d)\n", table->nr_entries);
     dumpf(indent, "(entries ");
     dump_insn_table(table->entries, indent+1, table->nr_entries);
     dumpf(indent, " )\n");
 
-    dumpf(indent, "(sibling ", table->sibling);
+    dumpf(indent, "(sibling ");
     dump_insn_table(table->sibling, indent+1, levels-1);
     dumpf(indent, " )\n");
 
-    dumpf(indent, "(parent ", table->parent);
+    dumpf(indent, "(parent ");
     dump_insn_table(table->parent, indent+1, 0);
     dumpf(indent, " )\n");
 
