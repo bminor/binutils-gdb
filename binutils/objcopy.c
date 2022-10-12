@@ -3074,7 +3074,7 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
       if (bfd_get_section_by_name (obfd, ".gnu_debuglink"))
 	{
 	  non_fatal (_("%s: debuglink section already exists"),
-		     bfd_get_filename (obfd));
+		     bfd_get_filename (ibfd));
 	  gnu_debuglink_filename = NULL;
 	}
       else

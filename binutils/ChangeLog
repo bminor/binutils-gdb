@@ -1,3 +1,9 @@
+2022-10-12  Nick Clifton  <nickc@redhat.com>
+
+	PR 29665
+	* objcopy.c (copy_object): Use the input filename when 
+	reporting that a .gnu_debuglink section already exists.
+
 2022-10-03  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_32bit_section_headers): Return false if the
