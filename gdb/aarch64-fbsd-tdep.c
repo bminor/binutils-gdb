@@ -293,7 +293,7 @@ aarch64_fbsd_supply_capregset (const struct regset *regset,
       if (regno == -1)
 	continue;
       if (regnum == -1 || regno == regnum)
-	regcache->raw_supply_tag (tag_map_regno(tdep, i), tag_map & 1);
+	regcache->raw_supply_tag (regno, tag_map & 1);
       tag_map >>= 1;
     }
 }
@@ -322,7 +322,7 @@ aarch64_fbsd_collect_capregset (const struct regset *regset,
       if (regnum == -1 || regno == regnum)
 	{
 	  mask = (uint64_t)1 << i;
-	  if (regcache->raw_collect_tag (tag_map_regno(tdep, i)))
+	  if (regcache->raw_collect_tag (regno))
 	    tag_map |= mask;
 	  else
 	    tag_map &= ~mask;
