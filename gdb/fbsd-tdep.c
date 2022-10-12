@@ -2307,9 +2307,9 @@ fbsd_signal_cause (enum gdb_signal siggnal, int code)
   return nullptr;
 }
 
-/* Report additional details for a signal stop.  */
+/* See fbsd-tdep.h.  */
 
-static void
+void
 fbsd_report_signal_info (struct gdbarch *gdbarch, struct ui_out *uiout,
 			 enum gdb_signal siggnal)
 {

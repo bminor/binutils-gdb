@@ -76,4 +76,10 @@ extern CORE_ADDR fbsd_get_thread_local_address (struct gdbarch *gdbarch,
 extern CORE_ADDR fbsd_skip_solib_resolver (struct gdbarch *gdbarch,
 					   CORE_ADDR pc);
 
+/* Report additional details for a signal stop.  */
+
+extern void fbsd_report_signal_info (struct gdbarch *gdbarch,
+				     struct ui_out *uiout,
+				     enum gdb_signal siggnal);
+
 #endif /* fbsd-tdep.h */
