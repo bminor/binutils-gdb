@@ -1297,35 +1297,12 @@ gdbscm_lookup_type (SCM name_scm, SCM rest)
 
 static const scheme_integer_constant type_integer_constants[] =
 {
-#define X(SYM) { #SYM, SYM }
-  X (TYPE_CODE_BITSTRING),
-  X (TYPE_CODE_PTR),
-  X (TYPE_CODE_ARRAY),
-  X (TYPE_CODE_STRUCT),
-  X (TYPE_CODE_UNION),
-  X (TYPE_CODE_ENUM),
-  X (TYPE_CODE_FLAGS),
-  X (TYPE_CODE_FUNC),
-  X (TYPE_CODE_INT),
-  X (TYPE_CODE_FLT),
-  X (TYPE_CODE_VOID),
-  X (TYPE_CODE_SET),
-  X (TYPE_CODE_RANGE),
-  X (TYPE_CODE_STRING),
-  X (TYPE_CODE_ERROR),
-  X (TYPE_CODE_METHOD),
-  X (TYPE_CODE_METHODPTR),
-  X (TYPE_CODE_MEMBERPTR),
-  X (TYPE_CODE_REF),
-  X (TYPE_CODE_RVALUE_REF),
-  X (TYPE_CODE_CHAR),
-  X (TYPE_CODE_BOOL),
-  X (TYPE_CODE_COMPLEX),
-  X (TYPE_CODE_TYPEDEF),
-  X (TYPE_CODE_NAMESPACE),
-  X (TYPE_CODE_DECFLOAT),
-  X (TYPE_CODE_INTERNAL_FUNCTION),
-#undef X
+  /* This is kept for backward compatibility.  */
+  { "TYPE_CODE_BITSTRING", -1 },
+
+#define OP(SYM) { #SYM, SYM },
+#include "type-codes.def"
+#undef OP
 
   END_INTEGER_CONSTANTS
 };

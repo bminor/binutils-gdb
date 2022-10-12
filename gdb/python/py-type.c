@@ -74,7 +74,7 @@ extern PyTypeObject type_iterator_object_type
 struct pyty_code
 {
   /* The code.  */
-  enum type_code code;
+  int code;
   /* The name.  */
   const char *name;
 };
@@ -82,37 +82,14 @@ struct pyty_code
 /* Forward declarations.  */
 static PyObject *typy_make_iter (PyObject *self, enum gdbpy_iter_kind kind);
 
-#define ENTRY(X) { X, #X }
-
 static struct pyty_code pyty_codes[] =
 {
-  ENTRY (TYPE_CODE_BITSTRING),
-  ENTRY (TYPE_CODE_PTR),
-  ENTRY (TYPE_CODE_ARRAY),
-  ENTRY (TYPE_CODE_STRUCT),
-  ENTRY (TYPE_CODE_UNION),
-  ENTRY (TYPE_CODE_ENUM),
-  ENTRY (TYPE_CODE_FLAGS),
-  ENTRY (TYPE_CODE_FUNC),
-  ENTRY (TYPE_CODE_INT),
-  ENTRY (TYPE_CODE_FLT),
-  ENTRY (TYPE_CODE_VOID),
-  ENTRY (TYPE_CODE_SET),
-  ENTRY (TYPE_CODE_RANGE),
-  ENTRY (TYPE_CODE_STRING),
-  ENTRY (TYPE_CODE_ERROR),
-  ENTRY (TYPE_CODE_METHOD),
-  ENTRY (TYPE_CODE_METHODPTR),
-  ENTRY (TYPE_CODE_MEMBERPTR),
-  ENTRY (TYPE_CODE_REF),
-  ENTRY (TYPE_CODE_RVALUE_REF),
-  ENTRY (TYPE_CODE_CHAR),
-  ENTRY (TYPE_CODE_BOOL),
-  ENTRY (TYPE_CODE_COMPLEX),
-  ENTRY (TYPE_CODE_TYPEDEF),
-  ENTRY (TYPE_CODE_NAMESPACE),
-  ENTRY (TYPE_CODE_DECFLOAT),
-  ENTRY (TYPE_CODE_INTERNAL_FUNCTION),
+  /* This is kept for backward compatibility.  */
+  { -1, "TYPE_CODE_BITSTRING" },
+
+#define OP(X) { X, #X },
+#include "type-codes.def"
+#undef OP
 };
 
 

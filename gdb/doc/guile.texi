@@ -1308,6 +1308,19 @@ A decimal floating point type.
 @item TYPE_CODE_INTERNAL_FUNCTION
 A function internal to @value{GDBN}.  This is the type used to represent
 convenience functions (@pxref{Convenience Funs}).
+
+@vindex TYPE_CODE_XMETHOD
+@item gdb.TYPE_CODE_XMETHOD
+A method internal to @value{GDBN}.  This is the type used to represent
+xmethods (@pxref{Writing an Xmethod}).
+
+@vindex TYPE_CODE_FIXED_POINT
+@item gdb.TYPE_CODE_FIXED_POINT
+A fixed-point number.
+
+@vindex TYPE_CODE_NAMESPACE
+@item gdb.TYPE_CODE_NAMESPACE
+A Fortran namelist.
 @end vtable
 
 Further support for types is provided in the @code{(gdb types)}

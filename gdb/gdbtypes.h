@@ -97,120 +97,12 @@ sect_offset_str (sect_offset offset)
 
 enum type_code
   {
-    TYPE_CODE_BITSTRING = -1,	/**< Deprecated  */
     TYPE_CODE_UNDEF = 0,	/**< Not used; catches errors */
-    TYPE_CODE_PTR,		/**< Pointer type */
 
-    /* * Array type with lower & upper bounds.
+#define OP(X) X,
+#include "type-codes.def"
+#undef OP
 
-       Regardless of the language, GDB represents multidimensional
-       array types the way C does: as arrays of arrays.  So an
-       instance of a GDB array type T can always be seen as a series
-       of instances of T->target_type () laid out sequentially in
-       memory.
-
-       Row-major languages like C lay out multi-dimensional arrays so
-       that incrementing the rightmost index in a subscripting
-       expression results in the smallest change in the address of the
-       element referred to.  Column-major languages like Fortran lay
-       them out so that incrementing the leftmost index results in the
-       smallest change.
-
-       This means that, in column-major languages, working our way
-       from type to target type corresponds to working through indices
-       from right to left, not left to right.  */
-    TYPE_CODE_ARRAY,
-
-    TYPE_CODE_STRUCT,		/**< C struct or Pascal record */
-    TYPE_CODE_UNION,		/**< C union or Pascal variant part */
-    TYPE_CODE_ENUM,		/**< Enumeration type */
-    TYPE_CODE_FLAGS,		/**< Bit flags type */
-    TYPE_CODE_FUNC,		/**< Function type */
-    TYPE_CODE_INT,		/**< Integer type */
-
-    /* * Floating type.  This is *NOT* a complex type.  */
-    TYPE_CODE_FLT,
-
-    /* * Void type.  The length field specifies the length (probably
-       always one) which is used in pointer arithmetic involving
-       pointers to this type, but actually dereferencing such a
-       pointer is invalid; a void type has no length and no actual
-       representation in memory or registers.  A pointer to a void
-       type is a generic pointer.  */
-    TYPE_CODE_VOID,
-
-    TYPE_CODE_SET,		/**< Pascal sets */
-    TYPE_CODE_RANGE,		/**< Range (integers within spec'd bounds).  */
-
-    /* * A string type which is like an array of character but prints
-       differently.  It does not contain a length field as Pascal
-       strings (for many Pascals, anyway) do; if we want to deal with
-       such strings, we should use a new type code.  */
-    TYPE_CODE_STRING,
-
-    /* * Unknown type.  The length field is valid if we were able to
-       deduce that much about the type, or 0 if we don't even know
-       that.  */
-    TYPE_CODE_ERROR,
-
-    /* C++ */
-    TYPE_CODE_METHOD,		/**< Method type */
-
-    /* * Pointer-to-member-function type.  This describes how to access a
-       particular member function of a class (possibly a virtual
-       member function).  The representation may vary between different
-       C++ ABIs.  */
-    TYPE_CODE_METHODPTR,
-
-    /* * Pointer-to-member type.  This is the offset within a class to
-       some particular data member.  The only currently supported
-       representation uses an unbiased offset, with -1 representing
-       NULL; this is used by the Itanium C++ ABI (used by GCC on all
-       platforms).  */
-    TYPE_CODE_MEMBERPTR,
-
-    TYPE_CODE_REF,		/**< C++ Reference types */
-
-    TYPE_CODE_RVALUE_REF,	/**< C++ rvalue reference types */
-
-    TYPE_CODE_CHAR,		/**< *real* character type */
-
-    /* * Boolean type.  0 is false, 1 is true, and other values are
-       non-boolean (e.g. FORTRAN "logical" used as unsigned int).  */
-    TYPE_CODE_BOOL,
-
-    /* Fortran */
-    TYPE_CODE_COMPLEX,		/**< Complex float */
-
-    TYPE_CODE_TYPEDEF,
-
-    TYPE_CODE_NAMESPACE,	/**< C++ namespace.  */
-
-    TYPE_CODE_DECFLOAT,		/**< Decimal floating point.  */
-
-    TYPE_CODE_MODULE,		/**< Fortran module.  */
-
-    /* * Internal function type.  */
-    TYPE_CODE_INTERNAL_FUNCTION,
-
-    /* * Methods implemented in extension languages.  */
-    TYPE_CODE_XMETHOD,
-
-    /* * Fixed Point type.  */
-    TYPE_CODE_FIXED_POINT,
-
-    /* * Fortran namelist is a group of variables or arrays that can be
-       read or written.
-
-       Namelist syntax: NAMELIST / groupname / namelist_items ...
-       NAMELIST statement assign a group name to a collection of variables
-       called as namelist items. The namelist items can be of any data type
-       and can be variables or arrays.
-
-       Compiler emit DW_TAG_namelist for group name and DW_TAG_namelist_item
-       for each of the namelist items. GDB process these namelist dies
-       and print namelist variables during print and ptype commands.  */
-    TYPE_CODE_NAMELIST,
   };
 
 /* * Some bits for the type's instance_flags word.  See the macros
