@@ -3576,7 +3576,7 @@ static const struct frame_unwind riscv_frame_unwind =
 /* Extract a set of required target features out of ABFD.  If ABFD is
    nullptr then a RISCV_GDBARCH_FEATURES is returned in its default state.  */
 
-static struct riscv_gdbarch_features
+struct riscv_gdbarch_features
 riscv_features_from_bfd (const bfd *abfd)
 {
   struct riscv_gdbarch_features features;

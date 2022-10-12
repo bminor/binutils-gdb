@@ -196,4 +196,6 @@ extern void riscv_supply_regset (const struct regset *regset,
 /* The names of the RISC-V target description features.  */
 extern const char *riscv_feature_name_csr;
 
+extern struct riscv_gdbarch_features riscv_features_from_bfd (const bfd *abfd);
+
 #endif /* RISCV_TDEP_H */
