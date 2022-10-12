@@ -32,7 +32,13 @@
    only the low 32-bits of each floating point register are valid.  */
 #define RISCV_FBSD_SIZEOF_FPREGSET (32 * 16 + 8)
 
+/* The capability regset consists of 33 capability registers plus the
+   tagmask psuedo-register.  The entire structure is padded to
+   capability alignment.  */
+#define	RISCV_FBSD_NUM_CAPREGS		34
+
 extern const struct regset riscv_fbsd_gregset;
 extern const struct regset riscv_fbsd_fpregset;
+extern const struct regset riscv_fbsd_capregset;
 
 #endif /* RISCV_FBSD_TDEP_H */
