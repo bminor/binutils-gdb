@@ -780,7 +780,7 @@ aarch64_linux_core_read_description (struct gdbarch *gdbarch,
 				     struct target_ops *target, bfd *abfd)
 {
   asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
-  gdb::optional<gdb::byte_vector> auxv = target_read_auxv (target);
+  gdb::optional<gdb::byte_vector> auxv = target_read_auxv_raw (target);
   CORE_ADDR hwcap = linux_get_hwcap (auxv, target, gdbarch);
   CORE_ADDR hwcap2 = linux_get_hwcap2 (auxv, target, gdbarch);
 

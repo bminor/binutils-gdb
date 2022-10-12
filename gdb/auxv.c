@@ -363,8 +363,7 @@ target_read_auxv ()
   if (info == nullptr)
     {
       info = auxv_inferior_data.emplace (inf);
-      info->data = target_read_alloc (inf->top_target (), TARGET_OBJECT_AUXV,
-				      nullptr);
+      info->data = target_read_auxv_raw (inf->top_target ());
     }
 
   return info->data;
@@ -373,7 +372,7 @@ target_read_auxv ()
 /* See auxv.h.  */
 
 gdb::optional<gdb::byte_vector>
-target_read_auxv (target_ops *ops)
+target_read_auxv_raw (target_ops *ops)
 {
   return target_read_alloc (ops, TARGET_OBJECT_AUXV, NULL);
 }

@@ -52,7 +52,7 @@ extern gdb::optional<gdb::byte_vector> target_read_auxv ();
 
 /* Read auxv data from OPS.  */
 
-extern gdb::optional<gdb::byte_vector> target_read_auxv (target_ops *ops);
+extern gdb::optional<gdb::byte_vector> target_read_auxv_raw (target_ops *ops);
 
 /* Search AUXV for an entry with a_type matching MATCH.
 

@@ -238,7 +238,7 @@ arm_fbsd_core_read_description (struct gdbarch *gdbarch,
 {
   asection *tls = bfd_get_section_by_name (abfd, ".reg-aarch-tls");
 
-  gdb::optional<gdb::byte_vector> auxv = target_read_auxv (target);
+  gdb::optional<gdb::byte_vector> auxv = target_read_auxv_raw (target);
   return arm_fbsd_read_description_auxv (auxv, target, gdbarch, tls != nullptr);
 }
 
