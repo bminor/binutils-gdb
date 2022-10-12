@@ -607,4 +607,10 @@ run_ld_link_exec_tests [list \
     ] \
 ]
 
+set merge_exec_tests {
+    {"merge4" "" ""
+	{merge4a.c merge4b.s} "merge4" "merge4.out"}
+}
+run_ld_link_exec_tests $merge_exec_tests
+
 catch "exec rm -f tmpdir/preinit tmpdir/init tmpdir/fini tmpdir/init-mixed" status
