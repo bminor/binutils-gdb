@@ -4583,6 +4583,7 @@ get_riscv_segment_type (unsigned long type)
   switch (type)
     {
     case PT_RISCV_ATTRIBUTES: return "RISCV_ATTRIBUTES";
+    case PT_RISCV_MEMTAG_CHERI: return "RISCV_MEMTAG_CHERI";
     default:                  return NULL;
     }
 }

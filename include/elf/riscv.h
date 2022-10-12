@@ -137,6 +137,9 @@ END_RELOC_NUMBERS (R_RISCV_max)
 /* Location of RISC-V ELF attribute section. */
 #define PT_RISCV_ATTRIBUTES 0x70000003
 
+/* CHERI memory tag segment type.  */
+#define PT_RISCV_MEMTAG_CHERI 0x7fffffff
+
 /* Object attributes.  */
 enum
 {

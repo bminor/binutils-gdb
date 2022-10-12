@@ -5181,6 +5181,51 @@ riscv_elf_additional_program_headers (bfd *abfd,
   return ret;
 }
 
+/* Process any RISC-V-specific program segment types.  */
+
+static bool
+riscv_section_from_phdr (bfd *abfd ATTRIBUTE_UNUSED,
+			 Elf_Internal_Phdr *hdr,
+			 int hdr_index ATTRIBUTE_UNUSED,
+			 const char *name ATTRIBUTE_UNUSED)
+{
+  if (hdr == NULL)
+    return false;
+
+  /* Right now we only handle the PT_RISCV_MEMTAG_CHERI segment types.  */
+  if (hdr->p_type != PT_RISCV_MEMTAG_CHERI)
+    return false;
+
+  if (hdr->p_filesz > 0)
+    {
+      asection *newsect = bfd_make_section_anyway (abfd, "memtag.cheri");
+
+      if (newsect == NULL)
+	return false;
+
+      unsigned int opb = bfd_octets_per_byte (abfd, NULL);
+
+      /* p_vaddr holds the original start address of the tagged memory
+	 range.  */
+      newsect->vma = hdr->p_vaddr / opb;
+
+      /* p_filesz holds the storage size of the packed tags.  */
+      newsect->size = hdr->p_filesz;
+      newsect->filepos = hdr->p_offset;
+
+      /* p_memsz holds the size of the memory range that contains tags.  The
+	 section's rawsize field is reused for this purpose.  */
+      newsect->rawsize = hdr->p_memsz;
+
+      /* Make sure the section's flags has SEC_HAS_CONTENTS set, otherwise
+	 BFD will return all zeroes when attempting to get contents from this
+	 section.  */
+      newsect->flags |= SEC_HAS_CONTENTS;
+    }
+
+  return true;
+}
+
 static bool
 riscv_elf_modify_segment_map (bfd *abfd,
 			      struct bfd_link_info *info ATTRIBUTE_UNUSED)
@@ -5277,6 +5322,7 @@ riscv_elf_merge_symbol_attribute (struct elf_link_hash_entry *h,
 #define elf_backend_object_p			riscv_elf_object_p
 #define elf_backend_write_core_note		riscv_write_core_note
 #define elf_backend_maybe_function_sym		riscv_maybe_function_sym
+#define elf_backend_section_from_phdr		riscv_section_from_phdr
 #define elf_info_to_howto_rel			NULL
 #define elf_info_to_howto			riscv_info_to_howto_rela
 #define bfd_elfNN_bfd_relax_section		_bfd_riscv_relax_section
