@@ -242,6 +242,11 @@ engine_run_n (SIM_DESC sd, int next_cpu_nr, int nr_cpus, int max_insns, int fast
       prime_cpu (cpu, max_insns);
     }
 
+  /* Ensure the remaining engine_fns slots are initialized, this silences a
+     compiler warning when engine_fns is used below.  */
+  for (i = nr_cpus; i < MAX_NR_PROCESSORS; ++i)
+    engine_fns[i] = NULL;
+
   while (1)
     {
       SIM_ENGINE_PREFIX_HOOK (sd);
