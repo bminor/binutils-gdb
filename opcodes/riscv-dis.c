@@ -66,6 +66,9 @@ static const char * const *riscv_gpcr_names;
 /* If set, disassemble as most general instruction.  */
 static int no_aliases;
 
+/* If true, use capability mode.  */
+static bool capmode = false;
+
 static void
 set_default_riscv_dis_options (void)
 {
@@ -366,6 +369,28 @@ print_insn_args (const char *oparg, insn_t l, bfd_vma pc, disassemble_info *info
 	case 'X': /* CHERI */
 	  switch (*++oparg)
 	    {
+	    case 'C': /* RVC */
+	      switch (*++oparg)
+		{
+		case 's': /* CS1 c8-c15.  */
+		case 'w': /* CS1 c8-c15.  */
+		  print (info->stream, "%s",
+			 riscv_gpcr_names[EXTRACT_OPERAND (CRS1S, l) + 8]);
+		  break;
+		case 't': /* CS2 c8-c15.  */
+		case 'x': /* CS2 c8-c15.  */
+		  print (info->stream, "%s",
+			 riscv_gpcr_names[EXTRACT_OPERAND (CRS2S, l) + 8]);
+		  break;
+		case 'c': /* CS1, constrained to equal csp.  */
+		  print (info->stream, "%s", riscv_gpcr_names[C_CSP]);
+		  break;
+		case 'V': /* CS2 */
+		  print (info->stream, "%s",
+			 riscv_gpcr_names[EXTRACT_OPERAND (CRS2, l)]);
+		  break;
+		}
+	      break;
 	    case 's':
 	      print (info->stream, "%s", riscv_gpcr_names[rs1]);
 	      break;
@@ -602,8 +627,10 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
   const struct riscv_opcode *op;
   static bool init = 0;
   static const struct riscv_opcode *riscv_hash[OP_MASK_OP + 1];
+  static const struct riscv_opcode *riscv_capmode_hash[OP_MASK_OP + 1];
   struct riscv_private_data *pd;
   int insnlen;
+  bool use_capmode = capmode;
 
 #define OP_HASH_IDX(i) ((i) & (riscv_insn_length (i) == 2 ? 0x3 : OP_MASK_OP))
 
@@ -613,6 +640,10 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
       for (op = riscv_opcodes; op->name; op++)
 	if (!riscv_hash[OP_HASH_IDX (op->match)])
 	  riscv_hash[OP_HASH_IDX (op->match)] = op;
+
+      for (op = riscv_capmode_opcodes; op->name; op++)
+	if (!riscv_capmode_hash[OP_HASH_IDX (op->match)])
+	  riscv_capmode_hash[OP_HASH_IDX (op->match)] = op;
 
       init = 1;
     }
@@ -650,7 +681,11 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
   info->target = 0;
   info->target2 = 0;
 
-  op = riscv_hash[OP_HASH_IDX (word)];
+ again:
+  if (use_capmode)
+    op = riscv_capmode_hash[OP_HASH_IDX (word)];
+  else
+    op = riscv_hash[OP_HASH_IDX (word)];
   if (op != NULL)
     {
       /* If XLEN is not known, get its value from the ELF class.  */
@@ -724,6 +759,12 @@ riscv_disassemble_insn (bfd_vma memaddr, insn_t word, disassemble_info *info)
 
 	  return insnlen;
 	}
+    }
+
+  if (use_capmode)
+    {
+      use_capmode = false;
+      goto again;
     }
 
   /* We did not find a match, so just print the instruction bits.  */
@@ -1010,6 +1051,7 @@ riscv_get_disassembler (bfd *abfd)
 {
   const char *default_arch = "rv64gc";
 
+  capmode = false;
   if (abfd)
     {
       const struct elf_backend_data *ebd = get_elf_backend_data (abfd);
@@ -1029,6 +1071,10 @@ riscv_get_disassembler (bfd *abfd)
 	      default_arch = attr[Tag_RISCV_arch].s;
 	    }
 	}
+
+      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour
+	  && elf_elfheader (abfd)->e_flags & EF_RISCV_CAPMODE)
+	capmode = true;
     }
 
   riscv_release_subset_list (&riscv_subsets);
