@@ -1166,6 +1166,83 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
   symtab_create_debug_printf ("done reading minimal symbols");
 }
 
+/* Dwarf-specific helper for elf_symfile_read.  Return true if we managed to
+   load dwarf debug info.  */
+
+static bool
+elf_symfile_read_dwarf2 (struct objfile *objfile,
+			 symfile_add_flags symfile_flags)
+{
+  bool has_dwarf2 = true;
+
+  if (dwarf2_has_info (objfile, NULL, true))
+    dwarf2_initialize_objfile (objfile);
+  /* If the file has its own symbol tables it has no separate debug
+     info.  `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to
+     SYMTABS/PSYMTABS.	`.gnu_debuglink' may no longer be present with
+     `.note.gnu.build-id'.
+
+     .gnu_debugdata is !objfile::has_partial_symbols because it contains only
+     .symtab, not .debug_* section.  But if we already added .gnu_debugdata as
+     an objfile via find_separate_debug_file_in_section there was no separate
+     debug info available.  Therefore do not attempt to search for another one,
+     objfile->separate_debug_objfile->separate_debug_objfile GDB guarantees to
+     be NULL and we would possibly violate it.	*/
+
+  else if (!objfile->has_partial_symbols ()
+	   && objfile->separate_debug_objfile == NULL
+	   && objfile->separate_debug_objfile_backlink == NULL)
+    {
+      std::string debugfile = find_separate_debug_file_by_buildid (objfile);
+
+      if (debugfile.empty ())
+	debugfile = find_separate_debug_file_by_debuglink (objfile);
+
+      if (!debugfile.empty ())
+	{
+	  gdb_bfd_ref_ptr debug_bfd (symfile_bfd_open (debugfile.c_str ()));
+
+	  symbol_file_add_separate (debug_bfd, debugfile.c_str (),
+				    symfile_flags, objfile);
+	}
+      else
+	{
+	  has_dwarf2 = false;
+	  const struct bfd_build_id *build_id
+	    = build_id_bfd_get (objfile->obfd.get ());
+	  const char *filename = bfd_get_filename (objfile->obfd.get ());
+
+	  if (build_id != nullptr)
+	    {
+	      gdb::unique_xmalloc_ptr<char> symfile_path;
+	      scoped_fd fd (debuginfod_debuginfo_query (build_id->data,
+							build_id->size,
+							filename,
+							&symfile_path));
+
+	      if (fd.get () >= 0)
+		{
+		  /* File successfully retrieved from server.  */
+		  gdb_bfd_ref_ptr debug_bfd (symfile_bfd_open (symfile_path.get ()));
+
+		  if (debug_bfd == nullptr)
+		    warning (_("File \"%s\" from debuginfod cannot be opened as bfd"),
+			     filename);
+		  else if (build_id_verify (debug_bfd.get (), build_id->size,
+					    build_id->data))
+		    {
+		      symbol_file_add_separate (debug_bfd, symfile_path.get (),
+						symfile_flags, objfile);
+		      has_dwarf2 = true;
+		    }
+		}
+	    }
+	}
+    }
+
+  return has_dwarf2;
+}
+
 /* Scan and build partial symbols for a symbol file.
    We have been initialized by a call to elf_symfile_init, which
    currently does nothing.
@@ -1195,7 +1272,6 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 {
   bfd *abfd = objfile->obfd.get ();
   struct elfinfo ei;
-  bool has_dwarf2 = true;
 
   memset ((char *) &ei, 0, sizeof (ei));
   if (!(objfile->flags & OBJF_READNEVER))
@@ -1244,69 +1320,7 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
 				bfd_section_size (str_sect));
     }
 
-  if (dwarf2_has_info (objfile, NULL, true))
-    dwarf2_initialize_objfile (objfile);
-  /* If the file has its own symbol tables it has no separate debug
-     info.  `.dynsym'/`.symtab' go to MSYMBOLS, `.debug_info' goes to
-     SYMTABS/PSYMTABS.  `.gnu_debuglink' may no longer be present with
-     `.note.gnu.build-id'.
-
-     .gnu_debugdata is !objfile::has_partial_symbols because it contains only
-     .symtab, not .debug_* section.  But if we already added .gnu_debugdata as
-     an objfile via find_separate_debug_file_in_section there was no separate
-     debug info available.  Therefore do not attempt to search for another one,
-     objfile->separate_debug_objfile->separate_debug_objfile GDB guarantees to
-     be NULL and we would possibly violate it.  */
-
-  else if (!objfile->has_partial_symbols ()
-	   && objfile->separate_debug_objfile == NULL
-	   && objfile->separate_debug_objfile_backlink == NULL)
-    {
-      std::string debugfile = find_separate_debug_file_by_buildid (objfile);
-
-      if (debugfile.empty ())
-	debugfile = find_separate_debug_file_by_debuglink (objfile);
-
-      if (!debugfile.empty ())
-	{
-	  gdb_bfd_ref_ptr debug_bfd (symfile_bfd_open (debugfile.c_str ()));
-
-	  symbol_file_add_separate (debug_bfd, debugfile.c_str (),
-				    symfile_flags, objfile);
-	}
-      else
-	{
-	  has_dwarf2 = false;
-	  const struct bfd_build_id *build_id
-	    = build_id_bfd_get (objfile->obfd.get ());
-	  const char *filename = bfd_get_filename (objfile->obfd.get ());
-
-	  if (build_id != nullptr)
-	    {
-	      gdb::unique_xmalloc_ptr<char> symfile_path;
-	      scoped_fd fd (debuginfod_debuginfo_query (build_id->data,
-							build_id->size,
-							filename,
-							&symfile_path));
-
-	      if (fd.get () >= 0)
-		{
-		  /* File successfully retrieved from server.  */
-		  gdb_bfd_ref_ptr debug_bfd (symfile_bfd_open (symfile_path.get ()));
-
-		  if (debug_bfd == nullptr)
-		    warning (_("File \"%s\" from debuginfod cannot be opened as bfd"),
-			     filename);
-		  else if (build_id_verify (debug_bfd.get (), build_id->size, build_id->data))
-		    {
-		      symbol_file_add_separate (debug_bfd, symfile_path.get (),
-						symfile_flags, objfile);
-		      has_dwarf2 = true;
-		    }
-		}
-	    }
-	}
-    }
+  bool has_dwarf2 = elf_symfile_read_dwarf2 (objfile, symfile_flags);
 
   /* Read the CTF section only if there is no DWARF info.  */
   if (!has_dwarf2 && ei.ctfsect)
