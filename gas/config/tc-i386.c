@@ -1907,7 +1907,6 @@ static const i386_operand_type disp16_32 = OPERAND_TYPE_DISP16_32;
 static const i386_operand_type anydisp = OPERAND_TYPE_ANYDISP;
 static const i386_operand_type anyimm = OPERAND_TYPE_ANYIMM;
 static const i386_operand_type regxmm = OPERAND_TYPE_REGXMM;
-static const i386_operand_type regmask = OPERAND_TYPE_REGMASK;
 static const i386_operand_type imm8 = OPERAND_TYPE_IMM8;
 static const i386_operand_type imm8s = OPERAND_TYPE_IMM8S;
 static const i386_operand_type imm16 = OPERAND_TYPE_IMM16;
@@ -8190,7 +8189,7 @@ build_modrm_byte (void)
 		  || ((op.bitfield.class != Reg
 		       || (!op.bitfield.dword && !op.bitfield.qword))
 		      && op.bitfield.class != RegSIMD
-		      && !operand_type_equal (&op, &regmask)))
+		      && op.bitfield.class != RegMask))
 		abort ();
 	      i.vex.register_specifier = i.op[vvvv].regs;
 	      dest++;
@@ -8601,7 +8600,7 @@ build_modrm_byte (void)
 	      if ((type->bitfield.class != Reg
 		   || (!type->bitfield.dword && !type->bitfield.qword))
 		  && type->bitfield.class != RegSIMD
-		  && !operand_type_equal (type, &regmask))
+		  && type->bitfield.class != RegMask)
 		abort ();
 
 	      i.vex.register_specifier = i.op[vex_reg].regs;
