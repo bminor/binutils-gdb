@@ -292,7 +292,7 @@ core_map_find_mapping(core_map *map,
     mapping = mapping->next;
   }
   if (abort)
-    error("core_find_mapping() - access to unmaped address, attach a default map to handle this - addr=0x%x nr_bytes=0x%x processor=0x%p cia=0x%x\n",
+    error("core_find_mapping() - access to unmaped address, attach a default map to handle this - addr=0x%x nr_bytes=0x%x processor=%p cia=0x%x\n",
 	  addr, nr_bytes, (void *) processor, cia);
   return NULL;
 }
