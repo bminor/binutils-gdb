@@ -29,10 +29,19 @@ if ![support_nested_function_tests] {
     return -1
 }
 
+set flags {}
+lappend flags debug
+lappend flags additional_flags=-std=gnu99
+
+set ld_flags additional_flags=-Wl,--no-warn-execstack
+if { [gdb_can_simple_compile ld-flags {int main () { return 0; }} executable \
+	  $ld_flags] } {
+    lappend flags $ld_flags
+}
+
 if { [gdb_compile "${srcdir}/${subdir}/${testcase}.c" \
-                  [standard_output_file "${testcase}"] \
-                  executable \
-                  [list debug "additional_flags=-std=gnu99"]] != "" } {
+	  [standard_output_file "${testcase}"] \
+	  executable $flags] != "" } {
     return -1
 }
 
