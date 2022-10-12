@@ -494,7 +494,7 @@ proc do_test {dir options} {
 # Build up the set of debug formats for which we will run this test.
 set specs { {dwarf {debug}} }
 if ![skip_ctf_tests] {
-    lappend specs {ctf {"additional_flags=-gt"}}
+    lappend specs {ctf {"additional_flags=-gctf"}}
 }
 
 # Setup and run the test for each debug format.
