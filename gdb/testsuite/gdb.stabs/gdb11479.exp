@@ -39,7 +39,7 @@ proc do_test {version} {
     gdb_test "print sizeof (*e)" "= \[1-9\]*" "sizeof (*e) in test $version"
 }
 
-if { [prepare_for_testing "failed to prepare" $testfile $testfile.c {debug additional_flags=-gstabs}] == 0 } {
+if { [prepare_for_testing "failed to prepare" $testfile $testfile.c {debug additional_flags=-gstabs quiet}] == 0 } {
     do_test forced_stabs
 }
 
