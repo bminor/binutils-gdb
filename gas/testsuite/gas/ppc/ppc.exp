@@ -94,10 +94,7 @@ run_dump_test "efs2"
 run_dump_test "spe2"
 run_dump_test "spe2-checks"
 run_dump_test "spe"
-
-setup_xfail "*-*-*"
 run_dump_test "spe_ambiguous"
-
 run_dump_test "altivec"
 run_dump_test "altivec2"
 run_dump_test "altivec3"
