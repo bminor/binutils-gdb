@@ -106,7 +106,7 @@ proc aarch64_page_plus_decimal_offset { page offset } {
 # Return the 8-hexdigit truncation of an address.
 proc aarch64_8digit_addr { addr { plusLSB 0 } } {
   if { $plusLSB } {
-    return [aarch64_8digit_addr [format %08x [expr "0x$addr + 1"]]];
+    return [format %08x [expr "0x$addr + 1"]];
   }
   return [format %08x "0x$addr"];
 }
@@ -312,6 +312,25 @@ if { [check_shared_lib_support]
   run_dump_test_lp64 "morello-dataptr-through-data"
   run_dump_test_lp64 "morello-dataptr-through-data-pie"
   run_dump_test_lp64 "morello-dataptr-code-and-data"
+  run_dump_test_lp64 "morello-ifunc-a"
+  run_dump_test_lp64 "morello-ifunc1-a"
+}
+run_dump_test_lp64 "morello-ifunc"
+run_dump_test_lp64 "morello-ifunc-b"
+run_dump_test_lp64 "morello-ifunc1"
+run_dump_test_lp64 "morello-ifunc1-b"
+run_dump_test_lp64 "morello-ifunc1-c"
+run_dump_test_lp64 "morello-ifunc2"
+run_dump_test_lp64 "morello-ifunc2-b"
+run_dump_test_lp64 "morello-ifunc3"
+run_dump_test_lp64 "morello-ifunc4"
+run_dump_test_lp64 "morello-ifunc4a"
+
+if { [check_shared_lib_support]
+     && [ld_assemble_flags $as -march=morello+c64 $srcdir/$subdir/morello-ifunc-shared.s tmpdir/morello-ifunc-shared.o]
+     && [ld_link $ld tmpdir/morello-ifunc-shared.so "--shared tmpdir/morello-ifunc-shared.o"] } {
+  run_dump_test_lp64 "morello-ifunc-dynlink"
+  run_dump_test_lp64 "morello-ifunc-dynlink-pie"
 }
 
 if { [check_shared_lib_support]

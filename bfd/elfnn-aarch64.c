@@ -3049,6 +3049,13 @@ struct elf_c64_tls_data_stub_hash_entry
   bfd_boolean populated;
 };
 
+struct elf_c64_ifunc_capinit_record
+{
+  struct elf_link_hash_entry *h;
+  /* Number of CAPINIT relocations this hash entry has against it.  */
+  unsigned long count;
+};
+
 /* Used to build a map of a section.  This is required for mixed-endian
    code/data.  */
 
@@ -3357,6 +3364,11 @@ struct elf_aarch64_link_hash_table
   void **c64_sec_info;
   unsigned min_output_section_id;
   unsigned max_output_section_id;
+
+  /* Used for CAPINIT relocations on a STT_GNU_IFUNC symbols in a static PDE.
+   * */
+  htab_t c64_ifunc_capinit_hash_table;
+  void * c64_ifunc_capinit_memory;
 };
 
 /* Create an entry in an AArch64 ELF linker hash table.  */
@@ -3543,6 +3555,55 @@ c64_tls_stub_find (struct elf_link_hash_entry *h,
   return (struct elf_c64_tls_data_stub_hash_entry *)ret;
 }
 
+static hashval_t
+c64_ifunc_capinit_hash (const void *ptr)
+{
+  struct elf_c64_ifunc_capinit_record *entry
+    = (struct elf_c64_ifunc_capinit_record *) ptr;
+  return htab_hash_pointer (entry->h);
+}
+
+static int
+c64_ifunc_capinit_eq (const void *ptr1, const void *ptr2)
+{
+  struct elf_c64_ifunc_capinit_record *entry1
+     = (struct elf_c64_ifunc_capinit_record *) ptr1;
+  struct elf_c64_ifunc_capinit_record *entry2
+    = (struct elf_c64_ifunc_capinit_record *) ptr2;
+
+  return entry1->h == entry2->h;
+}
+
+static bfd_boolean
+c64_record_ifunc_capinit (struct elf_aarch64_link_hash_table *htab,
+			  struct elf_link_hash_entry *h)
+{
+  BFD_ASSERT (h && h->type == STT_GNU_IFUNC);
+  struct elf_c64_ifunc_capinit_record e, *new_entry;
+  e.h = h;
+  void **slot = htab_find_slot (htab->c64_ifunc_capinit_hash_table, &e,
+				INSERT);
+  if (!slot)
+    return FALSE;
+  if (*slot)
+    {
+      ((struct elf_c64_ifunc_capinit_record *)*slot)->count += 1;
+      return TRUE;
+    }
+
+  new_entry = (struct elf_c64_ifunc_capinit_record *)
+    objalloc_alloc ((struct objalloc *) htab->c64_ifunc_capinit_memory,
+		    sizeof (struct elf_c64_ifunc_capinit_record));
+  if (new_entry)
+    {
+      new_entry->h = h;
+      new_entry->count = 1;
+      *slot = new_entry;
+      return TRUE;
+    }
+  return FALSE;
+}
+
 /* Compute a hash of a local hash entry.  We use elf_link_hash_entry
   for local symbol so that we can handle local STT_GNU_IFUNC symbols
   as global symbol.  We reuse indx and dynstr_index for local symbol
@@ -3685,6 +3746,11 @@ elfNN_aarch64_link_hash_table_free (bfd *obfd)
   if (ret->tls_data_stub_memory)
     objalloc_free ((struct objalloc *) ret->tls_data_stub_memory);
 
+  if (ret->c64_ifunc_capinit_hash_table)
+    htab_delete (ret->c64_ifunc_capinit_hash_table);
+  if (ret->c64_ifunc_capinit_memory)
+    objalloc_free ((struct objalloc *) ret->c64_ifunc_capinit_memory);
+
   bfd_hash_table_free (&ret->stub_hash_table);
   _bfd_elf_link_hash_table_free (obfd);
 }
@@ -3729,6 +3795,16 @@ elfNN_aarch64_link_hash_table_create (bfd *abfd)
 		       NULL);
   ret->tls_data_stub_memory = objalloc_create ();
   if (!ret->c64_tls_data_stub_hash_table || !ret->tls_data_stub_memory)
+    {
+      elfNN_aarch64_link_hash_table_free (abfd);
+      return NULL;
+    }
+
+  ret->c64_ifunc_capinit_hash_table
+    = htab_try_create (256, c64_ifunc_capinit_hash, c64_ifunc_capinit_eq,
+		       NULL);
+  ret->c64_ifunc_capinit_memory = objalloc_create ();
+  if (!ret->c64_ifunc_capinit_hash_table || !ret->c64_ifunc_capinit_memory)
     {
       elfNN_aarch64_link_hash_table_free (abfd);
       return NULL;
@@ -7133,6 +7209,26 @@ c64_symbol_adjust (struct elf_link_hash_entry *h,
   return FALSE;
 }
 
+static bfd_boolean
+c64_ifunc_reloc_static_irelative (struct bfd_link_info *info,
+			      struct elf_link_hash_entry *h)
+{
+  return (static_pde (info) && !h->pointer_equality_needed);
+}
+
+static asection *
+c64_ifunc_got_reloc_section (struct bfd_link_info *info,
+			     struct elf_link_hash_entry *h)
+{
+  struct elf_aarch64_link_hash_table *htab;
+  htab = elf_aarch64_hash_table (info);
+  if (c64_ifunc_reloc_static_irelative (info, h))
+    return htab->root.irelplt;
+  if (static_pde (info))
+    return htab->srelcaps;
+  return htab->root.srelgot;
+}
+
 /* Perform a relocation as part of a final link.  The input relocation type
    should be TLS relaxed.  */
 
@@ -7263,6 +7359,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  bfd_set_error (bfd_error_bad_value);
 	  return bfd_reloc_notsupported;
 
+	case BFD_RELOC_MORELLO_CAPINIT:
 	case BFD_RELOC_AARCH64_NN:
 	  if (rel->r_addend != 0)
 	    {
@@ -7280,9 +7377,29 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	      return bfd_reloc_notsupported;
 	    }
 
-	  /* Generate dynamic relocation only when there is a
-	     non-GOT reference in a shared object.  */
-	  if (bfd_link_pic (info) && h->non_got_ref)
+	  /* N.b. Having an AARCH64_NN relocation (i.e. an ABS64
+	     relocation) against a capability ifunc is not yet defined.  */
+	  if (globals->c64_rel && bfd_r_type == BFD_RELOC_AARCH64_NN)
+	    {
+	      if (h->root.root.string)
+		name = h->root.root.string;
+	      else
+		name = bfd_elf_sym_name (input_bfd, symtab_hdr,
+					 sym, NULL);
+	      _bfd_error_handler (_("%pB: relocation %s against a C64 "
+				    "STT_GNU_IFUNC symbol `%s'"),
+				  input_bfd, howto->name, name);
+	      bfd_set_error (bfd_error_bad_value);
+	      return bfd_reloc_notsupported;
+	    }
+
+	  /* Generate dynamic relocation for AArch64 only when there is a
+	     non-GOT reference in a shared object.
+	     Need a dynamic relocation for a CAPINIT whenever
+	     c64_needs_relocation.  */
+	  if ((bfd_link_pic (info) && h->non_got_ref)
+	      || (bfd_r_type == BFD_RELOC_MORELLO_CAPINIT
+		  && c64_needs_relocation (info, h)))
 	    {
 	      Elf_Internal_Rela outrel;
 	      asection *sreloc;
@@ -7300,17 +7417,57 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	      outrel.r_offset += (input_section->output_section->vma
 				  + input_section->output_offset);
 
+
 	      if (h->dynindx == -1
 		  || h->forced_local
 		  || bfd_link_executable (info))
 		{
-		  /* This symbol is resolved locally.  */
-		  outrel.r_info = (globals->c64_rel
-				   ? ELFNN_R_INFO (0, MORELLO_R (IRELATIVE))
-				   : ELFNN_R_INFO (0, AARCH64_R (IRELATIVE)));
-		  outrel.r_addend = (h->root.u.def.value
-				     + h->root.u.def.section->output_section->vma
-				     + h->root.u.def.section->output_offset);
+		  /* This symbol is resolved locally.
+		     N.b. a MORELLO_IRELATIVE relocation is not suitable for
+		     populating an 8-byte value.  We don't handle ABS64
+		     relocations against a capability IFUNC.  */
+		  bfd_vma resolver_loc = (h->root.u.def.value
+					  + h->root.u.def.section->output_section->vma
+					  + h->root.u.def.section->output_offset);
+
+		  if (bfd_r_type == BFD_RELOC_MORELLO_CAPINIT)
+		    {
+		      bfd_vma frag_value = 0, value_tmp;
+		      if (h->pointer_equality_needed && !bfd_link_pic (info))
+			{
+			  outrel.r_info = ELFNN_R_INFO (0, MORELLO_R (RELATIVE));
+			  /* Use the PLT as the canonical address.  */
+			  value_tmp = value;
+			}
+		      else
+			{
+			  outrel.r_info = ELFNN_R_INFO (0, MORELLO_R (IRELATIVE));
+			  value_tmp = resolver_loc;
+			}
+		      BFD_ASSERT (c64_symbol_adjust (h, value_tmp, sym_sec, info,
+						     &frag_value));
+		      outrel.r_addend
+			= (value_tmp | h->target_internal) - frag_value;
+		      /* Can feel safe asserting things here since we've
+			 created all of the values.  I.e. nothing is coming
+			 from the user and hence we don't need gracious error
+			 handling.  */
+		      BFD_ASSERT (_bfd_aarch64_elf_put_addend (input_bfd,
+							       hit_data,
+							       bfd_r_type,
+							       howto, frag_value)
+				  == bfd_reloc_ok);
+		      BFD_ASSERT (c64_fixup_frag (input_bfd, info, bfd_r_type,
+						  sym, h, sym_sec,
+						  input_section, hit_data + 8,
+						  value_tmp, 0, rel->r_offset)
+				  == bfd_reloc_continue);
+		    }
+		  else
+		    {
+		      outrel.r_info = ELFNN_R_INFO (0, AARCH64_R (IRELATIVE));
+		      outrel.r_addend = resolver_loc;
+		    }
 		}
 	      else
 		{
@@ -7318,8 +7475,21 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 		  outrel.r_addend = 0;
 		}
 
-	      sreloc = globals->root.irelifunc;
-	      elf_append_rela (output_bfd, sreloc, &outrel);
+	      if (c64_ifunc_reloc_static_irelative (info, h))
+		{
+		  /* In the same way as TLS descriptor PLT stubs, we want
+		     IRELATIVE relocations coming from CAPINIT relocations to
+		     be after all the relocations for PLT stub entries.  */
+		  BFD_ASSERT (bfd_r_type == BFD_RELOC_MORELLO_CAPINIT);
+		  sreloc = globals->root.irelplt;
+		  bfd_byte *loc = sreloc->contents
+		    + sreloc->reloc_count++ * RELOC_SIZE (globals);
+		  bfd_elfNN_swap_reloca_out (output_bfd, &outrel, loc);
+		}
+	      else if (bfd_link_pic (info))
+		elf_append_rela (output_bfd, globals->root.irelifunc, &outrel);
+	      else
+		elf_append_rela (output_bfd, globals->srelcaps, &outrel);
 
 	      /* If this reloc is against an external symbol, we
 		 do not want to fiddle with the addend.  Otherwise,
@@ -7356,6 +7526,7 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  if (base_got == NULL)
 	    abort ();
 
+	  value |= h->target_internal;
 	  if (off == (bfd_vma) -1)
 	    {
 	      bfd_vma plt_index;
@@ -9950,6 +10121,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      h->ref_regular = 1;
 	      h->forced_local = 1;
 	      h->root.type = bfd_link_hash_defined;
+	      h->target_internal = isym->st_target_internal;
 	    }
 	  else
 	    h = NULL;
@@ -10040,6 +10212,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
 	    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
 	    case BFD_RELOC_AARCH64_NN:
+	    case BFD_RELOC_MORELLO_CAPINIT:
 	      if (htab->root.dynobj == NULL)
 		htab->root.dynobj = abfd;
 	      if (!_bfd_elf_create_ifunc_sections (htab->root.dynobj, info))
@@ -10384,6 +10557,13 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    /* If this symbol does not need a relocation, then there's no
 	       reason to increase the srelcaps size for a relocation.  */
 	    break;
+	  /* Always create srelcaps, even if there's the possibility that this
+	     relocation will not end up in srelcaps (i.e. in the special case
+	     that our CAPINIT relocation will end up as an IRELATIVE relocation
+	     in .rela.iplt for static PDE).  If we don't actually put anything
+	     into this section it will be empty and won't appear in the output
+	     (similar to how we use `_bfd_elf_create_ifunc_sections` above).
+	     */
 	  if (htab->srelcaps == NULL)
 	    {
 	      if (htab->root.dynobj == NULL)
@@ -10397,6 +10577,49 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		return FALSE;
 
 	      htab->srelcaps = sreloc;
+	    }
+
+	  /* Mark any IFUNC symbol as requiring a PLT.
+	     We do not want to use dyn_relocs since generic code ignores this
+	     when not linking PIC but we need the dynamic relocation for
+	     capabilities.
+	     We would not benefit from using dyn_relocs since a CAPINIT
+	     relocation will never be reduced to a hand-coded value and hence
+	     can't be garbage collected (even if it may turn from a CAPINIT to
+	     an IRELATIVE).
+	     However, without dyn_relocs or a greater than zero plt.refcount,
+	     _bfd_elf_allocate_ifunc_dyn_relocs would garbage collect the PLT
+	     entry for this symbol believing that it is not used.  */
+	  if (h && h->type == STT_GNU_IFUNC)
+	    {
+	      h->needs_plt = 1;
+	      h->plt.refcount = h->plt.refcount < 0
+		? 1 : h->plt.refcount + 1;
+	      /* The only time that a CAPINIT relocation should not trigger
+		 some dynamic relocation in the srelcaps section of the output
+		 binary is when the relocation is against an STT_GNU_IFUNC in
+		 a static PDE.  In this case we need to emit the relocations in
+		 the .rela.iplt section.  */
+	      if (static_pde (info))
+		{
+		  /* As yet we do not know whether this symbol needs pointer
+		     equality or not.  This means that we don't know which
+		     symbols (either __rela_dyn_{start,end} or
+		     __rela_iplt_{start,end}) we need to put this relocation
+		     between.
+
+		     This problem does not exist outside of a static_pde since
+		     there the runtime reads all relocs rather than relying on
+		     symbols to point to where relocations are.  */
+		  BFD_ASSERT (c64_record_ifunc_capinit (htab, h));
+		  break;
+		}
+	      else if (bfd_link_pic (info))
+		{
+		  htab->root.irelifunc->size += RELOC_SIZE (htab);
+		  break;
+		}
+	      /* Otherwise put into the srelcaps section.  */
 	    }
 	  htab->srelcaps->size += RELOC_SIZE (htab);
 
@@ -10751,12 +10974,22 @@ elfNN_aarch64_output_arch_local_syms (bfd *output_bfd,
     }
 
   /* Finally, output mapping symbols for the PLT.  */
-  if (!htab->root.splt || htab->root.splt->size == 0)
+  if ((!htab->root.splt || htab->root.splt->size == 0)
+      && (!htab->root.iplt || htab->root.iplt->size == 0))
     return TRUE;
 
-  osi.sec_shndx = _bfd_elf_section_from_bfd_section
-    (output_bfd, htab->root.splt->output_section);
-  osi.sec = htab->root.splt;
+  if (htab->root.splt && htab->root.splt->size != 0)
+    {
+      osi.sec_shndx = _bfd_elf_section_from_bfd_section
+	(output_bfd, htab->root.splt->output_section);
+      osi.sec = htab->root.splt;
+    }
+  else
+    {
+      osi.sec_shndx = _bfd_elf_section_from_bfd_section
+	(output_bfd, htab->root.iplt->output_section);
+      osi.sec = htab->root.iplt;
+    }
 
   elfNN_aarch64_output_map_sym (&osi, (htab->c64_rel ? AARCH64_MAP_C64
 				       : AARCH64_MAP_INSN), 0);
@@ -10892,7 +11125,9 @@ elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	     entries are placed by computing their PLT index (0
 	     .. reloc_count). While other none PLT relocs are placed
 	     at the slot indicated by reloc_count and reloc_count is
-	     updated.  */
+	     updated.
+	     For reference, a similar abuse of the reloc_count is done for the
+	     irelplt section for Morello CAPINIT relocations.  */
 
 	  htab->root.srelplt->reloc_count++;
 
@@ -11161,12 +11396,29 @@ elfNN_aarch64_allocate_ifunc_dynrelocs (struct elf_link_hash_entry *h,
      here if it is defined and referenced in a non-shared object.  */
   if (h->type == STT_GNU_IFUNC
       && h->def_regular)
-    return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
-					       &h->dyn_relocs,
-					       htab->plt_entry_size,
-					       htab->plt_header_size,
-					       GOT_ENTRY_SIZE (htab),
-					       FALSE);
+    {
+      bfd_boolean ret
+	= _bfd_elf_allocate_ifunc_dyn_relocs (info, h, &h->dyn_relocs,
+					      htab->plt_entry_size,
+					      htab->plt_header_size,
+					      GOT_ENTRY_SIZE (htab), FALSE);
+      if (htab->c64_rel
+	  && ret
+	  && h->got.offset != (bfd_vma)-1
+	  && !UNDEFWEAK_NO_DYNAMIC_RELOC (info, h)
+	  && !bfd_link_pic (info)
+	  && !bfd_link_relocatable (info))
+	/* got.offset is not -1 which indicates we have an entry in the got.
+	   For non-capabilities we would manually populate the GOT with the
+	   known location of the PLT in finish_dynamic_symbol, since this is a
+	   non-PIC executable.  For capabilities we need to emit a relocation
+	   to populate that entry.  */
+	{
+	  asection *reloc_sec = c64_ifunc_got_reloc_section (info, h);
+	  reloc_sec->size += RELOC_SIZE (htab);
+	}
+      return ret;
+    }
   return TRUE;
 }
 
@@ -11187,6 +11439,34 @@ elfNN_aarch64_allocate_local_ifunc_dynrelocs (void **slot, void *inf)
     abort ();
 
   return elfNN_aarch64_allocate_ifunc_dynrelocs (h, inf);
+}
+
+/* Allocate space for CAPINIT relocations against IFUNC symbols in a static
+   PDE.  This case is special since the IRELATIVE relocations and RELATIVE
+   relocations need to be placed in different sections, and the decision about
+   whether we need to emit an IRELATIVE or RELATIVE relocation is dependent on
+   whether there are *other* relocations.  */
+static bfd_boolean
+c64_allocate_ifunc_capinit_static_relocs (void **slot, void *inf)
+{
+  struct elf_link_hash_entry *h;
+  struct elf_c64_ifunc_capinit_record *rec
+    = (struct elf_c64_ifunc_capinit_record *) *slot;
+  h = rec->h;
+
+  if (h->type != STT_GNU_IFUNC
+      || !h->def_regular
+      || !h->ref_regular
+      || h->root.type != bfd_link_hash_defined)
+    abort ();
+
+  struct bfd_link_info *info = (struct bfd_link_info *) inf;
+  struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
+  if (c64_ifunc_reloc_static_irelative (info, h))
+    htab->root.irelplt->size += rec->count * RELOC_SIZE (htab);
+  else
+    htab->srelcaps->size += rec->count * RELOC_SIZE (htab);
+  return TRUE;
 }
 
 /* This is the most important function of all . Innocuosly named
@@ -11345,6 +11625,14 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd,
 		 elfNN_aarch64_allocate_local_ifunc_dynrelocs,
 		 info);
 
+  if (static_pde (info))
+    {
+      htab_traverse (htab->c64_ifunc_capinit_hash_table,
+		     c64_allocate_ifunc_capinit_static_relocs,
+		     info);
+      htab_empty (htab->c64_ifunc_capinit_hash_table);
+    }
+
   if (static_pde (info)
       && htab->srelcaps
       && htab->srelcaps->size > 0)
@@ -11426,7 +11714,8 @@ elfNN_aarch64_size_dynamic_sections (bfd *output_bfd,
 
 	  /* We use the reloc_count field as a counter if we need
 	     to copy relocs into the output file.  */
-	  if (s != htab->root.srelplt)
+	  if (s != htab->root.srelplt
+	      && s != htab->root.irelplt)
 	    s->reloc_count = 0;
 	}
       else
@@ -11640,12 +11929,32 @@ elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
     {
       /* If an STT_GNU_IFUNC symbol is locally defined, generate
 	 R_AARCH64_IRELATIVE instead of R_AARCH64_JUMP_SLOT.  */
-      rela.r_info = (htab->c64_rel
-		     ? ELFNN_R_INFO (0, MORELLO_R (IRELATIVE))
-		     : ELFNN_R_INFO (0, AARCH64_R (IRELATIVE)));
       rela.r_addend = (h->root.u.def.value
 		       + h->root.u.def.section->output_section->vma
 		       + h->root.u.def.section->output_offset);
+      if (htab->c64_rel)
+	{
+	  /* A MORELLO_IRELATIVE relocation is the only kind of relocation that
+	     wants something other than PLT0 in the fragment.  It requires the
+	     PCC base with associated permissions and size information.  */
+	  bfd_vma frag_value = 0;
+	  bfd_vma orig_value = rela.r_addend;
+	  rela.r_info = ELFNN_R_INFO (0, MORELLO_R (IRELATIVE));
+	  BFD_ASSERT (c64_symbol_adjust (h, orig_value, plt, info,
+					 &frag_value));
+	  rela.r_addend = (orig_value | 1) - frag_value;
+	  bfd_put_NN (output_bfd, frag_value, gotplt->contents + got_offset);
+	  BFD_ASSERT (c64_fixup_frag (output_bfd, info,
+				      BFD_RELOC_MORELLO_CAPINIT,
+				      NULL, h, plt, gotplt,
+				      gotplt->contents + got_offset + 8,
+				      orig_value, 0, rela.r_offset)
+		      == bfd_reloc_continue);
+	}
+      else
+	{
+	  rela.r_info = ELFNN_R_INFO (0, AARCH64_R (IRELATIVE));
+	}
     }
   else
     {
@@ -11807,11 +12116,37 @@ elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 		 contains the real function address if we need pointer
 		 equality.  We load the GOT entry with the PLT entry.  */
 	      plt = htab->root.splt ? htab->root.splt : htab->root.iplt;
-	      bfd_put_NN (output_bfd, (plt->output_section->vma
-				       + plt->output_offset
-				       + h->plt.offset),
-			  htab->root.sgot->contents
-			  + (h->got.offset & ~(bfd_vma) 1));
+
+	      bfd_vma value = (plt->output_section->vma + plt->output_offset
+			       + h->plt.offset);
+	      bfd_vma got_offset = h->got.offset & ~(bfd_vma)1;
+	      if (htab->c64_rel)
+		{
+		  bfd_vma base_value = 0;
+		  BFD_ASSERT (c64_symbol_adjust (h, value, plt, info,
+						 &base_value));
+		  rela.r_info = ELFNN_R_INFO (0, MORELLO_R (RELATIVE));
+		  rela.r_addend = (value | h->target_internal) - base_value;
+		  asection *s = c64_ifunc_got_reloc_section (info, h);
+		  elf_append_rela (output_bfd, s, &rela);
+
+		  /* N.b. we do not use c64_fixup_frag since in includes a
+		     bunch of features we do not use like error checking the
+		     size and ensuring figuring out whether we need to extend
+		     things depending on the kind of symbol.  We know these due
+		     to the fact this is a STT_GNU_IFUNC symbol.
+		     In order to implement those features it requires quite a
+		     lot of arguments which we don't happen to have here.  */
+		  bfd_boolean guessed = FALSE;
+		  bfd_vma meta = cap_meta (pcc_high - pcc_low, plt, &guessed);
+		  BFD_ASSERT (!guessed);
+		  bfd_put_NN (output_bfd, meta,
+			      htab->root.sgot->contents + got_offset + 8);
+		  value = base_value;
+		}
+
+	      bfd_put_NN (output_bfd, value,
+			  htab->root.sgot->contents + got_offset);
 	      return TRUE;
 	    }
 	}
