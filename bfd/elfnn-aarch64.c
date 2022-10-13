@@ -7131,17 +7131,6 @@ c64_fixup_frag (bfd *input_bfd, struct bfd_link_info *info,
   bfd_vma base = value, limit = value + size;
   unsigned align = 0;
 
-  if (!bounds_ok && !c64_valid_cap_range (&base, &limit, &align))
-    {
-      /* Just warn about this.  It's not a requirement that bounds on
-	 objects should be precise, so there's no reason to error out on
-	 such an object.  */
-      /* xgettext:c-format */
-      _bfd_error_handler
-	(_("%pB: capability range for '%s' may exceed object bounds"),
-	 input_bfd, sym_name);
-    }
-
   if (perm_sec && perm_sec->flags & SEC_CODE)
     {
       /* Any symbol pointing into an executable section gets bounds according
@@ -7159,6 +7148,16 @@ c64_fixup_frag (bfd *input_bfd, struct bfd_link_info *info,
 	 we need to change it in order to have functions that can access global
 	 data or jump to other functions.  */
       size = pcc_high - pcc_low;
+    }
+  else if (!bounds_ok && !c64_valid_cap_range (&base, &limit, &align))
+    {
+      /* Just warn about this.  It's not a requirement that bounds on
+	 objects should be precise, so there's no reason to error out on
+	 such an object.  */
+      /* xgettext:c-format */
+      _bfd_error_handler
+	(_("%pB: capability range for '%s' may exceed object bounds"),
+	 input_bfd, sym_name);
     }
 
   if (perm_sec != NULL)

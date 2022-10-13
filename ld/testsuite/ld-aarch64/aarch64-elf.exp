@@ -392,6 +392,8 @@ run_dump_test_lp64 "morello-illegal-tls"
 run_dump_test_lp64 "morello-illegal-tls-pie"
 run_dump_test_lp64 "morello-illegal-tls-shared"
 
+run_dump_test_lp64 "morello-large-function"
+
 run_dump_test "no-morello-syms-static"
 
 run_dump_test "reloc-overflow-bad"
