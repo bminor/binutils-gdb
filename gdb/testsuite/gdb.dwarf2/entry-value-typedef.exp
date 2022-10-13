@@ -16,7 +16,7 @@
 # The program associated to this test case uncovered a bug in GDB (PR 29374)
 # where a typedef type was used before it was resolved.
 
-if { [istarget "x86_64-*-linux*"] } {
+if { [istarget "x86_64-*-linux*"] && [is_lp64_target] } {
     set suffix amd64
 } elseif { [istarget "aarch64-*-linux*"] } {
     set suffix aarch64
