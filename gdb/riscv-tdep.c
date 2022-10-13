@@ -57,6 +57,7 @@
 #include "prologue-value.h"
 #include "arch/riscv.h"
 #include "riscv-ravenscar-thread.h"
+#include "cheri-compressed-cap/cheri_compressed_cap.h"
 
 /* The stack must be 16-byte aligned.  */
 #define SP_ALIGNMENT 16
@@ -3745,6 +3746,187 @@ riscv_cheri_integer_to_address (struct gdbarch *gdbarch,
   return riscv_cheri_pointer_to_address (gdbarch, type, buf);
 }
 
+/* Print the compact attributes of a capability.  */
+
+template<class Cap>
+static void
+riscv_cheri_print_compact_attributes (struct gdbarch *gdbarch, Cap *cap,
+				      struct ui_file *stream)
+{
+  std::string perms ("");
+  if (cap->permissions () & CC128_PERM_LOAD)
+    perms += "r";
+  if (cap->permissions () & CC128_PERM_STORE)
+    perms += "w";
+  if (cap->permissions () & CC128_PERM_EXECUTE)
+    perms += "x";
+  if (cap->permissions () & CC128_PERM_LOAD_CAP)
+    perms += "R";
+  if (cap->permissions () & CC128_PERM_STORE_CAP)
+    perms += "W";
+
+  std::string attr("");
+  if (cap->cr_tag == 0)
+    attr += "invalid";
+  if (cap->type () == CC128_OTYPE_SENTRY)
+    {
+      if (!attr.empty ())
+	attr += ",";
+      attr += "sentry";
+    }
+  else if (cap->is_sealed ())
+    {
+      if (!attr.empty ())
+	attr += ",";
+      attr += "sealed";
+    }
+
+  fprintf_filtered (stream, " [%s,%s-%s]", perms.c_str (),
+		    paddress (gdbarch, cap->base()),
+		    /*
+		     * Top is a 65-bit number for CHERI128 but we don't care
+		     * about the last byte of the address space so we report
+		     * 0xff... instead of 0x10.....
+		     */
+		    paddress (gdbarch, cap->top64()));
+  if (!attr.empty ())
+    fprintf_filtered (stream, " (%s)", attr.c_str ());
+}
+
+/* Verbose permission names.  */
+
+static const char *cap_perms_strings[] =
+{
+  "Global",
+  "Execute",
+  "Load",
+  "Store",
+  "LoadCap",
+  "StoreCap",
+  "StoreLocalCap",
+  "Seal",
+  "CInvoke",
+  "Unseal",
+  "AccessSystemRegisters",
+  "SetCID"
+};
+
+static const char *cap_uperms_strings[] =
+{
+  "User0",
+  "User1",
+  "User2",
+  "User3"
+};
+
+/* Print the verbose attributes of a capability.  */
+
+template<class Cap>
+static void
+riscv_cheri_print_verbose_attributes (struct gdbarch *gdbarch, Cap *cap,
+				      struct ui_file *stream)
+{
+  /* See gdbsupport/capability.h.  */
+  std::string perms ("");
+  for (int i = 0; i < ARRAY_SIZE (cap_perms_strings); i++)
+    if (cap->permissions () & (1 << i))
+      {
+	perms += " ";
+	perms += cap_perms_strings[i];
+      }
+  for (int i = 0; i < ARRAY_SIZE (cap_uperms_strings); i++)
+    if (cap->software_permissions () & (1 << i))
+      {
+	perms += " ";
+	perms += cap_uperms_strings[i];
+      }
+  perms += " ";
+
+  fprintf_filtered (stream, "{tag = %d, address = %s, permissions = {[%s], ",
+		    cap->cr_tag, paddress (gdbarch, cap->address ()),
+		    perms.c_str ());
+  fprintf_filtered (stream, "flags = %d, ", cap->flags ());
+  if (cap->is_sealed ())
+    fprintf_filtered (stream, "otype = %s, ",
+		      core_addr_to_string_nz (cap->type ()));
+  fprintf_filtered (stream, "range = [%s - %s)}}",
+		    paddress (gdbarch, cap->base ()),
+		    paddress (gdbarch, cap->top64 ()));
+}
+
+/* Print a capability.  */
+
+static void
+riscv_cheri_print_cap (struct gdbarch *gdbarch, const gdb_byte *contents,
+		       bool tag, bool compact, struct ui_file *stream)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int xlen = riscv_isa_xlen (gdbarch);
+
+  ULONGEST pesbt = extract_unsigned_integer (contents + xlen, xlen, byte_order);
+  ULONGEST address = extract_unsigned_integer (contents, xlen, byte_order);
+
+  if (pesbt == 0 && !tag)
+    {
+      fprintf_filtered (stream, "%s", paddress (gdbarch, address));
+      return;
+    }
+
+  if (xlen == 8)
+    {
+      cc128_cap_t cap;
+      cc128_decompress_mem(pesbt, address, tag, &cap);
+      if (compact)
+	{
+	  fprintf_filtered (stream, "%s", paddress (gdbarch, address));
+	  riscv_cheri_print_compact_attributes (gdbarch, &cap, stream);
+	}
+      else
+	riscv_cheri_print_verbose_attributes (gdbarch, &cap, stream);
+    }
+  else
+    {
+      cc64_cap_t cap;
+      cc64_decompress_mem(pesbt, address, tag, &cap);
+      if (compact)
+	{
+	  fprintf_filtered (stream, "%s", paddress (gdbarch, address));
+	  riscv_cheri_print_compact_attributes (gdbarch, &cap, stream);
+	}
+      else
+	riscv_cheri_print_verbose_attributes (gdbarch, &cap, stream);
+    }
+}
+
+/* Print attributes of a capability.  */
+
+static void
+riscv_cheri_print_cap_attributes (struct gdbarch *gdbarch,
+				  const gdb_byte *contents, bool tag,
+				  struct ui_file *stream)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int xlen = riscv_isa_xlen (gdbarch);
+
+  ULONGEST pesbt = extract_unsigned_integer (contents + xlen, xlen, byte_order);
+  if (pesbt == 0 && !tag)
+    return;
+
+  ULONGEST address = extract_unsigned_integer (contents, xlen, byte_order);
+  if (xlen == 8)
+    {
+      cc128_cap_t cap;
+      cc128_decompress_mem(pesbt, address, tag, &cap);
+      riscv_cheri_print_compact_attributes (gdbarch, &cap, stream);
+    }
+  else
+    {
+      cc64_cap_t cap;
+      cc64_decompress_mem(pesbt, address, tag, &cap);
+      riscv_cheri_print_compact_attributes (gdbarch, &cap, stream);
+    }
+}
+
 /* Implement the gcc_target_options method.  We have to select the arch and abi
    from the feature info.  We have enough feature info to select the abi, but
    not enough info for the arch given all of the possible architecture
@@ -4033,6 +4215,9 @@ riscv_gdbarch_init (struct gdbarch_info info,
       set_gdbarch_pointer_to_address (gdbarch, riscv_cheri_pointer_to_address);
       set_gdbarch_address_to_pointer (gdbarch, riscv_cheri_address_to_pointer);
       set_gdbarch_integer_to_address (gdbarch, riscv_cheri_integer_to_address);
+      set_gdbarch_print_cap (gdbarch, riscv_cheri_print_cap);
+      set_gdbarch_print_cap_attributes (gdbarch,
+					riscv_cheri_print_cap_attributes);
     }
 
   /* Internal <-> external register number maps.  */
