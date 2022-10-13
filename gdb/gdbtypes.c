@@ -2043,8 +2043,9 @@ is_dynamic_type_internal (struct type *type, int top_level)
 {
   type = check_typedef (type);
 
-  /* We only want to recognize references at the outermost level.  */
-  if (top_level && type->code () == TYPE_CODE_REF)
+  /* We only want to recognize references and pointers at the outermost
+     level.  */
+  if (top_level && type->is_pointer_or_reference ())
     type = check_typedef (type->target_type ());
 
   /* Types that have a dynamic TYPE_DATA_LOCATION are considered
@@ -2780,6 +2781,8 @@ resolve_dynamic_type_internal (struct type *type,
       switch (type->code ())
 	{
 	case TYPE_CODE_REF:
+	case TYPE_CODE_PTR:
+	case TYPE_CODE_RVALUE_REF:
 	  {
 	    struct property_addr_info pinfo;
 

@@ -41,7 +41,7 @@ gdb_test "print buffer" \
 gdb_test "ptype buffer" \
     [multi_line \
 	 "type = PTR TO -> \\( Type l_buffer" \
-	 "    $real4 :: alpha\\(:\\)" \
+	 "    $real4 :: alpha\\(5\\)" \
 	 "End Type l_buffer \\)" ]
 gdb_test "ptype buffer%alpha" "type = $real4 \\(5\\)"
 

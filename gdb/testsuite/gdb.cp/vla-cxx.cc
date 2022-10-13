@@ -40,6 +40,10 @@ int main(int argc, char **argv)
   typedef typeof (vla) &vlareftypedef;
   vlareftypedef vlaref2 (vla);
   container c;
+  typeof (vla) *ptr = nullptr;
+
+  // Before pointer assignment.
+  ptr = &vla;
 
   for (int i = 0; i < z; ++i)
     vla[i] = 5 + 2 * i;
