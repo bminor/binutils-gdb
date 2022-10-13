@@ -2224,11 +2224,8 @@ namespace eval Dwarf {
 	_op .byte $flags "flags"
 
 	if { ${debug-line-offset-label} != "" } {
-	    if { ${is-64} } {
-		_op .8byte ${debug-line-offset-label} "debug_line offset"
-	    } else {
-		_op .4byte ${debug-line-offset-label} "debug_line offset"
-	    }
+	    _op_offset [expr ${is-64} ? 8 : 4] ${debug-line-offset-label} \
+		"debug_line offset"
 	}
 
 	with_override Dwarf::define Dwarf::_macro_unit_define {
