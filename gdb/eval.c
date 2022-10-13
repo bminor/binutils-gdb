@@ -2708,6 +2708,13 @@ evaluate_subexp_for_sizeof_base (struct expression *exp, struct type *type)
   if (exp->language_defn->la_language == language_cplus
       && (TYPE_IS_REFERENCE (type)))
     type = check_typedef (type->target_type ());
+  else if (exp->language_defn->la_language == language_fortran
+	   && type->code () == TYPE_CODE_PTR)
+    {
+      /* Dereference Fortran pointer types to allow them for the Fortran
+	 sizeof intrinsic.  */
+      type = check_typedef (type->target_type ());
+    }
   return value_from_longest (size_type, (LONGEST) type->length ());
 }
 
