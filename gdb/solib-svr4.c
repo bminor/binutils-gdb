@@ -568,9 +568,11 @@ find_program_interpreter (void)
 	int sect_size = bfd_section_size (interp_sect);
 
 	gdb::byte_vector buf (sect_size);
-	bfd_get_section_contents (current_program_space->exec_bfd (),
-				  interp_sect, buf.data (), 0, sect_size);
-	return buf;
+	bool res
+	  = bfd_get_section_contents (current_program_space->exec_bfd (),
+				      interp_sect, buf.data (), 0, sect_size);
+	if (res)
+	  return buf;
       }
    }
 
