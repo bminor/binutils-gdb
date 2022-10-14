@@ -28,6 +28,7 @@ standard_testfile .c
 set opts {}
 lappend opts debug
 lappend opts "ldflags=-nostdlib -emain -Wl,-Ttext=0x00 -Wl,-N"
+lappend opts additional_flags=-static
 
 set ld_flags ldflags=-Wl,--no-warn-rwx-segments
 if { [gdb_can_simple_compile ld-flags {int main () { return 0; }} executable \
