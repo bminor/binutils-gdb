@@ -41,7 +41,7 @@ set binfile_lib [standard_output_file ${libname}.so]
 #
 
 if {[gdb_compile_shlib ${srcdir}/${subdir}/${srcfile_lib} ${binfile_lib} \
-	 [list debug -Wl,-soname,${libname}.so]] != ""} {
+	 [list debug]] != ""} {
     return -1
 }
 
