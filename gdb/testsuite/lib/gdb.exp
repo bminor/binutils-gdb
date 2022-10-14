@@ -25,6 +25,26 @@ if {$tool == ""} {
     exit 2
 }
 
+# Execute BODY, if COND wrapped in proc WRAP.
+# Instead of writing the verbose and repetitive:
+#   if { $cond } {
+#     wrap $body
+#   } else {
+#     $body
+#   }
+# we can use instead:
+#   cond_wrap $cond wrap $body
+
+proc cond_wrap { cond wrap body } {
+    if { $cond } {
+	$wrap {
+	    uplevel 1 $body
+	}
+    } else {
+	uplevel 1 $body
+    }
+}
+
 # Add VAR_ID=VAL to ENV_VAR, unless ENV_VAR already contains a VAR_ID setting.
 
 proc set_sanitizer_default { env_var var_id val } {
