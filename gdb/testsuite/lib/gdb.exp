@@ -4783,7 +4783,10 @@ proc gdb_compile {source dest type options} {
 	}
     }
 
-    set result [target_compile $source $dest $type $options]
+    cond_wrap [expr $pie != -1 || $nopie != -1] \
+	with_PIE_multilib_flags_filtered {
+	set result [target_compile $source $dest $type $options]
+    }
 
     # Prune uninteresting compiler (and linker) output.
     regsub "Creating library file: \[^\r\n\]*\[\r\n\]+" $result "" result
