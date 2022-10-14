@@ -3356,7 +3356,6 @@ arm_m_exception_cache (frame_info_ptr this_frame)
      to the exception and if FPU is used (causing extended stack frame).  */
 
   CORE_ADDR lr = get_frame_register_unsigned (this_frame, ARM_LR_REGNUM);
-  CORE_ADDR sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
 
   /* ARMv7-M Architecture Reference "A2.3.1 Arm core registers"
      states that LR is set to 0xffffffff on reset.  ARMv8-M Architecture
@@ -3364,8 +3363,8 @@ arm_m_exception_cache (frame_info_ptr this_frame)
      reset if Main Extension is implemented, otherwise the value is unknown.  */
   if (lr == 0xffffffff)
     {
-      /* Terminate any further stack unwinding by referring to self.  */
-      arm_cache_set_active_sp_value (cache, tdep, sp);
+      /* Terminate any further stack unwinding.  */
+      arm_cache_set_active_sp_value (cache, tdep, 0);
       return cache;
     }
 
@@ -3387,8 +3386,8 @@ arm_m_exception_cache (frame_info_ptr this_frame)
 	{
 	  warning (_("Non-secure to secure stack unwinding disabled."));
 
-	  /* Terminate any further stack unwinding by referring to self.  */
-	  arm_cache_set_active_sp_value (cache, tdep, sp);
+	  /* Terminate any further stack unwinding.  */
+	  arm_cache_set_active_sp_value (cache, tdep, 0);
 	  return cache;
 	}
 
@@ -3452,8 +3451,8 @@ arm_m_exception_cache (frame_info_ptr this_frame)
 	    {
 	      warning (_("Non-secure to secure stack unwinding disabled."));
 
-	      /* Terminate any further stack unwinding by referring to self.  */
-	      arm_cache_set_active_sp_value (cache, tdep, sp);
+	      /* Terminate any further stack unwinding.  */
+	      arm_cache_set_active_sp_value (cache, tdep, 0);
 	      return cache;
 	    }
 
