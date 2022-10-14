@@ -3623,6 +3623,31 @@ riscv_features_from_bfd (const bfd *abfd)
   return features;
 }
 
+/* Returns true if a bfd contains any references to CHERI via the
+   attributes section.  This is true both for hybrid and purecap ELF
+   objects.  */
+
+static bool
+riscv_bfd_has_cheri (bfd *abfd)
+{
+  if (abfd != nullptr && bfd_get_flavour (abfd) == bfd_target_elf_flavour)
+    {
+      const struct elf_backend_data *ebd = get_elf_backend_data (abfd);
+      if (ebd != nullptr)
+	{
+	  const char *sec_name = ebd->obj_attrs_section;
+	  if (bfd_get_section_by_name (abfd, sec_name) != nullptr)
+	    {
+	      obj_attribute *attr = elf_known_obj_attributes_proc (abfd);
+
+	      if (strstr(attr[Tag_RISCV_arch].s, "xcheri") != nullptr)
+		return true;
+	    }
+	}
+    }
+  return false;
+}
+
 /* Find a suitable default target description.  Use the contents of INFO,
    specifically the bfd object being executed, to guide the selection of a
    suitable default target description.  */
@@ -3640,6 +3665,10 @@ riscv_find_default_target_description (const struct gdbarch_info info)
      based on the architecture from INFO.  */
   if (features.xlen == 0)
     features.xlen = info.bfd_arch_info->bits_per_word == 32 ? 4 : 8;
+
+  /* Check for a CHERI hybrid binary.  */
+  if (features.clen == 0 && riscv_bfd_has_cheri (info.abfd))
+    features.clen = features.xlen * 2;
 
   /* Now build a target description based on the feature set.  */
   return riscv_lookup_target_description (features);
@@ -3686,6 +3715,46 @@ riscv_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
     return RISCV_V0_REGNUM + (reg - RISCV_DWARF_REGNUM_V0);
 
   return -1;
+}
+
+/* Implementation of `address_class_type_flags' gdbarch method.  */
+
+static type_instance_flags
+riscv_address_class_type_flags (int byte_size, int dwarf2_addr_class)
+{
+  /* XXX: This should be conditional on byte_size == riscv_isa_clen ().  */
+  return TYPE_INSTANCE_FLAG_CAPABILITY;
+}
+
+/* Implementation of `address_class_type_flags_to_name' gdbarch method.
+
+   Convert a type_instance_flag_value to an address space qualifier.  */
+
+static const char*
+riscv_address_class_type_flags_to_name (struct gdbarch *gdbarch,
+					type_instance_flags type_flags)
+{
+    /* No need to display the extra __capability modifier.  GDB already takes
+       cares of this.  */
+    return NULL;
+}
+
+/* Implementation of `address_class_name_to_type_flags' gdbarch method.
+
+   Convert an address space qualifier to a type_instance_flag_value.  */
+
+static bool
+riscv_address_class_name_to_type_flags (struct gdbarch *gdbarch,
+					const char* name,
+					type_instance_flags *type_flags_ptr)
+{
+  if (strcmp (name, "__capability") == 0)
+    {
+      *type_flags_ptr = TYPE_INSTANCE_FLAG_CAPABILITY;
+      return true;
+    }
+  else
+    return false;
 }
 
 static CORE_ADDR
@@ -4212,6 +4281,12 @@ riscv_gdbarch_init (struct gdbarch_info info,
   /* Settings for CHERI processors.  */
   if (riscv_has_cheri (gdbarch))
     {
+      set_gdbarch_address_class_type_flags (gdbarch,
+					    riscv_address_class_type_flags);
+      set_gdbarch_address_class_name_to_type_flags
+	(gdbarch, riscv_address_class_name_to_type_flags);
+      set_gdbarch_address_class_type_flags_to_name
+	(gdbarch, riscv_address_class_type_flags_to_name);
       set_gdbarch_pointer_to_address (gdbarch, riscv_cheri_pointer_to_address);
       set_gdbarch_address_to_pointer (gdbarch, riscv_cheri_address_to_pointer);
       set_gdbarch_integer_to_address (gdbarch, riscv_cheri_integer_to_address);
