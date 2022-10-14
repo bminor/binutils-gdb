@@ -938,11 +938,9 @@ bfd_mach_o_get_synthetic_symtab (bfd *abfd,
   bfd_mach_o_symtab_command *symtab = mdata->symtab;
   asymbol *s;
   char * s_start;
-  char * s_end;
   unsigned long count, i, j, n;
   size_t size;
   char *names;
-  char *nul_name;
   const char stub [] = "$stub";
 
   *ret = NULL;
@@ -955,27 +953,27 @@ bfd_mach_o_get_synthetic_symtab (bfd *abfd,
   /* We need to allocate a bfd symbol for every indirect symbol and to
      allocate the memory for its name.  */
   count = dysymtab->nindirectsyms;
-  size = count * sizeof (asymbol) + 1;
-
+  size = 0;
   for (j = 0; j < count; j++)
     {
-      const char * strng;
       unsigned int isym = dysymtab->indirect_syms[j];
+      const char *str;
 
       /* Some indirect symbols are anonymous.  */
-      if (isym < symtab->nsyms && (strng = symtab->symbols[isym].symbol.name))
-	/* PR 17512: file: f5b8eeba.  */
-	size += strnlen (strng, symtab->strsize - (strng - symtab->strtab)) + sizeof (stub);
+      if (isym < symtab->nsyms
+	  && (str = symtab->symbols[isym].symbol.name) != NULL)
+	{
+	  /* PR 17512: file: f5b8eeba.  */
+	  size += strnlen (str, symtab->strsize - (str - symtab->strtab));
+	  size += sizeof (stub);
+	}
     }
 
-  s_start = bfd_malloc (size);
+  s_start = bfd_malloc (size + count * sizeof (asymbol));
   s = *ret = (asymbol *) s_start;
   if (s == NULL)
     return -1;
   names = (char *) (s + count);
-  nul_name = names;
-  *names++ = 0;
-  s_end = s_start + size;
 
   n = 0;
   for (i = 0; i < mdata->nsects; i++)
@@ -997,47 +995,39 @@ bfd_mach_o_get_synthetic_symtab (bfd *abfd,
 	  entry_size = bfd_mach_o_section_get_entry_size (abfd, sec);
 
 	  /* PR 17512: file: 08e15eec.  */
-	  if (first >= count || last >= count || first > last)
+	  if (first >= count || last > count || first > last)
 	    goto fail;
 
 	  for (j = first; j < last; j++)
 	    {
 	      unsigned int isym = dysymtab->indirect_syms[j];
-
-	      /* PR 17512: file: 04d64d9b.  */
-	      if (((char *) s) + sizeof (* s) > s_end)
-		goto fail;
-
-	      s->flags = BSF_GLOBAL | BSF_SYNTHETIC;
-	      s->section = sec->bfdsection;
-	      s->value = addr - sec->addr;
-	      s->udata.p = NULL;
+	      const char *str;
+	      size_t len;
 
 	      if (isym < symtab->nsyms
-		  && symtab->symbols[isym].symbol.name)
+		  && (str = symtab->symbols[isym].symbol.name) != NULL)
 		{
-		  const char *sym = symtab->symbols[isym].symbol.name;
-		  size_t len;
-
+		  /* PR 17512: file: 04d64d9b.  */
+		  if (n >= count)
+		    goto fail;
+		  len = strnlen (str, symtab->strsize - (str - symtab->strtab));
+		  /* PR 17512: file: 47dfd4d2, 18f340a4.  */
+		  if (size < len + sizeof (stub))
+		    goto fail;
+		  memcpy (names, str, len);
+		  memcpy (names + len, stub, sizeof (stub));
 		  s->name = names;
-		  len = strlen (sym);
-		  /* PR 17512: file: 47dfd4d2.  */
-		  if (names + len >= s_end)
-		    goto fail;
-		  memcpy (names, sym, len);
-		  names += len;
-		  /* PR 17512: file: 18f340a4.  */
-		  if (names + sizeof (stub) >= s_end)
-		    goto fail;
-		  memcpy (names, stub, sizeof (stub));
-		  names += sizeof (stub);
+		  names += len + sizeof (stub);
+		  size -= len + sizeof (stub);
+		  s->the_bfd = symtab->symbols[isym].symbol.the_bfd;
+		  s->flags = BSF_GLOBAL | BSF_SYNTHETIC;
+		  s->section = sec->bfdsection;
+		  s->value = addr - sec->addr;
+		  s->udata.p = NULL;
+		  s++;
+		  n++;
 		}
-	      else
-		s->name = nul_name;
-
 	      addr += entry_size;
-	      s++;
-	      n++;
 	    }
 	  break;
 	default:
