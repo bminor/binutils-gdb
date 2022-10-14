@@ -18,7 +18,7 @@
 #
 # (gdb) continue
 # Continuing.
-# Error in testing breakpoint condition:
+# Error in testing condition for breakpoint NUM:
 # Selected thread is running.
 #
 # Catchpoint 3 (signal SIGUSR1), 0x0000003615e35877 in __GI_raise (sig=10) at raise.c:56

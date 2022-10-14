@@ -5543,7 +5543,8 @@ bpstat_check_breakpoint_conditions (bpstat *bs, thread_info *thread)
 	  catch (const gdb_exception_error &ex)
 	    {
 	      exception_fprintf (gdb_stderr, ex,
-				 "Error in testing breakpoint condition:\n");
+				 "Error in testing condition for breakpoint %d:\n",
+				 b->number);
 	    }
 	}
       else

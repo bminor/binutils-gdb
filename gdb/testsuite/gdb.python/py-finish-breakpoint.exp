@@ -188,7 +188,7 @@ with_test_prefix "finish in normal frame" {
     gdb_test "python TestBreakpoint()" "TestBreakpoint init" "set BP in condition"
 
     gdb_test "continue" \
-	"test don't stop: 1.*test don't stop: 2.*test stop.*Error in testing breakpoint condition.*The program being debugged stopped while in a function called from GDB.*" \
+	"test don't stop: 1.*test don't stop: 2.*test stop.*Error in testing condition for breakpoint ${::decimal}.*The program being debugged stopped while in a function called from GDB.*" \
 	"stop in condition function"
 
     gdb_test "continue" "Continuing.*" "finish condition evaluation"
