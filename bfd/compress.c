@@ -151,7 +151,8 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec)
 	  free (input_buffer);
 	  bfd_set_section_alignment (sec, uncompressed_alignment_pow);
 	  sec->contents = buffer;
-	  sec->compress_status = COMPRESS_SECTION_DONE;
+	  sec->flags |= SEC_IN_MEMORY;
+	  sec->compress_status = COMPRESS_SECTION_NONE;
 	  sec->size = uncompressed_size;
 	  input_buffer = buffer;
 	}
@@ -206,6 +207,7 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec)
   if (compressed_size >= uncompressed_size)
     {
       memcpy (buffer, input_buffer, uncompressed_size);
+      elf_section_flags (sec) &= ~SHF_COMPRESSED;
       sec->compress_status = COMPRESS_SECTION_NONE;
     }
   else
@@ -216,6 +218,7 @@ bfd_compress_section_contents (bfd *abfd, sec_ptr sec)
       sec->compress_status = COMPRESS_SECTION_DONE;
     }
   sec->contents = buffer;
+  sec->flags |= SEC_IN_MEMORY;
   free (input_buffer);
   return uncompressed_size;
 }
@@ -268,6 +271,7 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 	  ufile_ptr filesize = bfd_get_file_size (abfd);
 	  if (filesize > 0
 	      && filesize < sz
+	      && (bfd_section_flags (sec) & SEC_IN_MEMORY) == 0
 	      /* PR 24753: Linker created sections can be larger than
 		 the file size, eg if they are being used to hold stubs.  */
 	      && (bfd_section_flags (sec) & SEC_LINKER_CREATED) == 0
@@ -378,29 +382,6 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
     default:
       abort ();
     }
-}
-
-/*
-FUNCTION
-	bfd_cache_section_contents
-
-SYNOPSIS
-	void bfd_cache_section_contents
-	  (asection *sec, void *contents);
-
-DESCRIPTION
-	Stash @var(contents) so any following reads of @var(sec) do
-	not need to decompress again.
-*/
-
-void
-bfd_cache_section_contents (asection *sec, void *contents)
-{
-  if (sec->compress_status == DECOMPRESS_SECTION_ZLIB
-      || sec->compress_status == DECOMPRESS_SECTION_ZSTD)
-    sec->compress_status = COMPRESS_SECTION_DONE;
-  sec->contents = contents;
-  sec->flags |= SEC_IN_MEMORY;
 }
 
 /*

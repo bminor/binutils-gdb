@@ -2801,14 +2801,14 @@ bfd_convert_section_contents (bfd *ibfd, sec_ptr isec, bfd *obfd,
   if (ohdr_size == sizeof (Elf32_External_Chdr))
     {
       Elf32_External_Chdr *echdr = (Elf32_External_Chdr *) contents;
-      bfd_put_32 (obfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+      bfd_put_32 (obfd, chdr.ch_type, &echdr->ch_type);
       bfd_put_32 (obfd, chdr.ch_size, &echdr->ch_size);
       bfd_put_32 (obfd, chdr.ch_addralign, &echdr->ch_addralign);
     }
   else
     {
       Elf64_External_Chdr *echdr = (Elf64_External_Chdr *) contents;
-      bfd_put_32 (obfd, ELFCOMPRESS_ZLIB, &echdr->ch_type);
+      bfd_put_32 (obfd, chdr.ch_type, &echdr->ch_type);
       bfd_put_32 (obfd, 0, &echdr->ch_reserved);
       bfd_put_64 (obfd, chdr.ch_size, &echdr->ch_size);
       bfd_put_64 (obfd, chdr.ch_addralign, &echdr->ch_addralign);

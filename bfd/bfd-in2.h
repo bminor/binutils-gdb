@@ -7964,9 +7964,6 @@ bfd_byte *bfd_simple_get_relocated_section_contents
 bool bfd_get_full_section_contents
    (bfd *abfd, asection *section, bfd_byte **ptr);
 
-void bfd_cache_section_contents
-   (asection *sec, void *contents);
-
 bool bfd_is_section_compressed_info
    (bfd *abfd, asection *section,
     int *compression_header_size_p,
