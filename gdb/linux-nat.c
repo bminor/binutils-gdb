@@ -1912,7 +1912,6 @@ linux_handle_extended_wait (struct lwp_info *lp, int status)
 	    {
 	      /* The process is not using thread_db.  Add the LWP to
 		 GDB's list.  */
-	      target_post_attach (new_lp->ptid.lwp ());
 	      add_thread (linux_target, new_lp->ptid);
 	    }
 
