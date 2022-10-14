@@ -9675,6 +9675,10 @@ const struct powerpc_opcode vle_opcodes[] = {
 {"se_rfi",	C(8),		C_MASK,		PPCVLE,	0,		{}},
 {"se_rfci",	C(9),		C_MASK,		PPCVLE,	0,		{}},
 {"se_rfdi",	C(10),		C_MASK,		PPCVLE,	0,		{}},
+/* PPCRFMCI in the following does not enable the instruction for any
+   PPC_OPCODE_RFMCI supporting cpu as vle_opcodes are all added to the
+   assembler hash table or searched by the disassembler under control
+   of PPC_OPCODE_VLE.  It's there to set apuinfo.  */
 {"se_rfmci",	C(11),		C_MASK, PPCRFMCI|PPCVLE, 0,		{}},
 {"se_rfgi",	C(12),		C_MASK,		PPCVLE,	0,		{}},
 {"se_not",	SE_R(0,2),	SE_R_MASK,	PPCVLE,	0,		{RX}},
@@ -9746,7 +9750,7 @@ const struct powerpc_opcode vle_opcodes[] = {
 {"e_ldmvdsrrw",	OPVUPRT(6,16,6),OPVUPRT_MASK,	PPCVLE,	0,		{D8, RA0}},
 {"e_stmvdsrrw",	OPVUPRT(6,17,6),OPVUPRT_MASK,	PPCVLE,	0,		{D8, RA0}},
 {"e_lmvmcsrrw",	OPVUPRT(6,16,7),OPVUPRT_MASK,	PPCVLE,	0,		{D8, RA0}},
-{"e_stmvmcsrrw",	OPVUPRT(6,17,7),OPVUPRT_MASK,	PPCVLE,	0,		{D8, RA0}},
+{"e_stmvmcsrrw",OPVUPRT(6,17,7),OPVUPRT_MASK,	PPCVLE,	0,		{D8, RA0}},
 {"e_add16i",	OP(7),		OP_MASK,	PPCVLE,	0,		{RT, RA, SI}},
 {"e_la",	OP(7),		OP_MASK,	PPCVLE,	EXT,		{RT, D, RA0}},
 {"e_sub16i",	OP(7),		OP_MASK,	PPCVLE,	EXT,		{RT, RA, NSI}},

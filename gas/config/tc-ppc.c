@@ -1694,10 +1694,12 @@ ppc_setup_opcodes (void)
 	  unsigned int new_opcode = PPC_OP (op[0].opcode);
 
 #ifdef PRINT_OPCODE_TABLE
-	  printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%llx\tmask: 0x%llx\tflags: 0x%llx\n",
+	  printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%llx"
+		  "\tmask: 0x%llx\tflags: 0x%llx\n",
 		  op->name, (unsigned int) (op - powerpc_opcodes),
 		  new_opcode, (unsigned long long) op->opcode,
-		  (unsigned long long) op->mask, (unsigned long long) op->flags);
+		  (unsigned long long) op->mask,
+		  (unsigned long long) op->flags);
 #endif
 
 	  /* The major opcodes had better be sorted.  Code in the disassembler
@@ -1745,10 +1747,12 @@ ppc_setup_opcodes (void)
 	  unsigned int new_opcode = PPC_PREFIX_SEG (op[0].opcode);
 
 #ifdef PRINT_OPCODE_TABLE
-	  printf ("%-14s\t#%04u\tmajor op/2: 0x%x\top: 0x%llx\tmask: 0x%llx\tflags: 0x%llx\n",
+	  printf ("%-14s\t#%04u\tmajor op/2: 0x%x\top: 0x%llx"
+		  "\tmask: 0x%llx\tflags: 0x%llx\n",
 		  op->name, (unsigned int) (op - prefix_opcodes),
 		  new_opcode, (unsigned long long) op->opcode,
-		  (unsigned long long) op->mask, (unsigned long long) op->flags);
+		  (unsigned long long) op->mask,
+		  (unsigned long long) op->flags);
 #endif
 
 	  /* The major opcodes had better be sorted.  Code in the disassembler
@@ -1775,43 +1779,42 @@ ppc_setup_opcodes (void)
     for (op = prefix_opcodes; op < op_end; op++)
       str_hash_insert (ppc_hash, op->name, op, 0);
 
-  op_end = vle_opcodes + vle_num_opcodes;
-  for (op = vle_opcodes; op < op_end; op++)
+  if ((ppc_cpu & (PPC_OPCODE_VLE | PPC_OPCODE_ANY)) != 0)
     {
-      if (ENABLE_CHECKING)
+      unsigned int prev_seg = 0;
+      unsigned int seg;
+
+      op_end = vle_opcodes + vle_num_opcodes;
+      for (op = vle_opcodes; op < op_end; op++)
 	{
-	  unsigned new_seg = VLE_OP_TO_SEG (VLE_OP (op[0].opcode, op[0].mask));
+	  if (ENABLE_CHECKING)
+	    {
+	      seg = VLE_OP_TO_SEG (VLE_OP (op[0].opcode, op[0].mask));
 
 #ifdef PRINT_OPCODE_TABLE
-	  printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%llx\tmask: 0x%llx\tflags: 0x%llx\n",
-		  op->name, (unsigned int) (op - vle_opcodes),
-		  (unsigned int) new_seg, (unsigned long long) op->opcode,
-		  (unsigned long long) op->mask, (unsigned long long) op->flags);
+	      printf ("%-14s\t#%04u\tmajor op: 0x%x\top: 0x%llx"
+		      "\tmask: 0x%llx\tflags: 0x%llx\n",
+		      op->name, (unsigned int) (op - vle_opcodes),
+		      (unsigned int) seg, (unsigned long long) op->opcode,
+		      (unsigned long long) op->mask,
+		      (unsigned long long) op->flags);
 #endif
 
-	  /* The major opcodes had better be sorted.  Code in the disassembler
-	     assumes the insns are sorted according to major opcode.  */
-	  if (op != vle_opcodes
-	      && new_seg < VLE_OP_TO_SEG (VLE_OP (op[-1].opcode, op[-1].mask)))
-	    {
-	      as_bad (_("major opcode is not sorted for %s"), op->name);
-	      bad_insn = true;
+	      if (seg < prev_seg)
+		{
+		  as_bad (_("major opcode is not sorted for %s"), op->name);
+		  bad_insn = true;
+		}
+	      prev_seg = seg;
+	      bad_insn |= insn_validate (op);
 	    }
 
-	  bad_insn |= insn_validate (op);
-	}
-
-      if ((ppc_cpu & op->flags) != 0
-	  && !(ppc_cpu & op->deprecated)
-	  && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
-	{
-	  as_bad (_("duplicate %s"), op->name);
-	  bad_insn = true;
+	  str_hash_insert (ppc_hash, op->name, op, 0);
 	}
     }
 
   /* LSP instructions */
-  if ((ppc_cpu & PPC_OPCODE_LSP) != 0)
+  if ((ppc_cpu & (PPC_OPCODE_LSP | PPC_OPCODE_ANY)) != 0)
     {
       unsigned int prev_seg = 0;
       unsigned int seg;
@@ -1835,46 +1838,27 @@ ppc_setup_opcodes (void)
     }
 
   /* SPE2 instructions */
-  if ((ppc_cpu & PPC_OPCODE_SPE2) == PPC_OPCODE_SPE2)
+  if ((ppc_cpu & (PPC_OPCODE_SPE2 | PPC_OPCODE_ANY)) != 0)
     {
+      unsigned int prev_seg = 0;
+      unsigned int seg;
       op_end = spe2_opcodes + spe2_num_opcodes;
       for (op = spe2_opcodes; op < op_end; op++)
 	{
 	  if (ENABLE_CHECKING)
 	    {
-	      if (op != spe2_opcodes)
+	      seg = VLE_OP_TO_SEG (VLE_OP (op[0].opcode, op[0].mask));
+	      if (seg < prev_seg)
 		{
-		unsigned old_seg, new_seg;
-
-		old_seg = VLE_OP (op[-1].opcode, op[-1].mask);
-		old_seg = VLE_OP_TO_SEG (old_seg);
-		new_seg = VLE_OP (op[0].opcode, op[0].mask);
-		new_seg = VLE_OP_TO_SEG (new_seg);
-
-		/* The major opcodes had better be sorted.  Code in the
-		    disassembler assumes the insns are sorted according to
-		    major opcode.  */
-		if (new_seg < old_seg)
-		  {
 		  as_bad (_("major opcode is not sorted for %s"), op->name);
 		  bad_insn = true;
-		  }
 		}
-
+	      prev_seg = seg;
 	      bad_insn |= insn_validate (op);
 	    }
 
-	  if ((ppc_cpu & op->flags) != 0
-	      && !(ppc_cpu & op->deprecated)
-	      && str_hash_insert (ppc_hash, op->name, op, 0) != NULL)
-	    {
-	      as_bad (_("duplicate %s"), op->name);
-	      bad_insn = true;
-	    }
+	  str_hash_insert (ppc_hash, op->name, op, 0);
 	}
-
-      for (op = spe2_opcodes; op < op_end; op++)
-	str_hash_insert (ppc_hash, op->name, op, 0);
     }
 
   if (bad_insn)
@@ -4035,7 +4019,7 @@ md_assemble (char *str)
          be set for VLE-only instructions or for VLE-only processors,
          however it'll remain clear for dual-mode instructions on
          dual-mode and, more importantly, standard-mode processors.  */
-      if ((ppc_cpu & opcode->flags) == PPC_OPCODE_VLE)
+      if (ppc_cpu & opcode->flags & PPC_OPCODE_VLE)
 	{
 	  ppc_apuinfo_section_add (PPC_APUINFO_VLE, 1);
 	  if (elf_section_data (now_seg) != NULL)

@@ -1016,6 +1016,10 @@ print_insn_powerpc (bfd_vma memaddr,
 	opcode = lookup_powerpc (insn, dialect & ~PPC_OPCODE_ANY);
       if (opcode == NULL && (dialect & PPC_OPCODE_ANY) != 0)
 	opcode = lookup_powerpc (insn, dialect);
+      if (opcode == NULL && (dialect & PPC_OPCODE_ANY) != 0)
+	opcode = lookup_spe2 (insn, dialect);
+      if (opcode == NULL && (dialect & PPC_OPCODE_ANY) != 0)
+	opcode = lookup_lsp (insn, dialect);
     }
 
   if (opcode != NULL)
