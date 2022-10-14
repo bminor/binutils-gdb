@@ -30,3 +30,5 @@ proc ${board}_spawn { board cmd } {
     set board_info($board,fileid) $spawn_id
     return $spawn_id
 }
+
+set GDBFLAGS "${GDBFLAGS} -iex \"set style enabled off\""
