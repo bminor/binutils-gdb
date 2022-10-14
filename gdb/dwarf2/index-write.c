@@ -1111,12 +1111,13 @@ write_cooked_index (cooked_index_vector *table,
 
   for (const cooked_index_entry *entry : table->all_entries ())
     {
-      /* GDB never put linkage names into .gdb_index.  The theory here
-	 is that a linkage name will normally be in the minimal
+      /* GDB never put C++ linkage names into .gdb_index.  The theory
+	 here is that a linkage name will normally be in the minimal
 	 symbols anyway, so including it in the index is usually
 	 redundant -- and the cases where it would not be redundant
 	 are rare and not worth supporting.  */
-      if ((entry->flags & IS_LINKAGE) != 0)
+      if (entry->per_cu->lang () == language_cplus
+	  && (entry->flags & IS_LINKAGE) != 0)
 	continue;
 
       const auto it = cu_index_htab.find (entry->per_cu);
