@@ -4589,7 +4589,7 @@ proc gdb_compile {source dest type options} {
                 set shlib_found 1
 		if { ([istarget "*-*-mingw*"]
 		      || [istarget *-*-cygwin*]) } {
-		    lappend new_options "additional_flags=-Wl,--enable-auto-import"
+		    lappend new_options "ldflags=-Wl,--enable-auto-import"
 		}
 		if { [test_compiler_info "gcc-*"] || [test_compiler_info "clang-*"] } {
 		    # Undo debian's change in the default.
@@ -4956,7 +4956,7 @@ proc gdb_compile_shlib_1 {sources dest options} {
 	    } else {
 		set name ${dest}
 	    }
-	    lappend link_options "additional_flags=-Wl,--out-implib,${name}.a"
+	    lappend link_options "ldflags=-Wl,--out-implib,${name}.a"
 	} else {
 	    # Set the soname of the library.  This causes the linker on ELF
 	    # systems to create the DT_NEEDED entry in the executable referring
@@ -4968,7 +4968,7 @@ proc gdb_compile_shlib_1 {sources dest options} {
 	    # rpath=$ORIGIN value when building the executable, so that it's
 	    # able to find the library in its own directory.
 	    set destbase [file tail $dest]
-	    lappend link_options "additional_flags=-Wl,-soname,$destbase"
+	    lappend link_options "ldflags=-Wl,-soname,$destbase"
 	}
     }
     if {[gdb_compile "${objects}" "${dest}" executable $link_options] != ""} {
@@ -8585,7 +8585,7 @@ gdb_caching_proc have_fuse_ld_gold {
 # Return 1 if linker supports -Ttext-segment, otherwise return 0.
 gdb_caching_proc linker_supports_Ttext_segment_flag {
     set me "linker_supports_Ttext_segment_flag"
-    set flags additional_flags="-Wl,-Ttext-segment=0x7000000"
+    set flags ldflags="-Wl,-Ttext-segment=0x7000000"
     set src { int main() { return 0; } }
     return [gdb_simple_compile $me $src executable $flags]
 }
@@ -8593,7 +8593,7 @@ gdb_caching_proc linker_supports_Ttext_segment_flag {
 # Return 1 if linker supports -Ttext, otherwise return 0.
 gdb_caching_proc linker_supports_Ttext_flag {
     set me "linker_supports_Ttext_flag"
-    set flags additional_flags="-Wl,-Ttext=0x7000000"
+    set flags ldflags="-Wl,-Ttext=0x7000000"
     set src { int main() { return 0; } }
     return [gdb_simple_compile $me $src executable $flags]
 }
@@ -8601,7 +8601,7 @@ gdb_caching_proc linker_supports_Ttext_flag {
 # Return 1 if linker supports --image-base, otherwise 0.
 gdb_caching_proc linker_supports_image_base_flag {
     set me "linker_supports_image_base_flag"
-    set flags additional_flags="-Wl,--image-base=0x7000000"
+    set flags ldflags="-Wl,--image-base=0x7000000"
     set src { int main() { return 0; } }
     return [gdb_simple_compile $me $src executable $flags]
 }

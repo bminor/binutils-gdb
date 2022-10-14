@@ -29,7 +29,7 @@ set objfile [standard_output_file ${testfile}.o]
       untested "failed to compile"
       return -1
  }
- set opts [list debug shlib=${binfile_lib} additional_flags=-Wl,-z,relro]
+ set opts [list debug shlib=${binfile_lib} ldflags=-Wl,-z,relro]
  if { [gdb_compile ${objfile} ${binfile} executable $opts] != "" } {
       unsupported "-Wl,-z,relro compilation failed"
       return -1

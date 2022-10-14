@@ -25,8 +25,8 @@ set binfile2 [standard_output_file ${testfile2}]
 set opts [list debug]
 lappend opts "additional_flags=-ffunction-sections"
 lappend opts "additional_flags=-fdata-sections"
-lappend opts "additional_flags=-Wl,-gc-sections"
-lappend opts "additional_flags=-Wl,-e,main"
+lappend opts "ldflags=-Wl,-gc-sections"
+lappend opts "ldflags=-Wl,-e,main"
 
 # Place variables in .data instead of .sdata.
 if {[istarget "riscv*-*-*"]} {

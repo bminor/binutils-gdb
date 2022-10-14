@@ -27,9 +27,9 @@ standard_testfile .c
 
 set opts {}
 lappend opts debug
-lappend opts "additional_flags=-nostdlib -emain -Wl,-Ttext=0x00 -Wl,-N"
+lappend opts "ldflags=-nostdlib -emain -Wl,-Ttext=0x00 -Wl,-N"
 
-set ld_flags additional_flags=-Wl,--no-warn-rwx-segments
+set ld_flags ldflags=-Wl,--no-warn-rwx-segments
 if { [gdb_can_simple_compile ld-flags {int main () { return 0; }} executable \
 	  $ld_flags] } {
     lappend opts $ld_flags

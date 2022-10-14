@@ -54,7 +54,7 @@ set testobjdir [standard_output_file {}]
 if {[gdb_compile "${binfile_main}.o" "${binfile_main}" executable \
 	 [list debug "additional_flags=-L$testobjdir" \
 	      "additional_flags=-l${test}" \
-	      "additional_flags=-Wl,-rpath=$testobjdir"]] != ""} {
+	      "ldflags=-Wl,-rpath=$testobjdir"]] != ""} {
     return -1
 }
 
