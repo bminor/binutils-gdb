@@ -9332,5 +9332,13 @@ proc has_dependency { file dep } {
     return [regexp $dep $output]
 }
 
+# Return true if we are currently testing the 'remote' or
+# 'extended-remote' targets.
+proc gdb_is_remote_or_extended_remote_target {} {
+    return [target_info exists gdb_protocol]
+	   && ([target_info gdb_protocol] == "remote"
+	       || [target_info gdb_protocol] == "extended-remote")
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

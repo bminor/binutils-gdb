@@ -281,7 +281,7 @@ proc misc_tests {resolver_attr resolver_debug final_debug} {
 
     # Also test a former patch regression:
     # Continuing.
-    # Error in testing breakpoint condition:
+    # Error in testing condition for breakpoint NUM:
     # Attempt to take address of value not located in memory.
     #
     # Breakpoint 2, main () at ./gdb.base/gnu-ifunc.c:33
