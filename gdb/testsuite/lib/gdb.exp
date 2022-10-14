@@ -4983,20 +4983,17 @@ proc gdb_compile_shlib_1 {sources dest options} {
     return ""
 }
 
-# Build a shared library from SOURCES.  Ignore target boards PIE-related
-# multilib_flags.
+# Ignore FLAGS in target board multilib_flags while executing BODY.
 
-proc gdb_compile_shlib {sources dest options} {
+proc with_multilib_flags_filtered { flags body } {
     global board
 
-    # Ignore PIE-related setting in multilib_flags.
+    # Ignore flags in multilib_flags.
     set board [target_info name]
     set multilib_flags_orig [board_info $board multilib_flags]
     set multilib_flags ""
     foreach op $multilib_flags_orig {
-	if { $op == "-pie" || $op == "-no-pie" \
-		 || $op == "-fPIE" || $op == "-fno-PIE"} {
-	} else {
+	if { [lsearch -exact $flags $op] == -1 } {
 	    append multilib_flags " $op"
 	}
     }
@@ -5004,6 +5001,24 @@ proc gdb_compile_shlib {sources dest options} {
     save_target_board_info { multilib_flags } {
 	unset_board_info multilib_flags
 	set_board_info multilib_flags "$multilib_flags"
+	set result [uplevel 1 $body]
+    }
+
+    return $result
+}
+
+# Ignore PIE-related flags in target board multilib_flags while executing BODY.
+
+proc with_PIE_multilib_flags_filtered { body } {
+    set pie_flags [list "-pie" "-no-pie" "-fPIE" "-fno-PIE"]
+    return [uplevel 1 [list with_multilib_flags_filtered $pie_flags $body]]
+}
+
+# Build a shared library from SOURCES.  Ignore target boards PIE-related
+# multilib_flags.
+
+proc gdb_compile_shlib {sources dest options} {
+    with_PIE_multilib_flags_filtered {
 	set result [gdb_compile_shlib_1 $sources $dest $options]
     }
 
