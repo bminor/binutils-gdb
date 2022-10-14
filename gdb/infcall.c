@@ -1293,6 +1293,15 @@ call_function_by_hand_dummy (struct value *function,
   /* Register a clean-up for unwind_on_terminating_exception_breakpoint.  */
   SCOPE_EXIT { delete_std_terminate_breakpoint (); };
 
+  /* The stopped_by_random_signal variable is global.  If we are here
+     as part of a breakpoint condition check then the global will have
+     already been setup as part of the original breakpoint stop.  By
+     making the inferior call the global will be changed when GDB
+     handles the stop after the inferior call.  Avoid confusion by
+     restoring the current value after the inferior call.  */
+  scoped_restore restore_stopped_by_random_signal
+    = make_scoped_restore (&stopped_by_random_signal, 0);
+
   /* - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP -
      If you're looking to implement asynchronous dummy-frames, then
      just below is the place to chop this function in two..  */
