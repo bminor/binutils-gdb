@@ -31,7 +31,7 @@ set gdbserver_command "$gdbserver --selftest"
 set server_spawn_id [remote_spawn target $gdbserver_command]
 
 set test "unit tests"
-gdb_expect {
+expect {
     -i $server_spawn_id
     -re "Ran ($decimal) unit tests, 0 failed" {
 	set num_ran $expect_out(1,string)
