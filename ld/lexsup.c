@@ -396,6 +396,8 @@ static const struct ld_option ld_options[] =
      OPTION_ERROR_HANDLING_SCRIPT},
     '\0', N_("SCRIPT"), N_("Provide a script to help with undefined symbol errors"), TWO_DASHES},
 #endif
+  { {"undefined-version", no_argument, NULL, OPTION_UNDEFINED_VERSION},
+    '\0', NULL, N_("Allow undefined version"), EXACTLY_TWO_DASHES },
   { {"no-undefined-version", no_argument, NULL, OPTION_NO_UNDEFINED_VERSION},
     '\0', NULL, N_("Disallow undefined version"), TWO_DASHES },
   { {"default-symver", no_argument, NULL, OPTION_DEFAULT_SYMVER},
@@ -1088,6 +1090,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 #endif
 
+	case OPTION_UNDEFINED_VERSION:
+	  link_info.allow_undefined_version = true;
+	  break;
 	case OPTION_NO_UNDEFINED_VERSION:
 	  link_info.allow_undefined_version = false;
 	  break;
