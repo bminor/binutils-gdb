@@ -17991,11 +17991,6 @@ tag_can_have_linkage_name (enum dwarf_tag tag)
 {
   switch (tag)
     {
-      /* We include types here because an anonymous C++ type might
-	 have a name for linkage purposes.  */
-    case DW_TAG_class_type:
-    case DW_TAG_structure_type:
-    case DW_TAG_union_type:
     case DW_TAG_variable:
     case DW_TAG_subprogram:
       return true;
