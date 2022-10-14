@@ -40,6 +40,12 @@ if ![info exists NM] then {
 if ![info exists NMFLAGS] then {
     set NMFLAGS ""
 }
+if ![info exists ADDR2LINE] then {
+    set ADDR2LINE [findfile $base_dir/addr2line]
+}
+if ![info exists ADDR2LINEFLAGS] then {
+    set ADDR2LINEFLAGS ""
+}
 if ![info exists SIZE] then {
     set SIZE [findfile $base_dir/size]
 }
