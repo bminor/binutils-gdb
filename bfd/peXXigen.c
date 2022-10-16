@@ -1122,7 +1122,8 @@ _bfd_XXi_swap_debugdir_out (bfd * abfd, void * inp, void * extp)
 }
 
 CODEVIEW_INFO *
-_bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length, CODEVIEW_INFO *cvinfo)
+_bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length, CODEVIEW_INFO *cvinfo,
+				char **pdb)
 {
   char buffer[256+1];
   bfd_size_type nread;
@@ -1162,6 +1163,9 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
       cvinfo->SignatureLength = CV_INFO_SIGNATURE_LENGTH;
       /* cvinfo->PdbFileName = cvinfo70->PdbFileName;  */
 
+      if (pdb)
+	*pdb = xstrdup (cvinfo70->PdbFileName);
+
       return cvinfo;
     }
   else if ((cvinfo->CVSignature == CVINFO_PDB20_CVSIGNATURE)
@@ -1173,6 +1177,9 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
       cvinfo->SignatureLength = 4;
       /* cvinfo->PdbFileName = cvinfo20->PdbFileName;  */
 
+      if (pdb)
+	*pdb = xstrdup (cvinfo20->PdbFileName);
+
       return cvinfo;
     }
 
@@ -1180,9 +1187,11 @@ _bfd_XXi_slurp_codeview_record (bfd * abfd, file_ptr where, unsigned long length
 }
 
 unsigned int
-_bfd_XXi_write_codeview_record (bfd * abfd, file_ptr where, CODEVIEW_INFO *cvinfo)
+_bfd_XXi_write_codeview_record (bfd * abfd, file_ptr where, CODEVIEW_INFO *cvinfo,
+				const char *pdb)
 {
-  const bfd_size_type size = sizeof (CV_INFO_PDB70) + 1;
+  size_t pdb_len = pdb ? strlen (pdb) : 0;
+  const bfd_size_type size = sizeof (CV_INFO_PDB70) + pdb_len + 1;
   bfd_size_type written;
   CV_INFO_PDB70 *cvinfo70;
   char * buffer;
@@ -1205,7 +1214,11 @@ _bfd_XXi_write_codeview_record (bfd * abfd, file_ptr where, CODEVIEW_INFO *cvinf
   memcpy (&(cvinfo70->Signature[8]), &(cvinfo->Signature[8]), 8);
 
   H_PUT_32 (abfd, cvinfo->Age, cvinfo70->Age);
-  cvinfo70->PdbFileName[0] = '\0';
+
+  if (pdb == NULL)
+    cvinfo70->PdbFileName[0] = '\0';
+  else
+    memcpy (cvinfo70->PdbFileName, pdb, pdb_len + 1);
 
   written = bfd_bwrite (buffer, size, abfd);
 
@@ -2603,22 +2616,25 @@ pe_print_debugdata (bfd * abfd, void * vfile)
 	     We need to use a 32-bit aligned buffer
 	     to safely read in a codeview record.  */
 	  char buffer[256 + 1] ATTRIBUTE_ALIGNED_ALIGNOF (CODEVIEW_INFO);
+	  char *pdb;
 
 	  CODEVIEW_INFO *cvinfo = (CODEVIEW_INFO *) buffer;
 
 	  /* The debug entry doesn't have to have to be in a section,
 	     in which case AddressOfRawData is 0, so always use PointerToRawData.  */
 	  if (!_bfd_XXi_slurp_codeview_record (abfd, (file_ptr) idd.PointerToRawData,
-					       idd.SizeOfData, cvinfo))
+					       idd.SizeOfData, cvinfo, &pdb))
 	    continue;
 
 	  for (j = 0; j < cvinfo->SignatureLength; j++)
 	    sprintf (&signature[j*2], "%02x", cvinfo->Signature[j] & 0xff);
 
 	  /* xgettext:c-format */
-	  fprintf (file, _("(format %c%c%c%c signature %s age %ld)\n"),
+	  fprintf (file, _("(format %c%c%c%c signature %s age %ld pdb %s)\n"),
 		   buffer[0], buffer[1], buffer[2], buffer[3],
-		   signature, cvinfo->Age);
+		   signature, cvinfo->Age, pdb[0] ? pdb : "(none)");
+
+	  free (pdb);
 	}
     }
 

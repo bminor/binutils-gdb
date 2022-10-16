@@ -1402,7 +1402,7 @@ pe_bfd_read_buildid (bfd *abfd)
 	  */
 	  if (_bfd_XXi_slurp_codeview_record (abfd,
 					      (file_ptr) idd.PointerToRawData,
-					      idd.SizeOfData, cvinfo))
+					      idd.SizeOfData, cvinfo, NULL))
 	    {
 	      struct bfd_build_id* build_id = bfd_alloc (abfd,
 			 sizeof (struct bfd_build_id) + cvinfo->SignatureLength);

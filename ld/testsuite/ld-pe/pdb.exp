@@ -1,0 +1,53 @@
+# Expect script for creating PDB files when linking.
+#   Copyright (C) 2022 Free Software Foundation, Inc.
+#
+# This file is part of the GNU Binutils.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+# MA 02110-1301, USA.
+
+if {![istarget i*86-*-mingw*]
+  && ![istarget x86_64-*-mingw*]} {
+    return
+}
+
+proc get_pdb_name { pe } {
+    global OBJDUMP
+
+    set exec_output [run_host_cmd "$OBJDUMP" "-p $pe"]
+
+    if ![regexp -line "^\\(format RSDS signature (\[0-9a-fA-F\]{32}) age 1 pdb (.*)\\)$" $exec_output full sig pdb] {
+	return ""
+    }
+
+    return $pdb
+}
+
+if ![ld_assemble $as $srcdir/$subdir/pdb1.s tmpdir/pdb1.o] {
+    unsupported "Build pdb1.o"
+    return
+}
+
+if ![ld_link $ld "tmpdir/pdb1.exe" "--pdb=tmpdir/pdb1.pdb tmpdir/pdb1.o"] {
+    fail "Could not create a PE image with a PDB file"
+    return
+}
+
+if ![string equal [get_pdb_name "tmpdir/pdb1.exe"] "pdb1.pdb"] {
+    fail "PDB filename not found in CodeView debug info"
+    return
+}
+
+pass "PDB filename present in CodeView debug info"

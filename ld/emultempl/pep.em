@@ -165,6 +165,8 @@ static lang_assignment_statement_type *image_base_statement = 0;
 static unsigned short pe_dll_characteristics = DEFAULT_DLL_CHARACTERISTICS;
 static bool insert_timestamp = true;
 static const char *emit_build_id;
+static int pdb;
+static char *pdb_name;
 
 #ifdef DLL_SUPPORT
 static int    pep_enable_stdcall_fixup = 1; /* 0=disable 1=enable (default).  */
@@ -281,6 +283,7 @@ enum options
   OPTION_NO_INSERT_TIMESTAMP,
   OPTION_TERMINAL_SERVER_AWARE,
   OPTION_BUILD_ID,
+  OPTION_PDB,
   OPTION_ENABLE_RELOC_SECTION,
   OPTION_DISABLE_RELOC_SECTION,
   OPTION_DISABLE_HIGH_ENTROPY_VA,
@@ -369,6 +372,7 @@ gld${EMULATION_NAME}_add_options
     {"insert-timestamp", no_argument, NULL, OPTION_INSERT_TIMESTAMP},
     {"no-insert-timestamp", no_argument, NULL, OPTION_NO_INSERT_TIMESTAMP},
     {"build-id", optional_argument, NULL, OPTION_BUILD_ID},
+    {"pdb", required_argument, NULL, OPTION_PDB},
     {"enable-reloc-section", no_argument, NULL, OPTION_ENABLE_RELOC_SECTION},
     {"disable-reloc-section", no_argument, NULL, OPTION_DISABLE_RELOC_SECTION},
     {"disable-high-entropy-va", no_argument, NULL, OPTION_DISABLE_HIGH_ENTROPY_VA},
@@ -516,6 +520,7 @@ gld${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --[disable-]wdmdriver              Driver uses the WDM model\n"));
   fprintf (file, _("  --[disable-]tsaware                Image is Terminal Server aware\n"));
   fprintf (file, _("  --build-id[=STYLE]                 Generate build ID\n"));
+  fprintf (file, _("  --pdb=[FILENAME]                   Generate PDB file\n"));
 #endif
 }
 
@@ -924,6 +929,11 @@ gld${EMULATION_NAME}_handle_option (int optc)
       if (strcmp (optarg, "none"))
 	emit_build_id = xstrdup (optarg);
       break;
+    case OPTION_PDB:
+      pdb = 1;
+      if (optarg && optarg[0])
+	pdb_name = xstrdup (optarg);
+      break;
     }
 
   /*  Set DLLCharacteristics bits  */
@@ -1045,6 +1055,9 @@ gld${EMULATION_NAME}_after_parse (void)
   if (link_info.export_dynamic)
     einfo (_("%P: warning: --export-dynamic is not supported for PE+ "
       "targets, did you mean --export-all-symbols?\n"));
+
+  if (pdb && emit_build_id == NULL)
+    emit_build_id = xstrdup (DEFAULT_BUILD_ID_STYLE);
 
   set_entry_point ();
 
@@ -1266,6 +1279,7 @@ write_build_id (bfd *abfd)
   bfd_size_type size;
   bfd_size_type build_id_size;
   unsigned char *build_id;
+  const char *pdb_base_name = NULL;
 
   /* Find the section the .buildid output section has been merged info.  */
   for (asec = abfd->sections; asec != NULL; asec = asec->next)
@@ -1305,6 +1319,9 @@ write_build_id (bfd *abfd)
 
   bfd_vma ib = pe_data (link_info.output_bfd)->pe_opthdr.ImageBase;
 
+  if (pdb_name)
+    pdb_base_name = lbasename (pdb_name);
+
   /* Construct a debug directory entry which points to an immediately following CodeView record.  */
   struct internal_IMAGE_DEBUG_DIRECTORY idd;
   idd.Characteristics = 0;
@@ -1312,7 +1329,7 @@ write_build_id (bfd *abfd)
   idd.MajorVersion = 0;
   idd.MinorVersion = 0;
   idd.Type = PE_IMAGE_DEBUG_TYPE_CODEVIEW;
-  idd.SizeOfData = sizeof (CV_INFO_PDB70) + 1;
+  idd.SizeOfData = sizeof (CV_INFO_PDB70) + (pdb_base_name ? strlen (pdb_base_name) : 0) + 1;
   idd.AddressOfRawData = asec->vma - ib + link_order->offset
     + sizeof (struct external_IMAGE_DEBUG_DIRECTORY);
   idd.PointerToRawData = asec->filepos + link_order->offset
@@ -1341,7 +1358,8 @@ write_build_id (bfd *abfd)
   free (build_id);
 
   /* Write the codeview record.  */
-  if (_bfd_XXi_write_codeview_record (abfd, idd.PointerToRawData, &cvinfo) == 0)
+  if (_bfd_XXi_write_codeview_record (abfd, idd.PointerToRawData, &cvinfo,
+				      pdb_base_name) == 0)
     return 0;
 
   /* Record the location of the debug directory in the data directory.  */
@@ -1378,10 +1396,13 @@ setup_build_id (bfd *ibfd)
 
       /* Section is a fixed size:
 	 One IMAGE_DEBUG_DIRECTORY entry, of type IMAGE_DEBUG_TYPE_CODEVIEW,
-	 pointing at a CV_INFO_PDB70 record containing the build-id, with a
-	 null byte for PdbFileName.  */
+	 pointing at a CV_INFO_PDB70 record containing the build-id, followed by
+	 PdbFileName if relevant.  */
       s->size = sizeof (struct external_IMAGE_DEBUG_DIRECTORY)
 	+ sizeof (CV_INFO_PDB70) + 1;
+
+      if (pdb_name)
+	s->size += strlen (pdb_name);
 
       return true;
     }
@@ -1413,6 +1434,25 @@ gld${EMULATION_NAME}_after_open (void)
 	printf ("*%s\n", bfd_get_filename (a));
     }
 #endif
+
+  if (pdb && !pdb_name)
+    {
+      const char *base = lbasename (bfd_get_filename (link_info.output_bfd));
+      size_t len = strlen (base);
+      static const char suffix[] = ".pdb";
+
+      while (len > 0 && base[len] != '.')
+	{
+	  len--;
+	}
+
+      if (len == 0)
+	len = strlen (base);
+
+      pdb_name = xmalloc (len + sizeof (suffix));
+      memcpy (pdb_name, base, len);
+      memcpy (pdb_name + len, suffix, sizeof (suffix));
+    }
 
   if (emit_build_id != NULL)
     {

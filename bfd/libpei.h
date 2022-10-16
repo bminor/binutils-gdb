@@ -423,9 +423,11 @@ void _bfd_XX_get_symbol_info (bfd *, asymbol *, symbol_info *);
 bool _bfd_XXi_final_link_postscript (bfd *, struct coff_final_link_info *);
 void _bfd_XXi_swap_debugdir_in (bfd *, void *, void *);
 unsigned _bfd_XXi_swap_debugdir_out (bfd *, void *, void *);
-unsigned _bfd_XXi_write_codeview_record (bfd *, file_ptr, CODEVIEW_INFO *);
+unsigned _bfd_XXi_write_codeview_record
+  (bfd *, file_ptr, CODEVIEW_INFO *, const char *);
 CODEVIEW_INFO *_bfd_XXi_slurp_codeview_record
-  (bfd * abfd, file_ptr where, unsigned long length, CODEVIEW_INFO *cvinfo);
+  (bfd * abfd, file_ptr where, unsigned long length, CODEVIEW_INFO *cvinfo,
+   char **pdb);
 
 /* The following are needed only for ONE of pe or pei, but don't
    otherwise vary; peicode.h fixes up ifdefs but we provide the
