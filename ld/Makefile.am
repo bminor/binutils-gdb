@@ -476,12 +476,14 @@ ALL_64_EMUL_EXTRA_OFILES = \
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
 	mri.c ldcref.c pe-dll.c pep-dll.c ldlex-wrapper.c \
-	plugin.c ldbuildid.c ldelf.c ldelfgen.c
+	plugin.c ldbuildid.c ldelf.c ldelfgen.c \
+	pdb.c
 
 HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
 	ldwrite.h mri.h deffile.h pe-dll.h pep-dll.h \
-	elf-hints-local.h plugin.h ldbuildid.h ldelf.h ldelfgen.h
+	elf-hints-local.h plugin.h ldbuildid.h ldelf.h ldelfgen.h \
+	pdb.h
 
 GENERATED_CFILES = ldgram.c ldlex.c deffilep.c
 GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
@@ -494,7 +496,7 @@ OFILES = ldgram.@OBJEXT@ ldlex-wrapper.@OBJEXT@ lexsup.@OBJEXT@ ldlang.@OBJEXT@ 
 	mri.@OBJEXT@ ldctor.@OBJEXT@ ldmain.@OBJEXT@ plugin.@OBJEXT@ \
 	ldwrite.@OBJEXT@ ldexp.@OBJEXT@  ldemul.@OBJEXT@ ldver.@OBJEXT@ ldmisc.@OBJEXT@ \
 	ldfile.@OBJEXT@ ldcref.@OBJEXT@ ${EMULATION_OFILES} ${EMUL_EXTRA_OFILES} \
-	ldbuildid.@OBJEXT@
+	ldbuildid.@OBJEXT@ pdb.@OBJEXT@
 
 STAGESTUFF = *.@OBJEXT@ ldscripts/* e*.c
 
@@ -957,7 +959,7 @@ EXTRA_ld_new_SOURCES += pep-dll.c pe-dll.c ldelf.c ldelfgen.c
 
 ld_new_SOURCES = ldgram.y ldlex-wrapper.c lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
 	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c plugin.c \
-	ldbuildid.c
+	ldbuildid.c pdb.c
 ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) \
 		      $(BFDLIB) $(LIBCTF) $(LIBIBERTY) $(LIBINTL_DEP) $(JANSSON_LIBS)
 ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBCTF) \

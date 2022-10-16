@@ -73,6 +73,7 @@ fragment <<EOF
 #include "ldctor.h"
 #include "ldbuildid.h"
 #include "coff/internal.h"
+#include "pdb.h"
 
 /* FIXME: See bfd/peXXigen.c for why we include an architecture specific
    header in generic PE code.  */
@@ -1344,6 +1345,12 @@ write_build_id (bfd *abfd)
 
   if (bfd_bwrite (contents, size, abfd) != size)
     return 0;
+
+  if (pdb)
+    {
+      if (!create_pdb_file (abfd, pdb_name, build_id))
+	return 0;
+    }
 
   /* Construct the CodeView record.  */
   CODEVIEW_INFO cvinfo;

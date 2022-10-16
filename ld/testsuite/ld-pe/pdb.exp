@@ -35,6 +35,249 @@ proc get_pdb_name { pe } {
     return $pdb
 }
 
+proc get_pdb_guid { pe } {
+    global OBJDUMP
+
+    set exec_output [run_host_cmd "$OBJDUMP" "-p $pe"]
+
+    if ![regexp -line "^\\(format RSDS signature (\[0-9a-fA-F\]{32}) age 1 pdb (.*)\\)$" $exec_output full sig pdb] {
+	return ""
+    }
+
+    return $sig
+}
+
+proc check_pdb_info_stream { pdb guid } {
+    global ar
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir $pdb 0001"]
+
+    if ![string match "" $exec_output] {
+	return 0
+    }
+
+    set fi [open tmpdir/0001]
+    fconfigure $fi -translation binary
+
+    # check version
+
+    set data [read $fi 4]
+    binary scan $data i version
+
+    if { $version != 20000404 } {
+	close $fi
+	return 0
+    }
+
+    # skip signature (timestamp)
+    read $fi 4
+
+    # check age
+
+    set data [read $fi 4]
+    binary scan $data i age
+
+    if { $age != 1 } {
+	close $fi
+	return 0
+    }
+
+    # check GUID
+
+    set data [read $fi 16]
+    binary scan $data H2H2H2H2H2H2H2H2H* guid1 guid2 guid3 guid4 guid5 guid6 guid7 guid8 guid9
+
+    set data "$guid4$guid3$guid2$guid1$guid6$guid5$guid8$guid7$guid9"
+
+    if { $data ne $guid } {
+	close $fi
+	return 0
+    }
+
+    # skip names string
+
+    set data [read $fi 4]
+    binary scan $data i names_length
+    read $fi $names_length
+
+    # read number of names entries
+
+    set data [read $fi 4]
+    binary scan $data i num_entries
+
+    # skip number of buckets
+    read $fi 4
+
+    # skip present bitmap
+
+    set data [read $fi 4]
+    binary scan $data i bitmap_length
+    read $fi [expr $bitmap_length * 4]
+
+    # skip deleted bitmap
+
+    set data [read $fi 4]
+    binary scan $data i bitmap_length
+    read $fi [expr $bitmap_length * 4]
+
+    # skip names entries
+    read $fi [expr $num_entries * 8]
+
+    # skip uint32_t
+    read $fi 4
+
+    # read second version
+
+    set data [read $fi 4]
+    binary scan $data i version2
+
+    if { $version2 != 20140508 } {
+	close $fi
+	return 0
+    }
+
+    close $fi
+
+    return 1
+}
+
+proc check_type_stream { pdb stream } {
+    global ar
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir $pdb $stream"]
+
+    if ![string match "" $exec_output] {
+	return 0
+    }
+
+    set fi [open tmpdir/$stream]
+    fconfigure $fi -translation binary
+
+    # check version
+
+    set data [read $fi 4]
+    binary scan $data i version
+
+    if { $version != 20040203 } {
+	close $fi
+	return 0
+    }
+
+    # check header size
+
+    set data [read $fi 4]
+    binary scan $data i header_size
+
+    if { $header_size != 0x38 } {
+	close $fi
+	return 0
+    }
+
+    # skip type_index_begin and type_index_end
+    read $fi 8
+
+    # read type_record_bytes
+
+    set data [read $fi 4]
+    binary scan $data i type_record_bytes
+
+    close $fi
+
+    # check stream length
+
+    set stream_length [file size tmpdir/$stream]
+
+    if { $stream_length != [ expr $header_size + $type_record_bytes ] } {
+	return 0
+    }
+
+    return 1
+}
+
+proc check_dbi_stream { pdb } {
+    global ar
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir $pdb 0003"]
+
+    if ![string match "" $exec_output] {
+	return 0
+    }
+
+    set fi [open tmpdir/0003]
+    fconfigure $fi -translation binary
+
+    # check signature
+
+    set data [read $fi 4]
+    binary scan $data i signature
+
+    if { $signature != -1 } {
+	close $fi
+	return 0
+    }
+
+    # check version
+
+    set data [read $fi 4]
+    binary scan $data i version
+
+    if { $version != 19990903 } {
+	close $fi
+	return 0
+    }
+
+    # check age
+
+    set data [read $fi 4]
+    binary scan $data i age
+
+    if { $age != 1 } {
+	close $fi
+	return 0
+    }
+
+    # skip fields
+    read $fi 12
+
+    # read substream sizes
+
+    set data [read $fi 4]
+    binary scan $data i mod_info_size
+
+    set data [read $fi 4]
+    binary scan $data i section_contribution_size
+
+    set data [read $fi 4]
+    binary scan $data i section_map_size
+
+    set data [read $fi 4]
+    binary scan $data i source_info_size
+
+    set data [read $fi 4]
+    binary scan $data i type_server_map_size
+
+    set data [read $fi 4]
+    binary scan $data i mfc_type_server_index
+
+    set data [read $fi 4]
+    binary scan $data i optional_dbg_header_size
+
+    set data [read $fi 4]
+    binary scan $data i ec_substream_size
+
+    close $fi
+
+    # check stream length
+
+    set stream_length [file size tmpdir/0003]
+
+    if { $stream_length != [expr 0x40 + $mod_info_size + $section_contribution_size + $section_map_size + $source_info_size + $type_server_map_size + $mfc_type_server_index + $optional_dbg_header_size + $ec_substream_size] } {
+	return 0
+    }
+
+    return 1
+}
+
 if ![ld_assemble $as $srcdir/$subdir/pdb1.s tmpdir/pdb1.o] {
     unsupported "Build pdb1.o"
     return
@@ -51,3 +294,27 @@ if ![string equal [get_pdb_name "tmpdir/pdb1.exe"] "pdb1.pdb"] {
 }
 
 pass "PDB filename present in CodeView debug info"
+
+if [check_pdb_info_stream tmpdir/pdb1.pdb [get_pdb_guid "tmpdir/pdb1.exe"]] {
+    pass "Valid PDB info stream"
+} else {
+    fail "Invalid PDB info stream"
+}
+
+if [check_type_stream tmpdir/pdb1.pdb "0002"] {
+    pass "Valid TPI stream"
+} else {
+    fail "Invalid TPI stream"
+}
+
+if [check_type_stream tmpdir/pdb1.pdb "0004"] {
+    pass "Valid IPI stream"
+} else {
+    fail "Invalid IPI stream"
+}
+
+if [check_dbi_stream tmpdir/pdb1.pdb] {
+    pass "Valid DBI stream"
+} else {
+    fail "Invalid DBI stream"
+}
