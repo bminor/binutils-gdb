@@ -989,6 +989,7 @@ main (int argc, char **argv, char **envp)
   char *real_file_name = NULL;
   int is_header = 0;
   int ch;
+  static const struct option longopts[] = { { 0 } };
   lf *standard_out =
     lf_open ("-", "stdout", lf_omit_references, lf_is_text, "igen");
 
@@ -1162,8 +1163,9 @@ main (int argc, char **argv, char **envp)
       printf ("  -t <output-file>      output itable\n");
     }
 
-  while ((ch = getopt (argc, argv,
-		       "B:D:F:G:H:I:M:N:P:T:W:o:k:i:n:hc:d:e:m:r:s:t:f:x"))
+  while ((ch = getopt_long (argc, argv,
+			    "B:D:F:G:H:I:M:N:P:T:W:o:k:i:n:hc:d:e:m:r:s:t:f:x",
+			    longopts, NULL))
 	 != -1)
     {
 #if 0  /* For debugging.  */

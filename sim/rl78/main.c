@@ -64,10 +64,12 @@ main (int argc, char **argv)
   int save_trace;
   bfd *prog;
   int rc;
+  static const struct option longopts[] = { { 0 } };
 
   xmalloc_set_program_name (argv[0]);
 
-  while ((o = getopt (argc, argv, "tvdr:D:M:")) != -1)
+  while ((o = getopt_long (argc, argv, "tvdr:D:M:", longopts, NULL))
+	 != -1)
     {
       switch (o)
 	{

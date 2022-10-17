@@ -351,6 +351,7 @@ main(int argc,
   filter *filters = NULL;
   insn_table *instructions = NULL;
   table_include *includes = NULL;
+  static const struct option longopts[] = { { 0 } };
   char *real_file_name = NULL;
   int is_header = 0;
   int ch;
@@ -390,9 +391,11 @@ main(int argc,
     printf("  -f <output-file>      output support functions\n");
   }
 
-  while ((ch = getopt(argc, argv,
-		      "F:EI:RSLJT:CB:H:N:o:k:i:n:hc:d:m:s:t:f:"))
-	 != -1) {
+  while (
+      (ch = getopt_long (argc, argv, "F:EI:RSLJT:CB:H:N:o:k:i:n:hc:d:m:s:t:f:",
+			 longopts, NULL))
+      != -1)
+  {
 #if 0  /* For debugging.  */
     fprintf(stderr, "\t-%c %s\n", ch, (optarg ? optarg : ""));
 #endif

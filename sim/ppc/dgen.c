@@ -271,6 +271,7 @@ main(int argc,
 {
   lf_file_references file_references = lf_include_references;
   spreg_table *sprs = NULL;
+  static const struct option longopts[] = { { 0 } };
   char *real_file_name = NULL;
   int is_header = 0;
   int ch;
@@ -284,8 +285,9 @@ main(int argc,
     printf("-L  Suppress cpp line numbering in output files\n");
   }
 
-
-  while ((ch = getopt(argc, argv, "hLsn:r:p:")) != -1) {
+  while ((ch = getopt_long (argc, argv, "hLsn:r:p:", longopts, NULL))
+	 != -1)
+  {
 #if 0  /* For debugging.  */
     fprintf(stderr, "\t-%c %s\n", ch, ( optarg ? optarg : ""));
 #endif
