@@ -254,8 +254,7 @@ syscall_start_syscall (struct gdb_xml_parser *parser,
       else if (strcmp (attr.name, "groups") == 0)
 	groups = (char *) attr.value.get ();
       else
-	internal_error (__FILE__, __LINE__,
-			_("Unknown attribute name '%s'."), attr.name);
+	internal_error (_("Unknown attribute name '%s'."), attr.name);
     }
 
   gdb_assert (name);

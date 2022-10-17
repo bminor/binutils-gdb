@@ -189,8 +189,7 @@ set_language_command (const char *ignore,
 	}
     }
 
-  internal_error (__FILE__, __LINE__,
-		  "Couldn't find language `%s' in known languages list.",
+  internal_error ("Couldn't find language `%s' in known languages list.",
 		  language);
 }
 
@@ -216,8 +215,7 @@ show_range_command (struct ui_file *file, int from_tty,
 	  tmp = "warn";
 	  break;
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  "Unrecognized range check setting.");
+	  internal_error ("Unrecognized range check setting.");
 	}
 
       gdb_printf (file,
@@ -263,8 +261,7 @@ set_range_command (const char *ignore,
     }
   else
     {
-      internal_error (__FILE__, __LINE__,
-		      _("Unrecognized range check setting: \"%s\""), range);
+      internal_error (_("Unrecognized range check setting: \"%s\""), range);
     }
   if (range_check == range_check_warn
       || ((range_check == range_check_on)
@@ -292,8 +289,7 @@ show_case_command (struct ui_file *file, int from_tty,
 	  tmp = "off";
 	  break;
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  "Unrecognized case-sensitive setting.");
+	  internal_error ("Unrecognized case-sensitive setting.");
 	}
 
       gdb_printf (file,
@@ -334,8 +330,7 @@ set_case_command (const char *ignore, int from_tty, struct cmd_list_element *c)
      }
    else
      {
-       internal_error (__FILE__, __LINE__,
-		       "Unrecognized case-sensitive setting: \"%s\"",
+       internal_error ("Unrecognized case-sensitive setting: \"%s\"",
 		       case_sensitive);
      }
 
@@ -418,7 +413,7 @@ range_error (const char *string,...)
       gdb_printf (gdb_stderr, "\n");
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
+      internal_error (_("bad switch"));
     }
   va_end (args);
 }

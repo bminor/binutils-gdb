@@ -185,15 +185,13 @@ public:
 
     gdb_assert (m_have_parsed_args);
     if (m_parsed_args.empty ())
-      internal_error (__FILE__, __LINE__,
-		      _("Probe '%s' apparently does not have arguments, but \n"
+      internal_error (_("Probe '%s' apparently does not have arguments, but \n"
 			"GDB is requesting its argument number %u anyway.  "
 			"This should not happen.  Please report this bug."),
 		      this->get_name ().c_str (), n);
 
     if (n > m_parsed_args.size ())
-      internal_error (__FILE__, __LINE__,
-		      _("Probe '%s' has %d arguments, but GDB is requesting\n"
+      internal_error (_("Probe '%s' has %d arguments, but GDB is requesting\n"
 			"argument %u.  This should not happen.  Please\n"
 			"report this bug."),
 		      this->get_name ().c_str (),
@@ -811,8 +809,7 @@ stap_parse_register_operand (struct stap_parse_info *p)
 						newregname.size ());
 
 	  if (regnum == -1)
-	    internal_error (__FILE__, __LINE__,
-			    _("Invalid register name '%s' after replacing it"
+	    internal_error (_("Invalid register name '%s' after replacing it"
 			      " (previous name was '%s')"),
 			    newregname.c_str (), regname.c_str ());
 

@@ -225,7 +225,7 @@ mi_ui_out::open (const char *name, ui_out_type type)
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
+      internal_error (_("bad switch"));
     }
 }
 
@@ -245,7 +245,7 @@ mi_ui_out::close (ui_out_type type)
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
+      internal_error (_("bad switch"));
     }
 
   m_suppress_field_separator = false;

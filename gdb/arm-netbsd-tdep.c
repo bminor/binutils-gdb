@@ -131,8 +131,7 @@ arm_netbsd_init_abi_common (struct gdbarch_info info,
       break;
 
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("arm_gdbarch_init: bad byte order for float format"));
+      internal_error (_("arm_gdbarch_init: bad byte order for float format"));
     }
 
   tdep->jb_pc = ARM_NBSD_JB_PC;

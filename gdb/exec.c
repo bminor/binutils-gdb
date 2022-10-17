@@ -123,8 +123,7 @@ set_exec_file_mismatch_command (const char *ignore,
 	  return;
 	}
       if (mode == exec_file_mismatch_off)
-	internal_error (__FILE__, __LINE__,
-			_("Unrecognized exec-file-mismatch setting: \"%s\""),
+	internal_error (_("Unrecognized exec-file-mismatch setting: \"%s\""),
 			exec_file_mismatch);
     }
 }

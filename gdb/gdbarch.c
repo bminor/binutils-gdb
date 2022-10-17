@@ -609,8 +609,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of get_pc_address_flags, invalid_p == 0 */
   /* Skip verify of read_core_file_mappings, invalid_p == 0 */
   if (!log.empty ())
-    internal_error (__FILE__, __LINE__,
-		    _("verify_gdbarch: the following are invalid ...%s"),
+    internal_error (_("verify_gdbarch: the following are invalid ...%s"),
 		    log.c_str ());
 }
 

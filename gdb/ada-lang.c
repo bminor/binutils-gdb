@@ -12005,7 +12005,7 @@ ada_exception_name_addr_1 (enum ada_exception_catchpoint_kind ex)
 	break;
 
       default:
-	internal_error (__FILE__, __LINE__, _("unexpected catchpoint type"));
+	internal_error (_("unexpected catchpoint type"));
 	break;
     }
 
@@ -12475,7 +12475,7 @@ ada_catchpoint::print_one (bp_location **last_loc) const
 	break;
 
       default:
-	internal_error (__FILE__, __LINE__, _("unexpected catchpoint type"));
+	internal_error (_("unexpected catchpoint type"));
 	break;
     }
 
@@ -12529,7 +12529,7 @@ ada_catchpoint::print_mention () const
 	break;
 
       default:
-	internal_error (__FILE__, __LINE__, _("unexpected catchpoint type"));
+	internal_error (_("unexpected catchpoint type"));
 	break;
     }
 }
@@ -12561,7 +12561,7 @@ ada_catchpoint::print_recreate (struct ui_file *fp) const
 	break;
 
       default:
-	internal_error (__FILE__, __LINE__, _("unexpected catchpoint type"));
+	internal_error (_("unexpected catchpoint type"));
     }
   print_recreate_thread (fp);
 }
@@ -12676,8 +12676,7 @@ ada_exception_sym_name (enum ada_exception_catchpoint_kind ex)
 	return (data->exception_info->catch_handlers_sym);
 	break;
       default:
-	internal_error (__FILE__, __LINE__,
-			_("unexpected catchpoint kind (%d)"), ex);
+	internal_error (_("unexpected catchpoint kind (%d)"), ex);
     }
 }
 

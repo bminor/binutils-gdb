@@ -3215,8 +3215,7 @@ static void
 cygwin_set_dr (int i, CORE_ADDR addr)
 {
   if (i < 0 || i > 3)
-    internal_error (__FILE__, __LINE__,
-		    _("Invalid register %d in cygwin_set_dr.\n"), i);
+    internal_error (_("Invalid register %d in cygwin_set_dr.\n"), i);
   windows_process.dr[i] = addr;
 
   for (auto &th : windows_process.thread_list)

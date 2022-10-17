@@ -1117,8 +1117,7 @@ static struct type *
 h8300_register_type (struct gdbarch *gdbarch, int regno)
 {
   if (regno < 0 || regno >= gdbarch_num_cooked_regs (gdbarch))
-    internal_error (__FILE__, __LINE__,
-		    _("h8300_register_type: illegal register number %d"),
+    internal_error (_("h8300_register_type: illegal register number %d"),
 		    regno);
   else
     {

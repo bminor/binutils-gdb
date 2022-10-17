@@ -269,8 +269,7 @@ legacy_virtual_frame_pointer (struct gdbarch *gdbarch,
   else
     /* Should this be an internal error?  I guess so, it is reflecting
        an architectural limitation in the current design.  */
-    internal_error (__FILE__, __LINE__, 
-		    _("No virtual frame pointer available"));
+    internal_error (_("No virtual frame pointer available"));
   *frame_offset = 0;
 }
 
@@ -398,8 +397,7 @@ set_endian (const char *ignore_args, int from_tty, struct cmd_list_element *c)
     {
       target_byte_order_user = BFD_ENDIAN_UNKNOWN;
       if (! gdbarch_update_p (info))
-	internal_error (__FILE__, __LINE__,
-			_("set_endian: architecture update failed"));
+	internal_error (_("set_endian: architecture update failed"));
     }
   else if (set_endian_string == endian_little)
     {
@@ -420,8 +418,7 @@ set_endian (const char *ignore_args, int from_tty, struct cmd_list_element *c)
 	target_byte_order_user = BFD_ENDIAN_BIG;
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("set_endian: bad value"));
+    internal_error (_("set_endian: bad value"));
 
   show_endian (gdb_stdout, from_tty, NULL, NULL);
 }
@@ -557,15 +554,13 @@ set_architecture (const char *ignore_args,
     {
       target_architecture_user = NULL;
       if (!gdbarch_update_p (info))
-	internal_error (__FILE__, __LINE__,
-			_("could not select an architecture automatically"));
+	internal_error (_("could not select an architecture automatically"));
     }
   else
     {
       info.bfd_arch_info = bfd_scan_arch (set_architecture_string);
       if (info.bfd_arch_info == NULL)
-	internal_error (__FILE__, __LINE__,
-			_("set_architecture: bfd_scan_arch failed"));
+	internal_error (_("set_architecture: bfd_scan_arch failed"));
       if (gdbarch_update_p (info))
 	target_architecture_user = info.bfd_arch_info;
       else
@@ -700,13 +695,11 @@ initialize_current_architecture (void)
 	}
 
       if (chosen == NULL)
-	internal_error (__FILE__, __LINE__,
-			_("initialize_current_architecture: No arch"));
+	internal_error (_("initialize_current_architecture: No arch"));
 
       default_bfd_arch = bfd_scan_arch (chosen);
       if (default_bfd_arch == NULL)
-	internal_error (__FILE__, __LINE__,
-			_("initialize_current_architecture: Arch not found"));
+	internal_error (_("initialize_current_architecture: Arch not found"));
     }
 
   gdbarch_info info;
@@ -749,8 +742,7 @@ initialize_current_architecture (void)
   info.byte_order_for_code = info.byte_order;
 
   if (! gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__,
-		    _("initialize_current_architecture: Selection of "
+    internal_error (_("initialize_current_architecture: Selection of "
 		      "initial architecture failed"));
 
   /* Create the ``set architecture'' command appending ``auto'' to the
@@ -1233,8 +1225,7 @@ gdbarch_printable_names ()
       const struct bfd_arch_info *ap
 	= bfd_lookup_arch (rego->bfd_architecture, 0);
       if (ap == nullptr)
-	internal_error (__FILE__, __LINE__,
-			_("gdbarch_architecture_names: multi-arch unknown"));
+	internal_error (_("gdbarch_architecture_names: multi-arch unknown"));
       do
 	{
 	  arches.push_back (ap->printable_name);
@@ -1259,8 +1250,7 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
   bfd_arch_info = bfd_lookup_arch (bfd_architecture, 0);
   if (bfd_arch_info == NULL)
     {
-      internal_error (__FILE__, __LINE__,
-		      _("gdbarch: Attempt to register "
+      internal_error (_("gdbarch: Attempt to register "
 			"unknown architecture (%d)"),
 		      bfd_architecture);
     }
@@ -1270,8 +1260,7 @@ gdbarch_register (enum bfd_architecture bfd_architecture,
        curr = &(*curr)->next)
     {
       if (bfd_architecture == (*curr)->bfd_architecture)
-	internal_error (__FILE__, __LINE__,
-			_("gdbarch: Duplicate registration "
+	internal_error (_("gdbarch: Duplicate registration "
 			  "of architecture (%s)"),
 			bfd_arch_info->printable_name);
     }

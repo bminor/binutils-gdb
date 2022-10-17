@@ -537,11 +537,9 @@ gdbsim_target::store_registers (struct regcache *regcache, int regno)
 				     tmp.data (), regsize);
 
       if (nr_bytes > 0 && nr_bytes != regsize)
-	internal_error (__FILE__, __LINE__,
-			_("Register size different to expected"));
+	internal_error (_("Register size different to expected"));
       if (nr_bytes < 0)
-	internal_error (__FILE__, __LINE__,
-			_("Register %d not updated"), regno);
+	internal_error (_("Register %d not updated"), regno);
       if (nr_bytes == 0)
 	warning (_("Register %s not updated"),
 		 gdbarch_register_name (gdbarch, regno));

@@ -533,8 +533,7 @@ microblaze_extract_return_value (struct type *type, struct regcache *regcache,
 	memcpy (valbuf, buf, type->length ());
 	return;
       default:
-	internal_error (__FILE__, __LINE__, 
-			_("Unsupported return value size requested"));
+	internal_error (_("Unsupported return value size requested"));
     }
 }
 

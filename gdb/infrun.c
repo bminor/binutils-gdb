@@ -847,8 +847,7 @@ follow_fork ()
       /* Nothing to follow.  */
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      "Unexpected pending_follow.kind %d\n",
+      internal_error ("Unexpected pending_follow.kind %d\n",
 		      tp->pending_follow.kind ());
       break;
     }
@@ -2007,8 +2006,7 @@ start_step_over (void)
 	  || tp->resumed ()
 	  || tp->executing ())
 	{
-	  internal_error (__FILE__, __LINE__,
-			  "[%s] has inconsistent state: "
+	  internal_error ("[%s] has inconsistent state: "
 			  "trap_expected=%d, resumed=%d, executing=%d\n",
 			  tp->ptid.to_string ().c_str (),
 			  tp->control.trap_expected,
@@ -5515,8 +5513,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    return;
 	  }
 
-	internal_error (__FILE__, __LINE__,
-			_("unhandled stop_soon: %d"), (int) stop_soon);
+	internal_error (_("unhandled stop_soon: %d"), (int) stop_soon);
       }
 
     case TARGET_WAITKIND_SPURIOUS:
@@ -5967,8 +5964,7 @@ restart_threads (struct thread_info *event_thread, inferior *inf)
 	 above.  */
       if (thread_still_needs_step_over (tp))
 	{
-	  internal_error (__FILE__, __LINE__,
-			  "thread [%s] needs a step-over, but not in "
+	  internal_error ("thread [%s] needs a step-over, but not in "
 			  "step-over queue\n",
 			  tp->ptid.to_string ().c_str ());
 	}
@@ -8492,7 +8488,7 @@ print_stop_location (const target_waitstatus &ws)
       do_frame_printing = 0;
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("Unknown value."));
+      internal_error (_("Unknown value."));
     }
 
   /* The behavior of this routine with respect to the source
@@ -9523,8 +9519,7 @@ show_exec_direction_func (struct ui_file *out, int from_tty,
     gdb_printf (out, _("Reverse.\n"));
     break;
   default:
-    internal_error (__FILE__, __LINE__,
-		    _("bogus execution_direction value: %d"),
+    internal_error (_("bogus execution_direction value: %d"),
 		    (int) execution_direction);
   }
 }

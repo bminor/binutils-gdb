@@ -1659,8 +1659,7 @@ write_var_or_type (struct parser_state *par_state,
 	      write_selectors (par_state, encoded_name + tail_index);
 	      return NULL;
 	    default:
-	      internal_error (__FILE__, __LINE__,
-			      _("impossible value from ada_parse_renaming"));
+	      internal_error (_("impossible value from ada_parse_renaming"));
 	    }
 
 	  if (type_sym != NULL)

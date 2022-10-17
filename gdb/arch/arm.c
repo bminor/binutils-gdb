@@ -194,7 +194,7 @@ arm_instruction_changes_pc (uint32_t this_instr)
 	return 0;
 
       default:
-	internal_error (__FILE__, __LINE__, _("bad value in switch"));
+	internal_error (_("bad value in switch"));
       }
 }
 

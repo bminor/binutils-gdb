@@ -849,8 +849,7 @@ opc_reg_to_gdb_regnum (int opcreg)
       case RL78_Reg_MEM:
 	return RL78_MEM_REGNUM;
       default:
-	internal_error (__FILE__, __LINE__,
-			_("Undefined mapping for opc reg %d"),
+	internal_error (_("Undefined mapping for opc reg %d"),
 			opcreg);
     }
 

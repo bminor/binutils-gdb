@@ -252,7 +252,7 @@ find_regno (const struct target_desc *tdesc, const char *name)
       if (strcmp (name, find_register_by_number (tdesc, i).name) == 0)
 	return i;
     }
-  internal_error (__FILE__, __LINE__, "Unknown register %s requested",
+  internal_error ("Unknown register %s requested",
 		  name);
 }
 

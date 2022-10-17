@@ -1489,7 +1489,7 @@ do_define_command (const char *comname, int from_tty,
 	  break;
 	default:
 	  /* Should never come here as hookc would be 0.  */
-	  internal_error (__FILE__, __LINE__, _("bad switch"));
+	  internal_error (_("bad switch"));
 	}
     }
 }
@@ -1621,7 +1621,7 @@ void
 script_from_file (FILE *stream, const char *file)
 {
   if (stream == NULL)
-    internal_error (__FILE__, __LINE__, _("called with NULL file pointer!"));
+    internal_error (_("called with NULL file pointer!"));
 
   scoped_restore restore_line_number
     = make_scoped_restore (&source_line_number, 0);

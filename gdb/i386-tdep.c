@@ -476,7 +476,7 @@ i386_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
   else if (i386_word_regnum_p (gdbarch, regnum))
     return i386_word_names[regnum - tdep->ax_regnum];
 
-  internal_error (__FILE__, __LINE__, _("invalid regnum"));
+  internal_error (_("invalid regnum"));
 }
 
 /* Convert a dbx register number REG to the appropriate register
@@ -2906,8 +2906,7 @@ i386_extract_return_value (struct gdbarch *gdbarch, struct type *type,
 	  memcpy (valbuf + low_size, buf, len - low_size);
 	}
       else
-	internal_error (__FILE__, __LINE__,
-			_("Cannot extract return value of %d bytes long."),
+	internal_error (_("Cannot extract return value of %d bytes long."),
 			len);
     }
 }
@@ -2971,8 +2970,7 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
 				    valbuf + low_size);
 	}
       else
-	internal_error (__FILE__, __LINE__,
-			_("Cannot store return value of %d bytes long."), len);
+	internal_error (_("Cannot store return value of %d bytes long."), len);
     }
 }
 
@@ -3337,7 +3335,7 @@ i386_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 	return bt->builtin_int64;
     }
 
-  internal_error (__FILE__, __LINE__, _("invalid regnum"));
+  internal_error (_("invalid regnum"));
 }
 
 /* Map a cooked register onto a raw register or memory.  For the i386,
@@ -3539,7 +3537,7 @@ i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
 	    memcpy (buf, raw_buf, 1);
 	}
       else
-	internal_error (__FILE__, __LINE__, _("invalid regnum"));
+	internal_error (_("invalid regnum"));
     }
 }
 
@@ -3676,7 +3674,7 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 	  regcache->raw_write (gpnum % 4, raw_buf);
 	}
       else
-	internal_error (__FILE__, __LINE__, _("invalid regnum"));
+	internal_error (_("invalid regnum"));
     }
 }
 
@@ -3758,7 +3756,7 @@ i386_ax_pseudo_register_collect (struct gdbarch *gdbarch,
       return 0;
     }
   else
-    internal_error (__FILE__, __LINE__, _("invalid regnum"));
+    internal_error (_("invalid regnum"));
   return 1;
 }
 

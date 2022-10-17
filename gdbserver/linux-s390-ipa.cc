@@ -372,8 +372,7 @@ get_ipa_tdesc (int idx)
       return tdesc_s390_gs_linux64;
 #endif
     default:
-      internal_error (__FILE__, __LINE__,
-		      "unknown ipa tdesc index: %d", idx);
+      internal_error ("unknown ipa tdesc index: %d", idx);
 #ifdef __s390x__
       return tdesc_s390x_linux64;
 #else

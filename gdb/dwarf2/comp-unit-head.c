@@ -65,8 +65,7 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
 	cu_header->unit_type = DW_UT_type;
 	break;
       default:
-	internal_error (__FILE__, __LINE__,
-			_("read_comp_unit_head: invalid section_kind"));
+	internal_error (_("read_comp_unit_head: invalid section_kind"));
       }
   else
     {
@@ -113,8 +112,7 @@ read_comp_unit_head (struct comp_unit_head *cu_header,
     }
   signed_addr = bfd_get_sign_extend_vma (abfd);
   if (signed_addr < 0)
-    internal_error (__FILE__, __LINE__,
-		    _("read_comp_unit_head: dwarf from non elf file"));
+    internal_error (_("read_comp_unit_head: dwarf from non elf file"));
   cu_header->signed_addr_p = signed_addr;
 
   bool header_has_signature = section_kind == rcuh_kind::TYPE
@@ -215,8 +213,7 @@ comp_unit_head::read_address (bfd *abfd, const gdb_byte *buf,
 	  retval = bfd_get_signed_64 (abfd, buf);
 	  break;
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("read_address: bad switch, signed [in module %s]"),
+	  internal_error (_("read_address: bad switch, signed [in module %s]"),
 			  bfd_get_filename (abfd));
 	}
     }
@@ -234,8 +231,7 @@ comp_unit_head::read_address (bfd *abfd, const gdb_byte *buf,
 	  retval = bfd_get_64 (abfd, buf);
 	  break;
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("read_address: bad switch, "
+	  internal_error (_("read_address: bad switch, "
 			    "unsigned [in module %s]"),
 			  bfd_get_filename (abfd));
 	}

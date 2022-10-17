@@ -1276,7 +1276,7 @@ s390_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
       return full_name[regnum - tdep->v0_full_regnum];
     }
 
-  internal_error (__FILE__, __LINE__, _("invalid regnum"));
+  internal_error (_("invalid regnum"));
 }
 
 /* Implement pseudo_register_type tdesc method.  */
@@ -1299,7 +1299,7 @@ s390_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum_is_vxr_full (tdep, regnum))
     return tdesc_register_type (gdbarch, S390_V16_REGNUM);
 
-  internal_error (__FILE__, __LINE__, _("invalid regnum"));
+  internal_error (_("invalid regnum"));
 }
 
 /* Implement pseudo_register_read gdbarch method.  */
@@ -1374,7 +1374,7 @@ s390_pseudo_register_read (struct gdbarch *gdbarch, readable_regcache *regcache,
       return status;
     }
 
-  internal_error (__FILE__, __LINE__, _("invalid regnum"));
+  internal_error (_("invalid regnum"));
 }
 
 /* Implement pseudo_register_write gdbarch method.  */
@@ -1431,7 +1431,7 @@ s390_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       return;
     }
 
-  internal_error (__FILE__, __LINE__, _("invalid regnum"));
+  internal_error (_("invalid regnum"));
 }
 
 /* Register groups.  */
@@ -1493,7 +1493,7 @@ s390_ax_pseudo_register_collect (struct gdbarch *gdbarch,
     }
   else
     {
-      internal_error (__FILE__, __LINE__, _("invalid regnum"));
+      internal_error (_("invalid regnum"));
     }
   return 0;
 }
@@ -1539,7 +1539,7 @@ s390_ax_pseudo_register_push_stack (struct gdbarch *gdbarch,
     }
   else
     {
-      internal_error (__FILE__, __LINE__, _("invalid regnum"));
+      internal_error (_("invalid regnum"));
     }
   return 0;
 }
@@ -2061,7 +2061,7 @@ s390_register_return_value (struct gdbarch *gdbarch, struct type *type,
 	}
     }
   else
-    internal_error (__FILE__, __LINE__, _("invalid return type"));
+    internal_error (_("invalid return type"));
 }
 
 /* Implement the 'return_value' gdbarch method.  */

@@ -399,7 +399,7 @@ display_gdb_prompt (const char *new_prompt)
       struct ui *ui = current_ui;
 
       if (ui->prompt_state == PROMPTED)
-	internal_error (__FILE__, __LINE__, _("double prompt"));
+	internal_error (_("double prompt"));
       else if (ui->prompt_state == PROMPT_BLOCKED)
 	{
 	  /* This is to trick readline into not trying to display the

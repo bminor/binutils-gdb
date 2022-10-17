@@ -400,8 +400,7 @@ gen_fetch (struct agent_expr *ax, struct type *type)
 	     implementing something we should be (this code's fault).
 	     In any case, it's a bug the user shouldn't see.  */
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("gen_fetch: strange size"));
+	  internal_error (_("gen_fetch: strange size"));
 	}
 
       gen_sign_extend (ax, type);
@@ -533,8 +532,7 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       break;
 
     case LOC_CONST_BYTES:
-      internal_error (__FILE__, __LINE__,
-		      _("gen_var_ref: LOC_CONST_BYTES "
+      internal_error (_("gen_var_ref: LOC_CONST_BYTES "
 			"symbols are not supported"));
 
       /* Variable at a fixed location in memory.  Easy.  */
@@ -1096,8 +1094,7 @@ gen_deref (struct axs_value *value)
   /* The caller should check the type, because several operators use
      this, and we don't know what error message to generate.  */
   if (!value->type->is_pointer_or_reference ())
-    internal_error (__FILE__, __LINE__,
-		    _("gen_deref: expected a pointer"));
+    internal_error (_("gen_deref: expected a pointer"));
 
   /* We've got an rvalue now, which is a pointer.  We want to yield an
      lvalue, whose address is exactly that pointer.  So we don't
@@ -1200,8 +1197,7 @@ gen_bitfield_ref (struct agent_expr *ax, struct axs_value *value,
 
   /* Can we fetch the number of bits requested at all?  */
   if ((end - start) > ((1 << num_ops) * 8))
-    internal_error (__FILE__, __LINE__,
-		    _("gen_bitfield_ref: bitfield too wide"));
+    internal_error (_("gen_bitfield_ref: bitfield too wide"));
 
   /* Note that we know here that we only need to try each opcode once.
      That may not be true on machines with weird byte sizes.  */
@@ -1362,8 +1358,7 @@ gen_struct_ref_recursive (struct agent_expr *ax, struct axs_value *value,
 	    }
 #if 0 /* is this right? */
 	  if (this_name[0] == '\0')
-	    internal_error (__FILE__, __LINE__,
-			    _("find_field: anonymous unions not supported"));
+	    internal_error (_("find_field: anonymous unions not supported"));
 #endif
 	}
     }
@@ -1476,8 +1471,7 @@ gen_struct_elt_for_reference (struct agent_expr *ax, struct axs_value *value,
 
   if (t->code () != TYPE_CODE_STRUCT
       && t->code () != TYPE_CODE_UNION)
-    internal_error (__FILE__, __LINE__,
-		    _("non-aggregate type to gen_struct_elt_for_reference"));
+    internal_error (_("non-aggregate type to gen_struct_elt_for_reference"));
 
   for (i = t->num_fields () - 1; i >= TYPE_N_BASECLASSES (t); i--)
     {
@@ -1569,8 +1563,7 @@ gen_aggregate_elt_ref (struct agent_expr *ax, struct axs_value *value,
       return gen_namespace_elt (ax, value, type, field);
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("non-aggregate type in gen_aggregate_elt_ref"));
+      internal_error (_("non-aggregate type in gen_aggregate_elt_ref"));
     }
 
   return 0;
@@ -1654,8 +1647,7 @@ register_operation::do_generate_ax (struct expression *exp,
 
   reg = user_reg_map_name_to_regnum (ax->gdbarch, name, len);
   if (reg == -1)
-    internal_error (__FILE__, __LINE__,
-		    _("Register $%s not available"), name);
+    internal_error (_("Register $%s not available"), name);
   /* No support for tracing user registers yet.  */
   if (reg >= gdbarch_num_cooked_regs (ax->gdbarch))
     error (_("'%s' is a user-register; "
@@ -2214,8 +2206,7 @@ gen_expr_binop_rest (struct expression *exp,
     default:
       /* We should only list operators in the outer case statement
 	 that we actually handle in the inner case statement.  */
-      internal_error (__FILE__, __LINE__,
-		      _("gen_expr: op case sets don't match"));
+      internal_error (_("gen_expr: op case sets don't match"));
     }
 }
 
@@ -2254,8 +2245,7 @@ gen_expr_structop (struct expression *exp,
   else
     /* If this `if' chain doesn't handle it, then the case list
        shouldn't mention it, and we shouldn't be here.  */
-    internal_error (__FILE__, __LINE__,
-		    _("gen_expr: unhandled struct case"));
+    internal_error (_("gen_expr: unhandled struct case"));
 }
 
 /* A helper function that emits a unary operation.  */

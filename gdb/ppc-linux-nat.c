@@ -1113,8 +1113,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
       regcache->raw_supply (regno, buf + padding);
     }
   else 
-    internal_error (__FILE__, __LINE__,
-		    _("fetch_register: unexpected byte order: %d"),
+    internal_error (_("fetch_register: unexpected byte order: %d"),
 		    gdbarch_byte_order (gdbarch));
 }
 

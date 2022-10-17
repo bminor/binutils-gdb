@@ -215,7 +215,7 @@ frv_linux_sigcontext_reg_addr (frame_info_ptr this_frame, int regno,
 	  sc_addr += 24;
 	}
       else
-	internal_error (__FILE__, __LINE__, _("not a signal trampoline"));
+	internal_error (_("not a signal trampoline"));
 
       if (sc_addr_cache_ptr)
 	*sc_addr_cache_ptr = sc_addr;

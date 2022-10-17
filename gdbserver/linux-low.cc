@@ -741,7 +741,7 @@ linux_process_target::handle_extended_wait (lwp_info **orig_event_lwp,
       return 0;
     }
 
-  internal_error (__FILE__, __LINE__, _("unknown ptrace event %d"), event);
+  internal_error (_("unknown ptrace event %d"), event);
 }
 
 CORE_ADDR
@@ -1892,8 +1892,7 @@ lwp_suspended_decr (struct lwp_info *lwp)
     {
       struct thread_info *thread = get_lwp_thread (lwp);
 
-      internal_error (__FILE__, __LINE__,
-		      "unsuspend LWP %ld, suspended=%d\n", lwpid_of (thread),
+      internal_error ("unsuspend LWP %ld, suspended=%d\n", lwpid_of (thread),
 		      lwp->suspended);
     }
 }
@@ -2524,8 +2523,7 @@ linux_process_target::wait_for_event_filtered (ptid_t wait_ptid,
       if (requested_child->suspended
 	  && requested_child->status_pending_p)
 	{
-	  internal_error (__FILE__, __LINE__,
-			  "requesting an event out of a"
+	  internal_error ("requesting an event out of a"
 			  " suspended child?");
 	}
 
@@ -3793,8 +3791,7 @@ linux_process_target::stuck_in_jump_pad (thread_info *thread)
 
   if (lwp->suspended != 0)
     {
-      internal_error (__FILE__, __LINE__,
-		      "LWP %ld is suspended, suspended=%d\n",
+      internal_error ("LWP %ld is suspended, suspended=%d\n",
 		      lwpid_of (thread), lwp->suspended);
     }
   gdb_assert (lwp->stopped);
@@ -3817,8 +3814,7 @@ linux_process_target::move_out_of_jump_pad (thread_info *thread)
 
   if (lwp->suspended != 0)
     {
-      internal_error (__FILE__, __LINE__,
-		      "LWP %ld is suspended, suspended=%d\n",
+      internal_error ("LWP %ld is suspended, suspended=%d\n",
 		      lwpid_of (thread), lwp->suspended);
     }
   gdb_assert (lwp->stopped);
@@ -4067,8 +4063,7 @@ linux_process_target::resume_one_lwp_throw (lwp_info *lwp, int step,
 	step = 1;
       else
 	{
-	  internal_error (__FILE__, __LINE__,
-			  "moving out of jump pad single-stepping"
+	  internal_error ("moving out of jump pad single-stepping"
 			  " not implemented on this target");
 	}
     }
@@ -4469,8 +4464,7 @@ linux_process_target::start_step_over (lwp_info *lwp)
 
   if (lwp->suspended != 0)
     {
-      internal_error (__FILE__, __LINE__,
-		      "LWP %ld suspended=%d\n", lwpid_of (thread),
+      internal_error ("LWP %ld suspended=%d\n", lwpid_of (thread),
 		      lwp->suspended);
     }
 

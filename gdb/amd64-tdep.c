@@ -1313,7 +1313,7 @@ amd64_get_unused_input_int_reg (const struct amd64_insn *details)
       }
 
     /* We shouldn't get here.  */
-    internal_error (__FILE__, __LINE__, _("unable to find free reg"));
+    internal_error (_("unable to find free reg"));
   }
 }
 

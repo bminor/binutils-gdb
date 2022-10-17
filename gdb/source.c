@@ -1293,7 +1293,7 @@ symtab_to_filename_for_display (struct symtab *symtab)
   else if (filename_display_string == filename_display_relative)
     return symtab->filename;
   else
-    internal_error (__FILE__, __LINE__, _("invalid filename_display_string"));
+    internal_error (_("invalid filename_display_string"));
 }
 
 

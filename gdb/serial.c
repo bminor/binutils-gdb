@@ -387,8 +387,7 @@ serial_readchar (struct serial *scb, int timeout)
   /* FIXME: cagney/1999-10-11: Don't enable this check until the ASYNC
      code is finished.  */
   if (0 && serial_is_async_p (scb) && timeout < 0)
-    internal_error (__FILE__, __LINE__,
-		    _("serial_readchar: blocking read in async mode"));
+    internal_error (_("serial_readchar: blocking read in async mode"));
 
   ch = scb->ops->readchar (scb, timeout);
   if (serial_logfp != NULL)

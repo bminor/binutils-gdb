@@ -3028,7 +3028,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 					   hppa64_cannot_fetch_register);
 	break;
       default:
-	internal_error (__FILE__, __LINE__, _("Unsupported address size: %d"),
+	internal_error (_("Unsupported address size: %d"),
 			tdep->bytes_per_address);
     }
 
@@ -3077,7 +3077,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_frame_align (gdbarch, hppa64_frame_align);
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
+      internal_error (_("bad switch"));
     }
       
   /* Struct return methods.  */
@@ -3090,7 +3090,7 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_return_value (gdbarch, hppa64_return_value);
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
+      internal_error (_("bad switch"));
     }
       
   set_gdbarch_breakpoint_kind_from_pc (gdbarch, hppa_breakpoint::kind_from_pc);

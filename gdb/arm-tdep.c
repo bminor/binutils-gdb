@@ -3692,11 +3692,11 @@ arm_m_exception_cache (frame_info_ptr this_frame)
       return cache;
     }
 
-  internal_error (__FILE__, __LINE__, _("While unwinding an exception frame, "
-					"found unexpected Link Register value "
-					"%s.  This should not happen and may "
-					"be caused by corrupt data or a bug in"
-					" GDB."),
+  internal_error (_("While unwinding an exception frame, "
+		    "found unexpected Link Register value "
+		    "%s.  This should not happen and may "
+		    "be caused by corrupt data or a bug in"
+		    " GDB."),
 		  phex (lr, ARM_INT_REGISTER_SIZE));
 }
 
@@ -3970,8 +3970,7 @@ arm_dwarf2_prev_register (frame_info_ptr this_frame, void **this_cache,
       return frame_unwind_got_constant (this_frame, regnum, val);
     }
 
-  internal_error (__FILE__, __LINE__,
-		  _("Unexpected register %d"), regnum);
+  internal_error (_("Unexpected register %d"), regnum);
 }
 
 /* Implement the stack_frame_destroyed_p gdbarch method.  */
@@ -4226,7 +4225,7 @@ arm_vfp_cprc_unit_length (enum arm_vfp_cprc_base_type b)
     case VFP_CPRC_VEC128:
       return 16;
     default:
-      internal_error (__FILE__, __LINE__, _("Invalid VFP CPRC type: %d."),
+      internal_error (_("Invalid VFP CPRC type: %d."),
 		      (int) b);
     }
 }
@@ -4248,7 +4247,7 @@ arm_vfp_cprc_reg_char (enum arm_vfp_cprc_base_type b)
     case VFP_CPRC_VEC128:
       return 'q';
     default:
-      internal_error (__FILE__, __LINE__, _("Invalid VFP CPRC type: %d."),
+      internal_error (_("Invalid VFP CPRC type: %d."),
 		      (int) b);
     }
 }
@@ -5078,7 +5077,7 @@ arm_register_sim_regno (struct gdbarch *gdbarch, int regnum)
     return SIM_ARM_FPS_REGNUM + reg;
   reg -= NUM_SREGS;
 
-  internal_error (__FILE__, __LINE__, _("Bad REGNUM %d"), regnum);
+  internal_error (_("Bad REGNUM %d"), regnum);
 }
 
 static const unsigned char op_lit0 = DW_OP_lit0;
@@ -5484,8 +5483,7 @@ displaced_write_reg (regcache *regs, arm_displaced_step_copy_insn_closure *dsc,
 	  break;
 
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("Invalid argument to displaced_write_reg"));
+	  internal_error (_("Invalid argument to displaced_write_reg"));
 	}
 
       dsc->wrote_to_pc = 1;
@@ -6413,8 +6411,7 @@ arm_copy_extra_ld_st (struct gdbarch *gdbarch, uint32_t insn, int unprivileged,
   opcode = ((op2 << 2) | (op1 & 0x1) | ((op1 & 0x4) >> 1)) - 4;
 
   if (opcode < 0)
-    internal_error (__FILE__, __LINE__,
-		    _("copy_extra_ld_st: instruction decode error"));
+    internal_error (_("copy_extra_ld_st: instruction decode error"));
 
   dsc->tmp[0] = displaced_read_reg (regs, dsc, 0);
   dsc->tmp[1] = displaced_read_reg (regs, dsc, 1);
@@ -8167,8 +8164,7 @@ thumb_process_displaced_16bit_insn (struct gdbarch *gdbarch, uint16_t insn1,
     }
 
   if (err)
-    internal_error (__FILE__, __LINE__,
-		    _("thumb_process_displaced_16bit_insn: Instruction decode error"));
+    internal_error (_("thumb_process_displaced_16bit_insn: Instruction decode error"));
 }
 
 static int
@@ -8374,8 +8370,7 @@ thumb_process_displaced_32bit_insn (struct gdbarch *gdbarch, uint16_t insn1,
     }
 
   if (err)
-    internal_error (__FILE__, __LINE__,
-		    _("thumb_process_displaced_32bit_insn: Instruction decode error"));
+    internal_error (_("thumb_process_displaced_32bit_insn: Instruction decode error"));
 
 }
 
@@ -8455,8 +8450,7 @@ arm_process_displaced_insn (struct gdbarch *gdbarch, CORE_ADDR from,
     }
 
   if (err)
-    internal_error (__FILE__, __LINE__,
-		    _("arm_process_displaced_insn: Instruction decode error"));
+    internal_error (_("arm_process_displaced_insn: Instruction decode error"));
 }
 
 /* Actually set up the scratch space for a displaced instruction.  */
@@ -8767,8 +8761,7 @@ arm_extract_return_value (struct type *type, struct regcache *regs,
 	  break;
 
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("arm_extract_return_value: "
+	  internal_error (_("arm_extract_return_value: "
 			    "Floating point model not supported"));
 	  break;
 	}
@@ -8975,8 +8968,7 @@ arm_store_return_value (struct type *type, struct regcache *regs,
 	  break;
 
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("arm_store_return_value: Floating "
+	  internal_error (_("arm_store_return_value: Floating "
 			    "point model not supported"));
 	  break;
 	}
@@ -9296,7 +9288,7 @@ arm_update_current_architecture (void)
   /* Update the architecture.  */
   gdbarch_info info;
   if (!gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__, _("could not update architecture"));
+    internal_error (_("could not update architecture"));
 }
 
 static void
@@ -9313,7 +9305,7 @@ set_fp_model_sfunc (const char *args, int from_tty,
       }
 
   if (fp_model == ARM_FLOAT_LAST)
-    internal_error (__FILE__, __LINE__, _("Invalid fp model accepted: %s."),
+    internal_error (_("Invalid fp model accepted: %s."),
 		    current_fp_model);
 
   arm_update_current_architecture ();
@@ -9353,7 +9345,7 @@ arm_set_abi (const char *args, int from_tty,
       }
 
   if (arm_abi == ARM_ABI_LAST)
-    internal_error (__FILE__, __LINE__, _("Invalid ABI accepted: %s."),
+    internal_error (_("Invalid ABI accepted: %s."),
 		    arm_abi_string);
 
   arm_update_current_architecture ();
@@ -10499,8 +10491,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       break;
 
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("arm_gdbarch_init: bad byte order for float format"));
+      internal_error (_("arm_gdbarch_init: bad byte order for float format"));
     }
 
   /* On ARM targets char defaults to unsigned.  */

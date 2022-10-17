@@ -127,8 +127,7 @@ read_offset (bfd *abfd, const gdb_byte *buf, unsigned int offset_size)
       retval = bfd_get_64 (abfd, buf);
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("read_offset_1: bad switch [in module %s]"),
+      internal_error (_("read_offset_1: bad switch [in module %s]"),
 		      bfd_get_filename (abfd));
     }
 

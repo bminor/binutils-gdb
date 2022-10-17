@@ -867,8 +867,7 @@ add_target (const target_info &t, target_open_ftype *func,
 
   auto &func_slot = target_factories[&t];
   if (func_slot != nullptr)
-    internal_error (__FILE__, __LINE__,
-		    _("target already added (\"%s\")."), t.shortname);
+    internal_error (_("target already added (\"%s\")."), t.shortname);
   func_slot = func;
 
   if (targetlist == NULL)
@@ -1203,8 +1202,7 @@ target_stack::unpush (target_ops *t)
   strata stratum = t->stratum ();
 
   if (stratum == dummy_stratum)
-    internal_error (__FILE__, __LINE__,
-		    _("Attempt to unpush the dummy target"));
+    internal_error (_("Attempt to unpush the dummy target"));
 
   /* Look for the specified target.  Note that a target can only occur
      once in the target stack.  */
@@ -1243,8 +1241,7 @@ unpush_target_and_assert (struct target_ops *target)
       gdb_printf (gdb_stderr,
 		  "pop_all_targets couldn't find target %s\n",
 		  target->shortname ());
-      internal_error (__FILE__, __LINE__,
-		      _("failed internal consistency check"));
+      internal_error (_("failed internal consistency check"));
     }
 }
 
@@ -2713,8 +2710,7 @@ default_follow_fork (struct target_ops *self, inferior *child_inf,
 		     bool follow_child, bool detach_fork)
 {
   /* Some target returned a fork event, but did not know how to follow it.  */
-  internal_error (__FILE__, __LINE__,
-		  _("could not find a target to follow fork"));
+  internal_error (_("could not find a target to follow fork"));
 }
 
 /* See target.h.  */
@@ -2753,8 +2749,7 @@ target_follow_exec (inferior *follow_inf, ptid_t ptid,
 static void
 default_mourn_inferior (struct target_ops *self)
 {
-  internal_error (__FILE__, __LINE__,
-		  _("could not find a target to follow mourn inferior"));
+  internal_error (_("could not find a target to follow mourn inferior"));
 }
 
 void
@@ -2849,7 +2844,7 @@ target_require_runnable (void)
   /* This function is only called if the target is running.  In that
      case there should have been a process_stratum target and it
      should either know how to create inferiors, or not...  */
-  internal_error (__FILE__, __LINE__, _("No targets found"));
+  internal_error (_("No targets found"));
 }
 
 /* Whether GDB is allowed to fall back to the default run target for
@@ -2877,8 +2872,7 @@ void
 set_native_target (target_ops *target)
 {
   if (the_native_target != NULL)
-    internal_error (__FILE__, __LINE__,
-		    _("native target already set (\"%s\")."),
+    internal_error (_("native target already set (\"%s\")."),
 		    the_native_target->longname ());
 
   the_native_target = target;

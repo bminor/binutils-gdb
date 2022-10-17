@@ -64,7 +64,7 @@ sentinel_frame_this_id (frame_info_ptr this_frame,
   /* The sentinel frame is used as a starting point for creating the
      previous (inner most) frame.  That frame's THIS_ID method will be
      called to determine the inner most frame's ID.  Not this one.  */
-  internal_error (__FILE__, __LINE__, _("sentinel_frame_this_id called"));
+  internal_error (_("sentinel_frame_this_id called"));
 }
 
 static struct gdbarch *

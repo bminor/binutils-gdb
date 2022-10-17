@@ -739,7 +739,7 @@ call_site_target::iterate_over_addresses
       break;
 
     default:
-      internal_error (__FILE__, __LINE__, _("invalid call site target kind"));
+      internal_error (_("invalid call site target kind"));
     }
 }
 
@@ -3035,7 +3035,7 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
     {
       int targ = offsets[dw_labels[i]];
       if (targ == -1)
-	internal_error (__FILE__, __LINE__, _("invalid label"));
+	internal_error (_("invalid label"));
       ax_label (expr, patches[i], targ);
     }
 }

@@ -4400,7 +4400,7 @@ check_types_equal (struct type *type1, struct type *type2,
 	      }
 	      break;
 	    default:
-	      internal_error (__FILE__, __LINE__, _("Unsupported field kind "
+	      internal_error (_("Unsupported field kind "
 						    "%d by check_types_equal"),
 			      field1->loc_kind ());
 	    }
@@ -5704,8 +5704,7 @@ copy_type_recursive (struct type *type, htab_t copied_types)
 		(type->field (i).loc_dwarf_block ());
               break;
 	    default:
-	      internal_error (__FILE__, __LINE__,
-			      _("Unexpected type field location kind: %d"),
+	      internal_error (_("Unexpected type field location kind: %d"),
 			      type->field (i).loc_kind ());
 	    }
 	}

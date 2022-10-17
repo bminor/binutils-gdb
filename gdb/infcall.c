@@ -1061,7 +1061,7 @@ call_function_by_hand_dummy (struct value *function,
 	break;
       }
     default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
+      internal_error (_("bad switch"));
     }
 
   /* Coerce the arguments and handle pass-by-reference.

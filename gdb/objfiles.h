@@ -137,20 +137,17 @@ struct entry_info
 
 #define SECT_OFF_DATA(objfile) \
      ((objfile->sect_index_data == -1) \
-      ? (internal_error (__FILE__, __LINE__, \
-			 _("sect_index_data not initialized")), -1)	\
+      ? (internal_error (_("sect_index_data not initialized")), -1)	\
       : objfile->sect_index_data)
 
 #define SECT_OFF_RODATA(objfile) \
      ((objfile->sect_index_rodata == -1) \
-      ? (internal_error (__FILE__, __LINE__, \
-			 _("sect_index_rodata not initialized")), -1)	\
+      ? (internal_error (_("sect_index_rodata not initialized")), -1)	\
       : objfile->sect_index_rodata)
 
 #define SECT_OFF_TEXT(objfile) \
      ((objfile->sect_index_text == -1) \
-      ? (internal_error (__FILE__, __LINE__, \
-			 _("sect_index_text not initialized")), -1)	\
+      ? (internal_error (_("sect_index_text not initialized")), -1)	\
       : objfile->sect_index_text)
 
 /* Sometimes the .bss section is missing from the objfile, so we don't

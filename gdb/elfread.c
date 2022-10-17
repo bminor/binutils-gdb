@@ -1024,8 +1024,7 @@ elf_gnu_ifunc_resolver_return_stop (code_breakpoint *b)
 	  delete_breakpoint (b);
 	  break;
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("handle_inferior_event: Invalid "
+	  internal_error (_("handle_inferior_event: Invalid "
 			    "gnu-indirect-function breakpoint type %d"),
 			  (int) b->type);
 	}

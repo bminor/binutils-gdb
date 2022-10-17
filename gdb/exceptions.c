@@ -97,7 +97,7 @@ print_exception (struct ui_file *file, const struct gdb_exception &e)
       annotate_error ();
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("Bad switch."));
+      internal_error (_("Bad switch."));
     }
 }
 

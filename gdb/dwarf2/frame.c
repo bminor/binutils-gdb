@@ -500,8 +500,7 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 			   insn);
 		}
 	      else
-		internal_error (__FILE__, __LINE__,
-				_("Unknown CFI encountered."));
+		internal_error (_("Unknown CFI encountered."));
 	    }
 	}
     }
@@ -827,7 +826,7 @@ dwarf2_fetch_cfa_info (struct gdbarch *gdbarch, CORE_ADDR pc,
       return 0;
 
     default:
-      internal_error (__FILE__, __LINE__, _("Unknown CFA rule."));
+      internal_error (_("Unknown CFA rule."));
     }
 }
 
@@ -974,7 +973,7 @@ dwarf2_frame_cache (frame_info_ptr this_frame, void **this_cache)
 	  break;
 
 	default:
-	  internal_error (__FILE__, __LINE__, _("Unknown CFA rule."));
+	  internal_error (_("Unknown CFA rule."));
 	}
     }
   catch (const gdb_exception_error &ex)
@@ -1218,7 +1217,7 @@ dwarf2_frame_prev_register (frame_info_ptr this_frame, void **this_cache,
       return cache->reg[regnum].loc.fn (this_frame, this_cache, regnum);
 
     default:
-      internal_error (__FILE__, __LINE__, _("Unknown register rule."));
+      internal_error (_("Unknown register rule."));
     }
 }
 
@@ -1405,7 +1404,7 @@ encoding_for_size (unsigned int size)
     case 8:
       return DW_EH_PE_udata8;
     default:
-      internal_error (__FILE__, __LINE__, _("Unsupported address size"));
+      internal_error (_("Unsupported address size"));
     }
 }
 
@@ -1421,8 +1420,7 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
   /* GCC currently doesn't generate DW_EH_PE_indirect encodings for
      FDE's.  */
   if (encoding & DW_EH_PE_indirect)
-    internal_error (__FILE__, __LINE__, 
-		    _("Unsupported encoding: DW_EH_PE_indirect"));
+    internal_error (_("Unsupported encoding: DW_EH_PE_indirect"));
 
   *bytes_read_ptr = 0;
 
@@ -1454,8 +1452,7 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
 	}
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("Invalid or unsupported encoding"));
+      internal_error (_("Invalid or unsupported encoding"));
     }
 
   if ((encoding & 0x07) == 0x00)
@@ -1502,8 +1499,7 @@ read_encoded_value (struct comp_unit *unit, gdb_byte encoding,
       *bytes_read_ptr += 8;
       return (base + bfd_get_signed_64 (unit->abfd, (bfd_byte *) buf));
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("Invalid or unsupported encoding"));
+      internal_error (_("Invalid or unsupported encoding"));
     }
 }
 

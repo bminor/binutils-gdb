@@ -1499,7 +1499,7 @@ get_return_value (struct symbol *func_symbol, struct value *function)
       value = NULL;
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
+      internal_error (_("bad switch"));
     }
 
   return value;
@@ -1628,8 +1628,7 @@ finish_command_fsm::should_stop (struct thread_info *tp)
 
       rv->type = function->type ()->target_type ();
       if (rv->type == NULL)
-	internal_error (__FILE__, __LINE__,
-			_("finish_command: function has no target type"));
+	internal_error (_("finish_command: function has no target type"));
 
       if (check_typedef (rv->type)->code () != TYPE_CODE_VOID)
 	{

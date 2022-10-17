@@ -977,8 +977,7 @@ cp_lookup_nested_symbol (struct type *parent_type,
       return {};
 
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("cp_lookup_nested_symbol called "
+      internal_error (_("cp_lookup_nested_symbol called "
 			"on a non-aggregate type."));
     }
 }

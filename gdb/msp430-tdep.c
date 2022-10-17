@@ -865,8 +865,7 @@ msp430_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	    code_model = MSP_LARGE_CODE_MODEL;
 	    break;
 	  default:
-	    internal_error (__FILE__, __LINE__,
-			    _("Unknown msp430x code memory model"));
+	    internal_error (_("Unknown msp430x code memory model"));
 	    break;
 	  }
 	break;

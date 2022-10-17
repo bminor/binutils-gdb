@@ -2628,8 +2628,7 @@ rs6000_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
     /* POWER7 Extended FP pseudo-registers.  */
     return builtin_type (gdbarch)->builtin_double;
   else
-    internal_error (__FILE__, __LINE__,
-		    _("rs6000_pseudo_register_type: "
+    internal_error (_("rs6000_pseudo_register_type: "
 		      "called on unexpected register '%s' (%d)"),
 		    gdbarch_register_name (gdbarch, regnum), regnum);
 }
@@ -3104,8 +3103,7 @@ rs6000_pseudo_register_read (struct gdbarch *gdbarch,
 	   || IS_CEFP_PSEUDOREG (tdep, reg_nr))
     return efp_pseudo_register_read (gdbarch, regcache, reg_nr, buffer);
   else
-    internal_error (__FILE__, __LINE__,
-		    _("rs6000_pseudo_register_read: "
+    internal_error (_("rs6000_pseudo_register_read: "
 		    "called on unexpected register '%s' (%d)"),
 		    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
 }
@@ -3134,8 +3132,7 @@ rs6000_pseudo_register_write (struct gdbarch *gdbarch,
 	   || IS_CEFP_PSEUDOREG (tdep, reg_nr))
     efp_pseudo_register_write (gdbarch, regcache, reg_nr, buffer);
   else
-    internal_error (__FILE__, __LINE__,
-		    _("rs6000_pseudo_register_write: "
+    internal_error (_("rs6000_pseudo_register_write: "
 		    "called on unexpected register '%s' (%d)"),
 		    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
 }
@@ -3276,8 +3273,7 @@ rs6000_ax_pseudo_register_collect (struct gdbarch *gdbarch,
       efp_ax_pseudo_register_collect (gdbarch, ax, reg_nr);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("rs6000_pseudo_register_collect: "
+    internal_error (_("rs6000_pseudo_register_collect: "
 		    "called on unexpected register '%s' (%d)"),
 		    gdbarch_register_name (gdbarch, reg_nr), reg_nr);
   return 0;
@@ -8467,7 +8463,7 @@ powerpc_set_soft_float (const char *args, int from_tty,
 
   /* Update the architecture.  */
   if (!gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__, _("could not update architecture"));
+    internal_error (_("could not update architecture"));
 }
 
 static void
@@ -8487,13 +8483,13 @@ powerpc_set_vector_abi (const char *args, int from_tty,
       }
 
   if (vector_abi == POWERPC_VEC_LAST)
-    internal_error (__FILE__, __LINE__, _("Invalid vector ABI accepted: %s."),
+    internal_error (_("Invalid vector ABI accepted: %s."),
 		    powerpc_vector_abi_string);
 
   /* Update the architecture.  */
   gdbarch_info info;
   if (!gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__, _("could not update architecture"));
+    internal_error (_("could not update architecture"));
 }
 
 /* Show the current setting of the exact watchpoints flag.  */

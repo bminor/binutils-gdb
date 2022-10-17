@@ -1207,8 +1207,7 @@ gdb_eval_agent_expr (struct eval_agent_expr_context *ctx,
 		top = cnv.u8.val;
 		break;
 	      default:
-		internal_error (__FILE__, __LINE__,
-				"unhandled register size");
+		internal_error ("unhandled register size");
 	      }
 	  }
 	  break;

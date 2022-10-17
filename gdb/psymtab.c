@@ -553,8 +553,7 @@ psymbol_functions::find_last_source_symtab (struct objfile *ofp)
     {
       if (cs_pst->readin_p (ofp))
 	{
-	  internal_error (__FILE__, __LINE__,
-			  _("select_source_symtab: "
+	  internal_error (_("select_source_symtab: "
 			  "readin pst found and no symtabs."));
 	}
       else

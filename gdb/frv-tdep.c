@@ -410,7 +410,7 @@ frv_register_sim_regno (struct gdbarch *gdbarch, int reg)
 	return SIM_FRV_SPR0_REGNUM + spr_reg_offset;
     }
 
-  internal_error (__FILE__, __LINE__, _("Bad register number %d"), reg);
+  internal_error (_("Bad register number %d"), reg);
 }
 
 constexpr gdb_byte frv_break_insn[] = {0xc0, 0x70, 0x00, 0x01};
@@ -1122,8 +1122,7 @@ frv_extract_return_value (struct type *type, struct regcache *regcache,
       store_unsigned_integer ((bfd_byte *) valbuf + 4, 4, byte_order, regval);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("Illegal return value length: %d"), len);
+    internal_error (_("Illegal return value length: %d"), len);
 }
 
 static CORE_ADDR
@@ -1328,8 +1327,7 @@ frv_store_return_value (struct type *type, struct regcache *regcache,
       regcache->cooked_write (9, (bfd_byte *) valbuf + 4);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("Don't know how to return a %d-byte value."), len);
+    internal_error (_("Don't know how to return a %d-byte value."), len);
 }
 
 static enum return_value_convention

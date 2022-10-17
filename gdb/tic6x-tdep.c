@@ -845,7 +845,7 @@ tic6x_arg_type_alignment (struct type *type)
 	    return 16;
 	}
       else
-	internal_error (__FILE__, __LINE__, _("unexpected length %d of type"),
+	internal_error (_("unexpected length %d of type"),
 			len);
     }
 }
@@ -1063,13 +1063,11 @@ tic6x_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 		}
 	      else
-		internal_error (__FILE__, __LINE__,
-				_("unexpected type %d of arg %d"),
+		internal_error (_("unexpected type %d of arg %d"),
 				typecode, argnum);
 	    }
 	  else
-	    internal_error (__FILE__, __LINE__,
-			    _("unexpected length %d of arg %d"), len, argnum);
+	    internal_error (_("unexpected length %d of arg %d"), len, argnum);
 
 	  addr = sp + stack_offset;
 	  write_memory (addr, val, len);

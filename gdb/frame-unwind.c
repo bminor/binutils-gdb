@@ -207,7 +207,7 @@ frame_unwind_find_by_frame (frame_info_ptr this_frame, void **this_cache)
     if (frame_unwind_try_unwinder (this_frame, this_cache, entry->unwinder))
       return;
 
-  internal_error (__FILE__, __LINE__, _("frame_unwind_find_by_frame failed"));
+  internal_error (_("frame_unwind_find_by_frame failed"));
 }
 
 /* A default frame sniffer which always accepts the frame.  Used by

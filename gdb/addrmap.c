@@ -34,8 +34,7 @@ void
 addrmap_fixed::set_empty (CORE_ADDR start, CORE_ADDR end_inclusive,
 			  void *obj)
 {
-  internal_error (__FILE__, __LINE__,
-		  "addrmap_fixed_set_empty: "
+  internal_error ("addrmap_fixed_set_empty: "
 		  "fixed addrmaps can't be changed\n");
 }
 
@@ -301,8 +300,7 @@ void
 addrmap_mutable::relocate (CORE_ADDR offset)
 {
   /* Not needed yet.  */
-  internal_error (__FILE__, __LINE__,
-		  _("addrmap_relocate is not implemented yet "
+  internal_error (_("addrmap_relocate is not implemented yet "
 		    "for mutable addrmaps"));
 }
 

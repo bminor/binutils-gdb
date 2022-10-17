@@ -1518,8 +1518,7 @@ nds32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  break;
 		default:
 		  /* Long double?  */
-		  internal_error (__FILE__, __LINE__,
-				  "Do not know how to handle %d-byte double.\n",
+		  internal_error ("Do not know how to handle %d-byte double.\n",
 				  len);
 		  break;
 		}
@@ -1664,8 +1663,7 @@ nds32_extract_return_value (struct gdbarch *gdbarch, struct type *type,
       else if (len == 8)
 	regcache->cooked_read (NDS32_FD0_REGNUM, valbuf);
       else
-	internal_error (__FILE__, __LINE__,
-			_("Cannot extract return value of %d bytes "
+	internal_error (_("Cannot extract return value of %d bytes "
 			  "long floating-point."), len);
     }
   else
@@ -1754,8 +1752,7 @@ nds32_store_return_value (struct gdbarch *gdbarch, struct type *type,
       else if (len == 8)
 	regcache->cooked_write (NDS32_FD0_REGNUM, valbuf);
       else
-	internal_error (__FILE__, __LINE__,
-			_("Cannot store return value of %d bytes "
+	internal_error (_("Cannot store return value of %d bytes "
 			  "long floating-point."), len);
     }
   else

@@ -1622,7 +1622,7 @@ ctf_target::trace_find (enum trace_find_type type, int num,
 			found = 1;
 		      break;
 		    default:
-		      internal_error (__FILE__, __LINE__, _("unknown tfind type"));
+		      internal_error (_("unknown tfind type"));
 		    }
 		}
 	    }

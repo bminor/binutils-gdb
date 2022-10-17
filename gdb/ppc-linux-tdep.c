@@ -1888,7 +1888,7 @@ ppc_init_linux_record_tdep (struct linux_record_tdep *record_tdep,
       record_tdep->size_time_t = 4;
     }
   else
-    internal_error (__FILE__, __LINE__, _("unexpected wordsize"));
+    internal_error (_("unexpected wordsize"));
 
   /* These values are the second argument of system call "sys_fcntl"
      and "sys_fcntl64".  They are obtained from Linux Kernel source.  */

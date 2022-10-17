@@ -210,7 +210,7 @@ reggroups_dump (struct gdbarch *gdbarch, struct ui_file *file)
 	  type = "internal";
 	  break;
 	default:
-	  internal_error (__FILE__, __LINE__, _("bad switch"));
+	  internal_error (_("bad switch"));
 	}
 
       /* Note: If you change this, be sure to also update the

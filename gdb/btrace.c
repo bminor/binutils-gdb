@@ -1512,7 +1512,7 @@ btrace_compute_ftrace_pt (struct thread_info *tp,
 			  const struct btrace_data_pt *btrace,
 			  std::vector<unsigned int> &gaps)
 {
-  internal_error (__FILE__, __LINE__, _("Unexpected branch trace format."));
+  internal_error (_("Unexpected branch trace format."));
 }
 
 #endif /* defined (HAVE_LIBIPT)  */
@@ -1548,7 +1548,7 @@ btrace_compute_ftrace_1 (struct thread_info *tp,
       return;
     }
 
-  internal_error (__FILE__, __LINE__, _("Unknown branch trace format."));
+  internal_error (_("Unknown branch trace format."));
 }
 
 static void
@@ -1808,7 +1808,7 @@ btrace_stitch_trace (struct btrace_data *btrace, struct thread_info *tp)
       return -1;
     }
 
-  internal_error (__FILE__, __LINE__, _("Unknown branch trace format."));
+  internal_error (_("Unknown branch trace format."));
 }
 
 /* Clear the branch trace histories in BTINFO.  */

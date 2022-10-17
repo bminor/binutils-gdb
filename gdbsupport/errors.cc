@@ -50,7 +50,7 @@ error (const char *fmt, ...)
 /* See gdbsupport/errors.h.  */
 
 void
-internal_error (const char *file, int line, const char *fmt, ...)
+internal_error_loc (const char *file, int line, const char *fmt, ...)
 {
   va_list ap;
 
@@ -62,7 +62,7 @@ internal_error (const char *file, int line, const char *fmt, ...)
 /* See gdbsupport/errors.h.  */
 
 void
-internal_warning (const char *file, int line, const char *fmt, ...)
+internal_warning_loc (const char *file, int line, const char *fmt, ...)
 {
   va_list ap;
 

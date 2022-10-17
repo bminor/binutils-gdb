@@ -1335,8 +1335,7 @@ regcache_read_pc (struct regcache *regcache)
       pc_val = gdbarch_addr_bits_remove (gdbarch, raw_val);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("regcache_read_pc: Unable to find PC"));
+    internal_error (_("regcache_read_pc: Unable to find PC"));
   return pc_val;
 }
 
@@ -1369,8 +1368,7 @@ regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
     regcache_cooked_write_unsigned (regcache,
 				    gdbarch_pc_regnum (gdbarch), pc);
   else
-    internal_error (__FILE__, __LINE__,
-		    _("regcache_write_pc: Unable to update PC"));
+    internal_error (_("regcache_write_pc: Unable to update PC"));
 
   /* Writing the PC (for instance, from "load") invalidates the
      current frame.  */

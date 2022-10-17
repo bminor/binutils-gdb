@@ -983,7 +983,7 @@ fbsd_nat_target::async (bool enable)
   if (enable)
     {
       if (!async_file_open ())
-	internal_error (__FILE__, __LINE__, "failed to create event pipe.");
+	internal_error ("failed to create event pipe.");
 
       add_file_handler (async_wait_fd (), handle_target_event, NULL, "fbsd-nat");
 

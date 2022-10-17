@@ -847,8 +847,7 @@ sparc64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum >= SPARC64_Q0_REGNUM && regnum <= SPARC64_Q60_REGNUM)
     return builtin_type (gdbarch)->builtin_long_double;
 
-  internal_error (__FILE__, __LINE__,
-		  _("sparc64_pseudo_register_type: bad register number %d"),
+  internal_error (_("sparc64_pseudo_register_type: bad register number %d"),
 		  regnum);
 }
 
@@ -889,7 +888,7 @@ sparc64_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum >= gdbarch_num_regs (gdbarch))
     return sparc64_pseudo_register_type (gdbarch, regnum);
 
-  internal_error (__FILE__, __LINE__, _("invalid regnum"));
+  internal_error (_("invalid regnum"));
 }
 
 static enum register_status

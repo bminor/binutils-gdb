@@ -544,8 +544,7 @@ fetch_register (struct regcache *regcache, int regno)
 								   regno))
     i387_supply_fsave (regcache, regno, &npx);
   else
-    internal_error (__FILE__, __LINE__,
-		    _("Invalid register no. %d in fetch_register."), regno);
+    internal_error (_("Invalid register no. %d in fetch_register."), regno);
 }
 
 void
@@ -574,8 +573,7 @@ store_register (const struct regcache *regcache, int regno)
 								   regno))
     i387_collect_fsave (regcache, regno, &npx);
   else
-    internal_error (__FILE__, __LINE__,
-		    _("Invalid register no. %d in store_register."), regno);
+    internal_error (_("Invalid register no. %d in store_register."), regno);
 }
 
 void
@@ -700,8 +698,7 @@ go32_nat_target::create_inferior (const char *exec_file,
 
   /* Init command line storage.  */
   if (redir_debug_init (&child_cmd) == -1)
-    internal_error (__FILE__, __LINE__,
-		    _("Cannot allocate redirection storage: "
+    internal_error (_("Cannot allocate redirection storage: "
 		      "not enough memory.\n"));
 
   /* Parse the command line and create redirections.  */
@@ -800,8 +797,7 @@ static void
 go32_set_dr (int i, CORE_ADDR addr)
 {
   if (i < 0 || i > 3)
-    internal_error (__FILE__, __LINE__, 
-		    _("Invalid register %d in go32_set_dr.\n"), i);
+    internal_error (_("Invalid register %d in go32_set_dr.\n"), i);
   D_REGS[i] = addr;
 }
 
@@ -841,8 +837,7 @@ static CORE_ADDR
 go32_get_dr (int i)
 {
   if (i < 0 || i > 3)
-    internal_error (__FILE__, __LINE__,
-		    _("Invalid register %d in go32_get_dr.\n"), i);
+    internal_error (_("Invalid register %d in go32_get_dr.\n"), i);
   return D_REGS[i];
 }
 
@@ -2086,8 +2081,7 @@ _initialize_go32_nat ()
 
   /* Initialize child's command line storage.  */
   if (redir_debug_init (&child_cmd) == -1)
-    internal_error (__FILE__, __LINE__,
-		    _("Cannot allocate redirection storage: "
+    internal_error (_("Cannot allocate redirection storage: "
 		      "not enough memory.\n"));
 
   /* We are always processing GCC-compiled programs.  */

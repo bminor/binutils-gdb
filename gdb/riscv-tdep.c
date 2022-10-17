@@ -3567,8 +3567,7 @@ riscv_features_from_bfd (const bfd *abfd)
       else if (eclass == ELFCLASS64)
 	features.xlen = 8;
       else
-	internal_error (__FILE__, __LINE__,
-			_("unknown ELF header class %d"), eclass);
+	internal_error (_("unknown ELF header class %d"), eclass);
 
       if (e_flags & EF_RISCV_FLOAT_ABI_DOUBLE)
 	features.flen = 8;

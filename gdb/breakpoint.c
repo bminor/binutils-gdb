@@ -4721,8 +4721,7 @@ print_bp_stop_message (bpstat *bs)
       break;
 
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("print_bp_stop_message: unrecognized enum value"));
+      internal_error (_("print_bp_stop_message: unrecognized enum value"));
       break;
     }
 }
@@ -5838,8 +5837,7 @@ bpstat_what (bpstat *bs_head)
 	  /* Tracepoint hits should not be reported back to GDB, and
 	     if one got through somehow, it should have been filtered
 	     out already.  */
-	  internal_error (__FILE__, __LINE__,
-			  _("bpstat_what: tracepoint encountered"));
+	  internal_error (_("bpstat_what: tracepoint encountered"));
 	  break;
 	case bp_gnu_ifunc_resolver:
 	  /* Step over it (and insert bp_gnu_ifunc_resolver_return).  */
@@ -5859,8 +5857,7 @@ bpstat_what (bpstat *bs_head)
 	  break;
 
 	default:
-	  internal_error (__FILE__, __LINE__,
-			  _("bpstat_what: unhandled bptype %d"), (int) bptype);
+	  internal_error (_("bpstat_what: unhandled bptype %d"), (int) bptype);
 	}
 
       retval.main_action = std::max (retval.main_action, this_action);
@@ -6127,8 +6124,7 @@ bptype_string (enum bptype type)
 
   if (((int) type >= (sizeof (bptypes) / sizeof (bptypes[0])))
       || ((int) type != bptypes[(int) type].type))
-    internal_error (__FILE__, __LINE__,
-		    _("bptypes table does not describe type #%d."),
+    internal_error (_("bptypes table does not describe type #%d."),
 		    (int) type);
 
   return bptypes[(int) type].description;
@@ -7231,7 +7227,7 @@ bp_location_from_bp_type (bptype type)
     case bp_static_marker_tracepoint:
       return bp_loc_other;
     default:
-      internal_error (__FILE__, __LINE__, _("unknown breakpoint type"));
+      internal_error (_("unknown breakpoint type"));
     }
 }
 
@@ -8244,8 +8240,7 @@ update_dprintf_command_list (struct breakpoint *b)
 	}
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("Invalid dprintf style."));
+    internal_error (_("Invalid dprintf style."));
 
   gdb_assert (printf_line != NULL);
 
@@ -9646,8 +9641,7 @@ watchpoint::print_mention () const
       tuple_name = "hw-awpt";
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("Invalid hardware watchpoint type."));
+      internal_error (_("Invalid hardware watchpoint type."));
     }
 
   ui_out_emit_tuple tuple_emitter (uiout, tuple_name);
@@ -9674,8 +9668,7 @@ watchpoint::print_recreate (struct ui_file *fp) const
       gdb_printf (fp, "awatch");
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("Invalid watchpoint type."));
+      internal_error (_("Invalid watchpoint type."));
     }
 
   gdb_printf (fp, " %s", exp_string.get ());
@@ -9783,8 +9776,7 @@ masked_watchpoint::print_it (const bpstat *bs) const
 	   async_reason_lookup (EXEC_ASYNC_ACCESS_WATCHPOINT_TRIGGER));
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("Invalid hardware watchpoint type."));
+      internal_error (_("Invalid hardware watchpoint type."));
     }
 
   mention (b);
@@ -9835,8 +9827,7 @@ masked_watchpoint::print_mention () const
       tuple_name = "hw-awpt";
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("Invalid hardware watchpoint type."));
+      internal_error (_("Invalid hardware watchpoint type."));
     }
 
   ui_out_emit_tuple tuple_emitter (uiout, tuple_name);
@@ -9863,8 +9854,7 @@ masked_watchpoint::print_recreate (struct ui_file *fp) const
       gdb_printf (fp, "awatch");
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("Invalid hardware watchpoint type."));
+      internal_error (_("Invalid hardware watchpoint type."));
     }
 
   gdb_printf (fp, " %s mask 0x%s", exp_string.get (),
@@ -11684,8 +11674,7 @@ ordinary_breakpoint::print_recreate (struct ui_file *fp) const
   else if (type == bp_hardware_breakpoint)
     gdb_printf (fp, "hbreak");
   else
-    internal_error (__FILE__, __LINE__,
-		    _("unhandled breakpoint type %d"), (int) type);
+    internal_error (_("unhandled breakpoint type %d"), (int) type);
 
   gdb_printf (fp, " %s", locspec->to_string ());
 
@@ -11926,8 +11915,7 @@ tracepoint::print_mention () const
       gdb_printf (_(" %d"), number);
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("unhandled tracepoint type %d"), (int) type);
+      internal_error (_("unhandled tracepoint type %d"), (int) type);
     }
 
   say_where (this);
@@ -11944,8 +11932,7 @@ tracepoint::print_recreate (struct ui_file *fp) const
   else if (type == bp_tracepoint)
     gdb_printf (fp, "trace");
   else
-    internal_error (__FILE__, __LINE__,
-		    _("unhandled tracepoint type %d"), (int) type);
+    internal_error (_("unhandled tracepoint type %d"), (int) type);
 
   gdb_printf (fp, " %s", locspec->to_string ());
   print_recreate_thread (fp);

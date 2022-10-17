@@ -591,8 +591,7 @@ list_args_or_locals (const frame_print_options &fp_opts,
       name_of_result = "variables";
       break;
     default:
-      internal_error (__FILE__, __LINE__,
-		      "unexpected what_to_list: %d", (int) what);
+      internal_error ("unexpected what_to_list: %d", (int) what);
     }
 
   ui_out_emit_list list_emitter (uiout, name_of_result);

@@ -253,8 +253,7 @@ raw_bkpt_type_to_target_hw_bp_type (enum raw_bkpt_type raw_type)
     case raw_bkpt_type_access_wp:
       return hw_access;
     default:
-      internal_error (__FILE__, __LINE__,
-		      "bad raw breakpoint type %d", (int) raw_type);
+      internal_error ("bad raw breakpoint type %d", (int) raw_type);
     }
 }
 

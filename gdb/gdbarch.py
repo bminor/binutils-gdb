@@ -373,8 +373,10 @@ with open("gdbarch.c", "w") as f:
             # here.
             raise Exception("unhandled case when generating gdbarch validation")
     print("  if (!log.empty ())", file=f)
-    print("    internal_error (__FILE__, __LINE__,", file=f)
-    print("""		    _("verify_gdbarch: the following are invalid ...%s"),""", file=f)
+    print(
+        """    internal_error (_("verify_gdbarch: the following are invalid ...%s"),""",
+        file=f,
+    )
     print("		    log.c_str ());", file=f)
     print("}", file=f)
     print(file=f)

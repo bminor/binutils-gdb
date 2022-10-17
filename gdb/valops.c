@@ -3402,8 +3402,7 @@ value_aggregate_elt (struct type *curtype, const char *name,
       return enum_constant_from_type (curtype, name);
 
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("non-aggregate type in value_aggregate_elt"));
+      internal_error (_("non-aggregate type in value_aggregate_elt"));
     }
 }
 
@@ -3848,7 +3847,7 @@ value_rtti_indirect_type (struct value *v, int *full,
       else if (type->code () == TYPE_CODE_PTR)
 	real_type = lookup_pointer_type (real_type);
       else
-	internal_error (__FILE__, __LINE__, _("Unexpected value type."));
+	internal_error (_("Unexpected value type."));
 
       /* Copy qualifiers to the pointer/reference.  */
       real_type = make_cv_type (TYPE_CONST (type), TYPE_VOLATILE (type),

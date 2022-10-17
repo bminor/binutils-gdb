@@ -162,8 +162,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
   else
     {
       if (value_type (v) != value_enclosing_type (v))
-	internal_error (__FILE__, __LINE__,
-			_("Should not be able to create a lazy value with "
+	internal_error (_("Should not be able to create a lazy value with "
 			  "an enclosing type"));
       if (check_optimized)
 	v_contents = nullptr;
@@ -432,7 +431,7 @@ rw_pieced_value (value *v, value *from, bool check_optimized)
 	  break;
 
 	default:
-	  internal_error (__FILE__, __LINE__, _("invalid location type"));
+	  internal_error (_("invalid location type"));
 	}
 
       offset += this_size_bits;
@@ -1057,7 +1056,7 @@ dwarf_expr_context::fetch_result (struct type *type, struct type *subobj_type,
 	  /* DWARF_VALUE_OPTIMIZED_OUT can't occur in this context --
 	     it can only be encountered when making a piece.  */
 	default:
-	  internal_error (__FILE__, __LINE__, _("invalid location type"));
+	  internal_error (_("invalid location type"));
 	}
     }
 
@@ -2103,8 +2102,7 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 		result_val = value_from_ulongest (address_type, result);
 		break;
 	      default:
-		internal_error (__FILE__, __LINE__,
-				_("Can't be reached."));
+		internal_error (_("Can't be reached."));
 	      }
 	  }
 	  break;

@@ -484,8 +484,7 @@ sparc32_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum >= SPARC32_D0_REGNUM && regnum <= SPARC32_D30_REGNUM)
     return builtin_type (gdbarch)->builtin_double;
 
-  internal_error (__FILE__, __LINE__,
-		  _("sparc32_pseudo_register_type: bad register number %d"),
+  internal_error (_("sparc32_pseudo_register_type: bad register number %d"),
 		  regnum);
 }
 

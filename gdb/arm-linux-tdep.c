@@ -1759,8 +1759,7 @@ arm_linux_init_abi (struct gdbarch_info info,
       break;
     default:
       internal_error
-	(__FILE__, __LINE__,
-	 _("arm_linux_init_abi: Floating point model not supported"));
+	(_("arm_linux_init_abi: Floating point model not supported"));
       break;
     }
   tdep->jb_elt_size = ARM_LINUX_JB_ELEMENT_SIZE;

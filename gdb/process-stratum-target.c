@@ -33,8 +33,7 @@ process_stratum_target::thread_address_space (ptid_t ptid)
   inferior *inf = find_inferior_ptid (this, ptid);
 
   if (inf == NULL || inf->aspace == NULL)
-    internal_error (__FILE__, __LINE__,
-		    _("Can't determine the current "
+    internal_error (_("Can't determine the current "
 		      "address space of thread %s\n"),
 		    target_pid_to_str (ptid).c_str ());
 

@@ -3211,8 +3211,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	       should occur, we'd like to know about it, so error out,
 	       fatally.  */
 	    if (mfunsym.value_address () == pc)
-	      internal_error (__FILE__, __LINE__,
-		_("Infinite recursion detected in find_pc_sect_line;"
+	      internal_error (_("Infinite recursion detected in find_pc_sect_line;"
 		  "please file a bug report"));
 
 	    return find_pc_line (mfunsym.value_address (), 0);

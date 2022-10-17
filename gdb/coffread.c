@@ -1360,7 +1360,7 @@ coff_getfilename (union internal_auxent *aux_entry)
   if (aux_entry->x_file.x_n.x_n.x_zeroes == 0)
     {
       if (strlen (stringtab + aux_entry->x_file.x_n.x_n.x_offset) >= BUFSIZ)
-	internal_error (__FILE__, __LINE__, _("coff file name too long"));
+	internal_error (_("coff file name too long"));
       strcpy (buffer, stringtab + aux_entry->x_file.x_n.x_n.x_offset);
     }
   else

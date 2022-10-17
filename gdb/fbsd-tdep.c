@@ -1925,7 +1925,7 @@ fbsd_get_syscall_number (struct gdbarch *gdbarch, thread_info *thread)
      However, system call catching requires this function to be
      set.  */
 
-  internal_error (__FILE__, __LINE__, _("fbsd_get_sycall_number called"));
+  internal_error (_("fbsd_get_sycall_number called"));
 }
 
 /* Read an integer symbol value from the current target.  */

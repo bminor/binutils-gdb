@@ -988,8 +988,7 @@ frame_unwind_pc (frame_info_ptr this_frame)
   else if (this_frame->prev_pc.status == CC_NOT_SAVED)
     throw_error (OPTIMIZED_OUT_ERROR, _("PC not saved"));
   else
-    internal_error (__FILE__, __LINE__,
-		    "unexpected prev_pc status: %d",
+    internal_error ("unexpected prev_pc status: %d",
 		    (int) this_frame->prev_pc.status);
 }
 
@@ -3008,8 +3007,7 @@ unwind_stop_reason_to_string (enum unwind_stop_reason reason)
 #undef SET
 
     default:
-      internal_error (__FILE__, __LINE__,
-		      "Invalid frame stop reason");
+      internal_error ("Invalid frame stop reason");
     }
 }
 
@@ -3041,8 +3039,7 @@ frame_stop_reason_symbol_string (enum unwind_stop_reason reason)
 #undef SET
 
     default:
-      internal_error (__FILE__, __LINE__,
-		      "Invalid frame stop reason");
+      internal_error ("Invalid frame stop reason");
     }
 }
 

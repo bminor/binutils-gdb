@@ -599,8 +599,7 @@ rs6000_nat_target::create_inferior (const char *exec_file,
   info.abfd = current_program_space->exec_bfd ();
 
   if (!gdbarch_update_p (info))
-    internal_error (__FILE__, __LINE__,
-		    _("rs6000_create_inferior: failed "
+    internal_error (_("rs6000_create_inferior: failed "
 		      "to select architecture"));
 }
 

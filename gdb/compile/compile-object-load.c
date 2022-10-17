@@ -678,7 +678,7 @@ compile_object_load (const compile_file_names &file_names,
       expect_return_type = builtin_type (target_gdbarch ())->builtin_void;
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("invalid scope %d"), scope);
+      internal_error (_("invalid scope %d"), scope);
     }
   if (func_type->num_fields () != expect_parameters)
     error (_("Invalid %d parameters of function \"%s\" in compiled "

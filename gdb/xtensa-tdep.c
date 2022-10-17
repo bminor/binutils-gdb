@@ -322,7 +322,7 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
       return reg->ctype;
     }
 
-  internal_error (__FILE__, __LINE__, _("invalid register number %d"), regnum);
+  internal_error (_("invalid register number %d"), regnum);
   return 0;
 }
 
@@ -615,8 +615,7 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
       return regcache->raw_read (regnum, buffer);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("invalid register number %d"), regnum);
+    internal_error (_("invalid register number %d"), regnum);
 }
 
 
@@ -704,8 +703,7 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
       regcache->raw_write (regnum, buffer);
     }
   else
-    internal_error (__FILE__, __LINE__,
-		    _("invalid register number %d"), regnum);
+    internal_error (_("invalid register number %d"), regnum);
 }
 
 static const reggroup *xtensa_ar_reggroup;
@@ -1551,8 +1549,7 @@ xtensa_extract_return_value (struct type *type,
 
       /* On Xtensa, we can return up to 4 words (or 2 for call12).  */
       if (len > (callsize > 8 ? 8 : 16))
-	internal_error (__FILE__, __LINE__,
-			_("cannot extract return value of %d bytes long"),
+	internal_error (_("cannot extract return value of %d bytes long"),
 			len);
 
       /* Get the register offset of the return
@@ -1607,8 +1604,7 @@ xtensa_store_return_value (struct type *type,
       callsize = extract_call_winsize (gdbarch, pc);
 
       if (len > (callsize > 8 ? 8 : 16))
-	internal_error (__FILE__, __LINE__,
-			_("unimplemented for this length: %s"),
+	internal_error (_("unimplemented for this length: %s"),
 			pulongest (type->length ()));
       areg = arreg_number (gdbarch,
 			   tdep->a0_base + 2 + callsize, wb);
@@ -3067,8 +3063,7 @@ xtensa_verify_config (struct gdbarch *gdbarch)
     log.printf (_("\n\ta0_base: No Ax registers"));
 
   if (!log.empty ())
-    internal_error (__FILE__, __LINE__,
-		    _("the following are invalid: %s"), log.c_str ());
+    internal_error (_("the following are invalid: %s"), log.c_str ());
 }
 
 

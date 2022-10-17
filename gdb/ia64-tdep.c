@@ -713,8 +713,7 @@ ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
      a single instance by update_global_location_list.  */
   instr_breakpoint = slotN_contents (bundle, slotnum);
   if (instr_breakpoint == IA64_BREAKPOINT)
-    internal_error (__FILE__, __LINE__,
-		    _("Address %s already contains a breakpoint."),
+    internal_error (_("Address %s already contains a breakpoint."),
 		    paddress (gdbarch, bp_tgt->placed_address));
   replace_slotN_contents (bundle, IA64_BREAKPOINT, slotnum);
 

@@ -1028,8 +1028,7 @@ do_examine (struct format_data fmt, struct gdbarch *gdbarch, CORE_ADDR addr)
 	size = 'h';
       else
 	/* Bad value for gdbarch_ptr_bit.  */
-	internal_error (__FILE__, __LINE__,
-			_("failed internal consistency check"));
+	internal_error (_("failed internal consistency check"));
     }
 
   if (size == 'b')
@@ -2872,8 +2871,7 @@ ui_printf (const char *arg, struct ui_file *stream)
 	    DIAGNOSTIC_POP
 	    break;
 	  default:
-	    internal_error (__FILE__, __LINE__,
-			    _("failed internal consistency check"));
+	    internal_error (_("failed internal consistency check"));
 	  }
 	/* Maybe advance to the next argument.  */
 	if (piece.argclass != literal_piece)

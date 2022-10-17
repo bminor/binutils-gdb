@@ -53,7 +53,7 @@ c_get_mode_for_size (int size)
       mode = "DI";
       break;
     default:
-      internal_error (__FILE__, __LINE__, _("Invalid GCC mode size %d."), size);
+      internal_error (_("Invalid GCC mode size %d."), size);
     }
 
   return mode;

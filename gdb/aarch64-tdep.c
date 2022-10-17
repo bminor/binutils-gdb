@@ -1278,8 +1278,7 @@ aarch64_dwarf2_prev_register (frame_info_ptr this_frame,
       return frame_unwind_got_constant (this_frame, regnum, lr);
 
     default:
-      internal_error (__FILE__, __LINE__,
-		      _("Unexpected register %d"), regnum);
+      internal_error (_("Unexpected register %d"), regnum);
     }
 }
 
@@ -2663,8 +2662,7 @@ aarch64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
   if (tdep->has_pauth () && regnum == tdep->ra_sign_state_regnum)
     return "";
 
-  internal_error (__FILE__, __LINE__,
-		  _("aarch64_pseudo_register_name: bad register number %d"),
+  internal_error (_("aarch64_pseudo_register_name: bad register number %d"),
 		  p_regnum);
 }
 
@@ -2703,8 +2701,7 @@ aarch64_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (tdep->has_pauth () && regnum == tdep->ra_sign_state_regnum)
     return builtin_type (gdbarch)->builtin_uint64;
 
-  internal_error (__FILE__, __LINE__,
-		  _("aarch64_pseudo_register_type: bad register number %d"),
+  internal_error (_("aarch64_pseudo_register_type: bad register number %d"),
 		  p_regnum);
 }
 
@@ -3503,7 +3500,7 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   uint64_t vq = aarch64_get_tdesc_vq (info.target_desc);
 
   if (vq > AARCH64_MAX_SVE_VQ)
-    internal_error (__FILE__, __LINE__, _("VQ out of bounds: %s (max %d)"),
+    internal_error (_("VQ out of bounds: %s (max %d)"),
 		    pulongest (vq), AARCH64_MAX_SVE_VQ);
 
   /* If there is already a candidate, use it.  */

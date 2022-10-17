@@ -2558,8 +2558,7 @@ m32c_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
   m32c_gdbarch_tdep *tdep = gdbarch_tdep<m32c_gdbarch_tdep> (gdbarch);
   
   if (!find_pc_partial_function (pc, &name, &func_addr, &func_end))
-    internal_error (__FILE__, __LINE__,
-		    _("No virtual frame pointer available"));
+    internal_error (_("No virtual frame pointer available"));
 
   m32c_analyze_prologue (gdbarch, func_addr, pc, &p);
   switch (p.kind)
@@ -2579,8 +2578,7 @@ m32c_virtual_frame_pointer (struct gdbarch *gdbarch, CORE_ADDR pc,
     }
   /* Sanity check */
   if (*frame_regnum > gdbarch_num_regs (gdbarch))
-    internal_error (__FILE__, __LINE__,
-		    _("No virtual frame pointer available"));
+    internal_error (_("No virtual frame pointer available"));
 }
 
 

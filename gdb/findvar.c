@@ -153,8 +153,7 @@ CORE_ADDR
 extract_typed_address (const gdb_byte *buf, struct type *type)
 {
   if (!type->is_pointer_or_reference ())
-    internal_error (__FILE__, __LINE__,
-		    _("extract_typed_address: "
+    internal_error (_("extract_typed_address: "
 		    "type is not a pointer or reference"));
 
   return gdbarch_pointer_to_address (type->arch (), type, buf);
@@ -206,8 +205,7 @@ void
 store_typed_address (gdb_byte *buf, struct type *type, CORE_ADDR addr)
 {
   if (!type->is_pointer_or_reference ())
-    internal_error (__FILE__, __LINE__,
-		    _("store_typed_address: "
+    internal_error (_("store_typed_address: "
 		    "type is not a pointer or reference"));
 
   gdbarch_address_to_pointer (type->arch (), type, buf, addr);

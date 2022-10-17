@@ -996,8 +996,7 @@ print_frame_info_to_print_what (const char *print_frame_info)
     if (print_frame_info == print_frame_info_choices[i])
       return print_frame_info_print_what[i];
 
-  internal_error (__FILE__, __LINE__,
-		  "Unexpected print frame-info value `%s'.",
+  internal_error ("Unexpected print frame-info value `%s'.",
 		  print_frame_info);
 }
 

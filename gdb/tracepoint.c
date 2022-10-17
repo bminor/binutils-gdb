@@ -594,13 +594,12 @@ report_agent_reqs_errors (struct agent_expr *aexpr)
   /* All of the "flaws" are serious bytecode generation issues that
      should never occur.  */
   if (aexpr->flaw != agent_flaw_none)
-    internal_error (__FILE__, __LINE__, _("expression is malformed"));
+    internal_error (_("expression is malformed"));
 
   /* If analysis shows a stack underflow, GDB must have done something
      badly wrong in its bytecode generation.  */
   if (aexpr->min_height < 0)
-    internal_error (__FILE__, __LINE__,
-		    _("expression has min height < 0"));
+    internal_error (_("expression has min height < 0"));
 
   /* Issue this error if the stack is predicted to get too deep.  The
      limit is rather arbitrary; a better scheme might be for the
@@ -1364,8 +1363,7 @@ encode_actions_1 (struct command_line *action,
 			i = user_reg_map_name_to_regnum (target_gdbarch (),
 							 name, strlen (name));
 			if (i == -1)
-			  internal_error (__FILE__, __LINE__,
-					  _("Register $%s not available"),
+			  internal_error (_("Register $%s not available"),
 					  name);
 			if (info_verbose)
 			  gdb_printf ("OP_REGISTER: ");

@@ -115,8 +115,7 @@ interp_factory_register (const char *name, interp_factory_func func)
   for (const interp_factory &f : interpreter_factories)
     if (strcmp (f.name, name) == 0)
       {
-	internal_error (__FILE__, __LINE__,
-			_("interpreter factory already registered: \"%s\"\n"),
+	internal_error (_("interpreter factory already registered: \"%s\"\n"),
 			name);
       }
 

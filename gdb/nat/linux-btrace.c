@@ -912,7 +912,7 @@ linux_read_pt (struct btrace_data_pt *btrace,
       return BTRACE_ERR_NONE;
     }
 
-  internal_error (__FILE__, __LINE__, _("Unknown btrace read type."));
+  internal_error (_("Unknown btrace read type."));
 }
 
 /* See linux-btrace.h.  */
@@ -943,7 +943,7 @@ linux_read_btrace (struct btrace_data *btrace,
       return linux_read_pt (&btrace->variant.pt, tinfo, type);
     }
 
-  internal_error (__FILE__, __LINE__, _("Unkown branch trace format."));
+  internal_error (_("Unkown branch trace format."));
 }
 
 /* See linux-btrace.h.  */

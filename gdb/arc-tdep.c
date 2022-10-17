@@ -1947,8 +1947,7 @@ mach_type_to_arc_isa (const unsigned long mach)
     case bfd_mach_arc_arcv2:
       return ARC_ISA_ARCV2;
     default:
-	internal_error (__FILE__, __LINE__,
-			_("unknown machine id %lu"), mach);
+	internal_error (_("unknown machine id %lu"), mach);
     }
 }
 
@@ -1973,8 +1972,7 @@ arc_arch_features_create (const bfd *abfd, const unsigned long mach)
       else if (eclass == ELFCLASS64)
 	reg_size = 8;
       else
-	internal_error (__FILE__, __LINE__,
-			_("unknown ELF header class %d"), eclass);
+	internal_error (_("unknown ELF header class %d"), eclass);
     }
 
   /* MACH from a bfd_arch_info struct is used here.  It should be a safe

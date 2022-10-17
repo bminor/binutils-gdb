@@ -412,7 +412,7 @@ internal_vproblem (struct internal_problem *problem,
   else if (problem->should_quit == internal_problem_no)
     quit_p = 0;
   else
-    internal_error (__FILE__, __LINE__, _("bad switch"));
+    internal_error (_("bad switch"));
 
   gdb_puts (_("\nThis is a bug, please report it."), gdb_stderr);
   if (REPORT_BUGS_TO[0])
@@ -442,7 +442,7 @@ internal_vproblem (struct internal_problem *problem,
   else if (problem->should_dump_core == internal_problem_no)
     dump_core_p = 0;
   else
-    internal_error (__FILE__, __LINE__, _("bad switch"));
+    internal_error (_("bad switch"));
 
   if (quit_p)
     {
@@ -714,13 +714,12 @@ malloc_failure (long size)
 {
   if (size > 0)
     {
-      internal_error (__FILE__, __LINE__,
-		      _("virtual memory exhausted: can't allocate %ld bytes."),
+      internal_error (_("virtual memory exhausted: can't allocate %ld bytes."),
 		      size);
     }
   else
     {
-      internal_error (__FILE__, __LINE__, _("virtual memory exhausted."));
+      internal_error (_("virtual memory exhausted."));
     }
 }
 
