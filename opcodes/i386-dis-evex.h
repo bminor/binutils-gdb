@@ -383,8 +383,8 @@ static const struct dis386 evex_table[][256] = {
     { "vrsqrt14p%XW",	{ XM, EXx }, 0 },
     { "vrsqrt14s%XW",	{ XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     /* 50 */
-    { "vpdpbusd",	{ XM, Vex, EXx }, PREFIX_DATA },
-    { "vpdpbusds",	{ XM, Vex, EXx }, PREFIX_DATA },
+    { VEX_W_TABLE (VEX_W_0F3850) },
+    { VEX_W_TABLE (VEX_W_0F3851) },
     { PREFIX_TABLE (PREFIX_EVEX_0F3852) },
     { PREFIX_TABLE (PREFIX_EVEX_0F3853) },
     { "vpopcnt%BW",	{ XM, EXx }, PREFIX_DATA },

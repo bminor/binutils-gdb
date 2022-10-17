@@ -1755,7 +1755,7 @@ struct dis386 {
    "XD" => print 'd' if !EVEX or EVEX.W=1, EVEX.W=0 is not a valid encoding
    "XH" => print 'h' if EVEX.W=0, EVEX.W=1 is not a valid encoding (for FP16)
    "XS" => print 's' if !EVEX or EVEX.W=0, EVEX.W=1 is not a valid encoding
-   "XV" => print "{vex3}" pseudo prefix
+   "XV" => print "{vex} " pseudo prefix
    "LQ" => print 'l' ('d' in Intel mode) or 'q' for memory operand, cond
 	   being false, or no operand at all in 64bit mode, or if suffix_always
 	   is true.
@@ -7545,19 +7545,19 @@ static const struct dis386 vex_w_table[][2] = {
   },
   {
     /* VEX_W_0F3850 */
-    { "%XV vpdpbusd",	{ XM, Vex, EXx }, 0 },
+    { "%XVvpdpbusd",	{ XM, Vex, EXx }, PREFIX_DATA },
   },
   {
     /* VEX_W_0F3851 */
-    { "%XV vpdpbusds",	{ XM, Vex, EXx }, 0 },
+    { "%XVvpdpbusds",	{ XM, Vex, EXx }, PREFIX_DATA },
   },
   {
     /* VEX_W_0F3852 */
-    { "%XV vpdpwssd",	{ XM, Vex, EXx }, 0 },
+    { "%XVvpdpwssd",	{ XM, Vex, EXx }, PREFIX_DATA },
   },
   {
     /* VEX_W_0F3853 */
-    { "%XV vpdpwssds",	{ XM, Vex, EXx }, 0 },
+    { "%XVvpdpwssds",	{ XM, Vex, EXx }, PREFIX_DATA },
   },
   {
     /* VEX_W_0F3858 */
@@ -10711,22 +10711,29 @@ putop (instr_info *ins, const char *in_template, int sizeflag)
 	case 'V':
 	  if (l == 0)
 	    abort ();
-	  else if (l == 1
-		   && (last[0] == 'L' || last[0] == 'X'))
+	  else if (l == 1)
 	    {
-	      if (last[0] == 'X')
+	      switch (last[0])
 		{
+		case 'X':
+		  if (ins->vex.evex)
+		    break;
 		  *ins->obufp++ = '{';
 		  *ins->obufp++ = 'v';
 		  *ins->obufp++ = 'e';
 		  *ins->obufp++ = 'x';
 		  *ins->obufp++ = '}';
-		}
-	      else if (ins->rex & REX_W)
-		{
+		  *ins->obufp++ = ' ';
+		  break;
+		case 'L':
+		  if (!(ins->rex & REX_W))
+		    break;
 		  *ins->obufp++ = 'a';
 		  *ins->obufp++ = 'b';
 		  *ins->obufp++ = 's';
+		  break;
+		default:
+		  abort ();
 		}
 	    }
 	  else

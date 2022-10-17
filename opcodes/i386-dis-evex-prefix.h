@@ -233,14 +233,14 @@
   {
     { Bad_Opcode },
     { "vdpbf16p%XS", { XM, Vex, EXx }, 0 },
-    { "vpdpwssd",	{ XM, Vex, EXx }, 0 },
+    { VEX_W_TABLE (VEX_W_0F3852) },
     { "vp4dpwssd",	{ XM, Vex, EXxmm }, 0 },
   },
   /* PREFIX_EVEX_0F3853 */
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpdpwssds",	{ XM, Vex, EXx }, 0 },
+    { VEX_W_TABLE (VEX_W_0F3853) },
     { "vp4dpwssds",	{ XM, Vex, EXxmm }, 0 },
   },
   /* PREFIX_EVEX_0F3868 */
