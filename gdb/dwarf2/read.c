@@ -18217,7 +18217,6 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
 
 	  if (new_reader->cu == reader->cu
 	      && new_info_ptr > watermark_ptr
-	      && maybe_defer != nullptr
 	      && *parent_entry == nullptr)
 	    *maybe_defer = form_addr (origin_offset, origin_is_dwz);
 	  else if (*parent_entry == nullptr)
