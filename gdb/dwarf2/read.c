@@ -18191,14 +18191,20 @@ cooked_indexer::scan_attributes (dwarf2_per_cu_data *scanning_per_cu,
      that is ok.  Similarly, we allow an external variable without a
      location; those are resolved via minimal symbols.  */
   if (is_declaration && !for_specification
-      && !(abbrev->tag == DW_TAG_variable && (*flags & IS_STATIC) == 0)
-      && !((abbrev->tag == DW_TAG_class_type
-	    || abbrev->tag == DW_TAG_structure_type
-	    || abbrev->tag == DW_TAG_union_type)
-	   && abbrev->has_children))
+      && !(abbrev->tag == DW_TAG_variable && (*flags & IS_STATIC) == 0))
     {
-      *linkage_name = nullptr;
-      *name = nullptr;
+      /* We always want to recurse into some types, but we may not
+	 want to treat them as definitions.  */
+      if ((abbrev->tag == DW_TAG_class_type
+	   || abbrev->tag == DW_TAG_structure_type
+	   || abbrev->tag == DW_TAG_union_type)
+	  && abbrev->has_children)
+	*flags |= IS_TYPE_DECLARATION;
+      else
+	{
+	  *linkage_name = nullptr;
+	  *name = nullptr;
+	}
     }
   else if ((*name == nullptr
 	    || (*linkage_name == nullptr

@@ -1167,6 +1167,11 @@ write_cooked_index (cooked_index_vector *table,
 	     be redundant are rare and not worth supporting.  */
 	  continue;
 	}
+      else if ((entry->flags & IS_TYPE_DECLARATION) != 0)
+	{
+	  /* Don't add type declarations to the index.  */
+	  continue;
+	}
 
       gdb_index_symbol_kind kind;
       if (entry->tag == DW_TAG_subprogram)

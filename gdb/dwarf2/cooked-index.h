@@ -48,6 +48,9 @@ enum cooked_index_flag_enum : unsigned char
   IS_ENUM_CLASS = 4,
   /* True if this entry uses the linkage name.  */
   IS_LINKAGE = 8,
+  /* True if this entry is just for the declaration of a type, not the
+     definition.  */
+  IS_TYPE_DECLARATION = 16,
 };
 DEF_ENUM_FLAGS_TYPE (enum cooked_index_flag_enum, cooked_index_flag);
 
@@ -76,6 +79,10 @@ struct cooked_index_entry : public allocate_on_obstack
   /* Return true if this entry matches SEARCH_FLAGS.  */
   bool matches (block_search_flags search_flags) const
   {
+    /* Just reject type declarations.  */
+    if ((flags & IS_TYPE_DECLARATION) != 0)
+      return false;
+
     if ((search_flags & SEARCH_STATIC_BLOCK) != 0
 	&& (flags & IS_STATIC) != 0)
       return true;
@@ -88,6 +95,10 @@ struct cooked_index_entry : public allocate_on_obstack
   /* Return true if this entry matches DOMAIN.  */
   bool matches (domain_enum domain) const
   {
+    /* Just reject type declarations.  */
+    if ((flags & IS_TYPE_DECLARATION) != 0)
+      return false;
+
     switch (domain)
       {
       case LABEL_DOMAIN:
@@ -106,6 +117,10 @@ struct cooked_index_entry : public allocate_on_obstack
   /* Return true if this entry matches KIND.  */
   bool matches (enum search_domain kind) const
   {
+    /* Just reject type declarations.  */
+    if ((flags & IS_TYPE_DECLARATION) != 0)
+      return false;
+
     switch (kind)
       {
       case VARIABLES_DOMAIN:
