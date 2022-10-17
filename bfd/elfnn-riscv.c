@@ -4043,27 +4043,32 @@ riscv_update_pcgp_relocs (riscv_pcgp_relocs *p, asection *deleted_sec,
     }
 }
 
-/* Delete some bytes from a section while relaxing.  */
+/* Delete some bytes, adjust relcocations and symbol table from a section.  */
 
 static bool
-riscv_relax_delete_bytes (bfd *abfd,
-			  asection *sec,
-			  bfd_vma addr,
-			  size_t count,
-			  struct bfd_link_info *link_info,
-			  riscv_pcgp_relocs *p)
+_riscv_relax_delete_bytes (bfd *abfd,
+			   asection *sec,
+			   bfd_vma addr,
+			   size_t count,
+			   struct bfd_link_info *link_info,
+			   riscv_pcgp_relocs *p,
+			   bfd_vma delete_total,
+			   bfd_vma toaddr)
 {
   unsigned int i, symcount;
-  bfd_vma toaddr = sec->size;
   struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (abfd);
   Elf_Internal_Shdr *symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
   unsigned int sec_shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
   struct bfd_elf_section_data *data = elf_section_data (sec);
   bfd_byte *contents = data->this_hdr.contents;
+  size_t bytes_to_move = toaddr - addr - count;
 
   /* Actually delete the bytes.  */
   sec->size -= count;
-  memmove (contents + addr, contents + addr + count, toaddr - addr - count);
+  memmove (contents + addr, contents + addr + count + delete_total, bytes_to_move);
+
+  /* Still adjust relocations and symbols in non-linear times.  */
+  toaddr = sec->size + count;
 
   /* Adjust the location of all of the relocs.  Note that we need not
      adjust the addends, since all PC-relative references must be against
@@ -4161,6 +4166,99 @@ riscv_relax_delete_bytes (bfd *abfd,
   return true;
 }
 
+typedef bool (*relax_delete_t) (bfd *, asection *,
+				bfd_vma, size_t,
+				struct bfd_link_info *,
+				riscv_pcgp_relocs *,
+				Elf_Internal_Rela *);
+
+static relax_delete_t riscv_relax_delete_bytes;
+
+/* Do not delete some bytes from a section while relaxing.
+   Just mark the deleted bytes as R_RISCV_DELETE.  */
+
+static bool
+_riscv_relax_delete_piecewise (bfd *abfd ATTRIBUTE_UNUSED,
+			       asection *sec ATTRIBUTE_UNUSED,
+			       bfd_vma addr,
+			       size_t count,
+			       struct bfd_link_info *link_info ATTRIBUTE_UNUSED,
+			       riscv_pcgp_relocs *p ATTRIBUTE_UNUSED,
+			       Elf_Internal_Rela *rel)
+{
+  if (rel == NULL)
+    return false;
+  rel->r_info = ELFNN_R_INFO (0, R_RISCV_DELETE);
+  rel->r_offset = addr;
+  rel->r_addend = count;
+  return true;
+}
+
+/* Delete some bytes from a section while relaxing.  */
+
+static bool
+_riscv_relax_delete_immediate (bfd *abfd,
+			       asection *sec,
+			       bfd_vma addr,
+			       size_t count,
+			       struct bfd_link_info *link_info,
+			       riscv_pcgp_relocs *p,
+			       Elf_Internal_Rela *rel)
+{
+  if (rel != NULL)
+    rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
+  return _riscv_relax_delete_bytes (abfd, sec, addr, count,
+				    link_info, p, 0, sec->size);
+}
+
+/* Delete the bytes for R_RISCV_DELETE relocs.  */
+
+static bool
+riscv_relax_resolve_delete_relocs (bfd *abfd,
+				   asection *sec,
+				   struct bfd_link_info *link_info,
+				   Elf_Internal_Rela *relocs)
+{
+  bfd_vma delete_total = 0;
+  unsigned int i;
+
+  for (i = 0; i < sec->reloc_count; i++)
+    {
+      Elf_Internal_Rela *rel = relocs + i;
+      if (ELFNN_R_TYPE (rel->r_info) != R_RISCV_DELETE)
+	continue;
+
+      /* Find the next R_RISCV_DELETE reloc if possible.  */
+      Elf_Internal_Rela *rel_next = NULL;
+      unsigned int start = rel - relocs;
+      for (i = start; i < sec->reloc_count; i++)
+	{
+	  /* Since we only replace existing relocs and don't add new relocs, the
+	     relocs are in sequential order. We can skip the relocs prior to this
+	     one, making this search linear time.  */
+	  rel_next = relocs + i;
+	  if (ELFNN_R_TYPE ((rel_next)->r_info) == R_RISCV_DELETE
+	      && (rel_next)->r_offset > rel->r_offset)
+	    break;
+	  else
+	    rel_next = NULL;
+	}
+
+      bfd_vma toaddr = rel_next == NULL ? sec->size : rel_next->r_offset;
+      if (!_riscv_relax_delete_bytes (abfd, sec, rel->r_offset, rel->r_addend,
+				      link_info, NULL, delete_total, toaddr))
+	return false;
+
+      delete_total += rel->r_addend;
+      rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
+
+      /* Skip ahead to the next delete reloc.  */
+      i = rel_next != NULL ? rel_next - relocs - 1 : sec->reloc_count;
+    }
+
+  return true;
+}
+
 typedef bool (*relax_func_t) (bfd *, asection *, asection *,
 			      struct bfd_link_info *,
 			      Elf_Internal_Rela *,
@@ -4239,10 +4337,10 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
   /* Replace the AUIPC.  */
   riscv_put_insn (8 * len, auipc, contents + rel->r_offset);
 
-  /* Delete unnecessary JALR.  */
+  /* Delete unnecessary JALR and reuse the R_RISCV_RELAX reloc.  */
   *again = true;
   return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + len, 8 - len,
-				   link_info, pcgp_relocs);
+				   link_info, pcgp_relocs, rel + 1);
 }
 
 /* Traverse all output sections and return the max alignment.  */
@@ -4332,11 +4430,10 @@ _bfd_riscv_relax_lui (bfd *abfd,
 	  return true;
 
 	case R_RISCV_HI20:
-	  /* We can delete the unnecessary LUI and reloc.  */
-	  rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
+	  /* Delete unnecessary LUI and reuse the reloc.  */
 	  *again = true;
 	  return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4,
-					   link_info, pcgp_relocs);
+					   link_info, pcgp_relocs, rel);
 
 	default:
 	  abort ();
@@ -4367,9 +4464,10 @@ _bfd_riscv_relax_lui (bfd *abfd,
       /* Replace the R_RISCV_HI20 reloc.  */
       rel->r_info = ELFNN_R_INFO (ELFNN_R_SYM (rel->r_info), R_RISCV_RVC_LUI);
 
+      /* Delete extra bytes and reuse the R_RISCV_RELAX reloc.  */
       *again = true;
       return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + 2, 2,
-				       link_info, pcgp_relocs);
+				       link_info, pcgp_relocs, rel + 1);
     }
 
   return true;
@@ -4407,11 +4505,10 @@ _bfd_riscv_relax_tls_le (bfd *abfd,
 
     case R_RISCV_TPREL_HI20:
     case R_RISCV_TPREL_ADD:
-      /* We can delete the unnecessary instruction and reloc.  */
-      rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
+      /* Delete unnecessary instruction and reuse the reloc.  */
       *again = true;
       return riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4, link_info,
-				       pcgp_relocs);
+				       pcgp_relocs, rel);
 
     default:
       abort ();
@@ -4472,10 +4569,10 @@ _bfd_riscv_relax_align (bfd *abfd, asection *sec,
   if (nop_bytes % 4 != 0)
     bfd_putl16 (RVC_NOP, contents + rel->r_offset + pos);
 
-  /* Delete the excess bytes.  */
+  /* Delete excess bytes.  */
   return riscv_relax_delete_bytes (abfd, sec, rel->r_offset + nop_bytes,
 				   rel->r_addend - nop_bytes, link_info,
-				   NULL);
+				   NULL, NULL);
 }
 
 /* Relax PC-relative references to GP-relative references.  */
@@ -4617,9 +4714,9 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 				      ELFNN_R_SYM(rel->r_info),
 				      sym_sec,
 				      undefined_weak);
-	  /* We can delete the unnecessary AUIPC and reloc.  */
-	  rel->r_info = ELFNN_R_INFO (0, R_RISCV_DELETE);
-	  rel->r_addend = 4;
+	  /* Delete unnecessary AUIPC and reuse the reloc.  */
+	  riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4, link_info,
+				    pcgp_relocs, rel);
 	  return true;
 
 	default:
@@ -4627,28 +4724,6 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 	}
     }
 
-  return true;
-}
-
-/* Delete the bytes for R_RISCV_DELETE.  */
-
-static bool
-_bfd_riscv_relax_delete (bfd *abfd,
-			 asection *sec,
-			 asection *sym_sec ATTRIBUTE_UNUSED,
-			 struct bfd_link_info *link_info,
-			 Elf_Internal_Rela *rel,
-			 bfd_vma symval ATTRIBUTE_UNUSED,
-			 bfd_vma max_alignment ATTRIBUTE_UNUSED,
-			 bfd_vma reserve_size ATTRIBUTE_UNUSED,
-			 bool *again ATTRIBUTE_UNUSED,
-			 riscv_pcgp_relocs *pcgp_relocs ATTRIBUTE_UNUSED,
-			 bool undefined_weak ATTRIBUTE_UNUSED)
-{
-  if (!riscv_relax_delete_bytes (abfd, sec, rel->r_offset, rel->r_addend,
-				 link_info, NULL))
-    return false;
-  rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
   return true;
 }
 
@@ -4729,6 +4804,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
       bool undefined_weak = false;
 
       relax_func = NULL;
+      riscv_relax_delete_bytes = NULL;
       if (info->relax_pass == 0)
 	{
 	  if (type == R_RISCV_CALL
@@ -4750,6 +4826,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	    relax_func = _bfd_riscv_relax_pc;
 	  else
 	    continue;
+	  riscv_relax_delete_bytes = _riscv_relax_delete_piecewise;
 
 	  /* Only relax this reloc if it is paired with R_RISCV_RELAX.  */
 	  if (i == sec->reloc_count - 1
@@ -4760,10 +4837,11 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 	  /* Skip over the R_RISCV_RELAX.  */
 	  i++;
 	}
-      else if (info->relax_pass == 1 && type == R_RISCV_DELETE)
-	relax_func = _bfd_riscv_relax_delete;
-      else if (info->relax_pass == 2 && type == R_RISCV_ALIGN)
-	relax_func = _bfd_riscv_relax_align;
+      else if (info->relax_pass == 1 && type == R_RISCV_ALIGN)
+	{
+	  relax_func = _bfd_riscv_relax_align;
+	  riscv_relax_delete_bytes = _riscv_relax_delete_immediate;
+	}
       else
 	continue;
 
@@ -4920,6 +4998,10 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 		       &pcgp_relocs, undefined_weak))
 	goto fail;
     }
+
+  /* Resolve R_RISCV_DELETE relocations.  */
+  if (!riscv_relax_resolve_delete_relocs (abfd, sec, info, relocs))
+    goto fail;
 
   ret = true;
 
