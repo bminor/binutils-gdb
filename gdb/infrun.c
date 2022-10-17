@@ -4219,7 +4219,7 @@ fetch_inferior_event ()
 	else
 	  {
 	    bool should_notify_stop = true;
-	    int proceeded = 0;
+	    bool proceeded = false;
 
 	    stop_all_threads_if_all_stop_mode ();
 
@@ -8582,8 +8582,8 @@ stop_context::changed () const
 
 /* See infrun.h.  */
 
-int
-normal_stop (void)
+bool
+normal_stop ()
 {
   struct target_waitstatus last;
 
@@ -8742,7 +8742,7 @@ normal_stop (void)
      the observers would print a stop for the wrong
      thread/inferior.  */
   if (saved_context.changed ())
-    return 1;
+    return true;
 
   /* Notify observers about the stop.  This is where the interpreters
      print the stop event.  */
@@ -8764,7 +8764,7 @@ normal_stop (void)
 	breakpoint_auto_delete (inferior_thread ()->control.stop_bpstat);
     }
 
-  return 0;
+  return false;
 }
 
 int

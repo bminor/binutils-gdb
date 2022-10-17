@@ -885,12 +885,10 @@ step_1 (int skip_subroutines, int single_inst, const char *count_string)
     proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT);
   else
     {
-      int proceeded;
-
       /* Stepped into an inline frame.  Pretend that we've
 	 stopped.  */
       thr->thread_fsm ()->clean_up (thr);
-      proceeded = normal_stop ();
+      bool proceeded = normal_stop ();
       if (!proceeded)
 	inferior_event_handler (INF_EXEC_COMPLETE);
       all_uis_check_sync_execution_done ();

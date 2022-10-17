@@ -149,7 +149,7 @@ extern process_stratum_target *user_visible_resume_target (ptid_t resume_ptid);
    appropriate messages, remove breakpoints, give terminal our modes,
    and run the stop hook.  Returns true if the stop hook proceeded the
    target, false otherwise.  */
-extern int normal_stop (void);
+extern bool normal_stop ();
 
 /* Return the cached copy of the last target/ptid/waitstatus returned
    by target_wait().  The data is actually cached by handle_inferior_event(),
