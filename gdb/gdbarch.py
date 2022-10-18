@@ -286,11 +286,18 @@ with open("gdbarch.c", "w") as f:
     print("  void **data = nullptr;", file=f)
     print(file=f)
     for c in filter(not_info, components):
-        if isinstance(c, Value):
-            print(f"  {c.type} {c.name} = 0;", file=f)
+        if isinstance(c, Function):
+            print(f"  gdbarch_{c.name}_ftype *", file=f, end="")
+        else:
+            print(f"  {c.type} ", file=f, end="")
+        print(f"{c.name} = ", file=f, end="")
+        if c.predefault is not None:
+            print(f"{c.predefault};", file=f)
+        elif isinstance(c, Value):
+            print("0;", file=f)
         else:
             assert isinstance(c, Function)
-            print(f"  gdbarch_{c.name}_ftype *{c.name} = nullptr;", file=f)
+            print("nullptr;", file=f)
     print("};", file=f)
     print(file=f)
     #
@@ -311,12 +318,6 @@ with open("gdbarch.c", "w") as f:
     print(file=f)
     for c in filter(info, components):
         print(f"  gdbarch->{c.name} = info->{c.name};", file=f)
-    print(file=f)
-    print("  /* Force the explicit initialization of these.  */", file=f)
-    for c in filter(not_info, components):
-        if c.predefault and c.predefault != "0":
-            print(f"  gdbarch->{c.name} = {c.predefault};", file=f)
-    print("  /* gdbarch_alloc() */", file=f)
     print(file=f)
     print("  return gdbarch;", file=f)
     print("}", file=f)

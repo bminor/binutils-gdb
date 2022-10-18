@@ -151,7 +151,7 @@ Number of bits in a short or unsigned short for the target machine.
     invalid=False,
 )
 
-Value(
+int_bit = Value(
     comment="""
 Number of bits in an int or unsigned int for the target machine.
 """,
@@ -161,7 +161,7 @@ Number of bits in an int or unsigned int for the target machine.
     invalid=False,
 )
 
-Value(
+long_bit = Value(
     comment="""
 Number of bits in a long or unsigned long for the target machine.
 """,
@@ -178,7 +178,7 @@ machine.
 """,
     type="int",
     name="long_long_bit",
-    predefault="2*gdbarch->long_bit",
+    predefault="2*" + long_bit.predefault,
     invalid=False,
 )
 
@@ -314,7 +314,7 @@ ptr_bit is the size of a pointer on the target
 """,
     type="int",
     name="ptr_bit",
-    predefault="gdbarch->int_bit",
+    predefault=int_bit.predefault,
     invalid=False,
 )
 
