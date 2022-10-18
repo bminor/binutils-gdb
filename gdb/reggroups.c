@@ -71,8 +71,13 @@ struct reggroups
   void add (const reggroup *group)
   {
     gdb_assert (group != nullptr);
-    gdb_assert (std::find (m_groups.begin(), m_groups.end(), group)
-		== m_groups.end());
+
+    auto find_by_name = [group] (const reggroup *g)
+      {
+	return streq (group->name (), g->name ());
+      };
+    gdb_assert (std::find_if (m_groups.begin (), m_groups.end (), find_by_name)
+		== m_groups.end ());
 
     m_groups.push_back (group);
   }
