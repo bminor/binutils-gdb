@@ -15,6 +15,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#ifdef TYPE_NOSPACE_long_long
+#define TYPE long long
+#elif defined TYPE_NOSPACE_signed_char
+#define TYPE signed char
+#else
+#define TYPE TYPE_NOSPACE
+#endif
+
 TYPE
 func (void)
 {

@@ -52,17 +52,23 @@ foreach type {{signed char} {short} {int} {long} {long long} {float} {double}} {
     if { $skip_float_test && ($type == "float" || $type == "double") } {
 	continue
     }
-    set typeesc [string map {{ } {\ }} $type]
-    set typenospace [string map {{ } -} $type]
+    set typenospace_dash \
+	[string map {{ } -} $type]
+    set typenospace_underscore \
+	[string map {{ } _} $type]
 
     standard_testfile .c return-nodebug1.c
 
-    set additional_flags "additional_flags=-DTYPE=$typeesc"
+    set additional_flags {}
+    lappend additional_flags \
+	additional_flags=-DTYPE_NOSPACE=$typenospace_underscore
+    lappend additional_flags \
+	additional_flags=-DTYPE_NOSPACE_$typenospace_underscore
 
     if {[prepare_for_testing_full "failed to prepare" \
-	     [list ${testfile}-${typenospace} debug \
-		  $srcfile [list debug $additional_flags] \
-		  $srcfile2 [list $additional_flags]]]} {
+	     [list ${testfile}-${typenospace_dash} debug \
+		  $srcfile [concat {debug} $additional_flags] \
+		  $srcfile2 $additional_flags]]} {
 	continue
     }
 
