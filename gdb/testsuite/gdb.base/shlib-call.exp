@@ -33,6 +33,10 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
+if { [is_remote host] } {
+    gdb_remote_download host $srcdir/$subdir/ss.h
+}
+
 standard_testfile shmain.c shr1.c shr2.c
 set srcfile  ${srcdir}/${subdir}/${srcfile}
 set lib1src  ${srcdir}/${subdir}/${srcfile2}

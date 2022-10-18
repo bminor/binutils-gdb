@@ -16,6 +16,10 @@
 
 standard_testfile .c line-symtabs.h
 
+if { [is_remote host] } {
+    gdb_remote_download host $srcdir/$subdir/$srcfile2
+}
+
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
     return -1
 }

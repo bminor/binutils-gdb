@@ -15,6 +15,10 @@
 #
 # This file is part of the gdb testsuite.
 
+if { [is_remote host] } {
+    gdb_remote_download host $srcdir/$subdir/large-frame.h
+}
+
 # This test was added to test GDB's ability to backtrace over a large
 # stack frame for which there is no debug information.  This should
 # test the non-DWARF stack unwinder.
