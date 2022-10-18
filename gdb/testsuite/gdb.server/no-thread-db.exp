@@ -59,5 +59,6 @@ gdb_breakpoint ${srcfile}:[gdb_get_line_number "after tls assignment"]
 gdb_continue_to_breakpoint "after tls assignment"
 
 # Printing a tls variable should fail gracefully without a libthread_db.
+set re_exec "\[^\r\n\]*[file tail $binfile]"
 gdb_test "print foo" \
-    "Cannot find thread-local storage for Thread \[^,\]+, executable file ${binfile}:\[\r\n\]+Remote target failed to process qGetTLSAddr request"
+    "Cannot find thread-local storage for Thread \[^,\]+, executable file $re_exec:\[\r\n\]+Remote target failed to process qGetTLSAddr request"
