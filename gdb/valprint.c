@@ -879,7 +879,7 @@ generic_value_print_memberptr
       cp_print_class_member (valaddr, type, stream, "&");
     }
   else
-    generic_value_print (val, stream, recurse, options, decorations);
+    value_print_scalar_formatted (val, options, 0, stream);
 }
 
 /* See valprint.h.  */
