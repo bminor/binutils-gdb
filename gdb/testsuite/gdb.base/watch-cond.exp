@@ -17,6 +17,14 @@
 # Tests involving watchpoint conditions with local expressions.
 #
 
+# The skip_hw_watchpoint_tests checks if watchpoints are supported by the
+# processor.  On PowerPC, the check runs a small test program under gdb
+# to determine if the Power processor supports HW watchpoints.  The check
+# must be done before starting the test so as to not disrupt the execution
+# of the actual test.
+
+set skip_hw_watchpoint_tests_p [skip_hw_watchpoint_tests]
+
 standard_testfile .c
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
@@ -24,7 +32,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
 }
 
 # Disable hardware watchpoints if necessary.
-if [target_info exists gdb,no_hardware_watchpoints] {
+if {$skip_hw_watchpoint_tests_p} {
     gdb_test_no_output "set can-use-hw-watchpoints 0" ""
 }
 
@@ -43,7 +51,7 @@ gdb_test "continue" \
 clean_restart ${testfile}
 
 # Disable hardware watchpoints if necessary.
-if [target_info exists gdb,no_hardware_watchpoints] {
+if {$skip_hw_watchpoint_tests_p} {
     gdb_test_no_output "set can-use-hw-watchpoints 0" ""
 }
 
@@ -62,7 +70,7 @@ gdb_test "continue" \
 clean_restart ${testfile}
 
 # Disable hardware watchpoints if necessary.
-if [target_info exists gdb,no_hardware_watchpoints] {
+if {$skip_hw_watchpoint_tests_p} {
     gdb_test_no_output "set can-use-hw-watchpoints 0" ""
 }
 

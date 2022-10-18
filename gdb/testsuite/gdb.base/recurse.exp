@@ -15,6 +15,13 @@
 
 # This file was written by Jeff Law. (law@cs.utah.edu)
 
+# The skip_hw_watchpoint_tests checks if watchpoints are supported by the
+# processor.  On PowerPC, the check runs a small test program under gdb
+# to determine if the Power processor supports HW watchpoints.  The check
+# must be done before starting the test so as to not disrupt the execution
+# of the actual test.
+
+set skip_hw_watchpoint_tests_p [skip_hw_watchpoint_tests]
 
 standard_testfile
 
@@ -25,8 +32,10 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 proc recurse_tests {} {
 
     # Disable hardware watchpoints if necessary.
-    if [target_info exists gdb,no_hardware_watchpoints] {
-	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
+    global skip_hw_watchpoint_tests_p
+
+    if {$skip_hw_watchpoint_tests_p} {
+	 gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
 
     if [runto recurse] then {

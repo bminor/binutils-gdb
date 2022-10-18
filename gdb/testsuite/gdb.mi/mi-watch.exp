@@ -20,6 +20,14 @@
 # The goal is not to test gdb functionality, which is done by other
 # tests, but to verify the correct output response to MI operations.
 
+# The skip_hw_watchpoint_tests checks if watchpoints are supported by the
+# processor.  On PowerPC, the check runs a small test program under gdb
+# to determine if the Power processor supports HW watchpoints.  The check
+# must be done before starting the test so as to not disrupt the execution
+# of the actual test.
+
+set skip_hw_watchpoint_tests_p [skip_hw_watchpoint_tests]
+
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
@@ -138,8 +146,9 @@ proc test_watchpoint_all {mi_mode type} {
     upvar srcdir srcdir
     upvar subdir subdir
     upvar binfile binfile
+    global skip_hw_watchpoint_tests_p
 
-    if {$type == "hw" && [target_info exists gdb,no_hardware_watchpoints] } {
+    if {$type == "hw" && $skip_hw_watchpoint_tests_p } {
 	return
     }
 

@@ -16,6 +16,14 @@
 # This file is part of the GDB testsuite.  It tests the mechanism
 # exposing breakpoints to Python.
 
+# The skip_hw_watchpoint_tests checks if watchpoints are supported by the
+# processor.  On PowerPC, the check runs a small test program under gdb
+# to determine if the Power processor supports HW watchpoints.  The check
+# must be done before starting the test so as to not disrupt the execution
+# of the actual test.
+
+set skip_hw_watchpoint_tests_p [skip_hw_watchpoint_tests]
+
 load_lib gdb-python.exp
 
 standard_testfile
@@ -275,12 +283,13 @@ proc_with_prefix test_hardware_breakpoints { } {
 
 proc_with_prefix test_watchpoints { } {
     global srcfile testfile hex decimal
+    global skip_hw_watchpoint_tests_p
 
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
     # Disable hardware watchpoints if necessary.
-    if [target_info exists gdb,no_hardware_watchpoints] {
+    if {$skip_hw_watchpoint_tests_p} {
 	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
 
@@ -303,7 +312,7 @@ proc_with_prefix test_bkpt_internal { } {
     clean_restart ${testfile}
 
     # Disable hardware watchpoints if necessary.
-    if [target_info exists gdb,no_hardware_watchpoints] {
+    if {$skip_hw_watchpoint_tests_p} {
 	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
     if ![runto_main] then {
@@ -350,7 +359,7 @@ proc_with_prefix test_bkpt_eval_funcs { } {
     clean_restart ${testfile}
 
     # Disable hardware watchpoints if necessary.
-    if [target_info exists gdb,no_hardware_watchpoints] {
+    if {$skip_hw_watchpoint_tests_p} {
 	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
     if ![runto_main] then {

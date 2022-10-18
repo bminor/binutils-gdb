@@ -44,7 +44,7 @@ proc test_watchpoint_across_vfork { hw teststr } {
 	"Watchpoint triggers after vfork ($teststr)"
 }
 
-if { ![target_info exists gdb,no_hardware_watchpoints] } {
+if { ![skip_hw_watchpoint_tests] } {
     test_watchpoint_across_vfork 1 "hw"
 }
 
