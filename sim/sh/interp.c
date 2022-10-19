@@ -1401,7 +1401,7 @@ fsca_s (int in, double (*f) (double))
   lower = result - error;
   frac = frexp (lower, &exp);
   lower = ldexp (ceil (ldexp (frac, 24)), exp - 24);
-  return abs (upper - result) >= abs (lower - result) ? upper : lower;
+  return fabs (upper - result) >= fabs (lower - result) ? upper : lower;
 }
 
 static float
