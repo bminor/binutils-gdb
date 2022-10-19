@@ -48,6 +48,7 @@ targ_underscore=no
 
 # Catch obsolete configurations.
 case $targ in
+ *-*-beos* | \
  null)
     if test "x$enable_obsolete" != xyes; then
       echo "*** Configuration $targ is obsolete." >&2
@@ -751,7 +752,7 @@ case "${targ}" in
     targ_defvec=i386_pe_vec
     targ_selvecs="i386_pe_vec i386_pei_vec"
     ;;
-  i[3-7]86-*-beoself* | i[3-7]86-*-beos*)
+  i[3-7]86-*-beos*)
     targ_defvec=i386_elf32_vec
     targ_selvecs="iamcu_elf32_vec i386_pe_vec i386_pei_vec"
     ;;
