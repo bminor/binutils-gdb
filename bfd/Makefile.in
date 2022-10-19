@@ -1048,6 +1048,7 @@ BFD64_BACKENDS = \
 	pe-loongarch64igen.lo \
 	pe-x86_64.lo \
 	pei-aarch64.lo \
+	pe-aarch64.lo \
 	pei-ia64.lo \
 	pei-loongarch64.lo \
 	pei-x86_64.lo \
@@ -1700,6 +1701,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pc532-mach.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdb.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pdp11.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pe-aarch64.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pe-aarch64igen.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pe-arm-wince.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pe-arm.Plo@am__quote@
