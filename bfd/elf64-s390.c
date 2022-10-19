@@ -3056,6 +3056,24 @@ elf_s390_relocate_section (bfd *output_bfd,
 	  || r_type == R_390_PLT24DBL)
 	rel->r_offset--;
 
+      /* Issue an error if the right shift implied by the relocation
+	 would drop bits from the symbol value.  */
+      if (howto->rightshift
+	  && (relocation & (((bfd_vma)1 << howto->rightshift) - 1)))
+	{
+	  _bfd_error_handler
+	    /* xgettext:c-format */
+	    (_("%pB(%pA+%#" PRIx64 "): "
+	       "misaligned symbol `%s' (%#" PRIx64 ") for relocation %s"),
+	     input_bfd,
+	     input_section,
+	     (uint64_t) rel->r_offset,
+	     h->root.root.string,
+	     (uint64_t)relocation,
+	     howto->name);
+	  return false;
+	}
+
       if (r_type == R_390_20
 	  || r_type == R_390_GOT20
 	  || r_type == R_390_GOTPLT20
