@@ -83,22 +83,6 @@
     }									\
   while (0)
 
-/* Helper functions used by expandLogicalImmediate.  */
-
-/* for i = 1, ... N result<i-1> = 1 other bits are zero  */
-static inline uint64_t
-ones (int N)
-{
-  return (N == 64 ? (uint64_t)-1UL : ((1UL << N) - 1));
-}
-
-/* result<0> to val<N>  */
-static inline uint64_t
-pickbit (uint64_t val, int N)
-{
-  return pickbits64 (val, N, N);
-}
-
 static uint64_t
 expand_logical_immediate (uint32_t S, uint32_t R, uint32_t N)
 {
