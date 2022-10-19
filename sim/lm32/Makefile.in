@@ -24,9 +24,6 @@ SIM_EXTRA_DEPS = $(CGEN_INCLUDE_DEPS) $(srcdir)/../../opcodes/lm32-desc.h \
 
 SIM_EXTRA_CLEAN = lm32-clean
 
-# Some modules don't build cleanly yet.
-dv-lm32cpu.o mloop.o sem.o traps.o user.o: SIM_WERROR_CFLAGS =
-
 ## COMMON_POST_CONFIG_FRAG
 
 arch = lm32 

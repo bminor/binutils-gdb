@@ -21,6 +21,9 @@
 /* This must come before any other includes.  */
 #include "defs.h"
 
+#define WANT_CPU lm32bf
+#define WANT_CPU_LM32BF
+
 #include "sim-main.h"
 
 /* Handle user defined instructions.  */
