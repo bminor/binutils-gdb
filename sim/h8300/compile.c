@@ -4141,7 +4141,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	  res = GET_B_REG (code->src.reg);	/* FIXME fetch? */
 	  if (!c && (0 <= (res >>  4) && (res >>  4) <= 9) && 
 	      !h && (0 <= (res & 0xf) && (res & 0xf) <= 9))
-	    res = res;		/* Value added == 0.  */
+	    /* Nothing.  */;		/* Value added == 0.  */
 	  else if (!c && (0  <= (res >>  4) && (res >>  4) <=  8) && 
 		   !h && (10 <= (res & 0xf) && (res & 0xf) <= 15))
 	    res = res + 0x6;		/* Value added == 6.  */
@@ -4174,7 +4174,7 @@ step_once (SIM_DESC sd, SIM_CPU *cpu)
 	  res = GET_B_REG (code->src.reg); /* FIXME fetch, fetch2... */
 	  if (!c && (0 <= (res >>  4) && (res >>  4) <= 9) && 
 	      !h && (0 <= (res & 0xf) && (res & 0xf) <= 9))
-	    res = res;		/* Value added == 0.  */
+	    /* Nothing.  */;		/* Value added == 0.  */
 	  else if (!c && (0 <= (res >>  4) && (res >>  4) <=  8) && 
 		    h && (6 <= (res & 0xf) && (res & 0xf) <= 15))
 	    res = res + 0xfa;		/* Value added == 0xfa.  */
