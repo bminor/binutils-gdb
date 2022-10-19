@@ -18,6 +18,7 @@
 
 #include "defs.h"
 #include "namespace.h"
+#include "frame.h"
 
 /* Add a using directive to USING_DIRECTIVES.  If the using directive
    in question has already been added, don't add it twice.
@@ -40,6 +41,7 @@ add_using_directive (struct using_direct **using_directives,
 		     const char *alias,
 		     const char *declaration,
 		     const std::vector<const char *> &excludes,
+		     unsigned int decl_line,
 		     int copy_names,
 		     struct obstack *obstack)
 {
@@ -74,6 +76,9 @@ add_using_directive (struct using_direct **using_directives,
 	    || strcmp (excludes[ix], current->excludes[ix]) != 0)
 	  break;
       if (ix < excludes.size () || current->excludes[ix] != NULL)
+	continue;
+
+      if (decl_line != current->decl_line)
 	continue;
 
       /* Parameters exactly match CURRENT.  */
@@ -111,6 +116,26 @@ add_using_directive (struct using_direct **using_directives,
 	    excludes.size () * sizeof (*newobj->excludes));
   newobj->excludes[excludes.size ()] = NULL;
 
+  newobj->decl_line = decl_line;
+
   newobj->next = *using_directives;
   *using_directives = newobj;
+}
+
+/* See namespace.h.  */
+
+bool
+using_direct::valid_line (unsigned int boundary) const
+{
+  try
+    {
+      CORE_ADDR curr_pc = get_frame_pc (get_selected_frame (nullptr));
+      symtab_and_line curr_sal = find_pc_line (curr_pc, 0);
+      return (decl_line <= curr_sal.line)
+	     || (decl_line >= boundary);
+    }
+  catch (const gdb_exception &ex)
+    {
+      return true;
+    }
 }

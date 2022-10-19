@@ -93,10 +93,12 @@ cp_scan_for_anonymous_namespaces (struct buildsym_compunit *compunit,
 	      /* We've found a component of the name that's an
 		 anonymous namespace.  So add symbols in it to the
 		 namespace given by the previous component if there is
-		 one, or to the global namespace if there isn't.  */
+		 one, or to the global namespace if there isn't.
+		 The declared line of this using directive can be set
+		 to 0, this way it is always considered valid.  */
 	      std::vector<const char *> excludes;
 	      add_using_directive (compunit->get_local_using_directives (),
-				   dest, src, NULL, NULL, excludes,
+				   dest, src, NULL, NULL, excludes, 0,
 				   1, &objfile->objfile_obstack);
 	    }
 	  /* The "+ 2" is for the "::".  */
@@ -392,16 +394,23 @@ cp_lookup_symbol_via_imports (const char *scope,
   if (sym.symbol != NULL)
     return sym;
 
+  /* Due to a GCC bug, we need to know the boundaries of the current block
+     to know if a certain using directive is valid.  */
+  symtab_and_line boundary_sal = find_pc_line (block->end () - 1, 0);
+
   /* Go through the using directives.  If any of them add new names to
      the namespace we're searching in, see if we can find a match by
      applying them.  */
-
   for (current = block_using (block);
        current != NULL;
        current = current->next)
     {
       const char **excludep;
 
+      /* If the using directive was below the place we are stopped at,
+	 do not use this directive.  */
+      if (!current->valid_line (boundary_sal.line))
+	continue;
       len = strlen (current->import_dest);
       directive_match = (search_parents
 			 ? (startswith (scope, current->import_dest)
