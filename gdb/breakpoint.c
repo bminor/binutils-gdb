@@ -5679,7 +5679,10 @@ handle_jit_event (CORE_ADDR address)
      function needs to be updated too.  */
   bound_minimal_symbol jit_bp_sym = lookup_minimal_symbol_by_pc (address);
   gdb_assert (jit_bp_sym.objfile != nullptr);
-  jit_event_handler (gdbarch, jit_bp_sym.objfile);
+  objfile *objfile = jit_bp_sym.objfile;
+  if (objfile->separate_debug_objfile_backlink)
+    objfile = objfile->separate_debug_objfile_backlink;
+  jit_event_handler (gdbarch, objfile);
 
   target_terminal::inferior ();
 }
