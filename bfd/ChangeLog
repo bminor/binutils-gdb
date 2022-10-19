@@ -1,3 +1,9 @@
+2022-10-19  Nick Clifton  <nickc@redhat.com>
+
+	PR 29699
+	* elf.c (_bfd_elf_slurp_version_tables): Fail if the sh_info field
+	of the section header is zero.
+
 2022-09-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 29532
