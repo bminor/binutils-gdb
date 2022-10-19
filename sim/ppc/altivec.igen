@@ -231,7 +231,7 @@ void::model-function::ppc_insn_vr_vscr:itable_index index, model_data *model_ptr
 	busy_ptr->vscr_busy = 1;
 
 	if (out_vmask)
-	  busy_ptr->nr_writebacks = 1 + (PPC_ONE_BIT_SET_P(out_vmask)) ? 1 : 2;
+	  busy_ptr->nr_writebacks = 1 + (PPC_ONE_BIT_SET_P (out_vmask) ? 1 : 2);
 
 	if (WITH_TRACE && ppc_trace[trace_model])
 	  model_trace_altivec_make_busy(model_ptr, vr_mask, 0);
