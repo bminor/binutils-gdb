@@ -161,8 +161,6 @@ sim_create_inferior (SIM_DESC sd,
 		     char * const *envp)
 {
   unsigned_word entry_point;
-  TRACE(trace_gdb, ("sim_create_inferior(start_address=0x%x, ...)\n",
-		    entry_point));
 
   if (simulator == NULL)
     error ("No program loaded");
@@ -171,6 +169,9 @@ sim_create_inferior (SIM_DESC sd,
     entry_point = bfd_get_start_address (abfd);
   else
     entry_point = 0xfff00000; /* ??? */
+
+  TRACE(trace_gdb, ("sim_create_inferior(start_address=0x%x, ...)\n",
+		    entry_point));
 
   psim_init(simulator);
   psim_stack(simulator, argv, envp);
