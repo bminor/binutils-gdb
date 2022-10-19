@@ -42,7 +42,7 @@
 #include "../bfd/libcoff.h"
 #include "deffile.h"
 
-#ifdef pe_use_x86_64
+#ifdef pe_use_plus
 
 #define PE_IDATA4_SIZE	8
 #define PE_IDATA5_SIZE	8
@@ -209,7 +209,7 @@ static const autofilter_entry_type autofilter_symbollist_i386[] =
   { STRING_COMMA_LEN ("_NULL_IMPORT_DESCRIPTOR") },
   /* Entry point symbols, and entry hooks.  */
   { STRING_COMMA_LEN ("cygwin_crt0") },
-#ifdef pe_use_x86_64
+#ifdef pe_use_plus
   { STRING_COMMA_LEN ("DllMain") },
   { STRING_COMMA_LEN ("DllEntryPoint") },
   { STRING_COMMA_LEN ("DllMainCRTStartup") },
@@ -246,13 +246,14 @@ static const autofilter_entry_type autofilter_symbollist_i386[] =
 #define PE_ARCH_mips	 3
 #define PE_ARCH_arm	 4
 #define PE_ARCH_arm_wince 5
+#define PE_ARCH_aarch64  6
 
 /* Don't make it constant as underscore mode gets possibly overriden
    by target or -(no-)leading-underscore option.  */
 static pe_details_type pe_detail_list[] =
 {
   {
-#ifdef pe_use_x86_64
+#ifdef pe_use_plus
     "pei-x86-64",
     "pe-x86-64",
     3 /* R_IMAGEBASE */,
@@ -263,14 +264,14 @@ static pe_details_type pe_detail_list[] =
 #endif
     PE_ARCH_i386,
     bfd_arch_i386,
-#ifdef pe_use_x86_64
+#ifdef pe_use_plus
     false,
 #else
     true,
 #endif
     autofilter_symbollist_i386
   },
-#ifdef pe_use_x86_64
+#ifdef pe_use_plus
   {
     "pei-x86-64",
     "pe-bigobj-x86-64",
@@ -324,6 +325,15 @@ static pe_details_type pe_detail_list[] =
     2,  /* ARM_RVA32 on Windows CE, see bfd/coff-arm.c.  */
     PE_ARCH_arm_wince,
     bfd_arch_arm,
+    false,
+    autofilter_symbollist_generic
+  },
+  {
+    "pei-aarch64-little",
+    "pe-aarch64-little",
+    2,  /* ARM64_RVA32 */
+    PE_ARCH_aarch64,
+    bfd_arch_aarch64,
     false,
     autofilter_symbollist_generic
   },
@@ -1638,7 +1648,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		  switch BITS_AND_SHIFT (relocs[i]->howto->bitsize,
 					 relocs[i]->howto->rightshift)
 		    {
-#ifdef pe_use_x86_64
+#ifdef pe_use_plus
 		    case BITS_AND_SHIFT (64, 0):
 		      reloc_data[total_relocs].type = IMAGE_REL_BASED_DIR64;
 		      total_relocs++;
@@ -2248,6 +2258,15 @@ static const unsigned char jmp_ix86_bytes[] =
 };
 
 /* _function:
+  b <__imp_function>
+  nop */
+static const unsigned char jmp_aarch64_bytes[] =
+{
+  0x00, 0x00, 0x00, 0x14,
+  0x1f, 0x20, 0x03, 0xD5
+};
+
+/* _function:
 	mov.l	ip+8,r0
 	mov.l	@r0,r0
 	jmp	@r0
@@ -2316,6 +2335,10 @@ make_one (def_file_export *exp, bfd *parent, bool include_jmp_stub)
 	case PE_ARCH_arm_wince:
 	  jmp_bytes = jmp_arm_bytes;
 	  jmp_byte_count = sizeof (jmp_arm_bytes);
+	  break;
+	case PE_ARCH_aarch64:
+	  jmp_bytes = jmp_aarch64_bytes;
+	  jmp_byte_count = sizeof (jmp_aarch64_bytes);
 	  break;
 	default:
 	  abort ();
@@ -2386,7 +2409,7 @@ make_one (def_file_export *exp, bfd *parent, bool include_jmp_stub)
       switch (pe_details->pe_arch)
 	{
 	case PE_ARCH_i386:
-#ifdef pe_use_x86_64
+#ifdef pe_use_plus
 	  quick_reloc (abfd, 2, BFD_RELOC_32_PCREL, 2);
 #else
 	  /* Mark this object as SAFESEH compatible.  */
@@ -2406,6 +2429,9 @@ make_one (def_file_export *exp, bfd *parent, bool include_jmp_stub)
 	case PE_ARCH_arm:
 	case PE_ARCH_arm_wince:
 	  quick_reloc (abfd, 8, BFD_RELOC_32, 2);
+	  break;
+	case PE_ARCH_aarch64:
+	  quick_reloc (abfd, 0, BFD_RELOC_AARCH64_JUMP26, 2);
 	  break;
 	default:
 	  abort ();
@@ -3406,7 +3432,7 @@ pe_implied_import_dll (const char *filename)
   /* Get pe_header, optional header and numbers of directory entries.  */
   pe_header_offset = pe_get32 (dll, 0x3c);
   opthdr_ofs = pe_header_offset + 4 + 20;
-#ifdef pe_use_x86_64
+#ifdef pe_use_plus
   num_entries = pe_get32 (dll, opthdr_ofs + 92 + 4 * 4); /*  & NumberOfRvaAndSizes.  */
 #else
   num_entries = pe_get32 (dll, opthdr_ofs + 92);
@@ -3416,7 +3442,7 @@ pe_implied_import_dll (const char *filename)
   if (num_entries < 1)
     return false;
 
-#ifdef pe_use_x86_64
+#ifdef pe_use_plus
   export_rva  = pe_get32 (dll, opthdr_ofs + 96 + 4 * 4);
   export_size = pe_get32 (dll, opthdr_ofs + 100 + 4 * 4);
 #else

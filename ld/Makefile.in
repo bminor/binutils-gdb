@@ -887,6 +887,7 @@ ALL_64_EMULATION_SOURCES = \
 	eaarch64linux32.c \
 	eaarch64linux32b.c \
 	eaarch64linuxb.c \
+	eaarch64pe.c \
 	eelf32_x86_64.c \
 	eelf32b4300.c \
 	eelf32bmip.c \

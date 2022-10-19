@@ -377,6 +377,7 @@ ALL_EMULATIONS = $(ALL_EMULATION_SOURCES:.c=.@OBJEXT@)
 ALL_64_EMULATION_SOURCES = \
 	eaarch64cloudabi.c \
 	eaarch64cloudabib.c \
+	eaarch64pe.c \
 	eaarch64elf.c \
 	eaarch64elf32.c \
 	eaarch64elf32b.c \

@@ -78,6 +78,11 @@ if {[istarget i*86-*-cygwin*]
     run_ld_link_tests $pe_tests
 }
 
+if {[istarget "aarch64-*-pe*"]} {
+	run_dump_test "pe-aarch64"
+}
+
+
 run_dump_test "image_size"
 run_dump_test "export_dynamic_warning"
 

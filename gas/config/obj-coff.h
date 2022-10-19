@@ -40,6 +40,10 @@
 #endif
 #endif
 
+#ifdef TC_AARCH64
+#include "coff/aarch64.h"
+#endif
+
 #ifdef TC_PPC
 #include "coff/rs6000.h"
 #endif

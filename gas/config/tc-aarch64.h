@@ -59,9 +59,11 @@ struct aarch64_fix
   enum aarch64_opnd opnd;
 };
 
-#if defined OBJ_ELF
+#ifdef OBJ_ELF
 # define AARCH64_BI_ENDIAN
 # define TARGET_FORMAT	elf64_aarch64_target_format ()
+#elif defined (OBJ_COFF)
+# define TARGET_FORMAT coff_aarch64_target_format ()
 #endif
 
 #define TC_FORCE_RELOCATION(FIX) aarch64_force_relocation (FIX)
@@ -169,7 +171,7 @@ void aarch64_elf_copy_symbol_attributes (symbolS *, symbolS *);
 struct aarch64_frag_type
 {
   int recorded;
-#ifdef OBJ_ELF
+#if defined OBJ_ELF || defined OBJ_COFF
   /* If there is a mapping symbol at offset 0 in this frag,
      it will be saved in FIRST_MAP.  If there are any mapping
      symbols in this frag, the last one will be saved in
@@ -202,8 +204,10 @@ struct aarch64_frag_type
 extern int aarch64_dwarf2_addr_size (void);
 #define DWARF2_ADDR_SIZE(bfd) aarch64_dwarf2_addr_size ()
 
+#if defined OBJ_ELF || defined OBJ_COFF
 #ifdef OBJ_ELF
 # define obj_frob_symbol(sym, punt)	aarch64elf_frob_symbol ((sym), & (punt))
+#endif
 
 # define GLOBAL_OFFSET_TABLE_NAME	"_GLOBAL_OFFSET_TABLE_"
 # define TC_SEGMENT_INFO_TYPE 		struct aarch64_segment_info_type
@@ -259,6 +263,7 @@ extern void aarch64_after_parse_args (void);
 
 extern void aarch64_frag_align_code (int, int);
 extern const char * elf64_aarch64_target_format (void);
+extern const char * coff_aarch64_target_format (void);
 extern int aarch64_force_relocation (struct fix *);
 extern void aarch64_cleanup (void);
 extern void aarch64_start_line_hook (void);
@@ -273,14 +278,5 @@ extern void aarch64_init_frag (struct frag *, int);
 extern void aarch64_handle_align (struct frag *);
 extern int tc_aarch64_regname_to_dw2regnum (char *regname);
 extern void tc_aarch64_frame_initial_instructions (void);
-
-#ifdef TE_PE
-
-#define O_secrel O_md1
-
-#define TC_DWARF2_EMIT_OFFSET  tc_pe_dwarf2_emit_offset
-void tc_pe_dwarf2_emit_offset (symbolS *, unsigned int);
-
-#endif /* TE_PE */
 
 #endif /* TC_AARCH64 */

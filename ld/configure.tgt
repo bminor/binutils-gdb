@@ -117,6 +117,10 @@ aarch64-*-linux*)	targ_emul=aarch64linux
 aarch64-*-haiku*)	targ_emul=aarch64haiku
 			targ_extra_emuls="aarch64elf aarch64elf32 aarch64elf32b aarch64elfb armelf armelfb armelf_haiku $targ_extra_libpath"
 			;;
+aarch64-*-pe*)
+			targ_emul=aarch64pe
+			targ_extra_ofiles="deffilep.o pep-dll-aarch64.o"
+			;;
 alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
 			targ_emul=elf64alpha_fbsd
 			targ_extra_emuls="elf64alpha alpha"
@@ -1042,7 +1046,7 @@ x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
 			;;
 x86_64-*-pe | x86_64-*-pep) targ_emul=i386pep ;
 			targ_extra_emuls=i386pe ;
-			targ_extra_ofiles="deffilep.o pep-dll.o pe-dll.o"
+			targ_extra_ofiles="deffilep.o pep-dll-x86_64.o pe-dll.o"
 			;;
 x86_64-*-cygwin)	targ_emul=i386pep ;
 			targ_extra_emuls=i386pe

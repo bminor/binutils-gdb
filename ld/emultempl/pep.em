@@ -48,7 +48,11 @@ fragment <<EOF
 
 #define COFF_IMAGE_WITH_PE
 #define COFF_WITH_PE
+#ifdef TARGET_IS_aarch64pe
+#define COFF_WITH_peAArch64
+#elif defined (TARGET_IS_i386pep)
 #define COFF_WITH_pex64
+#endif
 
 #include "sysdep.h"
 #include "bfd.h"
@@ -72,7 +76,11 @@ fragment <<EOF
 
 /* FIXME: See bfd/peXXigen.c for why we include an architecture specific
    header in generic PE code.  */
-#include "coff/x86_64.h"
+#ifdef TARGET_IS_i386pep
+# include "coff/x86_64.h"
+#elif defined TARGET_IS_aarch64pe
+# include "coff/aarch64.h"
+#endif
 #include "coff/pe.h"
 
 /* FIXME: These are BFD internal header files, and we should not be

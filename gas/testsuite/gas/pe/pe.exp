@@ -52,6 +52,12 @@ if ([istarget "x86_64-*-mingw*"]) then {
 	run_dump_test "peseh-x64-6"
 }
 
+
+# This test is only for AArch64
+if ([istarget "aarch64-*-pe*"]) {
+	run_dump_test "pe-aarch64"
+}
+
 # Big obj
 
 

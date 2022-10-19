@@ -191,6 +191,8 @@ coff_swap_filehdr_in (bfd * abfd, void * src, void * dst)
 
 #ifdef COFF_IMAGE_WITH_PE
 # define coff_swap_filehdr_out _bfd_XXi_only_swap_filehdr_out
+#elif defined COFF_WITH_peAArch64
+# define coff_swap_filehdr_out _bfd_XX_only_swap_filehdr_out
 #elif defined COFF_WITH_pex64
 # define coff_swap_filehdr_out _bfd_pex64_only_swap_filehdr_out
 #elif defined COFF_WITH_pep

@@ -313,6 +313,7 @@ osf-core.c
 pc532-mach.c
 pdb.c
 pdp11.c
+pe-aarch64.c
 pe-arm-wince.c
 pe-arm.c
 pe-i386.c

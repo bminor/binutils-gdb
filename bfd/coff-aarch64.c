@@ -39,34 +39,150 @@
 
 #include "libcoff.h"
 
-/* The page size is a guess based on ELF.  */
+/* In case we're on a 32-bit machine, construct a 64-bit "-1" value.  */
+#define MINUS_ONE (~ (bfd_vma) 0)
 
-#define COFF_PAGE_SIZE 0x1000
+static const reloc_howto_type arm64_reloc_howto_64 = HOWTO(IMAGE_REL_ARM64_ADDR64, 0, 8, 64, false, 0,
+	 complain_overflow_bitfield,
+	 NULL, "64",
+	 false, MINUS_ONE, MINUS_ONE, false);
 
-/* All users of this file have bfd_octets_per_byte (abfd, sec) == 1.  */
-#define OCTETS_PER_BYTE(ABFD, SEC) 1
+static const reloc_howto_type arm64_reloc_howto_32 = HOWTO (IMAGE_REL_ARM64_ADDR32, 0, 4, 32, false, 0,
+	 complain_overflow_bitfield,
+	 NULL, "32",
+	 false, 0xffffffff, 0xffffffff, false);
 
-#ifndef PCRELOFFSET
-#define PCRELOFFSET true
-#endif
+static const reloc_howto_type arm64_reloc_howto_32_pcrel = HOWTO (IMAGE_REL_ARM64_REL32, 0, 4, 32, true, 0,
+	 complain_overflow_bitfield,
+	 NULL, "DISP32",
+	 false, 0xffffffff, 0xffffffff, true);
 
-/* Currently we don't handle any relocations.  */
-static reloc_howto_type pe_aarch64_std_reloc_howto[] =
-  {
+static const reloc_howto_type arm64_reloc_howto_branch26 = HOWTO (IMAGE_REL_ARM64_BRANCH26, 0, 4, 26, true, 0,
+	 complain_overflow_bitfield,
+	 NULL, "BRANCH26",
+	 false, 0x03ffffff, 0x03ffffff, true);
 
-  };
+static const reloc_howto_type arm64_reloc_howto_page21 = HOWTO (IMAGE_REL_ARM64_PAGEBASE_REL21, 12, 4, 21, true, 0,
+	 complain_overflow_signed,
+	 NULL, "PAGE21",
+	 false, 0x1fffff, 0x1fffff, false);
 
-#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER  2
-#define COFF_PAGE_SIZE			      0x1000
+static const reloc_howto_type arm64_reloc_howto_lo21 = HOWTO (IMAGE_REL_ARM64_REL21, 0, 4, 21, true, 0,
+	 complain_overflow_signed,
+	 NULL, "LO21",
+	 false, 0x1fffff, 0x1fffff, true);
+
+static const reloc_howto_type arm64_reloc_howto_pgoff12 = HOWTO (IMAGE_REL_ARM64_PAGEOFFSET_12L, 1, 4, 12, true, 0,
+	 complain_overflow_signed,
+	 NULL, "PGOFF12",
+	 false, 0xffe, 0xffe, true);
+
+static const reloc_howto_type arm64_reloc_howto_branch19 = HOWTO (IMAGE_REL_ARM64_BRANCH19, 2, 4, 19, true, 0,
+	 complain_overflow_signed,
+	 NULL, "BRANCH19",
+	 false, 0x7ffff, 0x7ffff, true);
+
+
+static const reloc_howto_type* const arm64_howto_table[] = {
+     &arm64_reloc_howto_64,
+     &arm64_reloc_howto_32,
+     &arm64_reloc_howto_32_pcrel,
+     &arm64_reloc_howto_branch26,
+     &arm64_reloc_howto_page21,
+     &arm64_reloc_howto_lo21,
+     &arm64_reloc_howto_pgoff12,
+     &arm64_reloc_howto_branch19
+};
 
 #ifndef NUM_ELEM
 #define NUM_ELEM(a) ((sizeof (a)) / sizeof ((a)[0]))
 #endif
 
-#define NUM_RELOCS NUM_ELEM (pe_aarch64_std_reloc_howto)
+#define NUM_RELOCS NUM_ELEM (arm64_howto_table)
 
-#define RTYPE2HOWTO(cache_ptr, dst)             \
-  (cache_ptr)->howto = NULL
+#define coff_bfd_reloc_type_lookup		coff_aarch64_reloc_type_lookup
+#define coff_bfd_reloc_name_lookup		coff_aarch64_reloc_name_lookup
+
+static reloc_howto_type *
+coff_aarch64_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED, bfd_reloc_code_real_type code)
+{
+  switch (code)
+  {
+  case BFD_RELOC_64:
+    return &arm64_reloc_howto_64;
+  case BFD_RELOC_32:
+    return &arm64_reloc_howto_32;
+  case BFD_RELOC_32_PCREL:
+    return &arm64_reloc_howto_32_pcrel;
+  case BFD_RELOC_AARCH64_CALL26:
+  case BFD_RELOC_AARCH64_JUMP26:
+    return &arm64_reloc_howto_branch26;
+  case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
+    return &arm64_reloc_howto_page21;
+  case BFD_RELOC_AARCH64_ADR_LO21_PCREL:
+    return &arm64_reloc_howto_lo21;
+  case BFD_RELOC_AARCH64_LDST16_LO12:
+    return &arm64_reloc_howto_pgoff12;
+  case BFD_RELOC_AARCH64_BRANCH19:
+    return &arm64_reloc_howto_branch19;
+  default:
+    BFD_FAIL ();
+    return NULL;
+  }
+
+  return NULL;
+}
+
+static reloc_howto_type *
+coff_aarch64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+			    const char *r_name)
+{
+	unsigned int i;
+
+	for (i = 0; i < NUM_RELOCS; i++)
+	  if (arm64_howto_table[i]->name != NULL
+	    && strcasecmp (arm64_howto_table[i]->name, r_name) == 0)
+	    return arm64_howto_table[i];
+
+  return NULL;
+}
+
+#define COFF_DEFAULT_SECTION_ALIGNMENT_POWER  2
+#define COFF_PAGE_SIZE			      0x1000
+
+static reloc_howto_type *
+coff_aarch64_rtype_lookup (unsigned int code)
+{
+  switch (code)
+  {
+    case IMAGE_REL_ARM64_ADDR64:
+      return &arm64_reloc_howto_64;
+    case IMAGE_REL_ARM64_ADDR32:
+      return &arm64_reloc_howto_32;
+    case IMAGE_REL_ARM64_REL32:
+      return &arm64_reloc_howto_32_pcrel;
+    case IMAGE_REL_ARM64_BRANCH26:
+      return &arm64_reloc_howto_branch26;
+    case IMAGE_REL_ARM64_PAGEBASE_REL21:
+      return &arm64_reloc_howto_page21;
+    case IMAGE_REL_ARM64_REL21:
+      return &arm64_reloc_howto_lo21;
+    case IMAGE_REL_ARM64_PAGEOFFSET_12L:
+      return &arm64_reloc_howto_pgoff12;
+    case IMAGE_REL_ARM64_BRANCH19:
+      return &arm64_reloc_howto_branch19;
+    default:
+      BFD_FAIL ();
+      return NULL;
+  }
+
+  return NULL;
+}
+
+#define RTYPE2HOWTO(cache_ptr, dst)				\
+  ((cache_ptr)->howto =	coff_aarch64_rtype_lookup((dst)->r_type))
+
+#define SELECT_RELOC(x,howto) { (x).r_type = (howto)->type; }
 
 #ifndef bfd_pe_print_pdata
 #define bfd_pe_print_pdata      NULL
@@ -93,13 +209,13 @@ const bfd_target
 #ifdef TARGET_SYM
   TARGET_SYM =
 #else
-  aarch64_pei_vec =
+# error "target symbol name not specified"
 #endif
 {
 #ifdef TARGET_NAME
   TARGET_NAME,
 #else
- "pei-aarch64-little",			/* Name.  */
+# error "target name not specified"
 #endif
   bfd_target_coff_flavour,
   BFD_ENDIAN_LITTLE,		/* Data byte order is little.  */
@@ -125,14 +241,14 @@ const bfd_target
   0,				/* match priority.  */
   TARGET_KEEP_UNUSED_SECTION_SYMBOLS, /* keep unused section symbols.  */
 
-     /* Data conversion functions.  */
-     bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* Data.  */
-     /* Header conversion functions.  */
-     bfd_getl64, bfd_getl_signed_64, bfd_putl64,
-     bfd_getl32, bfd_getl_signed_32, bfd_putl32,
-     bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* Hdrs.  */
+  /* Data conversion functions.  */
+  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
+  bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+  bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* Data.  */
+  /* Header conversion functions.  */
+  bfd_getl64, bfd_getl_signed_64, bfd_putl64,
+  bfd_getl32, bfd_getl_signed_32, bfd_putl32,
+  bfd_getl16, bfd_getl_signed_16, bfd_putl16, /* Hdrs.  */
 
   /* Note that we allow an object file to be treated as a core file as well.  */
   {				/* bfd_check_format.  */

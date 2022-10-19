@@ -523,6 +523,7 @@ DESCRIPTION
 .#define bfd_mach_aarch64 0
 .#define bfd_mach_aarch64_8R	1
 .#define bfd_mach_aarch64_ilp32	32
+.#define bfd_mach_aarch64_llp64 64
 .  bfd_arch_nios2,     {* Nios II.  *}
 .#define bfd_mach_nios2		0
 .#define bfd_mach_nios2r1	1

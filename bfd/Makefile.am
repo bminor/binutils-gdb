@@ -578,6 +578,7 @@ BFD64_BACKENDS = \
 	pe-loongarch64igen.lo \
 	pe-x86_64.lo \
 	pei-aarch64.lo \
+	pe-aarch64.lo \
 	pei-ia64.lo \
 	pei-loongarch64.lo \
 	pei-x86_64.lo \
@@ -619,6 +620,7 @@ BFD64_BACKENDS_CFILES = \
 	mach-o-aarch64.c \
 	mach-o-x86-64.c \
 	mmo.c \
+	pe-aarch64.c \
 	pe-x86_64.c \
 	pei-aarch64.c \
 	pei-ia64.c \

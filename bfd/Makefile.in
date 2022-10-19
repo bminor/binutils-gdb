@@ -1089,6 +1089,7 @@ BFD64_BACKENDS_CFILES = \
 	mach-o-aarch64.c \
 	mach-o-x86-64.c \
 	mmo.c \
+	pe-aarch64.c \
 	pe-x86_64.c \
 	pei-aarch64.c \
 	pei-ia64.c \
