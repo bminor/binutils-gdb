@@ -14,48 +14,60 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
-global $NM
-global $ADDR2LINE
-
 set testname "addr2line"
+set opts ""
+set dot ""
+set exe [exeext]
+
+# powerpc64 function symbols are on descriptors rather than code.
+if [istarget powerpc64-*-*] {
+    set opts --synthetic
+    set dot {\.}
+}
+
 if { [target_compile $srcdir/$subdir/testprog.c tmpdir/testprog executable debug] != "" } {
     verbose "Unable to compile test file."
-    untested "addr2line"
+    untested "$testname"
     return
 }
 
 #testcase for default option.
 #Run nm command and input the main symbol address to addr2line.
-set output [binutils_run $NM "tmpdir/testprog"]
-regexp -line {^([0-9a-fA-F]+)?[ ]+T main} $output contents
-set list [regexp -inline -all -- {\S+} $contents]
-set got [binutils_run $ADDR2LINE "-e tmpdir/testprog  [lindex $list 0]"]
-set want "$srcdir/$subdir/testprog.c:\[0-9\]+"
-if ![regexp $want $got] then {
-    fail "$testname $got\n"
+set output [binutils_run $NM "$opts tmpdir/testprog$exe"]
+if ![regexp -line "^(\[0-9a-fA-F\]+)? +T ${dot}main" $output contents] then {
+    fail "$testname"
 } else {
-    pass "$testname"
+    set list [regexp -inline -all -- {\S+} $contents]
+    set got [binutils_run $ADDR2LINE "-e tmpdir/testprog$exe [lindex $list 0]"]
+    set want "$srcdir/$subdir/testprog.c:\[0-9\]+"
+    if ![regexp $want $got] then {
+	fail "$testname $got\n"
+    } else {
+	pass "$testname"
+    }
 }
 
 #testcase for -f option.
 #Run nm command and input the fn function symbol address to addr2line.
-regexp -line {^([0-9a-fA-F]+)?[ ]+T fn} $output contents
-pass "output is $output \n contents is $contents\n"
-set list [regexp -inline -all -- {\S+} $contents]
-set got [binutils_run $ADDR2LINE "-f -e tmpdir/testprog  [lindex $list 0]"]
-set want "fn\n$srcdir/$subdir/testprog.c:\[0-9\]+"
-if ![regexp $want $got] then {
-    fail "$testname -f option $got\n"
+if ![regexp -line "^(\[0-9a-fA-F\]+)? +T ${dot}fn" $output contents] then {
+    fail "$testname -f option"
 } else {
-    pass "$testname -f option"
-}
+    set list [regexp -inline -all -- {\S+} $contents]
+    set got [binutils_run $ADDR2LINE "-f -e tmpdir/testprog$exe [lindex $list 0]"]
+    set want "fn\n$srcdir/$subdir/testprog.c:\[0-9\]+"
+    if ![regexp $want $got] then {
+	fail "$testname -f option $got\n"
+    } else {
+	pass "$testname -f option"
+    }
 
 #testcase for -s option.
 #Using the same fn function address used in -f option.
-set got [binutils_run $ADDR2LINE "-s -e tmpdir/testprog  [lindex $list 0]"]
-set want "testprog.c:\[0-9\]+"
-if ![regexp $want $got] then {
-    fail "$testname -s option $got\n"
-} else {
-    pass "$testname -s option"
+    set got [binutils_run $ADDR2LINE "-s -e tmpdir/testprog$exe [lindex $list 0]"]
+    set want "testprog.c:\[0-9\]+"
+    if ![regexp $want $got] then {
+	fail "$testname -s option $got\n"
+    } else {
+	pass "$testname -s option"
+    }
 }
