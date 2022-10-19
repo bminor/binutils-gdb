@@ -212,6 +212,35 @@ also blatantly obvious), and so on.  Obvious fixes should always be
 small, the larger they are, the more likely it is that they contain
 some un-obvious side effect or consequence.
 
+Obvious fixes should not be "legally significant", as defined here:
+
+  https://www.gnu.org/prep/maintain/maintain.html#Legally-Significant
+
+     --------  Patches and Copyright  ---------
+
+If a patch is non-obvious, its copyright must be considered.  There
+are two ways to handle this.  The first is to assign the copyright
+of the FSF.  This ensures that if problems with the authorship of the
+patch arise, the FSF will be able to deal with them.
+
+The list of already assigned copyrights can be obtained from
+fencepost.gnu.org in the file: /gd/gnuorg/copyright.list. 
+
+New copyright assignments can be obtained by completing one of the
+forms found here and sending it off to the FSF:
+
+  https://git.savannah.gnu.org/gitweb/?p=gnulib.git;a=tree;f=doc/Copyright
+
+The alternative is to sign off the contribution by agreeing to the
+Developer's Certificate of Origin (version 1.1 or later) and adding a
+line to the end of the contribution that looks something like this:
+
+  Signed-off-by: Random J Developer <random@developer.example.org>
+
+The details of the Developer's Certificate or Origin can be found here:
+       
+  https://developercertificate.org/
+
     --------- Branch Checkins ---------
 
 If a patch is approved for check in to the mainline sources, it can
