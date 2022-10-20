@@ -45,16 +45,9 @@ proc_with_prefix run_test { target_async target_non_stop } {
 
     gdb_test_no_output "set direct-call-timeout 5"
 
-    # When non-stop mode is off we get slightly different output from GDB.
-    if { [gdb_is_remote_or_extended_remote_target] && $target_non_stop == "off" } {
-	set stopped_line_pattern "Program received signal SIGINT, Interrupt\\."
-    } else {
-	set stopped_line_pattern "Program stopped\\."
-    }
-
     gdb_test "print function_that_never_returns ()" \
 	[multi_line \
-	     $stopped_line_pattern \
+	     "Program stopped\\." \
 	     ".*" \
 	     "The program being debugged timed out while in a function called from GDB\\." \
 	     "GDB remains in the frame where the timeout occurred\\." \

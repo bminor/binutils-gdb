@@ -92,16 +92,9 @@ proc run_test { target_async target_non_stop other_thread_bp } {
 				 "get number for segfault breakpoint"]
     }
 
-    # When non-stop mode is off we get slightly different output from GDB.
-    if { [gdb_is_remote_or_extended_remote_target] && $target_non_stop == "off" } {
-	set stopped_line_pattern "Thread ${::decimal} \"\[^\r\n\"\]+\" received signal SIGINT, Interrupt\\."
-    } else {
-	set stopped_line_pattern "Thread ${::decimal} \"\[^\r\n\"\]+\" stopped\\."
-    }
-
     gdb_test "continue" \
 	[multi_line \
-	     $stopped_line_pattern \
+	     "Thread ${::decimal} \"\[^\r\n\"\]+\" stopped\\." \
 	     ".*" \
 	     "Error in testing condition for breakpoint ${bp_num}:" \
 	     "The program being debugged timed out while in a function called from GDB\\." \

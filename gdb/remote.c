@@ -1138,6 +1138,10 @@ struct remote_thread_info : public private_thread_info
   std::string name;
   int core = -1;
 
+  /* Only used when not in non-stop mode.  Set to true when a stop is
+     requested for the thread.  */
+  bool stop_requested = false;
+
   /* Thread handle, perhaps a pthread_t or thread_t value, stored as a
      sequence of bytes.  */
   gdb::byte_vector thread_handle;
@@ -7113,6 +7117,12 @@ remote_target::stop (ptid_t ptid)
       /* We don't currently have a way to transparently pause the
 	 remote target in all-stop mode.  Interrupt it instead.  */
       remote_interrupt_as ();
+
+      /* Record that this thread's stop is a result of GDB asking for the
+	 stop, rather than the user asking for an interrupt.  We can use
+	 this information to adjust the waitstatus when it arrives.  */
+      remote_thread_info *remote_thr = get_remote_thread_info (this, ptid);
+      remote_thr->stop_requested = true;
     }
 }
 
@@ -8096,9 +8106,16 @@ remote_target::process_stop_reply (struct stop_reply *stop_reply,
 	  /* If the target works in non-stop mode, a stop-reply indicates that
 	     only this thread stopped.  */
 	  remote_thr->set_not_resumed ();
+	  gdb_assert (!remote_thr->stop_requested);
 	}
       else
 	{
+	  if (status->kind () == TARGET_WAITKIND_STOPPED
+	      && status->sig () == GDB_SIGNAL_INT
+	      && remote_thr->stop_requested)
+	    status->set_stopped (GDB_SIGNAL_0);
+	  remote_thr->stop_requested = false;
+
 	  /* If the target works in all-stop mode, a stop-reply indicates that
 	     all the target's threads stopped.  */
 	  for (thread_info *tp : all_non_exited_threads (this))
