@@ -39,7 +39,7 @@ if { [is_address_zero_readable] } {
 # Where the breakpoint will be placed.
 set bp_line [gdb_get_line_number "Breakpoint here"]
 
-proc run_test { cond_eval } {
+proc run_test { cond_eval access_type } {
     clean_restart ${::binfile}
 
     if {![runto_main]} {
@@ -52,7 +52,7 @@ proc run_test { cond_eval } {
     }
 
     # Setup the conditional breakpoint and record its number.
-    gdb_breakpoint "${::srcfile}:${::bp_line} if (*(int *) 0) == 0"
+    gdb_breakpoint "${::srcfile}:${::bp_line} if (*(${access_type} *) 0) == 0"
     set bp_num [get_integer_valueof "\$bpnum" "*UNKNOWN*"]
 
     gdb_test "continue" \
@@ -68,16 +68,14 @@ proc run_test { cond_eval } {
 # If we're using a remote target then conditions could be evaulated
 # locally on the host, or on the remote target.  Otherwise, conditions
 # are always evaluated locally (which is what auto will select).
-#
-# NOTE: 'target' is not included here for remote targets as a
-# gdbserver bug prevents the test from passing.  This will be fixed in
-# the next commit, and this test updated.
 if { [gdb_is_remote_or_extended_remote_target] } {
-    set cond_eval_modes { "host" }
+    set cond_eval_modes { "host" "target" }
 } else {
     set cond_eval_modes { "auto" }
 }
 
-foreach_with_prefix cond_eval $cond_eval_modes {
-    run_test $cond_eval
+foreach_with_prefix access_type { "char" "short" "int" "long long" } {
+    foreach_with_prefix cond_eval $cond_eval_modes {
+	run_test $cond_eval $access_type
+    }
 }
