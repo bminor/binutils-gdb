@@ -2861,16 +2861,6 @@ vpshrdw, 0x6672, None, CpuAVX512_VBMI2, Modrm|Masking=3|Space0F3A|VexVVVV|VexW1|
 
 // AVX512_VBMI2 instructions end
 
-// AVX_VNNI instructions
-
-vpdpbusd, 0x6650, None, CpuAVX_VNNI, Modrm|Vex|PseudoVexPrefix|Space0F38|VexVVVV|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vpdpwssd, 0x6652, None, CpuAVX_VNNI, Modrm|Vex|PseudoVexPrefix|Space0F38|VexVVVV|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-
-vpdpbusds, 0x6651, None, CpuAVX_VNNI, Modrm|Vex|PseudoVexPrefix|Space0F38|VexVVVV|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-vpdpwssds, 0x6653, None, CpuAVX_VNNI, Modrm|Vex|PseudoVexPrefix|Space0F38|VexVVVV|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
-
-// AVX_VNNI instructions end
-
 // AVX512_VNNI instructions
 
 vpdpbusd, 0x6650, None, CpuAVX512_VNNI, Modrm|Masking=3|Space0F38|VexVVVV=1|VexW=1|Broadcast|Disp8ShiftVL|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|RegYMM|RegZMM|Dword|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
@@ -2880,6 +2870,16 @@ vpdpbusds, 0x6651, None, CpuAVX512_VNNI, Modrm|Masking=3|Space0F38|VexVVVV=1|Vex
 vpdpwssds, 0x6653, None, CpuAVX512_VNNI, Modrm|Masking=3|Space0F38|VexVVVV=1|VexW=1|Broadcast|Disp8ShiftVL|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|RegYMM|RegZMM|Dword|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }
 
 // AVX512_VNNI instructions end
+
+// AVX_VNNI instructions
+
+vpdpbusd, 0x6650, None, CpuAVX_VNNI, Modrm|Vex|Space0F38|VexVVVV|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vpdpwssd, 0x6652, None, CpuAVX_VNNI, Modrm|Vex|Space0F38|VexVVVV|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+
+vpdpbusds, 0x6651, None, CpuAVX_VNNI, Modrm|Vex|Space0F38|VexVVVV|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+vpdpwssds, 0x6653, None, CpuAVX_VNNI, Modrm|Vex|Space0F38|VexVVVV|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|RegXMM|RegYMM, RegXMM|RegYMM, RegXMM|RegYMM }
+
+// AVX_VNNI instructions end
 
 // AVX512_BITALG instructions
 

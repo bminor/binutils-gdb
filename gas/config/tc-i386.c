@@ -6456,12 +6456,6 @@ match_template (char mnem_suffix)
       if (cpu_flags_match (t) != CPU_FLAGS_PERFECT_MATCH)
 	continue;
 
-      /* Check Pseudo Prefix.  */
-      if (t->opcode_modifier.pseudovexprefix
-	  && !(i.vec_encoding == vex_encoding_vex
-	      || i.vec_encoding == vex_encoding_vex3))
-	continue;
-
       /* Check AT&T mnemonic.   */
       specific_error = progress (unsupported_with_intel_mnemonic);
       if (intel_mnemonic && t->opcode_modifier.attmnemonic)

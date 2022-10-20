@@ -711,7 +711,6 @@ static bitfield opcode_modifiers[] =
   BITFIELD (ImmExt),
   BITFIELD (NoRex64),
   BITFIELD (Ugh),
-  BITFIELD (PseudoVexPrefix),
   BITFIELD (Vex),
   BITFIELD (VexVVVV),
   BITFIELD (VexW),

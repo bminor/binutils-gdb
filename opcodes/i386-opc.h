@@ -531,8 +531,6 @@ enum
   NoRex64,
   /* deprecated fp insn, gets a warning */
   Ugh,
-  /* Intel AVX Instructions support via {vex} prefix */
-  PseudoVexPrefix,
   /* insn has VEX prefix:
 	1: 128bit VEX prefix (or operand dependent).
 	2: 256bit VEX prefix.
@@ -741,7 +739,6 @@ typedef struct i386_opcode_modifier
   unsigned int immext:1;
   unsigned int norex64:1;
   unsigned int ugh:1;
-  unsigned int pseudovexprefix:1;
   unsigned int vex:2;
   unsigned int vexvvvv:2;
   unsigned int vexw:2;
