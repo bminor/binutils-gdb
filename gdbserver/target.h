@@ -700,6 +700,9 @@ target_thread_pending_child (thread_info *thread)
   return the_target->thread_pending_child (thread);
 }
 
+/* Read LEN bytes from MEMADDR in the buffer MYADDR.  Return 0 if the read
+   is successful, otherwise, return a non-zero error code.  */
+
 int read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len);
 
 /* Set GDBserver's current thread to the thread the client requested

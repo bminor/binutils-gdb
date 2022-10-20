@@ -79,6 +79,8 @@ set_desired_process ()
   return proc != nullptr;
 }
 
+/* See target.h.  */
+
 int
 read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {

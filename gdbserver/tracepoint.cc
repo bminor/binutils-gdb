@@ -344,6 +344,8 @@ tracepoint_look_up_symbols (void)
    GDBserver side.  */
 
 #ifdef IN_PROCESS_AGENT
+/* See target.h.  */
+
 int
 read_inferior_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 {
