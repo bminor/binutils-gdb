@@ -26,8 +26,8 @@ if ![is_elf_format] {
     return
 }
 
-# No shared lib support on this target.
-if { [istarget "mcore-*-*"] } {
+# Skip targets where -shared is not supported
+if { ![check_shared_lib_support] } {
     return
 }
 
