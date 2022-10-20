@@ -145,7 +145,7 @@ bpfinishpy_post_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
     {
       /* Can't delete it here, but it will be removed at the next stop.  */
       disable_breakpoint (bp_obj->bp);
-      gdb_assert (bp_obj->bp->disposition == disp_del);
+      bp_obj->bp->disposition = disp_del_at_next_stop;
     }
   catch (const gdb_exception &except)
     {
