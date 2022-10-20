@@ -8358,6 +8358,8 @@ print_signal_received_reason (struct ui_out *uiout, enum gdb_signal siggnal)
 {
   struct thread_info *thr = inferior_thread ();
 
+  infrun_debug_printf ("signal = %s", gdb_signal_to_string (siggnal));
+
   annotate_signal ();
 
   if (uiout->is_mi_like_p ())
