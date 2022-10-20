@@ -30,4 +30,14 @@ extern std::string xml_escape_text (const char *text);
 
 extern void xml_escape_text_append (std::string &result, const char *text);
 
+/* Simple printf to string function.  Current implemented formatters:
+   %s - append an xml escaped text to BUFFER.
+   %d - append an signed integer to BUFFER.
+   %u - append an unsigned integer to BUFFER.
+   %x - append an unsigned integer formatted in hexadecimal to BUFFER.
+   %o - append an unsigned integer formatted in octal to BUFFER.  */
+
+void string_xml_appendf (std::string &buffer, const char *format, ...)
+  ATTRIBUTE_PRINTF (2, 3);
+
 #endif /* COMMON_XML_UTILS_H */
