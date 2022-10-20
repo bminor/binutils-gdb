@@ -23,6 +23,15 @@
 
 #define GNULIB_NAMESPACE gnulib
 
+#include "diagnostics.h"
+
+/* Since this file uses GNULIB_NAMESPACE, some code defined in headers ends up
+   using system functions rather than gnulib replacements.  This is not really
+   a problem for this test, but it generates some warnings with Clang, silence
+   them.  */
+DIAGNOSTIC_PUSH
+DIAGNOSTIC_IGNORE_USER_DEFINED_WARNINGS
+
 #include "defs.h"
 #include "gdbsupport/selftest.h"
 #include "gdbsupport/gdb_string_view.h"
@@ -33,6 +42,8 @@
 #include <sstream>
 #include <fstream>
 #include <iostream>
+
+DIAGNOSTIC_POP
 
 /* libstdc++'s testsuite uses VERIFY.  */
 #define VERIFY SELF_CHECK
