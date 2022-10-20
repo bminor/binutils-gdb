@@ -4914,8 +4914,7 @@ condition_true_at_tracepoint (struct tracepoint_hit_ctx *ctx,
   return (value ? 1 : 0);
 }
 
-/* Do memory copies for bytecodes.  */
-/* Do the recording of memory blocks for actions and bytecodes.  */
+/* See tracepoint.h.  */
 
 int
 agent_mem_read (struct eval_agent_expr_context *ctx,
@@ -4927,10 +4926,7 @@ agent_mem_read (struct eval_agent_expr_context *ctx,
 
   /* If a 'to' buffer is specified, use it.  */
   if (to != NULL)
-    {
-      read_inferior_memory (from, to, len);
-      return 0;
-    }
+    return read_inferior_memory (from, to, len);
 
   /* Otherwise, create a new memory block in the trace buffer.  */
   while (remaining > 0)
@@ -4951,7 +4947,8 @@ agent_mem_read (struct eval_agent_expr_context *ctx,
       memcpy (mspace, &blocklen, sizeof (blocklen));
       mspace += sizeof (blocklen);
       /* Record the memory block proper.  */
-      read_inferior_memory (from, mspace, blocklen);
+      if (read_inferior_memory (from, mspace, blocklen) != 0)
+	return 1;
       trace_debug ("%d bytes recorded", blocklen);
       remaining -= blocklen;
       from += blocklen;

@@ -161,8 +161,13 @@ void gdb_agent_about_to_close (int pid);
 struct traceframe;
 struct eval_agent_expr_context;
 
-/* Do memory copies for bytecodes.  */
-/* Do the recording of memory blocks for actions and bytecodes.  */
+/* When TO is not NULL, do memory copies for bytecodes, read LEN bytes
+   starting at address FROM, and place the result in the buffer TO.
+   Return 0 on success, otherwise a non-zero error code.
+
+   When TO is NULL, do the recording of memory blocks for actions and
+   bytecodes into a new traceframe block.  Return 0 on success, otherwise,
+   return 1 if there is an error.  */
 
 int agent_mem_read (struct eval_agent_expr_context *ctx,
 		    unsigned char *to, CORE_ADDR from,
