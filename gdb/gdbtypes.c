@@ -958,7 +958,13 @@ create_range_type (struct type *result_type, struct type *index_type,
 
   if (index_type->code () == TYPE_CODE_FIXED_POINT)
     result_type->set_is_unsigned (index_type->is_unsigned ());
-  /* Note that the signed-ness of a range type can't simply be copied
+  else if (index_type->is_unsigned ())
+    {
+      /* If the underlying type is unsigned, then the range
+	 necessarily is.  */
+      result_type->set_is_unsigned (true);
+    }
+  /* Otherwise, the signed-ness of a range type can't simply be copied
      from the underlying type.  Consider a case where the underlying
      type is 'int', but the range type can hold 0..65535, and where
      the range is further specified to fit into 16 bits.  In this
@@ -966,13 +972,15 @@ create_range_type (struct type *result_type, struct type *index_type,
      range values will cause an unwanted sign extension.  So, we have
      some heuristics here instead.  */
   else if (low_bound->kind () == PROP_CONST && low_bound->const_val () >= 0)
-    result_type->set_is_unsigned (true);
-  /* Ada allows the declaration of range types whose upper bound is
-     less than the lower bound, so checking the lower bound is not
-     enough.  Make sure we do not mark a range type whose upper bound
-     is negative as unsigned.  */
-  if (high_bound->kind () == PROP_CONST && high_bound->const_val () < 0)
-    result_type->set_is_unsigned (false);
+    {
+      result_type->set_is_unsigned (true);
+      /* Ada allows the declaration of range types whose upper bound is
+	 less than the lower bound, so checking the lower bound is not
+	 enough.  Make sure we do not mark a range type whose upper bound
+	 is negative as unsigned.  */
+      if (high_bound->kind () == PROP_CONST && high_bound->const_val () < 0)
+	result_type->set_is_unsigned (false);
+    }
 
   result_type->set_endianity_is_not_default
     (index_type->endianity_is_not_default ());
