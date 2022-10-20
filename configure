@@ -2960,6 +2960,12 @@ if test x$with_system_zlib = xyes ; then
   noconfigdirs="$noconfigdirs zlib"
 fi
 
+# Don't compile the bundled readline/libreadline.a if --with-system-readline
+# is provided.
+if test x$with_system_readline = xyes ; then
+  noconfigdirs="$noconfigdirs readline"
+fi
+
 
 # Check whether --with-zstd was given.
 if test "${with_zstd+set}" = set; then :

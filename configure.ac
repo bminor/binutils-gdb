@@ -248,6 +248,12 @@ if test x$with_system_zlib = xyes ; then
   noconfigdirs="$noconfigdirs zlib"
 fi
 
+# Don't compile the bundled readline/libreadline.a if --with-system-readline
+# is provided.
+if test x$with_system_readline = xyes ; then
+  noconfigdirs="$noconfigdirs readline"
+fi
+
 AC_ARG_WITH(zstd,
 [AS_HELP_STRING([--with-zstd], [Support zstd compressed debug sections (default=auto)])])
 
