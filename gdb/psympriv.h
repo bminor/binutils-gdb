@@ -536,16 +536,14 @@ struct psymbol_functions : public quick_symbol_functions
      CORE_ADDR pc, struct obj_section *section, int warn_if_readin) override;
 
   struct compunit_symtab *find_compunit_symtab_by_address
-    (struct objfile *objfile, CORE_ADDR address) override;
+    (struct objfile *objfile, CORE_ADDR address) override
+  {
+    return nullptr;
+  }
 
   void map_symbol_filenames (struct objfile *objfile,
 			     gdb::function_view<symbol_filename_ftype> fun,
 			     bool need_fullname) override;
-
-  void relocated () override
-  {
-    m_psymbol_map.clear ();
-  }
 
   /* Return a range adapter for the psymtabs.  */
   psymtab_storage::partial_symtab_range partial_symbols
@@ -588,11 +586,6 @@ private:
 
   /* Storage for the partial symbols.  */
   std::shared_ptr<psymtab_storage> m_partial_symtabs;
-
-  /* Map symbol addresses to the partial symtab that defines the
-     object at that address.  */
-
-  std::vector<std::pair<CORE_ADDR, partial_symtab *>> m_psymbol_map;
 };
 
 #endif /* PSYMPRIV_H */
