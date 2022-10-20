@@ -209,4 +209,21 @@ fast_hash (const void *ptr, size_t len, unsigned int start_value = 0)
 #endif
 }
 
+namespace gdb
+{
+
+/* Hash type for gdb::string_view.
+
+   Even after we switch to C++17 and dump our string_view implementation, we
+   might want to keep this hash implementation if it's faster than std::hash
+   for std::string_view.  */
+
+struct string_view_hash
+{
+  std::size_t operator() (gdb::string_view view) const
+  {  return fast_hash (view.data (), view.length ()); }
+};
+
+} /* namespace gdb */
+
 #endif /* COMMON_COMMON_UTILS_H */
