@@ -84,9 +84,11 @@ btrace_this_cpu (void)
 	      cpu.vendor = CV_INTEL;
 
 	      cpu.family = (cpuid >> 8) & 0xf;
-	      cpu.model = (cpuid >> 4) & 0xf;
+	      if (cpu.family == 0xf)
+		cpu.family += (cpuid >> 20) & 0xff;
 
-	      if (cpu.family == 0x6)
+	      cpu.model = (cpuid >> 4) & 0xf;
+	      if ((cpu.family == 0x6) || ((cpu.family & 0xf) == 0xf))
 		cpu.model += (cpuid >> 12) & 0xf0;
 	    }
 	}
