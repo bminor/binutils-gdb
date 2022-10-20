@@ -26,10 +26,6 @@
 #include "gdbsupport/scoped_restore.h"
 #include <chrono>
 
-#ifdef HAVE_LIBXXHASH
-#include <xxhash.h>
-#endif
-
 struct completion_match_for_lcd;
 class compiled_regex;
 
@@ -347,20 +343,5 @@ extern void dump_core (void);
 extern void copy_bitwise (gdb_byte *dest, ULONGEST dest_offset,
 			  const gdb_byte *source, ULONGEST source_offset,
 			  ULONGEST nbits, int bits_big_endian);
-
-/* A fast hashing function.  This can be used to hash data in a fast way
-   when the length is known.  If no fast hashing library is available, falls
-   back to iterative_hash from libiberty.  START_VALUE can be set to
-   continue hashing from a previous value.  */
-
-static inline unsigned int
-fast_hash (const void *ptr, size_t len, unsigned int start_value = 0)
-{
-#ifdef HAVE_LIBXXHASH
-  return XXH64 (ptr, len, start_value);
-#else
-  return iterative_hash (ptr, len, start_value);
-#endif
-}
 
 #endif /* UTILS_H */
