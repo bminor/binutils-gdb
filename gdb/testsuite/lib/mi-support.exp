@@ -2849,7 +2849,7 @@ proc mi_get_valueof { fmt exp default {test ""} } {
     }
 
     set val ${default}
-    gdb_test_multiple "print${fmt} ${exp}" "$test" {
+    gdb_test_multiple "print${fmt} ${exp}" "$test" -prompt "$::mi_gdb_prompt$" {
 	-re "~\"\\$\[0-9\]* = (\[^\r\n\]*)\\\\n\"\r\n\\^done\r\n$mi_gdb_prompt$" {
 	    set val $expect_out(1,string)
 	    pass "$test"
