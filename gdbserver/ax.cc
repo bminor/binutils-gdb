@@ -1112,22 +1112,26 @@ gdb_eval_agent_expr (struct eval_agent_expr_context *ctx,
 	  break;
 
 	case gdb_agent_op_ref8:
-	  agent_mem_read (ctx, cnv.u8.bytes, (CORE_ADDR) top, 1);
+	  if (agent_mem_read (ctx, cnv.u8.bytes, (CORE_ADDR) top, 1) != 0)
+	    return expr_eval_invalid_memory_access;
 	  top = cnv.u8.val;
 	  break;
 
 	case gdb_agent_op_ref16:
-	  agent_mem_read (ctx, cnv.u16.bytes, (CORE_ADDR) top, 2);
+	  if (agent_mem_read (ctx, cnv.u16.bytes, (CORE_ADDR) top, 2) != 0)
+	    return expr_eval_invalid_memory_access;
 	  top = cnv.u16.val;
 	  break;
 
 	case gdb_agent_op_ref32:
-	  agent_mem_read (ctx, cnv.u32.bytes, (CORE_ADDR) top, 4);
+	  if (agent_mem_read (ctx, cnv.u32.bytes, (CORE_ADDR) top, 4) != 0)
+	    return expr_eval_invalid_memory_access;
 	  top = cnv.u32.val;
 	  break;
 
 	case gdb_agent_op_ref64:
-	  agent_mem_read (ctx, cnv.u64.bytes, (CORE_ADDR) top, 8);
+	  if (agent_mem_read (ctx, cnv.u64.bytes, (CORE_ADDR) top, 8) != 0)
+	    return expr_eval_invalid_memory_access;
 	  top = cnv.u64.val;
 	  break;
 

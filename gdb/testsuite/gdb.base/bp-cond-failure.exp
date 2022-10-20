@@ -47,7 +47,7 @@ if { [is_address_zero_readable] } {
 # Where the breakpoint will be placed.
 set bp_line [gdb_get_line_number "Breakpoint here"]
 
-proc run_test { cond_eval } {
+proc run_test { cond_eval access_type } {
     clean_restart ${::binfile}
 
     if { ![runto_main] } {
@@ -59,7 +59,7 @@ proc run_test { cond_eval } {
     }
 
     # Setup the conditional breakpoint and record its number.
-    gdb_breakpoint "${::srcfile}:${::bp_line} if (*(int *) 0) == 0"
+    gdb_breakpoint "${::srcfile}:${::bp_line} if (*(${access_type} *) 0) == 0"
     set bp_num [get_integer_valueof "\$bpnum" "*UNKNOWN*"]
 
     gdb_test "continue" \
@@ -88,17 +88,7 @@ set cond_eval_modes { "auto" }
 
 gdb_test_multiple "show breakpoint condition-evaluation" "" {
     -re -wrap "Breakpoint condition evaluation mode is auto \\(currently target\\)\\." {
-
-	## NOTE: Instead of testing with "auto" and "host" in this
-	## case we only test with "host".  This is because a GDB bug
-	## prevents the "auto" (a.k.a. target) mode from working.
-	##
-	## Don't worry, this will be fixed in a later commit, and this
-	## comment will be removed at that time.
-	##
-	## lappend cond_eval_modes "host"
-
-	set cond_eval_modes { "host" }
+	lappend cond_eval_modes "host"
 	pass $gdb_test_name
     }
 
@@ -107,6 +97,8 @@ gdb_test_multiple "show breakpoint condition-evaluation" "" {
     }
 }
 
-foreach_with_prefix cond_eval $cond_eval_modes {
-    run_test $cond_eval
+foreach_with_prefix access_type { "char" "short" "int" "long long" } {
+    foreach_with_prefix cond_eval $cond_eval_modes {
+	run_test $cond_eval $access_type
+    }
 }
