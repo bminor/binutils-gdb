@@ -210,7 +210,10 @@ proc_with_prefix local_url { } {
 
     # GDB should now find the symbol and source files.
     clean_restart
-    gdb_test "file $binfile" "" "file [file tail $binfile]" "Enable debuginfod?.*" "y"
+    set enable_debuginfod_question \
+	"Enable debuginfod for this session. \\(y or \\\[n\\\]\\) "
+    gdb_test "file $binfile" "" "file [file tail $binfile]" \
+	$enable_debuginfod_question "y"
     gdb_test_no_output "set substitute-path $outputdir /dev/null" \
 	"set substitute-path"
     gdb_test "br main" "Breakpoint 1 at.*file.*"
@@ -219,14 +222,14 @@ proc_with_prefix local_url { } {
     # GDB should now find the executable file.
     clean_restart
     gdb_test "core $::corefile" ".*return 0.*" "file [file tail $::corefile]" \
-	"Enable debuginfod?.*" "y"
+	$enable_debuginfod_question "y"
 
     # GDB should now find the debugaltlink file.
     clean_restart
     gdb_test "file ${binfile}_alt.o" \
 	".*Downloading.*separate debug info.*" \
 	"file [file tail ${binfile}_alt.o]" \
-	".*Enable debuginfod?.*" "y"
+	$enable_debuginfod_question "y"
 
     # Configure debuginfod with commands.
     unsetenv DEBUGINFOD_URLS
