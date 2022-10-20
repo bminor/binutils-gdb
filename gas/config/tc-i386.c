@@ -6821,15 +6821,15 @@ match_template (char mnem_suffix)
 	     slip through to break.  */
 	}
 
-      /* Check if vector operands are valid.  */
-      if (check_VecOperands (t))
+      /* Check if VEX/EVEX encoding requirements can be satisfied.  */
+      if (VEX_check_encoding (t))
 	{
 	  specific_error = progress (i.error);
 	  continue;
 	}
 
-      /* Check if VEX/EVEX encoding requirements can be satisfied.  */
-      if (VEX_check_encoding (t))
+      /* Check if vector operands are valid.  */
+      if (check_VecOperands (t))
 	{
 	  specific_error = progress (i.error);
 	  continue;

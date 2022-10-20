@@ -37,3 +37,4 @@ _start:
 	.arch default
 	.arch .avx_vnni
 	 vpdpbusd	%xmm2, %xmm4, %xmm2
+	{vex3} vpdpbusd 2032(%ecx), %xmm4, %xmm2
