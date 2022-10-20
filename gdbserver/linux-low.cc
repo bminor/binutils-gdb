@@ -6520,7 +6520,7 @@ read_link_map (std::string &document, CORE_ADDR lmid, CORE_ADDR lm_addr,
       if (libname[0] != '\0')
 	{
 	  string_appendf (document, "<library name=\"");
-	  xml_escape_text_append (&document, (char *) libname);
+	  xml_escape_text_append (document, (char *) libname);
 	  string_appendf (document, "\" lm=\"0x%s\" l_addr=\"0x%s\" "
 			  "l_ld=\"0x%s\" lmid=\"0x%s\"/>",
 			  paddress (lm_addr), paddress (l_addr),

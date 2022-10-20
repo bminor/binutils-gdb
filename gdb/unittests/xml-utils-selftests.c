@@ -40,7 +40,7 @@ static void test_xml_escape_text_append ()
   const char *input = "<this isn't=\"xml\"> &";
   const char *expected_output
     = "foo<xml>&lt;this isn&apos;t=&quot;xml&quot;&gt; &amp;";
-  xml_escape_text_append (&actual_output, input);
+  xml_escape_text_append (actual_output, input);
 
   SELF_CHECK (actual_output == expected_output);
 }

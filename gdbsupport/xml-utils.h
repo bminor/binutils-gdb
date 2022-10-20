@@ -28,6 +28,6 @@ extern std::string xml_escape_text (const char *text);
 /* Append TEXT to RESULT, with special characters replaced by entity
    references.  */
 
-extern void xml_escape_text_append (std::string *result, const char *text);
+extern void xml_escape_text_append (std::string &result, const char *text);
 
 #endif /* COMMON_XML_UTILS_H */

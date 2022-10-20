@@ -1086,7 +1086,7 @@ netbsd_qxfer_libraries_svr4 (const pid_t pid, const char *annex,
 		}
 
 	      string_appendf (document, "<library name=\"");
-	      xml_escape_text_append (&document, (char *) libname);
+	      xml_escape_text_append (document, (char *) libname);
 	      string_appendf (document, "\" lm=\"0x%lx\" "
 			      "l_addr=\"0x%lx\" l_ld=\"0x%lx\"/>",
 			      (unsigned long) lm_addr, (unsigned long) l_addr,
