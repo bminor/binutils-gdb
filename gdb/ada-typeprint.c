@@ -925,8 +925,8 @@ print_func_type (struct type *type, struct ui_file *stream, const char *name,
 
 /* Print a description of a type TYPE0.
    Output goes to STREAM (via stdio).
-   If VARSTRING is a non-empty string, print as an Ada variable/field
-       declaration.
+   If VARSTRING is a non-NULL, non-empty string, print as an Ada
+       variable/field declaration.
    SHOW+1 is the maximum number of levels of internal type structure
       to show (this applies to record types, enumerated types, and
       array types).
@@ -996,7 +996,8 @@ ada_print_type (struct type *type0, const char *varstring,
 	/* An __XVL field is not truly a pointer, so don't print
 	   "access" in this case.  */
 	if (type->code () != TYPE_CODE_PTR
-	    || strstr (varstring, "___XVL") == nullptr)
+	    || (varstring != nullptr
+		&& strstr (varstring, "___XVL") == nullptr))
 	  gdb_printf (stream, "access ");
 	ada_print_type (type->target_type (), "", stream, show, level,
 			flags);
