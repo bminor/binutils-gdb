@@ -6955,7 +6955,10 @@ process_event_stop_test (struct execution_control_state *ecs)
 
   if (execution_direction != EXEC_REVERSE
       && ecs->event_thread->control.step_over_calls == STEP_OVER_UNDEBUGGABLE
-      && in_solib_dynsym_resolve_code (ecs->event_thread->stop_pc ()))
+      && in_solib_dynsym_resolve_code (ecs->event_thread->stop_pc ())
+      && !in_solib_dynsym_resolve_code (
+	  ecs->event_thread->control.step_start_function->value_block ()
+	      ->entry_pc ()))
     {
       CORE_ADDR pc_after_resolver =
 	gdbarch_skip_solib_resolver (gdbarch, ecs->event_thread->stop_pc ());
