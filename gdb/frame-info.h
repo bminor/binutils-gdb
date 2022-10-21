@@ -71,6 +71,7 @@ public:
     : m_ptr (other.m_ptr), m_cached_id (other.m_cached_id)
   {
     other.m_ptr = nullptr;
+    other.m_cached_id = null_frame_id;
     frame_list.push_back (*this);
   }
 
