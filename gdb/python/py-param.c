@@ -243,14 +243,18 @@ set_parameter_value (parmpy_object *self, PyObject *value)
 	long l;
 	int ok;
 
-	if (!PyLong_Check (value))
+	if (value == Py_None
+	    && (self->type == var_uinteger || self->type == var_integer))
+	  l = 0;
+	else if (value == Py_None && self->type == var_zuinteger_unlimited)
+	  l = -1;
+	else if (!PyLong_Check (value))
 	  {
 	    PyErr_SetString (PyExc_RuntimeError,
 			     _("The value must be integer."));
 	    return -1;
 	  }
-
-	if (! gdb_py_int_as_long (value, &l))
+	else if (! gdb_py_int_as_long (value, &l))
 	  return -1;
 
 	switch (self->type)

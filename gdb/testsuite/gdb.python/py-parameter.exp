@@ -346,18 +346,21 @@ proc_with_prefix test_gdb_parameter { } {
 	    "listsize" {
 		set param_get_zero None
 		set param_get_minus_one -1
+		set param_get_none None
 		set param_get_unlimited None
 		set param_set_minus_one ""
 	    }
 	    "print elements" {
 		set param_get_zero None
 		set param_get_minus_one None
+		set param_get_none None
 		set param_get_unlimited None
 		set param_set_minus_one $param_range_error
 	    }
 	    "max-completions" {
 		set param_get_zero 0
 		set param_get_minus_one -1
+		set param_get_none -1
 		set param_get_unlimited -1
 		set param_set_minus_one ""
 	    }
@@ -384,6 +387,12 @@ proc_with_prefix test_gdb_parameter { } {
 
 	gdb_test "python print(gdb.parameter('$param'))" \
 	    $param_get_minus_one "test value of -1"
+
+	gdb_test_no_output "python gdb.set_parameter('$param', None)" \
+	    "test set to None"
+
+	gdb_test "python print(gdb.parameter('$param'))" \
+	    $param_get_none "test value of None"
 
 	gdb_test_no_output "python gdb.set_parameter('$param', 'unlimited')" \
 	    "test set to 'unlimited'"
@@ -425,19 +434,19 @@ proc_with_prefix test_integer_parameter { } {
 		set param_get_zero None
 		set param_get_minus_one None
 		set param_get_minus_five 1
-		set param_get_none 5
+		set param_get_none None
 		set param_set_minus_one $param_range_error
 		set param_set_minus_five $param_range_error
-		set param_set_none $param_integer_error
+		set param_set_none ""
 	    }
 	    PARAM_INTEGER {
 		set param_get_zero None
 		set param_get_minus_one -1
 		set param_get_minus_five -5
-		set param_get_none 5
+		set param_get_none None
 		set param_set_minus_one -1
 		set param_set_minus_five -5
-		set param_set_none $param_integer_error
+		set param_set_none ""
 	    }
 	    PARAM_ZINTEGER {
 		set param_get_zero 0
@@ -461,10 +470,10 @@ proc_with_prefix test_integer_parameter { } {
 		set param_get_zero 0
 		set param_get_minus_one -1
 		set param_get_minus_five 1
-		set param_get_none 5
+		set param_get_none -1
 		set param_set_minus_one ""
 		set param_set_minus_five $param_range_error
-		set param_set_none $param_integer_error
+		set param_set_none ""
 	    }
 	    default {
 		error "invalid kind: $kind"
