@@ -87,6 +87,14 @@ set binfile_rtld [standard_output_file ${rtld_basename}]
 set rtld_flags [list debug additional_flags=[list -static-pie -fPIE \
 						  -nostdlib -static -lc]]
 
+if { ![gdb_can_simple_compile static-pie-static-libc \
+	   "void _start (void) { _exit (0); }" \
+	   executable $rtld_flags] } {
+    set reason "-static-pie not supported or static libc missing"
+    untested "failed to compile ($reason)"
+    return -1
+}
+
 # Main program file names and flags:
 set main_basename ${::gdb_test_file_name}-main
 set srcfile_main ${srcdir}/${subdir}/${main_basename}.c
