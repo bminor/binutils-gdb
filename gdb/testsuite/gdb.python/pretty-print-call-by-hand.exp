@@ -50,8 +50,6 @@ proc start_test { breakpoint_comment } {
     gdb_breakpoint [gdb_get_line_number ${breakpoint_comment} ${testfile}.c ]
     gdb_continue_to_breakpoint ${breakpoint_comment} ".*"
 
-    gdb_test_no_output "set print pretty on" "starting to pretty print"
-
     set remote_python_file [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
     gdb_test_no_output "source ${remote_python_file}" "load python file"
 
@@ -63,8 +61,6 @@ with_test_prefix "run to frame" {
     if {![runto_main]} {
 	untested "couldn't run to main"
     }
-
-    gdb_test_no_output "set print pretty on" "starting to pretty print"
 
     set remote_python_file [gdb_remote_download host ${srcdir}/${subdir}/${testfile}.py]
     gdb_test_no_output "source ${remote_python_file}" "load python file"

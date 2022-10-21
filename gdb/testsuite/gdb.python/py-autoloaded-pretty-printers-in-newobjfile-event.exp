@@ -61,8 +61,6 @@ gdb_test_no_output "source ${remote_python_event_handler_file}" "load python fil
 
 gdb_load ${binfile}
 
-gdb_test_no_output "set print pretty on"
-
 if { ![runto_main] } {
     return
 }
