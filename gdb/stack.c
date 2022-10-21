@@ -1047,6 +1047,8 @@ print_frame_info (const frame_print_options &fp_opts,
   int location_print;
   struct ui_out *uiout = current_uiout;
 
+  frame.prepare_reinflate ();
+
   if (!current_uiout->is_mi_like_p ()
       && fp_opts.print_frame_info != print_frame_info_auto)
     {
