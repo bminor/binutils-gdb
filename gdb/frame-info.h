@@ -25,12 +25,6 @@
 
 struct frame_info;
 
-/* Forward declarations of functions, needed for the frame_info_ptr
-   to work correctly.  */
-extern void reinit_frame_cache ();
-extern struct frame_id get_frame_id (frame_info_ptr);
-extern frame_info_ptr frame_find_by_id (struct frame_id id);
-
 /* A wrapper for "frame_info *".  frame_info objects are invalidated
    whenever reinit_frame_cache is called.  This class arranges to
    invalidate the pointer when appropriate.  This is done to help
@@ -136,20 +130,10 @@ public:
   }
 
   /* Cache the frame_id that the pointer will use to reinflate.  */
-  void prepare_reinflate ()
-  {
-    m_cached_id = get_frame_id (*this);
-  }
+  void prepare_reinflate ();
 
   /* Use the cached frame_id to reinflate the pointer.  */
-  void reinflate ()
-  {
-    gdb_assert (m_cached_id != null_frame_id);
-
-    if (m_ptr == nullptr)
-      m_ptr = frame_find_by_id (m_cached_id).get ();
-    gdb_assert (m_ptr != nullptr);
-  }
+  void reinflate ();
 
 private:
 

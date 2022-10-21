@@ -280,6 +280,10 @@ extern frame_info_ptr get_next_frame_sentinel_okay (frame_info_ptr);
    frame.  */
 extern frame_info_ptr get_prev_frame_always (frame_info_ptr);
 
+/* Given a frame's ID, relocate the frame.  Returns NULL if the frame
+   is not found.  */
+extern frame_info_ptr frame_find_by_id (frame_id id);
+
 /* Base attributes of a frame: */
 
 /* The frame's `resume' address.  Where the program will resume in

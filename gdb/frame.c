@@ -19,6 +19,7 @@
 
 #include "defs.h"
 #include "frame.h"
+#include "frame-info.h"
 #include "target.h"
 #include "value.h"
 #include "inferior.h"	/* for inferior_ptid */
@@ -55,9 +56,6 @@ static frame_info *sentinel_frame;
 
 /* Number of calls to reinit_frame_cache.  */
 static unsigned int frame_cache_generation = 0;
-
-/* See frame-info.h.  */
-intrusive_list<frame_info_ptr> frame_info_ptr::frame_list;
 
 /* See frame.h.  */
 
