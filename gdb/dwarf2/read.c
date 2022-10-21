@@ -11825,29 +11825,20 @@ queue_and_load_all_dwo_tus (dwarf2_cu *cu)
 static void
 inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 {
-  struct die_info *child_die;
-  sect_offset *offsetp;
-  /* Parent of DIE - referenced by DW_AT_abstract_origin.  */
-  struct die_info *origin_die;
-  /* Iterator of the ORIGIN_DIE children.  */
-  struct die_info *origin_child_die;
-  struct attribute *attr;
-  struct dwarf2_cu *origin_cu;
-  struct pending **origin_previous_list_in_scope;
-
-  attr = dwarf2_attr (die, DW_AT_abstract_origin, cu);
-  if (!attr)
+  attribute *attr = dwarf2_attr (die, DW_AT_abstract_origin, cu);
+  if (attr == nullptr)
     return;
 
   /* Note that following die references may follow to a die in a
-     different cu.  */
+     different CU.  */
+  dwarf2_cu *origin_cu = cu;
 
-  origin_cu = cu;
-  origin_die = follow_die_ref (die, attr, &origin_cu);
+  /* Parent of DIE - referenced by DW_AT_abstract_origin.  */
+  die_info *origin_die = follow_die_ref (die, attr, &origin_cu);
 
   /* We're inheriting ORIGIN's children into the scope we'd put DIE's
      symbols in.  */
-  origin_previous_list_in_scope = origin_cu->list_in_scope;
+  struct pending **origin_previous_list_in_scope = origin_cu->list_in_scope;
   origin_cu->list_in_scope = cu->list_in_scope;
 
   if (die->tag != origin_die->tag
@@ -11890,13 +11881,10 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 
   std::vector<sect_offset> offsets;
 
-  for (child_die = die->child;
+  for (die_info *child_die = die->child;
        child_die && child_die->tag;
        child_die = child_die->sibling)
     {
-      struct die_info *child_origin_die;
-      struct dwarf2_cu *child_origin_cu;
-
       /* We are trying to process concrete instance entries:
 	 DW_TAG_call_site DIEs indeed have a DW_AT_abstract_origin tag, but
 	 it's not relevant to our analysis here. i.e. detecting DIEs that are
@@ -11916,14 +11904,15 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	 DW_AT_abstract_origin, follow them all; there shouldn't be,
 	 but GCC versions at least through 4.4 generate this (GCC PR
 	 40573).  */
-      child_origin_die = child_die;
-      child_origin_cu = cu;
-      while (1)
+      die_info *child_origin_die = child_die;
+      dwarf2_cu *child_origin_cu = cu;
+      while (true)
 	{
 	  attr = dwarf2_attr (child_origin_die, DW_AT_abstract_origin,
 			      child_origin_cu);
-	  if (attr == NULL)
+	  if (attr == nullptr)
 	    break;
+
 	  child_origin_die = follow_die_ref (child_origin_die, attr,
 					     &child_origin_cu);
 	}
@@ -11959,22 +11948,26 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
       if (are_isomorphic)
 	corresponding_abstract_child = corresponding_abstract_child->sibling;
     }
+
   std::sort (offsets.begin (), offsets.end ());
   sect_offset *offsets_end = offsets.data () + offsets.size ();
-  for (offsetp = offsets.data () + 1; offsetp < offsets_end; offsetp++)
+  for (sect_offset *offsetp = offsets.data () + 1;
+       offsetp < offsets_end;
+       offsetp++)
     if (offsetp[-1] == *offsetp)
       complaint (_("Multiple children of DIE %s refer "
 		   "to DIE %s as their abstract origin"),
 		 sect_offset_str (die->sect_off), sect_offset_str (*offsetp));
 
-  offsetp = offsets.data ();
-  origin_child_die = origin_die->child;
-  while (origin_child_die && origin_child_die->tag)
+  sect_offset *offsetp = offsets.data ();
+  die_info *origin_child_die = origin_die->child;
+  while (origin_child_die != nullptr && origin_child_die->tag != 0)
     {
       /* Is ORIGIN_CHILD_DIE referenced by any of the DIE children?  */
       while (offsetp < offsets_end
 	     && *offsetp < origin_child_die->sect_off)
 	offsetp++;
+
       if (offsetp >= offsets_end
 	  || *offsetp > origin_child_die->sect_off)
 	{
@@ -11985,8 +11978,10 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	  if (!origin_child_die->in_process)
 	    process_die (origin_child_die, origin_cu);
 	}
+
       origin_child_die = origin_child_die->sibling;
     }
+
   origin_cu->list_in_scope = origin_previous_list_in_scope;
 
   if (cu != origin_cu)
