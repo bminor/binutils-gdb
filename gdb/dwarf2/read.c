@@ -11952,29 +11952,28 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
   if (!offsets.empty ())
     {
       std::sort (offsets.begin (), offsets.end ());
-      sect_offset *offsets_end = offsets.data () + offsets.size ();
-      for (sect_offset *offsetp = offsets.data () + 1;
-	   offsetp < offsets_end;
-	   offsetp++)
-	if (offsetp[-1] == *offsetp)
+
+      for (auto offsets_it = offsets.begin () + 1;
+	   offsets_it < offsets.end ();
+	   ++offsets_it)
+	if (*(offsets_it - 1) == *offsets_it)
 	  complaint (_("Multiple children of DIE %s refer "
 		       "to DIE %s as their abstract origin"),
 		     sect_offset_str (die->sect_off),
-		     sect_offset_str (*offsetp));
+		     sect_offset_str (*offsets_it));
     }
 
-  sect_offset *offsetp = offsets.data ();
-  sect_offset *offsets_end = offsets.data () + offsets.size ();
+  auto offsets_it = offsets.begin ();
   die_info *origin_child_die = origin_die->child;
   while (origin_child_die != nullptr && origin_child_die->tag != 0)
     {
       /* Is ORIGIN_CHILD_DIE referenced by any of the DIE children?  */
-      while (offsetp < offsets_end
-	     && *offsetp < origin_child_die->sect_off)
-	offsetp++;
+      while (offsets_it < offsets.end ()
+	     && *offsets_it < origin_child_die->sect_off)
+	++offsets_it;
 
-      if (offsetp >= offsets_end
-	  || *offsetp > origin_child_die->sect_off)
+      if (offsets_it == offsets.end ()
+	  || *offsets_it > origin_child_die->sect_off)
 	{
 	  /* Found that ORIGIN_CHILD_DIE is really not referenced.
 	     Check whether we're already processing ORIGIN_CHILD_DIE.
