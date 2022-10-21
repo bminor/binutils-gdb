@@ -44,6 +44,9 @@
 #include <assert.h>
 #include <time.h>
 #include <zlib.h>
+#ifdef HAVE_ZSTD
+#include <zstd.h>
+#endif
 #include <wchar.h>
 
 #if defined HAVE_MSGPACK
@@ -15183,48 +15186,56 @@ get_section_contents (Elf_Internal_Shdr * section, Filedata * filedata)
                              _("section contents"));
 }
 
-/* Uncompresses a section that was compressed using zlib, in place.  */
+/* Uncompresses a section that was compressed using zlib/zstd, in place.  */
 
 static bool
-uncompress_section_contents (unsigned char **buffer,
-			     uint64_t uncompressed_size,
-			     uint64_t *size)
+uncompress_section_contents (bool is_zstd, unsigned char **buffer,
+			     uint64_t uncompressed_size, uint64_t *size)
 {
   uint64_t compressed_size = *size;
   unsigned char *compressed_buffer = *buffer;
-  unsigned char *uncompressed_buffer;
+  unsigned char *uncompressed_buffer = xmalloc (uncompressed_size);
   z_stream strm;
   int rc;
 
-  /* It is possible the section consists of several compressed
-     buffers concatenated together, so we uncompress in a loop.  */
-  /* PR 18313: The state field in the z_stream structure is supposed
-     to be invisible to the user (ie us), but some compilers will
-     still complain about it being used without initialisation.  So
-     we first zero the entire z_stream structure and then set the fields
-     that we need.  */
-  memset (& strm, 0, sizeof strm);
-  strm.avail_in = compressed_size;
-  strm.next_in = (Bytef *) compressed_buffer;
-  strm.avail_out = uncompressed_size;
-  uncompressed_buffer = (unsigned char *) xmalloc (uncompressed_size);
-
-  rc = inflateInit (& strm);
-  while (strm.avail_in > 0)
+  if (is_zstd)
     {
-      if (rc != Z_OK)
-        break;
-      strm.next_out = ((Bytef *) uncompressed_buffer
-                       + (uncompressed_size - strm.avail_out));
-      rc = inflate (&strm, Z_FINISH);
-      if (rc != Z_STREAM_END)
-        break;
-      rc = inflateReset (& strm);
+#ifdef HAVE_ZSTD
+      size_t ret = ZSTD_decompress (uncompressed_buffer, uncompressed_size,
+				    compressed_buffer, compressed_size);
+      if (ZSTD_isError (ret))
+	goto fail;
+#endif
     }
-  if (inflateEnd (& strm) != Z_OK
-      || rc != Z_OK
-      || strm.avail_out != 0)
-    goto fail;
+  else
+    {
+      /* It is possible the section consists of several compressed
+	 buffers concatenated together, so we uncompress in a loop.  */
+      /* PR 18313: The state field in the z_stream structure is supposed
+	 to be invisible to the user (ie us), but some compilers will
+	 still complain about it being used without initialisation.  So
+	 we first zero the entire z_stream structure and then set the fields
+	 that we need.  */
+      memset (&strm, 0, sizeof strm);
+      strm.avail_in = compressed_size;
+      strm.next_in = (Bytef *)compressed_buffer;
+      strm.avail_out = uncompressed_size;
+
+      rc = inflateInit (&strm);
+      while (strm.avail_in > 0)
+	{
+	  if (rc != Z_OK)
+	    break;
+	  strm.next_out = ((Bytef *)uncompressed_buffer
+			   + (uncompressed_size - strm.avail_out));
+	  rc = inflate (&strm, Z_FINISH);
+	  if (rc != Z_STREAM_END)
+	    break;
+	  rc = inflateReset (&strm);
+	}
+      if (inflateEnd (&strm) != Z_OK || rc != Z_OK || strm.avail_out != 0)
+	goto fail;
+    }
 
   *buffer = uncompressed_buffer;
   *size = uncompressed_size;
@@ -15267,6 +15278,7 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
     {
       uint64_t new_size = num_bytes;
       uint64_t uncompressed_size = 0;
+      bool is_zstd = false;
 
       if ((section->sh_flags & SHF_COMPRESSED) != 0)
 	{
@@ -15279,7 +15291,13 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
 	       by get_compression_header.  */
 	    goto error_out;
 
-	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
+	  if (chdr.ch_type == ELFCOMPRESS_ZLIB)
+	    ;
+#ifdef HAVE_ZSTD
+	  else if (chdr.ch_type == ELFCOMPRESS_ZSTD)
+	    is_zstd = true;
+#endif
+	  else
 	    {
 	      warn (_("section '%s' has unsupported compress type: %d\n"),
 		    printable_section_name (filedata, section), chdr.ch_type);
@@ -15308,8 +15326,8 @@ dump_section_as_strings (Elf_Internal_Shdr * section, Filedata * filedata)
 
       if (uncompressed_size)
 	{
-	  if (uncompress_section_contents (& start,
-					   uncompressed_size, & new_size))
+	  if (uncompress_section_contents (is_zstd, &start, uncompressed_size,
+					   &new_size))
 	    num_bytes = new_size;
 	  else
 	    {
@@ -15483,6 +15501,7 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
     {
       uint64_t new_size = section_size;
       uint64_t uncompressed_size = 0;
+      bool is_zstd = false;
 
       if ((section->sh_flags & SHF_COMPRESSED) != 0)
 	{
@@ -15495,7 +15514,13 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
 	       by get_compression_header.  */
 	    goto error_out;
 
-	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
+	  if (chdr.ch_type == ELFCOMPRESS_ZLIB)
+	    ;
+#ifdef HAVE_ZSTD
+	  else if (chdr.ch_type == ELFCOMPRESS_ZSTD)
+	    is_zstd = true;
+#endif
+	  else
 	    {
 	      warn (_("section '%s' has unsupported compress type: %d\n"),
 		    printable_section_name (filedata, section), chdr.ch_type);
@@ -15524,8 +15549,8 @@ dump_section_as_bytes (Elf_Internal_Shdr *section,
 
       if (uncompressed_size)
 	{
-	  if (uncompress_section_contents (& start, uncompressed_size,
-					   & new_size))
+	  if (uncompress_section_contents (is_zstd, &start, uncompressed_size,
+					   &new_size))
 	    {
 	      section_size = new_size;
 	    }
@@ -15861,6 +15886,7 @@ load_specific_debug_section (enum dwarf_section_display_enum  debug,
       unsigned char *start = section->start;
       uint64_t size = sec->sh_size;
       uint64_t uncompressed_size = 0;
+      bool is_zstd = false;
 
       if ((sec->sh_flags & SHF_COMPRESSED) != 0)
 	{
@@ -15882,7 +15908,13 @@ load_specific_debug_section (enum dwarf_section_display_enum  debug,
 	       by get_compression_header.  */
 	    return false;
 
-	  if (chdr.ch_type != ELFCOMPRESS_ZLIB)
+	  if (chdr.ch_type == ELFCOMPRESS_ZLIB)
+	    ;
+#ifdef HAVE_ZSTD
+	  else if (chdr.ch_type == ELFCOMPRESS_ZSTD)
+	    is_zstd = true;
+#endif
+	  else
 	    {
 	      warn (_("section '%s' has unsupported compress type: %d\n"),
 		    section->name, chdr.ch_type);
@@ -15911,7 +15943,7 @@ load_specific_debug_section (enum dwarf_section_display_enum  debug,
 
       if (uncompressed_size)
 	{
-	  if (uncompress_section_contents (&start, uncompressed_size,
+	  if (uncompress_section_contents (is_zstd, &start, uncompressed_size,
 					   &size))
 	    {
 	      /* Free the compressed buffer, update the section buffer
