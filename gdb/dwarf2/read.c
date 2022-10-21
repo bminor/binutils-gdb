@@ -11949,17 +11949,22 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
 	corresponding_abstract_child = corresponding_abstract_child->sibling;
     }
 
-  std::sort (offsets.begin (), offsets.end ());
-  sect_offset *offsets_end = offsets.data () + offsets.size ();
-  for (sect_offset *offsetp = offsets.data () + 1;
-       offsetp < offsets_end;
-       offsetp++)
-    if (offsetp[-1] == *offsetp)
-      complaint (_("Multiple children of DIE %s refer "
-		   "to DIE %s as their abstract origin"),
-		 sect_offset_str (die->sect_off), sect_offset_str (*offsetp));
+  if (!offsets.empty ())
+    {
+      std::sort (offsets.begin (), offsets.end ());
+      sect_offset *offsets_end = offsets.data () + offsets.size ();
+      for (sect_offset *offsetp = offsets.data () + 1;
+	   offsetp < offsets_end;
+	   offsetp++)
+	if (offsetp[-1] == *offsetp)
+	  complaint (_("Multiple children of DIE %s refer "
+		       "to DIE %s as their abstract origin"),
+		     sect_offset_str (die->sect_off),
+		     sect_offset_str (*offsetp));
+    }
 
   sect_offset *offsetp = offsets.data ();
+  sect_offset *offsets_end = offsets.data () + offsets.size ();
   die_info *origin_child_die = origin_die->child;
   while (origin_child_die != nullptr && origin_child_die->tag != 0)
     {
