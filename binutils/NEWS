@@ -1,5 +1,7 @@
 -*- text -*-
 
+* DCO signed contributions are now accepted.
+
 * objcopy --decompress-debug-sections now supports zstd compressed debug
   sections.  The new option --compress-debug-sections=zstd compresses debug
   sections with zstd.
