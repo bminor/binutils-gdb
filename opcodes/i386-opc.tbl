@@ -3098,6 +3098,7 @@ ldtilecfg, 0x49, None, CpuAMX_TILE|Cpu64, Modrm|Vex128|Space0F38|VexW0|No_bSuf|N
 sttilecfg, 0x6649, None, CpuAMX_TILE|Cpu64, Modrm|Vex128|Space0F38|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
 
 tdpbf16ps, 0xf35c, None, CpuAMX_BF16|Cpu64, Modrm|Vex128|Space0F38|VexVVVV=1|VexW0|SwapSources|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegTMM, RegTMM, RegTMM }
+tdpfp16ps, 0xf25c, None, CpuAMX_FP16|Cpu64, Modrm|Vex128|Space0F38|VexVVVV|VexW0|SwapSources|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegTMM, RegTMM, RegTMM }
 tdpbssd, 0xf25e, None, CpuAMX_INT8|Cpu64, Modrm|Vex128|Space0F38|VexVVVV=1|VexW0|SwapSources|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegTMM, RegTMM, RegTMM }
 tdpbuud, 0x5e,   None, CpuAMX_INT8|Cpu64, Modrm|Vex128|Space0F38|VexVVVV=1|VexW0|SwapSources|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegTMM, RegTMM, RegTMM }
 tdpbusd, 0x665e, None, CpuAMX_INT8|Cpu64, Modrm|Vex128|Space0F38|VexVVVV=1|VexW0|SwapSources|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegTMM, RegTMM, RegTMM }

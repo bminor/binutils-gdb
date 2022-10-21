@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Intel AMX-FP16 instructions.
+
 * gas now supports --compress-debug-sections=zstd to compress
   debug sections with zstd.
 * Add --enable-default-compressed-debug-sections-algorithm={zlib,zstd}

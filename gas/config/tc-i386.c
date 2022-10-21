@@ -1076,6 +1076,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (cldemote, CLDEMOTE, CLDEMOTE, false),
   SUBARCH (amx_int8, AMX_INT8, ANY_AMX_INT8, false),
   SUBARCH (amx_bf16, AMX_BF16, ANY_AMX_BF16, false),
+  SUBARCH (amx_fp16, AMX_FP16, AMX_FP16, false),
   SUBARCH (amx_tile, AMX_TILE, ANY_AMX_TILE, false),
   SUBARCH (movdiri, MOVDIRI, ANY_MOVDIRI, false),
   SUBARCH (movdir64b, MOVDIR64B, ANY_MOVDIR64B, false),
