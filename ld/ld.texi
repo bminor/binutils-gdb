@@ -1876,6 +1876,15 @@ in filename invoked by -R or --just-symbols
 Treat all warnings as errors.  The default behaviour can be restored
 with the option @option{--no-fatal-warnings}.
 
+@kindex -w
+@kindex --no-warnings
+@item -w
+@itemx --no-warnings
+Do not display any warning or error messages.  This overrides
+@option{--fatal-warnings} if it has been enabled.  This option can be
+used when it is known that the output binary will not work, but there
+is still a need to create it.
+
 @kindex --force-exe-suffix
 @item  --force-exe-suffix
 Make sure that an output file has a .exe suffix.

@@ -252,8 +252,11 @@ typedef struct
      changes due to the alignment of an input section.  */
   bool warn_section_align;
 
-  /* If TRUE, warning messages are fatal */
+  /* If TRUE, warning messages are fatal.  */
   bool fatal_warnings;
+
+  /* If TRUE, warning and error messages are ignored.  */
+  bool no_warnings;
 
   sort_order sort_common;
 

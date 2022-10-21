@@ -381,6 +381,9 @@ static const struct ld_option ld_options[] =
   { {"no-undefined", no_argument, NULL, OPTION_NO_UNDEFINED},
     '\0', NULL, N_("Do not allow unresolved references in object files"),
     TWO_DASHES },
+  { {"no-warnings", no_argument, NULL, OPTION_NO_WARNINGS},
+    'w', NULL, N_("Do not display any warning or error messages"),
+    TWO_DASHES },
   { {"allow-shlib-undefined", no_argument, NULL, OPTION_ALLOW_SHLIB_UNDEFINED},
     '\0', NULL, N_("Allow unresolved references in shared libraries"),
     TWO_DASHES },
@@ -1552,6 +1555,11 @@ parse_args (unsigned argc, char **argv)
 	  config.fatal_warnings = true;
 	  break;
 	case OPTION_NO_WARN_FATAL:
+	  config.fatal_warnings = false;
+	  break;
+	case OPTION_NO_WARNINGS:
+	case 'w':
+	  config.no_warnings = true;
 	  config.fatal_warnings = false;
 	  break;
 	case OPTION_WARN_MULTIPLE_GP:

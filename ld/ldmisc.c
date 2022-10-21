@@ -95,6 +95,9 @@ vfinfo (FILE *fp, const char *fmt, va_list ap, bool is_warning)
       } type;
   } args[9];
 
+  if (is_warning && config.no_warnings)
+    return;
+  
   for (arg_no = 0; arg_no < sizeof (args) / sizeof (args[0]); arg_no++)
     args[arg_no].type = Bad;
 

@@ -1,7 +1,12 @@
 -*- text -*-
 
+* The linker has a new command line option to suppress the generation of any
+  warning or error messages.  This can be useful when there is a need to create
+  a known non-working binary.  The option is -w or --no-warnings.
+
 * ld now supports zstd compressed debug sections.  The new option
   --compress-debug-sections=zstd compresses debug sections with zstd.
+
 * Add --enable-default-compressed-debug-sections-algorithm={zlib,zstd}
   that selects the default compression algorithm
   for --enable-compressed-debug-sections.

@@ -1,3 +1,15 @@
+2022-10-21  Nick Clifton  <nickc@redhat.com>
+
+	PR 29654
+	* ld.h (struct ld_config_type): Add no_warnings field.
+	* ldlex.h (enum option_values): Add OPTION_NO_WARNINGS.
+	* lexsup.c (ld_options): Add --no-warnings.
+	(parse_args): Add support for -w and --no-warnings.
+	* ldmisc.c (vfinfo): Return early if the message is a warning and
+	-w has been enabled.
+	* ld.texi (options): Document new command line option.
+	* NEWS: Mention the new feature.
+
 2022-08-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 29529
