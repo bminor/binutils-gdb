@@ -122,6 +122,28 @@ struct gdbpy_disassembler : public gdb_printing_disassembler
     return m_string_file.release ();
   }
 
+  /* If there is a Python exception stored in this disassembler then
+     restore it (i.e. set the PyErr_* state), clear the exception within
+     this disassembler, and return true.  There must be no current
+     exception set (i.e. !PyErr_Occurred()) when this function is called,
+     as any such exception might get lost.
+
+     Otherwise, there is no exception stored in this disassembler, return
+     false.  */
+  bool restore_exception ()
+  {
+    gdb_assert (!PyErr_Occurred ());
+    if (m_stored_exception.has_value ())
+      {
+	gdbpy_err_fetch ex = std::move (*m_stored_exception);
+	m_stored_exception.reset ();
+	ex.restore ();
+	return true;
+      }
+
+    return false;
+  }
+
 private:
 
   /* Where the disassembler result is written.  */
@@ -138,6 +160,25 @@ private:
      memory source object then a pointer to the object is placed in here,
      otherwise, this field is nullptr.  */
   PyObject *m_memory_source;
+
+  /* Move the exception EX into this disassembler object.  */
+  void store_exception (gdbpy_err_fetch &&ex)
+  {
+    /* The only calls to store_exception are from read_memory_func, which
+       will return early if there's already an exception stored.  */
+    gdb_assert (!m_stored_exception.has_value ());
+    m_stored_exception.emplace (std::move (ex));
+  }
+
+  /* Return true if there is an exception stored in this disassembler.  */
+  bool has_stored_exception () const
+  {
+    return m_stored_exception.has_value ();
+  }
+
+  /* Store a single exception.  This is used to pass Python exceptions back
+     from ::memory_read to disasmpy_builtin_disassemble.  */
+  gdb::optional<gdbpy_err_fetch> m_stored_exception;
 };
 
 /* Return true if OBJ is still valid, otherwise, return false.  A valid OBJ
@@ -288,20 +329,15 @@ disasmpy_builtin_disassemble (PyObject *self, PyObject *args, PyObject *kw)
      the disassembled instruction, or -1 if there was a memory-error
      encountered while disassembling.  See below more more details on
      handling of -1 return value.  */
-  int length;
-  try
-    {
-      length = gdbarch_print_insn (disasm_info->gdbarch, disasm_info->address,
+  int length = gdbarch_print_insn (disasm_info->gdbarch, disasm_info->address,
 				   disassembler.disasm_info ());
-    }
-  catch (gdbpy_err_fetch &pyerr)
-    {
-      /* Reinstall the Python exception held in PYERR.  This clears to
-	 pointers held in PYERR, hence the need to catch as a non-const
-	 reference.  */
-      pyerr.restore ();
-      return nullptr;
-    }
+
+  /* It is possible that, while calling a user overridden memory read
+     function, a Python exception was raised that couldn't be
+     translated into a standard memory-error.  In this case the first such
+     exception is stored in the disassembler and restored here.  */
+  if (disassembler.restore_exception ())
+    return nullptr;
 
   if (length == -1)
     {
@@ -483,6 +519,14 @@ gdbpy_disassembler::read_memory_func (bfd_vma memaddr, gdb_byte *buff,
     = static_cast<gdbpy_disassembler *> (info->application_data);
   disasm_info_object *obj = dis->py_disasm_info ();
 
+  /* If a previous read attempt resulted in an exception, then we don't
+     allow any further reads to succeed.  We only do this check for the
+     read_memory_func as this is the only one the user can hook into,
+     thus, this check prevents us calling back into user code if a
+     previous call has already thrown an error.  */
+  if (dis->has_stored_exception ())
+    return -1;
+
   /* The DisassembleInfo.read_memory method expects an offset from the
      address stored within the DisassembleInfo object; calculate that
      offset here.  */
@@ -513,7 +557,8 @@ gdbpy_disassembler::read_memory_func (bfd_vma memaddr, gdb_byte *buff,
 	 exception and throw it, this will then be caught in
 	 disasmpy_builtin_disassemble, at which point the exception will be
 	 restored.  */
-      throw gdbpy_err_fetch ();
+      dis->store_exception (gdbpy_err_fetch ());
+      return -1;
     }
 
   /* Convert the result to a buffer.  */
@@ -523,7 +568,8 @@ gdbpy_disassembler::read_memory_func (bfd_vma memaddr, gdb_byte *buff,
     {
       PyErr_Format (PyExc_TypeError,
 		    _("Result from read_memory is not a buffer"));
-      throw gdbpy_err_fetch ();
+      dis->store_exception (gdbpy_err_fetch ());
+      return -1;
     }
 
   /* Wrap PY_BUFF so that it is cleaned up correctly at the end of this
@@ -536,7 +582,8 @@ gdbpy_disassembler::read_memory_func (bfd_vma memaddr, gdb_byte *buff,
       PyErr_Format (PyExc_ValueError,
 		    _("Buffer returned from read_memory is sized %d instead of the expected %d"),
 		    py_buff.len, len);
-      throw gdbpy_err_fetch ();
+      dis->store_exception (gdbpy_err_fetch ());
+      return -1;
     }
 
   /* Copy the data out of the Python buffer and return success.  */
