@@ -1798,7 +1798,7 @@ maint_print_cap_from_addr_cmd (const char *args, int from_tty)
   if (args == nullptr)
     error (_("Missing argument <address> (64-bit hex)."));
 
-  CORE_ADDR addr = parse_and_eval_address (args);
+  CORE_ADDR addr = parse_and_eval_long (args);
   cap = target_read_capability (addr);
 
   if (cap.empty ())
@@ -1859,10 +1859,10 @@ maint_set_capability_in_memory_cmd (const char *args, int from_tty)
   if (lower_str.empty ())
     error (_("Missing <lower 64 bits> argument (64-bit hex)"));
 
-  CORE_ADDR addr = parse_and_eval_address (addr_str.c_str ());
-  CORE_ADDR tag_part = parse_and_eval_address (tag_str.c_str ());
-  CORE_ADDR half_a = parse_and_eval_address (upper_str.c_str ());
-  CORE_ADDR half_b = parse_and_eval_address (lower_str.c_str ());
+  CORE_ADDR addr = parse_and_eval_long (addr_str.c_str ());
+  CORE_ADDR tag_part = parse_and_eval_long (tag_str.c_str ());
+  CORE_ADDR half_a = parse_and_eval_long (upper_str.c_str ());
+  CORE_ADDR half_b = parse_and_eval_long (lower_str.c_str ());
 
   unsigned __int128 a, b;
 
