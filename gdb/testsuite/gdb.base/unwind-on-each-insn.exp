@@ -149,6 +149,13 @@ for { set i_count 1 } { true } { incr i_count } {
 	    break
 	}
 
+	if { $i_count > 100 } {
+	    # We expect a handful of instructions, if we reach 100,
+	    # something is going wrong.  Avoid an infinite loop.
+	    fail "exceeded max number of instructions"
+	    break
+	}
+
 	gdb_test "stepi" ".*"
     }
 }
