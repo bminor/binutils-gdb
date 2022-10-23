@@ -5,6 +5,10 @@ AC_CONFIG_MACRO_DIRS([../.. ../../config])
 AC_PROG_INSTALL
 AC_PROG_CC
 
+dnl The sim shouldn't be checking $target and changing behavior.  But it is,
+dnl and until we clean that up, we need to expand --target for use below.
+AC_CANONICAL_SYSTEM
+
 AC_ARG_ENABLE(sim-bitsize,
 [  --enable-sim-bitsize=n		Specify target bitsize (32 or 64).],
 [case "${enableval}" in
