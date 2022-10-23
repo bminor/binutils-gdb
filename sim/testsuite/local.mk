@@ -40,7 +40,9 @@ DO_RUNTEST = \
 
 # Ignore dirs that only contain configuration settings.
 check/./config/%.exp: ; @true
+check/config/%.exp: ; @true
 check/./lib/%.exp: ; @true
+check/lib/%.exp: ; @true
 
 check/%.exp:
 	$(AM_V_at)mkdir -p testsuite/$*
