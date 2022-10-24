@@ -39,7 +39,7 @@ frame_info_ptr::prepare_reinflate ()
 void
 frame_info_ptr::reinflate ()
 {
-  gdb_assert (m_cached_id != null_frame_id);
+  gdb_assert (frame_id_p (m_cached_id));
 
   if (m_ptr == nullptr)
     m_ptr = frame_find_by_id (m_cached_id).get ();
