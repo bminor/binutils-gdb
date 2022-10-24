@@ -56,16 +56,21 @@ public:
   }
 
   frame_info_ptr (const frame_info_ptr &other)
-    : m_ptr (other.m_ptr), m_cached_id (other.m_cached_id)
+    : m_ptr (other.m_ptr),
+      m_cached_id (other.m_cached_id),
+      m_cached_level (other.m_cached_level)
   {
     frame_list.push_back (*this);
   }
 
   frame_info_ptr (frame_info_ptr &&other)
-    : m_ptr (other.m_ptr), m_cached_id (other.m_cached_id)
+    : m_ptr (other.m_ptr),
+      m_cached_id (other.m_cached_id),
+      m_cached_level (other.m_cached_level)
   {
     other.m_ptr = nullptr;
     other.m_cached_id = null_frame_id;
+    other.m_cached_level = invalid_level;
     frame_list.push_back (*this);
   }
 
@@ -78,6 +83,7 @@ public:
   {
     m_ptr = other.m_ptr;
     m_cached_id = other.m_cached_id;
+    m_cached_level = other.m_cached_level;
     return *this;
   }
 
@@ -85,6 +91,7 @@ public:
   {
     m_ptr = nullptr;
     m_cached_id = null_frame_id;
+    m_cached_level = invalid_level;
     return *this;
   }
 
@@ -92,8 +99,10 @@ public:
   {
     m_ptr = other.m_ptr;
     m_cached_id = other.m_cached_id;
+    m_cached_level = other.m_cached_level;
     other.m_ptr = nullptr;
     other.m_cached_id = null_frame_id;
+    other.m_cached_level = invalid_level;
     return *this;
   }
 
@@ -136,12 +145,19 @@ public:
   void reinflate ();
 
 private:
+  /* We sometimes need to construct frame_info_ptr objects around the
+     sentinel_frame, which has level -1.  Therefore, make the invalid frame
+     level value -2.  */
+  static constexpr int invalid_level = -2;
 
   /* The underlying pointer.  */
   frame_info *m_ptr = nullptr;
 
   /* The frame_id of the underlying pointer.  */
   frame_id m_cached_id = null_frame_id;
+
+  /* The frame level of the underlying pointer.  */
+  int m_cached_level = invalid_level;
 
   /* All frame_info_ptr objects are kept on an intrusive list.
      This keeps their construction and destruction costs
