@@ -4586,7 +4586,7 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 		     bfd_vma symval,
 		     bfd_vma max_alignment,
 		     bfd_vma reserve_size,
-		     bool *again ATTRIBUTE_UNUSED,
+		     bool *again,
 		     riscv_pcgp_relocs *pcgp_relocs,
 		     bool undefined_weak)
 {
@@ -4715,6 +4715,7 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 				      sym_sec,
 				      undefined_weak);
 	  /* Delete unnecessary AUIPC and reuse the reloc.  */
+	  *again = true;
 	  riscv_relax_delete_bytes (abfd, sec, rel->r_offset, 4, link_info,
 				    pcgp_relocs, rel);
 	  return true;
