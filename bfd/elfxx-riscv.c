@@ -1190,6 +1190,7 @@ static struct riscv_implicit_subset riscv_implicit_subsets[] =
   {"sscofpmf", "zicsr",		check_implicit_always},
   {"ssstateen", "zicsr",	check_implicit_always},
   {"sstc", "zicsr",		check_implicit_always},
+  {"svadu", "zicsr",		check_implicit_always},
   {NULL, NULL, NULL}
 };
 
@@ -1336,6 +1337,7 @@ static struct riscv_supported_ext riscv_supported_std_s_ext[] =
   {"sscofpmf",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"ssstateen",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"sstc",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
+  {"svadu",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"svinval",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"svnapot",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
   {"svpbmt",		ISA_SPEC_CLASS_DRAFT,		1, 0, 0 },
