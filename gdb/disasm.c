@@ -445,7 +445,7 @@ gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn
 	size = m_di.print_insn (pc);
 	gdb_assert (size > 0);
       }
-    catch (const gdb_exception &ex)
+    catch (const gdb_exception &)
       {
 	/* An exception was thrown while disassembling the instruction.
 	   However, the disassembler might still have written something
@@ -454,7 +454,7 @@ gdb_pretty_print_disassembler::pretty_print_insn (const struct disasm_insn *insn
 	   object destructor as the write itself might throw an exception
 	   if the pager kicks in, and the user selects quit.  */
 	write_out_insn_buffer ();
-	throw ex;
+	throw;
       }
 
     if ((flags & (DISASSEMBLY_RAW_INSN | DISASSEMBLY_RAW_BYTES)) != 0)
