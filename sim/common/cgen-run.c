@@ -229,7 +229,9 @@ static void
 engine_run_n (SIM_DESC sd, int next_cpu_nr, int nr_cpus, int max_insns, int fast_p)
 {
   int i;
-  ENGINE_FN *engine_fns[MAX_NR_PROCESSORS];
+  /* Ensure that engine_fns is fully initialized, this silences a compiler
+     warning when engine_fns is used below.  */
+  ENGINE_FN *engine_fns[MAX_NR_PROCESSORS] = {};
 
   SIM_ASSERT (nr_cpus <= MAX_NR_PROCESSORS);
   SIM_ASSERT (next_cpu_nr >= 0 && next_cpu_nr < nr_cpus);
@@ -241,11 +243,6 @@ engine_run_n (SIM_DESC sd, int next_cpu_nr, int nr_cpus, int max_insns, int fast
       engine_fns[i] = fast_p ? CPU_FAST_ENGINE_FN (cpu) : CPU_FULL_ENGINE_FN (cpu);
       prime_cpu (cpu, max_insns);
     }
-
-  /* Ensure the remaining engine_fns slots are initialized, this silences a
-     compiler warning when engine_fns is used below.  */
-  for (i = nr_cpus; i < MAX_NR_PROCESSORS; ++i)
-    engine_fns[i] = NULL;
 
   while (1)
     {
