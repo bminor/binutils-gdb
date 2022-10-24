@@ -69,9 +69,10 @@ enum riscv_csr_class
   CSR_CLASS_H,		/* hypervisor */
   CSR_CLASS_H_32,	/* hypervisor, rv32 only */
   CSR_CLASS_SMSTATEEN,		/* Smstateen only */
-  CSR_CLASS_SMSTATEEN_AND_H,	/* Smstateen only (with H) */
   CSR_CLASS_SMSTATEEN_32,	/* Smstateen RV32 only */
-  CSR_CLASS_SMSTATEEN_AND_H_32,	/* Smstateen RV32 only (with H) */
+  CSR_CLASS_SSSTATEEN,		/* S[ms]stateen only */
+  CSR_CLASS_SSSTATEEN_AND_H,	/* S[ms]stateen only (with H) */
+  CSR_CLASS_SSSTATEEN_AND_H_32,	/* S[ms]stateen RV32 only (with H) */
   CSR_CLASS_SSCOFPMF,		/* Sscofpmf only */
   CSR_CLASS_SSCOFPMF_32,	/* Sscofpmf RV32 only */
   CSR_CLASS_SSTC,		/* Sstc only */
@@ -1029,14 +1030,17 @@ riscv_csr_address (const char *csr_name,
       extension = "zve32x";
       break;
     case CSR_CLASS_SMSTATEEN:
-    case CSR_CLASS_SMSTATEEN_AND_H:
     case CSR_CLASS_SMSTATEEN_32:
-    case CSR_CLASS_SMSTATEEN_AND_H_32:
-      is_rv32_only = (csr_class == CSR_CLASS_SMSTATEEN_32
-		      || csr_class == CSR_CLASS_SMSTATEEN_AND_H_32);
-      is_h_required = (csr_class == CSR_CLASS_SMSTATEEN_AND_H
-		      || csr_class == CSR_CLASS_SMSTATEEN_AND_H_32);
+      is_rv32_only = (csr_class == CSR_CLASS_SMSTATEEN_32);
       extension = "smstateen";
+      break;
+    case CSR_CLASS_SSSTATEEN:
+    case CSR_CLASS_SSSTATEEN_AND_H:
+    case CSR_CLASS_SSSTATEEN_AND_H_32:
+      is_rv32_only = (csr_class == CSR_CLASS_SSSTATEEN_AND_H_32);
+      is_h_required = (csr_class == CSR_CLASS_SSSTATEEN_AND_H
+		      || csr_class == CSR_CLASS_SSSTATEEN_AND_H_32);
+      extension = "ssstateen";
       break;
     case CSR_CLASS_SSCOFPMF_32:
       is_rv32_only = true;

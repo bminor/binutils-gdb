@@ -337,7 +337,7 @@
 	csr vsip
 	csr vsatp
 
-	# Smstateen extension
+	# Smstateen/Ssstateen extensions
 	csr mstateen0
 	csr mstateen1
 	csr mstateen2
