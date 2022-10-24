@@ -183,10 +183,10 @@ foreach_with_prefix kind {
 	"end"
 
     set param_integer_error \
-	"ERROR: In procedure set-parameter-value!:\r\nERROR: In procedure\
-	 gdbscm_set_parameter_value_x: Wrong type argument in position 2\
-	 \\(expecting integer\\): #:unlimited\r\nError while executing Scheme\
-	 code\\."
+	[multi_line \
+	    "ERROR: In procedure set-parameter-value!:" \
+	    "(ERROR: )?In procedure gdbscm_set_parameter_value_x: Wrong type argument in position 2 \\(expecting integer\\): #:unlimited" \
+	    "Error while executing Scheme code\\."]
     set param_minus_one_error "integer -1 out of range"
     set param_minus_two_range "integer -2 out of range"
     set param_minus_two_unlimited "only -1 is allowed to set as unlimited"
