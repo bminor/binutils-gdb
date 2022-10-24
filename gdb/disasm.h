@@ -51,7 +51,13 @@ struct gdb_disassemble_info
 
 protected:
 
-  /* Types for the function callbacks within m_di.  */
+  /* Types for the function callbacks within m_di.  It would be nice if
+     these function types were all defined to include the noexcept
+     keyword, as every implementation of these must be noexcept.  However,
+     using noexcept within a function typedef like this is a C++17
+     feature, trying to do this for earlier C++ versions results in a
+     warning from GCC/Clang, and the noexcept isn't checked.  After we
+     move to C++17 these should be updated to add noexcept.  */
   using read_memory_ftype = decltype (disassemble_info::read_memory_func);
   using memory_error_ftype = decltype (disassemble_info::memory_error_func);
   using print_address_ftype = decltype (disassemble_info::print_address_func);
@@ -127,7 +133,7 @@ protected:
   /* Callback used as the disassemble_info's fprintf_func callback.  The
      DIS_INFO pointer is a pointer to a gdb_printing_disassembler object.
      Content is written to the m_stream extracted from DIS_INFO.  */
-  static int fprintf_func (void *dis_info, const char *format, ...)
+  static int fprintf_func (void *dis_info, const char *format, ...) noexcept
     ATTRIBUTE_PRINTF(2,3);
 
   /* Callback used as the disassemble_info's fprintf_styled_func callback.
@@ -135,7 +141,7 @@ protected:
      object.  Content is written to the m_stream extracted from DIS_INFO.  */
   static int fprintf_styled_func (void *dis_info,
 				  enum disassembler_style style,
-				  const char *format, ...)
+				  const char *format, ...) noexcept
     ATTRIBUTE_PRINTF(3,4);
 
   /* Return true if the disassembler is considered inside a comment, false
@@ -187,14 +193,14 @@ private:
 
   /* Callback used as the disassemble_info's fprintf_func callback, this
      doesn't write anything to STREAM, but just returns 0.  */
-  static int null_fprintf_func (void *stream, const char *format, ...)
+  static int null_fprintf_func (void *stream, const char *format, ...) noexcept
     ATTRIBUTE_PRINTF(2,3);
 
   /* Callback used as the disassemble_info's fprintf_styled_func callback,
      , this doesn't write anything to STREAM, but just returns 0.  */
   static int null_fprintf_styled_func (void *stream,
 				       enum disassembler_style style,
-				       const char *format, ...)
+				       const char *format, ...) noexcept
     ATTRIBUTE_PRINTF(3,4);
 };
 
@@ -208,7 +214,7 @@ struct gdb_disassembler_memory_reader
   /* Implements the read_memory_func disassemble_info callback.  */
   static int dis_asm_read_memory (bfd_vma memaddr, gdb_byte *myaddr,
 				  unsigned int len,
-				  struct disassemble_info *info);
+				  struct disassemble_info *info) noexcept;
 };
 
 /* A non-printing disassemble_info management class.  The disassemble_info
@@ -281,9 +287,9 @@ private:
   static bool use_ext_lang_colorization_p;
 
   static void dis_asm_memory_error (int err, bfd_vma memaddr,
-				    struct disassemble_info *info);
+				    struct disassemble_info *info) noexcept;
   static void dis_asm_print_address (bfd_vma addr,
-				     struct disassemble_info *info);
+				     struct disassemble_info *info) noexcept;
 
   /* Return true if we should use the extension language to apply
      disassembler styling.  This requires disassembler styling to be on

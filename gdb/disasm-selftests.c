@@ -234,7 +234,8 @@ print_one_insn_test (struct gdbarch *gdbarch)
     size_t m_len;
 
     static int read_memory (bfd_vma memaddr, gdb_byte *myaddr,
-			    unsigned int len, struct disassemble_info *info)
+			    unsigned int len,
+			    struct disassemble_info *info) noexcept
     {
       gdb_disassembler_test *self
 	= static_cast<gdb_disassembler_test *>(info->application_data);
@@ -296,7 +297,7 @@ memory_error_test (struct gdbarch *gdbarch)
 
     static int read_memory (bfd_vma memaddr, gdb_byte *myaddr,
 			    unsigned int len,
-			    struct disassemble_info *info)
+			    struct disassemble_info *info) noexcept
     {
       /* Always return an error.  */
       return -1;

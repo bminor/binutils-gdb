@@ -106,7 +106,7 @@ gdbscm_disasm_read_memory_worker (void *datap)
 static int
 gdbscm_disasm_read_memory (bfd_vma memaddr, bfd_byte *myaddr,
 			   unsigned int length,
-			   struct disassemble_info *dinfo)
+			   struct disassemble_info *dinfo) noexcept
 {
   gdbscm_disassembler *self
     = static_cast<gdbscm_disassembler *> (dinfo->application_data);

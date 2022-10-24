@@ -101,12 +101,12 @@ struct gdbpy_disassembler : public gdb_printing_disassembler
 
   /* Callbacks used by disassemble_info.  */
   static void memory_error_func (int status, bfd_vma memaddr,
-				 struct disassemble_info *info);
+				 struct disassemble_info *info) noexcept;
   static void print_address_func (bfd_vma addr,
-				  struct disassemble_info *info);
+				  struct disassemble_info *info) noexcept;
   static int read_memory_func (bfd_vma memaddr, gdb_byte *buff,
 			       unsigned int len,
-			       struct disassemble_info *info);
+			       struct disassemble_info *info) noexcept;
 
   /* Return a reference to an optional that contains the address at which a
      memory error occurred.  The optional will only have a value if a
@@ -513,7 +513,7 @@ disasmpy_info_progspace (PyObject *self, void *closure)
 int
 gdbpy_disassembler::read_memory_func (bfd_vma memaddr, gdb_byte *buff,
 				      unsigned int len,
-				      struct disassemble_info *info)
+				      struct disassemble_info *info) noexcept
 {
   gdbpy_disassembler *dis
     = static_cast<gdbpy_disassembler *> (info->application_data);
@@ -658,7 +658,7 @@ disasmpy_result_init (PyObject *self, PyObject *args, PyObject *kwargs)
 
 void
 gdbpy_disassembler::memory_error_func (int status, bfd_vma memaddr,
-				       struct disassemble_info *info)
+				       struct disassemble_info *info) noexcept
 {
   gdbpy_disassembler *dis
     = static_cast<gdbpy_disassembler *> (info->application_data);
@@ -669,7 +669,7 @@ gdbpy_disassembler::memory_error_func (int status, bfd_vma memaddr,
 
 void
 gdbpy_disassembler::print_address_func (bfd_vma addr,
-					struct disassemble_info *info)
+					struct disassemble_info *info) noexcept
 {
   gdbpy_disassembler *dis
     = static_cast<gdbpy_disassembler *> (info->application_data);
