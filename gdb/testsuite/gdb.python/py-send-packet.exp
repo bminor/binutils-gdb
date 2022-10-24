@@ -80,9 +80,9 @@ if { ! $skip_auxv_test } {
 	}
     }
 
-    # Expand the '\x' in the output, so we can pass a string through
-    # to Python.
-    set reply_data [string map {\x \\x} $reply_data]
+    # Escape any backslash characters in the output, so we can safely
+    # pass a string through to Python.
+    set reply_data [string map {\\ \\\\} $reply_data]
     gdb_assert { ![string equal "$reply_data" ""] }
 
     # Run the test, fetches the auxv data in Python and confirm it
