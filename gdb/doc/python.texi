@@ -6812,7 +6812,7 @@ bytes it has available, in this case @code{builtin_disassemble} will
 not itself raise a @code{MemoryError}.
 
 Any other exception type raised in @code{read_memory} will propagate
-back and be available re-raised by @code{builtin_disassemble}.
+back and be re-raised by @code{builtin_disassemble}.
 @end defun
 @end deftp
 
