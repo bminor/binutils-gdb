@@ -259,6 +259,38 @@ mi_ui_out::main_stream ()
   return (string_file *) m_streams.back ();
 }
 
+/* Initialize a progress update to be displayed with
+   mi_ui_out::do_progress_notify.  */
+
+void
+mi_ui_out::do_progress_start ()
+{
+  m_progress_info.emplace_back ();
+}
+
+/* Indicate that a task described by MSG is in progress.  */
+
+void
+mi_ui_out::do_progress_notify (const std::string &msg, const char *unit,
+			       double cur, double total)
+{
+  mi_progress_info &info (m_progress_info.back ());
+
+  if (info.state == progress_update::START)
+    {
+      gdb_printf ("%s...\n", msg.c_str ());
+      info.state = progress_update::WORKING;
+    }
+}
+
+/* Remove the most recent progress update from the progress_info stack.  */
+
+void
+mi_ui_out::do_progress_end ()
+{
+  m_progress_info.pop_back ();
+}
+
 /* Clear the buffer.  */
 
 void

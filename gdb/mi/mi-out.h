@@ -83,23 +83,31 @@ protected:
   virtual bool do_is_mi_like_p () const override
   { return true; }
 
-  virtual void do_progress_start (const std::string &, bool) override
-  {
-  }
+  virtual void do_progress_start () override;
+  virtual void do_progress_notify (const std::string &, const char *,
+				   double, double) override;
 
-  virtual void do_progress_notify (double) override
-  {
-  }
-
-  virtual void do_progress_end () override
-  {
-  }
+  virtual void do_progress_end () override;
 
 private:
 
   void field_separator ();
   void open (const char *name, ui_out_type type);
   void close (ui_out_type type);
+
+  /* The state of a recent progress_update.  */
+  struct mi_progress_info
+  {
+    /* The current state.  */
+    progress_update::state state;
+
+    mi_progress_info ()
+      : state (progress_update::START)
+    {}
+  };
+
+  /* Stack of progress info.  */
+  std::vector<mi_progress_info> m_progress_info;
 
   /* Convenience method that returns the MI out's string stream cast
      to its appropriate type.  Assumes/asserts that output was not

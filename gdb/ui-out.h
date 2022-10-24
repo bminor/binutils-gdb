@@ -278,38 +278,55 @@ class ui_out
      escapes.  */
   virtual bool can_emit_style_escape () const = 0;
 
-  /* An object that starts and finishes a progress meter.  */
-  class progress_meter
+  /* An object that starts and finishes displaying progress updates.  */
+  class progress_update
   {
   public:
+    /* Represents the printing state of a progress update.  */
+    enum state
+    {
+      /* Printing will start with the next update.  */
+      START,
+      /* Printing has already started.  */
+      WORKING,
+      /* Progress bar printing has already started.  */
+      BAR
+    };
+
     /* SHOULD_PRINT indicates whether something should be printed for a tty.  */
-    progress_meter (struct ui_out *uiout, const std::string &name,
-		    bool should_print)
-      : m_uiout (uiout)
+    progress_update ()
     {
-      m_uiout->do_progress_start (name, should_print);
+      m_uiout = current_uiout;
+      m_uiout->do_progress_start ();
     }
 
-    ~progress_meter ()
+    ~progress_update ()
     {
-      m_uiout->do_progress_notify (1.0);
-      m_uiout->do_progress_end ();
+
     }
 
-    progress_meter (const progress_meter &) = delete;
-    progress_meter &operator= (const progress_meter &) = delete;
+    progress_update (const progress_update &) = delete;
+    progress_update &operator= (const progress_update &) = delete;
 
-    /* Emit some progress for this progress meter.  HOWMUCH may range
-       from 0.0 to 1.0.  */
-    void progress (double howmuch)
+    /* Emit some progress for this progress meter.  Includes current
+       amount of progress made and total amount in the display.  */
+    void update_progress (const std::string& msg, const char *unit,
+			  double cur, double total)
     {
-      m_uiout->do_progress_notify (howmuch);
+      m_uiout->do_progress_notify (msg, unit, cur, total);
     }
 
+    /* Emit some progress for this progress meter.  */
+    void update_progress (const std::string& msg)
+    {
+      m_uiout->do_progress_notify (msg, "", -1, -1);
+    }
   private:
 
     struct ui_out *m_uiout;
   };
+
+  virtual void do_progress_end () = 0;
 
  protected:
 
@@ -345,9 +362,9 @@ class ui_out
   virtual void do_flush () = 0;
   virtual void do_redirect (struct ui_file *outstream) = 0;
 
-  virtual void do_progress_start (const std::string &, bool) = 0;
-  virtual void do_progress_notify (double) = 0;
-  virtual void do_progress_end () = 0;
+  virtual void do_progress_start () = 0;
+  virtual void do_progress_notify (const std::string &, const char *,
+				   double, double) = 0;
 
   /* Set as not MI-like by default.  It is overridden in subclasses if
      necessary.  */
