@@ -2,11 +2,11 @@
   {
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpsrlw",	{ Vex, EXx, Ib }, PREFIX_DATA },
+    { "%XEvpsrlw",	{ Vex, EXx, Ib }, PREFIX_DATA },
     { Bad_Opcode },
-    { "vpsraw",	{ Vex, EXx, Ib }, PREFIX_DATA },
+    { "%XEvpsraw",	{ Vex, EXx, Ib }, PREFIX_DATA },
     { Bad_Opcode },
-    { "vpsllw",	{ Vex, EXx, Ib }, PREFIX_DATA },
+    { "%XEvpsllw",	{ Vex, EXx, Ib }, PREFIX_DATA },
   },
   /* REG_EVEX_0F72 */
   {
@@ -14,7 +14,7 @@
     { "vprol%DQ",	{ Vex, EXx, Ib }, PREFIX_DATA },
     { VEX_W_TABLE (EVEX_W_0F72_R_2) },
     { Bad_Opcode },
-    { "vpsra%DQ",	{ Vex, EXx, Ib }, PREFIX_DATA },
+    { "%XEvpsra%DQ",	{ Vex, EXx, Ib }, PREFIX_DATA },
     { Bad_Opcode },
     { VEX_W_TABLE (EVEX_W_0F72_R_6) },
   },
@@ -23,11 +23,11 @@
     { Bad_Opcode },
     { Bad_Opcode },
     { VEX_W_TABLE (EVEX_W_0F73_R_2) },
-    { "vpsrldq",	{ Vex, EXx, Ib }, PREFIX_DATA },
+    { "%XEvpsrldq",	{ Vex, EXx, Ib }, PREFIX_DATA },
     { Bad_Opcode },
     { Bad_Opcode },
     { VEX_W_TABLE (EVEX_W_0F73_R_6) },
-    { "vpslldq",	{ Vex, EXx, Ib }, PREFIX_DATA },
+    { "%XEvpslldq",	{ Vex, EXx, Ib }, PREFIX_DATA },
   },
   /* REG_EVEX_0F38C6_M_0_L_2 */
   {
