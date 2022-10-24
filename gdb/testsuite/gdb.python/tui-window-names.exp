@@ -26,6 +26,11 @@ if {[skip_tui_tests]} {
     return
 }
 
+if { [skip_python_tests] } {
+    untested "skipping Python tests"
+    return
+}
+
 # Define a function we can use as a window constructor.  If this ever
 # gets called we'll throw an error, but that's OK, this test doesn't
 # actually try to create any windows.
