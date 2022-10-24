@@ -2082,20 +2082,7 @@ backtrace_command_1 (const frame_print_options &fp_opts,
 
 	  print_frame_info (fp_opts, fi, 1, LOCATION, 1, 0);
 	  if ((flags & PRINT_LOCALS) != 0)
-	    {
-	      struct frame_id frame_id = get_frame_id (fi);
-
-	      print_frame_local_vars (fi, false, NULL, NULL, 1, gdb_stdout);
-
-	      /* print_frame_local_vars invalidates FI.  */
-	      fi = frame_find_by_id (frame_id);
-	      if (fi == NULL)
-		{
-		  trailing = NULL;
-		  warning (_("Unable to restore previously selected frame."));
-		  break;
-		}
-	    }
+	    print_frame_local_vars (fi, false, NULL, NULL, 1, gdb_stdout);
 
 	  /* Save the last frame to check for error conditions.  */
 	  fi.reinflate ();
