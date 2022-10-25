@@ -22,6 +22,10 @@ load_lib gdbserver-support.exp
 
 standard_testfile
 
+if { [skip_gdbserver_tests] } {
+    return 0
+}
+
 if {![can_spawn_for_attach]} {
     return
 }
