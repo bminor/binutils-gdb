@@ -359,20 +359,46 @@ CHECK_VALID (true,  bool, NF (1) == char (1))
 
 enum test_flag
   {
-    FLAG1 = 1 << 1,
-    FLAG2 = 1 << 2,
-    FLAG3 = 1 << 3,
+    FLAG1 = 1 << 0,
+    FLAG2 = 1 << 1,
+    FLAG3 = 1 << 2,
+    FLAG4 = 1 << 3,
   };
 
 enum test_uflag : unsigned
   {
-    UFLAG1 = 1 << 1,
-    UFLAG2 = 1 << 2,
-    UFLAG3 = 1 << 3,
+    UFLAG1 = 1 << 0,
+    UFLAG2 = 1 << 1,
+    UFLAG3 = 1 << 2,
+    UFLAG4 = 1 << 3,
   };
 
 DEF_ENUM_FLAGS_TYPE (test_flag, test_flags);
 DEF_ENUM_FLAGS_TYPE (test_uflag, test_uflags);
+
+/* to_string enumerator->string mapping functions used to test
+   enum_flags::to_string.  These intentionally miss mapping a couple
+   enumerators each (xFLAG2, xFLAG4).  */
+
+static std::string
+to_string_flags (test_flags flags)
+{
+  static constexpr test_flags::string_mapping mapping[] = {
+    MAP_ENUM_FLAG (FLAG1),
+    MAP_ENUM_FLAG (FLAG3),
+  };
+  return flags.to_string (mapping);
+}
+
+static std::string
+to_string_uflags (test_uflags flags)
+{
+  static constexpr test_uflags::string_mapping mapping[] = {
+    MAP_ENUM_FLAG (UFLAG1),
+    MAP_ENUM_FLAG (UFLAG3),
+  };
+  return flags.to_string (mapping);
+}
 
 static void
 self_test ()
@@ -580,6 +606,37 @@ self_test ()
       }
 
     SELF_CHECK (ok);
+  }
+
+  /* Check string conversion.  */
+  {
+    SELF_CHECK (to_string_uflags (0)
+		== "0x0 []");
+    SELF_CHECK (to_string_uflags (UFLAG1)
+		== "0x1 [UFLAG1]");
+    SELF_CHECK (to_string_uflags (UFLAG1 | UFLAG3)
+		== "0x5 [UFLAG1 UFLAG3]");
+    SELF_CHECK (to_string_uflags (UFLAG1 | UFLAG2 | UFLAG3)
+		== "0x7 [UFLAG1 UFLAG3 0x2]");
+    SELF_CHECK (to_string_uflags (UFLAG2)
+		== "0x2 [0x2]");
+    /* Check that even with multiple unmapped flags, we only print one
+       unmapped hex number (0xa, in this case).  */
+    SELF_CHECK (to_string_uflags (UFLAG1 | UFLAG2 | UFLAG3 | UFLAG4)
+		== "0xf [UFLAG1 UFLAG3 0xa]");
+
+    SELF_CHECK (to_string_flags (0)
+		== "0x0 []");
+    SELF_CHECK (to_string_flags (FLAG1)
+		== "0x1 [FLAG1]");
+    SELF_CHECK (to_string_flags (FLAG1 | FLAG3)
+		== "0x5 [FLAG1 FLAG3]");
+    SELF_CHECK (to_string_flags (FLAG1 | FLAG2 | FLAG3)
+		== "0x7 [FLAG1 FLAG3 0x2]");
+    SELF_CHECK (to_string_flags (FLAG2)
+		== "0x2 [0x2]");
+    SELF_CHECK (to_string_flags (FLAG1 | FLAG2 | FLAG3 | FLAG4)
+		== "0xf [FLAG1 FLAG3 0xa]");
   }
 }
 
