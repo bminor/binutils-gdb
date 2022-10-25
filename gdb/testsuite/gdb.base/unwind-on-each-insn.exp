@@ -44,11 +44,7 @@ proc get_sp_and_fba { testname } {
 
 	set fba ""
 	gdb_test_multiple "info frame" "" {
-	    -re "^info frame\r\n" {
-		exp_continue
-	    }
-
-	    -re "^Stack level ${::decimal}, frame at ($::hex):\r\n.*$::gdb_prompt $" {
+	    -re -wrap ".*Stack level ${::decimal}, frame at ($::hex):.*" {
 		set fba $expect_out(1,string)
 	    }
 	}
@@ -62,11 +58,7 @@ proc get_sp_and_fba { testname } {
 proc get_fid { } {
     set fid ""
     gdb_test_multiple "maint print frame-id" "" {
-	-re "^maint print frame-id\r\n" {
-	    exp_continue
-	}
-
-	-re "^frame-id for frame #${::decimal}: (\[^\r\n\]+).*" {
+	-re -wrap ".*frame-id for frame #${::decimal}: (.*)" {
 	    set fid $expect_out(1,string)
 	}
     }
