@@ -139,3 +139,4 @@ func:
 	.long  0xfe766688    /* xscvdpqp v19,v12           */
 	.long  0xfdb92688    /* xscvqpsdz v13,v4           */
 	.long  0xfcf83ec8    /* xsiexpqp v7,v24,v7         */
+	.section	.note.GNU-stack,"",@progbits

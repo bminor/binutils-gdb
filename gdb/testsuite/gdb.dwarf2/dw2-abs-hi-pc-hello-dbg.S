@@ -149,3 +149,4 @@ LELTP:
         .uleb128 0x1
         .byte   0x1
 LELT:
+	.section	.note.GNU-stack,"",@progbits

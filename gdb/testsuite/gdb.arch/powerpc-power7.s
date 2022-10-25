@@ -108,3 +108,4 @@ func:
 	.long  0x7d80e3a6    /* mtppr   r12                */
 	.long  0x7da2e3a6    /* mtppr32 r13                */
 	.long  0x7d605264    /* tlbie   r10,r11            */
+	.section	.note.GNU-stack,"",@progbits

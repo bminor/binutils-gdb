@@ -33,3 +33,4 @@ main:
 	blr
 
 
+	.section	.note.GNU-stack,"",@progbits

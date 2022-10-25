@@ -375,3 +375,4 @@
 
 	.section	.debug_line
 .Ldebug_line0:
+	.section	.note.GNU-stack,"",@progbits

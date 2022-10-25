@@ -28,3 +28,4 @@
 SYMBOL(main):
 	int3
 	ret
+	.section	.note.GNU-stack,"",@progbits

@@ -59,3 +59,4 @@ main:
 #else
 	.size .main,.-.main
 #endif
+	.section	.note.GNU-stack,"",@progbits

@@ -30,3 +30,4 @@ loop:
 	jmp .L1
 .L2:
 	ret /* bp.2 */
+	.section	.note.GNU-stack,"",@progbits

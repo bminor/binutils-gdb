@@ -98,3 +98,4 @@ test_atomic_sequences:
 #else
 	.size .test_atomic_sequences,.-.test_atomic_sequences
 #endif
+	.section	.note.GNU-stack,"",@progbits

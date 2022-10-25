@@ -31,3 +31,4 @@ main_end:
 	.section	.debug_abbrev
 .Ldebug_abbrev0:
 	.byte	0x0
+	.section	.note.GNU-stack,"",@progbits

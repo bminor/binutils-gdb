@@ -239,3 +239,4 @@ gcc43:	.globl gcc43
 	.uleb128	1
 	.byte		1
 .Lgcc43_end:
+	.section	.note.GNU-stack,"",@progbits

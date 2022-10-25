@@ -384,3 +384,4 @@ func:
 	.long  0xffd7048e    /* mffscrni f30,0             */
 	.long  0xffd71c8e    /* mffscrni f30,3             */
 	.long  0xfff8048e    /* mffsl   f31                */
+	.section	.note.GNU-stack,"",@progbits

@@ -51,3 +51,4 @@
 
 	.byte		0x0			/* Terminator */
 	.byte		0x0			/* Terminator */
+	.section	.note.GNU-stack,"",@progbits

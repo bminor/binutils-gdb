@@ -218,3 +218,4 @@ func_cu1:
 	.byte		0x9c
 	.byte		0x00
 	.byte		0x92
+	.section	.note.GNU-stack,"",@progbits

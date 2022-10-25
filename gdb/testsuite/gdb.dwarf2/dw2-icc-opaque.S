@@ -252,3 +252,4 @@ debug_info_seg3_end:
 	.byte 0x08	/* DW_FORM_string. */
 	.2byte 0x0000	/* End abbrev. */
 	.byte 0x00	/* End abbrev table. */
+	.section	.note.GNU-stack,"",@progbits

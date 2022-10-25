@@ -170,3 +170,4 @@ func:
 	.long  0xf102e293    /* xxspltw vs40,vs60,2        */
 	.long  0x7d00a699    /* lxvd2x  vs40,0,r20         */
 	.long  0x7d00a799    /* stxvd2x vs40,0,r20         */
+	.section	.note.GNU-stack,"",@progbits

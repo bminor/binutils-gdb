@@ -167,3 +167,4 @@ d:
 	.string	"sizetype"
 .LASF1:
 	.string	"char"
+	.section	.note.GNU-stack,"",@progbits

@@ -246,3 +246,4 @@ p__top:
 .Lline1_begin:
         .byte   0
 
+	.section	.note.GNU-stack,"",@progbits

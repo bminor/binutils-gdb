@@ -180,3 +180,4 @@ it_breakpoints:
 	bx	lr
 
 #endif /* __thumb2__ */
+	.section	.note.GNU-stack,"",@progbits

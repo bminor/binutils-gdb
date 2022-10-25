@@ -121,3 +121,4 @@ die221:
 	.string	"GNU Modula-2 0.78 (20100402) grafted onto GCC 4.1.2"
 .LASF2:
 	.string	""
+	.section	.note.GNU-stack,"",@progbits

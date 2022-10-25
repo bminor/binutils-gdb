@@ -27,3 +27,4 @@ test:
 .Lhandler:
 	mov $1, %eax
 	ret
+	.section	.note.GNU-stack,"",@progbits

@@ -901,3 +901,4 @@ main:
 	j_s     [blink]
 
 .align 4
+	.section	.note.GNU-stack,"",@progbits

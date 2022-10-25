@@ -33,3 +33,4 @@ FUNC_START(foo)
 	mr 1,11
 	blr
 FUNC_END(foo)
+	.section	.note.GNU-stack,"",@progbits

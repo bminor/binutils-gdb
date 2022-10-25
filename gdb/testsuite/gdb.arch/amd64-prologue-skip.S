@@ -26,3 +26,4 @@ pushrbp: .globl pushrbp
 #define MINSYM nop; .globl minsym; minsym: nop
 /*8*/	MINSYM
 /*a*/	hlt
+	.section	.note.GNU-stack,"",@progbits

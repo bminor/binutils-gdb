@@ -20,3 +20,4 @@ _start:
 	.rept 5
 	nop
 	.endr
+	.section	.note.GNU-stack,"",@progbits

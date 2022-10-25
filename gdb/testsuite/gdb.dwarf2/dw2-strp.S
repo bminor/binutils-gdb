@@ -176,3 +176,4 @@
 	.string		"hello world!\n"
 .Lemptyname:
 	.string		""
+	.section	.note.GNU-stack,"",@progbits

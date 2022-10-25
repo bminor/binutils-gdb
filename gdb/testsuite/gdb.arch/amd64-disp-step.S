@@ -179,3 +179,4 @@ test_abs_jmp_end:
 test_rep_ret:
 	repz
 	ret
+	.section	.note.GNU-stack,"",@progbits

@@ -246,3 +246,4 @@ func_cu2:
 	.byte		1
 
 .Lline1_end:
+	.section	.note.GNU-stack,"",@progbits

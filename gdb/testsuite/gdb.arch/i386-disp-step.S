@@ -121,3 +121,4 @@ test_call_end:
 	.global test_ret
 test_ret:
 	ret
+	.section	.note.GNU-stack,"",@progbits

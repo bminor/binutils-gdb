@@ -29,3 +29,4 @@ main:
   li  3, 0
   blr
 
+	.section	.note.GNU-stack,"",@progbits

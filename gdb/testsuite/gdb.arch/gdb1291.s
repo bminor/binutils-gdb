@@ -126,3 +126,4 @@ _sub2:
 	.short	260
 	.size	_sub2, .-_sub2
 	.ident	"GCC: (GNU) 3.5.0 20040204 (experimental)"
+	.section	.note.GNU-stack,"",@progbits

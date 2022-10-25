@@ -74,3 +74,4 @@ main:
 	.cfi_endproc
 .LFE2:
 	.size	main, .-main
+	.section	.note.GNU-stack,"",@progbits

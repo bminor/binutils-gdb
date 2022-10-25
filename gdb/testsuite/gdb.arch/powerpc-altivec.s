@@ -213,3 +213,4 @@ func:
 	.long  0x11e0e28e    /* vupklsb v15,v28            */
 	.long  0x110042ce    /* vupklsh v8,v8              */
 	.long  0x13201cc4    /* vxor    v25,v0,v3          */
+	.section	.note.GNU-stack,"",@progbits

@@ -28,3 +28,4 @@ foo:
 bar:
 	move	$2, $8
 	.end	bar
+	.section	.note.GNU-stack,"",@progbits

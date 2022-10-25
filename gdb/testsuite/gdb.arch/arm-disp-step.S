@@ -391,3 +391,4 @@ test_add_rn_pc_end:
 	bx lr
 	.size test_add_rn_pc, .-test_add_rn_pc
 #endif
+	.section	.note.GNU-stack,"",%progbits

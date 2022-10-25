@@ -460,3 +460,4 @@ SYMBOL(main):
 .Ldebug_addr0:
 	.4byte	.LFB0	/* DW_AT_low_pc */
 	.4byte	SYMBOL(baz)	/* DW_AT_location */
+	.section	.note.GNU-stack,"",@progbits

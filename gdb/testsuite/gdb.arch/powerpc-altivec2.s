@@ -133,3 +133,4 @@ func:
 	.long  0x11e0f7c3    /* vpopcntd v15,v30           */
 	.long  0x105f36c7    /* vcmpgtud. v2,v31,v6        */
 	.long  0x128f17c7    /* vcmpgtsd. v20,v15,v2       */
+	.section	.note.GNU-stack,"",@progbits

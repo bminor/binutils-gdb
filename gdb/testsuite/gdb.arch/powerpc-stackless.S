@@ -22,3 +22,4 @@ FUNC_START(main)
         mtlr    sp
         blr
 FUNC_END(main)
+	.section	.note.GNU-stack,"",@progbits

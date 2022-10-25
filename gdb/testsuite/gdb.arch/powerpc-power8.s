@@ -185,3 +185,4 @@ func:
 	.long  0x7d81492d    /* stwcx.  r12,r1,r9          */
 	.long  0x7da051ad    /* stdcx.  r13,0,r10          */
 	.long  0x7da151ad    /* stdcx.  r13,r1,r10         */
+	.section	.note.GNU-stack,"",@progbits

@@ -86,3 +86,4 @@ func:
 	.long  0x11e90f4d    /* vextuhrx r15,r9,v1         */
 	.long  0x12b1878d    /* vextuwrx r21,r17,v16       */
 	.long  0x1295b5e3    /* vmsumudm v20,v21,v22,v23   */
+	.section	.note.GNU-stack,"",@progbits

@@ -31,3 +31,4 @@ main:
 	lnia 9  # /* set r9 */
 	blr
 
+	.section	.note.GNU-stack,"",@progbits

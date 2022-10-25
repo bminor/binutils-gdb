@@ -107,3 +107,4 @@
 
 	.byte		0x0			/* Terminator .debug_abbrev
 						   section.  */
+	.section	.note.GNU-stack,"",@progbits

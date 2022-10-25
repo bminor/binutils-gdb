@@ -164,3 +164,4 @@ __start_high_pc:
 
 .global __cu_high_pc
 __cu_high_pc:
+	.section	.note.GNU-stack,"",@progbits

@@ -41,3 +41,4 @@ main:
 
 	xor	%rax,%rax
 	ret
+	.section	.note.GNU-stack,"",@progbits

@@ -93,3 +93,4 @@
 .LASF0:
 	.string	"GNU C 4.8.2 20131212 (Red Hat 4.8.2-7) -mtune=generic -march=x86-64 -g"
 	.ident	"GCC: (GNU) 4.8.2 20131212 (Red Hat 4.8.2-7)"
+	.section	.note.GNU-stack,"",@progbits

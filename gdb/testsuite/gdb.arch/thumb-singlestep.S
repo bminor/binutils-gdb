@@ -38,3 +38,4 @@ main:
         pop	{r3, pc}
 	.size	main, .-main
 
+	.section	.note.GNU-stack,"",@progbits

@@ -43,3 +43,4 @@ mydata:
 	.long 0xabbbcbdb	# <<- loaded into                vs7
 	.long 0xacbcccdc	# <<-
 
+	.section	.note.GNU-stack,"",@progbits

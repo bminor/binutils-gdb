@@ -1015,3 +1015,4 @@ func:
 	.long 0x80060003
 	.long 0x05000000	/* xxspltiw vs0,8 */
 	.long 0x80060008
+	.section	.note.GNU-stack,"",@progbits

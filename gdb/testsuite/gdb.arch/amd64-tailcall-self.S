@@ -612,3 +612,4 @@ die10a:
 .LASF2:
 	.string	"argv"
 	.ident	"GCC: (GNU) 4.9.2 20150212 (Red Hat 4.9.2-6)"
+	.section	.note.GNU-stack,"",@progbits

@@ -27,3 +27,4 @@ some_func:
 	.size some_func,.-some_func
 some_func_end:
 	nop
+	.section	.note.GNU-stack,"",@progbits

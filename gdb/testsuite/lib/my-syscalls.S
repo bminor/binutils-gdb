@@ -54,3 +54,5 @@ my_execve_syscall:
 #else
 # error "Unsupported architecture"
 #endif
+
+	.section	.note.GNU-stack,"",@progbits

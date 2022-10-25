@@ -20,3 +20,4 @@ var1:	.byte	1
 
 	.section	sect2, "a"
 var2:	.byte	2
+	.section	.note.GNU-stack,"",@progbits

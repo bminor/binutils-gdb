@@ -1000,3 +1000,4 @@ start_branch_tests:
 
 .Lend:
 
+	.section	.note.GNU-stack,"",@progbits

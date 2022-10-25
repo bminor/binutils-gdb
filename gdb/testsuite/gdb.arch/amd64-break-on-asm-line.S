@@ -33,3 +33,4 @@ test:
 	nop			/* Incorrect.  */
 	nop
 	nop
+	.section	.note.GNU-stack,"",@progbits

@@ -47,3 +47,4 @@ foo:	.cfi_startproc
 	jmp 1b
 	.cfi_endproc
 	.endfunc
+	.section	.note.GNU-stack,"",@progbits

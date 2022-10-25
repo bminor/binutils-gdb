@@ -19,3 +19,4 @@
 foo:
 	lr	r0, [tlbpd0]
 .end	foo
+	.section	.note.GNU-stack,"",@progbits

@@ -134,3 +134,4 @@ test_fsr:
 .align 8
 flags: .xword 0x0000000000000000
 .size flags, .-flags
+	.section	.note.GNU-stack,"",@progbits

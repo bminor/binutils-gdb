@@ -3280,6 +3280,8 @@ namespace eval Dwarf {
 
 	_write_deferred_output
 
+	_section .note.GNU-stack "" progbits
+
 	if { $file_id == "" } {
 	    catch {close $_output_file}
 	}

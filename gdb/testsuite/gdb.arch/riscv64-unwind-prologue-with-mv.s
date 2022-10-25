@@ -45,3 +45,4 @@ foo:
 	addi	sp,sp,32
 	jr	ra
 	.size	foo, .-foo
+	.section	.note.GNU-stack,"",@progbits

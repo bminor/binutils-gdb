@@ -29,3 +29,4 @@ main:
         nop
         fld1
         nop
+	.section	.note.GNU-stack,"",@progbits

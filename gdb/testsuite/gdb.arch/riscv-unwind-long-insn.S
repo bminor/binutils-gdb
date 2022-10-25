@@ -60,3 +60,4 @@ func:
 	addi    sp,sp,16
 	jr      ra
 	.size   func, .-func
+	.section	.note.GNU-stack,"",@progbits

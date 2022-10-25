@@ -130,3 +130,4 @@ aa551234:	.byte	0xaa, 0x55, 0x12, 0x34
 
 	.byte		0x0			/* Terminator */
 	.byte		0x0			/* Terminator */
+	.section	.note.GNU-stack,"",@progbits

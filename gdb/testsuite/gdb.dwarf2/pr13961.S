@@ -378,3 +378,4 @@ SYMBOL(main):
 .LASF3:
 	.string	"main"
 
+	.section	.note.GNU-stack,"",@progbits

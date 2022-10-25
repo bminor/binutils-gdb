@@ -22,3 +22,4 @@ _start:	.globl	_start
 	int3
 	nop
 	nop
+	.section	.note.GNU-stack,"",@progbits

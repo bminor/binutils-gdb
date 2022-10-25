@@ -63,3 +63,4 @@ func:
 	.long  0xf360d52d    /* xscvspdpn vs59,vs26        */
 	.long  0xff0e168c    /* fmrgow  f24,f14,f2         */
 	.long  0xfec72f8c    /* fmrgew  f22,f7,f5          */
+	.section	.note.GNU-stack,"",@progbits

@@ -46,3 +46,4 @@ test_func:
         mov     x30, 0x1234
         ret     x0
         .cfi_endproc
+	.section	.note.GNU-stack,"",@progbits

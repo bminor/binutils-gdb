@@ -360,3 +360,4 @@ die149:	.uleb128 0x16		/* DW_TAG_variable */
 .LASF4:
 	.string	"GNU C++ 4.4.2"
 	.ident	"GCC: (GNU) 4.4.2"
+	.section	.note.GNU-stack,"",@progbits
