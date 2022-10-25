@@ -130,6 +130,17 @@ public:
   typedef E enum_type;
   typedef typename enum_underlying_type<enum_type>::type underlying_type;
 
+  /* For to_string.  Maps one enumerator of E to a string.  */
+  struct string_mapping
+  {
+    E flag;
+    const char *str;
+  };
+
+  /* Convenience for to_string implementations, to build a
+     string_mapping array.  */
+#define MAP_ENUM_FLAG(ENUM_FLAG) { ENUM_FLAG, #ENUM_FLAG }
+
 public:
   /* Allow default construction.  */
   constexpr enum_flags ()
@@ -182,6 +193,18 @@ public:
 
   /* Binary operations involving some unrelated type (which would be a
      bug) are implemented as non-members, and deleted.  */
+
+  /* Convert this object to a std::string, using MAPPING as
+     enumerator-to-string mapping array.  This is not meant to be
+     called directly.  Instead, enum_flags specializations should have
+     their own to_string function wrapping this one, thus hidding the
+     mapping array from callers.
+
+     Note: this is defined outside the template class so it can use
+     the global operators for enum_type, which are only defined after
+     the template class.  */
+  template<size_t N>
+  std::string to_string (const string_mapping (&mapping)[N]) const;
 
 private:
   /* Stored as enum_type because GDB knows to print the bit flags
@@ -414,6 +437,49 @@ void operator>> (const enum_type &, const any_type &) = delete;
 template <typename enum_type, typename any_type,
 	  typename = is_enum_flags_enum_type_t<enum_type>>
 void operator>> (const enum_flags<enum_type> &, const any_type &) = delete;
+
+template<typename E>
+template<size_t N>
+std::string
+enum_flags<E>::to_string (const string_mapping (&mapping)[N]) const
+{
+  enum_type flags = raw ();
+  std::string res = hex_string (flags);
+  res += " [";
+
+  bool need_space = false;
+  for (const auto &entry : mapping)
+    {
+      if ((flags & entry.flag) != 0)
+	{
+	  /* Work with an unsigned version of the underlying type,
+	     because if enum_type's underlying type is signed, op~
+	     won't be defined for it, and, bitwise operations on
+	     signed types are implementation defined.  */
+	  using uns = typename std::make_unsigned<underlying_type>::type;
+	  flags &= (enum_type) ~(uns) entry.flag;
+
+	  if (need_space)
+	    res += " ";
+	  res += entry.str;
+
+	  need_space = true;
+	}
+    }
+
+  /* If there were flags not included in the mapping, print them as
+     a hex number.  */
+  if (flags != 0)
+    {
+      if (need_space)
+	res += " ";
+      res += hex_string (flags);
+    }
+
+  res += "]";
+
+  return res;
+}
 
 #else /* __cplusplus */
 
