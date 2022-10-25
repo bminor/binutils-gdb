@@ -1879,17 +1879,19 @@ slurp_file (const char *   fn,
 #if HAVE_LIBDEBUGINFOD
   if (fd < 0 && use_debuginfod && fn[0] == '/' && abfd != NULL)
     {
-      unsigned char * build_id;
-      debuginfod_client * client;
+      unsigned char *build_id = get_build_id (abfd);
 
-      client = debuginfod_begin ();
-      if (client == NULL)
-	return NULL;
+      if (build_id)
+	{
+	  debuginfod_client *client = debuginfod_begin ();
 
-      build_id = get_build_id (abfd);
-      fd = debuginfod_find_source (client, build_id, 0, fn, NULL);
-      free (build_id);
-      debuginfod_end (client);
+	  if (client)
+	    {
+	      fd = debuginfod_find_source (client, build_id, 0, fn, NULL);
+	      debuginfod_end (client);
+	    }
+	  free (build_id);
+	}
     }
 #endif
 
