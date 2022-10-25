@@ -139,14 +139,32 @@ displaced_step_buffers::prepare (thread_info *thread, CORE_ADDR &displaced_pc)
       return DISPLACED_STEP_PREPARE_STATUS_CANT;
     }
 
-  /* Resume execution at the copy.  */
-  regcache_write_pc (regcache, buffer->addr);
-
   /* This marks the buffer as being in use.  */
   buffer->current_thread = thread;
 
   /* Save this, now that we know everything went fine.  */
   buffer->copy_insn_closure = std::move (copy_insn_closure);
+
+  /* Reset the displaced step buffer state if we failed to write PC.
+     Otherwise we will prevent this buffer from being used, as it will
+     always have a thread in buffer->current_thread.  */
+  auto reset_buffer = make_scope_exit
+    ([buffer] ()
+      {
+	buffer->current_thread = nullptr;
+	buffer->copy_insn_closure.reset ();
+      });
+
+  /* Adjust the PC so it points to the displaced step buffer address that will
+     be used.  This needs to be done after we save the copy_insn_closure, as
+     some architectures (Arm, for one) need that information so they can adjust
+     other data as needed.  In particular, Arm needs to know if the instruction
+     being executed in the displaced step buffer is thumb or not.  Without that
+     information, things will be very wrong in a random way.  */
+  regcache_write_pc (regcache, buffer->addr);
+
+  /* PC update successful.  Discard the displaced step state rollback.  */
+  reset_buffer.release ();
 
   /* Tell infrun not to try preparing a displaced step again for this inferior if
      all buffers are taken.  */
@@ -264,7 +282,11 @@ displaced_step_buffers::copy_insn_closure_by_addr (CORE_ADDR addr)
   for (const displaced_step_buffer &buffer : m_buffers)
     {
       if (addr == buffer.addr)
+      {
+	/* The closure information should always be available. */
+	gdb_assert (buffer.copy_insn_closure.get () != nullptr);
 	return buffer.copy_insn_closure.get ();
+      }
     }
 
   return nullptr;
