@@ -370,6 +370,11 @@ compute_stack_depth_worker (int start, int *need_tempvar,
 	  stack_depth -= 2;
 	  break;
 
+	case DW_OP_LLVM_overlay:
+	case DW_OP_LLVM_bit_overlay:
+	  stack_depth -= 3;
+	  break;
+
 	case DW_OP_LLVM_extend:
 	case DW_OP_LLVM_piece_end:
 	case DW_OP_LLVM_offset_constu:

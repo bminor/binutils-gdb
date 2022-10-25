@@ -1,0 +1,213 @@
+# Copyright (C) 2022 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test the new DW_OP_LLVM_overlay operation.
+#
+# The test uses a composite location description, where variable buff
+# address is used as a base location and a reg1 is used as an overlay
+# location.
+
+load_lib dwarf.exp
+
+# This test can only be run on targets which support DWARF-2 and use gas.
+if {![dwarf2_support]} {
+    return 0
+}
+
+# Choose suitable integer registers for the test.
+
+set dwarf_regnum {0 1}
+
+if { [is_aarch64_target] } {
+    set regname {x0 x1}
+} elseif { [is_aarch32_target]
+	   || [istarget "s390*-*-*" ]
+	   || [istarget "powerpc*-*-*"]
+	   || [istarget "rs6000*-*-aix*"] } {
+    set regname {r0 r1}
+} elseif { [is_x86_like_target] } {
+    set regname {eax ecx}
+} elseif { [is_amd64_regs_target] } {
+    set regname {rax rdx}
+} else {
+    verbose "Skipping $gdb_test_file_name."
+    return
+}
+
+standard_testfile .c -dw.S
+
+# Make some DWARF for the test.
+
+set asm_file [standard_output_file $srcfile2]
+Dwarf::assemble $asm_file {
+    global dwarf_regnum regname srcdir subdir srcfile
+    set buff_src [gdb_target_symbol buff]
+
+    set foo_result [function_range foo ${srcdir}/${subdir}/${srcfile}]
+    set foo_start [lindex $foo_result 0]
+    set foo_length [lindex $foo_result 1]
+
+    cu {} {
+	DW_TAG_compile_unit {
+	    {DW_AT_name $srcfile}
+	    {DW_AT_comp_dir /tmp}
+	} {
+	    declare_labels int_type_label uint_type_label array_type_label
+
+	    uint_type_label: DW_TAG_base_type {
+		{DW_AT_name "uint32_t"}
+		{DW_AT_encoding @DW_ATE_unsigned}
+		{DW_AT_byte_size 4 DW_FORM_sdata}
+	    }
+
+	    int_type_label: DW_TAG_base_type {
+		{DW_AT_name "int"}
+		{DW_AT_encoding @DW_ATE_signed}
+		{DW_AT_byte_size 4 DW_FORM_sdata}
+	    }
+
+	    array_type_label: DW_TAG_array_type {
+		{DW_AT_type :$uint_type_label}
+	    } {
+		DW_TAG_subrange_type {
+		    {DW_AT_type :$int_type_label}
+		    {DW_AT_upper_bound 7 DW_FORM_udata}
+		}
+	    }
+
+	    DW_TAG_subprogram {
+		{DW_AT_name foo}
+		{DW_AT_low_pc $foo_start addr}
+		{DW_AT_high_pc $foo_length data8}
+	    } {
+
+		DW_TAG_variable {
+		    {DW_AT_name dst_v1}
+		    {DW_AT_type :$array_type_label}
+		    {DW_AT_location {
+			# 1. Memory location description of dst elements located in memory:
+			DW_OP_addr $buff_src
+
+			# 2. Register location description of element dst\[i\] is located in a register:
+			DW_OP_regx [lindex $dwarf_regnum 1]
+
+			# 3. Offset of the register within the memory of dst:
+			DW_OP_bregx [lindex $dwarf_regnum 0] 0
+			DW_OP_lit4
+			DW_OP_mul
+
+			# 4. The size of the register element:
+			DW_OP_lit4
+
+			# 5. Make a composite location description for dst that is the memory #1 with
+			#    the register #2 positioned as an overlay at offset #3 of size #4:
+			DW_OP_LLVM_overlay
+		    } SPECIAL_expr}
+		}
+
+		DW_TAG_variable {
+		    {DW_AT_name dst_v2}
+		    {DW_AT_type :$array_type_label}
+		    {DW_AT_location {
+			# 1. Memory location description of dst elements located in memory:
+			DW_OP_addr $buff_src
+
+			# 2. Register location description of element dst\[i\] is located in a register:
+			DW_OP_regx [lindex $dwarf_regnum 1]
+
+			# 3. Offset of the register within the memory of dst:
+			DW_OP_bregx [lindex $dwarf_regnum 0] 0
+			DW_OP_lit4
+			DW_OP_mul
+
+			# 4. The size of the register element:
+			DW_OP_lit4
+
+			# 5. Make a composite location description for dst that is the memory #1 with
+			#    the register #2 positioned as an overlay at offset #3 of size #4:
+			DW_OP_LLVM_bit_overlay
+		    } SPECIAL_expr}
+		}
+
+		DW_TAG_variable {
+		    {DW_AT_name src}
+		    {DW_AT_type :$array_type_label}
+		    {DW_AT_location {
+			DW_OP_addr $buff_src
+		    } SPECIAL_expr}
+		}
+
+		DW_TAG_variable {
+		    {DW_AT_name i}
+		    {DW_AT_type :$int_type_label}
+		    {DW_AT_location {
+			DW_OP_regx [lindex $dwarf_regnum 0]
+		    } SPECIAL_expr}
+		}
+	    }
+	}
+    }
+}
+
+if { [prepare_for_testing ${testfile}.exp ${testfile} \
+     [list $srcfile $asm_file] {nodebug}] } {
+    return -1
+}
+
+if ![runto_main] {
+    return -1
+}
+
+gdb_test "break foo" "Breakpoint.*at.*" "break at function foo"
+gdb_test "continue"  "Continuing\\..*Breakpoint \[0-9\]+,.*foo \\(\\).*" \
+	 "continue to foo"
+
+gdb_test_no_output "set var \$[lindex $regname 0] = 0x0" "init reg 0"
+gdb_test_no_output "set var \$[lindex $regname 1] = 0xdeadbeef" "init reg 1"
+
+# gdb_interact
+
+# Determine byte order.
+set endian [get_endianness]
+
+switch $endian {
+	little {set val_v1 "0xdeadbeef, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7"}
+	big {set val_v1 "0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0xdeadbeef"}
+}
+
+gdb_test "print/x dst_v1" " = \\{${val_v1}\\}" "dst_v1 print i = 0"
+
+switch $endian {
+	little {set val_v2 "0xf, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7"}
+	big {set val_v2 "0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0xf"}
+}
+
+gdb_test "print/x dst_v2" " = \\{${val_v2}\\}" "dst_v2 print i = 0"
+
+gdb_test_no_output "set var i = 0x2" "init reg 0 to 2"
+
+switch $endian {
+	little {set val_v1 "0x0, 0x1, 0xdeadbeef, 0x3, 0x4, 0x5, 0x6, 0x7"}
+	big {set val_v1 "0x7, 0x6, 0x5, 0x4, 0x3, 0xdeadbeef, 0x1, 0x0"}
+}
+
+gdb_test "print/x dst_v1" " = \\{${val_v1}\\}" "dst_v1 print i = 2"
+
+switch $endian {
+	little {set val_v2 "0xf00, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7"}
+	big {set val_v2 "0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0xf00"}
+}
+
+gdb_test "print/x dst_v2" " = \\{${val_v2}\\}" "dst_v2 print i = 2"

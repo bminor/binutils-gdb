@@ -2837,6 +2837,21 @@ private:
   void create_select_composite (const loc_offset &piece_size,
 				ULONGEST pieces_count);
 
+  /* It pops two stack entries.  First must be a location description
+     that represents the overlay location description.  The Second
+     must be a location description that represents the base location
+     description.  The OVERLAY_SIZE represents the size of the overlay
+     piece of the composite and the OVERLAY_OFFSET represent a starting
+     point of the overlay from the base location.
+
+     A complete composite location description created with parts from
+     base location description, overlayed by the overlay location
+     description, starting from the overlay offset, ending at
+     a sum of the overlay offset and overlay size, is pushed
+     on top of the DWARF stack.  */
+  void create_overlay_composite (loc_offset overlay_size,
+				 loc_offset overlay_offset);
+
   /* The engine for the expression evaluator.  Using the context in this
      object, evaluate the expression between OP_PTR and OP_END.  */
   void execute_stack_op (const gdb_byte *op_ptr, const gdb_byte *op_end);
@@ -3274,6 +3289,38 @@ dwarf_expr_context::create_select_composite (const loc_offset &piece_size,
       composite->add_piece (std::move (slice), piece_size);
     }
 
+  composite->set_completed (true);
+  push (std::move (composite));
+}
+
+void
+dwarf_expr_context::create_overlay_composite (loc_offset overlay_size,
+					      loc_offset overlay_offset)
+{
+  gdbarch *arch = this->m_per_objfile->objfile->arch ();
+
+  if (stack_empty_p ())
+    ill_formed_expression ();
+
+  dwarf_location_up overlay = to_location (pop (), arch);
+
+  if (stack_empty_p ())
+    ill_formed_expression ();
+
+  dwarf_location_up base = to_location (pop (), arch);
+
+  std::unique_ptr<dwarf_composite> composite
+    = make_unique<dwarf_composite> (arch, this->m_per_cu);
+
+  composite->add_piece (std::move (base->slice (0, overlay_offset)),
+			overlay_offset);
+  composite->add_piece (std::move (overlay), overlay_size);
+
+  loc_offset end_offset = overlay_offset + overlay_size;
+  loc_offset end_size = base->size () - end_offset;
+
+  composite->add_piece
+    (std::move (base->slice (end_offset, end_size)), end_size);
   composite->set_completed (true);
   push (std::move (composite));
 }
@@ -4537,6 +4584,37 @@ dwarf_expr_context::execute_stack_op (const gdb_byte *op_ptr,
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &pieces_count);
 	    create_select_composite (piece_bit_size,
 				     pieces_count);
+	    break;
+	  }
+
+	case DW_OP_LLVM_overlay:
+	case DW_OP_LLVM_bit_overlay:
+	  {
+	    if (stack_empty_p ())
+	      ill_formed_expression ();
+
+	    dwarf_value_up overlay_size_val
+	      = to_value (pop (), address_type);
+	    dwarf_require_integral (overlay_size_val->type ());
+	    LONGEST overlay_size = overlay_size_val->to_long ();
+
+	    if (stack_empty_p () || overlay_size < 0)
+	      ill_formed_expression ();
+
+	    dwarf_value_up overlay_offset_val
+	       = to_value (pop (), address_type);
+	    dwarf_require_integral (overlay_offset_val->type ());
+	    LONGEST overlay_offset = overlay_offset_val->to_long ();
+
+	    if (overlay_offset < 0)
+	      ill_formed_expression ();
+
+	    if (op == DW_OP_LLVM_overlay)
+	      create_overlay_composite ({(ULONGEST) overlay_size, 0},
+					{(ULONGEST) overlay_offset, 0});
+	    else
+	      create_overlay_composite ((ULONGEST) overlay_size,
+					(ULONGEST) overlay_offset);
 	    break;
 	  }
 
