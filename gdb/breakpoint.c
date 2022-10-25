@@ -2647,23 +2647,28 @@ breakpoint_kind (const struct bp_location *bl, CORE_ADDR *addr)
     return gdbarch_breakpoint_kind_from_pc (bl->gdbarch, addr);
 }
 
-#define RETHROW_ON_TARGET_CLOSE_ERROR(E)				\
-  do									\
-    {									\
-      if ((E).reason != 0)						\
-	{								\
-	  /* Can't set the breakpoint.  */				\
-									\
-	  if ((E).error == TARGET_CLOSE_ERROR)				\
-	    /* If the target has closed then it will have deleted any	\
-	       breakpoints inserted within the target inferior, as a	\
-	       result any further attempts to interact with the		\
-	       breakpoint objects is not possible.  Just rethrow the	\
-	       error.  Don't use E to rethrow, to prevent object	\
-	       slicing of the exception.  */				\
-	    throw;							\
-	}								\
-    } while (0)
+/* Rethrow the currently handled exception, if it's a TARGET_CLOSE_ERROR.
+   E is either the currently handled exception, or a copy, or a sliced copy,
+   so we can't rethrow that one, but we can use it to inspect the properties
+   of the currently handled exception.  */
+
+static void
+rethrow_on_target_close_error (const gdb_exception &e)
+{
+  if (e.reason == 0)
+    return;
+  /* Can't set the breakpoint.  */
+
+  if (e.error != TARGET_CLOSE_ERROR)
+    return;
+
+  /* If the target has closed then it will have deleted any breakpoints
+     inserted within the target inferior, as a result any further attempts
+     to interact with the breakpoint objects is not possible.  Just rethrow
+     the error.  Don't use e to rethrow, to prevent object slicing of the
+     exception.  */
+  throw;
+}
 
 /* Insert a low-level "breakpoint" of some type.  BL is the breakpoint
    location.  Any error messages are printed to TMP_ERROR_STREAM; and
@@ -2752,7 +2757,7 @@ insert_bp_location (struct bp_location *bl,
 	    }
 	  catch (gdb_exception &e)
 	    {
-	      RETHROW_ON_TARGET_CLOSE_ERROR (e);
+	      rethrow_on_target_close_error (e);
 	      bp_excpt = std::move (e);
 	    }
 	}
@@ -2792,7 +2797,7 @@ insert_bp_location (struct bp_location *bl,
 		    }
 		  catch (gdb_exception &e)
 		    {
-		      RETHROW_ON_TARGET_CLOSE_ERROR (e);
+		      rethrow_on_target_close_error (e);
 		      bp_excpt = std::move (e);
 		    }
 
@@ -2817,7 +2822,7 @@ insert_bp_location (struct bp_location *bl,
 		}
 	      catch (gdb_exception &e)
 		{
-		  RETHROW_ON_TARGET_CLOSE_ERROR (e);
+		  rethrow_on_target_close_error (e);
 		  bp_excpt = std::move (e);
 		}
 	    }
