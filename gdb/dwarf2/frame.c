@@ -659,7 +659,7 @@ void
 dwarf2_frame_set_init_reg (struct gdbarch *gdbarch,
 			   void (*init_reg) (struct gdbarch *, int,
 					     struct dwarf2_frame_state_reg *,
-					     frame_info_ptr ))
+					     frame_info_ptr))
 {
   struct dwarf2_frame_ops *ops = get_frame_ops (gdbarch);
 
@@ -684,7 +684,7 @@ dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 void
 dwarf2_frame_set_signal_frame_p (struct gdbarch *gdbarch,
 				 int (*signal_frame_p) (struct gdbarch *,
-							frame_info_ptr ))
+							frame_info_ptr))
 {
   struct dwarf2_frame_ops *ops = get_frame_ops (gdbarch);
 

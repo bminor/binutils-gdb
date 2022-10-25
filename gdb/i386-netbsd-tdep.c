@@ -97,7 +97,7 @@ static int i386nbsd_mc_reg_offset[] =
 };
 
 static void i386nbsd_sigtramp_cache_init (const struct tramp_frame *,
-					  frame_info_ptr ,
+					  frame_info_ptr,
 					  struct trad_frame_cache *,
 					  CORE_ADDR);
 

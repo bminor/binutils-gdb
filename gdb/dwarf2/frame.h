@@ -208,7 +208,7 @@ extern bool dwarf2_frame_unwinders_enabled_p;
 extern void dwarf2_frame_set_init_reg (struct gdbarch *gdbarch,
 				       void (*init_reg) (struct gdbarch *, int,
 					     struct dwarf2_frame_state_reg *,
-					     frame_info_ptr ));
+					     frame_info_ptr));
 
 /* Set the architecture-specific signal trampoline recognition
    function for GDBARCH to SIGNAL_FRAME_P.  */
@@ -216,7 +216,7 @@ extern void dwarf2_frame_set_init_reg (struct gdbarch *gdbarch,
 extern void
   dwarf2_frame_set_signal_frame_p (struct gdbarch *gdbarch,
 				   int (*signal_frame_p) (struct gdbarch *,
-							  frame_info_ptr ));
+							  frame_info_ptr));
 
 /* Set the architecture-specific adjustment of .eh_frame and .debug_frame
    register numbers.  */

@@ -1069,7 +1069,7 @@ struct symbol_computed_ops
      FRAME may be zero.  */
 
   struct value *(*read_variable) (struct symbol * symbol,
-				  frame_info_ptr  frame);
+				  frame_info_ptr frame);
 
   /* Read variable SYMBOL like read_variable at (callee) FRAME's function
      entry.  SYMBOL should be a function parameter, otherwise
@@ -2254,7 +2254,7 @@ struct gnu_ifunc_fns
 
 extern const struct gnu_ifunc_fns *gnu_ifunc_fns_p;
 
-extern CORE_ADDR find_solib_trampoline_target (frame_info_ptr , CORE_ADDR);
+extern CORE_ADDR find_solib_trampoline_target (frame_info_ptr, CORE_ADDR);
 
 struct symtab_and_line
 {

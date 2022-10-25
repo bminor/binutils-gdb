@@ -64,7 +64,7 @@ static int hppanbsd_mc_reg_offset[] =
 };
 
 static void hppanbsd_sigtramp_cache_init (const struct tramp_frame *,
-					 frame_info_ptr ,
+					 frame_info_ptr,
 					 struct trad_frame_cache *,
 					 CORE_ADDR);
 

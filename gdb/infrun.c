@@ -84,9 +84,9 @@ static void follow_inferior_reset_breakpoints (void);
 
 static bool currently_stepping (struct thread_info *tp);
 
-static void insert_hp_step_resume_breakpoint_at_frame (frame_info_ptr );
+static void insert_hp_step_resume_breakpoint_at_frame (frame_info_ptr);
 
-static void insert_step_resume_breakpoint_at_caller (frame_info_ptr );
+static void insert_step_resume_breakpoint_at_caller (frame_info_ptr);
 
 static void insert_longjmp_resume_breakpoint (struct gdbarch *, CORE_ADDR);
 
@@ -3473,7 +3473,7 @@ static void handle_step_into_function_backward (struct gdbarch *gdbarch,
 						struct execution_control_state *ecs);
 static void handle_signal_stop (struct execution_control_state *ecs);
 static void check_exception_resume (struct execution_control_state *,
-				    frame_info_ptr );
+				    frame_info_ptr);
 
 static void end_stepping_range (struct execution_control_state *ecs);
 static void stop_waiting (struct execution_control_state *ecs);

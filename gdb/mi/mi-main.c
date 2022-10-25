@@ -95,7 +95,7 @@ static void mi_execute_async_cli_command (const char *cli_command,
 					  char **argv, int argc);
 static bool register_changed_p (int regnum, readonly_detached_regcache *,
 			       readonly_detached_regcache *);
-static void output_register (frame_info_ptr , int regnum, int format,
+static void output_register (frame_info_ptr, int regnum, int format,
 			     int skip_unavailable);
 
 /* Controls whether the frontend wants MI in async mode.  */

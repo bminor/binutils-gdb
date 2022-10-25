@@ -223,10 +223,10 @@ struct i386_gdbarch_tdep : gdbarch_tdep_base
   CORE_ADDR sigtramp_end = 0;
 
   /* Detect sigtramp.  */
-  int (*sigtramp_p) (frame_info_ptr ) = nullptr;
+  int (*sigtramp_p) (frame_info_ptr) = nullptr;
 
   /* Get address of sigcontext for sigtramp.  */
-  CORE_ADDR (*sigcontext_addr) (frame_info_ptr ) = nullptr;
+  CORE_ADDR (*sigcontext_addr) (frame_info_ptr) = nullptr;
 
   /* Offset of registers in `struct sigcontext'.  */
   int *sc_reg_offset = 0;

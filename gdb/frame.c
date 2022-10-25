@@ -298,7 +298,7 @@ frame_stash_add (frame_info *frame)
    given frame ID.  If found, return that frame.  Otherwise return
    NULL.  */
 
-static frame_info_ptr 
+static frame_info_ptr
 frame_stash_find (struct frame_id id)
 {
   struct frame_info dummy;
@@ -505,7 +505,7 @@ frame_info::to_string () const
    Return FRAME if FRAME is a non-artificial frame.
    Return NULL if FRAME is the start of an artificial-only chain.  */
 
-static frame_info_ptr 
+static frame_info_ptr
 skip_artificial_frames (frame_info_ptr frame)
 {
   /* Note we use get_prev_frame_always, and not get_prev_frame.  The
@@ -526,7 +526,7 @@ skip_artificial_frames (frame_info_ptr frame)
   return frame;
 }
 
-frame_info_ptr 
+frame_info_ptr
 skip_unwritable_frames (frame_info_ptr frame)
 {
   while (gdbarch_code_of_frame_writable (get_frame_arch (frame), frame) == 0)
@@ -541,7 +541,7 @@ skip_unwritable_frames (frame_info_ptr frame)
 
 /* See frame.h.  */
 
-frame_info_ptr 
+frame_info_ptr
 skip_tailcall_frames (frame_info_ptr frame)
 {
   while (get_frame_type (frame) == TAILCALL_FRAME)
@@ -866,7 +866,7 @@ frame_id_inner (struct gdbarch *gdbarch, struct frame_id l, struct frame_id r)
   return inner;
 }
 
-frame_info_ptr 
+frame_info_ptr
 frame_find_by_id (struct frame_id id)
 {
   frame_info_ptr frame, prev_frame;
@@ -1608,7 +1608,7 @@ frame_obstack_zalloc (unsigned long size)
 
 static frame_info_ptr get_prev_frame_always_1 (frame_info_ptr this_frame);
 
-frame_info_ptr 
+frame_info_ptr
 get_current_frame (void)
 {
   frame_info_ptr current_frame;
@@ -1802,7 +1802,7 @@ has_stack_frames ()
 
 /* See frame.h.  */
 
-frame_info_ptr 
+frame_info_ptr
 get_selected_frame (const char *message)
 {
   if (selected_frame == NULL)
@@ -1821,7 +1821,7 @@ get_selected_frame (const char *message)
    the inferior does not have a frame; in that case it will return
    NULL instead of calling error().  */
 
-frame_info_ptr 
+frame_info_ptr
 deprecated_safe_get_selected_frame (void)
 {
   if (!has_stack_frames ())
@@ -1906,7 +1906,7 @@ select_frame (frame_info_ptr fi)
 /* Create an arbitrary (i.e. address specified by user) or innermost frame.
    Always returns a non-NULL value.  */
 
-frame_info_ptr 
+frame_info_ptr
 create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 {
   frame_info *fi;
@@ -1945,7 +1945,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
    innermost frame).  Be careful to not fall off the bottom of the
    frame chain and onto the sentinel frame.  */
 
-frame_info_ptr 
+frame_info_ptr
 get_next_frame (frame_info_ptr this_frame)
 {
   if (this_frame->level > 0)
@@ -1958,7 +1958,7 @@ get_next_frame (frame_info_ptr this_frame)
    innermost (i.e. current) frame, return the sentinel frame.  Thus,
    unlike get_next_frame(), NULL will never be returned.  */
 
-frame_info_ptr 
+frame_info_ptr
 get_next_frame_sentinel_okay (frame_info_ptr this_frame)
 {
   gdb_assert (this_frame != NULL);
@@ -2062,7 +2062,7 @@ frame_register_unwind_location (frame_info_ptr this_frame, int regnum,
    then the frame_id of the inline frame, calculated based off the frame_id
    of the previous frame, should also be a duplicate.  */
 
-static frame_info_ptr 
+static frame_info_ptr
 get_prev_frame_maybe_check_cycle (frame_info_ptr this_frame)
 {
   frame_info_ptr prev_frame = get_prev_frame_raw (this_frame);
@@ -2150,7 +2150,7 @@ get_prev_frame_maybe_check_cycle (frame_info_ptr this_frame)
    TRY_CATCH block.  Return the frame that called THIS_FRAME or NULL if
    there is no such frame.  This may throw an exception.  */
 
-static frame_info_ptr 
+static frame_info_ptr
 get_prev_frame_always_1 (frame_info_ptr this_frame)
 {
   FRAME_SCOPED_DEBUG_ENTER_EXIT;
@@ -2306,7 +2306,7 @@ get_prev_frame_always_1 (frame_info_ptr this_frame)
    Unlike get_prev_frame, this function always tries to unwind the
    frame.  */
 
-frame_info_ptr 
+frame_info_ptr
 get_prev_frame_always (frame_info_ptr this_frame)
 {
   frame_info_ptr prev_frame = NULL;
@@ -2346,7 +2346,7 @@ get_prev_frame_always (frame_info_ptr this_frame)
 /* Construct a new "struct frame_info" and link it previous to
    this_frame.  */
 
-static frame_info_ptr 
+static frame_info_ptr
 get_prev_frame_raw (frame_info_ptr this_frame)
 {
   frame_info *prev_frame;
@@ -2471,7 +2471,7 @@ inside_entry_func (frame_info_ptr this_frame)
    This function should not contain target-dependent tests, such as
    checking whether the program-counter is zero.  */
 
-frame_info_ptr 
+frame_info_ptr
 get_prev_frame (frame_info_ptr this_frame)
 {
   FRAME_SCOPED_DEBUG_ENTER_EXIT;

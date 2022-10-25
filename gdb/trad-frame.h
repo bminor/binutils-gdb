@@ -31,7 +31,7 @@ struct trad_frame_cache;
    The entire cache is populated in a single pass and then generic
    routines are used to extract the various cache values.  */
 
-struct trad_frame_cache *trad_frame_cache_zalloc (frame_info_ptr );
+struct trad_frame_cache *trad_frame_cache_zalloc (frame_info_ptr);
 
 /* This frame's ID.  */
 void trad_frame_set_id (struct trad_frame_cache *this_trad_cache,
@@ -194,7 +194,7 @@ void trad_frame_reset_saved_regs (struct gdbarch *gdbarch,
 				  trad_frame_saved_reg *regs);
 
 /* Return a freshly allocated (and initialized) trad_frame array.  */
-trad_frame_saved_reg *trad_frame_alloc_saved_regs (frame_info_ptr );
+trad_frame_saved_reg *trad_frame_alloc_saved_regs (frame_info_ptr);
 trad_frame_saved_reg *trad_frame_alloc_saved_regs (struct gdbarch *);
 
 /* Given the trad_frame info, return the location of the specified

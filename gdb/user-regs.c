@@ -44,7 +44,7 @@ struct user_reg
   /* Avoid the "read" symbol name as it conflicts with a preprocessor symbol
      in the NetBSD header for Stack Smashing Protection, that wraps the read(2)
      syscall.  */
-  struct value *(*xread) (frame_info_ptr  frame, const void *baton);
+  struct value *(*xread) (frame_info_ptr frame, const void *baton);
   const void *baton;
   struct user_reg *next;
 };

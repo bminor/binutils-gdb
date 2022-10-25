@@ -279,7 +279,7 @@ extern void
 		       arm_displaced_step_copy_insn_closure *dsc, int regno,
 		       ULONGEST val, enum pc_write_style write_pc);
 
-CORE_ADDR arm_skip_stub (frame_info_ptr , CORE_ADDR);
+CORE_ADDR arm_skip_stub (frame_info_ptr, CORE_ADDR);
 
 ULONGEST arm_get_next_pcs_read_memory_unsigned_integer (CORE_ADDR memaddr,
 							int len,

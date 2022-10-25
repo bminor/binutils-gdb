@@ -2537,7 +2537,7 @@ ia64_access_fpreg (unw_addr_space_t as, unw_regnum_t uw_regnum,
 		   unw_fpreg_t *val, int write, void *arg)
 {
   int regnum = ia64_uw2gdb_regnum (uw_regnum);
-  frame_info_ptr this_frame = (frame_info_ptr ) arg;
+  frame_info_ptr this_frame = (frame_info_ptr) arg;
   
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);

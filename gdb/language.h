@@ -782,7 +782,7 @@ extern const char *language_str (enum language);
 
 /* Check for a language-specific trampoline.  */
 
-extern CORE_ADDR skip_language_trampoline (frame_info_ptr , CORE_ADDR pc);
+extern CORE_ADDR skip_language_trampoline (frame_info_ptr, CORE_ADDR pc);
 
 /* Return demangled language symbol, or NULL.  */
 extern gdb::unique_xmalloc_ptr<char> language_demangle
