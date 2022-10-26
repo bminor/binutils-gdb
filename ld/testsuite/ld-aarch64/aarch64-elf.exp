@@ -66,6 +66,9 @@ proc aarch64_choose_lp64_emul {} {
 	}
 	return "aarch64linux"
     }
+    if [istarget *nto*] then {
+	return "aarch64nto"
+    }
     if [istarget aarch64_be-*] {
         return "aarch64elfb"
     }
