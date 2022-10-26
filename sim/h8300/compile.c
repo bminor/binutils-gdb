@@ -4442,9 +4442,10 @@ sim_engine_run (SIM_DESC sd,
 }
 
 int
-sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
+sim_write (SIM_DESC sd, SIM_ADDR addr, const void *buffer, int size)
 {
   int i;
+  const unsigned char *data = buffer;
 
   init_pointers (sd);
   if (addr < 0)
@@ -4453,7 +4454,7 @@ sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
     {
       if (addr < memory_size)
 	{
-	  h8_set_memory    (sd, addr + i, buffer[i]);
+	  h8_set_memory (sd, addr + i, data[i]);
 	}
       else
 	break;
@@ -4462,7 +4463,7 @@ sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
 }
 
 int
-sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
+sim_read (SIM_DESC sd, SIM_ADDR addr, void *buffer, int size)
 {
   init_pointers (sd);
   if (addr < 0)

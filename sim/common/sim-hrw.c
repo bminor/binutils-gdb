@@ -27,17 +27,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
    modeling real hardware */
 
 int
-sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
+sim_read (SIM_DESC sd, SIM_ADDR mem, void *buffer, int length)
 {
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   return sim_core_read_buffer (sd, NULL, read_map,
-			       buf, mem, length);
+			       buffer, mem, length);
 }
 
 int
-sim_write (SIM_DESC sd, SIM_ADDR mem, const unsigned char *buf, int length)
+sim_write (SIM_DESC sd, SIM_ADDR mem, const void *buffer, int length)
 {
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   return sim_core_write_buffer (sd, NULL, write_map,
-				buf, mem, length);
+				buffer, mem, length);
 }

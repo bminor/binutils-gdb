@@ -722,7 +722,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 			     (((loop >> 2) & RSVD_INSTRUCTION_ARG_MASK)
 			      << RSVD_INSTRUCTION_ARG_SHIFT));
 	  H2T (insn);
-	  sim_write (sd, vaddr, (unsigned char *)&insn, sizeof (insn));
+	  sim_write (sd, vaddr, &insn, sizeof (insn));
 	}
     }
 
@@ -770,13 +770,13 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 	if (pmon_monitor_base != 0)
 	  {
 	    address_word vaddr = (pmon_monitor_base + (loop * 4));
-	    sim_write (sd, vaddr, (unsigned char *)&value, sizeof (value));
+	    sim_write (sd, vaddr, &value, sizeof (value));
 	  }
 
 	if (lsipmon_monitor_base != 0)
 	  {
 	    address_word vaddr = (lsipmon_monitor_base + (loop * 4));
-	    sim_write (sd, vaddr, (unsigned char *)&value, sizeof (value));
+	    sim_write (sd, vaddr, &value, sizeof (value));
 	  }
       }
 
@@ -791,13 +791,13 @@ sim_open (SIM_OPEN_KIND kind, host_callback *cb,
 			     HALT_INSTRUCTION /* BREAK */ };
       H2T (halt[0]);
       H2T (halt[1]);
-      sim_write (sd, 0x80000000, (unsigned char *) halt, sizeof (halt));
-      sim_write (sd, 0x80000180, (unsigned char *) halt, sizeof (halt));
-      sim_write (sd, 0x80000200, (unsigned char *) halt, sizeof (halt));
+      sim_write (sd, 0x80000000, halt, sizeof (halt));
+      sim_write (sd, 0x80000180, halt, sizeof (halt));
+      sim_write (sd, 0x80000200, halt, sizeof (halt));
       /* XXX: Write here unconditionally? */
-      sim_write (sd, 0xBFC00200, (unsigned char *) halt, sizeof (halt));
-      sim_write (sd, 0xBFC00380, (unsigned char *) halt, sizeof (halt));
-      sim_write (sd, 0xBFC00400, (unsigned char *) halt, sizeof (halt));
+      sim_write (sd, 0xBFC00200, halt, sizeof (halt));
+      sim_write (sd, 0xBFC00380, halt, sizeof (halt));
+      sim_write (sd, 0xBFC00400, halt, sizeof (halt));
     }
   }
 
@@ -1066,7 +1066,7 @@ fetch_str (SIM_DESC sd,
   while (sim_read (sd, addr + nr, &null, 1) == 1 && null != 0)
     nr++;
   buf = NZALLOC (char, nr + 1);
-  sim_read (sd, addr, (unsigned char *)buf, nr);
+  sim_read (sd, addr, buf, nr);
   return buf;
 }
 
@@ -1211,7 +1211,7 @@ sim_monitor (SIM_DESC sd,
 	int nr = A2;
 	char *buf = zalloc (nr);
 	V0 = sim_io_read (sd, fd, buf, nr);
-	sim_write (sd, A1, (unsigned char *)buf, nr);
+	sim_write (sd, A1, buf, nr);
 	free (buf);
       }
       break;
@@ -1221,7 +1221,7 @@ sim_monitor (SIM_DESC sd,
 	int fd = A0;
 	int nr = A2;
 	char *buf = zalloc (nr);
-	sim_read (sd, A1, (unsigned char *)buf, nr);
+	sim_read (sd, A1, buf, nr);
 	V0 = sim_io_write (sd, fd, buf, nr);
 	if (fd == 1)
 	    sim_io_flush_stdout (sd);
@@ -1368,9 +1368,9 @@ sim_monitor (SIM_DESC sd,
 
 	value = mem_size;
 	H2T (value);
-	sim_write (sd, A0 + 0, (unsigned char *)&value, 4);
-	sim_write (sd, A0 + 4, (unsigned char *)&zero, 4);
-	sim_write (sd, A0 + 8, (unsigned char *)&zero, 4);
+	sim_write (sd, A0 + 0, &value, 4);
+	sim_write (sd, A0 + 4, &zero, 4);
+	sim_write (sd, A0 + 8, &zero, 4);
 	/* sim_io_eprintf (sd, "sim: get_mem_info() deprecated\n"); */
 	break;
       }

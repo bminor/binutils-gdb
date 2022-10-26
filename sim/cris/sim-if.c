@@ -486,7 +486,7 @@ aux_ent_entry (struct bfd *ebfd)
    interp_load_addr offset.  */
 
 static int
-cris_write_interp (SIM_DESC sd, SIM_ADDR mem, const unsigned char *buf, int length)
+cris_write_interp (SIM_DESC sd, SIM_ADDR mem, const void *buf, int length)
 {
   return sim_write (sd, mem + interp_load_addr, buf, length);
 }

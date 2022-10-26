@@ -205,7 +205,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 /* Read memory.  */
 
 int
-sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
+sim_read (SIM_DESC sd, SIM_ADDR mem, void *buf, int length)
 {
   check_desc (sd);
 
@@ -221,7 +221,7 @@ sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 /* Write memory.  */
 
 int
-sim_write (SIM_DESC sd, SIM_ADDR mem, const unsigned char *buf, int length)
+sim_write (SIM_DESC sd, SIM_ADDR mem, const void *buf, int length)
 {
   check_desc (sd);
 

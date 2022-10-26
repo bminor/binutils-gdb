@@ -138,17 +138,17 @@ bfin_dma_process_desc (struct hw *me, struct bfin_dma *dma)
     case DMAFLOW_ARRAY:
       if (ndsize == 0 || ndsize > 7)
 	hw_abort (me, "DMA config error: DMAFLOW_ARRAY requires NDSIZE 1...7");
-      sim_read (hw_system (me), dma->curr_desc_ptr, (void *)flows, ndsize * 2);
+      sim_read (hw_system (me), dma->curr_desc_ptr, flows, ndsize * 2);
       break;
     case DMAFLOW_SMALL:
       if (ndsize == 0 || ndsize > 8)
 	hw_abort (me, "DMA config error: DMAFLOW_SMALL requires NDSIZE 1...8");
-      sim_read (hw_system (me), dma->next_desc_ptr, (void *)flows, ndsize * 2);
+      sim_read (hw_system (me), dma->next_desc_ptr, flows, ndsize * 2);
       break;
     case DMAFLOW_LARGE:
       if (ndsize == 0 || ndsize > 9)
 	hw_abort (me, "DMA config error: DMAFLOW_LARGE requires NDSIZE 1...9");
-      sim_read (hw_system (me), dma->next_desc_ptr, (void *)flows, ndsize * 2);
+      sim_read (hw_system (me), dma->next_desc_ptr, flows, ndsize * 2);
       break;
     default:
       hw_abort (me, "DMA config error: invalid DMAFLOW %#x", dma->config);

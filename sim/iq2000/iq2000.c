@@ -47,8 +47,7 @@ fetch_str (SIM_CPU *current_cpu, PCADDR pc, DI addr)
                           pc, read_map, CPU2DATA(addr + nr)) != 0)
     nr++;
   buf = NZALLOC (char, nr + 1);
-  sim_read (CPU_STATE (current_cpu), CPU2DATA(addr), (unsigned char *) buf,
-	    nr);
+  sim_read (CPU_STATE (current_cpu), CPU2DATA(addr), buf, nr);
   return buf;
 }
 
@@ -83,8 +82,7 @@ do_syscall (SIM_CPU *current_cpu, PCADDR pc)
 
     case TARGET_NEWLIB_SYS_write:
       buf = zalloc (PARM3);
-      sim_read (CPU_STATE (current_cpu), CPU2DATA(PARM2),
-		(unsigned char *) buf, PARM3);
+      sim_read (CPU_STATE (current_cpu), CPU2DATA(PARM2), buf, PARM3);
       SET_H_GR (ret_reg,
 		sim_io_write (CPU_STATE (current_cpu),
 			      PARM1, buf, PARM3));

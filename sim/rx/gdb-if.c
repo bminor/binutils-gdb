@@ -226,9 +226,10 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 }
 
 int
-sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
+sim_read (SIM_DESC sd, SIM_ADDR mem, void *buffer, int length)
 {
   int i;
+  unsigned char *data = buffer;
 
   check_desc (sd);
 
@@ -241,7 +242,7 @@ sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
     {
       bfd_vma addr = mem + i;
       int do_swap = addr_in_swap_list (addr);
-      buf[i] = mem_get_qi (addr ^ (do_swap ? 3 : 0));
+      data[i] = mem_get_qi (addr ^ (do_swap ? 3 : 0));
 
       if (execution_error_get_last_error () != SIM_ERR_NONE)
 	return i;
@@ -251,9 +252,10 @@ sim_read (SIM_DESC sd, SIM_ADDR mem, unsigned char *buf, int length)
 }
 
 int
-sim_write (SIM_DESC sd, SIM_ADDR mem, const unsigned char *buf, int length)
+sim_write (SIM_DESC sd, SIM_ADDR mem, const void *buffer, int length)
 {
   int i;
+  const unsigned char *data = buffer;
 
   check_desc (sd);
 
@@ -263,7 +265,7 @@ sim_write (SIM_DESC sd, SIM_ADDR mem, const unsigned char *buf, int length)
     {
       bfd_vma addr = mem + i;
       int do_swap = addr_in_swap_list (addr);
-      mem_put_qi (addr ^ (do_swap ? 3 : 0), buf[i]);
+      mem_put_qi (addr ^ (do_swap ? 3 : 0), data[i]);
 
       if (execution_error_get_last_error () != SIM_ERR_NONE)
 	return i;

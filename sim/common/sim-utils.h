@@ -64,7 +64,7 @@ SIM_RC sim_analyze_program (SIM_DESC sd, const char *prog_name,
 
 typedef struct host_callback_struct host_callback;
 typedef int sim_write_fn (SIM_DESC sd, SIM_ADDR mem,
-			  const unsigned char *buf, int length);
+			  const void *buf, int length);
 struct bfd *sim_load_file (SIM_DESC sd, const char *myname,
 			   host_callback *callback, const char *prog,
 			   struct bfd *prog_bfd, int verbose_p,

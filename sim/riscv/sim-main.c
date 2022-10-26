@@ -1192,15 +1192,15 @@ initialize_env (SIM_DESC sd, const char * const *argv, const char * const *env)
   cpu->sp = sp;
 
   /* First push the argc value.  */
-  sim_write (sd, sp, (void *)&argc, sizeof (unsigned_word));
+  sim_write (sd, sp, &argc, sizeof (unsigned_word));
   sp += sizeof (unsigned_word);
 
   /* Then the actual argv strings so we know where to point argv[].  */
   for (i = 0; i < argc; ++i)
     {
       unsigned len = strlen (argv[i]) + 1;
-      sim_write (sd, sp_flat, (void *)argv[i], len);
-      sim_write (sd, sp, (void *)&sp_flat, sizeof (address_word));
+      sim_write (sd, sp_flat, argv[i], len);
+      sim_write (sd, sp, &sp_flat, sizeof (address_word));
       sp_flat += len;
       sp += sizeof (address_word);
     }
@@ -1211,8 +1211,8 @@ initialize_env (SIM_DESC sd, const char * const *argv, const char * const *env)
   for (i = 0; i < envc; ++i)
     {
       unsigned len = strlen (env[i]) + 1;
-      sim_write (sd, sp_flat, (void *)env[i], len);
-      sim_write (sd, sp, (void *)&sp_flat, sizeof (address_word));
+      sim_write (sd, sp_flat, env[i], len);
+      sim_write (sd, sp, &sp_flat, sizeof (address_word));
       sp_flat += len;
       sp += sizeof (address_word);
     }

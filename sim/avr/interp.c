@@ -1526,25 +1526,26 @@ sim_engine_run (SIM_DESC sd,
 }
 
 int
-sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
+sim_write (SIM_DESC sd, SIM_ADDR addr, const void *buffer, int size)
 {
   int osize = size;
 
   if (addr >= 0 && addr < SRAM_VADDR)
     {
+      const unsigned char *data = buffer;
       while (size > 0 && addr < (MAX_AVR_FLASH << 1))
 	{
           word val = flash[addr >> 1].op;
 
           if (addr & 1)
-            val = (val & 0xff) | (buffer[0] << 8);
+            val = (val & 0xff) | (data[0] << 8);
           else
-            val = (val & 0xff00) | buffer[0];
+            val = (val & 0xff00) | data[0];
 
 	  flash[addr >> 1].op = val;
 	  flash[addr >> 1].code = OP_unknown;
 	  addr++;
-	  buffer++;
+	  data++;
 	  size--;
 	}
       return osize - size;
@@ -1562,12 +1563,13 @@ sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
 }
 
 int
-sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
+sim_read (SIM_DESC sd, SIM_ADDR addr, void *buffer, int size)
 {
   int osize = size;
 
   if (addr >= 0 && addr < SRAM_VADDR)
     {
+      unsigned char *data = buffer;
       while (size > 0 && addr < (MAX_AVR_FLASH << 1))
 	{
           word val = flash[addr >> 1].op;
@@ -1575,7 +1577,7 @@ sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
           if (addr & 1)
             val >>= 8;
 
-          *buffer++ = val;
+          *data++ = val;
 	  addr++;
 	  size--;
 	}

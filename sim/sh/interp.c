@@ -1049,7 +1049,7 @@ trap (SIM_DESC sd, int i, int *regs, unsigned char *insn_ptr,
 	      {
 		/* Include the termination byte.  */
 		int i = strlen (prog_argv[regs[5]]) + 1;
-		regs[0] = sim_write (0, regs[6], (void *) prog_argv[regs[5]], i);
+		regs[0] = sim_write (0, regs[6], prog_argv[regs[5]], i);
 	      }
 	    else
 	      regs[0] = -1;
@@ -1874,29 +1874,31 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
 }
 
 int
-sim_write (SIM_DESC sd, SIM_ADDR addr, const unsigned char *buffer, int size)
+sim_write (SIM_DESC sd, SIM_ADDR addr, const void *buffer, int size)
 {
   int i;
+  const unsigned char *data = buffer;
 
   init_pointers ();
 
   for (i = 0; i < size; i++)
     {
-      saved_state.asregs.memory[(MMASKB & (addr + i)) ^ endianb] = buffer[i];
+      saved_state.asregs.memory[(MMASKB & (addr + i)) ^ endianb] = data[i];
     }
   return size;
 }
 
 int
-sim_read (SIM_DESC sd, SIM_ADDR addr, unsigned char *buffer, int size)
+sim_read (SIM_DESC sd, SIM_ADDR addr, void *buffer, int size)
 {
   int i;
+  unsigned char *data = buffer;
 
   init_pointers ();
 
   for (i = 0; i < size; i++)
     {
-      buffer[i] = saved_state.asregs.memory[(MMASKB & (addr + i)) ^ endianb];
+      data[i] = saved_state.asregs.memory[(MMASKB & (addr + i)) ^ endianb];
     }
   return size;
 }
