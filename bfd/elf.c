@@ -8708,15 +8708,20 @@ _bfd_elf_get_reloc_upper_bound (bfd *abfd, sec_ptr asect)
   if (asect->reloc_count != 0 && !bfd_write_p (abfd))
     {
       /* Sanity check reloc section size.  */
-      struct bfd_elf_section_data *d = elf_section_data (asect);
-      Elf_Internal_Shdr *rel_hdr = &d->this_hdr;
-      bfd_size_type ext_rel_size = rel_hdr->sh_size;
       ufile_ptr filesize = bfd_get_file_size (abfd);
 
-      if (filesize != 0 && ext_rel_size > filesize)
+      if (filesize != 0)
 	{
-	  bfd_set_error (bfd_error_file_truncated);
-	  return -1;
+	  struct bfd_elf_section_data *d = elf_section_data (asect);
+	  bfd_size_type rel_size = d->rel.hdr ? d->rel.hdr->sh_size : 0;
+	  bfd_size_type rela_size = d->rela.hdr ? d->rela.hdr->sh_size : 0;
+
+	  if (rel_size + rela_size > filesize
+	      || rel_size + rela_size < rel_size)
+	    {
+	      bfd_set_error (bfd_error_file_truncated);
+	      return -1;
+	    }
 	}
     }
 
