@@ -3005,10 +3005,12 @@ som_write_fixups (bfd *abfd,
 		 then dump the current buffer contents now.  Also reinitialize
 		 the relocation queue.
 
-		 No single BFD relocation could ever translate into more
-		 than 100 bytes of SOM relocations (20bytes is probably the
-		 upper limit, but leave lots of space for growth).  */
-	      if (p - tmp_space + 100 > SOM_TMP_BUFSIZE)
+		 A single BFD relocation would probably only ever
+		 translate into at most 20 bytes of SOM relocations.
+		 However with fuzzed object files and resulting silly
+		 values for "skip" below, som_reloc_skip can emit 262
+		 bytes.  Leave lots of space for growth.  */
+	      if (p - tmp_space + 512 > SOM_TMP_BUFSIZE)
 		{
 		  amt = p - tmp_space;
 		  if (bfd_bwrite ((void *) tmp_space, amt, abfd) != amt)
