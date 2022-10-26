@@ -2026,6 +2026,8 @@ _bfd_XX_print_ce_compressed_pdata (bfd * abfd, void * vfile)
     }
 
   start = 0;
+  if (stop > datasize)
+    stop = datasize;
 
   for (i = start; i < stop; i += onaline)
     {
