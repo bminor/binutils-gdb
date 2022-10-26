@@ -4212,13 +4212,13 @@ load_specific_debug_section (enum dwarf_section_display_enum debug,
 
 	  if (reloc_size > 0)
 	    {
-	      unsigned long reloc_count;
+	      long reloc_count;
 	      arelent **relocs;
 
 	      relocs = (arelent **) xmalloc (reloc_size);
 
 	      reloc_count = bfd_canonicalize_reloc (abfd, sec, relocs, NULL);
-	      if (reloc_count == 0)
+	      if (reloc_count <= 0)
 		free (relocs);
 	      else
 		{
