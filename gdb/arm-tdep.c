@@ -3489,7 +3489,7 @@ arm_m_exception_cache (frame_info_ptr this_frame)
 	{
 	  secure_stack_used = (bit (lr, 6) != 0);
 	  default_callee_register_stacking = (bit (lr, 5) != 0);
-	  exception_domain_is_secure = (bit (lr, 0) == 0);
+	  exception_domain_is_secure = (bit (lr, 0) != 0);
 
 	  /* Unwinding from non-secure to secure can trip security
 	     measures.  In order to avoid the debugger being
@@ -3599,7 +3599,7 @@ arm_m_exception_cache (frame_info_ptr this_frame)
 
       /* With the Security extension, the hardware saves R4..R11 too.  */
       if (tdep->have_sec_ext && secure_stack_used
-	  && (!default_callee_register_stacking || exception_domain_is_secure))
+	  && (!default_callee_register_stacking || !exception_domain_is_secure))
 	{
 	  /* Read R4..R11 from the integer callee registers.  */
 	  cache->saved_regs[4].set_addr (unwound_sp + 0x08);
