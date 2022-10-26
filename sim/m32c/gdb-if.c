@@ -403,7 +403,7 @@ sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
 }
 
 int
-sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
+sim_store_register (SIM_DESC sd, int regno, const unsigned char *buf, int length)
 {
   size_t size;
 

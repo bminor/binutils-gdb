@@ -45,7 +45,7 @@ sim_fetch_register (SIM_DESC sd, int rn, unsigned char *buf, int length)
    cpus.  */
 
 int
-sim_store_register (SIM_DESC sd, int rn, unsigned char *buf, int length)
+sim_store_register (SIM_DESC sd, int rn, const unsigned char *buf, int length)
 {
   SIM_CPU *cpu = STATE_CPU (sd, 0);
 

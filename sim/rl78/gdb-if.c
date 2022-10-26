@@ -356,7 +356,7 @@ sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
    LENGTH must match the sim's internal notion of the register size.  */
 
 int
-sim_store_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
+sim_store_register (SIM_DESC sd, int regno, const unsigned char *buf, int length)
 {
   size_t size;
   SI val;

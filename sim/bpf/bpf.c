@@ -61,7 +61,7 @@ bpfbf_fetch_register (SIM_CPU *current_cpu,
 int
 bpfbf_store_register (SIM_CPU *current_cpu,
                       int rn,
-                      unsigned char *buf,
+                      const unsigned char *buf,
                       int len)
 {
   if (rn == 11)

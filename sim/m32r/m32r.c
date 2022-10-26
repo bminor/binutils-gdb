@@ -98,7 +98,7 @@ m32rbf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len
 /* The contents of BUF are in target byte order.  */
 
 int
-m32rbf_store_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
+m32rbf_store_register (SIM_CPU *current_cpu, int rn, const unsigned char *buf, int len)
 {
   int size = m32rbf_register_size (rn);
   if (len != size)

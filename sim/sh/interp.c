@@ -1913,7 +1913,7 @@ enum {
 };
 
 static int
-sh_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+sh_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
 {
   unsigned val;
 

@@ -55,7 +55,7 @@ or1k32bf_fetch_register (sim_cpu *current_cpu, int rn, unsigned char *buf,
 }
 
 int
-or1k32bf_store_register (sim_cpu *current_cpu, int rn, unsigned char *buf,
+or1k32bf_store_register (sim_cpu *current_cpu, int rn, const unsigned char *buf,
 			 int len)
 {
   if (rn < 32)

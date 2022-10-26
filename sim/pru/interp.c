@@ -650,7 +650,7 @@ pru_pc_set (sim_cpu *cpu, sim_cia pc)
 
 /* Implement callback for standard CPU_REG_STORE routine.  */
 static int
-pru_store_register (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+pru_store_register (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
 {
   if (rn < NUM_REGS && rn >= 0)
     {

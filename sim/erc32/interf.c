@@ -310,7 +310,7 @@ sim_create_inferior(SIM_DESC sd, bfd *abfd, char * const *argv,
 }
 
 int
-sim_store_register(SIM_DESC sd, int regno, unsigned char *value, int length)
+sim_store_register(SIM_DESC sd, int regno, const unsigned char *value, int length)
 {
     int regval;
 

@@ -392,7 +392,7 @@ m68hc11_pc_set (sim_cpu *cpu, sim_cia pc)
 }
 
 static int m68hc11_reg_fetch (SIM_CPU *, int, unsigned char *, int);
-static int m68hc11_reg_store (SIM_CPU *, int, unsigned char *, int);
+static int m68hc11_reg_store (SIM_CPU *, int, const unsigned char *, int);
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *callback,
@@ -595,7 +595,7 @@ m68hc11_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 }
 
 static int
-m68hc11_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+m68hc11_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
 {
   uint16_t val;
 

@@ -80,7 +80,7 @@ mn10300_pc_set (sim_cpu *cpu, sim_cia pc)
 }
 
 static int mn10300_reg_fetch (SIM_CPU *, int, unsigned char *, int);
-static int mn10300_reg_store (SIM_CPU *, int, unsigned char *, int);
+static int mn10300_reg_store (SIM_CPU *, int, const unsigned char *, int);
 
 /* These default values correspond to expected usage for the chip.  */
 
@@ -344,9 +344,9 @@ mn10300_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 }
  
 static int
-mn10300_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+mn10300_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
 {
-  uint8_t *a = memory;
+  const uint8_t *a = memory;
   State.regs[rn] = (a[3] << 24) + (a[2] << 16) + (a[1] << 8) + a[0];
   return length;
 }

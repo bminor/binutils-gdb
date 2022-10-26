@@ -4476,7 +4476,7 @@ sim_read (SIM_DESC sd, SIM_ADDR addr, void *buffer, int size)
 }
 
 static int
-h8300_reg_store (SIM_CPU *cpu, int rn, unsigned char *value, int length)
+h8300_reg_store (SIM_CPU *cpu, int rn, const unsigned char *value, int length)
 {
   int longval;
   int shortval;

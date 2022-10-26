@@ -185,7 +185,7 @@ v850_pc_set (sim_cpu *cpu, sim_cia pc)
 }
 
 static int v850_reg_fetch (SIM_CPU *, int, unsigned char *, int);
-static int v850_reg_store (SIM_CPU *, int, unsigned char *, int);
+static int v850_reg_store (SIM_CPU *, int, const unsigned char *, int);
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND    kind,
@@ -320,7 +320,7 @@ v850_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 }
 
 static int
-v850_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+v850_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
 {
   State.regs[rn] = T2H_4 (*(uint32_t *) memory);
   return length;

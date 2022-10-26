@@ -89,7 +89,7 @@ frvbf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
 /* The contents of BUF are in target byte order.  */
 
 int
-frvbf_store_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
+frvbf_store_register (SIM_CPU *current_cpu, int rn, const unsigned char *buf, int len)
 {
   if (SIM_FRV_GR0_REGNUM <= rn && rn <= SIM_FRV_GR63_REGNUM)
     {

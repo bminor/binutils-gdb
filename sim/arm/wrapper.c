@@ -429,7 +429,7 @@ tomem (struct ARMul_State *state,
 }
 
 static int
-arm_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+arm_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
 {
   init ();
 

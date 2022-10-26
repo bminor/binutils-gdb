@@ -90,7 +90,7 @@ MY (f_fetch_register) (SIM_CPU *current_cpu, int rn,
 
 int
 MY (f_store_register) (SIM_CPU *current_cpu, int rn,
-		      unsigned char *buf, int len ATTRIBUTE_UNUSED)
+		      const unsigned char *buf, int len ATTRIBUTE_UNUSED)
 {
   XCONCAT3(crisv,BASENUM,f_h_gr_set) (current_cpu, rn, GETTSI (buf));
   return -1;

@@ -1054,7 +1054,7 @@ reg_fetch (sim_cpu *cpu, int rn, unsigned char *buf, int len)
 }
 
 static int
-reg_store (sim_cpu *cpu, int rn, unsigned char *buf, int len)
+reg_store (sim_cpu *cpu, int rn, const unsigned char *buf, int len)
 {
   if (len <= 0 || len > sizeof (unsigned_word))
     return -1;

@@ -1600,7 +1600,7 @@ sim_read (SIM_DESC sd, SIM_ADDR addr, void *buffer, int size)
 }
 
 static int
-avr_reg_store (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+avr_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
 {
   if (rn < 32 && length == 1)
     {

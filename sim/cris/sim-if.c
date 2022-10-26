@@ -933,7 +933,7 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 	CPU_CRIS_MISC_PROFILE (cpu)->flags = STATE_TRACE_FLAGS (sd)[0];
 
 	/* Set SP to the stack we allocated above.  */
-	(* CPU_REG_STORE (cpu)) (cpu, H_GR_SP, (unsigned char *) sp_init, 4);
+	(* CPU_REG_STORE (cpu)) (cpu, H_GR_SP, (const unsigned char *) sp_init, 4);
 
 	/* Set the simulator environment data.  */
 	cpu->highest_mmapped_page = NULL;

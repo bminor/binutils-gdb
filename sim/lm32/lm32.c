@@ -52,7 +52,7 @@ lm32bf_fetch_register (SIM_CPU * current_cpu, int rn, unsigned char *buf,
 /* The contents of BUF are in target byte order.  */
 
 int
-lm32bf_store_register (SIM_CPU * current_cpu, int rn, unsigned char *buf,
+lm32bf_store_register (SIM_CPU * current_cpu, int rn, const unsigned char *buf,
 		       int len)
 {
   if (rn < 32)

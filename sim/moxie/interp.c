@@ -1132,7 +1132,7 @@ sim_engine_run (SIM_DESC sd,
 }
 
 static int
-moxie_reg_store (SIM_CPU *scpu, int rn, unsigned char *memory, int length)
+moxie_reg_store (SIM_CPU *scpu, int rn, const unsigned char *memory, int length)
 {
   if (rn < NUM_MOXIE_REGS && rn >= 0)
     {

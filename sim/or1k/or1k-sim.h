@@ -70,8 +70,8 @@ void or1k32bf_mtspr (sim_cpu *current_cpu, USI addr, USI val);
 
 int or1k32bf_fetch_register (sim_cpu *current_cpu, int rn, unsigned char *buf,
 			     int len);
-int or1k32bf_store_register (sim_cpu *current_cpu, int rn, unsigned char *buf,
-			     int len);
+int or1k32bf_store_register (sim_cpu *current_cpu, int rn,
+			     const unsigned char *buf, int len);
 int or1k32bf_model_or1200_u_exec (sim_cpu *current_cpu, const IDESC *idesc,
 				  int unit_num, int referenced);
 int or1k32bf_model_or1200nd_u_exec (sim_cpu *current_cpu, const IDESC *idesc,

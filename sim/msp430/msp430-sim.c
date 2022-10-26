@@ -74,7 +74,7 @@ msp430_reg_fetch (SIM_CPU *cpu, int regno, unsigned char *buf, int len)
 }
 
 static int
-msp430_reg_store (SIM_CPU *cpu, int regno, unsigned char *buf, int len)
+msp430_reg_store (SIM_CPU *cpu, int regno, const unsigned char *buf, int len)
 {
   if (0 <= regno && regno < 16)
     {
