@@ -3441,7 +3441,7 @@ arm_m_exception_cache (frame_info_ptr this_frame)
 	}
 
       ULONGEST xpsr = get_frame_register_unsigned (this_frame, ARM_PS_REGNUM);
-      if ((xpsr & 0xff) != 0)
+      if ((xpsr & 0x1ff) != 0)
 	/* Handler mode: This is the mode that exceptions are handled in.  */
 	arm_cache_switch_prev_sp (cache, tdep, tdep->m_profile_msp_s_regnum);
       else
