@@ -445,9 +445,9 @@ extern uint8_t *imem_addr (SIM_DESC, SIM_CPU *, uint32_t);
 #undef ENDIAN_INLINE
 
 #else
-extern uint32_t get_longword (uint8_t *);
-extern uint16_t get_word (uint8_t *);
-extern int64_t get_longlong (uint8_t *);
+extern uint32_t get_longword (const uint8_t *);
+extern uint16_t get_word (const uint8_t *);
+extern int64_t get_longlong (const uint8_t *);
 extern void write_word (uint8_t *addr, uint16_t data);
 extern void write_longword (uint8_t *addr, uint32_t data);
 extern void write_longlong (uint8_t *addr, int64_t data);

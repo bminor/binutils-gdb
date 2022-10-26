@@ -397,7 +397,7 @@ sim_create_inferior (SIM_DESC sd ATTRIBUTE_UNUSED,
 }
 
 static int
-frommem (struct ARMul_State *state, unsigned char *memory)
+frommem (struct ARMul_State *state, const unsigned char *memory)
 {
   if (state->bigendSig == HIGH)
     return (memory[0] << 24) | (memory[1] << 16)

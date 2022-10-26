@@ -38,7 +38,7 @@
 #define target_big_endian (CURRENT_TARGET_BYTE_ORDER == BFD_ENDIAN_BIG)
 
 static unsigned long
-microblaze_extract_unsigned_integer (unsigned char *addr, int len)
+microblaze_extract_unsigned_integer (const unsigned char *addr, int len)
 {
   unsigned long retval;
   unsigned char *p;

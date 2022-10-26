@@ -690,7 +690,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 }
 
 static uint32_t
-cr16_extract_unsigned_integer (unsigned char *addr, int len)
+cr16_extract_unsigned_integer (const unsigned char *addr, int len)
 {
   uint32_t retval;
   unsigned char * p;

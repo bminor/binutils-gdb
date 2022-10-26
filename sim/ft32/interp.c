@@ -56,7 +56,7 @@
 #define RAM_BIAS  0x800000  /* Bias added to RAM addresses.  */
 
 static unsigned long
-ft32_extract_unsigned_integer (unsigned char *addr, int len)
+ft32_extract_unsigned_integer (const unsigned char *addr, int len)
 {
   unsigned long retval;
   unsigned char *p;

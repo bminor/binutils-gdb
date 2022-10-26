@@ -24,4 +24,4 @@ extern unsigned IwmmxtCDP (ARMul_State *, unsigned, ARMword);
 extern int ARMul_HandleIwmmxt (ARMul_State *, ARMword);
 
 extern int Fetch_Iwmmxt_Register (unsigned int, unsigned char *);
-extern int Store_Iwmmxt_Register (unsigned int, unsigned char *);
+extern int Store_Iwmmxt_Register (unsigned int, const unsigned char *);

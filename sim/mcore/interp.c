@@ -42,7 +42,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
 static unsigned long
-mcore_extract_unsigned_integer (unsigned char *addr, int len)
+mcore_extract_unsigned_integer (const unsigned char *addr, int len)
 {
   unsigned long retval;
   unsigned char * p;

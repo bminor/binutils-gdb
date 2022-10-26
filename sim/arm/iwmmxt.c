@@ -3723,7 +3723,7 @@ Fetch_Iwmmxt_Register (unsigned int regnum, unsigned char * memory)
 }
 
 int
-Store_Iwmmxt_Register (unsigned int regnum, unsigned char * memory)
+Store_Iwmmxt_Register (unsigned int regnum, const unsigned char * memory)
 {
   if (regnum >= 16)
     {

@@ -11,19 +11,19 @@
 #endif
 
 ENDIAN_INLINE uint16_t
-get_word (uint8_t *x)
+get_word (const uint8_t *x)
 {
   return ((uint16_t)x[0]<<8) + x[1];
 }
 
 ENDIAN_INLINE uint32_t
-get_longword (uint8_t *x)
+get_longword (const uint8_t *x)
 {
   return ((uint32_t)x[0]<<24) + ((uint32_t)x[1]<<16) + ((uint32_t)x[2]<<8) + ((uint32_t)x[3]);
 }
 
 ENDIAN_INLINE int64_t
-get_longlong (uint8_t *x)
+get_longlong (const uint8_t *x)
 {
   uint32_t top = get_longword (x);
   uint32_t bottom = get_longword (x+4);

@@ -237,7 +237,7 @@ sim_write (SIM_DESC sd, SIM_ADDR mem, const void *buf, int length)
 /* Read the LENGTH bytes at BUF as an little-endian value.  */
 
 static SI
-get_le (unsigned char *buf, int length)
+get_le (const unsigned char *buf, int length)
 {
   SI acc = 0;
 

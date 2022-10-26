@@ -1758,7 +1758,7 @@ bfin_model_init (SIM_CPU *cpu)
 }
 
 static bu32
-bfin_extract_unsigned_integer (unsigned char *addr, int len)
+bfin_extract_unsigned_integer (const unsigned char *addr, int len)
 {
   bu32 retval;
   unsigned char * p;

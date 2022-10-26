@@ -45,12 +45,12 @@ enum {
 
 /* Extract (from PRU endianess) and return an integer in HOST's endianness.  */
 static uint32_t
-pru_extract_unsigned_integer (uint8_t *addr, size_t len)
+pru_extract_unsigned_integer (const uint8_t *addr, size_t len)
 {
   uint32_t retval;
-  uint8_t *p;
-  uint8_t *startaddr = addr;
-  uint8_t *endaddr = startaddr + len;
+  const uint8_t *p;
+  const uint8_t *startaddr = addr;
+  const uint8_t *endaddr = startaddr + len;
 
   /* Start at the most significant end of the integer, and work towards
      the least significant.  */

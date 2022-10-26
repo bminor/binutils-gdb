@@ -57,7 +57,7 @@ typedef unsigned int uword;
      + (sim_core_read_aligned_1 (scpu, cia, read_map, addr+1))) << 16) >> 16)
 
 static unsigned long
-moxie_extract_unsigned_integer (unsigned char *addr, int len)
+moxie_extract_unsigned_integer (const unsigned char *addr, int len)
 {
   unsigned long retval;
   unsigned char * p;
