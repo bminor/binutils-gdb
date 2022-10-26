@@ -32,6 +32,7 @@
 #include "buildsym.h"
 #include "language.h"
 #include "namespace.h"
+#include <map>
 #include <string>
 
 static struct block_symbol
@@ -344,7 +345,10 @@ cp_lookup_symbol_in_namespace (const char *the_namespace, const char *name,
   return sym;
 }
 
-/* Search for NAME by applying all import statements belonging to
+/* This version of the function is internal, use the wrapper unless
+   the list of ambiguous symbols is needed.
+
+   Search for NAME by applying all import statements belonging to
    BLOCK which are applicable in SCOPE.  If DECLARATION_ONLY the
    search is restricted to using declarations.
    Example:
@@ -372,27 +376,35 @@ cp_lookup_symbol_in_namespace (const char *the_namespace, const char *name,
    SEARCH_SCOPE_FIRST is an internal implementation detail: Callers must
    pass 0 for it.  Internally we pass 1 when recursing.  */
 
-static struct block_symbol
+static void
 cp_lookup_symbol_via_imports (const char *scope,
 			      const char *name,
 			      const struct block *block,
 			      const domain_enum domain,
 			      const int search_scope_first,
 			      const int declaration_only,
-			      const int search_parents)
+			      const int search_parents,
+			      std::map<std::string,
+				       struct block_symbol>& found_symbols)
 {
   struct using_direct *current;
   struct block_symbol sym = {};
   int len;
   int directive_match;
 
+  /* All the symbols we found will be kept in this relational map between
+     the mangled name and the block_symbol found.  We do this so that GDB
+     won't incorrectly report an ambiguous symbol for finding the same
+     thing twice.  */
+
   /* First, try to find the symbol in the given namespace if requested.  */
   if (search_scope_first)
-    sym = cp_lookup_symbol_in_namespace (scope, name,
-					 block, domain, 1);
-
-  if (sym.symbol != NULL)
-    return sym;
+    {
+      sym = cp_lookup_symbol_in_namespace (scope, name,
+					   block, domain, 1);
+      if (sym.symbol != nullptr)
+	found_symbols[sym.symbol->m_name] = sym;
+    }
 
   /* Due to a GCC bug, we need to know the boundaries of the current block
      to know if a certain using directive is valid.  */
@@ -446,7 +458,7 @@ cp_lookup_symbol_via_imports (const char *scope,
 	  if (declaration_only || sym.symbol != NULL || current->declaration)
 	    {
 	      if (sym.symbol != NULL)
-		return sym;
+		found_symbols[sym.symbol->m_name] = sym;
 
 	      continue;
 	    }
@@ -467,23 +479,57 @@ cp_lookup_symbol_via_imports (const char *scope,
 	      sym = cp_lookup_symbol_in_namespace (scope,
 						   current->import_src,
 						   block, domain, 1);
+	      found_symbols[sym.symbol->m_name] = sym;
 	    }
 	  else if (current->alias == NULL)
 	    {
 	      /* If this import statement creates no alias, pass
 		 current->inner as NAMESPACE to direct the search
 		 towards the imported namespace.  */
-	      sym = cp_lookup_symbol_via_imports (current->import_src,
-						  name, block,
-						  domain, 1, 0, 0);
+	      cp_lookup_symbol_via_imports (current->import_src, name,
+					    block, domain, 1, 0, 0,
+					    found_symbols);
 	    }
 
-	  if (sym.symbol != NULL)
-	    return sym;
 	}
     }
+}
 
-  return {};
+/* Wrapper for the actual cp_lookup_symbol_via_imports.  This wrapper sets
+   search_scope_first correctly and handles errors if needed.  */
+static struct block_symbol
+cp_lookup_symbol_via_imports (const char *scope,
+			      const char *name,
+			      const struct block *block,
+			      const domain_enum domain,
+			      const int declaration_only,
+			      const int search_parents)
+{
+  std::map<std::string, struct block_symbol> found_symbols;
+
+  cp_lookup_symbol_via_imports(scope, name, block, domain, 0,
+			       declaration_only, search_parents,
+			       found_symbols);
+
+  if (found_symbols.size () > 1)
+    {
+      auto itr = found_symbols.cbegin ();
+      std::string error_str = "Reference to \"";
+      error_str += name;
+      error_str += "\" is ambiguous, possibilities are: ";
+      error_str += itr->second.symbol->print_name ();
+      for (itr++; itr != found_symbols.end (); itr++)
+	{
+	  error_str += " and ";
+	  error_str += itr->second.symbol->print_name ();
+	}
+      error (_("%s"), error_str.c_str ());
+    }
+
+  if (found_symbols.size() == 1)
+    return found_symbols.cbegin ()->second;
+  else
+    return {};
 }
 
 /* Helper function that searches an array of symbols for one named NAME.  */
@@ -503,9 +549,10 @@ search_symbol_list (const char *name, int num,
   return NULL;
 }
 
-/* Like cp_lookup_symbol_via_imports, but if BLOCK is a function, it
-   searches through the template parameters of the function and the
-   function's type.  */
+/* Search for symbols whose name match NAME in the given SCOPE.
+   if BLOCK is a function, we'll search first through the template
+   parameters and function type. Afterwards (or if BLOCK is not a function)
+   search through imported directives using cp_lookup_symbol_via_imports.  */
 
 struct block_symbol
 cp_lookup_symbol_imports_or_template (const char *scope,
@@ -514,7 +561,6 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 				      const domain_enum domain)
 {
   struct symbol *function = block->function ();
-  struct block_symbol result;
 
   symbol_lookup_debug_printf
     ("cp_lookup_symbol_imports_or_template (%s, %s, %s, %s)",
@@ -583,10 +629,11 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 	}
     }
 
-  result = cp_lookup_symbol_via_imports (scope, name, block, domain, 0, 1, 1);
-  symbol_lookup_debug_printf
-    ("cp_lookup_symbol_imports_or_template (...) = %s",
-     result.symbol != NULL ? host_address_to_string (result.symbol) : "NULL");
+  struct block_symbol result
+    = cp_lookup_symbol_via_imports (scope, name, block, domain, 1, 1);
+  symbol_lookup_debug_printf ("cp_lookup_symbol_imports_or_template (...) = %s\n",
+		  result.symbol != nullptr
+		  ? host_address_to_string (result.symbol) : "NULL");
   return result;
 }
 
@@ -603,8 +650,8 @@ cp_lookup_symbol_via_all_imports (const char *scope, const char *name,
 
   while (block != NULL)
     {
-      sym = cp_lookup_symbol_via_imports (scope, name, block, domain, 0, 0, 1);
-      if (sym.symbol)
+      sym = cp_lookup_symbol_via_imports (scope, name, block, domain, 0, 1);
+      if (sym.symbol != nullptr)
 	return sym;
 
       block = block->superblock ();
