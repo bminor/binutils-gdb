@@ -181,13 +181,13 @@ DECLARE_SETMEM (DF, 8) /* TAGS: SETMEMDF */
    only used when interfacing with the outside world (e.g. gdb).  */
 
 #define DECLARE_GETT_EXTERN(mode, size) \
-extern mode XCONCAT2 (GETT,mode) (unsigned char *);
+extern mode XCONCAT2 (GETT,mode) (const unsigned char *);
 
 #if defined (MEMOPS_DEFINE_INLINE)
 #define DECLARE_GETT(mode, size) \
 DECLARE_GETT_EXTERN (mode, size) \
 mode \
-XCONCAT2 (GETT,mode) (unsigned char *p) \
+XCONCAT2 (GETT,mode) (const unsigned char *p) \
 { \
   mode tmp; \
   memcpy (&tmp, p, sizeof (mode)); \
