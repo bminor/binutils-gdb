@@ -724,9 +724,30 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
   return 0;
 }
 
+static inline bool
+arm_m_addr_is_lockup (CORE_ADDR addr)
+{
+  switch (addr)
+    {
+      /* Values for lockup state.
+	 For more details see "B1.5.15 Unrecoverable exception cases" in
+	 both ARMv6-M and ARMv7-M Architecture Reference Manuals, or
+	 see "B4.32 Lockup" in ARMv8-M Architecture Reference Manual.  */
+      case 0xeffffffe:
+      case 0xfffffffe:
+      case 0xffffffff:
+	return true;
+
+      default:
+	/* Address is not lockup.  */
+	return false;
+    }
+}
+
 /* Determine if the address specified equals any of these magic return
    values, called EXC_RETURN, defined by the ARM v6-M, v7-M and v8-M
-   architectures.
+   architectures.  Also include lockup magic PC value.
+   Check also for FNC_RETURN if we have the v8-M security extension.
 
    From ARMv6-M Reference Manual B1.5.8
    Table B1-5 Exception return behavior
@@ -769,6 +790,9 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 static int
 arm_m_addr_is_magic (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
+  if (arm_m_addr_is_lockup (addr))
+    return 1;
+
   arm_gdbarch_tdep *tdep = gdbarch_tdep<arm_gdbarch_tdep> (gdbarch);
   if (tdep->have_sec_ext)
     {
@@ -3355,6 +3379,31 @@ arm_m_exception_cache (frame_info_ptr this_frame)
      describes which bits in LR that define which stack was used prior
      to the exception and if FPU is used (causing extended stack frame).  */
 
+  /* In the lockup state PC contains a lockup magic value.
+     The PC value of the the next outer frame is irreversibly
+     lost.  The other registers are intact so LR likely contains
+     PC of some frame next to the outer one, but we cannot analyze
+     the next outer frame without knowing its PC
+     therefore we do not know SP fixup for this frame.
+     Some heuristics to resynchronize SP might be possible.
+     For simplicity, just terminate the unwinding to prevent it going
+     astray and attempting to read data/addresses it shouldn't,
+     which may cause further issues due to side-effects.  */
+  CORE_ADDR pc = get_frame_pc (this_frame);
+  if (arm_m_addr_is_lockup (pc))
+    {
+      /* The lockup can be real just in the innermost frame
+	 as the CPU is stopped and cannot create more frames.
+	 If we hit lockup magic PC in the other frame, it is
+	 just a sentinel at the top of stack: do not warn then.  */
+      if (frame_relative_level (this_frame) == 0)
+	warning (_("ARM M in lockup state, stack unwinding terminated."));
+
+      /* Terminate any further stack unwinding.  */
+      arm_cache_set_active_sp_value (cache, tdep, 0);
+      return cache;
+    }
+
   CORE_ADDR lr = get_frame_register_unsigned (this_frame, ARM_LR_REGNUM);
 
   /* ARMv7-M Architecture Reference "A2.3.1 Arm core registers"
@@ -3824,11 +3873,12 @@ arm_m_exception_unwind_sniffer (const struct frame_unwind *self,
   return arm_m_addr_is_magic (gdbarch, this_pc);
 }
 
-/* Frame unwinder for M-profile exceptions.  */
+/* Frame unwinder for M-profile exceptions (EXC_RETURN on stack),
+   lockup and secure/nonsecure interstate function calls (FNC_RETURN).  */
 
 struct frame_unwind arm_m_exception_unwind =
 {
-  "arm m exception",
+  "arm m exception lockup sec_fnc",
   SIGTRAMP_FRAME,
   arm_m_exception_frame_unwind_stop_reason,
   arm_m_exception_this_id,
