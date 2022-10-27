@@ -171,7 +171,7 @@ proc test {inftty_mode mi_mode force_fail} {
 # Create a not-executable copy of the program, in order to exercise
 # vfork->exec failing.
 gdb_remote_download host $binfile $binfile.nox
-remote_spawn target "chmod \"a-x\" $binfile.nox"
+remote_exec target "chmod \"a-x\" $binfile.nox"
 
 foreach_with_prefix inferior-tty {"main" "separate"} {
     foreach_with_prefix mi {"main" "separate"} {

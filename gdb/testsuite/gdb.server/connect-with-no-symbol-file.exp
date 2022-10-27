@@ -66,7 +66,7 @@ proc connect_no_symbol_file { sysroot action } {
 	if { $action == "delete" } then {
 	  remote_file target delete $target_exec
 	} elseif { $action == "permission" } {
-	  remote_spawn target "chmod 000 $target_exec"
+	  remote_exec target "chmod 000 $target_exec"
 	}
        
 	# Connect to GDBserver.
