@@ -292,7 +292,9 @@ with_test_prefix "address" {
 
     # Set the breakpoint by address, and check that GDB reports the
     # breakpoint location being the inline function.
-    gdb_test "break *$address" ".*Breakpoint .* at $address: file .*$srcfile, line $line."
+    gdb_test "break *$address" \
+	".*Breakpoint .* at $address: file .*$srcfile, line $line." \
+	"set breakpoint on address"
 
     gdb_test "info break \$bpnum" "in func1 at .*$srcfile:$line"
 

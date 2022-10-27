@@ -73,7 +73,7 @@ if { $address == -1 } {
 
 clean_restart ${binfile}
 
-gdb_breakpoint "*$address" message
+gdb_assert [gdb_breakpoint "*$address" no-message] "set breakpoint on address"
 
 # The assert did not reproduce when running to main, and continuing to the
 # breakpoint, so instead, run to the breakpoint.

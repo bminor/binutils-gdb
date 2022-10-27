@@ -45,7 +45,7 @@ if { $next_insn_addr == "" } {
     return -1
 }
 
-gdb_test "b *$next_insn_addr" "Breakpoint .*"
+gdb_test "b *$next_insn_addr" "Breakpoint .*" "set breakpoint on address"
 
 # So that GDB doesn't try to remove the regular breakpoint when the
 # step finishes.
