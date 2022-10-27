@@ -4418,6 +4418,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	  || !bfd_convert_section_contents (ibfd, isection, obfd,
 					    &memhunk, &size))
 	{
+	  bfd_set_section_size (osection, 0);
 	  status = 1;
 	  bfd_nonfatal_message (NULL, ibfd, isection, NULL);
 	  free (memhunk);
