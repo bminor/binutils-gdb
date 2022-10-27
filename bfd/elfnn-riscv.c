@@ -4239,7 +4239,10 @@ riscv_relax_resolve_delete_relocs (bfd *abfd,
 	  rel_next = relocs + i;
 	  if (ELFNN_R_TYPE ((rel_next)->r_info) == R_RISCV_DELETE
 	      && (rel_next)->r_offset > rel->r_offset)
-	    break;
+	    {
+	      BFD_ASSERT (rel_next - rel > 0);
+	      break;
+	    }
 	  else
 	    rel_next = NULL;
 	}
@@ -4253,7 +4256,8 @@ riscv_relax_resolve_delete_relocs (bfd *abfd,
       rel->r_info = ELFNN_R_INFO (0, R_RISCV_NONE);
 
       /* Skip ahead to the next delete reloc.  */
-      i = rel_next != NULL ? rel_next - relocs - 1 : sec->reloc_count;
+      i = rel_next != NULL ? (unsigned int) (rel_next - relocs - 1)
+			   : sec->reloc_count;
     }
 
   return true;
