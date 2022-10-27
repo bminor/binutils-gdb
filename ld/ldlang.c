@@ -8066,6 +8066,23 @@ lang_propagate_lma_regions (void)
     }
 }
 
+static void
+reset_one_wild (lang_statement_union_type *statement)
+{
+  if (statement->header.type == lang_wild_statement_enum)
+    {
+      lang_wild_statement_type *stmt = &statement->wild_statement;
+      stmt->resolved = false;
+      lang_list_init (&stmt->matching_sections);
+    }
+}
+
+static void
+reset_resolved_wilds (void)
+{
+  lang_for_each_statement (reset_one_wild);
+}
+
 void
 lang_process (void)
 {
@@ -8278,6 +8295,11 @@ lang_process (void)
   lang_check_relocs ();
 
   ldemul_after_check_relocs ();
+
+  /* There might have been new sections created (e.g. as result of
+     checking relocs to need a .got, or suchlike), so to properly order
+     them into our lists of matching sections reset them here.  */
+  reset_resolved_wilds ();
 
   /* Update wild statements in case the user gave --sort-section.
      Note how the option might have come after the linker script and
