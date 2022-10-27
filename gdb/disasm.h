@@ -26,6 +26,12 @@ struct gdbarch;
 struct ui_out;
 struct ui_file;
 
+#if __cplusplus >= 201703L
+#define LIBOPCODE_CALLBACK_NOEXCEPT noexcept
+#else
+#define LIBOPCODE_CALLBACK_NOEXCEPT
+#endif
+
 /* A wrapper around a disassemble_info and a gdbarch.  This is the core
    set of data that all disassembler sub-classes will need.  This class
    doesn't actually implement the disassembling process, that is something
@@ -51,18 +57,28 @@ struct gdb_disassemble_info
 
 protected:
 
-  /* Types for the function callbacks within m_di.  It would be nice if
-     these function types were all defined to include the noexcept
-     keyword, as every implementation of these must be noexcept.  However,
-     using noexcept within a function typedef like this is a C++17
-     feature, trying to do this for earlier C++ versions results in a
-     warning from GCC/Clang, and the noexcept isn't checked.  After we
-     move to C++17 these should be updated to add noexcept.  */
-  using read_memory_ftype = decltype (disassemble_info::read_memory_func);
-  using memory_error_ftype = decltype (disassemble_info::memory_error_func);
-  using print_address_ftype = decltype (disassemble_info::print_address_func);
-  using fprintf_ftype = decltype (disassemble_info::fprintf_func);
-  using fprintf_styled_ftype = decltype (disassemble_info::fprintf_styled_func);
+  /* Types for the function callbacks within m_di.  The actual function
+     signatures here are taken from include/dis-asm.h.  The noexcept macro
+     expands to 'noexcept' for C++17 and later, otherwise, it expands to
+     nothing.  This is because including noexcept was ignored for function
+     types before C++17, but both GCC and Clang warn that the noexcept
+     will become relevant when you switch to C++17, and this warning
+     causes the build to fail.  */
+  using read_memory_ftype
+    = int (*) (bfd_vma, bfd_byte *, unsigned int, struct disassemble_info *)
+	LIBOPCODE_CALLBACK_NOEXCEPT;
+  using memory_error_ftype
+    = void (*) (int, bfd_vma, struct disassemble_info *)
+	LIBOPCODE_CALLBACK_NOEXCEPT;
+  using print_address_ftype
+    = void (*) (bfd_vma, struct disassemble_info *)
+	LIBOPCODE_CALLBACK_NOEXCEPT;
+  using fprintf_ftype
+    = int (*) (void *, const char *, ...)
+	LIBOPCODE_CALLBACK_NOEXCEPT;
+  using fprintf_styled_ftype
+    = int (*) (void *, enum disassembler_style, const char *, ...)
+	LIBOPCODE_CALLBACK_NOEXCEPT;
 
   /* Constructor, many fields in m_di are initialized from GDBARCH.  The
      remaining arguments are function callbacks that are written into m_di.
