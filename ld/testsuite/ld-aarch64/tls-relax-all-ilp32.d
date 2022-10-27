@@ -1,6 +1,7 @@
 #source: tls-relax-all.s
 #as: -mabi=ilp32
 #ld: -m [aarch64_choose_ilp32_emul] -T relocs-ilp32.ld -e0
+#notarget: *-*-nto*
 #objdump: -dr
 #...
  +10000:	a9bf7bfd 	stp	x29, x30, \[sp, #-16\]!
