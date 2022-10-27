@@ -7788,7 +7788,7 @@ handle_step_into_function (struct gdbarch *gdbarch,
 
   compunit_symtab *cust
     = find_pc_compunit_symtab (ecs->event_thread->stop_pc ());
-  if (cust != NULL && compunit_language (cust) != language_asm)
+  if (cust != NULL && cust->language () != language_asm)
     ecs->stop_func_start
       = gdbarch_skip_prologue_noexcept (gdbarch, ecs->stop_func_start);
 
@@ -7867,7 +7867,7 @@ handle_step_into_function_backward (struct gdbarch *gdbarch,
   fill_in_stop_func (gdbarch, ecs);
 
   cust = find_pc_compunit_symtab (ecs->event_thread->stop_pc ());
-  if (cust != NULL && compunit_language (cust) != language_asm)
+  if (cust != NULL && cust->language () != language_asm)
     ecs->stop_func_start
       = gdbarch_skip_prologue_noexcept (gdbarch, ecs->stop_func_start);
 

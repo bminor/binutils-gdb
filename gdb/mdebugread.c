@@ -4623,7 +4623,7 @@ new_symtab (const char *name, int maxlines, struct objfile *objfile)
   symtab = allocate_symtab (cust, name);
 
   symtab->set_linetable (new_linetable (maxlines));
-  lang = compunit_language (cust);
+  lang = cust->language ();
 
   /* All symtabs must have at least two blocks.  */
   bv = new_bvect (2);

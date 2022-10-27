@@ -1895,10 +1895,10 @@ select_frame (frame_info_ptr fi)
 	  struct compunit_symtab *cust = find_pc_compunit_symtab (pc);
 
 	  if (cust != NULL
-	      && compunit_language (cust) != current_language->la_language
-	      && compunit_language (cust) != language_unknown
+	      && cust->language () != current_language->la_language
+	      && cust->language () != language_unknown
 	      && language_mode == language_mode_auto)
-	    set_language (compunit_language (cust));
+	    set_language (cust->language ());
 	}
     }
 }
@@ -2964,7 +2964,7 @@ get_frame_language (frame_info_ptr frame)
       struct compunit_symtab *cust = find_pc_compunit_symtab (pc);
 
       if (cust != NULL)
-	return compunit_language (cust);
+	return cust->language ();
     }
 
   return language_unknown;

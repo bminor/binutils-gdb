@@ -1840,6 +1840,9 @@ struct compunit_symtab
   /* Find call_site info for PC.  */
   call_site *find_call_site (CORE_ADDR pc) const;
 
+  /* Return the language of this compunit_symtab.  */
+  enum language language () const;
+
   /* Unordered chain of all compunit symtabs of this objfile.  */
   struct compunit_symtab *next;
 
@@ -1919,10 +1922,6 @@ struct compunit_symtab
 };
 
 using compunit_symtab_range = next_range<compunit_symtab>;
-
-/* Return the language of CUST.  */
-
-extern enum language compunit_language (const struct compunit_symtab *cust);
 
 /* Return true if this symtab is the "main" symtab of its compunit_symtab.  */
 

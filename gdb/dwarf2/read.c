@@ -9736,7 +9736,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
 	  m_builder.reset (new struct buildsym_compunit
 			   (cust->objfile (), "",
 			    cust->dirname (),
-			    compunit_language (cust),
+			    cust->language (),
 			    0, cust));
 	  list_in_scope = get_builder ()->get_file_symbols ();
 	}
@@ -9790,7 +9790,7 @@ dwarf2_cu::setup_type_unit_groups (struct die_info *die)
       m_builder.reset (new struct buildsym_compunit
 		       (cust->objfile (), "",
 			cust->dirname (),
-			compunit_language (cust),
+			cust->language (),
 			0, cust));
       list_in_scope = get_builder ()->get_file_symbols ();
 

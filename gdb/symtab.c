@@ -405,12 +405,12 @@ compunit_symtab::primary_filetab () const
 /* See symtab.h.  */
 
 enum language
-compunit_language (const struct compunit_symtab *cust)
+compunit_symtab::language () const
 {
-  struct symtab *symtab = cust->primary_filetab ();
+  struct symtab *symtab = primary_filetab ();
 
-/* The language of the compunit symtab is the language of its primary
-   source file.  */
+  /* The language of the compunit symtab is the language of its
+     primary source file.  */
   return symtab->language ();
 }
 
