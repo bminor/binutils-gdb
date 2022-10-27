@@ -78,6 +78,9 @@
 
 #elif defined (__GNUC__) /* GCC */
 
+# define DIAGNOSTIC_IGNORE_DEPRECATED_DECLARATIONS \
+  DIAGNOSTIC_IGNORE ("-Wdeprecated-declarations")
+
 # if __GNUC__ >= 7
 #  define DIAGNOSTIC_IGNORE_DEPRECATED_REGISTER \
    DIAGNOSTIC_IGNORE ("-Wregister")
