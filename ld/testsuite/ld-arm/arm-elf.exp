@@ -1247,7 +1247,7 @@ run_dump_test "attr-merge-nosection-1"
 run_dump_test "attr-merge-hardfp-use-1"
 run_dump_test "attr-merge-hardfp-use-2"
 run_dump_test "unresolved-1"
-if { [check_shared_lib_support] } {
+if { !$is_nacl && [check_shared_lib_support] } {
     run_dump_test "unresolved-1-dyn"
 }
 run_dump_test "unresolved-2"
@@ -1272,7 +1272,7 @@ run_dump_test "non-contiguous-arm4"
 run_dump_test "non-contiguous-arm5"
 run_dump_test "non-contiguous-arm6"
 
-if { [check_shared_lib_support] } {
+if { !$is_nacl && [check_shared_lib_support] } {
     run_dump_test "thumb-plt"
     run_dump_test "thumb-plt-got"
 }
