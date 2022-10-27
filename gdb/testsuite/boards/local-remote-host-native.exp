@@ -83,3 +83,7 @@ proc ${board}_download { board src dest } {
 
     return $destfile
 }
+
+if { $board_type == "host" } {
+    set GDBFLAGS "${GDBFLAGS} -iex \"set style enabled off\""
+}
