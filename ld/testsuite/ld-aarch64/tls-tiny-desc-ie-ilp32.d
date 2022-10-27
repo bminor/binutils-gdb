@@ -1,6 +1,7 @@
 #source: tls-tiny-desc-ie.s
 #as: -mabi=ilp32
 #ld: -m [aarch64_choose_ilp32_emul] -T relocs-ilp32.ld -e0 tmpdir/tls-sharedlib-ilp32.so
+#notarget: *-*-nto*
 #objdump: -dr
 #...
 
