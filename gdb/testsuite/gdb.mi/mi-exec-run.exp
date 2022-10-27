@@ -180,3 +180,5 @@ foreach_with_prefix inferior-tty {"main" "separate"} {
 	}
     }
 }
+
+mi_gdb_exit

@@ -83,7 +83,7 @@ proc mi_uncatched_gdb_exit {} {
 		exp_continue
 	    }
 	    -re "DOSEXIT code" { }
-	    default { }
+	    -re "\r\n999\\^exit\r\n" { }
 	}
     }
 
