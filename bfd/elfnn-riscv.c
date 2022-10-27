@@ -200,6 +200,9 @@ struct riscv_elf_link_hash_table
   /* The max alignment of output sections.  */
   bfd_vma max_alignment;
 
+  /* The max alignment of output sections in [gp-2K, gp+2K) range.  */
+  bfd_vma max_alignment_for_gp;
+
   /* Used by local STT_GNU_IFUNC symbols.  */
   htab_t loc_hash_table;
   void * loc_hash_memory;
@@ -488,6 +491,7 @@ riscv_elf_link_hash_table_create (bfd *abfd)
     }
 
   ret->max_alignment = (bfd_vma) -1;
+  ret->max_alignment_for_gp = (bfd_vma) -1;
 
   /* Create hash table for local ifunc.  */
   ret->loc_hash_table = htab_try_create (1024,
@@ -4460,17 +4464,27 @@ _bfd_riscv_relax_call (bfd *abfd, asection *sec, asection *sym_sec,
 				   link_info, pcgp_relocs, rel + 1);
 }
 
-/* Traverse all output sections and return the max alignment.  */
+/* Traverse all output sections and return the max alignment.
+
+   If gp is zero, then all the output section alignments are
+   possible candidates;  Otherwise, only the output sections
+   which are in the [gp-2K, gp+2K) range need to be considered.  */
 
 static bfd_vma
-_bfd_riscv_get_max_alignment (asection *sec)
+_bfd_riscv_get_max_alignment (asection *sec, bfd_vma gp)
 {
   unsigned int max_alignment_power = 0;
   asection *o;
 
   for (o = sec->output_section->owner->sections; o != NULL; o = o->next)
     {
-      if (o->alignment_power > max_alignment_power)
+      bool valid = true;
+      if (gp
+	  && !(VALID_ITYPE_IMM (sec_addr (o) - gp)
+	       || VALID_ITYPE_IMM (sec_addr (o) + o->size - gp)))
+	valid = false;
+
+      if (valid && o->alignment_power > max_alignment_power)
 	max_alignment_power = o->alignment_power;
     }
 
@@ -4492,15 +4506,16 @@ _bfd_riscv_relax_lui (bfd *abfd,
 		      riscv_pcgp_relocs *pcgp_relocs,
 		      bool undefined_weak)
 {
+  struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (link_info);
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
-  bfd_vma gp = riscv_elf_hash_table (link_info)->params->relax_gp
-		   ? riscv_global_pointer_value (link_info)
-		   : 0;
+  bfd_vma gp = htab->params->relax_gp
+	       ? riscv_global_pointer_value (link_info)
+	       : 0;
   int use_rvc = elf_elfheader (abfd)->e_flags & EF_RISCV_RVC;
 
   BFD_ASSERT (rel->r_offset + 4 <= sec->size);
 
-  if (gp)
+  if (!undefined_weak && gp)
     {
       /* If gp and the symbol are in the same output section, which is not the
 	 abs section, then consider only that output section's alignment.  */
@@ -4510,16 +4525,28 @@ _bfd_riscv_relax_lui (bfd *abfd,
       if (h->u.def.section->output_section == sym_sec->output_section
 	  && sym_sec->output_section != bfd_abs_section_ptr)
 	max_alignment = (bfd_vma) 1 << sym_sec->output_section->alignment_power;
+      else
+	{
+	  /* Consider output section alignments which are in [gp-2K, gp+2K). */
+	  max_alignment = htab->max_alignment_for_gp;
+	  if (max_alignment == (bfd_vma) -1)
+	    {
+	      max_alignment = _bfd_riscv_get_max_alignment (sec, gp);
+	      htab->max_alignment_for_gp = max_alignment;
+	    }
+	}
     }
 
   /* Is the reference in range of x0 or gp?
-     Valid gp range conservatively because of alignment issue.  */
+     Valid gp range conservatively because of alignment issue.
+
+     Should we also consider the alignment issue for x0 base?  */
   if (undefined_weak
-      || (VALID_ITYPE_IMM (symval)
-	  || (symval >= gp
-	      && VALID_ITYPE_IMM (symval - gp + max_alignment + reserve_size))
-	  || (symval < gp
-	      && VALID_ITYPE_IMM (symval - gp - max_alignment - reserve_size))))
+      || VALID_ITYPE_IMM (symval)
+      || (symval >= gp
+	  && VALID_ITYPE_IMM (symval - gp + max_alignment + reserve_size))
+      || (symval < gp
+	  && VALID_ITYPE_IMM (symval - gp - max_alignment - reserve_size)))
     {
       unsigned sym = ELFNN_R_SYM (rel->r_info);
       switch (ELFNN_R_TYPE (rel->r_info))
@@ -4709,6 +4736,7 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
 		     riscv_pcgp_relocs *pcgp_relocs,
 		     bool undefined_weak)
 {
+  struct riscv_elf_link_hash_table *htab = riscv_elf_hash_table (link_info);
   bfd_byte *contents = elf_section_data (sec)->this_hdr.contents;
   bfd_vma gp = riscv_global_pointer_value (link_info);
 
@@ -4765,7 +4793,7 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
       abort ();
     }
 
-  if (gp)
+  if (!undefined_weak && gp)
     {
       /* If gp and the symbol are in the same output section, which is not the
 	 abs section, then consider only that output section's alignment.  */
@@ -4775,16 +4803,28 @@ _bfd_riscv_relax_pc (bfd *abfd ATTRIBUTE_UNUSED,
       if (h->u.def.section->output_section == sym_sec->output_section
 	  && sym_sec->output_section != bfd_abs_section_ptr)
 	max_alignment = (bfd_vma) 1 << sym_sec->output_section->alignment_power;
+      else
+	{
+	  /* Consider output section alignments which are in [gp-2K, gp+2K). */
+	  max_alignment = htab->max_alignment_for_gp;
+	  if (max_alignment == (bfd_vma) -1)
+	    {
+	      max_alignment = _bfd_riscv_get_max_alignment (sec, gp);
+	      htab->max_alignment_for_gp = max_alignment;
+	    }
+	}
     }
 
   /* Is the reference in range of x0 or gp?
-     Valid gp range conservatively because of alignment issue.  */
+     Valid gp range conservatively because of alignment issue.
+
+     Should we also consider the alignment issue for x0 base?  */
   if (undefined_weak
-      || (VALID_ITYPE_IMM (symval)
-	  || (symval >= gp
-	      && VALID_ITYPE_IMM (symval - gp + max_alignment + reserve_size))
-	  || (symval < gp
-	      && VALID_ITYPE_IMM (symval - gp - max_alignment - reserve_size))))
+      || VALID_ITYPE_IMM (symval)
+      || (symval >= gp
+	  && VALID_ITYPE_IMM (symval - gp + max_alignment + reserve_size))
+      || (symval < gp
+	  && VALID_ITYPE_IMM (symval - gp - max_alignment - reserve_size)))
     {
       unsigned sym = hi_reloc.hi_sym;
       switch (ELFNN_R_TYPE (rel->r_info))
@@ -4877,6 +4917,7 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
   unsigned int i;
   bfd_vma max_alignment, reserve_size = 0;
   riscv_pcgp_relocs pcgp_relocs;
+  static asection *first_section = NULL;
 
   *again = false;
 
@@ -4892,6 +4933,13 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
       || *(htab->data_segment_phase) == 4)
     return true;
 
+  /* Record the first relax section, so that we can reset the
+     max_alignment_for_gp for the repeated relax passes.  */
+  if (first_section == NULL)
+    first_section = sec;
+  else if (first_section == sec)
+    htab->max_alignment_for_gp = -1;
+
   riscv_init_pcgp_relocs (&pcgp_relocs);
 
   /* Read this BFD's relocs if we haven't done so already.  */
@@ -4901,17 +4949,14 @@ _bfd_riscv_relax_section (bfd *abfd, asection *sec,
 						 info->keep_memory)))
     goto fail;
 
-  if (htab)
+  /* Estimate the maximum alignment for all output sections once time
+     should be enough.  */
+  max_alignment = htab->max_alignment;
+  if (max_alignment == (bfd_vma) -1)
     {
-      max_alignment = htab->max_alignment;
-      if (max_alignment == (bfd_vma) -1)
-	{
-	  max_alignment = _bfd_riscv_get_max_alignment (sec);
-	  htab->max_alignment = max_alignment;
-	}
+      max_alignment = _bfd_riscv_get_max_alignment (sec, 0/* gp */);
+      htab->max_alignment = max_alignment;
     }
-  else
-    max_alignment = _bfd_riscv_get_max_alignment (sec);
 
   /* Examine and consider relaxing each reloc.  */
   for (i = 0; i < sec->reloc_count; i++)
