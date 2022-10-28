@@ -7,6 +7,6 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <_start>:
+0000000000000000 <(_start|_btext)>:
    0:	d503201f 	nop
    4:	587fffe0 	ldr	x0, 100000 .*

@@ -15,7 +15,7 @@ Contents of section .got.plt:
 
 Disassembly of section .text:
 
-.* <ifunc>:
+.* <(ifunc|_btext)>:
  .*:	d65f03c0 	ret
 
 .* <bar>:

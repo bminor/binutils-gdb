@@ -7,7 +7,7 @@
 
 Disassembly of section .text:
 
-0+1000 <_start>:
+0+1000 <(_start|_btext)>:
 [ \t]+1000:[ \t]+94000004[ \t]+	bl[ \t]+1010 <__bar_veneer>
 [ \t]+1004:[ \t]+d65f03c0[ \t]+ret
 [ \t]+1008:[ \t]+14000008[ \t]+b[ \t]+1028 <__bar_veneer\+0x18>

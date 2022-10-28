@@ -7,7 +7,7 @@
 
 Disassembly of section .text:
 
-0+1000 <_start>:
+0+1000 <(_start|_btext)>:
     1000:	15ffffff 	b	8000ffc <bar>
     1004:	d65f03c0 	ret
 

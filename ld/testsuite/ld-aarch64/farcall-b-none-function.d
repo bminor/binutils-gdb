@@ -7,7 +7,7 @@
 
 Disassembly of section .text:
 
-.* <_start>:
+.* <(_start|_btext)>:
     1000:	14000004 	b	1010 <__bar_veneer>
     1004:	d65f03c0 	ret
     1008:	14000008 	b	1028 <__bar_veneer\+0x18>

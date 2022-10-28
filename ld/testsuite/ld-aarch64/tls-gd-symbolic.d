@@ -9,7 +9,7 @@
 
 Disassembly of section \.text:
 
-[0-9a-f]+ <_test_tls_desc>:
+[0-9a-f]+ <(_test_tls_desc|_btext)>:
  +[0-9a-f]+:	........ 	adrp	x0, .*
  +[0-9a-f]+:	........ 	ldr	x1, \[x0, #.*\]
  +[0-9a-f]+:	........ 	add	x0, x0, .*

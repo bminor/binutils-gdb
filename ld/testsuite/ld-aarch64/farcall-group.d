@@ -7,7 +7,7 @@
 
 Disassembly of section .text:
 
-0000000000400078 <_start>:
+0000000000400078 <(_start|_btext)>:
   400078:	95000008 	bl	4400098 <__end_veneer>
 	...
  440007c:	(d503201f|1f2003d5) 	.word	0x(d503201f|1f2003d5)

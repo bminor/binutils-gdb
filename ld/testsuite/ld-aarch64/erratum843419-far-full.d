@@ -6,7 +6,7 @@
 
 Disassembly of section \.text:
 
-0*400000 <_start>:
+0*400000 <(_start|_btext)>:
 	...
   400ffc:	90400000 	adrp	x0, 80400000 <__bss_end__\+0x7ffedff0>
   401000:	f9000042 	str	x2, \[x2\]
@@ -18,5 +18,5 @@ Disassembly of section \.text:
 
 0*401018 <e843419@0002_00000010_1008>:
   401018:	f9402001 	ldr	x1, \[x0, #64\]
-  40101c:	17fffffc 	b	40100c <_start\+0x100c>
+  40101c:	17fffffc 	b	40100c <(_start|_btext)\+0x100c>
 	...

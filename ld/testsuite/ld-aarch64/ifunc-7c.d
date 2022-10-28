@@ -10,7 +10,7 @@
 
 Disassembly of section \.text:
 
-[0-9a-f]+ <foo>:
+[0-9a-f]+ <(foo|_btext)>:
  [0-9a-f]+:	d65f03c0 	ret
 
 [0-9a-f]+ <__start>:

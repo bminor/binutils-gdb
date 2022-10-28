@@ -26,7 +26,7 @@ Disassembly of section .plt:
 
 Disassembly of section .text:
 
-.* <_start>:
+.* <(_start|_btext)>:
 	...
 .*:	.* 	b	.* <__foo_veneer>
 .*:	d65f03c0 	ret
