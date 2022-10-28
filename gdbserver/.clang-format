@@ -1,0 +1,127 @@
+# -*- yaml -*-
+
+# Notes for gdb.
+# * labels are not handled gnu-style
+#   https://github.com/llvm/llvm-project/issues/24492
+#   https://github.com/llvm/llvm-project/issues/53717
+# * function call bin-packing is weird
+#   https://github.com/llvm/llvm-project/issues/31255
+#   https://github.com/llvm/llvm-project/issues/37051
+# * gettext calls like "_()" are reformatted to "_ ()"
+#   I don't think there's an upstream bug for this yet
+
+Language:        Cpp
+# BasedOnStyle:  GNU
+AccessModifierOffset: -2
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: false
+AlignConsecutiveDeclarations: false
+AlignConsecutiveMacros: false
+# FIXME probably needs a decision
+AlignEscapedNewlines: Left
+AlignOperands:   true
+AlignTrailingComments: true
+AllowAllArgumentsOnNextLine: false
+# This isn't truly needed because
+# ConstructorInitializerAllOnOneLineOrOnePerLine is false.
+AllowAllConstructorInitializersOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowShortBlocksOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: false
+# Deprecated, so we don't set it.
+# AlwaysBreakAfterDefinitionReturnType: All
+AlwaysBreakAfterReturnType: TopLevelDefinitions
+AlwaysBreakBeforeMultilineStrings: false
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: true
+BinPackParameters: true
+# Because BreakBeforeBraces = GNU, we don't need BraceWrapping.
+BreakBeforeBinaryOperators: All
+BreakBeforeBraces: GNU
+BreakBeforeTernaryOperators: true
+BreakConstructorInitializers: BeforeColon
+BreakInheritanceList: BeforeColon
+BreakStringLiterals: true
+ColumnLimit:     79
+CommentPragmas:  'ARI'
+CompactNamespaces: false
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+ConstructorInitializerIndentWidth: 2
+ContinuationIndentWidth: 2
+Cpp11BracedListStyle: false
+DeriveLineEnding: false
+DerivePointerAlignment: false
+DisableFormat:   false
+# The docs say not to use this.
+# ExperimentalAutoDetectBinPacking: false
+FixNamespaceComments: true
+ForEachMacros:
+  - ALL_BLOCK_SYMBOLS
+  - ALL_BLOCK_SYMBOLS_WITH_NAME
+  - ALL_BREAKPOINTS
+  - ALL_BREAKPOINTS_SAFE
+  - ALL_BP_LOCATIONS
+  - ALL_BP_LOCATIONS_AT_ADDR
+  # FIXME many more here
+IncludeBlocks:   Preserve
+IncludeCategories:
+  - Regex:           '^"(common-defs.h|defs.h|server.h)/'
+    Priority:        -1
+# IncludeIsMainRegex: FIXME
+IndentCaseLabels: false
+# FIXME I think this is not quite right,
+# they should be outdented slightly.
+IndentGotoLabels: true
+IndentPPDirectives: None
+IndentWidth:     2
+IndentWrappedFunctionNames: false
+KeepEmptyLinesAtTheStartOfBlocks: false
+# MacroBlockBegin: ''
+# MacroBlockEnd:   ''
+MaxEmptyLinesToKeep: 1
+NamespaceIndentation: None
+# NamespaceMacros
+# PenaltyBreakAssignment: 2
+PenaltyBreakBeforeFirstCallParameter: 200
+# PenaltyBreakComment: 300
+# PenaltyBreakFirstLessLess: 120
+# PenaltyBreakString: 100
+# PenaltyBreakTemplateDeclaration: 1000
+# PenaltyExcessCharacter: 10
+# PenaltyReturnTypeOnItsOwnLine: 60
+PointerAlignment: Right
+# RawStringFormats: ???
+# FIXME - enable
+ReflowComments:  false
+# FIXME - enable
+SortIncludes:    false
+SortUsingDeclarations: true
+SpaceAfterCStyleCast: true
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: Always
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: false
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles:  false
+SpacesInCStyleCastParentheses: false
+SpacesInConditionalStatement: false
+SpacesInContainerLiterals: true
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+Standard: Cpp11
+# StatementMacros: do we have any?
+TabWidth: 8
+# TypenameMacros: do we have any?
+UseCRLF: false
+UseTab: Never
