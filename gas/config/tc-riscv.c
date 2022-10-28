@@ -484,7 +484,7 @@ make_mapping_symbol (enum riscv_seg_mstate state,
 		     bool reset_seg_arch_str)
 {
   const char *name;
-  char *buff;
+  char *buff = NULL;
   switch (state)
     {
     case MAP_DATA:
