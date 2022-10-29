@@ -470,11 +470,6 @@ static char *expr_end;
 #define OPCODE_MATCHES(OPCODE, OP) \
   (((OPCODE) & MASK_##OP) == MATCH_##OP)
 
-/* Indicate if .option directives do affect instructions.  Set to true means
-   we need to add $x+arch at somewhere; Otherwise just add $x for instructions
-   should be enough.  */
-static bool need_arch_map_symbol = false;
-
 /* Create a new mapping symbol for the transition to STATE.  */
 
 static void
@@ -579,7 +574,6 @@ riscv_mapping_state (enum riscv_seg_mstate to_state,
 		      S_GET_NAME (seg_arch_symbol) + 2) != 0)
     {
       reset_seg_arch_str = true;
-      need_arch_map_symbol = true;
     }
   else if (from_state == to_state)
     return;
@@ -633,13 +627,6 @@ riscv_check_mapping_symbols (bfd *abfd ATTRIBUTE_UNUSED,
 
   if (seginfo == NULL || seginfo->frchainP == NULL)
     return;
-
-  /* If we don't set any .option arch directive, then the arch_map_symbol
-     in each segment must be the first instruction, and we don't need to
-     add $x+arch for them.  */
-  if (!need_arch_map_symbol
-      && seginfo->tc_segment_info_data.arch_map_symbol != 0)
-    S_SET_NAME (seginfo->tc_segment_info_data.arch_map_symbol, "$x");
 
   for (fragp = seginfo->frchainP->frch_root;
        fragp != NULL;
