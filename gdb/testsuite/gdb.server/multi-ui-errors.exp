@@ -112,6 +112,14 @@ remote_exec target "kill -9 $gdbserver_pid"
 # interpreter now.
 
 with_spawn_id $gdb_main_spawn_id {
+    gdb_test_multiple "" "remote connection closed - main UI" {
+	-re -wrap "Remote connection closed" {
+	    pass $gdb_test_name
+	}
+    }
+}
+
+with_spawn_id $gdb_main_spawn_id {
     gdb_test "echo" "" \
 	"main UI, prompt after gdbserver dies"
 }
