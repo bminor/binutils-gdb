@@ -78,3 +78,15 @@ proc ${board}_file { dest op args } {
     }
     return [eval [list standard_file $dest $op] $args]
 }
+
+proc ${board}_spawn { board cmd } {
+    global board_info
+
+    set remote [board_info $board hostname]
+    set username [board_info $board username]
+    set RSH [board_info $board rsh_prog]
+
+    spawn $RSH -t -l $username $remote $cmd
+    set board_info($board,fileid) $spawn_id
+    return $spawn_id
+}

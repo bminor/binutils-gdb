@@ -32,6 +32,18 @@ set_board_info protocol standard
 set_board_info username $env(USER)
 set_board_info hostname localhost
 
+proc ${board}_spawn { board cmd } {
+    global board_info
+
+    set remote [board_info $board hostname]
+    set username [board_info $board username]
+    set RSH [board_info $board rsh_prog]
+
+    spawn $RSH -t -l $username $remote $cmd
+    set board_info($board,fileid) $spawn_id
+    return $spawn_id
+}
+
 # We will be using the standard GDB remote protocol
 set_board_info gdb_protocol "remote"
 
