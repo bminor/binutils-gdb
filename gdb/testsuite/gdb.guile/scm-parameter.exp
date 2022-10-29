@@ -185,7 +185,9 @@ foreach_with_prefix kind {
     set param_integer_error \
 	[multi_line \
 	    "ERROR: In procedure set-parameter-value!:" \
-	    "(ERROR: )?In procedure gdbscm_set_parameter_value_x: Wrong type argument in position 2 \\(expecting integer\\): #:unlimited" \
+	    "(ERROR: )?In procedure gdbscm_set_parameter_value_x:\
+	     Wrong type argument in position 2 \\(expecting integer\\):\
+	     #:unlimited" \
 	    "Error while executing Scheme code\\."]
     set param_minus_one_error "integer -1 out of range"
     set param_minus_two_range "integer -2 out of range"
