@@ -4211,7 +4211,7 @@ som_finish_writing (bfd *abfd)
 
   /* Setting of the system_id has to happen very late now that copying of
      BFD private data happens *after* section contents are set.  */
-  if (abfd->flags & (EXEC_P | DYNAMIC))
+  if ((abfd->flags & (EXEC_P | DYNAMIC)) && obj_som_exec_data (abfd))
     obj_som_file_hdr (abfd)->system_id = obj_som_exec_data (abfd)->system_id;
   else if (bfd_get_mach (abfd) == pa20)
     obj_som_file_hdr (abfd)->system_id = CPU_PA_RISC2_0;
@@ -4242,7 +4242,8 @@ som_finish_writing (bfd *abfd)
 
       exec_header = obj_som_exec_hdr (abfd);
       exec_header->exec_entry = bfd_get_start_address (abfd);
-      exec_header->exec_flags = obj_som_exec_data (abfd)->exec_flags;
+      if (obj_som_exec_data (abfd))
+	exec_header->exec_flags = obj_som_exec_data (abfd)->exec_flags;
 
       /* Oh joys.  Ram some of the BSS data into the DATA section
 	 to be compatible with how the hp linker makes objects
