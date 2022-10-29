@@ -3744,6 +3744,7 @@ copy_archive (bfd *ibfd, bfd *obfd, const char *output_target,
 	    bfd_close (l->obfd);
 	    unlink (l->name);
 	  }
+	free ((char *) l->name);
 	next = l->next;
 	free (l);
       }
