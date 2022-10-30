@@ -10652,22 +10652,12 @@ prealloc_cu_tu_list (unsigned int nshndx)
 static void
 add_shndx_to_cu_tu_entry (unsigned int shndx)
 {
-  if (shndx_pool_used >= shndx_pool_size)
-    {
-      error (_("Internal error: out of space in the shndx pool.\n"));
-      return;
-    }
   shndx_pool [shndx_pool_used++] = shndx;
 }
 
 static void
 end_cu_tu_entry (void)
 {
-  if (shndx_pool_used >= shndx_pool_size)
-    {
-      error (_("Internal error: out of space in the shndx pool.\n"));
-      return;
-    }
   shndx_pool [shndx_pool_used++] = 0;
 }
 
@@ -10773,53 +10763,55 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
 
   if (version == 1)
     {
+      unsigned char *shndx_list;
+      unsigned int shndx;
+
       if (!do_display)
-	prealloc_cu_tu_list ((limit - ppool) / 4);
-      for (i = 0; i < nslots; i++)
 	{
-	  unsigned char *shndx_list;
-	  unsigned int shndx;
-
-	  SAFE_BYTE_GET (signature, phash, 8, limit);
-	  if (signature != 0)
+	  prealloc_cu_tu_list ((limit - ppool) / 4);
+	  for (shndx_list = ppool + 4; shndx_list <= limit - 4; shndx_list += 4)
 	    {
-	      SAFE_BYTE_GET (j, pindex, 4, limit);
-	      shndx_list = ppool + j * 4;
-	      /* PR 17531: file: 705e010d.  */
-	      if (shndx_list < ppool)
-		{
-		  warn (_("Section index pool located before start of section\n"));
-		  return 0;
-		}
+	      shndx = byte_get (shndx_list, 4);
+	      add_shndx_to_cu_tu_entry (shndx);
+	    }
+	  end_cu_tu_entry ();
+	}
+      else
+	for (i = 0; i < nslots; i++)
+	  {
+	    SAFE_BYTE_GET (signature, phash, 8, limit);
+	    if (signature != 0)
+	      {
+		SAFE_BYTE_GET (j, pindex, 4, limit);
+		shndx_list = ppool + j * 4;
+		/* PR 17531: file: 705e010d.  */
+		if (shndx_list < ppool)
+		  {
+		    warn (_("Section index pool located before start of section\n"));
+		    return 0;
+		  }
 
-	      if (do_display)
 		printf (_("  [%3d] Signature:  %#" PRIx64 "  Sections: "),
 			i, signature);
-	      for (;;)
-		{
-		  if (shndx_list >= limit)
-		    {
-		      warn (_("Section %s too small for shndx pool\n"),
-			    section->name);
-		      return 0;
-		    }
-		  SAFE_BYTE_GET (shndx, shndx_list, 4, limit);
-		  if (shndx == 0)
-		    break;
-		  if (do_display)
+		for (;;)
+		  {
+		    if (shndx_list >= limit)
+		      {
+			warn (_("Section %s too small for shndx pool\n"),
+			      section->name);
+			return 0;
+		      }
+		    SAFE_BYTE_GET (shndx, shndx_list, 4, limit);
+		    if (shndx == 0)
+		      break;
 		    printf (" %d", shndx);
-		  else
-		    add_shndx_to_cu_tu_entry (shndx);
-		  shndx_list += 4;
-		}
-	      if (do_display)
+		    shndx_list += 4;
+		  }
 		printf ("\n");
-	      else
-		end_cu_tu_entry ();
-	    }
-	  phash += 8;
-	  pindex += 4;
-	}
+	      }
+	    phash += 8;
+	    pindex += 4;
+	  }
     }
   else if (version == 2)
     {
