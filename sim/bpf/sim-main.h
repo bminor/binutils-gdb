@@ -19,8 +19,6 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-#define SIM_HAVE_COMMON_SIM_CPU
-
 #include "sim-basics.h"
 #include "cgen-types.h"
 #include "bpf-desc.h"

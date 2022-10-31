@@ -19,8 +19,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-#define SIM_HAVE_COMMON_SIM_CPU
-
 #include "sim-basics.h"
 #include "sim-base.h"
 
