@@ -1907,7 +1907,6 @@ operand_type_xor (i386_operand_type x, i386_operand_type y)
 
 static const i386_operand_type disp16_32 = OPERAND_TYPE_DISP16_32;
 static const i386_operand_type anydisp = OPERAND_TYPE_ANYDISP;
-static const i386_operand_type anyimm = OPERAND_TYPE_ANYIMM;
 static const i386_operand_type regxmm = OPERAND_TYPE_REGXMM;
 static const i386_operand_type imm8 = OPERAND_TYPE_IMM8;
 static const i386_operand_type imm8s = OPERAND_TYPE_IMM8S;
@@ -5817,13 +5816,6 @@ optimize_imm (void)
 	      const insn_template *t = current_templates->start;
 
 	      operand_type_set (&mask, 0);
-	      allowed = t->operand_types[op];
-
-	      while (++t < current_templates->end)
-		{
-		  allowed = operand_type_and (allowed, anyimm);
-		  allowed = operand_type_or (allowed, t->operand_types[op]);
-		}
 	      switch (guess_suffix)
 		{
 		case QWORD_MNEM_SUFFIX:
@@ -5842,7 +5834,14 @@ optimize_imm (void)
 		default:
 		  break;
 		}
-	      allowed = operand_type_and (mask, allowed);
+
+	      allowed = operand_type_and (t->operand_types[op], mask);
+	      while (++t < current_templates->end)
+		{
+		  allowed = operand_type_or (allowed, t->operand_types[op]);
+		  allowed = operand_type_and (allowed, mask);
+		}
+
 	      if (!operand_type_all_zero (&allowed))
 		i.types[op] = operand_type_and (i.types[op], mask);
 	    }

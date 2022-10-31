@@ -539,8 +539,6 @@ static initializer operand_type_init[] =
     "Imm32|Imm32S|Imm64|Disp32" },
   { "OPERAND_TYPE_IMM32_32S_64_DISP32_64",
     "Imm32|Imm32S|Imm64|Disp32|Disp64" },
-  { "OPERAND_TYPE_ANYIMM",
-    "Imm1|Imm8|Imm8S|Imm16|Imm32|Imm32S|Imm64" },
 };
 
 typedef struct bitfield
