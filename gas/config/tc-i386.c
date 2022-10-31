@@ -5036,7 +5036,7 @@ md_assemble (char *line)
   /* Check if IP-relative addressing requirements can be satisfied.  */
   if (i.tm.cpu_flags.bitfield.cpuprefetchi
       && !(i.base_reg && i.base_reg->reg_num == RegIP))
-    as_warn (_("only support RIP-relative address"), i.tm.name);
+    as_warn (_("'%s' only supports RIP-relative address"), i.tm.name);
 
   /* Update operand types and check extended states.  */
   for (j = 0; j < i.operands; j++)
