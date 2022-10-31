@@ -1,3 +1,7 @@
+2022-10-31  Nick Clifton  <nickc@redhat.com>
+
+	* testsuite/gas/rx/mvtacgu.d: Update expected disassembly.
+
 2022-10-11  Nick Clifton  <nickc@redhat.com>
 
 	* symbols.c (S_GET_VALUE): If the unresolved symbol is the fake

@@ -1,3 +1,8 @@
+2022-10-31  Yoshinori Sato  <ysato@users.sourceforge.jp>
+
+	* rx-decode.opc: Switch arguments of the MVTACGU insn.
+	* rx-decode.c: Regenerate.
+
 2022-09-22  Yoshinori Sato  <ysato@users.sourceforge.jp>
 
 	* sh-dis.c (print_insn_sh): Enforce bit7 of LDC Rm,Rn_BANK and STC
