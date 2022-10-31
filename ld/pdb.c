@@ -444,8 +444,7 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
   pdb = bfd_openw (pdb_name, "pdb");
   if (!pdb)
     {
-      einfo (_("%P: warning: cannot create PDB file: %s\n"),
-	     bfd_errmsg (bfd_get_error ()));
+      einfo (_("%P: warning: cannot create PDB file: %E\n"));
       return false;
     }
 
@@ -454,7 +453,7 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
   if (!create_old_directory_stream (pdb))
     {
       einfo (_("%P: warning: cannot create old directory stream "
-	       "in PDB file: %s\n"), bfd_errmsg (bfd_get_error ()));
+	       "in PDB file: %E\n"));
       goto end;
     }
 
@@ -463,14 +462,14 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
   if (!info_stream)
     {
       einfo (_("%P: warning: cannot create info stream "
-	       "in PDB file: %s\n"), bfd_errmsg (bfd_get_error ()));
+	       "in PDB file: %E\n"));
       goto end;
     }
 
   if (!create_type_stream (pdb))
     {
       einfo (_("%P: warning: cannot create TPI stream "
-	       "in PDB file: %s\n"), bfd_errmsg (bfd_get_error ()));
+	       "in PDB file: %E\n"));
       goto end;
     }
 
@@ -479,14 +478,14 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
   if (!dbi_stream)
     {
       einfo (_("%P: warning: cannot create DBI stream "
-	       "in PDB file: %s\n"), bfd_errmsg (bfd_get_error ()));
+	       "in PDB file: %E\n"));
       goto end;
     }
 
   if (!create_type_stream (pdb))
     {
       einfo (_("%P: warning: cannot create IPI stream "
-	       "in PDB file: %s\n"), bfd_errmsg (bfd_get_error ()));
+	       "in PDB file: %E\n"));
       goto end;
     }
 
@@ -495,21 +494,21 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
   if (!names_stream)
     {
       einfo (_("%P: warning: cannot create /names stream "
-	       "in PDB file: %s\n"), bfd_errmsg (bfd_get_error ()));
+	       "in PDB file: %E\n"));
       goto end;
     }
 
   if (!populate_dbi_stream (dbi_stream, abfd))
     {
       einfo (_("%P: warning: cannot populate DBI stream "
-	       "in PDB file: %s\n"), bfd_errmsg (bfd_get_error ()));
+	       "in PDB file: %E\n"));
       goto end;
     }
 
   if (!populate_info_stream (pdb, info_stream, guid))
     {
       einfo (_("%P: warning: cannot populate info stream "
-	       "in PDB file: %s\n"), bfd_errmsg (bfd_get_error ()));
+	       "in PDB file: %E\n"));
       goto end;
     }
 
