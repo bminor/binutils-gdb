@@ -141,7 +141,12 @@ static enum color_selection
     on,   				/* --disassembler-color=color.  */
     off, 				/* --disassembler-color=off.  */
     extended				/* --disassembler-color=extended-color.  */
-  } disassembler_color = on_if_terminal_output;
+  } disassembler_color =
+#if DEFAULT_FOR_COLORED_DISASSEMBLY
+  on_if_terminal_output;
+#else
+  off;
+#endif
 
 static int dump_any_debugging;
 static int demangle_flags = DMGL_ANSI | DMGL_PARAMS;
@@ -414,13 +419,22 @@ usage (FILE *stream, int status)
       --visualize-jumps=extended-color\n\
                                  Use extended 8-bit color codes\n"));
       fprintf (stream, _("\
-      --visualize-jumps=off      Disable jump visualization\n\n"));
+      --visualize-jumps=off      Disable jump visualization\n"));
+#if DEFAULT_FOR_COLORED_DISASSEMBLY
       fprintf (stream, _("\
-      --disassembler-color=off   Disable disassembler color output.\n\n"));
+      --disassembler-color=off       Disable disassembler color output.\n"));
       fprintf (stream, _("\
-      --disassembler-color=color Use basic colors in disassembler output.\n\n"));
+      --disassembler-color=terminal  Enable disassembler color output if displaying on a terminal. (default)\n"));
+#else
       fprintf (stream, _("\
-      --disassembler-color=extended-color Use 8-bit colors in disassembler output.\n\n"));
+      --disassembler-color=off       Disable disassembler color output. (default)\n"));
+      fprintf (stream, _("\
+      --disassembler-color=terminal  Enable disassembler color output if displaying on a terminal.\n"));
+#endif
+      fprintf (stream, _("\
+      --disassembler-color=on        Enable disassembler color output.\n"));
+      fprintf (stream, _("\
+      --disassembler-color=extended  Use 8-bit colors in disassembler output.\n\n"));
 
       list_supported_targets (program_name, stream);
       list_supported_architectures (program_name, stream);
@@ -5890,9 +5904,15 @@ main (int argc, char **argv)
 	case OPTION_DISASSEMBLER_COLOR:
 	  if (streq (optarg, "off"))
 	    disassembler_color = off;
-	  else if (streq (optarg, "color"))
+	  else if (streq (optarg, "terminal"))
+	    disassembler_color = on_if_terminal_output;
+	  else if (streq (optarg, "color")
+		   || streq (optarg, "colour")
+		   || streq (optarg, "on")) 
 	    disassembler_color = on;
-	  else if (streq (optarg, "extended-color"))
+	  else if (streq (optarg, "extended")
+		   || streq (optarg, "extended-color")
+		   || streq (optarg, "extended-colour"))
 	    disassembler_color = extended;
 	  else
 	    nonfatal (_("unrecognized argument to --disassembler-color"));

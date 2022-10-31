@@ -2282,7 +2282,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{--prefix-strip=}@var{level}]
         [@option{--insn-width=}@var{width}]
         [@option{--visualize-jumps[=color|=extended-color|=off]}
-        [@option{--disassembler-color=[color|extended-color|off]}
+        [@option{--disassembler-color=[off|terminal|on|extended]}
         [@option{-U} @var{method}] [@option{--unicode=}@var{method}]
         [@option{-V}|@option{--version}]
         [@option{-H}|@option{--help}]
@@ -2821,18 +2821,26 @@ If it is necessary to disable the @option{visualize-jumps} option
 after it has previously been enabled then use
 @option{visualize-jumps=off}.
 
-@item --disassembler-color=[color|extended-color|off]
-Apply syntax highlighting to the disassembler output.  The
-@option{color} argument adds color using simple terminal colors.
-Alternatively the @option{extended-color} argument will use 8bit
-colors, but these might not work on all terminals.
+@item --disassembler-color=off
+@itemx --disassembler-color=terminal
+@itemx --disassembler-color=on|color|colour
+@itemx --disassembler-color=extened|extended-color|extened-colour
+Enables or disables the use of colored syntax highlighting in
+disassembly output.  The default behaviour is determined via a
+configure time option.  Note, not all architectures support colored
+syntax highlighting, and depending upon the terminal used, colored
+output may not actually be legible.
 
-If it is necessary to disable the @option{--disassembler-color} option
-after it has previously been enabled then use
-@option{--disassembler-color=off}.
+The @option{on} argument adds colors using simple terminal colors.
 
-If this option is not specified then the default is to enable color
-output if displaying to a terminal, but not otherwise.
+The @option{terminal} argument does the same, but only if the output
+device is a terminal.
+
+The @option{extended-color} argument is similar to the @option{on}
+argument, but it uses 8-bit colors.  These may not work on all
+terminals.
+
+The @option{off} argument disables colored disassembly.
 
 @item -W[lLiaprmfFsoORtUuTgAckK]
 @itemx --dwarf[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=str-offsets,=loc,=Ranges,=pubtypes,=trace_info,=trace_abbrev,=trace_aranges,=gdb_index,=addr,=cu_index,=links,=follow-links]

@@ -109,6 +109,21 @@ AC_DEFINE_UNQUOTED(DEFAULT_FOR_FOLLOW_LINKS, $default_for_follow_links,
 		   [Have readelf and objdump follow debug links by default])
 
 
+
+
+AC_ARG_ENABLE(colored-disassembly,
+[AS_HELP_STRING([--enable-colored-disassembly],
+	[Have objdump use colors in its disassembly by default])], [
+if test "${enableval}" = no; then
+  default_for_colored_disassembly=0
+else
+  default_for_colored_disassembly=1
+fi], [default_for_colored_disassembly=0])
+
+AC_DEFINE_UNQUOTED(DEFAULT_FOR_COLORED_DISASSEMBLY, $default_for_colored_disassembly,
+		   [Have objdump use colors in its disassembly by default])
+
+
 AC_DEBUGINFOD
 
 GCC_ENABLE([libctf], [yes], [], [Handle .ctf type-info sections])

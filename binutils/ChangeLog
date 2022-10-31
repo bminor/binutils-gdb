@@ -1,3 +1,13 @@
+2022-10-31  Nick Clifton  <nickc@redhat.com>
+
+	PR 29457
+	* configure.ac: Add --enable-colored-disassembly.
+	* objdump.c: Add --disassembler-color=terminal.
+	* doc/binutils.texi (objdump): Document the new option.
+	* NEWS: Mention new feature.
+	* config.in: Regenerate in.
+	* configure: Regenerate.
+
 2022-10-19  Nick Clifton  <nickc@redhat.com>
 
 	* MAINTAINERS: Add section on patches, copyright and DCO.

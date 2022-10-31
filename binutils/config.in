@@ -10,6 +10,9 @@
 /* Should ar and ranlib use -D behavior by default? */
 #undef DEFAULT_AR_DETERMINISTIC
 
+/* Have objdump use colors in its disassembly by default */
+#undef DEFAULT_FOR_COLORED_DISASSEMBLY
+
 /* Have readelf and objdump follow debug links by default */
 #undef DEFAULT_FOR_FOLLOW_LINKS
 

@@ -1,5 +1,9 @@
 -*- text -*-
 
+* Add --enable-colored-disassembly configure time option to enable colored
+  disassembly output by default, if the output device is a terminal.  Note,
+  this configure option is disabled by default.
+  
 * DCO signed contributions are now accepted.
 
 * objcopy --decompress-debug-sections now supports zstd compressed debug

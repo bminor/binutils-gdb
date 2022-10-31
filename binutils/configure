@@ -827,6 +827,7 @@ enable_deterministic_archives
 enable_default_strings_all
 enable_f_for_ifunc_symbols
 enable_follow_debug_links
+enable_colored_disassembly
 with_debuginfod
 enable_libctf
 enable_werror
@@ -1503,6 +1504,9 @@ Optional Features:
                           symbols
   --enable-follow-debug-links
                           Have readelf and objdump follow debug links by
+                          default
+  --enable-colored-disassembly
+                          Have objdump use colors in its disassembly by
                           default
   --enable-libctf         Handle .ctf type-info sections [default=yes]
   --enable-werror         treat compile warnings as errors
@@ -10813,7 +10817,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10816 "configure"
+#line 10820 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10919,7 +10923,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10922 "configure"
+#line 10926 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11627,6 +11631,28 @@ fi
 
 cat >>confdefs.h <<_ACEOF
 #define DEFAULT_FOR_FOLLOW_LINKS $default_for_follow_links
+_ACEOF
+
+
+
+
+
+# Check whether --enable-colored-disassembly was given.
+if test "${enable_colored_disassembly+set}" = set; then :
+  enableval=$enable_colored_disassembly;
+if test "${enableval}" = no; then
+  default_for_colored_disassembly=0
+else
+  default_for_colored_disassembly=1
+fi
+else
+  default_for_colored_disassembly=0
+fi
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define DEFAULT_FOR_COLORED_DISASSEMBLY $default_for_colored_disassembly
 _ACEOF
 
 
