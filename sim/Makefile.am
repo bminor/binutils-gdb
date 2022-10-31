@@ -18,6 +18,9 @@
 AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
 ACLOCAL_AMFLAGS = -Im4 -I.. -I../config
 
+GNULIB_PARENT_DIR = ..
+@include_makefile@ $(GNULIB_PARENT_DIR)/gnulib/Makefile.gnulib.inc
+
 srccom = $(srcdir)/common
 srcroot = $(srcdir)/..
 
@@ -39,6 +42,7 @@ MOSTLYCLEANFILES = core
 
 AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
 AM_CPPFLAGS = \
+	$(INCGNU) \
 	-I$(srcroot)/include \
 	$(SIM_INLINE)
 

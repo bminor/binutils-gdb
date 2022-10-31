@@ -891,6 +891,7 @@ host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
 htmldir = @htmldir@
+include_makefile = @include_makefile@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
@@ -927,6 +928,7 @@ zlibdir = @zlibdir@
 zlibinc = @zlibinc@
 AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
 ACLOCAL_AMFLAGS = -Im4 -I.. -I../config
+GNULIB_PARENT_DIR = ..
 srccom = $(srcdir)/common
 srcroot = $(srcdir)/..
 SUBDIRS = @subdirs@ $(SIM_SUBDIRS)
@@ -945,7 +947,8 @@ MOSTLYCLEANFILES = core $(am__append_5) site-sim-config.exp \
 	$(am__append_26) $(am__append_29) $(am__append_31) \
 	$(am__append_34) $(am__append_37) $(am__append_39)
 AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
-AM_CPPFLAGS = -I$(srcroot)/include $(SIM_INLINE) -I$(srcdir)/common
+AM_CPPFLAGS = $(INCGNU) -I$(srcroot)/include $(SIM_INLINE) \
+	-I$(srcdir)/common
 AM_CPPFLAGS_FOR_BUILD = -I$(srcroot)/include $(SIM_INLINE) \
 	-I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
@@ -2423,6 +2426,7 @@ uninstall-am: uninstall-armdocDATA uninstall-dtbDATA \
 
 .PRECIOUS: Makefile
 
+@include_makefile@ $(GNULIB_PARENT_DIR)/gnulib/Makefile.gnulib.inc
 
 # Generate target constants for newlib/libgloss from its source tree.
 # This file is shipped with distributions so we build in the source dir.
