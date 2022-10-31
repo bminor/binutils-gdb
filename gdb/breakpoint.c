@@ -2123,10 +2123,9 @@ update_watchpoint (struct watchpoint *b, bool reparse)
 	}
 
       /* Change the type of breakpoint between hardware assisted or
-	 an ordinary watchpoint depending on the hardware support
-	 and free hardware slots.  REPARSE is set when the inferior
-	 is started.  */
-      if (reparse)
+	 an ordinary watchpoint depending on the hardware support and
+	 free hardware slots.  Recheck the number of free hardware slots
+	 as the value chain may have changed.  */
 	{
 	  int reg_cnt;
 	  enum bp_loc_type loc_type;
