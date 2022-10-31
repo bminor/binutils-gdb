@@ -741,6 +741,7 @@ CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@
 CGEN_MAINT = @CGEN_MAINT@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CPPFLAGS_FOR_BUILD = @CPPFLAGS_FOR_BUILD@
 CYGPATH_W = @CYGPATH_W@
 C_DIALECT = @C_DIALECT@
 DATADIRNAME = @DATADIRNAME@
@@ -945,7 +946,9 @@ MOSTLYCLEANFILES = core $(am__append_5) site-sim-config.exp \
 	$(am__append_34) $(am__append_37) $(am__append_39)
 AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
 AM_CPPFLAGS = -I$(srcroot)/include $(SIM_INLINE) -I$(srcdir)/common
-COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
+AM_CPPFLAGS_FOR_BUILD = -I$(srcroot)/include $(SIM_INLINE) \
+	-I$(srcdir)/common
+COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 SIM_ALL_RECURSIVE_DEPS = common/libcommon.a $(am__append_2) \
 	$(am__append_6) $(am__append_8) $(am__append_11) \

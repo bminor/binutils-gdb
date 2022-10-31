@@ -42,7 +42,10 @@ AM_CPPFLAGS = \
 	-I$(srcroot)/include \
 	$(SIM_INLINE)
 
-COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS) $(CFLAGS_FOR_BUILD)
+AM_CPPFLAGS_FOR_BUILD = \
+	-I$(srcroot)/include \
+	$(SIM_INLINE)
+COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
 LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 
 ## Deps to add to the all-recursive target.  These are built before descending

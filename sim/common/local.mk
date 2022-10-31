@@ -19,6 +19,7 @@
 ## Most still lives in common/Make-common.in.
 
 AM_CPPFLAGS += -I$(srcdir)/%D%
+AM_CPPFLAGS_FOR_BUILD += -I$(srcdir)/%D%
 
 ## This makes sure common parts are available before building the arch-subdirs
 ## which will refer to these.
