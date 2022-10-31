@@ -11,7 +11,7 @@ Contents of section .text:
  [0-9a-f]+ .*
 Contents of section .got.plt:
  [0-9a-f]+ 0+ 0+ 0+ 0+  .*
- (10298|102b8) 0+ 0+ [0-9a-f]+ [0-9a-f]+  .*
+ (10298|102b8|10358) 0+ 0+ [0-9a-f]+ [0-9a-f]+  .*
 
 Disassembly of section .text:
 
@@ -20,7 +20,7 @@ Disassembly of section .text:
 
 .* <bar>:
  .*:	90000080 	adrp	x0, 10000 <.*>
- .*:	.* 	ldr	x0, \[x0, #(672|704)\]
+ .*:	.* 	ldr	x0, \[x0, #(672|704|864)\]
  .*:	d65f03c0 	ret
 
 #pass
