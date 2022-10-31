@@ -395,12 +395,111 @@ proc check_section_stream { img pdb } {
     return 1
 }
 
+proc get_publics_stream_index { pdb } {
+    global ar
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir $pdb 0003"]
+
+    if ![string match "" $exec_output] {
+	return -1
+    }
+
+    set fi [open tmpdir/0003]
+    fconfigure $fi -translation binary
+
+    # skip fields
+    seek $fi 16
+
+    # read substream sizes
+
+    set data [read $fi 2]
+    binary scan $data s index
+
+    close $fi
+
+    return $index
+}
+
+proc get_sym_record_stream_index { pdb } {
+    global ar
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir $pdb 0003"]
+
+    if ![string match "" $exec_output] {
+	return -1
+    }
+
+    set fi [open tmpdir/0003]
+    fconfigure $fi -translation binary
+
+    # skip fields
+    seek $fi 20
+
+    # read substream sizes
+
+    set data [read $fi 2]
+    binary scan $data s index
+
+    close $fi
+
+    return $index
+}
+
+proc check_publics_stream { pdb } {
+    global ar
+    global objdump
+    global srcdir
+    global subdir
+
+    set publics_index [get_publics_stream_index $pdb]
+
+    if { $publics_index == -1 } {
+	return 0
+    }
+
+    set index_str [format "%04x" $publics_index]
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir $pdb $index_str"]
+
+    if ![string match "" $exec_output] {
+	return 0
+    }
+
+    set exp [file_contents "$srcdir/$subdir/pdb1-publics.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/$index_str"]
+    if ![string match $exp $got] {
+	return 0
+    }
+
+    set sym_record_index [get_sym_record_stream_index $pdb]
+
+    if { $sym_record_index == -1 } {
+	return 0
+    }
+
+    set index_str [format "%04x" $sym_record_index]
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir $pdb $index_str"]
+
+    if ![string match "" $exec_output] {
+	return 0
+    }
+
+    set exp [file_contents "$srcdir/$subdir/pdb1-sym-record.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/$index_str"]
+    if ![string match $exp $got] {
+	return 0
+    }
+
+    return 1
+}
+
 if ![ld_assemble $as $srcdir/$subdir/pdb1.s tmpdir/pdb1.o] {
     unsupported "Build pdb1.o"
     return
 }
 
-if ![ld_link $ld "tmpdir/pdb1.exe" "--pdb=tmpdir/pdb1.pdb tmpdir/pdb1.o"] {
+if ![ld_link $ld "tmpdir/pdb1.exe" "--pdb=tmpdir/pdb1.pdb --gc-sections -e foo tmpdir/pdb1.o"] {
     fail "Could not create a PE image with a PDB file"
     return
 }
@@ -440,4 +539,10 @@ if [check_section_stream tmpdir/pdb1.exe tmpdir/pdb1.pdb] {
     pass "Valid section stream"
 } else {
     fail "Invalid section stream"
+}
+
+if [check_publics_stream tmpdir/pdb1.pdb] {
+    pass "Valid publics stream"
+} else {
+    fail "Invalid publics stream"
 }

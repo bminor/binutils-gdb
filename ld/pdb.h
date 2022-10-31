@@ -28,6 +28,8 @@
 #include "bfd.h"
 #include <stdbool.h>
 
+#define S_PUB32				0x110e
+
 /* PDBStream70 in pdb1.h */
 struct pdb_stream_70
 {
@@ -90,6 +92,51 @@ struct pdb_dbi_stream_header
 };
 
 #define DBI_STREAM_VERSION_70		19990903
+
+/* PSGSIHDR in gsi.h */
+struct publics_header
+{
+  uint32_t sym_hash_size;
+  uint32_t addr_map_size;
+  uint32_t num_thunks;
+  uint32_t thunks_size;
+  uint32_t thunk_table;
+  uint32_t thunk_table_offset;
+  uint32_t num_sects;
+};
+
+/* GSIHashHdr in gsi.h */
+struct globals_hash_header
+{
+  uint32_t signature;
+  uint32_t version;
+  uint32_t entries_size;
+  uint32_t buckets_size;
+};
+
+/* HRFile in gsi.h */
+struct hash_record
+{
+  uint32_t offset;
+  uint32_t reference;
+};
+
+#define GLOBALS_HASH_SIGNATURE		0xffffffff
+#define GLOBALS_HASH_VERSION_70		0xf12f091a
+
+/* PUBSYM32 in cvinfo.h */
+struct pubsym
+{
+  uint16_t record_length;
+  uint16_t record_type;
+  uint32_t flags;
+  uint32_t offset;
+  uint16_t section;
+  /* followed by null-terminated string */
+} ATTRIBUTE_PACKED;
+
+/* see bitset CV_PUBSYMFLAGS in cvinfo.h */
+#define PUBSYM_FUNCTION			0x2
 
 struct optional_dbg_header
 {
