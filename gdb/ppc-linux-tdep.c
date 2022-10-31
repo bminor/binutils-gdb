@@ -1400,6 +1400,8 @@ ppc_canonicalize_syscall (int syscall, int wordsize)
       else
 	result = gdb_sys_fstatat64;
     }
+  else if (syscall == 317)
+    result = gdb_sys_pipe2;
   else if (syscall == 336)
     result = gdb_sys_recv;
   else if (syscall == 337)
