@@ -1913,7 +1913,7 @@ enum {
 };
 
 static int
-sh_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
+sh_reg_store (SIM_CPU *cpu, int rn, const void *memory, int length)
 {
   unsigned val;
 
@@ -2086,7 +2086,7 @@ sh_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
 }
 
 static int
-sh_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+sh_reg_fetch (SIM_CPU *cpu, int rn, void *memory, int length)
 {
   int val;
 

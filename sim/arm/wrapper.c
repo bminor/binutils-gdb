@@ -429,7 +429,7 @@ tomem (struct ARMul_State *state,
 }
 
 static int
-arm_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
+arm_reg_store (SIM_CPU *cpu, int rn, const void *buf, int length)
 {
   init ();
 
@@ -460,11 +460,11 @@ arm_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
     case SIM_ARM_FP6_REGNUM:
     case SIM_ARM_FP7_REGNUM:
     case SIM_ARM_FPS_REGNUM:
-      ARMul_SetReg (state, state->Mode, rn, frommem (state, memory));
+      ARMul_SetReg (state, state->Mode, rn, frommem (state, buf));
       break;
 
     case SIM_ARM_PS_REGNUM:
-      state->Cpsr = frommem (state, memory);
+      state->Cpsr = frommem (state, buf);
       ARMul_CPSRAltered (state);
       break;
 
@@ -485,11 +485,11 @@ arm_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
     case SIM_ARM_MAVERIC_COP0R14_REGNUM:
     case SIM_ARM_MAVERIC_COP0R15_REGNUM:
       memcpy (& DSPregs [rn - SIM_ARM_MAVERIC_COP0R0_REGNUM],
-	      memory, sizeof (struct maverick_regs));
+	      buf, sizeof (struct maverick_regs));
       return sizeof (struct maverick_regs);
 
     case SIM_ARM_MAVERIC_DSPSC_REGNUM:
-      memcpy (&DSPsc, memory, sizeof DSPsc);
+      memcpy (&DSPsc, buf, sizeof DSPsc);
       return sizeof DSPsc;
 
     case SIM_ARM_IWMMXT_COP0R0_REGNUM:
@@ -524,7 +524,7 @@ arm_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
     case SIM_ARM_IWMMXT_COP1R13_REGNUM:
     case SIM_ARM_IWMMXT_COP1R14_REGNUM:
     case SIM_ARM_IWMMXT_COP1R15_REGNUM:
-      return Store_Iwmmxt_Register (rn - SIM_ARM_IWMMXT_COP0R0_REGNUM, memory);
+      return Store_Iwmmxt_Register (rn - SIM_ARM_IWMMXT_COP0R0_REGNUM, buf);
 
     default:
       return 0;
@@ -534,8 +534,9 @@ arm_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
 }
 
 static int
-arm_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+arm_reg_fetch (SIM_CPU *cpu, int rn, void *buf, int length)
 {
+  unsigned char *memory = buf;
   ARMword regval;
   int len = length;
 

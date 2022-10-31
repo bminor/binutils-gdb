@@ -184,8 +184,8 @@ v850_pc_set (sim_cpu *cpu, sim_cia pc)
   PC = pc;
 }
 
-static int v850_reg_fetch (SIM_CPU *, int, unsigned char *, int);
-static int v850_reg_store (SIM_CPU *, int, const unsigned char *, int);
+static int v850_reg_fetch (SIM_CPU *, int, void *, int);
+static int v850_reg_store (SIM_CPU *, int, const void *, int);
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND    kind,
@@ -313,14 +313,14 @@ sim_create_inferior (SIM_DESC      sd,
 }
 
 static int
-v850_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+v850_reg_fetch (SIM_CPU *cpu, int rn, void *memory, int length)
 {
   *(uint32_t*)memory = H2T_4 (State.regs[rn]);
   return -1;
 }
 
 static int
-v850_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
+v850_reg_store (SIM_CPU *cpu, int rn, const void *memory, int length)
 {
   State.regs[rn] = T2H_4 (*(uint32_t *) memory);
   return length;

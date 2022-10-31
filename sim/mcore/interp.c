@@ -1242,7 +1242,7 @@ sim_engine_run (SIM_DESC sd,
 }
 
 static int
-mcore_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
+mcore_reg_store (SIM_CPU *cpu, int rn, const void *memory, int length)
 {
   if (rn < NUM_MCORE_REGS && rn >= 0)
     {
@@ -1262,7 +1262,7 @@ mcore_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
 }
 
 static int
-mcore_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+mcore_reg_fetch (SIM_CPU *cpu, int rn, void *memory, int length)
 {
   if (rn < NUM_MCORE_REGS && rn >= 0)
     {

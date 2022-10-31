@@ -745,7 +745,7 @@ ft32_lookup_register (SIM_CPU *cpu, int nr)
 static int
 ft32_reg_store (SIM_CPU *cpu,
 		int rn,
-		const unsigned char *memory,
+		const void *memory,
 		int length)
 {
   if (0 <= rn && rn <= 32)
@@ -762,7 +762,7 @@ ft32_reg_store (SIM_CPU *cpu,
 static int
 ft32_reg_fetch (SIM_CPU *cpu,
 		int rn,
-		unsigned char *memory,
+		void *memory,
 		int length)
 {
   if (0 <= rn && rn <= 32)

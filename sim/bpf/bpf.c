@@ -45,7 +45,7 @@ IDESC *bpf_idesc_be;
 int
 bpfbf_fetch_register (SIM_CPU *current_cpu,
                       int rn,
-                      unsigned char *buf,
+                      void *buf,
                       int len)
 {
   if (rn == 11)
@@ -61,7 +61,7 @@ bpfbf_fetch_register (SIM_CPU *current_cpu,
 int
 bpfbf_store_register (SIM_CPU *current_cpu,
                       int rn,
-                      const unsigned char *buf,
+                      const void *buf,
                       int len)
 {
   if (rn == 11)

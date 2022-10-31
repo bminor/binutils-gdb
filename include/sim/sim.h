@@ -189,7 +189,7 @@ int sim_write (SIM_DESC sd, SIM_ADDR mem, const void *buf, int length);
    If LENGTH does not match the size of REGNO no data is transfered
    (the actual register size is still returned). */
 
-int sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length);
+int sim_fetch_register (SIM_DESC sd, int regno, void *buf, int length);
 
 
 /* Store register REGNO from the raw (target endian) value in BUF.
@@ -203,8 +203,7 @@ int sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length);
    Return a LENGTH of 0 to indicate the register was not updated
    but no error has occurred. */
 
-int sim_store_register (SIM_DESC sd, int regno, const unsigned char *buf,
-			int length);
+int sim_store_register (SIM_DESC sd, int regno, const void *buf, int length);
 
 
 /* Print whatever statistics the simulator has collected.

@@ -78,8 +78,8 @@ MY (f_break_handler) (SIM_CPU *cpu, USI breaknum, USI pc)
    Note the contents of BUF are in target byte order.  */
 
 int
-MY (f_fetch_register) (SIM_CPU *current_cpu, int rn,
-		      unsigned char *buf, int len ATTRIBUTE_UNUSED)
+MY (f_fetch_register) (SIM_CPU *current_cpu, int rn, void *buf,
+		      int len ATTRIBUTE_UNUSED)
 {
   SETTSI (buf, XCONCAT3(crisv,BASENUM,f_h_gr_get) (current_cpu, rn));
   return -1;
@@ -89,8 +89,8 @@ MY (f_fetch_register) (SIM_CPU *current_cpu, int rn,
    Note the contents of BUF are in target byte order.  */
 
 int
-MY (f_store_register) (SIM_CPU *current_cpu, int rn,
-		      const unsigned char *buf, int len ATTRIBUTE_UNUSED)
+MY (f_store_register) (SIM_CPU *current_cpu, int rn, const void *buf,
+		      int len ATTRIBUTE_UNUSED)
 {
   XCONCAT3(crisv,BASENUM,f_h_gr_set) (current_cpu, rn, GETTSI (buf));
   return -1;

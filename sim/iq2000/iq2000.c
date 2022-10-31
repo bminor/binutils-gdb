@@ -206,7 +206,7 @@ set_h_pc (SIM_CPU *cpu, PCADDR addr)
 }
 
 int
-iq2000bf_fetch_register (SIM_CPU *cpu, int nr, unsigned char *buf, int len)
+iq2000bf_fetch_register (SIM_CPU *cpu, int nr, void *buf, int len)
 {
   if (nr >= GPR0_REGNUM
       && nr < (GPR0_REGNUM + NR_GPR)
@@ -227,7 +227,7 @@ iq2000bf_fetch_register (SIM_CPU *cpu, int nr, unsigned char *buf, int len)
 }
 
 int
-iq2000bf_store_register (SIM_CPU *cpu, int nr, const unsigned char *buf, int len)
+iq2000bf_store_register (SIM_CPU *cpu, int nr, const void *buf, int len)
 {
   if (nr >= GPR0_REGNUM
       && nr < (GPR0_REGNUM + NR_GPR)

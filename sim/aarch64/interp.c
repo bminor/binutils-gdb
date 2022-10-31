@@ -210,7 +210,7 @@ reg_size (int regno)
 }
 
 static int
-aarch64_reg_get (SIM_CPU *cpu, int regno, unsigned char *buf, int length)
+aarch64_reg_get (SIM_CPU *cpu, int regno, void *buf, int length)
 {
   size_t size;
   bfd_vma val;
@@ -257,7 +257,7 @@ aarch64_reg_get (SIM_CPU *cpu, int regno, unsigned char *buf, int length)
 }
 
 static int
-aarch64_reg_set (SIM_CPU *cpu, int regno, const unsigned char *buf, int length)
+aarch64_reg_set (SIM_CPU *cpu, int regno, const void *buf, int length)
 {
   size_t size;
   bfd_vma val;

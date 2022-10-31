@@ -1021,7 +1021,7 @@ pc_set (sim_cpu *cpu, sim_cia pc)
 }
 
 static int
-reg_fetch (sim_cpu *cpu, int rn, unsigned char *buf, int len)
+reg_fetch (sim_cpu *cpu, int rn, void *buf, int len)
 {
   if (len <= 0 || len > sizeof (unsigned_word))
     return -1;
@@ -1054,7 +1054,7 @@ reg_fetch (sim_cpu *cpu, int rn, unsigned char *buf, int len)
 }
 
 static int
-reg_store (sim_cpu *cpu, int rn, const unsigned char *buf, int len)
+reg_store (sim_cpu *cpu, int rn, const void *buf, int len)
 {
   if (len <= 0 || len > sizeof (unsigned_word))
     return -1;

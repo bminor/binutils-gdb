@@ -30,8 +30,8 @@ typedef const char * (CPU_INSN_NAME_FN) (sim_cpu *, int);
 
 /* Types for register access functions.
    These routines implement the sim_{fetch,store}_register interface.  */
-typedef int (CPUREG_FETCH_FN) (sim_cpu *, int, unsigned char *, int);
-typedef int (CPUREG_STORE_FN) (sim_cpu *, int, const unsigned char *, int);
+typedef int (CPUREG_FETCH_FN) (sim_cpu *, int, void *, int);
+typedef int (CPUREG_STORE_FN) (sim_cpu *, int, const void *, int);
 
 /* Types for PC access functions.
    Some simulators require a functional interface to access the program

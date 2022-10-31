@@ -385,8 +385,8 @@ free_state (SIM_DESC sd)
   sim_state_free (sd);
 }
 
-static int cr16_reg_fetch (SIM_CPU *, int, unsigned char *, int);
-static int cr16_reg_store (SIM_CPU *, int, const unsigned char *, int);
+static int cr16_reg_fetch (SIM_CPU *, int, void *, int);
+static int cr16_reg_store (SIM_CPU *, int, const void *, int);
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, struct host_callback_struct *cb,
@@ -720,7 +720,7 @@ cr16_store_unsigned_integer (unsigned char *addr, int len, uint32_t val)
 }
 
 static int
-cr16_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+cr16_reg_fetch (SIM_CPU *cpu, int rn, void *memory, int length)
 {
   int size;
   switch ((enum sim_cr16_regs) rn)
@@ -769,7 +769,7 @@ cr16_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 }
 
 static int
-cr16_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
+cr16_reg_store (SIM_CPU *cpu, int rn, const void *memory, int length)
 {
   SIM_DESC sd = CPU_STATE (cpu);
   int size;

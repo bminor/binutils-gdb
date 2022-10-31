@@ -46,24 +46,26 @@ msp430_pc_store (SIM_CPU *cpu, sim_cia newpc)
 }
 
 static int
-msp430_reg_fetch (SIM_CPU *cpu, int regno, unsigned char *buf, int len)
+msp430_reg_fetch (SIM_CPU *cpu, int regno, void *buf, int len)
 {
+  unsigned char *memory = buf;
+
   if (0 <= regno && regno < 16)
     {
       if (len == 2)
 	{
 	  int val = cpu->state.regs[regno];
-	  buf[0] = val & 0xff;
-	  buf[1] = (val >> 8) & 0xff;
+	  memory[0] = val & 0xff;
+	  memory[1] = (val >> 8) & 0xff;
 	  return 0;
 	}
       else if (len == 4)
 	{
 	  int val = cpu->state.regs[regno];
-	  buf[0] = val & 0xff;
-	  buf[1] = (val >> 8) & 0xff;
-	  buf[2] = (val >> 16) & 0x0f; /* Registers are only 20 bits wide.  */
-	  buf[3] = 0;
+	  memory[0] = val & 0xff;
+	  memory[1] = (val >> 8) & 0xff;
+	  memory[2] = (val >> 16) & 0x0f; /* Registers are only 20 bits wide.  */
+	  memory[3] = 0;
 	  return 0;
 	}
       else
@@ -74,20 +76,22 @@ msp430_reg_fetch (SIM_CPU *cpu, int regno, unsigned char *buf, int len)
 }
 
 static int
-msp430_reg_store (SIM_CPU *cpu, int regno, const unsigned char *buf, int len)
+msp430_reg_store (SIM_CPU *cpu, int regno, const void *buf, int len)
 {
+  const unsigned char *memory = buf;
+
   if (0 <= regno && regno < 16)
     {
       if (len == 2)
 	{
-	  cpu->state.regs[regno] = (buf[1] << 8) | buf[0];
+	  cpu->state.regs[regno] = (memory[1] << 8) | memory[0];
 	  return len;
 	}
 
       if (len == 4)
 	{
-	  cpu->state.regs[regno] = ((buf[2] << 16) & 0xf0000)
-				   | (buf[1] << 8) | buf[0];
+	  cpu->state.regs[regno] = ((memory[2] << 16) & 0xf0000)
+				   | (memory[1] << 8) | memory[0];
 	  return len;
 	}
     }

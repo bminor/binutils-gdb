@@ -321,7 +321,7 @@ sim_engine_run (SIM_DESC sd,
 }
 
 static int
-microblaze_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
+microblaze_reg_store (SIM_CPU *cpu, int rn, const void *memory, int length)
 {
   if (rn < NUM_REGS + NUM_SPECIAL && rn >= 0)
     {
@@ -343,7 +343,7 @@ microblaze_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int len
 }
 
 static int
-microblaze_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+microblaze_reg_fetch (SIM_CPU *cpu, int rn, void *memory, int length)
 {
   long ival;
 

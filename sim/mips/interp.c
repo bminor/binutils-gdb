@@ -336,8 +336,8 @@ mips_pc_set (sim_cpu *cpu, sim_cia pc)
   PC = pc;
 }
 
-static int mips_reg_fetch (SIM_CPU *, int, unsigned char *, int);
-static int mips_reg_store (SIM_CPU *, int, const unsigned char *, int);
+static int mips_reg_fetch (SIM_CPU *, int, void *, int);
+static int mips_reg_store (SIM_CPU *, int, const void *, int);
 
 SIM_DESC
 sim_open (SIM_OPEN_KIND kind, host_callback *cb,
@@ -846,7 +846,7 @@ mips_sim_close (SIM_DESC sd, int quitting)
 }
 
 static int
-mips_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
+mips_reg_store (SIM_CPU *cpu, int rn, const void *memory, int length)
 {
   /* NOTE: gdb (the client) stores registers in target byte order
      while the simulator uses host byte order */
@@ -925,7 +925,7 @@ mips_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
 }
 
 static int
-mips_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+mips_reg_fetch (SIM_CPU *cpu, int rn, void *memory, int length)
 {
   /* NOTE: gdb (the client) stores registers in target byte order
      while the simulator uses host byte order */

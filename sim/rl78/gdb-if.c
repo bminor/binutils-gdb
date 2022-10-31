@@ -327,7 +327,7 @@ reg_addr (enum sim_rl78_regnum regno)
    notion of the register's size.  */
 
 int
-sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
+sim_fetch_register (SIM_DESC sd, int regno, void *buf, int length)
 {
   size_t size;
   SI val;
@@ -356,7 +356,7 @@ sim_fetch_register (SIM_DESC sd, int regno, unsigned char *buf, int length)
    LENGTH must match the sim's internal notion of the register size.  */
 
 int
-sim_store_register (SIM_DESC sd, int regno, const unsigned char *buf, int length)
+sim_store_register (SIM_DESC sd, int regno, const void *buf, int length)
 {
   size_t size;
   SI val;

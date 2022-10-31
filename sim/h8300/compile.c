@@ -4476,11 +4476,13 @@ sim_read (SIM_DESC sd, SIM_ADDR addr, void *buffer, int size)
 }
 
 static int
-h8300_reg_store (SIM_CPU *cpu, int rn, const unsigned char *value, int length)
+h8300_reg_store (SIM_CPU *cpu, int rn, const void *buf, int length)
 {
+  const unsigned char *value = buf;
   int longval;
   int shortval;
   int intval;
+
   longval = (value[0] << 24) | (value[1] << 16) | (value[2] << 8) | value[3];
   shortval = (value[0] << 8) | (value[1]);
   intval = h8300hmode ? longval : shortval;
@@ -4522,8 +4524,9 @@ h8300_reg_store (SIM_CPU *cpu, int rn, const unsigned char *value, int length)
 }
 
 static int
-h8300_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *buf, int length)
+h8300_reg_fetch (SIM_CPU *cpu, int rn, void *buf, int length)
 {
+  unsigned char *value = buf;
   int v;
   int longreg = 0;
 
@@ -4567,16 +4570,16 @@ h8300_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *buf, int length)
   /* In Normal mode PC is 2 byte, but other registers are 4 byte */
   if ((h8300hmode || longreg) && !(rn == PC_REGNUM && h8300_normal_mode))
     {
-      buf[0] = v >> 24;
-      buf[1] = v >> 16;
-      buf[2] = v >> 8;
-      buf[3] = v >> 0;
+      value[0] = v >> 24;
+      value[1] = v >> 16;
+      value[2] = v >> 8;
+      value[3] = v >> 0;
       return 4;
     }
   else
     {
-      buf[0] = v >> 8;
-      buf[1] = v;
+      value[0] = v >> 8;
+      value[1] = v;
       return 2;
     }
 }

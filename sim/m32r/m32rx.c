@@ -30,7 +30,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* The contents of BUF are in target byte order.  */
 
 int
-m32rxf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len)
+m32rxf_fetch_register (SIM_CPU *current_cpu, int rn, void *buf, int len)
 {
   return m32rbf_fetch_register (current_cpu, rn, buf, len);
 }
@@ -38,7 +38,7 @@ m32rxf_fetch_register (SIM_CPU *current_cpu, int rn, unsigned char *buf, int len
 /* The contents of BUF are in target byte order.  */
 
 int
-m32rxf_store_register (SIM_CPU *current_cpu, int rn, const unsigned char *buf, int len)
+m32rxf_store_register (SIM_CPU *current_cpu, int rn, const void *buf, int len)
 {
   return m32rbf_store_register (current_cpu, rn, buf, len);
 }

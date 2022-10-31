@@ -79,8 +79,8 @@ mn10300_pc_set (sim_cpu *cpu, sim_cia pc)
   PC = pc;
 }
 
-static int mn10300_reg_fetch (SIM_CPU *, int, unsigned char *, int);
-static int mn10300_reg_store (SIM_CPU *, int, const unsigned char *, int);
+static int mn10300_reg_fetch (SIM_CPU *, int, void *, int);
+static int mn10300_reg_store (SIM_CPU *, int, const void *, int);
 
 /* These default values correspond to expected usage for the chip.  */
 
@@ -332,7 +332,7 @@ sim_create_inferior (SIM_DESC sd,
    but need to be changed to use the memory map.  */
 
 static int
-mn10300_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+mn10300_reg_fetch (SIM_CPU *cpu, int rn, void *memory, int length)
 {
   reg_t reg = State.regs[rn];
   uint8_t *a = memory;
@@ -344,7 +344,7 @@ mn10300_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
 }
  
 static int
-mn10300_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
+mn10300_reg_store (SIM_CPU *cpu, int rn, const void *memory, int length)
 {
   const uint8_t *a = memory;
   State.regs[rn] = (a[3] << 24) + (a[2] << 16) + (a[1] << 8) + a[0];

@@ -1600,8 +1600,10 @@ sim_read (SIM_DESC sd, SIM_ADDR addr, void *buffer, int size)
 }
 
 static int
-avr_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
+avr_reg_store (SIM_CPU *cpu, int rn, const void *buf, int length)
 {
+  const unsigned char *memory = buf;
+
   if (rn < 32 && length == 1)
     {
       sram[rn] = *memory;
@@ -1629,8 +1631,10 @@ avr_reg_store (SIM_CPU *cpu, int rn, const unsigned char *memory, int length)
 }
 
 static int
-avr_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *memory, int length)
+avr_reg_fetch (SIM_CPU *cpu, int rn, void *buf, int length)
 {
+  unsigned char *memory = buf;
+
   if (rn < 32 && length == 1)
     {
       *memory = sram[rn];

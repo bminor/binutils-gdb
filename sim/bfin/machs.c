@@ -1850,7 +1850,7 @@ bfin_get_reg (SIM_CPU *cpu, int rn)
 }
 
 static int
-bfin_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *buf, int len)
+bfin_reg_fetch (SIM_CPU *cpu, int rn, void *buf, int len)
 {
   bu32 value, *reg;
 
@@ -1881,7 +1881,7 @@ bfin_reg_fetch (SIM_CPU *cpu, int rn, unsigned char *buf, int len)
 }
 
 static int
-bfin_reg_store (SIM_CPU *cpu, int rn, const unsigned char *buf, int len)
+bfin_reg_store (SIM_CPU *cpu, int rn, const void *buf, int len)
 {
   bu32 value, *reg;
 
