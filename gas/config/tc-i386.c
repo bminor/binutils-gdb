@@ -1095,6 +1095,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (uintr, UINTR, ANY_UINTR, false),
   SUBARCH (hreset, HRESET, ANY_HRESET, false),
   SUBARCH (avx512_fp16, AVX512_FP16, ANY_AVX512_FP16, false),
+  SUBARCH (prefetchi, PREFETCHI, PREFETCHI, false),
 };
 
 #undef SUBARCH
@@ -4496,9 +4497,8 @@ load_insn_p (void)
 
   if (!any_vex_p)
     {
-      /* Anysize insns: lea, invlpg, clflush, prefetchnta, prefetcht0,
-	 prefetcht1, prefetcht2, prefetchtw, bndmk, bndcl, bndcu, bndcn,
-	 bndstx, bndldx, prefetchwt1, clflushopt, clwb, cldemote.  */
+      /* Anysize insns: lea, invlpg, clflush, prefetch*, bndmk, bndcl, bndcu,
+	 bndcn, bndstx, bndldx, clflushopt, clwb, cldemote.  */
       if (i.tm.opcode_modifier.anysize)
 	return 0;
 
@@ -5032,6 +5032,11 @@ md_assemble (char *line)
 
   if (!process_suffix ())
     return;
+
+  /* Check if IP-relative addressing requirements can be satisfied.  */
+  if (i.tm.cpu_flags.bitfield.cpuprefetchi
+      && !(i.base_reg && i.base_reg->reg_num == RegIP))
+    as_warn (_("only support RIP-relative address"), i.tm.name);
 
   /* Update operand types and check extended states.  */
   for (j = 0; j < i.operands; j++)

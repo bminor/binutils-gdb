@@ -114,6 +114,7 @@ static void FXSAVE_Fixup (instr_info *, int, int);
 
 static void MOVSXD_Fixup (instr_info *, int, int);
 static void DistinctDest_Fixup (instr_info *, int, int);
+static void PREFETCHI_Fixup (instr_info *, int, int);
 
 /* This character is used to encode style information within the output
    buffers.  See oappend_insert_style for more details.  */
@@ -840,6 +841,8 @@ enum
   MOD_0F18_REG_1,
   MOD_0F18_REG_2,
   MOD_0F18_REG_3,
+  MOD_0F18_REG_6,
+  MOD_0F18_REG_7,
   MOD_0F1A_PREFIX_0,
   MOD_0F1B_PREFIX_0,
   MOD_0F1B_PREFIX_1,
@@ -1002,6 +1005,8 @@ enum
   PREFIX_0F11,
   PREFIX_0F12,
   PREFIX_0F16,
+  PREFIX_0F18_REG_6_MOD_0_X86_64,
+  PREFIX_0F18_REG_7_MOD_0_X86_64,
   PREFIX_0F1A,
   PREFIX_0F1B,
   PREFIX_0F1C,
@@ -1268,6 +1273,8 @@ enum
   X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_1,
   X86_64_0F01_REG_7_MOD_3_RM_6_PREFIX_3,
   X86_64_0F01_REG_7_MOD_3_RM_7_PREFIX_1,
+  X86_64_0F18_REG_6_MOD_0,
+  X86_64_0F18_REG_7_MOD_0,
   X86_64_0F24,
   X86_64_0F26,
   X86_64_0FC7_REG_6_MOD_3_PREFIX_1,
@@ -2720,8 +2727,8 @@ static const struct dis386 reg_table[][8] = {
     { MOD_TABLE (MOD_0F18_REG_3) },
     { "nopQ",		{ Ev }, 0 },
     { "nopQ",		{ Ev }, 0 },
-    { "nopQ",		{ Ev }, 0 },
-    { "nopQ",		{ Ev }, 0 },
+    { MOD_TABLE (MOD_0F18_REG_6) },
+    { MOD_TABLE (MOD_0F18_REG_7) },
   },
   /* REG_0F1C_P_0_MOD_0 */
   {
@@ -3077,6 +3084,22 @@ static const struct dis386 prefix_table[][4] = {
     { MOD_TABLE (MOD_0F16_PREFIX_0) },
     { "movshdup", { XM, EXx }, PREFIX_OPCODE },
     { MOD_TABLE (MOD_0F16_PREFIX_2) },
+  },
+
+  /* PREFIX_0F18_REG_6_MOD_0_X86_64 */
+  {
+    { "prefetchit1",	{ { PREFETCHI_Fixup, b_mode } }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+  },
+
+  /* PREFIX_0F18_REG_7_MOD_0_X86_64 */
+  {
+    { "prefetchit0",	{ { PREFETCHI_Fixup, b_mode } }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+    { "nopQ",		{ Ev }, 0 },
   },
 
   /* PREFIX_0F1A */
@@ -4297,6 +4320,18 @@ static const struct dis386 x86_64_table[][2] = {
   {
     { Bad_Opcode },
     { "psmash",	{ Skip_MODRM }, 0 },
+  },
+
+  /* X86_64_0F18_REG_6_MOD_0 */
+  {
+    { "nopQ",		{ Ev }, 0 },
+    { PREFIX_TABLE (PREFIX_0F18_REG_6_MOD_0_X86_64) },
+  },
+
+  /* X86_64_0F18_REG_7_MOD_0 */
+  {
+    { "nopQ",		{ Ev }, 0 },
+    { PREFIX_TABLE (PREFIX_0F18_REG_7_MOD_0_X86_64) },
   },
 
   {
@@ -7978,6 +8013,16 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_0F18_REG_3 */
     { "prefetcht2",	{ Mb }, 0 },
+    { "nopQ",		{ Ev }, 0 },
+  },
+  {
+    /* MOD_0F18_REG_6 */
+    { X86_64_TABLE (X86_64_0F18_REG_6_MOD_0) },
+    { "nopQ",		{ Ev }, 0 },
+  },
+  {
+    /* MOD_0F18_REG_7 */
+    { X86_64_TABLE (X86_64_0F18_REG_7_MOD_0) },
     { "nopQ",		{ Ev }, 0 },
   },
   {
@@ -13751,4 +13796,33 @@ OP_Rounding (instr_info *ins, int bytemode, int sizeflag ATTRIBUTE_UNUSED)
       abort ();
     }
   oappend (ins, "sae}");
+}
+
+static void
+PREFETCHI_Fixup (instr_info *ins, int bytemode, int sizeflag)
+{
+  if (ins->modrm.mod != 0 || ins->modrm.rm != 5)
+    {
+      if (ins->intel_syntax)
+	{
+	  ins->mnemonicendp = stpcpy (ins->obuf, "nop   ");
+	}
+      else
+	{
+	  USED_REX (REX_W);
+	  if (ins->rex & REX_W)
+	    ins->mnemonicendp = stpcpy (ins->obuf, "nopq  ");
+	  else
+	    {
+	      if (sizeflag & DFLAG)
+		ins->mnemonicendp = stpcpy (ins->obuf, "nopl  ");
+	      else
+		ins->mnemonicendp = stpcpy (ins->obuf, "nopw  ");
+	      ins->used_prefixes |= (ins->prefixes & PREFIX_DATA);
+	    }
+	}
+      bytemode = v_mode;
+    }
+
+  OP_M (ins, bytemode, sizeflag);
 }

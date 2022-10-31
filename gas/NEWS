@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Intel PREFETCHI instructions.
+
 * Add support for Intel AMX-FP16 instructions.
 
 * gas now supports --compress-debug-sections=zstd to compress
