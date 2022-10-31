@@ -46,20 +46,14 @@ sim_cpu_alloc_all_extra (SIM_DESC sd, int ncpus, size_t extra_bytes)
 sim_cpu *
 sim_cpu_alloc_extra (SIM_DESC sd, size_t extra_bytes)
 {
-  sim_cpu *cpu;
+  sim_cpu *cpu = zalloc (sizeof (*cpu));
 
 #ifndef CGEN_ARCH
 # define cgen_cpu_max_extra_bytes(sd) 0
 #endif
-#ifdef SIM_HAVE_COMMON_SIM_CPU
-  cpu = zalloc (sizeof (*cpu));
-
   extra_bytes += cgen_cpu_max_extra_bytes (sd);
   if (extra_bytes)
     CPU_ARCH_DATA (cpu) = zalloc (extra_bytes);
-#else
-  cpu = zalloc (sizeof (*cpu) + cgen_cpu_max_extra_bytes (sd));
-#endif
 
   return cpu;
 }
@@ -81,10 +75,7 @@ sim_cpu_free_all (SIM_DESC sd)
 void
 sim_cpu_free (sim_cpu *cpu)
 {
-#ifdef SIM_HAVE_COMMON_SIM_CPU
   free (CPU_ARCH_DATA (cpu));
-#endif
-
   free (cpu);
 }
 

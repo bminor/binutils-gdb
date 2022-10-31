@@ -19,8 +19,6 @@
 #ifndef PRU_SIM_MAIN
 #define PRU_SIM_MAIN
 
-#define SIM_HAVE_COMMON_SIM_CPU
-
 #include <stdint.h>
 #include <stddef.h>
 #include "pru.h"

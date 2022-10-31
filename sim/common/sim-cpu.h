@@ -126,7 +126,6 @@ typedef struct {
 
 } sim_cpu_base;
 
-#ifdef SIM_HAVE_COMMON_SIM_CPU
 struct _sim_cpu {
   /* All the common state.  */
   sim_cpu_base base;
@@ -142,7 +141,6 @@ struct _sim_cpu {
   void *arch_data;
 #define CPU_ARCH_DATA(cpu) ((cpu)->arch_data)
 };
-#endif
 
 /* Create all cpus.  */
 extern SIM_RC sim_cpu_alloc_all_extra (SIM_DESC, int, size_t);

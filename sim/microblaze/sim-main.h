@@ -18,8 +18,6 @@
 #ifndef MICROBLAZE_SIM_MAIN
 #define MICROBLAZE_SIM_MAIN
 
-#define SIM_HAVE_COMMON_SIM_CPU
-
 #include "microblaze.h"
 #include "sim-basics.h"
 #include "sim-base.h"

@@ -19,8 +19,6 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
-#define SIM_HAVE_COMMON_SIM_CPU
-
 #define WITH_SCACHE_PBB 1
 
 #include "ansidecl.h"

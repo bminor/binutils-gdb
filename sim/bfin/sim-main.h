@@ -21,8 +21,6 @@
 #ifndef _BFIN_MAIN_SIM_H_
 #define _BFIN_MAIN_SIM_H_
 
-#define SIM_HAVE_COMMON_SIM_CPU
-
 #include "sim-basics.h"
 #include "arch.h"
 #include "sim-base.h"
