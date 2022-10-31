@@ -385,7 +385,8 @@ get_arch_number (bfd *abfd)
 
 /* Stream 4 is the debug information (DBI) stream.  */
 static bool
-populate_dbi_stream (bfd *stream, bfd *abfd)
+populate_dbi_stream (bfd *stream, bfd *abfd,
+		     uint16_t section_header_stream_num)
 {
   struct pdb_dbi_stream_header h;
   struct optional_dbg_header opt;
@@ -419,7 +420,7 @@ populate_dbi_stream (bfd *stream, bfd *abfd)
   bfd_putl16 (0xffff, &opt.fixup_stream);
   bfd_putl16 (0xffff, &opt.omap_to_src_stream);
   bfd_putl16 (0xffff, &opt.omap_from_src_stream);
-  bfd_putl16 (0xffff, &opt.section_header_stream);
+  bfd_putl16 (section_header_stream_num, &opt.section_header_stream);
   bfd_putl16 (0xffff, &opt.token_map_stream);
   bfd_putl16 (0xffff, &opt.xdata_stream);
   bfd_putl16 (0xffff, &opt.pdata_stream);
@@ -432,6 +433,60 @@ populate_dbi_stream (bfd *stream, bfd *abfd)
   return true;
 }
 
+/* The section header stream contains a copy of the section headers
+   from the PE file, in the same format.  */
+static bool
+create_section_header_stream (bfd *pdb, bfd *abfd, uint16_t *num)
+{
+  bfd *stream;
+  unsigned int section_count;
+  file_ptr scn_base;
+  size_t len;
+  char *buf;
+
+  stream = add_stream (pdb, NULL, num);
+  if (!stream)
+    return false;
+
+  section_count = abfd->section_count;
+
+  /* Empty sections aren't output.  */
+  for (asection *sect = abfd->sections; sect; sect = sect->next)
+    {
+      if (sect->size == 0)
+	section_count--;
+    }
+
+  if (section_count == 0)
+    return true;
+
+  /* Copy section table from output - it's already been written at this
+     point.  */
+
+  scn_base = bfd_coff_filhsz (abfd) + bfd_coff_aoutsz (abfd);
+
+  bfd_seek (abfd, scn_base, SEEK_SET);
+
+  len = section_count * sizeof (struct external_scnhdr);
+  buf = xmalloc (len);
+
+  if (bfd_bread (buf, len, abfd) != len)
+    {
+      free (buf);
+      return false;
+    }
+
+  if (bfd_bwrite (buf, len, stream) != len)
+    {
+      free (buf);
+      return false;
+    }
+
+  free (buf);
+
+  return true;
+}
+
 /* Create a PDB debugging file for the PE image file abfd with the build ID
    guid, stored at pdb_name.  */
 bool
@@ -440,6 +495,7 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
   bfd *pdb;
   bool ret = false;
   bfd *info_stream, *dbi_stream, *names_stream;
+  uint16_t section_header_stream_num;
 
   pdb = bfd_openw (pdb_name, "pdb");
   if (!pdb)
@@ -498,7 +554,14 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
       goto end;
     }
 
-  if (!populate_dbi_stream (dbi_stream, abfd))
+  if (!create_section_header_stream (pdb, abfd, &section_header_stream_num))
+    {
+      einfo (_("%P: warning: cannot create section header stream "
+	       "in PDB file: %E\n"));
+      goto end;
+    }
+
+  if (!populate_dbi_stream (dbi_stream, abfd, section_header_stream_num))
     {
       einfo (_("%P: warning: cannot populate DBI stream "
 	       "in PDB file: %E\n"));
