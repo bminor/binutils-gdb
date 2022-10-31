@@ -2940,8 +2940,18 @@ aarch64_software_single_step (struct regcache *regcache)
   CORE_ADDR breaks[2] = { CORE_ADDR_MAX, CORE_ADDR_MAX };
   CORE_ADDR loc = pc;
   CORE_ADDR closing_insn = 0;
-  uint32_t insn = read_memory_unsigned_integer (loc, insn_size,
-						byte_order_for_code);
+
+  ULONGEST insn_from_memory;
+  if (!safe_read_memory_unsigned_integer (loc, insn_size,
+					  byte_order_for_code,
+					  &insn_from_memory))
+  {
+    /* Assume we don't have a atomic sequence, as we couldn't read the
+       instruction in this location.  */
+    return {};
+  }
+
+  uint32_t insn = insn_from_memory;
   int index;
   int insn_count;
   int bc_insn_count = 0; /* Conditional branch instruction count.  */
@@ -2958,9 +2968,17 @@ aarch64_software_single_step (struct regcache *regcache)
   for (insn_count = 0; insn_count < atomic_sequence_length; ++insn_count)
     {
       loc += insn_size;
-      insn = read_memory_unsigned_integer (loc, insn_size,
-					   byte_order_for_code);
 
+      if (!safe_read_memory_unsigned_integer (loc, insn_size,
+					      byte_order_for_code,
+					      &insn_from_memory))
+      {
+	/* Assume we don't have a atomic sequence, as we couldn't read the
+	   instruction in this location.  */
+	return {};
+      }
+
+      insn = insn_from_memory;
       if (aarch64_decode_insn (insn, &inst, 1, NULL) != 0)
 	return {};
       /* Check if the instruction is a conditional branch.  */
@@ -3259,9 +3277,15 @@ aarch64_displaced_step_copy_insn (struct gdbarch *gdbarch,
 				  struct regcache *regs)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
-  uint32_t insn = read_memory_unsigned_integer (from, 4, byte_order_for_code);
   struct aarch64_displaced_step_data dsd;
   aarch64_inst inst;
+  ULONGEST insn_from_memory;
+
+  if (!safe_read_memory_unsigned_integer (from, 4, byte_order_for_code,
+					  &insn_from_memory))
+    return nullptr;
+
+  uint32_t insn = insn_from_memory;
 
   if (aarch64_decode_insn (insn, &inst, 1, NULL) != 0)
     return NULL;
@@ -3472,7 +3496,13 @@ aarch64_stack_frame_destroyed_p (struct gdbarch *gdbarch, CORE_ADDR pc)
     return 0;
 
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
-  uint32_t insn = read_memory_unsigned_integer (pc, 4, byte_order_for_code);
+
+  ULONGEST insn_from_memory;
+  if (!safe_read_memory_unsigned_integer (pc, 4, byte_order_for_code,
+					  &insn_from_memory))
+    return 0;
+
+  uint32_t insn = insn_from_memory;
 
   aarch64_inst inst;
   if (aarch64_decode_insn (insn, &inst, 1, nullptr) != 0)
