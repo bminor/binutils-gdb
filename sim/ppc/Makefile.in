@@ -471,7 +471,7 @@ COMMON_OBJS_NAMES = \
 	target-newlib-signal.o \
 	target-newlib-syscall.o \
 	version.o
-COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/common_libcommon_a-%)
+COMMON_OBJS = $(COMMON_OBJS_NAMES:%=../common/%)
 
 # NOTE: semantics, idecode and psim put last so smaller files are compiled
 #       first

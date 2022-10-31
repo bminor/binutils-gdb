@@ -228,16 +228,13 @@ am__v_AR_1 =
 common_libcommon_a_AR = $(AR) $(ARFLAGS)
 common_libcommon_a_LIBADD =
 am__dirstamp = $(am__leading_dot)dirstamp
-am_common_libcommon_a_OBJECTS =  \
-	common/common_libcommon_a-callback.$(OBJEXT) \
-	common/common_libcommon_a-portability.$(OBJEXT) \
-	common/common_libcommon_a-sim-load.$(OBJEXT) \
-	common/common_libcommon_a-syscall.$(OBJEXT) \
-	common/common_libcommon_a-target-newlib-errno.$(OBJEXT) \
-	common/common_libcommon_a-target-newlib-open.$(OBJEXT) \
-	common/common_libcommon_a-target-newlib-signal.$(OBJEXT) \
-	common/common_libcommon_a-target-newlib-syscall.$(OBJEXT) \
-	common/common_libcommon_a-version.$(OBJEXT)
+am_common_libcommon_a_OBJECTS = common/callback.$(OBJEXT) \
+	common/portability.$(OBJEXT) common/sim-load.$(OBJEXT) \
+	common/syscall.$(OBJEXT) common/target-newlib-errno.$(OBJEXT) \
+	common/target-newlib-open.$(OBJEXT) \
+	common/target-newlib-signal.$(OBJEXT) \
+	common/target-newlib-syscall.$(OBJEXT) \
+	common/version.$(OBJEXT)
 common_libcommon_a_OBJECTS = $(am_common_libcommon_a_OBJECTS)
 igen_libigen_a_AR = $(AR) $(ARFLAGS)
 igen_libigen_a_LIBADD =
@@ -947,8 +944,8 @@ MOSTLYCLEANFILES = core $(am__append_5) site-sim-config.exp \
 	$(am__append_26) $(am__append_29) $(am__append_31) \
 	$(am__append_34) $(am__append_37) $(am__append_39)
 AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
-AM_CPPFLAGS = $(INCGNU) -I$(srcroot)/include $(SIM_INLINE) \
-	-I$(srcdir)/common
+AM_CPPFLAGS = $(INCGNU) -I$(srcroot)/include -I../bfd -I.. \
+	$(SIM_INLINE) -I$(srcdir)/common -DSIM_COMMON_BUILD
 AM_CPPFLAGS_FOR_BUILD = -I$(srcroot)/include $(SIM_INLINE) \
 	-I$(srcdir)/common
 COMPILE_FOR_BUILD = $(CC_FOR_BUILD) $(AM_CPPFLAGS_FOR_BUILD) $(CPPFLAGS_FOR_BUILD) $(CFLAGS_FOR_BUILD)
@@ -959,12 +956,6 @@ SIM_ALL_RECURSIVE_DEPS = common/libcommon.a $(am__append_2) \
 	$(am__append_20) $(am__append_22) $(am__append_25) \
 	$(am__append_27) $(am__append_30) $(am__append_33) \
 	$(am__append_35) $(am__append_38)
-common_libcommon_a_CPPFLAGS = \
-	$(AM_CPPFLAGS) \
-	-DSIM_COMMON_BUILD \
-	-I../bfd \
-	-I..
-
 common_libcommon_a_SOURCES = \
 	common/callback.c \
 	common/portability.c \
@@ -1356,23 +1347,23 @@ common/$(am__dirstamp):
 common/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) common/$(DEPDIR)
 	@: > common/$(DEPDIR)/$(am__dirstamp)
-common/common_libcommon_a-callback.$(OBJEXT): common/$(am__dirstamp) \
+common/callback.$(OBJEXT): common/$(am__dirstamp) \
 	common/$(DEPDIR)/$(am__dirstamp)
-common/common_libcommon_a-portability.$(OBJEXT):  \
-	common/$(am__dirstamp) common/$(DEPDIR)/$(am__dirstamp)
-common/common_libcommon_a-sim-load.$(OBJEXT): common/$(am__dirstamp) \
+common/portability.$(OBJEXT): common/$(am__dirstamp) \
 	common/$(DEPDIR)/$(am__dirstamp)
-common/common_libcommon_a-syscall.$(OBJEXT): common/$(am__dirstamp) \
+common/sim-load.$(OBJEXT): common/$(am__dirstamp) \
 	common/$(DEPDIR)/$(am__dirstamp)
-common/common_libcommon_a-target-newlib-errno.$(OBJEXT):  \
-	common/$(am__dirstamp) common/$(DEPDIR)/$(am__dirstamp)
-common/common_libcommon_a-target-newlib-open.$(OBJEXT):  \
-	common/$(am__dirstamp) common/$(DEPDIR)/$(am__dirstamp)
-common/common_libcommon_a-target-newlib-signal.$(OBJEXT):  \
-	common/$(am__dirstamp) common/$(DEPDIR)/$(am__dirstamp)
-common/common_libcommon_a-target-newlib-syscall.$(OBJEXT):  \
-	common/$(am__dirstamp) common/$(DEPDIR)/$(am__dirstamp)
-common/common_libcommon_a-version.$(OBJEXT): common/$(am__dirstamp) \
+common/syscall.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+common/target-newlib-errno.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+common/target-newlib-open.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+common/target-newlib-signal.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+common/target-newlib-syscall.$(OBJEXT): common/$(am__dirstamp) \
+	common/$(DEPDIR)/$(am__dirstamp)
+common/version.$(OBJEXT): common/$(am__dirstamp) \
 	common/$(DEPDIR)/$(am__dirstamp)
 
 common/libcommon.a: $(common_libcommon_a_OBJECTS) $(common_libcommon_a_DEPENDENCIES) $(EXTRA_common_libcommon_a_DEPENDENCIES) common/$(am__dirstamp)
@@ -1556,15 +1547,15 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-callback.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-portability.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-sim-load.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-syscall.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-target-newlib-errno.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-target-newlib-open.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-target-newlib-signal.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-target-newlib-syscall.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/common_libcommon_a-version.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/callback.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/portability.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/sim-load.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/syscall.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/target-newlib-errno.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/target-newlib-open.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/target-newlib-signal.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/target-newlib-syscall.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@common/$(DEPDIR)/version.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@cr16/$(DEPDIR)/gencode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@d10v/$(DEPDIR)/gencode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@igen/$(DEPDIR)/filter.Po@am__quote@
@@ -1618,132 +1609,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(LTCOMPILE) -c -o $@ $<
-
-common/common_libcommon_a-callback.o: common/callback.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-callback.o -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-callback.Tpo -c -o common/common_libcommon_a-callback.o `test -f 'common/callback.c' || echo '$(srcdir)/'`common/callback.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-callback.Tpo common/$(DEPDIR)/common_libcommon_a-callback.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/callback.c' object='common/common_libcommon_a-callback.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-callback.o `test -f 'common/callback.c' || echo '$(srcdir)/'`common/callback.c
-
-common/common_libcommon_a-callback.obj: common/callback.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-callback.obj -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-callback.Tpo -c -o common/common_libcommon_a-callback.obj `if test -f 'common/callback.c'; then $(CYGPATH_W) 'common/callback.c'; else $(CYGPATH_W) '$(srcdir)/common/callback.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-callback.Tpo common/$(DEPDIR)/common_libcommon_a-callback.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/callback.c' object='common/common_libcommon_a-callback.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-callback.obj `if test -f 'common/callback.c'; then $(CYGPATH_W) 'common/callback.c'; else $(CYGPATH_W) '$(srcdir)/common/callback.c'; fi`
-
-common/common_libcommon_a-portability.o: common/portability.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-portability.o -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-portability.Tpo -c -o common/common_libcommon_a-portability.o `test -f 'common/portability.c' || echo '$(srcdir)/'`common/portability.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-portability.Tpo common/$(DEPDIR)/common_libcommon_a-portability.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/portability.c' object='common/common_libcommon_a-portability.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-portability.o `test -f 'common/portability.c' || echo '$(srcdir)/'`common/portability.c
-
-common/common_libcommon_a-portability.obj: common/portability.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-portability.obj -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-portability.Tpo -c -o common/common_libcommon_a-portability.obj `if test -f 'common/portability.c'; then $(CYGPATH_W) 'common/portability.c'; else $(CYGPATH_W) '$(srcdir)/common/portability.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-portability.Tpo common/$(DEPDIR)/common_libcommon_a-portability.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/portability.c' object='common/common_libcommon_a-portability.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-portability.obj `if test -f 'common/portability.c'; then $(CYGPATH_W) 'common/portability.c'; else $(CYGPATH_W) '$(srcdir)/common/portability.c'; fi`
-
-common/common_libcommon_a-sim-load.o: common/sim-load.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-sim-load.o -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-sim-load.Tpo -c -o common/common_libcommon_a-sim-load.o `test -f 'common/sim-load.c' || echo '$(srcdir)/'`common/sim-load.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-sim-load.Tpo common/$(DEPDIR)/common_libcommon_a-sim-load.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/sim-load.c' object='common/common_libcommon_a-sim-load.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-sim-load.o `test -f 'common/sim-load.c' || echo '$(srcdir)/'`common/sim-load.c
-
-common/common_libcommon_a-sim-load.obj: common/sim-load.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-sim-load.obj -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-sim-load.Tpo -c -o common/common_libcommon_a-sim-load.obj `if test -f 'common/sim-load.c'; then $(CYGPATH_W) 'common/sim-load.c'; else $(CYGPATH_W) '$(srcdir)/common/sim-load.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-sim-load.Tpo common/$(DEPDIR)/common_libcommon_a-sim-load.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/sim-load.c' object='common/common_libcommon_a-sim-load.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-sim-load.obj `if test -f 'common/sim-load.c'; then $(CYGPATH_W) 'common/sim-load.c'; else $(CYGPATH_W) '$(srcdir)/common/sim-load.c'; fi`
-
-common/common_libcommon_a-syscall.o: common/syscall.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-syscall.o -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-syscall.Tpo -c -o common/common_libcommon_a-syscall.o `test -f 'common/syscall.c' || echo '$(srcdir)/'`common/syscall.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-syscall.Tpo common/$(DEPDIR)/common_libcommon_a-syscall.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/syscall.c' object='common/common_libcommon_a-syscall.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-syscall.o `test -f 'common/syscall.c' || echo '$(srcdir)/'`common/syscall.c
-
-common/common_libcommon_a-syscall.obj: common/syscall.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-syscall.obj -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-syscall.Tpo -c -o common/common_libcommon_a-syscall.obj `if test -f 'common/syscall.c'; then $(CYGPATH_W) 'common/syscall.c'; else $(CYGPATH_W) '$(srcdir)/common/syscall.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-syscall.Tpo common/$(DEPDIR)/common_libcommon_a-syscall.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/syscall.c' object='common/common_libcommon_a-syscall.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-syscall.obj `if test -f 'common/syscall.c'; then $(CYGPATH_W) 'common/syscall.c'; else $(CYGPATH_W) '$(srcdir)/common/syscall.c'; fi`
-
-common/common_libcommon_a-target-newlib-errno.o: common/target-newlib-errno.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-target-newlib-errno.o -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-target-newlib-errno.Tpo -c -o common/common_libcommon_a-target-newlib-errno.o `test -f 'common/target-newlib-errno.c' || echo '$(srcdir)/'`common/target-newlib-errno.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-target-newlib-errno.Tpo common/$(DEPDIR)/common_libcommon_a-target-newlib-errno.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/target-newlib-errno.c' object='common/common_libcommon_a-target-newlib-errno.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-target-newlib-errno.o `test -f 'common/target-newlib-errno.c' || echo '$(srcdir)/'`common/target-newlib-errno.c
-
-common/common_libcommon_a-target-newlib-errno.obj: common/target-newlib-errno.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-target-newlib-errno.obj -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-target-newlib-errno.Tpo -c -o common/common_libcommon_a-target-newlib-errno.obj `if test -f 'common/target-newlib-errno.c'; then $(CYGPATH_W) 'common/target-newlib-errno.c'; else $(CYGPATH_W) '$(srcdir)/common/target-newlib-errno.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-target-newlib-errno.Tpo common/$(DEPDIR)/common_libcommon_a-target-newlib-errno.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/target-newlib-errno.c' object='common/common_libcommon_a-target-newlib-errno.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-target-newlib-errno.obj `if test -f 'common/target-newlib-errno.c'; then $(CYGPATH_W) 'common/target-newlib-errno.c'; else $(CYGPATH_W) '$(srcdir)/common/target-newlib-errno.c'; fi`
-
-common/common_libcommon_a-target-newlib-open.o: common/target-newlib-open.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-target-newlib-open.o -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-target-newlib-open.Tpo -c -o common/common_libcommon_a-target-newlib-open.o `test -f 'common/target-newlib-open.c' || echo '$(srcdir)/'`common/target-newlib-open.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-target-newlib-open.Tpo common/$(DEPDIR)/common_libcommon_a-target-newlib-open.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/target-newlib-open.c' object='common/common_libcommon_a-target-newlib-open.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-target-newlib-open.o `test -f 'common/target-newlib-open.c' || echo '$(srcdir)/'`common/target-newlib-open.c
-
-common/common_libcommon_a-target-newlib-open.obj: common/target-newlib-open.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-target-newlib-open.obj -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-target-newlib-open.Tpo -c -o common/common_libcommon_a-target-newlib-open.obj `if test -f 'common/target-newlib-open.c'; then $(CYGPATH_W) 'common/target-newlib-open.c'; else $(CYGPATH_W) '$(srcdir)/common/target-newlib-open.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-target-newlib-open.Tpo common/$(DEPDIR)/common_libcommon_a-target-newlib-open.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/target-newlib-open.c' object='common/common_libcommon_a-target-newlib-open.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-target-newlib-open.obj `if test -f 'common/target-newlib-open.c'; then $(CYGPATH_W) 'common/target-newlib-open.c'; else $(CYGPATH_W) '$(srcdir)/common/target-newlib-open.c'; fi`
-
-common/common_libcommon_a-target-newlib-signal.o: common/target-newlib-signal.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-target-newlib-signal.o -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-target-newlib-signal.Tpo -c -o common/common_libcommon_a-target-newlib-signal.o `test -f 'common/target-newlib-signal.c' || echo '$(srcdir)/'`common/target-newlib-signal.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-target-newlib-signal.Tpo common/$(DEPDIR)/common_libcommon_a-target-newlib-signal.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/target-newlib-signal.c' object='common/common_libcommon_a-target-newlib-signal.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-target-newlib-signal.o `test -f 'common/target-newlib-signal.c' || echo '$(srcdir)/'`common/target-newlib-signal.c
-
-common/common_libcommon_a-target-newlib-signal.obj: common/target-newlib-signal.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-target-newlib-signal.obj -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-target-newlib-signal.Tpo -c -o common/common_libcommon_a-target-newlib-signal.obj `if test -f 'common/target-newlib-signal.c'; then $(CYGPATH_W) 'common/target-newlib-signal.c'; else $(CYGPATH_W) '$(srcdir)/common/target-newlib-signal.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-target-newlib-signal.Tpo common/$(DEPDIR)/common_libcommon_a-target-newlib-signal.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/target-newlib-signal.c' object='common/common_libcommon_a-target-newlib-signal.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-target-newlib-signal.obj `if test -f 'common/target-newlib-signal.c'; then $(CYGPATH_W) 'common/target-newlib-signal.c'; else $(CYGPATH_W) '$(srcdir)/common/target-newlib-signal.c'; fi`
-
-common/common_libcommon_a-target-newlib-syscall.o: common/target-newlib-syscall.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-target-newlib-syscall.o -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-target-newlib-syscall.Tpo -c -o common/common_libcommon_a-target-newlib-syscall.o `test -f 'common/target-newlib-syscall.c' || echo '$(srcdir)/'`common/target-newlib-syscall.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-target-newlib-syscall.Tpo common/$(DEPDIR)/common_libcommon_a-target-newlib-syscall.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/target-newlib-syscall.c' object='common/common_libcommon_a-target-newlib-syscall.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-target-newlib-syscall.o `test -f 'common/target-newlib-syscall.c' || echo '$(srcdir)/'`common/target-newlib-syscall.c
-
-common/common_libcommon_a-target-newlib-syscall.obj: common/target-newlib-syscall.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-target-newlib-syscall.obj -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-target-newlib-syscall.Tpo -c -o common/common_libcommon_a-target-newlib-syscall.obj `if test -f 'common/target-newlib-syscall.c'; then $(CYGPATH_W) 'common/target-newlib-syscall.c'; else $(CYGPATH_W) '$(srcdir)/common/target-newlib-syscall.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-target-newlib-syscall.Tpo common/$(DEPDIR)/common_libcommon_a-target-newlib-syscall.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/target-newlib-syscall.c' object='common/common_libcommon_a-target-newlib-syscall.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-target-newlib-syscall.obj `if test -f 'common/target-newlib-syscall.c'; then $(CYGPATH_W) 'common/target-newlib-syscall.c'; else $(CYGPATH_W) '$(srcdir)/common/target-newlib-syscall.c'; fi`
-
-common/common_libcommon_a-version.o: common/version.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-version.o -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-version.Tpo -c -o common/common_libcommon_a-version.o `test -f 'common/version.c' || echo '$(srcdir)/'`common/version.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-version.Tpo common/$(DEPDIR)/common_libcommon_a-version.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/version.c' object='common/common_libcommon_a-version.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-version.o `test -f 'common/version.c' || echo '$(srcdir)/'`common/version.c
-
-common/common_libcommon_a-version.obj: common/version.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT common/common_libcommon_a-version.obj -MD -MP -MF common/$(DEPDIR)/common_libcommon_a-version.Tpo -c -o common/common_libcommon_a-version.obj `if test -f 'common/version.c'; then $(CYGPATH_W) 'common/version.c'; else $(CYGPATH_W) '$(srcdir)/common/version.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) common/$(DEPDIR)/common_libcommon_a-version.Tpo common/$(DEPDIR)/common_libcommon_a-version.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='common/version.c' object='common/common_libcommon_a-version.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(common_libcommon_a_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o common/common_libcommon_a-version.obj `if test -f 'common/version.c'; then $(CYGPATH_W) 'common/version.c'; else $(CYGPATH_W) '$(srcdir)/common/version.c'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

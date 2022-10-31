@@ -44,6 +44,8 @@ AM_CFLAGS = $(WERROR_CFLAGS) $(WARN_CFLAGS)
 AM_CPPFLAGS = \
 	$(INCGNU) \
 	-I$(srcroot)/include \
+	-I../bfd \
+	-I.. \
 	$(SIM_INLINE)
 
 AM_CPPFLAGS_FOR_BUILD = \

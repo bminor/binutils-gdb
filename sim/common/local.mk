@@ -18,7 +18,9 @@
 ## Parts of the common/ sim code that have been unified.
 ## Most still lives in common/Make-common.in.
 
-AM_CPPFLAGS += -I$(srcdir)/%D%
+AM_CPPFLAGS += \
+	-I$(srcdir)/%D% \
+	-DSIM_COMMON_BUILD
 AM_CPPFLAGS_FOR_BUILD += -I$(srcdir)/%D%
 
 ## This makes sure common parts are available before building the arch-subdirs
@@ -29,11 +31,6 @@ SIM_ALL_RECURSIVE_DEPS += \
 ## NB: libcommon.a isn't used directly by ports.  We need a target for common
 ## objects to be a part of, and ports use the individual objects directly.
 noinst_LIBRARIES += %D%/libcommon.a
-%C%_libcommon_a_CPPFLAGS = \
-	$(AM_CPPFLAGS) \
-	-DSIM_COMMON_BUILD \
-	-I../bfd \
-	-I..
 %C%_libcommon_a_SOURCES = \
 	%D%/callback.c \
 	%D%/portability.c \
