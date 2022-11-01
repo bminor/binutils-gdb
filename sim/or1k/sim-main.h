@@ -19,6 +19,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #define WITH_SCACHE_PBB 1
 
 #include "ansidecl.h"
@@ -35,17 +37,10 @@
 
 #define OR1K_DEFAULT_MEM_SIZE 0x800000	/* 8M */
 
-/* The _sim_cpu struct.  */
-struct _sim_cpu
+struct or1k_sim_cpu
 {
-  /* sim/common cpu base.  */
-  sim_cpu_base base;
-
-  /* Static parts of cgen.  */
-  CGEN_CPU cgen_cpu;
-
   OR1K_MISC_PROFILE or1k_misc_profile;
-#define CPU_OR1K_MISC_PROFILE(cpu) (& (cpu)->or1k_misc_profile)
+#define CPU_OR1K_MISC_PROFILE(cpu) (& OR1K_SIM_CPU (cpu)->or1k_misc_profile)
 
   /* CPU specific parts go here.
      Note that in files that don't need to access these pieces WANT_CPU_FOO
@@ -65,5 +60,6 @@ struct _sim_cpu
   OR1K32BF_CPU_DATA cpu_data;
 #endif
 };
+#define OR1K_SIM_CPU(cpu) ((struct or1k_sim_cpu *) CPU_ARCH_DATA (cpu))
 
 #endif /* SIM_MAIN_H */
