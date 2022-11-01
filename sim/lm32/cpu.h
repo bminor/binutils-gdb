@@ -54,7 +54,7 @@ typedef struct {
 #define GET_H_CSR(a1) CPU (h_csr)[a1]
 #define SET_H_CSR(a1, x) (CPU (h_csr)[a1] = (x))
   } hardware;
-#define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
+#define CPU_CGEN_HW(cpu) (& LM32_SIM_CPU (cpu)->cpu_data.hardware)
 } LM32BF_CPU_DATA;
 
 /* Cover fns for register access.  */
