@@ -19,6 +19,8 @@
 #ifndef PRU_SIM_MAIN
 #define PRU_SIM_MAIN
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #include <stdint.h>
 #include <stddef.h>
 #include "pru.h"
@@ -78,9 +80,6 @@ struct pru_regset
   int		  insts;
 };
 
-struct _sim_cpu {
-  struct pru_regset pru_cpu;
-  sim_cpu_base base;
-};
+#define PRU_SIM_CPU(cpu) ((struct pru_regset *) CPU_ARCH_DATA (cpu))
 
 #endif /* PRU_SIM_MAIN */

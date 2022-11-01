@@ -41,7 +41,7 @@
 #define XFRID_SCRATCH_BANK_PEER	  14
 #define XFRID_MAX		  255
 
-#define CPU     (cpu->pru_cpu)
+#define CPU     (*pru_cpu)
 
 #define PC		(CPU.pc)
 #define PC_byteaddr	((PC << 2) | PC_ADDR_SPACE_MARKER)
