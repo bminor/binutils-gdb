@@ -88,7 +88,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback,
   current_target_byte_order = BFD_ENDIAN_LITTLE;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all_extra (sd, 1, sizeof (struct example_sim_cpu))
+      != SIM_RC_OK)
     {
       free_state (sd);
       return 0;
