@@ -513,4 +513,9 @@ gdb_test_no_output "maint print symbols"
 gdb_test_no_output "maint print msymbols"
 gdb_test_no_output "maint print psymbols"
 
+gdb_test "maint canonicalize int short" "canonical = short"
+gdb_test "maint canonicalize fn<ty<int>>" \
+    "canonical = fn<ty<int> >"
+gdb_test "maint canonical unsigned int" "No change\\."
+
 gdb_exit

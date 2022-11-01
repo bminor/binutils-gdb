@@ -56,6 +56,9 @@ maintenance check psymtabs
 maintenance check symtabs
   Renamed from maintenance check-symtabs
 
+maintenance canonicalize
+  Show the canonical form of a C++ name.
+
 set riscv numeric-register-names on|off
 show riscv numeric-register-names
   Controls whether GDB refers to risc-v registers by their numeric names

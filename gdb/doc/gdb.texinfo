@@ -41632,6 +41632,13 @@ into remote agent bytecodes and display them as a disassembled list.
 This command is useful for debugging the agent version of dynamic
 printf (@pxref{Dynamic Printf}).
 
+@kindex maint canonicalize
+@item maint canonicalize @var{name}
+Print the canonical form of @var{name}, a C@t{++} name.  Because a
+C@t{++} name may have multiple possible spellings, @value{GDBN}
+computes a canonical form of a name for internal use.  For example,
+@code{short int} and @code{short} are two ways to name the same type.
+
 @kindex maint info breakpoints
 @anchor{maint info breakpoints}
 @item maint info breakpoints
