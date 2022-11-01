@@ -251,14 +251,13 @@ MY (set_target_thread_data) (SIM_CPU *current_cpu, USI val)
 static void *
 MY (make_thread_cpu_data) (SIM_CPU *current_cpu, void *context)
 {
-  void *info = xmalloc (current_cpu->thread_cpu_data_size);
+  struct cris_sim_cpu *cris_cpu = CRIS_SIM_CPU (current_cpu);
+  void *info = xmalloc (cris_cpu->thread_cpu_data_size);
 
   if (context != NULL)
-    memcpy (info,
-	    context,
-	    current_cpu->thread_cpu_data_size);
+    memcpy (info, context, cris_cpu->thread_cpu_data_size);
   else
-    memset (info, 0, current_cpu->thread_cpu_data_size),abort();
+    memset (info, 0, cris_cpu->thread_cpu_data_size),abort();
   return info;
 }
 
@@ -267,11 +266,13 @@ MY (make_thread_cpu_data) (SIM_CPU *current_cpu, void *context)
 void
 MY (f_specific_init) (SIM_CPU *current_cpu)
 {
-  current_cpu->make_thread_cpu_data = MY (make_thread_cpu_data);
-  current_cpu->thread_cpu_data_size = sizeof (current_cpu->cpu_data);
-  current_cpu->set_target_thread_data = MY (set_target_thread_data);
+  struct cris_sim_cpu *cris_cpu = CRIS_SIM_CPU (current_cpu);
+
+  cris_cpu->make_thread_cpu_data = MY (make_thread_cpu_data);
+  cris_cpu->thread_cpu_data_size = sizeof (cris_cpu->cpu_data);
+  cris_cpu->set_target_thread_data = MY (set_target_thread_data);
 #if WITH_HW
-  current_cpu->deliver_interrupt = MY (deliver_interrupt);
+  cris_cpu->deliver_interrupt = MY (deliver_interrupt);
 #endif
 }
 

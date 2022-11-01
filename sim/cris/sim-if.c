@@ -670,7 +670,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
   current_target_byte_order = BFD_ENDIAN_LITTLE;
 
   /* The cpu data is kept in a separately allocated chunk of memory.  */
-  if (sim_cpu_alloc_all (sd, 1) != SIM_RC_OK)
+  if (sim_cpu_alloc_all_extra (sd, 1, sizeof (struct cris_sim_cpu))
+      != SIM_RC_OK)
     {
       free_state (sd);
       return 0;
@@ -926,6 +927,8 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
     for (i = 0; i < MAX_NR_PROCESSORS; ++i)
       {
 	SIM_CPU *cpu = STATE_CPU (sd, i);
+	struct cris_sim_cpu *cris_cpu = CRIS_SIM_CPU (cpu);
+
 	CPU_CPU_DESC (cpu) = cd;
 	CPU_DISASSEMBLER (cpu) = cris_disassemble_insn;
 
@@ -936,20 +939,20 @@ sim_open (SIM_OPEN_KIND kind, host_callback *callback, struct bfd *abfd,
 	(* CPU_REG_STORE (cpu)) (cpu, H_GR_SP, (const unsigned char *) sp_init, 4);
 
 	/* Set the simulator environment data.  */
-	cpu->highest_mmapped_page = NULL;
-	cpu->endmem = endmem;
-	cpu->endbrk = endbrk;
-	cpu->stack_low = stack_low;
-	cpu->syscalls = 0;
-	cpu->m1threads = 0;
-	cpu->threadno = 0;
-	cpu->max_threadid = 0;
-	cpu->thread_data = NULL;
-	memset (cpu->sighandler, 0, sizeof (cpu->sighandler));
-	cpu->make_thread_cpu_data = NULL;
-	cpu->thread_cpu_data_size = 0;
+	cris_cpu->highest_mmapped_page = NULL;
+	cris_cpu->endmem = endmem;
+	cris_cpu->endbrk = endbrk;
+	cris_cpu->stack_low = stack_low;
+	cris_cpu->syscalls = 0;
+	cris_cpu->m1threads = 0;
+	cris_cpu->threadno = 0;
+	cris_cpu->max_threadid = 0;
+	cris_cpu->thread_data = NULL;
+	memset (cris_cpu->sighandler, 0, sizeof (cris_cpu->sighandler));
+	cris_cpu->make_thread_cpu_data = NULL;
+	cris_cpu->thread_cpu_data_size = 0;
 #if WITH_HW
-	cpu->deliver_interrupt = NULL;
+	cris_cpu->deliver_interrupt = NULL;
 #endif
       }
 #if WITH_HW

@@ -24,6 +24,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 /* This is a global setting.  Different cpu families can't mix-n-match -scache
    and -pbb.  However some cpu families may use -simple while others use
    one of -scache/-pbb.  */
@@ -103,24 +105,18 @@ typedef int (*cris_interrupt_delivery_fn) (SIM_CPU *,
 					   enum cris_interrupt_type,
 					   unsigned int);
 
-struct _sim_cpu {
-  /* sim/common cpu base.  */
-  sim_cpu_base base;
-
-  /* Static parts of cgen.  */
-  CGEN_CPU cgen_cpu;
-
+struct cris_sim_cpu {
   CRIS_MISC_PROFILE cris_misc_profile;
-#define CPU_CRIS_MISC_PROFILE(cpu) (& (cpu)->cris_misc_profile)
+#define CPU_CRIS_MISC_PROFILE(cpu) (& CRIS_SIM_CPU (cpu)->cris_misc_profile)
 
   /* Copy of previous data; only valid when emitting trace-data after
      each insn.  */
   CRIS_MISC_PROFILE cris_prev_misc_profile;
-#define CPU_CRIS_PREV_MISC_PROFILE(cpu) (& (cpu)->cris_prev_misc_profile)
+#define CPU_CRIS_PREV_MISC_PROFILE(cpu) (& CRIS_SIM_CPU (cpu)->cris_prev_misc_profile)
 
 #if WITH_HW
   cris_interrupt_delivery_fn deliver_interrupt;
-#define CPU_CRIS_DELIVER_INTERRUPT(cpu) (cpu->deliver_interrupt)
+#define CPU_CRIS_DELIVER_INTERRUPT(cpu) (CRIS_SIM_CPU (cpu)->deliver_interrupt)
 #endif
 
   /* Simulator environment data.  */
@@ -204,6 +200,7 @@ struct _sim_cpu {
   union { void *dummy[16]; } cpu_data_placeholder;
 #endif
 };
+#define CRIS_SIM_CPU(cpu) ((struct cris_sim_cpu *) CPU_ARCH_DATA (cpu))
 
 /* Misc.  */
 
