@@ -2525,6 +2525,19 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 	}
     }
 
+  asection *resolved_plt = NULL;
+
+  if (htab->params->mark_plt && htab->elf.dynamic_sections_created)
+    {
+      if (htab->plt_second != NULL)
+	resolved_plt = htab->plt_second;
+      else
+	resolved_plt = htab->elf.splt;
+
+      if (resolved_plt != NULL && resolved_plt->size == 0)
+	resolved_plt = NULL;
+    }
+
   /* We now have determined the sizes of the various dynamic sections.
      Allocate memory for them.  */
   relocs = false;
@@ -2673,6 +2686,12 @@ _bfd_x86_elf_size_dynamic_sections (bfd *output_bfd,
 	_bfd_x86_elf_write_sframe_plt (output_bfd, info, SFRAME_PLT_SEC);
     }
 
+  if (resolved_plt != NULL
+      && (!_bfd_elf_add_dynamic_entry (info, DT_X86_64_PLT, 0)
+	  || !_bfd_elf_add_dynamic_entry (info, DT_X86_64_PLTSZ, 0)
+	  || !_bfd_elf_add_dynamic_entry (info, DT_X86_64_PLTENT, 0)))
+    return false;
+
   return _bfd_elf_maybe_vxworks_add_dynamic_tags (output_bfd, info,
 						  relocs);
 }
@@ -2747,6 +2766,12 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
   if (sdyn == NULL || htab->elf.sgot == NULL)
     abort ();
 
+  asection *resolved_plt;
+  if (htab->plt_second != NULL)
+    resolved_plt = htab->plt_second;
+  else
+    resolved_plt = htab->elf.splt;
+
   sizeof_dyn = bed->s->sizeof_dyn;
   dyncon = sdyn->contents;
   dynconend = sdyn->contents + sdyn->size;
@@ -2790,6 +2815,19 @@ _bfd_x86_elf_finish_dynamic_sections (bfd *output_bfd,
 	  s = htab->elf.sgot;
 	  dyn.d_un.d_ptr = s->output_section->vma + s->output_offset
 	    + htab->elf.tlsdesc_got;
+	  break;
+
+	case DT_X86_64_PLT:
+	  s = resolved_plt->output_section;
+	  dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
+	  break;
+
+	case DT_X86_64_PLTSZ:
+	  dyn.d_un.d_val = resolved_plt->size;
+	  break;
+
+	case DT_X86_64_PLTENT:
+	  dyn.d_un.d_ptr = htab->plt.plt_entry_size;
 	  break;
 	}
 
@@ -3561,6 +3599,7 @@ _bfd_x86_elf_get_synthetic_symtab (bfd *abfd,
   bfd_vma (*get_plt_got_vma) (struct elf_x86_plt *, bfd_vma, bfd_vma,
 			      bfd_vma);
   bool (*valid_plt_reloc_p) (unsigned int);
+  unsigned int jump_slot_reloc;
 
   dynrelbuf = NULL;
   if (count == 0)
@@ -3601,11 +3640,13 @@ _bfd_x86_elf_get_synthetic_symtab (bfd *abfd,
     {
       get_plt_got_vma = elf_x86_64_get_plt_got_vma;
       valid_plt_reloc_p = elf_x86_64_valid_plt_reloc_p;
+      jump_slot_reloc = R_X86_64_JUMP_SLOT;
     }
   else
     {
       get_plt_got_vma = elf_i386_get_plt_got_vma;
       valid_plt_reloc_p = elf_i386_valid_plt_reloc_p;
+      jump_slot_reloc = R_386_JUMP_SLOT;
       if (got_addr)
 	{
 	  /* Check .got.plt and then .got to get the _GLOBAL_OFFSET_TABLE_
@@ -3710,7 +3751,9 @@ _bfd_x86_elf_get_synthetic_symtab (bfd *abfd,
 		len = strlen ((*p->sym_ptr_ptr)->name);
 		memcpy (names, (*p->sym_ptr_ptr)->name, len);
 		names += len;
-		if (p->addend != 0)
+		/* There may be JUMP_SLOT and IRELATIVE relocations.
+		   JUMP_SLOT r_addend should be ignored.  */
+		if (p->addend != 0 && p->howto->type != jump_slot_reloc)
 		  {
 		    char buf[30], *a;
 
@@ -4275,6 +4318,7 @@ _bfd_x86_elf_link_setup_gnu_properties
      still be used with LD_AUDIT or LD_PROFILE if PLT entry is used for
      canonical function address.  */
   htab->plt.has_plt0 = 1;
+  htab->plt.plt_indirect_branch_offset = 0;
   normal_target = htab->elf.target_os == is_normal;
 
   if (normal_target)
@@ -4283,6 +4327,7 @@ _bfd_x86_elf_link_setup_gnu_properties
 	{
 	  htab->lazy_plt = init_table->lazy_ibt_plt;
 	  htab->non_lazy_plt = init_table->non_lazy_ibt_plt;
+	  htab->plt.plt_indirect_branch_offset = 4;
 	}
       else
 	{

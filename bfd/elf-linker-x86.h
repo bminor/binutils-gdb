@@ -61,6 +61,9 @@ struct elf_linker_x86_params
   /* Report relative relocations.  */
   unsigned int report_relative_reloc : 1;
 
+  /* Mark PLT with dynamic tags.  */
+  unsigned int mark_plt : 1;
+
   /* X86-64 ISA level needed.  */
   unsigned int isa_level;
 

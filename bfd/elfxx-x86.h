@@ -502,6 +502,9 @@ struct elf_x86_plt_layout
   /* 1 has PLT0.  */
   unsigned int has_plt0;
 
+  /* Offset of indirect branch in plt_entry.  */
+  unsigned int plt_indirect_branch_offset;
+
   /* Offsets into plt_entry that are to be replaced with...  */
   unsigned int plt_got_offset;    /* ... address of this symbol in .got. */
 

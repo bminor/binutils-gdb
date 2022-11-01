@@ -1475,6 +1475,17 @@ Specify that the object's filters be processed immediately at runtime.
 @item max-page-size=@var{value}
 Set the maximum memory page size supported to @var{value}.
 
+@item mark-plt
+@itemx nomark-plt
+Mark PLT entries with dynamic tags, DT_X86_64_PLT, DT_X86_64_PLTSZ and
+DT_X86_64_PLTENT.  Since this option stores a non-zero value in the
+r_addend field of R_X86_64_JUMP_SLOT relocations, the resulting
+executables and shared libraries are incompatible with dynamic linkers,
+such as those in older versions of glibc without the change to ignore
+r_addend in R_X86_64_GLOB_DAT and R_X86_64_JUMP_SLOT relocations, which
+don't ignore the r_addend field of R_X86_64_JUMP_SLOT relocations.
+Supported for x86_64.
+
 @item muldefs
 Allow multiple definitions.
 

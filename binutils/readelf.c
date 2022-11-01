@@ -2523,6 +2523,22 @@ get_riscv_dynamic_type (unsigned long type)
 }
 
 static const char *
+get_x86_64_dynamic_type (unsigned long type)
+{
+  switch (type)
+    {
+    case DT_X86_64_PLT:
+      return "DT_X86_64_PLT";
+    case DT_X86_64_PLTSZ:
+      return "DT_X86_64_PLTSZ";
+    case DT_X86_64_PLTENT:
+      return "DT_X86_64_PLTENT";
+    default:
+      return NULL;
+    }
+}
+
+static const char *
 get_dynamic_type (Filedata * filedata, unsigned long type)
 {
   static char buff[64];
@@ -2649,6 +2665,9 @@ get_dynamic_type (Filedata * filedata, unsigned long type)
 	      break;
 	    case EM_RISCV:
 	      result = get_riscv_dynamic_type (type);
+	      break;
+	    case EM_X86_64:
+	      result = get_x86_64_dynamic_type (type);
 	      break;
 	    default:
 	      if (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)

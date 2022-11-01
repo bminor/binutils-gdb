@@ -4455,7 +4455,12 @@ elf_x86_64_finish_dynamic_symbol (bfd *output_bfd,
 	  else
 	    {
 	      rela.r_info = htab->r_info (h->dynindx, R_X86_64_JUMP_SLOT);
-	      rela.r_addend = 0;
+	      if (htab->params->mark_plt)
+		rela.r_addend = (resolved_plt->output_section->vma
+				 + plt_offset
+				 + htab->plt.plt_indirect_branch_offset);
+	      else
+		rela.r_addend = 0;
 	      plt_index = htab->next_jump_slot_index++;
 	    }
 
