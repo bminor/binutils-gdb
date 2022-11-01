@@ -19,6 +19,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #include "sim-basics.h"
 #include "cgen-types.h"
 #include "bpf-desc.h"
@@ -29,15 +31,19 @@
 #include "bpf-sim.h"
 #include "bpf-helpers.h"
 
-
-struct _sim_cpu
+struct bpf_sim_cpu
 {
-  sim_cpu_base base;
-  CGEN_CPU cgen_cpu;
-
+  /* CPU-model specific parts go here.
+     Note that in files that don't need to access these pieces WANT_CPU_FOO
+     won't be defined and thus these parts won't appear.  This is ok in the
+     sense that things work.  It is a source of bugs though.
+     One has to of course be careful to not take the size of this
+     struct and no structure members accessed in non-cpu specific files can
+     go after here.  */
 #if defined (WANT_CPU_BPFBF)
   BPFBF_CPU_DATA cpu_data;
 #endif
 };
+#define BPF_SIM_CPU(cpu) ((struct bpf_sim_cpu *) CPU_ARCH_DATA (cpu))
 
 #endif /* ! SIM_MAIN_H */
