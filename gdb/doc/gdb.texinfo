@@ -26602,6 +26602,15 @@ then it will be used.
 @item show style sources
 Show the current state of source code styling.
 
+@item set style tui-current-position @samp{on|off}
+Enable or disable styling of the source and assembly code highlighted
+by the TUI's current position indicator.  The default is @samp{off}.
+@xref{TUI, ,@value{GDBN} Text User Interface}.
+
+@item show style tui-current-position
+Show whether the source and assembly code highlighted by the TUI's
+current position indicator is styled.
+
 @anchor{style_disassembler_enabled}
 @item set style disassembler enabled @samp{on|off}
 Enable or disable disassembler styling.  This affects whether
@@ -29163,8 +29172,12 @@ This window shows the processor registers.  Registers are highlighted
 when their values change.
 @end table
 
-The source and assembly windows show the current program position
-by highlighting the current line and marking it with a @samp{>} marker.
+The source and assembly windows show the current program position by
+highlighting the current line and marking it with a @samp{>} marker.
+By default, source and assembly code styling is disabled for the
+highlighted text, but you can enable it with the @code{set style
+tui-current-position on} command.  @xref{Output Styling}.
+
 Breakpoints are indicated with two markers.  The first marker
 indicates the breakpoint type:
 

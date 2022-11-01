@@ -65,4 +65,8 @@ extern void print_command_line (struct command_line *, unsigned int,
 extern void print_command_lines (struct ui_out *,
 				 struct command_line *, unsigned int);
 
+/* Chains containing all defined "set/show style" subcommands.  */
+extern struct cmd_list_element *style_set_list;
+extern struct cmd_list_element *style_show_list;
+
 #endif /* !defined (GDBCMD_H) */

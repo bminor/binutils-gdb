@@ -296,8 +296,8 @@ cli_style_option::add_setshow_commands (enum command_class theclass,
   return prefix_cmds;
 }
 
-static cmd_list_element *style_set_list;
-static cmd_list_element *style_show_list;
+cmd_list_element *style_set_list;
+cmd_list_element *style_show_list;
 
 /* The command list for 'set style disassembler'.  */
 

@@ -369,6 +369,9 @@ apply_ansi_escape (WINDOW *w, const char *buf)
 
   if (reverse_mode_p)
     {
+      if (!style_tui_current_position)
+	return n_read;
+
       /* We want to reverse _only_ the default foreground/background
 	 colors.  If the foreground color is not the default (because
 	 the text was styled), we want to leave it as is.  If e.g.,
@@ -411,18 +414,26 @@ tui_set_reverse_mode (WINDOW *w, bool reverse)
   ui_file_style style = last_style;
 
   reverse_mode_p = reverse;
-  style.set_reverse (reverse);
 
   if (reverse)
     {
       reverse_save_bg = style.get_background ();
       reverse_save_fg = style.get_foreground ();
+
+      if (!style_tui_current_position)
+	{
+	  /* Switch to default style (reversed) while highlighting the
+	     current position.  */
+	  style = {};
+	}
     }
   else
     {
       style.set_bg (reverse_save_bg);
       style.set_fg (reverse_save_fg);
     }
+
+  style.set_reverse (reverse);
 
   tui_apply_style (w, style);
 }

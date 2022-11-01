@@ -73,6 +73,11 @@
   For both /r and /b GDB is now better at using whitespace in order to
   align the disassembled instruction text.
 
+* The TUI no longer styles the source and assembly code highlighted by
+  the current position indicator by default.  You can however
+  re-enable styling using the new "set style tui-current-position"
+  command.
+
 * New commands
 
 maintenance set ignore-prologue-end-flag on|off
@@ -116,6 +121,10 @@ maintenance print frame-id [ LEVEL ]
 set debug infcall on|off
 show debug infcall
   Print additional debug messages about inferior function calls.
+
+set style tui-current-position [on|off]
+  Whether to style the source and assembly code highlighted by the
+  TUI's current position indicator.  The default is off.
 
 * Changed commands
 
