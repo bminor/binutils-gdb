@@ -597,6 +597,18 @@ if ![is_remote host] {
     } else {
 	readelf_test {--debug-dump=macro -wN} $tempfile pr26112.r
     }
+
+    set test $srcdir/$subdir/pr26160.dwp.bz2
+    # We need to strip the ".bz2", but can leave the dirname.
+    set t $subdir/[file tail $test]
+    set testname [file rootname $t]
+    verbose $testname
+    set tempfile tmpdir/pr26160.dwp
+    if {[catch "system \"bzip2 -dc $test > $tempfile\""] != 0} {
+	untested "bzip2 -dc ($testname)"
+    } else {
+	readelf_test {-wi} $tempfile pr26160.r
+    }
 }
 
 # Check dwarf-5 support for DW_OP_addrx.
