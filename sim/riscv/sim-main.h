@@ -21,11 +21,13 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #include "sim-basics.h"
 #include "machs.h"
 #include "sim-base.h"
 
-struct _sim_cpu {
+struct riscv_sim_cpu {
   union {
     unsigned_word regs[32];
     struct {
@@ -56,9 +58,8 @@ struct _sim_cpu {
 #include "opcode/riscv-opc.h"
 #undef DECLARE_CSR
   } csr;
-
-  sim_cpu_base base;
 };
+#define RISCV_SIM_CPU(cpu) ((struct riscv_sim_cpu *) CPU_ARCH_DATA (cpu))
 
 struct atomic_mem_reserved_list;
 struct atomic_mem_reserved_list {
