@@ -37,9 +37,9 @@
 .*:120: Error: .*not supported.*
 .*:121: Error: .*not supported.*
 .*:122: Error: .*not supported.*
-.*:126: Error: .*not supported.*
-.*:127: Error: .*not supported.*
-.*:128: Error: .*not supported.*
+.*:126: Error: .*operand .*
+.*:127: Error: .*unsupported .*
+.*:128: Error: .*unsupported .*
 .*:135: Error: .*operand size mismatch.*
 .*:136: Error: .*unsupported masking.*
 .*:137: Error: .*unsupported masking.*
@@ -50,9 +50,9 @@
 .*:142: Error: .*not supported.*
 .*:143: Error: .*not supported.*
 .*:144: Error: .*not supported.*
-.*:148: Error: .*not supported.*
-.*:149: Error: .*not supported.*
-.*:150: Error: .*not supported.*
+.*:148: Error: .*operand .*
+.*:149: Error: .*unsupported .*
+.*:150: Error: .*unsupported .*
 .*:151: Error: .*not supported.*
 .*:157: Error: .*operand size mismatch.*
 .*:158: Error: .*unsupported masking.*
@@ -64,9 +64,9 @@
 .*:164: Error: .*not supported.*
 .*:165: Error: .*not supported.*
 .*:166: Error: .*not supported.*
-.*:170: Error: .*not supported.*
-.*:171: Error: .*not supported.*
-.*:172: Error: .*not supported.*
+.*:170: Error: .*operand .*
+.*:171: Error: .*unsupported .*
+.*:172: Error: .*unsupported .*
 .*:173: Error: .*not supported.*
 .*:174: Error: .*not supported.*
 .*:175: Error: .*not supported.*
@@ -84,9 +84,9 @@
 .*:189: Error: .*bad register name.*
 .*:190: Error: .*unknown vector operation.*
 .*:191: Error: .*unknown vector operation.*
-.*:192: Error: .*not supported.*
-.*:193: Error: .*not supported.*
-.*:194: Error: .*not supported.*
+.*:192: Error: .*bad register name.*
+.*:193: Error: .*unknown vector operation.*
+.*:194: Error: .*unknown vector operation.*
 .*:195: Error: .*not supported.*
 .*:196: Error: .*not supported.*
 .*:197: Error: .*not supported.*

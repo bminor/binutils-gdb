@@ -2811,6 +2811,13 @@ vpmadd52luq, 0x66B4, None, CpuAVX512IFMA, Modrm|Masking=3|Space0F38|VexVVVV=1|Ve
 
 // AVX512IFMA instructions end
 
+// AVX-IFMA instructions.
+
+vpmadd52huq, 0x66B5, None, CpuAVX_IFMA, Modrm|Vex|Space0F38|VexVVVV|VexW1|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+vpmadd52luq, 0x66B4, None, CpuAVX_IFMA, Modrm|Vex|Space0F38|VexVVVV|VexW1|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|RegYMM|Unspecified|BaseIndex, RegXMM|RegYMM, RegXMM|RegYMM }
+
+// AVX-IFMA instructions end.
+
 // AVX512VBMI instructions
 
 vpmultishiftqb, 0x6683, None, CpuAVX512VBMI, Modrm|Masking=3|Space0F38|VexVVVV=1|VexW=2|Broadcast|Disp8ShiftVL|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM|RegYMM|RegZMM|Qword|Unspecified|BaseIndex, RegXMM|RegYMM|RegZMM, RegXMM|RegYMM|RegZMM }

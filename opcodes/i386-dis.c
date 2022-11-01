@@ -1536,6 +1536,8 @@ enum
   VEX_W_0F385E_X86_64_P_3,
   VEX_W_0F3878,
   VEX_W_0F3879,
+  VEX_W_0F38B4,
+  VEX_W_0F38B5,
   VEX_W_0F38CF,
   VEX_W_0F3A00_L_1,
   VEX_W_0F3A01_L_1,
@@ -6334,8 +6336,8 @@ static const struct dis386 vex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { VEX_W_TABLE (VEX_W_0F38B4) },
+    { VEX_W_TABLE (VEX_W_0F38B5) },
     { "vfmaddsub231p%XW", { XM, Vex, EXx }, PREFIX_DATA },
     { "vfmsubadd231p%XW", { XM, Vex, EXx }, PREFIX_DATA },
     /* b8 */
@@ -7648,6 +7650,16 @@ static const struct dis386 vex_w_table[][2] = {
   {
     /* VEX_W_0F3879 */
     { "%XEvpbroadcastw",	{ XM, EXw }, PREFIX_DATA },
+  },
+  {
+    /* VEX_W_0F38B4 */
+    { Bad_Opcode },
+    { "%XVvpmadd52luq",	{ XM, Vex, EXx }, PREFIX_DATA },
+  },
+  {
+    /* VEX_W_0F38B5 */
+    { Bad_Opcode },
+    { "%XVvpmadd52huq",	{ XM, Vex, EXx }, PREFIX_DATA },
   },
   {
     /* VEX_W_0F38CF */

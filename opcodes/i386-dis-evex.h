@@ -495,8 +495,8 @@ static const struct dis386 evex_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { "vpmadd52luq",	{ XM, Vex, EXx }, PREFIX_DATA },
-    { "vpmadd52huq",	{ XM, Vex, EXx }, PREFIX_DATA },
+    { VEX_W_TABLE (VEX_W_0F38B4) },
+    { VEX_W_TABLE (VEX_W_0F38B5) },
     { "%XEvfmaddsub231p%XW", { XM, Vex, EXx, EXxEVexR }, PREFIX_DATA },
     { "%XEvfmsubadd231p%XW", { XM, Vex, EXx, EXxEVexR }, PREFIX_DATA },
     /* B8 */
