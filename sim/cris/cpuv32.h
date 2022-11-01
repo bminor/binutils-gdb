@@ -226,7 +226,7 @@ crisv32f_single_step_enabled (current_cpu);\
 }\
 ;} while (0)
   } hardware;
-#define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
+#define CPU_CGEN_HW(cpu) (& CRIS_SIM_CPU (cpu)->cpu_data.hardware)
 } CRISV32F_CPU_DATA;
 
 /* Virtual regs.  */
