@@ -1098,6 +1098,7 @@ static const arch_entry cpu_arch[] =
   SUBARCH (prefetchi, PREFETCHI, PREFETCHI, false),
   SUBARCH (avx_ifma, AVX_IFMA, ANY_AVX_IFMA, false),
   SUBARCH (avx_vnni_int8, AVX_VNNI_INT8, ANY_AVX_VNNI_INT8, false),
+  SUBARCH (cmpccxadd, CMPCCXADD, ANY_CMPCCXADD, false),
 };
 
 #undef SUBARCH
@@ -8549,7 +8550,7 @@ build_modrm_byte (void)
 		 source operand is encoded in VEX prefix. */
 	      gas_assert (mem != (unsigned int) ~0);
 
-	      if (op > mem)
+	      if (op > mem || i.tm.cpu_flags.bitfield.cpucmpccxadd)
 		{
 		  vex_reg = op++;
 		  gas_assert (op < i.operands);

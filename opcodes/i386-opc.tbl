@@ -3289,3 +3289,9 @@ prefetchit0, 0xf18, 0x7, CpuPREFETCHI|Cpu64, Modrm|Anysize|IgnoreSize|No_bSuf|No
 prefetchit1, 0xf18, 0x6, CpuPREFETCHI|Cpu64, Modrm|Anysize|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { BaseIndex }
 
 // PREFETCHI instructions end.
+
+// CMPCCXADD instructions.
+
+cmp<cc>xadd, 0x66e<cc:opc>, None, CpuCMPCCXADD|Cpu64, Modrm|Vex|Space0F38|VexVVVV|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64, Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+
+// CMPCCXADD instructions end.

@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Intel CMPccXADD instructions.
+
 * Add support for Intel AVX-VNNI-INT8 instructions.
 
 * Add support for Intel AVX-IFMA instructions.
