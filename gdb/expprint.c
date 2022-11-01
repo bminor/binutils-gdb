@@ -59,12 +59,6 @@ op_name (enum exp_opcode opcode)
     }
 }
 
-void
-dump_prefix_expression (struct expression *exp, struct ui_file *stream)
-{
-  exp->op->dump (stream, 0);
-}
-
 /* Meant to be used in debug sessions, so don't export it in a header file.  */
 extern void ATTRIBUTE_USED debug_exp (struct expression *exp);
 

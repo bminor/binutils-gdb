@@ -208,6 +208,12 @@ struct expression
     return op->opcode ();
   }
 
+  /* Dump the expression to STREAM.  */
+  void dump (struct ui_file *stream)
+  {
+    op->dump (stream, 0);
+  }
+
   /* Evaluate the expression.  EXPECT_TYPE is the context type of the
      expression; normally this should be nullptr.  NOSIDE controls how
      evaluation is performed.  */
@@ -276,8 +282,6 @@ extern struct value *evaluate_subexp_do_call (expression *exp,
 /* From expprint.c */
 
 extern const char *op_name (enum exp_opcode opcode);
-
-extern void dump_prefix_expression (struct expression *, struct ui_file *);
 
 /* In an OP_RANGE expression, either bound could be empty, indicating
    that its value is by default that of the corresponding bound of the

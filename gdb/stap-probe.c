@@ -1328,7 +1328,7 @@ stap_probe::parse_arguments (struct gdbarch *gdbarch)
       expression_up expr = stap_parse_argument (&cur, atype, gdbarch);
 
       if (stap_expression_debug)
-	dump_prefix_expression (expr.get (), gdb_stdlog);
+	expr->dump (gdb_stdlog);
 
       m_parsed_args.emplace_back (bitness, atype, std::move (expr));
 

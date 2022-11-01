@@ -527,7 +527,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
   result->op->set_outermost ();
 
   if (expressiondebug)
-    dump_prefix_expression (result.get (), gdb_stdlog);
+    result->dump (gdb_stdlog);
 
   if (completer != nullptr)
     *completer = std::move (ps.m_completion_state);
