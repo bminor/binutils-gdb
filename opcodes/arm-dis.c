@@ -6002,7 +6002,7 @@ print_mve_vld_str_addr (struct disassemble_info *info,
     add_sub = "-";
 
   func (stream, dis_style_text, "[");
-  func (stream, dis_style_register, arm_regnames[gpr]);
+  func (stream, dis_style_register, "%s", arm_regnames[gpr]);
   if (p == 1)
     {
       func (stream, dis_style_text, ", ");
@@ -8588,7 +8588,8 @@ print_insn_coprocessor_1 (const struct sopcode32 *opcodes,
 			      is_unpredictable = true;
 			    u_reg = value;
 			  }
-			func (stream, dis_style_register, arm_regnames[value]);
+			func (stream, dis_style_register, "%s",
+			      arm_regnames[value]);
 			break;
 		      case 'V':
 			if (given & (1 << 6))
