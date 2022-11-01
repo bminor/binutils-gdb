@@ -54,7 +54,7 @@ do { \
 CPU (h_pc) = (x);\
 ;} while (0)
   } hardware;
-#define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
+#define CPU_CGEN_HW(cpu) (& BPF_SIM_CPU (cpu)->cpu_data.hardware)
 } BPFBF_CPU_DATA;
 
 /* Cover fns for register access.  */
