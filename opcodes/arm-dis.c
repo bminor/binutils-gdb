@@ -7234,7 +7234,9 @@ print_mve_unpredictable (struct disassemble_info *info,
 {
   void *stream = info->stream;
   fprintf_styled_ftype func = info->fprintf_styled_func;
-  const char *reason;
+  /* Initialize REASON to avoid compiler warning about uninitialized
+     usage, though such usage should be impossible.  */
+  const char *reason = "??";
 
   switch (unpredict_code)
     {
