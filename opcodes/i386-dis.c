@@ -985,6 +985,7 @@ enum
 enum
 {
   PREFIX_90 = 0,
+  PREFIX_0F01_REG_0_MOD_3_RM_6,
   PREFIX_0F01_REG_1_RM_4,
   PREFIX_0F01_REG_1_RM_5,
   PREFIX_0F01_REG_1_RM_6,
@@ -2954,6 +2955,11 @@ static const struct dis386 prefix_table[][4] = {
     { "pause", { XX }, 0 },
     { "xchgS", { { NOP_Fixup, 0 }, { NOP_Fixup, 1 } }, 0 },
     { NULL, { { NULL, 0 } }, PREFIX_IGNORED }
+  },
+
+  /* PREFIX_0F01_REG_0_MOD_3_RM_6 */
+  {
+    { "wrmsrns",        { Skip_MODRM }, 0 },
   },
 
   /* PREFIX_0F01_REG_1_RM_4 */
@@ -8652,6 +8658,7 @@ static const struct dis386 rm_table[][8] = {
     { "vmresume",	{ Skip_MODRM }, 0 },
     { "vmxoff",		{ Skip_MODRM }, 0 },
     { "pconfig",	{ Skip_MODRM }, 0 },
+    { PREFIX_TABLE (PREFIX_0F01_REG_0_MOD_3_RM_6) },
   },
   {
     /* RM_0F01_REG_1 */

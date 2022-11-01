@@ -253,6 +253,8 @@ static initializer cpu_flag_init[] =
     "CPU_AVX2_FLAGS|CpuAVX_VNNI_INT8" },
   { "CPU_CMPCCXADD_FLAGS",
     "CpuCMPCCXADD" },
+  { "CPU_WRMSRNS_FLAGS",
+    "CpuWRMSRNS" },
   { "CPU_IAMCU_FLAGS",
     "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuIAMCU" },
   { "CPU_ADX_FLAGS",
@@ -455,6 +457,8 @@ static initializer cpu_flag_init[] =
     "CpuAVX_VNNI_INT8" },
   { "CPU_ANY_CMPCCXADD_FLAGS",
     "CpuCMPCCXADD" },
+  { "CPU_ANY_WRMSRNS_FLAGS",
+    "CpuWRMSRNS" },
 };
 
 static initializer operand_type_init[] =
@@ -658,6 +662,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuAVX_IFMA),
   BITFIELD (CpuAVX_VNNI_INT8),
   BITFIELD (CpuCMPCCXADD),
+  BITFIELD (CpuWRMSRNS),
   BITFIELD (CpuMWAITX),
   BITFIELD (CpuCLZERO),
   BITFIELD (CpuOSPKE),

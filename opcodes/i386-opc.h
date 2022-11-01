@@ -217,6 +217,8 @@ enum
   CpuAVX_VNNI_INT8,
   /* Intel CMPccXADD instructions support required.  */
   CpuCMPCCXADD,
+  /* Intel WRMSRNS Instructions support required */
+  CpuWRMSRNS,
   /* mwaitx instruction required */
   CpuMWAITX,
   /* Clzero instruction required */
@@ -402,6 +404,7 @@ typedef union i386_cpu_flags
       unsigned int cpuavx_ifma:1;
       unsigned int cpuavx_vnni_int8:1;
       unsigned int cpucmpccxadd:1;
+      unsigned int cpuwrmsrns:1;
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;
