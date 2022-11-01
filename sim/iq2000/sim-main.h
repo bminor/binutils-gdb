@@ -4,6 +4,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 /* This is a global setting.  Different cpu families can't mix-n-match -scache
    and -pbb.  However some cpu families may use -simple while others use
    one of -scache/-pbb. ???? */
@@ -22,15 +24,7 @@
 #include "sim-base.h"
 #include "cgen-sim.h"
 
-/* The _sim_cpu struct.  */
-
-struct _sim_cpu {
-  /* sim/common cpu base.  */
-  sim_cpu_base base;
-
-  /* Static parts of cgen.  */
-  CGEN_CPU cgen_cpu;
-
+struct iq2000_sim_cpu {
   /* CPU specific parts go here.
      Note that in files that don't need to access these pieces WANT_CPU_FOO
      won't be defined and thus these parts won't appear.  This is ok in the
@@ -42,6 +36,7 @@ struct _sim_cpu {
   IQ2000BF_CPU_DATA cpu_data;
 #endif
 };
+#define IQ2000_SIM_CPU(cpu) ((struct iq2000_sim_cpu *) CPU_ARCH_DATA (cpu))
 
 /* Misc.  */
 
