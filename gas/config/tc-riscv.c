@@ -476,7 +476,8 @@ static void
 make_mapping_symbol (enum riscv_seg_mstate state,
 		     valueT value,
 		     fragS *frag,
-		     bool reset_seg_arch_str)
+		     const char *arch_str,
+		     bool odd_data_padding)
 {
   const char *name;
   char *buff = NULL;
@@ -486,12 +487,11 @@ make_mapping_symbol (enum riscv_seg_mstate state,
       name = "$d";
       break;
     case MAP_INSN:
-      if (reset_seg_arch_str)
+      if (arch_str != NULL)
 	{
-	  const char *isa = riscv_rps_as.subset_list->arch_str;
-	  size_t size = strlen (isa) + 3; /* "rv" + '\0'  */
+	  size_t size = strlen (arch_str) + 3; /* "$x" + '\0'  */
 	  buff = xmalloc (size);
-	  snprintf (buff, size, "$x%s", isa);
+	  snprintf (buff, size, "$x%s", arch_str);
 	  name = buff;
 	}
       else
@@ -503,7 +503,7 @@ make_mapping_symbol (enum riscv_seg_mstate state,
 
   symbolS *symbol = symbol_new (name, now_seg, frag, value);
   symbol_get_bfdsym (symbol)->flags |= (BSF_NO_FLAGS | BSF_LOCAL);
-  if (reset_seg_arch_str)
+  if (arch_str != NULL)
     {
       /* Store current $x+arch into tc_segment_info.  */
       seg_info (now_seg)->tc_segment_info_data.arch_map_symbol = symbol;
@@ -517,6 +517,7 @@ make_mapping_symbol (enum riscv_seg_mstate state,
      and .text.zero.fill.last.  */
   symbolS *first = frag->tc_frag_data.first_map_symbol;
   symbolS *last = frag->tc_frag_data.last_map_symbol;
+  symbolS *removed = NULL;
   if (value == 0)
     {
       if (first != NULL)
@@ -524,7 +525,7 @@ make_mapping_symbol (enum riscv_seg_mstate state,
 	  know (S_GET_VALUE (first) == S_GET_VALUE (symbol)
 		&& first == last);
 	  /* Remove the old one.  */
-	  symbol_remove (first, &symbol_rootP, &symbol_lastP);
+	  removed = first;
 	}
       frag->tc_frag_data.first_map_symbol = symbol;
     }
@@ -534,9 +535,23 @@ make_mapping_symbol (enum riscv_seg_mstate state,
       know (S_GET_VALUE (last) <= S_GET_VALUE (symbol));
       /* Remove the old one.  */
       if (S_GET_VALUE (last) == S_GET_VALUE (symbol))
-	symbol_remove (last, &symbol_rootP, &symbol_lastP);
+	removed = last;
     }
   frag->tc_frag_data.last_map_symbol = symbol;
+
+  if (removed == NULL)
+    return;
+
+  if (odd_data_padding)
+    {
+      /* If the removed mapping symbol is $x+arch, then add it back to
+	 the next $x.  */
+      const char *str = strncmp (S_GET_NAME (removed), "$xrv", 4) == 0
+			? S_GET_NAME (removed) + 2 : NULL;
+      make_mapping_symbol (MAP_INSN, frag->fr_fix + 1, frag, str,
+			   false/* odd_data_padding */);
+    }
+  symbol_remove (removed, &symbol_rootP, &symbol_lastP);
 }
 
 /* Set the mapping state for frag_now.  */
@@ -580,7 +595,10 @@ riscv_mapping_state (enum riscv_seg_mstate to_state,
 
   valueT value = (valueT) (frag_now_fix () - max_chars);
   seg_info (now_seg)->tc_segment_info_data.map_state = to_state;
-  make_mapping_symbol (to_state, value, frag_now, reset_seg_arch_str);
+  const char *arch_str = reset_seg_arch_str
+			 ? riscv_rps_as.subset_list->arch_str : NULL;
+  make_mapping_symbol (to_state, value, frag_now, arch_str,
+		       false/* odd_data_padding */);
 }
 
 /* Add the odd bytes of paddings for riscv_handle_align.  */
@@ -591,25 +609,9 @@ riscv_add_odd_padding_symbol (fragS *frag)
   /* If there was already a mapping symbol, it should be
      removed in the make_mapping_symbol.
 
-     Please see gas/testsuite/gas/riscv/mapping.s: .text.odd.align.  */
-  make_mapping_symbol (MAP_DATA, frag->fr_fix, frag, false);
-  make_mapping_symbol (MAP_INSN, frag->fr_fix + 1, frag, false);
-}
-
-/* If previous and current mapping symbol have same value, then remove the
-   current $x only if the previous is $x+arch; Otherwise, always remove the
-   previous.  */
-
-static void
-riscv_remove_mapping_symbol (symbolS *pre, symbolS *cur)
-{
-  know (pre != NULL && cur != NULL
-	&& S_GET_VALUE (pre) == S_GET_VALUE (cur));
-  symbolS *removed = pre;
-  if (strncmp (S_GET_NAME (pre), "$xrv", 4) == 0
-      && strcmp (S_GET_NAME (cur), "$x") == 0)
-    removed = cur;
-  symbol_remove (removed, &symbol_rootP, &symbol_lastP);
+     Please see gas/testsuite/gas/riscv/mapping.s: .text.odd.align.*.  */
+  make_mapping_symbol (MAP_DATA, frag->fr_fix, frag,
+		       NULL/* arch_str */, true/* odd_data_padding */);
 }
 
 /* Remove any excess mapping symbols generated for alignment frags in
@@ -654,7 +656,12 @@ riscv_check_mapping_symbols (bfd *abfd ATTRIBUTE_UNUSED,
 
 		 Please see the gas/testsuite/gas/riscv/mapping.s:
 		 .text.zero.fill.align.A and .text.zero.fill.align.B.  */
-	      riscv_remove_mapping_symbol (last, next_first);
+	      know (S_GET_VALUE (last) == S_GET_VALUE (next_first));
+	      symbolS *removed = last;
+	      if (strncmp (S_GET_NAME (last), "$xrv", 4) == 0
+		  && strcmp (S_GET_NAME (next_first), "$x") == 0)
+		removed = next_first;
+	      symbol_remove (removed, &symbol_rootP, &symbol_lastP);
 	      break;
 	    }
 

@@ -32,7 +32,7 @@ addi	a0, zero, 2		# $x, but same as previous addi, so removed
 .byte	5
 .option pop
 
-.section .text.odd.align, "ax"
+.section .text.odd.align.start.insn, "ax"
 .option push
 .option norelax
 .option arch, +c
@@ -41,6 +41,15 @@ addi	a0, zero, 1		# $xrv32ic
 .option arch, -c
 .align	3			# odd alignment, $x replaced by $d + $x
 addi	a0, zero, 2		# $xrv32i
+.option pop
+
+.section .text.odd.align.start.data, "ax"
+.option push
+.option norelax
+.option arch, +c
+.byte	1			# $d
+.align	2			# odd alignment, $xrv32ic replaced by $d + $xrv32ic
+addi	a0, zero, 1
 .option pop
 
 .section .text.zero.fill.first, "ax"

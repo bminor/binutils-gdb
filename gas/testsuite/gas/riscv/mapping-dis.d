@@ -26,15 +26,24 @@ Disassembly of section .text.data:
 [ 	]+[0-9a-f]+:[ 	]+4509[ 	]+li[ 	]+a0,2
 [ 	]+[0-9a-f]+:[ 	]+05000302[ 	]+.word[ 	]+0x05000302
 
-Disassembly of section .text.odd.align:
+Disassembly of section .text.odd.align.start.insn:
 
-0+000 <.text.odd.align>:
+0+000 <.text.odd.align.start.insn>:
 [ 	]+[0-9a-f]+:[ 	]+4505[ 	]+li[ 	]+a0,1
 [ 	]+[0-9a-f]+:[ 	]+01[ 	]+.byte[ 	]+0x01
 [ 	]+[0-9a-f]+:[ 	]+00[ 	]+.byte[ 	]+0x00
 [ 	]+[0-9a-f]+:[ 	]+00000013[ 	]+nop
 [ 	]+[0-9a-f]+:[ 	]+00200513[ 	]+li[ 	]+a0,2
 [ 	]+[0-9a-f]+:[ 	]+00000013[ 	]+nop
+
+Disassembly of section .text.odd.align.start.data:
+
+0+000 <.text.odd.align.start.data>:
+[ 	]+[0-9a-f]+:[ 	]+01[ 	]+.byte[ 	]+0x01
+[ 	]+[0-9a-f]+:[ 	]+00[ 	]+.byte[ 	]+0x00
+[ 	]+[0-9a-f]+:[ 	]+0001[ 	]+nop
+[ 	]+[0-9a-f]+:[ 	]+4505[ 	]+li[ 	]+a0,1
+[ 	]+[0-9a-f]+:[ 	]+0001[ 	]+nop
 
 Disassembly of section .text.zero.fill.first:
 
