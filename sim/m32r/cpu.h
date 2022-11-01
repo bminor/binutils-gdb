@@ -87,7 +87,7 @@ m32rbf_h_psw_set_handler (current_cpu, (x));\
 #define GET_H_LOCK() CPU (h_lock)
 #define SET_H_LOCK(x) (CPU (h_lock) = (x))
   } hardware;
-#define CPU_CGEN_HW(cpu) (& (cpu)->cpu_data.hardware)
+#define CPU_CGEN_HW(cpu) (& M32R_SIM_CPU (cpu)->cpu_data.hardware)
 } M32RBF_CPU_DATA;
 
 /* Cover fns for register access.  */

@@ -3,6 +3,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 /* This is a global setting.  Different cpu families can't mix-n-match -scache
    and -pbb.  However some cpu families may use -simple while others use
    one of -scache/-pbb.  */
@@ -19,17 +21,9 @@
 #include "m32r-sim.h"
 #include "opcode/cgen.h"
 
-/* The _sim_cpu struct.  */
-
-struct _sim_cpu {
-  /* sim/common cpu base.  */
-  sim_cpu_base base;
-
-  /* Static parts of cgen.  */
-  CGEN_CPU cgen_cpu;
-
+struct m32r_sim_cpu {
   M32R_MISC_PROFILE m32r_misc_profile;
-#define CPU_M32R_MISC_PROFILE(cpu) (& (cpu)->m32r_misc_profile)
+#define CPU_M32R_MISC_PROFILE(cpu) (& M32R_SIM_CPU (cpu)->m32r_misc_profile)
 
   /* CPU specific parts go here.
      Note that in files that don't need to access these pieces WANT_CPU_FOO
@@ -47,6 +41,7 @@ struct _sim_cpu {
   M32R2F_CPU_DATA cpu_data;
 #endif
 };
+#define M32R_SIM_CPU(cpu) ((struct m32r_sim_cpu *) CPU_ARCH_DATA (cpu))
 
 /* Misc.  */
 
