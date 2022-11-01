@@ -663,6 +663,11 @@ disassemble_init_for_target (struct disassemble_info * info)
       info->disassembler_needs_relocs = true;
       break;
 #endif
+#ifdef ARCH_mips
+    case bfd_arch_mips:
+      info->created_styled_output = true;
+      break;
+#endif
 #ifdef ARCH_m32c
     case bfd_arch_m32c:
       /* This processor in fact is little endian.  The value set here
