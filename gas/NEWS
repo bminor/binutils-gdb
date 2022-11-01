@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Intel MSRLIST instructions.
+
 * Add support for Intel WRMSRNS instructions.
 
 * Add support for Intel CMPccXADD instructions.

@@ -3301,3 +3301,10 @@ cmp<cc>xadd, 0x66e<cc:opc>, None, CpuCMPCCXADD|Cpu64, Modrm|Vex|Space0F38|VexVVV
 wrmsrns, 0x0f01c6, None, CpuWRMSRNS, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 
 // WRMSRNS instruction end.
+
+// MSRLIST instructions.
+
+rdmsrlist, 0xf20f01c6, None, CpuMSRLIST|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
+wrmsrlist, 0xf30f01c6, None, CpuMSRLIST|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
+
+// MSRLIST instructions end.
