@@ -213,6 +213,8 @@ enum
   CpuPREFETCHI,
   /* Intel AVX IFMA Instructions support required.  */
   CpuAVX_IFMA,
+  /* Intel AVX VNNI-INT8 Instructions support required.  */
+  CpuAVX_VNNI_INT8,
   /* mwaitx instruction required */
   CpuMWAITX,
   /* Clzero instruction required */
@@ -296,7 +298,7 @@ enum
 
 /* If you get a compiler error for zero width of the unused field,
    comment it out.  */
-#define CpuUnused	(CpuMax + 1)
+// #define CpuUnused	(CpuMax + 1)
 
 /* We can check if an instruction is available with array instead
    of bitfield. */
@@ -396,6 +398,7 @@ typedef union i386_cpu_flags
       unsigned int cpuavx512_fp16:1;
       unsigned int cpuprefetchi:1;
       unsigned int cpuavx_ifma:1;
+      unsigned int cpuavx_vnni_int8:1;
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;
