@@ -23,6 +23,8 @@
 #ifndef SIM_MAIN_H
 #define SIM_MAIN_H
 
+#define SIM_HAVE_COMMON_SIM_CPU
+
 #define WITH_SCACHE_PBB 1
 
 #include "symcat.h"
@@ -36,16 +38,8 @@
 #include "lm32-sim.h"
 #include "opcode/cgen.h"
 
-/* The _sim_cpu struct.  */
-
-struct _sim_cpu
+struct lm32_sim_cpu
 {
-  /* sim/common cpu base.  */
-  sim_cpu_base base;
-
-  /* Static parts of cgen.  */
-  CGEN_CPU cgen_cpu;
-
   /* CPU specific parts go here.
      Note that in files that don't need to access these pieces WANT_CPU_FOO
      won't be defined and thus these parts won't appear.  This is ok in the
@@ -56,8 +50,8 @@ struct _sim_cpu
 #if defined (WANT_CPU_LM32BF)
   LM32BF_CPU_DATA cpu_data;
 #endif
-
 };
+#define LM32_SIM_CPU(cpu) ((struct lm32_sim_cpu *) CPU_ARCH_DATA (cpu))
 
 /* Misc.  */
 
