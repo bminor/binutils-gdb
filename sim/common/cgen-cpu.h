@@ -20,6 +20,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef CGEN_CPU_H
 #define CGEN_CPU_H
 
+#include "cgen-defs.h"
+#include "cgen-fpu.h"
+#include "cgen-par.h"
+#include "cgen-scache.h"
+
 /* Type of function that is ultimately called by sim_resume.  */
 typedef void (ENGINE_FN) (SIM_CPU *);
 

@@ -28,6 +28,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Type of function to return an insn name.  */
 typedef const char * (CPU_INSN_NAME_FN) (sim_cpu *, int);
 
+#ifdef CGEN_ARCH
+# include "cgen-cpu.h"
+#endif
+
 /* Types for register access functions.
    These routines implement the sim_{fetch,store}_register interface.  */
 typedef int (CPUREG_FETCH_FN) (sim_cpu *, int, void *, int);
@@ -126,6 +130,12 @@ typedef struct {
 struct _sim_cpu {
   /* All the common state.  */
   sim_cpu_base base;
+
+#ifdef CGEN_ARCH
+  /* Static parts of cgen.  */
+  CGEN_CPU cgen_cpu;
+#define CPU_CGEN_CPU(cpu) ((cpu)->cgen_cpu)
+#endif
 
   /* Pointer for sim target to store arbitrary cpu data.  Normally the
      target should define a struct and use it here.  */
