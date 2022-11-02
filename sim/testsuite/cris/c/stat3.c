@@ -7,21 +7,25 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#define mybasename(x) ({ const char *x_ = (x), *y_ = strrchr (x_, '/'); y_ != NULL ? y_ + 1 : x_; })
 
 int main (int argc, char *argv[])
 {
-  char path[1024] = "/";
+  /* Pick a regular file we know will always be in the sim builddir.  */
+  char path[1024] = "/Makefile";
   struct stat buf;
 
-  strcat (path, mybasename (argv[0]));
   if (stat (".", &buf) != 0
       || !S_ISDIR (buf.st_mode))
-    abort ();
+    {
+      fprintf (stderr, "cwd is not a directory\n");
+      return 1;
+    }
   if (stat (path, &buf) != 0
       || !S_ISREG (buf.st_mode))
-    abort ();
+    {
+      fprintf (stderr, "%s: is not a regular file\n", path);
+      return 1;
+    }
   printf ("pass\n");
   exit (0);
 }
-
