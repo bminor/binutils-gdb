@@ -99,7 +99,7 @@ extern void malloc_failure (long size) ATTRIBUTE_NORETURN;
 
 extern void flush_streams ();
 
-#ifdef USE_WIN32API
+#if defined(USE_WIN32API) || defined(__CYGWIN__)
 
 /* Map the Windows error number in ERROR to a locale-dependent error
    message string and return a pointer to it.  Typically, the values

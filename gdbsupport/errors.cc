@@ -19,7 +19,7 @@
 
 #include "common-defs.h"
 #include "errors.h"
-#ifdef USE_WIN32API
+#if defined (USE_WIN32API) || defined(__CYGWIN__)
 #include <windows.h>
 #endif /* USE_WIN32API */
 
@@ -71,7 +71,7 @@ internal_warning_loc (const char *file, int line, const char *fmt, ...)
   va_end (ap);
 }
 
-#ifdef USE_WIN32API
+#if defined (USE_WIN32API) || defined(__CYGWIN__)
 
 /* See errors.h.  */
 
