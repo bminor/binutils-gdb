@@ -2020,7 +2020,7 @@ print_insn_mips (bfd_vma memaddr,
 
   /* Handle undefined instructions.  */
   info->insn_type = dis_noninsn;
-  infprintf (is, "0x%x", word);
+  infprintf (is, ".word\t0x%x", word);
   return INSNLEN;
 }
 
@@ -2398,7 +2398,7 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
     }
 #undef GET_OP
 
-  infprintf (is, "0x%x", first);
+  infprintf (is, ".short\t0x%x", first);
   info->insn_type = dis_noninsn;
 
   return 2;
@@ -2515,7 +2515,10 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 	}
     }
 
-  infprintf (is, "0x%x", insn);
+  if (length == 2)
+    infprintf (is, ".short\t0x%x", insn);
+  else
+    infprintf (is, ".word\t0x%x", insn);
   info->insn_type = dis_noninsn;
 
   return length;
