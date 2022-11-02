@@ -34,7 +34,6 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <fcntl.h>
-#include <winsock2.h>
 #include <windows.h>
 #include <imagehlp.h>
 #ifdef __CYGWIN__
