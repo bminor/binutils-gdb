@@ -599,7 +599,7 @@ fld, 0xdb, 5, CpuFP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Tbyte|Unsp
 fild, 0xdf, 0, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Word|Dword|Unspecified|BaseIndex }
 fild, 0xdf, 5, CpuFP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Qword|Unspecified|BaseIndex }
 fildll, 0xdf, 5, CpuFP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTSyntax, { Unspecified|BaseIndex }
-fldt, 0xdb, 5, CpuFP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Tbyte|Unspecified|BaseIndex }
+fldt, 0xdb, 5, CpuFP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
 fbld, 0xdf, 4, CpuFP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Tbyte|Unspecified|BaseIndex }
 
 // store (no pop)
@@ -617,7 +617,7 @@ fstp, 0xdb, 7, CpuFP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Tbyte|Uns
 fistp, 0xdf, 3, CpuFP, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Word|Dword|Unspecified|BaseIndex }
 fistp, 0xdf, 7, CpuFP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Qword|Unspecified|BaseIndex }
 fistpll, 0xdf, 7, CpuFP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTSyntax, { Unspecified|BaseIndex }
-fstpt, 0xdb, 7, CpuFP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Tbyte|Unspecified|BaseIndex }
+fstpt, 0xdb, 7, CpuFP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex }
 fbstp, 0xdf, 6, CpuFP, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Tbyte|Unspecified|BaseIndex }
 
 // exchange %st<n> with %st0
