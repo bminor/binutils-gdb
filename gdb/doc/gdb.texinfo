@@ -3642,8 +3642,15 @@ The debugger convenience variables @samp{$_thread} and
 @samp{$_gthread} contain, respectively, the per-inferior thread number
 and the global thread number of the current thread.  You may find this
 useful in writing breakpoint conditional expressions, command scripts,
-and so forth.  @xref{Convenience Vars,, Convenience Variables}, for
-general information on convenience variables.
+and so forth.  The convenience variable @samp{$_inferior_thread_count}
+contains the number of live threads in the current inferior.
+@xref{Convenience Vars,, Convenience Variables}, for general
+information on convenience variables.
+
+When running in non-stop mode (@pxref{Non-Stop Mode}), where new
+threads can be created, and existing threads exit, at any time,
+@samp{$_inferior_thread_count} could return a different value each
+time it is evaluated.
 
 If @value{GDBN} detects the program is multi-threaded, it augments the
 usual message about stopping at a breakpoint with the ID and name of
@@ -12654,6 +12661,9 @@ The thread number of the current thread.  @xref{thread numbers}.
 
 @item $_gthread
 The global number of the current thread.  @xref{global thread numbers}.
+
+@item $_inferior_thread_count
+The number of live threads in the current inferior.  @xref{Threads}.
 
 @item $_gdb_major
 @itemx $_gdb_minor

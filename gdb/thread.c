@@ -2123,6 +2123,22 @@ global_thread_id_make_value (struct gdbarch *gdbarch, struct internalvar *var,
   return thread_num_make_value_helper (gdbarch, 1);
 }
 
+/* Return a new value for the number of non-exited threads in the current
+   inferior.  If there are no threads in the current inferior return a
+   value of 0.  */
+
+static struct value *
+inferior_thread_count_make_value (struct gdbarch *gdbarch,
+				  struct internalvar *var, void *ignore)
+{
+  int int_val = 0;
+
+  if (inferior_ptid != null_ptid)
+    int_val = current_inferior ()->non_exited_threads ().size ();
+
+  return value_from_longest (builtin_type (gdbarch)->builtin_int, int_val);
+}
+
 /* Commands with a prefix of `thread'.  */
 struct cmd_list_element *thread_cmd_list = NULL;
 
@@ -2139,6 +2155,14 @@ static const struct internalvar_funcs thread_funcs =
 static const struct internalvar_funcs gthread_funcs =
 {
   global_thread_id_make_value,
+  NULL,
+};
+
+/* Implementation of `_inferior_thread_count` convenience variable.  */
+
+static const struct internalvar_funcs inferior_thread_count_funcs =
+{
+  inferior_thread_count_make_value,
   NULL,
 };
 
@@ -2258,4 +2282,6 @@ When on messages about thread creation and deletion are printed."),
 
   create_internalvar_type_lazy ("_thread", &thread_funcs, NULL);
   create_internalvar_type_lazy ("_gthread", &gthread_funcs, NULL);
+  create_internalvar_type_lazy ("_inferior_thread_count",
+				&inferior_thread_count_funcs, NULL);
 }

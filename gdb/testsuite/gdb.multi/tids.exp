@@ -123,6 +123,8 @@ with_test_prefix "single inferior" {
     info_threads "" "1"
 
     gdb_test "thread" "Current thread is 1 .*"
+
+    gdb_test "print \$_inferior_thread_count" " = 1"
 }
 
 # "info threads" while there are multiple inferiors should show
@@ -140,7 +142,13 @@ with_test_prefix "two inferiors" {
     gdb_test "inferior 2" "Switching to inferior 2 .*" "switch to inferior 2"
     gdb_test "file ${binfile}" ".*" "load file in inferior 2"
 
+    gdb_test "print \$_inferior_thread_count" " = 0" \
+	"no threads before we start the second inferior"
+
     runto_main
+
+    gdb_test "print \$_inferior_thread_count" " = 1" \
+	"no other threads started yet"
 
     # Now that we've added another inferior, thread IDs now show the
     # inferior number.
@@ -153,8 +161,14 @@ with_test_prefix "two inferiors" {
     gdb_breakpoint "thread_function1"
 
     gdb_continue_to_breakpoint "once"
+    gdb_test "print \$_inferior_thread_count" " = 2" \
+	"second thread started in inferior 2"
     gdb_test "inferior 1" "Switching to inferior 1 .*"
+    gdb_test "print \$_inferior_thread_count" " = 1" \
+	"still only one thread in inferior 1"
     gdb_continue_to_breakpoint "twice"
+    gdb_test "print \$_inferior_thread_count" " = 2" \
+	"second thread started in inferior 1"
 
     info_threads "" "1.1 1.2 2.1 2.2" \
 	"info threads again"
@@ -187,9 +201,15 @@ with_test_prefix "two inferiors" {
 
 	gdb_test "inferior 2" "Switching to inferior 2 .*"
 	gdb_continue_to_breakpoint "once"
+	gdb_test "print \$_inferior_thread_count" " = 3" \
+	    "third thread started in inferior 2"
 
 	gdb_test "inferior 1" "Switching to inferior 1 .*"
+	gdb_test "print \$_inferior_thread_count" " = 2" \
+	    "still only two threads in inferior 1"
 	gdb_continue_to_breakpoint "twice"
+	gdb_test "print \$_inferior_thread_count" " = 3" \
+	    "third thread started in inferior 1"
     }
 
     thr_apply_info_thr "1" \

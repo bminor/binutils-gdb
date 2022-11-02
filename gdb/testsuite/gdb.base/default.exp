@@ -584,6 +584,7 @@ set show_conv_list \
 	{$_thread = 0} \
 	{$_gthread = 0} \
 	{$_inferior = 1} \
+	{$_inferior_thread_count = 0} \
 	{$_exception = <error: No frame selected>} \
 	{$_probe_argc = <error: No frame selected>} \
 	{$_probe_arg0 = <error: No frame selected>} \

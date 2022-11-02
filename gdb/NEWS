@@ -78,6 +78,9 @@
   re-enable styling using the new "set style tui-current-position"
   command.
 
+* New convenience variable $_inferior_thread_count contains the number
+  of live threads in the current inferior.
+
 * New commands
 
 maintenance set ignore-prologue-end-flag on|off
