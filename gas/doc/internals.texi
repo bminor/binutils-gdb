@@ -1557,7 +1557,7 @@ information.
 @item md_emit_single_noop_insn
 @itemx md_single_noop_insn
 These macro facilitate the @var{.nop} directive.  If defined the
-@var{md_emit_single_noop_insn) macro provides code to insert a single no-op
+@var{md_emit_single_noop_insn} macro provides code to insert a single no-op
 instruction into the output stream.  If this involves calling @var{md_assemble}
 with a fixed string then the alternative macro @var{md_single_noop_insn} can be
 defined, specifying the string to pass.  If neither of these macros are defined
@@ -1890,7 +1890,6 @@ This section describes basic internal functions used by GAS.
 
 @menu
 * Warning and error messages::  Warning and error messages
-* Hash tables::                 Hash tables
 @end menu
 
 @node Warning and error messages
