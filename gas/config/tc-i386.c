@@ -1930,12 +1930,9 @@ operand_type_xor (i386_operand_type x, i386_operand_type y)
 static const i386_operand_type disp16_32 = OPERAND_TYPE_DISP16_32;
 static const i386_operand_type anydisp = OPERAND_TYPE_ANYDISP;
 static const i386_operand_type regxmm = OPERAND_TYPE_REGXMM;
-static const i386_operand_type imm8 = OPERAND_TYPE_IMM8;
-static const i386_operand_type imm8s = OPERAND_TYPE_IMM8S;
 static const i386_operand_type imm16 = OPERAND_TYPE_IMM16;
 static const i386_operand_type imm32 = OPERAND_TYPE_IMM32;
 static const i386_operand_type imm32s = OPERAND_TYPE_IMM32S;
-static const i386_operand_type imm64 = OPERAND_TYPE_IMM64;
 static const i386_operand_type imm16_32 = OPERAND_TYPE_IMM16_32;
 static const i386_operand_type imm16_32s = OPERAND_TYPE_IMM16_32S;
 static const i386_operand_type imm16_32_32s = OPERAND_TYPE_IMM16_32_32S;
@@ -3998,7 +3995,7 @@ process_immext (void)
 
   exp = &im_expressions[i.imm_operands++];
   i.op[i.operands].imms = exp;
-  i.types[i.operands] = imm8;
+  i.types[i.operands].bitfield.imm8 = 1;
   i.operands++;
   exp->X_op = O_constant;
   exp->X_add_number = i.tm.extension_opcode;
@@ -7674,18 +7671,12 @@ static int
 update_imm (unsigned int j)
 {
   i386_operand_type overlap = i.types[j];
-  if ((overlap.bitfield.imm8
-       || overlap.bitfield.imm8s
-       || overlap.bitfield.imm16
-       || overlap.bitfield.imm32
-       || overlap.bitfield.imm32s
-       || overlap.bitfield.imm64)
-      && !operand_type_equal (&overlap, &imm8)
-      && !operand_type_equal (&overlap, &imm8s)
-      && !operand_type_equal (&overlap, &imm16)
-      && !operand_type_equal (&overlap, &imm32)
-      && !operand_type_equal (&overlap, &imm32s)
-      && !operand_type_equal (&overlap, &imm64))
+  if (overlap.bitfield.imm8
+      + overlap.bitfield.imm8s
+      + overlap.bitfield.imm16
+      + overlap.bitfield.imm32
+      + overlap.bitfield.imm32s
+      + overlap.bitfield.imm64 > 1)
     {
       if (i.suffix)
 	{
@@ -7722,12 +7713,12 @@ update_imm (unsigned int j)
       else if (i.prefix[DATA_PREFIX])
 	overlap = operand_type_and (overlap,
 				    flag_code != CODE_16BIT ? imm16 : imm32);
-      if (!operand_type_equal (&overlap, &imm8)
-	  && !operand_type_equal (&overlap, &imm8s)
-	  && !operand_type_equal (&overlap, &imm16)
-	  && !operand_type_equal (&overlap, &imm32)
-	  && !operand_type_equal (&overlap, &imm32s)
-	  && !operand_type_equal (&overlap, &imm64))
+      if (overlap.bitfield.imm8
+	  + overlap.bitfield.imm8s
+	  + overlap.bitfield.imm16
+	  + overlap.bitfield.imm32
+	  + overlap.bitfield.imm32s
+	  + overlap.bitfield.imm64 != 1)
 	{
 	  as_bad (_("no instruction mnemonic suffix given; "
 		    "can't determine immediate size"));
@@ -8086,7 +8077,7 @@ build_modrm_byte (void)
 	     immediate operand to encode the first operand.  */
 	  exp = &im_expressions[i.imm_operands++];
 	  i.op[i.operands].imms = exp;
-	  i.types[i.operands] = imm8;
+	  i.types[i.operands].bitfield.imm8 = 1;
 	  i.operands++;
 
 	  gas_assert (i.tm.operand_types[reg_slot].bitfield.class == RegSIMD);
