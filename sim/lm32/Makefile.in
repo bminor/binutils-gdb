@@ -14,20 +14,11 @@ SIM_OBJS = \
 
 SIM_EXTRA_HW_DEVICES = lm32cpu lm32timer lm32uart
 
-# List of extra dependencies.
-# Generally this consists of simulator specific files included by sim-main.h.
-SIM_EXTRA_DEPS = $(CGEN_INCLUDE_DEPS) $(srcdir)/../../opcodes/lm32-desc.h \
-	eng.h
-
 SIM_EXTRA_CLEAN = lm32-clean
 
 ## COMMON_POST_CONFIG_FRAG
 
 arch = lm32 
-
-LM32BF_INCLUDE_DEPS = \
-	$(CGEN_MAIN_CPU_DEPS) \
-	cpu.h decode.h eng.h
 
 lm32-clean:
 	rm -f stamp-arch stamp-cpu 

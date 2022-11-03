@@ -40,36 +40,19 @@ SIM_OBJS = \
 
 SIM_OBJS += $(OR1K_OBJS)
 
-# Extra headers included by sim-main.h.
-SIM_EXTRA_DEPS = \
-	$(CGEN_INCLUDE_DEPS) \
-	or1k-sim.h \
-	$(srcdir)/../../opcodes/or1k-desc.h \
-	arch.h \
-	cpuall.h \
-	decode.h
-
 ## COMMON_POST_CONFIG_FRAG
 
 arch = or1k
 
-# or1k32bf
-
-OR1K32BF_INCLUDE_DEPS = \
-	$(CGEN_MAIN_CPU_DEPS) \
-	cpu.h \
-	decode.h \
-	eng.h
-
-or1k.o: or1k.c $(OR1K32BF_INCLUDE_DEPS)
+or1k.o: or1k.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-sim-if.o: sim-if.c $(SIM_MAIN_DEPS) $(srcdir)/../common/sim-core.h eng.h
+sim-if.o: sim-if.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-traps.o: traps.c $(SIM_MAIN_DEPS) eng.h
+traps.o: traps.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 

@@ -23,8 +23,4 @@ SIM_OBJS = \
 	itable.o semantics.o idecode.o icache.o engine.o irun.o support.o \
 	sim-resume.o
 
-# List of extra dependencies.
-# Generally this consists of simulator specific files included by sim-main.h.
-SIM_EXTRA_DEPS = v850_sim.h sim-main.h
-
 ## COMMON_POST_CONFIG_FRAG

@@ -24,6 +24,4 @@ SIM_OBJS = \
 	table.o \
 	simops.o
 
-SIM_EXTRA_DEPS = simops.h
-
 ## COMMON_POST_CONFIG_FRAG

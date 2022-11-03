@@ -33,12 +33,6 @@ SIM_OBJS = \
 
 SIM_EXTRA_HW_DEVICES = rv cris cris_900000xx
 
-# Extra headers included by sim-main.h.
-# FIXME: $(srccom)/cgen-ops.h should be in CGEN_INCLUDE_DEPS.
-SIM_EXTRA_DEPS = \
-	$(CGEN_INCLUDE_DEPS) $(srccom)/cgen-ops.h \
-	arch.h cpuall.h cris-sim.h engv10.h engv32.h
-
 SIM_EXTRA_CLEAN = cris-clean
 
 ## COMMON_POST_CONFIG_FRAG
@@ -55,20 +49,6 @@ check: rvdummy$(EXEEXT)
 rvdummy$(EXEEXT): rvdummy.o $(EXTRA_LIBDEPS)
 	$(ECHO_CCLD) $(LIBTOOL) $(AM_V_lt) --tag=CC --mode=link \
 	  $(CC) $(ALL_CFLAGS) -o rvdummy$(EXEEXT) rvdummy.o $(EXTRA_LIBS)
-
-rvdummy.o: rvdummy.c $(remote_sim_h) $(callback_h)
-
-# CRISV10 objs
-
-CRISV10F_INCLUDE_DEPS = \
-	$(CGEN_MAIN_CPU_DEPS) \
-	cpuv10.h decodev10.h engv10.h
-
-# CRISV32 objs
-
-CRISV32F_INCLUDE_DEPS = \
-	$(CGEN_MAIN_CPU_DEPS) \
-	cpuv32.h decodev32.h engv32.h
 
 cris-clean:
 	-rm -f stamp-arch

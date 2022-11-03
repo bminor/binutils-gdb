@@ -27,9 +27,6 @@ SIM_OBJS = $(MN10300_OBJS) interp.o
 
 SIM_EXTRA_HW_DEVICES = mn103cpu mn103int mn103tim mn103ser mn103iop
 
-# Extra dependencies for "sim-main.h"
-SIM_EXTRA_DEPS = mn10300_sim.h itable.h idecode.h
-
 # List of extra flags to always pass to $(CC).
 SIM_EXTRA_CFLAGS = -DPOLL_QUIT_INTERVAL=0x20
 

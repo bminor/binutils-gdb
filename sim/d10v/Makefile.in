@@ -25,9 +25,4 @@ SIM_OBJS = \
 	simops.o \
 	endian.o
 
-SIM_EXTRA_DEPS = simops.h
-
-INCLUDE = d10v_sim.h $(srcroot)/include/sim/callback.h endian.c \
-	$(srcroot)/include/gdb/sim-d10v.h
-
 ## COMMON_POST_CONFIG_FRAG

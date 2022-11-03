@@ -35,12 +35,6 @@ SIM_OBJS = \
 
 SIM_EXTRA_HW_DEVICES = m32r_cache m32r_uart
 
-# Extra headers included by sim-main.h.
-SIM_EXTRA_DEPS = \
-	$(CGEN_INCLUDE_DEPS) \
-	arch.h cpuall.h m32r-sim.h $(srcdir)/../../opcodes/m32r-desc.h \
-	eng.h engx.h eng2.h
-
 SIM_EXTRA_CLEAN = m32r-clean
 
 # Some modules don't build cleanly yet.

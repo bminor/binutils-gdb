@@ -31,27 +31,9 @@ SIM_OBJS = \
 	$(BPF_GEN_OBJS) \
 	$(BPF_HAND_OBJS)
 
-SIM_EXTRA_DEPS = \
-	$(CGEN_INCLUDE_DEPS) \
-	arch.h \
-	bpf-sim.h \
-	eng-le.h eng-be.h \
-	$(srcdir)/../../opcodes/bpf-desc.h \
-	$(srcdir)/../../opcodes/bpf-opc.h
-
 SIM_EXTRA_CLEAN = bpf-clean
 
 ## COMMON_POST_CONFIG_FRAG
-
-# BPF headers
-
-BPF_INCLUDE_DEPS = \
-	$(CGEN_MAIN_CPU_DEPS) \
-	$(SIM_EXTRA_DEPS) \
-	cpu.h cpuall.h \
-        decode-le.h decode-be.h \
-        defs-le.h defs-be.h \
-        eng-le.h eng-be.h
 
 # Dependencies for binaries from CGEN generated source
 
@@ -65,7 +47,7 @@ mloop-be.o: mloop-be.c
 decode-le.o: decode-le.c
 	$(COMPILE) -DWANT_ISA_EBPFLE $(srcdir)/decode-le.c
 	$(POSTCOMPILE)
-decode-be.o: decode-be.c $(BPF_INCLUDE_DEPS)
+decode-be.o: decode-be.c
 	$(COMPILE) -DWANT_ISA_EBPFBE $(srcdir)/decode-be.c
 	$(POSTCOMPILE)
 

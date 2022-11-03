@@ -175,24 +175,6 @@ SIM_NEW_COMMON_OBJS = \
 	\
 	$(SIM_HW_OBJS) \
 
-# cgen-sim.h and the headers it includes
-CGEN_SIM_DEPS = \
-	$(srccom)/cgen-sim.h \
-	$(srccom)/cgen-defs.h \
-	$(srccom)/cgen-scache.h \
-	$(srccom)/cgen-fpu.h \
-	$(srccom)/cgen-par.h \
-	$(srccom)/cgen-cpu.h \
-	$(srccom)/cgen-trace.h \
-	cpuall.h
-
-# Add this to SIM_EXTRA_DEPS.
-CGEN_INCLUDE_DEPS = \
-	$(CGEN_SIM_DEPS) \
-	$(srccom)/cgen-engine.h \
-	$(srccom)/cgen-types.h \
-	$(srcdir)/../../include/opcode/cgen.h
-
 ## End COMMON_PRE_CONFIG_FRAG
 
 ## COMMON_POST_CONFIG_FRAG
@@ -244,9 +226,6 @@ LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@
 
 RUNTESTFLAGS =
 
-callback_h = $(srcroot)/include/sim/callback.h
-remote_sim_h = $(srcroot)/include/sim/sim.h
-
 all: libsim.a run$(EXEEXT)
 
 libsim.a: $(LIB_OBJS)
@@ -258,104 +237,6 @@ run$(EXEEXT): $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
 	$(ECHO_CCLD) $(LIBTOOL) $(AM_V_lt) --tag=CC --mode=link \
 	  $(CC) $(ALL_CFLAGS) $(LDFLAGS) -o run$(EXEEXT) \
 	  $(SIM_RUN_OBJS) libsim.a $(EXTRA_LIBS)
-
-#
-# Rules for building sim-* components.  Triggered by listing the corresponding
-# .o file in the list of simulator targets.
-#
-
-sim_main_headers = \
-	sim-main.h \
-	$(sim-assert_h) \
-	$(sim-base_h) \
-	$(sim-cpu_h) \
-	$(sim-engine_h) \
-	$(sim-events_h) \
-	$(sim-memopt_h) \
-	$(sim-model_h) \
-	$(sim-module_h) \
-	$(sim-profile_h) \
-	$(sim-trace_h) \
-	$(sim-watch_h) \
-	$(sim-basics_h) \
-	$(SIM_EXTRA_DEPS)
-
-# Exported version of sim_main_headers.
-SIM_MAIN_DEPS = \
-	$(sim_main_headers)
-
-sim-alu_h = $(srccom)/sim-alu.h
-sim-arange_h = $(srccom)/sim-arange.h
-sim-assert_h = $(srccom)/sim-assert.h
-sim-base_h = $(srccom)/sim-base.h \
-		$(sim-module_h) \
-		$(sim-trace_h) \
-		$(sim-core_h) \
-		$(sim-events_h) \
-		$(sim-profile_h) \
-		$(sim-model_h) \
-		$(sim-io_h) \
-		$(sim-engine_h) \
-		$(sim-watch_h) \
-		$(sim-memopt_h) \
-		$(sim-cpu_h)
-sim-basics_h = $(srccom)/sim-basics.h \
-		$(sim-config_h) \
-		$(callback_h) \
-		$(sim-inline_h) \
-		$(sim-types_h) \
-		$(sim-bits_h) \
-		$(sim-endian_h) \
-		$(sim-signal_h) \
-		$(sim-arange_h) \
-		$(sim-utils_h)
-sim-bits_h = $(srccom)/sim-bits.h \
-		$(srccom)/sim-bits.c
-sim-config_h = $(srccom)/sim-config.h
-sim-core_h = $(srccom)/sim-core.h
-sim-cpu_h = $(srccom)/sim-cpu.h
-sim-endian_h = $(srccom)/sim-endian.h \
-		$(srccom)/sim-endian.c
-sim-engine_h = $(srccom)/sim-engine.h
-sim-events_h = $(srccom)/sim-events.h
-sim-fpu_h = $(srccom)/sim-fpu.h
-sim-hw_h = $(srccom)/sim-hw.h
-sim-inline_h = $(srccom)/sim-inline.h
-sim-io_h = $(srccom)/sim-io.h
-sim-memopt_h = $(srccom)/sim-memopt.h
-sim-model_h = $(srccom)/sim-model.h
-sim-module_h = $(srccom)/sim-module.h
-sim-n-bits_h = $(srccom)/sim-n-bits.h
-sim-n-core_h = $(srccom)/sim-n-core.h
-sim-n-endian_h = $(srccom)/sim-n-endian.h
-sim-options_h = $(srccom)/sim-options.h
-sim-profile_h = $(srccom)/sim-profile.h
-sim-signal_h = $(srccom)/sim-signal.h
-sim-trace_h = $(srccom)/sim-trace.h
-sim-types_h = $(srccom)/sim-types.h
-sim-utils_h = $(srccom)/sim-utils.h
-sim-watch_h = $(srccom)/sim-watch.h
-
-hw-alloc_h = $(srccom)/hw-alloc.h
-hw-base_h = $(srccom)/hw-base.h
-hw-device_h = $(srccom)/hw-device.h
-hw-events_h = $(srccom)/hw-events.h
-hw-handles_h = $(srccom)/hw-handles.h
-hw-instances_h = $(srccom)/hw-instances.h
-hw-ports_h = $(srccom)/hw-ports.h
-hw-properties_h = $(srccom)/hw-properties.h
-hw-tree_h = $(srccom)/hw-tree.h
-
-hw_main_headers = \
-	$(srccom)/hw-main.h \
-	$(hw-alloc_h) \
-	$(hw-base_h) \
-	$(hw-device_h) \
-	$(hw-events_h) \
-	$(hw-instances_h) \
-	$(hw-handles_h) \
-	$(hw-ports_h) \
-	$(hw-properties_h) \
 
 #
 # Dependency tracking.  Most of this is conditional on GNU Make being
@@ -439,14 +320,6 @@ stamp-modules: Makefile $(SIM_OBJS:.o=.c)
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change $@.tmp modules.c
 	$(SILENCE) rm -f $@.l-tmp $@.tmp
 	$(SILENCE) touch $@
-
-# CGEN support.
-
-# For use in Makefile.in for cpu-specific files.
-CGEN_MAIN_CPU_DEPS = \
-	$(SIM_MAIN_DEPS) \
-	$(srccom)/cgen-ops.h \
-	$(srccom)/cgen-mem.h
 
 # Support targets.
 

@@ -26,11 +26,6 @@ SIM_OBJS = \
 	sim-if.o arch.o \
 	$(IQ2000_OBJS)
 
-# Extra headers included by sim-main.h.
-SIM_EXTRA_DEPS = \
-	$(CGEN_INCLUDE_DEPS) \
-	arch.h cpuall.h $(srcdir)/../../opcodes/iq2000-desc.h eng.h
-
 ALL_CPU_CFLAGS = -DHAVE_CPU_IQ2000BF -DHAVE_CPU_IQ10BF
 
 SIM_EXTRA_CLEAN = iq2000-clean
@@ -44,10 +39,6 @@ arch.o: arch.c
 	$(POSTCOMPILE)
 
 # IQ2000 objs
-
-IQ2000BF_INCLUDE_DEPS = \
-	$(CGEN_MAIN_CPU_DEPS) \
-	cpu.h decode.h eng.h
 
 iq2000-clean:
 	rm -f tmp-*
