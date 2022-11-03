@@ -40542,6 +40542,14 @@ that symbol is described.  The type chain produced by this command is
 a recursive definition of the data type as stored in @value{GDBN}'s
 data structures, including its flags and contained types.
 
+@kindex maint print record-instruction
+@item maint print record-instruction
+@itemx maint print record-instruction @var{N}
+print how GDB recorded a given instruction.  If @var{n} is not positive
+number, it prints the values stored by the inferior before the @var{n}-th previous
+instruction was exectued.  If @var{n} is positive, print the values after the @var{n}-th
+following instruction is executed.  If @var{n} is not given, 0 is assumed.
+
 @kindex maint selftest
 @cindex self tests
 @item maint selftest @r{[}-verbose@r{]} @r{[}@var{filter}@r{]}

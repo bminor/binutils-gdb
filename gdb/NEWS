@@ -9,6 +9,14 @@
   This support requires that GDB be built with Python scripting
   enabled.
 
+* New commands
+
+maintenance print record-instruction [ N ]
+  Print the recorded information for a given instruction.  If N is not given
+  prints how GDB would undo the last instruction executed.  If N is negative,
+  prints how GDB would undo the N-th previous instruction, and if N is
+  positive, it prints how GDB will redo the N-th following instruction.
+
 *** Changes in GDB 13
 
 * MI version 1 is deprecated, and will be removed in GDB 14.
