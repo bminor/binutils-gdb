@@ -19,9 +19,6 @@ SIM_EXTRA_HW_DEVICES = lm32cpu lm32timer lm32uart
 SIM_EXTRA_DEPS = $(CGEN_INCLUDE_DEPS) $(srcdir)/../../opcodes/lm32-desc.h \
 	eng.h
 
-# List of flags to always pass to $(CC).
-#SIM_EXTRA_CFLAGS =
-
 SIM_EXTRA_CLEAN = lm32-clean
 
 ## COMMON_POST_CONFIG_FRAG
