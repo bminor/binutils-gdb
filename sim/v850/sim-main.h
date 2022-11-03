@@ -435,7 +435,7 @@ enum op_types
   OP_PUSHPOP3,
 };
 
-#ifdef DEBUG
+#if WITH_TRACE_ANY_P
 void trace_input (char *name, enum op_types type, int size);
 void trace_output (enum op_types result);
 void trace_result (int has_result, uint32_t result);

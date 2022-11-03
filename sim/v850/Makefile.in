@@ -27,8 +27,4 @@ SIM_OBJS = \
 # Generally this consists of simulator specific files included by sim-main.h.
 SIM_EXTRA_DEPS = v850_sim.h sim-main.h
 
-# List of flags to always pass to $(CC)
-SIM_EXTRA_CFLAGS = \
-	-DDEBUG
-
 ## COMMON_POST_CONFIG_FRAG

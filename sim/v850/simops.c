@@ -39,7 +39,7 @@ int type2_regs[16] = { 3, 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 20, 2
    that order in a push/pop instruction.  */
 int type3_regs[15] = { 2, 1, 0, 27, 26, 25, 24, 31, 30, 29, 28, 23, 22, 20, 21};
 
-#ifdef DEBUG
+#if WITH_TRACE_ANY_P
 #ifndef SIZE_INSTRUCTION
 #define SIZE_INSTRUCTION 18
 #endif
