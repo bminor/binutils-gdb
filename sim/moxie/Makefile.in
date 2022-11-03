@@ -22,7 +22,6 @@ SIM_OBJS = \
 	interp.o \
 	sim-resume.o
 
-SIM_EXTRA_LIBS = -lm
 SIM_EXTRA_CFLAGS = -DDTB="\"$(dtbdir)/moxie-gdb.dtb\""
 
 ## COMMON_POST_CONFIG_FRAG

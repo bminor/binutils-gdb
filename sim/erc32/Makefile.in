@@ -23,7 +23,7 @@ READLINE_SRC = $(srcroot)/readline/readline
 SIM_OBJS = exec.o erc32.o func.o help.o float.o interf.o
 SIM_RUN_OBJS = sis.o
 SIM_EXTRA_CFLAGS = $(READLINE_CFLAGS)
-SIM_EXTRA_LIBS = $(READLINE_LIB) $(TERMCAP_LIB) -lm
+SIM_EXTRA_LIBS = $(READLINE_LIB) $(TERMCAP_LIB)
 SIM_EXTRA_INSTALL = install-sis
 SIM_EXTRA_CLEAN = clean-sis
 

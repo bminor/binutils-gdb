@@ -49,8 +49,6 @@ SIM_EXTRA_DEPS = \
 	cpuall.h \
 	decode.h
 
-SIM_EXTRA_LIBS = -lm
-
 ## COMMON_POST_CONFIG_FRAG
 
 arch = or1k

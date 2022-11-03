@@ -21,8 +21,6 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_EXTRA_LIBS = -lm
-
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	interp.o \
