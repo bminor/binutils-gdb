@@ -1,6 +1,7 @@
 ## See sim/Makefile.am
 ##
-## Copyright (C) 1993-2022 Free Software Foundation, Inc.
+## Copyright (C) 2008-2022 Free Software Foundation, Inc.
+## Written by Anthony Green
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -14,6 +15,14 @@
 ##
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+%C%_run_SOURCES =
+%C%_run_LDADD = \
+	%D%/nrun.o \
+	%D%/libsim.a \
+	$(SIM_COMMON_LIBS)
+
+noinst_PROGRAMS += %D%/run
 
 dtbdir = $(datadir)/gdb/dtb
 
@@ -30,10 +39,3 @@ dtb_DATA = %D%/moxie-gdb.dtb
 	  echo "tree compiler tool (dtc) is missing.  Install the tool to "; \
 	  echo "update the device tree blob."; \
 	fi
-
-# Rule to create the .dirstamp file (on which moxie-gdb.dtb depends)
-# as automake fails to automatically create this rule for _DATA items.
-%D%/$(am__dirstamp):
-	@$(MKDIR_P) %D%
-	@: >%D%/$(am__dirstamp)
-DISTCLEANFILES += %D%/$(am__dirstamp)

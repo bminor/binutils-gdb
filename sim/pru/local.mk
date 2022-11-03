@@ -1,7 +1,7 @@
 ## See sim/Makefile.am
 ##
-## Copyright (C) 2008-2022 Free Software Foundation, Inc.
-## Contributed by Red Hat, Inc.
+## Copyright (C) 1990-2022 Free Software Foundation, Inc.
+## Written by Dimitar Dimitrov <dimitar@dinux.eu>
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -18,15 +18,8 @@
 
 %C%_run_SOURCES =
 %C%_run_LDADD = \
-	%D%/main.o \
+	%D%/nrun.o \
 	%D%/libsim.a \
 	$(SIM_COMMON_LIBS)
 
 noinst_PROGRAMS += %D%/run
-
-## Helper targets for running make from the top-level due to run's main.o.
-%D%/%.o: %D%/%.c | %D%/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
-	$(MAKE) -C $(@D) $(@F)
-
-%C%docdir = $(docdir)/%C%
-%C%doc_DATA = %D%/README.txt

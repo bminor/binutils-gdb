@@ -208,17 +208,12 @@ LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@
 
 RUNTESTFLAGS =
 
-all: libsim.a run$(EXEEXT)
+all: libsim.a $(SIM_RUN_OBJS)
 
 libsim.a: $(LIB_OBJS)
 	$(SILENCE) rm -f libsim.a
 	$(ECHO_AR) $(AR) $(AR_FLAGS) libsim.a $(LIB_OBJS)
 	$(ECHO_RANLIB) $(RANLIB) libsim.a
-
-run$(EXEEXT): $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
-	$(ECHO_CCLD) $(LIBTOOL) $(AM_V_lt) --tag=CC --mode=link \
-	  $(CC) $(ALL_CFLAGS) $(LDFLAGS) -o run$(EXEEXT) \
-	  $(SIM_RUN_OBJS) libsim.a $(EXTRA_LIBS)
 
 #
 # Dependency tracking.  Most of this is conditional on GNU Make being

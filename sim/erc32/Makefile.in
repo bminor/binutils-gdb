@@ -24,7 +24,6 @@ SIM_OBJS = exec.o erc32.o func.o help.o float.o interf.o
 SIM_RUN_OBJS = sis.o
 SIM_EXTRA_CFLAGS = $(READLINE_CFLAGS)
 SIM_EXTRA_LIBS = $(READLINE_LIB) $(TERMCAP_LIB)
-SIM_EXTRA_CLEAN = clean-sis
 
 # UARTS run at about 115200 baud (simulator time). Add -DFAST_UART to
 # CFLAGS if faster (infinite) UART speed is desired. Might affect the
@@ -32,11 +31,3 @@ SIM_EXTRA_CLEAN = clean-sis
 SIM_EXTRA_CFLAGS += -DFAST_UART -I$(srcroot)
 
 ## COMMON_POST_CONFIG_FRAG
-
-all: sis$(EXEEXT)
-sis$(EXEEXT): run$(EXEEXT)
-	$(SILENCE) rm -f $@
-	$(ECHO_GEN) ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
-
-clean-sis:
-	rm -f sis

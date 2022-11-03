@@ -37,10 +37,6 @@ include ../arch-subdir.mk
 prefix = @prefix@
 exec_prefix = @exec_prefix@
 
-bindir = @bindir@
-libdir = @libdir@
-tooldir = $(libdir)/$(target_alias)
-
 datarootdir = @datarootdir@
 datadir = @datadir@
 mandir = @mandir@
@@ -135,7 +131,7 @@ BFD_LIB		= ../../bfd/libbfd.la
 
 TARGETLIB	= libsim.a
 
-all:	run$(EXEEXT) $(TARGETLIB) $(GDB_OBJ)
+all:	main.o $(TARGETLIB) $(GDB_OBJ)
 
 .c.o:
 	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) $<
@@ -518,14 +514,6 @@ PACKAGE_SRC = pk_disklabel.c
 PACKAGE_OBJ = $(PACKAGE_SRC:.c=.o)
 
 
-psim$(EXEEXT): $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB)
-	$(ECHO_CCLD) $(LIBTOOL) $(AM_V_lt) --tag=CC --mode=link \
-	  $(CC) $(CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(LIBIBERTY_LIB) $(LIBS)
-
-run$(EXEEXT): psim$(EXEEXT)
-	$(SILENCE) rm -f $@
-	$(ECHO_GEN) ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
-
 $(TARGETLIB): tmp-igen tmp-dgen tmp-hw tmp-defines $(LIB_OBJ) $(GDB_OBJ)
 	$(ECHO_AR) $(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
 	$(ECHO_RANLIB) $(RANLIB) $(TARGETLIB)
@@ -811,7 +799,7 @@ TAGS: $(BUILT_SRC)
 	etags $(srcdir)/*.h $(srcdir)/*.c $(BUILT_SRC)
 
 clean mostlyclean:
-	rm -f tmp-* *.[oasi] core psim$(EXEEXT) run$(EXEEXT) igen dgen $(BUILT_SRC_WO_CONFIG)
+	rm -f tmp-* *.[oasi] core igen dgen $(BUILT_SRC_WO_CONFIG)
 
 distclean realclean: clean
 	rm -f TAGS Makefile config.cache config.status config.h defines.h stamp-h config.log

@@ -1,6 +1,7 @@
 ## See sim/Makefile.am
 ##
 ## Copyright (C) 1995-2022 Free Software Foundation, Inc.
+## Written by Cygnus Support.
 ##
 ## This program is free software; you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -14,6 +15,14 @@
 ##
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+%C%_run_SOURCES =
+%C%_run_LDADD = \
+	%D%/nrun.o \
+	%D%/libsim.a \
+	$(SIM_COMMON_LIBS)
+
+noinst_PROGRAMS += %D%/run
 
 %C%docdir = $(docdir)/%C%
 %C%doc_DATA = %D%/README

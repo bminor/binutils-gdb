@@ -16,6 +16,18 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%C%_run_SOURCES =
+%C%_run_LDADD = \
+	%D%/main.o \
+	%D%/libsim.a \
+	$(SIM_COMMON_LIBS)
+
+noinst_PROGRAMS += %D%/run
+
+## Helper targets for running make from the top-level due to run's main.o.
+%D%/%.o: %D%/%.c | %D%/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
+	$(MAKE) -C $(@D) $(@F)
+
 %C%_BUILD_OUTPUTS = \
 	%D%/opc2c$(EXEEXT) \
 	%D%/m32c.c \

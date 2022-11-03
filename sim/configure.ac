@@ -156,6 +156,7 @@ if test "${enable_sim}" != no; then
     SIM_AC_TOOLCHAIN_FOR_TARGET(example-synacor)
     SIM_BUILD_TARGET([example-synacor])
   fi
+  AM_CONDITIONAL([SIM_ENABLE_ARCH_examples], [test "${enable_example_sims}" = "yes"])
 fi
 AM_CONDITIONAL([SIM_ENABLE_IGEN], [test "$sim_igen" = "yes"])
 AM_CONDITIONAL([ENABLE_SIM], [test -n "$SIM_SUBDIRS"])

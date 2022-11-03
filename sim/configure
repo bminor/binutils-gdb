@@ -655,6 +655,8 @@ ENABLE_SIM_FALSE
 ENABLE_SIM_TRUE
 SIM_ENABLE_IGEN_FALSE
 SIM_ENABLE_IGEN_TRUE
+SIM_ENABLE_ARCH_examples_FALSE
+SIM_ENABLE_ARCH_examples_TRUE
 CC_FOR_TARGET_EXAMPLE_SYNACOR
 LD_FOR_TARGET_EXAMPLE_SYNACOR
 AS_FOR_TARGET_EXAMPLE_SYNACOR
@@ -12426,7 +12428,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12429 "configure"
+#line 12431 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12532,7 +12534,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12535 "configure"
+#line 12537 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15680,6 +15682,14 @@ as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_EXAMPLE_SYNACOR LD_FOR_TARGET_EX
 
 
   fi
+   if test "${enable_example_sims}" = "yes"; then
+  SIM_ENABLE_ARCH_examples_TRUE=
+  SIM_ENABLE_ARCH_examples_FALSE='#'
+else
+  SIM_ENABLE_ARCH_examples_TRUE='#'
+  SIM_ENABLE_ARCH_examples_FALSE=
+fi
+
 fi
  if test "$sim_igen" = "yes"; then
   SIM_ENABLE_IGEN_TRUE=
@@ -16485,6 +16495,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${SIM_ENABLE_ARCH_v850_TRUE}" && test -z "${SIM_ENABLE_ARCH_v850_FALSE}"; then
   as_fn_error $? "conditional \"SIM_ENABLE_ARCH_v850\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${SIM_ENABLE_ARCH_examples_TRUE}" && test -z "${SIM_ENABLE_ARCH_examples_FALSE}"; then
+  as_fn_error $? "conditional \"SIM_ENABLE_ARCH_examples\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${SIM_ENABLE_IGEN_TRUE}" && test -z "${SIM_ENABLE_IGEN_FALSE}"; then

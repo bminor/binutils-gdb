@@ -15,5 +15,20 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%C%_run_SOURCES =
+%C%_run_LDADD = \
+	%D%/main.o \
+	%D%/libsim.a \
+	$(SIM_COMMON_LIBS)
+
+%D%/psim$(EXEEXT): %D%/run$(EXEEXT)
+	$(AM_V_GEN)ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
+
+## Helper targets for running make from the top-level due to run's sis.o.
+%D%/%.o: %D%/%.c | %D%/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
+	$(MAKE) -C $(@D) $(@F)
+
+noinst_PROGRAMS += %D%/run %D%/psim
+
 %C%docdir = $(docdir)/%C%
 %C%doc_DATA = %D%/BUGS %D%/INSTALL %D%/README %D%/RUN

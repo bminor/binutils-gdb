@@ -30,7 +30,8 @@ SIM_ALL_RECURSIVE_DEPS += \
 
 ## NB: libcommon.a isn't used directly by ports.  We need a target for common
 ## objects to be a part of, and ports use the individual objects directly.
-noinst_LIBRARIES += %D%/libcommon.a
+SIM_COMMON_LIB = %D%/libcommon.a
+noinst_LIBRARIES += $(SIM_COMMON_LIB)
 %C%_libcommon_a_SOURCES = \
 	%D%/callback.c \
 	%D%/portability.c \
@@ -50,3 +51,19 @@ noinst_LIBRARIES += %D%/libcommon.a
 
 CLEANFILES += \
 	%D%/version.c %D%/version.c-stamp
+
+##
+## For subdirs.
+##
+
+LIBIBERTY_LIB = ../libiberty/libiberty.a
+BFD_LIB = ../bfd/libbfd.la
+OPCODES_LIB = ../opcodes/libopcodes.la
+
+SIM_COMMON_LIBS = \
+	$(SIM_COMMON_LIB) \
+	$(BFD_LIB) \
+	$(OPCODES_LIB) \
+	$(LIBIBERTY_LIB) \
+	$(LIBGNU) \
+	$(LIBGNU_EXTRA_LIBS)

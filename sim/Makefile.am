@@ -33,6 +33,7 @@ AM_MAKEFLAGS = SIM_PRIMARY_TARGET=$(SIM_PRIMARY_TARGET)
 ## be used consistently in local.mk files we include below.
 pkginclude_HEADERS =
 check_PROGRAMS =
+noinst_PROGRAMS =
 noinst_LIBRARIES =
 EXTRA_PROGRAMS =
 
@@ -85,8 +86,18 @@ include igen/local.mk
 endif
 include testsuite/local.mk
 
+## Arch includes must come after common/local.mk.
+if SIM_ENABLE_ARCH_aarch64
+include aarch64/local.mk
+endif
 if SIM_ENABLE_ARCH_arm
 include arm/local.mk
+endif
+if SIM_ENABLE_ARCH_avr
+include avr/local.mk
+endif
+if SIM_ENABLE_ARCH_bfin
+include bfin/local.mk
 endif
 if SIM_ENABLE_ARCH_bpf
 include bpf/local.mk
@@ -103,8 +114,17 @@ endif
 if SIM_ENABLE_ARCH_erc32
 include erc32/local.mk
 endif
+if SIM_ENABLE_ARCH_examples
+include example-synacor/local.mk
+endif
 if SIM_ENABLE_ARCH_frv
 include frv/local.mk
+endif
+if SIM_ENABLE_ARCH_ft32
+include ft32/local.mk
+endif
+if SIM_ENABLE_ARCH_h8300
+include h8300/local.mk
 endif
 if SIM_ENABLE_ARCH_iq2000
 include iq2000/local.mk
@@ -121,17 +141,38 @@ endif
 if SIM_ENABLE_ARCH_m68hc11
 include m68hc11/local.mk
 endif
+if SIM_ENABLE_ARCH_mcore
+include mcore/local.mk
+endif
+if SIM_ENABLE_ARCH_microblaze
+include microblaze/local.mk
+endif
+if SIM_ENABLE_ARCH_mips
+include mips/local.mk
+endif
 if SIM_ENABLE_ARCH_mn10300
 include mn10300/local.mk
 endif
 if SIM_ENABLE_ARCH_moxie
 include moxie/local.mk
 endif
+if SIM_ENABLE_ARCH_msp430
+include msp430/local.mk
+endif
 if SIM_ENABLE_ARCH_or1k
 include or1k/local.mk
 endif
 if SIM_ENABLE_ARCH_ppc
 include ppc/local.mk
+endif
+if SIM_ENABLE_ARCH_pru
+include pru/local.mk
+endif
+if SIM_ENABLE_ARCH_riscv
+include riscv/local.mk
+endif
+if SIM_ENABLE_ARCH_rl78
+include rl78/local.mk
 endif
 if SIM_ENABLE_ARCH_rx
 include rx/local.mk
@@ -142,6 +183,15 @@ endif
 if SIM_ENABLE_ARCH_v850
 include v850/local.mk
 endif
+
+## Helper targets for running make from the top-level when some subdirs still
+## have Makefiles in subdirs.
+
+%/libsim.a: | $(SIM_ALL_RECURSIVE_DEPS)
+	$(MAKE) -C $(@D) $(@F)
+
+%/nrun.o: common/nrun.c | %/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
+	$(MAKE) -C $(@D) $(@F)
 
 all-recursive: $(SIM_ALL_RECURSIVE_DEPS)
 
