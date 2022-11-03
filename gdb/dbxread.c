@@ -48,6 +48,7 @@
 #include "complaints.h"
 #include "cp-abi.h"
 #include "cp-support.h"
+#include "c-lang.h"
 #include "psympriv.h"
 #include "block.h"
 #include "aout/aout64.h"
@@ -1437,6 +1438,18 @@ read_dbx_symtab (minimal_symbol_reader &reader,
 	      std::string name (namestring, p - namestring);
 	      gdb::unique_xmalloc_ptr<char> new_name
 		= cp_canonicalize_string (name.c_str ());
+	      if (new_name != nullptr)
+		{
+		  sym_len = strlen (new_name.get ());
+		  sym_name = obstack_strdup (&objfile->objfile_obstack,
+					     new_name.get ());
+		}
+	    }
+	  else if (psymtab_language == language_c)
+	    {
+	      std::string name (namestring, p - namestring);
+	      gdb::unique_xmalloc_ptr<char> new_name
+		= c_canonicalize_name (name.c_str ());
 	      if (new_name != nullptr)
 		{
 		  sym_len = strlen (new_name.get ());

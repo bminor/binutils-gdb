@@ -727,6 +727,20 @@ c_is_string_type_p (struct type *type)
 
 
 
+/* See c-lang.h.  */
+
+gdb::unique_xmalloc_ptr<char>
+c_canonicalize_name (const char *name)
+{
+  if (strchr (name, ' ') != nullptr
+      || streq (name, "signed")
+      || streq (name, "unsigned"))
+    return cp_canonicalize_string (name);
+  return nullptr;
+}
+
+
+
 void
 c_language_arch_info (struct gdbarch *gdbarch,
 		      struct language_arch_info *lai)

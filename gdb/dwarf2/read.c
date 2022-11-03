@@ -22014,10 +22014,21 @@ static const char *
 dwarf2_canonicalize_name (const char *name, struct dwarf2_cu *cu,
 			  struct objfile *objfile)
 {
-  if (name && cu->lang () == language_cplus)
+  if (name == nullptr)
+    return name;
+
+  if (cu->lang () == language_cplus)
     {
       gdb::unique_xmalloc_ptr<char> canon_name
 	= cp_canonicalize_string (name);
+
+      if (canon_name != nullptr)
+	name = objfile->intern (canon_name.get ());
+    }
+  else if (cu->lang () == language_c)
+    {
+      gdb::unique_xmalloc_ptr<char> canon_name
+	= c_canonicalize_name (name);
 
       if (canon_name != nullptr)
 	name = objfile->intern (canon_name.get ());
@@ -22050,6 +22061,11 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 
   switch (die->tag)
     {
+      /* A member's name should not be canonicalized.  This is a bit
+	 of a hack, in that normally it should not be possible to run
+	 into this situation; however, the dw2-unusual-field-names.exp
+	 test creates custom DWARF that does.  */
+    case DW_TAG_member:
     case DW_TAG_compile_unit:
     case DW_TAG_partial_unit:
       /* Compilation units have a DW_AT_name that is a filename, not

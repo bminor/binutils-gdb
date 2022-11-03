@@ -167,4 +167,9 @@ extern std::string cplus_compute_program (compile_instance *inst,
 					  const struct block *expr_block,
 					  CORE_ADDR expr_pc);
 
+/* Return the canonical form of the C symbol NAME.  If NAME is already
+   canonical, return nullptr.  */
+
+extern gdb::unique_xmalloc_ptr<char> c_canonicalize_name (const char *name);
+
 #endif /* !defined (C_LANG_H) */

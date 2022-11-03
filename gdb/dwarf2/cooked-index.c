@@ -21,6 +21,7 @@
 #include "dwarf2/cooked-index.h"
 #include "dwarf2/read.h"
 #include "cp-support.h"
+#include "c-lang.h"
 #include "ada-lang.h"
 #include "split-name.h"
 #include <algorithm>
@@ -210,14 +211,17 @@ cooked_index::do_finalize ()
 	      m_names.push_back (std::move (canon_name));
 	    }
 	}
-      else if (entry->per_cu->lang () == language_cplus)
+      else if (entry->per_cu->lang () == language_cplus
+	       || entry->per_cu->lang () == language_c)
 	{
 	  void **slot = htab_find_slot (seen_names.get (), entry,
 					INSERT);
 	  if (*slot == nullptr)
 	    {
 	      gdb::unique_xmalloc_ptr<char> canon_name
-		= cp_canonicalize_string (entry->name);
+		= (entry->per_cu->lang () == language_cplus
+		   ? cp_canonicalize_string (entry->name)
+		   : c_canonicalize_name (entry->name));
 	      if (canon_name == nullptr)
 		entry->canonical = entry->name;
 	      else

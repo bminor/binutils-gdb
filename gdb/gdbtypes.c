@@ -1729,15 +1729,9 @@ lookup_unsigned_typename (const struct language_defn *language,
 struct type *
 lookup_signed_typename (const struct language_defn *language, const char *name)
 {
-  struct type *t;
-  char *uns = (char *) alloca (strlen (name) + 8);
-
-  strcpy (uns, "signed ");
-  strcpy (uns + 7, name);
-  t = lookup_typename (language, uns, NULL, 1);
-  /* If we don't find "signed FOO" just try again with plain "FOO".  */
-  if (t != NULL)
-    return t;
+  /* In C and C++, "char" and "signed char" are distinct types.  */
+  if (streq (name, "char"))
+    name = "signed char";
   return lookup_typename (language, name, NULL, 0);
 }
 
