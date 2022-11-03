@@ -145,12 +145,12 @@ AC_TYPE_UID_T
 LT_INIT
 
 dnl Libraries.
-AC_CHECK_LIB(socket, bind)
-AC_CHECK_LIB(nsl, gethostbyname)
-AC_CHECK_LIB(m, fabs)
-AC_CHECK_LIB(m, log2)
+AC_SEARCH_LIBS([bind], [socket])
+AC_SEARCH_LIBS([gethostbyname], [nsl])
+AC_SEARCH_LIBS([fabs], [m])
+AC_SEARCH_LIBS([log2], [m])
 
-AC_CHECK_LIB(dl, dlopen)
+AC_SEARCH_LIBS([dlopen], [dl])
 if test "${ac_cv_lib_dl_dlopen}" = "yes"; then
   PKG_CHECK_MODULES(SDL, sdl2, [dnl
     SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL=2"
