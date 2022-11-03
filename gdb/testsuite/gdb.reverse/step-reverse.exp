@@ -31,6 +31,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile] } {
 }
 
 runto_main
+set target_remote [gdb_is_target_remote]
 
 if [supports_process_record] {
     # Activate process record/replay
@@ -273,11 +274,25 @@ if { "$step_out" == 1 } {
 # Step forward over recursion again so we can test stepping over calls
 # inside the recursion itself.
 gdb_test_no_output "set exec-dir forward" "forward again to test recursion"
+if {$target_remote} {
+    # gdb doesn't record the change of return pointer for remote targets,
+    # so we can't next forward over functions.
+    setup_kfail gdb/29745 *-*-*
+}
 gdb_test "next" "NEXT OVER THIS CALL.*" "reverse next over recursion again"
 gdb_test_no_output "set exec-dir reverse" "reverse again to test recursion"
 
+if {$target_remote} {
+    # Because of the above mentioned KFAIL, the inferior is now out of sync
+    setup_kfail gdb/29745 *-*-*
+}
 gdb_test "step" ".*EXIT RECURSIVE FUNCTION.*" "enter recursive function"
 set seen_recursive_call 0
+if {$target_remote} {
+    # Because of the above mentioned KFAIL, the inferior is now out of sync
+    # The fail state below will resync the inferior.
+    setup_kfail gdb/29745 *-*-*
+}
 gdb_test_multiple "next" "step over recursion inside the recursion" {
     -re -wrap ".*RECURSIVE CALL.*" {
 	incr seen_recursive_call
