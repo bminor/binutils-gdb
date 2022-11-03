@@ -13230,7 +13230,6 @@ else
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 	      SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL=1"
-      SDL_LIBS="-ldl"
 
 fi
 
@@ -13332,7 +13331,6 @@ else
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 	      SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL=1"
-      SDL_LIBS="-ldl"
 
 fi
 
@@ -13342,14 +13340,20 @@ else
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 	    SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL=2"
-    SDL_LIBS="-ldl"
+
+fi
+    if test -n "$SDL_CFLAGS"; then :
+      if test "$ac_cv_search_dlopen" = no; then :
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: SDL support requires dlopen support" >&5
+$as_echo "$as_me: WARNING: SDL support requires dlopen support" >&2;}
+
+fi
 
 fi
 else
   SDL_CFLAGS=
-  SDL_LIBS=
 fi
-
+SDL_LIBS=
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for cygwin" >&5

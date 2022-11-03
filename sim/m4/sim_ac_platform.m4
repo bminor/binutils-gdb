@@ -154,19 +154,23 @@ AC_SEARCH_LIBS([dlopen], [dl])
 if test "${ac_cv_lib_dl_dlopen}" = "yes"; then
   PKG_CHECK_MODULES(SDL, sdl2, [dnl
     SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL=2"
-    SDL_LIBS="-ldl"
   ], [
     PKG_CHECK_MODULES(SDL, sdl, [dnl
       SDL_CFLAGS="${SDL_CFLAGS} -DHAVE_SDL=1"
-      SDL_LIBS="-ldl"
     ], [:])
+  ])
+  dnl If we use SDL, we need dlopen support.
+  AS_IF([test -n "$SDL_CFLAGS"], [dnl
+    AS_IF([test "$ac_cv_search_dlopen" = no], [dnl
+      AC_MSG_WARN([SDL support requires dlopen support])
+    ])
   ])
 else
   SDL_CFLAGS=
-  SDL_LIBS=
 fi
+dnl We dlopen the libs at runtime, so never pass down SDL_LIBS.
+SDL_LIBS=
 AC_SUBST(SDL_CFLAGS)
-AC_SUBST(SDL_LIBS)
 
 dnl In the Cygwin environment, we need some additional flags.
 AC_CACHE_CHECK([for cygwin], sim_cv_os_cygwin,
