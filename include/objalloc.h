@@ -50,7 +50,13 @@ struct objalloc
 
 /* Work out the required alignment.  */
 
-struct objalloc_align { char x; double d; };
+struct objalloc_align {
+    char x;
+    union {
+       double d;
+       void *p;
+    } u;
+};
 
 #if defined (__STDC__) && __STDC__
 #ifndef offsetof
@@ -60,7 +66,7 @@ struct objalloc_align { char x; double d; };
 #ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((unsigned long) &((TYPE *)0)->MEMBER)
 #endif
-#define OBJALLOC_ALIGN offsetof (struct objalloc_align, d)
+#define OBJALLOC_ALIGN offsetof (struct objalloc_align, u)
 
 /* Create an objalloc structure.  Returns NULL if malloc fails.  */
 
