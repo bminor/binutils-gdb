@@ -110,12 +110,6 @@ INLINE_OPTIONS\
 (void)
 print_options (void)
 {
-#if defined(_GNUC_) && defined(__VERSION__)
-  printf_filtered ("Compiled by GCC %s on %s %s\n", __VERSION__, __DATE__, __TIME__);
-#else
-  printf_filtered ("Compiled on %s %s\n", __DATE__, __TIME__);
-#endif
-
   printf_filtered ("HOST_BYTE_ORDER          = %s\n", options_byte_order (HOST_BYTE_ORDER));
   printf_filtered ("WITH_TARGET_BYTE_ORDER   = %s\n", options_byte_order (WITH_TARGET_BYTE_ORDER));
   printf_filtered ("WITH_XOR_ENDIAN          = %d\n", WITH_XOR_ENDIAN);
