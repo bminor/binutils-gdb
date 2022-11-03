@@ -359,6 +359,11 @@ psim_options(device *root,
 	  {
 	    extern const char version[];
 	    printf ("GNU simulator %s%s\n", PKGVERSION, version);
+	    printf ("Copyright (C) 2022 Free Software Foundation, Inc.\n");
+	    printf ( "\
+License GPLv3+: GNU GPL version 3 or later <https://gnu.org/licenses/gpl.html>\
+\nThis is free software: you are free to change and redistribute it.\n\
+There is NO WARRANTY, to the extent permitted by law.\n");
 	    if (kind == SIM_OPEN_STANDALONE)
 	      exit (0);
 	    else
