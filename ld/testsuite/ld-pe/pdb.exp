@@ -494,55 +494,189 @@ proc check_publics_stream { pdb } {
     return 1
 }
 
-if ![ld_assemble $as $srcdir/$subdir/pdb1.s tmpdir/pdb1.o] {
-    unsupported "Build pdb1.o"
-    return
+proc test1 { } {
+    global as
+    global ld
+    global srcdir
+    global subdir
+
+    if ![ld_assemble $as $srcdir/$subdir/pdb1.s tmpdir/pdb1.o] {
+	unsupported "Build pdb1.o"
+	return
+    }
+
+    if ![ld_link $ld "tmpdir/pdb1.exe" "--pdb=tmpdir/pdb1.pdb --gc-sections -e foo tmpdir/pdb1.o"] {
+	fail "Could not create a PE image with a PDB file"
+	return
+    }
+
+    if ![string equal [get_pdb_name "tmpdir/pdb1.exe"] "pdb1.pdb"] {
+	fail "PDB filename not found in CodeView debug info"
+	return
+    }
+
+    pass "PDB filename present in CodeView debug info"
+
+    if [check_pdb_info_stream tmpdir/pdb1.pdb [get_pdb_guid "tmpdir/pdb1.exe"]] {
+	pass "Valid PDB info stream"
+    } else {
+	fail "Invalid PDB info stream"
+    }
+
+    if [check_type_stream tmpdir/pdb1.pdb "0002"] {
+	pass "Valid TPI stream"
+    } else {
+	fail "Invalid TPI stream"
+    }
+
+    if [check_type_stream tmpdir/pdb1.pdb "0004"] {
+	pass "Valid IPI stream"
+    } else {
+	fail "Invalid IPI stream"
+    }
+
+    if [check_dbi_stream tmpdir/pdb1.pdb] {
+	pass "Valid DBI stream"
+    } else {
+	fail "Invalid DBI stream"
+    }
+
+    if [check_section_stream tmpdir/pdb1.exe tmpdir/pdb1.pdb] {
+	pass "Valid section stream"
+    } else {
+	fail "Invalid section stream"
+    }
+
+    if [check_publics_stream tmpdir/pdb1.pdb] {
+	pass "Valid publics stream"
+    } else {
+	fail "Invalid publics stream"
+    }
 }
 
-if ![ld_link $ld "tmpdir/pdb1.exe" "--pdb=tmpdir/pdb1.pdb --gc-sections -e foo tmpdir/pdb1.o"] {
-    fail "Could not create a PE image with a PDB file"
-    return
+proc test_mod_info { mod_info } {
+    # check filenames in mod_info
+
+    set off 64
+
+    set obj1 [string range $mod_info $off [expr [string first \000 $mod_info $off] - 1]]
+    incr off [expr [string length $obj1] + 1]
+
+    set ar1 [string range $mod_info $off [expr [string first \000 $mod_info $off] - 1]]
+    incr off [expr [string length $ar1] + 1]
+
+    if [string match "*pdb2a.o" $obj1] {
+	pass "Correct name for first object file"
+    } else {
+	fail "Incorrect name for first object file"
+    }
+
+    if [string equal $obj1 $ar1] {
+	pass "Correct archive name for first object file"
+    } else {
+	fail "Incorrect archive name for first object file"
+    }
+
+    if { [expr $off % 4] != 0 } {
+	set off [expr $off + 4 - ($off % 4)]
+    }
+
+    incr off 64
+
+    set obj2 [string range $mod_info $off [expr [string first \000 $mod_info $off] - 1]]
+    incr off [expr [string length $obj2] + 1]
+
+    set ar2 [string range $mod_info $off [expr [string first \000 $mod_info $off] - 1]]
+    incr off [expr [string length $ar2] + 1]
+
+    if [string match "*pdb2b.o" $obj2] {
+	pass "Correct name for second object file"
+    } else {
+	fail "Incorrect name for second object file"
+    }
+
+    if [string match "*pdb2b.a" $ar2] {
+	pass "Correct archive name for second object file"
+    } else {
+	fail "Incorrect archive name for second object file"
+    }
+
+    if { [expr $off % 4] != 0 } {
+	set off [expr $off + 4 - ($off % 4)]
+    }
+
+    incr off 64
+
+    set obj3 [string range $mod_info $off [expr [string first \000 $mod_info $off] - 1]]
+    incr off [expr [string length $obj3] + 1]
+
+    set ar3 [string range $mod_info $off [expr [string first \000 $mod_info $off] - 1]]
+    incr off [expr [string length $ar3] + 1]
+
+    if [string equal $obj3 "* Linker *"] {
+	pass "Correct name for dummy object file"
+    } else {
+	fail "Incorrect name for dummy object file"
+    }
+
+    if [string equal $ar3 ""] {
+	pass "Correct archive name for dummy object file"
+    } else {
+	fail "Incorrect archive name for dummy object file"
+    }
 }
 
-if ![string equal [get_pdb_name "tmpdir/pdb1.exe"] "pdb1.pdb"] {
-    fail "PDB filename not found in CodeView debug info"
-    return
+proc test2 { } {
+    global as
+    global ar
+    global ld
+    global srcdir
+    global subdir
+
+    if ![ld_assemble $as $srcdir/$subdir/pdb2a.s tmpdir/pdb2a.o] {
+	unsupported "Build pdb2a.o"
+	return
+    }
+
+    if ![ld_assemble $as $srcdir/$subdir/pdb2b.s tmpdir/pdb2b.o] {
+	unsupported "Build pdb2b.o"
+	return
+    }
+
+    set exec_output [run_host_cmd "$ar" "cr tmpdir/pdb2b.a tmpdir/pdb2b.o"]
+
+    if ![string match "" $exec_output] {
+	unsupported "Create pdb2b.a"
+	return
+    }
+
+    if ![ld_link $ld "tmpdir/pdb2.exe" "--pdb=tmpdir/pdb2.pdb -e foo tmpdir/pdb2a.o tmpdir/pdb2b.a"] {
+	unsupported "Create PE image with PDB file"
+	return
+    }
+
+    set exec_output [run_host_cmd "$ar" "x --output tmpdir tmpdir/pdb2.pdb 0003"]
+
+    if ![string match "" $exec_output] {
+	return 0
+    }
+
+    set fi [open tmpdir/0003]
+    fconfigure $fi -translation binary
+
+    seek $fi 24
+
+    set data [read $fi 4]
+    binary scan $data i mod_info_size
+
+    seek $fi 36 current
+
+    set mod_info [read $fi $mod_info_size]
+
+    close $fi
+
+    test_mod_info $mod_info
 }
 
-pass "PDB filename present in CodeView debug info"
-
-if [check_pdb_info_stream tmpdir/pdb1.pdb [get_pdb_guid "tmpdir/pdb1.exe"]] {
-    pass "Valid PDB info stream"
-} else {
-    fail "Invalid PDB info stream"
-}
-
-if [check_type_stream tmpdir/pdb1.pdb "0002"] {
-    pass "Valid TPI stream"
-} else {
-    fail "Invalid TPI stream"
-}
-
-if [check_type_stream tmpdir/pdb1.pdb "0004"] {
-    pass "Valid IPI stream"
-} else {
-    fail "Invalid IPI stream"
-}
-
-if [check_dbi_stream tmpdir/pdb1.pdb] {
-    pass "Valid DBI stream"
-} else {
-    fail "Invalid DBI stream"
-}
-
-if [check_section_stream tmpdir/pdb1.exe tmpdir/pdb1.pdb] {
-    pass "Valid section stream"
-} else {
-    fail "Invalid section stream"
-}
-
-if [check_publics_stream tmpdir/pdb1.pdb] {
-    pass "Valid publics stream"
-} else {
-    fail "Invalid publics stream"
-}
+test1
+test2

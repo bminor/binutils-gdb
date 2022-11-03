@@ -383,6 +383,196 @@ get_arch_number (bfd *abfd)
   return IMAGE_FILE_MACHINE_I386;
 }
 
+/* Populate the module stream, which consists of the transformed .debug$S
+   data for each object file.  */
+static bool
+populate_module_stream (bfd *stream, uint32_t *sym_byte_size)
+{
+  uint8_t int_buf[sizeof (uint32_t)];
+
+  *sym_byte_size = sizeof (uint32_t);
+
+  /* Write the signature.  */
+
+  bfd_putl32 (CV_SIGNATURE_C13, int_buf);
+
+  if (bfd_bwrite (int_buf, sizeof (uint32_t), stream) != sizeof (uint32_t))
+    return false;
+
+  /* Write the global refs size.  */
+
+  bfd_putl32 (0, int_buf);
+
+  if (bfd_bwrite (int_buf, sizeof (uint32_t), stream) != sizeof (uint32_t))
+    return false;
+
+  return true;
+}
+
+/* Create the module info substream within the DBI.  */
+static bool
+create_module_info_substream (bfd *abfd, bfd *pdb, void **data,
+			      uint32_t *size)
+{
+  uint8_t *ptr;
+
+  static const char linker_fn[] = "* Linker *";
+
+  *size = 0;
+
+  for (bfd *in = coff_data (abfd)->link_info->input_bfds; in;
+       in = in->link.next)
+    {
+      size_t len = sizeof (struct module_info);
+
+      if (!strcmp (bfd_get_filename (in), "dll stuff"))
+	{
+	  len += sizeof (linker_fn); /* Object name.  */
+	  len++; /* Empty module name.  */
+	}
+      else if (in->my_archive)
+	{
+	  char *name = lrealpath (bfd_get_filename (in));
+
+	  len += strlen (name) + 1; /* Object name.  */
+
+	  free (name);
+
+	  name = lrealpath (bfd_get_filename (in->my_archive));
+
+	  len += strlen (name) + 1; /* Archive name.  */
+
+	  free (name);
+	}
+      else
+	{
+	  char *name = lrealpath (bfd_get_filename (in));
+	  size_t name_len = strlen (name) + 1;
+
+	  len += name_len; /* Object name.  */
+	  len += name_len; /* And again as the archive name.  */
+
+	  free (name);
+	}
+
+      if (len % 4)
+	len += 4 - (len % 4);
+
+      *size += len;
+    }
+
+  *data = xmalloc (*size);
+
+  ptr = *data;
+
+  for (bfd *in = coff_data (abfd)->link_info->input_bfds; in;
+       in = in->link.next)
+    {
+      struct module_info *mod = (struct module_info *) ptr;
+      uint16_t stream_num;
+      bfd *stream;
+      uint32_t sym_byte_size;
+      uint8_t *start = ptr;
+
+      stream = add_stream (pdb, NULL, &stream_num);
+
+      if (!stream)
+	{
+	  free (*data);
+	  return false;
+	}
+
+      if (!populate_module_stream (stream, &sym_byte_size))
+	{
+	  free (*data);
+	  return false;
+	}
+
+      bfd_putl32 (0, &mod->unused1);
+
+      /* These are dummy values - MSVC copies the first section contribution
+	 entry here, but doesn't seem to use it for anything.  */
+      bfd_putl16 (0xffff, &mod->sc.section);
+      bfd_putl16 (0, &mod->sc.padding1);
+      bfd_putl32 (0, &mod->sc.offset);
+      bfd_putl32 (0xffffffff, &mod->sc.size);
+      bfd_putl32 (0, &mod->sc.characteristics);
+      bfd_putl16 (0xffff, &mod->sc.module_index);
+      bfd_putl16 (0, &mod->sc.padding2);
+      bfd_putl32 (0, &mod->sc.data_crc);
+      bfd_putl32 (0, &mod->sc.reloc_crc);
+
+      bfd_putl16 (0, &mod->flags);
+      bfd_putl16 (stream_num, &mod->module_sym_stream);
+      bfd_putl32 (sym_byte_size, &mod->sym_byte_size);
+      bfd_putl32 (0, &mod->c11_byte_size);
+      bfd_putl32 (0, &mod->c13_byte_size);
+      bfd_putl16 (0, &mod->source_file_count);
+      bfd_putl16 (0, &mod->padding);
+      bfd_putl32 (0, &mod->unused2);
+      bfd_putl32 (0, &mod->source_file_name_index);
+      bfd_putl32 (0, &mod->pdb_file_path_name_index);
+
+      ptr += sizeof (struct module_info);
+
+      if (!strcmp (bfd_get_filename (in), "dll stuff"))
+	{
+	  /* Object name.  */
+	  memcpy (ptr, linker_fn, sizeof (linker_fn));
+	  ptr += sizeof (linker_fn);
+
+	  /* Empty module name.  */
+	  *ptr = 0;
+	  ptr++;
+	}
+      else if (in->my_archive)
+	{
+	  char *name = lrealpath (bfd_get_filename (in));
+	  size_t name_len = strlen (name) + 1;
+
+	  /* Object name.  */
+	  memcpy (ptr, name, name_len);
+	  ptr += name_len;
+
+	  free (name);
+
+	  name = lrealpath (bfd_get_filename (in->my_archive));
+	  name_len = strlen (name) + 1;
+
+	  /* Archive name.  */
+	  memcpy (ptr, name, name_len);
+	  ptr += name_len;
+
+	  free (name);
+	}
+      else
+	{
+	  char *name = lrealpath (bfd_get_filename (in));
+	  size_t name_len = strlen (name) + 1;
+
+	  /* Object name.  */
+	  memcpy (ptr, name, name_len);
+	  ptr += name_len;
+
+	  /* Object name again as archive name.  */
+	  memcpy (ptr, name, name_len);
+	  ptr += name_len;
+
+	  free (name);
+	}
+
+      /* Pad to next four-byte boundary.  */
+
+      if ((ptr - start) % 4)
+	{
+	  memset (ptr, 0, 4 - ((ptr - start) % 4));
+	  ptr += 4 - ((ptr - start) % 4);
+	}
+    }
+
+  return true;
+}
+
 /* Return the index of a given output section.  */
 static uint16_t
 find_section_number (bfd *abfd, asection *sect)
@@ -404,13 +594,18 @@ find_section_number (bfd *abfd, asection *sect)
 
 /* Stream 4 is the debug information (DBI) stream.  */
 static bool
-populate_dbi_stream (bfd *stream, bfd *abfd,
+populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
 		     uint16_t section_header_stream_num,
 		     uint16_t sym_rec_stream_num,
 		     uint16_t publics_stream_num)
 {
   struct pdb_dbi_stream_header h;
   struct optional_dbg_header opt;
+  void *mod_info;
+  uint32_t mod_info_size;
+
+  if (!create_module_info_substream (abfd, pdb, &mod_info, &mod_info_size))
+    return false;
 
   bfd_putl32 (0xffffffff, &h.version_signature);
   bfd_putl32 (DBI_STREAM_VERSION_70, &h.version_header);
@@ -421,7 +616,7 @@ populate_dbi_stream (bfd *stream, bfd *abfd,
   bfd_putl16 (0, &h.pdb_dll_version);
   bfd_putl16 (sym_rec_stream_num, &h.sym_record_stream);
   bfd_putl16 (0, &h.pdb_dll_rbld);
-  bfd_putl32 (0, &h.mod_info_size);
+  bfd_putl32 (mod_info_size, &h.mod_info_size);
   bfd_putl32 (0, &h.section_contribution_size);
   bfd_putl32 (0, &h.section_map_size);
   bfd_putl32 (0, &h.source_info_size);
@@ -434,7 +629,18 @@ populate_dbi_stream (bfd *stream, bfd *abfd,
   bfd_putl32 (0, &h.padding);
 
   if (bfd_bwrite (&h, sizeof (h), stream) != sizeof (h))
-    return false;
+    {
+      free (mod_info);
+      return false;
+    }
+
+  if (bfd_bwrite (mod_info, mod_info_size, stream) != mod_info_size)
+    {
+      free (mod_info);
+      return false;
+    }
+
+  free (mod_info);
 
   bfd_putl16 (0xffff, &opt.fpo_stream);
   bfd_putl16 (0xffff, &opt.exception_stream);
@@ -888,7 +1094,7 @@ create_pdb_file (bfd *abfd, const char *pdb_name, const unsigned char *guid)
       goto end;
     }
 
-  if (!populate_dbi_stream (dbi_stream, abfd, section_header_stream_num,
+  if (!populate_dbi_stream (dbi_stream, abfd, pdb, section_header_stream_num,
 			    sym_rec_stream_num, publics_stream_num))
     {
       einfo (_("%P: warning: cannot populate DBI stream "
