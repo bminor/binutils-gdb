@@ -1,3 +1,10 @@
+2022-11-03  Nick Clifton  <nickc@redhat.com>
+
+	PR 29471
+	* scripttempl/avr.sc (__DATA_REGION_ORIGIN__): Define.  If a value
+	has not been provided on the command line then use DATA_ORIGIN.
+	(MEMORY): Use __DATA_REGION_ORIGIN__ as the start of the data region.
+
 2022-10-21  Nick Clifton  <nickc@redhat.com>
 
 	PR 29654
