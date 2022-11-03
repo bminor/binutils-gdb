@@ -22,9 +22,7 @@
 
 SIM_EXTRA_CFLAGS = -DTIMER_A
 
-SIM_RUN_OBJS = \
-	main.o \
-	$(ENDLIST)
+SIM_RUN_OBJS = main.o
 
 SIM_OBJS = \
 	gdb-if.o \
@@ -37,7 +35,6 @@ SIM_OBJS = \
 	m32c.o \
 	srcdest.o \
 	syscalls.o \
-	trace.o \
-	$(ENDLIST)
+	trace.o
 
 ## COMMON_POST_CONFIG_FRAG
