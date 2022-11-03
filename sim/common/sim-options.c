@@ -983,7 +983,7 @@ sim_print_version (SIM_DESC sd, int is_command)
 {
   sim_io_printf (sd, "GNU simulator %s%s\n", PKGVERSION, version);
 
-  sim_io_printf (sd, "Copyright (C) 2021 Free Software Foundation, Inc.\n");
+  sim_io_printf (sd, "Copyright (C) 2022 Free Software Foundation, Inc.\n");
 
   /* Following the copyright is a brief statement that the program is
      free software, that users are free to copy and change it on
