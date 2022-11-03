@@ -47,7 +47,7 @@ targ64_extra_libpath=
 
 if test "${ac_default_ld_warn_rwx_segments}" = unset; then
   case "${targ}" in
-      # The CRIS default linker script yields just one segment
+      # The CRIS and V850 default linker scripts yields just one segment
       # as intended, so a rwx segment warning is not helpful.
       # The HPPA's and SPARC's PLT sections use a constructed trampoline
       # hence it needs to have a RWX segment.
@@ -55,7 +55,8 @@ if test "${ac_default_ld_warn_rwx_segments}" = unset; then
     cris-*-* | crisv32-*-* | \
     hppa*-*-* | \
     mips*-*-* | \
-    sparc*-*-*)
+    sparc*-*-* | \
+    v850*-*-*)
       ac_default_ld_warn_rwx_segments=0
       ;;
     *)

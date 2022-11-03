@@ -1,5 +1,11 @@
 2022-11-03  Nick Clifton  <nickc@redhat.com>
 
+	PR 29748
+	* configure.tgt (ac_default_ld_warn_rwx_segments): Set to 0 for
+	the V850.
+
+2022-11-03  Nick Clifton  <nickc@redhat.com>
+
 	PR 29741
 	* scripttempl/avr.sc (__DATA_REGION_ORIGIN__): Define.  If a value
 	has not been provided on the command line then use DATA_ORIGIN.
