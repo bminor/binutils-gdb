@@ -210,8 +210,7 @@ CSEARCH = -I. -I$(srcdir) -I$(srccom) \
   -I$(srcroot)/include \
   -I../../bfd -I$(srcroot)/bfd \
   -I$(srcroot)/opcodes \
-  -I../.. \
-  $(INTL_CFLAGS)
+  -I../..
 ALL_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(INCGNU) $(SIM_EXTRA_CFLAGS) $(CFLAGS)
 BUILD_CFLAGS = $(CFLAGS_FOR_BUILD) $(CSEARCH)
 
@@ -219,14 +218,13 @@ COMMON_DEP_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(SIM_EXTRA_CFLAGS)
 
 SIM_HW_DEVICES = cfi core pal glue $(SIM_EXTRA_HW_DEVICES)
 
-ZLIB = $(zlibdir) -lz
 LIBIBERTY_LIB = ../../libiberty/libiberty.a
-BFD_LIB = ../../bfd/libbfd.a
-OPCODES_LIB = ../../opcodes/libopcodes.a
-CONFIG_LIBS = $(COMMON_LIBS) @LIBS@ $(ZLIB) $(ZSTD_LIBS)
-LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL_DEP) $(LIBIBERTY_LIB)
-EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL) $(LIBIBERTY_LIB) \
-	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS) $(LIBDL) $(LIBGNU) $(LIBGNU_EXTRA_LIBS)
+BFD_LIB = ../../bfd/libbfd.la
+OPCODES_LIB = ../../opcodes/libopcodes.la
+CONFIG_LIBS = $(COMMON_LIBS) @LIBS@
+LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB)
+EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBIBERTY_LIB) \
+	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS) $(LIBGNU) $(LIBGNU_EXTRA_LIBS)
 
 COMMON_OBJS_NAMES = \
 	callback.o \

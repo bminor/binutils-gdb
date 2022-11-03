@@ -166,13 +166,9 @@ subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/../config/depstand.m4 \
-	$(top_srcdir)/../config/gettext-sister.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
 	$(top_srcdir)/../config/override.m4 \
-	$(top_srcdir)/../config/pkg.m4 \
-	$(top_srcdir)/../config/plugins.m4 \
-	$(top_srcdir)/../config/zlib.m4 \
-	$(top_srcdir)/../config/zstd.m4 $(top_srcdir)/../libtool.m4 \
+	$(top_srcdir)/../config/pkg.m4 $(top_srcdir)/../libtool.m4 \
 	$(top_srcdir)/../ltoptions.m4 $(top_srcdir)/../ltsugar.m4 \
 	$(top_srcdir)/../ltversion.m4 $(top_srcdir)/../lt~obsolete.m4 \
 	$(top_srcdir)/m4/sim_ac_option_alignment.m4 \
@@ -695,8 +691,6 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-CATALOGS = @CATALOGS@
-CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CC_FOR_BUILD = @CC_FOR_BUILD@
@@ -741,7 +735,6 @@ CPPFLAGS = @CPPFLAGS@
 CPPFLAGS_FOR_BUILD = @CPPFLAGS_FOR_BUILD@
 CYGPATH_W = @CYGPATH_W@
 C_DIALECT = @C_DIALECT@
-DATADIRNAME = @DATADIRNAME@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DSYMUTIL = @DSYMUTIL@
@@ -753,16 +746,12 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
-GENCAT = @GENCAT@
-GMSGFMT = @GMSGFMT@
 GREP = @GREP@
-INCINTL = @INCINTL@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-INSTOBJEXT = @INSTOBJEXT@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LDFLAGS_FOR_BUILD = @LDFLAGS_FOR_BUILD@
@@ -799,8 +788,6 @@ LD_FOR_TARGET_RL78 = @LD_FOR_TARGET_RL78@
 LD_FOR_TARGET_RX = @LD_FOR_TARGET_RX@
 LD_FOR_TARGET_SH = @LD_FOR_TARGET_SH@
 LD_FOR_TARGET_V850 = @LD_FOR_TARGET_V850@
-LIBINTL = @LIBINTL@
-LIBINTL_DEP = @LIBINTL_DEP@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
@@ -828,7 +815,6 @@ PKGVERSION = @PKGVERSION@
 PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
-POSUB = @POSUB@
 RANLIB = @RANLIB@
 RANLIB_FOR_BUILD = @RANLIB_FOR_BUILD@
 READLINE_CFLAGS = @READLINE_CFLAGS@
@@ -850,13 +836,9 @@ SIM_SUBDIRS = @SIM_SUBDIRS@
 SIM_TOOLCHAIN_VARS = @SIM_TOOLCHAIN_VARS@
 STRIP = @STRIP@
 TERMCAP_LIB = @TERMCAP_LIB@
-USE_NLS = @USE_NLS@
 VERSION = @VERSION@
 WARN_CFLAGS = @WARN_CFLAGS@
 WERROR_CFLAGS = @WERROR_CFLAGS@
-XGETTEXT = @XGETTEXT@
-ZSTD_CFLAGS = @ZSTD_CFLAGS@
-ZSTD_LIBS = @ZSTD_LIBS@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -896,7 +878,6 @@ libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
 localstatedir = @localstatedir@
-lt_cv_dlopen_libs = @lt_cv_dlopen_libs@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
@@ -921,8 +902,6 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-zlibdir = @zlibdir@
-zlibinc = @zlibinc@
 AUTOMAKE_OPTIONS = dejagnu foreign no-dist subdir-objects
 ACLOCAL_AMFLAGS = -Im4 -I.. -I../config
 GNULIB_PARENT_DIR = ..

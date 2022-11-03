@@ -88,7 +88,7 @@ CONFIG_CFLAGS = \
   $(DEVZERO_CFLAGS)
 SIM_FPU_CFLAGS = -DHAVE_COMMON_FPU -I../common -I${srcdir}/../common
 
-STD_CFLAGS	= $(CFLAGS) $(WERROR_CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARN_CFLAGS) $(INCLUDES) $(INCGNU) $(INTL_CFLAGS) $(SIM_FPU_CFLAGS)
+STD_CFLAGS	= $(CFLAGS) $(WERROR_CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(WARN_CFLAGS) $(INCLUDES) $(INCGNU) $(SIM_FPU_CFLAGS)
 NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(INCLUDES) $(SIM_FPU_CFLAGS)
 BUILD_CFLAGS	= $(CFLAGS_FOR_BUILD) $(INCLUDES) $(WARN_CFLAGS)
 
@@ -132,8 +132,7 @@ GDB_INCLUDES	= -I../../gdb -I$(srcdir)/../../gdb  -I$(srcdir)/../../gdb/config
 INCLUDES	= -I. -I$(srcdir) $(LIB_INCLUDES) $(BFD_INCLUDES) $(GDB_INCLUDES) -I../..
 
 LIBIBERTY_LIB	= ../../libiberty/libiberty.a
-BFD_LIB		= ../../bfd/libbfd.a
-ZLIB		= $(zlibdir) -lz
+BFD_LIB		= ../../bfd/libbfd.la
 
 
 TARGETLIB	= libsim.a
@@ -521,9 +520,9 @@ PACKAGE_SRC = @sim_pk_src@
 PACKAGE_OBJ = @sim_pk_obj@
 
 
-psim$(EXEEXT): $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB) $(LIBINTL_DEP)
+psim$(EXEEXT): $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB)
 	$(ECHO_CCLD) $(LIBTOOL) $(AM_V_lt) --tag=CC --mode=link \
-	  $(CC) $(CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(ZLIB) $(ZSTD_LIBS) $(LIBINTL) $(LIBIBERTY_LIB) $(LIBS)
+	  $(CC) $(CFLAGS) $(LDFLAGS) -o psim$(EXEEXT) main.o $(TARGETLIB) $(BFD_LIB) $(LIBIBERTY_LIB) $(LIBS)
 
 run$(EXEEXT): psim$(EXEEXT)
 	$(SILENCE) rm -f $@

@@ -142,21 +142,7 @@ AC_TYPE_SIGNAL
 AC_TYPE_SIZE_T
 AC_TYPE_UID_T
 
-dnl We don't use gettext, but bfd does.  So we do the appropriate checks
-dnl to see if there are intl libraries we should link against.
-ALL_LINGUAS=
-ZW_GNU_GETTEXT_SISTER_DIR
-
-dnl BFD conditionally uses zlib, so we must link it in if libbfd does, by
-dnl using the same condition.
-AM_ZLIB
-AC_ZSTD
-
-dnl BFD uses libdl when when plugins enabled.
-AC_PLUGINS
-AM_CONDITIONAL(PLUGINS, test "$plugins" = yes)
-LT_INIT([dlopen])
-AC_SUBST(lt_cv_dlopen_libs)
+LT_INIT
 
 dnl Libraries.
 AC_CHECK_LIB(socket, bind)
