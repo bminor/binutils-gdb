@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+AM_V = @AM_V@
+
 host_alias = @host_alias@
 target_alias = @target_alias@
 program_transform_name = @program_transform_name@
@@ -41,6 +43,12 @@ AR = @AR@
 AR_FLAGS = rc
 RANLIB = @RANLIB@
 DTC = @DTC@
+
+LIBTOOL = @LIBTOOL@
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
 
 DEPMODE = @CCDEPMODE@
 DEPDIR = @DEPDIR@

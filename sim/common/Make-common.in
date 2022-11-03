@@ -43,6 +43,9 @@ srcsim = $(srcdir)/..
 @SIM_COMMON_BUILD_FALSE@config.status = config.status
 @SIM_COMMON_BUILD_TRUE@config.status = ../config.status
 
+# Settings from top-level configure.
+include ../arch-subdir.mk
+
 include $(srcroot)/gdb/silent-rules.mk
 
 ifeq ($(V),0)
@@ -55,9 +58,6 @@ endif
 # Helper code from gnulib.
 GNULIB_PARENT_DIR = ../..
 include $(GNULIB_PARENT_DIR)/gnulib/Makefile.gnulib.inc
-
-# Settings from top-level configure.
-include ../arch-subdir.mk
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -258,7 +258,8 @@ libsim.a: $(LIB_OBJS)
 	$(ECHO_RANLIB) $(RANLIB) libsim.a
 
 run$(EXEEXT): $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
-	$(ECHO_CCLD) $(CC) $(ALL_CFLAGS) $(LDFLAGS) -o run$(EXEEXT) \
+	$(ECHO_CCLD) $(LIBTOOL) $(AM_V_lt) --tag=CC --mode=link \
+	  $(CC) $(ALL_CFLAGS) $(LDFLAGS) -o run$(EXEEXT) \
 	  $(SIM_RUN_OBJS) libsim.a $(EXTRA_LIBS)
 
 #
@@ -416,7 +417,8 @@ stamp-hw: Makefile.in $(srccom)/Make-common.in $(config.status) Makefile
 	$(SILENCE) touch $@
 
 test-hw-events: $(srccom)/hw-events.c libsim.a
-	$(CC) $(ALL_CFLAGS) -DMAIN -o test-hw-events$(EXEEXT) \
+	$(ECHO_CCLD) $(LIBTOOL) $(AM_V_lt) --tag=CC --mode=link \
+		$(CC) $(ALL_CFLAGS) -DMAIN -o test-hw-events$(EXEEXT) \
 		$(srccom)/hw-events.c libsim.a $(EXTRA_LIBS)
 
 # See sim_pre_argv_init and sim_module_install in sim-module.c for more details.
