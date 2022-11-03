@@ -34,13 +34,10 @@ SIM_EXTRA_CFLAGS += -DFAST_UART -I$(srcroot)
 
 ## COMMON_POST_CONFIG_FRAG
 
-# `sis' doesn't need interf.o.
-SIS_OFILES = exec.o erc32.o func.o help.o float.o
-
 all: sis$(EXEEXT)
-sis$(EXEEXT): sis.o $(SIS_OFILES) libsim.a $(LIBDEPS)
-	$(ECHO_CCLD) $(CC) $(ALL_CFLAGS) -o sis$(EXEEXT) \
-	  sis.o $(SIS_OFILES) libsim.a $(EXTRA_LIBS)
+sis$(EXEEXT): run$(EXEEXT)
+	$(SILENCE) rm -f $@
+	$(ECHO_GEN) ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
 
 # Copy the files into directories where they will be run.
 install-sis: installdirs
