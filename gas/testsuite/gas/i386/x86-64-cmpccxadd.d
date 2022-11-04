@@ -264,3 +264,4 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*c4 c2 e1 e4 09\s+cmpzxadd %rbx,%rcx,\(%r9\)
 \s*[a-f0-9]+:\s*c4 e2 f9 e4 89 f8 03 00 00\s+cmpzxadd %rax,%rcx,0x3f8\(%rcx\)
 \s*[a-f0-9]+:\s*c4 e2 e1 e4 8a 00 fc ff ff\s+cmpzxadd %rbx,%rcx,-0x400\(%rdx\)
+#pass

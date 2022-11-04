@@ -12,3 +12,4 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*f3 0f 01 c6\s+wrmsrlist
 \s*[a-f0-9]+:\s*f2 0f 01 c6\s+rdmsrlist
 \s*[a-f0-9]+:\s*f3 0f 01 c6\s+wrmsrlist
+#pass

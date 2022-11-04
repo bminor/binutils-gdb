@@ -168,3 +168,4 @@ Disassembly of section \.text:
 \s*[a-f0-9]+:\s*62 f2 7e 28 72 72 80\s+vcvtneps2bf16 xmm6,YMMWORD PTR \[edx-0x1000\]
 \s*[a-f0-9]+:\s*c4 e2 7e 72 b2 00 f0 ff ff\s+\{vex\} vcvtneps2bf16 xmm6,YMMWORD PTR \[edx-0x1000\]
 \s*[a-f0-9]+:\s*c4 e2 7e 72 b2 00 f0 ff ff\s+\{vex\} vcvtneps2bf16 xmm6,YMMWORD PTR \[edx-0x1000\]
+#pass
