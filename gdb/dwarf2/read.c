@@ -8927,7 +8927,6 @@ dwarf2_compute_name (const char *name,
       if (die_needs_namespace (die, cu))
 	{
 	  const char *prefix;
-	  const char *canonical_name = NULL;
 
 	  string_file buf;
 
@@ -9093,10 +9092,9 @@ dwarf2_compute_name (const char *name,
 
 	  const std::string &intermediate_name = buf.string ();
 
-	  if (lang == language_cplus)
-	    canonical_name
-	      = dwarf2_canonicalize_name (intermediate_name.c_str (), cu,
-					  objfile);
+	  const char *canonical_name
+	    = dwarf2_canonicalize_name (intermediate_name.c_str (), cu,
+					objfile);
 
 	  /* If we only computed INTERMEDIATE_NAME, or if
 	     INTERMEDIATE_NAME is already canonical, then we need to
