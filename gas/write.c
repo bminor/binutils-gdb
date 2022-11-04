@@ -878,6 +878,28 @@ adjust_reloc_syms (bfd *abfd ATTRIBUTE_UNUSED,
 	      continue;
 	  }
 
+	/* Avoid adjusting a relocation against a symbol pointing into a
+	   ".eh_frame" section in an ELF binary.  The GNU bfd linker attempts
+	   to de-duplicate CIE/FDE's in *output* .eh_frame sections in ELF
+	   binaries and adjust any relocations pointing at the now removed
+	   duplicate to point to the remaining entry.
+	   Hence a symbol which had been adjusted to a section symbol plus
+	   offset would end up pointing at something completely different.
+
+	   We can not robustly match the exact linker-input sections that will
+	   end up in the .eh_frame output section, since users may provide
+	   their own linker scripts.  However it does seem useful to avoid
+	   transforming symbols in the sections that are expected to end up in
+	   this linker output section.  Rather than add a clause here to match
+	   the current default linker script we use the same check based on
+	   section name as is used in `gas/dw2gencfi.c` to check for .eh_frame
+	   sections.  */
+	if (IS_ELF
+	    && strncmp (segment_name (symsec),
+		     ".eh_frame", sizeof ".eh_frame" - 1) == 0
+	    && segment_name (symsec)[9] != '_')
+	  continue;
+
 	/* Never adjust a reloc against local symbol in a merge section
 	   with non-zero addend.  */
 	if ((symsec->flags & SEC_MERGE) != 0
