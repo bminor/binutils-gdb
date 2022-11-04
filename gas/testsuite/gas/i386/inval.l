@@ -99,6 +99,10 @@
 .*:115: Error: .*
 .*:116: Error: .*
 .*:117: Error: .*
+.*:119: Error: .*
+.*:120: Error: .*
+.*:121: Error: .*
+.*:122: Error: .*
 [ 	]*1[ 	]+\.text
 [ 	]*2[ 	]+\.allow_index_reg
 [ 	]*3[ 	]+\# All the following should be illegal
@@ -216,4 +220,9 @@
 [ 	]*[1-9][0-9]*[ 	]+inb	%dx, %ax
 [ 	]*[1-9][0-9]*[ 	]+outb	%ax, %dx
 [ 	]*[1-9][0-9]*[ 	]+movb	%ax, %bx
+[ 	]*[1-9][0-9]*[ 	]+
+[ 	]*[1-9][0-9]*[ 	]+incl	\(%dx\)
+[ 	]*[1-9][0-9]*[ 	]+incw	\(%dx\)
+[ 	]*[1-9][0-9]*[ 	]+mov	\(%dx\), %ax
+[ 	]*[1-9][0-9]*[ 	]+mov	%ax, \(%dx\)
 #pass
