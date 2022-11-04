@@ -1707,9 +1707,13 @@ restore_selected_frame (frame_id frame_id, int frame_level)
   selected_frame = nullptr;
 }
 
-/* See frame.h.  */
+/* Lookup the frame_info object for the selected frame FRAME_ID /
+   FRAME_LEVEL and cache the result.
 
-void
+   If FRAME_LEVEL > 0 and the originally selected frame isn't found,
+   warn and select the innermost (current) frame.  */
+
+static void
 lookup_selected_frame (struct frame_id a_frame_id, int frame_level)
 {
   frame_info_ptr frame = NULL;

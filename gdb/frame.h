@@ -264,13 +264,6 @@ extern void save_selected_frame (frame_id *frame_id, int *frame_level)
 extern void restore_selected_frame (frame_id frame_id, int frame_level)
   noexcept;
 
-/* Lookup the frame_info object for the selected frame FRAME_ID /
-   FRAME_LEVEL and cache the result.
-
-   If FRAME_LEVEL > 0 and the originally selected frame isn't found,
-   warn and select the innermost (current) frame.  */
-extern void lookup_selected_frame (frame_id frame_id, int frame_level);
-
 /* Given a FRAME, return the next (more inner, younger) or previous
    (more outer, older) frame.  */
 extern frame_info_ptr get_prev_frame (frame_info_ptr);
