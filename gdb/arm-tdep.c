@@ -504,8 +504,23 @@ arm_cache_switch_prev_sp (struct arm_prologue_cache *cache,
   gdb_assert (arm_is_alternative_sp_register (tdep, sp_regnum));
 
   if (tdep->have_sec_ext)
-    gdb_assert (sp_regnum != tdep->m_profile_msp_regnum
-		&& sp_regnum != tdep->m_profile_psp_regnum);
+    {
+      gdb_assert (sp_regnum != tdep->m_profile_msp_regnum
+		  && sp_regnum != tdep->m_profile_psp_regnum);
+
+      if (sp_regnum == tdep->m_profile_msp_s_regnum
+	  || sp_regnum == tdep->m_profile_psp_s_regnum)
+	{
+	  cache->active_msp_regnum = tdep->m_profile_msp_s_regnum;
+	  cache->active_psp_regnum = tdep->m_profile_psp_s_regnum;
+	}
+      else if (sp_regnum == tdep->m_profile_msp_ns_regnum
+	       || sp_regnum == tdep->m_profile_psp_ns_regnum)
+	{
+	  cache->active_msp_regnum = tdep->m_profile_msp_ns_regnum;
+	  cache->active_psp_regnum = tdep->m_profile_psp_ns_regnum;
+	}
+    }
 
   cache->active_sp_regnum = sp_regnum;
 }
