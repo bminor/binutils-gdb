@@ -21,13 +21,13 @@ Disassembly of section \.text:
 			.*: R_AARCH64_ADD_ABS_LO12_NC	ptr
 
 .* <f1>:
-  .*:	90800002 	adrp	c2, 0 <_start>
-			.*: R_MORELLO_ADR_GOT_PAGE	\.data\+0x10
+  .*:	90800002 	adrp	c2, 10 <add>
+			.*: R_MORELLO_ADR_GOT_PAGE	cap
   .*:	c2400042 	ldr	c2, \[c2\]
-			.*: R_MORELLO_LD128_GOT_LO12_NC	\.data\+0x10
+			.*: R_MORELLO_LD128_GOT_LO12_NC	cap
   .*:	82600042 	ldr	c2, \[x2\]
-			.*: R_MORELLO_LD128_GOT_LO12_NC	\.data\+0x20
+			.*: R_MORELLO_LD128_GOT_LO12_NC	ptr
   .*:	f9400042 	ldr	x2, \[c2\]
-			.*: R_AARCH64_LD64_GOT_LO12_NC	\.data\+0x20
+			.*: R_AARCH64_LD64_GOT_LO12_NC	ptr
   .*:	82600c42 	ldr	x2, \[x2\]
-			.*: R_AARCH64_LD64_GOT_LO12_NC	\.data\+0x20
+			.*: R_AARCH64_LD64_GOT_LO12_NC	ptr

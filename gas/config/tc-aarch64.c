@@ -9382,13 +9382,37 @@ check_mapping_symbols (bfd * abfd ATTRIBUTE_UNUSED, asection * sec,
 bfd_boolean
 aarch64_fix_adjustable (struct fix *fixP)
 {
-  /* We need size information of the target symbols to initialise
-     capabilities.  */
-  if (fixP->fx_r_type == BFD_RELOC_MORELLO_CAPINIT)
-    return FALSE;
-
   switch (fixP->fx_r_type)
     {
+      /* The AArch64 GNU bfd linker can not handle 'symbol + offset' entries in the
+	 GOT (it internally uses a symbol to reference a GOT slot).  Hence we can't
+	 emit any "section symbol + offset" relocations for the GOT.  */
+    case BFD_RELOC_AARCH64_GOT_LD_PREL19:
+    case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
+    case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G0_NC:
+    case BFD_RELOC_AARCH64_MOVW_GOTOFF_G1:
+    case BFD_RELOC_AARCH64_LD64_GOTOFF_LO15:
+    case BFD_RELOC_AARCH64_LD32_GOTPAGE_LO14:
+    case BFD_RELOC_AARCH64_LD64_GOTPAGE_LO15:
+    case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
+    case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC:
+    case BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1:
+    case BFD_RELOC_AARCH64_LD_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC:
+      return FALSE;
+
+      /* We need size information of the target symbols to initialise
+	 capabilities.  */
+    case BFD_RELOC_MORELLO_CAPINIT:
+    case BFD_RELOC_MORELLO_ADR_GOT_PAGE:
+    case BFD_RELOC_MORELLO_LD128_GOT_LO12_NC:
+      return FALSE;
+
       /* We need to retain symbol information when jumping between A64 and C64
 	 states or between two C64 functions.  In the C64 -> C64 situation it's
 	 really only a corner case that breaks when symbols get replaced with

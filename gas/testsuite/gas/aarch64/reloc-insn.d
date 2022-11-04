@@ -157,9 +157,9 @@ Disassembly of section \.text:
  18c:	39400001 	ldrb	w1, \[x0\]
  190:	d65f03c0 	ret
  194:	f94001bc 	ldr	x28, \[x13\]
-			194: R_AARCH64_LD64_GOTPAGE_LO15	\.data
+			194: R_AARCH64_LD64_GOTPAGE_LO15	dummy
  198:	f9400000 	ldr	x0, \[x0\]
-			198: R_AARCH64_LD64_GOTOFF_LO15	.data
+			198: R_AARCH64_LD64_GOTOFF_LO15	dummy
 
 000000000000019c <llit>:
  19c:	deadf00d 	\.word	0xdeadf00d
