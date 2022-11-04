@@ -21,10 +21,11 @@ Idx Name          Size      VMA               LMA               File off  Algn
 #record: PCC_START
   0 \.[^ ]+ +[0-9a-f]+  ([0-9a-f]+)  [0-9a-f]+  [0-9a-f]+  2\*\*.
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-#record: PCC_LAST_SIZE PCC_LAST_START
 #...
- *[0-9]+ \.got\.plt +([0-9a-f]+)  ([0-9a-f]+)  [0-9a-f]+  [0-9a-f]+  2\*\*.
+ *[0-9]+ \.got\.plt *[0-9a-f]+  [0-9a-f]+ .*
                   CONTENTS, ALLOC, LOAD, DATA
+#record: PCC_END
+ *[0-9]+ \.[^ ]* +[0-9a-f]*  ([0-9a-f]+)  .*
 #...
 Disassembly of section \.plt:
 
@@ -79,7 +80,7 @@ Disassembly of section \.got\.plt:
 
 #check: GOTLOC aarch64_page_plus_decimal_offset $PLTGOT_PAGE $PLTGOT_DEC_OFF
 #check: FRAGBASE format %08x 0x$PCC_START
-#check: FRAGSIZE format %08x [expr "0x$PCC_LAST_SIZE + 0x$PCC_LAST_START - 0x$PCC_START"]
+#check: FRAGSIZE format %08x [expr "0x$PCC_END - 0x$PCC_START"]
 #check: FOO_OFFSET format %x [expr "0x$FOO_ADDR + 1 - 0x$PCC_START"]
 [0-9a-f]+ <.*>:
 	\.\.\.

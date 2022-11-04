@@ -13,10 +13,11 @@ Idx Name          Size      VMA               LMA               File off  Algn
 #record: PCC_START
   0 \.[^ ]+ +[0-9a-f]+  ([0-9a-f]+)  [0-9a-f]+  [0-9a-f]+  2\*\*.
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-#record: PCC_LAST_SIZE PCC_LAST_START
 #...
- *[0-9]+ \.got\.plt +([0-9a-f]+)  ([0-9a-f]+)  [0-9a-f]+  [0-9a-f]+  2\*\*.
+ *[0-9]+ \.got\.plt *[0-9a-f]+  [0-9a-f]+ .*
                   CONTENTS, ALLOC, LOAD, DATA
+#record: PCC_END
+ *[0-9]+ \.[^ ]* +[0-9a-f]*  ([0-9a-f]+)  .*
 #...
 SYMBOL TABLE:
 #record: RELA_IPLT_END
@@ -140,7 +141,7 @@ Disassembly of section \.got:
 
 #check: GOTLOC format %x 0x$GOT_IFUNC_LOC
 #check: FRAGBASE format %08x 0x$PCC_START
-#check: FRAGSIZE format %08x [expr "0x$PCC_LAST_SIZE + 0x$PCC_LAST_START - 0x$PCC_START"]
+#check: FRAGSIZE format %08x [expr "0x$PCC_END - 0x$PCC_START"]
 [0-9a-f]+ <.*>:
  *[0-9a-f]+:	00000000 	.*
  *[0-9a-f]+:	00000000 	.*
