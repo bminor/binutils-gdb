@@ -196,16 +196,28 @@ cooked_index::do_finalize ()
   for (cooked_index_entry *entry : m_entries)
     {
       gdb_assert (entry->canonical == nullptr);
-      if ((entry->per_cu->lang () != language_cplus
-	   && entry->per_cu->lang () != language_ada)
-	  || (entry->flags & IS_LINKAGE) != 0)
+      if ((entry->flags & IS_LINKAGE) != 0)
 	entry->canonical = entry->name;
-      else
+      else if (entry->per_cu->lang () == language_ada)
 	{
-	  if (entry->per_cu->lang () == language_ada)
+	  gdb::unique_xmalloc_ptr<char> canon_name
+	    = handle_gnat_encoded_entry (entry, gnat_entries.get ());
+	  if (canon_name == nullptr)
+	    entry->canonical = entry->name;
+	  else
+	    {
+	      entry->canonical = canon_name.get ();
+	      m_names.push_back (std::move (canon_name));
+	    }
+	}
+      else if (entry->per_cu->lang () == language_cplus)
+	{
+	  void **slot = htab_find_slot (seen_names.get (), entry,
+					INSERT);
+	  if (*slot == nullptr)
 	    {
 	      gdb::unique_xmalloc_ptr<char> canon_name
-		= handle_gnat_encoded_entry (entry, gnat_entries.get ());
+		= cp_canonicalize_string (entry->name);
 	      if (canon_name == nullptr)
 		entry->canonical = entry->name;
 	      else
@@ -216,28 +228,13 @@ cooked_index::do_finalize ()
 	    }
 	  else
 	    {
-	      void **slot = htab_find_slot (seen_names.get (), entry,
-					    INSERT);
-	      if (*slot == nullptr)
-		{
-		  gdb::unique_xmalloc_ptr<char> canon_name
-		    = cp_canonicalize_string (entry->name);
-		  if (canon_name == nullptr)
-		    entry->canonical = entry->name;
-		  else
-		    {
-		      entry->canonical = canon_name.get ();
-		      m_names.push_back (std::move (canon_name));
-		    }
-		}
-	      else
-		{
-		  const cooked_index_entry *other
-		    = (const cooked_index_entry *) *slot;
-		  entry->canonical = other->canonical;
-		}
+	      const cooked_index_entry *other
+		= (const cooked_index_entry *) *slot;
+	      entry->canonical = other->canonical;
 	    }
 	}
+      else
+	entry->canonical = entry->name;
     }
 
   m_names.shrink_to_fit ();
