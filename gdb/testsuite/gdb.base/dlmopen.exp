@@ -159,7 +159,9 @@ set test_spawn_id [spawn_wait_for_attach $binfile]
 set testpid [spawn_id_get_pid $test_spawn_id]
 
 # Attach.
-gdb_test "attach $testpid" "Attaching to program.*, process $testpid.*"
+if { ![gdb_attach $testpid] } {
+    return
+}
 
 with_test_prefix "attach" {
     # Remove the pause.  We no longer need it.
