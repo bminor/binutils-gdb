@@ -62,48 +62,38 @@ int
 linux_common_core_of_thread (ptid_t ptid)
 {
   char filename[sizeof ("/proc//task//stat") + 2 * MAX_PID_T_STRLEN];
-  char *content = NULL;
-  char *p;
-  char *ts = 0;
-  int content_read = 0;
-  int i;
   int core;
 
   sprintf (filename, "/proc/%lld/task/%lld/stat",
 	   (PID_T) ptid.pid (), (PID_T) ptid.lwp ());
-  gdb_file_up f = gdb_fopen_cloexec (filename, "r");
-  if (!f)
+
+  gdb::optional<std::string> content = read_text_file_to_string (filename);
+  if (!content.has_value ())
     return -1;
 
-  for (;;)
-    {
-      int n;
-      content = (char *) xrealloc (content, content_read + 1024);
-      n = fread (content + content_read, 1, 1024, f.get ());
-      content_read += n;
-      if (n < 1024)
-	{
-	  content[content_read] = '\0';
-	  break;
-	}
-    }
-
   /* ps command also relies on no trailing fields ever contain ')'.  */
-  p = strrchr (content, ')');
-  if (p != NULL)
-    p++;
+  std::string::size_type pos = content->find_last_of (')');
+  if (pos == std::string::npos)
+    return -1;
 
   /* If the first field after program name has index 0, then core number is
-     the field with index 36.  There's no constant for that anywhere.  */
-  if (p != NULL)
-    p = strtok_r (p, " ", &ts);
-  for (i = 0; p != NULL && i != 36; ++i)
-    p = strtok_r (NULL, " ", &ts);
+     the field with index 36 (so, the 37th).  There's no constant for that
+     anywhere.  */
+  for (int i = 0; i < 37; ++i)
+    {
+      /* Find separator.  */
+      pos = content->find_first_of (' ', pos);
+      if (pos == std::string::npos)
+	return {};
 
-  if (p == NULL || sscanf (p, "%d", &core) == 0)
+      /* Find beginning of field.  */
+      pos = content->find_first_not_of (' ', pos);
+      if (pos == std::string::npos)
+	return {};
+    }
+
+  if (sscanf (&(*content)[pos], "%d", &core) == 0)
     core = -1;
-
-  xfree (content);
 
   return core;
 }

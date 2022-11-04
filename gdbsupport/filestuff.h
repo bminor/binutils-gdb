@@ -129,4 +129,8 @@ extern bool is_regular_file (const char *name, int *errno_ptr);
 
 extern bool mkdir_recursive (const char *dir);
 
+/* Read the entire content of file PATH into an std::string.  */
+
+extern gdb::optional<std::string> read_text_file_to_string (const char *path);
+
 #endif /* COMMON_FILESTUFF_H */
