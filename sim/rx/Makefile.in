@@ -37,5 +37,3 @@ SIM_OBJS = \
 	err.o
 
 ## COMMON_POST_CONFIG_FRAG
-
-arch = rx
