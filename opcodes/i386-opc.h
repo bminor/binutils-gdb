@@ -221,6 +221,8 @@ enum
   CpuWRMSRNS,
   /* Intel MSRLIST Instructions support required.  */
   CpuMSRLIST,
+  /* Intel AVX NE CONVERT Instructions support required.  */
+  CpuAVX_NE_CONVERT,
   /* mwaitx instruction required */
   CpuMWAITX,
   /* Clzero instruction required */
@@ -408,6 +410,7 @@ typedef union i386_cpu_flags
       unsigned int cpucmpccxadd:1;
       unsigned int cpuwrmsrns:1;
       unsigned int cpumsrlist:1;
+      unsigned int cpuavx_ne_convert:1;
       unsigned int cpumwaitx:1;
       unsigned int cpuclzero:1;
       unsigned int cpuospke:1;

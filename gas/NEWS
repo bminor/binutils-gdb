@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for Intel AVX-NE-CONVERT instructions.
+
 * Add support for Intel MSRLIST instructions.
 
 * Add support for Intel WRMSRNS instructions.

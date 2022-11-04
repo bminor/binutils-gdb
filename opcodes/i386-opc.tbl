@@ -3056,6 +3056,18 @@ vdpbf16ps, 0xf352, None, CpuAVX512_BF16, Modrm|Space0F38|VexVVVV|Masking=3|VexW0
 
 // AVX512_BF16 instructions end.
 
+// AVX-NE-CONVERT instructions.
+
+vbcstnebf162ps, 0xf3b1, None, CpuAVX_NE_CONVERT, Modrm|Vex|Space0F38|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Word|Unspecified|BaseIndex, RegXMM|RegYMM }
+vbcstnesh2ps, 0x66b1, None, CpuAVX_NE_CONVERT, Modrm|Vex|Space0F38|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Word|Unspecified|BaseIndex, RegXMM|RegYMM }
+vcvtneebf162ps, 0xf3b0, None, CpuAVX_NE_CONVERT, Modrm|Vex|Space0F38|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Ymmword|Unspecified|BaseIndex, RegXMM|RegYMM }
+vcvtneeph2ps, 0x66b0, None, CpuAVX_NE_CONVERT, Modrm|Vex|Space0F38|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Ymmword|Unspecified|BaseIndex, RegXMM|RegYMM }
+vcvtneobf162ps, 0xf2b0, None, CpuAVX_NE_CONVERT, Modrm|Vex|Space0F38|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Ymmword|Unspecified|BaseIndex, RegXMM|RegYMM }
+vcvtneoph2ps, 0xb0, None, CpuAVX_NE_CONVERT, Modrm|Vex|Space0F38|VexW0|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Ymmword|Unspecified|BaseIndex, RegXMM|RegYMM }
+vcvtneps2bf16<Vxy>, 0xf372, None, CpuAVX_NE_CONVERT, Modrm|<Vxy:vex>|Space0F38|VexW0|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|<Vxy:syntax>, { <Vxy:dst>, RegXMM }
+
+// AVX-NE-CONVERT instructions end.
+
 // ENQCMD instructions.
 
 enqcmd, 0xf20f38f8, None, CpuENQCMD, Modrm|AddrPrefixOpReg, { Unspecified|BaseIndex, Reg16|Reg32|Reg64 }

@@ -373,6 +373,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Mq { OP_M, q_mode }
 #define Mv { OP_M, v_mode }
 #define Mv_bnd { OP_M, v_bndmk_mode }
+#define Mw { OP_M, w_mode }
 #define Mx { OP_M, x_mode }
 #define Mxmm { OP_M, xmm_mode }
 #define Gb { OP_G, b_mode }
@@ -1140,6 +1141,9 @@ enum
   PREFIX_VEX_0F3851_W_0,
   PREFIX_VEX_0F385C_X86_64,
   PREFIX_VEX_0F385E_X86_64,
+  PREFIX_VEX_0F3872,
+  PREFIX_VEX_0F38B0_W_0,
+  PREFIX_VEX_0F38B1_W_0,
   PREFIX_VEX_0F38F5_L_0,
   PREFIX_VEX_0F38F6_L_0,
   PREFIX_VEX_0F38F7_L_0,
@@ -1556,8 +1560,11 @@ enum
   VEX_W_0F385E_X86_64_P_1,
   VEX_W_0F385E_X86_64_P_2,
   VEX_W_0F385E_X86_64_P_3,
+  VEX_W_0F3872_P_1,
   VEX_W_0F3878,
   VEX_W_0F3879,
+  VEX_W_0F38B0,
+  VEX_W_0F38B1,
   VEX_W_0F38B4,
   VEX_W_0F38B5,
   VEX_W_0F38CF,
@@ -4093,6 +4100,27 @@ static const struct dis386 prefix_table[][4] = {
     { VEX_W_TABLE (VEX_W_0F385E_X86_64_P_3) },
   },
 
+  /* PREFIX_VEX_0F3872 */
+  {
+    { Bad_Opcode },
+    { VEX_W_TABLE (VEX_W_0F3872_P_1) },
+  },
+
+  /* PREFIX_VEX_0F38B0_W_0 */
+  {
+    { "vcvtneoph2ps", { XM, Mx }, 0 },
+    { "vcvtneebf162ps", { XM, Mx }, 0 },
+    { "vcvtneeph2ps", { XM, Mx }, 0 },
+    { "vcvtneobf162ps", { XM, Mx }, 0 },
+  },
+
+  /* PREFIX_VEX_0F38B1_W_0 */
+  {
+    { Bad_Opcode },
+    { "vbcstnebf162ps", { XM, Mw }, 0 },
+    { "vbcstnesh2ps", { XM, Mw }, 0 },
+  },
+ 
   /* PREFIX_VEX_0F38F5_L_0 */
   {
     { "bzhiS",		{ Gdq, Edq, VexGdq }, 0 },
@@ -6415,7 +6443,7 @@ static const struct dis386 vex_table[][256] = {
     /* 70 */
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_VEX_0F3872) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
@@ -6485,8 +6513,8 @@ static const struct dis386 vex_table[][256] = {
     { "vfnmsub213p%XW", { XM, Vex, EXx }, PREFIX_DATA },
     { "vfnmsub213s%XW", { XMScalar, VexScalar, EXdq }, PREFIX_DATA },
     /* b0 */
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { VEX_W_TABLE (VEX_W_0F38B0) },
+    { VEX_W_TABLE (VEX_W_0F38B1) },
     { Bad_Opcode },
     { Bad_Opcode },
     { VEX_W_TABLE (VEX_W_0F38B4) },
@@ -7797,12 +7825,24 @@ static const struct dis386 vex_w_table[][2] = {
     { MOD_TABLE (MOD_VEX_0F385E_X86_64_P_3_W_0) },
   },
   {
+    /* VEX_W_0F3872_P_1 */
+    { "%XVvcvtneps2bf16%XY", { XMM, EXx }, 0 },
+  },
+  {
     /* VEX_W_0F3878 */
     { "%XEvpbroadcastb",	{ XM, EXb }, PREFIX_DATA },
   },
   {
     /* VEX_W_0F3879 */
     { "%XEvpbroadcastw",	{ XM, EXw }, PREFIX_DATA },
+  },
+  {
+    /* VEX_W_0F38B0 */
+    { PREFIX_TABLE (PREFIX_VEX_0F38B0_W_0) },
+  },
+  {
+    /* VEX_W_0F38B1 */
+    { PREFIX_TABLE (PREFIX_VEX_0F38B1_W_0) },
   },
   {
     /* VEX_W_0F38B4 */
