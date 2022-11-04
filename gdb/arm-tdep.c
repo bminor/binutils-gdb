@@ -324,20 +324,6 @@ reconstruct_t_bit(struct gdbarch *gdbarch, CORE_ADDR lr, ULONGEST psr)
   return psr;
 }
 
-/* Initialize stack pointers, and flag the active one.  */
-
-static inline void
-arm_cache_init_sp (int regnum, CORE_ADDR* member,
-				      struct arm_prologue_cache *cache,
-				      frame_info_ptr frame)
-{
-  CORE_ADDR val = get_frame_register_unsigned (frame, regnum);
-  if (val == cache->sp)
-    cache->active_sp_regnum = regnum;
-
-  *member = val;
-}
-
 /* Initialize CACHE fields for which zero is not adequate (CACHE is
    expected to have been ZALLOC'ed before calling this function).  */
 
@@ -362,34 +348,82 @@ arm_cache_init (struct arm_prologue_cache *cache, frame_info_ptr frame)
 
   if (tdep->have_sec_ext)
     {
-      CORE_ADDR msp_val = get_frame_register_unsigned (frame, tdep->m_profile_msp_regnum);
-      CORE_ADDR psp_val = get_frame_register_unsigned (frame, tdep->m_profile_psp_regnum);
+      const CORE_ADDR msp_val
+	= get_frame_register_unsigned (frame, tdep->m_profile_msp_regnum);
+      const CORE_ADDR psp_val
+	= get_frame_register_unsigned (frame, tdep->m_profile_psp_regnum);
 
-      arm_cache_init_sp (tdep->m_profile_msp_s_regnum, &cache->msp_s, cache, frame);
-      arm_cache_init_sp (tdep->m_profile_psp_s_regnum, &cache->psp_s, cache, frame);
-      arm_cache_init_sp (tdep->m_profile_msp_ns_regnum, &cache->msp_ns, cache, frame);
-      arm_cache_init_sp (tdep->m_profile_psp_ns_regnum, &cache->psp_ns, cache, frame);
+      cache->msp_s
+	= get_frame_register_unsigned (frame, tdep->m_profile_msp_s_regnum);
+      cache->msp_ns
+	= get_frame_register_unsigned (frame, tdep->m_profile_msp_ns_regnum);
+      cache->psp_s
+	= get_frame_register_unsigned (frame, tdep->m_profile_psp_s_regnum);
+      cache->psp_ns
+	= get_frame_register_unsigned (frame, tdep->m_profile_psp_ns_regnum);
 
+      /* Identify what msp is alias for (msp_s or msp_ns).  */
       if (msp_val == cache->msp_s)
 	cache->active_msp_regnum = tdep->m_profile_msp_s_regnum;
       else if (msp_val == cache->msp_ns)
 	cache->active_msp_regnum = tdep->m_profile_msp_ns_regnum;
+      else
+	{
+	  warning (_("Invalid state, unable to determine msp alias, assuming "
+		     "msp_s."));
+	  cache->active_msp_regnum = tdep->m_profile_msp_s_regnum;
+	}
+
+      /* Identify what psp is alias for (psp_s or psp_ns).  */
       if (psp_val == cache->psp_s)
 	cache->active_psp_regnum = tdep->m_profile_psp_s_regnum;
       else if (psp_val == cache->psp_ns)
 	cache->active_psp_regnum = tdep->m_profile_psp_ns_regnum;
+      else
+	{
+	  warning (_("Invalid state, unable to determine psp alias, assuming "
+		     "psp_s."));
+	  cache->active_psp_regnum = tdep->m_profile_psp_s_regnum;
+	}
 
-      /* Use MSP_S as default stack pointer.  */
-      if (cache->active_sp_regnum == ARM_SP_REGNUM)
-	  cache->active_sp_regnum = tdep->m_profile_msp_s_regnum;
+      /* Identify what sp is alias for (msp_s, msp_ns, psp_s or psp_ns).  */
+      if (msp_val == cache->sp)
+	cache->active_sp_regnum = cache->active_msp_regnum;
+      else if (psp_val == cache->sp)
+	cache->active_sp_regnum = cache->active_psp_regnum;
+      else
+	{
+	  warning (_("Invalid state, unable to determine sp alias, assuming "
+		     "msp."));
+	  cache->active_sp_regnum = cache->active_msp_regnum;
+	}
     }
   else if (tdep->is_m)
     {
-      arm_cache_init_sp (tdep->m_profile_msp_regnum, &cache->msp_s, cache, frame);
-      arm_cache_init_sp (tdep->m_profile_psp_regnum, &cache->psp_s, cache, frame);
+      cache->msp_s
+	= get_frame_register_unsigned (frame, tdep->m_profile_msp_s_regnum);
+      cache->psp_s
+	= get_frame_register_unsigned (frame, tdep->m_profile_psp_s_regnum);
+
+      /* Identify what sp is alias for (msp or psp).  */
+      if (cache->msp_s == cache->sp)
+	cache->active_sp_regnum = tdep->m_profile_msp_regnum;
+      else if (cache->psp_s == cache->sp)
+	cache->active_sp_regnum = tdep->m_profile_psp_regnum;
+      else
+	{
+	  warning (_("Invalid state, unable to determine sp alias, assuming "
+		     "msp."));
+	  cache->active_sp_regnum = tdep->m_profile_msp_regnum;
+	}
     }
   else
-    arm_cache_init_sp (ARM_SP_REGNUM, &cache->msp_s, cache, frame);
+    {
+      cache->msp_s
+	= get_frame_register_unsigned (frame, ARM_SP_REGNUM);
+
+      cache->active_sp_regnum = ARM_SP_REGNUM;
+    }
 }
 
 /* Return the requested stack pointer value (in REGNUM), taking into
