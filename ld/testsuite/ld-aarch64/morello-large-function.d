@@ -15,7 +15,7 @@
 
 Disassembly of section \.data:
 
-[0-9a-f]+ <__data_start>:
+[0-9a-f]+ <.*>:
  *[0-9a-f]+:	.*
 			.*: R_MORELLO_RELATIVE	\*ABS\*\+.*
  *[0-9a-f]+:	.* 	udf	#0
