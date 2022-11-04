@@ -27,6 +27,11 @@ if { ![check_compiler_available] } {
     return
 }
 
+# Skip targets where -shared is not supported
+if { ![check_shared_lib_support] } {
+    return
+}
+
 # This test can only be run on a couple of ELF platforms.
 # Square bracket expressions seem to confuse istarget.
 # This is similar to the test that is used in ld-shared, BTW.
