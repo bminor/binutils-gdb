@@ -22,6 +22,13 @@ static unsigned long ra, rb, rs;
 int
 main ()
 {
+
+  /* This test is used to verify the recording of the MMA instructions.  The
+     names of the MMA instructions pmxbf16ger*, pmxvf32ger*,pmxvf64ger*,
+     pmxvi4ger8*, pmxvi8ger4* pmxvi16ger2* instructions were officially changed
+     to pmdmxbf16ger*, pmdmxvf32ger*, pmdmxvf64ger*, pmdmxvi4ger8*,
+     pmdmxvi8ger4*, pmdmxvi16ger* respectively.  The old mnemonics are used in
+     this test for backward compatibity.   */
   ra = 0xABCDEF012;
   rb = 0;
   rs = 0x012345678;
@@ -87,6 +94,7 @@ main ()
 			"wa" (vec_xb) );
   __asm__ __volatile__ ("xvf16ger2pn 5, %x0, %x1" :: "wa" (vec_xa),\
 			"wa" (vec_xb) );
+  /* Use the older instruction name for backward compatibility */
   __asm__ __volatile__ ("pmxvi8ger4spp  6, %x0, %x1, 11, 13, 5"
                                 :: "wa" (vec_xa), "wa" (vec_xb) );
   __asm__ __volatile__ ("pmxvf32gerpp  7, %x0, %x1, 11, 13"

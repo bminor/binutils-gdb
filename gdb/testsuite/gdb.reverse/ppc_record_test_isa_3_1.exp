@@ -124,6 +124,11 @@ gdb_test_no_output "record" "start recording test2"
 ##       pmxvi8ger4   - ACC[6], vs[21] to vs[27]
 ##       pmxvf32gerpp - ACC[7], vs[28] to vs[31] and fpscr
 
+## Note the names for pmxvi8ger4 and pmxvf32gerpp have been officially
+## changed to pmdmxvi8ger4 and pmdmxvf32gerpp respectively.  The older
+## names are still supported by the assembler as extended mnemonics.  The
+## older names are used in this test for backward compatibility.
+
 set stop3 [gdb_get_line_number "stop 3"]
 set stop4 [gdb_get_line_number "stop 4"]
 

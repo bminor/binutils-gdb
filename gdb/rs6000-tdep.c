@@ -5535,6 +5535,10 @@ ppc_process_record_op59 (struct gdbarch *gdbarch, struct regcache *regcache,
   int ext = PPC_EXTOP (insn);
   int at = PPC_FIELD (insn, 6, 3);
 
+  /* Note the mnemonics for the pmxvf64ger* instructions were officially
+     changed to pmdmxvf64ger*.  The old mnemonics are still supported as
+     extended mnemonics.  */
+
   switch (ext & 0x1f)
     {
     case 18:		/* Floating Divide */
@@ -5603,7 +5607,8 @@ ppc_process_record_op59 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 218:	/* VSX Vector 32-bit Floating-Point GER Negative multiply,
 		   Negative accumulate, xvf32gernn */
 
-    case 59:	/* VSX Vector 64-bit Floating-Point GER, pmxvf64ger */
+    case 59:	/* VSX Vector 64-bit Floating-Point GER, pmdmxvf64ger
+		   (pmxvf64ger)  */
     case 58:	/* VSX Vector 64-bit Floating-Point GER Positive multiply,
 		   Positive accumulate, xvf64gerpp */
     case 186:	/* VSX Vector 64-bit Floating-Point GER Positive multiply,
@@ -5611,7 +5616,7 @@ ppc_process_record_op59 (struct gdbarch *gdbarch, struct regcache *regcache,
     case 122:	/* VSX Vector 64-bit Floating-Point GER Negative multiply,
 		   Positive accumulate, xvf64gernp */
     case 250:	/* VSX Vector 64-bit Floating-Point GER Negative multiply,
-		   Negative accumulate, pmxvf64gernn */
+		   Negative accumulate, pmdmxvf64gernn (pmxvf64gernn)  */
 
     case 51:	/* VSX Vector bfloat16 GER, xvbf16ger2 */
     case 50:	/* VSX Vector bfloat16 GER Positive multiply,
@@ -6486,98 +6491,106 @@ ppc_process_record_prefix_op59_XX3 (struct gdbarch *gdbarch,
   int at = PPC_FIELD (insn_suffix, 6, 3);
   ppc_gdbarch_tdep *tdep = gdbarch_tdep<ppc_gdbarch_tdep> (gdbarch);
 
+  /* Note, the mnemonics for the pmxvf16ger*, pmxvf32ger*,pmxvf64ger*,
+     pmxvi4ger8*, pmxvi8ger4* pmxvi16ger2* instructions were officially
+     changed to pmdmxbf16ger*, pmdmxvf32ger*, pmdmxvf64ger*, pmdmxvi4ger8*,
+     pmdmxvi8ger4*, pmdmxvi16ger* respectively.  The old mnemonics are still
+     supported by the assembler as extended mnemonics.  The disassembler
+     generates the new mnemonics.  */
   if (type == 3)
     {
       if (ST4 == 9)
 	switch (opcode)
 	  {
 	  case 35:	/* Prefixed Masked VSX Vector 4-bit Signed Integer GER
-			   MMIRR, pmxvi4ger8 */
+			   MMIRR, pmdmxvi4ger8 (pmxvi4ger8) */
 	  case 34:	/* Prefixed Masked VSX Vector 4-bit Signed Integer GER
-			   MMIRR, pmxvi4ger8pp */
+			   MMIRR, pmdmxvi4ger8pp (pmxvi4ger8pp) */
 
 	  case 99:	/* Prefixed Masked VSX Vector 8-bit Signed/Unsigned
 			   Integer GER with Saturate Positive multiply,
 			   Positive accumulate, xvi8ger4spp */
 
 	  case 3:	/* Prefixed Masked VSX Vector 8-bit Signed/Unsigned
-			   Integer GER MMIRR, pmxvi8ger4 */
+			   Integer GER MMIRR, pmdmxvi8ger4 (pmxvi8ger4)  */
 	  case 2:	/* Prefixed Masked VSX Vector 8-bit Signed/Unsigned
 			   Integer GER Positive multiply, Positive accumulate
-			   MMIRR, pmxvi8ger4pp */
+			   MMIRR, pmdmxvi8ger4pp (pmxvi8ger4pp)  */
 
 	  case 75:	/* Prefixed Masked VSX Vector 16-bit Signed Integer
-			   GER MMIRR, pmxvi16ger2 */
+			   GER MMIRR, pmdmxvi16ger2 (pmxvi16ger2)  */
 	  case 107:	/* Prefixed Masked VSX Vector 16-bit Signed Integer
 			   GER  Positive multiply, Positive accumulate,
-			   pmxvi16ger2pp */
+			   pmdmxvi16ger2pp (pmxvi16ger2pp)  */
 
 	  case 43:	/* Prefixed Masked VSX Vector 16-bit Signed Integer
-			   GER with Saturation MMIRR, pmxvi16ger2s */
+			   GER with Saturation MMIRR, pmdmxvi16ger2s
+			   (pmxvi16ger2s)  */
 	  case 42:	/* Prefixed Masked VSX Vector 16-bit Signed Integer
 			   GER with Saturation Positive multiply, Positive
-			   accumulate MMIRR, pmxvi16ger2spp */
+			   accumulate MMIRR, pmdmxvi16ger2spp (pmxvi16ger2spp)
+			*/
 	    ppc_record_ACC_fpscr (regcache, tdep, at, false);
 	    return 0;
 
 	  case 19:	/* Prefixed Masked VSX Vector 16-bit Floating-Point
-			   GER MMIRR, pmxvf16ger2 */
+			   GER MMIRR, pmdmxvf16ger2 (pmxvf16ger2)  */
 	  case 18:	/* Prefixed Masked VSX Vector 16-bit Floating-Point
 			   GER Positive multiply, Positive accumulate MMIRR,
-			   pmxvf16ger2pp */
+			   pmdmxvf16ger2pp (pmxvf16ger2pp)  */
 	  case 146:	/* Prefixed Masked VSX Vector 16-bit Floating-Point
 			   GER Positive multiply, Negative accumulate MMIRR,
-			   pmxvf16ger2pn */
+			   pmdmxvf16ger2pn (pmxvf16ger2pn)  */
 	  case 82:	/* Prefixed Masked VSX Vector 16-bit Floating-Point
 			   GER Negative multiply, Positive accumulate MMIRR,
-			   pmxvf16ger2np */
+			   pmdmxvf16ger2np (pmxvf16ger2np)  */
 	  case 210:	/* Prefixed Masked VSX Vector 16-bit Floating-Point
 			   GER Negative multiply, Negative accumulate MMIRR,
-			   pmxvf16ger2nn */
+			   pmdmxvf16ger2nn (pmxvf16ger2nn)  */
 
 	  case 27:	/* Prefixed Masked VSX Vector 32-bit Floating-Point
-			   GER MMIRR, pmxvf32ger */
+			   GER MMIRR, pmdmxvf32ger (pmxvf32ger)  */
 	  case 26:	/* Prefixed Masked VSX Vector 32-bit Floating-Point
 			   GER Positive multiply, Positive accumulate MMIRR,
-			   pmxvf32gerpp */
+			   pmdmxvf32gerpp (pmxvf32gerpp)  */
 	  case 154:	/* Prefixed Masked VSX Vector 32-bit Floating-Point
 			   GER Positive multiply, Negative accumulate MMIRR,
-			   pmxvf32gerpn */
+			   pmdmxvf32gerpn (pmxvf32gerpn)  */
 	  case 90:	/* Prefixed Masked VSX Vector 32-bit Floating-Point
 			   GER Negative multiply, Positive accumulate MMIRR,
-			   pmxvf32gernp */
+			   pmdmxvf32gernp (pmxvf32gernp )*/
 	  case 218:	/* Prefixed Masked VSX Vector 32-bit Floating-Point
 			   GER Negative multiply, Negative accumulate MMIRR,
-			   pmxvf32gernn */
+			   pmdmxvf32gernn (pmxvf32gernn)  */
 
 	  case 59:	/* Prefixed Masked VSX Vector 64-bit Floating-Point
-			   GER MMIRR, pmxvf64ger */
+			   GER MMIRR, pmdmxvf64ger (pmxvf64ger)  */
 	  case 58:	/* Floating-Point GER Positive multiply, Positive
-			   accumulate MMIRR, pmxvf64gerpp */
+			   accumulate MMIRR, pmdmxvf64gerpp (pmxvf64gerpp)  */
 	  case 186:	/* Prefixed Masked VSX Vector 64-bit Floating-Point
 			   GER Positive multiply, Negative accumulate MMIRR,
-			   pmxvf64gerpn */
+			   pmdmxvf64gerpn (pmxvf64gerpn)  */
 	  case 122:	/* Prefixed Masked VSX Vector 64-bit Floating-Point
 			   GER Negative multiply, Positive accumulate MMIRR,
-			   pmxvf64gernp */
+			   pmdmxvf64gernp (pmxvf64gernp)  */
 	  case 250:	/* Prefixed Masked VSX Vector 64-bit Floating-Point
 			   GER Negative multiply, Negative accumulate MMIRR,
-			   pmxvf64gernn */
+			   pmdmxvf64gernn (pmxvf64gernn)  */
 
 	  case 51:	/* Prefixed Masked VSX Vector bfloat16 GER MMIRR,
-			   pmxvbf16ger2 */
+			   pmdmxvbf16ger2 (pmxvbf16ger2)  */
 	  case 50:	/* Prefixed Masked VSX Vector bfloat16 GER Positive
 			   multiply, Positive accumulate MMIRR,
-			   pmxvbf16ger2pp */
+			   pmdmxvbf16ger2pp (pmxvbf16ger2pp)  */
 	  case 178:	/* Prefixed Masked VSX Vector bfloat16 GER Positive
 			   multiply, Negative accumulate MMIRR,
-			   pmxvbf16ger2pn */
+			   pmdmxvbf16ger2pn (pmxvbf16ger2pn)  */
 	  case 114:	/* Prefixed Masked VSX Vector bfloat16 GER Negative
 			   multiply, Positive accumulate MMIRR,
-			   pmxvbf16ger2np */
+			   pmdmxvbf16ger2np (pmxvbf16ger2np)  */
 	  case 242:	/* Prefixed Masked VSX Vector bfloat16 GER Negative
 			   multiply, Negative accumulate MMIRR,
-			   pmxvbf16ger2nn */
+			   pmdmxvbf16ger2nn (pmxvbf16ger2nn)  */
 	    ppc_record_ACC_fpscr (regcache, tdep, at, true);
 	    return 0;
 	  }
