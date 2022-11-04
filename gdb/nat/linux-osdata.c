@@ -271,6 +271,68 @@ get_cores_used_by_process (PID_T pid, int *cores, const int num_cores)
   return task_count;
 }
 
+/* get_core_array_size helper that uses /sys/devices/system/cpu/possible.  */
+
+static gdb::optional<size_t>
+get_core_array_size_using_sys_possible ()
+{
+  gdb::optional<std::string> possible
+    = read_text_file_to_string ("/sys/devices/system/cpu/possible");
+
+  if (!possible.has_value ())
+    return {};
+
+  /* The format is documented here:
+
+       https://www.kernel.org/doc/Documentation/admin-guide/cputopology.rst
+
+     For the purpose of this function, we assume the file can contain a complex
+     set of ranges, like `2,4-31,32-63`.  Read all number, disregarding commands
+     and dashes, in order to find the largest possible core number.  The size
+     of the array to allocate is that plus one.  */
+
+  unsigned long max_id = 0;
+  for (std::string::size_type start = 0; start < possible->size ();)
+    {
+      const char *start_p = &(*possible)[start];
+      char *end_p;
+
+      /* Parse one number.  */
+      errno = 0;
+      unsigned long id = strtoul (start_p, &end_p, 10);
+      if (errno != 0)
+	return {};
+
+      max_id = std::max (max_id, id);
+
+      start += end_p - start_p;
+      gdb_assert (start <= possible->size ());
+
+      /* Skip comma, dash, or new line (if we are at the end).  */
+      ++start;
+    }
+
+  return max_id + 1;
+}
+
+/* Return the array size to allocate in order to be able to index it using
+   CPU core numbers.  This may be more than the actual number of cores if
+   the core numbers are not contiguous.  */
+
+static size_t
+get_core_array_size ()
+{
+  /* Using /sys/.../possible is prefered, because it handles the case where
+     we are in a container that has access to a subset of the host's cores.
+     It will return a size that considers all the CPU cores available to the
+     host.  If that fials for some reason, fall back to sysconf.  */
+  gdb::optional<size_t> count = get_core_array_size_using_sys_possible ();
+  if (count.has_value ())
+    return *count;
+
+  return sysconf (_SC_NPROCESSORS_ONLN);
+}
+
 static void
 linux_xfer_osdata_processes (struct buffer *buffer)
 {
@@ -281,7 +343,7 @@ linux_xfer_osdata_processes (struct buffer *buffer)
   dirp = opendir ("/proc");
   if (dirp)
     {
-      const int num_cores = sysconf (_SC_NPROCESSORS_ONLN);
+      const int core_array_size = get_core_array_size ();
       struct dirent *dp;
 
       while ((dp = readdir (dirp)) != NULL)
@@ -308,10 +370,10 @@ linux_xfer_osdata_processes (struct buffer *buffer)
 	    strcpy (user, "?");
 
 	  /* Find CPU cores used by the process.  */
-	  cores = XCNEWVEC (int, num_cores);
-	  task_count = get_cores_used_by_process (pid, cores, num_cores);
+	  cores = XCNEWVEC (int, core_array_size);
+	  task_count = get_cores_used_by_process (pid, cores, core_array_size);
 
-	  for (i = 0; i < num_cores && task_count > 0; ++i)
+	  for (i = 0; i < core_array_size && task_count > 0; ++i)
 	    if (cores[i])
 	      {
 		string_appendf (cores_str, "%d", i);
