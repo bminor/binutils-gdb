@@ -365,6 +365,7 @@ When the time comes to actually make the release....
 	 cd ..
 	 put as.html
 	 put as.pdf
+	 
 	 cd bfd
 	 lcd ../../bfd/doc/bfd
 	 put *
@@ -372,6 +373,7 @@ When the time comes to actually make the release....
 	 lcd ..
 	 put bfd.html
 	 put bfd.pdf
+	 
 	 cd binutils
 	 lcd ../../binutils/binutils      <=== NB/ Path not like others
 	 put *
@@ -379,6 +381,7 @@ When the time comes to actually make the release....
 	 lcd ../doc
 	 put binutils.html
 	 put binutils.pdf
+	 
 	 cd gprof
 	 lcd ../../gprof/doc/gprof
 	 put *
@@ -386,6 +389,7 @@ When the time comes to actually make the release....
 	 lcd ../..
 	 put gprof.html
 	 put gprof.pdf
+	 
 	 cd ld
 	 lcd ../ld/doc/ld
 	 put *
@@ -393,6 +397,10 @@ When the time comes to actually make the release....
 	 lcd ../..
 	 put ld.html
 	 put ld.pdf
+	 
+	 lcd ../../gprofng/doc
+	 put gprofng.html
+	 put gprofng.pdf
 	 
       Edit the top level binutils index.html file to change the links
       to point to the new documentation.
