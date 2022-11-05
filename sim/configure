@@ -644,8 +644,8 @@ SIM_FRV_TRAPDUMP_FLAGS
 sim_float
 sim_bitsize
 SIM_INLINE
-sim_hw_sockser
-sim_hw_cflags
+SIM_HW_SOCKSER
+SIM_HW_CFLAGS
 SIM_ENABLE_HW_FALSE
 SIM_ENABLE_HW_TRUE
 cgen
@@ -15868,7 +15868,9 @@ fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${enable_sim_hardware}" >&5
 $as_echo "${enable_sim_hardware}" >&6; }
+SIM_HW_CFLAGS=$sim_hw_cflags
 
+SIM_HW_SOCKSER=$sim_hw_sockser
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking sim inline settings" >&5

@@ -36,6 +36,8 @@ else
 fi
 AM_CONDITIONAL([SIM_ENABLE_HW], [test "$enable_sim_hardware" = "yes"])
 AC_MSG_RESULT(${enable_sim_hardware})
-AC_SUBST(sim_hw_cflags)
-AC_SUBST(sim_hw_sockser)
+SIM_HW_CFLAGS=$sim_hw_cflags
+AC_SUBST(SIM_HW_CFLAGS)
+SIM_HW_SOCKSER=$sim_hw_sockser
+AC_SUBST(SIM_HW_SOCKSER)
 ])
