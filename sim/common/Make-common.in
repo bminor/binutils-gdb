@@ -186,8 +186,7 @@ CONFIG_CFLAGS = \
 	$(SIM_HW_CFLAGS) \
 	$(SIM_INLINE) \
 	$(SIM_WARN_CFLAGS) \
-	$(SIM_WERROR_CFLAGS) \
-	$(SIM_HARDWARE)
+	$(SIM_WERROR_CFLAGS)
 CSEARCH = -I. -I$(srcdir) -I$(srccom) \
   -I$(srcroot)/include \
   -I../../bfd -I$(srcroot)/bfd \
