@@ -214,7 +214,8 @@ install-exec-local: installdirs $(SIM_INSTALL_EXEC_LOCAL_DEPS)
 		if [ -e $$d/run$(EXEEXT) ]; then \
 			n="$$run"; \
 			[ "$(SIM_PRIMARY_TARGET)" = "$$d" ] || n="$$n-$$d"; \
-			$(INSTALL_PROGRAM) $$d/run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT) || exit 1; \
+			$(LIBTOOL) --mode=install \
+				$(INSTALL_PROGRAM) $$d/run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT) || exit 1; \
 		fi; \
 	done
 

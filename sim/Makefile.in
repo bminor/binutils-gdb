@@ -3271,7 +3271,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_erc32_TRUE@sim-%D-install-exec-local: installdirs
 @SIM_ENABLE_ARCH_erc32_TRUE@	$(AM_V_at)$(MKDIR_P) $(DESTDIR)$(bindir)
 @SIM_ENABLE_ARCH_erc32_TRUE@	n=`echo sis | sed '$(program_transform_name)'`; \
-@SIM_ENABLE_ARCH_erc32_TRUE@	$(INSTALL_PROGRAM) erc32/sis$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
+@SIM_ENABLE_ARCH_erc32_TRUE@	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM) erc32/run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
 @SIM_ENABLE_ARCH_erc32_TRUE@sim-erc32-uninstall-local:
 @SIM_ENABLE_ARCH_erc32_TRUE@	rm -f $(DESTDIR)$(bindir)/sis
 
@@ -3530,7 +3530,8 @@ install-exec-local: installdirs $(SIM_INSTALL_EXEC_LOCAL_DEPS)
 		if [ -e $$d/run$(EXEEXT) ]; then \
 			n="$$run"; \
 			[ "$(SIM_PRIMARY_TARGET)" = "$$d" ] || n="$$n-$$d"; \
-			$(INSTALL_PROGRAM) $$d/run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT) || exit 1; \
+			$(LIBTOOL) --mode=install \
+				$(INSTALL_PROGRAM) $$d/run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT) || exit 1; \
 		fi; \
 	done
 
