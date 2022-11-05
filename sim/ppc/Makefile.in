@@ -516,8 +516,8 @@ GDB_OBJ = gdb-sim.o sim_calls.o
 HW_SRC = @sim_hw_src@
 HW_OBJ = @sim_hw_obj@
 
-PACKAGE_SRC = @sim_pk_src@
-PACKAGE_OBJ = @sim_pk_obj@
+PACKAGE_SRC = pk_disklabel.c
+PACKAGE_OBJ = $(PACKAGE_SRC:.c=.o)
 
 
 psim$(EXEEXT): $(TARGETLIB) main.o $(LIBIBERTY_LIB) $(BFD_LIB)
@@ -528,7 +528,7 @@ run$(EXEEXT): psim$(EXEEXT)
 	$(SILENCE) rm -f $@
 	$(ECHO_GEN) ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
 
-$(TARGETLIB): tmp-igen tmp-dgen tmp-hw tmp-pk tmp-defines $(LIB_OBJ) $(GDB_OBJ)
+$(TARGETLIB): tmp-igen tmp-dgen tmp-hw tmp-defines $(LIB_OBJ) $(GDB_OBJ)
 	$(ECHO_AR) $(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
 	$(ECHO_RANLIB) $(RANLIB) $(TARGETLIB)
 
@@ -782,10 +782,12 @@ hw_vm.o: hw_vm.c $(DEVICE_TABLE_H) $(CPU_H)
 
 
 # real packages
-pk.h: tmp-pk; @true
-tmp-pk: Makefile $(PACKAGE_SRC) $(srcroot)/move-if-change
+$(srcdir)/pk.h: $(MAINT) tmp-pk
+	@true
+tmp-pk: $(srcdir)/Makefile.in $(PACKAGE_SRC) $(srcroot)/move-if-change
 	$(ECHO_GEN)# The first for loop is to remove duplicates.
-	$(SILENCE) f=""; \
+	$(SILENCE) echo "/* Generated file by Makefile.in; do not edit.  */" > tmp-pk.h; \
+	f=""; \
 	for i in $(PACKAGE_SRC) ; do \
 	  case " $$f " in \
 	    *" $$i "*) ;; \
@@ -796,8 +798,8 @@ tmp-pk: Makefile $(PACKAGE_SRC) $(srcroot)/move-if-change
 	| sed -e 's/^.*pk_\(.*\)\.c/\1/' \
 		-e 's/^/extern package_create_instance_callback pk_/' \
 		-e 's/$$/_create_instance;/' \
-		> tmp-pk.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-pk.h pk.h
+		>> tmp-pk.h
+	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-pk.h $(srcdir)/pk.h
 	$(SILENCE) touch $@
 
 pk_disklabel.o: pk_disklabel.c $(DEVICE_TABLE_H) $(PK_H)

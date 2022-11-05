@@ -634,8 +634,6 @@ sim_bitsize
 sim_igen_smp
 sim_smp
 sim_xor_endian
-sim_pk_obj
-sim_pk_src
 sim_hw_obj
 sim_hw_src
 sim_icache
@@ -727,7 +725,6 @@ enable_sim_model
 enable_sim_model_issue
 enable_sim_monitor
 enable_sim_opcode
-enable_sim_packages
 enable_sim_smp
 enable_sim_switch
 enable_sim_timebase
@@ -1369,7 +1366,6 @@ Optional Features:
   --enable-sim-model-issue		Specify whether to simulate model specific actions
   --enable-sim-monitor=mon		Specify whether to enable monitoring events.
   --enable-sim-opcode=which		Override default opcode lookup.
-  --enable-sim-packages=list		Specify the packages to be included in the build.
   --enable-sim-smp=n			Specify number of processors to configure for.
   --enable-sim-switch			Use a switch instead of a table for instruction call.
   --enable-sim-timebase			Specify whether the PPC timebase is supported.
@@ -3497,31 +3493,6 @@ fi
 fi
 
 
-# Check whether --enable-sim-packages was given.
-if test "${enable_sim_packages+set}" = set; then :
-  enableval=$enable_sim_packages; packages=disklabel
-case "${enableval}" in
-  yes)	;;
-  no)	as_fn_error $? "\"List of packages must be specified for --enable-sim-packages\"" "$LINENO" 5; packages="";;
-  ,*)   packages="${packages}${enableval}";;
-  *,)   packages="${enableval}${packages}";;
-  *)	packages="${enableval}"'';;
-esac
-sim_pk_src=`echo $packages | sed -e 's/,/.c pk_/g' -e 's/^/pk_/' -e 's/$/.c/'`
-sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
-if test x"$silent" != x"yes" && test x"$packages" != x""; then
-  echo "Setting packages to $sim_pk_src, $sim_pk_obj"
-fi
-else
-  packages=disklabel
-sim_pk_src=`echo $packages | sed -e 's/,/.c pk_/g' -e 's/^/pk_/' -e 's/$/.c/'`
-sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
-if test x"$silent" != x"yes"; then
-  echo "Setting packages to $sim_pk_src, $sim_pk_obj"
-fi
-fi
-
-
 # Check whether --enable-sim-smp was given.
 if test "${enable_sim_smp+set}" = set; then :
   enableval=$enable_sim_smp; case "${enableval}" in
@@ -4279,8 +4250,6 @@ else
   cd ..
   rm -rf $tempdir
 fi
-
-
 
 
 

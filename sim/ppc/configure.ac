@@ -337,28 +337,6 @@ if test x"$silent" != x"yes"; then
 fi])dnl
 
 
-AC_ARG_ENABLE(sim-packages,
-[  --enable-sim-packages=list		Specify the packages to be included in the build.],
-[packages=disklabel
-case "${enableval}" in
-  yes)	;;
-  no)	AC_MSG_ERROR("List of packages must be specified for --enable-sim-packages"); packages="";;
-  ,*)   packages="${packages}${enableval}";;
-  *,)   packages="${enableval}${packages}";;
-  *)	packages="${enableval}"'';;
-esac
-sim_pk_src=`echo $packages | sed -e 's/,/.c pk_/g' -e 's/^/pk_/' -e 's/$/.c/'`
-sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
-if test x"$silent" != x"yes" && test x"$packages" != x""; then
-  echo "Setting packages to $sim_pk_src, $sim_pk_obj"
-fi],[packages=disklabel
-sim_pk_src=`echo $packages | sed -e 's/,/.c pk_/g' -e 's/^/pk_/' -e 's/$/.c/'`
-sim_pk_obj=`echo $sim_pk_src | sed -e 's/\.c/.o/g'`
-if test x"$silent" != x"yes"; then
-  echo "Setting packages to $sim_pk_src, $sim_pk_obj"
-fi])dnl
-
-
 AC_ARG_ENABLE(sim-smp,
 [  --enable-sim-smp=n			Specify number of processors to configure for.],
 [case "${enableval}" in
@@ -590,8 +568,6 @@ AC_SUBST(sim_filter)
 AC_SUBST(sim_icache)
 AC_SUBST(sim_hw_src)
 AC_SUBST(sim_hw_obj)
-AC_SUBST(sim_pk_src)
-AC_SUBST(sim_pk_obj)
 AC_SUBST(sim_xor_endian)
 AC_SUBST(sim_smp)
 AC_SUBST(sim_igen_smp)
