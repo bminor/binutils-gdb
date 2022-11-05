@@ -845,3 +845,4 @@ install-pdf:
 
 install:
 installdirs:
+uninstall:

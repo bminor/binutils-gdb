@@ -23,3 +23,7 @@ sim-%D-install-exec-local: installdirs
 	$(AM_V_at)$(MKDIR_P) $(DESTDIR)$(bindir)
 	n=`echo sis | sed '$(program_transform_name)'`; \
 	$(INSTALL_PROGRAM) %D%/sis$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
+
+SIM_UNINSTALL_LOCAL_DEPS += sim-%D%-uninstall-local
+sim-%D%-uninstall-local:
+	rm -f $(DESTDIR)$(bindir)/sis

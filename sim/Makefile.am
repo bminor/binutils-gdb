@@ -63,6 +63,8 @@ SIM_ALL_RECURSIVE_DEPS =
 SIM_INSTALL_DATA_LOCAL_DEPS =
 ## Deps to add to the install-exec-local target.
 SIM_INSTALL_EXEC_LOCAL_DEPS =
+## Deps to add to the uninstall-local target.
+SIM_UNINSTALL_LOCAL_DEPS =
 
 # Generate target constants for newlib/libgloss from its source tree.
 # This file is shipped with distributions so we build in the source dir.
@@ -164,4 +166,10 @@ install-exec-local: installdirs $(SIM_INSTALL_EXEC_LOCAL_DEPS)
 			[ "$(SIM_PRIMARY_TARGET)" = "$$d" ] || n="$$n-$$d"; \
 			$(INSTALL_PROGRAM) $$d/run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT) || exit 1; \
 		fi; \
+	done
+
+uninstall-local: $(SIM_UNINSTALL_LOCAL_DEPS)
+	rm -f $(DESTDIR)$(bindir)/run $(DESTDIR)$(libdir)/libsim.a
+	for d in $(SUBDIRS); do \
+		rm -f $(DESTDIR)$(bindir)/run-$$d $(DESTDIR)$(libdir)/libsim-$$d.a; \
 	done
