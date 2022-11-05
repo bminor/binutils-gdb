@@ -19,7 +19,7 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT
-AC_CONFIG_MACRO_DIRS([../config])
+AC_CONFIG_MACRO_DIRS([.. ../config])
 AC_CONFIG_SRCDIR([main.c])
 AC_CONFIG_HEADERS(config.h:config.in, [echo > stamp-h])
 AM_MAINTAINER_MODE
@@ -45,6 +45,10 @@ AC_CANONICAL_TARGET
 ACX_NONCANONICAL_TARGET
 
 AC_ARG_PROGRAM
+
+# We require libtool to link with the in-tree libtool libraries
+# the proper way.
+LT_INIT
 
 # We require a C++11 compiler.  Check if one is available, and if
 # necessary, set CXX_DIALECT to some -std=xxx switch.
@@ -2092,7 +2096,7 @@ AC_ARG_ENABLE([libbacktrace],
 
 if test "${enable_libbacktrace}" = "yes"; then
   LIBBACKTRACE_INC="-I$srcdir/../libbacktrace/ -I../libbacktrace/"
-  LIBBACKTRACE_LIB=../libbacktrace/.libs/libbacktrace.a
+  LIBBACKTRACE_LIB=../libbacktrace/libbacktrace.la
   AC_DEFINE(HAVE_LIBBACKTRACE, 1, [Define if libbacktrace is being used.])
 else
   LIBBACKTRACE_INC=
@@ -2151,15 +2155,10 @@ AC_ARG_WITH(xxhash,
   [], [with_xxhash=auto])
 
 GCC_ENABLE([libctf], [yes], [], [Handle .ctf type-info sections])
-if test x${enable_static} = xno; then
-  LIBCTF="-Wl,--rpath,../libctf/.libs ../libctf/.libs/libctf.so"
-  CTF_DEPS="../libctf/.libs/libctf.so"
-else
-  LIBCTF="../libctf/.libs/libctf.a"
-  CTF_DEPS="$LIBCTF"
-fi
 if test "${enable_libctf}" = yes; then
   AC_DEFINE(ENABLE_LIBCTF, 1, [Handle .ctf type-info sections])
+  LIBCTF="../libctf/libctf.la"
+  CTF_DEPS="../libctf/libctf.la"
 else
   LIBCTF=
   CTF_DEPS=

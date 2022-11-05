@@ -143,10 +143,12 @@ MAKEINFO_CMD = $(MAKEINFO) $(MAKEINFOFLAGS) $(MAKEINFO_EXTRA_FLAGS)
 MAKEHTML = $(MAKEINFO_CMD) --html
 MAKEHTMLFLAGS =
 
+LIBTOOL = @LIBTOOL@
+
 # Set this up with gcc if you have gnu ld and the loader will print out
 # line numbers for undefined references.
 #CC_LD = g++ -static
-CC_LD = $(CXX) $(CXX_DIALECT)
+CC_LD = $(LIBTOOL) --mode=link $(CXX) $(CXX_DIALECT)
 
 # Where is our "include" directory?  Typically $(srcdir)/../include.
 # This is essentially the header file directory for the library
@@ -163,7 +165,7 @@ CTF_DEPS = @CTF_DEPS@
 
 # Where is the BFD library?  Typically in ../bfd.
 BFD_DIR = ../bfd
-BFD = $(BFD_DIR)/libbfd.a
+BFD = $(BFD_DIR)/libbfd.la
 BFD_SRC = $(srcdir)/$(BFD_DIR)
 BFD_CFLAGS = -I$(BFD_DIR) -I$(BFD_SRC)
 
@@ -504,7 +506,7 @@ SUBDIR_TARGET_OBS = $(patsubst %.c,%.o,$(SUBDIR_TARGET_SRCS))
 # disassemblers?
 OPCODES_DIR = ../opcodes
 OPCODES_SRC = $(srcdir)/$(OPCODES_DIR)
-OPCODES = $(OPCODES_DIR)/libopcodes.a
+OPCODES = $(OPCODES_DIR)/libopcodes.la
 # Where are the other opcode tables which only have header file
 # versions?
 OP_INCLUDE = $(INCLUDE_DIR)/opcode
@@ -2017,7 +2019,8 @@ install-only: $(CONFIG_INSTALL)
 		  true ; \
 		fi ; \
 		$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(bindir) ; \
-		$(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) gdb$(EXEEXT) \
+		$(LIBTOOL) --mode=install $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) \
+			gdb$(EXEEXT) \
 			$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
 		$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(includedir)/gdb ; \
 		$(INSTALL_DATA) jit-reader.h $(DESTDIR)$(includedir)/gdb/jit-reader.h
@@ -2529,7 +2532,8 @@ install-gdbtk:
 	  true ; \
 	fi ; \
 	$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(bindir); \
-	$(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) insight$(EXEEXT) \
+	$(LIBTOOL) --mode=install $(INSTALL_PROGRAM_ENV) $(INSTALL_PROGRAM) \
+		insight$(EXEEXT) \
 		$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
 	$(SHELL) $(srcdir)/../mkinstalldirs \
 		$(DESTDIR)$(GDBTK_LIBRARY) ; \
