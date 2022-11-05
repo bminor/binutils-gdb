@@ -214,16 +214,6 @@ if test x"$silent" != x"yes"; then
   echo "Setting hardware to $sim_hw_src, $sim_hw_obj"
 fi])dnl
 
-AC_ARG_ENABLE(sim-hostbitsize,
-[  --enable-sim-hostbitsize=32|64	Specify host bitsize (32 or 64).],
-[case "${enableval}" in
-  32|64) sim_hostbitsize="-DWITH_HOST_WORD_BITSIZE=$enableval";;
-  *)	 AC_MSG_ERROR("--enable-sim-hostbitsize was given $enableval.  Expected 32 or 64"); sim_hostbitsize="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_hostbitsize" != x""; then
-  echo "Setting hostbitsize flags = $sim_hostbitsize" 6>&1
-fi],[sim_hostbitsize=""])dnl
-
 
 AC_ARG_ENABLE(sim-icache,
 [  --enable-sim-icache=size		Specify instruction-decode cache size and type.],

@@ -79,19 +79,15 @@ extern enum bfd_endian current_target_byte_order;
 #endif
 
 
-/* Word size of host/target:
+/* Word size of target:
 
-   Set these according to your host and target requirements.  At this
+   Set these according to your target requirements.  At this
    point in time, I've only compiled (not run) for a 64bit and never
    built for a 64bit host.  This will always remain a compile time
    option */
 
 #ifndef WITH_TARGET_WORD_BITSIZE
 #define WITH_TARGET_WORD_BITSIZE        32 /* compiled only */
-#endif
-
-#ifndef WITH_HOST_WORD_BITSIZE
-#define WITH_HOST_WORD_BITSIZE		32 /* 64bit ready? */
 #endif
 
 

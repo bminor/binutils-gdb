@@ -717,7 +717,6 @@ enable_sim_duplicate
 enable_sim_filter
 enable_sim_float
 enable_sim_hardware
-enable_sim_hostbitsize
 enable_sim_icache
 enable_sim_jump
 enable_sim_line_nr
@@ -1358,7 +1357,6 @@ Optional Features:
   --enable-sim-filter=rule		Specify filter rules.
   --enable-sim-float			Specify whether the target has hard, soft, altivec or e500 floating point.
   --enable-sim-hardware=list		Specify the hardware to be included in the build.
-  --enable-sim-hostbitsize=32|64	Specify host bitsize (32 or 64).
   --enable-sim-icache=size		Specify instruction-decode cache size and type.
   --enable-sim-jump		Jump between semantic code (instead of call/return).
   --enable-sim-line-nr=opts		Generate extra CPP code that references source rather than generated code
@@ -3344,19 +3342,6 @@ sim_hw_obj=`echo $sim_hw_src | sed -e 's/\.c/.o/g'`
 if test x"$silent" != x"yes"; then
   echo "Setting hardware to $sim_hw_src, $sim_hw_obj"
 fi
-fi
-
-# Check whether --enable-sim-hostbitsize was given.
-if test "${enable_sim_hostbitsize+set}" = set; then :
-  enableval=$enable_sim_hostbitsize; case "${enableval}" in
-  32|64) sim_hostbitsize="-DWITH_HOST_WORD_BITSIZE=$enableval";;
-  *)	 as_fn_error $? "\"--enable-sim-hostbitsize was given $enableval.  Expected 32 or 64\"" "$LINENO" 5; sim_hostbitsize="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_hostbitsize" != x""; then
-  echo "Setting hostbitsize flags = $sim_hostbitsize" 6>&1
-fi
-else
-  sim_hostbitsize=""
 fi
 
 
