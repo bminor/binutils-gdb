@@ -59,6 +59,10 @@ LINK_FOR_BUILD = $(CC_FOR_BUILD) $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) -o $@
 ## Deps to add to the all-recursive target.  These are built before descending
 ## into any subdirs.
 SIM_ALL_RECURSIVE_DEPS =
+## Deps to add to the install-data-local target.
+SIM_INSTALL_DATA_LOCAL_DEPS =
+## Deps to add to the install-exec-local target.
+SIM_INSTALL_EXEC_LOCAL_DEPS =
 
 # Generate target constants for newlib/libgloss from its source tree.
 # This file is shipped with distributions so we build in the source dir.
@@ -138,3 +142,26 @@ include v850/local.mk
 endif
 
 all-recursive: $(SIM_ALL_RECURSIVE_DEPS)
+
+install-data-local: installdirs $(SIM_INSTALL_DATA_LOCAL_DEPS)
+	$(AM_V_at)$(MKDIR_P) $(DESTDIR)$(libdir)
+	lib=`echo sim | sed '$(program_transform_name)'`; \
+	for d in $(SUBDIRS); do \
+		if [ -e $$d/run$(EXEEXT) ]; then \
+			n="$$lib"; \
+			[ "$(SIM_PRIMARY_TARGET)" = "$$d" ] || n="$$n-$$d"; \
+			n="lib$$n.a"; \
+			$(INSTALL_DATA) $$d/libsim.a $(DESTDIR)$(libdir)/$$n || exit 1; \
+		fi; \
+	done
+
+install-exec-local: installdirs $(SIM_INSTALL_EXEC_LOCAL_DEPS)
+	$(AM_V_at)$(MKDIR_P) $(DESTDIR)$(bindir)
+	run=`echo run | sed '$(program_transform_name)'`; \
+	for d in $(SUBDIRS); do \
+		if [ -e $$d/run$(EXEEXT) ]; then \
+			n="$$run"; \
+			[ "$(SIM_PRIMARY_TARGET)" = "$$d" ] || n="$$n-$$d"; \
+			$(INSTALL_PROGRAM) $$d/run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT) || exit 1; \
+		fi; \
+	done

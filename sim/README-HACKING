@@ -71,8 +71,6 @@ SIM_EXTRA_DEPS =
 SIM_EXTRA_CFLAGS =
 # List of extra libraries to link with.
 SIM_EXTRA_LIBS =
-# Dependency of `install' to install any extra files.
-SIM_EXTRA_INSTALL =
 # Dependency of `clean' to clean any extra files.
 SIM_EXTRA_CLEAN =
 

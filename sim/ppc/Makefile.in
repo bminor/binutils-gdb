@@ -843,18 +843,5 @@ pdf:
 clean-pdf:
 install-pdf:
 
-install: installdirs
-	a=`basename "$$(pwd)"`; \
-	n=`echo run | sed '$(program_transform_name)'`; \
-	[ "$(SIM_PRIMARY_TARGET)" = "$$a" ] || n="$$n-$$a"; \
-	$(INSTALL_PROGRAM) run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
-
-install-strip: installdirs
-	a=`basename "$$(pwd)"`; \
-	n=`echo run | sed '$(program_transform_name)'`; \
-	[ "$(SIM_PRIMARY_TARGET)" = "$$a" ] || n="$$n-$$a"; \
-	$(INSTALL_PROGRAM) run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
-	$(STRIP) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
-
+install:
 installdirs:
-	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(bindir)

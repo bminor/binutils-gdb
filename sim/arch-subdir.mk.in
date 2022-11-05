@@ -19,15 +19,8 @@
 
 AM_V = @AM_V@
 
-host_alias = @host_alias@
-target_alias = @target_alias@
-program_transform_name = @program_transform_name@
-
 EXEEXT = @EXEEXT@
 
-INSTALL = @INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_DATA = @INSTALL_DATA@
 LN_S = @LN_S@
 
 CC = @CC@

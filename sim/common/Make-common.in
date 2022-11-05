@@ -59,21 +59,6 @@ endif
 GNULIB_PARENT_DIR = ../..
 include $(GNULIB_PARENT_DIR)/gnulib/Makefile.gnulib.inc
 
-prefix = @prefix@
-exec_prefix = @exec_prefix@
-
-bindir = @bindir@
-
-libdir = @libdir@
-tooldir = $(libdir)/$(target_alias)
-
-datadir = @datadir@
-datarootdir = @datarootdir@
-mandir = @mandir@
-man1dir = $(mandir)/man1
-infodir = @infodir@
-includedir = @includedir@
-
 # This can be referenced by the gettext configuration code.
 top_builddir = ..
 
@@ -115,8 +100,6 @@ SIM_EXTRA_CFLAGS =
 SIM_EXTRA_LIBS =
 # List of main object files for `run'.
 SIM_RUN_OBJS = nrun.o
-# Dependency of `install' to install any extra files.
-SIM_EXTRA_INSTALL =
 # Dependency of `clean' to clean any extra files.
 SIM_EXTRA_CLEAN =
 # Likewise `distclean'
@@ -322,23 +305,8 @@ stamp-modules: Makefile $(SIM_OBJS:.o=.c)
 
 # Support targets.
 
-install: install-common $(SIM_EXTRA_INSTALL)
-
-install-common: installdirs
-	a=`basename "$$(pwd)"`; \
-	n=`echo run | sed '$(program_transform_name)'`; \
-	[ "$(SIM_PRIMARY_TARGET)" = "$$a" ] || n="$$n-$$a"; \
-	$(INSTALL_PROGRAM) run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT)
-	n=`echo sim | sed '$(program_transform_name)'`; \
-	a=`basename "$$(pwd)"`; \
-	[ "$(SIM_PRIMARY_TARGET)" = "$$a" ] || n="$$n-$$a"; \
-	n="lib$$n.a"; \
-	$(INSTALL_DATA) libsim.a $(DESTDIR)$(libdir)/$$n ; \
-	( cd $(DESTDIR)$(libdir) ; $(RANLIB) $$n )
-
+install:
 installdirs:
-	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(bindir)
-	$(SHELL) $(srcdir)/../../mkinstalldirs $(DESTDIR)$(libdir)
 
 check:
 
