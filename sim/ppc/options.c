@@ -198,10 +198,6 @@ print_options (void)
 #ifdef HAVE_TERMIO_STRUCTURE
       "HAVE_TERMIO_STRUCTURE",
 #endif
-
-#ifdef HAVE_DEVZERO
-      "HAVE_DEVZERO",
-#endif
     };
 
     int i;

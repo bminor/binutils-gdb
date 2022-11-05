@@ -490,33 +490,6 @@ fi
 
 AC_CHECK_TYPES(long long)
 
-dnl Figure out if /dev/zero exists or not
-sim_devzero=""
-AC_MSG_CHECKING(for /dev/zero)
-AC_CACHE_VAL(ac_cv_devzero,
-[AC_TRY_RUN([#include <fcntl.h>
-main () {
-  char buf[2048];
-  int i;
-  int fd = open ("/dev/zero", O_RDONLY);
-  if (fd < 0)
-    return 1;
-  for (i = 0; i < sizeof (buf); i++)
-    buf[i] = 1;
-  if (read (fd, buf, sizeof (buf)) != sizeof (buf))
-    return 1;
-  for (i = 0; i < sizeof (buf); i++)
-    if (buf[i])
-      return 1;
-  return 0;
-}],[ac_cv_devzero=yes],[ac_cv_devzero=no],[ac_cv_devzero=no])])
-AC_MSG_RESULT($ac_cv_devzero)
-if test $ac_cv_devzero = yes; then
-  sim_devzero="-DHAVE_DEVZERO"
-else
-  sim_devzero=""
-fi
-
 # Since we run commands on the build system, we have to create a
 # separate config header for the build system if build != host.
 if test x$host = x$build; then
@@ -570,7 +543,6 @@ AC_SUBST(sim_model)
 AC_SUBST(sim_default_model)
 AC_SUBST(sim_model_issue)
 AC_SUBST(sim_termio)
-AC_SUBST(sim_devzero)
 
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in xconfig.h:config.in) echo > stamp-h ;; esac])
