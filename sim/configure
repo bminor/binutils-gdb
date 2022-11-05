@@ -13446,7 +13446,7 @@ fi
 
 
 if test -r ../readline/Makefile; then
-  READLINE_LIB=../../readline/readline/libreadline.a
+  READLINE_LIB=../readline/readline/libreadline.a
   READLINE_CFLAGS='-I$(READLINE_SRC)/..'
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for readline in -lreadline" >&5

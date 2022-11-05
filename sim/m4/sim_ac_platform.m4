@@ -190,7 +190,7 @@ AC_SUBST(TERMCAP_LIB)
 dnl We prefer the in-tree readline.  Top-level dependencies make sure
 dnl src/readline (if it's there) is configured before src/sim.
 if test -r ../readline/Makefile; then
-  READLINE_LIB=../../readline/readline/libreadline.a
+  READLINE_LIB=../readline/readline/libreadline.a
   READLINE_CFLAGS='-I$(READLINE_SRC)/..'
 else
   AC_CHECK_LIB(readline, readline, READLINE_LIB=-lreadline,
