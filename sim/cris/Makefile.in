@@ -39,20 +39,9 @@ SIM_EXTRA_CLEAN = cris-clean
 
 arch = cris
 
-# rvdummy is just used for testing.  It does nothing if
-# --enable-sim-hardware isn't active.
-
-all: rvdummy$(EXEEXT)
-
-check: rvdummy$(EXEEXT)
-
-rvdummy$(EXEEXT): rvdummy.o $(EXTRA_LIBDEPS)
-	$(ECHO_CCLD) $(LIBTOOL) $(AM_V_lt) --tag=CC --mode=link \
-	  $(CC) $(ALL_CFLAGS) -o rvdummy$(EXEEXT) rvdummy.o $(EXTRA_LIBS)
-
 cris-clean:
 	-rm -f stamp-arch
-	-rm -f tmp-* rvdummy$(EXEEXT)
+	-rm -f tmp-*
 
 # Useful when making CGEN-generated files manually, without --enable-cgen-maint.
 stamps: stamp-arch stamp-v10fcpu stamp-v32fcpu

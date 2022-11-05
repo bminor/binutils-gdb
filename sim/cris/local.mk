@@ -16,6 +16,13 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## rvdummy is just used for testing -- it runs on the same host as `run`.
+## It does nothing if --enable-sim-hardware isn't active.
+%C%_rvdummy_SOURCES = %D%/rvdummy.c
+%C%_rvdummy_LDADD = $(LIBIBERTY_LIB)
+
+check_PROGRAMS += %D%/rvdummy
+
 %C%_BUILD_OUTPUTS = \
 	%D%/engv10.h \
 	%D%/mloopv10f.c \
