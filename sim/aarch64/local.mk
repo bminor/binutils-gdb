@@ -16,6 +16,20 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+%C%_libsim_a_SOURCES =
+%C%_libsim_a_LIBADD = \
+	$(common_libcommon_a_OBJECTS) \
+	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \
+	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
+	%D%/cpustate.o \
+	%D%/interp.o \
+	%D%/memory.o \
+	%D%/modules.o \
+	%D%/sim-resume.o \
+	%D%/simulator.o
+
+noinst_LIBRARIES += %D%/libsim.a
+
 %C%_run_SOURCES =
 %C%_run_LDADD = \
 	%D%/nrun.o \
@@ -23,3 +37,13 @@
 	$(SIM_COMMON_LIBS)
 
 noinst_PROGRAMS += %D%/run
+
+SIM_ALL_RECURSIVE_DEPS += %D%/modules.c
+
+$(%C%_libsim_a_LIBADD): | $(SIM_ALL_RECURSIVE_DEPS)
+
+%D%/%.o: %D%/%.c | $(SIM_ALL_RECURSIVE_DEPS)
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
+%D%/%.o: common/%.c | $(SIM_ALL_RECURSIVE_DEPS)
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)

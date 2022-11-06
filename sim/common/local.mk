@@ -52,6 +52,9 @@ noinst_LIBRARIES += $(SIM_COMMON_LIB)
 CLEANFILES += \
 	%D%/version.c %D%/version.c-stamp
 
+%/modules.c:
+	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+
 ##
 ## For subdirs.
 ##
