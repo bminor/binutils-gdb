@@ -196,9 +196,7 @@ override POSTCOMPILE =
 endif
 
 all_object_files = $(LIB_OBJS) $(SIM_RUN_OBJS)
-generated_files = \
-	$(SIM_EXTRA_DEPS) \
-	modules.c
+generated_files = $(SIM_EXTRA_DEPS)
 
 # Ensure that generated files are created early.  Use order-only
 # dependencies if available.  They require GNU make 3.80 or newer,
@@ -216,28 +214,6 @@ test-hw-events: $(srccom)/hw-events.c libsim.a
 	$(ECHO_CCLD) $(LIBTOOL) $(AM_V_lt) --tag=CC --mode=link \
 		$(CC) $(ALL_CFLAGS) -DMAIN -o test-hw-events$(EXEEXT) \
 		$(srccom)/hw-events.c libsim.a $(EXTRA_LIBS)
-
-# See sim_pre_argv_init and sim_module_install in sim-module.c for more details.
-modules.c: stamp-modules ; @true
-stamp-modules: Makefile $(SIM_OBJS:.o=.c)
-	$(ECHO_STAMP) modules.c
-	$(SILENCE) LANG=C ; export LANG ; \
-	LC_ALL=C ; export LC_ALL ; \
-	sed -n -e '/^sim_install_/{s/^\(sim_install_[a-z_0-9A-Z]*\).*/\1/;p}' $^ | sort >$@.l-tmp
-	@set -e; (\
-	echo '/* Do not modify this file.  */'; \
-	echo '/* It is created automatically by the Makefile.  */'; \
-	echo '#include "libiberty.h"'; \
-	echo '#include "sim-module.h"'; \
-	sed -e 's:\(.*\):extern MODULE_INIT_FN \1;:' $@.l-tmp; \
-	echo 'MODULE_INSTALL_FN * const sim_modules_detected[] = {'; \
-	sed -e 's:\(.*\):  \1,:' $@.l-tmp; \
-	echo '};'; \
-	echo 'const int sim_modules_detected_len = ARRAY_SIZE (sim_modules_detected);'; \
-	) >$@.tmp
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change $@.tmp modules.c
-	$(SILENCE) rm -f $@.l-tmp $@.tmp
-	$(SILENCE) touch $@
 
 # Support targets.
 
@@ -274,7 +250,6 @@ TAGS: force
 mostlyclean clean: $(SIM_EXTRA_CLEAN)
 	rm -f *.[oa] *~ core \
 		run$(EXEEXT) libsim.a \
-		modules.c stamp-modules \
 		tmp-mloop.hin tmp-mloop.h tmp-mloop.cin tmp-mloop.c
 
 distclean maintainer-clean realclean: clean $(SIM_EXTRA_DISTCLEAN)

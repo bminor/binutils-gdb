@@ -51,9 +51,6 @@ noinst_LIBRARIES += $(SIM_COMMON_LIB)
 CLEANFILES += \
 	%D%/version.c %D%/version.c-stamp
 
-%/modules.c:
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 ##
 ## For subdirs.
 ##
@@ -132,6 +129,34 @@ endif
 %C%_HW_CONFIG_H_TARGETS = $(patsubst %,%/hw-config.h,$(SIM_ENABLED_ARCHES))
 MOSTLYCLEANFILES += $(%C%_HW_CONFIG_H_TARGETS) $(patsubst %,%/stamp-hw,$(SIM_ENABLED_ARCHES))
 SIM_ALL_RECURSIVE_DEPS += $(%C%_HW_CONFIG_H_TARGETS)
+
+# See sim_pre_argv_init and sim_module_install in sim-module.c for more details.
+GEN_MODULES_C_SRCS = \
+	$(wildcard \
+		$(patsubst %.o,$(srcdir)/%.c,$($(@D)_libsim_a_OBJECTS) $($(@D)_libsim_a_LIBADD)) \
+		$(patsubst $(@D)/%.o,$(srcdir)/common/%.c,$($(@D)_libsim_a_LIBADD)))
+GEN_MODULES_C = \
+	$(AM_V_GEN)set -e; \
+	LANG=C ; export LANG; \
+	LC_ALL=C ; export LC_ALL; \
+	sed -n -e '/^sim_install_/{s/^\(sim_install_[a-z_0-9A-Z]*\).*/\1/;p}' $(GEN_MODULES_C_SRCS) | sort >$@.l-tmp; \
+	( \
+	echo '/* Do not modify this file.  */'; \
+	echo '/* It is created automatically by the Makefile.  */'; \
+	echo '\#include "libiberty.h"'; \
+	echo '\#include "sim-module.h"'; \
+	sed -e 's:\(.*\):extern MODULE_INIT_FN \1;:' $@.l-tmp; \
+	echo 'MODULE_INSTALL_FN * const sim_modules_detected[] = {'; \
+	sed -e 's:\(.*\):  \1,:' $@.l-tmp; \
+	echo '};'; \
+	echo 'const int sim_modules_detected_len = ARRAY_SIZE (sim_modules_detected);'; \
+	) >$@.tmp; \
+	$(SHELL) $(srcroot)/move-if-change $@.tmp $(@D)/modules.c; \
+	rm -f $@.l-tmp; \
+	touch $@
+GEN_MODULES_C_TARGETS = $(patsubst %,%/modules.c,$(SIM_SUBDIRS))
+MOSTLYCLEANFILES += $(GEN_MODULES_C_TARGETS) $(patsubst %,%/stamp-moules,$(SIM_SUBDIRS))
+SIM_ALL_RECURSIVE_DEPS += $(GEN_MODULES_C_TARGETS)
 
 LIBIBERTY_LIB = ../libiberty/libiberty.a
 BFD_LIB = ../bfd/libbfd.la
