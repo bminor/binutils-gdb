@@ -4685,9 +4685,6 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 	$(AM_V_at)mv $@.tmp $@
 @SIM_ENABLE_ARCH_aarch64_TRUE@$(aarch64_libsim_a_OBJECTS) $(aarch64_libsim_a_LIBADD): aarch64/hw-config.h
 
-@SIM_ENABLE_ARCH_aarch64_TRUE@aarch64/%.o: aarch64/%.c
-@SIM_ENABLE_ARCH_aarch64_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
-
 @SIM_ENABLE_ARCH_aarch64_TRUE@aarch64/%.o: common/%.c
 @SIM_ENABLE_ARCH_aarch64_TRUE@	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_arm_TRUE@$(arm_libsim_a_OBJECTS) $(arm_libsim_a_LIBADD): arm/hw-config.h
