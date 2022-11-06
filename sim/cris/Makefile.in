@@ -19,6 +19,8 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
+arch = cris
+
 CRISV10F_OBJS = crisv10f.o cpuv10.o decodev10.o modelv10.o mloopv10f.o
 CRISV32F_OBJS = crisv32f.o cpuv32.o decodev32.o modelv32.o mloopv32f.o
 
@@ -31,13 +33,9 @@ SIM_OBJS = \
 	$(CRISV32F_OBJS) \
 	traps.o
 
-SIM_EXTRA_HW_DEVICES = rv cris cris_900000xx
-
 SIM_EXTRA_CLEAN = cris-clean
 
 ## COMMON_POST_CONFIG_FRAG
-
-arch = cris
 
 cris-clean:
 	-rm -f stamp-arch

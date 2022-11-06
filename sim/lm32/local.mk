@@ -24,6 +24,9 @@
 
 noinst_PROGRAMS += %D%/run
 
+%C%_SIM_EXTRA_HW_DEVICES = lm32cpu lm32timer lm32uart
+AM_MAKEFLAGS += %C%_SIM_EXTRA_HW_DEVICES="$(%C%_SIM_EXTRA_HW_DEVICES)"
+
 %C%_BUILD_OUTPUTS = \
 	%D%/eng.h \
 	%D%/mloop.c \

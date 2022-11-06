@@ -3,6 +3,8 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
+arch = mips
+
 # Object files created by various simulator generators.
 
 
@@ -63,8 +65,6 @@ SIM_OBJS = \
 	dsp.o \
 	sim-main.o \
 	sim-resume.o \
-
-SIM_EXTRA_HW_DEVICES = tx3904cpu tx3904irc tx3904tmr tx3904sio
 
 # List of flags to always pass to $(CC).
 SIM_SUBTARGET=@SIM_SUBTARGET@

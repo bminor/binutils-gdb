@@ -24,6 +24,9 @@
 
 noinst_PROGRAMS += %D%/run
 
+%C%_SIM_EXTRA_HW_DEVICES = mn103cpu mn103int mn103tim mn103ser mn103iop
+AM_MAKEFLAGS += %C%_SIM_EXTRA_HW_DEVICES="$(%C%_SIM_EXTRA_HW_DEVICES)"
+
 %C%_BUILT_SRC_FROM_IGEN = \
 	%D%/icache.h \
 	%D%/icache.c \

@@ -17,14 +17,14 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
+arch = m68hc11
+
 M68HC11_OBJS = interp.o m68hc11int.o m68hc12int.o \
 		emulos.o interrupts.o m68hc11_sim.o
 
 SIM_OBJS = $(M68HC11_OBJS) \
 	$(SIM_NEW_COMMON_OBJS) \
 	sim-resume.o
-
-SIM_EXTRA_HW_DEVICES = m68hc11 m68hc11sio m68hc11eepr m68hc11tim m68hc11spi nvram
 
 # We must use 32-bit addresses to support memory bank switching.
 # The WORD_BITSIZE is normally 16 but must be switched (temporarily)
