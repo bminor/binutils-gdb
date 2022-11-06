@@ -16,17 +16,19 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-%C%_libsim_a_SOURCES =
+AM_CPPFLAGS_%D% = -DSIM_TOPDIR_BUILD
+
+%C%_libsim_a_SOURCES = \
+	%D%/cpustate.c \
+	%D%/interp.c \
+	%D%/memory.c \
+	%D%/modules.c \
+	%D%/simulator.c
 %C%_libsim_a_LIBADD = \
 	$(common_libcommon_a_OBJECTS) \
 	$(patsubst %,%D%/%,$(SIM_NEW_COMMON_OBJS)) \
 	$(patsubst %,%D%/dv-%.o,$(SIM_HW_DEVICES)) \
-	%D%/cpustate.o \
-	%D%/interp.o \
-	%D%/memory.o \
-	%D%/modules.o \
-	%D%/sim-resume.o \
-	%D%/simulator.o
+	%D%/sim-resume.o
 
 noinst_LIBRARIES += %D%/libsim.a
 
@@ -40,10 +42,11 @@ noinst_PROGRAMS += %D%/run
 
 SIM_ALL_RECURSIVE_DEPS += %D%/modules.c
 
-$(%C%_libsim_a_LIBADD): | $(SIM_ALL_RECURSIVE_DEPS)
-
-%D%/%.o: %D%/%.c | $(SIM_ALL_RECURSIVE_DEPS)
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+$(%C%_libsim_a_OBJECTS) $(%C%_run_OBJECTS) $(%C%_libsim_a_LIBADD): | $(SIM_ALL_RECURSIVE_DEPS)
 
 %D%/%.o: common/%.c | $(SIM_ALL_RECURSIVE_DEPS)
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
+	$(AM_V_CC)$(COMPILE) -c -o $@ $<
+
+# See sim_pre_argv_init and sim_module_install in sim-module.c for more details.
+#%D%/modules.c: %D%/stamp-modules ; @true
+#%D%/stamp-modules: Makefile $(%C%_libsim_a_SOURCES) ; $(DO_MODULES_C)

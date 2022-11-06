@@ -18,9 +18,8 @@
 ## Parts of the common/ sim code that have been unified.
 ## Most still lives in common/Make-common.in.
 
-AM_CPPFLAGS += \
-	-I$(srcdir)/%D% \
-	-DSIM_COMMON_BUILD
+AM_CPPFLAGS += -I$(srcdir)/%D%
+AM_CPPFLAGS_%D% = -DSIM_COMMON_BUILD
 AM_CPPFLAGS_FOR_BUILD += -I$(srcdir)/%D%
 
 ## This makes sure common parts are available before building the arch-subdirs

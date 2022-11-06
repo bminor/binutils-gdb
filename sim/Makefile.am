@@ -47,8 +47,11 @@ AM_CPPFLAGS = \
 	-I$(srcroot)/include \
 	-I../bfd \
 	-I.. \
+	-I$(@D) \
+	-I$(srcdir)/$(@D) \
 	$(SIM_HW_CFLAGS) \
-	$(SIM_INLINE)
+	$(SIM_INLINE) \
+	$(AM_CPPFLAGS_$(@D))
 
 AM_CPPFLAGS_FOR_BUILD = \
 	-I$(srcroot)/include \
