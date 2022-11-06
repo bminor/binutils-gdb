@@ -135,10 +135,30 @@ SIM_ALL_RECURSIVE_DEPS += $(%C%_HW_CONFIG_H_TARGETS)
 am_arch_d = $(subst -,_,$(@D))
 GEN_MODULES_C_SRCS = \
 	$(wildcard \
-		$(patsubst %.o,$(abs_srcdir)/%.c,$($(am_arch_d)_libsim_a_OBJECTS) $($(am_arch_d)_libsim_a_LIBADD)) \
-		$(filter-out %.o,$(patsubst $(@D)/%.o,$(abs_srcdir)/common/%.c,$($(am_arch_d)_libsim_a_LIBADD))))
-%/modules.c:
-	$(AM_V_at)$(MAKE) $(AM_MAKEFLAGS) GEN_MODULES_C_SRCS="$(GEN_MODULES_C_SRCS)" -C $(@D) $(@F)
+		$(patsubst %,$(srcdir)/%,$($(am_arch_d)_libsim_a_SOURCES)) \
+		$(patsubst %.o,$(srcdir)/%.c,$($(am_arch_d)_libsim_a_OBJECTS) $($(am_arch_d)_libsim_a_LIBADD)) \
+		$(filter-out %.o,$(patsubst $(@D)/%.o,$(srcdir)/common/%.c,$($(am_arch_d)_libsim_a_LIBADD))))
+%/modules.c: %/stamp-modules ; @true
+%/stamp-modules: Makefile
+	$(AM_V_GEN)set -e; \
+	LANG=C ; export LANG; \
+	LC_ALL=C ; export LC_ALL; \
+	sed -n -e '/^sim_install_/{s/^\(sim_install_[a-z_0-9A-Z]*\).*/\1/;p}' $(GEN_MODULES_C_SRCS) | sort >$@.l-tmp; \
+	( \
+	echo '/* Do not modify this file.  */'; \
+	echo '/* It is created automatically by the Makefile.  */'; \
+	echo '#include "libiberty.h"'; \
+	echo '#include "sim-module.h"'; \
+	sed -e 's:\(.*\):extern MODULE_INIT_FN \1;:' $@.l-tmp; \
+	echo 'MODULE_INSTALL_FN * const sim_modules_detected[] = {'; \
+	sed -e 's:\(.*\):  \1,:' $@.l-tmp; \
+	echo '};'; \
+	echo 'const int sim_modules_detected_len = ARRAY_SIZE (sim_modules_detected);'; \
+	) >$@.tmp; \
+	$(SHELL) $(srcroot)/move-if-change $@.tmp $(@D)/modules.c; \
+	rm -f $@.l-tmp; \
+	touch $@
+.PRECIOUS: %/stamp-modules
 
 ## NB: The ppc port doesn't currently utilize the modules API, so skip it.
 %C%_GEN_MODULES_C_TARGETS = $(patsubst %,%/modules.c,$(filter-out ppc,$(SIM_ENABLED_ARCHES)))

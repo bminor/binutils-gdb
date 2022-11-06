@@ -159,28 +159,6 @@ test-hw-events: $(srccom)/hw-events.c libsim.a
 		$(CC) $(ALL_CFLAGS) -DMAIN -o test-hw-events$(EXEEXT) \
 		$(srccom)/hw-events.c libsim.a $(EXTRA_LIBS)
 
-# See sim_pre_argv_init and sim_module_install in sim-module.c for more details.
-modules.c: stamp-modules ; @true
-stamp-modules: Makefile
-	$(ECHO_STAMP) modules.c
-	$(SILENCE) LANG=C ; export LANG ; \
-	LC_ALL=C ; export LC_ALL ; \
-	sed -n -e '/^sim_install_/{s/^\(sim_install_[a-z_0-9A-Z]*\).*/\1/;p}' $^ $(GEN_MODULES_C_SRCS) | sort >$@.l-tmp
-	@set -e; (\
-	echo '/* Do not modify this file.  */'; \
-	echo '/* It is created automatically by the Makefile.  */'; \
-	echo '#include "libiberty.h"'; \
-	echo '#include "sim-module.h"'; \
-	sed -e 's:\(.*\):extern MODULE_INIT_FN \1;:' $@.l-tmp; \
-	echo 'MODULE_INSTALL_FN * const sim_modules_detected[] = {'; \
-	sed -e 's:\(.*\):  \1,:' $@.l-tmp; \
-	echo '};'; \
-	echo 'const int sim_modules_detected_len = ARRAY_SIZE (sim_modules_detected);'; \
-	) >$@.tmp
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change $@.tmp modules.c
-	$(SILENCE) rm -f $@.l-tmp $@.tmp
-	$(SILENCE) touch $@
-
 # Support targets.
 
 install:
@@ -214,8 +192,7 @@ TAGS: force
 		*.[ch] ../common/*.[ch]
 
 mostlyclean clean: $(SIM_EXTRA_CLEAN)
-	rm -f *.[oa] *~ core \
-		modules.c stamp-modules
+	rm -f *.[oa] *~ core
 
 distclean maintainer-clean realclean: clean
 	rm -f TAGS Makefile
