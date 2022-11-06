@@ -114,50 +114,6 @@ SIM_EXTRA_DISTCLEAN =
 # here.  Some files are used by all simulators (e.g. callback.o).
 # Those files are specified in LIB_OBJS below.
 
-SIM_COMMON_HW_OBJS = \
-	hw-alloc.o \
-	hw-base.o \
-	hw-device.o \
-	hw-events.o \
-	hw-handles.o \
-	hw-instances.o \
-	hw-ports.o \
-	hw-properties.o \
-	hw-tree.o \
-	sim-hw.o \
-
-SIM_NEW_COMMON_OBJS = \
-	sim-arange.o \
-	sim-bits.o \
-	sim-close.o \
-	sim-command.o \
-	sim-config.o \
-	sim-core.o \
-	sim-cpu.o \
-	sim-endian.o \
-	sim-engine.o \
-	sim-events.o \
-	sim-fpu.o \
-	sim-hload.o \
-	sim-hrw.o \
-	sim-io.o \
-	sim-info.o \
-	sim-memopt.o \
-	sim-model.o \
-	sim-module.o \
-	sim-options.o \
-	sim-profile.o \
-	sim-reason.o \
-	sim-reg.o \
-	sim-signal.o \
-	sim-stop.o \
-	sim-syscall.o \
-	sim-trace.o \
-	sim-utils.o \
-	sim-watch.o \
-	\
-	$(SIM_HW_OBJS) \
-
 ## End COMMON_PRE_CONFIG_FRAG
 
 ## COMMON_POST_CONFIG_FRAG
@@ -180,7 +136,8 @@ BUILD_CFLAGS = $(CFLAGS_FOR_BUILD) $(CSEARCH)
 
 COMMON_DEP_CFLAGS = $(CONFIG_CFLAGS) $(CSEARCH) $(SIM_EXTRA_CFLAGS)
 
-SIM_HW_DEVICES = cfi core pal glue $(SIM_EXTRA_HW_DEVICES)
+SIM_HW_DEVICES = $(SIM_HW_DEVICES_) $(SIM_EXTRA_HW_DEVICES)
+SIM_NEW_COMMON_OBJS = $(SIM_NEW_COMMON_OBJS_) $(SIM_HW_OBJS)
 
 LIBIBERTY_LIB = ../../libiberty/libiberty.a
 BFD_LIB = ../../bfd/libbfd.la
