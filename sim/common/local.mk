@@ -56,6 +56,60 @@ CLEANFILES += \
 ## For subdirs.
 ##
 
+SIM_COMMON_HW_OBJS = \
+	hw-alloc.o \
+	hw-base.o \
+	hw-device.o \
+	hw-events.o \
+	hw-handles.o \
+	hw-instances.o \
+	hw-ports.o \
+	hw-properties.o \
+	hw-tree.o \
+	sim-hw.o
+
+SIM_NEW_COMMON_OBJS = \
+	sim-arange.o \
+	sim-bits.o \
+	sim-close.o \
+	sim-command.o \
+	sim-config.o \
+	sim-core.o \
+	sim-cpu.o \
+	sim-endian.o \
+	sim-engine.o \
+	sim-events.o \
+	sim-fpu.o \
+	sim-hload.o \
+	sim-hrw.o \
+	sim-io.o \
+	sim-info.o \
+	sim-memopt.o \
+	sim-model.o \
+	sim-module.o \
+	sim-options.o \
+	sim-profile.o \
+	sim-reason.o \
+	sim-reg.o \
+	sim-signal.o \
+	sim-stop.o \
+	sim-syscall.o \
+	sim-trace.o \
+	sim-utils.o \
+	sim-watch.o
+
+AM_MAKEFLAGS += SIM_NEW_COMMON_OBJS_="$(SIM_NEW_COMMON_OBJS)"
+
+SIM_HW_DEVICES = cfi core pal glue
+
+if SIM_ENABLE_HW
+SIM_NEW_COMMON_OBJS += \
+	$(SIM_COMMON_HW_OBJS) \
+	$(SIM_HW_SOCKSER)
+
+AM_MAKEFLAGS += SIM_HW_DEVICES_="$(SIM_HW_DEVICES)"
+endif
+
 LIBIBERTY_LIB = ../libiberty/libiberty.a
 BFD_LIB = ../bfd/libbfd.la
 OPCODES_LIB = ../opcodes/libopcodes.la
