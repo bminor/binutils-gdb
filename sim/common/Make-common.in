@@ -89,6 +89,7 @@ SIM_OBJS =
 SIM_EXTRA_CFLAGS =
 # List of main object files for `run'.
 SIM_RUN_OBJS = nrun.o
+SIM_LIBSIM = libsim.a
 # Dependency of `clean' to clean any extra files.
 SIM_EXTRA_CLEAN =
 
@@ -152,7 +153,7 @@ LINK_FOR_BUILD = $(CC_FOR_BUILD) $(BUILD_CFLAGS) $(LDFLAGS_FOR_BUILD) -o $@
 
 RUNTESTFLAGS =
 
-all: libsim.a $(SIM_RUN_OBJS)
+all: $(SIM_LIBSIM) $(LIB_OBJS) $(SIM_RUN_OBJS)
 
 libsim.a: $(LIB_OBJS)
 	$(SILENCE) rm -f libsim.a

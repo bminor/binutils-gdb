@@ -21,13 +21,6 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_OBJS = \
-	$(SIM_NEW_COMMON_OBJS) \
-	interp.o \
-	cpustate.o \
-	simulator.o \
-	memory.o \
-	sim-resume.o \
+SIM_LIBSIM =
 
 ## COMMON_POST_CONFIG_FRAG
-
