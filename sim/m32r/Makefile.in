@@ -19,6 +19,8 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
+arch = m32r
+
 M32R_OBJS = m32r.o cpu.o decode.o sem.o model.o mloop.o
 M32RX_OBJS = m32rx.o cpux.o decodex.o modelx.o mloopx.o
 M32R2_OBJS = m32r2.o cpu2.o decode2.o model2.o mloop2.o
@@ -33,16 +35,12 @@ SIM_OBJS = \
 	$(M32R2_OBJS) \
 	traps.o
 
-SIM_EXTRA_HW_DEVICES = m32r_cache m32r_uart
-
 SIM_EXTRA_CLEAN = m32r-clean
 
 # Some modules don't build cleanly yet.
 cpu.o cpu2.o cpux.o m32r.o m32r2.o m32rx.o mloop.o mloop2.o mloopx.o sem.o sim-if.o traps.o: SIM_WERROR_CFLAGS =
 
 ## COMMON_POST_CONFIG_FRAG
-
-arch = m32r
 
 m32r-clean:
 	rm -f stamp-arch stamp-cpu stamp-xcpu stamp-2cpu

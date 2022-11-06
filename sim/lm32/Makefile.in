@@ -3,6 +3,8 @@
 
 ## COMMON_PRE_CONFIG_FRAG
 
+arch = lm32
+
 # List of object files, less common parts.
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
@@ -12,13 +14,9 @@ SIM_OBJS = \
         cpu.o decode.o sem.o model.o mloop.o \
         lm32.o traps.o user.o 
 
-SIM_EXTRA_HW_DEVICES = lm32cpu lm32timer lm32uart
-
 SIM_EXTRA_CLEAN = lm32-clean
 
 ## COMMON_POST_CONFIG_FRAG
-
-arch = lm32 
 
 lm32-clean:
 	rm -f stamp-arch stamp-cpu 

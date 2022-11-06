@@ -24,6 +24,40 @@
 
 noinst_PROGRAMS += %D%/run
 
+%C%_SIM_EXTRA_HW_DEVICES = \
+	bfin_cec \
+	bfin_ctimer \
+	bfin_dma \
+	bfin_dmac \
+	bfin_ebiu_amc \
+	bfin_ebiu_ddrc \
+	bfin_ebiu_sdc \
+	bfin_emac \
+	bfin_eppi \
+	bfin_evt \
+	bfin_gpio \
+	bfin_gpio2 \
+	bfin_gptimer \
+	bfin_jtag \
+	bfin_mmu \
+	bfin_nfc \
+	bfin_otp \
+	bfin_pfmon \
+	bfin_pint \
+	bfin_pll \
+	bfin_ppi \
+	bfin_rtc \
+	bfin_sic \
+	bfin_spi \
+	bfin_trace \
+	bfin_twi \
+	bfin_uart \
+	bfin_uart2 \
+	bfin_wdog \
+	bfin_wp \
+	eth_phy
+AM_MAKEFLAGS += %C%_SIM_EXTRA_HW_DEVICES="$(%C%_SIM_EXTRA_HW_DEVICES)"
+
 %D%/linux-fixed-code.h: @MAINT@ $(srcdir)/%D%/linux-fixed-code.s %D%/local.mk %D%/$(am__dirstamp)
 	$(AM_V_GEN)$(AS_FOR_TARGET_BFIN) $(srcdir)/%D%/linux-fixed-code.s -o %D%/linux-fixed-code.o
 	$(AM_V_at)(\

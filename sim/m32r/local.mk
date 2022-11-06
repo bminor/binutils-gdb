@@ -24,6 +24,9 @@
 
 noinst_PROGRAMS += %D%/run
 
+%C%_SIM_EXTRA_HW_DEVICES = m32r_cache m32r_uart
+AM_MAKEFLAGS += %C%_SIM_EXTRA_HW_DEVICES="$(%C%_SIM_EXTRA_HW_DEVICES)"
+
 %C%_BUILD_OUTPUTS = \
 	%D%/eng.h \
 	%D%/mloop.c \
