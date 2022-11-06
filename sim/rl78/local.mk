@@ -26,4 +26,4 @@ noinst_PROGRAMS += %D%/run
 
 ## Helper targets for running make from the top-level due to run's main.o.
 %D%/%.o: %D%/%.c | %D%/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
-	$(MAKE) -C $(@D) $(@F)
+	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)

@@ -188,10 +188,10 @@ endif
 ## have Makefiles in subdirs.
 
 %/libsim.a: | $(SIM_ALL_RECURSIVE_DEPS)
-	$(MAKE) -C $(@D) $(@F)
+	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 %/nrun.o: common/nrun.c | %/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
-	$(MAKE) -C $(@D) $(@F)
+	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 all-recursive: $(SIM_ALL_RECURSIVE_DEPS)
 

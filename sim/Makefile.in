@@ -3267,7 +3267,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_erc32_TRUE@	$(AM_V_GEN)ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
 
 @SIM_ENABLE_ARCH_erc32_TRUE@erc32/%.o: erc32/%.c | erc32/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
-@SIM_ENABLE_ARCH_erc32_TRUE@	$(MAKE) -C $(@D) $(@F)
+@SIM_ENABLE_ARCH_erc32_TRUE@	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 @SIM_ENABLE_ARCH_erc32_TRUE@sim-%D-install-exec-local: installdirs
 @SIM_ENABLE_ARCH_erc32_TRUE@	$(AM_V_at)$(MKDIR_P) $(DESTDIR)$(bindir)
 @SIM_ENABLE_ARCH_erc32_TRUE@	n=`echo sis | sed '$(program_transform_name)'`; \
@@ -3306,7 +3306,7 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_lm32_TRUE@	$(AM_V_at)touch $@
 
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c/%.o: m32c/%.c | m32c/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
-@SIM_ENABLE_ARCH_m32c_TRUE@	$(MAKE) -C $(@D) $(@F)
+@SIM_ENABLE_ARCH_m32c_TRUE@	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 @SIM_ENABLE_ARCH_m32c_TRUE@m32c/opc2c$(EXEEXT): $(m32c_opc2c_OBJECTS) $(m32c_opc2c_DEPENDENCIES) m32c/$(am__dirstamp)
@@ -3437,13 +3437,13 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_GEN)ln $< $@ 2>/dev/null || $(LN_S) $< $@ 2>/dev/null || cp -p $< $@
 
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/%.o: ppc/%.c | ppc/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
-@SIM_ENABLE_ARCH_ppc_TRUE@	$(MAKE) -C $(@D) $(@F)
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_rl78_TRUE@rl78/%.o: rl78/%.c | rl78/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
-@SIM_ENABLE_ARCH_rl78_TRUE@	$(MAKE) -C $(@D) $(@F)
+@SIM_ENABLE_ARCH_rl78_TRUE@	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 @SIM_ENABLE_ARCH_rx_TRUE@rx/%.o: rx/%.c | rx/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
-@SIM_ENABLE_ARCH_rx_TRUE@	$(MAKE) -C $(@D) $(@F)
+@SIM_ENABLE_ARCH_rx_TRUE@	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 # These rules are copied from automake, but tweaked to use FOR_BUILD variables.
 @SIM_ENABLE_ARCH_sh_TRUE@sh/gencode$(EXEEXT): $(sh_gencode_OBJECTS) $(sh_gencode_DEPENDENCIES) sh/$(am__dirstamp)
@@ -3504,10 +3504,10 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_v850_TRUE@	$(AM_V_at)touch $@
 
 %/libsim.a: | $(SIM_ALL_RECURSIVE_DEPS)
-	$(MAKE) -C $(@D) $(@F)
+	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 %/nrun.o: common/nrun.c | %/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
-	$(MAKE) -C $(@D) $(@F)
+	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
 all-recursive: $(SIM_ALL_RECURSIVE_DEPS)
 
