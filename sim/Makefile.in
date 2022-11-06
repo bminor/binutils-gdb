@@ -1164,7 +1164,7 @@ GNULIB_PARENT_DIR = ..
 srccom = $(srcdir)/common
 srcroot = $(srcdir)/..
 SUBDIRS = @subdirs@ $(SIM_SUBDIRS)
-AM_MAKEFLAGS = SIM_PRIMARY_TARGET=$(SIM_PRIMARY_TARGET)
+AM_MAKEFLAGS = 
 pkginclude_HEADERS = $(am__append_1)
 noinst_LIBRARIES = $(SIM_COMMON_LIB) $(am__append_3)
 CLEANFILES = common/version.c common/version.c-stamp \
