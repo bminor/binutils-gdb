@@ -262,7 +262,7 @@ CONFIG_CLEAN_FILES = Make-common.sim aarch64/Makefile.sim \
 	pru/.gdbinit riscv/Makefile.sim riscv/.gdbinit \
 	rl78/Makefile.sim rl78/.gdbinit rx/Makefile.sim rx/.gdbinit \
 	sh/Makefile.sim sh/.gdbinit erc32/Makefile.sim erc32/.gdbinit \
-	v850/.gdbinit example-synacor/Makefile.sim \
+	v850/Makefile.sim v850/.gdbinit example-synacor/Makefile.sim \
 	example-synacor/.gdbinit arch-subdir.mk .gdbinit
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
@@ -1800,6 +1800,8 @@ sh/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 erc32/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/erc32/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 erc32/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+v850/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/v850/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 v850/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@

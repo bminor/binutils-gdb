@@ -23,4 +23,6 @@ SIM_OBJS = \
 	itable.o semantics.o idecode.o icache.o engine.o irun.o support.o \
 	sim-resume.o
 
+SIM_EXTRA_CFLAGS = -DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31
+
 ## COMMON_POST_CONFIG_FRAG

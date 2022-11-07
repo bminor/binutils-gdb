@@ -155,7 +155,7 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([rx-*-*], [rx])
     SIM_TARGET([sh*-*-*], [sh])
     SIM_TARGET([sparc-*-*], [erc32])
-    SIM_TARGET([v850*-*-*], [v850], [true], [sim_igen=yes])
+    SIM_TARGET([v850*-*-*], [v850], [], [sim_igen=yes])
   done
 
   if test "x${enable_example_sims}" = xyes; then
