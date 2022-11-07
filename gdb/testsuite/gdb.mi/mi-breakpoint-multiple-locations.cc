@@ -16,13 +16,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 static int
-add (int a, int b)
+a_very_unique_name (int a, int b)
 {
   return a + b;
 }
 
 static double
-add (double a, double b)
+a_very_unique_name (double a, double b)
 {
   return a + b;
 }
@@ -30,7 +30,7 @@ add (double a, double b)
 int
 main (void)
 {
-  int i = add (3, 4);
-  double d = add (3.0, 4.0);
+  int i = a_very_unique_name (3, 4);
+  double d = a_very_unique_name (3.0, 4.0);
   return 1;
 }
