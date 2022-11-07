@@ -30,17 +30,10 @@
 #include "gdbsupport/gdb_signals.h"
 #include "py-event.h"
 #include "py-stopevent.h"
+#include <unordered_map>
 
-struct threadlist_entry
-{
-  threadlist_entry (gdbpy_ref<thread_object> &&ref)
-    : thread_obj (std::move (ref))
-  {
-  }
-
-  gdbpy_ref<thread_object> thread_obj;
-  struct threadlist_entry *next;
-};
+using thread_map_t
+  = std::unordered_map<thread_info *, gdbpy_ref<thread_object>>;
 
 struct inferior_object
 {
@@ -49,12 +42,9 @@ struct inferior_object
   /* The inferior we represent.  */
   struct inferior *inferior;
 
-  /* thread_object instances under this inferior.  This list owns a
+  /* thread_object instances under this inferior.  This owns a
      reference to each object it contains.  */
-  struct threadlist_entry *threads;
-
-  /* Number of threads in the list.  */
-  int nthreads;
+  thread_map_t *threads;
 };
 
 extern PyTypeObject inferior_object_type
@@ -65,8 +55,6 @@ struct infpy_deleter
 {
   void operator() (inferior_object *obj)
   {
-    struct threadlist_entry *th_entry, *th_tmp;
-
     if (!gdb_python_initialized)
       return;
 
@@ -75,15 +63,7 @@ struct infpy_deleter
 
     inf_obj->inferior = NULL;
 
-    /* Deallocate threads list.  */
-    for (th_entry = inf_obj->threads; th_entry != NULL;)
-      {
-	th_tmp = th_entry;
-	th_entry = th_entry->next;
-	delete th_tmp;
-      }
-
-    inf_obj->nthreads = 0;
+    delete inf_obj->threads;
   }
 };
 
@@ -257,8 +237,7 @@ inferior_to_inferior_object (struct inferior *inferior)
 	return NULL;
 
       inf_obj->inferior = inferior;
-      inf_obj->threads = NULL;
-      inf_obj->nthreads = 0;
+      inf_obj->threads = new thread_map_t ();
 
       /* PyObject_New initializes the new object with a refcount of 1.  This
 	 counts for the reference we are keeping in the inferior data.  */
@@ -333,11 +312,10 @@ thread_to_thread_object (thread_info *thr)
   if (inf_obj == NULL)
     return NULL;
 
-  for (threadlist_entry *thread = inf_obj->threads;
-       thread != NULL;
-       thread = thread->next)
-    if (thread->thread_obj->thread == thr)
-      return gdbpy_ref<>::new_reference ((PyObject *) thread->thread_obj.get ());
+  auto thread_it = inf_obj->threads->find (thr);
+  if (thread_it != inf_obj->threads->end ())
+    return gdbpy_ref<>::new_reference
+      ((PyObject *) (thread_it->second.get ()));
 
   PyErr_SetString (PyExc_SystemError,
 		   _("could not find gdb thread object"));
@@ -348,7 +326,6 @@ static void
 add_thread_object (struct thread_info *tp)
 {
   inferior_object *inf_obj;
-  struct threadlist_entry *entry;
 
   if (!gdb_python_initialized)
     return;
@@ -364,18 +341,19 @@ add_thread_object (struct thread_info *tp)
 
   inf_obj = (inferior_object *) thread_obj->inf_obj;
 
-  entry = new threadlist_entry (std::move (thread_obj));
-  entry->next = inf_obj->threads;
+  auto ins_result = inf_obj->threads->emplace
+    (thread_map_t::value_type (tp, std::move (thread_obj)));
 
-  inf_obj->threads = entry;
-  inf_obj->nthreads++;
+  if (!ins_result.second)
+    return;
 
   if (evregpy_no_listeners_p (gdb_py_events.new_thread))
     return;
 
-  gdbpy_ref<> event = create_thread_event_object (&new_thread_event_object_type,
-						  (PyObject *)
-						  entry->thread_obj.get ());
+  gdbpy_ref<> event = create_thread_event_object
+    (&new_thread_event_object_type,
+     (PyObject *) ins_result.first->second.get ());
+
   if (event == NULL
       || evpy_emit_event (event.get (), gdb_py_events.new_thread) < 0)
     gdbpy_print_stack ();
@@ -384,8 +362,6 @@ add_thread_object (struct thread_info *tp)
 static void
 delete_thread_object (struct thread_info *tp, int ignore)
 {
-  struct threadlist_entry **entry, *tmp;
-
   if (!gdb_python_initialized)
     return;
 
@@ -395,29 +371,22 @@ delete_thread_object (struct thread_info *tp, int ignore)
   if (inf_obj == NULL)
     return;
 
-  /* Find thread entry in its inferior's thread_list.  */
-  for (entry = &inf_obj->threads; *entry != NULL; entry =
-	 &(*entry)->next)
-    if ((*entry)->thread_obj->thread == tp)
-      break;
-
-  if (!*entry)
-    return;
-
-  tmp = *entry;
-  tmp->thread_obj->thread = NULL;
-
-  *entry = (*entry)->next;
-  inf_obj->nthreads--;
-
-  delete tmp;
+  auto it = inf_obj->threads->find (tp);
+  if (it != inf_obj->threads->end ())
+    {
+      /* Some python code can still hold a reference to the thread_object
+	 instance.   Make sure to remove the link to the associated
+	 thread_info object as it will be freed soon.  This makes the python
+	 object invalid (i.e. gdb.InfThread.is_valid returns False).  */
+      it->second->thread = nullptr;
+      inf_obj->threads->erase (it);
+    }
 }
 
 static PyObject *
 infpy_threads (PyObject *self, PyObject *args)
 {
-  int i;
-  struct threadlist_entry *entry;
+  int i = 0;
   inferior_object *inf_obj = (inferior_object *) self;
   PyObject *tuple;
 
@@ -432,16 +401,16 @@ infpy_threads (PyObject *self, PyObject *args)
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  tuple = PyTuple_New (inf_obj->nthreads);
+  tuple = PyTuple_New (inf_obj->threads->size ());
   if (!tuple)
     return NULL;
 
-  for (i = 0, entry = inf_obj->threads; i < inf_obj->nthreads;
-       i++, entry = entry->next)
+  for (const thread_map_t::value_type &entry : *inf_obj->threads)
     {
-      PyObject *thr = (PyObject *) entry->thread_obj.get ();
+      PyObject *thr = (PyObject *) entry.second.get ();
       Py_INCREF (thr);
       PyTuple_SET_ITEM (tuple, i, thr);
+      i = i + 1;
     }
 
   return tuple;
