@@ -135,16 +135,17 @@ GEN_MODULES_C_SRCS = \
 	$(wildcard \
 		$(patsubst %.o,$(srcdir)/%.c,$($(@D)_libsim_a_OBJECTS) $($(@D)_libsim_a_LIBADD)) \
 		$(patsubst $(@D)/%.o,$(srcdir)/common/%.c,$($(@D)_libsim_a_LIBADD)))
-GEN_MODULES_C = \
+%/modules.c: %/stamp-modules ; @true
+%/stamp-modules: Makefile
 	$(AM_V_GEN)set -e; \
 	LANG=C ; export LANG; \
 	LC_ALL=C ; export LC_ALL; \
-	sed -n -e '/^sim_install_/{s/^\(sim_install_[a-z_0-9A-Z]*\).*/\1/;p}' $(GEN_MODULES_C_SRCS) | sort >$@.l-tmp; \
+	sed -n -e '/^sim_install_/{s/^\(sim_install_[a-z_0-9A-Z]*\).*/\1/;p}' Makefile $(GEN_MODULES_C_SRCS) | sort >$@.l-tmp; \
 	( \
 	echo '/* Do not modify this file.  */'; \
 	echo '/* It is created automatically by the Makefile.  */'; \
-	echo '\#include "libiberty.h"'; \
-	echo '\#include "sim-module.h"'; \
+	echo '#include "libiberty.h"'; \
+	echo '#include "sim-module.h"'; \
 	sed -e 's:\(.*\):extern MODULE_INIT_FN \1;:' $@.l-tmp; \
 	echo 'MODULE_INSTALL_FN * const sim_modules_detected[] = {'; \
 	sed -e 's:\(.*\):  \1,:' $@.l-tmp; \
@@ -154,9 +155,11 @@ GEN_MODULES_C = \
 	$(SHELL) $(srcroot)/move-if-change $@.tmp $(@D)/modules.c; \
 	rm -f $@.l-tmp; \
 	touch $@
-GEN_MODULES_C_TARGETS = $(patsubst %,%/modules.c,$(SIM_SUBDIRS))
-MOSTLYCLEANFILES += $(GEN_MODULES_C_TARGETS) $(patsubst %,%/stamp-moules,$(SIM_SUBDIRS))
-SIM_ALL_RECURSIVE_DEPS += $(GEN_MODULES_C_TARGETS)
+.PRECIOUS: %/stamp-modules
+
+%C%_GEN_MODULES_C_TARGETS = $(patsubst %,%/modules.c,$(SIM_ENABLED_ARCHES))
+MOSTLYCLEANFILES += $(%C%_GEN_MODULES_C_TARGETS) $(patsubst %,%/stamp-moules,$(SIM_ENABLED_ARCHES))
+SIM_ALL_RECURSIVE_DEPS += $(%C%_GEN_MODULES_C_TARGETS)
 
 LIBIBERTY_LIB = ../libiberty/libiberty.a
 BFD_LIB = ../bfd/libbfd.la

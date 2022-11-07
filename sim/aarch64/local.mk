@@ -46,6 +46,3 @@ $(%C%_libsim_a_OBJECTS) $(%C%_run_OBJECTS) $(%C%_libsim_a_LIBADD): | $(SIM_ALL_R
 
 %D%/%.o: common/%.c | $(SIM_ALL_RECURSIVE_DEPS)
 	$(AM_V_CC)$(COMPILE) -c -o $@ $<
-
-%D%/modules.c: %D%/stamp-modules ; @true
-%D%/stamp-modules: Makefile $(%C%_libsim_a_SOURCES) ; $(GEN_MODULES_C)
