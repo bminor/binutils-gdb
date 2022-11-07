@@ -726,6 +726,7 @@ SIM_ENABLE_ARCH_mips_TRUE
 CC_FOR_TARGET_MIPS
 LD_FOR_TARGET_MIPS
 AS_FOR_TARGET_MIPS
+subdirs
 SIM_ENABLE_ARCH_microblaze_FALSE
 SIM_ENABLE_ARCH_microblaze_TRUE
 CC_FOR_TARGET_MICROBLAZE
@@ -796,7 +797,6 @@ SIM_ENABLE_ARCH_bpf_TRUE
 CC_FOR_TARGET_BPF
 LD_FOR_TARGET_BPF
 AS_FOR_TARGET_BPF
-subdirs
 SIM_ENABLE_ARCH_bfin_FALSE
 SIM_ENABLE_ARCH_bfin_TRUE
 CC_FOR_TARGET_BFIN
@@ -1110,8 +1110,7 @@ CC_FOR_TARGET_V850
 AS_FOR_TARGET_EXAMPLE_SYNACOR
 LD_FOR_TARGET_EXAMPLE_SYNACOR
 CC_FOR_TARGET_EXAMPLE_SYNACOR'
-ac_subdirs_all='bpf
-mips
+ac_subdirs_all='mips
 mn10300
 or1k
 ppc
@@ -12429,7 +12428,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12432 "configure"
+#line 12431 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12535,7 +12534,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12538 "configure"
+#line 12537 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14544,10 +14543,11 @@ fi
         SIM_PRIMARY_TARGET=bpf
       fi
         as_fn_append SIM_ENABLED_ARCHES " bpf"
+      ac_config_files="$ac_config_files bpf/Makefile.sim:bpf/Makefile.in"
 
+    ac_config_commands="$ac_config_commands bpf/Makefile"
 
-subdirs="$subdirs bpf"
-
+    as_fn_append SIM_SUBDIRS " bpf"
 
   ac_config_files="$ac_config_files bpf/.gdbinit:common/gdbinit.in"
 
@@ -15159,7 +15159,9 @@ fi
         SIM_PRIMARY_TARGET=mips
       fi
         as_fn_append SIM_ENABLED_ARCHES " mips"
-      subdirs="$subdirs mips"
+
+
+subdirs="$subdirs mips"
 
 
   ac_config_files="$ac_config_files mips/.gdbinit:common/gdbinit.in"
@@ -17482,6 +17484,8 @@ do
     "bfin/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS bfin/Makefile" ;;
     "bfin/.gdbinit") CONFIG_FILES="$CONFIG_FILES bfin/.gdbinit:common/gdbinit.in" ;;
     "depdir-bfin") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-bfin" ;;
+    "bpf/Makefile.sim") CONFIG_FILES="$CONFIG_FILES bpf/Makefile.sim:bpf/Makefile.in" ;;
+    "bpf/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS bpf/Makefile" ;;
     "bpf/.gdbinit") CONFIG_FILES="$CONFIG_FILES bpf/.gdbinit:common/gdbinit.in" ;;
     "depdir-bpf") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-bpf" ;;
     "cr16/Makefile.sim") CONFIG_FILES="$CONFIG_FILES cr16/Makefile.sim:cr16/Makefile.in" ;;
@@ -18964,6 +18968,18 @@ $as_echo X"$file" |
  rm -f bfin/Makesim1.tmp bfin/Makesim2.tmp
  ;;
     "depdir-bfin":C) $SHELL $ac_aux_dir/mkinstalldirs bfin/$DEPDIR ;;
+    "bpf/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir = / s:$:/bpf:
+		p
+	}' \
+	<Make-common.sim >bpf/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >bpf/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r bpf/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r bpf/Makesim2.tmp' \
+	<bpf/Makefile.sim >bpf/Makefile
+ rm -f bpf/Makesim1.tmp bpf/Makesim2.tmp
+ ;;
     "depdir-bpf":C) $SHELL $ac_aux_dir/mkinstalldirs bpf/$DEPDIR ;;
     "cr16/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
