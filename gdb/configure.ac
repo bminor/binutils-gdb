@@ -49,6 +49,9 @@ AC_ARG_PROGRAM
 # We require libtool to link with the in-tree libtool libraries
 # the proper way.
 LT_INIT
+# ... and we need it soon, since it is used by some of the
+# link tests in the configure script.
+LT_OUTPUT
 
 # We require a C++11 compiler.  Check if one is available, and if
 # necessary, set CXX_DIALECT to some -std=xxx switch.
