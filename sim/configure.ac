@@ -70,7 +70,7 @@ m4_define([SIM_BUILD_TARGET], [dnl
   AS_VAR_APPEND([SIM_ENABLED_ARCHES], [" $1"])
   m4_if($2, [true], [dnl
     AC_CONFIG_SUBDIRS($1)
-  ], [dnl
+  ], $2, [false], [], [dnl
     AC_CONFIG_FILES($1/Makefile.sim:$1/Makefile.in)
     AC_CONFIG_COMMANDS([$1/Makefile],
 [sed -n \
@@ -88,10 +88,12 @@ m4_define([SIM_BUILD_TARGET], [dnl
     AS_VAR_APPEND([SIM_SUBDIRS], [" $1"])
   ])
   AC_CONFIG_FILES($1/.gdbinit:common/gdbinit.in)
-  dnl Create the depdirs for ports until we can convert them to automake.
-  AC_CONFIG_COMMANDS([depdir-$1],
-		     [$SHELL $ac_aux_dir/mkinstalldirs $1/$DEPDIR],
-		     [ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR])
+  m4_if($2, [false], [], [dnl
+    dnl Create the depdirs for ports until we can convert them to automake.
+    AC_CONFIG_COMMANDS([depdir-$1],
+		       [$SHELL $ac_aux_dir/mkinstalldirs $1/$DEPDIR],
+		       [ac_aux_dir=$ac_aux_dir DEPDIR=$DEPDIR])
+  ])
 ])
 dnl Enable a particular arch subdir.
 dnl arg[1] is the matching target triple.
@@ -125,7 +127,7 @@ if test "${enable_sim}" != no; then
   sim_igen=no
   for targ in `echo $target $enable_targets | sed 's/,/ /g'`
   do
-    SIM_TARGET([aarch64*-*-*], [aarch64])
+    SIM_TARGET([aarch64*-*-*], [aarch64], [false])
     SIM_TARGET([arm*-*-*], [arm])
     SIM_TARGET([avr*-*-*], [avr])
     SIM_TARGET([bfin-*-*], [bfin])
