@@ -243,23 +243,25 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/../mkinstalldirs
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = Make-common.sim aarch64/.gdbinit \
-	aarch64/Makefile.sim arm/.gdbinit arm/Makefile.sim \
-	avr/.gdbinit avr/Makefile.sim bfin/.gdbinit bfin/Makefile.sim \
-	cr16/.gdbinit cr16/Makefile.sim cris/.gdbinit \
-	cris/Makefile.sim d10v/.gdbinit d10v/Makefile.sim frv/.gdbinit \
-	frv/Makefile.sim ft32/.gdbinit ft32/Makefile.sim \
-	h8300/.gdbinit h8300/Makefile.sim iq2000/.gdbinit \
-	iq2000/Makefile.sim lm32/.gdbinit lm32/Makefile.sim \
-	m32c/.gdbinit m32c/Makefile.sim m32r/.gdbinit \
-	m32r/Makefile.sim m68hc11/.gdbinit m68hc11/Makefile.sim \
-	mcore/.gdbinit mcore/Makefile.sim microblaze/.gdbinit \
-	microblaze/Makefile.sim moxie/.gdbinit moxie/Makefile.sim \
-	msp430/.gdbinit msp430/Makefile.sim pru/.gdbinit \
-	pru/Makefile.sim rl78/.gdbinit rl78/Makefile.sim rx/.gdbinit \
-	rx/Makefile.sim sh/.gdbinit sh/Makefile.sim erc32/.gdbinit \
-	erc32/Makefile.sim example-synacor/.gdbinit \
-	example-synacor/Makefile.sim arch-subdir.mk .gdbinit
+CONFIG_CLEAN_FILES = Make-common.sim aarch64/Makefile.sim \
+	aarch64/.gdbinit arm/Makefile.sim arm/.gdbinit \
+	avr/Makefile.sim avr/.gdbinit bfin/Makefile.sim bfin/.gdbinit \
+	bpf/.gdbinit cr16/Makefile.sim cr16/.gdbinit cris/Makefile.sim \
+	cris/.gdbinit d10v/Makefile.sim d10v/.gdbinit frv/Makefile.sim \
+	frv/.gdbinit ft32/Makefile.sim ft32/.gdbinit \
+	h8300/Makefile.sim h8300/.gdbinit iq2000/Makefile.sim \
+	iq2000/.gdbinit lm32/Makefile.sim lm32/.gdbinit \
+	m32c/Makefile.sim m32c/.gdbinit m32r/Makefile.sim \
+	m32r/.gdbinit m68hc11/Makefile.sim m68hc11/.gdbinit \
+	mcore/Makefile.sim mcore/.gdbinit microblaze/Makefile.sim \
+	microblaze/.gdbinit mips/.gdbinit mn10300/.gdbinit \
+	moxie/Makefile.sim moxie/.gdbinit msp430/Makefile.sim \
+	msp430/.gdbinit or1k/.gdbinit ppc/.gdbinit pru/Makefile.sim \
+	pru/.gdbinit riscv/.gdbinit rl78/Makefile.sim rl78/.gdbinit \
+	rx/Makefile.sim rx/.gdbinit sh/Makefile.sim sh/.gdbinit \
+	erc32/Makefile.sim erc32/.gdbinit v850/.gdbinit \
+	example-synacor/Makefile.sim example-synacor/.gdbinit \
+	arch-subdir.mk .gdbinit
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
@@ -1680,105 +1682,119 @@ distclean-hdr:
 	-rm -f config.h stamp-h1
 Make-common.sim: $(top_builddir)/config.status $(top_srcdir)/common/Make-common.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-aarch64/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
 aarch64/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/aarch64/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-arm/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+aarch64/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 arm/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/arm/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-avr/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+arm/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 avr/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/avr/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-bfin/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+avr/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 bfin/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/bfin/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-cr16/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+bfin/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+bpf/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 cr16/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/cr16/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-cris/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+cr16/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 cris/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/cris/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-d10v/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+cris/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 d10v/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/d10v/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-frv/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+d10v/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 frv/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/frv/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-ft32/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+frv/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 ft32/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/ft32/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-h8300/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+ft32/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 h8300/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/h8300/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-iq2000/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+h8300/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 iq2000/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/iq2000/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-lm32/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+iq2000/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 lm32/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/lm32/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-m32c/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+lm32/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 m32c/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/m32c/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-m32r/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+m32c/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 m32r/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/m32r/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-m68hc11/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+m32r/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 m68hc11/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/m68hc11/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-mcore/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+m68hc11/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 mcore/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/mcore/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-microblaze/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+mcore/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 microblaze/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/microblaze/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-moxie/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+microblaze/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+mips/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+mn10300/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 moxie/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/moxie/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-msp430/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+moxie/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 msp430/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/msp430/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-pru/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+msp430/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+or1k/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+ppc/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 pru/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/pru/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-rl78/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+pru/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+riscv/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 rl78/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/rl78/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-rx/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+rl78/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 rx/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/rx/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-sh/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+rx/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 sh/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/sh/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-erc32/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+sh/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 erc32/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/erc32/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-example-synacor/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+erc32/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+v850/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 example-synacor/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/example-synacor/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+example-synacor/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 arch-subdir.mk: $(top_builddir)/config.status $(srcdir)/arch-subdir.mk.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
