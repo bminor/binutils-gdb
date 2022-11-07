@@ -451,6 +451,13 @@ struct language_defn
     return nullptr;
   }
 
+  /* Return true if this class' implementation of print_type can
+     handle the /o modifier.  */
+  virtual bool can_print_type_offsets () const
+  {
+    return false;
+  }
+
   /* Print TYPE to STREAM using syntax appropriate for this language.
      LEVEL is the depth to indent lines by.  VARSTRING, if not NULL or the
      empty string, is the name of a variable and TYPE should be printed in

@@ -469,3 +469,16 @@ with_test_prefix "with_hex_default" {
   # restore
   gdb_test_no_output "set print type hex off"
 }
+
+gdb_test_no_output "set language asm"
+gdb_test "ptype/o struct tuv" \
+    [string_to_regexp [multi_line \
+  "/* offset      |    size */  type = struct tuv \{" \
+  "/*      0      |       4 */    int a1;" \
+  "/* XXX  4-byte hole      */" \
+  "/*      8      |       8 */    signed char *a2;" \
+  "/*     16      |       4 */    int a3;" \
+  "/* XXX  4-byte padding   */" \
+  "" \
+  "                               /* total size (bytes):   24 */" \
+  "                             \}"]]
