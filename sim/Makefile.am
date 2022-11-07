@@ -198,29 +198,25 @@ all-recursive: $(SIM_ALL_RECURSIVE_DEPS)
 install-data-local: installdirs $(SIM_INSTALL_DATA_LOCAL_DEPS)
 	$(AM_V_at)$(MKDIR_P) $(DESTDIR)$(libdir)
 	lib=`echo sim | sed '$(program_transform_name)'`; \
-	for d in $(SUBDIRS); do \
-		if [ -e $$d/run$(EXEEXT) ]; then \
-			n="$$lib"; \
-			[ "$(SIM_PRIMARY_TARGET)" = "$$d" ] || n="$$n-$$d"; \
-			n="lib$$n.a"; \
-			$(INSTALL_DATA) $$d/libsim.a $(DESTDIR)$(libdir)/$$n || exit 1; \
-		fi; \
+	for d in $(SIM_ENABLED_ARCHES); do \
+		n="$$lib"; \
+		[ "$(SIM_PRIMARY_TARGET)" = "$$d" ] || n="$$n-$$d"; \
+		n="lib$$n.a"; \
+		$(INSTALL_DATA) $$d/libsim.a $(DESTDIR)$(libdir)/$$n || exit 1; \
 	done
 
 install-exec-local: installdirs $(SIM_INSTALL_EXEC_LOCAL_DEPS)
 	$(AM_V_at)$(MKDIR_P) $(DESTDIR)$(bindir)
 	run=`echo run | sed '$(program_transform_name)'`; \
-	for d in $(SUBDIRS); do \
-		if [ -e $$d/run$(EXEEXT) ]; then \
-			n="$$run"; \
-			[ "$(SIM_PRIMARY_TARGET)" = "$$d" ] || n="$$n-$$d"; \
-			$(LIBTOOL) --mode=install \
-				$(INSTALL_PROGRAM) $$d/run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT) || exit 1; \
-		fi; \
+	for d in $(SIM_ENABLED_ARCHES); do \
+		n="$$run"; \
+		[ "$(SIM_PRIMARY_TARGET)" = "$$d" ] || n="$$n-$$d"; \
+		$(LIBTOOL) --mode=install \
+			$(INSTALL_PROGRAM) $$d/run$(EXEEXT) $(DESTDIR)$(bindir)/$$n$(EXEEXT) || exit 1; \
 	done
 
 uninstall-local: $(SIM_UNINSTALL_LOCAL_DEPS)
 	rm -f $(DESTDIR)$(bindir)/run $(DESTDIR)$(libdir)/libsim.a
-	for d in $(SUBDIRS); do \
+	for d in $(SIM_ENABLED_ARCHES); do \
 		rm -f $(DESTDIR)$(bindir)/run-$$d $(DESTDIR)$(libdir)/libsim-$$d.a; \
 	done

@@ -821,6 +821,7 @@ AS_FOR_TARGET
 CC_FOR_TARGET
 SIM_COMMON_BUILD_FALSE
 SIM_COMMON_BUILD_TRUE
+SIM_ENABLED_ARCHES
 SIM_SUBDIRS
 SIM_PRIMARY_TARGET
 AM_BACKSLASH
@@ -12428,7 +12429,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12431 "configure"
+#line 12432 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12534,7 +12535,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12537 "configure"
+#line 12538 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14216,6 +14217,9 @@ SIM_PRIMARY_TARGET=
 SIM_SUBDIRS=
 
 
+SIM_ENABLED_ARCHES=
+
+
 SIM_COMMON_BUILD_TRUE=
 SIM_COMMON_BUILD_FALSE='#'
 
@@ -14236,7 +14240,8 @@ if test "${enable_sim}" != no; then
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=aarch64
       fi
-            ac_config_files="$ac_config_files aarch64/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " aarch64"
+      ac_config_files="$ac_config_files aarch64/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files aarch64/Makefile.sim:aarch64/Makefile.in"
 
@@ -14406,7 +14411,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=arm
       fi
-            ac_config_files="$ac_config_files arm/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " arm"
+      ac_config_files="$ac_config_files arm/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files arm/Makefile.sim:arm/Makefile.in"
 
@@ -14449,7 +14455,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=avr
       fi
-            ac_config_files="$ac_config_files avr/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " avr"
+      ac_config_files="$ac_config_files avr/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files avr/Makefile.sim:avr/Makefile.in"
 
@@ -14492,7 +14499,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bfin
       fi
-            ac_config_files="$ac_config_files bfin/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " bfin"
+      ac_config_files="$ac_config_files bfin/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files bfin/Makefile.sim:bfin/Makefile.in"
 
@@ -14535,6 +14543,7 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=bpf
       fi
+        as_fn_append SIM_ENABLED_ARCHES " bpf"
 
 
 subdirs="$subdirs bpf"
@@ -14575,7 +14584,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cr16
       fi
-            ac_config_files="$ac_config_files cr16/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " cr16"
+      ac_config_files="$ac_config_files cr16/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files cr16/Makefile.sim:cr16/Makefile.in"
 
@@ -14618,7 +14628,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=cris
       fi
-            ac_config_files="$ac_config_files cris/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " cris"
+      ac_config_files="$ac_config_files cris/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files cris/Makefile.sim:cris/Makefile.in"
 
@@ -14661,7 +14672,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=d10v
       fi
-            ac_config_files="$ac_config_files d10v/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " d10v"
+      ac_config_files="$ac_config_files d10v/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files d10v/Makefile.sim:d10v/Makefile.in"
 
@@ -14704,7 +14716,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=frv
       fi
-            ac_config_files="$ac_config_files frv/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " frv"
+      ac_config_files="$ac_config_files frv/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files frv/Makefile.sim:frv/Makefile.in"
 
@@ -14747,7 +14760,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=ft32
       fi
-            ac_config_files="$ac_config_files ft32/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " ft32"
+      ac_config_files="$ac_config_files ft32/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files ft32/Makefile.sim:ft32/Makefile.in"
 
@@ -14790,7 +14804,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=h8300
       fi
-            ac_config_files="$ac_config_files h8300/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " h8300"
+      ac_config_files="$ac_config_files h8300/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files h8300/Makefile.sim:h8300/Makefile.in"
 
@@ -14833,7 +14848,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=iq2000
       fi
-            ac_config_files="$ac_config_files iq2000/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " iq2000"
+      ac_config_files="$ac_config_files iq2000/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files iq2000/Makefile.sim:iq2000/Makefile.in"
 
@@ -14876,7 +14892,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=lm32
       fi
-            ac_config_files="$ac_config_files lm32/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " lm32"
+      ac_config_files="$ac_config_files lm32/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files lm32/Makefile.sim:lm32/Makefile.in"
 
@@ -14919,7 +14936,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32c
       fi
-            ac_config_files="$ac_config_files m32c/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " m32c"
+      ac_config_files="$ac_config_files m32c/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files m32c/Makefile.sim:m32c/Makefile.in"
 
@@ -14962,7 +14980,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m32r
       fi
-            ac_config_files="$ac_config_files m32r/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " m32r"
+      ac_config_files="$ac_config_files m32r/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files m32r/Makefile.sim:m32r/Makefile.in"
 
@@ -15005,7 +15024,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=m68hc11
       fi
-            ac_config_files="$ac_config_files m68hc11/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " m68hc11"
+      ac_config_files="$ac_config_files m68hc11/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files m68hc11/Makefile.sim:m68hc11/Makefile.in"
 
@@ -15048,7 +15068,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mcore
       fi
-            ac_config_files="$ac_config_files mcore/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " mcore"
+      ac_config_files="$ac_config_files mcore/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files mcore/Makefile.sim:mcore/Makefile.in"
 
@@ -15091,7 +15112,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=microblaze
       fi
-            ac_config_files="$ac_config_files microblaze/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " microblaze"
+      ac_config_files="$ac_config_files microblaze/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files microblaze/Makefile.sim:microblaze/Makefile.in"
 
@@ -15134,7 +15156,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mips
       fi
-            subdirs="$subdirs mips"
+        as_fn_append SIM_ENABLED_ARCHES " mips"
+      subdirs="$subdirs mips"
 
 
     ac_config_commands="$ac_config_commands depdir-mips"
@@ -15172,7 +15195,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=mn10300
       fi
-            subdirs="$subdirs mn10300"
+        as_fn_append SIM_ENABLED_ARCHES " mn10300"
+      subdirs="$subdirs mn10300"
 
 
     ac_config_commands="$ac_config_commands depdir-mn10300"
@@ -15210,7 +15234,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=moxie
       fi
-            ac_config_files="$ac_config_files moxie/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " moxie"
+      ac_config_files="$ac_config_files moxie/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files moxie/Makefile.sim:moxie/Makefile.in"
 
@@ -15253,7 +15278,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=msp430
       fi
-            ac_config_files="$ac_config_files msp430/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " msp430"
+      ac_config_files="$ac_config_files msp430/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files msp430/Makefile.sim:msp430/Makefile.in"
 
@@ -15296,7 +15322,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=or1k
       fi
-            subdirs="$subdirs or1k"
+        as_fn_append SIM_ENABLED_ARCHES " or1k"
+      subdirs="$subdirs or1k"
 
 
     ac_config_commands="$ac_config_commands depdir-or1k"
@@ -15334,7 +15361,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=ppc
       fi
-            subdirs="$subdirs ppc"
+        as_fn_append SIM_ENABLED_ARCHES " ppc"
+      subdirs="$subdirs ppc"
 
 
     ac_config_commands="$ac_config_commands depdir-ppc"
@@ -15372,7 +15400,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=pru
       fi
-            ac_config_files="$ac_config_files pru/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " pru"
+      ac_config_files="$ac_config_files pru/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files pru/Makefile.sim:pru/Makefile.in"
 
@@ -15415,7 +15444,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=riscv
       fi
-            subdirs="$subdirs riscv"
+        as_fn_append SIM_ENABLED_ARCHES " riscv"
+      subdirs="$subdirs riscv"
 
 
     ac_config_commands="$ac_config_commands depdir-riscv"
@@ -15453,7 +15483,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rl78
       fi
-            ac_config_files="$ac_config_files rl78/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " rl78"
+      ac_config_files="$ac_config_files rl78/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files rl78/Makefile.sim:rl78/Makefile.in"
 
@@ -15496,7 +15527,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=rx
       fi
-            ac_config_files="$ac_config_files rx/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " rx"
+      ac_config_files="$ac_config_files rx/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files rx/Makefile.sim:rx/Makefile.in"
 
@@ -15539,7 +15571,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=sh
       fi
-            ac_config_files="$ac_config_files sh/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " sh"
+      ac_config_files="$ac_config_files sh/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files sh/Makefile.sim:sh/Makefile.in"
 
@@ -15582,7 +15615,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=erc32
       fi
-            ac_config_files="$ac_config_files erc32/.gdbinit:common/gdbinit.in"
+        as_fn_append SIM_ENABLED_ARCHES " erc32"
+      ac_config_files="$ac_config_files erc32/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files erc32/Makefile.sim:erc32/Makefile.in"
 
@@ -15625,7 +15659,8 @@ fi
       if test "${targ}" = "${target}"; then
         SIM_PRIMARY_TARGET=v850
       fi
-            subdirs="$subdirs v850"
+        as_fn_append SIM_ENABLED_ARCHES " v850"
+      subdirs="$subdirs v850"
 
 
     ac_config_commands="$ac_config_commands depdir-v850"
@@ -15670,7 +15705,8 @@ fi
 
 as_fn_append SIM_TOOLCHAIN_VARS " AS_FOR_TARGET_EXAMPLE_SYNACOR LD_FOR_TARGET_EXAMPLE_SYNACOR CC_FOR_TARGET_EXAMPLE_SYNACOR"
 
-          ac_config_files="$ac_config_files example-synacor/.gdbinit:common/gdbinit.in"
+      as_fn_append SIM_ENABLED_ARCHES " example-synacor"
+      ac_config_files="$ac_config_files example-synacor/.gdbinit:common/gdbinit.in"
 
     ac_config_files="$ac_config_files example-synacor/Makefile.sim:example-synacor/Makefile.in"
 

@@ -48,8 +48,13 @@ dnl used when installing files to see if they need to be suffixed.
 SIM_PRIMARY_TARGET=
 AC_SUBST(SIM_PRIMARY_TARGET)
 
+dnl Directories that we need to recurse into (i.e. add to $SUBDIRS).
 SIM_SUBDIRS=
 AC_SUBST(SIM_SUBDIRS)
+
+dnl List of enabled arch backends.
+SIM_ENABLED_ARCHES=
+AC_SUBST(SIM_ENABLED_ARCHES)
 
 dnl Used by common/Make-common.in to see which configure script created it.
 SIM_COMMON_BUILD_TRUE=
@@ -62,6 +67,7 @@ dnl Build a particular arch subdir.
 dnl arg[1] is the arch subdir name.
 dnl arg[2] is whether the arch has a dedicated configure script.
 m4_define([SIM_BUILD_TARGET], [dnl
+  AS_VAR_APPEND([SIM_ENABLED_ARCHES], [" $1"])
   m4_if($2, [true], [dnl
     AC_CONFIG_SUBDIRS($1)
   ], [dnl
