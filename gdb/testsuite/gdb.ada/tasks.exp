@@ -50,21 +50,18 @@ gdb_test "watch j task 1 task 3" "You can specify only one task\\."
 # breakpoint in the list that matched the triggered-breakpoint's
 # address, no matter which task it was specific to.
 gdb_test "break break_me task 1" "Breakpoint .* at .*"
+gdb_test "info breakpoints" "foo.adb:${decimal}\r\n\\s+stop only in task 1" \
+    "check info breakpoints for task 1 breakpoint"
 
 # Now, insert a breakpoint that should stop only if task 3 stops, and
 # extract its number.
-set bp_number -1
-set test "break break_me task 3"
-gdb_test_multiple $test $test {
-    -re "Breakpoint (.*) at .*$gdb_prompt $" {
-	set bp_number $expect_out(1,string)
-	pass $test
-    }
-}
-
+gdb_breakpoint "break_me task 3" message
+set bp_number [get_integer_valueof "\$bpnum" -1]
 if {$bp_number < 0} {
     return
 }
+gdb_test "info breakpoints" "foo.adb:${decimal}\r\n\\s+stop only in task 3" \
+    "check info breakpoints for task 3 breakpoint"
 
 # Continue to that breakpoint.  Task 2 should hit it first, and GDB
 # is expected to ignore that hit and resume the execution.  Only then
