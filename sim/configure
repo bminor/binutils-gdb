@@ -1111,7 +1111,6 @@ AS_FOR_TARGET_EXAMPLE_SYNACOR
 LD_FOR_TARGET_EXAMPLE_SYNACOR
 CC_FOR_TARGET_EXAMPLE_SYNACOR'
 ac_subdirs_all='mips
-mn10300
 ppc
 v850'
 
@@ -12427,7 +12426,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12430 "configure"
+#line 12429 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12533,7 +12532,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12536 "configure"
+#line 12535 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15201,8 +15200,11 @@ fi
         SIM_PRIMARY_TARGET=mn10300
       fi
         as_fn_append SIM_ENABLED_ARCHES " mn10300"
-      subdirs="$subdirs mn10300"
+      ac_config_files="$ac_config_files mn10300/Makefile.sim:mn10300/Makefile.in"
 
+    ac_config_commands="$ac_config_commands mn10300/Makefile"
+
+    as_fn_append SIM_SUBDIRS " mn10300"
 
   ac_config_files="$ac_config_files mn10300/.gdbinit:common/gdbinit.in"
 
@@ -17544,6 +17546,8 @@ do
     "depdir-microblaze") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-microblaze" ;;
     "mips/.gdbinit") CONFIG_FILES="$CONFIG_FILES mips/.gdbinit:common/gdbinit.in" ;;
     "depdir-mips") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mips" ;;
+    "mn10300/Makefile.sim") CONFIG_FILES="$CONFIG_FILES mn10300/Makefile.sim:mn10300/Makefile.in" ;;
+    "mn10300/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS mn10300/Makefile" ;;
     "mn10300/.gdbinit") CONFIG_FILES="$CONFIG_FILES mn10300/.gdbinit:common/gdbinit.in" ;;
     "depdir-mn10300") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-mn10300" ;;
     "moxie/Makefile.sim") CONFIG_FILES="$CONFIG_FILES moxie/Makefile.sim:moxie/Makefile.in" ;;
@@ -19155,6 +19159,18 @@ $as_echo X"$file" |
  ;;
     "depdir-microblaze":C) $SHELL $ac_aux_dir/mkinstalldirs microblaze/$DEPDIR ;;
     "depdir-mips":C) $SHELL $ac_aux_dir/mkinstalldirs mips/$DEPDIR ;;
+    "mn10300/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir = / s:$:/mn10300:
+		p
+	}' \
+	<Make-common.sim >mn10300/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >mn10300/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r mn10300/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r mn10300/Makesim2.tmp' \
+	<mn10300/Makefile.sim >mn10300/Makefile
+ rm -f mn10300/Makesim1.tmp mn10300/Makesim2.tmp
+ ;;
     "depdir-mn10300":C) $SHELL $ac_aux_dir/mkinstalldirs mn10300/$DEPDIR ;;
     "moxie/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {

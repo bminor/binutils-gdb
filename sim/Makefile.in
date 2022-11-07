@@ -256,14 +256,14 @@ CONFIG_CLEAN_FILES = Make-common.sim aarch64/Makefile.sim \
 	m32r/Makefile.sim m32r/.gdbinit m68hc11/Makefile.sim \
 	m68hc11/.gdbinit mcore/Makefile.sim mcore/.gdbinit \
 	microblaze/Makefile.sim microblaze/.gdbinit mips/.gdbinit \
-	mn10300/.gdbinit moxie/Makefile.sim moxie/.gdbinit \
-	msp430/Makefile.sim msp430/.gdbinit or1k/Makefile.sim \
-	or1k/.gdbinit ppc/.gdbinit pru/Makefile.sim pru/.gdbinit \
-	riscv/Makefile.sim riscv/.gdbinit rl78/Makefile.sim \
-	rl78/.gdbinit rx/Makefile.sim rx/.gdbinit sh/Makefile.sim \
-	sh/.gdbinit erc32/Makefile.sim erc32/.gdbinit v850/.gdbinit \
-	example-synacor/Makefile.sim example-synacor/.gdbinit \
-	arch-subdir.mk .gdbinit
+	mn10300/Makefile.sim mn10300/.gdbinit moxie/Makefile.sim \
+	moxie/.gdbinit msp430/Makefile.sim msp430/.gdbinit \
+	or1k/Makefile.sim or1k/.gdbinit ppc/.gdbinit pru/Makefile.sim \
+	pru/.gdbinit riscv/Makefile.sim riscv/.gdbinit \
+	rl78/Makefile.sim rl78/.gdbinit rx/Makefile.sim rx/.gdbinit \
+	sh/Makefile.sim sh/.gdbinit erc32/Makefile.sim erc32/.gdbinit \
+	v850/.gdbinit example-synacor/Makefile.sim \
+	example-synacor/.gdbinit arch-subdir.mk .gdbinit
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
@@ -1758,6 +1758,8 @@ microblaze/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/microblaze/
 microblaze/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 mips/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+mn10300/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/mn10300/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 mn10300/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@

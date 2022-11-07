@@ -144,7 +144,7 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([mcore-*-*], [mcore])
     SIM_TARGET([microblaze*-*-*], [microblaze])
     SIM_TARGET([mips*-*-*], [mips], [true], [sim_igen=yes])
-    SIM_TARGET([mn10300*-*-*], [mn10300], [true], [sim_igen=yes])
+    SIM_TARGET([mn10300*-*-*], [mn10300], [], [sim_igen=yes])
     SIM_TARGET([moxie-*-*], [moxie])
     SIM_TARGET([msp430*-*-*], [msp430])
     SIM_TARGET([or1k*-*-*], [or1k])
