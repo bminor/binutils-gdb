@@ -98,6 +98,14 @@ with_test_prefix "frame print" {
 	"backtrace test"
     }
 }
+
+# Test the "info frame" command
+with_test_prefix "info frame" {
+    if { [start_test "TAG: first frame"] == 0 } {
+	gdb_test "info frame" "mytype is $hex \"hello world\".*"
+    }
+}
+
 # Testing the down command.
 with_test_prefix "frame movement down" {
     if { [start_test "TAG: first frame"] == 0 } {

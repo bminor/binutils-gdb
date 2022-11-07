@@ -1679,8 +1679,12 @@ info_frame_command_core (frame_info_ptr fi, bool selected_frame_p)
 	    else
 	      gdb_printf (" %d args: ", numargs);
 	  }
+
+	fi.prepare_reinflate ();
 	print_frame_args (user_frame_print_options,
 			  func, fi, numargs, gdb_stdout);
+	fi.reinflate ();
+
 	gdb_puts ("\n");
       }
   }
