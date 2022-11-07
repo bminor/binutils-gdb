@@ -16279,6 +16279,8 @@ case $target in #(
   *) :
      ;;
 esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $SIM_RISCV_BITSIZE" >&5
+$as_echo "$SIM_RISCV_BITSIZE" >&6; }
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether sim rx should be cycle accurate" >&5
