@@ -233,7 +233,8 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/m4/sim_ac_option_warnings.m4 \
 	$(top_srcdir)/m4/sim_ac_platform.m4 \
 	$(top_srcdir)/m4/sim_ac_toolchain.m4 \
-	$(top_srcdir)/frv/acinclude.m4 $(top_srcdir)/rx/acinclude.m4 \
+	$(top_srcdir)/frv/acinclude.m4 \
+	$(top_srcdir)/riscv/acinclude.m4 $(top_srcdir)/rx/acinclude.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -257,11 +258,11 @@ CONFIG_CLEAN_FILES = Make-common.sim aarch64/Makefile.sim \
 	microblaze/.gdbinit mips/.gdbinit mn10300/.gdbinit \
 	moxie/Makefile.sim moxie/.gdbinit msp430/Makefile.sim \
 	msp430/.gdbinit or1k/.gdbinit ppc/.gdbinit pru/Makefile.sim \
-	pru/.gdbinit riscv/.gdbinit rl78/Makefile.sim rl78/.gdbinit \
-	rx/Makefile.sim rx/.gdbinit sh/Makefile.sim sh/.gdbinit \
-	erc32/Makefile.sim erc32/.gdbinit v850/.gdbinit \
-	example-synacor/Makefile.sim example-synacor/.gdbinit \
-	arch-subdir.mk .gdbinit
+	pru/.gdbinit riscv/Makefile.sim riscv/.gdbinit \
+	rl78/Makefile.sim rl78/.gdbinit rx/Makefile.sim rx/.gdbinit \
+	sh/Makefile.sim sh/.gdbinit erc32/Makefile.sim erc32/.gdbinit \
+	v850/.gdbinit example-synacor/Makefile.sim \
+	example-synacor/.gdbinit arch-subdir.mk .gdbinit
 CONFIG_CLEAN_VPATH_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
@@ -1092,6 +1093,7 @@ SIM_HW_CFLAGS = @SIM_HW_CFLAGS@
 SIM_HW_SOCKSER = @SIM_HW_SOCKSER@
 SIM_INLINE = @SIM_INLINE@
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
+SIM_RISCV_BITSIZE = @SIM_RISCV_BITSIZE@
 SIM_RX_CYCLE_ACCURATE_FLAGS = @SIM_RX_CYCLE_ACCURATE_FLAGS@
 SIM_SUBDIRS = @SIM_SUBDIRS@
 SIM_TOOLCHAIN_VARS = @SIM_TOOLCHAIN_VARS@
@@ -1771,6 +1773,8 @@ ppc/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 pru/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/pru/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 pru/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+riscv/Makefile.sim: $(top_builddir)/config.status $(top_srcdir)/riscv/Makefile.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 riscv/.gdbinit: $(top_builddir)/config.status $(top_srcdir)/common/gdbinit.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@

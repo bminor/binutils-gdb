@@ -150,7 +150,7 @@ if test "${enable_sim}" != no; then
     SIM_TARGET([or1k*-*-*], [or1k], [true])
     SIM_TARGET([powerpc*-*-*], [ppc], [true])
     SIM_TARGET([pru*-*-*], [pru])
-    SIM_TARGET([riscv*-*-*], [riscv], [true])
+    SIM_TARGET([riscv*-*-*], [riscv])
     SIM_TARGET([rl78-*-*], [rl78])
     SIM_TARGET([rx-*-*], [rx])
     SIM_TARGET([sh*-*-*], [sh])
@@ -203,6 +203,7 @@ AC_SUBST(sim_float)
 
 dnl Some arches have unique configure flags.
 m4_include([frv/acinclude.m4])
+m4_include([riscv/acinclude.m4])
 m4_include([rx/acinclude.m4])
 
 dnl Hack to output an "include" statement in the Makefile so automake doesn't

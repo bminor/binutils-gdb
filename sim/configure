@@ -640,6 +640,7 @@ am__EXEEXT_TRUE
 LTLIBOBJS
 include_makefile
 SIM_RX_CYCLE_ACCURATE_FLAGS
+SIM_RISCV_BITSIZE
 SIM_FRV_TRAPDUMP_FLAGS
 sim_float
 sim_bitsize
@@ -1114,7 +1115,6 @@ mips
 mn10300
 or1k
 ppc
-riscv
 v850'
 
 # Initialize some variables set by options.
@@ -15455,8 +15455,11 @@ fi
         SIM_PRIMARY_TARGET=riscv
       fi
         as_fn_append SIM_ENABLED_ARCHES " riscv"
-      subdirs="$subdirs riscv"
+      ac_config_files="$ac_config_files riscv/Makefile.sim:riscv/Makefile.in"
 
+    ac_config_commands="$ac_config_commands riscv/Makefile"
+
+    as_fn_append SIM_SUBDIRS " riscv"
 
   ac_config_files="$ac_config_files riscv/.gdbinit:common/gdbinit.in"
 
@@ -16257,6 +16260,17 @@ else
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
 fi
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking riscv bitsize" >&5
+$as_echo_n "checking riscv bitsize... " >&6; }
+SIM_RISCV_BITSIZE=64
+case $target in #(
+  riscv32*) :
+    SIM_RISCV_BITSIZE=32 ;; #(
+  *) :
+     ;;
+esac
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether sim rx should be cycle accurate" >&5
@@ -17542,6 +17556,8 @@ do
     "pru/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS pru/Makefile" ;;
     "pru/.gdbinit") CONFIG_FILES="$CONFIG_FILES pru/.gdbinit:common/gdbinit.in" ;;
     "depdir-pru") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-pru" ;;
+    "riscv/Makefile.sim") CONFIG_FILES="$CONFIG_FILES riscv/Makefile.sim:riscv/Makefile.in" ;;
+    "riscv/Makefile") CONFIG_COMMANDS="$CONFIG_COMMANDS riscv/Makefile" ;;
     "riscv/.gdbinit") CONFIG_FILES="$CONFIG_FILES riscv/.gdbinit:common/gdbinit.in" ;;
     "depdir-riscv") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir-riscv" ;;
     "rl78/Makefile.sim") CONFIG_FILES="$CONFIG_FILES rl78/Makefile.sim:rl78/Makefile.in" ;;
@@ -19161,6 +19177,18 @@ $as_echo X"$file" |
  rm -f pru/Makesim1.tmp pru/Makesim2.tmp
  ;;
     "depdir-pru":C) $SHELL $ac_aux_dir/mkinstalldirs pru/$DEPDIR ;;
+    "riscv/Makefile":C) sed -n \
+	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
+		/^srcdir = / s:$:/riscv:
+		p
+	}' \
+	<Make-common.sim >riscv/Makesim1.tmp
+ sed -n -e '/^## COMMON_POST_/,/^## End COMMON_POST_/ p' <Make-common.sim >riscv/Makesim2.tmp
+ sed -e '/^## COMMON_PRE_/ r riscv/Makesim1.tmp' \
+	-e '/^## COMMON_POST_/ r riscv/Makesim2.tmp' \
+	<riscv/Makefile.sim >riscv/Makefile
+ rm -f riscv/Makesim1.tmp riscv/Makesim2.tmp
+ ;;
     "depdir-riscv":C) $SHELL $ac_aux_dir/mkinstalldirs riscv/$DEPDIR ;;
     "rl78/Makefile":C) sed -n \
 	-e '/^## COMMON_PRE_/,/^## End COMMON_PRE_/ {
