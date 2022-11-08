@@ -7786,7 +7786,7 @@ static const struct dis386 vex_w_table[][2] = {
     { PREFIX_TABLE (PREFIX_VEX_0F3850_W_0) },
   },
   {
-    /* VEX_W_0F3851_P_0 */
+    /* VEX_W_0F3851 */
     { PREFIX_TABLE (PREFIX_VEX_0F3851_W_0) },
   },
   {
