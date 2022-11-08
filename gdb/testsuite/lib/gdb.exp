@@ -7736,7 +7736,8 @@ proc find_core_file {pid} {
     } elseif {$pid != -1} {
 	lappend files core.$pid
     }
-    lappend files [list ${::testfile}.core core]
+    lappend files ${::testfile}.core
+    lappend files core
 
     foreach file $files {
 	if {![is_remote host]} {
