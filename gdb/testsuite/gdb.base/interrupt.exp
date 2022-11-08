@@ -46,7 +46,7 @@ if ![file exists $binfile] then {
     gdb_load $binfile
     # Hope this is unix :-)
     gdb_test "shell stty intr '^C'" ".*" \
-	"set interrupt character in interrupt.exp"
+	"set interrupt character"
     if [runto_main] then {
 	global inferior_spawn_id gdb_spawn_id
 

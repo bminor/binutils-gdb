@@ -65,7 +65,7 @@ proc initialize {} {
     }
 
 
-    if [gdb_test "info break" "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*" "info break in watchpoint.exp" ] { 
+    if [gdb_test "info break" "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*" "info break" ] {
       return 0
     }
 
@@ -312,7 +312,7 @@ proc test_stepping {} {
 	    default { fail "back at main from marker1 (timeout)" ; return }
 	}
 
-	gdb_test "next" "for \\(count = 0.*" "next to `for' in watchpoint.exp"
+	gdb_test "next" "for \\(count = 0.*" "next to `for'"
 
 	# Now test that "until" works.  It's a bit tricky to test
 	# "until", because compilers don't always arrange the code

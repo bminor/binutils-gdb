@@ -264,12 +264,12 @@ if [nodebug_runto inner] then {
     gdb_test "ptype bsslocal" $data_var_type
 
     gdb_test "backtrace 10" "#0.*inner.*#1.*middle.*#2.*top.*#3.*main.*" \
-	"backtrace from inner in nodebug.exp"
+	"backtrace from inner"
     # Or if that doesn't work, at least hope for the external symbols
     # Commented out because if we aren't going to xfail the above test
     # ever, why bother with a weaker test?
     #gdb_test "backtrace 10" "#0.*inner.*#1.*#2.*top.*#3.*main.*" \
-	#    "backtrace from inner in nodebug.exp for externals"
+	#    "backtrace from inner for externals"
     
     # This test is not as obscure as it might look.  `p getenv ("TERM")'
     # is a real-world example, at least on many systems.
@@ -294,6 +294,6 @@ if [nodebug_runto inner] then {
     # to be unique, and have it still work
     if [nodebug_runto middle] then {
 	gdb_test "backtrace 10" "#0.*middle.*#1.*top.*#2.*main.*" \
-	    "backtrace from middle in nodebug.exp"
+	    "backtrace from middle"
     }
 }

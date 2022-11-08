@@ -258,7 +258,7 @@ proc_with_prefix test_at_autovars {} {
     gdb_breakpoint marker1
 
     gdb_test "cont" "Break.* marker1 \\(\\) at .*:$decimal.*" "continue to marker1"
-    gdb_test "up" ".*autovars.*" "up from marker1 in scope.exp"
+    gdb_test "up" ".*autovars.*" "up from marker1"
 
     set count 0
     while {$count < 100} {
@@ -283,7 +283,7 @@ proc_with_prefix test_at_localscopes {} {
     gdb_breakpoint marker4
 
     gdb_test "cont" "Break.* marker2 \\(\\) at .*:$decimal.*" "continue to marker2"
-    gdb_test "up" ".*localscopes.*" "up from marker2 in scopes.exp"
+    gdb_test "up" ".*localscopes.*" "up from marker2"
 
     # Should be at first (outermost) scope.  Check values.
 
@@ -295,8 +295,8 @@ proc_with_prefix test_at_localscopes {} {
 	"print localval3, outer scope"
 
     gdb_test "cont" "Break.* marker3 \\(\\) at .*:$decimal.*" \
-	"continue to marker3 in scope.exp"
-    gdb_test "up" ".*localscopes.*" "up from marker3 in scope.exp"
+	"continue to marker3"
+    gdb_test "up" ".*localscopes.*" "up from marker3"
 
     # Should be at next (first nested) scope.  Check values.
 
@@ -310,8 +310,8 @@ proc_with_prefix test_at_localscopes {} {
     # This test will only fail if the file was compiled by gcc, but
     # there's no way to check that.
     gdb_test "cont" "Break.* marker4.*at .*:$decimal.*" \
-	"continue to marker4 in scope.exp"
-    gdb_test "up" ".*localscopes.*" "up from marker4 in scope.exp"
+	"continue to marker4"
+    gdb_test "up" ".*localscopes.*" "up from marker4"
 
     gdb_test "print localval" " = 30" "print localval, innermost scope"
     gdb_test "print localval1" " = 11" "print localval1, innermost scope"

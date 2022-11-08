@@ -33,13 +33,13 @@ set timeout 10
 # Some tests require GCC.
 set gcc_compiled [is_c_compiler_gcc]
 
-gdb_test_multiple "b -qualified langs0" "break on nonexistent function in langs.exp" {
+gdb_test_multiple "b -qualified langs0" "break on nonexistent function" {
 	-re "Function \"langs0\" not defined\..*Make breakpoint pending on future shared library load.*y or .n.. $" {
 
-		gdb_test "n" "" "break on nonexistent function in langs.exp"
+		gdb_test "n" "" "break on nonexistent function"
 	}
 	-re "Breakpoint .* (deferred).*$gdb_prompt $" {
-		pass "break on nonexistent function in langs.exp"
+		pass "break on nonexistent function"
 	}
 }
 
@@ -53,44 +53,44 @@ if [runto csub] then {
 
     if { !$isfixed } { set lang c }
     gdb_test "show language" "currently $lang\".*" \
-	"show language at csub in langs.exp"
+	"show language at csub"
 
-    gdb_test "bt" "#0.*csub.*#1.*(foo|$foo_func) \\(.*#2.*cppsub_ .*#3.*fsub.*#4.*$do_func \\(.*#5  \[0-9a-fx\]* in main.*" "backtrace in langs.exp"
+    gdb_test "bt" "#0.*csub.*#1.*(foo|$foo_func) \\(.*#2.*cppsub_ .*#3.*fsub.*#4.*$do_func \\(.*#5  \[0-9a-fx\]* in main.*" "backtrace"
 
     if { !$isfixed } { set lang c\\+\\+; set ext cxx }
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_test "up" ".* in (foo|$foo_func).* at .*langs2\\.$ext.*return csub \\(.*" \
-	"up to foo in langs.exp"
+	"up to foo"
     gdb_test "show language" "currently $lang.*" \
-	"show language at foo in langs.exp"
+	"show language at foo"
 
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_test "up" ".* in cppsub_ .* at .*langs2\\.$ext.*return foo \\(.*" \
-	"up to cppsub_ in langs.exp"
+	"up to cppsub_"
     gdb_test "show language" "currently $lang.*" \
-	"show language at cppsub_ in langs.exp"
+	"show language at cppsub_"
 
     if { !$isfixed } { set lang fortran }
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_test "up" ".* in fsub.* at .*langs1\\.f.*" \
-	"up to fsub in langs.exp"
+	"up to fsub"
     gdb_test "show language" "currently $lang.*" \
-	"show language at fsub in langs.exp"
+	"show language at fsub"
 
     if { !$isfixed } { set lang c }
     gdb_test "up" ".* in $do_func .* at .*langs0\\.c.*return fsub.*" \
-	"up to langs0__2do in langs.exp"
+	"up to langs0__2do"
     gdb_test "show language" "currently $lang\".*" \
-	"show language at langs0__2do in langs.exp"
+	"show language at langs0__2do"
 
     gdb_test "up" ".* in main .* at .*langs0\\.c.*if \\(langs0__2do \\(.*" \
-	"up to main in langs.exp"
+	"up to main"
     gdb_test "show language" "currently $lang\".*" \
-	"show language at main in langs.exp"
+	"show language at main"
 
     if [target_info exists gdb,noresults] { return }
 
-    gdb_continue_to_end "langs.exp"
+    gdb_continue_to_end "first session"
 }
 
 gdb_exit
@@ -120,7 +120,7 @@ if [runto csub] then {
     if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
     gdb_test "up" \
 	".* in (foo|$foo_func).* at .*langs2\\.$ext.*return csub \\(.*Current language:  auto.*" \
-	"up to foo in langs.exp when verbose"
+	"up to foo when verbose"
 }
 
 set timeout $oldtimeout

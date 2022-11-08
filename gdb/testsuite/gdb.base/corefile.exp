@@ -152,8 +152,8 @@ gdb_test "print \$_exitcode" " = void" \
 # Somehow we better test the ability to read the registers out of the core
 # file correctly.  I don't think the other tests do this.
 
-gdb_test "bt" "abort.*func2.*func1.*main.*" "backtrace in corefile.exp"
-gdb_test "up" "#\[0-9\]* *\[0-9xa-fH'\]* in .* \\(.*\\).*" "up in corefile.exp"
+gdb_test "bt" "abort.*func2.*func1.*main.*" "backtrace"
+gdb_test "up" "#\[0-9\]* *\[0-9xa-fH'\]* in .* \\(.*\\).*" "up"
 
 # Test ability to read mmap'd data
 
@@ -197,7 +197,7 @@ gdb_test "x/wx buf3" "$hex:\[ \t\]+0x00000000" \
 # test reinit_frame_cache
 
 gdb_load ${binfile}
-gdb_test "up" "#\[0-9\]* *\[0-9xa-fH'\]* in .* \\(.*\\).*" "up in corefile.exp (reinit)"
+gdb_test "up" "#\[0-9\]* *\[0-9xa-fH'\]* in .* \\(.*\\).*" "up (reinit)"
 
 gdb_test "core" "No core file now."
 
