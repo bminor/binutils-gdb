@@ -3321,3 +3321,12 @@ rdmsrlist, 0xf20f01c6, None, CpuMSRLIST|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|N
 wrmsrlist, 0xf30f01c6, None, CpuMSRLIST|Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, {}
 
 // MSRLIST instructions end.
+
+// RAO-INT instructions.
+
+aadd, 0xf38fc, None, CpuRAO_INT, Modrm|IgnoreSize|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+aand, 0x660f38fc, None, CpuRAO_INT, Modrm|IgnoreSize|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+aor, 0xf20f38fc, None, CpuRAO_INT, Modrm|IgnoreSize|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+axor, 0xf30f38fc, None, CpuRAO_INT, Modrm|IgnoreSize|CheckRegSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex }
+
+// RAO-INT instructions end.
