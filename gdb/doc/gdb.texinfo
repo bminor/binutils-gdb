@@ -39317,7 +39317,8 @@ make program.  Other variants of @code{make} will not work.
 This library may be included with your operating system distribution;
 if it is not, you can get the latest version from
 @url{https://gmplib.org/}. If GMP is installed at an unusual path,
-you can use the @option{--with-libgmp-prefix} option to specify
+you can use the @option{--with-gmp} option or options
+@option{--with-gmp-include} and @option{--with-gmp-lib} to specify
 its location.
 
 @end table
@@ -39399,18 +39400,18 @@ automatically.  If it is installed in an unusual path, you can use the
 
 @item MPFR
 @anchor{MPFR}
-@value{GDBN} can use the GNU MPFR multiple-precision floating-point
+@value{GDBN} now uses the GNU MPFR multiple-precision floating-point
 library.  This library may be included with your operating system
 distribution; if it is not, you can get the latest version from
 @url{http://www.mpfr.org}.  The @file{configure} script will search
 for this library in several standard locations; if it is installed
-in an unusual path, you can use the @option{--with-libmpfr-prefix}
-option to specify its location.
+in an unusual path, you can use the @option{--with-mpfr} option or options
+@option{--with-mpfr-include} and @option{--with-mpfr-lib} to specify
+its location.
 
 GNU MPFR is used to emulate target floating-point arithmetic during
 expression evaluation when the target uses different floating-point
-formats than the host.  If GNU MPFR it is not available, @value{GDBN}
-will fall back to using host floating-point arithmetic.
+formats than the host.
 
 @item Python
 @value{GDBN} can be scripted using Python language.  @xref{Python}.

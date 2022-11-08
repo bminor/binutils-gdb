@@ -1581,14 +1581,6 @@ This GDB was configured as follows:\n\
 "));
 #endif
 
-#if HAVE_LIBMPFR
-  gdb_printf (stream, _("\
-	     --with-mpfr\n\
-"));
-#else
-  gdb_printf (stream, _("\
-	     --without-mpfr\n\
-"));
 #endif
 #if HAVE_LIBXXHASH
   gdb_printf (stream, _("\

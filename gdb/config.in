@@ -241,9 +241,6 @@
 /* Define if you have the expat library. */
 #undef HAVE_LIBEXPAT
 
-/* Define if you have the gmp library. */
-#undef HAVE_LIBGMP
-
 /* Define to 1 if you have the `libiconvlist' function. */
 #undef HAVE_LIBICONVLIST
 
@@ -255,9 +252,6 @@
 
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
-
-/* Define if you have the mpfr library. */
-#undef HAVE_LIBMPFR
 
 /* Define to 1 if you have the <libunwind-ia64.h> header file. */
 #undef HAVE_LIBUNWIND_IA64_H
