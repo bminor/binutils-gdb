@@ -27,14 +27,7 @@ extern "C" {
 /* This file is used when building stand-alone simulators, so isolate this
    file from gdb.  */
 
-/* Pick up CORE_ADDR_TYPE if defined (from gdb), otherwise use same value as
-   gdb does (unsigned int - from defs.h).  */
-
-#ifndef CORE_ADDR_TYPE
 typedef unsigned int SIM_ADDR;
-#else
-typedef CORE_ADDR_TYPE SIM_ADDR;
-#endif
 
 
 /* Semi-opaque type used as result of sim_open and passed back to all
