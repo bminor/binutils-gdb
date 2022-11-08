@@ -4972,6 +4972,7 @@ const unsigned int num_powerpc_operands = ARRAY_SIZE (powerpc_operands);
 #define PPCVSX2	PPC_OPCODE_POWER8
 #define PPCVSX3	PPC_OPCODE_POWER9
 #define PPCVSX4	PPC_OPCODE_POWER10
+#define PPCVSXF	PPC_OPCODE_FUTURE
 #define POWER	PPC_OPCODE_POWER
 #define POWER2	PPC_OPCODE_POWER | PPC_OPCODE_POWER2
 #define PWR2COM PPC_OPCODE_POWER | PPC_OPCODE_POWER2 | PPC_OPCODE_COMMON
@@ -8405,6 +8406,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"ao.",		XO(31,10,1,1),	XO_MASK,     PWRCOM,	0,		{RT, RA, RB}},
 
 {"lxsspx",	X(31,524),	XX1_MASK,    PPCVSX2,	0,		{XT6, RA0, RB}},
+{"lxvrl",	X(31,525),	XX1_MASK,    PPCVSXF,	0,		{XT6, RA0, RB}},
 
 {"clcs",	X(31,531),	XRB_MASK,    M601,	0,		{RT, RA}},
 
@@ -8450,6 +8452,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"subfo.",	XO(31,40,1,1),	XO_MASK,     PPC,	0,		{RT, RA, RB}},
 {"subo.",	XO(31,40,1,1),	XO_MASK,     PPC,	EXT,		{RT, RB, RA}},
 
+{"lxvrll",	X(31,557),	XX1_MASK,    PPCVSXF,	0,		{XT6, RA0, RB}},
+
 {"tlbsync",	X(31,566),	0xffffffff,  PPC,	0,		{0}},
 
 {"lfsux",	X(31,567),	X_MASK,	     COM,	PPCEFS,		{FRT, RAS, RB}},
@@ -8471,6 +8475,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"lwfcmux",	APU(31,583,0),	APU_MASK,    PPC405,	0,		{FCRT, RA, RB}},
 
 {"lxsdx",	X(31,588),	XX1_MASK,    PPCVSX,	0,		{XT6, RA0, RB}},
+{"lxvprl",	X(31,589),	XX1_MASK,    PPCVSXF,	0,		{XTP, RA0, RB}},
 
 {"mfsr",	X(31,595), XRB_MASK|(1<<20), COM,	NON32,		{RT, SR}},
 
@@ -8512,6 +8517,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mulo",	XO(31,107,1,0),	XO_MASK,     M601,	0,		{RT, RA, RB}},
 {"mulo.",	XO(31,107,1,1),	XO_MASK,     M601,	0,		{RT, RA, RB}},
 
+{"lxvprll",	X(31,621),	XX1_MASK,    PPCVSXF,	0,		{XTP, RA0, RB}},
+
 {"mfsri",	X(31,627),	X_MASK,	     M601,	0,		{RT, RA, RB}},
 
 {"dclst",	X(31,630),	XRB_MASK,    M601,	0,		{RS, RA}},
@@ -8525,6 +8532,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"stbfcmux",	APU(31,647,0),	APU_MASK,    PPC405,	0,		{FCRT, RA, RB}},
 
 {"stxsspx",	X(31,652),	XX1_MASK,    PPCVSX2,	0,		{XS6, RA0, RB}},
+{"stxvrl",	X(31,653),	XX1_MASK,    PPCVSXF,	0,		{XS6, RA0, RB}},
 
 {"tbegin.",	XRC(31,654,1), XRTLRARB_MASK, PPCHTM,	0,		{HTM_R}},
 
@@ -8566,6 +8574,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"stvrx",	X(31,679),	X_MASK,	     CELL,	0,		{VS, RA0, RB}},
 {"sthfcmux",	APU(31,679,0),	APU_MASK,    PPC405,	0,		{FCRT, RA, RB}},
 
+{"stxvrll",	X(31,685),	XX1_MASK,    PPCVSXF,	0,		{XS6, RA0, RB}},
+
 {"tendall.",	XRC(31,686,1)|(1<<25), XRTRARB_MASK, PPCHTM, 0,		{0}},
 {"tend.",	XRC(31,686,1), XRTARARB_MASK, PPCHTM,	0,		{HTM_A}},
 
@@ -8588,6 +8598,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"stwfcmux",	APU(31,711,0),	APU_MASK,    PPC405,	0,		{FCRT, RA, RB}},
 
 {"stxsdx",	X(31,716),	XX1_MASK,    PPCVSX,	0,		{XS6, RA0, RB}},
+{"stxvprl",	X(31,717),	XX1_MASK,    PPCVSXF,	0,		{XSP, RA0, RB}},
 
 {"tcheck",	X(31,718),   XRTBFRARB_MASK, PPCHTM,	0,		{BF}},
 
@@ -8644,6 +8655,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"mulso",	XO(31,235,1,0),	XO_MASK,     PWRCOM,	0,		{RT, RA, RB}},
 {"mullwo.",	XO(31,235,1,1),	XO_MASK,     PPCCOM,	0,		{RT, RA, RB}},
 {"mulso.",	XO(31,235,1,1),	XO_MASK,     PWRCOM,	0,		{RT, RA, RB}},
+
+{"stxvprll",	X(31,749),	XX1_MASK,    PPCVSXF,	0,		{XSP, RA0, RB}},
 
 {"tsuspend.",	XRCL(31,750,0,1), XRTRARB_MASK,PPCHTM,	EXT,		{0}},
 {"tresume.",	XRCL(31,750,1,1), XRTRARB_MASK,PPCHTM,	EXT,		{0}},
