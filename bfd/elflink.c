@@ -9997,7 +9997,8 @@ elf_link_output_symstrtab (void *finf,
 
   if (name == NULL
       || *name == '\0'
-      || (input_sec->flags & SEC_EXCLUDE))
+      || (!bfd_link_relocatable (flinfo->info)
+	  && (input_sec->flags & SEC_EXCLUDE)))
     elfsym->st_name = (unsigned long) -1;
   else
     {
