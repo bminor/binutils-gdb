@@ -98,6 +98,13 @@
   user that the end of file has been reached, refers the user to the
   newly added '.' argument
 
+* Breakpoints can now be inferior-specific.  This is similar to the
+  existing thread-specific breakpoint support.  Breakpoint conditions
+  can include the 'inferior' keyword followed by an inferior id (as
+  displayed in the 'info inferiors' output).  It is invalid to use the
+  'inferior' keyword with either the 'thread' or 'task' keywords when
+  creating a breakpoint.
+
 * New commands
 
 set debug breakpoint on|off
@@ -161,6 +168,14 @@ info main
    reference to an array, structure, or union.  (Previously all references were
    considered simple.)  Support for this feature can be verified by using the
    '-list-features' command, which should contain "simple-values-ref-types".
+
+** The -break-insert command now accepts a '-g thread-group-id' option
+   to allow for the creation of inferior-specific breakpoints.
+
+** The bkpt tuple, which appears in breakpoint-created notifications,
+   and in the result of the -break-insert command can now include an
+   optional 'inferior' field for both the main breakpoint, and each
+   location, when the breakpoint is inferior-specific.
 
 * Python API
 
@@ -256,6 +271,12 @@ info main
 
   ** gdb.Progspace now has the new method "objfile_for_address".  This
      returns the gdb.Objfile, if any, that covers a given address.
+
+  ** gdb.Breakpoint now has an "inferior" attribute.  If the
+     Breakpoint object is inferior specific then this attribute holds
+     the inferior-id (an integer).  If the Breakpoint object is not
+     inferior specific, then this field contains None.  This field can
+     be written too.
 
 *** Changes in GDB 13
 

@@ -3439,7 +3439,10 @@ Return an object representing the current inferior.
 A @code{gdb.Inferior} object has the following attributes:
 
 @defvar Inferior.num
-ID of inferior, as assigned by GDB.
+ID of inferior, as assigned by @value{GDBN}.  You can use this to make
+Python breakpoints inferior-specific, for example
+(@pxref{python_breakpoint_inferior,,The Breakpoint.inferior
+attribute}).
 @end defvar
 
 @anchor{gdbpy_inferior_connection}
@@ -6303,9 +6306,24 @@ read-only.
 
 @anchor{python_breakpoint_thread}
 @defvar Breakpoint.thread
-If the breakpoint is thread-specific, this attribute holds the
-thread's global id.  If the breakpoint is not thread-specific, this
-attribute is @code{None}.  This attribute is writable.
+If the breakpoint is thread-specific (@pxref{Thread-Specific
+Breakpoints}), this attribute holds the thread's global id.  If the
+breakpoint is not thread-specific, this attribute is @code{None}.
+This attribute is writable.
+
+Only one of @code{Breakpoint.thread} or @code{Breakpoint.inferior} can
+be set to a valid id at any time, that is, a breakpoint can be thread
+specific, or inferior specific, but not both.
+@end defvar
+
+@anchor{python_breakpoint_inferior}
+@defvar Breakpoint.inferior
+If the breakpoint is inferior-specific (@pxref{Inferior-Specific
+Breakpoints}), this attribute holds the inferior's id.  If the
+breakpoint is not inferior-specific, this attribute is @code{None}.
+
+This attribute can be written for breakpoints of type
+@code{gdb.BP_BREAKPOINT} and @code{gdb.BP_HARDWARE_BREAKPOINT}.
 @end defvar
 
 @defvar Breakpoint.task

@@ -416,17 +416,10 @@ run_command_1 (const char *args, int from_tty, enum run_how run_how)
   if (run_how == RUN_STOP_AT_MAIN)
     {
       /* To avoid other inferiors hitting this breakpoint, make it
-	 inferior-specific using a condition.  A better solution would be to
-	 have proper inferior-specific breakpoint support, in the breakpoint
-	 machinery.  We could then avoid inserting a breakpoint in the program
-	 spaces unrelated to this inferior.  */
-      const char *op
-	= ((current_language->la_language == language_ada
-	    || current_language->la_language == language_pascal
-	    || current_language->la_language == language_m2) ? "=" : "==");
-      std::string arg = string_printf
-	("-qualified %s if $_inferior %s %d", main_name (), op,
-	 current_inferior ()->num);
+	 inferior-specific.  */
+      std::string arg = string_printf ("-qualified %s inferior %d",
+				       main_name (),
+				       current_inferior ()->num);
       tbreak_command (arg.c_str (), 0);
     }
 

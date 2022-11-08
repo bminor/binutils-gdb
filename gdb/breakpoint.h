@@ -583,7 +583,7 @@ struct breakpoint_ops
 				  struct linespec_result *,
 				  gdb::unique_xmalloc_ptr<char>,
 				  gdb::unique_xmalloc_ptr<char>,
-				  enum bptype, enum bpdisp, int, int,
+				  enum bptype, enum bpdisp, int, int, int,
 				  int, int, int, int, unsigned);
 };
 
@@ -863,6 +863,10 @@ struct breakpoint : public intrusive_list_node<breakpoint>
      care.  */
   int thread = -1;
 
+  /* Inferior number for inferior-specific breakpoint, or -1 if this
+     breakpoint is for all inferiors.  */
+  int inferior = -1;
+
   /* Ada task number for task-specific breakpoint, or -1 if don't
      care.  */
   int task = -1;
@@ -921,7 +925,7 @@ struct code_breakpoint : public breakpoint
 		   gdb::unique_xmalloc_ptr<char> cond_string,
 		   gdb::unique_xmalloc_ptr<char> extra_string,
 		   enum bpdisp disposition,
-		   int thread, int task, int ignore_count,
+		   int thread, int task, int inferior, int ignore_count,
 		   int from_tty,
 		   int enabled, unsigned flags,
 		   int display_canonical);
@@ -1601,6 +1605,7 @@ enum breakpoint_create_flags
 extern int create_breakpoint (struct gdbarch *gdbarch,
 			      struct location_spec *locspec,
 			      const char *cond_string, int thread,
+			      int inferior,
 			      const char *extra_string,
 			      bool force_condition,
 			      int parse_extra,
@@ -1743,6 +1748,11 @@ extern void breakpoint_set_silent (struct breakpoint *b, int silent);
    set both a thread and task restriction on a breakpoint.  */
 
 extern void breakpoint_set_thread (struct breakpoint *b, int thread);
+
+/* Set the inferior for breakpoint B to INFERIOR.  If INFERIOR is -1, make
+   the breakpoint work for any inferior.  */
+
+extern void breakpoint_set_inferior (struct breakpoint *b, int inferior);
 
 /* Set the task for this breakpoint.  If TASK is -1, make the breakpoint
    work for any task.  Passing a value other than -1 for TASK should only

@@ -2542,7 +2542,7 @@ proc mi_build_kv_pairs {attr_list {joiner ,}} {
 # locations.
 #
 # All arguments for the breakpoint location may be specified using the
-# options: number, enabled, addr, func, file, fullname, line,
+# options: number, enabled, addr, func, file, fullname, line, inferior
 # thread-groups, and thread.
 #
 # For the option -thread the corresponding output field is only added
@@ -2556,12 +2556,14 @@ proc mi_build_kv_pairs {attr_list {joiner ,}} {
 proc mi_make_breakpoint_loc {args} {
     parse_args {{number .*} {enabled .*} {addr .*}
 	{func .*} {file .*} {fullname .*} {line .*}
-	{thread-groups \\\[.*\\\]} {thread ""}}
+	{thread-groups \\\[.*\\\]} {thread ""} {inferior ""}}
 
     set attr_list {}
     foreach attr [list number enabled addr func file \
-		      fullname line thread-groups] {
-	lappend attr_list $attr [set $attr]
+		      fullname line thread-groups inferior] {
+	if {$attr ne "inferior" || [set $attr] ne ""} {
+	    lappend attr_list $attr [set $attr]
+	}
     }
 
     set result [mi_build_kv_pairs $attr_list]
@@ -2635,7 +2637,7 @@ proc mi_make_breakpoint_1 {attr_list thread cond evaluated-by times \
 # locations.
 #
 # All arguments for the breakpoint may be specified using the options:
-# number, type, disp, enabled, times, ignore, script,
+# number, type, disp, enabled, times, ignore, script, inferior,
 # original-location, cond, evaluated-by, locations, and thread.
 #
 # Only if -script and -ignore are given will they appear in the output.
@@ -2656,7 +2658,7 @@ proc mi_make_breakpoint_multi {args} {
     parse_args {{number .*} {type .*} {disp .*} {enabled .*}
 	{times .*} {ignore 0}
 	{script ""} {original-location .*} {cond ""} {evaluated-by ""}
-	{locations .*} {thread ""}}
+	{locations .*} {thread ""} {inferior ""}}
 
     set attr_list {}
     foreach attr [list number type disp enabled] {
@@ -2664,6 +2666,12 @@ proc mi_make_breakpoint_multi {args} {
     }
 
     lappend attr_list "addr" "<MULTIPLE>"
+
+    # Only include the inferior field if it was set.  This field is
+    # optional in the MI output.
+    if {$inferior ne ""} {
+	lappend attr_list "inferior" $inferior
+    }
 
     set result [mi_make_breakpoint_1 \
 		    $attr_list $thread $cond ${evaluated-by} $times \

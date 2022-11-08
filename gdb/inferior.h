@@ -853,4 +853,15 @@ extern void print_selected_inferior (struct ui_out *uiout);
 extern void switch_to_inferior_and_push_target
   (inferior *new_inf, bool no_connection, inferior *org_inf);
 
+/* Return true if ID is a valid global inferior number.  */
+
+inline bool
+valid_global_inferior_id (int id)
+{
+  for (inferior *inf : all_inferiors ())
+    if (inf->num == id)
+      return true;
+  return false;
+}
+
 #endif /* !defined (INFERIOR_H) */

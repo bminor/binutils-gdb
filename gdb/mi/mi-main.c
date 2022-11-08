@@ -1762,8 +1762,7 @@ mi_cmd_remove_inferior (const char *command, const char *const *argv, int argc)
   if (argc != 1)
     error (_("-remove-inferior should be passed a single argument"));
 
-  if (sscanf (argv[0], "i%d", &id) != 1)
-    error (_("the thread group id is syntactically invalid"));
+  id = mi_parse_thread_group_id (argv[0]);
 
   inf_to_remove = find_inferior_id (id);
   if (inf_to_remove == NULL)
@@ -2796,6 +2795,21 @@ mi_cmd_complete (const char *command, const char *const *argv, int argc)
 		       result.number_matches == max_completions ? "1" : "0");
 }
 
+/* See mi-main.h.  */
+int
+mi_parse_thread_group_id (const char *id)
+{
+  if (*id != 'i')
+    error (_("thread group id should start with an 'i'"));
+
+  char *end;
+  long num = strtol (id + 1, &end, 10);
+
+  if (*end != '\0' || num > INT_MAX)
+    error (_("invalid thread group id '%s'"), id);
+
+  return (int) num;
+}
 
 void _initialize_mi_main ();
 void

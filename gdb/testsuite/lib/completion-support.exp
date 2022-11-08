@@ -27,7 +27,7 @@ namespace eval completion {
     # List of all quote chars, including no-quote at all.
     variable maybe_quoted_list {"" "'" "\""}
 
-    variable keyword_list {"-force-condition" "if" "task" "thread"}
+    variable keyword_list {"-force-condition" "if" "inferior" "task" "thread"}
 
     variable explicit_opts_list \
 	{"-function" "-label" "-line" "-qualified" "-source"}

@@ -1259,8 +1259,8 @@ proc_with_prefix function-labels {} {
 }
 
 # Test that completion after a function name offers keyword
-# (if/task/thread/-force-condition) matches in linespec mode, and also
-# the explicit location options in explicit locations mode.
+# (if/inferior/task/thread/-force-condition) matches in linespec mode,
+# and also the explicit location options in explicit locations mode.
 
 proc_with_prefix keywords-after-function {} {
     set explicit_list \

@@ -153,6 +153,8 @@ proc_with_prefix test_bkpt_basic { } {
 	"Check repr for a thread breakpoint"
     gdb_py_test_silent_cmd "python blist\[1\].thread = None" \
 	"clear breakpoint thread" 0
+    gdb_test "python print (blist\[1\].inferior)" \
+	"None" "Check breakpoint inferior"
     gdb_test "python print (blist\[1\].type == gdb.BP_BREAKPOINT)" \
 	"True" "Check breakpoint type"
     gdb_test "python print (blist\[0\].number)" \
@@ -253,6 +255,46 @@ proc_with_prefix test_bkpt_cond_and_cmds { } {
     # Note the length is 3 because the string ends in a \n.
     gdb_test "python print (len(last_bp.commands.split('\\n')))" "3" \
 	"check number of lines in commands"
+}
+
+# Test breakpoint thread and inferior attributes.
+proc_with_prefix test_bkpt_thread_and_inferior { } {
+    global srcfile testfile hex decimal
+
+    # Start with a fresh gdb.
+    clean_restart ${testfile}
+
+    if {![runto_main]} {
+	return 0
+    }
+
+    with_test_prefix "thread" {
+	delete_breakpoints
+	gdb_test "break multiply thread 1"
+	gdb_test "python bp = gdb.breakpoints ()\[0\]"
+	gdb_test "python print(bp.thread)" "1"
+	gdb_test "python print(bp.inferior)" "None"
+	gdb_test "python bp.inferior = 1" \
+	    "RuntimeError: Cannot have both 'thread' and 'inferior' conditions on a breakpoint.*"
+	gdb_test_no_output "python bp.thread = None"
+	gdb_test_no_output "python bp.inferior = 1" \
+	    "set the inferior now the thread has been cleared"
+	gdb_test "info breakpoints" "stop only in inferior 1\r\n.*"
+    }
+
+    with_test_prefix "inferior" {
+	delete_breakpoints
+	gdb_test "break multiply inferior 1"
+	gdb_test "python bp = gdb.breakpoints ()\[0\]"
+	gdb_test "python print(bp.thread)" "None"
+	gdb_test "python print(bp.inferior)" "1"
+	gdb_test "python bp.thread = 1" \
+	    "RuntimeError: Cannot have both 'thread' and 'inferior' conditions on a breakpoint.*"
+	gdb_test_no_output "python bp.inferior = None"
+	gdb_test_no_output "python bp.thread = 1" \
+	    "set the thread now the inferior has been cleared"
+	gdb_test "info breakpoints" "stop only in thread 1\r\n.*"
+    }
 }
 
 proc_with_prefix test_bkpt_invisible { } {
@@ -900,6 +942,7 @@ proc_with_prefix test_bkpt_auto_disable { } {
 test_bkpt_basic
 test_bkpt_deletion
 test_bkpt_cond_and_cmds
+test_bkpt_thread_and_inferior
 test_bkpt_invisible
 test_hardware_breakpoints
 test_catchpoints

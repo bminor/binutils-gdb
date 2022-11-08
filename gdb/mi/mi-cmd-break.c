@@ -173,6 +173,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command,
   int hardware = 0;
   int temp_p = 0;
   int thread = -1;
+  int thread_group = -1;
   int ignore_count = 0;
   const char *condition = NULL;
   int pending = 0;
@@ -191,7 +192,8 @@ mi_cmd_break_insert_1 (int dprintf, const char *command,
   enum opt
     {
       HARDWARE_OPT, TEMP_OPT, CONDITION_OPT,
-      IGNORE_COUNT_OPT, THREAD_OPT, PENDING_OPT, DISABLE_OPT,
+      IGNORE_COUNT_OPT, THREAD_OPT, THREAD_GROUP_OPT,
+      PENDING_OPT, DISABLE_OPT,
       TRACEPOINT_OPT,
       FORCE_CONDITION_OPT,
       QUALIFIED_OPT,
@@ -205,6 +207,7 @@ mi_cmd_break_insert_1 (int dprintf, const char *command,
     {"c", CONDITION_OPT, 1},
     {"i", IGNORE_COUNT_OPT, 1},
     {"p", THREAD_OPT, 1},
+    {"g", THREAD_GROUP_OPT, 1},
     {"f", PENDING_OPT, 0},
     {"d", DISABLE_OPT, 0},
     {"a", TRACEPOINT_OPT, 0},
@@ -246,6 +249,9 @@ mi_cmd_break_insert_1 (int dprintf, const char *command,
 	  thread = atol (oarg);
 	  if (!valid_global_thread_id (thread))
 	    error (_("Unknown thread %d."), thread);
+	  break;
+	case THREAD_GROUP_OPT:
+	  thread_group = mi_parse_thread_group_id (oarg);
 	  break;
 	case PENDING_OPT:
 	  pending = 1;
@@ -360,7 +366,8 @@ mi_cmd_break_insert_1 (int dprintf, const char *command,
 	error (_("Garbage '%s' at end of location"), address);
     }
 
-  create_breakpoint (get_current_arch (), locspec.get (), condition, thread,
+  create_breakpoint (get_current_arch (), locspec.get (), condition,
+		     thread, thread_group,
 		     extra_string.c_str (),
 		     force_condition,
 		     0 /* condition and thread are valid.  */,

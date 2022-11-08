@@ -75,4 +75,10 @@ extern void mi_cmd_fix_breakpoint_script_output (const char *command,
 						 const char *const *argv,
 						 int argc);
 
+/* Parse a thread-group-id from ID, and return the integer part of the
+   ID.  A valid thread-group-id is the character 'i' followed by an
+   integer that is greater than zero.  */
+
+extern int mi_parse_thread_group_id (const char *id);
+
 #endif /* MI_MI_MAIN_H */

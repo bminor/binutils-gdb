@@ -288,7 +288,82 @@ bppy_set_thread (PyObject *self, PyObject *newvalue, void *closure)
       return -1;
     }
 
+  if (self_bp->bp->inferior != -1 && id != -1)
+    {
+      PyErr_SetString (PyExc_RuntimeError,
+		       _("Cannot have both 'thread' and 'inferior' "
+			 "conditions on a breakpoint"));
+      return -1;
+    }
+
   breakpoint_set_thread (self_bp->bp, id);
+
+  return 0;
+}
+
+/* Python function to set the inferior of a breakpoint.  */
+
+static int
+bppy_set_inferior (PyObject *self, PyObject *newvalue, void *closure)
+{
+  gdbpy_breakpoint_object *self_bp = (gdbpy_breakpoint_object *) self;
+  long id;
+
+  BPPY_SET_REQUIRE_VALID (self_bp);
+
+  if (newvalue == NULL)
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("Cannot delete 'inferior' attribute."));
+      return -1;
+    }
+  else if (PyLong_Check (newvalue))
+    {
+      if (!gdb_py_int_as_long (newvalue, &id))
+	return -1;
+
+      if (!valid_global_inferior_id (id))
+	{
+	  PyErr_SetString (PyExc_RuntimeError,
+			   _("Invalid inferior ID."));
+	  return -1;
+	}
+    }
+  else if (newvalue == Py_None)
+    id = -1;
+  else
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("The value of 'inferior' must be an integer or None."));
+      return -1;
+    }
+
+  if (self_bp->bp->type != bp_breakpoint
+      && self_bp->bp->type != bp_hardware_breakpoint)
+    {
+      PyErr_SetString (PyExc_RuntimeError,
+		       _("Cannot set 'inferior' attribute on a gdb.Breakpoint "
+			 "of this type"));
+      return -1;
+    }
+
+  if (self_bp->bp->thread != -1 && id != -1)
+    {
+      PyErr_SetString (PyExc_RuntimeError,
+		       _("Cannot have both 'thread' and 'inferior' conditions "
+			 "on a breakpoint"));
+      return -1;
+    }
+
+  if (self_bp->bp->task != -1 && id != -1)
+    {
+      PyErr_SetString (PyExc_RuntimeError,
+		       _("Cannot have both 'task' and 'inferior' conditions "
+			 "on a breakpoint"));
+      return -1;
+    }
+
+  breakpoint_set_inferior (self_bp->bp, id);
 
   return 0;
 }
@@ -704,6 +779,20 @@ bppy_get_thread (PyObject *self, void *closure)
   return gdb_py_object_from_longest (self_bp->bp->thread).release ();
 }
 
+/* Python function to get the breakpoint's inferior ID.  */
+static PyObject *
+bppy_get_inferior (PyObject *self, void *closure)
+{
+  gdbpy_breakpoint_object *self_bp = (gdbpy_breakpoint_object *) self;
+
+  BPPY_REQUIRE_VALID (self_bp);
+
+  if (self_bp->bp->inferior == -1)
+    Py_RETURN_NONE;
+
+  return gdb_py_object_from_longest (self_bp->bp->inferior).release ();
+}
+
 /* Python function to get the breakpoint's task ID (in Ada).  */
 static PyObject *
 bppy_get_task (PyObject *self, void *closure)
@@ -942,7 +1031,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	      = breakpoint_ops_for_location_spec (locspec.get (), false);
 
 	    create_breakpoint (gdbpy_enter::get_gdbarch (),
-			       locspec.get (), NULL, -1, NULL, false,
+			       locspec.get (), NULL, -1, -1, NULL, false,
 			       0,
 			       temporary_bp, type,
 			       0,
@@ -1376,6 +1465,11 @@ static gdb_PyGetSetDef breakpoint_object_getset[] = {
 If the value is a thread ID (integer), then this is a thread-specific breakpoint.\n\
 If the value is None, then this breakpoint is not thread-specific.\n\
 No other type of value can be used.", NULL },
+  { "inferior", bppy_get_inferior, bppy_set_inferior,
+    "Inferior ID for the breakpoint.\n\
+If the value is an inferior ID (integer), then this is an inferior-specific\n\
+breakpoint.  If the value is None, then this breakpoint is not\n\
+inferior-specific.  No other type of value can be used.", NULL },
   { "task", bppy_get_task, bppy_set_task,
     "Thread ID for the breakpoint.\n\
 If the value is a task ID (integer), then this is an Ada task-specific breakpoint.\n\

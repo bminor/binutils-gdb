@@ -412,6 +412,7 @@ namespace eval $testfile {
 	    "-qualified"
 	    "-source"
 	    "if"
+	    "inferior"
 	    "task"
 	    "thread"
 	}

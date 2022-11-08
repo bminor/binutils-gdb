@@ -465,7 +465,7 @@ gdbscm_register_breakpoint_x (SCM self)
 	    const breakpoint_ops *ops =
 	      breakpoint_ops_for_location_spec (locspec.get (), false);
 	    create_breakpoint (get_current_arch (),
-			       locspec.get (), NULL, -1, NULL, false,
+			       locspec.get (), NULL, -1, -1, NULL, false,
 			       0,
 			       temporary, bp_breakpoint,
 			       0,
@@ -783,6 +783,11 @@ gdbscm_set_breakpoint_thread_x (SCM self, SCM newvalue)
     id = -1;
   else
     SCM_ASSERT_TYPE (0, newvalue, SCM_ARG2, FUNC_NAME, _("integer or #f"));
+
+  if (bp_smob->bp->inferior != -1 && id != -1)
+    scm_misc_error (FUNC_NAME,
+		    _("Cannot have both 'thread' and 'inferior' "
+		      "conditions on a breakpoint"), SCM_EOL);
 
   breakpoint_set_thread (bp_smob->bp, id);
 

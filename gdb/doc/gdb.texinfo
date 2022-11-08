@@ -3517,6 +3517,57 @@ Here, both inferior 2 and inferior 1 are running in the same program
 space as a result of inferior 1 having executed a @code{vfork} call.
 @end table
 
+@menu
+* Inferior-Specific Breakpoints::	Controlling breakpoints
+@end menu
+
+@node Inferior-Specific Breakpoints
+@subsection Inferior-Specific Breakpoints
+
+When debugging multiple inferiors, you can choose whether to set
+breakpoints for all inferiors, or for a particular inferior.
+
+@table @code
+@cindex breakpoints and inferiors
+@cindex inferior-specific breakpoints
+@kindex break @dots{} inferior @var{inferior-id}
+@item break @var{locspec} inferior @var{inferior-id}
+@itemx break @var{locspec} inferior @var{inferior-id} if @dots{}
+@var{locspec} specifies a code location or locations in your program.
+@xref{Location Specifications}, for details.
+
+Use the qualifier @samp{inferior @var{inferior-id}} with a breakpoint
+command to specify that you only want @value{GDBN} to stop when a
+particular inferior reaches this breakpoint.  The @var{inferior-id}
+specifier is one of the inferior identifiers assigned by @value{GDBN},
+shown in the first column of the @samp{info inferiors} output.
+
+If you do not specify @samp{inferior @var{inferior-id}} when you set a
+breakpoint, the breakpoint applies to @emph{all} inferiors of your
+program.
+
+You can use the @code{inferior} qualifier on conditional breakpoints as
+well; in this case, place @samp{inferior @var{inferior-id}} before or
+after the breakpoint condition, like this:
+
+@smallexample
+(@value{GDBP}) break frik.c:13 inferior 2 if bartab > lim
+@end smallexample
+@end table
+
+Inferior-specific breakpoints are automatically deleted when the
+corresponding inferior is removed from @value{GDBN}.  For example:
+
+@smallexample
+(@value{GDBP}) remove-inferiors 2
+Inferior-specific breakpoint 3 deleted - inferior 2 has been removed.
+@end smallexample
+
+A breakpoint can't be both inferior-specific and thread-specific
+(@pxref{Thread-Specific Breakpoints}), or task-specific (@pxref{Ada
+Tasks}); using more than one of the @code{inferior}, @code{thread}, or
+@code{task} keywords when creating a breakpoint will give an error.
+
 @node Threads
 @section Debugging Programs with Multiple Threads
 
@@ -4480,8 +4531,9 @@ Expressions,,Ambiguous Expressions}, for a discussion of that
 situation.
 
 It is also possible to insert a breakpoint that will stop the program
-only if a specific thread (@pxref{Thread-Specific Breakpoints})
-or a specific task (@pxref{Ada Tasks}) hits that breakpoint.
+only if a specific thread (@pxref{Thread-Specific Breakpoints}),
+specific inferior (@pxref{Inferior-Specific Breakpoints}), or a
+specific task (@pxref{Ada Tasks}) hits that breakpoint.
 
 @item break
 When called without any arguments, @code{break} sets a breakpoint at
@@ -7344,8 +7396,13 @@ thread exit, but also when you detach from the process with the
 Process}), or if @value{GDBN} loses the remote connection
 (@pxref{Remote Debugging}), etc.  Note that with some targets,
 @value{GDBN} is only able to detect a thread has exited when the user
-explictly asks for the thread list with the @code{info threads}
+explicitly asks for the thread list with the @code{info threads}
 command.
+
+A breakpoint can't be both thread-specific and inferior-specific
+(@pxref{Inferior-Specific Breakpoints}), or task-specific (@pxref{Ada
+Tasks}); using more than one of the @code{thread}, @code{inferior}, or
+@code{task} keywords when creating a breakpoint will give an error.
 
 @node Interrupted System Calls
 @subsection Interrupted System Calls 
@@ -31630,6 +31687,10 @@ Where this breakpoint's condition is evaluated, either @samp{host} or
 If this is a thread-specific breakpoint, then this identifies the
 thread in which the breakpoint can trigger.
 
+@item inferior
+If this is an inferior-specific breakpoint, this this identifies the
+inferior in which the breakpoint can trigger.
+
 @item task
 If this breakpoint is restricted to a particular Ada task, then this
 field will hold the task identifier.
@@ -32221,7 +32282,7 @@ N.A.
 @smallexample
  -break-insert [ -t ] [ -h ] [ -f ] [ -d ] [ -a ] [ --qualified ]
     [ -c @var{condition} ] [ --force-condition ] [ -i @var{ignore-count} ]
-    [ -p @var{thread-id} ] [ @var{locspec} ]
+    [ -p @var{thread-id} ] [ -g @var{thread-group-id} ] [ @var{locspec} ]
 @end smallexample
 
 @noindent
@@ -32287,6 +32348,9 @@ Restrict the breakpoint to the thread with the specified global
 time the breakpoint is requested.  Breakpoints created with a
 @var{thread-id} will automatically be deleted when the corresponding
 thread exits.
+@item -g @var{thread-group-id}
+Restrict the breakpoint to the thread group with the specified
+@var{thread-group-id}.
 @item --qualified
 This option makes @value{GDBN} interpret a function name specified as
 a complete fully-qualified name.
