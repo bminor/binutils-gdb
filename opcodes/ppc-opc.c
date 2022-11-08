@@ -3704,6 +3704,8 @@ const struct powerpc_operand powerpc_operands[] =
 #define BO16 PSWM
   /* The pst field in a SVRM form instruction.  */
 #define pst PSWM
+  /* The L field in a XO form instruction.  */
+#define XOL PSWM
   {  0x1, 10, 0, 0, 0 },
 
   /* IDX bits for quantization in the pair singles instructions.  */
@@ -4775,6 +4777,7 @@ const unsigned int num_powerpc_operands = ARRAY_SIZE (powerpc_operands);
    | ((((uint64_t)(oe)) & 1) << 10)	\
    | (((unsigned long)(rc)) & 1))
 #define XO_MASK XO (0x3f, 0x1ff, 1, 1)
+#define XOL_MASK XO (0x3f, 0x1ff, 0, 1)
 
 /* An XO_MASK with the RB field fixed.  */
 #define XORB_MASK (XO_MASK | RB_MASK)
@@ -7212,6 +7215,12 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"td",		X(31,68),	X_MASK,	     PPC64,	0,		{TO, RA, RB}},
 
 {"lwfcmx",	APU(31,71,0),	APU_MASK,    PPC405,	0,		{FCRT, RA, RB}},
+{"subwus",	XO(31,72,0,0),	XO_MASK,     FUTURE,	EXT,		{RT, RB, RA}},
+{"subwus.",	XO(31,72,0,1),	XO_MASK,     FUTURE,	EXT,		{RT, RB, RA}},
+{"subdus",	XO(31,72,1,0),	XO_MASK,     FUTURE,	EXT,		{RT, RB, RA}},
+{"subdus.",	XO(31,72,1,1),	XO_MASK,     FUTURE,	EXT,		{RT, RB, RA}},
+{"subfus",	XO(31,72,0,0),	XOL_MASK,    FUTURE,	0,		{RT, XOL, RA, RB}},
+{"subfus.",	XO(31,72,0,1),	XOL_MASK,    FUTURE,	0,		{RT, XOL, RA, RB}},
 {"mulhd",	XO(31,73,0,0),	XO_MASK,     PPC64,	0,		{RT, RA, RB}},
 {"mulhd.",	XO(31,73,0,1),	XO_MASK,     PPC64,	0,		{RT, RA, RB}},
 
