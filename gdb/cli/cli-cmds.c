@@ -488,7 +488,20 @@ quit_command (const char *args, int from_tty)
   if (!quit_confirm ())
     error (_("Not confirmed."));
 
-  query_if_trace_running (from_tty);
+  try
+    {
+      query_if_trace_running (from_tty);
+    }
+  catch (const gdb_exception_error &ex)
+    {
+      if (ex.error == TARGET_CLOSE_ERROR)
+	/* We don't care about this since we're quitting anyway, so keep
+	   quitting.  */
+	exception_print (gdb_stderr, ex);
+      else
+	/* Rethrow, to properly handle error (_("Not confirmed.")).  */
+	throw;
+    }
 
   quit_force (args ? &exit_code : NULL, from_tty);
 }
