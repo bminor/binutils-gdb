@@ -2332,7 +2332,7 @@ extract_xc6 (uint64_t insn,
   return ((insn << 2) & 0x20) | ((insn >> 6) & 0x1f);
 }
 
-/* The split XTp field in a vector paired insn.  */
+/* The split XTp and XSp field in a vector paired insn.  */
 
 static uint64_t
 insert_xtp (uint64_t insn,
@@ -3822,8 +3822,9 @@ const struct powerpc_operand powerpc_operands[] =
 #define XTQ6 XSQ6
   { 0x3f, PPC_OPSHIFT_INV, insert_xtq6, extract_xtq6, PPC_OPERAND_VSR },
 
-  /* The split XTp field in a vector paired instruction.  */
+  /* The split XTp and XSp field in a vector paired instruction.  */
 #define XTP XSQ6 + 1
+#define XSP XTP
   { 0x3e, PPC_OPSHIFT_INV, insert_xtp, extract_xtp, PPC_OPERAND_VSR },
 
 #define XTS XTP + 1
@@ -6024,7 +6025,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"dcbz_l",	X  (4,1014),	XRT_MASK,    PPCPS,	0,		{RA, RB}},
 
 {"lxvp",	DQXP(6,0),	DQXP_MASK,   POWER10,	PPCVLE,		{XTP, DQ, RA0}},
-{"stxvp",	DQXP(6,1),	DQXP_MASK,   POWER10,	PPCVLE,		{XTP, DQ, RA0}},
+{"stxvp",	DQXP(6,1),	DQXP_MASK,   POWER10,	PPCVLE,		{XSP, DQ, RA0}},
 
 {"mulli",	OP(7),		OP_MASK,     PPCCOM,	PPCVLE,		{RT, RA, SI}},
 {"muli",	OP(7),		OP_MASK,     PWRCOM,	PPCVLE,		{RT, RA, SI}},
@@ -8080,7 +8081,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"divwu",	XO(31,459,0,0),	XO_MASK,     PPC,	0,		{RT, RA, RB}},
 {"divwu.",	XO(31,459,0,1),	XO_MASK,     PPC,	0,		{RT, RA, RB}},
 
-{"stxvpx",	X(31,461),	XX1_MASK,    POWER10,	0,		{XTP, RA0, RB}},
+{"stxvpx",	X(31,461),	XX1_MASK,    POWER10,	0,		{XSP, RA0, RB}},
 
 {"mtpmr",	X(31,462),	X_MASK, PPCPMR|PPCE300, 0,		{PMR, RS}},
 {"mttmr",	X(31,494),	X_MASK,	     PPCTMR,	0,		{TMR, RS}},
@@ -9854,7 +9855,7 @@ const struct powerpc_opcode prefix_opcodes[] = {
 {"pmxvf64gernn",  PMMIRR|XX3(59,250),  P_GER64_MASK,	POWER10, 0,	{ACC, XA6ap, XB6a, XMSK, YMSK2}},
 {"pstq",	  P8LS|OP(60),	       P_D_MASK,	POWER10, 0,	{RSQ, D34, PRA0, PCREL}},
 {"pstd",	  P8LS|OP(61),	       P_D_MASK,	POWER10, 0,	{RS, D34, PRA0, PCREL}},
-{"pstxvp",	  P8LS|OP(62),	       P_D_MASK,	POWER10, 0,	{XTP, D34, PRA0, PCREL}},
+{"pstxvp",	  P8LS|OP(62),	       P_D_MASK,	POWER10, 0,	{XSP, D34, PRA0, PCREL}},
 };
 
 const unsigned int prefix_num_opcodes = ARRAY_SIZE (prefix_opcodes);
