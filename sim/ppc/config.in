@@ -56,8 +56,3 @@
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
-
-/* Define if we should use the Windows API, instead of the POSIX API. On
-   Windows, we use the Windows API when building for MinGW, but the POSIX API
-   when building for Cygwin. */
-#undef USE_WIN32API

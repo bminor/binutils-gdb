@@ -3543,14 +3543,6 @@ else
 fi
 
 
-case ${host} in
-  *mingw32*)
-
-$as_echo "#define USE_WIN32API 1" >>confdefs.h
-
-    ;;
-esac
-
 ac_config_headers="$ac_config_headers config.h:config.in"
 
 
