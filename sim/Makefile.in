@@ -3469,6 +3469,16 @@ testsuite/common/bits64m63.c: testsuite/common/bits-gen$(EXEEXT) testsuite/commo
 @SIM_ENABLE_ARCH_ppc_TRUE@ppc/%.o: ppc/%.c | ppc/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
 @SIM_ENABLE_ARCH_ppc_TRUE@	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc/spreg.c: @MAINT@ ppc/ppc-spr-table ppc/spreg-gen.py ppc/$(am__dirstamp)
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_GEN)$(srcdir)/ppc/spreg-gen.py --source $@.tmp
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $@.tmp $(srcdir)/ppc/spreg.c
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)touch $(srcdir)/ppc/spreg.c
+
+@SIM_ENABLE_ARCH_ppc_TRUE@ppc/spreg.h: @MAINT@ ppc/ppc-spr-table ppc/spreg-gen.py ppc/$(am__dirstamp)
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_GEN)$(srcdir)/ppc/spreg-gen.py --header $@.tmp
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $@.tmp $(srcdir)/ppc/spreg.h
+@SIM_ENABLE_ARCH_ppc_TRUE@	$(AM_V_at)touch $(srcdir)/ppc/spreg.h
+
 @SIM_ENABLE_ARCH_rl78_TRUE@rl78/%.o: rl78/%.c | rl78/libsim.a $(SIM_ALL_RECURSIVE_DEPS)
 @SIM_ENABLE_ARCH_rl78_TRUE@	$(MAKE) $(AM_MAKEFLAGS) -C $(@D) $(@F)
 
