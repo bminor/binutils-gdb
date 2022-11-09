@@ -33,6 +33,12 @@ if {!(([istarget "i?86-*-*"]
     return
 }
 
+# Skip when -shared is not supported
+if { ![check_shared_lib_support] } {
+    verbose "Size relocation tests not run - shared support disabled"
+    return
+}
+
 # So as to avoid rewriting every last test case here in a nacl variant,
 # we use black magic to massage the generic cases into nacl-variant cases.
 if [istarget "*-*-nacl*"] {
