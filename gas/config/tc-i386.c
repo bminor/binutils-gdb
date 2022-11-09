@@ -4885,7 +4885,8 @@ md_assemble (char *line)
       && !startswith (mnemonic, "rmp")
       && (strcmp (mnemonic, "tpause") != 0)
       && (strcmp (mnemonic, "umwait") != 0)
-      && !(operand_type_check (i.types[0], imm)
+      && !(i.operands == 2
+	   && operand_type_check (i.types[0], imm)
 	   && operand_type_check (i.types[1], imm)))
     swap_operands ();
 

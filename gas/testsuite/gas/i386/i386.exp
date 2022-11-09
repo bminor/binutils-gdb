@@ -51,7 +51,7 @@ if [gas_32_check] then {
 
     run_list_test "float" "-al -mmnemonic=att"
     run_list_test "general" "-al --listing-lhs-width=2"
-    run_list_test "inval" "-al"
+    run_list_test "inval" "-aln"
     run_list_test "inval-16" "-al"
     run_list_test "segment" "-al"
     run_list_test "inval-seg" "-al"
