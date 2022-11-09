@@ -30,6 +30,20 @@
   This support requires that GDB be built with Python scripting
   enabled.
 
+* For the break command, multiple uses of the 'thread' or 'task'
+  keywords will now give an error instead of just using the thread or
+  task id from the last instance of the keyword.  E.g.:
+    break foo thread 1 thread 2
+  will now give an error rather than using 'thread 2'.
+
+* For the watch command, multiple uses of the 'task' keyword will now
+  give an error instead of just using the task id from the last
+  instance of the keyword.  E.g.:
+    watch my_var task 1 task 2
+  will now give an error rather than using 'task 2'.  The 'thread'
+  keyword already gave an error when used multiple times with the
+  watch command, this remains unchanged.
+
 * New commands
 
 maintenance print record-instruction [ N ]

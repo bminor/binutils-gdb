@@ -8797,6 +8797,9 @@ find_condition_and_thread (const char *tok, CORE_ADDR pc,
 	  const char *tmptok;
 	  struct thread_info *thr;
 
+	  if (*thread != -1)
+	    error(_("You can specify only one thread."));
+
 	  tok = end_tok + 1;
 	  thr = parse_thread_id (tok, &tmptok);
 	  if (tok == tmptok)
@@ -8807,6 +8810,9 @@ find_condition_and_thread (const char *tok, CORE_ADDR pc,
       else if (toklen >= 1 && strncmp (tok, "task", toklen) == 0)
 	{
 	  char *tmptok;
+
+	  if (*task != 0)
+	    error(_("You can specify only one task."));
 
 	  tok = end_tok + 1;
 	  *task = strtol (tok, &tmptok, 0);
@@ -10089,6 +10095,9 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	  else if (toklen == 4 && startswith (tok, "task"))
 	    {
 	      char *tmp;
+
+	      if (task != 0)
+		error(_("You can specify only one task."));
 
 	      task = strtol (value_start, &tmp, 0);
 	      if (tmp == value_start)

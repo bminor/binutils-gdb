@@ -63,6 +63,10 @@ proc check_thread_specific_breakpoint {non_stop} {
 	return -1
     }
 
+    # Check that multiple uses of 'thread' keyword give an error.
+    gdb_test "break main thread $start_thre thread $main_thre" \
+	"You can specify only one thread\\."
+
     # Set a thread-specific breakpoint at "main".  This can't ever
     # be hit, but that's OK.
     gdb_breakpoint "main thread $start_thre"
