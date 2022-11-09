@@ -30,5 +30,15 @@
 
 noinst_PROGRAMS += %D%/run %D%/psim
 
+%D%/spreg.c: @MAINT@ %D%/ppc-spr-table %D%/dgen.py %D%/$(am__dirstamp)
+	$(AM_V_GEN)$(srcdir)/%D%/dgen.py --source $@.tmp
+	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $@.tmp $(srcdir)/%D%/spreg.c
+	$(AM_V_at)touch $(srcdir)/%D%/spreg.c
+
+%D%/spreg.h: @MAINT@ %D%/ppc-spr-table %D%/dgen.py %D%/$(am__dirstamp)
+	$(AM_V_GEN)$(srcdir)/%D%/dgen.py --header $@.tmp
+	$(AM_V_at)$(SHELL) $(srcroot)/move-if-change $@.tmp $(srcdir)/%D%/spreg.h
+	$(AM_V_at)touch $(srcdir)/%D%/spreg.h
+
 %C%docdir = $(docdir)/%C%
 %C%doc_DATA = %D%/BUGS %D%/INSTALL %D%/README %D%/RUN
