@@ -105,6 +105,6 @@ typedef struct {
 
 /* Shorthand macro for fetching registers.
    CPU_CGEN_HW is defined in cpu.h.  */
-#define CPU(x) (CPU_CGEN_HW (current_cpu)->x)
+//#define CPU(x) (CPU_CGEN_HW (current_cpu)->x)
 
 #endif /* CGEN_CPU_H */

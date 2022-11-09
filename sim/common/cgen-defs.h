@@ -20,6 +20,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef CGEN_DEFS_H
 #define CGEN_DEFS_H
 
+#include "opcode/cgen.h"
+#include "cgen-types.h"
+
 /* Compute number of longs required to hold N bits.  */
 #define HOST_LONGS_FOR_BITS(n) \
   (((n) + sizeof (long) * 8 - 1) / sizeof (long) * 8)

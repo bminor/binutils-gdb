@@ -20,6 +20,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef CGEN_SCACHE_H
 #define CGEN_SCACHE_H
 
+#include "cgen-types.h"
+
 /* When caching bb's, instructions are extracted into "chains".
    SCACHE_MAP is a hash table into these chains.  */
 
