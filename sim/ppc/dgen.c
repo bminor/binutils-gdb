@@ -238,14 +238,22 @@ gen_spreg_c(spreg_table *table, lf *file)
       spreg_table_entry *entry;
       lf_printf(file, "  switch (spr) {\n");
       for (entry = table->sprs; entry != NULL; entry = entry->next) {
-	lf_printf(file, "  case %d:\n", entry->spreg_nr);
-	if (strcmp(*attribute, "is_valid") == 0)
+	if (strcmp(*attribute, "is_valid") == 0) {
+	  lf_printf(file, "  case %d:\n", entry->spreg_nr);
 	  /* No return -- see below.  */;
-	else if (strcmp(*attribute, "is_readonly") == 0)
-	  lf_printf(file, "    return %d;\n", entry->is_readonly);
-	else if (strcmp(*attribute, "length") == 0)
-	  lf_printf(file, "    return %d;\n", entry->length);
-	else
+	} else if (strcmp(*attribute, "is_readonly") == 0) {
+	  /* Since we return 0 by default, only output non-zero entries.  */
+	  if (entry->is_readonly) {
+	    lf_printf(file, "  case %d:\n", entry->spreg_nr);
+	    lf_printf(file, "    return %d;\n", entry->is_readonly);
+	  }
+	} else if (strcmp(*attribute, "length") == 0) {
+	  /* Since we return 0 by default, only output non-zero entries.  */
+	  if (entry->length) {
+	    lf_printf(file, "  case %d:\n", entry->spreg_nr);
+	    lf_printf(file, "    return %d;\n", entry->length);
+	  }
+	} else
 	  ASSERT(0);
       }
       /* Output a single return for is_valid.  */
