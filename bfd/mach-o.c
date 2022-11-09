@@ -1663,7 +1663,10 @@ bfd_mach_o_canonicalize_reloc (bfd *abfd, asection *asect,
       size_t amt;
 
       if (_bfd_mul_overflow (asect->reloc_count, sizeof (arelent), &amt))
-	return -1;
+	{
+	  bfd_set_error (bfd_error_file_too_big);
+	  return -1;
+	}
       res = bfd_malloc (amt);
       if (res == NULL)
 	return -1;
