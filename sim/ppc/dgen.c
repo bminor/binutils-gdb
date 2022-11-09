@@ -196,14 +196,14 @@ gen_spreg_c(spreg_table *table, lf *file)
 
   lf_printf(file, "\n");
   lf_printf(file, "typedef struct _spreg_info {\n");
-  lf_printf(file, "  char *name;\n");
+  lf_printf(file, "  const char *name;\n");
   lf_printf(file, "  int is_valid;\n");
   lf_printf(file, "  int length;\n");
   lf_printf(file, "  int is_readonly;\n");
   lf_printf(file, "  int index;\n");
   lf_printf(file, "} spreg_info;\n");
   lf_printf(file, "\n");
-  lf_printf(file, "static spreg_info spr_info[nr_of_sprs+1] = {\n");
+  lf_printf(file, "static const spreg_info spr_info[nr_of_sprs+1] = {\n");
   entry = table->sprs;
   for (spreg_nr = 0; spreg_nr < nr_of_sprs+1; spreg_nr++) {
     if (entry == NULL || spreg_nr < entry->spreg_nr)
