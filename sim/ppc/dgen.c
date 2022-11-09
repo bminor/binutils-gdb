@@ -248,9 +248,8 @@ gen_spreg_c(spreg_table *table, lf *file)
 	else
 	  ASSERT(0);
       }
-      lf_printf(file, "  default:\n");
-      lf_printf(file, "    return 0;\n");
       lf_printf(file, "  }\n");
+      lf_printf(file, "  return 0;\n");
     }
     lf_printf(file, "}\n");
   }
