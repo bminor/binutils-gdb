@@ -101,7 +101,6 @@ IGEN_FILTER = @sim_filter@
 IGEN_ICACHE = @sim_icache@
 IGEN_SMP = @sim_igen_smp@
 IGEN_LINE_NR = @sim_line_nr@
-DGEN_FLAGS =
 
 IGEN_FLAGS = \
 	$(IGEN_DECODE_MECHANISM) \
@@ -112,11 +111,10 @@ IGEN_FLAGS = \
 	$(IGEN_SMP) \
 	$(IGEN_LINE_NR)
 
-# igen/dgen leak memory, and therefore makes AddressSanitizer unhappy.  Disable
-# leak detection while running them.
+# igen leaks memory, and therefore makes AddressSanitizer unhappy.  Disable
+# leak detection while running it.
 
 IGEN = ASAN_OPTIONS=detect_leaks=0 ./igen
-DGEN = ASAN_OPTIONS=detect_leaks=0 ./dgen
 
 .NOEXPORT:
 MAKEOVERRIDES=
@@ -416,7 +414,6 @@ BUILT_SRC_WO_CONFIG = \
 	idecode.h idecode.c \
 	semantics.h semantics.c \
 	itable.h itable.c \
-	spreg.h spreg.c \
 	model.h model.c \
 	support.h support.c \
 	pk.h \
@@ -516,7 +513,7 @@ PACKAGE_SRC = pk_disklabel.c
 PACKAGE_OBJ = $(PACKAGE_SRC:.c=.o)
 
 
-$(TARGETLIB): tmp-igen tmp-dgen tmp-hw tmp-defines $(LIB_OBJ) $(GDB_OBJ)
+$(TARGETLIB): tmp-igen tmp-hw tmp-defines $(LIB_OBJ) $(GDB_OBJ)
 	$(ECHO_AR) $(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
 	$(ECHO_RANLIB) $(RANLIB) $(TARGETLIB)
 
@@ -588,7 +585,7 @@ sim-fpu.o: $(srcdir)/../common/sim-fpu.c $(CONFIG_H)
 
 # Rebuild options whenever something changes so the date/time is up to date.
 options.o: options.c $(CPU_H) $(OPTIONS_H) $(DEFINES_H) $(BASICS_H) $(IDECODE_H) $(INLINE) $(LIB_SRC) $(BUILT_SRC) config.status Makefile
-	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' '-DDGEN_FLAGS="$(DGEN_FLAGS)"' $(srcdir)/options.c
+	$(ECHO_CC) $(CC) -c $(STD_CFLAGS) '-DOPCODE_RULES="@sim_opcode@"' '-DIGEN_FLAGS="$(IGEN_FLAGS)"' $(srcdir)/options.c
 
 defines.h: tmp-defines; @true
 tmp-defines: config.h Makefile
@@ -599,15 +596,6 @@ tmp-defines: config.h Makefile
 #
 # Rules to create the built c source code files
 #
-
-tmp-dgen: dgen ppc-spr-table $(srcroot)/move-if-change
-	$(ECHO_GEN) $(DGEN) $(DGEN_FLAGS) \
-		-r $(srcdir)/ppc-spr-table \
-		-n spreg.h -hp tmp-spreg.h \
-		-n spreg.c -p  tmp-spreg.c
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-spreg.h spreg.h
-	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-spreg.c spreg.c
-	$(SILENCE) touch $@
 
 tmp-igen: igen $(srcdir)/powerpc.igen $(srcdir)/altivec.igen $(srcdir)/e500.igen $(IGEN_OPCODE_RULES) $(srcroot)/move-if-change
 	$(ECHO_GEN) $(IGEN) $(IGEN_FLAGS) \
@@ -642,12 +630,8 @@ tmp-igen: igen $(srcdir)/powerpc.igen $(srcdir)/altivec.igen $(srcdir)/e500.igen
 # NOTE: Some versions of make don't handle files created as side-effects
 # uncomment the below if that is the case.
 
-$(TARGETLIB): tmp-igen tmp-dgen
+$(TARGETLIB): tmp-igen
 itable.h itable.c icache.h icache.c idecode.h idecode.c semantics.h semantics.c model.h model.c support.h support.c: tmp-igen
-spreg.h spreg.c: tmp-dgen
-
-dgen: dgen.o table.o lf.o misc.o filter_host.o
-	$(ECHO_CCLD) $(LINK_FOR_BUILD) dgen.o table.o lf.o misc.o filter_host.o
 
 igen: igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o ld-insn.o gen-model.o gen-itable.o gen-icache.o gen-semantics.o gen-idecode.o gen-support.o
 	$(ECHO_CCLD) $(LINK_FOR_BUILD) igen.o table.o lf.o misc.o filter_host.o ld-decode.o ld-cache.o filter.o ld-insn.o gen-model.o gen-itable.o gen-icache.o gen-semantics.o gen-idecode.o gen-support.o
@@ -701,9 +685,6 @@ gen-idecode.o: gen-idecode.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECOD
 
 gen-support.o: gen-support.c $(MISC_H) $(LF_H) $(TABLE_H) $(FILTER_H) $(LD_DECODE_H) $(LD_CACHE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_SEMANTICS_H) $(GEN_SUPPORT_H)
 	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/gen-support.c
-
-dgen.o: dgen.c $(CONFIG_H) $(MISC_H) $(LF_H) $(TABLE_H)
-	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/dgen.c
 
 igen.o: igen.c $(MISC_H) $(LF_H) $(TABLE_H) $(CONFIG_H) $(FILTER_H) $(LD_CACHE_H) $(LD_DECODE_H) $(LD_INSN_H) $(IGEN_H) $(GEN_MODEL_H) $(GEN_ICACHE_H) $(GEN_ITABLE_H) $(GEN_IDECODE_H) $(GEN_SEMANTICS_H) $(GEN_SUPPORT_H)
 	$(ECHO_CC) $(COMPILE_FOR_BUILD) -c $(srcdir)/igen.c
@@ -801,7 +782,7 @@ TAGS: $(BUILT_SRC)
 	etags $(srcdir)/*.h $(srcdir)/*.c $(BUILT_SRC)
 
 clean mostlyclean:
-	rm -f tmp-* *.[oasi] core igen dgen $(BUILT_SRC_WO_CONFIG)
+	rm -f tmp-* *.[oasi] core igen $(BUILT_SRC_WO_CONFIG)
 
 distclean realclean: clean
 	rm -f TAGS Makefile config.cache config.status config.h defines.h stamp-h config.log
