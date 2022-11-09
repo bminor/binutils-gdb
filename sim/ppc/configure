@@ -3498,7 +3498,7 @@ fi
 # Check whether --enable-sim-switch was given.
 if test "${enable_sim_switch+set}" = set; then :
   enableval=$enable_sim_switch; case "${enableval}" in
-  yes)	sim_switch="-s";;
+  yes)	sim_switch="-DWITH_SPREG_SWITCH_TABLE";;
   no)	sim_switch="";;
   *)	as_fn_error $? "\"--enable-sim-switch does not take a value\"" "$LINENO" 5; sim_switch="";;
 esac
