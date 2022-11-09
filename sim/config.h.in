@@ -135,8 +135,14 @@
 /* Define to 1 if you have the `lseek' function. */
 #undef HAVE_LSEEK
 
+/* Define to 1 if you have the `lstat' function. */
+#undef HAVE_LSTAT
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
+
+/* Define to 1 if you have the `mkdir' function. */
+#undef HAVE_MKDIR
 
 /* Define to 1 if you have the `mmap' function. */
 #undef HAVE_MMAP

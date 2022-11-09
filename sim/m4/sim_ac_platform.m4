@@ -79,6 +79,8 @@ AC_CHECK_FUNCS_ONCE(m4_flatten([
   kill
   link
   lseek
+  lstat
+  mkdir
   mmap
   munmap
   pipe
