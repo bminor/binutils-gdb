@@ -607,7 +607,7 @@ tmp-dgen: dgen ppc-spr-table $(srcroot)/move-if-change
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-spreg.c spreg.c
 	$(SILENCE) touch $@
 
-tmp-igen: igen $(srcdir)/ppc-instructions $(srcdir)/altivec.igen $(srcdir)/e500.igen $(IGEN_OPCODE_RULES) $(srcroot)/move-if-change tmp-ld-decode tmp-ld-cache tmp-ld-insn tmp-filter
+tmp-igen: igen $(srcdir)/ppc-instructions $(srcdir)/altivec.igen $(srcdir)/e500.igen $(IGEN_OPCODE_RULES) $(srcroot)/move-if-change
 	$(ECHO_GEN) $(IGEN) $(IGEN_FLAGS) \
 		-o $(srcdir)/$(IGEN_OPCODE_RULES) \
 		-I $(srcdir) -i $(srcdir)/ppc-instructions \
