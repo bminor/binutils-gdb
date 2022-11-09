@@ -292,10 +292,9 @@ main(int argc,
     printf("-n <file-name>  Use this as cpp line numbering name\n");
     printf("-h  Output header file\n");
     printf("-p <spreg-file>  Output spreg.h(P) or spreg.c(p)\n");
-    printf("-L  Suppress cpp line numbering in output files\n");
   }
 
-  while ((ch = getopt_long (argc, argv, "hLsn:r:p:", longopts, NULL))
+  while ((ch = getopt_long (argc, argv, "hsn:r:p:", longopts, NULL))
 	 != -1)
   {
 #if 0  /* For debugging.  */
@@ -310,9 +309,6 @@ main(int argc,
       break;
     case 'n':
       real_file_name = strdup(optarg);
-      break;
-    case 'L':
-      file_references = lf_omit_references;
       break;
     case 'h':
       is_header = 1;
