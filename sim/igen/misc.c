@@ -246,7 +246,7 @@ name2i (const char *names, const name_map * map)
   if (curr->i >= 0)
     return curr->i;
   else
-    error (NULL, "%s contains no valid names", names);
+    error (NULL, "%s contains no valid names\n", names);
   return 0;
 }
 

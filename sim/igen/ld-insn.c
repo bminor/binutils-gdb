@@ -914,7 +914,7 @@ static table_entry *
 parse_macro_record (table *file, table_entry *record)
 {
 #if 1
-  error (record->line, "Macros are not implemented");
+  error (record->line, "Macros are not implemented\n");
 #else
   /* parse the define record */
   if (record->nr_fields < nr_define_fields)

@@ -180,7 +180,7 @@ support_c_function (lf *file, function_entry * function, void *data)
   lf_printf (file, "{\n");
   lf_indent (file, +2);
   if (function->code == NULL)
-    error (function->line, "Function without body (or null statement)");
+    error (function->line, "Function without body (or null statement)\n");
   lf_print__line_ref (file, function->code->line);
   table_print_code (file, function->code);
   if (function->is_internal)

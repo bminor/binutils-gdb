@@ -987,7 +987,7 @@ gen_entry_expand_opcode (gen_entry *table,
 				}
 			      if (bit == NULL && t == NULL)
 				error (instruction->line,
-				       "Conditional `%s' of field `%s' isn't expanded",
+				       "Conditional `%s' of field `%s' isn't expanded\n",
 				       condition->string, field->val_string);
 			      switch (condition->test)
 				{

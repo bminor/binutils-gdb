@@ -64,7 +64,7 @@ do { \
   line_ref line; \
   line.file_name = filter_filename (__FILE__); \
   line.line_nr = __LINE__; \
-  error (&line, EXPRESSION); \
+  error (&line, EXPRESSION "\n"); \
 } while (0)
 
 #define ASSERT(EXPRESSION) \
@@ -73,7 +73,7 @@ do { \
     line_ref line; \
     line.file_name = filter_filename (__FILE__); \
     line.line_nr = __LINE__; \
-    error(&line, "assertion failed - %s\n", #EXPRESSION); \
+    error (&line, "assertion failed - %s\n", #EXPRESSION); \
   } \
 } while (0)
 
