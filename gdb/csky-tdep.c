@@ -711,6 +711,13 @@ csky_register_type (struct gdbarch *gdbarch, int reg_nr)
 	return builtin_type (gdbarch)->builtin_int32;
     }
 
+  /* Vector register has 128 bits, and only in ck810. Just return
+     csky_vector_type(), not check tdesc_has_registers(), is in case
+     of some GDB stub does not describe type for Vector resgisters
+     in the target-description-xml.  */
+  if ((reg_nr >= CSKY_VR0_REGNUM) && (reg_nr <= CSKY_VR0_REGNUM + 15))
+    return csky_vector_type (gdbarch);
+
   /* If type has been described in tdesc-xml, use it.  */
   if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
     {
@@ -732,10 +739,6 @@ csky_register_type (struct gdbarch *gdbarch, int reg_nr)
   if ((reg_nr >=CSKY_FR0_REGNUM) && (reg_nr <= CSKY_FR0_REGNUM + 15))
       return arch_float_type (gdbarch, 64, "builtin_type_csky_ext",
 			      floatformats_ieee_double);
-
-  /* Vector register has 128 bits, and only in ck810.  */
-  if ((reg_nr >= CSKY_VR0_REGNUM) && (reg_nr <= CSKY_VR0_REGNUM + 15))
-    return csky_vector_type (gdbarch);
 
   /* Profiling general register has 48 bits, we use 64bit.  */
   if ((reg_nr >= CSKY_PROFGR_REGNUM) && (reg_nr <= CSKY_PROFGR_REGNUM + 44))
