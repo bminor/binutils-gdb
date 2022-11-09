@@ -345,7 +345,7 @@ fi])dnl
 AC_ARG_ENABLE(sim-switch,
 [  --enable-sim-switch			Use a switch instead of a table for instruction call.],
 [case "${enableval}" in
-  yes)	sim_switch="-s";;
+  yes)	sim_switch="-DWITH_SPREG_SWITCH_TABLE";;
   no)	sim_switch="";;
   *)	AC_MSG_ERROR("--enable-sim-switch does not take a value"); sim_switch="";;
 esac

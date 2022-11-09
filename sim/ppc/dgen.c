@@ -39,7 +39,6 @@
 
 /****************************************************************/
 
-int spreg_lookup_table = 1;
 enum {
   nr_of_sprs = 1024,
 };
@@ -185,6 +184,7 @@ gen_spreg_c(spreg_table *table, lf *file)
   spreg_table_entry *entry;
   char **attribute;
   int spreg_nr;
+  int spreg_lookup_table;
 
   lf_print__gnu_copyleft(file);
   lf_printf(file, "\n");
@@ -229,13 +229,11 @@ gen_spreg_c(spreg_table *table, lf *file)
     }
     lf_printf(file, "spr_%s(sprs spr)\n", *attribute);
     lf_printf(file, "{\n");
-    if (spreg_lookup_table
-	|| strcmp(*attribute, "name") == 0
-	|| strcmp(*attribute, "index") == 0)
-      lf_printf(file, "  return spr_info[spr].%s;\n",
-		*attribute);
-    else {
+    spreg_lookup_table = !(strcmp(*attribute, "name") == 0
+			   || strcmp(*attribute, "index") == 0);
+    if (spreg_lookup_table) {
       spreg_table_entry *entry;
+      lf_printf(file, "#ifdef WITH_SPREG_SWITCH_TABLE\n");
       lf_printf(file, "  switch (spr) {\n");
       for (entry = table->sprs; entry != NULL; entry = entry->next) {
 	if (strcmp(*attribute, "is_valid") == 0) {
@@ -261,7 +259,12 @@ gen_spreg_c(spreg_table *table, lf *file)
 	lf_printf(file, "    return 1;\n");
       lf_printf(file, "  }\n");
       lf_printf(file, "  return 0;\n");
+      lf_printf(file, "#else\n");
     }
+    lf_printf(file, "  return spr_info[spr].%s;\n",
+	      *attribute);
+    if (spreg_lookup_table)
+      lf_printf(file, "#endif\n");
     lf_printf(file, "}\n");
   }
 
@@ -288,7 +291,6 @@ main(int argc,
 
   if (argc <= 1) {
     printf("Usage: dgen ...\n");
-    printf("-s  Use switch instead of table\n");
     printf("-n <file-name>  Use this as cpp line numbering name\n");
     printf("-h  Output header file\n");
     printf("-p <spreg-file>  Output spreg.h(P) or spreg.c(p)\n");
@@ -301,9 +303,6 @@ main(int argc,
     fprintf(stderr, "\t-%c %s\n", ch, ( optarg ? optarg : ""));
 #endif
     switch(ch) {
-    case 's':
-      spreg_lookup_table = 0;
-      break;
     case 'r':
       sprs = spreg_table_load(optarg);
       break;
