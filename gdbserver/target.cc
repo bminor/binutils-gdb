@@ -694,6 +694,12 @@ process_stratum_target::supports_agent ()
   return false;
 }
 
+bool
+process_stratum_target::supports_btrace ()
+{
+  return false;
+}
+
 btrace_target_info *
 process_stratum_target::enable_btrace (thread_info *tp,
 				       const btrace_config *conf)

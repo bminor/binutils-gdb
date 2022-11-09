@@ -6712,6 +6712,12 @@ linux_process_target::qxfer_libraries_svr4 (const char *annex,
 
 #ifdef HAVE_LINUX_BTRACE
 
+bool
+linux_process_target::supports_btrace ()
+{
+  return true;
+}
+
 btrace_target_info *
 linux_process_target::enable_btrace (thread_info *tp,
 				     const btrace_config *conf)

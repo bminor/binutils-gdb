@@ -388,6 +388,9 @@ public:
   /* Return true if target supports debugging agent.  */
   virtual bool supports_agent ();
 
+  /* Return true if target supports btrace.  */
+  virtual bool supports_btrace ();
+
   /* Enable branch tracing for TP based on CONF and allocate a branch trace
      target information struct for reading and for disabling branch trace.  */
   virtual btrace_target_info *enable_btrace (thread_info *tp,
