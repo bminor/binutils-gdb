@@ -240,7 +240,7 @@ gen_spreg_c(spreg_table *table, lf *file)
       for (entry = table->sprs; entry != NULL; entry = entry->next) {
 	lf_printf(file, "  case %d:\n", entry->spreg_nr);
 	if (strcmp(*attribute, "is_valid") == 0)
-	  lf_printf(file, "    return 1;\n");
+	  /* No return -- see below.  */;
 	else if (strcmp(*attribute, "is_readonly") == 0)
 	  lf_printf(file, "    return %d;\n", entry->is_readonly);
 	else if (strcmp(*attribute, "length") == 0)
@@ -248,6 +248,9 @@ gen_spreg_c(spreg_table *table, lf *file)
 	else
 	  ASSERT(0);
       }
+      /* Output a single return for is_valid.  */
+      if (strcmp(*attribute, "is_valid") == 0)
+	lf_printf(file, "    return 1;\n");
       lf_printf(file, "  }\n");
       lf_printf(file, "  return 0;\n");
     }
