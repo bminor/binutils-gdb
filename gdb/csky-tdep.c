@@ -700,6 +700,17 @@ csky_vector_type (struct gdbarch *gdbarch)
 static struct type *
 csky_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
+  int num_regs = gdbarch_num_regs (gdbarch);
+  csky_gdbarch_tdep *tdep
+    = gdbarch_tdep<csky_gdbarch_tdep> (gdbarch);
+
+  if (tdep->fv_pseudo_registers_count)
+    {
+      if ((reg_nr >= num_regs)
+	  && (reg_nr < (num_regs + tdep->fv_pseudo_registers_count)))
+	return builtin_type (gdbarch)->builtin_int32;
+    }
+
   /* If type has been described in tdesc-xml, use it.  */
   if (tdesc_has_registers (gdbarch_target_desc (gdbarch)))
     {
