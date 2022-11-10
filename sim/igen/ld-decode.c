@@ -131,6 +131,8 @@ load_decode_table (const char *file_name)
 		  break;
 		}
 	      chp = skip_to_separator (chp, ",");
+	      if (*chp == ',')
+		++chp;
 	      chp = skip_spaces (chp);
 	    }
 	}
