@@ -51,7 +51,7 @@ struct _line_ref
 typedef void error_func (const line_ref *line, const char *msg, ...)
   ATTRIBUTE_PRINTF (2, 3);
 
-extern error_func error;
+extern ATTRIBUTE_NORETURN error_func error;
 extern error_func warning;
 extern error_func notify;
 
