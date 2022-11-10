@@ -1976,19 +1976,25 @@ coff_get_normalized_symtab (bfd *abfd)
 long
 coff_get_reloc_upper_bound (bfd *abfd, sec_ptr asect)
 {
-  if (bfd_get_format (abfd) != bfd_object)
-    {
-      bfd_set_error (bfd_error_invalid_operation);
-      return -1;
-    }
-#if SIZEOF_LONG == SIZEOF_INT
-  if (asect->reloc_count >= LONG_MAX / sizeof (arelent *))
+  size_t count, raw;
+
+  count = asect->reloc_count;
+  if (count >= LONG_MAX / sizeof (arelent *)
+      || _bfd_mul_overflow (count, bfd_coff_relsz (abfd), &raw))
     {
       bfd_set_error (bfd_error_file_too_big);
       return -1;
     }
-#endif
-  return (asect->reloc_count + 1L) * sizeof (arelent *);
+  if (!bfd_write_p (abfd))
+    {
+      ufile_ptr filesize = bfd_get_file_size (abfd);
+      if (filesize != 0 && raw > filesize)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return -1;
+	}
+    }
+  return (count + 1) * sizeof (arelent *);
 }
 
 asymbol *

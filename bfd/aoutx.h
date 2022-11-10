@@ -2485,13 +2485,7 @@ NAME (aout, canonicalize_reloc) (bfd *abfd,
 long
 NAME (aout, get_reloc_upper_bound) (bfd *abfd, sec_ptr asect)
 {
-  bfd_size_type count;
-
-  if (bfd_get_format (abfd) != bfd_object)
-    {
-      bfd_set_error (bfd_error_invalid_operation);
-      return -1;
-    }
+  size_t count, raw;
 
   if (asect->flags & SEC_CONSTRUCTOR)
     count = asect->reloc_count;
@@ -2507,10 +2501,20 @@ NAME (aout, get_reloc_upper_bound) (bfd *abfd, sec_ptr asect)
       return -1;
     }
 
-  if (count >= LONG_MAX / sizeof (arelent *))
+  if (count >= LONG_MAX / sizeof (arelent *)
+      || _bfd_mul_overflow (count, obj_reloc_entry_size (abfd), &raw))
     {
       bfd_set_error (bfd_error_file_too_big);
       return -1;
+    }
+  if (!bfd_write_p (abfd))
+    {
+      ufile_ptr filesize = bfd_get_file_size (abfd);
+      if (filesize != 0 && raw > filesize)
+	{
+	  bfd_set_error (bfd_error_file_truncated);
+	  return -1;
+	}
     }
   return (count + 1) * sizeof (arelent *);
 }
