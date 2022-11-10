@@ -16572,7 +16572,7 @@ class Simple{
   }
 }
 EOF
-      if { ac_try='$JAVAC configtest.java &5 2>&1'
+      if { ac_try='$JAVAC configtest.java >&5 2>&5'
   { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
   (eval $ac_try) 2>&5
   ac_status=$?
