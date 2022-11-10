@@ -607,10 +607,10 @@ tmp-dgen: dgen ppc-spr-table $(srcroot)/move-if-change
 	$(SILENCE) $(SHELL) $(srcroot)/move-if-change tmp-spreg.c spreg.c
 	$(SILENCE) touch $@
 
-tmp-igen: igen $(srcdir)/ppc-instructions $(srcdir)/altivec.igen $(srcdir)/e500.igen $(IGEN_OPCODE_RULES) $(srcroot)/move-if-change
+tmp-igen: igen $(srcdir)/powerpc.igen $(srcdir)/altivec.igen $(srcdir)/e500.igen $(IGEN_OPCODE_RULES) $(srcroot)/move-if-change
 	$(ECHO_GEN) $(IGEN) $(IGEN_FLAGS) \
 		-o $(srcdir)/$(IGEN_OPCODE_RULES) \
-		-I $(srcdir) -i $(srcdir)/ppc-instructions \
+		-I $(srcdir) -i $(srcdir)/powerpc.igen \
 		-n icache.h    -hc tmp-icache.h \
 		-n icache.c    -c  tmp-icache.c \
 		-n semantics.h -hs tmp-semantics.h \
