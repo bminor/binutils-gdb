@@ -50,7 +50,7 @@ static const name_map cache_type_map[] = {
 
 
 cache_entry *
-load_cache_table (char *file_name)
+load_cache_table (const char *file_name)
 {
   cache_entry *cache = NULL;
   cache_entry **last = &cache;

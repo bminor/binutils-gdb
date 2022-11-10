@@ -37,7 +37,7 @@
 
 static void
 print_support_function_name (lf *file,
-			     function_entry * function,
+			     const function_entry *function,
 			     int is_function_definition)
 {
   if (function->is_internal)
@@ -90,7 +90,7 @@ print_support_function_name (lf *file,
 
 
 static void
-support_h_function (lf *file, function_entry * function, void *data)
+support_h_function (lf *file, const function_entry *function, void *data)
 {
   ASSERT (function->type != NULL);
   print_support_function_name (file, function, 0 /*!is_definition */ );
@@ -99,7 +99,7 @@ support_h_function (lf *file, function_entry * function, void *data)
 
 
 extern void
-gen_support_h (lf *file, insn_table *table)
+gen_support_h (lf *file, const insn_table *table)
 {
   /* output the definition of `SD_' */
   if (options.gen.smp)
@@ -173,7 +173,7 @@ gen_support_h (lf *file, insn_table *table)
 }
 
 static void
-support_c_function (lf *file, function_entry * function, void *data)
+support_c_function (lf *file, const function_entry *function, void *data)
 {
   ASSERT (function->type != NULL);
   print_support_function_name (file, function, 1 /*!is_definition */ );
@@ -197,7 +197,7 @@ support_c_function (lf *file, function_entry * function, void *data)
 
 
 void
-gen_support_c (lf *file, insn_table *table)
+gen_support_c (lf *file, const insn_table *table)
 {
   lf_printf (file, "#include \"sim-main.h\"\n");
   lf_printf (file, "#include \"%sidecode.h\"\n",

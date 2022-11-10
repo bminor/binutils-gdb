@@ -83,7 +83,7 @@ set_bits (int bit[max_insn_bit_size], uint64_t value)
 }
 
 decode_table *
-load_decode_table (char *file_name)
+load_decode_table (const char *file_name)
 {
   table *file = table_open (file_name);
   table_entry *entry;
@@ -284,7 +284,7 @@ load_decode_table (char *file_name)
 
 
 int
-decode_table_max_word_nr (decode_table *entry)
+decode_table_max_word_nr (const decode_table *entry)
 {
   int max_word_nr = 0;
   while (entry != NULL)
@@ -303,9 +303,9 @@ decode_table_max_word_nr (decode_table *entry)
 }
 
 
-
 static void
-dump_decode_cond (lf *file, char *prefix, decode_cond *cond, char *suffix)
+dump_decode_cond (lf *file, const char *prefix, const decode_cond *cond,
+		  const char *suffix)
 {
   lf_printf (file, "%s(decode_cond *) 0x%lx", prefix, (long) cond);
   if (cond != NULL)
@@ -323,7 +323,8 @@ dump_decode_cond (lf *file, char *prefix, decode_cond *cond, char *suffix)
 
 
 static void
-dump_decode_conds (lf *file, char *prefix, decode_cond *cond, char *suffix)
+dump_decode_conds (lf *file, const char *prefix, const decode_cond *cond,
+		   const char *suffix)
 {
   lf_printf (file, "%s(decode_cond *) 0x%lx", prefix, (long) cond);
   while (cond != NULL)
@@ -336,7 +337,8 @@ dump_decode_conds (lf *file, char *prefix, decode_cond *cond, char *suffix)
 
 
 void
-dump_decode_rule (lf *file, char *prefix, decode_table *rule, char *suffix)
+dump_decode_rule (lf *file, const char *prefix, const decode_table *rule,
+		  const char *suffix)
 {
   lf_printf (file, "%s(decode_table *) 0x%lx", prefix, (long) rule);
   if (rule != NULL)
@@ -369,7 +371,10 @@ dump_decode_rule (lf *file, char *prefix, decode_table *rule, char *suffix)
 #ifdef MAIN
 
 static void
-dump_decode_rules (lf *file, char *prefix, decode_table *rule, char *suffix)
+dump_decode_rules (lf *file,
+		   const char *prefix,
+		   const decode_table *rule,
+		   const char *suffix)
 {
   lf_printf (file, "%s", prefix);
   while (rule != NULL)

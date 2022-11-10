@@ -80,7 +80,9 @@ set_nr_table_entry_fields (table_entry *entry, int nr_fields)
 
 void
 table_push (table *root,
-	    line_ref *line, table_include *includes, const char *file_name)
+	    const line_ref *line,
+	    table_include *includes,
+	    const char *file_name)
 {
   FILE *ff;
   open_table *file;
@@ -485,7 +487,7 @@ table_read (table *root)
 }
 
 extern void
-table_print_code (lf *file, table_entry *entry)
+table_print_code (lf *file, const table_entry *entry)
 {
   int field_nr;
   int nr = 0;
@@ -528,9 +530,11 @@ table_print_code (lf *file, table_entry *entry)
 }
 
 
-
 void
-dump_line_ref (lf *file, char *prefix, const line_ref *line, char *suffix)
+dump_line_ref (lf *file,
+	       const char *prefix,
+	       const line_ref *line,
+	       const char *suffix)
 {
   lf_printf (file, "%s(line_ref*) 0x%lx", prefix, (long) line);
   if (line != NULL)
@@ -559,7 +563,9 @@ table_entry_type_to_str (table_entry_type type)
 
 void
 dump_table_entry (lf *file,
-		  char *prefix, const table_entry *entry, char *suffix)
+		  const char *prefix,
+		  const table_entry *entry,
+		  const char *suffix)
 {
   lf_printf (file, "%s(table_entry*) 0x%lx", prefix, (long) entry);
   if (entry != NULL)

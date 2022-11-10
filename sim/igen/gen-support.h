@@ -20,6 +20,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
-extern void gen_support_h (lf *file, insn_table *table);
+extern void gen_support_h (lf *file, const insn_table *table);
 
-extern void gen_support_c (lf *file, insn_table *table);
+extern void gen_support_c (lf *file, const insn_table *table);

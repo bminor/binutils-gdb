@@ -46,7 +46,9 @@ itable_info;
 
 static void
 itable_h_insn (lf *file,
-	       insn_table *entry, insn_entry * instruction, void *data)
+	       const insn_table *entry,
+	       const insn_entry *instruction,
+	       void *data)
 {
   int len;
   itable_info *info = data;
@@ -73,9 +75,9 @@ itable_h_insn (lf *file,
 /* print the list of all the different options */
 
 static void
-itable_print_enum (lf *file, filter *set, char *name)
+itable_print_enum (lf *file, const filter *set, const char *name)
 {
-  char *elem;
+  const char *elem;
   lf_printf (file, "typedef enum {\n");
   lf_indent (file, +2);
   for (elem = filter_next (set, "");
@@ -109,9 +111,9 @@ itable_print_enum (lf *file, filter *set, char *name)
 /* print an array of the option names as strings */
 
 static void
-itable_print_names (lf *file, filter *set, char *name)
+itable_print_names (lf *file, const filter *set, const char *name)
 {
-  char *elem;
+  const char *elem;
   lf_printf (file, "const char *%sitable_%s_names[nr_%sitable_%ss + 1] = {\n",
 	     options.module.itable.prefix.l, name,
 	     options.module.itable.prefix.l, name);
@@ -127,7 +129,7 @@ itable_print_names (lf *file, filter *set, char *name)
 }
 
 extern void
-gen_itable_h (lf *file, insn_table *isa)
+gen_itable_h (lf *file, const insn_table *isa)
 {
   itable_info *info = ZALLOC (itable_info);
 
@@ -206,9 +208,9 @@ gen_itable_h (lf *file, insn_table *isa)
 /****************************************************************/
 
 static void
-itable_print_set (lf *file, filter *set, filter *members)
+itable_print_set (lf *file, const filter *set, const filter *members)
 {
-  char *elem;
+  const char *elem;
   lf_printf (file, "\"");
   elem = filter_next (members, "");
   if (elem != NULL)
@@ -245,7 +247,9 @@ itable_print_set (lf *file, filter *set, filter *members)
 
 static void
 itable_c_insn (lf *file,
-	       insn_table *isa, insn_entry * instruction, void *data)
+	       const insn_table *isa,
+	       const insn_entry *instruction,
+	       void *data)
 {
   lf_printf (file, "{ ");
   lf_indent (file, +2);
@@ -273,7 +277,7 @@ itable_c_insn (lf *file,
 
 
 extern void
-gen_itable_c (lf *file, insn_table *isa)
+gen_itable_c (lf *file, const insn_table *isa)
 {
   /* leader */
   lf_printf (file, "#include \"%sitable.h\"\n",

@@ -28,9 +28,11 @@ void print_idecode_issue_function_header
 void print_idecode_globals (lf *file);
 
 void print_idecode_lookups
-  (lf *file, gen_entry *table, cache_entry *cache_rules);
+  (lf *file,
+   const gen_entry *table,
+   cache_entry *cache_rules);
 
-void print_idecode_body (lf *file, gen_entry *table, const char *result);
+void print_idecode_body (lf *file, const gen_entry *table, const char *result);
 
 
 
@@ -40,4 +42,6 @@ void print_idecode_body (lf *file, gen_entry *table, const char *result);
    hardware isn't disabled */
 
 extern void print_idecode_validate
-  (lf *file, insn_entry * instruction, insn_opcodes *opcode_paths);
+  (lf *file,
+   const insn_entry *instruction,
+   const insn_opcodes *opcode_paths);

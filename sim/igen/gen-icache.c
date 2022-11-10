@@ -42,7 +42,7 @@ static void
 print_icache_function_header (lf *file,
 			      const char *basename,
 			      const char *format_name,
-			      opcode_bits *expanded_bits,
+			      const opcode_bits *expanded_bits,
 			      int is_function_definition,
 			      int nr_prefetched_words)
 {
@@ -63,9 +63,10 @@ print_icache_function_header (lf *file,
 
 void
 print_icache_declaration (lf *file,
-			  insn_entry * insn,
-			  opcode_bits *expanded_bits,
-			  insn_opcodes *opcodes, int nr_prefetched_words)
+			  const insn_entry *insn,
+			  const opcode_bits *expanded_bits,
+			  const insn_opcodes *opcodes,
+			  int nr_prefetched_words)
 {
   print_icache_function_header (file,
 				insn->name,
@@ -84,16 +85,16 @@ print_icache_extraction (lf *file,
 			 const char *entry_name,
 			 const char *entry_type,
 			 const char *entry_expression,
-			 char *single_insn_field,
+			 const char *single_insn_field,
 			 line_ref *line,
 			 insn_field_entry *cur_field,
-			 opcode_bits *expanded_bits,
+			 const opcode_bits *expanded_bits,
 			 icache_decl_type what_to_declare,
 			 icache_body_type what_to_do)
 {
   const char *expression;
-  opcode_bits *bits;
-  char *reason;
+  const opcode_bits *bits;
+  const char *reason;
   ASSERT (format_name != NULL);
   ASSERT (entry_name != NULL);
 
@@ -323,8 +324,8 @@ print_icache_extraction (lf *file,
 
 void
 print_icache_body (lf *file,
-		   insn_entry * instruction,
-		   opcode_bits *expanded_bits,
+		   const insn_entry *instruction,
+		   const opcode_bits *expanded_bits,
 		   cache_entry *cache_rules,
 		   icache_decl_type what_to_declare,
 		   icache_body_type what_to_do, int nr_prefetched_words)
@@ -479,7 +480,7 @@ print_icache_body (lf *file,
 			      cache_rule->original_fields)
 	    && !filter_is_member (instruction->field_names, cache_rule->name))
 	  {
-	    char *single_field =
+	    const char *single_field =
 	      filter_next (cache_rule->original_fields, "");
 	    if (filter_next (cache_rule->original_fields, single_field) !=
 		NULL)
@@ -505,7 +506,7 @@ struct _form_fields
 };
 
 static form_fields *
-insn_table_cache_fields (insn_table *isa)
+insn_table_cache_fields (const insn_table *isa)
 {
   form_fields *forms = NULL;
   insn_entry *insn;
@@ -538,7 +539,7 @@ insn_table_cache_fields (insn_table *isa)
 
 
 extern void
-print_icache_struct (lf *file, insn_table *isa, cache_entry *cache_rules)
+print_icache_struct (lf *file, const insn_table *isa, cache_entry *cache_rules)
 {
   /* Create a list of all the different instruction formats with their
      corresponding field names. */
@@ -568,7 +569,7 @@ print_icache_struct (lf *file, insn_table *isa, cache_entry *cache_rules)
 	    lf_indent (file, +2);
 	    {
 	      cache_entry *cache_rule;
-	      char *field;
+	      const char *field;
 	      /* space for any instruction words */
 	      if (options.gen.insn_in_icache)
 		lf_printf (file, "instruction_word insn[%d];\n",
@@ -582,7 +583,7 @@ print_icache_struct (lf *file, insn_table *isa, cache_entry *cache_rules)
 		  if (filter_is_subset
 		      (format->fields, cache_rule->original_fields))
 		    {
-		      char *memb;
+		      const char *memb;
 		      lf_printf (file, "%s %s;",
 				 (cache_rule->type == NULL
 				  ? "unsigned"
@@ -642,9 +643,9 @@ print_icache_struct (lf *file, insn_table *isa, cache_entry *cache_rules)
 
 static void
 print_icache_function (lf *file,
-		       insn_entry * instruction,
-		       opcode_bits *expanded_bits,
-		       insn_opcodes *opcodes,
+		       const insn_entry *instruction,
+		       const opcode_bits *expanded_bits,
+		       const insn_opcodes *opcodes,
 		       cache_entry *cache_rules, int nr_prefetched_words)
 {
   int indent;
@@ -742,9 +743,9 @@ print_icache_function (lf *file,
 
 void
 print_icache_definition (lf *file,
-			 insn_entry * insn,
-			 opcode_bits *expanded_bits,
-			 insn_opcodes *opcodes,
+			 const insn_entry *insn,
+			 const opcode_bits *expanded_bits,
+			 const insn_opcodes *opcodes,
 			 cache_entry *cache_rules, int nr_prefetched_words)
 {
   print_icache_function (file,
@@ -757,7 +758,7 @@ print_icache_definition (lf *file,
 
 void
 print_icache_internal_function_declaration (lf *file,
-					    function_entry * function,
+					    const function_entry *function,
 					    void *data)
 {
   ASSERT (options.gen.icache);
@@ -778,7 +779,7 @@ print_icache_internal_function_declaration (lf *file,
 
 void
 print_icache_internal_function_definition (lf *file,
-					   function_entry * function,
+					   const function_entry *function,
 					   void *data)
 {
   ASSERT (options.gen.icache);

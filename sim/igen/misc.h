@@ -52,7 +52,7 @@ struct _line_ref
 };
 
 /* Error appends a new line, warning and notify do not */
-typedef void error_func (const line_ref *line, char *msg, ...);
+typedef void error_func (const line_ref *line, const char *msg, ...);
 
 extern error_func error;
 extern error_func warning;

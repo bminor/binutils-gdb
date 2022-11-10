@@ -49,8 +49,8 @@ lf_file_references;
    the print messages below. */
 
 extern lf *lf_open
-  (char *name,
-   char *real_name,
+  (const char *name,
+   const char *real_name,
    lf_file_references file_references,
    lf_file_type type, const char *program);
 
@@ -101,7 +101,7 @@ extern int lf_print__internal_ref (lf *file);
 extern int lf_print__external_ref
   (lf *file, int line_nr, const char *file_name);
 
-extern int lf_print__line_ref (lf *file, line_ref *line);
+extern int lf_print__line_ref (lf *file, const line_ref *line);
 
 extern int lf_print__ucase_filename (lf *file);
 

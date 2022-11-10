@@ -23,6 +23,6 @@
 
 /* Output a table of all the instructions */
 
-extern void gen_itable_h (lf *file, insn_table *table);
+extern void gen_itable_h (lf *file, const insn_table *table);
 
-extern void gen_itable_c (lf *file, insn_table *table);
+extern void gen_itable_c (lf *file, const insn_table *table);

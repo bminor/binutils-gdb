@@ -28,7 +28,7 @@
 #include "ld-insn.h"
 
 static insn_word_entry *
-parse_insn_word (line_ref *line, char *string, int word_nr)
+parse_insn_word (const line_ref *line, char *string, int word_nr)
 {
   char *chp;
   insn_word_entry *word = ZALLOC (insn_word_entry);
@@ -849,7 +849,7 @@ parse_insn_model_record (table *file,
       /* Find the corresponding master model record for each name so
          that they can be linked in. */
       int index;
-      char *name = "";
+      const char *name = "";
       while (1)
 	{
 	  name = filter_next (new_insn_model->names, name);
@@ -938,7 +938,7 @@ parse_macro_record (table *file, table_entry *record)
 
 
 insn_table *
-load_insn_table (char *file_name, cache_entry *cache)
+load_insn_table (const char *file_name, cache_entry *cache)
 {
   table *file = table_open (file_name);
   table_entry *record = table_read (file);
@@ -1279,7 +1279,7 @@ load_insn_table (char *file_name, cache_entry *cache)
 
 
 void
-print_insn_words (lf *file, insn_entry * insn)
+print_insn_words (lf *file, const insn_entry *insn)
 {
   insn_word_entry *word = insn->words;
   if (word != NULL)
@@ -1359,10 +1359,10 @@ print_insn_words (lf *file, insn_entry * insn)
 
 void
 function_entry_traverse (lf *file,
-			 function_entry * functions,
+			 const function_entry *functions,
 			 function_entry_handler * handler, void *data)
 {
-  function_entry *function;
+  const function_entry *function;
   for (function = functions; function != NULL; function = function->next)
     {
       handler (file, function, data);
@@ -1371,10 +1371,10 @@ function_entry_traverse (lf *file,
 
 void
 insn_table_traverse_insn (lf *file,
-			  insn_table *isa,
+			  const insn_table *isa,
 			  insn_entry_handler * handler, void *data)
 {
-  insn_entry *insn;
+  const insn_entry *insn;
   for (insn = isa->insns; insn != NULL; insn = insn->next)
     {
       handler (file, isa, insn, data);
@@ -1384,7 +1384,9 @@ insn_table_traverse_insn (lf *file,
 
 static void
 dump_function_entry (lf *file,
-		     char *prefix, function_entry * entry, char *suffix)
+		     const char *prefix,
+		     const function_entry *entry,
+		     const char *suffix)
 {
   lf_printf (file, "%s(function_entry *) 0x%lx", prefix, (long) entry);
   if (entry != NULL)
@@ -1403,7 +1405,9 @@ dump_function_entry (lf *file,
 
 static void
 dump_function_entries (lf *file,
-		       char *prefix, function_entry * entry, char *suffix)
+		       const char *prefix,
+		       const function_entry *entry,
+		       const char *suffix)
 {
   lf_printf (file, "%s", prefix);
   lf_indent (file, +1);
@@ -1433,7 +1437,10 @@ cache_entry_type_to_str (cache_entry_type type)
 }
 
 static void
-dump_cache_entry (lf *file, char *prefix, cache_entry *entry, char *suffix)
+dump_cache_entry (lf *file,
+		  const char *prefix,
+		  const cache_entry *entry,
+		  const char *suffix)
 {
   lf_printf (file, "%s(cache_entry *) 0x%lx", prefix, (long) entry);
   if (entry != NULL)
@@ -1452,7 +1459,10 @@ dump_cache_entry (lf *file, char *prefix, cache_entry *entry, char *suffix)
 }
 
 void
-dump_cache_entries (lf *file, char *prefix, cache_entry *entry, char *suffix)
+dump_cache_entries (lf *file,
+		    const char *prefix,
+		    const cache_entry *entry,
+		    const char *suffix)
 {
   lf_printf (file, "%s", prefix);
   lf_indent (file, +1);
@@ -1466,7 +1476,10 @@ dump_cache_entries (lf *file, char *prefix, cache_entry *entry, char *suffix)
 }
 
 static void
-dump_model_data (lf *file, char *prefix, model_data *entry, char *suffix)
+dump_model_data (lf *file,
+		 const char *prefix,
+		 const model_data *entry,
+		 const char *suffix)
 {
   lf_printf (file, "%s(model_data *) 0x%lx", prefix, (long) entry);
   if (entry != NULL)
@@ -1483,7 +1496,10 @@ dump_model_data (lf *file, char *prefix, model_data *entry, char *suffix)
 }
 
 static void
-dump_model_datas (lf *file, char *prefix, model_data *entry, char *suffix)
+dump_model_datas (lf *file,
+		  const char *prefix,
+		  const model_data *entry,
+		  const char *suffix)
 {
   lf_printf (file, "%s", prefix);
   lf_indent (file, +1);
@@ -1497,7 +1513,10 @@ dump_model_datas (lf *file, char *prefix, model_data *entry, char *suffix)
 }
 
 static void
-dump_model_entry (lf *file, char *prefix, model_entry *entry, char *suffix)
+dump_model_entry (lf *file,
+		  const char *prefix,
+		  const model_entry *entry,
+		  const char *suffix)
 {
   lf_printf (file, "%s(model_entry *) 0x%lx", prefix, (long) entry);
   if (entry != NULL)
@@ -1515,7 +1534,10 @@ dump_model_entry (lf *file, char *prefix, model_entry *entry, char *suffix)
 }
 
 static void
-dump_model_entries (lf *file, char *prefix, model_entry *entry, char *suffix)
+dump_model_entries (lf *file,
+		    const char *prefix,
+		    const model_entry *entry,
+		    const char *suffix)
 {
   lf_printf (file, "%s", prefix);
   lf_indent (file, +1);
@@ -1530,7 +1552,10 @@ dump_model_entries (lf *file, char *prefix, model_entry *entry, char *suffix)
 
 
 static void
-dump_model_table (lf *file, char *prefix, model_table *entry, char *suffix)
+dump_model_table (lf *file,
+		  const char *prefix,
+		  const model_table *entry,
+		  const char *suffix)
 {
   lf_printf (file, "%s(model_table *) 0x%lx", prefix, (long) entry);
   if (entry != NULL)
@@ -1573,7 +1598,9 @@ insn_field_type_to_str (insn_field_type type)
 
 void
 dump_insn_field (lf *file,
-		 char *prefix, insn_field_entry *field, char *suffix)
+		 const char *prefix,
+		 const insn_field_entry *field,
+		 const char *suffix)
 {
   char *sep = " ";
   lf_printf (file, "%s(insn_field_entry *) 0x%lx", prefix, (long) field);
@@ -1612,7 +1639,9 @@ dump_insn_field (lf *file,
 
 void
 dump_insn_word_entry (lf *file,
-		      char *prefix, insn_word_entry *word, char *suffix)
+		      const char *prefix,
+		      const insn_word_entry *word,
+		      const char *suffix)
 {
   lf_printf (file, "%s(insn_word_entry *) 0x%lx", prefix, (long) word);
   if (word != NULL)
@@ -1639,7 +1668,9 @@ dump_insn_word_entry (lf *file,
 
 static void
 dump_insn_word_entries (lf *file,
-			char *prefix, insn_word_entry *word, char *suffix)
+			const char *prefix,
+			const insn_word_entry *word,
+			const char *suffix)
 {
   lf_printf (file, "%s", prefix);
   while (word != NULL)
@@ -1652,7 +1683,9 @@ dump_insn_word_entries (lf *file,
 
 static void
 dump_insn_model_entry (lf *file,
-		       char *prefix, insn_model_entry *model, char *suffix)
+		       const char *prefix,
+		       const insn_model_entry *model,
+		       const char *suffix)
 {
   lf_printf (file, "%s(insn_model_entry *) 0x%lx", prefix, (long) model);
   if (model != NULL)
@@ -1672,7 +1705,9 @@ dump_insn_model_entry (lf *file,
 
 static void
 dump_insn_model_entries (lf *file,
-			 char *prefix, insn_model_entry *model, char *suffix)
+			 const char *prefix,
+			 const insn_model_entry *model,
+			 const char *suffix)
 {
   lf_printf (file, "%s", prefix);
   while (model != NULL)
@@ -1686,8 +1721,9 @@ dump_insn_model_entries (lf *file,
 
 static void
 dump_insn_mnemonic_entry (lf *file,
-			  char *prefix,
-			  insn_mnemonic_entry *mnemonic, char *suffix)
+			  const char *prefix,
+			  const insn_mnemonic_entry *mnemonic,
+			  const char *suffix)
 {
   lf_printf (file, "%s(insn_mnemonic_entry *) 0x%lx", prefix,
 	     (long) mnemonic);
@@ -1708,8 +1744,9 @@ dump_insn_mnemonic_entry (lf *file,
 
 static void
 dump_insn_mnemonic_entries (lf *file,
-			    char *prefix,
-			    insn_mnemonic_entry *mnemonic, char *suffix)
+			    const char *prefix,
+			    const insn_mnemonic_entry *mnemonic,
+			    const char *suffix)
 {
   lf_printf (file, "%s", prefix);
   while (mnemonic != NULL)
@@ -1721,7 +1758,10 @@ dump_insn_mnemonic_entries (lf *file,
 }
 
 void
-dump_insn_entry (lf *file, char *prefix, insn_entry * entry, char *suffix)
+dump_insn_entry (lf *file,
+		 const char *prefix,
+		 const insn_entry *entry,
+		 const char *suffix)
 {
   lf_printf (file, "%s(insn_entry *) 0x%lx", prefix, (long) entry);
   if (entry != NULL)
@@ -1757,7 +1797,10 @@ dump_insn_entry (lf *file, char *prefix, insn_entry * entry, char *suffix)
 }
 
 static void
-dump_insn_entries (lf *file, char *prefix, insn_entry * entry, char *suffix)
+dump_insn_entries (lf *file,
+		   const char *prefix,
+		   const insn_entry *entry,
+		   const char *suffix)
 {
   lf_printf (file, "%s", prefix);
   lf_indent (file, +1);
@@ -1771,9 +1814,11 @@ dump_insn_entries (lf *file, char *prefix, insn_entry * entry, char *suffix)
 }
 
 
-
 void
-dump_insn_table (lf *file, char *prefix, insn_table *isa, char *suffix)
+dump_insn_table (lf *file,
+		 const char *prefix,
+		 const insn_table *isa,
+		 const char *suffix)
 {
   lf_printf (file, "%s(insn_table *) 0x%lx", prefix, (long) isa);
   if (isa != NULL)

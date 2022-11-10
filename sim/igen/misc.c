@@ -34,7 +34,7 @@
    trailing '\n' */
 
 void
-error (const line_ref *line, char *msg, ...)
+error (const line_ref *line, const char *msg, ...)
 {
   va_list ap;
   if (line != NULL)
@@ -46,7 +46,7 @@ error (const line_ref *line, char *msg, ...)
 }
 
 void
-warning (const line_ref *line, char *msg, ...)
+warning (const line_ref *line, const char *msg, ...)
 {
   va_list ap;
   if (line != NULL)
@@ -57,7 +57,7 @@ warning (const line_ref *line, char *msg, ...)
 }
 
 void
-notify (const line_ref *line, char *msg, ...)
+notify (const line_ref *line, const char *msg, ...)
 {
   va_list ap;
   if (line != NULL)

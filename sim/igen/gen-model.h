@@ -21,6 +21,6 @@
 
 
 
-extern void gen_model_h (lf *file, insn_table *isa);
+extern void gen_model_h (lf *file, const insn_table *isa);
 
-extern void gen_model_c (lf *file, insn_table *isa);
+extern void gen_model_c (lf *file, const insn_table *isa);

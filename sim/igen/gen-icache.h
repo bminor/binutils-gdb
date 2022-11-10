@@ -42,8 +42,8 @@ icache_body_type;
 
 extern void print_icache_body
   (lf *file,
-   insn_entry * instruction,
-   opcode_bits *expanded_bits,
+   const insn_entry *instruction,
+   const opcode_bits *expanded_bits,
    cache_entry *cache_rules,
    icache_decl_type what_to_declare,
    icache_body_type what_to_do, int nr_prefetched_words);
@@ -53,15 +53,17 @@ extern void print_icache_body
 
 extern void print_icache_declaration
   (lf *file,
-   insn_entry * insn,
-   opcode_bits *expanded_bits,
-   insn_opcodes *opcodes, int nr_prefetched_words);
+   const insn_entry *insn,
+   const opcode_bits *expanded_bits,
+   const insn_opcodes *opcodes,
+   int nr_prefetched_words);
 
 extern void print_icache_definition
   (lf *file,
-   insn_entry * insn,
-   opcode_bits *expanded_bits,
-   insn_opcodes *opcodes, cache_entry *cache_rules, int nr_prefetched_words);
+   const insn_entry *insn,
+   const opcode_bits *expanded_bits,
+   const insn_opcodes *opcodes,
+   cache_entry *cache_rules, int nr_prefetched_words);
 
 
 /* Output an instruction cache support function */
@@ -73,7 +75,7 @@ extern function_entry_handler print_icache_internal_function_definition;
 /* Output the instruction cache table data structure */
 
 extern void print_icache_struct
-  (lf *file, insn_table *instructions, cache_entry *cache_rules);
+  (lf *file, const insn_table *instructions, cache_entry *cache_rules);
 
 
 /* Output a single instructions decoder */
