@@ -1628,7 +1628,7 @@ testsuite_common_CPPFLAGS = \
 
 @SIM_ENABLE_ARCH_v850_TRUE@v850_IGEN_TRACE = # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries
 @SIM_ENABLE_ARCH_v850_TRUE@v850_IGEN_INSN = $(srcdir)/v850/v850.igen
-@SIM_ENABLE_ARCH_v850_TRUE@v850_IGEN_DC = $(srcdir)/v850/v850-dc
+@SIM_ENABLE_ARCH_v850_TRUE@v850_IGEN_DC = $(srcdir)/v850/v850.dc
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 

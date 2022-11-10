@@ -51,7 +51,7 @@ $(%C%_BUILT_SRC_FROM_IGEN): %D%/stamp-igen
 
 %C%_IGEN_TRACE = # -G omit-line-numbers # -G trace-rule-selection -G trace-rule-rejection -G trace-entries
 %C%_IGEN_INSN = $(srcdir)/%D%/v850.igen
-%C%_IGEN_DC = $(srcdir)/%D%/v850-dc
+%C%_IGEN_DC = $(srcdir)/%D%/v850.dc
 %D%/stamp-igen: $(%C%_IGEN_INSN) $(%C%_IGEN_DC) $(IGEN)
 	$(AM_V_GEN)$(IGEN_RUN) \
 		$(%C%_IGEN_TRACE) \
