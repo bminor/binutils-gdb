@@ -2979,12 +2979,12 @@ find_overload_match (gdb::array_view<value *> args,
     {
       std::string hint = incomplete_type_hint (args);
       if (method == METHOD)
-	error (_("Cannot resolve method %s%s%s to any overloaded instance.%s"),
+	error (_("Cannot resolve method %s%s%s to any overloaded instance%s"),
 	       obj_type_name,
 	       (obj_type_name && *obj_type_name) ? "::" : "",
 	       name, hint.c_str ());
       else
-	error (_("Cannot resolve function %s to any overloaded instance.%s"),
+	error (_("Cannot resolve function %s to any overloaded instance%s"),
 	       func_name, hint.c_str ());
     }
   else if (match_quality == NON_STANDARD)
