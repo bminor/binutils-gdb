@@ -7523,11 +7523,7 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
     {
       bfd_byte *contents, *l, *lend;
 
-      contents = bfd_malloc (hdr->sh_size);
-      if (contents == NULL)
-	return false;
-      if (! bfd_get_section_contents (abfd, hdr->bfd_section, contents,
-				      0, hdr->sh_size))
+      if (!bfd_malloc_and_get_section (abfd, hdr->bfd_section, &contents))
 	{
 	  free (contents);
 	  return false;
