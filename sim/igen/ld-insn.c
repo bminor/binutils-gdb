@@ -448,7 +448,7 @@ parse_insn_words (insn_entry * insn, char *formats)
 				   the same size */
 				if (f->width != refered_field->width)
 				  error (insn->line,
-					 "Conditional `%s' of field `%s' should be of size %s\n",
+					 "Conditional `%s' of field `%s' should be of size %i\n",
 					 cond->string, f->val_string,
 					 refered_field->width);
 			      }

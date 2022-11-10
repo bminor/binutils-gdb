@@ -36,11 +36,7 @@ enum
 #include <stdlib.h>
 #include <string.h>
 
-#if !defined (__attribute__) && (!defined(__GNUC__) || __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 7))
-#define __attribute__(arg)
-#endif
-
-
+#include "ansidecl.h"
 
 #include "filter_host.h"
 
@@ -52,7 +48,8 @@ struct _line_ref
 };
 
 /* Error appends a new line, warning and notify do not */
-typedef void error_func (const line_ref *line, const char *msg, ...);
+typedef void error_func (const line_ref *line, const char *msg, ...)
+  ATTRIBUTE_PRINTF (2, 3);
 
 extern error_func error;
 extern error_func warning;
