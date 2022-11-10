@@ -254,18 +254,6 @@ dv_m6811_attach_address_callback (struct hw *me,
 }
 
 static void
-dv_m6811_detach_address_callback (struct hw *me,
-                                  int level,
-                                  int space,
-                                  address_word addr,
-                                  address_word nr_bytes,
-                                  struct hw *client)
-{
-  sim_core_detach (hw_system (me), NULL, /*cpu*/
-                   level, space, addr);
-}
-
-static void
 m68hc11_delete (struct hw* me)
 {
   struct m68hc11cpu *controller;
@@ -387,7 +375,6 @@ m68hc11cpu_finish (struct hw *me)
   set_hw_ports (me, m68hc11cpu_ports);
   set_hw_port_event (me, m68hc11cpu_port_event);
   set_hw_attach_address (me, dv_m6811_attach_address_callback);
-  set_hw_detach_address (me, dv_m6811_detach_address_callback);
 #ifdef set_hw_ioctl
   set_hw_ioctl (me, m68hc11_ioctl);
 #else
