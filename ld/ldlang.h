@@ -384,6 +384,7 @@ struct lang_wild_statement_struct
   lang_statement_header_type header;
   const char *filename;
   bool filenames_sorted;
+  bool any_specs_sorted;
   struct wildcard_list *section_list;
   bool keep_sections;
   lang_statement_list_type children;
@@ -391,7 +392,7 @@ struct lang_wild_statement_struct
 
   walk_wild_section_handler_t walk_wild_section_handler;
   struct wildcard_list *handler_data[4];
-  lang_section_bst_type *tree;
+  lang_section_bst_type *tree, **rightmost;
   struct flag_info *section_flag_list;
 };
 
