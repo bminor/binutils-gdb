@@ -595,7 +595,6 @@ sim_micromips16_flags
 sim_micromips_flags
 sim_m16_flags
 sim_igen_flags
-SIM_SUBTARGET
 target_os
 target_vendor
 target_cpu
@@ -1842,25 +1841,6 @@ test -n "$target_alias" &&
   test "$program_prefix$program_suffix$program_transform_name" = \
     NONENONEs,x,x, &&
   program_prefix=${target_alias}-
-
-
-# DEPRECATED
-#
-# Instead of defining a `subtarget' macro, code should be checking
-# the value of {STATE,CPU}_ARCHITECTURE to identify the architecture
-# in question.
-#
-case "${target}" in
-  mips64vr*-*-*)	SIM_SUBTARGET="-DTARGET_ENABLE_FR=1" ;;
-  mips*tx39*)           SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
-  mips*-sde-elf*)       SIM_SUBTARGET="-DTARGET_ENABLE_FR=1";;
-  mips*-mti-elf*)       SIM_SUBTARGET="-DTARGET_ENABLE_FR=1";;
-  mipsisa32*-*-*)       SIM_SUBTARGET="-DTARGET_ENABLE_FR=1";;
-  mipsisa64*-*-*)       SIM_SUBTARGET="-DTARGET_ENABLE_FR=1";;
-  *)                    SIM_SUBTARGET="";;
-esac
-
-
 
 
 #

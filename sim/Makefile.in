@@ -246,6 +246,7 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/m4/sim_ac_platform.m4 \
 	$(top_srcdir)/m4/sim_ac_toolchain.m4 \
 	$(top_srcdir)/frv/acinclude.m4 \
+	$(top_srcdir)/mips/acinclude-top.m4 \
 	$(top_srcdir)/riscv/acinclude.m4 $(top_srcdir)/rx/acinclude.m4 \
 	$(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -1105,6 +1106,7 @@ SIM_FRV_TRAPDUMP_FLAGS = @SIM_FRV_TRAPDUMP_FLAGS@
 SIM_HW_CFLAGS = @SIM_HW_CFLAGS@
 SIM_HW_SOCKSER = @SIM_HW_SOCKSER@
 SIM_INLINE = @SIM_INLINE@
+SIM_MIPS_SUBTARGET = @SIM_MIPS_SUBTARGET@
 SIM_PRIMARY_TARGET = @SIM_PRIMARY_TARGET@
 SIM_RISCV_BITSIZE = @SIM_RISCV_BITSIZE@
 SIM_RX_CYCLE_ACCURATE_FLAGS = @SIM_RX_CYCLE_ACCURATE_FLAGS@

@@ -6,25 +6,6 @@ dnl The sim shouldn't be checking $target and changing behavior.  But it is,
 dnl and until we clean that up, we need to expand --target for use below.
 AC_CANONICAL_SYSTEM
 
-# DEPRECATED
-#
-# Instead of defining a `subtarget' macro, code should be checking
-# the value of {STATE,CPU}_ARCHITECTURE to identify the architecture
-# in question.
-#
-case "${target}" in
-  mips64vr*-*-*)	SIM_SUBTARGET="-DTARGET_ENABLE_FR=1" ;;
-  mips*tx39*)           SIM_SUBTARGET="-DSUBTARGET_R3900=1";;
-  mips*-sde-elf*)       SIM_SUBTARGET="-DTARGET_ENABLE_FR=1";;
-  mips*-mti-elf*)       SIM_SUBTARGET="-DTARGET_ENABLE_FR=1";;
-  mipsisa32*-*-*)       SIM_SUBTARGET="-DTARGET_ENABLE_FR=1";;
-  mipsisa64*-*-*)       SIM_SUBTARGET="-DTARGET_ENABLE_FR=1";;
-  *)                    SIM_SUBTARGET="";;
-esac
-AC_SUBST(SIM_SUBTARGET)
-
-
-
 #
 # Select the bitsize of the target
 #

@@ -67,8 +67,7 @@ SIM_OBJS = \
 	sim-resume.o \
 
 # List of flags to always pass to $(CC).
-SIM_SUBTARGET=@SIM_SUBTARGET@
-SIM_EXTRA_CFLAGS = $(SIM_SUBTARGET)
+SIM_EXTRA_CFLAGS = $(SIM_MIPS_SUBTARGET)
 
 SIM_EXTRA_CLEAN = clean-extra
 SIM_EXTRA_DISTCLEAN = distclean-extra
