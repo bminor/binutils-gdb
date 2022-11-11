@@ -18,20 +18,16 @@
 int value = 0xdeadf00d;
 int *ptr = &value;
 
-asm (".section	\".text\"");
-asm (".balign 8");
-asm ("func_start: .globl func_start");
-
 static void
 func (void)
 {
+  asm ("func_label: .globl func_label");
 }
-
-asm ("func_end: .globl func_end");
 
 int
 main (void)
 {
+  asm ("main_label: .globl main_label");
   func ();
   return 0;
 }

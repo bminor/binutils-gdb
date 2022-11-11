@@ -23,7 +23,7 @@ if {![dwarf2_support]} {
     return 0
 }
 
-standard_testfile .c gdbjit-ops.S
+standard_testfile .c -dbg.S
 
 #
 # A port of the pr10770.c test code to the DWARF assembler format.
@@ -354,9 +354,17 @@ set program [subst {
     addr ptr
 }]
 
+if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {
+    return -1
+}
+
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
+
+    # Find start, end, and length of "func".
+    get_func_info func
+
     # Creating a CU with 4-byte addresses lets this test link on both
     # 32- and 64-bit machines.
     cu { addr_size 4 } {
@@ -366,8 +374,8 @@ Dwarf::assemble $asm_file {
 	compile_unit {
 	    {name file1.txt}
 	    {language @DW_LANG_C}
-	    {low_pc func_start addr}
-	    {high_pc func_end addr}
+	    {low_pc $func_start addr}
+	    {high_pc $func_end addr}
 	} {
 	    global program
 
@@ -380,8 +388,8 @@ Dwarf::assemble $asm_file {
 	    subprogram {
 		{external 1 flag}
 		{name func}
-		{low_pc func_start addr}
-		{high_pc func_end addr}
+		{low_pc $func_start addr}
+		{high_pc $func_end addr}
 	    } {
 		formal_parameter {
 		    {name param}
