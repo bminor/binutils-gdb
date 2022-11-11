@@ -81,7 +81,7 @@ zstd_compress(int header_size, const unsigned char *uncompressed_data,
 	      unsigned long uncompressed_size,
 	      unsigned char **compressed_data, unsigned long *compressed_size)
 {
-  const size_t size = ZSTD_compressBound(uncompressed_size);
+  size_t size = ZSTD_compressBound(uncompressed_size);
   *compressed_data = new unsigned char[size + header_size];
   size = ZSTD_compress(*compressed_data + header_size, size, uncompressed_data,
 		       uncompressed_size, ZSTD_CLEVEL_DEFAULT);
