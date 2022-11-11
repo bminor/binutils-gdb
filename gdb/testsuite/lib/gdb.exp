@@ -4685,6 +4685,7 @@ set gdb_saved_set_unbuffered_mode_obj ""
 #   - macros: Add the required compiler flag to include macro information in
 #     debug information
 #   - text_segment=addr: Tell the linker to place the text segment at ADDR.
+#   - build-id: Ensure the final binary includes a build-id.
 #
 # And here are some of the not too obscure options understood by DejaGnu that
 # influence the compilation:
@@ -4745,6 +4746,14 @@ proc gdb_compile {source dest type options} {
 	    # This is the equivalent for the icc compiler.
 	    lappend new_options "additional_flags=-diag-disable=10148"
 	}
+    }
+
+    # If the 'build-id' option is used, then ensure that we generate a
+    # build-id.  GCC does this by default, but Clang does not, so
+    # enable it now.
+    if {[lsearch -exact $options build-id] > 0
+	&& [test_compiler_info "clang-*"]} {
+	lappend new_options "additional_flags=-Wl,--build-id"
     }
 
     # Treating .c input files as C++ is deprecated in Clang, so

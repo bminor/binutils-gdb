@@ -32,12 +32,12 @@ if { [catch {file copy -force ${srcdir}/${subdir}/${srcfile} \
     return -1
 }
 
-if { [gdb_compile "$sourcetmp" "$binfile" executable {debug}] != "" } {
+if { [gdb_compile "$sourcetmp" "$binfile" executable {debug build-id}] != "" } {
     untested "failed to compile"
     return -1
 }
 
-if { [gdb_compile "$sourcetmp" "${binfile}2" executable {debug}] != "" } {
+if { [gdb_compile "$sourcetmp" "${binfile}2" executable {debug build-id}] != "" } {
     fail "compile"
     return -1
 }
