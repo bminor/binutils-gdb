@@ -244,7 +244,7 @@ DESCRIPTION
 bool
 bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
 {
-  bfd_size_type sz;
+  bfd_size_type sz = bfd_get_section_limit_octets (abfd, sec);
   bfd_byte *p = *ptr;
   bool ret;
   bfd_size_type save_size;
@@ -253,14 +253,23 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
   unsigned int compression_header_size;
   const unsigned int compress_status = sec->compress_status;
 
-  if (abfd->direction != write_direction && sec->rawsize != 0)
-    sz = sec->rawsize;
-  else
-    sz = sec->size;
   if (sz == 0)
     {
       *ptr = NULL;
       return true;
+    }
+
+  if (p == NULL
+      && compress_status != COMPRESS_SECTION_DONE
+      && _bfd_section_size_insane (abfd, sec))
+    {
+      /* PR 24708: Avoid attempts to allocate a ridiculous amount
+	 of memory.  */
+      _bfd_error_handler
+	/* xgettext:c-format */
+	(_("error: %pB(%pA) is too large (%#" PRIx64 " bytes)"),
+	 abfd, sec, (uint64_t) sz);
+      return false;
     }
 
   switch (compress_status)
@@ -268,30 +277,6 @@ bfd_get_full_section_contents (bfd *abfd, sec_ptr sec, bfd_byte **ptr)
     case COMPRESS_SECTION_NONE:
       if (p == NULL)
 	{
-	  ufile_ptr filesize = bfd_get_file_size (abfd);
-	  if (filesize > 0
-	      && filesize < sz
-	      && (bfd_section_flags (sec) & SEC_IN_MEMORY) == 0
-	      /* PR 24753: Linker created sections can be larger than
-		 the file size, eg if they are being used to hold stubs.  */
-	      && (bfd_section_flags (sec) & SEC_LINKER_CREATED) == 0
-	      /* PR 24753: Sections which have no content should also be
-		 excluded as they contain no size on disk.  */
-	      && (bfd_section_flags (sec) & SEC_HAS_CONTENTS) != 0
-	      /* The MMO file format supports its own special compression
-		 technique, but it uses COMPRESS_SECTION_NONE when loading
-		 a section's contents.  */
-	      && bfd_get_flavour (abfd) != bfd_target_mmo_flavour)
-	    {
-	      /* PR 24708: Avoid attempts to allocate a ridiculous amount
-		 of memory.  */
-	      bfd_set_error (bfd_error_file_truncated);
-	      _bfd_error_handler
-		/* xgettext:c-format */
-		(_("error: %pB(%pA) section size (%#" PRIx64 " bytes) is larger than file size (%#" PRIx64 " bytes)"),
-		 abfd, sec, (uint64_t) sz, (uint64_t) filesize);
-	      return false;
-	    }
 	  p = (bfd_byte *) bfd_malloc (sz);
 	  if (p == NULL)
 	    {

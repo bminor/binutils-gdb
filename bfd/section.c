@@ -1703,3 +1703,69 @@ _bfd_nowrite_set_section_contents (bfd *abfd,
 {
   return _bfd_bool_bfd_false_error (abfd);
 }
+
+/*
+INTERNAL_FUNCTION
+	_bfd_section_size_insane
+
+SYNOPSIS
+	bool _bfd_section_size_insane (bfd *abfd, asection *sec);
+
+DESCRIPTION
+	Returns true if the given section has a size that indicates
+	it cannot be read from file.  Return false if the size is OK
+	*or* this function can't say one way or the other.
+
+*/
+
+bool
+_bfd_section_size_insane (bfd *abfd, asection *sec)
+{
+  bfd_size_type size = bfd_get_section_limit_octets (abfd, sec);
+  if (size == 0)
+    return false;
+
+  if ((bfd_section_flags (sec) & SEC_IN_MEMORY) != 0
+      /* PR 24753: Linker created sections can be larger than
+	 the file size, eg if they are being used to hold stubs.  */
+      || (bfd_section_flags (sec) & SEC_LINKER_CREATED) != 0
+      /* PR 24753: Sections which have no content should also be
+	 excluded as they contain no size on disk.  */
+      || (bfd_section_flags (sec) & SEC_HAS_CONTENTS) == 0
+      /* The MMO file format supports its own special compression
+	 technique, but it uses COMPRESS_SECTION_NONE when loading
+	 a section's contents.  */
+      || bfd_get_flavour (abfd) == bfd_target_mmo_flavour)
+    return false;
+
+  ufile_ptr filesize = bfd_get_file_size (abfd);
+  if (filesize == 0)
+    return false;
+
+  if (sec->compress_status == DECOMPRESS_SECTION_ZSTD
+      || sec->compress_status == DECOMPRESS_SECTION_ZLIB)
+    {
+      /* PR26946, PR28834: Sanity check compress header uncompressed
+	 size against the original file size, and check that the
+	 compressed section can be read from file.  We choose an
+	 arbitrary uncompressed size of 10x the file size, rather than
+	 a compress ratio.  The reason being that compiling
+	 "int aaa..a;" with "a" repeated enough times can result in
+	 compression ratios without limit for .debug_str, whereas such
+	 a file will usually also have the enormous symbol
+	 uncompressed in .symtab.  */
+     if (size / 10 > filesize)
+       {
+	 bfd_set_error (bfd_error_bad_value);
+	 return true;
+       }
+     size = sec->compressed_size;
+    }
+
+  if ((ufile_ptr) sec->filepos > filesize || size > filesize - sec->filepos)
+    {
+      bfd_set_error (bfd_error_file_truncated);
+      return true;
+    }
+  return false;
+}

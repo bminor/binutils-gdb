@@ -690,7 +690,6 @@ read_section (bfd *abfd,
     {
       bfd_size_type amt;
       asection *msec;
-      ufile_ptr filesize;
 
       msec = bfd_get_section_by_name (abfd, section_name);
       if (msec == NULL)
@@ -706,20 +705,14 @@ read_section (bfd *abfd,
 	  return false;
 	}
 
-      amt = bfd_get_section_limit_octets (abfd, msec);
-      filesize = bfd_get_file_size (abfd);
-      /* PR 28834: A compressed debug section could well decompress to a size
-	 larger than the file, so we choose an arbitrary modifier of 10x in
-	 the test below.  If this ever turns out to be insufficient, it can
-	 be changed by a future update.  */
-      if (amt >= filesize * 10)
+      if (_bfd_section_size_insane (abfd, msec))
 	{
 	  /* PR 26946 */
-	  _bfd_error_handler (_("DWARF error: section %s is larger than 10x its filesize! (0x%lx vs 0x%lx)"),
-			      section_name, (long) amt, (long) filesize);
-	  bfd_set_error (bfd_error_bad_value);
+	  _bfd_error_handler (_("DWARF error: section %s is too big"),
+			      section_name);
 	  return false;
 	}
+      amt = bfd_get_section_limit_octets (abfd, msec);
       *section_size = amt;
       /* Paranoia - alloc one extra so that we can make sure a string
 	 section is NUL terminated.  */
@@ -5496,9 +5489,10 @@ _bfd_dwarf2_slurp_debug_info (bfd *abfd, bfd *debug_bfd,
 	   msec;
 	   msec = find_debug_info (debug_bfd, debug_sections, msec))
 	{
+	  if (_bfd_section_size_insane (debug_bfd, msec))
+	    return false;
 	  /* Catch PR25070 testcase overflowing size calculation here.  */
-	  if (total_size + msec->size < total_size
-	      || total_size + msec->size < msec->size)
+	  if (total_size + msec->size < total_size)
 	    {
 	      bfd_set_error (bfd_error_no_memory);
 	      return false;

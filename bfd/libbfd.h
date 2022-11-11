@@ -1,6 +1,7 @@
 /* DO NOT EDIT!  -*- buffer-read-only: t -*-  This file is automatically
    generated from "libbfd-in.h", "libbfd.c", "bfdio.c", "bfdwin.c",
-   "cache.c", "reloc.c", "targets.c", "archures.c" and "linker.c".
+   "cache.c", "reloc.c", "section.c", "targets.c", "archures.c"
+   and "linker.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* libbfd.h -- Declarations used by bfd library *implementation*.
@@ -3548,6 +3549,9 @@ bool _bfd_unrecognized_reloc
    (bfd * abfd,
     sec_ptr section,
     unsigned int r_type);
+
+/* Extracted from section.c.  */
+bool _bfd_section_size_insane (bfd *abfd, asection *sec);
 
 /* Extracted from targets.c.  */
 const char **_bfd_per_xvec_warn (const bfd_target *);
