@@ -3387,7 +3387,7 @@ v850_satsub (SIM_DESC sd, unsigned int op0, unsigned int op1, unsigned int *op2p
 
 uint32_t
 load_data_mem (SIM_DESC  sd,
-	       SIM_ADDR  addr,
+	       address_word  addr,
 	       int       len)
 {
   uint32_t data;
@@ -3414,7 +3414,7 @@ load_data_mem (SIM_DESC  sd,
 
 void
 store_data_mem (SIM_DESC    sd,
-		SIM_ADDR    addr,
+		address_word    addr,
 		int         len,
 		uint32_t  data)
 {
