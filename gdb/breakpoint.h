@@ -664,7 +664,8 @@ struct breakpoint
 			      const target_waitstatus &ws);
 
   /* Check internal conditions of the breakpoint referred to by BS.
-     If we should not stop for this breakpoint, set BS->stop to 0.  */
+     If we should not stop for this breakpoint, set BS->stop to
+     false.  */
   virtual void check_status (struct bpstat *bs)
   {
     /* Always stop.  */
@@ -1326,11 +1327,11 @@ struct bpstat
     /* Old value associated with a watchpoint.  */
     value_ref_ptr old_val;
 
-    /* Nonzero if this breakpoint tells us to print the frame.  */
-    char print;
+    /* True if this breakpoint tells us to print the frame.  */
+    bool print;
 
-    /* Nonzero if this breakpoint tells us to stop.  */
-    char stop;
+    /* True if this breakpoint tells us to stop.  */
+    bool stop;
 
     /* Tell bpstat_print and print_bp_stop_message how to print stuff
        associated with this element of the bpstat chain.  */

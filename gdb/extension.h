@@ -300,7 +300,7 @@ extern void preserve_ext_lang_values (struct objfile *, htab_t copied_types);
 extern const struct extension_language_defn *get_breakpoint_cond_ext_lang
   (struct breakpoint *b, enum extension_language skip_lang);
 
-extern int breakpoint_ext_lang_cond_says_stop (struct breakpoint *);
+extern bool breakpoint_ext_lang_cond_says_stop (struct breakpoint *);
 
 /* If a method with name METHOD_NAME is to be invoked on an object of type
    TYPE, then all extension languages are searched for implementations of

@@ -598,7 +598,7 @@ get_breakpoint_cond_ext_lang (struct breakpoint *b,
 /* Return whether a stop condition for breakpoint B says to stop.
    True is also returned if there is no stop condition for B.  */
 
-int
+bool
 breakpoint_ext_lang_cond_says_stop (struct breakpoint *b)
 {
   enum ext_lang_bp_stop stop = EXT_LANG_BP_STOP_UNSET;
@@ -627,7 +627,7 @@ breakpoint_ext_lang_cond_says_stop (struct breakpoint *b)
 	}
     }
 
-  return stop == EXT_LANG_BP_STOP_NO ? 0 : 1;
+  return stop != EXT_LANG_BP_STOP_NO;
 }
 
 /* ^C/SIGINT support.

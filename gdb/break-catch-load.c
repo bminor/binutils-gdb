@@ -134,7 +134,7 @@ solib_catchpoint::check_status (struct bpstat *bs)
 	}
     }
 
-  bs->stop = 0;
+  bs->stop = false;
   bs->print_it = print_it_noop;
 }
 

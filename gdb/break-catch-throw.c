@@ -172,7 +172,7 @@ exception_catchpoint::check_status (struct bpstat *bs)
   std::string type_name;
 
   this->breakpoint::check_status (bs);
-  if (bs->stop == 0)
+  if (!bs->stop)
     return;
 
   if (self->pattern == NULL)
@@ -200,7 +200,7 @@ exception_catchpoint::check_status (struct bpstat *bs)
   if (name != nullptr)
     {
       if (self->pattern->exec (name, 0, NULL, 0) != 0)
-	bs->stop = 0;
+	bs->stop = false;
     }
 }
 
