@@ -1041,7 +1041,6 @@ static const arch_entry cpu_arch[] =
   SUBARCH (padlock, PADLOCK, PADLOCK, false),
   SUBARCH (pacifica, SVME, SVME, true),
   SUBARCH (svme, SVME, SVME, false),
-  SUBARCH (sse4a, SSE4A, SSE4A, false),
   SUBARCH (abm, ABM, ABM, false),
   SUBARCH (bmi, BMI, BMI, false),
   SUBARCH (tbm, TBM, TBM, false),
