@@ -222,7 +222,7 @@ INSTRUCTION (loop,
 	     OP2 = (IO ? IMM8 + 1 : RS2_w0);
 	     if (OP2 == 0)
 	      {
-		PC = LOOPEND;
+		PC = PC + LOOP_JMPOFFS;
 	      }
 	     else
 	      {
@@ -237,7 +237,7 @@ INSTRUCTION (iloop,
 	     OP2 = (IO ? IMM8 + 1 : RS2_w0);
 	     if (OP2 == 0)
 	      {
-		PC = LOOPEND;
+		PC = PC + LOOP_JMPOFFS;
 	      }
 	     else
 	      {
