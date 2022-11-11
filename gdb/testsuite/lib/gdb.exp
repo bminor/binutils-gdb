@@ -9045,8 +9045,14 @@ gdb_caching_proc has_hw_wp_support {
     # support for HW watchpoints.
     global srcdir subdir gdb_prompt inferior_exited_re
 
-    set compile_flags {debug nowarnings quiet}
     set me "has_hw_wp_support"
+
+    global gdb_spawn_id
+    if { [info exists gdb_spawn_id] } {
+	error "$me called with running gdb instance"
+    }
+
+    set compile_flags {debug nowarnings quiet}
 
     # Compile a test program to test if HW watchpoints are supported
     set src {
@@ -9063,12 +9069,14 @@ gdb_caching_proc has_hw_wp_support {
         return 0
     }
 
-    gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load "$obj"
 
     if ![runto_main] {
+	gdb_exit
+	remote_file build delete $obj
+
 	set has_hw_wp_support 0
 	return $has_hw_wp_support
     }
