@@ -75,6 +75,26 @@ zlib_compress(int header_size,
     }
 }
 
+#if HAVE_ZSTD
+static bool
+zstd_compress(int header_size, const unsigned char *uncompressed_data,
+	      unsigned long uncompressed_size,
+	      unsigned char **compressed_data, unsigned long *compressed_size)
+{
+  const size_t size = ZSTD_compressBound(uncompressed_size);
+  *compressed_data = new unsigned char[size + header_size];
+  size = ZSTD_compress(*compressed_data + header_size, size, uncompressed_data,
+		       uncompressed_size, ZSTD_CLEVEL_DEFAULT);
+  if (ZSTD_isError(size))
+    {
+      delete[] *compressed_data;
+      return false;
+    }
+  *compressed_size = header_size + size;
+  return true;
+}
+#endif
+
 // Decompress COMPRESSED_DATA of size COMPRESSED_SIZE, into a buffer
 // UNCOMPRESSED_DATA of size UNCOMPRESSED_SIZE.  Returns TRUE if it
 // decompressed successfully, false if it failed.  The buffer, of
@@ -226,15 +246,19 @@ Output_compressed_section::set_final_data_size()
   this->write_to_postprocessing_buffer();
 
   bool success = false;
-  enum { none, gnu_zlib, gabi_zlib } compress;
+  enum { none, gnu_zlib, gabi_zlib, zstd } compress;
   int compression_header_size = 12;
   const int size = parameters->target().get_size();
   if (strcmp(this->options_->compress_debug_sections(), "zlib-gnu") == 0)
     compress = gnu_zlib;
-  else if (strcmp(this->options_->compress_debug_sections(), "zlib-gabi") == 0
-	   || strcmp(this->options_->compress_debug_sections(), "zlib") == 0)
+  else if (strcmp(this->options_->compress_debug_sections(), "none") == 0)
+    compress = none;
+  else
     {
-      compress = gabi_zlib;
+      if (strcmp(this->options_->compress_debug_sections(), "zstd") == 0)
+	compress = zstd;
+      else
+	compress = gabi_zlib;
       if (size == 32)
 	compression_header_size = elfcpp::Elf_sizes<32>::chdr_size;
       else if (size == 64)
@@ -242,34 +266,41 @@ Output_compressed_section::set_final_data_size()
       else
 	gold_unreachable();
     }
-  else
-    compress = none;
-  if (compress != none)
+  if (compress == gnu_zlib || compress == gabi_zlib)
     success = zlib_compress(compression_header_size, uncompressed_data,
 			    uncompressed_size, &this->data_,
 			    &compressed_size);
+#if HAVE_ZSTD
+  else if (compress == zstd)
+    success = zstd_compress(compression_header_size, uncompressed_data,
+			    uncompressed_size, &this->data_,
+			    &compressed_size);
+#endif
   if (success)
     {
       elfcpp::Elf_Xword flags = this->flags();
-      if (compress == gabi_zlib)
+      if (compress == gabi_zlib || compress == zstd)
 	{
 	  // Set the SHF_COMPRESSED bit.
 	  flags |= elfcpp::SHF_COMPRESSED;
 	  const bool is_big_endian = parameters->target().is_big_endian();
-	  uint64_t addralign = this->addralign();
+	  const unsigned int ch_type = compress == zstd
+					   ? elfcpp::ELFCOMPRESS_ZSTD
+					   : elfcpp::ELFCOMPRESS_ZLIB;
+	  uint64_t addralign = this->addralign ();
 	  if (size == 32)
 	    {
 	      if (is_big_endian)
 		{
 		  elfcpp::Chdr_write<32, true> chdr(this->data_);
-		  chdr.put_ch_type(elfcpp::ELFCOMPRESS_ZLIB);
+		  chdr.put_ch_type(ch_type);
 		  chdr.put_ch_size(uncompressed_size);
 		  chdr.put_ch_addralign(addralign);
 		}
 	      else
 		{
 		  elfcpp::Chdr_write<32, false> chdr(this->data_);
-		  chdr.put_ch_type(elfcpp::ELFCOMPRESS_ZLIB);
+		  chdr.put_ch_type(ch_type);
 		  chdr.put_ch_size(uncompressed_size);
 		  chdr.put_ch_addralign(addralign);
 		}
@@ -279,7 +310,7 @@ Output_compressed_section::set_final_data_size()
 	      if (is_big_endian)
 		{
 		  elfcpp::Chdr_write<64, true> chdr(this->data_);
-		  chdr.put_ch_type(elfcpp::ELFCOMPRESS_ZLIB);
+		  chdr.put_ch_type(ch_type);
 		  chdr.put_ch_size(uncompressed_size);
 		  chdr.put_ch_addralign(addralign);
 		  // Clear the reserved field.
@@ -288,7 +319,7 @@ Output_compressed_section::set_final_data_size()
 	      else
 		{
 		  elfcpp::Chdr_write<64, false> chdr(this->data_);
-		  chdr.put_ch_type(elfcpp::ELFCOMPRESS_ZLIB);
+		  chdr.put_ch_type(ch_type);
 		  chdr.put_ch_size(uncompressed_size);
 		  chdr.put_ch_addralign(addralign);
 		  // Clear the reserved field.

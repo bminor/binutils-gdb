@@ -1766,6 +1766,13 @@ flagstest_compress_debug_sections_gabi.cmp: flagstest_compress_debug_sections_ga
 		flagstest_compress_debug_sections_none.stdout > $@.tmp
 	mv -f $@.tmp $@
 
+if HAVE_ZSTD
+check_PROGRAMS += flagstest_compress_debug_sections_zstd
+flagstest_compress_debug_sections_zstd: flagstest_debug.o gcctestdir/ld
+	$(CXXLINK) -o $@ $< -Wl,--compress-debug-sections=zstd
+	test -s $@
+endif
+
 # The specialfile output has a tricky case when we also compress debug
 # sections, because it requires output-file resizing.
 check_PROGRAMS += flagstest_o_specialfile_and_compress_debug_sections

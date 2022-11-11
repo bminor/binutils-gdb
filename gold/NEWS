@@ -1,4 +1,6 @@
 * gold and dwp now support zstd compressed debug sections.
+* The new option --compress-debug-sections=zstd compresses debug sections with
+  zstd.
 
 Changes in 1.16:
 

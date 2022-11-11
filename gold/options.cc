@@ -1433,6 +1433,15 @@ General_options::finalize()
 	}
     }
 
+#ifndef HAVE_ZSTD
+  if (strcmp(this->compress_debug_sections(), "zstd") == 0)
+    {
+      gold_error(_("--compress-debug-sections=zstd: gold is not built with "
+		   "zstd support"));
+      this->set_compress_debug_sections("none");
+    }
+#endif
+
   // --rosegment-gap implies --rosegment.
   if (this->user_set_rosegment_gap())
     this->set_rosegment(true);
