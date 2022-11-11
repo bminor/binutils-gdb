@@ -11188,7 +11188,6 @@ i386_index_check (const char *operand_string)
   const insn_template *t = current_templates->start;
 
   if (t->opcode_modifier.isstring
-      && !t->cpu_flags.bitfield.cpupadlock
       && (current_templates->end[-1].opcode_modifier.isstring
 	  || i.mem_operands))
     {
