@@ -22,6 +22,9 @@
 
 #include "gold.h"
 #include <zlib.h>
+#ifdef HAVE_ZSTD
+#include <zstd.h>
+#endif
 #include "parameters.h"
 #include "options.h"
 #include "compressed_output.h"
@@ -148,45 +151,38 @@ decompress_input_section(const unsigned char* compressed_data,
   if ((sh_flags & elfcpp::SHF_COMPRESSED) != 0)
     {
       unsigned int compression_header_size;
+      unsigned int ch_type;
       if (size == 32)
 	{
 	  compression_header_size = elfcpp::Elf_sizes<32>::chdr_size;
 	  if (big_endian)
-	    {
-	      elfcpp::Chdr<32, true> chdr(compressed_data);
-	      if (chdr.get_ch_type() != elfcpp::ELFCOMPRESS_ZLIB)
-		return false;
-	    }
+	    ch_type = elfcpp::Chdr<32, true> (compressed_data).get_ch_type();
 	  else
-	    {
-	      elfcpp::Chdr<32, false> chdr(compressed_data);
-	      if (chdr.get_ch_type() != elfcpp::ELFCOMPRESS_ZLIB)
-		return false;
-	    }
+	    ch_type = elfcpp::Chdr<32, false>(compressed_data).get_ch_type();
 	}
       else if (size == 64)
 	{
 	  compression_header_size = elfcpp::Elf_sizes<64>::chdr_size;
 	  if (big_endian)
-	    {
-	      elfcpp::Chdr<64, true> chdr(compressed_data);
-	      if (chdr.get_ch_type() != elfcpp::ELFCOMPRESS_ZLIB)
-		return false;
-	    }
+	    ch_type = elfcpp::Chdr<64, true>(compressed_data).get_ch_type();
 	  else
-	    {
-	      elfcpp::Chdr<64, false> chdr(compressed_data);
-	      if (chdr.get_ch_type() != elfcpp::ELFCOMPRESS_ZLIB)
-		return false;
-	    }
+	    ch_type = elfcpp::Chdr<64, false>(compressed_data).get_ch_type();
 	}
       else
 	gold_unreachable();
 
-      return zlib_decompress(compressed_data + compression_header_size,
-			     compressed_size - compression_header_size,
-			     uncompressed_data,
-			     uncompressed_size);
+#ifdef HAVE_ZSTD
+      if (ch_type == elfcpp::ELFCOMPRESS_ZSTD)
+	return !ZSTD_isError(
+	    ZSTD_decompress(uncompressed_data, uncompressed_size,
+			    compressed_data + compression_header_size,
+			    compressed_size - compression_header_size));
+#endif
+      if (ch_type == elfcpp::ELFCOMPRESS_ZLIB)
+	return zlib_decompress(compressed_data + compression_header_size,
+			       compressed_size - compression_header_size,
+			       uncompressed_data, uncompressed_size);
+      return false;
     }
 
   const unsigned int zlib_header_size = 12;
