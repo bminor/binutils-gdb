@@ -548,6 +548,7 @@ proc gdb_start_cmd { {inferior_args {}} } {
 	-notransfer -re "Starting program: \[^\r\n\]*" {
 	    return 0
 	}
+	-re "$gdb_prompt $" { }
     }
     return -1
 }
