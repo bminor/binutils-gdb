@@ -1511,7 +1511,7 @@ dump_opcode_field (lf *file,
 		   char *prefix,
 		   opcode_field *field, char *suffix, int levels)
 {
-  lf_printf (file, "%s(opcode_field *) 0x%lx", prefix, (long) field);
+  lf_printf (file, "%s(opcode_field *) %p", prefix, field);
   if (levels && field != NULL)
     {
       lf_indent (file, +1);
@@ -1531,7 +1531,7 @@ static void
 dump_opcode_bits (lf *file,
 		  char *prefix, opcode_bits *bits, char *suffix, int levels)
 {
-  lf_printf (file, "%s(opcode_bits *) 0x%lx", prefix, (long) bits);
+  lf_printf (file, "%s(opcode_bits *) %p", prefix, bits);
 
   if (levels && bits != NULL)
     {
@@ -1550,13 +1550,13 @@ dump_opcode_bits (lf *file,
 static void
 dump_insn_list (lf *file, char *prefix, insn_list *entry, char *suffix)
 {
-  lf_printf (file, "%s(insn_list *) 0x%lx", prefix, (long) entry);
+  lf_printf (file, "%s(insn_list *) %p", prefix, entry);
 
   if (entry != NULL)
     {
       lf_indent (file, +1);
       dump_insn_entry (file, "\n(insn ", entry->insn, ")");
-      lf_printf (file, "\n(next 0x%lx)", (long) entry->next);
+      lf_printf (file, "\n(next %p)", entry->next);
       lf_indent (file, -1);
     }
   lf_printf (file, "%s", suffix);
@@ -1583,7 +1583,7 @@ dump_gen_entry (lf *file,
 		char *prefix, gen_entry *table, char *suffix, int levels)
 {
 
-  lf_printf (file, "%s(gen_entry *) 0x%lx", prefix, (long) table);
+  lf_printf (file, "%s(gen_entry *) %p", prefix, table);
 
   if (levels && table !=NULL)
     {
@@ -1614,9 +1614,9 @@ dump_gen_list (lf *file,
 {
   while (entry != NULL)
     {
-      lf_printf (file, "%s(gen_list *) 0x%lx", prefix, (long) entry);
+      lf_printf (file, "%s(gen_list *) %p", prefix, entry);
       dump_gen_entry (file, "\n(", entry->table, ")", levels);
-      lf_printf (file, "\n(next (gen_list *) 0x%lx)", (long) entry->next);
+      lf_printf (file, "\n(next (gen_list *) %p)", entry->next);
       lf_printf (file, "%s", suffix);
     }
 }
@@ -1626,9 +1626,9 @@ static void
 dump_gen_table (lf *file,
 		char *prefix, gen_table *gen, char *suffix, int levels)
 {
-  lf_printf (file, "%s(gen_table *) 0x%lx", prefix, (long) gen);
-  lf_printf (file, "\n(isa (insn_table *) 0x%lx)", (long) gen->isa);
-  lf_printf (file, "\n(rules (decode_table *) 0x%lx)", (long) gen->rules);
+  lf_printf (file, "%s(gen_table *) %p", prefix, gen);
+  lf_printf (file, "\n(isa (insn_table *) %p)", gen->isa);
+  lf_printf (file, "\n(rules (decode_table *) %p)", gen->rules);
   dump_gen_list (file, "\n(", gen->tables, ")", levels);
   lf_printf (file, "%s", suffix);
 }

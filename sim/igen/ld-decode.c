@@ -309,15 +309,15 @@ static void
 dump_decode_cond (lf *file, const char *prefix, const decode_cond *cond,
 		  const char *suffix)
 {
-  lf_printf (file, "%s(decode_cond *) 0x%lx", prefix, (long) cond);
+  lf_printf (file, "%s(decode_cond *) %p", prefix, cond);
   if (cond != NULL)
     {
       lf_indent (file, +1);
       lf_printf (file, "\n(word_nr %d)", cond->word_nr);
-      lf_printf (file, "\n(mask 0x%lx)", (long) cond->mask);
-      lf_printf (file, "\n(value 0x%lx)", (long) cond->value);
-      lf_printf (file, "\n(is_equal 0x%lx)", (long) cond->is_equal);
-      lf_printf (file, "\n(next (decode_cond *) 0%lx)", (long) cond->next);
+      lf_printf (file, "\n(mask %p)", cond->mask);
+      lf_printf (file, "\n(value %p)", cond->value);
+      lf_printf (file, "\n(is_equal %d)", cond->is_equal);
+      lf_printf (file, "\n(next (decode_cond *) %p)", cond->next);
       lf_indent (file, -1);
     }
   lf_printf (file, "%s", suffix);
@@ -328,7 +328,7 @@ static void
 dump_decode_conds (lf *file, const char *prefix, const decode_cond *cond,
 		   const char *suffix)
 {
-  lf_printf (file, "%s(decode_cond *) 0x%lx", prefix, (long) cond);
+  lf_printf (file, "%s(decode_cond *) %p", prefix, cond);
   while (cond != NULL)
     {
       dump_decode_cond (file, "\n(", cond, ")");
@@ -342,7 +342,7 @@ void
 dump_decode_rule (lf *file, const char *prefix, const decode_table *rule,
 		  const char *suffix)
 {
-  lf_printf (file, "%s(decode_table *) 0x%lx", prefix, (long) rule);
+  lf_printf (file, "%s(decode_table *) %p", prefix, rule);
   if (rule != NULL)
     {
       lf_indent (file, +1);
@@ -363,7 +363,7 @@ dump_decode_rule (lf *file, const char *prefix, const decode_table *rule,
       dump_filter (file, "\n(format_names \"", rule->format_names, "\")");
       dump_filter (file, "\n(model_names \"", rule->model_names, "\")");
       dump_decode_conds (file, "\n(conditions ", rule->conditions, ")");
-      lf_printf (file, "\n(next 0x%lx)", (long) rule->next);
+      lf_printf (file, "\n(next %p)", rule->next);
       lf_indent (file, -1);
     }
   lf_printf (file, "%s", suffix);

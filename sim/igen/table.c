@@ -536,7 +536,7 @@ dump_line_ref (lf *file,
 	       const line_ref *line,
 	       const char *suffix)
 {
-  lf_printf (file, "%s(line_ref*) 0x%lx", prefix, (long) line);
+  lf_printf (file, "%s(line_ref*) %p", prefix, line);
   if (line != NULL)
     {
       lf_indent (file, +1);
@@ -567,7 +567,7 @@ dump_table_entry (lf *file,
 		  const table_entry *entry,
 		  const char *suffix)
 {
-  lf_printf (file, "%s(table_entry*) 0x%lx", prefix, (long) entry);
+  lf_printf (file, "%s(table_entry*) %p", prefix, entry);
   if (entry != NULL)
     {
       int field;
