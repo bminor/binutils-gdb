@@ -469,13 +469,15 @@ new_logical_line_flags (const char *fname, /* DON'T destroy it!  We point to it!
       /* FIXME: we could check that include nesting is correct.  */
       break;
     case 1 << 3:
-      if (line_number < 0 || fname != NULL || next_saved_file == NULL)
+      if (line_number < 0 || fname != NULL)
 	abort ();
       /* PR gas/16908 workaround: Ignore updates when nested inside a macro
 	 expansion.  */
       if (from_sb_expansion == expanding_nested)
 	return;
-      if (next_saved_file->logical_input_file)
+      if (next_saved_file == NULL)
+	fname = physical_input_file;
+      else if (next_saved_file->logical_input_file)
 	fname = next_saved_file->logical_input_file;
       else
 	fname = next_saved_file->physical_input_file;
