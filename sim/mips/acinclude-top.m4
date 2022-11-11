@@ -46,3 +46,16 @@ AS_CASE([${target}],
   [mips*-*-*],      [SIM_MIPS_BITSIZE=32])
 AC_MSG_RESULT([$SIM_MIPS_BITSIZE])
 AC_SUBST(SIM_MIPS_BITSIZE)
+
+dnl Select the floating hardware support of the target.
+AC_MSG_CHECKING([mips fpu bitsize])
+SIM_MIPS_FPU_BITSIZE=64
+AS_CASE([${target}],
+  [mips*tx39*],     [SIM_MIPS_FPU_BITSIZE=32],
+  [mips*-sde-elf*], [SIM_MIPS_FPU_BITSIZE=64],
+  [mips*-mti-elf*], [SIM_MIPS_FPU_BITSIZE=64],
+  [mipsisa32*-*-*], [SIM_MIPS_FPU_BITSIZE=64],
+  [mipsisa64*-*-*], [SIM_MIPS_FPU_BITSIZE=64],
+  [mips*-*-*],      [SIM_MIPS_FPU_BITSIZE=32])
+AC_MSG_RESULT([$SIM_MIPS_FPU_BITSIZE])
+AC_SUBST(SIM_MIPS_FPU_BITSIZE)

@@ -586,6 +586,7 @@ ac_subst_vars='LTLIBOBJS
 LIBOBJS
 SIM_COMMON_BUILD_FALSE
 SIM_COMMON_BUILD_TRUE
+sim_float
 sim_bitsize
 sim_multi_obj
 sim_multi_src
@@ -645,12 +646,10 @@ PACKAGE_VERSION
 PACKAGE_TARNAME
 PACKAGE_NAME
 PATH_SEPARATOR
-SHELL
-sim_float'
+SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
-enable_sim_float
 '
       ac_precious_vars='build_alias
 host_alias
@@ -1263,13 +1262,6 @@ if test -n "$ac_init_help"; then
 
   cat <<\_ACEOF
 
-Optional Features:
-  --disable-option-checking  ignore unrecognized --enable/--with options
-  --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
-  --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-sim-float      Specify that the target processor has floating point
-                          hardware
-
 Report bugs to the package provider.
 _ACEOF
 ac_status=$?
@@ -1839,48 +1831,6 @@ test -n "$target_alias" &&
   test "$program_prefix$program_suffix$program_transform_name" = \
     NONENONEs,x,x, &&
   program_prefix=${target_alias}-
-
-
-#
-# Select the floating hardware support of the target
-#
-mips_fpu_bitsize=
-case "${target}" in
-  mips*tx39*)           mips_fpu_bitsize=32 ;;
-  mips*-sde-elf*)       mips_fpu_bitsize=64 ;;
-  mips*-mti-elf*)       mips_fpu_bitsize=64 ;;
-  mipsisa32*-*-*)       mips_fpu_bitsize=64 ;;
-  mipsisa64*-*-*)       mips_fpu_bitsize=64 ;;
-  mips*-*-*)            mips_fpu_bitsize=32 ;;
-esac
-
-default_sim_float="HARD_FLOATING_POINT"
-default_sim_float_bitsize="$mips_fpu_bitsize"
-# Check whether --enable-sim-float was given.
-if test "${enable_sim_float+set}" = set; then :
-  enableval=$enable_sim_float; case "${enableval}" in
-  yes | hard)	sim_float="-DWITH_FLOATING_POINT=HARD_FLOATING_POINT";;
-  no | soft)	sim_float="-DWITH_FLOATING_POINT=SOFT_FLOATING_POINT";;
-  32)           sim_float="-DWITH_FLOATING_POINT=HARD_FLOATING_POINT -DWITH_TARGET_FLOATING_POINT_BITSIZE=32";;
-  64)           sim_float="-DWITH_FLOATING_POINT=HARD_FLOATING_POINT -DWITH_TARGET_FLOATING_POINT_BITSIZE=64";;
-  *)		as_fn_error $? "\"Unknown value $enableval passed to --enable-sim-float\"" "$LINENO" 5; sim_float="";;
-esac
-if test x"$silent" != x"yes" && test x"$sim_float" != x""; then
-  echo "Setting float flags = $sim_float" 6>&1
-fi
-else
-
-sim_float=
-if test x"${default_sim_float}" != x""; then
-  sim_float="-DWITH_FLOATING_POINT=${default_sim_float}"
-fi
-if test x"${default_sim_float_bitsize}" != x""; then
-  sim_float="$sim_float -DWITH_TARGET_FLOATING_POINT_BITSIZE=${default_sim_float_bitsize}"
-fi
-
-fi
-
-
 
 
 #

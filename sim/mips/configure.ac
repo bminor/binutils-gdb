@@ -7,22 +7,6 @@ dnl and until we clean that up, we need to expand --target for use below.
 AC_CANONICAL_SYSTEM
 
 #
-# Select the floating hardware support of the target
-#
-mips_fpu_bitsize=
-case "${target}" in
-  mips*tx39*)           mips_fpu_bitsize=32 ;;
-  mips*-sde-elf*)       mips_fpu_bitsize=64 ;;
-  mips*-mti-elf*)       mips_fpu_bitsize=64 ;;
-  mipsisa32*-*-*)       mips_fpu_bitsize=64 ;;
-  mipsisa64*-*-*)       mips_fpu_bitsize=64 ;;
-  mips*-*-*)            mips_fpu_bitsize=32 ;;
-esac
-SIM_AC_OPTION_FLOAT(HARD_FLOATING_POINT,$mips_fpu_bitsize)
-
-
-
-#
 # Select the IGEN architecture
 #
 sim_gen=IGEN
