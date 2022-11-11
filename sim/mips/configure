@@ -586,6 +586,7 @@ ac_subst_vars='LTLIBOBJS
 LIBOBJS
 SIM_COMMON_BUILD_FALSE
 SIM_COMMON_BUILD_TRUE
+sim_bitsize
 sim_multi_obj
 sim_multi_src
 sim_multi_igen_configs
@@ -645,12 +646,10 @@ PACKAGE_TARNAME
 PACKAGE_NAME
 PATH_SEPARATOR
 SHELL
-sim_float
-sim_bitsize'
+sim_float'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
-enable_sim_bitsize
 enable_sim_float
 '
       ac_precious_vars='build_alias
@@ -1268,7 +1267,6 @@ Optional Features:
   --disable-option-checking  ignore unrecognized --enable/--with options
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
-  --enable-sim-bitsize=N  Specify target bitsize (32 or 64)
   --enable-sim-float      Specify that the target processor has floating point
                           hardware
 
@@ -1841,81 +1839,6 @@ test -n "$target_alias" &&
   test "$program_prefix$program_suffix$program_transform_name" = \
     NONENONEs,x,x, &&
   program_prefix=${target_alias}-
-
-
-#
-# Select the bitsize of the target
-#
-case "${target}" in
-  mips*-sde-elf*)       mips_bitsize=64 ; mips_msb=63 ;;
-  mips*-mti-elf*)       mips_bitsize=64 ; mips_msb=63 ;;
-  mips64*-*-*)          mips_bitsize=64 ; mips_msb=63 ;;
-  mips16*-*-*)          mips_bitsize=64 ; mips_msb=63 ;;
-  mipsisa32*-*-*)       mips_bitsize=32 ; mips_msb=31 ;;
-  mipsisa64*-*-*)       mips_bitsize=64 ; mips_msb=63 ;;
-  mips*-*-*)            mips_bitsize=32 ; mips_msb=31 ;;
-  *)                    mips_bitsize=64 ; mips_msb=63 ;;
-esac
-wire_word_bitsize="$mips_bitsize"
-wire_word_msb="$mips_msb"
-wire_address_bitsize=""
-wire_cell_bitsize=""
-# Check whether --enable-sim-bitsize was given.
-if test "${enable_sim_bitsize+set}" = set; then :
-  enableval=$enable_sim_bitsize; sim_bitsize=
-case "${enableval}" in
-  64,63 | 64,63,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=63";;
-  32,31 | 32,31,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31";;
-  64,0 | 64,0,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0";;
-  32,0 | 64,0,* ) sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0";;
-  32) if test x"$wire_word_msb" != x -a x"$wire_word_msb" != x0; then
-        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=31"
-      else
-        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=32 -DWITH_TARGET_WORD_MSB=0"
-      fi ;;
-  64) if test x"$wire_word_msb" != x -a x"$wire_word_msb" != x0; then
-        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=63"
-      else
-        sim_bitsize="-DWITH_TARGET_WORD_BITSIZE=64 -DWITH_TARGET_WORD_MSB=0"
-      fi ;;
-  *)  as_fn_error $? "\"--enable-sim-bitsize was given $enableval.  Expected 32 or 64\"" "$LINENO" 5 ;;
-esac
-# address bitsize
-tmp=`echo "${enableval}" | sed -e "s/^[0-9]*,*[0-9]*,*//"`
-case x"${tmp}" in
-  x ) ;;
-  x32 | x32,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_ADDRESS_BITSIZE=32" ;;
-  x64 | x64,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_ADDRESS_BITSIZE=64" ;;
-  * ) as_fn_error $? "\"--enable-sim-bitsize was given address size $enableval.  Expected 32 or 64\"" "$LINENO" 5 ;;
-esac
-# cell bitsize
-tmp=`echo "${enableval}" | sed -e "s/^[0-9]*,*[0-9*]*,*[0-9]*,*//"`
-case x"${tmp}" in
-  x ) ;;
-  x32 | x32,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_CELL_BITSIZE=32" ;;
-  x64 | x64,* ) sim_bitsize="${sim_bitsize} -DWITH_TARGET_CELL_BITSIZE=64" ;;
-  * ) as_fn_error $? "\"--enable-sim-bitsize was given cell size $enableval.  Expected 32 or 64\"" "$LINENO" 5 ;;
-esac
-if test x"$silent" != x"yes" && test x"$sim_bitsize" != x""; then
-  echo "Setting bitsize flags = $sim_bitsize" 6>&1
-fi
-else
-  sim_bitsize=""
-if test x"$wire_word_bitsize" != x; then
-  sim_bitsize="$sim_bitsize -DWITH_TARGET_WORD_BITSIZE=$wire_word_bitsize"
-fi
-if test x"$wire_word_msb" != x; then
-  sim_bitsize="$sim_bitsize -DWITH_TARGET_WORD_MSB=$wire_word_msb"
-fi
-if test x"$wire_address_bitsize" != x; then
-  sim_bitsize="$sim_bitsize -DWITH_TARGET_ADDRESS_BITSIZE=$wire_address_bitsize"
-fi
-if test x"$wire_cell_bitsize" != x; then
-  sim_bitsize="$sim_bitsize -DWITH_TARGET_CELL_BITSIZE=$wire_cell_bitsize"
-fi
-fi
-
-
 
 
 #

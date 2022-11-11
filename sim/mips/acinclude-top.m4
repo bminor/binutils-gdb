@@ -32,3 +32,17 @@ AS_CASE([${target}],
   [mipsisa64*-*-*], [SIM_MIPS_SUBTARGET="-DTARGET_ENABLE_FR=1"])
 AC_MSG_RESULT([${SIM_MIPS_SUBTARGET:-none}])
 AC_SUBST(SIM_MIPS_SUBTARGET)
+
+dnl Select the bitsize of the target.
+AC_MSG_CHECKING([mips bitsize])
+SIM_MIPS_BITSIZE=64
+AS_CASE([${target}],
+  [mips*-sde-elf*], [SIM_MIPS_BITSIZE=64],
+  [mips*-mti-elf*], [SIM_MIPS_BITSIZE=64],
+  [mips64*-*-*],    [SIM_MIPS_BITSIZE=64],
+  [mips16*-*-*],    [SIM_MIPS_BITSIZE=64],
+  [mipsisa32*-*-*], [SIM_MIPS_BITSIZE=32],
+  [mipsisa64*-*-*], [SIM_MIPS_BITSIZE=64],
+  [mips*-*-*],      [SIM_MIPS_BITSIZE=32])
+AC_MSG_RESULT([$SIM_MIPS_BITSIZE])
+AC_SUBST(SIM_MIPS_BITSIZE)

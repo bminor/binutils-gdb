@@ -7,23 +7,6 @@ dnl and until we clean that up, we need to expand --target for use below.
 AC_CANONICAL_SYSTEM
 
 #
-# Select the bitsize of the target
-#
-case "${target}" in
-  mips*-sde-elf*)       mips_bitsize=64 ; mips_msb=63 ;;
-  mips*-mti-elf*)       mips_bitsize=64 ; mips_msb=63 ;;
-  mips64*-*-*)          mips_bitsize=64 ; mips_msb=63 ;;
-  mips16*-*-*)          mips_bitsize=64 ; mips_msb=63 ;;
-  mipsisa32*-*-*)       mips_bitsize=32 ; mips_msb=31 ;;
-  mipsisa64*-*-*)       mips_bitsize=64 ; mips_msb=63 ;;
-  mips*-*-*)            mips_bitsize=32 ; mips_msb=31 ;;
-  *)                    mips_bitsize=64 ; mips_msb=63 ;;
-esac
-SIM_AC_OPTION_BITSIZE($mips_bitsize,$mips_msb)
-
-
-
-#
 # Select the floating hardware support of the target
 #
 mips_fpu_bitsize=

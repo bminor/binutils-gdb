@@ -641,6 +641,7 @@ LTLIBOBJS
 include_makefile
 SIM_RX_CYCLE_ACCURATE_FLAGS
 SIM_RISCV_BITSIZE
+SIM_MIPS_BITSIZE
 SIM_MIPS_SUBTARGET
 SIM_FRV_TRAPDUMP_FLAGS
 sim_float
@@ -12432,7 +12433,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12435 "configure"
+#line 12436 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12538,7 +12539,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12541 "configure"
+#line 12542 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16299,6 +16300,31 @@ case ${target} in #(
 esac
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${SIM_MIPS_SUBTARGET:-none}" >&5
 $as_echo "${SIM_MIPS_SUBTARGET:-none}" >&6; }
+
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking mips bitsize" >&5
+$as_echo_n "checking mips bitsize... " >&6; }
+SIM_MIPS_BITSIZE=64
+case ${target} in #(
+  mips*-sde-elf*) :
+    SIM_MIPS_BITSIZE=64 ;; #(
+  mips*-mti-elf*) :
+    SIM_MIPS_BITSIZE=64 ;; #(
+  mips64*-*-*) :
+    SIM_MIPS_BITSIZE=64 ;; #(
+  mips16*-*-*) :
+    SIM_MIPS_BITSIZE=64 ;; #(
+  mipsisa32*-*-*) :
+    SIM_MIPS_BITSIZE=32 ;; #(
+  mipsisa64*-*-*) :
+    SIM_MIPS_BITSIZE=64 ;; #(
+  mips*-*-*) :
+    SIM_MIPS_BITSIZE=32 ;; #(
+  *) :
+     ;;
+esac
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $SIM_MIPS_BITSIZE" >&5
+$as_echo "$SIM_MIPS_BITSIZE" >&6; }
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking riscv bitsize" >&5
