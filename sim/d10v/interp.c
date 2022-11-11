@@ -664,9 +664,9 @@ map_memory (SIM_DESC sd, SIM_CPU *cpu, unsigned phys_addr)
 
 static int
 xfer_mem (SIM_DESC sd,
-	  SIM_ADDR virt,
+	  address_word virt,
 	  unsigned char *buffer,
-	  int size,
+	  uint64_t size,
 	  int write_p)
 {
   uint8_t *memory;
@@ -705,8 +705,8 @@ xfer_mem (SIM_DESC sd,
 }
 
 
-int
-sim_write (SIM_DESC sd, SIM_ADDR addr, const void *buffer, int size)
+uint64_t
+sim_write (SIM_DESC sd, uint64_t addr, const void *buffer, uint64_t size)
 {
   /* FIXME: this should be performing a virtual transfer */
   /* FIXME: We cast the const away, but it's safe because xfer_mem only reads
@@ -714,8 +714,8 @@ sim_write (SIM_DESC sd, SIM_ADDR addr, const void *buffer, int size)
   return xfer_mem (sd, addr, (void *) buffer, size, 1);
 }
 
-int
-sim_read (SIM_DESC sd, SIM_ADDR addr, void *buffer, int size)
+uint64_t
+sim_read (SIM_DESC sd, uint64_t addr, void *buffer, uint64_t size)
 {
   /* FIXME: this should be performing a virtual transfer */
   return xfer_mem (sd, addr, buffer, size, 0);

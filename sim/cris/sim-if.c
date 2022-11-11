@@ -485,8 +485,8 @@ aux_ent_entry (struct bfd *ebfd)
 /* Helper for cris_handle_interpreter: like sim_write, but load at
    interp_load_addr offset.  */
 
-static int
-cris_write_interp (SIM_DESC sd, SIM_ADDR mem, const void *buf, int length)
+static uint64_t
+cris_write_interp (SIM_DESC sd, uint64_t mem, const void *buf, uint64_t length)
 {
   return sim_write (sd, mem + interp_load_addr, buf, length);
 }

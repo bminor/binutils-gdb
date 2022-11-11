@@ -26,16 +26,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 /* Generic implementation of sim_read that works with simulators
    modeling real hardware */
 
-int
-sim_read (SIM_DESC sd, SIM_ADDR mem, void *buffer, int length)
+uint64_t
+sim_read (SIM_DESC sd, uint64_t mem, void *buffer, uint64_t length)
 {
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   return sim_core_read_buffer (sd, NULL, read_map,
 			       buffer, mem, length);
 }
 
-int
-sim_write (SIM_DESC sd, SIM_ADDR mem, const void *buffer, int length)
+uint64_t
+sim_write (SIM_DESC sd, uint64_t mem, const void *buffer, uint64_t length)
 {
   SIM_ASSERT (STATE_MAGIC (sd) == SIM_MAGIC_NUMBER);
   return sim_core_write_buffer (sd, NULL, write_map,

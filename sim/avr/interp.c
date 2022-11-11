@@ -1529,8 +1529,8 @@ sim_engine_run (SIM_DESC sd,
     }
 }
 
-int
-sim_write (SIM_DESC sd, SIM_ADDR addr, const void *buffer, int size)
+uint64_t
+sim_write (SIM_DESC sd, uint64_t addr, const void *buffer, uint64_t size)
 {
   int osize = size;
 
@@ -1566,8 +1566,8 @@ sim_write (SIM_DESC sd, SIM_ADDR addr, const void *buffer, int size)
     return 0;
 }
 
-int
-sim_read (SIM_DESC sd, SIM_ADDR addr, void *buffer, int size)
+uint64_t
+sim_read (SIM_DESC sd, uint64_t addr, void *buffer, uint64_t size)
 {
   int osize = size;
 

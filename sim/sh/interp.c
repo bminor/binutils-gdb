@@ -1873,8 +1873,8 @@ sim_resume (SIM_DESC sd, int step, int siggnal)
   signal (SIGFPE, prev_fpe);
 }
 
-int
-sim_write (SIM_DESC sd, SIM_ADDR addr, const void *buffer, int size)
+uint64_t
+sim_write (SIM_DESC sd, uint64_t addr, const void *buffer, uint64_t size)
 {
   int i;
   const unsigned char *data = buffer;
@@ -1888,8 +1888,8 @@ sim_write (SIM_DESC sd, SIM_ADDR addr, const void *buffer, int size)
   return size;
 }
 
-int
-sim_read (SIM_DESC sd, SIM_ADDR addr, void *buffer, int size)
+uint64_t
+sim_read (SIM_DESC sd, uint64_t addr, void *buffer, uint64_t size)
 {
   int i;
   unsigned char *data = buffer;

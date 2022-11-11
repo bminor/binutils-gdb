@@ -329,8 +329,8 @@ sim_fetch_register(SIM_DESC sd, int regno, void *buf, int length)
     return -1;
 }
 
-int
-sim_write (SIM_DESC sd, SIM_ADDR mem, const void *buffer, int length)
+uint64_t
+sim_write (SIM_DESC sd, uint64_t mem, const void *buffer, uint64_t length)
 {
     int i, len;
     const unsigned char *data = buffer;
@@ -341,8 +341,8 @@ sim_write (SIM_DESC sd, SIM_ADDR mem, const void *buffer, int length)
     return length;
 }
 
-int
-sim_read (SIM_DESC sd, SIM_ADDR mem, void *buffer, int length)
+uint64_t
+sim_read (SIM_DESC sd, uint64_t mem, void *buffer, uint64_t length)
 {
     int i, len;
     unsigned char *data = buffer;

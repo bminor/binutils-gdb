@@ -150,13 +150,13 @@ ARMul_ConsolePrint (ARMul_State * state,
     }
 }
 
-int
+uint64_t
 sim_write (SIM_DESC sd ATTRIBUTE_UNUSED,
-	   SIM_ADDR addr,
+	   uint64_t addr,
 	   const void * buffer,
-	   int size)
+	   uint64_t size)
 {
-  int i;
+  uint64_t i;
   const unsigned char * data = buffer;
 
   init ();
@@ -167,13 +167,13 @@ sim_write (SIM_DESC sd ATTRIBUTE_UNUSED,
   return size;
 }
 
-int
+uint64_t
 sim_read (SIM_DESC sd ATTRIBUTE_UNUSED,
-	  SIM_ADDR addr,
+	  uint64_t addr,
 	  void * buffer,
-	  int size)
+	  uint64_t size)
 {
-  int i;
+  uint64_t i;
   unsigned char * data = buffer;
 
   init ();
