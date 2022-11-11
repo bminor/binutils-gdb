@@ -15,11 +15,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+volatile int global_var = 0;
+
 /* Dummy main function.  */
 
 int
 main()
 {
   asm ("main_label: .globl main_label");
-  return 0;
+  ++global_var;
+  return 0;	/* Breakpoint here.  */
 }

@@ -161,6 +161,10 @@ proc_with_prefix no_url { } {
     if ![runto_main] {
 	return -1
     }
+
+    gdb_breakpoint [gdb_get_line_number "Breakpoint here"]
+    gdb_continue_to_breakpoint "stop at last line of main"
+
     gdb_test "generate-core-file $::corefile" "Saved corefile $::corefile" \
 	"file [file tail $::corefile] gen"
     file rename -force ${binfile}2 $debugdir
@@ -217,7 +221,8 @@ proc_with_prefix local_url { } {
     gdb_test_no_output "set substitute-path $outputdir /dev/null" \
 	"set substitute-path"
     gdb_test "br main" "Breakpoint 1 at.*file.*"
-    gdb_test "l" ".*This program is distributed in the hope.*"
+    set lineno [gdb_get_line_number "Breakpoint here"]
+    gdb_test "list $lineno" "return 0;\[^\r\n\]+Breakpoint here\\. .*"
 
     # GDB should now find the executable file.
     clean_restart
