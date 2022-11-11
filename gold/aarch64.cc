@@ -1182,7 +1182,8 @@ class Reloc_stub : public Stub_base<size, big_endian>
   aarch64_valid_for_adrp_p(AArch64_address location, AArch64_address dest)
   {
     typedef AArch64_relocate_functions<size, big_endian> Reloc;
-    int64_t adrp_imm = (Reloc::Page(dest) - Reloc::Page(location)) >> 12;
+    int64_t adrp_imm = Reloc::Page (dest) - Reloc::Page (location);
+    adrp_imm = adrp_imm < 0 ? ~(~adrp_imm >> 12) : adrp_imm >> 12;
     return adrp_imm >= MIN_ADRP_IMM && adrp_imm <= MAX_ADRP_IMM;
   }
 
