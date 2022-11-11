@@ -66,7 +66,6 @@ sim_igen_machine="-M mipsIV"
 sim_m16_machine="-M mips16,mipsIII"
 sim_igen_filter="32,64,f"
 sim_m16_filter="16"
-sim_mach_default="mips8000"
 
 case "${target}" in
   mips*tx39*)		sim_gen=IGEN
@@ -75,18 +74,15 @@ case "${target}" in
 			;;
   mips64vr43*-*-*)	sim_gen=IGEN
 			sim_igen_machine="-M mipsIV"
-			sim_mach_default="mips8000"
 			;;
   mips64vr5*-*-*)	sim_gen=IGEN
 			sim_igen_machine="-M vr5000"
-			sim_mach_default="mips5000"
 			;;
   mips64vr41*)		sim_gen=M16
 			sim_igen_machine="-M vr4100"
 			sim_m16_machine="-M vr4100"
 			sim_igen_filter="32,64,f"
 			sim_m16_filter="16"
-			sim_mach_default="mips4100"
                         ;;
   mips64vr-*-* | mips64vrel-*-*)
 			sim_gen=MULTI
@@ -122,42 +118,35 @@ case "${target}" in
   mipsisa32r6*-*-*)	sim_gen=IGEN
 			sim_igen_machine="-M mips32r6"
 			sim_igen_filter="32,f"
-			sim_mach_default="mipsisa32r6"
 			;;
   mipsisa32*-*-*)	sim_gen=M16
 			sim_igen_machine="-M mips32,mips16,mips16e,smartmips"
 			sim_m16_machine="-M mips16,mips16e,mips32"
 			sim_igen_filter="32,f"
-			sim_mach_default="mipsisa32"
 			;;
   mipsisa64r2*-*-*)	sim_gen=M16
 			sim_igen_machine="-M mips64r2,mips3d,mips16,mips16e,mdmx,dsp,dsp2"
 			sim_m16_machine="-M mips16,mips16e,mips64r2"
 			sim_igen_filter="32,64,f"
-			sim_mach_default="mipsisa64r2"
 			;;
   mipsisa64r6*-*-*)	sim_gen=IGEN
 			sim_igen_machine="-M mips64r6"
 			sim_igen_filter="32,64,f"
-			sim_mach_default="mipsisa64r6"
 			;;
   mipsisa64sb1*-*-*)	sim_gen=IGEN
 			sim_igen_machine="-M mips64,mips3d,sb1"
 			sim_igen_filter="32,64,f"
-			sim_mach_default="mips_sb1"
 			;;
   mipsisa64*-*-*)	sim_gen=M16
 			sim_igen_machine="-M mips64,mips3d,mips16,mips16e,mdmx"
 			sim_m16_machine="-M mips16,mips16e,mips64"
 			sim_igen_filter="32,64,f"
-			sim_mach_default="mipsisa64"
 			;;
   mips*lsi*)		sim_gen=M16
 			sim_igen_machine="-M mipsIII,mips16"
 			sim_m16_machine="-M mips16,mipsIII"
 			sim_igen_filter="32,f"
 			sim_m16_filter="16"
-			sim_mach_default="mips4000"
 			;;
   mips*-*-*)		sim_gen=IGEN
 			sim_igen_filter="32,f"
@@ -357,47 +346,10 @@ __EOF__
   cat << __EOF__ >> multi-run.c
     }
 }
-
-int
-mips_mach_multi (SIM_DESC sd)
-{
-  if (STATE_ARCHITECTURE (sd) == NULL)
-    return bfd_mach_${sim_multi_default};
-
-  switch (STATE_ARCHITECTURE (SD)->mach)
-    {
 __EOF__
-
-  # Add case statements for this engine to mips_mach_multi().
-  for fc in ${sim_multi_configs}; do
-
-    # Split up the entry.  ${c} contains the first three elements.
-    # Note: outer sqaure brackets are m4 quotes.
-    c=`echo ${fc} | sed ['s/:[^:]*$//']`
-    bfdmachs=`echo ${fc} | sed 's/.*://'`
-
-    for mach in `echo ${bfdmachs} | sed 's/,/ /g'`; do
-      echo "    case bfd_mach_${mach}:" >> multi-run.c
-    done
-  done
-
-  cat << __EOF__ >> multi-run.c
-      return (STATE_ARCHITECTURE (SD)->mach);
-    default:
-      return bfd_mach_${sim_multi_default};
-    }
-}
-__EOF__
-
-  SIM_SUBTARGET="$SIM_SUBTARGET -DMIPS_MACH_MULTI"
 else
   # For clean-extra
   sim_multi_src=doesnt-exist.c
-
-  if test x"${sim_mach_default}" = x""; then
-    AC_MSG_ERROR(Error in configure.ac: \${sim_mach_default} not defined)
-  fi
-  SIM_SUBTARGET="$SIM_SUBTARGET -DMIPS_MACH_DEFAULT=bfd_mach_${sim_mach_default}"
 fi
 sim_igen_flags="-F ${sim_igen_filter} ${sim_igen_machine} ${sim_igen_smp}"
 sim_m16_flags=" -F ${sim_m16_filter}  ${sim_m16_machine}  ${sim_igen_smp}"
