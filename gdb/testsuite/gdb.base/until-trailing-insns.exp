@@ -84,12 +84,6 @@ if {![dwarf2_support]} {
     return 0
 }
 
-# The DWARF assembler requires the gcc compiler.
-if {![is_c_compiler_gcc]} {
-    unsupported "gcc is required for this test"
-    return 0
-}
-
 standard_testfile .c .S
 
 if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile}] } {

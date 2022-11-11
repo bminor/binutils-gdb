@@ -31,11 +31,6 @@ if [prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}] {
     return
 }
 
-if {[test_compiler_info clang-*-*]} {
-    untested "gcc is required for dwarf assembler tests"
-    return
-}
-
 if ![runto_main] {
     return
 }
