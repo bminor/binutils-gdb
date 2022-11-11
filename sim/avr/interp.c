@@ -1769,7 +1769,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 {
   struct avr_sim_state *state = AVR_SIM_STATE (sd);
   SIM_CPU *cpu = STATE_CPU (sd, 0);
-  SIM_ADDR addr;
+  bfd_vma addr;
 
   /* Set the PC.  */
   if (abfd != NULL)

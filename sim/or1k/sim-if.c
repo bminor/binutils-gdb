@@ -263,7 +263,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 		     char * const *argv, char * const *envp)
 {
   SIM_CPU *current_cpu = STATE_CPU (sd, 0);
-  SIM_ADDR addr;
+  bfd_vma addr;
 
   if (abfd != NULL)
     addr = bfd_get_start_address (abfd);

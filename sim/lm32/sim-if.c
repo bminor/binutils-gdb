@@ -198,7 +198,7 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char * const *argv,
 {
   SIM_CPU *current_cpu = STATE_CPU (sd, 0);
   host_callback *cb = STATE_CALLBACK (sd);
-  SIM_ADDR addr;
+  bfd_vma addr;
 
   if (abfd != NULL)
     addr = bfd_get_start_address (abfd);

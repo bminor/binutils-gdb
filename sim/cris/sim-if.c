@@ -974,10 +974,10 @@ sim_create_inferior (SIM_DESC sd, struct bfd *abfd,
 {
   SIM_CPU *current_cpu = STATE_CPU (sd, 0);
   host_callback *cb = STATE_CALLBACK (sd);
-  SIM_ADDR addr;
+  bfd_vma addr;
 
   if (sd != NULL)
-    addr = cris_start_address != (SIM_ADDR) -1
+    addr = cris_start_address != (USI) -1
       ? cris_start_address
       : (interp_start_addr != 0
 	 ? interp_start_addr
