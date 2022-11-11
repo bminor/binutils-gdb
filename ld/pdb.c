@@ -592,6 +592,96 @@ find_section_number (bfd *abfd, asection *sect)
   return 0;
 }
 
+/* Create the substream which maps addresses in the image file to locations
+   in the original object files.  */
+static bool
+create_section_contrib_substream (bfd *abfd, void **data, uint32_t *size)
+{
+  unsigned int num_sc = 0;
+  struct section_contribution *sc;
+  uint16_t mod_index;
+  char *sect_flags;
+  file_ptr offset;
+
+  for (bfd *in = coff_data (abfd)->link_info->input_bfds; in;
+       in = in->link.next)
+    {
+      for (asection *s = in->sections; s; s = s->next)
+	{
+	  if (s->size == 0 || discarded_section (s))
+	    continue;
+
+	  num_sc++;
+	}
+    }
+
+  *size = sizeof (uint32_t) + (num_sc * sizeof (struct section_contribution));
+  *data = xmalloc (*size);
+
+  bfd_putl32 (SECTION_CONTRIB_VERSION_60, *data);
+
+  /* Read characteristics of outputted sections.  */
+
+  sect_flags = xmalloc (sizeof (uint32_t) * abfd->section_count);
+
+  offset = bfd_coff_filhsz (abfd) + bfd_coff_aoutsz (abfd);
+  offset += offsetof (struct external_scnhdr, s_flags);
+
+  for (unsigned int i = 0; i < abfd->section_count; i++)
+    {
+      bfd_seek (abfd, offset, SEEK_SET);
+
+      if (bfd_bread (sect_flags + (i * sizeof (uint32_t)), sizeof (uint32_t),
+		     abfd) != sizeof (uint32_t))
+	{
+	  free (*data);
+	  free (sect_flags);
+	  return false;
+	}
+
+      offset += sizeof (struct external_scnhdr);
+    }
+
+  sc =
+    (struct section_contribution *) ((uint8_t *) *data + sizeof (uint32_t));
+
+  mod_index = 0;
+  for (bfd *in = coff_data (abfd)->link_info->input_bfds; in;
+       in = in->link.next)
+    {
+      for (asection *s = in->sections; s; s = s->next)
+	{
+	  uint16_t sect_num;
+
+	  if (s->size == 0 || discarded_section (s))
+	    continue;
+
+	  sect_num = find_section_number (abfd, s->output_section);
+
+	  memcpy (&sc->characteristics,
+		  sect_flags + ((sect_num - 1) * sizeof (uint32_t)),
+		  sizeof (uint32_t));
+
+	  bfd_putl16 (sect_num, &sc->section);
+	  bfd_putl16 (0, &sc->padding1);
+	  bfd_putl32 (s->output_offset, &sc->offset);
+	  bfd_putl32 (s->size, &sc->size);
+	  bfd_putl16 (mod_index, &sc->module_index);
+	  bfd_putl16 (0, &sc->padding2);
+	  bfd_putl32 (0, &sc->data_crc);
+	  bfd_putl32 (0, &sc->reloc_crc);
+
+	  sc++;
+	}
+
+      mod_index++;
+    }
+
+  free (sect_flags);
+
+  return true;
+}
+
 /* Stream 4 is the debug information (DBI) stream.  */
 static bool
 populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
@@ -601,11 +691,17 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
 {
   struct pdb_dbi_stream_header h;
   struct optional_dbg_header opt;
-  void *mod_info;
-  uint32_t mod_info_size;
+  void *mod_info, *sc;
+  uint32_t mod_info_size, sc_size;
 
   if (!create_module_info_substream (abfd, pdb, &mod_info, &mod_info_size))
     return false;
+
+  if (!create_section_contrib_substream (abfd, &sc, &sc_size))
+    {
+      free (mod_info);
+      return false;
+    }
 
   bfd_putl32 (0xffffffff, &h.version_signature);
   bfd_putl32 (DBI_STREAM_VERSION_70, &h.version_header);
@@ -617,7 +713,7 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
   bfd_putl16 (sym_rec_stream_num, &h.sym_record_stream);
   bfd_putl16 (0, &h.pdb_dll_rbld);
   bfd_putl32 (mod_info_size, &h.mod_info_size);
-  bfd_putl32 (0, &h.section_contribution_size);
+  bfd_putl32 (sc_size, &h.section_contribution_size);
   bfd_putl32 (0, &h.section_map_size);
   bfd_putl32 (0, &h.source_info_size);
   bfd_putl32 (0, &h.type_server_map_size);
@@ -630,17 +726,27 @@ populate_dbi_stream (bfd *stream, bfd *abfd, bfd *pdb,
 
   if (bfd_bwrite (&h, sizeof (h), stream) != sizeof (h))
     {
+      free (sc);
       free (mod_info);
       return false;
     }
 
   if (bfd_bwrite (mod_info, mod_info_size, stream) != mod_info_size)
     {
+      free (sc);
       free (mod_info);
       return false;
     }
 
   free (mod_info);
+
+  if (bfd_bwrite (sc, sc_size, stream) != sc_size)
+    {
+      free (sc);
+      return false;
+    }
+
+  free (sc);
 
   bfd_putl16 (0xffff, &opt.fpo_stream);
   bfd_putl16 (0xffff, &opt.exception_stream);

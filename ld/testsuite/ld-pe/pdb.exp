@@ -626,6 +626,26 @@ proc test_mod_info { mod_info } {
     }
 }
 
+proc test_section_contrib { section_contrib } {
+    global objdump
+    global srcdir
+    global subdir
+
+    set fi [open tmpdir/pdb2-sc w]
+    fconfigure $fi -translation binary
+    puts -nonewline $fi $section_contrib
+    close $fi
+
+    set exp [file_contents "$srcdir/$subdir/pdb2-section-contrib.d"]
+    set got [run_host_cmd "$objdump" "-s --target=binary tmpdir/pdb2-sc"]
+
+    if [string equal $exp $got] {
+	pass "Correct section contribution substream"
+    } else {
+	fail "Incorrect section contribution substream"
+    }
+}
+
 proc test2 { } {
     global as
     global ar
@@ -650,7 +670,7 @@ proc test2 { } {
 	return
     }
 
-    if ![ld_link $ld "tmpdir/pdb2.exe" "--pdb=tmpdir/pdb2.pdb -e foo tmpdir/pdb2a.o tmpdir/pdb2b.a"] {
+    if ![ld_link $ld "tmpdir/pdb2.exe" "--pdb=tmpdir/pdb2.pdb --gc-sections -e foo tmpdir/pdb2a.o tmpdir/pdb2b.a"] {
 	unsupported "Create PE image with PDB file"
 	return
     }
@@ -669,13 +689,18 @@ proc test2 { } {
     set data [read $fi 4]
     binary scan $data i mod_info_size
 
-    seek $fi 36 current
+    set data [read $fi 4]
+    binary scan $data i section_contrib_size
+
+    seek $fi 32 current
 
     set mod_info [read $fi $mod_info_size]
+    set section_contrib [read $fi $section_contrib_size]
 
     close $fi
 
     test_mod_info $mod_info
+    test_section_contrib $section_contrib
 }
 
 test1

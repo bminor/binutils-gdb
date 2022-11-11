@@ -155,6 +155,8 @@ struct optional_dbg_header
 
 #define CV_SIGNATURE_C13		4
 
+#define SECTION_CONTRIB_VERSION_60	0xf12eba2d
+
 /* SC in dbicommon.h */
 struct section_contribution
 {
