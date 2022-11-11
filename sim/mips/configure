@@ -1847,9 +1847,6 @@ case "${target}" in
 			sim_igen_filter="32,f"
 			sim_igen_machine="-M r3900"
 			;;
-  mips64vr43*)		sim_gen=IGEN
-			sim_igen_machine="-M mipsIV"
-			;;
   mips64vr5*)		sim_gen=IGEN
 			sim_igen_machine="-M vr5000"
 			;;
@@ -1859,7 +1856,7 @@ case "${target}" in
 			sim_igen_filter="32,64,f"
 			sim_m16_filter="16"
                         ;;
-  mips64vr-* | mips64vrel-*)
+  mips64vr43* | mips64vr-* | mips64vrel-*)
 			sim_gen=MULTI
 			sim_multi_configs="\
 			  vr4100:mipsIII,mips16,vr4100:32,64:mips4100,mips4111\
