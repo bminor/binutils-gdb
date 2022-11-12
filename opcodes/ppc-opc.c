@@ -730,16 +730,16 @@ extract_pcrel (uint64_t insn,
   return pcrel;
 }
 
-/* Variant of extract_pcrel that sets invalid for R bit set.  The idea
-   is to disassemble "paddi rt,0,offset,1" as "pla rt,offset".  */
+/* Variant of extract_pcrel that sets invalid for R bit clear.  Used
+   to disassemble "paddi rt,0,offset,1" as "pla rt,offset".  */
 
 static int64_t
-extract_pcrel0 (uint64_t insn,
+extract_pcrel1 (uint64_t insn,
 		ppc_cpu_t dialect,
 		int *invalid)
 {
   int64_t pcrel = extract_pcrel (insn, dialect, invalid);
-  if (pcrel)
+  if (!pcrel)
     *invalid = 1;
   return pcrel;
 }
@@ -3344,13 +3344,13 @@ const struct powerpc_operand powerpc_operands[] =
 #define PCREL_MASK (1ULL << 52)
   { 0x1, 52, insert_pcrel, extract_pcrel, PPC_OPERAND_OPTIONAL },
 
-#define PCREL0 PCREL + 1
-  { 0x1, 52, insert_pcrel, extract_pcrel0, PPC_OPERAND_OPTIONAL },
+#define PCREL1 PCREL + 1
+  { 0x1, 52, insert_pcrel, extract_pcrel1, PPC_OPERAND_OPTIONAL },
 
   /* The RA field in a D or X form instruction which is an updating
      load, which means that the RA field may not be zero and may not
      equal the RT field.  */
-#define RAL PCREL0 + 1
+#define RAL PCREL1 + 1
   { 0x1f, 16, insert_ral, extract_ral, PPC_OPERAND_GPR_0 },
 
   /* The RA field in an lmw instruction, which has special value
@@ -9749,9 +9749,9 @@ const unsigned int powerpc_num_opcodes = ARRAY_SIZE (powerpc_opcodes);
 const struct powerpc_opcode prefix_opcodes[] = {
 {"pnop",	  PMRR,		       PREFIX_MASK,	POWER10, 0,	{0}},
 {"pli",		  PMLS|OP(14),	       P_DRAPCREL_MASK,	POWER10, EXT,	{RT, SI34}},
-{"paddi",	  PMLS|OP(14),	       P_D_MASK,	POWER10, 0,	{RT, RA0, SI34, PCREL0}},
-{"psubi",	  PMLS|OP(14),	       P_D_MASK,	POWER10, EXT,	{RT, RA0, NSI34, PCREL0}},
-{"pla",		  PMLS|OP(14),	       P_D_MASK,	POWER10, EXT,	{RT, D34, PRA0, PCREL}},
+{"pla",		  PMLS|OP(14),	       P_D_MASK,	POWER10, EXT,	{RT, D34, PRA0, PCREL1}},
+{"paddi",	  PMLS|OP(14),	       P_D_MASK,	POWER10, 0,	{RT, RA0, SI34, PCREL}},
+{"psubi",	  PMLS|OP(14),	       P_D_MASK,	POWER10, EXT,	{RT, RA0, NSI34, PCREL}},
 {"xxsplti32dx",	  P8RR|VSOP(32,0),     P_VSI_MASK,	POWER10, 0,	{XTS, IX, IMM32}},
 {"xxspltidp",	  P8RR|VSOP(32,2),     P_VS_MASK,	POWER10, 0,	{XTS, IMM32}},
 {"xxspltiw",	  P8RR|VSOP(32,3),     P_VS_MASK,	POWER10, 0,	{XTS, IMM32}},
