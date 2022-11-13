@@ -322,6 +322,10 @@ elf64_sparc_set_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 {
   asect->orelocation = location;
   canon_reloc_count (asect) = count;
+  if (count != 0)
+    asect->flags |= SEC_RELOC;
+  else
+    asect->flags &= ~SEC_RELOC;
 }
 
 /* Write out the relocs.  */

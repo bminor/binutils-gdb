@@ -1448,3 +1448,5 @@ if { [istarget *-*-cygwin] || [istarget *-*-mingw*] } {
 if { ![is_xcoff_format] } {
     objcopy_test "pr25662" $src executable "" $ldflags
 }
+
+run_dump_test "rename-section-01"

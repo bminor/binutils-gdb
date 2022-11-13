@@ -8706,6 +8706,10 @@ _bfd_generic_set_reloc (bfd *abfd ATTRIBUTE_UNUSED,
 {
   section->orelocation = relptr;
   section->reloc_count = count;
+  if (count != 0)
+    section->flags |= SEC_RELOC;
+  else
+    section->flags &= ~SEC_RELOC;
 }
 
 /*

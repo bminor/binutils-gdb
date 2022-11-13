@@ -579,7 +579,6 @@ size_seg (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *xxx ATTRIBUTE_UNUSED)
   if (size > 0 && ! seginfo->bss)
     flags |= SEC_HAS_CONTENTS;
 
-  flags &= ~SEC_RELOC;
   x = bfd_set_section_flags (sec, flags);
   gas_assert (x);
 
@@ -1385,13 +1384,7 @@ write_relocs (bfd *abfd ATTRIBUTE_UNUSED, asection *sec,
   }
 #endif
 
-  if (n)
-    {
-      flagword flags = bfd_section_flags (sec);
-      flags |= SEC_RELOC;
-      bfd_set_section_flags (sec, flags);
-      bfd_set_reloc (stdoutput, sec, relocs, n);
-    }
+  bfd_set_reloc (stdoutput, sec, n ? relocs : NULL, n);
 
 #ifdef SET_SECTION_RELOCS
   SET_SECTION_RELOCS (sec, relocs, n);
