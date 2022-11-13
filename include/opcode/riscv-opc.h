@@ -2208,6 +2208,11 @@
 #define MASK_TH_FSURD 0xf800707f
 #define MATCH_TH_FSURW 0x5000700b
 #define MASK_TH_FSURW 0xf800707f
+/* Vendor-specific (T-Head) XTheadFmv instructions. */
+#define MATCH_TH_FMV_HW_X 0x6000100b
+#define MASK_TH_FMV_HW_X 0xfff0707f
+#define MATCH_TH_FMV_X_HW 0x5000100b
+#define MASK_TH_FMV_X_HW 0xfff0707f
 /* Vendor-specific (T-Head) XTheadMac instructions.  */
 #define MATCH_TH_MULA 0x2000100b
 #define MASK_TH_MULA 0xfe00707f
@@ -3122,6 +3127,9 @@ DECLARE_INSN(th_fsrd, MATCH_TH_FSRD, MASK_TH_FSRD)
 DECLARE_INSN(th_fsrw, MATCH_TH_FSRW, MASK_TH_FSRW)
 DECLARE_INSN(th_fsurd, MATCH_TH_FSURD, MASK_TH_FSURD)
 DECLARE_INSN(th_fsurw, MATCH_TH_FSURW, MASK_TH_FSURW)
+/* Vendor-specific (T-Head) XTheadFmv instructions. */
+DECLARE_INSN(th_fmv_hw_x, MATCH_TH_FMV_HW_X, MASK_TH_FMV_HW_X)
+DECLARE_INSN(th_fmv_x_hw, MATCH_TH_FMV_X_HW, MASK_TH_FMV_X_HW)
 /* Vendor-specific (T-Head) XTheadMac instructions.  */
 DECLARE_INSN(th_mula, MATCH_TH_MULA, MASK_TH_MULA)
 DECLARE_INSN(th_mulah, MATCH_TH_MULAH, MASK_TH_MULAH)

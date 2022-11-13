@@ -1239,6 +1239,7 @@ static struct riscv_supported_ext riscv_supported_vendor_x_ext[] =
   {"xtheadcmo",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadcondmov",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadfmemidx",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
+  {"xtheadfmv",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadmac",		ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadmemidx",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
   {"xtheadmempair",	ISA_SPEC_CLASS_DRAFT,	1, 0, 0 },
@@ -2419,6 +2420,8 @@ riscv_multi_subset_supports (riscv_parse_subset_t *rps,
       return riscv_subset_supports (rps, "xtheadcondmov");
     case INSN_CLASS_XTHEADFMEMIDX:
       return riscv_subset_supports (rps, "xtheadfmemidx");
+    case INSN_CLASS_XTHEADFMV:
+      return riscv_subset_supports (rps, "xtheadfmv");
     case INSN_CLASS_XTHEADMAC:
       return riscv_subset_supports (rps, "xtheadmac");
     case INSN_CLASS_XTHEADMEMIDX:
@@ -2573,6 +2576,8 @@ riscv_multi_subset_supports_ext (riscv_parse_subset_t *rps,
       return "xtheadcondmov";
     case INSN_CLASS_XTHEADFMEMIDX:
       return "xtheadfmemidx";
+    case INSN_CLASS_XTHEADFMV:
+      return "xtheadfmv";
     case INSN_CLASS_XTHEADMAC:
       return "xtheadmac";
     case INSN_CLASS_XTHEADMEMIDX:

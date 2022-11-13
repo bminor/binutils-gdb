@@ -734,6 +734,11 @@ The XTheadFMemIdx extension provides floating-point memory operations.
 
 It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.0.0/xthead-2022-09-05-2.0.0.pdf}.
 
+@item XTheadFmv
+The XTheadFmv extension provides access to the upper 32 bits of a doulbe-precision floating point register.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.1.0/xthead-2022-11-07-2.1.0.pdf}.
+
 @item XTheadMac
 The XTheadMac extension provides multiply-accumulate instructions.
 

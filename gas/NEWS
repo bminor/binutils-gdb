@@ -26,9 +26,9 @@
   for --enable-compressed-debug-sections.
 
 * Add support for various T-Head extensions (XTheadBa, XTheadBb, XTheadBs,
-  XTheadCmo, XTheadCondMov, XTheadFMemIdx, XTheadMemIdx, XTheadMemPair,
-  XTheadMac, and XTheadSync) from version 2.0 of the T-Head ISA manual, which
-  are implemented in the Allwinner D1.
+  XTheadCmo, XTheadCondMov, XTheadFMemIdx, XTheadFmv, XTheadMemIdx,
+  XTheadMemPair, XTheadMac, and XTheadSync) from version 2.0 of the T-Head
+  ISA manual, which are implemented in the Allwinner D1.
 
 * Add support for the RISC-V Zawrs extension, version 1.0-rc4.
 
