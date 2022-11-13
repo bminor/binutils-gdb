@@ -1935,6 +1935,10 @@ const struct riscv_opcode riscv_opcodes[] =
 {"th.fmv.hw.x", 32, INSN_CLASS_XTHEADFMV, "d,S", MATCH_TH_FMV_HW_X,  MASK_TH_FMV_HW_X,  match_opcode, 0},
 {"th.fmv.x.hw", 32, INSN_CLASS_XTHEADFMV, "d,S", MATCH_TH_FMV_X_HW,  MASK_TH_FMV_X_HW,  match_opcode, 0},
 
+/* Vendor-specific (T-Head) XTheadInt instructions.  */
+{"th.ipop",  0, INSN_CLASS_XTHEADINT, "", MATCH_TH_IPOP,  MASK_TH_IPOP,  match_opcode, 0},
+{"th.ipush", 0, INSN_CLASS_XTHEADINT, "", MATCH_TH_IPUSH, MASK_TH_IPUSH, match_opcode, 0},
+
 /* Vendor-specific (T-Head) XTheadMemIdx instructions.  */
 {"th.ldia",  64, INSN_CLASS_XTHEADMEMIDX, "d,(s),Xs5@20,Xu2@25", MATCH_TH_LDIA,  MASK_TH_LDIA,  match_th_load_inc, 0},
 {"th.ldib",  64, INSN_CLASS_XTHEADMEMIDX, "d,(s),Xs5@20,Xu2@25", MATCH_TH_LDIB,  MASK_TH_LDIB,  match_th_load_inc, 0},

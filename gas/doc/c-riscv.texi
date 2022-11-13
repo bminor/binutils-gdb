@@ -739,6 +739,11 @@ The XTheadFmv extension provides access to the upper 32 bits of a doulbe-precisi
 
 It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.1.0/xthead-2022-11-07-2.1.0.pdf}.
 
+@item XTheadInt
+The XTheadInt extension provides access to ISR stack management instructions.
+
+It is documented in @url{https://github.com/T-head-Semi/thead-extension-spec/releases/download/2.1.0/xthead-2022-11-07-2.1.0.pdf}.
+
 @item XTheadMac
 The XTheadMac extension provides multiply-accumulate instructions.
 

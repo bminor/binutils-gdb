@@ -26,7 +26,7 @@
   for --enable-compressed-debug-sections.
 
 * Add support for various T-Head extensions (XTheadBa, XTheadBb, XTheadBs,
-  XTheadCmo, XTheadCondMov, XTheadFMemIdx, XTheadFmv, XTheadMemIdx,
+  XTheadCmo, XTheadCondMov, XTheadFMemIdx, XTheadFmv, XTheadInt, XTheadMemIdx,
   XTheadMemPair, XTheadMac, and XTheadSync) from version 2.0 of the T-Head
   ISA manual, which are implemented in the Allwinner D1.
 
