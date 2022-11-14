@@ -2099,6 +2099,10 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct value *function,
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
 
+  if (!language_pass_by_reference (valtype).trivially_copyable
+      && valtype->code () == TYPE_CODE_STRUCT)
+    return RETURN_VALUE_STRUCT_CONVENTION;
+
   /* In the ELFv2 ABI, aggregate types of up to 16 bytes are
      returned in registers r3:r4.  */
   if (tdep->elf_abi == POWERPC_ELF_V2
