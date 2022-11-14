@@ -4,6 +4,7 @@
 #objcopy: --rename-section .data=myrodata,contents,alloc,load,readonly
 #objdump: -r
 #notarget: alpha*-*-*vms* rx-*-elf [is_som_format] [is_aout_format]
+#xfail: [is_xcoff_format]
 
 .*: +file format .*
 
