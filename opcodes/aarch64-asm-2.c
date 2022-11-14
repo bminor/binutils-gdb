@@ -723,6 +723,8 @@ aarch64_insert_operand (const aarch64_operand *self,
     case 190:
     case 215:
     case 221:
+    case 226:
+    case 227:
       return aarch64_ins_imm (self, info, code, inst, errors);
     case 44:
     case 45:

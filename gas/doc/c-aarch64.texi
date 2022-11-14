@@ -186,6 +186,8 @@ automatically cause those extensions to be disabled.
  @tab Enable floating-point extensions.
 @item @code{hbc} @tab @tab Armv8.8-A or later
  @tab Enable Armv8.8-A hinted conditional branch instructions
+@item @code{cssc} @tab @tab Armv8.7-A or later
+ @tab Enable Armv8.9-A Common Short Sequence Compression instructions.
 @item @code{i8mm} @tab ARMv8.2-A @tab ARMv8.6-A or later
  @tab Enable Int8 Matrix Multiply extension.
 @item @code{lor} @tab ARMv8-A @tab ARMv8.1-A or later

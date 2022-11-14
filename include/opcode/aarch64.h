@@ -99,6 +99,7 @@ typedef uint32_t aarch64_insn;
 #define AARCH64_FEATURE_SME_F64	     (1ULL << 57) /* SME F64.  */
 #define AARCH64_FEATURE_SME_I64	     (1ULL << 58) /* SME I64.  */
 #define AARCH64_FEATURE_V8_8	     (1ULL << 59) /* Armv8.8 processors.  */
+#define AARCH64_FEATURE_CSSC	     (1ULL << 60) /* Common Short Sequence Compression instructions.  */
 
 /* Crypto instructions are the combination of AES and SHA2.  */
 #define AARCH64_FEATURE_CRYPTO	(AARCH64_FEATURE_SHA2 | AARCH64_FEATURE_AES)
@@ -492,7 +493,9 @@ enum aarch64_opnd
   AARCH64_OPND_SM3_IMM2,	/* SM3 encodes lane in bits [13, 14].  */
   AARCH64_OPND_MOPS_ADDR_Rd,	/* [Rd]!, in bits [0, 4].  */
   AARCH64_OPND_MOPS_ADDR_Rs,	/* [Rs]!, in bits [16, 20].  */
-  AARCH64_OPND_MOPS_WB_Rn	/* Rn!, in bits [5, 9].  */
+  AARCH64_OPND_MOPS_WB_Rn,	/* Rn!, in bits [5, 9].  */
+  AARCH64_OPND_CSSC_SIMM8,	/* CSSC signed 8-bit immediate.  */
+  AARCH64_OPND_CSSC_UIMM8,	/* CSSC unsigned 8-bit immediate.  */
 };
 
 /* Qualifier constrains an operand.  It either specifies a variant of an
@@ -684,6 +687,7 @@ enum aarch64_insn_class
   cryptosm4,
   dotproduct,
   bfloat16,
+  cssc,
 };
 
 /* Opcode enumerators.  */

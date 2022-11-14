@@ -250,6 +250,8 @@ const struct aarch64_operand aarch64_operands[] =
   {AARCH64_OPND_CLASS_INT_REG, "MOPS_ADDR_Rd", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rd}, "a register destination address with writeback"},
   {AARCH64_OPND_CLASS_INT_REG, "MOPS_ADDR_Rs", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rs}, "a register source address with writeback"},
   {AARCH64_OPND_CLASS_INT_REG, "MOPS_WB_Rd", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_Rn}, "an integer register with writeback"},
+  {AARCH64_OPND_CLASS_IMMEDIATE, "CSSC_SIMM8", OPD_F_SEXT | OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_CSSC_imm8}, "an 8-bit signed immediate"},
+  {AARCH64_OPND_CLASS_IMMEDIATE, "CSSC_UIMM8", OPD_F_HAS_INSERTER | OPD_F_HAS_EXTRACTOR, {FLD_CSSC_imm8}, "an 8-bit unsigned immediate"},
   {AARCH64_OPND_CLASS_NIL, "", 0, {0}, "DUMMY"},
 };
 

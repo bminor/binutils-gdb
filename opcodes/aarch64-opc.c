@@ -342,6 +342,7 @@ const aarch64_field fields[] =
     { 12,  2 }, /* SM3: Indexed element SM3 2 bits index immediate.  */
     { 22,  1 }, /* sz: 1-bit element size select.  */
     { 10,  2 }, /* CRm_dsb_nxs: 2-bit imm. encoded in CRm<3:2>.  */
+    { 10,  8 }, /* CSSC_imm8.  */
 };
 
 enum aarch64_operand_class
@@ -2176,6 +2177,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SVE_UIMM7:
 	case AARCH64_OPND_SVE_UIMM8:
 	case AARCH64_OPND_SVE_UIMM8_53:
+	case AARCH64_OPND_CSSC_UIMM8:
 	  size = get_operand_fields_width (get_operand_from_code (type));
 	  assert (size < 32);
 	  if (!value_fit_unsigned_field_p (opnd->imm.value, size))
@@ -2206,6 +2208,7 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case AARCH64_OPND_SVE_SIMM5B:
 	case AARCH64_OPND_SVE_SIMM6:
 	case AARCH64_OPND_SVE_SIMM8:
+	case AARCH64_OPND_CSSC_SIMM8:
 	  size = get_operand_fields_width (get_operand_from_code (type));
 	  assert (size < 32);
 	  if (!value_fit_signed_field_p (opnd->imm.value, size))
@@ -3620,6 +3623,8 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
     case AARCH64_OPND_SVE_IMM_ROT1:
     case AARCH64_OPND_SVE_IMM_ROT2:
     case AARCH64_OPND_SVE_IMM_ROT3:
+    case AARCH64_OPND_CSSC_SIMM8:
+    case AARCH64_OPND_CSSC_UIMM8:
       snprintf (buf, size, "%s",
 		style_imm (styler, "#%" PRIi64, opnd->imm.value));
       break;

@@ -168,7 +168,8 @@ enum aarch64_field_kind
   FLD_rotate3,
   FLD_SM3_imm2,
   FLD_sz,
-  FLD_CRm_dsb_nxs
+  FLD_CRm_dsb_nxs,
+  FLD_CSSC_imm8
 };
 
 /* Field description.  */

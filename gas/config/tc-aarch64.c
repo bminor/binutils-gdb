@@ -6636,6 +6636,8 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SVE_IMM_ROT1:
 	case AARCH64_OPND_SVE_IMM_ROT2:
 	case AARCH64_OPND_SVE_IMM_ROT3:
+	case AARCH64_OPND_CSSC_SIMM8:
+	case AARCH64_OPND_CSSC_UIMM8:
 	  po_imm_nc_or_fail ();
 	  info->imm.value = val;
 	  break;
@@ -10040,6 +10042,8 @@ static const struct aarch64_option_cpu_value_table aarch64_features[] = {
   {"mops",		AARCH64_FEATURE (AARCH64_FEATURE_MOPS, 0),
 			AARCH64_ARCH_NONE},
   {"hbc",		AARCH64_FEATURE (AARCH64_FEATURE_HBC, 0),
+			AARCH64_ARCH_NONE},
+  {"cssc",		AARCH64_FEATURE (AARCH64_FEATURE_CSSC, 0),
 			AARCH64_ARCH_NONE},
   {NULL,		AARCH64_ARCH_NONE, AARCH64_ARCH_NONE},
 };
