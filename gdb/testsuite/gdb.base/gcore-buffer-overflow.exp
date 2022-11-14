@@ -34,7 +34,7 @@ clean_restart ${binfile}
 gdb_test_no_output "set args ${pattern}"	\
     "set buffer exceeding arguments"
 
-if { ! [ runto_main ] } then {
+if {![runto_main]} {
     return -1
 }
 

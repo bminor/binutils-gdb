@@ -453,7 +453,7 @@ proc_with_prefix do_command_attach_tests {} {
     global gdb_prompt
     global binfile
 
-    if ![isnative] then {
+    if {![isnative]} {
 	unsupported "command attach test"
 	return 0
     }

@@ -60,7 +60,7 @@ if !$use_gdb_stub {
 
 # Ok, on to real life
 #
-if ![runto_main] then {
+if {![runto_main]} {
     return
 }
 

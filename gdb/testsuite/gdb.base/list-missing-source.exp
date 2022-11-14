@@ -45,7 +45,7 @@ remote_file host delete $srcfile
 # Now start GDB, run to main and try to list the source.
 clean_restart ${binfile}
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

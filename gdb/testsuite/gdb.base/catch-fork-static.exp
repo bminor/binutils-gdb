@@ -23,7 +23,7 @@
 
 # Until "catch fork" is implemented on other targets...
 #
-if { ![istarget "*-*-linux*"] && ![istarget "*-*-openbsd*"] } then {
+if {![istarget "*-*-linux*"] && ![istarget "*-*-openbsd*"]} {
     return
 }
 

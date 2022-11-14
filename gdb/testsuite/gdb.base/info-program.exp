@@ -33,7 +33,7 @@ gdb_test "next" ".*" "step before info program"
 gdb_test "info program" "Program stopped at $hex\.\r\nIt stopped after being stepped\.\r\nType \"info stack\" or \"info registers\" for more information\." \
     "info program after next"
 
-if { ![runto_main] } then {
+if {![runto_main]} {
     return -1
 }
 

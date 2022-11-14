@@ -42,7 +42,7 @@ clean_restart ${binfile}
 set prev_timeout $timeout
 set timeout 30
 
-if { ! [ runto_main ] } then {
+if {![runto_main]} {
     return -1
 }
 

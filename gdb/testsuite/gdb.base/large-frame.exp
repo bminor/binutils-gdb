@@ -39,7 +39,7 @@ proc run_test { opt_level } {
 	return
     }
 
-    if { ![runto_main] } then {
+    if {![runto_main]} {
 	return
     }
 

@@ -34,7 +34,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [con
 
 clean_restart ${binfile}
 
-if { ![runto known_types] } then { 
+if {![runto known_types]} {
    return 
 }
 

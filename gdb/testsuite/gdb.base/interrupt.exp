@@ -38,7 +38,7 @@ if {[build_executable $testfile.exp $testfile $srcfile $options] == -1} {
 gdb_start
 
 
-if ![file exists $binfile] then {
+if {![file exists $binfile]} {
     perror "$binfile does not exist."
     return 0
 } else {
@@ -47,7 +47,7 @@ if ![file exists $binfile] then {
     # Hope this is unix :-)
     gdb_test "shell stty intr '^C'" ".*" \
 	"set interrupt character"
-    if [runto_main] then {
+    if {[runto_main]} {
 	global inferior_spawn_id gdb_spawn_id
 
 	set msg "process is alive"

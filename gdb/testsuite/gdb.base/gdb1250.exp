@@ -31,7 +31,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
 clean_restart ${binfile}
 
-if ![runto abort {allow-pending}] then {
+if {![runto abort {allow-pending}]} {
     return
 }
 

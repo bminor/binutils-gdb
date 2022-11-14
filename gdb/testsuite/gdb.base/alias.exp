@@ -32,7 +32,7 @@ proc test_abbrev_not_present { alias_name } {
 	    exp_continue
 	}
 	-re ".*$gdb_prompt $" {
-	    if { !$alias_present } then {
+	    if {!$alias_present} {
 		pass $test_name
 	    } else {
 		fail $test_name

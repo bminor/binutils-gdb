@@ -42,7 +42,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 gdb_load_shlib ${lib_sl}
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 1
 }
 

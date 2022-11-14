@@ -20,16 +20,16 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
     return -1
 }
 
-if [runto f2] then {
+if {[runto f2]} {
     get_debug_format
-    if { [test_compiler_info gcc-2-*] && [test_debug_format "DWARF \[0-9\]"] } then {
+    if {[test_compiler_info gcc-2-*] && [test_debug_format "DWARF \[0-9\]"]} {
 	setup_xfail "*-*-*"
     }
     gdb_test "p *y" "\\\$\[0-9\]* = \{c = 42 '\\*', f = 1 \\+ 0i\}" \
 	    "print complex packed value in C"
 }
 
-if [runto f4] then {
+if {[runto f4]} {
     gdb_test "p *y" "\\\$\[0-9\]* = \{c = 42 '\\*', f = 1 \\+ 0i\}" \
 	    "print complex value in C"
 }

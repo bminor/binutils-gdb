@@ -36,7 +36,7 @@ if {$skip_hw_watchpoint_tests_p} {
     gdb_test_no_output "set can-use-hw-watchpoints 0" ""
 }
 
-if ![runto_main] then {
+if {![runto_main]} {
     return
 }
 
@@ -55,7 +55,7 @@ if {$skip_hw_watchpoint_tests_p} {
     gdb_test_no_output "set can-use-hw-watchpoints 0" ""
 }
 
-if ![runto_main] then {
+if {![runto_main]} {
     return
 }
 
@@ -74,7 +74,7 @@ if {$skip_hw_watchpoint_tests_p} {
     gdb_test_no_output "set can-use-hw-watchpoints 0" ""
 }
 
-if ![runto_main] then {
+if {![runto_main]} {
     return
 }
 

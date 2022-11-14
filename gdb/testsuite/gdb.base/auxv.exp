@@ -56,7 +56,7 @@ if {$core_works} {
     }
 }
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 set print_core_line [gdb_get_line_number "ABORT;"]

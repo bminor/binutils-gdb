@@ -39,7 +39,7 @@ if { [gdb_compile_shlib ${srcdir}/${subdir}/${lib_src} ${lib_so} $lib_opts] != "
 clean_restart $binfile
 gdb_load_shlib $lib_so
 
-if ![runto_main] then {
+if {![runto_main]} {
     return -1
 }
 

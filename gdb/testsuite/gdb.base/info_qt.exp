@@ -27,7 +27,7 @@ if { [prepare_for_testing "failed to prepare" ${testfile}] } {
     return -1
 }
 
-if ![runto setup_done] then {
+if {![runto setup_done]} {
     return 0
 }
 

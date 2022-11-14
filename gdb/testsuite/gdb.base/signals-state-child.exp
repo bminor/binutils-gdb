@@ -81,7 +81,7 @@ remote_close target
 
 clean_restart $binfile
 
-if { ! [ runto_main ] } then {
+if {![runto_main]} {
     return -1
 }
 

@@ -26,7 +26,7 @@ if  { [prepare_for_testing "failed to prepare" $testfile ${testfile}.c] } {
 }
 
 # Check target supports catch syscall or not.
-if ![runto_main] then {
+if {![runto_main]} {
     return
 }
 
@@ -464,40 +464,40 @@ proc do_syscall_tests {} {
 
     # Testing the 'catch syscall' command without arguments.
     # This test should catch any syscalls.
-    if [runto_main] then { test_catch_syscall_without_args }
+    if {[runto_main]} { test_catch_syscall_without_args }
 
     # Testing the 'catch syscall' command with arguments.
     # This test should only catch the specified syscall.
-    if [runto_main] then { test_catch_syscall_with_args }
+    if {[runto_main]} { test_catch_syscall_with_args }
 
     # Testing the 'catch syscall' command with many arguments.
     # This test should catch $all_syscalls.
-    if [runto_main] then { test_catch_syscall_with_many_args }
+    if {[runto_main]} { test_catch_syscall_with_many_args }
 
     # Testing the 'catch syscall' command with WRONG arguments.
     # This test should not trigger any catchpoints.
-    if [runto_main] then { test_catch_syscall_with_wrong_args }
+    if {[runto_main]} { test_catch_syscall_with_wrong_args }
 
     # Testing the 'catch syscall' command during a restart of
     # the inferior.
-    if [runto_main] then { test_catch_syscall_restarting_inferior }
+    if {[runto_main]} { test_catch_syscall_restarting_inferior }
 
     # Testing the 'catch syscall' command toggling off past a
     # syscall return, then resuming entry/return as normal.
-    if [runto_main] then { test_catch_syscall_skipping_return }
+    if {[runto_main]} { test_catch_syscall_skipping_return }
 
     # Testing the 'catch syscall' command starting mid-vfork.
-    if [runto_main] then { test_catch_syscall_mid_vfork }
+    if {[runto_main]} { test_catch_syscall_mid_vfork }
 
     # Testing that 'catch syscall' entry/return tracks across execve.
-    if [runto_main] then { test_catch_syscall_execve }
+    if {[runto_main]} { test_catch_syscall_execve }
 
     # Testing if the 'catch syscall' command works when switching to
     # different architectures on-the-fly (PR gdb/10737).
-    if [runto_main] then { test_catch_syscall_multi_arch }
+    if {[runto_main]} { test_catch_syscall_multi_arch }
 
     # Testing the 'catch' syscall command for a group of syscalls.
-    if [runto_main] then { test_catch_syscall_group }
+    if {[runto_main]} { test_catch_syscall_group }
 }
 
 proc test_catch_syscall_without_args_noxml {} {
@@ -662,16 +662,16 @@ proc do_syscall_tests_without_xml {} {
 
     # Let's test if we can catch syscalls without XML support.
     # We should succeed, but GDB is not supposed to print syscall names.
-    if [runto_main] then { test_catch_syscall_without_args_noxml }
+    if {[runto_main]} { test_catch_syscall_without_args_noxml }
 
     # The only valid argument "catch syscall" should accept is the
     # syscall number, and not the name (since it can't translate a
     # name to a number).
-    if [runto_main] then { test_catch_syscall_with_args_noxml }
+    if {[runto_main]} { test_catch_syscall_with_args_noxml }
 
     # Now, we'll try to provide a syscall name (valid or not) to the command,
     # and expect it to fail.
-    if [runto_main] then { test_catch_syscall_with_wrong_args_noxml }
+    if {[runto_main]} { test_catch_syscall_with_wrong_args_noxml }
 }
 
 # This procedure fills the vector "all_syscalls_numbers" with the proper

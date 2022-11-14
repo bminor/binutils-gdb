@@ -25,7 +25,7 @@ gdb_test "maint expand-symtabs"
 
 gdb_test "p a" { = \{1, 2\}} "no running process: p a"
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

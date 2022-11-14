@@ -35,7 +35,7 @@ if { [target_info exists gdb_protocol]
 
 # Until "catch exec" is implemented on other targets...
 #
-if {![istarget "*-linux*"]} then {
+if {![istarget "*-linux*"]} {
      return
 }
 
@@ -68,7 +68,7 @@ proc do_catch_exec_test { } {
 
     # Start the program running, and stop at main.
     #
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return
     }
 
@@ -107,7 +107,7 @@ proc do_follow_exec_mode_tests { mode cmd infswitch } {
 
 	# Start the program running, and stop at main.
 	#
-	if ![runto_main] then {
+	if {![runto_main]} {
 	    return
 	}
 

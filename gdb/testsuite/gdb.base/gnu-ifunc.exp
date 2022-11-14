@@ -105,7 +105,7 @@ proc_with_prefix set-break {resolver_attr resolver_debug final_debug} {
     clean_restart $binfile-$suffix
     gdb_load_shlib ${lib_so}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 1
     }
 
@@ -227,7 +227,7 @@ proc misc_tests {resolver_attr resolver_debug final_debug} {
     clean_restart $binfile-$suffix
     gdb_load_shlib ${lib_so}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 1
     }
 

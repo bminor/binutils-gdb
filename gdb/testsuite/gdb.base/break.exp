@@ -161,7 +161,7 @@ proc_with_prefix test_break {} {
 	    exp_continue
 	}
 	-re ".*$::gdb_prompt $" {
-	    if { !$see1 && $see2 && !$see3 && $see4 && !$see5 && $see6 } then {
+	    if {!$see1 && $see2 && !$see3 && $see4 && !$see5 && $see6} {
 		pass "info break 2 4 6"
 	    } else {
 		fail "info break 2 4 6"
@@ -202,7 +202,7 @@ proc_with_prefix test_break {} {
 	    exp_continue
 	}
 	-re ".*$::gdb_prompt $" {
-	    if { !$see1 && !$see2 && $see3 && $see4 && $see5 && !$see6 } then {
+	    if {!$see1 && !$see2 && $see3 && $see4 && $see5 && !$see6} {
 		pass "info break 3-5"
 	    } else {
 		fail "info break 3-5"
@@ -260,7 +260,7 @@ proc_with_prefix test_break {} {
 		exp_continue
 	    }
 	    -re ".*$::gdb_prompt $" {
-		if { $see1 && $see2 && $see3 && $see4 && $see5 && $see6 } then {
+		if {$see1 && $see2 && $see3 && $see4 && $see5 && $see6} {
 		    pass "check disable with history values"
 		} else {
 		    fail "check disable with history values"
@@ -308,7 +308,7 @@ proc_with_prefix test_break {} {
 		exp_continue
 	    }
 	    -re ".*$::gdb_prompt $" {
-		if { $see1 && $see2 && $see3 && $see4 && $see5 && $see6 } then {
+		if {$see1 && $see2 && $see3 && $see4 && $see5 && $see6} {
 		    pass "check disable with convenience values"
 		} else {
 		    fail "check disable with convenience values"
@@ -458,7 +458,7 @@ test_tbreak
 proc_with_prefix test_no_break_on_catchpoint {} {
     clean_restart break
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return
     }
 
@@ -482,7 +482,7 @@ test_no_break_on_catchpoint
 proc_with_prefix test_break_nonexistent_line {} {
     clean_restart break
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return
     }
 
@@ -497,7 +497,7 @@ test_break_nonexistent_line
 proc_with_prefix test_break_default {} {
     clean_restart break
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return
     }
 
@@ -541,7 +541,7 @@ test_break_default
 proc_with_prefix test_break_silent_and_more {} {
     clean_restart break
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return
     }
 
@@ -686,7 +686,7 @@ test_break_user_call
 proc_with_prefix test_finish_arguments {} {
     clean_restart break
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return
     }
 

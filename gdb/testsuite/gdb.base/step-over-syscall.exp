@@ -115,7 +115,7 @@ proc setup { syscall } {
 
     clean_restart $testfile
 
-    if { ![runto_main] } then {
+    if {![runto_main]} {
 	return -1
     }
 
@@ -386,7 +386,7 @@ step_over_syscall "clone"
 
 set testfile "step-over-fork"
 clean_restart $testfile
-if { ![runto_main] } then {
+if {![runto_main]} {
     return -1
 }
 

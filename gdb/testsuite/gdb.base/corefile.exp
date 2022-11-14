@@ -17,7 +17,7 @@
 
 
 # are we on a target board
-if ![isnative] then {
+if {![isnative]} {
     return
 }
 
@@ -49,7 +49,7 @@ if {$corefile == ""} {
 # it a pass, but note that the program name is bad.
 
 gdb_exit
-if $verbose>1 then {
+if {$verbose>1} {
     send_user "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS -core=$corefile\n"
 }
 
@@ -82,7 +82,7 @@ expect {
 
 close
 
-if $verbose>1 then {
+if {$verbose>1} {
     send_user "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS $binfile -core=$corefile\n"
 }
 

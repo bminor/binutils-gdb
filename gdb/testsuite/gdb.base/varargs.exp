@@ -58,7 +58,7 @@ if [gdb_skip_stdio_test "varargs.exp"] {
     return
 }
 
-if ![runto test] then {
+if {![runto test]} {
     perror "couldn't run to breakpoint"
     return
 }

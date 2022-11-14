@@ -50,7 +50,7 @@ clean_restart ${binfile}
 #
 # set it up at a breakpoint so we can play with the variable values
 #
-if ![runto_main] then {
+if {![runto_main]} {
     perror "couldn't run to breakpoint"
     return
 }

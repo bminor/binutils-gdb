@@ -21,7 +21,7 @@
 # Until "set follow-fork-mode" and "catch vfork" are implemented on
 # other targets...
 #
-if {![istarget "*-linux*"]} then {
+if {![istarget "*-linux*"]} {
     continue
 }
 

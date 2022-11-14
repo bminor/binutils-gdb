@@ -38,7 +38,7 @@ proc recurse_tests {} {
 	 gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
 
-    if [runto recurse] then {
+    if {[runto recurse]} {
 	# First we need to step over the assignment of b, so it has a known
 	# value.
 	gdb_test "next" "if \\(a == 1\\)" "next over b = 0 in first instance"

@@ -44,7 +44,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile debug]} {
 # Run to `main' where we begin our tests.
 #
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

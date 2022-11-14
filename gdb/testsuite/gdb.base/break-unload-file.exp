@@ -59,7 +59,7 @@ proc test_break { initial_load always_inserted break_command } {
 	gdb_reload
 	set GDBFLAGS $saved_gdbflags
 
-	if ![runto_main] then {
+	if {![runto_main]} {
 	    return
 	}
 

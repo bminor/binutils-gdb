@@ -39,7 +39,7 @@ proc setup {commands} {
 
     clean_restart $binfile
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return -code return
     }
 

@@ -48,7 +48,7 @@ if { ! [use_gdb_stub] } {
     gdb_test_no_output "set args $cmdline" "set args"
 }
 
-if { ! [ runto_main ] } then {
+if {![runto_main]} {
     return -1
 }
 

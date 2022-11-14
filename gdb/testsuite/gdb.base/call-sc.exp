@@ -61,7 +61,7 @@ proc start_scalars_test { type } {
     }
 
     # Advance to main
-    if { ![runto_main] } then {
+    if {![runto_main]} {
 	return
     }
 

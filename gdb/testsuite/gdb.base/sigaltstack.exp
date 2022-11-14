@@ -44,7 +44,7 @@ gdb_test "handle SIGVTALRM print pass nostop"
 gdb_test "handle SIGPROF print pass nostop"
 
 # Advance to main
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

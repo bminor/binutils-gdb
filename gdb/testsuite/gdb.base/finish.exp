@@ -76,7 +76,7 @@ proc finish_void { } {
 
 proc finish_abbreviation { abbrev } {
 
-    if { ! [ runto "int_func" ] } then {
+    if {![runto "int_func"]} {
         return -1
     }
 
@@ -102,7 +102,7 @@ proc finish_no_print {} {
 proc finish_tests { } {
     global gdb_prompt skip_float_test
 
-    if { ! [ runto_main ] } then {
+    if {![runto_main]} {
 	return -1
     }
 

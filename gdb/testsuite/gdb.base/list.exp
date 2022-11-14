@@ -98,7 +98,7 @@ proc test_listsize {} {
 
     # Try small listsize > 2 that is an even number.
 
-    if [ set_listsize 4 ] then {
+    if {[set_listsize 4]} {
 	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\".*4\[ \t\]+\{" "list line 1 with listsize 4"
 	gdb_test "list 2" "1\[ \t\]+#include \"list0.h\".*4\[ \t\]+\{" "list line 2 with listsize 4"
 	
@@ -108,7 +108,7 @@ proc test_listsize {} {
 
     # Try a size larger than the entire file.
 
-    if [ set_listsize 100 ] then {
+    if {[set_listsize 100]} {
 	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\".*\r\n${last_line_re}" "list line 1 with listsize 100"
 	
 	gdb_test "list 10" "1\[ \t\]+#include \"list0.h\".*\r\n${last_line_re}" "list line 10 with listsize 100"
@@ -411,7 +411,7 @@ gdb_test_no_output "set width 0"
 
 test_listsize
 get_debug_format
-if [ set_listsize 10 ] then {
+if {[set_listsize 10]} {
     test_list_include_file
     test_list_filename_and_number
     test_list_function
@@ -466,7 +466,7 @@ proc test_list {command listsize1 listsize2 linerange1 linerange2} {
 	global binfile
 
 	clean_restart $binfile
-	if ![runto_main] then {
+	if {![runto_main]} {
 	    return
 	}
 

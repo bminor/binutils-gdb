@@ -26,7 +26,7 @@ if [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} {debug}] {
     return -1
 }
 
-if ![runto_main] then {
+if {![runto_main]} {
     return -1
 }
 

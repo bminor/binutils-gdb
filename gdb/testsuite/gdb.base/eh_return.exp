@@ -19,7 +19,7 @@
 standard_testfile
 
 # Set compiler flags.
-if {[istarget "powerpc*"]} then {
+if {[istarget "powerpc*"]} {
     # PowerPC generates a Traceback Table, as defined in the PPC64 ABI,
     # following each function by default.  The Traceback Table information is
     # typically interpreted by the disassembler as data represented with

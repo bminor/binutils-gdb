@@ -90,7 +90,7 @@ gdb_test "$commands\nend" "" "finish defining hello command"
 
 gdb_test "hello" [string_to_regexp "^done,value=\"23\""]
 
-if ![runto_main] then {
+if {![runto_main]} {
   return -1
 }
 

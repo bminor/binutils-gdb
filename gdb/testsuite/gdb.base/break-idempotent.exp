@@ -115,7 +115,7 @@ proc test_break { always_inserted break_command } {
     with_test_prefix "$cmd" {
 	delete_breakpoints
 
-	if ![runto_main] then {
+	if {![runto_main]} {
 	    return
 	}
 

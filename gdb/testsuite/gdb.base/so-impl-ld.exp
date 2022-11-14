@@ -40,7 +40,7 @@ gdb_load_shlib $lib_sl
 
 # This program implicitly loads SOM shared libraries.
 #
-if ![runto_main] then {
+if {![runto_main]} {
     return
 }
 

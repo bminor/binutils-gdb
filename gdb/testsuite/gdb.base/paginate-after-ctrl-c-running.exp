@@ -36,7 +36,7 @@ proc test_ctrlc_while_target_running_does_not_paginate {} {
     with_test_prefix "ctrlc target running" {
 	clean_restart $binfile
 
-	if ![runto_main] then {
+	if {![runto_main]} {
 	    return 0
 	}
 

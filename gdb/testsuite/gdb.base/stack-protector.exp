@@ -44,7 +44,7 @@ proc simple_func_break_test { protection } {
 	return -1
     }
 
-    if { ![runto_main] } then {
+    if {![runto_main]} {
 	return -1
     }
 

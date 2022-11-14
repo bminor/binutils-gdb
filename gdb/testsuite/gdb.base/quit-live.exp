@@ -101,7 +101,7 @@ proc quit_with_live_inferior {appear_how extra_inferior quit_how} {
     }
 
     if {$appear_how == "run"} {
-	if ![runto_main] then {
+	if {![runto_main]} {
 	    return
 	}
     } elseif {$appear_how == "attach" || $appear_how == "attach-nofile"} {

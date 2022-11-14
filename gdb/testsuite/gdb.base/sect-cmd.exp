@@ -22,7 +22,7 @@ if { [prepare_for_testing "failed to prepare" "sect-cmd" \
 set srcfile break.c
 set srcfile1 break1.c
 
-if ![runto_main] then {
+if {![runto_main]} {
     return
 }
 

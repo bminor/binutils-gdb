@@ -25,7 +25,7 @@ gdb_test "info terminal" \
     "No saved terminal information.*" \
     "test info terminal pre-execution"
 
-if ![runto break_here] then {
+if {![runto break_here]} {
     return 0
 }
 

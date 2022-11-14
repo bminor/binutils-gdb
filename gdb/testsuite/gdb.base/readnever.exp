@@ -34,7 +34,7 @@ save_vars { GDBFLAGS } {
     }
 }
 
-if ![runto_main] then {
+if {![runto_main]} {
     perror "couldn't run to breakpoint"
     return
 }

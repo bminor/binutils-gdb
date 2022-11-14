@@ -18,7 +18,7 @@
 
 # Until "catch exec" is implemented on other targets...
 #
-if { ![istarget "*-linux*"] } then {
+if {![istarget "*-linux*"]} {
     return
 }
 
@@ -51,7 +51,7 @@ proc do_exec_tests {} {
 
    # Start the program running, and stop at main.
    #
-   if ![runto_main] then {
+   if {![runto_main]} {
      return
    }
 
@@ -77,7 +77,7 @@ proc do_exec_tests {} {
 
    # Start the program running, and stop at main.
    #
-   if ![runto_main] then {
+   if {![runto_main]} {
      return
    }
 
@@ -166,7 +166,7 @@ proc do_exec_tests {} {
 
    # Start the program running, and stop at main.
    #
-   if ![runto_main] then {
+   if {![runto_main]} {
      return
    }
 
@@ -234,7 +234,7 @@ proc do_exec_tests {} {
 
    # Start the program running, and stop at main.
    #
-   if ![runto_main] then {
+   if {![runto_main]} {
      return
    }
 
@@ -301,7 +301,7 @@ proc do_exec_tests {} {
 
    # Start the program running, and stop at main.
    #
-   if ![runto_main] then {
+   if {![runto_main]} {
      return
    }
 
@@ -362,7 +362,7 @@ proc do_exec_tests {} {
 
    # Start the program running, and stop at main.
    #
-   if ![runto_main] then {
+   if {![runto_main]} {
      return
    }
 

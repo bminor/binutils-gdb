@@ -47,7 +47,7 @@ proc start_program {binfile} {
 
     clean_restart $binfile
 
-    if ![runto setup_done] then {
+    if {![runto setup_done]} {
 	return 0
     }
 

@@ -63,7 +63,7 @@ test_handle_all_print
 
 clean_restart $binfile
 
-if [runto_main] then {
+if {[runto_main]} {
 
     # Since count is a static variable outside main, runto_main is no
     # guarantee that count will be 0 at this point.

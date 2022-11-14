@@ -41,7 +41,7 @@ proc test_watchpoint { hw } {
 
     clean_restart ${testfile}
 
-    if { ![runto_main] } then {
+    if {![runto_main]} {
 	return
     }
 

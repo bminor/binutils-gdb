@@ -49,7 +49,7 @@ proc_with_prefix integral_args {} {
     gdb_breakpoint call0e
 
     # Run; should stop at call0a and print actual arguments.
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} { setup_xfail "rs6000-*-*" }
     gdb_run_cmd
     gdb_test "" " call0a \\(c=97 'a', s=1, i=2, l=3\\) .*" "run to call0a"
 
@@ -91,7 +91,7 @@ proc unsigned_integral_args {} {
     gdb_breakpoint call1e
 
     # Run; should stop at call1a and print actual arguments.
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} { setup_xfail "rs6000-*-*" }
     gdb_run_cmd
     gdb_test "" " call1a \\(uc=98 'b', us=6, ui=7, ul=8\\) .*" "run to call1a"
 
@@ -137,7 +137,7 @@ proc float_and_integral_args {} {
 
     # Run; should stop at call2a and print actual arguments.
 
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} { setup_xfail "rs6000-*-*" }
     gdb_run_cmd
     set test "run to call2a"
     gdb_test_multiple "" $test {
@@ -637,7 +637,7 @@ proc_with_prefix shuffle_round_robin {} {
     gdb_run_cmd
     gdb_test "" "Breakpoint $decimal, call7a .*" "run to call7a"
 
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} { setup_xfail "rs6000-*-*" }
     gdb_test_multiple "backtrace 100" "backtrace from call7a" {
 	-re " call7a \\(c=97 'a', i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7\\) .* main \\(.*\\) .*$gdb_prompt $" {
 	    pass "backtrace from call7a"
@@ -652,7 +652,7 @@ proc_with_prefix shuffle_round_robin {} {
 
     gdb_continue call7b
 
-    if {$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {$gcc_compiled} { setup_xfail "rs6000-*-*" }
 
     gdb_test_sequence "backtrace 100" "backtrace from call7b" {
 	"\[\r\n\]#0 .* call7b \\(i=2, s=1, l=3, f=4, uc=98 'b', d=5, us=6, ul=8, ui=7, c=97 'a'\\) "
@@ -853,9 +853,9 @@ proc_with_prefix localvars_after_alloca { } {
     # Print each arg as a double check to see if we can print
     # them here as well as with backtrace.
 
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} { setup_xfail "rs6000-*-*" }
     gdb_test "print c" " = 97 'a'" "print c after runto localvars_after_alloca"
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} { setup_xfail "rs6000-*-*" }
     gdb_test "print s" " = 1" "print s after runto localvars_after_alloca"
     gdb_test "print i" " = 2" "print i after runto localvars_after_alloca"
     gdb_test "print l" " = 3" "print l after runto localvars_after_alloca"
@@ -887,14 +887,14 @@ proc_with_prefix call_after_alloca { } {
     # Print each arg as a double check to see if we can print
     # them here as well as with backtrace.
 
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} { setup_xfail "rs6000-*-*" }
     gdb_test "print c" " = 97 'a'" "print c in call_after_alloca"
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} { setup_xfail "rs6000-*-*" }
     gdb_test "print s" " = 1" "print s in call_after_alloca"
     gdb_test "print i" " = 2" "print i in call_after_alloca"
     gdb_test "print l" " = 3" "print l in call_after_alloca"
 
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} { setup_xfail "rs6000-*-*" }
     gdb_test "backtrace 8" "#0.*call_after_alloca_subr \\(c=97 'a', s=1, i=2, l=3, uc=98 'b', us=11, ui=12, ul=13\\).*#1.*call_after_alloca \\(c=97 'a', s=1, i=2, l=3\\).*#2.*main.*" "backtrace from call_after_alloca_subr"
 }
 
@@ -925,14 +925,14 @@ proc_with_prefix localvars_in_indirect_call { } {
     # Print each arg as a double check to see if we can print
     # them here as well as with backtrace.
 
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} { setup_xfail "rs6000-*-*" }
     gdb_test "print c" " = 97 'a'" "print c in localvars_in_indirect_call"
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} { setup_xfail "rs6000-*-*" }
     gdb_test "print s" " = 1" "print s in localvars_in_indirect_call"
     gdb_test "print i" " = 2" "print i in localvars_in_indirect_call"
     gdb_test "print l" " = 3" "print l in localvars_in_indirect_call"
 
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} { setup_xfail "rs6000-*-*" }
     gdb_test "backtrace 8" \
 	"#0.*call0a \\(c=97 'a', s=1, i=2, l=3\\).*#1.*main.*" \
 	"backtrace in indirectly called function"
@@ -965,7 +965,7 @@ proc_with_prefix localvars_in_indirect_call { } {
 	}
     }
 
-    if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" }
+    if {!$gcc_compiled} { setup_xfail "rs6000-*-*" }
     gdb_test "step" "call0a \\(c=97 'a', s=1, i=2, l=3\\).*" \
 	"stepping into indirectly called function"
 }

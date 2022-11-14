@@ -42,7 +42,7 @@ if { [prepare_for_testing "failed to prepare" volatile constvars.c] } {
 #
 # set it up at a breakpoint so we can play with the variable values
 #
-if ![runto_main] then {
+if {![runto_main]} {
     perror "couldn't run to breakpoint"
     return
 }
@@ -52,7 +52,7 @@ get_debug_format
 # Many tests xfail with gcc 2 -gstabs+.
 
 proc local_compiler_xfail_check { } {
-    if { [test_compiler_info gcc-2-*] } then {
+    if {[test_compiler_info gcc-2-*]} {
 	if { ![test_debug_format "HP"] \
 		&& ![test_debug_format "DWARF \[0-9\]"] } then {
 	    setup_xfail "*-*-*" 

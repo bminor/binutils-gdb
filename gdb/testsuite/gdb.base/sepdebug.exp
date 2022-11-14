@@ -62,7 +62,7 @@ remote_exec build "rm -rf [file dirname $new_name]"
 remote_exec build "mkdir [file dirname $new_name]"
 remote_exec build "ln -s ${binfile}${EXEEXT} $new_name"
 clean_restart ${testfile}${EXEEXT}
-if { $gdb_file_cmd_debug_info != "debug" } then {
+if {$gdb_file_cmd_debug_info != "debug"} {
     fail "no debug information found."
 }
 
@@ -70,7 +70,7 @@ if { $gdb_file_cmd_debug_info != "debug" } then {
 set subdir ${old_subdir}
 
 clean_restart ${testfile}${EXEEXT}
-if { $gdb_file_cmd_debug_info != "debug" } then {
+if {$gdb_file_cmd_debug_info != "debug"} {
     fail "no debug information found."
 }
 
@@ -278,7 +278,7 @@ gdb_test "info break" "Num     Type.*Disp Enb Address.*What.*\[\r\n\]
 # inappropriately.  (There are no calls to those system functions
 # in this test program.)
 #
-if ![runto_main] then { 
+if {![runto_main]} {
     return
 }
 
@@ -329,7 +329,7 @@ gdb_test "break" \
 # Verify that a "silent" breakpoint can be set, and that GDB is indeed
 # "silent" about its triggering.
 #
-if ![runto_main] then {
+if {![runto_main]} {
     return
 }
 
@@ -451,7 +451,7 @@ gdb_test_multiple "finish" "finish from called function" {
 # Verify that GDB responds gracefully to a "finish" command with
 # arguments.
 #
-if ![runto_main] then {
+if {![runto_main]} {
     return
 }
 
@@ -669,7 +669,7 @@ if {[build_executable sepdebug.exp sepdebug2 sepdebug2.c debug] != -1
 # NT_GNU_BUILD_ID / .note.gnu.build-id test:
 
 set build_id_debug_filename [build_id_debug_filename_get $binfile$EXEEXT]
-if ![string compare $build_id_debug_filename ""] then {
+if {![string compare $build_id_debug_filename ""]} {
     unsupported "build-id is not supported by the compiler"
 
     # Spare debug files may confuse testsuite runs in the future.
@@ -678,10 +678,10 @@ if ![string compare $build_id_debug_filename ""] then {
     set build_id_debugself_filename [build_id_debug_filename_get $debugfile]
     set test "build-id support by binutils"
     set xfail 0
-    if ![string compare $build_id_debugself_filename ""] then {
+    if {![string compare $build_id_debugself_filename ""]} {
 	unsupported $test
 	set xfail 1
-    } elseif {[string compare $build_id_debugself_filename $build_id_debug_filename] != 0} then {
+    } elseif {[string compare $build_id_debugself_filename $build_id_debug_filename] != 0} {
 	fail $test
     } else {
 	pass $test

@@ -16,13 +16,13 @@
 standard_testfile .c
 
 # This test is Linux-only.
-if ![istarget *-*-linux*] then {
+if {![istarget *-*-linux*]} {
     unsupported "info-os.exp"
     return -1
 }
 
 # Support for XML-output is needed to run this test.
-if [gdb_skip_xml_test] then {
+if {[gdb_skip_xml_test]} {
     unsupported "info-os.exp"
     return -1
 }
@@ -32,7 +32,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile {debug pthreads
     return -1
 }
 
-if ![runto_main] then {
+if {![runto_main]} {
     return -1
 }
 

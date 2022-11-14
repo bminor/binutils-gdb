@@ -113,7 +113,7 @@ gdb_test "mt set per off" ".*" "mt set per off for expand-symtabs"
 
 gdb_load ${binfile}
 
-if ![runto_main] then {
+if {![runto_main]} {
         perror "tests suppressed"
 }
 

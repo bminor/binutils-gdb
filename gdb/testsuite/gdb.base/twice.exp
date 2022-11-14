@@ -34,7 +34,7 @@ if  { [gdb_compile $local_srcfile "${binfile}" executable $options] != "" } {
 
 clean_restart $binfile
 
-if [runto_main] then {
+if {[runto_main]} {
     # Test that GDB can still detect whether we have line numbers
     # even if we're executing code in an include file.
 

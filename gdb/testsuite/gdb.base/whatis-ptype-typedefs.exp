@@ -48,7 +48,7 @@ proc prepare {lang} {
 	return 0
     }
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -301,7 +301,7 @@ proc run_tests {lang} {
 }
 
 foreach_with_prefix lang {"c" "c++"} {
-    if { [prepare $lang] } then {
+    if {[prepare $lang]} {
 	run_tests $lang
     }
 }
