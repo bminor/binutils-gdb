@@ -170,6 +170,7 @@ processors[] =
   { bfd_mach_arm_7,	  "cortex-r7"	    },
   { bfd_mach_arm_7,	  "cortex-r8"	    },
   { bfd_mach_arm_8,	  "cortex-x1"	    },
+  { bfd_mach_arm_8,	  "cortex-x1c"	    },
   { bfd_mach_arm_4T,	  "ep9312"	    },
   { bfd_mach_arm_8,	  "exynos-m1"	    },
   { bfd_mach_arm_4,	  "fa526"	    },
