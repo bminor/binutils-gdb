@@ -15,11 +15,18 @@
 
 # This file is part of the gdb testsuite
 
+set additional_flags ""
+
 if {[skip_cplus_tests]} { continue }
 
 standard_testfile .cc
 
-if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
+if {[have_fvar_tracking]} {
+    set additional_flags "additional_flags= -fvar-tracking"
+}
+
+if {[prepare_for_testing "failed to prepare" $testfile $srcfile [list debug c++ $additional_flags]]} {
+
     return -1
 }
 

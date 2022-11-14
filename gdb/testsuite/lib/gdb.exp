@@ -8821,6 +8821,14 @@ gdb_caching_proc have_fuse_ld_gold {
     return [gdb_simple_compile $me $src executable $flags]
 }
 
+# Return 1 if compiler supports fvar-tracking, otherwise return 0.
+gdb_caching_proc have_fvar_tracking {
+    set me "have_fvar_tracking"
+    set flags "additional_flags=-fvar-tracking"
+    set src { int main() { return 0; } }
+    return [gdb_simple_compile $me $src executable $flags]
+}
+
 # Return 1 if linker supports -Ttext-segment, otherwise return 0.
 gdb_caching_proc linker_supports_Ttext_segment_flag {
     set me "linker_supports_Ttext_segment_flag"

@@ -175,6 +175,8 @@ extern void ppc_collect_vsxregset (const struct regset *regset,
 				  const struct regcache *regcache,
 				  int regnum, void *vsxregs, size_t len);
 
+extern CORE_ADDR ppc64_sysv_get_return_buf_addr (type*, frame_info_ptr);
+
 /* Private data that this module attaches to struct gdbarch.  */
 
 /* ELF ABI version used by the inferior.  */

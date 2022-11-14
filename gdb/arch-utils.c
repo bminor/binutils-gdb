@@ -1084,6 +1084,12 @@ default_read_core_file_mappings
 {
 }
 
+CORE_ADDR
+default_get_return_buf_addr (struct type *val_type, frame_info_ptr cur_frame)
+{
+  return 0;
+}
+
 /* Non-zero if we want to trace architecture code.  */
 
 #ifndef GDBARCH_DEBUG

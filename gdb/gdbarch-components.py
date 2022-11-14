@@ -868,6 +868,21 @@ for instance).
     invalid=True,
 )
 
+Function(
+    comment="""
+Return the address at which the value being returned from
+the current function will be stored.  This routine is only
+called if the current function uses the the "struct return
+convention".
+
+May return 0 when unable to determine that address.""",
+    type="CORE_ADDR",
+    name="get_return_buf_addr",
+    params=[("struct type *", "val_type"), ("frame_info_ptr", "cur_frame")],
+    predefault="default_get_return_buf_addr",
+    invalid=False,
+)
+
 Method(
     comment="""
 Return true if the return value of function is stored in the first hidden

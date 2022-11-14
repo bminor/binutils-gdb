@@ -8243,7 +8243,11 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_ps_regnum (gdbarch, tdep->ppc_ps_regnum);
 
   if (wordsize == 8)
-    set_gdbarch_return_value (gdbarch, ppc64_sysv_abi_return_value);
+    {
+      set_gdbarch_return_value (gdbarch, ppc64_sysv_abi_return_value);
+      set_gdbarch_get_return_buf_addr (gdbarch,
+				       ppc64_sysv_get_return_buf_addr);
+    }
   else
     set_gdbarch_return_value (gdbarch, ppc_sysv_abi_return_value);
 

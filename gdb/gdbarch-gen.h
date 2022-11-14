@@ -441,6 +441,17 @@ typedef enum return_value_convention (gdbarch_return_value_ftype) (struct gdbarc
 extern enum return_value_convention gdbarch_return_value (struct gdbarch *gdbarch, struct value *function, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf);
 extern void set_gdbarch_return_value (struct gdbarch *gdbarch, gdbarch_return_value_ftype *return_value);
 
+/* Return the address at which the value being returned from
+   the current function will be stored.  This routine is only
+   called if the current function uses the the "struct return
+   convention".
+
+   May return 0 when unable to determine that address. */
+
+typedef CORE_ADDR (gdbarch_get_return_buf_addr_ftype) (struct type *val_type, frame_info_ptr cur_frame);
+extern CORE_ADDR gdbarch_get_return_buf_addr (struct gdbarch *gdbarch, struct type *val_type, frame_info_ptr cur_frame);
+extern void set_gdbarch_get_return_buf_addr (struct gdbarch *gdbarch, gdbarch_get_return_buf_addr_ftype *get_return_buf_addr);
+
 /* Return true if the return value of function is stored in the first hidden
    parameter.  In theory, this feature should be language-dependent, specified
    by language and its ABI, such as C++.  Unfortunately, compiler may

@@ -55,6 +55,7 @@
 #include "gdbsupport/gdb_optional.h"
 #include "source.h"
 #include "cli/cli-style.h"
+#include "dwarf2/loc.h"
 
 /* Local functions: */
 
@@ -1609,6 +1610,12 @@ struct finish_command_fsm : public thread_fsm
      return value.  */
   struct return_value_info return_value_info {};
 
+  /* If the current function uses the "struct return convention",
+     this holds the address at which the value being returned will
+     be stored, or zero if that address could not be determined or
+     the "struct return convention" is not being used.  */
+  CORE_ADDR return_buf;
+
   explicit finish_command_fsm (struct interp *cmd_interp)
     : thread_fsm (cmd_interp)
   {
@@ -1646,7 +1653,13 @@ finish_command_fsm::should_stop (struct thread_info *tp)
 	  struct value *func;
 
 	  func = read_var_value (function, NULL, get_current_frame ());
-	  rv->value = get_return_value (function, func);
+
+	  if (return_buf != 0)
+	    /* Retrieve return value from the buffer where it was saved.  */
+	      rv->value = value_at (rv->type, return_buf);
+	  else
+	      rv->value = get_return_value (function, func);
+
 	  if (rv->value != NULL)
 	    rv->value_history_index = record_latest_value (rv->value);
 	}
@@ -1862,8 +1875,28 @@ finish_command (const char *arg, int from_tty)
     }
 
   /* Find the function we will return from.  */
+  frame_info_ptr callee_frame = get_selected_frame (NULL);
+  sm->function = find_pc_function (get_frame_pc (callee_frame));
 
-  sm->function = find_pc_function (get_frame_pc (get_selected_frame (NULL)));
+  /* Determine the return convention.  If it is RETURN_VALUE_STRUCT_CONVENTION,
+     attempt to determine the address of the return buffer.  */
+  enum return_value_convention return_value;
+  struct gdbarch *gdbarch = get_frame_arch (callee_frame);
+
+  struct type * val_type
+    = check_typedef (sm->function->type ()->target_type ());
+
+  return_value = gdbarch_return_value (gdbarch,
+				       read_var_value (sm->function, NULL,
+						       callee_frame),
+				       val_type, NULL, NULL, NULL);
+
+  if (return_value == RETURN_VALUE_STRUCT_CONVENTION
+      && val_type->code () != TYPE_CODE_VOID)
+    sm->return_buf = gdbarch_get_return_buf_addr (gdbarch, val_type,
+						  callee_frame);
+  else
+    sm->return_buf = 0;
 
   /* Print info on the selected frame, including level number but not
      source.  */
@@ -1881,7 +1914,7 @@ finish_command (const char *arg, int from_tty)
 	  gdb_printf (_("Run till exit from "));
 	}
 
-      print_stack_frame (get_selected_frame (NULL), 1, LOCATION, 0);
+      print_stack_frame (callee_frame, 1, LOCATION, 0);
     }
   frame.reinflate ();
 

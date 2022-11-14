@@ -296,4 +296,15 @@ extern struct value *indirect_synthetic_pointer
    dwarf2_per_objfile *per_objfile, frame_info_ptr frame,
    struct type *type, bool resolve_abstract_p = false);
 
+/* Read parameter of TYPE at (callee) FRAME's function entry.  KIND and KIND_U
+   are used to match DW_AT_location at the caller's
+   DW_TAG_call_site_parameter.
+
+   Function always returns non-NULL value.  It throws NO_ENTRY_VALUE_ERROR if
+   it cannot resolve the parameter for any reason.  */
+
+extern struct value *value_of_dwarf_reg_entry (struct type *type,
+					       struct frame_info_ptr frame,
+					       enum call_site_parameter_kind kind,
+					       union call_site_parameter_u kind_u);
 #endif /* DWARF2LOC_H */

@@ -116,6 +116,7 @@ struct gdbarch
   gdbarch_address_to_pointer_ftype *address_to_pointer = unsigned_address_to_pointer;
   gdbarch_integer_to_address_ftype *integer_to_address = nullptr;
   gdbarch_return_value_ftype *return_value = nullptr;
+  gdbarch_get_return_buf_addr_ftype *get_return_buf_addr = default_get_return_buf_addr;
   gdbarch_return_in_first_hidden_param_p_ftype *return_in_first_hidden_param_p = default_return_in_first_hidden_param_p;
   gdbarch_skip_prologue_ftype *skip_prologue = 0;
   gdbarch_skip_main_prologue_ftype *skip_main_prologue = nullptr;
@@ -369,6 +370,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of address_to_pointer, invalid_p == 0 */
   /* Skip verify of integer_to_address, has predicate.  */
   /* Skip verify of return_value, has predicate.  */
+  /* Skip verify of get_return_buf_addr, invalid_p == 0 */
   /* Skip verify of return_in_first_hidden_param_p, invalid_p == 0 */
   if (gdbarch->skip_prologue == 0)
     log.puts ("\n\tskip_prologue");
@@ -780,6 +782,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   gdb_printf (file,
                       "gdbarch_dump: return_value = <%s>\n",
                       host_address_to_string (gdbarch->return_value));
+  gdb_printf (file,
+                      "gdbarch_dump: get_return_buf_addr = <%s>\n",
+                      host_address_to_string (gdbarch->get_return_buf_addr));
   gdb_printf (file,
                       "gdbarch_dump: return_in_first_hidden_param_p = <%s>\n",
                       host_address_to_string (gdbarch->return_in_first_hidden_param_p));
@@ -2585,6 +2590,23 @@ set_gdbarch_return_value (struct gdbarch *gdbarch,
                           gdbarch_return_value_ftype return_value)
 {
   gdbarch->return_value = return_value;
+}
+
+CORE_ADDR
+gdbarch_get_return_buf_addr (struct gdbarch *gdbarch, struct type *val_type, frame_info_ptr cur_frame)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->get_return_buf_addr != NULL);
+  if (gdbarch_debug >= 2)
+    gdb_printf (gdb_stdlog, "gdbarch_get_return_buf_addr called\n");
+  return gdbarch->get_return_buf_addr (val_type, cur_frame);
+}
+
+void
+set_gdbarch_get_return_buf_addr (struct gdbarch *gdbarch,
+                                 gdbarch_get_return_buf_addr_ftype get_return_buf_addr)
+{
+  gdbarch->get_return_buf_addr = get_return_buf_addr;
 }
 
 int
