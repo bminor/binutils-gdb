@@ -9156,11 +9156,16 @@ proc get_set_option_choices {set_cmd} {
 
     with_set max-completions unlimited {
 	gdb_test_multiple $cmd $test {
-	    -re "\r\n$set_cmd (\[^\r\n\]+)" {
+	    -re "^[string_to_regexp $cmd]\r\n" {
+		exp_continue
+	    }
+
+	    -re "^$set_cmd (\[^\r\n\]+)\r\n" {
 		lappend values $expect_out(1,string)
 		exp_continue
 	    }
-	    -re -wrap "" {
+
+	    -re "^$::gdb_prompt $" {
 		pass $gdb_test_name
 	    }
 	}
