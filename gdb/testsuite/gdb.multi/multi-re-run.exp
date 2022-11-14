@@ -80,7 +80,7 @@ proc test_re_run {re_run_inf} {
 
     # Run the steady inferior to a breakpoint, and let it stay stopped
     # there.
-    if ![runto all_started] then {
+    if {![runto all_started]} {
 	return 0
     }
 

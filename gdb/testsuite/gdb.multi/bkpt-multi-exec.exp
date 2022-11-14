@@ -19,7 +19,7 @@ if ![target_can_use_run_cmd] {
 
 # Until "catch exec" is implemented on other targets...
 #
-if {![istarget "*-linux*"]} then {
+if {![istarget "*-linux*"]} {
     return
 }
 
@@ -49,7 +49,7 @@ clean_restart ${exec1}
 
 # Start the program running, and stop at main.
 #
-if ![runto_main] then {
+if {![runto_main]} {
     return
 }
 
