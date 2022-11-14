@@ -16,7 +16,7 @@
 
 # Tests for ARM iWMMXt register setting and fetching.
 
-if ![istarget "arm*-*-*"] then {
+if {![istarget "arm*-*-*"]} {
     verbose "Skipping iWMMXt register tests."
     return
 }
@@ -40,7 +40,7 @@ gdb_load ${binfile}
 # Run to `main' where we begin our tests.
 #
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

@@ -18,7 +18,7 @@
 # This test exercises set/show disassembler-options results are preserved
 # across multiple set architecture calls.
 
-if {![istarget "arm*-*-*"]} then {
+if {![istarget "arm*-*-*"]} {
     verbose "Skipping ARM disassembler options."
     return
 }

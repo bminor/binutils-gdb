@@ -31,7 +31,7 @@
 # about requirements to actual test cases can be found in corresponding
 # assembly file of this test case (arc-decode-insn.S).
 
-if {![istarget "arc*-*-*"]} then {
+if {![istarget "arc*-*-*"]} {
     verbose "Skipping ARC decoder test."
     return
 }

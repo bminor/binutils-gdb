@@ -39,7 +39,7 @@ foreach_with_prefix {insn_size} {6 8} {
 	return -1
     }
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 

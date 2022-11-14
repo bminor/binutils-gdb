@@ -88,7 +88,7 @@ proc get_addr_of_sym { sym } {
   return $addr
 }
 
-if  ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 
@@ -124,7 +124,7 @@ proc test_core_bt { test } {
 }
 
 set test "core at last insn in foo"
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 gdb_breakpoint "*$foo_last"
@@ -134,7 +134,7 @@ if [gen_core $test] {
 }
 
 set test "core at nullified insn"
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 gdb_breakpoint "*$foo_last"

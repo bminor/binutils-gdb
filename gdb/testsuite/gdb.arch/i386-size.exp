@@ -20,7 +20,7 @@
 
 # Test that GDB can see the sizes of symbols.
 
-if { ![is_x86_like_target] } then {
+if {![is_x86_like_target]} {
     verbose "Skipping i386 unwinder tests."
     return
 }

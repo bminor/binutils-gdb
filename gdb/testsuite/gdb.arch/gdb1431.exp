@@ -26,7 +26,7 @@
 # Observe that the until command doesn't go all the way to sub2.
 
 
-if ![istarget "sh-*-*"] then {
+if {![istarget "sh-*-*"]} {
     verbose "Skipping SH backtrace tests."
     return
 }
@@ -48,7 +48,7 @@ gdb_load ${binfile}
 # Run to `main' where we begin our tests.
 #
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

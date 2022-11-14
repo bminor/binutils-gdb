@@ -22,7 +22,7 @@
 #
 
 
-if ![istarget "powerpc-*eabispe"] then {
+if {![istarget "powerpc-*eabispe"]} {
     verbose "Skipping e500 abi tests."
     return
 }
@@ -45,7 +45,7 @@ gdb_load ${binfile}
 # Run to `main' where we begin our tests.
 #
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

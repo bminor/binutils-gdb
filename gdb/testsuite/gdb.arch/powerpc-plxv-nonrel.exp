@@ -33,7 +33,7 @@ if { [prepare_for_testing "failed to prepare" $testfile "$srcfile" \
 gdb_test "set radix 0b10000"
 gdb_test "set debug displaced"
 
-if ![runto_main] then {
+if {![runto_main]} {
       return
 }
 

@@ -15,7 +15,7 @@
 
 # Test ARC disassembler options.
 
-if { ![istarget "arc-*-*"] } then {
+if {![istarget "arc-*-*"]} {
     verbose "Skipping ARC disassembler option test."
     return
 }

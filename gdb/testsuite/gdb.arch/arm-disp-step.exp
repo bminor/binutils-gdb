@@ -17,7 +17,7 @@
 
 # Test arm displaced stepping.
 
-if {![is_aarch32_target]} then {
+if {![is_aarch32_target]} {
     verbose "Skipping arm displaced stepping tests."
     return
 }
@@ -409,7 +409,7 @@ proc test_add_rn_pc {} {
 # which is in library might be compiled in Thumb.
 gdb_test_no_output "set displaced-stepping off"
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

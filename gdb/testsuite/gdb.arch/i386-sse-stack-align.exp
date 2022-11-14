@@ -37,7 +37,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $opts
 
 clean_restart $executable
 
-if ![runto_main] then {
+if {![runto_main]} {
     return -1
 }
 

@@ -18,7 +18,7 @@
 # This tests checks that generating and loading a core file preserves
 # the correct FPSCR size.
 
-if {![istarget "powerpc*-*-linux*"]} then {
+if {![istarget "powerpc*-*-linux*"]} {
     verbose "Skipping PowerPC test for corefiles with FPSCR."
     return
 }
@@ -39,7 +39,7 @@ if {[build_executable "compile" $binfile $gen_src] == -1} {
 
 clean_restart $binfile
 
-if ![runto_main] then {
+if {![runto_main]} {
     return -1
 }
 

@@ -22,7 +22,7 @@
 #
 
 
-if {![istarget "powerpc*"] || [skip_altivec_tests]} then {
+if {![istarget "powerpc*"] || [skip_altivec_tests]} {
     verbose "Skipping altivec register tests."
     return
 }
@@ -52,7 +52,7 @@ gdb_load ${binfile}
 # Run to `main' where we begin our tests.
 #
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

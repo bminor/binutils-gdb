@@ -18,7 +18,7 @@
 
 # Test stepping over permanent breakpoints on i386.
 
-if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } then {
+if {![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"]} {
     verbose "Skipping skip over permanent breakpoint on i386 tests."
     return
 }
@@ -45,7 +45,7 @@ gdb_load ${binfile}
 # Run to `main' where we begin our tests.
 #
 
-if ![runto_main] then {
+if {![runto_main]} {
   return -1
 }
 

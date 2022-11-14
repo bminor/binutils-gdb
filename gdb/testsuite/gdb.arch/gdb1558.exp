@@ -22,7 +22,7 @@
 # from main.
 
 
-if ![istarget "sh-*-*"] then {
+if {![istarget "sh-*-*"]} {
     verbose "Skipping SH breakpoint test."
     return
 }

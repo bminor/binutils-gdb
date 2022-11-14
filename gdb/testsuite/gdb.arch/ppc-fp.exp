@@ -16,7 +16,7 @@
 
 # Tests for Powerpc floating point register setting and fetching
 
-if ![istarget "powerpc*"] then {
+if {![istarget "powerpc*"]} {
     verbose "Skipping powerpc floating point register tests."
     return
 }

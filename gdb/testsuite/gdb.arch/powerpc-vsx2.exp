@@ -20,7 +20,7 @@
 standard_testfile .s
 set objfile [standard_output_file ${testfile}.o]
 
-if {![istarget "powerpc*-*-*"]} then {
+if {![istarget "powerpc*-*-*"]} {
     verbose "Skipping PowerPC instructions disassembly."
     return
 }

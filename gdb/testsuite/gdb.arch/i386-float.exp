@@ -18,7 +18,7 @@
 
 # Test the x87 floating point information printout.
 
-if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } then {
+if {![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"]} {
     verbose "Skipping i386 tests for x87 floating point support."
     return
 }
@@ -32,7 +32,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile [list debug nop
     return -1
 }
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

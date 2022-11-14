@@ -21,7 +21,7 @@
 # Test i386 prologue analyzer.
 
 
-if { ![is_x86_like_target] } then {
+if {![is_x86_like_target]} {
     verbose "Skipping i386 prologue tests."
     return
 }
@@ -65,7 +65,7 @@ gdb_load ${binfile}
 # Run to `main' where we begin our tests.
 #
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

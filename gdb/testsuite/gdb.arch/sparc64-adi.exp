@@ -18,7 +18,7 @@
 # Basic tests of examining/assigning ADI version tags, and reporting 
 # precise mismatch.
 
-if ![istarget "sparc64*-*-linux*"] then {
+if {![istarget "sparc64*-*-linux*"]} {
     verbose "Skipping sparc64 ADI test."
     return 0
 }
@@ -30,7 +30,7 @@ if { [prepare_for_testing "failed to prepare" $testfile $srcfile \
     return -1
 }
 
-if ![runto_main] then {
+if {![runto_main]} {
     return -1
 }
 

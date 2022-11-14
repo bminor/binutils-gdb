@@ -18,7 +18,7 @@
 # Test initial values of x87 control registers, before any x87
 # instructions have been executed in the inferior.
 
-if ![is_amd64_regs_target] then {
+if {![is_amd64_regs_target]} {
     return
 }
 
@@ -45,7 +45,7 @@ proc_with_prefix check_x87_regs_around_init {} {
     clean_restart ${binfile}
 
     # Get things started.
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -119,7 +119,7 @@ proc_with_prefix check_setting_mxcsr_before_enable {} {
 
     clean_restart ${binfile}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -153,7 +153,7 @@ proc_with_prefix check_setting_x87_regs_before_enable {} {
 
     clean_restart ${binfile}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 

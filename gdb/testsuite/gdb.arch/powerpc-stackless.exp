@@ -15,7 +15,7 @@
 
 # Testcase for PR tdep/17379.
 
-if {![istarget "powerpc*-*-*"]} then {
+if {![istarget "powerpc*-*-*"]} {
     verbose "Skipping powerpc-stackless.exp"
     return
 }
