@@ -34,7 +34,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 
 # Set it up at a breakpoint so we can play with the variable values.
 
-if ![runto 'marker1'] then {
+if {![runto 'marker1']} {
     perror "couldn't run to marker1"
     continue
 }
@@ -359,7 +359,7 @@ with_test_prefix "list all overloads" {
     gdb_test "list bar" "${h1_re}${lines1}\r\n${h2_re}${lines2}"
 }
 
-if ![runto 'XXX::marker2'] then {
+if {![runto 'XXX::marker2']} {
     perror "couldn't run to XXX::marker2"
     continue
 }

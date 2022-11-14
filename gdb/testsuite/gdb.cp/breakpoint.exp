@@ -32,7 +32,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 proc test_breakpoint {name} {
     # Restart the program every time, so that a single failure doesn't
     # lead to a cascade.
-    if ![runto_main] then {
+    if {![runto_main]} {
 	perror "couldn't run to main when testing ${name}"
 	return -code continue
     } else {

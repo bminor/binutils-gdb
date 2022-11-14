@@ -22,7 +22,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
 ############################################
 # Test printing of namespace imported within the function.
 
-if ![runto_main] then {
+if {![runto_main]} {
     perror "couldn't run to breakpoint main"
     continue
 }
@@ -62,7 +62,7 @@ gdb_continue_to_breakpoint "marker3"
 # the global scope instead of the corresponding
 # function scope. These wrong import statements throw
 # this test off. This is fixed in gcc-4-4.
-if [test_compiler_info gcc-4-3-*] then { setup_xfail *-*-* }
+if {[test_compiler_info gcc-4-3-*]} { setup_xfail *-*-* }
 
 gdb_test "print _a" "No symbol \"_a\" in current context." \
     "Print _a without import at marker3"

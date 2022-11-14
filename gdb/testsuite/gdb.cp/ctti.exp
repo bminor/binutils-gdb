@@ -30,7 +30,7 @@ if {[prepare_for_testing "failed to prepare" $testfile \
     return -1
 }
 
-if ![runto_main] then {
+if {![runto_main]} {
     perror "couldn't run to breakpoint"
     return
 }
@@ -45,7 +45,7 @@ gdb_test "print i" "\\$\[0-9\]+ = 4"
 # TODO: this needs more work before actually deploying it.
 # So bail out here.
 
-if { [ test_compiler_info gcc-*] } then { return }
+if {[test_compiler_info gcc-*]} { return }
 
 gdb_test_multiple "print add<int>(2,2)" "print add<int>(2,2)" {
     -re "\\$\[0-9\]+ = 4\r\n$gdb_prompt $" {

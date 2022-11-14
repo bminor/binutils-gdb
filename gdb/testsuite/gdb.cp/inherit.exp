@@ -677,7 +677,7 @@ proc test_print_mvi_classes { } {
 proc do_tests { } {
     gdb_test_no_output "set width 0"
 
-    if { ![runto_main] } then {
+    if {![runto_main]} {
 	perror "couldn't run to main"
 	return
     }
@@ -688,7 +688,7 @@ proc do_tests { } {
     test_ptype_vi
     test_ptype_mvi
 
-    if { ![runto 'inheritance2'] } then {
+    if {![runto 'inheritance2']} {
 	perror "couldn't run to inheritance2"
 	return
     }

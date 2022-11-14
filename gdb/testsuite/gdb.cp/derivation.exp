@@ -55,7 +55,7 @@ with_test_prefix "before run" {
 
 # Set it up at a breakpoint so we can play with the variable values.
 
-if ![runto 'marker1'] then {
+if {![runto 'marker1']} {
     perror "couldn't run to marker1"
     return
 }

@@ -51,7 +51,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug c++}]} {
     return -1
 }
 
-if ![runto_main] then {
+if {![runto_main]} {
     perror "couldn't run to main"
     return
 }
@@ -96,7 +96,7 @@ gdb_test "p exceptions.throw_function()" \
     "call a function that raises an exception with unwinding off.."
 
 # Restart the inferior back at main.
-if ![runto_main] then {
+if {![runto_main]} {
     perror "couldn't run to main"
     return
 }

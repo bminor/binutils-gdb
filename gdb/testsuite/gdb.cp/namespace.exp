@@ -46,12 +46,12 @@ gdb_test "show lang" "auto; currently c\\+\\+.*"
 #
 # set it up at a breakpoint so we can play with the variable values
 #
-if ![runto_main] then {
+if {![runto_main]} {
     perror "couldn't run to breakpoint"
     return
 }
 
-if ![runto 'marker1'] then {
+if {![runto 'marker1']} {
     perror "couldn't run to marker1"
     return
 }
@@ -192,7 +192,7 @@ gdb_test_multiple $test $test {
 # to print out stuff from within a function defined within a
 # namespace.
 
-if ![runto "C::D::marker2"] then {
+if {![runto "C::D::marker2"]} {
     perror "couldn't run to marker2"
     return
 }
