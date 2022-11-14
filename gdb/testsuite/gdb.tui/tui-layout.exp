@@ -35,7 +35,7 @@ proc test_layout {layout execution} {
     clean_restart $binfile
 
     if {$execution} {
-	if ![runto_main] then {
+	if {![runto_main]} {
 	    return 0
 	}
     }

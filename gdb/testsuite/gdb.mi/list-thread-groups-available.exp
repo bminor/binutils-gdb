@@ -21,7 +21,7 @@ set MIFLAGS "-i=mi"
 standard_testfile
 
 # Support for XML is needed to run this test.
-if [gdb_skip_xml_test] then {
+if {[gdb_skip_xml_test]} {
     unsupported "list-thread-groups-available.exp"
     return -1
 }

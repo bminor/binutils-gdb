@@ -536,7 +536,7 @@ proc_with_prefix test_bkpt_probe {} {
 	return -1
     }
 
-    if ![gdb_guile_runto_main] then {
+    if {![gdb_guile_runto_main]} {
 	return
     }
 

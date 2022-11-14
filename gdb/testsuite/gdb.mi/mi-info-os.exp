@@ -17,13 +17,13 @@ load_lib mi-support.exp
 set MIFLAGS "-i=mi"
 
 # This test is Linux-only.
-if ![istarget *-*-linux*] then {
+if {![istarget *-*-linux*]} {
     unsupported "mi-info-os.exp"
     return -1
 }
 
 # Support for XML-output is needed to run this test.
-if [gdb_skip_xml_test] then {
+if {[gdb_skip_xml_test]} {
     unsupported "mi-info-os.exp"
     return -1
 }

@@ -35,7 +35,7 @@ if {[target_info gdb_protocol] != "extended-remote"} {
 
 # This test also makes use of 'detach-on-fork' which is not supported
 # on all platforms.
-if { ![istarget "*-*-linux*"] && ![istarget "*-*-openbsd*"] } then {
+if {![istarget "*-*-linux*"] && ![istarget "*-*-openbsd*"]} {
     return
 }
 
@@ -60,7 +60,7 @@ proc test_reload { do_kill_p follow_child_p } {
 
     clean_restart ${binfile}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 

@@ -105,7 +105,7 @@ with_test_prefix "first session" {
     gdb_load_shlib ${lib_so}
 
     # Run to foo to make sure foo refers to the function, and not foo@PLT.
-    if ![runto foo qualified] then {
+    if {![runto foo qualified]} {
 	return
     }
 
@@ -334,7 +334,7 @@ with_test_prefix "second session" {
     # loaded for remote targets.
     gdb_load_shlib ${lib_so}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return
     }
 

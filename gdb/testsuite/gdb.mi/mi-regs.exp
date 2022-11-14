@@ -104,7 +104,7 @@ proc sparc_register_tests { } {
 	    "list changed registers"
 }
 
-if [istarget "sparc-*-*"] then {
+if {[istarget "sparc-*-*"]} {
     mi_clean_restart
     sparc_register_tests_no_exec
     mi_clean_restart $binfile

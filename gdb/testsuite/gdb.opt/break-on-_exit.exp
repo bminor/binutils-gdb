@@ -50,7 +50,7 @@ save_vars { GDBFLAGS } {
     }
 }
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

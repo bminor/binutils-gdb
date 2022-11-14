@@ -63,7 +63,7 @@ proc connect_no_symbol_file { sysroot action } {
 	set gdbserver_gdbport [lindex $res 1]
 
 	# Perform test actions to the symbol file on the target.
-	if { $action == "delete" } then {
+	if {$action == "delete"} {
 	  remote_file target delete $target_exec
 	} elseif { $action == "permission" } {
 	  remote_exec target "chmod 000 $target_exec"

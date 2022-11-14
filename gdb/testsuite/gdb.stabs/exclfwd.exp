@@ -27,7 +27,7 @@ if {[prepare_for_testing "failed to prepare" $testfile \
     return -1
 }
 
-if ![runto_main] then {
+if {![runto_main]} {
     perror "couldn't run to breakpoint"
     return
 }
@@ -41,14 +41,14 @@ gdb_test "ptype v1" "type = struct a {$eol
     int y;$eol
 }$eol"
 
-if { [test_debug_format "stabs"] } then {
+if {[test_debug_format "stabs"]} {
     setup_kfail "gdb/1602" *-*-*
 }
 gdb_test "ptype v2" "type = struct a {$eol
     const char .c;$eol
 }$eol"
 
-if { [test_debug_format "stabs"] } then {
+if {[test_debug_format "stabs"]} {
     setup_kfail "gdb/1603" *-*-*
 }
 gdb_test "ptype v3" "type = const char ."

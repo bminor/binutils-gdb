@@ -56,7 +56,7 @@ proc run_test { target_async target_non_stop to_disable } {
     # extended-remote board, therefore already connected.
     gdb_test "disconnect" ".*"
 
-    if { [gdb_target_supports_trace] } then {
+    if {[gdb_target_supports_trace]} {
 	# Test predefined TSVs are uploaded.
 	gdb_test_sequence "info tvariables" "check uploaded tsv" {
 	    "\[\r\n\]+Name\[\t \]+Initial\[\t \]+Current"
