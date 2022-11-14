@@ -40,7 +40,7 @@ set catch_exception_info \
 # 1. Try catching all exceptions.  #
 ####################################
 
-if ![runto_main] then {
+if {![runto_main]} {
    return 0
 }
 
@@ -88,7 +88,7 @@ gdb_test "continue" \
 #  - continue, we should see the unhandled Constrait_Error exception
 #  - continue, the program exits.
 
-if ![runto_main] then {
+if {![runto_main]} {
    return 0
 }
 
@@ -148,7 +148,7 @@ gdb_test "continue" \
 #     at any of the other exceptions that are being raised inside
 #     the program.
 
-if ![runto_main] then {
+if {![runto_main]} {
    return 0
 }
 

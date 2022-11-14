@@ -67,7 +67,7 @@ clean_restart ${testfile}
 # loaded for remote targets.
 gdb_load_shlib $sofile
 
-if {![runto_main]} then {
+if {![runto_main]} {
    return 0
 }
 

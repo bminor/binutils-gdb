@@ -44,7 +44,7 @@ set catchpoint_storage_error_msg \
 # Check that runtime supports catchpoint.  #
 ############################################
 
-if ![runto_main] then {
+if {![runto_main]} {
    return 0
 }
 

@@ -29,7 +29,7 @@ foreach_with_prefix scenario {all minimal} {
     clean_restart ${testfile}-${scenario}
 
     set bp_location [gdb_get_line_number "START" ${testdir}/foo.adb]
-    if ![runto "foo.adb:$bp_location" ] then {
+    if {![runto "foo.adb:$bp_location"]} {
 	perror "Couldn't run ${testfile}-${scenario}"
 	return
     } 

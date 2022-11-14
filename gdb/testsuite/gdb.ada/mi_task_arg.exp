@@ -38,7 +38,7 @@ mi_gdb_load ${binfile}
 # This test won't work properly if system debuginfo is installed.
 mi_gdb_test "-gdb-set debug-file-directory \"\"" ".*"
 
-if ![mi_runto "task_switch.break_me"] then {
+if {![mi_runto "task_switch.break_me"]} {
    return 0
 }
 

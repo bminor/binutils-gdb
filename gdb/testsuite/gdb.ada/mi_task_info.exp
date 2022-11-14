@@ -39,7 +39,7 @@ mi_gdb_load ${binfile}
 # 1. Try catching all exceptions.  #
 ####################################
 
-if ![mi_runto "task_switch.break_me"] then {
+if {![mi_runto "task_switch.break_me"]} {
    return 0
 }
 
