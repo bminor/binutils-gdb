@@ -5911,34 +5911,31 @@ proc gdb_load { arg } {
 }
 
 #
-# with_complaints -- Execute BODY and set complaints temporary to N for the
+# with_set -- Execute BODY and set VAR temporary to VAL for the
 # duration.
 #
-proc with_complaints { n body } {
-    global decimal
-
-    # Save current setting of complaints.
+proc with_set { var val body } {
     set save ""
-    set show_complaints_re \
-	"Max number of complaints about incorrect symbols is ($decimal)\\."
-    gdb_test_multiple "show complaints" "" {
-	-re -wrap $show_complaints_re {
+    set show_re \
+	"is (\[^\r\n\]+)\\."
+    gdb_test_multiple "show $var" "" {
+	-re -wrap $show_re {
 	    set save $expect_out(1,string)
 	}
     }
 
     if { $save == "" } {
-	perror "Did not manage to set complaints"
+	perror "Did not manage to set $var"
     } else {
-	# Set complaints.
-	gdb_test_no_output -nopass "set complaints $n"
+	# Set var.
+	gdb_test_no_output -nopass "set $var $val"
     }
 
     set code [catch {uplevel 1 $body} result]
 
-    # Restore saved setting of complaints.
+    # Restore saved setting.
     if { $save != "" } {
-	gdb_test_no_output -nopass "set complaints $save"
+	gdb_test_no_output -nopass "set $var $save"
     }
 
     if {$code == 1} {
@@ -5947,6 +5944,14 @@ proc with_complaints { n body } {
     } else {
 	return -code $code $result
     }
+}
+
+#
+# with_complaints -- Execute BODY and set complaints temporary to N for the
+# duration.
+#
+proc with_complaints { n body } {
+    return [uplevel [list with_set complaints $n $body]]
 }
 
 #
@@ -9108,20 +9113,23 @@ gdb_caching_proc has_hw_wp_support {
 # Return a list of all the accepted values of the set command SET_CMD.
 
 proc get_set_option_choices {set_cmd} {
-    global gdb_prompt
-
     set values {}
 
+    set cmd "complete $set_cmd "
     set test "complete $set_cmd"
-    gdb_test_multiple "complete $set_cmd " "$test" {
-	-re "$set_cmd (\[^\r\n\]+)\r\n" {
-	    lappend values $expect_out(1,string)
-	    exp_continue
-	}
-	-re "$gdb_prompt " {
-	    pass $test
+
+    with_set max-completions unlimited {
+	gdb_test_multiple $cmd $test {
+	    -re "\r\n$set_cmd (\[^\r\n\]+)" {
+		lappend values $expect_out(1,string)
+		exp_continue
+	    }
+	    -re -wrap "" {
+		pass $gdb_test_name
+	    }
 	}
     }
+
     return $values
 }
 

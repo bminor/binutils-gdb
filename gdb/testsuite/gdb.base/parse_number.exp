@@ -346,17 +346,15 @@ proc test_parse_numbers {arch} {
 
 clean_restart
 
-gdb_test_no_output "set language unknown"
-gdb_test "p/x 0" \
-	"expression parsing not implemented for language \"Unknown\""
-
-gdb_test_no_output "set max-completions unlimited"
-
 set supported_archs [get_set_option_choices "set architecture"]
 # There should be at least one more than "auto".
 gdb_assert {[llength $supported_archs] > 1} "at least one architecture"
 
 set all_languages [get_set_option_choices "set language"]
+
+gdb_test_no_output "set language unknown"
+gdb_test "p/x 0" \
+	"expression parsing not implemented for language \"Unknown\""
 
 # If 1, test each arch.  If 0, test one arch for each sizeof
 # short/int/long/longlong configuration.
