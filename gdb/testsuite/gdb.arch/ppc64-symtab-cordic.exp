@@ -13,7 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if {![istarget "powerpc*"] || ![is_lp64_target]} {
+clean_restart
+
+set supported_archs [get_set_option_choices "set architecture"]
+if { [lsearch -exact $supported_archs "powerpc:common64"] == -1 } {
     verbose "Skipping powerpc64 separate debug file symtab test."
     return
 }
@@ -34,10 +37,6 @@ if {[catch "system \"bzip2 -dc ${kodebugbz2file} >${kodebugfile}\""] != 0} {
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-
 # This test won't work properly if system debuginfo is installed.
 # Test message is suppressed by "" as otherwise we could print PASS+UNTESTED
 # result to gdb.sum making a false feeling the issue has been tested.
@@ -49,8 +48,5 @@ set test "show architecture"
 gdb_test_multiple $test $test {
     -re "\r\nThe target architecture is set to \"auto\" \\(currently \"powerpc:common64\"\\)\.\r\n$gdb_prompt $" {
 	pass $test
-    }
-    -re "\r\nThe target architecture is set to \"auto\" \\(currently \".*\"\\)\.\r\n$gdb_prompt $" {
-	untested "powerpc:common64 is not supported"
     }
 }
