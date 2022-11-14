@@ -5924,18 +5924,36 @@ proc with_set { var val body } {
 	}
     }
 
+    # Handle 'set to "auto" (currently "i386")'.
+    set save [regsub {^set to} $save ""]
+    set save [regsub {\([^\r\n]+\)$} $save ""]
+    set save [string trim $save]
+    set save [regsub -all {^"|"$} $save ""]
+
     if { $save == "" } {
 	perror "Did not manage to set $var"
     } else {
 	# Set var.
-	gdb_test_no_output -nopass "set $var $val"
+	set cmd "set $var $val"
+	gdb_test_multiple $cmd "" {
+	    -re -wrap "^$cmd" {
+	    }
+	    -re -wrap " is set to \"?$val\"?\\." {
+	    }
+	}
     }
 
     set code [catch {uplevel 1 $body} result]
 
     # Restore saved setting.
     if { $save != "" } {
-	gdb_test_no_output -nopass "set $var $save"
+	set cmd "set $var $save"
+	gdb_test_multiple $cmd "" {
+	    -re -wrap "^$cmd" {
+	    }
+	    -re -wrap "is set to \"?$save\"?( \\(\[^)\]*\\))?\\." {
+	    }
+	}
     }
 
     if {$code == 1} {
