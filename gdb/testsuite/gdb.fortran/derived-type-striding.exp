@@ -29,7 +29,7 @@ if {[prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
     return -1
 }
 
-if {![runto [gdb_get_line_number "post_init"]]} then {
+if {![runto [gdb_get_line_number "post_init"]]} {
     perror "couldn't run to breakpoint post_init"
     return
 }

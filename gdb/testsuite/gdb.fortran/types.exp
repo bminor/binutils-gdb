@@ -106,7 +106,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 
 gdb_test "set print sevenbit-strings" ""
 
-if [set_lang_fortran] then {
+if {[set_lang_fortran]} {
     test_primitive_types_known
     test_default_types
     test_integer_literal_types_accepted

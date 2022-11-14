@@ -22,7 +22,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug f90 quiet
     return -1
 }
 
-if ![fortran_runto_main] then {
+if {![fortran_runto_main]} {
     perror "Couldn't run to main"
     return
 }

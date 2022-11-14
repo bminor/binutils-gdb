@@ -101,7 +101,7 @@ proc test_old_star_type_sizes {} {
 
 clean_restart
 
-if [set_lang_fortran] then {
+if {[set_lang_fortran]} {
     test_basic_parsing_of_type_kinds
     test_parsing_invalid_type_kinds
     test_old_star_type_sizes

@@ -30,7 +30,7 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug f90}]} {
     return -1
 }
 
-if ![fortran_runto_main] then {
+if {![fortran_runto_main]} {
     return -1
 }
 

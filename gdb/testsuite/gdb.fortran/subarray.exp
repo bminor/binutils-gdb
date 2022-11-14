@@ -30,7 +30,7 @@ if {[prepare_for_testing "failed to prepare" $testfile $srcfile {debug f90}]} {
 # Avoid shared lib symbols.
 gdb_test_no_output "set auto-solib-add off"
 
-if ![fortran_runto_main] then {
+if {![fortran_runto_main]} {
     perror "couldn't run to main"
     return
 }

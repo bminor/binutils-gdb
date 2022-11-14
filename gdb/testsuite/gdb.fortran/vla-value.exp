@@ -130,7 +130,7 @@ gdb_test "print vla1(9, 9, 9)" "no such vector element \\\(vector not allocated\
 # Try to assign VLA to user variable
 clean_restart ${testfile}
 
-if ![fortran_runto_main] then {
+if {![fortran_runto_main]} {
     perror "couldn't run to main"
     return
 }
