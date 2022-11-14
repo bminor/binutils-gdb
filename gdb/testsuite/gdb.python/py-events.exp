@@ -317,7 +317,7 @@ with_test_prefix "gdb exiting: normal" {
 with_test_prefix "gdb exiting: error" {
     clean_restart ${testfile}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	fail "cannot run to main."
 	return 0
     }

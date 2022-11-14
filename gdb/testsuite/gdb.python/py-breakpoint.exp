@@ -46,7 +46,7 @@ proc_with_prefix test_bkpt_basic { } {
     # We should start with no breakpoints.
     gdb_test "python print (gdb.breakpoints())" "\\(\\)"
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -128,7 +128,7 @@ proc_with_prefix test_bkpt_deletion { } {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -163,7 +163,7 @@ proc_with_prefix test_bkpt_cond_and_cmds { } {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -220,7 +220,7 @@ proc_with_prefix test_bkpt_invisible { } {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -265,7 +265,7 @@ proc_with_prefix test_hardware_breakpoints { } {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -293,7 +293,7 @@ proc_with_prefix test_watchpoints { } {
 	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -316,7 +316,7 @@ proc_with_prefix test_bkpt_internal { } {
     if {$skip_hw_watchpoint_tests_p} {
 	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
     delete_breakpoints
@@ -364,7 +364,7 @@ proc_with_prefix test_bkpt_eval_funcs { } {
     if {$skip_hw_watchpoint_tests_p} {
 	gdb_test_no_output "set can-use-hw-watchpoints 0" ""
     }
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
     delete_breakpoints
@@ -477,7 +477,7 @@ proc_with_prefix test_bkpt_temporary { } {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
     delete_breakpoints
@@ -595,7 +595,7 @@ proc_with_prefix test_bkpt_explicit_loc {} {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -680,7 +680,7 @@ proc_with_prefix test_bkpt_qualified {} {
     set one_location_re "Breakpoint $decimal at $hex:.*line $decimal."
     set two_location_re "Breakpoint $decimal at $hex:.*2 locations."
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -749,7 +749,7 @@ proc_with_prefix test_bkpt_probe {} {
 	return -1
     }
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -766,7 +766,7 @@ proc_with_prefix test_catchpoints {} {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
 
@@ -825,7 +825,7 @@ proc_with_prefix test_bkpt_auto_disable { } {
     # Start with a fresh gdb.
     clean_restart ${testfile}
 
-    if ![runto_main] then {
+    if {![runto_main]} {
 	return 0
     }
     delete_breakpoints

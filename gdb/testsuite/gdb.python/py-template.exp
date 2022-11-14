@@ -43,7 +43,7 @@ proc test_template_arg {exefile type} {
 	return -1
     }
     gdb_load ${exefile}
-    if ![runto_main ] then {
+    if {![runto_main]} {
 	perror "couldn't run to breakpoint"
 	return
     }

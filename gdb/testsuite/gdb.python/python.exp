@@ -217,7 +217,7 @@ clean_restart ${testfile}
 
 # The following tests require execution.
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 
@@ -431,7 +431,7 @@ clean_restart ${testfile}
 
 # The following tests require execution.
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 
@@ -486,7 +486,7 @@ clean_restart ${testfile}
 
 # The following tests require execution.
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

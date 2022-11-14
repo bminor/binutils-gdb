@@ -415,7 +415,7 @@ proc test_subscript_regression {exefile lang} {
  # Start with a fresh gdb.
  clean_restart ${exefile}
 
- if ![runto_main ] then {
+ if {![runto_main]} {
      perror "couldn't run to breakpoint"
      return
  }
@@ -652,7 +652,7 @@ test_add_to_history
 
 # The following tests require execution.
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

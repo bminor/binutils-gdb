@@ -47,7 +47,7 @@ proc start_test { breakpoint_comment } {
 
     clean_restart ${binfile}
 
-    if { ![runto_main] } then {
+    if {![runto_main]} {
 	untested "couldn't run to breakpoint"
 	return -1
     }
@@ -66,7 +66,7 @@ proc start_test { breakpoint_comment } {
 
 # Start by testing the "run" command, it can't leverage start_test
 with_test_prefix "run to frame" {
-    if { ![runto_main] } then {
+    if {![runto_main]} {
 	untested "couldn't run to main"
     }
 

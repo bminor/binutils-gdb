@@ -52,7 +52,7 @@ proc prepare_gdb {exefile} {
   gdb_reinitialize_dir $srcdir/$subdir
   gdb_load ${exefile}
 
-  if ![runto_main] then {
+  if {![runto_main]} {
       perror "couldn't run to breakpoint"
       return
   }
