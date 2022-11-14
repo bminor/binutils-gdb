@@ -4929,6 +4929,22 @@ s_arm_unwind_pad (int ignored ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Parse an unwind_pacspval directive.  */
+
+static void
+s_arm_unwind_pacspval (int ignored ATTRIBUTE_UNUSED)
+{
+  valueT op;
+
+  if (!unwind.proc_start)
+    as_bad (MISSING_FNSTART);
+
+  demand_empty_rest_of_line ();
+
+  op = 0xb5;
+  add_unwind_opcode (op, 1);
+}
+
 /* Parse an unwind_setfp directive.  */
 
 static void
@@ -5205,6 +5221,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "vsave",		s_arm_unwind_save,	1 },
   { "movsp",		s_arm_unwind_movsp,	0 },
   { "pad",		s_arm_unwind_pad,	0 },
+  { "pacspval",		s_arm_unwind_pacspval,	0 },
   { "setfp",		s_arm_unwind_setfp,	0 },
   { "unwind_raw",	s_arm_unwind_raw,	0 },
   { "eabi_attribute",	s_arm_eabi_attribute,	0 },

@@ -1086,6 +1086,12 @@ This directive writes 12-byte packed floating-point values to the
 output section.  These are not compatible with current ARM processors
 or ABIs.
 
+@anchor{arm_pacspval}
+@cindex @code{.pacspval} directive, ARM
+@item .pacspval
+Generate unwinder annotations to use effective vsp as modifier in PAC
+validation.
+
 @anchor{arm_pad}
 @cindex @code{.pad} directive, ARM
 @item .pad #@var{count}
