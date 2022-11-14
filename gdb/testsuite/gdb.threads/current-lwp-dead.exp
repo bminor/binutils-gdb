@@ -25,7 +25,7 @@
 standard_testfile
 
 # This only works with on Linux targets.
-if ![istarget *-*-linux*] then {
+if {![istarget *-*-linux*]} {
     return
 }
 

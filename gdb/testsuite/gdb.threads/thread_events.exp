@@ -23,7 +23,7 @@
 
 # This test has only been verified with Linux targets, and would need
 # to be generalized to support other targets
-if ![istarget *-*-linux*] then {
+if {![istarget *-*-linux*]} {
     return
 }
 
@@ -112,7 +112,7 @@ proc test_thread_messages {enabled} {
 
   # The initial thread may log a 'New Thread' message, but we don't
   # check for it.
-  if ![runto_main] then {
+  if {![runto_main]} {
      return 1
   }
 

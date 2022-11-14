@@ -31,7 +31,7 @@ clean_restart ${binfile}
 # Run to `main' where we begin our tests.
 #
 
-if ![runto_main] then {
+if {![runto_main]} {
     return 0
 }
 

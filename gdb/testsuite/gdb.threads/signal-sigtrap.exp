@@ -37,7 +37,7 @@ proc test { sigtrap_thread } {
     with_test_prefix "sigtrap thread $sigtrap_thread" {
 	clean_restart ${binfile}
 
-	if ![runto "thread_function"] then {
+	if {![runto "thread_function"]} {
 	    return 0
 	}
 

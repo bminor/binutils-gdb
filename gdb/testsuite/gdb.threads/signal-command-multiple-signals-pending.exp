@@ -37,7 +37,7 @@ proc test { schedlock } {
     with_test_prefix "schedlock $schedlock" {
 	clean_restart ${binfile}
 
-	if ![runto_main] then {
+	if {![runto_main]} {
 	    return 0
 	}
 

@@ -40,7 +40,7 @@ proc test { step_over } {
     with_test_prefix "step-over $step_over" {
 	clean_restart ${binfile}
 
-	if ![runto_main] then {
+	if {![runto_main]} {
 	    return 0
 	}
 

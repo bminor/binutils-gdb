@@ -34,7 +34,7 @@ clean_restart ${binfile}
 
 gdb_test_no_output "set can-use-hw-watchpoints 1" ""
 
-if ![runto_main] then {
+if {![runto_main]} {
     return
 }
 

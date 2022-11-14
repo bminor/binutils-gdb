@@ -205,7 +205,7 @@ proc_with_prefix test_detach_command {condition_eval target_non_stop non_stop di
     gdb_test "inferior 2" "Switching to .*"
 
     gdb_load $::binfile
-    if ![runto setup_done] then {
+    if {![runto setup_done]} {
 	fail "can't run to setup_done"
 	kill_wait_spawned_process $test_spawn_id
 	return

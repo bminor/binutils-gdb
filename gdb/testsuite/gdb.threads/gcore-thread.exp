@@ -22,7 +22,7 @@ set objfile  $binfile.o
 set corefile $binfile.test
 set core0file ${binfile}0.test
 
-if [istarget "*-*-linux"] then {
+if {[istarget "*-*-linux"]} {
     set target_cflags "-D_MIT_POSIX_THREADS"
 } else {
     set target_cflags ""
@@ -55,7 +55,7 @@ set nl "\[\r\n\]+"
 
 set timeout 30
 
-if { ! [ runto_main ] } then {
+if {![runto_main]} {
     return -1
 }
 

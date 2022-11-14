@@ -34,7 +34,7 @@ proc test { command } {
     with_test_prefix "$command" {
 	clean_restart ${binfile}
 
-	if ![runto_main] then {
+	if {![runto_main]} {
 	    return 0
 	}
 

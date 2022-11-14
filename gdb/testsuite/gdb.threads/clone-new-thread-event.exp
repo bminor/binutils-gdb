@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 # This only works on targets with the Linux kernel.
-if ![istarget *-*-linux*] then {
+if {![istarget *-*-linux*]} {
     return
 }
 

@@ -24,7 +24,7 @@ clean_restart ${testfile}
 
 gdb_test_no_output "set non-stop on"
 
-if { ! [ runto_main ] } then {
+if {![runto_main]} {
     return -1
 }
 
